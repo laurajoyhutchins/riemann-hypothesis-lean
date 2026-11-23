@@ -1,10 +1,50 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConj
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TwistPerm
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.FinSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.SplitLoc
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.TwUnitary
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConj
+import Development.AbelianVarietyTheory.BlockTheory.AdelicCMFields.UnitaryHeckeCharacterIdele
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.TwUnitary
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.FinSplit
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.SplitLoc
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TwistPerm
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -29,7 +69,7 @@ private theorem round_cycle {m : ℕ} {P : Fin (m + 1) → Prop} (h : ∀ i, P (
   rw [Fin.cast_val_eq_self]
   simpa using hj
 
-private theorem mem_fixL {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL K n)} [μ.IsHaarMeasure]
+private theorem mem_fixL {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Measure (normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
     {w : Pl K} {J : Subgroup (GL (Fin n) (w.adicCompletion K))} {f : LL μ} :
     f ∈ fixL μ w J ↔ ∀ g ∈ J, rhoL μ w g f = f := by
   simp only [fixL, fixF, Submodule.mem_iInf, LinearMap.mem_eqLocus, ContinuousLinearMap.coe_coe, LinearMap.id_apply]
@@ -40,7 +80,7 @@ private theorem mem_fixL {K : Type} [Field K] [NumberField K] {n : ℕ} {μ : Me
     exact h g hg
 
 private theorem fix_step {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsGalois F E]
-    {σ : E ≃ₐ[F] E} (hσ : ∀ τ, τ ∈ Subgroup.zpowers σ) {m n : ℕ} {μ : Measure (normOneGL E n)} [μ.IsHaarMeasure]
+    {σ : E ≃ₐ[F] E} (hσ : ∀ τ, τ ∈ Subgroup.zpowers σ) {m n : ℕ} {μ : Measure (normOneGL (K := E) (n := n))} [μ.IsHaarMeasure]
     {θ : Twist μ} (hθ : IsGalTwist σ θ) (p : Pl F) (hs : GM.Split E p) (D : Split (incFin E p) (galFin σ p) m)
     (e : Fin (m + 1) ≃ PlacesOver E p)
     (he : ∀ (b : CompletionsOver E p) i, completionMap p (e i).1 (D.e b i) = b (e i))

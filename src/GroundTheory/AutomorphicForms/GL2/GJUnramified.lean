@@ -1,5 +1,62 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJUnramifiedCosets
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJUnramifiedCosets
+public import GroundTheory.AutomorphicForms.GL2.GJLocalZeta
+public import GroundTheory.AutomorphicForms.Satake
+import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+public import GroundTheory.AutomorphicForms.GL2.GJUnramifiedDegree
+import GroundTheory.AutomorphicForms.GL2.GJZetaCore
+import GroundTheory.AutomorphicForms.SmoothRepContragredient
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,8 +163,8 @@ theorem qs_pow_mul_sqrtQ (s : ℂ) (m : ℤ) (k : ℕ) :
       Complex.ofReal_one]
   rw [qs_add, mul_pow, _root_.zpow_mul, zpow_natCast, mul_assoc, ← mul_pow, key, one_pow, mul_one]
 
-variable (F n) in
 
+variable (F n) in
 def integralMatrixSet : Set (Matrix (Fin n) (Fin n) F) :=
   Set.pi Set.univ fun _ => Set.pi Set.univ fun _ => (𝒪[F] : Set F)
 
@@ -115,8 +172,8 @@ theorem mem_integralMatrixSet {X : Matrix (Fin n) (Fin n) F} :
     X ∈ integralMatrixSet F n ↔ ∀ i j, X i j ∈ 𝒪[F] :=
   ⟨fun h i j => h i (Set.mem_univ _) j (Set.mem_univ _), fun h i _ j _ => h i j⟩
 
-variable (F n) in
 
+variable (F n) in
 def integralIndicator : Matrix (Fin n) (Fin n) F → ℂ :=
   (integralMatrixSet F n).indicator 1
 
@@ -162,10 +219,10 @@ theorem integral_shell_integralIndicator (μ : Measure (GL (Fin n) F)) [μ.IsHaa
       simp only [Pi.one_apply]
       ring
     · rw [integralIndicator, Set.indicator_of_notMem (fun h => hi (mem_integralMatrixSet.1 h)),
-        Set.indicator_of_notMem (fun h => hi h.1)]
+        Set.indicator_of_notMem (by exact fun h => hi h.1)]
       simp
   · rw [Set.indicator_of_notMem (show g ∉ {g : GL (Fin n) F | ordDet g = (m : ℤ)} from hg),
-      Set.indicator_of_notMem (fun h => hg h.2)]
+      Set.indicator_of_notMem (by exact fun h => hg h.2)]
     simp
 
 theorem integral_shell_integralIndicator_of_neg (μ : Measure (GL (Fin n) F))

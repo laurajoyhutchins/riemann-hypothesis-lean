@@ -1,14 +1,55 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NonemptyUnitAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.NonvanishingNearMaximum
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.OneAddZeta21PowSevenAddPowFourteenEqZero
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsCyclotomicExtensionCyclotomicField28
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.FinrankInt
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.InvMulVecEqZero
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.TraceMulConjIntIffMemOfMulDifferentEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.CMLattices.IntegralOf
-import Development.AbelianVarietyTheory.Statements.PrincipalLattices.ExistsPrincipalLattice
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.BaseNorm
-import Formalism.LocalToGlobal.ProjectiveLattices.L2DefiniteCuspForms
-import Formalism.LocalToGlobal.ProjectiveLattices.NonnegIffOfLiesTotal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NonemptyUnitAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.NonvanishingNearMaximum
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.TraceMulConjIntIffMemOfMulDifferentEqOne
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.InvMulVecEqZero
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.FinrankInt
+import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+import Formalism.LocalToGlobal.CMDeterminantIdeals.DetIdeal
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.LamCM Formalism.L2.Pj
 open scoped ComplexOrder
@@ -61,8 +102,8 @@ theorem exists_pair (H : Host E) {r : ℕ} (X : FD.DataX E r) (𝔄 : Fractional
       simp [FD.cc]
     · exact he x y
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem exists_nsmul_mem (𝔄 : Submodule (𝓞 E) E) (h : 𝔄 ≠ ⊥) {J : Type} [Fintype J] (c : J → E) :
     ∃ n : ℕ, 0 < n ∧ ∀ i, (n : E) * c i ∈ 𝔄 := by
   classical
@@ -148,6 +189,7 @@ theorem exists_cmLat (H : Host E) {r p q : ℕ} (Y : FD.Data E r) (x₀ : Y.dom)
       rw [← hS, Submodule.span_le]
       intro a ha
       refine (hN _).2 ⟨fun j => (e _).symm ⟨_, hc (⟨a, ha⟩, σ j)⟩, φ.injective (Subtype.ext ?_)⟩
+
       rw [map_sum, AddSubmonoidClass.coe_finsetSum]
       simp only [hf, LinearEquiv.apply_symm_apply]
       rw [Equiv.sum_comp σ (fun j => ((n : E) * B.repr (φ a : Fin r → E) j) • lam j)]

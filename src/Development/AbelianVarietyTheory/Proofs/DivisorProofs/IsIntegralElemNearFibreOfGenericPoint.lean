@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartValEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAffineOpenPreimageGenericBaseChangeModificatio
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralElementAffineSectionGenerated
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartValueIsIntegralOfIntegralAtPoints
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartValueIsIntegralOfIntegralAtPoints
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralElementAffineSectionGenerated
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAffineOpenPreimageGenericBaseChangeModificatio
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open TensorProduct
 
@@ -93,7 +134,6 @@ theorem regular_of_finite (c : B) (q : Ideal A) (hq : q = (IsLocalRing.maximalId
   obtain ⟨y, rfl⟩ := ((lTensor_exact B (LinearMap.exact_subtype_mkQ P) P.mkQ_surjective) z).1 e3
   clear e3 hz
   induction y with
-  | zero => simp
   | add a b ha hb => rw [map_add]; exact add_mem ha hb
   | tmul b v =>
     obtain ⟨v, hv⟩ := v
@@ -125,6 +165,7 @@ theorem regular_tensor (c : B) (q : Ideal A) (hq : q = (IsLocalRing.maximalIdeal
     simpa using ⟨i.1.1, i.2⟩)⟩ : P)
   have hy : P.subtype.baseChange B y = ∑ i ∈ S, i.1 ⊗ₜ[A] i.2 := by
     rw [← Finset.sum_attach S]
+
     simp [y, map_sum]
   have hinj := Module.Flat.lTensor_preserves_injective_linearMap (M := B) P.subtype P.injective_subtype
   have : c • y = 0 := hinj (by
@@ -174,7 +215,7 @@ theorem regular_mod_fibre (p₀ p : Ideal C) [p₀.IsPrime] [p.IsPrime]
   refine hmin (Ideal.comap (algebraMap C (Localization.AtPrime p)) Q) inferInstance (le_antisymm ?_ ?_) hd
   · refine Ideal.comap_mono ?_
     refine (Ideal.comap_mono (IsLocalRing.le_maximalIdeal hQp.ne_top)).trans ?_
-    exact (Localization.AtPrime.comap_maximalIdeal).le
+    exact (Localization.AtPrime.under_maximalIdeal).le
   · rw [Ideal.comap_comap, ← IsScalarTower.algebraMap_eq, ← Ideal.map_le_iff_le_comap]
     exact hQ
 
@@ -206,7 +247,7 @@ theorem isIntegral_tensor_of_fibre [IsNoetherianRing A] {K : Type} [CommRing K] 
     refine regular_tensor (algebraMap C B c) (p.comap (algebraMap A C)) ?_
       (regular_mod_fibre p₀ p h0 hmin c hc) (K ⧸ I) _ ?_
     · rw [IsScalarTower.algebraMap_eq A C B, ← Ideal.comap_comap]
-      exact congrArg _ (Localization.AtPrime.comap_maximalIdeal).symm
+      exact congrArg _ (Localization.AtPrime.under_maximalIdeal).symm
     · rw [algebraMap_smul, ← map_smul, h1, map_zero]
   obtain ⟨⟨s, hs⟩, h3⟩ := (IsLocalizedModule.eq_zero_iff p.primeCompl φ).1 h2
   exact ⟨s, hs, (key _).2 (by rw [map_smul]; exact h3)⟩

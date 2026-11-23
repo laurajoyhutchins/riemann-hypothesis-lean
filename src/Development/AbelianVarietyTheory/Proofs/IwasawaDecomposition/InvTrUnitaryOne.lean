@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousActP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StdSideUnique
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClassPresBasic
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsIntegralOfLine
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousActP
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsIntegralOfLine
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StdSideUnique
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +100,7 @@ theorem ratMat_unitary {D : D7} (V : HSp D) (hg : V.gram = 1) (γ : GQ V) (γE :
     exact (D.sp.cm.cmUnram.2.1 φ _).symm
   rw [bc_coe, hc, ← Matrix.map_mul, hu, Matrix.map_one _ (map_zero _) (map_one _)]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem coef_iso : ∀ (D : D7) (V : HSp D) (n : ℕ), V.rank = n → V.gram = 1 → ∀ (c : CoefA V), c.Is → ∀ {K ι : Type} [Field K] [NumberField K] [Fintype ι] (σ : K →+* ℂ) (emb : ι → (D.host.E →+* K)) (lam : ι → DomWeight n) (c0 : VV K lam →ₛₗ[σ] c.W), Nonempty (VVIdx lam) →
   (∀ (γ : GQ V) (γE : GL (Fin V.rank) D.host.E) (g : GL (Fin n) D.host.E), Bridge.IsRatMat V γ γE → MatEq γE g → ∀ v, c0 (rhoVr emb lam g v) = c.coef.ρ γ (c0 v)) →
@@ -79,7 +121,7 @@ theorem coef_iso : ∀ (D : D7) (V : HSp D) (n : ℕ), V.rank = n → V.gram = 1
     induction hv using Submodule.span_induction with
     | mem x hx => obtain ⟨i, rfl⟩ := hx; exact Submodule.subset_span ⟨i, rfl⟩
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul a x _ hx => rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ hx
   obtain ⟨i₀⟩ := hne
   have htop : Submodule.span ℂ (Set.range fun i => c0 (bVV K lam i)) = ⊤ := by

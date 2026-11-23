@@ -1,4 +1,47 @@
-import Formalism.JumpKernelCokernel.Statement
+module
+
+public import Formalism.JumpKernelCokernel.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +54,7 @@ variable {O : Type} [CommRing O] {V : Type} [AddCommGroup V] [Module O V]
 theorem decomp (d : Module.End O V) (P : O[X]) (v : V) :
     aeval d P v = P.eval 0 • v + aeval d P.divX (d v) := by
   conv_lhs => rw [← Polynomial.divX_mul_X_add P]
-  rw [map_add, map_mul, aeval_X, aeval_C, LinearMap.add_apply, Module.End.mul_apply,
+  rw [map_add (f := _), map_mul, aeval_X, aeval_C, LinearMap.add_apply, Module.End.mul_apply,
     Module.algebraMap_end_apply, ← Polynomial.coeff_zero_eq_eval_zero, add_comm]
 
 theorem aeval_mem (d : Module.End O V) (M : Submodule O V) (hM : M.map d ≤ M) :
@@ -29,7 +72,7 @@ theorem aeval_mem (d : Module.End O V) (M : Submodule O V) (hM : M.map d ≤ M) 
   induction Q using Polynomial.induction_on' with
   | add p q hp hq =>
     intro v hv
-    rw [map_add, LinearMap.add_apply]
+    rw [map_add (f := _), LinearMap.add_apply]
     exact M.add_mem (hp v hv) (hq v hv)
   | monomial n a =>
     intro v hv

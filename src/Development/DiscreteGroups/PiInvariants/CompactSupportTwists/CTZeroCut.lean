@@ -1,4 +1,49 @@
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.NoPiHk
+module
+
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.NoPiHk
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.PowerBoundFastDecay
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.FibreFactorHolds
+import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,30 +64,7 @@ def GSat (S : Finset (HeightOneSpectrum (𝓞 E))) (B : HeightOneSpectrum (𝓞 
     (g : Matrix (Fin n) (Fin n) (w.adicCompletion E)) = Matrix.diagonal (fun i : Fin n => if (i : ℕ) < j then ϖ else 1) →
     ∀ R, IsHk w g R → ∃ m : ℕ, ((hk w R - satEig (qV E w) n (B w) j • (1 : Module.End ℂ (Sm E n))) ^ m) φ = 0
 
-def sclQ (w : HeightOneSpectrum (𝓞 E)) (u : ℂ) (B : Multiset ℂˣ) : Multiset ℂ :=
-  B.map fun b : ℂˣ => (b : ℂ) * ((qV E w : ℕ) : ℂ) ^ u
-
 end Defs
-
-def PiZSat : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (π : CuspSub E n) (z : ℂ),
-  ∃ π' : CuspSub E n, ∀ᶠ w in Filter.cofinite, ∃ B : Multiset ℂˣ, (CG.mk π').HasSat w B ∧
-    ∀ ϖ, IsUnifV E w ϖ → ∀ j ≤ n, ∀ g : GL (Fin n) (w.adicCompletion E),
-      (g : Matrix (Fin n) (Fin n) (w.adicCompletion E)) = Matrix.diagonal (fun i : Fin n => if (i : ℕ) < j then ϖ else 1) →
-      ∀ R, IsHk w g R → ∀ v ∈ piZ π z, FixAt w v → hk w R v = satEig (qV E w) n B j • v
-
-def TwistSat : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (m : ℕ) (σ : CuspSub E m) (u : ℂ),
-  ∃ σ' : CuspSub E m, ∀ᶠ w in Filter.cofinite, ∀ B : Multiset ℂˣ, (CG.mk σ).HasSat w B →
-    ∃ B' : Multiset ℂˣ, (CG.mk σ').HasSat w B' ∧ B'.map (fun b : ℂˣ => (b : ℂ)) = sclQ w u B
-
-def CuspSat : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (φ : Sm E n), IsCuspForm φ →
-  φ ≠ 0 → ∀ S B, GSat S B φ → ∃ σ : CuspSub E n, ∀ᶠ w in Filter.cofinite, (CG.mk σ).HasSat w (B w)
-
-def CTEig : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (φ : Sm E n), IsAutForm φ →
-  ¬ IsCuspidal φ.1 → ∀ S B, GSat S B φ →
-  ∃ (r s : ℕ) (ψ₁ : Sm E r) (ψ₂ : Sm E s) (S₁ : Finset (HeightOneSpectrum (𝓞 E))) (S₂ : Finset (HeightOneSpectrum (𝓞 E)))
-    (B₁ B₂ : HeightOneSpectrum (𝓞 E) → Multiset ℂˣ) (u₁ u₂ : ℂ), r + s = n ∧ 0 < r ∧ 0 < s ∧
-    IsAutForm ψ₁ ∧ ψ₁ ≠ 0 ∧ GSat S₁ B₁ ψ₁ ∧ IsAutForm ψ₂ ∧ ψ₂ ≠ 0 ∧ GSat S₂ B₂ ψ₂ ∧
-    ∀ᶠ w in Filter.cofinite, (B w).map (fun b : ℂˣ => (b : ℂ)) = sclQ w u₁ (B₁ w) + sclQ w u₂ (B₂ w)
 
 def Supp : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (φ : Sm E n), IsAutForm φ →
   φ ≠ 0 → ∀ S B, GSat S B φ →

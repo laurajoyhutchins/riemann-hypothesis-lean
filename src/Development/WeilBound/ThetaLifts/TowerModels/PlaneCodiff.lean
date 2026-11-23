@@ -1,7 +1,51 @@
-import Development.WeilBound.ThetaLifts.TowerModels.PlaneForm
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ProductFormulaHaar.TrSumOf
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SumEmbeddingsEqRealAddComplex
+module
+
+import Development.WeilBound.ThetaLifts.TowerModels.TwistedSums.StandardAddCharSymplecticLocalLatticeEqOne
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SumEmbeddingsEqRealAddComplex
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,27 +64,7 @@ theorem trace_mixedEmbedding (y : F) :
 theorem psi_fin_rat {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (x : F) :
     ψ (pairA F 0 (algebraMap F (Af F) x)) =
       Complex.exp (2 * Real.pi * Complex.I * ((Algebra.trace ℚ F x : ℚ) : ℂ)) := by
-  have e : pairA F 0 (algebraMap F (Af F) x) =
-      algebraMap F (AF F) x + pairA F (algebraMap F (Ainf F) (-x)) 0 := by
-    refine Prod.ext ?_ (add_zero _).symm
-    show (0 : Ainf F) = algebraMap F (Ainf F) x + algebraMap F (Ainf F) (-x)
-    rw [map_neg, add_neg_cancel]
-  have hat : At (evI F) (pairA F (algebraMap F (Ainf F) (-x)) 0) := by
-    intro u hu
-    have h1 : u.1 = 0 := (InfiniteAdeleRing.ringEquiv_mixedSpace F).injective (by rw [map_zero]; exact hu)
-    refine Prod.ext ?_ ?_
-    · change u.1 * _ = 0
-      rw [h1, zero_mul]
-    · change u.2 * 0 = 0
-      rw [mul_zero]
-  rw [e, AddChar.map_add_eq_mul, hψ.2.1, one_mul, hψ.2.2 _ hat]
-  have h2 : evI F (pairA F (algebraMap F (Ainf F) (-x)) 0) = mixedEmbedding F (-x) := by
-    show InfiniteAdeleRing.ringEquiv_mixedSpace F (algebraMap F (Ainf F) (-x)) = _
-    rw [InfiniteAdeleRing.mixedEmbedding_eq_algebraMap_comp]
-  rw [h2, trace_mixedEmbedding, map_neg]
-  congr 1
-  push_cast
-  ring
+  apply Tw.LatVacArith.psi_fin_rat <;> assumption
 
 theorem psi_int {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (t : F)
     (ht : ∀ a : 𝓞 F, ∃ k : ℤ, Algebra.trace ℚ F ((a : F) * t) = k) (α : Af F) (hα : ∀ v, α v ∈ v.adicCompletionIntegers F) :
@@ -59,7 +83,7 @@ theorem trace_cm (h : IsCMExt F E σ) (x : E) : algebraMap F E (Algebra.trace F 
     simpa using eq_or_eq_comp_conj h τ τ'
   rw [h2, Finset.sum_pair (comp_conj_ne h τ).symm] at h1
   apply (algebraMap E (AlgebraicClosure E)).injective
-  rw [← IsScalarTower.algebraMap_apply, h1, map_add]
+  rw [← IsScalarTower.algebraMap_apply, h1, map_add (f := _)]
   rfl
 
 theorem val_le_one_of_codiff {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) {v : Pl F} (hv : PsiUnr ψ v) (a : F)
@@ -88,12 +112,12 @@ theorem val_le_one_of_codiff {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) {v : Pl 
   rw [e] at h3
   exact h3
 
-variable (E) in
 
+variable (E) in
 def codE : Submodule (𝓞 E) E where
   carrier := {c | ∀ o : 𝓞 E, IsIntegral ℤ (Algebra.trace ℚ E (o * c))}
   zero_mem' o := by simpa using isIntegral_zero
-  add_mem' ha hb o := by rw [mul_add, map_add]; exact (ha o).add (hb o)
+  add_mem' ha hb o := by rw [mul_add, map_add (f := _)]; exact (ha o).add (hb o)
   smul_mem' a c hc o := by
     have := hc (o * a)
     change IsIntegral ℤ (Algebra.trace ℚ E ((o : E) * (a : E) * c)) at this
@@ -102,8 +126,8 @@ def codE : Submodule (𝓞 E) E where
 theorem one_mem_codE : (1 : E) ∈ codE E := fun o => by
   rw [mul_one]; exact Algebra.isIntegral_trace o.isIntegral_coe
 
-variable (E) in
 
+variable (E) in
 def intE : Submodule (𝓞 E) E where
   carrier := {c | IsIntegral ℤ c}
   zero_mem' := isIntegral_zero
@@ -116,7 +140,7 @@ theorem val_le_one_of_intE {v : Pl F} (τ : E →ₐ[F] Fv F v) (c : E) (hc : c 
 theorem val_le_one_of_codE (h : IsCMExt F E σ) {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) {v : Pl F} (hv : PsiUnr ψ v)
     (τ : E →ₐ[F] Fv F v) (c : E) (hc : c ∈ codE E) : Valued.v (τ c) ≤ 1 := by
   have h1 : ∀ o : 𝓞 E, Valued.v (τ (o * c) + τ (σ (o * c))) ≤ 1 := fun o => by
-    rw [← map_add, ← trace_cm h, AlgHom.commutes]
+    rw [← map_add (f := _), ← trace_cm h, AlgHom.commutes]
     refine val_le_one_of_codiff hψ hv _ fun a => ?_
     have := hc (algebraMap (𝓞 F) (𝓞 E) a * o)
     rw [← Algebra.trace_trace (S := F)] at this

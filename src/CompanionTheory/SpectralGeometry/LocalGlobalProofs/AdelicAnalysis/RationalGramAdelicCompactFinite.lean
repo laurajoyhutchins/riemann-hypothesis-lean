@@ -1,8 +1,59 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.HypJ
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.RationalTuplesDiscreteCocompactAdelicStatement
+module
+
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianOneByOneIsScalar
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.RationalTuplesDiscreteCocompactAdelicStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,42 +87,12 @@ theorem exists_moved (σ : E →ₐ[F] E) (h : IsCMExt F E σ) : ∃ x : E, σ x
 
 theorem fixed_mem (σ : E →ₐ[F] E) (h : IsCMExt F E σ) (e : E) (he : σ e = e) :
     ∃ t : F, e = algebraMap F E t := by
-  obtain ⟨x, hx⟩ := exists_moved σ h
-  have hd : x - σ x ≠ 0 := fun h0 => hx (sub_eq_zero.mp h0).symm
-  have hli : LinearIndependent F ![(1 : E), x] := by
-    rw [LinearIndependent.pair_iff]
-    intro s t hst
-    have h2 := congrArg σ hst
-    simp only [Algebra.smul_def, map_add, map_mul, AlgHom.commutes, map_one, map_zero] at h2
-    have h3 : t • (x - σ x) = 0 := by
-      simp only [Algebra.smul_def] at hst ⊢
-      linear_combination hst - h2
-    have ht : t = 0 := (smul_eq_zero.mp h3).resolve_right hd
-    subst ht
-    simp only [zero_smul, add_zero] at hst
-    refine ⟨(smul_eq_zero.mp hst).resolve_right one_ne_zero, rfl⟩
-  have hspan : Submodule.span F (Set.range ![(1 : E), x]) = ⊤ :=
-    hli.span_eq_top_of_card_eq_finrank (by simp [h.2.2.1])
-  have hmem : e ∈ Submodule.span F ({(1 : E), x} : Set E) := by
-    have : e ∈ Submodule.span F (Set.range ![(1 : E), x]) := by rw [hspan]; trivial
-    simpa [Matrix.range_cons, Matrix.range_empty, Set.pair_comm] using this
-  obtain ⟨a, b, hab⟩ := Submodule.mem_span_pair.mp hmem
-  have h2 : a • (1 : E) + b • σ x = e := by
-    have := congrArg σ hab
-    simp only [Algebra.smul_def, map_add, map_mul, AlgHom.commutes, map_one, he] at this
-    simpa only [Algebra.smul_def] using this
-  have h3 : b • (x - σ x) = 0 := by
-    simp only [Algebra.smul_def] at hab h2 ⊢
-    linear_combination hab - h2
-  have hb : b = 0 := (smul_eq_zero.mp h3).resolve_right hd
-  subst hb
-  refine ⟨a, ?_⟩
-  rw [← hab, Algebra.algebraMap_eq_smul_one]
-  simp
+  apply GlobalTheory.CompanionTheory.SW.HermOne.exists_eq_algebraMap <;> assumption
 
 theorem hE_self_fixed (σ : E →ₐ[F] E) (h : IsCMExt F E σ) {M : ℕ}
     (J : Matrix (Fin M) (Fin M) E) (hJ : IsHermND σ J) (x : Fin M → E) :
     σ (hE σ J x x) = hE σ J x x := by
+
   simp only [hE, hform, map_sum, map_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -102,6 +123,7 @@ theorem gram_rational_finite : ∀ (F E : Type) [Field F] [NumberField F] [Field
     ext a b
     have hs : ∀ e : E, sigR (AF F) σ (inclR (AF F) e) = inclR (AF F) (σ e) := fun e => by
       simp [sigR, inclR]
+
     simp only [gramR, hR, hform, ratTup, JR, Matrix.map_apply, gramE, hE, map_sum, map_mul, hs]
     rfl
   · intro Ω hΩ

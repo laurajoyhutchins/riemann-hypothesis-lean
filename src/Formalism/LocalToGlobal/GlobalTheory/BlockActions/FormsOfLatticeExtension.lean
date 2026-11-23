@@ -1,8 +1,64 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.ValuationClassTranslateMem
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ClassMapEstimateOfPartial
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ExistsOnOfPosDef
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.TilEqLevel
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.DefNOfFact
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ClassMapEstimateOfPartial
+public import Formalism.LocalToGlobal.HermitianForms.TiedBrProof
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.DefNOfFact
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ExistsOnOfPosDef
+import Formalism.LocalToGlobal.GlobalTheory.BlockActions.HformSmulRightB
+import Formalism.LocalToGlobal.GlobalTheory.BlockActions.LengthInverseBound
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.RestrictionSymmetric
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.TilEqLevel
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.ValuationClassTranslateMem
+import Formalism.LocalToGlobal.HermitianForms.Interlace
+import Formalism.LocalToGlobal.HermitianForms.TiedBrInj
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.InterlaceDifferenceShiftInvariant
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.RationalPointsLeHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.FrobeniusNoKernelOfFrobeniusSimilitude
+import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +90,7 @@ theorem cls_eq_of_dec (S : StepLevel F E σ J T f bad) {C : Type} (yc : C → UP
     rw [e']; group
   apply hinj
   show (Quotient.mk'' (yc c1) : Cls S) = Quotient.mk'' (yc c2)
-  refine (DoubleCoset.eq _ _ (yc c1) (yc c2)).2 ⟨h, ?_, k, ?_, ?_⟩
+  refine (@DoubleCoset.eq _ _ _ _ (yc c1) (yc c2)).2 ⟨h, ?_, k, ?_, ?_⟩
   · exact Subgroup.mem_subgroupOf.2 (Subgroup.mem_map.2 ⟨γ2⁻¹ * γ1, (UJ _ _).mul_mem ((UJ _ _).inv_mem h2) h1, hh.symm⟩)
   · exact Subgroup.mem_subgroupOf.2 (S.U.mul_mem κ1.2 (S.U.inv_mem κ2.2))
   · simp only [h]; group
@@ -53,7 +109,7 @@ theorem fic_of_stab (S : StepLevel F E σ J T f bad) (emb : ι → E →+* ℂ)
       ∃ κ : S.U, x.1 = bc (inclE (F := F) (FiniteAdeleRing (𝓞 F) F)) γ * (yc c).1 * κ.1 := by
     intro x
     obtain ⟨c, hcx⟩ := hbij.2 (Quotient.mk'' x)
-    obtain ⟨hh, hhH, κ, hκK, e⟩ := (DoubleCoset.eq _ _ (yc c) x).1 hcx
+    obtain ⟨hh, hhH, κ, hκK, e⟩ := (@DoubleCoset.eq _ _ _ _ (yc c) x).1 hcx
     obtain ⟨g, hgU, hge⟩ := Subgroup.mem_map.1 (Subgroup.mem_subgroupOf.1 hhH)
     refine ⟨c, g, hgU, ⟨κ.1, hκK⟩, ?_⟩
     have := congrArg Subtype.val e
@@ -203,11 +259,11 @@ theorem ext_mul_bZ (Tf : FormsTiedSym D u Ch chOf) (γ : Matrix (Fin (D.R.N D.R.
   ext a b
   simp only [Matrix.mul_apply, bZ, bZg]
   by_cases hb : (b : ℕ) < D.R.N D.R.m - 1
-  · simp only [dif_pos hb]
+  · simp only [dite_eq_left hb]
     have := congrFun (congrFun h1 a) ⟨b, hb⟩
     simp only [Matrix.mul_apply] at this
     exact_mod_cast this
-  · simp only [dif_neg hb]
+  · simp only [dite_eq_right hb]
     have := congrFun h2' a
     simp only [Matrix.mulVec, dotProduct] at this
     rw [← this, Finset.sum_div]
@@ -221,7 +277,7 @@ open Formalism.MainNotions.product_first_zeroth_parts
 
 variable {D : D7} {u : D.what₂.Word} {Ch : ℕ → Type} {chOf : ∀ i, (D.mem u).C.cls i → Ch i}
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem extU (Tf : FormsTiedSym D u Ch chOf) (γ : GL (Fin (D.R.N D.R.m - 1)) D.host.E)
     (hγ : γ ∈ UJ (sigD D : D.host.E →+* D.host.E) (gramP D)) :
@@ -277,7 +333,7 @@ open Formalism.MainNotions.product_first_zeroth_parts TensorProduct
 
 variable {D : D7} {u : D.what₂.Word} {Ch : ℕ → Type} {chOf : ∀ i, (D.mem u).C.cls i → Ch i}
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem stab_m (Tf : FormsTiedSym D u Ch chOf) (hE : ExtLevS Tf)
     (c : (D.fm u).clsP) (γ : GL (Fin (D.R.N D.R.m - 1)) D.host.E) (κ : Tf.clsP.lev.U)
@@ -313,7 +369,7 @@ theorem stab_m (Tf : FormsTiedSym D u Ch chOf) (hE : ExtLevS Tf)
       _ = _ := by group
   · rw [← hGchi, map_mul, map_mul, map_inv, mul_comm ((Tf.cls D.R.m le_rfl (Or.inr rfl)).lev.chi (Tf.tilAd.ka c))⁻¹, mul_assoc, inv_mul_cancel, mul_one]
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem val_inv (Tf : FormsTiedSym D u Ch chOf) (hE : ExtLevS Tf) (φ : Fn D u D.R.m) (hφ : φ ∈ (D.fm u).Fi D.R.m)
     (c : (D.fm u).clsP) (γ : GL (Fin (D.R.N D.R.m - 1)) D.host.E) (κ : Tf.clsP.lev.U)
@@ -368,7 +424,7 @@ open Formalism.MainNotions.product_first_zeroth_parts
 
 variable {D : D7} {u : D.what₂.Word} {Ch : ℕ → Type} {chOf : ∀ i, (D.mem u).C.cls i → Ch i}
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem stab_of_ext (Tf : FormsTiedSym D u Ch chOf) (hL : Formalism.L2.Rows.LowerMapTieS Tf) (hE : ExtLevS Tf) : StabCompS Tf := by
   intro φ hφ c γ hγ κ hst y y' hy
@@ -458,7 +514,7 @@ open Formalism.MainNotions.product_first_zeroth_parts TensorProduct
 
 variable {D : D7} {u : D.what₂.Word} {Ch : ℕ → Type} {chOf : ∀ i, (D.mem u).C.cls i → Ch i}
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem extUA (Tf : FormsTiedSym D u Ch chOf) (k : Matrix (Fin (D.R.N D.R.m - 1)) (Fin (D.R.N D.R.m - 1)) (D.host.E ⊗[D.host.F] FiniteAdeleRing (𝓞 D.host.F) D.host.F))
     (hk : cT (sigR (sigD D) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) k * (gramP D).map (inclE (F := D.host.F) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) * k = (gramP D).map (inclE (F := D.host.F) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)))
@@ -542,7 +598,7 @@ open Formalism.MainNotions.product_first_zeroth_parts TensorProduct
 
 variable {D : D7} {u : D.what₂.Word} {Ch : ℕ → Type} {chOf : ∀ i, (D.mem u).C.cls i → Ch i}
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem extUR {R : Type} [CommRing R] [Algebra D.host.F R] (Tf : FormsTiedSym D u Ch chOf) (k : Matrix (Fin (D.R.N D.R.m - 1)) (Fin (D.R.N D.R.m - 1)) (D.host.E ⊗[D.host.F] R))
     (hk : cT (sigR (sigD D) R) k * (gramP D).map (inclE (F := D.host.F) R) * k = (gramP D).map (inclE (F := D.host.F) R))
@@ -714,7 +770,7 @@ def ExtLevL (Tf : FormsTiedSym D u Ch chOf) : Prop :=
     ∀ hG : G ∈ (Tf.cls D.R.m le_rfl (Or.inr rfl)).lev.U,
       (((Tf.cls D.R.m le_rfl (Or.inr rfl)).lev.chi ⟨G, hG⟩ : ℂˣ) : ℂ) = ((Tf.clsP.lev.chi κ : ℂˣ) : ℂ)
 
-set_option maxHeartbeats 4000000 in
+
 theorem extLevK_of (Tf : FormsTiedSym D u Ch chOf) (hL : ExtLevL Tf) : ExtLevK Tf := by
   intro κ
   obtain ⟨g, hg, hu⟩ := til_ext Tf (inclE (F := D.host.F) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) κ.1.1

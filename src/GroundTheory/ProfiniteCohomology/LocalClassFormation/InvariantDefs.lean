@@ -1,8 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FinrankLeNatCardGroupCohomologyTwoGalUnits
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.BrauerInflation
-import GroundTheory.LocalFields.SeparableClosure
-import GroundTheory.LocalFields.MaximalUnramified
+module
+
+public import GroundTheory.LocalFields.SeparableClosure
+public import GroundTheory.LocalFields.UnramifiedExistence
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.Brauer
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderScalars
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.Unramified
+public import GroundTheory.LocalFields.MaximalUnramified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -42,11 +86,6 @@ instance finiteDimensional_unramifiedLevel (n : ℕ+) :
 
 instance isGalois_unramifiedLevel (n : ℕ+) : IsGalois F (unramifiedLevel F Ω n) :=
   IsUnramifiedSubextension.isGalois (isUnramifiedSubextension_unramifiedLevel F Ω n)
-
-theorem eq_unramifiedLevel_of_isUnramifiedSubextension {E : IntermediateField F Ω}
-    (hE : IsUnramifiedSubextension E) {n : ℕ+} (hn : Module.finrank F E = n) :
-    E = unramifiedLevel F Ω n :=
-  IsUnramifiedSubextension.eq_adjoin hE hn n.ne_zero (isPrimitiveRoot_unramifiedRoot F Ω n)
 
 theorem unramifiedLevel_le {m n : ℕ+} (h : (m : ℕ) ∣ n) :
     unramifiedLevel F Ω m ≤ unramifiedLevel F Ω n :=

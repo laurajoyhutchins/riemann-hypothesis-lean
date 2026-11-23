@@ -1,4 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.FinDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.IsLocalHom
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 open TensorProduct IsLocalRing Polynomial UpperTheory.V.W UpperTheory.V.Alg UpperTheory.V.CA
 
@@ -19,7 +74,7 @@ private theorem piB_map {n : ℕ} {k G : Type} [Field k] [Group G] (χ : Fin n �
     piB χ B (MonoidAlgebra.mapRingHom G (algebraMap k B) y) i = algebraMap k B (piB χ k y i) := by
   induction y using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, Pi.add_apply, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), Pi.add_apply, ha, hb]
   | single g r => rw [MonoidAlgebra.mapRingHom_single, piB_single, piB_single]; simp
 
 private theorem D_eq {n : ℕ} {k G : Type} [Field k] [Group G] (χ : Fin n → G →* kˣ)
@@ -30,7 +85,7 @@ private theorem D_eq {n : ℕ} {k G : Type} [Field k] [Group G] (χ : Fin n → 
   congr 1
   induction x using MonoidAlgebra.induction_linear with
   | zero => simp [Pi.zero_def]
-  | add a b ha hb => simp only [map_add, ha, hb, Matrix.diagonal_add]; rfl
+  | add a b ha hb => simp only [map_add (f := _), ha, hb, Matrix.diagonal_add]; rfl
   | single g r =>
     ext i j
     by_cases h : i = j
@@ -59,12 +114,12 @@ theorem UpperTheory.V.CA.f_chars :
     have := h k z
     rw [D_eq, Finset.prod_eq_zero (Finset.mem_univ i)] at this
     · exact zero_ne_one this
-    · rw [map_add, map_mul, map_one, Pi.add_apply, Pi.mul_apply, piB_map, hz]
+    · rw [map_add (f := _), map_mul, map_one, Pi.add_apply, Pi.mul_apply, piB_map, hz]
       have hi' : piB χ k y i ≠ 0 := hi
       simp [hi']
   · rw [D_eq]
     refine Finset.prod_eq_one fun i _ => ?_
-    rw [map_add, map_mul, map_one, Pi.add_apply, Pi.mul_apply, piB_map, h]
+    rw [map_add (f := _), map_mul, map_one, Pi.add_apply, Pi.mul_apply, piB_map, h]
     simp
   · unfold GDet.chi
     rw [D_eq]

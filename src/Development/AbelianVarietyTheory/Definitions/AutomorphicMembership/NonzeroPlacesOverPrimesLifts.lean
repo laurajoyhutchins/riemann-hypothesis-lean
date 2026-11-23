@@ -1,8 +1,41 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReadPk
-import Formalism.SharpRestriction.Divisibility.WeightDegreeSizes
-import BuildAid.D3
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReadPk
+public import Formalism.SharpRestriction.Divisibility.WeightDegreeSizes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,9 +73,9 @@ structure ReadPk.Pin {m : Moved o} {s : Side0 o} (r : ReadPk m s) : Prop where
   eW : ∀ i x, HEq (r.Y.mj.eW i x) (m.t.lf.eW i x)
   jMt : ∀ μ h i x, HEq (r.Y.IL.jMt μ h i x).1 (m.t.lf.jMt μ i x)
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure Pre2 (K : Ctx) (w : ColW B f T) : Type 1 where
   Z₀ : w.Lt
   hX : B.fields.Ok
@@ -95,10 +128,6 @@ def LowerUnitaryCaseCondition : Prop := GroupRetwisting.Step KPx (fun _ _ _ _ =>
   ∀ (Z : w.Lt) (hX : B.fields.Ok) (Wt : Set B.places.Pl) (z : Dat (w.st Z) w.I hX T Wt), GrpTrue Z.N f → GrpAt (w.st Z) w.I →
     z.R.toRealDat.ExAt → GlobalTheory.RealGeo.InGeo z.geo → HoldsL z.R z.F
 
-def NonzeroPlacesOverPrimesLifts : Prop := StepW Pinned fun K B f T w => ∀ (Z : w.Lt) (hX : B.fields.Ok) (Wt : Set B.places.Pl)
-  (z : Dat (w.st Z) w.I hX T Wt), GrpTrue Z.N f → GrpAt (w.st Z) w.I → DV.KapDef (w.D Z) →
-    HoldsL z.R z.F → ∀ v ∈ z.W1 (F0K K.s (w.D Z)), B.places.resChar v ∈ T.pl
-
 def WeightCaseCondition : Prop := StepW Start fun K B f T w => ∀ (Z : w.Lt) (hX : B.fields.Ok) (Wt : Set B.places.Pl)
   (z : Dat (w.st Z) w.I hX T Wt), GrpTrue Z.N f → GrpAt (w.st Z) w.I → DV.KapDef (w.D Z) → z.R.toRealDat.ExAt →
     GlobalTheory.RealGeo.InGeo z.geo → CoreP z → GIs2 K w Z.G → Wt = z.W1 (F0K K.s (w.D Z)) → (∀ v ∈ Wt, B.places.resChar v ∈ T.pl) →
@@ -143,30 +172,6 @@ structure RowsSame {K : Ctx} {Z Z' : w.Lt} {p0 : BaseLevelRowSide (w.D Z)} {p0' 
   jW : HEq t'.r.Z.jW t.r.Z.jW
   eRR : HEq t'.r.Z.eRR t.r.Z.eRR
   eRR0 : HEq t'.r.Z.eRR0 t.r.Z.eRR0
-
-def p0To {Z : w.Lt} (p0 : BaseLevelRowSide (w.D Z)) (S : SStage B w.C Z.W) (G : GJStage B w.C) : BaseLevelRowSide (w.D ⟨Z.W, Z.V, S, Z.N, G⟩) :=
-  ⟨{ Amb := p0.s.Amb
-     instAmb := p0.s.instAmb
-     instAmbi := p0.s.instAmbi
-     instAmbf := p0.s.instAmbf
-     Mult := p0.s.Mult
-     instMult := p0.s.instMult
-     instMulti := p0.s.instMulti
-     instMultf := p0.s.instMultf
-     multZero := (by with_unfolding_all exact (p0.s.multZero :))
-     multTop := (by with_unfolding_all exact (p0.s.multTop :))
-     io := (by with_unfolding_all exact (p0.s.io :))
-     Mtilde := (by with_unfolding_all exact (p0.s.Mtilde :))
-     cen := (by with_unfolding_all exact (p0.s.cen :))
-     eOp := (by with_unfolding_all exact (p0.s.eOp :))
-     eOp_idem := (by with_unfolding_all exact (p0.s.eOp_idem :))
-     eOp_sa := (by with_unfolding_all exact (p0.s.eOp_sa :))
-     eOp_tie := (by with_unfolding_all exact (p0.s.eOp_tie :))
-     RR := p0.s.RR
-     RR_frames := (by with_unfolding_all exact (p0.s.RR_frames :))
-     jEE := (by with_unfolding_all exact (p0.s.jEE :))
-     jEE_basis := (by with_unfolding_all exact (p0.s.jEE_basis :))
-     jEE_norm := (by with_unfolding_all exact (p0.s.jEE_norm :)) }⟩
 
 end GlobalTheory.Mem.R3.Rw
 

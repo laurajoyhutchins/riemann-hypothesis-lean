@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped BigOperators
 
@@ -24,7 +71,7 @@ theorem _root_.GlobalTheory.HermNbr.hf_add_left (cK : K ≃+* K) (J : Matrix (Fi
     (x y z : Fin r → K) :
     _root_.GlobalTheory.HermNbr.hf cK J (x + y) z =
       _root_.GlobalTheory.HermNbr.hf cK J x z + _root_.GlobalTheory.HermNbr.hf cK J y z := by
-  simp only [_root_.GlobalTheory.HermNbr.hf, dotProduct, Pi.add_apply, map_add, add_mul,
+  simp only [_root_.GlobalTheory.HermNbr.hf, dotProduct, Pi.add_apply, map_add (f := _), add_mul,
     Finset.sum_add_distrib]
 
 open scoped BigOperators in
@@ -73,17 +120,18 @@ theorem _root_.GlobalTheory.HermNbr.hf_sub_left (cK : K ≃+* K) (J : Matrix (Fi
   simp only [_root_.GlobalTheory.HermNbr.hf, dotProduct, Pi.sub_apply, map_sub, sub_mul,
     Finset.sum_sub_distrib]
 
+
 open scoped BigOperators in
 variable {O K : Type} [CommRing O] [Field K] [Algebra O K] {r : ℕ} in
-
 theorem _root_.GlobalTheory.HermNbr.hf_conj (cK : K ≃+* K) (hc2 : ∀ x, cK (cK x) = x)
     (J : Matrix (Fin r) (Fin r) K)
     (hJ : J.transpose.map cK = J) (x y : Fin r → K) :
     _root_.GlobalTheory.HermNbr.hf cK J y x = cK (_root_.GlobalTheory.HermNbr.hf cK J x y) := by
   have hJ' : ∀ i j, cK (J i j) = J j i := fun i j => by
     simpa using congrFun (congrFun hJ j) i
+
   simp only [_root_.GlobalTheory.HermNbr.hf, dotProduct, Matrix.mulVec, map_sum, map_mul, hc2,
-    hJ', Finset.mul_sum]
+  hJ', Finset.mul_sum]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 
@@ -130,9 +178,9 @@ def Nbrs (cK : K ≃+* K) (J : Matrix (Fin r) (Fin r) K) (ϖ : O)
     (L : Submodule O (Fin r → K)) : Set (Submodule O (Fin r → K)) :=
   {L' | ∃ v, IsStep cK J ϖ L v ∧ L' = nb cK J L v}
 
+
 open scoped BigOperators in
 variable {O K : Type} [CommRing O] [Field K] [Algebra O K] {r : ℕ} in
-
 theorem _root_.GlobalTheory.HermNbr.graph_sum {X : Type} (S : Set X) (i : X → X → ℕ)
     (Nb : X → Set X) (Q : ℕ) (hQ : 2 ≤ Q)
     (s D : ℝ) (hs : 0 < s) (hD : 0 ≤ D)

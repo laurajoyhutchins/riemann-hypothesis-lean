@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -26,21 +66,6 @@ variable {X : Fields} {Pr : Primes X} {R : Ranks} (Ch : Chars X Pr R.m)
   (sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)) {S : Set ℕ}
   (mu : Tup X.F X.E X.K S) (cst : LocCst X (rowSG Pr sel mu)) (L : ChIdx X Pr R (QE sel (mu : Chr X.F X.E X.K)))
 
-open Classical in
-
-def TopLawQ (P : LevFam X.E X.K R.r Pr.vGs) (m2 : ℕ) (b : L.β (m2 + 1)) : Prop :=
-  ∀ (w : rowSG Pr sel mu) (hw : w.1 ∉ Pr.vGs) (c : ↥(L.levQ (m2 + 1) b ⟨w.1, (Finset.mem_union.mp w.2).resolve_left hw⟩).H)
-    (h₁ : GLG X.E (R.N R.m - 1) (rowSG Pr sel mu)) (hh₁ : h₁ w ∈ ((rowTy Ch sel mu P).inv w).H)
-    (κr : ↥(GLint X.E (R.N R.m - 1) w.1)) (κt : ↥(GLint X.E (R.N R.m) w.1)),
-    (∀ x ∈ stdAt X.E (R.N R.m - 1) w.1, redV w.1 (κr.1 x) = ((h₁ w)⁻¹).1.mulVec (redV w.1 x)) →
-    (∀ x ∈ stdAt X.E (R.N R.m) w.1, redV w.1 (κt.1 x) = ((extGH (N_m_succ R) h₁ w)⁻¹).1.mulVec (redV w.1 x)) →
-    ∀ y : HomE X.E (R.N (m2 + 1)) (R.N R.m - 1),
-      rhoS Ch sel mu (m2 + 1) w (LinearEquiv.det (c.1⁻¹).1 : X.Eˣ) * rhoT Ch sel mu (m2 + 1) w (LinearEquiv.det κt.1 : X.Eˣ) *
-          PhiTop Ch mu cst.sharp m2 w.1 (κr.1.symm.toLinearMap ∘ₗ y ∘ₗ (c.1⁻¹).1.toLinearMap ∘ₗ
-            LinearMap.funLeft X.E X.E (Fin.castAdd (cOf R (m2 + 1)))) =
-        (((((rowTy Ch sel mu P).inv w).lam ⟨h₁ w, hh₁⟩)⁻¹ : X.Kˣ) : X.K) *
-          ((((L.levQ (m2 + 1) b ⟨w.1, (Finset.mem_union.mp w.2).resolve_left hw⟩).lam c)⁻¹ : X.Kˣ) : X.K) *
-          PhiTop Ch mu cst.sharp m2 w.1 (y ∘ₗ LinearMap.funLeft X.E X.E (Fin.castAdd (cOf R (m2 + 1))))
 
 end Law
 

@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulMPull
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartLiftTensorCompatStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmulMPull
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GradedChartDegrees.ChartGrConst
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SplittingFieldLattices.GrSplit
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartLiftTensorCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpenStatement
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FlatBaseChangeCohomology
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.FaceMapCompSuccAboveCastSucc
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.AdmissibleMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb CrystallineSemistableComparison.Pb.Diso GlobalTheory.CompanionTheory.DisoHm
 
@@ -14,7 +68,7 @@ theorem dividedPowerFiltration_bot {B : Type} [CommRing B] {J : Ideal B} (δ : D
   rintro _ ⟨L, hL, hr', rfl⟩
   have : ∃ q ∈ L, q.1 ≠ 0 := by
     by_contra hc
-    push_neg at hc
+    push Not at hc
     have h0 : (L.map Prod.fst).sum = 0 := List.sum_eq_zero (by
       intro x hx
       obtain ⟨q, hq, rfl⟩ := List.mem_map.1 hx
@@ -35,9 +89,9 @@ theorem dividedPowerFiltration_bot {B : Type} [CommRing B] {J : Ideal B} (δ : D
 section Loc
 variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] {X : Scheme.{0}} {q : X ⟶ Spec (CommRingCat.of O)}
 
-theorem tfBase_ol (h : OL l O) {s : ℕ} (hs : 1 ≤ s) : TFBase (dividedPowersBot O) l s where
-  nil := dividedPowerFiltration_bot _ rfl hs
-  tf r x hx := by
+theorem tfBase_ol (h : OL l O) {s : ℕ} (hs : 1 ≤ s) : TFBase (dividedPowersBot O) l s := by
+  refine ⟨dividedPowerFiltration_bot _ rfl hs, ?_, ?_⟩
+  · intro r x hx
     cases r with
     | zero =>
       have h1 : (1 : O) ∈ pdP (dividedPowersBot O) 0 := Ideal.subset_span ⟨[], by simp, by simp, by simp⟩
@@ -46,7 +100,7 @@ theorem tfBase_ol (h : OL l O) {s : ℕ} (hs : 1 ≤ s) : TFBase (dividedPowersB
       rw [dividedPowerFiltration_bot _ rfl (by omega)] at hx ⊢
       have hl : (l : O) ∈ nonZeroDivisors O := h.tf l (Fact.out : l.Prime).ne_zero
       exact (mul_left_mem_nonZeroDivisors_eq_zero_iff hl).1 hx
-  dv n hn := by
+  · intro n hn
     obtain ⟨v, u, hlu, e⟩ := Nat.exists_eq_pow_mul_and_not_dvd hn l (Fact.out : l.Prime).ne_one
     obtain ⟨w, hw⟩ := (h.unit u hlu).exists_right_inv
     refine ⟨v, w, ?_⟩
@@ -248,7 +302,7 @@ end Top
 section Glue
 variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] {X : Scheme.{0}} {q : X ⟶ Spec (CommRingCat.of O)}
 
-set_option maxHeartbeats 1000000 in
+
 theorem glue (h : OL l O) (U : Cov q) (s m : ℕ) (hQ : ∀ (𝒱 : Set X.Opens) T, TO q l s 𝒱 T → Good (l := l) T m)
     (hP : ∀ (𝒱 : Set X.Opens) T, St (⊤ : ObjectProperty (Thick (Lm h q m))) 𝒱 ((GF h (TO q l s 𝒱) m (hQ 𝒱)).obj T))
     (hloc : ∀ S : Finset U.ι, S.Nonempty → ∀ j, Function.Bijective

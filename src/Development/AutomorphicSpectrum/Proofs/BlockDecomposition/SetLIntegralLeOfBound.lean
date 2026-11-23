@@ -1,5 +1,52 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.L2DecayOfCountEscape
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.L2DecayOfCountEscape
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,7 +97,7 @@ theorem sr_part {n : ℕ} (c : Fin (n - 1) → ℝ) (j : Fin (n - 1)) :
     sr (part n c) ((j : ℕ) + 1) = c j := by
   have hj := j.2
   unfold sr
-  rw [dif_pos (by omega : 0 < (j : ℕ) + 1 ∧ (j : ℕ) + 1 < n)]
+  rw [dite_eq_left (by omega : 0 < (j : ℕ) + 1 ∧ (j : ℕ) + 1 < n)]
   simp only [part, ← Finset.sum_sub_distrib, Nat.add_sub_cancel]
   rw [Finset.sum_eq_single j]
   · simp
@@ -85,7 +132,7 @@ theorem y_bound {n : ℕ} (y : Fin n → ℝ) (hl : ∀ i : Fin n, (i : ℕ) + 1
     obtain ⟨h3, h4⟩ := hd ⟨(i : ℕ), by omega⟩
     have e : sr y ((i : ℕ) + 1) = y i - y ⟨(i : ℕ) + 1, hi'⟩ := by
       unfold sr
-      rw [dif_pos (by omega : 0 < (i : ℕ) + 1 ∧ (i : ℕ) + 1 < n)]
+      rw [dite_eq_left (by omega : 0 < (i : ℕ) + 1 ∧ (i : ℕ) + 1 < n)]
       simp
     simp only at h3 h4
     rw [e] at h3 h4

@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalProjection.OrthogonalProjectionOntoCompSubtypeL
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
-import GroundTheory.AutomorphicForms.HarishChandraCentre
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalProjection.OrthogonalProjectionOntoCompSubtypeL
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsLintegralConstantTermL2SqLe
+public import GroundTheory.AutomorphicForms.TraceClass
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,9 +57,9 @@ namespace PositivityTheory.Rg.Tf.Core
 
 variable (K : Type*) [Field K] [NumberField K] (n : ℕ)
 
-abbrev G1 : Type _ := normOneGL K n
+abbrev G1 : Type _ := normOneGL (K := K) (n := n)
 
-abbrev Gam : Subgroup (G1 K n) := rationalGLOne K n
+abbrev Gam : Subgroup (G1 K n) := rationalGLOne (K := K) (n := n)
 
 abbrev CC : Type _ := CompactlySupportedContinuousMap (G1 K n) ℂ
 
@@ -33,8 +76,8 @@ def Pc : L2 μ →L[ℂ] L2 μ := (CuspidalSpectrum.cuspidalL2 μ).starProjectio
 
 variable {μ}
 
-variable (μ) in
 
+variable (μ) in
 structure Twist where
   e : G1 K n ≃ₜ* G1 K n
   mem_gam : ∀ g, e g ∈ Gam K n ↔ g ∈ Gam K n
@@ -72,8 +115,8 @@ def twInt (θ : Twist μ) (f : CC K n) : ℂ :=
 def qht (x : G1 K n) : ℝ :=
   ⨅ γ : Gam K n, AutomorphicForm.height (((γ : G1 K n) * x : G1 K n) : AdelicGLn.AdelicGL K n)
 
-variable (μ) in
 
+variable (μ) in
 def cuspTr (θ : Twist μ) (f : CC K n) : ℂ :=
   trace (Pc μ ∘L Rop μ f ∘L θ.U ∘L Pc μ)
 

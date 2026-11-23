@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenOfTwoStep
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanEqTopOfIrreducibleOverAlgClosed
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanEqTopOfIrreducibleOverAlgClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExpUpper
+
+@[expose] public section
+
 open scoped MatrixGroups TensorProduct
 open Matrix GlobalTheory.KZ
 
@@ -48,14 +102,17 @@ theorem exists_decomp {E : Type} [Field E] {ι : Type} [Fintype ι] [DecidableEq
     have e : (⟨P i₀ k ((∑ a, ∑ b', M a b' • P a b') u), hW k _⟩ : W)
         = ∑ b', M k b' • (⟨P i₀ b' u, hW b' u⟩ : W) := by
       apply Subtype.ext
+
       simp [LinearMap.sum_apply, map_sum, map_smul, hPa]
-    rw [e, map_sum, Finsupp.finset_sum_apply]
+
+    rw [e, map_sum, Finsupp.finsetSum_apply]
     simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, Matrix.mulVec, dotProduct, hπ]
   · intro i M
     refine LinearMap.ext fun v => ?_
     simp only [LinearMap.comp_apply, Matrix.toLin'_apply, hs]
+
     simp [LinearMap.sum_apply, map_sum, map_smul, hPa, Matrix.mulVec, dotProduct, Finset.sum_smul,
-      mul_smul]
+    mul_smul]
     simp only [Finset.smul_sum, smul_smul]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun y _ => Finset.sum_congr rfl fun x _ => by rw [mul_comm]
@@ -64,6 +121,7 @@ theorem exists_decomp {E : Type} [Field E] {ι : Type} [Fintype ι] [DecidableEq
     simp only [LinearMap.comp_apply, hπ, hs]
     have e : (⟨P i₀ k (∑ l, v l • P l i₀ (b j)), hW k _⟩ : W) = v k • b j := by
       apply Subtype.ext
+
       simp [map_sum, map_smul, hPa, hfix _ (b j).2]
     rw [e]
     split_ifs with h
@@ -75,6 +133,7 @@ theorem exists_decomp {E : Type} [Field E] {ι : Type} [Fintype ι] [DecidableEq
     have hk : ∀ k, ∑ x, b.repr ⟨P i₀ k u, hW k u⟩ x • P k i₀ (b x) = P k k u := by
       intro k
       have := congrArg (P k i₀) (hrec k u)
+
       rw [map_sum] at this
       simp only [map_smul] at this
       rw [this, hPa, if_pos rfl]
@@ -124,13 +183,13 @@ theorem isotypic_of_quadratic_relation : ∀ {E : Type} [Field E] [IsAlgClosed E
     induction x using MonoidAlgebra.induction_linear with
     | zero => simp
     | add x₁ x₂ h₁ h₂ =>
-      simp only [map_add, add_mul, mul_add, trace_add, add_smul, smul_add] at h₁ h₂ ⊢
+      simp only [map_add (f := _), add_mul, mul_add, trace_add, add_smul, smul_add] at h₁ h₂ ⊢
       linear_combination (norm := module) h₁ + h₂
     | single g c =>
       induction y using MonoidAlgebra.induction_linear with
       | zero => simp
       | add y₁ y₂ h₁ h₂ =>
-        simp only [map_add, add_mul, mul_add, trace_add, add_smul, smul_add] at h₁ h₂ ⊢
+        simp only [map_add (f := _), add_mul, mul_add, trace_add, add_smul, smul_add] at h₁ h₂ ⊢
         linear_combination (norm := module) h₁ + h₂
       | single h d =>
         simp only [hΦ, hΨ, trace_smul, smul_mul_smul_comm, smul_eq_mul]
@@ -205,17 +264,22 @@ theorem isotypic_of_quadratic_relation : ∀ {E : Type} [Field E] [IsAlgClosed E
       simp [h]
   have hsum : ∑ i, P i i = 1 := by
     simp only [P]
+
     rw [← map_sum, ← map_one Φ]
     apply hΦeq
+
     rw [map_sum, map_one]
     simp only [hyP]
-    ext i j; fin_cases i <;> fin_cases j <;> simp [Fin.sum_univ_two, Matrix.single_apply, Matrix.one_apply]
+    rw [Fin.sum_univ_two]
+    ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.single_apply, Matrix.one_apply]
   have hσ : ∀ g, σ g = ∑ a, ∑ b, (R g) a b • P a b := by
     intro g
     have e : σ g = Φ (MonoidAlgebra.single g 1) := by rw [hΦ, one_smul]
     rw [e]
+
     simp only [P, ← map_smul, ← map_sum]
     apply hΦeq
+
     simp only [map_sum, map_smul, hΨ, hyP, one_smul, Matrix.smul_single, smul_eq_mul, mul_one]
     exact Matrix.matrix_eq_sum_single (R g)
   obtain ⟨m, π, s, k1, k2, k3, k4⟩ := exists_decomp (0 : Fin 2) P hP hsum

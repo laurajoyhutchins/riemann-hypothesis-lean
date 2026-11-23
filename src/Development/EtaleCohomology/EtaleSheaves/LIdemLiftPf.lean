@@ -1,4 +1,49 @@
-import Development.EtaleCohomology.EtaleSheaves.LChartPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LChartPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -159,7 +204,7 @@ theorem lFinOfFact : LFinOfFact := by
   have hQb : π (aeval b Q) = (π b - 1) ^ (d + 1) := by
     rw [hπ Q ((X - 1) ^ (d + 1)) (by rw [hQ]; simp)]; simp
   have hUb : π (aeval b (u * P)) + π (aeval b (v * Q)) = 1 := by
-    rw [← map_add, ← map_add, hπ (u * P + v * Q) 1 (by simp [Polynomial.map_add, Polynomial.map_mul, hP, hQ, huv0])]
+    rw [← map_add (f := _), ← map_add (f := _), hπ (u * P + v * Q) 1 (by simp [Polynomial.map_add (f := _), Polynomial.map_mul, hP, hQ, huv0])]
     simp
   set x := aeval b (u * P)
   set y := aeval b (v * Q)
@@ -167,7 +212,7 @@ theorem lFinOfFact : LFinOfFact := by
     simp only [x, y, ← map_mul]
     rw [show u * P * (v * Q) = u * v * g by rw [hPQ]; ring, map_mul, hgb, mul_zero]
   have hs : (x + y) - 1 ∈ I.map (algebraMap A B) := by
-    rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_add, hUb, map_one, sub_self]
+    rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_add (f := _), hUb, map_one, sub_self]
   have hu := isUnit_one_add_of_finite I hI (x + y) hs
   refine ⟨x * hu.unit⁻¹, idem_of_mul_eq_zero x y hxy hu, ?_⟩
   have hinv : π (hu.unit⁻¹ : Bˣ) = 1 := by
@@ -187,6 +232,6 @@ theorem lFinOfFact : LFinOfFact := by
 
 theorem LIdemLift_of (h1 : LFact) : LateralTheory.E.LChartPf.LIdemLift := by
   intro A _ I _
-  exact lRed A I (lFinOfFact A I HenselianRing.jac (h1 A I))
+  exact lRed A I (lFinOfFact A I (by simpa only [Ideal.jacobson_bot] using (HenselianRing.jac (R := A) (I := I))) (h1 A I))
 
 end LateralTheory.E.LIdemLiftPf

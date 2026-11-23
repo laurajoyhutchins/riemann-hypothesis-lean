@@ -1,4 +1,52 @@
-import Formalism.CharacterColumnKernels.StatementN
+module
+
+public import Mathlib.Algebra.Algebra.Subalgebra.Lattice
+public import Mathlib.Algebra.Polynomial.Degree.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.RingTheory.SimpleModule.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial
 
@@ -13,27 +61,6 @@ def StatBurnside : Prop :=
     [IsScalarTower k A V] [FiniteDimensional k V], IsSimpleModule A V →
     (∀ φ : V →ₗ[A] V, ∃ c : k, ∀ v, φ v = c • v) →
     Function.Surjective (fun a : A => DistribSMul.toLinearMap k V a)
-
-def StatOntoLattice : Prop :=
-  ∀ (O A L : Type*) [CommRing O] [IsLocalRing O] [Ring A] [Algebra O A] [AddCommGroup L] [Module O L]
-    [Module.Free O L] [Module.Finite O L] (φ : A →ₐ[O] Module.End O L),
-    (∀ f : Module.End O L, ∃ a : A,
-      f - φ a ∈ (IsLocalRing.maximalIdeal O) • (⊤ : Submodule O (Module.End O L))) →
-    Function.Surjective φ
-
-def IdempotentLift : Prop :=
-  ∀ (O A B : Type*) [CommRing O] [IsLocalRing O] [IsNoetherianRing O]
-    [IsAdicComplete (IsLocalRing.maximalIdeal O) O] [Ring A] [Algebra O A] [Module.Finite O A]
-    [Ring B] (f : A →+* B), Function.Surjective f →
-    (∀ x : A, f x = 0 → ∃ n : ℕ, x ^ n ∈ (IsLocalRing.maximalIdeal O) • (⊤ : Submodule O A)) →
-    ∀ e₁ e₂ : B, IsIdempotentElem e₁ → IsIdempotentElem e₂ → e₁ * e₂ = 0 → e₂ * e₁ = 0 →
-      ∃ E₁ E₂ : A, IsIdempotentElem E₁ ∧ IsIdempotentElem E₂ ∧ E₁ * E₂ = 0 ∧ E₂ * E₁ = 0 ∧
-        f E₁ = e₁ ∧ f E₂ = e₂
-
-def StatRankMod : Prop :=
-  ∀ (O : Type*) [CommRing O] [IsDomain O] [IsLocalRing O] (r : Type) [Fintype r] [DecidableEq r]
-    (e : Matrix r r O), IsIdempotentElem e →
-    (e.map (IsLocalRing.residue O)).rank = (e.map (algebraMap O (FractionRing O))).rank
 
 def StatSplitAlg : Prop :=
   ∀ (T : Type u) [CommRing T] (P : T[X]), P.Monic →

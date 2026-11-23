@@ -1,6 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsStokesGeo
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.RegWeightLevi
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsStokesGeo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -28,34 +69,8 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
   {E : Ψ → Type} [∀ τ, AddCommGroup (E τ)] [∀ τ, Module Ω (E τ)]
   {D : ComponentData II Ψ K ι Ω E} {O Lt : Type} [CommRing O] [AddCommGroup Lt] [Module O Lt]
 
-omit [DecidableEq Ψ] in
-
-theorem NbarChartSemipos.hyps_of_setting (X : ComponentSetting D O Lt) {c : ℝ} (hc : 0 < c) :
-    ∃ t δ : ℝ, 0 < t ∧ X.M.atlas.Smooth (X.S.regWeight t) ∧
-      (∀ k : Fin X.S.R.N, ∀ x ∈ X.S.R.mid k, ∀ w : Fin D.n → ℂ,
-        -δ * ‖w‖ ^ 2 ≤ levi (X.S.R.chartFun (X.S.regWeight t) k) (X.S.R.chart k x) w) ∧
-      ((1 : ℕ) : ℝ) * δ ≤ ((1 : ℕ) : ℝ) * c := by
-  have hlim : Tendsto (fun t => 4 * X.S.Cη * X.S.e1 t) (𝓝[>] 0) (𝓝 0) := by
-    simpa using X.S_tied.e1_tendsto_zero.const_mul (4 * X.S.Cη)
-  have h1 : ∀ᶠ t in 𝓝[>] (0 : ℝ), 0 < t := eventually_mem_nhdsWithin
-  have hev := (X.S.eventually_chartLevi X.S_tied).and (h1.and (hlim.eventually (eventually_le_nhds hc)))
-  obtain ⟨t, ⟨hs, hl⟩, ht, hδ⟩ := hev.exists
-  exact ⟨t, 4 * X.S.Cη * X.S.e1 t, ht, hs, hl, by simpa using hδ⟩
 
 namespace Line
-
-open GroundTheory.Heights₂.Heights.Regular.ProjectiveLine
-
-theorem NbarChartSemipos.hyps_inhabited {c : ℝ} (hc : 0 < c) :
-    ∃ t δ : ℝ, 0 < t ∧ (projLineComponentSetting zeroSystem zero_hII).M.atlas.Smooth
-        ((projLineComponentSetting zeroSystem zero_hII).S.regWeight t) ∧
-      (∀ k : Fin (projLineComponentSetting zeroSystem zero_hII).S.R.N, ∀ x ∈ (projLineComponentSetting zeroSystem zero_hII).S.R.mid k,
-        ∀ w : Fin (lineData zeroSystem zero_hII).n → ℂ,
-        -δ * ‖w‖ ^ 2 ≤ levi ((projLineComponentSetting zeroSystem zero_hII).S.R.chartFun
-          ((projLineComponentSetting zeroSystem zero_hII).S.regWeight t) k)
-          ((projLineComponentSetting zeroSystem zero_hII).S.R.chart k x) w) ∧
-      ((1 : ℕ) : ℝ) * δ ≤ ((1 : ℕ) : ℝ) * c :=
-  LowerBoundFree.NbarChartSemipos.hyps_of_setting _ hc
 
 end Line
 

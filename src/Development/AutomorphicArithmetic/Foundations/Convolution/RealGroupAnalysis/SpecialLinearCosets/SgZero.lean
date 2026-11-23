@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.GoodU
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.MkLaws
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SgLaws
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.GoodU
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.SpecialLinearCosets.MkLaws
+import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnitaryActions.EqAmOfBarEq
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SgLaws
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -158,7 +200,7 @@ private theorem act_eq {J : GLv v →* GL (Fin 2) (A E)} (hs : Splt D v θ J) (y
     rw [hs.val, Matrix.add_apply, hNe, hT]
   have hb : (J y).val.map D.bar = 1 + T' := by
     ext i j
-    rw [Matrix.map_apply, hs.val, map_add, bar_sE, Matrix.add_apply]
+    rw [Matrix.map_apply, hs.val, map_add (f := _), bar_sE, Matrix.add_apply]
     have e : D.bar ((1 : Matrix (Fin 2) (Fin 2) (A E)) i j) = (1 : Matrix (Fin 2) (Fin 2) (A E)) i j := by
       rw [Matrix.one_apply]
       split_ifs <;> simp
@@ -251,7 +293,7 @@ theorem UpperTheory.ConvolutionTheory.R2.I.actJ :
   rw [act_eq D v hs x⁻¹ X Pm hP]
   have aw : ∀ (a : A F) (c : Kv v), (a + sg v c) - sg v (cp v (a + sg v c)) = a - sg v (cp v a) := by
     intro a c
-    rw [map_add, cp_sg', sg_add']
+    rw [map_add (f := _), cp_sg', sg_add']
     ring
   refine ⟨funext fun i => ?_, ?_⟩
   · fin_cases i
@@ -266,16 +308,16 @@ theorem UpperTheory.ConvolutionTheory.R2.I.actJ :
     refine Matrix.ext fun i j => ?_
     fin_cases i <;> fin_cases j
     · change cp v (X 1 + sg v (Pm 0 0)) = cp v (X 1) + Pm 0 0
-      rw [map_add, cp_sg']
+      rw [map_add (f := _), cp_sg']
     · change cp v (X 2 + sg v ((Pm 0 1 + Pm 1 0) / 2)) + cp v (X 3 + sg v ((Pm 0 1 - Pm 1 0) / (2 * θ))) * θ =
         cp v (X 2) + cp v (X 3) * θ + Pm 0 1
-      rw [map_add, map_add, cp_sg', cp_sg']
+      rw [map_add (f := _), map_add (f := _), cp_sg', cp_sg']
       field_simp
       ring
     · change cp v (X 2 + sg v ((Pm 0 1 + Pm 1 0) / 2)) - cp v (X 3 + sg v ((Pm 0 1 - Pm 1 0) / (2 * θ))) * θ =
         cp v (X 2) - cp v (X 3) * θ + Pm 1 0
-      rw [map_add, map_add, cp_sg', cp_sg']
+      rw [map_add (f := _), map_add (f := _), cp_sg', cp_sg']
       field_simp
       ring
     · change cp v (X 0 + sg v (Pm 1 1)) = cp v (X 0) + Pm 1 1
-      rw [map_add, cp_sg']
+      rw [map_add (f := _), cp_sg']

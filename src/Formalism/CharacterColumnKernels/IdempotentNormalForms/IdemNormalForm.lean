@@ -1,4 +1,66 @@
-import Formalism.CharacterColumnKernels.StatOntoLattice
+module
+
+public import Formalism.CharacterColumnKernels.StatOntoLattice
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.Projective
+public import Mathlib.LinearAlgebra.Basis.Prod
+public import Mathlib.LinearAlgebra.Matrix.Basis
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open Module
 
@@ -20,21 +82,6 @@ theorem burnside : StatBurnside := by
   refine ⟨a, (Module.finBasis k V).ext fun i => ?_⟩
   have := ha (Module.finBasis k V i) (Finset.mem_image_of_mem _ (Finset.mem_univ i))
   simpa [F] using this.symm
-
-theorem ontoLattice : StatOntoLattice := by
-  intro O A L _ _ _ _ _ _ _ _ φ hφ
-  have hle : (⊤ : Submodule O (Module.End O L)) ≤
-      LinearMap.range φ.toLinearMap ⊔ IsLocalRing.maximalIdeal O • ⊤ := by
-    intro f _
-    obtain ⟨a, ha⟩ := hφ f
-    have hf : f = φ a + (f - φ a) := by abel
-    rw [hf]
-    exact Submodule.add_mem_sup (LinearMap.mem_range.mpr ⟨a, rfl⟩) ha
-  have htop := Submodule.le_of_le_smul_of_le_jacobson_bot Module.Finite.fg_top
-    (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).ge hle
-  intro f
-  obtain ⟨a, ha⟩ := LinearMap.mem_range.mp (htop Submodule.mem_top)
-  exact ⟨a, ha⟩
 
 section RankMod
 
@@ -125,10 +172,5 @@ private theorem rank_map_conj {F : Type*} [Field F] (f : O →+* F) (P Q : Matri
     exact one_ne_zero
 
 end RankMod
-
-theorem rankMod : StatRankMod := by
-  intro O _ _ _ r _ _ e he
-  obtain ⟨P, Q, d, hd, hPQ, hQP, rfl⟩ := idem_normal_form e he
-  rw [rank_map_conj _ P Q d hd hPQ hQP, rank_map_conj _ P Q d hd hPQ hQP]
 
 end Formalism.NG

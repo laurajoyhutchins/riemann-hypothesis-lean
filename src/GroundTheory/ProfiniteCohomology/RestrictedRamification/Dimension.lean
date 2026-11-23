@@ -1,17 +1,67 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.DimensionKummer
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.DimensionSylow
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.SurjectiveOfInjectiveOfInjective
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.FiniteOpen
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeMackey
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeMackey
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.PrimaryComponentCohomologyEqBotOfScdpLt
+public import GroundTheory.ProfiniteCohomology.GaloisModules.CoeGalRootsOfUnityHomApply
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits.NormalFixingSubgroupGaloisClosure
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Vanishing
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeModules
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.DimensionKummer
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.DimensionSylow
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.FiniteOpen
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.SurjectiveOfInjectiveOfInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Trivial
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IsDedekindDomain GroundTheory.Global
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -34,6 +84,8 @@ theorem subsingleton_cohomology_of_cdp_le_two {n : ℕ} (hn : n ≠ 0)
 
 end Abstract
 
+local notation "ℚ̄" => AlgebraicClosure ℚ
+
 section Global
 
 variable (K : FiniteSubfield) (S : Set (HeightOneSpectrum (𝓞 K.1)))
@@ -51,7 +103,7 @@ theorem nonempty_zmod_addEquiv_rootsOfUnity_gs {ℓ : ℕ} (hℓ : ℓ.Prime)
     Nonempty (ZMod ℓ ≃+ Additive (rootsOfUnity ℓ (maxUnramifiedOutside K.1 ℚ̄ S))) := by
   have : Fact ℓ.Prime := ⟨hℓ⟩
   have : NeZero ℓ := ⟨hℓ.ne_zero⟩
-  obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℚ̄ ℓ
+  obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot ℚ̄ ℓ
   have hmem : ζ ∈ maxUnramifiedOutside K.1 ℚ̄ S :=
     mem_maxUnramifiedOutside_of_pow_eq_one S hℓ.ne_zero (fun v hv h => hv (hS v h)) hζ.pow_eq_one
   have hζ' : IsPrimitiveRoot (⟨ζ, hmem⟩ : maxUnramifiedOutside K.1 ℚ̄ S) ℓ :=
@@ -75,8 +127,8 @@ theorem nonempty_zmod_addEquiv_rootsOfUnity_gs {ℓ : ℕ} (hℓ : ℓ.Prime)
 variable {ℓ : ℕ} (hℓ : ℓ.Prime)
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
 
-include hℓ hS in
 
+include hℓ hS in
 theorem subsingleton_h3_rootsOfUnity (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.1) :
     Subsingleton (cohomology (galRootsOfUnity.{0} K.1 (maxUnramifiedOutside K.1 ℚ̄ S) ℓ) 3) :=
   ⟨fun x y => (eq_zero_h3_rootsOfUnity_of_h3_sUnits K S ℓ hℓ hS hK
@@ -84,8 +136,8 @@ theorem subsingleton_h3_rootsOfUnity (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.1) :
     (eq_zero_h3_rootsOfUnity_of_h3_sUnits K S ℓ hℓ hS hK
       (fun z hz => eq_zero_of_h3_sUnits K S ℓ hℓ hS z 1 (by rwa [pow_one])) y).symm⟩
 
-include hℓ hS in
 
+include hℓ hS in
 theorem subsingleton_h3_res_rootsOfUnity (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.1)
     (U : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S)) :
     Subsingleton (cohomology (Rep.res (U : Subgroup (galUnramifiedOutside K.1 ℚ̄ S)).subtype
@@ -100,8 +152,8 @@ theorem subsingleton_h3_res_rootsOfUnity (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.
   have := subsingleton_h3_rootsOfUnity L (placesOver S) hℓ hSL hKL'
   exact ((gsRootsOfUnityCohomologyIso S hL ℓ 3).toLinearEquiv.toEquiv.symm).subsingleton
 
-include hℓ hS in
 
+include hℓ hS in
 theorem cdp_galUnramifiedOutside_le_two (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.1) :
     cdp ℓ (galUnramifiedOutside K.1 ℚ̄ S) ≤ 2 := by
   obtain ⟨e⟩ := nonempty_zmod_addEquiv_rootsOfUnity_gs K S hℓ hS
@@ -116,8 +168,8 @@ variable (K : FiniteSubfield) (S : Set (HeightOneSpectrum (𝓞 K.1))) {n : ℕ}
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((n : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
   (hK : Odd n ∨ IsTotallyComplex K.1)
 
-include hn hS hK in
 
+include hn hS hK in
 theorem cdp_galUnramifiedOutside_le_two_of_dvd {ℓ : ℕ} (hℓ : ℓ.Prime) (hℓn : ℓ ∣ n) :
     cdp ℓ (galUnramifiedOutside K.1 ℚ̄ S) ≤ 2 := by
   refine cdp_galUnramifiedOutside_le_two K S hℓ (fun v hv => hS v ?_) ?_
@@ -128,27 +180,13 @@ theorem cdp_galUnramifiedOutside_le_two_of_dvd {ℓ : ℕ} (hℓ : ℓ.Prime) (h
     rw [h2] at hℓn
     exact (Nat.not_even_iff_odd.2 ho) (even_iff_two_dvd.2 hℓn)
 
-include hn hS hK in
 
-theorem subsingleton_cohomology_gs_of_three_le (U : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S))
-    (M : Rep.{0} (ULift.{0} ℤ) (U : Subgroup (galUnramifiedOutside K.1 ℚ̄ S))) [IsDiscreteRep M]
-    (hM : ∀ m : M, n • m = 0) {r : ℕ} (hr : 3 ≤ r) : Subsingleton (cohomology M r) :=
-  subsingleton_cohomology_of_cdp_le_two hn (fun ℓ hℓ hℓn =>
-    (cdp_openSubgroup_le ℓ U).trans (cdp_galUnramifiedOutside_le_two_of_dvd K S hn hS hK hℓ hℓn)) M hM hr
-
-include hn hS hK in
-
-theorem subsingleton_h3_res_rootsOfUnity_of_odd (U : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S)) :
-    Subsingleton (cohomology (Rep.res (U : Subgroup (galUnramifiedOutside K.1 ℚ̄ S)).subtype
-      (galRootsOfUnity.{0} K.1 (maxUnramifiedOutside K.1 ℚ̄ S) n)) 3) :=
-  subsingleton_cohomology_gs_of_three_le K S hn hS hK U _
-    (fun m => nsmul_rootsOfUnity_eq_zero (E := maxUnramifiedOutside K.1 ℚ̄ S) n m) le_rfl
 
 variable (ιs : ∀ v : S, ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1))
 
-set_option maxHeartbeats 2000000 in
-include hn hS hK in
 
+
+include hn hS hK in
 theorem subsingleton_compactCohomology_four (M : Rep.{0} (ULift.{0} ℤ) (galUnramifiedOutside K.1 ℚ̄ S))
     [IsDiscreteRep M] (hM : ∀ m : M, n • m = 0) :
     Subsingleton (compactCohomologyRes (gsFinFamily S ιs) M 4) := by

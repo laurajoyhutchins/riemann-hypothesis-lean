@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HilbertKodairaSpencer
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSymmetricVeryAmple
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsUniqueLinearLiftOfHolomorphicAbelianVariet
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRealMultiplicationUniformization
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticePreservingMapGivesEndomorphism
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqZeroOfFderivEqZero
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceSpecOfIsLocalRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAHOfIsFactorAH
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticePreservingMapGivesEndomorphism
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SurjectiveOfComplexPointsLiftOfUniversallyClosed
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsHolFormConst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,31 +82,5 @@ theorem smoothOfRelativeDimension_of_holUnif (A : Over (Sp ℂ)) [GrpObj A] (hA 
   rw [Obj.holUnif_dim_eq_of_linear u u₀ T hT]
   exact hd
 
-open GlobalTheory.ComplexPoints in
-
-theorem exists_oAct_of_map_lattice :
-    ∀ (g : ℕ) (A : Over (Sp ℂ)) [GrpObj A], IsAbelianScheme A →
-    ∀ (L : LB A.left) (u : HolUnif A L g) (O : Type) [CommRing O] (ρ : O →+* Module.End ℂ (Fin g → ℂ)),
-    (∀ a, ∀ z ∈ u.Λ, ρ a z ∈ u.Λ) → ∃ act : OAct O A, ∀ a z, u.ex (ρ a z) = u.ex z ≫ act.act a := by
-  intro g A _ hA L u O _ ρ hρ
-  haveI := hA.comm
-  haveI := hA.smooth
-  haveI := hA.proper
-  haveI : IsReduced A.left := isReduced_of_smooth_complex _ A.hom hA.smooth
-  choose ψ hhom hlift using fun a => GlobalTheory.HolUnifEnd.exists_isMonHom_of_map_lattice A g hA
-    (smoothOfRelativeDimension_of_holUnif A hA u) L u (ρ a) (hρ a)
-  have hext : ∀ f f' : A ⟶ A, (∀ z, u.ex z ≫ f = u.ex z ≫ f') → f = f' := fun f f' h =>
-    over_hom_ext_of_complexPoints fun x => by
-      obtain ⟨z, rfl⟩ := u.ex_onto x
-      exact h z
-  refine ⟨⟨ψ, hhom, ?_, ?_, ?_⟩, hlift⟩
-  · refine hext _ _ fun z => ?_
-    rw [← hlift, map_one, Module.End.one_apply, Category.comp_id]
-  · intro a b
-    refine hext _ _ fun z => ?_
-    rw [← hlift, ← Category.assoc, ← hlift, ← hlift, mul_comm, map_mul, Module.End.mul_apply]
-  · intro a b
-    refine hext _ _ fun z => ?_
-    rw [← hlift, comp_mul, ← hlift, ← hlift, map_add, LinearMap.add_apply, u.ex_add]
 
 end GlobalTheory.TorusAction

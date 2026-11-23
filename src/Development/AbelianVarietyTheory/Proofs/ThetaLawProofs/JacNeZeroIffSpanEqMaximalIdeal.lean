@@ -1,13 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsChartOfMemRedKer
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +86,7 @@ theorem det_ne_zero_iff_span_eq {K S : Type} [Field K] [CommRing S] [IsLocalRing
     have hδ : ∀ b, δ b = l (b - algebraMap K S (u b)) := fun b => rfl
     obtain ⟨c, hc⟩ := hsurj δ fun a b => by
       have h0 := hz _ (Submodule.mem_sup_right (Submodule.smul_mem_smul (hsub a) (hsub b)))
-      rw [hδ, hδ, hδ, ← smul_eq_mul (u a), ← smul_eq_mul (u b), ← map_smul, ← map_smul, ← map_add,
+      rw [hδ, hδ, hδ, ← smul_eq_mul (u a), ← smul_eq_mul (u b), ← map_smul, ← map_smul, ← map_add (f := _),
         ← sub_eq_zero, ← map_sub, ← h0]
       congr 1
       rw [smul_eq_mul]
@@ -65,6 +106,7 @@ theorem det_ne_zero_iff_span_eq {K S : Type} [Field K] [CommRing S] [IsLocalRing
     have h1 : ∀ k, D k 1 = 0 := fun k => by simpa using hD k 1 1
     have key : ∀ b ∈ Ideal.span (Set.range f), ∑ k, D k b * c k = 0 := fun b hb => by
       obtain ⟨r, rfl⟩ := Ideal.mem_span_range_iff_exists_fun.1 hb
+
       simp only [map_sum, hD, hf, zero_mul, add_zero, Finset.sum_mul, mul_assoc]
       rw [Finset.sum_comm]
       refine Finset.sum_eq_zero fun i _ => ?_

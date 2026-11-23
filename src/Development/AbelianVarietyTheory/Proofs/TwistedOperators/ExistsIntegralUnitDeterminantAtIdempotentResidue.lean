@@ -1,9 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDetInt
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulOfResSNeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnrOffOne
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDetInt
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulOfResSNeOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +62,7 @@ theorem toEAf_detAt_mem {D : D7} {V : HSp D} {β : GL (Fin V.rank) (Lev.EAf D)} 
       (GlobalTheory.AdIdem.idempotent_mem_intAE D _ (by rw [← map_mul, he]))
   have hd := GlobalTheory.VecInv.isDetAt_detAt e he V g
   unfold IsDetAt at hd
-  rw [hd, map_add, map_mul, map_sub, map_one, ← ha]
+  rw [hd, map_add (f := _), map_mul, map_sub, map_one, ← ha]
   exact add_mem (mul_mem hE a.2) (sub_mem (one_mem _) hE)
 
 theorem toEAf_detAt {D : D7} (V : HSp D) (g : GA D V) (e : AE D) (he : e * e = e) :
@@ -30,12 +70,12 @@ theorem toEAf_detAt {D : D7} (V : HSp D) (g : GA D V) (e : AE D) (he : e * e = e
       toEAf D e * toEAf D (Formalism.L2.Theta.mt V g).det + (1 - toEAf D e) := by
   have hd := GlobalTheory.VecInv.isDetAt_detAt e he V g
   unfold IsDetAt at hd
-  rw [hd, map_add, map_mul, map_sub, map_one]
+  rw [hd, map_add (f := _), map_mul, map_sub, map_one]
 
 theorem map_eq_of_idem {R K : Type} [Ring R] [Ring K] (S : Subring R) (f : S →+* K) (x ε a : S) (h1 : f ε = 1)
     (hx : (x : R) = (ε : R) * (a : R) + (1 - (ε : R))) : f a = f x := by
   have hx' : x = ε * a + (1 - ε) := Subtype.ext (by push_cast; exact hx)
-  rw [hx', map_add, map_mul, map_sub, map_one, h1]
+  rw [hx', map_add (f := _), map_mul, map_sub, map_one, h1]
   simp
 
 theorem toEAf_detAt_inv_mem {D : D7} {V : HSp D} {β : GL (Fin V.rank) (Lev.EAf D)} {g : GA D V} (hg : finE V g ∈ St β)

@@ -1,13 +1,74 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncModelEmbeddedLogResolution
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.BlkDegLeTotalDegree
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.HoloOnLocMono
+module
+
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.HoloOnLocMono
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.AnChart
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncModelEmbeddedLogResolution
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionBoundaryNormalCrossingStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCompactEmbeddedStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionCoverAndConeStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionLocalChartPolynomialStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionRegularLocalRingStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncResolutionTransitionPolynomialStatement
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.BlkDegLeTotalDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.Immersion
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.SNCstep
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterAlgRes
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinor
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FiniteMinimalPrimes
+
+@[expose] public section
 
 namespace PositivityTheory.Xgp.c_bm_exists_boundary
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.AnForm.M GlobalTheory.CompanionTheory.Ar.Cmp GlobalTheory.CompanionTheory.Ar.Cmp.SncRes
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_res {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {Ω : Type} [Field Ω] [CharZero Ω]
     (x : (Σ k, ι k) → Ω) (e : ℕ) (J : Ideal (MRing ι)) (hP : IsArithVar (mCoordIdeal x) (e + 1))
@@ -250,7 +311,7 @@ theorem exists_res {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι 
       obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.1 ha
       have hb0 := R.coord_mem_zero (idx x₀) hys b hb
       have := congrArg (eval (R.coord (idx x₀) y)) hab
-      rw [map_add, map_mul, h0, mul_zero, zero_add, hb0, map_mul] at this
+      rw [map_add (f := _), map_mul, h0, mul_zero, zero_add, hb0, map_mul] at this
       exact (mul_eq_zero.1 this.symm).resolve_left hh
   · intro G a _ hG
     have hmem : bind₁ (R.lift (idx x₀)) G ∈ R.bd (idx x₀) := by
@@ -276,7 +337,7 @@ theorem exists_res {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι 
       have hh : eval (R.coord (idx x₀) y) d.h ≠ 0 := (hψs hy).1.2.2
       have hb0 := R.coord_mem_zero (idx x₀) hys b hb
       have := congrArg (eval (R.coord (idx x₀) y)) hab
-      rw [map_add, map_mul, hb0, add_zero, map_mul] at this
+      rw [map_add (f := _), map_mul, hb0, add_zero, map_mul] at this
       show eval (fun q => eval (R.coord (idx x₀) y) (R.lift (idx x₀) q)) G = _
       rw [← ReciprocityTheory.AnForm.R.eval_bind_one, hmono y hy, div_mul_eq_mul_div, eq_div_iff hh]
       linear_combination (-1 : ℂ) * this

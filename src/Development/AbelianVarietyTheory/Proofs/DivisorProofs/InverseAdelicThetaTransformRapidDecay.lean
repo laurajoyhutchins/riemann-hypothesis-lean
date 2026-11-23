@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrandPeriodic
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrandPeriodic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.SWQ GlobalTheory.ThetaTransform
 open scoped Matrix Classical
@@ -38,12 +86,12 @@ theorem continuous_eMsymm : Continuous (eM F).symm := by
 
 theorem embR_add' {N : ℕ} (a b : Fin N → mixedEmbedding.mixedSpace F) : embR (a + b) = embR a + embR b := by
   funext i
-  simp only [embR, Pi.add_apply, map_add, pairA]
+  simp only [embR, Pi.add_apply, map_add (f := _), pairA]
   exact Prod.ext rfl (add_zero 0).symm
 
 theorem fstA_add_embR {N : ℕ} (x : Fin N → AF F) (t : Fin N → mixedEmbedding.mixedSpace F) (l : Fin N) :
     fstA F ((x + embR t) l) = fstA F (x l) + (eM F).symm (t l) := by
-  rw [Pi.add_apply, map_add]; rfl
+  rw [Pi.add_apply, map_add (f := _)]; rfl
 
 theorem dot_embR_single {N : ℕ} (z : Fin N → AF F) (l : Fin N) (y : mixedEmbedding.mixedSpace F) :
     z ⬝ᵥ embR (Pi.single l y) = pairA F (fstA F (z l) * (eM F).symm y) 0 := by
@@ -75,7 +123,7 @@ theorem phase {ψ : AddChar (AF F) ℂ} {lam : InfinitePlace F → ℝ} (hL : Is
       lam w₀.1 * (rc w₀ (fstA F (z l)) * s) := by
     rw [Finset.sum_eq_single w₀.1]
     · congr 1
-      rw [re, mul_apply', map_mul, ext_symm, dif_pos w₀.2, Complex.re_mul_ofReal, rc]
+      rw [re, mul_apply', map_mul, ext_symm, dite_eq_left w₀.2, Complex.re_mul_ofReal, rc]
       have := re_eq (fstA F (z l)) w₀.1 w₀.2
       rw [re] at this
       rw [this]
@@ -224,7 +272,7 @@ theorem invV_decay : ∀ (F : Type) [Field F] [NumberField F] (N : ℕ) [Inverti
         intro l w₀
         have hn := norm_invV_deriv l w₀ (x + embR t) (hrel l w₀ (x + embR t))
         have hrc : rc w₀ (fstA F ((x + embR t) l)) = rc w₀ (fstA F (x l)) + (t l).1 w₀ := by
-          rw [fstA_add_embR, rc, rc, map_add, RingEquiv.apply_symm_apply]; rfl
+          rw [fstA_add_embR, rc, rc, map_add (f := _), RingEquiv.apply_symm_apply]; rfl
         rw [hrc, ← hgdef] at hn
         have ha : 0 < 2 * Real.pi * |lam w₀.1| := by
           have := hL.1 w₀.1

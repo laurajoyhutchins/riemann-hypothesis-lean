@@ -1,14 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocallyConstantCompactSupportUnipotent
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicDoubleCosetDecomposition
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicCellStructureData
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DerivativeTwistedIso
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProjectionToTwistedEigenfunctionSupport
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsMemTwKerPolyBall
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsRepsSumEqZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousMatMir
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsIntertwinerOfEquiv
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousMatMir
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PolyBall
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DerivativeTwistedIso
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsMemTwKerPolyBall
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsRepsSumEqZero
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothSmInd
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocallyConstantCompactSupportUnipotent
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirabolicDoubleCosetDecomposition
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProjectionToTwistedEigenfunctionSupport
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothIntegralLinear
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaOpenMirabolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.BZMir GlobalTheory.BZMir.Leib GlobalTheory.RgGu.Leib GlobalTheory.CompanionTheory.BZPhiPG
 open scoped TensorProduct
@@ -38,6 +87,7 @@ theorem exists_avg (H : Subgroup G) (σ : Representation ℂ H Z) (L : Subgroup 
     have : E (cInd H σ ((r i : L) : G) f) = 0 := hcon _ (r i).2
     simp only [GlobalTheory.CompanionTheory.TwistedAverage.twOrbit, map_smul, this, smul_zero]
   have : E (c • ∑ i, GlobalTheory.CompanionTheory.TwistedAverage.twOrbit (cInd H σ) L θ f (r i)) = 0 := by
+
     rw [map_smul, map_sum, Finset.sum_eq_zero fun i _ => hz i, smul_zero]
   exact this
 
@@ -63,7 +113,8 @@ theorem avgVanish_conj (H : Subgroup G) (σ : Representation ℂ H Z) (U : Subgr
   have hconj : ∀ (n : G) (w : cIndSpace H σ), cInd H σ y⁻¹ (cInd H σ n w) =
       cInd H σ (y⁻¹ * n * y) (cInd H σ y⁻¹ w) := by
     intro n w
-    rw [← Module.End.mul_apply, ← Module.End.mul_apply, ← map_mul, ← map_mul]
+    set_option synthInstance.maxHeartbeats 200000 in
+      rw [← Module.End.mul_apply, ← Module.End.mul_apply, ← map_mul, ← map_mul]
     congr 2
     group
   refine ⟨L, hL, hc.image hcc, cInd H σ y⁻¹ g', ?_, ?_, ?_⟩
@@ -114,8 +165,8 @@ section Grp
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-variable (k) in
 
+variable (k) in
 def uEl (i t : ℕ) (c : Fin (i + 1) → k) (d : Fin (t + 1) → k) : Mir k ((i + 1) + t + 1) :=
   ⟨unip k ((i + 1) + (t + 1)) (Multiplicative.ofAdd (Fin.append c d)), MirU_le_Mir k _ ⟨_, rfl⟩⟩
 
@@ -491,11 +542,11 @@ theorem exists_polyBall_of_qC (z : τ.V ⊗[ℂ] σ.V) (hz : qC τ σ z = 0) :
     obtain ⟨s₂, h₂⟩ := hb
     obtain ⟨s, u, v⟩ := exists_val_ge s₁ s₂
     refine ⟨s, ?_⟩
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem (twKer_one_mono _ (polyBall_mono _ u) h₁) (twKer_one_mono _ (polyBall_mono _ v) h₂)
 
-variable (k) in
 
+variable (k) in
 def Lball (i t : ℕ) (s : kˣ) : Subgroup (Mir k ((i + 1) + t + 1)) :=
   (polyBall ((i + 1) + t + 1) s).map (GlobalTheory.CompanionTheory.BZPhiPhi.unipM k ((i + 1) + t))
 

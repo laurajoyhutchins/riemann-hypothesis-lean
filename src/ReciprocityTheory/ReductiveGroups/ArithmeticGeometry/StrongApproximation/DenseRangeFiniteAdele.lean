@@ -1,5 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.AdeleApproximation.AdeleIntA
+module
+
+public import Mathlib.RingTheory.DedekindDomain.FiniteAdeleRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.AdeleApproximation.AdeleIntA
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.SA
 
@@ -24,9 +69,6 @@ theorem small_mem_nhds (v : HeightOneSpectrum R) {s : Set (v.adicCompletion K)}
 theorem nhds_zero_int {N : Set (FiniteAdeleRing R K)} (hN : N ∈ 𝓝 (0 : FiniteAdeleRing R K)) :
     ∃ r : R, r ≠ 0 ∧ ∀ y : FiniteAdeleRing R K,
       (∀ v, Valued.v (y v) ≤ v.intValuation r) → y ∈ N := by
-  have hBopen : ∀ v : HeightOneSpectrum R,
-      IsOpen ((v.adicCompletionIntegers K : ValuationSubring _) : Set (v.adicCompletion K)) :=
-    fun v => Valued.isOpen_valuationSubring _
   let mk : (∀ v : HeightOneSpectrum R, v.adicCompletionIntegers K) → FiniteAdeleRing R K :=
     fun y => ⟨fun v => (y v : v.adicCompletion K), Eventually.of_forall fun v => (y v).2⟩
   have hmk : Continuous mk := by
@@ -69,7 +111,7 @@ theorem denseRange_finiteAdele : DenseRange (algebraMap K (FiniteAdeleRing R K))
   rw [mem_closure_iff_nhds]
   intro N hN
   have h0 : (fun y => b + y) ⁻¹' N ∈ 𝓝 (0 : FiniteAdeleRing R K) := by
-    have ht := (continuous_add_left b).tendsto (0 : FiniteAdeleRing R K)
+    have ht := (continuous_const_add b).tendsto (0 : FiniteAdeleRing R K)
     rw [add_zero] at ht
     exact ht hN
   obtain ⟨r, hr, hrN⟩ := nhds_zero_int h0
@@ -79,7 +121,7 @@ theorem denseRange_finiteAdele : DenseRange (algebraMap K (FiniteAdeleRing R K))
   have hx : algebraMap K (FiniteAdeleRing R K) (u + algebraMap R K a) - b =
       -((b - algebraMap K (FiniteAdeleRing R K) u) -
         algebraMap K (FiniteAdeleRing R K) (algebraMap R K a)) := by
-    rw [map_add]; ring
+    rw [map_add (f := _)]; ring
   have hmem := hrN (algebraMap K (FiniteAdeleRing R K) (u + algebraMap R K a) - b) (by
     rw [hx]
     intro v

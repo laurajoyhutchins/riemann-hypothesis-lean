@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspFree
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.AnChartAsm
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DualHalfLevelMarkingExistsAndMatchStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.AdmissibleSmulIffOfCoprime
+import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.ZeroNotAdmissibleOfRankPos
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DualHalfLevelMarkingExistsAndMatchStatement
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.AdmissibleSmulIffOfCoprime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HermitianTraceFormVanishing
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr
@@ -20,8 +68,8 @@ namespace GlobalTheory.Dict.CoverFourier
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r n : ℕ}
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem row_mem {Λ : Lt E n} {L : Lt E r} {s : E} (hs : ∀ v ∈ Λ, ∀ b, IsIntegral ℤ (s * v b))
     {y : Matrix (Fin n) (Fin r) E} (hy : y ∈ tens Λ L) (b : Fin n) : s • y b ∈ L := by
   induction hy using AddSubgroup.closure_induction with
@@ -39,8 +87,8 @@ theorem row_mem {Λ : Lt E n} {L : Lt E r} {s : E} (hs : ∀ v ∈ Λ, ∀ b, Is
     have : s • (-y) b = -(s • y b) := by funext j; simp
     rw [this]; exact L.neg_mem h
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem smul_mem_tens {Λ : Lt E n} {L : Lt E r} {s : E} (hs : ∀ b, (Pi.single b s : Fin n → E) ∈ Λ)
     {z : Matrix (Fin n) (Fin r) E} (hz : ∀ b, z b ∈ L) : s • z ∈ tens Λ L := by
   have : s • z = ∑ b, vecMulVec (Pi.single b s : Fin n → E) (z b) := by
@@ -71,8 +119,8 @@ theorem mem_mul_smul {L : Lt E r} {𝔞 𝔟 : Ideal (𝓞 E)} (h : IsCoprime �
   · rw [Submodule.mul_smul]; exact Submodule.smul_mem_smul ha' hb
   · rw [mul_comm, Submodule.mul_smul]; exact Submodule.smul_mem_smul hb' ha
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem finsum_tens {Λ : Lt E n} {L : Lt E r} {𝔟 𝔪 : Ideal (𝓞 E)} (hcop : IsCoprime 𝔟 𝔪) {s : 𝓞 E}
     (hs : s - 1 ∈ 𝔪) (hs1 : ∀ v ∈ Λ, ∀ b, IsIntegral ℤ ((s : E) * v b))
     (hs2 : ∀ b, (Pi.single b (s : E) : Fin n → E) ∈ Λ) (G : Matrix (Fin n) (Fin r) E → ℂ)
@@ -365,7 +413,7 @@ theorem cHalf_spec {I' : Ideal (𝓞 E)} (h : I' ⊔ I'.map (H.bar : 𝓞 E →+
     have : mb - 1 = -m := by rw [← hsum]; ring
     rw [this]; exact neg_mem hm
   unfold cHalf
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 theorem dvd_EF {m : ℕ} (x : Dw.La) {y : Dw.La}
@@ -410,7 +458,7 @@ theorem zetaM_pow (d : DeltaDat Xo c n) (h : d.IsLev) : zetaM d.c₂ ^ l.M =
   congr 1
   rw [hk, Nat.mul_div_cancel_left _ hM, h.2.1, mul_comm l.M, _root_.mul_assoc, Nat.mul_div_cancel_left _ hp, mul_comm]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem w_eq_sum : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Geo.Tor.Level H) (Xo : Moduli Dw l) (c : Coeff l) (n : ℕ) (d : DeltaDat Xo c n) [Algebra c.F ℂ] [Algebra d.c₂.F ℂ], (∀ t : c.F, algebraMap d.c₂.F ℂ (d.eF t) = algebraMap c.F ℂ t) → d.IsLev → ∀ (ph : (Fin n → LaJ Xo c d) → c.F) (ψ : (LaI Xo c d ≃ₗ[𝓞 E] LaI Xo c d) →* c.Fˣ) (x₀ : Fin n → LaJ Xo c d), d.PhiPin ph ψ x₀ → ∀ (r : ℕ) (X : Data E r) (D : SW.Level X) (hn : r ≤ n), r = Dw.p + Dw.q → LevTie d (algebraMap c.F ℂ) ph D hn → ∀ L ∈ D.lats, ∀ (mk mk₂ δ : Dw.La →ₗ[𝓞 E] (Fin r → E)) (x0 : Fin n → Dw.La), IsMark l L mk → IsMark d.l₂ L mk₂ → MarkOver l d.l₂ L mk mk₂ → IsDual X l (algebraMap c.F ℂ (zetaM c)) L mk δ → IsBaseClassLevelAdapted d D hn x0 δ → ∃ t : ℂ, ‖t‖ = 1 ∧ ∀ Λ ∈ Vset E n d.l₂.M, ∀ N : ℕ, NOK Λ N d.l₂.M → ∀ Y : (Fin n → LevQ Dw d.l₂) → Matrix (Fin n) (Fin r) E, IsRoots d.l₂ L mk₂ N Y → ∀ q, algebraMap d.c₂.F ℂ (d.w x0 q) = t * ∑ᶠ cl : tens Λ ((Ideal.span {2} * conjI D.𝔪) • L) ⧸ (tens Λ ((Ideal.span {2} * conjI D.𝔪 * D.𝔪) • L)).addSubgroupOf _, datF D (Mfr l) hn (cl.out : Matrix (Fin n) (Fin r) E) * cexp (-(2 * Real.pi * I * ((∑ b, EF X ((cl.out : Matrix (Fin n) (Fin r) E) b) (Y q b) : ℚ) : ℂ))) := by
   intro E _ _ _ H Dw l Xo c n d _ _ halg hlev ph ψ x₀ hpin r X D hn hr hT L hL mk mk₂ δ x0 hmk hmk₂ hov hδ hx0
@@ -502,7 +550,7 @@ theorem w_eq_sum : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : H
         have : (d.pd : E) ≠ 0 := by exact_mod_cast hpd
         rw [hlev.2.1]; funext j; simp; field_simp
       rw [this, hz, hδJ, LinearMap.smul_apply, Nat.cast_smul_eq_nsmul]
-      simp only [TensLat.EF_eq_bilin, map_add, map_nsmul, LinearMap.add_apply, LinearMap.smul_apply]
+      simp only [TensLat.EF_eq_bilin, map_add (f := _), map_nsmul, LinearMap.add_apply, LinearMap.smul_apply]
     have e3 : ex (EF X (δ (x0 b)) (((l.M : E)⁻¹) • mk₂ (a b))) = ex (EF X (δ (x0 b)) (((l.M : E)⁻¹) • mk (a b))) := by
       refine ex_congr ?_
       obtain ⟨u, hu, e⟩ := hov _ (ha b)
@@ -510,7 +558,7 @@ theorem w_eq_sum : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : H
       have : ((l.M : E)⁻¹) • mk₂ (a b) = ((l.M : E)⁻¹) • mk (a b) + u := by
         have : (l.M : E) ≠ 0 := by exact_mod_cast hM
         rw [e]; funext j; simp; field_simp
-      exact ⟨j, by rw [← hj, this]; simp only [TensLat.EF_eq_bilin, map_add, add_sub_cancel_left]⟩
+      exact ⟨j, by rw [← hj, this]; simp only [TensLat.EF_eq_bilin, map_add (f := _), add_sub_cancel_left]⟩
     rw [e1, e2, ex_add, e3, ex_nsmul, ex, ex, ← hδ.pair _ _ (Submodule.smul_mono_left (hT.m ▸ h𝔐) (ha b)),
       ← hδ₂.pair _ _ (ha b), ← zpow_natCast (_ ^ (_ : ℤ)), ← _root_.zpow_mul, mul_comm _ (l.M : ℤ), _root_.zpow_mul,
       zpow_natCast]
@@ -538,7 +586,7 @@ theorem w_eq_sum : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : H
       refine ⟨-(k * j), ?_⟩
       rw [Nat.cast_smul_eq_nsmul] at hj
       rw [this, Int.cast_neg, Int.cast_mul, ← hj]
-      simp only [TensLat.EF_eq_bilin, map_add, map_nsmul, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply]
+      simp only [TensLat.EF_eq_bilin, map_add (f := _), map_nsmul, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply]
       simp
   · congr 1
     · exact datF_congr D h𝔐 hn fun b => (cong_iff hL le_rfl (Submodule.smul_le_right (hww b))).2 (hww b)

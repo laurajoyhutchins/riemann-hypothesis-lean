@@ -1,15 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CenUsedOfCenReal
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CoreEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivChar
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ZeroDegreeOfPinFor
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsHeckeDatum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeReadOfDeltaFrob
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonzeroPlacesOverPrimes
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotBaseCondFalse
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RatInEig
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RowsRestWordColumnUnitBaseTupleAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsEmptyOfNotAll
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsRhoPtOfSplitting
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsComp
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeReadOfDeltaFrob
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsHeckeDatum
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AuxiliaryPrimeNeTypePrime
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EventuallyDefiniteSpacesStandardAndLarge
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsRationalHeckeOperatorsAdelicReadingStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisSideStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,8 +63,8 @@ open scoped TensorProduct
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1000000
+
+
 
 section General
 
@@ -90,13 +131,6 @@ theorem hkF_zero_of_sideB {cf Rw low Pq S hL eig θ} (Bs : SideB D cf Rw low Pq 
   rw [Bs.hkEq i j b h1 h2 0 P x hP hsp (Nat.zero_le _), pow_zero, one_smul]
   exact LinearMap.congr_fun ((GlobalTheory.ExportPin.Model.hkFR_of_smul S i j b (Bs.hs j h1 h2) 0 P).2 (h0 j P)) _
 
-theorem exists_frobUnit_and_hkF_trivial {hL : GlobalTheory.Published.LocalLanglandsGL} (b : NBuilt hL D) (h0 : ∀ j P, b.hL j 0 P = 1) :
-    (∃ u, IsFrobUnit D u) ∧
-      ∀ i j s P x, 1 ≤ j → j ≤ D.R.m → P ∉ D.ntw.S0 i → IsSplitPl D.host P → D.nexp.hkF i j s 0 P x = x := by
-  obtain ⟨D0, cf, jE, A, cg, au, rep, row, low, Pq, S, hl, eig, θ, Bs, M, C, tp, ch, mt, big, L, Sp, Au, ss, rfl⟩ := b
-  have h := hkF_zero_of_sideB (D := D0) Bs h0
-  exact ⟨⟨Bs.cHk, Bs.cHk_del⟩, fun i j s P x => h i j s P x⟩
-
 end General
 
 section Rows
@@ -105,19 +139,6 @@ variable {hL : GlobalTheory.Published.LocalLanglandsGL} {K : Ctx} {B : Base} {f 
   {Wt : Set B.places.Pl} {p0 : BaseLevelRowSide (w.D Z)} {t : RowsT K w Z Wt p0} {nch : NChoice (w.D Z)} {n : NchT w Z Wt nch}
   {xd : ThData (w.D Z)} {c : NCore hL t n}
 
-theorem nonempty_twOf {hH hV hs} (e : NE hL K B f T w Z Wt p0 t nch n xd c) (hF : FieldOk (realOf t hH hV hs))
-    (hG : ∃ G : GalSide (w.st Z).toD7, G.cf = TC.cf w.I w.l Z ∧ G.lam.C = TC.cf w.I w.l Z ∧ Nonempty (CGTrue hL _ G.wd))
-    (hR : ∀ (D : D7) (X : RealSide D) (S : RatDat D.ntw) (YS : NExpRealS X.R X.cG S),
-      ∃ hL : ∀ j, ℕ → PlE D.host → Module.End D.what₂.LL (S.WL j), (∀ j, 1 ≤ j → j ≤ D.R.m → HeckeStabR S j (hL j)) ∧
-        (∀ j P, hL j 0 P = 1) ∧ GlobalTheory.ExportPin.Reads X.R X.cG S YS hL) :
-    Nonempty (TwOf hL K B f T w Z Wt p0 t nch n xd c) := by
-  obtain ⟨g, h1, h2, ⟨cg⟩⟩ := hG
-  obtain ⟨k1, k2⟩ := hk_of_built c.a.nt.toNBuilt
-  obtain ⟨⟨u, hu⟩, hz⟩ := exists_frobUnit_and_hkF_trivial c.a.nt.toNBuilt (c.a.ratIn_hL ▸ c.a.ratIn.hL_zero)
-  obtain ⟨f', s1, s2, s3⟩ := hR _ (realOf t hH hV hs) _ c.row.nexp
-  obtain ⟨H, r1, r2⟩ := exists_hecke (realOf t hH hV hs) _ c.row.nexp e.ser.ex f' s1 s2 s3 u hu hz
-  exact ⟨twOf (serOf e H r1 r2 k1 k2) rfl HEq.rfl g h1 h2 hF cg fun hT v hv => base_of_untw _ hT v hv⟩
-
 end Rows
 
 end GlobalTheory.TwInputs.AtLayer
@@ -125,16 +146,6 @@ end GlobalTheory.TwInputs.AtLayer
 namespace GlobalTheory.TwInputs.AtLayer
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX NumberField IsDedekindDomain GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl GlobalTheory.Mem.R3 GlobalTheory.Mem.R3.Rw GlobalTheory.HeightCounting GlobalTheory.HeightCounting.Up
-
-theorem twOf_of_layer : PrN → SerN → ∀ hL : GlobalTheory.Published.LocalLanglandsGL, AtMem hL (fun _ _ _ _ w Z _ _ _ _ _ c => ∀ Rw : RowSide (w.D Z), HEq Rw.locR c.a.nt.A.row.locR → GlobalTheory.IndefiniteRowSideFullHecke.CMTypeEmbeddings.GoodRowCuspParam (w.D Z) Rw) → EvLgG fun K B f T => KPx B f → T = TwDat.untw B T.pl → ∀ w Z Wt p0 t nch n xd c, Nonempty (NEb hL K B f T w Z Wt p0 t nch n xd c) → Nonempty (RX K B f T w Z Wt p0 t) → ColPin w → Nonempty (GlobalTheory.TwInputs.TwOf hL K B f T w Z Wt p0 t nch n xd c) := by
-  intro hP hS hL _
-  have e1 := (evG_of_ev GlobalTheory.Mem.StdSize.vstd_size_ev).inter (evG_of_ev GlobalTheory.Mem.HostFrames.hostHyp_frames_ev)
-  have e2 := EvG.inter (GlobalTheory.T.exists_galois_side hP hS hL) (GlobalTheory.TwInputs.SmallField.evLgG_fieldOk hP)
-  refine (e1.inter e2).imp fun K _ _ _ _ H => ?_
-  obtain ⟨⟨hV, hH⟩, hG, hF⟩ := H
-  refine (hG.inter hF).imp fun B f T hO G hK _ w Z Wt p0 t nch n xd c ⟨e⟩ hR hC => ?_
-  exact nonempty_twOf (hH := (hH (w.st Z) hO).1) (hV := (hV (w.st Z) hO).1) (hs := (hV (w.st Z) hO).2) e.1
-    ((G.2 hK T w Z).1 _ t.r.z.lev.C) (G.1 hK w Z Wt p0 t nch n xd c ⟨e.1⟩ hR hC) (GlobalTheory.T.exists_rationalHeckeOperators_adelicReading hP.decay hS.hkTr hS.hkRead)
 
 end GlobalTheory.TwInputs.AtLayer
 

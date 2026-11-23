@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.LinearAlgebra.Dual.Defs
+public import Mathlib.LinearAlgebra.TensorProduct.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -17,7 +66,7 @@ def T (c : A →+* C₀) (k : K₀ →+* C₀) (hk : ∀ w : W, k (algebraMap W 
     { toFun := fun a =>
         { toFun := fun y => c a * k (f (1 ⊗ₜ y))
           map_zero' := by simp
-          map_add' := fun y y' => by rw [tmul_add, map_add, map_add, mul_add] }
+          map_add' := fun y y' => by rw [tmul_add, map_add (f := _), map_add (f := _), mul_add] }
       map_zero' := by ext; simp
       map_add' := fun a a' => by ext; simp [add_mul] }
     (fun w a y => by
@@ -34,8 +83,8 @@ theorem T_add (c : A →+* C₀) (k : K₀ →+* C₀) (hk : ∀ w : W, k (algeb
     (f g : Module.Dual K₀ (K₀ ⊗[W] L)) (z : A ⊗[W] L) : T c k hk (f + g) z = T c k hk f z + T c k hk g z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | tmul a y => simp only [T_tmul, LinearMap.add_apply, map_add, mul_add]
-  | add z z' hz hz' => rw [map_add, map_add, map_add, hz, hz']; ring
+  | tmul a y => simp only [T_tmul, LinearMap.add_apply, map_add (f := _), mul_add]
+  | add z z' hz hz' => rw [map_add (f := _), map_add (f := _), map_add (f := _), hz, hz']; ring
 
 def psi (c : A →+* C₀) (k : K₀ →+* C₀) (hk : ∀ w : W, k (algebraMap W K₀ w) = c (algebraMap W A w)) (u : C₀)
     {Λ : Type*} [AddCommGroup Λ] (α : Λ →+ A ⊗[W] L) : Λ →+ (Module.Dual K₀ (K₀ ⊗[W] L) →+ C₀) where
@@ -48,9 +97,5 @@ def psi (c : A →+* C₀) (k : K₀ →+* C₀) (hk : ∀ w : W, k (algebraMap 
       map_add' := fun f g => by rw [T_add, mul_add] }
   map_zero' := by ext f; simp
   map_add' x y := by ext f; simp [mul_add]
-
-theorem psi_apply (c : A →+* C₀) (k : K₀ →+* C₀) (hk : ∀ w : W, k (algebraMap W K₀ w) = c (algebraMap W A w)) (u : C₀)
-    {Λ : Type*} [AddCommGroup Λ] (α : Λ →+ A ⊗[W] L) (x : Λ) (f : Module.Dual K₀ (K₀ ⊗[W] L)) :
-    psi c k hk u α x f = u * T c k hk f (α x) := rfl
 
 end CrystallineSemistableComparison.Pb.Psi

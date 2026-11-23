@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SmallPointsSubstitutionAlgHomSinglePoint
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.GaugeThirdDifferenceSymmetryIntegralExponentials
+module
+
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SmallPointsSubstitutionAlgHomSinglePoint
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.GaugeThirdDifferenceSymmetryIntegralExponentials
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -108,7 +147,7 @@ theorem canonicalGauge_first_partial_law_in_field (hh : B.IsCanonGauge K h) (x y
       gt_ev_ev' _ _ hX (pair_points_zero_constant pa p2), eval_pair_points, eval_pair_points, eval_pair_points, evP_addOf _ hX _ _ _ p0 p1,
       evP_pt _ hX, evP_pt _ hX, evP_pt _ hX, mul_val_of x y hx hy, mp_addOf K B.G _ _ hx hy]
     rfl
-  · rw [map_sub, map_add, gt_const_ev_eq _ (pair_points_zero_constant p0 p2), gt_const_ev_eq _ (pair_points_zero_constant p1 p2),
+  · rw [map_sub, map_add (f := _), gt_const_ev_eq _ (pair_points_zero_constant p0 p2), gt_const_ev_eq _ (pair_points_zero_constant p1 p2),
       gt_const_ev_eq _ (pair_points_zero_constant pa p2), hc]
     simp
 
@@ -133,7 +172,7 @@ theorem canonicalGauge_second_partial_law_in_field (hh : B.IsCanonGauge K h) (x 
       gt_ev_ev' _ _ hX (pair_points_zero_constant p0 pa), eval_pair_points, eval_pair_points, eval_pair_points, evP_addOf _ hX _ _ _ p1 p2,
       evP_pt _ hX, evP_pt _ hX, evP_pt _ hX, mul_val_of y z hy hz, mp_addOf K B.G _ _ hy hz]
     rfl
-  · rw [map_sub, map_add, gt_const_ev_eq _ (pair_points_zero_constant p0 p1), gt_const_ev_eq _ (pair_points_zero_constant p0 p2),
+  · rw [map_sub, map_add (f := _), gt_const_ev_eq _ (pair_points_zero_constant p0 p1), gt_const_ev_eq _ (pair_points_zero_constant p0 p2),
       gt_const_ev_eq _ (pair_points_zero_constant p0 pa), hc]
     simp
 

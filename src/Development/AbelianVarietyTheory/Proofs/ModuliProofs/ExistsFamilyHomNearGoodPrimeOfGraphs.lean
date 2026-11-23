@@ -1,20 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsAwayFlatProjRep
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsProjByOfIsPullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsAwayProjectiveFormsThroughPoints
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsoOfProjectiveCoordinateRepresentation
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsProjCoordRepresentationHomogeneousIdealFlaStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSchemeMapOfProjectiveCoordinatesStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsIsoFibreOfPullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProjProperRelAmpleOfProjectiveCoordinateRep
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ProjRepGraphSegreCoordinatesFibreStatement
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ProjectiveRepresentationPullbackCoordinates
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SpMapCompRingHomComp
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SegreCoordinates
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsProjCoordRepresentationHomogeneousIdealFlaStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsoOfProjectiveCoordinateRepresentation
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SectionCoordinateVectorExistsLocallyStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSchemeMapOfProjectiveCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProjProperRelAmpleOfProjectiveCoordinateRep
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ProjRepGraphSegreCoordinatesFibreStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsAwayProjectiveFormsThroughPoints
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsIsoFibreOfPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SegreCoordinates
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SpMapCompRingHomComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct
@@ -24,8 +73,8 @@ noncomputable section
 namespace GlobalTheory.ZM.LocalGraph
 open GlobalTheory.ZM.SegreCoord GlobalTheory.AbLaw.Segre
 
-open MvPolynomial in
 
+open MvPolynomial in
 theorem homogeneousComponent_mem_vanIdeal {R σ Hh : Type} [CommRing R] (d : ℕ) (p : Hh → σ → R)
     (F : MvPolynomial σ R) (hF : F ∈ vanIdeal d p) (e : ℕ) : homogeneousComponent e F ∈ vanIdeal d p := by
   classical
@@ -36,34 +85,17 @@ theorem homogeneousComponent_mem_vanIdeal {R σ Hh : Type} [CommRing R] (d : ℕ
   rwa [show ((DirectSum.decompose (homogeneousSubmodule σ R) F e : homogeneousSubmodule σ R e) : MvPolynomial σ R)
     = homogeneousComponent e F from MvPolynomial.decomposition.decompose'_apply F e] at this
 
-open MvPolynomial in
 
+open MvPolynomial in
 theorem eval₂_eq_zero_of_forms_le {K σ : Type} [CommRing K] {I J : Ideal (MvPolynomial σ K)} {d : ℕ}
     (hI : ∀ F ∈ I, ∀ e, homogeneousComponent e F ∈ I)
     (hle : ∀ e ≥ d, ∀ F : MvPolynomial σ K, F.IsHomogeneous e → F ∈ I → F ∈ J)
     {T : Type} [CommRing T] (β : K →+* T) (v : σ → T) (hv : Ideal.span (Set.range v) = ⊤)
     (hJ : ∀ F ∈ J, eval₂ β v F = 0) : ∀ F ∈ I, eval₂ β v F = 0 := by
-  intro F hF
-  have key : ∀ e, eval₂ β v (homogeneousComponent e F) = 0 := by
-    intro e
-    have h1 : ∀ i, v i ^ d * eval₂ β v (homogeneousComponent e F) = 0 := by
-      intro i
-      have := hJ _ (hle (d + e) (by omega) (X i ^ d * homogeneousComponent e F)
-        ((isHomogeneous_X_pow i d).mul (homogeneousComponent_isHomogeneous e F)) (I.mul_mem_left _ (hI F hF e)))
-      rwa [eval₂_mul, eval₂_pow, eval₂_X] at this
-    have h2 := Ideal.span_pow_eq_top _ hv d
-    have h3 : Ideal.span ((fun x => x ^ d) '' Set.range v) ≤
-        LinearMap.ker (LinearMap.toSpanSingleton T T (eval₂ β v (homogeneousComponent e F))) := by
-      refine Ideal.span_le.2 ?_
-      rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-      exact h1 i
-    rw [h2] at h3
-    simpa using h3 (Submodule.mem_top (x := (1 : T)))
-  rw [← sum_homogeneousComponent F, eval₂_sum]
-  exact Finset.sum_eq_zero fun e _ => key e
+  apply GlobalTheory.ZM.NearCut.eval₂_eq_zero_of_forms_le <;> assumption
+
 
 open MvPolynomial in
-
 theorem mem_of_forall_map_mem {S σ : Type} [CommRing S] (J : Ideal (MvPolynomial σ S)) (e : ℕ)
     (hJ : ∀ F ∈ J, homogeneousComponent e F ∈ J)
     (hp : Module.Projective S (↥(homogeneousSubmodule σ S e) ⧸
@@ -90,7 +122,7 @@ theorem mem_of_forall_map_mem {S σ : Type} [CommRing S] (J : Ideal (MvPolynomia
       have h2 : (monomial m c : MvPolynomial σ S) = c • monomial m 1 := by simp [smul_monomial]
       rw [map_monomial, h1, map_smul, h2, map_smul, map_smul, smul_eq_mul, smul_eq_mul, map_mul]
       simp only [Λ, Module.Basis.constr_basis]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
   have key : ∀ G ∈ J.map (map x), ∀ H, Λ (H * G) = 0 := by
     intro G hG
     induction hG using Submodule.span_induction with
@@ -102,9 +134,9 @@ theorem mem_of_forall_map_mem {S σ : Type} [CommRing S] (J : Ideal (MvPolynomia
         have h1 : (monomial m c : MvPolynomial σ K) = c • map x (monomial m 1) := by simp [smul_monomial]
         rw [h1, smul_mul_assoc, map_smul, ← map_mul, hΛ, (hπ _).2 (hJ _ (J.mul_mem_left _ hG))]
         simp
-      | add p q hp hq => rw [add_mul, map_add, hp, hq, add_zero]
+      | add p q hp hq => rw [add_mul, map_add (f := _), hp, hq, add_zero]
     | zero => simp
-    | add p q _ _ hp hq => intro H; rw [mul_add, map_add, hp, hq, add_zero]
+    | add p q _ _ hp hq => intro H; rw [mul_add, map_add (f := _), hp, hq, add_zero]
     | smul c p _ hp => intro H; rw [smul_eq_mul, ← _root_.mul_assoc, hp]
   have := key _ hm 1
   rw [_root_.one_mul, hΛ] at this

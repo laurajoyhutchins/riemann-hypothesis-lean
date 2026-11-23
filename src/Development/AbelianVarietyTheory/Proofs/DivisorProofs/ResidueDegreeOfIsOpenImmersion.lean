@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.DegreeAdditiveFrobenius
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.FiniteDegreeMorphisms
+module
+
+public import Mathlib.AlgebraicGeometry.ResidueField
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsFrameOfForallExists
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.TopologicalKrullDimLeOfIrreducibleCloseds
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsQuasicoherentOfForallExistsAffine
+public import Mathlib.AlgebraicGeometry.Properties
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.QuadTie
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -9,13 +62,13 @@ noncomputable section
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.QCoh (IsFiniteQC)
-open GlobalTheory.VB GlobalTheory.IndefiniteRowSideFullHecke
+open GlobalTheory.VB
 
 namespace GlobalTheory.CurveDegreesCompare
 
+
 set_option autoImplicit false in
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits in
-
 theorem _root_.GlobalTheory.CurveDegreesCompare.residueDegree_comp {X Y Z : Scheme.{0}} (f : X ⟶ Y) (g : Y ⟶ Z) (x : X) :
     (f ≫ g).residueDegree x = g.residueDegree (f x) * f.residueDegree x := by
   letI := (g.residueFieldMap (f x)).hom.toAlgebra
@@ -33,9 +86,9 @@ theorem _root_.GlobalTheory.CurveDegreesCompare.residueDegree_comp {X Y Z : Sche
       Module.finrank (Y.residueField (f x)) (X.residueField x)
   exact (Module.finrank_mul_finrank _ _ _).symm
 
+
 set_option autoImplicit false in
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits in
-
 theorem _root_.GlobalTheory.CurveDegreesCompare.residueDegree_of_isOpenImmersion {X Y : Scheme.{0}} (f : X ⟶ Y)
     [IsOpenImmersion f] (x : X) : f.residueDegree x = 1 := by
   letI := (f.residueFieldMap x).hom.toAlgebra
@@ -45,69 +98,6 @@ theorem _root_.GlobalTheory.CurveDegreesCompare.residueDegree_of_isOpenImmersion
     (AlgEquiv.ofBijective (Algebra.ofId _ _) hbij).toLinearEquiv
   change Module.finrank (Y.residueField (f x)) (X.residueField x) = 1
   rw [← e.finrank_eq, Module.finrank_self]
-
-theorem isFractionRing_residueField (X : Scheme.{0}) [IsIntegral X] [IsAffine X] {x : X}
-    (hx : x = genericPoint X) :
-    letI := (X.Γevaluation x).hom.toAlgebra
-    IsFractionRing Γ(X, ⊤) (X.residueField x) := by
-  subst hx
-  letI := (X.Γevaluation (genericPoint X)).hom.toAlgebra
-  haveI : Nonempty (⊤ : X.Opens) := ⟨⟨genericPoint X, trivial⟩⟩
-  have := functionField_isFractionRing_of_isAffineOpen X ⊤ (isAffineOpen_top X)
-  let φ : X.functionField →+* X.residueField (genericPoint X) := (X.residue _).hom
-  let e : X.functionField ≃ₐ[Γ(X, ⊤)] X.residueField (genericPoint X) :=
-    { RingEquiv.ofBijective φ ⟨φ.injective, X.residue_surjective _⟩ with
-      commutes' := fun _ => rfl }
-  exact IsLocalization.isLocalization_of_algEquiv _ e
-
-theorem finrank_appTop_eq {P T : Scheme.{0}} [IsIntegral P] [IsIntegral T] [IsAffine P]
-    [IsAffine T] (g : P ⟶ T) (hg : g (genericPoint P) = genericPoint T) :
-    g.appTop.hom.finrank (T.isoSpec.hom (genericPoint T)) = g.residueDegree (genericPoint P) := by
-  rw [genericPoint_eq_of_isOpenImmersion, genericPoint_eq_bot_of_affine]
-  letI := g.appTop.hom.toAlgebra
-  letI := (g.residueFieldMap (genericPoint P)).hom.toAlgebra
-  letI := (T.Γevaluation (g (genericPoint P))).hom.toAlgebra
-  letI := (P.Γevaluation (genericPoint P)).hom.toAlgebra
-  haveI := isFractionRing_residueField T hg
-  haveI := isFractionRing_residueField P rfl
-  letI : Algebra Γ(T, ⊤) (P.residueField (genericPoint P)) :=
-    (g.appTop ≫ P.Γevaluation (genericPoint P)).hom.toAlgebra
-  haveI : IsScalarTower Γ(T, ⊤) Γ(P, ⊤) (P.residueField (genericPoint P)) :=
-    IsScalarTower.of_algebraMap_eq' rfl
-  haveI : IsScalarTower Γ(T, ⊤) (T.residueField (g (genericPoint P)))
-      (P.residueField (genericPoint P)) :=
-    IsScalarTower.of_algebraMap_eq' congr($(Scheme.Γevaluation_naturality g _).hom).symm
-  have h : (⊥ : PrimeSpectrum Γ(T, ⊤)).asIdeal.primeCompl ≤ nonZeroDivisors Γ(T, ⊤) := fun x hx =>
-    mem_nonZeroDivisors_of_ne_zero fun h0 => hx (h0 ▸ Ideal.zero_mem _)
-  refine Eq.trans ?_ (IsFractionRing.finrank_eq Γ(T, ⊤) _ Γ(P, ⊤) _).symm
-  change Module.rankAtStalk (R := Γ(T, ⊤)) Γ(P, ⊤) ⊥ = _
-  rw [Module.rankAtStalk, IsLocalization.finrank_eq _ _ h]
-  exact IsLocalizedModule.finrank_eq _ (LocalizedModule.mkLinearMap _ _) h
-
-theorem finrank_genericPoint {C' C : Scheme.{0}} [IsIntegral C'] [IsIntegral C] (π : C' ⟶ C)
-    [IsAffineHom π] (h : π (genericPoint C') = genericPoint C) :
-    π.finrank (genericPoint C) = π.residueDegree (genericPoint C') := by
-  let ι := C.affineOpenCover.f (C.affineOpenCover.idx (genericPoint C))
-  let t := (C.affineOpenCover.covers (genericPoint C)).choose
-  have ht : ι t = genericPoint C := (C.affineOpenCover.covers (genericPoint C)).choose_spec
-  obtain ⟨y, hy, -⟩ := Scheme.Pullback.exists_preimage_pullback (f := π) (g := ι) _ t
-    (h.trans ht.symm)
-  haveI : Nonempty _ := ⟨t⟩
-  haveI := isIntegral_of_isOpenImmersion ι
-  haveI : Nonempty ↥(pullback π ι) := ⟨y⟩
-  haveI := isIntegral_of_isOpenImmersion (pullback.fst π ι)
-  haveI : IsAffine (pullback π ι) := isAffine_of_isAffineHom (pullback.snd π ι)
-  have e₀ := genericPoint_eq_of_isOpenImmersion ι
-  have e₁ := genericPoint_eq_of_isOpenImmersion (pullback.fst π ι)
-  have e₂ : pullback.snd π ι (genericPoint _) = genericPoint _ :=
-    ι.isOpenEmbedding.injective (by
-      rw [← Scheme.Hom.comp_apply, ← pullback.condition, Scheme.Hom.comp_apply, e₁, h, e₀])
-  have e₃ : t = genericPoint _ := ι.isOpenEmbedding.injective (ht.trans e₀.symm)
-  have e₄ := residueDegree_comp (pullback.fst π ι) π (genericPoint _)
-  rw [pullback.condition, residueDegree_comp, residueDegree_of_isOpenImmersion,
-    residueDegree_of_isOpenImmersion (pullback.fst π ι), e₁, one_mul, mul_one] at e₄
-  change (pullback.snd π ι).appTop.hom.finrank ((Scheme.isoSpec _).hom t) = _
-  rw [e₃, finrank_appTop_eq _ e₂, e₄]
 
 section Clauses
 

@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfEtaSp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.GenOfTwo
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfEtaSp
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.GenOfTwo
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QInertHolds
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.QSplitHolds
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,19 +105,19 @@ theorem etaSp_holds : EtaSp σ J ψ v := by
     have h0 := hind' (-(algebraMap F (Fv F v) c)) 1 (by
       rw [map_neg, map_one, one_mul, hT, ← hc, inclR_alg', sc_eq', neg_add_cancel])
     exact one_ne_zero h0
-  obtain ⟨t, ht⟩ := fix_range σ hcm (y := (θ : E) + σ θ) (by rw [map_add, sig_sig σ hcm, add_comm])
+  obtain ⟨t, ht⟩ := fix_range σ hcm (y := (θ : E) + σ θ) (by rw [map_add (f := _), sig_sig σ hcm, add_comm])
   obtain ⟨m, hm⟩ := fix_range σ hcm (y := (θ : E) * σ θ) (by rw [map_mul, sig_sig σ hcm, mul_comm])
   set r := φ (θ : E) with hr
   set r' := φ (σ (θ : E)) with hr'
   have hsum : A r + A r' = inclR (F := F) (Fv F v) ((θ : E) + σ θ) := by
-    rw [← ht, inclR_alg', sc_eq', ← φ.commutes t, ht, map_add, map_add]
+    rw [← ht, inclR_alg', sc_eq', ← φ.commutes t, ht, map_add (f := _), map_add (f := _)]
   have hprod : A r * A r' = inclR (F := F) (Fv F v) ((θ : E) * σ θ) := by
     rw [← hm, inclR_alg', sc_eq', ← φ.commutes m, hm, map_mul, map_mul]
   have hkey : (T - A r) * (T - A r') = 0 := by
     calc (T - A r) * (T - A r') = T * T - (A r + A r') * T + A r * A r' := by ring
       _ = inclR (F := F) (Fv F v) ((θ : E) * θ - ((θ : E) + σ θ) * θ + θ * σ θ) := by
           rw [hsum, hprod, hT]
-          simp only [map_add, map_sub, map_mul]
+          simp only [map_add (f := _), map_sub, map_mul]
       _ = 0 := by rw [show (θ : E) * θ - ((θ : E) + σ θ) * θ + θ * σ θ = 0 by ring, map_zero]
   set d := r - r' with hd
   have hd0 : d ≠ 0 := by

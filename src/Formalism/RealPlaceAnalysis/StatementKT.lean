@@ -1,4 +1,51 @@
-import Formalism.RealPlaceAnalysis.StatementA
+module
+
+public import Formalism.RealPlaceAnalysis.StatementA
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped InnerProductSpace
 open Finset
@@ -54,13 +101,6 @@ theorem isUnitary_kUnit {V : Type*} [NormedAddCommGroup V] [InnerProductSpace �
   intro a b hab x y
   simpa [sgn, hab] using h a b x y
 
-def KNegT : Prop :=
-  ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (n : ℕ) (ε : Fin n → Bool)
-    (F : Fin n → Fin n → Module.End ℂ V),
-    (KRel ε F → KRel ε (negT F)) ∧ (KUnit ε F → KUnit ε (negT F)) ∧
-    ∀ (ν : Fin n → ℝ) (x : V),
-      (IsWeight F ν x ∧ ∀ a b, a < b → ε a = ε b → F b a x = 0) ↔ KHighest ε (negT F) (-ν) x
-
 def KWtOrth : Prop :=
   ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (n : ℕ) (ε : Fin n → Bool)
     (F : Fin n → Fin n → Module.End ℂ V) (μ ν : Fin n → ℝ) (x y : V),
@@ -90,21 +130,6 @@ def KHiUniq : Prop :=
     (F : Fin n → Fin n → Module.End ℂ V) (μ ν : Fin n → ℝ) (x y : V),
     KRel ε F → KUnit ε F → KHighest ε F μ x → y ∈ kSpan ε F x → KHighest ε F ν y →
     y = 0 ∨ (ν = μ ∧ ∃ c : ℂ, y = c • x)
-
-def KFormUniq : Prop :=
-  ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (n : ℕ) (ε : Fin n → Bool)
-    (F : Fin n → Fin n → Module.End ℂ V) (μ : Fin n → ℝ) (x : V) (H : V →ₗ⋆[ℂ] V →ₗ[ℂ] ℂ),
-    KRel ε F → KUnit ε F → KHighest ε F μ x →
-    (∀ a b, ε a = ε b → ∀ y ∈ kSpan ε F x, ∀ z ∈ kSpan ε F x, H (F a b y) z = H y (F b a z)) →
-    ∀ y ∈ kSpan ε F x, ∀ z ∈ kSpan ε F x, H y z * ((‖x‖ ^ 2 : ℝ) : ℂ) = H x x * ⟪y, z⟫_ℂ
-
-def KCommScalar : Prop :=
-  ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (n : ℕ) (ε : Fin n → Bool)
-    (F : Fin n → Fin n → Module.End ℂ V) (μ : Fin n → ℝ) (x : V) (T : Module.End ℂ V),
-    KRel ε F → KUnit ε F → KHighest ε F μ x →
-    (∀ y ∈ kSpan ε F x, T y ∈ kSpan ε F x) →
-    (∀ a b, ε a = ε b → ∀ y ∈ kSpan ε F x, T (F a b y) = F a b (T y)) →
-    ∃ c : ℂ, ∀ y ∈ kSpan ε F x, T y = c • y
 
 def KHiExist : Prop :=
   ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (n : ℕ) (ε : Fin n → Bool)

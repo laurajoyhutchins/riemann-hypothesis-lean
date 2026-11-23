@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.HTIntLeft
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.HTIntLeft
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.OFDefs
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.CommonMult
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.EichESymmApply
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.WeightPositive
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,6 +61,12 @@ open Classical
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
+private theorem stage1_span_eq_top_of_unimodular (D : Formalism.BasicNotions.D7) {Λ : Submodule (𝓞 D.host.E) (VS D).V}
+    (hL : Λ.FG) (hU : Formalism.HermitianLatticesTheory.IsUnimodular (VS D).hT Λ) :
+    Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ := by
+  exact Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top hU (VS D).herm hL
+
+
 theorem inW_neg (D : Formalism.BasicNotions.D7) {x : (VS D).V} (hx : InW D x) : InW D (-x) := by
   simpa using inW_smul D (-1) hx
 
@@ -18,7 +75,10 @@ theorem stage1_of_unipotentIntegralIsGroup (hN : UnipotentIntegralIsGroup) : Sta
   have hF' := hF
   obtain ⟨hlat, hU, he, heΛ0, c0, hc0, hz⟩ := hF
   have heΛ : ∀ a, D.sp.hypE a ∈ Λ := fun a => by rw [← he]; exact heΛ0 a
-  obtain ⟨d, hd0, hdv, hdk⟩ := common_mult D hlat
+  let : Submodule.IsLattice D.host.E Λ := hlat
+  have hfull : Submodule.IsFullLattice D.host.E Λ :=
+    ⟨stage1_span_eq_top_of_unimodular D hlat.fg hU⟩
+  obtain ⟨d, hd0, hdv, hdk⟩ := common_mult D hfull
     (Finset.univ.image D.sp.hypF ∪ {((D.sp.T : D.host.E)⁻¹) • D.sp.zm})
     (Finset.univ.image (fun p : Fin (D.R.rS + 1) × Fin D.R.rS => R p.1 p.2) ∪
       Finset.univ.image (fun p : Fin (D.R.rS + 1) × Fin (D.R.rS + 1) => Pm D Z R p.1 p.2))

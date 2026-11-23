@@ -1,11 +1,67 @@
-import Mathlib
-import Formalism.PeriodIntegrals.GoodTwo
-import Formalism.EllipticTorsion.EllipticTorsionProofs.Deuring
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.StatementH
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DyadicStableLattices.ChainPC
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DyadicStableLattices.ExistsNormEqTwoPow
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsGoodReductionAlgebraicWeierstrassModel
+module
+
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.JInvNormLeOne
+public import Formalism.PeriodIntegrals.GoodTwo
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.StatementH
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ModularJExpansionAndPolynomialAndIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsGoodReductionAlgebraicWeierstrassModel
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.Deuring
+import Formalism.EllipticTorsion.EllipticTorsionProofs.LegendreInvariant
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DyadicStableLattices.ChainPB
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DyadicStableLattices.ChainPC
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DyadicStableLattices.ExistsNormEqTwoPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsVariableChangeEqLatticeCurve
+
+@[expose] public section
 
 noncomputable section
 open scoped ComplexConjugate
@@ -16,25 +72,7 @@ namespace GlobalTheory.ThLoc.GoodTwo
 open PI.GoodTwo
 
 theorem isIntegral_jInv : Formalism.L2.Th1.CM.JInvariantIntegrality := by
-  intro d L _ hd4 hcm
-  obtain ⟨a, τ, ha, h⟩ := GlobalTheory.exists_lattice_eq_mul_tau L
-  have e : Formalism.L2.Th1.CM.jInv L = (GlobalTheory.latticeCurve L).j := by
-    rw [WeierstrassCurve.j, Units.val_inv_eq_inv_val, WeierstrassCurve.coe_Δ', GlobalTheory.latticeCurve_Δ, GlobalTheory.latticeCurve_c₄,
-      Formalism.L2.Th1.CM.jInv]
-    ring
-  rw [e, GlobalTheory.latticeCurve_j ha h]
-  refine GlobalTheory.isIntegral_modularJ_of_mul_mem (α := Formalism.L2.Th1.CM.omegaK d) ?_ ?_
-  · intro m hm
-    have him := congrArg Complex.im hm
-    simp [Formalism.L2.Th1.CM.omegaK] at him
-    omega
-  · intro x hx
-    obtain ⟨m, n, rfl⟩ := Submodule.mem_span_pair.1 hx
-    obtain ⟨m', n', h'⟩ := (h _).1 (hcm _ ((h _).2 ⟨m, n, rfl⟩))
-    refine Submodule.mem_span_pair.2 ⟨m', n', ?_⟩
-    simp only [zsmul_eq_mul, mul_one]
-    apply mul_left_cancel₀ ha
-    rw [h']; ring
+  apply GlobalTheory.ThLoc.cm1 <;> assumption
 
 theorem norm_jInv_le_one (d : ℕ) (L : PeriodPair) (hsq : Squarefree d) (hmod : d % 4 = 3) (hcm : Formalism.L2.Th1.CM.HasCMBy d L)
     (p : ℕ) [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) : ‖ι (Formalism.L2.Th1.CM.jInv L)‖ ≤ 1 :=
@@ -286,7 +324,7 @@ theorem jUnit_of (hW : TwoIsog) (hN : NormPow) (hC : Chain) (hR : RootCubic) (hU
   have hcubι : ∀ i, i < h → (ι (r i) + 16) ^ 3 = ι (jInv (M i)) * ι (r i) := by
     intro i hi
     have := congrArg ι (hcub i hi)
-    simpa [map_add, map_pow, map_mul, map_ofNat] using this
+    simpa [map_add (f := _), map_pow, map_mul, map_ofNat] using this
   have hle : ∀ i, i < h → ‖ι (r i)‖ ≤ 1 := fun i hi =>
     hR _ _ (norm_jInv_le_one d (M i) hsf hd4 (hMcm i) 2 ι) (hcubι i hi)
 
@@ -308,7 +346,7 @@ theorem jUnit_of (hW : TwoIsog) (hN : NormPow) (hC : Chain) (hR : RootCubic) (hU
   obtain ⟨k, rfl⟩ : ∃ k, h = k + 1 := ⟨h - 1, by omega⟩
   rw [Finset.prod_range_succ'] at hnorm
   have hrest : ∏ i ∈ Finset.range k, ‖ι (r (i + 1))‖ ≤ 1 :=
-    Finset.prod_le_one (fun _ _ => norm_nonneg _) (fun i hi => hle (i + 1) (by simp at hi; omega))
+    Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) (fun i hi => hle (i + 1) (by simp at hi; omega))
   have h0le := hle 0 (by omega)
   have hr0 : ‖ι (r 0)‖ = 1 := by
     have := mul_le_of_le_one_left (norm_nonneg (ι (r 0))) hrest
@@ -550,7 +588,7 @@ theorem norm_odd_eq_one (n : ℤ) (hn : Odd n) : ‖(n : ℂ_[2])‖ = 1 := by
   rw [norm_one]; exact max_eq_right hk.le
 
 theorem omegaK_add_conj (d : ℕ) : omegaK d + conj (omegaK d) = 1 := by
-  simp only [omegaK, map_div₀, map_add, map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
+  simp only [omegaK, map_div₀, map_add (f := _), map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
   ring
 
 theorem omegaK_sq_four (d : ℕ) : 4 * omegaK d ^ 2 = 4 * omegaK d - (1 + d) := by
@@ -575,7 +613,7 @@ theorem exists_unit_conjugate_norm_two_power_two_adic : UnitChoice := by
   set a := ι ((x : ℂ) + (y : ℂ) * ω) with ha_def
   set b := ι ((x : ℂ) + (y : ℂ) * conj ω) with hb_def
   have hsum : a + b = ((2 * x + y : ℤ) : ℂ_[2]) := by
-    rw [ha_def, hb_def, ← map_add, hc,
+    rw [ha_def, hb_def, ← map_add (f := _), hc,
       show ((x : ℂ) + y * ω + (x + y * (1 - ω))) = ((2 * x + y : ℤ) : ℂ) by push_cast; ring]
     exact map_intCast ι _
   have hprod : a * b = 2 ^ h := by

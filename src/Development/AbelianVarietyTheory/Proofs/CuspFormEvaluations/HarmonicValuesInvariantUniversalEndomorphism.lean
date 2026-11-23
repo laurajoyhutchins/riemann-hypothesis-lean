@@ -1,17 +1,64 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Formalism.LocalToGlobal.ProjectiveLattices.IsLevMove
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBC
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsAdjointnessSeriesOfFrames
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDPf
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBCNab
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PrimUniqPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsNatCastSmulCoeffIsIntegral
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsLevMove
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermBPrim
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsAdjointnessSeriesOfFrames
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsNatCastSmulCoeffIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBCNab
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDPf
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDVal
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PrimUniqPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -257,8 +304,8 @@ open GlobalTheory.FrameAdjSeries
 
 variable {S : Type} [CommRing S] {x0 : Sp S ⟶ X} {x0' : Sp S ⟶ X'}
 
-variable (ν) in
 
+variable (ν) in
 def pu (h0 : x0' ≫ ρ = x0) (A : Type) [CommRing A] [Algebra S A] : (overAt x0' A ⟶ t'.G) →* (overAt x0 A ⟶ t.G) :=
   have e : (overAt x0' A).hom ≫ ρ = (overAt x0 A).hom := (Category.assoc _ _ _).trans (congrArg (_ ≫ ·) h0)
   MonoidHom.mk' (fun a => Over.homMk (a.left ≫ ν.φ) ((Over.w (pushPt ν.cart.1.w a)).trans e)) fun a b =>
@@ -300,8 +347,8 @@ theorem jpt_push (hx : ∀ m, (x' m).left ≫ ν.φ = (x m).left) {n : ℕ} (m :
     (jptG t' x0' d x' m i).left ≫ ν.φ = (jptG t x0 d x m i).left :=
   (Category.assoc _ _ _).trans (congrArg (_ ≫ ·) (hx m))
 
-variable (w) in
 
+variable (w) in
 def FrRel (e' : ∀ m, FrTyG t' x0' d x' m) (e : ∀ m, FrTyG t x0 d x m) : Prop :=
   ∀ (m : ℕ) (Z : Scheme.{0}) (r : Z ⟶ Sp (Jet S (Fin 2 × Fin d) m)) (z : Z) J J', Good t.PP.L z J → Good t'.PP.L z J' →
     val (L := t.PP.L) (φ := cφG t ![jptG t x0 d x m (0 : Fin 2), jptG t x0 d x m (1 : Fin 2)]) (ε := cε 2) (e m) r z J =
@@ -415,7 +462,7 @@ theorem corr_of_val₂ {Y : Scheme.{0}} {K K' : Type} [Fintype K] [Fintype K'] {
     obtain ⟨J', hJ'⟩ := DegPull.exists_good' t'.PP.isLB y
     exact h _ _ y J J' hJ hJ'
 
-set_option maxHeartbeats 800000 in
+
 theorem isFrame_push (hG : GlobalFnsSt) (hA : IsAbelianScheme t'.G) (hw : w.IsGen)
     (hcub : LB.Gen.Maps (LB.linCombIso w (thφ t'.G (x3 t'.G)) thε) t'.cub.t (ν.cm.thetaPull t.PP.L t.cub.t))
     (hc : IsChartG t' x0' d F act tg uvec x') (hx : ∀ m, (x' m).left ≫ ν.φ = (x m).left) (he : FrRel w e' e)
@@ -671,7 +718,7 @@ theorem const_ad {d : ℕ} (B : Germ.FB S d (𝓞 E)) (a : 𝓞 E) : MvPowerSeri
   rw [B.adjoint_zero_fst a, map_one] at e
   exact e.symm
 
-set_option maxHeartbeats 400000 in
+
 
 theorem exists_chart_push (hG : GlobalFnsSt) {ρ : Xo.X ⟶ Xo.X} (ν : SABMap Xo.univ.t Xo.univ.t ρ) {y y' : FrPt Xo c S}
     {pm : Gx y.x ⟶ Gx y'.x} {w : LB.Iso Xo.univ.t.PP.L (Xo.univ.t.PP.L.pull ν.cm.F)} (h0 : y'.x = y.x ≫ ρ)

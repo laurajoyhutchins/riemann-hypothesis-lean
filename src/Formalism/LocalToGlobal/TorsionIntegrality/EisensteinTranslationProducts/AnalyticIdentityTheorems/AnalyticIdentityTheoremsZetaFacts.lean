@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.Legendre
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.Legendre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Filter Topology
@@ -46,17 +96,6 @@ lemma hasSumLU_zetaExcept (L : PeriodPair) (l₀ : ℂ) :
   · rw [norm_zero]
     positivity
   · exact term_bound r hr x hx l (by rw [hl]; exact hR)
-
-lemma zetaExcept_of_notMem (L : PeriodPair) (l₀ : ℂ) (hl : l₀ ∉ L.lattice) :
-    zetaExcept L l₀ = wZeta L := by
-  funext z
-  simp only [zetaExcept, wZeta]
-  refine tsum_congr fun l => ?_
-  rw [if_neg]
-  intro h
-  apply hl
-  rw [← h]
-  exact l.2
 
 lemma hasSumLU_wZeta (L : PeriodPair) :
     HasSumLocallyUniformly
@@ -213,19 +252,6 @@ theorem zeta_odd : ZetaOdd := by
   simp only [Equiv.neg_apply, Submodule.coe_neg]
   have h1 : -z - -(l : ℂ) = -(z - l) := by ring
   rw [h1, neg_sq, one_div_neg_eq_neg_one_div, one_div_neg_eq_neg_one_div, neg_div]
-  ring
-
-theorem zeta_pole_holds : ZetaPole := by
-  intro L
-  have hU : IsOpen (((L.lattice : Set ℂ) \ {0})ᶜ) := L.isOpen_compl_lattice_diff
-  have h0 : (0 : ℂ) ∈ ((L.lattice : Set ℂ) \ {0})ᶜ := by simp
-  have hc : ContinuousAt (zetaExcept L 0) 0 :=
-    ((differentiableOn_zetaExcept L 0).differentiableAt (hU.mem_nhds h0)).continuousAt
-  have ht := hc.tendsto.mono_left (nhdsWithin_le_nhds (s := {(0 : ℂ)}ᶜ))
-  rw [zetaExcept_zero_zero] at ht
-  refine ht.congr' (Filter.Eventually.of_forall fun z => ?_)
-  show zetaExcept L 0 z = wZeta L z - 1 / z
-  rw [← zetaExcept_zero_add L z]
   ring
 
 end Formalism.L2.Th1.F

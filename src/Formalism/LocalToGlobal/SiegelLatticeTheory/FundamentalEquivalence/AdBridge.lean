@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.LevelIntersectParabolic
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.LevelIntersectParabolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,10 +67,12 @@ def evV (v : InfinitePlace I.F) : Formalism.MainNotions.GlobalTheoryTheory.Genus
 
 theorem evV_algebraMap (v : InfinitePlace I.F) (a : I.F) :
     evV I v (algebraMap I.F (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) a) = v.embedding a := by
-  first
-    | (exact InfinitePlace.Completion.extensionEmbedding_coe v ((WithAbs.equiv v.1).symm a))
-    | (have h := InfinitePlace.Completion.extensionEmbedding_coe v ((WithAbs.equiv v.1).symm a); simp only [Equiv.apply_symm_apply] at h; exact h)
-    | (simp [evV]; done)
+  change InfinitePlace.Completion.extensionEmbedding v
+    ((algebraMap I.F (AdeleRing (𝓞 I.F) I.F) a).1 v) = v.embedding a
+  rw [AdeleRing.algebraMap_fst_apply]
+  change InfinitePlace.Completion.extensionEmbedding v
+    (((WithAbs.equiv v.1).symm a : WithAbs v.1) : v.Completion) = v.embedding a
+  rw [InfinitePlace.Completion.extensionEmbedding_coe, RingEquiv.apply_symm_apply]
 
 def thetaV (v : InfinitePlace I.F) : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E →+* ℂ :=
   letI : Algebra I.F ℂ := v.embedding.toAlgebra
@@ -43,8 +86,6 @@ theorem thetaV_tmul (v : InfinitePlace I.F) (a : Formalism.MainNotions.GlobalThe
     thetaV I v (a ⊗ₜ[I.F] x) = evV I v a * I.φ v x := by
   first
     | (simp [thetaV]; done)
-    | (exact Algebra.TensorProduct.lift_tmul _ _ _ a x)
-    | rfl
 
 def tauF : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E →+* I.E ⊗[I.F] Formalism.MainNotions.S.Af I.F :=
   (Algebra.TensorProduct.lift
@@ -126,17 +167,13 @@ theorem thetaV_sigR (v : InfinitePlace I.F) (x : Formalism.MainNotions.GlobalThe
   have hv : v.IsReal := by
     first
     | exact I.cm.totReal.isReal v
-    | (haveI := I.cm.totReal; exact NumberField.IsTotallyReal.isReal v)
   have hc : Continuous (InfinitePlace.Completion.extensionEmbedding v) := by
     first
     | exact (InfinitePlace.Completion.isometry_extensionEmbedding v).continuous
-    | fun_prop
   have hK : ∀ y : I.F, starRingEnd ℂ (v.embedding y) = v.embedding y := by
     intro y
     first
     | exact RingHom.congr_fun
-        (NumberField.ComplexEmbedding.isReal_iff.mp (InfinitePlace.isReal_iff.mp hv)) y
-    | simpa using RingHom.congr_fun
         (NumberField.ComplexEmbedding.isReal_iff.mp (InfinitePlace.isReal_iff.mp hv)) y
   have key : ∀ c : v.Completion, starRingEnd ℂ (InfinitePlace.Completion.extensionEmbedding v c) =
       InfinitePlace.Completion.extensionEmbedding v c := by
@@ -144,8 +181,6 @@ theorem thetaV_sigR (v : InfinitePlace I.F) (x : Formalism.MainNotions.GlobalThe
     first
     | (refine InfinitePlace.Completion.induction_on c (isClosed_eq (Complex.continuous_conj.comp hc) hc) ?_; intro y; first | (rw [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp only [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp [InfinitePlace.Completion.extensionEmbedding_coe, hK]; done) | (simp [hK]; done))
     | (refine (InfinitePlace.Completion.denseRange_coe (v := v)).induction_on c (isClosed_eq (Complex.continuous_conj.comp hc) hc) ?_; intro y; first | (rw [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp only [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp [InfinitePlace.Completion.extensionEmbedding_coe, hK]; done) | (simp [hK]; done))
-    | (refine (InfinitePlace.Completion.denseRange_coe v).induction_on c (isClosed_eq (Complex.continuous_conj.comp hc) hc) ?_; intro y; first | (rw [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp only [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp [InfinitePlace.Completion.extensionEmbedding_coe, hK]; done) | (simp [hK]; done))
-    | (obtain ⟨c'⟩ := c; refine UniformSpace.Completion.induction_on c' (isClosed_eq (Complex.continuous_conj.comp (hc.comp (by fun_prop))) (hc.comp (by fun_prop))) ?_; intro y; first | (rw [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp only [InfinitePlace.Completion.extensionEmbedding_coe]; exact hK _) | (simp [InfinitePlace.Completion.extensionEmbedding_coe, hK]; done) | (simp [hK]; done))
   have hreal : ∀ a : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F, starRingEnd ℂ (evV I v a) = evV I v a :=
     fun a => key (a.1 v)
   induction x using TensorProduct.induction_on with
@@ -156,7 +191,7 @@ theorem thetaV_sigR (v : InfinitePlace I.F) (x : Formalism.MainNotions.GlobalThe
     rw [hs, thetaV_tmul, thetaV_tmul, map_mul, hreal]
     congr 1
     exact I.cm.cmUnram.2.1 (I.φ v) y
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 theorem ofHAInf_rat (h : HAd I) (γ : GL (Fin I.n) I.E)
     (hγ : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.HA.mat (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) I.cm.sig I.J h =
@@ -166,11 +201,6 @@ theorem ofHAInf_rat (h : HAd I) (γ : GL (Fin I.n) I.E)
       (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.inclR (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F)) := by
     first
       | (unfold hmat; rw [hγ]; rfl)
-      | (simp only [hmat, hγ]; rfl)
-      | (simp only [hmat, hγ]; done)
-      | (rw [show hmat I h = ((Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.HA.mat (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) I.cm.sig I.J h :
-          GL (Fin I.n) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E)) :
-          Matrix (Fin I.n) (Fin I.n) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E)) from rfl, hγ]; rfl)
   have key : (hmat I h).map (thetaV I v) = (γ : Matrix (Fin I.n) (Fin I.n) I.E).map (I.φ v) := by
     rw [hh]
     ext i j
@@ -187,11 +217,6 @@ theorem ofHAFin_rat (h : HAd I) (γ : GL (Fin I.n) I.E)
       (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.inclR (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F)) := by
     first
       | (unfold hmat; rw [hγ]; rfl)
-      | (simp only [hmat, hγ]; rfl)
-      | (simp only [hmat, hγ]; done)
-      | (rw [show hmat I h = ((Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.HA.mat (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) I.cm.sig I.J h :
-          GL (Fin I.n) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E)) :
-          Matrix (Fin I.n) (Fin I.n) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F ⊗[I.F] I.E)) from rfl, hγ]; rfl)
   unfold ofHAFin
   rw [hh]
   ext i j
@@ -243,7 +268,7 @@ private theorem tauF_sigR_comm (x : Formalism.MainNotions.GlobalTheoryTheory.Gen
         a ⊗ₜ[I.F] I.cm.sig y := rfl
     rw [hs, tauF_tmul, tauF_tmul]
     rfl
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 theorem ofHAFin_mem (h : HAd I) :
     Formalism.UG.cT (Formalism.UG.sigR I.cm.sig (Formalism.MainNotions.S.Af I.F)) (ofHAFin I h) *

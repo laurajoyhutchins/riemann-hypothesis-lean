@@ -1,6 +1,68 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.SingleLetterBiextensionRelation
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.UnimodularGram.Orthonormal
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TrDual
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.UnimodularGram.Orthonormal
+public import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExponentialSpecification
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.TraceDualExists
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KurComplete
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TransportFirstLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.FieldTheory.KummerExtension
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.MetricSpace.Contracting
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.L2.Th1.CM (MaximalUnramifiedExtension)
 open Formalism.L2.Th1.D (OwOK TrDual)
@@ -138,8 +200,8 @@ private lemma norm_onto [CompleteSpace K] [CharZero K] (hU : UnrOK K l σ) (ζ :
   refine ⟨x * (1 + t), ?_, ?_, ?_⟩
   · rw [norm_mul, nx, one_mul]
     exact nadd norm_one.le ht.le
-  · simp only [map_mul, map_add, map_one, hst, hx2]
-  · simp only [map_mul, map_add, map_one, hst]
+  · simp only [map_mul, map_add (f := _), map_one, hst, hx2]
+  · simp only [map_mul, map_add (f := _), map_one, hst]
     have : (t ^ 2 + 2 * t) * n = u - n := by rw [htw]; field_simp
     linear_combination this + (1 + t) ^ 2 * hn
 
@@ -149,7 +211,7 @@ private def intFix (hU : UnrOK K l σ) : Subring K where
     rw [norm_mul]; exact mul_le_one₀ ha.1 (norm_nonneg _) hb.1, by
     rw [map_mul, map_mul, ha.2, hb.2]⟩
   one_mem' := ⟨norm_one.le, by rw [map_one, map_one]⟩
-  add_mem' := fun {a b} ha hb => ⟨nadd ha.1 hb.1, by rw [map_add, map_add, ha.2, hb.2]⟩
+  add_mem' := fun {a b} ha hb => ⟨nadd ha.1 hb.1, by rw [map_add (f := _), map_add (f := _), ha.2, hb.2]⟩
   zero_mem' := ⟨by simp, by rw [map_zero, map_zero]⟩
   neg_mem' := fun {a} ha => ⟨by rw [norm_neg]; exact ha.1, by rw [map_neg, map_neg, ha.2]⟩
 
@@ -206,15 +268,16 @@ private lemma congr_one [CompleteSpace K] [CharZero K] (hU : UnrOK K l σ) (ζ :
     ext i j
     have := congrFun (congrFun hHG i) j
     rw [Matrix.mul_apply, Matrix.one_apply] at this
-    rw [Matrix.mul_apply, Matrix.one_apply, AddSubmonoidClass.coe_finset_sum]
+    rw [Matrix.mul_apply, Matrix.one_apply, AddSubmonoidClass.coe_finsetSum]
     refine this.trans ?_
     split_ifs <;> rfl
   obtain ⟨P, -, hP⟩ := KStar.Cstarloc.exists_congr_one hD H'
     (by ext i j; exact hh i j) (Matrix.isUnit_det_of_right_inverse hHG')
   refine ⟨Matrix.of fun i j => (P i j : K), fun i j => (P i j).2, fun r r' => ?_⟩
   have := congrArg (intFix hU).subtype (congrFun (congrFun hP r) r')
+
   simp only [Matrix.mul_apply, Matrix.one_apply, map_sum, map_mul, Matrix.conjTranspose_apply,
-    Subring.coe_subtype, hst] at this
+  Subring.coe_subtype, hst] at this
   refine this.trans ?_
   split_ifs <;> rfl
 
@@ -237,6 +300,7 @@ private lemma tr_shift (i : ℕ) (x : K) (hx : (σ ^ (2 * i)) x = x) : tr σ i (
 omit [IsUltrametricDist K] in
 private lemma tr_map (i m : ℕ) (x : K) : (σ ^ m) (tr σ i x) = tr σ i ((σ ^ m) x) := by
   unfold tr
+
   simp only [map_sum, pp, add_comm]
 
 omit [IsUltrametricDist K] in
@@ -325,6 +389,7 @@ private lemma main [CompleteSpace K] [CharZero K] (hU : UnrOK K l σ) (ζ : K)
     IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun a _ =>
       hmul (hP r a).1 (hn a).1
   have f1 : ∀ r, (σ ^ (2 * i)) (∑ a, P r a * om a) = ∑ a, P r a * om a := fun r => by
+
     simp only [map_sum, map_mul, fix_even (hP _ _).2, (hf _).1]
   have hPi : ∀ r a, (σ ^ i) (P r a) = σ (P r a) := fun r a => by
     rw [hj, add_comm, ← pp, fix_even (hP _ _).2, pow_one]
@@ -335,8 +400,9 @@ private lemma main [CompleteSpace K] [CharZero K] (hU : UnrOK K l σ) (ζ : K)
   · simp only [← RingHom.coe_pow]
     exact ⟨f1 r, hfi (f1 r)⟩
   · rw [tr_eq, ← hPH r r', ← RingHom.coe_pow]
+
     simp only [H, Matrix.of_apply, tr, map_sum, map_mul, hPi, hPs, fix_even (hP _ _).2,
-      Finset.sum_mul, Finset.mul_sum]
+    Finset.sum_mul, Finset.mul_sum]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun b _ => ?_
     rw [Finset.sum_comm]

@@ -1,17 +1,54 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsDualFamilyOfIsLattice
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CmDataIsCMExtAndGramIsHermND
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IteratedLiftChains
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SatakeParameterOfSphericalStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsDualFamilyOfIsLattice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CmDataIsCMExtAndGramIsHermND
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HilbertSchurOfAdjointClosed
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SatakeParameterBound
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSplitPrimeAvoiding
-import Development.AutomorphicArithmetic.CyclotomicBounds.RamifiedDiscriminants.CondSq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitPrimePlacesSplit
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitPrimeAdditiveCharacterUnramified
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeCharacterInfiniteOrderAtSplit
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CharacterEquivalenceLocalData
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.IndefR.Links
@@ -35,8 +72,43 @@ theorem isHermND_gram (V : HSp D) : IsHermND D.sp.cm.sig V.gram :=
 theorem chart (V : HSp D) {v : HeightOneSpectrum (𝓞 D.host.F)} {w : HeightOneSpectrum (𝓞 D.host.E)}
     (h : w.under (𝓞 D.host.F) = v) (hv : IsSplit (E := D.host.E) v) :
     (∃ e, IsSplitChart D.sp.cm.sig V.gram (frameLat V) h e) ∧ Ideal.absNorm w.asIdeal = Formalism.UG.qV D.host.F v := by
+  have hspan : Submodule.span D.host.E (frameLat V : Set (Fin V.rank → D.host.E)) = ⊤ := by
+    have hfull : Submodule.span D.host.E (V.L0 : Set V.V) = ⊤ := by
+      let W := Submodule.span D.host.E (V.L0 : Set V.V)
+      change W = ⊤
+      by_contra h
+      let e : V.V ≃ₗ⋆[D.host.E] V.V :=
+        (V.frame.equivFun.trans (starLinearEquiv D.host.E)).trans V.frame.equivFun.symm
+      let g : V.V →ₗ[D.host.E] Module.Dual D.host.E W :=
+        (LinearMap.domRestrict' W).comp (V.hT.comp e.toLinearMap)
+      have hdim : Module.finrank D.host.E (Module.Dual D.host.E W) < Module.finrank D.host.E V.V := by
+        rw [Subspace.dual_finrank_eq]
+        exact Submodule.finrank_lt h
+      obtain ⟨x, hx, hx₀⟩ :=
+        Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+      have hsmul (a : D.host.E) : a • e x ∈ V.L0 := by
+        rw [← V.baseLattice_isUnimodular]
+        rw [Formalism.HermitianLatticesTheory.dualBasic_mem_dual]
+        intro y hy
+        have hxy : V.hT (e x) y = 0 :=
+          congrArg (fun f : Module.Dual D.host.E W => f ⟨y, Submodule.subset_span hy⟩) (LinearMap.mem_ker.mp hx)
+        have hyx : V.hT y (e x) = 0 := by
+          rw [(V.herm.eq (e x) y).symm, hxy, map_zero]
+        simp [hyx]
+      let i : D.host.E →ₗ[𝓞 D.host.E] V.L0 :=
+        ((LinearMap.toSpanSingleton D.host.E _ (e x)).restrictScalars (𝓞 D.host.E)).codRestrict V.L0 hsmul
+      let : Module.Finite (𝓞 D.host.E) V.L0 := Module.Finite.iff_fg.mpr V.standardTuple_isLattice.fg
+      let : Module.Finite (𝓞 D.host.E) D.host.E := Module.Finite.of_injective i fun a b hab =>
+        smul_left_injective D.host.E (fun hzero => hx₀ (e.map_eq_zero_iff.mp hzero)) (congrArg Subtype.val hab)
+      exact RingOfIntegers.not_isField D.host.E
+        (isField_of_isIntegral_of_isField (R := 𝓞 D.host.E) (S := D.host.E)
+          (FaithfulSMul.algebraMap_injective _ _) (Field.toIsField _))
+    have heq : (frameLat V : Set (Fin V.rank → D.host.E)) =
+        V.frame.equivFun.toLinearMap '' (V.L0 : Set V.V) :=
+      (V.frame.equivFun.toEquiv.image_eq_preimage_symm _).symm
+    rw [heq, ← Submodule.map_span, hfull, Submodule.map_top, LinearEquiv.range]
   obtain ⟨⟨e, he, -⟩, w', -, -, h1, -⟩ := SplitChart.split_chart_and_places (isCMExt_host D) (isHermND_gram V)
-    (frameLat_fg V) (SelfDual.isLattice_frameLat V).span_eq_top h hv (SelfDual.isSelfDualAt_frameLat D V v)
+    (frameLat_fg V) hspan h hv (SelfDual.isSelfDualAt_frameLat D V v)
   exact ⟨⟨e, he⟩, h1⟩
 
 section Param
@@ -53,40 +125,10 @@ variable {T : Type} {L : LevCh D T} {t₀ : T}
 
 end Chars
 
-def liftParam (μ : ℕ → (AE D)ˣ →* Circle) (η : (AE D)ˣ →* Circle) (k : ℕ) (w : HeightOneSpectrum (𝓞 D.host.E))
-    (B : Multiset ℂˣ) : Multiset ℂˣ :=
-  (B + ∑ i ∈ Finset.range k, seg w (val (μ (i + 1)) w) D.R.t).map (· * if Odd k then (val η w)⁻¹ else 1)
-
-def LiftParameters (D : D7) : Prop :=
-  (∃ N : ℕ, D.R.rankY D.R.m + 1 ≤ N ∧ D.NodeGap ((D.R.t : ℝ) + 2 * (N : ℝ) ^ 3 + 1)) →
-  ∀ (T : Type) (L : LevCh D T) (t₀ : T), L.Is t₀ → ∀ (t : T) (θ : InfFam D), IsInfFam θ →
-  ∀ (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D ψ (-1) →
-  ∀ (th : ∀ k, GA D (Yc D k) → GA D (Yc D (k + 1)) → (WO (Yc D k) (Yc D (k + 1)) → ℂ) → ℂ),
-    IsChainKernel ψ (L.mu t) L.eta D.R.m (Yc D) th →
-  ∀ (ν : ∀ k, Measure (GA D (Yc D k))) [∀ k, (ν k).IsHaarMeasure] [∀ k, (ν k).IsMulRightInvariant]
-    (𝓕 : ∀ k, Set (GA D (Yc D k))), (∀ k, IsFundamentalDomain (GQ (Yc D k)) (𝓕 k) (ν k)) →
-  ∀ (σ : Submodule ℂ (DividedPowerChartLift (Yc D 0) (ν 0))) (hσ : IsCuspIrr (Yc D 0) (ν 0) σ),
-    HasRealType σ θ (parA (tparRec D) 0) → (∀ v ∉ typePlaces D, SphAt hσ v) →
-  ∀ k, 1 ≤ k → k < D.R.m → ∀ (π : Submodule ℂ (DividedPowerChartLift (Yc D k) (ν k))) (hπ : IsCuspIrr (Yc D k) (ν k) π),
-    MeetsLift θ ψ th ν 𝓕 σ k π →
-  ∀ v ∉ badPlaces L t, IsSplit (E := D.host.E) v →
-  ∀ (w : HeightOneSpectrum (𝓞 D.host.E)) (h : w.under (𝓞 D.host.F) = v) (B : Multiset ℂˣ),
-    HasParam D.sp.cm.sig (Yc D 0).gram (frameLat (Yc D 0)) h (locRep hσ v) B →
-    HasParam D.sp.cm.sig (Yc D k).gram (frameLat (Yc D k)) h (locRep hπ v) (liftParam (L.mu t) L.eta k w B)
-
 section Zero
 
 variable {V : HSp D} {ν : Measure (GA D V)} [ν.IsHaarMeasure] [ν.IsMulRightInvariant]
   {σ π : Submodule ℂ (DividedPowerChartLift V ν)}
-
-def funsOf (σ : Submodule ℂ (DividedPowerChartLift V ν)) : Submodule ℂ (GA D V → ℂ) where
-  carrier := {F | ∃ h : MemL2Quotient (GQ V) ν F, h.toL2 ∈ σ}
-  zero_mem' := ⟨⟨fun _ _ _ => rfl, MemLp.zero⟩, by
-    convert σ.zero_mem using 1
-    exact MemLp.toLp_zero _⟩
-  add_mem' := fun ⟨h, e⟩ ⟨h', e'⟩ => ⟨⟨fun γ hγ g => congrArg₂ (· + ·) (h.1 γ hγ g) (h'.1 γ hγ g), h.2.add h'.2⟩,
-    σ.add_mem e e'⟩
-  smul_mem' := fun c _ ⟨h, e⟩ => ⟨⟨fun γ hγ g => congrArg (c • ·) (h.1 γ hγ g), h.2.const_smul c⟩, σ.smul_mem c e⟩
 
 end Zero
 

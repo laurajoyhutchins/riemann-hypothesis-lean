@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.StandardFunctorsFiniteLength
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,8 +65,6 @@ def neOrder (m : α → Type) [Fintype α] [LinearOrder α] [∀ a, Fintype (m a
 
 def blockSize (m : α → Type) [Fintype α] [LinearOrder α] [∀ a, Fintype (m a)] (i : Fin (numBlocks m)) : ℕ :=
   Fintype.card (m (neOrder m i).1)
-
-theorem blockSize_pos (i : Fin (numBlocks m)) : 0 < blockSize m i := (neOrder m i).2
 
 def blockNum (i : Fin (numBlocks m)) : Fin (blockSize m i) ≃ m (neOrder m i).1 := (Fintype.equivFin _).symm
 
@@ -209,6 +252,7 @@ def pullInd (e : (Σ a, m a) ≃ n) (ρ : Representation ℂ (Levi k m) W) :
       exact parInd_law e ρ f ⟨glIso k e p, glIso_mem_parab k e p.2⟩ (glIso k e g)⟩,
     mem_smoothPart_of_nhds (Filter.mem_of_superset
       ((continuous_glIso e).continuousAt.preimage_mem_nhds
+        (t := {g : GL n k | ind (parab k e) ((twist ρ (deltaHalf k m)).comp (leviProj k e)) g f.1 = f.1})
         (by rw [map_one]; exact IsOpen.mem_nhds f.2 (by simp))) fun g hg => by
       have hg' : ind (parab k e) ((twist ρ (deltaHalf k m)).comp (leviProj k e)) (glIso k e g) f.1 = f.1 := hg
       apply Subtype.ext
@@ -225,7 +269,10 @@ def pullMap (e : (Σ a, m a) ≃ n) (ρ : Representation ℂ (Levi k m) W) :
   toLinearMap := pullInd e ρ
   isIntertwining' g := by
     refine LinearMap.ext fun f => Subtype.ext (Subtype.ext (funext fun x => ?_))
-    show f.1.1 (glIso k e x * glIso k e g) = f.1.1 (glIso k e (x * g))
+    change (parInd e ρ (glIso k e g) f).1.1 (glIso k e x) =
+      (parInd finSigmaFinEquiv (ρ.comp (leviMap k e)) g (pullInd e ρ f)).1.1 x
+    rw [parInd_apply, parInd_apply]
+    change f.1.1 (glIso k e x * glIso k e g) = f.1.1 (glIso k e (x * g))
     rw [map_mul]
 
 theorem pullInd_injective (e : (Σ a, m a) ≃ n) (ρ : Representation ℂ (Levi k m) W) :
@@ -248,13 +295,5 @@ end GlobalTheory.BlockReorder
 
 namespace GlobalTheory
 
-open BlockReorder in
-
-theorem inductionFiniteLength_of_standard : GlobalTheory.Published.StandardFunctorsFiniteLength →
-    ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k],
-      GlobalTheory.SmGL.InductionFiniteLength k := by
-  intro hP k _ _ _ _ α n m _ _ _ _ _ _ e W _ _ ρ hρ hl
-  refine hasFiniteLength_parInd e ρ ((hP k (numBlocks m) (blockSize m) blockSize_pos).2 W (ρ.comp (leviMap k e))
-    (isSmooth_comp hρ _ (continuous_leviMap e)) ((hasFiniteLength_comp_iff _ _ (leviMap_surjective e)).2 hl))
 
 end GlobalTheory

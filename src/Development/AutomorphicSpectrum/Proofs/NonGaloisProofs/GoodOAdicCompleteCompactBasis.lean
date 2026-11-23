@@ -1,10 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.ChainRows
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.H2EquivOfTorsionCharacter
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosurePadicInt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TateH2IffAllFiniteExtensions
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicSpectrum.Definitions.NonGaloisLines.TopLine
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TateH2IffAllFiniteExtensions
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.H2EquivOfTorsionCharacter
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Module GlobalTheory.CompanionTheory.LocDual
 
@@ -90,13 +136,13 @@ theorem basis_nhds (hop : IsOpen (Set.range (algebraMap O LL)))
       rw [hy, map_zero] at hxU
       exact hxU h0
     obtain ⟨n, hn⟩ := (hc.diff hU).elim_directed_family_closed (ball ϖ : ℕ → Set LL)
-      (fun n => (isCompact_ball hc ϖ n).isClosed) hint (ball_antitone ϖ).directed_ge
+      (fun n => (isCompact_ball hc ϖ n).isClosed) (Set.disjoint_iff_inter_eq_empty.mpr hint)
+      (ball_antitone ϖ).directed_ge
     refine ⟨n, trivial, fun x hx => hUt ?_⟩
     by_contra hxU
     have : x ∈ (Set.range (algebraMap O LL) \ U) ∩ (ball ϖ n : Set LL) :=
       ⟨⟨ball_subset_range ϖ n hx, hxU⟩, hx⟩
-    rw [hn] at this
-    exact this
+    exact (Set.disjoint_left.mp hn) this.1 this.2
   · rintro ⟨n, -, hn⟩
     exact Filter.mem_of_superset ((isOpen_ball hop hϖ n).mem_nhds (hzero n)) hn
 
@@ -169,8 +215,8 @@ section Main
 variable {l : ℕ} [Fact l.Prime] {LL O : Type} [Field LL] [Algebra ℚ_[l] LL] [TopologicalSpace LL]
   [CommRing O] [Algebra O LL]
 
-open GlobalTheory.TateTopCompare in
 
+open GlobalTheory.TateTopCompare in
 theorem t2_and_compact (h : GoodO (Qp := ℚ_[l]) LL O) :
     T2Space LL ∧ IsCompact (Set.range (algebraMap O LL)) := by
   have hfd : FiniteDimensional ℚ_[l] LL := h.2.1
@@ -202,8 +248,8 @@ theorem t2_and_compact (h : GoodO (Qp := ℚ_[l]) LL O) :
   rw [heq]
   exact hball.image hc2
 
-open GlobalTheory.TateTop in
 
+open GlobalTheory.TateTop in
 theorem not_isUnit_natCast (h : GoodO (Qp := ℚ_[l]) LL O) : ¬ IsUnit (l : O) := by
   rintro ⟨u, hu⟩
   have hsurj : Function.Surjective (algebraMap O LL) := by
@@ -241,8 +287,8 @@ theorem exists_pow_mem (h : GoodO (Qp := ℚ_[l]) LL O) {ϖ : O} (hϖ : Irreduci
     rw [this, pow_succ]
     ring
 
-open GlobalTheory.TateTop in
 
+open GlobalTheory.TateTop in
 theorem goodO_structure : ∀ (l : ℕ) [Fact l.Prime], ∀ (LL : Type) [Field LL] [Algebra ℚ_[l] LL]
     [TopologicalSpace LL] (O : Type) [CommRing O] [Algebra O LL], GoodO (Qp := ℚ_[l]) LL O →
     ∀ ϖ : O, Irreducible ϖ → IsAdicComplete (Ideal.span {ϖ}) O ∧ Finite (O ⧸ Ideal.span {ϖ}) ∧

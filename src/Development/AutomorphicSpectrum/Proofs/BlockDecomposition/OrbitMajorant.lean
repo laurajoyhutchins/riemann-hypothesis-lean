@@ -1,11 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FockTranslateSchwartzMajorant
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TraceConjTransposeMulSelf
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HypsSatisfiable
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianIsSchwartzFunction
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsClopenCompactNbhdZero
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FockTranslateSchwartzMajorant
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TraceConjTransposeMulSelf
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsClopenCompactNbhdZero
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.GaussianIsSchwartzFunction
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HypsSatisfiable
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LatHatOpenAndContinuous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct Topology
@@ -102,7 +145,7 @@ theorem exists_supp_clopen {n : ℕ} (g : (Fin (V1 D).rank → Fin n → Af D.ho
     fun p i j => ∑ k, p.1 i k * p.2 k j
   have hmul : Continuous mulF := by
     refine continuous_pi fun i => continuous_pi fun j => ?_
-    refine continuous_finset_sum _ fun k _ => ?_
+    refine continuous_finsetSum _ fun k _ => ?_
     fun_prop
   have hT : IsCompact (mulF '' (tsupport g ×ˢ (fp '' A₂))) :=
     (hg.isCompact.prod (hA₂.image hfp)).image hmul
@@ -120,7 +163,7 @@ theorem exists_supp_clopen {n : ℕ} (g : (Fin (V1 D).rank → Fin n → Af D.ho
 theorem exists_inv_bound (θ : InfFam D) (hθ : IsInfFam θ) {n : ℕ} (A₂ : Set (Mx D n n)) (hA₂ : IsCompact A₂) :
     ∃ S : ℝ, 0 < S ∧ ∀ b ∈ A₂, ∀ τ, fro (compAt θ τ b) ≤ S := by
   have hc : Continuous fun b : Mx D n n => ∑ τ, fro (compAt θ τ b) :=
-    continuous_finset_sum _ fun τ _ => continuous_fro.comp (GlobalTheory.RealWeil.continuous_compAt hθ τ n n)
+    continuous_finsetSum _ fun τ _ => continuous_fro.comp (GlobalTheory.RealWeil.continuous_compAt hθ τ n n)
   obtain ⟨C, hC⟩ := hA₂.exists_bound_of_continuousOn hc.continuousOn
   refine ⟨max C 1, by positivity, fun b hb τ => ?_⟩
   have h1 : fro (compAt θ τ b) ≤ ∑ τ, fro (compAt θ τ b) :=

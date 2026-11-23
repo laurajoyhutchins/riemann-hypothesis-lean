@@ -1,12 +1,54 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.SConjSpaceC
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedFactorEqProductAbove
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalComponentsThetaPull
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSchwartzFinitePureTensors
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.SConjSpaceC
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSchwartzFinitePureTensors
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedFactorEqProductAbove
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalComponentsThetaPull
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,13 +82,13 @@ theorem conjSrc_conjSrc_symm {E : Type} [Field E] [NumberField E] (c : E ≃+* E
     simp
   rw [e]
 
-variable {M : Type} [Field M] [NumberField M] [IsTotallyComplex M]
+variable {M : Type} [Field M] [NumberField M] [_root_.NumberField.IsTotallyComplex M]
 
 theorem pInf_s_sFin (s : Ad M ≃+* Ad M) (hs : Continuous s) (y : Af M) : pInf M (s (sFin M y)) = 0 := by
   let f : Af M →+ Cinf M :=
     { toFun := fun y => pInf M (s (sFin M y))
       map_zero' := by simp
-      map_add' := fun a b => by simp [map_add] }
+      map_add' := fun a b => by simp [map_add (f := _)] }
   have hf : Continuous f := by
     have h1 : Continuous fun y : Af M => (sFin M y : Ad M) :=
       (continuous_const.prodMk continuous_id : Continuous fun y : Af M => ((0 : InfiniteAdeleRing M), y))
@@ -93,7 +135,7 @@ theorem map_finGL (σ : M ≃+* M) (s : Ad M ≃+* Ad M) (hs : IsGalAd σ s) {n 
     by_cases h : i = j <;> simp [Matrix.one_apply, h]
   have e2 : conjFin σ ((1 : Matrix (Fin n) (Fin n) (Af M)) i j) = (1 : Matrix (Fin n) (Fin n) (Af M)) i j := by
     by_cases h : i = j <;> simp [Matrix.one_apply, h]
-  rw [map_add, map_sub, e1, s_sFin σ s hs, s_sFin σ s hs, e2]
+  rw [map_add (f := _), map_sub, e1, s_sFin σ s hs, s_sFin σ s hs, e2]
 
 theorem main (σ : M ≃+* M) (s : Ad M ≃+* Ad M) (hs : IsGalAd σ s) {n : ℕ} (P P' : CuspSub M n)
     (hsp : (Cusp.cx P').space =
@@ -156,8 +198,8 @@ theorem main (σ : M ≃+* M) (s : Ad M ≃+* Ad M) (hs : IsGalAd σ s) {n : ℕ
     fun k => by ext i j; rfl
   have hK := GlobalTheory.LFun.SplitTie.mem_KGL_iff (n := n) h3
   let ρ'' := (P.locRep v).comp (GlobalTheory.LFun.SplitTie.glEquiv n ψ₀).symm.toMonoidHom
-  have hfix : ∀ x, x ∈ GlobalTheory.PRep.fixed ρ'' (GlobalTheory.LFun.KGL (conjSrc σ v) n) ↔
-      x ∈ GlobalTheory.PRep.fixed (P.locRep v) (GlobalTheory.LFun.KGL v n) := fun x => GlobalTheory.LFun.mem_fixed_comp_symm _ hK
+  have hfix : ∀ x, x ∈ GlobalTheory.PRep.fixed ρ'' (GlobalTheory.LFun.KGL (conjSrc σ v) (n := n)) ↔
+      x ∈ GlobalTheory.PRep.fixed (P.locRep v) (GlobalTheory.LFun.KGL v (n := n)) := fun x => GlobalTheory.LFun.mem_fixed_comp_symm _ hK
   have hB'' : GlobalTheory.LFun.HasSatGL (conjSrc σ v) ρ'' B := by
     refine ⟨?_, fun x hx h0 => (GlobalTheory.LFun.SplitTie.isSatVecGL_comp_symm h3 hq _ x B).2 (hB.2 x ((hfix x).1 hx) h0)⟩
     obtain ⟨x, hx⟩ := hB.exists_vec
@@ -174,8 +216,11 @@ theorem UpperTheory.CBC.SConjSatC_holds : UpperTheory.CBC.SConjSatC := by
   intro K M _ _ _ _ _ _ σ s hs n P P' hsp
   have hc : ∀ x : K, σ.toRingEquiv.symm (algebraMap K M x) = algebraMap K M x := fun x => σ.symm.commutes x
   refine ⟨conjSrc σ.toRingEquiv.symm, conjSrc_injective _, fun w => GlobalTheory.DefU.ClassFin.under_conjSrc _ hc w,
-    fun w => GlobalTheory.UnrEuler.ConjFac.absNorm_conjSrc _ w, Filter.Eventually.of_forall fun w B hB => ?_⟩
-  have h := UpperTheory.CBC.SConjSatCAux.main σ.toRingEquiv s hs P P' hsp (conjSrc σ.toRingEquiv.symm w)
-    ((CG.hasSat_mk _ _ _).1 hB)
-  rw [UpperTheory.CBC.SConjSatCAux.conjSrc_conjSrc_symm] at h
-  exact (CG.hasSat_mk _ _ _).2 h
+    fun w => ?_, Filter.Eventually.of_forall fun w B hB => ?_⟩
+  · have h := GlobalTheory.UnrEuler.ConjFac.absNorm_conjSrc σ.toRingEquiv.symm w
+    rw [Ideal.absNorm_apply, Ideal.absNorm_apply, Submodule.cardQuot_apply, Submodule.cardQuot_apply] at h
+    exact h
+  · have h := UpperTheory.CBC.SConjSatCAux.main σ.toRingEquiv s hs P P' hsp (conjSrc σ.toRingEquiv.symm w)
+      ((CG.hasSat_mk _ _ _).1 hB)
+    rw [UpperTheory.CBC.SConjSatCAux.conjSrc_conjSrc_symm] at h
+    exact (CG.hasSat_mk _ _ _).2 h

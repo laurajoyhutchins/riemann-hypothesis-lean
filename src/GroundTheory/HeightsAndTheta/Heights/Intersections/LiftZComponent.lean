@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreLast
-import GroundTheory.HeightsAndTheta.Heights.Intersections.IsMultiProjPrimeImageZ
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreLast
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.IsMultiProjPrimeImageZ
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -45,7 +97,7 @@ theorem exists_clear [Fintype K] [∀ k, Fintype (ι k)] [Fintype K'] [∀ k, Fi
     obtain ⟨b₁, hb₁, F₁, e₁⟩ := hf
     obtain ⟨b₂, hb₂, F₂, e₂⟩ := hg
     refine ⟨b₁ * b₂, by rw [map_mul]; exact mul_ne_zero hb₁ hb₂, C b₂ * F₁ + C b₁ * F₂, ?_⟩
-    rw [map_add, map_mul, map_mul, map_mul, map_mul, MvPolynomial.map_C, MvPolynomial.map_C, ← e₁, ← e₂]
+    rw [map_add (f := _), map_mul, map_mul, map_mul, map_mul, MvPolynomial.map_C, MvPolynomial.map_C, ← e₁, ← e₂]
     simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
     ring
 
@@ -73,7 +125,7 @@ theorem liftZ_component [Fintype K'] [∀ k, Fintype (ι' k)] [DecidableEq K'] {
     weightedHomogeneousComponent (cycBlockWt k.1) n (liftZ κ v F) =
       liftZ κ v (weightedHomogeneousComponent (cycBlockWt k) n F) := by
   induction F using MvPolynomial.induction_on' with
-  | add F G hF hG => simp only [map_add, hF, hG]
+  | add F G hF hG => simp only [map_add (f := _), hF, hG]
   | monomial m a =>
     have hj : ∀ q : Σ k : FibreBlock κ, ι' k.1,
         cycBlockWt (ι := ι') k.1 ⟨q.1.1, q.2⟩ = cycBlockWt (ι := fun k : FibreBlock κ => ι' k.1) k q := by
@@ -81,7 +133,7 @@ theorem liftZ_component [Fintype K'] [∀ k, Fintype (ι' k)] [DecidableEq K'] {
       simp only [cycBlockWt, Subtype.ext_iff]
     have h0 : IsWeightedHomogeneous (cycBlockWt (ι := ι') k.1) (rename v a) 0 := by
       intro d hd
-      obtain ⟨u, rfl, -⟩ : ∃ u, u.mapDomain v = d ∧ coeff u a ≠ 0 := by
+      obtain ⟨u, rfl, -⟩ : ∃ u, u.mapDomain v = d ∧ AddMonoidAlgebra.coeff a u ≠ 0 := by
         by_contra! h
         exact hd (coeff_rename_eq_zero _ _ _ h)
       rw [Finsupp.weight_apply, Finsupp.sum_mapDomain_index (by simp) (by intros; simp [add_mul])]
@@ -110,8 +162,8 @@ theorem liftZ_component [Fintype K'] [∀ k, Fintype (ι' k)] [DecidableEq K'] {
 
 end FibreMultiHomogeneous
 
-open FibreMultiHomogeneous in
 
+open FibreMultiHomogeneous in
 theorem ArithmeticIntersectionFibreMultiHomogeneous.proof : ArithmeticIntersectionFibreMultiHomogeneous.Statement := by
   intro K _ ι _ K' _ ι' _ κ v p _ W' hv hp hW G'
   classical

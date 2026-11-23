@@ -1,4 +1,48 @@
-import Development.WeilBound.ThetaLifts.CartanFactorisation.Factor
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Factor
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorPureTensorComponentAtPlace
+import Development.WeilBound.ThetaLifts.CartanFactorisation.TensOfEval
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,7 +112,19 @@ theorem anAll_of (hW : WeilConv) (hC : KCoinv) (hI : ILeft) : AnAll := by
   intro F E _ _ _ _ _ σ B a a' G X om om' R Rf hm hq c hc Φ Φ' ⟨T, hT, m, m', f, φ, f', φ', h1, h2, e1, e2, e⟩ h
   have g := hm.triple.geo.hM
   have g' := hm.triple.geo.hM'
-  have hp := pairV' hm.triple
+  have hp : IsPair B G.M' X.α (X.α / X.β) om' G.q (a' - G.q)
+      (a + a' - (G.p + G.q)) (G.p + G.q) := by
+    have hd : IsHecke F E (X.α / X.β) :=
+      ⟨hm.triple.chars.heckeα.1.div' hm.triple.chars.heckeβ.1, fun x => by
+        rw [MonoidHom.div_apply, hm.triple.chars.heckeα.2, hm.triple.chars.heckeβ.2, div_one]⟩
+    have hr : ResEtaPow (Units.map (algebraMap F (AF F)).toMonoidHom).range (X.α / X.β) (a + a') := by
+      intro x
+      rw [MonoidHom.div_apply, Circle.coe_div, hm.triple.chars.resα, hm.triple.chars.resβ, add_comm a a']
+      split_ifs
+      · simp
+      · rw [pow_add, div_eq_mul_inv, ← inv_pow, inv_neg, inv_one]
+    exact ⟨hm.triple.base, hm.triple.geo.hV', hm.triple.geo.hW, g',
+      hm.triple.chars.heckeα, hd, hm.triple.chars.resα, hr, hm.triple.weil'⟩
   obtain ⟨J, hJ⟩ := exists_Ilin hm.triple.weil' (schA F _) le_rfl fun Φ hΦ =>
     ((hW F E σ B _ _ _ _ _ _ _ om' _ _ _ _ hp (Or.inr (by rw [hq]; simp))).1 Φ hΦ).1
   obtain ⟨-, c2, c3, -⟩ := (hC F E σ B a a' G X om om' R Rf hm).1 B.v₁ hm.triple.chars.good
@@ -94,6 +150,7 @@ theorem anAll_of (hW : WeilConv) (hC : KCoinv) (hI : ILeft) : AnAll := by
       fun i => ⟨(h1 i).1, (h1 i).2.1, fun v hv => (h1 i).2.2 v fun k => hv (Finset.mem_insert_of_mem k)⟩,
       fun j => ⟨(h2 j).1, sb j, off j⟩, e1, rfl, ?_⟩
     have := congrArg (TensorProduct.map LinearMap.id L) e
+
     simp only [map_sum, TensorProduct.map_tmul, LinearMap.id_apply] at this
     simp only [pe]
     refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) (this.trans (Finset.sum_congr rfl fun j _ => ?_))
@@ -104,6 +161,7 @@ theorem anAll_of (hW : WeilConv) (hC : KCoinv) (hI : ILeft) : AnAll := by
   congr 1
   have st : ∀ j, Std (φ' j) := fun j => (good_std g').congr (ev_of_off (h2 j).2.2)
   have m1 : Φ' ∈ schA F _ := e2 ▸ sum_mem fun j _ => GlobalTheory.TensUniq.pure_mem_schA _ _ (h2 j).2.1 (st j)
+
   rw [← hJ _ (so_le g' _ so), ← hJ _ m1, e2, map_sum, map_sum]
   refine congrFun (Finset.sum_congr rfl fun j _ => ?_) h
   have k := kill_aug hI hp J hJ B.v₁ (f' j) (φ' j) (h2 j).2.1 (st j) (y j - φ' j B.v₁)
@@ -112,7 +170,7 @@ theorem anAll_of (hW : WeilConv) (hC : KCoinv) (hI : ILeft) : AnAll := by
   rw [one_smul, one_smul, add_sub_cancel, Function.update_eq_self] at a2
   have k' : J (pure (f' j) (φ₀ j)) = J (pure (f' j) (φ' j)) := by
     have := congrArg J a2
-    rw [map_add] at this
+    rw [map_add (f := _)] at this
     exact this.trans (by rw [show J _ = 0 from k, add_zero])
   exact k'
 

@@ -1,15 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorBasePointNormSq
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIntOv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralEqOfNorms
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FderivCompress
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorBasePointNormSq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsQuadOfPlane
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FockVacuumAnnihilationEquationRealCoordinates
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VacuumProjectorRangeAnnihilatedStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEuclideanCoordsHermitianCartanInvolutionStatement
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.CmTypeRestrictRealSubfieldInfinitePlaceBijective
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOscillatorActionOfGaussianPairings
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOscillatorActionUnitaryGroupHermitian
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralEqOfNorms
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEuclideanCoordsHermitianCartanInvolutionStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeisenbergSmoothRapidSuperpositionTranslatesStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorVacuumEqSmulBasePointStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VacuumProjectorRangeAnnihilatedStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.InfAdeleTensorBijective
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorVacuumEqSmulBasePointStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeisenbergSmoothRapidSuperpositionTranslatesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,7 +223,7 @@ theorem isFockVacAt_iff (h : Chart θ σ) (hψ : IsStdChar D ψ (-1)) {G : BB ψ
   refine forall_congr' fun y => ?_
   have e : ∀ w, ev _ _ w (dH (rhoV hψ σ S T) (atPl τ y) G + Complex.I • dH (rhoV hψ σ S T) (atPl τ (J y)) G) =
       annih (heisO ψ S T) θ τ J y G.1 w := fun w => by
-    rw [map_add, map_smul, coe_dH_atPl h hψ hG, coe_dH_atPl h hψ hG]
+    rw [map_add (f := _), map_smul, coe_dH_atPl h hψ hG, coe_dH_atPl h hψ hG]
     rfl
   refine ⟨fun hv => QB_ext fun w => ?_, fun hv => funext fun w => ?_⟩
   · rw [← ev_apply, e, hv]
@@ -299,7 +348,7 @@ theorem line (h : Chart θ σ) (hψ : IsStdChar D ψ (-1)) {X F₀ : BB ψ S T} 
         exact hann y
       · have hd : ∀ y, dH (rhoV hψ σ S T) (atPl τ' y) (A X) = A (dH (rhoV hψ σ S T) (atPl τ' y) X) := fun y =>
           dH_comm_line A _ (fun t => hA _ fun v f => by rw [smul_atPl, rhoV_comm h hψ ht]) sm hs
-        rw [hd, hd, ← map_smul, ← map_add,
+        rw [hd, hd, ← map_smul, ← map_add (f := _),
           (isFockVacAt_iff h hψ sm τ' _).1 (hx.2.2 τ' fun e => ht (Sum.inr_injective e)) y, map_zero]
   exact ⟨a, QB_ext fun w => congrFun ha w⟩
 
@@ -342,7 +391,7 @@ theorem isLocOp_integral (h : Chart θ σ) (hψ : IsStdChar D ψ (-1)) {μ : Mea
     rw [(fix_iff hψ u F).1 (hl u hu h0)] at e1
     exact (map_smul _ _ _).trans (congrArg (c v • ·) e1)
 
-set_option maxHeartbeats 800000 in
+
 
 theorem isLocOp_coord (h : Chart θ σ) (hψ : IsStdChar D ψ (-1)) {μ : Measure (WO S T)} {𝓕 : Set (WO S T)}
     (hμ : IsCovolOne (ratL T S) μ 𝓕) {X F₀ : BB ψ S T} (hb : IsBase ψ θ S T sS sT ΛS ΛT F₀.1)

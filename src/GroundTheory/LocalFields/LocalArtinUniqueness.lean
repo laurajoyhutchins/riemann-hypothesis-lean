@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalArtinMap
-import GroundTheory.LocalFields.KroneckerWeber
+module
+
+public import GroundTheory.LocalFields.LocalArtinMap
+import GroundTheory.LocalFields.Existence
+public import GroundTheory.LocalFields.KroneckerWeber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,7 +125,22 @@ theorem eq_localArtinMap_of
   have := algebraicValuativeRel_valuativeExtension K Ω
   have := algebraicTopology_isValuativeTopology K Ω
   have : IsSepClosed Ω := IsSepClosure.sep_closed K
-  have hf := isLubinTateSeries_ltPoly ϖ
+  have hf : IsLubinTateSeries ϖ (ltPoly ϖ : PowerSeries 𝒪[K]) := by
+    have hq := one_lt_card_residueField' K
+    refine ⟨?_, ?_, ?_⟩
+    · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, Polynomial.coeff_coe, ltPoly]
+      simp [Polynomial.coeff_X_pow, show 0 ≠ Nat.card 𝓀[K] by omega]
+    · rw [Polynomial.coeff_coe, ltPoly]
+      simp [Polynomial.coeff_X_pow, hq.ne]
+    · intro k
+      rw [coeff_ltPoly_sub, Polynomial.coeff_C_mul_X]
+      split_ifs
+      · exact dvd_rfl
+      · exact dvd_zero ϖ
+  haveI (n : ℕ) : IsGalois K (lubinTateField Ω hϖ hf n) :=
+    IsGalois.of_card_aut_eq_finrank K _
+      ((Nat.card_congr (lubinTateGalEquiv (Ω := Ω) hϖ hf n).toEquiv).trans
+        (card_units_quotient_eq_finrank (Ω := Ω) (hπ := hϖ) hf n))
 
   have hLT : ∀ (χ : Kˣ →* (maximalAbelianExtension K Ω ≃ₐ[K] maximalAbelianExtension K Ω))
       (hχ : ∀ (L : IntermediateField K Ω) [FiniteDimensional K L] [IsAbelianGalois K L],

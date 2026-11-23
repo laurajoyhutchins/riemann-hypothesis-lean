@@ -1,9 +1,67 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.HeckeFixedLevelSpaces.SpIntMulVec
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.CtrlOrd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.ClFinMulVec
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.OrdBCMapOrd
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.ClFinMulVec
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.CtrlOrd
 import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.FnIndep
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.OrdBCMapOrd
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpMul
 import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Hi
 
@@ -307,8 +365,9 @@ private theorem ctrl_UF_eq_U_ctrl {O Ω : Type} [Field Ω] [CommRing O] [IsLocal
       Pi.smul_apply, smul_eq_mul, MonoidHom.inr_apply] at this ⊢
     rw [Prod.snd_mul, map_mul, _root_.mul_inv_rev, Units.val_mul, ← Matrix.mulVec_mulVec, this]
     simp [mul_inv_cancel_left₀]
+
   simp only [Frame.UF, Frame.U, Iwa.uOp, finsum_eq_sum_of_fintype, LinearMap.smul_apply, map_smul,
-    LinearMap.sum_apply, map_sum, Finset.smul_sum]
+  LinearMap.sum_apply, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [key q, smul_smul]
   simp
@@ -366,11 +425,12 @@ private theorem UF_maps_clOrd_of_maps_cl {O Ω : Type} [Field Ω] [CommRing O] [
         rw [UF_comm_on_N_fixed X W _ _ y (hN y hy)]
     rw [key k x hx1, hk, map_zero]
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
 
 private theorem sum_raF_rpF_comm {Ω : Type} [Field Ω] (d : ℕ) {m : ℕ} (τ : X.Ub →* GL (Fin m) Ω)
     (κ : Type) [Fintype κ] (u : κ → X.Ub) (b : Gp) (F : Fin m → X.Fn Ω d) :
     (∑ q, X.raF d τ (u q)) (X.rpF Ω d m b F) = X.rpF Ω d m b ((∑ q, X.raF d τ (u q)) F) := by
+
   simp only [LinearMap.sum_apply, map_sum, raF_rpF_comm]
 
 private theorem raF_mem_pi_AF {Ω : Type} [Field Ω] {d m : ℕ} (τ : X.Ub →* GL (Fin m) Ω)
@@ -420,7 +480,7 @@ private theorem sum_raF_maps_clOrd_of_maps_fixd {O Ω : Type} [Field Ω] [CommRi
     exact Submodule.mem_iSup_of_mem μ (Submodule.mem_inf.mpr
       ⟨hCl x hx1, Module.End.mapsTo_maxGenEigenspace_of_comm hUF μ hx2⟩)
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
 
 theorem absSpec {A O Ω : Type} [CommRing A] [IsCNL A] [CommRing O] [IsDomain O] [IsCNL O] [Field Ω] [IsAlgClosed Ω]
     [Algebra A O] [Algebra O Ω] [Algebra A Ω] [IsScalarTower A O Ω] [IsLocalHom (algebraMap A O)]
@@ -523,7 +583,7 @@ theorem absSpec {A O Ω : Type} [CommRing A] [IsCNL A] [CommRing O] [IsDomain O]
   · intro K f hf f' hf'
     obtain ⟨h1, h2⟩ := hspec K c le_rfl f hf
     obtain ⟨h1', h2'⟩ := hspec K c le_rfl f' hf'
-    exact hsp _ _ ⟨⟨K, c, le_rfl, Submodule.add_mem _ h1 h1'⟩, by rw [map_add, h2, h2', map_add]⟩
+    exact hsp _ _ ⟨⟨K, c, le_rfl, Submodule.add_mem _ h1 h1'⟩, by rw [map_add (f := _), h2, h2', map_add (f := _)]⟩
   · intro K f hf b
     obtain ⟨h1, h2⟩ := hspec K c le_rfl f hf
     exact hsp _ _ ⟨⟨K, c, le_rfl, Submodule.smul_mem _ _ h1⟩, by rw [map_smul, h2, map_smul, algebraMap_smul]⟩
@@ -540,9 +600,8 @@ theorem absSpec {A O Ω : Type} [CommRing A] [IsCNL A] [CommRing O] [IsDomain O]
       rw [Submodule.span_le]
       rintro _ ⟨g, hg, rfl⟩
       refine hbc.inductionOn (⟨g, hg⟩ : X.Ord τO θO (U K))
-        (fun n => X.mapFn (B := Ω) (n : X.Fn O m) ∈
-          Submodule.map (X.ctrl m W) (Submodule.span Ω (sp '' X.Ord τ θ (U K)))) ?_ ?_ ?_ ?_
-      · simp
+        (motive := fun n => X.mapFn (B := Ω) (n : X.Fn O m) ∈
+          Submodule.map (X.ctrl m W) (Submodule.span Ω (sp '' X.Ord τ θ (U K)))) ?_ ?_ ?_
       · intro f
         refine ⟨sp f, Submodule.subset_span ⟨f, f.2, rfl⟩, ?_⟩
         rw [(hspec K c le_rfl f f.2).2, hj, hmap2]
@@ -550,7 +609,7 @@ theorem absSpec {A O Ω : Type} [CommRing A] [IsCNL A] [CommRing O] [IsDomain O]
         rw [Submodule.coe_smul, map_smul, ← algebraMap_smul Ω s]
         exact Submodule.smul_mem _ _ hn
       · intro n1 n2 h1 h2
-        rw [Submodule.coe_add, map_add]
+        rw [Submodule.coe_add, map_add (f := _)]
         exact Submodule.add_mem _ h1 h2
     have h1 : X.ctrl m W F ∈ Submodule.map (X.ctrl m W) (X.ClOrd W τ' (U K) e φ') := ⟨F, hF, rfl⟩
     rw [(hCO K e he).2] at h1
@@ -571,10 +630,8 @@ theorem absSpec {A O Ω : Type} [CommRing A] [IsCNL A] [CommRing O] [IsDomain O]
     refine LinearIndependent.of_comp (X.ctrl m W) ?_
     convert hw using 1
     funext i
-    simp only [Function.comp_apply, (hspec K c le_rfl _ (b i).2).2]
-    rw [← hmap2]
-    simp only [hj]
-    rfl
+    change X.ctrl m W (sp (b i)) = X.mapFn (B := Ω) (j (b i) : X.Fn O m)
+    rw [(hspec K c le_rfl (b i) (b i).2).2, hj, hmap2]
   · intro K a f hf
     obtain ⟨h1, h2⟩ := hspec K c le_rfl f hf
     refine hsp _ _ ⟨⟨K, c, le_rfl, UF_maps_clOrd_of_maps_cl X W τ' (U K) c φ' (fun a => ((hCF K c le_rfl).2 a).1) a _ h1⟩, ?_⟩
@@ -582,6 +639,7 @@ theorem absSpec {A O Ω : Type} [CommRing A] [IsCNL A] [CommRing O] [IsDomain O]
   · intro K K' κ _ u hS f hf
     obtain ⟨h1, h2⟩ := hspec K c le_rfl f hf
     refine hsp _ _ ⟨⟨K', c, le_rfl, sum_raF_maps_clOrd_of_maps_fixd X W τ' (U K) (U K') c φ' κ u hS _ h1⟩, ?_⟩
+
     rw [LinearMap.sum_apply, map_sum, LinearMap.sum_apply, map_sum]
     simp only [ctrl_raF_comm, h2, mapFn_ra]
     all_goals rfl

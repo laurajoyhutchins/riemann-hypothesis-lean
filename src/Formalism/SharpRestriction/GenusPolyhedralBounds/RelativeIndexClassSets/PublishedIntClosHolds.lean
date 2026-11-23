@@ -1,7 +1,52 @@
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.GlobalFamilyData
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.RestrictionEqZeroIffMemVanishingFiltration
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.HasseKpAlgebraMapKl
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.IsIntegralOfAll
+module
+
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.GlobalFamilyData
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.RestrictionEqZeroIffMemVanishingFiltration
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.HasseKpAlgebraMapKl
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.ExistsPowSmulMemBall
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,7 +123,7 @@ private theorem fld_lemma_3 (O K A : Type) [CommRing O] [IsDomain O] [IsDiscrete
     exact (algebraMap K (A ⧸ M)).injective.comp (IsFractionRing.injective O K)
   exact hinj (congrArg Subtype.val hab)
 
-set_option maxHeartbeats 800000 in
+
 
 private theorem dvr_lemma_4 (Cr Dr : Type) [CommRing Cr] [CommRing Dr] [IsDomain Dr] [IsDedekindDomain Dr]
     (hD : ¬IsField Dr) (φ : Cr →+* Dr) (hφ : Function.Surjective φ) (e : Cr) (he1 : φ e = 1)
@@ -117,7 +162,7 @@ private theorem dvr_lemma_4 (Cr Dr : Type) [CommRing Cr] [CommRing Dr] [IsDomain
       rw [hQb] at h1
       exact Ideal.mem_bot.mp h1
     have h2 := congrArg φ hyi
-    rw [map_add, map_mul, hφi, add_zero, map_one] at h2
+    rw [map_add (f := _), map_mul, hφi, add_zero, map_one] at h2
     rw [mul_comm]
     exact h2
   let LQ := Localization.AtPrime (Pm.map φ)
@@ -183,7 +228,7 @@ private theorem fin_lemma_5 (O K A : Type) [CommRing O] [IsDomain O] [IsDiscrete
     exact congrArg Subtype.val (congrFun hxy M)
   exact Module.Finite.of_injective ψ hψ
 
-set_option maxHeartbeats 800000 in
+
 
 private theorem pt_lemma_6 (O K A : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field K]
     [Algebra O K] [IsFractionRing O K] [CharZero K] [CommRing A] [Algebra K A] [Algebra O A]
@@ -222,6 +267,7 @@ private theorem pt_lemma_6 (O K A : Type) [CommRing O] [IsDomain O] [IsDiscreteV
     rw [← sub_eq_zero]
     apply inj_lemma K A
     intro M
+
     rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_sum, map_one, Finset.sum_eq_single M]
     · rw [hE1, sub_self]
     · intro J _ hJ
@@ -385,20 +431,5 @@ def Heights {G : GlobalFamilyData X ka wL wF} (Qf : ∀ la, LocalPointData G la)
     (∑' la, (Qf la).Net * X.lN la) / (G.iet : ℝ) ≤
       g0 D * (((WeightFamilies.dimY D j : ℝ) + 1) * G.del * (2 * Gc + 6 * PH) * wL.size +
         4 / 3 * (WeightFamilies.dimY D j : ℝ) * G.del * Prw * wL.size) + G.del * Pet)
-
-def Conclusion1Of2 : Prop :=
-  ∀ (large₂ : SizeData₂ D) (X : Prov D B P) (K : KAdm) (H : KHyp) (Ch Ah Cq Aq C2 A2 CR CT : ℝ),
-    AdmW large₂ X K H Ch Ah Cq Aq → WeightFamilies.TransferenceTheoremCond →
-    (∀ j (h1 : 1 ≤ j) (h2 : j ≤ D.R.m) (S : Scal B) (ka wL wF : WeightFamilies.Wt D j) (T nP nW : ℕ) (h0 : ℝ)
-        (nus : HeightOneSpectrum (𝓞 B.KO) → ℝ),
-      Hyp large₂ (X j h1 h2) H C2 A2 CR 0 CT S ka wL wF T nP nW h0 nus →
-      ∃ (G : GlobalFamilyData (X j h1 h2) ka wL wF) (Gc PH Prw Pet Pd : ℝ),
-        G.Tied large₂ S K.CRm T (cc D large₂ C2 A2 CR wL) Gc Prw Ch Ah K.Cf K.Af ∧
-        DeepIn (X j h1 h2) ka large₂ K.CG K.AG Pd ∧
-        Shares D wL G.del G.rz G.rq ((X j h1 h2).rk ka (B.Mlat j ka)) T K.CRm (cc D large₂ C2 A2 CR wL) ∧
-        PolyDom (j := j) D B large₂ K H C2 A2 CR Ch Ah Cq Aq Gc PH Prw Pet Pd ka ∧
-        ∃ Qf : ∀ la, LocalPointData G la,
-          (∀ la, (Qf la).Ok S K.CRm T (cc D large₂ C2 A2 CR wL)) ∧ Heights Qf Gc PH Prw Pet) →
-    Conclusion1 large₂ X H C2 A2 CR CT
 
 end Formalism.MainNotions.Gaps.EtaleWeightGaps

@@ -1,7 +1,49 @@
-import Mathlib
-import GroundTheory.TateCohomology.HerbrandAbstract
-import GroundTheory.GlobalFields.HerbrandQuotients.CycTate
-import GroundTheory.LocalFields.CompleteTrivial
+module
+
+public import GroundTheory.GlobalFields.HerbrandQuotients.CycTate
+public import GroundTheory.LocalFields.CompleteTrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.LocalField
 
@@ -14,8 +56,8 @@ theorem toMul_cycNorm (x : Additive M) :
   rw [cycNorm_apply, toMul_sum, tateNorm_apply]
   rfl
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 theorem toMul_cycSubOne (σ : G) (x : Additive M) :
     (cycSubOne (Representation.ofMulDistribMulAction G M) σ x).toMul = σ • x.toMul / x.toMul := by
   rw [cycSubOne_apply]
@@ -42,8 +84,8 @@ theorem range_cycNorm_ofMulDistribMulAction :
 
 variable {σ : G}
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 theorem ker_cycSubOne_ofMulDistribMulAction (hσ : ∀ g, g ∈ Subgroup.zpowers σ) :
     (cycSubOne (Representation.ofMulDistribMulAction G M) σ).ker =
       (invariants G M).toAddSubgroup := by
@@ -52,8 +94,8 @@ theorem ker_cycSubOne_ofMulDistribMulAction (hσ : ∀ g, g ∈ Subgroup.zpowers
   simp only [Representation.ofMulDistribMulAction_apply_apply]
   exact ⟨fun h g => congrArg Additive.toMul (h g), fun h g => by rw [h g]; rfl⟩
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 theorem range_cycSubOne_ofMulDistribMulAction (hσ : ∀ g, g ∈ Subgroup.zpowers σ) :
     (cycSubOne (Representation.ofMulDistribMulAction G M) σ).range =
       (augmentation G M).toAddSubgroup := by
@@ -109,8 +151,8 @@ section Injective
 
 variable {N : Type*} [CommGroup N] [MulDistribMulAction G N]
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 theorem toAdditive_cycSubOne (i : M →* N) (hi : ∀ (g : G) (x : M), i (g • x) = g • i x) (τ : G)
     (x : Additive M) :
     MonoidHom.toAdditive i (cycSubOne (Representation.ofMulDistribMulAction G M) τ x) =

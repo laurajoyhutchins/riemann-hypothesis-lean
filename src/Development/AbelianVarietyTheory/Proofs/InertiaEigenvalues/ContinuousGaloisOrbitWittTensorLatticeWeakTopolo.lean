@@ -1,20 +1,66 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWeakTopologyWittTiltTensor
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ZlTowerGen
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAutCbCbTop
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ZlTowerGen
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAutCbCbTop
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContinuousGaloisLatticeMatrixIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices GlobalTheory.WeakClosed
 open scoped Topology PowerSeries.WithPiTopology
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1600000
+
+
 
 noncomputable section
 open Filter Topology
 
 namespace GlobalTheory.WeakClosed
 
-theorem continuous_orbit_twTop : ∀ {l : ℕ} [Fact l.Prime] {P : LocPrime l} (AI : LocAinf l P) {K LL : FinExt l} (T : Lt K LL) {d : ℕ} (b : LatB T d) (y : TW (RW LL) T), letI := twTop T b; Continuous fun g : ↥(GK K) => TWact (AI.gRW LL (g : GQ l)) T g y := by
+theorem continuous_orbit_twTop :
+    ∀ {l : ℕ} [Fact l.Prime] {P : LocPrime l} (AI : LocAinf l P) {K LL : FinExt l}
+      (T : Lt K LL) {d : ℕ} (b : LatB T d) (y : TW (RW LL) T),
+      letI := twTop T b
+      Continuous fun g : ↥(GK K) => TWact (AI.gRW LL (g : GQ l)) T g y := by
   intro l _ P AI K LL T d b y
 
   letI := zlMod T
@@ -40,7 +86,7 @@ theorem continuous_orbit_twTop : ∀ {l : ℕ} [Fact l.Prime] {P : LocPrime l} (
       (f := fun g : ↥(GK K) => ((g : GQ l), w)) ha (continuous_subtype_val.prodMk continuous_const)
   have hs : ∀ i, Continuous fun g : ↥(GK K) => ∑ j, algebraMap ℤ_[l] (WCb l) (b.repr (T.actT g (b j)) i) *
       (AI.actWCbHom (g : GQ l)).toAlgHom (GlobalTheory.WeakTop.coords (WCb l) ↥(OL LL) b y j) := fun i =>
-    continuous_finset_sum _ fun j _ => (hW.comp (hρ i j)).mul (h2 _)
+    continuous_finsetSum _ fun j _ => (hW.comp (hρ i j)).mul (h2 _)
   refine continuous_induced_rng.2 (continuous_pi fun i => ?_)
   refine (hs i).congr fun g => ?_
   exact (GlobalTheory.WeakTop.coords_map b _ _ y i).symm

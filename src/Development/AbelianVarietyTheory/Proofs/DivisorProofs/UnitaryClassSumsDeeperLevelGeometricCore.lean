@@ -1,27 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SpecializesGenericImage
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsMonoFamNontrivial
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabRange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimeEqOfNatCastEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralClosureStalkFibre
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsHom
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLinearEquivLabelledLatticesUnitaryTraitsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeeperUnitaryLevelGaloisActsOnLabelsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryTraitLabelsSurjectiveKernel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRatPointOfFiniteType
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CPtEqOfNormValLtOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassLimitNormLe
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassSumNormEqOfUniqueLeast
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompatForcesCongMod
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeepEqOfCongMod
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeeperUnitaryLevelGaloisActsOnLabelsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvdDetSubOneOfCongModThreeLe
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfClassSumApprox
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsHom
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLabelsUnitaryClassicalTraitStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLinearEquivLabelledLatticesUnitaryTraitsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTie
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntClosureAutExtends
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralClosureStalkFibre
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModuliPointCompCompactificationStructure
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryThetaFourierClassSumsDeeperIntegralStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryTraitLabelsExtendToDeeperLevelStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryThetaFourierClassSumsDeeperIntegralStatement
-import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyUWit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTie
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModuliPointCompCompactificationStructure
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfClassSumApprox
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeepEqOfCongMod
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompatForcesCongMod
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassSumNormEqOfUniqueLeast
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassLimitNormLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvdDetSubOneOfCongModThreeLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntClosureAutExtends
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CPtEqOfNormValLtOne
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryTraitLabelsSurjectiveKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LabRange
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyUWit
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open GlobalTheory.Toroidal GlobalTheory.Models GlobalTheory.LN GlobalTheory.ShFam GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZH GlobalTheory.Poinc
@@ -96,7 +133,7 @@ theorem classSums_core : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] 
     obtain ⟨w, hw⟩ := hcc 0
     refine GlobalTheory.UPoinc.DeepSame.deep_eq_of_congMod E H Dw hpq l Xo cf C X₁ D p z₁ z₂ hz₂ f t hfO hfapp w₁ w₂ htie hproj (ct₂ y₀) (yy y₀) (hyy₂ y₀) _ _ _ _
       (hA _) (hA _) ⟨e y₀ w, ?_⟩ κ
-    rw [hw, map_add, map_nsmul]
+    rw [hw, map_add (f := _), map_nsmul]
   ·
     intro y c κ μ hμ hmin
     rw [hval y, qW_one]
@@ -106,7 +143,7 @@ theorem classSums_core : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] 
       (Φ.sc_pos y) (he y) D.m (fun μ' => t (ct y) (yy₁ y) μ' κ) (fun μ' => hle_t μ' κ) _ _
       (hfapp (ct y) (yy₁ y) (hyy₁ y).uIsLab (y₂ y) (hq y) (hcen y) (yy y) (hyy y).uIsLab (hcomp y) _ _ κ hyyA) (μ 0) ?_ ?_
     · obtain ⟨w, hw⟩ := hμ 0
-      exact ⟨e y w, by simp [hw, map_add, map_nsmul]⟩
+      exact ⟨e y w, by simp [hw, map_add (f := _), map_nsmul]⟩
     · intro x' hx'
       have := hmin (fun _ => x') (fun u => by rw [Subsingleton.elim u 0]; exact hx')
       simpa [qW_one] using this
@@ -178,7 +215,7 @@ theorem classSums_core : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] 
       have hw' : g (e y₀ x) = e y₀ x + (X₁.S.r * X₁.S.N) • w := hw
       refine ⟨(e y₀).symm w, ?_⟩
       simp only [γ, LinearEquiv.trans_apply]
-      rw [hw', map_add, map_nsmul, LinearEquiv.symm_apply_apply]
+      rw [hw', map_add (f := _), map_nsmul, LinearEquiv.symm_apply_apply]
     refine ⟨γ, GlobalTheory.UPoinc.dvd_det_sub_one_of_congMod_three_le (Φ.X y₀) (X₁.S.r * X₁.S.N) D.m hL (γ.restrictScalars ℤ) hcong, hcong, ?_⟩
     · intro c κ
       apply Subtype.ext

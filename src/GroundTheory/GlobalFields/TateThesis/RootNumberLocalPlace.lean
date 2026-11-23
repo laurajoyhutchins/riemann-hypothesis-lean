@@ -1,10 +1,61 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.EulerFactorsFourierFinite
-import GroundTheory.GlobalFields.TateThesis.AdelicCharLocal
+module
+
+public import GroundTheory.GlobalFields.TateThesis.EulerFactorsFourierFinite
+public import GroundTheory.AutomorphicForms.GL2.FiniteIdeleDecomp
+public import GroundTheory.AutomorphicForms.GL2.GodementSectionFactor
+public import GroundTheory.LocalFields.LocalZetaEpsilon
+public import GroundTheory.GlobalFields.Artin.ConductorOneDim
 import GroundTheory.GlobalFields.KummerTheory.LocalIndexAtPlace
-import GroundTheory.GlobalFields.Artin.ConductorOneDim
-import GroundTheory.AutomorphicForms.GL2.FiniteAdeleDecomp
-import GroundTheory.LocalFields.LocalZeta
+import GroundTheory.GlobalFields.LocalAtPlace
+public import GroundTheory.LocalFields.LocalZeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -139,7 +190,7 @@ theorem quasiCharConductor_localChar :
 theorem isUnramifiedChar_localChar_iff :
     IsUnramifiedChar (localChar χ v) ↔ ¬ v.asIdeal ∣ χ.conductor := by
   rw [IsUnramifiedChar, χ.unitFiltrationUnits_le_ker_localChar_iff v 0, Nat.le_zero,
-    multiplicity_eq_zero]
+    multiplicity_eq_zero (Ideal.finiteMultiplicity v.isPrime.ne_top χ.conductor_ne_bot)]
 
 theorem isLocallyConstant_finiteTest : IsLocallyConstant (χ.finiteTest v) := by
   refine (IsLocallyConstant.iff_eventually_eq _).2 fun x₀ ↦ ?_

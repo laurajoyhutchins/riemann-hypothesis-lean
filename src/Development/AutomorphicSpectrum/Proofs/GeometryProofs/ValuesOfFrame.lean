@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsValues
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackEquivalence
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptAwayFromPrimesStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsValues
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUniqueLeftBasisCoordsAdicCompletion
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptAwayFromPrimesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelPullbackEquivalence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -74,7 +120,9 @@ theorem values_basis {A Ω L Li V T I : Type} [CommRing A] [Field Ω] [Field L] 
     obtain ⟨r, hr⟩ := hsp _ (hf lab)
     refine ⟨r, fun k => ?_⟩
     have h1 : π (i (∑ j, f j)) = π (i (f lab)) := by
+
       rw [map_sum, map_sum, Finset.sum_eq_single lab (fun j _ hj => hπV j hj _ (hf j)) (by simp)]
+
     rw [h1, hr, map_sum, map_sum]
     simp only [hi, map_smul, hπ]
     simp [Finset.sum_apply, Pi.single_apply]
@@ -83,7 +131,7 @@ theorem values_basis {A Ω L Li V T I : Type} [CommRing A] [Field Ω] [Field L] 
     rw [← hc, hπ, Pi.single_apply]
     split_ifs <;> simp)
   have hadd : ∀ t t' k, c (t + t') k = c t k + c t' k := fun t t' k => hg (by
-    rw [← hc, map_add, map_add, map_add, ← hc, ← hc]; rfl)
+    rw [← hc, map_add (f := _), map_add (f := _), map_add (f := _), ← hc, ← hc]; rfl)
   have hsm : ∀ (a : A) t k, c (a • t) k = a * c t k := fun a t k => hg (by
     rw [← hc, hi, map_smul, map_mul, ← hc]; rfl)
   have hF : ∀ k, ∃ F : V →ₗ[L] L, ∀ t, F (β t) = v (c t k) := fun k =>
@@ -91,6 +139,7 @@ theorem values_basis {A Ω L Li V T I : Type} [CommRing A] [Field Ω] [Field L] 
   choose F hFβ using hF
   refine ⟨Fintype.linearIndependent_iff.2 fun w hw k => ?_, le_antisymm ?_ fun x hx => ?_⟩
   · have := congrArg (F k) hw
+
     simp only [map_sum, map_smul, hFβ, hcb, map_zero, smul_eq_mul] at this
     simpa using this
   · exact Submodule.span_le.2 (by rintro _ ⟨k, rfl⟩; exact hβW _ _ (hbV k))
@@ -98,12 +147,14 @@ theorem values_basis {A Ω L Li V T I : Type} [CommRing A] [Field Ω] [Field L] 
     have hSle : S ≤ W lab := Submodule.span_le.2 (by rintro _ ⟨k, rfl⟩; exact hβW _ _ (hbV k))
     have htop : S ⊔ (⨆ j, ⨆ (_ : j ≠ lab), W j) = ⊤ := hgen _ fun t => by
       obtain ⟨f, hf, rfl⟩ := hdec t
+
       rw [map_sum]
       refine Submodule.sum_mem _ fun j _ => ?_
       by_cases hj : j = lab
       · subst hj
         refine Submodule.mem_sup_left ?_
         obtain ⟨r, hr⟩ := hsp _ (hf j)
+
         rw [hr, map_sum]
         refine Submodule.sum_mem _ fun k _ => ?_
         rw [hβ]
@@ -192,7 +243,7 @@ theorem stalk_model [IsCommMonObj G] [Smooth G.hom] {Li : Type} [AddCommGroup Li
           rfl }
     exact ⟨hbc.lift ψl, fun t => hbc.lift_eq ψl t⟩
   · refine eq_top_iff.2 fun x _ => ?_
-    exact hbc.inductionOn x (· ∈ P) P.zero_mem hP (fun c n hn => P.smul_mem c hn) (fun _ _ => P.add_mem)
+    exact hbc.inductionOn x hP (fun c n hn => P.smul_mem c hn) (fun _ _ => P.add_mem)
 
 theorem value_end [IsCommMonObj G] {Li T : Type} [AddCommGroup Li] [Module Ω Li] (M : LieModel G ξ Li)
     (hξ : IsCptGen ξ) {L : Type} [Field L] (z : Sp L ⟶ X) (h : genPt ξ ⤳ centre z) {V : Type} [AddCommGroup V]
@@ -278,7 +329,8 @@ theorem values_core (𝔐 : HodgeCpt Y S y) {L : Type} [Field L] (z : Sp L ⟶ �
     refine ⟨g, fun j => ?_, hinj ?_⟩
     · rw [hg]
       exact (hf j).2
-    · rw [map_sum, ← e]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sum, ← e]
       exact (Finset.sum_congr rfl fun j _ => hg j).symm
   have hβW : ∀ j t, i t ∈ eigSp 𝔐.ρ (𝔐.emb j) → β t ∈ eigSp ρ (σ j) := by
     intro j t ht
@@ -307,6 +359,7 @@ theorem values_core (𝔐 : HodgeCpt Y S y) {L : Type} [Field L] (z : Sp L ⟶ �
       obtain ⟨cf, hcf⟩ := (Submodule.mem_span_range_iff_exists_fun _).1 hm
       choose r hr using fun k => RingHom.mem_range.1 (cf k).2
       refine ⟨r, hinj ?_⟩
+
       rw [← hcf, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [hsi, hr, hb]
@@ -320,7 +373,7 @@ theorem values_of_frame : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
   intro E _ _ _ H D l Xo c Y S Ω _ K _ J _ y 𝔐 L _ _ z P V _ _ _ _ MV A lab m s hLin hfr
   obtain ⟨hact, hlab, -⟩ := hLin
   have hlat := (GlobalTheory.T.hodge_cpt_away_from_primes E H D l Xo c (𝓞 c.F) (algebraMap _ _) Y S Ω K J y 𝔐
-    (FaithfulSMul.algebraMap_injective _ _) ⟨centre (spMap (algebraMap (𝓞 L) L) ≫ z), 𝔐.all _⟩
+    (RingOfIntegers.coe_injective) ⟨centre (spMap (algebraMap (𝓞 L) L) ≫ z), 𝔐.all _⟩
     (fun r hr => not_inFibre _ _ r hr)).2.2
   exact values_core 𝔐 _ P.tK P.m MV A.ρ A.σ A.σ_bij.1 hact hlab hlat lab s hfr
 

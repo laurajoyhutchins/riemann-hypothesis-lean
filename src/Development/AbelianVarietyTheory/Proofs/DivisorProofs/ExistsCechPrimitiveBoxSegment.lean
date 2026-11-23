@@ -1,6 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMergeFibrePrimitivesConvexBoxes
+module
+
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMergeFibrePrimitivesConvexBoxes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Set
 
 namespace GlobalTheory
@@ -127,6 +184,7 @@ private theorem hasDerivAt_radial_integrand {P : Type} [NormedAddCommGroup P] [N
         · simp [Prod.fst_sum]
         · funext i
           simp [Prod.snd_sum, Finset.sum_apply, Pi.single_apply]
+
       rw [hv, map_sum]
       simp only [map_smul, smul_eq_mul]
     have hterm : ∀ c, fderiv ℂ (ω c) p (0, τ • Pi.single a 1) = τ * fderiv ℂ (ω a) p (0, Pi.single c 1) := by
@@ -242,9 +300,9 @@ private theorem iUnion_ball_smul_Icc_union {g : ℕ} (w₀ : Fin g → ℂ) (ρ 
     · exact Or.inl ⟨u, ⟨h1, hum⟩, h⟩
     · exact Or.inr ⟨u, ⟨hum, h2⟩, h⟩
 
+
 set_option autoImplicit false in
 open Set Metric in
-
 theorem _root_.GlobalTheory.exists_cechPrimitive_box_segment : ∀ {P : Type} [NormedAddCommGroup P] [NormedSpace ℂ P] [FiniteDimensional ℂ P] {g : ℕ} {K : Type} (W : K → Set (P × (Fin g → ℂ))) (c : K → K → P × (Fin g → ℂ) → ℂ) (ω : K → Fin g → P × (Fin g → ℂ) → ℂ) (V : Set P), IsOpen V → (∀ k, IsOpen (W k)) → (∀ p : P × (Fin g → ℂ), p.1 ∈ V → ∃ k, p ∈ W k) → (∀ k l, AnalyticOnNhd ℂ (c k l) (W k ∩ W l)) → (∀ k l m, ∀ p ∈ W k, p ∈ W l → p ∈ W m → c k m p = c k l p + c l m p) → (∀ k a, AnalyticOnNhd ℂ (ω k a) (W k)) → (∀ k a b, ∀ p ∈ W k, fderiv ℂ (ω k b) p (0, Pi.single a 1) = fderiv ℂ (ω k a) p (0, Pi.single b 1)) → (∀ k l a, ∀ p ∈ W k, p ∈ W l → ω k a p - ω l a p = fderiv ℂ (c k l) p (0, Pi.single a 1)) → ∀ z₀ ∈ V, ∀ w₀ : Fin g → ℂ, ∃ (Z : Set P) (C : Set (Fin g → ℂ)) (G : K → P × (Fin g → ℂ) → ℂ), IsOpen Z ∧ z₀ ∈ Z ∧ Z ⊆ V ∧ IsOpen C ∧ Convex ℝ C ∧ 0 ∈ C ∧ w₀ ∈ C ∧ ((∀ k, AnalyticOnNhd ℂ (G k) (W k ∩ Z ×ˢ C)) ∧ (∀ k a, ∀ p ∈ W k, p ∈ Z ×ˢ C → fderiv ℂ (G k) p (0, Pi.single a 1) = ω k a p) ∧ ∀ k l, ∀ p ∈ W k, p ∈ W l → p ∈ Z ×ˢ C → G k p - G l p = c k l p) := by
   intro P _ _ _ g K W c ω V hV hW hcov hc hcoc hω hcl hdiff z₀ hz₀ w₀
   have hloc : ∀ (Z : Set P), IsOpen Z → ∀ (w : Fin g → ℂ) (r : ℝ) (k₀ : K), Z ×ˢ ball w r ⊆ W k₀ →

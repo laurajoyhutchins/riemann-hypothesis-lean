@@ -1,11 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntPull
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.LocalLevelIsKOneAtT
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.FdOfCharts
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesLaw
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NatCastMemOfPlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KernelThetaAdmissibleLatticesStatement
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntPull
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NatCastMemOfPlace
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ConditionIffAdditiveMaps
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SuccMulSuccSubOneDivSucc
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KernelThetaAdmissibleLatticesStatement
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.LocalLevelIsKOneAtT
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.HkLatTupUpdate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesTrivial
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,12 +68,14 @@ variable {σ R : Type} [Fintype σ] [CommRing R]
 theorem hasSubst_linMat (B : σ → σ → R) :
     MvPowerSeries.HasSubst (fun x : σ => ∑ y, MvPowerSeries.C (B x y) * MvPowerSeries.X y) :=
   MvPowerSeries.hasSubst_of_constantCoeff_zero fun x => by
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun y _ => by rw [map_mul, MvPowerSeries.constantCoeff_X, mul_zero]
 
 theorem subst_linMat {τ : Type} {a : σ → MvPowerSeries τ R} (ha : MvPowerSeries.HasSubst a) (c : σ → R) :
     MvPowerSeries.subst a (∑ y, MvPowerSeries.C (c y) * MvPowerSeries.X y : MvPowerSeries σ R) =
       ∑ y, MvPowerSeries.C (c y) * a y := by
+
   rw [← MvPowerSeries.coe_substAlgHom ha, map_sum]
   refine Finset.sum_congr rfl fun y _ => ?_
   rw [MvPowerSeries.coe_substAlgHom ha, MvPowerSeries.subst_mul ha, MvPowerSeries.subst_C, MvPowerSeries.subst_X ha]
@@ -44,6 +92,7 @@ theorem linSub_linSub' (U V : σ → σ → R) (f : MvPowerSeries σ R) :
   congr 1
   funext x
   rw [subst_linMat (hasSubst_linMat U)]
+
   simp only [Finset.mul_sum, map_sum, Finset.sum_mul, map_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun y _ => Finset.sum_congr rfl fun z _ => ?_
@@ -103,18 +152,18 @@ theorem lamC_mul' {p : ℕ} [Fact p.Prime] (lam : TaylorLogMetric.Qbar →+* ℂ
   unfold TaylorLogMetric.lamC
   by_cases ht : t ∈ TaylorLogMetric.Qbar
   · have hst : s * t ∈ TaylorLogMetric.Qbar := TaylorLogMetric.Qbar.mul_mem hs ht
-    rw [dif_pos hst, dif_pos hs, dif_pos ht, ← map_mul]
+    rw [dite_eq_left hst, dite_eq_left hs, dite_eq_left ht, ← map_mul]
     rfl
   · have hst : s * t ∉ TaylorLogMetric.Qbar := by
       intro h
       apply ht
       have : s⁻¹ * (s * t) ∈ TaylorLogMetric.Qbar := TaylorLogMetric.Qbar.mul_mem (TaylorLogMetric.Qbar.inv_mem hs) h
       rwa [← mul_assoc, inv_mul_cancel₀ hs0, one_mul] at this
-    rw [dif_neg hst, dif_neg ht, mul_zero]
+    rw [dite_eq_right hst, dite_eq_right ht, mul_zero]
 
 theorem lamC_zero' {p : ℕ} [Fact p.Prime] (lam : TaylorLogMetric.Qbar →+* ℂ_[p]) : TaylorLogMetric.lamC lam 0 = 0 := by
   unfold TaylorLogMetric.lamC
-  rw [dif_pos (TaylorLogMetric.Qbar.zero_mem)]
+  rw [dite_eq_left (TaylorLogMetric.Qbar.zero_mem)]
   exact map_zero lam
 
 theorem pSer_const_mul' (D : D7) {N N' p : ℕ} [Fact p.Prime] (lam : TaylorLogMetric.Qbar →+* ℂ_[p]) {s : ℂ} (hs : s ∈ TaylorLogMetric.Qbar)
@@ -199,6 +248,7 @@ theorem serLaw' (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (lam : TaylorLogMetric.Q
   rw [e1, h]
   congr 1
   funext s
+
   rw [← MvPolynomial.coeToMvPowerSeries.ringHom_apply, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.coeToMvPowerSeries.ringHom_apply,
@@ -247,8 +297,8 @@ section Frames
 
 variable {p : ℕ} [Fact p.Prime] {X : Sys p} {D : D7}
 
-open Classical in
 
+open Classical in
 def frameGL (fd : FData X D) (j : ℕ) (La : X.Lt j) (v : X.Pl) : GL (Fin ((X.Pj j).m + 1)) (X.G.P.Qq v) :=
   if h : IsUnit (fd.frM j La v).det then Matrix.nonsingInvUnit _ h else 1
 
@@ -258,11 +308,11 @@ def frameInv (fd : FData X D) (j : ℕ) (La : X.Lt j) : ∀ v : X.Pl, GL (Fin ((
 theorem frameGL_val (fd : FData X D) (j : ℕ) (La : X.Lt j) (v : X.Pl) (h : IsUnit (fd.frM j La v).det) :
     ((frameGL fd j La v : GL _ _) : Matrix _ _ _) = fd.frM j La v := by
   unfold frameGL
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
-open Classical in
 
+open Classical in
 def vMat (Kc : Type) [Field Kc] [Algebra (Formalism.L2.G.Pend.K0 p) Kc] [Algebra X.G.Kf Kc] (fd : FData X D) (c : Kc) (j : ℕ)
     (La' : X.Lt (j + 1)) (x y : X.ZA j) : Kc :=
   if (⟨y.1, y.2.1⟩ : Σ v : X.Pl, Fin (X.G.P.n' v)) = ⟨x.1, x.2.1⟩ ∧ y.2.2.1 = x.2.2.1 then

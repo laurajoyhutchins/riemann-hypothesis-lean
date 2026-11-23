@@ -1,24 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SquareTriple
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.UnifModGrowthOfIsUnifModerate
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LiftPRouteSmall
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTranslatesEqPrimFrameLat
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoBarZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodinger
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallySelfDualLatticeIndicatorIsVacuum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalAddCharUnramifiedOfSplitsCompletelyAbovePla
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousSingleAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StoneVonNeumannSchwartzBruhatTransverseLagrangiaStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoAtEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalUnipotentAdditiveStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PsiUnramifiedAwayDifferentStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousSingleAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodinger
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallySelfDualLatticeIndicatorIsVacuum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalUnipotentAdditiveStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalAddCharUnramifiedOfSplitsCompletelyAbovePla
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PsiUnramifiedAwayDifferentStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StoneVonNeumannSchwartzBruhatTransverseLagrangiaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoAtEqZero
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.IndefR.Links
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -38,14 +65,15 @@ noncomputable section
 namespace GlobalTheory.LinBarAt
 
 theorem locCo_form' {F : Type} [Field F] [NumberField F] {W : Type} [AddCommGroup W] [Module (AF F) W]
-    {B : W → W → AF F} {κ : Type} [Fintype κ] (co : Darboux B κ) (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F) (x u : W) :
+    {B : W → W → AF F} {κ : Type} [Fintype κ] (co : Darboux B κ) (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)) (x u : W) :
     (GlobalTheory.LatVac.locCo co v x).1 ⬝ᵥ (GlobalTheory.LatVac.locCo co v u).2 -
       (GlobalTheory.LatVac.locCo co v u).1 ⬝ᵥ (GlobalTheory.LatVac.locCo co v x).2 = evFin F v (B x u) := by
   rw [co.form]
+
   simp [GlobalTheory.LatVac.locCo, dotProduct, map_sum, map_mul, map_sub]
 
 theorem locCo_surj' {F : Type} [Field F] [NumberField F] {W : Type} [AddCommGroup W] [Module (AF F) W]
-    {B : W → W → AF F} {κ : Type} [Fintype κ] (co : Darboux B κ) (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F)
+    {B : W → W → AF F} {κ : Type} [Fintype κ] (co : Darboux B κ) (v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F))
     (w : (κ → Fv F v) × (κ → Fv F v)) : ∃ u : W, At (evFin F v) u ∧ GlobalTheory.LatVac.locCo co v u = w := by
   refine ⟨co.e.symm (fun k => GlobalTheory.LatVac.liftV v (w.1 k), fun k => GlobalTheory.LatVac.liftV v (w.2 k)), ?_, ?_⟩
   · intro a ha
@@ -58,8 +86,8 @@ theorem locCo_surj' {F : Type} [Field F] [NumberField F] {W : Type} [AddCommGrou
       simp [GlobalTheory.LatVac.locCo, GlobalTheory.LatVac.evFin_liftV]
 
 theorem at_symp' {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E)
-    {n d : ℕ} (JA : Matrix (Fin n) (Fin n) (AE F E)) (JB : Matrix (Fin d) (Fin d) (AE F E)) {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F}
-    (x u : Matrix (Fin n) (Fin d) (AE F E)) (hx : At (evFin F v) x) :
+    {n d : ℕ} (JA : Matrix (Fin n) (Fin n) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) (JB : Matrix (Fin d) (Fin d) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) {v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)}
+    (x u : Matrix (Fin n) (Fin d) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E))) (hx : At (evFin F v) x) :
     At (evFin F v) (symp (R := AF F) (cA σ) (-1) JA JB x u) := by
   intro a ha
   have h := GlobalTheory.LatVac.symp_smul_smul σ JA JB (-1) a 1 x u
@@ -89,20 +117,26 @@ theorem exists_isLinBar_at : GlobalTheory.FunPr.Hypotheses₂ → ∀ (F E : Typ
     ((GlobalTheory.LatVac.locCo G.M'.co v).comp uT) ((GlobalTheory.LatVac.locCo G.M'.co v).comp uM)
     (fun Y Y' => by
       simp only [AddMonoidHom.comp_apply]
-      rw [locCo_form', hsymp _ _ (hT Y).1 (hT Y').1, (hT Y).2.1, (hT Y').2.1]
+      rw [locCo_form']
+      unfold GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA incM
+      rw [hsymp _ _ (hT Y).1 (hT Y').1, (hT Y).2.1, (hT Y').2.1]
       simp)
     (fun z z' => by
       simp only [AddMonoidHom.comp_apply]
-      rw [locCo_form', hsymp _ _ (hM z).1 (hM z').1, hcoM, hcoM]
+      rw [locCo_form']
+      unfold GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA incM
+      rw [hsymp _ _ (hM z).1 (hM z').1, hcoM, hcoM]
       simp)
     (fun Y z => by
       simp only [AddMonoidHom.comp_apply]
-      rw [locCo_form', hsymp _ _ (hT Y).1 (hM z).1, (hT Y).2.1, (hT Y).2.2, (hM z).2.2, hcoM]
+      rw [locCo_form']
+      unfold GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA incM
+      rw [hsymp _ _ (hT Y).1 (hM z).1, (hT Y).2.1, (hT Y).2.2, (hM z).2.2, hcoM]
       simp)
     (fun w => by
       obtain ⟨u, hu, rfl⟩ := locCo_surj' G.M'.co v w
       obtain ⟨Y, z, rfl⟩ := hspan u hu
-      exact ⟨Y, z, by simp only [AddMonoidHom.comp_apply, map_add]⟩)
+      exact ⟨Y, z, by simp only [AddMonoidHom.comp_apply, map_add (f := _)]⟩)
   have hφ₁ : ∀ (u : Matrix (Fin a') (Fin (a + a')) (AE F E)), At (evFin F v) u →
       ∀ φ ∈ GlobalTheory.WeilM.SB _, ∀ φ₁, Acts (evFin F v) (G.M'.co.rho B.ψ u) φ φ₁ →
         φ₁ = GlobalTheory.WeilM.schr (GlobalTheory.LatVac.psiAt B.ψ v) (GlobalTheory.LatVac.locCo G.M'.co v u) φ :=
@@ -132,7 +166,9 @@ theorem exists_isLinBar_at : GlobalTheory.FunPr.Hypotheses₂ → ∀ (F E : Typ
     subst hY
     rw [map_zero, zero_add] at e1 ⊢
     show ι φ₁ (coAt G t x) = _ * ι φ (coAt G t x)
-    rw [e1, GlobalTheory.VacIndic.psi_of_at B.ψ (at_symp' _ _ _ x (uM z) hx), hsymp x (uM z) hx (hM z).1, hx0, hcoM,
+    rw [e1, GlobalTheory.VacIndic.psi_of_at B.ψ (at_symp' _ _ _ x (uM z) hx)]
+    conv_rhs => unfold GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA incM
+    rw [hsymp x (uM z) hx (hM z).1, hx0, hcoM,
       (hM z).2.2]
     have h2 := congrFun (hmu z φ hφ) (coAt G t x)
     simp only [AddMonoidHom.comp_apply] at h2

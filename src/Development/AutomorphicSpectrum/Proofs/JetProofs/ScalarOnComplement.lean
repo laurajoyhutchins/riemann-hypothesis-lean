@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.JetProofs.MulExpOfMulEqZero
+module
+
+public import Formalism.RealPlaceAnalysis.Complexify
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicSplitTorusIwasawaUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAdmOnOfFiniteDimensional
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsStandardIndModule
+import Development.AutomorphicSpectrum.PublishedTheorems.Jets₂.IsPermissibleOfCentre
+
+@[expose] public section
 
 noncomputable section
 
-open Matrix Formalism.REAL Formalism.MainNotions.S GlobalTheory.LinRed GlobalTheory.FlagMeas GlobalTheory.RealInd GlobalTheory.CompanionTheory.Hypotheses₂ GlobalTheory.CompanionTheory.Hypotheses₂.HCSS GlobalTheory.CompanionTheory.HCSide
+open Matrix Formalism.REAL Formalism.MainNotions.S GlobalTheory.LinRed GlobalTheory.FlagMeas GlobalTheory.RealInd GlobalTheory.CompanionTheory.Hypotheses₂ GlobalTheory.CompanionTheory.Hypotheses₂.HCSS
 open scoped InnerProductSpace
 
 namespace GlobalTheory.CompanionTheory.HCSide.CentreNone
@@ -93,31 +142,6 @@ theorem exists_frame_J {C : Matrix (Fin n) (Fin n) ℂ} (hh : Cᴴ = C) (hi : C 
     · have := e2 l
       simp only [Jm, diagonal_mul] at this ⊢
       simpa [mul_diagonal] using this
-
-theorem blkC_props {P J : Matrix (Fin n) (Fin n) ℂ} (hP : Pᴴ = P) (hPP : P * P = P) (hJ : Jᴴ = J)
-    (hJJ : J * J = 1) (h : P * J * P = 0) :
-    (1 - P - J * P * J)ᴴ = 1 - P - J * P * J ∧
-      (1 - P - J * P * J) * (1 - P - J * P * J) = 1 - P - J * P * J ∧
-      J * (1 - P - J * P * J) = (1 - P - J * P * J) * J := by
-  have e1 : P * (J * P * J) = 0 := by
-    rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, h, Matrix.zero_mul]
-  have e2 : J * P * J * P = 0 := by
-    rw [Matrix.mul_assoc, Matrix.mul_assoc, ← Matrix.mul_assoc P, h, Matrix.mul_zero]
-  have e3 : J * P * J * (J * P * J) = J * P * J := by
-    calc J * P * J * (J * P * J) = J * P * (J * J) * P * J := by simp only [Matrix.mul_assoc]
-      _ = J * (P * P) * J := by rw [hJJ, Matrix.mul_one]; simp only [Matrix.mul_assoc]
-      _ = _ := by rw [hPP]
-  refine ⟨?_, ?_, ?_⟩
-  · simp only [conjTranspose_sub, conjTranspose_one, conjTranspose_mul, hP, hJ, Matrix.mul_assoc]
-  · generalize J * P * J = Q at e1 e2 e3
-    simp only [Matrix.sub_mul, Matrix.mul_sub, Matrix.one_mul, Matrix.mul_one, hPP, e1, e2, e3]
-    abel
-  · have e4 : J * (J * P * J) = P * J := by
-      rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, hJJ, Matrix.one_mul]
-    have e5 : J * P * J * J = J * P := by
-      rw [Matrix.mul_assoc, hJJ, Matrix.mul_one]
-    simp only [Matrix.sub_mul, Matrix.mul_sub, Matrix.one_mul, Matrix.mul_one, e4, e5]
-    abel
 
 end GlobalTheory.CompanionTheory.HCSide.CentreNone
 

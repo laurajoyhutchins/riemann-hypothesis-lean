@@ -1,9 +1,51 @@
-import Mathlib
-import GroundTheory.TateCohomology.PullbackExtension
-import GroundTheory.TateCohomology.AugTrivial
-import GroundTheory.TateCohomology.DeltaMap
-import GroundTheory.TateCohomology.DimensionShift
-import GroundTheory.TateCohomology.TateConnecting
+module
+
+public import GroundTheory.TateCohomology.PullbackExtension
+public import GroundTheory.TateCohomology.AugTrivial
+public import GroundTheory.TateCohomology.DimensionShift
+public import GroundTheory.TateCohomology.DeltaMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open CategoryTheory Limits groupCohomology Rep
@@ -39,12 +81,12 @@ noncomputable def splittingSES : ShortComplex (Rep.{u} k G) :=
   pullbackSES (coindSES.obj M) (cocycleHom (splittingCocycle M u))
 
 theorem splittingSES_shortExact : (splittingSES M u).ShortExact :=
-  pullbackSES_shortExact _ (coindSES_shortExact M)
+  pullbackSES_shortExact (cocycleHom (splittingCocycle M u)) (coindSES_shortExact M)
 
 noncomputable abbrev splittingModule : Rep.{u} k G := (splittingSES M u).X₂
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 theorem map_H1π_augCocycle {H : Type u} [Group H] (φ : H →* G) {A : Rep.{u} k G}
     (f : cocycles₁ A) :
     map (A := res φ (augIdeal k G)) (B := res φ A) (MonoidHom.id H)

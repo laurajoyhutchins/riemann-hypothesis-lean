@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+module
+
+import Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,28 +83,7 @@ theorem prime_unique {L : Type} [Field L] [NumberField L] {p q : ℕ} (hp : p.Pr
 
 theorem resChar_mem (w : D.what₂.places.Pl) :
     ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL) ∈ (D.plEq w).asIdeal := by
-  have hq := D.what₂.places.resChar_prime w
-  have hne : ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) ≠ 0 := Nat.cast_ne_zero.mpr hq.ne_zero
-  have h1 := D.val_eq w _ hne
-  rw [D.what₂.places.val_resChar] at h1
-  have h2 : ((D.what₂.places.ramIdx w : ℕ) : ℤ) =
-      vAdd (D.plEq w) ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) := by exact_mod_cast h1
-  have h3 : 0 < vAdd (D.plEq w) ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) := by
-    rw [← h2]; exact_mod_cast D.what₂.places.ramIdx_pos w
-  unfold vAdd at h3
-  have hlt : (D.plEq w).valuation D.what₂.LL ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) < 1 := by
-    by_contra h
-    push_neg at h
-    have hv0 : (D.plEq w).valuation D.what₂.LL ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) ≠ 0 :=
-      (Valuation.ne_zero_iff _).mpr hne
-    have h4 := (WithZero.log_le_log one_ne_zero hv0).mpr h
-    rw [WithZero.log_one] at h4
-    omega
-  refine (HeightOneSpectrum.valuation_lt_one_iff_mem (K := D.what₂.LL) _ _).mp ?_
-  first
-    | exact hlt
-    | (simpa using hlt)
-    | (convert hlt using 2; exact map_natCast _ _)
+  apply Formalism.MainNotions.J.resChar_mem <;> assumption
 
 theorem resChar_eq_iff (p : ℕ) [hp : Fact p.Prime] (w : D.what₂.places.Pl) :
     D.what₂.places.resChar w = p ↔ ((p : ℕ) : 𝓞 D.what₂.LL) ∈ (D.plEq w).asIdeal := by
@@ -72,18 +94,6 @@ theorem resChar_eq_iff (p : ℕ) [hp : Fact p.Prime] (w : D.what₂.places.Pl) :
 
 theorem span_ne_bot (p : ℕ) [hp : Fact p.Prime] : Ideal.span {(p : ℤ)} ≠ ⊥ := by
   simp [hp.out.ne_zero]
-
-theorem mem_over (p : ℕ) [Fact p.Prime] (w : {w : D.what₂.places.Pl // D.what₂.places.resChar w = p}) :
-    (D.plEq w.1).asIdeal ∈ IsDedekindDomain.primesOverFinset (Ideal.span {(p : ℤ)}) (𝓞 D.what₂.LL) := by
-  have := Int.ideal_span_isMaximal_of_prime p
-  have := (D.plEq w.1).isPrime
-  rw [IsDedekindDomain.mem_primesOverFinset_iff (span_ne_bot p)]
-  exact ⟨(D.plEq w.1).isPrime, liesOver_of_mem _ ((resChar_eq_iff D p w.1).mp w.2)⟩
-
-instance plFin (p : ℕ) [Fact p.Prime] : Fintype {w : D.what₂.places.Pl // D.what₂.places.resChar w = p} :=
-  Fintype.ofInjective
-    (fun w => (⟨(D.plEq w.1).asIdeal, mem_over D p w⟩ : ↥(IsDedekindDomain.primesOverFinset (Ideal.span {(p : ℤ)}) (𝓞 D.what₂.LL))))
-    (fun a b h => Subtype.ext (D.plEq.injective (HeightOneSpectrum.ext (show (D.plEq a.1).asIdeal = (D.plEq b.1).asIdeal from congrArg Subtype.val h))))
 
 theorem exists_over (p : ℕ) [Fact p.Prime] (P : Ideal (𝓞 D.what₂.LL))
     (hP : P ∈ (Ideal.span {(p : ℤ)}).primesOver (𝓞 D.what₂.LL)) :
@@ -98,42 +108,5 @@ theorem plNe (p : ℕ) [Fact p.Prime] : Nonempty {w : D.what₂.places.Pl // D.w
   have := Int.ideal_span_isMaximal_of_prime p
   obtain ⟨P, hP⟩ := Ideal.nonempty_primesOver (S := 𝓞 D.what₂.LL) (Ideal.span {(p : ℤ)})
   exact ⟨(exists_over D p P hP).choose⟩
-
-theorem sumEF (p : ℕ) [hp : Fact p.Prime] :
-    ∑ w : {w : D.what₂.places.Pl // D.what₂.places.resChar w = p},
-      D.what₂.places.ramIdx w.1 * padicValNat p (Ideal.absNorm (D.plEq w.1).asIdeal) =
-      Module.finrank ℚ D.what₂.LL := by
-  have := Int.ideal_span_isMaximal_of_prime p
-  rw [← Ideal.sum_ramification_inertia (𝓞 D.what₂.LL) ℚ D.what₂.LL (span_ne_bot p)]
-  refine Finset.sum_bij (fun w _ => (D.plEq w.1).asIdeal) (fun w _ => mem_over D p w)
-    (fun _ _ _ _ h => Subtype.ext (D.plEq.injective (HeightOneSpectrum.ext h))) ?_ ?_
-  · intro P hP
-    rw [IsDedekindDomain.mem_primesOverFinset_iff (span_ne_bot p)] at hP
-    obtain ⟨w, hw⟩ := exists_over D p P hP
-    exact ⟨w, Finset.mem_univ _, hw⟩
-  · intro w _
-    have := (D.plEq w.1).isPrime
-    have : (D.plEq w.1).asIdeal.LiesOver (Ideal.span {(p : ℤ)}) :=
-      liesOver_of_mem _ ((resChar_eq_iff D p w.1).mp w.2)
-    rw [D.ram_eq, Ideal.absNorm_eq_pow_inertiaDeg' (p := p) _ hp.out, padicValNat.prime_pow,
-      Ideal.ramificationIdx'_eq_ramificationIdx _ _ (span_ne_bot p)]
-    rfl
-
-def wt (p : ℕ) (w : D.what₂.places.Pl) : ℝ :=
-  (D.what₂.places.ramIdx w : ℝ) * (padicValNat p (Ideal.absNorm (D.plEq w).asIdeal) : ℝ) /
-    (Module.finrank ℚ D.what₂.LL : ℝ)
-
-theorem wt_nonneg (p : ℕ) (w : D.what₂.places.Pl) : 0 ≤ wt D p w := by
-  unfold wt; positivity
-
-theorem wt_sum (p : ℕ) [Fact p.Prime] :
-    ∑ w : {w : D.what₂.places.Pl // D.what₂.places.resChar w = p}, wt D p w.1 = 1 := by
-  unfold wt
-  rw [← Finset.sum_div]
-  have h := sumEF D p
-  have h0 : (Module.finrank ℚ D.what₂.LL : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr Module.finrank_pos.ne'
-  rw [div_eq_one_iff_eq h0, ← h]
-  push_cast
-  rfl
 
 end Formalism.BasicNotions.Examples₂.PlOver

@@ -1,5 +1,57 @@
+module
+
 import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.SemiabelianTori.GeometricallyConnectedSplitTorusAff
+public import Development.AbelianVarietyTheory.PublishedTheorems.SemiabelianTori.GeometricallyConnectedSplitTorusAff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -311,8 +363,7 @@ private theorem isGrpPullback_pullback_fst {S S' : Scheme.{0}} (f : S' ⟶ S) (G
   have e : ∀ {A B : Over S} (g : A ⟶ B),
       ((Over.pullback f).map g).left ≫ pullback.fst B.hom f = pullback.fst A.hom f ≫ g.left := by
     intro A B g
-    simp only [Over.pullback_map_left]
-    exact pullback.lift_fst _ _ _
+    simp only [Over.pullback_map_left, pullback.lift_fst]
   have key : (lift x₀ y₀).left =
       (lift x y ≫ Functor.LaxMonoidal.μ (Over.pullback f) G G).left ≫ pullback.fst (G ⊗ G).hom f := by
     apply pullback.hom_ext
@@ -493,8 +544,7 @@ theorem generic_of_isGrpPullback (h : SemiAbelianHomExtension) (hS : Reciprocity
   have hVd : Dense (V : Set S) := V.isOpen.dense ⟨_, hηV⟩
   obtain ⟨F, ⟨hF, hFg⟩, -⟩ := h S hS V hVd G H hG hH g hg
   have hsq : ((Over.pullback V.ι).map F).left ≫ pullback.fst H.hom V.ι = pullback.fst G.hom V.ι ≫ F.left := by
-    simp only [Over.pullback_map_left]
-    exact pullback.lift_fst _ _ _
+    simp only [Over.pullback_map_left, pullback.lift_fst]
   have hex : f.left ≫ ψ = φ ≫ F.left := by
     rw [← hw₂, ← hFg, hsq, ← Category.assoc, hw₁]
   refine ⟨F, ⟨hF, hex⟩, ?_⟩
@@ -510,8 +560,7 @@ private theorem pullback_map_eq_iff_fst_comp {S₀ U₀ : Scheme.{0}} {t : U₀ 
     (Over.pullback t).map F = f ↔ f.left ≫ pullback.fst H₀.hom t = pullback.fst G₀.hom t ≫ F.left := by
   constructor
   · rintro rfl
-    simp only [Over.pullback_map_left]
-    exact pullback.lift_fst _ _ _
+    simp only [Over.pullback_map_left, pullback.lift_fst]
   · intro hF
     apply Over.OverMorphism.ext
     apply pullback.hom_ext
@@ -591,12 +640,6 @@ theorem fractionField_of_isGrpPullback (h : SemiAbelianHomExtension) {R K : Type
   generic_of_isGrpPullback h (isNormalScheme_spec R) (IsGenericPointHom.fractionField R K) hG hH hφ hψ f
 
 end GlobalTheory.Published.SemiAbelianHomExtension
-
-theorem GlobalTheory.Published.SemiAbelianHomExtension.generic (h : GlobalTheory.Published.SemiAbelianHomExtension) (S : Scheme.{0}) [IsIntegral S] [AlgebraicGeometry.IsNoetherian S]
-    (hS : ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsNormalScheme S) (G H : Over S) [GrpObj G] [GrpObj H] (hG : IsSemiAbelian G) (hH : IsSemiAbelian H)
-    (f : (Over.pullback (S.fromSpecStalk (genericPoint S))).obj G ⟶ (Over.pullback (S.fromSpecStalk (genericPoint S))).obj H) [IsMonHom f] :
-    ∃! F : G ⟶ H, IsMonHom F ∧ (Over.pullback (S.fromSpecStalk (genericPoint S))).map F = f :=
-  of_isGenericPointHom h hS (GlobalTheory.IsGenericPointHom.fromSpecStalk S) hG hH f
 
 theorem GlobalTheory.Published.SemiAbelianHomExtension.fractionField (h : GlobalTheory.Published.SemiAbelianHomExtension) (R K : Type) [CommRing R] [IsDomain R] [IsNoetherianRing R]
     [IsIntegrallyClosed R] [Field K] [Algebra R K] [IsFractionRing R K] (G H : Over (Sp R)) [GrpObj G] [GrpObj H] (hG : IsSemiAbelian G) (hH : IsSemiAbelian H)

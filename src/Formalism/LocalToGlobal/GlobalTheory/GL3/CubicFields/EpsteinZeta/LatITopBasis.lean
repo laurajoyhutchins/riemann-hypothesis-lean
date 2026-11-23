@@ -1,5 +1,57 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.EpsteinZeta.DedekindFactorK
-import Formalism.DirichletDensity.DirichletDensityProofs.QuadDiscr
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.EpsteinZeta.DedekindFactorK
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Formalism.DirichletDensity.DirichletDensityProofs.QuadDiscr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Prime
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,7 +159,7 @@ lemma covA_span (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Prime] (h
         rw [hab]
         simp
       have h2 : IsIntegral ℤ a := by
-        rw [← isIntegral_algebraMap_iff (algebraMap ℚ K).injective, ← h1]
+        rw [← isIntegral_algebraMap_iff (B := K), ← h1]
         exact hyint
       obtain ⟨z, hz⟩ := IsIntegrallyClosed.isIntegral_iff.mp h2
       refine ⟨2 * z, by simp [← hz], z ^ 2, by simp [← hz]⟩
@@ -121,7 +173,7 @@ lemma covA_span (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Prime] (h
         compute_degree!
       have hqy : Polynomial.aeval (y : K) q = 0 := by
         rw [hq]
-        simp only [map_add, map_sub, map_mul, map_pow, Polynomial.aeval_X, Polynomial.aeval_C,
+        simp only [map_add (f := _), map_sub, map_mul, map_pow, Polynomial.aeval_X, Polynomial.aeval_C,
           eq_ratCast]
         rw [hab]
         push_cast
@@ -143,8 +195,8 @@ lemma covA_span (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Prime] (h
           minpoly.natDegree_pos (Algebra.IsIntegral.isIntegral _)
         omega
       have hZ := minpoly.isIntegrallyClosed_eq_field_fractions' ℚ hyint
-      have c1 := congrArg (fun p => Polynomial.coeff p 1) (hmin.trans hZ)
-      have c0 := congrArg (fun p => Polynomial.coeff p 0) (hmin.trans hZ)
+      have c1 := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p 1) (hmin.trans hZ)
+      have c0 := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p 0) (hmin.trans hZ)
       simp only [hq, Polynomial.coeff_map, Polynomial.coeff_add, Polynomial.coeff_sub,
         Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, Polynomial.coeff_X, Polynomial.coeff_C,
         eq_intCast] at c1 c0
@@ -205,7 +257,7 @@ lemma covA_span (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Prime] (h
     · exact ⟨u - v, by rw [hu, hv]; ring⟩
   refine ⟨m, B, ?_⟩
   apply FaithfulSMul.algebraMap_injective (𝓞 K) K
-  simp only [map_add, map_mul, map_intCast]
+  simp only [map_add (f := _), map_mul, map_intCast]
   change (y : K) = (m : K) + (B : K) * ((1 + x) / 2)
   rw [hab]
   have ha2 : (2 : K) * a = A := by exact_mod_cast hA.symm
@@ -244,7 +296,7 @@ theorem latI_top_basis (K : Type) [Field K] [NumberField K] (d : ℕ) [Fact d.Pr
       rintro w (rfl | rfl)
       · exact AddSubgroup.subset_closure ⟨1, Submodule.mem_top, by simp⟩
       · exact AddSubgroup.subset_closure ⟨ω', Submodule.mem_top, by simp⟩
-  have hωc : φ (ω : K) = (1 + φ x) / 2 := by rw [hω, map_div₀, map_add, map_one, map_ofNat]
+  have hωc : φ (ω : K) = (1 + φ x) / 2 := by rw [hω, map_div₀, map_add (f := _), map_one, map_ofNat]
   rcases lt_or_ge 0 (φ x).im with hpos | hneg
   · refine ⟨1, φ (ω : K), ?_, key ω hspan, ?_⟩
     · simp [hωc]

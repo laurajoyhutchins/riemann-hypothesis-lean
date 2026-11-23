@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2Classical.HeckeOperator
+module
+
+public import Mathlib.Algebra.GroupWithZero.Nat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.AdelicGLn
+import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Archimedean
+public import Lean.Elab.MutualDef
+import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+import Mathlib.NumberTheory.ModularForms.SlashActions
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix CongruenceSubgroup
 open UpperHalfPlane hiding I I_re I_im
@@ -14,20 +61,6 @@ namespace GL2Classical
 open AdelicGLn AutomorphicForm
 
 set_option linter.unusedSectionVars false
-
-def triHecke (x z : ℕ) [NeZero x] [NeZero z] (c : ℤ) : GL (Fin 2) ℚ where
-  val := !![(x : ℚ), -c; 0, z]
-  inv := !![(x : ℚ)⁻¹, c / (x * z); 0, (z : ℚ)⁻¹]
-  val_inv := by
-    have hx := natCast_ne_zero_rat x
-    have hz := natCast_ne_zero_rat z
-    ext a b
-    fin_cases a <;> fin_cases b <;> simp [Matrix.mul_apply, Fin.sum_univ_two] <;> field_simp <;> ring
-  inv_val := by
-    have hx := natCast_ne_zero_rat x
-    have hz := natCast_ne_zero_rat z
-    ext a b
-    fin_cases a <;> fin_cases b <;> simp [Matrix.mul_apply, Fin.sum_univ_two] <;> field_simp <;> ring
 
 variable (p q : ℕ) [NeZero p] [NeZero q]
 

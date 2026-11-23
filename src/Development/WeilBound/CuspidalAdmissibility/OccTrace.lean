@@ -1,6 +1,61 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.SmoothRep
-import GroundTheory.AutomorphicForms.LocallyConstantCompact
+module
+
+public import GroundTheory.AutomorphicForms.SmoothRep
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Topology.LocallyConstant.Basic
+public import GroundTheory.AutomorphicForms.LocallyConstantCompact
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 open MeasureTheory GroundTheory.Automorphic
 
@@ -10,8 +65,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Local
   [TotallyDisconnectedSpace G] [MeasurableSpace G] [BorelSpace G]
   {X : Type} [AddCommGroup X] [Module ℂ X]
 
-omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] [MeasurableSpace G] [BorelSpace G] in
 
+omit [LocallyCompactSpace G] [T2Space G] [TotallyDisconnectedSpace G] [MeasurableSpace G] [BorelSpace G] in
 theorem orbit_isLocallyConstant (ρ : Representation ℂ G X) (hρ : IsSmooth ρ) (v : X) :
     IsLocallyConstant fun g => ρ g v := by
   rw [IsLocallyConstant.iff_exists_open]
@@ -53,6 +108,7 @@ theorem exists_vec (m : Measure G) [m.IsHaarMeasure] (ρ : Representation ℂ G 
         exact absurd hgS h
   have hfun : (fun g => φ g * l (ρ g v)) = fun g => ∑ s ∈ S, (E s).indicator φ g * l s := funext hpt
   rw [hfun, integral_finsetSum]
+
   · simp only [map_sum, map_smul, smul_eq_mul, integral_mul_const]
   · intro s _
     exact (hφi.indicator (hE s)).mul_const (l s)
@@ -71,10 +127,10 @@ theorem exists_integralOp (m : Measure G) [m.IsHaarMeasure] (ρ : Representation
   let A : X →ₗ[ℂ] X :=
     { toFun := A0
       map_add' := fun v v' => huniq _ _ fun l => by
-        rw [map_add, hA0, hA0, hA0, ← integral_add (hint v l) (hint v' l)]
+        rw [map_add (f := _), hA0, hA0, hA0, ← integral_add (hint v l) (hint v' l)]
         congr 1
         funext g
-        rw [map_add, map_add, mul_add]
+        rw [map_add (f := _), map_add (f := _), mul_add]
       map_smul' := fun c v => huniq _ _ fun l => by
         rw [map_smul, hA0, hA0, RingHom.id_apply, smul_eq_mul, ← integral_const_mul]
         congr 1

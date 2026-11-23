@@ -1,17 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
-import Formalism.LocalRingCardinality.DataForced
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.SingleLetterBiextensionRelation
-import Formalism.LocalRingCardinality.FactDelDualNabla
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TransportFirstLevel
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PHfTrace
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PLinkThU
-import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormLeOneOfValuationLeOne
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TauPlBijective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.IsLawOfLog
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormLeOneOfValuationLeOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsKurFrobTauEmbPosPl
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormPadicEmbeddingLeOneOfMemInverseHalfDifferent
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PrimeOfLiesOver
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormPadicEmbeddingLeOneOfMemInverseHalfDifferent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsKurFrobTauEmbPosPl
+import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.LocalRingCardinality.FactDelDualNabla
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PHfTrace
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TransportFirstLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.G Formalism.MainNotions.TaylorLogMetric GlobalTheory.KerStd Classical
 open Formalism.L2.Th1.CM (MaximalUnramifiedExtension)
@@ -177,6 +221,7 @@ private theorem cols_of_trace (D : D7) {p : ℕ} [Fact p.Prime] (lam : Qbar →+
       = ∑ τ : D.what₂.Tau, lam (embQ τ Y) := by
         rw [Fintype.sum_prod_type]
         refine Finset.sum_congr rfl fun τ _ => ?_
+
         simp only [lamB, lamBc, hl, hY, map_sum, map_mul]
         exact Finset.sum_congr rfl fun _ _ => mul_comm _ _
     _ = lam (∑ τ : D.what₂.Tau, embQ τ Y) := (map_sum lam _ _).symm
@@ -328,12 +373,14 @@ private theorem frob_moves_coords : ∀ (D : D7) (p : ℕ) [Fact p.Prime] (lam :
   have hPc := hP.2.1 hcl
   have hP'c := hP'.2.1 hcl
   refine ⟨fun z a b₀ i => ?_, fun w a b₀ i => ?_⟩
+
   · simp only [gK, hK, hfun, map_sum, map_mul]
     refine Finset.sum_congr rfl fun b₁ _ => Finset.sum_congr rfl fun a₁ _ => ?_
     rw [hs, hs, conj_conj, hinv, K1 P hPc z]
     have e2 := congrFun (congrFun (K2 P' hP'c z) b₁) b₀
     simp only [Matrix.map_apply, Matrix.transpose_apply] at e2 ⊢
     rw [e2]; ring
+
   · simp only [gK, hK, hfun, map_sum, map_mul]
     refine Finset.sum_congr rfl fun b₁ _ => Finset.sum_congr rfl fun a₁ _ => ?_
     rw [hs, hs, hinv, K1 P' hP'c w]
@@ -433,7 +480,7 @@ private theorem lamB_sum_gK : ∀ (D : D7) (p : ℕ) [Fact p.Prime] (lam : Qbar 
         (tauEmb D lam τ (P' τ b₁ b₀) * ((P τ).map (tauEmb D lam τ))⁻¹ a a₁) := by
     intro i
     rw [gK, ← hτ]
-    simp only [AddSubmonoidClass.coe_finset_sum, MulMemClass.coe_mul, coe_rhoK D lam σ hσ hcl, hinv, mul_assoc, ← hτ]
+    simp only [AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul, coe_rhoK D lam σ hσ hcl, hinv, mul_assoc, ← hτ]
     rfl
   simp_rw [hg, Finset.mul_sum]
   rw [Finset.sum_comm]
@@ -495,7 +542,7 @@ private theorem IntIn.smul {e : D.host.E} (he : ‖ρ e‖ ≤ 1) {B : Matrix (F
 
 private theorem IntIn.add {B C : Matrix (Fin N') (Fin N) D.host.E} (hB : IntIn ρ Q' P B) (hC : IntIn ρ Q' P C) :
     IntIn ρ Q' P (B + C) := fun b a => by
-  rw [Matrix.mul_add, Matrix.add_mul, Matrix.add_apply, map_add]
+  rw [Matrix.mul_add, Matrix.add_mul, Matrix.add_apply, map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hB b a) (hC b a))
 
 private theorem IntIn.zero : IntIn ρ Q' P (0 : Matrix (Fin N') (Fin N) D.host.E) := fun b a => by
@@ -566,6 +613,7 @@ private theorem norm_hK_le_one : ∀ (D : D7) (p : ℕ) [Fact p.Prime] (lam : Qb
   have e : hK D lam P P' b w a b₀ i = ρ (((P' τ)⁻¹ * b i * P τ) b₀ a) := by
     unfold hK
     rw [← hτ, hρK, hinv]
+
     simp only [Matrix.mul_apply, Matrix.map_apply, map_sum, map_mul, Finset.sum_mul]
     rw [Finset.sum_comm]
   show ‖((hK D lam P P' b w a b₀ i : MaximalUnramifiedExtension p) : ℂ_[p])‖ ≤ 1

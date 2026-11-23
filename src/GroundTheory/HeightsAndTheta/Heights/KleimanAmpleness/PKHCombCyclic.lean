@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombCyclicSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombContractSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombCyclicSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombContractSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -17,8 +62,8 @@ variable {S : Type} [CommRing S] {K : Type} [Fintype K] [LinearOrder K] {ι : K 
 abbrev FaceOK (J : ∀ k, Finset (ι k)) (n : ℕ) (G : ∀ k, Finset (ι k)) : Prop :=
   ((∀ l, (G l).Nonempty) ∧ ∑ l, ((G l).card - 1) = n) ∧ ∀ l, J l ⊆ G l
 
-open Classical in
 
+open Classical in
 theorem combD_apply (J : ∀ k, Finset (ι k)) (n : ℕ) (f : CombC S J n) (I : CombCell ι J (n + 1)) :
     combD S J n f I = ∑ k, ∑ i ∈ I.1.1 k,
       if h : FaceOK J n (Function.update I.1.1 k ((I.1.1 k).erase i)) then
@@ -27,7 +72,7 @@ theorem combD_apply (J : ∀ k, Finset (ι k)) (n : ℕ) (f : CombC S J n) (I : 
   simp only [combD, LinearMap.pi_apply, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun i _ => ?_
   by_cases h : FaceOK J n (Function.update I.1.1 k ((I.1.1 k).erase i))
-  · rw [dif_pos h, dif_pos h]; rfl
+  · rw [dite_eq_left h, dite_eq_left h]; rfl
   · rw [dif_neg h, dif_neg h]; rfl
 
 theorem cell_ext {J : ∀ k, Finset (ι k)} {n : ℕ} {I₁ I₂ : CombCell ι J n} (h : I₁.1.1 = I₂.1.1) : I₁ = I₂ :=
@@ -88,8 +133,8 @@ theorem faceSign_update_one (A : ∀ k, Finset (ι k)) {k l : K} (hl : l ≠ k) 
   unfold KH.faceSign
   rw [Function.update_of_ne hl, hs]
 
-open Classical in
 
+open Classical in
 theorem block_pair (J : ∀ k, Finset (ι k)) (n : ℕ) (f : CombC S J n) (I : CombCell ι J (n + 1)) (k : K)
     (hJ : J k = ∅) (h2 : (I.1.1 k).card = 2)
     (hf : ∀ i ∈ I.1.1 k, ∀ j ∈ I.1.1 k,
@@ -112,15 +157,15 @@ theorem block_pair (J : ∀ k, Finset (ι k)) (n : ℕ) (f : CombC S J n) (I : C
   by_cases hOK : FaceOK J n (Function.update I.1.1 k ((I.1.1 k).erase a))
   · have hOK' := hiff.mp hOK
     simp only [t]
-    rw [dif_pos hOK, dif_pos hOK', hf b hb a ha hOK' hOK]
+    rw [dite_eq_left hOK, dite_eq_left hOK', hf b hb a ha hOK' hOK]
     rcases lt_or_gt_of_ne hab with h | h
     · rw [faceSign_pair I.1.1 k h he, neg_smul, add_neg_cancel]
     · rw [faceSign_pair I.1.1 k h (he.trans (Finset.pair_comm a b)), neg_smul, neg_add_cancel]
   · simp only [t]
     rw [dif_neg hOK, dif_neg (fun h => hOK (hiff.mpr h)), add_zero]
 
-open Classical in
 
+open Classical in
 theorem singOne_cocycle (J : ∀ k, Finset (ι k)) (n : ℕ) (hJ : ∀ k, J k = ∅ ∨ J k = Finset.univ) :
     combD S J n (singOne S J n) = 0 := by
   funext I
@@ -161,8 +206,8 @@ theorem singOne_cocycle (J : ∀ k, Finset (ι k)) (n : ℕ) (hJ : ∀ k, J k = 
     rw [Function.update_self] at this
     exact Finset.notMem_erase i _ this
 
-open Classical in
 
+open Classical in
 theorem contract_cocycle (J : ∀ k, Finset (ι k)) (n : ℕ) (k : K) (i₀ : ι k) (hJ : J k = ∅)
     (φ g : CombC S J n) (hφ : combD S J n φ = 0)
     (hg1 : ∀ I : CombCell ι J n, (I.1.1 k).card = 1 →
@@ -209,7 +254,7 @@ theorem contract_cocycle (J : ∀ k, Finset (ι k)) (n : ℕ) (k : K) (i₀ : ι
       rw [hI']
       exact faceSign_update_one I.1.1 hl i {i₀} h1 (Finset.card_singleton i₀)
     by_cases hc : FaceOK J n (Function.update I.1.1 l ((I.1.1 l).erase i))
-    · rw [dif_pos hc, dif_pos (hiff.mp hc), hsign]
+    · rw [dite_eq_left hc, dite_eq_left (hiff.mp hc), hsign]
       obtain ⟨I'', hk'', ho'', hgI⟩ := hg1 ⟨⟨_, hc.1⟩, hc.2⟩ hFk
       rw [hgI]
       congr 1
@@ -321,7 +366,7 @@ theorem cyclic_cohom (hC : KHCombContract.Statement) (J : ∀ k, Finset (ι k)) 
     simp only [Pi.smul_apply, singOne, smul_eq_mul]
     by_cases hI : ∀ k ∈ E, (I.1.1 k).card = 1
     · have h : ∃ I : CombCell ι J n, ∀ k ∈ E, (I.1.1 k).card = 1 := ⟨I, hI⟩
-      rw [dif_pos h, if_pos (fun k hk => hI k ((hE k).mpr hk)), mul_one]
+      rw [dite_eq_left h, if_pos (fun k hk => hI k ((hE k).mpr hk)), mul_one]
       exact hval I h.choose hI h.choose_spec
     · rw [if_neg (fun h => hI fun k hk => h k ((hE k).mp hk)), mul_zero]
       exact (hφI I).2 hI

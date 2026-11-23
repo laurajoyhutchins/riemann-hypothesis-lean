@@ -1,6 +1,54 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.SegreIdealIsHomogeneous
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FromSpecResidueFieldAppTopIso
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjDehomA
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.FromSpecResidueFieldAppTopIso
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjDehomA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -31,8 +79,8 @@ instance locallyOfFiniteType_toSpecC {P : Ideal (MvPolynomial (Σ k, ι k) ℂ)}
   have h1 : LocallyOfFiniteType (Proj.toSpecZero (segreGrading P)) := inferInstance
   exact @locallyOfFiniteType_comp _ _ _ (Proj.toSpecZero (segreGrading P)) _ h1 h2
 
-open Classical in
 
+open Classical in
 def chartUpd (p : (k : K) → ι k) (q : Σ k, ι k) : (k : K) → ι k :=
   Function.update p q.1 q.2
 
@@ -64,7 +112,7 @@ theorem val_polyToAway {P : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (hP : IsMulti
       (Localization.Away (segreW P p)), ← Localization.mk_one_eq_algebraMap]
     rfl
   | add f g hf hg =>
-    simp only [map_add, HomogeneousLocalization.val_add, hf, hg, eval₂_add]
+    simp only [map_add (f := _), HomogeneousLocalization.val_add, hf, hg, eval₂_add]
   | mul_X f q hf =>
     rw [map_mul, HomogeneousLocalization.val_mul, hf, eval₂_mul, eval₂_X]
     congr 1

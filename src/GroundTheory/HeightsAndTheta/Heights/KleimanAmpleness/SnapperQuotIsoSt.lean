@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperCutObj
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperCutObj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -24,11 +66,6 @@ structure QuotIso {E : Type v} [AddCommGroup E] [Module Ω E] [Module S E] [IsSc
   comm : ∀ (I J : Chart x) (h : I.1 ⊆ J.1) (y : F₁.sub I ⧸ SubSystem.quotSub F₁ F₂ I),
     equiv J (SubSystem.quotRes F₁ F₂ I J h y) = SubSystem.quotRes G₁ G₂ I J h (equiv I y)
 
-def QuotIso.refl {E : Type v} [AddCommGroup E] [Module Ω E] [Module S E] [IsScalarTower S Ω E]
-    (F₁ F₂ : SubSystem S x E) : QuotIso F₁ F₂ F₁ F₂ where
-  equiv _ := LinearEquiv.refl S _
-  comm _ _ _ _ := rfl
-
 end Defs
 
 def SnapperQuotIso.Statement : Prop :=
@@ -37,13 +74,6 @@ def SnapperQuotIso.Statement : Prop :=
     (E' : Type v') [AddCommGroup E'] [Module Ω E'] [Module k E'] [IsScalarTower k Ω E']
     (F₁ F₂ : SubSystem k x E) (G₁ G₂ : SubSystem k x E'), QuotIso F₁ F₂ G₁ G₂ →
     eulerCharQuot k F₁ F₂ = eulerCharQuot k G₁ G₂
-
-def snapperQuotIso_hyps (k : Type u) [Field k] :
-    QuotIso (twistSys k (genericPt k 1) 0)
-      ((twistSys k (genericPt k 1) 0).twist (idealSys (genericPt k 1) (primeOf (S := k) (genericPt k 1))))
-      (twistSys k (genericPt k 1) 0)
-      ((twistSys k (genericPt k 1) 0).twist (idealSys (genericPt k 1) (primeOf (S := k) (genericPt k 1)))) :=
-  QuotIso.refl _ _
 
 end
 

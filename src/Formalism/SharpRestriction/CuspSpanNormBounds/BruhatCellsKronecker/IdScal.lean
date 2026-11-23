@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.UnitriangularFrameLift
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.UnitriangularFrameLift
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellGeo
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.ClauseAOfIdentityFlag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -102,7 +145,7 @@ theorem scal_exists_v (U : Submodule E S.V) (f : S.V) (hf : f ∉ U) :
     intro x hx
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hx
     obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.1 hb
-    rw [map_add, LinearMap.add_apply, hv a ha, map_smulₛₗ, LinearMap.smul_apply, p_symm_zero S hvf, smul_zero,
+    rw [map_add (f := _), LinearMap.add_apply, hv a ha, map_smulₛₗ, LinearMap.smul_apply, p_symm_zero S hvf, smul_zero,
       add_zero]
   have h1 := Submodule.finrank_mono hle
   have h2 := c_finrank_orth_ge U
@@ -257,7 +300,7 @@ theorem id_scal : EqualFlagsScalar := by
     have hxx : S.hT x x = 0 := geo_X_X F _ _ hzc hzc
     have hn := F'.z_norm
     rw [hz'] at hn
-    simp only [map_add, LinearMap.add_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hzx, hxz, hxx,
+    simp only [map_add (f := _), LinearMap.add_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hzx, hxz, hxx,
       F.z_norm, mul_zero, add_zero, starRingEnd_apply] at hn
     have : (c * star c) * T = 1 * T := by linear_combination -hn
     exact mul_right_cancel₀ hT0 this

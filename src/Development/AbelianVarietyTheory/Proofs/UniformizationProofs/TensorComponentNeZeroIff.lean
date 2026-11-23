@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.TensorProduct.Map
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -23,8 +67,8 @@ theorem tensor_component_ne_zero_iff (F : Type) [Field F] (X C : Type) [Finite C
     { toFun := p c
       map_add' := fun s t => hext _ _ fun x => by
         by_cases hx : cl x = c
-        · rw [map_add, (hp c _ x).1 hx, (hp c _ x).1 hx, (hp c _ x).1 hx, map_add]
-        · rw [map_add, (hp c _ x).2 hx, (hp c _ x).2 hx, (hp c _ x).2 hx, add_zero]
+        · rw [map_add (f := _), (hp c _ x).1 hx, (hp c _ x).1 hx, (hp c _ x).1 hx, map_add (f := _)]
+        · rw [map_add (f := _), (hp c _ x).2 hx, (hp c _ x).2 hx, (hp c _ x).2 hx, add_zero]
       map_smul' := fun r s => hext _ _ fun x => by
         by_cases hx : cl x = c
         · rw [RingHom.id_apply, map_smul, (hp c _ x).1 hx, (hp c _ x).1 hx, map_smul]
@@ -33,6 +77,7 @@ theorem tensor_component_ne_zero_iff (F : Type) [Field F] (X C : Type) [Finite C
   have h0 : ∀ c s x, cl x ≠ c → ex x (π c s) = 0 := fun c s x h => (hp c s x).2 h
   have hsum : ∑ c, π c = LinearMap.id := by
     refine LinearMap.ext fun s => hext _ _ fun x => ?_
+
     rw [LinearMap.sum_apply, map_sum, Finset.sum_eq_single (cl x)]
     · exact h1 _ s x rfl
     · intro c _ hc

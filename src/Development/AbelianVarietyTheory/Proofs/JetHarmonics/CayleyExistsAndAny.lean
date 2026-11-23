@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
-import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.ExistsIsCayleyUIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPrAlt
+public import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.ExistsIsCayleyUIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open BranchingSupport Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
@@ -91,11 +138,11 @@ private theorem isKTypeOf_map_of_intertwining {σ₁ σ₂ : Matrix (Fin n) (Fin
     obtain ⟨x, hx, rfl⟩ := hy
     exact hmax ν x hx (by rintro rfl; simp at hy0) (wt' ν x hyw)
 
+
 open Matrix MeasureTheory Finset in
 open scoped InnerProductSpace ENNReal in
 variable {n : ℕ} {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] {ε : Fin n → Bool}
   {σ σ' : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} in
-
 theorem _root_.GlobalTheory.CayleyChoice.isDS_conj {lam : Fin n → ℝ} (hσ : _root_.PI.UpqRep.IsDS ε lam σ)
     {u u' : Matrix (Fin n) (Fin n) ℂ}
     (hu : u ∈ _root_.PI.UpqRep.UJset ε) (hu' : u' ∈ _root_.PI.UpqRep.UJset ε) (h1 : u * u' = 1) :
@@ -186,9 +233,9 @@ theorem _root_.GlobalTheory.CayleyChoice.isDS_conj {lam : Fin n → ℝ} (hσ : 
   · intro μ T hT
     exact hmin μ _ (isKTypeOf_map_of_intertwining e.symm he' hT)
 
+
 open Matrix MeasureTheory Finset in
 open scoped InnerProductSpace ENNReal in
-
 theorem _root_.GlobalTheory.CayleyChoice.cayley_exists_and_any : ∀ (k r : ℕ),
     (1 ≤ k → ∃ Q, _root_.PI.UpqRep.IsCayleyU k r (_root_.PI.BesselPeriodGGP.eps48 k r) Q) ∧
     ∀ (ε : Fin (2 * r + k + 1) → Bool) (mu : Fin (2 * r + k + 1) → ℝ)

@@ -1,5 +1,53 @@
-import Formalism.SatakeDualWeyl.StatementC
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabstd
+module
+
+public import Formalism.SatakeDualWeyl.StatementC
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabstd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,25 +56,6 @@ open Matrix TensorProduct NumberField IsDedekindDomain
 namespace Formalism.UG.P
 
 open Formalism.UG
-
-def easyc_fstAdd : ↥(stdLat (n := Fin 2) (A := ℚ) ℤ) →+ ZMod 2 where
-  toFun x := (((x : Fin 2 → ℚ) 0).num : ZMod 2)
-  map_zero' := by simp
-  map_add' := by
-    intro x y
-    obtain ⟨a, ha⟩ := (mem_stdLat_iff' (R := ℤ) (x : Fin 2 → ℚ)).1 x.2 0
-    obtain ⟨b, hb⟩ := (mem_stdLat_iff' (R := ℤ) (y : Fin 2 → ℚ)).1 y.2 0
-    simp only [algebraMap_int_eq, eq_intCast] at ha hb
-    simp only [Submodule.coe_add, Pi.add_apply, ← ha, ← hb]
-    rw [← Int.cast_add, Rat.num_intCast, Rat.num_intCast, Rat.num_intCast]
-    push_cast; rfl
-
-def easyc_fst : ↥(stdLat (n := Fin 2) (A := ℚ) ℤ) →ₗ[ℤ] ZMod 2 := easyc_fstAdd.toIntLinearMap
-
-def easyc_swap : GL (Fin 2) ℚ :=
-  ⟨!![0, 1; 1, 0], !![0, 1; 1, 0], by
-    ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two], by
-    ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]⟩
 
 section Lattice
 
@@ -80,11 +109,6 @@ end Lattice
 theorem level_subgroup_finite_adelic_standard : Formalism.UG.LevelAfLStd := by
   intro F E _ _ _ _ _ n _ _ σ J
   unfold levelAfL levelAf
-  rw [easyc_latS_std]
-
-theorem level_subgroup_local_standard : Formalism.UG.LevelVLStd := by
-  intro F E _ _ _ _ _ n _ _ σ J v
-  unfold levelVL levelV
   rw [easyc_latS_std]
 
 end Formalism.UG.P

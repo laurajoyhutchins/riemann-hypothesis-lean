@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicFormValuesNearPointSpecStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlESymmApply
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicFormValuesNearPointSpecStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.L2.Forms Formalism.UG Formalism.L2.GlobalTheoryTheory.LocalLatticeBases NumberField IsDedekindDomain Matrix GlobalTheory.LevelHecke
 open scoped TensorProduct
@@ -29,12 +72,6 @@ theorem inc_dil {res : R →+* k} (hs : Function.Surjective res) {t : R} {p q : 
     rw [h1.smul _ _ he, h3, hb, mul_one, mul_inv_cancel₀ ha]
   · show a * p.f _ = 1
     rw [smul_comm, hp.smul _ _ hte, h4, hb, mul_one, mul_inv_cancel₀ ha]
-
-theorem inc_dil_iff {res : R →+* k} (hs : Function.Surjective res) {t : R} {p : Pr R V k} (hp : p.Ok res)
-    (q : Pr R V k) {a : k} (ha : a ≠ 0) : Pr.Inc res t (p.dil a) (q.dil a) ↔ Pr.Inc res t p q := by
-  refine ⟨fun h => ?_, fun h => inc_dil hs hp h ha⟩
-  have := inc_dil hs (hp.dil ha) h (inv_ne_zero ha)
-  rwa [Pr.dil_dil, Pr.dil_dil, inv_mul_cancel₀ ha, Pr.dil_one, Pr.dil_one] at this
 
 def dilEquiv {a : k} (ha : a ≠ 0) : Pr R V k ≃ Pr R V k where
   toFun q := q.dil a
@@ -82,7 +119,7 @@ theorem upAd_dia : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberF
         rw [e, hp, hc.2] at this
         rw [this]
         unfold valAt
-        rw [dif_pos h]
+        rw [dite_eq_left h]
       · have h' : ¬ ∃ η, AtV v η ∧ p (x * δ * η) = q := by
           rintro ⟨η, hη, hq⟩
           refine h ⟨δ⁻¹⁻¹ * η * δ⁻¹, atV_conj hη _, ?_⟩
@@ -90,7 +127,7 @@ theorem upAd_dia : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberF
           congr 1
           group
         unfold valAt
-        rw [dif_neg h, dif_neg h']
+        rw [dite_eq_right h, dite_eq_right h']
     unfold upAd
     rw [hp, key]
 

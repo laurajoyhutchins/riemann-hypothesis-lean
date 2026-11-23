@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LabExt
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Definitions.Uniformization.SeriesFrame
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecTw
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LabExt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecTw
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionOfIsPushout
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionPullOver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -38,6 +77,7 @@ theorem linearIndependent_image {a : V →ₛₗ[algebraMap K F] W} (ha : IsExte
     obtain ⟨Λ, hΛ⟩ := ha.coord ℓ
     have h0 : ∑ j ∈ s, ℓ (g j) • Module.Basis.ofVectorSpace K V j = 0 := by
       have := congrArg Λ hg
+
       rw [map_sum, map_zero, Finset.sum_congr rfl fun j _ => hΛ (g j) _] at this
       exact this
     exact linearIndependent_iff'.1 (Module.Basis.ofVectorSpace K V).linearIndependent s _ h0 i hi
@@ -50,8 +90,9 @@ theorem span_image {a : V →ₛₗ[algebraMap K F] W} (ha : IsExtension a) :
     ⊤ ≤ Submodule.span F (Set.range fun i => a (Module.Basis.ofVectorSpace K V i)) := by
   rw [← ha.span, Submodule.span_le]
   rintro _ ⟨v, rfl⟩
+
   rw [← (Module.Basis.ofVectorSpace K V).linearCombination_repr v, Finsupp.linearCombination_apply,
-    Finsupp.sum, map_sum]
+  Finsupp.sum, map_sum]
   refine Submodule.sum_mem _ fun i _ => ?_
   rw [map_smulₛₗ]
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
@@ -73,7 +114,7 @@ theorem repr_semilinear {Idx : Type} (B : Module.Basis Idx F W) (τ : F →+* F)
     rw [hg, B.repr_self, Finsupp.single_apply]
     split_ifs <;> simp
   | zero => simp
-  | add x y _ _ hx hy => simp only [map_add, Finsupp.add_apply, hx, hy]
+  | add x y _ _ hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
   | smul c x _ hx =>
     rw [map_smulₛₗ, map_smul, map_smul, Finsupp.smul_apply, Finsupp.smul_apply, smul_eq_mul, smul_eq_mul, hx,
       map_mul]
@@ -95,6 +136,7 @@ theorem exists_scale [CharZero K] [IsAlgClosure K F] {a : V →ₛₗ[algebraMap
     choose k hk using this
     refine ⟨∑ j ∈ (B.repr w).support, k j • Module.Basis.ofVectorSpace K V j, ?_⟩
     conv_rhs => rw [← B.linearCombination_repr w, Finsupp.linearCombination_apply, Finsupp.sum]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_smulₛₗ, hk, extBasis_apply]

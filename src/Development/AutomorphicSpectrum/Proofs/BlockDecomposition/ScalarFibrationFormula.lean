@@ -1,8 +1,54 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GramFibreMeasureLocal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArchimedeanBinaryGramDensity
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArchimedeanBinaryGramDensity
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ScalHHermScal
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasure
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasureStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianMatricesLocallyCompactBorel
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.RankOneFiberMeasureBlockExtension
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GramFibreMeasureLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
@@ -30,8 +76,9 @@ theorem map_eq_of_semiconj (φ : V ≃ₜ+ V') (μ : Measure V) [μ.IsAddHaarMea
       Measure.map_id]
   have h1 : (μ.map e).map φ = c • μ.map φ := by
     rw [Measure.map_map hφ he.measurable, show (φ ∘ e) = e' ∘ φ from funext h,
-      ← Measure.map_map he'.measurable hφ, ht, Measure.map_smul, hc, smul_comm]
-  rw [← hback (μ.map e), h1, Measure.map_smul, hback]
+      ← Measure.map_map he'.measurable hφ, ht,
+      Measure.map_smul _ he'.measurable.aemeasurable, hc, smul_comm]
+  rw [← hback (μ.map e), h1, Measure.map_smul _ hφs.aemeasurable, hback]
 
 end Gen
 
@@ -62,7 +109,8 @@ theorem factor_eq (κ : Measure A) [κ.IsAddHaarMeasure] (S : A ≃ₜ+ A) (x x'
   have h2 : κ.map (fun y => ((x' : A) * x) * y) = (a * a) • κ := by
     have e : (fun y : A => ((x' : A) * x) * y) = (fun y => (x' : A) * y) ∘ fun y => (x : A) * y :=
       funext fun y => mul_assoc _ _ _
-    rw [e, ← Measure.map_map (hm _) (hm _), ha, Measure.map_smul, h1, smul_smul]
+    rw [e, ← Measure.map_map (hm _) (hm _), ha,
+      Measure.map_smul _ (hm _).aemeasurable, h1, smul_smul]
   have h3 : a * a = c * c :=
     GlobalTheory.CompanionTheory.SW.PiLocalization₂.nnreal_eq_of_smul_haar κ (h2.symm.trans hc)
   exact (mul_self_inj zero_le zero_le).1 h3

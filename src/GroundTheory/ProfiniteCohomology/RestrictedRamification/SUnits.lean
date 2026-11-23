@@ -1,9 +1,60 @@
-import Mathlib
-import GroundTheory.GlobalFields.SUnits
-import GroundTheory.GlobalFields.KummerTheory.Unramified
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.SUnitsDefs
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+module
+
+public import GroundTheory.GlobalFields.SUnits
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.SUnitsDefs
+public import GroundTheory.GlobalFields.KummerTheory.Unramified
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.FiniteAdeleRing
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Ramification
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -182,8 +233,8 @@ theorem isIntegral_of_isIntegral_algebraMap {c : F}
 theorem mem_integer_of_isIntegral {c : F} (hc : IsIntegral (S.integer F) c) : c ∈ S.integer F :=
   fun v _ => valuation_le_one_of_isIntegral (v.valuation F) (fun r => r.2 v ‹_›) hc
 
-variable {E} in
 
+variable {E} in
 theorem map_mem_sUnitsOf_iff {a : Fˣ} :
     Units.map (algebraMap F E : F →* E) a ∈ sUnitsOf S E ↔ a ∈ S.unit F := by
   constructor
@@ -207,12 +258,6 @@ def sUnitsToInvariants : Additive (S.unit F) →+ (galSUnits S E).ρ.invariants 
     Additive.toMul.injective (Subtype.ext (Units.ext (σ.commutes _)))⟩
   map_zero' := Subtype.ext (Additive.toMul.injective (Subtype.ext (Units.ext (map_one _))))
   map_add' _ _ := Subtype.ext (Additive.toMul.injective (Subtype.ext (Units.ext (map_mul _ _ _))))
-
-@[simp]
-theorem coe_sUnitsToInvariants_apply (a : Additive (S.unit F)) :
-    (((Additive.toMul (α := sUnitsOf S E) (sUnitsToInvariants S E a).1 : sUnitsOf S E) : Eˣ) : E) =
-      algebraMap F E ((Additive.toMul a : S.unit F) : Fˣ) :=
-  rfl
 
 theorem sUnitsToInvariants_injective : Function.Injective (sUnitsToInvariants S E) := by
   intro a b h
@@ -239,20 +284,6 @@ theorem sUnitsToInvariants_surjective [IsGalois F E] :
     exact (Additive.toMul (α := sUnitsOf S E) v.1).2
   exact ⟨Additive.ofMul ⟨Units.mk0 a ha0, hS⟩,
     Subtype.ext (Additive.toMul.injective (Subtype.ext hmap))⟩
-
-noncomputable def sUnitsInvariantsEquiv [IsGalois F E] :
-    Additive (S.unit F) ≃+ (galSUnits S E).ρ.invariants :=
-  AddEquiv.ofBijective (sUnitsToInvariants S E)
-    ⟨sUnitsToInvariants_injective S E, sUnitsToInvariants_surjective S E⟩
-
-@[simp]
-theorem sUnitsInvariantsEquiv_apply [IsGalois F E] (a : Additive (S.unit F)) :
-    sUnitsInvariantsEquiv S E a = sUnitsToInvariants S E a :=
-  rfl
-
-noncomputable def h0SUnitsEquiv [IsGalois F E] :
-    cohomology (galSUnits S E) 0 ≃+ Additive (S.unit F) :=
-  (H0Iso (galSUnits S E)).toLinearEquiv.toAddEquiv.trans (sUnitsInvariantsEquiv S E).symm
 
 end Invariants
 
@@ -387,9 +418,9 @@ theorem exists_pow_eq_of_mem_sUnitsMax {n : ℕ} (hn : n ≠ 0)
 
 theorem sUnitsKummerSequence_shortExact (n : ℕ) [NeZero n]
     (hnS : ∀ v ∉ S, ((n : ℕ) : 𝓞 F) ∉ v.asIdeal) :
-    (sUnitsKummerSequence S (maxUnramifiedOutside F Ω S) n).ShortExact where
-  exact := by
-    apply shortComplex_exact_of_forall_exists
+    (sUnitsKummerSequence S (maxUnramifiedOutside F Ω S) n).ShortExact := by
+  refine ShortComplex.ShortExact.mk' ?_ ?_ ?_
+  · apply shortComplex_exact_of_forall_exists
     intro x hx
     let x' : Additive (sUnitsMax F Ω S) := x
     have hx2 : n • x' = 0 :=
@@ -402,11 +433,12 @@ theorem sUnitsKummerSequence_shortExact (n : ℕ) [NeZero n]
       rw [mem_rootsOfUnity, ← Subgroup.coe_pow, hx']
       rfl
     exact ⟨Additive.ofMul ⟨_, hmem⟩, rfl⟩
-  mono_f := (Rep.mono_iff_injective _).2 fun a b h =>
-    Additive.toMul.injective (Subtype.ext (congrArg
-      (fun z : Additive (sUnitsMax F Ω S) => ((Additive.toMul z : sUnitsMax F Ω S) :
-        (maxUnramifiedOutside F Ω S)ˣ)) h))
-  epi_g := (Rep.epi_iff_surjective _).2 fun y => by
+  · exact (Rep.mono_iff_injective _).2 fun a b h =>
+      Additive.toMul.injective (Subtype.ext (congrArg
+        (fun z : Additive (sUnitsMax F Ω S) => ((Additive.toMul z : sUnitsMax F Ω S) :
+          (maxUnramifiedOutside F Ω S)ˣ)) h))
+  · refine (Rep.epi_iff_surjective _).2 ?_
+    intro y
     obtain ⟨β, hβ, hβn⟩ := exists_pow_eq_of_mem_sUnitsMax S (NeZero.ne n) hnS
       (Additive.toMul y : sUnitsMax F Ω S).2
     refine ⟨Additive.ofMul ⟨β, hβ⟩, ?_⟩

@@ -1,4 +1,49 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.JacquetLanglands.TorusKernels.ComplexMinusRealLineMeasureCoordinates
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.JacquetLanglands.TorusKernels.ComplexMinusRealLineMeasureCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,25 +77,25 @@ theorem pres_prod (μ : Measure X) [SigmaFinite μ] (hμ : Pres G μ) :
     Pres G ((Measure.count : Measure Ω).prod μ) := fun g =>
   (count_pres g).prod (hμ g)
 
-open Classical in
 
-def cut (R : Set Ω) (β : Ω → X → ℝ) (p : Ω × X) : ℝ := if p.1 ∈ R then β p.1 p.2 else 0
+open Classical in
+def cut (R : Set Ω) (β : Ω → X → ℝ) (p : Ω × X) : ℝ := by
+  classical
+  exact if p.1 ∈ R then β p.1 p.2 else 0
 
 theorem cut_isCut (R : Set Ω) (hR : ∀ ω, ∃! r, r ∈ R ∧ r ∈ MulAction.orbit G ω) (β : Ω → X → ℝ)
-    (hβ : ∀ r ∈ R, IsCut (MulAction.stabilizer G r) (β r)) : IsCut G (cut R β) where
-  meas := by
-    refine meas_of_left fun ω => ?_
+    (hβ : ∀ r ∈ R, IsCut (MulAction.stabilizer G r) (β r)) : IsCut G (cut R β) := by
+  refine ⟨?_, ?_, ?_⟩
+  · refine meas_of_left fun ω => ?_
     by_cases h : ω ∈ R
     · simpa [cut, h] using (hβ ω h).meas
     · simp [cut, h]
-  nonneg := by
-    rintro ⟨ω, x⟩
+  · rintro ⟨ω, x⟩
     unfold cut
     split_ifs with h
     · exact (hβ _ h).nonneg x
     · exact le_rfl
-  sum := by
-    rintro ⟨ω, x⟩
+  · rintro ⟨ω, x⟩
     obtain ⟨r, ⟨hrR, g₀, hg₀'⟩, hu⟩ := hR ω
     have hg₀ : g₀ • ω = r := hg₀'
     have key : ∀ g : G, g • ω ∈ R → g • ω = r := fun g hg => hu _ ⟨hg, MulAction.mem_orbit ω g⟩
@@ -67,7 +112,7 @@ theorem cut_isCut (R : Set Ω) (hR : ∀ ω, ∃! r, r ∈ R ∧ r ∈ MulAction
       · exact absurd (h2.symm ▸ hrR) hc
     · intro g hg
       simp only [cut, Prod.smul_mk]
-      rw [if_neg]
+      rw [ite_eq_right]
       intro hgR
       apply hg
       refine ⟨⟨g * g₀⁻¹, ?_⟩, ?_⟩

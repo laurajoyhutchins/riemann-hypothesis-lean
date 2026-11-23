@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.IsotypicProjectorFixedMem
-import Lemmata.GeneralBFactLeftVersion.Imports
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.IsotypicProjectorFixedMem
+public import Mathlib.Algebra.Module.Lattice.Basic
+public import Lemmata.GeneralBFactLeftVersion.Imports
+public import Mathlib.Algebra.Module.Lattice.Full
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +60,7 @@ open Formalism.MainNotions.G Formalism.MainNotions.CovariantDegrees
 theorem finite_full_submodule_isLattice {O : Type} [CommRing O] [IsDomain O]
     {V : Type} [AddCommGroup V] [Module (KK O) V] [Module O V] [IsScalarTower O (KK O) V]
     (M : Submodule O V) (hfg : M.FG) (hM : MQ (K := KK O) M = ⊤) : Submodule.IsLattice (KK O) M :=
-  ⟨hfg, hM⟩
+  Submodule.IsLattice.of_fg (KK O) hfg
 
 theorem exists_nonzero_multiple_mem_lattice {O : Type} [CommRing O] [IsDomain O]
     {V : Type} [AddCommGroup V] [Module (KK O) V] [Module O V] [IsScalarTower O (KK O) V]
@@ -21,10 +69,15 @@ theorem exists_nonzero_multiple_mem_lattice {O : Type} [CommRing O] [IsDomain O]
 
 theorem dual_lattice_values_mem_scaled : DualLatticeDivisibility := by
   intro O _ _ _ V _ _ _ _ _ M hfg hM t z hz
-  have : Submodule.IsLattice (KK O) M := finite_full_submodule_isLattice M hfg hM
+  have : Submodule.IsFullLattice (KK O) M :=
+    { toIsLattice := finite_full_submodule_isLattice M hfg hM
+      span_eq_top := hM }
+  have : Module.Free O M := Submodule.IsLattice.free (KK O) M
+  have : Module.Finite O M := Submodule.IsLattice.finite (KK O) M
   let b := Module.finBasis O M
-  let B := b.extendOfIsLattice (KK O)
-  have hB : ∀ i, B i = ((b i : M) : V) := fun i => Module.Basis.extendOfIsLattice_apply (KK O) b i
+  let B := b.extendOfIsFullLattice (KK O)
+  have hB : ∀ i, B i = ((b i : M) : V) := fun i =>
+    Module.Basis.extendOfIsFullLattice_apply (KK O) b i
   have hcoord : ∀ i, ∀ x ∈ M, ∃ o : O, B.coord i x = algebraMap O (KK O) o := by
     intro i x hx
     refine ⟨b.repr ⟨x, hx⟩ i, ?_⟩
@@ -70,10 +123,14 @@ theorem lattice_inter_subspace_basis : LatticeSubspaceBasis := by
       rw [← algebraMap_smul (KK O) a x, smul_smul, inv_mul_cancel₀ ha1, one_smul]
     rw [hx]
     exact Submodule.smul_mem _ _ (Submodule.subset_span hmem)
-  have : Submodule.IsLattice (KK O) N := ⟨hNfg, hNspan⟩
+  have : Submodule.IsFullLattice (KK O) N :=
+    { toIsLattice := Submodule.IsLattice.of_fg (KK O) hNfg
+      span_eq_top := hNspan }
+  have : Module.Free O N := Submodule.IsLattice.free (KK O) N
   let b := Module.finBasis O N
-  let B := b.extendOfIsLattice (KK O)
-  have hB : ∀ i, B i = ((b i : N) : H) := fun i => Module.Basis.extendOfIsLattice_apply (KK O) b i
+  let B := b.extendOfIsFullLattice (KK O)
+  have hB : ∀ i, B i = ((b i : N) : H) := fun i =>
+    Module.Basis.extendOfIsFullLattice_apply (KK O) b i
   refine ⟨Module.finrank O N, fun j => (((b j : N) : H) : V), fun j => ⟨(hmemN _).1 (b j).2, (b j : H).2⟩, ?_, ?_, ?_⟩
   · have h1 := B.linearIndependent.map' H.subtype (Submodule.ker_subtype H)
     have h2 : (fun j => (((b j : N) : H) : V)) = (H.subtype ∘ B) := by

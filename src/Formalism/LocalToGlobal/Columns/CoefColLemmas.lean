@@ -1,8 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.CoefCol
-import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
-import Formalism.LocalToGlobal.Columns.BaseLemmas
+module
+
+public import Formalism.LocalToGlobal.Columns.CoefCol
+public import Formalism.SatakeDualWeyl.StatementB
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.LocalToGlobal.Columns.BaseLemmas
+public import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 open scoped Matrix
@@ -40,7 +93,7 @@ section DecoAct
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ}
   {ST SG : Finset (HeightOneSpectrum (𝓞 E))}
 
-theorem Deco.L_act (d : Deco E n ST SG) (ga : Sp E n ≃ₗ[E] Sp E n) (h : GLG E n SG) :
+theorem Deco.L_act (d : Deco E n ST SG) (ga : Sp E n ≃ₗ[E] Sp E n) (h : GLG (E := E) (n := n) (SG := SG)) :
     (d.act ga h).L = gmap ga d.L := by
   unfold Deco.L gmap
   rw [Submodule.map_span]
@@ -53,13 +106,13 @@ theorem Deco.L_act (d : Deco E n ST SG) (ga : Sp E n ≃ₗ[E] Sp E n) (h : GLG 
   · rintro ⟨y, ⟨hy, hf⟩, rfl⟩
     refine ⟨(mem_gmap ga d.N (ga y)).2 (by simpa using hy), fun P => by simpa using hf P⟩
 
-theorem Deco.Lsh_act (d : Deco E n ST SG) {ga : Sp E n ≃ₗ[E] Sp E n} (hga : ga ∈ UF E n) (h : GLG E n SG) :
+theorem Deco.Lsh_act (d : Deco E n ST SG) {ga : Sp E n ≃ₗ[E] Sp E n} (hga : ga ∈ UF E n) (h : GLG (E := E) (n := n) (SG := SG)) :
     (d.act ga h).Lsh = gmap ga d.Lsh := by
   unfold Deco.Lsh
   rw [Deco.L_act, dual_gmap ga hga]
 
 theorem Deco.LshKer_act (d : Deco E n ST SG) {ga : Sp E n ≃ₗ[E] Sp E n} (hga : ga ∈ UF E n)
-    (h : GLG E n SG) (P : ST) :
+    (h : GLG (E := E) (n := n) (SG := SG)) (P : ST) :
     (d.act ga h).LshKer P = gmap ga (d.LshKer P) := by
   unfold Deco.LshKer gmap
   rw [Submodule.map_span]
@@ -73,7 +126,7 @@ theorem Deco.LshKer_act (d : Deco E n ST SG) {ga : Sp E n ≃ₗ[E] Sp E n} (hga
   · rintro ⟨y, ⟨hy, hf⟩, rfl⟩
     refine ⟨(mem_gmap ga d.Lsh (ga y)).2 (by simpa using hy), by simpa [Deco.act] using hf⟩
 
-theorem Deco.N_act (d : Deco E n ST SG) (ga : Sp E n ≃ₗ[E] Sp E n) (h : GLG E n SG) :
+theorem Deco.N_act (d : Deco E n ST SG) (ga : Sp E n ≃ₗ[E] Sp E n) (h : GLG (E := E) (n := n) (SG := SG)) :
     (d.act ga h).N = gmap ga d.N := rfl
 
 end DecoAct
@@ -225,41 +278,41 @@ section ValsEquiv
 variable {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Word R)
 
 theorem colVal_nab_smul (u : Pr.Word) (j : ℕ) {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (a : UF X.E (R.N j) × GLG X.E (R.N j) SG) (d : DecoSet X.E (R.N j) ST SG) :
+    (a : UF X.E (R.N j) × GLG (E := X.E) (n := R.N j) (SG := SG)) (d : DecoSet (E := X.E) (n := R.N j) (ST := ST) (SG := SG)) :
     (colVal W u j ST SG).Nab (a • d) =
       ((colVal W u j ST SG).Nab d).map (((colVal W u j ST SG).rho a.1).restrictScalars (𝓞 X.K)) :=
   roundPk_nab X _ _ (d.1.Lsh_act a.1.2 a.2)
 
 theorem colVal_del_smul (u : Pr.Word) (j : ℕ) {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (a : UF X.E (R.N j) × GLG X.E (R.N j) SG) (d : DecoSet X.E (R.N j) ST SG) :
+    (a : UF X.E (R.N j) × GLG (E := X.E) (n := R.N j) (SG := SG)) (d : DecoSet (E := X.E) (n := R.N j) (ST := ST) (SG := SG)) :
     (colVal W u j ST SG).Del (a • d) =
       ((colVal W u j ST SG).Del d).map (((colVal W u j ST SG).rho a.1).restrictScalars (𝓞 X.K)) :=
   roundPk_del X _ _ (d.1.Lsh_act a.1.2 a.2)
 
 theorem BvLat_smul (u : Pr.Word) (j : ℕ) {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))} (P : ST)
-    (a : UF X.E (R.N j) × GLG X.E (R.N j) SG) (d : DecoSet X.E (R.N j) ST SG) :
+    (a : UF X.E (R.N j) × GLG (E := X.E) (n := R.N j) (SG := SG)) (d : DecoSet (E := X.E) (n := R.N j) (ST := ST) (SG := SG)) :
     BvLat W u j P (a • d) = (BvLat W u j P d).map (((colVal W u j ST SG).rho a.1).restrictScalars (𝓞 X.K)) := by
   show delAtr X.emb (W.lamTrue u j) ((a • d).1.LshKer P) = _
   rw [DecoSet.smul_val, Deco.LshKer_act _ a.1.2, delAtr_gmap]
   rfl
 
 theorem rowVal_nab_smul {SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (a : UF X.E (R.N R.m - 1) × GLG X.E (R.N R.m - 1) SG) (d : DecoSet X.E (R.N R.m - 1) ∅ SG) :
+    (a : UF X.E (R.N R.m - 1) × GLG (E := X.E) (n := R.N R.m - 1) (SG := SG)) (d : DecoSet (E := X.E) (n := R.N R.m - 1) (ST := ∅) (SG := SG)) :
     (rowVal W SG).Nab (a • d) = ((rowVal W SG).Nab d).map (((rowVal W SG).rho a.1).restrictScalars (𝓞 X.K)) :=
   squarePk_nab X _ _ (d.1.N_act a.1.1 a.2)
 
 theorem rowVal_del_smul {SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (a : UF X.E (R.N R.m - 1) × GLG X.E (R.N R.m - 1) SG) (d : DecoSet X.E (R.N R.m - 1) ∅ SG) :
+    (a : UF X.E (R.N R.m - 1) × GLG (E := X.E) (n := R.N R.m - 1) (SG := SG)) (d : DecoSet (E := X.E) (n := R.N R.m - 1) (ST := ∅) (SG := SG)) :
     (rowVal W SG).Del (a • d) = ((rowVal W SG).Del d).map (((rowVal W SG).rho a.1).restrictScalars (𝓞 X.K)) :=
   squarePk_del X _ _ (d.1.N_act a.1.1 a.2)
 
 theorem mtVal_nab_smul (j : ℕ) {SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (a : UF X.E R.nV × GLG X.E R.nV SG) (d : DecoSet X.E R.nV ∅ SG) :
+    (a : UF X.E R.nV × GLG (E := X.E) (n := R.nV) (SG := SG)) (d : DecoSet (E := X.E) (n := R.nV) (ST := ∅) (SG := SG)) :
     (mtVal W j SG).Nab (a • d) = ((mtVal W j SG).Nab d).map (((mtVal W j SG).rho a.1).restrictScalars (𝓞 X.K)) :=
   roundPk_nab X _ _ (d.1.N_act a.1.1 a.2)
 
 theorem mtVal_del_smul (j : ℕ) {SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (a : UF X.E R.nV × GLG X.E R.nV SG) (d : DecoSet X.E R.nV ∅ SG) :
+    (a : UF X.E R.nV × GLG (E := X.E) (n := R.nV) (SG := SG)) (d : DecoSet (E := X.E) (n := R.nV) (ST := ∅) (SG := SG)) :
     (mtVal W j SG).Del (a • d) = ((mtVal W j SG).Del d).map (((mtVal W j SG).rho a.1).restrictScalars (𝓞 X.K)) :=
   roundPk_del X _ _ (d.1.N_act a.1.1 a.2)
 
@@ -358,12 +411,12 @@ theorem lamTrue_sgTrue_detShift (hW : W.Ok) (u : Word) (τ : X.Tau) :
   have hN1 : 0 < R.N R.m := by omega
   have hN2 : 0 < R.N R.m - 1 := by omega
   unfold DomWeight.detShift
-  rw [dif_pos hN1, dif_pos hN2]
+  rw [dite_eq_left hN1, dite_eq_left hN2]
   apply Int.cast_injective (α := ℚ)
 
   rw [Wts.lamTrue_eq, Wts.lamN_eq W u le_rfl]
   have hlt : ¬ R.N R.m - 1 < R.k := by omega
-  rw [dif_neg hlt]
+  rw [dite_eq_right hlt]
   have e1 : (R.N R.m - 1 - R.k) / (R.t + 1) = R.m - 1 := by
     have : R.N R.m - 1 - R.k = (R.m - 1) * (R.t + 1) + R.t := by omega
     rw [this]

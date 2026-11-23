@@ -1,6 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrBase
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.AddMemSupportOfMemSupportCoefOut
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.Monomial
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrBase
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.AddMemSupportOfMemSupportCoefOut
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.Monomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,7 +91,7 @@ variable {K : Type} [Field K] {L L' : Type} {r : ℕ}
 theorem mapDomain_prod_apply (g : L → L') (hg : Function.Injective g) (α : L × Fin r →₀ ℕ) (i : L) (a : Fin r) :
     (α.mapDomain (Prod.map g (id : Fin r → Fin r))) (g i, a) = α (i, a) := by
   have hinj : Function.Injective (Prod.map g (id : Fin r → Fin r)) := fun x y h => Prod.ext (hg (congrArg Prod.fst h)) (by have h2 := congrArg Prod.snd h; exact h2)
-  exact Finsupp.mapDomain_apply hinj α (i, a)
+  exact Finsupp.mapDomain_apply_of_injective hinj α (i, a)
 
 theorem PolK_rename (g : L ≃ L') (d' : L' → ℕ) (F : MvPolynomial (L × Fin r) K) :
     rename (Prod.map g (id : Fin r → Fin r)) F ∈ PolK K r d' ↔ F ∈ PolK K r (d' ∘ g) := by
@@ -99,8 +144,8 @@ def eO : PlaneGramData.TL J Dt.nL r ≃ ((Σ j : ZMod J, Fin (Dt.nL j)) ⊕ (Fin
       rw [RingEquiv.apply_symm_apply]
   right_inv := by rintro (⟨j, l⟩ | ⟨j, m⟩) <;> simp
 
-open Classical in
 
+open Classical in
 abbrev toData : TwistData (G.KK O) where
   r := r
   J := J
@@ -135,7 +180,7 @@ theorem zE_nxt (j : Fin J) : zE J ((toData Dt).nxt j) = zE J j + 1 := by
     apply Fin.ext
     show (j.val + 1) % J = _
     rw [Fin.val_add, Fin.val_one', Nat.add_mod_mod]
-  rw [h, map_add, map_one]
+  rw [h, map_add (f := _), map_one]
 
 theorem zE_prv (j : Fin J) : zE J ((toData Dt).aux₃ j) = zE J j - 1 := by
   have h : (toData Dt).aux₃ j = j - 1 := by
@@ -334,7 +379,7 @@ theorem fM_inj : Function.Injective (Prod.map (fM Dt) (id : Fin r → Fin r)) :=
 theorem md_apply (mo : PlaneGramData.TL J Dt.nL r × Fin r →₀ ℕ) (y : (toData Dt).OL) (a : Fin r) :
     (mo.mapDomain (Prod.map (gO Dt) (id : Fin r → Fin r))) (y, a) = mo ((gO Dt).symm y, a) := by
   have hinj : Function.Injective (Prod.map (gO Dt) (id : Fin r → Fin r)) := gO_inj Dt
-  have := Finsupp.mapDomain_apply hinj mo ((gO Dt).symm y, a)
+  have := Finsupp.mapDomain_apply_of_injective hinj mo ((gO Dt).symm y, a)
   simpa using this
 
 theorem ph_comm (Gm : MvPolynomial (PlaneGramData.ML J Dt.nL r × Fin r) (G.KK O)) :
@@ -362,8 +407,9 @@ theorem gaAct_comm (H : MvPolynomial (PlaneGramData.TL J Dt.nL r × Fin r) (G.KK
         (∑ mo ∈ H.support, monomial mo (algebraMap O (G.KK O) (Dt.ga mo) * H.coeff mo)) := by
   classical
   unfold TwistData.gaAct
+
   rw [support_rename_of_injective (gO_inj Dt),
-    Finset.sum_image (fun a _ b _ h => Finsupp.mapDomain_injective (gO_inj Dt) h), map_sum]
+  Finset.sum_image (fun a _ b _ h => Finsupp.mapDomain_injective (gO_inj Dt) h), map_sum]
   refine Finset.sum_congr rfl fun mo _ => ?_
   rw [rename_monomial, ga_md, coeff_rename_mapDomain _ (gO_inj Dt)]
 
@@ -391,8 +437,8 @@ theorem sum_single_inj {α β : Type} [DecidableEq α] (u : α → β) (hu : Fun
       ∀ x, x ∉ Set.range u → (∑ v ∈ s, Finsupp.single (u v) (e v)) x = 0 := by
   classical
   refine ⟨fun v0 => ?_, fun x hx => ?_⟩
-  · simp [Finsupp.finset_sum_apply, Finsupp.single_apply, hu.eq_iff]
-  · simp only [Finsupp.finset_sum_apply, Finsupp.single_apply]
+  · simp [Finsupp.finsetSum_apply, Finsupp.single_apply, hu.eq_iff]
+  · simp only [Finsupp.finsetSum_apply, Finsupp.single_apply]
     exact Finset.sum_eq_zero fun v _ => if_neg fun h => hx ⟨v, h⟩
 
 theorem liftVar_inj : Function.Injective Dt.liftVar := by
@@ -456,9 +502,10 @@ theorem digit_comm (ρ : (toData Dt).Tau → Fin r → ℕ) (F : MvPolynomial (P
       rename (Prod.map (fM Dt) id) (Dt.Fdig (fun x => ρ ((zE J).symm x.1.1, x.1.2) x.2) F) := by
   classical
   unfold TwistData.digitPart PlaneGramData.SignedChainData.Fdig
+
   rw [support_rename_of_injective (gO_inj Dt),
-    Finset.sum_image (fun a _ b _ h => Finsupp.mapDomain_injective (gO_inj Dt) h), map_sum,
-    Finset.sum_filter]
+  Finset.sum_image (fun a _ b _ h => Finsupp.mapDomain_injective (gO_inj Dt) h), map_sum,
+  Finset.sum_filter]
   refine Finset.sum_congr rfl fun mo _ => ?_
   rw [coeff_rename_mapDomain _ (gO_inj Dt)]
   by_cases hd : Dt.digOK (fun x => ρ ((zE J).symm x.1.1, x.1.2) x.2) mo
@@ -564,7 +611,7 @@ theorem binom_comm (lam : (PlaneGramData.TL J Dt.nL r × Fin r →₀ ℕ) →�
   have hα : ∀ v : PlaneGramData.TL J Dt.nL r × Fin r,
       (α.mapDomain (Prod.map (eO Dt).symm id)) v = α (gO Dt v.1, v.2) := by
     intro v
-    have := Finsupp.mapDomain_apply hinj α (gO Dt v.1, v.2)
+    have := Finsupp.mapDomain_apply_of_injective hinj α (gO Dt v.1, v.2)
     simpa [gO] using this
   have hsub : ∏ v ∈ m.support, ((((α.mapDomain (Prod.map (eO Dt).symm id)) v).choose (m v) : ℕ) : G.KK O) =
       ∏ v, ((((α.mapDomain (Prod.map (eO Dt).symm id)) v).choose (m v) : ℕ) : G.KK O) :=
@@ -683,7 +730,7 @@ theorem exists_pre (G' : MvPolynomial ((toData Dt).ML × Fin r) (G.KK O)) (h : (
   classical
   refine exists_rename_eq_of_vars_subset_range G' (Prod.map (fM Dt) id) (fM_inj Dt) ?_
   intro v hv
-  rw [Finset.mem_coe, mem_vars] at hv
+  rw [Finset.mem_coe, mem_vars_iff_mem_support] at hv
   obtain ⟨α, hα, hvα⟩ := hv
   rw [Finsupp.mem_support_iff] at hvα
   obtain ⟨x, a⟩ := v
@@ -737,7 +784,7 @@ theorem plane_gram_of_theorem_at {p : ℕ} {O : Type} [CommRing O] [IsDomain O] 
   have hE : (toData Dt).E p 1 2 = Dt.EE 2 := by
     unfold TwistData.E PlaneGramData.SignedChainData.EE
     rw [Dm_eq, Dl_eq, kapD_eq]
-  rw [← map_add, ph_comm] at hBB hB
+  rw [← map_add (f := _), ph_comm] at hBB hB
   refine ⟨G0, R0, ?_, ⟨?_, ?_⟩, ?_, ?_, ?_, ?_⟩
   · intro mo
     rw [geQ_iff S]

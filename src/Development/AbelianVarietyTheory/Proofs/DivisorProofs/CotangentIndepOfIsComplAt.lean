@@ -1,7 +1,47 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
-import Development.AbelianVarietyTheory.Definitions.Divisors.MinSt5OfMinSt4
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMember
-import Development.AbelianVarietyTheory.Definitions.Divisors.TateProductRigidificationTrivial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsMinAt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg GlobalTheory.Poinc GlobalTheory.SiegJoin GlobalTheory.TChart
@@ -24,7 +64,7 @@ theorem cotangent_indep_of_isComplAt : ∀ (W : Type) [CommRing W] [IsLocalRing 
   let δ : MvPolynomial I W → ResidueField R := fun f => residue R (ψ (MvPolynomial.pderiv (ι₀ k) f))
   have hπP : ∀ p ∈ P, residue R (ψ p) = 0 := fun p hp => (residue_eq_zero_iff _).2 hp
   have hδmul : ∀ a b, δ (a * b) = residue R (ψ a) * δ b + residue R (ψ b) * δ a := by
-    intro a b; simp only [δ, Derivation.leibniz, smul_eq_mul, map_add, map_mul]
+    intro a b; simp only [δ, Derivation.leibniz, smul_eq_mul, map_add (f := _), map_mul]
   have hδadd : ∀ a b, δ (a + b) = δ a + δ b := by intro a b; simp [δ]
   let K : Ideal (MvPolynomial I W) :=
     { carrier := {x | x ∈ P ∧ δ x = 0}
@@ -73,7 +113,7 @@ theorem cotangent_indep_of_isComplAt : ∀ (W : Type) [CommRing W] [IsLocalRing 
       intro r
       obtain ⟨t₁, h₁, h₁'⟩ := hx r
       obtain ⟨t₂, h₂, h₂'⟩ := hy r
-      exact ⟨t₁ + t₂, by rw [map_add, h₁, h₂]; ring, by rw [map_add, h₁', h₂', add_zero]⟩
+      exact ⟨t₁ + t₂, by rw [map_add (f := _), h₁, h₂]; ring, by rw [map_add (f := _), h₁', h₂', add_zero]⟩
     | smul a x _ hx =>
       intro r
       obtain ⟨t, h₁, h₂⟩ := hx (r * a)
@@ -81,8 +121,10 @@ theorem cotangent_indep_of_isComplAt : ∀ (W : Type) [CommRing W] [IsLocalRing 
   have hX' : ∀ j, MvPolynomial.X (ι₀ j) ∈ P := hX
   let t₀ : TensorProduct (MvPolynomial I W) R P := ∑ j, c j ⊗ₜ ⟨MvPolynomial.X (ι₀ j), hX' j⟩
   have hmu0 : muT t₀ = ∑ j, c j * ψ (MvPolynomial.X (ι₀ j)) := by
+
     simp only [t₀, map_sum, hmut]; exact Finset.sum_congr rfl fun j _ => mul_comm _ _
   have hL₀ : L t₀ = residue R (c k) := by
+
     simp only [t₀, map_sum, hLt, δ, MvPolynomial.pderiv_X, Pi.single_apply, ι₀.injective.eq_iff]
     simp
   obtain ⟨t, ht₁, ht₂⟩ := hspan _ (hJ hc) 1

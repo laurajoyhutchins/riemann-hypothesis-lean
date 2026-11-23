@@ -1,31 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsChartIff
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LiePush
 import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.JetSubstPCompJetBC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LawsProved
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ChartJetSubPf
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.NuAlgLeOfCharts
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsoIntegralModelsMatchingLieBases
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.JetPointsUnitLawActionBaseChange
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsFramesCoefficientRingBaseChange
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsFrameGCoefficientRingBaseChange
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.CubeFramesMoveToPullbackTriple
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.JetPointsUnitLawActionIffPullback
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FrameFirstPartialLawIffPullback
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FrameSecondPartialLawIffPullback
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FrameSymmetryIffPullback
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.AdjointSeriesFramesPullback
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.NabValNMap
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IsCanonGaugeMapFB
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsRawChartBaseChangeJetPoints
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelMapFiniteEtaleSurjective
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantCoeffEv
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMemPowSubMemPowSucc
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.BidegreeTwoJet
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.BoxTuple
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpBijectiveUniformisation
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpUniqJet
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.LemmaBStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.QuadTie
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.WchartLePreimage
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -39,14 +64,6 @@ open ReciprocityTheory.ChartRestriction.G.TB (colM dAct)
 open IsDedekindDomain
 
 namespace GlobalTheory.DepthExt
-
-theorem vV_unit {V K : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [Field K] [Algebra V K]
-    [IsFractionRing V K] {u : V} (hu : IsUnit u) : vV V (algebraMap V K u) = 0 := by
-  have h : valV V (algebraMap V K u) = 1 := by
-    unfold valV
-    rw [HeightOneSpectrum.valuation_of_algebraMap, HeightOneSpectrum.intValuation_eq_one_iff]
-    exact fun h => (IsLocalRing.mem_maximalIdeal u).1 h hu
-  simp [vV, h]
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 
@@ -69,22 +86,6 @@ theorem tan_iff (t : SAB H (Sp V)) (w : epsR V ⟶ t.G) : IsTangent w ↔ IsTanA
 
 variable (ψ : V →+* V') {t : SAB H (Sp V)} {t' : SAB H (Sp V')} (mp : SABMap t' t (spMap ψ))
 
-theorem exists_lift {A A' : Type} [CommRing A] [CommRing A'] [Algebra V A] [Algebra V' A'] (g : A →+* A')
-    (hg : g.comp (algebraMap V A) = (algebraMap V' A').comp ψ) (x : Sp A ⟶ t.G.left)
-    (hx : x ≫ t.G.hom = spMap (algebraMap V A)) :
-    ∃ x' : Sp A' ⟶ t'.G.left, x' ≫ mp.φ = spMap g ≫ x ∧ x' ≫ t'.G.hom = spMap (algebraMap V' A') :=
-  ⟨mp.cart.1.lift (spMap g ≫ x) (spMap (algebraMap V' A')) (by
-    rw [Category.assoc, hx, RawChartBC.spMap_spMap, RawChartBC.spMap_spMap, hg]),
-    mp.cart.1.lift_fst _ _ _, mp.cart.1.lift_snd _ _ _⟩
-
 end Tangent
-
-theorem map_sq {V K V' K' σ : Type} [CommRing V] [CommRing K] [CommRing V'] [CommRing K'] {f : V →+* K}
-    {f' : V' →+* K'} {φ : K →+* K'} {ψ : V →+* V'} (h : ∀ a, f' (ψ a) = φ (f a)) {g : MvPowerSeries σ V}
-    {g' : MvPowerSeries σ K} (hg : g' = MvPowerSeries.map f g) :
-    MvPowerSeries.map f' (MvPowerSeries.map ψ g) =
-      MvPowerSeries.map (algebraMap K' K') (MvPowerSeries.map φ g') := by
-  ext m
-  simp [hg, MvPowerSeries.coeff_map, h]
 
 end GlobalTheory.DepthExt

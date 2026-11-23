@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJGlobalHaar
-import GroundTheory.AutomorphicForms.MultiplicityOne.FiniteAdelicDistribution
+module
+
+public import GroundTheory.AutomorphicForms.ReductionMeasure
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalHaar
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Measure Topology Filter Set IsDedekindDomain NumberField
 
@@ -39,6 +86,7 @@ theorem isMulRightInvariant_finite (μ : Measure (AdelicGLn.FiniteAdelicGL K n))
     rw [Measure.map_map (measurable_mul_const p) he, hcomp,
       ← Measure.map_map he (measurable_mul_const _), map_mul_right_eq_self]
 
+  set_option synthInstance.maxHeartbeats 400000 in
   set c := haarScalarFactor (ν.map e) P
   have hc : ν.map e = c • P := isMulLeftInvariant_eq_smul (ν.map e) P
   have hc0 : c ≠ 0 := by
@@ -50,7 +98,7 @@ theorem isMulRightInvariant_finite (μ : Measure (AdelicGLn.FiniteAdelicGL K n))
   have hP : ∀ p, P.map (· * p) = P := by
     intro p
     have h1 : P = c⁻¹ • ν.map e := by rw [hc, smul_smul, inv_mul_cancel₀ hc0, one_smul]
-    rw [h1, Measure.map_smul, hν']
+    rw [h1, Measure.map_smul _ (measurable_mul_const p).aemeasurable, hν']
   refine ⟨fun g => ?_⟩
   have hprod : P.map (· * ((1 : AdelicGLn.InfiniteAdelicGL K n), g)) = μi.prod (μ.map (· * g)) := by
     have hf : (· * ((1 : AdelicGLn.InfiniteAdelicGL K n), g)) = Prod.map id (· * g) := by

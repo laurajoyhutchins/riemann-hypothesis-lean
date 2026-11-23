@@ -1,11 +1,59 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodRingsGaloisActionLawsFrobeniusCommStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BcrisFrobeniusFixedFilZeroEqQpStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRFiltrationLawsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BcrisFrobeniusFixedFilZeroEqQpStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRGaloisInvariantsEqFinExtStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRGaloisInvariantsEqFinExtStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalPeriodRingsDataUnramifiedLawsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodRingsGaloisActionLawsFrobeniusCommStatement
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.MemLoc Polynomial
 open scoped Formalism.Per
@@ -83,6 +131,7 @@ theorem mem_range (hu : ∀ c : U, ι (u c) = O c) (hφ : ∀ c : U, φ (u c) = 
     intro n
     obtain ⟨c, hc⟩ := fund (∑ i ∈ Finset.range N, u ((σ^[i] ζ) ^ n) * φ^[i] b)
       (∑ i ∈ Finset.range N, (((σ^[i] ζ) ^ n : U) : Ω) * y i) (by
+
         rw [map_sum]
         have e : ∀ i, φ (u ((σ^[i] ζ) ^ n) * φ^[i] b) = u ((σ^[i + 1] ζ) ^ n) * φ^[i + 1] b := by
           intro i
@@ -92,6 +141,7 @@ theorem mem_range (hu : ∀ c : U, ι (u c) = O c) (hφ : ∀ c : U, φ (u c) = 
         have h2 := Finset.sum_range_succ' (fun i => u ((σ^[i] ζ) ^ n) * φ^[i] b) N
         rw [h1, hζ, hb] at h2
         exact (add_right_cancel h2).symm) (by
+
         rw [map_sum, map_sum]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [map_mul, map_mul, hu, hy])
@@ -100,7 +150,7 @@ theorem mem_range (hu : ∀ c : U, ι (u c) = O c) (hφ : ∀ c : U, φ (u c) = 
     intro p
     induction p using Polynomial.induction_on' with
     | add p q hp hq =>
-      simp only [eval_add, map_add, add_mul, Finset.sum_add_distrib]
+      simp only [eval_add, map_add (f := _), add_mul, Finset.sum_add_distrib]
       exact add_mem hp hq
     | monomial n a =>
       simp only [eval_monomial, map_mul, mul_assoc, ← Finset.mul_sum]
@@ -174,7 +224,7 @@ theorem invariants_Bcris : ∀ (l : ℕ) [Fact l.Prime], ∀ (C : Core l) (K : F
   let S : AddSubgroup (Per.Bcris l) :=
     { carrier := {x | ∀ g ∈ GK K, Per.σB g x = x}
       zero_mem' := fun g _ => map_zero _
-      add_mem' := fun {x y} hx hy g hg => by rw [map_add, hx g hg, hy g hg]
+      add_mem' := fun {x y} hx hy g hg => by rw [map_add (f := _), hx g hg, hy g hg]
       neg_mem' := fun {x} hx g hg => by rw [map_neg, hx g hg] }
   have hS : ∀ x ∈ S, Per.φB l x ∈ S := fun x hx g hg => by rw [← hcomm, hx g hg]
   have hO' : ∀ x ∈ S, ∃ y ∈ K.1, C.ι x = O y := by

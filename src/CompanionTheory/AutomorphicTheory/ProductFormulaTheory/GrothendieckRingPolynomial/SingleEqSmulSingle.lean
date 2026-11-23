@@ -1,11 +1,55 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.ProductFormulaTheory.GrothendieckRingPolynomial.ProdList
+module
+
+public import CompanionTheory.AutomorphicTheory.ProductFormulaTheory.GrothendieckRingPolynomial.ProdList
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyInterleaving.LInjective
+
+@[expose] public section
 
 noncomputable section
 
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.JHMult Zc Zc.M Zc.Cos
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 namespace CompanionTheory.Groth
 
@@ -61,9 +105,6 @@ theorem bil_smul_right (z : ℤ) (a b : ι →₀ ℤ) : bil C a (z • b) = z �
   refine Finsupp.sum_congr fun y _ => ?_
   rw [smul_eq_mul, mul_left_comm, mul_smul]
 
-theorem bil_single (x y : ι) : bil C (Finsupp.single x 1) (Finsupp.single y 1) = C x y := by
-  simp [bil, Finsupp.sum_single_index]
-
 theorem bil_comm (hC : ∀ x y, C x y = C y x) (a b : ι →₀ ℤ) : bil C a b = bil C b a := by
   unfold bil
   rw [Finsupp.sum_comm]
@@ -111,11 +152,11 @@ theorem bil_one (u : ι →₀ ℤ) (h : ∀ x, bil C u (Finsupp.single x 1) = F
 
 end BilAssoc
 
-def cm (x y : IrrGL k) : GrothGL k := cl0 (prod₂ (IrrGL.rep x) (IrrGL.rep y))
+def cm (x y : IrrGL (k := k)) : GrothGL k := cl0 (prod₂ (IrrGL.rep x) (IrrGL.rep y))
 
 theorem mulR_eq (a b : GrothGL k) : mulR a b = bil cm a b := rfl
 
-theorem sg_eq (x : IrrGL k) : sg x = Finsupp.single x 1 := rfl
+theorem sg_eq (x : IrrGL (k := k)) : sg x = Finsupp.single x 1 := rfl
 
 theorem mulR_add (a b c : GrothGL k) : mulR a (b + c) = mulR a b + mulR a c := bil_add_right _ a b c
 
@@ -168,10 +209,10 @@ theorem toR_mulR (a b : GrothGL k) : toR (mulR a b) = toR a * toR b := rfl
 
 theorem toR_unit : toR (GrothGL.unit k) = 1 := rfl
 
-def phiOf (f : Segment k → IrrGL k) : MvPolynomial (Segment k) ℤ →+* R k :=
+def phiOf (f : Segment k → IrrGL (k := k)) : MvPolynomial (Segment k) ℤ →+* R k :=
   MvPolynomial.eval₂Hom (Int.castRingHom (R k)) fun Δ => toR (sg (f Δ))
 
-theorem phiOf_X (f : Segment k → IrrGL k) (Δ : Segment k) : phiOf f (MvPolynomial.X Δ) = toR (sg (f Δ)) :=
+theorem phiOf_X (f : Segment k → IrrGL (k := k)) (Δ : Segment k) : phiOf f (MvPolynomial.X Δ) = toR (sg (f Δ)) :=
   MvPolynomial.eval₂Hom_X' _ _ _
 
 end CompanionTheory.Groth

@@ -1,8 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.FriedrichsKernels.CalcSteps
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ZOpMemCE
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryMemGLs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthFunctionFactsHold
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.FriedrichsKernels.CalcSteps
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DifferentiableAtOfSmooth
+import Aesop.Main
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthFunctionFactsHold
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryMemGLs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ZOpMemCE
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +86,6 @@ theorem inv_inv_mat {x : Mat n} (hx : x ∈ GLs n) : x⁻¹⁻¹ = x :=
   Matrix.nonsing_inv_nonsing_inv x (isUnit_iff_ne_zero.2 hx)
 
 def toG {x : Mat n} (hx : x ∈ GLs n) : G n := Matrix.GeneralLinearGroup.mkOfDetNeZero x hx
-
-@[simp] theorem toG_val {x : Mat n} (hx : x ∈ GLs n) : (toG hx).val = x := rfl
 
 theorem val_inv (z : G n) : (z⁻¹ : G n).val = z.val⁻¹ := Matrix.coe_units_inv z
 
@@ -73,15 +121,11 @@ def mulLL : Mat n →L[ℝ] Mat n →L[ℝ] Mat n :=
       map_add' := fun a b => by ext1 v; simp [Matrix.add_mul]
       map_smul' := fun c a => by ext1 v; simp }
 
-@[simp] theorem mulLL_apply (a : Mat n) : mulLL a = mulL a := rfl
-
 section Core
 
 variable {V : Type} [NormedAddCommGroup V] [NormedSpace ℂ V]
 
 def evL : V →L[ℝ] (V →L[ℂ] V) →L[ℝ] V := (ContinuousLinearMap.restrictScalarsL ℂ V V ℝ ℝ).flip
-
-@[simp] theorem evL_apply (v : V) (A : V →L[ℂ] V) : evL v A = A v := rfl
 
 abbrev CL (P W : Type) [NormedAddCommGroup P] [NormedSpace ℝ P] [NormedAddCommGroup W] [NormedSpace ℝ W] : Type :=
   P →L[ℝ] W

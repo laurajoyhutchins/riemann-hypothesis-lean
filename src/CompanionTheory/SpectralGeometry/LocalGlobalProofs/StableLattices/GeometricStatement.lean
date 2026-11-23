@@ -1,12 +1,62 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HsConjTranspose
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.IwasawaParabolicCompactFactorizationStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.UnitaryMaximalCompactIsCompactStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HilbertSchmidtProjectionBoundStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ExistsGradedMatrixEigenBoundStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.InverseGramEigenvaluesSumHsStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.EigenvalueGapExistsStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.FiniteNetOfGradedProjectionsStatement
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.AbsoluteL2Bound
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HsConjTranspose
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.EigenvalueGapExistsStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ExistsGradedMatrixEigenBoundStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.FiniteNetOfGradedProjectionsStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HaarExistence
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HilbertSchmidtProjectionBoundStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.InverseGramEigenvaluesSumHsStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.IwasawaParabolicCompactFactorizationStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.UnitaryMaximalCompactIsCompactStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicFlagLeviMaxCompactClosedSubgroups
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IwasawaDecompositionUnitaryIsotropicFlag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,13 +66,13 @@ open CompanionTheory.RgExh.Dec CompanionTheory.RgExh.Dec.L ReciprocityTheory.Cha
 
 namespace GlobalTheory.CompanionTheory.UGeo
 
-variable {n : ℕ} {ε : Fin n → Bool} {A : Matrix (Fin n) (Fin n) ℂ}
+open Formalism.REAL (hs)
 
-local notation "hs" => Formalism.REAL.hs
+variable {n : ℕ} {ε : Fin n → Bool} {A : Matrix (Fin n) (Fin n) ℂ}
 
 theorem continuous_hs : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => hs M) := by
   unfold Formalism.REAL.hs
-  exact continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
     ((continuous_id.matrix_elem i j).norm).pow 2
 
 theorem hs_Pm_pos (hA : IsGrad ε A) (x : S7.UJ ε) : 0 < hs (S7.toM x * Pm A) :=
@@ -46,15 +96,20 @@ theorem exp_tau (hA : IsGrad ε A) (x : S7.UJ ε) :
 
 theorem hs_line_Pm (hA : IsGrad ε A) (M : Matrix (Fin n) (Fin n) ℂ) (t : ℝ) :
     hs (M * aT A t * Pm A) = Real.exp (-t) ^ 2 * hs (M * Pm A) := by
-  rw [Matrix.mul_assoc, aT_Pm hA, Matrix.mul_smul, hs_smul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  have h : aT A t * Pm A = (Real.exp (-t) : ℂ) • Pm A := aT_Pm hA t
+  rw [Matrix.mul_assoc, h, Matrix.mul_smul, hs_smul,
+    Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
 
 theorem hs_line_Pp (hA : IsGrad ε A) (M : Matrix (Fin n) (Fin n) ℂ) (t : ℝ) :
     hs (M * aT A t * Pp A) = Real.exp t ^ 2 * hs (M * Pp A) := by
-  rw [Matrix.mul_assoc, aT_Pp hA, Matrix.mul_smul, hs_smul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  have h : aT A t * Pp A = (Real.exp t : ℂ) • Pp A := aT_Pp hA t
+  rw [Matrix.mul_assoc, h, Matrix.mul_smul, hs_smul,
+    Complex.norm_real, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
 
 theorem hs_line_Pz (hA : IsGrad ε A) (M : Matrix (Fin n) (Fin n) ℂ) (t : ℝ) :
     hs (M * aT A t * Pz A) = hs (M * Pz A) := by
-  rw [Matrix.mul_assoc, aT_Pz hA]
+  have h : aT A t * Pz A = Pz A := aT_Pz hA t
+  rw [Matrix.mul_assoc, h]
 
 theorem tau_add (hA : IsGrad ε A) (x : S7.UJ ε) (t : ℝ) :
     tauG A (S7.toM x * aT A t) = tauG A (S7.toM x) + t := by

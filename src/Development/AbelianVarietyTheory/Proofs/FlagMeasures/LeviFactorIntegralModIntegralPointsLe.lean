@@ -1,13 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalUnitaryPointsDiscreteFundamentalDomain
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryLatticeStabilizerDetRoot
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LintegralRpowNegChangeOfVariable
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeftQuotientCovolumeWithDensityDetNormSqStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagLeviRealPlacesProductMeasureStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsScalarStableLatticeAutomorphismFundamentalStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeftQuotientCovolumeWithDensityDetNormSq
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsScalarStableLatticeAutomorphismFundamental
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsScalarStableLatticeAutomorphismFundamentalStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FiniteAdelicUnitaryCongruenceTopology
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagLeviRealPlacesProductMeasureStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeftQuotientCovolumeWithDensityDetNormSqStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LintegralRpowNegChangeOfVariable
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalUnitaryPointsDiscreteFundamentalDomain
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase
+
+open scoped Pointwise
 
 namespace GlobalTheory.FlagBase.LeviInt
 
@@ -93,7 +150,7 @@ theorem lintegral_pi_comp (ρ : Measure ℝ) [SigmaFinite ρ] : ∀ (a : ℕ) (X
             ring
         _ = _ := lintegral_const_mul _ (hKt t)
     have hmL : Measurable fun z : (∀ i, X i) => F (fun i => p i (z i)) :=
-      hF.comp (measurable_pi_lambda _ fun i => (hp i).comp (measurable_pi_apply i))
+      hF.comp (Measurable.of_eval fun i => (hp i).comp (measurable_pi_apply i))
     have hmR : Measurable fun τ : Fin (a + 1) → ℝ => F τ * ∏ i, w i (τ i) :=
       hF.mul (Finset.measurable_prod _ fun i _ => (hw i).comp (measurable_pi_apply i))
     calc ∫⁻ z, F (fun i => p i (z i)) ∂Measure.pi ν
@@ -226,7 +283,7 @@ theorem sigmaFinite_haarGL : SigmaFinite (haarGL E j) := by
     fun x => ENNReal.ofReal ((∏ w, ‖(Matrix.of (x w)).det‖ ^ 2)⁻¹ ^ j))
   exact SigmaFinite.withDensity_ofReal _
 
-theorem detNorm_aut_mul (hE : IsTotallyComplex E) {Λ : Submodule (𝓞 E) (Fin j → E)} (hΛ : Submodule.IsLattice E Λ)
+theorem detNorm_aut_mul (hE : IsTotallyComplex E) {Λ : Submodule (𝓞 E) (Fin j → E)} (hΛ : Submodule.IsFullLattice E Λ)
     {γ : MatInf E j} (hγ : γ ∈ autGL E j Λ) (g : MatInf E j) : detNorm E j (γ * g) = detNorm E j g := by
   obtain ⟨γ', hγΛ, hγw⟩ := hγ
 
@@ -357,35 +414,16 @@ theorem detNorm_aut_mul (hE : IsTotallyComplex E) {Λ : Submodule (𝓞 E) (Fin 
   simp_rw [h3, norm_mul, mul_pow, Finset.prod_mul_distrib, hprod, one_mul]
 
 theorem haarGL_restrict (hj : 1 ≤ j) : (haarGL E j).restrict {g | 0 < detNorm E j g} = haarGL E j := by
-  have hm : MeasurableSet {g : MatInf E j | ¬ 0 < detNorm E j g} :=
-    (measurableSet_lt measurable_const measurable_detNorm).compl
-  refine Measure.restrict_eq_self_of_ae_mem ?_
-  rw [ae_iff]
-  show haarGL E j {g | ¬ 0 < detNorm E j g} = 0
-  have key : (volume : Measure (InfinitePlace E → Fin j → Fin j → ℂ)).withDensity
-      (fun x => ENNReal.ofReal ((∏ w, ‖(Matrix.of (x w)).det‖ ^ 2)⁻¹ ^ j))
-      {x | ¬ 0 < ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2} = 0 := by
-    have hm2 : MeasurableSet
-        {x : InfinitePlace E → Fin j → Fin j → ℂ | ¬ 0 < ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2} := hm
-    rw [withDensity_apply _ hm2, ← lintegral_indicator hm2]
-    have hz : {x : InfinitePlace E → Fin j → Fin j → ℂ | ¬ 0 < ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2}.indicator
-        (fun x => ENNReal.ofReal ((∏ w, ‖(Matrix.of (x w)).det‖ ^ 2)⁻¹ ^ j)) = 0 := by
-      funext x
-      refine Set.indicator_apply_eq_zero.2 fun hx => ?_
-      have h0 : ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2 = 0 :=
-        le_antisymm (not_lt.1 hx) (Finset.prod_nonneg fun w _ => sq_nonneg _)
-      rw [h0, _root_.inv_zero, zero_pow (by omega), ENNReal.ofReal_zero]
-    rw [hz]
-    exact lintegral_zero
-  exact key
+  apply GlobalTheory.DetSlab.restrict_pos <;> assumption
 
 theorem exists_dom (hE : IsTotallyComplex E) (hj : 1 ≤ j) {Λ : Submodule (𝓞 E) (Fin j → E)}
-    (hΛ : Submodule.IsLattice E Λ) {N κ : ℝ} (hN : 0 < N) (hκ : 0 < κ) :
+    (hΛ : Submodule.IsFullLattice E Λ) {N κ : ℝ} (hN : 0 < N) (hκ : 0 < κ) :
     ∃ D : Set (MatInf E j), MeasurableSet D ∧ D ⊆ {g | 0 < detNorm E j g} ∧
       (∀ g, 0 < detNorm E j g → ∃ γ ∈ autGL E j Λ, γ * g ∈ D) ∧
       ∀ G : ℝ → ENNReal, Measurable G → ∫⁻ x in D, G ((detNorm E j x / κ) ^ (-(1 / N))) ∂haarGL E j =
         slabVol E j Λ * ∫⁻ t in Set.Ioi (0 : ℝ), G t * ENNReal.ofReal (N / t) := by
-  obtain ⟨D, hDm, hDpos, hDcov, -, hDint⟩ := GlobalTheory.T.exists_scalarStable_latticeAutomorphismFundamentalDomain E hE j Λ hΛ
+  obtain ⟨D, hDm, hDpos, hDcov, -, hDint⟩ :=
+    GlobalTheory.T.exists_scalarStable_latticeAutomorphismFundamentalDomain E hE j Λ hΛ
   refine ⟨D, hDm, hDpos, hDcov, fun G hG => ?_⟩
   have hAm : MeasurableSet {g : MatInf E j | 0 < detNorm E j g} :=
     measurableSet_lt measurable_const measurable_detNorm
@@ -404,7 +442,8 @@ theorem exists_dom (hE : IsTotallyComplex E) (hj : 1 ≤ j) {Λ : Submodule (�
   rw [haarGL_restrict hj, Set.inter_eq_right.2 hDpos] at h1
   beta_reduce at h1
   rw [← h1]
-  have h2 := GlobalTheory.T.leftQuotientCovolume_withDensity_detNormSq E hE j hj Λ hΛ (fun t => G ((t / κ) ^ (-(1 / N)))) hF
+  have h2 := GlobalTheory.T.leftQuotientCovolume_withDensity_detNormSq E hE j hj Λ hΛ
+    (fun t => G ((t / κ) ^ (-(1 / N)))) hF
   beta_reduce at h2
   rw [h2, GlobalTheory.FlagMeas.lintegral_rpow_neg_change_of_variable N κ hN hκ G hG]
   rfl
@@ -469,7 +508,7 @@ theorem covol_leviGroup_le : ∀ (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf :
     have hψf : ψ = fun z₁ => F (fun i => (detNorm I.E (j i) (z₁ i) / κ i) ^ (-(1 / (2 * (I.f : ℝ) * j i)))) :=
       funext hψdef
     rw [hψf]
-    exact hF.comp (measurable_pi_lambda _ fun i =>
+    exact hF.comp (Measurable.of_eval fun i =>
       ((measurable_detNorm.comp (measurable_pi_apply i)).div_const _).pow_const _)
   have hBoxm : MeasurableSet ((Set.univ.pi D) ×ˢ D₀) := (MeasurableSet.univ_pi hDm).prod hD₀m
   have hBoxpos : ∀ z ∈ (Set.univ.pi D) ×ˢ D₀, ∀ i, 0 < detNorm I.E (j i) (z.1 i) :=
@@ -494,9 +533,9 @@ theorem covol_leviGroup_le : ∀ (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf :
       refine lintegral_congr fun z₂ => ?_
       by_cases h2 : z₂ ∈ D₀
       · rw [Set.indicator_of_mem (Set.mk_mem_prod h h2), Set.indicator_of_mem h2]
-      · rw [Set.indicator_of_notMem (fun hh => h2 hh.2), Set.indicator_of_notMem h2]
+      · rw [Set.indicator_of_notMem (by exact fun hh => h2 hh.2), Set.indicator_of_notMem h2]
     · rw [Set.indicator_of_notMem h, zero_mul]
-      exact (lintegral_congr fun z₂ => Set.indicator_of_notMem (fun hh => h hh.1) _).trans lintegral_zero
+      exact (lintegral_congr fun z₂ => Set.indicator_of_notMem (by exact fun hh => h hh.1) _).trans lintegral_zero
   have hset : {τ : Fin a → ℝ | ∀ i, 0 < τ i} = Set.univ.pi fun _ => Set.Ioi 0 := by
     ext τ; simp
   have hsetm : MeasurableSet {τ : Fin a → ℝ | ∀ i, 0 < τ i} := by
@@ -516,7 +555,7 @@ theorem covol_leviGroup_le : ∀ (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf :
         rw [hmeas, lintegral_smul_measure, smul_eq_mul]
         have hle : ∫⁻ m, (Θ '' ((Set.univ.pi D) ×ˢ D₀)).indicator (fun m => F (sizesAt I xf S m)) m
             ∂Measure.map Θ ρ ≤ ∫⁻ z, ((Set.univ.pi D) ×ˢ D₀).indicator (fun z => ψ z.1) z ∂ρ := by
-          refine le_trans (lintegral_map_le _ Θ) (lintegral_mono_ae ?_)
+          refine le_trans (lintegral_map_le _ hΘm.aemeasurable) (lintegral_mono_ae ?_)
           have hae : ∀ᵐ z ∂ρ, ∀ i, 0 < detNorm I.E (j i) (z.1 i) := by
             rw [hρ]
             exact Measure.QuasiMeasurePreserving.ae Measure.quasiMeasurePreserving_fst

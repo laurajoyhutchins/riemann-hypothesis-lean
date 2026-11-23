@@ -1,24 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsIsComOfOf
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.WeilDatumExistence
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsLocFac
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NarrowJetMoments
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HermitianCodeWordWeilElementMemQuadraticField
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.RationalDatumThetaFactorsPlaceByPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdempotentSumDisjointUnion
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdempotentSumPartialProperties
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.DivisiblePontryaginAnnihilatorDuality
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsSchwartzBruhatHalfSplitDatumCompletedLattice
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPointComponentMemSpanOfLatticeGenerators
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CongruenceUnipotentMatrixReduction
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MatchAtType
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AtMostOneHolds
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IntIndFromCols
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsIntegralMatrixUpImageCompletedHomLattice
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UpImageIntegralMatrixMemCompletedHomLattice
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CoeLatFrameOfEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCombAt
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsRatDatum
+public import Formalism.LocalToGlobal.Columns.ChainTw
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsIntegralMatrixUpImageCompletedHomLattice
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UpImageIntegralMatrixMemCompletedHomLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteDimensionalMram
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FrameTop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Forms
 open NumberField IsDedekindDomain Matrix MeasureTheory ValuativeRel GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.Core.Rk GlobalTheory.AdForm GlobalTheory.SeeSaw
@@ -112,8 +136,10 @@ theorem mul_toLoc (ι : E →+* k) {Y Y' : Type} [Fintype Y] [Fintype Y'] {a b n
   ext r c
   have key : ∀ x : Fin nT → E, ∑ y : Y, f' (Pi.single (e y) 1) r * x (e y) = f' x r := fun x => by
     rw [e.sum_comp fun j => f' (Pi.single j 1) r * x j]
+
     conv_rhs => rw [pi_eq_sum_univ' x, map_sum, Finset.sum_apply]
     exact Finset.sum_congr rfl fun j _ => by rw [map_smul, Pi.smul_apply, smul_eq_mul, mul_comm]
+
   simp only [Matrix.mul_apply, hβ, hM, toLoc, Matrix.map_apply, ← map_mul, ← map_sum, finCongr_refl, Equiv.refl_apply]
   rw [key]
   simp [Formalism.L2.Col.inFr, Matrix.mulVec, dotProduct]
@@ -146,17 +172,7 @@ variable {B : Base} {X : PreX B.toPre} {I : TC B X} {l : I.Laws} {Z : TC.Later B
   {A : ColDat I l Z v Ch} {a : XPart (I.rec7 l Z) v} {ζ₀ : Fin a.Lz.rank → (I.rec7 l Z).host.E}
   {PP : Formalism.L2.DIV.Pl (I.rec7 l Z).host.E} {G : GX a ζ₀ PP} {P : rowSG (B.primes X) I.sel (I.tup I.mu0)}
 
-variable (A) in
 
-def ratMap (i : ℕ) (hi : i + 1 ≤ B.R.m) (P : rowSG (B.primes X) I.sel (I.tup I.mu0))
-    (γ : Matrix (Fin ((I.rec7 l Z).sp.X (i + 1)).rank) (Fin ((I.rec7 l Z).sp.X i).rank) (I.rec7 l Z).host.E) :
-    HomE B.fields.E (B.R.N i) (B.R.N (i + 1)) :=
-  inFr (frsF I.sel (I.tup I.mu0) (A.p0 i).1.1 P) (frsF I.sel (I.tup I.mu0) (A.p0 (i + 1)).1.1 P)
-    (Matrix.toLin' (γ.reindex (finCongr (rankN (I.rec7 l Z) (i + 1) hi)) (finCongr (rankN (I.rec7 l Z) i (Nat.le_of_succ_le hi)))))
-
-variable (a) in
-
-def StdLat : Prop := ∀ j, j ≤ B.R.m → IsSelfDualC _ (a.x j).L ∧ ((a.x j).L : Set (Fin ((I.rec7 l Z).sp.X j).rank → (I.rec7 l Z).host.E)) = intVec (I.rec7 l Z) _
 
 end World
 

@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.Algebra.Module.SpanRankOperations
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.CA.AB.RegA
 
@@ -81,10 +135,8 @@ theorem spanFinrank_maximalIdeal_quotient_succ_le (R : Type*) [CommRing R] [IsLo
     have h1 := congrArg (Submodule.map (maximalIdeal R).subtype) htop
     first
     | rw [Submodule.map_span, Submodule.map_subtype_top] at h1
-    | rw [Submodule.map_span, Submodule.map_top, Submodule.range_subtype] at h1
     first
     | exact h1
-    | simpa using h1
   have hcomap : (maximalIdeal (R ⧸ Ideal.span ({x} : Set R))).comap (Ideal.Quotient.mk (Ideal.span ({x} : Set R))) = maximalIdeal R :=
     IsLocalRing.eq_maximalIdeal (Ideal.comap_isMaximal_of_surjective _ Ideal.Quotient.mk_surjective)
   have hmax : maximalIdeal (R ⧸ Ideal.span ({x} : Set R)) = Ideal.map (Ideal.Quotient.mk (Ideal.span ({x} : Set R))) (Ideal.span (Subtype.val ''
@@ -116,7 +168,6 @@ theorem eq_natCast_and_add_one_eq_of_le {a : WithBot ℕ∞} {d n : ℕ}
   | bot =>
     first
     | simp at h1
-    | exact absurd h1 (by simp)
   | coe e =>
     induction e using ENat.recTopCoe with
     | top =>
@@ -149,13 +200,11 @@ theorem spanFinrank_quotient_eq_and_ringKrullDim_add_one (R : Type*) [CommRing R
   have hreg : ((Submodule.spanFinrank (maximalIdeal R) : ℕ) : WithBot ℕ∞) = ringKrullDim R := by
     first
     | exact IsRegularLocalRing.spanFinrank_maximalIdeal
-    | exact (IsRegularLocalRing.spanFinrank_maximalIdeal (R := R)).symm
   have hlink : Submodule.spanFinrank (maximalIdeal R) =
       Module.finrank (ResidueField R) (CotangentSpace R) := by
     first
     | exact IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace
     | exact IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace (R := R)
-    | exact (IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace (R := R)).symm
   have h5 := spanFinrank_maximalIdeal_quotient_succ_le R hx hx2
   have hxj : (((({x} : Finset R)) : Set R)) ⊆ (Ring.jacobson R : Set R) := by
     intro z hz
@@ -163,7 +212,6 @@ theorem spanFinrank_quotient_eq_and_ringKrullDim_add_one (R : Type*) [CommRing R
     rw [hz']
     first
     | exact (Ideal.jacobson_bot (R := R)) ▸ IsLocalRing.maximalIdeal_le_jacobson ⊥ hx
-    | exact IsLocalRing.maximalIdeal_le_jacobson ⊥ hx
     | (rw [← Ideal.jacobson_bot]; exact IsLocalRing.maximalIdeal_le_jacobson ⊥ hx)
     | (rw [← Ideal.jacobson_bot, IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top]; exact hx)
   have hd := ringKrullDim_le_ringKrullDim_quotient_add_card ({x} : Finset R) hxj
@@ -183,13 +231,11 @@ theorem isPrime_of_mem_minimalPrimes {R : Type*} [CommRing R] {p : Ideal R}
     (hp : p ∈ minimalPrimes R) : p.IsPrime := by
   first
   | exact Ideal.minimalPrimes_isPrime hp
-  | exact hp.1.1
 
 theorem le_of_le_of_mem_minimalPrimes {R : Type*} [CommRing R] {p q : Ideal R}
     (hp : p ∈ minimalPrimes R) (hq : q.IsPrime) (hle : q ≤ p) : p ≤ q := by
   first
   | exact hp.2 ⟨hq, bot_le⟩ hle
-  | exact Minimal.le_of_le hp ⟨hq, bot_le⟩ hle
 
 private theorem isDomain_of_bot_isPrime {R : Type*} [CommRing R] [Nontrivial R]
     (h : (⊥ : Ideal R).IsPrime) : IsDomain R := by
@@ -216,7 +262,6 @@ theorem maximalIdeal_eq_bot_of_le_sq (R : Type*) [CommRing R] [IsLocalRing R]
   have hjac : maximalIdeal R ≤ Ideal.jacobson ⊥ := by
     first
     | exact IsLocalRing.maximalIdeal_le_jacobson ⊥
-    | exact (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).ge
   exact Submodule.eq_bot_of_le_smul_of_le_jacobson_bot _ _ hfg hle hjac
 
 theorem exists_mem_maximalIdeal_notMem_sq_notMem_minimalPrimes (R : Type*) [CommRing R]
@@ -227,7 +272,6 @@ theorem exists_mem_maximalIdeal_notMem_sq_notMem_minimalPrimes (R : Type*) [Comm
   have hfin : (minimalPrimes R).Finite := by
     first
     | exact minimalPrimes.finite_of_isNoetherianRing R
-    | exact minimalPrimes.finite_of_isNoetherianRing (R := R)
   by_contra hcon
   push_neg at hcon
   have hsub : ((maximalIdeal R : Set R)) ⊆ ⋃ i ∈ (↑(insert (maximalIdeal R ^ 2) hfin.toFinset) :
@@ -256,8 +300,6 @@ theorem quotient_span_singleton {R : Type*} [CommRing R]
   have h := (spanFinrank_quotient_eq_and_ringKrullDim_add_one R hx hx2).1
   first
   | exact ⟨h⟩
-  | exact { spanFinrank_maximalIdeal := h }
-  | exact ⟨inferInstance, inferInstance, h⟩
   | constructor
 
 theorem ringKrullDim_quotient_span_singleton_add_one {R : Type*} [CommRing R]
@@ -288,13 +330,11 @@ theorem isDomain_of_forall_spanFinrank_lt (R : Type u) [CommRing R]
   have hreg : ((Submodule.spanFinrank (maximalIdeal R) : ℕ) : WithBot ℕ∞) = ringKrullDim R := by
     first
     | exact IsRegularLocalRing.spanFinrank_maximalIdeal
-    | exact (IsRegularLocalRing.spanFinrank_maximalIdeal (R := R)).symm
   have hlink : Submodule.spanFinrank (maximalIdeal R) =
       Module.finrank (ResidueField R) (CotangentSpace R) := by
     first
     | exact IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace
     | exact IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace (R := R)
-    | exact (IsLocalRing.spanFinrank_maximalIdeal_eq_finrank_cotangentSpace (R := R)).symm
   by_cases hmin : ∃ p ∈ minimalPrimes R, maximalIdeal R ≤ p
   · exfalso
     obtain ⟨p, hp, hle⟩ := hmin
@@ -321,7 +361,6 @@ theorem isDomain_of_forall_spanFinrank_lt (R : Type u) [CommRing R]
       first
       | exact Nat.le_zero.mp (by exact_mod_cast h0')
       | (norm_cast at h0'; omega)
-      | simpa using h0'
     exact hsq (maximalIdeal_le_sq_of_finrank_cotangent_zero R (hlink.symm.trans h0))
   obtain ⟨x, hx, hx2, hxmin⟩ := exists_mem_maximalIdeal_notMem_sq_notMem_minimalPrimes R hsq hmin
   haveI hR' : IsRegularLocalRing (R ⧸ Ideal.span ({x} : Set R)) := quotient_span_singleton hx hx2
@@ -350,7 +389,6 @@ theorem isDomain_of_forall_spanFinrank_lt (R : Type u) [CommRing R]
     rw [Ideal.span_singleton_le_iff_mem]
     first
     | exact IsLocalRing.maximalIdeal_le_jacobson ⊥ hx
-    | exact (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).symm ▸ hx
   have hbot : p = ⊥ :=
     Submodule.eq_bot_of_le_smul_of_le_jacobson_bot _ _ (IsNoetherian.noetherian p) hle hjac
   rw [hbot] at hpp

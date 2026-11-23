@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramPosSemidefOfIntForm
+module
+
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramPosSemidefOfIntForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.CasimirOrder
 
@@ -9,9 +58,9 @@ variable {O : Type} [Ring O]
 
 def form (s : O →+ O) (φ : O →+ ℤ) : LinearMap.BilinForm ℤ O :=
   LinearMap.mk₂ ℤ (fun u v => φ (s u * v))
-    (fun u₁ u₂ v => by simp [map_add, add_mul])
+    (fun u₁ u₂ v => by simp [map_add (f := _), add_mul])
     (fun c u v => by rw [map_zsmul, smul_mul_assoc, map_zsmul])
-    (fun u v₁ v₂ => by simp [mul_add, map_add])
+    (fun u v₁ v₂ => by simp [mul_add, map_add (f := _)])
     (fun c u v => by rw [mul_smul_comm, map_zsmul])
 
 @[simp] theorem form_apply (s : O →+ O) (φ : O →+ ℤ) (u v : O) : form s φ u v = φ (s u * v) := rfl
@@ -39,26 +88,27 @@ theorem det_smul_eq_sum (x : Module.Basis (Fin r) ℤ O) (b : LinearMap.BilinFor
   have hv : v = ∑ k, x.repr v k • x k := (x.sum_repr v).symm
   have hb' : ∀ i, b (x i) v = ∑ k, G i k * x.repr v k := by
     intro i; conv_lhs => rw [hv]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [LinearMap.map_smul, smul_eq_mul, mul_comm]; rfl
   have key : ∀ j, ∑ i, G.adjugate i j * b (x i) v = G.det * x.repr v j := by
     intro j
     have e : ∑ i, G.adjugate i j * b (x i) v = ∑ k, (G.adjugate * G) j k * x.repr v k := by
-      simp_rw [hb', Finset.mul_sum, mul_apply, Finset.sum_mul]
+      simp_rw [hb', Finset.mul_sum, Matrix.mul_apply, Finset.sum_mul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun i _ => ?_
       rw [hA]; ring
     rw [e, adjugate_mul]
-    simp [Matrix.smul_apply, one_apply]
+    simp [Matrix.smul_apply, Matrix.one_apply]
   rw [Finset.sum_comm]
   simp_rw [← Finset.sum_smul, key]
   conv_lhs => rw [hv]
   rw [Finset.smul_sum]
   exact Finset.sum_congr rfl fun k _ => by rw [smul_smul]
 
-open scoped MatrixOrder in
 
+open scoped MatrixOrder in
 theorem trace_mul_pos_real {n : ℕ} {P H : Matrix (Fin n) (Fin n) ℝ} (hP : P.PosDef) (hH : H.PosSemidef)
     (h0 : H ≠ 0) : 0 < (P * H).trace := by
   obtain ⟨C, hC, rfl⟩ := CStarAlgebra.isStrictlyPositive_iff_eq_star_mul_self.mp hP.isStrictlyPositive
@@ -125,6 +175,7 @@ theorem adjugate_gram_symm {x : Fin r → O} {s : O →+ O} {φ : O →+ ℤ} (h
 theorem casimir_star {x : Fin r → O} {s : O →+ O} {φ : O →+ ℤ} (hs : ∀ a b, s (a * b) = s b * s a)
     (hss : ∀ a, s (s a) = a) (hφs : ∀ a, φ (s a) = φ a) : s (casimir x s φ) = casimir x s φ := by
   unfold casimir
+
   simp only [map_sum, map_zsmul, hs, hss]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by
@@ -132,8 +183,9 @@ theorem casimir_star {x : Fin r → O} {s : O →+ O} {φ : O →+ ℤ} (hs : �
 
 theorem quad_eq (x : Fin r → O) (b : LinearMap.BilinForm ℤ O) (v : Fin r → ℤ) :
     v ⬝ᵥ (Matrix.of fun i j => b (x i) (x j)) *ᵥ v = b (∑ i, v i • x i) (∑ j, v j • x j) := by
+
   simp only [dotProduct, mulVec, of_apply, map_sum, LinearMap.sum_apply, LinearMap.map_smul,
-    LinearMap.smul_apply, smul_eq_mul, Finset.mul_sum]
+  LinearMap.smul_apply, smul_eq_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring

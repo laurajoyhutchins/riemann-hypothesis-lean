@@ -1,6 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CurvePt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StChartScalingIndep
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CurvePt
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StChartScalingIndep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsMonomialNotMem
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -69,6 +122,7 @@ theorem coeff_eq_zero (x : (Σ k, ι k) → Ω) (i : ∀ k, ι k) (hx : ∀ k, x
 
   have hH : (∑ α ∈ s, G α * ∏ k, (X ⟨k, i k⟩ : MRingOver F ι) ^ α k) ∈
       RingHom.ker (aeval x : MRingOver F ι →ₐ[F] Ω) := by
+
     rw [RingHom.mem_ker, map_sum]
     calc ∑ α ∈ s, aeval x (G α * ∏ k, (X ⟨k, i k⟩ : MRingOver F ι) ^ α k)
         = ∑ α ∈ s, (∏ k, x ⟨k, i k⟩ ^ M k) *
@@ -83,6 +137,7 @@ theorem coeff_eq_zero (x : (Σ k, ι k) → Ω) (i : ∀ k, ι k) (hx : ∀ k, x
   have hcomp : weightedHomogeneousComponent (mw (ι := ι)) (M + ⇑β)
       (∑ α ∈ s, G α * ∏ k, (X ⟨k, i k⟩ : MRingOver F ι) ^ α k) =
         G β * ∏ k, (X ⟨k, i k⟩ : MRingOver F ι) ^ β k := by
+
     rw [map_sum, Finset.sum_eq_single β]
     · rw [weightedHomogeneousComponent_of_mem (hmem β hβ), if_pos rfl]
     · intro α hα hne
@@ -133,6 +188,7 @@ theorem ChartScalingIndep.proof : ChartScalingIndep.Statement := by
   have h1 : aeval (fun k => x ⟨k, i k⟩) p = ∑ α ∈ p.support,
       ((p.coeff α : IntermediateField.adjoin F (Set.range y)) : Ω) * ∏ k, x ⟨k, i k⟩ ^ α k := by
     conv_lhs => rw [p.as_sum]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun α _ => ?_
     rw [aeval_monomial, Finsupp.prod_fintype _ _ (fun k => pow_zero _)]
@@ -145,7 +201,7 @@ theorem ChartScalingIndep.proof : ChartScalingIndep.Statement := by
       _ = 0 := by rw [hp, mul_zero]
   have h0 := ChartScalingIndep.coeff_eq_zero x i hx hV p.support g hsum
   refine MvPolynomial.ext _ _ fun α => ?_
-  rw [coeff_zero]
+  change p.coeff α = 0
   by_cases hα : α ∈ p.support
   · have h2 := h0 α hα
     rw [hgD α hα] at h2

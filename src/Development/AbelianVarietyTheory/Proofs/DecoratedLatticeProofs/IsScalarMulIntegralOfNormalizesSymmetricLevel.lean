@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSingle
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SymEdgeStableSubmoduleEqTopStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.KerReductionLeRangeReductionOfMulEqSmulStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSingle
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.KerReductionLeRangeReductionOfMulEqSmulStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SymEdgeStableSubmoduleEqTopStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Matrix Formalism.UG Formalism.L2.DIV GlobalTheory.LevNorm
 
 namespace GlobalTheory.ScalInt
@@ -221,7 +273,7 @@ theorem isScal_of_normalises (K : Type) [Field K] (O : ValuationSubring K) (k : 
         · have hij : i ≠ j := fun e => by unfold symEdge at he; rw [e] at he; omega
           show a i j * r ((x' : Matrix (Fin n) (Fin n) O) i j) = _
           rw [hx'e, Matrix.one_apply_ne hij]
-          simp only [map_add, map_mul, map_zero, zero_add]
+          simp only [map_add (f := _), map_mul, map_zero, zero_add]
           ring
         · rw [mul_zero]
       rw [← hev, hψx, hxr, edgeVal_one, AddChar.map_zero_eq_one]
@@ -242,7 +294,7 @@ theorem isScal_of_normalises (K : Type) [Field K] (O : ValuationSubring K) (k : 
     have hxe : ∀ p q, ((bc r x : GL (Fin n) k) : Matrix (Fin n) (Fin n) k) p q =
         r ((1 : Matrix (Fin n) (Fin n) O) p q) + (if i = p ∧ j = q then 1 else 0) := fun p q => by
       show r ((1 + Matrix.single i j (1 : O)) p q) = _
-      rw [Matrix.add_apply, map_add, Matrix.single_apply]
+      rw [Matrix.add_apply, map_add (f := _), Matrix.single_apply]
       split_ifs <;> simp
     have hxu : bc r x ∈ unipSym k n ρ κ := by
       refine mem_unipSym_of _ (fun p q hpq => ?_) (fun p => ?_) (fun p q h1 h2 h3 => ?_)

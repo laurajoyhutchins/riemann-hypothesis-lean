@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.LocalFields.Different
-import GroundTheory.LocalFields.LowerIndexQuotient
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MinpolyProductMap
+module
+
+public import GroundTheory.LocalFields.Different
+public import GroundTheory.LocalFields.LowerIndex
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MinpolyProductMap
+public import GroundTheory.LocalFields.LowerIndexQuotient
+public import GroundTheory.LocalFields.Monogenic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,15 +60,15 @@ variable (K L : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K]
   [Field L] [ValuativeRel L] [TopologicalSpace L] [IsNonarchimedeanLocalField L]
   [Algebra K L] [ValuativeExtension K L] [FiniteDimensional K L] [IsGalois K L]
 
-variable {K L} in
 
+variable {K L} in
 theorem map_minpoly_eq_prod {x : 𝒪[L]} (hx : Algebra.adjoin 𝒪[K] {x} = ⊤) :
     (minpoly 𝒪[K] x).map (algebraMap 𝒪[K] 𝒪[L]) =
       ∏ σ : L ≃ₐ[K] L, (X - C (integerAlgEquiv K L σ x)) :=
   _root_.UpperTheory.Reformulated.B.MinpolyProductMap.map_minpoly_eq_prod hx
 
-variable {K L} in
 
+variable {K L} in
 theorem aeval_derivative_minpoly_eq_prod [DecidableEq (L ≃ₐ[K] L)] {x : 𝒪[L]}
     (hx : Algebra.adjoin 𝒪[K] {x} = ⊤) :
     aeval x (derivative (minpoly 𝒪[K] x)) =
@@ -42,7 +88,7 @@ theorem aeval_derivative_minpoly_eq_prod [DecidableEq (L ≃ₐ[K] L)] {x : 𝒪
 theorem differentExponent_eq_sum_lowerIndex [DecidableEq (L ≃ₐ[K] L)] :
     (differentExponent K L : ℕ∞) =
       ∑ σ ∈ Finset.univ.erase (1 : L ≃ₐ[K] L), lowerIndex K L σ := by
-  obtain ⟨x, hx⟩ := exists_integer_adjoin_eq_top K L
+  obtain ⟨x, hx⟩ := exists_integer_adjoin_eq_top (K := K) (L := L)
   rw [differentExponent_eq_addVal hx, aeval_derivative_minpoly_eq_prod hx, addVal_prod]
   refine Finset.sum_congr rfl fun σ _ ↦ ?_
   rw [lowerIndex_eq_addVal_of_adjoin_eq_top hx, ← AddValuation.map_neg, neg_sub]
@@ -85,19 +131,5 @@ theorem differentExponent_eq_sum_card_lowerRamificationGroup {N : ℕ}
       Nat.card_eq_fintype_card]
   rw [← hswap]
   exact_mod_cast h
-
-theorem differentExponent_eq_finsum_card_lowerRamificationGroup :
-    differentExponent K L = ∑ᶠ i : ℕ, (Nat.card (lowerRamificationGroup K L i) - 1) := by
-  obtain ⟨N, hN⟩ := exists_lowerRamificationGroup_eq_bot K L
-  rw [differentExponent_eq_sum_card_lowerRamificationGroup K L (hN N le_rfl),
-    finsum_eq_sum_of_support_subset _ (s := Finset.range N)]
-  intro i hi
-  rw [Function.mem_support] at hi
-  rw [Finset.coe_range, Set.mem_Iio]
-  by_contra h'
-  have h := not_lt.mp h'
-  apply hi
-  rw [hN i (by exact_mod_cast h)]
-  simp
 
 end GroundTheory.LocalField

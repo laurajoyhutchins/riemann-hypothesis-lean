@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Smooth.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Smooth.Field
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.FieldTheory.Perfect
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+public import Mathlib.RingTheory.Etale.Basic
+
+@[expose] public section
 
 open IsLocalRing
 
@@ -42,7 +97,7 @@ theorem exists_derivation_cotangent (R B : Type) [CommRing R] [CommRing B] [IsLo
     Algebra.smul_def a z
   have hmul : ∀ a b, D (a * b) = a • D b + b • D a := fun a b => by
     apply hinj
-    rw [map_add, map_smul, map_smul, hD, hD, hD, hsm, hsm, map_mul, map_mul, map_mul]
+    rw [map_add (f := _), map_smul, map_smul, hD, hD, hD, hsm, hsm, map_mul, map_mul, map_mul]
     linear_combination (-1 : B ⧸ m ^ 2) * hsq a b
   have hR : ∀ c : R, D (algebraMap R B c) = 0 := fun c => by
     apply hinj
@@ -50,7 +105,7 @@ theorem exists_derivation_cotangent (R B : Type) [CommRing R] [CommRing B] [IsLo
     exact (s.commutes c).symm
   refine ⟨⟨⟨D, fun a b => ?_⟩, fun c a => ?_⟩, hmul, fun t => ?_⟩
   · apply hinj
-    rw [map_add, hD, hD, hD, map_add, map_add, map_add]
+    rw [map_add (f := _), hD, hD, hD, map_add (f := _), map_add (f := _), map_add (f := _)]
     ring
   · show D (c • a) = c • D a
     rw [Algebra.smul_def, hmul, hR, smul_zero, add_zero, algebraMap_smul]
@@ -98,12 +153,12 @@ theorem exists_derivation_extending :
     rw [← algebraMap_smul (ResidueField B) a v, map_smul, algebraMap_smul]
   let L : B →ₗ[R] ResidueField B :=
     { toFun := fun a => lam (D a)
-      map_add' := fun a b => by rw [map_add, map_add]
+      map_add' := fun a b => by rw [map_add (f := _), map_add (f := _)]
       map_smul' := fun c a => by
         rw [RingHom.id_apply, map_smul, ← algebraMap_smul B c (D a), hsm, algebraMap_smul] }
   refine ⟨Derivation.mk' L fun a b => ?_, fun y hy => ?_⟩
   · change lam (D (a * b)) = a • lam (D b) + b • lam (D a)
-    rw [hmul, map_add, hsm, hsm]
+    rw [hmul, map_add (f := _), hsm, hsm]
   · show lam (D y) = _
     exact congrArg lam (hD ⟨y, hy⟩)
 

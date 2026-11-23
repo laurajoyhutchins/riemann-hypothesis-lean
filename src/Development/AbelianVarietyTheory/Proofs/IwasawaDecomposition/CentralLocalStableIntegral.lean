@@ -1,16 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CenLocOfCenReal
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CoreEq
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NoFormsOff
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsRhoPtOfSplitting
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsComp
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroWild
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroSupport
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalGlobalAboveL
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsXdAllIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JumpsCardOfBuilt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CentralCharacterIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CentralCharacterLocalStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsComp
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MovedReadingSameMapsBaseReadingAgrees
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CoeffRingsHaveRootsOfUnity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RowsRestWordColumnUnitBaseTupleAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,14 +88,7 @@ theorem zlStable_of_allT {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type
   refine ⟨y, ?_⟩
   rw [hy]
   unfold NTypes.onMt
-  rw [dif_pos hc]
-
-theorem zlStable_at (hL : GlobalTheory.Published.LocalLanglandsGL) :
-    AtMem hL fun _ _ _ _ w Z _ _ _ _ _ _ => GlobalTheory.PendOf.ZLStable (w.D Z) :=
-  GlobalTheory.HeightCounting.JumpsAt.evLgG_of_forall fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hR _ => hR.elim fun r => zlStable_of_allT r.all
-
-theorem cen_at : ∀ hL : GlobalTheory.Published.LocalLanglandsGL, AtMem hL fun _ _ _ _ w Z _ _ t nch n c => CenLoc (w.D Z) c.a.all.gal.mt ∧ GlobalTheory.PendOf.ZLStable (w.D Z) ∧ GlobalTheory.PendOf.CenInt (w.D Z) := fun hL =>
-  GlobalTheory.HeightCounting.Up.Model.AtMem.and (GlobalTheory.T.central_character_local hL) (GlobalTheory.HeightCounting.Up.Model.AtMem.and (zlStable_at hL) (GlobalTheory.T.central_character_integral hL))
+  rw [dite_eq_left hc]
 
 end GlobalTheory.CenAtLoc
 

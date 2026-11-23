@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ToOneSucc
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SymmetricPositionsDoubleIntegralExistsUnique
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiTargetBilinearFormIntegral
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatSelfAverageHeisenberg
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemFourierJacobiSubgroupIffParabolicMulColumn
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnipotentRadicalBasic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ToOneSucc
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.StandardOrderExtendedBasisApplyLowBlock
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatSelfAverageHeisenberg
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SymmetricPositionsDoubleIntegralExistsUnique
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegrableOfMemSB
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralCompBlocks
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LinearChangeOfVariablesLocalFieldMatrix
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemFourierJacobiSubgroupIffParabolicMulColumn
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OpEOmTargetUnipotent
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OrbitLocallyConstant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SecondCountableLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.StepData GlobalTheory.PosOne
 open GlobalTheory.IndefiniteRowSideFullHecke.FourierJacobiAverage (app HasTensorVal fl opEFJ IsQuotIntFJ IsFJ Represents RFJ app_coe)
 open GlobalTheory.RootEx.Unfolding (omR omR_val omR_mul omR_smooth orbit_locallyConstant opL)
@@ -25,24 +76,24 @@ theorem app_smul {X V : Type} [TopologicalSpace X] [AddCommGroup V] [Module ℂ 
   · have h' : z • f ∉ SB X := fun h' => h ((Submodule.smul_mem_iff _ hz).1 h')
     simp [app, h, h']
 
-omit [MeasurableSpace k] [BorelSpace k] in
 
+omit [MeasurableSpace k] [BorelSpace k] in
 theorem om_smul' {a b : Type} [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] (μ : kˣ →* ℂˣ) (g : GL a k) (h : GL b k)
     (z : ℂ) (Φ : Matrix b a k → ℂ) : om μ g h (z • Φ) = z • om μ g h Φ := by
   funext x
   simp only [om, Pi.smul_apply, smul_eq_mul]
   ring
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [BorelSpace k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [BorelSpace k] in
 theorem opE_smul (ψ : AddChar k Circle) (ν : Measure k) (p : ℕ) (z : ℂ)
     (Φ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ) : opE ψ ν p (z • Φ) = z • opE ψ ν p Φ := by
   funext x
   simp only [opE, Pi.smul_apply, smul_eq_mul, mul_assoc]
   rw [integral_const_mul]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [BorelSpace k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [BorelSpace k] in
 theorem opEFJ_smul (ψ : AddChar k Circle) (ν : Measure k) (p : ℕ) (z : ℂ) (Φ₀ : (n' → k) → ℂ)
     (Φ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ) : opEFJ ψ ν p Φ₀ (z • Φ) = z • opEFJ ψ ν p Φ₀ Φ := by
   funext x
@@ -93,8 +144,8 @@ theorem tInt_left {p : ℕ} (hp : 1 ≤ p) (hpc : p ≤ c) {ψ : AddChar k Circl
     Module.End.mul_apply, h6, h5, ← h4, ← ha, smul_eq_mul]
   linear_combination (a * a * B (E h) (σ h F)) * h3
 
-omit [BorelSpace k] in
 
+omit [BorelSpace k] in
 theorem tInt_right (ψ : AddChar k Circle) (ν : Measure k) (μ : kˣ →* ℂˣ) (p : ℕ) (σ : Representation ℂ (GL (n ⊕ Fin c) k) A)
     (B : SB (Matrix n n' k) →ₗ[ℂ] A →ₗ[ℂ] ℂ) (F : A) (Φ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ)
     (j : GL (n ⊕ Fin c) k) (l : ℂˣ) (h1 : om μ 1 j Φ = ((l⁻¹ : ℂˣ) : ℂ) • Φ) (h2 : σ j F = (l : ℂ) • F)
@@ -192,7 +243,7 @@ theorem exists_avg_form {ρ : ℕ} (hcρ : c + 1 = 2 * ρ) {ψ : AddChar k Circl
   have hw' : ∀ Ψ (Φ₀ : SB (n₁ → k)), app (T Ψ) (opEFJ ψ ν ρ Φ₀.1 (om μ₂ h 1 Φ₂.1)) v = fj Ψ (ρ₁ h Φ₂) Φ₀ :=
     fun Ψ Φ₀ => hw Ψ (ρ₁ h Φ₂) Φ₀
   simp only [hw', (hrep.2 _ _ _).2]
-  rw [← integral_finset_sum _ fun i _ => (hrep.2 _ _ _).1]
+  rw [← MeasureTheory.integral_finsetSum _ fun i _ => (hrep.2 _ _ _).1]
   congr 1; funext β
   have e := om_mul μ₁ 1 1 (colE (c + 1) (ρ + 1) β) h Φ₁
   rw [one_mul] at e

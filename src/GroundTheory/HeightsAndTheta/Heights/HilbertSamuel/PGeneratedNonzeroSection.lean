@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGeneratedNonzeroSection
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenOnFibres
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGeneratedNonzeroSection
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenOnFibres
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -234,7 +286,7 @@ def evHom (I : ∀ k, Finset (ι k)) (hI : NonzeroOn y I) :
         have hs0 := aeval_ne_zero_of_mem hI s.2
         have hs0' := aeval_ne_zero_of_mem hI s'.2
         rw [LocalizedModule.mk_add_mk, ev_mk, ev_mk, ev_mk]
-        simp only [Submonoid.smul_def, map_add, evQ_smul, Submonoid.coe_mul, map_mul]
+        simp only [Submonoid.smul_def, map_add (f := _), evQ_smul, Submonoid.coe_mul, map_mul]
         field_simp
 
 theorem evHom_mk (I : ∀ k, Finset (ι k)) (hI : NonzeroOn y I) (m : MRingOver ℚ ι ⧸ KH.genIdeal y)
@@ -252,7 +304,7 @@ theorem evHom_smul (I : ∀ k, Finset (ι k)) (hI : NonzeroOn y I) (q : ℚ)
 def evLin (I : ∀ k, Finset (ι k)) (hI : NonzeroOn y I) :
     LocalizedModule (KH.cellMon ℚ I) (MRingOver ℚ ι ⧸ KH.genIdeal y) →ₗ[ℚ] Ω where
   toFun := evHom y I hI
-  map_add' := map_add _
+  map_add' := (evHom y I hI).map_add
   map_smul' := evHom_smul y I hI
 
 theorem evHom_cellRes {J I : ∀ k, Finset (ι k)} (hJI : ∀ k, J k ⊆ I k) (hI : NonzeroOn y I)
@@ -271,8 +323,8 @@ variable {Ω : Type} [Field Ω] [CharZero Ω] (y : (Σ k, ι k) → Ω)
 theorem nonzeroOn_chart {c : ∀ k, ι k} (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) : NonzeroOn y (chartCell c).1 :=
   fun k i hi => by rw [Finset.mem_singleton.mp hi]; exact hc k
 
-open Classical in
 
+open Classical in
 def val (z : KH.CechC ℚ ι (MRingOver ℚ ι ⧸ KH.genIdeal y) 0) (c : ∀ k, ι k) : Ω :=
   if h : ∀ k, y ⟨k, c k⟩ ≠ 0 then evHom y _ (nonzeroOn_chart y h) (z (chartCell c)) else 0
 
@@ -370,6 +422,7 @@ theorem mem_ratChart_of_mem {c : ∀ k, ι k} {w : Ω} (hw : w ∈ chartRingZ y 
 theorem aeval_homog_mem (c : ∀ k, ι k) {p : MRingOver ℚ ι} {d : K → ℕ} (hp : IsMultiHomog p d) :
     aeval y p * ∏ k, y ⟨k, c k⟩ ^ (-(d k : ℤ)) ∈ ratChart y c := by
   classical
+
   rw [p.as_sum, map_sum, Finset.sum_mul]
   refine Submodule.sum_mem _ fun μ hμ => ?_
   have hdeg := hp μ hμ
@@ -483,7 +536,8 @@ theorem exists_section {Ω : Type} [Field Ω] [CharZero Ω] (y : (Σ k, ι k) �
   choose c₀ hc₀ using hall
   obtain ⟨r, z, u, hz, -, hsum⟩ := hG (chartCell c₀)
   have h1 := congrArg (evHom y _ (nonzeroOn_chart y hc₀)) hsum
-  rw [map_sum, map_one] at h1
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [map_sum, map_one] at h1
   obtain ⟨j, hj⟩ : ∃ j, evHom y _ (nonzeroOn_chart y hc₀) (z j (chartCell c₀)) ≠ 0 := by
     by_contra hcon
     push Not at hcon

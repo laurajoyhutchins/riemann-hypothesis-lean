@@ -1,22 +1,68 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+public import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ConstantCoeffEv
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsUniversalChartOfFormalGroupChart
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CharAtOfMultiplicativeSeries
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsLeadingMinorsGeOfLeRank
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsNnrealValuationOfAddValuation
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NotIsUnitNatCastOfIsLocalHom
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TwistBaseChangeAndValuationStatements
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EvSelfTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.FormalGroupLawPointMaps
 import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.FormalGroupLawPointMaps
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ExpLaw
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CharAtOfMultiplicativeSeries
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsLeadingMinorsGeOfLeRank
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsNnrealValuationOfAddValuation
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NotIsUnitNatCastOfIsLocalHom
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsUniversalChartOfFormalGroupChart
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EvSelfTwo
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TwistBaseChangeAndValuationStatements
+import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.BidegreeTwoJet
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.BoxTuple
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpBijectiveUniformisation
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermCut
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.LemmaBStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofComm
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -77,7 +123,7 @@ theorem isCh_pull (G : FGLaw k d) {Λ : Type} [CommRing Λ] (A : OAct Λ G) (a :
       fin_cases j
       exact ev_X hb 1 i
 
-theorem dl_eq (u : PS k 1 d) (j : Fin d) : dl u j = constantCoeff (pderiv k ((0 : Fin 1), j) u) := by
+theorem dl_eq (u : PS k 1 d) (j : Fin d) : dl u j = constantCoeff (pderiv ((0 : Fin 1), j) u) := by
   rw [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv, zero_add]
   simp [dl]
 
@@ -87,11 +133,12 @@ theorem dl_one (j : Fin d) : dl (1 : PS k 1 d) j = 0 := by
 
 theorem dl_mul {u u' : PS k 1 d} (h : constantCoeff u = 1) (h' : constantCoeff u' = 1) (j : Fin d) :
     dl (u * u') j = dl u j + dl u' j := by
-  rw [dl_eq, dl_eq, dl_eq, Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add, map_mul, map_mul, h, h']
+  rw [dl_eq, dl_eq, dl_eq, Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add (f := _), map_mul, map_mul, h, h']
   ring
 
 theorem dl_pull {φ : Pt k 1 d} (hφ : ∀ i, constantCoeff (φ i) = 0) (u : PS k 1 d) (j : Fin d) :
     dl (ev ![φ] u) j = ∑ i, dl u i * dLin φ i j := by
+
   rw [dl_eq, pderiv_ev (CZ.cons hφ CZ.nil), map_sum, Fintype.sum_prod_type, Fin.sum_univ_one]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, WickVanishing.gt_const_ev_eq _ (CZ.cons hφ CZ.nil), ← dl_eq, ← dl_eq]
@@ -176,6 +223,7 @@ theorem smul_mem_span_pairing {O N : Type} [CommRing O] {d r : ℕ} {c : O} (w :
       rw [← hlam]
       show ∑ s, e a s * lam i s = _
       exact Finset.sum_congr rfl fun s _ => mul_comm _ _
+
     simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, this]
     simp
   rw [e1] at h
@@ -204,7 +252,7 @@ theorem HasDlog.add {B : FB V d Λ} {I : Ideal O} {e : L → Fin d → O} {y y' 
   obtain ⟨u, z, h1, h2, h3⟩ := h
   obtain ⟨u', z', h1', h2', h3'⟩ := h'
   refine ⟨u * u', z + z', by rw [map_mul]; exact isCh_mul (WickVanishing.Nab.lawK F B) h1 h1', fun l => ?_, fun l => ?_⟩
-  · rw [Pi.add_apply, map_add, h2, h2', map_mul, ← Finset.sum_add_distrib]
+  · rw [Pi.add_apply, map_add (f := _), h2, h2', map_mul, ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun j _ => by rw [dl_mul h1.1 h1'.1, mul_add]
   · have := I.add_mem (h3 l) (h3' l)
     simp only [Pi.add_apply]
@@ -260,6 +308,7 @@ theorem hasDlog_pull (f : V →+* O) (hf : ∀ r, algebraMap O F (f r) = algebra
     exact isCh_pull (WickVanishing.Nab.lawK F B) (PointMapComposition.actKO F B) a (isCh_map f hf B hu)
   · rw [hm]
     have hc : ∀ i, constantCoeff (B.actK F a i) = 0 := (PointMapComposition.actKO F B).const a
+
     simp only [dl_pull hc, Finset.mul_sum, map_sum, map_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => ?_

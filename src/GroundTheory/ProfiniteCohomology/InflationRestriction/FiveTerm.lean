@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.InflationRestriction.Transgression
+module
+
+public import GroundTheory.ProfiniteCohomology.InflationRestriction.Transgression
+import GroundTheory.ProfiniteCohomology.FilteredHomology
+import GroundTheory.ProfiniteCohomology.InflationRestriction.DegreeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -36,11 +84,11 @@ theorem cohomologyRes_π (y : cocycles A 1) :
 
 theorem isTgLift_cocycleOneApplyG (y : cocycles A 1) :
     IsTgLift A N (cocycleOneApply A N ((cocyclesMapAlong N.subtype (continuous_subgroup_subtype N)
-      (𝟙 _) 1).hom y)) (cocycleOneApplyG A y) where
-  map_one := cocycle_one_apply_one A (iCycles_d_apply _ 1 2 y)
-  mul_right g n := by
+      (𝟙 _) 1).hom y)) (cocycleOneApplyG A y) := by
+  refine ⟨cocycle_one_apply_one A (iCycles_d_apply _ 1 2 y), ?_, ?_⟩
+  · intro g n
     rw [cocycleOneApply_cocyclesMapAlong, cocycleOneApplyG_mul]
-  conj h n := by
+  · intro h n
     rw [cocycleOneApply_cocyclesMapAlong, cocycleOneApply_cocyclesMapAlong]
     have e : h * (GroundTheory.GroupCoh.conjHom N h n : G) = n * h := by
       simp only [GroundTheory.GroupCoh.coe_conjHom_apply]; group
@@ -95,8 +143,8 @@ section Exactness
 
 variable [CompactSpace G] [TotallyDisconnectedSpace G] (hN : IsClosed (N : Set G))
 
-include hN in
 
+include hN in
 theorem cohomologyInfl_transgression (h : cohomologyConjInvariants A N 1) :
     (cohomologyInfl A N 2).hom (transgression A N hN h) = 0 := by
   obtain ⟨z, y, hy, hyc, -, ht⟩ := isTransgression_transgression A N hN h

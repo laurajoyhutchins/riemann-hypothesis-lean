@@ -1,4 +1,56 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Finsupp
 
@@ -27,7 +79,8 @@ theorem iwh_X_pderiv {σ : Type} {K : Type} [Field K] (w : σ → ℕ) (i j : σ
     {f : MvPolynomial σ K} {n : ℕ} (hf : IsWeightedHomogeneous w f n) :
     IsWeightedHomogeneous w (X i * pderiv j f) n := by
   classical
-  rw [f.as_sum, map_sum, Finset.mul_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [f.as_sum, map_sum, Finset.mul_sum]
   apply IsWeightedHomogeneous.sum
   intro m hm
   have hwm : weight w m = n := hf (MvPolynomial.mem_support_iff.1 hm)
@@ -41,10 +94,10 @@ theorem iwh_X_pderiv {σ : Type} {K : Type} [Field K] (w : σ → ℕ) (i j : σ
       intro v
       simp [Finsupp.weight_apply, Finsupp.sum_single_index]
     have h1 : weight w (m - Finsupp.single j 1) + w j = n := by
-      rw [← hs j, ← map_add, tsub_add_cancel_of_le hle, hwm]
+      rw [← hs j, ← map_add (f := _), tsub_add_cancel_of_le hle, hwm]
     rw [X, monomial_mul, one_mul]
     apply isWeightedHomogeneous_monomial
-    rw [map_add, hs i, hij, add_comm, h1]
+    rw [map_add (f := _), hs i, hij, add_comm, h1]
 
 theorem polarizationBihomogeneous : RBihom := by
   intro K _ _ k d a b f hf
@@ -61,7 +114,7 @@ theorem polarizationBihomogeneous : RBihom := by
   · exact iwh_X_pderiv _ _ _ (by simp [wxi]) h2
 
 theorem coeff_X_pderiv_self {σ : Type} {K : Type} [Field K] (i : σ) (f : MvPolynomial σ K)
-    (m : σ →₀ ℕ) : coeff m (X i * pderiv i f) = coeff m f * (m i : K) := by
+    (m : σ →₀ ℕ) : AddMonoidAlgebra.coeff (X i * pderiv i f) m = AddMonoidAlgebra.coeff f m * (m i : K) := by
   classical
   induction f using MvPolynomial.induction_on'
   next u a =>
@@ -80,13 +133,13 @@ theorem coeff_X_pderiv_self {σ : Type} {K : Type} [Field K] (i : σ) (f : MvPol
         rfl
       · simp
   next p q hp hq =>
-    simp only [map_add, mul_add, coeff_add, hp, hq, add_mul]
+    simp only [map_add (f := _), mul_add, MvPolynomial.coeff_add, hp, hq, add_mul]
 
 theorem weightOfEigenvector : WtOfEig := by
   intro K _ _ k a w f h m hm
-  have h1 := congrArg (coeff m) h
-  rw [rop_apply_eq, coeff_sub, coeff_X_pderiv_self, coeff_X_pderiv_self, coeff_smul] at h1
-  have hc : coeff m f ≠ 0 := MvPolynomial.mem_support_iff.1 hm
+  have h1 := congrArg (AddMonoidAlgebra.coeff · m) h
+  rw [rop_apply_eq, MvPolynomial.coeff_sub, coeff_X_pderiv_self, coeff_X_pderiv_self, MvPolynomial.coeff_smul] at h1
+  have hc : AddMonoidAlgebra.coeff f m ≠ 0 := MvPolynomial.mem_support_iff.1 hm
   have h2 : (((m (Sum.inl a) : ℤ) - m (Sum.inr a) : ℤ) : K) = (w : K) := by
     apply mul_left_cancel₀ hc
     push_cast
@@ -118,22 +171,22 @@ theorem comp_mul_zero {σ : Type} {K : Type} [Field K] (w : σ → ℤ) {φ : Mv
   split_ifs with hd
   · refine Finset.sum_congr rfl fun x hx => ?_
     rw [coeff_weightedHomogeneousComponent]
-    by_cases h0 : coeff x.1 φ = 0
+    by_cases h0 : AddMonoidAlgebra.coeff φ x.1 = 0
     · simp [h0]
     · have hx0 := hφ h0
       have hsum := by simpa using hx
       have hw : weight w x.2 = n := by
-        rw [← hd, ← hsum, map_add, hx0, zero_add]
+        rw [← hd, ← hsum, map_add (f := _), hx0, zero_add]
       rw [if_pos hw]
   · symm
     refine Finset.sum_eq_zero fun x hx => ?_
     rw [coeff_weightedHomogeneousComponent]
-    by_cases h0 : coeff x.1 φ = 0
+    by_cases h0 : AddMonoidAlgebra.coeff φ x.1 = 0
     · simp [h0]
     · have hx0 := hφ h0
       have hsum := by simpa using hx
       have hw : weight w x.2 ≠ n := by
-        rw [← hsum, map_add, hx0, zero_add] at hd
+        rw [← hsum, map_add (f := _), hx0, zero_add] at hd
         exact hd
       rw [if_neg hw, mul_zero]
 
@@ -152,7 +205,7 @@ theorem pairingWeightCancel : TTWt := by
   have hk : 0 < k := Fin.pos a
   have hcomp : weightedHomogeneousComponent (va k a) n g ≠ 0 := by
     intro h0
-    have h3 := congrArg (coeff m) h0
+    have h3 := congrArg (AddMonoidAlgebra.coeff · m) h0
     rw [coeff_weightedHomogeneousComponent, if_pos hwm] at h3
     exact (MvPolynomial.mem_support_iff.1 hm) (by simpa using h3)
   have hprod : weightedHomogeneousComponent (va k a) n (tt K k * g) ≠ 0 := by
@@ -160,7 +213,7 @@ theorem pairingWeightCancel : TTWt := by
     exact mul_ne_zero (tt_ne_zero K k hk) hcomp
   apply hprod
   ext m'
-  rw [coeff_weightedHomogeneousComponent, coeff_zero]
+  rw [coeff_weightedHomogeneousComponent, AddMonoidAlgebra.coeff_zero]
   split_ifs with hw
   · by_contra hne
     have h4 := h m' (MvPolynomial.mem_support_iff.2 hne) a

@@ -1,6 +1,47 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumPairLevStarMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.InvMemOfKappa
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PairOperatorCommute
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ReflectionTransposeEntriesMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory
 open scoped ComplexConjugate
@@ -48,53 +89,12 @@ variable {k r : ℕ} {z z' : Fin (2 * r + k + 1) → ℂ} {Wp Wq : Type} [Normed
   [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wq]
   {π : Mx k r → (Wp →L[ℂ] Wp)} {π' : Mx k r → (Wq →L[ℂ] Wq)}
 
-theorem intOn_of_last {μ : Measure (Mt k r)} {U : Submodule ℂ (RadSp k r z z' π π')}
-    (hI : IntLevOn μ (Fin.last r) U) : IntOn μ U := by
-  intro c hc Φ hΦ Ψ hΨ
-  obtain ⟨h1, -⟩ := hI c hc Φ hΦ Ψ hΨ
-  have h2 := h1 (Classical.arbitrary _)
-  rwa [glue_last_level] at h2
-
 end Lev
 
 section Top
 
 variable {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] {S : Type} [Fintype S] [DecidableEq S]
-
-theorem herAnalyticF_of_cls (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : Mx P.k P.r → (Wp →L[ℂ] Wp))
-    (π' : Mx P.k P.r → (Wq →L[ℂ] Wq)) (X : ActualOps P.k P.r z z' π π') (μ : Measure (Mt P.k P.r))
-    (L : R.LevelData (Pr (RadSp P.k P.r z z' π π')) P.r) (st : Fr.Start (Pr (RadSp P.k P.r z z' π π')))
-    (K : Fin (P.r + 1) → Submodule ℂ (RadSp P.k P.r z z' π π')) (l0 : ℕ)
-    (hD : IsData P z z' π π' X μ L st l0)
-    (U : Fin (P.r + 1) → Submodule ℂ (RadSp P.k P.r z z' π π')) (hKU : ∀ i, K i ≤ U i)
-    (hI : ∀ i, IntLevOn μ i (U i))
-    (hQ : ∀ i, ∀ Y : ℂ, star Y = Y → ∀ a b, st.QQ Y a b ∈ presAlg (U i))
-    (hS : ∀ (i : Fin (P.r + 1)) (l : Fin P.r), i.val ≤ l.val →
-      L.p l ∈ presAlg (U i) ∧ L.c l ∈ presAlg (U i) ∧ L.ci l ∈ presAlg (U i))
-    (hfn : ∀ j, ∀ Φ ∈ U (Fin.last P.r), X.fn j Φ ∈ U (Fin.last P.r))
-    (hT : ∀ Y : ℂ, star Y = Y → ∀ a b, X.QQ Y a b ∈ adjAlg μ (U (Fin.last P.r)) (intOn_of_last (hI _)))
-    (hSA : ∀ (l : Fin P.r) (c : Fin P.r → ℂ) (hc : c ∈ OmX P.r),
-      L.p l ∈ adjLev μ l.castSucc (U l.castSucc) (hI _) c hc ∧ L.c l ∈ adjLev μ l.castSucc (U l.castSucc) (hI _) c hc ∧
-        L.ci l ∈ adjLev μ l.castSucc (U l.castSucc) (hI _) c hc)
-    (hPh : ∀ w : List (Letter ℂ S), WordOK P z z' π π' st l0 w → ∀ (l : Fin P.r) (x y : Ix S → RadSp P.k P.r z z' π π'),
-      InK (K l.castSucc) x → InK (K l.castSucc) y → ∀ c ∈ OmX P.r,
-      ∃ φ : ℂ → ℂ, Continuous φ ∧ (∀ t, t ≠ 0 → φ t = ph L st μ l w x y c t) ∧
-        ∃ C : ℝ, ∀ t, ‖φ t‖ ≤ C * (1 + ‖t‖) ^ (-4 : ℤ)) :
-    HerAnalyticF S P z z' π π' μ L st l0 K := by
-  refine ⟨?_, ?_, ?_⟩
-  · exact adjTop_of_tAdj P z z' π π' X μ L st K l0 hD (U (Fin.last P.r)) (intOn_of_last (hI _)) (hKU _) hfn hT
-  · refine stepDens_of P z z' π π' μ L st K l0 (fun l => U l.castSucc) (fun l => hKU _) (fun l => hI _)
-      (fun w hw l => siteStep_actual P z z' π π' X μ L st l0 w hD hw l)
-      ?_ ?_ hPh
-    · intro w _ l c hc a b
-      obtain ⟨hp, hcc, hci⟩ := hSA l c hc
-      exact bT_mem (site L l) hp hcc hci w a b
-    · intro w hw l a b
-      refine rrw_mem (QQi L st l.succ) (QQi_mem L st (presAlg (U l.castSucc)) l.succ (hQ _) ?_) w hw.1.2.1 a b
-      intro l' hl'
-      exact hS l.castSucc l' (by simp only [Fin.val_succ] at hl'; simp only [Fin.val_castSucc]; omega)
-  · exact formInt_of_cls P z z' π π' μ L st K l0 U hKU hI hQ hS
 
 end Top
 

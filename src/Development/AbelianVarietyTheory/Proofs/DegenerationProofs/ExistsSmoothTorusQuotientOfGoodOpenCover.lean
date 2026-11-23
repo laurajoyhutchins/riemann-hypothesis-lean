@@ -1,16 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsTorusQuotientSchemeOverNilpotentThickening
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSchemeOfThickenings
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceOfSection
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGroupQuotientPullback
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.LocallyTrivialTorusQuotientFlatSurjectiveCosetsStatement
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGraded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.CategoryTheory.Limits.Shapes.Connected
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGroupQuotientPullback
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceOfSection
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsTorusQuotientSchemeOverNilpotentThickening
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.LocallyTrivialTorusQuotientFlatSurjectiveCosetsStatement
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry Opposite
 open scoped CategoryTheory.Obj
@@ -20,8 +67,8 @@ open GlobalTheory.SS
 noncomputable section
 namespace GlobalTheory.TorusQuotientGlue
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_glue (Y : Scheme.{0}) (𝒰 : Set Y.Opens)
     (hbas : ∀ U ∈ 𝒰, ∀ V ∈ 𝒰, ∀ x : Y, x ∈ U → x ∈ V → ∃ W ∈ 𝒰, x ∈ W ∧ W ≤ U ∧ W ≤ V)
     (hc : ∀ x : Y, ∃ U : 𝒰, x ∈ U.1) (F : 𝒰 ⥤ Scheme.{0})
@@ -103,9 +150,9 @@ theorem exists_glue (Y : Scheme.{0}) (𝒰 : Set Y.Opens)
   · obtain ⟨U, x, rfl⟩ := Scheme.IsLocallyDirected.ι_jointly_surjective F b
     exact ⟨U, x, rfl⟩
 
+
 open ThickGlue in
 set_option backward.isDefEq.respectTransparency false in
-
 theorem exists_scheme (Y : Scheme.{0}) (𝒰 : Set Y.Opens) (hc : ∀ x : Y, ∃ U : 𝒰, x ∈ U.1)
     (𝒜 : Y.Opensᵒᵖ ⥤ CommRingCat.{0}) (p : 𝒜 ⟶ Y.presheaf)
     (hbo : ∀ U ∈ 𝒰, ∀ a : 𝒜.obj (op U), Y.basicOpen ((p.app (op U)).hom a) ∈ 𝒰)
@@ -254,6 +301,7 @@ theorem basicOpen_le_of_sum [Module.Free ℤ X] [Module.Finite ℤ X] [IsMonHom 
       have h₁ : (q ≫ g₀).left z ∈ W := mem_of_act_mem hW p (q ≫ g₀) (hs hz.2)
       rw [Over.comp_left, Scheme.Hom.comp_apply, hg] at h₁
       exact hyW h₁
+
     rw [map_sum] at this
     refine Eq.trans (Finset.sum_congr rfl fun χ _ => ?_) this
     rw [ha χ _ p (q ≫ g₀) _ k, ← chV_val, val_comp q h₀ k]
@@ -273,6 +321,7 @@ theorem exists_invariant [Module.Free ℤ X] [Module.Finite ℤ X] [hi : IsMonHo
   obtain ⟨f, hf, hx⟩ := h₁.exists_basicOpen_le (V := W) ⟨x, hxW⟩ hxV
   obtain ⟨d, hd, rfl⟩ := (functions_graded_by_weights S G X i hi V h₁ h₂).1 f
   have hx' := (G.left.mem_basicOpen _ x hxV).1 hx
+
   rw [Finsupp.sum, map_sum] at hx'
   obtain ⟨χ, hχ, h⟩ := IsLocalRing.exists_of_isUnit_sum hx'
   have hw : IsWt i V (d χ * ((u (Multiplicative.ofAdd χ))⁻¹).val) 0 := by

@@ -1,8 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.NotAllMatchRankZero
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.FourierExtractionTsumClass
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TendstoTsumZeroOfEventuallyNotMemRange
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUniqueAddEquivOfCompatibleCongr
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.NotAllMatchRankZero
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.FourierExtractionTsumClass
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TendstoTsumZeroOfEventuallyNotMemRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
+
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Ex Module Filter
 open scoped BigOperators Topology
 
@@ -80,13 +132,13 @@ section
 variable {C : Type} [NormedField C] {N N' : NumD C} {n : ℕ} (μ : Match N N' n)
 
 theorem r_left {k : ℕ} {p q : N.QT k} {p' : N'.QT k} (h : μ.r k p p') (e : N.QEq p q) : μ.r k q p' :=
-  (μ.eqv k p q p' p' h e).2 ((N'.qEq_equivalence k).refl _)
+  (μ.eqv k p q p' p' h e).2 ⟨0, by simp, by simp⟩
 
 theorem r_right {k : ℕ} {p : N.QT k} {p' q' : N'.QT k} (h : μ.r k p p') (e : N'.QEq p' q') : μ.r k p q' :=
-  (μ.eqv k p p p' q' h ((N.qEq_equivalence k).refl _)).2 e
+  (μ.eqv k p p p' q' h ⟨0, by simp, by simp⟩).2 e
 
 theorem qeq_right {k : ℕ} {p : N.QT k} {p' q' : N'.QT k} (h : μ.r k p p') (e : μ.r k p q') : N'.QEq p' q' :=
-  (μ.eqv k p p p' q' h ((N.qEq_equivalence k).refl _)).1 e
+  (μ.eqv k p p p' q' h ⟨0, by simp, by simp⟩).1 e
 
 theorem eq_of_qeq {N : NumD C} {k : ℕ} (hk : k ≠ 0) {p q : N.QT k} (h : N.QEq p q) (e : p.1.1 = q.1.1) : p = q := by
   obtain ⟨z, h1, h2⟩ := h
@@ -103,7 +155,10 @@ theorem r_one {k : ℕ} (hk : ∃ j, k = n ^ j) : μ.r k 1 1 := by
   have h := μ.mul _ _ _ _ _ hu hu
   rw [mul_one] at h
   obtain ⟨z, hz⟩ := (N'.qEq_iff _ _).1 (qeq_right μ hu h)
-  refine r_right μ hu ((N'.qEq_equivalence _).symm ((N'.qEq_iff _ _).2 ⟨z, ?_⟩))
+  have hsymm : ∀ {a b : N'.QT (n ^ j)}, N'.QEq a b → N'.QEq b a := by
+    rintro a b ⟨w, hw, hw'⟩
+    exact ⟨-w, by rw [hw, smul_neg, add_neg_cancel_right], by rw [hw', N'.io_neg, mul_inv_cancel_right]⟩
+  refine r_right μ hu (hsymm ((N'.qEq_iff _ _).2 ⟨z, ?_⟩))
   rw [one_mul]
   exact mul_left_cancel hz
 
@@ -121,7 +176,10 @@ theorem r_inv {k : ℕ} (hk : ∃ j, k = n ^ j) {p : N.QT k} {p' : N'.QT k} (h :
   have h2 := μ.mul _ _ _ _ _ h hu
   rw [mul_inv_cancel] at h2
   obtain ⟨z, hz⟩ := (N'.qEq_iff _ _).1 (qeq_right μ h1 h2)
-  refine r_right μ hu ((N'.qEq_equivalence _).symm ((N'.qEq_iff _ _).2 ⟨z, ?_⟩))
+  have hsymm : ∀ {a b : N'.QT (n ^ j)}, N'.QEq a b → N'.QEq b a := by
+    rintro a b ⟨w, hw, hw'⟩
+    exact ⟨-w, by rw [hw, smul_neg, add_neg_cancel_right], by rw [hw', N'.io_neg, mul_inv_cancel_right]⟩
+  refine r_right μ hu (hsymm ((N'.qEq_iff _ _).2 ⟨z, ?_⟩))
   rw [one_mul] at hz
   rw [← hz, inv_mul_cancel_left]
 
@@ -165,7 +223,7 @@ theorem exists_tor_of_inT {N : NumD C} {k : ℕ} {p : N.QT k} (h : N.InT p) :
   exact this ▸ e
 
 theorem inT_tor {N : NumD C} {k : ℕ} (t : Multiplicative N.X →* Cˣ) (ht : t ^ k = 1) : N.InT (N.qTor t ht) :=
-  ⟨_, (N.qEq_equivalence k).refl _, rfl, rfl⟩
+  ⟨N.qTor t ht, ⟨0, by simp, by simp⟩, rfl, rfl⟩
 
 theorem thetaMatching_exists_right_torus_torsion (hA : μ.A) {k : ℕ} (hk : ∃ j, k = n ^ j) (t : Multiplicative N.X →* Cˣ) (ht : t ^ k = 1) :
     ∃ t' ht', μ.r k (N.qTor t ht) (N'.qTor t' ht') := by

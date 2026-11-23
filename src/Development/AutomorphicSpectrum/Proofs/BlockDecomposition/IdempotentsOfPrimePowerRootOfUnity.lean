@@ -1,9 +1,57 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ConstantCoeffSurjective
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.GaloisTwistIdentitySection
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralLocalizationAwayInRing
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdemMulEqZero
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.MapUgAlgebraMap
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.Splits
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUniqueIdempotentLiftTiltStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralLocalizationAwayInRing
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PerfectoidXiNonZeroDivisor
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUniqueIdempotentLiftTiltStatement
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ConstantCoeffSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -60,6 +108,7 @@ theorem proj_mul_proj (hq : ζ ^ q = 1) (hω : ζ * ω = 1) (hz : z ^ q = 1) (j 
         simp [pow_succ]
       rw [pow_succ, e]
       linear_combination (z * φ ω ^ j) * ih + φ ((ζ ^ k * ω ^ j) ^ i) * φ ω ^ j * hzk
+
   rw [map_sum, Finset.sum_mul]
   conv_lhs => rw [proj, Finset.sum_mul]
   exact Finset.sum_congr rfl fun i _ => step i
@@ -93,6 +142,7 @@ theorem sum_proj (hq : IsPrimitiveRoot ζ q) (hq0 : 0 < q) (hω : ζ * ω = 1) :
     rw [mul_pow, map_pow, map_pow, ← pow_mul, ← pow_mul, mul_comm k i]
   simp_rw [e]
   rw [Finset.sum_comm]
+
   simp_rw [← Finset.mul_sum, ← map_sum]
   rw [Finset.sum_eq_single_of_mem 0 (Finset.mem_range.2 hq0)]
   · simp
@@ -148,26 +198,7 @@ variable {l : ℕ} [Fact l.Prime] (A : PAlg l)
 
 theorem eq_of_idem {a b : A.W} (ha : IsIdempotentElem a) (hb : IsIdempotentElem b)
     (h : a.coeff 0 = b.coeff 0) : a = b := by
-  have ha' : a * a = a := ha
-  have hb' : b * b = b := hb
-  set d := a - b with hd
-  have hd3 : d * d * d = d := by
-    rw [hd]
-    linear_combination (a + 1 - 3 * b) * ha' + (3 * a - b - 1) * hb'
-  have hmem : d ∈ Ideal.span {(l : A.W)} := by
-    rw [A.mem_span_l_iff, hd, ← WittVector.constantCoeff_apply, map_sub, sub_eq_zero]
-    exact h
-  have hall : ∀ k : ℕ, d ∈ Ideal.span {(l : A.W)} ^ k := by
-    intro k
-    induction k with
-    | zero => simp
-    | succ k ih =>
-      rw [← hd3, pow_succ]
-      exact Ideal.mul_mem_mul (Ideal.mul_mem_left _ _ ih) hmem
-  have h0 : d = 0 := IsHausdorff.haus (A.completeW.toIsHausdorff) d fun k => by
-    rw [SModEq.zero, smul_eq_mul, Ideal.mul_top]
-    exact hall k
-  exact sub_eq_zero.1 h0
+  apply GlobalTheory.CompanionTheory.LcLogProof.eq_of_idem <;> assumption
 
 theorem teich_sum {ι : Type*} [Fintype ι] {e : ι → A.A} (he : OrthogonalIdempotents e) :
     WittVector.teichmuller l (∑ i, e i) = ∑ i, WittVector.teichmuller l (e i) := by
@@ -182,6 +213,7 @@ theorem teich_sum {ι : Type*} [Fintype ι] {e : ι → A.A} (he : OrthogonalIde
   · have := he.isIdempotentElem_sum (s := Finset.univ)
     show _ * _ = _
     rw [← map_mul, this.eq]
+
   · rw [WittVector.teichmuller_coeff_zero, ← WittVector.constantCoeff_apply, map_sum]
     simp [WittVector.constantCoeff_apply, WittVector.teichmuller_coeff_zero]
 
@@ -192,6 +224,7 @@ theorem sharp_zero : A.sharp 0 = 0 := by
 theorem sharp_sum {ι : Type*} [Fintype ι] {e : ι → A.A} (he : OrthogonalIdempotents e) :
     A.sharp (∑ i, e i) = ∑ i, A.sharp (e i) := by
   show A.th (WittVector.teichmuller l _) = ∑ i, A.th (WittVector.teichmuller l _)
+
   rw [teich_sum A he, map_sum]
 
 end Teich

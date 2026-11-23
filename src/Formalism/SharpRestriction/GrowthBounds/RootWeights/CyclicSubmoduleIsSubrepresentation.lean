@@ -1,4 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.OperatorsKillInvariantProjection
+module
+
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.IntegralEnvelopingPreservesStable
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.OperatorsKillInvariantProjection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,26 +58,7 @@ open Formalism.MainNotions.G Formalism.MainNotions.CovariantDegrees
 
 theorem charZero_fraction_field_of_setting {p : ℕ} {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
     (S : UniformizedDVR p O) (hp : p.Prime) : CharZero (KK O) := by
-  have hO : CharZero O := by
-    rcases S with ⟨w, hw, hpm, hp0, -⟩
-    rcases CharP.char_is_prime_or_zero O (ringChar O) with hq | hq
-    · exfalso
-      have hne : p ≠ ringChar O := by
-        rintro h
-        apply hp0
-        rw [h]
-        exact CharP.cast_eq_zero O (ringChar O)
-      have hcop : Nat.gcd p (ringChar O) = 1 := (Nat.coprime_primes hp hq).mpr hne
-      have key : (1 : O) = (p : O) * (Nat.gcdA p (ringChar O) : O) := by
-        have h := congrArg (fun z : ℤ => (z : O)) (Nat.gcd_eq_gcd_ab p (ringChar O))
-        simp only [hcop, Nat.cast_one, Int.cast_one, Int.cast_add, Int.cast_mul, Int.cast_natCast,
-          CharP.cast_eq_zero, zero_mul, add_zero] at h
-        exact h
-      have h1 : (1 : O) ∈ IsLocalRing.maximalIdeal O := key ▸ Ideal.mul_mem_right _ _ hpm
-      exact (IsLocalRing.maximalIdeal.isMaximal O).ne_top ((Ideal.eq_top_iff_one _).mpr h1)
-    · haveI : CharP O 0 := hq ▸ ringChar.charP O
-      exact CharP.charP_to_charZero O
-  exact charZero_of_injective_algebraMap (IsFractionRing.injective O (KK O))
+  apply Formalism.MainNotions.G.GLWeightTheory.dvr_fraction_field_charZero <;> assumption
 
 theorem cyclicSubmodule_isSubrepresentation {n : ℕ} {K V : Type} [Field K] [AddCommGroup V] [Module K V] (E : GLOps n K V) (v : V) :
     IsSubrepresentation E (cyclicSubmodule E v) := by
@@ -55,67 +84,5 @@ theorem pow_smul_mem_of_le' {O W : Type} [CommRing O] [AddCommGroup W] [Module O
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hab
   rw [pow_add, mul_comm, mul_smul]
   exact M.smul_mem _ h
-
-theorem lattice_theorem_single_rep (h : InvariantDenominatorEllPBound) (hTop : IsotypicSubmodulesSpanTop) (hRes : RestrictionIsRepresentation) (hHom : HomSpaceIsRepresentation) (hInv : InvariantProjectionExists)
-    (hTh : IsotypicProjectorTraceFormula) (hB : LatticeAdaptedBasisExists) (hLat : HomLatticeDividedPowerStable) (hEll : HomRepEllBoundedByTarget)
-    (p n' : ℕ) (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (S : UniformizedDVR p O)
-    (hG : AdmissibleDVR p n' O) (n : ℕ) (V : Type) [AddCommGroup V] [Module (KK O) V] [Module O V]
-    [IsScalarTower O (KK O) V] [FiniteDimensional (KK O) V] (E : GLOps n (KK O) V) (hE : IsGLRep E)
-    (M : Submodule O V) (hM : UZLattice E M) (hMQ : MQ (K := KK O) M = ⊤)
-    (lam : Fin n → ℤ) (e : Module.End (KK O) V) (he : IsIsoProj E lam e) (x : V) (hx : x ∈ M) :
-    ((p : O) ^ (N0 n * deF p n (ellOf E (MQ M)))) • e x ∈ M := by
-  haveI : CharZero (KK O) := charZero_fraction_field_of_setting S hG.prime
-  by_cases hv : ∃ v0, IsHWV E lam v0
-  · obtain ⟨v0, hv0⟩ := hv
-    have hL := cyclicSubmodule_isSubrepresentation E v0
-    obtain ⟨d, b, hbM, hbc⟩ := hB O V M hM.2 hMQ (cyclicSubmodule E v0)
-    have hEH : IsGLRep (homRepresentation (restrictRepresentation E _ hL) E) :=
-      hHom n (KK O) _ V _ E (hRes n (KK O) V E hE _ hL) hE
-    obtain ⟨P, hP⟩ := hInv n (KK O) _ _ hEH
-    obtain ⟨hl1, hl2⟩ := hLat O n V E hE M hM hMQ _ hL
-    have key : ∀ i, ((p : O) ^ (N0 n * deF p n (ellOf E (MQ M)))) • P ((b.coord i).smulRight x) (b i) ∈ M := by
-      intro i
-      have hf : (b.coord i).smulRight x ∈ homLattice M (cyclicSubmodule E v0) := by
-        intro y hy
-        obtain ⟨o, ho⟩ := hbc y hy i
-        rw [LinearMap.smulRight_apply, ho, algebraMap_smul]
-        exact M.smul_mem _ hx
-      have h1 := h p n' O S hG n _ _ hEH _ hl1 hl2 P hP _ hf
-      have h2 := h1 (b i) (hbM i)
-      rw [LinearMap.smul_apply] at h2
-      refine pow_smul_mem_of_le' M _ ?_ h2
-      refine Nat.mul_le_mul_left _ (log_bound_monotone p n ?_)
-      rw [hl2, hMQ]
-      exact hEll n (KK O) V E hE _ hL
-    rw [← hTh n (KK O) V E hE lam e he v0 hv0 hL P hP (Fin d) b x, Nat.cast_smul_eq_nsmul, smul_comm,
-      Finset.smul_sum]
-    exact M.smul_of_tower_mem _ (M.sum_mem fun i _ => key i)
-  · have h0 : e x = 0 := by
-      have hle : (⨆ mu, isoSub E mu) ≤ LinearMap.ker e := by
-        refine iSup_le fun mu => ?_
-        by_cases hmu : mu = lam
-        · subst hmu
-          refine Submodule.span_le.2 ?_
-          rintro y ⟨u, _, v, hv', _⟩
-          exact absurd ⟨v, hv'⟩ hv
-        · intro y hy
-          exact he.2 mu hmu y hy
-      have : x ∈ (⨆ mu, isoSub E mu) := by rw [hTop n (KK O) V E hE]; trivial
-      exact hle this
-    rw [h0, smul_zero]; exact M.zero_mem
-
-theorem lattice_theorem_of_interfaces (D : Formalism.BasicNotions.D7) (h : InvariantDenominatorEllPBound) (hTop : IsotypicSubmodulesSpanTop) (hRes : RestrictionIsRepresentation) (hHom : HomSpaceIsRepresentation)
-    (hInv : InvariantProjectionExists) (hTh : IsotypicProjectorTraceFormula) (hB : LatticeAdaptedBasisExists) (hLat : HomLatticeDividedPowerStable) (hEll : HomRepEllBoundedByTarget) :
-    IsotypicProjectorTheoremField D := by
-  unfold IsotypicProjectorTheoremField
-  intro p n' O _ _ _ S hG n _ V _ _ _ _ _ E hE M hM hMQ Sw _ e he x hx
-  rw [Finset.smul_sum]
-  refine Submodule.sum_mem _ fun lam hlam => ?_
-  have h1 := lattice_theorem_single_rep h hTop hRes hHom hInv hTh hB hLat hEll p n' O S hG n V E hE M hM hMQ lam (e lam)
-    (he lam hlam) x hx
-  refine pow_smul_mem_of_le' M (p : O) ?_ h1
-  calc N0 n * deF p n (ellOf E (MQ M)) ≤ N0 n * deF p n (ellOf E (MQ M) + ellWt lam) :=
-        Nat.mul_le_mul_left _ (log_bound_monotone p n (Nat.le_add_right _ _))
-    _ ≤ _ := Finset.le_sup (f := fun lam => N0 n * deF p n (ellOf E (MQ M) + ellWt lam)) hlam
 
 end Formalism.MainNotions.G.GLWeightTheory

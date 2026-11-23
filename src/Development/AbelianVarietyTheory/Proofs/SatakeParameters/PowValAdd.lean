@@ -1,18 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.EllipticCurveLevels.ClosedAtLConclusionOfMem
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EigenvectorSmallSubFiniteEigenApproxInequalityStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EigenFormEqFiniteSumAutRepEigenFormsStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantZmodLift
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAlgebraicFormWeightLevelSmoothAtPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsFiniteBasisAlgebraicForms
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsOpenSubgroupCharacterKernel
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAlgebraicModularFormMulArchInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsAutomorphicOfWeightOfNonzeroFixedFinPartFormStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLocalComponentEigenvectorSplitPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSupercuspidalTypeCharacterZmodPowStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsWeight
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -52,21 +88,21 @@ def stab (W : Wt E n) (f : algForms W) : Subgroup (UA E n) where
     rw [inv_mul_cancel_right] at this
     exact this.symm
 
-theorem stab_level (W : Wt E n) (f : algForms W) (C : Subgroup (UA E n)) (hC : C ≤ finU E n)
-    (hc : IsCompact (C : Set (UA E n))) (ho : ∃ N : Set (UA E n), IsOpen N ∧ 1 ∈ N ∧ N ∩ finU E n ⊆ C) :
+theorem stab_level (W : Wt E n) (f : algForms W) (C : Subgroup (UA E n)) (hC : C ≤ finU (E := E) (n := n))
+    (hc : IsCompact (C : Set (UA E n))) (ho : ∃ N : Set (UA E n), IsOpen N ∧ 1 ∈ N ∧ N ∩ finU (E := E) (n := n) ⊆ C) :
     IsCompact ((C ⊓ stab W f : Subgroup (UA E n)) : Set (UA E n)) ∧
-      ∃ N : Set (UA E n), IsOpen N ∧ 1 ∈ N ∧ N ∩ finU E n ⊆ (C ⊓ stab W f : Subgroup (UA E n)) := by
+      ∃ N : Set (UA E n), IsOpen N ∧ 1 ∈ N ∧ N ∩ finU (E := E) (n := n) ⊆ (C ⊓ stab W f : Subgroup (UA E n)) := by
   obtain ⟨N₁, hN₁, h1, hN₁C⟩ := ho
   have hsm := isSmooth_algRep W f
   obtain ⟨t, ht, hte⟩ := isOpen_induced_iff.1 hsm
-  have hfix : ∀ x (hx : x ∈ finU E n), x ∈ t → x ∈ stab W f := by
+  have hfix : ∀ x (hx : x ∈ finU (E := E) (n := n)), x ∈ t → x ∈ stab W f := by
     intro x hx hxt v g
-    have : (⟨x, hx⟩ : finU E n) ∈ {k : finU E n | algRep W k f = f} := by rw [← hte]; exact hxt
+    have : (⟨x, hx⟩ : finU (E := E) (n := n)) ∈ {k : finU (E := E) (n := n) | algRep W k f = f} := by rw [← hte]; exact hxt
     exact congrArg (fun F : algForms W => F.1 v g) this
   have h1t : (1 : UA E n) ∈ t := by
-    have : (1 : finU E n) ∈ {k : finU E n | algRep W k f = f} := by simp
+    have : (1 : finU (E := E) (n := n)) ∈ {k : finU (E := E) (n := n) | algRep W k f = f} := by simp
     rw [← hte] at this; exact this
-  have hN : N₁ ∩ t ∩ finU E n ⊆ (C ⊓ stab W f : Subgroup (UA E n)) := fun x ⟨⟨hx1, hxt⟩, hxf⟩ =>
+  have hN : N₁ ∩ t ∩ finU (E := E) (n := n) ⊆ (C ⊓ stab W f : Subgroup (UA E n)) := fun x ⟨⟨hx1, hxt⟩, hxf⟩ =>
     ⟨hN₁C ⟨hx1, hxf⟩, hfix x hxf hxt⟩
   refine ⟨?_, N₁ ∩ t, hN₁.inter ht, ⟨h1, h1t⟩, hN⟩
   haveI : CompactSpace C := isCompact_iff_compactSpace.1 hc

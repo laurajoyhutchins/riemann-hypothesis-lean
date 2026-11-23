@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.IdeleNormCharacters.AbsFactsAlt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.IdeleNormCharacters.AbsFactsAlt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCmAdeleUnitCharacterReadingHeckeChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Host Formalism.ConjugateSelfDual Neutral.B1 ReciprocityTheory.Gal
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.HeckeGal GlobalTheory.CuspRep UpperTheory.Gal.TP.Chr
@@ -24,7 +64,10 @@ private theorem fst_extZero (y : Formalism.MainNotions.GlobalTheoryTheory.GenusM
     erw [GlobalTheory.UnitaryHeckeBaseChange.toAdele_tmul]
     show GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.infiniteAdeleMap F E 0 * _ = 0
     rw [map_zero, zero_mul]
-  | add y z hy hz => simp [map_add, hy, hz]
+  | add y z hy hz =>
+    simp only [map_add (f := _)]
+    erw [Prod.fst_add, hy, hz]
+    simp
 
 private theorem snd_extZero (y : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Af F ⊗[F] E) :
     (GlobalTheory.UnitaryHeckeBaseChange.toAdele F E (extZero F E y)).2 = finAdEquiv F E y := by
@@ -43,21 +86,21 @@ private theorem snd_extZero (y : Formalism.MainNotions.GlobalTheoryTheory.GenusM
     refine Eq.trans ?_ (finAdEquiv_tmul a x w).symm
     simp only [complMap_rfl, GlobalTheory.CharTransport.locMap_eq]
     rfl
-  | add y z hy hz => simp [map_add, hy, hz]
+  | add y z hy hz =>
+    simp only [map_add (f := _)]
+    erw [Prod.snd_add, hy, hz]
 
 private theorem toAdele_locIdele (w : HeightOneSpectrum (𝓞 E)) (x : (w.adicCompletion E)ˣ) :
     GlobalTheory.UnitaryHeckeBaseChange.toAdele F E (locIdele F w x : AF F ⊗[F] E) =
       (GlobalTheory.Mem.Chr.localIdele E w x : AdeleRing (𝓞 E) E) := by
   rw [coe_locIdele]
-  simp only [map_add, map_sub, map_one]
+  simp only [map_add (f := _), map_sub, map_one]
   refine Prod.ext ?_ ?_
   · erw [Prod.fst_add, Prod.fst_sub, fst_extZero, fst_extZero]
     simp
     rfl
   · erw [Prod.snd_add, Prod.snd_sub, snd_extZero, snd_extZero]
     simp
-    show (1 : FiniteAdeleRing (𝓞 E) E) - 1 + finiteSingle E w (x : w.adicCompletion E) = _
-    rw [sub_self, zero_add]
     rfl
 
 end

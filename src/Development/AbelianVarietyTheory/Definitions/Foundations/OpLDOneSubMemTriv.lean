@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.Letter
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.Letter
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactification.OnePoint.ProjectiveLine
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.ZMod.Units
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,11 +90,6 @@ def admitted (N l : ℕ) : Letter → Prop
 def LetAlg (R : Type) [CommRing R] (S : Letter → Prop) : Subalgebra R (FreeAlgebra R Letter) :=
   Algebra.adjoin R (FreeAlgebra.ι R '' {T | S T})
 
-def SSPot (N l w : ℕ) (lam : Letter → ℂ) : Prop :=
-  ∃ P ∈ LetAlg ℂ (admitted N l), FreeAlgebra.lift ℂ lam P = 1 ∧ ∀ F ∈ Pot ℂ w (Gam N l), ∀ T : Letter, admitted N l T →
-    (opL ℂ N l T - lam T • (1 : Module.End ℂ (ℂ → MvPolynomial (Fin 2) ℂ)))
-      (FreeAlgebra.lift ℂ (opL ℂ N l) P F) ∈ Triv ℂ w (Gam N l)
-
 variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ}
 
 def FrobAt (q : ℕ) (s : Ω ≃ₐ[ℚ] Ω) : Prop :=
@@ -61,10 +106,6 @@ def Tower.opV (X : Tower Ω ε) (N l : ℕ) [Fact l.Prime] (E : Type) [Field E] 
 def Tower.galV (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (E : Type) [Field E] [Algebra ℤ_[l] E] (s : Ω ≃ₐ[ℚ] Ω) :
     Module.End E (E ⊗[ℤ_[l]] X.Fn l) :=
   LinearMap.baseChange E (X.galB l s)
-
-def Tower.SSB (X : Tower Ω ε) (N l w : ℕ) [Fact l.Prime] (E : Type) [Field E] [Algebra ℤ_[l] E] (lam : Letter → E) : Prop :=
-  ∃ P ∈ LetAlg E (admitted N l), FreeAlgebra.lift E lam P = 1 ∧ ∀ x ∈ X.VB N l w E, ∀ T : Letter, admitted N l T →
-    (X.opV N l E T - lam T • (1 : Module.End E (E ⊗[ℤ_[l]] X.Fn l))) (FreeAlgebra.lift E (X.opV N l E) P x) = 0
 
 namespace Betti
 
@@ -140,7 +181,7 @@ theorem polySlash_polySlash (m m' : Matrix (Fin 2) (Fin 2) ℤ) (p : MvPolynomia
   have h1 : (slP m').comp (slP m) = slP (R := R) (m * m') := by
     apply MvPolynomial.algHom_ext
     intro i
-    simp only [AlgHom.comp_apply, slP_X, map_add, map_smul, Matrix.mul_apply, Fin.sum_univ_two,
+    simp only [AlgHom.comp_apply, slP_X, map_add (f := _), map_smul, Matrix.mul_apply, Fin.sum_univ_two,
       Int.cast_add, Int.cast_mul]
     module
   exact DFunLike.congr_fun h1 p
@@ -160,7 +201,7 @@ theorem eval_slP (m : Matrix (Fin 2) (Fin 2) ℤ) (u : Fin 2 → R) (p : MvPolyn
   | C a => simp [slP]
   | add p q hp hq => simp [hp, hq]
   | mul_X p i hp =>
-    simp only [map_mul, hp, slP_X, MvPolynomial.eval_X, map_add, MvPolynomial.smul_eval]
+    simp only [map_mul, hp, slP_X, MvPolynomial.eval_X, map_add (f := _), MvPolynomial.smul_eval]
     congr 1
     fin_cases i <;> simp [Matrix.mulVec, dotProduct, Fin.sum_univ_two]
 
@@ -169,7 +210,7 @@ theorem toGQ_sl (γ : SL(2, ℤ)) : toGQ (γ : Matrix (Fin 2) (Fin 2) ℤ) = ofS
     rw [Matrix.SpecialLinearGroup.det_coe]
     exact one_pos
   unfold toGQ
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   apply Subtype.ext
   apply Units.ext
   rfl
@@ -185,7 +226,7 @@ def potSub (R : Type) [CommRing R] (w : ℕ) (Γ : Subgroup SL(2, ℤ)) : Submod
     obtain ⟨p, hp⟩ := hF' γ hγ
     obtain ⟨q, hq⟩ := hG' γ hγ
     refine ⟨p + q, fun z hz => ?_⟩
-    rw [← hp z hz, ← hq z hz]; simp only [Pi.add_apply, map_add]; ring
+    rw [← hp z hz, ← hq z hz]; simp only [Pi.add_apply, map_add (f := _)]; ring
   smul_mem' := by
     rintro c F ⟨hF, hF'⟩
     refine ⟨fun z => (MvPolynomial.homogeneousSubmodule (Fin 2) R w).smul_mem c (hF z), fun γ hγ => ?_⟩
@@ -193,44 +234,7 @@ def potSub (R : Type) [CommRing R] (w : ℕ) (Γ : Subgroup SL(2, ℤ)) : Submod
     refine ⟨c • p, fun z hz => ?_⟩
     rw [← hp z hz]; simp only [Pi.smul_apply, map_smul, smul_sub]
 
-def trivSub (R : Type) [CommRing R] (w : ℕ) (Γ : Subgroup SL(2, ℤ)) : Submodule R (ℂ → MvPolynomial (Fin 2) R) where
-  carrier := Triv R w Γ
-  zero_mem' := ⟨0, 0, fun _ _ _ _ => by simp, fun _ _ => by simp⟩
-  add_mem' := by
-    rintro F G ⟨ψ, p, h1, h2⟩ ⟨ψ', p', h1', h2'⟩
-    refine ⟨ψ + ψ', p + p', fun γ hγ z hz => ?_, fun z hz => ?_⟩
-    · simp [h1 γ hγ z hz, h1' γ hγ z hz]
-    · simp only [Pi.add_apply, h2 z hz, h2' z hz]; ring
-  smul_mem' := by
-    rintro c F ⟨ψ, p, h1, h2⟩
-    refine ⟨c • ψ, c • p, fun γ hγ z hz => ?_, fun z hz => ?_⟩
-    · simp [h1 γ hγ z hz]
-    · simp [h2 z hz]
-
-@[simp] theorem mem_potSub {F : ℂ → MvPolynomial (Fin 2) R} : F ∈ potSub R w Γ ↔ F ∈ Pot R w Γ := by exact Iff.rfl
-
-@[simp] theorem mem_trivSub {F : ℂ → MvPolynomial (Fin 2) R} : F ∈ trivSub R w Γ ↔ F ∈ Triv R w Γ := by exact Iff.rfl
-
 end Slash
-
-example : slP (R := ℤ) !![1, 2; 0, 3] (MvPolynomial.X 0) = MvPolynomial.X 0 + 2 * MvPolynomial.X 1 := by
-  simp [slP_X, MvPolynomial.smul_eq_C_mul]
-
-example : admitted 5 3 (Letter.T 2) ∧ ¬ admitted 5 3 (Letter.T 0) ∧ ¬ admitted 5 3 (Letter.T 1) ∧ ¬ admitted 5 3 (Letter.T 3) ∧
-    ¬ admitted 5 3 (Letter.T 4) ∧ admitted 5 3 (Letter.D 3) ∧ ¬ admitted 5 3 (Letter.D 0) := by
-  simp only [admitted]; decide
-
-example : FreeAlgebra.ι ℂ (Letter.T 0) ∉ LetAlg ℂ (admitted 5 3) := by
-  intro h
-  have := lift_congr (f := fun _ => (0 : ℂ)) (g := fun T => match T with | Letter.T 0 => 1 | _ => 0) (fun T hT => by
-    rcases T with (_ | q) | _ | d
-    · exact absurd hT.1 Nat.not_prime_zero
-    all_goals rfl) h
-  simp at this
-
-example (s : Ω ≃ₐ[ℚ] Ω) : ¬ FrobAt 1 s := by
-  rintro ⟨V, h, -⟩
-  simp [ValuationSubring.mem_nonunits_iff] at h
 
 end Betti
 

@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivPowerCompatTwoFormDerivativeCompOneForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DivPowerCompatRelFiltrationTwoSidedRelEqBotOfBasStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DivPowerCompatTwoFormDerivativeCompOneForm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DivPowerCompatRelFiltrationTwoSidedRelEqBotOfBasStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -55,7 +94,7 @@ theorem exists_lift_of_pdDerivation (R B : Type) [CommRing R] [CommRing B] [Alge
           algebraMap_smul] }
     fun a b ↦ by
       change kq δ (w (a * b)) = a • kq δ (w b) + b • kq δ (w a)
-      rw [hw, map_add, map_smul, map_smul, smulC, smulC]
+      rw [hw, map_add (f := _), map_smul, map_smul, smulC, smulC]
   have hv : ∀ c, v c = kq δ (w c) := fun _ ↦ rfl
   have key : ∀ ω : Ω[C⁄R], ∃ η : Ω[B⁄R], v.liftKaehlerDifferential ω = Ideal.Quotient.mk (rel R δ) (ι1 η) := by
     intro ω
@@ -69,7 +108,7 @@ theorem exists_lift_of_pdDerivation (R B : Type) [CommRing R] [CommRing B] [Alge
     | ha x y hx hy =>
       obtain ⟨a, ha⟩ := hx
       obtain ⟨b, hb⟩ := hy
-      exact ⟨a + b, by rw [map_add, ha, hb, map_add, map_add]⟩
+      exact ⟨a + b, by rw [map_add (f := _), ha, hb, map_add (f := _), map_add (f := _)]⟩
   let Φ : DR R C →ₐ[C] DR R B ⧸ rel R δ := ExteriorAlgebra.lift C ⟨v.liftKaehlerDifferential, fun m ↦ by
     obtain ⟨η, h⟩ := key m
     rw [h, ← map_mul, ExteriorAlgebra.ι_sq_zero, map_zero]⟩
@@ -82,7 +121,7 @@ theorem exists_lift_of_pdDerivation (R B : Type) [CommRing R] [CommRing B] [Alge
     rw [← Ideal.Quotient.eq, hρ]
   refine ⟨ρ, fun x y ↦ ?_, fun x y ↦ ?_, fun c ↦ ?_, fun c ω h ↦ ?_, fun x hx ↦ ?_, fun x ↦ ?_, fun j x hx ↦ ?_⟩
   · rw [sub_sub]
-    exact (cv _ _).2 (by rw [map_add, map_add, hρ, hρ])
+    exact (cv _ _).2 (by rw [map_add (f := _), map_add (f := _), hρ, hρ])
   · exact (cv _ _).2 (by rw [map_mul, map_mul, hρ, hρ])
   · exact (cv _ _).2 (by rw [AlgHom.commutes, Ideal.Quotient.mk_algebraMap]; rfl)
   · exact (cv _ _).2 (by rw [hΦD, ← h, kq_mk])
@@ -92,7 +131,7 @@ theorem exists_lift_of_pdDerivation (R B : Type) [CommRing R] [CommRing B] [Alge
       obtain ⟨n, a, ha, rfl⟩ := hx
       rw [map_sub, map_smul, map_sub, map_smul, hΦD, hΦD, hwd n a ha, map_smul, smulC, sub_self]
     | zero => exact map_zero _
-    | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+    | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
     | smul r x _ ih => rw [smul_eq_mul, map_mul, ih, mul_zero]
   · obtain ⟨η, h⟩ := key x
     exact ⟨η, (cv _ _).2 (by rw [hΦι, h])⟩
@@ -104,7 +143,7 @@ theorem exists_lift_of_pdDerivation (R B : Type) [CommRing R] [CommRing B] [Alge
     | add x y i _ _ hx hy =>
       obtain ⟨a, ha, ha'⟩ := hx
       obtain ⟨b, hb, hb'⟩ := hy
-      exact ⟨a + b, add_mem ha hb, (cv _ _).2 (by rw [map_add, (cv _ _).1 ha', (cv _ _).1 hb', map_add])⟩
+      exact ⟨a + b, add_mem ha hb, (cv _ _).2 (by rw [map_add (f := _), (cv _ _).1 ha', (cv _ _).1 hb', map_add (f := _)])⟩
     | mem_mul m hm i x hx ih =>
       obtain ⟨ω, rfl⟩ := hm
       obtain ⟨η, hη⟩ := key ω

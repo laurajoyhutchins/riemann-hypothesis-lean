@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OfE
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OfE
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteAdeleHaarEqProductLocalMeasures
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountableStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicTupleCompactSetsStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicTupleProjectionsStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRingStatement
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,10 +107,10 @@ theorem scale_one (v : HeightOneSpectrum (𝓞 F)) (Q : Set (Fv F v)) (hQ : IsCo
       · have hvt : Valued.v t ≠ 0 := (Valuation.ne_zero_iff _).2 ht
         obtain ⟨n, hn⟩ := exists_pow_lt₀ hp1 (Units.mk0 _ (inv_ne_zero hvt))
         refine Set.mem_iUnion.2 ⟨n, ?_⟩
-        simp only [Set.mem_setOf_eq, map_mul, map_pow]
+        simp only [Set.mem_ofPred_eq, map_mul, map_pow]
         exact (mul_le_mul' hn.le le_rfl).trans (inv_mul_cancel₀ hvt).le)
     (directed_of_isDirected_le fun i j hij t ht => by
-      simp only [Set.mem_setOf_eq] at ht ⊢
+      simp only [Set.mem_ofPred_eq] at ht ⊢
       rw [← Nat.sub_add_cancel hij, pow_add, mul_assoc, map_mul, map_pow]
       exact mul_le_one' (pow_le_one' hp1.le _) ht)
   exact ⟨p ^ k, pow_pos hp0 k, fun t ht => (HeightOneSpectrum.mem_adicCompletionIntegers (𝓞 F) F v).2 (by
@@ -159,8 +208,8 @@ theorem unit_box : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberF
     continuous_pi fun a => continuous_pi fun i =>
       (Units.continuous_val.comp continuous_fst).mul ((continuous_apply_apply a i).comp continuous_snd)
   have hK2 : IsCompact ((fun q : (AF F ⊗[F] E)ˣ × (Fin 1 → Fin 1 → AF F ⊗[F] E) =>
-      (fun a i => (q.1 : AF F ⊗[F] E) * q.2 a i : Fin 1 → Fin 1 → AF F ⊗[F] E)) '' (K⁻¹ ×ˢ K1)) :=
-    (hK.inv.prod hK1).image hcont
+      (fun a i => (q.1 : AF F ⊗[F] E) * q.2 a i : Fin 1 → Fin 1 → AF F ⊗[F] E)) '' ((Inv.inv '' K) ×ˢ K1)) :=
+    ((hK.image continuous_inv).prod hK1).image hcont
   obtain ⟨N, ρ, hN, hρ, hsub⟩ := u2 _ hK2
   refine ⟨N, N * ρ, hN, fun k hk X ε hε hne => ?_⟩
   set Y : Fin 1 → Fin 1 → AF F ⊗[F] E := fun a i =>
@@ -183,7 +232,7 @@ theorem unit_box : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberF
   have hWY : (fun a i => ((k⁻¹ : (AF F ⊗[F] E)ˣ) : AF F ⊗[F] E) * Y a i) = W := by
     funext a i
     simp only [hY, hW, Units.val_mul, ← mul_assoc, Units.inv_mul, one_mul]
-  obtain ⟨hW1, hW2⟩ := hsub W ⟨(k⁻¹, Y), ⟨Set.inv_mem_inv.2 hk, hYK⟩, hWY⟩
+  obtain ⟨hW1, hW2⟩ := hsub W ⟨(k⁻¹, Y), ⟨⟨k, hk, rfl⟩, hYK⟩, hWY⟩
   obtain ⟨hr1', hr2'⟩ := hray ε hε
   have hWv : ∀ v, projV v (projFin W) = ratTup (Fv F v) X := fun v => projV_ofF _ hr2' v X
   have hWinf : projInf W = fun a i => (θ ε ⊗ₜ[F] (1 : E)) * ratTup (Ainf F) X a i := projInf_ofF _ _ hr1' X

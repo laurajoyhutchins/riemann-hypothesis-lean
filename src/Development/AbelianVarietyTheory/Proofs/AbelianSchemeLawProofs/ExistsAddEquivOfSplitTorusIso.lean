@@ -1,7 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsSplitTorusPointsMulEquiv
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueCharacterOfMul
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsSplitTorusPointsMulEquiv
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueCharacterOfMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out
@@ -67,20 +111,23 @@ theorem exists_addMonoidHom [ConnectedSpace S]
 
 end SplitTorusHom
 
-open SplitTorusHom in
 
+open SplitTorusHom in
 theorem exists_addEquiv_of_splitTorus_iso :
     ∀ (S : Scheme.{0}) [ConnectedSpace S] (X X' : Type) [AddCommGroup X] [AddCommGroup X']
       (θ : splitTorus S X' ≅ splitTorus S X), IsMonHom θ.hom →
       ∃ xe : X' ≃+ X, ∀ x : X',
         θ.hom.left.appTop.hom (charUnit S X (xe x)).val = (charUnit S X' x).val := by
   intro S _ X X' _ _ θ hθ
-  obtain ⟨φ, hφ⟩ := exists_addMonoidHom θ.hom
-  obtain ⟨ψ, hψ⟩ := exists_addMonoidHom θ.inv
-  have h1 (x : X') : φ (ψ x) = x := charUnit_injective (S := S) (by
-    rw [← hφ, ← hψ, ← appTop_comp, Iso.hom_inv_id, appTop_id])
-  have h2 (x : X) : ψ (φ x) = x := charUnit_injective (S := S) (by
-    rw [← hψ, ← hφ, ← appTop_comp, Iso.inv_hom_id, appTop_id])
+  letI : IsMonHom θ.hom := hθ
+  obtain ⟨φ, hφ⟩ := SplitTorusHom.exists_addMonoidHom θ.hom
+  obtain ⟨ψ, hψ⟩ := SplitTorusHom.exists_addMonoidHom θ.inv
+  have h1 (x : X') : φ (ψ x) = x := SplitTorusHom.charUnit_injective (S := S) (by
+    rw [← hφ, ← hψ, ← SplitTorusHom.appTop_comp, Iso.hom_inv_id,
+      SplitTorusHom.appTop_id])
+  have h2 (x : X) : ψ (φ x) = x := SplitTorusHom.charUnit_injective (S := S) (by
+    rw [← hψ, ← hφ, ← SplitTorusHom.appTop_comp, Iso.inv_hom_id,
+      SplitTorusHom.appTop_id])
   refine ⟨{ ψ with invFun := φ, left_inv := h1, right_inv := h2 }, fun x => ?_⟩
   rw [hφ]
   exact congrArg (fun z => (charUnit S X' z).val) (h1 x)

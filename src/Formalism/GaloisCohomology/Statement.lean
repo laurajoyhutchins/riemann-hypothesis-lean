@@ -1,4 +1,48 @@
-import ReciprocityTheory.Hypotheses.GalCoh
+module
+
+public import ReciprocityTheory.Hypotheses.GalCoh
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,8 +77,8 @@ def scalRep {R : Type*} [CommRing R] {Γ : Type*} [Group Γ] (M : Type*) [AddCom
   map_mul' g h := by
     ext x
     simp only [map_mul, Units.val_mul, mul_smul, LinearMap.smul_apply, LinearMap.id_apply,
-      Module.End.mul_apply, map_smul]
-    first | rfl | exact smul_comm _ _ _
+      mul_apply_eq_comp, map_smul]
+    exact smul_comm _ _ _
 
 @[simp] theorem scalRep_apply {R : Type*} [CommRing R] {Γ : Type*} [Group Γ] (M : Type*)
     [AddCommGroup M] [Module R M] (ψ : Γ →* Rˣ) (g : Γ) (m : M) :
@@ -45,12 +89,12 @@ section Field
 variable {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω]
   (l : ℕ) [Fact l.Prime]
 
-variable (F) in
 
+variable (F) in
 def Above : Set (HeightOneSpectrum (𝓞 F)) := {v | ((l : ℕ) : 𝓞 F) ∈ v.asIdeal}
 
-variable (F Ω) in
 
+variable (F Ω) in
 structure LData where
 
   S : Finset (HeightOneSpectrum (𝓞 F))
@@ -60,7 +104,7 @@ structure LData where
   hA : ∀ v, IsPlaceOver (A v) v.1
 
   chi : GS Ω (S : Set (HeightOneSpectrum (𝓞 F))) →* ℤ_[l]ˣ
-  hchi : chi.comp (toGS Ω _) = cycZ F Ω l
+  hchi : chi.comp (toGS Ω _) = cycZ (F := F) (Ω := Ω) l
 
 variable {l}
 
@@ -119,21 +163,9 @@ end Field
 def LDataExists : Prop := ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
   [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime], Nonempty (LData F Ω l)
 
-def Indep : Prop := ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
-  [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (D D' : LData F Ω l) (e : ℤ),
-  shaLen D e = shaLen D' e ∧ VLen D e = VLen D' e ∧ sumLocalH0TwistLength D e = sumLocalH0TwistLength D' e
-
 def ContTw : Prop := ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
   [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (D : LData F Ω l) (e : ℤ),
   ContAction (qzTw D e) ∧ ContAction (zlTw D e)
-
-def GlobalH0TwistFiniteLength : Prop := ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
-  [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (D : LData F Ω l) (e : ℤ), e ≠ 0 →
-  Module.length ℤ_[l] (H0 (qzTw D e)) < ⊤
-
-def LocalH0TwistFiniteLength : Prop := ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
-  [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (D : LData F Ω l) (e : ℤ), e ≠ 0 → ∀ v : D.S,
-  Module.length ℤ_[l] (H0 ((qzTw D e).comp (locFam D.S D.A v))) < ⊤
 
 def VFormula : Prop := ∀ (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
   [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (D : LData F Ω l) (e : ℤ), PTCase F l →
@@ -146,8 +178,8 @@ variable {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
   {R : Type} [CommRing R] {M : Type} [AddCommGroup M] [Module R M] [TopologicalSpace M]
   [IsTopologicalAddGroup M] [ContinuousConstSMul R M]
 
-variable (F Ω) in
 
+variable (F Ω) in
 abbrev Places : Type :=
   {A : HeightOneSpectrum (𝓞 F) → ValuationSubring Ω // ∀ v, IsPlaceOver (A v) v}
 
@@ -165,11 +197,6 @@ def bkCond (rho : Representation R (G F Ω) M) (A : Places F Ω)
     ∀ v, Submodule R (H1 (rho.comp (Dec (F := F) (A.1 v)).subtype)) :=
   open Classical in
   fun v => if ((l : ℕ) : 𝓞 F) ∈ v.asIdeal then Ll v else if v ∈ Sig then ⊤ else unrAt rho (A.1 v)
-
-def selLen (rho : Representation R (G F Ω) M) (A : Places F Ω)
-    (l : ℕ) (Sig : Set (HeightOneSpectrum (𝓞 F)))
-    (Ll : ∀ v, Submodule R (H1 (rho.comp (Dec (F := F) (A.1 v)).subtype))) : ℕ∞ :=
-  Module.length R (SelAll rho A (bkCond rho A l Sig Ll))
 
 end Sel
 

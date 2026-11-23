@@ -1,13 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.DiscreteSeriesCoefficientsCuspidal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.AlgOfCyc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.AfDesc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.AutomorphicFormHyp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TAlgCyc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TAlgRes
+module
 
-set_option maxHeartbeats 800000
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.AfDesc
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenConnectedComponentOfOneInf
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenKerOfInfConn
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PlaceEqOfContEmbCompEq
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ConclusionAbsPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TAlgCyc
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.TAlgRes
+import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
+
+
+
 
 section
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.HeckeGal GlobalTheory.GalOfCusp Filter Topology
@@ -176,14 +222,17 @@ private theorem nhd_loc (V : Set (Ideles E)) (hV : V ∈ 𝓝 (1 : Ideles E)) : 
       · subst hw
         rw [Function.update_self, Function.update_self, add_sub_cancel_left, e1]
       · rw [Function.update_of_ne hw, Function.update_of_ne hw, sub_self, smul_zero, add_zero]
-  refine ⟨{u | (u : AdeleRing (𝓞 E) E).2 - 1 ∈ P ∧ ((u⁻¹ : Ideles E) : AdeleRing (𝓞 E) E).2 - 1 ∈ P}, Filter.inter_mem ?_ ?_,
+  refine ⟨{u | (u : AdeleRing (𝓞 E) E).2 - 1 ∈ P ∧ ((u⁻¹ : Ideles E) : AdeleRing (𝓞 E) E).2 - 1 ∈ P}, ?_,
     fun u hu v x hx => ?_⟩
-  · have hc : Continuous fun u : Ideles E => (u : AdeleRing (𝓞 E) E).2 - 1 :=
-      (continuous_snd.comp (Units.continuous_val (M := AdeleRing (𝓞 E) E))).sub continuous_const
-    exact hc.continuousAt.preimage_mem_nhds (t := P) (by convert hP; exact sub_self _)
-  · have hc : Continuous fun u : Ideles E => ((u⁻¹ : Ideles E) : AdeleRing (𝓞 E) E).2 - 1 :=
-      (continuous_snd.comp (Units.continuous_coe_inv (M := AdeleRing (𝓞 E) E))).sub continuous_const
-    exact hc.continuousAt.preimage_mem_nhds (t := P) (by convert hP; exact sub_self _)
+  · change ({u : Ideles E | (u : AdeleRing (𝓞 E) E).2 - 1 ∈ P} ∩
+      {u : Ideles E | ((u⁻¹ : Ideles E) : AdeleRing (𝓞 E) E).2 - 1 ∈ P}) ∈ 𝓝 1
+    apply Filter.inter_mem
+    · have hc : Continuous fun u : Ideles E => (u : AdeleRing (𝓞 E) E).2 - 1 :=
+        (continuous_snd.comp (Units.continuous_val (M := AdeleRing (𝓞 E) E))).sub continuous_const
+      exact hc.continuousAt.preimage_mem_nhds (t := P) (by convert hP; exact sub_self _)
+    · have hc : Continuous fun u : Ideles E => ((u⁻¹ : Ideles E) : AdeleRing (𝓞 E) E).2 - 1 :=
+        (continuous_snd.comp (Units.continuous_coe_inv (M := AdeleRing (𝓞 E) E))).sub continuous_const
+      exact hc.continuousAt.preimage_mem_nhds (t := P) (by convert hP; exact sub_self _)
   · obtain ⟨k1, b, hb, e⟩ := key u hu.1 v x hx
     obtain ⟨k2, b', hb', e'⟩ := key u⁻¹ hu.2 v x⁻¹ (by
       rw [Units.val_inv_eq_inv_val, hx]
@@ -246,8 +295,10 @@ private theorem pos_conn (k : Eˣ) (hk : ∀ φ : E →+* ℝ, 0 < φ (k : E)) :
     · exact fun y hy => ⟨Units.mk0 y fun e => h0 (e ▸ hy), rfl⟩
   rcases w.isReal_or_isComplex with hw | hw
   · let e := InfinitePlace.Completion.ringEquivRealOfIsReal hw
-    have he : e (algebraMap E w.Completion (k : E)) = InfinitePlace.embedding_of_isReal hw (k : E) :=
-      InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hw ((WithAbs.equiv w.1).symm (k : E))
+    have he : e (algebraMap E w.Completion (k : E)) = InfinitePlace.embedding_of_isReal hw (k : E) := by
+      rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply,
+        Algebra.algebraMap_self_apply]
+      simpa [e] using InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hw ((WithAbs.equiv w.1).symm (k : E))
     refine key (e ⁻¹' Set.Ioi 0) ((InfinitePlace.Completion.isometryEquivRealOfIsReal hw).toHomeomorph.isPreconnected_preimage.2
       isPreconnected_Ioi) (by simp) (by simp) ?_
     rw [Set.mem_preimage, he]

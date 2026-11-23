@@ -1,13 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CovolXOfCovol
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HostBoundHolds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightBoundHolds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjCmHostRootNeSelf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AnchoredWeightIndefiniteLiftGaps
+module
 
-set_option synthInstance.maxHeartbeats 400000
+public import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AnchoredWeightIndefiniteLiftGaps
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjCmHostRootNeSelf
+import Formalism.SharpRestriction.GlobalSchurBounds.QuadraticLogDerivCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -34,7 +67,7 @@ theorem anchor_eq (P : ParameterChoice' D L) (t : D.what₂.Tau) (τ : Psi p.T.Q
   have hj : D.R.k - 2 < (D.R.sigW ((i : ℕ) + 1)).1 := by omega
   obtain ⟨-, hnn⟩ := GlobalTheory.RecGaps.bigEnt p P i t (D.R.k - 2) hj
   unfold anchor
-  rw [dif_pos hlt, GlobalTheory.CovTop.WtRead.laOf_big D p.T p.fw.laws i (p.κ i) t τ hτ _ ⟨D.R.k - 2, hj⟩ (by simp; omega),
+  rw [dite_eq_left hlt, GlobalTheory.CovTop.WtRead.laOf_big D p.T p.fw.laws i (p.κ i) t τ hτ _ ⟨D.R.k - 2, hj⟩ (by simp; omega),
     (p.fw.kap i t).1 ⟨D.R.k - 2, hj⟩]
   rw [GlobalTheory.RecGaps.sig_Wc]
   unfold aPl
@@ -47,7 +80,7 @@ theorem abs_anchor_sub_le (P : ParameterChoice' D L) (t : D.what₂.Tau) (τ : P
   have ha := anchor_eq p i P t τ hτ
   have hn : (p.κ i).n = D.R.nV := (p.fw.kap i t).2.2
   have hv : Formalism.L2.NTheta.lamAt (D.hc t) (D.R.k - 2) = (D.hc t).v ⟨D.R.k - 2, by omega⟩ := by
-    unfold Formalism.L2.NTheta.lamAt; rw [dif_pos (by omega)]
+    unfold Formalism.L2.NTheta.lamAt; rw [dite_eq_left (by omega)]
   have hc := L.cloud_v t ⟨D.R.k - 2, by omega⟩
   have hsw : ((D.R.sigW ((i : ℕ) + 1)).1 : ℚ) - ((D.R.k - 2 : ℕ) + 1) = (i : ℚ) + 1 := by
     rw [show (D.R.sigW ((i : ℕ) + 1)).1 = D.R.k + (i : ℕ) by simp only [Ranks.sigW]; omega,
@@ -72,7 +105,7 @@ theorem abs_anchor_sub_le (P : ParameterChoice' D L) (t : D.what₂.Tau) (τ : P
   rw [abs_le]
   constructor <;> linarith [hc.1, hc.2]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem anchorAt_of {PP A : ℝ} (P : ParameterChoice' D L) (hw : WtNum p i PP) (hh : HostNum D L PP A 1) : AnchorAt p i 100 := by
   have hk := D.R.m_add_three_le_k
@@ -118,7 +151,7 @@ theorem anchorAt_of {PP A : ℝ} (P : ParameterChoice' D L) (hw : WtNum p i PP) 
     refine Finset.sum_congr rfl fun ρ _ => ?_
     congr 2
     simp only [NumDatum.w, NumDatum.eQ]
-    rw [dif_pos ⟨by omega, by omega⟩]
+    rw [dite_eq_left ⟨by omega, by omega⟩]
     congr 3
   have hancS : ∑ τ : Psi p.T.Q.H, (((dat p i).p : ℝ) - (dat p i).q) *
       ((anchor (dat p i) (wtA (p.κ i)) (p.κ i).n (D.R.k - 1) τ : ℤ) : ℝ) * (ofRecord D L p.Del p.h0).logOm =
@@ -211,12 +244,5 @@ theorem anchorAt_of {PP A : ℝ} (P : ParameterChoice' D L) (hw : WtNum p i PP) 
 end GlobalTheory.CovTop.AnchorRd
 
 namespace GlobalTheory.CovTop
-
-theorem anchor_holds : Anchor := by
-  refine Closed.imp (Closed.and WtShape.wtN (Sizes.hostN 1)) ?_
-  rintro eps Fm CH - ⟨⟨C1, -, hW⟩, ⟨A, -, hH⟩⟩
-  obtain ⟨x0, h⟩ := EvTied.and hW hH
-  exact ⟨100, by norm_num, x0, fun x hx hle ι p hp i =>
-    AnchorRd.anchorAt_of p i (Fm.params x hx ι) ((h x hx hle ι p hp).1 i) ((h x hx hle ι p hp).2 i)⟩
 
 end GlobalTheory.CovTop

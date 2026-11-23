@@ -1,6 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MapSmulOfIsHausdorff
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
+import Development.AbelianVarietyTheory.PublishedTheorems.RelativeAmpleness.RelAmpleAndKTrivIff
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.QuadTie
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj CategoryTheory.MonObj Pointwise
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -20,11 +76,7 @@ def consZero (n : ℕ) : (Fin n → R') →ₗ[R'] (Fin (n + 1) → R') where
     funext i
     refine Fin.cases ?_ ?_ i <;> simp
 
-omit [Algebra R R'] in
-@[simp] lemma consZero_zero (n : ℕ) (w : Fin n → R') : consZero n w 0 = 0 := rfl
 
-omit [Algebra R R'] in
-@[simp] lemma consZero_succ (n : ℕ) (w : Fin n → R') (j : Fin n) : consZero n w j.succ = w j := rfl
 
 theorem scalar_descent [IsDomain R'] (D : Set (R' ≃ₐ[R] R')) (ϖ : R)
     (hπ : algebraMap R R' ϖ ≠ 0)
@@ -44,13 +96,13 @@ theorem scalar_descent [IsDomain R'] (D : Set (R' ≃ₐ[R] R')) (ϖ : R)
       intro σ hσ
       have h := hx σ hσ
       have e : σ x - x = algebraMap R R' ϖ * (σ t - t) := by
-        rw [hx']; simp only [map_add, map_mul, AlgEquiv.commutes]; ring
+        rw [hx']; simp only [map_add (f := _), map_mul, AlgEquiv.commutes]; ring
       rw [e, pow_succ'] at h
       exact (mul_dvd_mul_iff_left hπ).mp h
     obtain ⟨c1, hc1⟩ := ih t ht'
     refine ⟨c0 + ϖ * c1, ?_⟩
     have e : x - algebraMap R R' (c0 + ϖ * c1) = algebraMap R R' ϖ * (t - algebraMap R R' c1) := by
-      rw [hx']; simp only [map_add, map_mul]; ring
+      rw [hx']; simp only [map_add (f := _), map_mul]; ring
     rw [e, pow_succ']
     exact mul_dvd_mul_left _ hc1
 
@@ -88,7 +140,7 @@ theorem main_induction [IsDomain R'] [IsDiscreteValuationRing R'] (D : Set (R' �
     have hLact : ∀ (σ : R' ≃ₐ[R] R') (w : Fin n → R'),
         (fun i => σ (L w i)) = L (fun i => σ (w i)) := by
       intro σ w; funext i
-      refine Fin.cases ?_ ?_ i <;> simp [L]
+      refine Fin.cases ?_ ?_ i <;> simp [L, consZero]
     let K := N.comap L
     have hKlat : ∀ w : Fin n → R', π ^ r • w ∈ K := fun w => by
       show L (π ^ r • w) ∈ N
@@ -121,20 +173,20 @@ theorem main_induction [IsDomain R'] [IsDiscreteValuationRing R'] (D : Set (R' �
       have e : L ((fun i => σ (Fin.tail vs i)) - Fin.tail vs) = (fun i => σ (vs i)) - vs := by
         funext i
         refine Fin.cases ?_ ?_ i
-        · simp [L, hvs0, hfix σ _ hpa]
-        · intro j; simp [L, Fin.tail]
+        · simp [L, consZero, hvs0, hfix σ _ hpa]
+        · intro j; simp [L, consZero, Fin.tail]
       show L _ ∈ N
       rw [e]; exact N.sub_mem (hstab σ hσ _ hvsN) hvsN
     obtain ⟨a0, ha0, ha0K⟩ := hQK (Fin.tail vs) hvsK
     obtain ⟨vo, hvo⟩ : ∃ vo, vo = vs - L (Fin.tail vs - a0) := ⟨_, rfl⟩
     have hvoN : vo ∈ N := hvo ▸ N.sub_mem hvsN ha0K
-    have hvo0 : vo 0 = π ^ a := by rw [hvo]; simp [L, hvs0]
+    have hvo0 : vo 0 = π ^ a := by rw [hvo]; simp [L, consZero, hvs0]
     have hvorat : ∀ i, vo i ∈ Set.range (algebraMap R R') := by
       intro i
       refine Fin.cases ?_ ?_ i
       · rw [hvo0]; exact hpa
       · intro j
-        have : vo j.succ = a0 j := by rw [hvo]; simp [L, Fin.tail]
+        have : vo j.succ = a0 j := by rw [hvo]; simp [L, consZero, Fin.tail]
         rw [this]; exact ha0 j
     have hrat_add : ∀ x y : R', x ∈ Set.range (algebraMap R R') → y ∈ Set.range (algebraMap R R') →
         x + y ∈ Set.range (algebraMap R R') := by
@@ -144,8 +196,8 @@ theorem main_induction [IsDomain R'] [IsDiscreteValuationRing R'] (D : Set (R' �
         ∀ i, L w i ∈ Set.range (algebraMap R R') := by
       intro w hw i
       refine Fin.cases ?_ ?_ i
-      · simpa [L] using hrat0
-      · intro j; simpa [L] using hw j
+      · simpa [L, consZero] using hrat0
+      · intro j; simpa [L, consZero] using hw j
     refine ⟨?_, ?_⟩
     ·
       intro v hv
@@ -154,8 +206,8 @@ theorem main_induction [IsDomain R'] [IsDiscreteValuationRing R'] (D : Set (R' �
       have hLw : L w = v - t • vo := by
         funext i
         refine Fin.cases ?_ ?_ i
-        · simp [L, ht, hvo0]; ring
-        · intro j; simp [L, hw, Fin.tail]
+        · simp [L, consZero, ht, hvo0]; ring
+        · intro j; simp [L, consZero, hw, Fin.tail]
       have hwK : w ∈ K := by
         show L w ∈ N
         rw [hLw]; exact N.sub_mem hv (N.smul_mem t hvoN)
@@ -187,8 +239,8 @@ theorem main_induction [IsDomain R'] [IsDiscreteValuationRing R'] (D : Set (R' �
       have hLw : L w = u' := by
         funext i
         refine Fin.cases ?_ ?_ i
-        · simp [L, hu', he, hvo0]; rw [ht, hπdef]; ring
-        · intro j; simp [L, hw, Fin.tail]
+        · simp [L, consZero, hu', he, hvo0]; rw [ht, hπdef]; ring
+        · intro j; simp [L, consZero, hw, Fin.tail]
       have hwinv : ∀ σ ∈ D, (fun i => σ (w i)) - w ∈ K := by
         intro σ hσ
         have key : L ((fun i => σ (w i)) - w) = ((fun i => σ (u i)) - u) - (σ t - t) • vo := by

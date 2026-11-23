@@ -1,4 +1,57 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemPreG
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemCrit
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSAddLeft
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExpPowSubOne
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LevNOsmul
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemOfExp
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemZeroSubCoe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfFrame
+
+@[expose] public section
 
 set_option linter.unusedVariables false
 
@@ -124,6 +177,7 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
     intro f
     conv_lhs => rw [← bF.sum_repr f]
     show dH (∑ k, bF.repr f k • bF k) = _
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun k _ => hds _ _
 
@@ -135,6 +189,7 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
     have e2 : ιV PD (LL := LL) (V := T₂.V) (φVB PD (LL := LL) (V := T₂.V) (ellF f)) =
         ∑ k, algebraMap O LL (bF.repr f k) •
           ιV PD (LL := LL) (V := T₂.V) (φVB PD (LL := LL) (V := T₂.V) (ell k)) := by
+
       simp only [hellFdef, map_sum, map_smul]
     rw [e1, e2, Finset.smul_sum, Finset.smul_sum, ← Finset.sum_sub_distrib]
     refine Submodule.sum_mem _ fun k _ => ?_
@@ -145,7 +200,7 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
   have hellF0 : ellF 0 = 0 := by simp [hellFdef]
   have hellFa : ∀ f g, ellF (f + g) = ellF f + ellF g := by
     intro f g
-    simp only [hellFdef, map_add, Finsupp.add_apply, add_smul, Finset.sum_add_distrib]
+    simp only [hellFdef, map_add (f := _), Finsupp.add_apply, add_smul, Finset.sum_add_distrib]
   have hellFs : ∀ (o : O) f, ellF (o • f) = algebraMap O LL o • ellF f := by
     intro o f
     simp only [hellFdef, map_smul, Finsupp.smul_apply, smul_eq_mul, map_mul, mul_smul, Finset.smul_sum]
@@ -156,10 +211,10 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
         have h0 : d 0 = 0 := dH.map_zero
         simp [h0, hellF0]
       map_add' := fun f g => by
-        rw [← map_add]
+        rw [← map_add (f := _)]
         congr 1
         rw [hda, hellFa]
-        simp only [Pi.add_apply, map_add, smul_add]
+        simp only [Pi.add_apply, map_add (f := _), smul_add]
         abel }
   have hψ4 : ∀ (o : O) (x : ↥F3), ψ4 (o • x) = algebraMap O LL o • ψ4 x := by
     intro o x
@@ -190,6 +245,7 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
     have hyI : Formalism.MainNotions.CrystallineLiftingInputs.InI W T₁ c (yL f3) := by
       rw [hyLf]; exact inI_sum W T₁ c _ _ _ (fun k _ => hykI k)
     have hmapy : W.map F (yL f3) = ∑ k, bF.repr f3 k • W.map F (yk k) := by
+
       rw [hyLf, map_sum]
       exact Finset.sum_congr rfl fun k _ => Formalism.MainNotions.UnusedSlot80.ArcC.map_smulO W F _ _
     have hFyD : Formalism.MainNotions.CrystallineLiftingInputs.DL W T₂ c (W.map F (yL f3)) :=
@@ -261,6 +317,7 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
           show W.Q ^ Bn • (bF.repr f3 k • W.map F (yk k)) =
             bF.repr f3 k • (W.Q ^ Bn • W.map F (yk k))
           exact osmul_comm W T₂ _ _ _
+
       rw [e1, map_sum, hddy, hsumS]
       exact Finset.sum_congr rfl fun k _ => by rw [levN_osmul W T₂ c ζ₀, hdke k]
     have hlevy : W.levN T₂ c ζ₀ ⟨W.Q ^ (η + Bn) • W.map F (yL f3), hKy⟩ =
@@ -299,6 +356,7 @@ theorem pass4 [NeZero n] [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O
         have hd0 : ddy 0 = (PD.p : LL) ^ κ •
             ιV PD (LL := LL) (V := T₂.V) (φVB PD (LL := LL) (V := T₂.V) (ellF f3)) := by
           rw [hddyi]
+
           simp only [hellFdef, map_sum, map_smul, Finset.smul_sum]
           exact Finset.sum_congr rfl fun k _ => by rw [(hdkP k).2.1, smul_comm]
         rw [hd0, neg_zero]

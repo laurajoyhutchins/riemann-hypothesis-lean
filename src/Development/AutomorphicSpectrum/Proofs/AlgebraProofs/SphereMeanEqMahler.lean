@@ -1,7 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.HSClaim
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OnbMat
-import Development.AutomorphicSpectrum.Statements.MetricStatements.RankBound
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OnbMat
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.RegularityCompacts
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open GlobalTheory.CompanionTheory.Ar.HS NumberField MeasureTheory Matrix GroundTheory.Heights₂.Heights
 
@@ -17,8 +71,8 @@ section Cone
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [MeasurableSpace E] [BorelSpace E] [Nontrivial E]
 
-open Classical in
 
+open Classical in
 def radial (p : sphere (0 : E) 1) (z : E) : sphere (0 : E) 1 :=
   ⟨if z = 0 then (p : E) else ‖z‖⁻¹ • z, by
     split_ifs with h
@@ -104,7 +158,7 @@ variable {X Y : Type*} [MeasurableSpace X] [MeasurableSpace Y]
 lemma map_normalised {f : X → Y} (hf : MeasurableEmbedding f) {μ : Measure X} {ν : Measure Y}
     {a : ℝ≥0∞} (ha0 : a ≠ 0) (ha1 : a ≠ ⊤) (hmap : μ.map f = a • ν) (s : Set Y) :
     ((μ (f ⁻¹' s))⁻¹ • μ.restrict (f ⁻¹' s)).map f = (ν s)⁻¹ • ν.restrict s := by
-  rw [Measure.map_smul, ← hf.restrict_map, ← hf.map_apply μ s, hmap, Measure.restrict_smul,
+  rw [Measure.map_smul _ hf.measurable.aemeasurable, ← hf.restrict_map, ← hf.map_apply μ s, hmap, Measure.restrict_smul,
     Measure.smul_apply, smul_eq_mul, smul_smul]
   congr 1
   rw [ENNReal.mul_inv (Or.inl ha0) (Or.inl ha1), mul_comm a⁻¹, mul_assoc, ENNReal.inv_mul_cancel ha0 ha1,
@@ -192,7 +246,7 @@ theorem sphere_mean_eq_mahler : ∀ (N k : ℕ) (h : HermNorm N) (B : Matrix (Fi
     rw [map_radial]
     rfl
   have hmeas : Measurable (fun (z : Fin k → EuclideanSpace ℂ (Fin N)) (i : Fin k) => radial p (z i)) :=
-    measurable_pi_lambda _ (fun i => (measurable_radial p).comp (measurable_pi_apply i))
+    Measurable.of_eval (fun i => (measurable_radial p).comp (measurable_pi_apply i))
   have hΦ : Continuous (fun t : Fin k → Metric.sphere (0 : EuclideanSpace ℂ (Fin N)) 1 =>
       fun q : Fin k × Fin N => (B *ᵥ fun a => (t q.1 : EuclideanSpace ℂ (Fin N)) a) q.2) := by
     refine continuous_pi (fun q => ?_)

@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Archimedean.Defs
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -44,10 +95,6 @@ theorem LB_smul {m : ℤ} {f : ℤ → V} (hf : LB m f) (c : LL) : LB m (c • f
   intro k hk
   simp [hf k hk]
 
-theorem LB_min {m m' : ℤ} {f f' : ℤ → V} (hf : LB m f) (hf' : LB m' f') :
-    LB (min m m') f ∧ LB (min m m') f' := by
-  exact ⟨LB_mono hf (min_le_left _ _), LB_mono hf' (min_le_right _ _)⟩
-
 private theorem exists_nat_gt_int_sub (k m : ℤ) : ∃ N : ℕ, k - m < N := by
   first
   | exact exists_nat_gt (k - m)
@@ -81,15 +128,6 @@ theorem smulS_smul {m : ℤ} {f : ℤ → V} (hf : LB m f) (g : PowerSeries LL) 
   refine Finset.sum_congr rfl fun j _ => ?_
   simp only [Pi.smul_apply]
   exact smul_comm _ _ _
-
-theorem smulS_add_left {m : ℤ} {f : ℤ → V} (hf : LB m f) (g h : PowerSeries LL) :
-    smulS (g + h) f = smulS g f + smulS h f := by
-  funext k
-  obtain ⟨N, hN⟩ := exists_nat_gt_int_sub k m
-  rw [Pi.add_apply, smulS_eq_sum hf (g + h) k N hN, smulS_eq_sum hf g k N hN,
-    smulS_eq_sum hf h k N hN, ← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  simp only [map_add, add_smul]
 
 private theorem smulS_C_eq_smul_of_LB {m : ℤ} {f : ℤ → V} (hf : LB m f) (c : LL) :
     smulS (PowerSeries.C c) f = c • f := by
@@ -191,24 +229,6 @@ theorem Dg_smulS {Fil : ℤ → Submodule LL V} (hF : Antitone Fil) {m s : ℤ} 
   refine sum_mem fun j _ => Submodule.smul_mem _ _ ?_
   exact hF (by omega : s - k ≤ s - (k - (j : ℤ))) (hD (k - j))
 
-theorem Dg_add {Fil : ℤ → Submodule LL V} {s : ℤ} {f f' : ℤ → V} (h : Dg Fil s f)
-    (h' : Dg Fil s f') : Dg Fil s (f + f') := by
-  intro k
-  rw [Pi.add_apply]
-  exact add_mem (h k) (h' k)
-
-theorem Dg_sub {Fil : ℤ → Submodule LL V} {s : ℤ} {f f' : ℤ → V} (h : Dg Fil s f)
-    (h' : Dg Fil s f') : Dg Fil s (f - f') := by
-  intro k
-  rw [Pi.sub_apply]
-  exact sub_mem (h k) (h' k)
-
-theorem Dg_smul {Fil : ℤ → Submodule LL V} {s : ℤ} {f : ℤ → V} (h : Dg Fil s f) (c : LL) :
-    Dg Fil s (c • f) := by
-  intro k
-  rw [Pi.smul_apply]
-  exact Submodule.smul_mem _ c (h k)
-
 def resc (χ : LL) (f : ℤ → V) : ℤ → V := fun k => (χ ^ k) • f k
 
 theorem LB_resc {m : ℤ} {f : ℤ → V} (hf : LB m f) (χ : LL) : LB m (resc χ f) := by
@@ -231,11 +251,5 @@ theorem smulS_rescale {m : ℤ} {f : ℤ → V} (hf : LB m f) (χ : LL) (hχ : �
   show PowerSeries.coeff j (PowerSeries.rescale χ g) • (χ ^ (k - (j : ℤ)) • f (k - j)) =
     χ ^ k • (PowerSeries.coeff j g • f (k - j))
   rw [PowerSeries.coeff_rescale, smul_smul, smul_smul, mul_right_comm, e]
-
-theorem Dg_resc {Fil : ℤ → Submodule LL V} {s : ℤ} {f : ℤ → V} (h : Dg Fil s f) (χ : LL) :
-    Dg Fil s (resc χ f) := by
-  intro k
-  show (χ ^ k) • f k ∈ Fil (s - k)
-  exact Submodule.smul_mem _ _ (h k)
 
 end Formalism.MainNotions.N.Pv.LocalLengthBound.Ser

@@ -1,75 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
-import Formalism.SharpRestriction.LevelLetterCocycles.LiftingTheory
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LiftingTheory
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 namespace Formalism.MainNotions.N
 
 open Formalism.BasicNotions
-
-theorem theorem_one_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.wachTheoremLocal D.loc HW D.locA F Cm := h.1
-
-theorem consistency_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.consL D.loc HW D.locA F := h.2.1
-
-theorem proposition_two_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.prop2L D.loc HW D.locA F := h.2.2.1
-
-theorem lemma_three_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.wachLengthLocal D.loc HW D.locA F := h.2.2.2
-
-theorem first_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p1L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).1
-
-theorem second_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p2L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.1
-
-theorem third_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p3L D.loc HW D.locA F Cm := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.1
-
-theorem fourth_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p4L D.loc HW D.locA F Cm := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.1
-
-theorem fifth_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p5L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.2.1
-
-theorem sixth_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p6L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.2.2.1
-
-theorem seventh_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p7L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.2.2.2.1
-
-theorem eighth_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p8L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.2.2.2.2.1
-
-theorem delta_invariants_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p9L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.2.2.2.2.2.1
-
-theorem tenth_clause_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p10L D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.1 l K s LL hg).2.2.2.2.2.2.2.2.2
-
-theorem second_first_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p2aL D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.2.2.1 l K s LL hg).1
-
-theorem second_b_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p2bL D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.2.2.1 l K s LL hg).2.1
-
-theorem second_c_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p2cL D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.2.2.1 l K s LL hg).2.2.1
-
-theorem second_dual_of_local_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) : Formalism.MainNotions.DeltaInvariantLattices.p2dL D.loc HW D.locA F := by
-  intro l _ K s LL hg
-  exact (h.2.2.1 l K s LL hg).2.2.2
 
 theorem lifting_local_of_package (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (C CA CB CK : ℝ) (h : Formalism.MainNotions.LiftingTheory.aux₃ D HW F C CA CB CK) :
     Formalism.MainNotions.LiftingTheory.ConclusionL D HW F := h.1

@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.ValuationNonnegIffIntegral
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.FockLatticeFiniteSpanning
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Presheaf
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,15 +74,14 @@ theorem mem_fock_lattice_iff_coeff {p : ℕ} (hV : ValuationProperties p O) {σ 
 theorem fock_lattice_zero_mem {p : ℕ} (hV : ValuationProperties p O) {σ : Type} : InBB (O := O) p (0 : MvPolynomial σ (KK O)) := by
   obtain ⟨hV0, -, -, -, -, -⟩ := id hV
   refine (mem_fock_lattice_iff_coeff hV 0).2 fun m => ?_
-  rw [coeff_zero, hV0, top_add]
-  exact le_top
+  simp only [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, hV0, top_add, le_top]
 
 theorem fock_lattice_add_mem {p : ℕ} (hV : ValuationProperties p O) {σ : Type} {F G : MvPolynomial σ (KK O)}
     (hF : InBB (O := O) p F) (hG : InBB (O := O) p G) : InBB (O := O) p (F + G) := by
   obtain ⟨-, -, hVadd, -, -, -⟩ := id hV
   rw [mem_fock_lattice_iff_coeff hV] at hF hG ⊢
   intro m
-  rw [coeff_add]
+  rw [MvPolynomial.coeff_add]
   calc (0 : WithTop ℚ)
       ≤ min (vK p (F.coeff m) + halfFactorialValuation p m) (vK p (G.coeff m) + halfFactorialValuation p m) := le_min (hF m) (hG m)
     _ = min (vK p (F.coeff m)) (vK p (G.coeff m)) + halfFactorialValuation p m := min_add_add_right _ _ _
@@ -51,7 +96,7 @@ theorem fock_lattice_smul_mem {p : ℕ} (hV : ValuationProperties p O) {σ : Typ
   obtain ⟨-, hVmul, -, -, -, hVint⟩ := id hV
   rw [mem_fock_lattice_iff_coeff hV] at hF ⊢
   intro m
-  rw [coeff_smul, Algebra.smul_def, hVmul]
+  rw [MvPolynomial.coeff_smul, Algebra.smul_def, hVmul]
   have ho : 0 ≤ vK p (algebraMap O (KK O) o) := (hVint _).2 ⟨o, rfl⟩
   calc (0 : WithTop ℚ) ≤ vK p (F.coeff m) + halfFactorialValuation p m := hF m
     _ ≤ vK p (algebraMap O (KK O) o) + vK p (F.coeff m) + halfFactorialValuation p m :=
@@ -83,6 +128,7 @@ theorem fock_lattice_linear_map_closed {p : ℕ} (hV : ValuationProperties p O) 
     (u : MvPolynomial σ (KK O) →ₗ[KK O] MvPolynomial σ (KK O))
     (h : ∀ m c, InBB (O := O) p (monomial m c) → InBB (O := O) p (u (monomial m c)))
     (F : MvPolynomial σ (KK O)) (hF : InBB (O := O) p F) : InBB (O := O) p (u F) := by
+
   rw [← F.support_sum_monomial_coeff, map_sum]
   exact fock_lattice_sum_mem hV _ _ fun m _ => h m _ ((fock_lattice_iff_monomials hV F).1 hF m)
 
@@ -90,7 +136,8 @@ theorem valuation_intCast_padicVal {p : ℕ} (hV : ValuationProperties p O) (z :
     vK p (z : KK O) = ((padicValInt p z : ℚ) : WithTop ℚ) := by
   obtain ⟨-, -, -, hVnat, hVneg, -⟩ := id hV
   have hn : z.natAbs ≠ 0 := Int.natAbs_ne_zero.2 hz
-  have e : padicValInt p z = padicValNat p z.natAbs := rfl
+  have e : padicValInt p z = padicValNat p z.natAbs := by
+    simp [padicValInt, padicValNat]
   rw [e]
   rcases Int.natAbs_eq z with h | h
   · conv_lhs => rw [h]
@@ -139,6 +186,7 @@ theorem mem_integral_poly_iff_coeff {σ : Type} (F : MvPolynomial σ (KK O)) :
   · intro h
     choose g hg using h
     refine ⟨∑ m ∈ F.support, monomial m (g m), ?_⟩
+
     rw [map_sum]
     conv_rhs => rw [← F.support_sum_monomial_coeff]
     refine Finset.sum_congr rfl fun m _ => ?_
@@ -151,6 +199,7 @@ theorem integral_poly_linear_map_closed {σ : Type} (u : MvPolynomial σ (KK O) 
     (h : ∀ m, u (monomial m 1) ∈ IntPol O σ) (F : MvPolynomial σ (KK O)) (hF : F ∈ IntPol O σ) :
     u F ∈ IntPol O σ := by
   choose g hg using (mem_integral_poly_iff_coeff F).1 hF
+
   rw [← F.support_sum_monomial_coeff, map_sum]
   refine Submodule.sum_mem _ fun m _ => ?_
   have e : monomial m (F.coeff m) = (algebraMap O (KK O) (g m)) • monomial m (1 : KK O) := by

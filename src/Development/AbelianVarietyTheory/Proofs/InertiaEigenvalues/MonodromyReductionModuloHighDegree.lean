@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ImageStableDegreeBounds
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilRingModHighDegreePropertyStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ImageStableDegreeBounds
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilRingModHighDegreePropertyStatement
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -151,7 +201,7 @@ theorem conn_mem_MMHigh (hR : RingModHigh O K l e) (P : PhiMod O K l e a ι)
     rw [h1]
     exact add_mem (Submodule.smul_mem_smul hg hm) (Submodule.smul_mem_smul hs (hMM m hm))
   · intro x y hx hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
 
 theorem conn_mem_uL_sup (hR : RingModHigh O K l e) (P : PhiMod O K l e a ι)
@@ -162,7 +212,7 @@ theorem conn_mem_uL_sup (hR : RingModHigh O K l e) (P : PhiMod O K l e a ι)
   obtain ⟨p, hp, q, hq, hpq⟩ := Submodule.mem_sup.1 (MM_le_sup hR P (hMM y' (L_le_MM P hy')))
   have h1 : P.conn ((X : K⟦X⟧) ^ i • y' + z) =
       (X : K⟦X⟧) ^ i • (i • y' + p) + ((X : K⟦X⟧) ^ i • q + P.conn z) := by
-    rw [map_add, P.conn_smul, N_X_pow, ← hpq, mul_comm, mul_smul, Nat.cast_smul_eq_nsmul,
+    rw [map_add (f := _), P.conn_smul, N_X_pow, ← hpq, mul_comm, mul_smul, Nat.cast_smul_eq_nsmul,
       smul_add, smul_add]
     abel
   rw [h1]
@@ -206,7 +256,7 @@ theorem app_mem_MMHigh {P : PhiMod O K l e a ι} {Q : PhiMod O K l e a κ} (F : 
     rw [h1]
     exact Submodule.smul_mem_smul hs (F.app_mem_ext (A_le_S l e) hm)
   · intro x y hx hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
 
 theorem mem_imL {P : PhiMod O K l e a ι} {Q : PhiMod O K l e a κ} (F : Hom P Q) {y : Vec K a ι}
@@ -224,7 +274,7 @@ theorem imageStable_top (hR : RingModHigh O K l e) {P : PhiMod O K l e a ι}
   subst hyy
   obtain ⟨p, hp, q, hq, hpq⟩ := Submodule.mem_sup.1 (MM_le_sup hR P (hMM₁ y' (L_le_MM P hy')))
   have h1 : Q.conn (F.app y' + z) = F.app p + (F.app q + Q.conn z) := by
-    rw [map_add, ← F.app_conn, ← hpq, map_add, add_assoc]
+    rw [map_add (f := _), ← F.app_conn, ← hpq, map_add (f := _), add_assoc]
   rw [h1]
   exact Submodule.add_mem_sup (mem_imL F hp)
     (add_mem (app_mem_MMHigh F hq) (conn_mem_MMHigh hR Q hMM₂ hz))
@@ -238,7 +288,7 @@ theorem mem_part_sup {W : Submodule K (Vec K a ι)} (π : Vec K a ι →ₗ[K] V
     (h₁ : ∀ v ∈ V₁, π v ∈ V₁) (h₂ : ∀ v ∈ V₂, π v ∈ V₂) {x : Vec K a ι} (hx : x ∈ V₁ ⊔ V₂)
     (hxW : x ∈ W) : x ∈ part W V₁ ⊔ part W V₂ := by
   obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.1 hx
-  rw [← hπ _ hxW, map_add]
+  rw [← hπ _ hxW, map_add (f := _)]
   exact Submodule.add_mem_sup (Submodule.mem_inf.2 ⟨h₁ y hy, hπW y⟩)
     (Submodule.mem_inf.2 ⟨h₂ z hz, hπW z⟩)
 
@@ -330,8 +380,8 @@ theorem norm_e (l a : ℕ) [Fact l.Prime] [NormedAlgebra ℚ_[l] K] [NeZero a] [
     exact dvd_pow_self l (NeZero.ne a)
   exact (Fact.out : l.Prime).one_lt.ne' (Nat.dvd_one.1 ((Nat.dvd_add_right h).1 h1))
 
-variable (l a) in
 
+variable (l a) in
 def isoCoef (c : ZMod e) (ζ : rootsOfUnity e K) : ZMod a → K⟦X⟧ :=
   fun τ => C ((e : K)⁻¹ * (TameGal.inertia ζ⁻¹ : TameGal K l e a).root τ ^ c.val)
 
@@ -346,7 +396,7 @@ theorem ringAct_isoCoef (c : ZMod e) (ζ ξ : rootsOfUnity e K) :
 
 def isoProj {P : PhiMod O K l e a ι} (Δ : Descent P) (c : ZMod e) : Vec K a ι →ₗ[K] Vec K a ι where
   toFun v := ∑ ζ : rootsOfUnity e K, isoCoef l a c ζ • Δ.act (TameGal.inertia ζ) v
-  map_add' v w := by simp only [map_add, smul_add, Finset.sum_add_distrib]
+  map_add' v w := by simp only [map_add (f := _), smul_add, Finset.sum_add_distrib]
   map_smul' r v := by
     simp only [map_smul, Finset.smul_sum, RingHom.id_apply]
     refine Finset.sum_congr rfl fun ζ _ => ?_
@@ -362,6 +412,7 @@ theorem isoProj_mem {P : PhiMod O K l e a ι} (Δ : Descent P) (c : ZMod e) (v :
   intro ξ τ
   have h1 : Δ.act (TameGal.inertia ξ) (isoProj Δ c v) =
       ∑ ζ, isoCoef l a c (ξ⁻¹ * ζ) • Δ.act (TameGal.inertia ζ) v := by
+
     rw [isoProj_def, map_sum]
     refine Fintype.sum_equiv (Equiv.mulLeft ξ) _ _ fun ζ => ?_
     rw [Δ.act_smul_tot, ringAct_isoCoef, Equiv.coe_mulLeft, inv_mul_cancel_left]
@@ -401,8 +452,6 @@ section IsoStable
 
 variable [Fact l.Prime] [NormedAlgebra ℚ_[l] K] [NeZero e] [NeZero a] [TameDescentExponentData K l e a]
 
-local instance : Fintype (rootsOfUnity e K) := Fintype.ofFinite _
-
 theorem smulTot_mem_MMHigh (P : PhiMod O K l e a ι) {f : ZMod a → K⟦X⟧} (hf : ∀ τ, f τ ∈ A O K)
     {v : Vec K a ι} (hv : v ∈ MMHigh P) : f • v ∈ MMHigh P := by
   change v ∈ SHigh O K l e • P.MM at hv
@@ -435,7 +484,7 @@ theorem act_mem_MMHigh {P : PhiMod O K l e a ι} (Δ : Descent P) (g : TameGal K
     rw [ht, map_mul, map_pow, rescale_X, mul_pow]
     exact Dvd.dvd.mul_right (dvd_mul_left _ _) _
   · intro x y hx hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
 
 theorem act_mem_uL {P : PhiMod O K l e a ι} (Δ : Descent P) (g : TameGal K l e a) (i : ℕ)
@@ -479,6 +528,7 @@ theorem isoProj_mem_uL {P : PhiMod O K l e a ι} (Δ : Descent P) (c : ZMod e) (
 theorem isoProj_app {P : PhiMod O K l e a ι} {Q : PhiMod O K l e a κ} {Δ₁ : Descent P}
     {Δ₂ : Descent Q} (F : Descent.Hom Δ₁ Δ₂) (c : ZMod e) (y : Vec K a ι) :
     isoProj Δ₂ c (F.app y) = F.app (isoProj Δ₁ c y) := by
+
   simp only [isoProj_def, map_sum, BK.Hom.app_smul_tot, F.app_act]
 
 theorem conn_mem_isotypic {P : PhiMod O K l e a ι} (Δ : Descent P) (c : ZMod e) {v : Vec K a ι}

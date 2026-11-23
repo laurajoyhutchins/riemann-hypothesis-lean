@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPosHermFormV
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IntMIffInt
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsZeroOrPosMulRootOfUnityFiniteGaussSum
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPosHermFormV
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IntMIffInt
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsZeroOrPosMulRootOfUnityFiniteGaussSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Complex MeasureTheory GlobalTheory.UnitaryTheta
 open scoped BigOperators ComplexConjugate Real Classical
 
@@ -65,7 +110,7 @@ theorem gauss_phase : ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (H : Sesq V
     intro x hx y hy
     have e : (H (B (x + y)) (x + y)).im + (H x y).im =
         (H (B x) x).im + (H (B y) y).im + 2 * (H (B x) y).im := by
-      simp only [map_add, LinearMap.add_apply, Complex.add_im, ← hadj x y]; ring
+      simp only [map_add (f := _), LinearMap.add_apply, Complex.add_im, ← hadj x y]; ring
     have e' := congrArg ex e
     rw [ex_add, ex_add, ex_add] at e'
     simp only [ph, hadd' x hx y hy]
@@ -91,7 +136,7 @@ theorem gauss_phase : ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (H : Sesq V
     rw [hph _ (hmem y hy) x hx, hphA y hy, hB2, hm, ex_two, one_mul, mul_one]
   let φ : Λ'.addSubgroupOf Λ →+ Λ := AddMonoidHom.mk'
     (fun y => ⟨((y : Λ) : V) - a ((y : Λ) : V), hmem _ y.2⟩)
-    (fun y z => Subtype.ext (by simp only [AddSubgroup.coe_add, map_add]; abel))
+    (fun y z => Subtype.ext (by simp only [AddSubgroup.coe_add, map_add (f := _)]; abel))
   have hφ : ∀ y, ((φ y : Λ) : V) = ((y : Λ) : V) - a ((y : Λ) : V) := fun _ => rfl
   have hinj : Function.Injective φ := by
     intro y z h
@@ -99,7 +144,7 @@ theorem gauss_phase : ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (H : Sesq V
     simp only [hφ, hB2] at this
     exact Subtype.ext (Subtype.ext this)
   have : Module.Finite ℤ Λ := Module.Finite.iff_addGroup_fg.2 ((AddGroup.fg_iff_addSubgroup_fg _).2 hfg)
-  have : IsAddTorsionFree V := .of_isTorsionFree ℂ V
+  have : HasUniqueDiv V := .of_isTorsionFree ℂ V
   have : Module.Free ℤ Λ := inferInstance
   have := finite_quot _ φ hinj
   let _ : Fintype (Λ ⧸ φ.range) := Fintype.ofFinite _
@@ -160,7 +205,7 @@ theorem gauss_phase : ∀ (V : Type) [AddCommGroup V] [Module ℂ V] (H : Sesq V
       simp only [← QuotientAddGroup.mk_add, ← QuotientAddGroup.mk_zero, hf, AddSubgroup.coe_add,
         AddSubgroup.coe_zero]
       rw [hph _ (Λ.add_mem x.2 y.2) _ z.2, hph _ y.2 _ z.2, hph _ x.2 _ z.2, hph0]
-      simp only [map_add, LinearMap.add_apply, Complex.add_im, mul_add, ex_add]
+      simp only [map_add (f := _), LinearMap.add_apply, Complex.add_im, mul_add, ex_add]
       ring
 
 end GlobalTheory.UnitaryTheta.GaussPhase

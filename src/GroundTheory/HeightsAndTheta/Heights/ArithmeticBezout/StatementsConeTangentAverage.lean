@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeFibreAverage
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeMassOfFibre
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeFibreAverage
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeIntegralMass
+public import Mathlib.Analysis.InnerProductSpace.NormDet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -97,39 +145,6 @@ def TangentGaussMoment.Statement : Prop :=
       (∀ r : ℝ, 0 < tangentGaussProfile n m r) ∧
       0 < ∫⁻ r in Set.Ioi (0 : ℝ), tangentGaussProfile n m r * ENNReal.ofReal (2 * m * r ^ (2 * m - 1)) ∧
       ∫⁻ r in Set.Ioi (0 : ℝ), tangentGaussProfile n m r * ENNReal.ofReal (2 * m * r ^ (2 * m - 1)) < ⊤
-
-theorem ConeAreaFormula.hypotheses_inhabited :
-    IsProjPrime (coordPlaneIdeal 1 1) ∧ 0 < 1 ∧ 1 ≤ 1 + 1 ∧
-      (∀ᵐ π : Fin 1 → Fin (1 + 1) → ℂ, ∀ᵐ w : EuclideanSpace ℂ (Fin 1),
-        fibreCount (HermNorm.std (1 + 1)) (coordPlaneIdeal 1 1) π w ≠ ⊤) ∧
-      Measurable (fun _ : EuclideanSpace ℂ (Fin 1) => (1 : ℝ≥0∞)) := by
-  refine ⟨isProjPrime_coordPlaneIdeal one_pos 1, one_pos, by norm_num, ?_, measurable_const⟩
-  filter_upwards [ae_coordPlaneBlock_det_ne_zero 1 1] with π hπ
-  refine Filter.Eventually.of_forall fun w => ?_
-  rw [fibreCount_coordPlaneIdeal π hπ w]
-  exact ENat.one_ne_top
-
-theorem ConeTangentAverage.hypotheses_inhabited :
-    IsProjPrime (coordPlaneIdeal 1 1) ∧ 0 < 1 ∧ 1 ≤ 1 + 1 ∧
-      (∀ᵐ π : Fin 1 → Fin (1 + 1) → ℂ, ∀ᵐ w : EuclideanSpace ℂ (Fin 1),
-        fibreCount (HermNorm.std (1 + 1)) (coordPlaneIdeal 1 1) π w ≠ ⊤) :=
-by
-  obtain ⟨h1, h2, h3, h4, -⟩ := ConeAreaFormula.hypotheses_inhabited
-  exact ⟨h1, h2, h3, h4⟩
-
-theorem ConeRadialIntegral.hypotheses_inhabited :
-    0 < 1 ∧
-      (∀ y ∈ {y : EuclideanSpace ℂ (Fin (1 + 1)) | ∀ j : Fin (1 + 1), 1 ≤ (j : ℕ) → y j = 0},
-        ∀ t : ℝ, 0 < t → t • y ∈ {y : EuclideanSpace ℂ (Fin (1 + 1)) | ∀ j : Fin (1 + 1), 1 ≤ (j : ℕ) → y j = 0}) ∧
-      Measure.hausdorffMeasure ((2 * 1 : ℕ) : ℝ)
-          {y : EuclideanSpace ℂ (Fin (1 + 1)) | ‖y‖ < 1 ∧ ∀ j : Fin (1 + 1), 1 ≤ (j : ℕ) → y j = 0} < ⊤ ∧
-      Measurable (fun r : ℝ => ENNReal.ofReal (Real.exp (-r ^ 2))) := by
-  refine ⟨one_pos, ?_, (coordBall_mass (by norm_num : 1 ≤ 1 + 1)).2, by fun_prop⟩
-  intro y hy t _ j hj
-  simp [hy j hj]
-
-theorem TangentGaussMoment.hypotheses_inhabited : 0 < 1 ∧ 1 ≤ 2 := by
-  norm_num
 
 end
 

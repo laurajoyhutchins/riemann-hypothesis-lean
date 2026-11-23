@@ -1,4 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.PositionPrependMemNoncompactPositionSubmodule
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.Permute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,27 +74,6 @@ theorem permute_apply {k : ℕ} (σ : Equiv.Perm (Fin k)) (F : Big n k M)
 theorem phi_apply_eq (k : ℕ) (F : Big n k M) : phi E k F = ∑ κ, word E κ (F κ) := by
   simp only [phi, LinearMap.sum_apply, LinearMap.comp_apply]
   rfl
-
-theorem permute_mem_ncV {k : ℕ} (σ : Equiv.Perm (Fin k)) {F : Big n k M} (hF : F ∈ ncV ε V k) :
-    permute σ F ∈ ncV ε V k := by
-  rw [mem_ncV_iff_apply] at hF ⊢
-  intro κ
-  rw [permute_apply]
-  have hκ := hF (κ ∘ σ)
-  by_cases hc : ∀ i, ε (κ i).1 ≠ ε (κ i).2
-  · have hc' : ∀ i, ε ((κ ∘ σ) i).1 ≠ ε ((κ ∘ σ) i).2 := fun i => hc (σ i)
-    rw [if_pos hc'] at hκ
-    rw [if_pos hc]
-    exact hκ
-  · have hc' : ¬ ∀ i, ε ((κ ∘ σ) i).1 ≠ ε ((κ ∘ σ) i).2 := fun h => hc (fun i => by
-      have := h (σ.symm i)
-      simpa using this)
-    rw [if_neg hc'] at hκ
-    rw [if_neg hc]
-    exact hκ
-
-theorem bool_eq_of_ne_ne {x y z : Bool} (h1 : x ≠ y) (h2 : y ≠ z) : x = z := by
-  cases x <;> cases y <;> cases z <;> simp_all
 
 theorem listProd_mem_layer (hE : IsGlRep E) (hV : IsKStableSub ε E V)
     (l : List (Fin n × Fin n)) {j : ℕ} {v : M} (hv : v ∈ layer ε E V j) :

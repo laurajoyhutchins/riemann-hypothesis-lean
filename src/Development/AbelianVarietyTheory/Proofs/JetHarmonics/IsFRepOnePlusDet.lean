@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPrAlt
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPrAlt
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal ContDiff
@@ -14,16 +54,6 @@ open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 variable {k r : ℕ}
-
-abbrev detRep (k r m : ℕ) : Rep k r where
-  H := ℂ
-  σ := fun g => (g.det ^ m) • ContinuousLinearMap.id ℂ ℂ
-
-def rho2 (g : Mx k r) : Matrix (Fin 2) (Fin 2) ℂ := !![1, 0; 0, g.det]
-
-def gam2 : Matrix (Fin 2) (Fin 2) ℂ := !![1, 0; 0, -1]
-
-def dl (I c : Fin 2) : ℂ := if I = c then 1 else 0
 
 theorem lenA_eq_lA (z : Fin (2 * r + k + 1) → ℂ) (g : Mx k r) (a : Fin (r + 1)) :
     lenA k r z g a = Formalism.MainNotions.S.lA k r z g a := by

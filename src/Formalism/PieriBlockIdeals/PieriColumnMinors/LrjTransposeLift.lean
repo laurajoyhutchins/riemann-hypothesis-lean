@@ -1,4 +1,56 @@
-import Formalism.PieriBlockIdeals.PieriColumnMinors.XiOfDepth2
+module
+
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.XiOfDepth2
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LRowdivLemmas
+import Formalism.PieriBlockIdeals.PieriColumnMinors.DividedPowerZeroZeroVector
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightMemWZero
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LowerTriangularIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -75,8 +127,8 @@ theorem wt_extract (p q w : ℕ) (lam2 : Fin q → ℕ) (u : VQ p q w lam2) (hu 
   rw [MvPolynomial.mem_support_iff] at hd
   have hκ : κ = fun a => ((Finsupp.weight (rowW (p + q) (p + q)) d (idx p q a) : ℕ) : ℤ) := by
     funext a
-    have h1 := congrArg (fun x : VQ p q w lam2 => coeff d (x : MvPolynomial _ ℚ)) (((mem_wt p q w lam2 u κ).1 hw') a)
-    simp only [EV_coe, coeff_der_diag, Submodule.coe_smul, coeff_smul, smul_eq_mul] at h1
+    have h1 := congrArg (fun x : VQ p q w lam2 => AddMonoidAlgebra.coeff (x : MvPolynomial _ ℚ) d) (((mem_wt p q w lam2 u κ).1 hw') a)
+    simp only [EV_coe, coeff_der_diag, Submodule.coe_smul, MvPolynomial.coeff_smul, smul_eq_mul] at h1
     have h2 := mul_right_cancel₀ hd h1
     exact_mod_cast h2.symm
   refine ⟨Finsupp.weight (rowW (p + q) (p + q)) d, ?_, hκ⟩
@@ -96,7 +148,7 @@ theorem liftWeyl (p q w : ℕ) (lam2 : Fin q → ℕ) (ha : Antitone lam2) (hb :
   | add x y _ _ hx hy =>
     obtain ⟨d1, h1, e1⟩ := hx
     obtain ⟨d2, h2, e2⟩ := hy
-    exact ⟨d1 + d2, Submodule.add_mem _ h1 h2, by rw [map_add, map_add, e1, e2]⟩
+    exact ⟨d1 + d2, Submodule.add_mem _ h1 h2, by rw [map_add (f := _), map_add (f := _), e1, e2]⟩
   | smul c x _ hx =>
     obtain ⟨d1, h1, e1⟩ := hx
     exact ⟨c • d1, Submodule.smul_mem _ c h1, by rw [map_zsmul, map_zsmul, e1]⟩
@@ -108,9 +160,9 @@ theorem lrj_hom_of_smul {σ M : Type*} [AddCommMonoid M] (wt : σ → M) (g' : M
   apply hg
   intro h0
   apply hd
-  have h1 := congrArg (coeff d) h
-  rw [coeff_smul, h0, smul_zero, coeff_map] at h1
-  have h2 : ((coeff d g' : ℤ) : ℚ) = 0 := by simpa using h1.symm
+  have h1 := congrArg (AddMonoidAlgebra.coeff · d) h
+  rw [MvPolynomial.coeff_smul, h0, smul_zero, coeff_map] at h1
+  have h2 : ((AddMonoidAlgebra.coeff g' d : ℤ) : ℚ) = 0 := by simpa using h1.symm
   exact_mod_cast h2
 
 theorem expL_real (hC : CoeffWord) (l : ℕ) (hl : l.Prime) (p q w : ℕ) (lam2 : Fin q → ℕ) (ha : Antitone lam2)

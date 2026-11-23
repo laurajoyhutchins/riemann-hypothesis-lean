@@ -1,4 +1,60 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselScaling
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Analysis.Calculus.BumpFunction.Normed
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal
@@ -10,22 +66,8 @@ namespace Formalism.FourierDecayAlt.P.SettingConstruction
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.B2
 
 theorem haar_smul {k r : ℕ} {U : Set (Mat k r)} {μ : Measure (Mt k r)} (h : IsHaarOn U μ) (c : ℝ≥0) (hc : 0 < c) :
-    IsHaarOn U (c • μ) where
-  conc := by
-    rw [Measure.smul_apply, h.conc, smul_zero]
-  left := fun a ha => by rw [Measure.map_smul, h.left a ha]
-  right := fun a ha => by rw [Measure.map_smul, h.right a ha]
-  finite_compact := fun K hK => by
-    rw [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul]
-    exact ENNReal.mul_lt_top ENNReal.coe_lt_top (h.finite_compact K hK)
-  ne_zero := by
-    intro h0
-    apply h.ne_zero
-    have h1 : (c • μ) Set.univ = 0 := by rw [h0]; rfl
-    rw [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul] at h1
-    rcases mul_eq_zero.mp h1 with h2 | h2
-    · exact absurd (by exact_mod_cast h2 : c = 0) hc.ne'
-    · exact Measure.measure_univ_eq_zero.mp h2
+    IsHaarOn U (c • μ) := by
+  apply Formalism.FourierDecayAlt.P.BesselScaling.haar_smul <;> assumption
 
 section forms
 variable {ι : Type*} [Fintype ι] (H : Matrix ι ι ℂ)
@@ -322,10 +364,6 @@ end Formalism.FourierDecayAlt.P.SettingConstruction
 namespace Formalism.FourierDecayAlt.P
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.B2
-
-theorem crude_integrability_of_parts : Formalism.FourierDecayAlt.B2.AssembleCCIntCrude := by
-  intro hCC hGN k r Wp Wq _ _ _ _ D A hA
-  exact hCC k r Wp Wq D A (hGN k r D.μG A D.haarG hA)
 
 theorem base_vector_exists : Formalism.FourierDecayAlt.B2.ZExists := by
   intro k r

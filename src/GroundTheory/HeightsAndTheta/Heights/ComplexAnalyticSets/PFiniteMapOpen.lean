@@ -1,5 +1,67 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StFiniteMapOpen
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StFiniteMapOpen
+public import Mathlib.Algebra.Polynomial.Degree.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Unbundled.RingSeminorm
+public import Mathlib.Analysis.Polynomial.CauchyBound
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.PurelyInseparable.Exponent
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Algebra.Polynomial.Monic
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.Algebra.Polynomial.Splits
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.RingTheory.Ideal.GoingUp
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -130,7 +192,10 @@ theorem exists_point_of_evalYT_eq_zero (J : Ideal (MvPolynomial (Fin n) ℂ))
     exact hq'
   have key2 : ∀ F, e F = 0 → g F ∈ Q := by
     intro F hF
-    have hF' : F ∈ Q.comap (algebraMap _ _) := by rw [hQP]; exact hF
+    have hF' : F ∈ Q.comap (algebraMap _ _) := by
+      change F ∈ Ideal.under _ Q
+      rw [hQP]
+      exact hF
     exact hF'
   refine ⟨z, fun q hq => key q ?_, ?_, ?_⟩
   · rw [Ideal.Quotient.eq_zero_iff_mem.2 hq]
@@ -153,9 +218,9 @@ theorem exists_point_of_evalYT_eq_zero (J : Ideal (MvPolynomial (Fin n) ℂ))
 
 end FiniteMapOpen
 
+
 set_option synthInstance.maxHeartbeats 400000 in
 open FiniteMapOpen in
-
 theorem FiniteMapOpen.proof : FiniteMapOpen.Statement := by
   classical
   intro n d J p hJ hinj hfin x hx U hU
@@ -189,14 +254,16 @@ theorem FiniteMapOpen.proof : FiniteMapOpen.Statement := by
     have hP0 : ∀ w, w ≠ x → P w ≠ 0 := by
       intro w hw h0
       obtain ⟨j, hj⟩ := Function.ne_iff.1 hw
-      have h1 := congrArg (fun q => Polynomial.coeff q j) h0
-      simp only [P, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial, Polynomial.coeff_zero] at h1
+      have h1 := congrArg (fun q => _root_.AddMonoidAlgebra.coeff (M := ℕ) q j) h0
+      simp only [P, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial_apply, Polynomial.coeff_zero] at h1
       rw [Finset.sum_eq_single j (fun k _ hk => if_neg (fun h => hk (Fin.ext h))) (by simp)] at h1
       simp only [if_true] at h1
       exact hj (sub_eq_zero.1 h1)
+    have hsub : {w | (w ∈ zeroLocus J ∧ φ w = y₀) ∧ w ≠ x}.Finite :=
+      hfib.subset (by intro w hw; exact hw.1)
     have hbad : (⋃ w ∈ {w | (w ∈ zeroLocus J ∧ φ w = y₀) ∧ w ≠ x},
         {c : ℂ | (P w).eval c = 0}).Finite :=
-      (hfib.subset fun w hw => hw.1).biUnion fun w hw =>
+      hsub.biUnion fun w hw =>
         Polynomial.finite_setOfPred_isRoot (hP0 w hw.2)
     obtain ⟨c, hc⟩ := hbad.infinite_compl.nonempty
     refine ⟨c, fun w hw hwx h => hc ?_⟩

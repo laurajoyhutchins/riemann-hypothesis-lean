@@ -1,5 +1,63 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceEstimates.IfaceSt
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+module
+
+public import Formalism.RealPlaceAnalysis.SmoothVectorGrowthBound
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedEmbeddingToM
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 noncomputable section
 
@@ -158,30 +216,5 @@ theorem eword_conv (ν : Measure (S7.UJ ε)) [ν.IsHaarMeasure] {β φ f : Matri
       ((integrable_ker ν a2.continuous c2 hφ hg).2.const_mul _)]
     refine integral_congr_ae (ae_of_all _ fun y => ?_)
     simp only []; ring
-
-theorem eword_repro {n : ℕ} (ε : Fin n → Bool) (lam : Fin n → ℝ) (T : S7.KType ε (lowK ε lam))
-    (μ : Fin n → ℤ) (ν : Measure (S7.UJ ε)) [ν.IsHaarMeasure]
-    (hcont : ContinuousOn (S7.PsiM T μ) (UJset ε)) (β : Matrix (Fin n) (Fin n) ℂ → ℂ) (M : T.V →L[ℂ] T.V) (hβ : ContDiff ℝ (⊤ : ℕ∞) β)
-    (hβc : HasCompactSupport β)
-    (hrep : ∀ g ∈ UJset ε, S7.PsiM T μ g = (∫ y, β (S7.toM y) • S7.PsiM T μ (g * S7.toM y) ∂ν) * M)
-    (w : List (Fin n × Fin n)) (v₁ v₂ : T.V) :
-    ∃ βw : Matrix (Fin n) (Fin n) ℂ → ℂ, ContDiff ℝ (⊤ : ℕ∞) βw ∧ HasCompactSupport βw ∧
-      ∀ g ∈ UJset ε, Formalism.REAL.Eword ε w (fun y => ⟪v₂, S7.PsiM T μ y v₁⟫_ℂ) g =
-        ∫ y, βw (S7.toM y) * ⟪v₂, S7.PsiM T μ (g * S7.toM y) (M v₁)⟫_ℂ ∂ν := by
-  let L : (T.V →L[ℂ] T.V) →L[ℂ] ℂ := (innerSL ℂ v₂).comp (ContinuousLinearMap.apply ℂ T.V (M v₁))
-  refine eword_conv ν (φ := fun y => L (S7.PsiM T μ y)) hβ hβc
-    (L.continuous.comp_continuousOn hcont) (fun g hg => ?_) w
-  obtain ⟨u, rfl⟩ : g ∈ Set.range (fun g : S7.UJ ε => S7.toM g) := by rw [S7.range_toM]; exact hg
-  have hc : Continuous (fun y : S7.UJ ε => S7.PsiM T μ (S7.toM u * S7.toM y)) :=
-    hcont.comp_continuous (continuous_const.matrix_mul (S7.continuous_toM ε)) fun y => (u * y).2
-  have hi : Integrable (fun y : S7.UJ ε => β (S7.toM y) • S7.PsiM T μ (S7.toM u * S7.toM y)) ν :=
-    ((hβ.continuous.comp (S7.continuous_toM ε)).smul hc).integrable_of_hasCompactSupport
-      (hβc.comp_isClosedEmbedding (S7.isClosedEmbedding_toM ε)).smul_right
-  have h1 := L.integral_comp_comm hi
-  simp only [map_smul, smul_eq_mul] at h1
-  rw [h1]
-  simp only []
-  rw [hrep _ hg]
-  rfl
 
 end ReciprocityTheory.ChartRestriction.DS.Lap.S0.DecRepro

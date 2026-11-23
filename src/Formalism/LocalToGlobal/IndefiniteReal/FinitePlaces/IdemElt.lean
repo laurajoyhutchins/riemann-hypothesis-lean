@@ -1,11 +1,57 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemLoc
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemLoc
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta IsDedekindDomain NumberField Polynomial
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 160000
+
 
 namespace Formalism.IndefR.Fin
 
@@ -74,7 +120,7 @@ theorem split_datum (P : HeightOneSpectrum (𝓞 D.host.E)) (hP : ¬ Lev.IsConjP
 instance finiteFE : Module.Finite D.host.F D.host.E :=
   Module.finite_of_finrank_pos (by rw [D.sp.cm.deg2]; norm_num)
 
-set_option synthInstance.maxHeartbeats 200000 in
+
 
 theorem emb_exists (v : HeightOneSpectrum (𝓞 D.host.F)) (b : D.host.E) (t N : D.host.F)
     (ht : algebraMap D.host.F D.host.E t = b + star b) (hN : algebraMap D.host.F D.host.E N = b * star b)
@@ -98,7 +144,7 @@ theorem emb_exists (v : HeightOneSpectrum (𝓞 D.host.F)) (b : D.host.E) (t N :
   have hPm : P.Monic := by simp only [P]; monicity!
   have hPd : P.natDegree = 2 := by simp only [P]; compute_degree!
   have hPb : Polynomial.aeval b P = 0 := by
-    simp only [P, map_add, map_sub, map_mul, Polynomial.aeval_X_pow, Polynomial.aeval_X,
+    simp only [P, map_add (f := _), map_sub, map_mul, Polynomial.aeval_X_pow, Polynomial.aeval_X,
       Polynomial.aeval_C, ht, hN]
     ring
   have hint : IsIntegral D.host.F b := ⟨P, hPm, hPb⟩
@@ -143,7 +189,7 @@ theorem emb_exists (v : HeightOneSpectrum (𝓞 D.host.F)) (b : D.host.E) (t N :
   let pb := IntermediateField.adjoin.powerBasis hint
   have hr' : Polynomial.aeval r₁ (minpoly D.host.F pb.gen) = 0 := by
     rw [IntermediateField.adjoin.powerBasis_gen, IntermediateField.minpoly_gen, hmin]
-    simp only [P, map_add, map_sub, map_mul, Polynomial.aeval_X_pow, Polynomial.aeval_X, Polynomial.aeval_C]
+    simp only [P, map_add (f := _), map_sub, map_mul, Polynomial.aeval_X_pow, Polynomial.aeval_X, Polynomial.aeval_C]
     exact hr
   let ι0 := pb.lift r₁ hr'
   refine ⟨ι0.comp ((IntermediateField.equivOfEq htop).symm.toAlgHom.comp
@@ -169,7 +215,7 @@ theorem phiE_mul (a b : v.adicCompletion D.host.F) : phiE v (a * b) = phiE v a *
   simp only [phiE, map_mul]
 
 theorem phiE_add (a b : v.adicCompletion D.host.F) : phiE v (a + b) = phiE v a + phiE v b := by
-  simp only [phiE, map_add]
+  simp only [phiE, map_add (f := _)]
 
 theorem phiE_sub (a b : v.adicCompletion D.host.F) : phiE v (a - b) = phiE v a - phiE v b := by
   simp only [phiE, map_sub]
@@ -236,7 +282,7 @@ theorem compV_int (ι : D.host.E →ₐ[D.host.F] v.adicCompletion D.host.F) {z 
     exact mul_le_one' (ha v) (val_emb_le v ι x)
   | zero => simp
   | add y z _ _ hy hz =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (Valuation.map_add _ _ _).trans (max_le hy hz)
   | neg y _ hy => rwa [map_neg, Valuation.map_neg]
 

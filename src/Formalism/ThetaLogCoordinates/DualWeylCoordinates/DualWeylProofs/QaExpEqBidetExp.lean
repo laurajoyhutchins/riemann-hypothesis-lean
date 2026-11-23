@@ -1,5 +1,54 @@
-import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DualWeylProofs.QaNuAntitone
-import Formalism.GradedWeylDivisibility.FinalD
+module
+
+public import Formalism.GradedWeylDivisibility.StatementC
+public import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DualWeylProofs.QaRowStrictMono
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FinalC
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LCassemLemmas
+public import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DualWeylProofs.QaNuAntitone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,47 +129,6 @@ lemma tableauBideterminant_mem_dualWeyl (R : Type) [CommRing R] {n : ℕ} [NeZer
     qa_P R I ∈ dualWeyl R n n (qa_nu mu) := by
   rw [tableauBideterminant_eq_bideterminant, ← qa_shape hmu]
   exact bidetMem R n n _ _ _ _
-
-lemma tableauBideterminant_ne_zero (R : Type) [CommRing R] [Nontrivial R] {n : ℕ} [NeZero n] {mu : Fin n → ℤ} (I : TIdx mu) :
-    qa_P R I ≠ 0 := by
-  intro h
-  have := (tableauBideterminant_degree_leadingCoeff R I).2
-  rw [h] at this
-  simp at this
-
-lemma map_tableauBideterminant {R S : Type*} [CommRing R] [CommRing S] (φ : R →+* S) {n : ℕ} [NeZero n] {mu : Fin n → ℤ}
-    (I : TIdx mu) : MvPolynomial.map φ (qa_P R I) = qa_P S I := by
-  unfold qa_P
-  rw [map_prod]
-  refine Finset.prod_congr rfl fun c _ => ?_
-  unfold initMinor
-  rw [RingHom.map_det]
-  congr 1
-  ext p q
-  simp
-
-lemma qa_exp_mem {n : ℕ} [NeZero n] {mu : Fin n → ℤ} (hmu : Dominant mu) (I : TIdx mu) :
-    qa_exp I ∈ ssIdx n n (qa_nu mu) := by
-  have h1 := leadInterlaced ℤ n n (qa_nu mu) (qa_P ℤ I) (tableauBideterminant_mem_dualWeyl ℤ hmu I) (tableauBideterminant_ne_zero ℤ I)
-  have h2 := colSums ℤ n n (qa_nu mu) (qa_P ℤ I) (tableauBideterminant_mem_dualWeyl ℤ hmu I) _
-    (((colLex n n).degree_mem_support_iff _).mpr (tableauBideterminant_ne_zero ℤ I))
-  rw [(tableauBideterminant_degree_leadingCoeff ℤ I).1] at h1 h2
-  exact ⟨h1, h2⟩
-
-def qa_stdEquiv {n : ℕ} [NeZero n] {mu : Fin n → ℤ} (hmu : Dominant mu) :
-    {I : TIdx mu // StdT I} ≃ ssIdx n n (qa_nu mu) :=
-  Equiv.ofBijective (fun I => ⟨qa_exp I.1, qa_exp_mem hmu I.1⟩)
-    ⟨fun I J h => Subtype.ext (qa_exp_inj I.1 J.1 I.2 J.2 (congrArg Subtype.val h)),
-     fun m => by
-      obtain ⟨I, hI, he⟩ := qa_exp_surj hmu m.1 m.2
-      exact ⟨⟨I, hI⟩, Subtype.ext he⟩⟩
-
-theorem linearIndependent_standard_tableauBideterminant (R : Type) [CommRing R] [Nontrivial R] {n : ℕ} [NeZero n] (mu : Fin n → ℤ) :
-    LinearIndependent R (fun I : {I : TIdx mu // StdT I} => qa_P R I.1) := by
-  refine ldbasis_linearIndependent (colLex n n) _ ?_ fun I => (tableauBideterminant_degree_leadingCoeff R I.1).2
-  intro I J h
-  simp only [(tableauBideterminant_degree_leadingCoeff R _).1] at h
-  exact Subtype.ext (qa_exp_inj I.1 J.1 I.2 J.2 h)
 
 theorem dualWeyl_eq_span_standard_tableauBideterminant (B : Type) [CommRing B] [IsDomain B] {n : ℕ} [NeZero n] {mu : Fin n → ℤ} (hmu : Dominant mu) :
     dualWeyl B n n (qa_nu mu) =

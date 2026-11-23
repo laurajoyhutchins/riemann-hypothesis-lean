@@ -1,5 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.TowerRallisLemma
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LaArtinLit
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RepresentationTheory.Intertwining
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.MultiplicityOne.CompOfBis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ContinuousResP
+import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.LocalRingCardinality.SpanPowerMembership.NZTypeD
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +74,7 @@ open scoped Matrix TensorProduct
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Z.J.D
 
@@ -22,27 +83,5 @@ private def resEquiv {G V V' : Type} [Group G] [AddCommGroup V] [Module ℂ V] [
     Representation.Equiv (ρ.comp K.subtype) (ρ'.comp K.subtype) :=
   Representation.Equiv.mk e.toLinearEquiv fun g => LinearMap.ext fun v =>
     Representation.IntertwiningMap.isIntertwining _ _ e.toIntertwiningMap (g : G) v
-
-theorem resEq2 : TypePS2 → PsRes → ResEq2 := by
-  intro hT hP hN L Ω _ _ _ _ _ _ n hn π π' w A h τ τ' hτ hτ' χ hx hc hc'
-  obtain ⟨ω, hs, ⟨e⟩, hω⟩ := hT hN L Ω n hn π w A h τ hτ χ hx hc
-  obtain ⟨ω', hs', ⟨e'⟩, hω'⟩ := hT hN L Ω n hn π' w A h τ' hτ' χ hx hc'
-  have ha : IsLocalArtin h (artOf h) := Classical.epsilon_spec (UpperTheory.V.Loc.localArtinReciprocity hN h)
-  have hu : ∀ i (y : Uo (w.adicCompletion L)), ω i y = ω' i y := by
-    intro i y
-    obtain ⟨σ, hσ⟩ := ha.surj y
-    have h1 : valuation (w.adicCompletion L) (artOf h σ : w.adicCompletion L) = 1 := by
-      rw [hσ]
-      exact y.2
-    have h2 := ha.ord_eq σ
-    rw [GlobalTheory.SmGL.ord_eq_zero_iff.2 h1] at h2
-    have hI : (σ : G L Ω) ∈ Ine (F := L) A := deg_eq_zero_iff.mp (by omega)
-    have e1 : artOf h (ineIncl h ⟨σ, hI⟩) = y := hσ
-    have h3 := hω i ⟨σ, hI⟩
-    have h4 := hω' i ⟨σ, hI⟩
-    rw [e1] at h3 h4
-    exact h3.trans h4.symm
-  obtain ⟨f⟩ := hP (w.adicCompletion L) n ω ω' hs hs' hu
-  exact ⟨(resEquiv _ e).trans (f.trans (resEquiv _ e').symm)⟩
 
 end UpperTheory.V.Z.J.D

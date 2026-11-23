@@ -1,5 +1,58 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.TestBoundOfRhoAndNormSets
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.SegDefs
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.SegDefs
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.DigitPartMonomial
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.AddMemSupportOfMemSupportCoefOut
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.Monomial
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.TestBoundOfRhoAndNormSets
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,6 +65,7 @@ variable {K : Type} [Field K]
 theorem lin_eq_sum {σ τ : Type} (T : MvPolynomial σ K →ₗ[K] MvPolynomial τ K) (Z : MvPolynomial σ K) :
     T Z = ∑ ζ ∈ Z.support, Z.coeff ζ • T (monomial ζ 1) := by
   conv_lhs => rw [Z.as_sum]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun ζ _ => ?_
   rw [show monomial ζ (Z.coeff ζ) = Z.coeff ζ • monomial ζ (1 : K) by rw [smul_monomial, smul_eq_mul, mul_one], map_smul]
@@ -27,7 +81,7 @@ theorem exists_of_mem_support_lin {σ τ : Type} (T : MvPolynomial σ K →ₗ[K
   refine Finset.sum_eq_zero fun ζ hζ => ?_
   have hz := hc ζ hζ
   rw [mem_support_iff, not_not] at hz
-  rw [coeff_smul, hz, smul_zero]
+  rw [MvPolynomial.coeff_smul, hz, smul_zero]
 
 namespace TwistData
 
@@ -66,11 +120,11 @@ theorem ph_rename_iotaL (p : ℕ) (G : MvPolynomial (D.OL × Fin D.r) K) :
 
 theorem mapDomain_mb (α : D.EA) (b : D.Lb) (a : Fin D.r) :
     (α.mapDomain (Prod.map D.iotaL id)) (D.mb b, a) = α (Sum.inl b, a) :=
-  Finsupp.mapDomain_apply D.localizationToLaurent_injective α (Sum.inl b, a)
+  Finsupp.mapDomain_apply_of_injective D.localizationToLaurent_injective α (Sum.inl b, a)
 
 theorem mapDomain_mlab (α : D.EA) (t : D.Tau) (a : Fin D.r) :
     (α.mapDomain (Prod.map D.iotaL id)) (D.mlab t, a) = α (Sum.inr t, a) :=
-  Finsupp.mapDomain_apply D.localizationToLaurent_injective α (Sum.inr t, a)
+  Finsupp.mapDomain_apply_of_injective D.localizationToLaurent_injective α (Sum.inr t, a)
 
 theorem mapDomain_mw (α : D.EA) (t : D.Tau) (a : Fin D.r) :
     (α.mapDomain (Prod.map D.iotaL id)) (D.mw t, a) = 0 := by
@@ -213,8 +267,9 @@ theorem inv_step [CharZero K] {v : AddValuation K (WithTop ℚ)} {p : ℕ} (hSeg
     rw [lin_eq_sum Th Z, coeff_sum]
     apply AddValuation.map_le_sum
     intro ζ hζ
-    rw [coeff_smul, smul_eq_mul, AddValuation.map_mul]
+    rw [MvPolynomial.coeff_smul, smul_eq_mul, AddValuation.map_mul]
     exact add_nonneg (hInt ζ) (tI ζ (hpre ζ hζ) α)
+
   · rw [lin_eq_sum Th Z, map_sum, ← hph, D.ph_lin_sum p Z]
     refine Finset.sum_congr rfl fun ζ hζ => ?_
     rw [map_smul, tph ζ (hpre ζ hζ)]
@@ -288,6 +343,7 @@ theorem Sp_monomial (p : ℕ) (ζ : D.EM) : D.Sp p (monomial ζ (1 : K)) = monom
   rw [Sp, lsup_monomial, one_smul]
 
 theorem ph_Sp (p : ℕ) (Z : MvPolynomial (D.ML × Fin D.r) K) : D.ph p (D.Sp p Z) = D.ph p Z := by
+
   rw [Sp, lsup_apply, map_sum, ph_eq_sum]
   refine Finset.sum_congr rfl fun ζ _ => ?_
   rw [map_smul, ph_monomial, phE_splitE, smul_monomial, smul_eq_mul, mul_one]
@@ -299,7 +355,7 @@ theorem integral_Sp (v : AddValuation K (WithTop ℚ)) (p : ℕ) {Z : MvPolynomi
   rw [Sp, lsup_apply, coeff_sum]
   apply AddValuation.map_le_sum
   intro ζ _
-  rw [coeff_smul, coeff_monomial]
+  rw [MvPolynomial.coeff_smul, coeff_monomial]
   split_ifs
   · rw [smul_eq_mul, mul_one]
     exact hZ ζ

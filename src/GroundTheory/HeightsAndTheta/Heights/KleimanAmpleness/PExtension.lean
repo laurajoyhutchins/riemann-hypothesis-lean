@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -46,8 +94,8 @@ theorem mul_mem_twistMod {J : Chart x} {f s : Poly S N} {e e' : ℕ} {d c : ℤ}
     rw [chartRing_smul_def, mul_left_comm, ← chartRing_smul_def]
     exact Submodule.smul_mem _ a hq
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem smul_mem_twist (F : SubSystem S x E) {J : Chart x} {f s : Poly S N} {e e' : ℕ} {d c : ℤ}
     (hs : s ∈ monos J.1) (hf : f.IsHomogeneous e') (hse : s.IsHomogeneous e) (hd : (e' : ℤ) = e + d)
     {m : E} (hm : m ∈ (F.twist (twistSys S x c)).sub J) :
@@ -78,8 +126,8 @@ theorem mem_chartRing_of_mem_twistMod_zero {J : Chart x} {q : Ω} (hq : q ∈ tw
     rw [chartRing_smul_def]
     exact Subalgebra.mul_mem _ a.2 hq
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem mem_of_mem_twist_zero (F : SubSystem S x E) {J : Chart x} {m : E}
     (hm : m ∈ (F.twist (twistSys S x 0)).sub J) : m ∈ F.sub J := by
   refine Submodule.span_induction (p := fun m _ => m ∈ F.sub J) ?_ ?_ ?_ ?_ hm
@@ -111,8 +159,8 @@ theorem smul_mem_gam (F : SubSystem S x E) {f : Poly S N} {d : ℕ} (hf : f.IsHo
     (isHomogeneous_one _ _) (by simp) (hm J)
   rwa [map_one, div_one] at h
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem eventually_pow_smul_mem (F : SubFamily S x E) {i : Fin (N + 1)} (hi : x i ≠ 0) {y : E}
     (hy : y ∈ F.sub (singleChart hi)) (J : Chart x) :
     ∀ᶠ n : ℕ in Filter.atTop, x i ^ n • y ∈ (F.twist (twistSys S x (n : ℤ))).sub J := by
@@ -200,8 +248,8 @@ theorem ofGens_piece_le {ι : Type} [Fintype ι] (deg : ι → ℤ) (gen : ι �
 
 end ExtensionProof
 
-open ExtensionProof in
 
+open ExtensionProof in
 theorem Extension.proof : Extension.Statement.{u, v, w} := by
   intro S _ _ Ω _ _ N x E _ _ _ _ F hF
   classical

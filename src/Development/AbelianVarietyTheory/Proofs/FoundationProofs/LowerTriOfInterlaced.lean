@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.GradedWeylDivisibility.StatementE
+module
+
+public import Formalism.GradedWeylDivisibility.StatementE
+public import Formalism.GradedWeylDivisibility.StatementC
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FinalC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility
 
@@ -104,7 +154,7 @@ theorem eq_diagExp_of_lowerTri (hn : n ≤ r) {ν : Fin n → ℕ} {m : Fin r ×
 
 theorem eval_idFrame_eq_coeff {R : Type*} [CommRing R] {ν : Fin n → ℕ} {F : MvPolynomial (Fin r × Fin n) R}
     (hcol : ∀ m ∈ F.support, ∀ t : Fin n, ∑ a : Fin r, m (a, t) = ν t) :
-    eval (idFrame R r n) F = coeff (diagExp r ν) F := by
+    eval (idFrame R r n) F = AddMonoidAlgebra.coeff F (diagExp r ν) := by
   rw [eval_eq', Finset.sum_eq_single (diagExp r ν)]
   · rw [Finset.prod_eq_one, mul_one]
     rintro ⟨a, s⟩ _
@@ -150,7 +200,7 @@ theorem component_eq_smul_hw {R : Type} [CommRing R] [IsDomain R] (hn : n ≤ r)
     (colSums R r n ν G hGm _ hd) (hGw (mem_support_iff.mp hd))
   rw [he, mem_support_iff] at hd
   apply hd
-  rw [hGdef, coeff_sub, coeff_weightedHomogeneousComponent, if_pos (weight_rowW_diagExp ν), coeff_smul,
+  rw [hGdef, MvPolynomial.coeff_sub, coeff_weightedHomogeneousComponent, if_pos (weight_rowW_diagExp ν), MvPolynomial.coeff_smul,
     ← eval_idFrame_eq_coeff (colSums R r n ν F hF), ← eval_idFrame_eq_coeff (colSums R r n ν _ hH),
     eval_idFrame_hw]
   simp
@@ -163,8 +213,8 @@ theorem fockQ_hw : Formalism.GradedWeylDivisibility.FockQHW := by
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hw' := hwRowWeight ℚ r n hn ν hν (mem_support_iff.mp hm)
-  have h2 := congrArg (coeff m) h
-  rw [coeff_weightedHomogeneousComponent, if_pos hw', coeff_smul, smul_eq_mul] at h2
+  have h2 := congrArg (AddMonoidAlgebra.coeff · m) h
+  rw [coeff_weightedHomogeneousComponent, if_pos hw', MvPolynomial.coeff_smul, smul_eq_mul] at h2
   rw [h2]
   ring
 

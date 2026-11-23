@@ -1,5 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.TransportBA
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsContinuousBijectiveAbelianizationOfAlgEqui
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecDefs
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.TransportDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.TransportBA
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -22,10 +69,12 @@ theorem continuous_gal_of_fix {k F k' F' : Type*} [Field k] [Field F] [Algebra k
   intro x hx
   have hx' : x = ∑ i, b.repr ⟨x, hx⟩ i • (b i : F') := by
     have := congrArg E.val (b.sum_repr ⟨x, hx⟩)
+
     rw [map_sum] at this
     exact this.symm
   rw [hx']
   show φ σ _ = _
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Algebra.smul_def, map_mul, AlgEquiv.commutes]
@@ -35,23 +84,7 @@ theorem exists_topAb_iso {G H : Type*} [Group G] [TopologicalSpace G] [IsTopolog
     [TopologicalSpace H] [IsTopologicalGroup H] (φ : G ≃* H) (hφ : IsHomeomorph φ) :
     ∃ ψ : TopologicalAbelianization G ≃* TopologicalAbelianization H, IsHomeomorph ψ ∧
       ∀ g : G, ψ (QuotientGroup.mk g) = QuotientGroup.mk (φ g) := by
-  have hc : (commutator G).map (φ : G →* H) = commutator H := by
-    rw [commutator_def, commutator_def, Subgroup.map_commutator, Subgroup.map_top_of_surjective _ φ.surjective]
-  have hmap : (Subgroup.topologicalClosure (commutator G)).map (φ : G →* H) =
-      Subgroup.topologicalClosure (commutator H) := by
-    apply SetLike.coe_injective
-    rw [Subgroup.coe_map, Subgroup.topologicalClosure_coe, Subgroup.topologicalClosure_coe, ← hc, Subgroup.coe_map]
-    exact (hφ.homeomorph φ).image_closure _
-  let ψ := QuotientGroup.congr _ _ φ hmap
-  have h1 : Continuous ψ :=
-    (QuotientGroup.isOpenQuotientMap_mk.isQuotientMap.continuous_iff).2
-      (QuotientGroup.continuous_mk.comp hφ.continuous)
-  have hs : Continuous φ.symm :=
-    (φ.toEquiv.toHomeomorphOfContinuousOpen hφ.continuous hφ.isOpenMap).symm.continuous
-  have h2 : Continuous ψ.symm :=
-    (QuotientGroup.isOpenQuotientMap_mk.isQuotientMap.continuous_iff).2
-      (QuotientGroup.continuous_mk.comp hs)
-  exact ⟨ψ, (Homeomorph.mk ψ.toEquiv h1 h2).isHomeomorph, fun g => rfl⟩
+  apply GlobalTheory.HeckeGal.exists_topAbelianization_mulEquiv <;> assumption
 
 variable {K : Type} [Field K] [ValuativeRel K] [TopologicalSpace K] {p : ℕ} [Fact p.Prime] (m : Model K p)
 

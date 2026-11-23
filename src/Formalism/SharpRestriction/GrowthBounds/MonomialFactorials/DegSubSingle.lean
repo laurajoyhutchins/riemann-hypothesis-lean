@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.BlockValuationZpOfLatticeInclusion
-import Formalism.PolynomialDimension.MultinomialDepth.PartnerM
+module
+
+public import Formalism.MahlerMeasure.GoodCount
+public import Formalism.PolynomialDimension.MultinomialDepth.PartnerM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +78,7 @@ theorem pderiv_glAct (LL : M.Letters N) (J : ℕ) (a : Fin N) (c c' d' : Fin r)
         have h2 : (s - Finsupp.single u 1 : Fin N × Fin r →₀ ℕ) v = s v := by
           rw [Finsupp.tsub_apply, Finsupp.single_apply, if_neg huv, Nat.sub_zero]
         rw [h1, h2, tsub_right_comm, mul_assoc, mul_assoc, mul_comm ((s u : ℚ_[p]))]
-    · simp only [map_add, hq, hq']
+    · simp only [map_add (f := _), hq, hq']
   have hg : ∀ y, M.glAct p LL J c' d' y = ∑ i : Fin N, (if (i : ℕ) < J then
       (if LL.vec i then X (i, c') * pderiv (i, d') y else -(X (i, d') * pderiv (i, c') y)) else 0) := by
     intro y
@@ -71,8 +118,9 @@ theorem pderiv_glAct (LL : M.Letters N) (J : ℕ) (a : Fin N) (c c' d' : Fin r)
         · have hne : (i, d') ≠ (a, c) := fun h' => hai (congrArg Prod.fst h').symm
           simp [hai, hne]
     · simp [hi]
+
   rw [hg, hg, map_sum, Finset.sum_congr rfl (fun i _ => key i), Finset.sum_add_distrib,
-    Finset.sum_ite_eq]
+  Finset.sum_ite_eq]
   simp
 
 theorem pderiv_keep {σ : Type} (v : σ) (Q Q' : Set (σ →₀ ℕ))
@@ -80,6 +128,7 @@ theorem pderiv_keep {σ : Type} (v : σ) (Q Q' : Set (σ →₀ ℕ))
     ∀ x ∈ restrictSupport ℚ_[p] Q, pderiv v x ∈ restrictSupport ℚ_[p] Q' := by
   intro x hx
   have hx' := (mem_restrictSupport_iff ℚ_[p]).mp hx
+
   rw [x.as_sum, map_sum]
   refine Submodule.sum_mem _ fun m hm => ?_
   rw [pderiv_monomial]
@@ -182,7 +231,7 @@ theorem pderiv_ycond (LL : M.Letters N) (J : ℕ) (Mt : WithTop ℤ) (a : Fin N)
       exact S'.sub_mem (hgen c'' _ hy') hext
     | zero => simp
     | add z z' _ _ hz hz' =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact S'.add_mem hz hz'
     | smul t z _ hz =>
       rw [map_smul]
@@ -208,11 +257,12 @@ theorem tieF_ycond (LL : M.Letters N) (J : ℕ) (Mt : WithTop ℤ) (W E : Fin N)
         (if c0 = c then pderiv (W, d) (pderiv (E, c0) y) else 0) +
         (if c0 = d then -pderiv (W, c0) (pderiv (E, c) y) else 0) := by
       intro c0
-      rw [pderiv_glAct LL J E c0 c d y, map_add, pderiv_glAct LL J W c0 c d (pderiv (E, c0) y)]
+      rw [pderiv_glAct LL J E c0 c d y, map_add (f := _), pderiv_glAct LL J W c0 c d (pderiv (E, c0) y)]
       simp only [hE, hW, hvW, hvE, if_true, Bool.false_eq_true, if_false]
       split_ifs <;> simp [map_neg]
+
     rw [ht, ht, map_sum, Finset.sum_congr rfl (fun c0 _ => step c0), Finset.sum_add_distrib,
-      Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.sum_ite_eq']
+    Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.sum_ite_eq']
     simp only [Finset.mem_univ, if_true, add_assoc, add_neg_cancel, add_zero]
   · intro z hz
     rw [ht]

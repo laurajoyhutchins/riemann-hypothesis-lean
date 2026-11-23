@@ -1,7 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCurve
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.JacobianSmoothness.RingKrullDimLeRingKrullDimQuotientAddOne
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRat
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCurve
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRat
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.JacobianSmoothness.RingKrullDimLeRingKrullDimQuotientAddOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRatA
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -16,11 +66,12 @@ variable {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι → ℕ}
 
 def tDeg (ι : Type) [DecidableEq ι] : ι → ι → ℕ := fun k ↦ Pi.single k 1
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem isWeightedHomogeneous_mConeMap (x : Cone n (AlgebraicClosure ℚ))
     {f : MvPolynomial (Coord n) ℤ} {b : ι → ℕ} (hf : IsWeightedHomogeneous (coordDeg n) f b) :
     IsWeightedHomogeneous (tDeg ι) (Geo.mConeMap (ι := blockIdx n) (flatCone x) f) b := by
+
   rw [f.as_sum, map_sum]
   refine IsWeightedHomogeneous.sum _ _ _ fun m hm ↦ ?_
   rw [Geo.mConeMap, aeval_monomial, Finsupp.prod, MvPolynomial.algebraMap_apply]
@@ -33,15 +84,16 @@ theorem isWeightedHomogeneous_mConeMap (x : Cone n (AlgebraicClosure ℚ))
     (isWeightedHomogeneous_X (AlgebraicClosure ℚ) (tDeg ι) p.1)).pow (m p)
   rwa [zero_add] at h
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem mConeMap_weightedHomogeneousComponent (x : Cone n (AlgebraicClosure ℚ))
     (f : MvPolynomial (Coord n) ℤ) (b : ι → ℕ) :
     Geo.mConeMap (ι := blockIdx n) (flatCone x) (weightedHomogeneousComponent (coordDeg n) b f) =
       weightedHomogeneousComponent (tDeg ι) b (Geo.mConeMap (ι := blockIdx n) (flatCone x) f) := by
   classical
+
   conv_rhs => rw [← sum_weightedHomogeneousComponent (w := coordDeg n) f,
-    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum, map_sum]
+  finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum, map_sum]
   have hom : ∀ a, IsWeightedHomogeneous (tDeg ι)
       (Geo.mConeMap (ι := blockIdx n) (flatCone x) (weightedHomogeneousComponent (coordDeg n) a f)) a :=
     fun a ↦ isWeightedHomogeneous_mConeMap x (weightedHomogeneousComponent_isWeightedHomogeneous a f)
@@ -55,13 +107,13 @@ theorem mConeMap_weightedHomogeneousComponent (x : Cone n (AlgebraicClosure ℚ)
       exact hb ((Set.Finite.mem_toFinset _).mpr h)
     rw [h0, map_zero, map_zero]
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem isPrime_orbitIdeal (x : Cone n (AlgebraicClosure ℚ)) : (orbitIdeal x).IsPrime :=
   RingHom.ker_isPrime _
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem weightedHomogeneousComponent_mem_orbitIdeal (x : Cone n (AlgebraicClosure ℚ))
     {f : MvPolynomial (Coord n) ℤ} (hf : f ∈ orbitIdeal x) (b : ι → ℕ) :
     weightedHomogeneousComponent (coordDeg n) b f ∈ orbitIdeal x := by
@@ -86,8 +138,8 @@ theorem isRelevant_orbitIdeal {x : Cone n (AlgebraicClosure ℚ)} (hx : BlockNon
   rw [orbitIdeal, Geo.mCoordIdeal, RingHom.mem_ker, Geo.mConeMap, aeval_X] at h
   exact mul_ne_zero (C_ne_zero.mpr (hc k)) (X_ne_zero _) h
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem isHorizontal_orbitIdeal (x : Cone n (AlgebraicClosure ℚ)) :
     Geo.IsHorizontal (ι := blockIdx n) (orbitIdeal x) := by
   ext a
@@ -106,15 +158,15 @@ theorem coneMapQ_map (x : Cone n (AlgebraicClosure ℚ)) (f : MvPolynomial (Coor
   rw [← algebraMap_int_eq, coneMapQ, aeval_map_algebraMap]
   rfl
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem comap_ker_coneMapQ (x : Cone n (AlgebraicClosure ℚ)) :
     (RingHom.ker (coneMapQ x)).comap (map (Int.castRingHom ℚ)) = orbitIdeal x := by
   ext f
   rw [Ideal.mem_comap, RingHom.mem_ker, coneMapQ_map, orbitIdeal, Geo.mCoordIdeal, RingHom.mem_ker]
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem ker_coneMapQ (x : Cone n (AlgebraicClosure ℚ)) :
     RingHom.ker (coneMapQ x) = ReciprocityTheory.AnForm.R.extQ (orbitIdeal x) := by
   have := isPrime_orbitIdeal x
@@ -130,8 +182,8 @@ theorem ker_coneMapQ (x : Cone n (AlgebraicClosure ℚ)) :
   simp only [hc, comap_ker_coneMapQ] at h
   exact lt_irrefl _ h
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem algebraicIndependent_C_mul_X (a : ι → AlgebraicClosure ℚ) (ha : ∀ k, a k ≠ 0) :
     AlgebraicIndependent ℚ (fun k ↦ (C (a k) * X k : MvPolynomial ι (AlgebraicClosure ℚ))) := by
   let φ : MvPolynomial ι (AlgebraicClosure ℚ) →ₐ[AlgebraicClosure ℚ]

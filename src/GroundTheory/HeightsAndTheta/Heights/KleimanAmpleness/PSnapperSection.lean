@@ -1,17 +1,69 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperSectionSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperQuotAddSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperQuotDevissageSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MulQuotEqSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionNonvanishSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionMulInjSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperSectionObj
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSnapper
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PIdealTwistFamily
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCutZeroNotLe
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperSectionSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperQuotAddSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperQuotDevissageSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MulQuotEqSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionNonvanishSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SectionMulInjSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperSectionObj
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCutZeroNotLe
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PIdealTwistFamily
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSnapper
 import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PStepThreeAway
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -79,8 +131,8 @@ theorem idealMod_le_one (pp : Ideal (Poly k N)) (I : Chart x) : idealMod (x := x
   rintro _ ⟨f, m, e, -, hm, hf, hme, rfl⟩
   exact Submodule.mem_one.mpr ⟨⟨_, f, m, e, hm, hf, hme, rfl⟩, rfl⟩
 
-attribute [local instance] MvPolynomial.gradedAlgebra in
 
+attribute [local instance] MvPolynomial.gradedAlgebra in
 theorem zeroIdeal_homog (D : SubSystem k x Ω) (s : Ω) :
     ∀ f ∈ zeroIdeal D s, ∀ d : ℕ, homogeneousComponent d f ∈ zeroIdeal D s := by
   have hJ : (zeroIdeal D s).IsHomogeneous (homogeneousSubmodule (Fin (N + 1)) k) :=
@@ -98,8 +150,8 @@ theorem idealMod_sup_le (pp pp' : Ideal (Poly k N)) (hh : ∀ f ∈ pp, ∀ d : 
   rintro _ ⟨f, m, e, hf, hm, hfe, hme, rfl⟩
   obtain ⟨g, hg, z, hz, hgz⟩ := Submodule.mem_sup.mp hf
   have hfe' : f = homogeneousComponent e g + homogeneousComponent e z := by
-    rw [← map_add, hgz, homogeneousComponent_eq_self hfe]
-  rw [SetLike.mem_coe, hfe', map_add, add_div]
+    rw [← map_add (f := _), hgz, homogeneousComponent_eq_self hfe]
+  rw [SetLike.mem_coe, hfe', map_add (f := _), add_div]
   exact Submodule.add_mem_sup
     (Submodule.subset_span ⟨_, m, e, hh g hg e, hm, homogeneousComponent_isHomogeneous _ _, hme, rfl⟩)
     (Submodule.subset_span ⟨_, m, e, hh' z hz e, hm, homogeneousComponent_isHomogeneous _ _, hme, rfl⟩)
@@ -127,8 +179,8 @@ theorem exists_dim_eq (pp : Ideal (Poly k N)) [pp.IsPrime] (hh : ∀ f ∈ pp, �
 
 end SnapperSections
 
-open SnapperSections in
 
+open SnapperSections in
 theorem SnapperSection.proof (hA : SnapperQuotAdd.Statement.{u, w, w})
     (hD : SnapperQuotDevissage.Statement.{u, w, w}) (hM : MulQuotEq.Statement.{u, w})
     (hN : SectionNonvanish.Statement.{u, w}) (hI : SectionMulInj.Statement.{u, w}) :
@@ -154,7 +206,7 @@ theorem SnapperSection.proof (hA : SnapperQuotAdd.Statement.{u, w, w})
   have hJh : ∀ f ∈ pp ⊔ Zs, ∀ d : ℕ, homogeneousComponent d f ∈ pp ⊔ Zs := by
     intro f hf d
     obtain ⟨g, hg, z, hz, rfl⟩ := Submodule.mem_sup.mp hf
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (hh g hg d) (hZh z hz d)
   obtain ⟨F₁, hF₁def⟩ : ∃ F₁ : LineBundle k x, F₁ = (twistBundle k x a).tensorProd D := ⟨_, rfl⟩
   have hF₁sub : ∀ I, F₁.sub I = D.sub I * (twistSys k x a).sub I := fun I => by

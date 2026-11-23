@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocOrbCut
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocOrbCut
+import Formalism.DoubleCosetMeasures.LatticeCoset
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelPropertiesOfHypotheses
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,14 +110,14 @@ theorem uLow_lowUni {n : ℕ} (x : Loc.IL n → E) : Formalism.DoubleCosetMeasur
   refine ⟨fun i j hij => ?_, fun a => ?_⟩
   · have h' : i < j := OrderDual.toDual_lt_toDual.mp hij
     simp only [Loc.uLow]
-    rw [if_neg (ne_of_lt h'), dif_neg (not_lt.mpr h'.le)]
+    rw [if_neg (ne_of_lt h'), dite_eq_right (not_lt.mpr h'.le)]
   · simp [Loc.uLow]
 
 theorem uUp_upUni {n : ℕ} (w : Loc.Pt E n) (y : Loc.IN w → E) : Formalism.DoubleCosetMeasures.IsUpUni (Loc.uUp w y) := by
   refine ⟨fun i j hij => ?_, fun a => ?_⟩
   · have h' : j < i := hij
     simp only [Loc.uUp]
-    rw [if_neg (ne_of_gt h'), dif_neg (fun h => absurd h.1 (not_lt.mpr h'.le))]
+    rw [if_neg (ne_of_gt h'), dite_eq_right (fun h => absurd h.1 (not_lt.mpr h'.le))]
   · simp [Loc.uUp]
 
 def rI {m : ℕ} (a : Loc.Pt E (m + 1)) (B : Matrix (Fin (m + 1)) (Fin (m + 1)) E) :
@@ -191,7 +237,7 @@ theorem val (M : Loc.Model F E) (hOK : M.OK) {m : ℕ} (a : Loc.Pt E (m + 1)) (c
     exact Formalism.FourierDecayAlt.P.A5x6.pt_det_isUnit _
   rw [Formalism.MainNotions.LocalOrbitGerms.Cls.bbIntegrand_eq]
   unfold valQ Formalism.MainNotions.LocalOrbitGerms.Cls.GG
-  rw [dif_pos ⟨hIq, hdq⟩, dif_pos ⟨hI', hdz⟩, phase_eq M hOK a q xy l ρ hl hρ hq,
+  rw [dite_eq_left ⟨hIq, hdq⟩, dite_eq_left ⟨hI', hdz⟩, phase_eq M hOK a q xy l ρ hl hρ hq,
     nIso_orb M l ρ hl hρ hq hIq hdq hI' hdz]
   rfl
 

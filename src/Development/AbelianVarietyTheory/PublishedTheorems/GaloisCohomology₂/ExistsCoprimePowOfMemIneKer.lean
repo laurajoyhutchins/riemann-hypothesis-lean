@@ -1,9 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WeilDeligneParamMonodromyEqZeroIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ValuationPowApplyDivSubOneLt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowCardEq
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ToZModPowKummerEqIff
+public import ReciprocityTheory.GaloisValuations.GlobalB
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WeilDeligneParamMonodromyEqZeroIff
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTameGenAtOfValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ValuationPowApplyDivSubOneLt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowCardEq
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCongOfCongOnFixed
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuationApplyOfWild
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GaloisValuations.GlobalA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.TameQuot
 
@@ -157,8 +217,9 @@ theorem exists_pow_cong {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Alge
   set Q := primeBelow (F := F) A with hQ
   have : v.asIdeal.IsMaximal := v.isMaximal
   have : Q.LiesOver v.asIdeal := ⟨(under_primeBelow hA).symm⟩
-  have : Q.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := 𝓞 F) Q
-    (by rw [show Ideal.comap (algebraMap (𝓞 F) (IntCl F Ω)) Q = v.asIdeal from
+  have : Q.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := 𝓞 F) Q
+    (by change (Ideal.comap (algebraMap (𝓞 F) (IntCl F Ω)) Q).IsMaximal
+        rw [show Ideal.comap (algebraMap (𝓞 F) (IntCl F Ω)) Q = v.asIdeal from
       under_primeBelow hA]; exact v.isMaximal)
   let : Field (IntCl F Ω ⧸ Q) := Ideal.Quotient.field Q
   let : Field (𝓞 F ⧸ v.asIdeal) := Ideal.Quotient.field v.asIdeal
@@ -526,7 +587,7 @@ theorem exists_hom {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F
   have hχ : ∀ g, (χ g : ZMod (l ^ k)) = PadicInt.toZModPow k (cycZ F Ω l g.1 : ℤ_[l]ˣ) :=
     fun _ => rfl
   have hκ : ∀ g h, κ (g * h) = κ g + (χ g : ZMod (l ^ k)) * κ h := fun g h => by
-    simp only [κ, hχ, Subgroup.coe_mul, kummer_mul, ← map_mul, ← map_add]
+    simp only [κ, hχ, Subgroup.coe_mul, kummer_mul, ← map_mul, ← map_add (f := _)]
     congr 1; ring
   have ho : IsOpen {g : Dec (F := F) A | κ g = 0} := by
     have e : {g : Dec (F := F) A | κ g = 0} = Subtype.val ⁻¹'
@@ -723,8 +784,8 @@ theorem cycMod_eq_one (hA : IsPlaceOver A v) (hl : ((l : ℕ) : 𝓞 F) ∉ v.as
       exact isClosed_eq ((continuous_cycMod l n).comp continuous_subtype_val) continuous_const
   exact h4 (Subgroup.mem_top g)
 
-omit [IsAlgClosure F Ω] [Fact l.Prime] in
 
+omit [IsAlgClosure F Ω] [Fact l.Prime] in
 def homOf (z : Z1 (trivDec F A l n)) : Dec (F := F) A →* Multiplicative (ZMod (l ^ n)) :=
   MonoidHom.mk' (fun g => Multiplicative.ofAdd (z.1 g)) fun g h => congrArg _ (z.2.2 g h)
 
@@ -922,8 +983,8 @@ omit [IsAlgClosure F Ω] in
 theorem muDec_apply (g : Dec (F := F) A) (s : ZMod (l ^ n)) : muDec F A l n g s = s := by
   simp [hμ g]
 
-omit [IsAlgClosure F Ω] in
 
+omit [IsAlgClosure F Ω] in
 def toMu : Z1 (trivDec F A l n) ≃ₗ[ZMod (l ^ n)] Z1 (muDec F A l n) :=
   LinearEquiv.ofEq _ _ (Submodule.ext fun f => by
     simp only [mem_Z1_iff_cocycle, muDec_apply hμ, Representation.trivial_apply])

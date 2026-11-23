@@ -1,5 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RadicalStalks.IsConst
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RadicalStalks.IsConst
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Cris GlobalTheory.DeRham GlobalTheory.ConjSeq GlobalTheory.UPel.HT GlobalTheory.UPel.HT.ES UpperTheory.Gal.Ord
@@ -29,6 +75,7 @@ private lemma not_le_span_image {k P : Type*} [Field k] [AddCommGroup P] [Module
       have h : ((∑ i, b.repr ⟨y, hy⟩ i • b i : K) : P) = y := by rw [b.sum_repr]
       rw [Submodule.coe_sum] at h
       simpa only [Submodule.coe_smul] using h.symm
+
     rw [e, map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [hA]
@@ -169,7 +216,7 @@ private lemma exists_not_mem {k C P : Type*} [Field k] [IsAlgClosed k] [CommRing
       rw [hfix, ← congrFun h c]
     · simp
     · intro y z hy hz
-      rw [map_add]
+      rw [map_add (f := _)]
       exact H.add_mem hy hz
   have hεG : ∀ x ∈ G, ρ ε x = x := by
     have aux : ∀ (n : ℕ) (x : P), ((ρ ε - (1 : k) • 1) ^ n) x = 0 → ρ ε x = x := by
@@ -212,7 +259,7 @@ private lemma exists_not_mem {k C P : Type*} [Field k] [IsAlgClosed k] [CommRing
     rintro _ ⟨z, rfl⟩
     have hz : z ∈ G ⊔ H := hsup ▸ Submodule.mem_top
     obtain ⟨z1, h1, z2, h2, rfl⟩ := Submodule.mem_sup.1 hz
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (Submodule.subset_span ⟨z1, h1, rfl⟩) (hAH z2 h2)
   have hstep : ∀ u ∈ G, ∃ w ∈ Wd, ∃ u' ∈ G, u = w + ρ a u' := by
     intro u hu
@@ -224,7 +271,7 @@ private lemma exists_not_mem {k C P : Type*} [Field k] [IsAlgClosed k] [CommRing
     obtain ⟨v1, hv1, v2, hv2, rfl⟩ := Submodule.mem_sup.1 (d v')
     have e0 : ρ (1 - ε) v1 = 0 := h1εG v1 hv1
     have e1 : u - w - ρ a u1 = h + ρ a u2 + ρ (1 - ε) v2 := by
-      simp only [map_add, e0] at hx
+      simp only [map_add (f := _), e0] at hx
       have h' := sub_eq_iff_eq_add.1 hx
       rw [h']
       abel
@@ -252,7 +299,7 @@ private lemma exists_not_mem {k C P : Type*} [Field k] [IsAlgClosed k] [CommRing
       obtain ⟨w, hw, u', hu', e⟩ := ih u hu
       obtain ⟨w2, hw2, u'', hu'', e2⟩ := hstep u' hu'
       refine ⟨w + (ρ a ^ n) w2, Wd.add_mem hw (hpow n _ hw2), u'', hu'', ?_⟩
-      rw [pow_succ, Module.End.mul_apply, e, e2, map_add, add_assoc]
+      rw [pow_succ, Module.End.mul_apply, e, e2, map_add (f := _), add_assoc]
   obtain ⟨e, he⟩ := hnil
   have hGW : G ≤ Wd := by
     intro u hu

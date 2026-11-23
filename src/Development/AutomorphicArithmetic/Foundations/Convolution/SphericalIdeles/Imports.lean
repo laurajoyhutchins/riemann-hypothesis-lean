@@ -1,19 +1,59 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConj
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.LiftAll
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.DescAt
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SameSat
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.PowSat
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.NormUnr
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConjAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PowTwist
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConj
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.Ci
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExCusp
 import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.IsoEq
-import Development.AutomorphicArithmetic.Foundations.Convolution.NormCharacterPowers.NormCharPowHolds
+import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatEx
+import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.SSatIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.NormCharacterPowers.NormCharPowHolds
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.DescAt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.LiftAll
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.NormUnr
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.PowSat
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SameSat
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.SphConjAlt
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
+import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PowTwist
+import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.SatakeTwists.SatakeTwistHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Multiset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction
@@ -24,9 +64,10 @@ theorem UpperTheory.ConvolutionTheory.Sph.down :
     UpperTheory.ConvolutionTheory.Sph.Down := by
   classical
   intro F E _ _ _ _ _ _ _ _ σ hσ hp n hn π P hW v hv ⟨w, hwv, B', hB'⟩
-  let μE : Measure (normOneGL E n) := Measure.haar
-  let μF : Measure (normOneGL F n) := Measure.haar
-  obtain ⟨s, χ, χ', V, V', θ, hχ, hχ', hV, hV', hθ, hst, hW', -, hOff⟩ := Sph.norm F E σ hσ hp n hn μE μF π P hW
+  let μE : Measure (normOneGL (K := E) (n := n)) := Measure.haar
+  let μF : Measure (normOneGL (K := F) (n := n)) := Measure.haar
+  have hnorm := Sph.norm F E σ hσ hp n hn μE μF π P hW
+  obtain ⟨s, χ, χ', V, V', θ, hχ, hχ', hV, hV', hθ, hst, hW', -, hOff⟩ := hnorm
   obtain ⟨-, htw⟩ := powTwist F E
   obtain ⟨hi, -, h1⟩ := htw s χ χ' hχ hχ'
   obtain ⟨hback, -⟩ := h1 n hn

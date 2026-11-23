@@ -1,8 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeAt
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeAt
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
 open scoped CategoryTheory.Obj
@@ -101,6 +151,7 @@ theorem exists_integral_leftInverse {V K : Type} [CommRing V] [IsDomain V]
     simp only [smul_eq_mul]
   calc ∑ k, algebraMap V K (F i (fun j => if k = j then 1 else 0)) * b i' k
       = algebraMap V K (∑ k, β i' k * F i (fun j => if k = j then 1 else 0)) := by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [map_mul, hβ, mul_comm]
@@ -165,6 +216,7 @@ theorem eigSub_baseChange : ∀ (E : Type) [Field E] [NumberField E] (K C V A : 
       intro i'
       have e3 : ∑ k, j (algebraMap V K (m i k)) * (c i' * j (b i' k)) =
           c i' * j (∑ k, algebraMap V K (m i k) * b i' k) := by
+
         rw [map_sum, Finset.mul_sum]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [map_mul]
@@ -220,6 +272,7 @@ theorem eigSub_baseChange : ∀ (E : Type) [Field E] [NumberField E] (K C V A : 
         intro a k
         refine Fintype.linearIndependent_iff.1 hc (fun t => ρK a (y t) k - σ (a : E) * y t k) ?_
         have h := congrFun (hxE a) k
+
         rw [hxsum, map_sum] at h
         simp only [map_smul, hρ, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Finset.mul_sum] at h
         calc ∑ t, (ρK a (y t) k - σ (a : E) * y t k) • c t
@@ -245,6 +298,7 @@ theorem eigSub_baseChange : ∀ (E : Type) [Field E] [NumberField E] (K C V A : 
         refine (Submodule.mem_span_range_iff_exists_fun C).2 ⟨fun i => j (coef i), ?_⟩
         funext k
         rw [← hcoef]
+
         simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul]
       rw [hxsum]
       exact Submodule.sum_mem _ fun t _ => Submodule.smul_mem _ (c t) (hyC t)

@@ -1,5 +1,53 @@
-import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
+module
+
+public import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
+
 open NumberField GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl
 
 namespace PositivityTheory.Xgf
@@ -43,7 +91,7 @@ theorem padic_logIdeal_max_element : ∀ (E : Type) [Field E] [NumberField E] (p
     | mem x hx => exact hmax x hx
     | zero => simp
     | add x y _ _ hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hx hy)
     | smul r x _ hx =>
       rw [smul_eq_mul, map_mul, norm_mul]
@@ -69,7 +117,7 @@ theorem log_ideal_mul_span_map : ∀ (E : Type) [Field E] [NumberField E] (p : N
       refine Submodule.mul_induction_on (C := fun c => ‖j c‖ ≤ ‖j a‖ * ‖j b‖) hc (fun m hm n hn => ?_) (fun x y hx hy => ?_)
       · rw [map_mul, norm_mul]
         exact mul_le_mul (hla m hm) (hlb n hn) (norm_nonneg _) (norm_nonneg _)
-      · rw [map_add]
+      · rw [map_add (f := _)]
         exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hx hy)
     rw [NI.logIdeal_eq j (I * J) (Ideal.mul_mem_mul haI hbJ) hle, ea, eb, map_mul, norm_mul,
       Real.log_mul (norm_ne_zero_iff.2 fun h => ha0 (hj (by rw [h, map_zero])))

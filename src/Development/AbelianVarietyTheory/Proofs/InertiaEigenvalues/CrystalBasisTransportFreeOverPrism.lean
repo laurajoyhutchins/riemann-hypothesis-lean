@@ -1,11 +1,50 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBreuilKisinModuleBasisOfFCrystal
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConnPhiExtensionGeneratorEqZeta
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinPrismCrystalCoordinates
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCrystalCoordinatesOverBreuilKisin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.OneSubPhiOntoOfFilZero
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ConductorExponents
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBreuilKisinModuleBasisOfFCrystal
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinPrismCrystalCoordinates
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCrystalCoordinatesOverBreuilKisin
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Matrix
 open scoped Formalism.Per
@@ -29,9 +68,9 @@ theorem exists_read {Z O S W R N ι : Type} [CommRing Z] [CommRing O] [CommRing 
   choose C hC using hD
   refine ⟨AddMonoidHom.mk' (fun x i => Ψ (C x i)) fun x y => funext fun i => ?_, fun s x x' i h => ?_,
     fun c x i h => ?_⟩
-  · have : C (x + y) i = C x i + C y i := hi (by rw [map_add, hC, hC, hC, map_add, Pi.add_apply])
+  · have : C (x + y) i = C x i + C y i := hi (by rw [map_add (f := _), hC, hC, hC, map_add (f := _), Pi.add_apply])
     change Ψ (C (x + y) i) = Ψ (C x i) + Ψ (C y i)
-    rw [this, map_add]
+    rw [this, map_add (f := _)]
   · have : C x' i = ((1 : O) ⊗ₜ[Z] s) * C x i := hi (by
       rw [map_mul, hC, hC, h, Algebra.TensorProduct.map_tmul]; rfl)
     change Ψ (C x' i) = g s * Ψ (C x i)
@@ -72,14 +111,15 @@ theorem indep_of_coord {Z O S W B R M N ι : Type} [CommRing Z] [CommRing O] [Co
     · rw [Algebra.smul_def, mul_comm]
     · rw [map_zero, mul_zero]
   change lam _ () i = _
+
   simp only [map_sum, Finset.sum_apply, h3]
   rw [Finset.sum_comm]
   simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 variable {l : ℕ} [hl : Fact l.Prime] {a : ℕ} [NeZero a] {e : ℕ} [NeZero e]
 
-variable (a) in
 
+variable (a) in
 noncomputable def evW (ϖ : PiSys l e) : (Wq l a)⟦X⟧ →ₐ[ℤ_[l]] WCb l where
   toRingHom := (inclW l).comp (ϖ.ev a)
   commutes' z := by
@@ -99,6 +139,7 @@ theorem exists_toW_eq {m : Vec K a ι} (hm : m ∈ P.M) (i : ι) :
   obtain ⟨s, hs⟩ := exists_eq_sum_toAc t K (Module.Free.chooseBasis ℤ_[l] O)
     (fun τ => ⟨m τ i, mem_tot.1 hm τ i⟩)
   refine ⟨∑ k, Module.Free.chooseBasis ℤ_[l] O k • ((1 : O) ⊗ₜ[ℤ_[l]] s k), ?_⟩
+
   rw [h1, hs, map_sum, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, map_smul, OfCrystal.iR_toAc]

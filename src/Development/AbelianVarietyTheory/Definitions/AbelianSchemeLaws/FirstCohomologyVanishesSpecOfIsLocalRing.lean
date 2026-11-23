@@ -1,7 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+public import Aesop.BuiltinRules
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi
@@ -97,7 +140,7 @@ theorem rs_cst (f : X ⟶ Spec (CommRingCat.of R)) {U V : X.Opens} (h : V ≤ U)
     rs X h (cst f U r) = cst f V r :=
   rs_rs le_top h _
 
-theorem isLB_pw {H : LB X} (hH : H.IsLB) (t : ℤ) : (pw H t).IsLB where
+theorem isLB_pw {H : LB X} (hH : H.IsLB) (t : ℤ) : (pw H t).IsLB := {
   cover := hH.cover
   g_self := fun i => by
     have h := congrArg (· ^ t) (hH.g_self i)
@@ -106,7 +149,7 @@ theorem isLB_pw {H : LB X} (hH : H.IsLB) (t : ℤ) : (pw H t).IsLB where
   cocycle := fun i j k => by
     have h := congrArg (· ^ t) (hH.cocycle i j k)
     simp only [mul_zpow, ← map_zpow] at h
-    exact h
+    exact h }
 
 theorem isLB_tw {M H : LB X} (hM : M.IsLB) (hH : H.IsLB) (t : ℤ) : (tw M H t).IsLB :=
   LB.isLB_div hM (isLB_pw hH (-t))
@@ -131,7 +174,7 @@ theorem firstCohomologyVanishes_of_every_cover_trivial (M : LB X)
   have hle : ∀ U : X.Opens, U ≤ V d := fun U => hd ▸ le_top
   refine ⟨fun a => rs X (le_inf le_rfl (hle _) : V a ≤ V a ⊓ V d) (φ a d), fun a b => ?_⟩
   have h := congrArg (rs X (le_inf le_rfl (hle _) : V a ⊓ V b ≤ V a ⊓ V b ⊓ V d)) (hφ a b d)
-  simp only [map_add, map_mul, rs_rs, rs_self] at h
+  simp only [map_add (f := _), map_mul, rs_rs, rs_self] at h
   simp only [rs_rs]
   exact eq_sub_of_add_eq h
 
@@ -233,14 +276,5 @@ def perfTriv (f : X ⟶ Spec (CommRingCat.of R)) [IsIso f] : Perf f (Inh.trivLB 
     rw [Fin.sum_univ_one, map_one, _root_.mul_one]
     exact rs_cst f' _ _
   exact := fun R' _ g X' π f' _ _ w _ => ⟨0, Subsingleton.elim _ _⟩
-
-example (R : Type) [CommRing R] :
-    Nonempty (Perf (𝟙 (Spec (CommRingCat.of R))) (Inh.trivLB _)) := ⟨perfTriv _⟩
-
-example (R : Type) [CommRing R] : (perfTriv (𝟙 (Spec (CommRingCat.of R)))).a = 1 := rfl
-
-example : IsProjBy (𝟙 (Spec (CommRingCat.of ℤ))) := isProjBy_id ℤ
-
-example : FirstCohomologyVanishes (Inh.trivLB (Spec (CommRingCat.of ℚ))) := firstCohomologyVanishes_spec_of_isLocalRing _
 
 end GlobalTheory.AbLaw

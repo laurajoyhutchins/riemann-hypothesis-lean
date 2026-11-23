@@ -1,18 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TameValuesGaloisCharFormResidueUnitCharacter
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIneOfUnit
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OpenKerCharWildEqOneOfPowEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPowJoint
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsInertiaTameCharPrimitiveRootOfUniformizerR
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsConjInertiaTameCharOtherPlace
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsZetaPowCloseToUnitZpow
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ToUnitsCompToCircle
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinPartMulIncAMem
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivChar
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsSplitOfMemAdmissibleConjugatePairPlaces
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.RingHomOfBaseOrderToFraction
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ToUnitsCompToCircle
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTameGenAtOfValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinPartMulIncAMem
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsConjInertiaTameCharOtherPlace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIneOfUnit
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsInertiaTameCharPrimitiveRootOfUniformizerR
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPowJoint
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsZetaPowCloseToUnitZpow
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemZpowersOfTameGen
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OpenKerCharWildEqOneOfPowEqOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TameValuesGaloisCharFormResidueUnitCharacter
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulOfResSNeOne
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.GaloisValuations.GlobalA
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NoFormsOff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SubsetTwistExceptionalPlaces
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameEquivApply
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameEquivApply
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelIndexNeZeroOfReps
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.GoodPartLeTypeSubspace
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,8 +70,8 @@ open Formalism.AUTREP (GAf)
 open GlobalTheory.FormInner (frameEquiv)
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 namespace GlobalTheory.TameResRead
 
@@ -147,7 +195,7 @@ theorem tameVal_eq_of_tameRep : ∀ {E Ω : Type} [Field E] [NumberField E] [Fie
   intro σ u hu hσ
   obtain ⟨a, ha⟩ := GlobalTheory.TamePowTeich.exists_zeta_pow_close P A0 ζ0 hA0 hζ0prim u e hu
   have hex : ∃ σ : Formalism.ConjugateSelfDual.G E Ω, Formalism.L2.NX.TameRep P e σ u := ⟨σ, hσ⟩
-  rw [Formalism.L2.NX.tameVal, dif_pos hex, hK _ u a hex.choose_spec ha, hK σ u a hσ ha]
+  rw [Formalism.L2.NX.tameVal, dite_eq_left hex, hK _ u a hex.choose_spec ha, hK σ u a hσ ha]
 
 variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω]
 
@@ -193,8 +241,8 @@ theorem tameRep_zpow {A : ValuationSubring Ω} {P : HeightOneSpectrum (𝓞 E)} 
 
 end Gal
 
-open Formalism.IndefR.Datum in
 
+open Formalism.IndefR.Datum in
 theorem eq_res_locU {D : D7} {M : Type} [CommGroup M] {χ : (AE D)ˣ →* M} {PP : Pl D.host.E}
     (h : Formalism.L2.NTheta.IsIdemAt (idemAt PP) PP) {c : (kP PP)ˣ →* M} (hc : IsResAt χ PP c) (a : 𝓞 D.host.E)
     (ha0 : (a : D.host.E) ≠ 0) (z : (kP PP)ˣ) (hz : (z : kP PP) = Ideal.Quotient.mk PP.asIdeal a) :

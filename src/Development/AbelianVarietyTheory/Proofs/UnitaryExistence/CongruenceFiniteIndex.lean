@@ -1,6 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Quotient.Index
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors
@@ -31,11 +79,6 @@ theorem _root_.GlobalTheory.CongruenceIndex.mulVec_inv_mulVec (γ : GL (Fin r) E
       = v := by
   rw [Matrix.mulVec_mulVec, ← Units.val_mul, mul_inv_cancel, Units.val_one, Matrix.one_mulVec]
 
-omit [NumberField E] [IsCMField E] in
-theorem inv_mulVec_mulVec (γ : GL (Fin r) E) (v : Fin r → E) :
-    ((γ⁻¹ : GL (Fin r) E) : Matrix (Fin r) (Fin r) E) *ᵥ ((γ : Matrix (Fin r) (Fin r) E) *ᵥ v)
-      = v := by
-  rw [← mul_mulVec, inv_mul_cancel, Units.val_one, Matrix.one_mulVec]
 
 open NumberField Matrix in
 open scoped nonZeroDivisors in
@@ -93,14 +136,6 @@ def congruenceSubgroup (Gm : Matrix (Fin r) (Fin r) E) (Λ : Submodule (𝓞 E) 
     refine ⟨-w, Λ.neg_mem hw, ?_⟩
     rw [smul_neg, ← sub_eq_add_neg, eq_sub_iff_add_eq]
     exact e.symm
-
-theorem finite_quotient (hΛ : Λ.FG) {M : ℕ} (hM : 0 < M) :
-    Finite (Λ ⧸ (nsmulAddMonoidHom M : Λ →+ Λ).range) := by
-  haveI : Module.Finite (𝓞 E) Λ := Module.Finite.iff_fg.2 hΛ
-  haveI : Module.Finite ℤ Λ := Module.Finite.trans (𝓞 E) Λ
-  haveI : AddGroup.FG Λ := Module.Finite.iff_addGroup_fg.1 inferInstance
-  haveI := AddSubgroup.finiteIndex_range_nsmulAddMonoidHom_of_fg Λ hM.ne'
-  infer_instance
 
 open NumberField Matrix in
 open scoped nonZeroDivisors in
@@ -181,11 +216,11 @@ theorem _root_.GlobalTheory.CongruenceIndex.exists_finset_cosets (hΛ : Λ.FG) {
   rw [hb']
   abel
 
+
 open NumberField Matrix in
 open scoped nonZeroDivisors in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
   {Gm : Matrix (Fin r) (Fin r) E} {Λ : Submodule (𝓞 E) (Fin r → E)} in
-
 theorem _root_.GlobalTheory.CongruenceIndex.congruence_finiteIndex : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r M : ℕ) (Gm : Matrix (Fin r) (Fin r) E) (Λ : Submodule (𝓞 E) (Fin r → E)), Λ.FG → 0 < M → ∃ Γ : Subgroup (GL (Fin r) E), (∀ γ, γ ∈ Γ ↔ _root_.ReciprocityTheory.ChartRestriction.G.FD.IsUStab Gm Λ γ ∧ (∀ v ∈ Λ, ∃ w ∈ Λ, (γ : Matrix (Fin r) (Fin r) E) *ᵥ v = v + M • w)) ∧ ∃ S : Finset (GL (Fin r) E), ∀ γ, _root_.ReciprocityTheory.ChartRestriction.G.FD.IsUStab Gm Λ γ → ∃ s ∈ S, s⁻¹ * γ ∈ Γ := by
   intro E _ _ _ r M Gm Λ hΛ hM
   exact ⟨_root_.GlobalTheory.CongruenceIndex.congruenceSubgroup Gm Λ M, fun γ => Iff.rfl,

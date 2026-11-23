@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawLinearCoeffAdditive
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoboundaryEqAdditiveLeadingTerms
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdditiveFormalGroupCoboundaryHomogeneous
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdditiveFormalGroupCoboundaryHomogeneous
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoboundaryEqAdditiveLeadingTerms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawLinearCoeffAdditive
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.CoeffSingleLawAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -123,14 +169,14 @@ theorem coeff_prod_addLaw (d n : ℕ) : ∀ α : Fin d →₀ ℕ, α.degree = n
       simp only [Finsupp.coe_add, Finsupp.coe_tsub, Pi.add_apply, Pi.sub_apply, Finsupp.single_apply]
       split_ifs with h1 <;> (try subst h1) <;> omega⟩
     have ha : α.degree = n := by
-      rw [map_add, Finsupp.degree_single] at hα; omega
+      rw [map_add (f := _), Finsupp.degree_single] at hα; omega
     have hP : ((α + Finsupp.single j 1).prod fun s m => addLaw R d s ^ m) =
         (α.prod fun s m => addLaw R d s ^ m) * monomial (Finsupp.single (Sum.inl j) 1) 1 +
         (α.prod fun s m => addLaw R d s ^ m) * monomial (Finsupp.single (Sum.inr j) 1) 1 := by
       rw [Finsupp.prod_add_index' (by simp) (by intros; rw [pow_add]),
         Finsupp.prod_single_index (by simp), pow_one, ← hX, ← hX, ← mul_add]
       rfl
-    rw [hP, map_add, coeff_mul_monomial, coeff_mul_monomial]
+    rw [hP, map_add (f := _), coeff_mul_monomial, coeff_mul_monomial]
     simp only [single_inl_le, single_inr_le, sumElim_sub_inl, sumElim_sub_inr, ih α ha, mul_one]
     by_cases hae : a + e = α + Finsupp.single j 1
     · rw [if_pos hae]
@@ -196,7 +242,7 @@ theorem sumElim_eq_inl {d : ℕ} (a e δ : Fin d →₀ ℕ) :
 theorem sumElim_eq_inr {d : ℕ} (a e δ : Fin d →₀ ℕ) :
     Finsupp.sumElim a e = δ.mapDomain Sum.inr ↔ a = 0 ∧ δ = e := by
   have hr : ∀ k, (δ.mapDomain Sum.inr : Fin d ⊕ Fin d →₀ ℕ) (Sum.inr k) = δ k :=
-    fun k => Finsupp.mapDomain_apply Sum.inr_injective δ k
+    fun k => Finsupp.mapDomain_apply_of_injective Sum.inr_injective δ k
   constructor
   · intro h
     refine ⟨?_, ?_⟩

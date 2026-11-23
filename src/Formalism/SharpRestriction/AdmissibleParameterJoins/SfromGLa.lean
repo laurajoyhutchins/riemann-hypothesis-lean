@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.HermitianLattices.StatementMass
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+import Formalism.ThetaLiftIndependence.ThetaOrbitSums.LatLiftIndep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,15 +133,24 @@ theorem cj_mem_isom {φ : V ≃ₗ[K] V'} (hφ : ∀ x y, h' (φ x) (φ y) = h x
   rw [cj_apply, cj_apply, hφ, hg, isom_symm hφ]
 
 theorem isLattice_tr (φ : V ≃ₗ[K] V') {M : Submodule (𝓞 K) V} (hM : Submodule.IsLattice K M) :
-    Submodule.IsLattice K (latMap φ M) where
-  fg := hM.fg.map _
-  span_eq_top := by
-    have h1 : ((latMap φ M : Submodule (𝓞 K) V') : Set V') = (φ : V →ₗ[K] V') '' (M : Set V) := rfl
-    rw [h1, Submodule.span_image, hM.span_eq_top, Submodule.map_top, LinearEquiv.range]
+    Submodule.IsLattice K (latMap φ M) :=
+  Submodule.IsLattice.of_fg K (hM.fg.map _)
+
+theorem isFullLattice_tr (φ : V ≃ₗ[K] V') {M : Submodule (𝓞 K) V}
+    (hM : Submodule.IsFullLattice K M) : Submodule.IsFullLattice K (latMap φ M) := by
+  letI : Submodule.IsLattice K (latMap φ M) := isLattice_tr φ hM.toIsLattice
+  constructor
+  change Submodule.span K ((M.map ((φ : V →ₗ[K] V').restrictScalars (𝓞 K)) :
+    Submodule (𝓞 K) V') : Set V') = ⊤
+  rw [show Submodule.span K ((M.map ((φ : V →ₗ[K] V').restrictScalars (𝓞 K)) :
+      Submodule (𝓞 K) V') : Set V') = (Submodule.span K (M : Set V)).map φ.toLinearMap by
+        rw [Submodule.map_span]; rfl,
+    hM.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
+  exact φ.surjective
 
 theorem genus_tr {φ : V ≃ₗ[K] V'} (hφ : ∀ x y, h' (φ x) (φ y) = h x y) {L M : Submodule (𝓞 K) V}
     (hM : M ∈ genus h L) : latMap φ M ∈ genus h' (latMap φ L) := by
-  refine ⟨isLattice_tr φ hM.1, fun p hp => ?_⟩
+  refine ⟨isFullLattice_tr φ hM.1, fun p hp => ?_⟩
   obtain ⟨g, hg, e⟩ := hM.2 p hp
   exact ⟨cj φ g, cj_mem_isom hφ hg, by rw [loc_tr, gmap_cj, e, loc_tr]⟩
 
@@ -159,7 +213,7 @@ theorem mass_tr {φ : V ≃ₗ[K] V'} (hφ : ∀ x y, h' (φ x) (φ y) = h x y) 
       rw [tr_symm_tr] at this
       exact ⟨_, this⟩
     unfold mass
-    rw [dif_neg hs, dif_neg hs']
+    rw [dite_eq_right hs, dite_eq_right hs']
 
 theorem mass_ortho_eq {n : ℕ} {L : Submodule (𝓞 K) V} {L' : Submodule (𝓞 K) V'}
     (hL : IsOrthoLattice h L n) (hL' : IsOrthoLattice h' L' n) : mass h L = mass h' L' := by
@@ -176,8 +230,9 @@ theorem mass_ortho_eq {n : ℕ} {L : Submodule (𝓞 K) V} {L' : Submodule (𝓞
     have hx := b.sum_repr x
     have hy := b.sum_repr y
     rw [← hx, ← hy]
+
     simp only [map_sum, map_smul, map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, b,
-      Module.Basis.mk_apply, hφe, he, he']
+    Module.Basis.mk_apply, hφe, he, he']
   rw [← mass_tr hφ]
   congr 1
   unfold latMap

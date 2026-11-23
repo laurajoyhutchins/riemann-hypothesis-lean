@@ -1,21 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgHomEqOrConj
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteOfLocEqOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CongOfLoc
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfSupportedAtSplit
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCompactOpenCongr
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsComplEquiv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHomTrivOutsideLoc
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IrreducibleRepIsotypicOfCentraliserFactor
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteCosetsHeckeSetAtSplitPlaceOutsideLevel
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AlgHomEqOrConj
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsComplEquiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceCompletionEquivUnique
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHomTrivOutsideLoc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfSupportedAtSplit
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteOfLocEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CongOfLoc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceProjMemIntegersOfIntegral
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PrincipalCongInvMul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCompactOpenCongr
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatCongruenceLeOpenSubgroupGL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedNatCastAdicCompletionLeOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalOfLevel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatCongruenceLeOpenSubgroupGL
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalOfLevel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IrreducibleRepIsotypicOfCentraliserFactor
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PrincipalCongInvMul
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceCompletionEquivUnique
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceProjMemIntegersOfIntegral
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedNatCastAdicCompletionLeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX GlobalTheory.HeightCounting NumberField IsDedekindDomain Polynomial
 
 noncomputable section
@@ -275,7 +315,9 @@ theorem isLocS_unique {n : ℕ} (π π' : NG.AutRep L n) (s : SplitPlace L)
     have h2 := DFunLike.congr_fun h a
     have h3 : T0.symm ⟨T' a, hTm' a⟩ = 0 := h2
     have h4 := congrArg (fun y => ((T0 y : π'.S) : GAf L n → π'.W)) h3
-    simpa using h4
+    rw [T0.apply_symm_apply] at h4
+    rw [T0.map_zero] at h4
+    exact h4
   have hcomm : ∀ (x : GAf L n), ∃ u, ∀ y, Commute ((e u)⁻¹ * x) (e y) := fun x =>
     ⟨s.loc n x, fun y => GlobalTheory.SplitLocComm.commute_of_loc_eq_one L n s _ _ (by rw [map_mul, map_inv, he2, inv_mul_cancel]) (he1 y)⟩
   obtain ⟨-, hiso⟩ := GlobalTheory.CuspRep.CompUniq.isotypic (GAf L n) _ π.S σ.V σ'.V (rtOf π) e (σ.ρ.comp φ) (σ'.ρ.comp φ)

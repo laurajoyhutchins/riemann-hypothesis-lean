@@ -1,9 +1,52 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LiftsAtThinLetterType
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.FilVSep
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsPhiBridge
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.AcoordSumVecMul
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LemGBInImgIff
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.AlgebraMapMemInvariants
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +77,7 @@ theorem φVB_inj {V : Type} [AddCommGroup V] [Module LL V] [Module Qp V] [IsScal
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul x b => simp [φVB]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hi : Function.Injective (PD.φ.toLinearMap.restrictScalars Qp) := PD.φ_inj
   intro a b hab
   rw [h, h] at hab
@@ -46,10 +89,11 @@ theorem crisMap_φ {V V' : Type} [AddCommGroup V] [Module LL V] [Module Qp V] [I
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul x b => simp [Formalism.MainNotions.TruncatedSeriesCountingBounds.crisMap, φVB]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem dv_succ (T : LocLat G Qp LL O) (e : ℕ) {d : ℕ} (b : Fin d → W.DD T) (c₀ : Fin d → LL) :
     dv W T (e + 1) b c₀ = φVB PD (LL := LL) (V := T.V) (dv W T e b c₀) := by
+
   simp only [dv, map_sum, map_smul, pow_succ', Module.End.mul_apply]
 
 theorem dvO_succ (T : LocLat G Qp LL O) (e : ℕ) {d : ℕ} (b : Fin d → W.DD T) (c₀ : Fin d → O) :
@@ -75,6 +119,7 @@ theorem dv_eq_sum (T : LocLat G Qp LL O) (e : ℕ) {d : ℕ} (b : Fin d → W.DD
 theorem dvO_lin (T : LocLat G Qp LL O) (e : ℕ) {d : ℕ} (b : Fin d → W.DD T) {I : Type} (s : Finset I)
     (a : I → O) (c₀ : I → Fin d → O) :
     dvO W T e b (fun m => ∑ i ∈ s, a i * c₀ i m) = ∑ i ∈ s, algebraMap O LL (a i) • dvO W T e b (c₀ i) := by
+
   simp only [dvO, dv, map_sum, map_mul, Finset.smul_sum, Finset.sum_smul, smul_smul]
   rw [Finset.sum_comm]
 
@@ -107,21 +152,7 @@ theorem RepVV_smulA {T : LocLat G Qp LL O} {c' : ZMod n} {e M : ℕ} {Λ : LetA 
     {b : Fin d → W.DD T} {sol : Fin d → ℕ → Fin d → LL} {a : LetA O n} (ha : a ∈ W.AΔ) {x : W.DD T}
     {f : Fin d → W.EE} (h : RepVV W T c' e M Λ b sol x f) :
     RepVV W T c' e M Λ b sol (a • x) (fun k => algebraMap (LetA O n) W.EE a * f k) := by
-  obtain ⟨κ, κ', H, a', hH, ha', hP⟩ := h
-  refine ⟨κ, κ', H, fun k => a * a' k, hH,
-    fun k => ⟨mul_mem ha (ha' k).1, ?_⟩, ?_⟩
-  · rw [map_mul, ← (ha' k).2]
-    ring
-  · have hs : ∑ k, (a * a' k) • ((W.φD T) ^ e) (H k) = a • ∑ k, a' k • ((W.φD T) ^ e) (H k) := by
-      rw [Finset.smul_sum]
-      exact Finset.sum_congr rfl fun k _ => mul_smul _ _ _
-    rw [hs]
-    have key : lA W ^ κ' • (lA W ^ κ • Λ • (a • x) - a • ∑ k, a' k • ((W.φD T) ^ e) (H k)) =
-        a • (lA W ^ κ' • (lA W ^ κ • Λ • x - ∑ k, a' k • ((W.φD T) ^ e) (H k))) := by
-      rw [smul_sub, smul_sub, smul_sub, smul_comm a (lA W ^ κ') (lA W ^ κ • Λ • x), smul_comm a (lA W ^ κ) (Λ • x),
-        smul_comm a Λ x, smul_comm a (lA W ^ κ')]
-    rw [key]
-    exact TypesA.inMultiple_smul W ha hP
+  apply Formalism.MainNotions.N.FrobeniusPowerSeries.repVV_smul_invariant <;> assumption
 
 theorem γD_smulA (T : LocLat G Qp LL O) (g : W.Gam) (a : LetA O n) (x : W.DD T) :
     W.γD T g (a • x) = W.γA g a • W.γD T g x := by
@@ -146,7 +177,8 @@ theorem avg_props {T : LocLat G Qp LL O} (a : ZMod n) {z : W.DD T} (hz : z ∈ W
     (∑ δ ∈ W.DelF, W.γD T δ z) ∈ W.NΔ T ∧
       (letE a : LetA O n) • (∑ δ ∈ W.DelF, W.γD T δ z) = ∑ δ ∈ W.DelF, W.γD T δ z := by
   refine ⟨⟨Submodule.sum_mem _ fun δ _ => W.N_Γ T δ z hz, fun δ' hδ' => ?_⟩, ?_⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_nbij' (δ' * ·) (δ'⁻¹ * ·) (fun g hg => TypesA.delF_mul W hδ' hg)
       (fun g hg => TypesA.delF_mul W (TypesA.delF_inv W hδ') hg) (fun g _ => by simp) (fun g _ => by simp)
       (fun g _ => ?_)

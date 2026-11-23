@@ -1,6 +1,61 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.PowMapMemOfPowMulMem
-import ReciprocityTheory.SemistableReduction.AlgAll
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DerAeval
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PowMapMemOfPowMulMem
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.SemistableReduction.AlgAll
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -50,7 +105,7 @@ theorem der_aeval {δ : F → F} (h : IsDer δ) {E : Type} [CommRing E] [Algebra
   next a =>
     simp [hE]
   next p q hp hq =>
-    simp only [map_add, h.add, hp, hq, add_mul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), h.add, hp, hq, add_mul, Finset.sum_add_distrib]
   next p n hp =>
     have hsingle : ∀ i, MvPolynomial.aeval t (MvPolynomial.pderiv i (MvPolynomial.X n : MvPolynomial σ E)) =
         if i = n then 1 else 0 := by
@@ -59,7 +114,7 @@ theorem der_aeval {δ : F → F} (h : IsDer δ) {E : Type} [CommRing E] [Algebra
       · subst hi
         simp
       · simp [MvPolynomial.pderiv_X, Pi.single_apply, hi, Ne.symm hi]
-    simp only [map_mul, MvPolynomial.aeval_X, h.mul, hp, MvPolynomial.pderiv_mul, map_add, hsingle,
+    simp only [map_mul, MvPolynomial.aeval_X, h.mul, hp, MvPolynomial.pderiv_mul, map_add (f := _), hsingle,
       add_mul, Finset.sum_add_distrib, mul_ite, mul_one, mul_zero, ite_mul, zero_mul,
       Finset.sum_ite_eq', Finset.mem_univ, if_true]
     rw [Finset.mul_sum, add_comm]
@@ -128,7 +183,7 @@ theorem algIndep_of_der {E : Type} [Field E] [CharZero E] [Algebra E F] {N : ℕ
       exact hs ((mul_eq_zero.mp hc.symm).resolve_right h2)
     rw [MvPolynomial.totalDegree_eq_zero_iff_eq_C] at hdeg0
     rw [hdeg0, MvPolynomial.aeval_C] at hP
-    have hc0 : MvPolynomial.coeff 0 P = 0 := (map_eq_zero (algebraMap E F)).mp hP
+    have hc0 : AddMonoidAlgebra.coeff P 0 = 0 := (map_eq_zero (algebraMap E F)).mp hP
     rw [hdeg0, hc0, MvPolynomial.C_0]
   exact (injective_iff_map_eq_zero (MvPolynomial.aeval (R := E) t)).mpr fun P hP => main _ P le_rfl hP
 
@@ -138,12 +193,12 @@ theorem gauss_indep {K Ω U τ : Type} [Field K] [Field Ω] [Field U] [Algebra K
     [IsScalarTower K Ω U] (V : ValuationSubring U) (T : τ → U) (hT : ∀ q, T q ∈ V)
     (hG : ∀ Q : MvPolynomial τ K, (∀ α, V.valuation (algebraMap K U (Q.coeff α)) ≤ 1) →
       (∃ α, V.valuation (algebraMap K U (Q.coeff α)) = 1) → V.valuation (MvPolynomial.aeval T Q) = 1) :
-    letI _iW := ReciprocityTheory.MultiplicativeHeights.residueAlgebra V (algebraMap Ω U)
-    letI _io := ReciprocityTheory.MultiplicativeHeights.residueAlgebra (V.comap (algebraMap Ω U)) (algebraMap K Ω)
+    (letI _iW := ReciprocityTheory.MultiplicativeHeights.residueAlgebra V (algebraMap Ω U);
+    letI _io := ReciprocityTheory.MultiplicativeHeights.residueAlgebra (V.comap (algebraMap Ω U)) (algebraMap K Ω);
     letI : Algebra (ResidueField ((V.comap (algebraMap Ω U)).comap (algebraMap K Ω))) (ResidueField V) :=
-      ((algebraMap _ (ResidueField V)).comp (algebraMap _ (ResidueField (V.comap (algebraMap Ω U))))).toAlgebra
+      ((algebraMap _ (ResidueField V)).comp (algebraMap _ (ResidueField (V.comap (algebraMap Ω U))))).toAlgebra;
     AlgebraicIndependent (ResidueField ((V.comap (algebraMap Ω U)).comap (algebraMap K Ω)))
-      (fun j => residue V ⟨T j, hT j⟩) := by
+      (fun j => residue V ⟨T j, hT j⟩)) := by
   letI _iW := ReciprocityTheory.MultiplicativeHeights.residueAlgebra V (algebraMap Ω U)
   letI _io := ReciprocityTheory.MultiplicativeHeights.residueAlgebra (V.comap (algebraMap Ω U)) (algebraMap K Ω)
   letI _ia : Algebra (ResidueField ((V.comap (algebraMap Ω U)).comap (algebraMap K Ω))) (ResidueField V) :=
@@ -398,7 +453,7 @@ theorem gauss_direct {F K : Type} [Field F] [Field K] [CharZero K] [Algebra K F]
     ∑ k, MvPolynomial.C (abar k) * MvPolynomial.X k
   have hLp : Lp ≠ 0 := by
     intro h0
-    have := congrArg (fun P => MvPolynomial.coeff (Finsupp.single j0 1) P) h0
+    have := congrArg (fun P => AddMonoidAlgebra.coeff P (Finsupp.single j0 1)) h0
     simp only [Lp, MvPolynomial.coeff_sum, MvPolynomial.coeff_C_mul, MvPolynomial.coeff_X',
       MvPolynomial.coeff_zero] at this
     rw [Finset.sum_eq_single j0] at this
@@ -415,6 +470,7 @@ theorem gauss_direct {F K : Type} [Field F] [Field K] [CharZero K] [Algebra K F]
       exact hb ((Finsupp.single_left_inj one_ne_zero).mp hs)
     · simp
   have hev : MvPolynomial.aeval (fun s => residue V ⟨T (0, s), hTV _⟩) Lp = residue V (∑ k, aV k * tV k) := by
+
     simp only [Lp, map_sum, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_X]
     refine Finset.sum_congr rfl fun k _ => ?_
     congr 1

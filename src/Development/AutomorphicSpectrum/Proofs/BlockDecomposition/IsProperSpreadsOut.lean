@@ -1,6 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.CubeTheorem.SchemeModels
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFiniteAffineCover
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.CubeTheorem.SchemeModels
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFiniteAffineCover
+public import Mathlib.AlgebraicGeometry.ValuativeCriterion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -175,7 +224,7 @@ theorem ae_exists_lift [CompactSpace X] [Algebra.FiniteType ℤ R₀]
       rw [← r₂.2, ← hρ]
       exact RingHom.congr_fun hγ r
   have c2 := ae_pt_eq_of_pt_eq U hfp (rep_alg U (K := K) r₂) rP (by rw [← map_pt, e2])
-  filter_upwards [r₂.1, c1, c2, ha] with i ⟨p, hp⟩ d1 d2 ⟨q, hq, eq⟩
+  filter_upwards [r₂.1, c1, c2, ha] with i ⟨p, hp⟩ d1 d2 ⟨q, hq, hq_pt⟩
   have hb : p.comp (baseHom f₀ W₂) = (β i).comp (ψ i) := by
     refine RingHom.ext fun r => ?_
     have := congrFun d1 r
@@ -184,7 +233,7 @@ theorem ae_exists_lift [CompactSpace X] [Algebra.FiniteType ℤ R₀]
   refine ⟨pullback.lift (pt W₂ p) (Spec.map (CommRingCat.ofHom (β i)))
     (by rw [pt_comp, hb, spec_comp]), ?_, pullback.lift_snd _ _ _⟩
   apply pullback.hom_ext
-  · rw [Category.assoc, pullback.lift_fst, map_pt, eq]
+  · rw [Category.assoc, pullback.lift_fst, map_pt, hq_pt]
     exact d2 ((algebraMap (V i) (K i)).comp p) q (by funext b; simp [← hp]) hq
   · rw [Category.assoc, pullback.lift_snd, hsq, spec_comp]
 
@@ -368,8 +417,8 @@ lemma exists_limit_hom {R₀ R : Type} [CommRing R₀] [CommRing R] (φ : R₀ �
     exact map_one (β F)
   · intro a b
     filter_upwards [hmem a, hmem b, hmem (a + b)] with F ha hb hab
-    rw [hv F _ hab, hv F _ ha, hv F _ hb, ← map_add]
-    rfl
+    rw [hv F _ hab, hv F _ ha, hv F _ hb]
+    exact (β F).map_add ⟨a, ha⟩ ⟨b, hb⟩
   · intro a b
     filter_upwards [hmem a, hmem b, hmem (a * b)] with F ha hb hab
     rw [hv F _ hab, hv F _ ha, hv F _ hb, ← map_mul]

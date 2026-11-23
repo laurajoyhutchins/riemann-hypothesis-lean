@@ -1,8 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdMeas
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.PkLaws
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdMeas
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.HpSpec
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.PkLaws
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -120,7 +168,7 @@ private theorem low_coord {K : Type} [Field K] [NumberField K] :
   have hXc : Continuous X := continuous_pi fun p => by
     refine ((hN.matrix_elem p.1.1 p.1.2).sub (continuous_const (y := (1 : Matrix (Fin (2 + 2)) (Fin (2 + 2)) 𝔸[K]) p.1.1 p.1.2))).congr fun s => ?_
     show unipMatrix (X s) p.1.1 p.1.2 - _ = _
-    rw [unipMatrix, Matrix.add_apply, blockEntry_apply, dif_pos p.2, add_sub_cancel_left]
+    rw [unipMatrix, Matrix.add_apply, blockEntry_apply, dite_eq_left p.2, add_sub_cancel_left]
   have hlow : ∀ g : G1 K (2 + 2), (∃ X m₁ m₂ t, g = nn X * lv m₁ m₂ t) → (F g).toBlocks₂₁ = 0 := by
     rintro _ ⟨X, m₁, m₂, t, rfl⟩
     simp only [F, Subgroup.coe_mul, hlv]
@@ -142,13 +190,15 @@ private theorem par_homeo {K : Type} [Field K] [NumberField K] :
     exact ⟨e.symm X, by rw [he, e.apply_symm_apply]⟩
   let S : Subgroup (G1 K (2 + 2)) :=
     { carrier := {g | ∃ X m₁ m₂ t, g = nn X * lv m₁ m₂ t}
-      one_mem' := ⟨0, 1, 1, 0, by rw [hone, mul_one]; exact (unipOne_zero 2).symm⟩
+      one_mem' := ⟨0, 1, 1, 0, by
+        rw [hone, mul_one]
+        exact (unipOne_zero (K := K) (n := 2 + 2) 2).symm⟩
       mul_mem' := by
         rintro _ _ ⟨X, m₁, m₂, t, rfl⟩ ⟨X', m₁', m₂', t', rfl⟩
         obtain ⟨Y, hY⟩ := hcomm m₁ m₂ t X'
         refine ⟨X + Y, m₁ * m₁', m₂ * m₂', t + t', ?_⟩
         rw [mul_assoc, ← mul_assoc (lv m₁ m₂ t), hY, mul_assoc, hmul, ← mul_assoc]
-        exact congrArg (· * _) (unipOne_add 2 X Y).symm
+        exact congrArg (· * _) (unipOne_add (K := K) (n := 2 + 2) 2 X Y).symm
       inv_mem' := by
         rintro _ ⟨X, m₁, m₂, t, rfl⟩
         obtain ⟨Y, hY⟩ := hcomm m₁⁻¹ m₂⁻¹ (-t) (-X)
@@ -166,7 +216,7 @@ private theorem par_homeo {K : Type} [Field K] [NumberField K] :
     have : Continuous fun p : G1 K 2 × G1 K 2 × ℝ × (UPos (2 + 2) 2 → 𝔸[K]) => (p.1, p.2.1, p.2.2.1) := by fun_prop
     simpa only [Function.comp_def] using hc.comp this
   have hN : Continuous fun p : G1 K 2 × G1 K 2 × ℝ × (UPos (2 + 2) 2 → 𝔸[K]) => (nn p.2.2.2 : G1 K (2 + 2)) :=
-    (continuous_unipOne 2).comp (by fun_prop)
+    (continuous_unipOne (K := K) (n := 2 + 2) 2).comp (by fun_prop)
   refine ⟨S,
     { toFun := fun p => ⟨nn p.2.2.2 * lv p.1 p.2.1 p.2.2.1, _, _, _, _, rfl⟩
       invFun := fun s => ψ ⟨s.1, hSC _ s.2⟩
@@ -193,6 +243,13 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.parHaar :
       simp [Real.exp_pos]))
   haveI : (unipMeasure K (2 + 2) 2).IsAddHaarMeasure := inferInstance
   let ρ := μ₂.prod (μ₂.prod (w.prod (unipMeasure K (2 + 2) 2)))
+  haveI : SFinite (w.prod (unipMeasure K (2 + 2) 2)) := inferInstance
+  haveI : SFinite (μ₂.prod (w.prod (unipMeasure K (2 + 2) 2))) := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact inferInstance
+  haveI : (w.prod (unipMeasure K (2 + 2) 2)).IsOpenPosMeasure := inferInstance
+  haveI : (μ₂.prod (w.prod (unipMeasure K (2 + 2) 2))).IsOpenPosMeasure := inferInstance
+  haveI : ρ.IsOpenPosMeasure := inferInstance
   have form : ∀ f : S → ℝ≥0∞, Measurable f → ∫⁻ s, f s ∂ρ.map φ = ∫⁻ m₁, ∫⁻ m₂, ∫⁻ t : ℝ, ∫⁻ X,
       f (φ (m₁, m₂, t, X)) * ENNReal.ofReal (Real.exp (-4 * t)) ∂unipMeasure K (2 + 2) 2 ∂volume ∂μ₂ ∂μ₂ := by
     intro f hf
@@ -219,7 +276,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.parHaar :
       have := he (e.symm X)
       rw [e.apply_symm_apply] at this
       rw [Subgroup.coe_mul, hφ, hφ, hφ, mul_assoc, ← mul_assoc (lv a b u), ← this, mul_assoc, hmul, ← mul_assoc]
-      exact congrArg (· * _) (unipOne_add 2 Y _).symm
+      exact congrArg (· * _) (unipOne_add (K := K) (n := 2 + 2) 2 Y (e.symm X)).symm
     have h2 : ∀ (H : (UPos (2 + 2) 2 → 𝔸[K]) → ℝ≥0∞) (t : ℝ),
         ∫⁻ X, H (Y + e.symm X) * ENNReal.ofReal (Real.exp (-4 * t)) ∂unipMeasure K (2 + 2) 2 =
           ∫⁻ X, H X * ENNReal.ofReal (Real.exp (-4 * (u + t))) ∂unipMeasure K (2 + 2) 2 := by

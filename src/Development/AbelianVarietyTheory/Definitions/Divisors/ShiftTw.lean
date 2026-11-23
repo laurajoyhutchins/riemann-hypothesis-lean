@@ -1,4 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.GroupTheory.Coset.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -6,21 +51,7 @@ namespace GlobalTheory.LKRes
 
 variable {H : Type} [Group H]
 
-def shiftTw (τ : H →* H) (d : ℕ) : (Fin (d + 1) → H) →* (Fin (d + 1) → H) where
-  toFun g i := if h : i.val < d then g ⟨i.val + 1, Nat.succ_lt_succ h⟩ else τ (g 0)
-  map_one' := by
-    funext i
-    by_cases h : i.val < d <;> simp [h]
-  map_mul' g g' := by
-    funext i
-    by_cases h : i.val < d <;> simp [h]
-
-def prodF {d : ℕ} (g : Fin (d + 1) → H) : H := (List.ofFn g).prod
-
 def conv (K : Subgroup H) (f f' : H → ℂ) (x : H) : ℂ :=
   ∑ᶠ q : H ⧸ K, f (Quotient.out q) * f' ((Quotient.out q)⁻¹ * x)
-
-def convF (K : Subgroup H) {d : ℕ} (f : Fin (d + 1) → H → ℂ) : H → ℂ :=
-  List.foldr (conv K) (f (Fin.last d)) (List.ofFn fun i : Fin d => f i.castSucc)
 
 end GlobalTheory.LKRes

@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.GlobalFields.HerbrandQuotients.CycTateNegOneOrbitEquivSymmMk
+module
+
+public import GroundTheory.GlobalFields.HerbrandQuotients.CycTateNegOneOrbitEquivSymmMk
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -109,22 +152,6 @@ section Prod
 variable (M N : Type*) [CommGroup M] [CommGroup N] [MulDistribMulAction G M]
   [MulDistribMulAction G N] [Fintype G]
 
-def cycTateZeroMulProdEquiv (σ : G) :
-    CycTateZero (Representation.ofMulDistribMulAction G (M × N)) σ ≃+
-      CycTateZero (Representation.ofMulDistribMulAction G M) σ ×
-        CycTateZero (Representation.ofMulDistribMulAction G N) σ :=
-  (cycTateZeroCongr (ρ' := (Representation.ofMulDistribMulAction G M).prod
-      (Representation.ofMulDistribMulAction G N)) (additiveProdEquiv M N) (fun _ _ ↦ rfl) σ).trans
-    (cycTateZeroProdEquiv _ _ σ)
-
-def cycTateNegOneMulProdEquiv (σ : G) :
-    CycTateNegOne (Representation.ofMulDistribMulAction G (M × N)) σ ≃+
-      CycTateNegOne (Representation.ofMulDistribMulAction G M) σ ×
-        CycTateNegOne (Representation.ofMulDistribMulAction G N) σ :=
-  (cycTateNegOneCongr (ρ' := (Representation.ofMulDistribMulAction G M).prod
-      (Representation.ofMulDistribMulAction G N)) (additiveProdEquiv M N) (fun _ _ ↦ rfl) σ).trans
-    (cycTateNegOneProdEquiv _ _ σ)
-
 theorem cycHerbrand_mulProd (σ : G) :
     cycHerbrand (Representation.ofMulDistribMulAction G (M × N)) σ =
       cycHerbrand (Representation.ofMulDistribMulAction G M) σ *
@@ -164,8 +191,8 @@ section Orbit
 
 variable {X : Type*} {U : X → Type*} [∀ x, CommGroup (U x)] [MulDistribMulAction G (∀ x, U x)]
 
-variable (G U) in
 
+variable (G U) in
 def mulPiRep : Representation ℤ G (∀ x, Additive (U x)) where
   toFun g := AddMonoidHom.toIntLinearMap ((additivePiEquiv U).toAddMonoidHom.comp
     ((Representation.ofMulDistribMulAction G (∀ x, U x) g).toAddMonoidHom.comp
@@ -179,7 +206,7 @@ variable [MulAction G X]
 
 theorem permutesFactors_mulPiRep
     (h : ∀ (g : G) (f : ∀ x, U x) (x : X), f x = 1 → (g • f) (g • x) = 1) :
-    PermutesFactors (mulPiRep G U) := fun g f x hf ↦
+    PermutesFactors (mulPiRep (G := G) (U := U)) := fun g f x hf ↦
   congrArg Additive.ofMul (h g (fun x ↦ (f x).toMul) x hf)
 
 variable [Fintype G] [MulAction.IsPretransitive G X]
@@ -191,8 +218,9 @@ def cycTateZeroMulOrbitEquiv
     (hσ : ∀ g, g ∈ Subgroup.zpowers σ) (τ : D) (hτ : ∀ d, d ∈ Subgroup.zpowers τ) :
     CycTateZero (Representation.ofMulDistribMulAction G (∀ x, U x)) σ ≃+
       CycTateZero (Representation.ofMulDistribMulAction D (U x₀)) τ :=
-  (cycTateZeroCongr (ρ' := mulPiRep G U) (additivePiEquiv U) (fun _ _ ↦ rfl) σ).trans
-    (cycTateZeroOrbitEquiv (mulPiRep G U) (permutesFactors_mulPiRep hU) x₀ D hD
+  (cycTateZeroCongr (ρ' := mulPiRep (G := G) (U := U)) (additivePiEquiv U)
+    (fun _ _ ↦ rfl) σ).trans
+    (cycTateZeroOrbitEquiv (mulPiRep (G := G) (U := U)) (permutesFactors_mulPiRep hU) x₀ D hD
       (Representation.ofMulDistribMulAction D (U x₀))
       (fun d f ↦ congrArg Additive.ofMul (hU₀ d fun x ↦ (f x).toMul)) σ hσ τ hτ)
 
@@ -203,8 +231,9 @@ def cycTateNegOneMulOrbitEquiv
     (hσ : ∀ g, g ∈ Subgroup.zpowers σ) (τ : D) (hτ : ∀ d, d ∈ Subgroup.zpowers τ) :
     CycTateNegOne (Representation.ofMulDistribMulAction G (∀ x, U x)) σ ≃+
       CycTateNegOne (Representation.ofMulDistribMulAction D (U x₀)) τ :=
-  (cycTateNegOneCongr (ρ' := mulPiRep G U) (additivePiEquiv U) (fun _ _ ↦ rfl) σ).trans
-    (cycTateNegOneOrbitEquiv (mulPiRep G U) (permutesFactors_mulPiRep hU) x₀ D hD
+  (cycTateNegOneCongr (ρ' := mulPiRep (G := G) (U := U)) (additivePiEquiv U)
+    (fun _ _ ↦ rfl) σ).trans
+    (cycTateNegOneOrbitEquiv (mulPiRep (G := G) (U := U)) (permutesFactors_mulPiRep hU) x₀ D hD
       (Representation.ofMulDistribMulAction D (U x₀))
       (fun d f ↦ congrArg Additive.ofMul (hU₀ d fun x ↦ (f x).toMul)) σ hσ τ hτ)
 

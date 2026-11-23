@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PtRows
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsScaleWithBoundedGamma
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SameForm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Formalism.LocalToGlobal.Columns.Adelic
+import Formalism.LocalToGlobal.Columns.RowFormsAdelic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.CxTiesOf
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.TopFormula
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,20 +90,6 @@ def RecVal (u : B.Word) (a : (I.rec7 l Z).what₂.Tup) (φ : Frm I a) (G : (I.re
 variable {L : SizeData₂ (I.rec7 l Z)}
   {hT : GatTies (I.rec7 l Z)} {Gi : Formalism.MainNotions.G.Inst (I.rec7 l Z) L} {Gl : Formalism.MainNotions.G.LatInst (I.rec7 l Z)} {Kc : Formalism.MainNotions.G.Consts}
   {Yd : DivX (I.rec7 l Z)} {cX : ExtraC} {ex : Extra (I.rec7 l Z) L hT Gi Gl Kc Yd cX} (W : RealPack ex)
-
-def ValEqv (c : Val B →ₛₗ[B.embLL] (pk W).cX.W) : Prop :=
-  ∀ (γ : GQ (I.rec7 l Z).sp.X') γE (g : GL (Fin (B.R.N B.R.m - 1)) B.fields.E), Bridge.IsRatMat (I.rec7 l Z).sp.X' γ γE →
-    GlobalTheory.Mem.R3.MatEq (A := B.fields.E) γE g → ∀ v, c (rhoV B.fields.emb B.wts.sgTrue g v) = (pk W).cX.ρ γ.1 (c v)
-
-def pkAt (t : W.P.T) (x : W.P.A3.A.fam.amb.FR t) (h : GA (I.rec7 l Z) (I.rec7 l Z).sp.X') : (pk W).cX.W :=
-  ((pk W).HX t).e ((pk W).jX t x) ((finHom (I.rec7 l Z).sp.X').rangeRestrict h)
-
-def PkVal (c : Val B →ₛₗ[B.embLL] (pk W).cX.W) : Prop :=
-  ∀ (t : W.P.T) (φ : Frm I (W.P.I.tup t)) (x : W.P.A3.A.fam.amb.FR t), IsRes φ x →
-    ∀ h y, HasMat h y → IsUni B y → pkAt W t x h = c (val φ (latOf I (W.P.I.tup t) y))
-
-def JVal (c : Val B →ₛₗ[B.embLL] (pk W).cX.W) (j : SmT (pk W).MX →ₗ[ℂ] (Formalism.L2.Forms.FrP (I.rec7 l Z) → ℂ)) : Prop :=
-  ∀ w v, (pk W).prX (c w) v = pairVal B (j v) w
 
 end GlobalTheory.TopVal
 
@@ -110,41 +138,6 @@ variable {l : I.Laws} {Z : TC.Later B (I.cols l)} {L : SizeData₂ (I.rec7 l Z)}
   {hT : GatTies (I.rec7 l Z)} {Gi : Formalism.MainNotions.G.Inst (I.rec7 l Z) L} {Gl : Formalism.MainNotions.G.LatInst (I.rec7 l Z)} {Kc : Formalism.MainNotions.G.Consts}
   {Yd : DivX (I.rec7 l Z)} {cX : ExtraC} {ex : Extra (I.rec7 l Z) L hT Gi Gl Kc Yd cX} (W : RealPack ex)
 
-set_option maxHeartbeats 1000000 in
-
-theorem reads_of_val (hC : I.StdC l Z W.R.T.cols) (hW : GlobalTheory.AdForm.TwStd W) (u : B.Word)
-    (j : SmT (pk W).MX →ₗ[ℂ] (Formalism.L2.Forms.FrP (I.rec7 l Z) → ℂ)) (a : (I.rec7 l Z).what₂.Tup) (φ : Frm I a)
-    (G : (I.rec7 l Z).what₂.Amb a) (hG : RecVal u a φ G)
-    (f : SmT (pk W).MX →ₗ[ℂ] (GA (I.rec7 l Z) (I.rec7 l Z).sp.X' → ℂ))
-    (hf : ∀ h y (p : XPt (B.primes X) B.R I.sel (I.tup a)) v, HasMat h y → TC.PtOf y p →
-      f v h = pairVal B (j v) (val φ (toRow I.sel (I.tup a) p))) :
-    Reads W u j 1 a G f := by
-  refine ⟨fun h => ?_, fun h => ?_⟩
-  · subst h
-    intro c v g hg
-    have s := hC u
-    rw [mul_one, hf g _ _ v hg (s.what₂.pt c)]
-    have e := fun c' y => (s.eW ((W.R.T.cols.forms u).valP.eW.symm (Pi.single c (j v))) c' y y rfl).symm
-    simp only [LinearEquiv.apply_symm_apply] at e
-    refine (period_single l u I.mu0 φ _ (hG.1 rfl) c (j v) _ (funext fun y => (e c y).trans ?_)
-      fun c' hc => funext fun y => (e c' y).trans ?_).symm
-    · rw [Pi.single_eq_same]
-    · rw [Pi.single_eq_of_ne' (fun e => hc e.symm : ¬ c = c')]
-      rfl
-  · obtain ⟨l0, t, he, ht, -, -, s⟩ := hW
-    have key : ∀ (Tw : TwForms (I.rec7 l Z)) (t' : Formalism.L2.Forms.SymmetricTwistedColumnsAtPrimes W.R.T.n.tp W.R.T.cols Tw), Tw = I.tw l l0 Z → HEq t' t →
-        ReadsG (t'.pt.cls u a h) (t'.pt.val u a h).eW j 1 (((I.rec7 l Z).eMtTw u a).symm G) f := by
-      rintro _ t' rfl rfl
-      intro c v g hg
-      rw [mul_one, hf g _ _ v hg ((s.what₂ u a h).pt c)]
-      have e := fun c' y => (s.eW u a h ((t'.pt.val u a h).eW.symm (Pi.single c (j v))) c' y y rfl).symm
-      simp only [LinearEquiv.apply_symm_apply] at e
-      refine (period_single l u a φ _ hG.2 c (j v) _ (funext fun y => (e c y).trans ?_)
-        fun c' hc => funext fun y => (e c' y).trans ?_).symm
-      · rw [Pi.single_eq_same]
-      · rw [Pi.single_eq_of_ne' (fun e => hc e.symm : ¬ c = c')]
-        rfl
-    exact key _ _ he ht
 
 end GlobalTheory.TopVal
 

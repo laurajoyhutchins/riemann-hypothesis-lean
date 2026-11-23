@@ -1,13 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AmbientBaseHeq
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RationalRootsDef
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ToMapSurj
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TupTiedOfMuIs
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistedPlaceIndexMemFirstPairOfCompatibleChoice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TupTiedOfMuIsW
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsNormPrimeIffInertiaDegEqOneAndFiniteRamified
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuationPowSubPowLt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuationPowSubPowLt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsNormPrimeIffInertiaDegEqOneAndFiniteRamified
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResCharConj
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ToMapSurj
+import Formalism.LocalToGlobal.UnitaryNorms.CharUniq
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -333,34 +371,8 @@ end Enlarge
 
 section Data
 
-def ofFamily (B : Base) (pl : Finset ℕ) {I : Type} (s : B.places.Pl → I) (Q : I → Finset (HeightOneSpectrum (𝓞 B.host.E)))
-    (k : I → ℕ) (χ : I → HChar B.host.E)
-    (h : ∀ w, B.places.resChar w ∈ pl → TwProp B.toPre (B.places.resChar w) (k (s w)) (Q (s w)) (χ (s w)))
-    (hs : ∀ w, B.places.resChar w ∈ pl → s (B.places.conj w) = s w) : TwDat B where
-  pl := pl
-  Q w := if B.places.resChar w ∈ pl then Q (s w) else ∅
-  k w := if B.places.resChar w ∈ pl then k (s w) else 0
-  psi w := if B.places.resChar w ∈ pl then χ (s w) else 1
-  psi_is w := by
-    split_ifs with hw
-    exacts [(h w hw).1, isPsi_one _]
-  psi_ord w := by
-    split_ifs with hw
-    exacts [(h w hw).2.1, one_pow _]
-  psi_tw w := by
-    split_ifs with hw
-    exacts [(h w hw).2.2.1, Chr.isTwist_one _ _]
-  Q_l w := by
-    split_ifs with hw
-    exacts [(h w hw).2.2.2, fun _ h => absurd h (Finset.notMem_empty _)]
-  off w hw := ⟨if_neg hw, if_neg hw⟩
-  conj w := by
-    rw [TwFin.resChar_conj]
-    split_ifs with hw
-    exacts [by rw [hs w hw]; exact ⟨rfl, rfl⟩, ⟨rfl, rfl⟩]
 
 open Classical in
-
 def avoidPlaces (P : Pre) (s : Finset ℕ) : Finset (HeightOneSpectrum (𝓞 P.host.E)) :=
   (((finite_offSet P).union s.finite_toSet).inter_of_left {p | p.Prime}).toFinset.attach.biUnion fun p =>
     (placesOver_finite_av P.host.E p.1 (((Set.Finite.mem_toFinset _).1 p.2).2.ne_zero)).toFinset
@@ -373,15 +385,15 @@ theorem subset_avoidPlaces (P : Pre) (s : Finset ℕ) {p : ℕ} (h : p ∈ offSe
 
 end Data
 
-open Classical in
 
+open Classical in
 def settingChar {D : D7} {art : Ideles D.host.E →* Gab D.host.E D.nd.Om} (ha : IsGlobalArtin art)
     (A Q : D.ntw.Tw → Finset (PlE D.host)) (k : D.ntw.Tw → ℕ) (ψ : ∀ i, D.ntw.RCG i (Q i) →* (D.ntw.Ok i (k i))ˣ)
     (ι : ∀ i, RootIso D i (k i)) (i : D.ntw.Tw) : HChar D.host.E :=
   if h : BlochKatoReduction.Gen.PsiOk i (A i) (Q i) (k i) (ψ i) then pickChar ha h (ι i) else 1
 
-open Classical in
 
+open Classical in
 def ofFamilyOn (B : Base) (pl : Finset ℕ) (Wt : Set B.places.Pl) (hsub : ∀ w ∈ Wt, B.places.resChar w ∈ pl)
     (hc : ∀ w, B.places.conj w ∈ Wt ↔ w ∈ Wt) {I : Type} (s : B.places.Pl → I)
     (Q : I → Finset (HeightOneSpectrum (𝓞 B.host.E))) (k : I → ℕ) (χ : I → HChar B.host.E)
@@ -440,7 +452,7 @@ theorem exists_twDat_stagesOn (X : Stages) (f : Fr X.B.toPre) (pl : Finset ℕ) 
       IsPsi (H := X.toD7.host) (X.toD7.ntw.l i) (Q i) (settingChar ha A Q k ψ ι i) ∧
       (settingChar ha A Q k ψ ι i).OrderDvd (X.toD7.ntw.l i ^ k i) ∧
       Chr.IsTwist X.toD7.host (offSet X.B.toPre) (settingChar ha A Q k ψ ι i) := fun i hi => by
-    rw [settingChar, dif_pos hi]
+    rw [settingChar, dite_eq_left hi]
     exact pickChar_spec ha hi (ι i) fun p hp => hA i p (Or.inl hp)
   have h2 : ∀ w ∈ Wt,
       TwProp X.B.toPre (X.B.places.resChar w) (k (s w)) (Q (s w)) (settingChar ha A Q k ψ ι (s w)) := fun w hw => by

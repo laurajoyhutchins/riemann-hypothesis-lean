@@ -1,10 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
-import Formalism.SharpRestriction.GlobalTheoremInputs
-import Formalism.SharpRestriction.Divisibility.LocalQuadraticParts
-import Formalism.SharpRestriction.Divisibility.WeightDegreeSizes
-import Formalism.LocalToGlobal.GlobalTheory.GL5.PNamed
-import Formalism.LocalToGlobal.GlobalTheory.GL5.DiscreteSeriesOfFormalDegree
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+public import Formalism.SharpRestriction.Divisibility.WeightDegreeSizes
+public import Formalism.LocalToGlobal.GlobalTheory.GL5.PNamed
+public import Formalism.LocalToGlobal.GlobalTheory.GL5.DiscreteSeriesOfFormalDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,11 +46,6 @@ open Formalism.BasicNotions Formalism.MainNotions GlobalTheory.Mem.Top
 namespace GlobalTheory.Fc.ClassTwoEntries
 
 open GlobalTheory.Fc
-
-def H_hh (𝒜 : FamClass) : Prop :=
-  Closed (W3 𝒜) fun Fm CH => Formalism.MainNotions.LocalQuadraticParts.ComplementTwoFamily Fm → DIVinN Fm → Formalism.MainNotions.LocalQuadraticParts.FrameNumberBoundFamily Fm Fm.Csz CH
-
-def HeightConditionAtConstructedPoints {Bd : BdT} (Q : V4.Slot) (Lk : LkT Bd) : Prop := Row Q Lk fun 𝒜 _ => H_hh 𝒜
 
 def H_hInstR (𝒜 : FamClass) : Prop :=
   ∀ {eps : ℝ} (Fm : FamP eps), 𝒜 Fm → ∀ (x : ℝ) (_ : Fm.x1 < x) (i : Fm.Ix x),
@@ -29,17 +57,6 @@ def DivisionSecondComplementAdmissible (𝒜 : FamClass) : Prop :=
   Closed (W3 𝒜) fun Fm _ => Formalism.MainNotions.WeightDegreeSizes.FamilySecondComplementInputs Fm
 
 def DivisionSecondComplementAtConstructedPoints {Bd : BdT} (Q : V4.Slot) (Lk : LkT Bd) : Prop := Row Q Lk fun 𝒜 _ => DivisionSecondComplementAdmissible 𝒜
-
-structure All (𝒜 : FamClass) : Prop where
-  hh : H_hh 𝒜
-  hInstR : H_hInstR 𝒜
-  aC2 : DivisionSecondComplementAdmissible 𝒜
-
-theorem row_all {Bd : BdT} {Q : V4.Slot} {Lk : LkT Bd}
-    (hh : HeightConditionAtConstructedPoints Q Lk) (hInstR : InstanceRankAtConstructedPoints Q Lk) (aC2 : DivisionSecondComplementAtConstructedPoints Q Lk) :
-    Row Q Lk fun 𝒜 _ => All 𝒜 :=
-  Row.imp (Row.and hh (Row.and hInstR aC2))
-    fun _ _ _ ⟨a0, a1, a2⟩ => ⟨a0, a1, a2⟩
 
 end GlobalTheory.Fc.ClassTwoEntries
 

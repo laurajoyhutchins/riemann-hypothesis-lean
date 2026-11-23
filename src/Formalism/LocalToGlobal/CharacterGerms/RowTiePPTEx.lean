@@ -1,8 +1,47 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePTyp
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePAllOps
-import Formalism.LocalToGlobal.CharacterGerms.RowTieGermI
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePIndAr
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePLimTy
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePAllSet
+public import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,46 +74,5 @@ theorem typ_link (V : VF C) (g : Fin 2) {L : ℕ → I g ⊕ JJ I g → C} (hL :
   · intro q; simp only [key]; exact h2 q
 
 end RawChart
-
-def AllStartFBSt : Prop :=
-  AllFB fun C _ V _ I _ _ X => ∀ (g : Fin 2) (w : I g → C), (∀ c, V.Ge 0 (w c)) →
-    ∃ L ∈ X.AllSet V g, ∀ c, L 1 (Sum.inl c) = w c
-
-theorem ptEx_of_start (hS : AllStartFBSt) : PTExFBSt := by
-  intro C _ _ V O _ _ dd Y d _ I _ p g a w hw _
-  obtain ⟨L0, hL0, hL01⟩ := hS C V O dd Y d I p g w hw
-  set X := Y.raw p with hX
-  let M : Set (ℕ → I g ⊕ JJ I g → C) := {m | ∀ L ∈ X.AllSet V g, m * L ∈ X.AllSet V g}
-  have hAdd := addCvFB_of germIAll_holds C V O dd Y d I p
-  have h1 : (1 : ℕ → I g ⊕ JJ I g → C) ∈ M := fun L hL => by rwa [one_mul]
-  have hadd : ∀ m m', m ∈ M → m' ∈ M → m + m' ∈ M := fun m m' hm hm' L hL => by
-    rw [add_mul]; exact X.allSet_add V g hAdd p.u_int (hm L hL) (hm' L hL)
-  have hmul : ∀ m m', m ∈ M → m' ∈ M → m * m' ∈ M := fun m m' hm hm' L hL => by
-    rw [mul_assoc]; exact hm _ (hm' L hL)
-  have hteich : ∀ c : C, V.Ge 0 c → (fun n (_ : I g ⊕ JJ I g) => c ^ n) ∈ M := fun c hc L hL =>
-    X.allSet_teich V g c hc hL
-  have hlim : ∀ (m : ℕ → ℕ → I g ⊕ JJ I g → C) (m' : ℕ → I g ⊕ JJ I g → C), (∀ k, m k ∈ M) → VLim V m m' → m' ∈ M :=
-    fun m m' hm hmm' L hL => X.allSet_lim (Y.chart_log_constantCoeff p) (Y.chart_exp_constantCoeff p) (Y.raw_lgex p) (Y.raw_exlg p)
-      (fun k => hm k L hL) (hmm'.mul_right L)
-  have hroot : ∀ q : ℕ, q.Prime → q ≠ V.l → ∃ ζ : C, IsPrimitiveRoot ζ q := by
-    intro q hq _
-    have := Y.algClosed
-    have : NeZero (q : C) := ⟨Nat.cast_ne_zero.mpr hq.ne_zero⟩
-    exact HasEnoughRootsOfUnity.exists_primitiveRoot C q
-  have hind := TypAr.typ_gen M hroot h1 hadd hmul hteich hlim
-  have hL := hind L0 hL0
-  refine ⟨_, X.typ_link V g hL ?_, ?_⟩
-  · intro n k hn
-    simp only [Pi.mul_apply]
-    rw [if_neg hn, zero_mul]
-  · intro c
-    simp only [Pi.mul_apply, pow_zero]
-    rw [if_pos ⟨0, pow_zero _⟩, one_mul, hL01 c]
-
-theorem ptFB_of_start (hS : AllStartFBSt) (hAct : OActTySt) (hLim : LimTySt) (hStab : HStabFBSt) : PTFBSt :=
-  ptFB_of_act (ptEx_of_start hS) hAct hLim indSt_holds hStab
-
-theorem ptFB_of_start2 (hS : AllStartFBSt) (hAct : OActTySt) (hStab : HStabFBSt) : PTFBSt :=
-  ptFB_of_start hS hAct limTy_holds hStab
 
 end Formalism.L2.FormalSeriesBounds

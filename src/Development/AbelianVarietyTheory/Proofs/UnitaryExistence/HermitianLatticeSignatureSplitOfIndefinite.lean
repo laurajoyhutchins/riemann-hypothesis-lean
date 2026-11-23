@@ -1,12 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.PermutesRefl
-import Formalism.LocalToGlobal.ProjectiveLattices.UnFree
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSplitLatticeDatumEverySignatureStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsCoprimeScaledIsometrySameSignatureStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsUnitaryConjSplitLatticeOfLocalStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsotropicOfIndefinite
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.TransvectionIdentitiesUnitary
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LandherrSelfDual
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.PermutesRefl
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsotropicOfIndefinite
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasseNormTheoremQuadraticExtension
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.TransvectionIdentitiesUnitary
+import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.TraceFormDualOneTraceFormDual
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsCoprimeScaledIsometrySameSignatureStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsHermCoordOfDatum
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsScaledIsometry
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSplitLatticeDatumEverySignatureStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsUnitaryConjSplitLatticeOfLocalStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FinrankEqOfInjectiveOfSpan
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HermitianFormsSameSignatureSameSpace
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LandherrStOfHasseNormSt
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.SignatureHermitianModelOfDatumStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+
+@[expose] public section
 
 open NumberField Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompRat GlobalTheory.HermModel
@@ -16,8 +73,8 @@ namespace GlobalTheory.SplitGenus
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem exists_matrix {M : Type} [AddCommGroup M] [Module (𝓞 E) M] (φ ψ : M →ₗ[𝓞 E] (Fin r → E))
     (hf : Function.Injective φ) (hspan : Submodule.span E (Set.range φ) = ⊤) :
     ∃ A : Matrix (Fin r) (Fin r) E, ∀ x, A *ᵥ φ x = ψ x := by
@@ -84,9 +141,9 @@ theorem trace_nsmul (G : Matrix (Fin r) (Fin r) E) (ξ : E) (N : ℕ) (u v : Fin
     ring
   rw [h3, map_smul, smul_eq_mul]
 
-omit [IsCMField E] in
 
-theorem denseRange_emb [IsTotallyComplex E] (τ : E →+* ℂ) : DenseRange τ := by
+omit [IsCMField E] in
+theorem denseRange_emb [_root_.NumberField.IsTotallyComplex E] (τ : E →+* ℂ) : DenseRange τ := by
   have hn : ¬ ComplexEmbedding.IsReal τ := IsTotallyComplex.complexEmbedding_not_isReal τ
   obtain ⟨x, hx⟩ : ∃ x, (τ x).im ≠ 0 := by
     by_contra h
@@ -251,9 +308,9 @@ theorem exists_projector (D₀ : Datum H) (G : Matrix (Fin r) (Fin r) E) (φ₀ 
       rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩
       rw [one_mulVec, one_mulVec, hπ', hπ']
       have e1 : FD.herm G (φ₀ (P x)) (φ₀ y) = FD.herm G (φ₀ (P x)) (φ₀ (P y)) := by
-        conv_lhs => rw [← add_sub_cancel (P y) y, map_add, herm_add_right, o1 _ (hP1 x) _ (hP4 y), add_zero]
+        conv_lhs => rw [← add_sub_cancel (P y) y, map_add (f := _), herm_add_right, o1 _ (hP1 x) _ (hP4 y), add_zero]
       have e2 : FD.herm G (φ₀ x) (φ₀ (P y)) = FD.herm G (φ₀ (P x)) (φ₀ (P y)) := by
-        conv_lhs => rw [← add_sub_cancel (P x) x, map_add, herm_add_left, o2 _ (hP1 y) _ (hP4 x), add_zero]
+        conv_lhs => rw [← add_sub_cancel (P x) x, map_add (f := _), herm_add_left, o2 _ (hP1 y) _ (hP4 x), add_zero]
       rw [e1, e2]) v w
     rwa [one_mulVec, one_mulVec] at this
   · rw [hπ'] at h

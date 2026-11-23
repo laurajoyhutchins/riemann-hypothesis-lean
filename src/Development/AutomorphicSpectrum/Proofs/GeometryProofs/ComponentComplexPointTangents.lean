@@ -1,22 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.GagaSections
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
-import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
-import Formalism.LocalToGlobal.ProjectiveLattices.RulInst
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLatticeVectorBundle
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundle
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEig
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLatticeVectorBundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsStableEigenTangentsStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapFromSpecStalk
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeVectorBundleOfSmooth
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelEigenvectorsActionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsStableEigenTangentsStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEigenAtComponentStalkStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEigenAtComponentStalkStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat Filter Topology Metric
 
@@ -53,6 +89,7 @@ theorem exists_coef {g : A →+* Ω} (j : F →ₛₗ[g] V) (hj : Function.Injec
   obtain ⟨a, ha⟩ := (Submodule.mem_span_range_iff_exists_fun _).1 h
   choose C hC using fun k => (a k).2
   refine ⟨C, hj ?_⟩
+
   rw [← ha, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [j.map_smulₛₗ, hC]
@@ -80,6 +117,7 @@ theorem frame_change {g : A →+* Ω} (hg : Function.Injective g) {θ : A →+* 
       exact Finset.sum_congr rfl fun k _ => by rw [hQ k]
     have h2 : j (x i) = ∑ m, g ((Matrix.vecMul (P i) Q) m) • j (x m) := by
       conv_lhs => rw [h1]
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun m _ => j.map_smulₛₗ _ _
     have h3 := congrFun (coef_eq hx i _ h2) l
@@ -99,10 +137,12 @@ theorem frame_change {g : A →+* Ω} (hg : Function.Injective g) {θ : A →+* 
     rw [← Matrix.map_mul, hDC, Matrix.map_one _ (map_zero θ) (map_one θ)]
   have hw : ∀ i, jy (e i) = ∑ k, (Cm.map θ) i k • jy (f k) := fun i => by
     conv_lhs => rw [hC i]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun k _ => jy.map_smulₛₗ _ _
   have hv : ∀ k, jy (f k) = ∑ i, (Dm.map θ) k i • jy (e i) := fun k => by
     conv_lhs => rw [hD k]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun m _ => jy.map_smulₛₗ _ _
   refine ⟨?_, le_antisymm ?_ ?_⟩

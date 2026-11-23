@@ -1,10 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.DiscreteSeriesCoefficientsCuspidal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.SphericalTwists.UnramifiedTwists.EqOneOfUnr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.WStmtx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
+module
 
-set_option maxHeartbeats 800000
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.WStmtx
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalSeriesSatakeParameters
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSubquotientUnramPrinSeriesOfHasSupport
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalLanglandsExtensionPreservesCuspidal
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PlainTorExistsChars
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParIndJacPlacing
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PrincipalSeriesSubquotientOfCharacters
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSteinberg
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalDoubleCosets.OfSupportHolds
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalPairIrreducibleUnlinked
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnitaryDualGLOfTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
+
+
 
 section
 noncomputable section
@@ -24,7 +72,7 @@ private theorem full_chars [CharZero k] {n : ℕ} {V : Type} [AddCommGroup V] [M
     IsL ((List.ofFn fun i => Segment.single (IrrGL.ofChar (ξ i) (hξ i)) (IrrGL.isCusp_ofChar _ _) : List (Segment k)) :
       Multiset (Segment k)) ρ := by
   obtain ⟨hρ, hq⟩ := (UpperTheory.Gal.LocD.ofSupport_holds k n V ρ ξ hξ).1 hs
-  let y : Fin n → IrrGL k := fun i => IrrGL.ofChar (ξ i) (hξ i)
+  let y : Fin n → IrrGL (k := k) := fun i => IrrGL.ofChar (ξ i) (hξ i)
   have hy : ∀ i, (y i).IsCusp := fun i => IrrGL.isCusp_ofChar _ _
   have hd : ∑ i, (y i).1 = n := by simp [y, IrrGL.ofChar]
   have hmem : ∀ i, y i ∈ GlobalTheory.RoadU.chars ξ hξ := fun i => Multiset.mem_map_of_mem _ (Finset.mem_univ i)
@@ -39,9 +87,29 @@ private theorem full_chars [CharZero k] {n : ℕ} {V : Type} [AddCommGroup V] [M
   have hM : (multiProd (Equiv.sigmaUnique (Fin n) fun _ => Fin 1) fun i => detRep (Fin 1) (ξ i)).IsIrreducible :=
     GlobalTheory.Parabolic.isIrreducible_of_equiv (p.trans q).symm hP
   haveI := nontrivial_of_irreducible hM
-  haveI := GlobalTheory.TypeTwo.PowIrrProof.nontrivial_of_isSubquotient
-    (GlobalTheory.PermPrin.isSubquotient_multiProd_prinSeries (Equiv.sigmaUnique (Fin n) fun _ => Fin 1) ξ)
-  obtain ⟨e1⟩ := GlobalTheory.TypeTwo.PowIrrProof.equiv_of_isSubquotient (GlobalTheory.PrinProd.isSubquotient_prinSeries_multiProd k n ξ) hM
+  haveI : Nontrivial (IndSp _ _) := by
+    obtain ⟨S, f, hf⟩ := GlobalTheory.PermPrin.isSubquotient_multiProd_prinSeries (Equiv.sigmaUnique (Fin n) fun _ => Fin 1) ξ
+    have := hf.nontrivial
+    exact Subtype.val_injective.nontrivial (α := S.toSubmodule)
+  have equiv_of_sub {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
+      [Module ℂ W] {σ : Representation ℂ G W} {ρ : Representation ℂ G V} (h : IsSubquotient σ ρ) [Nontrivial W]
+      (hρ : ρ.IsIrreducible) : Nonempty (ρ.Equiv σ) := by
+    obtain ⟨S, f, hf⟩ := h
+    obtain ⟨y, hy⟩ := exists_ne (0 : W)
+    obtain ⟨v, rfl⟩ := hf y
+    haveI : IsSimpleOrder (Subrepresentation ρ) := hρ
+    rcases eq_bot_or_eq_top S with rfl | rfl
+    · exact absurd (by rw [show v = 0 from Subtype.ext v.2, map_zero]) hy
+    let F : ρ.IntertwiningMap σ := f.comp (topEquiv ρ).symm.toIntertwiningMap
+    have hs : Function.Surjective F := hf.comp (topEquiv ρ).symm.toLinearEquiv.surjective
+    refine ⟨equivOfBijective F ⟨(injective_iff_map_eq_zero _).2 fun x hx => ?_, hs⟩⟩
+    rcases eq_bot_or_eq_top F.ker with h | h
+    · have : x ∈ F.ker := hx
+      rw [h] at this
+      exact this
+    · have : v.1 ∈ F.ker := by rw [h]; trivial
+      exact absurd this hy
+  obtain ⟨e1⟩ := equiv_of_sub (GlobalTheory.PrinProd.isSubquotient_prinSeries_multiProd k n ξ) hM
   obtain ⟨e⟩ := hq.nonempty_equiv hρ (GlobalTheory.Parabolic.isIrreducible_of_equiv e1 hM)
   have φ : ρ.Equiv (prodIrr y hd) := (e.symm.trans e1.symm).trans (p.trans q)
   exact ⟨⟨e.symm⟩, n, y, hd, ⟨fun i => Segment.single (y i) (hy i), ⟨Fin.univ_val_map _, fun i j _ hp => hnl i j hp.1⟩,

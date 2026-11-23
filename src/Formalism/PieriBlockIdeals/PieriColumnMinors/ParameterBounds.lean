@@ -1,8 +1,60 @@
-import Formalism.PieriBlockIdeals.MertensReciprocalElementary
-import Formalism.PieriBlockIdeals.PieriColumnMinors.SharperSizeNeedsMleKFalse
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LocalComponentGL
-import Formalism.PieriBlockIdeals.PieriColumnMinors.LogarithmEquivalence
-import Formalism.RankGapBounds.RankGapProofs.CardLargePrimeFactorsLeOneHolds
+module
+
+public import Formalism.PieriBlockIdeals.MertensReciprocalElementary
+public import Formalism.RankGapBounds.LargePrimeFactor
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LocalComponentGL
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.LogarithmEquivalence
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.SharperSizeNeedsMleKFalse
+public import Formalism.RankGapBounds.RankGapProofs.CardLargePrimeFactorsLeOneHolds
+import Mathlib.Algebra.Order.Floor.Extended
+public import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -1130,7 +1182,7 @@ theorem sum_div_mul_log_le_log_factorial' (n : ℕ) :
     rw [Real.log_prod (fun p hp => pow_ne_zero _
       (Nat.cast_ne_zero.2 (Finset.mem_filter.1 hp).2.ne_zero))] at h
     simp only [Real.log_pow] at h
-    exact h.symm
+    simpa only [Nat.padicValNat_def] using h.symm
   rw [hlog]
   calc ∑ p ∈ Formalism.RankGapBounds.ChebyshevFactorialBounds.primesUpTo n, ((n / p : ℕ) : ℝ) * Real.log (p : ℝ)
       ≤ ∑ p ∈ Formalism.RankGapBounds.ChebyshevFactorialBounds.primesUpTo n, (padicValNat p n.factorial : ℝ) * Real.log (p : ℝ) := by
@@ -1139,6 +1191,7 @@ theorem sum_div_mul_log_le_log_factorial' (n : ℕ) :
         have hp' : p.Prime := (Finset.mem_filter.1 hp).2
         have := Fact.mk hp'
         have hv : n / p ≤ padicValNat p n.factorial := by
+          rw [Nat.padicValNat_def]
           rw [padicValNat_factorial (b := max 2 (Nat.log p n + 1))
             (lt_of_lt_of_le (Nat.lt_succ_self _) (le_max_right _ _))]
           calc n / p = n / p ^ 1 := by rw [pow_one]

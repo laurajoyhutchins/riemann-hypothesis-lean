@@ -1,21 +1,68 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousRs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaIntegralContinuousStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaIntegralLocallySummableBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PoissonSummationHermitianLatticeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SummableOfLatticeDecayStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FourierOneParameterIntegralStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FourierParameterDerivativeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TemperateMultiplierPreservesSchwartzStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArchimedeanMultiplierTemperateStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CharacterAlongOneParameterPathStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InjectivePairingFiniteFamilyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralMultiplePathTrivialCharacterStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableSchwartzAHaarStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSumInvariantUnipotentTranslate
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzBoundFiniteInfinite
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousRs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OfHermEBijective
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralNormSqEqToL2
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasDerivAtAndIsTheta
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ArchimedeanMultiplierTemperateStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CharacterAlongOneParameterPathStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FourierOneParameterIntegralStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FourierParameterDerivativeStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InjectivePairingFiniteFamilyStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableSchwartzAHaarStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralMultiplePathTrivialCharacterStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PoissonSummationHermitianLatticeStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SummableOfLatticeDecayStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TemperateMultiplierPreservesSchwartzStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaIntegralContinuousStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaIntegralLocallySummableBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSumInvariantUnipotentTranslate
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FrameTransport.InstIsModTopTens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
@@ -29,7 +76,7 @@ namespace GlobalTheory.CompanionTheory.WSum
 variable {D : D7} {r : ℕ}
 
 theorem halfTr_add (x y : AE D) : halfTr (x + y) = halfTr x + halfTr y := by
-  simp only [halfTr, trA, map_add, mul_add]
+  simp only [halfTr, trA, map_add (f := _), mul_add]
 
 theorem halfTr_zero : halfTr (0 : AE D) = 0 := by
   simp only [halfTr, trA, map_zero, mul_zero]
@@ -165,6 +212,7 @@ theorem trace_rat (β a : HermE D r) :
   have h : (HMul.hMul (β.1.map (incA D)) (a.1.map (incA D)) : Mx D r r) = (β.1 * a.1).map (incA D) := by
     rw [Matrix.map_mul]
   rw [h]
+
   simp only [Matrix.trace, Matrix.diag, Matrix.map_apply, map_sum]
 
 theorem chi_path {ψ : AddChar (AF D.host.F) ℂ} {θ : InfFam D} {σ : (D.what₂.Tau → ℂ) →+ AE D}
@@ -181,7 +229,7 @@ theorem chi_path {ψ : AddChar (AF D.host.F) ℂ} {θ : InfFam D} {σ : (D.what�
   rw [e, AddChar.map_neg_eq_inv, hph, Complex.exp_neg]
   rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem W_mult {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsCharAF D.host.F ψ) {θ : InfFam D} (hθ : IsInfFam θ)
     {σ : (D.what₂.Tau → ℂ) →+ AE D} (hσ : GlobalTheory.FockCompare.Chart θ σ) {α : D.host.F}
     (hph : ∀ (t : AE D) (s : ℝ), ψ (halfTr (rs σ s * t)) =
@@ -223,7 +271,7 @@ theorem W_mult {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsCharAF D.host.F ψ) {θ
     (hasDeriv_Jt hψ V μ (GlobalTheory.T.integrable_of_mem_schwartzA D θ hθ _ _ μ φ hφ) hMc.measurable
       (GlobalTheory.T.integrable_of_mem_schwartzA D θ hθ _ _ μ _ hMφ) (path hσ a) hc)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem W_int {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsCharAF D.host.F ψ) {θ : InfFam D}
     {σ : (D.what₂.Tau → ℂ) →+ AE D} (hσ : GlobalTheory.FockCompare.Chart θ σ) {α : D.host.F}
     (hph : ∀ (t : AE D) (s : ℝ), ψ (halfTr (rs σ s * t)) =

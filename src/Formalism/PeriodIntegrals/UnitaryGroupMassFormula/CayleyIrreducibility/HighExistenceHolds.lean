@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CayleyIrreducibility.DivClosedOf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CayleyIrreducibility.DivClosedOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +58,7 @@ section Grade
 variable {σ : Type*}
 
 def TGood (w : σ → ℕ) (c d : ℕ) (F : Polynomial (MvPolynomial σ ℂ)) : Prop :=
-  ∀ j m, coeff m (F.coeff j) ≠ 0 → Finsupp.weight w m + j * c = d
+  ∀ j m, AddMonoidAlgebra.coeff (F.coeff j) m ≠ 0 → Finsupp.weight w m + j * c = d
 
 theorem tgood_CC (w : σ → ℕ) (c : ℕ) (r : ℂ) : TGood w c 0 (Polynomial.C (C r)) := by
   classical
@@ -24,7 +70,7 @@ theorem tgood_CC (w : σ → ℕ) (c : ℕ) (r : ℂ) : TGood w c 0 (Polynomial.
     by_cases hm : 0 = m
     · subst hm; simp
     · rw [if_neg hm] at h; exact absurd rfl h
-  · rw [if_neg hj, coeff_zero] at h; exact absurd rfl h
+  · rw [if_neg hj, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at h; exact absurd rfl h
 
 theorem tgood_mul (w : σ → ℕ) (c : ℕ) {d₁ d₂ : ℕ} {F G : Polynomial (MvPolynomial σ ℂ)}
     (hF : TGood w c d₁ F) (hG : TGood w c d₂ G) : TGood w c (d₁ + d₂) (F * G) := by
@@ -37,7 +83,7 @@ theorem tgood_mul (w : σ → ℕ) (c : ℕ) {d₁ d₂ : ℕ} {F G : Polynomial
   have h1 := hF x.1 y.1 (left_ne_zero_of_mul hy0)
   have h2 := hG x.2 y.2 (right_ne_zero_of_mul hy0)
   rw [Finset.HasAntidiagonal.mem_antidiagonal] at hx hy
-  rw [← hx, ← hy, map_add, ← h1, ← h2]
+  rw [← hx, ← hy, map_add (f := _), ← h1, ← h2]
   ring
 
 theorem tgood_one (w : σ → ℕ) (c : ℕ) : TGood w c 0 (1 : Polynomial (MvPolynomial σ ℂ)) := by
@@ -74,8 +120,9 @@ theorem tgood_aeval_monomial (w : σ → ℕ) (c : ℕ) (f : σ → Polynomial (
 
 theorem aeval_support (w : σ → ℕ) (c : ℕ) (f : σ → Polynomial (MvPolynomial σ ℂ))
     (hf : ∀ v, TGood w c (w v) (f v)) (P : MvPolynomial σ ℂ) (j : ℕ) (m' : σ →₀ ℕ)
-    (h : coeff m' ((aeval f P).coeff j) ≠ 0) :
-    ∃ m, coeff m P ≠ 0 ∧ Finsupp.weight w m' + j * c = Finsupp.weight w m := by
+    (h : AddMonoidAlgebra.coeff ((aeval f P).coeff j) m' ≠ 0) :
+    ∃ m, AddMonoidAlgebra.coeff P m ≠ 0 ∧ Finsupp.weight w m' + j * c = Finsupp.weight w m := by
+
   rw [P.as_sum, map_sum, Polynomial.finsetSum_coeff, coeff_sum] at h
   obtain ⟨m, hm, hm0⟩ := Finset.exists_ne_zero_of_sum_ne_zero h
   exact ⟨m, mem_support_iff.mp hm, tgood_aeval_monomial w c f hf m _ j m' hm0⟩
@@ -89,17 +136,17 @@ theorem tgood_gen {ι : Type} [DecidableEq ι] {n : ℕ} (τ : ι) (a b : Fin n)
         else 0)) := by
   classical
   intro j m h
-  rw [Polynomial.coeff_add, coeff_add] at h
+  rw [Polynomial.coeff_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply] at h
   by_cases hj : j = 0
   · subst hj
-    have h0 : coeff m ((if v.1 = τ ∧ v.2.1 = b then Polynomial.X * Polynomial.C (X (τ, a, v.2.2))
-        else 0 : Polynomial (MvPolynomial (ι × Fin n × Fin n) ℂ)).coeff 0) = 0 := by
+    have h0 : AddMonoidAlgebra.coeff ((if v.1 = τ ∧ v.2.1 = b then Polynomial.X * Polynomial.C (X (τ, a, v.2.2))
+        else 0 : Polynomial (MvPolynomial (ι × Fin n × Fin n) ℂ)).coeff 0) m = 0 := by
       split_ifs <;> simp
     rw [h0, add_zero, Polynomial.coeff_C_zero, coeff_X] at h
     by_cases hm : Finsupp.single v 1 = m
     · subst hm; simp [Finsupp.weight_single]
     · rw [if_neg hm] at h; exact absurd rfl h
-  · rw [Polynomial.coeff_C, if_neg hj, coeff_zero, zero_add] at h
+  · rw [Polynomial.coeff_C, if_neg hj, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, zero_add] at h
     by_cases hc : v.1 = τ ∧ v.2.1 = b
     · rw [if_pos hc, Polynomial.X_mul_C, Polynomial.coeff_C_mul_X] at h
       by_cases hj1 : j = 1
@@ -113,13 +160,13 @@ theorem tgood_gen {ι : Type} [DecidableEq ι] {n : ℕ} (τ : ι) (a b : Fin n)
           dsimp only
           omega
         · rw [if_neg hm] at h; exact absurd rfl h
-      · rw [if_neg hj1, coeff_zero] at h; exact absurd rfl h
-    · rw [if_neg hc, Polynomial.coeff_zero, coeff_zero] at h; exact absurd rfl h
+      · rw [if_neg hj1, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at h; exact absurd rfl h
+    · rw [if_neg hc, Polynomial.coeff_zero, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at h; exact absurd rfl h
 
 theorem bigDiv_support {ι : Type} [DecidableEq ι] {n : ℕ} (τ : ι) (a b : Fin n) (hab : a < b) (k : ℕ)
     (P : MvPolynomial (ι × Fin n × Fin n) ℂ) (m' : ι × Fin n × Fin n →₀ ℕ)
-    (h : coeff m' (bigDiv τ a b k P) ≠ 0) :
-    ∃ m, coeff m P ≠ 0 ∧ Finsupp.weight (fun v : ι × Fin n × Fin n => (v.2.1 : ℕ)) m' + k * ((b : ℕ) - a)
+    (h : AddMonoidAlgebra.coeff (bigDiv τ a b k P) m' ≠ 0) :
+    ∃ m, AddMonoidAlgebra.coeff P m ≠ 0 ∧ Finsupp.weight (fun v : ι × Fin n × Fin n => (v.2.1 : ℕ)) m' + k * ((b : ℕ) - a)
       = Finsupp.weight (fun v : ι × Fin n × Fin n => (v.2.1 : ℕ)) m :=
   aeval_support _ _ _ (tgood_gen τ a b hab) P k m' h
 
@@ -127,7 +174,7 @@ theorem high_existence_holds : HiEx := by
   intro ι _ _ n M hM hne
   classical
   have key : ∀ e : ℕ, ∀ P ∈ M, P ≠ 0 →
-      (∀ m, coeff m P ≠ 0 → Finsupp.weight (fun v : ι × Fin n × Fin n => (v.2.1 : ℕ)) m < e) →
+      (∀ m, AddMonoidAlgebra.coeff P m ≠ 0 → Finsupp.weight (fun v : ι × Fin n × Fin n => (v.2.1 : ℕ)) m < e) →
       ∃ Q ∈ M, Q ≠ 0 ∧ ∀ (τ : ι) (a b : Fin n), a < b → ∀ k, 1 ≤ k → bigDiv τ a b k Q = 0 := by
     intro e
     induction e with

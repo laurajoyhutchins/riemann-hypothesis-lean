@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase
 
@@ -29,6 +75,7 @@ theorem isSatFlag_of_isAdapted (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf : I
     simp only [p, mulVecLin_apply, mulVec_mulVec]
     rw [hsw, (h1 k i).2.2 hk]; simp
   have pS : ∀ i (u : ∀ i, Fin (j i) → I.E), p i (∑ k, T k *ᵥ u k) = u i := fun i u => by
+
     rw [map_sum, Finset.sum_eq_single i (fun k _ hk => pT' i k _ hk) (by simp), pT]
   have hsp : ∀ k z, z ∈ Submodule.span I.E (S k : Set (Fin I.n → I.E)) →
       z = ∑ i, T i *ᵥ p i z ∧ ∀ i : Fin a, ¬ i.castSucc < k → p i z = 0 := fun k z hz => by
@@ -39,8 +86,8 @@ theorem isSatFlag_of_isAdapted (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf : I
       exact ⟨trivial, hu⟩
     | zero => simp
     | add x y _ _ hx hy =>
-      refine ⟨?_, fun i hi => by rw [map_add, hx.2 i hi, hy.2 i hi, add_zero]⟩
-      simp only [map_add, mulVec_add, Finset.sum_add_distrib]
+      refine ⟨?_, fun i hi => by rw [map_add (f := _), hx.2 i hi, hy.2 i hi, add_zero]⟩
+      simp only [map_add (f := _), mulVec_add, Finset.sum_add_distrib]
       rw [← hx.1, ← hy.1]
     | smul c x _ hx =>
       refine ⟨?_, fun i hi => by rw [map_smul, hx.2 i hi, smul_zero]⟩
@@ -79,7 +126,8 @@ theorem isSatFlag_of_isAdapted (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf : I
             rw [Fin.castSucc_lt_succ_iff] at h
             exact Fin.castSucc_lt_castSucc_iff.2 (lt_of_le_of_ne h hki)
       · refine sup_le (Submodule.span_mono (hmono (Fin.castSucc_lt_succ).le)) ?_
-        rw [LinearMap.range_eq_map, ← (hΛ i).span_eq_top, Submodule.map_span]
+        letI : Submodule.IsFullLattice I.E (Λ i) := hΛ i
+        rw [LinearMap.range_eq_map, ← Submodule.IsFullLattice.span_eq_top (A := I.E) (M := Λ i), Submodule.map_span]
         refine Submodule.span_mono ?_
         rintro _ ⟨x, hx, rfl⟩
         refine (hS _ _).2 ⟨Pi.single i x, fun k => ?_, fun k hk => ?_, ?_⟩
@@ -103,7 +151,7 @@ theorem isSatFlag_of_isAdapted (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf : I
     rw [hinf, ← hsup, LinearMap.finrank_range_of_inj hinj] at this
     simpa [Formalism.HN.rkK] using this
   · obtain ⟨u, hu, -, rfl⟩ := (hS k y).1 hy
-    refine (hL _).2 ⟨u, 0, 0, hu, fun i t _ => by simpa using zero_mem _, zero_mem _, ?_⟩
+    refine (hL _).2 ⟨u, 0, 0, hu, fun i t _ => by simp, zero_mem _, ?_⟩
     have : (fun l => e ((0 : Fin I₀.n → I₀.E) l)) = 0 := by ext; simp
     rw [this]
     simp
@@ -116,7 +164,8 @@ theorem isSatFlag_of_isAdapted (I I₀ : AutInst) (e : I₀.E ≃+* I.E) (xf : I
       have a2 : ∀ x, p i (T₀ *ᵥ x) = 0 := fun x => by
         simp only [p, mulVecLin_apply, mulVec_mulVec]
         rw [(h2 i).2.2]; simp
-      rw [hz, map_add, map_add, pS, a2, map_sum]
+
+      rw [hz, map_add (f := _), map_add (f := _), pS, a2, map_sum]
       simp [a1]
     obtain ⟨b1, b2⟩ := hsp k y hy'
     exact (hS k y).2 ⟨fun i => p i y, fun i => by simpa only [hp] using hu i, b2, b1⟩

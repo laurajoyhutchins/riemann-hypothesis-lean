@@ -1,6 +1,50 @@
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
-import Development.WeilBound.CoreStatements.HodgeTatePoints.TwpdivHopf
-import Development.WeilBound.CoreStatements.HodgeTatePoints.TwpdivTate
+module
+
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.TwpdivHopf
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.PairingExtends
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.TwpdivTate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.IndexNSmul
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.SplitTori.SplitTorusAff
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +114,8 @@ theorem resT_surjective (n : ℕ) : Function.Surjective (resT X n) := fun g => b
   rw [ev_resT]
   exact (h a).symm
 
-theorem ker_resT (n : ℕ) : RingHom.ker (resT X n) = torsionIdeal O (Ord (X.hopf (n + 1))) (p ^ n) := by
+theorem ker_resT (n : ℕ) :
+    RingHom.ker (resT X n) = torsionIdeal (R := O) (A := Ord (X.hopf (n + 1))) (p ^ n) := by
   apply le_antisymm
   · intro f hf
     have hf' : resT X n f = 0 := hf
@@ -79,17 +124,23 @@ theorem ker_resT (n : ℕ) : RingHom.ker (resT X n) = torsionIdeal O (Ord (X.hop
       rw [hf', map_zero] at this
       exact this.symm
     have h2 : Ideal.span {g : X.A (n + 1) | ∃ h ∈ X.A (n + 1), ∀ t, g.1 t = h (t ^ p ^ n) - h 1} ≤
-        (torsionIdeal O (Ord (X.hopf (n + 1))) (p ^ n)).comap (Ord.equiv (X.hopf (n + 1))).symm := by
+        (torsionIdeal (R := O) (A := Ord (X.hopf (n + 1))) (p ^ n)).comap
+          (Ord.equiv (X.hopf (n + 1))).symm := by
       rw [Ideal.span_le]
       rintro g ⟨u, hu, hg⟩
       let u' := (Ord.equiv (X.hopf (n + 1))).symm ⟨u, hu⟩
       have h3 : (Ord.equiv (X.hopf (n + 1))).symm g =
-          mulBy O _ (p ^ n) (u' - algebraMap O _ (counit u')) := Ord.sep _ _ _ fun t => by
+          mulBy (R := O) (A := Ord (X.hopf (n + 1))) (p ^ n)
+            (u' - algebraMap O _ (counit u')) := Ord.sep _ _ _ fun t => by
         rw [Ord.ev_mulBy, map_sub, AlgHom.commutes, Ord.counit_eq]
         exact hg t
-      change (Ord.equiv (X.hopf (n + 1))).symm g ∈ torsionIdeal O (Ord (X.hopf (n + 1))) (p ^ n)
+      change (Ord.equiv (X.hopf (n + 1))).symm g ∈ torsionIdeal (R := O) (A := Ord (X.hopf (n + 1))) (p ^ n)
       rw [h3]
-      exact Ideal.mem_map_of_mem _ (by simp [RingHom.mem_ker])
+      have hu' : u' - algebraMap O _ (counit u') ∈ augIdeal (R := O) (A := Ord (X.hopf (n + 1))) := by
+        change counit (R := O) (u' - algebraMap O _ (counit (R := O) u')) = 0
+        rw [map_sub, counit_algebraMap, sub_self]
+      unfold torsionIdeal kerIdeal
+      exact Ideal.mem_map_of_mem (mulBy (R := O) (A := Ord (X.hopf (n + 1))) (p ^ n)).toAlgHom hu'
     exact h2 h1
   · refine (kerIdeal_le_ker_iff _ (resT X n : Ord (X.hopf (n + 1)) →ₐ[O] Ord (X.hopf n))).2 fun c =>
       Ord.sep _ _ _ fun t => ?_

@@ -1,4 +1,52 @@
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvA
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelL2RowsColumns
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,10 +93,10 @@ theorem unfold (hb : KerBasic) (hl2 : KernelL2RowsColumns) {φ : X.G → ℂ} (h
     (hinv : ∀ γ : X.Γ, ∀ y, f ((γ : X.G) * y) = f y) (hf : MemLp f 2 X.ν) (x : X.G) :
     Integrable (fun y => φ (x⁻¹ * y) * f y) X.μ ∧
     ∫ y, ker X.Γ φ x y * f y ∂X.ν = ∫ y, φ (x⁻¹ * y) * f y ∂X.μ := by
-  have hfm : AEStronglyMeasurable f X.μ := aesm_of_inv X hinv hf.1
+  have hfm : AEStronglyMeasurable f X.μ := aesm_of_inv X hinv hf.aestronglyMeasurable
   have hk := (hl2 X _ (tst_norm X hφ)).2 x
   have hint : Integrable (fun y => ker X.Γ (fun w => ((‖φ w‖ : ℝ) : ℂ)) x y * f y) X.ν := hk.integrable_mul hf
-  have hlu := lint_unfold X hb hφ hinv hf.1 x
+  have hlu := lint_unfold X hb hφ hinv hf.aestronglyMeasurable x
   have hgm : AEStronglyMeasurable (fun y => φ (x⁻¹ * y) * f y) X.μ :=
     (hφ.1.comp (continuous_const.mul continuous_id)).aestronglyMeasurable.mul hfm
   have hlin : ∫⁻ y, ‖φ (x⁻¹ * y) * f y‖ₑ ∂X.μ =
@@ -75,8 +123,8 @@ theorem unfold (hb : KerBasic) (hl2 : KernelL2RowsColumns) {φ : X.G → ℂ} (h
     rw [tsum_mul_right, tsum_eq_finsum ((hb X φ hφ).1 x y)]
     rfl
   · intro γ
-    exact (hφ.1.comp (continuous_const.mul continuous_id)).aestronglyMeasurable.mul hf.1
-  · rw [lint_unfold X hb hφ hinv hf.1 x]
+    exact (hφ.1.comp (continuous_const.mul continuous_id)).aestronglyMeasurable.mul hf.aestronglyMeasurable
+  · rw [lint_unfold X hb hφ hinv hf.aestronglyMeasurable x]
     exact hint.2.ne
 
 end DiscreteGroups.T1.G

@@ -1,5 +1,59 @@
-import Formalism.FlagUnipotentLattices.DetIndexProductHyperbolicInequality
-import Formalism.HyperbolicPlaceProducts.ArithmeticCountRevised
+module
+
+public import Formalism.FlagUnipotentLattices.DetIndexProductHyperbolicInequality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField Formalism.HermitianLatticeCounting.LocalIntegralStructure
 
@@ -50,7 +104,6 @@ theorem local_congruence_condition : Formalism.HermitianLatticeCounting.LocalInt
     have e : (y : E) * x = (N : E) * ((y : E) * (x * (1 / (N : E)))) := by
       first
       | field_simp
-      | rw [mul_one_div, mul_div_assoc', mul_div_assoc', mul_div_cancel_left₀ _ hN]
     rw [e, hyz]; simp
   obtain ⟨ha, hc⟩ := h (1 / (T : E)) 0 (one _ (by field_simp)) (zer _ (by simp))
   obtain ⟨hb, hd⟩ := h 0 (1 / (T' : E)) (zer _ (by simp)) (one _ (by field_simp))
@@ -82,9 +135,6 @@ theorem complex_multiplication_root : Formalism.HermitianLatticeCounting.LocalIn
   have hq0 : 0 ≤ q ^ ((Fintype.card (InfinitePlace E) : ℝ) / 2) := (Real.rpow_pos_of_pos hq _).le
   first
   | exact le_of_pow_le_pow_left₀ (by norm_num) h0 key
-  | exact (pow_le_pow_iff_left₀ hq0 h0 (by norm_num)).mp key
-  | exact le_of_pow_le_pow_left (by norm_num) h0 key
-  | exact (pow_le_pow_iff_left hq0 h0 (by norm_num)).mp key
 
 namespace IntegralityLocalGlobal
 
@@ -104,13 +154,10 @@ lemma isInt_coe (y : 𝓞 E) : IsInt (y : E) := by
   first
   | exact y.2
   | exact ⟨y, rfl⟩
-  | exact NumberField.RingOfIntegers.isIntegral_coe y
 lemma isInt_map (σ : E →+* E) {a : E} (ha : IsInt a) : IsInt (σ a) := by
   obtain ⟨x, rfl⟩ := ha
   first
   | exact ⟨⟨σ x, (NumberField.RingOfIntegers.isIntegral_coe x).map σ.toIntAlgHom⟩, rfl⟩
-  | exact ⟨⟨σ x, x.2.map σ.toIntAlgHom⟩, rfl⟩
-  | exact ⟨NumberField.RingOfIntegers.mapRingHom σ x, rfl⟩
 
 lemma locGlob (x : E) (h : ∀ P : Ideal (𝓞 E), P.IsPrime → ∃ y : 𝓞 E, y ∉ P ∧ IsInt ((y : E) * x)) :
     IsInt x := by
@@ -176,7 +223,6 @@ private theorem exists_not_mem_prime_mul_eq_of_locIn {E : Type} [Field E] [Numbe
     haveI := hP
     first
     | exact Ideal.comap_isPrime f P
-    | exact Ideal.IsPrime.comap f
     | infer_instance
   have hMQ : (M : 𝓞 E) ∈ P.comap f := by
     rw [Ideal.mem_comap, map_natCast]; exact hMP
@@ -257,7 +303,6 @@ lemma formEq (a b c d : ℂ) (T T' : ℝ)
   have h4 := h 1 Complex.I
   first
   | simp only [← Complex.normSq_eq_norm_sq] at h1 h2 h3 h4 ⊢
-  | simp only [Complex.sq_norm] at h1 h2 h3 h4 ⊢
   simp only [Complex.normSq_apply, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
     Complex.one_re, Complex.one_im, Complex.zero_re, Complex.zero_im, Complex.I_re,
     Complex.I_im] at h1 h2 h3 h4 ⊢
@@ -334,7 +379,7 @@ theorem theorem_B_statement : Formalism.HermitianLatticeCounting.LocalIntegralSt
       rw [hnw]
       nlinarith [mul_nonneg e3 (sub_nonneg.mpr e4)]
     have hprod : ∏ w : InfinitePlace E, (w (β : E)) ^ 2 ≤ ∏ _w : InfinitePlace E, (4 / 9 : ℝ) :=
-      Finset.prod_le_prod (fun w _ => sq_nonneg _) (fun w _ => hb w)
+      Finset.prod_le_prod₀ (fun w _ => sq_nonneg _) (fun w _ => hb w)
     rw [Finset.prod_const, Finset.card_univ] at hprod
     have h49 : (4 / 9 : ℝ) ^ Fintype.card (InfinitePlace E) ≤ 4 / 9 :=
       pow_le_of_le_one (by norm_num) (by norm_num) (by omega)
@@ -427,7 +472,7 @@ theorem theorem_B_statement : Formalism.HermitianLatticeCounting.LocalIntegralSt
     rw [hn, pow_mul]
     have hprod : ∏ w : InfinitePlace E, q ^ 2 * (w (β : E)) ^ 2 ≤
         ∏ w : InfinitePlace E, (x w ^ 2) ^ 2 :=
-      Finset.prod_le_prod (fun w _ => by positivity) (fun w _ => key w)
+      Finset.prod_le_prod₀ (fun w _ => by positivity) (fun w _ => key w)
     rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ] at hprod
     have hqn : 0 ≤ (q ^ 2) ^ Fintype.card (InfinitePlace E) := by positivity
     have h3 := mul_le_mul_of_nonneg_left (normge β hβ0) hqn

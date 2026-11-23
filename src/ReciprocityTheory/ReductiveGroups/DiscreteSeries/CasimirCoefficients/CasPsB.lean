@@ -1,6 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiP
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiCas
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.CasPsA
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.CasPsA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiCas
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiCasA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiFacts
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,7 +122,7 @@ theorem contDiff_lead' (i : ℕ) {m : ℕ∞ω} : ContDiff ℂ m (fun z : 𝕄 =
       rfl
     rw [e]
     exact ContDiff.sum fun σ _ => contDiff_const.mul
-      (contDiff_prod fun j _ => contDiff_apply_apply ℂ ℂ _ _)
+      (contDiff_prod fun j _ => contDiff_apply_apply ℂ _ _)
   · have e : (fun z : 𝕄 => lead i z) = fun _ => 0 := by
       funext z
       simp only [lead, dif_neg h]
@@ -135,8 +185,10 @@ theorem FY_facts (T : KType ε Λ) (μ : Fin n → ℤ) (Y : Matrix (Fin n) (Fin
   have h := ((h2.comp x h1).clm_apply h4).smul_const (T.op k * projW T * T.op k⁻¹)
   have hd : HasFDerivAt (fun y : 𝕄 => FY T μ Y y k) _ x := h
   refine ⟨hd.differentiableAt.hasFDerivAt, fun H => ?_⟩
-  rw [FY', hd.fderiv]
-  all_goals rfl
+  change (fderiv ℂ (fun y : 𝕄 => FY T μ Y y k) x) H = _
+  have hd' : HasFDerivAt (fun y : 𝕄 => FY T μ Y y k) _ (Matrix.of.symm x) := hd
+  set_option backward.isDefEq.respectTransparency false in
+    exact congrArg (fun f : 𝕄 →L[ℂ] (T.V →L[ℂ] T.V) => f H) hd'.fderiv
 
 theorem contOn_FY (T : KType ε Λ) (μ : Fin n → ℤ) (Y : Matrix (Fin n) (Fin n) ℂ)
     {U : Set (Matrix (Fin n) (Fin n) ℂ)}

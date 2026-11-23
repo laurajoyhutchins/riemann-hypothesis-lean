@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.LinearAlgebra.BilinearMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Group.Subgroup.Finite
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+
+@[expose] public section
 
 namespace GlobalTheory.IwaFlag
 
@@ -29,7 +82,7 @@ theorem exists_triangular (hεc : c ε = ε) (hmul : ∀ a ∈ O, ∀ b ∈ O, a
       zero_mem' := ⟨0, fun _ _ => rfl, by rw [map_zero]; exact M.zero_mem, rfl⟩
       add_mem' := by
         rintro _ _ ⟨t, h1, h2, rfl⟩ ⟨s, g1, g2, rfl⟩
-        exact ⟨t + s, fun l hl => by simp [h1 l hl, g1 l hl], by rw [map_add]; exact M.add_mem h2 g2, rfl⟩
+        exact ⟨t + s, fun l hl => by simp [h1 l hl, g1 l hl], by rw [map_add (f := _)]; exact M.add_mem h2 g2, rfl⟩
       neg_mem' := by
         rintro _ ⟨t, h1, h2, rfl⟩
         exact ⟨-t, fun l hl => by simp [h1 l hl], by rw [map_neg]; exact M.neg_mem h2, rfl⟩ }
@@ -62,7 +115,7 @@ theorem exists_step (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc : c 
       zero_mem' := ⟨0, M.zero_mem, fun _ _ => map_zero _, map_zero _⟩
       add_mem' := by
         rintro _ _ ⟨t, h1, h2, rfl⟩ ⟨s, g1, g2, rfl⟩
-        exact ⟨t + s, M.add_mem h1 g1, fun l hl => by rw [map_add, h2 l hl, g2 l hl, add_zero], map_add _ _ _⟩
+        exact ⟨t + s, M.add_mem h1 g1, fun l hl => by rw [map_add (f := _), h2 l hl, g2 l hl, add_zero], map_add _ _ _⟩
       neg_mem' := by
         rintro _ ⟨t, h1, h2, rfl⟩
         exact ⟨-t, M.neg_mem h1, fun l hl => by rw [map_neg, h2 l hl, neg_zero], map_neg _ _⟩ }
@@ -91,6 +144,7 @@ theorem exists_step (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc : c 
   let s := Finset.univ.filter (· < j)
   let t : Fin ρ → R := β' • b j - ∑ i ∈ s, (β' * h (X (b j)) (g i)) • b i
   have hXt : X t = β' • X (b j) - ∑ i ∈ s, (β' * h (X (b j)) (g i)) • X (b i) := by
+
     simp only [t, map_sub, map_sum, map_smul]
   have htM : X t ∈ M := by
     refine (hM₂ _ ?_).2 fun y hy => ?_
@@ -101,6 +155,7 @@ theorem exists_step (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc : c 
         M.sub_mem hy (M.sum_mem fun i _ => hsm (hcO _ (hint i y hy)) (hg i))
       have hK : h (X (b j)) (y - ∑ i ∈ s, c (h (X (b i)) y) • g i) ∈ K := by
         refine ⟨_, hy', fun l hl => ?_, rfl⟩
+
         rw [map_sub, map_sum, Finset.sum_eq_single l]
         · rw [map_smulₛₗ, hcc, hg' l l hl, Pi.single_eq_same, smul_eq_mul, mul_comm, hOε _ (hint l y hy), sub_self]
         · intro i _ hi
@@ -109,8 +164,9 @@ theorem exists_step (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc : c 
       have := h3 _ hK
       convert this using 1
       rw [hXt]
+
       simp only [map_sub, map_sum, map_smul, map_smulₛₗ, LinearMap.sub_apply, LinearMap.sum_apply,
-        LinearMap.smul_apply, smul_eq_mul, hcc, mul_sub, Finset.mul_sum, RingHom.id_apply]
+      LinearMap.smul_apply, smul_eq_mul, hcc, mul_sub, Finset.mul_sum, RingHom.id_apply]
       congr 1
       exact Finset.sum_congr rfl fun i _ => by ring
   have hz : ∀ l, j ≤ l → (∑ i ∈ s, (β' * h (X (b j)) (g i)) • b i) l = 0 := fun l hl => by
@@ -151,7 +207,7 @@ theorem exists_flag_dual (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc
       obtain ⟨y, hy, hy'⟩ := ih (Nat.le_of_succ_le hn) z hz
       have ho : z j - h (X (b j)) y ∈ O := O.sub_mem (hz j) (hint j y hy)
       refine ⟨y + c (z j - h (X (b j)) y) • w, M.add_mem hy (smul_mem_of_sd hmul hM₁ hM₂ (hcO _ ho) hw), fun i hi => ?_⟩
-      rw [map_add, map_smulₛₗ, hcc, smul_eq_mul]
+      rw [map_add (f := _), map_smulₛₗ, hcc, smul_eq_mul]
       rcases Nat.lt_succ_iff_lt_or_eq.1 hi with hi | hi
       · rw [hw₁ i hi, hy' i hi, mul_zero, add_zero]
       · have : i = j := Fin.ext hi
@@ -165,15 +221,15 @@ theorem exists_flag_dual (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc
     simpa only [map_smul, LinearMap.smul_apply, smul_eq_mul, hXf] using this
   · rw [hy' j i i.2, Pi.single_apply]
 
-open Matrix in
 
+open Matrix in
 def sesq (c : R →+* R) {n : ℕ} (G : Matrix (Fin n) (Fin n) R) : (Fin n → R) →ₗ[R] (Fin n → R) →ₛₗ[c] R :=
   LinearMap.mk₂'ₛₗ (RingHom.id R) c (fun x y => ∑ i, ∑ j, c (y i) * G i j * x j)
     (fun x x' y => by simp only [Pi.add_apply, mul_add, Finset.sum_add_distrib])
     (fun a x y => by
       simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply, Finset.mul_sum]
       exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring)
-    (fun x y y' => by simp only [Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib])
+    (fun x y y' => by simp only [Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib])
     (fun a x y => by
       simp only [Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
       exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring)
@@ -183,8 +239,9 @@ theorem sesq_col {n p q : ℕ} (G : Matrix (Fin n) (Fin n) R) (A : Matrix (Fin n
     (i : Fin p) (j : Fin q) : sesq c G (fun k => A k i) (fun k => B k j) = ((B.map c)ᵀ * (G * A)) j i := by
   simp only [sesq, LinearMap.mk₂'ₛₗ_apply, Matrix.mul_apply, transpose_apply, map_apply, Finset.mul_sum, mul_assoc]
 
-open Matrix in
 
+open scoped Matrix in
+open Matrix in
 theorem exists_flag_dual_matrix {n : ℕ} {M : AddSubgroup (Fin n → R)} (G : Matrix (Fin n) (Fin n) R)
     (hcc : ∀ a, c (c a) = a) (hεε : ε * ε = ε) (hεc : c ε = ε) (hεO : ε ∈ O)
     (hOε : ∀ a ∈ O, ε * a = a) (hmul : ∀ a ∈ O, ∀ b ∈ O, a * b ∈ O) (hcO : ∀ a ∈ O, c a ∈ O) (hP : Princ ε O)

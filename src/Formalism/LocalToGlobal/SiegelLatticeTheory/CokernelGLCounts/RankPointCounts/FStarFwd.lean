@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.UnipotentFrameFixers
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.UnipotentFrameFixers
+public import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,14 +56,14 @@ section Defs
 
 variable {D : Formalism.BasicNotions.D7}
 
-def OmCls {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F'₂ F' : LFlag (VS D) D.R.rS T') : Prop :=
+def OmCls {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F'₂ F' : LFlag (D.sp.Y 0) D.R.rS T') : Prop :=
   ∀ c : Fin (D.R.rS + 1) → D.host.E, (∀ a, (VS D).hT (F0.e a) (∑ b, c b • frame F'₂ b) = 0) →
     ∑ b, c b • (frame F' b - frame F'₂ b) ∈ Xsp (lf D F0)
 
 variable (D)
 
 def NMove : Prop :=
-  ∀ {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F'₂ F' : LFlag (VS D) D.R.rS T'),
+  ∀ {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F'₂ F' : LFlag (D.sp.Y 0) D.R.rS T'),
     ZhatL (lf D F0) F'₂ = ZhatL (lf D F0) F' → Gval (lf D F0) F' ≠ 0 → OmCls F0 F'₂ F' →
       ∃ n ∈ unipotentFrameFixers F0, Moves n F'₂ F'
 
@@ -36,7 +77,7 @@ variable (u u' F0 what₂)
 def OmPart : Prop :=
   IsRowReps D F0 what₂ →
   ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D), Ctx γ Z →
-    ∀ (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+    ∀ (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
       (φ : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (tLoc Zd p γ).f)
       (φ' : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂)),
       StarHyp Zd γ Z F'₂ φ φ' → ∀ F', IsPartner γ Z F' → OmCls F0 F'₂ F'
@@ -44,7 +85,7 @@ def OmPart : Prop :=
 def LocIn : Prop :=
   IsRowReps D F0 what₂ →
   ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D), Ctx γ Z →
-    ∀ (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+    ∀ (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
       (φ : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (tLoc Zd p γ).f)
       (φ' : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂)),
       StarHyp Zd γ Z F'₂ φ φ' → ∀ F', IsPartner γ Z F' → ∀ n ∈ unipotentFrameFixers F0, Moves n F'₂ F' →
@@ -64,7 +105,7 @@ theorem fwdCut_image_gmap_symm (n : (VS D).V ≃ₗ[D.host.E] (VS D).V) (Λ : Su
   · intro hx
     exact ⟨n.symm x, ⟨x, hx, rfl⟩, by simp⟩
 
-theorem fwdCut_gval_congr {T T' : D.host.E} (F : LFlag (VS D) D.R.rS T) (F₁ F₂ : LFlag (VS D) D.R.rS T')
+theorem fwdCut_gval_congr {T T' : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) (F₁ F₂ : LFlag (D.sp.Y 0) D.R.rS T')
     (h : ZhatL F F₁ = ZhatL F F₂) : Gval F F₁ = Gval F F₂ := by
   simp only [Gval, Formalism.MainNotions.S.Gflag, Formalism.MainNotions.S.Dl] at h ⊢
   rw [show Formalism.MainNotions.S.Zhat F.fl F₁.fl = Formalism.MainNotions.S.Zhat F.fl F₂.fl from h]
@@ -78,6 +119,11 @@ theorem fwdC_of (hrows : IsRowReps D F0 what₂) (h1 : NMove D) (h2 : OmPart Zd 
   obtain ⟨n, hn, hm⟩ := h1 F0 F'₂ F' (hS.1.trans hZ'.symm) hG (h2 hrows γ Z hC F'₂ φ φ' hS F' hP)
   refine ⟨Formalism.HermitianLatticesTheory.gmap n.symm γ.lam, ⟨?_, h3 hrows γ Z hC F'₂ φ φ' hS F' hP n hn hm⟩, n, hn, hm,
     fwdCut_image_gmap_symm n γ.lam⟩
-  exact Formalism.HermitianLatticesTheory.isomAct_lattice n.symm γ.lam (hrows.1 γ.lam γ.mem).1.1
+  have hlat : Submodule.IsFullLattice D.host.E γ.lam := (hrows.1 γ.lam γ.mem).1.1
+  letI := Formalism.HermitianLatticesTheory.isomAct_lattice n.symm γ.lam hlat.toIsLattice
+  refine ⟨?_⟩
+  rw [Formalism.HermitianLatticesTheory.gmap, Submodule.map_coe]
+  change Submodule.span D.host.E ((n.symm : (VS D).V →ₗ[D.host.E] (VS D).V) '' (γ.lam : Set _)) = ⊤
+  rw [← Submodule.map_span, hlat.span_eq_top, Submodule.map_top, LinearMap.range_eq_top.2 n.symm.surjective]
 
 end Formalism.L2.SG.Pf.FrameGlobalPatching.FStar

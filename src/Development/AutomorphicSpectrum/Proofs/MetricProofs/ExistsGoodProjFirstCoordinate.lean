@@ -1,18 +1,72 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
+module
+
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGoodE
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreCoordGoodProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.MemConePtsIffChartIdeal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGoodA
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxPosDens
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxSimple
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MemChartComponents
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreCoordGoodProj
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.MemConePtsIffChartIdeal
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MemChartComponents
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory ReciprocityTheory.ChartRestriction.G.Geo GlobalTheory.CompanionTheory.Ar.Pub.CxInt GlobalTheory.CompanionTheory.Ar.Pub.CxComp Filter Topology
 open ReciprocityTheory.AnForm.R (conePts)
 open GlobalTheory.CompanionTheory.Ar.Pub.CxChart (chartSet chartComponents chartSection domCell absLogNorm)
@@ -95,9 +149,10 @@ theorem component_aeval_cx {E : Type*} (w' : E → (K →₀ ℕ))
     weightedHomogeneousComponent (blkWt (ι := ι)) δ (aeval yt H) =
       aeval yt (weightedHomogeneousComponent w' δ H) := by
   classical
+
   rw [H.as_sum, map_sum, map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
-  have hmon : IsWeightedHomogeneous (blkWt (ι := ι)) (aeval yt (monomial m (coeff m H)))
+  have hmon : IsWeightedHomogeneous (blkWt (ι := ι)) (aeval yt (monomial m (AddMonoidAlgebra.coeff H m)))
       (Finsupp.weight w' m) := by
     rw [aeval_monomial, algebraMap_eq, Finsupp.prod]
     refine IsWeightedHomogeneous.C_mul ?_ _
@@ -107,9 +162,9 @@ theorem component_aeval_cx {E : Type*} (w' : E → (K →₀ ℕ))
   by_cases h : Finsupp.weight w' m = δ
   · subst h
     rw [hmon.weightedHomogeneousComponent_same,
-      (isWeightedHomogeneous_monomial w' m (coeff m H) rfl).weightedHomogeneousComponent_same]
+      (isWeightedHomogeneous_monomial w' m (AddMonoidAlgebra.coeff H m) rfl).weightedHomogeneousComponent_same]
   · rw [hmon.weightedHomogeneousComponent_ne δ (Ne.symm h),
-      (isWeightedHomogeneous_monomial w' m (coeff m H) rfl).weightedHomogeneousComponent_ne δ
+      (isWeightedHomogeneous_monomial w' m (AddMonoidAlgebra.coeff H m) rfl).weightedHomogeneousComponent_ne δ
         (Ne.symm h), map_zero]
 
 theorem aeval_sumElim_factor_cx (k0 : K) {S : Type*} [CommRing S] [Algebra ℂ S] {r : ℕ}
@@ -119,6 +174,7 @@ theorem aeval_sumElim_factor_cx (k0 : K) {S : Type*} [CommRing S] [Algebra ℂ S
     aeval (Sum.elim a b) H = (∏ k', b k' ^ n0 (Sum.inr k')) * aeval (Sum.elim a 1) H := by
   conv_lhs => rw [H.as_sum]
   conv_rhs => rw [H.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun n hn => ?_
   have hw : Finsupp.weight (sWt k0 r) n = Finsupp.weight (sWt k0 r) n0 :=
@@ -153,6 +209,7 @@ theorem algebraicIndependent_sumElim_cx (Q : Ideal (MRingOver ℂ ι)) [Q.IsPrim
   have hπy : (fun e => π (yt e)) = Sum.elim (forms (segC Q) L) xs := by
     funext e
     rcases e with j | k'
+
     · simp [yt, π, forms, segC, map_sum]
     · rfl
   have hcomp : ∀ G : MvPolynomial (Fin r ⊕ {k // k ≠ k0}) ℂ,
@@ -258,6 +315,7 @@ theorem evC_segC (Q : Ideal (MRingOver ℂ ι)) (z : (Σ k, ι k) → ℂ) (hz :
 theorem evC_forms (Q : Ideal (MRingOver ℂ ι)) (z : (Σ k, ι k) → ℂ) (hz : z ∈ conePts Q) {r : ℕ}
     (L : Fin r → ((k : K) → ι k) → ℂ) (j : Fin r) :
     evC Q z hz (forms (segC Q) L j) = ∑ t, L j t * segre z t := by
+
   simp only [forms, map_sum, map_smul, evC_segC, smul_eq_mul]
 
 theorem mem_conePts (Q : Ideal (MRingOver ℂ ι)) (hQ : IsMultiHomogIdeal Q) (k0 : K) {c : ℂ}

@@ -1,5 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.CosetFd
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PhiMapAdd
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.CosetFd
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.IdealCovol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +84,7 @@ theorem phiInv_add (v w : ι → ℂ) : phiInv σ cj (v + w) = phiInv σ cj v + 
 
 theorem measurable_phiInv : Measurable (phiInv σ cj (K := K)) := by
   unfold phiInv
-  refine Measurable.prodMk (measurable_pi_lambda _ fun w => isEmptyElim w) (measurable_pi_lambda _ fun w => ?_)
+  refine Measurable.prodMk (Measurable.of_eval fun w => isEmptyElim w) (Measurable.of_eval fun w => ?_)
   by_cases h : cj (σ.symm w)
   · simp only [h, ↓reduceIte]
     exact Complex.continuous_conj.measurable.comp (measurable_pi_apply _)
@@ -165,7 +219,7 @@ theorem exists_fd (K : Type) [Field K] [NumberField K] [IsEmpty {w : InfinitePla
       rw [← hfE a, hae, hfg]
   obtain ⟨FL, hFLm, hFL⟩ := idealLattice_fd K I
   have hgm : Measurable g :=
-    (measurable_phiInv σ cj).comp (measurable_pi_lambda _ fun i => measurable_const.mul (measurable_pi_apply i))
+    (measurable_phiInv σ cj).comp (Measurable.of_eval fun i => measurable_const.mul (measurable_pi_apply i))
   have hdL : ∀ y, ∃! m : L, (m : ι → ℂ) + y ∈ g ⁻¹' FL :=
     existsUnique_add_mem_preimage_of_additive_equiv f g hgf hfg hg _ L hLM FL hFL
   let Λ' : AddSubgroup (ι → ℂ) := Λ.map E

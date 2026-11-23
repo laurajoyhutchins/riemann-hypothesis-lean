@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.LineBundleRestrictSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.RestrictionBundle
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.RestrictionSystems
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.RestrictionBundle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -171,19 +219,6 @@ theorem redSys_invertible (hγ0 : γ ≠ 0) (hg : RedGood hxy Q.toSubSystem γ) 
     rw [(locAt_one hsp).2] at this
     exact this.2
 
-omit hsp in
-
-theorem LineBundleRestrict.proof : LineBundleRestrict.Statement.{u, w} := by
-  intro k _ Ω _ _ N x K' _ _ y hxy hsp Q
-  obtain ⟨γ, hγ0, hg, hb⟩ := exists_restrict_gen hsp hxy Q
-  refine ⟨LineBundle.mk (SubFamily.mk (redSys hxy Q.toSubSystem γ) (redSys_mem_iff hsp hxy hg)) ?_ ?_,
-    _, restrictData_redSys hsp hxy hg _ rfl⟩
-  · intro I
-    obtain ⟨s, hs⟩ := Q.fg (liftChart hxy I)
-    rw [redSys_sub_eq_span hsp hxy hg I hs]
-    exact Submodule.fg_span (s.finite_toSet.image _)
-  · intro I
-    exact redSys_invertible hsp hxy hγ0 hg I (hb I)
 
 end
 

@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.LocalFields.LubinTateTowerMaps
+module
+
+public import GroundTheory.LocalFields.LubinTateTowerMaps
+public import GroundTheory.LocalFields.UnitsBasic
+public import Mathlib.FieldTheory.KrullTopology
+public import Mathlib.Order.CompletePartialOrder
 import GroundTheory.LocalFields.ExamplesLaurent
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+public import Mathlib.Topology.Algebra.Ring.Compact
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -105,8 +154,8 @@ variable {Ω : Type*} [Field Ω] [ValuativeRel Ω] [TopologicalSpace Ω] [IsValu
   [Algebra K Ω] [ValuativeExtension K Ω] [Algebra.IsAlgebraic K Ω]
 variable {π : 𝒪[K]} (hπ : Irreducible π) {f g : PowerSeries 𝒪[K]}
 
-variable (Ω) in
 
+variable (Ω) in
 def lubinTateLimit (hπ : Irreducible π) : IntermediateField K Ω :=
   ⨆ n, lubinTateField Ω hπ (isLubinTateSeries_ltPoly π) n
 
@@ -301,9 +350,6 @@ def lubinTateLimitGalEquiv (hf : IsLubinTateSeries π f) :
         ← mem_fixingSubgroup_restrict_iff]
       exact hσ }
 
-theorem lubinTateLimitGalEquiv_apply' (hf : IsLubinTateSeries π f) (u : 𝒪[K]ˣ) :
-    lubinTateLimitGalEquiv (Ω := Ω) hπ hf u = lubinTateLimitAut hπ hf u := rfl
-
 theorem lubinTateChar_lubinTateLimitGalEquiv (hf : IsLubinTateSeries π f) (u : 𝒪[K]ˣ) (n : ℕ) :
     lubinTateChar hπ hf n (lubinTateField_le_lubinTateLimit hπ hf n)
       (lubinTateLimitGalEquiv (Ω := Ω) hπ hf u) = unitsMk π n u :=
@@ -311,32 +357,11 @@ theorem lubinTateChar_lubinTateLimitGalEquiv (hf : IsLubinTateSeries π f) (u : 
 
 theorem lubinTateLimitGalEquiv_apply (hf : IsLubinTateSeries π f) (u : 𝒪[K]ˣ) {n : ℕ}
     {x : IdealPoint Ω (lubinTateFormalGroup hπ hf)} (hx : x ∈ lubinTateTorsion Ω hf n) :
-    ((lubinTateLimitGalEquiv hπ hf u
+    ((lubinTateLimitGalEquiv (Ω := Ω) hπ hf u
       ⟨x.val, lubinTateField_le_lubinTateLimit hπ hf n (val_mem_lubinTateField hπ hf hx)⟩ :
         lubinTateLimit Ω hπ) : Ω) = ((u : 𝒪[K]) • x).val :=
   lubinTateChar_spec hπ hf _ _ hx (u : 𝒪[K]) (by
     rw [lubinTateChar_lubinTateLimitGalEquiv, coe_unitsMk])
-
-theorem lubinTateLimitGalEquiv_eq_iff (hf : IsLubinTateSeries π f) (u : 𝒪[K]ˣ)
-    (σ : lubinTateLimit Ω hπ ≃ₐ[K] lubinTateLimit Ω hπ) :
-    lubinTateLimitGalEquiv hπ hf u = σ ↔
-      ∀ (n : ℕ) (x : IdealPoint Ω (lubinTateFormalGroup hπ hf)) (hx : x ∈ lubinTateTorsion Ω hf n),
-        ((σ ⟨x.val, lubinTateField_le_lubinTateLimit hπ hf n (val_mem_lubinTateField hπ hf hx)⟩ :
-          lubinTateLimit Ω hπ) : Ω) = ((u : 𝒪[K]) • x).val := by
-  constructor
-  · rintro rfl n x hx
-    exact lubinTateLimitGalEquiv_apply hπ hf u hx
-  · intro h
-    refine lubinTateLimit_ext hπ hf fun n => Units.ext ?_
-    rw [lubinTateChar_lubinTateLimitGalEquiv, coe_unitsMk,
-      lubinTateChar_eq_of_apply hπ hf _ σ _ fun x hx => h n x hx]
-
-theorem lubinTateLimitGalEquiv_eq (hf : IsLubinTateSeries π f) (hg : IsLubinTateSeries π g) :
-    lubinTateLimitGalEquiv (Ω := Ω) hπ hf = lubinTateLimitGalEquiv hπ hg := by
-  ext u : 1
-  refine lubinTateLimit_ext hπ hg fun n => ?_
-  rw [← lubinTateChar_eq hπ hf hg (lubinTateField_le_lubinTateLimit hπ hf n),
-    lubinTateChar_lubinTateLimitGalEquiv, lubinTateChar_lubinTateLimitGalEquiv]
 
 end Limit
 

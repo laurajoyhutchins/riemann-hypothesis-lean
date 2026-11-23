@@ -1,7 +1,61 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+module
+
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.Q Filter Topology
 
@@ -97,13 +151,6 @@ lemma pat_smul {l : Fin r} {A : Mx k r} (c : ℂ) (hA : Pat k r l A) : Pat k r l
   intro h0
   apply h
   rw [Matrix.smul_apply, h0, smul_zero]
-
-lemma pat_neg {l : Fin r} {A : Mx k r} (hA : Pat k r l A) : Pat k r l (-A) := by
-  intro i j h
-  apply hA
-  intro h0
-  apply h
-  rw [Matrix.neg_apply, h0, neg_zero]
 
 lemma pat_sub {l : Fin r} {A B : Mx k r} (hA : Pat k r l A) (hB : Pat k r l B) : Pat k r l (A - B) := by
   intro i j h
@@ -367,7 +414,7 @@ theorem lam {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] (z : Fin (2 *
     hE, hE2, smul_smul, ← add_smul]
   congr 1
   rw [Complex.star_def]
-  simp only [map_add, map_mul, map_neg, Complex.conj_I]
+  simp only [map_add (f := _), map_mul, map_neg, Complex.conj_I]
   ring
 
 end Formalism.FourierDecayAlt.Q.QRR

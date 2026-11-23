@@ -1,4 +1,59 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ContinuousCoboundaries2
+public import ReciprocityTheory.Hypotheses.GalCohDefs
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.GLinkQuot
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V UpperTheory.V.Fr UpperTheory.V.GC
 
@@ -197,7 +252,7 @@ private def g2Z : (∀ v, Z1 (σ v)) →ₗ[k] continuousCocycles2 loc ρ (fun v
     fun v => ((IsLocallyConstant.iff_continuous _).2 (a v).2.1).comp (r v), by simp,
     fun v s t => by
       change q v _ = 0
-      simp only [Alg.dOne, (a v).2.2 s t, Pi.zero_apply, map_sub, map_add, MonoidHom.comp_apply, hq, hr, map_zero,
+      simp only [Alg.dOne, (a v).2.2 s t, Pi.zero_apply, map_sub, map_add (f := _), MonoidHom.comp_apply, hq, hr, map_zero,
         sub_self]⟩
   map_add' _ _ := Subtype.ext (Prod.ext (by simp) (funext fun v => funext fun s => by simp))
   map_smul' _ _ := Subtype.ext (Prod.ext (by simp) (funext fun v => funext fun s => by simp))
@@ -234,7 +289,7 @@ private theorem range_h2_eq_inf_ker_pairing : LinearMap.range (h2 loc ρ q) =
     rw [LinearMap.mem_ker, map_sub, sub_eq_zero] at h4
     show _ = q v (x.1.1 (loc v p.1, loc v p.2))
     rw [h4]
-    simp only [Alg.dOne, map_sub, map_add, MonoidHom.comp_apply, hq]
+    simp only [Alg.dOne, map_sub, map_add (f := _), MonoidHom.comp_apply, hq]
   · intro hc
     obtain ⟨z, rfl⟩ := Submodule.Quotient.mk_surjective _ c
     have hv : ∀ v, ∃ cv : Gv v → Q v, Continuous cv ∧
@@ -255,7 +310,7 @@ private theorem range_h2_eq_inf_ker_pairing : LinearMap.range (h2 loc ρ q) =
       have e := congrFun (hd v) (s, t)
       rw [first_differential_eq] at e
       rw [LinearMap.mem_ker, map_sub, ← e]
-      simp only [Alg.dOne, map_sub, map_add, MonoidHom.comp_apply, hq, hr, sub_self]
+      simp only [Alg.dOne, map_sub, map_add (f := _), MonoidHom.comp_apply, hq, hr, sub_self]
 
 include hloc in
 private theorem ker_h2_eq_range_g2 : LinearMap.ker (h2 loc ρ q) = LinearMap.range (g2 loc ρ σ q hq r hr) := by
@@ -274,7 +329,7 @@ private theorem ker_h2_eq_range_g2 : LinearMap.ker (h2 loc ρ q) = LinearMap.ran
       intro v s t
       have h4 := x.2.2.2.2 v s t
       rw [hd', LinearMap.mem_ker] at h4
-      simp only [Alg.dOne, MonoidHom.comp_apply, map_mul, map_sub, map_add, hq] at h4 ⊢
+      simp only [Alg.dOne, MonoidHom.comp_apply, map_mul, map_sub, map_add (f := _), hq] at h4 ⊢
       rw [← sub_eq_zero, ← h4]; abel
     refine ⟨fun v => ⟨fun s => q v (x.1.2 v s - β (loc v s)), ?_, hcoc v⟩, ?_⟩
     · exact (continuous_of_discreteTopology (f := q v)).comp

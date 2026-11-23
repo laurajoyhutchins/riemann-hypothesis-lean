@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.PolyImgSuccAbove
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.PolyImgSuccAbove
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,7 +64,6 @@ variable {K Ω Kl K' : Type} [Field K] [Field Ω] [Algebra K Ω] [Field Kl] [Fie
   [Algebra Kl K'] [Algebra K K'] [IsScalarTower K Kl K']
 
 variable (K Kl K') in
-
 def incl : Ω →+* K' ⊗[Kl] (Kl ⊗[K] Ω) :=
   (Algebra.TensorProduct.includeRight : (Kl ⊗[K] Ω) →ₐ[Kl] K' ⊗[Kl] (Kl ⊗[K] Ω)).toRingHom.comp
     (Algebra.TensorProduct.includeRight : Ω →ₐ[K] Kl ⊗[K] Ω).toRingHom
@@ -184,6 +233,7 @@ theorem exists_maps (j0 : Fin (N + 1)) (v : Fin (N + 1) → Ω) (x : Fin N → �
       · rw [polyImg_same, if_pos rfl, hX]; rfl
       · have h1 := congrArg β₀ (sum_polyImg_succ j v x hv hx i)
         have h2 := hrel i
+
         rw [map_sum, map_zero, Fin.sum_univ_succAbove _ j] at h1
         rw [Fin.sum_univ_succAbove _ j] at h2
         simp only [map_mul, hC, polyImg_succAbove, hX] at h1
@@ -195,7 +245,7 @@ theorem exists_maps (j0 : Fin (N + 1)) (v : Fin (N + 1) → Ω) (x : Fin N → �
     intro q
     induction q using MvPolynomial.induction_on with
     | C c => rw [aeval_C, aeval_C, MvPolynomial.algebraMap_apply, hC, hc]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X q n hq => simp only [map_mul, aeval_X, hq, hp]
   have hunit : ∀ y : nonZeroDivisors (MvPolynomial (SVar D N) Ω), IsUnit (β₀ y) := by
     intro y
@@ -226,6 +276,7 @@ theorem exists_maps (j0 : Fin (N + 1)) (v : Fin (N + 1) → Ω) (x : Fin N → �
       (iR.comp (algebraMap Ω _)) (v j) =
       iR (algebraMap (MvPolynomial (SVar D N) Ω) _ (∑ j, polyImg j0 x (i, j) * C (v j))) := by
     intro i
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [hTX, RingHom.comp_apply, hΩ, map_mul, map_mul]
@@ -269,8 +320,8 @@ section All
 variable {K K' : Type} [Field K] [Field K'] [Algebra K K'] {D N : ℕ} {ι : Type} [Fintype ι]
   {Ω : ι → Type} [∀ Z, Field (Ω Z)] [∀ Z, Algebra K (Ω Z)]
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 theorem basis_descends (j0 : ι → Fin (N + 1)) (v : ∀ Z, Fin (N + 1) → Ω Z) (x : ∀ Z, Fin N → Ω Z)
     (hv : ∀ Z, v Z (j0 Z) ≠ 0) (hx : ∀ Z k, x Z k = v Z ((j0 Z).succAbove k) / v Z (j0 Z))
@@ -298,6 +349,8 @@ theorem basis_descends (j0 : ι → Fin (N + 1)) (v : ∀ Z, Fin (N + 1) → Ω 
   letI iL : ∀ Z, Algebra (FractionRing (MvPolynomial (TVar D N) K)) (OmS (Ω Z) D N) := fun Z =>
     ((algebraMap (IntermediateField.adjoin K (Set.range (sImg (D := D) (j0 Z) (x Z)))) (OmS (Ω Z) D N)).comp
       (hind Z).aevalEquivField.toRingEquiv.toRingHom).toAlgebra
+  haveI : ∀ Z, Module.Free (FractionRing (MvPolynomial (TVar D N) K)) (OmS (Ω Z) D N) :=
+    fun Z => Module.Free.of_divisionRing _ _
   have hL : ∀ Z (q : MvPolynomial (TVar D N) K), algebraMap (FractionRing (MvPolynomial (TVar D N) K))
       (OmS (Ω Z) D N) (algebraMap (MvPolynomial (TVar D N) K) _ q) = sHom (j0 Z) (x Z) q := fun Z q =>
     (hind Z).aevalEquivField_algebraMap_apply_coe q
@@ -328,6 +381,7 @@ theorem basis_descends (j0 : ι → Fin (N + 1)) (v : ∀ Z, Fin (N + 1) → Ω 
     intro g hg k
     have := hli (fun k => algebraMap _ K' (g k)) (fun Z => by
       have h1 := congrArg (β Z) (congrFun hg Z)
+
       rw [Finset.sum_apply, map_sum, Pi.zero_apply, map_zero] at h1
       rw [← h1]
       refine Finset.sum_congr rfl fun k _ => ?_
@@ -348,6 +402,7 @@ theorem basis_descends (j0 : ι → Fin (N + 1)) (v : ∀ Z, Fin (N + 1) → Ω 
       obtain ⟨c, hc⟩ := hsp y
       rw [Submodule.mem_span_range_iff_exists_fun]
       refine ⟨c, funext fun Z => ?_⟩
+
       rw [← hy, hc, map_sum, Finset.sum_apply]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [Pi.smul_apply, Algebra.smul_def, map_mul, hα1]
@@ -391,6 +446,7 @@ theorem coords_of_equiv {K' M ι : Type} [Field K'] [AddCommGroup M] [Module K' 
   letI : ∀ Z, Module K' (Q Z) := fun Z => (a Z).toModule
   have key : ∀ (c : Fin n → K') Z, E (∑ k, c k • b k) Z = ∑ k, a Z (c k) * E (b k) Z := by
     intro c Z
+
     rw [map_sum, Finset.sum_apply]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul]
@@ -406,8 +462,8 @@ theorem coords_of_equiv {K' M ι : Type} [Field K'] [AddCommGroup M] [Module K' 
 variable {K Kl K' : Type} [Field K] [Field Kl] [Field K'] [Algebra K Kl] [Algebra Kl K'] [Algebra K K']
   [IsScalarTower K Kl K'] {ι : Type} [Fintype ι] {Ω : ι → Type} [∀ Z, Field (Ω Z)] [∀ Z, Algebra K (Ω Z)]
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 theorem basis_descends_loc {D D' N m n : ℕ} (hD : D = D') (e : Fin m ≃ Fin (N + 1)) (j0 : ι → Fin (N + 1))
     (v : ∀ Z, Fin m → Ω Z) (x : ∀ Z, Fin N → Ω Z)
@@ -459,6 +515,7 @@ theorem basis_descends_loc {D D' N m n : ℕ} (hD : D = D') (e : Fin m ≃ Fin (
       (∀ y, f (algebraMap K' _ y) = a' y) → (∀ ω, f (incl K Kl K' ω) = ψ' ω) → ∀ i,
       f (s Z i) = ∑ j, a' ((t ∘ ε) (i, j)) * ψ' (v Z (e.symm j)) := by
     intro Z R _ f a' ψ' h1 h2 i
+
     rw [hs', map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [map_mul, h1, h2]
   refine basis_descends j0 (fun Z j => v Z (e.symm j)) x hv hx hind hfin (t ∘ ε)

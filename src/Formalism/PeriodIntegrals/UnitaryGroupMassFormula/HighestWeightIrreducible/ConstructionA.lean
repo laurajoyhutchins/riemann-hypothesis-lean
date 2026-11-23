@@ -1,4 +1,57 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightIrreducible.ClosedEqNablaC
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightIrreducible.ClosedEqNablaC
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,16 +71,17 @@ theorem coeff_mem_of_eval {σ : Type*} (U : Submodule ℂ (MvPolynomial σ ℂ))
     intro n
     have h1 : (φ.comp U.mkQ) (p.eval (C (n : ℂ))) = 0 := by
       rw [LinearMap.comp_apply, Submodule.mkQ_apply, (Submodule.Quotient.mk_eq_zero U).mpr (h n), map_zero]
+
     rw [Polynomial.eval_eq_sum_range, map_sum] at h1
-    rw [hq, Polynomial.eval_finset_sum, ← h1]
+    rw [hq, Polynomial.eval_finsetSum, ← h1]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X, ← MvPolynomial.C_pow,
       mul_comm (p.coeff i), ← MvPolynomial.smul_eq_C_mul, map_smul, smul_eq_mul, mul_comm]
   by_cases hk : k ≤ p.natDegree
   · have hq0 : q = 0 := Polynomial.eq_zero_of_infinite_isRoot q
       (Set.infinite_of_injective_forall_mem Nat.cast_injective (fun n => hroot n))
-    have hc := congrArg (fun r => Polynomial.coeff r k) hq0
-    simp only [hq, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_zero,
+    have hc := congrArg (fun r => _root_.AddMonoidAlgebra.coeff (M := ℕ) r k) hq0
+    simp only [hq, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_zero,
       Finset.sum_ite_eq, Finset.mem_range, Nat.lt_succ_iff.mpr hk, if_true] at hc
     simpa using hc
   · rw [Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)]
@@ -54,7 +108,7 @@ theorem eval_rowGen {N n : ℕ} (a b : Fin N) (t : ℂ) (f : MvPolynomial (Fin N
   · rename_i c
     simp [rowGen, rowAct]
   · rename_i p q hp hq
-    simp only [map_add, Polynomial.eval_add, hp, hq]
+    simp only [map_add (f := _), Polynomial.eval_add, hp, hq]
   · rename_i p v hp
     obtain ⟨i, j⟩ := v
     simp only [map_mul, Polynomial.eval_mul, hp, eval_rowGen_X_eq_rowAct_one_add_single]

@@ -1,8 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NilpotentOfNotIsUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.Identities
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NilpotentOfNotIsUnit
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct GlobalTheory.HWL GlobalTheory.Decompl
 
@@ -25,7 +73,7 @@ private theorem crd_mul_lemma_2 (i : I) (c : W) (y : O ⊗[Z] W) :
   | tmul o v =>
     rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul, crd_tmul_lemma, crd_tmul_lemma]
     exact (mul_smul_comm _ _ _).symm
-  | add y z hy hz => rw [mul_add, map_add, map_add, hy, hz, mul_add]
+  | add y z hy hz => rw [mul_add, map_add (f := _), map_add (f := _), hy, hz, mul_add]
 
 private theorem sum_basis_tmul_crd_eq (y : O ⊗[Z] W) : ∑ i, b i ⊗ₜ[Z] crd b i y = y := by
   induction y using TensorProduct.induction_on with
@@ -34,11 +82,12 @@ private theorem sum_basis_tmul_crd_eq (y : O ⊗[Z] W) : ∑ i, b i ⊗ₜ[Z] cr
     simp_rw [crd_tmul_lemma, Module.Basis.coord_apply, ← TensorProduct.smul_tmul,
       ← TensorProduct.sum_tmul, Module.Basis.sum_repr]
   | add y z hy hz =>
-    simp_rw [map_add, TensorProduct.tmul_add, Finset.sum_add_distrib, hy, hz]
+    simp_rw [map_add (f := _), TensorProduct.tmul_add, Finset.sum_add_distrib, hy, hz]
 
 private theorem crd_sum_lemma_4 (j : I) (v : I → W) : crd b j (∑ i, b i ⊗ₜ[Z] v i) = v j := by
   classical
-  simp [map_sum, crd_tmul_lemma, Module.Basis.coord_apply, Finsupp.single_apply]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [map_sum, crd_tmul_lemma, Module.Basis.coord_apply, Finsupp.single_apply]
 
 theorem mem_pow_iff (w : W) (n : ℕ) (x : O ⊗[Z] W) :
     x ∈ Ideal.span {((1 : O) ⊗ₜ[Z] w) ^ n} ↔ ∀ i, crd b i x ∈ Ideal.span {w ^ n} := by
@@ -55,8 +104,8 @@ theorem mem_pow_iff (w : W) (n : ℕ) (x : O ⊗[Z] W) :
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [hc i, Algebra.TensorProduct.tmul_mul_tmul, one_mul]
 
-include b in
 
+include b in
 theorem complete_tensor (w : W) [h : IsAdicComplete (Ideal.span {w}) W] :
     IsAdicComplete (Ideal.span {(1 : O) ⊗ₜ[Z] w}) (O ⊗[Z] W) := by
   have key : ∀ (n : ℕ) (x : O ⊗[Z] W),
@@ -133,7 +182,7 @@ private theorem crd_tensorProduct_map_eq {Z O I W W' : Type} [CommRing Z] [CommR
   | zero => simp
   | tmul o v =>
     rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, crd_tmul_lemma, crd_tmul_lemma, map_smul]
-  | add y z hy hz => rw [map_add, map_add, hy, hz, map_add, map_add]
+  | add y z hy hz => rw [map_add (f := _), map_add (f := _), hy, hz, map_add (f := _), map_add (f := _)]
 
 private theorem tensor_eq_of_crd_eq {Z O I W : Type} [CommRing Z] [CommRing O] [Algebra Z O]
     [Fintype I] (b : Module.Basis I Z O) [CommRing W] [Algebra Z W] {y y' : O ⊗[Z] W}

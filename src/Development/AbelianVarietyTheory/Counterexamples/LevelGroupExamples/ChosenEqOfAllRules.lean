@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.AlgebraMapCAt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.AlgebraMapCAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,46 +56,5 @@ variable (mapR : ∀ {S T : Type} [CommRing S] [Algebra K S] [CommRing T] [Algeb
 
 def conjAt (σ : K →+* ℂ) : CAt σ →ₐ[K] CAt ((starRingEnd ℂ).comp σ) :=
   { (starRingEnd ℂ : ℂ →+* ℂ) with commutes' := fun _ => rfl }
-
-theorem ptNorm_conj (σ : K →+* ℂ) (fn : pts (CAt σ) → ι → ℝ)
-    (fn' : pts (CAt ((starRingEnd ℂ).comp σ)) → ι → ℝ) (e : ι → ℕ) (f : Rules pts)
-    (y : pts (CAt σ)) (z : pts (CAt ((starRingEnd ℂ).comp σ)))
-    (hv : evalAt pts mapR f z = conjAt σ (evalAt pts mapR f y)) (hn : ∀ i, |fn' z i| = |fn y i|) :
-    ptNorm pts mapR _ fn' e f z = ptNorm pts mapR σ fn e f y := by
-  unfold ptNorm
-  rw [hv]
-  simp only [hn]
-  congr 1
-  exact RCLike.norm_conj (K := ℂ) _
-
-theorem bddAt_of_fnorm_zero (σ : K →+* ℂ) (e : ι → ℕ) (i : ι) (hi : e i ≠ 0) (f : Rules pts) :
-    BddAt pts mapR σ (fun _ _ => 0) e f ∧ supAt pts mapR σ (fun _ _ => 0) e f = 0 := by
-  have h : ∀ y, ptNorm pts mapR σ (fun _ _ => 0) e f y = 0 := fun y => by
-    unfold ptNorm
-    rw [Finset.prod_eq_zero (Finset.mem_univ i) (by simp [hi]), mul_zero]
-  refine ⟨⟨0, ?_⟩, ?_⟩
-  · rintro _ ⟨y, rfl⟩; exact (h y).le
-  · unfold supAt; simp [h]
-
-theorem exists_fnorm_small (σ : K →+* ℂ) (e : ι → ℕ) (i : ι) (hi : e i ≠ 0) (f : Rules pts) :
-    ∃ fnorm : pts (CAt σ) → ι → ℝ, (∀ y j, 0 < fnorm y j) ∧ BddAt pts mapR σ fnorm e f ∧
-      supAt pts mapR σ fnorm e f ≤ 1 := by
-  classical
-  let c : pts (CAt σ) → ℝ := fun y => cabs (evalAt pts mapR f y)
-  have hc : ∀ y, 0 ≤ c y := fun y => norm_nonneg _
-  have h : ∀ y, ptNorm pts mapR σ (fun y _ => 1 + c y) e f y ≤ 1 := fun y => by
-    have hp : 0 < 1 + c y := by linarith [hc y]
-    have h1 : (1 + c y)⁻¹ ≤ 1 := inv_le_one_of_one_le₀ (by linarith [hc y])
-    have h0 : 0 ≤ (1 + c y)⁻¹ := inv_nonneg.2 hp.le
-    show c y * ∏ j, |1 + c y|⁻¹ ^ e j ≤ 1
-    rw [abs_of_pos hp, Finset.prod_pow_eq_pow_sum]
-    have hs : 1 ≤ ∑ j, e j :=
-      (Nat.one_le_iff_ne_zero.2 hi).trans (Finset.single_le_sum (fun _ _ => Nat.zero_le _) (Finset.mem_univ i))
-    have h2 : (1 + c y)⁻¹ ^ ∑ j, e j ≤ (1 + c y)⁻¹ := by
-      simpa using pow_le_pow_of_le_one h0 h1 hs
-    refine (mul_le_mul_of_nonneg_left h2 (hc y)).trans ?_
-    rw [← div_eq_mul_inv, div_le_one hp]; linarith
-  refine ⟨fun y _ => 1 + c y, fun y _ => by linarith [hc y], ⟨1, ?_⟩, Real.iSup_le h zero_le_one⟩
-  rintro _ ⟨y, rfl⟩; exact h y
 
 end GlobalTheory.SupNormExample

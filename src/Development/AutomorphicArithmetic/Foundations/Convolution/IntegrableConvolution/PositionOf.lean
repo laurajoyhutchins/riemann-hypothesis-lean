@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmooth
-import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmooth
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
+public import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+public import GroundTheory.AutomorphicForms.L2LocalComponents.ArchPolar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,12 +55,12 @@ open scoped ComplexConjugate NumberField.LiesOver
 namespace UpperTheory.ConvolutionTheory.L1
 
 section co
-variable {K : Type} [Field K] [NumberField K] [IsTotallyComplex K]
+variable {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
 
 private theorem cpx (w : InfinitePlace K) : IsComplex w := IsTotallyComplex.isComplex w
 
-open Classical in
 
+open Classical in
 private def co (τ : K →+* ℂ) : mixedSpace K →+* ℂ :=
   if (mk τ).embedding = τ then complexComp ⟨mk τ, cpx _⟩
   else (starRingEnd ℂ).comp (complexComp ⟨mk τ, cpx _⟩)
@@ -68,8 +113,8 @@ private theorem mk_eq_of_co_along {τ τ₀ : K →+* ℂ} {z : ℂ} (h : co τ 
   apply h
   rcases co_cases τ with h1 | h1 <;> simp [h1, along, hc]
 
-open Classical in
 
+open Classical in
 private def cc (w : InfinitePlace K) (τ : K →+* ℂ) : w.Completion →+* ℂ :=
   if w.embedding = τ then Completion.extensionEmbedding w
   else (starRingEnd ℂ).comp (Completion.extensionEmbedding w)
@@ -148,9 +193,9 @@ private theorem archC_iff {n : ℕ} (x : archGroup K n) :
 end co
 
 section ext
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyComplex F]
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [_root_.NumberField.IsTotallyComplex F]
 
-private theorem totC (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyComplex F] :
+private theorem totC (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [_root_.NumberField.IsTotallyComplex F] :
     IsTotallyComplex E := ⟨fun w => by
   rw [← not_isReal_iff_isComplex]
   intro h
@@ -159,7 +204,7 @@ private theorem totC (F E : Type) [Field F] [NumberField F] [Field E] [NumberFie
   exact not_isReal_iff_isComplex.2 (IsTotallyComplex.isComplex (mk (w.embedding.comp (algebraMap F E))))
     (isReal_mk_iff.2 h2)⟩
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 private theorem co_iota (τ : E →+* ℂ) (y : InfiniteAdeleRing F) :
     co τ (InfiniteAdeleRing.ringEquiv_mixedSpace E (GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap (K := F) (L := E) y)) =
@@ -172,8 +217,9 @@ private theorem co_iota (τ : E →+* ℂ) (y : InfiniteAdeleRing F) :
     rfl
   have hv : mk (τ.comp (algebraMap F E)) = (mk τ).comap (algebraMap F E) := (comap_mk _ _).symm
   rw [key _ hv, GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap_apply]
-  have hcont : Continuous (algebraMap ((mk τ).comap (algebraMap F E)).Completion (mk τ).Completion) :=
-    NumberField.LiesOver.continuous_completionMap (v := (mk τ).comap (algebraMap F E)) (w := mk τ)
+  have hcont : Continuous (algebraMap ((mk τ).comap (algebraMap F E)).Completion (mk τ).Completion) := by
+    rw [AbsoluteValue.Completion.algebraMap_eq_of_liesOver]
+    exact AbsoluteValue.Completion.continuous_map ((mk τ).comap (algebraMap F E)).1 (mk τ).1
   have h : (cc (mk τ) τ).comp (algebraMap ((mk τ).comap (algebraMap F E)).Completion (mk τ).Completion) =
       cc ((mk τ).comap (algebraMap F E)) (τ.comp (algebraMap F E)) := by
     refine cc_unique _ _ _ ((continuous_cc _ _).comp hcont) (continuous_cc _ _) fun x => ?_
@@ -185,7 +231,7 @@ private theorem co_iota (τ : E →+* ℂ) (y : InfiniteAdeleRing F) :
 end ext
 
 section intersection_update_fsHerm_neg_one
-variable {K : Type} [Field K] [NumberField K] [IsTotallyComplex K]
+variable {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
 
 private def P (τ : K →+* ℂ) (z : ℂ) : InfiniteAdeleRing K := (InfiniteAdeleRing.ringEquiv_mixedSpace K).symm (along τ z)
 
@@ -223,8 +269,8 @@ private theorem idem_eq (τ : K →+* ℂ) {x : InfiniteAdeleRing K} (hx : P τ 
 end intersection_update_fsHerm_neg_one
 
 section main
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyComplex F]
-  [IsTotallyComplex E] {σ : E ≃ₐ[F] E} {m : ℕ}
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [_root_.NumberField.IsTotallyComplex F]
+  [_root_.NumberField.IsTotallyComplex E] {σ : E ≃ₐ[F] E} {m : ℕ}
 
 private theorem cq_iota (τ : E →+* ℂ) (y : InfiniteAdeleRing F) :
     cq τ (GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap (K := F) (L := E) y) = cq (τ.comp (algebraMap F E)) y :=

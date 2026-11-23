@@ -1,12 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEigenBasisSameVec
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FramesOnEqModel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadsZero
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEigenBasisSameVec
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FramesOnEqModel
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsBijectiveKappa
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.MemIffConjugateNotMem
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ModelBaseTrivModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsHorizontalGeneratorOfCharts
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactification
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ModelBaseTrivModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -21,8 +63,8 @@ section Linear
 
 variable {E : Type} [Field E] [NumberField E]
 
-open Classical in
 
+open Classical in
 theorem char_part {g : ℕ} (ty : Fin g → E →+* ℂ) (t : Fin g → ℂ) (s : E)
     (h : ∀ α : 𝓞 E, (∑ j, ty j α * t j).im = ((Algebra.trace ℚ E (α * s) : ℚ) : ℝ)) (ρ : E →+* ℂ) :
     ∑ j, (if ty j = ρ then t j else 0) - ∑ j, (if conjEmb (ty j) = ρ then conj (t j) else 0) =
@@ -51,8 +93,8 @@ theorem char_part {g : ℕ} (ty : Fin g → E →+* ℂ) (t : Fin g → ℂ) (s 
   simp only [Complex.ofReal_ofNat, Finset.mul_sum, Finset.sum_mul]
   exact sub_eq_zero.2 (Finset.sum_congr rfl fun _ _ => by ring)
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem eq_zero_of_span {r : ℕ} (τ : E →+* ℂ) (Λ : Set (Fin r → E)) (hΛ : Submodule.span E Λ = ⊤)
     (f : (Fin r → ℂ) → ℂ) (ha : ∀ u v, f (u + v) = f u + f v) (hs : ∀ (s : ℂ) u, f (s • u) = conj s * f u)
     (h : ∀ v ∈ Λ, f (fun n => τ (v n)) = 0) (u : Fin r → ℂ) : f u = 0 := by
@@ -65,7 +107,7 @@ theorem eq_zero_of_span {r : ℕ} (τ : E →+* ℂ) (Λ : Set (Fin r → E)) (h
     | add v w _ _ hv hw =>
       have := ha (fun n => τ (v n)) (fun n => τ (w n))
       rw [hv, hw, add_zero] at this
-      simp only [Pi.add_apply, map_add]; exact this
+      simp only [Pi.add_apply, map_add (f := _)]; exact this
     | smul a v _ hv =>
       have := hs (τ a) (fun n => τ (v n))
       rw [hv, mul_zero] at this
@@ -111,8 +153,8 @@ theorem det_sum_elim {p q r : ℕ} (ε : Fin q ⊕ Fin p ≃ Fin r) (Γ : Matrix
 
 variable [IsCMField E]
 
-open Classical in
 
+open Classical in
 theorem flatCoord_eq {p q r g : ℕ} (ε : Fin q ⊕ Fin p ≃ Fin r) (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E)
     (hG : ∀ a b, cc (G a b) = G b a) (ξ : E) (X : Matrix (Fin r) (Fin r) ℂ) (hX : X.det ≠ 0)
     (hΓ : ((gram τ G X).submatrix (ε ∘ Sum.inl) (ε ∘ Sum.inl)).det ≠ 0)
@@ -142,7 +184,7 @@ theorem flatCoord_eq {p q r g : ℕ} (ε : Fin q ⊕ Fin p ≃ Fin r) (τ : E �
     refine eq_zero_of_span τ _ hφ (fun u => ∑ b, hermC τ G (col X (ε (.inl b))) u * (Hm *ᵥ star (P b₀)) (jw b) -
         ∑ b, conj ((X⁻¹ *ᵥ u) (ε (.inr b)) * (Hm *ᵥ star (P b₀)) (jv b)) -
         2 * Complex.I * conj (τ ξ) * hermC τ G (Data.emb τ (φ b₀)) u) (fun u v => ?_) (fun s u => ?_) ?_ u
-    · simp only [UnitFrame.hermC_eq, star_add, Matrix.mulVec_add, dotProduct_add, add_mul, Pi.add_apply, map_add,
+    · simp only [UnitFrame.hermC_eq, star_add, Matrix.mulVec_add, dotProduct_add, add_mul, Pi.add_apply, map_add (f := _),
         Finset.sum_add_distrib]
       ring
     · simp only [UnitFrame.hermC_eq, star_smul, Matrix.mulVec_smul, dotProduct_smul, Pi.smul_apply, smul_eq_mul,
@@ -165,8 +207,9 @@ theorem flatCoord_eq {p q r g : ℕ} (ε : Fin q ⊕ Fin p ≃ Fin r) (τ : E �
       have h2 : conjEmb τ (herm G (φ a) (φ b₀)) = hermC τ G (Data.emb τ (φ b₀)) (Data.emb τ (φ a)) := by
         have h3 : ∀ a b, conj (τ (G a b)) = τ (G b a) := fun a b => by
           rw [← hG a b, cc, IsCMField.complexEmbedding_complexConj]
+
         simp only [conjEmb, RingHom.comp_apply, herm, hermC, Data.emb, cc, map_sum, map_mul, h3,
-          IsCMField.complexEmbedding_complexConj, Complex.conj_conj]
+        IsCMField.complexEmbedding_complexConj, Complex.conj_conj]
         rw [Finset.sum_comm]
         exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
       rw [map_mul, h2] at h1
@@ -204,8 +247,8 @@ open AlgebraicGeometry CategoryTheory Limits IsDedekindDomain Module Formalism.B
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {Dw : Datum H}
   {l : Level H} {Xo : Moduli Dw l} {c : Coeff l} {r : ℕ}
 
-open Classical in
 
+open Classical in
 theorem sum_letters (σ : c.F →+* ℂ) {g : ℕ} (e : Fin g ≃ Σ τ : E →+* ℂ, Fin (Dw.mult τ)) (τ : E →+* ℂ) {n : ℕ}
     (hn : n = Dw.mult τ) (F : Fin g → ℂ) :
     ∑ j, (if relab c σ (e j).1 = relab c σ τ then F j else 0) = ∑ b : Fin n, F (e.symm ⟨τ, Fin.cast hn b⟩) := by
@@ -298,7 +341,7 @@ theorem rdU_eq_mul_horizGen {σ : c.F →+* ℂ} (U : Unf Xo c σ r) (hσ : Good
         rw [show (⟨_, hb⟩ : Fin r) = ε (.inl b) from Fin.ext (by rw [hε₁]; simp only [hp0])]
         rfl
       unfold perFr
-      rw [dif_neg hnot, dif_pos (hcc.symm ▸ hτ)]
+      rw [dite_eq_right hnot, dif_pos (hcc.symm ▸ hτ)]
       exact (dif_pos hb).trans (key _ hcc _))
     (fun a b => by
       rw [hP, Equiv.apply_symm_apply]

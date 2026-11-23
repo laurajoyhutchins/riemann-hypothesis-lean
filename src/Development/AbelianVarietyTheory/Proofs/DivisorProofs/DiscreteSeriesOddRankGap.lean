@@ -1,7 +1,58 @@
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Formalism.LocalToGlobal.IndefiniteReal.ConjLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.EllipticPartTestData
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasTypeVec
-import Formalism.LocalToGlobal.IndefiniteReal.ConjLemmas
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyNormFinLeOne
+import Development.AbelianVarietyTheory.Definitions.Foundations.InnerEqZeroOfNotUEquiv
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsHilbertSchmidtOfFiniteDimensional
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
+
+@[expose] public section
+
 open MeasureTheory Set Filter NumberField IsDedekindDomain
 open GlobalTheory.AdelicU GlobalTheory.OpTrace GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary GlobalTheory.AutMult Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.IndefR.Mult
@@ -46,13 +97,13 @@ theorem lamAt_b' {Rk : Ranks} (h : HCParam Rk) (j : Fin Rk.m) :
   have hc : ∀ (x y : ℕ) (hx : x < Rk.m) (hy : y < Rk.m), x = y → h.b ⟨x, hx⟩ = h.b ⟨y, hy⟩ := by
     rintro x _ _ _ rfl; rfl
   unfold Formalism.L2.NTheta.lamAt
-  rw [dif_neg (by omega), dif_pos (by omega)]
+  rw [dite_eq_right (by omega), dite_eq_left (by omega)]
   rw [hc _ _ _ j.2 (by omega)]
 
 theorem lamAt_v' {Rk : Ranks} (h : HCParam Rk) (j : Fin (Rk.k - 1)) :
     Formalism.L2.NTheta.lamAt h j = h.v j := by
   unfold Formalism.L2.NTheta.lamAt
-  rw [dif_pos j.2]
+  rw [dite_eq_left j.2]
 
 theorem parA_fst (D : D7) (ρ : D.what₂.Tau) {n : ℕ} (hn : n = D.R.r) :
     (parA (Ptw D) 0 ρ).image Prod.fst = Finset.univ.image fun a : Fin n => Formalism.L2.NTheta.lamAt (D.hc ρ) a := by
@@ -80,7 +131,7 @@ theorem parA_fst (D : D7) (ρ : D.what₂.Tau) {n : ℕ} (hn : n = D.R.r) :
       by_cases h2 : (c : ℕ) = 0 ∨ Even (c : ℕ)
       · exact Or.inr (Or.inr ⟨c, rfl, h2⟩)
       · push_neg at h2
-        exact Or.inl ⟨c, rfl, h2.1, Nat.not_even_iff_odd.mp h2.2⟩
+        exact Or.inl ⟨c, rfl, h2.1, h2.2⟩
 
 theorem tauE_inj {D : D7} {τ ρ : D.what₂.Tau} (h : tauE D τ = tauE D ρ) : τ = ρ :=
   D.eTau.injective (Subtype.ext (Formalism.IndefR.Conj.emb_injective h))
@@ -108,7 +159,7 @@ theorem lab_base {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : F
   have hex : ∃ τ, labE D.what₂.embLL τ = tauE D ρ ∨ labE D.what₂.embLL τ = (starRingEnd ℂ).comp (tauE D ρ) :=
     ⟨ρ, Or.inl (hb ρ)⟩
   unfold lab
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   rcases hex.choose_spec with h | h
   · rw [hb] at h; exact tauE_inj h
   · rw [hb] at h; exact absurd h (tauE_ne_conj' _ _)
@@ -144,43 +195,5 @@ theorem parAt_fst {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : 
       simp only [Sum.elim_inr]
       congr 1
       omega
-
-theorem params_match : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), Given R F → ∀ (i : Fin D.R.m) (M₀ : DSModel (Yc D 0) (parA (Ptw D) 0)), ∃ (hr : (Wc D i).rank = (Yc D 0).rank) (lam : D.what₂.Tau → Fin (Yc D 0).rank → ℤ), Odd (Yc D 0).rank ∧ (∀ ρ, Gap (lam ρ)) ∧ (∀ ρ a, M₀.lam ρ a = lam ρ a) ∧ ∀ ρ a, (R.MW i (sg0 D A)).lam ρ a = lam ρ (a.cast hr) := by
-  intro D G _ _ Pl0 T A Ks _ _ _ R F hG i M₀
-  have hY : (Yc D 0).rank = D.R.r := by
-    rw [D.sp.Y_rank _ (min_le_right _ _), Nat.zero_min]
-    simp [Ranks.rankY]
-  have hW : (Wc D i).rank = D.R.r := D.sp.W_rank _ (Nat.le_add_left _ _) i.2
-  have key : ∀ ρ (n : ℕ), (((⌊Formalism.L2.NTheta.lamAt (D.hc ρ) n⌋ : ℤ) : ℚ)) = Formalism.L2.NTheta.lamAt (D.hc ρ) n := by
-    intro ρ n
-    obtain ⟨z, hz⟩ := Formalism.L2.NTheta.lamAt_int (D.hc ρ) n
-    rw [hz, Int.floor_intCast]
-  have keyR : ∀ ρ (n : ℕ), (((⌊Formalism.L2.NTheta.lamAt (D.hc ρ) n⌋ : ℤ) : ℝ)) = ((Formalism.L2.NTheta.lamAt (D.hc ρ) n : ℚ) : ℝ) := by
-    intro ρ n
-    obtain ⟨z, hz⟩ := Formalism.L2.NTheta.lamAt_int (D.hc ρ) n
-    rw [hz, Int.floor_intCast, Rat.cast_intCast]
-  refine ⟨hW.trans hY.symm, fun ρ a => ⌊Formalism.L2.NTheta.lamAt (D.hc ρ) (a : ℕ)⌋, hY ▸ Formalism.L2.NTheta.odd_r D.R, ?_, ?_, ?_⟩
-  · intro ρ a b hab
-    have hb : (b : ℕ) < D.R.r := lt_of_lt_of_eq b.2 hY
-    have h1 := hG.gapR ρ a (by omega)
-    rw [← hab] at h1
-    have hr1 : ((Yc D 0).rank : ℚ) ≤ 100 * (D.R.r : ℚ) ^ 4 := by
-      rw [hY]
-      have : D.R.r ≤ 100 * D.R.r ^ 4 := by
-        have := Nat.le_self_pow (by norm_num : (4 : ℕ) ≠ 0) D.R.r
-        omega
-      exact_mod_cast this
-    have : ((Yc D 0).rank : ℚ) ≤ ((⌊Formalism.L2.NTheta.lamAt (D.hc ρ) (a : ℕ)⌋ - ⌊Formalism.L2.NTheta.lamAt (D.hc ρ) (b : ℕ)⌋ : ℤ) : ℚ) := by
-      push_cast
-      rw [key, key]
-      linarith
-    exact_mod_cast this
-  · intro ρ a
-    rw [enum_fst (M₀.enum ρ) (fun a : Fin (Yc D 0).rank => Formalism.L2.NTheta.lamAt (D.hc ρ) a)
-      (lamAt_anti_fin _ hY.le) (parA_fst D ρ hY) a, keyR]
-  · intro ρ a
-    rw [enum_fst ((R.MW i (sg0 D A)).enum ρ) (fun a : Fin (Wc D i).rank => Formalism.L2.NTheta.lamAt (D.hc ρ) a)
-      (lamAt_anti_fin _ hW.le) (parAt_fst R i ρ hW) a]
-    exact (keyR ρ (a : ℕ)).symm
 
 end GlobalTheory.ParamMatch

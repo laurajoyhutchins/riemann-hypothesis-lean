@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LatticeMapsOfFunctorComparison
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.Tensor
+module
+
+public import Formalism.GradedWeylDivisibility.StatementD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +101,7 @@ theorem prodTopsT (G : TT → MvPolynomial (Fin k × Fin n) K) :
   rw [← Finset.prod_subset (Finset.subset_univ TT)]
   · rw [← Finset.prod_coe_sort TT]
     refine Finset.prod_congr rfl fun s _ => ?_
-    rw [dif_pos s.2]
+    rw [dite_eq_left s.2]
     rfl
   · intro s _ hs
     rw [dif_neg hs, map_one]
@@ -114,7 +159,7 @@ theorem ioMem (hK2 : RegroupP) (i : TT → MvPolynomial (Fin k × Fin n) K →�
     rw [map_zero, smul_zero]
     exact Submodule.zero_mem _
   | add x y _ _ ihx ihy =>
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     exact Submodule.add_mem _ ihx ihy
   | smul a x _ ih =>
     rw [LinearMap.map_smul_of_tower, hcomm]
@@ -147,7 +192,7 @@ theorem prMem (pr : TT → MvPolynomial (Bool × (Fin k × Fin n)) K →ₗ[K] M
       c • pr ⟨s, h⟩ (∏ b, blockEmb K b (F (⟨s, h⟩, b))) else 1, fun s => ?_, rfl⟩
     dsimp only
     by_cases h : s ∈ TT
-    · rw [dif_pos h]
+    · rw [dite_eq_left h]
       exact h1 ⟨s, h⟩ _ (Submodule.subset_span ⟨fun b => F (⟨s, h⟩, b), fun b => hF _, rfl⟩)
     · rw [dif_neg h]
       exact h0 s h
@@ -155,7 +200,7 @@ theorem prMem (pr : TT → MvPolynomial (Bool × (Fin k × Fin n)) K →ₗ[K] M
     rw [map_zero, smul_zero]
     exact Submodule.zero_mem _
   | add x y _ _ ihx ihy =>
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     exact Submodule.add_mem _ ihx ihy
   | smul a x _ ih =>
     rw [LinearMap.map_smul_of_tower, hcomm]

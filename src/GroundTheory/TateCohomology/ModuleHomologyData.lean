@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Abelian
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -67,14 +116,6 @@ variable (S : ShortComplex (ModuleCat.{u} R))
     (hrange : LinearMap.range ι = LinearMap.ker S.g.hom) (N : Submodule R K)
     (hN : ∀ x, x ∈ N ↔ ι x ∈ LinearMap.range S.f.hom)
 
-@[simp]
-lemma moduleLeftHomologyData_i_hom :
-    (moduleLeftHomologyData S K ι hι hrange N hN).i.hom = ι := rfl
-
-@[simp]
-lemma moduleLeftHomologyData_π_hom :
-    (moduleLeftHomologyData S K ι hι hrange N hN).π.hom = N.mkQ := rfl
-
 lemma moduleLeftHomologyData_homologyIso_hom_homologyπ [S.HasHomology]
     (z : S.cycles) (x : K) (hx : ι x = S.iCycles.hom z) :
     (moduleLeftHomologyData S K ι hι hrange N hN).homologyIso.hom.hom (S.homologyπ.hom z) =
@@ -140,7 +181,6 @@ lemma homologyFunctorIso'_moduleLeftHomologyData_apply {ιc : Type*} {c : Comple
   have h1 : (HomologicalComplex.homologyFunctorIso' _ c i j k hi hk).hom.app C =
       ShortComplex.homologyMap e := by
     simp [HomologicalComplex.homologyFunctorIso', e]
-    exact Category.id_comp _
   have h2 : (ShortComplex.homologyMap e).hom ((C.sc j).homologyπ.hom z) =
       (C.sc' i j k).homologyπ.hom ((ShortComplex.cyclesMap e).hom z) :=
     congr(($(ShortComplex.homologyπ_naturality e)).hom z)
@@ -174,7 +214,6 @@ lemma exists_cycles_of_moduleLeftHomologyData {ιc : Type*} {c : ComplexShape ι
   refine h3.trans ?_
   rw [h4]
   simp [e]
-  rfl
 
 end Complexes
 

@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.OrderTwoTate
-import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.OrderTwoTate
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
 import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -47,7 +93,7 @@ theorem cartierDualToQZ_apply_eq_zero_iff (φ : cartierDual F Ω M) (m : M) :
     (rootsOfUnityToUnits_injective n).eq_iff]
 
 theorem cartierDualToQZ_injective : Function.Injective (cartierDualToQZ M hMn e) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro φ hφ
   apply LinearMap.ext
   intro m
@@ -83,8 +129,8 @@ section Equivariance
 variable {F Ω : Type} [Field F] [Field Ω] [Algebra F Ω] (M : Rep.{0} (ULift.{0} ℤ) Gal(Ω/F))
   {n : ℕ} [NeZero n] (hMn : ∀ m : M, n • m = 0) (e : galRootsOfUnity.{0} F Ω n ≃+ ZMod n)
 
-omit [NeZero n] in
 
+omit [NeZero n] in
 theorem cartierDualToQZ_act {c : Gal(Ω/F)} (hinv : c⁻¹ = c)
     (hconj : ∀ ζ : galUnits.{0} F Ω, n • ζ = 0 → (galUnits.{0} F Ω).ρ c ζ = -ζ)
     (φ : cartierDual F Ω M) :
@@ -129,8 +175,8 @@ variable {F Ω : Type} [Field F] [Field Ω] [Algebra F Ω] [FiniteDimensional F 
   {c : Gal(Ω/F)} (hG : ∀ g : Gal(Ω/F), g = 1 ∨ g = c) (hc : c ≠ 1)
   (hneg : (-1 : F) ∉ Set.range (Algebra.norm F : Ω → F))
 
-include hneg in
 
+include hneg in
 theorem realInv_cocycleTwo (t : galUnits.{0} F Ω) (ht : (galUnits.{0} F Ω).ρ c t = t)
     (h2t : 2 • t = 0) (q : QZ) (hq : 2 • q = 0) (hqt : q = 0 ↔ t = 0) :
     realInv F Ω h2 hN (cohomologyπ _ 2 (cocycleTwo (galUnits.{0} F Ω) hG hc t ht)) = q := by
@@ -183,8 +229,8 @@ variable {F Ω : Type} [Field F] [Field Ω] [Algebra F Ω] [FiniteDimensional F 
   (M : Rep.{0} (ULift.{0} ℤ) Gal(Ω/F)) [IsDiscreteRep M] [Finite M]
   {c : Gal(Ω/F)} (hG : ∀ g : Gal(Ω/F), g = 1 ∨ g = c) (hc : c ≠ 1)
 
-omit [FiniteDimensional F Ω] in
 
+omit [FiniteDimensional F Ω] in
 theorem cochainOf_cupCartier {p q : ℕ} (h : p + q = 2) (x : cocycles M p)
     (y : cocycles (cartierDual F Ω M) q) (s : Fin 2 → Gal(Ω/F)) :
     cochainOf _ (cocycleι _ 2 (HomologicalComplex.cyclesMap (cochainsMap (cartierPairing F Ω M)) 2

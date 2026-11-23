@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsRootOne
-import Development.AbelianVarietyTheory.Definitions.Foundations.LiftApplyOfMemAdmissibleSubalgebra
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsDCReps
-import CompanionTheory.EightfoldTheory.VariationTheory.AutomorphicForms.Newform
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.BinaryMonomialDegreeSubstExpansionStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsRootOne
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsDCReps
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.BinaryMonomialDegreeSubstExpansionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,18 +65,19 @@ theorem dehH_slP_mon (w : ℕ) (m : Matrix (Fin 2) (Fin 2) ℤ) (i : ℕ) :
 
 theorem dehH_expand (w : ℕ) (p : MvPolynomial (Fin 2) ℂ) (hp : p.IsHomogeneous w) :
     deh p = ∑ i ∈ Finset.range (w + 1),
-      Polynomial.C (MvPolynomial.coeff (Finsupp.single 0 i + Finsupp.single 1 (w - i)) p) * Polynomial.X ^ i := by
+      Polynomial.C (AddMonoidAlgebra.coeff p (Finsupp.single 0 i + Finsupp.single 1 (w - i))) * Polynomial.X ^ i := by
   have h := (GlobalTheory.T.binaryMonomialDegree_subst_expansion ℂ w).2.1 p hp
   conv_lhs => rw [h]
-  rw [map_sum, ← Fin.sum_univ_eq_sum_range (fun i => Polynomial.C (MvPolynomial.coeff
-    (Finsupp.single 0 i + Finsupp.single 1 (w - i)) p) * Polynomial.X ^ i)]
+
+  rw [map_sum, ← Fin.sum_univ_eq_sum_range (fun i => Polynomial.C (AddMonoidAlgebra.coeff
+  p (Finsupp.single 0 i + Finsupp.single 1 (w - i))) * Polynomial.X ^ i)]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, dehH_mon]
   simp [deh]
 
 theorem dehH_coeff (w : ℕ) (c : ℕ → ℂ) (j : ℕ) (hj : j < w + 1) :
     (∑ i ∈ Finset.range (w + 1), Polynomial.C (c i) * Polynomial.X ^ i).coeff j = c j := by
-  simp [Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow, hj]
+  simp [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, hj]
 
 end GlobalTheory.KZ.H3
 
@@ -56,7 +99,7 @@ theorem dehH_sum_eq (w : ℕ) (q : Polynomial ℂ) (hq : q ∈ Polynomial.degree
   ext j
   by_cases hj : j < w + 1
   · exact dehH_coeff w _ j hj
-  · rw [Polynomial.finset_sum_coeff]
+  · rw [Polynomial.finsetSum_coeff]
     rw [Polynomial.mem_degreeLT] at hq
     have h0 : q.coeff j = 0 := Polynomial.coeff_eq_zero_of_degree_lt
       (lt_of_lt_of_le hq (by exact_mod_cast not_lt.mp hj))
@@ -73,10 +116,11 @@ theorem deh_homog_iso : ∀ w : ℕ, (∀ (m : Matrix (Fin 2) (Fin 2) ℤ) (p : 
     have h := (GlobalTheory.T.binaryMonomialDegree_subst_expansion ℂ w).2.1 p hp
     rw [dehH_expand w p hp, dehH_slP_sum]
     conv_lhs => rw [h]
-    rw [map_sum, map_sum, ← Fin.sum_univ_eq_sum_range (fun i => Polynomial.C (MvPolynomial.coeff
-      (Finsupp.single 0 i + Finsupp.single 1 (w - i)) p) *
-        ((Polynomial.C ((m 0 0 : ℤ) : ℂ) * Polynomial.X + Polynomial.C ((m 0 1 : ℤ) : ℂ)) ^ i *
-          (Polynomial.C ((m 1 0 : ℤ) : ℂ) * Polynomial.X + Polynomial.C ((m 1 1 : ℤ) : ℂ)) ^ (w - i)))]
+
+    rw [map_sum, map_sum, ← Fin.sum_univ_eq_sum_range (fun i => Polynomial.C (AddMonoidAlgebra.coeff
+    p (Finsupp.single 0 i + Finsupp.single 1 (w - i))) *
+      ((Polynomial.C ((m 0 0 : ℤ) : ℂ) * Polynomial.X + Polynomial.C ((m 0 1 : ℤ) : ℂ)) ^ i *
+        (Polynomial.C ((m 1 0 : ℤ) : ℂ) * Polynomial.X + Polynomial.C ((m 1 1 : ℤ) : ℂ)) ^ (w - i)))]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, map_mul, MvPolynomial.algHom_C, mon, dehH_slP_mon]
     simp [deh]
@@ -91,7 +135,8 @@ theorem deh_homog_iso : ∀ w : ℕ, (∀ (m : Matrix (Fin 2) (Fin 2) ℤ) (p : 
     refine ⟨∑ i : Fin (w + 1), MvPolynomial.C (q.coeff i) * mon ℂ w i, ?_, ?_⟩
     · exact MvPolynomial.IsHomogeneous.sum _ _ _ fun i _ =>
         ((GlobalTheory.T.binaryMonomialDegree_subst_expansion ℂ w).2.2.1 i).C_mul _
-    · rw [map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
       simp only [map_mul, dehH_mon]
       simp only [deh, MvPolynomial.aeval_C, Polynomial.algebraMap_eq]
       rw [Fin.sum_univ_eq_sum_range (fun i => Polynomial.C (q.coeff i) * Polynomial.X ^ i)]
@@ -99,8 +144,8 @@ theorem deh_homog_iso : ∀ w : ℕ, (∀ (m : Matrix (Fin 2) (Fin 2) ℤ) (p : 
   · intro p p' hp hp' he
     rw [(GlobalTheory.T.binaryMonomialDegree_subst_expansion ℂ w).2.1 p hp, (GlobalTheory.T.binaryMonomialDegree_subst_expansion ℂ w).2.1 p' hp']
     refine Finset.sum_congr rfl fun i _ => ?_
-    have h1 := dehH_coeff w (fun i => MvPolynomial.coeff (Finsupp.single 0 i + Finsupp.single 1 (w - i)) p) i i.2
-    have h2 := dehH_coeff w (fun i => MvPolynomial.coeff (Finsupp.single 0 i + Finsupp.single 1 (w - i)) p') i i.2
+    have h1 := dehH_coeff w (fun i => AddMonoidAlgebra.coeff p (Finsupp.single 0 i + Finsupp.single 1 (w - i))) i i.2
+    have h2 := dehH_coeff w (fun i => AddMonoidAlgebra.coeff p' (Finsupp.single 0 i + Finsupp.single 1 (w - i))) i i.2
     rw [← dehH_expand w p hp, he, dehH_expand w p' hp', h2] at h1
     rw [h1]
 

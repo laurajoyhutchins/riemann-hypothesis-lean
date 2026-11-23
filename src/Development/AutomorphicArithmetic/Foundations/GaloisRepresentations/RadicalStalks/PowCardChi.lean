@@ -1,5 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RadicalStalks.IsConst
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RadicalStalks.IsConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Cris GlobalTheory.DeRham GlobalTheory.ConjSeq GlobalTheory.UPel.HT GlobalTheory.UPel.HT.ES UpperTheory.Gal.Ord
@@ -82,10 +126,10 @@ private theorem proj_gs (ρ : C → Module.End k P) (hI : iSupIndep (Gs ρ)) (hT
       (le_iSup₂_of_le (f := fun (ψ : C → k) (_ : ψ ≠ χ) => Gs ρ ψ) ψ hψ le_rfl : Gs ρ ψ ≤ _) (hTm ψ v hv)
   have h₃ := hmap h₂
   have h₄ : T u₂ ∈ Gs ρ χ := by
-    have : T u₂ = y - T u₁ := by rw [← h, map_add]; abel
+    have : T u₂ = y - T u₁ := by rw [← h, map_add (f := _)]; abel
     rw [this]; exact sub_mem hy (hTm χ _ h₁)
   have h₅ : T u₂ = 0 := (Submodule.disjoint_def.1 (hI χ)) _ h₄ h₃
-  exact ⟨u₁, h₁, by rw [← h, map_add, h₅, add_zero]⟩
+  exact ⟨u₁, h₁, by rw [← h, map_add (f := _), h₅, add_zero]⟩
 
 private theorem semi_surj [IsAlgClosed k] {p : ℕ} (hp : 0 < p) [FiniteDimensional k P] (Φ : P →+ P)
     (semi : ∀ (l : k) x, Φ (l • x) = l ^ p • Φ x) (A B : Submodule k P) (hm : ∀ x ∈ A, Φ x ∈ B)
@@ -98,6 +142,7 @@ private theorem semi_surj [IsAlgClosed k] {p : ℕ} (hp : 0 < p) [FiniteDimensio
   let v : Fin (Module.finrank k A) → B := fun i => ⟨Φ (b i : P), hm _ (b i).2⟩
   have hsum : ∀ m : Fin (Module.finrank k A) → k,
       Φ (∑ i, m i • (b i : P)) = ∑ i, m i ^ p • Φ (b i : P) := fun m => by
+
     rw [map_sum]; exact Finset.sum_congr rfl fun i _ => semi _ _
   have hli : LinearIndependent k v := by
     rw [Fintype.linearIndependent_iff]
@@ -145,8 +190,8 @@ private theorem pow_ne_chi [CommRing C] {p : ℕ} [Fact p.Prime] (χ : C →+* k
     Nat.finite_of_card_ne_zero (by rw [hq]; exact pow_ne_zero _ (by omega))
   letI := Fintype.ofFinite (C ⧸ RingHom.ker χ)
   let Q : Polynomial k := Polynomial.X ^ p ^ j - Polynomial.X
-  have hQ : Q ≠ 0 := FiniteField.X_pow_card_sub_X_ne_zero k hpj
-  have hQd : Q.natDegree = p ^ j := FiniteField.X_pow_card_sub_X_natDegree_eq k hpj
+  have hQ : Q ≠ 0 := Polynomial.X_pow_sub_X_ne_zero hpj
+  have hQd : Q.natDegree = p ^ j := Polynomial.natDegree_X_pow_sub_X (R := k) hpj
   have hsub : Finset.univ.image χ.kerLift ⊆ Q.roots.toFinset := by
     intro x hx
     obtain ⟨y, -, rfl⟩ := Finset.mem_image.1 hx

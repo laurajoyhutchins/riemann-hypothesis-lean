@@ -1,6 +1,54 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL4.LowerSlopeInequalityFamily
-import Formalism.LocalToGlobal.Columns.BrzoPairAtZeroRight
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.AlternatingFormStandardHermitian
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColFin
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColInf
+public import Formalism.LocalToGlobal.GlobalTheory.HLatOps
+public import Formalism.SharpRestriction.GlobalSchurBounds.SlopeMaxOpenOfHookTwoLeV
+public import Formalism.LocalToGlobal.Columns.BrzoPairAtZeroRight
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColStd
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PZBasis
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.AlternatingFormStandardHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -17,8 +65,8 @@ section Orth
 
 variable {D : D7} {u : D.what₂.Word} (CV : ColVal D u)
 
-open Classical in
 
+open Classical in
 def prjC (c : (D.mem u).C.cls 0) : ((D.fm u).lat 0).V →ₗ[D.what₂.LL] ((D.fm u).lat 0).V :=
   ((coE CV (hTV0 D u)).symm : ((D.mem u).C.cls 0 → VV D.what₂.LL ((D.fm u).lam 0)) →ₗ[D.what₂.LL] ((D.fm u).lat 0).V) ∘ₗ
     (LinearMap.single D.what₂.LL (fun _ : (D.mem u).C.cls 0 => VV D.what₂.LL ((D.fm u).lam 0)) c ∘ₗ
@@ -50,6 +98,7 @@ private theorem coE_prjC_of_ne_eq_zero (c c' : (D.mem u).C.cls 0) (x : ((D.fm u)
 theorem prjC_sum (x : ((D.fm u).lat 0).V) : ∑ c, prjC CV c x = x := by
   apply (coE CV (hTV0 D u)).injective
   funext c'
+
   rw [map_sum, Finset.sum_apply, Finset.sum_eq_single c']
   · exact coE_prjC_self CV c' x
   · intro b _ hb
@@ -202,15 +251,6 @@ theorem slopeMaxGiven_of_class (D : D7) (h : SlopeMaxClass D) : SlopeMaxGiven D 
   intro u CV hs
   obtain ⟨c, hc⟩ := muMax_le_class CV
   exact hc.trans (h u CV c (hs c))
-
-theorem third_proposition_of_class (h : ∀ D, SlopeMaxClass D) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : ConclusionF6 Fm :=
-  family_third_bound_of_max_slope Fm ⟨0, fun x _ _ i => slopeMaxGiven_of_class _ (h _)⟩
-
-theorem Link6F_of_class (h : ∀ D, SlopeMaxClass D) : Link6F :=
-  fun _ Fm _ _ _ => third_proposition_of_class h Fm
-
-theorem packet_of_slope_max_class (h : ∀ D, SlopeMaxClass D) : KudlaFamilyOfMinkowskiTransference :=
-  packet_of_third_proposition (Link6F_of_class h)
 
 end Formalism.L2.GlobalTheoryTheory.TraceIntegrality
 

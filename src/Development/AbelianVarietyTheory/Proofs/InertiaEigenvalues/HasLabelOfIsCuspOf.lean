@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.DetCharacterMemPrincipalCongruenceFixedVectors
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqOfRootsBarEq
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PrincipalCongruenceFixedVectorsLeSmoothVectors
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharInOfIsCharLab
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PrincipalCongruenceFixedVectorsLeSmoothVectors
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CharInOfIsCharLab
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemRootsBarXSubC
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CentralIdempotentOfIrrCharacterOrthogonalCentralStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIrrCharactersAndFinsumCentralIdempotentsEqStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GroupAlgebraTraceIdempotentAndIrreducibleDegreeStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarishChandraSeriesCentralIdempotentLaws
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,6 +63,7 @@ theorem trace_alg {G : Type} [Group G] [Fintype G] (τ : FDRep ℂ G) (a : Monoi
     LinearMap.trace ℂ τ (Representation.asAlgebraHom τ.ρ a) = tr a τ.character := by
   have e : Representation.asAlgebraHom τ.ρ a = ∑ x, a.coeff x • τ.ρ x :=
     LinearMap.ext fun w => by rw [alg_apply, LinearMap.sum_apply]; rfl
+
   rw [e, map_sum, tr]
   exact Finset.sum_congr rfl fun x _ => map_smul _ _ _
 
@@ -67,29 +114,5 @@ theorem five_le (D : D7) (k : Fin 2) : 5 ≤ D.host.g k := by
         ((((show (4 : ℕ) ∣ 2 ^ (D.R.e + 2) from ⟨2 ^ D.R.e, by ring⟩).trans D.host.tower_dvd).mul_right _).mul_right _)), hc]
   have := (D.host.g_prime k).two_le
   omega
-
-theorem labParam_of (D : D7) (L : ∀ k, LabelDatum (D.host.g k)) (rc : Corr D) (hG : Green)
-    (h1 : ∀ k v, TameGen.SupportCompat (fun a => D.naut.inePol a (D.ntypes.tg k v))
-      (fun π : GLRep _ => rc k v π.1 π.2))
-    (h2 : ∀ k, TameGen.DepthZeroCuspidal (D.host.g k))
-    (h3 : ∀ k v, TameGen.TameParam (L k) (fun a => D.naut.inePol a (D.ntypes.tg k v))
-      (fun π : GLRep _ => rc k v π.1 π.2)) :
-    LabParam D L rc := fun k v n π hπ f hf =>
-  TameGen.ine_eq_of_has_green (OfLabel.ofLabel (L k) (five_le D k) hG) (L k) _ _ _ (h1 k v) (h2 k) hG (h3 k v)
-    (labelsCusp _ _ _) ⟨n, π⟩ hπ.1 hπ.2 f hf
-
-theorem serLoc_of (D : D7) (L : ∀ k, LabelDatum (D.host.g k)) (rc : Corr D) (hG : Green)
-    (hL : LabTie D L) (hU : IneUnr D) (hC : LocComp D rc) (hP : LabParam D L rc) : SerLoc D :=
-  have hS : ∀ k, (OfLabel.ofLabel (L k) (five_le D k) hG).IsOf (L k) := fun _ _ _ => rfl
-  GlobalTheory.SerLocal.serLoc D _ (hL.sysTie hS) hU (locType_of_ties hL hS hC hP)
-
-theorem serLoc_of_ties (D : D7) (L : ∀ k, LabelDatum (D.host.g k)) (rc : Corr D) (hG : Green)
-    (hL : LabTie D L) (hU : IneUnr D) (hC : LocComp D rc)
-    (h1 : ∀ k v, TameGen.SupportCompat (fun a => D.naut.inePol a (D.ntypes.tg k v))
-      (fun π : GLRep _ => rc k v π.1 π.2))
-    (h2 : ∀ k, TameGen.DepthZeroCuspidal (D.host.g k))
-    (h3 : ∀ k v, TameGen.TameParam (L k) (fun a => D.naut.inePol a (D.ntypes.tg k v))
-      (fun π : GLRep _ => rc k v π.1 π.2)) : SerLoc D :=
-  serLoc_of D L rc hG hL hU hC (labParam_of D L rc hG h1 h2 h3)
 
 end GlobalTheory.SerSys.Bridge

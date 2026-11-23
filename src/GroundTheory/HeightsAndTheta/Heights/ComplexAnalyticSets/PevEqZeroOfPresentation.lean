@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimitivePresentationCover
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimeGermPrimitivePresentation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -92,9 +140,6 @@ def analyticSubring {d : ℕ} (y₀ : Fin d → ℂ) : Subring ((Fin d → ℂ) 
 def evalAt {d : ℕ} (y₀ y : Fin d → ℂ) : analyticSubring y₀ →+* ℂ :=
   (Pi.evalRingHom (fun _ : Fin d → ℂ => ℂ) y).comp (analyticSubring y₀).subtype
 
-@[simp] theorem evalAt_apply {d : ℕ} (y₀ y : Fin d → ℂ) (f : analyticSubring y₀) :
-    evalAt y₀ y f = (f : (Fin d → ℂ) → ℂ) y := rfl
-
 def pev {d : ℕ} {y₀ : Fin d → ℂ} (y : Fin d → ℂ) (t : ℂ) : (analyticSubring y₀)[X] →+* ℂ :=
   (Polynomial.evalRingHom t).comp (Polynomial.mapRingHom (evalAt y₀ y))
 
@@ -104,7 +149,7 @@ variable {d : ℕ} {y₀ : Fin d → ℂ}
 
 @[simp] theorem pev_C (y : Fin d → ℂ) (t : ℂ) (f : analyticSubring y₀) :
     pev y t (C f) = (f : (Fin d → ℂ) → ℂ) y := by
-  simp [pev]
+  simp [pev, evalAt]
 
 @[simp] theorem pev_X (y : Fin d → ℂ) (t : ℂ) : pev (y₀ := y₀) y t X = t := by
   simp [pev]
@@ -145,6 +190,7 @@ theorem presPoly_degree {d N : ℕ} {y₀ : Fin d → ℂ} (c : Fin N → (Fin d
 theorem pev_presPoly {d N : ℕ} {y₀ : Fin d → ℂ} (c : Fin N → (Fin d → ℂ) → ℂ)
     (hc : ∀ j, AnalyticAt ℂ (c j) y₀) (y : Fin d → ℂ) (t : ℂ) :
     pev y t (presPoly c hc) = t ^ N + ∑ j, c j y * t ^ (j : ℕ) := by
+
   simp [presPoly, map_sum]
 
 theorem pev_eq_zero_of_presentation {σ : Type} [Fintype σ] {w : σ → ℂ} {k : ℕ} {p : Fin k → (σ → ℂ) → ℂ}
@@ -162,7 +208,7 @@ theorem pev_eq_zero_of_presentation {σ : Type} [Fintype σ] {w : σ → ℂ} {k
   set Q := H /ₘ F with hQdef
   have hdec : ∀ y t, pev y t H = pev y t R + pev y t F * pev y t Q := by
     intro y t
-    rw [← map_mul, ← map_add, hRdef, hQdef, modByMonic_add_div]
+    rw [← map_mul, ← map_add (f := _), hRdef, hQdef, modByMonic_add_div]
   have hRdeg : R.natDegree < N := by
     by_cases hR0 : R = 0
     · rw [hR0, natDegree_zero]; exact hN

@@ -1,11 +1,60 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import ReciprocityTheory.DualLattices.EigenLengthProductStatementHolds
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ComapFgOfValuationRing
-import Development.WeilBound.CoreStatements.HodgeTatePoints.RbProj
-import Development.WeilBound.CoreStatements.HodgeTatePoints.RbTriang
+module
+
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RbProj
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ComapFgOfValuationRing
+import Development.WeilBound.CoreStatements.HodgeTatePoints.RbFund
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RbTriang
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.EigenLengthProductStatementHolds
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR
 open scoped Matrix
@@ -17,8 +66,8 @@ section general
 variable {C : Type} [Field C] {R : Type} [CommRing R] [Algebra R C]
   {F : Type} [Field F] {N : Type} [AddCommGroup N] [Module F N]
 
-variable (C) in
 
+variable (C) in
 noncomputable def Phi (p f : ℕ) {n : ℕ} (b : Module.Basis (Fin n) F N) (σ : MulChar F R) :
     (Fin n × Fin f → R) →ₗ[R] (N → C) :=
   Fintype.linearCombination R
@@ -87,7 +136,7 @@ theorem Phi_mem_linFun [Fact p.Prime] [CharP F p] (hinj : Function.Injective (al
   rw [Phi_apply, Phi_apply, Phi_apply, ← map_sub, ← map_sub, mem_pInt_iff hinj,
     ← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
   refine Ideal.sum_mem _ fun j _ => ?_
-  rw [← mul_sub, ← mul_sub, map_add, Finsupp.add_apply]
+  rw [← mul_sub, ← mul_sub, map_add (f := _), Finsupp.add_apply]
   exact Ideal.mul_mem_left _ _ (FundGen.frob_pow_additive p F σ hσ _ _ _)
 
 theorem pFun_le_addFun : pFun (C := C) R p N ≤ addFun R p N := fun g hg x y =>
@@ -124,6 +173,7 @@ theorem proj_Phi [Fintype F] [DecidableEq F] [IsDomain R] (h0 : (Fintype.card F�
     (hinj : ∀ s t : Fin f, σ ^ p ^ (s : ℕ) = σ ^ p ^ (t : ℕ) → s = t)
     (l : Fin n × Fin f → R) (s : Fin f) :
     proj (σ ^ p ^ (s : ℕ)) (Phi C p f b σ l) = Phi C p f b σ (cut s l) := by
+
   conv_lhs => rw [← sum_cut l, map_sum, ← projL_apply, map_sum]
   rw [Finset.sum_eq_single s]
   · exact proj_eigen_self h0 _ _ (Phi_eigen _ s (cut_supp s l))
@@ -151,6 +201,7 @@ theorem exists_Phi (p : ℕ) [Fact p.Prime] {C : Type} [Field C] [IsAlgClosed C]
     (Ideal.sum_mem _ (t := Finset.univ) fun i _ => hβ i (b.repr x i))
   convert Submodule.add_mem _ h1 h2 using 1
   rw [Pi.sub_apply, Phi_apply, Fintype.sum_prod_type, Finset.sum_sub_distrib, map_sub]
+
   simp only [map_sum, hr]
   ring
 

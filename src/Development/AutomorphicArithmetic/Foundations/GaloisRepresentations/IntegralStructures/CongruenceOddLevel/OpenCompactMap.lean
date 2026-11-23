@@ -1,5 +1,54 @@
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LimWPhi
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLevelAwayAdapted
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LatticeDataThicknessBound
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOfNotApartOfNotSplit
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AutFormFixedByIntegralPointsAlmostAllPlacesStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DefiniteUnitaryIntegralBelowPlaceCompactOpenStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLevelAwayAdapted
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsOpenSubgroupCharacterKernel
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsVectorFixedByProductLocalLevelsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FixedOfFixedByLocalLevelsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsLevelAwayDefiniteUnitaryLevelFromLocalLevelsStatement
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsIntegralOpW
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,8 +93,8 @@ theorem exists_locLev {U : Submodule ℂ (UA E a → ℂ)} (hU : IsAutRepU U) (w
     · exact (GlobalTheory.T.definiteUnitaryIntegralBelowPlace_compact_open E a r).2
     · have e : (((intU a r ⊓ stab).subgroupOf (locU a r)) : Set (locU a r)) =
           (((intU a r).subgroupOf (locU a r)) : Set (locU a r)) ∩
-            (fun x : locU a r => (⟨x.1, ((GlobalTheory.Cong.LevelExt.mem_locU_iff x.1).1 x.2).1⟩ : finU E a)) ⁻¹'
-              {k : finU E a | RU E a k φ₀ = φ₀} := by
+            (fun x : locU a r => (⟨x.1, ((GlobalTheory.Cong.LevelExt.mem_locU_iff x.1).1 x.2).1⟩ : finU (E := E) (n := a))) ⁻¹'
+              {k : finU (E := E) (n := a) | RU E a k φ₀ = φ₀} := by
         ext x; exact Iff.rfl
       rw [e]
       exact (GlobalTheory.T.definiteUnitaryIntegralBelowPlace_compact_open E a r).2.inter (hφ₀aut.level.preimage (Continuous.subtype_mk continuous_subtype_val _))
@@ -57,7 +106,7 @@ theorem exists_locLev {U : Submodule ℂ (UA E a → ℂ)} (hU : IsAutRepU U) (w
   · filter_upwards [GlobalTheory.T.autForm_fixed_by_integralPoints_almostAllPlaces E a φ₀ hφ₀aut] with w hw
     exact hint w ⟨φ₀, hφ₀U, hφ₀0, hw⟩
 
-theorem map_intU {w : HeightOneSpectrum (𝓞 E)} (hw : IsSplitAt w) : (intU a w).map (cLoc w) = GlobalTheory.LFun.KGL w a := by
+theorem map_intU {w : HeightOneSpectrum (𝓞 E)} (hw : IsSplitAt w) : (intU a w).map (cLoc w) = GlobalTheory.LFun.KGL w (n := a) := by
   refine le_antisymm ?_ (KGL_le_map hw)
   rintro _ ⟨x, hx, rfl⟩
   exact (mem_intU.1 hx).2 w (not_apart_self w)
@@ -78,11 +127,11 @@ theorem exists_level {T : Finset (HeightOneSpectrum (𝓞 E))} {U : Submodule �
     {w₀ v' : HeightOneSpectrum (𝓞 E)} (hw₀ : IsSplitAt w₀) (hv' : IsSplitAt v') (hap : Apart v' w₀) :
     ∃ (K : Subgroup (UA E a)) (Kw : Levels E a) (Kv : Subgroup (GL (Fin a) (v'.adicCompletion E))),
       IsLevelAway w₀ K ∧ IsOpen (Kv : Set (GL (Fin a) (v'.adicCompletion E))) ∧
-      (∃ φ ∈ U, φ ≠ 0 ∧ ∀ x ∈ K ⊓ Kv.comap (cLoc v'), RU E a x φ = φ) ∧ Kw v' = GlobalTheory.LFun.KGL v' a ∧
+      (∃ φ ∈ U, φ ≠ 0 ∧ ∀ x ∈ K ⊓ Kv.comap (cLoc v'), RU E a x φ = φ) ∧ Kw v' = GlobalTheory.LFun.KGL v' (n := a) ∧
       (∀ w, IsSplitAt w → Apart w w₀ → IsOpen (Kw w : Set (GL (Fin a) (w.adicCompletion E))) ∧
         IsCompact (Kw w : Set (GL (Fin a) (w.adicCompletion E)))) ∧
-      (∀ w, IsSplitAt w → Apart w v' → (∃ B, SatU U w B) → Kw w = GlobalTheory.LFun.KGL w a) ∧
-      (∀ w, ¬ IsSplitAt w → w ∉ T → ∀ x ∈ locU a w, cLoc w x ∈ GlobalTheory.LFun.KGL w a → x ∈ K) ∧
+      (∀ w, IsSplitAt w → Apart w v' → (∃ B, SatU U w B) → Kw w = GlobalTheory.LFun.KGL w (n := a)) ∧
+      (∀ w, ¬ IsSplitAt w → w ∉ T → ∀ x ∈ locU a w, cLoc w x ∈ GlobalTheory.LFun.KGL w (n := a) → x ∈ K) ∧
       ∀ w, IsSplitAt w → Apart w w₀ → ∀ x ∈ locU a w, x ∈ K ↔ cLoc w x ∈ Kw w := by
   classical
   obtain ⟨H, hleI, hopen, hfib, hfix, hint, hae⟩ := exists_locLev hU.1 w₀

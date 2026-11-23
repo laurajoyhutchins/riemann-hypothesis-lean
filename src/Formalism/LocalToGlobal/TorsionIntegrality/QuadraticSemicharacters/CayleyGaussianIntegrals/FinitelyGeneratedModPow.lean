@@ -1,11 +1,63 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactAltForm
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactAltForm
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.UnitaryConstant
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.CayleyPhaseQuadratic
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.DifferentialRepresentation
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.GaussSumEighthPower
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.MatrixFormFourfoldBlockFirstBlockEmb
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.RelIndexEqAbsDetReal
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.StdDataCmProof
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.TripleEighthProof
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.UnitaryEighthOf
 import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.CayleyPhaseQuadratic
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.GaussSumEighthPower
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.UnitaryEighthOf
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.RelIndexEqAbsDetReal
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.TripleEighthProof
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.StdDataCmProof
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -98,8 +150,8 @@ theorem norm_mul_eq_one {l : ℕ} [Fact l.Prime] (ι : ℂ ≃+* ℂ_[l]) (κ c 
 
 end KR
 
-open KR in
 
+open KR in
 theorem KernelRatio_of (hC : UnitaryConstant) : KernelRatio := by
   intro L ω₀ n _ _ h Λ α β g₀ g₁ D0 D1 hfix
   have hE : UnitaryEighth := UnitaryEighth_of hC (UnitaryGauss_of gaussSumEighthPower) unitary_index
@@ -116,7 +168,7 @@ theorem KernelRatio_of (hC : UnitaryConstant) : KernelRatio := by
   have hδap : ∀ x, δ x = g₁ (g₀.symm x) := fun x => by rw [hδ]; rfl
   have hδsy : ∀ x, δ.symm x = g₀ (g₁.symm x) := fun x => by rw [hδ]; rfl
   have hδΛ : imgLat (δ : (Fin 4 × n → ℂ) →ₗ[ℂ] (Fin 4 × n → ℂ)) Λa = Λb := by
-    rw [hΛa, ← imgLat_trans, hΛb, hδ]
+    rw [hΛa, ← KR.imgLat_trans, hΛb, hδ]
     congr 2
     ext x
     simp
@@ -125,8 +177,8 @@ theorem KernelRatio_of (hC : UnitaryConstant) : KernelRatio := by
   have ia0 : relIdx Λa Λ₀ ≠ 0 := by rw [hΛ₀, hΛa]; exact D0.idx₂
   have i0b : relIdx Λ₀ Λb ≠ 0 := by rw [hΛ₀, hΛb]; exact D1.idx₁
   have ib0 : relIdx Λb Λ₀ ≠ 0 := by rw [hΛ₀, hΛb]; exact D1.idx₂
-  have iab : relIdx Λa Λb ≠ 0 := relIdx_trans ia0 i0b
-  have iba : relIdx Λb Λa ≠ 0 := relIdx_trans ib0 i0a
+  have iab : relIdx Λa Λb ≠ 0 := KR.relIdx_trans ia0 i0b
+  have iba : relIdx Λb Λa ≠ 0 := KR.relIdx_trans ib0 i0a
 
   have sd0 : IsSelfDual H Λ₀ := by rw [hHdef, hΛ₀]; exact stdSelfDual L _
   have sda : IsSelfDual H Λa := by rw [hHdef, hΛa]; exact D0.selfDual
@@ -136,8 +188,8 @@ theorem KernelRatio_of (hC : UnitaryConstant) : KernelRatio := by
     exact isSemiChar_congr _ _ _ _ D0.betaStd (stdSemiChar L ω₀ (Fin 4 × n) D0.per)
   have sca : IsSemiChar H Λa β := by rw [hHdef, hΛa]; exact D0.betaSemi
   have scb : IsSemiChar H Λb β := by rw [hHdef, hΛb]; exact D1.betaSemi
-  have hLat0 : IsLat Λ₀ := by rw [hΛ₀]; exact isLat_stdLat L _
-  have hLata : IsLat Λa := isLat_of_comm hLat0 ia0 i0a
+  have hLat0 : IsLat Λ₀ := by rw [hΛ₀]; exact KR.isLat_stdLat L _
+  have hLata : IsLat Λa := KR.isLat_of_comm hLat0 ia0 i0a
 
   have hiso : IsIsom H H (δ : (Fin 4 × n → ℂ) →ₗ[ℂ] (Fin 4 × n → ℂ)) := by
     intro x y
@@ -238,8 +290,8 @@ theorem quadraticSemicharacterIdentityEquivalent_of_kernelRatio (hK : KernelRati
   · exact le_of_eq (KR.norm_mul_eq_one ι κ c _ hc8 hκ)
   · rw [hθκ, hc, smul_smul]
 
-open KR in
 
+open KR in
 theorem quadraticSemicharacterIdentityReformulated_of_kernelRatio_of_localStandard_of_kappaExists (hK : KernelRatio) (hL : LocalStandard) (hκ : KappaExists) : quadraticSemicharacterIdentityReformulated := by
   intro a b c d ha hd lam hlam hOK n _ _ h Λ g₀ hg₀ hsd hst i1 i2
   obtain ⟨h4, hodd, h8, hprime⟩ := hOK
@@ -254,7 +306,7 @@ theorem quadraticSemicharacterIdentityReformulated_of_kernelRatio_of_localStanda
   obtain ⟨δ, hδiso, hδfix, j1, jl, j2⟩ := hL a b c d ha hd lam hlam ⟨h4, hodd, h8, hprime⟩ (Fin 4 × n) _ hsda hsta i1 i2
     l Fact.out
   have hκδ := hκl l ι δ hδiso j1 jl j2
-  rw [← imgLat_trans] at j1 jl j2
+  rw [← KR.imgLat_trans] at j1 jl j2
   have hg₁ : IsIsom (matH (blk4 h)) (stdH (cmL a b d ha hd lam hlam) (Fin 4 × n))
       ((g₀.trans δ : (Fin 4 × n → ℂ) ≃ₗ[ℂ] (Fin 4 × n → ℂ)) : (Fin 4 × n → ℂ) →ₗ[ℂ] (Fin 4 × n → ℂ)) := by
     intro x y
@@ -276,6 +328,6 @@ theorem quadraticSemicharacterIdentityReformulated_of_kernelRatio_of_localStanda
     quadraticSemicharacterIdentityEquivalent_of_kernelRatio hK l _ ι _ lg linv ph hlog hph hTr n h Λ _ _ g₀ (g₀.trans δ) D0 D1 hfix jl κ hκδ θ hθ hθκ
       t N hN hlN hNt O τ γ B' hB⟩
   obtain ⟨e, he8, he⟩ := hK _ _ n h Λ _ _ g₀ (g₀.trans δ) D0 D1 hfix
-  exact ⟨κ * e, norm_mul_eq_one ι κ e _ he8 hκδ, by rw [hθκ, he, smul_smul]⟩
+  exact ⟨κ * e, KR.norm_mul_eq_one ι κ e _ he8 hκδ, by rw [hθκ, he, smul_smul]⟩
 
 end Formalism.L2.Th1.H

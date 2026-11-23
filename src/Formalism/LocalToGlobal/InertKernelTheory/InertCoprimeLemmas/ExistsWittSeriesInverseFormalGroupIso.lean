@@ -1,21 +1,66 @@
-import Formalism.LocalToGlobal.InertKernelTheory.StatementBeCob
-import Formalism.LocalToGlobal.InertKernelTheory.DefsBeCob
-import Formalism.LocalToGlobal.InertKernelTheory.DefsBeW
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PadicNormTwoHundredSixteenEqOneOfFiveLe
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.SecondLevelOfNorm
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.FinalOfNRDense
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.SingleLetterBiextensionRelation
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KurComplete
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Joints
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.FinalFree
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsBeCob
+public import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PadicNormTwoHundredSixteenEqOneOfFiveLe
 import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.InVarAddInVarNeZero
 import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SigmaAlg
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.BeWInertOfSigma
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ExistsUnitFactorizationBounded
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Joints
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.BridgeTwoMore
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Formalism.SharpRestriction.AdmissibleParameterJoins.GandSq
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.FamilyLogGammaSmallHolds
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.CoeffSubstLgFOfDegreeOne
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.LogarithmEquivalence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.FormalExponentialAgree
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +98,7 @@ theorem cc_beLT {l : ℕ} [Fact l.Prime] {g : G1 l} (hOk : g.Ok) (hLT : LTIso g)
   have hadd : MvPowerSeries.constantCoeff (g.add (g.pt (MvPowerSeries.C (eLT hLT)⁻¹ * MvPowerSeries.X 0))
       (g.pt (MvPowerSeries.C (eLT hLT)⁻¹ * MvPowerSeries.X 1)) : MvPowerSeries (Fin 2) ℂ_[l]) = 0 := by
     apply Formalism.MainNotions.J.cc_pt g hex
-    rw [map_add, Formalism.MainNotions.J.cc_lg g hp0, Formalism.MainNotions.J.cc_lg g hp1, add_zero]
+    rw [map_add (f := _), Formalism.MainNotions.J.cc_lg g hp0, Formalism.MainNotions.J.cc_lg g hp1, add_zero]
   unfold Formalism.L2.G.Pend.beC G1.be G1.phAt
   rw [map_sub, map_sub, PowerSeries.constantCoeff_subst_eq_zero hadd _ hph,
     PowerSeries.constantCoeff_subst_eq_zero hp0 _ hph, PowerSeries.constantCoeff_subst_eq_zero hp1 _ hph]
@@ -227,7 +272,7 @@ theorem beta_coefficients : BeCoef := by
   have hs0 : MvPowerSeries.constantCoeff
       (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) (K0 l)) L0 +
         PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) (K0 l)) L0) = 0 := by
-    rw [map_add, PowerSeries.constantCoeff_subst_eq_zero (hX 0) _ hL00,
+    rw [map_add (f := _), PowerSeries.constantCoeff_subst_eq_zero (hX 0) _ hL00,
       PowerSeries.constantCoeff_subst_eq_zero (hX 1) _ hL00, add_zero]
   have hs1 : MvPowerSeries.constantCoeff (PowerSeries.subst
       (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) (K0 l)) L0 +
@@ -473,7 +518,7 @@ theorem ips {f : PowerSeries K} (hf : Integral (f : MvPowerSeries Unit K)) (k : 
 theorem ips_add {f g : PowerSeries K} (hf : Integral (f : MvPowerSeries Unit K))
     (hg : Integral (g : MvPowerSeries Unit K)) : Integral ((f + g : PowerSeries K) : MvPowerSeries Unit K) := by
   apply integral_ps; intro k
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (ips hf k) (ips hg k))
 
 theorem ips_sub {f g : PowerSeries K} (hf : Integral (f : MvPowerSeries Unit K))
@@ -525,7 +570,7 @@ theorem short_exact_isomorphism : ShortIso := by
     rw [hnum, PowerSeries.subst_add hlS, PowerSeries.subst_mul hlS, PowerSeries.subst_pow hlS,
       PowerSeries.subst_X hlS, ← PowerSeries.coe_substAlgHom hlS, map_one]
   have hsd : PowerSeries.subst lW (Formalism.L2.Th1.CM.wpDen (Formalism.L2.Th1.A.g₂ W) (Formalism.L2.Th1.A.g₃ W)) =
-      1 - PowerSeries.C (1 / 2 : K) * lW ^ 3 * PowerSeries.subst lW (PowerSeries.derivative K P) := by
+      1 - PowerSeries.C (1 / 2 : K) * lW ^ 3 * PowerSeries.subst lW (PowerSeries.derivative (R := K) P) := by
     rw [hden, PowerSeries.subst_sub hlS, PowerSeries.subst_mul hlS, PowerSeries.subst_mul hlS,
       PowerSeries.subst_pow hlS, PowerSeries.subst_X hlS, PowerSeries.subst_C, ← PowerSeries.coe_substAlgHom hlS,
       map_one]
@@ -541,7 +586,7 @@ theorem short_exact_isomorphism : ShortIso := by
     have h3ne : lW ^ 3 ≠ 0 := pow_ne_zero 3 hl_ne
     apply mul_left_cancel₀ h3ne
     have e2 : (2 : K) ≠ 0 := two_ne_zero
-    have hB' : PowerSeries.X ^ 3 * (1 - PowerSeries.C (1 / 2 : K) * lW ^ 3 * PowerSeries.subst lW (PowerSeries.derivative K P)) =
+    have hB' : PowerSeries.X ^ 3 * (1 - PowerSeries.C (1 / 2 : K) * lW ^ 3 * PowerSeries.subst lW (PowerSeries.derivative (R := K) P)) =
         lW ^ 3 * D := by
       have hh : (PowerSeries.C (1 / 2 : K) : PowerSeries K) * (2 : PowerSeries K) = 1 := by
         rw [show (2 : PowerSeries K) = PowerSeries.C (2 : K) from (map_ofNat _ 2).symm, ← map_mul]; norm_num

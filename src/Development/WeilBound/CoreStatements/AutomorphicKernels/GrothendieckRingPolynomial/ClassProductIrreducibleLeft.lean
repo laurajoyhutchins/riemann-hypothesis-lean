@@ -1,14 +1,61 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.ProdList
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductHasFiniteLengthGL
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SegmentRepSplitIntertwiner
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.GrothendieckRingPolynomial.ProdList
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InductionFiniteLength
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIrreducibleSubquotientTwoBlockConstituents
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductHasFiniteLengthGL
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SegmentRepSplitIntertwiner
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.PUnit
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.JHMult
 
-set_option synthInstance.maxHeartbeats 400000
+
 set_option linter.unusedSectionVars false
 
 namespace PositivityTheory.Groth
@@ -57,7 +104,7 @@ theorem bil_single (x y : ι) : bil f (Finsupp.single x 1) (Finsupp.single y 1) 
 end Bil
 
 theorem mulR_eq_bil (a b : GrothGL k) :
-    mulR a b = bil (fun x y : IrrGL k => cl0 (prod₂ (IrrGL.rep x) (IrrGL.rep y))) a b := rfl
+    mulR a b = bil (fun x y : IrrGL (k := k) => cl0 (prod₂ (IrrGL.rep x) (IrrGL.rep y))) a b := rfl
 
 theorem mulR_zero_left (b : GrothGL k) : mulR 0 b = 0 :=
   (mulR_eq_bil _ _).trans (bil_zero_left _ b)
@@ -73,7 +120,7 @@ theorem mulR_add_right (a b b' : GrothGL k) : mulR a (b + b') = mulR a b + mulR 
   (mulR_eq_bil _ _).trans ((bil_add_right _ a b b').trans
     (congrArg₂ (· + ·) (mulR_eq_bil a b).symm (mulR_eq_bil a b').symm))
 
-theorem mulR_sg_sg (x y : IrrGL k) : mulR (sg x) (sg y) = cl0 (prod₂ (IrrGL.rep x) (IrrGL.rep y)) :=
+theorem mulR_sg_sg (x y : IrrGL (k := k)) : mulR (sg x) (sg y) = cl0 (prod₂ (IrrGL.rep x) (IrrGL.rep y)) :=
   (mulR_eq_bil _ _).trans (bil_single _ x y)
 
 section Cl0
@@ -97,7 +144,7 @@ theorem class_congr_equiv {π : Representation ℂ (GL (Fin N) k) V} {τ : Repre
   · rw [class_eq_finite_length_class π h, class_eq_finite_length_class τ (h.of_equiv φ), clsGL_congr φ]
   · have h' : ¬ HasFiniteLength τ := fun h' => h (h'.of_equiv φ.symm)
     unfold cl0
-    rw [dif_neg h, dif_neg h']
+    rw [dite_eq_right h, dite_eq_right h']
 
 theorem class_subsingleton [Subsingleton V] (π : Representation ℂ (GL (Fin N) k) V) : cl0 π = 0 := by
   rw [class_eq_finite_length_class π (GlobalTheory.ProdLength.hasFiniteLength_of_subsingleton π), clsGL]
@@ -327,8 +374,8 @@ theorem class_parabolic_product {V W : Type} [AddCommGroup V] [Module ℂ V] [Ad
 
 end Main
 
-variable (k) in
 
+variable (k) in
 theorem mulCls : MulCls k := by
   intro r t V W _ _ _ _ π₁ π₂ h₁ h₂ s₁ s₂
   exact ⟨GlobalTheory.ProdLength.prod₂_hasFiniteLength GlobalTheory.CompanionTheory.Published.bernsteinZelevinskyFiniteness k r t V W π₁ π₂

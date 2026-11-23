@@ -1,11 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpecializationMapCompUniversalSection
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.YPrime
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpecializationMapCompUniversalSection
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IsCplAtSelf
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCmPatch
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplFlat
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplLift
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplFlat
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplModfree
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCmPatch
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplMap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CaCplModfree
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.YPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix Filter UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Core
 open scoped TensorProduct
@@ -38,7 +84,7 @@ private theorem pmDim_quot {A B σ M : Type} [CommRing A] [CommRing B] [Algebra 
         rw [TensorProduct.tmul_add]
         exact Submodule.add_mem _ hu hv
     | add x z hx hz =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem _ hx hz
   · rw [Submodule.smul_le]
     intro r hr x hx
@@ -117,7 +163,7 @@ theorem UpperTheory.V.Pa.Core.pmDim :
   letI : Algebra La B := ψ.toAlgebra
   haveI : IsLocalHom (algebraMap La B) := by
     show IsLocalHom ψ
-    refine ((IsLocalRing.local_hom_TFAE ψ).out 0 3).mpr ?_
+    refine ((IsLocalRing.local_hom_tfae ψ).out 1 4).mpr ?_
     have hm : maximalIdeal La = (q.comap c).map (algebraMap Λ La) := by
       simpa using (UpperTheory.V.AlgebraTools.IsCplAt.map_pow_eq Λ (q.comap c) La hLa 1).symm
     rw [hm, Ideal.map_le_iff_le_comap, Ideal.comap_comap, hψ, hφ]

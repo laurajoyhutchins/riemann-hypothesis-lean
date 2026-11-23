@@ -1,8 +1,49 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.PairsStable
-import Development.WeilBound.ThetaLifts.LatticeBasics.PairsD
-import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
-import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+public import Development.WeilBound.ThetaLifts.LatticeBasics.PairsD
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,17 +59,17 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
   {Y : Spc F E n} {W : Spc F E d} {B : Base F E} {M : Model σ Y W} {o : Rep σ Y W} {R : RealMaps F a a'} {Rf : FinMaps F a a'}
   {p : SInf F (Fin n × Fin d) →ₗ[ℂ] R.Pi} {q : ∀ v, ((Fin n × Fin d → Fv F v) → ℂ) →ₗ[ℂ] Rf.Pi v} {T T₁ : Finset (Pl F)}
 
-variable (R Rf T) in
 
+variable (R Rf T) in
 abbrev PiT : Type := R.Pi ⊗[ℂ] PiTensorProduct ℂ fun v : T => Rf.Pi v
 
-variable (B M T) in
 
+variable (B M T) in
 def Dat (f : SInf F (Fin n × Fin d)) (φ : ∀ v : Pl F, (Fin n × Fin d → Fv F v) → ℂ) : Prop :=
   f ∈ M.Pol B.ψ B.emb ∧ (∀ v, φ v ∈ SB _) ∧ ∀ v ∉ T, φ v = M.vac v
 
-variable (B M p q T) in
 
+variable (B M p q T) in
 def Cl : Submodule ℂ (Fn F n d × PiT R Rf T) :=
   Submodule.span ℂ {z | ∃ f φ, Dat B M T f φ ∧ z = (pure f φ, p f ⊗ₜ[ℂ] PiTensorProduct.tprod ℂ fun v : T => q v (φ v))}
 
@@ -76,8 +117,8 @@ theorem cl_ext (hT : T ⊆ T₁) (e : (PiTensorProduct ℂ fun v : T => Rf.Pi v)
     rw [LinearMap.lTensor_tmul, he (fun v => q v (φ v)) fun v hv => by rw [hd.2.2 v hv, hs v hv]]
     exact gen_mem ⟨hd.1, hd.2.1, fun v hv => hd.2.2 v fun h => hv (hT h)⟩) hz
 
-variable (R) in
 
+variable (R) in
 def opAt (v : T) (Op : Module.End ℂ (Rf.Pi v)) : PiT R Rf T →ₗ[ℂ] PiT R Rf T :=
   LinearMap.lTensor R.Pi (PiTensorProduct.map (Function.update (fun j : T => (LinearMap.id : Rf.Pi j →ₗ[ℂ] Rf.Pi j)) v Op))
 
@@ -111,7 +152,7 @@ theorem finPart_add {κ : Type} (φ : ∀ v : Pl F, (κ → Fv F v) → ℂ) (x 
     have h3 : evFin F v (z i) = 0 := by
       show Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV F v (z i).2 = 0
       rw [← one_mul (z i).2, h, map_zero]
-    rw [Pi.add_apply, map_add, h3, add_zero]
+    rw [Pi.add_apply, map_add (f := _), h3, add_zero]
   simp only [finPart, e]
 
 theorem Dat.rest (hM : M.IsGood B.ψ) {f φ} (h : Dat B M T f φ) : Rest (evI F) f (finPart φ) := ⟨finPart_add φ, h.sch hM⟩

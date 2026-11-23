@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.LocalFields.Interface
-import GroundTheory.LocalFields.Uniqueness
+module
+
+public import Mathlib.FieldTheory.IntermediateField.Basic
+public import Mathlib.NumberTheory.LocalField.Basic
+public import GroundTheory.LocalFields.Uniqueness
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,23 +63,27 @@ variable {K L : Type*} [Field K] [Field L] [Algebra K L] [ValuativeRel L]
 instance intermediateField_valuativeRel : ValuativeRel E :=
   ValuativeRel.ofValuation ((valuation L).comap (algebraMap E L))
 
-variable {E} in
 
+variable {E} in
 @[simp]
 theorem IntermediateField.coe_vle_coe_iff (x y : E) : (x : L) ≤ᵥ (y : L) ↔ x ≤ᵥ y :=
   by exact (valuation L).vle_iff_le
 
 instance intermediateField_valuativeExtension_right : ValuativeExtension E L :=
-  ⟨IntermediateField.coe_vle_coe_iff⟩
+  ⟨by
+    intro a b
+    exact IntermediateField.coe_vle_coe_iff (E := E) a b⟩
 
 instance intermediateField_valuativeExtension_left [ValuativeRel K] [ValuativeExtension K L] :
     ValuativeExtension K E :=
-  ⟨fun a b ↦ by
-    rw [← IntermediateField.coe_vle_coe_iff, IntermediateField.coe_algebraMap_apply,
+  ⟨by
+    intro a b
+    rw [← IntermediateField.coe_vle_coe_iff (E := E) (algebraMap K E a)
+      (algebraMap K E b), IntermediateField.coe_algebraMap_apply,
       IntermediateField.coe_algebraMap_apply, ValuativeExtension.vle_iff_vle]⟩
 
-variable {E} in
 
+variable {E} in
 theorem IntermediateField.valuation_coe (x : E) :
     valuation L (x : L) = ValuativeExtension.mapValueGroupWithZero E L (valuation E x) :=
   (ValuativeExtension.mapValueGroupWithZero_valuation (A := E) (B := L) x).symm
@@ -103,17 +154,6 @@ instance intermediateField_isNonarchimedeanLocalField : IsNonarchimedeanLocalFie
     rw [hval, h, map_one] at hb
     exact hb.false
   exact { hvt, hlc, hnt with }
-
-example : IsNonarchimedeanLocalField E := inferInstance
-example : ValuativeExtension E L := inferInstance
-example : Algebra 𝒪[E] 𝒪[L] := inferInstance
-example : Algebra 𝓀[E] 𝓀[L] := inferInstance
-example (σ : L ≃ₐ[E] L) (x : L) : valuation L (σ x) = valuation L x :=
-  valuation_algEquiv_apply E L σ x
-example (F : IntermediateField K L) (h : E ≤ F) :
-    letI := (IntermediateField.inclusion h).toRingHom.toAlgebra
-    ValuativeExtension E F :=
-  valuativeExtension_algHom (K := K) (IntermediateField.inclusion h)
 
 end Topological
 

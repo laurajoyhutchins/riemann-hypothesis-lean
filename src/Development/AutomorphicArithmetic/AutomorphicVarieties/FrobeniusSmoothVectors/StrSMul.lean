@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.StrYMap
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.StrYMap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Integral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,36 +74,40 @@ structure Low (y a : F.G0 → Q) : Prop where
 
 variable {F Q} {Q' : Type} [CommRing Q'] [Algebra k Q'] {y a : F.G0 → Q}
 
-theorem Low.map (h : F.Low Q y a) (φ : Q →ₐ[k] Q') : F.Low Q' (fun g => φ (y g)) (fun g => φ (a g)) where
-  lcy := h.lcy.comp φ
-  lca := h.lca.comp φ
-  muly g g' := by simp only [h.muly, map_add, map_smul]
-  mula g g' := by simp only [h.mula, map_add, map_smul, map_mul]
-  pol g := by simp only [h.pol]
-  nor := congrArg φ h.nor
-  loc v := by
-    obtain ⟨α, β, γ, H⟩ := h.loc v
-    refine ⟨φ α, φ β, φ γ, fun s => ?_⟩
-    obtain ⟨h1, h2, h3⟩ := H s
-    exact ⟨by rw [h1, map_smul], by rw [h2, map_smul], by rw [h3, map_sub, map_smul, map_smul, map_mul]⟩
+theorem Low.map (h : F.Low Q y a) (φ : Q →ₐ[k] Q') : F.Low Q' (fun g => φ (y g)) (fun g => φ (a g)) := by
+  refine
+    { lcy := h.lcy.comp φ
+      lca := h.lca.comp φ
+      muly g g' := by simp only [h.muly, map_add (f := _), map_smul]
+      mula g g' := by simp only [h.mula, map_add (f := _), map_smul, map_mul]
+      pol g := by simp only [h.pol]
+      nor := congrArg φ h.nor
+      loc := ?_ }
+  intro v
+  obtain ⟨α, β, γ, H⟩ := h.loc v
+  refine ⟨φ α, φ β, φ γ, fun s => ?_⟩
+  obtain ⟨h1, h2, h3⟩ := H s
+  exact ⟨by rw [h1, map_smul], by rw [h2, map_smul], by rw [h3, map_sub, map_smul, map_smul, map_mul]⟩
 
 theorem Low.comb (h : F.Low Q y a) (t : Q) {b : F.G0 → Q} (hb : b ∈ F.strS Q) :
-    F.Low Q (fun g => t * y g) (fun g => t ^ 2 * a g + b g) where
-  lcy := h.lcy.comp (t * ·)
-  lca := (h.lca.comp (t ^ 2 * ·)).add hb.1
-  muly g g' := by simp only [h.muly, Algebra.smul_def]; ring
-  mula g g' := by simp only [h.mula, hb.2.1 g g', Algebra.smul_def]; ring
-  pol g := by simp only [h.pol, hb.2.2.1 g]
-  nor := congrArg (t * ·) h.nor
-  loc v := by
-    obtain ⟨α, β, γ, H⟩ := h.loc v
-    obtain ⟨δ, H'⟩ := hb.2.2.2 v
-    refine ⟨t * α, t * β, t ^ 2 * γ + δ, fun s => ?_⟩
-    obtain ⟨h1, h2, h3⟩ := H s
-    refine ⟨?_, ?_, ?_⟩
-    · rw [h1]; simp only [Algebra.smul_def]; ring
-    · rw [h2]; simp only [Algebra.smul_def]; ring
-    · rw [h3, H' s]; simp only [Algebra.smul_def]; ring
+    F.Low Q (fun g => t * y g) (fun g => t ^ 2 * a g + b g) := by
+  refine
+    { lcy := h.lcy.comp (t * ·)
+      lca := (h.lca.comp (t ^ 2 * ·)).add hb.1
+      muly g g' := by simp only [h.muly, Algebra.smul_def]; ring
+      mula g g' := by simp only [h.mula, hb.2.1 g g', Algebra.smul_def]; ring
+      pol g := by simp only [h.pol, hb.2.2.1 g]
+      nor := congrArg (t * ·) h.nor
+      loc := ?_ }
+  intro v
+  obtain ⟨α, β, γ, H⟩ := h.loc v
+  obtain ⟨δ, H'⟩ := hb.2.2.2 v
+  refine ⟨t * α, t * β, t ^ 2 * γ + δ, fun s => ?_⟩
+  obtain ⟨h1, h2, h3⟩ := H s
+  refine ⟨?_, ?_, ?_⟩
+  · rw [h1]; simp only [Algebra.smul_def]; ring
+  · rw [h2]; simp only [Algebra.smul_def]; ring
+  · rw [h3, H' s]; simp only [Algebra.smul_def]; ring
 
 theorem Low.zero : F.Low Q 0 0 :=
   ⟨IsLocallyConstant.const 0, IsLocallyConstant.const 0, by simp, by simp, fun _ => rfl, rfl,
@@ -82,12 +136,13 @@ structure FPt (S : Space O F n) (ξ : S.A →+* Q) : Prop where
   alg : ∀ c : O, ξ (algebraMap O S.A c) = algebraMap (ResidueField O) Q (residue O c)
 
 theorem FPt.comp {S : Space O F n} {ξ : S.A →+* Q} (h : S.FPt ξ) (φ : Q →ₐ[ResidueField O] Q') :
-    S.FPt ((φ : Q →+* Q').comp ξ) where
-  x0 x hx := by
+    S.FPt ((φ : Q →+* Q').comp ξ) := by
+  refine ⟨?_, ?_⟩
+  · intro x hx
     have : ξ x = 0 := h.x0 hx
     show φ (ξ x) = 0
     rw [this, map_zero]
-  alg c := by
+  · intro c
     show φ (ξ _) = _
     rw [h.alg, AlgHom.commutes]
 
@@ -98,14 +153,12 @@ structure At (S : Space O F 3) (ξ : S.A →+* Q) (y a : F.G0 → Q) : Prop wher
   ha : ∀ g, ξ (S.u.r g 2 0) = a g
 
 theorem At.comp {S : Space O F 3} {ξ : S.A →+* Q} {y a : F.G0 → Q} (h : S.At ξ y a) (φ : Q →ₐ[ResidueField O] Q') :
-    S.At ((φ : Q →+* Q').comp ξ) (fun g => φ (y g)) (fun g => φ (a g)) where
-  fpt := h.fpt.comp φ
-  low x hx := by
-    have : ξ x = 0 := h.low hx
-    show φ (ξ x) = 0
-    rw [this, map_zero]
-  hy g := congrArg φ (h.hy g)
-  ha g := congrArg φ (h.ha g)
+    S.At ((φ : Q →+* Q').comp ξ) (fun g => φ (y g)) (fun g => φ (a g)) := by
+  refine ⟨h.fpt.comp φ, ?_, fun g => congrArg φ (h.hy g), fun g => congrArg φ (h.ha g)⟩
+  intro x hx
+  have : ξ x = 0 := h.low hx
+  show φ (ξ x) = 0
+  rw [this, map_zero]
 
 end Space
 

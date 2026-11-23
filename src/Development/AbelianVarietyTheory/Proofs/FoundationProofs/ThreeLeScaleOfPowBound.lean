@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AutomorphicArithmetic.CMTraceForms.CmDatumSmallPrimesLogBoundsOfParams
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ONPage
-import Development.AbelianVarietyTheory.Definitions.Jets.NotRunTiesZeroSteps
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DegreeWeightKappaLePageBound
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RunWeightsSum
+module
+
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ONPage
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmQuadraticFormEqAlternatingForm
+public import Development.AbelianVarietyTheory.Definitions.Jets.NotRunTiesZeroSteps
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DegreeWeightKappaLePageBound
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RunWeightsSum
+public import Development.AutomorphicArithmetic.CMTraceForms.CmDatumSmallPrimesLogBoundsOfParams
+public import Formalism.LocalRingCardinality.HostCls
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,9 +65,6 @@ def SizeRows (Tp : ParamsT D L Pm) (hK : DV.KapDef D) : Prop :=
     L.sc.x ^ (-L.sc.eps) ≤ L.de2 ∧ L.de2 ≤ 1 / (4 * (D.host.Lw : ℝ)) ∧ (∀ i, (D.host.g i : ℝ) ≤ L.sc.b ^ 9) ∧
     Real.log ((D.host.q * D.host.d : ℕ) : ℝ) ≤ D.R.m ∧ (D.R.k : ℝ) * L.sc.b' ≤ L.sc.b ∧ (D.R.N D.R.m : ℝ) ≤ L.sc.X' ∧
     44 ≤ D.R.m ∧ 0 ≤ (D.R.n : ℝ)
-
-def DomPlus (Tp : ParamsT D L Pm) (hK : DV.KapDef D) : Prop :=
-  (∀ j, InR D j → WeightAlgebra.DomAt D L j Tp.nWn Tp.CP) ∧ SizeRows Tp hK
 
 theorem le_topDeg (Tp : ParamsT D L Pm) (hK : DV.KapDef D) {j : ℕ} (hj : InR D j) : WeightAlgebra.DF (lR Tp hK j) ≤ topDeg Tp hK :=
   Finset.le_sup (f := fun j => WeightAlgebra.DF (lR Tp hK j)) (Finset.mem_Icc.2 hj)
@@ -105,8 +143,8 @@ variable {T : Core D} {EX : ErrX D} {Tp : ParamsT D L Pm} {hK : DV.KapDef D} [St
   [Algebra.IsIntegral (𝓞 T.Q.c.F) (𝓞 K)] [Algebra (𝓞 D.host.E) K]
   {Bs : DefBase K} {Df : DefSide Bs} {S : IndefData Df} {P : Type} [Group P] [Finite P] {c : OnConst}
 
-variable (Tp hK) in
 
+variable (Tp hK) in
 def NumTie (O : OnObj S P c) : Prop :=
   O.rr = (D.R.r : ℝ) ∧ O.T2 = D.host.T2.card ∧ O.Nc = budgetNc D.R L.sc.x L.sc.eps D.host.T2.card ∧
     O.DF = (topDeg Tp hK : ℝ) ∧ O.de2 = L.de2 ∧ O.pde = D.host.pde

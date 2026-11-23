@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierCut
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
+public import Formalism.HermitianCurvature.StatementMA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,31 +105,5 @@ def Parts.FromX (P : Parts X u u') : Prop := BuiltFromX X P.S u u' P.T P.f P.τ 
 
 def Parts.Base (P : Parts X u u') (i0 i0' : ∀ _ : InfinitePlace X.B.I.F, Fin D.R.k) : Prop :=
   BaseFromX X P.S u u' i0 i0' P.τ P.Q P.Qi P.ν' P.m₀
-
-def Parts.Top (P : Parts X u u') (sc : ℝ) (i0 i0' : ∀ _ : InfinitePlace X.B.I.F, Fin D.R.k)
-    (FdN FdN' : Set X.B.I.Ginf) (νq : X.B.I.Ginf → Measure X.B.I.Ginf) : Prop :=
-  TopTie X P.S u u' sc i0 i0' FdN FdN' νq P.τ
-
-def Parts.Joint (P : Parts X u u') (sc : ℝ) (i0 i0' : ∀ _ : InfinitePlace X.B.I.F, Fin D.R.k)
-    (νq : X.B.I.Ginf → Measure X.B.I.Ginf) : Prop :=
-  VJoint X P.S u u' sc i0 i0' νq P.T P.f P.ν' P.m₀ P.τ P.eP P.eQ
-
-def Parts.Inputs (P : Parts X u u') (C₄ C₆ sc : ℝ) (i0 i0' : ∀ _ : InfinitePlace X.B.I.F, Fin D.R.k)
-    (FdN FdN' : Set X.B.I.Ginf) (νq : X.B.I.Ginf → Measure X.B.I.Ginf) : Prop :=
-  Formalism.FourierDecayAlt.JCT.BuiltInputs C₄ C₆ P.S P.T P.f P.χ P.ν' P.m₀ P.top P.L P.j P.lam P.c P.Cm P.σ P.Lw P.Ll P.Ll'
-    (VtPt X u u' sc i0 i0' FdN FdN' νq)
-
-def Parts.Energy (P : Parts X u u') (jn : ℝ) : Prop := (∏ v, Formalism.FourierDecayAlt.JCT.jvModel P.S P.j P.Cm v) = jn
-
-theorem carrierData_of_parts (P : Parts X u u') (sc : ℝ) (i0 i0' : ∀ _ : InfinitePlace X.B.I.F, Fin D.R.k)
-    (FdN FdN' : Set X.B.I.Ginf) (νq : X.B.I.Ginf → Measure X.B.I.Ginf) (C₄ jn CA : ℝ)
-    (G0 : Formalism.FourierDecayAlt.Sz.Glob (InfinitePlace D.host.E)) (de de' : ℕ → ℝ) (l : ℕ) (C₆ : ℝ)
-    (h1 : P.Pins CA G0 de de' l) (h2 : P.Built) (h3 : P.FromX) (h4 : P.Base i0 i0')
-    (h5 : P.Top sc i0 i0' FdN FdN' νq) (h6 : P.Joint sc i0 i0' νq) (h7 : P.Inputs C₄ C₆ sc i0 i0' FdN FdN' νq)
-    (h8 : P.Energy jn) :
-    CarrierData X u u' sc i0 i0' FdN FdN' νq C₄ jn CA G0 de de' l C₆ :=
-  ⟨P.Wp, P.Wq, P.pN, P.pI, P.qN, P.qI, P.pF, P.qF, P.S, P.T, P.f, P.χ, P.ν', P.m₀, P.top, P.A₀, P.τ, P.Q, P.Qi,
-    P.eP, P.eQ, P.L, P.j, P.lam, P.c, P.Cm, P.σ, P.Lw, P.Ll, P.Ll', h1.1, h1.2.1, h1.2.2.1, h1.2.2.2.1,
-    h1.2.2.2.2.1, h1.2.2.2.2.2, h2, h3, h4, h5, h6, h7, h8⟩
 
 end Formalism.L2.SG.Pf.Carrier

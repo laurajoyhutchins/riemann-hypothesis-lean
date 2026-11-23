@@ -1,32 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
-import Development.AutomorphicSpectrum.Statements.TowerExistence.GoodTowerExistsX
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.VolumeInputs
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.OverLaUnique
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.PrimeLogSum
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.PrimeLogSum
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Filter Topology
 open Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Rec GlobalTheory.CompanionTheory.Ar.Plug
 attribute [-instance] GlobalTheory.CompHt.fintypePsi
 
 namespace GlobalTheory.CompanionTheory.Ar.Plug
-
-theorem log_div_pred_le_log_two {p : ℕ} (hp : p.Prime) : Real.log p / ((p : ℝ) - 1) ≤ Real.log 2 := by
-  have h2 : 2 ≤ p := hp.two_le
-  have h2' : (2 : ℝ) ≤ p := by exact_mod_cast h2
-  have hpos : (0 : ℝ) < (p : ℝ) - 1 := by linarith
-  rw [div_le_iff₀ hpos]
-  have hlt : p - 1 < 2 ^ (p - 1) := Nat.lt_two_pow_self
-  have hle : p ≤ 2 ^ (p - 1) := by omega
-  have hle' : (p : ℝ) ≤ (2 : ℝ) ^ (p - 1) := by exact_mod_cast hle
-  have h := Real.log_le_log (by linarith) hle'
-  rw [Real.log_pow] at h
-  have hc : ((p - 1 : ℕ) : ℝ) = (p : ℝ) - 1 := by
-    rw [Nat.cast_sub (by omega)]; simp
-  rw [hc] at h
-  linarith
 
 theorem sum_padicVal_log {n : ℕ} (hn : n ≠ 0) {S : Finset ℕ} (hS : ∀ p ∈ S, p.Prime) (hsub : n.primeFactors ⊆ S) :
     ∑ p ∈ S, (padicValNat p n : ℝ) * Real.log p = Real.log n := by
@@ -35,12 +54,13 @@ theorem sum_padicVal_log {n : ℕ} (hn : n ≠ 0) {S : Finset ℕ} (hS : ∀ p �
     refine Finset.sum_subset hsub fun p hpS hp => ?_
     have hpp := hS p hpS
     have hnd : ¬ p ∣ n := fun hd => hp (Nat.mem_primeFactors.2 ⟨hpp, hd, hn⟩)
-    simp [padicValNat.eq_zero_of_not_dvd hnd]
+    simp [Nat.padicValNat_def, multiplicity_eq_zero_of_not_dvd hnd]
   rw [← h1]
   conv_rhs => rw [← Nat.prod_factorization_pow_eq_self hn]
   rw [Finsupp.prod, Nat.support_factorization, Nat.cast_prod, Real.log_prod]
   · refine Finset.sum_congr rfl fun p hp => ?_
-    rw [Nat.cast_pow, Real.log_pow, Nat.factorization_def n (Nat.prime_of_mem_primeFactors hp)]
+    rw [Nat.cast_pow, Real.log_pow, Nat.factorization_def n (Nat.prime_of_mem_primeFactors hp),
+      Nat.padicValNat_def]
   · intro p hp
     have := (Nat.prime_of_mem_primeFactors hp).pos
     positivity

@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +71,6 @@ instance : TopologicalSpace P := inferInstanceAs (TopologicalSpace {z : ℂ // z
 instance : MeasurableSpace P := inferInstanceAs (MeasurableSpace {z : ℂ // z.im ≠ 0})
 instance : BorelSpace P := inferInstanceAs (BorelSpace {z : ℂ // z.im ≠ 0})
 instance : SecondCountableTopology P := inferInstanceAs (SecondCountableTopology {z : ℂ // z.im ≠ 0})
-instance : T2Space P := inferInstanceAs (T2Space {z : ℂ // z.im ≠ 0})
 
 instance : MeasureSpace P where
   volume := (Measure.comap (Subtype.val : {z : ℂ // z.im ≠ 0} → ℂ) volume).withDensity fun z => ENNReal.ofReal (1 / z.1.im ^ 2)
@@ -76,8 +133,8 @@ def q1 (k : ℕ) (z w : P) : ℂ :=
 
 def kap (z w : P) : ℝ := if 0 < z.1.im * w.1.im then 4 * (z.1.im * w.1.im) / ‖z.1 - conj w.1‖ ^ 2 else 0
 
-open Classical in
 
+open Classical in
 def ext1 (f : P → ℂ) (t : ℂ) : ℂ := if h : t.im ≠ 0 then f ⟨t, h⟩ else 0
 
 def Hol1 (f : P → ℂ) : Prop := DifferentiableOn ℂ (ext1 f) {t | t.im ≠ 0}

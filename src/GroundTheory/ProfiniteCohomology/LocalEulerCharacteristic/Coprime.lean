@@ -1,11 +1,66 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Scalars
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CoprimeRegular
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CoprimeTwist
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ModNEquivOfSurjectiveApplyModNRep
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveInvariants
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Cohomology
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.KummerOpen
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Scalars
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Cohomology
+public import GroundTheory.ProfiniteCohomology.ClassFormations.CorestrictionDefs
+public import GroundTheory.ProfiniteCohomology.EulerCharDefs
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CohomologyGal
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ConjAction
+public import Mathlib.FieldTheory.Galois.Profinite
+import GroundTheory.ProfiniteCohomology.EulerChar
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveInvariants
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CoprimeRegular
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CoprimeTwist
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ModNEquivOfSurjectiveApplyModNRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.CohomologyMapTensorRightMorCompCohomologyConj
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -68,8 +123,8 @@ section RootsSubgroupOf
 variable {K Ksep : Type} [Field K] [Field Ksep] [Algebra K Ksep] [IsSepClosure K Ksep] {l : ℕ}
   {U V : OpenSubgroup Gal(Ksep/K)}
 
-omit [IsSepClosure K Ksep] in
 
+omit [IsSepClosure K Ksep] in
 theorem rootsRepZMod_ρ_of_mem
     (hμ : ∀ ζ : Ksep, ζ ^ l = 1 → ζ ∈ fixedField (V : Subgroup Gal(Ksep/K)))
     (g : (openSubgroupOf U V : Subgroup (U : Subgroup Gal(Ksep/K))))
@@ -91,8 +146,8 @@ theorem rootsRepZMod_ρ_of_mem
     exact (mem_fixedField_iff _ _).1 (hμ _ hs) _ hg
   exact key t
 
-variable (l) in
 
+variable (l) in
 noncomputable def rootsCohomologyZModEquiv (n : ℕ) :
     cohomology (Rep.res ((V : Subgroup Gal(Ksep/K)).subgroupOf (U : Subgroup Gal(Ksep/K))).subtype
         (Rep.res (U : Subgroup Gal(Ksep/K)).subtype (galRootsOfUnity.{0} K Ksep l))) n ≃+
@@ -165,8 +220,8 @@ variable {K Ksep : Type} [Field K] [Field Ksep] [Algebra K Ksep] [IsSepClosure K
 
 attribute [local instance] Subgroup.fintypeQuotientOfFiniteIndex
 
-include h in
 
+include h in
 theorem toFun_cohomologyConjRep_eq
     (d : letI := (IntermediateField.inclusion (fixedField_le_fixedField h)).toRingHom.toAlgebra
       AdditiveFunction.{0} l (fixedField (V : Subgroup Gal(Ksep/K)) ≃ₐ[fixedField
@@ -208,7 +263,7 @@ variable {K Ksep : Type} [Field K] [ValuativeRel K] [TopologicalSpace K]
   [ValuativeRel Ksep] [TopologicalSpace Ksep] [IsValuativeTopology Ksep] [ValuativeExtension K Ksep]
   {l : ℕ} [Fact l.Prime] {U V : OpenSubgroup Gal(Ksep/K)}
 
-set_option maxHeartbeats 400000 in
+
 
 theorem finrank_cohomology_alternating_sum_coprime (hl : (l : K) ≠ 0) (h : V ≤ U)
     [((V : Subgroup Gal(Ksep/K)).subgroupOf (U : Subgroup Gal(Ksep/K))).Normal]
@@ -354,10 +409,10 @@ theorem finrank_cohomology_alternating_sum_coprime (hl : (l : K) ≠ 0) (h : V �
   change _ - _ + d.one = _
   linarith
 
-set_option maxHeartbeats 400000 in
+
+
 omit [ValuativeRel Ksep] [TopologicalSpace Ksep] [IsValuativeTopology Ksep]
   [ValuativeExtension K Ksep] in
-
 theorem finite_cohomology_coprime (hl : (l : K) ≠ 0) (h : V ≤ U)
     [((V : Subgroup Gal(Ksep/K)).subgroupOf (U : Subgroup Gal(Ksep/K))).Normal]
     (hcop : Nat.Coprime ((V : Subgroup Gal(Ksep/K)).relIndex U) l)
@@ -432,21 +487,6 @@ theorem eulerChar_coprime (hl : (l : K) ≠ 0) (h : V ≤ U)
   congr 1
   linarith
 
-omit [ValuativeRel Ksep] [TopologicalSpace Ksep] [IsValuativeTopology Ksep]
-  [ValuativeExtension K Ksep] in
-
-theorem finite_cohomology_coprime_of_torsion (hl : (l : K) ≠ 0) (h : V ≤ U)
-    [((V : Subgroup Gal(Ksep/K)).subgroupOf (U : Subgroup Gal(Ksep/K))).Normal]
-    (hcop : Nat.Coprime ((V : Subgroup Gal(Ksep/K)).relIndex U) l)
-    (hμ : ∀ ζ : Ksep, ζ ^ l = 1 → ζ ∈ fixedField (V : Subgroup Gal(Ksep/K)))
-    (M : Rep.{0} (ULift.{0} ℤ) (U : Subgroup Gal(Ksep/K))) [IsDiscreteRep M] [Finite M]
-    (hMl : ∀ m : M, l • m = 0)
-    (hM : ∀ g : (U : Subgroup Gal(Ksep/K)), (g : Gal(Ksep/K)) ∈ V → ∀ m : M, M.ρ g m = m)
-    (i : ℕ) (hi : i ≤ 2) : Finite (cohomology M i) := by
-  have : Finite (zmodRepOfTorsion l M hMl) := ‹Finite M›
-  have : Module.Finite (ZMod l) (zmodRepOfTorsion l M hMl) := Module.Finite.of_finite
-  have := finite_cohomology_coprime hl h hcop hμ (zmodRepOfTorsion l M hMl) hM i hi
-  exact Finite.of_equiv _ (cohomologyZModEquiv l M hMl i).symm.toEquiv
 
 end Main
 

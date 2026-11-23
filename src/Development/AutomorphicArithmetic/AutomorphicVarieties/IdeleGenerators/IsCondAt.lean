@@ -1,7 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.SlopeTestRemainingChoices
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsoOfFrob
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsoOfFrob
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CongruenceNumberRankThree
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,12 +107,12 @@ def GenD (y : Af F) (𝔪 : Ideal (𝓞 F)) : Prop :=
   𝔪 ≠ ⊥ ∧ ∀ w : HeightOneSpectrum (𝓞 F),
     Valued.v (pLoc F w y) = WithZero.exp ((ordI w (differentIdeal ℤ (𝓞 F)) : ℤ) - (ordI w 𝔪 : ℤ))
 
-open Classical in
 
+open Classical in
 def coefAt (c : Ideal (𝓞 F) → ℂ) (y : Af F) : ℂ := if h : ∃ 𝔪, GenD y 𝔪 then c h.choose else 0
 
-open Classical in
 
+open Classical in
 def coefDiv (c : Ideal (𝓞 F) → ℂ) (𝔮 𝔪 : Ideal (𝓞 F)) : ℂ := if h : ∃ 𝔫, 𝔪 = 𝔮 * 𝔫 then c h.choose else 0
 
 def absF (y : (Af F)ˣ) : ℝ := ∏ᶠ w : HeightOneSpectrum (𝓞 F), ‖pLoc F w (y : Af F)‖
@@ -84,8 +127,8 @@ def HasExp (φ : GA F 2 → ℂ) (k : ℕ) (c₀ : (Af F)ˣ → ℂ) (c : Ideal 
         Complex.exp (2 * Real.pi * Complex.I * ∑ v, (reAt v ξ.1 : ℂ) * ((x v : ℂ) + Complex.I * (y.val v : ℂ))))
       (φ (TR.infGL F 2 (aff y x) * finGL F 2 (aff yf 0)) / ((((∏ v, y.val v) * absF yf) ^ ((k : ℝ) / 2) : ℝ) : ℂ) - c₀ yf)
 
-variable (F) in
 
+variable (F) in
 def locSm (w : HeightOneSpectrum (𝓞 F)) : Representation ℂ (GL (Fin 2) (w.adicCompletion F)) (TR.Sm F 2) :=
   (TR.finRep F 2).comp (locGL F 2 w)
 

@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqTopOfTranslates
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsWeilDatumGeneratorRealOneParamGroupStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanLiftUnitaryGroupProduct
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsSmoothAutomorphicFunctionTranslateAtRealPlace
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsSmoothAutomorphicFunctionTranslateAtRealPlace
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HolomorphicLowestType
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UniformModerateGrowthLevel
+public import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ConjAtFixedIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanLiftUnitaryGroupProduct
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqTopOfTranslates
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsWeilDatumGeneratorRealOneParamGroupStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,10 +76,10 @@ theorem block_conj {n : ℕ} {ε : Fin n → Bool} {κ κ' Y : Matrix (Fin n) (F
     (h : κ * Formalism.REAL.Jm ε = Formalism.REAL.Jm ε * κ) (h' : κ' * Formalism.REAL.Jm ε = Formalism.REAL.Jm ε * κ')
     (hY : ∀ a b, ¬ (ε a = false ∧ ε b = true) → Y a b = 0) (a b : Fin n) (hab : ¬ (ε a = false ∧ ε b = true)) :
     (κ' * Y * κ) a b = 0 := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   refine Finset.sum_eq_zero fun d _ => ?_
   by_cases hd : ε d = ε b
-  · rw [mul_apply, Finset.sum_eq_zero fun c _ => ?_, zero_mul]
+  · rw [Matrix.mul_apply, Finset.sum_eq_zero fun c _ => ?_, zero_mul]
     by_cases hc : ε a = ε c
     · rw [hY c d (by rw [← hc, hd]; exact hab), mul_zero]
     · rw [entry_eq_zero h' hc, zero_mul]
@@ -128,7 +174,7 @@ def killed (hom : IsWeilDatumO ψ S T χS χT om) (hθ : IsInfFam θ) (M : DSMod
     funext g
     have a' := congrFun a g
     have b' := congrFun b g
-    simp only [thetaKO, map_add, Pi.add_apply, Pi.zero_apply] at a' b' ⊢
+    simp only [thetaKO, map_add (f := _), Pi.add_apply, Pi.zero_apply] at a' b' ⊢
     rw [a', b', add_zero]
   zero_mem' := by
     intro τ Z _ h
@@ -177,7 +223,7 @@ theorem values_killed : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp
         rw [← Module.End.mul_apply, ← map_mul, Prod.mk_mul_mk, mul_one]
       rw [e]
       exact hx τ Z hZ (h * u)
-  let B : MultilinearMap ℂ (fun τ => lowT M τ) (PolF D T.rank S.rank) :=
+  let B : MultilinearMap (RingHom.id ℂ) (fun τ => lowT M τ) (PolF D T.rank S.rank) :=
     (io.flip w).compMultilinearMap (PiTensorProduct.tprod ℂ)
   refine mem_of_translates h1 h2 B N v₀ (fun ρ h0 => ?_) (step1 w) ?_ v τ Z hZ h
   · have := hv₀ ρ

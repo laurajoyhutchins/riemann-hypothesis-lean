@@ -1,9 +1,47 @@
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSpanFormsNeBot
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SubsingletonRankZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneMemGoodCT
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.BlockMatrixIdentity.BlockMatOne
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SubsingletonRankZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneMemGoodCT
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.BlockMatrixIdentity.BlockMatOne
+public import Mathlib.Data.Multiset.Functor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +50,7 @@ open GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.SmGL GlobalTheory.
 
 namespace PositivityTheory.Rg.Rs
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N a r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N a r s : ℕ}
 
 def aInf (E : Type) [Field E] (N r : ℕ) (t : ℝ) : GL (Fin N) (Cinf E) :=
   ⟨Matrix.diagonal fun i _ => Complex.exp (if (i : ℕ) < r then (t : ℂ) else 0),
@@ -20,7 +58,7 @@ def aInf (E : Type) [Field E] (N r : ℕ) (t : ℝ) : GL (Fin N) (Cinf E) :=
     by rw [Matrix.diagonal_mul_diagonal, ← Matrix.diagonal_one]; congr 1; funext i v; simp [← Complex.exp_add],
     by rw [Matrix.diagonal_mul_diagonal, ← Matrix.diagonal_one]; congr 1; funext i v; simp [← Complex.exp_add]⟩
 
-def aT (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (N r : ℕ) (t : ℝ) : GA E N := infGL E N (aInf E N r t)
+def aT (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (N r : ℕ) (t : ℝ) : GA E N := infGL E N (aInf E N r t)
 
 def IsCT (r : ℕ) (φ F : GA E N → ℂ) : Prop :=
   letI : MeasurableSpace (BlockIx N r → Ad E) := borel _
@@ -59,7 +97,7 @@ def RegInt (V : Submodule ℂ (Sm E N)) (τ : E →+* ℂ) : Prop :=
 
 def SatV (V : Submodule ℂ (Sm E N)) (w : HeightOneSpectrum (𝓞 E)) (B : Multiset ℂˣ) : Prop :=
   (∃ φ ∈ V, GlobalTheory.LFun.IsSatVecGL w ((finRep E N).comp (locGL E N w)) φ B) ∧
-    ∀ φ ∈ V, (∀ k ∈ GlobalTheory.LFun.KGL w N, finRep E N (locGL E N w k) φ = φ) → φ ≠ 0 →
+    ∀ φ ∈ V, (∀ k ∈ GlobalTheory.LFun.KGL w (n := N), finRep E N (locGL E N w k) φ = φ) → φ ≠ 0 →
       GlobalTheory.LFun.IsSatVecGL w ((finRep E N).comp (locGL E N w)) φ B
 
 def satTw (w : HeightOneSpectrum (𝓞 E)) (z : ℂ) (B : Multiset ℂˣ) : Multiset ℂ :=

@@ -1,5 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 noncomputable section
 
@@ -501,11 +552,16 @@ theorem cub_pull (hG : GlobalFnsSt) (hD : IsPullDeg φ D D') {T' : Over (Sp R')}
     (fun V _ k => Finset.prod_congr rfl fun I _ => congrArg (fun q => k q ^ thε I) ((cubeMapOf (pull_grp hD)).psum_comm I.down))
     _ e.left he sj (pullGen_isGen _ _ _ _ D.cub.isGen (cubeMapOf (pull_grp hD)).F3) ht (fun y I hI => by
       choose I' hI' using fun χ : (𝟙_ (Over (Sp R'))).left ⟶ D'.P.A.left => exists_chart D'.P.isLB (χ y)
-      have C' : IsCub (cubV D'.cub y I') := isCub_cubV D'.cub hI'
+      have face' : cubV D'.cub y I' 1 1 1 = 1 := by
+        have h := val_corr hI' (D'.cub.face 0) (lift (1 : 𝟙_ (Over (Sp R')) ⟶ D'.P.A) 1).left
+        rw [val_one] at h
+        refine Eq.trans ?_ h
+        refine Eq.trans ?_ (val_cub D'.cub (lift (1 : 𝟙_ (Over (Sp R')) ⟶ D'.P.A) 1) hI' (pzero D'.P.A _) (x2 D'.P.A 0) (x2 D'.P.A 1)).symm
+        congr 1 <;> simp [x2, pzero, Hom.one_def]
       have p := prod_cub (1 : 𝟙_ (Over (Sp R')) ⟶ D'.P.A) 1 1
         (fun q => gw hD.w q y (I (q ≫ (cubeMapOf (pull_grp hD)).F)) (I' q))
       rw [_root_.mul_one, _root_.mul_one] at p
-      refine Eq.trans ?_ ((hv' _ e.left y I I' hI hI').trans (congrArg₂ (· * ·) p (C'.face 1 1))).symm
+      refine Eq.trans ?_ ((hv' _ e.left y I I' hI hI').trans (congrArg₂ (· * ·) p face')).symm
       have o : pushPt (pull_grp hD).1.w (1 : 𝟙_ (Over (Sp R')) ⟶ D'.P.A) = 1 := map_one (pushHom (pull_grp hD) _)
       have q : e.left ≫ (cubeMapOf (pull_grp hD)).F3 =
           (lift (pushPt (pull_grp hD).1.w (1 : 𝟙_ (Over (Sp R')) ⟶ D'.P.A)) (lift (pushPt (pull_grp hD).1.w 1)
@@ -514,7 +570,14 @@ theorem cub_pull (hG : GlobalFnsSt) (hD : IsPullDeg φ D D') {T' : Over (Sp R')}
         fin_cases i <;> simp [e, x3, pushPt, cubeMapOf]
       refine (val_pull hI _ _ _).trans ?_
       rw [q, o]
-      refine ((isCub_cubV D.cub (T := Over.mk ((𝟙_ (Over (Sp R'))).hom ≫ spMap φ)) hI).face 1 1).trans ?_
+      have face' : cubV D.cub (T := Over.mk ((𝟙_ (Over (Sp R'))).hom ≫ spMap φ)) y I 1 1 1 = 1 := by
+        have h := val_corr hI (D.cub.face 0) (lift (1 : Over.mk ((𝟙_ (Over (Sp R'))).hom ≫ spMap φ) ⟶ D.P.A) 1).left
+        rw [val_one] at h
+        refine Eq.trans ?_ h
+        refine Eq.trans ?_ (val_cub D.cub (lift (1 : Over.mk ((𝟙_ (Over (Sp R'))).hom ≫ spMap φ) ⟶ D.P.A) 1) hI (pzero D.P.A _) (x2 D.P.A 0) (x2 D.P.A 1)).symm
+        congr 1 <;> simp [x2, pzero, Hom.one_def]
+      change cubV D.cub (T := Over.mk ((𝟙_ (Over (Sp R'))).hom ≫ spMap φ)) y I 1 1 1 = _
+      rw [face']
       simp) _ (lift x (lift x' y)).left z J hJ
   exact (val_pull hJ _ _ _).symm.trans (key.trans (hv' _ _ z J J' hJ hJ'))
 
@@ -528,7 +591,7 @@ def vK {F : Type} [Field F] [Algebra (FractionRing R) F] {X : Scheme.{0}} {M : L
     {ψ : K → ((TK R).left ⟶ X)} {ε : K → ℤ} (t : LB.Gen (LB.LinComb M ψ ε)) (y : Sp F) (J : (Sp F ⟶ X) → M.ι) :
     ((Sp F).presheaf.stalk y)ˣ := val t (𝟙 _ ≫ jFK (R := R) F) y J
 
-set_option maxHeartbeats 2000000 in
+
 theorem qkPullExists (hG : GlobalFnsSt) : QkPullExistsSt := by
   intro R R' _ _ _ _ φ D D' hD F _ _ _ hF k p'
   have gp := pull_grp hD
@@ -597,7 +660,7 @@ theorem qkPullExists (hG : GlobalFnsSt) : QkPullExistsSt := by
         have e : vS (g'.s (χ + χ')) y J' * thS D' y J' (cP D' _ χ) (cP D' _ χ') g'.b = vS (g'.s χ) y J' * vS (g'.s χ') y J' := e₀
         show vS (t (hD.xe.symm (hD.xe χ + hD.xe χ'))) y J * thS D y J (cP D _ (hD.xe χ)) (cP D _ (hD.xe χ')) (β g'.b) =
           vS (t (hD.xe.symm (hD.xe χ))) y J * vS (t (hD.xe.symm (hD.xe χ'))) y J
-        rw [← map_add, AddEquiv.symm_apply_apply, AddEquiv.symm_apply_apply, AddEquiv.symm_apply_apply, ← βc, ← βc,
+        rw [← map_add (f := _), AddEquiv.symm_apply_apply, AddEquiv.symm_apply_apply, AddEquiv.symm_apply_apply, ← βc, ← βc,
           cub y J J' hJ hJ', vt _ y J J' hJ hJ', vt _ y J J' hJ hJ', vt _ y J J' hJ hJ', cPoint_add]
         apply Additive.ofMul.injective
         have e' := congrArg Additive.ofMul e
@@ -670,7 +733,7 @@ theorem qkPullExists (hG : GlobalFnsSt) : QkPullExistsSt := by
     obtain ⟨χ, rfl⟩ := hD.xe.surjective χ
     have ι₁ : vS (h.s χ) y J' = vK (D'.tau p'.y χ) y J' := ιv _ y J' hJ'
     show vS ((up h).s (hD.xe χ)) y J = vK (D.tau (hD.xe p'.y) (hD.xe χ)) y J
-    rw [hv _ _ y J J' hJ hJ', ι₁, ιb, vτ D _ _ y J hJ, vτ D' _ _ y J' hJ', ← map_add, vψ _ y J J' hJ hJ',
+    rw [hv _ _ y J J' hJ hJ', ι₁, ιb, vτ D _ _ y J hJ, vτ D' _ _ y J' hJ', ← map_add (f := _), vψ _ y J J' hJ hJ',
       vψ _ y J J' hJ hJ', vψ _ y J J' hJ hJ', vρ y J J' hJ hJ', cPoint_add, mul_comm (cP D' _ χ)]
     apply Additive.ofMul.injective
     simp only [ofMul_mul, ofMul_inv]

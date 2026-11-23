@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedSmooth
+module
+
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSplitSupportedUnitaryComponent
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,22 +109,7 @@ end Lin
 variable {D : D7} (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)) (V : HSp D)
 
 theorem gram_det_ne : V.gram.det ≠ 0 := by
-  intro h
-  obtain ⟨v, hv, h0⟩ := Matrix.exists_mulVec_eq_zero_iff.2 h
-  have hx : ∀ y, V.hT y (∑ j, v j • V.frame j) = 0 := by
-    intro y
-    rw [← V.frame.sum_repr y]
-    simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, RingHom.id_apply, smul_eq_mul]
-    simp only [Finset.mul_sum]
-    rw [Finset.sum_comm]
-    refine Finset.sum_eq_zero fun i _ => ?_
-    have := congrFun h0 i
-    simp only [mulVec, dotProduct, HSpace.gram, Pi.zero_apply] at this
-    calc _ = (starRingEnd _) (V.frame.repr y i) * ∑ j, V.hT (V.frame i) (V.frame j) * v j := by
-          rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ => by ring
-      _ = 0 := by rw [this, mul_zero]
-  have := V.nondeg.2 _ hx
-  exact hv (funext (Fintype.linearIndependent_iff.1 V.frame.linearIndependent v this))
+  apply GlobalTheory.SplitOnto.gram_det_ne <;> assumption
 
 theorem gramAt_unit (τ : D.what₂.Tau) : IsUnit (gramAt D V τ).det := by
   have : (gramAt D V τ).det = tauE D τ V.gram.det := (RingHom.map_det _ _).symm
@@ -117,14 +146,6 @@ theorem RderC_eq (τ : D.what₂.Tau) {X : Matrix (Fin V.rank) (Fin V.rank) ℂ}
     simp [Rder, oneP]
   rw [this]
   simp
-
-theorem oneP_spec {X : ThetaX D} (T : ThetaTied D X) (hθ : IsInfFam (D := D) θ) (τ : D.what₂.Tau)
-    {Y : Matrix (Fin V.rank) (Fin V.rank) ℂ} (hY : Y ∈ lieAt V τ) (t : ℝ) :
-    IsAtTau θ V τ (NormedSpace.exp (t • Y)) (oneP θ V τ Y t) := by
-  have h := (T.actR.2 θ hθ V τ _ (exp_mem_UH (gramAt_unit V τ) hY t)).1
-  unfold oneP atTau
-  rw [dif_pos h]
-  exact h.choose_spec
 
 def reSig (s : (D.host.E →+* ℂ) → ℕ × ℕ) : HSp D := { V with sig := s }
 

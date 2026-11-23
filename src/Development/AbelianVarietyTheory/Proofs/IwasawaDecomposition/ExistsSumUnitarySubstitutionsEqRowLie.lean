@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RowActCoefPolyAndUnitaryDense
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RowActCoefPolyAndUnitaryDense
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +56,8 @@ section RowLie
 
 variable {ι : Type} {m n : ℕ}
 
-open Classical in
 
+open Classical in
 def rowSubst (n : ℕ) (τ : ι) (g : Matrix (Fin m) (Fin m) ℂ) : Pol ι m n →ₐ[ℂ] Pol ι m n :=
   subst (fun _ => 1) (fun ρ => if ρ = τ then g else 1)
 
@@ -62,22 +106,24 @@ theorem exists_poly_rowSubst_coef (τ : ι) (k l : Fin m) (f : Pol ι m n) (φ :
   | add p q hp hq =>
     obtain ⟨P, hP, hP'⟩ := hp φ
     obtain ⟨Q, hQ, hQ'⟩ := hq φ
-    exact ⟨P + Q, fun g => by simp only [map_add, hP, hQ], by simp only [map_add, hP', hQ']⟩
+    exact ⟨P + Q, fun g => by simp only [map_add (f := _), hP, hQ], by simp only [map_add (f := _), hP', hQ']⟩
   | mul_X p v hp =>
     obtain ⟨ρ, j, c⟩ := v
     by_cases h : ρ = τ
     · subst h
       choose P hP hP' using fun b : Fin m => hp (φ ∘ₗ LinearMap.mulRight ℂ (X (ρ, b, c)))
       refine ⟨∑ b, X (b, j) * P b, fun g => ?_, ?_⟩
-      · rw [map_mul, rowSubst_X_self, Finset.mul_sum, map_sum, map_sum]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_mul, rowSubst_X_self, Finset.mul_sum, map_sum, map_sum]
         refine Finset.sum_congr rfl fun b _ => ?_
         rw [mul_smul_comm, map_smul, map_mul (eval _), eval_X, ← hP b g]
         rfl
       · have h1 : ∀ b, eval (fun x => (1 : Matrix (Fin m) (Fin m) ℂ) x.1 x.2) (P b) = φ (p * X (ρ, b, c)) := by
           intro b
           rw [← hP b 1, rowSubst_one]; rfl
-        rw [rowLie_mul, rowLie_X_self, map_add, map_sum, map_sum]
-        simp only [Derivation.leibniz, smul_eq_mul, map_add, map_mul, eval_X, ← hP', h1, Finset.sum_add_distrib,
+
+        rw [rowLie_mul, rowLie_X_self, map_add (f := _), map_sum, map_sum]
+        simp only [Derivation.leibniz, smul_eq_mul, map_add (f := _), map_mul, eval_X, ← hP', h1, Finset.sum_add_distrib,
           pderiv_X]
         congr 1
         · simp [Matrix.one_apply]
@@ -99,11 +145,13 @@ theorem rowLie_mem_span_rowSub {J : Type} [Fintype J] (f : J → Pol ι m n) (τ
   have hs : ∀ x : J → Pol ι m n, φ x = ∑ j, (φ ∘ₗ LinearMap.single ℂ (fun _ : J => Pol ι m n) j) (x j) := by
     intro x
     conv_lhs => rw [← Finset.univ_sum_single x]
+
     rw [map_sum]; rfl
   choose Q hQ hQ' using fun j =>
     exists_poly_rowSubst_coef τ k l (f j) (φ ∘ₗ LinearMap.single ℂ (fun _ : J => Pol ι m n) j)
   have h0 : ∑ j, Q j = 0 := by
     refine GlobalTheory.Branching.eq_zero_of_vanish_unitaryGroup m _ fun u hu => ?_
+
     rw [map_sum]
     simp only [← hQ]
     have hm : φ (fun j => rowSub n τ ⟨u, hu⟩ (f j)) ∈ (⊥ : Submodule ℂ ℂ) :=
@@ -113,6 +161,7 @@ theorem rowLie_mem_span_rowSub {J : Type} [Fintype J] (f : J → Pol ι m n) (τ
   apply hφ
   rw [hs]
   simp only [hQ']
+
   rw [← map_sum, ← map_sum, h0, map_zero, map_zero]
 
 end RowLie

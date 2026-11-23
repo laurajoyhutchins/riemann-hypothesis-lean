@@ -1,6 +1,62 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.AbByPOfComm
+public import Mathlib.Algebra.Group.Action.Pointwise.Finset
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.GroupTheory.SemidirectProduct
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.VirtualCharactersMulComapConjIndLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.InvariantSubspaceMobiusInverseRecEqOfFinrankLt
 import Development.AbelianVarietyTheory.Definitions.Divisors.OrthSubrepresentation
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.VirtualCharactersMulComapConjIndLinear
+
+@[expose] public section
+
 open Polynomial GlobalTheory.CuspGL GlobalTheory.BI GlobalTheory.Shin SemidirectProduct
 open scoped Classical Pointwise
 
@@ -152,7 +208,7 @@ theorem ind_off (φ : Γ →* MulAut G) (ψ : (inl : G →* G ⋊[φ] Γ).range 
   have : ∀ x : G ⋊[φ] Γ, ext0 (inl : G →* G ⋊[φ] Γ).range ψ (x⁻¹ * (inl δ * inr s) * x) = 0 := by
     intro x
     unfold ext0
-    rw [dif_neg]
+    rw [dite_eq_right]
     rw [mem_range_inl_iff, conj_off_right]
     intro h
     apply hs
@@ -170,7 +226,7 @@ theorem ind_inl (φ : Γ →* MulAut G) [Fintype G] [Fintype Γ] (c : G → ℂ)
       (x⁻¹ * inl g * x) = c (φ x.right⁻¹ g) := by
     intro x
     unfold ext0
-    rw [dif_pos ((mem_range_inl_iff φ _).2 (conj_inl_right φ x g))]
+    rw [dite_eq_left ((mem_range_inl_iff φ _).2 (conj_inl_right φ x g))]
     dsimp only
     rw [inlEquiv_symm_apply]
     show c ((x⁻¹ * inl g * x).left) = _

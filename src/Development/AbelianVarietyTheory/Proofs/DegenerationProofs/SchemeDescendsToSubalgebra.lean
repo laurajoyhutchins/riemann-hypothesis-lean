@@ -1,11 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MorphismsSpreadOutToFgSubalgebra
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GlueModelsOverSubfield
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MorphismsSpreadOutToFgSubalgebra
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GlueModelsOverSubfield
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -37,7 +82,6 @@ def up {R R' : Subalgebra k V} (h : R ≤ R') (ψ : pullback p (spMap (algebraMa
   pullback.lift (bcMap p (Subalgebra.inclusion h) ≫ ψ) (pullback.snd _ _)
     (by rw [Category.assoc, hψ, bcMap_fst_assoc, pullback.condition])
 
-@[reassoc]
 theorem up_fst {R R' : Subalgebra k V} (h : R ≤ R') (ψ : pullback p (spMap (algebraMap k R)) ⟶ Q)
     (hψ : ψ ≫ q = pullback.fst _ _ ≫ p) :
     up h ψ hψ ≫ pullback.fst _ _ = bcMap p (Subalgebra.inclusion h) ≫ ψ := pullback.lift_fst _ _ _
@@ -404,27 +448,5 @@ theorem hasModel {X : Scheme.{0}} (q : X ⟶ Sp V) [LocallyOfFinitePresentation 
 end GlobalTheory.SpreadScheme
 
 namespace GlobalTheory
-
-theorem scheme_descends_to_subalgebra :
-    ∀ (V R : Type) [CommRing V] [CommRing R] [Algebra V R] (X : Over (Sp R)), LocallyOfFinitePresentation X.hom → QuasiCompact X.hom → IsSeparated X.hom → ∃ s : Finset R, ∀ W : Subalgebra V R, (↑s : Set R) ⊆ W → ∃ X₀ : Over (Sp W), LocallyOfFinitePresentation X₀.hom ∧ QuasiCompact X₀.hom ∧ QuasiSeparated X₀.hom ∧ Nonempty ((Over.pullback (spMap W.val.toRingHom)).obj X₀ ≅ X) := by
-  classical
-  intro V R _ _ _ X h₁ h₂ h₃
-  obtain ⟨k, _, f, X₀, p₀, φ, hk, g₁, g₂, g₃, hφ⟩ := SpreadScheme.hasModel X.hom
-  obtain ⟨s, hs⟩ := hk.out
-  refine ⟨s.image f, fun W hW ↦ ?_⟩
-  have hf (x : k) : f x ∈ W := by
-    have hx : x ∈ Algebra.adjoin ℤ (s : Set k) := hs ▸ Algebra.mem_top
-    induction hx using Algebra.adjoin_induction with
-    | mem x hx => exact hW (by simpa using ⟨x, hx, rfl⟩)
-    | algebraMap r => simp
-    | add x y _ _ hx hy => rw [map_add]; exact W.add_mem hx hy
-    | mul x y _ _ hx hy => rw [map_mul]; exact W.mul_mem hx hy
-  have e : spMap W.val.toRingHom ≫ spMap (f.codRestrict W hf) = spMap f := by
-    rw [← Spec.map_comp]
-    rfl
-  have h := SpreadScheme.isPullback_lift hφ _ _ e
-  refine ⟨Over.mk (pullback.snd p₀ (spMap (f.codRestrict W hf))), inferInstanceAs (LocallyOfFinitePresentation (pullback.snd _ _)),
-    inferInstanceAs (QuasiCompact (pullback.snd _ _)), inferInstanceAs (QuasiSeparated (pullback.snd _ _)),
-    ⟨Over.isoMk h.isoPullback.symm h.isoPullback_inv_snd⟩⟩
 
 end GlobalTheory

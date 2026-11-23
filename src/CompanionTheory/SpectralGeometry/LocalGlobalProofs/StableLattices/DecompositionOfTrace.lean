@@ -1,5 +1,56 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.ZuckermanFunctors.IsSimpleFam
+module
+
+public import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.ZuckermanFunctors.IsSimpleFam
+public import Mathlib.LinearAlgebra.Trace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open CompanionTheory.Zuck BranchingSupport Matrix Finset
 open scoped InnerProductSpace Kronecker
@@ -47,8 +98,9 @@ theorem exists_basis (hc : IsLinCat N Hom) {P : Type} [DecidableEq P] {T : P →
     have := hT.1 ν
     obtain ⟨x, hx⟩ := exists_ne (0 : N (T ν))
     have h3 := congrArg (fun w : homSub hc (T ν) X => θ' i (pr i.1 (w.1 x))) hg
+
     simp only [v, Submodule.coe_sum, Submodule.coe_smul, LinearMap.sum_apply, LinearMap.smul_apply,
-      map_sum, map_smul, Submodule.coe_zero, LinearMap.zero_apply, map_zero, LinearMap.comp_apply] at h3
+    map_sum, map_smul, Submodule.coe_zero, LinearMap.zero_apply, map_zero, LinearMap.comp_apply] at h3
     rw [Finset.sum_eq_single i] at h3
     · have e1 : pr i.1 (io i.1 (θ i x)) = θ i x := LinearMap.congr_fun (hd.pr_io i.1) _
       have e2 : θ' i (θ i x) = x := LinearMap.congr_fun (h2 i) _
@@ -153,6 +205,7 @@ theorem dec_of_gen (hc : IsLinCat N Hom) {P : Type} {T : P → O} (hT : IsSimple
       have e1 := LinearMap.congr_fun hd.sum (j x)
       have e2 : q (j x) = x := LinearMap.congr_fun hqj x
       simp only [LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.id_apply] at e1 ⊢
+
       rw [← map_sum, e1, e2]
     rw [this]
     exact Finset.sum_induction _ S Sadd S0 fun k _ =>
@@ -208,7 +261,7 @@ theorem decOfTrace : DecOfTrace := by
       rw [sub_smul, ← e1]
       abel
     have ht := congrArg (LinearMap.trace ℂ _) hA
-    rw [map_smul, LinearMap.trace_comp_comm', hid, LinearMap.trace_id, map_add, map_add, t₁, t₂, t₃,
+    rw [map_smul, LinearMap.trace_comp_comm', hid, LinearMap.trace_id, map_add (f := _), map_add (f := _), t₁, t₂, t₃,
       ← Finset.sum_add_distrib, ← Finset.sum_add_distrib, smul_eq_mul] at ht
     rw [ht]
     exact Finset.sum_congr rfl fun k _ => by ring

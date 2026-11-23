@@ -1,14 +1,54 @@
-import Development.WeilBound.CoreStatements.AmpleLineBundles.FrameBasis
-import Development.WeilBound.CoreStatements.AmpleLineBundles.RhoEventually
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtComplexEmbedding
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlopeBoundSt
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AbelianVarietyTheory.PublishedTheorems.SemiabelianTori.GeometricallyConnectedSplitTorusAff
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlopeBoundSt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtComplexEmbedding
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtSmul
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUniqueStatement
+public import Development.WeilBound.CoreStatements.AmpleLineBundles.FrameBasis
+public import Development.WeilBound.CoreStatements.AmpleLineBundles.RhoEventually
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 
@@ -77,12 +117,14 @@ theorem nonempty_lie_metric_of_coordinates : ∀ (X : Scheme.{0}) (Ω : Type) [F
     by_cases hl : rho f l (wz z) = 0
     · simp only [hl, Complex.ofReal_zero, zero_mul]
     · rw [(hg l hl).2, (hg l hl).2]
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     by_cases hl : rho f l (wz (spMap (starRingEnd ℂ) ≫ z)) = 0
     · rw [← hcj z l]
       simp only [hl, Complex.ofReal_zero, zero_mul, map_zero]
     · have hfr := frame (hwz _) l (rho_ne f (hf _) hl)
+
       rw [map_mul, Complex.conj_ofReal, hcj, map_sum]
       congr 1
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -93,7 +135,7 @@ theorem nonempty_lie_metric_of_coordinates : ∀ (X : Scheme.{0}) (Ω : Type) [F
       have hc : ∀ l, ContinuousAt (f l) w₀ := fun l => wt_cont _ _ (hne h₀)
       refine ContinuousWithinAt.mono (t := {w | ∃ z : Sp ℂ ⟶ X, CoordsAt ξ y z w}) ?_
         fun w ⟨z, _, _, h, _⟩ => ⟨z, h⟩
-      refine tendsto_finset_sum _ fun l _ => ?_
+      refine tendsto_finsetSum _ fun l _ => ?_
       by_cases hl : f l w₀ = 0
       · have h1 := rho_eventually f hc (hf _) (pos h₀) hl
         refine (ContinuousAt.continuousWithinAt ((continuousAt_const (y := (0 : ℂ))).congr (h1.mono fun v hv => ?_)))
@@ -101,7 +143,7 @@ theorem nonempty_lie_metric_of_coordinates : ∀ (X : Scheme.{0}) (Ω : Type) [F
       · have hfr := frame h₀ l hl
         refine ContinuousWithinAt.mul
           (Complex.continuous_ofReal.continuousAt.comp (rho_cont f hc l)).continuousWithinAt
-          (tendsto_finset_sum _ fun i _ => ContinuousWithinAt.mul ?_ ?_)
+          (tendsto_finsetSum _ fun i _ => ContinuousWithinAt.mul ?_ ?_)
         · exact Complex.continuous_conj.continuousAt.comp_continuousWithinAt
             (vl_cont hall tie h₀ (co_val hξ M _ z₀ _ hfr ha i))
         · exact vl_cont hall tie h₀ (co_val hξ M _ z₀ _ hfr hb i)

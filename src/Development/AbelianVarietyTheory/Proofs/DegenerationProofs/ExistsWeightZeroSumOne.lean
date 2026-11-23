@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGraded
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGraded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -35,11 +76,12 @@ theorem exists_weight_zero_sum_one {A X J : Type} [CommRing A] [AddCommGroup X] 
       split_ifs with h
       · exact h ▸ one
       · exact zero_mem _
-    · rw [← hT, map_sub, map_sum]
-      simp only [map_smul]
-      simp only [hT, Finsupp.sum_equivMapDomain, ← hsum, smul_eq_mul]
-      rw [Finsupp.sum_single_index rfl, sub_eq_zero, ← hc]
-      exact Finset.sum_congr rfl fun f _ => mul_comm _ _
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [← hT, map_sub, map_sum]
+        simp only [map_smul]
+        simp only [hT, Finsupp.sum_equivMapDomain, ← hsum, smul_eq_mul]
+        rw [Finsupp.sum_single_index rfl, sub_eq_zero, ← hc]
+        exact Finset.sum_congr rfl fun f _ => mul_comm _ _
   refine ⟨fun f => g f * a f (-δ + 0), fun f => hm f 0, fun f => Dvd.intro _ rfl, ?_⟩
   have := hB 0
   rw [h0, Finsupp.single_eq_same] at this
@@ -85,7 +127,7 @@ theorem exists_units {d : ℕ} {i : splitTorus S (Fin d → ℤ) ⟶ H} {V : H.l
         rw [map_zero]; exact GlobalTheory.UU.isWt_one
       add_mem' := fun {a c} ha hc => by
         show GlobalTheory.UU.IsWt i _ (Additive.toMul (l (a + c))).val (a + c)
-        rw [map_add]; exact GlobalTheory.UU.IsWt.mul ha hc
+        rw [map_add (f := _)]; exact GlobalTheory.UU.IsWt.mul ha hc
       neg_mem' := fun {a} ha => by
         show GlobalTheory.UU.IsWt i _ (Additive.toMul (l (-a))).val (-a)
         rw [map_neg]; exact GlobalTheory.UU.IsWt.inv ha }
@@ -128,7 +170,8 @@ theorem main : ∀ (K : Type) [Field K] (H : Over (Sp K)) [GrpObj H] [IsCommMonO
   obtain ⟨b, hb, hd, h1⟩ := exists_weight_zero_sum_one (wtSpace i (C.W a)) GlobalTheory.UU.isWt_one
     (fun _ _ _ _ => GlobalTheory.UU.IsWt.mul) ex un g _ hg hs
   have hu : IsUnit (∑ f, (H.left.presheaf.germ (C.W a) x hx).hom (b f)) := by
-    rw [← map_sum, h1, map_one]; exact isUnit_one
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [← map_sum, h1, map_one]; exact isUnit_one
   obtain ⟨f, -, hf⟩ := IsLocalRing.exists_of_isUnit_sum hu
   refine ⟨b f, hasWt_iff.2 (hb f), (H.left.mem_basicOpen _ x hx).2 hf,
     stable_basicOpen (hT.stable a) (hasWt_iff.2 (hb f)), ?_⟩

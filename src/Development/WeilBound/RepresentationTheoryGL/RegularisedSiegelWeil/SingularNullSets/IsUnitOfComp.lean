@@ -1,4 +1,45 @@
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,8 +52,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open IsDedekindDomain NumberField
 open GlobalTheory.RegSch (ikS projS Lvl)
 
-set_option maxHeartbeats 1000000
-set_option synthInstance.maxHeartbeats 400000
+
+
 
 namespace PositivityTheory.Rg.Rsw.L.LGenK
 
@@ -49,7 +90,7 @@ theorem crd_map {R R' : Type} [CommRing R] [Algebra F R] [CommRing R'] [Algebra 
   | tmul r e =>
     rw [Algebra.TensorProduct.map_tmul, crd_tmul, crd_tmul, map_mul, AlgHom.commutes]
     rfl
-  | add x y hx hy => rw [map_add, crd_add, crd_add, hx, hy, map_add]
+  | add x y hx hy => rw [map_add (f := _), crd_add, crd_add, hx, hy, map_add (f := _)]
 
 theorem crd_ext (R : Type) [CommRing R] [Algebra F R] {x y : R ⊗[F] E}
     (h : ∀ k, crd R x k = crd R y k) : x = y :=
@@ -87,13 +128,13 @@ theorem cv_cA {D : D7} (v : Pl D) (x : AE D) : cv D v (cA D x) = sigR (Fv D.host
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem infPart_cA {D : D7} (x : AE D) : infPart D (cA D x) = sigR (Ainf D.host.F) D.sp.cm.sig (infPart D x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a e => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem crd_int_ev (k : Fin (Module.finrank D.host.F D.host.E)) :
     ∀ᶠ v in Filter.cofinite, ∀ y ∈ intLoc D.host.F D.host.E (v : Pl D),
@@ -117,6 +158,7 @@ theorem crd_int_ev (k : Fin (Module.finrank D.host.F D.host.E)) :
       conv_lhs => rw [← B.sum_repr o]
       push_cast
       rfl
+
     rw [ho, map_sum, Finsupp.coe_finsetSum, Finset.sum_apply, map_sum]
     refine sum_mem fun j _ => ?_
     rw [map_zsmul, Finsupp.smul_apply, map_zsmul]
@@ -136,10 +178,12 @@ theorem glue_one (D : D7) (f : ∀ v : Pl D, Fv D.host.F v ⊗[D.host.F] D.host.
     exact hv _ (hf v)
   let C : Fin (Module.finrank D.host.F D.host.E) → Af D.host.F := fun k => RestrictedProduct.mk (c k) (hc k)
   refine ⟨∑ k, pairA D.host.F 0 (C k) ⊗ₜ[D.host.F] (Module.finBasis D.host.F D.host.E) k, fun v => ?_, ?_⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     conv_rhs => rw [← sum_crd (Fv D.host.F v) (f v)]
     rfl
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_eq_zero fun k _ => ?_
     show (0 : Ainf D.host.F) ⊗ₜ[D.host.F] _ = 0
     rw [TensorProduct.zero_tmul]
@@ -163,8 +207,8 @@ theorem isUnit_of_comp (D : D7) (y : AE D) (hf : ∀ v, ∃ z ∈ intLoc D.host.
   have hei : infPart D e = 1 := rfl
   have h1 : y * (s + e) = 1 := by
     refine ext_comp (fun v => ?_) ?_
-    · rw [map_mul, map_add, hs, hev, add_zero, hzy, map_one]
-    · rw [map_mul, map_add, hs0, hei, zero_add, hi, mul_one, map_one]
+    · rw [map_mul, map_add (f := _), hs, hev, add_zero, hzy, map_one]
+    · rw [map_mul, map_add (f := _), hs0, hei, zero_add, hi, mul_one, map_one]
   exact ⟨⟨y, s + e, h1, by rw [mul_comm]; exact h1⟩, rfl⟩
 
 end PositivityTheory.Rg.Rsw.L.LGenK

@@ -1,4 +1,60 @@
-import Formalism.PeriodIntegrals.FockDegreeTwoParts
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OmEDiagMonomial
+public import Formalism.PeriodIntegrals.FockDegreeTwoParts
+import Aesop.Frontend.Tactic
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,25 +146,7 @@ theorem sum_diag_of {p q r s : ℕ} (M : Matrix (Ln p q r s) (Ln p q r s) ℂ)
 
 theorem fockAct1_diag (p q r s : ℕ) (a : Ix p q) :
     fockAct1 p q r s (Eab a a) = ∑ c : Ix r s, omE ((a, c) : Ln p q r s) (a, c) := by
-  have hM : ∀ l l' : FockH1Action.Ln p q r s,
-      ((Matrix.kroneckerMapBilinear (LinearMap.mul ℂ ℂ)).flip (1 : FockH1Action.Mat r s)
-        (FockH1Action.Eab a a)) l l' = if l = l' ∧ l.1 = a then 1 else 0 := by
-    rintro ⟨x, y⟩ ⟨x', y'⟩
-    show FockH1Action.Eab a a x x' * (1 : FockH1Action.Mat r s) y y' = _
-    first
-      | simp only [FockH1Action.Eab, Matrix.single_apply, Matrix.one_apply, Prod.mk.injEq]
-      | simp only [FockH1Action.Eab, Matrix.single, Matrix.of_apply, Matrix.one_apply, Prod.mk.injEq]
-    split_ifs <;> first | (simp_all; done) | aesop
-  rw [show FockH1Action.fockAct1 p q r s (FockH1Action.Eab a a) = FockH1Action.omAct p q r s
-      ((Matrix.kroneckerMapBilinear (LinearMap.mul ℂ ℂ)).flip (1 : FockH1Action.Mat r s)
-        (FockH1Action.Eab a a)) from rfl, omAct_apply',
-    sum_diag_of _ (fun l => l.1 = a) hM, Fintype.sum_prod_type,
-    Finset.sum_eq_single a]
-  · simp
-  · intro b _ hb
-    simp [hb]
-  · intro h
-    exact absurd (Finset.mem_univ a) h
+  apply PI.FockOneDegW.Diag.fockAct1_diag <;> assumption
 
 theorem fockAct2_diag (p q r s : ℕ) (c : Ix r s) :
     fockAct2 p q r s (Eab c c) = ∑ a : Ix p q, omE ((a, c) : Ln p q r s) (a, c) := by
@@ -156,7 +194,7 @@ theorem fockAct2_monomial (p q r s : ℕ) (c : Ix r s) (β : Ln p q r s →₀ �
 theorem coeff_of_diag {σ : Type*} (T : Module.End ℂ (MvPolynomial σ ℂ)) (f : (σ →₀ ℕ) → ℂ)
     (hT : ∀ β, T (MvPolynomial.monomial β 1) = f β • MvPolynomial.monomial β 1)
     (P : MvPolynomial σ ℂ) (α : σ →₀ ℕ) :
-    MvPolynomial.coeff α (T P) = f α * MvPolynomial.coeff α P := by
+    AddMonoidAlgebra.coeff (T P) α = f α * AddMonoidAlgebra.coeff P α := by
   classical
   induction P using MvPolynomial.induction_on'
   next u a =>
@@ -169,7 +207,7 @@ theorem coeff_of_diag {σ : Type*} (T : Module.End ℂ (MvPolynomial σ ℂ)) (f
       ring
     · simp
   next P Q hP hQ =>
-    rw [map_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add, hP, hQ, mul_add]
+    rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hP, hQ, mul_add]
 
 theorem exists_monomial_weight {σ ι : Type*} [Fintype σ]
     (T : ι → Module.End ℂ (MvPolynomial σ ℂ)) (f : ι → (σ →₀ ℕ) → ℚ)
@@ -178,7 +216,7 @@ theorem exists_monomial_weight {σ ι : Type*} [Fintype σ]
     (μ : ι → ℚ) (d : ℕ) (P : MvPolynomial σ ℂ) (hP : P ∈ homog σ d) (h0 : P ≠ 0)
     (hw : ∀ a, (T a - ((μ a : ℚ) : ℂ) • (LinearMap.id : Module.End ℂ (MvPolynomial σ ℂ))) P = 0) :
     ∃ α : σ →₀ ℕ, ∑ i, α i = d ∧ ∀ a, μ a = f a α := by
-  obtain ⟨α, hα⟩ : ∃ α, MvPolynomial.coeff α P ≠ 0 := by
+  obtain ⟨α, hα⟩ : ∃ α, AddMonoidAlgebra.coeff P α ≠ 0 := by
     by_contra hne
     push_neg at hne
     exact h0 (MvPolynomial.ext _ _ fun β => by simp [hne β])

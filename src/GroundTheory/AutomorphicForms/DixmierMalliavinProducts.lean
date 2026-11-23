@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
-import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
+module
+
+public import GroundTheory.AutomorphicForms.DixmierMalliavinBasic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -23,12 +74,11 @@ theorem integral_fin_succ_cons {E : Type*} [NormedAddCommGroup E] [NormedSpace �
   congr 1; funext s; congr 1; funext t'
   congr 1
   simp [MeasurableEquiv.piFinSuccAbove]
-  rfl
 
 theorem contDiff_cons_kernel {d : ℕ} {a : ℝ → ℂ} {K : (Fin d → ℝ) → ℂ} (ha : ContDiff ℝ ∞ a)
     (hK : ContDiff ℝ ∞ K) : ContDiff ℝ ∞ (fun t : Fin (d + 1) → ℝ => a (t 0) * K (Fin.tail t)) :=
-  (ha.comp (contDiff_apply ℝ ℝ 0)).mul
-    (hK.comp (contDiff_pi.2 fun j => contDiff_apply ℝ ℝ j.succ))
+  (ha.comp (contDiff_apply ℝ (fun _ => ℝ) 0)).mul
+    (hK.comp (contDiff_pi.2 fun j => contDiff_apply ℝ (fun _ => ℝ) j.succ))
 
 theorem tsupport_cons_kernel {d : ℕ} {ε : ℝ} (hε : 0 ≤ ε) {a : ℝ → ℂ} {K : (Fin d → ℝ) → ℂ}
     (has : tsupport a ⊆ Icc (-ε) ε)
@@ -67,16 +117,18 @@ theorem revProdExp_succ {d : ℕ} (X : Fin (d + 1) → 𝔤) (t : Fin (d + 1) �
     h.revProdExp X t = h.revProdExp (Fin.tail X) (Fin.tail t) * h.expG (t 0 • X 0) := by
   simp [revProdExp, List.ofFn_succ, Fin.tail]
 
-theorem continuous_revProdExp : ∀ {d : ℕ} (X : Fin d → 𝔤), Continuous (h.revProdExp X)
-  | 0, X => by
-    have : h.revProdExp X = fun _ => 1 := funext (h.revProdExp_zero X)
-    rw [this]; exact continuous_const
-  | d + 1, X => by
-    have : h.revProdExp X =
+theorem continuous_revProdExp {d : ℕ} (X : Fin d → 𝔤) : Continuous (h.revProdExp X) := by
+  induction d with
+  | zero =>
+    have hconst : h.revProdExp X = fun _ => 1 := funext (h.revProdExp_zero X)
+    rw [hconst]
+    exact continuous_const
+  | succ d ih =>
+    have hsucc : h.revProdExp X =
         fun t => h.revProdExp (Fin.tail X) (Fin.tail t) * h.expG (t 0 • X 0) :=
       funext (h.revProdExp_succ X)
-    rw [this]
-    exact ((continuous_revProdExp (Fin.tail X)).comp
+    rw [hsucc]
+    exact ((ih (Fin.tail X)).comp
       (continuous_pi fun j => continuous_apply j.succ)).mul
       (h.continuous_expG.comp ((continuous_apply 0).smul continuous_const))
 

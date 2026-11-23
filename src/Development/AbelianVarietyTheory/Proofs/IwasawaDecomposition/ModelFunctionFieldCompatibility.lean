@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingKrullDimIntegers
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JGenSpecializes
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JGenSpecializes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -14,7 +51,7 @@ theorem ratVal_eq {Z : Scheme.{0}} [IsIntegral Z] {k : Type} [CommRing k] {q : Z
     (y : CxPts q σ) (f : Z.functionField) : ratVal f y = valAt y.1 f := by
   by_cases hf : RegAt (under y) f
   · exact ratVal_eq_valAt y hf
-  · rw [ratVal, valAt, dif_neg hf, dif_neg hf]
+  · rw [ratVal, valAt, dite_eq_right hf, dite_eq_right hf]
 
 theorem valAt_comp {X Y : Scheme.{0}} [IsIntegral X] [IsIntegral Y] (j : Y ⟶ X) [IsPreimmersion j]
     (hη : j (genericPoint Y) ⤳ genericPoint X) {K : Type} [Field K] (y : Sp K ⟶ Y) (f : X.functionField) :
@@ -22,19 +59,6 @@ theorem valAt_comp {X Y : Scheme.{0}} [IsIntegral X] [IsIntegral Y] (j : Y ⟶ X
   by_cases hf : RegAt (j (below y)) f
   · exact (valAt_fnMap j hη y hf).symm
   · have h₁ : ¬ RegAt (below (y ≫ j)) f := hf
-    rw [valAt, valAt, dif_neg h₁, dif_neg (mt (regAt_fnMap_iff j hη).1 hf)]
-
-theorem main : ∀ (F : Type) [Field F] [NumberField F] (Y : Var F) (M : TrueGeo.Model Y), haveI := M.ar.isIntegral; ∃ ρ : M.X.functionField ≃+* Y.Fn, (∀ (U : M.X.Opens) (hU : genericPoint M.X ∈ U) (hU' : genericPoint Y.X ∈ M.j ⁻¹ᵁ U) (s : Γ(M.X, U)), ρ (fnOf U hU s) = fnOf (M.j ⁻¹ᵁ U) hU' (M.j.app U s)) ∧ M.j (genericPoint Y.X) = genericPoint M.X ∧ (∀ (x : Y.X) (f : M.X.functionField), RegAt (M.j x) f ↔ RegAt x (ρ f)) ∧ (∀ (K : Type) [Field K] (y : Sp K ⟶ Y.X) (f : M.X.functionField), valAt (y ≫ M.j) f = valAt y (ρ f)) ∧ ∀ (σ : F →+* ℂ) (y : Pts Y σ) (y' : CxPts M.p (σ.comp (algebraMap (𝓞 F) F))), y'.1 = y.1 ≫ M.j → ∀ f : M.X.functionField, ratVal f y' = ratVal (ρ f) y := by
-  intro F _ _ Y M
-  have := M.ar.isIntegral
-  have := isPreimmersion_j M
-  have hη := j_gen_specializes M
-  refine ⟨RingEquiv.ofBijective (fnMap M.j hη) ⟨(fnMap M.j hη).injective, fnMap_surjective M.j hη⟩,
-    fun U hU hU' s => fnMap_fnOf M.j hη hU hU' s,
-    (hη.antisymm (genericPoint_specializes _)).eq,
-    fun x f => (regAt_fnMap_iff M.j hη).symm,
-    fun K _ y f => valAt_comp M.j hη y f, fun σ y y' h f => ?_⟩
-  rw [ratVal_eq, ratVal_eq, h]
-  exact valAt_comp M.j hη y.1 f
+    rw [valAt, valAt, dite_eq_right h₁, dite_eq_right (mt (regAt_fnMap_iff j hη).1 hf)]
 
 end GlobalTheory.TrueGeo.ModelFn

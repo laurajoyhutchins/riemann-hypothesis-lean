@@ -1,4 +1,50 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfChoices
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfCauchySchwarz
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfChoices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBL
 
@@ -45,7 +91,7 @@ theorem loe_trans {Y : Finset α} {A B C : α → α → ℂ} (h1 : Loe Y A B) (
   have a := h1.1 x hx y hy
   have b := h2.1 x hx y hy
   have : C y x - A y x = (C y x - B y x) + (B y x - A y x) := by ring
-  rw [this, a, b, ← map_add]; ring_nf
+  rw [this, a, b, ← map_add (f := _)]; ring_nf
 
 theorem loe_zero_of_psd {Y : Finset α} {B : α → α → ℂ} (h : TB.PSDOn Y B) : Loe Y (fun _ _ => 0) B := by
   unfold Loe; simpa using h
@@ -90,6 +136,7 @@ theorem loe_convex {N : Type} [Fintype N] (Y : Finset α) (lam : N → ℂ) (h :
   rw [loe_iff]
   constructor
   · intro x _ y _
+
     simp only [gramH, map_sub, map_mul, map_sum, Complex.conj_ofReal, inner_conj_symm]
   · intro c
     have eW : ∑ P ∈ Y, conj (c P) • ∑ n, lam n • h n P = ∑ n, lam n • ∑ P ∈ Y, conj (c P) • h n P := by
@@ -119,7 +166,7 @@ theorem loe_add {Y : Finset α} {A B A' B' : α → α → ℂ} (h : Loe Y A B) 
   refine ⟨fun x hx y hy => ?_, fun c => ?_⟩
   · have a := h.1 x hx y hy; have b := h'.1 x hx y hy
     have : B y x + B' y x - (A y x + A' y x) = (B y x - A y x) + (B' y x - A' y x) := by ring
-    rw [this, a, b, ← map_add]; ring_nf
+    rw [this, a, b, ← map_add (f := _)]; ring_nf
   · have e : ∀ K K' : α → α → ℂ, PBA.qf Y (fun x y => K x y + K' x y) c = PBA.qf Y K c + PBA.qf Y K' c := by
       intro K K'; unfold PBA.qf; simp only [← Finset.sum_add_distrib]
       exact Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => by ring

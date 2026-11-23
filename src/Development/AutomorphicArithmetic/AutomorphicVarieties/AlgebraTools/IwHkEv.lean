@@ -1,5 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IwHkApply
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HeckePairTop
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.DcSumEqOfMk
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Matrix GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V.Hi UpperTheory.V.AlgebraTools
 
 section SlopeTestRemainingChoices
@@ -10,7 +57,7 @@ private theorem hkEv_coe (ρ : Representation A G M) (I : Subgroup G) (hI : Heck
     (v : fixd ρ I) : (hk ρ I x v : M) = dc ρ I I x v := by
   have h := (UpperTheory.V.Hi.dcSum A G M ρ I I x (hI x)).2.1
   unfold hk hk2
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
 private noncomputable def hkEv_phi (ρ : Representation A G M) (I : Subgroup G) (m : M) :
@@ -32,7 +79,7 @@ private theorem hkEv_phi_equiv (ρ : Representation A G M) (I : Subgroup G) (m :
     (a : MonoidAlgebra A (G ⧸ I)) : hkEv_phi ρ I m (permRep A I h a) = ρ h (hkEv_phi ρ I m a) := by
   induction a using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | single q c =>
     obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective q
     rw [Representation.ofMulAction_single]
@@ -83,7 +130,7 @@ private theorem hkEv_alg (ρ : Representation A G M) (I : Subgroup G) (c : A) :
 private theorem hkEv_add {ρ : Representation A G M} {I : Subgroup G}
     {T T' : Module.End A (fixd (permRep A I) I)} {E E' : Module.End A (fixd ρ I)}
     (h : hkEv_R ρ I T E) (h' : hkEv_R ρ I T' E') : hkEv_R ρ I (T + T') (E + E') := fun m a => by
-  rw [LinearMap.add_apply, LinearMap.add_apply, map_add, h, h']
+  rw [LinearMap.add_apply, LinearMap.add_apply, map_add (f := _), h, h']
 
 private theorem hkEv_mul {ρ : Representation A G M} {I : Subgroup G}
     {T T' : Module.End A (fixd (permRep A I) I)} {E E' : Module.End A (fixd ρ I)}

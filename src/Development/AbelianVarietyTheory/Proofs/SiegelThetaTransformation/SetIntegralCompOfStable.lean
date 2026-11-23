@@ -1,12 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.MeasurePreservingMulLeft
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsMemRowHighestTotalDegreeEqTwo
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FderivIntegralApplyOfHolomorphicOfDominated
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.GaussianKernelIntegrableOnThinSlabStatement
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.KernInvariantSymmPos
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LowestWeightFunctionMulEq
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FderivIntegralApplyOfHolomorphicOfDominated
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.GaussianKernelIntegrableOnThinSlabStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RealPlaceKernelHolomorphicWeightRowHighestStatement
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.MeasurePreservingMulLeft
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RealPlaceKernelHolomorphicWeightRowHighestStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.Circle
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.DetSubUpper
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical
@@ -43,7 +94,10 @@ theorem exists_mean {K V : Type} [Group K] [TopologicalSpace K] [IsTopologicalGr
   let μ : Measure K := (Measure.haarMeasure ⊤).inv
   have hp : IsProbabilityMeasure (Measure.haarMeasure (⊤ : TopologicalSpace.PositiveCompacts K)) :=
     ⟨by simpa using Measure.haarMeasure_self (K₀ := (⊤ : TopologicalSpace.PositiveCompacts K))⟩
-  have hp' : IsProbabilityMeasure μ := Measure.isProbabilityMeasure_map measurable_inv.aemeasurable
+  have hp' : IsProbabilityMeasure μ := by
+    change IsProbabilityMeasure ((Measure.haarMeasure ⊤).inv)
+    rw [Measure.inv_def]
+    infer_instance
   have hχ0 : ∀ t, χ t ≠ 0 := fun t h => by simpa [h] using hχ1 t
   have hcont : ContinuousOn (Function.uncurry fun t x => (χ t)⁻¹ * F (A t x)) (Set.univ ×ˢ U) := by
     refine ContinuousOn.mul ?_ ?_
@@ -137,9 +191,9 @@ theorem exists_bchar_bound (la : Wt X.Ψ r) (C : ℝ) : ∃ D : ℝ, 0 ≤ D ∧
     (∀ τ i j, ‖b τ i j‖ ≤ C ∧ ‖(b τ i i)⁻¹‖ ≤ C) → ‖bchar la b‖ ≤ D := by
   refine ⟨∏ τ, ∏ i, |C| ^ (la τ i).natAbs, by positivity, fun b hb => ?_⟩
   rw [bchar, norm_prod]
-  refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun τ _ => ?_
+  refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun τ _ => ?_
   rw [norm_prod]
-  refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun i _ => ?_
+  refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun i _ => ?_
   obtain ⟨n, h | h⟩ := Int.eq_nat_or_neg (la τ i)
   · rw [h, zpow_natCast, norm_pow, Int.natAbs_natCast]
     exact pow_le_pow_left₀ (norm_nonneg _) ((hb τ i i).1.trans (le_abs_self C)) n
@@ -226,7 +280,7 @@ theorem integral_mul_ortho (la : Wt X.Ψ r) {x₀ : Frame X.Ψ r}
     simp only [Matrix.mul_assoc, Matrix.nonsing_inv_mul_cancel_left _ _ (hdet τ), Circle.coe_mul,
       ← Matrix.diagonal_mul_diagonal]
   have a3 : Continuous fun t : X.Ψ → Fin r → Circle => ∏ τ, ∏ i, (t τ i : ℂ) ^ la τ i := by
-    refine continuous_finset_prod _ fun τ _ => continuous_finset_prod _ fun i _ => ?_
+    refine continuous_finsetProd _ fun τ _ => continuous_finsetProd _ fun i _ => ?_
     exact Continuous.zpow₀ (by fun_prop) _ fun t => Or.inl (Circle.coe_ne_zero _)
   have a4 : ∀ s t : X.Ψ → Fin r → Circle, ∏ τ, ∏ i, ((t * s) τ i : ℂ) ^ la τ i =
       (∏ τ, ∏ i, (t τ i : ℂ) ^ la τ i) * ∏ τ, ∏ i, (s τ i : ℂ) ^ la τ i := by
@@ -263,8 +317,8 @@ end GlobalTheory.SW.Repro
 
 namespace GlobalTheory.SW
 
-open Repro in
 
+open Repro in
 theorem kern_reproducing : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : ℕ) (X : Data E r) (g q0 : ℕ) (hr : X.p0 + q0 = r) (idx : Fin g ≃ X.Ψ × Fin r) (n : ℕ) (c : X.Ψ → Fin q0 → ℕ) (c' : X.Ψ → Fin X.p0 → ℕ) (m : ℕ) (P : Fin m → Harm.Poly ℂ X.Ψ q0 X.p0 (Fin n)), Even n → (∀ j, P j ∈ Harm.rowHighest ℂ c c') → 2 * r ≤ n → (∃ j, P j ≠ 0) → ∃ δ₁ : ℝ, 0 < δ₁ ∧ ∀ δ : ℝ, 0 < δ → δ ≤ δ₁ → ∃ a : ℝ, 0 < a ∧ ∀ F : Frame X.Ψ r → ℂ, DifferentiableOn ℂ F X.dom → (∀ x ∈ X.dom, ∀ b ∈ Bor X.Ψ r, F (rmul x b) = bchar (wtOf X hr c c' n) b * F x) → (∃ C : ℝ, ∀ x ∈ X.dom, X.pnorm (wtOf X hr c c' n) F x ≤ C) → ∀ x₁ ∈ X.dom, ∫ x₂ in slab X δ, kern X hr idx P x₁ x₂ * F x₂ = a * F x₁ := by
   intro E _ _ _ r X g q0 hr idx n c c' m P hn hP hrn hP0
   have _ := isAddHaarMeasure_volume X

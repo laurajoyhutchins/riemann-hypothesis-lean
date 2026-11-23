@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GenTyL
-import Development.AbelianVarietyTheory.Definitions.Divisors.OverPair
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.OverPair
+public import Formalism.LocalRingCardinality.DataCoeff
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsWeight
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.GaloisValuations.GlobalA
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,40 +67,10 @@ namespace GlobalTheory.CongW
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {l : ℕ} [Fact l.Prime] {a : ℕ}
 
-open Classical in
 
+open Classical in
 def wtSizeOver (ι : Qbar l ≃+* ℂ) (lam : (E →+* ℂ) → DomWeight a) (u : HeightOneSpectrum (𝓞 E)) : ℕ :=
   ∑ τ ∈ Finset.univ.filter (fun τ : E →+* ℂ => OverPair ι u τ), ∑ k : Fin a, ((lam τ).w k).natAbs
-
-def IsIntegralOpW' (ι : Qbar l ≃+* ℂ) (lam : (E →+* ℂ) → DomWeight a) (w₀ : HeightOneSpectrum (𝓞 E))
-    (f : UA E a →₀ ℂ) : Prop :=
-  ∀ g ∈ f.support, g ∈ finU E a ∧ (∀ u, ¬ Apart u w₀ → cLoc u g = 1) ∧
-    ∃ d : ℕ, (∀ u : HeightOneSpectrum (𝓞 E), ((l : ℕ) : 𝓞 E) ∈ u.asIdeal →
-        IntMat u (((l : u.adicCompletion E) ^ d) • ((cLoc u g : GL (Fin a) (u.adicCompletion E)) :
-          Matrix (Fin a) (Fin a) (u.adicCompletion E))) ∧
-        IntMat u (((l : u.adicCompletion E) ^ d) • (((cLoc u g)⁻¹ : GL (Fin a) (u.adicCompletion E)) :
-          Matrix (Fin a) (Fin a) (u.adicCompletion E)))) ∧
-      ‖ι.symm (f g)‖ ≤ ((l : ℝ)⁻¹) ^ (a * d *
-        ∑ᶠ (u : HeightOneSpectrum (𝓞 E)) (_ : ((l : ℕ) : 𝓞 E) ∈ u.asIdeal ∧ cLoc u g ≠ 1), wtSizeOver ι lam u)
-
-def GenTyL' : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (a : ℕ), 1 ≤ a →
-    ∀ (w₀ : HeightOneSpectrum (𝓞 E)), ((l : ℕ) : 𝓞 E) ∈ w₀.asIdeal → IsSplitAt w₀ →
-    ∀ (K : Subgroup (UA E a)), IsLevelAway w₀ K → ∀ (lam : (E →+* ℂ) → DomWeight a) (Jx : Type) (t : Jx → (UA E a →₀ ℂ))
-      (η : Submodule ℂ (UA E a → ℂ) → Jx → ℂ), (∀ j, IsIntegralOpW' ι lam w₀ (t j)) → ActsBy K t η →
-    ∀ (Fam : ∀ (J : Subgroup (GL (Fin a) (w₀.adicCompletion E))) (m : ℕ), (J →* Multiplicative (ZMod (l ^ m))) → Prop),
-      (∀ J m θ, Fam J m θ → IsOpen (J : Set (GL (Fin a) (w₀.adicCompletion E))) ∧
-        IsCompact (J : Set (GL (Fin a) (w₀.adicCompletion E))) ∧ (∀ x ∈ J, ∀ k : ℕ, 0 < k → x ^ k = 1 → x = 1) ∧
-        Function.Surjective θ) →
-      (∀ N : Set (GL (Fin a) (w₀.adicCompletion E)), IsOpen N → 1 ∈ N → ∀ m₀ : ℕ,
-        ∃ (J : Subgroup (GL (Fin a) (w₀.adicCompletion E))) (m : ℕ) (θ : J →* Multiplicative (ZMod (l ^ m))), m₀ ≤ m ∧ (J : Set (GL (Fin a) (w₀.adicCompletion E))) ⊆ N ∧ Fam J m θ) →
-    ∀ (S : Finset (HeightOneSpectrum (𝓞 E))), (∀ w ∈ S, IsSplitAt w ∧ Apart w w₀ ∧
-        ∀ x ∈ locU a w, cLoc w x ∈ GlobalTheory.LFun.KGL w a → x ∈ K) →
-    ∀ D : MvPolynomial (Fin a) ℤ, D.IsSymmetric → D ≠ 0 →
-    ∀ U, OfType lam K U →
-      PolyApprox (fun j => ι.symm (η U j)) {ϑ | ∃ U', OfType lam K U' ∧
-        (∃ (J : Subgroup (GL (Fin a) (w₀.adicCompletion E))) (m : ℕ) (θ : J →* Multiplicative (ZMod (l ^ m))), Fam J m θ ∧ ∃ χ : Multiplicative (ZMod (l ^ m)) →* ℂˣ, χ ≠ 1 ∧ HasTypeVec w₀ K J θ χ U') ∧
-        (∀ w ∈ S, GenAt D U' w) ∧ ϑ = fun j => ι.symm (η U' j)}
 
 end GlobalTheory.CongW
 

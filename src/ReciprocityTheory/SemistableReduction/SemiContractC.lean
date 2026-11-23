@@ -1,5 +1,59 @@
-import ReciprocityTheory.SemistableReduction.LatSemiSt
-import Lemmata.GeneralBFactSecond.Imports
+module
+
+public import ReciprocityTheory.SemistableReduction.LatSemiSt
+public import Lemmata.GeneralBFactSecond.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -85,7 +139,8 @@ theorem sc_append_li {K : Type} [Field K] [NumberField K] {r k m : ℕ}
   simp only [Fin.append_left, Fin.append_right] at hg
   have h1 : ∑ j, g (Fin.natAdd k j) • (N *ᵥ c j) = 0 := by
     have := congrArg N.mulVecLin hg
-    simpa [map_add, map_sum, map_smul, Matrix.mulVecLin_apply, hbN] using this
+
+    simpa [map_add (f := _), map_sum, map_smul, Matrix.mulVecLin_apply, hbN] using this
   have hc0 := Fintype.linearIndependent_iff.mp hc _ h1
   have hb0 : ∀ i, g (Fin.castAdd m i) = 0 := by
     apply Fintype.linearIndependent_iff.mp hb
@@ -135,6 +190,7 @@ theorem sc_index {K : Type} [Field K] [NumberField K] {r k m : ℕ}
       Submodule.sum_mem _ fun j _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩)
     have hzL : z ∈ L := Submodule.sum_mem _ fun j _ => L.smul_mem _ (hcL j)
     have hfz : f (x - z) = 0 := by
+
       rw [map_sub, hz, map_sum]
       simp only [map_smul]
       simp only [hfx] at ha ⊢
@@ -150,7 +206,7 @@ theorem sc_index {K : Type} [Field K] [NumberField K] {r k m : ℕ}
       have h := hspanb hy.2
       rw [LinearMap.mem_ker] at h
       exact h
-    rw [map_add, hy0, zero_add]
+    rw [map_add (f := _), hy0, zero_add]
     exact hspanc hz
 
 end ReciprocityTheory.MultiplicativeHeights

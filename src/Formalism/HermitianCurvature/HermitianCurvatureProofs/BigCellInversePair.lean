@@ -1,6 +1,53 @@
+module
+
+public import Formalism.HermitianCurvature.StatementB
+public import Formalism.FormalDegreeBessel.FinalG
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.HermitianCurvature.StatementJF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.FormalDegreeBessel.FinalG
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter
 
@@ -62,20 +109,5 @@ end Formalism.FourierDecayAlt.P.BigCellInversePair
 namespace Formalism.FourierDecayAlt.P
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.JF
-
-theorem equiv_det_of_onto : Formalism.FourierDecayAlt.JF.EquivDetOfOnto := by
-  intro hOnto k r Wp Wq _ _ _ _ D f f' hf hf' hq g hg
-  obtain ⟨p, hp, q, hqD, rfl⟩ := hOnto k r Wp Wq D g hg
-  have hx := BigCellInversePair.sgs_invP p (WeylGroupFacts.isUnit_of_uh hp.1.1) (WeylGroupFacts.isUnit_of_uh hp.2.1.1)
-    (WeylGroupFacts.isUnit_of_uh hp.2.2.1.1) (WeylGroupFacts.isUnit_of_uh hp.2.2.2.1) (gq D q)
-  have hP := BigCellInversePair.invP_inSS D hp
-  rw [← hf _ hP _ hg, ← hf' _ hP _ hg]
-  unfold rho
-  rw [hx, hq q hqD]
-
-theorem radial_part_intertwines_of_parts : Formalism.FourierDecayAlt.JF.RadialPartIntertwinesFromComponents := by
-  intro hJ hG k r Wp Wq _ _ _ _ _ _ D A m F Θ ho hT hF hC
-  filter_upwards [hG k r Wp Wq D] with q hq
-  exact (hJ k r Wp Wq D A m F Θ ho hT hF hC _ hq).symm
 
 end Formalism.FourierDecayAlt.P

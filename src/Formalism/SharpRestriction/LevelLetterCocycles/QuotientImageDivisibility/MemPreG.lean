@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LevNOsmul
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusSqComparisonLetter
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.PchainDNAlt
+import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusSqComparisonLetter
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusUniformizerPowDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.NDlCoords
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.PchainDN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSAddLeft
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -26,7 +74,7 @@ def preG (i : ZMod n) {U : Type} [AddCommGroup U] [Module LL U]
   carrier := {x | G (Formalism.MainNotions.ArcLiftingSetup.cmpD W T (x : W.DD T)) ∈ Z}
   add_mem' := fun {a b} ha hb => by
     show G (Formalism.MainNotions.ArcLiftingSetup.cmpD W T ((a : W.DD T) + b)) ∈ Z
-    rw [cmpD_add W T (NDl_N W T a.2) (NDl_N W T b.2), map_add]
+    rw [cmpD_add W T (NDl_N W T a.2) (NDl_N W T b.2), map_add (f := _)]
     exact Z.add_mem ha hb
   zero_mem' := by
     show G (Formalism.MainNotions.ArcLiftingSetup.cmpD W T 0) ∈ Z
@@ -88,7 +136,7 @@ theorem pass3 [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O LL]
     have e : Formalism.MainNotions.ArcLiftingSetup.cmpD W T ((x + x' : ↥(Formalism.MainNotions.RamifiedCoefficientChains.S9.NDl W T (c - 1 - 1))) : W.DD T) =
         Formalism.MainNotions.ArcLiftingSetup.cmpD W T (x : W.DD T) + Formalism.MainNotions.ArcLiftingSetup.cmpD W T (x' : W.DD T) :=
       cmpD_add W T (NDl_N W T x.2) (NDl_N W T x'.2)
-    rw [e, hd0a, map_add, smul_add, smul_add]
+    rw [e, hd0a, map_add (f := _), smul_add, smul_add]
     have := Fη.add_mem h1 h2
     convert this using 1
     abel
@@ -153,7 +201,7 @@ theorem pass3 [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O LL]
     have e : Formalism.MainNotions.ArcLiftingSetup.cmpD W T ((y + y' : ↥(Formalism.MainNotions.RamifiedCoefficientChains.S9.NDl W T (c - 1 - 1 - 1))) :
         W.DD T) = Formalism.MainNotions.ArcLiftingSetup.cmpD W T (y : W.DD T) + Formalism.MainNotions.ArcLiftingSetup.cmpD W T (y' : W.DD T) :=
       cmpD_add W T (NDl_N W T y.2) (NDl_N W T y'.2)
-    rw [e, map_add, map_add, hd0a, smul_add, smul_add]
+    rw [e, map_add (f := _), map_add (f := _), hd0a, smul_add, smul_add]
     have := Fη.add_mem h1 h2
     convert this using 1
     abel
@@ -184,7 +232,7 @@ theorem pass3 [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O LL]
     { toFun := fun α => C.mkQ (φ2 (∑ k, algebraMap O LL (α k) • Formalism.MainNotions.ArcLiftingSetup.cmpD W T (bF k)))
       map_zero' := by simp
       map_add' := fun α β => by
-        simp only [Pi.add_apply, map_add, add_smul, Finset.sum_add_distrib] }
+        simp only [Pi.add_apply, map_add (f := _), add_smul, Finset.sum_add_distrib] }
   have hphA : ∀ (o : O) (α : Fin d → O), phA (o • α) = algebraMap O LL o • phA α := by
     intro o α
     simp only [phA, AddMonoidHom.coe_mk, ZeroHom.coe_mk, Pi.smul_apply, smul_eq_mul, map_mul,
@@ -202,6 +250,7 @@ theorem pass3 [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O LL]
       rw [Submodule.span_le]
       rintro _ ⟨α, rfl⟩
       refine ⟨_, ?_, rfl⟩
+
       rw [map_sum]
       exact Submodule.sum_mem _ fun k _ => by
         rw [map_smul]; exact Submodule.smul_mem _ _ (hletter k)
@@ -241,7 +290,7 @@ theorem pass3 [IsDomain O] [IsPrincipalIdealRing O] [IsFractionRing O LL]
       rw [hsG, Finset.coe_image]
       exact h
     have e : Submodule.Quotient.mk y = Amb.mkQ (y - lin σ) + Amb.mkQ (lin σ) := by
-      rw [← map_add, sub_add_cancel]; rfl
+      rw [← map_add (f := _), sub_add_cancel]; rfl
     rw [e]
     exact Submodule.add_mem _ (Submodule.mem_sup_left hm1) (Submodule.mem_sup_right hm2)
   have ch2 := pchain_of_gen (pstep_gen (lenO := lenOl PD (O := O)) (m := m) (c := cc) F3b ψ3c

@@ -1,5 +1,59 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePProjFBTop
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieFB
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+public import Formalism.LocalToGlobal.CharacterGerms.EndomorphismLimitIntegral
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePLSmall
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePLSmallMain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.LocalToGlobal.CharacterGerms.CoeffSubstEqSum
 import Formalism.LocalToGlobal.CharacterGerms.RowTiePSplitDef
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +77,7 @@ theorem linAct_eq (φ : Pt C 1 dd) (v : Fin dd → C) : linAct φ v = Matrix.mul
   rfl
 
 theorem coeff_single_cc {σ : Type} (s : σ) (f : MvPowerSeries σ C) :
-    coeff (Finsupp.single s 1) f = constantCoeff (pderiv C s f) := by
+    coeff (Finsupp.single s 1) f = constantCoeff (MvPowerSeries.pderiv (R := C) s f) := by
   rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, MvPowerSeries.coeff_pderiv]
   simp
 
@@ -44,10 +98,11 @@ theorem lin_comp1 {φ ψ : Pt C 1 dd} (hψ : ∀ k, constantCoeff (ψ k) = 0) :
     linM (comp1 φ ψ) = linM φ * linM ψ := by
   ext i j
   simp only [linM, Matrix.of_apply, Matrix.mul_apply, coeff_single_cc]
-  show constantCoeff (pderiv C ((0 : Fin 1), j)
+  show constantCoeff (MvPowerSeries.pderiv (R := C) ((0 : Fin 1), j)
     (MvPowerSeries.subst (fun p : Fin 1 × Fin dd => (![ψ] : Fin 1 → Pt C 1 dd) p.1 p.2) (φ i))) = _
+
   rw [Formalism.G.LogCR.pderiv_subst (a := fun p : Fin 1 × Fin dd => (![ψ] : Fin 1 → Pt C 1 dd) p.1 p.2)
-    (fun p => (z0_1 ψ hψ) p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_one]
+  (fun p => (z0_1 ψ hψ) p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_one]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul, cc_subst (a := fun p : Fin 1 × Fin dd => (![ψ] : Fin 1 → Pt C 1 dd) p.1 p.2)
     (fun p => (z0_1 ψ hψ) p.1 p.2)]
@@ -65,7 +120,7 @@ theorem lin_pt : linM (pt C (n := 1) dd 0) = 1 := by
     have h3 := (Finsupp.single_left_inj (one_ne_zero : (1 : ℕ) ≠ 0)).mp h2
     exact (Prod.mk.inj h3).2.symm
 
-theorem cc_pderiv_X {σ : Type} [DecidableEq σ] (s t : σ) : constantCoeff (pderiv C s (X t : MvPowerSeries σ C)) = if t = s then 1 else 0 := by
+theorem cc_pderiv_X {σ : Type} [DecidableEq σ] (s t : σ) : constantCoeff (MvPowerSeries.pderiv (R := C) s (X t : MvPowerSeries σ C)) = if t = s then 1 else 0 := by
   rw [MvPowerSeries.pderiv_X]
   by_cases h : t = s
   · subst h
@@ -73,12 +128,13 @@ theorem cc_pderiv_X {σ : Type} [DecidableEq σ] (s t : σ) : constantCoeff (pde
   · simp [Pi.single_apply, h]
 
 theorem formal_group_coeff_first_linear {V : VF C} {O : Type} [CommRing O] [StarRing O] (Y : FBChart C V O dd) (i j : Fin dd) :
-    constantCoeff (pderiv C ((0 : Fin 2), j) (Y.B.G.F i)) = if i = j then 1 else 0 := by
+    constantCoeff (MvPowerSeries.pderiv (R := C) ((0 : Fin 2), j) (Y.B.G.F i)) = if i = j then 1 else 0 := by
   have hA : Z0 (![pt C (n := 1) dd 0, 0] : Fin 2 → Pt C 1 dd) := z0_p0 _ (z0_pt 0)
-  have h := congrArg (fun f => constantCoeff (pderiv C ((0 : Fin 1), j) f)) (formalGroupLaw_ev_x_zero Y (pt C (n := 1) dd 0) (z0_pt 0) i)
+  have h := congrArg (fun f => constantCoeff (MvPowerSeries.pderiv (R := C) ((0 : Fin 1), j) f)) (formalGroupLaw_ev_x_zero Y (pt C (n := 1) dd 0) (z0_pt 0) i)
   unfold ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ.ev at h
+
   rw [Formalism.G.LogCR.pderiv_subst (a := fun p : Fin 2 × Fin dd => (![pt C (n := 1) dd 0, 0] : Fin 2 → Pt C 1 dd) p.1 p.2)
-    (fun p => hA p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_two] at h
+  (fun p => hA p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_two] at h
   simp only [map_mul, cc_subst (a := fun p : Fin 2 × Fin dd => (![pt C (n := 1) dd 0, 0] : Fin 2 → Pt C 1 dd) p.1 p.2)
     (fun p => hA p.1 p.2), Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, pt, Pi.zero_apply, map_zero,
     mul_zero, Finset.sum_const_zero, add_zero, cc_pderiv_X, Prod.mk.injEq, true_and, mul_ite, mul_one,
@@ -86,15 +142,16 @@ theorem formal_group_coeff_first_linear {V : VF C} {O : Type} [CommRing O] [Star
   rw [h]
 
 theorem formal_group_coeff_second_linear {V : VF C} {O : Type} [CommRing O] [StarRing O] (Y : FBChart C V O dd) (i j : Fin dd) :
-    constantCoeff (pderiv C ((1 : Fin 2), j) (Y.B.G.F i)) = if i = j then 1 else 0 := by
+    constantCoeff (MvPowerSeries.pderiv (R := C) ((1 : Fin 2), j) (Y.B.G.F i)) = if i = j then 1 else 0 := by
   have hA : Z0 (![0, pt C (n := 1) dd 0] : Fin 2 → Pt C 1 dd) := by
     intro k j'; fin_cases k
     · simp
     · exact z0_pt 0 j'
-  have h := congrArg (fun f => constantCoeff (pderiv C ((0 : Fin 1), j) f)) (Y.B.G.unit i)
+  have h := congrArg (fun f => constantCoeff (MvPowerSeries.pderiv (R := C) ((0 : Fin 1), j) f)) (Y.B.G.unit i)
   unfold ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ.ev at h
+
   rw [Formalism.G.LogCR.pderiv_subst (a := fun p : Fin 2 × Fin dd => (![0, pt C (n := 1) dd 0] : Fin 2 → Pt C 1 dd) p.1 p.2)
-    (fun p => hA p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_two] at h
+  (fun p => hA p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_two] at h
   simp only [map_mul, cc_subst (a := fun p : Fin 2 × Fin dd => (![0, pt C (n := 1) dd 0] : Fin 2 → Pt C 1 dd) p.1 p.2)
     (fun p => hA p.1 p.2), Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, pt, Pi.zero_apply, map_zero,
     mul_zero, Finset.sum_const_zero, zero_add, cc_pderiv_X, Prod.mk.injEq, true_and, mul_ite, mul_one,
@@ -107,10 +164,11 @@ theorem lin_addOf {V : VF C} {O : Type} [CommRing O] [StarRing O] (Y : FBChart C
   have hZ : Z0 (![A, B] : Fin 2 → Pt C 1 dd) := constant_zero_two_points A B hA hB
   ext i j
   simp only [linM, Matrix.of_apply, Matrix.add_apply, coeff_single_cc]
-  show constantCoeff (pderiv C ((0 : Fin 1), j)
+  show constantCoeff (MvPowerSeries.pderiv (R := C) ((0 : Fin 1), j)
     (MvPowerSeries.subst (fun p : Fin 2 × Fin dd => (![A, B] : Fin 2 → Pt C 1 dd) p.1 p.2) (Y.B.G.F i))) = _
+
   rw [Formalism.G.LogCR.pderiv_subst (a := fun p : Fin 2 × Fin dd => (![A, B] : Fin 2 → Pt C 1 dd) p.1 p.2)
-    (fun p => hZ p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_two]
+  (fun p => hZ p.1 p.2), map_sum, Fintype.sum_prod_type, Fin.sum_univ_two]
   simp only [map_mul, cc_subst (a := fun p : Fin 2 × Fin dd => (![A, B] : Fin 2 → Pt C 1 dd) p.1 p.2)
     (fun p => hZ p.1 p.2), formal_group_coeff_first_linear Y, formal_group_coeff_second_linear Y, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]
@@ -135,16 +193,6 @@ def linHom (Y : FBChart C V O dd) : O →+* Matrix (Fin dd) (Fin dd) C where
     simp only [sub_self, add_sub_cancel_right] at h2
     exact h2.symm
   map_add' x y := by rw [Y.B.A.add_act]; exact lin_addOf Y (Y.B.A.const x) (Y.B.A.const y)
-
-def KeySt : Prop :=
-  ∀ (C : Type) [Field C] [CharZero C] (V : VF C) (O : Type) [CommRing O] [StarRing O] (dd : ℕ)
-    (Y : FBChart C V O dd) (d : ℕ) [NeZero d] (I : Fin 2 → Type) [∀ g, Fintype (I g)] (p : PairData Y d I)
-    (g : Fin 2) (ε : O), (∃ y, ε * ε - ε = (V.l : O) * y) → (∀ a, V.MM (p.em g a ε - 1)) →
-    (∀ x : O, (∀ a, V.MM (p.em g a x)) → ∃ y, ε * x = (V.l : O) * y) →
-    ∀ e : Pt C 1 dd, (∀ (N : ℕ) i μ, ∃ n0 : ℕ, ∀ n ≥ n0,
-      V.Ge N (MvPowerSeries.coeff μ (e i) - MvPowerSeries.coeff μ (Y.B.A.act (ε ^ V.l ^ n) i))) →
-    ∀ x : O, Polynomial.aeval (linM (Y.B.A.act x))
-      (∏ c : ZMod d, (Polynomial.X - Polynomial.C (p.em g c x))) * linM e = 0
 
 theorem proj_core (Y : FBChart C V O dd) (ε : O) (hε : ∃ y, ε * ε - ε = (V.l : O) * y) (e : Pt C 1 dd)
     (he : ∀ (N : ℕ) i μ, ∃ n0 : ℕ, ∀ n ≥ n0,
@@ -174,30 +222,6 @@ theorem proj_core (Y : FBChart C V O dd) (ε : O) (hε : ∃ y, ε * ε - ε = (
       rw [← Y.B.A.mul_act, ← Y.B.A.mul_act, mul_comm]
     rw [eq] at L
     exact L.unique R
-
-theorem projLie_of (hK : KeySt) (hS : SplitSt) : ProjLieSt := by
-  intro C _ _ V O _ _ dd Y d _ I _ p g ε hε hε1 hεx e he v
-  obtain ⟨e0, hidem, hcomm⟩ := proj_core Y ε hε e he
-  have hinj : Function.Injective (fun c : ZMod d => p.em g c) := by
-    intro c c' h
-    by_contra hne
-    obtain ⟨x, hx⟩ := p.em_sep (g, c) (g, c') (by simp [hne])
-    have h2 : p.em g c = p.em g c' := h
-    rw [h2, sub_self, AddValuation.map_zero] at hx
-    simp at hx
-  have hPP : linM e * linM e = linM e := by rw [← lin_comp1 e0, hidem]
-  have hPM : ∀ x, linM e * linHom Y x = linHom Y x * linM e := fun x => by
-    show linM e * linM (Y.B.A.act x) = linM (Y.B.A.act x) * linM e
-    rw [← lin_comp1 (Y.B.A.const x), ← lin_comp1 e0, hcomm x]
-  obtain ⟨w, hw, hwe⟩ := hS C O dd (ZMod d) (linHom Y) (linM e) (fun c => p.em g c) hPP hPM hinj
-    (fun x => hK C V O dd Y d I p g ε hε hε1 hεx e he x) v
-  have hb : ∀ c, ∃ b : I g → C, (∀ c', p.ty g c' ≠ c → b c' = 0) ∧ w c = ∑ c', b c' • p.u g c' := fun c =>
-    p.u_full g c (w c) fun x => by rw [linAct_eq]; exact hwe c x
-  choose b _ hbw using hb
-  refine ⟨fun c' => ∑ c, b c c', ?_⟩
-  rw [linAct_eq, hw]
-  simp_rw [hbw, Finset.sum_smul]
-  exact Finset.sum_comm
 
 end Glue
 

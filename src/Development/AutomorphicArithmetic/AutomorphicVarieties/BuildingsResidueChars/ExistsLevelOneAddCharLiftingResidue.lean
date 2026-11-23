@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.KirCusp
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Matrix GlobalTheory.SmGL GlobalTheory.SplitWeil UpperTheory.V.Hi UpperTheory.V.Z.Desc.V0
 
 private theorem sep_char {A : Type} [AddCommGroup A] (H : AddSubgroup A) {a : A} (ha : a ∉ H) :
@@ -25,7 +71,7 @@ private theorem sep_char {A : Type} [AddCommGroup A] (H : AddSubgroup A) {a : A}
   let ψ : AddChar A Circle :=
     { toFun := fun x => AddCircle.toCircle (f x)
       map_zero_eq_one' := by rw [map_zero, AddCircle.toCircle_zero]
-      map_add_eq_mul' := fun x y => by rw [map_add, AddCircle.toCircle_add] }
+      map_add_eq_mul' := fun x y => by rw [map_add (f := _), AddCircle.toCircle_add] }
   refine ⟨ψ, fun u hu => ?_, fun h => ?_⟩
   · have h0 : f u = 0 := by
       have : QuotientAddGroup.mk' H u = 0 := (QuotientAddGroup.eq_zero_iff _).2 hu
@@ -60,7 +106,7 @@ theorem UpperTheory.exists_level_one_addChar_lifting_residue :
         show valuation k (-a) < 1
         rw [Valuation.map_neg]; exact ha }
   have hMo : IsOpen (M : Set k) := by
-    have h := IsValuativeTopology.isOpen_ball (R := k) (v := valuation k) 1
+    have h := Valuation.isOpen_ball (v := valuation k) 1
     convert h using 1
     ext x
     exact ((valuation k).restrict_lt_one_iff (x := x)).symm
@@ -84,7 +130,7 @@ theorem UpperTheory.exists_level_one_addChar_lifting_residue :
         have : ψ (σ 0 : k) = ψ ((0 : 𝒪[k]) : k) := hres _ _ (by rw [hσ, map_zero])
         rw [this]; simp
       map_add_eq_mul' := fun c d => by
-        have : ψ (σ (c + d) : k) = ψ ((σ c + σ d : 𝒪[k]) : k) := hres _ _ (by rw [hσ, map_add, hσ, hσ])
+        have : ψ (σ (c + d) : k) = ψ ((σ c + σ d : 𝒪[k]) : k) := hres _ _ (by rw [hσ, map_add (f := _), hσ, hσ])
         rw [this]; push_cast; rw [AddChar.map_add_eq_mul] }
   have hφ : ∀ y : 𝒪[k], ψ (y : k) = φ (IsLocalRing.residue 𝒪[k] y) := fun y =>
     hres _ _ (hσ _).symm

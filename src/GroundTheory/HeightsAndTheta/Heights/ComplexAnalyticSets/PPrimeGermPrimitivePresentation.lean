@@ -1,9 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimeGermPrimitivePresentation
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimeGermFiniteProjection
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StHolGermsIntegrallyClosed
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StGermCentredIntegralEquation
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PrimitiveLinearForm
+module
+
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PPrimeGermNullstellensatz
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimeGermFiniteProjection
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StHolGermsIntegrallyClosed
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StGermCentredIntegralEquation
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PrimitiveLinearForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -63,8 +112,8 @@ def pull {d : ℕ} (A : (σ → ℂ) →L[ℂ] (Fin d → ℂ)) (w : σ → ℂ)
     rw [toGerm_compA_congr A w (rep 0) 0 (by rw [toGerm_rep, map_zero]), map_zero, map_zero]
   map_add' φ ψ := by
     show toGerm w (compA A w (rep (φ + ψ))) = toGerm w (compA A w (rep φ)) + toGerm w (compA A w (rep ψ))
-    rw [← map_add, ← map_add]
-    exact toGerm_compA_congr A w _ _ (by rw [map_add, toGerm_rep, toGerm_rep, toGerm_rep])
+    rw [← map_add (f := _), ← map_add (f := _)]
+    exact toGerm_compA_congr A w _ _ (by rw [map_add (f := _), toGerm_rep, toGerm_rep, toGerm_rep])
 
 theorem pull_toGerm {d : ℕ} (A : (σ → ℂ) →L[ℂ] (Fin d → ℂ)) (w : σ → ℂ) (u : anFun (A w)) :
     pull A w (toGerm (A w) u) = toGerm w (compA A w u) :=
@@ -76,37 +125,7 @@ theorem exists_of_mem_holGermIdeal {w : σ → ℂ} {k : ℕ} (p : Fin k → (σ
     (hφ : φ ∈ holGermIdeal w p) :
     ∃ h : Fin k → (σ → ℂ) → ℂ, (∀ i, AnalyticAt ℂ (h i) w) ∧
       (φ : Germ (𝓝 w) ℂ) = ((fun z => ∑ i, h i z * p i z : (σ → ℂ) → ℂ) : Germ (𝓝 w) ℂ) := by
-  induction hφ using Submodule.span_induction with
-  | mem φ hφ =>
-    obtain ⟨i, hi⟩ := hφ
-    refine ⟨fun j _ => if j = i then 1 else 0, fun j => analyticAt_const, ?_⟩
-    rw [hi]
-    congr 1
-    funext z
-    simp
-  | zero =>
-    refine ⟨fun _ _ => 0, fun _ => analyticAt_const, ?_⟩
-    rw [show (fun z => ∑ i, (fun (_ : Fin k) (_ : σ → ℂ) => (0 : ℂ)) i z * p i z) = (0 : (σ → ℂ) → ℂ) by
-      funext z; simp]
-    rfl
-  | add x y _ _ hx hy =>
-    obtain ⟨h₁, hh₁, e₁⟩ := hx
-    obtain ⟨h₂, hh₂, e₂⟩ := hy
-    refine ⟨fun i z => h₁ i z + h₂ i z, fun i => (hh₁ i).add (hh₂ i), ?_⟩
-    show (x : Germ (𝓝 w) ℂ) + y = _
-    rw [e₁, e₂, ← Germ.coe_add]
-    congr 1
-    funext z
-    simp [add_mul, Finset.sum_add_distrib]
-  | smul a x _ hx =>
-    obtain ⟨h, hh, e⟩ := hx
-    obtain ⟨fa, hfa, efa⟩ : ∃ f : (σ → ℂ) → ℂ, AnalyticAt ℂ f w ∧ (f : Germ (𝓝 w) ℂ) = a := a.2
-    refine ⟨fun i z => fa z * h i z, fun i => hfa.mul (hh i), ?_⟩
-    show (a : Germ (𝓝 w) ℂ) * x = _
-    rw [e, ← efa, ← Germ.coe_mul]
-    congr 1
-    funext z
-    simp [Finset.mul_sum, mul_assoc]
+  apply _root_.GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets.PrimeGermNullstellensatz.exists_of_mem_holGermIdeal <;> assumption
 
 theorem toGerm_mem_iff {w : σ → ℂ} {k : ℕ} {p : Fin k → (σ → ℂ) → ℂ} (hp : ∀ i, AnalyticAt ℂ (p i) w)
     (u : anFun w) : toGerm w u ∈ holGermIdeal w p ↔ IsGermCombination w p u.1 := by
@@ -116,6 +135,7 @@ theorem toGerm_mem_iff {w : σ → ℂ} {k : ℕ} {p : Fin k → (σ → ℂ) �
     exact ⟨h, hh, Germ.coe_eq.1 e⟩
   · rintro ⟨h, hh, hev⟩
     have hsum : toGerm w u = ∑ i, toGerm w (mkA (h i) (hh i)) * toGerm w (mkA (p i) (hp i)) := by
+
       simp only [← map_mul, ← map_sum]
       apply Subtype.ext
       change ((u.1 : (σ → ℂ) → ℂ) : Germ (𝓝 w) ℂ) =
@@ -125,7 +145,7 @@ theorem toGerm_mem_iff {w : σ → ℂ} {k : ℕ} {p : Fin k → (σ → ℂ) �
     rw [hsum]
     refine Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegrallyClosed.Statement)
     (hCE : CentredIntegralEquation.Statement) : PrimeGermPrimitivePresentation.Statement := by
@@ -153,7 +173,7 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
     rw [hcompA, toGerm_rep]
 
   have hRB : Function.Injective (algebraMap R B) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro r hr
     rw [← hcomp, hcl0] at hr
     have hev := hinj (rep r).1 (rep r).2 hr
@@ -191,6 +211,7 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
       refine Finset.sum_congr rfl fun m hm => ?_
       simp [a', hm, compA, mkA, crd]
     have h0 := (hcl0 _).2 (by rw [hU]; exact hc)
+
     rw [map_sub, sub_eq_zero, map_sum] at h0
     show cl u ∈ _
     rw [h0]
@@ -211,7 +232,8 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
       funext z
       simp [compA, mkA, crd, Finset.sum_apply]
     have h0 := (hcl0 _).2 (by rw [hV]; exact hc)
-    rw [map_add, map_pow, map_sum] at h0
+
+    rw [map_add (f := _), map_pow, map_sum] at h0
     simp only [map_mul, map_pow, hcompA] at h0
     rw [eval₂_add, eval₂_X_pow, eval₂_finsetSum]
     simpa [eval₂_mul, eval₂_C, eval₂_X_pow] using h0
@@ -231,6 +253,7 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
       apply Subtype.ext
       funext z
       simp [lA, mkA, ℓ, compA, cst, crd, Finset.sum_apply]
+
     rw [this, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, hcompA]
@@ -238,6 +261,7 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
   have haev : ∀ (q : R[X]) (K : ℕ), q.natDegree < K →
       aeval ℓB q = cl (∑ j : Fin K, compA A w (rep (q.coeff j)) * lA ^ (j : ℕ)) := by
     intro q K hq
+
     rw [aeval_eq_sum_range' hq, ← Fin.sum_univ_eq_sum_range (fun i => q.coeff i • ℓB ^ i) K, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, map_pow, hlA, hcomp, Algebra.smul_def]
@@ -256,8 +280,9 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
       simp [lA, mkA, compA, cf, Finset.sum_apply]
     have hcm : cl (lA ^ N + ∑ j : Fin N, compA A w (rep (m.coeff j)) * lA ^ (j : ℕ)) = aeval ℓB m := by
       conv_rhs => rw [hmon.as_sum]
-      rw [map_add, map_pow, hlA, map_sum, map_add, map_pow, aeval_X, map_sum,
-        ← Fin.sum_univ_eq_sum_range (fun i => aeval ℓB (C (m.coeff i) * X ^ i)) N]
+
+      rw [map_add (f := _), map_pow, hlA, map_sum, map_add (f := _), map_pow, aeval_X, map_sum,
+      ← Fin.sum_univ_eq_sum_range (fun i => aeval ℓB (C (m.coeff i) * X ^ i)) N]
       congr 1
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_mul, map_pow, hlA, hcomp, map_mul, aeval_C, map_pow, aeval_X]
@@ -273,6 +298,7 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
         funext z
         simp [lA, mkA, compA, Finset.sum_apply]
       have h := (hcl0 _).2 (by rw [hU]; exact hc')
+
       rw [← h, map_sum, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_mul, map_pow, aeval_C, aeval_X, map_mul, map_pow, hlA, hcompA]
@@ -308,13 +334,14 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
     let Fm : ((Fin d → ℂ) → ℂ)[X] := X ^ N + ∑ j : Fin N, C (cf j) * X ^ (j : ℕ)
     have hFm : Fm.map G = m.map ιR := by
       conv_rhs => rw [hmon.as_sum]
-      simp only [Fm, Polynomial.map_add, Polynomial.map_pow, map_X, Polynomial.map_sum, Polynomial.map_mul,
-        map_C, cf, hGrep]
+
+      simp only [Fm, Polynomial.map_add (f := _), Polynomial.map_pow, map_X, Polynomial.map_sum, Polynomial.map_mul,
+      map_C, cf, hGrep]
       rw [← Fin.sum_univ_eq_sum_range (fun i => C (ιR (m.coeff i)) * X ^ i) N]
     let E : ((Fin d → ℂ) → ℂ)[X] := lift a * Fm + lift b * derivative Fm - C δ
     have hE : E.map G = 0 := by
       have h1 : E.map G = (a * m + b * derivative m - C D).map ιR := by
-        simp only [E, Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul, ← derivative_map, hlift, hFm,
+        simp only [E, Polynomial.map_sub, Polynomial.map_add (f := _), Polynomial.map_mul, ← derivative_map, hlift, hFm,
           map_C, δ, hGrep]
       rw [h1, hab, sub_self, Polynomial.map_zero]
     have hev : ∀ᶠ y in 𝓝 (A w), ∀ i ∈ E.support, E.coeff i y = 0 := by
@@ -332,9 +359,10 @@ theorem proof (hFP : PrimeGermFiniteProjection.Statement) (hIC : HolGermsIntegra
       · rw [hi, map_zero]
       · exact hy i (mem_support_iff.2 hi)
     have hFy : Fm.map ev = monicOfCoeffs fun j => cf j y := by
+
       simp [Fm, monicOfCoeffs, Polynomial.map_sum, ev]
     rw [separable_def, ← hFy]
-    simp only [E, Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul, map_C, ← derivative_map,
+    simp only [E, Polynomial.map_sub, Polynomial.map_add (f := _), Polynomial.map_mul, map_C, ← derivative_map,
       sub_eq_zero] at hE0
     refine ⟨C (δ y)⁻¹ * (lift a).map ev, C (δ y)⁻¹ * (lift b).map ev, ?_⟩
     rw [mul_assoc, mul_assoc, ← mul_add, hE0, ← C_mul, show ev δ = δ y from rfl, inv_mul_cancel₀ hδy, C_1]

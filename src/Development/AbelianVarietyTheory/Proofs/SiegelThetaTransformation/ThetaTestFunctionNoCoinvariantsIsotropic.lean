@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.NeBotOfNorm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelStructurePropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelTestFunctionFiniteSumEquivariantStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.NeBotOfNorm
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelStructurePropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LevelTestFunctionFiniteSumEquivariantStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical nonZeroDivisors
@@ -64,6 +112,7 @@ theorem gen_of_red (D : Level X) {u : Fin r → Fin r → E} {k : GL (Fin r) (�
   choose k'' hk'' using fun i j => Ideal.Quotient.mk_surjective
     (((k⁻¹ : GL (Fin r) (𝓞 E ⧸ D.𝔪)) : Matrix (Fin r) (Fin r) (𝓞 E ⧸ D.𝔪)) i j)
   have hone (j l) : ∑ i, k' j i * k'' i l - (1 : Matrix (Fin r) (Fin r) (𝓞 E)) j l ∈ D.𝔪 := by
+
     rw [← Ideal.Quotient.eq, map_sum]
     have := congrFun (congrFun k.mul_inv j) l
     rw [Matrix.mul_apply, ← hk'] at this
@@ -125,7 +174,7 @@ theorem not_smul_idq {𝔞 𝔟 : Ideal (𝓞 E)} (h0 : 𝔟 ≠ ⊥) (h1 : 𝔟
   have h3 : ((u * a : 𝓞 E) : E) + (m : E) = 1 := by
     have := congrArg (algebraMap (𝓞 E) E) ham
     rwa [map_add, map_one] at this
-  rw [map_add, hc]
+  rw [map_add (f := _), hc]
   change _ + (b : E) = _
   rw [hb]
   linear_combination t * h3
@@ -150,7 +199,7 @@ theorem exists_pairing (D : Level X) (hn : r ≤ n) (hX : SelfD X X.Λ) {M : ℕ
   push Not at hcon
   obtain ⟨k, hk⟩ : ∃ k : D.J, D.Red (fun i => y (Fin.castLE hn i)) k := by
     by_contra h
-    exact hy (by rw [Level.dat, dif_neg fun h' => h h'.1])
+    exact hy (by rw [Level.dat, dite_eq_right fun h' => h h'.1])
   obtain ⟨s₁, hs₁, hgen⟩ := gen_of_red D hk
   obtain ⟨hLs, s₂, hs₂, -, hs₂'⟩ := hL
   obtain ⟨-, -, t, -, ht, -, ht'⟩ := hΛ

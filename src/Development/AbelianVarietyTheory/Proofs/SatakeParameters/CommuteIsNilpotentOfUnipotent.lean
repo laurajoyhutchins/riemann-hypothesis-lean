@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CharpolyEqOfIsNilpotentSub
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyBlockAndInvariantUnderStabilizerNilradic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CharpolyEqOfIsNilpotentSub
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyBlockAndInvariantUnderStabilizerNilradic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,9 +64,6 @@ def letterLin (T : D →ₗ[LL] D') (hT : ∀ c, T ∘ₗ m c = m' c ∘ₗ T) :
     rw [LinearMap.baseChange_comp, LinearMap.baseChange_comp, LinearMap.comp_apply, LinearMap.comp_apply] at this
     simp [this])
 
-@[simp] theorem letterLin_mk (T : D →ₗ[LL] D') (hT : ∀ c, T ∘ₗ m c = m' c ∘ₗ T) (x : D) :
-    letterLin m m' F τ T hT (letterMk m F τ x) = letterMk m' F τ (T x) := rfl
-
 end Letter
 
 section Dmap
@@ -37,21 +75,19 @@ variable {l : ℕ} [Fact l.Prime] (P : LocPrime l) {K : FinExt l} {LL : Type} [F
 
 def tensV : V ⊗[ℚ_[l]] Bst P →ₗ[LL] V' ⊗[ℚ_[l]] Bst P := AlgebraTensorModule.map f LinearMap.id
 
-@[simp] theorem tensV_tmul (v : V) (b : Bst P) : tensV P f (v ⊗ₜ b) = f v ⊗ₜ b := rfl
-
 theorem tensV_onB (T : End ℚ_[l] (Bst P)) (x : V ⊗[ℚ_[l]] Bst P) :
     tensV P f (onB P LL V T x) = onB P LL V' T (tensV P f x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem tensV_stRep (hf : ∀ g v, f (ρ g v) = ρ' g (f v)) (g : ↥(GK K)) (x : V ⊗[ℚ_[l]] Bst P) :
     tensV P f (stRep P ρ g x) = stRep P ρ' g (tensV P f x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | tmul v b => simp [hf]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | tmul v b => simp [tensV, hf]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 variable {ρ ρ' f}
 
@@ -62,9 +98,6 @@ theorem tensV_mem_Dpst (hf : ∀ g v, f (ρ g v) = ρ' g (f v)) (x : V ⊗[ℚ_[
 
 def dmap (hf : ∀ g v, f (ρ g v) = ρ' g (f v)) : ↥(Dpst P ρ) →ₗ[LL] ↥(Dpst P ρ') :=
   (tensV P f).restrict (tensV_mem_Dpst P hf)
-
-@[simp] theorem coe_dmap (hf : ∀ g v, f (ρ g v) = ρ' g (f v)) (x : ↥(Dpst P ρ)) :
-    (dmap P hf x : V' ⊗[ℚ_[l]] Bst P) = tensV P f x := rfl
 
 variable (hf : ∀ g v, f (ρ g v) = ρ' g (f v))
 include hf

@@ -1,10 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.SDecomposition
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Decompose
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Ramified
-import GroundTheory.GlobalFields.KummerTheory.Splitting
-import GroundTheory.GlobalFields.KummerTheory.SplittingInfinite
-import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.SDecomposition
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Decompose
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleCohomology.Ramified
+public import GroundTheory.GlobalFields.KummerTheory.Splitting
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.LongExactSequence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -16,12 +58,12 @@ open scoped Pointwise
 
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
 
-variable (K) in
 
+variable (K) in
 abbrev Place : Type := InfinitePlace K ⊕ HeightOneSpectrum (𝓞 K)
 
-variable (L) in
 
+variable (L) in
 noncomputable def placeRep : Place K → Rep ℤ Gal(L/K)
   | .inl v => Rep.of (infiniteUnitsAboveRep L v)
   | .inr v => Rep.of (finiteUnitsAboveRep L v)
@@ -47,9 +89,9 @@ theorem placeEmbed_comp_placeProj_of_ne {v v' : Place K} (h : v ≠ v') :
   · exact finiteEmbedAboveRep_comp_infiniteProjAboveRep v' v
   · exact finiteEmbedAboveRep_comp_finiteProjAboveRep_of_ne fun e => h (by rw [e])
 
+
 variable (L) in
 open Classical in
-
 noncomputable def idelesCohomologySum (n : ℕ) :
     (⨁ v : Place K, cohomology (placeRep L v) n) →+ cohomology (ideleRep K L) n :=
   DirectSum.toAddMonoid fun v => (cohomologyMap (placeEmbed v) n).hom.toAddMonoidHom
@@ -61,8 +103,8 @@ theorem idelesCohomologySum_of (n : ℕ) (v : Place K) (x : cohomology (placeRep
   unfold idelesCohomologySum
   exact DirectSum.toAddMonoid_of (β := fun v => cohomology (placeRep L v) n) _ v x
 
-open Classical in
 
+open Classical in
 theorem placeProj_idelesCohomologySum (n : ℕ) (ξ : ⨁ v : Place K, cohomology (placeRep L v) n)
     (v : Place K) : (cohomologyMap (placeProj v) n).hom (idelesCohomologySum L n ξ) = ξ v := by
   classical
@@ -77,7 +119,7 @@ theorem placeProj_idelesCohomologySum (n : ℕ) (ξ : ⨁ v : Place K, cohomolog
     · rw [placeEmbed_comp_placeProj_of_ne h, cohomologyMap_zero]
       simp only [DirectSum.of_apply, dif_neg h]
       rfl
-  | add ξ η hξ hη => rw [map_add, map_add, hξ, hη, DirectSum.add_apply]
+  | add ξ η hξ hη => rw [map_add (f := _), map_add (f := _), hξ, hη, DirectSum.add_apply]
 
 theorem idelesCohomologySum_injective (n : ℕ) :
     Function.Injective (idelesCohomologySum (K := K) L n) := by
@@ -85,8 +127,8 @@ theorem idelesCohomologySum_injective (n : ℕ) :
   ext v
   rw [← placeProj_idelesCohomologySum n ξ v, ← placeProj_idelesCohomologySum n η v, h]
 
-variable (K L) in
 
+variable (K L) in
 noncomputable def ramifiedBelow : Finset (HeightOneSpectrum (𝓞 K)) :=
   ((finite_setOf_ramified K L).image (AdeleBaseChange.below K)).toFinset
 
@@ -134,8 +176,8 @@ theorem subtype_sEmbFin (S : Finset (HeightOneSpectrum (𝓞 K))) (n : ℕ)
     (cohomologyMap_comp (sEmbFin S v) (Rep.subtype _ _ (sIdelesSubmodule_stable K L S)) n)).symm.trans
     (idelesCohomologySum_of n (.inr v.1) z).symm
 
-open Classical in
 
+open Classical in
 theorem idelesCohomologySum_surjective {n : ℕ} (hn : 1 ≤ n) :
     Function.Surjective (idelesCohomologySum (K := K) L n) := by
   intro x
@@ -153,7 +195,9 @@ theorem idelesCohomologySum_surjective {n : ℕ} (hn : 1 ≤ n) :
       DirectSum.of (fun v => cohomology (placeRep L v) n) (Sum.inr v.1)
       ((cohomologyMap (sProj (L := L) S (Sum.inr (Sum.inl v))) n).hom y :
         cohomology (Rep.of (finiteUnitsAboveRep L v.1)) n), ?_⟩
-  rw [map_add, map_sum, map_sum]
+
+  rw [map_add (f := _), map_sum, map_sum]
+
   conv_rhs => rw [hy, map_sum, Finset.sum_map, Fintype.sum_sum_type]
   congr 1
   · refine Finset.sum_congr rfl fun v _ => ?_
@@ -172,44 +216,12 @@ theorem idelesCohomologyEquiv_apply {n : ℕ} (hn : 1 ≤ n)
     idelesCohomologyEquiv hn ξ = idelesCohomologySum L n ξ :=
   rfl
 
-variable (L) in
 
-noncomputable def chosenPlace : ∀ v : Place K,
-    match v with
-    | .inl v => v.placesOver L
-    | .inr v => PlacesOver L v
-  | .inl v => Classical.choice (InfinitePlace.nonempty_placesOver L v)
-  | .inr v => Classical.choice (nonempty_placesOver L v)
-
-variable (L) in
-
-noncomputable def localCohomology (n : ℕ) : Place K → ModuleCat ℤ
-  | .inl v => cohomology (Rep.ofMulDistribMulAction
-      (MulAction.stabilizer Gal(L/K) (chosenPlace L (.inl v)).1)
-      ((chosenPlace L (.inl v)).1.Completion)ˣ) n
-  | .inr v => cohomology (Rep.ofMulDistribMulAction
-      (MulAction.stabilizer Gal(L/K) (chosenPlace L (.inr v)).1.asIdeal)
-      ((chosenPlace L (.inr v)).1.adicCompletion L)ˣ) n
-
-noncomputable def placeShapiro (n : ℕ) :
-    ∀ v : Place K, cohomology (placeRep L v) n ≃+ localCohomology L n v
-  | .inl v => (infiniteShapiroIso v (chosenPlace L (.inl v)) n).toLinearEquiv.toAddEquiv
-  | .inr v => (finiteShapiroIso v (chosenPlace L (.inr v)) n).toLinearEquiv.toAddEquiv
-
-noncomputable def idelesCohomologyLocalEquiv {n : ℕ} (hn : 1 ≤ n) :
-    cohomology (ideleRep K L) n ≃+ ⨁ v : Place K, localCohomology L n v :=
-  (idelesCohomologyEquiv hn).symm.trans (DFinsupp.mapRange.addEquiv (placeShapiro n))
 
 theorem idelesCohomologyEquiv_symm_apply {n : ℕ} (hn : 1 ≤ n) (x : cohomology (ideleRep K L) n)
     (v : Place K) :
     (idelesCohomologyEquiv hn).symm x v = (cohomologyMap (placeProj v) n).hom x := by
   conv_rhs => rw [← (idelesCohomologyEquiv hn).apply_symm_apply x, idelesCohomologyEquiv_apply]
   exact (placeProj_idelesCohomologySum n _ v).symm
-
-theorem idelesCohomologyLocalEquiv_apply {n : ℕ} (hn : 1 ≤ n) (x : cohomology (ideleRep K L) n)
-    (v : Place K) :
-    idelesCohomologyLocalEquiv hn x v = placeShapiro n v ((cohomologyMap (placeProj v) n).hom x) := by
-  rw [idelesCohomologyLocalEquiv, AddEquiv.trans_apply, DFinsupp.mapRange.addEquiv_apply,
-    DFinsupp.mapRange_apply, idelesCohomologyEquiv_symm_apply]
 
 end GroundTheory.ProfCoh

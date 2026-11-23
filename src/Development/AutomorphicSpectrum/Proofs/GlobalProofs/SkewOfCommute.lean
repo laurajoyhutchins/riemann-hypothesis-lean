@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HolomorphicDiscreteSeries
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.DiscreteSeriesClassificationIff
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesLowestKTypeOfClassification
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DRepCEqDsigC
-open Matrix Formalism.REAL Formalism.MainNotions.S Formalism.L2.Theta GlobalTheory.GKModule GlobalTheory.GKLie GlobalTheory.CompanionTheory.GKClosure GlobalTheory.CompanionTheory.Hypotheses₂
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+open Matrix Formalism.REAL
 open GlobalTheory.SmoothGlob (lieSet)
-open scoped InnerProductSpace
 
 noncomputable section
 
@@ -26,8 +62,6 @@ theorem skew_of_commute {X : Matrix (Fin n) (Fin n) ℂ} (hX : X ∈ lieSet ε) 
 theorem exp_mem_Kset {X : Matrix (Fin n) (Fin n) ℂ} (hX : X ∈ lieSet ε) (hc : X * Jm ε = Jm ε * X) (t : ℝ) :
     NormedSpace.exp (t • X) ∈ Kset ε := by
   have hs := skew_of_commute hX hc
-  have hJ : (Jm ε)⁻¹ = Jm ε := Matrix.inv_eq_right_inv (Formalism.REAL.Jm_mul_self ε)
-  have hu : IsUnit (Jm ε) := IsUnit.of_mul_eq_one _ (Formalism.REAL.Jm_mul_self ε)
   constructor
   · rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose, ← Matrix.exp_conjTranspose,
       Matrix.conjTranspose_smul, hs]
@@ -35,20 +69,8 @@ theorem exp_mem_Kset {X : Matrix (Fin n) (Fin n) ℂ} (hX : X ∈ lieSet ε) (hc
     have hcm : Commute (t • X) (-(t • X)) := (Commute.refl _).neg_right
     rw [hneg, ← Matrix.exp_add_of_commute _ _ hcm]
     simp
-  · have h1 : Jm ε * (t • X) * (Jm ε)⁻¹ = t • X := by
-      rw [hJ, Matrix.mul_smul, Matrix.smul_mul, ← hc, Matrix.mul_assoc, Formalism.REAL.Jm_mul_self, Matrix.mul_one]
-    have h2 := Matrix.exp_conj (Jm ε) (t • X) hu
-    rw [h1, hJ] at h2
-    calc NormedSpace.exp (t • X) * Jm ε = Jm ε * NormedSpace.exp (t • X) * Jm ε * Jm ε := by rw [← h2]
-      _ = Jm ε * NormedSpace.exp (t • X) := by rw [Matrix.mul_assoc, Formalism.REAL.Jm_mul_self, Matrix.mul_one]
-
-variable {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-  {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)}
+  · exact ((show Commute X (Jm ε) from hc).smul_left t).exp_left
 
 end GlobalTheory.CompanionTheory.Hypotheses₂.KStable
-
-namespace GlobalTheory.CompanionTheory.Hypotheses₂
-
-end GlobalTheory.CompanionTheory.Hypotheses₂
 
 end

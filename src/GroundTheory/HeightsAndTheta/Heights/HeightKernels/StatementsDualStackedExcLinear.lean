@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExc
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -58,19 +100,6 @@ theorem linPointMap_first {T : Type} [Fintype T] {k : Type} [Field k] {n : ℕ} 
 theorem linPointMap_second {T : Type} [Fintype T] {k : Type} [Field k] {n : ℕ} (α : T → k) (M : T → Fin n → k)
     (t : T) : linPointMap α M (graphSecond t) = ∑ j, C (M t j) * X (some j) := by
   simp [linPointMap, graphSecond]
-
-def idForms : Fin 2 → Fin 2 → ZMod 2 := fun t j => if t = j then 1 else 0
-
-theorem two_mem_not_one : (C 2 : MRing (stackedBlocks Unit)) ∈
-      linPrime (fun _ : Unit => (1 : ZMod 2)) (fun (_ : Unit) (_ : Fin 1) => (1 : ZMod 2)) ∧
-    (1 : MRing (stackedBlocks Unit)) ∉
-      linPrime (fun _ : Unit => (1 : ZMod 2)) (fun (_ : Unit) (_ : Fin 1) => (1 : ZMod 2)) := by
-  refine ⟨?_, ?_⟩
-  · rw [linPrime, RingHom.mem_ker, linPointMap, coe_eval₂Hom, eval₂_C, eq_intCast,
-      ← map_intCast (C : ZMod 2 →+* MvPolynomial (Option (Fin 1)) (ZMod 2)),
-      show ((2 : ℤ) : ZMod 2) = 0 by decide, map_zero]
-  · rw [linPrime, RingHom.mem_ker, map_one]
-    exact one_ne_zero
 
 end LinPrimeExample
 

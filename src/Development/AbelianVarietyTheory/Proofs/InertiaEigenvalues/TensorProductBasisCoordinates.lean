@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+
+@[expose] public section
+
 open TensorProduct Module
 
 theorem GlobalTheory.tensorBasisCoords : ∀ (F : Type) [Field F] (B : Type) [CommRing B] [Algebra F B] (V : Type) [AddCommGroup V] [Module F V] (n : Type) [Fintype n] [DecidableEq n] (b : Basis n F V), ∃ e : V ⊗[F] B ≃ₗ[F] (n → B), (∀ v x i, e (v ⊗ₜ[F] x) i = b.repr v i • x) ∧ (∀ y : n → B, e.symm y = ∑ i, b i ⊗ₜ[F] y i) ∧ ∀ (r : V →ₗ[F] V) (f : B →ₗ[F] B) (y : V ⊗[F] B), e (TensorProduct.map r f y) = ((LinearMap.toMatrix b b r).map (algebraMap F B)).mulVec (fun i => f (e y i)) := by
@@ -14,6 +60,7 @@ theorem GlobalTheory.tensorBasisCoords : ∀ (F : Type) [Field F] (B : Type) [Co
   · intro y
     rw [LinearEquiv.symm_apply_eq]
     funext j
+
     rw [map_sum, Finset.sum_apply]
     simp only [h1, Basis.repr_self, Finsupp.single_apply]
     simp
@@ -30,11 +77,12 @@ theorem GlobalTheory.tensorBasisCoords : ∀ (F : Type) [Field F] (B : Type) [Co
       rw [← Finset.sum_smul]
       congr 1
       conv_lhs => rw [← b.sum_repr v]
-      rw [map_sum, map_sum, Finsupp.finset_sum_apply]
+
+      rw [map_sum, map_sum, Finsupp.finsetSum_apply]
       simp only [map_smul, Finsupp.smul_apply, smul_eq_mul]
       exact Finset.sum_congr rfl fun _ _ => mul_comm _ _
     | add y z hy hz =>
-      rw [map_add, hadd, hy, hz, hadd, ← Matrix.mulVec_add]
+      rw [map_add (f := _), hadd, hy, hz, hadd, ← Matrix.mulVec_add]
       congr 1
       funext i
-      simp [map_add]
+      simp [map_add (f := _)]

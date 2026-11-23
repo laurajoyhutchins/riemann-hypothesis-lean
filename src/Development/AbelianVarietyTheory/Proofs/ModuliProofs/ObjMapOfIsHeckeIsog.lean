@@ -1,9 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsHeckeIsog
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsHeckeIsog
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfProper
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsPullCubicalOfIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,12 +75,21 @@ theorem objMap_of_isHeckeIsog [IsAlgClosed k] [CharZero k] (hL : Out.Laws)
     Nonempty (ObjMap o₁ o₂ (𝟙 _)) := by
   obtain ⟨hom₁, lin₁, sur₁, ker₁, weil₁, lev₁⟩ := h₁
   obtain ⟨hom₂, lin₂, sur₂, ker₂, weil₂, lev₂⟩ := h₂
-  obtain ⟨hab, hdim, -, -⟩ := hfacts E H D l B b _ s o
-  obtain ⟨hab₁, hdim₁, -, -⟩ := hfacts E H D l B b _ s o₁
-  obtain ⟨hab₂, hdim₂, -, -⟩ := hfacts E H D l B b _ s o₂
-  let P := polOf o.t o.proper o.ample o.ktriv hdim
-  let P₁ := polOf o₁.t o₁.proper o₁.ample o₁.ktriv hdim₁
-  let P₂ := polOf o₂.t o₂.proper o₂.ample o₂.ktriv hdim₂
+  obtain ⟨hab, hdim, hrig, hsym⟩ := hfacts E H D l B b _ s o
+  obtain ⟨hab₁, hdim₁, hrig₁, hsym₁⟩ := hfacts E H D l B b _ s o₁
+  obtain ⟨hab₂, hdim₂, hrig₂, hsym₂⟩ := hfacts E H D l B b _ s o₂
+  let P : Out.PolAV (Sp k) :=
+    { A := o.t.G, isAb := hab, g := _, smoothDim := hdim,
+      L := o.t.PP.L, isLB := o.t.PP.isLB, rigid := hrig, sym := hsym,
+      ample := o.ample, ktriv := o.ktriv }
+  let P₁ : Out.PolAV (Sp k) :=
+    { A := o₁.t.G, isAb := hab₁, g := _, smoothDim := hdim₁,
+      L := o₁.t.PP.L, isLB := o₁.t.PP.isLB, rigid := hrig₁, sym := hsym₁,
+      ample := o₁.ample, ktriv := o₁.ktriv }
+  let P₂ : Out.PolAV (Sp k) :=
+    { A := o₂.t.G, isAb := hab₂, g := _, smoothDim := hdim₂,
+      L := o₂.t.PP.L, isLB := o₂.t.PP.isLB, rigid := hrig₂, sym := hsym₂,
+      ample := o₂.ample, ktriv := o₂.ktriv }
   have := o₁.proper
   have := o₂.proper
   obtain ⟨α, hα⟩ := exists_fac hab.smooth ψ₁ ψ₂ fun x hx => (ker₂ x).2 ((ker₁ x).1 hx)

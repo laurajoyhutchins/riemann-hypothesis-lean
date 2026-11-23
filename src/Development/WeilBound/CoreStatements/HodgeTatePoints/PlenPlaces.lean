@@ -1,5 +1,63 @@
-import Development.WeilBound.CoreStatements.HodgeTatePoints.IsMaximalOfNeBot
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFiniteBirationalLength
+module
+
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.IsMaximalOfNeBot
+public import GroundTheory.FunctionField.PlaceBridge
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFiniteBirationalLength
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Finiteness.Quotient
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace PositivityTheory.HtPt.Plen
 
@@ -35,8 +93,8 @@ theorem deg_eq_of_surjective (B : Type) [CommRing B] [Algebra k B] [Algebra B K]
   rw [Place.deg, ← hker]
   exact (Ideal.quotientKerAlgEquivOfSurjective hs).toLinearEquiv.finrank_eq.symm
 
-omit [IsFunctionField k K] in
 
+omit [IsFunctionField k K] in
 theorem deg_ofHeightOneSpectrum (B : Type) [CommRing B] [IsDedekindDomain B] [Algebra B K]
     [IsFractionRing B K] [Algebra k B] [IsScalarTower k B K]
     (hk : ∀ c : k, algebraMap k K c ∈ (algebraMap B K).range) (P : HeightOneSpectrum B) :
@@ -140,7 +198,7 @@ private theorem valuation_eq_of_isEquiv_of_uniformizers {K : Type} [Field K]
     (v w : Valuation K (WithZero (Multiplicative ℤ))) (h : v.IsEquiv w)
     (π : K) (hπ : v π = WithZero.exp (-1)) (ρ : K) (hρ : w ρ = WithZero.exp (-1)) :
     v = w := by
-  have key : ∀ x y : K, v x = v y → w x = w y := fun x y hxy => h.val_eq.mp hxy
+  have key : ∀ x y : K, v x = v y → w x = w y := fun x y hxy => (Valuation.IsEquiv.eq_iff h).mp hxy
   have hπ0 : π ≠ 0 := by
     rintro rfl
     rw [map_zero] at hπ

@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ResidueDegreeOfIsClosedImmersion
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ArFormExists
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NefFibOfIsNef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -19,27 +58,5 @@ def MixOn {k : Type} [CommRing k] {X : Scheme.{0}} [IsIntegral X] [IsLocallyNoet
     ∀ (r : M.B.ι → X.functionFieldˣ) (hr : IsRatSec M.B r), (comb L n).ArchIntegrable M D hr ∧
       Φ (MvPolynomial.X none * rename some (lin fun i => (n i : ℝ)) ^ D) =
         ∑ᶠ z, ((M.div hr).mult z : ℝ) * h z - (comb L n).archInt M D hr
-
-def Heights : Prop := ∀ (k : Type) [CommRing k] (P : Scheme.{0}) [IsIntegral P] (q : P ⟶ Sp k) (N : ℕ),
-  IsArithVar q N → GenSmooth q N → ∀ M : HermLB q, ∃ h, M.IsArithHeight h
-
-def Form : Prop := ∀ (k : Type) [CommRing k] (P : Scheme.{0}) [IsIntegral P] (q : P ⟶ Sp k) (N : ℕ),
-  IsArithVar q N → GenSmooth q N → ∀ (X : Scheme.{0}) [IsIntegral X] (i : X ⟶ P) [IsClosedImmersion i] (D : ℕ),
-    IsArithVar (i ≫ q) D → ∀ (ι : Type) [Fintype ι] (M : ι → HermLB q), ∃ Φ, IsArFun (fun j => (M j).restr i) D Φ
-
-def Mix : Prop := ∀ (k : Type) [CommRing k] (P : Scheme.{0}) [IsIntegral P] (q : P ⟶ Sp k) (N : ℕ),
-  IsArithVar q N → GenSmooth q N → ∀ (X : Scheme.{0}) [IsIntegral X] [IsLocallyNoetherian X] (i : X ⟶ P)
-    [IsClosedImmersion i] (D : ℕ), IsArithVar (i ≫ q) D → ∀ (ι : Type) [Fintype ι] (M₀ : HermLB q) (M : ι → HermLB q),
-      MixOn (i ≫ q) D ι (M₀.restr i) (fun j => (M j).restr i)
-
-def Proj : Prop := ∀ (k : Type) [CommRing k] (P Q : Scheme.{0}) [IsIntegral P] [IsIntegral Q] (p : P ⟶ Sp k)
-  (q : Q ⟶ Sp k) (N N' : ℕ), IsArithVar p N → GenSmooth p N → IsArithVar q N' → GenSmooth q N' →
-    ∀ (F : Q ⟶ P) (hF : F ≫ p = q) (Y : Scheme.{0}) [IsIntegral Y] (j : Y ⟶ Q) [IsClosedImmersion j] (e : ℕ),
-      IsArithVar (j ≫ q) e → topologicalKrullDim (closure ({F (j (genericPoint Y))} : Set P)) = (e + 1 : ℕ) →
-      F.residueDegree (j (genericPoint Y)) ≠ 0 → ∀ (M : HermLB p) (h : P → ℝ) (h' : Q → ℝ), M.IsArithHeight h →
-        (M.pull F hF).IsArithHeight h' →
-          h' (j (genericPoint Y)) = (F.residueDegree (j (genericPoint Y)) : ℝ) * h (F (j (genericPoint Y)))
-
-def Cycles : Prop := Heights ∧ Form ∧ Mix ∧ Proj
 
 end GlobalTheory.Published.Amb

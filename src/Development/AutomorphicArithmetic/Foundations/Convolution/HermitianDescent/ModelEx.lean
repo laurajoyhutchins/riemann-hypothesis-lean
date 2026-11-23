@@ -1,6 +1,53 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.UniformExportStatement
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.GalBase
-import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.Descent
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.UniformExportStatement
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.Descent
+public import Development.AutomorphicArithmetic.Foundations.Convolution.HermitianDescent.GalBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Finiteness.Descent
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open Matrix Polynomial NumberField IsDedekindDomain
 open scoped TensorProduct
@@ -28,14 +75,12 @@ private theorem desc_alg {k R : Type} [CommRing k] [CommRing R] [Algebra k R] (c
     convert h2 using 1
     funext z
     induction z with
-    | zero => simp
-    | add a b ha hb => simp only [Function.comp_apply, map_add] at ha hb ⊢; rw [ha, hb]
+    | add a b ha hb => simp only [Function.comp_apply, map_add (f := _)] at ha hb ⊢; rw [ha, hb]
     | tmul r a => rw [hf, ← Algebra.smul_def]; rfl
   refine ⟨A, inferInstance, inferInstance, AlgEquiv.ofBijective f hbij, fun z => ?_⟩
   change f _ = s (f z)
   induction z with
-  | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul r a =>
     have h1 : io c A (r ⊗ₜ a) = c r ⊗ₜ a := by simp [io]
     have h2 : s a = a := a.2
@@ -51,7 +96,7 @@ private theorem inv_ex {k R : Type} [CommRing k] [CommRing R] [Algebra k R] (c :
   have hx : IsUnit (AdjoinRoot.root P) := by
     have h1 : AdjoinRoot.mk P (X * P.divX + C (P.coeff 0)) = 0 := by
       rw [X_mul_divX_add, AdjoinRoot.mk_self]
-    rw [map_add, map_mul, AdjoinRoot.mk_X, AdjoinRoot.mk_C] at h1
+    rw [map_add (f := _), map_mul, AdjoinRoot.mk_X, AdjoinRoot.mk_C] at h1
     have h2 := (hu.map (AdjoinRoot.of P)).neg
     rw [← eq_neg_of_add_eq_zero_left h1] at h2
     exact isUnit_of_mul_isUnit_left h2
@@ -75,7 +120,7 @@ private theorem inv_ex {k R : Type} [CommRing k] [CommRing R] [Algebra k R] (c :
     obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective z
     induction p using Polynomial.induction_on with
     | C a => rw [AdjoinRoot.mk_C, h1, h1, hcc]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | monomial m a ih =>
       rw [pow_succ, ← mul_assoc, map_mul, map_mul, map_mul, ih, AdjoinRoot.mk_X, h2, h3]
   · change _ * s0 _ = 1

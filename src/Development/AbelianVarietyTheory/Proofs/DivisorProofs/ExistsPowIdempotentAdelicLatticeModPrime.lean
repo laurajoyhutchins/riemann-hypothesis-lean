@@ -1,10 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFinMapsOfForall
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMemKAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FromBlocksMem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMemKAt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
-open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.KFinLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
 open scoped TensorProduct Matrix
 
 noncomputable section
@@ -56,21 +97,21 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
 
 open GlobalTheory.EmbChart GlobalTheory.InertSph
 
-theorem at_atPlace (v : Pl F) (a : Fv F v) : At (evFin F v) (atPlace v a) := by
+theorem at_atPlace (v : Pl (F := F)) (a : Fv F v) : At (evFin F v) (atPlace v a) := by
   intro u hu
   rw [smul_eq_mul, mul_comm, atPlace_mul_right, hu, mul_zero, map_zero]
 
-theorem eq_atPlace (v : Pl F) (a : AF F) (ha : At (evFin F v) a) : a = atPlace v (evFin F v a) := by
+theorem eq_atPlace (v : Pl (F := F)) (a : AF F) (ha : At (evFin F v) a) : a = atPlace v (evFin F v a) := by
   have h := ha (1 - atPlace v 1) (by rw [map_sub, map_one, evFin_atPlace, sub_self])
   rw [smul_eq_mul, sub_mul, one_mul, atPlace_mul_right, one_mul, sub_eq_zero] at h
   exact h
 
 omit [NumberField E] in
-theorem gen_mem {d : ℕ} (W : Spc F E d) (v : Pl F) (c : v.adicCompletionIntegers F) (y : Fin d → E) (hy : y ∈ W.L) :
+theorem gen_mem {d : ℕ} (W : Spc F E d) (v : Pl (F := F)) (c : v.adicCompletionIntegers F) (y : Fin d → E) (hy : y ∈ W.L) :
     (atPlace v (c : Fv F v) • fun i => inclR (F := F) (AF F) (y i)) ∈ latAt W v :=
   AddSubgroup.subset_closure ⟨_, at_atPlace v _, by rw [evFin_atPlace]; exact c.2, y, hy, rfl⟩
 
-theorem finite_mod {d : ℕ} (W : Spc F E d) (hW : W.L.FG) (v : Pl F) (p : ℕ) (hp : 0 < p) :
+theorem finite_mod {d : ℕ} (W : Spc F E d) (hW : W.L.FG) (v : Pl (F := F)) (p : ℕ) (hp : 0 < p) :
     Finite ((latAt W v).map (QuotientAddGroup.mk' ((latAt W v).map (nsmulAddMonoidHom p)))) := by
   set P := (latAt W v).map (nsmulAddMonoidHom p) with hPdef
   have hp0 : (p : v.adicCompletionIntegers F) ≠ 0 := by
@@ -144,7 +185,7 @@ theorem finite_mod {d : ℕ} (W : Spc F E d) (hW : W.L.FG) (v : Pl F) (p : ℕ) 
   exact (QuotientAddGroup.eq_zero_iff _).2 ⟨z, hz, rfl⟩
 
 theorem exists_pow_idem : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (d : ℕ) (W : Spc F E d),
-    W.L.IsLattice E → ∀ (v : Pl F) (p : ℕ), 0 < p → (p : 𝓞 F) ∈ v.asIdeal →
+    W.L.IsLattice E → ∀ (v : Pl (F := F)) (p : ℕ), 0 < p → (p : 𝓞 F) ∈ v.asIdeal →
     ∀ f : Matrix (Fin d) (Fin d) (AE F E), (∀ z ∈ GlobalTheory.InertSph.latAt W v, f *ᵥ z ∈ GlobalTheory.InertSph.latAt W v) →
     ∃ N : ℕ, 0 < N ∧ ∀ z ∈ GlobalTheory.InertSph.latAt W v, ∃ y ∈ GlobalTheory.InertSph.latAt W v, (f ^ (2 * N)) *ᵥ z - (f ^ N) *ᵥ z = p • y := by
   intro F E _ _ _ _ _ d W hW v p hp _ f hf

@@ -1,7 +1,47 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.JetAnalytic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasLevelStd
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasQIff
-import Development.AbelianVarietyTheory.Definitions.Divisors.JetAnalytic
+
+@[expose] public section
+
 open NumberField UpperHalfPlane GlobalTheory.HilbFam GlobalTheory.QFam
 open GlobalTheory.IndefiniteRowSideFullHecke.OmegaFactorization (Emb Frac latM qPow upperHalf cK omegaFactor IsPartialZeta HasExpansion)
 open GlobalTheory.IndefiniteRowSideFullHecke.DefiningCoordinates (iterD partialD)
@@ -28,7 +68,7 @@ theorem isIntegral_coord_of_isIntegral (E : Type) [Field E] [NumberField E] [IsC
   have hri : IsIntegral ℤ r := hθ.sub (hc _ hθ)
   have h0 : IsIntegral ℤ ((x 0 : E) * r) := by
     have := hu.sub (hc _ hu)
-    rw [map_add, map_mul, hfix, hfix] at this
+    rw [map_add (f := _), map_mul, hfix, hfix] at this
     have e : (x 0 : E) * r = (x 0 : E) * θ + (x 1 : E) -
         ((x 0 : E) * IsCMField.complexConj E θ + (x 1 : E)) := by rw [hrdef]; ring
     rw [e]; exact this
@@ -44,10 +84,10 @@ theorem isIntegral_coord_of_isIntegral (E : Type) [Field E] [NumberField E] [IsC
   have hinj : Function.Injective (algebraMap (FR E) E) := (algebraMap (FR E) E).injective
   have hx : algebraMap (FR E) E (x j) = (x j : E) := rfl
   constructor
-  · rw [← isIntegral_algebraMap_iff hinj, map_mul, map_pow, map_natCast, hx, hD']
+  · rw [← (isIntegral_algebraMap_iff (B := E)), map_mul, map_pow, map_natCast, hx, hD']
     have e : -r ^ 2 * (x j : E) ^ 2 = -((x j : E) * r * ((x j : E) * r)) := by ring
     rw [e]; exact (hj.mul hj).neg
-  · rw [← isIntegral_algebraMap_iff hinj, map_mul, map_natCast, hx, hD']
+  · rw [← (isIntegral_algebraMap_iff (B := E)), map_mul, map_natCast, hx, hD']
     have e : -r ^ 2 * (x j : E) = -((x j : E) * r * r) := by ring
     rw [e]; exact (hj.mul hri).neg
 

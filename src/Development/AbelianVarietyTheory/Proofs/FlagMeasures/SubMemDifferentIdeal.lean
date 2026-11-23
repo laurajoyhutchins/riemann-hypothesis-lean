@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataSpaces
-import Formalism.FlagUnipotentLattices.CardSubmodulesAndLinearEquivBounds
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module Matrix Formalism.BasicNotions
 open scoped ENNReal
@@ -44,7 +94,7 @@ private lemma sub_mem_differentIdeal_of_eq_star (h : _root_.Formalism.BasicNotio
   have hpdeg : p.natDegree = 2 := by rw [hp_def]; compute_degree!
   have hpm : p.Monic := by rw [hp_def]; monicity!
   have hroot : aeval θ p = 0 := by
-    simp only [hp_def, map_add, map_sub, map_mul, map_pow, aeval_X, aeval_C, hs, hn]
+    simp only [hp_def, map_add (f := _), map_sub, map_mul, map_pow, aeval_X, aeval_C, hs, hn]
     ring
   have hint : IsIntegral (𝓞 F) θ := Algebra.IsIntegral.isIntegral θ
   have hdvd := minpoly.isIntegrallyClosed_dvd hint hroot
@@ -77,11 +127,11 @@ private lemma sub_mem_differentIdeal_of_eq_star (h : _root_.Formalism.BasicNotio
   simp [hp_def, hs]
   ring
 
+
 open NumberField Module Matrix in
 open scoped ENNReal in
 open Polynomial in
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E] in
-
 theorem _root_.GlobalTheory.CMDiscrSq.differentIdeal_eq_top (h : _root_.Formalism.BasicNotions.CMData F E) : differentIdeal (𝓞 F) (𝓞 E) = ⊤ := by
   by_contra hne
   obtain ⟨P, hP, hle⟩ := Ideal.exists_le_maximal _ hne
@@ -90,9 +140,9 @@ theorem _root_.GlobalTheory.CMDiscrSq.differentIdeal_eq_top (h : _root_.Formalis
 
 end GlobalTheory.CMDiscrSq
 
+
 open NumberField Module Matrix in
 open scoped ENNReal in
-
 theorem _root_.GlobalTheory.cm_discr_sq : ∀ (F E : Type) [Field F] [NumberField F] [Field E]
     [NumberField E] [StarRing E] [Algebra F E], _root_.Formalism.BasicNotions.CMData F E → |discr E| = discr F ^ 2 ∧
       Ideal.absNorm (Ideal.map (algebraMap (𝓞 F) (𝓞 E)) (differentIdeal ℤ (𝓞 F))) =

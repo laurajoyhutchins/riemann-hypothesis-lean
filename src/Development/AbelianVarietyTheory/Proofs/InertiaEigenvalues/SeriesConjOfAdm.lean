@@ -1,10 +1,54 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCharLab
+public import Mathlib.RepresentationTheory.Coinduced
+public import Development.AbelianVarietyTheory.Counterexamples.DegenerateExamples.NotAdmissibleWithAmbientTop
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TeichmullerRoots
+public import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.FactorSeriesSupport
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.DetCharacterMemPrincipalCongruenceFixedVectors
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PadicIntGLSmulMemPrincipalCongruenceFixed
-import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TeichmullerRoots
-import Development.AbelianVarietyTheory.Counterexamples.DegenerateExamples.NotAdmissibleWithAmbientTop
-import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
+public import Formalism.LocalRingCardinality.PrincipalHermitianLattice
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,9 +67,6 @@ def ConjIn (ρ : Representation ℂ G V) (W : Submodule ℂ V) (j : Gn g n →* 
   ∀ y ∈ W, y ≠ 0 → ∃ Λ : V →ₛₗ[starRingEnd ℂ] U, Λ y ≠ 0 ∧
     ∀ z ∈ W, Λ z ∈ fixK1 π ∧ ∀ h, Λ (ρ (j h) z) = π (lift g n h) (Λ z)
 
-def typeSpan {ι T : Type} (ρ : Representation ℂ G V) (b : ι → V) (ty : ι → T) (π : T) : Submodule ℂ V :=
-  Submodule.span ℂ {z | ∃ (x : G) (σ : ι), ty σ = π ∧ z = ρ x (b σ)}
-
 theorem ConjIn.act_ne {ρ : Representation ℂ G V} {W : Submodule ℂ V} {j : Gn g n →* G}
     {π : Representation ℂ (GL (Fin n) ℚ_[g]) U} (h : ConjIn ρ W j π) (a a' : MonoidAlgebra ℂ (Gn g n))
     (ha : ∀ x, starRingEnd ℂ (a.coeff x) = a'.coeff x) {y : V} (hy : y ∈ W) (h0 : y ≠ 0)
@@ -34,6 +75,7 @@ theorem ConjIn.act_ne {ρ : Representation ℂ G V} {W : Submodule ℂ V} {j : G
   refine ⟨Λ y, (h2 y hy).1, ?_⟩
   have : actK π a' (Λ y) = Λ y := by
     conv_rhs => rw [← hfix]
+
     rw [map_sum, actK, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [LinearMap.smul_apply, map_smulₛₗ, ha, (h2 y hy).2]
@@ -62,20 +104,7 @@ def facHom (D : D7) (k : Fin 2) (v : D.nd.PlG k) : Gn (D.host.g k) D.R.r →* G0
 
 abbrev LocRep (D : D7) (k : Fin 2) : Type 1 := Rep.{0} ℂ (GL (Fin D.R.r) ℚ_[D.host.g k])
 
-abbrev Corr (D : D7) : Type 1 := ∀ (k : Fin 2) (v : D.nd.PlG k), LocRep D k → D.naut.LP (D.naut.plGw k v)
-
 abbrev Comp (D : D7) : Type 1 := D.what₂.FT → ∀ k : Fin 2, D.nd.PlG k → LocRep D k
-
-def SeriesTame (D : D7) (rc : Corr D) : Prop :=
-  ∀ (k : Fin 2) (v : D.nd.PlG k) (π : LocRep D k), IsIrrRep π.ρ → GlobalTheory.SplitWeil.IsSmoothRep π.ρ →
-    D.naut.lpDim (rc k v π) = D.R.r ∧
-    ∀ f, (∃ u ∈ fixK1 π.ρ, actK π.ρ (D.ntypes.eSer k f) u ≠ 0) →
-      D.naut.inePol (rc k v π) (D.ntypes.tg k v) =
-        ((Formalism.CyclotomicNorms.rootsBar f).map fun x => X - C (D.ntypes.teichC k x)).prod
-
-def ParamTie (D : D7) (i : D.nd.Loc) (rc : Corr D) (cp : Comp D) : Prop :=
-  ∀ (σ : D.what₂.FT) (k : Fin 2) (v : D.nd.PlG k), IsIrrRep (cp σ k v).ρ ∧ GlobalTheory.SplitWeil.IsSmoothRep (cp σ k v).ρ ∧
-    D.naut.locW i σ (D.naut.plGw k v) = rc k v (cp σ k v)
 
 def SeriesConj (D : D7) : Prop :=
   ∀ (k : Fin 2) (f : (ZMod (D.host.g k))[X]), IsLabel D k f →
@@ -108,6 +137,7 @@ theorem exists_good (D : D7) {V : Type} [AddCommGroup V] [Module ℂ V] (ρ : Re
     (hx : x ≠ 0) (he : ρ.asAlgebraHom D.ntypes.e0 x = x) :
     ∃ (t : Tup2 D) (a : MonoidAlgebra ℂ (G0g D.nd)), D.ntypes.goodTuple t ∧ ρ.asAlgebraHom a x ≠ 0 ∧
       ∀ k v, ρ.asAlgebraHom (atPlace D k v (D.ntypes.eSer k (t k v))) (ρ.asAlgebraHom a x) = ρ.asAlgebraHom a x := by
+
   rw [Ten.e0_eq, Ten.eGood, map_sum, LinearMap.sum_apply] at he
   obtain ⟨p, -, hp⟩ := Finset.exists_ne_zero_of_sum_ne_zero (he.trans_ne hx)
   by_cases hg : Ten.goodVec D p
@@ -122,11 +152,5 @@ theorem exists_good (D : D7) {V : Type} [AddCommGroup V] [Module ℂ V] (ρ : Re
     simp at hp
 
 variable {D : D7} {X : BaseLevelRowSide D}
-
-def TypeTie (Y : Prov D X) (cp : Comp D) {EE : Type} [NormedAddCommGroup EE] [InnerProductSpace ℂ EE]
-    [FiniteDimensional ℂ EE] (S : RowSide D EE) (P : Pair D.what₂.LL (G0g D.nd))
-    (j : S.RR.V →ₗ[D.what₂.LL] Y.sK.RR.V) {ι : Type} (b : ι → EE) (ty : ι → D.what₂.FT) : Prop :=
-  ∃ (aE : EE →ₗ[ℂ] Y.EEK) (aA : ∀ μ, S.Amb μ →ₗ[ℂ] Y.sK.Amb μ), IsLevelIn Y S P j aE aA ∧
-    ∀ σ k v, ConjIn Y.actEE (typeSpan Y.actEE (fun s => aE (b s)) ty σ) (facHom D k v) (cp σ k v).ρ
 
 end GlobalTheory.GoodTypes

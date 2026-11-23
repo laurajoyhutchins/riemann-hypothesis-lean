@@ -1,7 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.ExistsNeZeroMem
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumBAt
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumBCut
 import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumBAt
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Skeleton
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PairCorankPositivity.EqZeroOfMulVec
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.ExistsNeZeroMem
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.MemThPairs
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.XLeOrthXplus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,6 +109,7 @@ def wv (F' : LFlag S r T') (v : Fin (r + 1) → E) : S.V := ∑ j, v j • F'.fl
 
 theorem hT_wv (F : LFlag S r T) (F' : LFlag S r T') (v : Fin (r + 1) → E) (i : Fin (r + 1)) :
     S.hT (F.fl.fvec i) (wv F' v) = (Zhat F.fl F'.fl *ᵥ v) i := by
+
   simp only [wv, Matrix.mulVec, dotProduct, map_sum, map_smul, smul_eq_mul, zhat_apply]
   exact Finset.sum_congr rfl fun j _ => mul_comm _ _
 
@@ -230,14 +280,14 @@ theorem zeta_core (k : ℕ) (F : LFlag S r T) (F' F'' : LFlag S r T') (β : S.V 
     have hAv : A' *ᵥ v = b := by
       rw [hvdef, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ (isUnit_iff_ne_zero.2 hA), Matrix.one_mulVec]
     have hvz : ∀ i, S.hT (F.fl.fvec i) ((1 : E) • F.fl.z + wv F' v) = 0 := fun i => by
-      rw [one_smul, map_add, hermitian_frame_z, hT_wv, hAv]
+      rw [one_smul, map_add (f := _), hermitian_frame_z, hT_wv, hAv]
       by_cases hi : i = Fin.last r
       · subst hi; simp [hb]
       · simp [hb, hi, Pi.single_eq_of_ne hi]
     obtain ⟨v'', hl'', hv''⟩ := transfer 1 v hvz
     have hA''v : A'' *ᵥ v'' = b := funext fun i => by
       have := hv'' i
-      rw [one_smul, map_add, hermitian_frame_z, hT_wv] at this
+      rw [one_smul, map_add (f := _), hermitian_frame_z, hT_wv] at this
       by_cases hi : i = Fin.last r
       · subst hi
         rw [if_pos rfl] at this
@@ -306,7 +356,7 @@ theorem sgnL_succ : sgnL (D := D) (D.R.rS + 1) = sgnL (D := D) D.R.rS := by
   rw [Fin.prod_univ_castSucc]
   simp
 
-theorem dmin_eq {u u' : D.what₂.Word} {F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)} {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)}
+theorem dmin_eq {u u' : D.what₂.Word} {F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)} {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)}
     {w : Point D.host.E (D.R.rS + 1)} (hc : IsInCell (ZhatOM (ZhatL (lf D F0) F')) w) (l : ℕ) (h : l ≤ D.R.rS + 1) :
     Dmin w l = sgnL l * leadMinorE (ZhatL (lf D F0) F') l := by
   obtain ⟨L, U, hL, hU, hZ⟩ := hc
@@ -317,15 +367,15 @@ theorem dmin_eq {u u' : D.what₂.Word} {F' : LFlag (VS D) D.R.rS ((Tu D u' : �
     exact det_sub_ZhatOM h _
   have hD : Dmin w l = ((ptMat w).submatrix (Fin.castLE h) (Fin.castLE h)).det := by
     unfold Dmin
-    rw [dif_pos h]
+    rw [dite_eq_left h]
   have hM : leadMinorE (ZhatL (lf D F0) F') l =
       ((ZhatL (lf D F0) F').submatrix (Fin.castLE h) (Fin.castLE h)).det := by
     unfold leadMinorE
-    rw [dif_pos h]
+    rw [dite_eq_left h]
   rw [hD, hM, e1]
   rfl
 
-theorem kind_eq {u u' : D.what₂.Word} {F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)} {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)}
+theorem kind_eq {u u' : D.what₂.Word} {F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)} {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)}
     {w : Point D.host.E (D.R.rS + 1)} (hc : IsInCell (ZhatOM (ZhatL (lf D F0) F')) w) :
     kind w = if Dr (lf D F0) F' = 0 then none else some (Dr1 (lf D F0) F' / Dr (lf D F0) F') := by
   have h1 := dmin_eq hc D.R.rS (Nat.le_succ _)

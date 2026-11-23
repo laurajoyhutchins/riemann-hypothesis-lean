@@ -1,10 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DefiniteThetaPairTestVectorExpansion
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNsmulSymplecticPairingCharacterTrivialStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPosNatMulInvIdealLatticeMemIntegralStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulEqZeroOfInf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNsmulSymplecticPairingCharacterTrivialStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPosNatMulInvIdealLatticeMemIntegralStatement
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField MeasureTheory
 open scoped Classical
@@ -33,7 +71,7 @@ theorem decomp {D : D7} (a : AE D) : a = secI D (infPart D a) + secF D (finPart 
   induction a using TensorProduct.induction_on with
   | zero => rw [RingHom.map_zero, RingHom.map_zero, LinearMap.map_zero, LinearMap.map_zero, add_zero]
   | add a b ha hb =>
-    rw [RingHom.map_add, RingHom.map_add, LinearMap.map_add, LinearMap.map_add]
+    rw [RingHom.map_add (f := _), RingHom.map_add (f := _), LinearMap.map_add (f := _), LinearMap.map_add (f := _)]
     conv_lhs => rw [ha, hb]
     abel
   | tmul c e =>
@@ -49,7 +87,7 @@ theorem decomp {D : D7} (a : AE D) : a = secI D (infPart D a) + secF D (finPart 
 theorem infPart_secF {D : D7} (y : Af D.host.F ⊗[D.host.F] D.host.E) : infPart D (secF D y) = 0 := by
   induction y using TensorProduct.induction_on with
   | zero => rw [LinearMap.map_zero, RingHom.map_zero]
-  | add a b ha hb => rw [LinearMap.map_add, RingHom.map_add, ha, hb, add_zero]
+  | add a b ha hb => rw [LinearMap.map_add (f := _), RingHom.map_add (f := _), ha, hb, add_zero]
   | tmul c e =>
     show fstA D.host.F (LinearMap.inr D.host.F (Ainf D.host.F) (Af D.host.F) c) ⊗ₜ[D.host.F] e = 0
     have : fstA D.host.F (LinearMap.inr D.host.F (Ainf D.host.F) (Af D.host.F) c) = 0 := rfl
@@ -58,7 +96,7 @@ theorem infPart_secF {D : D7} (y : Af D.host.F ⊗[D.host.F] D.host.E) : infPart
 theorem finPart_secF {D : D7} (y : Af D.host.F ⊗[D.host.F] D.host.E) : finPart D (secF D y) = y := by
   induction y using TensorProduct.induction_on with
   | zero => rw [LinearMap.map_zero, RingHom.map_zero]
-  | add a b ha hb => rw [LinearMap.map_add, RingHom.map_add, ha, hb]
+  | add a b ha hb => rw [LinearMap.map_add (f := _), RingHom.map_add (f := _), ha, hb]
   | tmul c e =>
     show sndA D.host.F (LinearMap.inr D.host.F (Ainf D.host.F) (Af D.host.F) c) ⊗ₜ[D.host.F] e = c ⊗ₜ[D.host.F] e
     have : sndA D.host.F (LinearMap.inr D.host.F (Ainf D.host.F) (Af D.host.F) c) = c := rfl
@@ -143,7 +181,7 @@ theorem ent_smul {D : D7} {m n : ℕ} (Y : Matrix (Fin m) (Fin m) (Formalism.Mai
     (Y * (c • Z) * X) i j = c * (Y * Z * X) i j := by
   rw [Matrix.mul_smul, Matrix.smul_mul, Matrix.smul_apply, smul_eq_mul]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem psi_sympl_moved_eq_one : ∀ {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (S T : HSp D) {a d : ℕ} (hS : S.rank = a) (hT : T.rank = d)
   (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (r : D.host.E), Setup ψ θ S T cc δ r →

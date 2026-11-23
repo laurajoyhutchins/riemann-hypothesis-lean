@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.SameKindIsometric
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas
 
@@ -57,7 +109,7 @@ theorem finrank_skewPart (B : Submodule ℂ (Matrix (Fin n) (Fin n) ℂ)) (hB : 
         simp only [Prod.smul_fst, Prod.smul_snd, Submodule.coe_smul_of_tower, Submodule.coe_smul, RingHom.id_apply, smul_add]
         rw [smul_comm] }
   have hinj : Function.Injective f := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨⟨X, hX⟩, ⟨Y, hY⟩⟩ h
     have h1 : X + Complex.I • Y = 0 := congrArg Subtype.val h
     have h2 : -X + Complex.I • Y = 0 := by
@@ -116,7 +168,7 @@ theorem exists_proj (W : Submodule ℂ (Fin n → ℂ)) :
     rw [hP]
     exact Submodule.starProjection_eq_self_iff.2 ⟨y, hy, rfl⟩
   refine ⟨P, ?_, h1, h2, ?_⟩
-  · apply Matrix.isHermitian_iff_isSymmetric.2
+  · apply Matrix.isSymmetric_toEuclideanLin_iff.mp
     rw [LinearEquiv.apply_symm_apply]
     exact W'.starProjection_isSymmetric
   · have h : LinearMap.IsProj W (Matrix.toLin' P) := ⟨h1, h2⟩
@@ -172,7 +224,8 @@ theorem finrank_commutant {κ : Type} [Fintype κ] (J : Matrix (Fin n) (Fin n) �
       rw [hπ, this, hX.1, mul_assoc, hJ, mul_one]
       module
   rw [← hP.trace]
-  simp only [π, map_smul, map_sum, map_add, trace_mulLeftRight, smul_eq_mul, Matrix.trace_mul_comm (e _) J, sq]
+
+  simp only [π, map_smul, map_sum, map_add (f := _), trace_mulLeftRight, smul_eq_mul, Matrix.trace_mul_comm (e _) J, sq]
 
 theorem exists_trace_eq_nat (M : Matrix (Fin n) (Fin n) ℂ) (h : M * M = M) : ∃ m : ℕ, M.trace = m := by
   have hp : LinearMap.IsProj (LinearMap.range (Matrix.toLin' M)) (Matrix.toLin' M) :=

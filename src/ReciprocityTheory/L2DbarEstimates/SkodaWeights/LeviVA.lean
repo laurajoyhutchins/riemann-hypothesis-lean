@@ -1,6 +1,61 @@
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SkodaWeightStatement
-import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.Matrix
+module
+
+import ReciprocityTheory.L2DbarEstimates.LeviForms.OfRealNormSqSumMul
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.Matrix
+public import ReciprocityTheory.L2DbarEstimates.IsLocalHomeomorph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+
+@[expose] public section
 
 open Complex ComplexConjugate Filter Topology Matrix
 
@@ -21,40 +76,14 @@ variable {n : ℕ}
 theorem ofReal_normSq_sum_mul (a ξ : Fin n → ℂ) :
     ((Complex.normSq (∑ j, a j * ξ j) : ℝ) : ℂ) =
       ∑ j, ∑ kk, a j * conj (a kk) * ξ j * conj (ξ kk) := by
+
   rw [← Complex.mul_conj, map_sum, Finset.sum_mul_sum]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul]
   ring
 
 theorem leviChain : LeviChainStatement := by
-  intro n k v x ξ hv hk
-  have hv1 : DifferentiableAt ℝ v x := hv.differentiableAt (by simp)
-  have hk1 : DifferentiableAt ℝ (deriv k) (v x) := differentiableAt_deriv_of_contDiffAt hk
-  have hv' : ContDiffAt ℝ 2 (fun y => ((v y : ℝ) : ℂ)) x :=
-    ofRealCLM.contDiff.contDiffAt.comp x hv
-  have hvd : ∀ᶠ y in 𝓝 x, DifferentiableAt ℝ v y := eventually_differentiableAt_of_contDiffAt hv
-  have hkd : ∀ᶠ y in 𝓝 x, DifferentiableAt ℝ k (v y) :=
-    hv1.continuousAt.tendsto.eventually (eventually_differentiableAt_of_contDiffAt hk)
-  have hE : ∀ kk : Fin n, wdb n kk (fun y => ((k (v y) : ℝ) : ℂ)) =ᶠ[𝓝 x]
-      fun y => ((deriv k (v y) : ℝ) : ℂ) * wdb n kk (fun y => ((v y : ℝ) : ℂ)) y := by
-    intro kk
-    filter_upwards [hvd, hkd] with y hy1 hy2
-    exact wdb_ofReal_comp hy2 hy1
-  have hD1 : DifferentiableAt ℝ (fun y => ((deriv k (v y) : ℝ) : ℂ)) x :=
-    differentiableAt_ofReal (hk1.comp x hv1)
-  have hterm : ∀ j kk : Fin n, wd n j (wdb n kk (fun y => ((k (v y) : ℝ) : ℂ))) x =
-      ((deriv (deriv k) (v x) : ℝ) : ℂ) * wd n j (fun y => ((v y : ℝ) : ℂ)) x *
-          conj (wd n kk (fun y => ((v y : ℝ) : ℂ)) x) +
-        ((deriv k (v x) : ℝ) : ℂ) * wd n j (wdb n kk (fun y => ((v y : ℝ) : ℂ))) x := by
-    intro j kk
-    rw [wd_congr (hE kk),
-      wd_mul (f := fun y => ((deriv k (v y) : ℝ) : ℂ)) (g := wdb n kk (fun y => ((v y : ℝ) : ℂ)))
-        hD1 (differentiableAt_wdb hv'),
-      wd_ofReal_comp hk1 hv1, wdb_ofReal hv1]
-  rw [ofReal_normSq_sum_mul]
-  simp only [leviV, hterm, Finset.mul_sum, ← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun kk _ => ?_
-  ring
+  apply ReciprocityTheory.L2DbarEstimates.leviChain <;> assumption
 
 theorem wd_ofReal_sum {m : ℕ} {j : Fin n} {u : Fin m → V n → ℝ} {x : V n}
     (hu : ∀ i, DifferentiableAt ℝ (u i) x) :
@@ -308,6 +337,7 @@ private theorem ofReal_sqNorm_projPerp_mulVec {p : ℕ} (G w : Fin p → ℂ) (h
     rw [hP i, map_sub, map_mul, map_mul, map_inv₀, Complex.conj_ofReal]
     ring
   have h2 : ∑ i, G i * conj (w i) = conj (∑ j, conj (G j) * w j) := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, Complex.conj_conj]

@@ -1,5 +1,51 @@
-import Mathlib
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation
 
 namespace GlobalTheory.GamFilt
@@ -28,7 +74,7 @@ theorem sub_mem_pow_succ {A : Type*} [CommRing A] (f : A →+* A) (I : Ideal A)
         exact Ideal.mul_mem_mul hx (h1 y hy)
     · intro x y hx hy
       have e : f (x + y) - (x + y) = (f x - x) + (f y - y) := by
-        rw [map_add]; ring
+        rw [map_add (f := _)]; ring
       rw [e]
       exact Ideal.add_mem _ hx hy
 
@@ -41,7 +87,7 @@ theorem sub_mem_pow_succ_pair {A : Type*} [CommRing A] (f : A →+* A) (p t : A)
   obtain ⟨a, b, rfl⟩ := Ideal.mem_span_pair.1 hy
   have e : f (a * p + b * t) - (a * p + b * t) =
       (f a - a) * p + (f b - b) * t + f b * (f t - t) := by
-    rw [map_add, map_mul, map_mul, hp]; ring
+    rw [map_add (f := _), map_mul, map_mul, hp]; ring
   rw [e]
   have hpm : p ∈ Ideal.span {p, t} := Ideal.subset_span (by simp)
   have htm : t ∈ Ideal.span {p, t} := Ideal.subset_span (by simp)
@@ -57,7 +103,7 @@ theorem X_dvd_sub {O : Type*} [CommRing O] (g : PowerSeries O →ₐ[O] PowerSer
   obtain ⟨b, hb⟩ := h1
   have ha : a = algebraMap O (PowerSeries O) (PowerSeries.constantCoeff a) + PowerSeries.X * b := by
     rw [← hb, PowerSeries.algebraMap_apply]; simp
-  rw [PowerSeries.X_dvd_iff, ha, map_add, AlgHom.commutes, map_mul]
+  rw [PowerSeries.X_dvd_iff, ha, map_add (f := _), AlgHom.commutes, map_mul]
   simp [hg]
 
 theorem exists_X_sub {O : Type*} [CommRing O] (F : PowerSeries O) (p : ℕ) (c : O)
@@ -115,8 +161,16 @@ theorem exists_eq_one_add {l : ℕ} [Fact l.Prime] (P : LocPrime l) (LL : FinExt
   push_cast
   linear_combination this
 
-theorem gamma_sub_mem_pow_succ : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; ∀ g ∈ W.GKs, ∀ (k : ℕ), ∀ a ∈ (Ideal.span {((l : ℕ) : LetA ↥(OL LL) (Module.finrank ℚ_[l] ↥(K0 K))), letπ}) ^ k, W.γA (W.resΓ g) a - a ∈ (Ideal.span {((l : ℕ) : LetA ↥(OL LL) (Module.finrank ℚ_[l] ↥(K0 K))), letπ}) ^ (k + 1) := by
-  intro D HW l _ K s LL h W g hg
+theorem gamma_sub_mem_pow_succ :
+    ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime]
+      (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL),
+    ∀ g ∈ ((HW l).W K s LL h).GKs, ∀ (k : ℕ),
+    ∀ a ∈ (Ideal.span {((l : ℕ) : LetA ↥(OL LL) (Module.finrank ℚ_[l] ↥(K0 K))), letπ}) ^ k,
+      ((HW l).W K s LL h).γA (((HW l).W K s LL h).resΓ g) a - a ∈
+        (Ideal.span {((l : ℕ) : LetA ↥(OL LL) (Module.finrank ℚ_[l] ↥(K0 K))), letπ}) ^ (k + 1) := by
+  intro D HW l _ K s LL h
+  let W := (HW l).W K s LL h
+  intro g hg
   have h1 := (W.GKs_def g).1 hg
   rw [← W.χΓ_res g] at h1
   have hs : (1 : WithTop ℚ) ≤ (W.s : WithTop ℚ) := by exact_mod_cast W.s_pos

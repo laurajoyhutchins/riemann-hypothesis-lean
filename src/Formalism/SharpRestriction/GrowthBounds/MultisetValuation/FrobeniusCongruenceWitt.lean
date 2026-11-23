@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.TwoSumsCondition
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.WModel
+module
+
+import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SubstZOfXCoordZA
+public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.WModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.CyclicPowerClassOfExpEquiv
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.OddLogRelation
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,57 +70,7 @@ theorem sx_dual_even {n' : ℕ} (B : OmBasis p n') (i i' : Fin (n' / 2)) :
 
 theorem sx_dual {n' : ℕ} (B : OmBasis p n') (hev : Even n') (a b : Fin n') (hab : a.val % 2 = b.val % 2) :
     ∑ r, (sigW p)^[a.val] (B.omS r) * (sigW p)^[b.val] (B.om r) = if a = b then 1 else 0 := by
-  classical
-  obtain ⟨k, hk⟩ := hev
-  have ha := a.isLt
-  have hb := b.isLt
-  let i : Fin (n' / 2) := ⟨a.val / 2, by omega⟩
-  let i' : Fin (n' / 2) := ⟨b.val / 2, by omega⟩
-  have hE := sx_dual_even B i i'
-  have hii : (i = i') ↔ (a = b) := by
-    simp only [i, i', Fin.ext_iff]
-    constructor
-    · intro h
-      omega
-    · intro h
-      rw [h]
-  rcases Nat.mod_two_eq_zero_or_one a.val with h0 | h1
-  · have e1 : (sigW p)^[a.val] = (sigW p)^[2 * i.val] := by
-      congr 1
-      show a.val = 2 * (a.val / 2)
-      omega
-    have e2 : (sigW p)^[b.val] = (sigW p)^[2 * i'.val] := by
-      congr 1
-      show b.val = 2 * (b.val / 2)
-      omega
-    rw [e1, e2, hE]
-    by_cases h : a = b
-    · rw [if_pos h, if_pos (hii.mpr h)]
-    · rw [if_neg h, if_neg (fun h' => h (hii.mp h'))]
-  · have e1 : (sigW p)^[a.val] = (sigW p) ∘ (sigW p)^[2 * i.val] := by
-      rw [← Function.iterate_succ']
-      congr 1
-      show a.val = 2 * (a.val / 2) + 1
-      omega
-    have e2 : (sigW p)^[b.val] = (sigW p) ∘ (sigW p)^[2 * i'.val] := by
-      rw [← Function.iterate_succ']
-      congr 1
-      show b.val = 2 * (b.val / 2) + 1
-      omega
-    rw [e1, e2]
-    simp only [Function.comp_apply]
-    have hsig : ∑ r, sigW p ((sigW p)^[2 * i.val] (B.omS r)) * sigW p ((sigW p)^[2 * i'.val] (B.om r)) =
-        sigW p (∑ r, (sigW p)^[2 * i.val] (B.omS r) * (sigW p)^[2 * i'.val] (B.om r)) := by
-      rw [map_sum]
-      exact Finset.sum_congr rfl fun r _ => (map_mul _ _ _).symm
-    rw [hsig, hE]
-    by_cases h : a = b
-    · rw [if_pos h, if_pos (hii.mpr h), map_one]
-    · rw [if_neg h, if_neg (fun h' => h (hii.mp h')), map_zero]
-
-theorem sx_iter_posAdd {n' : ℕ} (x : WW p) (hx : (sigW p)^[n'] x = x) (s : Fin n') (e : ℕ) :
-    (sigW p)^[(posAdd s e).val] x = (sigW p)^[s.val + e] x := by
-  exact Function.IsPeriodicPt.iterate_mod_apply hx (s.val + e)
+  apply Formalism.L2.G.Pend.dualS <;> assumption
 
 theorem frobenius_congruence_witt (a : WW p) : ∃ y : WW p, sigW p a = a ^ p + p * y := by
   obtain ⟨y, hy⟩ := Formalism.InvariantFactorPaths.G7.WModel.frob_sub_pow p a
@@ -115,7 +110,8 @@ theorem sx_frob_sum {ι α K' : Type} [Field K'] (R : Subring K') (s : Finset α
       simp only [y', dif_pos hi]
       exact hy i hi
     have h2 := congrArg (MvPowerSeries.map R.subtype) hr
-    simp only [map_pow, map_sum, map_add, map_mul, map_natCast] at h2
+
+    simp only [map_pow, map_sum, map_add (f := _), map_mul, map_natCast] at h2
     have e3 : ∑ i ∈ s, (MvPowerSeries.map R.subtype (y' i)) ^ p = ∑ i ∈ s, x i ^ p :=
       Finset.sum_congr rfl fun i hi => by rw [hsum i hi]
     rw [Finset.sum_congr rfl hsum, e3] at h2

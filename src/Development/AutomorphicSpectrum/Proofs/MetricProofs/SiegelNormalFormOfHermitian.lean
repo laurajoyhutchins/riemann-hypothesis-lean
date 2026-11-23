@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BigZe
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BigZe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PUnipotentModulusMatrix
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume
 open scoped ENNReal InnerProductSpace
@@ -60,7 +109,8 @@ theorem exists_linear_antilinear (L : (I → ℂ) →ₗ[ℝ] (I → ℂ)) :
     simp [Finset.sum_apply, Pi.single_apply, Finset.sum_add_distrib]
   have hL : L z = ∑ j, ((z j).re • L (Pi.single j 1) + (z j).im • L (Pi.single j Complex.I)) := by
     conv_lhs => rw [hz]
-    simp [map_sum, map_add, map_smul]
+
+    simp [map_sum, map_add (f := _), map_smul]
   rw [hL]
   ext i
   simp only [Finset.sum_apply, Pi.add_apply, Pi.smul_apply, mulVec, dotProduct, Matrix.of_apply,
@@ -120,9 +170,9 @@ theorem symm_posDef_of_relations (G Z : Matrix I I ℂ) (hG : G.PosDef)
   have hgc : Gc.map star = G := by ext; simp [hGc]
   have hct : Zᴴ = Zcᵀ := by ext; simp [hZc, conjTranspose_apply]
   have mapmul : ∀ A B : Matrix I I ℂ, (A * B).map star = A.map star * B.map star := by
-    intro A B; ext i j; simp [mul_apply]
+    intro A B; ext i j; simp [Matrix.mul_apply]
   have mapone : (1 : Matrix I I ℂ).map star = 1 := by
-    ext i j; by_cases h : i = j <;> simp [one_apply, h]
+    ext i j; by_cases h : i = j <;> simp [Matrix.one_apply, h]
   have mapsub : ∀ A B : Matrix I I ℂ, (A - B).map star = A.map star - B.map star := by
     intro A B; ext i j; simp
   have mapneg : ∀ A : Matrix I I ℂ, (-A).map star = -A.map star := by

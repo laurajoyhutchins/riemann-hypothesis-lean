@@ -1,6 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SchwartzBruhatInnerProductSelfNonnegBoundsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SchwartzBruhatInnerProductSelfNonnegBoundsStatement
+public import Mathlib.Algebra.Module.LinearMap.Rat
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Category.Grp.Injective
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+public import Mathlib.RingTheory.RootsOfUnity.Complex
+
+@[expose] public section
+
 open Matrix Complex GlobalTheory.SW
 open scoped ComplexConjugate Real
 
@@ -88,6 +147,7 @@ theorem exists_pr (f : Matrix κ ι ℚ →ₗ[ℤ] ℚ) : ∃ x, ∀ v, f v = p
   refine ⟨fun k i => g (Matrix.single k i 1), fun v => ?_⟩
   change g v = _
   conv_lhs => rw [Matrix.matrix_eq_sum_single v]
+
   simp only [map_sum, pr, dotProduct]
   refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun i _ => ?_
   have : Matrix.single k i (v k i) = v k i • Matrix.single k i (1 : ℚ) := by
@@ -142,7 +202,8 @@ theorem exists_den (x : Matrix κ ι ℚ) : ∃ N : ℕ, 0 < N ∧ IntM ((N : �
 theorem exists_den_fg (M : AddSubgroup (Matrix κ ι ℚ)) (hM : M.FG) :
     ∃ N : ℕ, 0 < N ∧ ∀ x ∈ M, IntM ((N : ℚ) • x) := by
   classical
-  obtain ⟨S, rfl⟩ := hM
+  obtain ⟨S, hS⟩ := AddSubgroup.isAddFG_iff.mp hM
+  rw [← hS]
   choose d hd hd' using fun x : Matrix κ ι ℚ => exists_den x
   refine ⟨∏ x ∈ S, d x, Finset.prod_pos fun x _ => hd x, fun x hx => ?_⟩
   induction hx using AddSubgroup.closure_induction with
@@ -179,8 +240,9 @@ theorem ip_smul_self (c : ℂ) (hc : c ≠ 0) (φ : Matrix κ ι ℚ → ℂ) :
 theorem fg_map {G G' : Type} [AddCommGroup G] [AddCommGroup G'] {A : AddSubgroup G} (hA : A.FG)
     (f : G →+ G') : (A.map f).FG := by
   classical
-  obtain ⟨S, rfl⟩ := hA
-  exact ⟨S.image f, by rw [AddMonoidHom.map_closure, Finset.coe_image]⟩
+  obtain ⟨S, hS⟩ := AddSubgroup.isAddFG_iff.mp hA
+  apply AddSubgroup.isAddFG_iff.mpr
+  exact ⟨S.image f, by rw [Finset.coe_image, ← AddMonoidHom.map_closure, hS]⟩
 
 def fac (ε : Matrix κ ι ℚ × Matrix κ ι ℚ → ℂ) (y : Matrix κ ι ℚ × Matrix κ ι ℚ)
     (x : Matrix κ ι ℚ) : ℂ := ε y * ex (2 * pr x y.1 - pr y.1 y.2)

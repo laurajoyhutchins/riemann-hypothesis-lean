@@ -1,4 +1,44 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BaseLengthBound.TaylorSpanGeneratorsAlt
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BaseLengthBound.TaylorSpanGeneratorsAlt
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.FinitePtsOfCurve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,10 +57,10 @@ variable {D : D7} {B : WeightFamilies.Prov D} {P : ModuliIntegralCharts.Prov D} 
   {la : HeightOneSpectrum (𝓞 B.KO)} {N : ℕ} {w : Fin N → B.Cusp j wL}
 
 theorem hasse_Op_smul (o : Op X la N) (x : ↥(HK X la w wF)) (β : Idx D j N →₀ ℕ) :
-    hasse X la w β (((algebraMap (Op X la N) (Kp X la N) o • x : ↥(HK X la w wF))) : Lw X la w) =
+    hasse X la w β (((@algebraMap (Op X la N) (Kp X la N) _ _ _ o • x : ↥(HK X la w wF))) : Lw X la w) =
       ∑ q ∈ Finset.HasAntidiagonal.antidiagonal β,
-        algebraMap (Op X la N) (Kp X la N) (hasseOp X la N q.1 o) • hasse X la w q.2 (x : Lw X la w) := by
-  have e1 : ((algebraMap (Op X la N) (Kp X la N) o • x : ↥(HK X la w wF)) : Lw X la w) =
+        @algebraMap (Op X la N) (Kp X la N) _ _ _ (hasseOp X la N q.1 o) • hasse X la w q.2 (x : Lw X la w) := by
+  have e1 : ((@algebraMap (Op X la N) (Kp X la N) _ _ _ o • x : ↥(HK X la w wF)) : Lw X la w) =
       algebraMap (Rp X la N) (Lw X la w) (algebraMap (Op X la N) (Rp X la N) o) * (x : Lw X la w) := by
     rw [Submodule.coe_smul_of_tower, Algebra.smul_def,
       IsScalarTower.algebraMap_apply (Kp X la N) (Rp X la N) (Lw X la w),
@@ -72,7 +112,7 @@ theorem aaRep_holds : AARep := by
       exact map_add (hasse X la G.w β) _ _
     refine ⟨xa + xb, ⟨fun β hβ => by rw [hs]; exact add_mem (ha1 β hβ) (hb1 β hβ), fun β hβ => ?_⟩, map_add _ _ _⟩
     convert Q.A0.add_mem (ha2 β hβ) (hb2 β hβ) using 1
-    rw [← map_add]
+    rw [← map_add (f := _)]
     exact congrArg _ (Subtype.ext (hs β))
   | smul o y _ ih =>
     classical
@@ -82,19 +122,20 @@ theorem aaRep_holds : AARep := by
     have hg' : ∀ q : (Idx D j G.N →₀ ℕ) × (Idx D j G.N →₀ ℕ), ∀ hq : (q.2.sum fun _ n => n) ≤ a0 D j T - 1,
         g q = ⟨_, h1 q.2 hq⟩ := fun q hq => dif_pos (h1 q.2 hq)
     let F : (Idx D j G.N →₀ ℕ) → ↥(HK X la G.w wF) := fun β =>
-      ∑ q ∈ Finset.HasAntidiagonal.antidiagonal β, algebraMap (Op X la G.N) (Kp X la G.N) (hasseOp X la G.N q.1 o) • g q
+      ∑ q ∈ Finset.HasAntidiagonal.antidiagonal β, @algebraMap (Op X la G.N) (Kp X la G.N) _ _ _ (hasseOp X la G.N q.1 o) • g q
     have he : ∀ β : Idx D j G.N →₀ ℕ, (β.sum fun _ n => n) ≤ a0 D j T - 1 →
-        hasse X la G.w β ((algebraMap (Op X la G.N) (Kp X la G.N) o • x0 : ↥(HK X la G.w wF)) : Lw X la G.w) =
+        hasse X la G.w β ((@algebraMap (Op X la G.N) (Kp X la G.N) _ _ _ o • x0 : ↥(HK X la G.w wF)) : Lw X la G.w) =
           ((F β : ↥(HK X la G.w wF)) : Lw X la G.w) := by
       intro β hβ
       rw [hasse_Op_smul, Submodule.coe_sum]
       refine Finset.sum_congr rfl fun q hq => ?_
       rw [Submodule.coe_smul_of_tower, hg' q ((sum_snd_le hq).trans hβ)]
       rfl
-    refine ⟨algebraMap (Op X la G.N) (Kp X la G.N) o • x0, ⟨fun β hβ => ?_, fun β hβ => ?_⟩, ?_⟩
+    refine ⟨@algebraMap (Op X la G.N) (Kp X la G.N) _ _ _ o • x0, ⟨fun β hβ => ?_, fun β hβ => ?_⟩, ?_⟩
     · rw [he β hβ]
       exact Submodule.coe_mem _
     · have hm : toA0K X la G.w wF (F β) ∈ Q.A0 := by
+
         rw [map_sum]
         refine Q.A0.sum_mem fun q hq => ?_
         rw [LinearMap.map_smul_of_tower, algebraMap_smul, hg' q ((sum_snd_le hq).trans hβ)]

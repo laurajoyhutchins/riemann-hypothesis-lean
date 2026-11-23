@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHaarOfIsCompact
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,8 +72,9 @@ def intAd : AddSubgroup (AF F) where
     rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
     refine ⟨?_, fun v => ?_⟩
     · simp only [evI] at ha hb ⊢
-      rw [show (a + b).1 = a.1 + b.1 from rfl, map_add, ha, hb, add_zero]
-    · rw [map_add]; exact add_mem (ha' v) (hb' v)
+      rw [show (a + b).1 = a.1 + b.1 from rfl, map_add (f := _), ha, hb, add_zero]
+    · rw [map_add (evFin F v)]
+      exact add_mem (ha' v) (hb' v)
   neg_mem' := by
     rintro a ⟨ha, ha'⟩
     refine ⟨?_, fun v => ?_⟩
@@ -53,7 +97,7 @@ theorem isCompact_intAd : IsCompact (intAd F : Set (AF F)) := by
 
 theorem incV_add {E : Type} [Field E] [NumberField E] [Algebra F E] {n : ℕ} (x y : Fin n → E) :
     incV F (x + y) = incV F x + incV F y := by
-  funext i; simp [incV, map_add]
+  funext i; simp [incV, map_add (f := _)]
 
 theorem incV_zero {E : Type} [Field E] [NumberField E] [Algebra F E] {n : ℕ} :
     incV F (0 : Fin n → E) = 0 := by
@@ -80,7 +124,7 @@ theorem isClosed_latHat : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [
       map_add' := fun c d => by simp [add_smul, Finset.sum_add_distrib] }
   let P : AddSubgroup (s → AF F) := AddSubgroup.pi Set.univ (fun _ => intAd F)
   have hψc : Continuous ψ :=
-    continuous_finset_sum _ fun i _ => by
+    continuous_finsetSum _ fun i _ => by
       show Continuous fun c : s → AF F => c i • incV F (i : Fin n → E)
       exact (continuous_apply i : Continuous fun c : s → AF F => c i).smul
         (continuous_const : Continuous fun _ : s → AF F => incV F (i : Fin n → E))

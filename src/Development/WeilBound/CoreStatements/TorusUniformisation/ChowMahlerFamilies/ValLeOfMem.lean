@@ -1,5 +1,58 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.MulMemPInt
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsFinFlatSub
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RaTlog
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.DetUpdateRowDiagonal
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.FormMemLin
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RaChar
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.MulMemPInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.DualLattices.HasLenCokerDet
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RaCpaf
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR PositivityTheory.HtPt.Ra
 open scoped Matrix
@@ -50,13 +103,15 @@ theorem tl_est (hv : v.Integers R) (hp : v (p : C) < 1) {ζ : C} (hζ : IsPrimit
     rw [← Ideal.Quotient.eq]
     have hE' : ∀ m m', Ideal.Quotient.mk (Ideal.span {(p : R)}) (Eg m m') = zq p R (ε m m') := fun m m' => by
       rw [zq_val, Ideal.Quotient.eq]; exact hE m m'
+
     simp only [map_sum, map_mul, ← zq_val, Matrix.mulVec, Matrix.vecMul, dotProduct, hE', Finset.mul_sum,
-      Finset.sum_mul, mul_assoc]
+    Finset.sum_mul, mul_assoc]
     exact Finset.sum_comm
   have e : ∑ m, algebraMap R C (y m) * tl p (ζ ^ ((ε *ᵥ z) m).val) -
       algebraMap R C c * algebraMap R C (∑ i, (y ᵥ* Eg) i * ((z i).val : R)) =
       ∑ m, algebraMap R C (y m) * (tl p (ζ ^ ((ε *ᵥ z) m).val) - tl p ζ * (((ε *ᵥ z) m).val : C)) +
         tl p ζ * algebraMap R C ((∑ m, y m * (((ε *ᵥ z) m).val : R)) - ∑ i, (y ᵥ* Eg) i * ((z i).val : R)) := by
+
     rw [hc, map_sub, map_sum (algebraMap R C) fun m => y m * _]
     simp only [mul_sub, Finset.sum_sub_distrib, map_mul, map_natCast, Finset.mul_sum]
     have : ∀ m, algebraMap R C (y m) * (tl p ζ * (((ε *ᵥ z) m).val : C)) =
@@ -92,7 +147,7 @@ theorem slice {N : Type} {M : Submodule R (N → C)} (hM : M ≤ intFun R N) {Q 
     refine ⟨f + f', M.add_mem hf hf', fun x => ?_⟩
     obtain ⟨h1, r, e1, e2⟩ := ha x
     obtain ⟨h1', r', e1', e2'⟩ := hb x
-    exact ⟨M.add_mem h1 h1', r + r', by simp [e1, e1'], by rw [map_add, ← e2, ← e2', ← map_add]; rfl⟩
+    exact ⟨M.add_mem h1 h1', r + r', by simp [e1, e1'], by rw [map_add (f := _), ← e2, ← e2', ← map_add (f := _)]; rfl⟩
   | smul a b _ hb =>
     obtain ⟨f, hf, hb⟩ := hb
     refine ⟨a • f, M.smul_mem a hf, fun x => ?_⟩
@@ -191,7 +246,9 @@ theorem core (hv : v.Integers R) (hp : v (p : C) < 1) (hp2 : p ≠ 2) (AA : Hopf
       rw [Finset.sum_eq_single m (fun k _ hk => by simp [Pi.single_eq_of_ne hk]) (by simp)]
       simp [ZMod.val_one]
     funext k
+
     simp only [T, map_sum, map_smul, this, Finset.sum_apply, Pi.smul_apply]
+
     simp only [Matrix.mulVec, dotProduct, map_mul, map_sum, Algebra.smul_def, Ideal.Quotient.algebraMap_eq, mul_comm]
   have hF1 : ∀ (y : I → R) (f : AA.carrier),
       (∀ x, f.1 x - algebraMap R C (∑ i, (y ᵥ* Eg) i * ((x i).val : R)) ∈ pInt (C := C) R p) →
@@ -226,9 +283,11 @@ theorem core (hv : v.Integers R) (hp : v (p : C) < 1) (hp2 : p ≠ 2) (AA : Hopf
       convert Submodule.sum_mem _ fun j (_ : j ∈ Finset.univ) => Submodule.smul_mem _ (a j) (hl j x) using 1
       simp only [Submodule.coe_sum, Finset.sum_apply, Submodule.coe_smul, Pi.smul_apply, smul_sub,
         Finset.sum_sub_distrib, smul_eq_mul]
+
       simp only [Algebra.smul_def, ← map_mul, ← map_sum, Finset.sum_mul, Finset.mul_sum, mul_assoc]
       rw [Finset.sum_comm]
     have h2 := hF1 _ _ h1
+
     rw [map_sum] at h2
     simp only [map_smul] at h2
     rw [ha, hf] at h2

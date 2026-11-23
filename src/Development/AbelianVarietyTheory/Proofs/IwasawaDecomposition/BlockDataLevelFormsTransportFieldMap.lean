@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockBaseChange
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ImportsExtra
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockBaseChange
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ImportsExtra
+public import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,15 +82,16 @@ theorem exists_dual_family [NumberField K] [NumberField K'] (φ : K →+* K') :
   · exact (F i).map_smul a x
   · intro x
     induction x using hbc.inductionOn with
-    | zero => simp
     | tmul a =>
       have h1 : a = ∑ i, g a i • f (Pi.single i 1) := by
+
         conv_lhs => rw [← LinearMap.id_apply (R := 𝓞 K) a, ← hfg, LinearMap.comp_apply, pi_eq_sum_univ' (g a), map_sum]
         simp only [map_smul]
       have h2 : ∀ i, (F i).toAddMonoidHom ((IsScalarTower.toAlgHom (𝓞 K) (𝓞 K') K').toLinearMap a) =
           algebraMap (𝓞 K) K (g a i) := fun i => hF i a
       simp only [h2]
       change algebraMap (𝓞 K') K' a = _
+
       conv_lhs => rw [h1, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [Algebra.smul_def, map_mul, mul_comm, ← IsScalarTower.algebraMap_apply,
@@ -58,7 +107,7 @@ theorem exists_dual_family [NumberField K] [NumberField K'] (φ : K →+* K') :
       change φ s * _ = _
       ring
     | add x y hx hy =>
-      simp only [map_add, mul_add, Finset.sum_add_distrib]
+      simp only [map_add (f := _), mul_add, Finset.sum_add_distrib]
       rw [← hx, ← hy]
 
 theorem map_mulVec' (φ : K →+* K') {n d : ℕ} (E : Matrix (Fin n) (Fin d) K) (x : Fin d → K) :
@@ -127,6 +176,7 @@ theorem comap_baseChange (φ : K →+* K') {R R' : Type} [CommRing R] [CommRing 
     convert this using 1
     funext k
     rw [← hu2, map_one, one_mul]
+
     simp only [Matrix.mulVec, dotProduct, map_sum, Matrix.map_apply, hF]
   · rw [Submodule.span_le]
     rintro _ ⟨x, hx, rfl⟩
@@ -144,7 +194,7 @@ theorem map_baseChange (φ : K →+* K') {R R' : Type} [CommRing R] [CommRing R'
   rw [Submodule.map_span, Submodule.map_coe, Set.image_image, Set.image_image]
   congr 2
   funext x
-  simp only [LinearMap.restrictScalars_apply, Matrix.mulVecLin_apply]
+  change L' *ᵥ (C *ᵥ (fun k => φ (x k))) = A *ᵥ (fun k => φ ((L *ᵥ x) k))
   rw [Matrix.mulVec_mulVec, hL, ← Matrix.mulVec_mulVec, map_mulVec']
 
 theorem span_range (φ : K →+* K') {n n' : ℕ} (C : Matrix (Fin n') (Fin n) K') :
@@ -155,6 +205,7 @@ theorem span_range (φ : K →+* K') {n n' : ℕ} (C : Matrix (Fin n') (Fin n) K
     rintro _ ⟨x, -, rfl⟩
     exact ⟨_, rfl⟩
   · rintro _ ⟨z, rfl⟩
+
     rw [pi_eq_sum_univ' z, map_sum]
     refine Submodule.sum_mem _ fun j _ => ?_
     rw [map_smul]
@@ -285,6 +336,7 @@ theorem hform_baseChange (φ : K →+* K') (hφ : ∀ x : K, φ (star x) = star 
     hform H' (C *ᵥ (fun k => φ (x k))) (C *ᵥ (fun k => φ (y k))) = φ (hform H x y) := by
   rw [hform_eq_dot, hform_eq_dot, Matrix.star_mulVec, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec,
     Matrix.mulVec_mulVec, hH, map_mulVec']
+
   simp only [dotProduct, map_sum, map_mul, Pi.star_apply, hφ]
 
 end Coord
@@ -296,6 +348,7 @@ variable {K K' : Type} [Field K] [NumberField K] [StarRing K] [Field K'] [Number
 
 theorem gaMat_sum_single (S : CSD K) (r : Representation K G S.Forms) {ι : Type} (s : Finset ι) (g : ι → G) (c : ι → K) :
     S.gaMat r (∑ i ∈ s, MonoidAlgebra.single (g i) (c i)) = ∑ i ∈ s, c i • S.actMat r (g i) := by
+
   rw [CSD.gaMat_eq_lift, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [MonoidAlgebra.lift_single]
@@ -303,6 +356,7 @@ theorem gaMat_sum_single (S : CSD K) (r : Representation K G S.Forms) {ι : Type
 
 theorem gaMat_sum (S : CSD K) (r : Representation K G S.Forms) {ι : Type} (s : Finset ι) (a : ι → MonoidAlgebra K G) :
     S.gaMat r (∑ i ∈ s, a i) = ∑ i ∈ s, S.gaMat r (a i) := by
+
   simp only [CSD.gaMat_eq_lift, map_sum]
 
 section

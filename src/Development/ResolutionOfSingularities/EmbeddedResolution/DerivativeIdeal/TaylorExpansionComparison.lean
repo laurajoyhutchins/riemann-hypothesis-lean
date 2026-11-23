@@ -1,6 +1,54 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdeal
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.TaylorExpansion
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdeal
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.TaylorExpansion
+public import Mathlib.RingTheory.Unramified.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace FunctorialResolution.EmbeddedResolution
 
@@ -130,8 +178,17 @@ theorem isTaylorExpansionOn_mvPolynomial {k : Type*} [CommRing k] {ι : Type*}
     IsTaylorExpansionOn (MvPolynomial ι k) φ φ' D β := by
   intro N hN x
   have hβN : β ^ N ∈ maximalIdeal B ^ N := Ideal.pow_mem_pow hβ N
+  let T : R →+* B ⧸ (maximalIdeal B ^ N) :=
+    { toFun := fun f => Ideal.Quotient.mk _ (TaylorExpansion.truncatedSeries φ D β N f)
+      map_one' := by rw [TaylorExpansion.truncatedSeries_one φ D β N hN, map_one]
+      map_zero' := by rw [TaylorExpansion.truncatedSeries_zero, map_zero]
+      map_add' := by intros; rw [TaylorExpansion.truncatedSeries_add, map_add]
+      map_mul' := by
+        intro a b
+        rw [← map_mul]
+        exact Ideal.Quotient.eq.mpr (TaylorExpansion.truncatedSeries_mul_sub_mem φ D β N _ hβN a b) }
   have key :
-      (TaylorExpansion.truncatedSeriesRingHom φ D β N (maximalIdeal B ^ N) hN hβN).comp
+      T.comp
           (algebraMap (MvPolynomial ι k) R) =
         ((Ideal.Quotient.mk (maximalIdeal B ^ N)).comp φ').comp
           (algebraMap (MvPolynomial ι k) R) := by
@@ -143,12 +200,14 @@ theorem isTaylorExpansionOn_mvPolynomial {k : Type*} [CommRing k] {ι : Type*}
         rw [TaylorExpansion.truncatedSeries_of_deriv_eq_zero φ D β N hN
           (algebraMap (MvPolynomial ι k) R (MvPolynomial.C c)) (hDconst c)]
         exact hconst c
-      simp only [RingHom.coe_comp, Function.comp_apply, TaylorExpansion.truncatedSeriesRingHom_apply, h1]
+      change Ideal.Quotient.mk _ (TaylorExpansion.truncatedSeries φ D β N _) = _
+      rw [h1]
+      rfl
     · intro i
-      simp only [RingHom.coe_comp, Function.comp_apply, TaylorExpansion.truncatedSeriesRingHom_apply]
+      simp only [RingHom.coe_comp, Function.comp_apply, T]
       exact Ideal.Quotient.eq.2 (hvar i N hN)
   have h := RingHom.congr_fun key x
-  simp only [RingHom.coe_comp, Function.comp_apply, TaylorExpansion.truncatedSeriesRingHom_apply] at h
+  simp only [RingHom.coe_comp, Function.comp_apply, T] at h
   exact Ideal.Quotient.eq.1 h
 
 private theorem derivation_apply_eq_zero_of_formallyUnramified {P R : Type*} [CommRing P]
@@ -198,9 +257,9 @@ private theorem sub_mem_pow_succ_of_sub_mem_pow (P : Type*) {R B : Type*} [CommR
             = Ideal.Quotient.mk (m ^ (k + 1)) (T a - φ' a)
               + Ideal.Quotient.mk (m ^ (k + 1)) (T b - φ' b)
         have harg : T (a + b) - φ' (a + b) = T a - φ' a + (T b - φ' b) := by
-          rw [hadd, map_add]
+          rw [hadd, map_add (f := _)]
           ring
-        rw [harg, map_add]
+        rw [harg, map_add (f := _)]
       map_smul' := by
         intro p a
         show Ideal.Quotient.mk (m ^ (k + 1)) (T (p • a) - φ' (p • a))
@@ -234,7 +293,7 @@ private theorem sub_mem_pow_succ_of_sub_mem_pow (P : Type*) {R B : Type*} [CommR
         simp only [Algebra.smul_def]
         have halg : ∀ y : R, (algebraMap R (B ⧸ m ^ (k + 1))) y
             = Ideal.Quotient.mk (m ^ (k + 1)) (φ' y) := fun _ => rfl
-        rw [halg a, halg b, ← map_mul, ← map_mul, ← map_add]
+        rw [halg a, halg b, ← map_mul, ← map_mul, ← map_add (f := _)]
         exact Ideal.Quotient.eq.mpr (hleib a b) }
   have hdx : Ideal.Quotient.mk (m ^ (k + 1)) (T x - φ' x) = 0 :=
     derivation_apply_eq_zero_of_formallyUnramified d x
@@ -370,7 +429,7 @@ private theorem mem_of_forall_mem_sup_maximalIdeal_pow {B : Type*} [CommRing B] 
     intro N
     obtain ⟨j, hj, y, hy, hxy⟩ := Submodule.mem_sup.1 (hx N)
     have hxe : Ideal.Quotient.mk J x = Ideal.Quotient.mk J y := by
-      rw [← hxy, map_add, Ideal.Quotient.eq_zero_iff_mem.2 hj, zero_add]
+      rw [← hxy, map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.2 hj, zero_add]
     rw [hxe]
     exact (Ideal.map_pow (Ideal.Quotient.mk J) (IsLocalRing.maximalIdeal B) N).le
       (Ideal.mem_map_of_mem _ hy)

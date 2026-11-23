@@ -1,12 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTauComponentFrameOfLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PrimePowSmulMemOfTwistedInvariantModLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContinuousGaloisLatticeMatrixIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowSmulMemOL
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsContinuousGaloisLatticeMatrixIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowSmulMemOL
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTauComponentFrameOfLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PrimePowSmulMemOfTwistedInvariantModLatticeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,8 +92,9 @@ theorem killed_of_coordinates {G : Type} [Group G] [TopologicalSpace G] {Qp LL O
     have e2 : b.repr (ac σ t) a =
         ∑ j, b.repr (ac σ (b j)) a * b.repr t j := by
       conv_lhs => rw [← b.sum_repr t]
-      simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.smul_apply,
-        smul_eq_mul, mul_comm]
+
+      simp only [map_sum, map_smul, Finset.sum_apply', Finsupp.smul_apply,
+      smul_eq_mul, mul_comm]
     have e3 := congrArg (fun z => ((b.repr z a : ℤ_[l]) : ℚ_[l])) e1
     simp only [map_sub, map_smul, Finsupp.sub_apply, Finsupp.smul_apply, smul_eq_mul, e2] at e3
     push_cast at e3
@@ -64,6 +103,7 @@ theorem killed_of_coordinates {G : Type} [Group G] [TopologicalSpace G] {Qp LL O
         (fun a => algebraMap ℚ_[l] (PadicComplex l) (((l : ℚ_[l]) ^ n)⁻¹ * (b.repr t a : ℚ_[l])))) a =
         algebraMap ℚ_[l] (PadicComplex l) ((b.repr (⟨_, hw σ⟩ : ↥T.L.T) a : ℤ_[l]) : ℚ_[l]) := by
       have hb' : ∀ i j, M σ i j = zC (b.repr (ac σ (b j)) i) := hb σ
+
       simp only [Pi.sub_apply, Matrix.mulVec, dotProduct, hb', zC, ← map_mul, ← map_sum, ← map_sub]
       congr 1
       have hp : (l : ℚ_[l]) ^ n ≠ 0 := pow_ne_zero _ hl
@@ -80,7 +120,6 @@ theorem killed_of_coordinates {G : Type} [Group G] [TopologicalSpace G] {Qp LL O
     ext a
     have : b.repr t' a = z a := congrFun (b.repr_sum_self z) a
     simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, this]
-    apply Subtype.ext
     have hz : ((z a : ℤ_[l]) : ℚ_[l]) = (l : ℚ_[l]) ^ c * (((l : ℚ_[l]) ^ n)⁻¹ * (b.repr t a : ℚ_[l])) := rfl
     rw [PadicInt.coe_mul, PadicInt.coe_mul, hz]
     push_cast
@@ -193,8 +232,9 @@ theorem invariants_killed : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc
             (P.mulVec (fun a => algebraMap ℚ_[l] (PadicComplex l) (y a)) a)) =
             (P.map ((D.locA l).actC σ)).mulVec (fun a => algebraMap ℚ_[l] (PadicComplex l) (y a)) := by
           funext a
+
           simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Matrix.map_apply,
-            act_algebraMap' hact]
+          act_algebraMap' hact]
         rw [Matrix.mulVec_sub, Matrix.mulVec_mulVec, hPM σ hσ, twAct, e1, Matrix.mulVec_mulVec]
         simp [chiC])
     rw [Finset.erase_eq_of_notMem h0J] at key

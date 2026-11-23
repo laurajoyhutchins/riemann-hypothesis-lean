@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.IndexCocycleOrbits.IdxCocycle
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.IndexCocycleOrbits.OrbStabZ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,22 +84,6 @@ theorem relIndex_cj (s : G) (X Y : Subgroup G) : (cj s X).relIndex (cj s Y) = X.
 
 theorem idxRatio_self (A : Subgroup G) : IdxRatio A A = 1 := by
   simp [IdxRatio, Subgroup.relIndex_self]
-
-theorem idxRatio_conj_sub (A B B' : Subgroup G) (s : G) (hBA : B ≤ A) (hAB' : A ≤ B') (hs : s ∈ B')
-    (hfin : B.relIndex B' ≠ 0) : IdxRatio A (cj s B) = (B.relIndex A : ℝ) := by
-  have hmul : B.relIndex A * A.relIndex B' = B.relIndex B' := Subgroup.relIndex_mul_relIndex B A B' hBA hAB'
-  have hBA0 : B.relIndex A ≠ 0 := fun h => hfin (by rw [← hmul, h, zero_mul])
-  have hAB0 : A.relIndex B' ≠ 0 := fun h => hfin (by rw [← hmul, h, mul_zero])
-  have hB'eq : cj s B' = B' := cj_self hs
-  have hA'le : cj s A ≤ B' := hB'eq ▸ cj_le hAB'
-  have hA'idx : (cj s A).relIndex B' = A.relIndex B' := by
-    rw [← relIndex_cj s A B', hB'eq]
-  have e1 := idxCocycle G A (cj s B) (cj s A) (cj_le hBA) (by rw [relIndex_cj]; exact hBA0)
-  have e2 := idxCocycle G A (cj s A) B' hA'le (by rw [hA'idx]; exact hAB0)
-  have e3 := idxCocycle G A A B' hAB' hAB0
-  rw [idxRatio_self] at e3
-  rw [hA'idx, ← e3] at e2
-  rw [e1, e2, relIndex_cj, mul_one]
 
 end Conj
 

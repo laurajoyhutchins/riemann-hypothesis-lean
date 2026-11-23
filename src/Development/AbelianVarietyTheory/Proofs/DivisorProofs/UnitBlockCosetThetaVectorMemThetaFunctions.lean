@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaFunctionsAllLevelsClosure
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActAApply
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecEq
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActAApply
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KernelLatticesFormSelfDualTriples
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaFunctionsAllLevelsClosure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HESmulRight
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,12 +132,12 @@ theorem la_skew_nsmul (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (𝔪 : Ideal (�
   obtain ⟨M, hM0, hM⟩ := skewLat_smul (D := D) 𝔪 d
   refine ⟨M, hM0, fun x hx => ?_⟩
   have key : La D (tor0 D cc δ) (stdL D a) (skewLat D 𝔪 d) ≤
-      (La0 D (tor0 D cc δ) a d).comap (DistribMulAction.toAddMonoidHom (VC D a d) M) := by
+      (La0 D (tor0 D cc δ) a d).comap (DistribSMul.toAddMonoidHom (VC D a d) M) := by
     refine (AddSubgroup.closure_le _).2 fun z hz => ?_
     obtain ⟨w, hw, A, hA, rfl⟩ := hz
     have hA' := YYl_smul (a := a) hM hA
     simp only [Submodule.mem_comap, LinearMap.lsmul_apply] at hA'
-    simp only [SetLike.mem_coe, AddSubgroup.mem_comap, DistribMulAction.toAddMonoidHom_apply]
+    simp only [SetLike.mem_coe, AddSubgroup.mem_comap, DistribSMul.toAddMonoidHom_apply]
     refine AddSubgroup.subset_closure ⟨w, hw, _, hA', ?_⟩
     funext τ i j
     simp [embV, tor0, Algebra.smul_def, nsmul_eq_mul]

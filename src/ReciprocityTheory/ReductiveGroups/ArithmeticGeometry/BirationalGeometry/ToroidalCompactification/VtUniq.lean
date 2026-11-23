@@ -1,6 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullFEPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
+module
+
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPowerSectionOfChartFunctions
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Std.Tactic.BVDecide.Normalize.BitVec
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,27 +69,7 @@ variable {A U : Type} [CommGroup A] [CommGroup U]
 
 theorem cubN_right {θ : A → A → A → U} (h : IsCub θ) {k : ℕ} {x : A} (hx : x ^ k = 1) (z y : A) :
     cubN θ k 1 x (z * y) * θ x z y ^ k = cubN θ k 1 x z * cubN θ k 1 x y := by
-  have cyc : ∀ p q r, θ r p q = θ p q r := fun p q r => (h.s01 r p q).trans (h.s12 p r q)
-  have key : ∀ a, θ a x (z * y) * θ x z y = θ a x z * θ a x y * (θ (a * x) z y * (θ a z y)⁻¹) := by
-    intro a
-    have c1 := h.coc x z y a
-    have c2 := h.coc a x z y
-    rw [← cyc x z a, ← cyc (x * z) y a, ← cyc x (z * y) a, ← cyc z y a] at c1
-    rw [← _root_.mul_assoc, eq_mul_inv_iff_mul_eq]
-    calc θ a x (z * y) * θ x z y * θ a z y = θ a x (z * y) * θ a z y * θ x z y := mul_right_comm _ _ _
-      _ = θ a (x * z) y * θ a x z * θ x z y := by rw [← c1]
-      _ = θ a x z * (θ a (x * z) y * θ x z y) := by rw [mul_comm (θ a (x * z) y) (θ a x z), _root_.mul_assoc]
-      _ = θ a x z * (θ (a * x) z y * θ a x y) := by rw [← c2]
-      _ = θ a x z * θ a x y * θ (a * x) z y := by rw [mul_comm (θ (a * x) z y) (θ a x y), _root_.mul_assoc]
-  have htel : ∏ i ∈ Finset.range k, (θ (x ^ i * x) z y * (θ (x ^ i) z y)⁻¹) = 1 := by
-    have := Finset.prod_range_div (fun i => θ (x ^ i) z y) k
-    simp only [pow_succ, div_eq_mul_inv] at this
-    rw [this, hx, pow_zero, mul_inv_cancel]
-  have hG : θ x z y ^ k = ∏ _i ∈ Finset.range k, θ x z y := by simp
-  unfold cubN
-  simp only [_root_.one_mul]
-  rw [hG, ← Finset.prod_mul_distrib, Finset.prod_congr rfl (fun i _ => key (x ^ i)), Finset.prod_mul_distrib,
-    Finset.prod_mul_distrib, htel, _root_.mul_one]
+  apply GlobalTheory.ThetaInValues.cubN_mul <;> assumption
 
 theorem lift_const {k : ℕ} (hk : Odd k) {t d : A} (ht : t ^ k = 1) (hd : d ^ k = 1) (φ' φ β ν' ν κ : A → U) (c e : U)
     (hga : ∀ y, φ (y * d) * β (y * d * t) * β y = φ y * β (y * t) * β (y * d))
@@ -290,7 +323,7 @@ theorem prod_pm (N : ℕ) {T : Over S} (a b : T ⟶ A) {U : Type} [CommGroup U] 
   norm_cast
 
 include c in
-set_option maxHeartbeats 1600000 in
+
 theorem vtOver_unique (hG : GlobalFnsSt) (hA : IsAbelianScheme A) (hsym : L.IsSymmetric) {N : ℕ} (hN : Odd N) (f g : A ⟶ A)
     [IsMonHom f] [IsMonHom g] (hr : RosatiAdj A L.L f g) {T : Over S} (ok : (T ⟶ A) → Prop)
     (hf : ∀ x, ok x → x ≫ f = 1) (hg : ∀ x, ok x → x ≫ g = x) (hk : ∀ x, ok x → x ^ (N ^ 2) = 1)

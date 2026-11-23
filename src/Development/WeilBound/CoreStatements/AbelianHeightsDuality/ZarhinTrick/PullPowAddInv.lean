@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.IsPolarisationOfRelAmple
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ZarhinTrick.FibAmpleD
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ZarhinTrick.FibLamD
+module
+
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ZarhinTrick.IsLBZb
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianDeRhamPoincareDualityOfCubeDual
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPointPrimitiveBundleEqTranslatePpav
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ZarhinTrick.FibLamA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -132,8 +172,8 @@ private theorem lam_pow_right' (hD0 : IsDual A B P) (hD1 : IsDual B A (swap P)) 
   | succ k ih =>
     rw [pow_succ, lam_mul_right_zarhin_trick (hD0 := hD0) (hD1 := hD1) (e' := e'), ih, succ_nsmul]
 
-include e hD hD' in
 
+include e hD hD' in
 theorem lam_self_add_inv (q : T ⟶ (Over.pullback s).obj A) :
     lam (cls L hL) q q + lam (cls L hL) q q⁻¹ = 0 := by
   rw [← lam_mul_right_zarhin_trick (hL := hL) (hD0 := hD) (hD1 := hD') (e' := e), mul_inv_cancel, lam_one_right]
@@ -196,7 +236,8 @@ theorem two_cls_pow (hA : IsAbelianScheme A) (hB : IsAbelianScheme B) {P : LB (A
   have hz := isLB_zb mu α s hP hL
   have hpull : cls _ h' = pull ((𝟙 ((Over.pullback s).obj (G4 (A ⊗ B)))) ^ n).left (cls _ hz) := rfl
   have hsplit : cls _ hz = cls _ hLA + cls _ hPA := cls_tens hLA hPA hz
-  rw [hpull, hsplit, map_add, cls_linComb hL, cls_linComb hP, map_sum, map_sum]
+
+  rw [hpull, hsplit, map_add (f := _), cls_linComb hL, cls_linComb hP, map_sum, map_sum]
   simp only [map_zsmul, ← pull_comp, one_smul]
   rw [Fintype.sum_prod_type, Fintype.sum_prod_type, Fintype.sum_prod_type, Fintype.sum_prod_type]
   obtain ⟨N, hN⟩ : ∃ N : (Over.pullback s).obj (G4 (A ⊗ B)) ⟶ (Over.pullback s).obj (G4 (A ⊗ B)), N = (𝟙 _) ^ n := ⟨_, rfl⟩

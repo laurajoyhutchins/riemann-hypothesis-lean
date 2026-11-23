@@ -1,14 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.HeckeFr
-import Formalism.LocalToGlobal.ProjectiveLattices.NonnegIffOfLiesTotal
-import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FrMapComp
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BddGood
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsPointedOfIsHkIsog
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EvLawsGenFrNonemptyComp
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BddGood
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsPointedOfIsHkIsog
+public import Formalism.LocalToGlobal.ProjectiveLattices.RulInst
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.SectionEqZeroOfGenericFramedPointValues
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EvLawsGenFrNonemptyComp
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeByMatricesReflAndComp
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LowerTriIsUnitDet
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.SectionEqZeroOfGenericFramedPointValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FrMapComp
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,7 +83,7 @@ def placeAt [NumberField F] : HeightOneSpectrum (𝓞 F) where
     { carrier := {a | ‖φ (a : F)‖ < 1}
       add_mem' := fun {a b} ha hb => by
         have e : ((a + b : 𝓞 F) : F) = (a : F) + (b : F) := by simp
-        simp only [Set.mem_ofPred_eq, e, map_add] at *
+        simp only [Set.mem_ofPred_eq, e, map_add (f := _)] at *
         exact (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ha hb)
       zero_mem' := by simp
       smul_mem' := fun c a ha => by
@@ -103,8 +147,8 @@ structure IsReading (T : CDVR) (io : F →+* T.Fr) (k : T.Fr →+* ℂ_[p]) : Pr
   comp : ∀ a, k (io a) = φ a
   int : ∀ x, ‖k x‖ ≤ 1 ↔ InV T x
 
-variable {φ} in
 
+variable {φ} in
 def IsReading.alg {T : CDVR} {io : F →+* T.Fr} {k : T.Fr →+* ℂ_[p]} (h : IsReading φ T io k) :
     letI := io.toAlgebra; T.Fr →ₐ[F] PAt φ :=
   letI := io.toAlgebra
@@ -117,15 +161,15 @@ section Points
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
   (Xo : Moduli Dw l) (c : Coeff l) {p : ℕ} [Fact p.Prime] (φ : c.F →+* ℂ_[p])
 
-variable {Xo c φ} in
 
+variable {Xo c φ} in
 def IsReadPt {T : CDVR} {io : c.F →+* T.Fr} {k : T.Fr →+* ℂ_[p]} (h : IsReading φ T io k) (y : IntFr Xo c T io)
     (u : Ix Dw → (PAt φ)ˣ) (z : FrPt Xo c (PAt φ)) : Prop :=
   letI := io.toAlgebra
   ∃ w : FrPt Xo c (PAt φ), FrMap h.alg y.1 w ∧ FrBor u w z
 
-variable {Xo c φ} in
 
+variable {Xo c φ} in
 def IsIntPt (z : FrPt Xo c (PAt φ)) : Prop :=
   ∃ (T : CDVR) (io : c.F →+* T.Fr) (k : T.Fr →+* ℂ_[p]) (h : IsReading φ T io k) (y : IntFr Xo c T io)
     (u : Ix Dw → (PAt φ)ˣ), y.IsAlg ∧ (∀ a, ‖toCp φ (u a)‖ = 1) ∧ IsReadPt h y u z
@@ -185,10 +229,6 @@ def IsHkQuot (𝔓 : Ideal (𝓞 E)) (q i : ℕ) (z : FrPt Xo c (PAt φ)) (C : H
   hkRelFr 𝔓 q i (GlobalTheory.ThetaTrace.hkTr Xo c q) (PAt φ) z C z'
 
 end Points
-
-example (p : ℕ) [Fact p.Prime] : ((p : ℕ) : 𝓞 ℚ) ∈ (placeAt (Rat.castHom ℂ_[p])).asIdeal ∧
-    (1 : 𝓞 ℚ) ∉ (placeAt (Rat.castHom ℂ_[p])).asIdeal :=
-  ⟨natCast_mem_placeAt _, by simp [mem_placeAt]⟩
 
 end GlobalTheory.GeoTie
 

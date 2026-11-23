@@ -1,7 +1,57 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatLConjIIffHform
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatIffOfSelfDual
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HformZeroRight
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSelfDualAdelicFrameLevelOne
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryCompletionMapsDualLattices
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Presheaf
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelPlusSubgroup
+import Development.AbelianVarietyTheory.Definitions.Divisors.NatCastSmulMemHatL
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.DepthPays
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatLConjIIffHform
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSelfDualAdelicFrameLevelOne
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsVacFOfIsVacVec
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.Grow
 open GlobalTheory.IndefiniteRowSideFullHecke.LevelPlusSubgroup (coefPlus Cols SizeRows)
@@ -108,9 +158,6 @@ end Forms
 
 variable {D : D7}
 
-local notation "σA" => Formalism.UG.sigR D.sp.cm.sig (Formalism.L2.Herm.Af D.host.F)
-local notation "ιA" => Formalism.UG.inclE (F := D.host.F) (Formalism.L2.Herm.Af D.host.F)
-
 theorem conjI_eq (𝔪 : Ideal (𝓞 D.host.E)) : GlobalTheory.SW.conjI 𝔪 = D.host.conj • 𝔪 := by
   show _ = 𝔪.map (MulSemiringAction.toRingHom _ _ D.host.conj)
   unfold GlobalTheory.SW.conjI
@@ -133,7 +180,9 @@ theorem inId_hform {V : HSp D} {Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D
     {β : GL (Fin V.rank) (Lev.EAf D)} (hfr : Formalism.L2.DIV.IsFrame β Λ) {𝔪 : Ideal (𝓞 D.host.E)}
     {a b : Fin V.rank → Lev.EAf D} (ha : a ∈ Formalism.L2.Herm.hatL (F := D.host.F) Λ)
     (hb : b ∈ Formalism.L2.Herm.hatL (F := D.host.F) (𝔪 • Λ)) :
-    GlobalTheory.FrameIdeal.InId (F := D.host.F) 𝔪 (Formalism.UG.hform σA (V.gram.map ιA) a b) := by
+    GlobalTheory.FrameIdeal.InId (F := D.host.F) 𝔪
+      (Formalism.UG.hform (Formalism.UG.sigR D.sp.cm.sig (Formalism.L2.Herm.Af D.host.F))
+        (V.gram.map (Formalism.UG.inclE (F := D.host.F) (Formalism.L2.Herm.Af D.host.F))) a b) := by
   have hc := (GlobalTheory.FrameIdeal.mem_hatL_smul_iff β Λ hfr 𝔪 b).1 hb
   have e : b = β.1 *ᵥ ((β⁻¹).1 *ᵥ b) := by
     rw [Matrix.mulVec_mulVec, ← Units.val_mul, mul_inv_cancel, Units.val_one, Matrix.one_mulVec]
@@ -143,22 +192,25 @@ theorem inId_hform {V : HSp D} {Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D
   rw [Matrix.mulVec_single_one] at hk
   exact GlobalTheory.GramFrame.pair_hatL V.gram Λ (GlobalTheory.FrameIdeal.selfDual_pair hsd) _ _ ha hk
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem congLev_conj : ∀ {D : D7} (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)), IsSelfDualC V Λ → ∀ (𝔪 : Ideal (𝓞 D.host.E)) (g : GL (Fin V.rank) (Lev.EAf D)), g ∈ congLev D.sp.cm V.gram Λ 𝔪 → g ∈ congLev D.sp.cm V.gram Λ (𝔪 ⊓ D.host.conj • 𝔪) := by
   intro D V Λ hsd 𝔪 g hg
+  by_cases h𝔪 : 𝔪 = ⊥
+  · subst 𝔪
+    simpa only [bot_inf_eq] using hg
   rw [GlobalTheory.ChiGrid.mem_congLev] at hg ⊢
   obtain ⟨g1, g2, g3⟩ := hg
   obtain ⟨β, hfr⟩ : ∃ β : GL (Fin V.rank) (Lev.EAf D), Formalism.L2.DIV.IsFrame β Λ :=
-    GlobalTheory.AdelicFrame.exists_isFrame D.host.F Λ hsd.1.fg hsd.1.span_eq_top
+    GlobalTheory.AdelicFrame.exists_isFrame D.host.F Λ hsd.1.fg
+      (Submodule.IsFullLattice.span_eq_top (self := GlobalTheory.AdIsom.selfDual_isFullLattice hsd))
   refine ⟨g1, g2, fun y hy => ?_⟩
   have hm := g3 y hy
   have hU : Formalism.UG.cT (Formalism.UG.sigR D.sp.cm.sig (Formalism.L2.Herm.Af D.host.F)) g.1 *
       V.gram.map (Formalism.UG.inclE (F := D.host.F) (Formalism.L2.Herm.Af D.host.F)) * g.1 =
       V.gram.map (Formalism.UG.inclE (F := D.host.F) (Formalism.L2.Herm.Af D.host.F)) := g1
   have hc : g.1 *ᵥ y - y ∈ Formalism.L2.Herm.hatL (F := D.host.F) (GlobalTheory.SW.conjI 𝔪 • Λ) := by
-    rw [GlobalTheory.FrameIdeal.mem_hatL_smul_iff β Λ hfr]
-    refine (GlobalTheory.FrameIdeal.key_iff hsd hfr 𝔪 _).2 fun j => ?_
+    refine (GlobalTheory.FrameIdeal.mem_hatL_conjI_iff_hform D V Λ hsd β hfr 𝔪 h𝔪 _).2 fun j => ?_
     have hx : (β.1)ᵀ j ∈ Formalism.L2.Herm.hatL (F := D.host.F) Λ := by
       have h0 := GlobalTheory.FrameIdeal.col_mem_hatL (D := D) (β := β) (Λ := Λ) hfr j
       rwa [Matrix.mulVec_single_one] at h0

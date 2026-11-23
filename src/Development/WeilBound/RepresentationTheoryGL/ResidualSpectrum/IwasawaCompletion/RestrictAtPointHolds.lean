@@ -1,5 +1,48 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.LsProps
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.IwasawaCompletion.ExistsIwasawaLeft
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.LsProps
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.IwasawaCompletion.AwayPartMulIotaWPart
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.IwasawaCompletion.ExistsIwasawaLeft
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +78,7 @@ theorem restrictAtPoint_holds : RestrictAtPoint := by
     { toFun := Lf
       map_add' := fun v v' => by
         funext m
-        simp only [Lf, map_add]
+        simp only [Lf, map_add (f := _)]
         rfl
       map_smul' := fun z v => by
         funext m
@@ -53,7 +96,29 @@ theorem restrictAtPoint_holds : RestrictAtPoint := by
     simpa only [mul_assoc] using h1
   · intro p v
     funext m
-    obtain ⟨up, hup, hp⟩ := exists_levi_mul_unip (w.adicCompletion E) (stdBlocks n h) p
+    have hemb (g : Levi (w.adicCompletion E) (fun i => Fin (n i))) :
+        leviEmb _ (stdBlocks n h) g ∈ parab (w.adicCompletion E) (stdBlocks n h) := by
+      apply mem_parab_iff.2
+      intro a b i j hab
+      letI : DecidableEq (Fin c) := Classical.typeDecidableEq _
+      simp [leviEmb]
+      exact Matrix.blockDiagonal'_apply_ne _ _ _ hab.ne'
+    let Lp : parab (w.adicCompletion E) (stdBlocks n h) :=
+      ⟨leviEmb _ _ (leviProj _ _ p), hemb _⟩
+    have hdec : ∃ up ∈ unipRad (w.adicCompletion E) (stdBlocks n h),
+        (p : GL (Fin N) (w.adicCompletion E)) =
+          leviEmb _ (stdBlocks n h) (leviProj _ (stdBlocks n h) p) * up := by
+      refine ⟨((Lp⁻¹ * p : parab (w.adicCompletion E) (stdBlocks n h)) : GL _ _),
+        (coe_mem_unipRad _ _).2 ?_, ?_⟩
+      · rw [map_mul, map_inv]
+        have hproj : leviProj _ (stdBlocks n h) Lp = leviProj _ (stdBlocks n h) p := by
+          funext a
+          ext i j
+          simp [Lp, leviProj, diagBlock, leviEmb, Matrix.blockDiagonal'_apply_eq]
+        rw [hproj, inv_mul_cancel]
+      · rw [Subgroup.coe_mul, Subgroup.coe_inv]
+        exact (mul_inv_cancel_left _ _).symm
+    obtain ⟨up, hup, hp⟩ := hdec
     change (F.1 (ρ p v)).1 _ = (F.1 v).1 _
     rw [F.2.2 p v]
     change (F.1 v).1 (_ * finGL E N (locGL E N w (p : GL (Fin N) (w.adicCompletion E)))) = _
@@ -71,8 +136,23 @@ theorem restrictAtPoint_holds : RestrictAtPoint := by
     have key : ∀ a b c' d : GA E N, a * (b * c' * d) = (a * b * c' * (a * b)⁻¹) * (a * b * d) := by
       intros
       group
-    have hconj := (Subgroup.mem_normalizer_iff.1
-      (leviEmb_mem_normalizer (Ad E) (stdBlocks n h) (m * M')) _).1 hu'
+    have hpar : leviEmb (Ad E) (stdBlocks n h) (m * M') ∈ parab (Ad E) (stdBlocks n h) := by
+      generalize m * M' = g
+      apply mem_parab_iff.2
+      intro a b i j hab
+      letI : DecidableEq (Fin c) := Classical.typeDecidableEq _
+      simp [leviEmb]
+      exact Matrix.blockDiagonal'_apply_ne _ _ _ hab.ne'
+    have hconj : leviEmb (Ad E) (stdBlocks n h) (m * M') *
+        finGL E N (locGL E N w up) * (leviEmb (Ad E) (stdBlocks n h) (m * M'))⁻¹ ∈
+        unipRad (Ad E) (stdBlocks n h) := by
+      obtain ⟨U, hU, hUeq⟩ := Subgroup.mem_map.1 hu'
+      let P : parab (Ad E) (stdBlocks n h) := ⟨_, hpar⟩
+      let V : parab (Ad E) (stdBlocks n h) := U
+      have hkernel : leviProj (Ad E) (stdBlocks n h) V = 1 := MonoidHom.mem_ker.1 hU
+      rw [← hUeq]
+      change ((P * V * P⁻¹ : parab (Ad E) (stdBlocks n h)) : GL (Fin N) (Ad E)) ∈ _
+      rw [coe_mem_unipRad, map_mul, map_mul, map_inv, hkernel, mul_one, mul_inv_cancel]
     rw [mul_assoc, hcomm, hq, key, ← map_mul, (F.2.1 v).1 _ hconj]
     rfl
 

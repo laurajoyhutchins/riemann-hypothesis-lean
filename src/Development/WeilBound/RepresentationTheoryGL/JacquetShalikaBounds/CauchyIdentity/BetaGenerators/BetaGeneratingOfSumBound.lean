@@ -1,7 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.CauchyIdentity.SchurJT
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.CauchyIdentity.StaircaseDeterminants.AlternatingJacobiTrudiOfRelation
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.CauchyIdentity.ProductCoefficients.ElementaryRelationOfGenerating
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdjointInverseTranslate.CauchyBinet
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.CauchyIdentity.SchurJT
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.CauchyIdentity.ProductCoefficients.ElementaryRelationOfGenerating
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.CauchyIdentity.StaircaseDeterminants.AlternatingJacobiTrudiOfRelation
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdjointInverseTranslate.CauchyBinet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,7 +133,7 @@ theorem detC (α : Fin m → ℂ) (X : ℂ) (l : Fin k → ℕ) :
 theorem ML_eq (α : Fin m → ℂ) (b : Fin k → ℂ) (X : ℂ) (L : ℕ) :
     ML α b X L = (Matrix.of fun i (n : Fin L) => b i ^ (n : ℕ)) * (Matrix.of fun (n : Fin L) c => cE α X k n c) := by
   ext i c
-  simp only [ML, of_apply, mul_apply]
+  simp only [ML, of_apply, Matrix.mul_apply]
   exact (Fin.sum_univ_eq_sum_range (fun n => b i ^ n * cE α X k n c) L).symm
 
 theorem gap {f : Fin k → ℕ} (hf : StrictMono f) : ∀ (d : ℕ) (s t : Fin k), (t : ℕ) = s + d → f s + d ≤ f t := by

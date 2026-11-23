@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+
+@[expose] public section
 
 open NumberField IsDedekindDomain NumberField.mixedEmbedding Complex Classical
 open scoped TensorProduct ContDiff nonZeroDivisors
@@ -41,7 +92,8 @@ theorem exists_primeInvolution_of_ringInvolution {R : Type} [CommRing R] [IsDede
   refine ⟨hf.toPerm f, hf, ?_, ?_, ?_⟩
   · intro P
     show Ideal.absNorm (P.asIdeal.map s) = _
-    simp only [Ideal.absNorm_apply, Submodule.cardQuot_apply]
+    rw [Ideal.absNorm_of_ne_bot (f P).ne_bot, Ideal.absNorm_of_ne_bot P.ne_bot,
+      Submodule.cardQuot_apply, Submodule.cardQuot_apply]
     exact (Nat.card_congr (Ideal.quotientEquiv P.asIdeal (P.asIdeal.map s) s rfl).toEquiv).symm
   · intro P x
     exact hm _ x
@@ -113,7 +165,7 @@ theorem cmConjugation_on_primes : ∀ (F E : Type) [Field F] [NumberField F] [Fi
       have hai : IsIntegral ℤ a := by
         have h1 : IsIntegral ℤ (algebraMap F E a) := by
           rw [ha]; exact RingOfIntegers.isIntegral_coe _
-        exact (isIntegral_algebraMap_iff (algebraMap F E).injective).1 h1
+        exact (isIntegral_algebraMap_iff ).1 h1
       obtain ⟨b, hb⟩ : ∃ b : 𝓞 F, algebraMap (𝓞 F) (𝓞 E) b = x * s x :=
         ⟨⟨a, hai⟩, RingOfIntegers.ext ha⟩
       have h1 : b ∈ (Q.under (𝓞 F)).asIdeal := by

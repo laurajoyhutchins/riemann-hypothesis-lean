@@ -1,6 +1,50 @@
-import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
-import GroundTheory.AutomorphicForms.HermitianExistenceLocal
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.Statements
+module
+
+public import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.Statements
+public import GroundTheory.AutomorphicForms.HermitianExistenceLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace CompanionTheory.SWFin
 
@@ -26,7 +70,7 @@ theorem HR_eq {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (R : Type) [CommRing R] [
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul r e => rfl
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   ext g
   show cT (sigR R (conj F E).toAlgHom) _ * _ * _ = _ ↔ _
   rw [this]
@@ -48,7 +92,7 @@ theorem HFin_eq {M : ℕ} (J : Matrix (Fin M) (Fin M) E) :
       rw [tensorMap_tmul, Algebra.TensorProduct.lid_tmul]
       show algebraMap F 𝔸[F] r ⊗ₜ[F] e = (1 : 𝔸[F]) ⊗ₜ[F] (r • e)
       rw [Algebra.algebraMap_eq_smul_one, TensorProduct.smul_tmul]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   ext g
   rw [Subgroup.mem_subgroupOf]
   constructor
@@ -79,7 +123,7 @@ theorem finite_volume_unitary_adelic {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (h
   exact allSome_of _ h
 
 theorem finVol_of (hC : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-      [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [IsTotallyComplex E] (M : ℕ)
+      [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] (M : ℕ)
       (h : HermitianForm F E (Fin M → E)), AdelicCovolumeFinite.Statement h (Pi.basisFun E (Fin M)))
     (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E)
     (hσ : IsCMExt F E σ) (M : ℕ) (J : Matrix (Fin M) (Fin M) E) (hJ : IsHermND σ J) : FinVol F E σ M J := by
@@ -99,8 +143,10 @@ theorem finVol_of (hC : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Nu
   unfold AdelicCovolumeFinite.Statement at h
   rw [hr] at h
   have hg := gram_ofGram J hH hu
-  generalize gram (HermitianForm.ofGram J hH hu).toSesq (Pi.basisFun E (Fin M)) = J' at h hg
-  subst hg
-  exact finite_volume_unitary_adelic J' hu h _ (HR_eq J' _)
+  change ∀ (μ : Measure (unitaryPoints F E (gram (HermitianForm.ofGram J hH hu).toSesq (Pi.basisFun E (Fin M))) 𝔸[F])) [μ.IsHaarMeasure],
+    ∃ D : Set (unitaryPoints F E (gram (HermitianForm.ofGram J hH hu).toSesq (Pi.basisFun E (Fin M))) 𝔸[F]),
+      IsFundamentalDomain (unitaryDiagonal F (gram (HermitianForm.ofGram J hH hu).toSesq (Pi.basisFun E (Fin M)))).range D μ ∧ μ D < ⊤ at h
+  rw [hg] at h
+  exact finite_volume_unitary_adelic J hu h _ (HR_eq J _)
 
 end CompanionTheory.SWFin

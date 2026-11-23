@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.HaarPolA
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.HaarPolA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,12 +136,14 @@ theorem Lm_strict (ε : Fin n → Bool) :
     simp [kMat_zero', pmat_zero']
   have hl : HasStrictFDerivAt (logM n) (ContinuousLinearMap.id ℝ _)
       ((fun s : GCo ε => NormedSpace.exp (kMat s.1) * NormedSpace.exp (pmat s.2)) 0) := by
-    rw [h0]; exact logM_strict
+    have h := (exp_strict (n := n)).to_localInverse
+    rw [NormedSpace.exp_zero] at h
+    rw [h0]
+    exact h
   have h := (LinearMap.toContinuousLinearMap (cLin ε)).hasStrictFDerivAt.comp (0 : GCo ε)
     (hl.comp (0 : GCo ε) (prod_strict ε))
   refine h.congr_fderiv (ContinuousLinearMap.ext fun s => ?_)
-  simp only [ContinuousLinearMap.coe_comp', Function.comp_apply, ContinuousLinearMap.id_apply,
-    LinearMap.coe_toContinuousLinearMap']
+  simp only [ContinuousLinearMap.id_apply]
   exact cLin_gMat s
 
 end An
@@ -110,9 +160,11 @@ theorem Lm_exp (ε : Fin n → Bool) : ∀ᶠ s in 𝓝 (0 : GCo ε),
       (𝓝 0) (𝓝 1) := by
     have := (prod_strict ε).continuousAt.tendsto
     rwa [hP0] at this
+  have hlog := exp_strict (n := n)
   have hl : Tendsto (logM n) (𝓝 1) (𝓝 0) := by
-    have := (logM_strict (n := n)).continuousAt.tendsto
-    rwa [logM_one] at this
+    have h := hlog.to_localInverse.continuousAt.tendsto
+    rw [hlog.localInverse_apply_image, NormedSpace.exp_zero] at h
+    exact h
   have hΦ := hl.comp hP
   have hc : Continuous fun Y : Matrix (Fin n) (Fin n) ℂ => Jm ε * (-Yᴴ) * Jm ε :=
     (continuous_const.matrix_mul continuous_id.matrix_conjTranspose.neg).matrix_mul continuous_const
@@ -122,7 +174,13 @@ theorem Lm_exp (ε : Fin n → Bool) : ∀ᶠ s in 𝓝 (0 : GCo ε),
     have := (hc.tendsto 0).comp hΦ
     simp only [Matrix.conjTranspose_zero, neg_zero, Matrix.mul_zero, Matrix.zero_mul] at this
     exact this
-  filter_upwards [hP.eventually exp_logM, hΦ.eventually logM_exp, hJ.eventually logM_exp]
+  have hleft : ∀ᶠ X in 𝓝 (0 : Matrix (Fin n) (Fin n) ℂ), logM n (NormedSpace.exp X) = X :=
+    hlog.eventually_left_inverse
+  have hright : ∀ᶠ Y in 𝓝 (1 : Matrix (Fin n) (Fin n) ℂ), NormedSpace.exp (logM n Y) = Y := by
+    have h := hlog.eventually_right_inverse
+    rw [NormedSpace.exp_zero] at h
+    exact h
+  filter_upwards [hP.eventually hright, hΦ.eventually hleft, hJ.eventually hleft]
     with s h1 h2 h3
   have hU : inUJ ε (NormedSpace.exp (logM n (NormedSpace.exp (kMat s.1) * NormedSpace.exp (pmat s.2)))) := by
     rw [h1]; exact inUJ_pol s
@@ -145,8 +203,12 @@ theorem polSet_eq_expSet (ε : Fin n → Bool) : ∃ δ > 0, ∀ S : Set (GCo ε
     refine ⟨s, hs, ?_⟩
     rw [hg, h s (by simpa using hS s hs)]
 
+attribute [local instance] Matrix.linftyOpNormedRing Matrix.linftyOpNormedAlgebra in
 theorem Lm_zero (ε : Fin n → Bool) : Lm (0 : GCo ε) = 0 := by
-  simp [Lm, kMat_zero', pmat_zero', logM_one]
+  have h := (exp_strict (n := n)).localInverse_apply_image
+  rw [NormedSpace.exp_zero] at h
+  have hzero : logM n 1 = 0 := h
+  simp [Lm, kMat_zero', pmat_zero', hzero]
 
 instance borel_gco (ε : Fin n → Bool) : BorelSpace (GCo ε) := Prod.borelSpace
 
@@ -191,7 +253,7 @@ theorem image_est (ε : Fin n → Bool) {η : ℝ} (hη : 0 < η) : ∃ δ > 0, 
   have hinj : Set.InjOn Lm S := by
     intro x hx y hy hxy
     have h := hAS x hx y hy
-    simp only [A, ContinuousLinearMap.id_apply, hxy, sub_self, zero_sub, norm_neg] at h
+    simp only [ContinuousLinearMap.id_apply, hxy, sub_self, zero_sub, norm_neg] at h
     have h0 : ‖x - y‖ = 0 := by
       have := norm_nonneg (x - y)
       nlinarith
@@ -203,7 +265,7 @@ theorem image_est (ε : Fin n → Bool) {η : ℝ} (hη : 0 < η) : ∃ δ > 0, 
   refine ⟨hS.image_of_continuousOn_injOn hAS.continuousOn hinj, fun s hs => ?_, hc1 S Lm hAS,
     hc2 S Lm hAS⟩
   have h := hB s (hSb hs) 0 (mem_ball_self hδ)
-  simp only [A, ContinuousLinearMap.id_apply, Lm_zero, sub_zero] at h
+  simp only [ContinuousLinearMap.id_apply, Lm_zero, sub_zero] at h
   have := norm_sub_norm_le (Lm s) s
   have := norm_nonneg s
   nlinarith

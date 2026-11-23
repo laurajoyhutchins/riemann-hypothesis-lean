@@ -1,4 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvGroupA
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Mathlib.Algebra.Group.MinimalAxioms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvGroupA
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,9 +92,6 @@ instance : BorelSpace (SG hU) :=
 
 private theorem continuous_matrix_of_Mt : Continuous (fun x : Mt k r => (Matrix.of x : Mat k r)) :=
   continuous_matrix (fun i j => (continuous_apply j).comp (continuous_apply i))
-
-theorem continuous_val : Continuous (fun g : SG hU => g.1) := by
-  exact continuous_subtype_val
 
 theorem continuous_mat : Continuous (fun g : SG hU => mat g) := by
   exact continuous_matrix_of_Mt.comp continuous_subtype_val
@@ -104,12 +144,11 @@ theorem nu_left {μ : Measure (Mt k r)} (hμ : IsHaarOn U μ) : (nu hU μ).IsMul
     Set.preimage_image_eq s (me_val hU).injective] at h1
 
 theorem nu_inv (HI : HaarInv) {μ : Measure (Mt k r)} (hμ : IsHaarOn U μ) : (nu hU μ).IsInvInvariant := by
-  have hae : AEMeasurable invM μ := by
-    by_contra h
-    exact hμ.ne_zero (by rw [← HI k r U μ hU hμ, Measure.map_of_not_aemeasurable h])
+  have hae : AEMeasurable invM μ := InvGrp.measurable_invM.aemeasurable
   constructor
   ext s hs
-  have hset : (fun g : SG hU => g.1) '' s⁻¹ = invM ⁻¹' ((fun g : SG hU => g.1) '' s) ∩
+  have hset : (fun g : SG hU => g.1) '' (Inv.inv ⁻¹' s) =
+      invM ⁻¹' ((fun g : SG hU => g.1) '' s) ∩
       {x : Mt k r | (Matrix.of x : Mat k r) ∈ U} := by
     ext y
     constructor
@@ -126,7 +165,7 @@ theorem nu_inv (HI : HaarInv) {μ : Measure (Mt k r)} (hμ : IsHaarOn U μ) : (n
       show (@id (SG hU) ⟨y, hy⟩)⁻¹ ∈ s
       rw [e]
       exact hx
-  rw [Measure.inv_apply]
+  rw [Measure.inv_def, Measure.map_apply measurable_inv hs]
   simp only [nu]
   rw [(me_val hU).comap_apply, (me_val hU).comap_apply, hset,
     measure_inter_conull (t := {x : Mt k r | (Matrix.of x : Mat k r) ∈ U}) hμ.conc,

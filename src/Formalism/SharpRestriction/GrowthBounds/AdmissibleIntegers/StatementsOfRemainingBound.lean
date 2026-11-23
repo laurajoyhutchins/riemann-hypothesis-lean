@@ -1,5 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
-import Formalism.SharpRestriction.GrowthBounds.TopChoiceBounds
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
+public import Formalism.LocalRingCardinality.HostCls
+public import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+public import Formalism.SharpRestriction.GrowthBounds.TopChoiceBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -201,23 +245,10 @@ theorem statements_of_remaining_bound (W : TwLoc D Y) (hV : CmpV c Dx T W) (hA :
 def RestComp : Prop :=
   ∀ (D : D7) (Dx : DivX D) (T : TwForms D) (sp : ℝ), IsotypicPartsInternalDirectSum D Dx T sp → DGamDef D → RestElse D Dx T sp
 
-def RestSz (C : ℝ) : Prop := ∀ (D : D7) (L : SizeData₂ D), ErrorFirstTermSize D L C
-
 theorem stmt_of_rest (hR : RestComp) (D : D7) (L : SizeData₂ D) (X : Inst D L) (Y : LatInst D) (K : Consts) (c : LatCmp D)
     (Dx : DivX D) : Stmt D L X Y K c Dx := by
   intro T W lev Xe ce hV sp _ hA
   exact statements_of_remaining_bound W hV hA (fun hG => hR D Dx T sp hA.2.2.1 hG)
-
-theorem stmtE_of_rest (hR : RestComp) {C : ℝ} (hC : 0 ≤ C) (hS : RestSz C) (D : D7) (L : SizeData₂ D) (X : Inst D L)
-    (Y : LatInst D) (K : Consts) (c : LatCmp D) (Dx : DivX D) : ClosedFormOfAdmitted D L X Y K c Dx :=
-  ⟨stmt_of_rest hR D L X Y K c Dx, C, hC, hS D L⟩
-
-theorem stmtF_of_rest (hR : RestComp) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) : KudlaFamilyStatement Fm :=
-  ⟨0, fun _ _ _ _ => stmt_of_rest hR _ _ _ _ _ _ _⟩
-
-theorem stmtEF_of_rest (hR : RestComp) {C : ℝ} (hC : 0 ≤ C) (hS : RestSz C) {eps : ℝ} (Fm : Formalism.MainNotions.FamP eps) :
-    FamilyClosedForm Fm :=
-  ⟨stmtF_of_rest hR Fm, C, hC, 0, fun _ _ _ _ => hS _ _⟩
 
 end Formalism.MainNotions.WeilJacquetShalikaLaw.Proof
 

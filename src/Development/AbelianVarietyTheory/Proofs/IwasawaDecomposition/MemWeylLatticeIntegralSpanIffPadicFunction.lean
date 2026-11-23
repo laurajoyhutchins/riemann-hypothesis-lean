@@ -1,15 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedVectorEqOfStandardData
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsTwIffCanonEq
-import Formalism.LocalToGlobal.KernelLattices.TopPin
-import Formalism.LocalToGlobal.KernelLattices.InterlaceAll
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.JetsInIffStepField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DominantWeightPolynomialFunctionalMinorsStatement
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.DiagramFitsSourceRank
-import Formalism.UnipotentAdelicQuotients.WeylLatDual
-import Formalism.LocalToGlobal.Divisibility.NumbersLemmas
-import Formalism.LocalToGlobal.Columns.TiedValLatG
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PZBasis
+module
+
+public import Formalism.UnipotentAdelicQuotients.WeylLatDual
+public import Formalism.LocalToGlobal.Columns.TiedValLatG
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColLoc
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PZBasis
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LFunctionMinors.InfinitePadicComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 noncomputable section
@@ -55,6 +91,7 @@ theorem mem_vlIntSpan_iff {K : Type} [Field K] (σ : K →+* ℂ) (Pl : Rows.Pla
         exact Submodule.subset_span ⟨f, hf, rfl⟩
       obtain ⟨z, hz⟩ := (Submodule.mem_span_range_iff_exists_fun ℤ).1 hx
       refine ⟨fun i => r * (z i : K), fun i => mul_mem hr (intCast_mem _ _), ?_⟩
+
       rw [ten_int_map, ← hz, map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_zsmul, map_mul, map_intCast, mul_smul, Int.cast_smul_eq_zsmul]
@@ -82,7 +119,7 @@ theorem mem_vlIntSpan_iff {K : Type} [Field K] (σ : K →+* ℂ) (Pl : Rows.Pla
         rw [map_zero, smul_zero]
         exact zero_mem _
       | add x y _ _ hx hy =>
-        rw [map_add, smul_add]
+        rw [map_add (f := _), smul_add]
         exact add_mem hx hy
       | smul a x _ hx =>
         rw [map_zsmul, smul_comm]
@@ -109,6 +146,7 @@ theorem mem_delW_iff {p : ℕ} [Fact p.Prime] (lam : ι → DomWeight n) (Z : ZB
         exact mul_le_one₀ hr (norm_nonneg _) (IsUltrametricDist.norm_intCast_le_one _ _)
       · funext y
         rw [prod_eval_eq_evM, ← hz]
+
         simp only [evM, map_sum, map_zsmul, zsmul_eq_mul, map_mul, map_intCast, Finset.mul_sum]
         refine Finset.sum_congr rfl fun i _ => ?_
         ring
@@ -182,6 +220,7 @@ theorem map_mem_vlIntSpan_iff_delW : ∀ {K ι : Type} [Field K] [NumberField K]
   have hmap : ∀ (L : Type) [Field L] (s : K →+* L), MvPolynomial.map s G =
       ∑ i, s (c i) • MvPolynomial.map (Int.castRingHom L) (Z.bZ i) := by
     intro L _ s
+
     rw [← hc, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C, MvPolynomial.map_map, ← MvPolynomial.smul_eq_C_mul]
@@ -207,6 +246,7 @@ theorem map_mem_vlIntSpan_iff_delW : ∀ {K ι : Type} [Field K] [NumberField K]
       apply MvPolynomial.funext
       intro x
       have h1 := congrFun he (fun τ a b => x (τ, a, b))
+
       rw [map_sum]
       simp only [MvPolynomial.smul_eval]
       exact h1

@@ -1,5 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ArithmeticGapBounds.Arith
-import Mathlib
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ArithmeticGapBounds.Arith
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace PositivityTheory.KB.SpectralGap
 
@@ -422,6 +477,7 @@ private theorem sl_mul_col_off_diag_zero_of_both {R : Type} [CommRing R] {F : Ty
     (hY : ∀ i, i ≠ k → q ((Y : Matrix (Fin N) (Fin N) R) i k) = 0) :
     ∀ i, i ≠ k → q (((X * Y : Matrix.SpecialLinearGroup (Fin N) R) : Matrix (Fin N) (Fin N) R) i k) = 0 := by
   intro i hi
+
   rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, map_sum]
   rw [Finset.sum_eq_single k]
   · rw [map_mul, hX i hi, zero_mul]
@@ -450,7 +506,7 @@ private theorem exists_col_fixing_mul_entry_ne_zero {R : Type} [CommRing R] {F :
       rw [hε]
       simp [Matrix.transvection, Matrix.one_apply_ne hi, Matrix.single_apply, hki.symm, Ne.symm hki]
     · rw [Matrix.SpecialLinearGroup.coe_mul, hε]
-      simp only [Matrix.transvection_mul_apply_same, one_mul, map_add, hm, zero_add]
+      simp only [Matrix.transvection_mul_apply_same, one_mul, map_add (f := _), hm, zero_add]
       exact hp
   · refine ⟨1, ?_, ?_⟩
     · intro i hi
@@ -497,7 +553,7 @@ private theorem exists_col_fixing_mul_col_eq_smul_single {R : Type} [CommRing R]
     by_cases him : i = m
     · subst him
       simp [hc]
-    · simp only [hc, him, if_false, mul_zero, map_add, map_mul, map_neg, ht]
+    · simp only [hc, him, if_false, mul_zero, map_add (f := _), map_mul, map_neg, ht]
       field_simp
       ring
 

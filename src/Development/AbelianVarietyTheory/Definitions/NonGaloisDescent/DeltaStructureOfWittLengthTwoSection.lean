@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
+public import Mathlib.Algebra.Ring.MinimalAxioms
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +95,7 @@ def mapF (f : A →+* B) (x : W2 l A) : W2 l B := ⟨f x.fst, f x.snd⟩
 theorem mapF_add (f : A →+* B) (x y : W2 l A) : mapF f (x + y) = mapF f x + mapF f y :=
   W2.ext (map_add f _ _) (by
     change f (x.snd + y.snd - cc l x.fst y.fst) = f x.snd + f y.snd - cc l (f x.fst) (f y.fst)
-    rw [map_sub, map_add, map_cc])
+    rw [map_sub, map_add (f := _), map_cc])
 
 theorem mapF_mul (f : A →+* B) (x y : W2 l A) : mapF f (x * y) = mapF f x * mapF f y :=
   W2.ext (map_mul f _ _) (by
@@ -63,8 +111,8 @@ theorem gh_add (x y : W2 l A) : gh (x + y) = gh x + gh y := by
   change (x.fst + y.fst) ^ l + (l : A) * (x.snd + y.snd - cc l x.fst y.fst) = _
   simp only [gh]; linear_combination -l_mul_cc l x.fst y.fst
 
-omit hl in
 
+omit hl in
 theorem gh_mul (x y : W2 l A) : gh (x * y) = gh x * gh y := by
   change (x.fst * y.fst) ^ l + (l : A) * (x.fst ^ l * y.snd + y.fst ^ l * x.snd + (l : A) * x.snd * y.snd) = _
   simp only [gh]; ring
@@ -74,8 +122,8 @@ theorem ext_gh {σ : Type} {x y : W2 l (MvPolynomial σ ℤ)} (h0 : x.fst = y.fs
   simp only [gh, h0] at h1
   exact add_left_cancel h1
 
-omit hl in
 
+omit hl in
 theorem exists_lift (x : W2 l A) :
     ∃ y : W2 l (MvPolynomial A ℤ), mapF (MvPolynomial.eval₂Hom (Int.castRingHom A) id) y = x :=
   ⟨⟨MvPolynomial.X x.fst, MvPolynomial.X x.snd⟩, W2.ext (by simp [mapF]) (by simp [mapF])⟩
@@ -146,7 +194,7 @@ def deltaStructureOfWittLengthTwoSection (s : A →+* W2 l A) (h : ∀ a, (s a).
   δ_one := by rw [map_one]; rfl
   δ_mul a b := by rw [map_mul]; exact (congrArg₂ (fun x y => x ^ l * (s b).snd + y ^ l * (s a).snd +
     (l : A) * (s a).snd * (s b).snd) (h a) (h b))
-  δ_add a b := by rw [map_add]; exact (congrArg₂ (fun x y => (s a).snd + (s b).snd - cc l x y) (h a) (h b))
+  δ_add a b := by rw [map_add (f := _)]; exact (congrArg₂ (fun x y => (s a).snd + (s b).snd - cc l x y) (h a) (h b))
   φ := W2.ghHom.comp s
   φ_eq a := congrArg (fun x => x ^ l + (l : A) * (s a).snd) (h a)
 
@@ -183,9 +231,6 @@ structure IsCompl {L Q : Type} [CommRing L] [CommRing Q] (i : L →+* Q) (J : Id
   complete : IsAdicComplete (J.map i) Q
   surj : ∀ (x : Q) (n : ℕ), ∃ a, x - i a ∈ (J ^ n).map i
   ker : ∀ (a : L) (n : ℕ), i a ∈ (J ^ n).map i → a ∈ J ^ n
-
-theorem IsCompl.self {L : Type} [CommRing L] (J : Ideal L) [h : IsAdicComplete J L] : IsCompl (RingHom.id L) J :=
-  ⟨by rwa [Ideal.map_id], fun x _ => ⟨x, by simp⟩, fun a n ha => by rwa [Ideal.map_id] at ha⟩
 
 variable {l : ℕ}
 

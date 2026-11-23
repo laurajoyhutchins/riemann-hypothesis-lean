@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ConstantCoeffUniformiserZero
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecondPropositionRingAll
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.BlockProductRing
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ConstantCoeffUniformiserZero
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.DvdOfCoeffSubstXPowNeZero
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.GradNPfB
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.U2ringPfBSingleMem
+import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,8 +70,6 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {PD : PeriodData G Qp K₀ K B BdR} {LL O : Type} [Field LL] [Algebra Qp LL] [TopologicalSpace LL]
     [CommRing O] [Algebra O LL] {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
     (W : LocWach PD LL O v n)
-
-local notation "mkI" y => Ideal.Quotient.mk (DualFramesAlt.eigenRingInvariants.Ia y)
 
 theorem u2ringPfD_main [IsDomain O] [IsDiscreteValuationRing O] [CharZero O]
     [IsAdicComplete (IsLocalRing.maximalIdeal O) O]
@@ -85,7 +134,7 @@ theorem u2ringPfD_main [IsDomain O] [IsDiscreteValuationRing O] [CharZero O]
     intro δ hδ
     have hπc : W.γ₀ δ (π' c) = π' c := congrFun (hπΔ δ hδ) c
     have h1 := congrArg (W.γ₀ δ) hγc
-    rw [u2ringPfB_γ₀_comm, hπc, map_add, map_mul, map_mul, hπc, hψΔ δ hδ] at h1
+    rw [u2ringPfB_γ₀_comm, hπc, map_add (f := _), map_mul, map_mul, hπc, hψΔ δ hδ] at h1
     have h2 : (W.γ₀ δ ((w₂ : LetA O n) c) - (w₂ : LetA O n) c) * (π' c * ψ EY) = 0 := by
       linear_combination h1.symm.trans hγc
     exact sub_eq_zero.1 ((mul_eq_zero.1 h2).resolve_right (mul_ne_zero hπc0 hψEY0))
@@ -107,7 +156,7 @@ theorem u2ringPfD_main [IsDomain O] [IsDiscreteValuationRing O] [CharZero O]
     rw [hΓ, PowerSeries.subst_C]; rfl
   have hγπc : W.γ₀ W.gam (π' c) = ψ XG := by
     rw [hγc, hXG, hGt]
-    simp only [map_mul, map_add, map_one, hψX, hŴ]
+    simp only [map_mul, map_add (f := _), map_one, hψX, hŴ]
     ring
   have hγψ : ∀ F, W.γ₀ W.gam (ψ F) = ψ (Γ F) := by
     intro F
@@ -211,9 +260,11 @@ theorem u2ringPfD_main [IsDomain O] [IsDiscreteValuationRing O] [CharZero O]
     ring
 
   let ρ : ℕ → PowerSeries O := fun k => nh * ∏ i ∈ Finset.range k, θY i
+  let mkI := fun x : O => Ideal.Quotient.mk (DualFramesAlt.eigenRingInvariants.Ia x)
   let cc : ℕ → O := fun k => Classical.choose (DualFramesAlt.eigenRingInvariants.ev_exists (hrootm k) (ρ k))
-  have hcc : ∀ k, (mkI (root k)) (ρ k) = (mkI (root k)) (PowerSeries.C (cc k)) := fun k =>
-    Classical.choose_spec (DualFramesAlt.eigenRingInvariants.ev_exists (hrootm k) (ρ k))
+  have hcc : ∀ k, (mkI (root k)) (ρ k) = (mkI (root k)) (PowerSeries.C (cc k)) := by
+    intro k
+    exact Classical.choose_spec (DualFramesAlt.eigenRingInvariants.ev_exists (hrootm k) (ρ k))
   have hmkΓ : ∀ k F, (mkI (root k)) (Γ F) = (mkI (root k)) F := by
     intro k F
     obtain ⟨c₀, hc₀⟩ := DualFramesAlt.eigenRingInvariants.ev_exists (hrootm k) F
@@ -260,7 +311,7 @@ theorem u2ringPfD_main [IsDomain O] [IsDiscreteValuationRing O] [CharZero O]
     · rw [hi]
       simp only [Pi.mul_apply, Pi.add_apply, Pi.single_eq_same]
       congr 1
-      rw [halg, hfc, ← hF, ← hψC, ← map_mul, ← map_add]
+      rw [halg, hfc, ← hF, ← hψC, ← map_mul, ← map_add (f := _)]
       congr 1
       linear_combination hH + H * hu
     · simp [letE, hi]
@@ -326,7 +377,7 @@ theorem u2ringPfD_main [IsDomain O] [IsDiscreteValuationRing O] [CharZero O]
         have h3 := Ideal.sub_mem _ h1 h2
         rw [add_sub_cancel_right] at h3
         exact (IsLocalRing.maximalIdeal.isMaximal O).ne_top ((Ideal.eq_top_iff_one _).2 h3)
-      · simp only [θ, map_add, map_one, map_mul, map_prod, map_sub, DualFramesAlt.eigenRingInvariants.mk_X, hwj]
+      · simp only [mkI, θ, map_add (f := _), map_one, map_mul, map_prod, map_sub, DualFramesAlt.eigenRingInvariants.mk_X, hwj]
     have hcount : (Finset.range (NR + 1)).filter (fun k => cc k = 1) ⊆
         ((Finset.range e).image fun j => m * j + h') ∪ {NR} := by
       intro k hk

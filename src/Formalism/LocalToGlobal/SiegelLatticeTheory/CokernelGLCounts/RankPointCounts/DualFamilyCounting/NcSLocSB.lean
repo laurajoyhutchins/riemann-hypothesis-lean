@@ -1,11 +1,66 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSKfOrb
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DetAdmA
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DetAdmC
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSFinVolSk
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSAdTup
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSKfOrb
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSOmDecomp
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.ProdFirstProjectionSmul
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensFibV
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TopoGram
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.LatStab
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensPos
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DetAdmA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DetAdmC
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensPos
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.RPGlue
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.RestrProdG
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensTop
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TopoAF
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TopoGram
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedMeasureSplitting.ContinuousMeasureSplitting
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeightedMeasureSplitting.T2SpaceGeneralLinearGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +84,7 @@ def IntWittAE : Prop :=
     (σ : E →ₐ[F] E) (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (a : ℕ) (X0 : Fin a → Fin n → E)
     (Λ : Set (Fin n → E)),
     IsCMExt F E σ → IsHermND σ J → (gramE σ J X0).det ≠ 0 →
-    (∃ L : Submodule (𝓞 E) (Fin n → E), Submodule.IsLattice E L ∧ (L : Set (Fin n → E)) = Λ) →
+    (∃ L : Submodule (𝓞 E) (Fin n → E), Submodule.IsFullLattice E L ∧ (L : Set (Fin n → E)) = Λ) →
     ∀ (d : ℕ) (b : Module.Basis (Fin d) F E),
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in cofinite, ∀ X ∈ latV (M := n) (n := a) b v,
       gramR (Fv F v) σ J X = (gramE σ J X0).map (inclR (Fv F v)) →
@@ -114,7 +169,7 @@ theorem continuous_act (R : Type) [CommRing R] [Algebra F R] [TopologicalSpace R
     ((HA.mat R σ J p.1 : GL (Fin n) (R ⊗[F] E)) : Matrix (Fin n) (Fin n) (R ⊗[F] E)).mulVec (p.2 c))
   exact (hmat.comp continuous_fst).matrix_mulVec ((continuous_apply c).comp continuous_snd)
 
-theorem kv_compact_open (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsLattice E L)
+theorem kv_compact_open (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsFullLattice E L)
     (v : HeightOneSpectrum (𝓞 F)) :
     IsCompact (Formalism.L2.SG.TypedSets.Kv σ J (L : Set (Fin n → E)) v) ∧
       IsOpen (Formalism.L2.SG.TypedSets.Kv σ J (L : Set (Fin n → E)) v) := by
@@ -196,7 +251,7 @@ theorem exists_cc_tup (v : HeightOneSpectrum (𝓞 F)) {a : ℕ} {O : Set (Fin a
   have : LocallyCompactSpace (Fv F v) := PI.VolStabS.locallyCompact_Fv F v
   let h := PI.VolStabS.DeterminantAdmissible.crdH (a := a) (M := n) b (Fv F v)
   obtain ⟨V, hV, hpV, hVO⟩ :=
-    (loc_compact_Haus_tot_disc_of_zero_dim (H := Fin a × Fin n × Fin (Module.finrank F E) → Fv F v)).exists_subset_of_mem_open
+    (loc_compact_Haus_tot_disc_of_zero_dim (X := Fin a × Fin n × Fin (Module.finrank F E) → Fv F v)).exists_subset_of_mem_open
       (Set.mem_image_of_mem h hy) (h.isOpenMap O hO)
   let K : Set (Fin a × Fin n × Fin (Module.finrank F E) → Fv F v) :=
     Set.pi Set.univ fun c => (Homeomorph.subRight (h y c)) ⁻¹' (v.adicCompletionIntegers F : Set (Fv F v))
@@ -219,7 +274,7 @@ section Place
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [FiniteDimensional F E]
   (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) {a : ℕ} (X0 : Fin a → Fin n → E)
 
-theorem exists_C (v : HeightOneSpectrum (𝓞 F)) (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsLattice E L)
+theorem exists_C (v : HeightOneSpectrum (𝓞 F)) (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsFullLattice E L)
     (hW : ∀ X : Fin a → Fin n → Fv F v ⊗[F] E, gramR (Fv F v) σ J X = (gramE σ J X0).map (inclR (Fv F v)) →
       ∃ g : HA (Fv F v) σ J, g • ratTup (F := F) (Fv F v) X0 = X) :
     ∃ C : Set (Fin a → Fin n → Fv F v ⊗[F] E), IsClopen C ∧ IsCompact C ∧

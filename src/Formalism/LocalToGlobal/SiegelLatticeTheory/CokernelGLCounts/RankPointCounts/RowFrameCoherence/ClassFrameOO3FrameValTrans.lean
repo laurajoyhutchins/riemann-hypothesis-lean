@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DecompPhaseCOf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.ClassFrameOO1FrameValPiIso
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DecompPhaseCOf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.ClassFrameOO1FrameValPiIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,16 +78,6 @@ def decVal (g g' h h' : X.B.I.Ginf) (s : Formalism.L2.SG.TermOp.GTerm X u u' (X.
   Formalism.L2.SG.PairVal.cTerm vR s.toTerm •
     ((X.piU u g).comp ((X.piU u h).comp ((Formalism.L2.SG.RealObj.unscaledOperatorAtPointRepresentative X u u' 1 i0 i0' νq (Formalism.L2.SG.PairVal.ptOf s.toTerm)).comp
       ((X.piU u' h'⁻¹).comp (X.piU u' g'⁻¹)))))
-
-def CommonDC : Prop :=
-  ∀ (R : Formalism.L2.SG.TermOp.Rw (Y.what₂ u) (Y.what₂ u') Y.TR) (ρ : ℕ),
-    ∃ (U : X.Vpi u ≃ₗᵢ[ℂ] X.Vpi u) (U' : X.Vpi u' ≃ₗᵢ[ℂ] X.Vpi u') (ζ : ℂ), ‖ζ‖ = 1 ∧
-      ∀ s : LiftT X Y u u' κ R ρ, s.1.relevant →
-        ∀ g ∈ X.SinfU u, ∀ g' ∈ X.SinfU u',
-          s.1.pt.1 = g * Formalism.L2.SG.RealObj.gamW X u u' (Formalism.L2.SG.PairVal.ptOf s.1.toTerm) * g'⁻¹ →
-          ∀ h h', Formalism.L2.SG.RealObj.IsDFrameX X u u' 1 i0 i0'
-              (Formalism.L2.SG.RealObj.gamW X u u' (Formalism.L2.SG.PairVal.ptOf s.1.toTerm)) h h' →
-            decVal X Y u u' vR i0 i0' νq g g' h h' s.1 = ζ • frameVal X Y u u' vR i0 i0' νq U U' s.1
 
 theorem classFrameOO3_frameVal_trans (g g' h h' : X.B.I.Ginf) (hg : g ∈ X.SinfU u) (hg' : g' ∈ X.SinfU u')
     (hh : h ∈ X.SinfU u) (hh' : h' ∈ X.SinfU u')
@@ -98,7 +128,7 @@ theorem chiOO_decomp (h1 : LiftAtSomeC X Y u u' κ)
           (X.Wu u) (X.Wu u') (Formalism.L2.SG.RealObj.gamW X u u' (Formalism.L2.SG.PairVal.ptOf s.1.toTerm))).comp
         (X.piU u' hDF.choose.2)) := by
     unfold Formalism.L2.SG.RealObj.unscaledOperatorAtPointRepresentative Formalism.L2.SG.RealObj.unscaledFrameConjugatedOperator
-    rw [if_pos hpt, dif_pos hDF]
+    rw [if_pos hpt, dite_eq_left hDF]
   have hO : Formalism.L2.SG.TermOp.OOt s.1 =
       (((vR s.1.toTerm : ℝ) : ℂ) * (X.psiInfU u g * conj (X.psiInfU u' g'))) •
         (((Formalism.L2.SG.RealObj.InfCut.piIso X u g hg).toContinuousLinearEquiv : X.Vpi u →L[ℂ] X.Vpi u).comp
@@ -179,38 +209,5 @@ theorem ptValueC_of (h1 : LiftAtSomeC X Y u u' κ)
   unfold decVal
   ext x
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply, map_smul, hk2, c2, c3, hk1, c1]
-
-theorem commonFrameC_of_D (h1 : LiftAtSomeC X Y u u' κ)
-    (h2 : Formalism.L2.SG.PairVal.CellPtUnique D u u' (X.Fu u) (Y.what₂ u))
-    (h3 : DecompPhaseC X Y u u' κ) (h4 : DFrameAtS X u u' i0 i0' 1) (h4' : LiftGPosC X Y u u' κ)
-    (h5 : FormTranspC X Y u u' vR νq κ) (hD : CommonDC X Y u u' vR i0 i0' νq κ)
-    (hV : LemmaVLiftC X Y u u' κ) (hAt : AtPtRelevantC X Y u u') :
-    CommonFrameC X Y u u' vR i0 i0' νq κ := by
-  intro R ρ
-  obtain ⟨U, U', ζ, hζ, hc⟩ := hD R ρ
-  refine ⟨U, U', ζ, hζ, fun s A B hAB => ?_⟩
-  rw [← hAB]
-  by_cases hrel : s.1.relevant
-  · obtain ⟨g, hg, g', hg', hdec, h, h', hDF, hval⟩ :=
-      chiOO_decomp X Y u u' vR i0 i0' νq κ h1 h2 h3 h4 h4' h5 R ρ s hrel
-    rw [hval]
-    exact hc s hrel g hg g' hg' hdec h h' hDF
-  · obtain ⟨h0, hc0⟩ := irrelZeroC_of X Y u u' vR i0 i0' νq κ hV hAt R ρ s hrel
-    rw [h0]
-    unfold frameVal
-    rcases hc0 with hc0 | hc0
-    · rw [hc0, zero_smul, smul_zero]
-    · rw [hc0]
-      simp
-
-theorem commonFrameC_of_move (h1 : LiftAtSomeC X Y u u' κ)
-    (h2 : Formalism.L2.SG.PairVal.CellPtUnique D u u' (X.Fu u) (Y.what₂ u))
-    (h3 : DecompPhaseC X Y u u' κ) (h4 : DFrameAtS X u u' i0 i0' 1) (h4' : LiftGPosC X Y u u' κ)
-    (h5 : FormTranspC X Y u u' vR νq κ) (hM : DFrameMoveC X u u' i0 i0') (hF : OOtNuC X Y u u' νq κ)
-    (hNu : Formalism.L2.SG.RealObj.NuQOK X u u' νq) (hVI : Formalism.L2.SG.RealObj.VIndep X u u' 1 i0 i0' νq)
-    (hS : ScalarAgreeC X Y u u' κ) (hV : LemmaVLiftC X Y u u' κ) (hAt : AtPtRelevantC X Y u u') :
-    CommonFrameC X Y u u' vR i0 i0' νq κ :=
-  commonFrameC_of_scalar X Y u u' vR i0 i0' νq κ (ptValueC_of X Y u u' vR i0 i0' νq κ h1 h2 h3 h4 h4' h5 hM) hF hNu hVI
-    hS hV hAt
 
 end Formalism.L2.SG.Pf.RowForm

@@ -1,17 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPoint
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryHeckeCharacterValues
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleIntegralSeparatedComplete
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilRepresentationVacuumSignInertPlacesStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaTranslationIntertwinerUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilOperatorConjHeisenbergMovedLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeAgreeOfTrivialAtPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.OneSubSmulPeirceCut
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.OneSubSmulPeirceCut
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleIntegralSeparatedComplete
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPoint
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembership
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeAgreeOfTrivialAtPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaTranslationIntertwinerUnitaryStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryHeckeCharacterValues
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilOperatorConjHeisenbergMovedLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilRepresentationVacuumSignInertPlacesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -151,7 +198,7 @@ theorem Hf_add_left (x y z : VC D N N') : Hf D T (x + y) z = Hf D T x z + Hf D T
   simp only [Hf, Pi.add_apply, add_mul, Finset.sum_add_distrib, add_div]
 
 theorem Hf_add_right (x y z : VC D N N') : Hf D T z (x + y) = Hf D T z x + Hf D T z y := by
-  simp only [Hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib, add_div]
+  simp only [Hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib, add_div]
 
 def Wl (T : Tor D) (x : VC D N N') : Module.End ℂ (VC D N N' → ℂ) where
   toFun := Wd D T x
@@ -339,7 +386,7 @@ def TTs (T : Tor D) (N N' : ℕ) : Submodule ℂ (VC D N N' → ℂ) where
     have b := h' _ (AddSubgroup.nsmul_mem _ hx m)
     rw [smul_smul] at a b
     rw [mul_comm] at b
-    rw [← Wl_apply, map_add, Wl_apply, Wl_apply, a, b]
+    rw [← Wl_apply, map_add (f := _), Wl_apply, Wl_apply, a, b]
   smul_mem' := by
     rintro c F ⟨hF, m, hm, h⟩
     refine ⟨hF.const_smul c, m, hm, fun x hx => ?_⟩
@@ -355,6 +402,7 @@ theorem Om_sum {e0 : VC D N N' → ℂ} (W : WeilO D cc δ N N' e0) (g : GA D N)
     (F : Fin k → VC D N N' → ℂ) (hF : ∀ j, F j ∈ TT D (tor0 D cc δ) N N') :
     W.Om g g' (a • ∑ j, F j) = a • ∑ j, W.Om g g' (F j) := by
   have := (OmL W g g').map_smul a (∑ j, ⟨F j, hF j⟩)
+
   rw [map_sum] at this
   refine Eq.trans ?_ this
   change _ = W.Om g g' _
@@ -552,14 +600,14 @@ theorem exists_trivial_inert {e : AE D} (h1 : e * e = e) (h2 : sgA D e = e)
     ring
   · rw [Units.val_mul, det_cutG, ← hdef]
     change e * x + (1 - e) * 1 = _ * sgA D (e * x + (1 - e) * 1)
-    rw [map_add, map_mul, map_mul, map_sub, map_one, h2]
+    rw [map_add (f := _), map_mul, map_mul, map_sub, map_one, h2]
     linear_combination e * hxv + (d - 1) * h1
   · have hsplit : x = Units.map (cut e h1) x * Units.map (cut (1 - e) (compl_idem h1)) x :=
       Units.ext (cut_mul_cut e h1 (x : AE D)).1.symm
     have hfix : sgU D (Units.map (cut (1 - e) (compl_idem h1)) x) = Units.map (cut (1 - e) (compl_idem h1)) x := by
       refine Units.ext ?_
       change sgA D ((1 - e) * x + (1 - (1 - e)) * 1) = (1 - e) * x + (1 - (1 - e)) * 1
-      simp only [map_add, map_mul, map_sub, map_one, h2]
+      simp only [map_add (f := _), map_mul, map_sub, map_one, h2]
       linear_combination -(1 - e) * hxv + (d - 1) * sgA D x * h1
     conv_rhs => rw [hsplit, map_mul, mul_pow, χ.sq_AF _ hfix, mul_one]
 
@@ -576,7 +624,7 @@ theorem exists_solution {ε : AE D} (a1 : ε * ε = ε) (a2 : ε * sgA D ε = 0)
   · rw [Units.val_mul, det_cutG, ← hdef]
     have a3 : sgA D ε * sgA D ε = sgA D ε := by rw [← map_mul, a1]
     change (1 - ε) + ε * d = _ * sgA D ((1 - ε) + ε * d)
-    rw [map_add, map_mul, map_sub, map_one]
+    rw [map_add (f := _), map_mul, map_sub, map_one]
     linear_combination (-(1 - d - sgA D d + d * sgA D d)) * (a3 + a2) - sgA D ε * hn
   · convert zeroAt_mul D hq h (ε * (d - 1)) using 1
     change (1 - ε) + ε * d - 1 = _
@@ -613,15 +661,15 @@ theorem unitAt_neg_one {p : ℕ} [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) : Uni
 
 end Main
 
-open GlobalTheory.NormSum.VacMove in
 
+open GlobalTheory.NormSum.VacMove in
 theorem vacuum_scalar : ∀ D : D7, odd4 D := by
   intro D cc δ hc N N' hev e0 he _ W g g' L L' c hL hL' hO
   obtain ⟨ε, -, a1, a2, h3⟩ := exists_half_idem D
   have h1 : (ε + sgA D ε) * (ε + sgA D ε) = ε + sgA D ε := by
     have a3 : sgA D ε * sgA D ε = sgA D ε := by rw [← map_mul, a1]
     linear_combination a1 + a3 + 2 * a2
-  have h2 : sgA D (ε + sgA D ε) = ε + sgA D ε := by rw [map_add, sgA_sgA, add_comm]
+  have h2 : sgA D (ε + sgA D ε) = ε + sgA D ε := by rw [map_add (f := _), sgA_sgA, add_comm]
   refine ⟨fun z z' x x' hz hz' hx hx' => ?_, fun p hp lam hg hg' => ?_⟩
   · obtain ⟨y, b1, b2, b3⟩ := exists_trivial_inert h1 h2 h3 g hz hx
     obtain ⟨y', c1, c2, c3⟩ := exists_trivial_inert h1 h2 h3 g' hz' hx'

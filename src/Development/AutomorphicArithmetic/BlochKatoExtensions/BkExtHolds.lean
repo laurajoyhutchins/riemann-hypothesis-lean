@@ -1,11 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.RealExtOfExact
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExtensionRuleStmt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.T2SpaceLocalLatticeRepresentationSpace
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardTorsionMulFinrank
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RealExtOfExact
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardTorsionMulFinrank
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExtensionRuleStmt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.T2SpaceLocalLatticeRepresentationSpace
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.WachCoordinates Formalism.MainNotions.WachCoordinates.Br Module IsLocalRing
 
@@ -114,11 +153,11 @@ private theorem UpperTheory.Prune.bk_core [IsTopologicalRing LL] [FiniteDimensio
   have e1 : (w : W.DD T × W.DD T).1 - y = W.φD T m - m := congrArg Prod.fst hmw
   have e2 : (w : W.DD T × W.DD T).2 - z = W.γD T W.gamK m - m := congrArg Prod.snd hmw
   refine ⟨E₀ + W.map ι m, fun δ hδ => ?_, ?_, ?_, ?_⟩
-  · rw [map_add, hΔ δ hδ, ← W.map_γ, hm δ hδ]
-  · rw [map_add, hπ, (hex _).2 ⟨m, rfl⟩, add_zero]
-  · rw [sub_eq_iff_eq_add.1 e1, map_add, map_sub, hy, map_add, W.map_φ]
+  · rw [map_add (f := _), hΔ δ hδ, ← W.map_γ, hm δ hδ]
+  · rw [map_add (f := _), hπ, (hex _).2 ⟨m, rfl⟩, add_zero]
+  · rw [sub_eq_iff_eq_add.1 e1, map_add (f := _), map_sub, hy, map_add (f := _), W.map_φ]
     abel
-  · rw [sub_eq_iff_eq_add.1 e2, map_add, map_sub, hz, map_add, W.map_γ]
+  · rw [sub_eq_iff_eq_add.1 e2, map_add (f := _), map_sub, hz, map_add (f := _), W.map_γ]
     abel
 
 end Generic

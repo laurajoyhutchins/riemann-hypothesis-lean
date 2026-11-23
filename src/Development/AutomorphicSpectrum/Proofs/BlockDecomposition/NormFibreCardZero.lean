@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open PositivityTheory.PfSWUS.Loc GlobalTheory.CompanionTheory.UnrDens
 
@@ -63,7 +113,7 @@ theorem exists_idem (h : ResAlg E τ q ε) (hf : ¬ IsField E) :
     by_contra hN
     have hfix : τ (a * τ a) = a * τ a := by rw [map_mul, h.inv, mul_comm]
     exact hau (isUnit_of_mul_isUnit_left (h.fixedUnit _ hfix hN))
-  have htfix : τ (a + τ a) = a + τ a := by rw [map_add, h.inv, add_comm]
+  have htfix : τ (a + τ a) = a + τ a := by rw [map_add (f := _), h.inv, add_comm]
   by_cases ht : a + τ a = 0
   · exfalso
     have hτa : τ a = -a := by linear_combination ht
@@ -115,7 +165,7 @@ theorem card_zero_split (h : ResAlg E τ q ε) {e : E} (he : e * e = e) (hτ : �
   have hnorm : ∀ p, g p * τ (g p) = (p.1 : E) * (p.2 : E) := by
     rintro ⟨⟨x, hx⟩, ⟨y, hy⟩⟩
     show (x * e + y * (1 - e)) * τ (x * e + y * (1 - e)) = x * y
-    rw [map_add, map_mul, map_mul, hx, hy, hτ, hτf]
+    rw [map_add (f := _), map_mul, map_mul, hx, hy, hτ, hτf]
     linear_combination (2 * x * y - x ^ 2 - y ^ 2) * he
   have hg : Function.Bijective g := by
     constructor
@@ -123,7 +173,7 @@ theorem card_zero_split (h : ResAlg E τ q ε) {e : E} (he : e * e = e) (hτ : �
       have h1 : x * e + y * (1 - e) = x' * e + y' * (1 - e) := hxy
       have h2 : x * (1 - e) + y * e = x' * (1 - e) + y' * e := by
         have := congrArg τ h1
-        simpa only [map_add, map_mul, hx, hy, hx', hy', hτ, hτf] using this
+        simpa only [map_add (f := _), map_mul, hx, hy, hx', hy', hτ, hτf] using this
       have hxe : x * e = x' * e := by
         linear_combination e * h1 + (y - y' - x + x') * he
       have hye : y * e = y' * e := by
@@ -134,8 +184,8 @@ theorem card_zero_split (h : ResAlg E τ q ε) {e : E} (he : e * e = e) (hτ : �
       rfl
     · intro a
       refine ⟨(⟨a * e + τ a * (1 - e), ?_⟩, ⟨a * (1 - e) + τ a * e, ?_⟩), ?_⟩
-      · rw [map_add, map_mul, map_mul, h.inv, hτ, hτf]; ring
-      · rw [map_add, map_mul, map_mul, h.inv, hτ, hτf]; ring
+      · rw [map_add (f := _), map_mul, map_mul, h.inv, hτ, hτf]; ring
+      · rw [map_add (f := _), map_mul, map_mul, h.inv, hτ, hτf]; ring
       · show (a * e + τ a * (1 - e)) * e + (a * (1 - e) + τ a * e) * (1 - e) = a
         linear_combination (2 * a - 2 * τ a) * he
   have hz : ∀ p : Fx τ × Fx τ, (p.1 = zeroFx τ ∨ p.2 = zeroFx τ) ↔ g p * τ (g p) = 0 := by

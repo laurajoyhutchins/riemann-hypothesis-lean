@@ -1,6 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsHorizontalTwist
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIntegralClosureOfEssFiniteTypeField
+module
+
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.RingTheory.EssentialFiniteness
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIntegralClosureOfEssFiniteTypeField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
+@[expose] public section
 
 namespace GlobalTheory.CompanionTheory.QuadFin
 
@@ -18,11 +72,11 @@ theorem exists_eq_add_mul_of_mem_adjoin {E : Type*} [Field E] [Algebra ℚ E] (x
   · exact ⟨r, 0, by simp⟩
   · obtain ⟨a, b, rfl⟩ := hu
     obtain ⟨a', b', rfl⟩ := hv
-    exact ⟨a + a', b + b', by simp only [map_add]; ring⟩
+    exact ⟨a + a', b + b', by simp only [map_add (f := _)]; ring⟩
   · obtain ⟨a, b, rfl⟩ := hu
     obtain ⟨a', b', rfl⟩ := hv
     refine ⟨a * a' + b * b' * c, a * b' + a' * b, ?_⟩
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
     linear_combination (algebraMap ℚ E b * algebraMap ℚ E b') * hx
 
 theorem not_sq_eq_of_prime {p q : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) (b : ℚ)
@@ -45,7 +99,7 @@ theorem false_of_sq_eq {E : Type*} [Field E] [CharZero E] [Algebra ℚ E] {p q :
     (h : (algebraMap ℚ E a + algebraMap ℚ E b * x) ^ 2 = -(p : E)) : False := by
   have hφ : Function.Injective (algebraMap ℚ E) := (algebraMap ℚ E).injective
   have key : algebraMap ℚ E (a ^ 2 - q * b ^ 2 + p) + algebraMap ℚ E (2 * a * b) * x = 0 := by
-    simp only [map_add, map_sub, map_mul, map_pow, map_natCast, map_ofNat]
+    simp only [map_add (f := _), map_sub, map_mul, map_pow, map_natCast, map_ofNat]
     linear_combination h - algebraMap ℚ E b ^ 2 * hx
   have hq0 : (0 : ℚ) < q := by exact_mod_cast hq.pos
   have hp0 : (0 : ℚ) < p := by exact_mod_cast hp.pos
@@ -110,7 +164,7 @@ theorem finite_primes_of_isFractionRing (A F : Type*) [CommRing A] [IsDomain A] 
     hb (IsFractionRing.injective A F (by rw [h0, map_zero]))
   refine ⟨hp, algebraMap A F a / algebraMap A F b, ?_⟩
   have e := congrArg (algebraMap A F) hab
-  simp only [map_add, map_mul, map_pow, map_natCast, map_zero] at e
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast, map_zero] at e
   rw [div_pow, div_eq_iff (pow_ne_zero 2 hb')]
   linear_combination e
 

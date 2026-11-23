@@ -1,4 +1,48 @@
-import Development.EtaleCohomology.EtaleSheaves.StalkGerm
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.StalkGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC LateralTheory.E.t_E2Cut LateralTheory.E.ZLGPf
@@ -66,12 +110,12 @@ theorem ZarInd_of_step (hS : Step) : ZarInd := by
   intro hM hH q Y X S f p _ _ _ _ _ _ hq i hg
   have P : ∀ n : ℤ, ∀ U : S.Opens, IsCompact (U : Set S) → Bij q i n f p U := by
     intro n
-    rcases lt_or_ge n 0 with hn | hn
-    · exact fun U _ => bij_neg hH hn f p U
-    induction n, hn using Int.le_induction with
-    | base => exact hS hM hH q f p hq i 0 (fun s => hg s 0) (fun U _ => bij_neg hH (by norm_num) f p U)
-    | succ m _ ih =>
+    induction n using Int.induction_on with
+    | zero => exact hS hM hH q f p hq i 0 (fun s => hg s 0) (fun U _ => bij_neg hH (by norm_num) f p U)
+    | succ m ih =>
       exact hS hM hH q f p hq i (m + 1) (fun s => hg s (m + 1)) (by simpa using ih)
+    | pred m ih =>
+      exact fun U _ => bij_neg hH (by omega) f p U
   intro n
   have : IsIso (⊤ : S.Opens).ι := (Scheme.topIso S).isIso_hom
   exact bij_top f p (P n ⊤ (by simpa using isCompact_univ))

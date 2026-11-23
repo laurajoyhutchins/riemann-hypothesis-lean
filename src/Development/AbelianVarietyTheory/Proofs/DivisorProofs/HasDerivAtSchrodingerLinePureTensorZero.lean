@@ -1,7 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsArchimedeanExponentsAdeleCharacter
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousBdGen
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousBdGen
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsArchimedeanExponentsAdeleCharacter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Distribution.SchwartzSpace.Deriv
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace SchrodingerLinePhase
 section
@@ -101,7 +152,8 @@ theorem phase_line [Invertible (2 : AF F)] (hF : IsTotallyReal F) {ψ : AddChar 
   haveI : IsTotallyReal F := hF
   have hy0 : ∀ l, sndA F ((M s).2 l) = 0 := fun l => congrFun (hM.2 s).2 l
   have hsnd : sndA F (z ⬝ᵥ (M s).2 + ⅟(2 : AF F) * ((M s).1 ⬝ᵥ (M s).2)) = 0 := by
-    simp only [dotProduct, map_add, map_mul, map_sum, hy0, mul_zero, Finset.sum_const_zero, add_zero]
+
+    simp only [dotProduct, map_add (f := _), map_mul, map_sum, hy0, mul_zero, Finset.sum_const_zero, add_zero]
   have e1 : ∀ w, re (fstA F (z ⬝ᵥ (M s).2 + ⅟(2 : AF F) * ((M s).1 ⬝ᵥ (M s).2))) w =
       s * ∑ l, coord hF w (arch (z l)) * coord hF w (arch ((M 1).2 l)) +
         s ^ 2 * (coord hF w (arch ⅟(2 : AF F)) *
@@ -109,8 +161,9 @@ theorem phase_line [Invertible (2 : AF F)] (hF : IsTotallyReal F) {ψ : AddChar 
     intro w
     have hxs : ∀ l, arch ((M s).1 l) = s • arch ((M 1).1 l) := fun l => arch_fst hM l s
     have hys : ∀ l, arch ((M s).2 l) = s • arch ((M 1).2 l) := fun l => arch_snd hM l s
-    simp only [dotProduct, map_add, map_mul, map_sum, re_add, re_mul, re_sum, re_fstA_eq_coord_arch hF, hxs, hys,
-      map_smul, smul_eq_mul]
+
+    simp only [dotProduct, map_add (f := _), map_mul, map_sum, re_add, re_mul, re_sum, re_fstA_eq_coord_arch hF, hxs, hys,
+    map_smul, smul_eq_mul]
     first
       | (simp only [Finset.mul_sum, ← Finset.sum_add_distrib]
          refine Finset.sum_congr rfl fun l _ => ?_
@@ -169,8 +222,8 @@ private theorem hasDerivAt_exp_quadratic_mul_schwartz_line_zero {E : Type} [Norm
 
 end GlobalTheory.CompanionTheory.SchrLine
 
-open GlobalTheory.CompanionTheory.SchrLine in
 
+open GlobalTheory.CompanionTheory.SchrLine in
 theorem GlobalTheory.CompanionTheory.SchrLine.exists_hasDerivAt_schr_pureA :
     ∀ (F : Type) [Field F] [NumberField F] (N : ℕ) [Invertible (2 : AF F)] (ψ : AddChar (AF F) ℂ), IsTotallyReal F →
     IsCharAF F ψ → ∀ M : ℝ →+ VA F N, IsRealLine M →
@@ -194,14 +247,14 @@ theorem GlobalTheory.CompanionTheory.SchrLine.exists_hasDerivAt_schr_pureA :
     have hq : (fun i => InfiniteAdeleRing.ringEquiv_mixedSpace F ((z + (M s).1) i).1) = q + s • v := by
       funext i
       show InfiniteAdeleRing.ringEquiv_mixedSpace F (fstA F (z i + (M s).1 i)) = q i + s • v i
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       first
         | exact congrArg₂ (· + ·) rfl (arch_fst hM i s)
         | (congr 1; exact arch_fst hM i s)
     have hz : (fun i => ((z + (M s).1) i).2) = zf := by
       funext i
       show sndA F (z i + (M s).1 i) = (z i).2
-      rw [map_add, show sndA F ((M s).1 i) = 0 from congrFun (hM.2 s).1 i]
+      rw [map_add (f := _), show sndA F ((M s).1 i) = 0 from congrFun (hM.2 s).1 i]
       exact add_zero _
     show ψ (z ⬝ᵥ (M s).2 + ⅟(2 : AF F) * ((M s).1 ⬝ᵥ (M s).2)) *
         (f (fun i => InfiniteAdeleRing.ringEquiv_mixedSpace F ((z + (M s).1) i).1) *

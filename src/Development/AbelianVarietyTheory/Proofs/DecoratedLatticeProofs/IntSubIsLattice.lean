@@ -1,8 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionSchrodingerModelFiniteIdempotent
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSelfDualCHLat
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsRatDatum
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSelfDualCHLat
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SplitOffBadOfSuppSplitOff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantForm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SchrodingerIntertwinerSchwartzBruhatIsTheta
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionSchrodingerModelFiniteIdempotent
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicHermitianFormGaloisMemOfMemCompletion
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CompletedLatticeEqAdelicCompletionAndGram
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLatticeRationalVectorsInAdelicTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteDimensionalMram
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Forms Formalism.L2.Ker Formalism.UG
 open NumberField IsDedekindDomain Matrix MeasureTheory GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.MixPer GlobalTheory.Core.Rk GlobalTheory.AdForm
 open scoped TensorProduct Classical
@@ -22,7 +77,7 @@ def intSub (D : D7) (n : ℕ) : Submodule (𝓞 D.host.E) (Fin n → D.host.E) w
 
 theorem coe_intSub (n : ℕ) : ((intSub D n : Submodule (𝓞 D.host.E) (Fin n → D.host.E)) : Set (Fin n → D.host.E)) = intVec D n := rfl
 
-set_option maxHeartbeats 1000000 in
+
 theorem hat_intVec_iff (D : D7) (n : ℕ) (z : Fin n → GlobalTheory.AdLat.RA D.host.F D.host.E) :
     z ∈ GlobalTheory.AdLat.hat D.host.F (intVec D n) ↔
       ∀ i, Algebra.TensorProduct.comm D.host.F (Formalism.L2.Herm.Af D.host.F) D.host.E (z i) ∈ Formalism.L2.Herm.intAf D.host.F D.host.E := by
@@ -58,7 +113,7 @@ theorem hat_intVec_iff (D : D7) (n : ℕ) (z : Fin n → GlobalTheory.AdLat.RA D
         · subst hk; simp [cm]
         · simp [Pi.single_eq_of_ne hk]
     | zero => simp
-    | add s t _ _ hs ht => rw [map_add, Pi.single_add]; exact add_mem hs ht
+    | add s t _ _ hs ht => rw [map_add (f := _), Pi.single_add]; exact add_mem hs ht
     | neg s _ hs => rw [map_neg, Pi.single_neg]; exact neg_mem hs
   constructor
   · intro hz
@@ -72,7 +127,7 @@ theorem hat_intVec_iff (D : D7) (n : ℕ) (z : Fin n → GlobalTheory.AdLat.RA D
       refine mul_mem (Subring.subset_closure (Or.inl ⟨⟨x i, ⟨⟨x i, hx i⟩, rfl⟩⟩, rfl⟩))
         (Subring.subset_closure (Or.inr ⟨⟨a, ha⟩, rfl⟩))
     | zero => intro i; simp
-    | add s t _ _ hs ht => intro i; rw [Pi.add_apply, map_add]; exact add_mem (hs i) (ht i)
+    | add s t _ _ hs ht => intro i; rw [Pi.add_apply, map_add (f := _)]; exact add_mem (hs i) (ht i)
     | neg s _ hs => intro i; rw [Pi.neg_apply, map_neg]; exact neg_mem (hs i)
   · intro hz
     rw [← Finset.univ_sum_single z]
@@ -135,7 +190,7 @@ theorem intSub_span (n : ℕ) : Submodule.span D.host.E (intSub D n : Set (Fin n
   · subst h; simp only [Pi.single_eq_same]; exact isIntegral_one
   · rw [Pi.single_eq_of_ne' h]; exact isIntegral_zero
 
-instance intSub_isLattice (n : ℕ) : Submodule.IsLattice D.host.E (intSub D n) := ⟨intSub_fg n, intSub_span n⟩
+instance intSub_isLattice (n : ℕ) : Submodule.IsLattice D.host.E (intSub D n) := Submodule.IsLattice.of_fg D.host.E (intSub_fg n)
 
 theorem sum_swap_one (n : ℕ) (x y : Fin n → D.host.E) :
     ∑ i, ∑ j, star (x i) * (1 : Matrix (Fin n) (Fin n) D.host.E) i j * y j =
@@ -167,8 +222,9 @@ theorem latOf_eq (V : HSp D) (g : GA D V) (N : Submodule (𝓞 D.host.E) (Fin V.
         (((finHom V g⁻¹).1 *ᵥ GlobalTheory.AdLat.fv D.host.F x) i) =
       (finM V rfl g⁻¹ *ᵥ fun j => eToEAf D (x j)) i := by
     intro x i
+
     simp only [GlobalTheory.AdForm.finM, Matrix.mulVec, dotProduct, map_sum, map_mul, Matrix.reindex_apply,
-      finCongr_refl, Equiv.refl_symm, Equiv.coe_refl, Matrix.submatrix_id_id]
+    finCongr_refl, Equiv.refl_symm, Equiv.coe_refl, Matrix.submatrix_id_id]
     refine Finset.sum_congr rfl fun j _ => ?_
     congr 1
   ext x
@@ -208,7 +264,7 @@ theorem hat_move (V : HSp D) (g : GA D V) (N : Submodule (𝓞 D.host.E) (Fin V.
 theorem selfDual_move (V : HSp D) (hV : V.gram = 1) (g : GA D V) (N : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E))
     (hN : Moves V rfl g N) : IsSelfDualC V N := by
   obtain ⟨hfg, hsp, -⟩ := exists_eq_latOf V g N hN
-  refine ⟨⟨hfg, hsp⟩, fun y => ?_⟩
+  refine ⟨Submodule.IsLattice.of_fg D.host.E hfg, fun y => ?_⟩
   obtain ⟨-, -, -, -, c2, -⟩ := GlobalTheory.Member.latHat_eq_hat_and_gram D V
   have hU := GlobalTheory.RepsCompare.isUnA_gf V (Formalism.IndefR.FWT.fin V g)
   rw [hV, Matrix.transpose_one] at hU

@@ -1,9 +1,63 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.VolumeDictionaryLuDecomposition
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.IndexCocycleOrbits.PtEntryExists
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.AdmNPf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.UnipBasis
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.SpanPerpZero
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexBStable
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.VolPinAsm
+public import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.AdmNPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PairValG
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SaturatedPf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.PtMatIsUnit
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TermDefPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.FibreCounting
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.VolumeDictionaryLuDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -187,8 +241,9 @@ theorem FM_comp {e : Fin m → V} {g h : V →ₗ[K] V} {G H : Matrix (Fin m) (F
     (hg : FM e g G) (hh : FM e h H) : FM e (g ∘ h) (G * H) := by
   unfold FM at hg hh ⊢
   intro b
+
   simp only [Function.comp_apply, hh b, map_sum, map_smul, hg, Finset.smul_sum, smul_smul,
-    Matrix.mul_apply, Finset.sum_smul]
+  Matrix.mul_apply, Finset.sum_smul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun d _ => Finset.sum_congr rfl fun c _ => ?_
   rw [mul_comm]
@@ -199,6 +254,7 @@ theorem FM_inv {e : Fin m → V} {g : V ≃ₗ[K] V} {G : Matrix (Fin m) (Fin m)
   intro b
   apply g.injective
   rw [LinearEquiv.apply_symm_apply]
+
   simp only [map_sum, map_smul, hg, Finset.smul_sum, smul_smul]
   rw [Finset.sum_comm]
   have hGG : G * G⁻¹ = 1 := Matrix.mul_nonsing_inv G hG
@@ -353,6 +409,7 @@ theorem realFM {u' : D.what₂.Word} {x : X.B.I.GA} {ρ : (VS D).V ≃ₗ[D.host
   intro b
   show Formalism.MainNotions.S.uMat (x.1 v) *ᵥ efr X u' v b = _
   rw [efr_eq, h1 v, Formalism.L2.SG.Pf.Level.rv_mulVec, ← h3, hK b, Formalism.L2.SG.NormCut.crd_sum' X]
+
   rw [← Formalism.L2.SG.Pf.Level.rvHom_apply, map_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [Formalism.L2.SG.NormCut.crd_smul' X, Formalism.L2.SG.Pf.Level.rv_smul, Formalism.L2.SG.Pf.Level.rvHom_apply, ← efr_eq]
@@ -404,6 +461,7 @@ theorem K_FM {F0' F'' : FlagG (VS D) D.R.rS T'} (τ g m' : (VS D).V ≃ₗ[D.hos
   have hA : FM F0'.fvec ⇑(g⁻¹ * τ * g) P := by
     intro b
     show g⁻¹ (τ (g (F0'.fvec b))) = _
+
     rw [hg b, hτ b, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [map_smul, ← hg c]
@@ -544,8 +602,8 @@ end Helpers
 
 section Final
 
-open Formalism.L2.SG.PackageTie2 in
 
+open Formalism.L2.SG.PackageTie2 in
 theorem dictC_holds : DictC := by
   intro D X Y u u' t _ hGt w _ F' L U hN γw s s' _ _ hs' hdec
   obtain ⟨hLu, hZu, hZ1⟩ := nr_units hN

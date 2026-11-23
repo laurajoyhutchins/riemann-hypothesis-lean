@@ -1,8 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.FibDis
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.ExOmTOfSteps
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.FibOfTens
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PeriodIntegrals.VolFromSW
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,11 +53,6 @@ namespace PI.VolStabSW
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes NumberField IsDedekindDomain MeasureTheory PI.VolFromSW Topology
 open scoped TensorProduct
 
-def FreeOpen : Prop := InCtx fun F E _ _ _ _ _ _σ M _J a _X0 _hT =>
-  IsOpen {X : Fin a → Fin M → Ainf F ⊗[F] E | LinearIndependent (Ainf F ⊗[F] E) X} ∧
-  ∀ v : HeightOneSpectrum (𝓞 F),
-    IsOpen {X : Fin a → Fin M → Fv F v ⊗[F] E | LinearIndependent (Fv F v ⊗[F] E) X}
-
 theorem tensFacts_of_fib {F E : Type} [Field F] [Field E] [Algebra F E] [FiniteDimensional F E]
     (σ : E →ₐ[F] E) (M : ℕ) (J : Matrix (Fin M) (Fin M) E) (a : ℕ) (R : Type) [CommRing R]
     [Algebra F R] [TopologicalSpace R] [IsTopologicalRing R] [LocallyCompactSpace R] [T2Space R]
@@ -23,27 +60,5 @@ theorem tensFacts_of_fib {F E : Type} [Field F] [Field E] [Algebra F E] [FiniteD
     (hfree : IsOpen {X : Fin a → Fin M → R ⊗[F] E | LinearIndependent (R ⊗[F] E) X}) :
     TensFacts F E σ M J a R := ⟨inferInstance, inferInstance, inferInstance, isClosed_HermR (R := R) σ a,
   continuous_gramR (R := R) σ J, fun X => gramR_mem (R := R) σ hσ J hJ X, hfree⟩
-
-theorem tensAll_of (h : FreeOpen) : TensAll := by
-  intro F E _ _ _ _ _ σ hCM M J hJ h1 h2 a ha haM X0 hT hdet
-  have hF := h F E σ hCM M J hJ h1 h2 a ha haM X0 hT hdet
-  haveI : FiniteDimensional F E := Module.finite_of_finrank_pos (by rw [hCM.2.2.1]; norm_num)
-  have hσ : ∀ x, σ (σ x) = x := by
-    intro x
-    obtain ⟨τ⟩ := (inferInstance : Nonempty (E →+* ℂ))
-    apply τ.injective
-    rw [hCM.2.2.2, hCM.2.2.2, star_star]
-  exact ⟨tensFacts_of_fib σ M J a (Ainf F) hσ hJ.1 hF.1,
-    fun v => by
-      haveI : LocallyCompactSpace (Fv F v) := locallyCompact_Fv (F := F) (v := v)
-      haveI : SecondCountableTopology (Fv F v) := secondCountable_Fv (F := F) (v := v)
-      exact tensFacts_of_fib σ M J a (Fv F v) hσ hJ.1 (hF.2 v)⟩
-
-theorem fibInfEx_of_core (h1 : FreeOpen) (h2 : DensInf) : FibInfEx := fibInfEx_of DiscreteGroups.fibOfDens_holds (tensAll_of h1) h2
-
-theorem fibVEx_of_core (h1 : FreeOpen) (h2 : DensV) : FibVEx := fibVEx_of DiscreteGroups.fibOfDens_holds (tensAll_of h1) h2
-
-theorem exOmT_of_core (h1 : FreeOpen) (h2 : DensInf) (h3 : DensV) (h4 : SdUniq) (h5 : RestrProd) :
-    ExOmT := exOmT_of_open (fibInfEx_of_core h1 h2) (fibVEx_of_core h1 h3) h4 h5
 
 end PI.VolStabSW

@@ -1,17 +1,60 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GSEqZeroOfLt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussUnitsNormSq
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormSatakeLeOfUnitarySphericalGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfUnit
 import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfUnit
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegIdxOfIsStd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseFits
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GSEqZeroOfLt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMulPowIntegral
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.CentralInvolutionRing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussUnitsNormSq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormSatakeLeOfUnitarySphericalGL
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,9 +88,11 @@ theorem exists_int_gauss {K : Type} [Field K] [NumberField K] (σ : K →+* ℂ)
   have hinv : ∀ u, χ u⁻¹ = (χ u)⁻¹ := fun u =>
     eq_inv_of_mul_eq_one_left (by rw [← map_mul, inv_mul_cancel, map_one])
   have hg : σ ((∑ u : Rˣ, a u⁻¹ * b u : NumberField.RingOfIntegers K) : K) = ∑ u : Rˣ, (χ u)⁻¹ * ψ u := by
+
     simp only [map_sum, map_mul, ha, hb, hinv]
   have hg' : σ ((∑ u : Rˣ, a u * b (-u) : NumberField.RingOfIntegers K) : K) =
       starRingEnd ℂ (∑ u : Rˣ, (χ u)⁻¹ * ψ u) := by
+
     simp only [map_sum, map_mul, ha, hb]
     refine Finset.sum_congr rfl fun z _ => ?_
     rw [Complex.inv_eq_conj (hχ z), Complex.conj_conj, AddChar.map_neg_eq_conj]
@@ -78,8 +123,8 @@ theorem val_rep_sub {ϖ : kˣ} (hϖ : IsUnif ϖ) {c : ℕ} (y : Res k c) (a : �
     (h : y = Ideal.Quotient.mk _ a) : valuation k (rep y - a) ≤ valuation k (ϖ : k) ^ c :=
   (mk_eq_mk_iff hϖ c (Quotient.out y) a).1 (by rw [Ideal.Quotient.mk_out, h])
 
-open Classical in
 
+open Classical in
 theorem exists_int_gS {K : Type} [Field K] [NumberField K] (σ : K →+* ℂ) {ψl : k → ℂ}
     (hadd : ∀ x y, ψl (x + y) = ψl x * ψl y) (hO : ∀ x : k, valuation k x ≤ 1 → ψl x = 1)
     (hcond : ∀ x : k, (∀ y : k, valuation k y ≤ 1 → ψl (x * y) = 1) → valuation k x ≤ 1)
@@ -105,7 +150,7 @@ theorem exists_int_gS {K : Type} [Field K] [NumberField K] (σ : K →+* ℂ) {�
       map_add_eq_mul' := fun x y => by
         rw [← hadd, ← add_div]
         exact hdiv _ _ (val_rep_sub hϖ (x + y) (Quotient.out x + Quotient.out y)
-          (by rw [map_add, Ideal.Quotient.mk_out, Ideal.Quotient.mk_out])) }
+          (by rw [map_add (f := _), Ideal.Quotient.mk_out, Ideal.Quotient.mk_out])) }
   let χ : (Res k c)ˣ →* ℂ :=
     { toFun := fun u => ν (uRep hϖ hc1 u)
       map_one' := by
@@ -113,7 +158,7 @@ theorem exists_int_gS {K : Type} [Field K] [NumberField K] (σ : K →+* ℂ) {�
         simp
       map_mul' := fun u w => by
         rw [nu_congr hϖ hc1 hc (b := uRep hϖ hc1 u * uRep hϖ hc1 w)
-          (by simp [val_rep_unit hϖ hc1]) (hmul u w)]
+          (by simp [map_mul, uRep, val_rep_unit hϖ hc1]) (hmul u w)]
         simp }
   have hΨ : ∀ d : Res k c, (∀ x, Ψ (d * x) = 1) → d = 0 := fun d hd => by
     have h3 := hcond (rep d / (ϖ : k) ^ c) fun a ha => by
@@ -180,8 +225,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels (gauss unifAt PsiUnr)
 
-open ValuativeRel GlobalTheory.SplitFlip GlobalTheory.GaussNonvanish GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels in
 
+open ValuativeRel GlobalTheory.SplitFlip GlobalTheory.GaussNonvanish GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels in
 theorem GlobalTheory.GaussDiv.gauss_dvd_pow : ∀ {F : Type} [Field F] [NumberField F] {K : Type} [Field K] [NumberField K] (σ : K →+* ℂ)
     (ψ : AddChar (AF F) ℂ) (v : HeightOneSpectrum (𝓞 F)) (ν : (Fv F v)ˣ →* ℂˣ), PsiUnr ψ v →
     Continuous (fun x : (Fv F v)ˣ => (ν x : ℂ)) → (∀ x, ‖(ν x : ℂ)‖ = 1) → 1 ≤ GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.condExp ν →
@@ -192,7 +237,7 @@ theorem GlobalTheory.GaussDiv.gauss_dvd_pow : ∀ {F : Type} [Field F] [NumberFi
   intro F _ _ K _ _ σ ψ v ν hψ hcont hun hc1 hr hζ
   have hϖ : IsUnif (unifAt v) := (GlobalTheory.SplitFlip.exists_isUnif (k := Fv F v)).choose_spec
   have hadd : ∀ x y, psiLoc ψ v (x + y) = psiLoc ψ v x * psiLoc ψ v y := fun x y => by
-    simp only [psiLoc, map_add]
+    simp only [psiLoc, map_add (f := _)]
     exact AddChar.map_add_eq_mul ψ _ _
   have hO : ∀ x : Fv F v, valuation (Fv F v) x ≤ 1 → psiLoc ψ v x = 1 := fun x hx => by
     have := ((hψ 1).2 ((val_le_one_iff v 1).1 (by simp))) x ((val_le_one_iff v x).1 hx)
@@ -219,5 +264,5 @@ theorem GlobalTheory.GaussDiv.gauss_dvd_pow : ∀ {F : Type} [Field F] [NumberFi
   refine Finset.sum_congr rfl fun y _ => ?_
   have hr := rep_ne_zero hϖ hc1 y
   unfold rep at hr
-  rw [dif_neg hr, one_mul]
+  rw [dite_eq_right hr, one_mul]
   rfl

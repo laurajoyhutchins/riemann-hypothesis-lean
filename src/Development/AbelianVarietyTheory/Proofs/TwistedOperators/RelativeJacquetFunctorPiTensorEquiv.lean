@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SmRep
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelativeJacquetPiExteriorTensorEquivNormalized
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelativeJacquetPiExteriorTensorEquivNormalized
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SmGL
 open GlobalTheory.JacPiTensor (qlift mk_qlift descend descend_mk)
@@ -32,7 +75,7 @@ theorem piTensor_mulSingle (a : α) (g : GL (m a) k) (x : ∀ j, X j) :
     simp
   · simp [h]
 
-def qf : MultilinearMap ℂ X (Jacquet (piTensor ρ) (relUnip k e')) :=
+def qf : (∀ a, X a) →ₘₗ[ℂ] Jacquet (piTensor ρ) (relUnip k e') :=
   (twKer (piTensor ρ) (relUnip k e') 1).mkQ.compMultilinearMap (PiTensorProduct.tprod ℂ)
 
 theorem qf_update (v : ∀ a, X a) (i : α) (w : X i)
@@ -137,12 +180,12 @@ def jacEquiv : Jacquet (piTensor ρ) (relUnip k e') ≃ₗ[ℂ] ⨂[ℂ] a, Jacq
         Submodule.mkQ_apply])
 
 theorem relJac_piTensor :
-    Nonempty ((relJac e' (piTensor ρ)).Equiv (piTensor fun a => jac (e' a) (ρ a))) := by
+    Nonempty ((relJac e' (piTensor ρ)).Equiv (piTensor fun a => GlobalTheory.SmGL.jac (e' a) (ρ a))) := by
   refine ⟨Representation.Equiv.mk (jacEquiv e' ρ) fun g => ?_⟩
   refine Submodule.linearMap_qext _ (PiTensorProduct.ext (MultilinearMap.ext fun x => ?_))
   simp only [LinearMap.compMultilinearMap_apply, LinearMap.comp_apply, Submodule.mkQ_apply,
     LinearEquiv.coe_coe, jacEquiv, LinearEquiv.ofLinear_apply, relJac_mk, piTensor_tprod, relEmb_apply,
-    map_smul, fwd_mk_tprod', jac_mk, MultilinearMap.map_smul_univ, relDeltaHalf_apply]
+    map_smul, fwd_mk_tprod', jac_mk, MultilinearMap.map_smul_univ, RingHom.id_apply, relDeltaHalf_apply]
   congr 1
   rw [← Finset.prod_inv_distrib, Units.coe_prod]
 
@@ -154,7 +197,7 @@ theorem relJac_piTensor_equiv : ∀ (k : Type) [Field k] [ValuativeRel k] [Topol
     (c : α → β → Type) [∀ i j, Fintype (c i j)] [∀ i j, DecidableEq (c i j)]
     (f : ∀ i, (Σ j, c i j) ≃ m i) (X : α → Type) [∀ i, AddCommGroup (X i)] [∀ i, Module ℂ (X i)]
     (ρ : ∀ i, Representation ℂ (GL (m i) k) (X i)),
-    Nonempty ((relJac f (piTensor ρ)).Equiv (piTensor fun i => jac (f i) (ρ i))) := by
+    Nonempty ((relJac f (piTensor ρ)).Equiv (piTensor fun i => GlobalTheory.SmGL.jac (f i) (ρ i))) := by
   intro k _ _ _ _ α β _ _ _ m _ _ c _ _ f X _ _ ρ
   classical
   exact relJac_piTensor f ρ

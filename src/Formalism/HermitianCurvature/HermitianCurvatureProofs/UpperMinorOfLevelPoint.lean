@@ -1,5 +1,57 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroKernel
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.EmbeddingMapApplyFirstBlock
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroKernel
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGLet
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjugateBlockSingleLastColumn
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AsmCastMCastM
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.EmbeddingMapApplyFirstBlock
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MulVecBvecApply
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 
@@ -54,9 +106,9 @@ theorem upper_minor_of_level_point (hj : j + 1 ≤ r) (Z : Matrix (Fin j) (Fin j
     ext; rw [Ux3.block_index_last_val]; simp [esI]; omega
   rw [hi, LeftFubiniLemmas.embedding_map_apply_last_block]
   by_cases hq : q.val < j + 1
-  · rw [dif_pos (by simpa using hq), dif_pos hq]
+  · rw [dite_eq_left (by simpa using hq), dite_eq_left hq]
     congr 1; ext; simp [Fin.val_rev]; omega
-  · rw [dif_neg (by simpa using hq), dif_neg hq]
+  · rw [dite_eq_right (by simpa using hq), dite_eq_right hq]
 
 theorem lower_minor_of_level_point (hj : j + 1 ≤ r) {Z : Matrix (Fin j) (Fin j) ℂ} {τ : ℂ} (hZ : Z.det ≠ 0) (hτ : τ ≠ 0)
     {γ : B.Mat k (r - (j + 1))} (hγ : γ ∈ B.GV k (r - (j + 1)))
@@ -76,9 +128,9 @@ theorem lower_minor_of_level_point (hj : j + 1 ≤ r) {Z : Matrix (Fin j) (Fin j
     ext; rw [Ux3.block_index_first_val]; simp [eI]
   rw [hjj, LeftFubiniLemmas.embedding_map_apply_first_block]
   by_cases hq : r + k < q.val ∧ 2 * r + k - q.val < j + 1
-  · rw [dif_pos (by simp; omega), dif_pos hq, Ux3.wMat_mul_apply, Matrix.conjTranspose_apply]
+  · rw [dite_eq_left (by simp; omega), dite_eq_left hq, Ux3.wMat_mul_apply, Matrix.conjTranspose_apply]
     congr 2 <;> ext <;> simp [Fin.val_rev] <;> omega
-  · rw [dif_neg (by simp; omega), dif_neg hq]
+  · rw [dite_eq_right (by simp; omega), dite_eq_right hq]
 
 end point
 

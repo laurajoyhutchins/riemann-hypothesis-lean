@@ -1,5 +1,52 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.MaIntEmpty
+module
+
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+public import Mathlib.Analysis.Calculus.BumpFunction.Normed
+public import Mathlib.MeasureTheory.Integral.CircleAverage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.BumpFunction.InnerProduct
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -23,12 +70,6 @@ def IsPsh_iff_isLeviPshStatement : Prop :=
   ∀ (D : ℕ) (U : Set (Fin D → ℂ)) (φ : (Fin D → ℂ) → ℝ), IsOpen U → ContDiffOn ℝ 2 φ U →
     (IsPsh U φ ↔ IsLeviPsh U φ)
 
-def IsPshInhabitStatement : Prop :=
-  ∀ D : ℕ, IsPsh (Set.univ : Set (Fin D → ℂ)) (fun z => ∑ j, ‖z j‖ ^ 2) ∧
-    IsPsh (Set.univ : Set (Fin D → ℂ)) (fun z => ‖z‖) ∧
-    IsLeviPsh (Set.univ : Set (Fin D → ℂ)) (fun z => ∑ j, ‖z j‖ ^ 2) ∧
-    ¬ IsPsh (Set.univ : Set (Fin (D + 1) → ℂ)) (fun z => -‖z 0‖ ^ 2)
-
 def IsPsh_locallyIntegrableStatement : Prop :=
   ∀ (D : ℕ) (U : Set (Fin D → ℂ)) (φ : (Fin D → ℂ) → ℝ), IsOpen U → IsPsh U φ →
     LocallyIntegrableOn φ U volume
@@ -46,10 +87,12 @@ def SubMeanPolydiscStatement : Prop :=
 def coordDiv (S : Finset (Fin D)) : Set (Fin D → ℂ) :=
   {z | ∃ i ∈ S, z i = 0}
 
-open Classical in
 
+open Classical in
 def limsupExt (U A : Set (Fin D → ℂ)) (v : (Fin D → ℂ) → ℝ) (z : Fin D → ℂ) : ℝ :=
-  if z ∈ A then limsup v (𝓝[U \ A] z) else v z
+  by
+    classical
+    exact if z ∈ A then limsup v (𝓝[U \ A] z) else v z
 
 def PshExtensionStatement : Prop :=
   ∀ (D : ℕ) (S : Finset (Fin D)) (U : Set (Fin D → ℂ)) (u : (Fin D → ℂ) → ℝ) (C : ℝ),
@@ -97,10 +140,6 @@ def MollifyStatement : Prop :=
         ∀ z ∈ shrink U ε, φ z ≤ molli ρ ε φ z ∧ molli ρ ε φ z ≤ polyMax φ z ε) ∧
       (∀ z ∈ U, Tendsto (fun ε => molli ρ ε φ z) (𝓝[>] 0) (𝓝 (φ z)))
 
-def MollifyLipStatement : Prop :=
-  ∀ (D : ℕ) (ρ : Mollifier D) (U : Set (Fin D → ℂ)) (φ : (Fin D → ℂ) → ℝ) (L : NNReal),
-    LipschitzOnWith L φ U → ∀ ε, 0 < ε → ∀ z ∈ shrink U ε, |molli ρ ε φ z - φ z| ≤ L * ε
-
 def MollificationSecondOrder : Prop :=
   ∀ (D : ℕ) (ρ : Mollifier D) (U K : Set (Fin D → ℂ)) (φ : (Fin D → ℂ) → ℝ),
     IsOpen U → ContDiffOn ℝ 3 φ U → IsCompact K → K ⊆ U →
@@ -131,11 +170,6 @@ def RegMaxStatement : Prop :=
       (∀ t : ι → ℝ, ∑ j, fderiv ℝ (regMax (ι := ι) η) t (Pi.single j 1) = 1)) ∧
     ∃ C : ℝ, ∀ η : ℝ, 0 < η → ∀ (t : ι → ℝ) (i j : ι),
       |fderiv ℝ (fderiv ℝ (regMax (ι := ι) η)) t (Pi.single i 1) (Pi.single j 1)| ≤ C / η
-
-def RegMaxPshStatement : Prop :=
-  ∀ (D : ℕ) (ι : Type) [Fintype ι] [Nonempty ι] (η : ℝ) (U : Set (Fin D → ℂ))
-    (u : ι → (Fin D → ℂ) → ℝ), IsOpen U → 0 < η → (∀ j, IsPsh U (u j)) →
-    IsPsh U (fun z => regMax η (fun j => u j z))
 
 def RegMaxLeviStatement : Prop :=
   ∀ (D : ℕ) (ι : Type) [Fintype ι] [Nonempty ι] (η : ℝ) (U : Set (Fin D → ℂ))

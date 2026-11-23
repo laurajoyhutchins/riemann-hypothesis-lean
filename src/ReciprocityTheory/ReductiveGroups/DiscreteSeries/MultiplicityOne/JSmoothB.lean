@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JSmoothA
+module
+
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JSmoothA
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,19 +126,21 @@ theorem Dw_joint {Φ : Mat k r → ℂ} (hΦ : ContDiff ℝ ninf Φ) :
     simp only [List.ofFn_zero]
     exact hΦ.comp contDiff_snd
   | j + 1 => by
-    have IH := Dw_joint hΦ j
+    have IH : ContDiff ℝ ninf (fun p : (Fin j → Mat k r) × Mat k r => Dw (List.ofFn p.1) Φ p.2) :=
+      Dw_joint hΦ j
     have e : (fun p : (Fin (j + 1) → Mat k r) × Mat k r => Dw (List.ofFn p.1) Φ p.2) =
         fun p => fderiv ℝ (fun y => Dw (List.ofFn (fun i => p.1 i.succ)) Φ y) p.2 (-(mulLL (p.1 0) p.2)) := by
       funext p
       simp only [List.ofFn_succ, Dw, List.foldr_cons, DX, mulLL_apply]
     rw [e]
     have hT : ContDiff ℝ ninf (fun q : (Fin (j + 1) → Mat k r) => fun i : Fin j => q i.succ) :=
-      contDiff_pi.2 fun i => contDiff_apply ℝ (Mat k r) i.succ
+      contDiff_pi.2 fun i => contDiff_apply ℝ (fun _ => Mat k r) i.succ
     have hf : ContDiff ℝ ninf (Function.uncurry
         (fun (p : (Fin (j + 1) → Mat k r) × Mat k r) (y : Mat k r) => Dw (List.ofFn (fun i => p.1 i.succ)) Φ y)) :=
       IH.comp ((hT.comp (contDiff_fst.comp contDiff_fst)).prodMk contDiff_snd)
     refine (hf.fderiv contDiff_snd ninf_succ_le).clm_apply ?_
-    exact ((mulLL.contDiff.comp ((contDiff_apply ℝ (Mat k r) (0 : Fin (j + 1))).comp contDiff_fst)).clm_apply contDiff_snd).neg
+    exact ((mulLL.contDiff.comp ((contDiff_apply ℝ (fun _ => Mat k r) (0 : Fin (j + 1))).comp
+      contDiff_fst)).clm_apply contDiff_snd).neg
 
 theorem Dw_bound {Φ : Mat k r → ℂ} (hΦ : ContDiff ℝ ninf Φ) (hc : HasCompactSupport Φ) (j : ℕ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ q : Fin j → Mat k r, (∀ i a b, ‖q i a b‖ ≤ 1) → ∀ x, ‖Dw (List.ofFn q) Φ x‖ ≤ M := by
@@ -198,7 +248,9 @@ theorem pint_contDiffOn (hμK : ∀ S : Set (Mt k r), IsCompact S → μ S < ∞
     rw [Nat.cast_zero, contDiffOn_zero]
     exact fun g hg => (pint_hasFDerivAt hμK hG hh hMh hU hK hΨ hz hg).continuousAt.continuousWithinAt
   | n + 1, E, _, _, Ψ, hΨ, hz => by
-    have hd := fun g (hg : g ∈ U) => pint_hasFDerivAt hμK hG hh hMh hU hK hΨ hz hg
+    have hd (g : Mt k r) (hg : g ∈ U) :
+        HasFDerivAt (fun g' => ∫ y, h y • Ψ (g', y) ∂μ) (∫ y, h y • pd Ψ (g, y) ∂μ) g :=
+      pint_hasFDerivAt hμK hG hh hMh hU hK hΨ hz hg
     rw [show ((n + 1 : ℕ) : WithTop ℕ∞) = (n : WithTop ℕ∞) + 1 by push_cast; rfl]
     refine (contDiffOn_succ_iff_fderiv_of_isOpen hU).2
       ⟨fun g hg => (hd g hg).differentiableAt.differentiableWithinAt, by simp, ?_⟩

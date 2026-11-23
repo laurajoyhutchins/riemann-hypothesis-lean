@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AutomorphicArithmetic.OrbitLabellings.ColDefs
-import Formalism.GaussJetBounds.OneLetterRadius
+module
+
+public import Development.AutomorphicArithmetic.OrbitLabellings.ColDefs
+public import Formalism.GaussJetBounds.GaussJetProofs.AsmOne
+import Formalism.GaussJetBounds.GaussJetProofs.AsmRDotAddRight
+public import Formalism.GaussJetBounds.GaussJetProofs.SubstitutionWeightBound
+public import Formalism.GaussJetBounds.OneLetterRadius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped BigOperators
 open Formalism.DworkPowerSeriesWeights Formalism.IncomingBounds UpperTheory.G2
@@ -63,7 +110,8 @@ theorem UpperTheory.beS_constantCoeff_eq_zero_and_wtGe :
     · simpa using Real.rpow_nonneg h0.le _
   unfold beS
   constructor
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_eq_zero fun r hr => asmOne_smul_const _ ?_
     have hbe0 : MvPowerSeries.constantCoeff (be r) = 0 := by
       by_contra h
@@ -71,6 +119,7 @@ theorem UpperTheory.beS_constantCoeff_eq_zero_and_wtGe :
         rwa [MvPowerSeries.coeff_zero_eq_constantCoeff_apply]
       have := ((hbe r hr).2.2.1 0 h').1
       simp [degE] at this
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun b _ => ?_
     exact MvPowerSeries.constantCoeff_subst_eq_zero

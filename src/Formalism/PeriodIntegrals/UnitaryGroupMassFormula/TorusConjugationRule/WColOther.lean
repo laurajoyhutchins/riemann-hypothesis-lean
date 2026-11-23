@@ -1,5 +1,59 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LeftPhaseRule.ReflectionColumnDualIsotropic
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.Q
 
@@ -17,8 +71,6 @@ lemma e_ne_es (l : Fin r) : eI k r l ≠ esI k r l := by
   have h' := congrArg Fin.val h
   simp only [eI, esI] at h'
   omega
-
-lemma es_ne_e (l : Fin r) : esI k r l ≠ eI k r l := (e_ne_es l).symm
 
 private lemma tau_val_lemma (i : Fin (2 * r + k + 1)) :
     (WeylGroupFacts.tau k r i).val = if i.val < r ∨ r + k < i.val then 2 * r + k - i.val else i.val := rfl
@@ -158,13 +210,6 @@ private lemma hpk_sq_lemma : Hpk k r * Hpk k r = 1 := by
     simp [sgn_sq_lemma]
   · simp [h, Ne.symm h]
 
-private lemma isUnit_det_Hpk' : IsUnit (Hpk k r).det := by
-  have h := congrArg Matrix.det (hpk_sq_lemma (k := k) (r := r))
-  rw [Matrix.det_mul, Matrix.det_one] at h
-  exact isUnit_iff_ne_zero.mpr fun h0 => by
-    rw [h0, zero_mul] at h
-    exact zero_ne_one h
-
 private lemma conjTranspose_mul_Hpk_mul_apply (A : Mx k r) (p q : Fin (2 * r + k + 1)) :
     (Aᴴ * Hpk k r * A) p q = ∑ y, star (A (WeylGroupFacts.tau k r y) p) * WeylGroupFacts.sgn k r y * A y q := by
   rw [Matrix.mul_apply]
@@ -183,35 +228,7 @@ private lemma mul_mem_uh {g h : Mx k r} (hg : g ∈ UH (Hpk k r)) (hh : h ∈ UH
     _ = Hpk k r := by rw [hg', hh']
 
 lemma w_uh (l : Fin r) (a : ℂ) (ha : a ≠ 0) : w1 k r l a ∈ UH (Hpk k r) := by
-  show (w1 k r l a)ᴴ * Hpk k r * w1 k r l a = Hpk k r
-  ext p q
-  rw [conjTranspose_mul_Hpk_mul_apply, hpk_col_lemma]
-  by_cases hq1 : q = eI k r l
-  · subst hq1
-    simp only [w_col_e, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, tau_es, sgn_es, w_row_e, tau_e, sgn_e]
-    by_cases hp : p = esI k r l
-    · rw [if_pos hp, if_pos hp, mul_one]
-      first
-        | rw [star_inv₀, star_star, inv_mul_cancel₀ ha]
-        | rw [star_inv', star_star, inv_mul_cancel₀ ha]
-    · simp [hp]
-  by_cases hq2 : q = esI k r l
-  · subst hq2
-    simp only [w_col_es, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, tau_e, sgn_e, w_row_es, tau_es, sgn_es]
-    by_cases hp : p = eI k r l
-    · rw [if_pos hp, if_pos hp, mul_one]
-      exact mul_inv_cancel₀ (star_ne_zero.mpr ha)
-    · simp [hp]
-  have hcol : ∀ x, w1 k r l a x q = if x = q then 1 else 0 := fun x => w_col_other l a x q hq1 hq2
-  simp only [hcol, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-  have ht1 : WeylGroupFacts.tau k r q ≠ eI k r l := fun h => hq2 (by rw [← tau_tau_lemma q, h, tau_e])
-  have ht2 : WeylGroupFacts.tau k r q ≠ esI k r l := fun h => hq1 (by rw [← tau_tau_lemma q, h, tau_es])
-  rw [w_row_other l a _ p ht1 ht2]
-  by_cases h : p = WeylGroupFacts.tau k r q
-  · subst h
-    simp
-  · have h' : WeylGroupFacts.tau k r q ≠ p := Ne.symm h
-    simp [h, h']
+  apply Formalism.FourierDecayAlt.Q.LeftMultiplicationRule.weyl_cell_mem_unitary <;> assumption
 
 lemma w_fix (l : Fin r) (a : ℂ) (x : Fin (2 * r + k + 1)) (h1 : x ≠ eI k r l) (h2 : x ≠ esI k r l) :
     w1 k r l a *ᵥ bvec x = bvec x := by
@@ -221,32 +238,7 @@ lemma w_fix (l : Fin r) (a : ℂ) (x : Fin (2 * r + k + 1)) (h1 : x ≠ eI k r l
 
 lemma w_mul_mem (l : Fin r) (a : ℂ) (ha : a ≠ 0) (g₁ : Mx k r) (hg : g₁ ∈ Glev k r l.succ) :
     w1 k r l a * g₁ ∈ Glev k r l.castSucc := by
-  have hl := l.isLt
-  simp only [Glev, Set.mem_setOf_eq] at hg ⊢
-  obtain ⟨hU, hfix⟩ := hg
-  refine ⟨mul_mem_uh (w_uh l a ha) hU, fun b hb => ?_⟩
-  have hbl := b.isLt
-  simp only [Fin.coe_castSucc] at hb
-  have hfb := hfix b (by simp; omega)
-  have h1 : eI k r b ≠ eI k r l := fun h => by
-    have h' := congrArg Fin.val h
-    simp only [eI] at h'
-    omega
-  have h2 : eI k r b ≠ esI k r l := fun h => by
-    have h' := congrArg Fin.val h
-    simp only [eI, esI] at h'
-    omega
-  have h3 : esI k r b ≠ eI k r l := fun h => by
-    have h' := congrArg Fin.val h
-    simp only [eI, esI] at h'
-    omega
-  have h4 : esI k r b ≠ esI k r l := fun h => by
-    have h' := congrArg Fin.val h
-    simp only [esI] at h'
-    omega
-  constructor
-  · rw [← Matrix.mulVec_mulVec, hfb.1, w_fix l a _ h1 h2]
-  · rw [← Matrix.mulVec_mulVec, hfb.2, w_fix l a _ h3 h4]
+  apply Formalism.FourierDecayAlt.Q.LeftMultiplicationRule.wg_glev <;> assumption
 
 def dg (l : Fin r) (u v : ℂ) : Mx k r :=
   diagonal (fun p => if p = eI k r l then u else if p = esI k r l then v else 1)

@@ -1,15 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.FlagBasis
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.Biextensions.CubicalExtendsSt
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisBaseChange
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ReductionSurjectiveOfIsNilpotent
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
-import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.ExistsIsComplEigenSubOfValuationRing
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.IsLocallyConstantRankAtStalkEigenSub
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLaw
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.ExistsIsComplEigenSubOfValuationRing
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ReductionSurjectiveOfIsNilpotent
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsChartOfMemRedKer
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -156,8 +201,8 @@ theorem exists_action (hv : IsLieBasis v) {O : Type} [CommRing O] (act : OAct O 
 variable {R' : Type} [CommRing R'] {G' : Over (Sp R')} [GrpObj G'] [IsCommMonObj G']
   {v' : Fin n → (epsR R' ⟶ G')} {f : R →+* R'} {φ : G'.left ⟶ G.left}
 
-omit [IsCommMonObj G] [IsCommMonObj G'] in
 
+omit [IsCommMonObj G] [IsCommMonObj G'] in
 theorem prodPts_left (h : IsGrpPullback G' G (spMap f) φ)
     (hv' : ∀ i, (v' i).left ≫ φ = spMap (dualMapR f) ≫ (v i).left) (c : Fin n → R) :
     (prodPts (f ∘ c) v').left ≫ φ = spMap (dualMapR f) ≫ (prodPts c v).left := by
@@ -232,7 +277,7 @@ theorem finrank_of_lieMult {S : Scheme.{0}} {G : Over S} [GrpObj G] {k : Type} [
     refine (existsUnique_congr fun d => ?_).1 (H _ ⟨isTangent_prodPts hv.1 c, (mem _).1 c.2⟩)
     refine (Chart.isLieComb_iff d _ _).trans ?_
     rw [prodPts_prodPts hv.1, Subtype.ext_iff, Fintype.linearCombination_apply, eq_comm]
-    simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul]
+    simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul]
     exact (prodPts_injective hv).eq_iff
   rw [← (LinearEquiv.ofBijective _ ((Function.bijective_iff_existsUnique _).2 key)).finrank_eq,
     Module.finrank_fin_fun]
@@ -243,8 +288,8 @@ end GlobalTheory.LieEigen
 
 namespace GlobalTheory
 
-open LieEigen in
 
+open LieEigen in
 theorem exists_isLieBasis_eigen : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (l : Level H) (c : Coeff l) (g : ℕ) (ty : Fin g → (E →+* ℂ)), IsTypeFn H D.p D.q ty → ∀ (R : Type) [CommRing R] (j : c.F →+* R) (o : Obj D l (baseKA l) (spMap j ≫ spMap (IntermediateField.inclusion c.le).toRingHom)) (n : ℕ) (v₀ : Fin n → (epsR R ⟶ o.t.G)), IsLieBasis v₀ → ∀ p : PrimeSpectrum R, ∃ r ∉ p.asIdeal, ∀ (t' : SAB H (Sp (Localization.Away r))), Nonempty (SABMap t' o.t (spMap (algebraMap R (Localization.Away r)))) → ∃ v : Fin g → (epsR (Localization.Away r) ⟶ t'.G), (IsLieBasis v ∧ ∀ i a, (v i ≫ t'.act.act a).left = spMap (epsScaleR (algebraMap R (Localization.Away r) (j ⟨ty i (a : E), c.conj (ty i) a⟩))) ≫ (v i).left) := by
   intro E _ _ _ H D l c g ty hty R _ j o n v₀ hv₀ p
   let σ₀ : (E →+* ℂ) → 𝓞 E →+* c.F := fun τ =>
@@ -258,7 +303,7 @@ theorem exists_isLieBasis_eigen : ∀ (E : Type) [Field E] [NumberField E] [IsCM
   obtain ⟨ρ, hρ⟩ := exists_action hv₀ o.t.act
   let k := AlgebraicClosure p.asIdeal.ResidueField
   let f : R →+* k := (algebraMap p.asIdeal.ResidueField k).comp (algebraMap R _)
-  have := (IsSemiAbelian.pullback (spMap f) o.t.G o.t.semi).comm
+  have : IsCommMonObj ((Over.pullback (spMap f)).obj o.t.G) := inferInstance
   have hk := isGrpPullback_pullback o.t.G (spMap f)
   obtain ⟨vk, hvk, hvk'⟩ := exists_isLieBasis_baseChange R k f _ _ _ hk o.t.semi.smooth n v₀ hv₀
   let actk := OAct.pullback (spMap f) o.t.G o.t.act

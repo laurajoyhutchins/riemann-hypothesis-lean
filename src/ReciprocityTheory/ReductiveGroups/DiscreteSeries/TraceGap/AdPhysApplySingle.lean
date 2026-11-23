@@ -1,6 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.AlgebraMapInvFf
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.DSymmHypsInhabited
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.IsInLieAlgebraISmulAddConjTranspose
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.DSymmHypsInhabited
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DefsRep
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.IsPhysSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.IsInLieAlgebraISmulAddConjTranspose
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.AdMatConjTranspose
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.AlgebraMapInvFf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,8 +97,7 @@ theorem sum_minus_kk {k : Matrix (Fin n) (Fin n) ℂ} (hk : k ∈ Kset ε) (c b 
 
 theorem conj_single_apply (k : Matrix (Fin n) (Fin n) ℂ) (a i c d : Fin n) :
     (k * Matrix.single a i (1 : ℂ) * kᴴ : Matrix (Fin n) (Fin n) ℂ) c d = k c a * star (k d i) := by
-  simp [Matrix.mul_apply, Matrix.single_apply, conjTranspose_apply, ite_and, ite_mul, Finset.sum_ite_eq,
-]
+  simp [Matrix.mul_apply, Matrix.single_apply, conjTranspose_apply, ite_and, ite_mul, Finset.sum_ite_eq]
 
 theorem coef_d {k : Matrix (Fin n) (Fin n) ℂ} (hk : k ∈ Kset ε) (c d : Fin n) (x : Fin n × Fin n) :
     ∑ i ∈ plusIdx ε, ∑ a ∈ minusIdx ε, (k * Matrix.single a i (1 : ℂ) * kᴴ : Matrix (Fin n) (Fin n) ℂ) c d * adMat ε k x (i, a) =
@@ -191,8 +241,9 @@ theorem wK_dOp (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {k : 
     wK hD hk * dOp ε (eT E) cpT = dOp ε (eT E) cpT * wK hD hk := by
   apply TensorProduct.ext'
   intro v f
+
   simp only [Module.End.mul_apply, dOp, LinearMap.sum_apply, map_sum, eT, cpT, TensorProduct.map_tmul,
-    LinearMap.id_apply, wK, AlgHom.toLinearMap_apply]
+  LinearMap.id_apply, wK, AlgHom.toLinearMap_apply]
   have key : ∀ i a, sigD hD hk (E a i v) ⊗ₜ[ℂ] ff ε k (cpFock i a f) =
       ∑ c, ∑ d, ∑ x : Fin n × Fin n,
         ((k * Matrix.single a i (1 : ℂ) * kᴴ : Matrix (Fin n) (Fin n) ℂ) c d * adMat ε k x (i, a)) •
@@ -228,8 +279,9 @@ theorem wK_dOp' (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {k :
     wK hD hk * dOp' ε (eT E) cmT = dOp' ε (eT E) cmT * wK hD hk := by
   apply TensorProduct.ext'
   intro v f
+
   simp only [Module.End.mul_apply, dOp', LinearMap.neg_apply, map_neg, LinearMap.sum_apply, map_sum, eT, cmT,
-    TensorProduct.map_tmul, LinearMap.id_apply, wK, AlgHom.toLinearMap_apply]
+  TensorProduct.map_tmul, LinearMap.id_apply, wK, AlgHom.toLinearMap_apply]
   congr 1
   have key : ∀ i a, sigD hD hk (E i a v) ⊗ₜ[ℂ] ff ε k (cmFock i a f) =
       ∑ c, ∑ d, ∑ x : Fin n × Fin n,

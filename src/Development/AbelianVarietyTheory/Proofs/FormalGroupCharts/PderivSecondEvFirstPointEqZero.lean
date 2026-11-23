@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalFamilyConstantCoeffZeroZeroSecondVar
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ConstantCoeffPrim
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalFamilyConstantCoeffZeroZeroSecondVar
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ConstantCoeffPrim
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.EqCOfPderivZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,8 +62,8 @@ namespace GlobalTheory.FormalLog
 variable {k : Type} [CommRing k] {d : ℕ} (G : FGLaw k d)
 
 theorem om_closed (i a c : Fin d) :
-    pderiv k ((0 : Fin 1), c) (Om G i a) = pderiv k ((0 : Fin 1), a) (Om G i c) := by
-  set M : Fin d → PS k 1 d := fun e => pderiv k ((0 : Fin 1), e) (Om G i a) - pderiv k ((0 : Fin 1), a) (Om G i e)
+    pderiv ((0 : Fin 1), c) (Om G i a) = pderiv ((0 : Fin 1), a) (Om G i c) := by
+  set M : Fin d → PS k 1 d := fun e => pderiv ((0 : Fin 1), e) (Om G i a) - pderiv ((0 : Fin 1), a) (Om G i e)
     with hMdef
   have hM : ∀ b, ∑ e, M e * Jac G e b = 0 := by
     intro b
@@ -37,27 +85,27 @@ theorem om_closed (i a c : Fin d) :
   exact sub_eq_zero.1 h3
 
 theorem d_evY (h : PS k 1 d) (b : Fin d) :
-    pderiv k ((1 : Fin 2), b) (ev (n := 2) ![pt k d 1] h) = ev (n := 2) ![pt k d 1] (pderiv k ((0 : Fin 1), b) h) := by
+    pderiv ((1 : Fin 2), b) (ev (n := 2) ![pt k d 1] h) = ev (n := 2) ![pt k d 1] (pderiv ((0 : Fin 1), b) h) := by
   rw [pderiv_ev czY, Fintype.sum_prod_type, Fin.sum_univ_one]
   simp [pderiv_pt]
 
 theorem d_evX (h : PS k 1 d) (a : Fin d) :
-    pderiv k ((0 : Fin 2), a) (ev (n := 2) ![pt k d 0] h) = ev (n := 2) ![pt k d 0] (pderiv k ((0 : Fin 1), a) h) := by
+    pderiv ((0 : Fin 2), a) (ev (n := 2) ![pt k d 0] h) = ev (n := 2) ![pt k d 0] (pderiv ((0 : Fin 1), a) h) := by
   rw [pderiv_ev czX, Fintype.sum_prod_type, Fin.sum_univ_one]
   simp [pderiv_pt]
 
-theorem pderiv_first_ev_second_point_eq_zero (h : PS k 1 d) (a : Fin d) : pderiv k ((0 : Fin 2), a) (ev (n := 2) ![pt k d 1] h) = 0 :=
+theorem pderiv_first_ev_second_point_eq_zero (h : PS k 1 d) (a : Fin d) : pderiv ((0 : Fin 2), a) (ev (n := 2) ![pt k d 1] h) = 0 :=
   pderiv_ev_zero czY _ _ (fun j l => by fin_cases j; simp [pderiv_pt])
 
-theorem pderiv_second_ev_first_point_eq_zero (h : PS k 1 d) (b : Fin d) : pderiv k ((1 : Fin 2), b) (ev (n := 2) ![pt k d 0] h) = 0 :=
+theorem pderiv_second_ev_first_point_eq_zero (h : PS k 1 d) (b : Fin d) : pderiv ((1 : Fin 2), b) (ev (n := 2) ![pt k d 0] h) = 0 :=
   pderiv_ev_zero czX _ _ (fun j l => by fin_cases j; simp [pderiv_pt])
 
 variable [Algebra ℚ k]
 
 def logOf (i : Fin d) : PS k 1 d := prim (fun v : Fin 1 × Fin d => Om G i v.2)
 
-theorem pderiv_logOf (i a : Fin d) : pderiv k ((0 : Fin 1), a) (logOf G i) = Om G i a := by
-  have hcl : ∀ v w : Fin 1 × Fin d, pderiv k w (Om G i v.2) = pderiv k v (Om G i w.2) := by
+theorem pderiv_logOf (i a : Fin d) : pderiv ((0 : Fin 1), a) (logOf G i) = Om G i a := by
+  have hcl : ∀ v w : Fin 1 × Fin d, pderiv w (Om G i v.2) = pderiv v (Om G i w.2) := by
     rintro ⟨v1, v⟩ ⟨w1, w⟩
     obtain rfl : v1 = 0 := Subsingleton.elim _ _
     obtain rfl : w1 = 0 := Subsingleton.elim _ _
@@ -68,19 +116,19 @@ theorem logOf_add (i : Fin d) :
     ev (n := 2) ![G.F] (logOf G i) = ev (n := 2) ![pt k d 0] (logOf G i) + ev (n := 2) ![pt k d 1] (logOf G i) := by
   rw [← sub_eq_zero]
   set g := ev (n := 2) ![G.F] (logOf G i) - (ev (n := 2) ![pt k d 0] (logOf G i) + ev (n := 2) ![pt k d 1] (logOf G i))
-  have hd : ∀ v, pderiv k v g = 0 := by
+  have hd : ∀ v, pderiv v g = 0 := by
     rintro ⟨j, c⟩
     fin_cases j
     · simp only [Fin.zero_eta]
-      simp only [g, map_sub, map_add, d_evF, pderiv_logOf, pderiv_first_ev_second_point_eq_zero, d_evX]
+      simp only [g, map_sub, map_add (f := _), d_evF, pderiv_logOf, pderiv_first_ev_second_point_eq_zero, d_evX]
       rw [om_P G i c]; ring
     · simp only [Fin.mk_one]
-      simp only [g, map_sub, map_add, d_evF, pderiv_logOf, pderiv_second_ev_first_point_eq_zero, d_evY]
+      simp only [g, map_sub, map_add (f := _), d_evF, pderiv_logOf, pderiv_second_ev_first_point_eq_zero, d_evY]
       have := om_Q G i c
       simp only [Ar] at this
       rw [this]; ring
   have hc : constantCoeff g = 0 := by
-    simp only [g, map_sub, map_add, cc_ev (czFF G), cc_ev czX, cc_ev czY, logOf, constantCoeff_prim]
+    simp only [g, map_sub, map_add (f := _), cc_ev (czFF G), cc_ev czX, cc_ev czY, logOf, constantCoeff_prim]
     ring
   rw [eq_C_of_pderiv_zero hd, hc, map_zero]
 
@@ -124,43 +172,44 @@ theorem logDerivSt : LogDerivSt := by
     have := congrFun hadd c
     change ev (n := 2) ![G.add (pt k d 0) (pt k d 1)] (ℓ c) = _ at this
     rwa [addPt] at this
-  have DJ : ∀ c b, ∑ j, pderiv k ((0 : Fin 1), j) (ℓ c) * Jac G j b = C (if c = b then 1 else 0) := by
+  have DJ : ∀ c b, ∑ j, pderiv ((0 : Fin 1), j) (ℓ c) * Jac G j b = C (if c = b then 1 else 0) := by
     intro c b
-    have h := congrArg (fun x => ev (n := 1) ![pt k d 0, 0] (pderiv k ((1 : Fin 2), b) x)) (hadd' c)
+    have h := congrArg (fun x => ev (n := 1) ![pt k d 0, 0] (pderiv ((1 : Fin 2), b) x)) (hadd' c)
     beta_reduce at h
-    simp only [d_evF, map_add, pderiv_second_ev_first_point_eq_zero, d_evY, zero_add, ev_sum cz1, ev_mul cz1, ez_F, ez_dy, ez_y] at h
+    simp only [d_evF, map_add (f := _), pderiv_second_ev_first_point_eq_zero, d_evY, zero_add, ev_sum cz1, ev_mul cz1, ez_F, ez_dy, ez_y] at h
     rw [h]
     congr 1
     have hc := congrFun (congrFun h1 c) b
     rw [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv, zero_add]
     simp only [dLin] at hc
     simp [hc, Matrix.one_apply]
-  have hch : ∀ j, pderiv k ((0 : Fin 1), j) (ev (n := 1) ![ℓ] g) =
-      ∑ c, ev (n := 1) ![ℓ] (pderiv k ((0 : Fin 1), c) g) * pderiv k ((0 : Fin 1), j) (ℓ c) := by
+  have hch : ∀ j, pderiv ((0 : Fin 1), j) (ev (n := 1) ![ℓ] g) =
+      ∑ c, ev (n := 1) ![ℓ] (pderiv ((0 : Fin 1), c) g) * pderiv ((0 : Fin 1), j) (ℓ c) := by
     intro j
     rw [pderiv_ev hℓ, Fintype.sum_prod_type, Fin.sum_univ_one]
     rfl
-  have step : ∀ c, ∑ i, C (u i) * ∑ j, pderiv k ((0 : Fin 1), j) (ℓ c) * Jac G j i = (C (u c) : PS k 1 d) := by
+  have step : ∀ c, ∑ i, C (u i) * ∑ j, pderiv ((0 : Fin 1), j) (ℓ c) * Jac G j i = (C (u c) : PS k 1 d) := by
     intro c
     simp only [DJ, ← map_mul, mul_ite, mul_one, mul_zero]
+
     rw [← map_sum]
     simp [Finset.sum_ite_eq]
-  show ∑ j : Fin d, (∑ i : Fin d, C (u i) * Jac G j i) * pderiv k ((0 : Fin 1), j) (ev (n := 1) ![ℓ] g) = _
+  show ∑ j : Fin d, (∑ i : Fin d, C (u i) * Jac G j i) * pderiv ((0 : Fin 1), j) (ev (n := 1) ![ℓ] g) = _
   simp only [hch]
   rw [ev_sum hℓ]
   calc ∑ j, (∑ i, C (u i) * Jac G j i) *
-        ∑ c, ev (n := 1) ![ℓ] (pderiv k ((0 : Fin 1), c) g) * pderiv k ((0 : Fin 1), j) (ℓ c)
+        ∑ c, ev (n := 1) ![ℓ] (pderiv ((0 : Fin 1), c) g) * pderiv ((0 : Fin 1), j) (ℓ c)
       = ∑ j, ∑ c, ∑ i, C (u i) * Jac G j i *
-          (ev (n := 1) ![ℓ] (pderiv k ((0 : Fin 1), c) g) * pderiv k ((0 : Fin 1), j) (ℓ c)) := by
+          (ev (n := 1) ![ℓ] (pderiv ((0 : Fin 1), c) g) * pderiv ((0 : Fin 1), j) (ℓ c)) := by
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [Finset.sum_mul_sum, Finset.sum_comm]
     _ = ∑ c, ∑ j, ∑ i, C (u i) * Jac G j i *
-          (ev (n := 1) ![ℓ] (pderiv k ((0 : Fin 1), c) g) * pderiv k ((0 : Fin 1), j) (ℓ c)) := Finset.sum_comm
+          (ev (n := 1) ![ℓ] (pderiv ((0 : Fin 1), c) g) * pderiv ((0 : Fin 1), j) (ℓ c)) := Finset.sum_comm
     _ = ∑ c, ∑ i, ∑ j, C (u i) * Jac G j i *
-          (ev (n := 1) ![ℓ] (pderiv k ((0 : Fin 1), c) g) * pderiv k ((0 : Fin 1), j) (ℓ c)) :=
+          (ev (n := 1) ![ℓ] (pderiv ((0 : Fin 1), c) g) * pderiv ((0 : Fin 1), j) (ℓ c)) :=
         Finset.sum_congr rfl fun c _ => Finset.sum_comm
-    _ = ∑ c, ev (n := 1) ![ℓ] (pderiv k ((0 : Fin 1), c) g) *
-          ∑ i, C (u i) * ∑ j, pderiv k ((0 : Fin 1), j) (ℓ c) * Jac G j i := by
+    _ = ∑ c, ev (n := 1) ![ℓ] (pderiv ((0 : Fin 1), c) g) *
+          ∑ i, C (u i) * ∑ j, pderiv ((0 : Fin 1), j) (ℓ c) * Jac G j i := by
         refine Finset.sum_congr rfl fun c _ => ?_
         simp only [Finset.mul_sum]
         refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_

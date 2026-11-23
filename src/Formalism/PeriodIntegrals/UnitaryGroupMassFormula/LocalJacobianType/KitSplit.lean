@@ -1,10 +1,59 @@
-import Mathlib
-import Formalism.PeriodIntegrals.LocJacTyp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.Development
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.RingTopologyInstances
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalDualGenerator.EpSelfDualSplit
-import Formalism.PeriodIntegrals.SplitIntLoc
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SplitIntLoc
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.RingTopologyInstances
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalDualGenerator.EpSelfDualSplit
+public import Formalism.PeriodIntegrals.SplitIntLoc
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.ContinuousTrESymm
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SplitIntLoc
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +103,7 @@ theorem p_sig (z : Fv F v ⊗[F] E) :
     D.p 0 (sigR (Fv F v) σ z) = D.p 1 z ∧ D.p 1 (sigR (Fv F v) σ z) = D.p 0 z := by
   have h : sigR (Fv F v) σ z = D.p 1 z • D.e + D.p 0 z • (1 - D.e) := by
     conv_lhs => rw [D.decomp z]
-    rw [map_add, sigR_smul, sigR_smul, map_sub, map_one, D.hσ, sub_sub_cancel, add_comm]
+    rw [map_add (f := _), sigR_smul, sigR_smul, map_sub, map_one, D.hσ, sub_sub_cancel, add_comm]
   rw [h]
   exact D.p_pair _ _
 
@@ -124,7 +173,7 @@ theorem tens_iff (x : Fv F v ⊗[F] E) :
       left
       exact ⟨⟨(a : E), ⟨a, rfl⟩⟩, by simp [inclR]⟩
     | zero => simpa using zero_mem _
-    | add y z _ _ hy hz => rw [map_add]; exact add_mem hy hz
+    | add y z _ _ hy hz => simpa only [map_add] using add_mem hy hz
     | smul t y _ hy =>
       have h1 : t • y = ((t : Fv F v) ⊗ₜ[F] (1 : E)) * y := by
         rw [show t • y = (t : Fv F v) • y from rfl, Algebra.smul_def]
@@ -207,7 +256,7 @@ theorem exists_SD (hS : SplitHyp σ v) : Nonempty (SD σ v) := by
     have hfix : ∀ z, sigR (Fv F v) σ z = z := by
       intro z
       conv_lhs => rw [dec z]
-      rw [(sigR (Fv F v) σ).map_add, sigR_smul, sigR_smul, (sigR (Fv F v) σ).map_sub,
+      rw [map_add, sigR_smul, sigR_smul, (sigR (Fv F v) σ).map_sub,
         (sigR (Fv F v) σ).map_one, ← hfdef, hfe, ← dec z]
     ext x
     have h1 := hfix ((1 : Fv F v) ⊗ₜ[F] x)

@@ -1,6 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaPt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaPt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -157,39 +199,7 @@ abbrev jFR : Spec (CommRingCat.of F) ⟶ Spec (CommRingCat.of R) := jFK (R := R)
 
 abbrev BFo : Over (Spec (CommRingCat.of F)) := (Over.pullback (jFR (R := R) F)).obj D.P.A
 
-abbrev prBo : (BFo D F).left ⟶ D.P.A.left := pullback.fst _ _
-
-abbrev overR (Y : Over (Spec (CommRingCat.of F))) : Over (Spec (CommRingCat.of R)) :=
-  Over.mk (Y.hom ≫ jFR (R := R) F)
-
-def ptOfBFo {Y : Over (Spec (CommRingCat.of F))} (e : Y ⟶ BFo D F) : overR (R := R) F Y ⟶ D.P.A :=
-  Over.homMk (e.left ≫ prBo D F) (by
-    simp only [overR, Over.mk_hom, Category.assoc, prBo, pullback.condition]
-    rw [← Over.w e]
-    rfl)
-
-def oFφ {Y : Over (Spec (CommRingCat.of F))} (e : Y ⟶ BFo D F) (χ : D.X) :
-    Fin 4 → (Y.left ⟶ D.P.A.left) :=
-  ![(padd D.P.A (ptOfBFo D F e) (toUnit _ ≫ D.c χ)).left, (toUnit (overR (R := R) F Y) ≫ D.c χ).left,
-    (ptOfBFo D F e).left, (toUnit (overR (R := R) F Y) ≫ η[D.P.A]).left]
-
-def oFε : Fin 4 → ℤ := ![1, -1, -1, 1]
-
 end DegPre
-
-structure SplitExtIsD (E : SplitExt (Spec (CommRingCat.of F))) where
-  e : E.B ≅ DegPre.BFo D F
-  hom : IsMonHom e.hom
-  chi : D.X ≃+ E.X
-  oIso : ∀ χ : D.X,
-    ∃ t : LB.Iso (LB.LinComb D.P.L (DegPre.oFφ D F e.hom χ) DegPre.oFε) (E.O (chi χ)).L, t.IsGen
-
-def GtPtBridgeSt : Prop :=
-  ∀ (E : SplitExt (Spec (CommRingCat.of F))) (h : SplitExtIsD D F E)
-    (G : Over (Spec (CommRingCat.of F))) [GrpObj G] (Dat : E.GtDatum G),
-    ∃ φ : (𝟙_ (Over (Spec (CommRingCat.of F))) ⟶ G) ≃ GtPtF D F,
-      (∀ x x', GtPtF.IsAdd (φ x) (φ x') (φ (x * x'))) ∧
-      ∀ x, (φ x).b.left = (x ≫ Dat.q ≫ h.e.hom).left ≫ DegPre.prBo D F
 
 end Bridge
 

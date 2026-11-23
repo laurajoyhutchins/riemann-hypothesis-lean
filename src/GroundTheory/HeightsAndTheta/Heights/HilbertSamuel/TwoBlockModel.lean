@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNestedLattice
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.DoubleBlock
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.DoubleBlock
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ProjDefs
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -18,7 +64,8 @@ variable {Ω : Type} [Field Ω] [CharZero Ω] {κ : Type} [Fintype κ]
 def twoBlockIdeal (x x' : Ix κ → Ω) : Ideal (MRing (FinTwoTypeFamily κ)) :=
   mCoordIdeal (ι := FinTwoTypeFamily κ) (pair x x')
 
-def blockLine (m : ConeMetric ℂ (Ix κ)) (k₀ : Fin 2) : HermLine (FinTwoTypeFamily κ) where
+def blockLine (m : ConeMetric (C := ℂ) (ι := Ix κ)) (k₀ : Fin 2) :
+    ReciprocityTheory.ChartRestriction.G.Geo.HermLine (ι := FinTwoTypeFamily κ) where
   a := Pi.single k₀ 1
   h z := m.ρ fun p : Ix κ => z ⟨k₀, p.2⟩
   pos z hz := m.pos _ fun h0 => by
@@ -30,27 +77,30 @@ def blockLine (m : ConeMetric ℂ (Ix κ)) (k₀ : Fin 2) : HermLine (FinTwoType
     rw [e, m.smul, Finset.prod_eq_single k₀ (fun k _ hk => by simp [hk]) (by simp)]
     simp
 
-def twoBlockList (m m' : ConeMetric ℂ (Ix κ)) (D i : ℕ) : Fin (D + 1) → HermLine (FinTwoTypeFamily κ) :=
+def twoBlockList (m m' : ConeMetric (C := ℂ) (ι := Ix κ)) (D i : ℕ) :
+    Fin (D + 1) → ReciprocityTheory.ChartRestriction.G.Geo.HermLine (ι := FinTwoTypeFamily κ) :=
   fun j => if (j : ℕ) < i then blockLine m 0 else blockLine m' 1
 
-def twoBlockCoeff (I : AllFam) (x x' : Ix κ → Ω) (m m' : ConeMetric ℂ (Ix κ)) (D i : ℕ) : ℝ :=
+def twoBlockCoeff (I : ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.AllFam)
+    (x x' : Ix κ → Ω) (m m' : ConeMetric (C := ℂ) (ι := Ix κ)) (D i : ℕ) : ℝ :=
   I (Fin 2) (FinTwoTypeFamily κ) (twoBlockIdeal x x') (D + 1) (twoBlockList m m' D i) -
     I (Fin 2) (FinTwoTypeFamily κ) (twoBlockIdeal x x') (D + 1) (twoBlockList m m' D (i + 1))
 
 def twoBlockStep (x x' : Ix κ → Ω) (a b : ℕ) : ℝ :=
   Real.log ((sec ℤ x (a + 1) * sec ℤ x' b).toAddSubgroup.relIndex (sec ℤ x a * sec ℤ x' (b + 1)).toAddSubgroup)
 
-theorem twoBlockList_zero (m m' : ConeMetric ℂ (Ix κ)) (D : ℕ) :
+theorem twoBlockList_zero (m m' : ConeMetric (C := ℂ) (ι := Ix κ)) (D : ℕ) :
     twoBlockList m m' D 0 = fun _ => blockLine m' 1 := by
   funext j
   simp [twoBlockList]
 
-theorem twoBlockList_last (m m' : ConeMetric ℂ (Ix κ)) (D : ℕ) :
+theorem twoBlockList_last (m m' : ConeMetric (C := ℂ) (ι := Ix κ)) (D : ℕ) :
     twoBlockList m m' D (D + 1) = fun _ => blockLine m 0 := by
   funext j
   simp [twoBlockList, j.2]
 
-theorem sum_twoBlockCoeff (I : AllFam) (x x' : Ix κ → Ω) (m m' : ConeMetric ℂ (Ix κ)) (D : ℕ) :
+theorem sum_twoBlockCoeff (I : ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.AllFam)
+    (x x' : Ix κ → Ω) (m m' : ConeMetric (C := ℂ) (ι := Ix κ)) (D : ℕ) :
     ∑ i ∈ Finset.range (D + 1), twoBlockCoeff I x x' m m' D i =
       I (Fin 2) (FinTwoTypeFamily κ) (twoBlockIdeal x x') (D + 1) (fun _ => blockLine m' 1) -
         I (Fin 2) (FinTwoTypeFamily κ) (twoBlockIdeal x x') (D + 1) (fun _ => blockLine m 0) := by

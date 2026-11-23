@@ -1,5 +1,49 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.FiniteDimensionalOfOrtho
-import Formalism.HermitianLattices.HermitianLatticesProofs.AutFinite
+module
+
+public import Formalism.ThetaLiftIndependence.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 open NumberField Module
 
@@ -46,7 +90,7 @@ theorem sum_inv_card_stab {G X : Type*} [Group G] [Finite G] [MulAction G X] (A 
     intro t ht
     have hset : MulAction.orbit G t = ↑(A'.filter (fun x => ∃ g : G, g • t = x)) := by
       ext x
-      simp only [MulAction.mem_orbit_iff, Finset.coe_filter, Set.mem_setOf_eq]
+      simp only [MulAction.mem_orbit_iff, Finset.coe_filter, Set.mem_ofPred_eq]
       constructor
       · rintro ⟨g, rfl⟩
         exact ⟨(hA' _).mpr (hA g t (hTA t ht)), g, rfl⟩
@@ -85,21 +129,5 @@ def autSub (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Submodule (𝓞 K) V) : Subgr
     refine ⟨inv_mem ha.1, ?_⟩
     conv_lhs => rw [← ha.2]
     rw [← autSub_gmap_mul, inv_mul_cancel, autSub_gmap_one]
-
-theorem finite_autL_of_ortho (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) {h : V →ₗ⋆[K] V →ₗ[K] K}
-    (hs : h.IsSymm) {I : Submodule (𝓞 K) V} {n : ℕ} (hI : Formalism.HermitianLatticesTheory.IsOrthoLattice h I n)
-    {L : Submodule (𝓞 K) V} (hL : Submodule.IsLattice K L) : (Formalism.ThetaLiftIndependence.autL h L).Finite := by
-  have := finiteDimensional_of_ortho hI
-  exact Formalism.HermitianLatticesTheory.autFinite K V h hs (trace_pos_of_ortho hK hs hI) L hL
-
-theorem finite_repSet_of_ortho (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) {h : V →ₗ⋆[K] V →ₗ[K] K}
-    (hs : h.IsSymm) {I : Submodule (𝓞 K) V} {n : ℕ} (hI : Formalism.HermitianLatticesTheory.IsOrthoLattice h I n)
-    {L : Submodule (𝓞 K) V} (hL : Submodule.IsLattice K L) (t : K) :
-    {x : V | x ∈ L ∧ h x x = t}.Finite := by
-  have := hL
-  refine (Formalism.HermitianLatticesTheory.autFinite_short h (trace_pos_of_ortho hK hs hI) L
-    (Algebra.trace ℚ K t)).subset ?_
-  rintro x ⟨hx, rfl⟩
-  exact ⟨hx, le_rfl⟩
 
 end Formalism.HermitianLattices.Ext.L3

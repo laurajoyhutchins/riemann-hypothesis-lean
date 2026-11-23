@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsFCocIff
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.CohDimTwoLocalOfLocalFiniteness
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsFCocIff
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
+public import Development.AbelianVarietyTheory.Counterexamples.NonGaloisSurvey.CrystallineCharacterRatio
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TateH2IffAllFiniteExtensions
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LocalGaloisRepInvariantsFromFractionRing
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TateH2IffAllFiniteExtensions
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
-import Development.AbelianVarietyTheory.Counterexamples.NonGaloisSurvey.CrystallineCharacterRatio
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +64,8 @@ open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.Bas
 
 variable {LL O : Type} [Field LL] [CommRing O] [Algebra O LL] {r : ℕ}
 
-variable (LL) in
 
+variable (LL) in
 def incl : (Fin r → O) →ₗ[O] (Fin r → LL) := (Algebra.linearMap O LL).compLeft (Fin r)
 
 theorem incl_apply (z : Fin r → O) (a : Fin r) : incl LL z a = algebraMap O LL (z a) := rfl
@@ -107,8 +153,8 @@ theorem mem_HfD_iff {V : Type} [AddCommGroup V] [Module LL V] [Module Qp V] [IsS
 
 variable {H : Type} [Group H] [TopologicalSpace H] (e : H ≃* G) (he : Continuous e) (he' : Continuous e.symm)
 
-include he he' in
 
+include he he' in
 theorem cobO_iff [IsDomain O] [IsFractionRing O LL] (L1 : Lattice (O := O) (charRep (cycLL PD LL)))
     (hL : L1.T = LinearMap.range (Algebra.linearMap O LL)) (χ : H → O)
     (hχ : ∀ g, algebraMap O LL (χ g) = ((cycLL PD LL (e g) : LLˣ) : LL)) (z : G × G → LL)
@@ -155,8 +201,8 @@ def vecRep [TopologicalSpace LL] [IsTopologicalRing LL] (ρ : Representation LL 
   ρ := ρ
   cont := hρ
 
-include he he' in
 
+include he he' in
 theorem lift_iff [TopologicalSpace Qp] [TopologicalSpace LL] [IsTopologicalRing LL] [IsDomain O]
     [IsDiscreteValuationRing O] (hG : GoodO (Qp := Qp) LL O) (hBK : bkBCore PD)
     (ρ ρ' : Representation LL G (Fin r → LL)) (M M' : H → Matrix (Fin r) (Fin r) O) (χ : H → O)
@@ -223,7 +269,7 @@ theorem lift_iff [TopologicalSpace Qp] [TopologicalSpace LL] [IsTopologicalRing 
       obtain ⟨g', rfl⟩ := e.surjective g'
       change (Submodule.Quotient.mk _ : (Fin r → LL) ⧸ L'.T) =
         Submodule.Quotient.mk (_ + ρ' (e g) ((algebraMap O LL ϖ)⁻¹ • incl LL (y (e.symm (e g')))))
-      rw [map_smul, hρ', incl_mulVec, ← smul_add, ← map_add, key, ← map_mul]
+      rw [map_smul, hρ', incl_mulVec, ← smul_add, ← map_add (f := _), key, ← map_mul]
       simp only [MulEquiv.symm_apply_apply]
       exact hyc g g'
   have main : c ∈ HfD PD L' ↔ ∀ d ∈ latticeFiniteCocycles PD L, CobO PD L1 (cupLD L' (dotProductBilin LL LL) d c) :=
@@ -237,7 +283,7 @@ theorem lift_iff [TopologicalSpace Qp] [TopologicalSpace LL] [IsTopologicalRing 
         refine ⟨d g ⬝ᵥ (M' g).mulVec t, ?_⟩
         change incl LL (d (e.symm (e g))) ⬝ᵥ ρ' (e g) (liftD L' (c (e h))) = _
         rw [eq_sub_iff_add_eq] at ht
-        rw [← ht, map_add, map_smul, hρ', hρ', incl_mulVec, incl_mulVec, dotProduct_add, dotProduct_smul, incl_dot,
+        rw [← ht, map_add (f := _), map_smul, hρ', hρ', incl_mulVec, incl_mulVec, dotProduct_add, dotProduct_smul, incl_dot,
           incl_dot, add_comm]
         simp
   refine Iff.trans ?_ (main.trans ?_)
@@ -290,18 +336,22 @@ theorem lift_iff_orthogonal : ∀ (D : Formalism.BasicNotions.D7) (N : NData D.R
   refine lift_iff (PDv bkP i v hv) Bw.e Bw.e_cont Bw.e_symm_cont hG
     (h.2.2.2.2.2.1 (X.l i) Bw.Kw).2.2 (repV bkP i v hv (Tgl i s)) (repV bkP i v hv ρ)
     (fun g => Tmat i s g.1) (fun g => Tdual i s g.1) (fun g => ((eps0 X i g.1 : (X.O0 i)ˣ) : X.O0 i))
-    (fun g x => ?_) (fun g x => ?_) (GlobalTheory.BKDimNoInv.rep_continuous Bw _ ?_) (GlobalTheory.BKDimNoInv.rep_continuous Bw _ ?_)
+    (fun g x => ?_) (fun g x => ?_) (fun x => ?_) (fun x => ?_)
     (fun g => ?_) (fun g => ?_) ?_ ϖ hϖ y hy hyc
-  · rw [GlobalTheory.BKDimNoInv.rep_apply, MulEquiv.symm_apply_apply, ← Tgl_coe]
+  · change (((Tgl i s (Bw.e.symm (Bw.e g)) : GL (Fin D.R.r) (X.O0 i)) : Matrix (Fin D.R.r) (Fin D.R.r) (X.O0 i)).map Bw.toLL).mulVec x = _
+    rw [MulEquiv.symm_apply_apply, ← Tgl_coe]
     rfl
-  · rw [GlobalTheory.BKDimNoInv.rep_apply, MulEquiv.symm_apply_apply, ← hρ]
+  · change (((ρ (Bw.e.symm (Bw.e g)) : GL (Fin D.R.r) (X.O0 i)) : Matrix (Fin D.R.r) (Fin D.R.r) (X.O0 i)).map Bw.toLL).mulVec x = _
+    rw [MulEquiv.symm_apply_apply, ← hρ]
     rfl
-  · change Continuous fun g : ↥(DecV N v) => ((Tgl i s g.1 : GL (Fin D.R.r) (X.O0 i)) : Matrix (Fin D.R.r) (Fin D.R.r) (X.O0 i))
-    simp_rw [Tgl_coe]
-    exact (GlobalTheory.PrimeToInertia.continuous_Tmat i s).comp continuous_subtype_val
-  · change Continuous fun g : ↥(DecV N v) => ((ρ g.1 : GL (Fin D.R.r) (X.O0 i)) : Matrix (Fin D.R.r) (Fin D.R.r) (X.O0 i))
-    simp_rw [hρ _]
-    exact (GlobalTheory.PrimeToInertia.continuous_Tdual i s).comp continuous_subtype_val
+  · have hr : Continuous (fun g : ↥(DecV N v) => ((Tgl i s g.1 : GL (Fin D.R.r) (X.O0 i)) : Matrix (Fin D.R.r) (Fin D.R.r) (X.O0 i))) := by
+      simp_rw [Tgl_coe]
+      exact (GlobalTheory.PrimeToInertia.continuous_Tmat i s).comp continuous_subtype_val
+    exact ((hr.comp Bw.e_symm_cont).matrix_map (continuous_subtype_val.comp Bw.eO_cont)).matrix_mulVec continuous_const
+  · have hr : Continuous (fun g : ↥(DecV N v) => ((ρ g.1 : GL (Fin D.R.r) (X.O0 i)) : Matrix (Fin D.R.r) (Fin D.R.r) (X.O0 i))) := by
+      simp_rw [hρ _]
+      exact (GlobalTheory.PrimeToInertia.continuous_Tdual i s).comp continuous_subtype_val
+    exact ((hr.comp Bw.e_symm_cont).matrix_map (continuous_subtype_val.comp Bw.eO_cont)).matrix_mulVec continuous_const
   · have h1 := (D.loc (X.l i)).PD_χ Bw.Kw (Bw.e g)
     have h2 := GlobalTheory.Survey.CrystallineCharacterRatio.chi_eq_cyc (D.loc (X.l i)) Bw.j g.1 (Bw.e g : Loc.GQ (X.l i)) (Bw.e_comm g)
     change algebraMap ↥(Loc.OL Bw.LL) ↥Bw.LL.1 (Bw.eO (algebraMap ℤ_[X.l i] (X.O0 i) _)) =

@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalPol
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RowDivRowWeight
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalPol
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LevelPrimePowSmulMemValueLatticeErase
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RowDivRowWeight
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.PieriBlockIdeals.PieriColumnMinors.RealLocalDeltaNabla
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.RowDivStable
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.RealLocalDeltaNabla
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,7 +63,7 @@ theorem weight_rowW_le_colSum {N : ℕ} (d : Fin N × Fin N →₀ ℕ) (c : Fin
   have h2 : ∑ c', Finsupp.weight (rowW N N) d c' = ∑ s, Finsupp.weight (colW N N) d s := by
     induction d using Finsupp.induction_linear with
     | zero => simp
-    | add f g hf hg => simp only [map_add, Pi.add_apply, Finset.sum_add_distrib, hf, hg]
+    | add f g hf hg => simp only [map_add (f := _), Pi.add_apply, Finset.sum_add_distrib, hf, hg]
     | single v k => simp [Finsupp.weight_apply, rowW, colW, Finsupp.sum_single_index, Pi.single_apply]
   exact (Finset.single_le_sum (fun _ _ => Nat.zero_le _) (Finset.mem_univ c)).trans h2.le
 
@@ -49,7 +94,7 @@ theorem comp_of_rowZ {O : Type} [CommRing O] {N : ℕ} (H : Fin N → ℤ) (h : 
   classical
   ext d
   rw [coeff_weightedHomogeneousComponent]
-  by_cases hd : coeff d h = 0
+  by_cases hd : AddMonoidAlgebra.coeff h d = 0
   · split_ifs <;> simp [hd]
   · have e := hh hd
     have key : Finsupp.weight (rowW N N) d = w ↔ (fun c => (w c : ℤ)) = H := by
@@ -62,12 +107,12 @@ theorem comp_of_rowZ {O : Type} [CommRing O] {N : ℕ} (H : Fin N → ℤ) (h : 
         exact_mod_cast this.symm
     by_cases hw : (fun c => (w c : ℤ)) = H
     · rw [if_pos (key.mpr hw), if_pos hw]
-    · rw [if_neg (mt key.mp hw), if_neg hw, coeff_zero]
+    · rw [if_neg (mt key.mp hw), if_neg hw, AddMonoidAlgebra.coeff_zero] <;> rfl
 
 theorem eq_zero_of_rowZ_neg {O : Type} [CommRing O] {N : ℕ} (H : Fin N → ℤ) (h : MvPolynomial (Fin N × Fin N) O)
     (hh : IsWeightedHomogeneous (GlobalTheory.LvT.KerLat.rowZ N N) h H) (c : Fin N) (hc : H c < 0) : h = 0 := by
   ext d
-  rw [coeff_zero]
+  simp only [AddMonoidAlgebra.coeff_zero, Pi.zero_apply]
   by_contra hd
   have e := congrFun (hh hd) c
   rw [GlobalTheory.LvT.KerLat.weight_rowZ] at e
@@ -105,6 +150,7 @@ theorem comp_rowAct_transvection {O : Type} [CommRing O] {N : ℕ} (a b : Fin N)
   classical
   have hZ := rowZ_of_rowW w h hh
   rw [rowAct_transvection, Polynomial.eval_eq_sum_range' (n := (rowGen O a b h).natDegree + 2) (by omega)]
+
   simp only [one_pow, mul_one, map_sum]
   have hk : ∀ k ∈ Finset.range ((rowGen O a b h).natDegree + 2),
       weightedHomogeneousComponent (rowW N N) (w + Pi.single a 1 - Pi.single b 1) ((rowGen O a b h).coeff k) =
@@ -155,18 +201,27 @@ theorem polar_formula : ∀ (O : Type) [CommRing O] (N : ℕ) (ι : Type) [Finty
     have hPx : ∀ w, P τ w (PiTensorProduct.tprod O x) =
         PiTensorProduct.tprod O (Function.update x τ (cmp w)) :=
       fun w => hP τ w x (cmp w) rfl
+
     simp only [evalE, map_sum, map_smul, FreeAlgebra.lift_ι_apply, Sum.elim_inr, LinearMap.sum_apply,
-      Finset.sum_apply, LinearMap.smul_apply, hPx]
-    simp_rw [← MultilinearMap.map_update_smul]
+    Finset.sum_apply, LinearMap.smul_apply, hPx]
+    have hsum : (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
+        (w a : O) • PiTensorProduct.tprod O (Function.update x τ (cmp w))) =
+        ∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
+          PiTensorProduct.tprod O (Function.update x τ ((w a : O) • cmp w)) := by
+      apply Finset.sum_congr rfl
+      intro w _
+      exact ((PiTensorProduct.tprod O).map_update_smul x τ (w a : O) (cmp w)).symm
+    rw [hsum]
     rw [← MultilinearMap.map_update_sum]
     congr 2
     apply Subtype.ext
     simp only [Submodule.coe_sum, Submodule.coe_smul]
     conv_rhs => rw [← sum_rowComp _ M hM _ hcol]
+
     rw [show rowDiv O a a 1 (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
-        weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) =
-        rowDivL O a a 1 (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
-        weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) from rfl, map_sum]
+      weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) =
+      rowDivL O a a 1 (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
+      weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) from rfl, map_sum]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [rowDivL_apply, (GlobalTheory.ValCmp.rowDiv_rowWeight O N N w _
       (weightedHomogeneousComponent_isWeightedHomogeneous _ _)).2 a 1, Nat.choose_one_right,
@@ -197,17 +252,19 @@ theorem polar_formula : ∀ (O : Type) [CommRing O] (N : ℕ) (ι : Type) [Finty
       by_cases hσ : σ = τ
       · subst hσ; simp [g]
       · simp [g, hσ, Pi.mulSingle_eq_of_ne hσ]
+
     simp only [evalE, map_sum, map_mul, FreeAlgebra.lift_ι_apply, Sum.elim_inr, Sum.elim_inl, LinearMap.sum_apply,
-      Finset.sum_apply, Module.End.mul_apply, hPz, hg, Function.update_self, Function.update_idem]
+    Finset.sum_apply, Module.End.mul_apply, hPz, hg, Function.update_self, Function.update_idem]
     rw [← MultilinearMap.map_update_sum]
     congr 2
     apply Subtype.ext
     simp only [Submodule.coe_sum]
     conv_rhs => rw [← sum_rowComp _ M hM _ hcol]
+
     rw [show rowDiv O a b 1 (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
-        weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) =
-        rowDivL O a b 1 (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
-        weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) from rfl, map_sum]
+      weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) =
+      rowDivL O a b 1 (∑ w ∈ Fintype.piFinset (fun _ : Fin N => Finset.range (M + 1)),
+      weightedHomogeneousComponent (rowW N N) w (x τ : MvPolynomial (Fin N × Fin N) O)) from rfl, map_sum]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [rowDivL_apply]
     exact comp_rowAct_transvection a b hab w _ (weightedHomogeneousComponent_isWeightedHomogeneous _ _)

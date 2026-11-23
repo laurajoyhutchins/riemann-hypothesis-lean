@@ -1,10 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StVarMassNearSmall
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StChartMassCompact
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsArea
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PFibreBound
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PNullSmaller
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StVarMassNearSmall
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StChartMassCompact
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PFibreBound
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PNullSmaller
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -38,7 +86,7 @@ theorem volume_eq_zero_of_hausdorff {S : Set (Fin d → ℂ)} (hS : μH[((2 * d 
     simp [Fintype.card_sigma, mul_comm]
   have hT : volume (E ⁻¹' S) = 0 := by
     rw [← hausdorffMeasure_pi_real, hcard]
-    have h := E.symm.lipschitz.hausdorffMeasure_image_le (d := ((2 * d : ℕ) : ℝ)) (by positivity) S
+    have h := E.symm.lipschitzWith.hausdorffMeasure_image_le (d := ((2 * d : ℕ) : ℝ)) (by positivity) S
     rw [hS, mul_zero, nonpos_iff_eq_zero, ContinuousLinearEquiv.image_symm_eq_preimage] at h
     exact h
   have : (Measure.map E volume).IsAddHaarMeasure := E.isAddHaarMeasure_map volume
@@ -60,7 +108,7 @@ theorem volume_image_eq_zero (W I : Ideal (MvPolynomial (Fin n) ℂ)) (A : Matri
     refine ⟨(EuclideanSpace.equiv (Fin n) ℂ).symm x, fun q hq => ?_, by simp only [L, ContinuousLinearMap.comp_apply]; rfl⟩
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hq
     have hx : (fun i => ((EuclideanSpace.equiv (Fin n) ℂ).symm x) i) = x := rfl
-    rw [hx, map_add, hxW a ha, hxI b hb, add_zero]
+    rw [hx, map_add (f := _), hxW a ha, hxI b hb, add_zero]
   refine volume_eq_zero_of_hausdorff (le_antisymm ?_ bot_le)
   calc μH[((2 * d : ℕ) : ℝ)] (A.mulVec '' (zeroSet W ∩ zeroSet I))
       ≤ μH[((2 * d : ℕ) : ℝ)] (L '' zeroSetEuc (W ⊔ I)) := measure_mono hsub
@@ -69,8 +117,8 @@ theorem volume_image_eq_zero (W I : Ideal (MvPolynomial (Fin n) ℂ)) (A : Matri
 
 end VarMassNearSmall
 
-open VarMassNearSmall in
 
+open VarMassNearSmall in
 theorem VarMassNearSmall.proof (hCMC : ChartMassCompact.Statement) : VarMassNearSmall.Statement := by
   classical
   intro n d W I φ f hW hdim hφ hI hf hfc δ hδ
@@ -78,13 +126,13 @@ theorem VarMassNearSmall.proof (hCMC : ChartMassCompact.Statement) : VarMassNear
   swap
   · refine ⟨Set.univ, isOpen_univ, Set.subset_univ _, fun χ _ _ _ => ?_⟩
     unfold varInt
-    rw [dif_neg hA, abs_zero]
+    rw [dite_eq_right hA, abs_zero]
     exact hδ.le
   set A := hA.choose with hAdef
   have hAf : IsFiniteProjection W A := hA.choose_spec
   have hvar : ∀ g, varInt W d g φ = ∫ y, chartDens W A g φ y := fun g => by
     unfold varInt chartInt
-    rw [dif_pos hA]
+    rw [dite_eq_left hA]
   have hfin : ∀ y, (fibre W A y).Finite := fun y => (FibreBound.proof n d W A hW hdim hAf y).2.1
   have hS : IsClosed (zeroSet I) := SheetSumMeasurable.isClosed_zeroSet I
   set U : ℕ → Set (Fin n → ℂ) := fun k => Metric.thickening (1 / ((k : ℝ) + 1)) (zeroSet I) with hU

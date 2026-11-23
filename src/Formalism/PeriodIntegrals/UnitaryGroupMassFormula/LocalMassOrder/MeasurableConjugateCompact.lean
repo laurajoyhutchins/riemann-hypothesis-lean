@@ -1,4 +1,51 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassOrder.ContinuousHRRight
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassOrder.Development
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassOrder.ContinuousHRRight
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassOrder.IsTopRingTens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,39 +55,9 @@ open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.SG.S
   NumberField IsDedekindDomain LocMassOrdW
 open scoped TensorProduct Classical
 
-def MeasConjK : Prop :=
-  ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (ψ : AddChar (AF F) ℂ)
-    (v : HeightOneSpectrum (𝓞 F)) {r : ℕ} (P : Frame E n r) (Λ : Set (Fin n → E))
-    (μG : Measure (HA (Fv F v) σ J)) (μS : Measure (Ssub (Fv F v) σ J P))
-    (μS0 : Measure (S0 (Fv F v) σ J P)) (y : HA (Fv F v) σ J),
-    FrameHyp σ J ψ v P Λ μG μS μS0 y →
-    MeasurableSet {g : HA (Fv F v) σ J | y * g * y⁻¹ ∈ Formalism.L2.SG.TypedSets.Kv σ J Λ v}
-
 def MeasUO : Prop :=
   ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     (v : HeightOneSpectrum (𝓞 F)) (r : ℕ), MeasurableSet (UO (E := E) v r)
-
-def UnipExists : Prop :=
-  ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (ψ : AddChar (AF F) ℂ)
-    (v : HeightOneSpectrum (𝓞 F)) {r : ℕ} (P : Frame E n r) (Λ : Set (Fin n → E))
-    (μG : Measure (HA (Fv F v) σ J)) (μS : Measure (Ssub (Fv F v) σ J P))
-    (μS0 : Measure (S0 (Fv F v) σ J P)) (y : HA (Fv F v) σ J),
-    FrameHyp σ J ψ v P Λ μG μS μS0 y → ∀ x : UIdx r → Fv F v ⊗[F] E,
-    ∃ g : HA (Fv F v) σ J, ∀ b, lin (Fv F v) σ J g (ratV (F := F) (Fv F v) (F0 P b)) =
-      ∑ a, uMat v x a b • ratV (F := F) (Fv F v) (F0 P a)
-
-def KUnip : Prop :=
-  ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (ψ : AddChar (AF F) ℂ)
-    (v : HeightOneSpectrum (𝓞 F)) {r : ℕ} (P : Frame E n r) (Λ : Set (Fin n → E))
-    (μG : Measure (HA (Fv F v) σ J)) (μS : Measure (Ssub (Fv F v) σ J P))
-    (μS0 : Measure (S0 (Fv F v) σ J P)) (y : HA (Fv F v) σ J),
-    FrameHyp σ J ψ v P Λ μG μS μS0 y → ∀ x ∈ UO (E := E) v r,
-    ∃ g : HA (Fv F v) σ J, (∀ b, lin (Fv F v) σ J g (ratV (F := F) (Fv F v) (F0 P b)) =
-      ∑ a, uMat v x a b • ratV (F := F) (Fv F v) (F0 P a)) ∧
-      y * g * y⁻¹ ∈ Formalism.L2.SG.TypedSets.Kv σ J Λ v
 
 section Alg
 
@@ -99,6 +116,7 @@ theorem uo_of_mem {y : HA (Fv F v) σ J}
   have hkX : ∀ b, lin (Fv F v) σ J (y * ((s0 : HA (Fv F v) σ J) * g) * y⁻¹) (X b) =
       ∑ a, uMat v x a b • X a := by
     intro b
+
     rw [hXa, lin_mul, lin_inv_lin, lin_mul, lin_mul, hg, map_sum, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, hs0, map_smul, hXa]
@@ -214,10 +232,6 @@ theorem measConj {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E
     (continuous_const.mul continuous_id).mul continuous_const
   exact hc.measurable (LocMassOrdKv.kv_measurableSet σ J v Λ hSD)
 
-theorem measurable_conjugate_compact : MeasConjK := by
-  intro F E _ _ _ _ _ σ n J ψ v r P Λ μG μS μS0 y h
-  exact measConj σ J v Λ h.2.2.1 y
-
 theorem measurable_unipotent_orbit : MeasUO := by
   intro F E _ _ _ _ _ v r
   have : BorelSpace (Fv F v ⊗[F] E) := ⟨rfl⟩
@@ -230,10 +244,5 @@ theorem measurable_unipotent_orbit : MeasUO := by
   refine MeasurableSet.iInter fun p => measurable_pi_apply p ?_
   exact ((LocMassOrdKv.isClosed_oev v).preimage
     (continuous_const.mul continuous_id)).measurableSet
-
-theorem stepC_of (hE : UnipExists) (hK : KUnip) : StepC := by
-  intro F E _ _ _ _ _ σ n J ψ v r P Λ μG μS μS0 y h
-  exact stepC_at σ J ψ v P Λ μG μS μS0 y h (measConj σ J v Λ h.2.2.1 y) (measurable_unipotent_orbit v r)
-    (hE σ J ψ v P Λ μG μS μS0 y h) (hK σ J ψ v P Λ μG μS μS0 y h)
 
 end LocMassOrdSC

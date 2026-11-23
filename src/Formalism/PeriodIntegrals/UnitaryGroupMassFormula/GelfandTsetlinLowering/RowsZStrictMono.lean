@@ -1,5 +1,55 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.ZScalarVanish
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.MultisetProdNormLeOne
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.RowActDiagMonomial
+public import Formalism.PeriodIntegrals.GTDefs
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.MultisetProdNormLeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,28 +61,7 @@ theorem embGL_apply {n N : ℕ} (h : n + 1 = N) (g : GL (Fin n) ℂ) (a b : Fin 
     ((embGL ℂ n N h g : GL (Fin N) ℂ) : Matrix (Fin N) (Fin N) ℂ) a b =
       if ha : a.1 < n then (if hb : b.1 < n then (g : Matrix (Fin n) (Fin n) ℂ) ⟨a.1, ha⟩ ⟨b.1, hb⟩ else 0)
       else (if b.1 < n then 0 else 1) := by
-  unfold embGL blkHom
-  simp [Matrix.reindexAlgEquiv_apply, Matrix.reindex_apply, Matrix.submatrix_apply]
-  have hl : ∀ (x : Fin N) (hx : x.1 < n),
-      finSumFinEquiv.symm (Fin.cast h.symm x) = (Sum.inl ⟨x.1, hx⟩ : Fin n ⊕ Fin 1) := by
-    intro x hx
-    have hc : Fin.cast h.symm x = Fin.castAdd 1 ⟨x.1, hx⟩ := Fin.ext rfl
-    rw [hc, finSumFinEquiv_symm_apply_castAdd]
-  have hr : ∀ (x : Fin N), ¬ x.1 < n →
-      finSumFinEquiv.symm (Fin.cast h.symm x) = (Sum.inr 0 : Fin n ⊕ Fin 1) := by
-    intro x hx
-    have hxN := x.isLt
-    have hc : Fin.cast h.symm x = Fin.natAdd n (0 : Fin 1) := Fin.ext (by simp; omega)
-    rw [hc, finSumFinEquiv_symm_apply_natAdd]
-  by_cases ha : a.1 < n <;> by_cases hb : b.1 < n
-  · rw [hl a ha, hl b hb]
-    simp [ha, hb]
-  · rw [hl a ha, hr b hb]
-    simp [ha, hb]
-  · rw [hr a ha, hl b hb]
-    simp [ha, hb]
-  · rw [hr a ha, hr b hb]
-    simp [ha, hb]
+  apply PI.WGB.embGL_apply_B <;> assumption
 
 theorem rowAct_initMinor {N s : ℕ} (G : Matrix (Fin N) (Fin N) ℂ) (I : Fin s → Fin N) (hI : StrictMono I)
     (hs : s ≤ N) (hG : ∀ a b : Fin N, a < b → G b a = 0)

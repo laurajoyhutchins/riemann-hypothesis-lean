@@ -1,4 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMRad
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpMRad
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Matrix
 
@@ -18,12 +68,6 @@ theorem eI_inj {a b : Fin r} (h : eI k r a = eI k r b) : a = b := by
 
 theorem esI_inj {a b : Fin r} (h : esI k r a = esI k r b) : a = b := by
   simp only [esI, Fin.ext_iff] at h; have := a.isLt; have := b.isLt; exact Fin.ext (by omega)
-
-theorem w1_mulVec_bvec_eI (a : Fin r) (c : ℂ) : Q.w1 k r a c *ᵥ bvec (eI k r a) = c • bvec (esI k r a) := by
-  funext p
-  simp only [bvec, Matrix.mulVec_single_one, Matrix.col_apply, Pi.single_apply, Pi.smul_apply, smul_eq_mul]
-  rw [Formalism.FourierDecayAlt.P.Qx3.w1_apply, Formalism.FourierDecayAlt.P.Qx3.sw_e, Formalism.FourierDecayAlt.P.Qx3.dd_e]
-  split_ifs <;> simp
 
 theorem w1_mulVec_bvec_esI (a : Fin r) (c : ℂ) : Q.w1 k r a c *ᵥ bvec (esI k r a) = (star c)⁻¹ • bvec (eI k r a) := by
   funext p
@@ -52,24 +96,6 @@ theorem wl_fixv (c : Fin r → ℂ) (L : List (Fin r)) (v : Fin (2 * r + k + 1) 
   | cons b L ih =>
     rw [List.map_cons, List.prod_cons, ← Matrix.mulVec_mulVec, ih, w1_mulVec_eq_self_of_eI_esI_eq_zero b _ v (hv b).1 (hv b).2]
 
-theorem wl_e (c : Fin r → ℂ) (L : List (Fin r)) (hL : L.Nodup) (a : Fin r) :
-    (L.map fun b => Q.w1 k r b (c b)).prod *ᵥ bvec (eI k r a) =
-      if a ∈ L then c a • bvec (esI k r a) else bvec (eI k r a) := by
-  induction L with
-  | nil => simp
-  | cons b L ih =>
-    rw [List.nodup_cons] at hL
-    rw [List.map_cons, List.prod_cons, ← Matrix.mulVec_mulVec, ih hL.2]
-    by_cases hab : a = b
-    · subst hab
-      rw [if_neg hL.1, w1_mulVec_bvec_eI, if_pos List.mem_cons_self]
-    · have hmem : (a ∈ b :: L) ↔ a ∈ L := by simp [hab]
-      by_cases h1 : a ∈ L
-      · rw [if_pos h1, if_pos (hmem.2 h1), Matrix.mulVec_smul, Formalism.FourierDecayAlt.P.Qx3.reflection_fixes_basis_vector b _
-          (fun h => eI_ne_esI b a h.symm) (fun h => hab (esI_inj h))]
-      · rw [if_neg h1, if_neg (fun h => h1 (hmem.1 h)), Formalism.FourierDecayAlt.P.Qx3.reflection_fixes_basis_vector b _
-          (fun h => hab (eI_inj h)) (fun h => eI_ne_esI a b h)]
-
 theorem wl_es (c : Fin r → ℂ) (L : List (Fin r)) (hL : L.Nodup) (a : Fin r) :
     (L.map fun b => Q.w1 k r b (c b)).prod *ᵥ bvec (esI k r a) =
       if a ∈ L then (star (c a))⁻¹ • bvec (eI k r a) else bvec (esI k r a) := by
@@ -96,10 +122,6 @@ theorem wc_nodup : ((List.finRange r).filter fun a : Fin r => a.val < (Fin.last 
 
 theorem wc_mem (a : Fin r) : a ∈ ((List.finRange r).filter fun a : Fin r => a.val < (Fin.last r).val) := by
   rw [List.mem_filter]; exact ⟨List.mem_finRange a, by simp [a.isLt]⟩
-
-theorem W_e (c : Fin r → ℂ) (a : Fin r) :
-    Q.wCell k r (Fin.last r) c *ᵥ bvec (eI k r a) = c a • bvec (esI k r a) := by
-  rw [wc_list, wl_e c _ wc_nodup, if_pos (wc_mem a)]
 
 theorem W_es (c : Fin r → ℂ) (a : Fin r) :
     Q.wCell k r (Fin.last r) c *ᵥ bvec (esI k r a) = (star (c a))⁻¹ • bvec (eI k r a) := by

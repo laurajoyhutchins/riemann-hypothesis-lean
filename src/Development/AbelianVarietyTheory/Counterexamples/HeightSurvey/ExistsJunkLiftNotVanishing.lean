@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleySignature
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,12 +63,12 @@ theorem hHom_add_right (V W : HSp D) (x y y' : WA V W) : hHom V W x (y + y') = h
 theorem symplH_add_left (V W : HSp D) (x x' y : WA V W) :
     symplH V W (x + x') y = symplH V W x y + symplH V W x' y := by
   unfold symplH sympl
-  rw [hHom_add_right, mul_add, map_add, mul_add]
+  rw [hHom_add_right, mul_add, map_add (f := _), mul_add]
 
 theorem symplH_add_right (V W : HSp D) (x y y' : WA V W) :
     symplH V W x (y + y') = symplH V W x y + symplH V W x y' := by
   unfold symplH sympl
-  rw [hHom_add_left, mul_add, map_add, mul_add]
+  rw [hHom_add_left, mul_add, map_add (f := _), mul_add]
 
 theorem heis_heis (ψ : AddChar (AF D.host.F) ℂ) (V W : HSp D) (w w' : WA V W) (f : WA V W → ℂ) :
     Heisenberg₂ ψ V W w (Heisenberg₂ ψ V W w' f) = ψ (symplH V W w w') • Heisenberg₂ ψ V W (w + w') f := by
@@ -76,43 +115,6 @@ theorem isThetaFun_transpose (ψ : AddChar (AF D.host.F) ℂ) (V W : HSp D) (hne
 
 variable {X : ThetaX D} {T : ThetaTied D X}
 
-def noFact (X : ThetaX D) : ThetaX D := { X with fact := fun _ _ => ∅ }
-
-def allTied_noFact {A : TH.ProvA} (h : AllTied D X A) : AllTied D (noFact X) A where
-  T := { h.T with }
-  sm := h.sm
-  ty := { h.ty with }
-  W := { h.W with om_tw := { h.W.om_tw with } }
-  unr := h.unr
-  kf := { h.kf with }
-  phiUp := h.phiUp
-  B := { h.B with }
-  real := h.real
-  prov := h.prov
-
-open Classical in
-
-def junkLift (T : ThetaTied D X) (J : ∀ V W, X.Sch V W →ₗ[ℂ] X.cusp V →ₗ[ℂ] X.AF W) : ThetaX D :=
-  { X with th := fun V W χ χ' =>
-      if ResEta D (T.eChr χ) V.rank ∧ ResEta D (T.eChr χ') W.rank then X.th V W χ χ' else J V W }
-
-def allTied_junkLift {A : TH.ProvA} (h : AllTied D X A) (J : ∀ V W, X.Sch V W →ₗ[ℂ] X.cusp V →ₗ[ℂ] X.AF W) :
-    AllTied D (junkLift h.T J) A where
-  T := { h.T with }
-  sm := h.sm
-  ty := { h.ty with }
-  W := { h.W with
-    om_tw := { h.W.om_tw with }
-    th := fun V W χ χ' hne h1 h2 hs μ 𝓕 hv Φ F g => by
-      have e : (junkLift h.T J).th V W χ χ' = X.th V W χ χ' := if_pos ⟨h1, h2⟩
-      rw [e]
-      exact h.W.th V W χ χ' hne h1 h2 hs μ 𝓕 hv Φ F g }
-  unr := h.unr
-  kf := { h.kf with }
-  phiUp := h.phiUp
-  B := { h.B with }
-  real := h.real
-  prov := h.prov
 
 end GlobalTheory.WeilTieCheck
 

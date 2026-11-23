@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityUnitary
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues
@@ -35,10 +76,10 @@ theorem eventually_vac_eq_one (M : GlobalTheory.IndefiniteRowSideFullHecke.WeilT
   rw [hv]
   simp [Set.indicator, hi]
 
-open Classical in
 
+open Classical in
 theorem pure_update_eq (f : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.SInf F (Fin n × Fin d))
-    (φ : ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F, (Fin n × Fin d → Fv F v) → ℂ) (a : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F)
+    (φ : ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F), (Fin n × Fin d → Fv F v) → ℂ) (a : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F))
     (x : Fin n × Fin d → AF F)
     (hx : {v | v ≠ a ∧ φ v (fun i => GlobalTheory.AdelicU.evFin F v (x i)) ≠ 1}.Finite) :
     ∃ c : ℂ, ∀ ζ : (Fin n × Fin d → Fv F a) → ℂ,
@@ -67,20 +108,20 @@ section Main
 
 variable (M : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Model σ X W) (ψ : AddChar (AF F) ℂ) (emb : ∀ w : InfinitePlace F, GlobalTheory.AdelicU.EmbOver E w)
 
-open Classical in
 
+open Classical in
 def gens : Set ((Fin n × Fin d → AF F) → ℂ) :=
-  Set.range fun p : Σ S : Finset (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F), Module.Basis.ofVectorSpaceIndex ℂ (M.Pol ψ emb) ×
+  Set.range fun p : Σ S : Finset (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F)), Module.Basis.ofVectorSpaceIndex ℂ (M.Pol ψ emb) ×
       (∀ v : S, Module.Basis.ofVectorSpaceIndex ℂ (GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v.1))) =>
     GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.pure ((Module.Basis.ofVectorSpace ℂ (M.Pol ψ emb) p.2.1 : M.Pol ψ emb) : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.SInf F (Fin n × Fin d))
       (fun v => if h : v ∈ p.1 then
         ((Module.Basis.ofVectorSpace ℂ (GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) (p.2.2 ⟨v, h⟩) :
           GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) : (Fin n × Fin d → Fv F v) → ℂ) else M.vac v)
 
-open Classical in
 
+open Classical in
 theorem pure_mem_span_gens (hM : M.IsGood ψ) (i : Module.Basis.ofVectorSpaceIndex ℂ (M.Pol ψ emb)) :
-    ∀ (S T : Finset (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F)) (φ : ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F, (Fin n × Fin d → Fv F v) → ℂ),
+    ∀ (S T : Finset (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F))) (φ : ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F), (Fin n × Fin d → Fv F v) → ℂ),
       (∀ v, φ v ∈ GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) → (∀ v, v ∉ S → v ∉ T → φ v = M.vac v) →
       (∀ v ∈ T, ∃ j, φ v = ((Module.Basis.ofVectorSpace ℂ (GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) j :
           GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) : (Fin n × Fin d → Fv F v) → ℂ)) →
@@ -96,9 +137,9 @@ theorem pure_mem_span_gens (hM : M.IsGood ψ) (i : Module.Basis.ofVectorSpaceInd
           GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) : (Fin n × Fin d → Fv F v) → ℂ) else M.vac v) = φ := by
       funext v
       by_cases h : v ∈ T
-      · rw [dif_pos h]
+      · rw [dite_eq_left h]
         exact (hj v h).symm
-      · rw [dif_neg h]
+      · rw [dite_eq_right h]
         exact (hoff v (Finset.notMem_empty v) h).symm
     exact Submodule.subset_span ⟨⟨T, i, fun v => j v.1 v.2⟩, congrArg (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.pure
       ((Module.Basis.ofVectorSpace ℂ (M.Pol ψ emb) i : M.Pol ψ emb) : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.SInf F (Fin n × Fin d))) hfun⟩
@@ -185,7 +226,7 @@ theorem rank_algD_le_aleph0 : ∀ {F E : Type} [Field F] [NumberField F] [Field 
     {n d : ℕ} {X : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Spc F E n} {W : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Spc F E d} (M : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Model σ X W) (ψ : AddChar (AF F) ℂ)
     (emb : ∀ w : InfinitePlace F, GlobalTheory.AdelicU.EmbOver E w), M.IsGood ψ →
     Module.rank ℂ (M.Pol ψ emb) ≤ Cardinal.aleph0 →
-    (∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F, Module.rank ℂ (GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) ≤ Cardinal.aleph0) →
+    (∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F), Module.rank ℂ (GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v)) ≤ Cardinal.aleph0) →
     Module.rank ℂ (GlobalTheory.SquareAgree.algD M ψ emb) ≤ Cardinal.aleph0 := by
   intro F E _ _ _ _ _ σ n d X W M ψ emb hM hPol hSB
   classical
@@ -193,7 +234,7 @@ theorem rank_algD_le_aleph0 : ∀ {F E : Type} [Field F] [NumberField F] [Field 
   haveI : Countable (Module.Basis.ofVectorSpaceIndex ℂ (M.Pol ψ emb)) := by
     rw [← Cardinal.mk_le_aleph0_iff, (Module.Basis.ofVectorSpace ℂ _).mk_eq_rank'']
     exact hPol
-  haveI : ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F,
+  haveI : ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F),
       Countable (Module.Basis.ofVectorSpaceIndex ℂ (GlobalTheory.WeilM.SB (Fin n × Fin d → Fv F v))) := fun v => by
     rw [← Cardinal.mk_le_aleph0_iff, (Module.Basis.ofVectorSpace ℂ _).mk_eq_rank'']
     exact hSB v

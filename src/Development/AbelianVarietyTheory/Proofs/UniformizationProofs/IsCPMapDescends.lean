@@ -1,12 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsUniqueTorusCompat
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueCharacterOfMul
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueCharacterOfMul
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -32,7 +73,7 @@ theorem kap_gm (σ : Z ⟶ Y) (r : Y ⟶ X) (z : Z) (U : X.Opens) (a : Γ(X, U)�
     rw [gm_val r (σ z) U h]
     exact Scheme.Hom.germ_stalkMap_apply σ (r ⁻¹ᵁ U) z h _
   · have h' : ¬ (σ ≫ r) z ∈ U := h
-    rw [gm, gm, dif_neg h, dif_neg h']
+    rw [gm, gm, dite_eq_right h, dite_eq_right h']
     exact map_one _
 
 theorem kap_injective (σ : Z ⟶ Y) [Flat σ] (z : Z) : Function.Injective (kap σ z) := by
@@ -255,7 +296,7 @@ theorem Eqns.ker (mul : ∀ (T : Over S') (x y : T ⟶ B'), toBase hβ (x * y) =
     have a := h.2.2 t y u
     have c : @id (T.left.presheaf.stalk z)ˣ (cubV M.c (T := Over.mk (T.hom ≫ f)) z J 1
       (toBase hβ (π y)) (toBase hβ (π u))) = 1 := (isCub_cubV M.c (T := Over.mk (T.hom ≫ f)) hJ).face _ _
-    rwa [ht, o, c, (isCub_cubV M'.c hI).face, _root_.one_mul, _root_.mul_one] at a
+    rwa [ht, o, c, (isCub_cubV M'.c hI).face _ _, _root_.one_mul, _root_.mul_one] at a
 
 theorem exists_lift [Flat q.left] [Surjective q.left] {T : Over S'} (x : T ⟶ B') :
     ∃ (T' : Over S') (ρ : T' ⟶ T) (x' : T' ⟶ G), Flat ρ.left ∧ Surjective ρ.left ∧ x' ≫ q = ρ ≫ x :=
@@ -448,8 +489,8 @@ end Main
 
 end GlobalTheory.IsoDesc
 
-open GlobalTheory.IsoDesc in
 
+open GlobalTheory.IsoDesc in
 theorem GlobalTheory.isCPMap_descends : ∀ (S S' : Scheme.{0}) [ConnectedSpace S'] (f : S' ⟶ S) (X : Type) [AddCommGroup X] [Module.Free ℤ X] (G' : Over S') [GrpObj G'] [IsCommMonObj G'] [ConnectedSpace G'.left] (Q : TQ G' X) (P' : CP G') (D : Q.Desc P') (B : Over S) [GrpObj B] [IsCommMonObj B] (M : CP B) (β : Q.B.left ⟶ B.left) (hβ : β ≫ B.hom = Q.B.hom ≫ f) (hw) (w), (∀ (T : Over S') (x y : T ⟶ Q.B), toBase hβ (x * y) = toBase hβ x * toBase hβ y) → IsCPMap P' M f (Q.q.left ≫ β) hw w → ∃ v, IsCPMap D.M M f β hβ v := by
   intro S S' _ f X _ _ G _ _ _ Q P D B _ _ M β hβ hw w mul Hw
   have := Q.q_hom

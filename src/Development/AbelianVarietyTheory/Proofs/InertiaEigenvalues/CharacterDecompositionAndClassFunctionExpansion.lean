@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CentralIdempotentOfIrrCharacterOrthogonalCentralStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIrrCharactersAndFinsumCentralIdempotentsEqStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CentralIdempotentOfIrrCharacterOrthogonalCentralStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteIrrCharactersAndFinsumCentralIdempotentsEqStatement
+import Mathlib.Algebra.Category.ModuleCat.Algebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.PUnit
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open GlobalTheory.GLq Formalism.MainNotions.ArithmeticCylinders Polynomial
 open scoped Classical
 
@@ -89,6 +140,7 @@ theorem class_eq_zero_of_orth {G : Type} [Group G] [Fintype G] (f : G → ℂ) (
     let T : V →ₗ[ℂ] V := ∑ x, f x • V.ρ x⁻¹
     have hcomm : ∀ h : G, ∀ v : V, T (V.ρ h v) = V.ρ h (T v) := by
       intro h v
+
       simp only [T, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul]
       have e1 : ∀ x, V.ρ x⁻¹ (V.ρ h v) = V.ρ (x⁻¹ * h) v := fun x => by rw [map_mul, Module.End.mul_apply]
       have e2 : ∀ x, V.ρ h (V.ρ x⁻¹ v) = V.ρ (h * x⁻¹) v := fun x => by rw [map_mul, Module.End.mul_apply]
@@ -114,6 +166,7 @@ theorem class_eq_zero_of_orth {G : Type} [Group G] [Fintype G] (f : G → ℂ) (
         rcases mul_eq_zero.1 h1 with h | h
         · exact absurd h (inv_ne_zero hG)
         · exact h
+
       simp only [T, map_sum, map_smul, smul_eq_mul]
       rw [← h2]
       refine Finset.sum_congr rfl fun x _ => ?_
@@ -130,6 +183,7 @@ theorem class_eq_zero_of_orth {G : Type} [Group G] [Fintype G] (f : G → ℂ) (
       have hS' : T ∘ₗ V.ρ y = ∑ x, f x • (V.ρ x⁻¹ ∘ₗ V.ρ y) := LinearMap.ext fun v => by
         simp only [T, LinearMap.comp_apply, LinearMap.sum_apply, LinearMap.smul_apply]
       rw [hS']
+
       simp only [map_sum, map_smul, smul_eq_mul]
       refine Finset.sum_congr rfl fun x _ => ?_
       rw [← hV]
@@ -142,7 +196,7 @@ theorem class_eq_zero_of_orth {G : Type} [Group G] [Fintype G] (f : G → ℂ) (
   have hB : ∀ w : G, ∑ ρ ∈ hS.toFinset, ρ 1 / (Fintype.card G : ℂ) * ρ w⁻¹ = if w = 1 then 1 else 0 := by
     intro w
     have := congrArg (fun a : MonoidAlgebra ℂ G => a.coeff w) hsum
-    simp only [MonoidAlgebra.coeff_sum, zOf, Finsupp.finset_sum_apply, MonoidAlgebra.coeff_single,
+    simp only [MonoidAlgebra.coeff_sum, zOf, Finsupp.finsetSum_apply, MonoidAlgebra.coeff_single,
       Finsupp.single_apply, Finset.sum_ite_eq', Finset.mem_univ, if_true] at this
     rw [this, MonoidAlgebra.one_def, MonoidAlgebra.coeff_single, Finsupp.single_apply]
     simp [eq_comm]
@@ -249,8 +303,8 @@ theorem char_norm_one {G : Type} [Group G] [Fintype G] (χ : G → ℂ) (hχ : I
 
 end GlobalTheory.CharDec
 
-open GlobalTheory.CharDec in
 
+open GlobalTheory.CharDec in
 theorem GlobalTheory.charDec : ∀ (G : Type) [Group G] [Fintype G] (χ : G → ℂ), (IsChar χ → ∃ L : List (G → ℂ), (∀ ρ ∈ L, IsIrr ρ) ∧ χ = L.sum) ∧ (IsClass χ → χ = ∑ᶠ ρ ∈ {ρ : G → ℂ | IsIrr ρ}, ip χ ρ • ρ) ∧ (IsChar χ → IsClass χ) ∧ (IsChar χ → ip χ χ = 1 → IsIrr χ) ∧ (∀ L : List (G → ℂ), (∀ ρ ∈ L, IsChar ρ) → IsChar L.sum) := by
   intro G _ _ χ
   exact ⟨char_decomp χ, class_expand χ, fun h => isClass_of_isChar h, char_norm_one χ, isChar_list_sum⟩

@@ -1,11 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StStokesOffDiscriminant
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.HessCRestrictThm
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
-import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCEqZeroOfEventuallyEqZero
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSheetSumMeasurable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.HessCRestrictThm
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCEqZeroOfEventuallyEqZero
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -19,8 +68,8 @@ namespace StokesOffDiscriminant
 
 variable {n D : ℕ}
 
-open Classical in
 
+open Classical in
 def sheetTerm (J : Ideal (MvPolynomial (Fin n) ℂ)) (A : Matrix (Fin D) (Fin n) ℂ)
     (H : (Fin n → ℂ) → ((Fin D → ℂ) → Fin n → ℂ) → ℝ) (y : Fin D → ℂ) (x : Fin n → ℂ) : ℝ :=
   (fibre J A y).indicator (fun x => if h : ∃ s, IsSheetAt J A x s then H x h.choose else 0) x
@@ -45,8 +94,8 @@ theorem window_of_sheet {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix (Fin 
   exact ⟨hx'V, V, hV, hx'V, hsd, hx's, hsec, interior N, isOpen_interior.mem_nhds hx'N,
     fun x'' hx'' hAx'' => hNs x'' ⟨hx''.1, interior_subset hx''.2⟩ hAx''⟩
 
-open Classical in
 
+open Classical in
 theorem sheetTerm_window {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix (Fin D) (Fin n) ℂ}
     {H : (Fin n → ℂ) → ((Fin D → ℂ) → Fin n → ℂ) → ℝ} {y : Fin D → ℂ}
     {s : (Fin D → ℂ) → Fin n → ℂ} {V : Set (Fin D → ℂ)} {W : Set (Fin n → ℂ)}
@@ -66,7 +115,7 @@ theorem sheetTerm_window {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix (Fin
       have hyV : y ∈ V := hxy ▸ hAV
       have hx' : x = s y := by rw [← hxy, hxs]
       have hex : ∃ s', IsSheetAt J A x s' := ⟨s, hsx⟩
-      rw [dif_pos hex, if_pos ⟨hyV, hx'⟩, h1 x _ hxy hex.choose_spec hsx, ← hx']
+      rw [dite_eq_left hex, if_pos ⟨hyV, hx'⟩, h1 x _ hxy hex.choose_spec hsx, ← hx']
     · have h0 : (if h : ∃ s', IsSheetAt J A x s' then H x h.choose else 0) = 0 := by
         split_ifs with hex
         · exact h2 x _ hxZ hxy hxW hex.choose_spec
@@ -200,8 +249,8 @@ theorem contDiffOn_comp_section {J : Ideal (MvPolynomial (Fin n) ℂ)} {g : (Fin
   exact hgO.comp (ReciprocityTheory.AnForm.M.pa_holoSmooth s V (analyticOnNhd_of_differentiableOn hV hsd))
     fun y hy => hZO (hsZ y hy)
 
-open Classical in
 
+open Classical in
 theorem sheetTerm_weight_window {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matrix (Fin D) (Fin n) ℂ}
     {s : (Fin D → ℂ) → Fin n → ℂ} {V : Set (Fin D → ℂ)} {W : Set (Fin n → ℂ)}
     (hsec : ∀ y ∈ V, A *ᵥ s y = y ∧ s y ∈ zeroSet J)
@@ -219,8 +268,8 @@ theorem sheetTerm_weight_window {J : Ideal (MvPolynomial (Fin n) ℂ)} {A : Matr
   · intro _ hyW
     rw [hf0 _ hyW, zero_mul]
 
-open Classical in
 
+open Classical in
 theorem sheetTerm_cons_window {J : Ideal (MvPolynomial (Fin n) ℂ)}
     {A : Matrix (Fin (D + 1)) (Fin n) ℂ} {s : (Fin (D + 1) → ℂ) → Fin n → ℂ}
     {V : Set (Fin (D + 1) → ℂ)} {W : Set (Fin n → ℂ)} (hV : IsOpen V)

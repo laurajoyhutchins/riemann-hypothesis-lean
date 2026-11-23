@@ -1,13 +1,61 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
-import Development.WeilBound.CoreStatements.HodgeTatePoints.RdBase
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TeichmullerCharacterExistsStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderSubgroupRestrictionStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderSubgroupTranslationStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderFundamentalIdealStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderSubgroupCharactersStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.RdBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderFundamentalIdealStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderSubgroupCharactersStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderSubgroupRestrictionStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.StableHopfOrderSubgroupTranslationStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TeichmullerCharacterExistsStatement
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR
 open scoped Matrix
@@ -26,19 +74,21 @@ structure IsChain (n : ℕ) (K : ℕ → Submodule F N) (t : ℕ → N) : Prop w
   notMem : ∀ i < n, t i ∉ K i
 
 theorem IsChain.quot {n : ℕ} {K : ℕ → Submodule F N} {t : ℕ → N} (h : IsChain n K t) (j : ℕ) :
-    IsChain (n - j) (fun i => (K (j + i)).map (K j).mkQ) (fun i => (K j).mkQ (t (j + i))) where
-  mono := fun a b hab => Submodule.map_mono (h.mono (by omega))
-  zero := by simp
-  top := by
-    have : K (j + (n - j)) = ⊤ := top_le_iff.1 (h.top ▸ h.mono (by omega))
-    simp only [this, Submodule.map_top, Submodule.range_mkQ]
-  succ := fun i hi => by
-    simp only [← add_assoc]
-    rw [h.succ (j + i) (by omega), Submodule.map_sup, Submodule.map_span, Set.image_singleton]
-  notMem := fun i hi hm => by
-    apply h.notMem (j + i) (by omega)
-    have : t (j + i) ∈ ((K (j + i)).map (K j).mkQ).comap (K j).mkQ := hm
-    rwa [Submodule.comap_map_eq, Submodule.ker_mkQ, sup_eq_left.2 (h.mono (by omega))] at this
+    IsChain (n - j) (fun i => (K (j + i)).map (K j).mkQ) (fun i => (K j).mkQ (t (j + i))) := by
+  exact {
+    mono := fun a b hab => Submodule.map_mono (h.mono (by omega))
+    zero := by simp
+    top := by
+      have : K (j + (n - j)) = ⊤ := top_le_iff.1 (h.top ▸ h.mono (by omega))
+      simp only [this, Submodule.map_top, Submodule.range_mkQ]
+    succ := fun i hi => by
+      simp only [← add_assoc]
+      rw [h.succ (j + i) (by omega), Submodule.map_sup, Submodule.map_span, Set.image_singleton]
+    notMem := fun i hi hm => by
+      apply h.notMem (j + i) (by omega)
+      have : t (j + i) ∈ ((K (j + i)).map (K j).mkQ).comap (K j).mkQ := hm
+      rwa [Submodule.comap_map_eq, Submodule.ker_mkQ, sup_eq_left.2 (h.mono (by omega))] at this
+  }
 
 theorem IsChain.mem {n : ℕ} {K : ℕ → Submodule F N} {t : ℕ → N} (h : IsChain n K t) {i j : ℕ}
     (hi : i < min j n) : t i ∈ K j := by
@@ -49,44 +99,48 @@ theorem IsChain.mem {n : ℕ} {K : ℕ → Submodule F N} {t : ℕ → N} (h : I
 open Classical in
 theorem IsChain.sub {n : ℕ} {K : ℕ → Submodule F N} {t : ℕ → N} (h : IsChain n K t) (j : ℕ) :
     IsChain (min j n) (fun i => (K i).comap (K j).subtype)
-      (fun i => if hi : t i ∈ K j then ⟨t i, hi⟩ else 0) where
-  mono := fun a b hab => Submodule.comap_mono (h.mono hab)
-  zero := by simp [h.zero]
-  top := by
-    rw [Submodule.comap_subtype_eq_top]
-    rcases le_total j n with h1 | h1
-    · rw [min_eq_left h1]
-    · rw [min_eq_right h1, h.top]; exact le_top
-  succ := fun i hi => by
-    apply Submodule.map_injective_of_injective (K j).injective_subtype
-    simp only [dif_pos (h.mem hi)]
-    rw [Submodule.map_sup, Submodule.map_span, Set.image_singleton, Submodule.map_comap_subtype,
-      Submodule.map_comap_subtype, inf_eq_right.2 (h.mono (by omega)),
-      inf_eq_right.2 (h.mono (by omega)), h.succ i (by omega)]
-    rfl
-  notMem := fun i hi hm => by
-    apply h.notMem i (by omega)
-    simp only [dif_pos (h.mem hi)] at hm
-    exact hm
+      (fun i => if hi : t i ∈ K j then ⟨t i, hi⟩ else 0) := by
+  exact {
+    mono := fun a b hab => Submodule.comap_mono (h.mono hab)
+    zero := by simp [h.zero]
+    top := by
+      rw [Submodule.comap_subtype_eq_top]
+      rcases le_total j n with h1 | h1
+      · rw [min_eq_left h1]
+      · rw [min_eq_right h1, h.top]; exact le_top
+    succ := fun i hi => by
+      apply Submodule.map_injective_of_injective (K j).injective_subtype
+      simp only [dite_eq_left (h.mem hi)]
+      rw [Submodule.map_sup, Submodule.map_span, Set.image_singleton, Submodule.map_comap_subtype,
+        Submodule.map_comap_subtype, inf_eq_right.2 (h.mono (by omega)),
+        inf_eq_right.2 (h.mono (by omega)), h.succ i (by omega)]
+      rfl
+    notMem := fun i hi hm => by
+      apply h.notMem i (by omega)
+      simp only [dite_eq_left (h.mem hi)] at hm
+      exact hm
+  }
 
 theorem isChain_flag {n : ℕ} (b : Module.Basis (Fin n) F N) :
-    IsChain n (flagSub b) (fun i => if h : i < n then b ⟨i, h⟩ else 0) where
-  mono := fun a c hac => Submodule.span_mono (Set.image_mono fun j hj => lt_of_lt_of_le hj hac)
-  zero := by simp [flagSub]
-  top := by
-    have : {j : Fin n | (j : ℕ) < n} = Set.univ := Set.eq_univ_of_forall fun j => j.2
-    rw [flagSub, this, Set.image_univ, b.span_eq]
-  succ := fun i hi => by
-    have : {j : Fin n | (j : ℕ) < i + 1} = {j : Fin n | (j : ℕ) < i} ∪ {⟨i, hi⟩} := by
-      ext j
-      simp only [Set.mem_setOf_eq, Set.mem_union, Set.mem_singleton_iff, Fin.ext_iff]
-      omega
-    simp only [dif_pos hi]
-    rw [flagSub, this, Set.image_union, Submodule.span_union, Set.image_singleton]
-    rfl
-  notMem := fun i hi => by
-    simp only [dif_pos hi]
-    exact b.linearIndependent.notMem_span_image (by simp)
+    IsChain n (flagSub b) (fun i => if h : i < n then b ⟨i, h⟩ else 0) := by
+  exact {
+    mono := fun a c hac => Submodule.span_mono (Set.image_mono fun j hj => lt_of_lt_of_le hj hac)
+    zero := by simp [flagSub]
+    top := by
+      have : {j : Fin n | (j : ℕ) < n} = Set.univ := Set.eq_univ_of_forall fun j => j.2
+      rw [flagSub, this, Set.image_univ, b.span_eq]
+    succ := fun i hi => by
+      have : {j : Fin n | (j : ℕ) < i + 1} = {j : Fin n | (j : ℕ) < i} ∪ {⟨i, hi⟩} := by
+        ext j
+        simp only [Set.mem_ofPred_eq, Set.mem_union, Set.mem_singleton_iff, Fin.ext_iff]
+        omega
+      simp only [dite_eq_left hi]
+      rw [flagSub, this, Set.image_union, Submodule.span_union, Set.image_singleton]
+      rfl
+    notMem := fun i hi => by
+      simp only [dite_eq_left hi]
+      exact b.linearIndependent.notMem_span_image (by simp)
+  }
 
 end
 
@@ -162,7 +216,7 @@ theorem chain_partial (hstep : type_of% @GlobalTheory.T.stable_hopf_order_subgro
   have h2 := chain_le hex hsq hsplit hos p C v R hv hp F f hF χ _ _ AK hKs _ _ (h.sub j)
     s a (fun i hi => by
       rw [(hstep p C v R hv hp F f hF _ AK hKs _ _ ((h.sub j).notMem i hi)).2, hK,
-        sub_stepRes _ (h.mono (by omega)), dif_pos (h.mem hi),
+        sub_stepRes _ (h.mono (by omega)), dite_eq_left (h.mem hi),
         ← (hstep p C v R hv hp F f hF _ AA hst _ _ (h.notMem i (by omega))).2]
       exact hs _ (by omega)) ha
   rw [hK] at ha

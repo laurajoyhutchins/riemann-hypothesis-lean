@@ -1,12 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.LocalQuadraticParts
-import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
-import Formalism.SharpRestriction.GlobalSchurBounds.MainIn
-import Formalism.QuotientMetricDivisors.FinalW
-import Formalism.QuotientMetricDivisors.SixthReductionExplicit
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.OneLeLetterBlockLength
+module
+
+public import Formalism.LocalRingCardinality.DataErr
+public import Formalism.LocalRingCardinality.DataKap
+public import Formalism.LocalRingCardinality.DataParams
+public import Formalism.SharpRestriction.ElevenLe
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.OneLeLetterBlockLength
+public import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.DV Formalism.MainNotions NumberField Classical
 
 namespace GlobalTheory.FockDegreeGap
@@ -59,7 +98,7 @@ theorem sum_topWt (L : SizeData₂ D) : ∑ τ, topWt L τ = ∑ t : D.host.TT, 
 theorem wj_succ (D : D7) (i : ℕ) (hi : i < D.R.m) (τ : D.what₂.Tau) :
     wj D (i + 1) τ = (((D.hc τ).e ⟨i, hi⟩ : ℚ) : ℝ) := by
   unfold wj
-  rw [dif_pos (by simpa using hi)]
+  rw [dite_eq_left (by simpa using hi)]
   rfl
 
 theorem head_row (u : D.what₂.Word) (i : ℕ) (hi : i < D.R.m) (τ : D.what₂.Tau) (r : ℕ) (hr : r < D.R.k) :
@@ -74,8 +113,6 @@ theorem head_row (u : D.what₂.Word) (i : ℕ) (hi : i < D.R.m) (τ : D.what₂
     omega
   have h1' : (r : ℝ) ≤ D.R.N i := by exact_mod_cast h1
   have h2' : (D.R.N i : ℝ) + D.R.t ≤ D.R.N D.R.m := by exact_mod_cast h2
-  have h3 : (0 : ℝ) ≤ D.R.t := Nat.cast_nonneg _
-  have h4 : (0 : ℝ) ≤ r := Nat.cast_nonneg _
   push_cast
   constructor <;> linarith
 
@@ -101,7 +138,6 @@ theorem nuAbs_place (P : ParameterChoice' D L) (u : D.what₂.Word) (i : ℕ) (h
   have hN : D.R.N (i + 1 - 1) = n + 1 + 1 + i * (D.R.t + 1) := by unfold Ranks.N; rw [hn]; rfl
   have hS := L.Sc_pos
   have he := L.etaSz_pos
-  have hNm : (0 : ℝ) ≤ D.R.N D.R.m := Nat.cast_nonneg _
   have hkN : (D.R.k : ℝ) ≤ D.R.N D.R.m := by
     have : D.R.k ≤ D.R.N D.R.m := by unfold Ranks.N; omega
     exact_mod_cast this
@@ -142,13 +178,12 @@ theorem nuAbs_place (P : ParameterChoice' D L) (u : D.what₂.Word) (i : ℕ) (h
   have hi' : (i : ℝ) ≤ D.R.m := by exact_mod_cast hi.le
   have s8 : (i : ℝ) * ((D.R.t : ℝ) + 1) * (2 * L.etaSz) ≤ D.R.m * ((D.R.t : ℝ) + 1) * (2 * L.etaSz) := by gcongr
   push_cast at s2
-  have s9 : 0 ≤ (n : ℝ) * (L.Sc + D.R.N D.R.m) := by positivity
   rw [hkn, abs_le]
   constructor <;> nlinarith [s1.1, s1.2, s2.1, s2.2, s7.1, s7.2]
 
 theorem eQ_succ (D : D7) (i : ℕ) (hi : i < D.R.m) (τ : D.what₂.Tau) : eQ D (i + 1) τ = (D.hc τ).e ⟨i, hi⟩ := by
   unfold eQ
-  rw [dif_pos ⟨by omega, hi⟩]
+  rw [dite_eq_left ⟨by omega, hi⟩]
   rfl
 
 theorem ranks_le (D : D7) : (D.R.k : ℝ) + D.R.m ≤ D.R.N D.R.m ∧ (D.R.t : ℝ) + 1 ≤ D.R.N D.R.m := by
@@ -173,10 +208,7 @@ theorem letters_place (L : SizeData₂ D) (hK : KapDef D) (i : ℕ) (hi : i < D.
   obtain ⟨r1, r2⟩ := ranks_le D
   have hS := L.Sc_pos
   have he := L.etaSz_pos
-  have hNm : (0 : ℝ) ≤ D.R.N D.R.m := Nat.cast_nonneg _
-  have ht : (0 : ℝ) ≤ D.R.t := Nat.cast_nonneg _
   have hi' : (i : ℝ) + 1 ≤ D.R.m := by exact_mod_cast hi
-  have hi0 : (0 : ℝ) ≤ i := Nat.cast_nonneg _
   have e1 : ((∑ a, |D.what₂.kaBig (i + 1) τ a| : ℤ) : ℝ) =
       ∑ r ∈ Finset.range (n + (i + 1)), |aPlus D (i + 1) τ r| := by
     rw [show n + (i + 1) = (D.R.sigW (i + 1)).1 by unfold Ranks.sigW; simp only; omega,
@@ -198,13 +230,12 @@ theorem letters_place (L : SizeData₂ D) (hK : KapDef D) (i : ℕ) (hi : i < D.
     (L.Sc + 2 * D.R.N D.R.m) (fun r hr => by
       have hr' : r < D.R.k - 1 := by omega
       have hr2 : (r : ℝ) + 1 ≤ n := by exact_mod_cast hr
-      have hr0 : (0 : ℝ) ≤ r := Nat.cast_nonneg _
       obtain ⟨c1, c2⟩ := L.cloud_v τ ⟨r, hr'⟩
       have h1 : |aPlus D (i + 1) τ r - wj D (i + 1) τ| ≤ L.Sc + 2 * D.R.N D.R.m := by
         unfold aPlus
         rw [aPlusQ_eq, eQ_succ D i hi, wj_succ D i hi]
         unfold sigPar
-        rw [dif_pos hr', abs_le]
+        rw [dite_eq_left hr', abs_le]
         push_cast
         constructor <;> linarith
       refine le_trans ?_ h1
@@ -213,25 +244,23 @@ theorem letters_place (L : SizeData₂ D) (hK : KapDef D) (i : ℕ) (hi : i < D.
   have s2 := abs_le.1 (abs_sum_range_sub (fun r => |aPlus D (i + 1) τ (n + r)|) (i + 1) 0
     (L.etaSz + 2 * D.R.N D.R.m) (fun r hr => by
       have hr2 : (r : ℝ) ≤ i := by exact_mod_cast Nat.lt_succ_iff.1 hr
-      have hr0 : (0 : ℝ) ≤ r := Nat.cast_nonneg _
       have hb : n + r - (D.R.k - 1) < D.R.m := by omega
       have c := abs_le.1 (L.be_close τ ⟨_, hb⟩ ⟨i, hi⟩)
       simp only [sub_zero, abs_abs]
       unfold aPlus
       rw [aPlusQ_eq, eQ_succ D i hi]
       unfold sigPar
-      rw [dif_neg (by omega), dif_pos hb, abs_le]
+      rw [dite_eq_right (by omega), dite_eq_left hb, abs_le]
       push_cast at c ⊢
       constructor <;> linarith [c.1, c.2]))
   have s3 := abs_le.1 (abs_sum_range_sub (fun r => |aMinus D (i + 1) τ r|) (D.R.m - (i + 1)) 0
     (L.etaSz + 2 * D.R.N D.R.m) (fun r hr => by
       have hb : i + 1 + r < D.R.m := by omega
       have hr2 : (r : ℝ) ≤ D.R.m := by exact_mod_cast (by omega : r ≤ D.R.m)
-      have hr0 : (0 : ℝ) ≤ r := Nat.cast_nonneg _
       have c := abs_le.1 (L.be_close τ ⟨_, hb⟩ ⟨i, hi⟩)
       simp only [sub_zero, abs_abs]
       unfold aMinus aMinusQ
-      rw [eQ_succ D i hi, dif_pos hb, abs_le]
+      rw [eQ_succ D i hi, dite_eq_left hb, abs_le]
       push_cast at c ⊢
       constructor <;> linarith [c.1, c.2]))
   have b1 : ((i + 1 : ℕ) : ℝ) * (L.etaSz + 2 * D.R.N D.R.m) ≤ D.R.m * (L.etaSz + 2 * D.R.N D.R.m) :=
@@ -256,7 +285,6 @@ theorem errors_le (h : SizesAt L) (P : ParameterChoice' D L) :
   have hm : (1 : ℝ) ≤ D.R.m := by exact_mod_cast (by have := D.R.two_le_m; omega : 1 ≤ D.R.m)
   have h2 : LevelStarExponents.h0 L ≤ L.etaSz := div_le_self L.etaSz_pos.le hm
   obtain ⟨r1, r2⟩ := ranks_le D
-  have ht : (0 : ℝ) ≤ D.R.t := Nat.cast_nonneg _
   have hN : (1 : ℝ) ≤ D.R.N D.R.m := by linarith
   have h3 : (D.R.k : ℝ) * D.R.N D.R.m ≤ (D.R.N D.R.m : ℝ) ^ 2 := by nlinarith
   have h4 : (D.R.N D.R.m : ℝ) ^ 2 ≤ (D.R.N D.R.m : ℝ) ^ 3 := pow_le_pow_right₀ hN (by norm_num)

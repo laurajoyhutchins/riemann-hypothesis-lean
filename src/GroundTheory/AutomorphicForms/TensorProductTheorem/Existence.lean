@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.Places
+module
+
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Places
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Irreducible
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.LocalComponent
+import GroundTheory.AutomorphicForms.TensorProductTheorem.MatrixCoeff
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,7 +154,7 @@ theorem nonempty_equiv_of_coeff (hρirr : ρ.IsIrreducible) (hπ : ∀ v, IsAdmi
   have hr : IsRestricted ξ fun v => π v (g v) (ξ v) := by
     filter_upwards [g.2, hξ] with v h1 h2
     exact h2 _ h1
-  show _ = evalForm ξ l hl (tensorRep K π g (tprod ℂ ξ))
+  show _ = evalForm ξ l hl (tensorRep (K := K) π g (tprod ℂ ξ))
   rw [tensorRep_tprod, evalForm_tprod hr]
 
 end Coefficient
@@ -260,7 +313,7 @@ theorem exists_equiv_restrictedTensorRep (hρ : IsAdmissible ρ) (hirr : ρ.IsIr
     intro v u hu
     have hle : (genSubrep (ρ.comp (singleHom K v)) (NV v)).toSubmodule ≤
         { carrier := {u | ∀ h ∈ H, h v = 1 → ρ h u = u}
-          add_mem' := fun ha hb h hh hv => by rw [map_add, ha h hh hv, hb h hh hv]
+          add_mem' := fun ha hb h hh hv => by rw [map_add (f := _), ha h hh hv, hb h hh hv]
           zero_mem' := fun h _ _ => map_zero _
           smul_mem' := fun c u hu h hh hv => by rw [map_smul, hu h hh hv] } := by
       refine iSup_le fun g => ?_
@@ -388,7 +441,7 @@ theorem exists_equiv_restrictedTensorRep (hρ : IsAdmissible ρ) (hirr : ρ.IsIr
       obtain ⟨x, hx0, hx⟩ := ih
       let Y : Submodule ℂ M :=
         { carrier := {y | ∀ w ∈ s, p w y = y}
-          add_mem' := fun ha hb w hw => by rw [map_add, ha w hw, hb w hw]
+          add_mem' := fun ha hb w hw => by rw [map_add (f := _), ha w hw, hb w hw]
           zero_mem' := fun w _ => map_zero _
           smul_mem' := fun c y hy w hw => by rw [map_smul, hy w hw] }
       have hxY : x ∈ Y := hx

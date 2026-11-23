@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.MassDataInst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.TypedNeOf
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.OmVSDBwdHolds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.LevelIntersectParabolic
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Measures
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,31 +68,7 @@ variable {E : Type} [Field E] [NumberField E] {n : ℕ}
 theorem exists_int_smul_mem (L : Submodule (𝓞 E) (Fin n → E))
     (hL : Submodule.span E (L : Set (Fin n → E)) = ⊤) (x : Fin n → E) :
     ∃ N : ℤ, N ≠ 0 ∧ N • x ∈ L := by
-  have hx : x ∈ Submodule.span E (L : Set (Fin n → E)) := hL ▸ Submodule.mem_top
-  induction hx using Submodule.span_induction with
-  | mem y hy => exact ⟨1, one_ne_zero, by simpa using hy⟩
-  | zero => exact ⟨1, one_ne_zero, by simp⟩
-  | add y z _ _ hy hz =>
-    obtain ⟨N1, h1, m1⟩ := hy
-    obtain ⟨N2, h2, m2⟩ := hz
-    refine ⟨N1 * N2, mul_ne_zero h1 h2, ?_⟩
-    have e1 : (N1 * N2) • y = N2 • (N1 • y) := by rw [mul_comm, mul_smul]
-    have e2 : (N1 * N2) • z = N1 • (N2 • z) := by rw [mul_smul]
-    rw [smul_add, e1, e2]
-    exact L.add_mem (zsmul_mem m1 N2) (zsmul_mem m2 N1)
-  | smul e y _ hy =>
-    obtain ⟨N, hN, m⟩ := hy
-    obtain ⟨c, hc, hint⟩ := exists_integral_multiples ℤ ℚ (L := E) {e}
-    have hi : IsIntegral ℤ (c • e) := hint e (Finset.mem_singleton_self e)
-    refine ⟨c * N, mul_ne_zero hc hN, ?_⟩
-    have e3 : (c * N) • (e • y) = (c • e) • (N • y) := by
-      rw [mul_smul, smul_comm N e y, smul_assoc]
-    rw [e3]
-    have e4 : (c • e) • (N • y) = (IsIntegralClosure.mk' (𝓞 E) (c • e) hi) • (N • y) := by
-      rw [← algebraMap_smul E (IsIntegralClosure.mk' (𝓞 E) (c • e) hi) (N • y),
-        IsIntegralClosure.algebraMap_mk']
-    rw [e4]
-    exact L.smul_mem _ m
+  apply Formalism.L2.SG.Pf.NcVal.OmVSt.OmX.exists_int_smul_mem <;> assumption
 
 end Key
 
@@ -53,8 +79,6 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
 
 def ratAdd : (Fin n → E) →+ (Fin n → Fv F v ⊗[F] E) :=
   AddMonoidHom.compLeft (inclR (F := F) (Fv F v) : E →+* Fv F v ⊗[F] E).toAddMonoidHom (Fin n)
-
-theorem ratAdd_apply (x : Fin n → E) : ratAdd v x = ratV (F := F) (Fv F v) x := rfl
 
 theorem smul_mem_latLoc (Λ : Set (Fin n → E)) {c : Fv F v} (hc : c ∈ v.adicCompletionIntegers F)
     {y : Fin n → Fv F v ⊗[F] E} (hy : y ∈ latLoc (E := E) v Λ) : c • y ∈ latLoc (E := E) v Λ :=
@@ -90,7 +114,7 @@ theorem isCompact_latLoc (L : Submodule (𝓞 E) (Fin n → E)) (hfg : L.FG) :
         simp
       | add x y _ _ hx hy =>
         show ratAdd v ((x + y : L) : Fin n → E) ∈ _
-        rw [Submodule.coe_add, map_add]
+        rw [Submodule.coe_add, map_add (f := _)]
         exact Submodule.add_mem _ hx hy
       | smul k x _ hx =>
         show ratAdd v ((k • x : L) : Fin n → E) ∈ _

@@ -1,7 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountDefs
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.SegLow
-import Formalism.SharpRestriction.GrowthBounds.CountingStatementReduction
-import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountDefs
+public import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.IntegralPolyLinearMapClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,13 +76,13 @@ theorem xiVar_inj (N r t : ℕ) : Function.Injective (xiVar N r t) := by
 
 theorem xiExp_xi (N r t : ℕ) (β : Fin r → ℕ) (c : Fin r) : xiExp N r t β (xiVar N r t c) = β c := by
   classical
-  simp only [xiExp, Finsupp.finset_sum_apply, Finsupp.single_apply, (xiVar_inj N r t).eq_iff]
+  simp only [xiExp, Finsupp.finsetSum_apply, Finsupp.single_apply, (xiVar_inj N r t).eq_iff]
   simp
 
 theorem xiExp_other (N r t : ℕ) (β : Fin r → ℕ) (v : BVar N r t) (hv : ∀ c, v ≠ xiVar N r t c) :
     xiExp N r t β v = 0 := by
   classical
-  simp only [xiExp, Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp only [xiExp, Finsupp.finsetSum_apply, Finsupp.single_apply]
   exact Finset.sum_eq_zero fun c _ => if_neg fun h => hv c h.symm
 
 theorem eq_xiExp (N r t : ℕ) (μ : BVar N r t →₀ ℕ) (h : ∀ v ∈ μ.support, ∃ c, v = xiVar N r t c) :
@@ -57,8 +103,8 @@ def ell (x : (Fin D.T.t → ℕ) × ℕ) (β : Fin r → ℕ) :
 theorem ell_apply (x : (Fin D.T.t → ℕ) × ℕ) (β : Fin r → ℕ) (y : MvPolynomial (Fin N × Fin r) (KK O)) :
     ell D x β y = pre (O := O) D x * (rename (chainEmb N r D.T.t) y * xiMon (KK O) N r D.T.t β) := rfl
 
-open Classical in
 
+open Classical in
 def Lv : Finset ((Fin D.T.t → ℕ) × ℕ) :=
   ((Fintype.piFinset fun i => Finset.range (D.LL.deg (D.letterAt (D.T.pos i)) + 1)) ×ˢ
     Finset.range (D.B + 1)).filter fun x => D.LevelOK x.1 x.2
@@ -164,8 +210,8 @@ private theorem mem_gens_span_le_range_of_levelOK (j : Fin D.T.t → ℕ) (jp : 
   rw [g.as_sum, Finset.mul_sum]
   refine Submodule.sum_mem _ fun m hm => ?_
   obtain ⟨hsupp, hsum⟩ := hgS hm
-  have hmono : monomial m (coeff m g) =
-      coeff m g • xiMon (KK O) N r D.T.t (fun c => m (xiVar N r D.T.t c)) := by
+  have hmono : monomial m (AddMonoidAlgebra.coeff g m) =
+      AddMonoidAlgebra.coeff g m • xiMon (KK O) N r D.T.t (fun c => m (xiVar N r D.T.t c)) := by
     rw [xiMon, ← eq_xiExp N r D.T.t m hsupp, MvPolynomial.smul_monomial, smul_eq_mul, mul_one]
   rw [hmono, mul_smul_comm]
   refine Submodule.smul_mem _ _ ?_
@@ -209,7 +255,7 @@ private theorem IF_range_le_span (i : ↥(IF (r := r) D)) (y : MvPolynomial (Fin
     rw [GLWeightTheory.mem_integral_poly_iff_coeff]
     intro m
     by_cases hm : m ∈ y.support
-    · obtain ⟨o, ho⟩ := hb (coeff m y) (MvPolynomial.coeff_mem_coeffs m (MvPolynomial.mem_support_iff.mp hm))
+    · obtain ⟨o, ho⟩ := hb (AddMonoidAlgebra.coeff y m) (MvPolynomial.coeff_mem_coeffs m (MvPolynomial.mem_support_iff.mp hm))
       refine ⟨o, ?_⟩
       rw [ho, MvPolynomial.coeff_smul, smul_eq_mul, Algebra.smul_def]
     · refine ⟨0, ?_⟩

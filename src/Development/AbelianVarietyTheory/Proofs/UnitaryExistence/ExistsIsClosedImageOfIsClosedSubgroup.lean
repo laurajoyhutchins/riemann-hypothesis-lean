@@ -1,6 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteOfIsClosedTorusZariskiOfPowEqOne
+module
+
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteOfIsClosedTorusZariskiOfPowEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+public import Mathlib.AlgebraicGeometry.Noetherian
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -87,8 +141,8 @@ theorem pt_mem_image_iff {X Y : Over (Sp k)} [LocallyOfFiniteType X.hom]
   · rintro ⟨x, hx, rfl⟩
     exact ⟨pt x, hx, rfl⟩
 
-omit [IsAlgClosed k] in
 
+omit [IsAlgClosed k] in
 theorem isConstructible_image_of_isClosed {X Y : Over (Sp k)} [LocallyOfFiniteType X.hom]
     [QuasiCompact X.hom] [LocallyOfFiniteType Y.hom] [QuasiCompact Y.hom] (f : X ⟶ Y)
     {Z : Set X.left} (hZ : IsClosed Z) : IsConstructible (f.left '' Z) := by
@@ -107,26 +161,26 @@ theorem isConstructible_image_of_isClosed {X Y : Over (Sp k)} [LocallyOfFiniteTy
 
 end RationalPoint
 
-open RationalPoint in
 
+open RationalPoint in
 theorem exists_isClosed_image_of_isClosed_subgroup :
     ∀ (k : Type) [Field k] [IsAlgClosed k] (G B : Over (Sp k)) [GrpObj G] [GrpObj B] (q : G ⟶ B), IsMonHom q → LocallyOfFiniteType G.hom → QuasiCompact G.hom → LocallyOfFiniteType B.hom → QuasiCompact B.hom → ∀ (C : Subgroup (𝟙_ (Over (Sp k)) ⟶ G)) (Z : Set G.left), IsClosed Z → (∀ x, x ∈ C ↔ Set.range x.left ⊆ Z) → ∃ Z' : Set B.left, IsClosed Z' ∧ ∀ y : (𝟙_ (Over (Sp k)) ⟶ B), (∃ x ∈ C, x ≫ q = y) ↔ Set.range y.left ⊆ Z' := by
   intro k _ _ G B _ _ q _ _ _ _ _ C Z hZ hC
-  letI := zariski B
-  haveI := separatelyContinuousMul B
-  haveI := continuousInv B
+  letI := RationalPoint.zariski B
+  haveI := RationalPoint.separatelyContinuousMul B
+  haveI := RationalPoint.continuousInv B
   let φ : (𝟙_ (Over (Sp k)) ⟶ G) →* (𝟙_ (Over (Sp k)) ⟶ B) :=
     MonoidHom.mk' (fun x => x ≫ q) fun x y => MonObj.mul_comp x y q
   have hcl : IsClosed (C.map φ : Set (𝟙_ (Over (Sp k)) ⟶ B)) := by
-    refine isClosed_subgroup_of_eq_preimage_isConstructible _ (f := pt) continuous_induced_dom
-      (isConstructible_image_of_isClosed q hZ) ?_
+    refine isClosed_subgroup_of_eq_preimage_isConstructible _ (f := RationalPoint.pt)
+      continuous_induced_dom (RationalPoint.isConstructible_image_of_isClosed q hZ) ?_
     ext y
-    rw [Set.mem_preimage, pt_mem_image_iff q hZ]
-    simp only [← range_left_subset_iff, ← hC]
+    rw [Set.mem_preimage, RationalPoint.pt_mem_image_iff q hZ]
+    simp only [← RationalPoint.range_left_subset_iff, ← hC]
     rfl
   obtain ⟨Z', hZ', h⟩ := isClosed_induced_iff.1 hcl
   refine ⟨Z', hZ', fun y => ?_⟩
-  rw [range_left_subset_iff, ← Set.mem_preimage, h]
+  rw [RationalPoint.range_left_subset_iff, ← Set.mem_preimage, h]
   rfl
 
 end GlobalTheory

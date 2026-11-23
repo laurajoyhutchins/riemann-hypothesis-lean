@@ -1,8 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
-import GroundTheory.AutomorphicForms.GL2.GJMatrixInfinite
-import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
-import GroundTheory.GlobalFields.Adele.Compact
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import GroundTheory.GlobalFields.Adele.Approximation
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixInfinite
+public import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
+import Mathlib.Algebra.Module.ZLattice.Summable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.Adele.Compact
+public import GroundTheory.GlobalFields.Adele.Discrete
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
 
 open Matrix NumberField IsDedekindDomain GlobalTheory.WeilM MeasureTheory
 open scoped TensorProduct SchwartzMap nonZeroDivisors Classical
@@ -45,8 +97,8 @@ theorem tempered_sum {E X : Type} [NormedAddCommGroup E] [NormedSpace ℝ E] (p 
 
 variable (F : Type) [Field F] [NumberField F] {κ : Type} [Fintype κ]
 
-open GroundTheory.Global GroundTheory.Automorphic.GJMatrix in
 
+open GroundTheory.Global GroundTheory.Automorphic.GJMatrix in
 theorem summable_weight {g : (κ → FiniteAdeleRing (𝓞 F) F) → ℂ} (hg : g ∈ SB (κ → FiniteAdeleRing (𝓞 F) F)) :
     ∃ k : ℕ, Summable fun x : κ → F => ‖g (fun i => algebraMap F (FiniteAdeleRing (𝓞 F) F) (x i))‖ *
       ((1 + ‖(fun i => mixedEmbedding F (x i) : κ → mixedEmbedding.mixedSpace F)‖) ^ k)⁻¹ := by
@@ -89,8 +141,8 @@ theorem summable_weight {g : (κ → FiniteAdeleRing (𝓞 F) F) → ℂ} (hg : 
     rw [Set.indicator_of_mem hmem, Complex.norm_real, Real.norm_of_nonneg (by positivity)]
     exact mul_le_mul_of_nonneg_right (hC _) (by positivity)
 
-omit [Fintype κ] in
 
+omit [Fintype κ] in
 theorem pureA_rat (f : (κ → mixedEmbedding.mixedSpace F) → ℂ) (g : (κ → FiniteAdeleRing (𝓞 F) F) → ℂ) (x : κ → F) :
     pureA F f g (fun i => algebraMap F (AdeleRing (𝓞 F) F) (x i)) =
       f (fun i => mixedEmbedding F (x i)) * g (fun i => algebraMap F (FiniteAdeleRing (𝓞 F) F) (x i)) := by
@@ -113,8 +165,8 @@ def thetaLin : schA F κ →ₗ[ℂ] ℂ where
   map_add' Φ Ψ := (summable_schA F Φ.2).of_norm.tsum_add (summable_schA F Ψ.2).of_norm
   map_smul' a Φ := by simp [thetaSum, tsum_mul_left]
 
-open GroundTheory.Global in
 
+open GroundTheory.Global in
 theorem indicator_mem_SB : (Set.univ.pi fun _ : κ => (integralFiniteAdeles (𝓞 F) F : Set (FiniteAdeleRing (𝓞 F) F))).indicator
     (fun _ => (1 : ℂ)) ∈ SB (κ → FiniteAdeleRing (𝓞 F) F) := by
   have hc : IsCompact (Set.univ.pi fun _ : κ => (integralFiniteAdeles (𝓞 F) F : Set (FiniteAdeleRing (𝓞 F) F))) :=
@@ -131,8 +183,8 @@ theorem indicator_mem_SB : (Set.univ.pi fun _ : κ => (integralFiniteAdeles (�
   · exact ⟨_, ho, hx, fun y hy => by rw [Set.indicator_of_mem hx, Set.indicator_of_mem hy]⟩
   · exact ⟨_, hcl.isOpen_compl, hx, fun y hy => by rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hy]⟩
 
-open GroundTheory.Global in
 
+open GroundTheory.Global in
 theorem exists_thetaSum_ne_zero : ∃ Φ ∈ schA F κ, thetaSum F Φ ≠ 0 := by
   let b : ContDiffBump (0 : κ → mixedEmbedding.mixedSpace F) := default
   have hb : HasCompactSupport fun v => (b v : ℂ) := b.hasCompactSupport.comp_left (g := fun r : ℝ => (r : ℂ)) (by simp)

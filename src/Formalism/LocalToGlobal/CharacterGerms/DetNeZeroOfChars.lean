@@ -1,4 +1,56 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieUpFBrPl
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,6 +72,7 @@ theorem char_indep (χ : ι' → A →+* L) (hχ : Function.Injective χ) (φ : 
     have hx : ∀ j, χ j x = ∑ i, φ (r i) * χ j (b i) := by
       intro j
       have h1 : χ j (e * x) = χ j x := by rw [map_mul, he, one_mul]
+
       rw [← h1, hr, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [Algebra.smul_def, map_mul, hφ]
@@ -80,27 +133,6 @@ theorem det_ne_zero_of_chars [DecidableEq ι] (χ : ι → A →+* L) (hχ : Fun
 end Chars
 
 section Label
-
-theorem exists_jj (d : ℕ) [NeZero d] : ∃ jj : ZMod d ≃ Fin d, ∀ a, jj (a + 1) = jj a + 1 := ⟨(ZMod.finEquiv d).symm.toEquiv, fun a => by
-  first
-  | simp
-  | (show (ZMod.finEquiv d).symm (a + 1) = (ZMod.finEquiv d).symm a + 1
-     rw [map_add, map_one])⟩
-
-theorem assemble {X : Type} {d : ℕ} [NeZero d] (n : ℕ) (hn : n = d) (Emb : Set X) (em : ZMod d → X)
-    (hinj : Function.Injective em) (hmem : ∀ a, em a ∈ Emb) (hsurj : ∀ τ ∈ Emb, ∃ a, τ = em a) :
-    ∃ (_ : NeZero n) (t : Fin n ≃ Emb) (jj : ZMod d ≃ Fin n),
-      (∀ a, jj (a + 1) = jj a + 1) ∧ ∀ a, ((t (jj a) : Emb) : X) = em a := by
-  subst n
-  obtain ⟨jj, hjj⟩ := exists_jj d
-  let e : ZMod d ≃ Emb := Equiv.ofBijective (fun a => (⟨em a, hmem a⟩ : Emb))
-    ⟨fun a a' h => hinj (congrArg Subtype.val h), fun τ => by
-      obtain ⟨a, ha⟩ := hsurj τ τ.2
-      exact ⟨a, Subtype.ext ha.symm⟩⟩
-  refine ⟨inferInstance, jj.symm.trans e, jj, hjj, fun a => ?_⟩
-  show ((e (jj.symm (jj a)) : Emb) : X) = em a
-  rw [Equiv.symm_apply_apply]
-  rfl
 
 end Label
 

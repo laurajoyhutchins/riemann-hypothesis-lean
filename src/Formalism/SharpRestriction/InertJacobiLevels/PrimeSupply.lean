@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.InertJacobiLevels.SizeDataAt
-import Formalism.SharpRestriction.InertJacobiLevels.GenSplit
+module
+
+public import Formalism.FrobeniusOrbits.Statement
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.SpanPowerMembership.Primes
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,36 +57,6 @@ def dlogQ (d : ℕ) (hd : d.Prime) : ℝ :=
       ((quadraticChar (ZMod d)).ringHomComp (Int.castRingHom ℂ) : DirichletCharacter ℂ d)) 1 /
     DirichletCharacter.LFunction
       ((quadraticChar (ZMod d)).ringHomComp (Int.castRingHom ℂ) : DirichletCharacter ℂ d) 1).re
-
-theorem dlogL_one (D : D7) : dlogL D 1 = dlogQ D.host.d D.host.hyp.2.1 := rfl
-
-def ProgAt (C : ℝ) : Prop :=
-  ∀ (M : ℕ) (a : ℤ) (X : ℝ), 0 < M → IsCoprime a (M : ℤ) → (M : ℝ) ^ C ≤ X → 3 ≤ X →
-    ∃ p : ℕ, ∃ hp : p.Prime, X < p ∧ (p : ℝ) ≤ X ^ 2 ∧ (p : ℤ) ≡ a [ZMOD (M : ℤ)] ∧
-      |dlogQ p hp| ≤ C * Real.log p
-
-def ProgPrimes : Prop := ∃ C : ℝ, 1 ≤ C ∧ ProgAt C
-
-def ProgSmall : Prop :=
-  ∀ ε A : ℝ, 0 < ε → 0 < A → ∃ x₀ : ℝ, ∀ x : ℝ, x₀ ≤ x → ∀ M : ℕ, 3 ≤ M →
-    Real.log M ≤ A * x ^ (ε / 5) * Real.log x ^ 2 →
-    ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ p ≠ q ∧ p ≡ 1 [MOD M] ∧ q ≡ 1 [MOD M] ∧
-      Real.log p < x ^ (ε / 3) ∧ Real.log q < x ^ (ε / 3)
-
-def ProgTwo : Prop :=
-  ∃ C : ℝ, 0 < C ∧ ∀ M : ℕ, 3 ≤ M → ∃ p p' : ℕ, p ≠ p' ∧ p.Prime ∧ p'.Prime ∧ p ≡ 1 [MOD M] ∧ p' ≡ 1 [MOD M] ∧
-    Real.log p ≤ C * Real.log M ^ 2 ∧ Real.log p' ≤ C * Real.log M ^ 2
-
-def RayAt (C : ℝ) : Prop :=
-  ∀ (d M : ℕ) (h X : ℝ) (S : Finset ℕ), d.Prime → d % 4 = 3 → 0 < M → 0 < h → h ≤ 1 →
-    C * (Real.log ((d : ℝ) * M) + Real.log (1 / h) + 1) ^ 2 ≤ Real.log X → 0 < X →
-    (S.card : ℝ) ≤ X ^ ((4 : ℝ) / 5) →
-    ∃ (u v : ℤ) (T : ℕ), T ∉ S ∧ T.Prime ∧ X ≤ T ∧ (T : ℝ) ≤ X * (1 + h) ∧
-      (T : ℤ) = (1 + M * u) ^ 2 + d * (M * v) ^ 2
-
-def RayWindow : Prop := ∃ C : ℝ, 1 ≤ C ∧ RayAt C
-
-def PrimeSupply : Prop := ProgPrimes ∧ RayWindow
 
 structure QDGood (x eps : ℝ) (q d : ℕ) : Prop where
   hyp : HostHyp q d

@@ -1,6 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfE
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.SiegelSpaceAlgebraHolds
+module
+
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KaUnfoldPfB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfD
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.SiegelSpaceAlgebraHolds
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up
 
@@ -78,35 +129,7 @@ theorem half_le {w : ℝ≥0∞} {p ψ : ℝ} (hw : ENNReal.ofReal (Real.exp (-(
         rw [← Real.exp_mul, mul_one_div]
 
 theorem orth_mem_dom {r : ℕ} (X : Data E r) {x0 : Frame X.Ψ r} (ho : IsOrth X x0) : x0 ∈ X.dom := by
-  simp only [Data.dom, GG, Set.mem_setOf_eq]
-  intro τ
-  have hs : ∀ a : Fin r, ((sgn X.p0 (a : ℕ) : ℝ) : ℂ) ≠ 0 := by
-    intro a
-    unfold sgn
-    split_ifs <;> norm_num
-  refine ⟨?_, fun i => ?_⟩
-  · intro h0
-    have hg : gram τ.1 X.Gm (mat x0 τ) =
-        (mat x0 τ)ᵀ * X.Gm.map τ.1 * (mat x0 τ).map (starRingEnd ℂ) := by
-      ext a b
-      simp only [gram, hermC, col, mat, Matrix.of_apply, Matrix.mul_apply, Matrix.transpose_apply,
-        Matrix.map_apply, Finset.sum_mul]
-      exact Finset.sum_comm
-    have h1 := congrArg Matrix.det hg
-    rw [ho τ, Matrix.det_diagonal, Matrix.det_mul, Matrix.det_mul, Matrix.det_transpose, h0,
-      zero_mul, zero_mul] at h1
-    exact (Finset.prod_ne_zero_iff.mpr fun a _ => hs a) h1
-  · have hd : dmin X.Gm x0 τ i = ((psgn X.p0 i : ℝ) : ℂ) := by
-      unfold dmin lminor
-      rw [ho τ, Matrix.submatrix_diagonal _ _ (Fin.castLE_injective _), Matrix.det_diagonal]
-      simp [psgn, ← Fin.prod_univ_eq_prod_range]
-    have hne : psgn X.p0 i ≠ 0 := by
-      unfold psgn
-      refine Finset.prod_ne_zero_iff.mpr fun a _ => ?_
-      unfold sgn
-      split_ifs <;> norm_num
-    rw [hd, Complex.ofReal_re]
-    exact mul_self_pos.mpr hne
+  apply ReciprocityTheory.ChartRestriction.G.AR.Up.KU.orth_dom <;> assumption
 
 private lemma leviO_fderiv_lemma {m : ℕ} (c : ℝ) (f : V m → ℂ) (y : V m) :
     fderiv ℝ (fun w => (c : ℂ) * f w) y = (c : ℂ) • fderiv ℝ f y := by

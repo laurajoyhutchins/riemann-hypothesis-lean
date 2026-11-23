@@ -1,5 +1,46 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SiegelOneDescent.Descend2
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SiegelOneDescent.Descend2
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.AdelicHomeomorphisms.IsTopologicalGroupG2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,14 +73,15 @@ theorem extensionEmbedding_algebraMap_of_totallyReal (hF : IsTotallyReal F) (w :
     (z : (w.comap (algebraMap F E)).Completion) :
     extensionEmbedding w (algebraMap (w.comap (algebraMap F E)).Completion w.Completion z) =
       extensionEmbedding (w.comap (algebraMap F E)) z := by
+  rw [AbsoluteValue.Completion.algebraMap_eq_of_liesOver (w.comap (algebraMap F E)).1 w.1]
   have h := (denseRange_coe (v := w.comap (algebraMap F E))).equalizer
-    (g := fun z => extensionEmbedding w (algebraMap (w.comap (algebraMap F E)).Completion w.Completion z))
+    (g := fun z => extensionEmbedding w (AbsoluteValue.Completion.map (w.comap (algebraMap F E)).1 w.1 z))
     (h := fun z => extensionEmbedding (w.comap (algebraMap F E)) z)
-    ((isometry_extensionEmbedding w).continuous.comp LiesOver.continuous_completionMap)
+    ((isometry_extensionEmbedding w).continuous.comp (AbsoluteValue.Completion.continuous_map _ _))
     (isometry_extensionEmbedding _).continuous (funext fun k => ?_)
   · exact congrFun h z
   · have e := LiesOver.completionMap_coe (v := w.comap (algebraMap F E)) (w := w) k
-    show extensionEmbedding w (LiesOver.completionMap (k : (w.comap (algebraMap F E)).Completion)) =
+    show extensionEmbedding w (AbsoluteValue.Completion.map (w.comap (algebraMap F E)).1 w.1 (k : (w.comap (algebraMap F E)).Completion)) =
       extensionEmbedding (w.comap (algebraMap F E)) (k : (w.comap (algebraMap F E)).Completion)
     rw [e, extensionEmbedding_coe, extensionEmbedding_coe]
     exact embedding_algebraMap_of_totallyReal hF w _

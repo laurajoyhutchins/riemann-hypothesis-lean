@@ -1,21 +1,69 @@
-import Formalism.GradedWeylDivisibility.FinalB
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.MinorExpLt
+module
+
+public import Formalism.GradedWeylDivisibility.StatementC
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColLexInitMinor
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColumnLexBideterminant
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.SSYTPeel
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.SSYTExists
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.CompDeg
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.CompDeg
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.EvalDeg
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetdomLemmas
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LeadComp
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LeadInterlaced
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.MinorExpLt
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.PeelDecomp
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.PeelDegBound
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.PeelHomog
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.PeelLead
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.EvalDeg
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.PeelDegBound
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.TwoColumn
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LeadInterlaced
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.SMSAssembly
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.StandardMonomialSpanOf
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.SSYTExists
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.SSYTPeel
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.StandardMonomialSpanOf
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.TwoColumn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.GradedWeylDivisibility
 

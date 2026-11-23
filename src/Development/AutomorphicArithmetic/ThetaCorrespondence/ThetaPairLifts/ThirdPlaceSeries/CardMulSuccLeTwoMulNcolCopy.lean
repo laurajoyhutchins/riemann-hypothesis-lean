@@ -1,12 +1,62 @@
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.HodgeBundleWeights.CardMulSuccLeTwoMulNcol
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.CohomologicalCsdTempered
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LiftLambdaBound
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.RunParams
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.HostN
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.WtNZ
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.QuoShape
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EightDvdNCol
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.HodgeBundleWeights.ToKnownTheoremsOf
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LiftLambdaBound
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SemiposAtOfPositive
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaBoundLengthUnit
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.JetNumberQuotientBounds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPhiHatIndPhi
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaExponentsDominantLastEntryOneDegree
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightAntitoneBoundary
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HalfPrincipalAndSplit
+public import Development.AutomorphicArithmetic.CyclotomicBounds.RamifiedDiscriminants.FourMulQLeCondN
+public import Development.AutomorphicArithmetic.LocalEmbeddings.ThinCore
+public import Development.AutomorphicArithmetic.LocalEmbeddings.ThinCover
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.HostN
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.QuoShape
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.RunParams
+import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.WtNZ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MinimumGrowthBounds
+public import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnifOfSpaceEq
+
+@[expose] public section
+
+
 
 section
 section
@@ -60,7 +110,7 @@ private theorem frn_le_pow_of_bounds_copy {f r n t : ℝ} (ht : 11 ≤ t) (hf0 :
     _ ≤ t * t * t ^ 4 := by gcongr
     _ = t ^ 6 := by ring
     _ ≤ _ := pow_le_pow_right₀ (by linarith) (by norm_num)
-set_option maxHeartbeats 1000000 in
+
 theorem cover_dimension_size_bounds_alt : _root_.GlobalTheory.CovTop.SizeCondition → _root_.GlobalTheory.CovTop.CoversCondition fun Fm x _ ι p i Y PP _ => ∀ u1, Quo p i PP u1 → (Dom (GlobalTheory.RefSum.aOf p i u1) (GlobalTheory.RefSum.nCol (dat p i)) ∧ LastPos (dat p i) (GlobalTheory.RefSum.aOf p i u1) ∧ Nonempty (ErrX (Fm.D x ι))) ∧ 1000 ≤ (Fm.L x ι).sc.b ∧ (Fm.D x ι).R.r ≤ GlobalTheory.RefSum.nCol (dat p i) ∧ (Fm.D x ι).R.f * (Fm.D x ι).R.r * ((Fm.D x ι).R.r + 1) ≤ 2 * GlobalTheory.RefSum.nCol (dat p i) ∧ ((Fm.D x ι).R.f : ℝ) * (Fm.D x ι).R.r * GlobalTheory.RefSum.nCol (dat p i) ≤ (Fm.L x ι).sc.b ∧ (Fm.D x ι).host.rdE ^ 7 ≤ (Fm.L x ι).sc.b ∧ (Fm.L x ι).sc.b ^ 16 ≤ (((Fm.D x ι).host.g 0 * (Fm.D x ι).host.g 1 : ℕ) : ℝ) ∧ (((Fm.D x ι).host.g 0 * (Fm.D x ι).host.g 1 : ℕ) : ℝ) ≤ (Fm.L x ι).sc.b ^ 70 ∧ 1 ≤ Formalism.L2.Pj.DF (dat p i) (GlobalTheory.RefSum.aOf p i u1) ∧ ((Formalism.L2.Pj.DF (dat p i) (GlobalTheory.RefSum.aOf p i u1) : ℕ) : ℝ) ≤ (Fm.L x ι).sc.b ^ 2 ∧ (((Fm.D x ι).host.g 0 * (Fm.D x ι).host.g 1 : ℕ) : ℝ) * (Fm.L x ι).sc.b ≤ (Y.d.l₂.M : ℝ) := by
   intro hS
   refine (Formalism.MainNotions.Closed.and (Formalism.MainNotions.Closed.and (_root_.GlobalTheory.CovTop.Sizes.hostN_alt 6) _root_.GlobalTheory.CovTop.WtShape.wtN_z)
@@ -145,7 +195,7 @@ theorem cover_dimension_size_bounds_alt : _root_.GlobalTheory.CovTop.SizeConditi
       _ = ((Fm.D x ι).R.f : ℝ) * (Fm.D x ι).R.r * 5 * (Fm.L x ι).sc.b := by ring
       _ ≤ (Fm.L x ι).sc.b * (Fm.L x ι).sc.b := mul_le_mul_of_nonneg_right h6 (by linarith)
       _ = _ := by ring
-set_option maxHeartbeats 4000000 in
+
 theorem _root_.GlobalTheory.T.thin_divisor_pivot_bound_alt : _root_.GlobalTheory.CovTop.PublishedHodgeBundleTheorems → HypothesesH → _root_.GlobalTheory.CovTop.DeepGoodness → _root_.GlobalTheory.CovTop.SizeCondition → _root_.GlobalTheory.CovTop.FlatDegreeCondition → _root_.GlobalTheory.CovTop.CoversCondition fun Fm x _ ι p i Y PP _ => ∀ u1, Quo p i PP u1 → ∀ (Z : Comp Y.d.Xo₂ Y.d.c₂) (σ : Y.d.c₂.F →+* ℂ), GoodEmb Y.d.c₂ σ → ∀ y : FPt (Y.U σ).X, (⟨y.1, y.2.1⟩ : Σ k, Frame ((Y.U σ).X k).Ψ (Fm.D x ι).R.r) ∈ framesOn (Y.U σ) Z → (Y.d.l₂.M : ℝ) * ((Y.U σ).X y.1).firstMinimumSq y.2.1 < (Fm.L x ι).sc.b → ∃ f ∈ cuspW Y.d.Xo₂ Y.d.c₂ Y.U (GlobalTheory.RefSum.GOf p i u1), rdU (Y.U σ) f y.1 y.2.1 ≠ 0 ∧ ∀ z : FPt (Y.U σ).X, (⟨z.1, z.2.1⟩ : Σ k, Frame ((Y.U σ).X k).Ψ (Fm.D x ι).R.r) ∈ framesOn (Y.U σ) Z → Real.exp (-(2 * (ReciprocityTheory.ChartRestriction.G.I2.PT.f (Fm.D x ι).host.E : ℝ) / (ReciprocityTheory.ChartRestriction.G.I2.PT.rd (Fm.D x ι).host.E ^ 2 * ((Y.U σ).X y.1).la1 y.2.1 ^ 2) / 1250)) * ptN (modelWt (Y.U σ) (GlobalTheory.RefSum.GOf p i u1)) (rdU (Y.U σ) f) ⟨z.1, z.2.1⟩ ≤ ptN (modelWt (Y.U σ) (GlobalTheory.RefSum.GOf p i u1)) (rdU (Y.U σ) f) ⟨y.1, y.2.1⟩ := by
   intro _ _ _ hS _
   refine _root_.UpperTheory.Dv.Thin.covers_and_of_covers_of_imp_alt (_root_.UpperTheory.Dv.Thin.cover_dimension_size_bounds_alt hS) (_root_.GlobalTheory.ThetaSizeBounds.run_params_alt hS) ?_

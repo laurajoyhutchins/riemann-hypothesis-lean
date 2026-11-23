@@ -1,14 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Order.Interval.Finset.Nat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.BlockD.FourierDecayAlt.WaveGridLiftGrid
 
 open Finset
 
 def Pst (k r : ℕ) (lam : ℕ → ℝ) (c Y : ℝ) : ℝ := ∏ s ∈ Icc 1 (k + 2 * r + 1), (|Y + lam s| + c)
-
-theorem Pst_pos (k r : ℕ) (lam : ℕ → ℝ) {c : ℝ} (hc : 0 < c) (Y : ℝ) : 0 < Pst k r lam c Y := by
-  unfold Pst
-  exact Finset.prod_pos fun s _ => add_pos_of_nonneg_of_pos (abs_nonneg _) hc
 
 def PairOK (k : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (x : ℝ) : Prop :=
   ∀ s, 1 ≤ s → s ≤ k - 1 → s ≠ e →
@@ -19,21 +60,5 @@ theorem pairOK_of_interlace (k : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (x : ℝ)
     PairOK k lam v e x := by
   intro s hs1 hsk _
   exact ⟨fun _ => (h s hs1 hsk).1, fun _ => (h s hs1 hsk).2⟩
-
-theorem pairOK_moved (k l : ℕ) (lam u v : ℕ → ℝ) (x : ℝ)
-    (h : ∀ s, 1 ≤ s → s ≤ k - 1 → lam s + 1 / 2 ≤ u s ∧ u (s + 1) ≤ lam s - 1 / 2)
-    (hv : ∀ i, i ≠ l → i ≠ l + 1 → v i = u i)
-    (hlow : ∀ s, 1 ≤ s → s < l → x < lam s) (hhigh : ∀ s, l < s → s ≤ k - 1 → lam s ≤ x) :
-    PairOK k lam v l x := by
-  intro s hs1 hsk hsl
-  rcases lt_or_gt_of_ne hsl with hlt | hgt
-  · have hx := hlow s hs1 hlt
-    refine ⟨fun _ => ?_, fun hle => absurd hx (not_lt.mpr hle)⟩
-    rw [hv s (by omega) (by omega)]
-    exact (h s hs1 hsk).1
-  · have hx := hhigh s hgt hsk
-    refine ⟨fun hlt => absurd hx (not_le.mpr hlt), fun _ => ?_⟩
-    rw [hv (s + 1) (by omega) (by omega)]
-    exact (h s hs1 hsk).2
 
 end GroundTheory.BlockD.FourierDecayAlt.WaveGridLiftGrid

@@ -1,14 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.ExistsIdempotentHeckeOperatorWithRegularSupportAlt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.FacEx
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.InvTMemSim
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.PLocComm
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PKNOpen
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PKNIdx
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PKNIff
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PLatCoord
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PRepLaws
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriAndMaximalCompactCriteria
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.ExistsIdempotentHeckeOperatorWithRegularSupportAlt
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.InvTMemSim
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.PLocComm
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.FacEx
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PKNIdx
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PKNIff
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PKNOpen
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PLatCoord
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PRepLaws
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwahoriAndMaximalCompactCriteria
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,8 +56,10 @@ noncomputable section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKGeo GlobalTheory.LKMid GlobalTheory.LKDef GlobalTheory.CuspRep GlobalTheory.UnitaryBC
 open UpperTheory.Gal.CertificateRingHomMap (GUf Plc comp cj lev GLw mat sim)
-open UpperTheory.Gal.LocalSmoothExtension UpperTheory.Gal.W2.Seed
-open UpperTheory.Gal.Int.Geo UpperTheory.Gal.Int.Geo.Pl
+open UpperTheory.Gal.LocalSmoothExtension
+open UpperTheory.Gal.W2.Seed (Arith Setup Cong1 apart_of_not_mem pKNOpen pKNIdx pKNIff pLatCoord pRepLaws)
+open UpperTheory.Gal.Int.Geo
+open UpperTheory.Gal.Int.Geo.Pl (Frame)
 open GlobalTheory.LFun (KGL)
 open scoped TensorProduct Classical
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -44,16 +86,16 @@ private theorem relIndex_ne_zero_of_open {X : Type*} [Group X] [TopologicalSpace
 
 private theorem isCompact_comap_th (F : Frame S) {K : Subgroup (GUf E n)} (hK : IsCompact (K : Set (GUf E n))) :
     IsCompact ((K.comap F.th : Subgroup (GUf E n)) : Set (GUf E n)) := by
-  convert hK.image continuous_th using 1
-  ext g
-  constructor
-  · intro h
-    refine ⟨F.th g, h, ?_⟩
-    rw [th_eq, UpperTheory.Gal.CertificateRingHomMap.th_th]
-  · rintro ⟨y, hy, rfl⟩
-    show F.th (CertificateRingHomMap.th y) ∈ K
-    rw [th_eq, UpperTheory.Gal.CertificateRingHomMap.th_th]
-    exact hy
+  have hImage : (K.comap F.th : Set (GUf E n)) = CertificateRingHomMap.th '' (K : Set (GUf E n)) := by
+    ext g
+    constructor
+    · intro h
+      exact ⟨F.th g, h, by rw [th_eq F, CertificateRingHomMap.th_th]⟩
+    · rintro ⟨y, hy, rfl⟩
+      change F.th (CertificateRingHomMap.th y) ∈ K
+      rwa [th_eq F, CertificateRingHomMap.th_th]
+  rw [hImage]
+  exact hK.image continuous_th
 
 private theorem relIdx (F : Frame S) {K : Subgroup (GUf E n)} (hK : IsCompact (K : Set (GUf E n))) (N : ℕ) (hN : 0 < N) :
     (S.L.KN N).relIndex ((K.comap F.th).map F.j) ≠ 0 := by
@@ -64,11 +106,10 @@ private theorem relIdx (F : Frame S) {K : Subgroup (GUf E n)} (hK : IsCompact (K
 
 private theorem cong_at (F : Frame S) (k : GUf E n) (N : ℕ) (hN : 0 < N) (hk : S.L.CongOne N (F.j k)) (w : Plc E)
     (hp : (p : 𝓞 E) ∉ w.asIdeal) : Cong1 N w (F.a w * comp w k * (F.a w)⁻¹) := by
+  have hk' : S.L.CongOne N (F.tr.j k) := by simpa only [← F.j_tr] using hk
   have h := ((pKNIff (pLatCoord pRepLaws)) E A n p S F.tr k).2 N hN
-  rw [← F.j_tr] at h
-  have := h.1 hk w hp
-  rw [map_mul, map_mul, map_inv, ← F.a_tr] at this
-  exact this
+  simpa only [map_mul, map_inv, ← F.a_tr w, CertificateRingHomMap.comp, MonoidHom.comp_apply]
+    using h.mp hk' w hp
 
 private theorem val_nat_lt_one {w : Plc E} {r N : ℕ} (hr : (r : 𝓞 E) ∈ w.asIdeal) (hN : r ∣ N) :
     Valued.v (N : w.adicCompletion E) < 1 := by
@@ -96,7 +137,7 @@ private theorem mul_lt_right {w : Plc E} {A B : Matrix (Fin n) (Fin n) (w.adicCo
   rw [map_mul]
   exact lt_of_le_of_lt (mul_le_mul' le_rfl (hB _ _)) (by simpa using hA i l)
 
-private theorem sub_lt_of_conj {w : Plc E} (a g : GLw n w) (ha : a ∈ KGL w n)
+private theorem sub_lt_of_conj {w : Plc E} (a g : GLw n w) (ha : a ∈ KGL w (n := n))
     (h : ∀ i k, Valued.v (((a * g * a⁻¹).val - 1) i k) < 1) (i k : Fin n) : Valued.v ((g.val - 1) i k) < 1 := by
   have hK := ((GlobalTheory.CompanionTheory.IwEntries.iwGL_KGL_entries E w n a).2).1 ha
   have e : g.val - 1 = (a⁻¹).val * ((a * g * a⁻¹).val - 1) * a.val := by
@@ -116,7 +157,7 @@ private theorem le_one_of_sub_lt {w : Plc E} {g : GLw n w} (h : ∀ i k, Valued.
   refine (Valuation.map_add _ _ _).trans (max_le (h i k).le ?_)
   by_cases hik : i = k <;> simp [hik, Matrix.one_apply]
 
-private theorem iw_of_cong {w : Plc E} (a g : GLw n w) (ha : a ∈ KGL w n)
+private theorem iw_of_cong {w : Plc E} (a g : GLw n w) (ha : a ∈ KGL w (n := n))
     (h : ∀ i k, Valued.v (((a * g * a⁻¹).val - 1) i k) < 1)
     (h' : ∀ i k, Valued.v (((a * g⁻¹ * a⁻¹).val - 1) i k) < 1) : g ∈ Iw n w := by
   have c1 := sub_lt_of_conj a g ha h

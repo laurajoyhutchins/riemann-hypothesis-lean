@@ -1,7 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.WinUpDown
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalDoubleCosets.OfSupportHolds
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.UnlSph
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalFieldTwoVocabulariesDictionaryStatement
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.WinUpDown
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedPrincipalSeriesNoInvariant
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSubquotientUnramPrinSeriesOfHasSupport
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParIndJacPlacing
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PrincipalSeriesSubquotientOfCharacters
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalDoubleCosets.OfSupportHolds
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalPairIrreducibleUnlinked
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnitaryDualGLOfTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NontrivialOfIsSubquotient
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,10 +137,36 @@ private theorem prinSeries_irreducible {n : ℕ} (ω : Fin n → kˣ →* ℂˣ)
   have hM : (multiProd (Equiv.sigmaUnique (Fin n) fun _ => Fin 1)
       fun a => detRep (Fin 1) (ω a)).IsIrreducible :=
     GlobalTheory.Parabolic.isIrreducible_of_equiv (E1.trans E2) hirr
-  haveI := nontrivial_of_irreducible hM
-  haveI := nontrivial_of_isSubquotient
+  have hn {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
+      [Module ℂ W] {σ : Representation ℂ G W} {ρ : Representation ℂ G V}
+      (h : IsSubquotient σ ρ) (hW : Nontrivial W) : Nontrivial V := by
+    letI := hW
+    obtain ⟨S, f, hf⟩ := h
+    have := hf.nontrivial
+    exact Subtype.val_injective.nontrivial (α := S.toSubmodule)
+  haveI := hn
     (GlobalTheory.PermPrin.isSubquotient_multiProd_prinSeries (Equiv.sigmaUnique (Fin n) fun _ => Fin 1) ω)
-  obtain ⟨E3⟩ := equiv_of_isSubquotient (GlobalTheory.PrinProd.isSubquotient_prinSeries_multiProd k n ω) hM
+    (nontrivial_of_irreducible hM)
+  have he {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
+      [Module ℂ W] {σ : Representation ℂ G W} {ρ : Representation ℂ G V}
+      (h : IsSubquotient σ ρ) [Nontrivial W] (hρ : ρ.IsIrreducible) :
+      Nonempty (ρ.Equiv σ) := by
+    obtain ⟨S, f, hf⟩ := h
+    obtain ⟨y, hy⟩ := exists_ne (0 : W)
+    obtain ⟨v, rfl⟩ := hf y
+    haveI : IsSimpleOrder (Subrepresentation ρ) := hρ
+    rcases eq_bot_or_eq_top S with rfl | rfl
+    · exact absurd (by rw [show v = 0 from Subtype.ext v.2, map_zero]) hy
+    let F : ρ.IntertwiningMap σ := f.comp (topEquiv ρ).symm.toIntertwiningMap
+    have hs : Function.Surjective F := hf.comp (topEquiv ρ).symm.toLinearEquiv.surjective
+    refine ⟨equivOfBijective F ⟨(injective_iff_map_eq_zero _).2 fun x hx => ?_, hs⟩⟩
+    rcases eq_bot_or_eq_top F.ker with h | h
+    · have : x ∈ F.ker := hx
+      rw [h] at this
+      exact this
+    · have : v.1 ∈ F.ker := by rw [h]; trivial
+      exact absurd this hy
+  obtain ⟨E3⟩ := he (GlobalTheory.PrinProd.isSubquotient_prinSeries_multiProd k n ω) hM
   exact GlobalTheory.Parabolic.isIrreducible_of_equiv E3 hM
 
 end Loc

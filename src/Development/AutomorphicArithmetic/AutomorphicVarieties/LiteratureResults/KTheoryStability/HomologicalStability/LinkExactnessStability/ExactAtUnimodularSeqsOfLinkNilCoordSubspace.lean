@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LinkExactAff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.HomologicalStability.LinkExactnessStability.SeqChainExactAtMapIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LinkExactAff
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.GroupTheory.GroupAction.Ring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.SeqCx Matrix
 
@@ -11,12 +59,12 @@ noncomputable def emb (R : Type) [CommRing R] (m : ℕ) : (Fin m → R) →ₗ[R
 
 theorem emb_apply_val {R : Type} [CommRing R] {m : ℕ} (v : Fin m → R) (k : Fin m) :
     emb R m v (k : ℕ) = v k := by
-  simp [emb, Finsupp.mapDomain_apply Fin.val_injective]
+  simp [emb, Finsupp.mapDomain_apply_of_injective Fin.val_injective]
 
 theorem emb_apply_of_le {R : Type} [CommRing R] {m : ℕ} (v : Fin m → R) (n : ℕ) (h : m ≤ n) :
     emb R m v n = 0 := by
   simp only [emb, LinearMap.comp_apply, Finsupp.lmapDomain_apply, LinearEquiv.coe_coe]
-  apply Finsupp.mapDomain_notin_range
+  apply Finsupp.mapDomain_of_notMem_range
   rintro ⟨k, hk⟩
   have hk2 := k.isLt
   omega
@@ -51,8 +99,9 @@ theorem emb_form {R : Type} [CommRing R] {m : ℕ} (f : (ℕ →₀ R) →ₗ[R]
     by_cases hj : j = k
     · subst hj
       simp
-    · simp [Pi.single_apply, hj]
+    · simp [hj]
   conv_rhs => rw [← Finset.univ_sum_single v]
+
   simp only [map_sum, hs, map_smul, smul_eq_mul, dotProduct]
   refine Finset.sum_congr rfl ?_
   intro k _
@@ -61,7 +110,7 @@ theorem emb_form {R : Type} [CommRing R] {m : ℕ} (f : (ℕ →₀ R) →ₗ[R]
 theorem link_eq (R : Type) [CommRing R] (m : ℕ) :
     linkIn (uniM R (ℕ →₀ R)) (low R m) [] = List.map (emb R m) '' uniSeq R m := by
   ext w
-  simp only [linkIn, Set.mem_setOf_eq, List.nil_append, Set.mem_image]
+  simp only [linkIn, Set.mem_ofPred_eq, List.nil_append, Set.mem_image]
   constructor
   · rintro ⟨hw, f, hf⟩
     refine ⟨w.map (fun x (k : Fin m) => x k), ⟨fun i k => f (Fin.cast (by simp) i) (emb R m (Pi.single k 1)), ?_⟩, ?_⟩
@@ -98,7 +147,7 @@ private theorem exactAt_of_exactAt_image_injective {V U : Type} (e : V → U) (h
       apply Finsupp.lhom_ext'
       intro l
       apply LinearMap.ext_ring
-      simp [bd, Finsupp.mapDomain_finset_sum, Finsupp.mapDomain_smul, Finsupp.mapDomain_single, List.eraseIdx_map]
+      simp [bd, map_sum, Finsupp.lmapDomain_apply, Finsupp.mapDomain_smul, Finsupp.mapDomain_single, List.eraseIdx_map]
     exact LinearMap.congr_fun E c
   intro c hc hbc
   have hc' : Finsupp.mapDomain (List.map e) c ∈ chains (List.map e '' F) q := by

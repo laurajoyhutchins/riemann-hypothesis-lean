@@ -1,11 +1,59 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SExpDefs
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.MixedFourierArchSchwartz
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SExpDefs
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.AbsoluteConvergenceHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.IdeleModuleFiniteEmbeddingUnit
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.LocalExpansionHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.MeasurePreservingPhiA
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.MixedFourierArchSchwartz
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.PointwiseThetaExpansion
 import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.UnitaryTransvectionZeroSecondMemClosure
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.PointwiseThetaExpansion
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.LocalExpansionHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.AbsoluteConvergenceHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.MeasurePreservingPhiA
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.IdeleModuleFiniteEmbeddingUnit
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -232,9 +280,8 @@ theorem sExp_assembly (hPt : SPoint) (hZ : SZero) (hNl : SNull) (hA : SAbs) (hU 
   have h2 := (he.hasSum_iff hout).2 hSint
   convert h2 using 1
   funext ξ
-  simp only [Function.comp_apply, hcoef, e, Units.val_mk0]
   have hξ2 := ξ.2
-  simp only [hξ2, implies_true, ↓reduceIte]
+  simp only [Function.comp_apply, hcoef, e, Units.val_mk0, hξ2, implies_true, ↓reduceIte]
   show coefAt (fun 𝔪 => C₀ * divS ω c 𝔪) _ * _ = _
   rw [coefAt_const_mul, ex]
   have hs : ∑ v, (reAt v ξ.1 : ℂ) * ((x v : ℂ) + Complex.I * (y.val v : ℂ)) =

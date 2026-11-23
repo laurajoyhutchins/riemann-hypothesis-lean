@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsMoreMore
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KerAltSucc
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisFurther
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCechDSq
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsMoreMore
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KerAltSucc
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisFurther
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCechDSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -160,18 +207,18 @@ section Double
 variable {F : Type} [Field F] {K : Type} [Fintype K] [LinearOrder K] {ι : K → Type} [∀ k, LinearOrder (ι k)]
   {Ω : Type} [Field Ω] [Algebra F Ω] {N : ℕ} {x : Fin (N + 1) → Ω}
 
-variable (K ι Ω x) in
 
+variable (K ι Ω x) in
 abbrev DoubleCech.Amb (q p : ℕ) : Type :=
   Kleiman.Cech.Cochain (fun _ : Kleiman.Chart x => ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.Cell K ι q → Ω) p
 
-variable (F K ι Ω x) in
 
+variable (F K ι Ω x) in
 def DoubleCech.vert (q p : ℕ) : DoubleCech.Amb K ι Ω x q p →ₗ[F] DoubleCech.Amb K ι Ω x q (p + 1) :=
   Kleiman.Cech.d (fun _ : Kleiman.Chart x => ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.Cell K ι q → Ω) (fun _ _ _ => LinearMap.id) p
 
-variable (F) in
 
+variable (F) in
 def DoubleCech.horiz (y : (Σ k, ι k) → Ω) (q p : ℕ) :
     DoubleCech.Amb K ι Ω x q p →ₗ[F] DoubleCech.Amb K ι Ω x (q + 1) p :=
   Kleiman.Cech.mapC (G := fun _ : Kleiman.Chart x => ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.Cell K ι q → Ω)
@@ -200,8 +247,8 @@ theorem DoubleCech.vert_apply {q p : ℕ} (s : DoubleCech.Amb K ι Ω x q p) (J 
   rw [Kleiman.Cech.d_apply]
   simp only [Finset.sum_apply, Pi.smul_apply, LinearMap.id_apply]
 
-omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 
+omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 theorem DoubleCech.d_eval {q p : ℕ} (s : DoubleCech.Amb K ι Ω x q p) (c : ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.Cell K ι q) :
     Kleiman.Cech.d (fun _ : Kleiman.Chart x => Ω) (omegaRes F x) p (fun J => s J c) =
       fun J => DoubleCech.vert F K ι Ω x q p s J c := by
@@ -225,8 +272,8 @@ def DoubleCech.hD (y : (Σ k, ι k) → Ω) (M : Kleiman.Chart x → (∀ k, Fin
     rw [DoubleCech.mem_dsub'] at hs ⊢
     exact fun J => cellD_mem (M J.1) (fun I I' _ _ h h' => hMI J.1 I I' h h') (hs J)
 
-open Classical in
 
+open Classical in
 def DoubleCech.aug (y : (Σ k, ι k) → Ω) (T : Kleiman.SubSystem F x Ω)
     (M : Kleiman.Chart x → (∀ k, Finset (ι k)) → Submodule F Ω)
     (hrow : ∀ J, CellAugExact F y (M J) ((T.sub J).restrictScalars F)) (p : ℕ) :
@@ -423,8 +470,8 @@ theorem DoubleCech.col_succ (hMJ : ∀ (J J' : Kleiman.Chart x) I, J.1 ⊆ J'.1 
       (fun _ : Kleiman.Chart x => ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.Cell K ι q → Ω) (fun _ _ _ => LinearMap.id)
       (fun _ _ _ _ _ => LinearMap.id_comp _) p t.1)
 
-omit [Fintype K] [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 
+omit [Fintype K] [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 theorem DoubleCech.B_mono {B : (∀ k, Finset (ι k)) → Submodule F Ω}
     (hMI : ∀ J (I I' : ∀ k, Finset (ι k)), (∀ k, I k ⊆ I' k) → CellMeets y I' → M J I ≤ M J I')
     (hcol : ∀ I : ∀ k, Finset (ι k), (∀ k, (I k).Nonempty) → CellMeets y I → CechAugExact F (fun J => M J I) (B I))
@@ -447,6 +494,7 @@ section Ends
 variable {F : Type} [Field F] {K : Type} [Fintype K] [LinearOrder K] {ι : K → Type} [∀ k, LinearOrder (ι k)]
   {Ω : Type} [Field Ω] [Algebra F Ω] {N : ℕ} {x : Fin (N + 1) → Ω} {y : (Σ k, ι k) → Ω}
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem DoubleCech.T_equiv (T : Kleiman.SubSystem F x Ω) (n : ℕ) :
     Nonempty (T.H n ≃ₗ[F] Staircase.H (fun p => Kleiman.Cech.d (fun J => ↥(T.sub J)) T.res p) n) := by
   cases n <;> exact ⟨LinearEquiv.refl F _⟩
@@ -487,6 +535,7 @@ theorem DoubleCech.B_equiv {B : (∀ k, Finset (ι k)) → Submodule F Ω}
 
 end Ends
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem DoubleCech.proof (hS : Staircase.Statement) (hSq : CellDSq.Statement) : DoubleCech.Statement := by
   intro F _ K _ _ ι _ _ Ω _ _ y N x T B M hy hx hB hM hMJ hMI hcol hrow n
   classical

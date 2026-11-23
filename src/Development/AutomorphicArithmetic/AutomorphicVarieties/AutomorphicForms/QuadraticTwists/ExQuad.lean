@@ -1,10 +1,69 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Hypotheses2
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LocIsotypic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.SplittingFieldIsoQuadratic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.KstarRam
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.PlaceBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.GalEmbTop
-import Mathlib.NumberTheory.Padics.Hensel
+module
+
+public import Mathlib.NumberTheory.NumberField.CMField
+public import ReciprocityTheory.GaloisValuations.Global
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.KstarRam
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.SplittingFieldIsoQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+public import Mathlib.NumberTheory.LSeries.PrimesInAP
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.Hensel
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.LocalRingCardinality.SpanPowerMembership.NZTypeD
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Polynomial
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published
@@ -94,7 +153,7 @@ private theorem nonempty_ringHom_Kstar_of_sq_eq_neg (l : ℕ) [Fact l.Prime] (p 
   have hf : (map (algebraMap ℚ ℚ_[l]) (X ^ 2 + C (p : ℚ))) = (X - C s) * (X - C (-s)) := by
     have h' : C s ^ 2 = -C (p : ℚ_[l]) := by rw [← C_pow, hs, C_neg]
     rw [map_natCast] at h'
-    simp only [Polynomial.map_add, Polynomial.map_pow, map_X, map_C, map_natCast, Polynomial.map_natCast, C_neg]
+    simp only [Polynomial.map_add (f := _), Polynomial.map_pow, map_X, map_C, map_natCast, Polynomial.map_natCast, C_neg]
     linear_combination h'
   have hsp : (map (algebraMap ℚ ℚ_[l]) (X ^ 2 + C (p : ℚ))).Splits := by
     rw [hf]
@@ -153,7 +212,11 @@ theorem UpperTheory.V.Af.Cq.exQuad :
     exact this
   obtain ⟨ι⟩ := nonempty_ringHom_Kstar_of_sq_eq_neg l p s hs'
   obtain ⟨-, htc, hfr, -⟩ := HV.kstar p hp hp4
-  let φ : Kstar p →ₐ[ℚ] Ω := IsAlgClosed.lift
+  let φ : Kstar p →ₐ[ℚ] Ω := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   letI alg : Algebra (Kstar p) Ω := φ.toRingHom.toAlgebra
   haveI tower : IsScalarTower ℚ (Kstar p) Ω :=
     IsScalarTower.of_algebraMap_eq (fun x => (φ.commutes x).symm)

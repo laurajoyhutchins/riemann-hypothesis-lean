@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DatVtEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DatVtEq
+public import Formalism.LocalToGlobal.Divisibility.RowSideTie
+public import Formalism.LocalToGlobal.GaloisLevelStructure.TiedLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,9 +51,9 @@ namespace GlobalTheory.MtIn
 
 variable {D : D7}
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure SideIn (V : HSp D) (β : GL (Fin V.rank) (EAf D)) (c : CoefA V) (j : ℕ) (hr : D.R.r ≤ V.rank)
     (Pg Q : Finset (Pl D.host.E)) (chi xi : ∀ PP : Pl D.host.E, (kP PP)ˣ →* ℂˣ)
     (ψ : ∀ PP : Pl D.host.E, AddChar (kP PP) ℂ) : Type 1 where
@@ -58,9 +98,9 @@ def fn (x : Fin u.dim → D.what₂.LL) : Bridge.Gf V → c.W := u.pres.ext (lvl
 
 end SideIn
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure TupIn (μ : D.what₂.Tup) (i : Fin D.R.m) (c : CoefA (Vc D i)) {T : Type} (L : LevCh D T) (t : T)
     (ψ : ∀ PP : Pl D.host.E, AddChar (kP PP) ℂ) : Type 1 where
   u : SideIn (Vc D i) (L.βV i) c ((i : ℕ) + 1) (r_le_V i) L.Pg (L.Q t) (L.chi ((i : ℕ) + 1)) (L.xiR t) ψ

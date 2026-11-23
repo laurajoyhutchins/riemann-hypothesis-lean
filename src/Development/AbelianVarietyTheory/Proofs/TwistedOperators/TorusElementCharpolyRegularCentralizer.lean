@@ -1,5 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.EllipticPartTestData
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHasCls
+
+@[expose] public section
+
 open MeasureTheory Set Filter Polynomial NumberField IsDedekindDomain
 open GlobalTheory.AdelicU GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.IndefiniteRowSideFullHecke.PlusPolynomialRoots GlobalTheory.TrEll
@@ -26,11 +73,11 @@ theorem lT_smul (f : Fld P →ₗ[E] E) (a : k ⊗[F] E) (z : k ⊗[F] Fld P) :
     LinearMap.lTensor k (f.restrictScalars F) (a • z) = a * LinearMap.lTensor k (f.restrictScalars F) z := by
   induction a using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => rw [add_smul, map_add, ha, hb, add_mul]
+  | add a b ha hb => rw [add_smul, map_add (f := _), ha, hb, add_mul]
   | tmul k1 e1 =>
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add z w hz hw => rw [smul_add, map_add, hz, hw, map_add, mul_add]
+    | add z w hz hw => rw [smul_add, map_add (f := _), hz, hw, map_add (f := _), mul_add]
     | tmul k2 l =>
       rw [tmul_smul_tmul, LinearMap.lTensor_tmul, LinearMap.lTensor_tmul, Algebra.TensorProduct.tmul_mul_tmul,
         LinearMap.restrictScalars_apply, LinearMap.restrictScalars_apply, f.map_smul, smul_eq_mul]
@@ -53,13 +100,14 @@ def tEquiv : (k ⊗[F] Fld P) ≃ₗ[k ⊗[F] E] (ι → k ⊗[F] E) where
     induction z using TensorProduct.induction_on with
     | zero => simp
     | add z w hz hw =>
-      simp only [map_add, add_smul, Finset.sum_add_distrib] at hz hw ⊢
+      simp only [map_add (f := _), add_smul, Finset.sum_add_distrib] at hz hw ⊢
       rw [hz, hw]
     | tmul c y =>
       simp only [crd_tmul, tmul_smul_tmul, mul_one]
       rw [← TensorProduct.tmul_sum, b.sum_repr]
   right_inv v := by
     funext j
+
     simp only [map_sum]
     rw [Finset.sum_eq_single j]
     · rw [crd_smul, crd_tmul]
@@ -136,8 +184,8 @@ variable (k) in
 theorem trBase_smul (a : k ⊗[F] E) (z : k ⊗[F] Fld P) : trBase P k (a • z) = a * trBase P k z :=
   lT_smul P k (Algebra.trace E (Fld P)) a z
 
-variable (k) in
 
+variable (k) in
 theorem eq_zero_of_trBase [NumberField E] (z : k ⊗[F] Fld P) (hz : ∀ y, trBase P k (z * y) = 0) : z = 0 := by
   classical
   let b := (pb P).basis
@@ -153,6 +201,7 @@ theorem eq_zero_of_trBase [NumberField E] (z : k ⊗[F] Fld P) (hz : ∀ y, trBa
     rw [trBase, LinearMap.lTensor_tmul, LinearMap.restrictScalars_apply, this]
     split_ifs <;> simp [Algebra.TensorProduct.one_def]
   have h := hz ((1 : k) ⊗ₜ[F] d i)
+
   rw [← (bb P k b).sum_repr z, Finset.sum_mul, map_sum] at h
   simp only [smul_mul_assoc, trBase_smul, bb_apply, Algebra.TensorProduct.tmul_mul_tmul, one_mul, key, mul_ite,
     mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true] at h
@@ -215,6 +264,7 @@ theorem torUnit_injective : Function.Injective (torUnit (P := P) (k := k)) := fu
 
 theorem commute_mulMat {φ : (k ⊗[F] Fld P) ≃ₗ[k ⊗[F] E] (Fin n → k ⊗[F] E)} {G : Matrix (Fin n) (Fin n) (k ⊗[F] E)}
     (hG : Commute G (mulMat φ ((1 : k) ⊗ₜ[F] alpha P))) (z : k ⊗[F] Fld P) : Commute G (mulMat φ z) := by
+
   rw [← (bb P k (pb P).basis).sum_repr z, ← mulAlg_apply, map_sum]
   refine Commute.sum_right _ _ _ fun i _ => ?_
   rw [map_smul, bb_apply, PowerBasis.coe_basis, pb_gen, ← one_pow (i : ℕ), ← Algebra.TensorProduct.tmul_pow, map_pow,
@@ -296,8 +346,8 @@ end GlobalTheory.TrEll.GamAlg
 
 namespace GlobalTheory.TrEll
 
-open GamAlg in
 
+open GamAlg in
 theorem gam_charpoly_regular_cent : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (r n : ℕ) (P : PPol σ r) (J : Matrix (Fin n) (Fin n) E), IsHermND σ J →
     ∀ (k : Type) [CommRing k] [Algebra F k], ∀ (x : plusUnits P k)

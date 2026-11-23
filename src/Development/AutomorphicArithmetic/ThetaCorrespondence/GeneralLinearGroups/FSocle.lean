@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.ThetaCorrespondence.GeneralLinearGroups.FirstIn
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SocleOfMultiplicityOne
+module
+
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.GeneralLinearGroups.FirstIn
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSemisimpleRepresentationTprodChevalley
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SocleOfMultiplicityOne
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
+
+@[expose] public section
 
 open Filter Topology GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.JHMult UpperTheory.Lit.Cas UpperTheory.Lit.Red
 
@@ -18,7 +61,7 @@ private theorem exists_isAtom {G V : Type} [Group G] [AddCommGroup V] [Module �
   exact ⟨S, hS⟩
 
 theorem UpperTheory.Lit.Full.socle :
-    GlobalTheory.Published.BernsteinZelevinskyFiniteness → ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (y z : IrrGL k), (∃ x, Emb x y z) ∧ ∀ (N : ℕ) (hd : ∑ a, (![y, z] a).1 = N), jm ![y, z] hd (prodIrr ![y, z] hd) ≤ 1 → ∀ x x', Emb x y z → Emb x' y z → x = x' := by
+    GlobalTheory.Published.BernsteinZelevinskyFiniteness → ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (y z : IrrGL (k := k)), (∃ x, Emb x y z) ∧ ∀ (N : ℕ) (hd : ∑ a, (![y, z] a).1 = N), jm ![y, z] hd (prodIrr ![y, z] hd) ≤ 1 → ∀ x x', Emb x y z → Emb x' y z → x = x' := by
   intro hBZ k _ _ _ _ y z
   have hA : GlobalTheory.Published.IrreducibleAdmissibleGL := fun k _ _ _ _ n V _ _ π => (hBZ k).1 (Fin n) V π
   have hρ : (piTensor fun a => (![y, z] a).rep).IsIrreducible :=
@@ -30,12 +73,17 @@ theorem UpperTheory.Lit.Full.socle :
     obtain ⟨S, hS⟩ := exists_isAtom (prodIrr ![y, z] hd)
       ((hBZ k).2.2.1 _ _ _ _ _ _ hsρ (hasFiniteLength_of_isIrreducible hρ))
     let ι : S.toRepresentation.IntertwiningMap (prodIrr ![y, z] hd) := ⟨S.toSubmodule.subtype, fun _ => rfl⟩
+    have hι : Function.Injective ι := Subtype.val_injective
     have hSs : IsSmooth S.toRepresentation :=
-      (IsSubquotient.of_injective ι Subtype.val_injective).isSmooth (isSmooth_prodIrr _ hd)
+      (IsSubquotient.of_injective ι hι).isSmooth (isSmooth_prodIrr _ hd)
     have hSi := GlobalTheory.ClassFin.isIrreducible_toRepresentation_of_isAtom S hS
-    let φ := (IrrGL.equivOf S.toRepresentation hSs hSi).symm
-    exact ⟨IrrGL.of S.toRepresentation hSs hSi, hd, ι.comp φ.toIntertwiningMap,
-      Subtype.val_injective.comp φ.toLinearEquiv.injective⟩
+    let τ := IrrGL.of S.toRepresentation hSs hSi
+    let φ : τ.rep.Equiv S.toRepresentation := (IrrGL.equivOf S.toRepresentation hSs hSi).symm
+    let f : τ.rep.IntertwiningMap (prodIrr ![y, z] hd) := ι.comp φ.toIntertwiningMap
+    have hf : Function.Injective f.toLinearMap.toFun := by
+      change Function.Injective (fun v => ι (φ.toLinearEquiv v))
+      exact hι.comp φ.toLinearEquiv.injective
+    exact ⟨τ, hd, f, hf⟩
   · obtain ⟨n, c⟩ := x
     obtain ⟨n', c'⟩ := x'
     obtain ⟨h1, f, hf⟩ := hx

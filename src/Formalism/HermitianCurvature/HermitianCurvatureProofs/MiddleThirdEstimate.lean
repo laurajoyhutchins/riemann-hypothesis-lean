@@ -1,65 +1,52 @@
-import Formalism.HermitianCurvature.StatementE
+module
+
+public import Formalism.HermitianCurvature.StatementE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.E2
 
 open Formalism.FourierDecayAlt.E Real Polynomial MeasureTheory
-
-theorem middleThird_ok : MiddleThird := by
-  intro n lam α β Y hI hroot hY1 hY2
-  have hL : 0 < β - α := by linarith
-  have key : ∀ s, (β-α)/3 ≤ |Y + lam s| := by
-    intro s
-    have h := hroot s
-    simp only [Set.mem_Ioo, not_and_or, not_lt] at h
-    rcases h with h | h
-    · rw [le_abs]; left; linarith
-    · rw [le_abs]; right; linarith
-  have key2 : ∀ s, (β-α)/4 ≤ |Y + 1 + lam s| := by
-    intro s
-    have h := hroot s
-    simp only [Set.mem_Ioo, not_and_or, not_lt] at h
-    rcases h with h | h
-    · rw [le_abs]; left; linarith
-    · rw [le_abs]; right; linarith
-  constructor
-  · rw [← Finset.prod_div_distrib, Finset.abs_prod]
-    calc ∏ s, |(Y + 1 + lam s) / (Y + lam s)| ≤ ∏ _s : Fin n, Real.exp (3 / (β - α)) := by
-          apply Finset.prod_le_prod (fun s _ => abs_nonneg _)
-          intro s _
-          have h1 := key s
-          have hpos : 0 < |Y + lam s| := by linarith
-          have hne : Y + lam s ≠ 0 := abs_pos.mp hpos
-          have e0 : (Y + 1 + lam s) / (Y + lam s) = 1 + 1 / (Y + lam s) := by field_simp; ring
-          rw [e0]
-          calc |1 + 1 / (Y + lam s)| ≤ 1 + 1/|Y + lam s| := by
-                 have := abs_add_le (1:ℝ) (1 / (Y + lam s))
-                 rw [abs_one, abs_div, abs_one] at this; exact this
-            _ ≤ 1 + 3/(β-α) := by
-                 have h2 : 1/|Y + lam s| ≤ 1/((β-α)/3) := one_div_le_one_div_of_le (by linarith) h1
-                 have e : 1/((β-α)/3) = 3/(β-α) := by field_simp
-                 linarith
-            _ ≤ Real.exp (3/(β-α)) := by linarith [Real.add_one_le_exp (3/(β-α))]
-      _ = Real.exp (3 * n / (β - α)) := by
-          rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin, ← Real.exp_nat_mul]; congr 1; ring
-  · rw [← Finset.prod_div_distrib, Finset.abs_prod]
-    calc ∏ s, |(Y + lam s) / (Y + 1 + lam s)| ≤ ∏ _s : Fin n, Real.exp (4 / (β - α)) := by
-          apply Finset.prod_le_prod (fun s _ => abs_nonneg _)
-          intro s _
-          have h1 := key2 s
-          have hpos : 0 < |Y + 1 + lam s| := by linarith
-          have hne : Y + 1 + lam s ≠ 0 := abs_pos.mp hpos
-          have e0 : (Y + lam s) / (Y + 1 + lam s) = 1 + (-1) / (Y + 1 + lam s) := by field_simp; ring
-          rw [e0]
-          calc |1 + (-1) / (Y + 1 + lam s)| ≤ 1 + 1/|Y + 1 + lam s| := by
-                 have := abs_add_le (1:ℝ) ((-1) / (Y + 1 + lam s))
-                 rw [abs_one, abs_div, abs_neg, abs_one] at this; exact this
-            _ ≤ 1 + 4/(β-α) := by
-                 have h2 : 1/|Y + 1 + lam s| ≤ 1/((β-α)/4) := one_div_le_one_div_of_le (by linarith) h1
-                 have e : 1/((β-α)/4) = 4/(β-α) := by field_simp
-                 linarith
-            _ ≤ Real.exp (4/(β-α)) := by linarith [Real.add_one_le_exp (4/(β-α))]
-      _ = Real.exp (4 * n / (β - α)) := by
-          rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin, ← Real.exp_nat_mul]; congr 1; ring
 
 theorem bdd_add' {Λ : Type} {f g : Λ → ℂ} (hf : Bdd f) (hg : Bdd g) : Bdd (f + g) := by
   obtain ⟨a, ha⟩ := hf; obtain ⟨b, hb⟩ := hg
@@ -131,5 +118,4 @@ theorem mpd : MeanPosDef := by
 
 end Formalism.FourierDecayAlt.P.E2
 
-theorem Formalism.FourierDecayAlt.P.middle_third_estimate : Formalism.FourierDecayAlt.E.MiddleThird := Formalism.FourierDecayAlt.P.E2.middleThird_ok
 theorem Formalism.FourierDecayAlt.P.mean_matrix_posDef : Formalism.FourierDecayAlt.E.MeanPosDef := Formalism.FourierDecayAlt.P.E2.mpd

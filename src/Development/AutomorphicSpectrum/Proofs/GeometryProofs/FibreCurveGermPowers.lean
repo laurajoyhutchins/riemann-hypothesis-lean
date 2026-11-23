@@ -1,10 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSubMemEigW
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionHiddenFirstStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibreCurveDegreeCompareStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibrePowerFreeConjInjectiveStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ProjectiveLinePlaceTrivialOnConstants
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalIsomorphismTransportStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSubMemEigW
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibreCurveDegreeCompareStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibrePowerFreeConjInjectiveStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalIsomorphismTransportStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionHiddenFirstStatement
+import Mathlib.Algebra.CharP.Subring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LocalComponentsSurjective
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
 open scoped CategoryTheory.Obj
@@ -17,13 +67,17 @@ namespace GlobalTheory.CompanionTheory.Ar.Flat.DegZ.GermFam
 
 theorem isMapOf_cancel {R R₁ R₂ : Type} [CommRing R] [CommRing R₁] [CommRing R₂] {d : ℕ} {O : Type} [CommRing O]
     [StarRing O] {f : R →+* R₁} {g : R₁ →+* R₂} {B : Germ.FB R d O} {B₁ : Germ.FB R₁ d O} {B₂ : Germ.FB R₂ d O}
-    (h : IsMapOf f B B₁) (h' : IsMapOf (g.comp f) B B₂) : IsMapOf g B₁ B₂ where
-  F := fun i => by rw [h'.F, h.F, MvPowerSeries.map_comp]; rfl
-  act := fun a i => by rw [h'.act, h.act, MvPowerSeries.map_comp]; rfl
-  ph1 := by rw [h'.ph1, h.ph1, MvPowerSeries.map_comp]; rfl
-  ph2 := by rw [h'.ph2, h.ph2, MvPowerSeries.map_comp]; rfl
-  sy := by rw [h'.sy, h.sy, MvPowerSeries.map_comp]; rfl
-  ad := fun a => by rw [h'.ad, h.ad, MvPowerSeries.map_comp]; rfl
+    (h : IsMapOf f B B₁) (h' : IsMapOf (g.comp f) B B₂) : IsMapOf g B₁ B₂ := by
+  constructor
+  · intro i
+    simp only [h'.F i, h.F i, MvPowerSeries.map_comp, RingHom.comp_apply]
+  · intro a i
+    simp only [h'.act a i, h.act a i, MvPowerSeries.map_comp, RingHom.comp_apply]
+  · simp only [h'.ph1, h.ph1, MvPowerSeries.map_comp, RingHom.comp_apply]
+  · simp only [h'.ph2, h.ph2, MvPowerSeries.map_comp, RingHom.comp_apply]
+  · simp only [h'.sy, h.sy, MvPowerSeries.map_comp, RingHom.comp_apply]
+  · intro a
+    simp only [h'.ad a, h.ad a, MvPowerSeries.map_comp, RingHom.comp_apply]
 
 section Lat
 

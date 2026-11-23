@@ -1,5 +1,44 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.StatementFamilies.ArithmeticCylinders
-import Formalism.SharpRestriction.LevelLetterCocycles.PlaceLabelTeichmuller
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,28 +46,7 @@ namespace Formalism.MainNotions.FamilyNumericLemmas
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.ArithmeticCylinders Filter Topology
 
-def kF (c : ℝ) : ℝ := (1 + Real.exp (-(c * Real.log 6))) / (1 - Real.exp (-(c * Real.log 6)))
-
-theorem exp_neg_log_six_lt_one {c : ℝ} (hc : 0 < c) : Real.exp (-(c * Real.log 6)) < 1 := by
-  have h6 : 0 < Real.log 6 := Real.log_pos (by norm_num)
-  exact Real.exp_lt_one_iff.mpr (by nlinarith)
-
-theorem kF_nonneg {c : ℝ} (hc : 0 < c) : 0 ≤ kF c := by
-  have h := exp_neg_log_six_lt_one hc
-  have h0 := Real.exp_pos (-(c * Real.log 6))
-  unfold kF
-  exact div_nonneg (by linarith) (by linarith)
-
-theorem kF_mul {c : ℝ} (hc : 0 < c) : kF c * (1 - Real.exp (-(c * Real.log 6))) = 1 + Real.exp (-(c * Real.log 6)) := by
-  have h := exp_neg_log_six_lt_one hc
-  unfold kF
-  field_simp [show (1 - Real.exp (-(c * Real.log 6))) ≠ 0 by linarith]
-
 theorem cyl_univ (D : D7) (k : Fin 2) : cyl D k Set.univ = Set.univ := by
   ext t; simp [cyl]
-
-theorem locShare_nonneg (D : D7) (eV : VecAt D) (CL : ℝ) (hL : lawL D eV CL) (k : Fin 2) (S : Finset (Tup D k)) :
-    0 ≤ locShare D eV k S :=
-  Finset.sum_nonneg fun t _ => Finset.prod_nonneg fun v _ => (hL k v).1 (t v)
 
 end Formalism.MainNotions.FamilyNumericLemmas

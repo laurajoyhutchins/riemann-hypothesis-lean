@@ -1,10 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ExistsChartComplexPoint
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueFamOfReps
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FormalThetaSumShiftPeriodDiv
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SectionsEquivAnArcTheta
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ExistsChartComplexPoint
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FormalThetaSumShiftPeriodDiv
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SectionsEquivAnArcTheta
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SurjectiveOfComplexPointsLiftOfUniversallyClosed
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsReducedSchemeOfSmoothOfIsIntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,8 +125,8 @@ theorem ptB_fst (z : Fin d.A.gB → ℂ) : ptB d z ≫ fst _ _ = base := lift_fs
 
 theorem ptB_prB (z : Fin d.A.gB → ℂ) : ptB d z ≫ DegPre.prB D ℂ = d.u.ex z := lift_snd _ _
 
-omit [Algebra (FractionRing ℂ) ℂ] [IsScalarTower ℂ (FractionRing ℂ) ℂ] in
 
+omit [Algebra (FractionRing ℂ) ℂ] [IsScalarTower ℂ (FractionRing ℂ) ℂ] in
 theorem comp_toUnit_comp {T B : Over (Sp ℂ)} (x : 𝟙_ (Over (Sp ℂ)) ⟶ T) (y : 𝟙_ (Over (Sp ℂ)) ⟶ B) :
     x ≫ toUnit T ≫ y = y := by
   rw [← Category.assoc, Subsingleton.elim (x ≫ toUnit T) (𝟙 _), Category.id_comp]
@@ -170,8 +212,8 @@ theorem exists_phi_eq_shift (k : ℕ) [NeZero k] (la : d.A.La)
   have f₁ := fr_period d la.l (z + d.A.ct (α + la.y))
   have f₂ := fr_period d la.l (d.A.ct (α + la.y))
   rw [add_comm z, d.A.ah_add, add_comm _ z] at f₁
-  have a₁ : d.A.ct α + (d.A.ct la.y + la.l) + z = z + d.A.ct (α + la.y) + la.l := by rw [map_add]; abel
-  have a₂ : d.A.ct α + (d.A.ct la.y + la.l) = d.A.ct (α + la.y) + la.l := by rw [map_add]; abel
+  have a₁ : d.A.ct α + (d.A.ct la.y + la.l) + z = z + d.A.ct (α + la.y) + la.l := by rw [map_add (f := _)]; abel
+  have a₂ : d.A.ct α + (d.A.ct la.y + la.l) = d.A.ct (α + la.y) + la.l := by rw [map_add (f := _)]; abel
   have a₃ : z + v.2 + d.A.ct α = d.A.ct α + z + v.2 := by abel
   rw [hb, a₁, a₂, a₃, f₁, f₂, add_comm v.2 z] at e₅
   have a₄ : v.1 α = (d.A.P0 la).1 α / k := by rw [hvdef, div_eq_inv_mul]; rfl
@@ -230,8 +272,8 @@ theorem famFn_smul {k : ℕ} (ζ : ℂ) (s : Fam D ℂ k) (α : d.A.X) : famFn d
   rw [← _root_.mul_assoc ζ] at e₃
   exact mul_right_cancel₀ (by simp [frAt_ne_zero]) e₃
 
-include d in
 
+include d in
 theorem tauBimult : D.TauBimult := by
   intro a a' b
   obtain ⟨b, rfl⟩ := d.eX.surjective b

@@ -1,10 +1,50 @@
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.GenSpace
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.GenSpace
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSpanFormsNeBot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open NumberField GlobalTheory.CuspRep MeasureTheory PositivityTheory.Affgl
 
 namespace PositivityTheory.Affgl.TopEig
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 def Jc (c : (E →+* ℂ) → ℂ → ℂ) : Set (Module.End ℂ (Sm E a)) :=
   {z | ∃ τ u, z = cap τ u - c τ u • (1 : Module.End ℂ (Sm E a))}
@@ -60,7 +100,7 @@ theorem forms_subset (L : Subgroup (GL (Fin a) (Af E))) {W : Type} [AddCommGroup
   rintro _ ⟨τ, u, rfl⟩
   rw [LinearMap.sub_apply, h4, LinearMap.smul_apply, Module.End.one_apply, sub_self]
 
-theorem top : (∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ), GenFin E a) → GlobalTheory.Published.AutomorphicFormsFiniteGL := by
+theorem top : (∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ), GenFin E a) → GlobalTheory.Published.AutomorphicFormsFiniteGL := by
   intro h E _ _ _ a L hL W _ _ _ ρ hρ c
   have := h E a L hL W ρ hρ (Jc c) (cofin_Jc c)
   exact Submodule.finiteDimensional_of_le (Submodule.span_mono (forms_subset L ρ c))

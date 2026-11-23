@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+
+@[expose] public section
+
 open MeasureTheory
 open scoped InnerProductSpace
 
@@ -76,7 +134,7 @@ theorem schur_orthogonality {G : Type} [Group G] [MeasurableSpace G] [Measurable
     simp only [hB]
     rw [← integral_add (hint y y1) (hint y y2)]
     congr 1; funext g
-    simp only [hF, map_add, inner_add_right, mul_add]
+    simp only [hF, map_add (f := _), inner_add_right, mul_add]
   have hBsmul : ∀ y (c : ℂ) y', B y (c • y') = c * B y y' := by
     intro y c y'
     simp only [hB]
@@ -87,7 +145,7 @@ theorem schur_orthogonality {G : Type} [Group G] [MeasurableSpace G] [Measurable
     intro y y'
     simp only [hB]
     simp_rw [← integral_const_mul]
-    rw [← integral_finset_sum _ (fun i _ => (hint (b i) y').const_mul _)]
+    rw [← integral_finsetSum _ (fun i _ => (hint (b i) y').const_mul _)]
     congr 1; funext g
     simp only [hF]
     have hs : ∀ z, star ⟪a, ρ g⁻¹ z⟫_ℂ = ⟪z, ρ g a⟫_ℂ := by
@@ -128,7 +186,7 @@ theorem schur_orthogonality {G : Type} [Group G] [MeasurableSpace G] [Measurable
     exact hBinv h hh _ _
   have hsum : ∑ i, B (b i) (b i) = ⟪a', a⟫_ℂ := by
     simp only [hB]
-    rw [← integral_finset_sum _ (fun i _ => hint (b i) (b i))]
+    rw [← integral_finsetSum _ (fun i _ => hint (b i) (b i))]
     have : ∀ g, ∑ i, F (b i) (b i) g = ⟪a', a⟫_ℂ := by
       intro g
       simp only [hF]

@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CechModulesFunctorShortExactOfIsAffineOpen
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.EventuallyExistsResMEqSecHomSecToPow
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsGloballyGeneratedIffGeneratingSections
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexGradedModuleExactAtOfLargeDegree
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.FiniteGrCechHomology
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.VeryAmpleCompactQuasiSeparatedAffineCharts
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.FiniteCohPushforwardIffOfIsClosedImmersion
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MemSaturationOfPowSmulMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.EventuallyExistsResMEqSecHomSecToPow
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.FiniteCohPushforwardIffOfIsClosedImmersion
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MemSaturationOfPowSmulMem
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAmpleLBOfRelAmpleOfIsAffine
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CechModulesFunctorShortExactOfIsAffineOpen
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexGradedModuleExactAtOfLargeDegree
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.FiniteGrCechHomology
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.VeryAmpleCompactQuasiSeparatedAffineCharts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -144,7 +189,7 @@ theorem exists_fg_submodulePowSat_gammaStar_locus [QCoh.IsFiniteQC F] (hL : L.Is
       exact P.smul_of_tower_mem r hb
     | add p q hp hq =>
       intro b hb
-      rw [map_add, add_smul, map_add]
+      rw [map_add (f := _), add_smul, map_add (f := _)]
       exact P.add_mem (hp b hb) (hq b hb)
     | mul_X p j hp =>
       intro b hb
@@ -156,7 +201,7 @@ theorem exists_fg_submodulePowSat_gammaStar_locus [QCoh.IsFiniteQC F] (hL : L.Is
     induction hb using Submodule.span_induction with
     | mem t ht => exact le_submodulePowSat _ _ (Submodule.subset_span ⟨t, ht, rfl⟩)
     | zero => rw [map_zero]; exact P.zero_mem
-    | add a b _ _ ha hb => rw [map_add]; exact P.add_mem ha hb
+    | add a b _ _ ha hb => rw [map_add (f := _)]; exact P.add_mem ha hb
     | smul p b _ hb => exact hsmul p b hb
   have step : ∀ n : ℤ, (∀ b, gammaOf R x F _ n b ∈ P) ↔ ∀ b, gammaOf R x F _ (n + 1) b ∈ P :=
     fun n => ⟨fun h b => by
@@ -280,8 +325,8 @@ open MvPolynomial QCoh.Qcqs Cartier
 
 variable {R : Type} [CommRing R] {N : ℕ} {X : Scheme.{0}} {L : LB X}
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem isFinite_iff_pullRatio (φ : X ⟶ PSpace R N) {U : Fin (N + 1) → X.Opens}
     (hU : ∀ i, φ ⁻¹ᵁ chart R N i = U i) :
     IsFinite φ ↔ ∀ i, IsAffineOpen (U i) ∧ RingHom.Finite
@@ -404,8 +449,8 @@ theorem IsAmpleLB.eventually_subsingleton_coh_twist [IsProper f] {L : LB X} (h :
     ∀ᶠ n : ℕ in atTop, ∀ p, 0 < p → Subsingleton (coh (twist F (lbPow L n)) p) :=
   tendsto_natCast_atTop_atTop.eventually (h.eventually_subsingleton_coh_twistZ hf F)
 
-omit hf [IsNoetherianRing R] [Algebra R Γ(X, ⊤)] in
 
+omit hf [IsNoetherianRing R] [Algebra R Γ(X, ⊤)] in
 theorem isProper_and_exists_isAmpleLB_of_isProjOver (h : IsProjOver f) :
     IsProper f ∧ ∃ L : LB X, IsAmpleLB L := by
   obtain ⟨N, φ, _, rfl⟩ := h
@@ -452,8 +497,8 @@ theorem finiteCohTwists_of_isProjOver (h : IsProjOver f) : FiniteCohTwists k F :
 
 end Field
 
-open QCoh Twist ProjSpace in
 
+open QCoh Twist ProjSpace in
 theorem serre_finiteness_vanishing (R : Type) [CommRing R] [IsNoetherianRing R] (X : Scheme.{0})
     [Algebra R Γ(X, ⊤)] (F : X.Modules) [IsFiniteQC F] :
     (∀ (L : LB X) (ι : Type) [Finite ι] (x : ι → L.Sec), L.IsLB → ⨆ i, nonzeroLocus (x i) = ⊤ →
@@ -500,20 +545,5 @@ theorem serre_finiteness_vanishing (R : Type) [CommRing R] [IsNoetherianRing R] 
       hA.finite_coh hf _ p
     exact ⟨hA.finite_coh hf F, H, fun L hL => ⟨fun n => H _ (isLB_lbZPow hL.isLB n),
       hL.eventually_subsingleton_coh_twistZ hf F, hL.eventually_subsingleton_coh_twist hf F⟩⟩
-
-example :
-    letI := algebraΓOfHom (PSpace.str ℤ 2)
-    ∀ᶠ n : ℤ in atTop, ∀ p, 0 < p →
-      Subsingleton (coh (twistZ (QCoh.structureModule _) (ProjSpace.O1 ℤ 2) n) p) :=
-  letI := algebraΓOfHom (PSpace.str ℤ 2)
-  eventually_subsingleton_coh_twistZ_of_isProjOver (f := PSpace.str ℤ 2) (fun _ => rfl) _
-    ⟨2, 𝟙 _, inferInstance, Category.id_comp _⟩ (isAmple_projective_O_one ℤ 2)
-
-example (k : Type) [Field k] (N : ℕ) :
-    letI := algebraΓOfHom (PSpace.str k N)
-    FiniteCohTwists k (QCoh.structureModule (PSpace k N)) :=
-  letI := algebraΓOfHom (PSpace.str k N)
-  finiteCohTwists_of_isProjOver (f := PSpace.str k N) (fun _ => rfl) _
-    ⟨N, 𝟙 _, inferInstance, Category.id_comp _⟩
 
 end GlobalTheory

@@ -1,6 +1,52 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ContinuousPInfApply
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ContinuousPInfCoord
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.IdeleModuleSectionMul
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ContinuousPInfApply
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ContinuousPInfCoord
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.IdeleModuleSectionMul
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+public import GroundTheory.GlobalFields.TateThesis.SchwartzBruhatFinite
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,18 +64,16 @@ theorem vecMul_scalar_mul (z : IdeleGroup F) (g : GA F 2) (ξ : Fin 2 → F) :
       (fun i => z • algebraMap F (Ad F) (ξ i)) ᵥ* (g : Matrix (Fin 2) (Fin 2) (Ad F)) := by
   rw [Units.val_mul, ← Matrix.vecMul_vecMul, Matrix.GeneralLinearGroup.coe_scalar]
   congr 1
-  funext i
-  simp only [Matrix.scalar_apply, Matrix.vecMul_diagonal, Units.smul_def, rowA]
-  exact mul_comm _ _
+  ext i
+  simp [Matrix.scalar, Matrix.vecMul_diagonal, rowA, mul_comm, Units.smul_def, smul_eq_mul]
 
 theorem inv_mulVec_scalar_mul (z : IdeleGroup F) (g : GA F 2) (ξ : Fin 2 → F) :
     (((Matrix.GeneralLinearGroup.scalar (Fin 2) z * g)⁻¹ : GA F 2) : Matrix (Fin 2) (Fin 2) (Ad F)) *ᵥ rowA ξ =
       ((g⁻¹ : GA F 2) : Matrix (Fin 2) (Fin 2) (Ad F)) *ᵥ (fun i => z⁻¹ • algebraMap F (Ad F) (ξ i)) := by
   rw [mul_inv_rev, ← map_inv, Units.val_mul, ← Matrix.mulVec_mulVec, Matrix.GeneralLinearGroup.coe_scalar]
   congr 1
-  funext i
-  simp only [Matrix.scalar_apply, Matrix.mulVec_diagonal, Units.smul_def, rowA]
-  rfl
+  ext i
+  simp [Matrix.scalar, Matrix.mulVec_diagonal, rowA, Units.smul_def, smul_eq_mul]
 
 theorem thetaS_bound {ω : HChar F} {c : HeightOneSpectrum (𝓞 F) → ℕ} (H : Hyp ω c) {K : Set (GA F 2)}
     (hK : IsCompact K) :

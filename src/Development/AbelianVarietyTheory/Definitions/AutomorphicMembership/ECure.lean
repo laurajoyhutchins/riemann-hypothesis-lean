@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EHHre
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ColDictLReTr
-import Formalism.LocalToGlobal.IndefiniteReal.HeckeNonvanishing.Imports
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EHHre
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ParametersTermRelations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ColDict
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +53,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7} (Z : New D)
 
+
 set_option smartUnfolding false in
-set_option maxHeartbeats 4000000 in
 
 def reY {X : HidaSetting D} (Y : Full X) : Full (reX Z X) where
   hK := (Y.hK)
@@ -36,7 +74,7 @@ def reY {X : HidaSetting D} (Y : Full X) : Full (reX Z X) where
   agree := (Y.agree)
   δ_pin := (Y.δ_pin)
 
-set_option maxHeartbeats 4000000 in
+
 
 def eRT {X : HidaSetting D} (Y : Full X) (u u' : D.what₂.Word) : RT Y u u' ≃ RT (reY Z Y) (wd Z u) (wd Z u') where
   toFun t := ⟨(t.lam), (t.mem), (t.cls)⟩
@@ -44,7 +82,7 @@ def eRT {X : HidaSetting D} (Y : Full X) (u u' : D.what₂.Word) : RT Y u u' ≃
   left_inv t := (Eq.refl t)
   right_inv t := (Eq.refl t)
 
-set_option maxHeartbeats 4000000 in
+
 
 def eTT {X : HidaSetting D} (Y : Full X) (u u' : D.what₂.Word) : TT Y u u' ≃ TT (reY Z Y) (wd Z u) (wd Z u') where
   toFun t := ⟨(t.lam), (t.mem), (t.lam'), (t.mem'), (t.cls)⟩
@@ -52,10 +90,16 @@ def eTT {X : HidaSetting D} (Y : Full X) (u u' : D.what₂.Word) : TT Y u u' ≃
   left_inv t := (Eq.refl t)
   right_inv t := (Eq.refl t)
 
-set_option maxHeartbeats 4000000 in
+
 
 def eCure {X : HidaSetting D} {Y : Full X} (h : FinX Y) (h' : FinX (reY Z Y)) (u : D.what₂.Word) :
-    ColT (h.shInj u) ≃ₗᵢ[ℂ] ColT (h'.shInj (wd Z u)) := by kexactB LinearIsometryEquiv.refl ℂ (ColT (h.shInj u))
+    ColT (h.shInj u) ≃ₗᵢ[ℂ] ColT (h'.shInj (wd Z u)) := by
+  run_tac
+    let h := Lean.mkIdent `h
+    let u := Lean.mkIdent `u
+    let e ← Lean.Elab.Term.elabTerm (← `(LinearIsometryEquiv.refl ℂ (ColT (($h).shInj $u)))) none
+    (← Lean.Elab.Tactic.getMainGoal).assign e
+    Lean.Elab.Tactic.replaceMainGoal []
 
 end GlobalTheory.Mem.SRe
 

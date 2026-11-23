@@ -1,42 +1,86 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.HasMultiplier
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallPacking
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNmSectionsRankBound
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNmSectionsFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSecMRankBound
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionsSeparated
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSecEq
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PConductor
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootGridLower
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGridSeparation
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNormalLocusRep
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormBound
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjAvoidingForm
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSegreArith
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreRepresentatives
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PAvoidFormFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormMax
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMetricMaxComparison
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullFormsGeneric
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullRatiosAlgebraic
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullConeNull
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullConeDegree
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullGradedAlgebraic
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormDehomCharpoly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormPullback
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGridSeparation
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFormsGeneric
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullRatiosAlgebraic
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.NormFormGaussBoundHoldsStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PullbackConeNullModPHoldsStatement
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PFibreNormPullbackX
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PAvoidFormFinite
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChartPrimePowerInverse
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PConductor
 import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PDehomCharpolyForms
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormDehomIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullSectionIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormBadPrimesFinite
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormGoodPrimeIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormPrimeBound
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormDehomRoots
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullConeDegreeInt
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullSectionIntegralInt
 import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PDehomNormPIntegral
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChartPrimePowerInverse
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PFibreNormPullbackX
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PullbackConeNullModPHoldsStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.NormFormGaussBoundHoldsStatement
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormBadPrimesFinite
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormBound
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormDehomCharpoly
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormDehomIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormDehomRoots
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormGoodPrimeIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormMax
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreNormPrimeBound
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PFibreRepresentatives
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGridSeparation
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMetricMaxComparison
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNmSectionsFinite
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNmSectionsRankBound
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNormalLocusRep
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjAvoidingForm
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullConeDegree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullConeDegreeInt
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullConeNull
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullGradedAlgebraic
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullRatiosAlgebraic
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullSectionIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PPullSectionIntegralInt
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PRootGridLower
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSecEq
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSecMRankBound
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSegreArith
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallPacking
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionsSeparated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.HasMultiplier
+
+@[expose] public section
 
 open GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.HilbertSamuel
 

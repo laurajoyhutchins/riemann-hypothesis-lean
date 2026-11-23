@@ -1,13 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DatumEquiv
-import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.FockWeightWedgeLowerModes
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.MemHighestWeightSubIff
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.TensFockInfPhysSub
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.ActDiagMemOfWK
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.CFPrimeB
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.CFCoreA
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirAlgebra.MulMulSubMulMulEqAdd
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.CFCoreA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.ActDiagMemOfWK
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.FockWeightWedgeLowerModes
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.MemHighestWeightSubIff
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.TensFockInfPhysSub
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GapConditionsOfLargeGaps
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +63,8 @@ theorem highestWeightKernel_lowestType : AlgDatum := by
     have e : (diagE ε (eT E) cpT cmT : Fin n → Fin n → Module.End ℂ (TensorProduct ℂ M (Fock n))) =
         fun a b => TensorProduct.map (E a b) LinearMap.id + LinearMap.lTensor M (sgE ε cpFock cmFock a b) := by
       funext a b
-      simp only [diagE, eT, sgE_cpT]
+      delta diagE eT
+      rw [sgE_cpT]
     rw [← e]; exact hz
   obtain ⟨s, hy0, hy⟩ := khw_extract ε hg.1 hz' hz0
   set y := tcoef ((fockBasis n).coord s) z with hydef
@@ -42,7 +81,8 @@ theorem highestWeightKernel_lowestType : AlgDatum := by
   have hwt : gaW ε lam - fockWt ε s = lowK ε lam - phSum Ph := by
     rw [gc_wt_eq ε hs]
     funext a
-    simp only [gaW, lowK, Pi.sub_apply, Pi.add_apply]
+    delta gaW lowK
+    simp only [Pi.sub_apply, Pi.add_apply]
     ring
   rw [hwt] at hy
   have hyS : y ∈ S := hzS s
@@ -76,7 +116,8 @@ theorem highestWeightKernel_lowestType : AlgDatum := by
     by_contra hne
     exact dirac_sharp hg hE hU (gc_isPosNC ε hs) (Finset.nonempty_iff_ne_empty.2 hne) hVirr hVc
   rw [hPh0] at hVirr
-  simp only [phSum, Finset.sum_empty, sub_zero] at hVirr
+  delta phSum at hVirr
+  simp only [Finset.sum_empty, sub_zero] at hVirr
   refine ⟨V, hVirr, ?_, hVc⟩
   intro h0
   apply hy0

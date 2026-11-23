@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.RootOfUnityEightQMemCoeffGaloisSubfield
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
-import Formalism.SharpRestriction.InertJacobiLevels.HostFam
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NegOneNormFromCmFieldFiniteAdelesStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasSignatureDiagonalSgn
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasSignatureDiagonalSgn
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NegOneNormFromCmFieldFiniteAdelesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -188,7 +235,7 @@ def hypVec (a b : E) (i : Fin R.rS) : Fin (R.rankY 0) → E :=
 theorem hypVec_hypVec (a b c d : E) (i j : Fin R.rS) :
     diagForm _ (cut _ (pY R 0)) (hypVec R a b i) (hypVec R c d j) =
       if i = j then star a * c - star b * d else 0 := by
-  simp only [hypVec, map_add, LinearMap.add_apply, diag_single_single, cut_idxP, cut_idxM]
+  simp only [hypVec, map_add (f := _), LinearMap.add_apply, diag_single_single, cut_idxP, cut_idxM]
   have hi := i.isLt
   have hj := j.isLt
   have e1 : ¬ ((idxP R i : ℕ) = idxM R j) := by simp only [idxP, idxM]; omega
@@ -205,14 +252,14 @@ theorem hypVec_hypVec (a b c d : E) (i j : Fin R.rS) :
 
 theorem ext_hypVec (x : Fin (R.N 0) → E) (a b : E) (i : Fin R.rS) :
     diagForm _ (cut _ (pY R 0)) (extTo (R.N 0) (R.rankY 0) x) (hypVec R a b i) = 0 := by
-  rw [hypVec, map_add, diag_ext_single, diag_ext_single, add_zero]
+  rw [hypVec, map_add (f := _), diag_ext_single, diag_ext_single, add_zero]
   · simp only [idxM, N_zero]; omega
   · simp only [idxP, N_zero]; omega
 
 theorem z_hypVec (c a b : E) (i : Fin R.rS) :
     diagForm _ (cut _ (pY R 0)) (Pi.single (idxZ R) c) (hypVec R a b i) = 0 := by
   have hi := i.isLt
-  rw [hypVec, map_add, diag_single_single, diag_single_single, if_neg, if_neg, add_zero]
+  rw [hypVec, map_add (f := _), diag_single_single, diag_single_single, if_neg, if_neg, add_zero]
   · simp only [idxM, idxZ]; omega
   · simp only [idxP, idxZ]; omega
 
@@ -322,10 +369,5 @@ end GlobalTheory.Mem.DiagSp
 
 open Formalism.BasicNotions NumberField IsDedekindDomain GlobalTheory.Mem
 open scoped TensorProduct
-
-theorem GlobalTheory.Mem.exists_spaces : ∀ (R : Ranks) (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E] (cm : CMData F E) (T : ℕ) (hT : T.Prime) (pz : E) (hpz : star pz * pz = T) (vn : ℕ → Bool), ∃ S : Spaces R F E, S.T = T ∧ (∀ j, j ≤ R.m → ∀ τ : E →+* ℂ, (S.Y j).sig τ = sigYD R j) ∧ S.Vneg = vn ∧ ∃ hstar : ∀ x : E, IsIntegral ℤ x → IsIntegral ℤ (star x), ∀ j, S.X j = Formalism.BasicNotions.Examples₂.posSpace hstar (R.N j) := by
-  intro R F E _ _ _ _ _ _ cm T hT pz hpz vn
-  exact ⟨DiagSp.spacesStd R cm T hT pz hpz vn, rfl, fun j _ τ => DiagSp.spY_sig R j τ, rfl,
-    Formalism.BasicNotions.Examples₂.star_isIntegral, fun _ => rfl⟩
 
 end

@@ -1,7 +1,56 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LetterPull
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfLevelZeroParts
-import Formalism.SharpRestriction.LevelLetterCocycles.CancelUnitMulUniformizerPow
-import Formalism.SharpRestriction.LevelLetterCocycles.UniversalGeneralOfRestriction
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfLevelZeroParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecOfPInt
+import Formalism.SharpRestriction.LevelLetterCocycles.FrameInvPoly
+import Formalism.SharpRestriction.LevelLetterCocycles.HorTrUnique
+public import Formalism.SharpRestriction.LevelLetterCocycles.LetterPull
+public import Formalism.SharpRestriction.LevelLetterCocycles.LinearIdentityHeadDifference
+import Formalism.SharpRestriction.LevelLetterCocycles.SecInTransport
+import Formalism.SharpRestriction.LevelLetterCocycles.SecOfP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +81,7 @@ theorem intA_inFr {a : ZMod n} {Λ : LetA O n} (hΛ : Λ ∈ W.AΔ) {g : W.EE} (
 theorem intA_add {a : ZMod n} {g g' : W.EE} (h : IntA W a g) (h' : IntA W a g') : IntA W a (g + g') := by
   obtain ⟨u, hu, rfl⟩ := h
   obtain ⟨u', hu', rfl⟩ := h'
-  exact ⟨u + u', W.AΔ.add_mem hu hu', by rw [← map_add, mul_add]⟩
+  exact ⟨u + u', W.AΔ.add_mem hu hu', by rw [← map_add (f := _), mul_add]⟩
 
 theorem intA_neg {a : ZMod n} {g : W.EE} (h : IntA W a g) : IntA W a (-g) := by
   obtain ⟨u, hu, rfl⟩ := h
@@ -198,6 +247,7 @@ theorem polar_core [FiniteDimensional Qp LL] (C : LevC.Ctx W) (h9 : DcrisExactSt
     · simp only [if_pos hi]
       have h3 : ∑ k, g i * algebraMap O W.EE (r' i k) * algebraMap O W.EE (o k j) =
           g i * algebraMap O W.EE (∑ k, r' i k * o k j) := by
+
         rw [map_sum, Finset.mul_sum]
         exact Finset.sum_congr rfl fun k _ => by simp only [map_mul]; ring
       rw [h3, hr'1 i hi j]
@@ -223,6 +273,7 @@ theorem polar_core [FiniteDimensional Qp LL] (C : LevC.Ctx W) (h9 : DcrisExactSt
     (o_inj W C.hbij h9 T₂ Y ι π hses h2 hY a e b bY hind2 hspan2 hindY o hdv)
   have hZq : ∀ m, lE W q * Z m = ∑ j, R j * algebraMap O W.EE (D j m) := fun m => by
     have e2 : ∑ j, R j * algebraMap O W.EE (D j m) = ∑ k, Z k * algebraMap O W.EE (∑ j, o k j * D j m) := by
+
       simp only [← hZR, Finset.sum_mul, map_sum, Finset.mul_sum]
       rw [Finset.sum_comm]
       exact Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun j _ => by simp only [map_mul]; ring

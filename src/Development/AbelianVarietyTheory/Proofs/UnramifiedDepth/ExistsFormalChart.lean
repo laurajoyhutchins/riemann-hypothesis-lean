@@ -1,8 +1,52 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.SubMemOfCompat
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+public import Mathlib.Algebra.DualNumber
+public import ReciprocityTheory.DualLattices.FormalChartAtZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open TensorProduct IsLocalRing Matrix CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Be2 ReciprocityTheory.ChartRestriction.G.Chart
 open scoped CategoryTheory.Obj CategoryTheory.MonObj
@@ -113,8 +157,8 @@ variable {G : Over (Spec (CommRingCat.of R₀))} [GrpObj G] {g : ℕ}
     (∀ a ∈ RingHom.ker ρ, IsNilpotent a) → ∀ z : sp (R₀ := R₀) S ⟶ G, spMap ρ ≫ z = 1 →
     ∃ a : Fin g → S, (∀ i, a i ∈ RingHom.ker ρ) ∧ z = x S a)
 
-include h0 hnat hinj hsurj in
 
+include h0 hnat hinj hsurj in
 theorem first_order_add (a b : Fin g → R₀) :
     x (DualNumber R₀) (fun k => TrivSqZeroExt.inr (a k)) *
       x (DualNumber R₀) (fun k => TrivSqZeroExt.inr (b k)) =
@@ -178,8 +222,8 @@ theorem e_zero (R : LAlg R₀) : e R 0 = 1 := by
   rw [add_zero] at h
   exact mul_eq_left.1 h.symm
 
-include h0 hnat hinj hsurj he hadd hen in
 
+include h0 hnat hinj hsurj he hadd hen in
 theorem exists_basis : ∃ gb : Module.Basis (Fin g) R₀ B.gg, ∀ w : B.gg,
     e (dualL R₀) (B.tg (dualProj R₀) dualProj_sqZero (w ⊗ₜ epsK R₀)) =
       x (DualNumber R₀) (fun k => TrivSqZeroExt.inr (gb.repr w k)) := by
@@ -205,7 +249,7 @@ theorem exists_basis : ∃ gb : Module.Basis (Fin g) R₀ B.gg, ∀ w : B.gg,
   have hθadd : ∀ v w, θ (v + w) = θ v + θ w := by
     intro v w
     apply huniq
-    rw [← hθ, TensorProduct.add_tmul, map_add, hadd, hθ, hθ, first_order_add x h0 hnat hinj hsurj]
+    rw [← hθ, TensorProduct.add_tmul, map_add (f := _), hadd, hθ, hθ, first_order_add x h0 hnat hinj hsurj]
     rfl
   have hθsmul : ∀ (r : R₀) w, θ (r • w) = r • θ w := by
     intro r w

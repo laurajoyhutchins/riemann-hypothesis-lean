@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,37 +88,6 @@ theorem lawA3'_of (δ : ∀ Z : Comp Xo c, AddValuation (Om Z) (WithTop ℤ) →
     rw [hz]
     rfl
   · exact Or.inl ⟨hadm, hv⟩
-
-theorem divFin_of_lawA3' (δ : ∀ Z : Comp Xo c, AddValuation (Om Z) (WithTop ℤ) → Ix Dw → ℤ)
-    (hord : ∀ Z v, d.ord Z v = ordC (δ Z v) v) (h : LawA3' d) : DivFin d := by
-  intro Z r hr
-  have hmem : AddMonoidAlgebra.single (0 : WTZ E) r ∈ AG Z 0 := by
-    refine Submodule.mem_span_singleton.mpr ⟨r, ?_⟩
-    first
-      | simp [AddMonoidAlgebra.smul_single']
-      | (rw [AddMonoidAlgebra.smul_single', mul_one])
-  have hne0 : AddMonoidAlgebra.single (0 : WTZ E) r ≠ 0 := by
-    first
-      | simpa using hr
-      | exact Finsupp.single_ne_zero.mpr hr
-  refine (h Z hmem hne0).subset ?_
-  rintro v ⟨hadm, hv⟩
-  refine ⟨hadm, ?_⟩
-  rw [hord]
-  unfold ordC
-  have hc : (AddMonoidAlgebra.single (0 : WTZ E) r).coeff 0 = r := by
-    first
-      | simp
-      | rfl
-  have hf0 : frW (δ Z v) (0 : WTZ E) = 0 := by
-    unfold frW
-    refine Finset.sum_eq_zero (fun i _ => ?_)
-    cases i <;> simp [exZ]
-  rw [hc, hf0, add_zero]
-  obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.mp ((AddValuation.top_iff v).not.mpr hr)
-  rw [← hn, WithTop.untopD_coe]
-  rintro rfl
-  exact hv (by rw [← hn]; rfl)
 
 end Fin
 

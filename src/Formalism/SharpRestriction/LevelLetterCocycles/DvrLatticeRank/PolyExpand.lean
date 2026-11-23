@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.Inductions
+public import Mathlib.Data.Nat.Choose.Factorization
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +84,6 @@ theorem Gd.mul (hF : Antitone F) (H : Gd F h A v) (u : PowerSeries LL) :
   have hpq' : pq.1 + pq.2 = i := by
     first
     | exact Finset.HasAntidiagonal.mem_antidiagonal.mp hpq
-    | simpa using hpq
   exact hF (show h - (i : ℤ) ≤ h - (pq.2 : ℤ) by omega) (H pq.2)
 
 theorem Gd.unit (hF : Antitone F) {u : PowerSeries LL} (hu : IsUnit u)
@@ -44,12 +98,12 @@ theorem Gd.step (hF : Antitone F) {y u : PowerSeries LL} (hy : y = X * u) (hu : 
   subst hy
   have hc : ∀ j i, coeff (i + 1) (A j) = coeff i (u * A' j) := by
     intro j i
-    rw [hA j, map_add, coeff_C, if_neg (by omega : i + 1 ≠ 0), zero_add, mul_assoc, coeff_succ_X_mul]
+    rw [hA j, map_add (f := _), coeff_C, if_neg (by omega : i + 1 ≠ 0), zero_add, mul_assoc, coeff_succ_X_mul]
   refine ⟨?_, ?_⟩
   · have h0 := H 0
     have e : ∀ j, coeff 0 (A j) = o j := by
       intro j
-      rw [hA j, map_add, coeff_C, if_pos rfl, mul_assoc, coeff_zero_X_mul, add_zero]
+      rw [hA j, map_add (f := _), coeff_C, if_pos rfl, mul_assoc, coeff_zero_X_mul, add_zero]
     simp only [e, Nat.cast_zero, sub_zero] at h0
     exact h0
   · apply Formalism.MainNotions.N.Ln34.LevelExpansions.Gd.unit hF hu
@@ -91,7 +145,8 @@ private theorem sum_coeff_smul_eq_sum_coeff_y_pow_mul_smul {y : PowerSeries LL} 
     ∑ j, coeff i (A j) • v j = ∑ j, coeff i (y ^ N * A' j) • v j := by
   have e : ∀ j, coeff i (A j) = ∑ k ∈ range N, p j k * coeff i (y ^ k) + coeff i (y ^ N * A' j) := by
     intro j
-    rw [hA j, map_add, map_sum]
+
+    rw [hA j, map_add (f := _), map_sum]
     simp only [coeff_C_mul]
   have hk0 : ∀ k ∈ range N, ∑ j, (p j k * coeff i (y ^ k)) • v j = 0 := by
     intro k hk
@@ -149,8 +204,6 @@ theorem peel1 {y u : PowerSeries LL} (hy : y = X * u) (hu : IsUnit u) {N : ℕ} 
 private theorem algebraMap_powerSeries_eq_C (c : LL) : algebraMap LL (PowerSeries LL) c = C c := by
   first
   | rfl
-  | simp
-  | exact PowerSeries.algebraMap_apply' c
 
 theorem poly_expand (y : PowerSeries LL) (N : ℕ) : ∀ Q : Polynomial LL, ∃ G : PowerSeries LL,
     Polynomial.aeval y Q = ∑ k ∈ range N, C (Q.coeff k) * y ^ k + y ^ N * G := by
@@ -162,7 +215,7 @@ theorem poly_expand (y : PowerSeries LL) (N : ℕ) : ∀ Q : Polynomial LL, ∃ 
     refine ⟨G, ?_⟩
     have hQ : Polynomial.aeval y Q = Polynomial.aeval y Q.divX * y + C (Q.coeff 0) := by
       have e := congrArg (Polynomial.aeval y) (Polynomial.divX_mul_X_add Q)
-      rw [map_add, map_mul, Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C] at e
+      rw [map_add (f := _), map_mul, Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C] at e
       exact e.symm
     rw [hQ, hG, Finset.sum_range_succ', add_mul, Finset.sum_mul]
     have hs : ∑ k ∈ range N, C (Q.divX.coeff k) * y ^ k * y = ∑ k ∈ range N, C (Q.coeff (k + 1)) * y ^ (k + 1) := by
@@ -181,7 +234,6 @@ private theorem coeff_eq_zero_of_isUnit_of_coeff_mul_eq_zero {u E : PowerSeries 
   have hpq' : pq.1 + pq.2 = i := by
     first
     | exact Finset.HasAntidiagonal.mem_antidiagonal.mp hpq
-    | simpa using hpq
   rw [h pq.2 (by omega), mul_zero]
 
 private theorem sum_coeff_smul_eq_of_isUnit_mul_eq {u : PowerSeries LL} (hu : IsUnit u) {G : PowerSeries LL} {w : V} {n : ℕ}
@@ -198,7 +250,6 @@ private theorem sum_coeff_smul_eq_of_isUnit_mul_eq {u : PowerSeries LL} (hu : Is
   have hpq' : pq.1 + pq.2 = i := by
     first
     | exact Finset.HasAntidiagonal.mem_antidiagonal.mp hpq
-    | simpa using hpq
   rw [H pq.2 (by omega), mul_smul]
 
 private theorem sum_smul_eq_smul_of_coeff_expansion {y u : PowerSeries LL} (hy : y = X * u) (hu : IsUnit u) {N : ℕ}
@@ -216,7 +267,6 @@ private theorem sum_smul_eq_smul_of_coeff_expansion {y u : PowerSeries LL} (hy :
     simp only [Option.elim]
     first
     | rw [H i hi, smul_neg, neg_add_cancel]
-    | simp [H i hi]
   have hm := Formalism.MainNotions.N.Ln34.LevelExpansions.Gd.peel (F := Fv LL V) (v := fun x : Option ι => Option.elim x (-w) v₀)
     Fv_anti hy hu N (N : ℤ) (fun x => Option.elim x G A₀) (fun x => Option.elim x G' A₀')
     (fun x k => Option.elim x (c k) (fun j => p j k))
@@ -262,7 +312,6 @@ theorem Dv.expand {y : Z → PowerSeries LL} (H : Dv ev O y) (N : ℕ) : ∀ a :
       congr 1
       · first
         | rw [if_pos rfl, pow_zero, mul_one]
-        | simp
       · refine Finset.sum_congr rfl fun k _ => ?_
         rw [if_neg (show k + 1 ≠ 0 by omega), Nat.add_sub_cancel]
         ring
@@ -300,7 +349,6 @@ theorem unit_add_C {y u : PowerSeries LL} (hy : y = X * u) {δ : LL} (hδ : δ �
   subst hy
   first
   | (rw [PowerSeries.isUnit_iff_constantCoeff]; simpa using hδ)
-  | exact isUnit_of_mul_eq_one _ _ (PowerSeries.mul_inv_cancel _ (by simpa using hδ))
 
 theorem integ {yU yD : Z → PowerSeries LL} (HU : Dv ev O yU) (HD : Dv ev O yD) {zU zD : Z}
     {u u' : PowerSeries LL} (hyU : yU zU = X * u) (hu : IsUnit u) (hyD : yD zD = X * u')
@@ -322,8 +370,8 @@ theorem integ {yU yD : Z → PowerSeries LL} (HU : Dv ev O yU) (HD : Dv ev O yD)
   have hPt : Polynomial.aeval (yD zD) P = C (x * a₂ ^ h) * yU zD ^ b * yD zD ^ h := by
     rw [hP, hUD]
     first
-    | (simp only [map_mul, map_pow, map_add, Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C]; done)
-    | (simp only [map_mul, map_pow, map_add, Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C]; ring)
+    | (simp only [map_mul, map_pow, map_add (f := _), Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C]; done)
+    | (simp only [map_mul, map_pow, map_add (f := _), Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C]; ring)
   have hsU : IsUnit (yU zD) := by rw [hUD]; exact unit_add_C hyD hδ
   have key : yU zD ^ (h - b) * Polynomial.aeval (yD zD) P = C x * (C a₂ * yU zD * yD zD) ^ h := by
     rw [hPt]
@@ -396,7 +444,7 @@ theorem caseB {V₁ V₂ : Type*} [AddCommGroup V₁] [Module LL V₁] [AddCommG
   obtain ⟨G', hG'⟩ := poly_expand (yU zU) (B + η + (h - b) + 1) P
   have hPt : Polynomial.aeval (yU zU) P = C κ * yU zU ^ (h - b) * yD zU ^ (B + η) := by
     rw [hP, hDU]
-    simp only [map_mul, map_pow, map_add, Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C]
+    simp only [map_mul, map_pow, map_add (f := _), Polynomial.aeval_X, Polynomial.aeval_C, algebraMap_powerSeries_eq_C]
     ring
   rw [hPt] at hG'
   have huniq : ∑ j, algebraMap O LL (q j (B + η + (h - b))) • v₂ j = P.coeff (B + η + (h - b)) • w :=
@@ -423,11 +471,12 @@ theorem caseC {O K : Type*} [CommRing O] [Field K] [Algebra O K] (l : ℕ) [Fact
   obtain ⟨c, hc⟩ : ∃ c, c = b.choose (B - 1) := ⟨_, rfl⟩
   rw [← hc] at ho hy
   have hc0 : c ≠ 0 := by rw [hc]; exact (Nat.choose_pos (by omega)).ne'
-  obtain ⟨c', hc'⟩ := (pow_padicValNat_dvd : l ^ padicValNat l c ∣ c)
+  obtain ⟨c', hc'⟩ := ((_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _)) : l ^ padicValNat l c ∣ c)
   have hnd : ¬ l ∣ c' := by
     rintro ⟨d, rfl⟩
     have hd : l ^ (padicValNat l c + 1) ∣ l ^ padicValNat l c * (l * d) := ⟨d, by ring⟩
     rw [← hc'] at hd
+    rw [Nat.padicValNat_def] at hd
     exact pow_succ_padicValNat_not_dvd (p := l) hc0 hd
   generalize hv : padicValNat l c = v at hc' hy
   obtain ⟨r, hr⟩ := hδ
@@ -456,7 +505,7 @@ theorem yc_bound (l : ℕ) [hl : Fact l.Prime] (b B η h : ℕ) (hb : b ≤ h)
   obtain ⟨v, hv⟩ : ∃ v, v = padicValNat l (b.choose (B - 1)) := ⟨_, rfl⟩
   rw [← hv]
   have hvlog : v ≤ Nat.log l b := by
-    rw [hv, ← Nat.factorization_def _ hl.out]
+    rw [hv, Nat.padicValNat_def, ← Nat.factorization_def _ hl.out]
     exact Nat.factorization_choose_le_log
   have hl1 : (1 : ℝ) < l := by exact_mod_cast hl.out.one_lt
   have hvle : (v : ℝ) ≤ Real.logb l h := by

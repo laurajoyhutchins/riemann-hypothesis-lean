@@ -1,7 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.UnitOfPair
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.IsCompactSpanRange
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.HRSumSmulRight
+module
+
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DisjointSpanPerpLat
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.UnitOfPair
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.CrossMSmulRight
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.GenSmulMem
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUniformizerHermitianIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,45 +59,7 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
   (σ : E →ₐ[F] E) (v : HeightOneSpectrum (𝓞 F))
 
 theorem fixed_mem_F (hcm : IsCMExt F E σ) (e : E) (he : σ e = e) : ∃ f : F, algebraMap F E f = e := by
-  obtain ⟨-, hE, hdeg, hconj⟩ := hcm
-  by_contra hne
-  have hbot : e ∉ (⊥ : IntermediateField F E) := by
-    intro hmem
-    obtain ⟨f, hf⟩ := IntermediateField.mem_bot.mp hmem
-    exact hne ⟨f, hf⟩
-  have hint : IsIntegral F e := Algebra.IsIntegral.isIntegral e
-  have htop : (IntermediateField.adjoin F {e}) = ⊤ := by
-    have hd : Module.finrank F (IntermediateField.adjoin F {e}) ∣ 2 := by
-      have := IntermediateField.finrank_dvd_of_le_right (K := F) (le_top : (IntermediateField.adjoin F {e}) ≤ ⊤)
-      rwa [IntermediateField.finrank_top', hdeg] at this
-    have h1 : Module.finrank F (IntermediateField.adjoin F {e}) ≠ 1 := by
-      rw [Ne, IntermediateField.finrank_eq_one_iff, IntermediateField.adjoin_simple_eq_bot_iff]
-      exact hbot
-    have h22 : Module.finrank F (IntermediateField.adjoin F {e}) = 2 := by
-      rcases (Nat.dvd_prime Nat.prime_two).mp hd with h | h
-      · exact absurd h h1
-      · exact h
-    apply IntermediateField.eq_of_le_of_finrank_eq le_top
-    rw [h22, IntermediateField.finrank_top', hdeg]
-  have hfix : ∀ x : E, σ x = x := by
-    intro x
-    have hx : x ∈ Algebra.adjoin F ({e} : Set E) := by
-      rw [← IntermediateField.adjoin_simple_toSubalgebra_of_isAlgebraic hint.isAlgebraic, htop]
-      trivial
-    have hle : Algebra.adjoin F ({e} : Set E) ≤ AlgHom.equalizer σ (AlgHom.id F E) := by
-      rw [Algebra.adjoin_le_iff]
-      intro y hy
-      rw [Set.mem_singleton_iff] at hy
-      subst hy
-      exact he
-    exact hle hx
-  obtain ⟨w⟩ : Nonempty (NumberField.InfinitePlace E) := inferInstance
-  apply NumberField.InfinitePlace.not_isReal_iff_isComplex.mpr (hE.isComplex w)
-  rw [NumberField.InfinitePlace.isReal_iff, NumberField.ComplexEmbedding.isReal_iff]
-  ext x
-  have h := hconj w.embedding x
-  rw [hfix] at h
-  rw [NumberField.ComplexEmbedding.conjugate_coe_eq, starRingEnd_apply, ← h]
+  apply GlobalTheory.SelfDualLatticeCompare.exists_of_conj_eq <;> assumption
 
 theorem sc_eq (a : Fv F v) : sc (E := E) v a = algebraMap (Fv F v) (Fv F v ⊗[F] E) a := by
   simp [sc, Algebra.TensorProduct.algebraMap_apply]
@@ -61,7 +68,7 @@ theorem add_sig_sc (hcm : IsCMExt F E σ) (z : Fv F v ⊗[F] E) : ∃ t : Fv F v
   induction z using TensorProduct.induction_on with
   | zero => exact ⟨0, by simp [sc_eq]⟩
   | tmul r e =>
-    obtain ⟨f, hf⟩ := fixed_mem_F σ hcm (e + σ e) (by rw [map_add, sigma_invol σ hcm, add_comm])
+    obtain ⟨f, hf⟩ := fixed_mem_F σ hcm (e + σ e) (by rw [map_add (f := _), sigma_invol σ hcm, add_comm])
     refine ⟨f • r, ?_⟩
     have hs : sigR (Fv F v) σ (r ⊗ₜ[F] e) = r ⊗ₜ[F] σ e := by
       simp [Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sigR, Algebra.TensorProduct.map_tmul]
@@ -71,7 +78,7 @@ theorem add_sig_sc (hcm : IsCMExt F E σ) (z : Fv F v ⊗[F] E) : ∃ t : Fv F v
     obtain ⟨t1, h1⟩ := hx
     obtain ⟨t2, h2⟩ := hy
     refine ⟨t1 + t2, ?_⟩
-    rw [map_add, sc_eq, map_add, ← sc_eq, ← sc_eq, ← h1, ← h2]
+    rw [map_add (f := _), sc_eq, map_add (f := _), ← sc_eq, ← sc_eq, ← h1, ← h2]
     abel
 
 theorem two_ne_zero_v : (2 : Fv F v) ≠ 0 := by
@@ -95,11 +102,6 @@ theorem one_mem_oEv : (1 : Fv F v ⊗[F] E) ∈ OEv (E := E) v := by
 
 theorem sc_mem {c : Fv F v} (hc : c ∈ v.adicCompletionIntegers F) : sc (E := E) v c ∈ OEv (E := E) v := by
   simpa using sc_mul_mem_oEv (E := E) v hc (one_mem_oEv v)
-
-def oAlg : Subalgebra (v.adicCompletionIntegers F) (Fv F v ⊗[F] E) :=
-  Submodule.toSubalgebra (Submodule.span (v.adicCompletionIntegers F)
-    ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ)) (by exact one_mem_oEv v)
-    (fun _ _ hx hy => by exact oEv_mul v hx hy)
 
 theorem sc_mem_int {a : Fv F v} (ha : sc (E := E) v a ∈ OEv (E := E) v) : a ∈ v.adicCompletionIntegers F := by
   have hle : OEv (E := E) v ⊆ {z | IsIntegral (v.adicCompletionIntegers F) z} := by
@@ -161,7 +163,7 @@ theorem fixLoc_holds : FixLoc σ v := by
   obtain ⟨a, ha, rfl⟩ := fix_int σ v hcm hx hfx
   obtain ⟨b, hb, rfl⟩ := fix_int σ v hcm hy hfy
   have hab : a + b ∈ v.adicCompletionIntegers F := add_mem ha hb
-  rw [sc_eq, sc_eq, ← map_add, ← sc_eq] at hu
+  rw [sc_eq, sc_eq, ← map_add (f := _), ← sc_eq] at hu
   have hU : IsUnit ((⟨a, ha⟩ : v.adicCompletionIntegers F) + ⟨b, hb⟩) := fixLoc_holds_lemma v hab hu
   rcases IsLocalRing.isUnit_or_isUnit_of_isUnit_add hU with h | h
   · exact Or.inl (isU_sc v ha h)

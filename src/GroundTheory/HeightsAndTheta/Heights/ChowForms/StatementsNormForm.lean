@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -43,30 +92,6 @@ def PrimeMapFractionRing.Statement : Prop :=
     Prime P → (∀ a : O, P ≠ C a) → Prime (map (algebraMap O K) P)
 
 section Inhabitants
-
-theorem LinearFormPrime.hypotheses_inhabited : (fun _ : Fin 1 => (1 : ℚ)) ≠ 0 :=
-  fun h => one_ne_zero (congrFun h 0)
-
-theorem NormFormEmbeddings.hypotheses_inhabited :
-    Infinite ℚ ∧ FiniteDimensional ℚ ℚ ∧ Algebra.IsSeparable ℚ ℚ ∧ IsAlgClosed (AlgebraicClosure ℚ) :=
-  ⟨inferInstance, inferInstance, inferInstance, inferInstance⟩
-
-theorem NormFormDvd.hypotheses_inhabited :
-    Algebra.adjoin ℚ (Set.range (fun _ : Fin 1 => (1 : ℚ))) = ⊤ ∧
-      ∑ m : Fin 1, (fun _ : Fin 1 => (1 : ℚ)) m • (fun _ : Fin 1 => (1 : ℚ)) m = 1 ∧
-      (∑ m : Fin 1, X m * C ((fun _ : Fin 1 => (1 : ℚ)) m)) ∣
-        map (algebraMap ℚ ℚ) (X 0 : MvPolynomial (Fin 1) ℚ) := by
-  refine ⟨?_, by simp, by simp⟩
-  rw [eq_top_iff]
-  intro x _
-  exact Subalgebra.algebraMap_mem (Algebra.adjoin ℚ (Set.range (fun _ : Fin 1 => (1 : ℚ)))) x
-
-theorem PrimeMapFractionRing.hypotheses_inhabited :
-    Prime (X 0 : MvPolynomial (Fin 1) ℤ) ∧ ∀ a : ℤ, (X 0 : MvPolynomial (Fin 1) ℤ) ≠ C a :=
-  ⟨X_prime, fun a h => by
-    have h' := congrArg totalDegree h
-    rw [totalDegree_X, totalDegree_C] at h'
-    exact one_ne_zero h'⟩
 
 end Inhabitants
 

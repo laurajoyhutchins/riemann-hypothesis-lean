@@ -1,7 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.SamePartIffOfNeZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassSamePartOneFactorLe
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassTwoFactorsLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SamePartIffOfNeZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowPadicValEqOneOfPrimePow
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassDivisorBound
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassSamePartOneFactorLe
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassTwoFactorsLe
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassUnionBounds
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Artinian.Instances
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial Classical GlobalTheory.BadShare
 
@@ -55,11 +115,12 @@ private theorem exists_root_pow_eq_pow_padicVal {g : ℕ} [Fact g.Prime] (l : �
       z ^ l ^ padicValNat l n = y ^ l ^ padicValNat l n := by
   set B := padicValNat l n
   set m := n / l ^ B
-  have hnm : n = l ^ B * m := (Nat.mul_div_cancel' pow_padicValNat_dvd).symm
+  have hnm : n = l ^ B * m := (Nat.mul_div_cancel' (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))).symm
   have hm0 : m ≠ 0 := by rintro h; rw [h, mul_zero] at hnm; omega
   have hcop : (l ^ B).Coprime m := by
     have := Nat.coprime_ordCompl hl hn.ne'
     rw [Nat.factorization_def n hl] at this
+    rw [← Nat.padicValNat_def] at this
     exact Nat.Coprime.pow_left _ this
   haveI : NeZero m := ⟨hm0⟩
   obtain ⟨t, ht⟩ : ∃ t, l ^ B * t ≡ 1 [MOD m] := by
@@ -82,10 +143,11 @@ private theorem pow_pow_gcd_sub_one_eq_one_of_same_prime_power {g : ℕ} [Fact g
     z ^ (g ^ Nat.gcd d e - 1) = 1 := by
   set B := padicValNat l (g ^ e - 1)
   set m := (g ^ e - 1) / l ^ B
-  have hnm : g ^ e - 1 = l ^ B * m := (Nat.mul_div_cancel' pow_padicValNat_dvd).symm
+  have hnm : g ^ e - 1 = l ^ B * m := (Nat.mul_div_cancel' (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))).symm
   have hcop : (l ^ (max a B)).Coprime m := by
     have := Nat.coprime_ordCompl hl he.ne'
     rw [Nat.factorization_def _ hl] at this
+    rw [← Nat.padicValNat_def] at this
     exact Nat.Coprime.pow_left _ this
   have hK : z ^ l ^ max a B = x ^ l ^ max a B := by
     have h1 : z ^ l ^ max a B = y ^ l ^ max a B := by
@@ -308,8 +370,8 @@ private theorem sum_icc_prod_add_mul_pow_le (N : ℕ) {r : ℝ} (hr0 : 0 ≤ r) 
         gcongr
     _ = 2 * r ^ 2 / (1 - r) ^ 3 := by field_simp <;> ring
 
-open Polynomial Classical in
 
+open Polynomial Classical in
 theorem _root_.GlobalTheory.BadShare.mass_not_rootsApart_le : ∀ (g : ℕ) [Fact g.Prime], ∀ N : ℕ, 2 ^ 12 ≤ g →
     (_root_.GlobalTheory.BadShare.mass g N fun f => ¬ _root_.GlobalTheory.BadShare.RootsApart g N f) ≤ 23 * Real.log g / Real.sqrt g := by
   intro g _ N hg

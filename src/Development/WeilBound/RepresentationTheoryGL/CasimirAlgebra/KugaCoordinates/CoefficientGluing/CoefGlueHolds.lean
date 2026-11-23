@@ -1,7 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CompactUnitaryGroups.IsCompactUnitaryGroup
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CoefficientGluing.SumFinVal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfinitesimalCharacterQuantumDet
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfinitesimalCharacterQuantumDet
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CoefficientGluing.SumFinVal
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CompactUnitaryGroups.IsCompactUnitaryGroup
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +57,7 @@ set_option linter.unusedSimpArgs false
 
 namespace PositivityTheory.Rg.Cz.CGlue
 
-theorem prod_coord_det {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ} (k : Kinf E a) :
+theorem prod_coord_det {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ} (k : Kinf E a) :
     ∏ τ : E →+* ℂ, coord τ (k.1.det) = 1 := by
   have hne : ∀ τ : E →+* ℂ, ComplexEmbedding.conjugate τ ≠ τ := by
     intro τ h
@@ -27,7 +72,7 @@ theorem prod_coord_det {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
     (fun τ _ => Finset.mem_univ _) (fun τ _ => by simp [ComplexEmbedding.conjugate])
   rw [J.coord_conjugate, ← J.coord_star, ← map_mul, hu, map_one]
 
-theorem bigM_kap {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ} {Q : Type} [Fintype Q]
+theorem bigM_kap {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ} {Q : Type} [Fintype Q]
     [DecidableEq Q] (lab : Q → (E →+* ℂ)) (s : ℤ) (k : Kinf E a) :
     bigM lab s (Unitary.toUnits k) = Matrix.of (fun I J : Q → Fin a => ∏ p, kap E a (lab p) k (I p) (J p)) := by
   ext I J
@@ -40,7 +85,7 @@ theorem cx_mul {E : Type} [Field E] {a : ℕ} {A B : Type} [Fintype A] [Fintype 
     (i j : Fin a) : cx τ φ i j * J = J * cx τ ψ i j := by
   simp only [cx, Matrix.smul_mul, Matrix.mul_smul, Matrix.sub_mul, Matrix.mul_sub, h]
 
-theorem glRel_cx {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ} (π : CuspSub E a)
+theorem glRel_cx {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ} (π : CuspSub E a)
     (τ : E →+* ℂ) : GlRel (cx τ (lieOp π)) := by
   intro i j k l
   refine LinearMap.ext fun φ => Subtype.ext ?_

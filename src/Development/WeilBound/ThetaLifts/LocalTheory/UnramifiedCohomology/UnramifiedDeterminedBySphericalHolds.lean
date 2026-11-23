@@ -1,8 +1,55 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedMultiplicityOneProportional
-import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedCohomology.MemLatWIff
-import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
-import Development.WeilBound.CoreStatements.LocalThetaKernels.Locrep
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Vaceigen
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedMultiplicityOneProportional
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Vaceigen
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasMain
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.Locrep
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedCohomology.MemLatWIff
+public import Development.WeilBound.ThetaLifts.TowerModels.LeviAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
+
+@[expose] public section
 
 noncomputable section
 
@@ -153,11 +200,6 @@ theorem unramifiedProportional_holds : UnramifiedMultiplicityOneProportional := 
     obtain ⟨h1, h2⟩ := (mS ψ).1 hψ
     have := h2 1 (USub σ G.W v).one_mem
     rwa [show ((1 : UA σ G.V.J), (1 : UA σ G.W.J)) = 1 from rfl, L.one ψ h1] at this
-
-theorem unramifiedDeterminedBySpherical_holds : UnramifiedDeterminedBySpherical := fun F E _ _ _ _ _ σ B a a' a₁ a₁' G G₁ X om om' om₁ om₁' R Rf R₁ Rf₁ H' i₀ i₁ χ r hM hM₁ hs hH v hv
-    lam hl h0 => by
-  simpa using unramifiedProportional_holds F E σ B a a' a₁ a₁' G G₁ X om om' om₁ om₁' R Rf R₁ Rf₁ H' i₀ i₁ χ r hM hM₁ hs hH v hv lam lam hl hl 0
-    (by rw [h0, zero_smul])
 
 end PositivityTheory.ThKG.Loc
 

@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.HeckeSplitOne
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.FiniteResidueFieldPadicInt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SatakeBoundOfIsometricSphericalGLStatement
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.SmallRowEigenvalues
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.HeckeSplitOne
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.FiniteResidueFieldPadicInt
+public import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.SmallRowEigenvalues
+public import Formalism.SatakeDualWeyl.StatementE
+public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SatakeBoundOfIsometricSphericalGLStatement
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,22 +67,6 @@ def IsUnitarySatake (r : ℕ) (β : Multiset ℂ) : Prop :=
       Set.BijOn (fun g => glMap g (std O K r).1) s (Subtype.val '' subElem k (std O K r)) →
       ∑ g ∈ s, ρ g v =
         ((((qRes O : ℝ) ^ ((k : ℝ) * ((r : ℝ) - k) / 2) : ℝ) : ℂ) * β.esymm k) • v
-
-theorem isUnitarySatake_one : IsUnitarySatake O K 1 {1} := by
-  refine ⟨rfl, ℂ, inferInstance, inferInstance, Representation.trivial ℂ _ ℂ, 1,
-    fun g x => by simp, one_ne_zero, fun g _ => by simp, fun k hk s hs => ?_⟩
-  have hcard : s.card = 1 := by
-    have h1 := hs.ncard_eq
-    rw [Set.ncard_coe_finset] at h1
-    rw [h1]
-    interval_cases k
-    · rw [subElem_zero]
-      exact (Set.ncard_image_of_injective _ Subtype.val_injective).trans (Set.ncard_singleton _)
-    · rw [subElem_top]
-      exact (Set.ncard_image_of_injective _ Subtype.val_injective).trans (Set.ncard_singleton _)
-  interval_cases k
-  · simp [hcard, Multiset.esymm]
-  · simp [hcard, Multiset.esymm, Multiset.powersetCard_one]
 
 variable {O K}
 
@@ -90,16 +114,6 @@ def UnitarySphericalComponent : Prop :=
 theorem rowSizeLe_of_component (h : UnitarySphericalComponent N A) :
     GlobalTheory.ThetaExh.RowSizeLe N A :=
   fun i σ hσ w hw hu => (h i σ hσ w hw hu).2.norm_le
-
-theorem rpow_neg_le_norm_of_component (h : UnitarySphericalComponent N A)
-    (i : N.Loc) (σ : what₂.FT) (hσ : what₂.isot (N.j i) σ ≠ ⊥) (w : PlE H) (hw : IsSplitPl H w)
-    (hu : A.unr (A.locW i σ w)) (α : ℂ) (hα : α ∈ A.frobEig (A.locW i σ w)) :
-    ((normV w : ℕ) : ℝ) ^ (-(((R.r : ℝ) - 1) / 2)) ≤ ‖α‖ := by
-  have h1 := (h i σ hσ w hw hu).1.norm_le α⁻¹ (Multiset.mem_map_of_mem _ hα)
-  have h0 : α ≠ 0 := fun e => A.frobEig_ne_zero _ hu (e ▸ hα)
-  rw [norm_inv] at h1
-  rw [Real.rpow_neg (Nat.cast_nonneg _)]
-  exact inv_le_of_inv_le₀ (norm_pos_iff.2 h0) h1
 
 theorem rowEigSmall_of_component : ∀ (R : Ranks) (H : Host R) (what₂ : Rows.Data R)
     (N : NData R H what₂) (A : NAut N),

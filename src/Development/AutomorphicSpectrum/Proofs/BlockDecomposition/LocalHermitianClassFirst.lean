@@ -1,12 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CTUnitsLeft
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NonsplitCentraliserNormElement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetGramRatOneNeZero
-import Development.WeilBound.CoreStatements.AutomorphicKernels.IsobaricBaseChange.IntegralCoefficientBaseChange.UnitaryBaseChangeCharacters.UnitaryBaseChangeLemmas.ToComplBijective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramKernelSignNonsplitBaseChangeEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianFormSignatureRealisation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinprodNonsplitSignTotallyPositiveEqOne
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCyclicVectorOfSeparable
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CTUnitsLeft
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.IsobaricBaseChange.IntegralCoefficientBaseChange.UnitaryBaseChangeCharacters.UnitaryBaseChangeLemmas.ToComplBijective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinprodNonsplitSignTotallyPositiveEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramKernelSignNonsplitBaseChangeEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianFormSignatureRealisation
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmField
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetGramRatOneNeZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeftMulMatrixTransfer
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCyclicVectorOfSeparable
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.LinearIndependent.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT GlobalTheory.UnitaryClasses
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -55,7 +100,7 @@ theorem det_gramOn_mul (H M : Matrix (Fin n) (Fin n) K) (V : Submodule K (Fin n 
       have h := b.sum_repr (restr M V hM (b j))
       calc ((restr M V hM (b j) : V) : Fin n → K) = ((∑ l, b.repr (restr M V hM (b j)) l • b l : V) : Fin n → K) := by
             rw [h]
-        _ = _ := by simp only [AddSubmonoidClass.coe_finset_sum, Submodule.coe_smul, LinearMap.toMatrix_apply]
+        _ = _ := by simp only [AddSubmonoidClass.coe_finsetSum, Submodule.coe_smul, LinearMap.toMatrix_apply]
     simp only [gramOn, Matrix.of_apply, Matrix.mul_apply]
     rw [hform_mul_right, hT, hform_sum_smul]
   rw [hmat, Matrix.det_mul, LinearMap.det_toMatrix]
@@ -69,8 +114,8 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} (Q : SelfR
   (hc : ∀ a : maximalRealSubfield E, cm (algebraMap _ k a) = φ (algebraMap _ E a))
   {n : ℕ} (ψ : Fld Q →ₗ[E] (Fin n → E))
 
-include hc in
 
+include hc in
 def vecT : k ⊗[maximalRealSubfield E] Fld Q →+ (Fin n → K) :=
   TensorProduct.liftAddHom
     (AddMonoidHom.mk' (fun a : k => AddMonoidHom.mk' (fun y : Fld Q => cm a • (φ ∘ ψ y))
@@ -96,7 +141,7 @@ theorem vecT_smul (a : k) (t : k ⊗[maximalRealSubfield E] Fld Q) :
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul b y => rw [TensorProduct.smul_tmul', vecT_tmul, vecT_tmul, smul_eq_mul, map_mul, mul_smul]
-  | add s t hs ht => rw [smul_add, map_add, map_add, hs, ht, smul_add]
+  | add s t hs ht => rw [smul_add, map_add (f := _), map_add (f := _), hs, ht, smul_add]
 
 variable (j : K ≃+* k ⊗[maximalRealSubfield E] E) (hj : ∀ a e, j.symm (a ⊗ₜ e) = cm a * φ e)
   (A₀ : Matrix (Fin n) (Fin n) E) (hψ : ∀ y, ψ (alpha Q * y) = A₀ *ᵥ ψ y)
@@ -106,11 +151,11 @@ theorem vecT_inclBase (u : k ⊗[maximalRealSubfield E] E) (t : k ⊗[maximalRea
     vecT Q φ cm hc ψ (inclBase Q k u * t) = j.symm u • vecT Q φ cm hc ψ t := by
   induction u using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => rw [map_add, add_mul, map_add, ha, hb, map_add, add_smul]
+  | add a b ha hb => rw [map_add (f := _), add_mul, map_add (f := _), ha, hb, map_add (f := _), add_smul]
   | tmul a e =>
     induction t using TensorProduct.induction_on with
     | zero => simp
-    | add s t hs ht => rw [mul_add, map_add, hs, ht, map_add, smul_add]
+    | add s t hs ht => rw [mul_add, map_add (f := _), hs, ht, map_add (f := _), smul_add]
     | tmul b y =>
       have e1 : inclBase Q k (a ⊗ₜ e) = a ⊗ₜ algebraMap E (Fld Q) e := rfl
       rw [e1, Algebra.TensorProduct.tmul_mul_tmul, vecT_tmul, vecT_tmul, hj, ← Algebra.smul_def, map_smul]
@@ -123,15 +168,15 @@ theorem vecT_alpha (t : k ⊗[maximalRealSubfield E] Fld Q) :
     vecT Q φ cm hc ψ (((1 : k) ⊗ₜ alpha Q) * t) = (A₀.map φ) *ᵥ vecT Q φ cm hc ψ t := by
   induction t using TensorProduct.induction_on with
   | zero => simp
-  | add s t hs ht => rw [mul_add, map_add, hs, ht, map_add, Matrix.mulVec_add]
+  | add s t hs ht => rw [mul_add, map_add (f := _), hs, ht, map_add (f := _), Matrix.mulVec_add]
   | tmul b y =>
     rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul, vecT_tmul, vecT_tmul, hψ, Matrix.mulVec_smul]
     congr 1
     ext i
     exact RingHom.map_mulVec φ A₀ (ψ y) i
 
-include hj hψ in
 
+include hj hψ in
 theorem vecT_eval (m : K[X]) : ∀ t : k ⊗[maximalRealSubfield E] Fld Q,
     vecT Q φ cm hc ψ (eval₂RingHom ((inclBase Q k).toRingHom.comp j.toRingHom) ((1 : k) ⊗ₜ alpha Q) m * t) =
       aeval (A₀.map φ) m *ᵥ vecT Q φ cm hc ψ t := by
@@ -144,7 +189,7 @@ theorem vecT_eval (m : K[X]) : ∀ t : k ⊗[maximalRealSubfield E] Fld Q,
       Matrix.one_mulVec, RingEquiv.symm_apply_apply]
   | add p q hp hq =>
     intro t
-    rw [map_add, add_mul, map_add, hp, hq, map_add, Matrix.add_mulVec]
+    rw [map_add (f := _), add_mul, map_add (f := _), hp, hq, map_add (f := _), Matrix.add_mulVec]
   | monomial d a ih =>
     intro t
     have e1 : (C a * X ^ (d + 1) : K[X]) = (C a * X ^ d) * X := by rw [pow_succ, mul_assoc]
@@ -175,6 +220,7 @@ theorem det_restr_eq (b : Module.Basis (Fin r) (maximalRealSubfield E) (plus Q))
     rw [hB]; rfl
   have h4 : ∀ j, inclPlus Q k x * ((1 : k) ⊗ₜ B j) = ∑ i, L i j • ((1 : k) ⊗ₜ[maximalRealSubfield E] B i) := by
     intro j
+
     rw [← h3, ← map_mul, h2, map_sum]
     simp only [map_smul, h3]
   have h5 : ∀ i, vecT Q φ cm hc ψ ((1 : k) ⊗ₜ B i) = (cB i : Fin n → K) := by
@@ -182,6 +228,7 @@ theorem det_restr_eq (b : Module.Basis (Fin r) (maximalRealSubfield E) (plus Q))
     rw [vecT_tmul, map_one, one_smul, hcB]
   have h6 : ∀ j, M *ᵥ (cB j : Fin n → K) = ∑ i, cm (L i j) • (cB i : Fin n → K) := by
     intro j
+
     rw [← h5, ← hMx, h4, map_sum]
     simp only [vecT_smul, h5]
   have h7 : LinearMap.toMatrix cB cB (restr M V hM) = L.map cm := by
@@ -237,9 +284,9 @@ theorem exists_psi {n : ℕ} (A : Matrix (Fin n) (Fin n) E) (hs : A.charpoly.Sep
   let ψ : Fld Q →ₗ[E] (Fin n → E) :=
     { toFun := fun y => aeval A (rep y) *ᵥ e₀
       map_add' := fun y y' => by
-        rw [← Matrix.add_mulVec, ← map_add]
+        rw [← Matrix.add_mulVec, ← map_add (f := _)]
         refine hmk _ _ ?_
-        rw [map_add, hrep, hrep, hrep]
+        rw [map_add (f := _), hrep, hrep, hrep]
         rfl
       map_smul' := fun c y => by
         rw [RingHom.id_apply, ← Matrix.smul_mulVec, ← map_smul]

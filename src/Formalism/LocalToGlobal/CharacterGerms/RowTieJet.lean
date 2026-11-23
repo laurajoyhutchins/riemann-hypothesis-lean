@@ -1,4 +1,56 @@
-import Formalism.LocalToGlobal.CharacterGerms.MemVarsProdAll
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.MemVarsProdAll
+public import Mathlib.Algebra.MvPolynomial.Supported
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +70,7 @@ def rtjSerIn (A : Set σ) (F : MvPowerSeries σ K) : Prop :=
 
 theorem rtj_jet_subset (P : MvPolynomial σ K) (F : MvPowerSeries σ K) (S : Finset (σ →₀ ℕ))
     (hS : P.support ⊆ S) :
-    jetAt0 P F = ∑ m ∈ S, MvPolynomial.coeff m P * (mfact m : K) * MvPowerSeries.coeff m F := by
+    jetAt0 P F = ∑ m ∈ S, AddMonoidAlgebra.coeff P m * (mfact m : K) * MvPowerSeries.coeff m F := by
   unfold jetAt0
   exact Finset.sum_subset hS fun m _ hm => by
     rw [MvPolynomial.mem_support_iff, not_not] at hm
@@ -64,10 +116,10 @@ theorem rtj_antidiag_split {A : Set σ} (f g : (σ →₀ ℕ) → K)
   exact hne (Prod.ext h1 h2)
 
 theorem rtj_supp_of_supported {A : Set σ} {P : MvPolynomial σ K} (hP : P ∈ MvPolynomial.supported K A)
-    (m : σ →₀ ℕ) (hm : MvPolynomial.coeff m P ≠ 0) : (↑m.support : Set σ) ⊆ A := by
+    (m : σ →₀ ℕ) (hm : AddMonoidAlgebra.coeff P m ≠ 0) : (↑m.support : Set σ) ⊆ A := by
   intro i hi
   rw [MvPolynomial.mem_supported] at hP
-  exact hP ((MvPolynomial.mem_vars i).mpr ⟨m, MvPolynomial.mem_support_iff.mpr hm, hi⟩)
+  exact hP ((MvPolynomial.mem_vars_iff_mem_support i).mpr ⟨m, MvPolynomial.mem_support_iff.mpr hm, hi⟩)
 
 theorem rtj_mfact_add {a b : σ →₀ ℕ} (h : Disjoint a.support b.support) :
     mfact (a + b) = mfact a * mfact b := by
@@ -83,10 +135,10 @@ theorem rtj_jet_mul (A : Set σ) (P Q : MvPolynomial σ K) (F G : MvPowerSeries 
   have hQs : ∀ b ∈ Q.support, (↑b.support : Set σ) ⊆ Aᶜ := fun b hb =>
     rtj_supp_of_supported hQ b (MvPolynomial.mem_support_iff.mp hb)
   have hterm : ∀ x ∈ P.support ×ˢ Q.support,
-      MvPolynomial.coeff (x.1 + x.2) (P * Q) * (mfact (x.1 + x.2) : K) *
+      AddMonoidAlgebra.coeff (P * Q) (x.1 + x.2) * (mfact (x.1 + x.2) : K) *
           MvPowerSeries.coeff (x.1 + x.2) (F * G) =
-        (MvPolynomial.coeff x.1 P * (mfact x.1 : K) * MvPowerSeries.coeff x.1 F) *
-          (MvPolynomial.coeff x.2 Q * (mfact x.2 : K) * MvPowerSeries.coeff x.2 G) := by
+        (AddMonoidAlgebra.coeff P x.1 * (mfact x.1 : K) * MvPowerSeries.coeff x.1 F) *
+          (AddMonoidAlgebra.coeff Q x.2 * (mfact x.2 : K) * MvPowerSeries.coeff x.2 G) := by
     intro x hx
     rw [Finset.mem_product] at hx
     have ha := hPs x.1 hx.1
@@ -96,7 +148,7 @@ theorem rtj_jet_mul (A : Set σ) (P Q : MvPolynomial σ K) (F G : MvPowerSeries 
       intro i hia hib
       exact hb hib (ha hia)
     rw [MvPolynomial.coeff_mul, MvPowerSeries.coeff_mul,
-      rtj_antidiag_split (A := A) (fun c => MvPolynomial.coeff c P) (fun d => MvPolynomial.coeff d Q)
+      rtj_antidiag_split (A := A) (fun c => AddMonoidAlgebra.coeff P c) (fun d => AddMonoidAlgebra.coeff Q d)
         (fun c hc => rtj_supp_of_supported hP c hc) (fun d hd => rtj_supp_of_supported hQ d hd) ha hb,
       rtj_antidiag_split (A := A) (fun c => MvPowerSeries.coeff c F) (fun d => MvPowerSeries.coeff d G)
         hF hG ha hb,
@@ -363,7 +415,7 @@ theorem rtj_grAll_pl {pl : (Σ i : Fin K, Fin (what₂ i)) → Fin N} (hpl : Fun
     grAll pl gr (pl s) = gr s.1 s.2 := by
   unfold grAll
   have h : ∃ s', pl s' = pl s := ⟨s, rfl⟩
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   have hs : h.choose = s := hpl h.choose_spec
   rw [hs]
 
@@ -373,7 +425,7 @@ theorem jetProd : JetProdSt := by
     intro s
     unfold kindAll
     have h : ∃ s', pl s' = pl s := ⟨s, rfl⟩
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     have hs : h.choose = s := hpl h.choose_spec
     rw [hs]
   have hout : ∀ ρ : Fin N, ρ ∉ Finset.univ.image pl →
@@ -384,10 +436,10 @@ theorem jetProd : JetProdSt := by
       exact hρ (Finset.mem_image_of_mem pl (Finset.mem_univ s))
     have h1 : grAll pl gr ρ = 1 := by
       unfold grAll
-      rw [dif_neg h]
+      rw [dite_eq_right h]
     have h2 : kindAll pl kind ρ = none := by
       unfold kindAll
-      rw [dif_neg h]
+      rw [dite_eq_right h]
     rw [h1, h2, rtj_rowCopy_eq, rtj_rowCopy_eq]
     simp only [rtjH, map_one, map_zero, rtj_mvExp_zero, mul_one]
   have hreindex : ∀ f : Fin N → MvPowerSeries (Fin N × WV I) C, (∀ ρ ∉ Finset.univ.image pl, f ρ = 1) →

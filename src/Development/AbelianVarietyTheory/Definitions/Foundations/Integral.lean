@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.BernoulliPolynomials
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,13 +81,6 @@ def rowIdx (N p n : ℕ) (γ : GL (Fin 2) (ZMod (p ^ n))) (i : Fin 2) (y : ℤ) 
   ((N : ℤ) * ((γ : Matrix (Fin 2) (Fin 2) (ZMod (p ^ n))) i 0).val,
    (N : ℤ) * ((γ : Matrix (Fin 2) (Fin 2) (ZMod (p ^ n))) i 1).val + (p : ℤ) ^ n * y)
 
-def piece (N p n m k : ℕ) [NeZero p] (ψ : DirichletCharacter K (p ^ m)) (c d x t : ℤ) (ζ : K)
-    (X : Finset (GL (Fin 2) (ZMod (p ^ n)))) (r : ℕ) : K :=
-  -((p : K) ^ ((n : ℤ) * ((k : ℤ) - 4))) * ∑ γ ∈ X,
-    ψ (((γ : Matrix (Fin 2) (Fin 2) (ZMod (p ^ n))).det.val : ℕ) : ZMod (p ^ m)) *
-      cmul (smF c (k - 1) (N * p ^ n) ζ (rowIdx N p n γ 0 (x * t)).1 (rowIdx N p n γ 0 (x * t)).2)
-           (smF d 1 (N * p ^ n) ζ (rowIdx N p n γ 1 t).1 (rowIdx N p n γ 1 t).2) r
-
 def unitSet (p n : ℕ) [NeZero p] : Finset (GL (Fin 2) (ZMod (p ^ n))) :=
   Finset.univ.filter fun γ => ¬ (p : ℕ) ∣ ((γ : Matrix (Fin 2) (Fin 2) (ZMod (p ^ n))) 0 0).val ∧
     ¬ (p : ℕ) ∣ ((γ : Matrix (Fin 2) (Fin 2) (ZMod (p ^ n))) 1 0).val
@@ -62,27 +99,6 @@ def eePos (N p m : ℕ) (ψ : DirichletCharacter K (p ^ m)) (t : ℤ) (ζ : K) (
     (ψ⁻¹ ((d : ℕ) : ZMod (p ^ m)) * (ζ ^ (p ^ m)) ^ (t * d) -
      ψ⁻¹ (-((d : ℕ) : ZMod (p ^ m))) * (ζ ^ (p ^ m)) ^ (-(t * d)))
     else 0
-
-def lval (p m k : ℕ) (ψ : DirichletCharacter K (p ^ m)) : K :=
-  ((p : K) ^ m) ^ (k - 2) * ∑ u ∈ range (p ^ m), ψ (u : ZMod (p ^ m)) *
-    (-(((Polynomial.bernoulli (k - 1)).eval ((u : ℚ) / (p ^ m : ℕ)) / (k - 1 : ℕ) : ℚ) : K))
-
-def eeConst (N p m : ℕ) [NeZero p] (ψ : DirichletCharacter K (p ^ m)) (t : ℤ) (ζ : K) : K :=
-  (gaussS p m ψ (ζ ^ N))⁻¹ * ∑ v ∈ range (p ^ m), ψ (v : ZMod (p ^ m)) *
-    ((1 / 2 : K) * (1 + ζ ^ ((N : ℤ) * v + (p : ℤ) ^ m * t)) / (1 - ζ ^ ((N : ℤ) * v + (p : ℤ) ^ m * t)))
-
-def ffSer (N p m k : ℕ) (ψ : DirichletCharacter K (p ^ m)) (x t : ℤ) (ζ : K) (n : ℕ) : K :=
-  if n = 0 then lval p m k ψ else ffPos N p m k ψ x t ζ true n
-
-def eeSer (N p m : ℕ) [NeZero p] (ψ : DirichletCharacter K (p ^ m)) (t : ℤ) (ζ : K) (n : ℕ) : K :=
-  if n = 0 then eeConst N p m ψ t ζ else eePos N p m ψ t ζ true n
-
-def xSer (N p m k : ℕ) [NeZero p] (ψ : DirichletCharacter K (p ^ m)) (x t : ℤ) (ζ : K) : ℕ → K :=
-  cmul (ffSer N p m k ψ x t ζ) (eeSer N p m ψ t ζ)
-
-def coPt (N p m k : ℕ) (ψ : DirichletCharacter K (p ^ m)) (x t : ℤ) (ζ : K) : ℕ → K :=
-  cmul (fun n => if n = 0 then 0 else ffPos N p m k ψ x t ζ false n)
-       (fun n => if n = 0 then 0 else eePos N p m ψ t ζ false n)
 
 def toQ (M : ℕ) (f : ℕ → K) (n : ℕ) : K := f (M * n)
 

@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.MassDataInst
-import Formalism.PeriodIntegrals.AdBridgeSteps
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.BridgeFinK
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.Measures
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.AdBridge
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.BridgeFinK
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.InclusionInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,10 +73,10 @@ theorem Bridge_tens_eq (t : AF I.F ⊗[I.F] I.E) :
   | zero => simp
   | tmul a e =>
     simp [tensMap, tauF, swapE, Algebra.TensorProduct.lift_tmul, Algebra.TensorProduct.tmul_mul_tmul]
-  | add s u hs hu => rw [map_add, map_add, map_add, hs, hu]
+  | add s u hs hu => rw [map_add (f := _), map_add (f := _), map_add (f := _), hs, hu]
+
 
 variable {I} in
-
 theorem Bridge_HA_ext {R : Type} [CommRing R] [Algebra I.F R] (g h : HA R I.cm.sig I.J)
     (e : ((HA.mat R I.cm.sig I.J g : GL (Fin I.n) (R ⊗[I.F] I.E)) : Matrix (Fin I.n) (Fin I.n) (R ⊗[I.F] I.E)) =
       ((HA.mat R I.cm.sig I.J h : GL (Fin I.n) (R ⊗[I.F] I.E)) : Matrix (Fin I.n) (Fin I.n) (R ⊗[I.F] I.E))) :
@@ -66,7 +110,7 @@ theorem Bridge_tf_surjective : Function.Surjective (tf I hb) := by
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => simp [φ, swapE, sigR, Formalism.UG.sigR]
-    | add s u hs hu => simp only [map_add] at hs hu ⊢; rw [hs, hu]
+    | add s u hs hu => simp only [map_add (f := _)] at hs hu ⊢; rw [hs, hu]
   have hJ : (JR (Af I.F) I.J).map φ = I.J.map (Formalism.UG.inclE (F := I.F) (Af I.F)) := by
     ext i j
     simp [φ, swapE, JR, inclR, Formalism.UG.inclE]

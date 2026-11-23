@@ -1,5 +1,56 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.TranslateProduct
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.TranslateProduct
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SigmaLogDeriv2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -64,11 +115,9 @@ lemma wEta_eq (h : L.lattice = L'.lattice) : wEta L = wEta L' := by
   have hb0 : L.basis 0 = L.ω₁ := by
     first
       | exact L.basis_zero
-      | simp [PeriodPair.basis]
   have hb1 : L.basis 1 = L.ω₂ := by
     first
       | exact L.basis_one
-      | simp [PeriodPair.basis]
   have hω₁ : L.ω₁ ∈ L.lattice := PeriodPair.mem_lattice.mpr ⟨1, 0, by simp⟩
   have hω₂ : L.ω₂ ∈ L.lattice := PeriodPair.mem_lattice.mpr ⟨0, 1, by simp⟩
   apply L.basis.ext
@@ -118,16 +167,8 @@ theorem lattice_only : LatticeOnly := by
     LatOnly.quasiPeriodConst_eq h, LatOnly.sgStar_eq h, LatOnly.wp_eq h, ?_, ?_⟩
   · first
       | simp only [PeriodPair.g₂, LatOnly.G_eq h]
-      | (unfold PeriodPair.g₂
-         rw [LatOnly.G_eq h])
-      | (unfold PeriodPair.g₂
-         done)
   · first
       | simp only [PeriodPair.g₃, LatOnly.G_eq h]
-      | (unfold PeriodPair.g₃
-         rw [LatOnly.G_eq h])
-      | (unfold PeriodPair.g₃
-         done)
 
 namespace Homog
 
@@ -212,7 +253,6 @@ lemma wEta_basis₁ (L : PeriodPair) : wEta L L.ω₁ = 2 * wZeta L (L.ω₁ / 2
   have hb : L.basis 0 = L.ω₁ := by
     first
       | exact L.basis_zero
-      | simp [PeriodPair.basis]
   have h1 := L.basis.constr_basis ℝ ![2 * wZeta L (L.ω₁ / 2), 2 * wZeta L (L.ω₂ / 2)] 0
   rw [hb] at h1
   simpa [wEta] using h1
@@ -221,7 +261,6 @@ lemma wEta_basis₂ (L : PeriodPair) : wEta L L.ω₂ = 2 * wZeta L (L.ω₂ / 2
   have hb : L.basis 1 = L.ω₂ := by
     first
       | exact L.basis_one
-      | simp [PeriodPair.basis]
   have h1 := L.basis.constr_basis ℝ ![2 * wZeta L (L.ω₁ / 2), 2 * wZeta L (L.ω₂ / 2)] 1
   rw [hb] at h1
   simpa [wEta] using h1
@@ -230,11 +269,9 @@ lemma wEta_scale (z : ℂ) : wEta (scalePair L c hc) (c * z) = c⁻¹ * wEta L z
   have hb0 : L.basis 0 = L.ω₁ := by
     first
       | exact L.basis_zero
-      | simp [PeriodPair.basis]
   have hb1 : L.basis 1 = L.ω₂ := by
     first
       | exact L.basis_one
-      | simp [PeriodPair.basis]
   have k1 : wEta (scalePair L c hc) (c * L.ω₁) = c⁻¹ * wEta L L.ω₁ := by
     have h := wEta_basis₁ (scalePair L c hc)
     change wEta (scalePair L c hc) (c * L.ω₁) = 2 * wZeta (scalePair L c hc) (c * L.ω₁ / 2) at h
@@ -254,13 +291,9 @@ lemma wEta_scale (z : ℂ) : wEta (scalePair L c hc) (c * z) = c⁻¹ * wEta L z
         | (show wEta (scalePair L c hc) (c * L.basis 0) = c⁻¹ * wEta L (L.basis 0)
            rw [hb0]
            exact k1)
-        | (simp only [LinearMap.comp_apply, LinearMap.mulLeft_apply, Fin.zero_eta, hb0]
-           exact k1)
     · first
         | (show wEta (scalePair L c hc) (c * L.basis 1) = c⁻¹ * wEta L (L.basis 1)
            rw [hb1]
-           exact k2)
-        | (simp only [LinearMap.comp_apply, LinearMap.mulLeft_apply, Fin.mk_one, hb1]
            exact k2)
   exact LinearMap.congr_fun key z
 
@@ -275,7 +308,6 @@ lemma area_scale : area (scalePair L c hc) = ‖c‖ ^ 2 * area L := by
   rw [e]
   first
     | rw [Complex.im_ofReal_mul]
-    | simp only [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, zero_mul, add_zero]
   rw [abs_mul, abs_of_nonneg (by positivity)]
 
 lemma quasiPeriodConst_scale : s2 (scalePair L c hc) = (c ^ 2)⁻¹ * s2 L := by
@@ -294,11 +326,6 @@ lemma quasiPeriodConst_scale : s2 (scalePair L c hc) = (c ^ 2)⁻¹ * s2 L := by
   first
     | (field_simp
        done)
-    | (field_simp
-       ring)
-    | (rw [div_eq_iff (mul_ne_zero hc hcc)]
-       field_simp
-       ring)
 
 lemma sgStar_scale (z : ℂ) : sgStar (scalePair L c hc) (c * z) = c * sgStar L z := by
   simp only [sgStar]
@@ -343,12 +370,8 @@ theorem homogeneity_thm : Homogeneity := by
   · first
       | (simp only [PeriodPair.g₂, Homog.G_scale L c hc]
          ring)
-      | (unfold PeriodPair.g₂
-         done)
   · first
       | (simp only [PeriodPair.g₃, Homog.G_scale L c hc]
          ring)
-      | (unfold PeriodPair.g₃
-         done)
 
 end Formalism.L2.Th1.F

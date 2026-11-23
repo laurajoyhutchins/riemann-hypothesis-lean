@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcChart
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualStackedGraphBihomogeneous
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcChart
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLead
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualStackedGraphBihomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GlobalTheory.CompanionTheory.Ar.Giv
@@ -75,8 +123,10 @@ theorem arc_form (p : K) (y₀ : Fin i → K) (g : Fin m → Fin i → K) (φ : 
     rw [map_mul, eval₂Hom_C, eval₂Hom_X']
     simp only [C_mul, mul_assoc, ← Finset.mul_sum]
     ring
+
   rw [map_sum, Finset.sum_congr rfl fun j _ => hj j, ← Finset.mul_sum, Finset.sum_add_distrib,
-    ← Finset.sum_mul, Finset.sum_comm]
+  ← Finset.sum_mul, Finset.sum_comm]
+
   simp only [dotProduct, map_sum, Finset.sum_mul]
 
 end ThetaShiftProofs
@@ -120,7 +170,8 @@ theorem lead_of_coords {b : Module.Basis T ℤ (dualLattice F)} {b' : Module.Bas
     · intro t
       rw [RingHom.comp_apply, DualStackedExcLeadExample.stackedFormEval_first, blockEval_first]
       refine (arc_form p y₀ g _).trans ?_
-      simp only [A, ι, map_add, map_mul, map_C, map_X, map_sum, one_mul]
+
+      simp only [A, ι, map_add (f := _), map_mul, map_C, map_X, map_sum, one_mul]
       rw [hcα, dotProduct_smul, smul_eq_mul, C_mul, mul_add, Finset.mul_sum, mul_assoc]
       congr 1
       refine Finset.sum_congr rfl fun l _ => ?_
@@ -129,7 +180,8 @@ theorem lead_of_coords {b : Module.Basis T ℤ (dualLattice F)} {b' : Module.Bas
     · intro t
       rw [RingHom.comp_apply, DualStackedExcLeadExample.stackedFormEval_second, blockEval_second]
       refine (arc_form p y₀ g _).trans ?_
-      simp only [L, ι, map_add, map_mul, map_C, map_X, map_sum, hc0, hc1]
+
+      simp only [L, ι, map_add (f := _), map_mul, map_C, map_X, map_sum, hc0, hc1]
   have hι2 : blockEval (fun t => ι (A t)) (fun t => ι (L t)) = ι.comp (blockEval A L) := by
     apply ringHom_block_ext
     · intro t
@@ -155,13 +207,15 @@ theorem lead_of_coords {b : Module.Basis T ℤ (dualLattice F)} {b' : Module.Bas
     apply ringHom_block_ext
     · intro t
       rw [RingHom.comp_apply, blockEval_first, blockEval_first]
-      simp only [A, ψ, map_add, map_mul, eval₂Hom_C, eval₂Hom_X', map_sum, RingHom.comp_apply, hcαρ,
-        hπ, map_zero, zero_mul, Finset.sum_const_zero, add_zero]
+
+      simp only [A, ψ, map_add (f := _), map_mul, eval₂Hom_C, eval₂Hom_X', map_sum, RingHom.comp_apply, hcαρ,
+      hπ, map_zero, zero_mul, Finset.sum_const_zero, add_zero]
       ring
     · intro t
       rw [RingHom.comp_apply, blockEval_second, blockEval_second]
-      simp only [L, ψ, ℓ, map_add, map_mul, eval₂Hom_C, eval₂Hom_X', map_sum, RingHom.comp_apply, hc0ρ,
-        hc1ρ, one_mul, Fin.sum_univ_succ]
+
+      simp only [L, ψ, ℓ, map_add (f := _), map_mul, eval₂Hom_C, eval₂Hom_X', map_sum, RingHom.comp_apply, hc0ρ,
+      hc1ρ, one_mul, Fin.sum_univ_succ]
   have hlin : (linPointMap α M : MRing (stackedBlocks T) →+* _) =
       blockEval (fun t => X none * C (α t)) (fun t => 1 * ℓ t) := by
     apply ringHom_block_ext
@@ -203,6 +257,7 @@ theorem exc_base : DualStackedExcBase.Statement := by
   refine sup_le ?_ ?_
   · intro f hf
     obtain ⟨s, G, rfl, hG⟩ := graph_bihomog K i F F' T b b' a hab f hf
+
     rw [linPrime, RingHom.mem_ker, map_sum]
     exact Finset.sum_eq_zero fun p hp => lead_of_coords hco (hG p hp).1 (hG p hp).2
   · rw [Ideal.span_le, Set.range_subset_iff]

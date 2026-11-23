@@ -1,17 +1,64 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.LeibnizDerivatives.GenericProdIff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenFns
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompactOpenExhaustionStabilizes
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosedUnipotentCompactExhaustion
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProjectionToTwistedEigenfunctionSupport
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BruhatCellHeightStratification
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdjacentDescentOrOpenCell
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WhittakerCharacterNontrivialOnCell
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CellHeightLocalReduction
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenFns
+import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIrreducibleIffOfLinearEquiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasCompactSupportDescend
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsGenericIffIsGenericFor
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasCompactSupportDescend
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIrreducibleIffOfLinearEquiv
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsGenericIffIsGenericFor
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdjacentDescentOrOpenCell
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BruhatCellHeightStratification
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosedUnipotentCompactExhaustion
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompactOpenExhaustionStabilizes
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProjectionToTwistedEigenfunctionSupport
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WhittakerCharacterNontrivialOnCell
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.LeibnizDerivatives.GenericProdIff
+
+@[expose] public section
+
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.BZMir.Leib GlobalTheory.CompanionTheory.Rodier
 open scoped TensorProduct
 
@@ -74,22 +121,32 @@ theorem kill_cell (ψ : AddChar k Circle) (hψ : Continuous ψ) (hψ1 : ψ ≠ 1
       exact ⟨p, hp, j, n, hj, rfl⟩
     · rintro ⟨p, hp, j, n, hn, rfl⟩
       exact ⟨p, hp, n, hLU j hn, rfl⟩
-  have : T2Space (GL (Fin N) k) := by
-    obtain ⟨_, _⟩ := GlobalTheory.SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
-    infer_instance
-  obtain ⟨j₀, hj₀⟩ := GlobalTheory.CompanionTheory.BaireCoset.baire_double_coset (parab k (stdBlocks d hd))
-    (GlobalTheory.WhitHered.CellLoc.isClosed_parab (stdBlocks d hd)) (GlobalTheory.SplitWeil.KO k (Fin N) : Set (GL (Fin N) k)) GlobalTheory.SplitFlip.isCompact_KO
-    (fun g => by
-      obtain ⟨p, c, hc, e⟩ := GlobalTheory.SmGL.MultiIrr.exists_parab_mul (stdBlocks d hd) g
-      exact ⟨p, p.2, c, hc, e⟩)
-    L hLm hLc (pm k w) {g | f.1.1 g ≠ 0} (isClopen_supp f).isOpen
-    (fun p hp g hg => ne_zero_left f ⟨p, hp⟩ g hg) (by rw [← hcellL]; exact hcl)
   obtain ⟨i, j, hij, hb⟩ := (exists_adjacent_blk_lt_or_cell_eq_open k h N d hd w).resolve_right hbad
   obtain ⟨t, ht⟩ : ∃ t, ψ t ≠ 1 := by
     by_contra hc
     push Not at hc
     exact hψ1 (by ext x; simp [hc x])
   obtain ⟨u, hu, hwu, hrad⟩ := GlobalTheory.CompanionTheory.Rodier.RootElt.exists_root_conj_mem_unipRad k ψ h N d hd w i j hij hb t
+  have : T2Space (GL (Fin N) k) := by
+    obtain ⟨_, _⟩ := GlobalTheory.SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
+    infer_instance
+  obtain ⟨j₀, hj₀⟩ := GlobalTheory.CompanionTheory.BaireCoset.baire_double_coset (parab k (stdBlocks d hd))
+    (by
+      obtain ⟨_, _⟩ := GlobalTheory.SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
+      have heq : (parab k (stdBlocks d hd) : Set (GL (Fin N) k)) =
+          ⋂ i, ⋂ j, ⋂ _ : blk (stdBlocks d hd) j < blk (stdBlocks d hd) i,
+            {g : GL (Fin N) k | g.val i j = 0} := by
+        ext g
+        simp only [SetLike.mem_coe, mem_parab, Set.mem_iInter, Set.mem_setOf_eq]
+      rw [heq]
+      exact isClosed_iInter fun i => isClosed_iInter fun j => isClosed_iInter fun _ =>
+        isClosed_eq (Units.continuous_val.matrix_elem i j) continuous_const)
+    (GlobalTheory.SplitWeil.KO k (Fin N) : Set (GL (Fin N) k)) GlobalTheory.SplitFlip.isCompact_KO
+    (fun g => by
+      obtain ⟨p, c, hc, e⟩ := GlobalTheory.SmGL.MultiIrr.exists_parab_mul (stdBlocks d hd) g
+      exact ⟨p, p.2, c, hc, e⟩)
+    L hLm hLc (pm k w) {g | f.1.1 g ≠ 0} (isClopen_supp f).isOpen
+    (fun p hp g hg => ne_zero_left f ⟨p, hp⟩ g hg) (by rw [← hcellL]; exact hcl)
   obtain ⟨j₁, hj₁⟩ := hLex u hu
   have hJ0 : L j₀ ≤ L (max j₀ j₁) := hLm (le_max_left _ _)
   have hJ1 : L j₁ ≤ L (max j₀ j₁) := hLm (le_max_right _ _)
@@ -140,8 +197,8 @@ end GlobalTheory.CompanionTheory.Rodier.Bad
 
 namespace GlobalTheory.CompanionTheory.Rodier
 
-open Bad in
 
+open Bad in
 theorem exists_open_congr : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     (ψ : AddChar k Circle), Continuous ψ → ψ ≠ 1 → ∀ (h N : ℕ) (d : Fin h → ℕ) (hd : ∑ a, d a = N) {W : Type}
     [AddCommGroup W] [Module ℂ W] (ρ : Representation ℂ (Levi k fun a => Fin (d a)) W) (f : IndSp (stdBlocks d hd) ρ),

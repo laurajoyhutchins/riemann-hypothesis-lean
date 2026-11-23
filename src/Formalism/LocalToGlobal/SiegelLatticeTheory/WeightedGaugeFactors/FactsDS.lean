@@ -1,13 +1,53 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.BesselNVG
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLitG
-import Formalism.SharpRestriction.CuspSpanNormBounds.DiscreteSeriesWeylDimension
-import Formalism.HermitianCurvature.BesselNonvanishingReduction
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefLoc
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.BesselVectors.Closed
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.BesselVectors.DecLow
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.FinalClosed
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.HWExists
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.BesselNVG
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLitG
+public import Formalism.SharpRestriction.CuspSpanNormBounds.DiscreteSeriesWeylDimension
+public import Formalism.HermitianCurvature.BesselNonvanishingReduction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DiscreteSeriesUniqueLargeGap
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.FinalClosed
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.CoefLoc
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.HWExists
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.BesselVectors.Closed
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.BesselVectors.DecLow
+
+@[expose] public section
 
 namespace Formalism.L2.SG.OwnFacts
 
@@ -29,12 +69,6 @@ instance factExists : Fact DiscreteSeriesWeylDimension.DiscreteSeriesExistsG := 
   exact ⟨H, i1, i2, σ, hσ⟩⟩
 
 instance factMultOne : Fact DiscreteSeriesWeylDimension.LowKMultOneG := ⟨ReciprocityTheory.ChartRestriction.DS.final_lowKMultOneG⟩
-
-instance factUniq : Fact BridgeLemma₂.deg_DSUniqG := ⟨ReciprocityTheory.ChartRestriction.DS.final_deg_DSUniqG⟩
-
-instance factDiscreteSeriesUnique : Fact LeviCoordinates.DiscreteSeriesUniqueBesselGapped := ⟨ReciprocityTheory.ChartRestriction.DS.discrete_series_unique_large_gap⟩
-
-instance factHCMult : Fact BridgeCPX.HCMultDSG := ⟨ReciprocityTheory.ChartRestriction.DS.final_HCMultDSG⟩
 
 instance factHighestWeight : Fact DiscreteSeriesWeylDimension.HighestWeightExists :=
   ⟨fun k u h => ReciprocityTheory.ChartRestriction.DS.HW.highest_weight_exists k u h⟩

@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionSameSSOfLattices
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodCoefficientRingPadicIntegersFinExt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodCoefficientRingPadicIntegersFinExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionSameSSOfLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +73,7 @@ def asModuleIso (π : Representation O G M) (π' : Representation O G N) (e : M 
         LinearEquiv.apply_symm_apply]
       induction r using MonoidAlgebra.induction_on with
       | of g => simp [he]
-      | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
       | smul c a ha => simp only [map_smul, LinearMap.smul_apply, ha] }
 
 theorem sameSS_of_equiv {π₀ : Representation O G P} {π : Representation O G M} {π' : Representation O G N}
@@ -62,7 +106,7 @@ theorem lTensor_coefRep (W : Representation O G M) (f : N →ₗ[O] P) (g : G) (
   induction m using TensorProduct.induction_on with
   | zero => simp
   | tmul a x => simp [coefRep_tmul]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 end Alg
 
@@ -334,7 +378,7 @@ theorem admissible_coefRep [IsDomain O] [IsPrincipalIdealRing O] [CharZero LL] {
       · rintro g ⟨a, b⟩
         change LinearMap.lTensor M _ (coefRep W _ g a) + LinearMap.lTensor M _ (coefRep W _ g b) =
           coefRep W _ g (LinearMap.lTensor M _ a + LinearMap.lTensor M _ b)
-        rw [lTensor_coefRep, lTensor_coefRep, map_add]
+        rw [lTensor_coefRep, lTensor_coefRep, map_add (f := _)]
       · intro y
         induction y using TensorProduct.induction_on with
         | zero => exact ⟨0, map_zero _⟩

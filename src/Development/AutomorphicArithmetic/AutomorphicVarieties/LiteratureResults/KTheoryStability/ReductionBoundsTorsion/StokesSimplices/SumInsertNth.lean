@@ -1,4 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.StokesSimplices.SubSlice
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.StokesSimplices.SubSlice
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,10 +76,10 @@ lemma mem_Δ_insertNth {m : ℕ} (i : Fin (m + 1)) (x : ℝ) (s : Fin m → ℝ)
 
 lemma isClosed_Δ (m : ℕ) : IsClosed (Δ m) := by
   have h1 : IsClosed {t : Fin m → ℝ | ∀ j, 0 ≤ t j} := by
-    simp only [Set.setOf_forall]
+    simp only [Set.ofPred_forall]
     exact isClosed_iInter fun j => isClosed_le continuous_const (continuous_apply j)
   have h2 : IsClosed {t : Fin m → ℝ | ∑ j, t j ≤ 1} :=
-    isClosed_le (continuous_finset_sum _ fun j _ => continuous_apply j) continuous_const
+    isClosed_le (by fun_prop) continuous_const
   exact h1.inter h2
 
 lemma isCompact_Δ (m : ℕ) : IsCompact (Δ m) := by
@@ -68,7 +119,7 @@ theorem subSlice : SubSlice := by
   rw [← hem.map_eq, setIntegral_map_equiv, Measure.volume_eq_prod,
     ← integral_indicator hS, integral_prod_symm _ ((integrable_indicator_iff hS).2 hFint)]
   have hA := integrableOn_Δ_insertNth i G W hΔW hG (fun s => 1 - ∑ j, s j)
-    (continuous_const.sub (continuous_finset_sum _ fun j _ => continuous_apply j))
+    (continuous_const.sub (by fun_prop))
     (fun s hs => by have := hs.2; linarith) (fun s hs => le_rfl)
   have hB := integrableOn_Δ_insertNth i G W hΔW hG (fun _ => 0) continuous_const
     (fun s hs => le_rfl) (fun s hs => by have := hs.2; linarith)

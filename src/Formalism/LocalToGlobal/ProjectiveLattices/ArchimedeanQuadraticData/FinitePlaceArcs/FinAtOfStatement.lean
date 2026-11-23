@@ -1,9 +1,45 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.QbridgeOf
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.ValLine
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcWitnessExistence.PolyFr
-import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.FinitePlaceArcs.BeSumStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.FinCoreSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.BasisChangeSt
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.ArcDatumIsArcPointBasis
+public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.FunDef
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.Rationality.QuotSt
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,30 +95,5 @@ def FinLocalAt {K₁ : Type} [Field K₁] [NumberField K₁] [Algebra T.Q.c.F K�
           (MvPolynomial.map Z.ι (lcoeffPoly (arcNum (evR (T.Q.Xo j) T.Q.c F d.yF)) k)) * t ^ k‖ ≤ 1
 
 variable {h : LawsCore T} {ka : WeightFamilies.Wt D j} {CR Tt cc : ℝ}
-
-def IsValLineAt (q : QDataAt h j ka CR Tt cc)
-    (s : Fin (WeightFamilies.rhoP (recB h) CR Tt cc j ka) → HeightOneSpectrum (𝓞 q.K₁) → ℝ)
-    (vth : Fin (WeightFamilies.rhoP (recB h) CR Tt cc j ka) → HeightOneSpectrum (𝓞 q.K₁) → ℤ)
-    (vη : Fin (WeightFamilies.rhoP (recB h) CR Tt cc j ka) → HeightOneSpectrum (𝓞 q.K₁) →
-      ∀ τ : D.host.E →+* ℂ, Fin ((T.Q.Dw j).mult τ) → ℤ) : Prop :=
-  (∀ i w, s i w = (lineVal ka.n (vth i w) (vη i w) (q.d i).μ : ℝ)) ∧
-  ∀ i, {w | vth i w ≠ 0 ∨ ∃ τ k, vη i w τ k ≠ 0}.Finite
-
-def mlatRul (h : LawsCore T) (j : ℕ) (ka : WeightFamilies.Wt D j) : Set (T.R j) :=
-  {F | ∃ G : (recB h).Cusp j ka, G ∈ (recB h).Mlat j ka ∧ G.1 = F}
-
-def FinAtOfStatement (h : LawsCore T) (j : ℕ) (ka : WeightFamilies.Wt D j) (CR Tt cc : ℝ) : Prop :=
-  PolyFrStatement T →
-  ∀ (q : QDataAt h j ka CR Tt cc) (large₂ : SizeData₂ D) (Cc Ac : ℝ) (n' : ℕ)
-    (s : Fin (WeightFamilies.rhoP (recB h) CR Tt cc j ka) → HeightOneSpectrum (𝓞 q.K₁) → ℝ)
-    (vth : Fin (WeightFamilies.rhoP (recB h) CR Tt cc j ka) → HeightOneSpectrum (𝓞 q.K₁) → ℤ)
-    (vη : Fin (WeightFamilies.rhoP (recB h) CR Tt cc j ka) → HeightOneSpectrum (𝓞 q.K₁) →
-      ∀ τ : D.host.E →+* ℂ, Fin ((T.Q.Dw j).mult τ) → ℤ),
-    0 < n' → IsValLineAt q s vth vη →
-    (∀ i (la : HeightOneSpectrum (𝓞 T.Q.c.F)) (w : HeightOneSpectrum (𝓞 q.K₁)), LiesOver w la →
-      FinLocalAt (q.d i) w ka.n (vth i w) (vη i w)
-        (w.asIdeal.ramificationIdx (𝓞 T.Q.c.F) * mOf D.host.E n' la) (mlatRul h j ka)) →
-    (Real.log |((discr D.host.E : ℤ) : ℝ)| + Real.log n') * (aAbs ka : ℝ) ≤ WeightFamilies.PPv D large₂ Cc Ac * ka.size →
-    FinAt q large₂ Cc Ac (beOf D.host.E n' (aAbs ka)) s
 
 end Formalism.L2.Pj.QAt

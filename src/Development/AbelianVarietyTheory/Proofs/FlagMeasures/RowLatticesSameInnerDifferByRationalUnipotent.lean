@@ -1,13 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.Saturated
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.CoreStepOf
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.FrameReduction
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.MeasureIsomorphismAtInfinity
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.AdjointActionReduction
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.FrameReduction
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.MeasureIsomorphismAtInfinity
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.SecondDualReduction
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.AdjointActionReduction
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.CoreStepOf
+
+@[expose] public section
 
 open scoped Classical
 open NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat
@@ -48,9 +88,11 @@ theorem pr_f (h : DualFr e f) (b : Fin r) : pr e f (f b) = 0 := by
   simp [pr_apply, h.2.1, h.2.2]
 
 theorem perp_e (h : DualFr e f) (b : Fin r) (v : S.V) : S.hT (e b) (pr e f v) = 0 := by
+
   simp [pr_apply, map_sub, map_sum, map_smul, h.1, h.2.2]
 
 theorem perp_f (h : DualFr e f) (b : Fin r) (v : S.V) : S.hT (f b) (pr e f v) = 0 := by
+
   simp [pr_apply, map_sub, map_sum, map_smul, h.2.1, fe h]
 
 theorem pr_of_perp (w : S.V) (he : ∀ a, S.hT (e a) w = 0) (hf : ∀ a, S.hT (f a) w = 0) :
@@ -125,8 +167,9 @@ theorem expand (h : DualFr e f) (c d c' d' : Fin r → E) (w w' : S.V)
       ∑ a, (star (c a) * d' a + star (d a) * c' a) + S.hT w w' := by
   have h1 := perp_e' hwe
   have h2 := perp_e' (e := f) hwf
-  simp [map_add, map_sum, LinearMap.add_apply, LinearMap.sum_apply, LinearMap.map_smulₛₗ₂, map_smul,
-    h.1, h.2.1, h.2.2, fe h, hwe, hwf, hwe', hwf', h1, h2, Finset.sum_add_distrib]
+
+  simp [map_add (f := _), map_sum, LinearMap.add_apply, LinearMap.sum_apply, LinearMap.map_smulₛₗ₂, map_smul,
+  h.1, h.2.1, h.2.2, fe h, hwe, hwf, hwe', hwf', h1, h2, Finset.sum_add_distrib]
   rw [add_comm]
   congr 1 <;> refine Finset.sum_congr rfl fun x _ => ?_ <;> simp [starRingEnd_apply, mul_comm]
 
@@ -157,7 +200,7 @@ theorem pr_sig_isom (hb : DualFr e fb) {u u' : S.V} (hu : ∀ a, S.hT (e a) u = 
     intro x hx x' hx'
     have p1 := sig_perp σ hσ hσX' hu
     have p2 := sig_perp σ hσ hσX' hu'
-    simp only [map_add, LinearMap.add_apply, hσ, (perpX p2 hx).1, (perpX p1 hx').2, isoX hb hx hx']
+    simp only [map_add (f := _), LinearMap.add_apply, hσ, (perpX p2 hx).1, (perpX p1 hx').2, isoX hb hx hx']
     simp
   have := k _ (pr_sub_mem (f := fb) _ (sig_perp σ hσ hσX' hu)) _ (pr_sub_mem (f := fb) _ (sig_perp σ hσ hσX' hu'))
   simpa using this
@@ -286,7 +329,7 @@ theorem split_perp {f : Fin r → S.V} (hd : DualFr F0.e f) {aa aa' : Fin r → 
   have ht0 : t = 0 := by
     refine spanF_zero hd ht' fun a => ?_
     have := hp a
-    simp only [map_add, isoX hd (Submodule.subset_span ⟨a, rfl⟩) hs', (hL l hl a).1, zero_add] at this
+    simp only [map_add (f := _), isoX hd (Submodule.subset_span ⟨a, rfl⟩) hs', (hL l hl a).1, zero_add] at this
     exact this
   exact ⟨s, hs', l, hl, by simp [ht0]⟩
 
@@ -326,7 +369,7 @@ theorem map_G_eq {aa : Fin r → FractionalIdeal (nonZeroDivisors (𝓞 E)) E} {
     have e1 : σ l = l' + ((σ l - (s + l')) + s) := by abel
     rw [G_w σ hle (fun a => (hLa l hl a).2)]
     try simp only [LinearEquiv.coe_coe]
-    rw [e1, map_add, pr_spanE hb (Submodule.add_mem _ hmx hs), add_zero,
+    rw [e1, map_add (f := _), pr_spanE hb (Submodule.add_mem _ hmx hs), add_zero,
       pr_of_perp l' (fun a => (hLb l' hl' a).1) (fun a => (hLb l' hl' a).2)]
     exact hl'
   have hB : ∀ l' ∈ Lb, ∃ l ∈ La, G F0.e fa fb σ l = l' := by
@@ -344,7 +387,7 @@ theorem map_G_eq {aa : Fin r → FractionalIdeal (nonZeroDivisors (𝓞 E)) E} {
       exact (perpX hmp (hσX _ (Submodule.subset_span ⟨a, rfl⟩))).1
     obtain ⟨s, hs, l, hl, rfl⟩ := split_perp F0 ha hLa hΛa hm0 hm0p
     refine ⟨l, hl, ?_⟩
-    have e1 : σ l = l' - ((l' - σ (s + l)) + σ s) := by rw [map_add]; abel
+    have e1 : σ l = l' - ((l' - σ (s + l)) + σ s) := by rw [map_add (f := _)]; abel
     rw [G_w σ (fun a => (hLa l hl a).1) (fun a => (hLa l hl a).2)]
     try simp only [LinearEquiv.coe_coe]
     rw [e1, map_sub, pr_spanE hb (Submodule.add_mem _ hmx (hσX _ hs)), sub_zero,
@@ -432,8 +475,8 @@ section Gen5
 
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {S : HSpace E} {r : ℕ} {T : E}
 
-open Formalism.L2.SG.Saturated in
 
+open Formalism.L2.SG.Saturated in
 theorem exists_unip (F0 : FlagG S r T) (aa : Fin r → FractionalIdeal (nonZeroDivisors (𝓞 E)) E)
     (Λa Λb : Submodule (𝓞 E) S.V) (σ : S.V ≃ₗ[E] S.V) (hσ : ∀ x y, S.hT (σ x) (σ y) = S.hT x y)
     (hσe : ∀ i : Fin r, σ (F0.e i) - F0.e i ∈ F0.Xa i.val)

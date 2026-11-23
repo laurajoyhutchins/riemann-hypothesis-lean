@@ -1,5 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.FieldTheory.Separable
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.HeckeSplitOne
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.OffRange
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.IntegralHeckeForms
+public import Mathlib.FieldTheory.Perfect
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.IntegralHeckeForms Formalism.ConjugateSelfDual ReciprocityTheory.Gal NumberField IsDedekindDomain Polynomial GlobalTheory.LiftLeaf GlobalTheory.SupLaw
 open scoped TensorProduct
@@ -28,7 +81,7 @@ theorem aeval_adj (U : Submodule ℂ H) (S S' : Module.End ℂ H) (hS : ∀ u �
   · intro a u hu v hv
     simp [Module.algebraMap_end_apply, inner_smul_left, inner_smul_right, mul_comm]
   · intro p r hp hr u hu v hv
-    simp only [map_add, Polynomial.map_add, LinearMap.add_apply, inner_add_left, inner_add_right,
+    simp only [map_add (f := _), Polynomial.map_add (f := _), LinearMap.add_apply, inner_add_left, inner_add_right,
       hp u hu v hv, hr u hu v hv]
   · intro n a ih u hu v hv
     have e : (Polynomial.C a * Polynomial.X ^ (n + 1) : Polynomial ℂ)
@@ -48,7 +101,7 @@ theorem aeval_comm (U : Submodule ℂ H) (S B : Module.End ℂ H) (hS : ∀ u �
   · intro a u hu
     simp [Module.algebraMap_end_apply]
   · intro p r hp hr u hu
-    simp only [map_add, LinearMap.add_apply, hp u hu, hr u hu]
+    simp only [map_add (f := _), LinearMap.add_apply, hp u hu, hr u hu]
   · intro n a ih u hu
     rw [pow_succ, ← mul_assoc, map_mul, Polynomial.aeval_X]
     simp only [Module.End.mul_apply]
@@ -100,7 +153,7 @@ theorem minpoly_separable_of_normal : ∀ (K V H : Type) [Field K] [AddCommGroup
     · intro a x
       simp [Module.algebraMap_end_apply]
     · intro p r hp hr x
-      simp only [map_add, Polynomial.map_add, LinearMap.add_apply, hp, hr]
+      simp only [map_add (f := _), Polynomial.map_add (f := _), LinearMap.add_apply, hp, hr]
     · intro n a ih x
       have e : (Polynomial.C a * Polynomial.X ^ (n + 1) : Polynomial K)
           = Polynomial.C a * Polynomial.X ^ n * Polynomial.X := by ring

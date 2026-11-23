@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialBaseChange
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialBaseChange
+public import Mathlib.FieldTheory.LinearDisjoint
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -15,7 +60,7 @@ theorem eq_zero_of_aeval_genX_add_mul_genY {K : Type*} [Field K] (V : Weierstras
     {P Q : K[X]} (h : aeval (genX V) P + aeval (genX V) Q * genY V = 0) : P = 0 ∧ Q = 0 := by
   apply CoordinateRing.smul_basis_eq_zero (W' := V.toAffine)
   apply IsFractionRing.injective V.toAffine.CoordinateRing V.toAffine.FunctionField
-  rw [map_zero, ← h, map_add, Algebra.smul_def, Algebra.smul_def, mul_one, map_mul,
+  rw [map_zero, ← h, map_add (f := _), Algebra.smul_def, Algebra.smul_def, mul_one, map_mul,
     genX_eq, aeval_algebraMap_apply, aeval_algebraMap_apply, aeval_X_left_apply,
     aeval_X_left_apply, ← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
   rfl
@@ -35,7 +80,7 @@ theorem bcEmb_algebraMap_smul_basis (p q : F[X]) :
       (algebraMap F[X] W.toAffine.CoordinateRing t) = aeval (genX W) t := by
     intro t
     rw [← IsScalarTower.algebraMap_apply, genX_eq, aeval_algebraMap_apply, aeval_X_left_apply]
-  rw [map_add, Algebra.smul_def, Algebra.smul_def, mul_one, map_add, map_mul, e, e,
+  rw [map_add (f := _), Algebra.smul_def, Algebra.smul_def, mul_one, map_add (f := _), map_mul, e, e,
     show algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
       (CoordinateRing.mk W.toAffine Y) = genY W from rfl, map_mul, ← aeval_algHom_apply,
     ← aeval_algHom_apply, bcEmb_genX, bcEmb_genY, aeval_map_algebraMap, aeval_map_algebraMap]
@@ -53,13 +98,14 @@ theorem coordinateRing_eq_zero_of_sum {ι : Type*} (s : Finset ι) {ω : ι → 
     rw [← hpq i, bcEmb_algebraMap_smul_basis]
     simp only [map_mul, aeval_C]
     ring
+
   simp only [e, Finset.sum_add_distrib, ← Finset.sum_mul, ← map_sum] at h
   obtain ⟨hP, hQ⟩ := eq_zero_of_aeval_genX_add_mul_genY _ h
   have hcoef : ∀ (t : ι → F[X]), ∑ i ∈ s, C (ω i) * (t i).map (algebraMap F Ω) = 0 →
       ∀ i ∈ s, t i = 0 := by
     intro t ht i hi
     ext n
-    have hn := congrArg (coeff · n) ht
+    have hn := congrArg (fun p : Polynomial Ω => p.coeff n) ht
     simp only [finsetSum_coeff, coeff_C_mul, coeff_map, coeff_zero] at hn
     have hn' : ∑ j ∈ s, (t j).coeff n • ω j = 0 := by
       rw [← hn]
@@ -144,12 +190,15 @@ variable {F Ω : Type u} [Field F] [Field Ω] [Algebra F Ω]
 
 theorem comap_isogBaseChange_bcEmb (φ : Isogeny E E') (g : E'.toAffine.FunctionField) :
     (isogBaseChange (F' := Ω) φ).comap (bcEmb (F' := Ω) E' g) = bcEmb (F' := Ω) E (φ.comap g) := by
+  classical
   obtain ⟨⟨x, y, h, he, -⟩, -⟩ := φ.2
   have hx : (isogBaseChange (F' := Ω) φ).x = bcEmb (F' := Ω) E φ.x := by
-    simp only [Isogeny.x, isogBaseChange_val, he]
+    change xOf _ (isogBaseChange (F' := Ω) φ).1 = _
+    rw [isogBaseChange_val, he, Point.map_some, Isogeny.x, he]
     rfl
   have hy : (isogBaseChange (F' := Ω) φ).y = bcEmb (F' := Ω) E φ.y := by
-    simp only [Isogeny.y, isogBaseChange_val, he]
+    change yOf _ (isogBaseChange (F' := Ω) φ).1 = _
+    rw [isogBaseChange_val, he, Point.map_some, Isogeny.y, he]
     rfl
   have : ((isogBaseChange (F' := Ω) φ).comap.restrictScalars F).comp (bcEmb (F' := Ω) E') =
       (bcEmb (F' := Ω) E).comp φ.comap := by

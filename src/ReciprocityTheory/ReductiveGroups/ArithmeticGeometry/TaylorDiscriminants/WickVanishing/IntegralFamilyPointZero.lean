@@ -1,6 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofComm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.NabTrans
-import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ConnectionKillsSeries
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ConstantCoeffEv
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LogChain
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,18 +71,13 @@ theorem ig_C {σ : Type} (r : R) : (C (algebraMap R k r) : MvPowerSeries σ k) �
 theorem ig_X {σ : Type} (s : σ) : (X s : MvPowerSeries σ k) ∈ Ig R k σ := RingHom.mem_range.mpr ⟨X s, by simp⟩
 
 theorem map_pderiv' {σ : Type} (f : MvPowerSeries σ R) (v : σ) :
-    MvPowerSeries.map (algebraMap R k) (pderiv R v f) = pderiv k v (MvPowerSeries.map (algebraMap R k) f) := by
+    MvPowerSeries.map (algebraMap R k) (pderiv v f) = pderiv v (MvPowerSeries.map (algebraMap R k) f) := by
   ext n
-  show coeff n (MvPowerSeries.map (algebraMap R k) (pderivFun v f)) =
-    coeff n (pderivFun v (MvPowerSeries.map (algebraMap R k) f))
-  unfold pderivFun
-  show algebraMap R k (coeff (n + Finsupp.single v 1) f * ((n v : R) + 1)) =
-    algebraMap R k (coeff (n + Finsupp.single v 1) f) * ((n v : k) + 1)
-  rw [map_mul, map_add, map_one, map_natCast]
+  simp only [coeff_map, coeff_pderiv, map_mul, map_add, map_natCast, map_one]
 
-theorem ig_pderiv {σ : Type} {f : MvPowerSeries σ k} (hf : f ∈ Ig R k σ) (v : σ) : pderiv k v f ∈ Ig R k σ := by
+theorem ig_pderiv {σ : Type} {f : MvPowerSeries σ k} (hf : f ∈ Ig R k σ) (v : σ) : pderiv v f ∈ Ig R k σ := by
   obtain ⟨g, rfl⟩ := RingHom.mem_range.mp hf
-  exact RingHom.mem_range.mpr ⟨pderiv R v g, map_pderiv' g v⟩
+  exact RingHom.mem_range.mpr ⟨pderiv v g, map_pderiv' g v⟩
 
 theorem ig_subst {σ τ : Type} [Finite σ] {a : σ → MvPowerSeries τ k} (ha : ∀ s, a s ∈ Ig R k τ)
     (hc : ∀ s, constantCoeff (a s) = 0) {f : MvPowerSeries σ k} (hf : f ∈ Ig R k σ) : subst a f ∈ Ig R k τ := by
@@ -70,12 +111,6 @@ theorem ig_liftX [Algebra ℚ k] {d : ℕ} {f : PS k 1 d} (hf : f ∈ Ig R k (Fi
   · intro p
     exact MvPowerSeries.constantCoeff_X _
 
-theorem intAA_of_ig {σ : Type} {G : MvPowerSeries σ k} (hG : G ∈ Ig R k σ) : IntAA (R := R) k G := by
-  unfold IntAA
-  intro n
-  obtain ⟨g, rfl⟩ := RingHom.mem_range.mp hG
-  exact ⟨coeff n g, (MvPowerSeries.coeff_map _ _ _).symm⟩
-
 theorem ig_of_intAA {σ : Type} {G : MvPowerSeries σ k} (hG : IntAA (R := R) k G) : G ∈ Ig R k σ := by
   unfold IntAA at hG
   refine RingHom.mem_range.mpr ⟨(fun n => (hG n).choose : MvPowerSeries σ R), ?_⟩
@@ -103,20 +138,20 @@ theorem cc_ev' {K : Type} [CommRing K] {m n d : ℕ} {a : Fin m → Pt K n d} (h
     rw [map_pow, ha s.1 s.2, zero_pow hs']
 
 theorem pderiv_expS [Algebra ℚ k] {n d : ℕ} {f : PS k n d} (hf : constantCoeff f = 0) (v : Fin n × Fin d) :
-    pderiv k v (FB.expS k f) = FB.expS k f * pderiv k v f := by
+    pderiv v (FB.expS k f) = FB.expS k f * pderiv v f := by
   rw [FB.expS, Formalism.G.LogCR.pderiv_psubst hf, PowerSeries.derivative_exp]
 
 theorem ig_dlog [Algebra ℚ k] {n d : ℕ} (U : PS R n d) (hU : constantCoeff U = 1) (H : PS k n d)
     (hH : constantCoeff H = 0) (he : MvPowerSeries.map (algebraMap R k) U = FB.expS k H) (v : Fin n × Fin d) :
-    pderiv k v H ∈ Ig R k (Fin n × Fin d) := by
-  have h1 : pderiv k v (MvPowerSeries.map (algebraMap R k) U) =
-      MvPowerSeries.map (algebraMap R k) U * pderiv k v H := by
+    pderiv v H ∈ Ig R k (Fin n × Fin d) := by
+  have h1 : pderiv v (MvPowerSeries.map (algebraMap R k) U) =
+      MvPowerSeries.map (algebraMap R k) U * pderiv v H := by
     rw [he]
     exact pderiv_expS hH v
   have hinv : U * MvPowerSeries.invOfUnit U 1 = 1 :=
     MvPowerSeries.mul_invOfUnit U 1 (by rw [hU, Units.val_one])
-  have h2 : pderiv k v H =
-      MvPowerSeries.map (algebraMap R k) (MvPowerSeries.invOfUnit U 1 * pderiv R v U) := by
+  have h2 : pderiv v H =
+      MvPowerSeries.map (algebraMap R k) (MvPowerSeries.invOfUnit U 1 * pderiv v U) := by
     rw [map_mul, map_pderiv', h1, ← mul_assoc, ← map_mul, mul_comm (MvPowerSeries.invOfUnit U 1) U,
       hinv, map_one, one_mul]
   rw [h2]

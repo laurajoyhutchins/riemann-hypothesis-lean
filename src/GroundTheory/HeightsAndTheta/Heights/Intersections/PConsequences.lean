@@ -1,11 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDerived
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ConservationDegreeFormOfExistence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeA
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ConservationDegreeFormOfExistence
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -16,8 +61,8 @@ open MvPolynomial MeasureTheory ReciprocityTheory.ChartRestriction.G.Geo Recipro
 
 variable {K : Type*} [Fintype K] {ι : K → Type*} [∀ k, Fintype (ι k)]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem ptsIntegral_congr_pts (P : Ideal (MRing ι)) {e : ℕ} (φ : Fin e → ((Σ k, ι k) → ℂ) → ℝ)
     {g g' : ((Σ k, ι k) → ℂ) → ℝ} (hg : ∀ z ∈ mcPts P, g z = g' z) :
     ptsIntegral P φ g = ptsIntegral P φ g' := by
@@ -49,8 +94,6 @@ theorem tensor_sqMetric_a {A : HermLine ι} {α β : K → ℕ} (h : ∀ k, (α 
   rw [← h k]
   ring
 
-theorem ArithmeticIntersectionSecond.proof : ArithmeticIntersectionSecond.Statement := metricChange
-
 theorem Conservation.proof : Conservation.Statement := Conservation.statement_holds
 
 theorem InductiveIntersectionFormula.proof : InductiveIntersectionFormula.Statement := by
@@ -80,22 +123,6 @@ theorem InductiveIntersectionFormula.proof : InductiveIntersectionFormula.Statem
     rw [hmult W hW.2 ((hhor W hW.2).2 hW.1)]
   rw [recR_eq] at hRf hRg
   linarith
-
-theorem ArithmeticIntersectionFifth.proof (h₀ : ArithVarZeroStatement) : ArithmeticIntersectionFifth.Statement := by
-  intro K _ ι _ I hI P A s hP hA ⟨a, ha, hs, hsP⟩
-  have hR := hI.2.2 P 0 Fin.elim0 A s a hP (fun j ↦ j.elim0) hA ha hs hsP
-  have hsnoc : (Fin.snoc (Fin.elim0 : Fin 0 → HermLine ι) A : Fin (0 + 1) → HermLine ι) = ![A] := by
-    funext j
-    fin_cases j
-    rfl
-  rw [hsnoc] at hR
-  rw [hR, recR_eq]
-  congr 1
-  unfold cycR vertR
-  refine finsum_mem_congr rfl fun W hW ↦ ?_
-  have hnh : ¬ IsHorizontal W := fun hh ↦
-    h₀ K ι W ((divSuppArith K ι P 0 A s W hP ⟨a, ha, hs, hsP⟩ hW).1 hh)
-  rw [if_neg hnh, if_neg hnh]
 
 theorem ae_eval_ne_zero {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {P : Ideal (MRing ι)} {e : ℕ} {Ψ : (((k : K) → ι k) → ℂ) →ₗ[ℂ] (Fin (e + 1) → ℂ)}
     (hP : IsArithVar P (e + 1)) (hΨ : IsGoodProj P Ψ) {h : MRing ι} (hh : ∃ a, IsMultiHomog h a)

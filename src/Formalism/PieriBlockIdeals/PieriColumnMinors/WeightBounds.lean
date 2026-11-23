@@ -1,10 +1,56 @@
-import Formalism.PieriBlockIdeals.LatticeInclusionRealSettingAlt
-import Formalism.PieriBlockIdeals.PieriColumnMinors.SL2BinomialLattices
-import Formalism.PieriBlockIdeals.PieriColumnMinors.RealLocalDeltaNabla
-import Formalism.PieriBlockIdeals.PieriColumnMinors.DepthNonnegative
-import Formalism.PieriBlockIdeals.PieriColumnMinors.ParameterBounds
-import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightProdLeadingMinors
-import Formalism.PieriBlockIdeals.PieriColumnMinors.WorkedExample
+module
+
+public import Formalism.PieriBlockIdeals.LatticeInclusionRealSettingAlt
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.DepthNonnegative
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightProdLeadingMinors
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.ParameterBounds
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.RealLocalDeltaNabla
+import Formalism.PieriBlockIdeals.PieriColumnMinors.UnitNormBounds
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.WorkedExample
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -505,8 +551,6 @@ theorem correction_weight_eq_formula {ι : Type} (W : Wts ι) (P : Par) (J : ℕ
               ((W.sizeData₂ P J).depth P τ l / (d0 l (W.xm τ - W.top P τ) : ℝ)) else 0)
         + ((W.sizeData₂ P J).depth P τ l / (l : ℝ)) * (1 + max 0 (Real.log (P.h / (l : ℝ)))) := rfl
 
-theorem top_inputs_real_holds : TopInputsReal := top_inputs_of_shape_w shape_w_real_holds
-
 theorem inclusion_w_real_holds : InclWReal := inclusion_w_of_shape_w shape_w_real_holds
 
 theorem linkage_depth_eq_sum_difference (N k j t q : ℕ) (hN : k + j + t + q = N) (lam : ℕ → ℕ) (w : Fin N → ℕ)
@@ -630,7 +674,8 @@ theorem coarse_le_c_w_holds : CoarseLeCW := by
   have t5 : ((W.iW P l τ : ℝ) / (l : ℝ)) * (1 + Real.posLog ((h0 P : ℝ) / (l : ℝ))) ≤
       (dep / (l : ℝ)) * (1 + max 0 (Real.log (P.h / (l : ℝ)))) := by
     have hp : Real.posLog ((h0 P : ℝ) / (l : ℝ)) ≤ max 0 (Real.log (P.h / (l : ℝ))) :=
-      Real.posLog_le_posLog (div_nonneg (Nat.cast_nonneg _) hl0) (div_le_div_of_nonneg_right hh0 hl0)
+      Real.posLog_le_posLog (by have := div_nonneg (Nat.cast_nonneg (h0 P)) hl0; linarith)
+        (div_le_div_of_nonneg_right hh0 hl0)
     exact mul_le_mul (div_le_div_of_nonneg_right hdep hl0) (by linarith)
       (add_nonneg zero_le_one Real.posLog_nonneg) (div_nonneg hdep0 hl0)
   by_cases hc : ((d0 l (W.xm τ - W.top P τ) : ℕ) : ℤ) < W.xm τ - W.top P τ
@@ -670,15 +715,6 @@ theorem j_w_seven_le_holds : CoarseWeightBoundLe := by
       unfold cTau
       rw [if_neg hτ]
       exact le_rfl
-
-theorem inclusion_w_seven_real_holds : HidaLatticeInclusionAtCoarseWeightBound := by
-  intro hD P hH hL ι _ _ W hW l X hl hu hlJ hWI
-  obtain ⟨ϖ, n₀, e, Λ, L, _, _, _, _, _, hwt, hfin, hϖ, hA, hT, hS, hI⟩ := hWI
-  have hTop := top_inputs_real_holds P hH hL ι W hW l X hl hu hlJ ϖ n₀ e Λ L hwt hfin hϖ hA hT hS hI
-  have h := weight_theorem_top_coarse (last_graded_of_graded_alone hD) X.O X.A X.G X.Γ X.K X.jK ι l
-    P.Nr (kc P) P.t (h0 P) W.lam W.T2 W.j W.q W.xm W.xp (fun τ => W.ecl P τ l)
-    (fun τ => W.ex P τ l) (W.iW P l) X.T X.S ϖ n₀ e Λ L hwt hTop
-  exact ⟨h, Nat.sInf_le h⟩
 
 theorem seventh_recursion_eq_a_of_small_prime {ι : Type} [Fintype ι] [DecidableEq ι] (W : Wts ι) (P : Par) (l : ℕ)
     (hc : (l : ℝ) ≤ P.lJ ∨ P.Excl l ∨ l ∈ W.Sp) : W.Jrec7 P l = W.JA P l := by

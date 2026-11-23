@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix GlobalTheory.ClassFin
 open scoped Kronecker ComplexOrder TensorProduct
@@ -14,7 +61,7 @@ theorem evC_aeval_invariants {κ : Type} (Φ : κ → MvPolynomial (ι × ι) �
     (y : Matrix ι ι ℂ) : evC (aeval Φ P) y = eval (fun k => evC (Φ k) y) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simp [evC]
-  | add p q hp hq => simp only [evC, map_add] at *; rw [hp, hq]
+  | add p q hp hq => simp only [evC, map_add (f := _)] at *; rw [hp, hq]
   | mul_X p n hp => simp only [evC, map_mul, aeval_X, eval_X] at *; rw [hp]
 
 theorem evC_det_generic [Fintype ι] [DecidableEq ι] (y : Matrix ι ι ℂ) :
@@ -43,6 +90,7 @@ theorem exists_evC_eq_of_relations [Fintype ι] [DecidableEq ι] (Γ : Set (Matr
       rw [this]
     have hone : Rey 1 = 1 := hR.fix 1 (fun g hg y => by simp [evC])
     have h2 : ∑ k, (Φ k - C (z k)) * Rey (a k) = 1 := by
+
       rw [← hone, ← ha, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [smul_eq_mul, mul_comm (a k), hR.mul _ _ (hinv k)]
@@ -53,6 +101,7 @@ theorem exists_evC_eq_of_relations [Fintype ι] [DecidableEq ι] (Γ : Set (Matr
       exact this
     choose P hP using h3
     have h4 := hz (∑ k, (X k - C (z k)) * P k - 1) (by
+
       simp only [map_sub, map_sum, map_mul, aeval_X, aeval_C, map_one, hP, algebraMap_eq]
       rw [h2, sub_self])
     simp at h4

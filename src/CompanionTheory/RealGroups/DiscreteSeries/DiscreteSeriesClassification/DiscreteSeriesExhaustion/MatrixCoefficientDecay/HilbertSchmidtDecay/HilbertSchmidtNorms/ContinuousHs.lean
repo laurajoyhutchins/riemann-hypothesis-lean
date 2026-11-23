@@ -1,4 +1,45 @@
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HilbertSchmidtNorms.HsConjTranspose
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.AbsoluteL2Bound
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HilbertSchmidtNorms.HsConjTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +107,7 @@ theorem psiK_meas (q : Matrix (Fin n) (Fin n) ℂ → ℂ) (w : ℝ) (hq : Conti
     intro k
     have hc : Continuous fun g : S7.UJ ε => q (S7.toM (g * (k : S7.UJ ε))) :=
       hq.comp (continuous_mul_const (k : S7.UJ ε))
-    exact (ENNReal.continuous_pow 2).comp hc.enorm
+    exact (ENNReal.continuous_pow 2).comp hc.eNorm
   have hsup : Measurable fun g : S7.UJ ε => ⨆ k : S7.KG ε, ‖q (S7.toM g * S7.toMK k)‖ₑ ^ 2 :=
     (lowerSemicontinuous_iSup fun k => (h1 k).lowerSemicontinuous).measurable
   have hw : Measurable fun g : S7.UJ ε => ENNReal.ofReal (Formalism.REAL.hs (S7.toM g) ^ w) :=
@@ -113,7 +154,7 @@ theorem psiK_lint (q : Matrix (Fin n) (Fin n) ℂ → ℂ) (w : ℝ) (T : Finset
     _ = ENNReal.ofReal Cf * ∑ h ∈ T, ∫⁻ g : S7.UJ ε, ‖h (S7.toM g)‖ₑ ^ 2 * ENNReal.ofReal (Formalism.REAL.hs (S7.toM g) ^ w) ∂Measure.haar := by
         rw [lintegral_const_mul' _ _ ENNReal.ofReal_ne_top, lintegral_finsetSum']
         intro h hh
-        exact (((ENNReal.continuous_pow 2).comp (hTc h hh).enorm).measurable.mul
+        exact (((ENNReal.continuous_pow 2).comp (hTc h hh).eNorm).measurable.mul
           (ENNReal.measurable_ofReal.comp ((continuous_hs.comp (S7.continuous_toM ε)).measurable.pow_const w))).aemeasurable
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top (ENNReal.sum_lt_top.2 fun h hh => hT h hh)
 

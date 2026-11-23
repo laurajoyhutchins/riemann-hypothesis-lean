@@ -1,9 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.DegreeHermitianFormula
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.DegreeHermitianFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Lit.Geo
 
 private theorem absBd {V W F : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     [AddCommGroup W] [Module ℝ W] [NormedAddCommGroup F] [NormedSpace ℝ F] (e : W ≃ₗ[ℝ] V) (q : ℕ) :
-    ∃ (T : Finset (Fin q → W)) (B : ℝ), 0 ≤ B ∧ ∀ (m : MultilinearMap ℝ (fun _ : Fin q => W) F) (M : ℝ), 0 ≤ M →
+    ∃ (T : Finset (Fin q → W)) (B : ℝ), 0 ≤ B ∧ ∀ (m : (Fin q → W) →ₘₗ[ℝ] F) (M : ℝ), 0 ≤ M →
       (∀ X ∈ T, ‖m X‖ ≤ M) → ∀ X, ‖m X‖ ≤ B * M * ∏ i, ‖e (X i)‖ := by
   classical
   let b := Module.finBasis ℝ V
@@ -13,17 +52,19 @@ private theorem absBd {V W F : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] 
   have hX : X = fun i => ∑ j, c j (e (X i)) • e.symm (b j) := by
     funext i
     apply e.injective
+
     simp only [map_sum, map_smul, LinearEquiv.apply_symm_apply]
     exact (b.sum_repr _).symm
   have h1 : m X = ∑ I : Fin q → Fin (Module.finrank ℝ V),
       (∏ i, c (I i) (e (X i))) • m fun i => e.symm (b (I i)) := by
     conv_lhs => rw [hX]
+
     rw [m.map_sum]
     exact Finset.sum_congr rfl fun I _ => m.map_smul_univ _ _
   rw [h1, Finset.sum_mul, Finset.sum_mul]
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun I _ => ?_)
   rw [norm_smul, norm_prod, mul_right_comm, ← Finset.prod_mul_distrib]
-  refine mul_le_mul (Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun i _ => (c (I i)).le_opNorm _)
+  refine mul_le_mul (Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun i _ => (c (I i)).le_opNorm _)
     (hT _ (Finset.mem_image_of_mem _ (Finset.mem_univ I))) (norm_nonneg _) (by positivity)
 
 theorem UpperTheory.V.Lit.Geo.bdBasis :

@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FiltrationZeroMembership
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ToMatrixRepOf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdmSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations GlobalTheory.Pst GlobalTheory.PMon TensorProduct
 open scoped Formalism.Per
 
@@ -25,8 +67,9 @@ theorem GlobalTheory.PMon.cocycle_rat_coords : ∀ (l : ℕ) [Fact l.Prime] (n :
         (Matrix.blockDiagonal (fun m : Fin r => (σ g : Matrix n n ↥(MaximalUnramifiedExtension l)).map (fr l m))).mulVec
           (fun x : n × Fin r => fr l x.2 (c h x.1)) := by
     funext ⟨i, m⟩
-    simp only [hc, Pi.add_apply, map_add, Matrix.mulVec, dotProduct, Fintype.sum_prod_type,
-      Matrix.blockDiagonal_apply, Matrix.map_apply, map_sum, map_mul]
+
+    simp only [hc, Pi.add_apply, map_add (f := _), Matrix.mulVec, dotProduct, Fintype.sum_prod_type,
+    Matrix.blockDiagonal_apply, Matrix.map_apply, map_sum, map_mul]
     congr 1
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Finset.sum_eq_single m]
@@ -38,11 +81,9 @@ theorem GlobalTheory.PMon.cocycle_rat_coords : ∀ (l : ℕ) [Fact l.Prime] (n :
     rw [hc0, hC, ← hc0 g, ← hc0 h, Matrix.mulVec_mulVec, ← hint g]
     rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_add]
     congr 1
-    funext x
-    simp only [Pi.add_apply, map_add]
     congr 1
-    rw [RingHom.map_mulVec]
-    rfl
+    funext x
+    simp only [Pi.add_apply, map_add, RingHom.map_mulVec, Function.comp_def]
   have inj : (fun x => f (c₀ (g * h) x)) =
       (fun x => f ((c₀ g + (ρ₀ g : Matrix (n × Fin r) (n × Fin r) ℚ_[l]).mulVec (c₀ h)) x)) := by
     have := congrArg (fun v => ((p⁻¹ : GL (n × Fin r) ↥(MaximalUnramifiedExtension l)) : Matrix (n × Fin r) (n × Fin r) ↥(MaximalUnramifiedExtension l)).mulVec v) key

@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.QuadraticSplitting.QuadSplit
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.QuadraticSplitting.QuadSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.IndexNormal
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Polynomial Matrix
 
@@ -19,8 +62,10 @@ private def Qm (α β : k) : Matrix (Fin 4) (Fin 4) k :=
   (2 : k)⁻¹ • !![0, β⁻¹, 0, 1; α⁻¹, 0, -1, 0; 0, -β⁻¹, 0, 1; α⁻¹, 0, 1, 0]
 
 private lemma PQ (h2 : (2 : k) ≠ 0) {α β : k} (ha : α ≠ 0) (hb : β ≠ 0) : Pm α β * Qm α β = 1 := by
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [Pm, Qm, Matrix.mul_apply, Fin.sum_univ_four] <;> field_simp <;> ring
+  ext i j : 1
+  fin_cases i <;> fin_cases j <;>
+    simp [Pm, Qm, Matrix.mul_apply, Fin.sum_univ_four] <;>
+    field_simp [h2, ha, hb] <;> ring
 
 private lemma cp_conj (h2 : (2 : k) ≠ 0) {α β : k} (ha : α ≠ 0) (hb : β ≠ 0) (M N : Matrix (Fin 4) (Fin 4) k)
     (h : Pm α β * M = N * Pm α β) : M.charpoly = N.charpoly := by
@@ -33,24 +78,29 @@ private lemma P_mix (h2 : (2 : k) ≠ 0) (α β : kˣ) (A B : Matrix (Fin 2) (Fi
     Pm (α : k) β * mix (β / α) A B = blk A B * Pm (α : k) β := by
   have ha := α.ne_zero
   have hb := β.ne_zero
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [Pm, mix, blk, Matrix.mul_apply, Fin.sum_univ_four] <;> field_simp <;> ring
+  ext i j : 1
+  fin_cases i <;> fin_cases j <;>
+    simp [Pm, mix, blk, Matrix.mul_apply, Fin.sum_univ_four, Units.val_div_eq_div_val] <;>
+    field_simp [h2, ha, hb] <;> ring
 
 private lemma blk_P (α β : k) (A B : Matrix (Fin 2) (Fin 2) k) :
     blk A B * Pm α β * Matrix.diagonal ![β, -α, -β, α] =
       ant (A * Matrix.diagonal ![α ^ 2, β ^ 2]) B * Pm α β := by
-  ext i j
+  ext i j : 1
   rw [Matrix.mul_diagonal]
   fin_cases i <;> fin_cases j <;> simp [Pm, ant, blk, Matrix.mul_apply, Fin.sum_univ_four] <;> ring
 
 private lemma cp_blk (A B : Matrix (Fin 2) (Fin 2) k) : (blk A B).charpoly = A.charpoly * B.charpoly := by
-  simp [Matrix.charpoly, Matrix.det_succ_row_zero, Fin.sum_univ_succ, blk, Matrix.charmatrix_apply, Fin.succAbove,
-    Matrix.diagonal_apply]
+  simp only [Matrix.charpoly, Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.sum_univ_zero,
+    Matrix.det_fin_zero, Matrix.submatrix_apply, Matrix.charmatrix_apply]
+  norm_num [blk, Fin.succAbove, Fin.lt_def, Fin.ext_iff, Matrix.diagonal_apply]
   ring
 
 private lemma cp_ant (A B : Matrix (Fin 2) (Fin 2) k) : (ant A B).charpoly = (A * B).charpoly.comp (X ^ 2) := by
-  simp [Matrix.charpoly, Matrix.det_succ_row_zero, Fin.sum_univ_succ, ant, Matrix.charmatrix_apply, Fin.succAbove,
-    Matrix.diagonal_apply, Matrix.mul_apply]
+  simp only [Matrix.charpoly, Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.sum_univ_zero,
+    Matrix.det_fin_zero, Matrix.submatrix_apply, Matrix.charmatrix_apply]
+  norm_num [ant, Fin.succAbove, Fin.lt_def, Fin.ext_iff, Matrix.diagonal_apply, Matrix.mul_apply,
+    Fin.sum_univ_two]
   ring
 
 end UpperTheory.V.Sd.S2.symmetric_square_mixed_charpoly

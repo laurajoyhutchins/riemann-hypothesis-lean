@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 namespace CompanionTheory.NFCpt
 
@@ -56,13 +109,14 @@ theorem tower_integral : ∀ (n : ℕ) (E : (j : ℕ) → (Fin j → ℂ) → �
       intro c hc
       rw [← (hs n (Nat.lt_succ_self n) c hc).2]
       exact integral_nonneg_of_ae (hGpos c hc)
-    obtain ⟨hI, hV⟩ := tower_integral n E hmn h0n fun j hj => hs j (Nat.lt_succ_of_lt hj)
+    have ih : Integrable (E n) ∧ ∫ c, E n c = E 0 (fun a => a.elim0) :=
+      tower_integral n E hmn h0n fun j hj => hs j (Nat.lt_succ_of_lt hj)
     have hGI : Integrable G ((volume : Measure (Fin n → ℂ)).prod (volume : Measure ℂ)) := by
       rw [integrable_prod_iff hGm]
       refine ⟨?_, ?_⟩
       · filter_upwards [ae_coords_ne_zero n] with c hc
         exact (hs n (Nat.lt_succ_self n) c hc).1
-      · refine hI.congr ?_
+      · refine (And.left ih).congr ?_
         filter_upwards [ae_coords_ne_zero n] with c hc
         rw [← (hs n (Nat.lt_succ_self n) c hc).2]
         refine integral_congr_ae ?_
@@ -77,7 +131,7 @@ theorem tower_integral : ∀ (n : ℕ) (E : (j : ℕ) → (Fin j → ℂ) → �
         rw [← show ∫ q, G q = ∫ q, G q ∂((volume : Measure (Fin n → ℂ)).prod (volume : Measure ℂ)) from rfl, ← this]
         refine integral_congr_ae (Eventually.of_forall fun c => ?_)
         simp [hGe]
-      rw [h1, integral_prod G hGI, integral_congr_ae hae, hV]
+      rw [h1, integral_prod G hGI, integral_congr_ae hae, And.right ih]
 
 theorem abs_sub_le_of_sqrt {a b d δ : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hd : 0 ≤ d) (hδ : 0 < δ)
     (h : |Real.sqrt a - Real.sqrt b| ≤ Real.sqrt d) : |a - b| ≤ d / δ + δ * (a + b) := by
@@ -89,7 +143,6 @@ theorem abs_sub_le_of_sqrt {a b d δ : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hd : 
   have hz : d = z ^ 2 := (Real.sq_sqrt hd).symm
   have hx0 : 0 ≤ x := Real.sqrt_nonneg _
   have hy0 : 0 ≤ y := Real.sqrt_nonneg _
-  have hz0 : 0 ≤ z := Real.sqrt_nonneg _
   have e : |a - b| = |x - y| * (x + y) := by
     rw [hx, hy, show x ^ 2 - y ^ 2 = (x - y) * (x + y) by ring, abs_mul, abs_of_nonneg (add_nonneg hx0 hy0)]
   rw [e, hx, hy, hz]

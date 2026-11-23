@@ -1,7 +1,58 @@
-import Mathlib
-import ReciprocityTheory.GroupCohomology.IsLowExists
-import ReciprocityTheory.GroupCohomology.LowNat
-import ReciprocityTheory.NeutralLocalFields.Duality
+module
+
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Basic
+public import ReciprocityTheory.GroupCohomology.ContinuousContractNth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.FiniteCyclic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RepresentationTheory.Homological.FiniteCyclic
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -17,19 +68,6 @@ section Discrete
 
 variable {G G' : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [Group G'] [TopologicalSpace G'] [IsTopologicalGroup G']
-
-theorem contAction_of_discrete [DiscreteTopology G] {V : Type u} [AddCommGroup V] [Module R V]
-    [TopologicalSpace V] [IsTopologicalAddGroup V] [ContinuousConstSMul R V] (rho : Representation R G V)
-    (h : ∀ g, Continuous (rho g)) : ReciprocityTheory.Gal.ContAction rho :=
-  continuous_prod_of_discrete_left.2 h
-
-def discRep [DiscreteTopology G] {V : Type u} [AddCommGroup V] [Module R V] (rho : Representation R G V) :
-    TRep R G :=
-  letI : TopologicalSpace V := ⊥
-  haveI : DiscreteTopology V := ⟨rfl⟩
-  { V := V
-    rho := rho
-    cont := contAction_of_discrete rho fun _ => continuous_of_discreteTopology }
 
 def pairRepHom {M : TRep R G} {M' : TRep R G'} (P : Pair M M') :
     Rep.res P.φ (Rep.of M.rho) ⟶ Rep.of M'.rho :=
@@ -185,15 +223,6 @@ section Low
 
 variable {G G' : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [Group G'] [TopologicalSpace G'] [IsTopologicalGroup G']
-
-def lowEquiv0 (M : TRep R G) : M.H 0 ≃ₗ[R] _root_.Neutral.B1.H0 M.rho :=
-  (exists_isLow M).choose
-
-def lowEquiv1 (M : TRep R G) : M.H 1 ≃ₗ[R] _root_.Neutral.B1.H1 M.rho :=
-  (exists_isLow M).choose_spec.choose
-
-def lowEquiv2 (M : TRep R G) : M.H 2 ≃ₗ[R] _root_.Neutral.B1.H2 M.rho :=
-  (exists_isLow M).choose_spec.choose_spec.choose
 
 end Low
 

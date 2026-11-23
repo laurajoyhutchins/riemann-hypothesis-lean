@@ -1,8 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnram
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SmulMemOfOne
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnram
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
 import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
-import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Module Matrix Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.Cnt GlobalTheory.LoopC
 open scoped ENNReal Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -18,70 +71,7 @@ variable {K : Type} [Field K] [NumberField K] {V : Type} [AddCommGroup V] [Modul
 
 theorem exists_proj (L : Submodule (𝓞 K) V) (hfg : L.FG) (hsp : Submodule.span K (L : Set V) = ⊤) (W : Submodule K V) :
     ∃ P : V →ₗ[K] V, (∀ v, P v ∈ W) ∧ (∀ w ∈ W, P w = w) ∧ ∀ v ∈ L, P v ∈ L := by
-  classical
-  let q : V →ₗ[𝓞 K] V ⧸ W := W.mkQ.restrictScalars (𝓞 K)
-  let Lb : Submodule (𝓞 K) (V ⧸ W) := L.map q
-  have hfin : Module.Finite (𝓞 K) Lb := Module.Finite.iff_fg.2 (hfg.map q)
-  have hcancel : ∀ (d : 𝓞 K) (x : V ⧸ W), d ≠ 0 → d • x = 0 → x = 0 := by
-    intro d x hd h
-    rw [← IsScalarTower.algebraMap_smul K d x] at h
-    exact (smul_eq_zero.1 h).resolve_left (by simpa using hd)
-  have hflat : Module.Flat (𝓞 K) Lb := by
-    rw [IsDedekindDomain.flat_iff_torsion_eq_bot, eq_bot_iff]
-    rintro x ⟨d, hd⟩
-    have : (d : 𝓞 K) • (x : V ⧸ W) = 0 := congrArg Subtype.val hd
-    exact Subtype.ext (hcancel d x (nonZeroDivisors.coe_ne_zero d) this)
-  have hfp : Module.FinitePresentation (𝓞 K) Lb := Module.finitePresentation_of_finite _ _
-  have hproj : Module.Projective (𝓞 K) Lb := Module.Flat.projective_of_finitePresentation
-  let qL : L →ₗ[𝓞 K] Lb := q.submoduleMap L
-  obtain ⟨s, hs⟩ := Module.projective_lifting_property qL LinearMap.id (LinearMap.submoduleMap_surjective q L)
-  have hs' : ∀ y : Lb, q (s y : V) = y := fun y => congrArg Subtype.val (LinearMap.congr_fun hs y)
-  let p0 : L →ₗ[𝓞 K] V := L.subtype - L.subtype ∘ₗ s ∘ₗ qL
-  have hp0 : ∀ x : L, p0 x = (x : V) - s (qL x) := fun x => rfl
-  have hden : ∀ v : V, ∃ d : 𝓞 K, d ≠ 0 ∧ d • v ∈ L := by
-    intro v
-    have hv : v ∈ Submodule.span K (L : Set V) := by rw [hsp]; trivial
-    obtain ⟨d, hd⟩ := multiple_mem_span_of_mem_localization_span (nonZeroDivisors (𝓞 K)) K (L : Set V) v hv
-    rw [Submodule.span_eq] at hd
-    exact ⟨d, nonZeroDivisors.coe_ne_zero d, hd⟩
-  have hunit : ∀ x : nonZeroDivisors (𝓞 K), IsUnit (algebraMap (𝓞 K) (Module.End (𝓞 K) V) x) :=
-    (isLocalizedModule_id (nonZeroDivisors (𝓞 K)) V K).map_units
-  haveI hloc : IsLocalizedModule (nonZeroDivisors (𝓞 K)) L.subtype := by
-    refine ⟨hunit, fun v => ?_, fun {x y} h => ⟨1, by simpa using Subtype.ext h⟩⟩
-    obtain ⟨d, hd, hv⟩ := hden v
-    exact ⟨(⟨d • v, hv⟩, ⟨d, mem_nonZeroDivisors_of_ne_zero hd⟩), rfl⟩
-  let P0 : V →ₗ[𝓞 K] V := IsLocalizedModule.lift (nonZeroDivisors (𝓞 K)) L.subtype p0 hunit
-  have hP0 : ∀ x : L, P0 (x : V) = p0 x := fun x => IsLocalizedModule.lift_apply _ L.subtype p0 hunit x
-  let P : V →ₗ[K] V := P0.extendScalarsOfIsLocalization (nonZeroDivisors (𝓞 K)) K
-  have hP : ∀ v, P v = P0 v := fun v => rfl
-  have hW : ∀ x : L, p0 x ∈ W := by
-    intro x
-    rw [← Submodule.Quotient.mk_eq_zero]
-    change q (p0 x) = 0
-    rw [hp0, map_sub, hs']
-    exact sub_self _
-  refine ⟨P, fun v => ?_, fun w hw => ?_, fun v hv => ?_⟩
-  · obtain ⟨d, hd, hv⟩ := hden v
-    rw [← Submodule.Quotient.mk_eq_zero]
-    apply hcancel d _ hd
-    change d • q (P0 v) = 0
-    rw [← map_smul, ← map_smul, show d • v = ((⟨d • v, hv⟩ : L) : V) from rfl, hP0]
-    exact (Submodule.Quotient.mk_eq_zero W).2 (hW _)
-  · obtain ⟨d, hd, hv⟩ := hden w
-    have h0 : qL ⟨d • w, hv⟩ = 0 := by
-      apply Subtype.ext
-      change q (d • w) = 0
-      rw [map_smul]
-      change d • (Submodule.Quotient.mk w : V ⧸ W) = 0
-      rw [(Submodule.Quotient.mk_eq_zero W).2 hw, smul_zero]
-    have h1 : d • P0 w = d • w := by
-      rw [← map_smul, show d • w = ((⟨d • w, hv⟩ : L) : V) from rfl, hP0, hp0, h0, map_zero]
-      simp
-    rw [hP]
-    rw [← IsScalarTower.algebraMap_smul K d, ← IsScalarTower.algebraMap_smul K d w] at h1
-    exact smul_right_injective V (by simpa using hd) h1
-  · rw [hP, show v = ((⟨v, hv⟩ : L) : V) from rfl, hP0, hp0]
-    exact L.sub_mem hv (s _).2
+  apply GlobalTheory.DegAsm.FrameMove.exists_proj <;> assumption
 
 end Lattices
 
@@ -213,7 +203,7 @@ theorem pair_idSpan {e f : Fin r → S.V} (h : IsHyp e f) {B : Fin r → FI E} (
       exact (mem_inv (h0 a) c).1 hc β hβ
     · simpa using isIntegral_zero
   | zero => simpa using isIntegral_zero
-  | add x y _ _ hx hy => rw [map_add, mul_add]; exact hx.add hy
+  | add x y _ _ hx hy => rw [map_add (f := _), mul_add]; exact hx.add hy
   | smul c x _ hx =>
     rw [osmul, map_smul, smul_eq_mul, mul_left_comm]
     exact c.isIntegral_coe.mul hx
@@ -227,7 +217,44 @@ theorem exists_dual_frame (hE : Formalism.HermitianLatticesTheory.IsCMUnram E) {
     (hprim : ∀ (c : E), ∀ x ∈ Submodule.span E (Set.range e), x + c • z ∈ Λ → ∃ o : 𝓞 E, (o : E) = c) :
     ∃ f' : Fin r → S.V, IsHyp e f' ∧ (∀ a, S.hT (f' a) z = 0) ∧ ∀ a, ∀ β ∈ B a, β • f' a ∈ Λ := by
   obtain ⟨t, ht⟩ := GlobalTheory.exists_integer_add_star_eq_one_of_isCMUnram E hE
-  obtain ⟨P, hPU, hPid, hPL⟩ := exists_proj Λ hl.fg hl.span_eq_top
+  let W := Submodule.span E (Λ : Set S.V)
+  let N := (orth S W).restrictScalars (𝓞 E)
+  have hNL : N ≤ Λ := by
+    intro x hx
+    apply (mem_unimod hu x).2
+    intro y hy
+    have hzero := (mem_orth.1 hx) y (Submodule.subset_span hy)
+    rw [hzero]
+    exact isIntegral_zero
+  have hN : N = ⊥ := by
+    by_contra hn
+    have hfg : N.FG := hl.fg.of_le hNL
+    have hi : IsIntegral (𝓞 E) ((2 : E)⁻¹) :=
+      isIntegral_of_smul_mem_submodule N hn hfg _ (fun x hx => (orth S W).smul_mem _ hx)
+    have hi' : IsIntegral ℤ ((2 : E)⁻¹) := isIntegral_trans (R := ℤ) _ hi
+    have hiq : IsIntegral ℤ ((2 : ℚ)⁻¹) := by
+      apply (isIntegral_ratCast_iff (R := ℤ) (K := E) (q := (2 : ℚ)⁻¹)).1
+      simpa using hi'
+    obtain ⟨n, hn⟩ := hiq.mem_range_ratCast_iff.mp ⟨(2 : ℚ)⁻¹, rfl⟩
+    have : (n : ℚ) = 1 / 2 := by simpa using hn
+    have : (2 : ℤ) * n = 1 := by exact_mod_cast (show (2 : ℚ) * n = 1 by linarith)
+    omega
+  have hsp : W = ⊤ := by
+    apply Submodule.dualAnnihilator_eq_bot_iff.mp
+    apply eq_bot_iff.mpr
+    intro φ hφ
+    obtain ⟨y, hy⟩ := exists_rep (S := S) φ
+    have hyN : y ∈ N := by
+      apply mem_orth.2
+      intro x hx
+      rw [← hsym, hy]
+      have := ((Submodule.mem_dualAnnihilator φ).1 hφ) x hx
+      rw [this, star_zero]
+    have hy0 : y = 0 := by simpa [hN] using hyN
+    ext x
+    rw [← hy, hy0]
+    simp
+  obtain ⟨P, hPU, hPid, hPL⟩ := exists_proj Λ hl.fg hsp
     (Submodule.span E (Set.range e) ⊔ Submodule.span E {z})
   choose g hg using fun a => exists_rep (S := S) (S.hT (f a) ∘ₗ P)
   have hge : ∀ a b, S.hT (g a) (e b) = if a = b then 1 else 0 := by
@@ -255,17 +282,20 @@ theorem exists_dual_frame (hE : Formalism.HermitianLatticesTheory.IsCMUnram E) {
     have hxL : x ∈ Λ := by
       have := Λ.sub_mem hm (Λ.smul_mem o hz)
       rwa [osmul, add_sub_cancel_right] at this
-    rw [← hxw, map_add, map_smul, hfz, smul_zero, add_zero]
+    rw [← hxw, map_add (f := _), map_smul, hfz, smul_zero, add_zero]
     exact pair_idSpan h h0 (hX ▸ ⟨hxL, hx⟩) a (hB a β hβ)
   refine ⟨fun b => g b - ∑ a, ((t : E) * S.hT (g a) (g b)) • e a, ⟨h.1, fun a b => ?_, fun a b => ?_⟩,
     fun a => ?_, fun b β hβ => ?_⟩
+
   · simp only [map_sub, map_sum, LinearMap.sub_apply, LinearMap.sum_apply, hsmul, map_smul, h.1, hge, heg,
-      smul_eq_mul, mul_zero, Finset.sum_const_zero, sub_zero, mul_ite, mul_one, Finset.sum_ite_eq,
-      Finset.sum_ite_eq', Finset.mem_univ, if_true, star_mul, hsym]
+    smul_eq_mul, mul_zero, Finset.sum_const_zero, sub_zero, mul_ite, mul_one, Finset.sum_ite_eq,
+    Finset.sum_ite_eq', Finset.mem_univ, if_true, star_mul, hsym]
     linear_combination (-(S.hT (g a) (g b))) * ht
+
   · simp only [map_sub, map_sum, map_smul, h.1, heg, smul_eq_mul, mul_zero, Finset.sum_const_zero, sub_zero]
+
   · simp only [map_sub, map_sum, LinearMap.sub_apply, LinearMap.sum_apply, hsmul, hez, hgz, mul_zero,
-      Finset.sum_const_zero, sub_zero]
+    Finset.sum_const_zero, sub_zero]
   · rw [smul_sub, Finset.smul_sum]
     refine Λ.sub_mem (hgL b β hβ) (Λ.sum_mem fun a _ => ?_)
     rw [smul_smul]
@@ -290,9 +320,11 @@ theorem prj_apply (e f : Fin r → S.V) (v : S.V) :
   simp [prj, LinearMap.sum_apply]
 
 theorem e_prj {e f : Fin r → S.V} (h : IsHyp e f) (a : Fin r) (v : S.V) : S.hT (e a) (prj e f v) = 0 := by
+
   simp [prj_apply, map_sum, h.1, h.2.2]
 
 theorem f_prj {e f : Fin r → S.V} (h : IsHyp e f) (a : Fin r) (v : S.V) : S.hT (f a) (prj e f v) = 0 := by
+
   simp [prj_apply, map_sum, h.2.1, h.fe]
 
 theorem prj_prj {e f : Fin r → S.V} (h : IsHyp e f) (u v : S.V) :
@@ -300,9 +332,11 @@ theorem prj_prj {e f : Fin r → S.V} (h : IsHyp e f) (u v : S.V) :
       ∑ a, S.hT (e a) v * star (S.hT (f a) u) := by
   have h1 : S.hT (prj e f u) (prj e f v) = S.hT u (prj e f v) := by
     rw [prj_apply e f u]
+
     simp only [map_sub, map_sum, LinearMap.sub_apply, LinearMap.sum_apply, hsmul, e_prj h, f_prj h, mul_zero,
-      Finset.sum_const_zero, sub_zero]
+    Finset.sum_const_zero, sub_zero]
   rw [h1, prj_apply]
+
   simp only [map_sub, map_sum, map_smul, smul_eq_mul, hsym]
 
 def chg (e f f' : Fin r → S.V) : S.V →ₗ[E] S.V :=
@@ -316,9 +350,11 @@ theorem chg_isom {e f f' : Fin r → S.V} (h : IsHyp e f) (h' : IsHyp e f') (u v
     S.hT (chg e f f' u) (chg e f f' v) = S.hT u v := by
   have h1 : ∀ a v, S.hT (e a) (chg e f f' v) = S.hT (e a) v := by
     intro a v
+
     simp [chg_apply, map_sum, h.1, h.2.2, e_prj h]
   have h2 : ∀ a v, S.hT (f a) (chg e f f' v) = S.hT (f' a) v := by
     intro a v
+
     simp [chg_apply, map_sum, h.2.1, h.fe, f_prj h]
   have h3 : ∀ v, prj e f (chg e f f' v) = prj e f (prj e f' v) := by
     intro v
@@ -344,7 +380,7 @@ theorem chg_of_orth {e f f' : Fin r → S.V} (h' : IsHyp e f') {x : S.V} (hx : �
 theorem exists_chg {e f f' : Fin r → S.V} (h : IsHyp e f) (h' : IsHyp e f') :
     ∃ n : S.V ≃ₗ[E] S.V, n ∈ Formalism.HermitianLatticesTheory.isom S.hT ∧ ∀ v, n v = chg e f f' v := by
   have hi : Function.Injective (chg e f f') := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     refine S.nondeg.2 x fun y => ?_
     rw [← chg_isom h h', hx, map_zero]
@@ -478,7 +514,7 @@ theorem starStable_ddS (D : D7) : StarStable (ddS D) := by
     rw [this]
     exact FractionalIdeal.mem_coeIdeal_of_mem _ (Ideal.mem_map_of_mem _ hw)
   | zero => simp
-  | add a b _ _ ha hb => rw [map_add, star_add]; exact Submodule.add_mem (FractionalIdeal.coeToSubmodule _) ha hb
+  | add a b _ _ ha hb => rw [map_add (f := _), star_add]; exact Submodule.add_mem (FractionalIdeal.coeToSubmodule _) ha hb
   | smul c a _ ha =>
     rw [smul_eq_mul, map_mul, star_mul, mul_comm]
     exact Submodule.smul_mem (FractionalIdeal.coeToSubmodule _)
@@ -522,9 +558,15 @@ theorem main : ∀ (D : D7) (u : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D), Is
     | smul c x _ hx => simp [hx]
   have hXL := XLam_gmap (lf D F0) Λ n hnX
   obtain ⟨-, -, -, hu', hl'⟩ := Formalism.HermitianLatticesTheory.isomAct _ _ _ (hS D).hT n hn Λ
+  have hfull : Submodule.IsFullLattice D.host.E (Formalism.HermitianLatticesTheory.gmap n Λ) := by
+    letI := hl'.2 hl
+    refine { span_eq_top := ?_ }
+    change Submodule.span D.host.E (n.toLinearMap '' (Λ : Set (hS D).V)) = ⊤
+    rw [← Submodule.map_span n.toLinearMap, hgen.1.span_eq_top, Submodule.map_top,
+      LinearEquiv.range]
   obtain ⟨heq, hsg, -⟩ := Formalism.HermitianLatticesTheory.genusBasic (𝓞 D.host.E) D.host.E _ (hS D).hT (hS D).herm
     (fun r => ⟨⟨_, star_int r.isIntegral_coe⟩, rfl⟩)
-  refine ⟨n, ⟨hn, fun b => ?_, hq⟩, ?_, ⟨hl'.2 hl, heq.trans hgen.2 (hsg Λ n hn)⟩,
+  refine ⟨n, ⟨hn, fun b => ?_, hq⟩, ?_, ⟨hfull, heq.trans hgen.2 (hsg Λ n hn)⟩,
     ⟨hl'.2 hl, hu'.2 hu, ⟨⟨_, hlift.1, hnz⟩, rfl⟩, ?_, fun c hc => ?_⟩, hXL.trans hX⟩
   · refine Fin.lastCases ?_ (fun a => ?_) b
     · simpa [frame, FlagG.fvec] using hnz

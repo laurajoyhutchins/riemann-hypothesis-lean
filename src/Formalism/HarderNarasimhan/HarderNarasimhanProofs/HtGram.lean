@@ -1,7 +1,62 @@
-import Formalism.HarderNarasimhan.StatementPl
+module
+
+public import Formalism.HarderNarasimhan.StatementPl
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DegSupermodZ
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
 import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DegSupermodZ
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField Matrix
 
@@ -32,25 +87,7 @@ theorem realize_apply1 (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι 
 
 theorem realize_injective (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
     (hX : ∀ v, IsUnit (X v).det) : Function.Injective (Formalism.HermitianLatticesTheory.realize b X) := by
-  rw [injective_iff_map_eq_zero]
-  intro x hx
-  obtain ⟨v⟩ : Nonempty (InfinitePlace K) := inferInstance
-  have hf : ∀ i, Formalism.HermitianLatticesTheory.fcoord b X v x i = 0 := by
-    intro i
-    apply Complex.ext
-    · rw [← realize_apply0, hx]; simp
-    · rw [← realize_apply1, hx]; simp
-  have hvec : Formalism.HermitianLatticesTheory.vecAt b v x = 0 := by
-    have h1 : (X v)⁻¹ *ᵥ Formalism.HermitianLatticesTheory.vecAt b v x = 0 := funext hf
-    have h2 := congrArg (fun w => X v *ᵥ w) h1
-    simp only [Matrix.mulVec_mulVec, Matrix.mulVec_zero] at h2
-    rwa [Matrix.mul_nonsing_inv _ (hX v), Matrix.one_mulVec] at h2
-  have hrep : b.repr x = 0 := by
-    ext i
-    have := congrFun hvec i
-    simp only [Formalism.HermitianLatticesTheory.vecAt, Pi.zero_apply] at this
-    simpa using this
-  simpa using hrep
+  apply Formalism.HN.PlaceLattice.realize_injective <;> assumption
 
 theorem fcoord_smul (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ) (v : InfinitePlace K)
     (a : K) (x : V) : Formalism.HermitianLatticesTheory.fcoord b X v (a • x) = v.embedding a • Formalism.HermitianLatticesTheory.fcoord b X v x := by
@@ -200,7 +237,7 @@ end DetG
 
 section NT
 
-variable (K : Type) [Field K] [NumberField K] [IsTotallyComplex K]
+variable (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
 
 theorem isEmpty_real : IsEmpty {w : InfinitePlace K // w.IsReal} := ⟨fun w => (InfinitePlace.not_isReal_iff_isComplex.mpr (IsTotallyComplex.isComplex w.1)) w.2⟩
 
@@ -254,25 +291,7 @@ theorem zl_span_eq {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     zl ρ (Submodule.span (𝓞 K) (Set.range e)) =
       Submodule.span ℤ (Set.range fun p : Free.ChooseBasisIndex ℤ (𝓞 K) × ι' =>
         ρ (integralBasis K p.1 • e p.2)) := by
-  have hω : ∀ p : Free.ChooseBasisIndex ℤ (𝓞 K) × ι',
-      integralBasis K p.1 • e p.2 = (RingOfIntegers.basis K p.1) • e p.2 := fun p => by
-    rw [integralBasis_apply, algebraMap_smul]
-  have hspan : (Submodule.span (𝓞 K) (Set.range e)).restrictScalars ℤ =
-      Submodule.span ℤ (Set.range fun p : Free.ChooseBasisIndex ℤ (𝓞 K) × ι' =>
-        integralBasis K p.1 • e p.2) := by
-    rw [← Submodule.span_smul_of_span_eq_top (RingOfIntegers.basis K).span_eq (Set.range e),
-      Set.range_smul_range]
-    congr 1
-    ext x
-    simp only [Set.mem_range, hω]
-  have hz : zl ρ (Submodule.span (𝓞 K) (Set.range e)) =
-      ((Submodule.span (𝓞 K) (Set.range e)).restrictScalars ℤ).map ρ.toIntLinearMap := by
-    ext x
-    first
-    | exact Iff.rfl
-    | simp [zl]
-  rw [hz, hspan, Submodule.map_span, ← Set.range_comp]
-  rfl
+  apply Formalism.HN.PlaceLattice.zl_span_eq <;> assumption
 
 theorem linIndep_int {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (ρ : V →+ E) (hρ : Function.Injective ρ) {ι' : Type} [Fintype ι']

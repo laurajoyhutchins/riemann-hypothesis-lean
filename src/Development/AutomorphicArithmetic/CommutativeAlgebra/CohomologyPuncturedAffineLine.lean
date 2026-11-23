@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.GoodRoot
-import Development.EtaleCohomology.EtaleSheaves.StandardChartsLineOne
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsNearRootOfUnityProductDecomposition
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsGoodRootOfHenselianSepClosedResidue
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsAffineIsDomainPullbackStandardOpens
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ClosedFiberAffineSurjectiveKerMaximalIdeal
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsFiberPullbackSquareOfOpenImmersions
-import Development.AutomorphicArithmetic.CommutativeAlgebra.SchemeRootsOfUnityEqLocallyConstantPowers
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.StandardChartsLineOne
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ClosedFiberAffineSurjectiveKerMaximalIdeal
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsFiberPullbackSquareOfOpenImmersions
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsGoodRootOfHenselianSepClosedResidue
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsNearRootOfUnityProductDecomposition
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.IsAffineIsDomainPullbackStandardOpens
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.SchemeRootsOfUnityEqLocallyConstantPowers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.GoodRoot
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry IsLocalRing GlobalTheory.EtC UpperTheory.Et LateralTheory.E.t_E2Cut LateralTheory.E.LineOneCut LateralTheory.E.StandardEtaleChartsMultivariableHensel
@@ -49,7 +93,7 @@ private theorem exists_preimage_map_eq_zero_of_mem_mm {A D E F : Type} [CommRing
     obtain ⟨b₀, rfl⟩ := hb'
     exact ⟨σ a * b₀, by rw [map_mul, ← hσ, Algebra.smul_def], by rw [map_mul, hψ a ha, zero_mul]⟩
   · rintro x y ⟨x₀, rfl, hx0⟩ ⟨y₀, rfl, hy0⟩
-    exact ⟨x₀ + y₀, map_add _ _ _, by rw [map_add, hx0, hy0, add_zero]⟩
+    exact ⟨x₀ + y₀, map_add _ _ _, by rw [map_add (f := _), hx0, hy0, add_zero]⟩
 
 private theorem pow_mod_eq_pow_of_pow_eq_one_commutative_algebra {S : Type} [CommRing S] {ζ : S} {q : ℕ} (h : ζ ^ q = 1) (n : ℕ) :
     ζ ^ (n % q) = ζ ^ n := by
@@ -101,7 +145,7 @@ theorem UpperTheory.cohomology_punctured_affine_line : LateralTheory.E.StandardE
     exact hy
   have hmem : w' ^ q - 1 ∈ mm (⊤ : Subalgebra A Γ(pullback ι₁ ι₂, ⊤)) := by
     have hk : w' ^ q - 1 ∈ RingHom.ker r.appTop.hom := by
-      rw [RingHom.mem_ker, map_sub, map_pow, hwq, map_one, sub_self]
+      rw [RingHom.mem_ker, RingHom.map_sub, map_pow, hwq, map_one, sub_self]
     rw [hrker] at hk
     unfold mm
     rw [Algebra.top_toSubmodule, Ideal.smul_top_eq_map]

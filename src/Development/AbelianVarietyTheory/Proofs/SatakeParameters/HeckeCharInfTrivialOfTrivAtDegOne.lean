@@ -1,12 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DegOneIffSurjective
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CharConstOnTranslatesTrivialStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsResidueClassNearRealEmbeddingsStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ResidueDegreeOneOfLinearMemStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ContinuousIdeleCharLocalFactorizationStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.QuadraticExistsIntegralGeneratorCommonDenominatoStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InfinitePlaceEqOfEmbeddingCompAlgebraMapEqStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ImEmbeddingNeZeroOfNotMemRangeOfTotallyRealQuadrStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DegOneIffSurjective
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CharConstOnTranslatesTrivialStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ContinuousIdeleCharLocalFactorizationStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsResidueClassNearRealEmbeddingsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ImEmbeddingNeZeroOfNotMemRangeOfTotallyRealQuadrStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InfinitePlaceEqOfEmbeddingCompAlgebraMapEqStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.QuadraticExistsIntegralGeneratorCommonDenominatoStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ResidueDegreeOneOfLinearMemStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain HeckeValGen GlobalTheory.HeckeSplit NumberField.mixedEmbedding
@@ -28,7 +76,7 @@ theorem continuous_mixedSymm : Continuous (InfiniteAdeleRing.ringEquiv_mixedSpac
 theorem continuous_infIdele : Continuous (infIdele E) :=
   Continuous.units_map _ (continuous_id.prodMk continuous_const)
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 def cplxUnit : ({w : InfinitePlace E // w.IsComplex} → ℂˣ) →* (mixedSpace E)ˣ where
   toFun z := ⟨((fun _ => 1), fun w => (z w : ℂ)), ((fun _ => 1), fun w => ((z w)⁻¹ : ℂˣ)),
@@ -90,7 +138,7 @@ theorem coe_algebraMap (F : Type) [Field F] [NumberField F] [Algebra F E] (a : �
 
 end Loc
 
-theorem inf_trivial_of_trivAt_degOne : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] [Algebra.IsQuadraticExtension F E] (χ : Ideles E →* ℂˣ), IsHeckeChar E χ → (∀ᶠ w in Filter.cofinite, DegOne F w → TrivAt χ w) → ∀ x : (InfiniteAdeleRing E)ˣ, χ (infIdele E x) = 1 := by
+theorem inf_trivial_of_trivAt_degOne : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] [Algebra.IsQuadraticExtension F E] (χ : Ideles E →* ℂˣ), IsHeckeChar E χ → (∀ᶠ w in Filter.cofinite, DegOne F w → TrivAt χ w) → ∀ x : (InfiniteAdeleRing E)ˣ, χ (infIdele E x) = 1 := by
   intro F E _ _ _ _ _ _ _ _ χ hχ hdeg
   classical
   obtain ⟨hunr, hcond, hfact⟩ := GlobalTheory.T.continuous_ideleChar_local_factorization E χ hχ.1
@@ -164,7 +212,7 @@ theorem inf_trivial_of_trivAt_degOne : ∀ (F E : Type) [Field F] [NumberField F
         · haveI := v.isPrime
           haveI := v.isMaximal
           have hdeg1 : DegOne F v := GlobalTheory.T.residue_degree_one_of_linear_mem' (𝓞 F) (𝓞 E) v.asIdeal θ D b 1
-            (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal v.asIdeal) hDspan
+            (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := 𝓞 F) v.asIdeal) hDspan
             (fun h => he0v (Ideal.mul_mem_right _ _ h))
             (by rw [map_one]; exact fun h => v.isPrime.ne_top ((Ideal.eq_top_iff_one _).2 h))
             (by rwa [map_one, one_mul])
@@ -212,7 +260,7 @@ theorem inf_trivial_of_trivAt_degOne : ∀ (F E : Type) [Field F] [NumberField F
     have hzb : z = fun w => Units.map w.1.embedding.toMonoidHom (xb b) := funext fun i => Units.ext (by
       rw [hz i, Units.coe_map, hτapp]
       simp only [hxbdef, Units.val_mk0, RingHom.toMonoidHom_eq_coe, MonoidHom.coe_coe]
-      rw [← map_add, ← coe_algebraMap]
+      rw [← map_add (f := _), ← coe_algebraMap]
       rfl)
     rw [hzb]
     show χ (infIdele E (infUnit E _)) = _

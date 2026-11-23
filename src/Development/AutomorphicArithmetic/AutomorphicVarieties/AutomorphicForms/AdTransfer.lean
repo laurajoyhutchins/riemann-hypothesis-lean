@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CongruenceNumberRankThree
+module
+
+public import Mathlib.NumberTheory.NumberField.CMField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.PadicNumbers
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,70 +98,15 @@ section Iso
 variable {F₀ F₁ Ω : Type} [Field F₀] [Field F₁] [Field Ω] [Algebra F₀ F₁] [Algebra F₀ Ω] [Algebra F₁ Ω]
   [IsScalarTower F₀ F₁ Ω]
 
-theorem restrictScalarsHom_surjective (h : Function.Surjective (algebraMap F₀ F₁)) :
-    Function.Surjective (AlgEquiv.restrictScalarsHom F₀ : G F₁ Ω →* G F₀ Ω) := fun σ =>
-  ⟨AlgEquiv.ofRingEquiv (f := σ.toRingEquiv) fun x => by
-    obtain ⟨y, rfl⟩ := h x
-    rw [← IsScalarTower.algebraMap_apply]
-    exact σ.commutes y, rfl⟩
-
-theorem IsAdOf.of_surjective (h : Function.Surjective (algebraMap F₀ F₁)) {F k : Type} [Field F] [Algebra F₀ F] [Algebra F₁ F]
-    [Algebra F Ω] [IsScalarTower F₀ F Ω] [IsScalarTower F₁ F Ω] [Field k] {n : ℕ} {r : G F Ω →* GL (Fin n) k}
-    {μ : G F Ω →* kˣ} {ρ : Representation k (G F₀ Ω) (Matrix (Fin n) (Fin n) k)} (H : IsAdOf r μ ρ) :
-    IsAdOf (F₀ := F₁) r μ (ρ.comp (AlgEquiv.restrictScalarsHom F₀ : G F₁ Ω →* G F₀ Ω)) := by
-  obtain ⟨c, P, hj, h1, h2, h3⟩ := H
-  obtain ⟨c', rfl⟩ := restrictScalarsHom_surjective (Ω := Ω) h c
-  refine ⟨c', P, hj, fun s s' e => h1 s s' ?_, fun s X => h2 s X, h3⟩
-  exact AlgEquiv.ext fun x => AlgEquiv.congr_fun e x
-
 variable [NumberField F₀] [NumberField F₁] {l : ℕ} [Fact l.Prime]
   {C V : Type} [CommRing C] [Algebra ℚ_[l] C] [AddCommGroup V] [Module C V] [Module ℚ_[l] V]
   [IsScalarTower ℚ_[l] C V] [TopologicalSpace V] [IsTopologicalAddGroup V] [ContinuousConstSMul C V]
-
-theorem IsBK.of_surjective (h : Function.Surjective (algebraMap F₀ F₁)) {ρ : Representation C (G F₀ Ω) V} {c : G F₀ Ω → V}
-    (H : IsBK l ρ c) :
-    IsBK l (ρ.comp (AlgEquiv.restrictScalarsHom F₀ : G F₁ Ω →* G F₀ Ω)) fun s => c (s.restrictScalars F₀) := by
-  constructor
-  · intro w hw
-    obtain ⟨A, hA, x, hx⟩ := H.away (w.under (𝓞 F₀)) fun h' => hw (by simpa using Ideal.mem_comap.1 h')
-    refine ⟨A, fun y => ?_, x, fun s hs => hx _ ⟨hs.1, hs.2⟩⟩
-    obtain ⟨z, hz⟩ := h (y : F₁)
-    have hi : IsIntegral ℤ z := by
-      rw [← isIntegral_algebraMap_iff (algebraMap F₀ F₁).injective, hz]
-      exact y.2
-    have e : y = algebraMap (𝓞 F₀) (𝓞 F₁) ⟨z, hi⟩ := Subtype.ext hz.symm
-    have := hA ⟨z, hi⟩
-    rw [← hz, ← IsScalarTower.algebraMap_apply, e]
-    exact this
-  · intro τ
-    obtain ⟨j, hj, ⟨hc, hm⟩, x, hx⟩ := H.above (τ.comp (algebraMap F₀ F₁))
-    let φ : ↥(decJ F₁ j) →* ↥(decJ F₀ j) :=
-      { toFun := fun g => ⟨(g.1.1.restrictScalars F₀, g.1.2), g.2⟩
-        map_one' := rfl
-        map_mul' := fun _ _ => rfl }
-    have hφ : Continuous φ := Continuous.subtype_mk
-      (((continuous_restrictScalarsHom F₀ F₁ Ω).comp (continuous_fst.comp continuous_subtype_val)).prodMk
-        (continuous_snd.comp continuous_subtype_val)) _
-    refine ⟨j, RingHom.ext fun y => ?_, ⟨hc.comp hφ, fun g g' => hm (φ g) (φ g')⟩, x, fun g => hx (φ g)⟩
-    obtain ⟨z, rfl⟩ := h y
-    rw [RingHom.comp_apply, ← IsScalarTower.algebraMap_apply]
-    exact RingHom.congr_fun hj z
-
-theorem BlochKatoSelmerVanishes.of_surjective (h : Function.Surjective (algebraMap F₀ F₁)) {ρ : Representation C (G F₀ Ω) V}
-    (H : BlochKatoSelmerVanishes l (ρ.comp (AlgEquiv.restrictScalarsHom F₀ : G F₁ Ω →* G F₀ Ω))) : BlochKatoSelmerVanishes l ρ := by
-  intro c hc hbk
-  obtain ⟨m, hm⟩ := (mem_coboundaries1 _ _).1 (H _
-    ⟨hc.1.comp (continuous_restrictScalarsHom F₀ F₁ Ω), fun g g' => hc.2 (g.restrictScalars F₀) (g'.restrictScalars F₀)⟩
-    (hbk.of_surjective h))
-  refine (mem_coboundaries1 _ _).2 ⟨m, fun g => ?_⟩
-  obtain ⟨g', rfl⟩ := restrictScalarsHom_surjective (Ω := Ω) h g
-  exact hm g'
 
 end Iso
 
 theorem surjective_algebraMap_real (K : Type) [Field K] [NumberField K] [IsCMField K] (h : Module.finrank ℚ K = 2) :
     Function.Surjective (algebraMap ℚ (maximalRealSubfield K)) := by
-  have h1 := Module.finrank_mul_finrank ℚ (maximalRealSubfield K) K
+  have h1 := (letI : Module.Free (maximalRealSubfield K) K := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℚ (maximalRealSubfield K) K)
   rw [h, Algebra.IsQuadraticExtension.finrank_eq_two (maximalRealSubfield K) K] at h1
   have h2 : Module.finrank ℚ (maximalRealSubfield K) = 1 := by omega
   exact ((Algebra.finrank_eq_one_iff_bijective_algebraMap).1 h2).2

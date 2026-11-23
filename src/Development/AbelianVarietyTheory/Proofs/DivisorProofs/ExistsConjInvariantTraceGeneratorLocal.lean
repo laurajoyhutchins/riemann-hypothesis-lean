@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmHostUnitAddConjEqOne
+module
+
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmHostUnitAddConjEqOne
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FormallyUnramifiedEtaleCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +66,7 @@ theorem sub_bar_mem_pow_succ (H : Host E) (𝔭 : Ideal (𝓞 E)) (n : ℕ) (hn 
   haveI := H.unram
   let L : 𝓞 E →ₗ[𝓞 (maximalRealSubfield E)] (𝓞 E ⧸ 𝔭 ^ (n + 1)) :=
     { toFun := fun c => Ideal.Quotient.mk _ (c - H.bar c)
-      map_add' := fun a b => by rw [← map_add, map_add H.bar]; congr 1; ring
+      map_add' := fun a b => by rw [← map_add (f := _), map_add H.bar]; congr 1; ring
       map_smul' := fun r a => by
         rw [Algebra.smul_def, map_mul, bar_algebraMap, ← mul_sub, RingHom.id_apply, Algebra.smul_def, map_mul,
           Ideal.Quotient.mk_algebraMap] }
@@ -33,7 +74,7 @@ theorem sub_bar_mem_pow_succ (H : Host E) (𝔭 : Ideal (𝓞 E)) (n : ℕ) (hn 
     Derivation.mk' L fun a b => by
       show Ideal.Quotient.mk _ (a * b - H.bar (a * b)) =
         a • Ideal.Quotient.mk _ (b - H.bar b) + b • Ideal.Quotient.mk _ (a - H.bar a)
-      rw [Algebra.smul_def, Algebra.smul_def, Ideal.Quotient.algebraMap_eq, ← map_mul, ← map_mul, ← map_add,
+      rw [Algebra.smul_def, Algebra.smul_def, Ideal.Quotient.algebraMap_eq, ← map_mul, ← map_mul, ← map_add (f := _),
         Ideal.Quotient.eq]
       have hab : (a - H.bar a) * (b - H.bar b) ∈ 𝔭 ^ (n + 1) :=
         Ideal.pow_le_pow_right (by omega : n + 1 ≤ n + n) (by rw [pow_add]; exact Ideal.mul_mem_mul (h a) (h b))
@@ -82,8 +123,8 @@ theorem exists_trace_eq (ψ : 𝓞 E →+ ℤ) : ∃ δ : E, ∀ u : 𝓞 E, ((�
     simp [f, ← integralBasis_apply]
   exact (LinearMap.congr_fun h2 u)
 
-open FractionalIdeal in
 
+open FractionalIdeal in
 theorem exists_local_gen {M : FractionalIdeal (𝓞 E)⁰ E} (hM : M ≠ 0) {𝔭 : Ideal (𝓞 E)} {δ : E} (hδ : δ ∈ M)
     (hδ' : δ ∉ (𝔭 : FractionalIdeal (𝓞 E)⁰ E) * M) :
     ∃ s : 𝓞 E, s ∉ 𝔭 ∧ ∀ x ∈ M, ∃ t : 𝓞 E, (s : E) * x = δ * t := by
@@ -105,8 +146,8 @@ theorem exists_local_gen {M : FractionalIdeal (𝓞 E)⁰ E} (hM : M ≠ 0) {�
   obtain ⟨t, ht⟩ := (mem_spanSingleton _).1 this
   exact ⟨t, by rw [← ht, Algebra.smul_def, mul_comm]⟩
 
-open FractionalIdeal in
 
+open FractionalIdeal in
 theorem exists_mem_notMem_mul {M : FractionalIdeal (𝓞 E)⁰ E} (hM : M ≠ 0) {𝔭 : Ideal (𝓞 E)} (h𝔭 : 𝔭 ≠ ⊤) :
     ∃ x ∈ M, x ∉ (𝔭 : FractionalIdeal (𝓞 E)⁰ E) * M := by
   by_contra! h
@@ -137,7 +178,7 @@ theorem exists_real_notMem (H : Host E) {M : FractionalIdeal (𝓞 E)⁰ E} (hM 
   have hbar : IsCMField.complexConj E (c : E) = (H.bar c : E) := (H.bar_eq c).symm
   by_cases h1 : x + IsCMField.complexConj E x ∈ (𝔭 : FractionalIdeal (𝓞 E)⁰ E) * M
   · refine ⟨(c : E) * x + IsCMField.complexConj E ((c : E) * x), fi_add_mem _ (fi_mul_mem M c hx)
-      (hconj _ (fi_mul_mem M c hx)), by rw [map_add, hcc, add_comm], fun h2 => hx' ?_⟩
+      (hconj _ (fi_mul_mem M c hx)), by rw [map_add (f := _), hcc, add_comm], fun h2 => hx' ?_⟩
     have h3 : ((c - H.bar c : 𝓞 E) : E) * x ∈ (𝔭 : FractionalIdeal (𝓞 E)⁰ E) * M := by
       have := fi_sub_mem _ h2 (fi_mul_mem _ (H.bar c) h1)
       convert this using 1
@@ -150,7 +191,7 @@ theorem exists_real_notMem (H : Host E) {M : FractionalIdeal (𝓞 E)⁰ E} (hM 
     rw [this]
     exact fi_add_mem _ (fi_mul_mem _ y h3)
       (FractionalIdeal.mul_mem_mul ((FractionalIdeal.mem_coeIdeal _).2 ⟨i, hi, rfl⟩) hx)
-  · exact ⟨x + IsCMField.complexConj E x, fi_add_mem _ hx (hconj x hx), by rw [map_add, hcc, add_comm], h1⟩
+  · exact ⟨x + IsCMField.complexConj E x, fi_add_mem _ hx (hconj x hx), by rw [map_add (f := _), hcc, add_comm], h1⟩
 
 theorem trace_conj (y : E) : Algebra.trace ℚ E (IsCMField.complexConj E y) = Algebra.trace ℚ E y :=
   Algebra.trace_eq_of_algEquiv ((IsCMField.complexConj E).restrictScalars ℚ) y
@@ -188,7 +229,7 @@ theorem exists_bar_inv_trace_gen : ∀ {E : Type} [Field E] [NumberField E] [IsC
     exact ⟨z, by rw [← Algebra.traceForm_apply, ← hz]; simp⟩
   choose z hz using hint δ hδM
   let θ : 𝓞 E →+ ℤ := AddMonoidHom.mk' z fun a b => Int.cast_injective (α := ℚ) (by
-    push_cast; rw [hz, hz, hz]; push_cast; rw [mul_add, map_add])
+    push_cast; rw [hz, hz, hz]; push_cast; rw [mul_add, map_add (f := _)])
   have hθ : ∀ u, ((θ u : ℤ) : ℚ) = Algebra.trace ℚ E (δ * u) := hz
   have hmemψ : ∀ ψ : 𝓞 E →+ ℤ, ∃ x ∈ M, ∀ u : 𝓞 E, ((ψ u : ℤ) : ℚ) = Algebra.trace ℚ E (x * u) := by
     intro ψ
@@ -224,7 +265,7 @@ theorem exists_bar_inv_trace_gen : ∀ {E : Type} [Field E] [NumberField E] [IsC
     refine ⟨s + H.bar s, hsb, by rwa [map_add, bar_bar, add_comm], fun ψ => ?_⟩
     obtain ⟨t, ht⟩ := hPs ψ
     obtain ⟨t', ht'⟩ := hPbar s hPs ψ
-    exact ⟨t + t', fun u => by rw [add_mul, map_add, ht, ht', add_mul, map_add]⟩
+    exact ⟨t + t', fun u => by rw [add_mul, map_add (f := _), ht, ht', add_mul, map_add (f := _)]⟩
   · exact ⟨s, hs, hb, hPs⟩
 
 end GlobalTheory.RealTheta

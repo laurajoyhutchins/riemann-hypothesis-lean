@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LogFactorialIndices.StatementIdx
+module
+
+public import Formalism.LogFactorialIndices.StatementIdx
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.RingTheory.IsTensorProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,19 +119,5 @@ def LocalStepDescent : Prop :=
           d * ((e : ℝ) * (finrank K' (Submodule.span K' (j '' (V' : Set V))) : ℝ) + Y) + Z →
         d * (Formalism.LatticeIndexTer.idx O V (M ⊓ V'.restrictScalars O) (Θ ⊓ V'.restrictScalars O) : ℝ) ≤
           d * ((e : ℝ) * (finrank K V' : ℝ) + Y) + Z
-
-def AddValAlgebraMap : Prop :=
-  ∀ (O O' : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [CommRing O'] [IsDomain O'] [IsDiscreteValuationRing O'] [Algebra O O'],
-    ∀ ϖ : O, Irreducible ϖ → Irreducible (algebraMap O O' ϖ) →
-    ∀ a : O, a ≠ 0 →
-      IsDiscreteValuationRing.addVal O' (algebraMap O O' a) = IsDiscreteValuationRing.addVal O a
-
-def FinrankNormTensor : Prop :=
-  ∀ (K K' K₁ : Type) [Field K] [Field K'] [Algebra K K'] [Field K₁] [Algebra K K₁]
-    [FiniteDimensional K K₁],
-    finrank K' (TensorProduct K K' K₁) = finrank K K₁ ∧
-      ∀ x : K₁, Algebra.norm K' (TensorProduct.tmul K (1 : K') x) =
-        algebraMap K K' (Algebra.norm K x)
 
 end Formalism.LatticeBaseChangeAlt

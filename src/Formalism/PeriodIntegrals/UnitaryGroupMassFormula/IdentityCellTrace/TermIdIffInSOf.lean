@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IdentityCellTrace.AlgIdentity
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelevantCarrierNonempty.InSCarrierNonempty
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.FourParts
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.FourParts
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IdentityCellTrace.AlgIdentity
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelevantCarrierNonempty.InSCarrierNonempty
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +76,7 @@ theorem coef_add (G : FlagG S r T) (a : Fin r) (x : S.V) (hx : x ∈ G.X) (y : S
   have hxy : x + y ∈ Submodule.span E (Set.range G.e) := Submodule.add_mem _ hx' hy'
   simp only [FlagG.coefX, dif_pos hx', dif_pos hy', dif_pos hxy]
   have e : (⟨x + y, hxy⟩ : Submodule.span E (Set.range G.e)) = ⟨x, hx'⟩ + ⟨y, hy'⟩ := rfl
-  rw [e, map_add, Finsupp.add_apply]
+  rw [e, map_add (f := _), Finsupp.add_apply]
 
 theorem coef_smul (G : FlagG S r T) (a : Fin r) (t : E) (x : S.V) (hx : x ∈ G.X) :
     G.coefX (t • x) a = t * G.coefX x a := by
@@ -112,7 +159,7 @@ theorem smul_e_mem_XS {D : D7} {T : D.host.E} (G : FlagG (VS D) D.R.rS T) (a : F
 
 theorem isIdF_of (D : D7) (hθ : TraceOne D) {u u' : D.what₂.Word}
     (F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)) (Λ : Submodule (𝓞 D.host.E) (VS D).V)
-    (hΛ : IsRowLat D F0 Λ) (F' : LFlag (hS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+    (hΛ : IsRowLat D F0 Λ) (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
     (hP : PD D Λ (lf D F0) u' F') (hin : InSF (lf D F0) F') : IsIdF Λ (lf D F0) F' := by
   obtain ⟨θ, hθ⟩ := hθ
   obtain ⟨_, ⟨hlat, hU, _, _⟩, hXS⟩ := hΛ
@@ -130,20 +177,22 @@ theorem isIdF_of (D : D7) (hθ : TraceOne D) {u u' : D.what₂.Word}
     rw [← hXS]
     exact ⟨hy, hyX⟩
   have hXΛ' : ∀ y ∈ Λ, y ∈ F0.X → y ∈ XS D F'.fl := fun y hy hyX => by
-    rw [← hXS']
-    refine ⟨hy, ?_⟩
-    show y ∈ F'.fl.X
-    rw [hXX]
-    exact hyX
+    have hy' : y ∈ XLam Λ F' := ⟨hy, by
+      show y ∈ F'.fl.X
+      rw [hXX]
+      exact hyX⟩
+    exact hXS' ▸ hy'
   have hXSΛ : ∀ y ∈ XS D F0, y ∈ Λ := fun y hy => by
     rw [← hXS] at hy
     exact hy.1
   have hXSΛ' : ∀ y ∈ XS D F'.fl, y ∈ Λ := fun y hy => by
-    rw [← hXS'] at hy
-    exact hy.1
+    have hy' : y ∈ XLam Λ F' := hXS'.symm ▸ hy
+    exact hy'.1
   have he' : ∀ a, F'.fl.e a ∈ F0.X := fun a => hXX ▸ e_mem_X F'.fl a
+  have hspan : Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ :=
+    Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top hU (VS D).herm hlat.fg
   obtain ⟨n, hnisom, hngmap, hne, hnperp⟩ :=
-    core (VS D).hT (VS D).herm (VS D).nondeg Λ hlat.fg hlat.span_eq_top hU F0.X (X_iso F0)
+    core (VS D).hT (VS D).herm (VS D).nondeg Λ hlat.fg hspan hU F0.X (X_iso F0)
       F0.e F'.fl.e (e_mem_X F0) he'
       (fun a x => F0.coefX x a) (fun a x => F'.fl.coefX x a)
       (fun x hx => coef_expand F0 x hx) (fun x hx => coef_expand F'.fl x (hXX ▸ hx))
@@ -171,7 +220,7 @@ theorem isIdF_of (D : D7) (hθ : TraceOne D) {u u' : D.what₂.Word}
       exact PI.UnitaryGroupMassFormula.InSRelevantW.xa_mono F0 (Nat.lt_succ_iff.1 hi') (hin.1 i)
     | zero => simp
     | add y w _ _ hy hw =>
-      have e : n (y + w) - (y + w) = (n y - y) + (n w - w) := by rw [map_add]; abel
+      have e : n (y + w) - (y + w) = (n y - y) + (n w - w) := by rw [map_add (f := _)]; abel
       rw [e]
       exact Submodule.add_mem _ hy hw
     | smul t y _ hy =>

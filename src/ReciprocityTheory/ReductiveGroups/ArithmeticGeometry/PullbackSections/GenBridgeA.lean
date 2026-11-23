@@ -1,5 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsSecNeObj
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,14 +74,6 @@ theorem gm_of_id (r : Z ⟶ Y) (ψ : Y ⟶ X) (z : Z) {U : Y.Opens} {V : X.Opens
   have e2 := gs_comp_stalk r ψ z V hV b.val
   rw [Category.comp_id] at e1
   rw [e1, e2, gs_unit (𝟙 Y) (r z) U (by simpa using hU) a, gs_unit ψ (r z) V hV b, h]
-
-theorem gs_of_id (r : Z ⟶ Y) (ψ : Y ⟶ X) (z : Z) {U : Y.Opens} {V : X.Opens} (hU : r z ∈ U)
-    (hV : ψ (r z) ∈ V) (a : Γ(Y, U)) (b : Γ(X, V)) (h : gs (𝟙 Y) (r z) U a = gs ψ (r z) V b) :
-    gs r z U a = gs (r ≫ ψ) z V b := by
-  have e1 := gs_comp_stalk r (𝟙 Y) z U (by simpa using hU) a
-  have e2 := gs_comp_stalk r ψ z V hV b
-  rw [Category.comp_id] at e1
-  rw [e1, e2, h]
 
 structure PullOf (L : LB X) (ψ : Y ⟶ X) (A : LB Y) where
   c : A.ι → L.ι
@@ -174,15 +211,6 @@ def sabM (hC : ReciprocityTheory.ChartRestriction.G.Out.CubePullSt) {S S' : Sche
   have h := isGrpPullback_pullback t.G f
   have P := hC S S' t.G _ (cubeMapOf h) t.PP t.cub
   ⟨cubeMapOf h, h, rfl, fun a => pullback.lift_fst _ _ _, P.choose_spec.choose_spec.1.choose_spec⟩
-
-theorem sabT_L (hC : ReciprocityTheory.ChartRestriction.G.Out.CubePullSt) {S S' : Scheme.{0}} (f : S' ⟶ S) (t : SAB H S) :
-    (sabT hC f t).PP.L = t.PP.L.pull (pullback.fst t.G.hom f) := rfl
-
-theorem sabM_φ (hC : ReciprocityTheory.ChartRestriction.G.Out.CubePullSt) {S S' : Scheme.{0}} (f : S' ⟶ S) (t : SAB H S) :
-    (sabM hC f t).φ = pullback.fst t.G.hom f := rfl
-
-theorem sabT_hom (hC : ReciprocityTheory.ChartRestriction.G.Out.CubePullSt) {S S' : Scheme.{0}} (f : S' ⟶ S) (t : SAB H S) :
-    (sabT hC f t).G.hom = pullback.snd t.G.hom f := rfl
 
 end Sab
 

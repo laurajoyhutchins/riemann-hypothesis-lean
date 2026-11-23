@@ -1,6 +1,49 @@
-import Formalism.LocalToGlobal.GlobalTheory.MemIffOfLocBasisG
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PColInf
-import Formalism.LocalToGlobal.HermitianForms.FormsTied
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.FormsTied
+public import Formalism.SharpRestriction.GlobalSchurBounds.FlipTwoThree
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColInf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +62,7 @@ theorem map_aeval_sub (s : K →+* L) (f : (ι × Fin n × Fin n) → MvPolynomi
     MvPolynomial.map s (MvPolynomial.aeval f p) = MvPolynomial.aeval (fun v => MvPolynomial.map s (f v)) (MvPolynomial.map s p) := by
   induction p using MvPolynomial.induction_on with
   | C a => simp [MvPolynomial.algebraMap_eq]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.map_X]
 
 theorem map_actAll (s : K →+* L) (lam : ι → DomWeight n) (g : ι → Matrix (Fin n) (Fin n) K)
@@ -33,6 +76,7 @@ theorem map_actAll (s : K →+* L) (lam : ι → DomWeight n) (g : ι → Matrix
   · congr 1
     congr 1
     funext v
+
     simp [map_sum, Matrix.map_apply]
 
 end Map
@@ -67,13 +111,13 @@ variable (φ : E →+* ℂ) (hφ : ∀ a, φ (star a) = starRingEnd ℂ (φ a)) 
 theorem defect_add_left (x x' y : Fin n → E) : defect φ Y G (x + x') y = defect φ Y G x y + defect φ Y G x' y := by
   unfold defect
   have e : (fun i => φ ((x + x') i)) = (fun i => φ (x i)) + fun i => φ (x' i) := by funext i; simp
-  rw [e, Matrix.mulVec_add, star_add, add_dotProduct, star_add, add_dotProduct, map_add]
+  rw [e, Matrix.mulVec_add, star_add, add_dotProduct, star_add, add_dotProduct, map_add (f := _)]
   ring
 
 theorem defect_add_right (x y y' : Fin n → E) : defect φ Y G x (y + y') = defect φ Y G x y + defect φ Y G x y' := by
   unfold defect
   have e : (fun i => φ ((y + y') i)) = (fun i => φ (y i)) + fun i => φ (y' i) := by funext i; simp
-  rw [e, Matrix.mulVec_add, dotProduct_add, Matrix.mulVec_add, dotProduct_add, map_add]
+  rw [e, Matrix.mulVec_add, dotProduct_add, Matrix.mulVec_add, dotProduct_add, map_add (f := _)]
   ring
 
 include hφ in
@@ -93,8 +137,8 @@ theorem defect_smul_right (t : E) (x y : Fin n → E) :
   simp only [smul_eq_mul, map_mul]
   ring
 
-include hφ in
 
+include hφ in
 theorem defect_eq_zero (t : E) (ht : (φ t).im ≠ 0) (h0 : ∀ x, defect φ Y G x x = 0) (x y : Fin n → E) :
     defect φ Y G x y = 0 := by
   have h1 : ∀ x y, defect φ Y G x y + defect φ Y G y x = 0 := fun x y => by
@@ -113,8 +157,8 @@ theorem defect_eq_zero (t : E) (ht : (φ t).im ≠ 0) (h0 : ∀ x, defect φ Y G
     linarith
   exact (mul_eq_zero.1 h4).resolve_left h5
 
-include hφ in
 
+include hφ in
 theorem gram_of_norm (hG : Gᴴ = G) (t : E) (ht : (φ t).im ≠ 0)
     (h : ∀ x : Fin n → E, (star (Y *ᵥ fun i => φ (x i)) ⬝ᵥ (Y *ᵥ fun i => φ (x i))).re = (φ (star x ⬝ᵥ (G *ᵥ x))).re) :
     Yᴴ * Y = G.map φ := by
@@ -144,7 +188,8 @@ theorem gram_of_norm (hG : Gᴴ = G) (t : E) (ht : (φ t).im ≠ 0)
         rw [Complex.conj_im] at this
         linarith
       rw [i1, i2, sub_zero]
-  ext i j
+  apply Matrix.ext
+  intro i j
   have := defect_eq_zero φ hφ Y G t ht h0 (Pi.single i 1) (Pi.single j 1)
   unfold defect at this
   have e : ∀ k : Fin n, (fun a => φ ((Pi.single k (1 : E) : Fin n → E) a)) = Pi.single k 1 := fun k => by

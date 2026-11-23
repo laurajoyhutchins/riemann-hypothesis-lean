@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RpowNegLeNormOfComponent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EsymmInvMulEsymmCard
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RelIndexGlMapStandardLatticeOfIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CardQuotMatrixRangeDvrEqResiduePowCorankStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RpowNegLeNormOfComponent
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EsymmInvMulEsymmCard
+public import Mathlib.LinearAlgebra.Matrix.Rank
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CardQuotMatrixRangeDvrEqResiduePowCorankStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RelIndexGlMapStandardLatticeOfIntegralStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,20 +77,22 @@ theorem mem_std_iff {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationR
 theorem glMap_std_le_iff (O K : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field K] [Algebra O K] [IsFractionRing O K] (r : ℕ) (g : GL (Fin r) K) :
     glMap g (std O K r).1 ≤ (std O K r).1 ↔ ∀ i j, (g : Matrix (Fin r) (Fin r) K) i j ∈ (algebraMap O K).range := by
   change Submodule.map _ (Submodule.span O (Set.range (Pi.basisFun K (Fin r)))) ≤ (std O K r).1 ↔ _
-  rw [Submodule.map_span, Submodule.span_le, ← Set.range_comp, Set.range_subset_iff, forall_swap]
+  rw [Submodule.map_span, Submodule.span_le, ← Set.range_comp, Set.range_subset_iff, forall_comm]
   refine forall_congr' fun j => ?_
   simp only [Function.comp_apply, LinearMap.coe_restrictScalars, Pi.basisFun_apply,
     Matrix.toLin'_apply, SetLike.mem_coe, mem_std_iff, Matrix.mulVec_single_one]
   rfl
 
 theorem exists_matrix_of_isLattice' {R K : Type} [CommRing R] [IsDomain R] [IsPrincipalIdealRing R] [Field K]
-    [Algebra R K] [IsFractionRing R K] {n : ℕ} (M : Submodule R (Fin n → K)) [Submodule.IsLattice K M] :
+    [Algebra R K] [IsFractionRing R K] {n : ℕ} (M : Submodule R (Fin n → K)) [Submodule.IsFullLattice K M] :
     ∃ B : GL (Fin n) K, ∀ x : Fin n → K, x ∈ M ↔
       ∀ i, ((B⁻¹ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K).mulVec x i ∈ (algebraMap R K).range := by
+  have := Submodule.IsLattice.finite K M
+  have := Submodule.IsLattice.free K M
   have hr : Module.finrank R M = n := by
-    rw [Submodule.IsLattice.finrank_of_pi K M, Fintype.card_fin]
+    rw [((Submodule.IsFullLattice.finrank_eq K M).trans (Module.finrank_fintype_fun_eq_card K)), Fintype.card_fin]
   let b : Module.Basis (Fin n) R M := Module.finBasisOfFinrankEq R M hr
-  let c : Module.Basis (Fin n) K (Fin n → K) := b.extendOfIsLattice K
+  let c : Module.Basis (Fin n) K (Fin n → K) := b.extendOfIsFullLattice K
   let p := Pi.basisFun K (Fin n)
   let B : GL (Fin n) K := ⟨p.toMatrix c, c.toMatrix p, by simp, by simp⟩
   have hB : ∀ x i, ((B⁻¹ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K).mulVec x i = c.repr x i := by
@@ -59,7 +107,7 @@ theorem exists_matrix_of_isLattice' {R K : Type} [CommRing R] [IsDomain R] [IsPr
     have h1 : x = ∑ j, algebraMap R K (b.repr ⟨x, hx⟩ j) • c j := by
       have := congrArg Subtype.val (b.sum_repr ⟨x, hx⟩)
       rw [Submodule.coe_sum] at this
-      simp only [c, Module.Basis.extendOfIsLattice_apply, algebraMap_smul]
+      simp only [c, Module.Basis.extendOfIsFullLattice_apply, algebraMap_smul]
       exact this.symm
     have h2 := congrFun (c.repr_sum_self fun j => algebraMap R K (b.repr ⟨x, hx⟩ j)) i
     rw [← h1] at h2
@@ -115,7 +163,7 @@ theorem glMap_tinv_inv_le_iff (A : GL (Fin r) K) :
     glMap (tinv A)⁻¹ (std O K r).1 ≤ (std O K r).1 ↔ glMap A (std O K r).1 ≤ (std O K r).1 := by
   rw [glMap_std_le_iff O K r, glMap_std_le_iff O K r]
   simp only [tinv_inv_val, transpose_apply]
-  exact forall_swap
+  exact forall_comm
 
 theorem glMap_tinv_std (X : GL (Fin r) K) (h : glMap X (std O K r).1 = (std O K r).1) :
     glMap (tinv X) (std O K r).1 = (std O K r).1 := by

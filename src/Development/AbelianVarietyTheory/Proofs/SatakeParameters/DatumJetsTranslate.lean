@@ -1,9 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TypePrimeBadPrimesLevelsHypotheses
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KernelJetsOfTranslateJets
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.CharacterValuation
+public import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.BadPrimesPeriodBound
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KernelJets
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FieldIsoLatticesFormTaylorCorrespond
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousToZModComp
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FieldIsoLatticesFormTaylorCorrespond
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.L2.Th1.H GlobalTheory.MomT
 open GlobalTheory.IndefiniteRowSideFullHecke.BadPrimesPeriodBound (recFields recPrimes recSeam HostTie AnTie badS)
@@ -37,7 +77,10 @@ theorem exists_denom {E W : Type} [Field E] [NumberField E] [AddCommGroup W] [Mo
       · rw [h1, Int.cast_neg, Int.cast_natCast, neg_smul, neg_mem_iff] at hz1; exact hz1
     obtain ⟨Q, hQ, hQp, hQc⟩ := Ideal.exists_ideal_over_prime_of_isIntegral (Ideal.span {(p : ℤ)}) I hI
     have hpQ : (p : 𝓞 E) ∈ Q := by
-      have : (p : ℤ) ∈ Q.comap (algebraMap ℤ (𝓞 E)) := hQc ▸ Ideal.mem_span_singleton_self _
+      have : (p : ℤ) ∈ Q.comap (algebraMap ℤ (𝓞 E)) := by
+        change (p : ℤ) ∈ Ideal.under ℤ Q
+        rw [hQc]
+        exact Ideal.mem_span_singleton_self _
       simpa using this
     have hQ0 : Q ≠ ⊥ := by
       rintro rfl
@@ -74,17 +117,5 @@ theorem stdAt_of_stdOver (D : D7) {p : ℕ} (hp : p.Prime) {n : ℕ} {N : Submod
     exact nsmul_mem this _
 
 variable {D : D7} {a b : ℕ}
-
-theorem applyAt0_monomial (cD : D.what₂.Tau → ℂ) (G : TaylorLogMetric.VC D a b → ℂ) (m : TaylorLogMetric.Mono D a b) :
-    GL3Theta.applyAt0 D (inLetters D cD (MvPolynomial.monomial m 1)) G =
-      (m.prod fun k n => cD k.1 ^ n) * ((m.prod fun _ n => (n.factorial : ℂ)) * TaylorLogMetric.taylor D G m) := by
-  classical
-  have h : inLetters D cD (MvPolynomial.monomial m (1 : ℂ)) = MvPolynomial.monomial m (m.prod fun k n => cD k.1 ^ n) := by
-    rw [inLetters, MvPolynomial.aeval_monomial, MvPolynomial.monomial_eq]
-    simp only [mul_pow, Finsupp.prod_mul, map_one, one_mul, map_finsuppProd, map_pow]
-  rw [h, GL3Theta.applyAt0, Finset.sum_subset MvPolynomial.support_monomial_subset, Finset.sum_singleton,
-    MvPolynomial.coeff_monomial, if_pos rfl, mul_assoc]
-  intro x _ hx
-  rw [MvPolynomial.notMem_support_iff.1 hx, zero_mul, zero_mul]
 
 end GlobalTheory.DatumJets.Transl

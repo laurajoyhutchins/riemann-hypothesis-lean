@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.MatrixEntryAbsSumUnitaryLieCoordinatesSplit
+module
+
+public import Mathlib.Analysis.Complex.Norm
+public import Mathlib.Data.Finsupp.Weight
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.Defs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PolynomialCoefficientBounds.MatrixEntryAbsSumUnitaryLieCoordinatesSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Polynomial.Vieta
+
+@[expose] public section
 
 open MvPolynomial Filter Topology
 
@@ -37,7 +92,7 @@ private theorem FXRep.add {p q c d} (h : FXRep φ m p c) (h' : FXRep φ m q d) :
   obtain ⟨G', h1', h2'⟩ := h'
   refine ⟨fun β => G β + G' β, ?_, ?_⟩
   · rw [h1, h1', ← Finset.sum_add_distrib]
-    simp only [map_add, add_mul]
+    simp only [map_add (f := _), add_mul]
   · refine (Finset.sum_le_sum fun β _ => nrm_add _ _).trans ?_
     rw [Finset.sum_add_distrib]
     linarith
@@ -95,7 +150,7 @@ private theorem vieta (n : ℕ) (j : Fin n) :
   have h := congrArg (Polynomial.eval (-(X j : MvPolynomial (Fin n) ℂ)))
     (MvPolynomial.prod_C_add_X_eq_sum_esymm ℂ (Fin n))
   rw [Polynomial.eval_prod, Finset.prod_eq_zero (Finset.mem_univ j) (by simp),
-    Polynomial.eval_finset_sum, Fintype.card_fin, Finset.sum_range_succ',
+    Polynomial.eval_finsetSum, Fintype.card_fin, Finset.sum_range_succ',
     Finset.sum_range] at h
   simp only [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X,
     esymm_zero, one_mul, Nat.sub_zero] at h
@@ -130,6 +185,7 @@ private theorem step (τ : Type) [Fintype τ] [DecidableEq τ] (n : ℕ) (u : τ
     exact (FXRep.basis _).mono (by linarith [Nat.cast_nonneg (α := ℝ) n])
   · have hn : (β u : ℕ) + 1 = n := by have := (β u).2; omega
     have hv := congrArg (rename (fun j => (u.1, j))) (vieta n u.2)
+
     simp only [map_pow, rename_X, map_sum, map_mul, Prod.mk.eta, rename_C] at hv
     rw [hn, hv, Finset.sum_mul]
     have key := FXRep.sum (φ := aeval (fun ti : τ × Fin n =>
@@ -163,7 +219,7 @@ theorem UpperTheory.ConvolutionTheory.FX.gen_reduce :
       (fun u => ⟨0, u.2.pos⟩)
     simpa using this
   | single_add a b f _ _ ih =>
-    rw [monomial_single_add, map_add, Finsupp.degree_single, pow_add]
+    rw [monomial_single_add, map_add (f := _), Finsupp.degree_single, pow_add]
     clear * - ih hK
     induction b with
     | zero => simpa using ih

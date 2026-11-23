@@ -1,4 +1,50 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.MemPolData
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedMultiplicityOneProportional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +85,7 @@ theorem stepFac_eq {X : Chars F E} (h : X.T ⊆ B.P) (e₁ e₂ s : ℤˣ) (𝔟
   congr 1
   refine Finset.prod_bij (fun v _ => v.1) (fun v hv => by simpa using hv) (fun _ _ _ _ e => Subtype.ext e)
     (fun v hv => ⟨⟨v, h hv⟩, by simpa using hv, rfl⟩) fun v _ => ?_
-  rw [wT, dif_pos v.2]
+  rw [wT, dite_eq_left v.2]
 
 theorem prod_w {T₀ T : Finset (Pl F)} (h : T₀ ⊆ T) (w u : Pl F → ℂ) :
     ∏ v ∈ T, (if v ∈ T₀ then w v else u v) = (∏ v ∈ T₀, w v) * ∏ v ∈ T \ T₀, u v := by

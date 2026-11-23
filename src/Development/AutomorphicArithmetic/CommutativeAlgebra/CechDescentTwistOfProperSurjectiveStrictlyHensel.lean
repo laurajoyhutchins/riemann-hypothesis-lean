@@ -1,9 +1,60 @@
-import Mathlib
-import Development.EtaleCohomology.EtaleSheaves.H0TwistOverClosedField
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChainsCechNerveQuasiIsoOfSurjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyEquivalenceBasicPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechLevelRepresentableStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCechNerveBaseChangeIsPullbackStatement
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.H0TwistOverClosedField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechLevelRepresentableStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChainsCechNerveQuasiIsoOfSurjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCechNerveBaseChangeIsPullbackStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleCohomologyEquivalenceBasicPropertiesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+public import Mathlib.AlgebraicGeometry.Morphisms.UniversallyInjective
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC LateralTheory.E.E4
 
@@ -63,7 +114,7 @@ private noncomputable abbrev bpt (A : Type) [CommRing A] [IsLocalRing A] :
 private theorem henselianRing_of_le_nilradical {B : Type} [CommRing B] (J : Ideal B) (hJ : J ≤ nilradical B) :
     HenselianRing B J := by
   have hjac : J ≤ Ideal.jacobson ⊥ := hJ.trans Ideal.radical_le_jacobson
-  refine ⟨hjac, ?_⟩
+  refine ⟨by simpa only [Ideal.jacobson_bot] using hjac, ?_⟩
   intro f _ a₀ h₁ h₂
   have hloc := isLocalHom_of_le_jacobson_bot J hjac
   have hunit : ∀ c : B, c - a₀ ∈ J → IsUnit (f.derivative.eval c) := by
@@ -213,7 +264,7 @@ theorem UpperTheory.cech_descent_twist_of_proper_surjective_strictly_henselian :
   have hqk : IsUnit (q : Γ(Spec (CommRingCat.of k), ⊤)) := unit_map q r hqA
   haveI : IsIntegralHom u := IsIntegralHom.SpecMap_iff.mpr (fun x => Algebra.IsIntegral.isIntegral x)
   haveI : UniversallyInjective u := by
-    refine ((tfae_universallyInjective u).out 0 1).mpr ?_
+    refine ((tfae_universallyInjective u).out 1 2).mpr ?_
     intro L _ g₁ g₂ hg
     simp only at hg
     rw [← Spec.map_preimage g₁, ← Spec.map_preimage g₂] at hg ⊢

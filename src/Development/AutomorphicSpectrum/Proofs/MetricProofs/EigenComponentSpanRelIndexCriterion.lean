@@ -1,12 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsEigenComponentPolynomialStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannLatticeEigenProjectionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogPeriodLimit
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsIsChart
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeCovolumePositiveStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannLatticeEigenProjectionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsEigenComponentPolynomialStatement
+
+@[expose] public section
 
 open NumberField Matrix Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp GroundTheory.Heights₂.Heights.LowerBoundFree GroundTheory.Heights₂.Heights.Regular
 open GlobalTheory.CompanionTheory.Ar.RiemannLimit GlobalTheory.CompanionTheory.Ar.Cusp.BoundaryLimit
@@ -116,8 +156,8 @@ theorem exists_eigLin (s : 𝓞 E →+* ℂ) :
            map_add' := fun x y => by simpa using hl 1 x y
            map_smul' := fun c x => by simpa [h0] using hl c x 0 }, fun _ => rfl⟩
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem emb_injective (s : 𝓞 E →+* ℂ) : Function.Injective s := by
   have hc : (RingHom.ker s).comap (algebraMap ℤ (𝓞 E)) = ⊥ := by
     rw [RingHom.comap_ker]
@@ -130,8 +170,8 @@ omit [IsCMField E] in
 theorem extEmb_apply (s : 𝓞 E →+* ℂ) (a : 𝓞 E) : extEmb s (algebraMap (𝓞 E) E a) = s a :=
   IsFractionRing.lift_algebraMap (emb_injective s) a
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem exists_ext (s : 𝓞 E →+* ℂ) : ∃ t : E →+* ℂ, t.comp (algebraMap (𝓞 E) E) = s :=
   ⟨extEmb s, RingHom.ext (extEmb_apply s)⟩
 
@@ -188,7 +228,7 @@ theorem eigComp_P_mem_span (s : 𝓞 E →+* ℂ) {r : ℕ} (y : Fin r → Λ) {
     rw [map_zero, ← hL, map_zero]
     exact Submodule.zero_mem _
   | add x x' _ _ hx hx' =>
-    rw [map_add, ← hL, map_add, hL, hL]
+    rw [map_add (f := _), ← hL, map_add (f := _), hL, hL]
     exact Submodule.add_mem _ hx hx'
   | smul a x _ hx =>
     rw [R.act, (h1 s).2.2.2 a]

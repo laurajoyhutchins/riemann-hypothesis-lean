@@ -1,5 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.ThStmt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.QhtFacts
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.ThStmt
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Lit.Geo
 
 section
@@ -10,7 +50,7 @@ private theorem ratio_bound {m : ℕ} {f : Fin (m + 1) → ℝ} {c u : ℝ} (hf 
     (hu : ∀ i, f i ≤ u) (h1 : 1 ≤ c * ∏ i, f i) (i j : Fin (m + 1)) : f i / f j ≤ c * u ^ (m + 1) := by
   rw [Fin.prod_univ_succAbove _ j] at h1
   have h2 : ∏ k, f (j.succAbove k) ≤ u ^ m := by
-    calc ∏ k, f (j.succAbove k) ≤ ∏ _k : Fin m, u := Finset.prod_le_prod (fun k _ => (hf _).le) fun k _ => hu _
+    calc ∏ k, f (j.succAbove k) ≤ ∏ _k : Fin m, u := Finset.prod_le_prod₀ (fun k _ => (hf _).le) fun k _ => hu _
       _ = u ^ m := by rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
   have hu0 : 0 < u := (hf i).trans_le (hu i)
   have h3 : 1 ≤ c * (f j * u ^ m) :=
@@ -37,7 +77,7 @@ private theorem le_of_pow_le {x c : ℝ} {d : ℕ} (hd : d ≠ 0) (hc : 1 ≤ c)
   · exact h1.trans hc
   · exact (le_self_pow₀ h1.le hd).trans h
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 private theorem qht_le_height (g : KernelIndexFullLattice.G1 E a) (γ : GL (Fin a) E) :
     qht (E := E) (a := a) g.1 ≤ height (AdelicGLn.diagonal E a γ * g.1) := by
@@ -49,11 +89,11 @@ private theorem qht_le_height (g : KernelIndexFullLattice.G1 E a) (γ : GL (Fin 
   rw [retractOne_coe]
   exact h1
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 private theorem prod_bound {ω : Set (AdelicGLn.AdelicGL E a)} (hω : IsCompact ω) :
     ∃ c : ℝ, 1 ≤ c ∧ ∀ b ∈ ω, ∀ (ρ : Fin a → ℝ) (hρ : ∀ i, 0 < ρ i),
       ∀ kk ∈ (Reduction.maxCompact : Subgroup (AdelicGLn.AdelicGL E a)),
-      b * Reduction.diagUnits a (fun i => Reduction.posIdele (K := E) (ρ i) (hρ i)) * kk ∈ Reduction.normOneGL E a →
+      b * Reduction.diagUnits a (fun i => Reduction.posIdele (K := E) (ρ i) (hρ i)) * kk ∈ Reduction.normOneGL (K := E) (n := a) →
       ∏ i, ρ i ≤ c ∧ (∏ i, ρ i)⁻¹ ≤ c := by
   have hdc : Continuous fun g : AdelicGLn.AdelicGL E a => (Reduction.detModule E a g : ℝ) :=
     continuous_subtype_val.comp Reduction.continuous_detModule
@@ -96,7 +136,7 @@ theorem UpperTheory.height_bound_of_quasiHeight_le :
   rw [← he] at hCh
   refine ⟨ω, Ch * c ^ (2 * e) * σ⁻¹ ^ (2 * ((m + 1) * e)), (m + 1) * e, hω, hωB, fun g => ?_⟩
   obtain ⟨γ, b, hb, _, ⟨ρ, hρ, hs, rfl⟩, kk, hkk, hxe⟩ := hsieg g.1
-  have hγx : AdelicGLn.diagonal E (m + 1) γ * g.1 ∈ Reduction.normOneGL E (m + 1) :=
+  have hγx : AdelicGLn.diagonal E (m + 1) γ * g.1 ∈ Reduction.normOneGL (K := E) (n := (m + 1)) :=
     mul_mem (Reduction.rationalGL_le_normOneGL ⟨γ, rfl⟩) g.2
   obtain ⟨hP1, hP2⟩ := hcb b hb ρ hρ kk hkk (hxe ▸ hγx)
   have hP : 0 < ∏ i, ρ i := Finset.prod_pos fun i _ => hρ i

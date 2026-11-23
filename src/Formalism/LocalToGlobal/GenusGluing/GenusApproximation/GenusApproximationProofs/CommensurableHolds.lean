@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.GenusGluing.GenusApproximation.GlueExists
+module
+
+public import Formalism.LocalToGlobal.GenusGluing.GenusApproximation.GlueExists
+public import Formalism.HermitianLattices.HermitianLatticesProofs.LocBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,6 +62,7 @@ section LocEqSec
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
 
+omit [NumberField F] [NumberField E] [StarRing E] in
 theorem loc_coe_algebraMap (r : 𝓞 F) :
     ((algebraMap (𝓞 F) (𝓞 E) r : 𝓞 E) : E) = algebraMap F E (r : F) := rfl
 
@@ -45,7 +97,7 @@ theorem localEquality_holds : LocEq := by
     obtain ⟨a, ha⟩ := (hc.fixed (m : E)).1 hfix
     have hint : IsIntegral ℤ a := by
       have h2 : IsIntegral ℤ (algebraMap F E a) := by rw [ha]; exact m.2
-      exact (isIntegral_algebraMap_iff (algebraMap F E).injective).1 h2
+      exact (isIntegral_algebraMap_iff ).1 h2
     set r : 𝓞 F := ⟨a, hint⟩ with hr
     have hrm : algebraMap (𝓞 F) (𝓞 E) r = m := by
       apply RingOfIntegers.ext
@@ -89,10 +141,15 @@ theorem commens_denoms (s : Finset E) :
 
 end CommensSec
 
-theorem commensurable_holds : Commens := by
+theorem commensurable_holds :
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
+      (n : ℕ) (N : Submodule (𝓞 E) (Sp E n)), Submodule.IsFullLattice E N →
+      ∃ D : 𝓞 F, D ≠ 0 ∧ (∀ y ∈ N, algebraMap (𝓞 F) (𝓞 E) D • y ∈ stdLat E n) ∧
+        (∀ y ∈ stdLat E n, algebraMap (𝓞 F) (𝓞 E) D • y ∈ N) := by
   intro F E _ _ _ _ _ n N hN
   classical
-  obtain ⟨s, hs⟩ := hN.fg
+  let _ : Submodule.IsFullLattice E N := hN
+  obtain ⟨s, hs⟩ := Submodule.IsLattice.fg E N
   obtain ⟨d1, hd1, h1⟩ := commens_denoms (s.biUnion fun x => Finset.univ.image x)
   have hA : ∀ y ∈ N, ((d1 : 𝓞 E)) • y ∈ stdLat E n := by
     have hle : N ≤ (stdLat E n).comap (((d1 : 𝓞 E)) • LinearMap.id) := by
@@ -110,8 +167,8 @@ theorem commensurable_holds : Commens := by
     simpa only [Submodule.mem_comap, LinearMap.smul_apply, LinearMap.id_apply] using this
   have hB : ∀ i : Fin n, Pi.single i (1 : E) ∈ Submodule.span E (N : Set (Sp E n)) := by
     intro i
-    rw [hN.span_eq_top]
-    trivial
+    rw [Submodule.IsFullLattice.span_eq_top (A := E) (M := N)]
+    exact Submodule.mem_top
   choose f t ht _ hsum using fun i => Submodule.mem_span_iff_exists_finset_subset.1 (hB i)
   obtain ⟨d2, hd2, h2⟩ := commens_denoms (Finset.univ.biUnion fun i => (t i).image (f i))
   have hsingle : ∀ i : Fin n, ((d2 : 𝓞 E)) • Pi.single i (1 : E) ∈ N := by

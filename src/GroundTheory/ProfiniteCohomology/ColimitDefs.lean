@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
+module
+
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Functoriality
+public import Mathlib.Tactic.Bound
+public import Mathlib.Tactic.Monotonicity.Lemmas
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import Mathlib.Topology.Sheaves.Presheaf
+import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
 import GroundTheory.ProfiniteCohomology.OpenNormal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -36,12 +85,6 @@ noncomputable def invariantsInclusion {U V : OpenNormalSubgroup G} (h : V ≤ U)
   Rep.ofHom ⟨Submodule.inclusion (invariants_comp_subtype_antitone A fun _ hx => h hx),
     fun g => QuotientGroup.induction_on g fun _ => LinearMap.ext fun _ => rfl⟩
 
-@[simp]
-theorem invariantsInclusion_hom_apply {U V : OpenNormalSubgroup G} (h : V ≤ U)
-    (x : Representation.invariants (A.ρ.comp (U : Subgroup G).subtype)) :
-    ((invariantsInclusion A h).hom x : A) = x :=
-  rfl
-
 noncomputable abbrev transitionCochains {U V : OpenNormalSubgroup G} (h : V ≤ U) :
     inhomogeneousCochains (A.quotientToInvariants (U : Subgroup G)) ⟶
       inhomogeneousCochains (A.quotientToInvariants (V : Subgroup G)) :=
@@ -65,28 +108,13 @@ theorem transitionCochains_trans {U V W : OpenNormalSubgroup G} (hVU : V ≤ U) 
   exact groupCohomology.cochainsMap_congr
     (MonoidHom.ext fun g => QuotientGroup.induction_on g fun _ => rfl) (LinearMap.ext fun _ => rfl)
 
-variable (k G) in
 
-example [Nonempty (OpenNormalSubgroup G)] : IsFiltered (OpenNormalSubgroup G)ᵒᵖ := inferInstance
-
-@[simps]
 noncomputable def levelCochains :
     (OpenNormalSubgroup G)ᵒᵖ ⥤ CochainComplex (ModuleCat k) ℕ where
   obj U := inhomogeneousCochains (A.quotientToInvariants (U.unop : Subgroup G))
   map f := transitionCochains A (leOfHom f.unop)
   map_id U := transitionCochains_refl A U.unop
   map_comp f g := transitionCochains_trans A (leOfHom f.unop) (leOfHom g.unop)
-
-noncomputable abbrev levelFunctor (n : ℕ) : (OpenNormalSubgroup G)ᵒᵖ ⥤ ModuleCat k :=
-  levelCochains A ⋙ HomologicalComplex.homologyFunctor (ModuleCat k) (ComplexShape.up ℕ) n
-
-theorem levelFunctor_obj (n : ℕ) (U : (OpenNormalSubgroup G)ᵒᵖ) :
-    (levelFunctor A n).obj U = groupCohomology (A.quotientToInvariants (U.unop : Subgroup G)) n :=
-  rfl
-
-theorem levelFunctor_map (n : ℕ) {U V : (OpenNormalSubgroup G)ᵒᵖ} (f : U ⟶ V) :
-    (levelFunctor A n).map f = transition A (leOfHom f.unop) n :=
-  rfl
 
 variable [IsTopologicalGroup G] [IsDiscreteRep A]
 
@@ -122,22 +150,9 @@ theorem inflationCochains_f_hom_apply (U : OpenNormalSubgroup G) (n : ℕ)
       (x fun i => (g i : G ⧸ (U : Subgroup G)) : A) :=
   rfl
 
-theorem inflationCochains_comp_cochainsComplexι (U : OpenNormalSubgroup G) :
-    inflationCochains A U ≫ cochainsComplexι A = infCochains A U := by
-  ext n : 1
-  exact inflationCochainsX_comp_ι A U n
-
 noncomputable def inflation (U : OpenNormalSubgroup G) (n : ℕ) :
     groupCohomology (A.quotientToInvariants (U : Subgroup G)) n ⟶ cohomology A n :=
   HomologicalComplex.homologyMap (inflationCochains A U) n
-
-theorem inflation_comp_cohomologyToGroupCohomology (U : OpenNormalSubgroup G) (n : ℕ) :
-    inflation A U n ≫ cohomologyToGroupCohomology A n =
-      (groupCohomology.infNatTrans k (U : Subgroup G) n).app A := by
-  unfold inflation cohomologyToGroupCohomology
-  refine (HomologicalComplex.homologyMap_comp _ _ n).symm.trans ?_
-  rw [inflationCochains_comp_cochainsComplexι]
-  rfl
 
 theorem transitionCochains_comp_inflationCochains {U V : OpenNormalSubgroup G} (h : V ≤ U) :
     transitionCochains A h ≫ inflationCochains A V = inflationCochains A U := by
@@ -152,7 +167,6 @@ theorem transition_comp_inflation {U V : OpenNormalSubgroup G} (h : V ≤ U) (n 
   refine (HomologicalComplex.homologyMap_comp _ _ n).symm.trans ?_
   rw [transitionCochains_comp_inflationCochains]
 
-@[simps]
 noncomputable def inflationCochainsCocone : Limits.Cocone (levelCochains A) where
   pt := cochainsComplex A
   ι :=
@@ -160,17 +174,6 @@ noncomputable def inflationCochainsCocone : Limits.Cocone (levelCochains A) wher
       naturality U V f := by
         exact (transitionCochains_comp_inflationCochains A (leOfHom f.unop)).trans
           (Category.comp_id _).symm }
-
-noncomputable abbrev inflationCocone (n : ℕ) : Limits.Cocone (levelFunctor A n) :=
-  (HomologicalComplex.homologyFunctor (ModuleCat k) (ComplexShape.up ℕ) n).mapCocone
-    (inflationCochainsCocone A)
-
-theorem inflationCocone_pt (n : ℕ) : (inflationCocone A n).pt = cohomology A n :=
-  rfl
-
-theorem inflationCocone_ι_app (n : ℕ) (U : (OpenNormalSubgroup G)ᵒᵖ) :
-    (inflationCocone A n).ι.app U = inflation A U.unop n :=
-  rfl
 
 end Level
 

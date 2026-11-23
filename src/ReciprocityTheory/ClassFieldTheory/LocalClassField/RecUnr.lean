@@ -1,8 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.ValUnitsE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.InflationH2InjectiveOfSameRamification
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.ExistsDvdQKPowSubOne
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
+import ReciprocityTheory.GroupCohomology.ComapZeroCoboundariesEqBot
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -25,7 +70,7 @@ theorem exists_ur_lift (χ : charGrp (GK p K)) (hχ : TrivOn p K (MaximalUnramif
     obtain ⟨n, hn⟩ := QuotientGroup.mk_out_eq_mul (subG p K (MaximalUnramifiedExtension p K)) g
     rw [hn]
     show χ.1 (Additive.ofMul g + Additive.ofMul n.1) = _
-    rw [map_add, hχ n.1 n.2, add_zero]
+    rw [map_add (f := _), hχ n.1 n.2, add_zero]
   have hloc : IsLocallyConstant fun q : GalLK p K (MaximalUnramifiedExtension p K) => f q.out := by
     intro s
     rw [← QuotientGroup.isOpenQuotientMap_mk.isQuotientMap.isOpen_preimage]
@@ -40,12 +85,10 @@ theorem exists_ur_lift (χ : charGrp (GK p K)) (hχ : TrivOn p K (MaximalUnramif
   rw [hsec]
   exact hfq g
 
-variable (p K) in
 
+variable (p K) in
 noncomputable def urOfK (a : Kˣ) : (urT p K).V :=
   toLayer p ⟨ofK p K (Additive.ofMul a), le_Kur (K := K) (ofK_mem p K _)⟩
-
-theorem urOfK_val (a : Kˣ) : (urOfK p K a).1 = ofK p K (Additive.ofMul a) := rfl
 
 theorem exists_ur_cocycle (a : Kˣ) (χ : charGrp (GK p K)) (hχ : TrivOn p K (MaximalUnramifiedExtension p K) χ) :
     ∃ (t : GalLK p K (MaximalUnramifiedExtension p K) → ℚ) (m : (Fin 2 → GalLK p K (MaximalUnramifiedExtension p K)) → ℤ) (z : (urT p K).coch.X 2)
@@ -92,31 +135,6 @@ theorem exists_ur_cocycle (a : Kˣ) (χ : charGrp (GK p K)) (hχ : TrivOn p K (M
       (layerInf p K (MaximalUnramifiedExtension p K)).hom.f 2 z, by rw [← (layerInf p K (MaximalUnramifiedExtension p K)).hom.comm, hz, map_zero],
       ht.comp_continuous continuous_quot_mk, htχ, fun g => hm _, fun g => rfl, rfl⟩
 
-theorem pairK_unit_unr (hK : FiniteDimensional ℚ_[p] K) (a : Kˣ) (ha : a ∈ UK p K) (χ : charGrp (GK p K))
-    (hχ : TrivOn p K (MaximalUnramifiedExtension p K) χ) : pairK p K a χ = 0 := by
-  obtain ⟨t, m, z, hz, -, -, -, hzm, h⟩ := exists_ur_cocycle a χ hχ
-  have hv : vLayerMap p K (MaximalUnramifiedExtension p K) (urOfK p K a) = 0 := by
-    apply Int.cast_injective (α := ℝ)
-    rw [vLayerMap_spec p le_Kur, urOfK_val, vbar_apply]
-    have ha' : ‖((a : K) : PadicAlgCl p)‖ = 1 := ha
-    show (eK p (MaximalUnramifiedExtension p K) : ℝ) * - Real.logb p ‖((a : K) : PadicAlgCl p)‖ = _
-    rw [ha']
-    simp
-  have hf0 : (vLayer p K (MaximalUnramifiedExtension p K)).hom.f 2 z = 0 := by
-    apply Subtype.ext
-    funext g
-    show vLayerMap p K (MaximalUnramifiedExtension p K) (z.1 fun i => g i) = 0
-    rw [hzm, map_zsmul, hv, smul_zero]
-  have hc : (urT p K).coch.cls 2 z hz = 0 := by
-    apply (valuation_unramified_closure_h2_bijective hK).1
-    rw [map_zero]
-    show (trivRep (GalLK p K (MaximalUnramifiedExtension p K)) ℤ).coch.cls 2 ((vLayer p K (MaximalUnramifiedExtension p K)).hom.f 2 z) _ = 0
-    refine (LongExactSequenceMaps.cls_eq_zero _ 2 _ _).2 ?_
-    rw [hf0]
-    exact Submodule.zero_mem _
-  unfold pairK
-  rw [h, hc, map_zero, map_zero]
-
 theorem pairK_uniformiser_unr (hK : FiniteDimensional ℚ_[p] K) (π : Kˣ) (hπ : vK p K π = 1) (χ : charGrp (GK p K))
     (hχ : TrivOn p K (MaximalUnramifiedExtension p K) χ) : pairK p K π χ = χ.1 (Additive.ofMul (frobK p K)) := by
   obtain ⟨t, m, z, hz, ht, htχ, hm, hzm, h⟩ := exists_ur_cocycle π χ hχ
@@ -128,20 +146,5 @@ theorem pairK_uniformiser_unr (hK : FiniteDimensional ℚ_[p] K) (π : Kˣ) (hπ
   unfold pairK
   rw [h, invBr_layerInf hK, isInv_invUr hK (urOfK p K π) t m z hz (ofK_mem p K _) h1 ht hm hzm]
   exact htχ (frobK p K)
-
-theorem pairK_unr (hK : FiniteDimensional ℚ_[p] K) (a : Kˣ) (χ : charGrp (GK p K)) (hχ : TrivOn p K (MaximalUnramifiedExtension p K) χ) :
-    pairK p K a χ = vK p K a • χ.1 (Additive.ofMul (frobK p K)) := by
-  obtain ⟨π, hπ⟩ := exists_vK_eq_one p K hK
-  have hzpow : ∀ n : ℤ, pairK p K (π ^ n) χ = n • pairK p K π χ := by
-    intro n
-    obtain ⟨k, rfl | rfl⟩ := n.eq_nat_or_neg
-    · rw [zpow_natCast, pairK_pow, natCast_zsmul]
-    · rw [zpow_neg, zpow_natCast, pairK_inv, pairK_pow, neg_smul, natCast_zsmul]
-  have hu : a * (π ^ vK p K a)⁻¹ ∈ UK p K := by
-    rw [mem_UK_iff p K hK, vK_mul, vK_inv, vK_zpow, hπ]
-    ring
-  have ha : a = a * (π ^ vK p K a)⁻¹ * π ^ vK p K a := by rw [inv_mul_cancel_right]
-  conv_lhs => rw [ha]
-  rw [pairK_mul, pairK_unit_unr hK _ hu χ hχ, zero_add, hzpow, pairK_uniformiser_unr hK π hπ χ hχ]
 
 end ReciprocityTheory.DiscreteGroups.LocalClassField

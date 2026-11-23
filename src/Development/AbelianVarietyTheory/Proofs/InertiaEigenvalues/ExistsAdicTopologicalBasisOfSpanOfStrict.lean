@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeIntegral
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemBallOfGaugeLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InvertibleSpanSingleton
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsAdicCompleteOfPowLe
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BKReal GlobalTheory.Per GlobalTheory.BSP
 open scoped Formalism.Per NNReal
 
@@ -10,8 +62,8 @@ namespace GlobalTheory.BSP.TopBasisCons
 
 variable {S A : Type} [CommRing S] [CommRing A] {s : S →+* A} {I : Ideal S} {ι : Type} {b : ι → A}
 
-variable (s I b) in
 
+variable (s I b) in
 def Approx (x : A) (f : ι → S) : Prop :=
   ∀ n : ℕ, ∃ F : Finset ι, (∀ i, i ∉ F → f i ∈ I ^ n) ∧ x - ∑ i ∈ F, s (f i) * b i ∈ (I ^ n).map s
 
@@ -51,7 +103,7 @@ theorem Approx.add {x y : A} {f g : ι → S} (hx : Approx s I b x f) (hy : Appr
   · have h1 := hx.approx n (F ∪ G) fun i hi => hF i fun h => hi (Finset.mem_union_left _ h)
     have h2 := hy.approx n (F ∪ G) fun i hi => hG i fun h => hi (Finset.mem_union_right _ h)
     convert add_mem h1 h2 using 1
-    simp only [Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+    simp only [Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
     ring
 
 theorem Approx.mul {x : A} {f : ι → S} (hx : Approx s I b x f) (a : S) :
@@ -105,7 +157,7 @@ theorem exists_step (hsp : ∀ x : A, ∃ a : ι →₀ S, x - a.sum (fun i y =>
   have Tadd : ∀ y y', T y → T y' → T (y + y') := by
     rintro y y' ⟨a, ha, hy⟩ ⟨a', ha', hy'⟩
     refine ⟨a + a', fun i => add_mem (ha i) (ha' i), ?_⟩
-    rw [Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => by rw [map_add, add_mul])]
+    rw [Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => by rw [map_add (f := _), add_mul])]
     convert add_mem hy hy' using 1
     ring
   have T1 : ∀ t ∈ I ^ n, ∀ w : A, T (s t * w) := by
@@ -172,6 +224,7 @@ theorem exists_approx (hS : IsPrecomplete I S) (g : ℕ → A → ι →₀ S)
         (fun i hi => Finset.mem_biUnion.2 ⟨k, hk, hi⟩) (fun i c => s c * b i) (fun _ _ => by simp),
         Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => ?_
+
       simp only [P, map_sum, Finset.sum_mul]
     have e : x - ∑ i ∈ F, s (f i) * b i = r n + ∑ i ∈ F, s (P n i - f i) * b i := by
       rw [hrx, hsum]
@@ -182,8 +235,8 @@ theorem exists_approx (hS : IsPrecomplete I S) (g : ℕ → A → ι →₀ S)
 
 end GlobalTheory.BSP.TopBasisCons
 
-open GlobalTheory.BSP.TopBasisCons in
 
+open GlobalTheory.BSP.TopBasisCons in
 theorem GlobalTheory.BSP.exists_topBasis_of_span_of_strict : ∀ (S A : Type) [CommRing S] [CommRing A] (s : S →+* A)
     (I : Ideal S) (ι : Type) (b : ι → A) (i₀ : ι), b i₀ = 1 → I.FG → IsAdicComplete I S →
     IsAdicComplete (I.map s) A → (∀ x : A, ∃ a : ι →₀ S, x - a.sum (fun i y => s y * b i) ∈ I.map s) →

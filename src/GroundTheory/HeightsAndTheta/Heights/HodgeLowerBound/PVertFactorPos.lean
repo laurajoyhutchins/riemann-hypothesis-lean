@@ -1,6 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsVertFactorPos
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenFibreHomog
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsVertFactorPos
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenFibreHomog
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -41,7 +96,7 @@ theorem mCoordIdeal_le {Ω : Type} [Field Ω] {y : (Σ k, ι k) → Ω} {z : (Σ
   show F ∈ RingHom.ker (mConeMap z)
   rw [RingHom.mem_ker]
   ext m
-  rw [coeff_zero, ← Finsupp.equivFunOnFinite_symm_coe m,
+  rw [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, ← Finsupp.equivFunOnFinite_symm_coe m,
     HilbertSamuel.GenFibreHomog.coeff_mConeMap, aeval_eq_eval_map]
   exact hz.2 _ (HilbertSamuel.GenFibreHomog.isMultiHomogIdeal_mCoordIdeal y F hF _)
 
@@ -106,11 +161,11 @@ theorem exists_value {Ω : Type} [Field Ω] {y : (Σ k, ι k) → Ω} {z : (Σ k
       mConeMap_of_isMultiHomog y hg] at h
     exact h
 
-  have hcoef := congrArg (coeff (m + Finsupp.equivFunOnFinite.symm bf)) hrel'
+  have hcoef := congrArg (AddMonoidAlgebra.coeff · (m + Finsupp.equivFunOnFinite.symm bf)) hrel'
   rw [prod_X_pow_eq_monomial, prod_X_pow_eq_monomial, C_mul_monomial, C_mul_monomial,
     coeff_mul_monomial', coeff_mul_monomial', if_pos le_add_self, add_tsub_cancel_right, mul_one,
     mul_one] at hcoef
-  have hcu : coeff m (mConeMap y u) = aeval y ue := by
+  have hcu : AddMonoidAlgebra.coeff (mConeMap y u) m = aeval y ue := by
     rw [← Finsupp.equivFunOnFinite_symm_coe m, HilbertSamuel.GenFibreHomog.coeff_mConeMap]
   rw [hcu] at hcoef
   by_cases hle : Finsupp.equivFunOnFinite.symm bg ≤ m + Finsupp.equivFunOnFinite.symm bf
@@ -122,8 +177,8 @@ theorem exists_value {Ω : Type} [Field Ω] {y : (Σ k, ι k) → Ω} {z : (Σ k
   set a := weightedHomogeneousComponent (NumbersDVR.blockWeight ι) d' v with ha_def
   have ha : IsMultiHomog a d' := HilbertSamuel.GenFibreHomog.isMultiHomog_of_weighted
     (weightedHomogeneousComponent_isWeightedHomogeneous d' v)
-  have hcv : coeff (m + Finsupp.equivFunOnFinite.symm bf - Finsupp.equivFunOnFinite.symm bg)
-      (mConeMap y v) = aeval y a := by
+  have hcv : AddMonoidAlgebra.coeff (mConeMap y v)
+      (m + Finsupp.equivFunOnFinite.symm bf - Finsupp.equivFunOnFinite.symm bg) = aeval y a := by
     rw [← Finsupp.equivFunOnFinite_symm_coe
       (m + Finsupp.equivFunOnFinite.symm bf - Finsupp.equivFunOnFinite.symm bg),
       HilbertSamuel.GenFibreHomog.coeff_mConeMap]
@@ -195,13 +250,13 @@ theorem exists_value {Ω : Type} [Field Ω] {y : (Σ k, ι k) → Ω} {z : (Σ k
 
 end VertFactorPos
 
-open VertFactorPos in
 
+open VertFactorPos in
 theorem VertFactorPos.proof : VertFactorPos.Statement := by
   intro II Ψ _ K _ ι _ Ω _ _ E _ _ D p hp z hz
   have hex : ∃ c : (k : K) → ι k, ∀ k, z ⟨k, c k⟩ ≠ 0 :=
     ⟨fun k => (hz.1 k).choose, fun k => (hz.1 k).choose_spec⟩
-  rw [ComponentData.vertFactor, dif_pos hex]
+  rw [ComponentData.vertFactor, dite_eq_left hex]
   obtain ⟨v, hv0, hv⟩ := exists_value hz (D.S_prime p hp).ne_zero (D.vertical p hp) hex.choose
     hex.choose_spec
   rw [valAt_eq hz hv]

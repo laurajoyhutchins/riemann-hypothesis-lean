@@ -1,5 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RepresentationTheory.Irreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.DepthZeroGoodLines
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EvAtParabNeZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,43 +80,5 @@ theorem isIrreducible_of_isAtom {π : Representation ℂ G V} {U : Subrepresenta
   · right
     refine Subrepresentation.toSubmodule_injective (hinj ?_)
     exact (congrArg Subrepresentation.toSubmodule h).trans U.toSubmodule.map_subtype_top.symm
-
-def orbitSpan (π : Representation ℂ G V) (x : V) : Subrepresentation π where
-  toSubmodule := Submodule.span ℂ (Set.range fun h : G => π h x)
-  apply_mem_toSubmodule g v hv := by
-    have : Submodule.span ℂ (Set.range fun h : G => π h x) ≤
-        (Submodule.span ℂ (Set.range fun h : G => π h x)).comap (π g) := by
-      refine Submodule.span_le.2 ?_
-      rintro _ ⟨h, rfl⟩
-      exact Submodule.subset_span ⟨g * h, by show π (g * h) x = π g (π h x); rw [map_mul]; rfl⟩
-    exact this hv
-
-theorem isCompl_toSubmodule {π : Representation ℂ G V} {S T : Subrepresentation π} (h : IsCompl S T) :
-    IsCompl S.toSubmodule T.toSubmodule := by
-  constructor
-  · rw [disjoint_iff]; exact congrArg Subrepresentation.toSubmodule h.inf_eq_bot
-  · rw [codisjoint_iff]; exact congrArg Subrepresentation.toSubmodule h.sup_eq_top
-
-theorem proj_left {π : Representation ℂ G V} {S T : Subrepresentation π} (h : IsCompl S T) (v : V)
-    (hv : v ∈ S.toSubmodule) :
-    S.toSubmodule.projectionOnto T.toSubmodule (isCompl_toSubmodule h) v = ⟨v, hv⟩ :=
-  Submodule.projectionOnto_apply_left (isCompl_toSubmodule h) ⟨v, hv⟩
-
-theorem proj_right {π : Representation ℂ G V} {S T : Subrepresentation π} (h : IsCompl S T) (v : V)
-    (hv : v ∈ T.toSubmodule) :
-    S.toSubmodule.projectionOnto T.toSubmodule (isCompl_toSubmodule h) v = 0 :=
-  Submodule.projectionOnto_apply_right (isCompl_toSubmodule h) ⟨v, hv⟩
-
-def proj {π : Representation ℂ G V} {S T : Subrepresentation π} (h : IsCompl S T) :
-    π.IntertwiningMap S.toRepresentation :=
-  (S.toSubmodule.projectionOnto T.toSubmodule (isCompl_toSubmodule h)).intertwiningMap_of_isIntertwiningMap
-    π S.toRepresentation (by
-      intro g v
-      have hv : v ∈ S.toSubmodule ⊔ T.toSubmodule := by
-        rw [(isCompl_toSubmodule h).sup_eq_top]; exact Submodule.mem_top
-      obtain ⟨s, hs, t, ht, rfl⟩ := Submodule.mem_sup.1 hv
-      rw [map_add, map_add, map_add, proj_left h _ (S.apply_mem_toSubmodule g hs),
-        proj_right h _ (T.apply_mem_toSubmodule g ht), proj_left h s hs, proj_right h t ht, add_zero, add_zero]
-      rfl)
 
 end GlobalTheory.MaschkeForms

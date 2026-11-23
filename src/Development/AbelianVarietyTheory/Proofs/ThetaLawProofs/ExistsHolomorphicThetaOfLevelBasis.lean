@@ -1,25 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.LevBasis
-import Development.AbelianVarietyTheory.Statements.ThetaLevelCharacters.MemThetaLevelCharDimZero
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.KaRuleK
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLevelIffAut
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolomorphicUniformisationPowerThetaKeyDatu
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CubeTrivialisationOnUniformisingSpace
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsRepresentativesModSimilitudeTransposeStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolomorphicCoordSimilitudeThetaProductStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaCharLevelOneAndHolomorphicParameterStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaGeneratorPullbackMulConstInFramesStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SimilitudeGeneratorEqExpInFramesStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLevelIffAut
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolomorphicCoordSimilitudeThetaProductStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolomorphicUniformisationPowerThetaKeyDatu
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsRepresentativesModSimilitudeTransposeStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MulTransposeEqOfTransposeMulEq
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SimilitudeGeneratorEqExpInFramesStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaCharLevelOneAndHolomorphicParameterStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaGeneratorPullbackMulConstInFramesStatement
 import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaUniformisationFrameEqAutomorphyMulStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MulTransposeEqOfTransposeMulEq
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CubeTrivialisationOnUniformisingSpace
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -132,6 +170,7 @@ theorem theta_eq {τ : Matrix (Fin g) (Fin g) ℂ} {a b : Fin g → ℂ} {al : M
       (by rintro (r | c) <;> exact congrArg J (Category.id_comp _)) pt.left ((Category.comp_id _).trans hp)]
     exact hC y pt hy _ m₂ m₁
   have h := congrArg ev (hQ y₀ J hJ)
+
   simp only [map_prod, map_mul, map_sum, v₁, v₂, v₃, Finset.prod_mul_distrib] at h
   have n₁ : (∏ r, u.fr (J (alMap x al r (ξ r)).left) (∑ c, al r c • y c + tors τ al m k n r)) ≠ 0 :=
     Finset.prod_ne_zero_iff.2 fun r _ => u.fr_ne _ _ (m₂ r)
@@ -288,8 +327,8 @@ theorem mul_transpose_eq {al : Matrix (Fin 4) (Fin 4) ℤ} {m : ℕ} (hm : 1 ≤
   | (intros; apply @_root_.GlobalTheory.TransposeMulCommute.mul_transpose_eq_of_transpose_mul_eq <;> first | assumption | infer_instance)
   | (intros; exact _root_.GlobalTheory.TransposeMulCommute.mul_transpose_eq_of_transpose_mul_eq ..)
 
-omit x u in
 
+omit x u in
 theorem eq_tors_add {τ : Matrix (Fin g) (Fin g) ℂ} {al : Matrix (Fin 4) (Fin 4) ℤ} {m : ℕ} (hm : 1 ≤ m)
     (hal : al.transpose * al = (m : ℤ) • (1 : Matrix (Fin 4) (Fin 4) ℤ)) (t : Fin 4 → Fin g → ℂ)
     (k n d e : Fin 4 → Fin g → ℤ)
@@ -311,8 +350,8 @@ theorem eq_tors_add {τ : Matrix (Fin g) (Fin g) ℂ} {al : Matrix (Fin 4) (Fin 
   simp only [h1]
   rw [h2, smul_smul, inv_mul_cancel₀ hmc, one_smul, sub_add_cancel]
 
-omit x u in
 
+omit x u in
 theorem l2Val_holomorphic : Out.Laws → ThetaUnifAV → ∀ (g m : ℕ) (a b : Fin g → ℂ) (al : Matrix (Fin 4) (Fin 4) ℤ) (Th : Fin (m ^ g) → (Fin g → Fin g → ℂ) → (Fin g → ℂ) → ℂ), charHalf g a b → 1 ≤ m → al.transpose * al = (m : ℤ) • (1 : Matrix (Fin 4) (Fin 4) ℤ) → LevBasis a b m Th → ∃ lam : (Fin g → Fin g → ℂ) → ℂ, DifferentiableOn ℂ lam (Key.phDom g) ∧ ∀ p ∈ Key.phDom g, ∀ (x : KeyIn ℂ) (h : x.P.g = g) (u : HolUnif x.P.A x.P.L g) (bs : Fin (m ^ x.P.g) → RR x m) (la : ℂˣ), Wit x h u (per p) a b → (∀ k, FnPw x u (bs k) (Th (k.cast (by rw [h])) p)) → IsSquareDeterminantComparison x m al bs la → (la : ℂ) = lam p := by
   intro _ _ g m a b al Th hab hm hal hTh
   obtain ⟨k, n, hkn⟩ := GlobalTheory.T.exists_perm_representatives_mod_similitude g m al hm hal

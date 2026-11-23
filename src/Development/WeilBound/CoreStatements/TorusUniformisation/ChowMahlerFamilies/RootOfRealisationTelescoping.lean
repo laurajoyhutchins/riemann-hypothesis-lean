@@ -1,11 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NumberField
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.PointsIntegralSmallLimit
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NumberField
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.PointsIntegralSmallLimit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedE
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+
+@[expose] public section
+
 open MvPolynomial NumberField Filter Topology ReciprocityTheory.ChartRestriction.G.Geo GlobalTheory.CompanionTheory.Ar.Flat
 
 namespace PositivityTheory.Xgn.RealisationRoots
@@ -224,7 +273,7 @@ theorem mono_roots {Ψ : Type} [Fintype Ψ] {N : ℕ} (M : GlobalTheory.Companio
   obtain ⟨r, hr⟩ := hall _ (List.get_mem _ ⟨j, hl⟩)
   refine ⟨r, fun t => ?_⟩
   unfold GlobalTheory.CompanionTheory.Ar.Top.monoLines
-  rw [dif_pos hl, ← hr]
+  rw [dite_eq_left hl, ← hr]
   rfl
 
 end PositivityTheory.Xgn.RealisationRoots
@@ -283,7 +332,7 @@ theorem PositivityTheory.Xgn.root_of_realisation_telescoping : GlobalTheory.Comp
     by_cases h : 0 < (r.2 : ℕ)
     · exact Or.inl ⟨_, fun t h0 h1 z hz => by
         have := hxh t h0 h1 r.1 r.2 z hz
-        rwa [dif_pos h] at this⟩
+        rwa [dite_eq_left h] at this⟩
     · exact Or.inr fun t h0 h1 z hz => by
         have := hxh t h0 h1 r.1 r.2 z hz
-        rwa [dif_neg h] at this
+        rwa [dite_eq_right h] at this

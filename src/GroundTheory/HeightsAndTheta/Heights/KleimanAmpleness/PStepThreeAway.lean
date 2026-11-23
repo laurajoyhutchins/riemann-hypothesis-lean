@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsStepThreeAway
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsStepThreeAway
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -22,6 +71,7 @@ theorem homogeneousComponent_homog_mul {σ R : Type*} [CommRing R] {P : MvPolyno
     homogeneousComponent d (P * G) =
       if l ≤ d then P * homogeneousComponent (d - l) G else 0 := by
   conv_lhs => rw [← sum_homogeneousComponent G, Finset.mul_sum]
+
   rw [map_sum]
   have hterm : ∀ i, homogeneousComponent d (P * homogeneousComponent i G) =
       if d = l + i then P * homogeneousComponent i G else 0 := fun i =>
@@ -115,12 +165,13 @@ theorem homogeneousComponent_mul_mem (D : SubSystem S x Ω) (σ : Ω) (I : Chart
   | zero => intro δ _; rw [map_zero, map_zero, zero_mul]; exact Submodule.zero_mem _
   | add f g _ _ hf hg =>
     intro δ hδ
-    rw [map_add, map_add, add_mul]
+    rw [map_add (f := _), map_add (f := _), add_mul]
     exact Submodule.add_mem _ (hf e δ hδ) (hg e δ hδ)
   | smul r f _ hf =>
     intro δ hδ
     have hsum : r * f = ∑ d ∈ Finset.range (r.totalDegree + 1), homogeneousComponent d r * f := by
       rw [← Finset.sum_mul, sum_homogeneousComponent]
+
     rw [smul_eq_mul, hsum, map_sum, map_sum, Finset.sum_mul]
     refine Submodule.sum_mem _ fun d _ => ?_
     rw [homogeneousComponent_homog_mul (homogeneousComponent_isHomogeneous d r) f e]

@@ -1,9 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.CyclicBr
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.EqZeroOfMemBrKerOfCoprime
+module
+
+public import ReciprocityTheory.GroupCohomology.ContinuousContractNth
+public import ReciprocityTheory.NeutralLocalFields.Duality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GroupCohomology.ComapZeroCoboundariesEqBot
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.RecCyc
 
@@ -31,7 +74,7 @@ theorem exists_defect {t : G → ℚ} (χ : Additive G →+ QZ)
     ∃ m : (Fin 2 → G) → ℤ, ∀ g, (m g : ℚ) = t (g 0) + t (g 1) - t (g 0 * g 1) := by
   have : ∀ g : Fin 2 → G, ∃ k : ℤ, (k : ℚ) = t (g 0) + t (g 1) - t (g 0 * g 1) := fun g => by
     have h0 : (QuotientAddGroup.mk (t (g 0) + t (g 1) - t (g 0 * g 1)) : QZ) = 0 := by
-      rw [QuotientAddGroup.mk_sub, QuotientAddGroup.mk_add, h, h, h, ofMul_mul, map_add, sub_self]
+      rw [QuotientAddGroup.mk_sub, QuotientAddGroup.mk_add, h, h, h, ofMul_mul, map_add (f := _), sub_self]
     obtain ⟨k, hk⟩ := (QuotientAddGroup.eq_zero_iff _).1 h0
     exact ⟨k, hk⟩
   choose m hm using this
@@ -94,9 +137,10 @@ theorem exists_cobound_of_norm [DiscreteTopology G] {t : G → ℚ} {m : (Fin 2 
   rw [LowDeg.dn_one_apply]
   simp only [Matrix.cons_val_zero]
   have hv : v = ![v 0, v 1] := by funext i; fin_cases i <;> rfl
+
   rw [← Equiv.sum_comp (Equiv.mulLeft (v 1)) (fun ρ => m ![v 0, ρ] • M.rho (v 0 * ρ) y),
-    ← Equiv.sum_comp (Equiv.mulLeft (v 0 * v 1)) (fun ρ => M.rho ρ y), map_sum, Finset.smul_sum,
-    ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+  ← Equiv.sum_comp (Equiv.mulLeft (v 0 * v 1)) (fun ρ => M.rho ρ y), map_sum, Finset.smul_sum,
+  ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun ρ _ => ?_
   simp only [Equiv.coe_mulLeft]
   rw [map_zsmul, ← Module.End.mul_apply, ← map_mul, ← mul_assoc, ← sub_smul, ← add_smul, defect_cocycle hm, ← hv]

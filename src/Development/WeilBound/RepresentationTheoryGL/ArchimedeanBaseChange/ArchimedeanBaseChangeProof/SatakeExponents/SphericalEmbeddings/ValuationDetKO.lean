@@ -1,8 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.ExtremeSph
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeviIntegralFacts
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IrreducibleOfFixedLine
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIrreducibleSubquotient
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SphericalEmbeddings.ExtremeSph
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeviIntegralFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,12 +68,18 @@ private theorem deltaHalf_and_torusChar_eq_one_of_mem_KO (n : ℕ) (ξ : Fin n �
     deltaHalf k (fun _ : Fin n => Unit) (leviProj k (points (Fin n)) b) = 1 ∧
     torusChar (fun i => unrChar k (ξ i)) ((leviTorus k (Fin n)).symm (leviProj k (points (Fin n)) b)) = 1 := by
   have hL := (GlobalTheory.SmGL.LeviInt.levi_integral_facts k (Fin n) (Fin n) (fun _ => Unit) (points (Fin n))).2.1 b hb
+  have hp {α β ι : Type} [Monoid α] [CommMonoid β] (s : Finset ι)
+      (f : ι → α →* β) (x : α) : (∏ i ∈ s, f i) x = ∏ i ∈ s, f i x := by
+    classical
+    induction s using Finset.induction_on with
+    | empty => simp
+    | insert a s ha ih => simp [ha, ih]
   constructor
-  · rw [deltaHalf, MonoidHom.finset_prod_apply]
+  · rw [deltaHalf, hp]
     refine Finset.prod_eq_one (fun a _ => ?_)
     rw [MonoidHom.comp_apply, detChar_apply]
     exact isUnram_absPow k _ _ (valuation_det_KO (hL a))
-  · rw [torusChar, MonoidHom.finset_prod_apply]
+  · rw [torusChar, hp]
     refine Finset.prod_eq_one (fun i _ => ?_)
     have h0 : ord k (GeneralLinearGroup.det (leviProj k (points (Fin n)) b i)) = 0 :=
       ord_eq_zero_iff.mpr (valuation_det_KO (hL i))

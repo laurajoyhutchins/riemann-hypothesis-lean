@@ -1,12 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.OmHeightslockG
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsDerivAt0Congr
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.DerivZero
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.XCBmExistsSumframe
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.InteriorPointPolarisedStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairSumFrameAtPointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GramMatrixChangeFrameStatement
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.OmHeightslockG
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsOpenDet
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Statements.HyperbolicHypotheses.HypothesesInhabitedHyperbolic
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsIffCentresStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GramMatrixChangeFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeGeneratedSumSpecializationStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.InteriorPointPolarisedStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUniqueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairSumFrameAtPointStatement
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.DerivZero
+import Development.WeilBound.CoreStatements.PluriharmonicCharts.ExistsPeriodOfFrames
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.IsDerivAt0Congr
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.XCBmExistsSumframe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory NumberField Matrix ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top GlobalTheory.CompanionTheory.Ar.PB GlobalTheory.CompanionTheory.Ar.PB.BMx ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P
 open ReciprocityTheory.ChartRestriction.G.Semi
@@ -103,7 +152,7 @@ theorem gramFn_eq {r : ℕ} {b : Fin r → 𝔐.Li} {z : Sp ℂ ⟶ 𝔐.X} {w :
   have hex : ∃ (Γ : Matrix (Fin r) (Fin r) ℂ) (z : Spec (CommRingCat.of ℂ) ⟶ 𝔐.X),
       CoordsAt 𝔐.ξ M.x z w ∧ 𝔐.Interior z ∧ 𝔐.M.GramAt 𝔐.t.PP.L z b Γ := ⟨Γ, z, hw, hi, h1⟩
   unfold HodgeMetric.gramFn
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   obtain ⟨z₀, hw₀, -, hΓ₀⟩ := hex.choose_spec
   have hz : z₀ = z := (tp.1 w hw.1 (tp.2.2 z w (𝔐.all _) hw).1).unique ⟨𝔐.all _, hw₀⟩ ⟨𝔐.all _, hw⟩
   rw [hz] at hΓ₀

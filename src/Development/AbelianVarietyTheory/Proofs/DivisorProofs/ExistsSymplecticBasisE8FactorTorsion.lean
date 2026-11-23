@@ -1,13 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsE8WeightedBundle
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMember
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSharpBasisSharpBasis
-import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.ExistsStdSympZmod
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsE8WeightedBundle
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.WeilIsAlternatingSkewNatural
+import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.ExistsStdSympZmod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg
@@ -64,7 +103,7 @@ theorem exists_family {N g : ℕ} (hN : Odd N) {T R : Type} [CommGroup T] [CommR
       ← MonoidHom.zpow_apply, ← map_zpow]
     congr 2
     funext u
-    simp only [Pi.smul_apply, smul_eq_mul, Pi.pow_apply]
+    change p ^ (dotProduct s (E.mulVec t) * s₀ u) = (p ^ s₀ u) ^ dotProduct s (E.mulVec t)
     rw [← zpow_mul, _root_.mul_comm]
   have eskew : ∀ x y, e x y * e y x = 1 := fun x y => by
     have := halt (x * y)
@@ -93,7 +132,11 @@ theorem exists_family {N g : ℕ} (hN : Odd N) {T R : Type} [CommGroup T] [CommR
       (fun u => ∏ c, v (σ.symm c) ^ x u c) = ∏ c, fun u => v (σ.symm c) ^ x u c := fun x =>
     funext fun u => by rw [Finset.prod_apply]
   rw [hp, hp]
-  simp only [map_prod, MonoidHom.finset_prod_apply, key, hv, ← zpow_mul]
+  have heval (f : (Fin g ⊕ Fin g) → ((Fin 8 → T) →* Rˣ)) (a : Fin 8 → T) :
+      (∏ c, f c) a = ∏ c, f c a := by
+    exact map_prod (MonoidHom.eval a) f Finset.univ
+  simp only [map_prod, heval, key, hv, ← zpow_mul]
+  rw [Finset.prod_comm]
   have zs : ∀ {α : Type} [Fintype α] (f : α → ℤ), ∏ a, z ^ f a = z ^ ∑ a, f a := fun f =>
     (map_prod (zpowersHom Rˣ z) (fun a => Multiplicative.ofAdd (f a)) Finset.univ).symm
   simp only [zs]

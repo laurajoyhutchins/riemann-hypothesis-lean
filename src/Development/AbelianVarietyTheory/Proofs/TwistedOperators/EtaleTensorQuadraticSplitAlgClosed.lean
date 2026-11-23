@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CentralizerTensorForms
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NotCompactOfIdempotent
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NotCompactOfIdempotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.TensorProduct.Pi
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +99,7 @@ theorem splitClosed_quad {F E : Type} [Field F] [CharZero F] [CommRing E] [Algeb
   have hs : Function.Surjective f := by
     rintro ⟨x, y⟩
     refine ⟨((x + y) / 2) ⊗ₜ 1 + ((x - y) / (2 * θ (b 1))) ⊗ₜ b 1, ?_⟩
-    rw [map_add, hf, hf, hb1, map_neg, map_one, map_one]
+    rw [map_add (f := _), hf, hf, hb1, map_neg, map_one, map_one]
     ext <;> simp <;> field_simp <;> ring
   have hi : Function.Injective f :=
     (LinearMap.injective_iff_surjective_of_finrank_eq_finrank (f := f.toLinearMap)
@@ -55,11 +107,10 @@ theorem splitClosed_quad {F E : Type} [Field F] [CharZero F] [CommRing E] [Algeb
   refine ⟨(Algebra.TensorProduct.comm F E Ω).trans
     ((AlgEquiv.ofBijective f ⟨hi, hs⟩).restrictScalars F), fun ω => (hf ω 1).trans (by simp), fun u => ?_⟩
   induction u with
-  | zero => simp
   | tmul a w =>
     change f (w ⊗ₜ σ a) = (f (w ⊗ₜ a)).swap
     rw [hf, hf, h.invol]; rfl
-  | add a w ha hw => rw [map_add, map_add, map_add, ha, hw, Prod.swap_add]
+  | add a w ha hw => rw [map_add (f := _), map_add (f := _), map_add (f := _), ha, hw, Prod.swap_add]
 
 def splitClosedPair (F Ω n : Type) [Field F] [Field Ω] [Algebra F Ω] :
     ((n → Ω) × (n → Ω)) ≃ₐ[F] (n → Ω × Ω) where
@@ -85,8 +136,7 @@ theorem splitClosed : SplitClosed := by
     intro p x i; rfl
   refine ⟨φ, fun ω => funext fun i => by rw [hφ, hg1, he'], fun u i => ?_⟩
   induction u with
-  | zero => simp
   | tmul p x => rw [tConj3, Algebra.TensorProduct.map_tmul, hφ, hφ, hg]; rfl
-  | add a w ha hw => rw [map_add, map_add, map_add, Pi.add_apply, Pi.add_apply, ha, hw, Prod.swap_add]
+  | add a w ha hw => rw [map_add (f := _), map_add (f := _), map_add (f := _), Pi.add_apply, Pi.add_apply, ha, hw, Prod.swap_add]
 
 end GlobalTheory.RegSS

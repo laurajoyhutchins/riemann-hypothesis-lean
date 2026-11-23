@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TrDefs
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TrDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +85,7 @@ private def RR (r : Fin (m + 1) → (Mt d →ₐ[ℂ] Module.End ℂ W))
     (show Pairwise (fun i j => ∀ x y, Commute (MonoidHomClass.toMonoidHom (r i) x)
       (MonoidHomClass.toMonoidHom (r j) y)) from fun i j h x y => hc i j h x y)
 
-variable (r : Fin (m + 1) → (Mt d →ₐ[ℂ] Module.End ℂ W))
+variable (r : Fin (m + 1) → (Matrix (Fin d) (Fin d) ℂ →ₐ[ℂ] Module.End ℂ W))
     (hc : ∀ i j, i ≠ j → ∀ a b, Commute (r i a) (r j b))
 
 private theorem RR_single (i : Fin (m + 1)) (x : Mt d) : RR r hc (Pi.mulSingle i x) = r i x := by
@@ -59,16 +107,17 @@ private theorem RR_mem (Q : Submonoid (Module.End ℂ W)) (a : Fin (m + 1) → M
   simp only [MonoidHom.noncommPiCoprod, MonoidHom.coe_mk, OneHom.coe_mk]
   exact Submonoid.noncommProd_mem _ _ _ _ (fun i _ => h i)
 
-private def RM : MultilinearMap ℂ (fun _ : Fin (m + 1) => Mt d) (Module.End ℂ W) where
+private def RM : (Fin (m + 1) → Mt d) →ₘₗ[ℂ] Module.End ℂ W where
   toFun := RR r hc
   map_update_add' := by
     intro inst a i x y
     obtain rfl : inst = instDecidableEqFin (m + 1) := Subsingleton.elim _ _
-    rw [RR_update r hc a i (x + y), RR_update r hc a i x, RR_update r hc a i y, map_add, add_mul]
+    rw [RR_update r hc a i (x + y), RR_update r hc a i x, RR_update r hc a i y, map_add (f := _), add_mul]
   map_update_smul' := by
     intro inst a i c x
     obtain rfl : inst = instDecidableEqFin (m + 1) := Subsingleton.elim _ _
-    rw [RR_update r hc a i (c • x), RR_update r hc a i x, map_smul, smul_mul_assoc]
+    rw [RR_update r hc a i (c • x), RR_update r hc a i x, map_smul, smul_mul_assoc,
+      RingHom.id_apply]
 
 private theorem RM_apply (a : Fin (m + 1) → Mt d) : RM r hc a = RR r hc a := rfl
 
@@ -310,7 +359,7 @@ private theorem exists_scalar [FiniteDimensional ℂ W] [Nontrivial W] (o : Fin 
           rw [map_mul, RR_single]
           rfl⟩
       | zero => simp
-      | add x y _ _ hx hy => rw [map_add]; exact P.add_mem hx hy
+      | add x y _ _ hx hy => rw [map_add (f := _)]; exact P.add_mem hx hy
       | smul c x _ hx => rw [map_smul]; exact P.smul_mem c hx
     rcases hirr P hinvP with h | h
     · exfalso
@@ -324,7 +373,7 @@ private theorem exists_scalar [FiniteDimensional ℂ W] [Nontrivial W] (o : Fin 
       rintro _ ⟨b, rfl⟩
       have h1 : f * RR r hc b * f = (∏ i, b i o o) • f := by
         have h := (RM r hc).map_smul_univ (fun i => b i o o) (fun _ => uu o o)
-        simp only [RM_apply] at h
+        simp only [RM_apply, RingHom.id_apply] at h
         rw [hf]
         unfold FF
         rw [← h, ← map_mul, ← map_mul]
@@ -369,6 +418,7 @@ private theorem core [FiniteDimensional ℂ W] [Nontrivial W] (o : Fin d)
   have hone : ∀ T : Module.End ℂ W, LinearMap.trace ℂ W T =
       ∑ p : Fin (m + 1) → Fin d, LinearMap.trace ℂ W (FF r hc p * T) := by
     intro T
+
     rw [← map_sum, ← Finset.sum_mul, FF_sum, one_mul]
   have h1 : LinearMap.trace ℂ W (S * Ue) =
       ∑ a : Fin d, LinearMap.trace ℂ W (FF r hc (fun _ => a) * (S * Ue)) := by

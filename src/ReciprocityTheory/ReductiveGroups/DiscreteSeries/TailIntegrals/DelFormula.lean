@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.HeisenbergDualBaseVectorFormula
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.HeisenbergDualBaseVectorFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,8 +73,6 @@ private theorem bvec_dotProduct {n : ℕ} (v : Fin n → ℂ) (p : Fin n) : bvec
 private theorem star_inv_sqrt_two' : star ((Real.sqrt 2 : ℂ)⁻¹) = (Real.sqrt 2 : ℂ)⁻¹ := by
   first
     | (rw [star_inv₀]; congr 1; exact Complex.conj_ofReal _)
-    | simp [Complex.star_def]
-    | simp
 
 private theorem inv_sqrt_two_mul_inv_sqrt_two_mul_two_eq_one : (Real.sqrt 2 : ℂ)⁻¹ * (Real.sqrt 2 : ℂ)⁻¹ * 2 = 1 := by
   have h2 : (Real.sqrt 2 : ℂ) * (Real.sqrt 2 : ℂ) = 2 := by
@@ -113,10 +159,6 @@ private theorem Hpk_mulVec_Hpk_mulVec (k r : ℕ) (y : Fin (2 * r + k + 1) → �
 private theorem bvec_apply_eq_ite_val {n : ℕ} (p q : Fin n) : bvec p q = if q.val = p.val then 1 else 0 := by
   first
     | simp [bvec, Pi.single_apply, Fin.ext_iff]
-    | (unfold bvec; rw [Pi.single_apply]; simp only [Fin.ext_iff])
-    | (by_cases h : q = p
-       · subst h; simp [bvec]
-       · rw [if_neg (fun e => h (Fin.ext e))]; simp [bvec, h])
 
 private theorem epsV_apply_eq (k r : ℕ) (q : Fin (2 * r + k + 1)) :
     epsV k r q = (Real.sqrt 2 : ℂ)⁻¹ * (bvec (wI k r 0) q + bvec (wI k r (Fin.last k)) q) := rfl
@@ -136,13 +178,13 @@ theorem ortho (k r : ℕ) (hk : 1 ≤ k) (i j : Fin (r + 1)) :
   · rw [dif_pos hi, dif_pos hj, star_bvec, dotProduct_bvec]
     simp only [bvec_apply_eq_ite_val, esI, Fin.ext_iff, Fin.val_mk]
     split_ifs <;> first | rfl | (exfalso; omega)
-  · rw [dif_pos hi, dif_neg hj, star_bvec, bvec_dotProduct, if_neg (fun (e : i = j) => hj (e ▸ hi))]
+  · rw [dif_pos hi, dite_eq_right hj, star_bvec, bvec_dotProduct, if_neg (fun (e : i = j) => hj (e ▸ hi))]
     simp only [epsV_apply_eq, bvec_apply_eq_ite_val, wI, esI, Fin.val_mk, Fin.val_zero, Fin.val_last]
     split_ifs <;> first | (exfalso; omega) | simp
-  · rw [dif_neg hi, dif_pos hj, dotProduct_bvec, if_neg (fun (e : i = j) => hi (e ▸ hj))]
+  · rw [dite_eq_right hi, dif_pos hj, dotProduct_bvec, if_neg (fun (e : i = j) => hi (e ▸ hj))]
     simp only [Pi.star_apply, epsV_apply_eq, bvec_apply_eq_ite_val, wI, esI, Fin.val_mk, Fin.val_zero, Fin.val_last]
     split_ifs <;> first | (exfalso; omega) | simp
-  · rw [dif_neg hi, dif_neg hj, if_pos (Fin.ext (by omega))]
+  · rw [dite_eq_right hi, dite_eq_right hj, if_pos (Fin.ext (by omega))]
     have hv : (wI k r 0).val ≠ (wI k r (Fin.last k)).val := by
       simp only [wI, Fin.val_mk, Fin.val_zero, Fin.val_last]
       omega
@@ -156,9 +198,6 @@ theorem ortho (k r : ℕ) (hk : 1 ≤ k) (i j : Fin (r + 1)) :
 theorem dot_swap {n : ℕ} (u v : Fin n → ℂ) : star u ⬝ᵥ v = star (star v ⬝ᵥ u) := by
   first
     | exact star_dotProduct u v
-    | exact Matrix.star_dotProduct u v
-    | (simp only [dotProduct, star_sum, star_mul', star_star, Pi.star_apply]
-       exact Finset.sum_congr rfl fun i _ => mul_comm _ _)
 
 def AN (k r' : ℕ) (y : Fin (2 * r' + k + 1) → ℂ) (j : ℕ) : ℂ := if h : j < r' + 1 then aF k r' y ⟨j, h⟩ else 0
 
@@ -249,7 +288,40 @@ theorem gram_Y (k r' : ℕ) (hk : 1 ≤ k) (x : HPar k r') (l : Fin (1 + r' + 1)
   rw [gram_det l.val _ (star x.1 ⬝ᵥ x.1 + b * star b) (fun j => A' j - b * A j) A]
   · congr 1
     rw [pars1' k r' hk]
-    exact final_alg (r' + 1) l.val hml A A' (Uu k r' x.1) b
+    let X : ℕ → ℂ := fun j => A' j - b * A j
+    have hnorm : ∑ j ∈ Finset.range l.val, star (X j) * X j =
+        ∑ j ∈ Finset.range l.val, star (A' j) * A' j -
+        b * ∑ j ∈ Finset.range l.val, star (A' j) * A j -
+        star b * ∑ j ∈ Finset.range l.val, star (A j) * A' j +
+        b * star b * ∑ j ∈ Finset.range l.val, star (A j) * A j := by
+      simp only [Finset.mul_sum, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      simp only [X, star_sub, star_mul']
+      ring
+    have hleft : ∑ j ∈ Finset.range l.val, star (X j) * A j =
+        ∑ j ∈ Finset.range l.val, star (A' j) * A j -
+        star b * ∑ j ∈ Finset.range l.val, star (A j) * A j := by
+      simp only [Finset.mul_sum, ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      simp only [X, star_sub, star_mul']
+      ring
+    have hright : ∑ j ∈ Finset.range l.val, star (A j) * X j =
+        ∑ j ∈ Finset.range l.val, star (A j) * A' j -
+        b * ∑ j ∈ Finset.range l.val, star (A j) * A j := by
+      simp only [Finset.mul_sum, ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      dsimp only [X]
+      ring
+    have hcross : ∑ j ∈ Finset.range l.val, A' j * star (A j) =
+        ∑ j ∈ Finset.range l.val, star (A j) * A' j :=
+      Finset.sum_congr rfl fun j _ => mul_comm _ _
+    have hstar : star (b + ∑ j ∈ Finset.range l.val, star (A j) * A' j) =
+        star b + ∑ j ∈ Finset.range l.val, star (A' j) * A j := by
+      rw [star_add, star_sum]
+      exact congrArg (star b + ·) (Finset.sum_congr rfl fun j _ => by rw [star_mul', star_star, mul_comm])
+    rw [hnorm, hleft, hright, hcross, hstar, Finset.sum_add_distrib,
+      sum_lt_split (r' + 1) l.val hml (fun j => star (A' j) * A' j)]
+    ring
   · simp only [Matrix.of_apply]; rw [hY0 _ (by simp)]
     simp [star_add, star_smul, add_dotProduct, dotProduct_add, smul_dotProduct, dotProduct_smul, lift_dot]; ring
   · intro j; simp only [Matrix.of_apply]
@@ -270,8 +342,6 @@ theorem gram_Y (k r' : ℕ) (hk : 1 ≤ k) (x : HPar k r') (l : Fin (1 + r' + 1)
 theorem nsq (z : ℂ) : ((‖z‖ ^ 2 : ℝ) : ℂ) = star z * z := by
   first
     | (rw [Complex.star_def, mul_comm, Complex.mul_conj, Complex.normSq_eq_norm_sq])
-    | (rw [Complex.star_def, Complex.conj_mul']; push_cast; ring)
-    | simp [Complex.mul_conj, Complex.normSq_eq_norm_sq, mul_comm]
 
 theorem fsum (r' : ℕ) (g : ℕ → ℂ) : ∑ j : Fin (1 + r'), g j.val = ∑ j ∈ Finset.range (r' + 1), g j := by
   rw [Fin.sum_univ_eq_sum_range g (1 + r'), Nat.add_comm]
@@ -310,7 +380,6 @@ theorem hc1 (k r' : ℕ) (hk : 1 ≤ k) (x : HPar k r') (j : Fin (1 + r')) : (hc
       | (simp only [smul_eq_mul, cc]; ring)
       | (simp [wI]; done)
       | (simp [wI]; omega)
-      | omega
 
 theorem hc2 (k r' : ℕ) (x : HPar k r') (j : Fin (1 + r')) : (hcoord k r' x).2.1 j = AN' k r' x.1 j.val := by
   have hj : j.val < r' + 1 := by omega

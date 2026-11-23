@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColJoinColLColR
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CharacterIntegralOrthogonalityStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PeriodizationIntegralUnfoldingStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ColJoinColLColR
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CharacterIntegralOrthogonality
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PeriodizationIntegralUnfolding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.EisCellsDefs
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.ThetaOrbits
+
+@[expose] public section
+
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
@@ -88,7 +135,7 @@ theorem tsum_join_le {m r s : ℕ} {a : Matrix (Fin (r + s)) (Fin (r + s)) D.hos
         refine tsum_congr fun pq => ?_
         simp only [join_mul_eq, hw]
     _ ≤ ∑' ξ : Matrix (Fin m) (Fin (r + s)) D.host.E, ‖Φ (rat ξ + w)‖ₑ :=
-        ENNReal.tsum_comp_le_tsum_of_injective (join_mul_injective ha) _
+        ENNReal.tsum_comp_le_tsum_of_injective (join_mul_injective (m := m) ha) (fun ξ : Matrix (Fin m) (Fin (r + s)) D.host.E => ‖Φ (rat ξ + w)‖ₑ)
     _ ≤ B := hB w
 
 theorem countable_mat (D : D7) (m n : ℕ) : Countable (Matrix (Fin m) (Fin n) D.host.E) := by
@@ -209,14 +256,14 @@ theorem integral_cells_eq : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsCha
       ((p, 0) : Matrix (Fin V.rank) (Fin r) D.host.E × Matrix (Fin V.rank) (Fin s) D.host.E) :=
     fun _ _ h => congrArg Prod.fst h
   rw [← hinj.tsum_eq]
-  · obtain ⟨-, hu⟩ := GlobalTheory.T.periodization_integral_unfolding D V.rank r μr 𝓕r hr (Core.cellZero (s := s) ψ V b a Φ)
+  · obtain ⟨-, hu⟩ := GlobalTheory.CompanionTheory.EisUnfold.Lattice.tsum_setIntegral_sub_rat D V.rank r μr 𝓕r hr (Core.cellZero (s := s) ψ V b a Φ)
       (Core.continuous_cellZero ψ hψ V b a hΦ) B (Core.tsum_cellZero_le ψ hψ V b ha hB)
     refine Eq.trans (tsum_congr fun p => ?_) hu
-    simp only [(GlobalTheory.T.character_integral_orthogonality D ψ hψ V s μs 𝓕s hs 0).1 rfl, mul_one, Core.cellRest_zero]
+    simp only [(GlobalTheory.CompanionTheory.EisUnfold.Orth.orthogonality D ψ hψ V s μs 𝓕s hs 0).1 rfl, mul_one, Core.cellRest_zero]
   · rintro ⟨p, q⟩ hne
     by_cases hq : q = 0
     · exact ⟨p, by rw [hq]⟩
-    · exact absurd (by simp only [(GlobalTheory.T.character_integral_orthogonality D ψ hψ V s μs 𝓕s hs q).2 hq, mul_zero]) hne
+    · exact absurd (by simp only [(GlobalTheory.CompanionTheory.EisUnfold.Orth.orthogonality D ψ hψ V s μs 𝓕s hs q).2 hq, mul_zero]) hne
 
 end GlobalTheory.CompanionTheory.EisUnfold
 

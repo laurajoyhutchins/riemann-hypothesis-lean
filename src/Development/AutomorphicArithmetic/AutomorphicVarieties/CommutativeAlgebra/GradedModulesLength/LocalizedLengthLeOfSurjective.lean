@@ -1,5 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.OzTwoMulEqPow
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.OzTwoMulEqPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Filter Formalism.MainNotions.V.Pf.V2.Calc UpperTheory.V.Alg UpperTheory.V.Alg.M
 
@@ -99,7 +151,7 @@ private def u4K (F : A) (b : 𝒜 0) (J : Ideal (rees (mN 𝒜 F))) (μ : Fin 3 
     refine ⟨n + n', b ^ n' • p + b ^ n • p',
       J.add_mem (Submodule.smul_of_tower_mem _ _ hp) (Submodule.smul_of_tower_mem _ _ hp'), ?_⟩
     show b ^ n' • p.1 + b ^ n • p'.1 = _
-    rw [e, e', MvPolynomial.smul_monomial, MvPolynomial.smul_monomial, ← map_add]
+    rw [e, e', MvPolynomial.smul_monomial, MvPolynomial.smul_monomial, ← map_add (f := _)]
     congr 1
     show ((b ^ n' : 𝒜 0) : A) * _ + ((b ^ n : 𝒜 0) : A) * _ = _
     simp only [SetLike.GradeZero.coe_pow]
@@ -185,12 +237,12 @@ theorem UpperTheory.V.Alg.M.locLen_mQ_gr_le_locLen_aPiece :
       ⟨h.1, lattice_le_weight_submodule 𝒜 (Q.hF (Fin.last r)) μ h.2, rfl⟩
   refine localized_length_le_of_surjective σ φ ψ ?_ ?_
   · rintro ⟨_, p, hp', rfl⟩
-    refine ⟨⟨MvPolynomial.coeff μ p.1, p.2 μ⟩, Subtype.ext ?_⟩
+    refine ⟨⟨AddMonoidAlgebra.coeff p.1 μ, p.2 μ⟩, Subtype.ext ?_⟩
     show J.mkQ (mono _ μ _ (p.2 μ)) = J.mkQ p
     congr 1
     apply Subtype.ext
     ext ν
-    show MvPolynomial.coeff ν (MvPolynomial.monomial μ _) = _
+    show AddMonoidAlgebra.coeff (MvPolynomial.monomial μ _) ν = _
     rw [MvPolynomial.coeff_monomial]
     split_ifs with h
     · rw [h]

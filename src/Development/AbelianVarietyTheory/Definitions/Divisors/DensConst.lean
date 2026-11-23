@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
-import Development.AbelianVarietyTheory.Definitions.Divisors.AnalyticOnNhdFinChartIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsClosedImmersionGenericPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -27,8 +66,6 @@ namespace MLine
 def ofHerm (L : HermLB p) (σ : k →+* ℂ) : MLine p σ := ⟨L.B, L.φ σ, L.cInf σ⟩
 
 def tens (A B : MLine p σ) : MLine p σ := ⟨CechPic.tens A.B B.B, A.φ.tens B.φ, A.cInf.tens B.cInf⟩
-
-def dual (A : MLine p σ) : MLine p σ := ⟨CechPic.dual A.B, A.φ.dual, A.cInf.dual⟩
 
 def pull (A : MLine p σ) {q : Y ⟶ Sp k} (π : Y ⟶ X) (hπ : π ≫ p = q) : MLine q σ :=
   ⟨A.B.pull π, A.φ.pull π hπ, A.cInf.pull π hπ⟩
@@ -93,34 +130,7 @@ section Generic
 
 variable (t : X ⟶ Sp ℤ)
 
-def gX : Scheme.{0} := pullback t (spMap (Int.castRingHom ℚ))
-
-def gj : gX t ⟶ X := pullback.fst _ _
-
-def gq : gX t ⟶ Sp ℚ := pullback.snd _ _
-
-def gΦ (z : CxPts (gq t) (Rat.castHom ℂ)) : CxPts t (Int.castRingHom ℂ) :=
-  ⟨z.1 ≫ gj t, specZIsTerminal.hom_ext _ _⟩
-
-theorem continuous_gΦ : Continuous (gΦ t) := continuous_of_comp (f := gj t) fun _ => rfl
-
 variable {t}
-
-theorem cInfAt_gΦ {f : CxPts t (Int.castRingHom ℂ) → ℝ} {z : CxPts (gq t) (Rat.castHom ℂ)} (h : CInfAt f (gΦ t z)) :
-    CInfAt (fun w => f (gΦ t w)) z := by
-  obtain ⟨W, ι, _, g, F, O, h₁, h₂, h₃, h₄, h₅⟩ := h
-  have e (a : Γ(X, W)) (w : CxPts (gq t) (Rat.castHom ℂ)) :
-      ev (gq t) _ (gj t ⁻¹ᵁ W) ((gj t).app W a) w = ev t _ W a (gΦ t w) := (valR_comp w.1 (gj t) W a).symm
-  refine ⟨gj t ⁻¹ᵁ W, ι, inferInstance, fun a => (gj t).app W (g a), F, O, h₁, h₂, ?_, h₄, ?_⟩
-  · simpa only [e] using h₃
-  · simp only [e]
-    exact (continuous_gΦ t).continuousAt.eventually h₅
-
-def MLine.gen (A : MLine t (Int.castRingHom ℂ)) : MLine (gq t) (Rat.castHom ℂ) where
-  B := A.B.pull (gj t)
-  φ := A.φ.linComb (κ := PUnit) (fun _ => gj t) (fun _ => 1) (fun _ => gΦ t) fun _ _ => rfl
-  cInf j z hz := (cInfAt_gΦ (A.cInf _ _ (mem_of_mem_linComb (m := fun _ => gΦ t z)
-    (fun _ => rfl) hz PUnit.unit))).congr (.of_forall fun w => by simp [Weight.linComb])
 
 end Generic
 

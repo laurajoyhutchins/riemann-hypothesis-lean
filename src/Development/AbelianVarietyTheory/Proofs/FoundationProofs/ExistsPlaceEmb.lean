@@ -1,7 +1,60 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Formalism.ConjugateSelfDual.Statement
 import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.SelmerRankVanishing
-open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.BlochKatoReduction GlobalTheory.IndefiniteRowSideFullHecke.LengthValuationTwists
+public import Mathlib.Algebra.Algebra.Hom.Rat
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
+
+open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.BlochKatoReduction
 
 namespace GlobalTheory.EmbThroughCompletion
 
@@ -151,23 +204,6 @@ theorem exists_conj (a b : E →+* PadicAlgCl l) (h : ∀ x, ‖a x‖ < 1 ↔ �
 variable {Ω : Type} [Field Ω] [Algebra E Ω]
   {Gw : Subgroup (Ω ≃ₐ[E] Ω)} {O : Type} [CommRing O] [Algebra ℤ_[l] O] [TopologicalSpace O]
   (Bw : LocBridge l E Ω Gw O)
-
-theorem exists_factor (v : HeightOneSpectrum (𝓞 E)) (A : ValuationSubring Ω) (hA : IsPlaceOver A v)
-    (hj : ∀ x, x ∈ A ↔ ‖Bw.j x‖ ≤ 1) (b : E →+* Bw.LL.1)
-    (hb : ∀ x : 𝓞 E, ‖((b (x : E) : Bw.LL.1) : PadicAlgCl l)‖ < 1 ↔ x ∈ v.asIdeal) :
-    ∃ τ : Bw.Kw.1 →ₐ[ℚ_[l]] Bw.LL.1, ∀ x : E, τ ⟨Bw.j (algebraMap E Ω x), Bw.j_E x⟩ = b x := by
-  obtain ⟨g, hg⟩ := exists_conj (Bw.j.comp (algebraMap E Ω)) (Bw.LL.1.val.toRingHom.comp b)
-    (norm_lt_one_iff v _ _ (fun x => by
-      rw [← hA x, ← ValuationSubring.mem_nonunits_iff, ValuationSubring.mem_nonunits_iff_or, hj,
-        RingHom.comp_apply, map_inv₀, norm_inv]
-      generalize algebraMap E Ω (x : E) = y
-      by_cases hy : y = 0
-      · simp [hy]
-      · have : 0 < ‖Bw.j y‖ := norm_pos_iff.2 ((map_ne_zero _).2 hy)
-        simp only [hy, false_or, not_le]
-        rw [one_lt_inv₀ this]) hb)
-  let σ : Bw.Kw.1 →ₐ[ℚ_[l]] PadicAlgCl l := (g : PadicAlgCl l →ₐ[ℚ_[l]] PadicAlgCl l).comp Bw.Kw.1.val
-  exact ⟨σ.codRestrict Bw.LL.1.toSubalgebra (Bw.LL_split σ), fun x => Subtype.ext (hg x)⟩
 
 end Padic
 

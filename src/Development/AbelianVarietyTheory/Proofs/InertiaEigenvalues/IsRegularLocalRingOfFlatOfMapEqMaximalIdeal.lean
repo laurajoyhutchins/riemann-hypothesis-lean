@@ -1,8 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ProjectionSurjective
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsHasProjectiveDimensionLEOfResidueField
-import ReciprocityTheory.CommutativeAlgebra.CohenMacaulay.LocDim
-import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+module
+
+public import Mathlib.CategoryTheory.Abelian.Projective.Dimension
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsHasProjectiveDimensionLEOfResidueField
+import Mathlib.Algebra.Category.ModuleCat.Projective
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import Mathlib.Algebra.Module.SpanRankOperations
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
+import Mathlib.RingTheory.KrullDimension.Regular
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FiniteCocycles
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 open IsLocalRing GlobalTheory.Pat CategoryTheory TensorProduct
 
@@ -69,8 +129,7 @@ theorem pd_quot {A : Type} [CommRing A] [IsNoetherianRing A] {x : A} (hx : IsSMu
         x • TensorProduct.lid A N t := by
       intro t
       induction t with
-      | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb, smul_add]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb, smul_add]
       | tmul a m => simp [smul_smul, mul_comm]
     intro a b hab
     apply (TensorProduct.lid A N).injective
@@ -108,6 +167,7 @@ theorem projective_of_socle {A : Type} [CommRing A] [IsNoetherianRing A] [IsLoca
       intro c
       have h0 : ∑ i, residue A (c.1 i) • b i = 0 := by
         have h1 := congrArg (TensorProduct.mk A (ResidueField A) M 1) (LinearMap.mem_ker.mp c.2)
+
         rw [Fintype.linearCombination_apply, map_sum, map_zero] at h1
         rw [← h1]
         refine Finset.sum_congr rfl fun i _ => ?_
@@ -310,24 +370,5 @@ theorem isRegularRing_of_isRegularLocalRing (R : Type) [CommRing R] [IsRegularLo
   intro p _
   exact isRegularLocalRing_of_flat_of_map_eq_maximalIdeal R _ p
     Localization.AtPrime.map_eq_maximalIdeal.symm
-
-theorem Pat.IsCplAt.isRegularLocalRing_and_ringKrullDim :
-    ∀ (R S : Type) [CommRing R] [IsRegularLocalRing R] [CommRing S] [IsLocalRing S] (q : Ideal R)
-      [q.IsPrime] (φ : R →+* S), IsCplAt q φ →
-      ∃ _ : IsRegularLocalRing S, ringKrullDim S + ringKrullDim (R ⧸ q) = ringKrullDim R := by
-  intro R S _ _ _ _ q _ φ h
-  let _ : Algebra R S := φ.toAlgebra
-  have := h.noeth
-  have : Module.Flat R S := h.flat
-  have hq : maximalIdeal S = q.map (algebraMap R S) := h.max_eq
-  refine ⟨isRegularLocalRing_of_flat_of_map_eq_maximalIdeal R S q hq, ?_⟩
-  have : (maximalIdeal S).LiesOver q := ⟨h.comap_eq.symm⟩
-  have e := Ideal.height_eq_height_add_of_liesOver_of_hasGoingDown q (maximalIdeal S)
-  have e0 : (Ideal.map (Ideal.Quotient.mk (q.map (algebraMap R S))) (maximalIdeal S)).height = 0 := by
-    have hp : (q.map (algebraMap R S)).IsPrime := hq ▸ inferInstance
-    rw [hq, Ideal.map_quotient_self, Ideal.height_bot]
-  rw [e0, add_zero] at e
-  rw [← maximalIdeal_height_eq_ringKrullDim, e]
-  exact (isCM_of_isRegularLocalRing R).height_add_ringKrullDim_quotient q
 
 end GlobalTheory

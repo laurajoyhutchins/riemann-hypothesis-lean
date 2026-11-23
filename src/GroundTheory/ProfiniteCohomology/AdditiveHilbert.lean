@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.Galois.NormalBasis
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Basic
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ReduceModChar
+public import Std.Tactic.BVDecide.Normalize.Prop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Functoriality
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Shapiro
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Interval.Set.Instances
+public import Mathlib.NumberTheory.NumberField.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -77,18 +132,6 @@ theorem isZero_groupCohomology {n : ℕ} (hn : n ≠ 0) :
 theorem isZero_groupCohomology_galois {n : ℕ} (hn : n ≠ 0) :
     IsZero (groupCohomology (Rep.ofDistribMulAction K Gal(L/K) L) n) :=
   isZero_groupCohomology K K L hn
-
-theorem subsingleton_groupCohomology_galois {n : ℕ} (hn : n ≠ 0) :
-    Subsingleton (groupCohomology (Rep.ofDistribMulAction K Gal(L/K) L) n) :=
-  ModuleCat.subsingleton_of_isZero (isZero_groupCohomology_galois K L hn)
-
-theorem isCoboundary₁_of_isCocycle₁_galois (f : Gal(L/K) → L) (hf : IsCocycle₁ f) :
-    IsCoboundary₁ f := by
-  have := subsingleton_groupCohomology_galois K L one_ne_zero
-  have h0 : H1π (Rep.ofDistribMulAction K Gal(L/K) L) (cocyclesOfIsCocycle₁ hf) = 0 :=
-    Subsingleton.elim _ _
-  rw [H1π_eq_zero_iff] at h0
-  exact isCoboundary₁_of_mem_coboundaries₁ f h0
 
 end Vanishing
 

@@ -1,9 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolRepOfIsTau
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialActionOneMulAdjointStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolRepOfIsTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialActionOneMulAdjointStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +57,7 @@ variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] {z : E} {n : ℕ}
 theorem diff_prod {ι : Type} (s : Finset ι) {f : ι → E → ℂ} (h : ∀ i ∈ s, DifferentiableAt ℂ (f i) z) :
     DifferentiableAt ℂ (fun w => ∏ i ∈ s, f i w) z := by
   classical
-  exact (HasFDerivAt.finset_prod fun i hi => (h i hi).hasFDerivAt).differentiableAt
+  exact (HasFDerivAt.finsetProd fun i hi => (h i hi).hasFDerivAt).differentiableAt
 
 def EntryDiff (M : E → Matrix (Fin n) (Fin n) ℂ) (z : E) : Prop :=
   ∀ i j, DifferentiableAt ℂ (fun w => M w i j) z
@@ -75,7 +114,7 @@ theorem CoeffDiff.aeval {σ : Type} {F : E → σ → MvPolynomial σ ℂ} (hF :
     exact fun _ => differentiableAt_const _
   | add p q hp hq =>
     intro d
-    simp only [map_add, MvPolynomial.coeff_add]
+    simp only [map_add (f := _), MvPolynomial.coeff_add]
     exact (hp d).add (hq d)
   | mul_X p v hp =>
     simp only [map_mul, MvPolynomial.aeval_X]
@@ -164,8 +203,8 @@ theorem entryDiff_mulSingle {ι : Type} [DecidableEq ι] (τ τ' : ι) (z : Fin 
   · simp only [Pi.mulSingle_eq_of_ne h]
     exact EntryDiff.const _
 
-open scoped Classical in
 
+open scoped Classical in
 theorem isHolFam_of {ι P : Type} [AddCommGroup P] [Module ℂ P] {ε : ι → Fin m → Bool}
     {B : P →ₗ⋆[ℂ] P →ₗ[ℂ] ℂ} {ϖ : (ι → Matrix (Fin m) (Fin m) ℂ) → Module.End ℂ P}
     (h0 : ∀ x, B x x = 0 → x = 0) (h1 : ϖ 1 = 1)

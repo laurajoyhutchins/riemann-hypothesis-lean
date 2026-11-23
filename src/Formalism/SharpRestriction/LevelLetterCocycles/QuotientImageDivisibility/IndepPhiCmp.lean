@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.HasSubstPi0Series
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExpRules
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusUniformizerPowDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.HasSubstPi0Series
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IsExpSmulA
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.PhiExp
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.Pi0PowSmulInjective
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsXPowMul
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -24,7 +74,7 @@ theorem φVB_inj : Function.Injective (φVB PD (LL := LL) (V := V)) := by
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul x b => simp [φVB]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   intro a b hab
   rw [h, h] at hab
   exact Module.Flat.lTensor_preserves_injective_linearMap _ PD.φ_inj hab
@@ -89,6 +139,7 @@ theorem indep_phi_cmp (hdom : IsDomain O) (hFr : IsFractionRing O LL)
   have hsum : ∑ m, c m • W.cmp T ⟨e m, (he.1 m).1⟩ = 0 := by
     apply φVB_inj PD (LL := LL) (V := T.V)
     apply Formalism.MainNotions.UnusedSlot80.LevR.ιV_inj (PD := PD) (LL := LL) (V := T.V)
+
     rw [map_zero, map_zero, map_sum, map_sum]
     simpa [map_smul] using hc
   obtain ⟨⟨dd, hdd⟩, hint⟩ := IsLocalization.exist_integer_multiples (nonZeroDivisors O)
@@ -102,11 +153,13 @@ theorem indep_phi_cmp (hdom : IsDomain O) (hFr : IsFractionRing O LL)
     refine ⟨?_, fun δ hδ => ?_⟩
     · rw [hz, Finset.smul_sum]
       exact Finset.sum_congr rfl fun m _ => by rw [smul_comm, (he.1 m).2.1]
-    · rw [hz, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+      rw [hz, map_sum]
       exact Finset.sum_congr rfl fun m _ => by rw [map_smul, (he.1 m).2.2 δ hδ]
   have hcz : W.cmp T ⟨z, hzN⟩ = 0 := by
     have e1 : (⟨z, hzN⟩ : ↥(W.N T)) = ∑ m, o m • (⟨e m, (he.1 m).1⟩ : ↥(W.N T)) :=
       Subtype.ext (by simp [hz, Submodule.coe_sum])
+
     rw [e1, map_sum]
     simp only [W.cmp_smul]
     calc ∑ m, algebraMap O LL (o m) • W.cmp T ⟨e m, (he.1 m).1⟩
@@ -115,7 +168,7 @@ theorem indep_phi_cmp (hdom : IsDomain O) (hFr : IsFractionRing O LL)
           rw [ho m, Algebra.smul_def, mul_smul]
       _ = 0 := by rw [← Finset.smul_sum, hsum, smul_zero]
   have hPN := ker_NDl W T i h3 hmod hR (x := z) ⟨hzN, hzD⟩
-    (by unfold Formalism.MainNotions.ArcLiftingSetup.cmpD; rw [dif_pos hzN]; exact hcz)
+    (by unfold Formalism.MainNotions.ArcLiftingSetup.cmpD; rw [dite_eq_left hzN]; exact hcz)
   obtain ⟨y, hy, hyΔ, hzy⟩ := hPN
   rw [pow_one] at hzy
   have hyl : (letE i : LetA O n) • y = y := by

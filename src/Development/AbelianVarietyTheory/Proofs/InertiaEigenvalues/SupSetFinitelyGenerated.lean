@@ -1,22 +1,76 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BddGood
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import Formalism.LocalToGlobal.ProjectiveLattices.MulCMemSec
-import Formalism.LocalToGlobal.ProjectiveLattices.RealPtGeo
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsModelPushInvertibleOverCompleteDVR
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIntegralFramesModelInvertiblePushforward
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NumberFieldFinitePlaceCompletionEmbedding
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NaturalRuleValueBaseChangeOfIsReduced
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsAlgebraMapEqOfValVLeOne
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NoCommonZeroOfFiniteValues
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BddGood
+public import Formalism.LocalToGlobal.ProjectiveLattices.MulCMemSec
+public import Formalism.LocalToGlobal.ProjectiveLattices.RulInst
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsAlgebraMapEqOfValVLeOne
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NaturalRuleValueBaseChangeOfIsReduced
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NoCommonZeroOfFiniteValues
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CardTorsionAbelianVariety
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsBasisOnAny
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModuliSchemePolarizedAbelianLevel
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FullObjOfSecondTyping
-import Development.AbelianVarietyTheory.Counterexamples.ModuliSurvey.CubeMapTripleProductUnique
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTopBaseModel
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsIsoOfNoTwoTorsion
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTopBaseModel
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsQProjOverOfIsIso
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsPolAVGenericFibre
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIntegralFramesModelInvertiblePushforward
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsModelPushInvertibleOverCompleteDVR
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NumberFieldFinitePlaceCompletionEmbedding
+import Formalism.LocalToGlobal.ProjectiveLattices.RealPtGeo
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.SystemPrimesDistinctLevelsGeThree
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+
+@[expose] public section
 
 set_option synthInstance.maxHeartbeats 400000
 
@@ -56,7 +110,7 @@ theorem fg_of_separating {K V : Type} [Field K] [AddCommGroup V] [Module K V] (O
         ext ψ
         exact ψ.1.map_smul (a : K) g.1 }
   have hΦ : Function.Injective Φ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro g hg
     exact Subtype.ext (hsep g (hS g g.2) fun ψ hψ => congrArg Subtype.val (congrFun hg ⟨ψ, hψ⟩))
   have : Module.Finite O S := Module.Finite.of_injective Φ hΦ
@@ -65,8 +119,8 @@ theorem fg_of_separating {K V : Type} [Field K] [AddCommGroup V] [Module K V] (O
 variable {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
   (la : HeightOneSpectrum (𝓞 K))
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem exists_denominator (y : L)
     (hy : ∀ w : HeightOneSpectrum (𝓞 L), w.asIdeal.LiesOver la.asIdeal → w.valuation L y ≤ 1) :
     ∃ s : 𝓞 K, s ∉ la.asIdeal ∧ ∃ z : 𝓞 L, algebraMap K L s * y = z := by
@@ -140,7 +194,7 @@ theorem exists_bound (X : Set L)
       exact le_of_eq_of_le (congrArg _ ho.symm) (la.valuation_le_one o)
     | zero => simp
     | add x y _ _ hx hy =>
-      rw [RingOfIntegers.coe_eq_algebraMap (x + y), map_add, mul_add, map_add, mul_add]
+      rw [RingOfIntegers.coe_eq_algebraMap (x + y), map_add (f := _), mul_add, map_add (f := _), mul_add]
       exact Valuation.map_add_le _ hx hy
     | smul n x _ hx =>
       have e : ((d : 𝓞 K) : K) * ℓ ((D : L)⁻¹ * ((n • x : 𝓞 L) : L)) =
@@ -164,8 +218,8 @@ section Geometry
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
   (Xo : Moduli Dw l) (c : Coeff l)
 
-open GlobalTheory.Models GlobalTheory.Models.RankZero in
 
+open GlobalTheory.Models GlobalTheory.Models.RankZero in
 theorem exists_model_rank_zero (hD : Dw.p + Dw.q = 0) {O : Type} [CommRing O] [IsDomain O] [IsIntegrallyClosed O]
     [IsNoetherianRing O] (β : O →+* c.F) : ∃ Y : Model Xo c β, PushInvertible Y.t.G Y.t.PP.L := by
   have hX := isIso_moduli GlobalTheory.card_torsion_abelianVariety hD Xo
@@ -218,7 +272,8 @@ theorem exists_bound_values {la : HeightOneSpectrum (𝓞 c.F)} {p : ℕ} (hp : 
     show vV T.V (κ (algebraMap c.F L x)) = _
     rw [ho.2]
     simp only [vLa]
-    rw [← HeightOneSpectrum.valuation_liesOver L la w x, WithZero.log_pow]
+    rw [← HeightOneSpectrum.valuation_liesOver L la w x,
+      ← Ideal.ramificationIdx'_eq_ramificationIdx la.asIdeal w.asIdeal la.ne_bot, WithZero.log_pow]
     push_cast
     simp [mul_assoc]
   let _ : Algebra c.F T.Fr := io.toAlgebra
@@ -264,7 +319,7 @@ theorem exists_value_ne_zero {a : (E →+* ℂ) × ℕ → ℕ} {n : ℕ} {f : R
   have hev : evR Xo c f y = f q y := by
     have hT := hL.test q.R y
     unfold evR evalAt
-    rw [dif_pos hT]
+    rw [dite_eq_left hT]
     exact (hf.1 _ _ _ _ _ hT.choose_spec.choose_spec.choose_spec).symm
   have hM : ∃ M : Ideal q.R, M.IsMaximal ∧ f q y ∉ M := by
     by_contra hcon

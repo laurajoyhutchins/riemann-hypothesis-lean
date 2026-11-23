@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ContinuousAevalMvPolynomial
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.PowCardLeNormProd
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ContinuousAevalMvPolynomial
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.PowCardLeNormProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Polynomial.CauchyBound
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.RingTheory.Ideal.GoingUp
+
+@[expose] public section
 
 namespace GlobalTheory.AffinePoints
 
@@ -19,7 +71,8 @@ theorem exists_comap_eq_of_isIntegral {K A B : Type*} [Field K] [IsAlgClosed K] 
   have hcomp : ∀ a, Ideal.Quotient.mk Q (φ a) = algebraMap K (B ⧸ Q) (p a) := by
     intro a
     have : a - algebraMap K A (p a) ∈ Q.comap (algebraMap A B) := by
-      rw [hQp]; simp [RingHom.mem_ker]
+      rw [← Ideal.under_def, hQp]
+      simp [RingHom.mem_ker]
     have h2 : φ (a - algebraMap K A (p a)) ∈ Q := this
     rw [map_sub, AlgHom.commutes] at h2
     exact Ideal.Quotient.eq.2 h2
@@ -36,13 +89,6 @@ theorem exists_comap_eq_of_isIntegral {K A B : Type*} [Field K] [IsAlgClosed K] 
   ext a
   change e.symm (Ideal.Quotient.mk Q (φ a)) = p a
   rw [hcomp, AlgEquiv.commutes]; rfl
-
-theorem surjective_comap_of_isIntegral {K A B : Type*} [Field K] [IsAlgClosed K] [CommRing A]
-    [Algebra K A] [CommRing B] [Algebra K B] (φ : A →ₐ[K] B) (hφ : φ.toRingHom.IsIntegral)
-    (hinj : Function.Injective φ) :
-    Function.Surjective (comap φ : (B →ₐ[K] K) → (A →ₐ[K] K)) := fun p =>
-  exists_comap_eq_of_isIntegral φ hφ p fun a ha => by
-    rw [(injective_iff_map_eq_zero φ).1 hinj a ha, map_zero]
 
 theorem finite_fiber_comap {R A B K : Type*} [CommRing R] [CommRing A] [Algebra R A] [CommRing B]
     [Algebra R B] [Field K] [Algebra R K] (φ : A →ₐ[R] B) (hφ : φ.Finite) (p : A →ₐ[R] K) :
@@ -74,7 +120,7 @@ theorem isProperMap_comap (φ : A →ₐ[ℂ] B) (hφ : φ.toRingHom.IsIntegral)
     obtain ⟨h, hm, hb⟩ := hφ b
     let M : (A →ₐ[ℂ] ℂ) → ℝ := fun r => ∑ i ∈ Finset.range h.natDegree, ‖r (h.coeff i)‖ + 1
     have hM : Continuous M :=
-      (continuous_finset_sum _ fun i _ => (continuous_eval _).norm).add continuous_const
+      (continuous_finsetSum _ fun i _ => (continuous_eval _).norm).add continuous_const
     have hbd : ∀ q : B →ₐ[ℂ] ℂ, ‖q b‖ ≤ M (comap φ q) := by
       intro q
       have hr : (h.map (comap φ q).toRingHom).IsRoot (q b) := by

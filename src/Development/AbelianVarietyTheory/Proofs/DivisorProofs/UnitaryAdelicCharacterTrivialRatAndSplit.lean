@@ -1,12 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsRepSuppSplit
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemClosureUnitary
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TendstoSmulZeroOfCompact
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUnitaryAdelicDecompositionSplitSupport
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryMatrixEqProdQuasiReflections
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUnitaryAdelicDecompositionSplitSupport
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSplitIdempotentsOfRelTraceOneModTwo
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.EmbRelExistsUnique
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsDenominatorPrimesPrescribed
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsRepSuppSplit
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.NormOneApproximationAtLevelPrimes
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryMatrixEqProdQuasiReflections
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.UnitaryQuasiReflectionLaws
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ValuationEqOneOfNormOneOfNotMoved
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRepsOfFiniteIndex
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsSplitAt
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsPosNatMemOpenAdeleSubgroup
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TendstoSmulZeroOfCompact
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsCompactLatticeStabilizerBoundedReal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemClosureUnitary
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplit
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CompletedLatticeEqAdelicCompletionAndGram
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsPrincipalLevelSubgroupOpen
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RationalPointsAdelicUnitaryEqUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,7 +146,7 @@ theorem tendsto_rf [TopologicalSpace A] [IsTopologicalRing A] (hσ : Continuous 
 
 theorem norm_cut (ε : A) (hε : ε * ε = ε) (hσ : σ ε = ε) (a : A) (ha : a * σ a = 1) :
     (1 + ε * (a - 1)) * σ (1 + ε * (a - 1)) = 1 := by
-  simp only [map_add, map_mul, map_sub, map_one, hσ]
+  simp only [map_add (f := _), map_mul, map_sub, map_one, hσ]
   linear_combination (a - 1) * (σ a - 1) * hε + ε * ha
 
 theorem cut_rf (P : Matrix (Fin n) (Fin n) A) (hP : P * P = P) (hJ : cT σ P * J = J * P) (ε : A) (hε : ε * ε = ε)
@@ -160,7 +218,7 @@ theorem tendsto_ratio_inf {N : ℕ → ℕ} (hN : Tendsto N atTop atTop) (hN0 : 
   have hk : (N k : E) ≠ 0 := Nat.cast_ne_zero.2 (hN0 k)
   have e : (N k : E)⁻¹ + β = (N k : E)⁻¹ * (1 + N k * β) := by field_simp
   have hk' := hw k
-  rw [Function.comp_apply, ← map_add, ← map_add, hi _ (by rw [e]; exact mul_ne_zero (inv_ne_zero hk) hk'), ← map_mul, e]
+  rw [Function.comp_apply, ← map_add (f := _), ← map_add (f := _), hi _ (by rw [e]; exact mul_ne_zero (inv_ne_zero hk) hk'), ← map_mul, e]
   congr 1
   field_simp
 
@@ -193,10 +251,12 @@ theorem exists_cut (c : E ≃ₐ[F] E) (hc : ∀ x, c (c x) = x) (N : ℕ) (hN :
   let e : Af F := ∑ v ∈ hfin.toFinset, singleV F v 1
   have he1 : ∀ v : HeightOneSpectrum (𝓞 F), m ∈ v.asIdeal → e v = 1 := fun v hv => by
     change evalV F v e = 1
+
     rw [map_sum, Finset.sum_eq_single v (fun w _ h => GlobalTheory.SplitIdem.evalV_singleV_ne _ w _ h.symm)
-      (fun h => absurd (hfin.mem_toFinset.2 hv) h), GlobalTheory.SplitIdem.evalV_singleV_same]
+    (fun h => absurd (hfin.mem_toFinset.2 hv) h), GlobalTheory.SplitIdem.evalV_singleV_same]
   have he0 : ∀ v : HeightOneSpectrum (𝓞 F), m ∉ v.asIdeal → e v = 0 := fun v hv => by
     change evalV F v e = 0
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun w hw => GlobalTheory.SplitIdem.evalV_singleV_ne _ w _
       (fun h : v = w => hv (h ▸ hfin.mem_toFinset.1 hw))
@@ -239,7 +299,7 @@ theorem exists_seq (c : E ≃ₐ[F] E) (hc : ∀ x, c (c x) = x) (hc1 : c ≠ 1)
   have hw : ∀ k, w k * c (w k) = 1 := fun k => by
     have a1 := h1 k α
     have a2 := h1 k β
-    simp only [w, map_div₀, map_add, map_mul, map_one, map_natCast, ← hβc, show c β = α by rw [hβc, hc]]
+    simp only [w, map_div₀, map_add (f := _), map_mul, map_one, map_natCast, ← hβc, show c β = α by rw [hβc, hc]]
     field_simp
   choose e he1 he2 he3 a ha b hab using fun k => exists_cut c hc (N k) (Nat.factorial_pos _) α β
     (one_add_ne_zero (N k) (hN1 k) β) (w k) rfl (hw k)
@@ -257,8 +317,8 @@ theorem exists_seq (c : E ≃ₐ[F] E) (hc : ∀ x, c (c x) = x) (hc1 : c ≠ 1)
     congr 2
     exact mul_one _
 
-omit [NumberField F] [NumberField E] in
 
+omit [NumberField F] [NumberField E] in
 def cutH (R : Type) [CommRing R] [Algebra F R] (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (ε : R ⊗[F] E)
     (hε : ε * ε = ε) (hσ : sigR R σ ε = ε) : HA R σ J →* HA R σ J :=
   cut (sigR R σ) (JR R J) ε hε hσ
@@ -339,6 +399,7 @@ theorem eq_one_of_idem (hs : ∀ e, IsSplitIdem D e → ∀ g, SuppAt e V g → 
     (h1 : e * e = e) (h2 : {v | e v ≠ 0}.Finite) (h3 : ∀ v, e v ≠ 0 → SplitPl (cF D) v) (g : GA D V)
     (hg : fj D e • (Formalism.L2.Theta.mt V g - 1) = Formalism.L2.Theta.mt V g - 1) : ν g = 1 := by
   refine eq_one_of_finset hs h2.toFinset (fun v hv => h3 v (h2.mem_toFinset.1 hv)) g ?_
+
   rw [← map_sum, ← GlobalTheory.SplitReps.idem_eq_sum e h1 h2.toFinset (fun v => h2.mem_toFinset), hg]
 
 end Char

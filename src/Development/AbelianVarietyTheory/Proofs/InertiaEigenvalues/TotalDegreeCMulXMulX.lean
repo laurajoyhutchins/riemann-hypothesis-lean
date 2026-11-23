@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+module
+
+public import Mathlib.Algebra.MvPolynomial.Degrees
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Basic
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.ChevalleyWarning
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Defs
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,7 +163,7 @@ theorem exists_point_mod [LocallyCompactSpace K] (s t c : K) (hs : ‖s‖ ≤ 1
   choose l hl using fun i => Ideal.Quotient.mk_surjective (I := maxIdeal K) (x.1 i)
   have hval : π (l 0 * l 0 + S * (l 0 * l 1) + T * (l 1 * l 1) + (-Cc) * (l 2 * l 2)) = 0 := by
     have := x.2
-    simp only [f, map_add, map_mul, eval_C, eval_X, map_neg, one_mul] at this
+    simp only [f, eval_add, eval_mul, eval_C, eval_X, one_mul] at this
     simp only [map_add, map_mul, map_neg, π, hl]
     linear_combination this
   have hmem := (Ideal.Quotient.eq_zero_iff_mem).1 hval
@@ -143,7 +199,7 @@ theorem exists_sqrt_mod [LocallyCompactSpace K] (t : K) (ht : ‖t‖ ≤ 1) (h2
       rw [Subring.coe_add, Subring.coe_one]; norm_num
     have : (Ideal.Quotient.mk (maxIdeal K) (1 + 1) : Res K) = 0 :=
       (Ideal.Quotient.eq_zero_iff_mem).2 ((mem_maxIdeal K _).2 (by rw [h11]; exact h2))
-    rw [map_add, map_one] at this
+    rw [map_add (f := _), map_one] at this
     rw [← one_add_one_eq_two]; exact this
   have hchar : ringChar (Res K) = 2 := by
     have hd : ringChar (Res K) ∣ 2 := ringChar.dvd (by exact_mod_cast h2k)

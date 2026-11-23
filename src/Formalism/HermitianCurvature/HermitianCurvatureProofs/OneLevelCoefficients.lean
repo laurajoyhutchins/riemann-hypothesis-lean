@@ -1,4 +1,53 @@
-import Formalism.HermitianCurvature.StatementTB
+module
+
+public import Formalism.HermitianCurvature.StatementTB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.OneLevelCoefficients
 
@@ -43,8 +92,6 @@ theorem oneLevel_of_steps : OneLevelOfSteps := by
   have hwc : D.cnt w ≤ 4 * D.K * (D.r + 1 - i) := (Finset.mem_filter.1 hw).2
   have hwt : 0 < D.wt w := hW w
   have he : 0 ≤ D.e i := (hA13 i 1 le_rfl hi1 hi).1.1
-  have ha0 : 0 ≤ 3 ^ D.f * ep := by positivity
-  have hb0 : 0 ≤ 2 ^ D.f * ep := by positivity
 
   have hS : ∀ s, 1 ≤ s → s ≤ i → ∀ M : ℝ,
       (∀ w' ∈ D.Wb (D.cnt w + D.K), D.Dg T ε i s w' ≤ M) →
@@ -150,13 +197,11 @@ lemma coef (D : Data E W) (Θ C₄ C₀ a e : ℝ) (hΘ : 1 ≤ Θ) (h4 : 1 ≤ 
     (i s : ℕ) (hs : 2 ≤ s) (hsi : s ≤ i) (hi : i ≤ D.r + 1) :
     √((1 + a) * (1 + e) * C₄ ^ (D.f * s) * ∏ s' ∈ Ico 1 s, D.vol (i - s + 1) s') ≤
       ((C₀ / Θ) ^ D.f) ^ (s - 1) := by
-  have hΘ0 : 0 < Θ := by linarith
   set q : ℝ := (Θ ^ D.f)⁻¹ with hq
-  have hq0 : 0 ≤ q := by positivity
   have hC0 : 0 ≤ C₀ := by linarith
   have hP : ∏ s' ∈ Ico 1 s, D.vol (i - s + 1) s' ≤ (q ^ 2) ^ (s - 1) := by
     calc ∏ s' ∈ Ico 1 s, D.vol (i - s + 1) s' ≤ ∏ _s' ∈ Ico 1 s, q ^ 2 := by
-          apply Finset.prod_le_prod (fun s' _ => hS.1 _ _)
+          apply Finset.prod_le_prod₀ (fun s' _ => hS.1 _ _)
           intro s' hs'
           rw [Finset.mem_Ico] at hs'
           exact hS.2 _ _ (by omega) hs'.1 (by omega)
@@ -234,146 +279,10 @@ lemma gram_diag (D : Data E W) (hG : D.GramPSD) (ε : ℝ) (hε : 0 < ε) (i : �
   have h2 : 0 ≤ D.gram ε i w p p := by simpa using this
   exact (Complex.le_def.1 h2).1
 
-theorem theoremA_of_steps : TheoremAOfSteps := by
-  intro hOL hLS hJ C₁ C₄ h1 h4
-  set C₀ : ℝ := max (3 * C₁) (2 * C₄) with hC₀
-  have hC01 : 1 ≤ C₀ := le_trans (by linarith) (le_max_left _ _)
-  have hC03 : 3 * C₁ ≤ C₀ := le_max_left _ _
-  have hC04 : 2 * C₄ ≤ C₀ := le_max_right _ _
-  obtain ⟨C'J, CJ, hJ⟩ := hJ C₀ hC01
-  refine ⟨max C₀ CJ, max (max C'J (3 * C₁)) 1, ?_⟩
-  intro E W _ D Θ jn H _ _ _ Vt c hK hf hΘ0 hC' hsm hS hG hKer hW hA2 hA13 hE72 hP hE73 hE74 hLat
-    hE hCut hA4 R
-  set C : ℝ := max C₀ CJ with hC
-  have hCC0 : C₀ ≤ C := le_max_left _ _
-  have hCCJ : CJ ≤ C := le_max_right _ _
-  have hCpos : 0 ≤ C := by linarith
-  have hΘ1 : 1 ≤ Θ := le_trans (le_max_right _ _) hC'
-  have hΘ3 : 3 * C₁ ≤ Θ := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hC'
-  have hΘJ : C'J ≤ Θ := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hC'
-  set y : ℝ := Θ ^ (-((D.K : ℝ) - 5 / 2)) with hy
-  have hy0 : 0 ≤ y := Real.rpow_nonneg hΘ0.le _
-  have hK4 : (4 : ℝ) ≤ (D.K : ℝ) := by exact_mod_cast hK
-  have hy1 : y ≤ Θ⁻¹ := by
-    rw [← Real.rpow_neg_one]
-    exact Real.rpow_le_rpow_of_exponent_le hΘ1 (by linarith)
-  set ep : ℝ := (C₁ * y) ^ D.f with hep
-  have hep0 : 0 ≤ ep := by positivity
-  have ha : 3 ^ D.f * ep = (3 * C₁ * y) ^ D.f := by rw [hep, ← mul_pow, mul_assoc]
-  have h3y : 3 * C₁ * y ≤ 1 := by
-    calc 3 * C₁ * y ≤ Θ * Θ⁻¹ := mul_le_mul hΘ3 hy1 hy0 hΘ0.le
-      _ = 1 := mul_inv_cancel₀ hΘ0.ne'
-  have ha1 : 3 ^ D.f * ep ≤ 1 := by
-    rw [ha]; exact pow_le_one₀ (by positivity) h3y
-  have ha0 : 0 ≤ 3 ^ D.f * ep := by positivity
-  have haC : 3 ^ D.f * ep ≤ (C₀ * y) ^ D.f := by
-    rw [ha]; exact pow_le_pow_left₀ (by positivity) (mul_le_mul_of_nonneg_right hC03 hy0) _
-  have hb : 2 ^ D.f * ep ≤ 3 ^ D.f * ep :=
-    mul_le_mul_of_nonneg_right (pow_le_pow_left₀ (by norm_num) (by norm_num) _) hep0
-  have he : ∀ i, 1 ≤ i → i ≤ D.r + 1 → 0 ≤ D.e i ∧ D.e i ≤ 1 := fun i h1 h2 =>
-    (hA13 i 1 le_rfl h1 h2).1
-  set e' : ℕ → ℝ := fun i => if 1 ≤ i ∧ i ≤ D.r + 1 then D.e i else 0 with he'
-  have he'0 : ∀ i, 0 ≤ e' i := by
-    intro i; simp only [he']; split_ifs with h
-    · exact (he i h.1 h.2).1
-    · exact le_rfl
-  have hprod : ∏ i ∈ Icc 1 (D.r + 1), (1 + e' i) = ∏ i ∈ Icc 1 (D.r + 1), (1 + D.e i) := by
-    apply Finset.prod_congr rfl
-    intro i hi; rw [Finset.mem_Icc] at hi
-    simp only [he', if_pos hi]
-  have hprod0 : 0 ≤ ∏ i ∈ Icc 1 (D.r + 1), (1 + D.e i) := by
-    apply Finset.prod_nonneg
-    intro i hi; rw [Finset.mem_Icc] at hi
-    have := (he i hi.1 hi.2).1; linarith
-  have hx0 : 0 ≤ (C₀ / Θ) ^ D.f := by positivity
-  have hxy : (C₀ / Θ) ^ D.f ≤ (C / Θ) ^ D.f :=
-    pow_le_pow_left₀ (by positivity) (div_le_div_of_nonneg_right hCC0 hΘ0.le) _
-  have hr0 : (0 : ℝ) ≤ (D.r : ℝ) + 1 := by positivity
-  have hBJ : 1 + CJ * ((D.r : ℝ) + 1) * (C₀ / Θ) ^ D.f ≤ 1 + C * ((D.r : ℝ) + 1) * (C / Θ) ^ D.f := by
-    have s1 : CJ * ((D.r : ℝ) + 1) * (C₀ / Θ) ^ D.f ≤ C * ((D.r : ℝ) + 1) * (C₀ / Θ) ^ D.f :=
-      mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hCCJ hr0) hx0
-    have s2 : C * ((D.r : ℝ) + 1) * (C₀ / Θ) ^ D.f ≤ C * ((D.r : ℝ) + 1) * (C / Θ) ^ D.f :=
-      mul_le_mul_of_nonneg_left hxy (by positivity)
-    linarith
-  have hB0 : 0 ≤ 1 + C * ((D.r : ℝ) + 1) * (C / Θ) ^ D.f := by positivity
-  refine hLS E W D jn H Vt c hG hKer hE hCut hA4 _ ?_ R
-  intro T ε hε σ₀ hσ₀
-  have hempN : D.emp ∈ D.Wb D.Ntop := by
-    simp [Data.Wb, D.emp_mem, D.cnt_emp]
-  have hσ₀0 : 0 ≤ σ₀ := by
-    refine le_trans ?_ (hσ₀ D.emp hempN)
-    rw [D.wt_emp, div_one]; exact gram_diag D hG ε hε 0 D.emp []
-  set S : ℕ → NNReal := fun k => (D.Wb (D.budget k)).sup (fun w => (D.Q T ε k w).toNNReal) with hSd
-  set σ : ℕ → ℝ := fun k => √(S k : ℝ) with hσ
-  have hσ0 : ∀ k, 0 ≤ σ k := fun k => Real.sqrt_nonneg _
-  have hσsq : ∀ k, σ k ^ 2 = (S k : ℝ) := fun k => Real.sq_sqrt (NNReal.coe_nonneg _)
-  have hσQ : ∀ k, ∀ w ∈ D.Wb (D.budget k), D.Q T ε k w ≤ σ k ^ 2 := by
-    intro k w hw
-    rw [hσsq]
-    refine le_trans (Real.le_coe_toNNReal _) ?_
-    exact_mod_cast Finset.le_sup (f := fun w => (D.Q T ε k w).toNNReal) hw
-  have hSle : ∀ k (X : ℝ), 0 ≤ X → (∀ w ∈ D.Wb (D.budget k), D.Q T ε k w ≤ X) → (S k : ℝ) ≤ X := by
-    intro k X hX h
-    have : S k ≤ X.toNNReal := Finset.sup_le fun w hw => Real.toNNReal_le_toNNReal (h w hw)
-    calc (S k : ℝ) ≤ (X.toNNReal : ℝ) := by exact_mod_cast this
-      _ = X := Real.coe_toNNReal _ hX
-  have hσle : ∀ k (X : ℝ), 0 ≤ X → (∀ w ∈ D.Wb (D.budget k), √(D.Q T ε k w) ≤ X) → σ k ≤ X := by
-    intro k X hX h
-    apply Real.sqrt_le_iff.mpr
-    exact ⟨hX, hSle k _ (sq_nonneg X) fun w hw => (Real.sqrt_le_iff.mp (h w hw)).2⟩
-  have hb0 : D.budget 0 = D.Ntop := by simp [Data.budget, Data.Ntop]
-  have hσ00 : σ 0 ^ 2 ≤ σ₀ := by
-    rw [hσsq]
-    apply hSle 0 σ₀ hσ₀0
-    intro w hw
-    rw [Q0]; rw [hb0] at hw; exact hσ₀ w hw
-  have hrec : ∀ i, 1 ≤ i → i ≤ D.r + 1 →
-      σ i ≤ (1 + (C₀ * Θ ^ (-((D.K : ℝ) - 5 / 2))) ^ D.f) * √(1 + e' i) * σ (i - 1) +
-        ∑ t ∈ Icc 2 i, ((C₀ / Θ) ^ D.f) ^ (t - 1) * σ (i - t) := by
-    intro i hi1 hi
-    have hei : e' i = D.e i := by simp only [he', if_pos (And.intro hi1 hi)]
-    rw [hei]
-    apply hσle i
-    · apply add_nonneg
-      · exact mul_nonneg (mul_nonneg (by positivity) (Real.sqrt_nonneg _)) (hσ0 _)
-      · exact Finset.sum_nonneg fun t _ => mul_nonneg (by positivity) (hσ0 _)
-    intro w hw
-    refine le_trans (hOL E W D ep C₄ hG hKer hW hA2 hA13 hE72 hP hE73 hE74 hLat hep0 h4 hS.1
-      (size_le_one D Θ hΘ1 hS) T ε hε σ i hi1 hi (fun k _ => ⟨hσ0 k, hσQ k⟩) w hw) ?_
-    apply add_le_add
-    · apply mul_le_mul_of_nonneg_right _ (hσ0 _)
-      apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg _)
-      apply Real.sqrt_le_iff.mpr
-      refine ⟨by positivity, ?_⟩
-      have q1 : 0 ≤ 2 ^ D.f * ep := by positivity
-      nlinarith
-    · apply Finset.sum_le_sum
-      intro s hs; rw [Finset.mem_Icc] at hs
-      apply mul_le_mul_of_nonneg_right _ (hσ0 _)
-      exact coef D Θ C₄ C₀ _ _ hΘ1 h4 hC04 hf hS ha0 ha1 (he i hi1 hi).1 (he i hi1 hi).2 i s hs.1 hs.2 hi
-  have hfin := hJ (D.K : ℝ) Θ D.f D.r e' σ hK4 hf hΘJ
-    (small D.r D.f C C₀ Θ hΘ0 (by linarith) hCC0 hsm) he'0 hσ0 hrec
-  rw [hprod] at hfin
-  have hempB : D.emp ∈ D.Wb (D.budget (D.r + 1)) := by
-    simp [Data.Wb, D.emp_mem, D.cnt_emp]
-  have hQ := hσQ (D.r + 1) D.emp hempB
-  have hQS : D.Q T ε (D.r + 1) D.emp = D.Sf ε (D.r + 1) D.emp (T.X (D.r + 1)) := by
-    simp [Data.Q, D.wt_emp]
-  rw [hQS] at hQ
-  have hs0 : 0 ≤ σ 0 ^ 2 := sq_nonneg _
-  calc D.Sf ε (D.r + 1) D.emp (T.X (D.r + 1)) ≤ σ (D.r + 1) ^ 2 := hQ
-    _ ≤ (1 + CJ * ((D.r : ℝ) + 1) * (C₀ / Θ) ^ D.f) * (∏ i ∈ Icc 1 (D.r + 1), (1 + D.e i)) * σ 0 ^ 2 := hfin
-    _ ≤ (1 + C * ((D.r : ℝ) + 1) * (C / Θ) ^ D.f) * (∏ i ∈ Icc 1 (D.r + 1), (1 + D.e i)) * σ 0 ^ 2 :=
-        mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hBJ hprod0) hs0
-    _ ≤ (1 + C * ((D.r : ℝ) + 1) * (C / Θ) ^ D.f) * (∏ i ∈ Icc 1 (D.r + 1), (1 + D.e i)) * σ₀ :=
-        mul_le_mul_of_nonneg_left hσ00 (mul_nonneg hB0 hprod0)
-
 end Formalism.FourierDecayAlt.P.OneLevelCoefficients
 
 namespace Formalism.FourierDecayAlt.P
 
 theorem levelInequalityOfSteps : Formalism.FourierDecayAlt.TB.OneLevelOfSteps := OneLevelCoefficients.oneLevel_of_steps
-
-theorem towerBoundOfSteps : Formalism.FourierDecayAlt.TB.TheoremAOfSteps := OneLevelCoefficients.theoremA_of_steps
 
 end Formalism.FourierDecayAlt.P

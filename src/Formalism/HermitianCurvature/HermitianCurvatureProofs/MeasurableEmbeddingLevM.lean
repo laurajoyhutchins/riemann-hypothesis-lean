@@ -1,4 +1,46 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousZetaL
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftVectorZeroBlock
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ContDiff ENNReal
@@ -18,7 +60,7 @@ def projM (y : Mt k (1 + ρ)) : Mt k ρ := fun a b => y ⟨a.val + 1, by omega�
 theorem projM_levM (x : Mt k ρ) : projM (B2.levM k ρ x) = x := by
   funext a b
   simp only [projM, B2.levM, ιLev, Matrix.of_apply]
-  rw [dif_pos ⟨by omega, by omega⟩, dif_pos ⟨by omega, by omega⟩]
+  rw [dite_eq_left ⟨by omega, by omega⟩, dite_eq_left ⟨by omega, by omega⟩]
   rfl
 
 theorem continuous_levM : Continuous (B2.levM k ρ) := by
@@ -79,36 +121,6 @@ theorem pairAt_tr {t : ℂ} (ht : t ≠ 0) {μ : Measure (Mt k (1 + ρ))} {μs :
   rfl
 
 end pair
-
-def RadTransport : Prop :=
-  ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
-    [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (k ρ : ℕ)
-    (z z' : Fin (2 * ρ + k + 1) → ℂ) (π : Mx k (1 + ρ) → (Wp →L[ℂ] Wp)) (π' : Mx k (1 + ρ) → (Wq →L[ℂ] Wq))
-    (X : ActualOps k (1 + ρ) (liftVec k 1 ρ z) (liftVec k 1 ρ z') π π')
-    (Xs : ActualOps k ρ z z' (fun y => π (ιLev k 1 ρ y)) (fun y => π' (ιLev k 1 ρ y)))
-    (L : R.LevelData (Pr (RadSp k (1 + ρ) (liftVec k 1 ρ z) (liftVec k 1 ρ z') π π')) (1 + ρ))
-    (st : Fr.Start (Pr (RadSp k (1 + ρ) (liftVec k 1 ρ z) (liftVec k 1 ρ z') π π')))
-    (Ls : R.LevelData (Pr (RadSp k ρ z z' (fun y => π (ιLev k 1 ρ y)) (fun y => π' (ιLev k 1 ρ y)))) ρ)
-    (sts : Fr.Start (Pr (RadSp k ρ z z' (fun y => π (ιLev k 1 ρ y)) (fun y => π' (ιLev k 1 ρ y)))))
-    (s : ℂ) (μ : Measure (Mt k (1 + ρ))) (μs : Measure (Mt k ρ)),
-    inWb k ρ z → inWb k ρ z' → IsActualLevel X L → IsActualLevel Xs Ls →
-    (∀ Y, st.QQ Y = s • X.QQ Y) → (∀ Y, sts.QQ Y = s • Xs.QQ Y) →
-    B.IsHaarOn (Glev k (1 + ρ) (Fin.last (1 + ρ))) μ → B.IsHaarOn (Glev k ρ (Fin.last ρ)) μs →
-    (∀ ψ : ℂ → ℝ≥0∞, Measurable ψ →
-      ∫⁻ x, ψ (zetaL k (1 + ρ) (liftVec k 1 ρ z) (liftVec k 1 ρ z') (Fin.last (1 + ρ)) (Matrix.of x)) ∂μ =
-        ∫⁻ ζ, ENNReal.ofReal (B2.zWeight k (Tz k ρ z) (Tz k ρ z') ζ) * ψ ζ) →
-    (∀ ψ : ℂ → ℝ≥0∞, Measurable ψ →
-      ∫⁻ x, ψ (zetaL k ρ z z' (Fin.last ρ) (Matrix.of x)) ∂μs =
-        ∫⁻ ζ, ENNReal.ofReal (B2.zWeight k (Tz k ρ z) (Tz k ρ z') ζ) * ψ ζ) →
-    ∀ t : ℂ, t ≠ 0 →
-      ∃ T : RadSp k (1 + ρ) (liftVec k 1 ρ z) (liftVec k 1 ρ z') π π' →ₗ[ℂ]
-          RadSp k ρ z z' (fun y => π (ιLev k 1 ρ y)) (fun y => π' (ιLev k 1 ρ y)),
-        (∀ Φ c g, (T Φ : Fn k ρ (Wq →L[ℂ] Wp)) c g =
-          (Φ : Fn k (1 + ρ) (Wq →L[ℂ] Wp)) (consC t c) (ιLev k 1 ρ g)) ∧
-        (∀ (Y : ℂ) (a b : Fin 2) Φ,
-          ((P5.QQi Ls sts 0 Y) a b).1 (T Φ) = T (((P5.QQi L st 1 Y) a b).1 Φ) ∧
-          ((P5.QQi Ls sts 0 Y) a b).2.unop (T Φ) = T (((P5.QQi L st 1 Y) a b).2.unop Φ)) ∧
-        ∀ Φ Ψ c, P5.pairAt μs (T Φ) (T Ψ) c = P5.pairAt μ Φ Ψ (consC t c)
 
 end Formalism.FourierDecayAlt.P.PBH
 

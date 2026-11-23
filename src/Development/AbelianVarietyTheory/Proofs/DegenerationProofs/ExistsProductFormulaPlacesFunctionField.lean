@@ -1,10 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValNorm
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValNorm
+import ReciprocityTheory.SemistableReduction.AlgAll
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraMapOLInjective
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.SS.PlacesExt
@@ -78,8 +128,8 @@ section Ext
 variable {k F L : Type} [Field k] [Field F] [Algebra k F] [Field L] [Algebra F L]
   [FiniteDimensional F L] [Algebra.IsSeparable F L] (Pl : Places k F)
 
-variable (L) in
 
+variable (L) in
 theorem exists_local (i : Pl.I) [IsDiscreteValuationRing (Pl.O i)] :
     ∃ (J : Type) (_ : Finite J) (O' : J → ValuationSubring L) (w : J → Lˣ → ℤ),
       (∀ j x y, w j (x * y) = w j x + w j y) ∧ (∀ j (x : Lˣ), (x : L) ∈ O' j ↔ 0 ≤ w j x) ∧
@@ -125,8 +175,8 @@ theorem exists_local (i : Pl.I) [IsDiscreteValuationRing (Pl.O i)] :
       exact hN
     rw [this, Pl.v_mul, v_zpow, v_unit Pl i hu (Units.mk0 _ hu0) rfl, add_zero, finsum_mul' _ _ (Set.toFinite _)]
 
-variable (L) in
 
+variable (L) in
 theorem exists_ext [Algebra k L] [IsScalarTower k F L] (hD : ∀ i, IsDiscreteValuationRing (Pl.O i)) :
     ∃ Pl' : Places k L, ∀ y : L, (∀ j, y ∈ Pl'.O j) → ∀ i, IsIntegral (Pl.O i) y := by
   classical

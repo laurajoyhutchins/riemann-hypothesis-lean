@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmAtSmulRight
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ImportsBis
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmAtSmulRight
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ImportsBis
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -9,15 +55,9 @@ open GlobalTheory.FockCompare GlobalTheory.VacUnique
 namespace GlobalTheory.VacUnique.Den
 
 theorem exists_nsmul_mem_lattice {E : Type} [Field E] [NumberField E] {n : ℕ}
-    (Λ : Submodule (𝓞 E) (Fin n → E)) (h : Submodule.IsLattice E Λ) (v : Fin n → E) :
+    (Λ : Submodule (𝓞 E) (Fin n → E)) (h : Submodule.IsFullLattice E Λ) (v : Fin n → E) :
     ∃ N : ℕ, 0 < N ∧ N • v ∈ Λ := by
-  first
-  | exact @_root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem
-  | exact _root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem
-  | (apply _root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem <;> assumption)
-  | (intros; apply _root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem ..)
+  exact _root_.GlobalTheory.NatMulIntegralNsmul.exists_nsmul_mem Λ h v
 
 theorem AA_ne_zero (D : D7) : D.host.AA ≠ 0 := by
   refine mul_ne_zero ?_ (inv_ne_zero ?_)
@@ -30,7 +70,7 @@ theorem AA_ne_zero (D : D7) : D.host.AA ≠ 0 := by
     rw [h, Ideal.bot_mul] at h1
     exact differentIdeal_ne_bot h1
 
-theorem exists_nsmul_finRat_mem : ∀ (D : D7) (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E)) (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)), Submodule.IsLattice D.host.E ΛS → Submodule.IsLattice D.host.E ΛT → ∀ γ : Matrix (Fin T.rank) (Fin S.rank) D.host.E, ∃ N : ℕ, 0 < N ∧ N • finRat S T γ ∈ (latO S T (ΛS : Set (Fin S.rank → D.host.E)) (ΛT : Set (Fin T.rank → D.host.E)) fun _ => True) := by
+theorem exists_nsmul_finRat_mem : ∀ (D : D7) (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E)) (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)), Submodule.IsFullLattice D.host.E ΛS → Submodule.IsFullLattice D.host.E ΛT → ∀ γ : Matrix (Fin T.rank) (Fin S.rank) D.host.E, ∃ N : ℕ, 0 < N ∧ N • finRat S T γ ∈ (latO S T (ΛS : Set (Fin S.rank → D.host.E)) (ΛT : Set (Fin T.rank → D.host.E)) fun _ => True) := by
   intro D S T ΛS ΛT hS hT γ
   obtain ⟨a, ha, ha0⟩ : ∃ a ∈ D.host.AA, a ≠ 0 := by
     by_contra hc
@@ -41,7 +81,7 @@ theorem exists_nsmul_finRat_mem : ∀ (D : D7) (S T : HSp D) (ΛS : Submodule (�
   refine Finset.sum_induction _ (fun γ => ∃ N : ℕ, 0 < N ∧ N • finRat S T γ ∈ (latO S T (ΛS : Set (Fin S.rank → D.host.E)) (ΛT : Set (Fin T.rank → D.host.E)) fun _ => True)) ?_ ?_ ?_
   · rintro x y ⟨N, hN, hx⟩ ⟨M, hM, hy⟩
     refine ⟨N * M, mul_pos hN hM, ?_⟩
-    rw [AddMonoidHom.map_add, nsmul_add]
+    rw [AddMonoidHom.map_add (f := _), nsmul_add]
     refine add_mem ?_ ?_
     · rw [mul_nsmul]; exact nsmul_mem hx M
     · rw [mul_nsmul']; exact nsmul_mem hy N

@@ -1,9 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PullChartIsLB
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUniqueIsRatio
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsPartPartSec
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GroupAlgebraSingleOneMemOfSpan
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPowEqTorus
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsPartPartSec
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPowEqTorus
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUniqueIsRatio
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.GroupAlgebraSingleOneMemOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -151,7 +199,7 @@ def satur {C C' : Type} [CommRing C] [CommRing C'] (σ : C →+* C') (F : C) (R 
     rintro a b ⟨n, r, hr, e⟩ ⟨m, s, hs, e'⟩
     refine ⟨n + m, F ^ m * r + F ^ n * s,
       R.add_mem (R.mul_mem (R.pow_mem hF _) hr) (R.mul_mem (R.pow_mem hF _) hs), ?_⟩
-    rw [map_add, map_mul, map_mul, map_pow, map_pow, ← e, ← e']
+    rw [map_add (f := _), map_mul, map_mul, map_pow, map_pow, ← e, ← e']
     ring
   mul_mem' := by
     rintro a b ⟨n, r, hr, e⟩ ⟨m, s, hs, e'⟩
@@ -173,7 +221,7 @@ theorem ratios_generate : (∀ (k : Type) [Field k] [IsAlgClosed k] (Φ : FibPre
         rw [map_zero, zero_mul]; exact R.zero_mem
       add_mem' := fun {a b} ha hb => by
         show _ ∈ R
-        rw [map_add, add_mul]; exact R.add_mem ha hb
+        rw [map_add (f := _), add_mul]; exact R.add_mem ha hb
       smul_mem' := fun c a ha => by
         show _ ∈ R
         rw [smul_eq_mul, map_mul, _root_.mul_assoc]; exact R.mul_mem (h0 c) ha }

@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.PairHermSmulRight
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.LatBasOHolds
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUnifOIff
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.CountUOfBas
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.CountUOfBas
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.RelIndexSmulSub
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.LatBasOHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUnifOIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +80,7 @@ theorem latIdx (b : Fin (2 * n) → Fin n → Fv F v ⊗[F] E) (hb : LinearIndep
       obtain ⟨d, rfl⟩ := (hmem z).1 hz
       refine ⟨d i, ?_⟩
       have e : ∑ i, (c i : Fv F v) • b i = ∑ i, (ϖ * d i) • b i := by
-        have : (DistribMulAction.toAddMonoidHom (Fin n → Fv F v ⊗[F] E) (sc (E := E) v ϖ))
+        have : (DistribSMul.toAddMonoidHom (Fin n → Fv F v ⊗[F] E) (sc (E := E) v ϖ))
             (∑ i, (d i : Fv F v) • b i) = ∑ i, (ϖ * d i) • b i := by
           show sc (E := E) v ϖ • ∑ i, (d i : Fv F v) • b i = _
           rw [Finset.smul_sum]
@@ -73,7 +114,7 @@ theorem lamIdx (a : ℕ) (b : Fin (2 * n) → Fin n → Fv F v ⊗[F] E) (hb : L
     rw [← hV, AddSubgroup.relIndex, AddSubgroup.index]
   rw [hq, ← pow_mul]
 
-theorem basis_of (hCM : IsCMExt F E σ) (L : Submodule (𝓞 E) (Fin n → E)) (hLat : Submodule.IsLattice E L) :
+theorem basis_of (hCM : IsCMExt F E σ) (L : Submodule (𝓞 E) (Fin n → E)) (hLat : Submodule.IsFullLattice E L) :
     ∃ b : Fin (2 * n) → (Fin n → Fv F v ⊗[F] E), LinearIndependent (Fv F v) b ∧
       ∀ x, x ∈ latLoc (E := E) v (L : Set (Fin n → E)) ↔
         ∃ c : Fin (2 * n) → v.adicCompletionIntegers F, x = ∑ i, (c i : Fv F v) • b i := by
@@ -96,17 +137,20 @@ theorem smul_tup {a : ℕ} (ϖ : Fv F v) (p : TupV (E := E) v n a) : ϖ • p = 
   rw [Algebra.smul_def]
   rfl
 
-theorem idxPiW_std (a : ℕ) (hS : StdHyp σ J ψ) : IdxPiW v Λ a := by
-  rintro ⟨L, hLat, rfl⟩ _ ϖ hϖ
+theorem idxPiW_std (a : ℕ) (hS : StdHyp σ J ψ)
+    (hFull : ∃ L : Submodule (𝓞 E) (Fin n → E),
+      Submodule.IsFullLattice E L ∧ (L : Set (Fin n → E)) = Λ) : IdxPiW v Λ a := by
+  obtain ⟨L, hLat, rfl⟩ := hFull
+  rintro _ _ ϖ hϖ
   obtain ⟨b, hb, hmem⟩ := basis_of σ v hS.1 L hLat
   have e : smulSub ϖ (LW v (L : Set (Fin n → E)) a) = lamP v (L : Set (Fin n → E)) a ϖ := by
     ext X
     rw [mem_smulSub, lamP, AddSubgroup.mem_map]
     constructor
     · rintro ⟨p, hp, rfl⟩
-      exact ⟨p, hp, by rw [DistribMulAction.toAddMonoidHom_apply, smul_tup]⟩
+      exact ⟨p, hp, by rw [DistribSMul.toAddMonoidHom_apply, smul_tup]⟩
     · rintro ⟨p, hp, rfl⟩
-      exact ⟨p, hp, by rw [DistribMulAction.toAddMonoidHom_apply, smul_tup]⟩
+      exact ⟨p, hp, by rw [DistribSMul.toAddMonoidHom_apply, smul_tup]⟩
   have e2 : LW v (L : Set (Fin n → E)) a = lamA v (L : Set (Fin n → E)) a := AddSubgroup.ext fun _ => Iff.rfl
   rw [e, e2, lamIdx v _ a b hb hmem (resIdx_holds v) ϖ hϖ, qv]
   push_cast

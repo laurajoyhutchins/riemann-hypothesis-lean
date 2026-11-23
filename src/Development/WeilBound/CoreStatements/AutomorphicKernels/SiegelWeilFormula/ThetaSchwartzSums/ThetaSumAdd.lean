@@ -1,4 +1,44 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AuxiliaryPrimeFunction
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AuxiliaryPrimeFunction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +64,7 @@ def Tl : d.Fn →ₗ[ℂ] (Mx F E d.m d.n → ℂ) where
   toFun := d.T
   map_add' Φ Φ' := by
     funext X
-    simp only [SD.T, Pi.add_apply, rho_add, map_add]
+    simp only [SD.T, Pi.add_apply, rho_add, map_add (f := _)]
   map_smul' a Φ := by
     funext X
     simp only [SD.T, Pi.smul_apply, rho_smul, map_smul, RingHom.id_apply]
@@ -35,7 +75,7 @@ def secl : d.Fn →ₗ[ℂ] (d.G → ℂ) where
   toFun := d.sec0
   map_add' Φ Φ' := by
     funext x
-    simp only [SD.sec0, Pi.add_apply, map_add]
+    simp only [SD.sec0, Pi.add_apply, map_add (f := _)]
   map_smul' a Φ := by
     funext x
     simp only [SD.sec0, Pi.smul_apply, map_smul, RingHom.id_apply]
@@ -55,7 +95,7 @@ theorem thetaSum_add (hT : TTheta) {Φ Φ' : d.Fn} (h : Φ ∈ d.sch) (h' : Φ' 
   have h3 := (hT F E σ d (Φ + Φ') (d.sch.add_mem h h')).1
   have h4 := h1.add h2
   rw [← Tl_apply] at h3
-  simp only [map_add, Pi.add_apply, Tl_apply] at h3
+  simp only [map_add (f := _), Pi.add_apply, Tl_apply] at h3
   exact h3.unique h4
 
 theorem thetaSum_smul (hT : TTheta) (a : ℂ) {Φ : d.Fn} (h : Φ ∈ d.sch) : thetaSum F (a • Φ) = a * thetaSum F Φ := by
@@ -73,7 +113,7 @@ theorem I_add (hT : TTheta) (hA : ThetaAuto) {Φ Φ' : d.Fn} (h : Φ ∈ d.sch) 
   have i2 := ((hA F E σ d).2.2 Φ' h').1 x
   have e : ∀ g, thetaSum F (d.om x (d.S g (Φ + Φ'))) = thetaSum F (d.om x (d.S g Φ)) + thetaSum F (d.om x (d.S g Φ')) :=
     fun g => by
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       exact thetaSum_add d hT (om_mem d x (S_mem d g h)) (om_mem d x (S_mem d g h'))
   simp only [SD.I, thetaMean, Pi.add_apply, e]
   rw [average_eq, average_eq, average_eq, integral_add i1 i2, smul_add]

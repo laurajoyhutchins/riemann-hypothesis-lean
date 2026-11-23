@@ -1,10 +1,54 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapUSharp
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ValuationOfValuationModSquare
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PeriodRingBaseChangeFromUniversal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EpsilonCyclotomicElementProperties
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompShiftZero
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapUSharp
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.ObFacts
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompShiftZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PeriodRingBaseChangeFromUniversal
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.FaceMapCompSuccAboveCastSucc
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry DividedPowers GroundTheory.PAdicHodge GlobalTheory.LogCris GlobalTheory.PDA CrystallineSemistableComparison CrystallineSemistableComparison.CH CrystallineSemistableComparison.PAlg CrystallineSemistableComparison.B
 universe w v u t
@@ -18,35 +62,40 @@ section Generic
 variable {𝓐 : Type u} [Category.{v} 𝓐] (W : ObjectProperty 𝓐) (P : 𝓐 ⥤ Type t)
 
 def jG : (W.ι ⋙ P).Elements ⥤ P.Elements where
-  obj T := ⟨T.1.obj, T.2⟩
-  map f := ⟨f.1.hom, f.2⟩
+  obj T := P.elementsMk (W.ι.obj T.obj) T.val
+  map f := Functor.Elements.homMk (W.ι.map f.hom) f.map_val
   map_id _ := rfl
   map_comp _ _ := rfl
 
 def toPts (T : P.Elements) : StructuredArrow T (jG W P) ⥤ (pts W.ι T.1).Elements where
-  obj x := ⟨x.right.1, x.hom.1⟩
-  map {x x'} f := ⟨f.right.1, congrArg Subtype.val (StructuredArrow.w f)⟩
+  obj x := (pts W.ι T.obj).elementsMk x.right.obj x.hom.hom
+  map f := Functor.Elements.homMk f.right.hom
+    (congrArg Functor.Elements.Hom.hom (StructuredArrow.w f))
   map_id _ := rfl
   map_comp _ _ := rfl
 
 instance (T : P.Elements) : (toPts W P T).Faithful :=
-  ⟨fun {x x'} {f g} h => StructuredArrow.hom_ext _ _ (Subtype.ext
-    (congrArg (fun z : (toPts W P T).obj x ⟶ (toPts W P T).obj x' => z.1) h))⟩
+  ⟨fun {x x'} {_ _} h => StructuredArrow.hom_ext _ _
+    (Functor.Elements.hom_ext
+      (congrArg (fun z : (toPts W P T).obj x ⟶ (toPts W P T).obj x' => z.hom) h))⟩
 
 instance (T : P.Elements) : (toPts W P T).Full :=
   ⟨fun {x x'} g => by
-    have hw : x.hom.1 ≫ g.1.hom = x'.hom.1 := g.2
-    have a : P.map x.hom.1 T.2 = x.right.2 := x.hom.2
-    have a' : P.map x'.hom.1 T.2 = x'.right.2 := x'.hom.2
-    have h2 : P.map g.1.hom x.right.2 = x'.right.2 := by
+    have hw : x.hom.hom ≫ W.ι.map g.hom = x'.hom.hom := g.map_val
+    have a : P.map x.hom.hom T.val = x.right.val := x.hom.map_val
+    have a' : P.map x'.hom.hom T.val = x'.right.val := x'.hom.map_val
+    have h2 : P.map (W.ι.map g.hom) x.right.val = x'.right.val := by
       rw [← a, ← a', ← hw, Functor.map_comp_apply]
       rfl
-    refine ⟨StructuredArrow.homMk ⟨g.1, h2⟩ (Subtype.ext hw), rfl⟩⟩
+    exact ⟨StructuredArrow.homMk (Functor.Elements.homMk g.hom h2)
+      (Functor.Elements.hom_ext hw), Functor.Elements.hom_ext rfl⟩⟩
 
-def ptOf (T : P.Elements) (e : (pts W.ι T.1).Elements) : (W.ι ⋙ P).Elements := ⟨e.1, P.map e.2 T.2⟩
+def ptOf (T : P.Elements) (e : (pts W.ι T.obj).Elements) : (W.ι ⋙ P).Elements :=
+  (W.ι ⋙ P).elementsMk e.obj (P.map (show T.obj ⟶ W.ι.obj e.obj from e.val) T.val)
 
 instance (T : P.Elements) : (toPts W P T).EssSurj :=
-  ⟨fun e => ⟨StructuredArrow.mk (Y := ptOf W P T e) ⟨e.2, rfl⟩, ⟨Iso.refl _⟩⟩⟩
+  ⟨fun e => ⟨StructuredArrow.mk (Y := ptOf W P T e)
+    (Functor.Elements.homMk (show T.obj ⟶ W.ι.obj e.obj from e.val) rfl), ⟨Iso.refl _⟩⟩⟩
 
 instance (T : P.Elements) : (toPts W P T).IsEquivalence := { }
 
@@ -59,7 +108,7 @@ def mor (T : P.Elements) :
     Mor (elF (pts W.ι T.1) (W.ι ⋙ Ff)) (StructuredArrow.proj T (jG W P) ⋙ jG W P ⋙ Gf) (RingHom.id R) where
   G := toPts W P T
   τ x := (θ ((jG W P).obj x.right)).toLinearMap
-  nat {x x'} φ y := hθ ((jG W P).map φ.right) y
+  nat φ y := hθ ((jG W P).map φ.right) y
 
 include hθ in
 theorem mor_aug (T : P.Elements) (y : Ff.obj T.1) :
@@ -77,8 +126,8 @@ theorem res_of_comp {K : Cx.{w} R} {M M' : Type*} [AddCommGroup M] [AddCommGroup
   · obtain ⟨x, hx⟩ := h2 y hy
     exact ⟨e x, hx⟩
 
-include hθ in
 
+include hθ in
 theorem desc_of_des (s : R) (h : CrystallineSemistableComparison.D.DesJ W.ι Ff s) : Desc s Gf (jG W P) := by
   intro T
   let m := mor W P Ff Gf θ hθ T
@@ -120,22 +169,22 @@ def stepEquiv (T : P.Elements) :
       obtain ⟨x, hx⟩ := (v_mem T _).1 y.2
       exact ⟨x, Subtype.ext hx⟩⟩
 
-include v_add v_smul v_inj v_mem in
 
+include v_add v_smul v_inj v_mem in
 theorem desc_step (v_nat : ∀ {T T' : P.Elements} (f : T ⟶ T') (x : Ff.obj T.1),
       v T' ((Ff.map f.1).hom x) = (gG.map f).φ (v T x)) (s : Λ) (h : CrystallineSemistableComparison.D.DesJ W.ι Ff s) :
     Desc s (((pdFlt L c ρ hρ μ hμ).comap gG).S r).fn (jG W P) :=
   desc_of_des W P Ff _ (stepEquiv P c gG Ff ρ hρ μ hμ r v v_add v_smul v_inj v_mem)
     (fun f x => Subtype.ext (v_nat f x)) s h
 
-include hρ in
 
+include hρ in
 theorem raise (T : Thick L) (ξ : Λ) (hξ : T.i (c ξ) ∈ T.J) (x : (OM L c).obj T)
     (hx : x ∈ (pdS L c (ρ r)).S T) : ξ • x ∈ (pdS L c (ρ (r + 1))).S T :=
   T.pdPow_anti (hρ.2 r) (mul_pdPow L T _ hξ hx)
 
-include hρ in
 
+include hρ in
 theorem desc_flt {C' : Type*} [Category C'] (G : C' ⥤ P.Elements) (μ' ξ : Λ) (hμ' : μ = μ' * ξ)
     (hm : ∀ T : P.Elements, (gG.obj T).i (c ξ) ∈ (gG.obj T).J)
     (h : ∀ r, Desc μ' (((pdFlt L c ρ hρ μ hμ).comap gG).S r).fn G) :
@@ -205,7 +254,7 @@ theorem desc_fil (ε : Eps l) (k : Bool) (n : ℕ) (ρ : ℕ → ℕ) (hρ : Slo
 
 end Main
 
-set_option maxHeartbeats 1000000 in
+
 theorem des_qk {l : ℕ} [Fact l.Prime] (hOut : D.Out l) (ε : Eps l)
     (h1 : D.InWm l (WittVector.teichmuller l (ε.e 1 : Ob l) - 1)) (n m : ℕ) :
     CrystallineSemistableComparison.D.Des (FilF l n m) (ε.qk 1 - 1) := by

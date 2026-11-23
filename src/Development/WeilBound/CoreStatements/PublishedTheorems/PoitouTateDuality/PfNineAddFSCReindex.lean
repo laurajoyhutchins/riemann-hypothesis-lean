@@ -1,5 +1,47 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.PoitouTate.PoitouTateNineTermGs
+module
+
+public import GroundTheory.ProfiniteCohomology.PoitouTate.PtCompactDualMapEqZeroOfPtCompactToGlobalEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,34 +103,10 @@ theorem locSq_reindex {κ : Type} (e : κ ≃ ι) (M : Rep.{0} (ULift.{0} ℤ) G
   funext k
   rw [ptGlobalToLocal_reindex, sq]
 
-theorem trSq_reindex [Fintype ι] {κ : Type} [Fintype κ] (e : κ ≃ ι)
-    (D : Rep.{0} (ULift.{0} ℤ) G) [IsDiscreteRep D] (M : Rep.{0} (ULift.{0} ℤ) G) [IsDiscreteRep M]
-    [Finite M] (inv : ∀ v, cohomology (Rep.res (φ v).toMonoidHom D) 2 →+ QZ) {r s : ℕ}
-    (h : r + s = 2) {N : ℕ} [NeZero N] {Xk : κ → Type} [∀ k, AddCommGroup (Xk k)]
-    [∀ k, Module (ZMod N) (Xk k)] {Y : Type} [AddCommGroup Y] [Module (ZMod N) Y]
-    {Yk : κ → Type} [∀ k, AddCommGroup (Yk k)] [∀ k, Module (ZMod N) (Yk k)]
-    (resY : ∀ k, Y →ₗ[ZMod N] Yk k) (P : ∀ k, Xk k →ₗ[ZMod N] Yk k →ₗ[ZMod N] ZMod N)
-    (Ex : ∀ k, Xk k ≃+ cohomology (Rep.res (φ (e k)).toMonoidHom M) r)
-    (Ey : Y ≃+ cohomology (dualRep D M) s)
-    (Eyk : ∀ k, Yk k ≃+ cohomology (Rep.res (φ (e k)).toMonoidHom (dualRep D M)) s)
-    (hres : ∀ k y, Eyk k (resY k y) = ptRes φ (dualRep D M) (e k) s (Ey y)) (ε : ℤ)
-    (hQ : ∀ k a b, ptLocalPairing φ D M inv (e k) h (Ex k a) (Eyk k b) = ε • zmodToQZ N (P k a b))
-    (x : ∀ k, Xk k) (y : cohomology (dualRep D M) s) :
-    ptLocalDualMap φ D M inv h
-        (reindexAdd (fun v => cohomology (Rep.res (φ v).toMonoidHom M) r) e (fun k => Ex k (x k))) y =
-      ε • zmodToQZ N (∑ k, P k (x k) (resY k (Ey.symm y))) := by
-  rw [ptLocalDualMap_reindex, map_sum, Finset.smul_sum]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [← hQ, hres, AddEquiv.apply_symm_apply]
-
 def finsetCoeEquiv {α : Type} (S : Finset α) : S ≃ (S : Set α) where
   toFun v := ⟨v.1, Finset.mem_coe.2 v.2⟩
   invFun w := ⟨w.1, Finset.mem_coe.1 w.2⟩
   left_inv _ := rfl
   right_inv _ := rfl
-
-theorem ptRes_comp_reindex {κ : Type} (e : κ ≃ ι) (M : Rep.{0} (ULift.{0} ℤ) G) [IsDiscreteRep M]
-    (k : κ) (r : ℕ) (x : cohomology M r) :
-    ptRes (fun k => φ (e k)) M k r x = ptRes φ M (e k) r x := rfl
 
 end PositivityTheory.Lit1.PTN

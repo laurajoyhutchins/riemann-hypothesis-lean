@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitHermOfDet
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.MeasurableSetIntF
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitHermOfDet
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.MeasurableSetIntF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.IsSchwartzBruhatOfProd
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.Published.SiegelOneVector GlobalTheory.CompanionTheory.SiegelND GlobalTheory.CompanionTheory.SiegelND.Coef
 open scoped TensorProduct ENNReal
 
@@ -18,6 +62,7 @@ theorem map_eq_sum (f : R →ₐ[F] R') {d : ℕ} (b : Module.Basis (Fin d) F E)
     Algebra.TensorProduct.map f (AlgHom.id F E) x =
       ∑ k, f ((Algebra.TensorProduct.basis R b).repr x k) ⊗ₜ[F] b k := by
   conv_lhs => rw [← (Algebra.TensorProduct.basis R b).sum_repr x]
+
   simp [map_sum, Algebra.TensorProduct.basis_apply, TensorProduct.smul_tmul']
 
 theorem repr_map (f : R →ₐ[F] R') {d : ℕ} (b : Module.Basis (Fin d) F E) (x : R ⊗[F] E) (k : Fin d) :
@@ -36,6 +81,7 @@ theorem trace_map (f : R →ₐ[F] R') {d : ℕ} (b : Module.Basis (Fin d) F E) 
   have h1 : ∀ e : E, Algebra.trace R' (R' ⊗[F] E) ((1 : R') ⊗ₜ[F] e) = algebraMap F R' (Algebra.trace F E e) := by
     intro e
     rw [Algebra.trace_apply, Algebra.trace_apply, ← Algebra.baseChange_lmul, LinearMap.trace_baseChange]
+
   rw [map_eq_sum f b x, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   have h2 : ∀ (a : R') (e : E), a ⊗ₜ[F] e = a • ((1 : R') ⊗ₜ[F] e) := by
@@ -73,7 +119,7 @@ theorem mem_latH_iff (σ : E →ₐ[F] E) {d : ℕ} (b : Module.Basis (Fin d) F 
         ∀ i j, i < j → ∀ k, cf v b ((y : Matrix (Fin n) (Fin n) (AF F ⊗[F] E)) i j) k ∈
           v.adicCompletionIntegers F := by
   unfold latH
-  simp only [Set.mem_setOf_eq, hermV_apply, trace_map _ b, repr_map]
+  simp only [Set.mem_ofPred_eq, hermV_apply, trace_map _ b, repr_map]
   rfl
 
 theorem ev_rat (a : F) :
@@ -133,13 +179,13 @@ theorem measurableSet_latH (σ : E →ₐ[F] E) {d : ℕ} (b : Module.Basis (Fin
         (fun y : HermR (AF F) σ n => cf v b ((y : Matrix (Fin n) (Fin n) (AF F ⊗[F] E)) i j) k) ⁻¹'
           (v.adicCompletionIntegers F : Set (Fv F v)) := by
     ext y
-    simp only [Set.mem_setOf_eq, mem_latH_iff, Set.mem_inter_iff, Set.mem_iInter, Set.mem_preimage, SetLike.mem_coe]
+    simp only [Set.mem_ofPred_eq, mem_latH_iff, Set.mem_inter_iff, Set.mem_iInter, Set.mem_preimage, SetLike.mem_coe]
   rw [hset]
   refine MeasurableSet.inter (MeasurableSet.iInter fun i => ?_) (MeasurableSet.iInter fun i =>
     MeasurableSet.iInter fun j => MeasurableSet.iInter fun _ => MeasurableSet.iInter fun k =>
       (hO.preimage (hc i j k)).measurableSet)
   refine (hO.preimage ?_).measurableSet
-  exact continuous_const.mul (continuous_finset_sum _ fun k _ => (hc i i k).mul continuous_const)
+  exact continuous_const.mul (continuous_finsetSum _ fun k _ => (hc i i k).mul continuous_const)
 
 theorem measurableSet_intH (σ : E →ₐ[F] E) {d : ℕ} (b : Module.Basis (Fin d) F E) {n : ℕ}
     (S : Finset (HeightOneSpectrum (𝓞 F))) :
@@ -165,11 +211,12 @@ theorem continuous_chiT (σ : E →ₐ[F] E) {n : ℕ} (ψ : AddChar (AF F) ℂ)
       fun y : HermR (AF F) σ n => ∑ a, ∑ c, Algebra.trace (AF F) (AF F ⊗[F] E)
         (T.map (inclR (AF F)) a c * (y : Matrix (Fin n) (Fin n) (AF F ⊗[F] E)) c a) := by
     funext y
+
     simp only [Matrix.trace, Matrix.diag_apply, Matrix.mul_apply, map_sum]
   have ht : Continuous fun y : HermR (AF F) σ n => Algebra.trace (AF F) (AF F ⊗[F] E)
       (Matrix.trace (T.map (inclR (AF F)) * (y : Matrix (Fin n) (Fin n) (AF F ⊗[F] E)))) := by
     rw [hs]
-    exact continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun c _ =>
+    exact continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun c _ =>
       (hl _).comp (continuous_entry σ c a)
   exact hψ.comp (continuous_const.mul ht).neg
 

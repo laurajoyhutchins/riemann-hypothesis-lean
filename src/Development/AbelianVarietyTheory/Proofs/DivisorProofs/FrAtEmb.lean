@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FibExtMarked
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilGramSignature
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+public import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadingsExistRow
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FibExtMarked
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,8 +76,8 @@ end Rec
 
 variable {T : CoreJ D} [Algebra T.Q.c.F D.what₂.LL] {R : RealDat D A T.Q.c.F} {i : Fin D.R.m}
 
-variable (T R i) in
 
+variable (T R i) in
 abbrev OM : Type 1 := OMDat T.toCore R i Unit (fun _ => A.μ0)
 
 abbrev Pinned (κ : ∀ i : Fin D.R.m, WeightFamilies.Wt D ((i : ℕ) + 1)) (v₀ : ∀ (i : Fin D.R.m) (σ : D.what₂.LL →+* ℂ), (R.MW i σ).Vec)
@@ -45,17 +86,17 @@ abbrev Pinned (κ : ∀ i : Fin D.R.m, WeightFamilies.Wt D ((i : ℕ) + 1)) (v�
 
 abbrev sOf (O : OM T R i) (σ' : O.c'.F →+* ℂ) : T.Q.c.F →+* ℂ := σ'.comp (incF T.Q.c O.c' O.hle)
 
-omit [Algebra T.Q.c.F D.what₂.LL] in
 
+omit [Algebra T.Q.c.F D.what₂.LL] in
 abbrev dictS {s : T.Q.c.F →+* ℂ} (hV : T.V ((i : ℕ) + 1) s = Wc D i) :
     GA D (Wc D i) → Σ k, Frame ((T.U ((i : ℕ) + 1) s).X k).Ψ D.R.r := castDict hV (T.dict ((i : ℕ) + 1) s)
 
-omit [Algebra T.Q.c.F D.what₂.LL] in
 
+omit [Algebra T.Q.c.F D.what₂.LL] in
 abbrev muS {s : T.Q.c.F →+* ℂ} (hV : T.V ((i : ℕ) + 1) s = Wc D i) : GA D (Wc D i) → ℂ := castDict hV (T.mu ((i : ℕ) + 1) s)
 
-omit [Algebra T.Q.c.F D.what₂.LL] in
 
+omit [Algebra T.Q.c.F D.what₂.LL] in
 abbrev xS {s : T.Q.c.F →+* ℂ} (hV : T.V ((i : ℕ) + 1) s = Wc D i) (h : GA D (Wc D i)) : Data D.host.E D.R.r :=
   (T.U ((i : ℕ) + 1) s).X (dictS hV h).1
 

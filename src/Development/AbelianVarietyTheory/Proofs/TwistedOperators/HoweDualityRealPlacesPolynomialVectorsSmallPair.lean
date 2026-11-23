@@ -1,17 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsThetaSubGAlgDOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityUnitary
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HypothesesAbsDet
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AlgAtLeAlgD
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RelInfAlt
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LieDerivativePolynomialFockArchimedeanUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompactUnitaryPreservesPolynomialFockStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RankPolynomialFockSchrodingerModelLeAleph0Statement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchActionReadingsCompatible
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRealLieOperatorThetaQuotientLine
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RelInfAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchActionReadingsCompatible
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompactUnitaryPreservesPolynomialFockStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRealLieOperatorThetaQuotientLine
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LieDerivativePolynomialFockArchimedeanUnitaryStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RankPolynomialFockSchrodingerModelLeAleph0Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
 open scoped TensorProduct
@@ -31,8 +69,8 @@ private theorem acts_zero₀ (T : Module.End ℂ ((κ → AF F) → ℂ)) :
   have e : tens (evI F) (⇑(0 : SInf F κ)) r = 0 := by funext y; simp [tens]
   rw [e, map_zero]
 
-open scoped Classical in
 
+open scoped Classical in
 theorem acts_comb_eq (T : Module.End ℂ ((κ → AF F) → ℂ)) (c : ℂ) {f f₁ g g₁ h : SInf F κ}
     (hf : Acts (evI F) ⇑T ⇑f ⇑f₁) (hg : Acts (evI F) ⇑T ⇑g ⇑g₁) (hh : Acts (evI F) ⇑T ⇑(c • f + g) ⇑h) :
     h = c • f₁ + g₁ := by
@@ -53,7 +91,7 @@ theorem acts_comb_eq (T : Module.End ℂ ((κ → AF F) → ℂ)) (c : ℂ) {f f
   have e : ∀ φ ψ : SInf F κ, tens (evI F) ⇑(c • φ + ψ) r₀ = c • tens (evI F) ⇑φ r₀ + tens (evI F) ⇑ψ r₀ := by
     intro φ ψ; funext y; simp [tens]; ring
   have key : tens (evI F) ⇑h r₀ = tens (evI F) ⇑(c • f₁ + g₁) r₀ := by
-    rw [← hh r₀ (hrest₀ _), e, map_add, map_smul, hf r₀ (hrest₀ f), hg r₀ (hrest₀ g), e]
+    rw [← hh r₀ (hrest₀ _), e, map_add (f := _), map_smul, hf r₀ (hrest₀ f), hg r₀ (hrest₀ g), e]
   ext a
   have := congrFun key (GlobalTheory.RealLift.ptAt a 0)
   rw [htens₀, htens₀, GlobalTheory.RealLift.pureA_ptAt, GlobalTheory.RealLift.pureA_ptAt, hg₀0, mul_one, mul_one] at this

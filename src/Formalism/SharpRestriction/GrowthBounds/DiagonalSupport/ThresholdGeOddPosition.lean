@@ -1,5 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PosULeIff
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PosTLSurj
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.PlaneCoeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.DvdOfAdd
+import Formalism.SharpRestriction.GrowthBounds.WittFrameLocaliserOrders
+
+@[expose] public section
 
 noncomputable section
 
@@ -183,7 +227,7 @@ theorem deg_mul (A : MvPolynomial (ℤ × Fin r) O) (B : MvPolynomial (ℤ × Fi
     simp only [Prod.mk.injEq] at h
     exact Prod.ext h.1 (Fin.natAdd_injective _ _ h.2)
   refine ⟨ua, hua, ub, hub, fun x => ⟨fun c => ?_, fun c => ?_⟩⟩
-  · have e1 := Finsupp.mapDomain_apply hinj1 ua (x, c)
+  · have e1 := Finsupp.mapDomain_apply_of_injective hinj1 ua (x, c)
     simp only at e1
     have e2 : Finsupp.mapDomain (fun v : ℤ × Fin K => (v.1, Fin.natAdd r v.2)) ub (x, Fin.castAdd K c) = 0 := by
       apply Finsupp.mapDomain_notin_range
@@ -193,7 +237,7 @@ theorem deg_mul (A : MvPolynomial (ℤ × Fin r) O) (B : MvPolynomial (ℤ × Fi
       simp only [Fin.coe_natAdd, Fin.coe_castAdd] at h5
       omega
     rw [Finsupp.add_apply, e1, e2, add_zero]
-  · have e1 := Finsupp.mapDomain_apply hinj2 ub (x, c)
+  · have e1 := Finsupp.mapDomain_apply_of_injective hinj2 ub (x, c)
     simp only at e1
     have e2 : Finsupp.mapDomain (fun v : ℤ × Fin r => (v.1, Fin.castAdd K v.2)) ua (x, Fin.natAdd r c) = 0 := by
       apply Finsupp.mapDomain_notin_range

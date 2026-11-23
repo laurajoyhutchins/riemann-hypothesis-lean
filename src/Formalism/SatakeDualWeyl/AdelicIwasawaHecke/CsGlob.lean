@@ -1,6 +1,58 @@
-import Formalism.SatakeDualWeyl.DefsCS
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AdelstabL
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlobApprox
+module
+
+import Formalism.LocalToGlobal.GroupLattices.TrivialTransfer.FiniteStabAtOfLocal
+public import Formalism.SatakeDualWeyl.DefsCS
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Adelstab
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AdelstabL
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlobApprox
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabfin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +62,7 @@ namespace Formalism.UG.P
 
 open Formalism.UG
 
-section Glob
+section
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
   {n : Type} [Fintype n] [DecidableEq n]
@@ -25,7 +77,7 @@ theorem csGlob_eq (g : GL n 𝒜) (Λ : Submodule (𝓞 E) (n → E)) :
 
 theorem csGlob_lattice (Λ : Submodule (𝓞 E) (n → E)) (hfin : Module.Finite (𝓞 E) Λ)
     (hspan : Submodule.span E (Λ : Set (n → E)) = ⊤) (g : GL n 𝒜) :
-    Submodule.IsLattice E (Formalism.UG.CS.globLat g Λ) := by
+    Submodule.IsFullLattice E (Formalism.UG.CS.globLat g Λ) := by
   obtain ⟨c₁, hc₁, h₁⟩ := adelstabL_lower (F := F) Λ hspan
   obtain ⟨c₂, hc₂, h₂⟩ := adelstabL_upper (F := F) Λ hfin
   obtain ⟨d, hd, c, hc, hcg, hcgi⟩ := levelaf_exists_denom (E := E) g
@@ -34,26 +86,16 @@ theorem csGlob_lattice (Λ : Submodule (𝓞 E) (n → E)) (hfin : Module.Finite
   have hf := adelstab_finite g _ c₂ d hc₂ hd h₂ hG
   have hs := adelstab_span g _ c₁ d hc₁ hd h₁ hGi
   rw [csGlob_eq]
-  exact ⟨Module.Finite.iff_fg.mp hf, hs⟩
-
-end Glob
-
-section One
-
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {n : Type} [Fintype n] [DecidableEq n]
-
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ι" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
+  exact {
+    toIsLattice := Submodule.IsLattice.of_fg E (Module.Finite.iff_fg.mp hf)
+    span_eq_top := hs }
 
 variable (F E) in
-
 def csGlobN : Submodule (𝓞 F) E where
   carrier := {e | ι e ∈ 𝒮}
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_ofPred_eq, map_add] at *
+    simp only [Set.mem_ofPred_eq, map_add (f := _)] at *
     exact add_mem ha hb
   zero_mem' := by simp only [Set.mem_ofPred_eq, map_zero]; exact zero_mem _
   smul_mem' := by
@@ -100,17 +142,6 @@ theorem csGlob_int (e : E) (he : ι e ∈ 𝒮) : IsIntegral ℤ e := by
       rw [map_mul]; exact mul_mem he hm)
   exact isIntegral_trans (R := ℤ) (A := 𝓞 F) e hI
 
-end One
-
-section Approx
-
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {n : Type} [Fintype n] [DecidableEq n]
-
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ι" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
-
 theorem csGlob_tmul_int (x : E) (ρ : 𝓞 F) :
     x ⊗ₜ[F] algebraMap (𝓞 F) (FiniteAdeleRing (𝓞 F) F) ρ = ι (algebraMap (𝓞 F) E ρ * x) := by
   rw [IsScalarTower.algebraMap_apply (𝓞 F) F (FiniteAdeleRing (𝓞 F) F),
@@ -127,50 +158,19 @@ theorem csGlob_approx (hA : Formalism.UG.CS.IntAdApprox) (D : 𝓞 F) (hD : D �
   choose ρ y hy hρ using fun j => hA F D hD (r j) (hr j)
   refine ⟨∑ j, algebraMap (𝓞 F) (𝓞 E) (ρ j) * bb j, ∑ j, algebraMap (𝓞 E) E (bb j) ⊗ₜ[F] y j,
     sum_mem fun j _ => levelaf_tmul_mem _ (hy j), ?_⟩
+
   simp only [hρ, TensorProduct.tmul_add, Finset.sum_add_distrib, map_sum, Finset.mul_sum, levelafC,
-    Algebra.TensorProduct.tmul_mul_tmul, one_mul]
+  Algebra.TensorProduct.tmul_mul_tmul, one_mul]
   congr 1
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [csGlob_tmul_int, map_mul (algebraMap (𝓞 E) E), ← IsScalarTower.algebraMap_apply (𝓞 F) (𝓞 E) E,
     map_mul]
 
-end Approx
-
-section OneMain
-
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-  {n : Type} [Fintype n] [DecidableEq n]
-
-local notation "𝒜" => E ⊗[F] FiniteAdeleRing (𝓞 F) F
-local notation "𝒮" => tensInt (F := F) (FiniteAdeleRing (𝓞 F) F) (intOE E) (intAd F)
-local notation "ι" => inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)
-
 omit [NumberField F] [Algebra F E] in
-
 theorem csGlob_single (Λ : Submodule (𝓞 E) (n → E))
     (hspan : Submodule.span E (Λ : Set (n → E)) = ⊤) :
     ∃ m : ℤ, m ≠ 0 ∧ ∀ k, (Pi.single k (m : E) : n → E) ∈ Λ := by
-  classical
-  have hk : ∀ k : n, ∃ N : ℕ, ∃ f : Fin N → E, ∃ w : Fin N → Λ,
-      ∑ j, f j • (w j : n → E) = Pi.single k 1 := by
-    intro k
-    have : (Pi.single k 1 : n → E) ∈ Submodule.span E (Λ : Set (n → E)) := by
-      rw [hspan]; exact Submodule.mem_top
-    obtain ⟨N, f, w, h⟩ := Submodule.mem_span_set'.1 this
-    exact ⟨N, f, fun j => ⟨w j, (w j).2⟩, h⟩
-  choose N f w hw using hk
-  obtain ⟨m, hm0, hm⟩ := adelstabL_den (fun p : Σ k : n, Fin (N k) => f p.1 p.2)
-  refine ⟨m, hm0, fun k => ?_⟩
-  have : (Pi.single k (m : E) : n → E) =
-      ∑ j, (⟨(m : E) * f k j, hm ⟨k, j⟩⟩ : 𝓞 E) • (w k j : n → E) := by
-    have h1 : (Pi.single k (m : E) : n → E) = (m : E) • (Pi.single k 1 : n → E) := by
-      rw [← Pi.single_smul', smul_eq_mul, mul_one]
-    rw [h1, ← hw k, Finset.smul_sum]
-    refine Finset.sum_congr rfl fun j _ => ?_
-    rw [← algebraMap_smul E, smul_smul]
-    rfl
-  rw [this]
-  exact sum_mem fun j _ => Λ.smul_mem _ (w k j).2
+  apply Formalism.L2.G.Triv.den_lower <;> assumption
 
 theorem csGlob_one (hA : Formalism.UG.CS.IntAdApprox) (Λ : Submodule (𝓞 E) (n → E))
     (hfin : Module.Finite (𝓞 E) Λ) (hspan : Submodule.span E (Λ : Set (n → E)) = ⊤) :
@@ -194,7 +194,7 @@ theorem csGlob_one (hA : Formalism.UG.CS.IntAdApprox) (Λ : Submodule (𝓞 E) (
       obtain ⟨y', hy', s', hs', rfl⟩ := hw
       refine ⟨y + y', add_mem hy hy', s + s', fun i => add_mem (hs i) (hs' i), ?_⟩
       ext i
-      simp only [Pi.add_apply, map_add]
+      simp only [Pi.add_apply, map_add (f := _)]
       ring
     | smul a u _ hu =>
       obtain ⟨y, hy, s, hs, rfl⟩ := hu
@@ -240,7 +240,7 @@ theorem csGlob_one (hA : Formalism.UG.CS.IntAdApprox) (Λ : Submodule (𝓞 E) (
     rw [inv_one, Units.val_one, one_mulVec]
     exact Submodule.subset_span ⟨x, hx, rfl⟩
 
-end OneMain
+end
 
 theorem global_lattice_one_holds : Formalism.UG.CS.GlobLatOne := by
   intro F E _ _ _ _ _ n _ _ Λ hfin hspan
@@ -248,6 +248,6 @@ theorem global_lattice_one_holds : Formalism.UG.CS.GlobLatOne := by
 
 theorem global_lattice_isLattice_holds : Formalism.UG.CS.GlobLatLattice := by
   intro F E _ _ _ _ _ n _ _ Λ hfin hspan g
-  exact csGlob_lattice Λ hfin hspan g
+  exact (csGlob_lattice Λ hfin hspan g).toIsLattice
 
 end Formalism.UG.P

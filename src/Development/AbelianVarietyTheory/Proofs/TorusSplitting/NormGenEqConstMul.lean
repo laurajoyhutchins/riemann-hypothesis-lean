@@ -1,11 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.LocalToGlobal.ProjectiveLattices.NormsFree
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.IsOrth
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToFibPtAndCompFibre
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CubeTrivialisationOnUniformisingSpace
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertTrivialOfNowhereVanishing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertTrivialOfNowhereVanishing
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CubeTrivialisationOnUniformisingSpace
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToFibPtAndCompFibre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -59,7 +102,7 @@ theorem exists_entire {V W : Type} [NormedAddCommGroup V] [NormedSpace ℂ V] [N
       (((hd _).differentiableAt ((hopen _).mem_nhds (hch (w k z)))).comp z (hwd k z)).zpow
         (Or.inl (hne _ _ (hch (w k z))))
     have hq : DifferentiableAt ℂ (R j) z :=
-      (hd'.differentiableAt hn).mul (HasFDerivAt.finset_prod fun k _ => (d1 k).hasFDerivAt).differentiableAt
+      (hd'.differentiableAt hn).mul (HasFDerivAt.finsetProd fun k _ => (d1 k).hasFDerivAt).differentiableAt
     refine hq.congr_of_eventuallyEq ?_
     filter_upwards [hn] with y hy
     exact hrR y j ((hiff y j).1 hy.2)
@@ -71,8 +114,8 @@ theorem exists_entire {V W : Type} [NormedAddCommGroup V] [NormedSpace ℂ V] [N
     intro k _
     rw [← zpow_add₀ (hne _ _ (hj k)), neg_add_cancel, zpow_zero]
 
-open AppellHumbertTrivial in
 
+open AppellHumbertTrivial in
 theorem norm_mul_exp_add {g : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH : Hm.IsHermitian) {x y χ : ℂ} {z l : Fin g → ℂ}
     (hχ : ‖χ‖ = 1) (h : x = χ * Complex.exp (Real.pi * hermForm Hm z l + Real.pi / 2 * hermForm Hm l l) * y) :
     ‖y‖ * Real.exp (Real.pi / 2 * (hermForm Hm (z + l) (z + l)).re) =
@@ -84,8 +127,8 @@ theorem norm_mul_exp_add {g : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH : Hm.Is
   congr 2
   ring
 
-open AppellHumbertTrivial in
 
+open AppellHumbertTrivial in
 theorem exists_entire_weight {g : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH : Hm.IsHermitian) {K : Type} [Fintype K]
     (ε n : K → ℤ) (a : K → Fin g → ℂ) (h0 : ∑ k, ε k * n k ^ 2 = 0) :
     ∃ φ : (Fin g → ℂ) → ℂ, Differentiable ℂ φ ∧ ∀ z, Real.exp (φ z).re =

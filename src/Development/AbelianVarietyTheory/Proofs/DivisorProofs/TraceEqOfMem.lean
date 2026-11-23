@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.RangeShape
-import Development.AbelianVarietyTheory.Definitions.Divisors.DatumEquiv
-import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.Clause1
-import ReciprocityTheory.ReductiveGroups.SymplecticTraces.WeylCharacters.Weyl
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RangeShape
+public import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.Clause1
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GapConditionsOfLargeGaps
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactHaarRightInvariantInst
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PID
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ContinuousTorepK
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.ActDiagMemOfWK
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.ProdModeCharExp
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.SupTrace
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.TraceIntegralRestrict
+public import ReciprocityTheory.ReductiveGroups.SymplecticTraces.WeylCharacters.Weyl
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,7 +138,8 @@ theorem exists_type (hCp : CptCase) (hSch : SchurOne)
     rw [trace_eq_of_mem B ⊤ (fun _ => trivial) hc, h1, hs, pow_zero, ← hSch n ε _ X D hT]
     refine integral_congr_ae (Filter.Eventually.of_forall fun k => ?_)
     dsimp only
-    rw [hpd, mul_one, hP (toMK k) k.2, trK]
+    rw [hpd, mul_one, hP (toMK k) k.2]
+    delta trK
     congr 1
     exact LinearMap.trace_restrict_eq_of_forall_mem ⊤ _ fun _ => trivial
   · obtain ⟨W, i1, i2, i3, T, h1, h2, h3, h4⟩ := supTrace n ε lam h X D hD hHC hh hthr (by omega) (by omega)
@@ -119,7 +170,9 @@ theorem stKData_of (hBF : BlockForm) (hOm : OmDet) (hCP : CoefPoly) (hTP : TrPol
   have hsq : ((-1 : ℂ) ^ sDeg ε) * (-1) ^ sDeg ε = 1 := by rw [← mul_pow]; simp
   have htop : ∀ k ∈ Formalism.REAL.Kset ε, ev k (topP ε M R) = (-1) ^ sDeg ε * (ev k P * physDet ε k) := by
     intro k hk
-    rw [topP, map_mul, ← hRe k hk, ← hQ k hk, map_mul, map_mul, show ev k (MvPolynomial.C _) = _ from MvPolynomial.eval_C _]
+    change ev k (detbP r ^ M * R * (OmP ε).det) = _
+    rw [map_mul, ← hRe k hk, ← hQ k hk, map_mul, map_mul,
+      show ev k (MvPolynomial.C _) = _ from MvPolynomial.eval_C _]
     ring
   have hscale : ∀ (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
       (A : KG ε → (H →L[ℂ] H)) (B : H →L[ℂ] H) (c : ℂ),

@@ -1,16 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsSmoothHermTrivLine
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemAbLocusIff
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionCompatiblePullbackStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInhab
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsSmoothHermTrivLine
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PtsOverPt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AlgebraicElementHomogRelationStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyReindexedStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointsGoodStatementStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HomogRelationRatioReindexStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ImplicitRootAnalyticStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionCompatiblePullbackStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Analytic.Polynomial
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInhab
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointsGoodStatementStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyReindexedStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AlgebraicElementHomogRelationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ImplicitRootAnalyticStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HomogRelationRatioReindexStatement
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 open ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB GlobalTheory.CompanionTheory.Ar.Chg
@@ -69,7 +113,7 @@ theorem isMultiHomog_rename' {κ : K₀ → K} {v : (Σ k, J₀ k) → (Σ k, J 
         exact eq_of_heq (Sigma.mk.inj (hv.2.1 h2)).2
     calc ∑ i', (Finsupp.mapDomain v m0) ⟨κ k, i'⟩ = ∑ i', m0 ⟨k, g i'⟩ := by
           refine Finset.sum_congr rfl fun i' _ => ?_
-          rw [← hg i', Finsupp.mapDomain_apply hv.2.1]
+          rw [← hg i', Finsupp.mapDomain_apply_of_injective hv.2.1]
       _ = ∑ i, m0 ⟨k, i⟩ := hb.sum_comp fun i => m0 ⟨k, i⟩
   · rw [Function.extend_apply' _ _ _ (by simpa using hk)]
     refine Finset.sum_eq_zero fun i' _ => ?_
@@ -96,7 +140,7 @@ theorem imageZ_eq {Ω₀ Ω : Type} [Field Ω₀] [Field Ω] (i : Ω₀ →+* Ω
     intro f
     induction f using MvPolynomial.induction_on with
     | C a => simp [mConeMap, Φ]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p n hp =>
       obtain ⟨k, a⟩ := n
       simp only [map_mul, hp, rename_X]

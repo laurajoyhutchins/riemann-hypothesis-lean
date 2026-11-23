@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.AdelicChar
+module
+
+public import GroundTheory.GlobalFields.TateThesis.AdelicChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -11,8 +60,8 @@ noncomputable section
 
 variable {K : Type*} [Field K] [NumberField K]
 
-open Classical in
 
+open Classical in
 def finiteAdeleSingleAdd (v : HeightOneSpectrum (𝓞 K)) :
     v.adicCompletion K →+ FiniteAdeleRing (𝓞 K) K where
   toFun x := RestrictedProduct.single
@@ -78,8 +127,8 @@ theorem continuous_finitePlaceIncl (v : HeightOneSpectrum (𝓞 K)) :
     Continuous (finitePlaceIncl (K := K) v) :=
   continuous_const.prodMk (continuous_finiteAdeleSingleAdd v)
 
-open Classical in
 
+open Classical in
 def infinitePlaceIncl (w : InfinitePlace K) : w.Completion →+ 𝔸[K] :=
   ((AddMonoidHom.single (fun u : InfinitePlace K => u.Completion) w).prod 0 :
     w.Completion →+ InfiniteAdeleRing K × FiniteAdeleRing (𝓞 K) K)
@@ -104,23 +153,16 @@ def infiniteAdeleInl : InfiniteAdeleRing K →+ 𝔸[K] :=
 
 theorem infiniteAdeleInl_add_finiteAdeleInr (x : 𝔸[K]) :
     infiniteAdeleInl x.1 + finiteAdeleInr x.2 = x := by
-  refine Prod.ext (α := InfiniteAdeleRing K) (β := FiniteAdeleRing (𝓞 K) K) ?_ ?_
-  · rw [adeleRing_add_fst, infiniteAdeleInl_fst, finiteAdeleInr_fst, add_zero]
-  · rw [adeleRing_add_snd, infiniteAdeleInl_snd, finiteAdeleInr_snd, zero_add]
+  have h : infiniteAdeleInl x.1 + finiteAdeleInr x.2 = (x.1 + 0, 0 + x.2) := rfl
+  simpa using h
 
-theorem continuous_infinitePlaceIncl (w : InfinitePlace K) :
-    Continuous (infinitePlaceIncl (K := K) w) := by
-  classical
-  exact (continuous_single (A := fun u : InfinitePlace K => u.Completion) w).prodMk
-    continuous_const
 
 variable (K) in
-
 def localAdelicChar (v : HeightOneSpectrum (𝓞 K)) : AddChar (v.adicCompletion K) Circle :=
   (adelicChar K).compAddMonoidHom (finitePlaceIncl v)
 
-variable (K) in
 
+variable (K) in
 def infiniteAdelicChar (w : InfinitePlace K) : AddChar w.Completion Circle :=
   (adelicChar K).compAddMonoidHom (infinitePlaceIncl w)
 
@@ -133,10 +175,6 @@ theorem infiniteAdelicChar_apply' (w : InfinitePlace K) (z : w.Completion) :
 theorem continuous_localAdelicChar (v : HeightOneSpectrum (𝓞 K)) :
     Continuous (localAdelicChar K v) :=
   (continuous_adelicChar (K := K)).comp (continuous_finitePlaceIncl v)
-
-theorem continuous_infiniteAdelicChar (w : InfinitePlace K) :
-    Continuous (infiniteAdelicChar K w) :=
-  (continuous_adelicChar (K := K)).comp (continuous_infinitePlaceIncl w)
 
 theorem infiniteAdelicChar_apply (w : InfinitePlace K) (z : w.Completion) :
     infiniteAdelicChar K w z = 𝐞 (-((w.mult : ℝ) * (extensionEmbedding w z).re)) := by
@@ -234,14 +272,6 @@ theorem localAdelicChar_coe (v : HeightOneSpectrum (𝓞 K)) {k : K}
     localAdelicChar K v k = 𝐞 (Algebra.trace ℚ K k) :=
   localAdelicChar_eq v _ (by rw [sub_self]; exact zero_mem _) hk'
 
-theorem exists_localAdelicChar_eq (v : HeightOneSpectrum (𝓞 K)) (y : v.adicCompletion K) :
-    ∃ k : K, y - k ∈ v.adicCompletionIntegers K ∧
-      (∀ u ≠ v, (k : u.adicCompletion K) ∈ u.adicCompletionIntegers K) ∧
-      localAdelicChar K v y = 𝐞 (Algebra.trace ℚ K k) := by
-  obtain ⟨k, hk, hk'⟩ := exists_sub_mem_adicCompletionIntegers_and_forall_ne v y
-  exact ⟨k, hk, hk', localAdelicChar_eq v y (mem_localInvDifferent_of_mem hk)
-    fun u hu => mem_localInvDifferent_of_mem (hk' u hu)⟩
-
 theorem forall_localAdelicChar_mul_eq_one_iff (v : HeightOneSpectrum (𝓞 K))
     (x : v.adicCompletion K) :
     (∀ a ∈ v.adicCompletionIntegers K, localAdelicChar K v (a * x) = 1) ↔
@@ -287,11 +317,6 @@ theorem forall_localAdelicChar_eq_one_iff_le (v : HeightOneSpectrum (𝓞 K))
   ⟨fun h x hx => (forall_localAdelicChar_mul_eq_one_iff v x).mp fun a ha => h _ (hM a ha x hx),
     fun h _ hx => localAdelicChar_eq_one_of_mem (h hx)⟩
 
-theorem finite_mulSupport_localAdelicChar (x : 𝔸[K]) :
-    (Function.mulSupport fun v => localAdelicChar K v (x.2 v)).Finite :=
-  (Filter.eventually_cofinite.mp x.2.2).subset fun _ hv hO =>
-    hv (localAdelicChar_eq_one_of_mem (mem_localInvDifferent_of_mem hO))
-
 theorem adelicChar_eq_prod (x : 𝔸[K]) :
     adelicChar K x = (∏ w : InfinitePlace K, infiniteAdelicChar K w (x.1 w)) *
       ∏ᶠ v, localAdelicChar K v (x.2 v) := by
@@ -319,7 +344,7 @@ theorem adelicChar_eq_prod (x : 𝔸[K]) :
         (by rintro rfl; exact hu hv) _), sub_zero]
       exact mem_localInvDifferent_of_mem (hmemS u hu)
   have hf : finiteAdeleInr f + finiteAdeleInr (x.2 - f) = finiteAdeleInr (K := K) x.2 := by
-    rw [← map_add, add_sub_cancel]
+    rw [← map_add (f := _), add_sub_cancel]
   have hx : x = infiniteAdeleInl x.1 + finiteAdeleInr f + finiteAdeleInr (x.2 - f) := by
     rw [add_assoc, hf, infiniteAdeleInl_add_finiteAdeleInr]
   have h1 : adelicChar K (finiteAdeleInr (x.2 - f)) = 1 := by
@@ -327,6 +352,7 @@ theorem adelicChar_eq_prod (x : 𝔸[K]) :
       (mem_invDifferentAdeles.mpr (by rw [finiteAdeleInr_snd]; exact hrest)),
       finiteAdeleInr_fst, map_zero, neg_zero, AddChar.map_zero_eq_one]
   have h2 : adelicChar K (finiteAdeleInr f) = ∏ v ∈ S, localAdelicChar K v (x.2 v) := by
+
     rw [hfdef, map_sum, addChar_map_finsetSum]
     rfl
   have h3 : ∏ᶠ v, localAdelicChar K v (x.2 v) = ∏ v ∈ S, localAdelicChar K v (x.2 v) := by

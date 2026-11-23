@@ -1,4 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaBounds.UnfoldedThetaIntegralConvergesSimilitudeOne
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaBounds.UnfoldedThetaIntegralConvergesSimilitudeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -29,7 +73,9 @@ private lemma finPart_shift (w : InfinitePlace F) (i : Fin 4) (v : V4 F) (t : �
   funext j
   by_cases h : j = i
   · subst h
-    simp [finPartPi, placeEmbedReal_finitePart]
+    simp only [finPartPi, Pi.add_apply, Pi.single_eq_same]
+    change (v j).2 + (Fo.at1 w t).2 = (v j).2
+    rw [placeEmbedReal_finitePart, add_zero]
   · simp [finPartPi, Pi.single_eq_of_ne h]
 
 private lemma coord_shift (w w' : InfinitePlace F) (i j : Fin 4) (v : V4 F) (t : ℝ) :
@@ -39,8 +85,8 @@ private lemma coord_shift (w w' : InfinitePlace F) (i j : Fin 4) (v : V4 F) (t :
   · subst h
     by_cases h' : w' = w
     · subst h'
-      simp [map_add, infiniteProjection_placeEmbed]
-    · simp [map_add, infiniteProjection_placeEmbed, h', Pi.single_eq_of_ne h']
+      simp [map_add (f := _), infiniteProjection_placeEmbed]
+    · simp [map_add (f := _), infiniteProjection_placeEmbed, h', Pi.single_eq_of_ne h']
   · simp [h, Pi.single_eq_of_ne h]
 
 private lemma lin_der (a c : ℂ) : HasDerivAt (fun t : ℝ => a + c * (t : ℂ)) c 0 := by
@@ -91,7 +137,7 @@ private lemma Qf_mem (δ : F) : Qf δ ∈ UpperTheory.ConvolutionTheory.R2.polyF
     funext v
     have h2 : ∀ x, TR.pInf F (2 : A F) x = 2 := fun x => by
       rw [map_ofNat]; rfl
-    simp [Qf, Finset.sum_apply, map_add, map_mul, map_sub, map_pow, h2]
+    simp [Qf, Finset.sum_apply, map_add (f := _), map_mul, map_sub, map_pow, h2]
   rw [e]
   refine sum_mem fun w _ => ?_
   exact add_mem (add_mem (pow_mem (coord_mem 0 w) 2) (pow_mem (coord_mem 1 w) 2))
@@ -170,7 +216,7 @@ end SlopeTestRemainingChoices
 end UpperTheory.ConvolutionTheory.R2.Ff
 
 theorem UpperTheory.ConvolutionTheory.R2.Ff.opsFock :
-    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] (D : Dat F E) (O : Fo.Ops F), OpsFock D O := by
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] (D : Dat F E) (O : Fo.Ops F), OpsFock D O := by
   intro F E _ _ _ _ _ _ _ D O w i φ hφ
   have hs : φ.1 ∈ Submodule.span ℂ (Gen D.δ) := hφ
   refine ⟨?_, ?_⟩

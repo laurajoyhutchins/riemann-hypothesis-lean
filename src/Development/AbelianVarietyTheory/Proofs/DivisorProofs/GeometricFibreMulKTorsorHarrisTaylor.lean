@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompEqOneOfTransl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeSubFiniteFree
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompEqOneOfTransl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeSubFiniteFree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT
 
@@ -40,7 +85,7 @@ theorem fibre_mulK : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [Comm
   have hdk : d ^ k = 1 := by rw [hd, mul_pow, inv_pow, hpow, inv_mul_cancel]
   have hβ : x ≫ s = spMap (Spec.preimage (x ≫ s)).hom := (Spec.map_preimage _).symm
   obtain ⟨I, hI⟩ := o.geom K x _ hβ
-  have hcop : (N * k * k).Coprime p := Nat.Coprime.mul (Nat.Coprime.mul hNp hkp) hkp
+  have hcop : (N * k * k).Coprime p := Nat.Coprime.mul_left (Nat.Coprime.mul_left hNp hkp) hkp
   have hpos : 0 < N * k * k := Nat.mul_pos (Nat.mul_pos hN hk) hk
   obtain ⟨z, hz⟩ := (I.onto (N * k * k) hpos hcop d).1 (by
     rw [pow_mul, pow_right_comm, hdk, one_pow])
@@ -79,7 +124,7 @@ theorem fibre_mulK : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [Comm
         rw [← h2, ← comp_mul, inv_mul_cancel, comp_one]
       rw [comp_mul, h1, hi, mul_inv_cancel]
     have h4 := (heckeSub_finite_free p D R b LinearMap.id k (N * k) hk (Nat.mul_pos hN hk) hkp
-      (Nat.Coprime.mul hNp hkp) S s o).2 K x _ hm h3
+      (Nat.Coprime.mul_left hNp hkp) S s o).2 K x _ hm h3
     exact Subtype.ext (mul_inv_eq_one.mp h4)
 
 end GlobalTheory.UPel.HT.Hecke.FibreMulK

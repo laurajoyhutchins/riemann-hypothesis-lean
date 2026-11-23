@@ -1,4 +1,48 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafTwSecKillCut
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafTwSecKillCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -28,8 +72,8 @@ theorem exists_unit (ζ ξ : Prim q K) : ∃ u : (ZMod q)ˣ, ξ.1 = ζ.1 ^ (u : 
 theorem unit_unique (ζ : Prim q K) {u v : (ZMod q)ˣ} (h : ζ.1 ^ (u : ZMod q).val = ζ.1 ^ (v : ZMod q).val) : u = v :=
   Units.ext (ZMod.val_injective q ((prim_isPrim ζ).pow_inj (ZMod.val_lt _) (ZMod.val_lt _) h))
 
-open Classical in
 
+open Classical in
 def ex (j : ℤ) (ζ : Prim q K) (ξ : Prim q K) : ZMod q :=
   if h : ∃ u : (ZMod q)ˣ, ξ.1 = ζ.1 ^ (u : ZMod q).val then (((h.choose) ^ j : (ZMod q)ˣ) : ZMod q) else 0
 
@@ -37,7 +81,7 @@ theorem ex_spec (j : ℤ) (ζ ξ : Prim q K) (u : (ZMod q)ˣ) (h : ξ.1 = ζ.1 ^
     ex j ζ ξ = ((u ^ j : (ZMod q)ˣ) : ZMod q) := by
   have he : ∃ u : (ZMod q)ˣ, ξ.1 = ζ.1 ^ (u : ZMod q).val := ⟨u, h⟩
   unfold ex
-  rw [dif_pos he, unit_unique ζ (he.choose_spec.symm.trans h)]
+  rw [dite_eq_left he, unit_unique ζ (he.choose_spec.symm.trans h)]
 
 def Φ (j : ℤ) (ζ : Prim q K) : (Prim q K →₀ ULift.{1} (ZMod q)) →ₗ[ULift.{1} (ZMod q)] ULift.{1} (ZMod q) :=
   Finsupp.linearCombination (ULift.{1} (ZMod q)) (fun ξ => ULift.up (ex j ζ ξ))

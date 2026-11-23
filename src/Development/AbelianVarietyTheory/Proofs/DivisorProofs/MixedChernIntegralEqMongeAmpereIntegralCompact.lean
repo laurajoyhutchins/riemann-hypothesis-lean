@@ -1,12 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DensConst
-import Development.AbelianVarietyTheory.Definitions.Divisors.ContinuousBcPt
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAmbOfIsArithVar
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalSectionDivisorPullbackGeneric
-import ReciprocityTheory.AnalyticForms.PotentialTheory.ProjectiveLineFubiniStudyFacts
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnSourceIffOfDensity
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MixedChernFormSignedPartMeasureChartApplyStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DensConst
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AnalyticOnNhdFinChartIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnSourceIffOfDensity
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MixedChernFormSignedPartMeasureChartApplyStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCIsHermitian
+import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureB
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -128,8 +170,11 @@ theorem int_eq_mInt (k : Type) [CommRing k] (X : Scheme.{0}) (p : X ⟶ Sp k) (�
     simp only [Pi.sub_apply, ← mul_sub, hsub, hd]
   refine ⟨⟨fwd, fun hm => ⟨(pieces hm 1).1, (pieces hm (-1)).1⟩⟩, fun hi => ?_⟩
   have hm := fwd hi
+  have hmi : mInt A (fun i => (L i).φ.locPot) g = integralWith A hne.some (fun i => (L i).φ.locPot) g := by
+    unfold mInt
+    rw [dite_eq_left hne]
   rw [Mix.int, (pieces hm 1).2, (pieces hm (-1)).2,
-    mInt_eq_integralWith A _ hne, integralWith, ← Finset.sum_sub_distrib]
+    hmi, integralWith, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [← integral_sub (back hm 1 j) (back hm (-1) j)]
   simp only [← mul_sub, hsub, hd, P]

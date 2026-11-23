@@ -1,13 +1,57 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.AlgebraMapIntMemIntAd
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.ParabolicDecomposition
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.NatSmulMulEq
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirVolumeRatios.DetNorm
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.T2SpaceFiniteAdelesExt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.AlgebraMapIntMemIntAd
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IwasawaMeasureExistence.NatSmulMulEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrgCountableField
+
+@[expose] public section
 
 noncomputable section
 
 namespace PI.IwaMeasEx.Nrm
 
-open Matrix NumberField Topology Filter MeasureTheory Formalism.MainNotions.S Formalism.MainNotions.LeviCoordinates Formalism.L2.S.S7.DensDefs
-  Formalism.L2.S.S7.WittLeviSubgroups Formalism.L2.S.S7.PositiveOrthantChangeOfVariables Formalism.L2.S.S7.GLOne
+open Matrix NumberField Topology Filter MeasureTheory Formalism.MainNotions.S
+  Formalism.MainNotions.LeviCoordinates Formalism.L2.S.S7.GLOne
 open scoped TensorProduct nonZeroDivisors
 
 section Top
@@ -63,7 +107,7 @@ theorem continuous_inclR :
 
 theorem continuous_embC {ι : Type} [Fintype ι] (b : Module.Basis ι I.F I.E) :
     Continuous (fun c : ι → Af I.F => (∑ j, b j ⊗ₜ[I.F] c j : AEf I)) := by
-  refine continuous_finset_sum _ fun j _ => ?_
+  refine continuous_finsetSum _ fun j _ => ?_
   have e : (fun c : ι → Af I.F => (b j ⊗ₜ[I.F] c j : AEf I)) =
       fun c => iE I (b j) * Algebra.TensorProduct.includeRight (c j) := by
     funext c
@@ -84,16 +128,6 @@ theorem isCompact_IntAf : IsCompact ((IntAf I.F I.E : Subring (AEf I)) : Set (AE
   rw [nsmul_eq_mul]
   exact AfT.crd_mem I b hDb (AfT.IntAf_le_sumsInt I hx) j
 
-def Bs (𝔞 : FractionalIdeal (𝓞 I.E)⁰ I.E) : Set (AEf I) :=
-  {x | ∃ b ∈ (𝔞 : Submodule (𝓞 I.E) I.E), ∃ N : ℕ, 1 ≤ N ∧ (N : I.E) ∈ (𝔞 : Submodule (𝓞 I.E) I.E) ∧
-    ∃ z ∈ IntAf I.F I.E, x = iE I b + iE I N * z}
-
-def Sa (𝔞 : FractionalIdeal (𝓞 I.E)⁰ I.E) : Set (AEf I) :=
-  Bs I 𝔞 ∩ ⋂ 𝔟 : {𝔟 : FractionalIdeal (𝓞 I.E)⁰ I.E // 𝔟 ≠ 0 ∧ 𝔟 < 𝔞}, (Bs I 𝔟.1)ᶜ
-
-open Classical in
-
-def hq (u : AEf I) : ℚ := if h : IsUnit u then (FractionalIdeal.absNorm (FI I h.unit))⁻¹ else 0
 
 end Top
 

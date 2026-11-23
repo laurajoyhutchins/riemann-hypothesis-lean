@@ -1,5 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.IsDSSigLam
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PuniqSmoothAddSmul
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumInj
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumIrr
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.FormulaF
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PropsEquiv
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PuniqSmoothAddSmul
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RregRep
+
+@[expose] public section
 
 noncomputable section
 
@@ -128,7 +181,7 @@ theorem puniq_psi_eq (hgap : StdGap ε lam) {Ψ' : Matrix (Fin n) (Fin n) ℂ �
   have hAadd : ∀ v w, A (v + w) = A v + A w := by
     intro v w
     apply hj'
-    rw [← hAv, xv_add, map_add, Submodule.coe_add, hAv, hAv, datumEmbedding_add hP']
+    rw [← hAv, xv_add, map_add (f := _), Submodule.coe_add, hAv, hAv, datumEmbedding_add hP']
   have hAsmul : ∀ (c : ℂ) v, A (c • v) = c • A v := by
     intro c v
     apply hj'
@@ -179,47 +232,5 @@ theorem puniq_psi_eq (hgap : StdGap ε lam) {Ψ' : Matrix (Fin n) (Fin n) ℂ �
     rw [e, hrr]
     ring
   exact (mul_left_cancel₀ hr e').symm
-
-theorem uniq_psi (hgap : StdGap ε lam) (hP : IsPsiFor ε lam T Ψ) (hv₀ : v₀ ≠ 0) (F : Matrix (Fin n) (Fin n) ℂ → (T.V →L[ℂ] T.V)) (hFs : S7.SmoothOnGV ε F)
-    (hF2 : MemLp (fun g : Formalism.REAL.UJ ε => F (Formalism.MainNotions.S.umat g)) 2 (Formalism.REAL.muG ε))
-    (hFK : ∀ (k₁ k₂ : S7.KG ε) (g : Matrix (Fin n) (Fin n) ℂ), inUJ ε g →
-      F (S7.toMK k₁ * g * S7.toMK k₂) = T.op k₁ * F g * T.op k₂)
-    (hFc : ∀ g, inUJ ε g → S7.casimirV ε F g = ((casVal lam : ℝ) : ℂ) • F g) :
-    ∃ c : ℂ, ∀ g ∈ UJset ε, F g = c • Ψ g := by
-  have h1 : inUJ ε 1 := by
-    show (1 : Matrix (Fin n) (Fin n) ℂ)ᴴ * Jm ε * 1 = Jm ε
-    simp
-  have hk1 : S7.toMK (1 : S7.KG ε) = 1 := rfl
-  have ho : T.op 1 = 1 := by simp [S7.KType.op]
-  have hcomm : ∀ (k : S7.KG ε) (v : T.V), F 1 (T.op k v) = T.op k (F 1 v) := by
-    intro k v
-    have e1 := hFK k 1 1 h1
-    have e2 := hFK 1 k 1 h1
-    simp only [hk1, ho, mul_one, one_mul] at e1 e2
-    have := congrArg (fun B : T.V →L[ℂ] T.V => B v) (e2.symm.trans e1)
-    simpa only [ContinuousLinearMap.mul_apply] using this
-  obtain ⟨c, hc⟩ := puniq_schur T (F 1 : T.V →L[ℂ] T.V).toLinearMap hcomm
-  have hF1 : F 1 = c • 1 := ContinuousLinearMap.ext fun v => by
-    rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.one_apply]
-    exact hc v
-  have hP' : IsPsiFor ε lam T (fun g => F g + (1 - c) • Ψ g) := by
-    refine ⟨?_, ?_, ?_, ?_, ?_⟩
-    · intro k₁ k₂ g hg
-      simp only [hFK _ _ _ hg, hP.1 _ _ _ hg, mul_add, add_mul, mul_smul_comm, smul_mul_assoc]
-    · show F 1 + (1 - c) • Ψ 1 = 1
-      rw [hF1, hP.2.1, ← add_smul]
-      simp
-    · exact puniq_smooth_add_smul hFs hP.2.2.1 (1 - c)
-    · intro g hg
-      rw [puniq_casimirV_lin hFs hP.2.2.1 (1 - c) hg, hFc g hg, hP.2.2.2.1 g hg, smul_add,
-        smul_comm ((casVal lam : ℝ) : ℂ) (1 - c)]
-    · intro μ hμ
-      exact (puniq_memLp_haar F hF2 μ hμ).add ((hP.2.2.2.2 μ hμ).const_smul (1 - c))
-  refine ⟨c, fun g hg => ?_⟩
-  have e := puniq_psi_eq hgap hP hP' hv₀ g hg
-  have e' : F g + (1 - c) • Ψ g = Ψ g := e
-  calc F g = (F g + (1 - c) • Ψ g) - (1 - c) • Ψ g := by abel
-    _ = Ψ g - (1 - c) • Ψ g := by rw [e']
-    _ = c • Ψ g := by rw [sub_smul, one_smul]; abel
 
 end ReciprocityTheory.ChartRestriction.DS

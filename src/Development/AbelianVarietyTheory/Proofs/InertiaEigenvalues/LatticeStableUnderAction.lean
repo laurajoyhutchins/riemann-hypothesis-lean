@@ -1,6 +1,58 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.PerCEmb
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdmissibleEmptyOfGood
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivOfNotLinearIndependent
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsInertTop
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LowerTriangularMul
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.JetIndepStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+
+@[expose] public section
+
 open NumberField Matrix Complex IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Dict GlobalTheory.AdTh GlobalTheory.ClsVal
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor hiding Level Host
@@ -10,8 +62,8 @@ open GlobalTheory.ExportSeries (Base Twist Weight PairRep GLR detChar detFam foc
 open scoped TensorProduct Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.SingleDatum
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 namespace GlobalTheory.LatKeep
 
@@ -48,32 +100,5 @@ theorem isFrame_mul_intGL {n : ℕ} {β : GL (Fin n) (EAf D)} {Λ : Submodule (�
   · intro h i
     rw [e2]
     exact intGL_mulVec_int _ _ h i
-
-theorem latKeep : ∀ (D : D7) (V W : HSp D) (F : GlobalTheory.ExportSeries.Frame V W), F.Good → ∀ k ∈ GfC V,
-    Formalism.UG.bc (Lev.swapAE D) (finPt V k).1 ∈ Formalism.L2.DIV.St F.βS →
-    ∀ u : WO V W, u ∈ F.lat ↔ actO V W k 1 u ∈ F.lat := by
-  intro D V W F hF k _ hk u
-  obtain ⟨y, hy⟩ := hk
-  have hfin : ((Formalism.UG.bc (Lev.swapAE D) (finPt V k).1 : GL (Fin V.rank) (EAf D)) : Matrix (Fin V.rank) (Fin V.rank) (EAf D))
-      = (mt V k).map (toEAf D) := rfl
-  have hβ' : Formalism.L2.DIV.IsFrame (F.βS * Formalism.L2.DIV.intGL D.host.F D.host.E V.rank y) F.ΛS := isFrame_mul_intGL hF.frS y
-  have hg : (F.βS * Formalism.L2.DIV.intGL D.host.F D.host.E V.rank y).val = (mt V k).map (toEAf D) * F.βS.val := by
-    rw [← hfin, ← hy]
-    simp [Formalism.L2.DIV.frGL, MulAut.conj_apply, Matrix.mul_assoc]
-  have hh : F.βT.val = (mt W 1).map (toEAf D) * F.βT.val := by
-    have h1 : (mt W 1).map (toEAf D) = 1 := by
-      rw [GlobalTheory.AdelicLatMove.mt_one]
-      exact Matrix.map_one _ (toEAf D).map_zero (toEAf D).map_one
-    rw [h1, Matrix.one_mul]
-  constructor
-  · intro hu
-    exact GlobalTheory.AdelicLatMove.actO_mem_latO V W k 1 F.ΛS F.ΛS F.ΛT F.ΛT F.βS _ F.βT F.βT hF.frS hβ' hF.frT hF.frT hg hh u hu
-  · intro hu
-    have h2 := GlobalTheory.AdelicLatMove.actO_mem_latO V W k⁻¹ 1⁻¹ F.ΛS F.ΛS F.ΛT F.ΛT _ F.βS F.βT F.βT hβ' hF.frS hF.frT hF.frT
-      (GlobalTheory.AdelicLatMove.frame_inv V k _ _ hg) (GlobalTheory.AdelicLatMove.frame_inv W 1 _ _ hh) _ hu
-    have e := GlobalTheory.AdelicLatMove.actO_actO_inv V W k⁻¹ 1⁻¹ u
-    rw [inv_inv, inv_inv] at e
-    rw [e] at h2
-    exact h2
 
 end GlobalTheory.LatKeep

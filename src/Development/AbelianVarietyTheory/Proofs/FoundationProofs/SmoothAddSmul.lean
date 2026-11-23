@@ -1,7 +1,52 @@
-import Mathlib
+module
+
+public import Formalism.RealPlaceAnalysis.SmoothOnGVIff
+public import Formalism.RealPlaceAnalysis.QuotientSettingHolds
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.FormalDegreeBessel.StatementIO
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
-import Formalism.RealPlaceAnalysis.QuotientSettingHolds
+
+@[expose] public section
 
 open Matrix
 open scoped ContDiff
@@ -87,8 +132,8 @@ theorem _root_.GlobalTheory.CapelliCentral.eab_zero (a b : Fin n) (g : Matrix (F
     _root_.Formalism.REAL.EabV ε a b (fun _ => (0 : E)) g = 0 := by
   simp [_root_.Formalism.REAL.EabV, _root_.Formalism.REAL.EcV, _root_.Formalism.REAL.RdV]
 
-open Classical in
 
+open Classical in
 def cut (ε : Fin n → Bool) (f : Matrix (Fin n) (Fin n) ℂ → E) : Matrix (Fin n) (Fin n) ℂ → E :=
   fun g => if inUJ ε g then f g else 0
 
@@ -227,24 +272,6 @@ theorem _root_.GlobalTheory.CapelliCentral.eabEnd_glRel : _root_.Formalism.REAL.
   simp only [LinearMap.sub_apply, Module.End.mul_apply, Submodule.coe_sub, Pi.sub_apply, hFF]
   rw [key]
   split_ifs <;> simp [hF]
-
-lemma tm_apply (u : ℂ) (a b : Fin n) (F : smoothSpace ε E) {f : Matrix (Fin n) (Fin n) ℂ → E}
-    (h : ∀ g, inUJ ε g → F.1 g = f g) {g : Matrix (Fin n) (Fin n) ℂ} (hg : inUJ ε g) :
-    (Tm (eabEnd ε E) u a b F).1 g = Top (EabV ε) u a b f g := by
-  unfold Tm Formalism.QuantumDeterminants.Top
-  rw [LinearMap.add_apply, Submodule.coe_add, Pi.add_apply, eabEnd_apply a b F h hg, ← h g hg]
-  split_ifs <;> simp
-
-lemma prod_apply (l : List (ℂ × Fin n × Fin n)) (F : smoothSpace ε E)
-    {f : Matrix (Fin n) (Fin n) ℂ → E} (h : ∀ g, inUJ ε g → F.1 g = f g) :
-    ∀ g, inUJ ε g → ((l.map fun p => Tm (eabEnd ε E) p.1 p.2.1 p.2.2).prod F).1 g =
-      (l.map fun p => Top (EabV ε) p.1 p.2.1 p.2.2).foldr (fun T h => T h) f g := by
-  induction l with
-  | nil => intro g hg; simpa using h g hg
-  | cons p l ih =>
-    intro g hg
-    rw [List.map_cons, List.map_cons, List.prod_cons, List.foldr_cons, Module.End.mul_apply]
-    exact tm_apply _ _ _ _ ih hg
 
 end GlobalTheory.CapelliCentral
 

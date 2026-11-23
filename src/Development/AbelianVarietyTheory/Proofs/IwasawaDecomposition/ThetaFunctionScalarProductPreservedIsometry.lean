@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHeisenbergInvariantMeanSquareForm
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasDerivAtZeroAndIsTheta
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasDerivAtZeroAndIsTheta
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHeisenbergInvariantMeanSquareForm
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.MeanSquareAddFundamentalDomainOfCocompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WordDerivatives
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsQuadOfPlane
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +63,7 @@ theorem sesq_eq_of_diag {V : Type} [AddCommGroup V] [Module ℂ V] (B B' : V →
     (h : ∀ v, B v v = B' v v) (f g : V) : B f g = B' f g := by
   have h1 := h (f + g)
   have h2 := h (f + Complex.I • g)
-  simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
+  simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
     Complex.conj_I, h f, h g] at h1 h2
   linear_combination (1 / 2 : ℂ) * h1 + (Complex.I / 2) * h2 + (1 / 2 : ℂ) * (B f g - B' f g - B g f + B' g f) * Complex.I_mul_I
 
@@ -33,9 +80,9 @@ theorem integral_mul_star_eq {X : Type} [MeasurableSpace X] (ν : Measure X) [Is
       rw [integral_complex_ofReal]⟩
   let N : Θ →ₗ[ℂ] Θ := M.restrict hM
   let B' : Θ →ₗ[ℂ] Θ →ₗ⋆[ℂ] ℂ := LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun u v => B (N u) (N v))
-    (fun _ _ _ => by simp only [map_add, LinearMap.add_apply])
+    (fun _ _ _ => by simp only [map_add (f := _), LinearMap.add_apply])
     (fun _ _ _ => by simp only [map_smul, LinearMap.smul_apply, RingHom.id_apply])
-    (fun _ _ _ => by simp only [map_add])
+    (fun _ _ _ => by simp only [map_add (f := _)])
     (fun _ _ _ => by simp only [map_smul, LinearMap.map_smulₛₗ])
   have hd : ∀ v : Θ, B' v v = B v v := fun v => by
     show B (N v) (N v) = B v v

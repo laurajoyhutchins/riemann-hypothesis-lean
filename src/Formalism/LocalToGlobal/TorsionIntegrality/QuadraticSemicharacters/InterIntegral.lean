@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactVersion
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharactersFactVersion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -12,22 +54,5 @@ def IntAt (l : ℕ) [Fact l.Prime] (ι : ℂ ≃+* ℂ_[l]) (lg ph : PowerSeries
   ∀ (t : n → ℂ) (N : ℕ), 0 < N → ¬ l ∣ N → (N : ℂ) • t ∈ Λ →
     Integral (mvExp (Formalism.L2.Th1.E.phSum ph : MvPowerSeries n ℂ_[l]) *
       thetaU (ι : ℂ →+* ℂ_[l]) lg B' (opU (matH h) t θ))
-
-def InterIntegral : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (ι : ℂ ≃+* ℂ_[l]) (lg ph : PowerSeries ℂ_[l]), PowerSeries.constantCoeff lg = 0 →
-    ∀ (n : Type) [Fintype n] [DecidableEq n] (h : Matrix n n ℂ), IsHerm (matH h) → ∀ (Λ₁ Λ₂ : AddSubgroup (n → ℂ)) (α : (n → ℂ) → ℂ),
-    IsSemiChar (matH h) Λ₂ α → Λ₂ ≤ dualLat (matH h) Λ₂ → relIdx Λ₁ Λ₂ ≠ 0 → ¬ l ∣ relIdx Λ₁ Λ₂ →
-    ∀ (B' : Matrix n n ℂ_[l]), ∀ θ ∈ Th (matH h) α Λ₁, IntAt l ι lg ph h Λ₁ B' θ →
-      IntAt l ι lg ph h Λ₂ B' (inter (matH h) α Λ₁ Λ₂ θ)
-
-def InK (d : ℕ) (z : ℂ) : Prop := ∃ p q : ℚ, z = (p : ℂ) + (q : ℂ) * (Complex.I * ((Real.sqrt d : ℝ) : ℂ))
-
-def IsometryFour : Prop :=
-  ∀ (d : ℕ), 0 < d → ∀ (L : PeriodPair) (n : Type) [Fintype n] [DecidableEq n] (h₀ : Matrix n n ℂ),
-    (∀ i j, InK d (h₀ i j)) → h₀.IsHermitian → IsPosDef (matH h₀) →
-    ∃ g : (Fin 4 × n → ℂ) ≃ₗ[ℂ] (Fin 4 × n → ℂ),
-      (∀ w w', InK d (g (Pi.single w' 1) w)) ∧ (∀ w w', InK d (g.symm (Pi.single w' 1) w)) ∧
-      IsIsom (matH (blk4 ((((Formalism.L2.Th1.F.area L : ℝ) : ℂ))⁻¹ • h₀))) (stdH L (Fin 4 × n))
-        (g : (Fin 4 × n → ℂ) →ₗ[ℂ] (Fin 4 × n → ℂ))
 
 end Formalism.L2.Th1.H

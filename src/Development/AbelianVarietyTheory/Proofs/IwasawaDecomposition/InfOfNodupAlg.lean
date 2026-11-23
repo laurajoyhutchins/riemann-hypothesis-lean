@@ -1,6 +1,41 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
-import Formalism.LocalToGlobal.GaloisLevelStructure.Checks
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,14 +85,14 @@ theorem WtQ.cls_rep (X : WtQ L n) : clsW X.rep = X := Subtype.ext X.2.choose_spe
 section
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-def LocAt (π : NG.AutRep L n) (w : HeightOneSpectrum (𝓞 L)) (x : GlobalTheory.LocGL.IrrGL (w.adicCompletion L)) : Prop :=
+def LocAt (π : NG.AutRep L n) (w : HeightOneSpectrum (𝓞 L)) (x : GlobalTheory.LocGL.IrrGL (k := w.adicCompletion L)) : Prop :=
   ∃ (s : SplitPlace L) (σ : GlobalTheory.SmGL.IrrRep (GL (Fin n) (s.w.adicCompletion L))) (h : s.w = w),
     IsLocS π.S s σ ∧ HEq (GlobalTheory.LocLanglands.cls σ) x
 
 end
 
-open Classical in
 
+open Classical in
 def hwOf (a : NG.AlgWt L n) (τ : L →+* ℂ) : Fin n → ℤ :=
   if h : ∃ lam, a.HWAt τ lam ∧ Antitone lam then h.choose else 0
 
@@ -67,8 +102,8 @@ theorem hwOf_antitone (a : NG.AlgWt L n) (τ : L →+* ℂ) : Antitone (hwOf a �
   · exact h.choose_spec.2
   · exact fun _ _ _ => le_rfl
 
-open Classical in
 
+open Classical in
 def satOf (π : NG.AutRep L n) (w : HeightOneSpectrum (𝓞 L)) : Multiset ℂ :=
   if h : ∃ (v : HeightOneSpectrum (𝓞 (maximalRealSubfield L))) (Dv : InertDatum L n v w) (α : Fin (n / 2) → ℂ),
       NG.OverPl w v ∧ NG.SatAt π Dv α
@@ -109,39 +144,18 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formal
 
 namespace GlobalTheory.AutQuot
 
+open Classical in
+def wtOf (D : D7) (π : NG.AutRep D.host.E D.R.nV) : WtQ D.host.E D.R.nV :=
+  if h : ∃ b, π.toAlgWt.IsDual b then clsW h.choose else clsW π.toAlgWt
+
 variable (hL : GlobalTheory.Published.LocalLanglandsGL) (D : D7) (T : GlobalTheory.RowTie.WDTie D.nd D.naut)
 
-open Classical in
 
+open Classical in
 def locOf (π : NG.AutRep D.host.E D.R.nV) (w : PlE D.host) : D.naut.LP w :=
   if h : ∃ x, LocAt π w x then (T.e w).symm (GlobalTheory.CuspRep.ParLaws.locRec hL (D.nd.plOm.2 w) h.choose)
   else D.naut.lpZero w
 
-open Classical in
-
-def wtOf (π : NG.AutRep D.host.E D.R.nV) : WtQ D.host.E D.R.nV :=
-  if h : ∃ b, π.toAlgWt.IsDual b then clsW h.choose else clsW π.toAlgWt
-
-set_option synthInstance.maxHeartbeats 400000 in
-
-def nbcOf (hE : IsEmpty D.nd.Loc) : NBC D.naut where
-  AU := fun _ => AUq D.host.E D.R.nV
-  multAU := fun _ X => X.rep.mult
-  sphAU := fun _ X w => ∃ v, NG.OverPl w v ∧ X.rep.SphAt v
-  locAU := fun _ X w => locOf hL D T X.rep w
-  satAU := fun _ X w => satOf X.rep w
-  satAU_card := fun _ X w => satOf_card X.rep w
-  Wt := fun _ => WtQ D.host.E D.R.nV
-  infW := fun _ Y τ => NG.infOf (hwOf Y.rep τ)
-  infW_card := fun _ Y τ => infOf_card _
-  wtAU := fun _ X => wtOf D X.rep
-  infW_alg := fun _ Y τ => infOf_nodup_alg (hwOf_antitone Y.rep τ)
-  embAV := fun i => isEmptyElim i
-  embAV_inj := fun i => isEmptyElim i
-  embAV_loc := fun i => isEmptyElim i
-  embAV_sat := fun i => isEmptyElim i
-  embAV_sph := fun i => isEmptyElim i
-  embAV_inf := fun i => isEmptyElim i
 
 end GlobalTheory.AutQuot
 

@@ -1,8 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FewOrbitsSubspacesHermitianLatticeDiscriminant
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MassIntegralLatticesDiscriminantOrderLe
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DefiniteHermitianIsometricOfSameBadPrimesStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardSublatticesOfIndexLeStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsMaximalIntegralHermitianLatticeOrthonormalStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FewOrbitsSubspacesHermitianLatticeDiscriminant
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianGenusMassEqOrbitStabilizerMassStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodulaStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MassIntegralLatticesDiscriminantOrderLe
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MaximalHermitianLatticeLocalStructureDiscriminan
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MaximalLatticeLocalFactorProductPosAndLeStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemGenusIffMaximalIntegralHermitianLatticeStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OrbitStabilizerMassEqWeightedSumFibresStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OrbitWeightedStabilizerSumMonoSubadditiveStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitianStatement
+import Formalism.HyperbolicPlaceProducts.SubgroupIndexCounts.CountO
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
 
@@ -60,17 +123,11 @@ theorem count_sets (K : Type) [Field K] [NumberField K] (d : ℕ) : 1 ≤ d →
             field_simp
     · intro S hS hprod
       have hdvd : Nat.minFac d ∣ ∏ P ∈ S, qIn P := hprod ▸ Nat.minFac_dvd d
-      obtain ⟨P, hP, hpP⟩ := (Prime.dvd_finset_prod_iff hp.prime _).1 hdvd
+      obtain ⟨P, hP, hpP⟩ := hp.prime.exists_mem_finset_dvd hdvd
       obtain ⟨hmax, h2, hN⟩ := hS P hP
       have hq : qIn P ∣ d := hprod ▸ Finset.dvd_prod_of_mem (fun P => qIn P) hP
       obtain ⟨a, b, -⟩ := hlt _ h2 hq
       have hmem : ((Nat.minFac d : ℕ) : 𝓞 K) ∈ P := by
-        have hP0 : P ≠ ⊥ := by
-          intro h0
-          have : Ideal.absNorm P = 0 := by rw [h0, Ideal.absNorm_bot]
-          rw [hN] at this
-          have := pow_eq_zero_iff (two_ne_zero) |>.1 this
-          omega
         have hdv : Nat.minFac d ∣ Ideal.absNorm P := hN ▸ hpP.trans (dvd_pow_self _ two_ne_zero)
         obtain ⟨Q, hQ, hQu, hQP⟩ := Ideal.exists_isMaximal_dvd_of_dvd_absNorm' hp P hdv
         rw [hmax.eq_of_le hQ.ne_top (Ideal.le_of_dvd hQP)]
@@ -98,9 +155,15 @@ theorem space_mass (hMM : MaxMass) (K V : Type) [Field K] [NumberField K] [StarR
   obtain ⟨c, hc⟩ := hMM K hK _ hj
   obtain ⟨-, hu', ho'⟩ := GlobalTheory.T.exists_maximal_integralHermitianLattice_orthonormal_maximal K V' h' hK hs' hnd'
   obtain ⟨hIl, hIu, hIr⟩ := ho' I _ hI
-  obtain ⟨hImax, -, hIlam⟩ := hu' I hIl hIu
+  have hIfull : Submodule.IsFullLattice K I := by
+    refine { toIsLattice := hIl, span_eq_top := ?_ }
+    obtain ⟨e, -, hspan, rfl, -⟩ := hI
+    apply top_unique
+    rw [← hspan]
+    exact Submodule.span_mono Submodule.subset_span
+  obtain ⟨hImax, -, hIlam⟩ := hu' I hIfull hIu
   have hcI : mass h' I = c := by rw [hc V' h' hs' hp' hIr I hImax, hIlam, mul_one]
-  have hcpos : 0 < c := hcI ▸ (GlobalTheory.T.hermitianGenusMass_eq_orbitStabilizerMass K V' h' hK hs' hp' I hIl).2.1
+  have hcpos : 0 < c := hcI ▸ (GlobalTheory.T.hermitianGenusMass_eq_orbitStabilizerMass K V' h' hK hs' hp' I hIfull).2.1
   have hdisc := GlobalTheory.T.hermitianLatticeDiscriminantOrder_ne_zero_unimodular K V h hK hs hnd
   obtain ⟨hmass, hmpos, hYst, hfin, -⟩ := GlobalTheory.T.hermitianGenusMass_eq_orbitStabilizerMass K V h hK hs hp M₀ hM₀.1.1
   have hn'0 := (hdisc M₀ hM₀.1).1
@@ -135,7 +198,7 @@ theorem space_mass (hMM : MaxMass) (K V : Type) [Field K] [NumberField K] [StarR
       Real.logb 2 (Module.finrank ℚ K))) * orbMass (isom h) (genus h M₀) := by
     rw [f2, ← hconst]
     refine mono _ _ _ _ subset_rfl fun M' hM' => ?_
-    refine le_trans ?_ (GlobalTheory.T.encard_sublattices_of_index_le K V h hK hs hnd M' hM'.1 i (Nat.one_le_iff_ne_zero.2 hi0))
+    refine le_trans ?_ (GlobalTheory.T.encard_sublattices_of_index_le K V h hK hs hnd M' hM'.1.toIsLattice i (Nat.one_le_iff_ne_zero.2 hi0))
     have hM'' := (hdisc M₀ hM₀.1).2.2.2.1 M' hM'
     have : (X ∩ Prod.snd ⁻¹' {M'}).encard ≤
         {N : Submodule (𝓞 K) V | N ≤ M' ∧ idxN M' N = i}.encard := by
@@ -168,7 +231,6 @@ theorem real_eq (d i j : ℕ) (L c : ℝ) (hd : d ≠ 0) (hi : i ≠ 0) :
     congr 1
     push_cast
     ring
-  have hdL : (0 : ℝ) < (d : ℝ) ^ L := by positivity
   rw [e, Real.rpow_add hi', Real.rpow_natCast]
   push_cast
   rw [Real.mul_rpow hd'.le hi'.le]
@@ -182,7 +244,13 @@ theorem main : MaxMass → ∀ (K V : Type) [Field K] [NumberField K] [StarRing 
   have hc : 0 < mass h₁ I₁ := by
     have hp' := SpaceMass.PD_of_ortho h₁ hK I₁ _ hI₁
     obtain ⟨-, -, ho'⟩ := GlobalTheory.T.exists_maximal_integralHermitianLattice_orthonormal_maximal K V₁ h₁ hK hs₁ (SpaceMass.nondeg_of_PD h₁ hp')
-    exact (GlobalTheory.T.hermitianGenusMass_eq_orbitStabilizerMass K V₁ h₁ hK hs₁ hp' I₁ (ho' I₁ _ hI₁).1).2.1
+    have hfull : Submodule.IsFullLattice K I₁ := by
+      refine { toIsLattice := (ho' I₁ _ hI₁).1, span_eq_top := ?_ }
+      obtain ⟨e, -, hspan, rfl, -⟩ := hI₁
+      apply top_unique
+      rw [← hspan]
+      exact Submodule.span_mono Submodule.subset_span
+    exact (GlobalTheory.T.hermitianGenusMass_eq_orbitStabilizerMass K V₁ h₁ hK hs₁ hp' I₁ hfull).2.1
   set L : ℝ := Real.logb 2 (Module.finrank ℚ K) with hLdef
   have hLf : L = 1 + Real.logb 2 (fDeg K) := by
     have := hK.1
@@ -260,7 +328,6 @@ theorem main : MaxMass → ∀ (K V : Type) [Field K] [NumberField K] [StarRing 
       rw [hge]
       simp
   · set B : ℝ := mass h₁ I₁ * (de : ℝ) ^ j * (de : ℝ) ^ L with hB
-    have hB0 : 0 ≤ B := by positivity
     have key : ∀ p ∈ A.filter fun I => ∃ U, Q I U,
         orbMass (isom (hRes h (f p))) (latsDisc (R := 𝓞 K) (hRes h (f p)) (de ^ 2)) ≤
           ENNReal.ofReal (B / (p.1 : ℝ) ^ L) := by
@@ -288,9 +355,6 @@ theorem main : MaxMass → ∀ (K V : Type) [Field K] [NumberField K] [StarRing 
           calc _ ≤ ∑ _d ∈ Finset.Icc 1 de, B := by
                 refine Finset.sum_le_sum fun d hd => ?_
                 have hd1 := (Finset.mem_Icc.1 hd).1
-                have hpos : (0 : ℝ) < (d : ℝ) ^ L := by
-                  have : (0 : ℝ) < d := by exact_mod_cast hd1
-                  positivity
                 change ∑ _S ∈ T d, B / (d : ℝ) ^ L ≤ B
                 rw [Finset.sum_const, nsmul_eq_mul]
                 calc _ ≤ (d : ℝ) ^ L * (B / (d : ℝ) ^ L) :=

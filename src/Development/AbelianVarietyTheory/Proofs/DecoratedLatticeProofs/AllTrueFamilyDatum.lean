@@ -1,28 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.Framed
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevTrue
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.OnFramesRdApply
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RatioOKOfRootOfUnity
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AllTrueFamilyGeometryStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LineVectorBesselExistenceStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsGeometricMeasureVolumeStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsKFinOfMem
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AllTrueFamilyGeometryColumnStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LocalComponentVectorRelationStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSymmetricDataAtTypePlacesStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsLevelData
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LocalComponentPlacesCharacterizedStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LocalComponentAtSplitPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FixLevCompactOpen
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EasyInputs
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SymRead
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.Framed
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsStdFr
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsTransportAdelicCorrection
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsGeometricMeasureVolumeStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsLevelData
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSymmetricDataAtTypePlacesStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FixLevCompactOpen
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsKFinOfMem
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LineVectorBesselExistenceStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LocalComponentAtSplitPlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LocalComponentPlacesCharacterizedStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LocalComponentVectorRelationStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EasyInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,7 +103,7 @@ theorem selfDual_top (h : PkHyp W) : IsSelfDualC D.sp.X' (pk W).ΛX := by
 
 def xOf (A : GeoAll W u) : XGeo D := ⟨A.g.x, A.g.vac, A.g.Lz, A.g.oT, A.o.ζ₀, A.g.bT, A.g.LT⟩
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem core (hD : GlobalTheory.Published.DiscreteSeriesCover) (hH : GlobalTheory.Published.HarishChandraModules) (hPk : PkHyp W)
     (hTy : GlobalTheory.Core.Mi.IsTypePlaces (pk W).Pg) (hT0 : ((D.mem u).A.T : ℕ) ≠ 0)
@@ -88,7 +119,7 @@ theorem core (hD : GlobalTheory.Published.DiscreteSeriesCover) (hH : GlobalTheor
       (p : ι → GlobalTheory.FinPl.SplitPt D k), (∀ j i, GlobalTheory.FinPl.Frame (p i) (D.sp.X j) (Fin (D.sp.X j).rank)) →
         (∀ j, ι → GlobalTheory.LatPair.Pair k (Fin (D.sp.X j).rank)) → Prop)
     (hpre : ∀ (y : YRat a) (m : YMeas y) (b) (v : VCom (commOf (pk W) u (mkGeo m b))), v.NT = (pk W).ΛX →
-      (∀ p, p ∈ v.tP ↔ (((D.mem u).A.T : ℕ) : 𝓞 D.host.F) ∈ p.asIdeal) → v.τ = y.τ → y.Tau (-D.host.xi0 ^ (D.R.m / 2)) →
+      (∀ p, p ∈ v.tP ↔ (((D.mem u).A.T : ℕ) : 𝓞 D.host.F) ∈ (_root_.IsDedekindDomain.HeightOneSpectrum.asIdeal p)) → v.τ = y.τ → y.Tau (-D.host.xi0 ^ (D.R.m / 2)) →
       ∃ (k : Type) (_ : Field k) (_ : ValuativeRel k) (_ : TopologicalSpace k) (_ : IsNonarchimedeanLocalField k) (ι : Type)
         (o : GlobalTheory.SeeSaw.TDat (commOf (pk W) u (mkGeo m b)) k ι), PreT v o ∧ o.ζ₀ = a.ζ₀ ∧ R k ι o.p o.β o.Q) :
     ∃ A : GeoAll W u, A.Is ∧ A.c₀ = c₀ ∧ xOf A = a ∧ Framed A.d.B ∧ R A.k A.ι A.o.p A.o.β A.o.Q := by
@@ -96,8 +127,8 @@ theorem core (hD : GlobalTheory.Published.DiscreteSeriesCover) (hH : GlobalTheor
   obtain ⟨m, hm₀, hlast⟩ := GlobalTheory.T.exists_geometric_measure_volume W u hPk a y (fun _ => 1) hx
   have hc₀ := GlobalTheory.Fam.commOf_is hD hH W u hPk _ hm₀ hx
   obtain ⟨tP, htP⟩ := exists_places D _ hT0
-  obtain ⟨gP, hgP⟩ : ∃ s : Finset (GlobalTheory.FinPl.Pl D), ∀ p, p ∈ s ↔ ∃ PP ∈ (pk W).Pg, p = PP.under (𝓞 D.host.F) :=
-    ⟨(pk W).Pg.image fun PP => PP.under (𝓞 D.host.F), fun p => by simp only [Finset.mem_image, eq_comm]⟩
+  obtain ⟨gP, hgP⟩ : ∃ s : Finset (GlobalTheory.FinPl.Pl D), ∀ p, p ∈ s ↔ ∃ PP ∈ (pk W).Pg, p = (_root_.IsDedekindDomain.HeightOneSpectrum.under (𝓞 D.host.F) PP) :=
+    ⟨(pk W).Pg.image fun PP => (_root_.IsDedekindDomain.HeightOneSpectrum.under (𝓞 D.host.F) PP), fun p => by simp only [Finset.mem_image, eq_comm]⟩
   have hdisj : Disjoint gP tP := Finset.disjoint_left.2 fun p h1 h2 => by
     obtain ⟨PP, hP, rfl⟩ := (hgP p).1 h1
     refine hGT PP hP ?_
@@ -156,21 +187,6 @@ theorem core (hD : GlobalTheory.Published.DiscreteSeriesCover) (hH : GlobalTheor
 
 end Gen
 
-set_option maxHeartbeats 2000000 in
-
-theorem exists_geoAll : GlobalTheory.Published.DiscreteSeriesCover → GlobalTheory.Published.HarishChandraModules → GlobalTheory.Published.StrongApproxSU → ∀ {B : GlobalTheory.Mem.Base} {X : GlobalTheory.Mem.PreX B.toPre} {I : TC B X} {l : I.Laws} {Z : TC.Later B (I.cols l)} {L : SizeData₂ (I.rec7 l Z)} {hT : GatTies (I.rec7 l Z)} {Gi : Formalism.MainNotions.G.Inst (I.rec7 l Z) L} {Gl : Formalism.MainNotions.G.LatInst (I.rec7 l Z)} {Kc : Formalism.MainNotions.G.Consts} {Yd : DivX (I.rec7 l Z)} {cX : ExtraC} {ex : Extra (I.rec7 l Z) L hT Gi Gl Kc Yd cX} (W : RealPack ex), AllTrue W → ∀ u : B.Word, ∃ a : GeoAll W u, a.Is ∧ a.True ∧ (∀ r s, (a.g.oT B.R.m rfl).iA r s = if r.val = s.val then 1 else 0) ∧ GlobalTheory.MiTop.Framed a.d.B := by
-  intro hD hH hS B X I l Z L hT Gi Gl Kc Yd cX ex W hW u
-  obtain ⟨a, c₀, hx, hpin, hbT, hiA, hLT, hline, hn, hemb, hz, horth, hloc⟩ := GlobalTheory.T.all_true_family_geometry hS W hW u
-  obtain ⟨jj, hjj⟩ := hW.tq.top1 u
-  have hPr := (base_fields_primes_ok B X).2.1
-  obtain ⟨A, hA, rfl, rfl, hfr, hR⟩ := core (W := W) (u := u) hD hH hW.pk hW.lev.1 (hPr.T_prime u).ne_zero
-    (fun PP hP => Formalism.L2.Col.T_notMem_vGs hPr u ⟨PP, (hW.lev.2.1 PP).1 hP⟩)
-    (fun PP ⟨t, ht⟩ hP => TC.Q_notMem_of_ok hW.tr.ok _ PP ((hW.tq.Q t PP).1 ht) ((hW.lev.2.1 PP).1 hP))
-    jj hjj a c₀ hx hbT hLT hline hn (fun n h x _ => horth n h x) hloc
-    (fun k _ _ _ _ ι p β Q => GlobalTheory.AdForm.StdT I l Z u p β Q fun j => (a.x j).L)
-    fun y m b v h1 h2 h3 h4 => GlobalTheory.T.all_true_family_geometry_column W hW u (mkGeo m b) c₀ v a.ζ₀ hpin h1 h2 hline hz hemb
-      (fun x _ => let ⟨LZ, _, ho⟩ := horth _ rfl x; ⟨LZ, hLT ▸ ho⟩) (by rw [h3]; exact h4)
-  exact ⟨A, hA, ⟨hpin, hR, hemb, hz⟩, hiA, hfr⟩
 
 end GlobalTheory.GeoExists
 

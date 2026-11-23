@@ -1,13 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsUniqueStatement
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HeckeSectionsIsotropicCommutatorPairingPower
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.KleimanSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import Development.WeilBound.CoreStatements.FlagImmersions.PointsIntegralSectionSnoc
-import Development.WeilBound.CoreStatements.HodgeTatePoints.GfForms
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+module
+
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.GfForms
+public import Development.WeilBound.CoreStatements.FlagImmersions.IntersectionConstantMetricLine
+public import Development.WeilBound.CoreStatements.FlagImmersions.PointsIntegralSectionSnoc
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo Filter Topology GlobalTheory.CompanionTheory.Ar.Top
 
@@ -86,7 +133,7 @@ theorem eval_one_coneMap (y : (Σ k, ι k) → Ω) (f : MRing ι) :
     eval (fun _ => (1 : Ω)) (mConeMap y f) = aeval y f := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, hp]
     congr 1
@@ -107,48 +154,7 @@ theorem prod_pow_add (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (a b : K → �
 theorem exists_form_of_mem_chart {y : (Σ k, ι k) → Ω} {c : ∀ k, ι k} (hc : ∀ k, y ⟨k, c k⟩ ≠ 0)
     {t : Ω} (ht : t ∈ chartRingZ y c) :
     ∃ (N : K → ℕ) (r : MRing ι), IsMultiHomog r N ∧ aeval y r = t * ∏ k, y ⟨k, c k⟩ ^ N k := by
-  classical
-  unfold chartRingZ at ht
-  induction ht using Algebra.adjoin_induction with
-  | mem x hx =>
-    obtain ⟨p, rfl⟩ := hx
-    refine ⟨Pi.single p.1 1, X p, ?_, ?_⟩
-    · intro m hm k
-      rw [support_X] at hm
-      rw [Finset.mem_singleton.mp hm]
-      obtain ⟨k0, i0⟩ := p
-      by_cases hk : k = k0
-      · subst hk
-        simp [Finsupp.single_apply]
-      · have : ∀ i, (Finsupp.single (⟨k0, i0⟩ : Σ k, ι k) 1 : (Σ k, ι k) →₀ ℕ) ⟨k, i⟩ = 0 := by
-          intro i
-          rw [Finsupp.single_apply, if_neg]
-          intro h
-          exact hk (congrArg Sigma.fst h).symm
-        simp [this, Pi.single_eq_of_ne hk]
-    · have hprod : ∏ k, y ⟨k, c k⟩ ^ (Pi.single p.1 1 : K → ℕ) k = y ⟨p.1, c p.1⟩ := by
-        rw [Finset.prod_eq_single p.1 (fun b _ hb => by simp [Pi.single_eq_of_ne hb]) (by simp)]
-        simp
-      rw [hprod, aeval_X, div_mul_cancel₀ _ (hc _)]
-  | algebraMap n =>
-    refine ⟨0, C n, ?_, by simp⟩
-    intro m hm k
-    rw [C_apply] at hm
-    rw [Finset.mem_singleton.mp (support_monomial_subset hm)]
-    simp
-  | add a b _ _ h1 h2 =>
-    obtain ⟨N1, r1, hr1, e1⟩ := h1
-    obtain ⟨N2, r2, hr2, e2⟩ := h2
-    refine ⟨N1 + N2, r1 * mon c N2 + r2 * mon c N1, hom_add (hom_mul hr1 (hom_mon c N2))
-      (hom_of_eq (hom_mul hr2 (hom_mon c N1)) fun k => by simp [add_comm]), ?_⟩
-    rw [map_add, map_mul, map_mul, aeval_mon, aeval_mon, e1, e2, prod_pow_add]
-    ring
-  | mul a b _ _ h1 h2 =>
-    obtain ⟨N1, r1, hr1, e1⟩ := h1
-    obtain ⟨N2, r2, hr2, e2⟩ := h2
-    refine ⟨N1 + N2, r1 * r2, hom_mul hr1 hr2, ?_⟩
-    rw [map_mul, e1, e2, prod_pow_add]
-    ring
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.SectionBounded.exists_form_of_mem_chartRingZ <;> assumption
 
 theorem chart_rel {y : (Σ k, ι k) → Ω} {c : ∀ k, ι k} (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) {a : K → ℤ} {s : Ω}
     (hs : s * ∏ k, y ⟨k, c k⟩ ^ (-(((1 : ℕ) : ℤ) * a k)) ∈ chartRingZ y c) {g h : MRing ι}
@@ -230,20 +236,20 @@ theorem deg_tensor (II : IntersectionSystem) (hII : IsFullIntersectionSystem II)
 
 end GlobalTheory.CompanionTheory.Ar.Top.EffLat
 
-open GlobalTheory.CompanionTheory.Ar.Top.EffLat PositivityTheory.HtPt.Gf in
 
+open GlobalTheory.CompanionTheory.Ar.Top.EffLat PositivityTheory.HtPt.Gf in
 theorem GlobalTheory.CompanionTheory.Ar.Top.eff_lat : ∀ II : IntersectionSystem, IsFullIntersectionSystem II → ReciprocityTheory.ChartRestriction.G.Geo.DivSuppArithStatement → ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (Ω : Type) [Field Ω] (y : (Σ k, ι k) → Ω) (e : ℕ) (L : Fin e → HermLine ι) (A : HermLine ι) (s : Ω), IsArithVar (mCoordIdeal y) (e + 2) → Birational y → (∀ j, IsSmoothHerm (L j)) → IsSmoothHerm A → s ≠ 0 → s ∈ chartLat y A.a 1 → (∀ W, IsArithVar W (e + 1) → mCoordIdeal y ≤ W → 0 ≤ ptsIntegral W (fun j z => Real.log ((L j).h z)) (fun _ => 1)) → 0 ≤ ptsIntegral (mCoordIdeal y) (fun j z => Real.log (((Fin.snoc L A : Fin (e + 1) → HermLine ι) j).h z)) (fun _ => 1) := by
   classical
   intro II hII hD K _ ι _ Ω _ y e L A s hP hbir hL hA hs0 hs hnef
   haveI hPp : (mCoordIdeal y).IsPrime := hP.2.1.1
   choose c0 hc0 using hP.2.1.2.2
-  have hy0 : ∀ k, y ⟨k, c0 k⟩ ≠ 0 := fun k => y_ne_of_not_mem (hc0 k)
-  obtain ⟨g, h, dg, dh, hg, hh, hd, hhne, e1⟩ := exists_rep hbir hy0 A.a s
+  have hy0 : ∀ k, y ⟨k, c0 k⟩ ≠ 0 := fun k => EffLat.y_ne_of_not_mem (hc0 k)
+  obtain ⟨g, h, dg, dh, hg, hh, hd, hhne, e1⟩ := EffLat.exists_rep hbir hy0 A.a s
   have hgne : aeval y g ≠ 0 := by
     rw [e1]
     exact mul_ne_zero hs0 hhne
-  have hgP := not_mem_of_aeval_ne hgne
-  have hhP := not_mem_of_aeval_ne hhne
+  have hgP := EffLat.not_mem_of_aeval_ne hgne
+  have hhP := EffLat.not_mem_of_aeval_ne hhne
   have hHs : IsSmoothHerm (HermLine.sqMetric (ι := ι) dh) := isSmoothHerm_sqMetric dh
   have hGs := isSmoothHerm_tensor hA hHs
   have secH : IsSectionOn (mCoordIdeal y) (HermLine.sqMetric (ι := ι) dh) h :=
@@ -255,7 +261,7 @@ theorem GlobalTheory.CompanionTheory.Ar.Top.eff_lat : ∀ II : IntersectionSyste
     ring
   have cutG := RootFieldNumerics.points_integral_section_snoc II hII hD K ι (mCoordIdeal y) e L _ g hP hL hGs secG
   have cutH := RootFieldNumerics.points_integral_section_snoc II hII hD K ι (mCoordIdeal y) e L _ h hP hL hHs secH
-  have hadd := deg_tensor II hII (mCoordIdeal y) e L A _ hP hL hA hHs
+  have hadd := EffLat.deg_tensor II hII (mCoordIdeal y) e L A _ hP hL hA hHs
   have hfin : ∀ f : MRing ι, ({W | W ∈ divSupp (mCoordIdeal y) f ∧ IsHorizontal W}).Finite :=
     fun f => (divSupp_finite _ f).subset fun W hW => hW.1
   have hInn : ∀ W, W ∈ divSupp (mCoordIdeal y) g → IsHorizontal W →
@@ -269,14 +275,14 @@ theorem GlobalTheory.CompanionTheory.Ar.Top.eff_lat : ∀ II : IntersectionSyste
     have hrel' := hWrel
     choose c hcW using hWrel
     have hPW : mCoordIdeal y ≤ W := le_sup_left.trans hWmin.1.2
-    have hyc : ∀ k, y ⟨k, c k⟩ ≠ 0 := fun k => y_ne_of_not_mem fun h' => hcW k (hPW h')
+    have hyc : ∀ k, y ⟨k, c k⟩ ≠ 0 := fun k => EffLat.y_ne_of_not_mem fun h' => hcW k (hPW h')
     have hsc : s * ∏ k, y ⟨k, c k⟩ ^ (-(((1 : ℕ) : ℤ) * A.a k)) ∈ chartRingZ y c := hs c hyc
-    obtain ⟨u, r, hrel⟩ := chart_rel hyc hsc hg hh hd e1
+    obtain ⟨u, r, hrel⟩ := EffLat.chart_rel hyc hsc hg hh hd e1
     haveI hWp : W.IsPrime := hWmin.1.1
-    obtain ⟨hm, hle⟩ := len_le_of_rel hgP (mon_not_mem hWp hcW u) hrel hWmin
+    obtain ⟨hm, hle⟩ := EffLat.len_le_of_rel hgP (PositivityTheory.HtPt.Gf.mon_not_mem hWp hcW u) hrel hWmin
     refine ⟨⟨hm, hrel'⟩, ?_⟩
     unfold multAt
-    rw [dif_pos hWp, dif_pos hWp]
+    rw [dite_eq_left hWp, dite_eq_left hWp]
     exact hle
   have cmp : (∑ᶠ (W) (_ : W ∈ divSupp (mCoordIdeal y) h ∧ IsHorizontal W),
         (multAt (mCoordIdeal y ⊔ Ideal.span {h}) W : ℝ) *

@@ -1,5 +1,63 @@
-import Formalism.GaussJetBounds.GenLogInverse
-import Formalism.FormalGroupWitt.WeightInvariance
+module
+
+public import Formalism.GaussJetBounds.GenLogInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Data.Nat.Choose.Lucas
+public import Mathlib.Data.Nat.Prime.Factorial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -16,6 +74,7 @@ theorem bnx_lin_pow {K : Type u} [Field K] {σ : Type*} [DecidableEq σ] (x y : 
       ∑ r ∈ Finset.range (k + 1),
         if Finsupp.single x r + Finsupp.single y (k - r) = μ then
           a ^ r * b ^ (k - r) * (k.choose r : K) else 0 := by
+
   rw [add_pow, map_sum]
   refine Finset.sum_congr rfl fun r _ => ?_
   have e : (C a * X x : MvPowerSeries σ K) ^ r * (C b * X y) ^ (k - r) *
@@ -148,7 +207,6 @@ private theorem coeff_prod_bnxA_pow_eq_ite {K : Type u} [Field K] {d : ℕ} [NeZ
     · intro p hp hne
       first
         | rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
-        | simp only [Finset.mem_antidiagonal] at hp
       by_contra hnz
       have h1 : coeff p.1 (bnxA a b c ^ k c) ≠ 0 := left_ne_zero_of_mul hnz
       have h2 : coeff p.2 (∏ s ∈ S, bnxA a b s ^ k s) ≠ 0 := right_ne_zero_of_mul hnz
@@ -183,7 +241,6 @@ private theorem coeff_prod_bnxA_pow_eq_ite {K : Type u} [Field K] {d : ℕ} [NeZ
       apply h
       first
       | rw [Finset.HasAntidiagonal.mem_antidiagonal]
-      | simp only [Finset.mem_antidiagonal]
       ext z
       rw [Finsupp.add_apply, Finsupp.tsub_apply, hr]
       split_ifs <;> omega
@@ -204,7 +261,6 @@ def bnxN (m : V2 d →₀ ℕ) : ZMod d →₀ ℕ :=
 theorem bnxN_apply (m : V2 d →₀ ℕ) (s : ZMod d) : bnxN m s = m (false, s) + m (true, s) := by
   first
   | rfl
-  | simp [bnxN]
 
 theorem bnx_coeff_subst (a b : ZMod d → K) (f : MvPowerSeries (ZMod d) K) (m : V2 d →₀ ℕ) :
     coeff m (subst (bnxA a b) f) = coeff (bnxN m) f *
@@ -273,13 +329,11 @@ def bnxM (n : ZMod d →₀ ℕ) (k : ZMod d → ℕ) : V2 d →₀ ℕ :=
 theorem bnxM_false (n : ZMod d →₀ ℕ) (k : ZMod d → ℕ) (s : ZMod d) : bnxM n k (false, s) = k s := by
   first
   | rfl
-  | simp [bnxM]
 
 theorem bnxM_true (n : ZMod d →₀ ℕ) (k : ZMod d → ℕ) (s : ZMod d) :
     bnxM n k (true, s) = n s - k s := by
   first
   | rfl
-  | simp [bnxM]
 
 theorem bnxN_bnxM (n : ZMod d →₀ ℕ) (k : ZMod d → ℕ) (hk : ∀ s, k s ≤ n s) : bnxN (bnxM n k) = n := by
   ext s
@@ -318,7 +372,6 @@ theorem bnx_prod_choose (n : ZMod d →₀ ℕ) (s : ZMod d) (j : ℕ) (hj : j <
   · first
     | (rw [Function.update_apply, if_pos rfl, he, one_pow, one_pow, one_mul, one_mul,
         Nat.add_sub_cancel' hj.le])
-    | simp [Function.update_apply, he, Nat.add_sub_cancel' hj.le]
   · intro t _ hts
     simp [Function.update_apply, hts]
   · intro h
@@ -526,8 +579,6 @@ theorem bnx_choose_pow {l : ℕ} (hl : l.Prime) (e : ℕ) (he : 1 ≤ e) :
       (l ^ e - 1 + 1).choose (l ^ (e - 1) - 1 + 1) * (l ^ (e - 1) - 1 + 1) := by
     first
     | exact Nat.add_one_mul_choose_eq _ _
-    | exact Nat.succ_mul_choose_eq' _ _
-    | exact (Nat.choose_mul_succ_eq _ _).symm
   have e1 : l ^ e - 1 + 1 = l ^ e := by omega
   have e2 : l ^ (e - 1) - 1 + 1 = l ^ (e - 1) := by omega
   rw [e1, e2] at hid
@@ -539,7 +590,6 @@ theorem bnx_choose_pow {l : ℕ} (hl : l.Prime) (e : ℕ) (he : 1 ≤ e) :
   have h7 : l ∣ (l ^ e - 1).choose (l ^ (e - 1) - 1) := by
     first
     | exact Nat.dvd_of_mul_dvd_mul_left hlp hdiv
-    | exact (Nat.mul_dvd_mul_iff_left hlp).1 hdiv
   exact hnd e _ (by omega) h7
 
 theorem bnx_pow_reduce (l d x : ℕ) (hl : 1 ≤ l) : l ^ x ≡ l ^ (x % d) [MOD l ^ d - 1] := by
@@ -595,7 +645,7 @@ private theorem finsupp_prod_torus_pow_eq_C_mul_monomial {K : Type u} [Field K] 
   rw [hmono]
   rw [show ∑ t, Finsupp.single t (dd t) = dd from by
     ext u
-    simp [Finsupp.finset_sum_apply, Finsupp.single_apply]]
+    simp [Finsupp.finsetSum_apply, Finsupp.single_apply]]
 
 theorem bnx_torus_cong {K : Type u} [Field K] (l d : ℕ) [NeZero d] (hl : l.Prime) (hl3 : 3 ≤ l)
     (hd2 : 2 ≤ d) (hde : Even d) (ζ : K) (hζ : IsPrimitiveRoot ζ (l ^ d - 1))
@@ -641,7 +691,6 @@ theorem bnx_torus_cong {K : Type u} [Field K] (l d : ℕ) [NeZero d] (hl : l.Pri
     rw [e]
     first
     | exact dvd_neg.2 hprod
-    | exact dvd_neg.2 (by exact_mod_cast hprod)
   have key := bnx_pow_mod l d _ _ hl3 (by omega) hmod
   have h2 := congrArg (fun x : ℕ => (x : ZMod d)) key
   first
@@ -655,7 +704,6 @@ theorem bnx_dot_const {ι : Type*} (n : ι →₀ ℕ) (c : ℝ) :
   congr 1
   first
   | simp [Finsupp.degree_apply]
-  | simp [Finsupp.degree, Finsupp.sum]
   | (rw [Finsupp.degree_apply]; push_cast; rfl)
 
 section Sides
@@ -863,7 +911,6 @@ theorem binomial_coefficient_extraction : BinomExtract.{u} := by
         refine h.trans ?_
         first
         | exact Real.rpow_le_rpow_of_exponent_ge hpi0 hl1.le (by linarith)
-        | exact (Real.rpow_le_rpow_left_iff_of_base_lt_one hpi0 hl1).2 (by linarith)
       · exact h
   · intro n hnb
     by_cases hn : coeff n be = 0

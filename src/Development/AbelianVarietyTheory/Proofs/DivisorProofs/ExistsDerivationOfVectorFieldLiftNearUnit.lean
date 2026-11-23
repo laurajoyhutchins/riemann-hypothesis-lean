@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntDerApply
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -13,7 +52,7 @@ namespace GlobalTheory.Heat
 
 theorem scheme_constantSection_add {R : Type} [CommRing R] {X : Scheme.{0}} (p : X ⟶ Sp R) (U : X.Opens) (a b : R) :
     constFn p U (a + b) = constFn p U a + constFn p U b := by
-  simp [constFn, map_add]
+  simp [constFn, map_add (f := _)]
 
 theorem constFn_mul_on_open {R : Type} [CommRing R] {X : Scheme.{0}} (p : X ⟶ Sp R) (U : X.Opens) (a b : R) :
     constFn p U (a * b) = constFn p U a * constFn p U b := by
@@ -51,12 +90,12 @@ theorem liftDer_isDerivation : ∀ (R : Type) [CommRing R] (G : Over (Sp R)) [Gr
   have hadd : ∀ a b, D (a + b) = D a + D b := by
     intro a b
     have := congrArg ev (hc (a + b))
-    rw [scheme_constantSection_add, hL.1.1 W le_rfl, hc, hc, map_add, hev, hev, hev] at this
+    rw [scheme_constantSection_add, hL.1.1 W le_rfl, hc, hc, map_add (f := _), hev, hev, hev] at this
     exact this.symm
   have hmul : ∀ a b, D (a * b) = a * D b + b * D a := by
     intro a b
     have := congrArg ev (hc (a * b))
-    rw [constFn_mul_on_open, hL.1.2.1 W le_rfl, hc, hc, map_add, map_mul, map_mul, hev, hev, hev, hev, hev] at this
+    rw [constFn_mul_on_open, hL.1.2.1 W le_rfl, hc, hc, map_add (f := _), map_mul, map_mul, hev, hev, hev, hev, hev] at this
     exact this.symm
   let L : R →ₗ[ℤ] R := (AddMonoidHom.mk' D hadd).toIntLinearMap
   exact ⟨Derivation.mk' L (fun a b => by simpa [L, smul_eq_mul] using hmul a b), fun r => rfl⟩

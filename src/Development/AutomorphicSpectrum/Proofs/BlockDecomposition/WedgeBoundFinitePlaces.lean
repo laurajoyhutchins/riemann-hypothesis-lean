@@ -1,5 +1,57 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.LogAbsoluteWedges.WedgeSub
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.LogAbsoluteWedges.WedgeSub
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +88,7 @@ theorem sz_le_one {g : Matrix ι κ K} (h : ∀ i j, ‖g i j‖ ≤ 1) : sz g �
 theorem int_mul [IsUltrametricDist K] [Fintype κ] {a : Matrix ι κ K} {b : Matrix κ ι' K}
     (ha : ∀ i j, ‖a i j‖ ≤ 1) (hb : ∀ i j, ‖b i j‖ ≤ 1) : ∀ i j, ‖(a * b) i j‖ ≤ 1 := by
   intro i j
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun k _ => ?_
   rw [norm_mul]
   exact mul_le_one₀ (ha i k) (norm_nonneg _) (hb k j)
@@ -54,7 +106,7 @@ theorem int_sub [IsUltrametricDist K] {a b : Matrix ι κ K}
 
 theorem int_one [DecidableEq ι] : ∀ i j, ‖(1 : Matrix ι ι K) i j‖ ≤ 1 := by
   intro i j
-  rw [one_apply]
+  rw [Matrix.one_apply]
   split_ifs <;> simp
 
 theorem nF_mul_le (hM : MulF) [IsUltrametricDist K] [Fintype ι] [Fintype ι'] [Fintype κ]
@@ -67,7 +119,7 @@ theorem nF_mul_le (hM : MulF) [IsUltrametricDist K] [Fintype ι] [Fintype ι'] [
 theorem sel_mul [DecidableEq ι] [Fintype ι] (s : κ → ι) (M : Matrix ι ι' K) :
     (1 : Matrix ι ι K).submatrix s id * M = M.submatrix s id := by
   ext a b
-  simp [mul_apply, one_apply]
+  simp [Matrix.mul_apply, Matrix.one_apply]
 
 theorem norm_det_perm [Fintype κ] [DecidableEq κ] (M : Matrix κ κ K) (e : Equiv.Perm κ) :
     ‖(M.submatrix e id).det‖ = ‖M.det‖ := by
@@ -87,7 +139,7 @@ theorem nF_fromCols_sel_le [IsUltrametricDist K] [Fintype ι] [DecidableEq ι] [
     obtain ⟨k, hk⟩ := hu
     have : ((fromCols Eᵀ C).submatrix u id).det = 0 := by
       refine det_eq_zero_of_column_eq_zero (Sum.inl k) fun x => ?_
-      simpa [hE, one_apply] using hk x
+      simpa [hE, Matrix.one_apply] using hk x
     rw [this, norm_zero]
     exact nF_nonneg' C
   by_cases inj : Function.Injective u
@@ -114,7 +166,7 @@ theorem nF_fromCols_sel_le [IsUltrametricDist K] [Fintype ι] [DecidableEq ι] [
   have hb : ((fromCols Eᵀ C).submatrix u id).submatrix e id =
       fromBlocks 1 0 (Eᵀ.submatrix (u ∘ e ∘ Sum.inr) id) (C.submatrix (u ∘ e ∘ Sum.inr) id) := by
     ext (a | a) (b | b)
-    · simp [he, hσ, hE, one_apply, hs.eq_iff, eq_comm]
+    · simp [he, hσ, hE, Matrix.one_apply, hs.eq_iff, eq_comm]
     · simpa [he, hσ] using congrFun (congrFun hC a) b
     · simp
     · simp
@@ -150,7 +202,7 @@ theorem nF_fromCols_of_id (hM : MulF) [IsUltrametricDist K] [Fintype ι] [Decida
   have hEE : E * Eᵀ = 1 := by
     rw [hE, sel_mul]
     ext a b
-    simp [one_apply, hs.eq_iff, eq_comm]
+    simp [Matrix.one_apply, hs.eq_iff, eq_comm]
   have hEC : E * C = 0 := by rw [hE, sel_mul, hC]
   have hEint : ∀ i j, ‖E i j‖ ≤ 1 := fun i j => int_one _ _
   have hEtint : ∀ i j, ‖Eᵀ i j‖ ≤ 1 := fun i j => int_one _ _

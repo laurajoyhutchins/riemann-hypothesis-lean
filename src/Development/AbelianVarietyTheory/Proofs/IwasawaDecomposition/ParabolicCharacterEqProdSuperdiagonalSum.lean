@@ -1,10 +1,61 @@
+module
+
+public import Formalism.LocalToGlobal.Divisibility.PsiWeilOfAbsNorm
+public import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SignsG
+public import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColumnCharacterReductionEqExp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockVectorsKilledHeisenbergAverageIsotropic
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardAddCharPlaceIdempotentDivPrime
+import Formalism.LocalRingCardinality.SpanPowerMembership.Adelic
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Algebra.Field
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardAddCharPlaceIdempotentDivPrime
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColumnCharacterReductionEqExp
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockVectorsKilledHeisenbergAverageIsotropic
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsPlaceChartOfSplitIdempotent
-import Formalism.LocalToGlobal.Divisibility.PsiWeilOfAbsNorm
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SignsG
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -98,7 +149,7 @@ theorem core (ψ : AddChar (AF D.host.F) ℂ) (hψ : IsStdChar D ψ (-1)) (k : F
     ext c'
     have hx : xiBar D PP = 0 := by
       unfold xiBar Formalism.L2.Col.redP
-      rw [dif_neg]
+      rw [dite_eq_right]
       rintro ⟨_, r, s, hs, hsa, _⟩
       apply hs
       rw [hE0 s r hsa]
@@ -238,6 +289,7 @@ theorem edgeSum_eq_supSum {κ : Type} [CommRing κ] {r : ℕ} (g : GL (Fin r) κ
 theorem supSum_map {κ κ' : Type} [CommRing κ] [CommRing κ'] (φ : κ →+* κ') {r : ℕ} (x : Matrix (Fin r) (Fin r) κ) :
     Formalism.IndefR.Mi.supSum (x.map φ) = φ (Formalism.IndefR.Mi.supSum x) := by
   unfold Formalism.IndefR.Mi.supSum
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   split_ifs <;> simp
@@ -247,7 +299,7 @@ theorem parabolicCharacter_eq_prod_superdiagonalSum {Pg : Finset (Pl D.host.E)} 
     (((Formalism.L2.DIV.P0 Pg r ψ).chi ⟨x, hx⟩ : D.what₂.LLˣ) : D.what₂.LL) =
       ∏ PP : ↥Pg, ψ PP.1 (Formalism.IndefR.Mi.supSum ((x PP : GL (Fin r) (kP PP.1)) : Matrix (Fin r) (Fin r) (kP PP.1))) := by
   unfold Formalism.L2.DIV.P0 LevelP.ofLocal
-  rw [MonoidHom.finset_prod_apply, Units.coe_prod]
+  rw [MonoidHom.finsetProd_apply, Units.coe_prod]
   refine Finset.prod_congr rfl fun PP _ => ?_
   rw [← edgeSum_eq_supSum]
   rfl

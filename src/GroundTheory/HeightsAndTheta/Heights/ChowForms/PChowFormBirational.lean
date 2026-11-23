@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.Imports
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -14,9 +68,9 @@ theorem pderiv_aeval_eq_sum {F K : Type*} [CommRing F] [CommRing K] [Algebra F K
   classical
   induction g using MvPolynomial.induction_on with
   | C a => simp [MvPolynomial.algebraMap_apply]
-  | add p q hp hq => simp only [map_add, hp, hq, add_mul, Finset.sum_add_distrib]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq, add_mul, Finset.sum_add_distrib]
   | mul_X p j hp =>
-    simp only [map_mul, aeval_X, Derivation.leibniz, smul_eq_mul, hp, map_add, add_mul,
+    simp only [map_mul, aeval_X, Derivation.leibniz, smul_eq_mul, hp, map_add (f := _), add_mul,
       Finset.sum_add_distrib, pderiv_X, Finset.mul_sum]
     congr 1
     · rw [Finset.sum_eq_single j]
@@ -32,8 +86,9 @@ theorem pderiv_genSubst {K : Type*} [CommRing K] {n k : ℕ} (ζ c : Fin n → K
       (if j = (i, m) then 1 else 0) - (if j.1 = i then C (ζ m) * C (c j.2) else 0) := by
   classical
   obtain ⟨j₁, j₂⟩ := j
+
   simp only [genSubst, map_sub, Derivation.leibniz, smul_eq_mul, pderiv_C, mul_zero, zero_add,
-    map_sum, pderiv_X, Pi.single_apply, mul_zero]
+  map_sum, pderiv_X, Pi.single_apply, mul_zero]
   by_cases h : j₁ = i
   · subst h
     simp [Prod.ext_iff, eq_comm, mul_comm]
@@ -56,9 +111,9 @@ theorem not_dvd_pderiv_of_degreeOf_pos {F σ : Type*} [Field F] [CharZero F] {g 
     rw [← degreeOf_eq_sup] at hsd
     have hle : Finsupp.single i 1 ≤ s := Finsupp.single_le_iff.2 (by omega)
     intro h0
-    have := congrArg (coeff (s - Finsupp.single i 1)) h0
-    rw [coeff_pderiv, coeff_zero, tsub_add_cancel_of_le hle] at this
-    have hcs : coeff s g ≠ 0 := mem_support_iff.1 hs
+    have := congrArg (AddMonoidAlgebra.coeff · (s - Finsupp.single i 1)) h0
+    simp only [coeff_pderiv, AddMonoidAlgebra.coeff_zero, tsub_add_cancel_of_le hle] at this
+    have hcs : AddMonoidAlgebra.coeff g s ≠ 0 := mem_support_iff.1 hs
     have hsi : (((s - Finsupp.single i 1 : σ →₀ ℕ) i : ℕ) : F) + 1 ≠ 0 := by
       exact Nat.cast_add_one_ne_zero _
     exact mul_ne_zero hcs hsi this
@@ -116,6 +171,7 @@ theorem ChowFormBirational.proof (h₁ : IncidenceGeneric.Statement)
       · simp
     rw [hsum, hmem]
     exact not_dvd_pderiv_of_degreeOf_pos hg.1 hdeg
+
   · simp only [map_sum, map_mul, aeval_C, MvPolynomial.algebraMap_apply, hρ]
     simp only [Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun l' _ => ?_

@@ -1,7 +1,54 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Adelstab
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsEasy
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlobApprox
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsSpan
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.LevelSubgroupFiniteAdelicStandard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPoint
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +84,7 @@ theorem mv_smul (g : GL (Fin N) (AE D)) (g' : GL (Fin N') (AE D)) (e : D.host.E)
   rw [this, Matrix.mul_smul, Matrix.smul_mul]
 
 theorem inc_int (o : 𝓞 D.host.E) : inc D (o : D.host.E) ∈ OhE D :=
-  (incl_mem_iff (F := ℚ) (o : D.host.E)).2 ⟨o, rfl⟩
+  Formalism.UG.P.adelstab_incl_int (F := ℚ) o
 
 theorem mulVec_mem_of_span {R m n : Type} [CommRing R] [Fintype n] {S : Subring R} (M : Matrix m n R) (i : m)
     {T : Set (n → R)} (hT : ∀ u ∈ T, (M *ᵥ u) i ∈ S) {u : n → R} (hu : u ∈ Submodule.span S T) :
@@ -55,15 +102,26 @@ theorem mv_int_of_maps {g : GL (Fin N) (AE D)} {g' : GL (Fin N') (AE D)}
     {L : Submodule (𝓞 D.host.E) (Fin N → D.host.E)} {L' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E)}
     (h : Moves D g L) (h' : Moves D g' L') {A : Matrix (Fin N') (Fin N) D.host.E}
     (hA : ∀ x ∈ L, A.mulVec x ∈ L') (i : Fin N') (j : Fin N) : mv g g' A i j ∈ OhE D := by
-  have hL : L = lat g := by
+  let Λ := Formalism.UG.stdLat (n := Fin N) (A := D.host.E) (𝓞 D.host.E)
+  have hstd (v : Fin N → AE D) :
+      v ∈ Formalism.UG.latS (F := ℚ) (IsDedekindDomain.FiniteAdeleRing (𝓞 ℚ) ℚ) (OhE D) Λ ↔
+        ∀ i, v i ∈ OhE D := by
+    dsimp [Λ, OhE]
+    rw [Formalism.UG.P.easyc_latS_std]
+    exact Formalism.UG.P.adelstab_mem_stdLat (F := ℚ) (E := D.host.E) v
+  have hL : L = Formalism.UG.CS.globLat g Λ := by
     ext x
-    exact (h x).trans (mem_lat g x).symm
-  have h1 := (lat_span g ((g : Matrix (Fin N) (Fin N) (AE D)) *ᵥ Pi.single j 1)).2 (by
+    exact (h x).trans (hstd _).symm
+  have h1 := (Formalism.UG.P.span_recovery_of_integral_adelic_approx
+    Formalism.UG.P.csGlob_intAdApprox ℚ D.host.E (Fin N) Λ
+    (Formalism.UG.P.standard_lattice_full_holds D.host.E (Fin N)).1
+    (Formalism.UG.P.standard_lattice_full_holds D.host.E (Fin N)).2
+    g ((g : Matrix (Fin N) (Fin N) (AE D)) *ᵥ Pi.single j 1)).2 (hstd _ |>.2 (by
     intro k
     rw [mulVec_mulVec, Units.inv_mul, one_mulVec, Pi.single_apply]
     split_ifs
     · exact one_mem _
-    · exact zero_mem _)
+    · exact zero_mem _))
   have h3 := mulVec_mem_of_span
     (((g'⁻¹ : GL (Fin N') (AE D)) : Matrix (Fin N') (Fin N') (AE D)) * A.map (inc D)) i (by
       rintro _ ⟨x, hx, rfl⟩
@@ -136,8 +194,8 @@ theorem mv_neg (g : GL (Fin N) (AE D)) (g' : GL (Fin N') (AE D)) (z : Matrix (Fi
 
 end GlobalTheory.NormSum.MovedTheta
 
-open GlobalTheory.NormSum.MovedTheta in
 
+open GlobalTheory.NormSum.MovedTheta in
 theorem GlobalTheory.NormSum.exists_pt_of_mem_La_moved : ∀ (D : D7), admG1 D → ∀ (cc : Ideal (𝓞 D.host.K)) (δ : ℂ), cc ≠ ⊥ → ∀ (N N' : ℕ) (g : GA D N) (g' : GA D N') (L₁ : Submodule (𝓞 D.host.E) (Fin N → D.host.E)) (L₁' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E)), Moves D (g : GL (Fin N) (AE D)) L₁ → Moves D (g' : GL (Fin N') (AE D)) L₁' → ∀ x ∈ La D (tor0 D cc δ) L₁ L₁', ∃ z : Matrix (Fin N') (Fin N) D.host.E, x = pt D (tor0 D cc δ) δ z ∧ ∀ i j, ((((g' : GL (Fin N') (AE D))⁻¹ : GL (Fin N') (AE D)) : Matrix (Fin N') (Fin N') (AE D)) * z.map (inc D) * ((g : GL (Fin N) (AE D)) : Matrix (Fin N) (Fin N) (AE D))) i j ∈ IhE D cc := by
   intro D hG cc δ _ N N' g g' L L' h h' x hx
   let P : VC D N N' → Prop := fun x => ∃ z : Matrix (Fin N') (Fin N) D.host.E, x = pt D (tor0 D cc δ) δ z ∧

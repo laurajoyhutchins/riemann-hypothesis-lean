@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.LetterB
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.LetterB
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -14,14 +63,20 @@ theorem lin_comp {R : Type} [CommRing R] {k : ℕ} (M N : Matrix (Fin k) (Fin k)
   rw [← AlgHom.comp_apply, MvPolynomial.comp_aeval]
   apply congrArg (fun F : MvPolynomial (Fin k) R →ₐ[R] MvPolynomial (Fin k) R => F P)
   congr 1
-  funext c
-  simp only [map_sum, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_X, MvPolynomial.algebraMap_eq,
+  funext i
+  simp only [map_sum, map_mul, aeval_C, aeval_X,
     Matrix.mul_apply, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
-  simp only [mul_assoc]
+  simp only [mul_assoc, MvPolynomial.algebraMap_eq]
 
 theorem lin_one {R : Type} [CommRing R] {k : ℕ} (P : MvPolynomial (Fin k) R) : lin (1 : Matrix (Fin k) (Fin k) R) P = P := by
-  simp [lin, Matrix.one_apply]
+  unfold lin
+  calc
+    _ = MvPolynomial.aeval (fun i : Fin k => (X i : MvPolynomial (Fin k) R)) P := by
+      apply congrArg (fun v => MvPolynomial.aeval v P)
+      funext i
+      simp [Matrix.one_apply, apply_ite]
+    _ = P := MvPolynomial.aeval_X_left_apply P
 
 theorem mono_eq {R : Type} [CommRing R] {σ : Type} [Fintype σ] (μ : σ →₀ ℕ) :
     (monomial μ (1 : R)) = ∏ v, X v ^ μ v := by
@@ -35,6 +90,7 @@ theorem scaleHd {R : Type} [CommRing R] {k d : ℕ} (q : MvPolynomial (Fin k) R)
   simp only [Hd, MvPolynomial.mem_restrictSupport_iff] at hP
   conv_lhs => rw [MvPolynomial.as_sum P]
   conv_rhs => rw [MvPolynomial.as_sum P]
+
   rw [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hd : ∑ c, μ c = d := hP hμ
@@ -50,6 +106,7 @@ theorem lin_smul {R : Type} [CommRing R] {k d : ℕ} (a : R) (M : Matrix (Fin k)
   simp only [lin]
   conv_lhs => rw [MvPolynomial.as_sum P]
   conv_rhs => rw [MvPolynomial.as_sum P]
+
   rw [map_sum, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hd : ∑ c, μ c = d := hP hμ
@@ -83,7 +140,7 @@ theorem lin_Hd {R : Type} [CommRing R] {k d : ℕ} (M : Matrix (Fin k) (Fin k) R
     have h2 := Hd_prod (Finset.range (μ c)) (fun _ => 1) (fun _ => lin M (X c)) (fun _ _ => h1)
     simpa using h2
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul a x _ hx => rw [map_smul]; exact Submodule.smul_mem _ _ hx
 
 theorem map_Nv {R R' : Type} [CommRing R] [CommRing R'] (f : R →+* R') (m : ℕ) (vec : Bool) (c : Fin (m + 1)) :
@@ -147,15 +204,21 @@ theorem Lin_comp {R : Type} [CommRing R] {k : ℕ} (M N : S → Matrix (Fin k) (
   rw [← AlgHom.comp_apply, MvPolynomial.comp_aeval]
   apply congrArg (fun F : MvPolynomial (S × Fin k) R →ₐ[R] MvPolynomial (S × Fin k) R => F P)
   congr 1
-  funext v
-  simp only [map_sum, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_X, MvPolynomial.algebraMap_eq,
+  funext i
+  simp only [map_sum, map_mul, aeval_C, aeval_X,
     Matrix.mul_apply, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
-  simp only [mul_assoc]
+  simp only [mul_assoc, MvPolynomial.algebraMap_eq]
 
 theorem Lin_one {R : Type} [CommRing R] {k : ℕ} (P : MvPolynomial (S × Fin k) R) :
     Lin (fun _ : S => (1 : Matrix (Fin k) (Fin k) R)) P = P := by
-  simp [Lin, Matrix.one_apply]
+  unfold Lin
+  calc
+    _ = MvPolynomial.aeval (fun v : S × Fin k => (X v : MvPolynomial (S × Fin k) R)) P := by
+      apply congrArg (fun v => MvPolynomial.aeval v P)
+      funext v
+      simp [Matrix.one_apply, apply_ite]
+    _ = P := MvPolynomial.aeval_X_left_apply P
 
 theorem mem_Pol {R : Type} [CommRing R] {k : ℕ} {d : S → ℕ} {F : MvPolynomial (S × Fin k) R} :
     F ∈ Pol R k d ↔ ∀ μ ∈ F.support, ∀ i, multideg μ i = d i := by
@@ -209,7 +272,7 @@ theorem emb_Pol {R : Type} [CommRing R] {k a : ℕ} (s : S) (P : MvPolynomial (F
   · subst hi
     simp only [Pi.single_eq_same]
     rw [← hd]
-    exact Finset.sum_congr rfl fun c _ => Finsupp.mapDomain_apply hinj ν c
+    exact Finset.sum_congr rfl fun c _ => Finsupp.mapDomain_apply_of_injective hinj ν c
   · rw [Pi.single_eq_of_ne hi]
     exact Finset.sum_eq_zero fun c _ => Finsupp.mapDomain_notin_range _ _
       (by rintro ⟨c', hc'⟩; exact hi (congrArg Prod.fst hc').symm)
@@ -249,6 +312,7 @@ theorem scalePol {R : Type} [CommRing R] {k : ℕ} {d : S → ℕ} (Q : S → Mv
   rw [mem_Pol] at hF
   conv_lhs => rw [MvPolynomial.as_sum F]
   conv_rhs => rw [MvPolynomial.as_sum F]
+
   rw [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hd : ∀ s, ∑ c, μ (s, c) = d s := fun s => hF μ hμ s
@@ -271,7 +335,7 @@ theorem Lin_Pol {R : Type} [CommRing R] {k : ℕ} {d : S → ℕ} (N : S → Mat
     simp only [Lin_emb]
     exact prod_emb_Pol d _ fun s => lin_Hd _ _ (partS_Hd R d μ hμ s)
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul a x _ hx => rw [map_smul]; exact Submodule.smul_mem _ _ hx
 
 theorem Lin_smul {R : Type} [CommRing R] {k : ℕ} {d : S → ℕ} (a : S → R) (M : S → Matrix (Fin k) (Fin k) R)
@@ -282,6 +346,7 @@ theorem Lin_smul {R : Type} [CommRing R] {k : ℕ} {d : S → ℕ} (a : S → R)
   simp only [Lin]
   conv_lhs => rw [MvPolynomial.as_sum F]
   conv_rhs => rw [MvPolynomial.as_sum F]
+
   rw [map_sum, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun μ hμ => ?_
   have hd : ∀ s, ∑ c, μ (s, c) = d s := fun s => hF μ hμ s

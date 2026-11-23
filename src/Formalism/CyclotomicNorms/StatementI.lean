@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.GroupTheory.Solvable
+public import Mathlib.GroupTheory.SpecificGroups.Alternating
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Polynomial
 open scoped ComplexOrder
@@ -57,46 +103,8 @@ def Restriction : Prop :=
     p.Prime → Fintype.card (Fin N) < 2 * p → p + 3 ≤ N → p ∈ π.cycleType →
     ∀ W : Submodule k V, (∀ h ∈ H, ∀ x ∈ W, ρ h x ∈ W) → W = ⊥ ∨ W = ⊤
 
-def IdemHyp {O K A : Type} [CommRing O] [IsDomain O] [Field K] [Algebra O K] [IsFractionRing O K]
-    [AddCommGroup A] [Module K A] [Module O A] [IsScalarTower O K A] (e : A →ₗ[K] A) (c : O)
-    (M : Submodule O A) : Prop :=
-  e ∘ₗ e = e ∧ c ≠ 0 ∧ ∀ x ∈ M, c • e x ∈ M
-
-def IdempotentLattice : Prop :=
-  ∀ (O K A : Type) [CommRing O] [IsDomain O] [Field K] [Algebra O K] [IsFractionRing O K]
-    [AddCommGroup A] [Module K A] [Module O A] [IsScalarTower O K A] (e : A →ₗ[K] A) (c : O)
-    (M : Submodule O A), IdemHyp e c M →
-    (∀ x ∈ M, c • e x ∈ M ∧ c • e x ∈ LinearMap.range e) ∧
-    (∀ y ∈ M, y ∈ LinearMap.range e → ∃ x ∈ M, e x = y) ∧
-    (∀ x ∈ M, ∃ u ∈ M, ∃ w ∈ M, u ∈ LinearMap.range e ∧
-      w ∈ LinearMap.range (LinearMap.id - e) ∧ c • x = u + w)
-
-def IdempotentDrop : Prop :=
-  ∀ (O K A : Type) [CommRing O] [IsDomain O] [Field K] [Algebra O K] [IsFractionRing O K]
-    [AddCommGroup A] [Module K A] [Module O A] [IsScalarTower O K A] (e f Z : A →ₗ[K] A) (c : O)
-    (M : Submodule O A), IdemHyp e c M →
-    f ∘ₗ e = e ∘ₗ f → (∀ x ∈ M, f x ∈ M) → Z ∘ₗ Z = Z → Z ∘ₗ e = e ∘ₗ Z → Z ∘ₗ f = f ∘ₗ Z →
-    (∀ x ∈ M, f (Z x) ∈ M ∧ f (Z x) ∈ LinearMap.range Z) →
-    ∀ x ∈ M, c • f (e (Z x)) ∈ M ∧ c • f (e (Z x)) ∈ LinearMap.range (e ∘ₗ Z)
-
-def Discard : Prop :=
-  ∀ (n : ℕ) (Q Pi : Matrix (Fin n) (Fin n) ℂ) (δ Dstar η : ℝ),
-    Q.PosSemidef → Pi.IsHermitian → Pi * Pi = Pi → 0 ≤ δ → 0 < Dstar →
-    (Pi.rank : ℝ) ≤ δ * Dstar → 0 ≤ η → η ≤ 1 →
-    (Q * Q).trace.re ≤ (1 + η) * (Q.trace.re) ^ 2 / Dstar →
-    (Pi * Q).trace.re ≤ Real.sqrt (2 * δ) * Q.trace.re ∧
-    (((1 - Pi) * Q * (1 - Pi)) * ((1 - Pi) * Q * (1 - Pi))).trace.re ≤ (Q * Q).trace.re ∧
-    (1 - Real.sqrt (2 * δ)) * Q.trace.re ≤ ((1 - Pi) * Q * (1 - Pi)).trace.re
-
 def monicOf {K : Type} [Field K] {N : ℕ} (a : Fin N → K) : K[X] :=
   X ^ N + ∑ i : Fin N, C (a i) * X ^ (i : ℕ)
 
-open Classical in
-
-def SquarefreeShare : Prop :=
-  ∀ (K : Type) [Field K] [Fintype K] (N : ℕ),
-    ((univ.filter (fun a : Fin N → K => (monicOf a).coeff 0 ≠ 0 ∧ ¬ Squarefree (monicOf a))).card : ℝ)
-      * Fintype.card K ≤
-      2 * (univ.filter (fun a : Fin N → K => (monicOf a).coeff 0 ≠ 0)).card
 
 end Formalism.CyclotomicNorms

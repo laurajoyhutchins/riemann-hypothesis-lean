@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -10,30 +56,12 @@ open scoped ENNReal
 
 noncomputable section
 
-def realForm {p q : ℕ} (M : Matrix (Fin p) (Fin q) ℂ) : Matrix (Fin p × Fin 2) (Fin q × Fin 2) ℝ :=
-  Matrix.of fun ia jb =>
-    (![![(M ia.1 jb.1).re, -(M ia.1 jb.1).im], ![(M ia.1 jb.1).im, (M ia.1 jb.1).re]] :
-      Fin 2 → Fin 2 → ℝ) ia.2 jb.2
-
 def AreaLinear.Statement : Prop :=
   ∀ (k m : ℕ) (L : EuclideanSpace ℝ (Fin k) →ₗ[ℝ] EuclideanSpace ℝ (Fin m)),
     Function.Injective L → ∀ A : Set (EuclideanSpace ℝ (Fin k)),
       μH[(k : ℝ)] (L '' A) =
         ENNReal.ofReal (√(LinearMap.det (LinearMap.adjoint L ∘ₗ L))) * μH[(k : ℝ)] A
 
-def ComplexJacobian.Statement : Prop :=
-  ∀ (p q : ℕ) (M : Matrix (Fin p) (Fin q) ℂ),
-    (((1 + (realForm M)ᵀ * realForm M).det : ℝ) : ℂ) = (1 + Mᴴ * M).det ^ 2
-
-open Classical in
-
-def CauchyBinetMinors.Statement : Prop :=
-  ∀ (p q : ℕ) (M : Matrix (Fin p) (Fin q) ℂ),
-    (1 + Mᴴ * M).det =
-      ((∑ k ∈ Finset.range (p + 1),
-        ∑ a ∈ Finset.univ.filter (fun a : Fin k → Fin p => StrictMono a),
-          ∑ b ∈ Finset.univ.filter (fun b : Fin k → Fin q => StrictMono b),
-            ‖(M.submatrix a b).det‖ ^ 2 : ℝ) : ℂ)
 
 def realGraphPt {k m : ℕ} (F : EuclideanSpace ℝ (Fin k) → EuclideanSpace ℝ (Fin m))
     (x : EuclideanSpace ℝ (Fin k)) : EuclideanSpace ℝ (Fin k ⊕ Fin m) :=
@@ -84,15 +112,6 @@ def MassFinite.Statement : Prop :=
   ∀ (n d : ℕ) (J : Ideal (MvPolynomial (Fin n) ℂ)), J.IsPrime →
     ringKrullDim (MvPolynomial (Fin n) ℂ ⧸ J) = d → ∀ R : ℝ,
       μH[((2 * d : ℕ) : ℝ)] (zeroSetEuc J ∩ Metric.ball 0 R) < ⊤
-
-def MassBound.Statement : Prop :=
-  ∀ (n d : ℕ) (J : Ideal (MvPolynomial (Fin n) ℂ)), J.IsPrime →
-    ringKrullDim (MvPolynomial (Fin n) ℂ ⧸ J) = d →
-    ∀ (b : OrthonormalBasis (Fin n) ℂ (EuclideanSpace ℂ (Fin n))) (R : ℝ),
-      μH[((2 * d : ℕ) : ℝ)] (zeroSetEuc J ∩ Metric.ball 0 R) ≤
-        ∑ I ∈ Finset.univ.powersetCard d,
-          (⨆ x : I → ℂ, frameFibreCount b I (zeroSetEuc J) x) *
-            μH[((2 * d : ℕ) : ℝ)] (Metric.ball (0 : EuclideanSpace ℂ I) R)
 
 def PolySublevel.Statement : Prop :=
   ∀ (d : ℕ) (Q : MvPolynomial (Fin d) ℂ), Q ≠ 0 → ∀ R : ℝ, 0 < R →

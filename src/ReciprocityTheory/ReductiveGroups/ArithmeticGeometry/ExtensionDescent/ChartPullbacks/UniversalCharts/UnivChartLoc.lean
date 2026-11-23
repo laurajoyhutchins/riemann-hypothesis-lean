@@ -1,5 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.AlgChart
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.IsUnivChart
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.IsUnivChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.AlgChart
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,8 +65,6 @@ private lemma mem_of_local_lemma [IsLocalRing R] {X : Scheme} (e : Spec (CommRin
     IsLocalRing.specializes_closedPoint _
   first
   | exact (hs.map e.base.hom.continuous).mem_open U.isOpen hU
-  | exact (hs.map e.continuous).mem_open U.isOpen hU
-  | exact (hs.map e.base.continuous).mem_open U.isOpen hU
 
 private lemma surj_lemma_2 {A : Type} [CommRing A] [Algebra R A] (aug : A →ₐ[R] R) (m : ℕ)
     (hm : (RingHom.ker aug) ^ (m + 1) = ⊥) (z : Spec (CommRingCat.of A)) :
@@ -40,9 +83,6 @@ private lemma surj_lemma_2 {A : Type} [CommRing A] [Algebra R A] (aug : A →ₐ
   first
   | (change Ideal.comap aug (Ideal.map aug P) = P
      rw [Ideal.comap_map_of_surjective _ hsurj]
-     exact sup_eq_left.mpr hker)
-  | (change Ideal.comap aug.toRingHom (Ideal.map aug.toRingHom P) = P
-     rw [Ideal.comap_map_of_surjective _ hsurj']
      exact sup_eq_left.mpr hker)
 
 private lemma spMap_inj_lemma_3 {A B : Type} [CommRing A] [Algebra R A] [CommRing B] [Algebra R B]
@@ -111,14 +151,6 @@ theorem univChartLoc [IsLocalRing R] (G : Over (Spec (CommRingCat.of R))) [GrpOb
     | (obtain ⟨W, hW, hxW, -⟩ := exists_isAffineOpen_mem_and_subset
           (show e.base (IsLocalRing.closedPoint R) ∈ (⊤ : G.left.Opens) from trivial)
        exact ⟨W, hW, hxW⟩)
-    | (obtain ⟨W, hW, hxW, -⟩ := (TopologicalSpace.Opens.isBasis_iff_nbhd.mp
-          G.left.isBasis_affineOpens)
-          (show e.base (IsLocalRing.closedPoint R) ∈ (⊤ : G.left.Opens) from trivial)
-       exact ⟨W, hW, hxW⟩)
-    | (obtain ⟨W, hW, hxW, -⟩ := (TopologicalSpace.Opens.isBasis_iff_nbhd.mp
-          (isBasis_affineOpens G.left))
-          (show e.base (IsLocalRing.closedPoint R) ∈ (⊤ : G.left.Opens) from trivial)
-       exact ⟨W, hW, hxW⟩)
   have he_mem : ∀ w, e.base w ∈ U := mem_of_local_lemma e U hqU
   let jU := hU.fromSpec
   haveI hjUo : IsOpenImmersion jU := (inferInstance : IsOpenImmersion hU.fromSpec)
@@ -134,13 +166,10 @@ theorem univChartLoc [IsLocalRing R] (G : Over (Spec (CommRingCat.of R))) [GrpOb
   have hsm : Smooth (jU ≫ G.hom) := by
     first
     | exact inferInstance
-    | (haveI : Smooth jU := inferInstance; exact inferInstance)
-    | (haveI : Etale jU := inferInstance; haveI : Smooth jU := inferInstance; exact inferInstance)
   haveI hBsm : Algebra.Smooth R Bc := by
     have h2 : Smooth (Spec.map fB) := by rw [hfB]; exact hsm
     first
     | exact (HasRingHomProperty.Spec_iff (P := @Smooth)).mp h2
-    | exact (HasRingHomProperty.Spec_iff (P := @Smooth) (Q := @RingHom.Smooth)).mp h2
 
   have hsub : Set.range e.base ⊆ Set.range jU.base := by
     rw [hrange]; rintro _ ⟨w, rfl⟩; exact he_mem w

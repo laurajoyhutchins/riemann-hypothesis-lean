@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsOrthonormalOfUnimodular
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsOrthonormalOfUnimodular
+public import Mathlib.RingTheory.Unramified.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,22 +63,6 @@ def IsSelfRecip (r : ℕ) (P : E[X]) : Prop :=
 def SelfRecip (r : ℕ) : Type := {P : E[X] // IsSelfRecip E r P}
 
 variable {E}
-
-theorem isSelfRecip_X_sub_C {a : E} (ha : a * IsCMField.complexConj E a = 1) :
-    IsSelfRecip E 1 (X - C a) := by
-  have ha0 : a ≠ 0 := by
-    rintro rfl
-    simp at ha
-  have hc : (IsCMField.complexConj E a)⁻¹ = a := (eq_inv_of_mul_eq_one_left ha).symm
-  refine ⟨monic_X_sub_C a, irreducible_X_sub_C a, natDegree_X_sub_C a, by simpa using ha0, ?_⟩
-  have h1 : reflect 1 (X : E[X]) = 1 := by
-    simpa using reflect_monomial (R := E) 1 1
-  have h2 : C a * C (IsCMField.complexConj E a) = (1 : E[X]) := by rw [← C_mul, ha, C_1]
-  simp only [sharp, coeff_sub, coeff_X_zero, coeff_C_zero, zero_sub, map_neg, inv_neg, hc,
-    Polynomial.map_sub, map_X, map_C, reflect_sub, h1, reflect_C, RingHom.coe_coe, pow_one]
-  linear_combination (-X) * h2
-
-instance : Nonempty (SelfRecip E 1) := ⟨⟨X - C (-1), isSelfRecip_X_sub_C (by simp)⟩⟩
 
 variable {r : ℕ} (P : SelfRecip E r)
 
@@ -185,12 +212,12 @@ theorem norms_le : norms P (maximalRealSubfield E) ≤
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [toLocalFld, involBase]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have e2 : ∀ y, toLocalFld P k (inclPlus P _ y) = inclPlus P k (toLocalPlus P k y) := fun y => by
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [toLocalFld, toLocalPlus, inclPlus]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   refine ⟨Units.map (toLocalFld P k).toMonoidHom c, Units.ext ?_⟩
   change toLocalFld P k c * involBase P k (toLocalFld P k c) = inclPlus P k (toLocalPlus P k n)
   rw [← e1, ← e2, ← map_mul, hc']

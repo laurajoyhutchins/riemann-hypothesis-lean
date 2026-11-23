@@ -1,7 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandFactor
-import Development.WeilBound.CuspidalAdmissibility.OccPair
-import Development.WeilBound.CuspidalAdmissibility.OccTrace
-import Development.WeilBound.CuspidalAdmissibility.CuspProjectionOrthogonality
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.SummandFactor
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.WeilBound.CuspidalAdmissibility.CuspProjectionOrthogonality
+public import Development.WeilBound.CuspidalAdmissibility.OccPair
+public import Development.WeilBound.CuspidalAdmissibility.OccTrace
+import GroundTheory.GlobalFields.LocalAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,19 +77,19 @@ theorem admissible_and_equiv_of_pairing {G : Type} [Group G] [TopologicalSpace G
     GroundTheory.Automorphic.IsAdmissible σ ∧ Nonempty (σ.Equiv π) :=
   PositivityTheory.TfC.OccursIff.Pair.admissible_and_equiv σ π hσ hσi hπ hπi B hB hB0 C hC hC0
 
-theorem exists_localComponent_family (K : Type) [Field K] [NumberField K] (n : ℕ) (μ : Measure (normOneGL K n))
-    [μ.IsHaarMeasure] (V : Submodule ℂ (Lp ℂ 2 (quotientMeasure (rationalGLOne K n) μ)))
-    (hle : V ≤ cuspidalL2 μ) (hcl : IsClosed (V : Set (Lp ℂ 2 (quotientMeasure (rationalGLOne K n) μ))))
-    (hinv : (rightRegularRep (rationalGLOne K n) μ).IsInvariant V) (hne : V ≠ ⊥)
-    (hirr : ∀ V' ≤ V, IsClosed (V' : Set (Lp ℂ 2 (quotientMeasure (rationalGLOne K n) μ))) →
-      (rightRegularRep (rationalGLOne K n) μ).IsInvariant V' → V' = ⊥ ∨ V' = V)
+theorem exists_localComponent_family (K : Type) [Field K] [NumberField K] (n : ℕ) (μ : Measure (normOneGL (K := K) (n := n)))
+    [μ.IsHaarMeasure] (V : Submodule ℂ (Lp ℂ 2 (quotientMeasure (rationalGLOne (K := K) (n := n)) μ)))
+    (hle : V ≤ cuspidalL2 μ) (hcl : IsClosed (V : Set (Lp ℂ 2 (quotientMeasure (rationalGLOne (K := K) (n := n)) μ))))
+    (hinv : (rightRegularRep (rationalGLOne (K := K) (n := n)) μ).IsInvariant V) (hne : V ≠ ⊥)
+    (hirr : ∀ V' ≤ V, IsClosed (V' : Set (Lp ℂ 2 (quotientMeasure (rationalGLOne (K := K) (n := n)) μ))) →
+      (rightRegularRep (rationalGLOne (K := K) (n := n)) μ).IsInvariant V' → V' = ⊥ ∨ V' = V)
     (w : HeightOneSpectrum (𝓞 K)) :
     ∃ (W : Type) (_ : AddCommGroup W) (_ : Module ℂ W)
       (π : Representation ℂ (GL (Fin n) (w.adicCompletion K)) W),
       GroundTheory.Automorphic.IsAdmissible π ∧ π.IsIrreducible ∧
-      ∃ F : Set (W →ₗ[ℂ] Lp ℂ 2 (quotientMeasure (rationalGLOne K n) μ)),
+      ∃ F : Set (W →ₗ[ℂ] Lp ℂ 2 (quotientMeasure (rationalGLOne (K := K) (n := n)) μ)),
         (∀ f ∈ F, (∀ x, f x ∈ V) ∧ ∀ g x, f (π g x) =
-          rightRegularRep (rationalGLOne K n) μ (MultiplicityOne.finProj K n (AdelicGLn.localEmbedding w g)) (f x)) ∧
+          rightRegularRep (rationalGLOne (K := K) (n := n)) μ (MultiplicityOne.finProj K n (AdelicGLn.localEmbedding w g)) (f x)) ∧
         ∀ u ∈ V, u ≠ 0 → ∃ f ∈ F, ∃ x, inner ℂ (f x) u ≠ 0 :=
   PositivityTheory.TfC.CuspProjectionOrthogonality.occ_loccomp K n μ V hle hcl hinv hne hirr w
 
@@ -77,9 +119,9 @@ theorem pairL_invariant {G G' X Y H : Type} [Group G] [Group G'] [TopologicalSpa
   rw [pairL_apply, pairL_apply, hf, hf']
   exact UnitaryRep.inner_map_map _ _ _ _
 
-theorem rhoL_def (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure] (w : Pl K) (g : GL (Fin n) (w.adicCompletion K))
+theorem rhoL_def (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (w : Pl K) (g : GL (Fin n) (w.adicCompletion K))
     (v : LL μ) :
-    rhoL μ w g v = rightRegularRep (rationalGLOne K n) μ (MultiplicityOne.finProj K n (AdelicGLn.localEmbedding w g)) v :=
+    rhoL μ w g v = rightRegularRep (rationalGLOne (K := K) (n := n)) μ (MultiplicityOne.finProj K n (AdelicGLn.localEmbedding w g)) v :=
   rfl
 
 end PositivityTheory.TfC.OccursIff
@@ -100,14 +142,14 @@ theorem PositivityTheory.TfC.OccursBasics_holds : UpperTheory.ConvolutionTheory.
     have hfz : f z ≠ 0 := fun h => hz (by rw [h, inner_zero_left])
     refine admissible_and_equiv_of_pairing σ.ρ π (isSmooth_of_smIrr σ) σ.irred hπ hπi (pairL f' f) ?_ ?_
       (pairL f f) ?_ ?_
-    · exact pairL_invariant (rightRegularRep (rationalGLOne K n) μ)
+    · exact pairL_invariant (rightRegularRep (rationalGLOne (K := K) (n := n)) μ)
         (fun g => MultiplicityOne.finProj K n (AdelicGLn.localEmbedding w g)) σ.ρ π f' f
         (fun g x => (hf'eq g x).trans (rhoL_def μ w g _)) (hF f hfF).2
     · intro h
       apply hz
       have := LinearMap.congr_fun (LinearMap.congr_fun h x₀) z
       simpa [pairL_apply] using this
-    · exact pairL_invariant (rightRegularRep (rationalGLOne K n) μ)
+    · exact pairL_invariant (rightRegularRep (rationalGLOne (K := K) (n := n)) μ)
         (fun g => MultiplicityOne.finProj K n (AdelicGLn.localEmbedding w g)) π π f f
         (hF f hfF).2 (hF f hfF).2
     · intro h

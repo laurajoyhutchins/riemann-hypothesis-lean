@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
+import Aesop.Main
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnitaryActions.ContinuousAdelicGL2OfContinuousEntries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +82,7 @@ private theorem wr_bot (k r : ℕ) : wr k r =O[𝓝[>] 0] (fun y : ℝ => y ^ (-
 
 private theorem wr_cont (k r : ℕ) : ContinuousOn (wr k r) (Set.Ioi 0) := by
   unfold wr
-  refine ContinuousOn.mul (by fun_prop) (ContinuousOn.inv₀ (by fun_prop) fun y hy => ?_)
+  refine ContinuousOn.mul (by fun_prop) (ContinuousOn.fun_inv₀ (by fun_prop) fun y hy => ?_)
   have : (0 : ℝ) < y := hy
   positivity
 
@@ -230,12 +276,12 @@ private theorem cont_iy : ContinuousOn iy {0}ᶜ := by
     exact continuous_subtype_val.inv₀ fun y => y.2
   refine ((TR.continuous_infId ℚ).comp h).congr fun y => ?_
   change _ = iy y.1
-  rw [iy, dif_neg (show (y : ℝ) ≠ 0 from y.2)]
+  rw [iy, dite_eq_right (show (y : ℝ) ≠ 0 from y.2)]
   rfl
 
 private theorem re_iy {y : ℝ} (hy : y ≠ 0) : re (iy y : A ℚ) = y := by
   have h : ∀ x, TR.pInf ℚ (TR.sInf ℚ x) = x := fun x => (TR.infEq ℚ).symm_apply_apply x
-  rw [re, iy, dif_neg hy]
+  rw [re, iy, dite_eq_right hy]
   change TR.pInf ℚ (1 - TR.sInf ℚ 1 + TR.sInf ℚ _) _ = y
   simp [h]
 

@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.CompRightEqZero
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCIsHermitian
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.StokesA
 import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
-import ReciprocityTheory.AnalyticForms.PotentialTheory.StokesA
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+
+@[expose] public section
 
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights
 open scoped ComplexOrder
@@ -31,10 +79,19 @@ theorem mdisc_sum_smul {D : ℕ} {σ : Type*} [Fintype σ] (H : σ → Matrix (F
     mdisc (fun i => ∑ a, c i a • H a) =
       ∑ w : Fin D → σ, (∏ i, c i (w i)) * mdisc (fun i => H (w i)) := by
   classical
-  obtain ⟨M, hM⟩ := ReciprocityTheory.AnForm.A.exists_multilinearMap_eq_mdisc (D := D)
+  obtain ⟨M, hM⟩ := (by
+    show ∃ F : MultilinearMap (RingHom.id ℂ)
+        (fun _ : Fin D => Matrix (Fin D) (Fin D) ℂ) ℂ,
+        ⇑F = _root_.ReciprocityTheory.AnForm.mdisc
+    refine ⟨MultilinearMap.mk' _root_.ReciprocityTheory.AnForm.mdisc
+      _root_.ReciprocityTheory.AnForm.A.mdisc_update_add ?_, rfl⟩
+    intro A k c B
+    simpa only [RingHom.id_apply, smul_eq_mul] using
+      (_root_.ReciprocityTheory.AnForm.A.mdisc_update_smul A k c B))
+
   rw [← hM, M.map_sum]
   refine Finset.sum_congr rfl fun w _ => ?_
-  rw [M.map_smul_univ, smul_eq_mul]
+  simp only [M.map_smul_univ, RingHom.id_apply, smul_eq_mul]
 
 theorem locDens_sumPot_expand {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X)
     {σ : Type} [Fintype σ] (P : σ → LocPot X) (c : Fin e → σ → ℝ) (j : Fin A.n)

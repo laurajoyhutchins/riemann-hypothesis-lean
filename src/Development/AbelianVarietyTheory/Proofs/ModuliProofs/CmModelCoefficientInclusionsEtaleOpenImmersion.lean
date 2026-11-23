@@ -1,12 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsEquivalenceFiniteEtaleBaseChangeResidueField
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Splits
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsEquivalenceFiniteEtaleBaseChangeResidueField
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct Pointwise
@@ -16,8 +61,8 @@ noncomputable section
 
 namespace GlobalTheory.BaseRing
 
-open Polynomial in
 
+open Polynomial in
 theorem etale_of_adjoin_root_of_unity {R B : Type} [CommRing R] [CommRing B] [IsDomain R] [IsDomain B]
     [IsIntegrallyClosed R] [Algebra R B] (hinj : Function.Injective (algebraMap R B)) (x : B)
     (hx : Algebra.adjoin R {x} = ⊤) (n : ℕ) (hn : 0 < n) (h1 : x ^ n = 1) (hu : IsUnit (n : B)) :
@@ -36,7 +81,7 @@ theorem etale_of_adjoin_root_of_unity {R B : Type} [CommRing R] [CommRing B] [Is
   obtain ⟨g, hg⟩ := minpoly.isIntegrallyClosed_dvd hint hroot
   have hd : IsUnit (aeval x (derivative (minpoly R x))) := by
     have h2 := congrArg (fun p => aeval x (derivative p)) hg
-    simp only [derivative_mul, map_add, map_mul, minpoly.aeval, zero_mul, add_zero, derivative_sub,
+    simp only [derivative_mul, map_add (f := _), map_mul, minpoly.aeval, zero_mul, add_zero, derivative_sub,
       derivative_X_pow, derivative_C, sub_zero, aeval_C, map_pow, aeval_X, map_natCast] at h2
     have hxu : IsUnit x := IsUnit.of_pow_eq_one h1 hn.ne'
     exact isUnit_of_mul_isUnit_left (h2 ▸ hu.mul (hxu.pow _))
@@ -122,7 +167,7 @@ theorem isIntegrallyClosed_of_div (R : Subring ℂ)
 
 theorem exists_int_of_isIntegral (q : ℚ) (h : IsIntegral ℤ (q : ℂ)) : ∃ k : ℤ, (k : ℚ) = q := by
   have : IsIntegral ℤ q := by
-    have := (isIntegral_algebraMap_iff (R := ℤ) (A := ℚ) (B := ℂ) (x := q) (algebraMap ℚ ℂ).injective).mp h
+    have := (isIntegral_algebraMap_iff (R := ℤ) (A := ℚ) (B := ℂ) (x := q) ).mp h
     exact this
   exact IsIntegrallyClosed.algebraMap_eq_of_integral this
 
@@ -179,9 +224,9 @@ theorem isIntegrallyClosed_closure (d : ℕ) (hd : d.Prime) (h4 : d % 4 = 3) (r 
   obtain ⟨a, b, hab⟩ := hform x x.2
   obtain ⟨a', b', hab'⟩ := hform y y.2
   have hcw : starRingEnd ℂ w = 1 - w := by
-    rw [hw, map_div₀, map_add, hc, map_one, map_ofNat]; ring
+    rw [hw, map_div₀, map_add (f := _), hc, map_one, map_ofNat]; ring
   have hN : (y : ℂ) * starRingEnd ℂ y = ((a' ^ 2 + a' * b' + b' ^ 2 * m : ℤ) : ℂ) := by
-    rw [hab', map_add, map_mul, hcw, map_intCast, map_intCast]
+    rw [hab', map_add (f := _), map_mul, hcw, map_intCast, map_intCast]
     push_cast
     linear_combination (-(b' : ℂ) ^ 2) * hw2
   have hcy : starRingEnd ℂ y ≠ 0 := by simpa using hy
@@ -191,7 +236,7 @@ theorem isIntegrallyClosed_closure (d : ℕ) (hd : d.Prime) (h4 : d % 4 = 3) (r 
     refine ⟨((a * (a' + b') + b * b' * m : ℤ) : ℚ) / N, ((a' * b - a * b' : ℤ) : ℚ) / N, ?_⟩
     have : (x : ℂ) / y = x * starRingEnd ℂ y / N := by
       rw [← hN]; field_simp
-    rw [this, hab, hab', map_add, map_mul, hcw, map_intCast, map_intCast]
+    rw [this, hab, hab', map_add (f := _), map_mul, hcw, map_intCast, map_intCast]
     push_cast
     field_simp
     linear_combination (-(b * b' : ℂ)) * hw2

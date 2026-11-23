@@ -1,6 +1,55 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.InvSubOneSqLeInv
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.TsumThree
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingBounds
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,48 +70,7 @@ theorem tsum_three (l : ℕ) (hl : 11 ≤ l) (f : ℕ → ℝ) (x₀ x₁ X : �
     (h0 : f 0 ≤ x₀) (h1 : f 1 ≤ x₁) (h2 : ∀ a, 2 ≤ a → f a ≤ X) :
     ∑' a : ℕ, f a * ((l : ℝ) - 1) ^ (-(a : ℤ)) ≤
       x₀ + x₁ / ((l : ℝ) - 1) + X / (((l : ℝ) - 1) * ((l : ℝ) - 2)) := by
-  have ht : (11:ℝ) ≤ (l:ℝ) := by exact_mod_cast hl
-  obtain ⟨q, hq⟩ : ∃ q : ℝ, q = ((l:ℝ) - 1)⁻¹ := ⟨_, rfl⟩
-  have hq0 : 0 ≤ q := by rw [hq]; exact inv_nonneg.mpr (by linarith)
-  have hqm : q * ((l:ℝ) - 1) = 1 := by rw [hq]; exact inv_mul_cancel₀ (by linarith)
-  have hq1 : q < 1 := by nlinarith
-  have hterm : ∀ a : ℕ, ((l:ℝ) - 1) ^ (-(a:ℤ)) = q ^ a := by
-    intro a; rw [hq, inv_pow, zpow_neg, zpow_natCast]
-  simp_rw [hterm]
-  have hX : 0 ≤ X := le_trans (hf 2) (h2 2 le_rfl)
-  have hB : ∀ a, f a ≤ max (f 0) (max (f 1) X) := by
-    intro a
-    rcases a with _ | _ | a
-    · exact le_max_left _ _
-    · exact le_trans (le_max_left _ _) (le_max_right _ _)
-    · exact le_trans (h2 _ (by omega)) (le_trans (le_max_right _ _) (le_max_right _ _))
-  have hsum : Summable (fun a : ℕ => f a * q ^ a) :=
-    Summable.of_nonneg_of_le (fun a => mul_nonneg (hf a) (pow_nonneg hq0 a))
-      (fun a => mul_le_mul_of_nonneg_right (hB a) (pow_nonneg hq0 a))
-      ((summable_geometric_of_lt_one hq0 hq1).mul_left _)
-  have hsplit := Summable.sum_add_tsum_nat_add 2 hsum
-  simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add, pow_zero, pow_one,
-    mul_one] at hsplit
-  have htail : ∑' i : ℕ, f (i + 2) * q ^ (i + 2) ≤ X * q ^ 2 * (1 - q)⁻¹ := by
-    have hs2 : Summable (fun i : ℕ => X * q ^ 2 * q ^ i) :=
-      (summable_geometric_of_lt_one hq0 hq1).mul_left _
-    have hs1 : Summable (fun i : ℕ => f (i + 2) * q ^ (i + 2)) :=
-      (summable_nat_add_iff 2).mpr hsum
-    calc ∑' i : ℕ, f (i + 2) * q ^ (i + 2) ≤ ∑' i : ℕ, X * q ^ 2 * q ^ i := by
-          refine Summable.tsum_le_tsum (fun i => ?_) hs1 hs2
-          calc f (i + 2) * q ^ (i + 2) ≤ X * q ^ (i + 2) :=
-                mul_le_mul_of_nonneg_right (h2 _ (by omega)) (pow_nonneg hq0 _)
-            _ = X * q ^ 2 * q ^ i := by ring
-      _ = X * q ^ 2 * (1 - q)⁻¹ := by rw [tsum_mul_left, tsum_geometric_of_lt_one hq0 hq1]
-  have e1 : x₁ / ((l:ℝ) - 1) = x₁ * q := by rw [hq, div_eq_mul_inv]
-  have e2 : X * q ^ 2 * (1 - q)⁻¹ = X / (((l:ℝ) - 1) * ((l:ℝ) - 2)) := by
-    have h1' : (l:ℝ) - 1 ≠ 0 := by linarith
-    have h2' : (l:ℝ) - 2 ≠ 0 := by linarith
-    have h3' : (l:ℝ) - 1 - 1 ≠ 0 := by linarith
-    rw [hq]; field_simp; ring
-  have hx1 : f 1 * q ≤ x₁ * q := mul_le_mul_of_nonneg_right h1 hq0
-  rw [e1, ← e2, ← hsplit]
-  linarith
+  apply Formalism.MainNotions.N.FrobeniusPowerSeries.tsum_three <;> assumption
 
 theorem cW_le (l : ℕ) (hl : 11 ≤ l) (h η H : ℕ) (hη : η + 1 ≤ h) (hH : H ≤ h + η) :
     (cW l H : ℝ) ≤ 2 + Real.logb l (2 * (h : ℝ)) := by

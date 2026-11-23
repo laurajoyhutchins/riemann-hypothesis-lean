@@ -1,9 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NCoords
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NCoords
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagUnipotentLebesgueMeasureIsHaarOn
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieNilpotentEqLebesgueStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentLeviRadicalCoordsHomeomorph
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagUnipotentLebesgueMeasureIsHaarOn
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieNilpotentEqLebesgueStatement
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Zero
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MemConfTOfDetNeZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -148,7 +200,7 @@ def glue (q : (UT r → ℂ) × (Fin r → Fin (k + 1) → ℂ)) : Idx k r → �
 theorem glue_mp : MeasurePreserving (glue (k := k) (r := r)) volume volume ∧
     Function.Bijective (glue (k := k) (r := r)) := by
   have hm : Measurable (glue (k := k) (r := r)) := by
-    refine measurable_pi_lambda _ fun p => ?_
+    refine Measurable.of_eval fun p => ?_
     unfold glue
     rcases (idx k r).symm p with y | y <;> simp only [Sum.elim_inl, Sum.elim_inr] <;> fun_prop
   refine ⟨⟨hm, (Measure.pi_eq fun s hs => ?_).symm⟩, fun q q' h => ?_, fun y => ?_⟩
@@ -234,6 +286,7 @@ theorem tri_mp (x : UT r → ℂ) : MeasurePreserving (tri (k := k) x) volume vo
     (cont_tri.comp (Continuous.prodMk_right x)).snd.measurable
     (Filter.Eventually.of_forall fun B => ((measurePreserving_add_left volume (shift x B)).comp (unip_NS x).1).map_eq)
 
+set_option synthInstance.maxHeartbeats 200000 in
 theorem entries_mp : MeasurePreserving
     (fun q : (UT r → ℂ) × PPar k r => nCoords k r (Matrix.of.symm (NHaar.coord k r q))) volume volume := by
   have h1 : MeasurePreserving (fun q : (UT r → ℂ) × PPar k r => (q.1, tri q.1 q.2)) volume volume :=
@@ -267,7 +320,7 @@ theorem haarLie_entries : ∀ (k r : ℕ), IsHaarOn (Nset k r) (haarLie (Nset k 
     refine ⟨Matrix.of.symm (NHaar.coord k r (x, q)), hbij.mapsTo (Set.mem_univ (x, q)), ?_⟩
     rw [nCoords_coord, hq, hx]
   · have hΦ' : Continuous fun q => (Matrix.of.symm (NHaar.coord k r q) : Mt k r) := hΦ
-    rw [GlobalTheory.T.haar_lie_nilpotent_eq_lebesgue, Measure.map_smul, add_comm (r * (k + 1)), lebN, Measure.map_map cont_nCoords.measurable hΦ'.measurable]
+    rw [GlobalTheory.T.haar_lie_nilpotent_eq_lebesgue, Measure.map_smul _ cont_nCoords.measurable.aemeasurable, add_comm (r * (k + 1)), lebN, Measure.map_map cont_nCoords.measurable hΦ'.measurable]
     exact congrArg _ entries_mp.map_eq
 
 end GlobalTheory.SnMass.NEntry

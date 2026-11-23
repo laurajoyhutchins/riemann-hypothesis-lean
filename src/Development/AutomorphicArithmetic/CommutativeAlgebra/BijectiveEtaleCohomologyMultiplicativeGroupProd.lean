@@ -1,9 +1,55 @@
-import Development.AutomorphicArithmetic.CupPullbacks.ConstCompSingle
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
-import Development.AutomorphicArithmetic.CommutativeAlgebra.BijectiveEtaleCohomologyLaurentPolynomialOfCoord
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CupHypercohomologyPullbackStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KummerClassOfUnitCocycleNaturalAdditiveStatement
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.LaurentCharacterLambda
+module
+
+public import Development.AutomorphicArithmetic.CupPullbacks.ConstCompSingle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CupHypercohomologyPullbackStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KummerClassOfUnitCocycleNaturalAdditiveStatement
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.BijectiveEtaleCohomologyLaurentPolynomialOfCoord
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.LaurentCharacterLambda
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC UpperTheory.Pbf
 
 namespace UpperTheory.KG
@@ -35,7 +81,7 @@ private theorem lp_hom_ext {R : Type} [CommRing R] {f g : LaurentPolynomial S �
     exact congrArg (fun v : Rˣ => (v : R)) h
   refine RingHom.ext fun p => ?_
   induction p using LaurentPolynomial.induction_on' with
-  | add p q hp hq => rw [map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq]
   | C_mul_T n a => rw [map_mul, map_mul, hT n]; exact congrArg (· * _) (RingHom.congr_fun h1 a)
 
 private noncomputable def lam (q : ℕ) (hq : IsUnit (q : S)) : Localization.Away (q : ℤ) →+* S :=
@@ -153,5 +199,5 @@ theorem UpperTheory.bijective_etaleCohomology_multiplicativeGroup_prod :
       kum q (Units.map (Spec.map (CommRingCat.ofHom (UpperTheory.KG.iot q hq))).appTop.hom.toMonoidHom (tq q)) := by
     rw [← GlobalTheory.EtC.pull_comp, ← Functor.map_comp, h1]
     exact (GlobalTheory.T.kummerClassOfUnit_cocycle_natural_additive q).2.1 _ _ (UpperTheory.KG.isUnit_q q)
-  simp only [Function.comp_apply, map_add, UpperTheory.KG.pull_cup, hκ]
+  simp only [Function.comp_apply, map_add (f := _), UpperTheory.KG.pull_cup, hκ]
   rw [← GlobalTheory.EtC.pull_comp, ← GlobalTheory.EtC.pull_comp, ← Functor.map_comp, h2]

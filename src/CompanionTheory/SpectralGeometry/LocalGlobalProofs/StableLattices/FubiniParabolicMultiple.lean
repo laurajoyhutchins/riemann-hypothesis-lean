@@ -1,9 +1,59 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.LineFormulas.Fub2
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ParabolicSubgroupEquality
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.FlagFacts
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HaarExistence
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicMeasureModulus
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.LineFormulas.Fub2
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicMeasureModulus
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.FlagFacts
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.HaarExistence
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.ParabolicSubgroupEquality
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsGaugeMeasuresIsotropicFlagParabolicStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicFlagLeviConjHaarModulusStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicFlagLeviMaxCompactClosedSubgroups
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicFlagUnipotentRadicalClosedSubgroupKeeps
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IwasawaDecompositionUnitaryIsotropicFlag
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IwasawaIntegrationFormulaUpToConstant
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IwasawaIntegrationFormulaUpToConstantStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,10 +113,9 @@ theorem muPar_facts (A : Matrix (Fin n) (Fin n) ℂ) (ν : Measure (PSub ε A)) 
       (∀ s ∈ PSub ε A, (muPar ε A ν).map (fun g => s * g) = muPar ε A ν) ∧ muPar ε A ν ≠ 0 := by
   have hcl := GlobalTheory.CompanionTheory.ParabolicHaar.isClosed_pSub ε A
   have hv : Measurable (Subtype.val : PSub ε A → S7.UJ ε) := measurable_subtype_coe
-  refine ⟨⟨⟨⟨compactCovering (S7.UJ ε), fun _ => trivial, fun i => ?_, iUnion_compactCovering _⟩⟩⟩, ?_, ?_, ?_⟩
-  · have hK := isCompact_compactCovering (S7.UJ ε) i
-    rw [muPar, Measure.map_apply hv hK.measurableSet]
-    exact (hcl.isClosedEmbedding_subtypeVal.isCompact_preimage hK).measure_lt_top
+  have hσ : SigmaFinite (muPar ε A ν) :=
+    (MeasurableEmbedding.subtype_coe hcl.measurableSet).sigmaFinite_map (μ := ν)
+  refine ⟨hσ, ?_, ?_, ?_⟩
   · rw [muPar, Measure.map_apply hv hcl.measurableSet.compl]
     have : (Subtype.val : PSub ε A → S7.UJ ε) ⁻¹' (PSub ε A : Set (S7.UJ ε))ᶜ = ∅ := by
       ext x
@@ -77,10 +126,8 @@ theorem muPar_facts (A : Matrix (Fin n) (Fin n) ℂ) (ν : Measure (PSub ε A)) 
         Subtype.val ∘ (fun g : PSub ε A => (⟨s, hs⟩ : PSub ε A) * g) := rfl
     rw [muPar, Measure.map_map (measurable_const_mul s) hv, e,
       ← Measure.map_map hv (measurable_const_mul _), map_mul_left_eq_self]
-  · intro h
-    have h1 : muPar ε A ν Set.univ = 0 := by rw [h]; simp
-    rw [muPar, Measure.map_apply hv MeasurableSet.univ, Set.preimage_univ] at h1
-    exact (Measure.IsHaarMeasure.toIsOpenPosMeasure (μ := ν)).open_pos _ isOpen_univ Set.univ_nonempty h1
+  · exact (Measure.map_ne_zero_iff (μ := ν) hv.aemeasurable).2
+      (fun h => isOpen_univ.measure_ne_zero ν Set.univ_nonempty (by simp [h]))
 
 theorem fub2 : Fub2 := by
   intro n ε A hA

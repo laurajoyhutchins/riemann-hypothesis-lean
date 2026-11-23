@@ -1,10 +1,58 @@
-import Mathlib
-import ReciprocityTheory.CommutativeAlgebra.ChainConnInDim
-import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.IsSaturatedChain
-import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.Integral
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.IsWeaklyRegularPairModOneLeft
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.BaseExistsPrime
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.MaxNotMemMinimalPrimes
+module
+
+public import ReciprocityTheory.CommutativeAlgebra.ChainConnInDim
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.BaseExistsPrime
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ConnectedPrimeFields.MaxNotMemMinimalPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Presheaf
+public import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.Integral
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing UpperTheory.V.AlgebraTools.Conn
 
@@ -56,8 +104,11 @@ private theorem cut_dim_map {A R : Type} [CommRing A] [CommRing R] [Algebra A R]
     obtain ⟨Q, -, hQ, hQp⟩ := Ideal.exists_ideal_over_prime_of_isIntegral p (⊥ : Ideal R)
       (by simp [← RingHom.ker_eq_comap_bot,
         (RingHom.injective_iff_ker_eq_bot _).mp (FaithfulSMul.algebraMap_injective A R)])
-    have hle : J.map (algebraMap A R) ≤ Q := Ideal.map_le_iff_le_comap.mpr (hQp ▸ hJ)
-    exact hQp ▸ Ideal.comap_mono hle
+    change Ideal.comap (algebraMap A R) Q = p at hQp
+    have hle : J.map (algebraMap A R) ≤ Q := Ideal.map_le_iff_le_comap.mpr (by simpa [hQp] using hJ)
+    have hcomap : Ideal.comap (algebraMap A R) (J.map (algebraMap A R)) ≤
+        Ideal.comap (algebraMap A R) Q := Ideal.comap_mono hle
+    simpa [hQp] using hcomap
 
 private theorem cut_rad_max {R : Type} [CommRing R] [IsLocalRing R] {I : Ideal R} (hI : I ≠ ⊤)
     (h : ringKrullDim (R ⧸ I) = 0) : I.radical = maximalIdeal R := by

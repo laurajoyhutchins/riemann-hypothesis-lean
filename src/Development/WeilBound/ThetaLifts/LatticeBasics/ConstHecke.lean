@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HeckeLEntireAndNonzeroAtOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCompactLatticeGL
-import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.ExistsPrimeAbsNormOfHasDirichletDensity
-import GroundTheory.AutomorphicForms.CompactAbelianCharacters
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HeckeLEntireAndNonzeroAtOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCompactLatticeGL
+public import GroundTheory.AutomorphicForms.CompactAbelianCharacters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.InfiniteSum.Field
+import Mathlib.Topology.Algebra.ProperAction.Basic
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.ExistsPrimeAbsNormOfHasDirichletDensity
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.TendstoPrimeIdealZetaSumUniv
+public import Mathlib.NumberTheory.NumberField.DirichletDensity
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +92,7 @@ theorem hchar_eq_one (H : GlobalTheory.Published.HeckeLEntireAndNonzeroAtOne) (�
     have sx : Summable x := summable_absNorm_rpow K hs
     have s1 : HasSum (fun w => x w - 2 * (A.indicator x w + (hS.toFinset : Set _).indicator x w))
         (∑' w, x w - 2 * (∑' w : A, x w + ∑ w ∈ hS.toFinset, x w)) :=
-      sx.hasSum.sub (((hasSum_subtype_iff_indicator.1 (sx.subtype A).hasSum).add
+      sx.hasSum.sub (((hasSum_subtype_iff_indicator.1 (sx.subtype (· ∈ A)).hasSum).add
         (hasSum_subtype_iff_indicator.1 (hS.toFinset.hasSum x))).mul_left 2)
     have le : ∀ w, Real.exp (x w - 2 * (A.indicator x w + (hS.toFinset : Set _).indicator x w)) ≤ ‖eulerFactor χ s w‖ := fun w => by
       by_cases hw : w ∈ A ∨ w ∈ (hS.toFinset : Set _)
@@ -67,8 +112,9 @@ theorem hchar_eq_one (H : GlobalTheory.Published.HeckeLEntireAndNonzeroAtOne) (�
           show χ.val w = 1 from hl _, xc]
         simpa using exp_le_inv (x1 w)
     refine le_trans (Real.exp_le_exp.2 ?_) (le_of_tendsto_of_tendsto' s1.rexp (hP s hs).norm fun T =>
-      Finset.prod_le_prod (fun _ _ => (Real.exp_pos _).le) fun w _ => le w)
-    have e1 : ∑' w : A, x w ≤ C := hC s hs
+      Finset.prod_le_prod₀ (fun _ _ => (Real.exp_pos _).le) fun w _ => le w)
+    have e1 : ∑' w : A, x w ≤ C := by
+      simpa only [NumberField.Set.primeIdealZetaSum_def, hx] using hC s hs
     have e2 : ∑ w ∈ hS.toFinset, x w ≤ hS.toFinset.card := by
       simpa using Finset.sum_le_card_nsmul _ _ 1 fun w _ => (x1 w).le
     rw [NumberField.Set.primeIdealZetaSum_def, tsum_univ x]
@@ -86,7 +132,7 @@ theorem exists_prime_norm (H : GlobalTheory.Published.HeckeLEntireAndNonzeroAtOn
   obtain ⟨t, ht⟩ := GlobalTheory.HeckeOne.exists_normChar_ne_one (K := K)
   exact ht (hchar_eq_one H _ (GlobalTheory.HeckeOne.isUnitary_normChar t) hS fun w h1 h2 => absurd h2 (hn w h1))
 
-theorem closed_eq_top [IsTotallyComplex K] (H : GlobalTheory.Published.HeckeLEntireAndNonzeroAtOne) (M : Subgroup (Ideles K))
+theorem closed_eq_top [_root_.NumberField.IsTotallyComplex K] (H : GlobalTheory.Published.HeckeLEntireAndNonzeroAtOne) (M : Subgroup (Ideles K))
     (hM : IsClosed (M : Set (Ideles K))) (h1 : ∀ k, diagUnits K k ∈ M) (h2 : GlobalTheory.IdeleCovolume.eIdele K ∈ M)
     {S : Set (HeightOneSpectrum (𝓞 K))} (hS : S.Finite)
     (h : ∀ w ∉ S, (Ideal.absNorm w.asIdeal).Prime → ∀ x, localIdele K w x ∈ M) (z : Ideles K) : z ∈ M := by

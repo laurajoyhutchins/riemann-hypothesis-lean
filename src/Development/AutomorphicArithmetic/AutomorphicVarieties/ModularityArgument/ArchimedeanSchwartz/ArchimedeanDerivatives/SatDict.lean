@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.StrongMultiplicityOne.EigOfSat
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationDetEqOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.HodgeTateFromSandwich
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationDetEqOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SmoothRepresentationsGL.MemIffLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SmoothRepresentationsGL.SphDict
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.StrongMultiplicityOne.EigOfSat
+import Formalism.DoubleCosetMeasures.Statement
+import GroundTheory.AutomorphicForms.GL2.GJFEInducedLevi
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLCuspidalGen
+import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SmoothRepresentationsGL.ExistsCombComb
+
+@[expose] public section
 
 attribute [-instance] Formalism.DoubleCosetMeasures.instMeasGL
 
@@ -49,7 +95,7 @@ private theorem isSatake_of_eig {K : Type} [Field K] [NumberField K] {n : ℕ} (
   intro h u hu'
   have h1 : h ∈ Spherical.eigenSubalgebra (localHaar n w) z (fun g => l (ρ g y)) hf := htop ▸ Algebra.mem_top
   have h2 := h1 1
-  simp only [one_mul, map_one, Module.End.one_apply] at h2
+  simp only [one_mul, map_one, one_apply_eq_self] at h2
   have h3 := dual_heckeAct (localHaar n w) (ρ := ρ) (h : HeckeAlgebra (localHaar n w)).mem (hs y) l
   rw [h2, hz' h y hy, map_smul, smul_eq_mul] at h3
   rw [hz' h u hu', mul_right_cancel₀ hl h3]
@@ -93,7 +139,7 @@ theorem UpperTheory.V.Z.Inf.satDict :
     exact h0 (Subtype.ext (Subtype.ext (funext hc)))
   let l : Module.Dual ℂ (D.finite.W v) :=
     { toFun := fun y => (J y).1.1 t
-      map_add' := fun y y' => by rw [map_add]; rfl
+      map_add' := fun y y' => by rw [map_add (f := _)]; rfl
       map_smul' := fun c y => by rw [map_smul]; rfl }
   have hE := Af.StrongMultiplicityOne.eigOfSat K n σ v _ ((CG.hasSat_mk σ v _).1 hB) (J (x v)).1 (J (x v)).2 (fun g k hk => by
     rw [← (Af.Smo.sphDict K n v).1] at hk

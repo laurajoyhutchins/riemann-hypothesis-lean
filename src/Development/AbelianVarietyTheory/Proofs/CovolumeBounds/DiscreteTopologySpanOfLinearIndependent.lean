@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsOrthonormalOfLinearIndependent
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LinearIndependentRealOfIntOfDiscrete
+module
+
+public import Mathlib.Algebra.Module.ZLattice.Covolume
+public import Mathlib.Analysis.InnerProductSpace.GramMatrix
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsOrthonormalOfLinearIndependent
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LinearIndependentRealOfIntOfDiscrete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.Finite.CardQuotient
+
+@[expose] public section
 
 open scoped InnerProductSpace
 open Module Submodule Matrix
@@ -28,12 +76,13 @@ variable {E F : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 theorem free_of_fg {V : Type*} [AddCommGroup V] [Module ℝ V] {L : Submodule ℤ V} (h : L.FG) :
     Module.Free ℤ L := by
   have : Module.Finite ℤ L := .of_fg h
-  have : IsAddTorsionFree V := .of_isTorsionFree ℝ V
+  have : HasUniqueDiv V := .of_isTorsionFree ℝ V
   infer_instance
 
-open Classical in
 
+open Classical in
 noncomputable def spanCovol (L : Submodule ℤ E) : ℝ :=
+  letI : Decidable L.FG := Classical.propDecidable _
   if h : L.FG then
     haveI : Module.Finite ℤ L := .of_fg h
     haveI : Module.Free ℤ L := free_of_fg h
@@ -63,7 +112,7 @@ theorem spanCovol_eq_sqrt_det_gram {L : Submodule ℤ E} (b : Basis ι ℤ L) :
   have hfg : L.FG := Module.Finite.iff_fg.1 hf
   have : Module.Free ℤ L := .of_basis b
   let e := (finBasis ℤ L).indexEquiv b
-  rw [spanCovol, dif_pos hfg, sqrt_det_gram_eq_relIndex_mul le_rfl b ((finBasis ℤ L).reindex e),
+  rw [spanCovol, dite_eq_left hfg, sqrt_det_gram_eq_relIndex_mul le_rfl b ((finBasis ℤ L).reindex e),
     AddSubgroup.relIndex_self, Nat.cast_one, one_mul, ← Hadamard.det_gram_comp_equiv _ e]
   congr 3
   ext i
@@ -73,12 +122,6 @@ theorem spanCovol_span {v : ι → E} (hv : LinearIndependent ℤ v) :
     spanCovol (span ℤ (Set.range v)) = √(gram ℝ v).det := by
   rw [spanCovol_eq_sqrt_det_gram (Basis.span hv)]
   simp
-
-@[simp]
-theorem spanCovol_bot : spanCovol (⊥ : Submodule ℤ E) = 1 := by
-  have := spanCovol_span (E := E) (ι := Empty) (v := Empty.elim) linearIndependent_empty_type
-  rw [Set.range_eq_empty, span_empty] at this
-  simpa using this
 
 theorem spanCovol_map_linearIsometry {L : Submodule ℤ E} (hL : L.FG) (T : E →ₗᵢ[ℝ] F) :
     spanCovol (L.map (T.toLinearMap.restrictScalars ℤ)) = spanCovol L := by
@@ -160,9 +203,6 @@ theorem spanCovol_eq_covolume_comap_span [MeasurableSpace E] [BorelSpace E] (L :
     [DiscreteTopology L] :
     spanCovol L = ZLattice.covolume (ZLattice.comap ℝ L (span ℝ (L : Set E)).subtype) := by
   rw [← spanCovol_eq_covolume, spanCovol_comap_subtype L _ subset_span]
-
-noncomputable def projAlong (L N : Submodule ℤ E) : Submodule ℤ E :=
-  L.map ((span ℝ (N : Set E))ᗮ.starProjection.toLinearMap.restrictScalars ℤ)
 
 end Main
 

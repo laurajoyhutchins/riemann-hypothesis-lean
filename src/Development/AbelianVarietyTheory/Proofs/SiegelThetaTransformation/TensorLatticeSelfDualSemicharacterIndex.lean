@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Definitions.HermitianLattices.TraceFormBilinSeparatingLeftIff
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocalizedModuleSubtype
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsCoeEqSpanDetOfIntVecLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.TraceFormDualOneTraceFormDual
+public import Development.AbelianVarietyTheory.Definitions.HermitianLattices.TraceFormBilinSeparatingLeftIff
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsCoeEqSpanDetOfIntVecLe
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocalizedModuleSubtype
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemOfMemSpanFraction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HermitianTraceFormVanishing
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical nonZeroDivisors
@@ -247,6 +296,7 @@ theorem EF_swap (u v : Fin r → E) : EF X v u = -EF X u v := by
 
 theorem sum_EF_pure (y : Matrix (Fin n) (Fin r) E) (v : Fin n → E) (u : Fin r → E) :
     ∑ k, EF X (y k) (vecMulVec v u k) = EF X (ctr y v) u := by
+
   rw [ctr, EF_eq_bilin, map_sum, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [← EF_eq_bilin, EF_smul]
@@ -285,7 +335,7 @@ theorem tens_selfDual {M : ℕ} {Λ : Lt E n} (hΛ : Λ ∈ Vset E n M) {L : Lt 
     let f : Matrix (Fin n) (Fin r) E →+ ℚ := AddMonoidHom.mk' (fun y' => ∑ i, EF X (y i) (y' i))
       fun a b => by
         have : ∀ i, (a + b) i = a i + b i := fun _ => rfl
-        simp only [EF_eq_bilin, this, map_add, Finset.sum_add_distrib]
+        simp only [EF_eq_bilin, this, map_add (f := _), Finset.sum_add_distrib]
     obtain ⟨k, hk⟩ := tens_le (H := (Int.castAddHom ℚ).range.comap f) (fun a ha b hb => by
       obtain ⟨k, hk⟩ := (hL.2 _).1 ((mem_tens_iff hΛ L y).1 hy a ha) b hb
       exact ⟨k, (hk.symm.trans (sum_EF_pure X y a b).symm :)⟩) hy'
@@ -326,9 +376,9 @@ theorem epsW_semichar {M : ℕ} {Λ : Lt E n} (hΛ : Λ ∈ Vset E n M) {L : Lt 
       have e : (y + y') i = y i + y' i := rfl
       have h2 : EF X (y' i) (w • y i) = -EF X (y i) (cc w • y' i) := by rw [EF_swap, EF_smul]
       have h3 : EF X (y i) (w • y' i) + EF X (y i) (cc w • y' i) = EF X (y i) (y' i) := by
-        rw [EF_eq_bilin, EF_eq_bilin, ← map_add, ← add_smul, hw1, one_smul, EF_eq_bilin]
+        rw [EF_eq_bilin, EF_eq_bilin, ← map_add (f := _), ← add_smul, hw1, one_smul, EF_eq_bilin]
       simp only [EF_eq_bilin] at h2 h3 ⊢
-      simp only [e, smul_add, map_add, LinearMap.add_apply]
+      simp only [e, smul_add, map_add (f := _), LinearMap.add_apply]
       linarith
     simp only [epsW, h1, Finset.sum_add_distrib, Finset.sum_sub_distrib, ← Finset.mul_sum, hk]
     rw [← Complex.exp_add, ← Complex.exp_add, ← mul_one (cexp (_ + _)),

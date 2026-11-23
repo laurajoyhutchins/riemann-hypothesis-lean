@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DiscreteSpectrumResidual
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsNormalisedOfIsDiscrete
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.L2.Host
 open scoped ContDiff Topology
@@ -37,7 +81,7 @@ theorem qdet_intertwine {M M' : Type} [AddCommGroup M] [Module ℂ M] [AddCommGr
   rw [e1, e2] at hm
   exact hm
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 theorem tensorForms_update {c : ℕ} {n : Fin c → ℕ} (π : ∀ i, CuspSub E (n i)) (i : Fin c)
     (m : ∀ j, GA E (n j)) {F : (∀ j, GA E (n j)) → ℂ} (hF : F ∈ tensorForms π) :
@@ -67,10 +111,10 @@ theorem map_leviEmb {R S : Type} [CommRing R] [CommRing S] (p : R →+* S) {c N 
   obtain ⟨⟨k, y⟩, rfl⟩ := e.surjective b
   by_cases hjk : j = k
   · subst hjk
-    simp [leviEmb_apply_same]
-  · simp [leviEmb_apply_ne _ e _ hjk]
+    simp [leviEmb, blockDiagonal'_apply_eq]
+  · simp [leviEmb, blockDiagonal'_apply, hjk]
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {c N : ℕ} {n : Fin c → ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {c N : ℕ} {n : Fin c → ℕ}
 
 theorem leviEmb_update_infGL (e : (Σ j, Fin (n j)) ≃ Fin N) (i : Fin c) (y : GL (Fin (n i)) (Cinf E)) :
     leviEmb (Ad E) e (Function.update 1 i (infGL E (n i) y)) =
@@ -261,7 +305,7 @@ theorem restrLin_Eop (e : (Σ j, Fin (n j)) ≃ Fin N) (m : Levi (Ad E) fun j =>
   rw [LinearMap.comp_smul, LinearMap.smul_comp, LinearMap.comp_sub, LinearMap.sub_comp, LinearMap.comp_smul,
     LinearMap.smul_comp, hS, hS]
 
-theorem qdet_block_levi : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] {c N : ℕ} (n : Fin c → ℕ)
+theorem qdet_block_levi : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {c N : ℕ} (n : Fin c → ℕ)
     (h : ∑ i, n i = N) (π : ∀ i, CuspSub E (n i)) (τ : E →+* ℂ) (i : Fin c) (M : Multiset ℂ),
     (π i).HasInfChar τ M → ∀ (u : ℂ) (ψ : Sm E N),
       (fun m => ψ.1 (leviEmb (Ad E) (stdBlocks n h) m)) ∈ tensorForms π → ∀ m,

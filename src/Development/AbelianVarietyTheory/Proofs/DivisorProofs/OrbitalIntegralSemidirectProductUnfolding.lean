@@ -1,15 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ParP
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralTwistedConjInvariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrbitalIntegralEqClosedSubgroupConjAverage
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumCompEqFinsumCardFiberMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnfoldSumInvariantLeviConjStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DoubleCosetRelIndexInfConjConstStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexUnfoldSemidirectProductStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrbitCountParabolicUnfoldLeviStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DoubleCosetSemidirectRepSurjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StabilizerRelIndexNeZeroParabolicStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumFiberwiseOfFiniteSupportComplexStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DoubleCosetRelIndexInfConjConstStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DoubleCosetSemidirectRepSurjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumCompEqFinsumCardFiberMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinsumFiberwiseOfFiniteSupportComplexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrbitCountParabolicUnfoldLeviStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrbitalIntegralEqClosedSubgroupConjAverage
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexUnfoldSemidirectProductStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StabilizerRelIndexNeZeroParabolicStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnfoldSumInvariantLeviConjStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -93,7 +133,7 @@ theorem core : ∀ (P M N : Type) [Group P] [Group M] [Group N] (s : M →* P) (
   intro P M N _ _ _ s π u hs hinj hker KP KM L hsK hπK huK TM CM TP CP hCT hTP hCP hTC G hGT hGK hU hfin
   have hGout : ∀ p, G (Quotient.out (DoubleCoset.mk TP KP p)) = G p := by
     intro p
-    obtain ⟨t, ht, k, hk, he⟩ := (DoubleCoset.eq _ _ _ _).1 (DoubleCoset.out_eq' TP KP (DoubleCoset.mk TP KP p)).symm
+    obtain ⟨t, ht, k, hk, he⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 (DoubleCoset.out_eq' (DoubleCoset.mk TP KP p)).symm
     rw [he, hGK k hk, hGT t ht]
   have hTCP : ∀ p : P, TP ⊓ KP.map (MulAut.conj p).toMonoidHom ≤ CP := by
     intro p x hx
@@ -108,7 +148,7 @@ theorem core : ∀ (P M N : Type) [Group P] [Group M] [Group N] (s : M →* P) (
     fun d => DoubleCoset.mk TM KM (π (Quotient.out d))
   have hρmk : ∀ p, ρ (DoubleCoset.mk TP KP p) = DoubleCoset.mk TM KM (π p) := by
     intro p
-    obtain ⟨t, ht, k, hk, he⟩ := (DoubleCoset.eq _ _ _ _).1 (DoubleCoset.out_eq' TP KP (DoubleCoset.mk TP KP p)).symm
+    obtain ⟨t, ht, k, hk, he⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 (DoubleCoset.out_eq' (DoubleCoset.mk TP KP p)).symm
     show DoubleCoset.mk TM KM (π (Quotient.out (DoubleCoset.mk TP KP p))) = _
     rw [he, DoubleCoset.eq]
     obtain ⟨t', ht', rfl⟩ := (hTP t).1 ht
@@ -121,7 +161,7 @@ theorem core : ∀ (P M N : Type) [Group P] [Group M] [Group N] (s : M →* P) (
   rw [GlobalTheory.T.finsum_fiberwise_of_finite_support_complex ρ _ hsupp]
   refine finsum_congr fun q => ?_
   set q0 := Quotient.out q with hq0def
-  have hq0 : DoubleCoset.mk TM KM q0 = q := DoubleCoset.out_eq' TM KM q
+  have hq0 : DoubleCoset.mk TM KM q0 = q := DoubleCoset.out_eq' q
   have hψ : ∀ x : N ⧸ L, ρ (DoubleCoset.mk TP KP (s q0 * u (Quotient.out x))) = q := fun x => by
     rw [hρmk, map_mul, hs, (hker _).2 ⟨_, rfl⟩, mul_one]
     exact hq0
@@ -143,7 +183,7 @@ theorem core : ∀ (P M N : Type) [Group P] [Group M] [Group N] (s : M →* P) (
       (((TM ⊓ KM.map (MulAut.conj q0).toMonoidHom).relIndex CM : ℕ) : ℂ) * (Nat.card (ψ ⁻¹' {d}) : ℂ) := by
     intro d
     obtain ⟨X, hX, hc⟩ := hfib d
-    obtain ⟨t, ht, k, hk, he⟩ := (DoubleCoset.eq _ _ _ _).1 (hX.trans (DoubleCoset.out_eq' TP KP d.1).symm)
+    obtain ⟨t, ht, k, hk, he⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 (hX.trans (DoubleCoset.out_eq' d.1).symm)
     rw [he, GlobalTheory.T.doubleCoset_relIndex_inf_conj_const P TP CP KP hTCP t ht k hk,
       GlobalTheory.T.relIndex_unfold_semidirect_product P M N s π u hs hinj hker KP KM L hsK hπK huK TM CM TP CP hCT hTP hCP hTC q0 X, hc]
     push_cast

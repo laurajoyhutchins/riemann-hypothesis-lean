@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
-import GroundTheory.HeightsAndTheta.Theta.Capelli.CompleteHomogeneous
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
+public import GroundTheory.HeightsAndTheta.Theta.Capelli.CompleteHomogeneous
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.FundamentalTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -16,8 +63,9 @@ theorem sum_esymm_mul_hsymm_int {k : ℕ} (hk : k ≠ 0) :
   apply map_injective (Int.castRingHom ℂ) Int.cast_injective
   apply MvPolynomial.funext
   intro x
+
   simp only [map_sum, map_mul, map_pow, map_neg, map_one, map_esymm, map_hsymm, map_zero]
-  rw [GroundTheory.Heights₂.Theta.SymmFun.sum_esymm_mul_hsymm x k, if_neg hk]
+  simp [GroundTheory.Heights₂.Theta.SymmFun.sum_esymm_mul_hsymm x k, hk]
 
 theorem esymm_mem_adjoin (k : ℕ) :
     esymm σ ℤ k ∈ Algebra.adjoin ℤ (Set.range (hsymm σ ℤ)) := by
@@ -38,8 +86,8 @@ theorem esymm_mem_adjoin (k : ℕ) :
   refine neg_mem (mul_mem (hm1 k) (sum_mem fun s hs => mul_mem (mul_mem (hm1 s)
     (ih s (mem_range.mp hs))) (Algebra.subset_adjoin ⟨k - s, rfl⟩)))
 
-omit [Fintype σ] [DecidableEq σ] in
 
+omit [Fintype σ] [DecidableEq σ] in
 theorem isHomogeneous_prod_map_X (t : Multiset σ) :
     ((t.map (X : σ → MvPolynomial σ ℤ)).prod).IsHomogeneous (Multiset.card t) := by
   induction t using Multiset.induction_on with
@@ -81,7 +129,7 @@ theorem exists_hsymmPart_of_mem_closure {x : MvPolynomial σ ℤ}
     · rcases Multiset.mem_add.mp hi with h | h
       exacts [μ.parts_pos h, ν.parts_pos h]
     · rw [Multiset.sum_add, μ.parts_sum, ν.parts_sum]
-    · simp only [hsymmPart, Multiset.map_add, Multiset.prod_add]
+    · simp only [hsymmPart, Multiset.map_add (f := _), Multiset.prod_add]
 
 theorem proof : SymmetricSpanHsymm.Statement := by
   intro N m G hG hsym

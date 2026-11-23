@@ -1,10 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.LocJacTyp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.BoxMulAlt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.ContinuousTrESymm
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.BoxMulAlt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.ContinuousTrESymm
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +67,6 @@ theorem oev_one : (1 : Fv F v ⊗[F] E) ∈ OEv (E := E) v := by
   refine ⟨1, Set.mem_univ _, ?_⟩
   first
     | exact map_one _
-    | simp
 
 theorem sc_mul (t : Fv F v) (x : Fv F v ⊗[F] E) : sc (E := E) v t * x = t • x := by
   induction x using TensorProduct.induction_on with
@@ -48,7 +88,6 @@ theorem oev_mul {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ 
       refine ⟨a' * b', Set.mem_univ _, ?_⟩
       first
         | exact map_mul _ _ _
-        | simp
     | zero => simp
     | add y z _ _ hy hz =>
       rw [mul_add]
@@ -56,7 +95,6 @@ theorem oev_mul {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ 
     | smul c y _ hy =>
       first
         | rw [mul_smul_comm]
-        | rw [← algebraMap_smul (Fv F v) c y, mul_smul_comm, algebraMap_smul]
       exact Submodule.smul_mem _ c hy
   | zero => simp
   | add x z _ _ hx hz =>
@@ -65,7 +103,6 @@ theorem oev_mul {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ 
   | smul c x _ hx =>
     first
       | rw [smul_mul_assoc]
-      | rw [← algebraMap_smul (Fv F v) c x, smul_mul_assoc, algebraMap_smul]
     exact Submodule.smul_mem _ c hx
 
 theorem sigR_smul (σ : E →ₐ[F] E) (c : Fv F v) (x : Fv F v ⊗[F] E) :
@@ -73,16 +110,12 @@ theorem sigR_smul (σ : E →ₐ[F] E) (c : Fv F v) (x : Fv F v ⊗[F] E) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp [sigR, TensorProduct.smul_tmul']
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
 private theorem sigR_smulO_lemma (σ : E →ₐ[F] E) (c : v.adicCompletionIntegers F)
     (x : Fv F v ⊗[F] E) : sigR (Fv F v) σ (c • x) = c • sigR (Fv F v) σ x := by
   first
     | rw [← algebraMap_smul (Fv F v) c x, sigR_smul, algebraMap_smul]
-    | (induction x using TensorProduct.induction_on with
-        | zero => simp
-        | tmul a b => simp [sigR, TensorProduct.smul_tmul']
-        | add y z hy hz => simp only [smul_add, map_add, hy, hz])
 
 theorem oev_sigR (σ : E →ₐ[F] E) {x : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) :
     sigR (Fv F v) σ x ∈ OEv (E := E) v := by
@@ -95,11 +128,9 @@ theorem oev_sigR (σ : E →ₐ[F] E) {x : Fv F v ⊗[F] E} (hx : x ∈ OEv (E :
     first
       | exact ⟨NumberField.RingOfIntegers.mapRingHom (σ : E →+* E) a', Set.mem_univ _,
           by simp [sigR, inclR]⟩
-      | exact ⟨⟨σ a', (a'.isIntegral_coe.map (σ : E →+* E).toIntAlgHom)⟩, Set.mem_univ _,
-          by simp [sigR, inclR]⟩
   | zero => simp
   | add x y _ _ hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem _ hx hy
   | smul c x _ hx =>
     rw [sigR_smulO_lemma]
@@ -110,8 +141,5 @@ theorem integer_ring_topology : OTop (E := E) v :=
     fun _ hx _ hy => Sd.oev_add v hx hy, fun _ hx => Sd.oev_neg v hx,
     fun t ht x hx => by rw [sc_mul]; exact Sd.oev_smul v ht hx,
     fun σ _ hx => oev_sigR v σ hx⟩
-
-theorem ring_topology_instances : RTop (E := E) v :=
-  ⟨inferInstance, inferInstance, inferInstance, inferInstance⟩
 
 end PI.UnitaryGroupMassFormula.LocJacTyp

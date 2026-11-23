@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.CoboundaryTransfers.Statement
-import Formalism.WeaklyAdmissibleFiltrations.Statement
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,10 +101,6 @@ def PartB (T : LocLat G Qp LL O) : Prop :=
   ∀ (i : ZMod n) (y : W.DD T), MemInv W T i y →
     (y ∈ W.Nl T i ↔ ∀ ζ : LL, IsPrimitiveRoot ζ (PD.p ^ W.s) → MemLoc W T i ζ y)
 
-example (T : LocLat G Qp LL O) (i : ZMod n) (ζ : LL) (y : W.DD T) (hy : y ∈ W.Nl T i) :
-    MemLoc W T i ζ y :=
-  ⟨0, by simpa using hy, (1 : LocRing W i ζ) ⊗ₜ[LetA O n] (⟨y, hy⟩ : ↥(W.Nl T i)), by simp⟩
-
 variable {W} {RA RW : Type} [CommRing RA] [CommRing RW] [Algebra O RA] [Algebra O RW]
   {inclR : RA →ₐ[O] RW} {φR : RW →ₐ[O] RW} {gR : G → (RW →ₐ[O] RW)} {πA : RA}
   (E : EtTie W RA RW inclR φR gR πA)
@@ -78,8 +117,8 @@ def PartC (T : LocLat G Qp LL O) (M h : ℕ) : Prop :=
 
 end Generic
 
-open TensorProduct in
 
+open TensorProduct in
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.LocalRingStructure.letters_neZero {l : ℕ} [Fact l.Prime] (K : _root_.Formalism.BasicNotions.Loc.FinExt l) :
     NeZero (Module.finrank ℚ_[l] ↥(_root_.Formalism.BasicNotions.Loc.K0 K)) := by
   haveI : FiniteDimensional ℚ_[l] ↥(K : IntermediateField ℚ_[l] (_root_.Formalism.BasicNotions.Loc.Om l)) := K.2
@@ -93,15 +132,6 @@ def letterMax {l : ℕ} [Fact l.Prime] (K : FinExt l)
     (m : ZMod (Module.finrank ℚ_[l] ↥(K0 K)) → ℕ) : ℕ :=
   haveI := letters_neZero K
   Finset.univ.sup m
-
-example {l : ℕ} [Fact l.Prime] (K : FinExt l) (m : ZMod (Module.finrank ℚ_[l] ↥(K0 K)) → ℕ) :
-    IsGreatest (Set.range m) (letterMax K m) := by
-  haveI := letters_neZero K
-  refine ⟨?_, ?_⟩
-  · obtain ⟨i, -, hi⟩ := Finset.exists_mem_eq_sup Finset.univ Finset.univ_nonempty m
-    exact ⟨i, hi.symm⟩
-  · rintro _ ⟨i, rfl⟩
-    exact Finset.le_sup (f := m) (Finset.mem_univ i)
 
 def HeightsFromJumps (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (H : LocHW l P)
     (F : LocFon l P AI H) (_C : LocCmpT l P AI H F) : Prop :=

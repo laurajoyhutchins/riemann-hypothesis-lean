@@ -1,5 +1,59 @@
-import Formalism.HarderNarasimhan.DegSupermodZ
-import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
+module
+
+public import Formalism.HarderNarasimhan.DegSupermodZ
+public import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
+import Formalism.LatticeSlopes.LatticeSlopesProofs.CovolEqGram
+import Formalism.LatticeSlopes.LatticeSlopesProofs.GramDetLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.Finite.CardQuotient
+
+@[expose] public section
 
 open Module Submodule
 
@@ -121,7 +175,7 @@ theorem orthogonal_starProjection_comp_of_le {U W : Submodule ℝ E} (hUW : U �
   calc Wᗮ.starProjection (Uᗮ.starProjection x)
       = Wᗮ.starProjection (U.starProjection x) + Wᗮ.starProjection (Uᗮ.starProjection x) := by
         rw [h2, zero_add]
-    _ = Wᗮ.starProjection x := by rw [← map_add, h1]
+    _ = Wᗮ.starProjection x := by rw [← map_add (f := _), h1]
 
 theorem mem_of_orthogonal_starProjection_eq_zero {W : Submodule ℝ E} {x : E}
     (h : Wᗮ.starProjection x = 0) : x ∈ W := by
@@ -137,6 +191,7 @@ theorem covol_le_of_contraction (Q1 Q2 : Submodule ℤ E) [DiscreteTopology Q1]
   apply Real.sqrt_le_sqrt
   have h := gram_det_le E E _ (fun i => (v i : E)) (fun i => (w i : E)) 1 (fun c => by
     have : ∑ i, c i • ((w i : Q2) : E) = f (∑ i, c i • ((v i : Q1) : E)) := by
+
       simp only [w, Basis.map_apply, hf, map_sum, map_smul]
     rw [this, one_mul]
     exact hn _)
@@ -256,7 +311,7 @@ theorem degree_supermodular_integral : DegSupermodZ := by
         quot B (satur B (A ⊓ B)) := Submodule.mem_map.2 ⟨b, hb, rfl⟩
     refine ⟨⟨_, hpb⟩, Subtype.ext ?_⟩
     rw [hg]
-    simp only [LinearMap.coe_restrictScalars, ContinuousLinearMap.coe_coe, map_add, hPU0 a ha,
+    simp only [LinearMap.coe_restrictScalars, ContinuousLinearMap.coe_coe, map_add (f := _), hPU0 a ha,
       zero_add]
     exact orthogonal_starProjection_comp_of_le hspan b
   let φ := LinearEquiv.ofBijective g ⟨hinj, hsurj⟩

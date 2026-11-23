@@ -1,4 +1,9 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafHensCutDef
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafHensCutDef
+import Mathlib.Tactic.Linter.Style
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits

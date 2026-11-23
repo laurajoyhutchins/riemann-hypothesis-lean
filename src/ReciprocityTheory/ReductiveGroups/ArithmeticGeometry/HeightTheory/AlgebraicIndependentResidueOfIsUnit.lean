@@ -1,8 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
-import ReciprocityTheory.SemistableReduction.GaussValExists
-import ReciprocityTheory.SemistableReduction.GaussValLeIffDivMem
-import ReciprocityTheory.SemistableReduction.GaussIndepOfLeTrdeg
-import ReciprocityTheory.SemistableReduction.IntegralClosureRankAndResidueTrdegLe
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.SemistableReduction.GaussIndepOfLeTrdeg
+public import ReciprocityTheory.SemistableReduction.IntegralClosureRankAndResidueTrdegLe
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -34,9 +79,8 @@ theorem algebraicIndependent_residue_of_isUnit {A R E : Type} [CommRing A] [Fiel
 theorem trdeg_residue_le {K Ω : Type} [Field K] [Field Ω] [Algebra K Ω] (D : ℕ)
     (hD : Algebra.trdeg K Ω = D) (v : AddValuation Ω (WithTop ℤ))
     (hK : ∀ a : K, a ≠ 0 → v (algebraMap K Ω a) = 0) (a0 : Ω) (ha0 : a0 ≠ 0) (hva0 : v a0 ≠ 0) :
-    letI := resAlg (F := K) v
-    Algebra.trdeg (IsLocalRing.ResidueField ((vRing v).comap (algebraMap K Ω)))
-      (IsLocalRing.ResidueField (vRing v)) ≤ ((D - 1 : ℕ) : Cardinal) := by
+    @Algebra.trdeg (IsLocalRing.ResidueField ((vRing v).comap (algebraMap K Ω)))
+      (IsLocalRing.ResidueField (vRing v)) _ _ (resAlg (F := K) v) ≤ ((D - 1 : ℕ) : Cardinal) := by
   set V := vRing v with hV
   set k := IsLocalRing.ResidueField (V.comap (algebraMap K Ω)) with hk
   set κ := IsLocalRing.ResidueField V with hκ
@@ -62,7 +106,7 @@ theorem trdeg_residue_le {K Ω : Type} [Field K] [Field Ω] [Algebra K Ω] (D : 
     rw [hD] at h
     exact h
   obtain ⟨r, hr⟩ : ∃ r : ℕ, Algebra.trdeg k κ = r :=
-    Cardinal.lt_aleph0.mp (lt_of_le_of_lt hle (Cardinal.nat_lt_aleph0 D))
+    Cardinal.lt_aleph0.mp (lt_of_le_of_lt hle Cardinal.natCast_lt_aleph0)
   haveI : FaithfulSMul k κ :=
     (faithfulSMul_iff_algebraMap_injective k κ).mpr (algebraMap k κ).injective
   obtain ⟨s, hs⟩ := exists_isTranscendenceBasis k κ
@@ -186,10 +230,10 @@ theorem trdeg_eq_of_card {F E C : Type} [Field F] [Field E] [Field C] [Algebra F
   have h1 := ReciprocityTheory.MultiplicativeHeights.gauss_card_le_trdeg_add tb ub hu hmem
   have h2 := ReciprocityTheory.MultiplicativeHeights.gauss_trdeg_adjoin_le (E := E) tb
   obtain ⟨a, ha⟩ : ∃ a : ℕ, Algebra.trdeg F E = a :=
-    Cardinal.lt_aleph0.mp (lt_of_le_of_lt hE (Cardinal.nat_lt_aleph0 n))
+    Cardinal.lt_aleph0.mp (lt_of_le_of_lt hE Cardinal.natCast_lt_aleph0)
   rw [Cardinal.mk_fintype] at h2
   obtain ⟨b, hb⟩ : ∃ b : ℕ, Algebra.trdeg E (Algebra.adjoin E (Set.range tb)) = b :=
-    Cardinal.lt_aleph0.mp (lt_of_le_of_lt h2 (Cardinal.nat_lt_aleph0 _))
+    Cardinal.lt_aleph0.mp (lt_of_le_of_lt h2 Cardinal.natCast_lt_aleph0)
   rw [Cardinal.mk_fintype, hcard, ha, hb] at h1
   rw [ha] at hE
   rw [hb] at h2
@@ -226,7 +270,7 @@ theorem val_eq_zero_of_isUnit' {E : Type} [Field E] (v : AddValuation E (WithTop
 theorem scalarRatio_eq {Ω V : Type} [Field Ω] [AddCommGroup V] [Module Ω V] {f g : V} {a : Ω}
     (hg : g ≠ 0) (h : f = a • g) : ratio f g = a := by
   have he : ∃ b : Ω, f = b • g := ⟨a, h⟩
-  rw [ratio, dif_pos he]
+  rw [ratio, dite_eq_left he]
   exact smul_left_injective Ω hg (he.choose_spec.symm.trans h)
 
 theorem genericImage_base {Ω : Type} [Field Ω] {D N : ℕ} (j₀ : Fin (N + 1)) (x : Fin N → Ω)

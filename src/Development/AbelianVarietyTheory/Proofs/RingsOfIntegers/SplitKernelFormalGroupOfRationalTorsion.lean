@@ -1,15 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FiniteHeightFormalGroupUniformisedModel
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalGroupPointsOfIntegralChartSpec
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalModuleMatrixApplyPointsActionLaws
+module
+
+public import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+public import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.TwoChartSt
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesMemMapCOfCoeffMem
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosure
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsLawOfOfMatch
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.StarRingExtOfStar
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UniversalJetsReindexFin
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.UniversalStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FiniteHeightFormalGroupUniformisedModel
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalGroupLawCompMulNZero
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalGroupPointsOfIntegralChartSpec
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalModuleMatrixApplyPointsActionLaws
 import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalGroupLawCompMulNZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosure
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesMemMapCOfCoeffMem
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.DualLiftInjective
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+public import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -79,7 +126,7 @@ theorem exists_expansion {x : Fam G (Fin d)} (hu : IsUnivChart G d x) (C : Chart
   · simp only [hτ', map_one]
   · simp only [hτ', map_mul]
   · simp only [hτ', map_zero]
-  · simp only [hτ', map_add]
+  · simp only [hτ', map_add (f := _)]
   · simp only [hτ', AlgHom.commutes]
 
 theorem le_preimage_of_local (C : Chart G) {P P₀ : Type} [CommRing P] [IsLocalRing P] [Algebra V P] [CommRing P₀]
@@ -261,7 +308,7 @@ theorem mem_range_of_dense [IsLocalRing V] [IsNoetherianRing V] [IsAdicComplete 
       rw [this]
       exact Submodule.smul_mem_smul hc (hN r)
     | zero => intro r; simp
-    | add u v _ _ hu hv => intro r; rw [mul_add, map_add]; exact add_mem (hu r) (hv r)
+    | add u v _ _ hu hv => intro r; rw [mul_add, map_add (f := _)]; exact add_mem (hu r) (hv r)
     | smul a v _ hv => intro r; rw [smul_eq_mul, ← mul_assoc]; exact hv _
   have hle : N ≤ LinearMap.range (Algebra.linearMap V Ω) := by
     refine Submodule.le_of_le_smul_of_le_jacobson_bot (I := maximalIdeal V) hfg (maximalIdeal_le_jacobson _) ?_
@@ -270,7 +317,7 @@ theorem mem_range_of_dense [IsLocalRing V] [IsNoetherianRing V] [IsAdicComplete 
     obtain ⟨g', ⟨c, hc⟩, hg⟩ := H M g
     obtain ⟨u, hu, v, hv, e⟩ := Submodule.mem_sup.1 (hlift (Ideal.pow_le_pow_right (Nat.le_succ M) hg))
     have : χ g = χ g' + χ (1 * v) := by
-      rw [one_mul, show g = g' + (u + v) by rw [e]; ring, map_add, map_add, show χ u = 0 from hker hu, zero_add]
+      rw [one_mul, show g = g' + (u + v) by rw [e]; ring, map_add (f := _), map_add (f := _), show χ u = 0 from hker hu, zero_add]
     change χ g ∈ _
     rw [this]
     exact Submodule.add_mem_sup ⟨c, hc⟩ (hm v hv 1)

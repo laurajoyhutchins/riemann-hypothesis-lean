@@ -1,4 +1,47 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitRestrictionDegreeOne.Lemmas
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitRestrictionDegreeOne.Lemmas
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.OrbitPowerSeriesCoefficients.KillSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.DataDIV
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,12 +95,15 @@ theorem restricted_single_jet_equation (p : ℕ) [Fact p.Prime] (hn : nP D p = 1
           (X (z, a, b) : MvPowerSeries (Pl D × Fin N0 × Fin N1) ℂ_[p])
         else C (ep z) * X (z, a, b)) (be z) with hSdef
   have hS : constantCoeff S = 0 := by
+
     rw [hSdef, map_sum]
     apply Finset.sum_eq_zero
     intro y _
+
     rw [← coeff_zero_eq_constantCoeff_apply, map_smul, map_sum]
     rw [Finset.sum_eq_zero, smul_zero]
     intro a _
+
     rw [map_sum]
     apply Finset.sum_eq_zero
     intro b _
@@ -67,10 +113,13 @@ theorem restricted_single_jet_equation (p : ℕ) [Fact p.Prime] (hn : nP D p = 1
       subst (fun s : ZMod 2 => if s = 0 then
           (X ((0 : ZMod 1), a, b) : MvPowerSeries (ZMod 1 × Fin N0 × Fin N1) ℂ_[p])
         else C (ep z) * X ((0 : ZMod 1), a, b)) (be z) := by
+
     rw [hSdef, map_sum, Finset.sum_eq_single z]
-    · rw [map_smul, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_smul, map_sum]
       congr 1
       refine Finset.sum_congr rfl (fun a _ => ?_)
+
       rw [map_sum]
       refine Finset.sum_congr rfl (fun b _ => ?_)
       rw [killCompl_subst e (hσ z a b)]
@@ -80,9 +129,11 @@ theorem restricted_single_jet_equation (p : ℕ) [Fact p.Prime] (hn : nP D p = 1
       · rw [he, killCompl_X_one, if_pos rfl]
       · rw [map_mul, killCompl_C, he, killCompl_X_one, if_pos rfl]
     · intro y _ hy
+
       rw [map_smul, map_sum]
       rw [Finset.sum_eq_zero, smul_zero]
       intro a _
+
       rw [map_sum]
       apply Finset.sum_eq_zero
       intro b _

@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.IsotypicProjectorFixedMem
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsotypicStableUnderOperators
+module
+
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.ExistsHighestWeightVectorFindim
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.IsotypicProjectorFixedMem
+public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsotypicStableUnderOperators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,8 +75,8 @@ theorem weightSpace_disjoint [CharZero K] (E : GLOps n K V) {mu ka : Fin n → �
   · exact absurd (by exact_mod_cast sub_eq_zero.1 h0) ha
   · exact h0
 
-open Classical in
 
+open Classical in
 def lagrangeFactor (E : GLOps n K V) (mu nu : Fin n → ℤ) : Module.End K V :=
   if h : nu = mu then 1 else
     (((mu (Classical.choose (Function.ne_iff.1 h)) : K) - (nu (Classical.choose (Function.ne_iff.1 h)) : K))⁻¹) •
@@ -61,7 +108,7 @@ theorem lagrange_factor_fixes_weight [CharZero K] (E : GLOps n K V) (mu nu : Fin
 theorem lagrange_factor_kills_other (E : GLOps n K V) {mu nu : Fin n → ℤ} (h : nu ≠ mu) {x : V} (hx : x ∈ weightSp E nu) :
     lagrangeFactor E mu nu x = 0 := by
   unfold lagrangeFactor
-  rw [dif_neg h]
+  rw [dite_eq_right h]
   set a := Classical.choose (Function.ne_iff.1 h)
   simp only [LinearMap.smul_apply, LinearMap.sub_apply, Module.End.one_apply]
   rw [(mem_weightSpace_iff_diagonal E nu x).1 hx a, sub_self, smul_zero]
@@ -145,7 +192,7 @@ theorem sum_lagrange_projectors_eq_self (E : GLOps n K V) (t : Finset (Fin n →
       simp [this]
   · simp
   · intro y z hy hz
-    simp only [map_add, Finset.sum_add_distrib, hy, hz]
+    simp only [map_add (f := _), Finset.sum_add_distrib, hy, hz]
 
 theorem lagrange_projector_mem_weightSpace (E : GLOps n K V) (t : Finset (Fin n → ℤ))
     (ht : (⊤ : Submodule K V) ≤ ⨆ mu ∈ t, weightSp E mu) (mu : Fin n → ℤ) (x : V) :
@@ -164,7 +211,7 @@ theorem lagrange_projector_mem_weightSpace (E : GLOps n K V) (t : Finset (Fin n 
       simp [this]
   · simp
   · intro y z hy hz
-    rw [map_add]; exact Submodule.add_mem _ hy hz
+    rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
 
 theorem nonzero_weight_mem_support (E : GLOps n K V) (t : Finset (Fin n → ℤ))
     (ht : (⊤ : Submodule K V) ≤ ⨆ mu ∈ t, weightSp E mu) {ka : Fin n → ℤ} {y : V}
@@ -257,30 +304,7 @@ end
 theorem isotypic_subspaces_span_top (D : Formalism.BasicNotions.D7) (h2 : adm2 D) (K V : Type) [Field K] [CharZero K] [AddCommGroup V]
     [Module K V] [FiniteDimensional K V] (n : ℕ) (E : GLOps n K V) (hE : IsGLRep E) :
     (⨆ mu : Fin n → ℤ, isoSub E mu) = ⊤ := by
-  obtain ⟨hrel, _, hw⟩ := hE
-  have hst : ∀ a b, ∀ x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu), E a b x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu) := by
-    intro a b x hx
-    refine Submodule.iSup_induction (fun mu => isoSub E mu)
-      (motive := fun x => E a b x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu)) hx ?_ ?_ ?_
-    · intro mu y hy
-      exact Submodule.mem_iSup_of_mem mu (isotypic_stable_under_operators E mu a b hy)
-    · simp
-    · intro y z hy hz
-      rw [map_add]; exact Submodule.add_mem _ hy hz
-  obtain ⟨W', hc, hW'⟩ := h2 K V n E ⟨hrel, ‹_›, hw⟩ _ hst
-  obtain ⟨t, ht⟩ := CompleteLattice.IsCompactElement.exists_finset_of_le_iSup (Submodule K V)
-    ((Submodule.fg_iff_compact (⊤ : Submodule K V)).1 Module.Finite.fg_top)
-    (fun mu => weightSp E mu) (le_of_eq hw.symm)
-  have hbot : W' = ⊥ := by
-    by_contra hne
-    obtain ⟨mu, x, hxW, hx⟩ := exists_highest_weight_vector E hrel t ht W' hW' hne
-    have h1 : x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu) :=
-      Submodule.mem_iSup_of_mem mu (Submodule.subset_span ⟨1, Submonoid.one_mem _, x, hx, rfl⟩)
-    have h0 : x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu) ⊓ W' := ⟨h1, hxW⟩
-    rw [hc.inf_eq_bot] at h0
-    exact hx.1 (by simpa using h0)
-  have := hc.sup_eq_top
-  rwa [hbot, sup_bot_eq] at this
+  apply Formalism.MainNotions.G.GLWeightTheory.complete_reducibility_findim <;> assumption
 
 theorem isotypic_projector_fixed_mem (D : Formalism.BasicNotions.D7) (h2 : adm2 D) : IsotypicProjectorFixedMem := by
   intro K V _ _ _ _ _ n E hE lam e he Y hY
@@ -295,6 +319,6 @@ theorem isotypic_projector_fixed_mem (D : Formalism.BasicNotions.D7) (h2 : adm2 
     · rw [he.2 mu hm y hy]; exact Submodule.zero_mem _
   · simp
   · intro y z hy hz
-    rw [map_add]; exact Submodule.add_mem _ hy hz
+    rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
 
 end Formalism.MainNotions.G.GLWeightTheory

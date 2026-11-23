@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+module
+
+import Formalism.LocalToGlobal.CharacterGerms.RowTiePGerm
+public import Formalism.LocalToGlobal.CharacterGerms.IntSubst
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieAxes
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,24 +86,7 @@ theorem IntS.pow {f : MvPowerSeries τ C} (hf : IntS V f) (n : ℕ) : IntS V (f 
 theorem IntS.subst {σ : Type} [Finite σ] {a : σ → MvPowerSeries τ C}
     (ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0) (ha : ∀ s, IntS V (a s)) {f : MvPowerSeries σ C}
     (hf : IntS V f) : IntS V (MvPowerSeries.subst a f) := by
-  have hA : MvPowerSeries.HasSubst a := MvPowerSeries.hasSubst_of_constantCoeff_zero ha0
-  intro μ
-  rw [MvPowerSeries.coeff_subst hA]
-  have hterm : ∀ d : σ →₀ ℕ,
-      V.Ge 0 (MvPowerSeries.coeff d f • MvPowerSeries.coeff μ (d.prod fun s e => a s ^ e)) := by
-    intro d
-    have hp : IntS V (d.prod fun s e => a s ^ e) := by
-      show IntS V (∏ s ∈ d.support, a s ^ d s)
-      exact Finset.prod_induction _ (fun p => IntS V p) (fun _ _ hx hy => IntS.mul hx hy) IntS.one
-        (fun s _ => IntS.pow (ha s) _)
-    have h2 := (hf d).mul (hp μ)
-    simpa [smul_eq_mul] using h2
-  by_cases hfin : (Function.support fun d : σ →₀ ℕ =>
-      MvPowerSeries.coeff d f • MvPowerSeries.coeff μ (d.prod fun s e => a s ^ e)).Finite
-  · rw [finsum_eq_sum _ hfin]
-    exact VF.Ge.sum fun d _ => hterm d
-  · rw [finsum_of_infinite_support hfin]
-    simp [VF.Ge]
+  apply Formalism.L2.FormalSeriesBounds.PartialDerivEval.intS_subst <;> assumption
 
 theorem intS_ps {f : PowerSeries C} : IntS V f ↔ ∀ n, V.Ge 0 (PowerSeries.coeff n f) := by
   constructor
@@ -135,20 +168,6 @@ section SgSec
 variable [CharZero C] {V : VF C} {O : Type} [CommRing O] [StarRing O] {dd : ℕ} {d : ℕ} {I : Fin 2 → Type}
   [∀ g, Fintype (I g)] (Y : FBChart C V O dd) (p : PairData Y d I)
 
-theorem FBChart.raw_sg (v : Fin dd → C) : (Y.raw p).sg v = un1 (Y.sgP v) := by
-  ext μ
-  show -∑ i, v i * MvPowerSeries.coeff (μ.mapDomain (fun x : Fin dd => ((0 : Fin 2), x)) +
-      Finsupp.single ((1 : Fin 2), i) 1) Y.h =
-    MvPowerSeries.coeff (μ.mapDomain fun x : Fin dd => ((0 : Fin 1), x)) (Y.sgP v)
-  simp only [FBChart.sgP, map_neg, map_sum, MvPowerSeries.coeff_C_mul, coeff_eval_second_zero]
-  congr 1
-  refine Finset.sum_congr rfl fun i _ => ?_
-  congr 1
-  rw [MvPowerSeries.coeff_pderiv, Finsupp.mapDomain_notin_range]
-  · simp
-  · rintro ⟨x, hx⟩
-    simp at hx
-
 end SgSec
 
 section AddSec
@@ -167,72 +186,5 @@ theorem addOf_pts (F : Fin dd → PS C 2 dd) (j : Fin dd) :
   rfl
 
 end AddSec
-
-theorem addCvFB_of
-    (hG : ∀ (C : Type) [Field C] [CharZero C] (V : VF C) (O : Type) [CommRing O] [StarRing O] (dd : ℕ)
-      (Y : FBChart C V O dd), GermISt Y) : AddCvFBSt := by
-  intro C _ _ V O _ _ dd Y d _ I _ p γ γ' hγ hγ'
-  set ρ : Fin 2 × Fin dd → PowerSeries C := fun q => ![γ, γ'] q.1 q.2 with hρ
-  have hρ0 : ∀ q, MvPowerSeries.constantCoeff (ρ q) = 0 := by
-    rintro ⟨b, j⟩
-    fin_cases b
-    · exact (hγ j).1
-    · exact (hγ' j).1
-  have hρI : ∀ q, IntS V (ρ q) := by
-    rintro ⟨b, j⟩
-    fin_cases b
-    · exact intS_ps.2 (hγ j).2
-    · exact intS_ps.2 (hγ' j).2
-  have hρS := MvPowerSeries.hasSubst_of_constantCoeff_zero hρ0
-  set γ'' : Fin dd → PowerSeries C := fun j => MvPowerSeries.subst ρ (Y.B.G.F j) with hγ''
-  have hγ''0 : ∀ j, MvPowerSeries.constantCoeff (γ'' j) = 0 := fun j =>
-    constantCoeff_subst_zero hρ0 (Y.B.G.const j)
-  have hγ''I : IsCv V γ'' := fun j => ⟨hγ''0 j, intS_ps.1 (IntS.subst hρ0 hρI (Y.intF j))⟩
-
-  have hev : ∀ (a : Pt C 2 dd), (∀ j, MvPowerSeries.constantCoeff (a j) = 0) → ∀ f : PS C 1 dd,
-      MvPowerSeries.subst ρ (ev ![a] f) = alongCv (fun j => MvPowerSeries.subst ρ (a j)) (un1 f) := by
-    intro a ha f
-    unfold alongCv
-    rw [eval_single_eq_subst, MvPowerSeries.subst_comp_subst_apply
-      (MvPowerSeries.hasSubst_of_constantCoeff_zero fun q : Fin 1 × Fin dd => ha q.2) hρS,
-      subst_singlePointUncurry (fun j => constantCoeff_subst_zero hρ0 (ha j))]
-  have hp0 : (fun j => MvPowerSeries.subst ρ (pt C (n := 2) dd 0 j)) = γ := by
-    funext j
-    show MvPowerSeries.subst ρ (MvPowerSeries.X ((0 : Fin 2), j)) = γ j
-    rw [MvPowerSeries.subst_X hρS]
-    rfl
-  have hp1 : (fun j => MvPowerSeries.subst ρ (pt C (n := 2) dd 1 j)) = γ' := by
-    funext j
-    show MvPowerSeries.subst ρ (MvPowerSeries.X ((1 : Fin 2), j)) = γ' j
-    rw [MvPowerSeries.subst_X hρS]
-    rfl
-  have hpa : (fun j => MvPowerSeries.subst ρ (addOf Y.B.G.F (pt C (n := 2) dd 0) (pt C (n := 2) dd 1) j)) = γ'' := by
-    funext j
-    rw [addOf_pts]
-  have hc0 : ∀ j, MvPowerSeries.constantCoeff (pt C (n := 2) dd 0 j) = 0 := fun j => MvPowerSeries.constantCoeff_X _
-  have hc1 : ∀ j, MvPowerSeries.constantCoeff (pt C (n := 2) dd 1 j) = 0 := fun j => MvPowerSeries.constantCoeff_X _
-  have hca : ∀ j, MvPowerSeries.constantCoeff (addOf Y.B.G.F (pt C (n := 2) dd 0) (pt C (n := 2) dd 1) j) = 0 :=
-    fun j => by rw [addOf_pts]; exact Y.B.G.const j
-  refine ⟨γ'', hγ''I, ?_, ?_⟩
-  · intro i
-    have h := congrArg (MvPowerSeries.subst ρ) (Y.lg_add i)
-    rw [← MvPowerSeries.coe_substAlgHom hρS, map_add, MvPowerSeries.coe_substAlgHom hρS, hev _ hca, hev _ hc0,
-      hev _ hc1, hpa, hp0, hp1] at h
-    exact h
-  · intro v hv
-    have hsg0 : MvPowerSeries.constantCoeff ((Y.raw p).sg v) = 0 := (Y.raw p).constantCoeff_sg (Y.raw_axis0 p) v
-    refine ⟨?_, ?_⟩
-    · rw [map_sub, map_sub]
-      have e1 : PowerSeries.constantCoeff (alongCv γ'' ((Y.raw p).sg v)) = 0 := constantCoeff_subst_zero hγ''0 hsg0
-      have e2 : PowerSeries.constantCoeff (alongCv γ ((Y.raw p).sg v)) = 0 :=
-        constantCoeff_subst_zero (fun i => (hγ i).1) hsg0
-      have e3 : PowerSeries.constantCoeff (alongCv γ' ((Y.raw p).sg v)) = 0 :=
-        constantCoeff_subst_zero (fun i => (hγ' i).1) hsg0
-      rw [e1, e2, e3]
-      simp
-    · have h := IntS.subst hρ0 hρI (hG C V O dd Y v hv)
-      rw [← MvPowerSeries.coe_substAlgHom hρS, map_sub, map_sub, MvPowerSeries.coe_substAlgHom hρS, hev _ hca,
-        hev _ hc0, hev _ hc1, hpa, hp0, hp1, ← Y.raw_sg p v] at h
-      exact intS_ps.1 h
 
 end Formalism.L2.FormalSeriesBounds

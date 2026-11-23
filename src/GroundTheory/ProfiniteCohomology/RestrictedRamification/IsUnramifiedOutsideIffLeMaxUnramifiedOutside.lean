@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GaloisModules.Discrete
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Unramified
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.MaxUnramifiedOutside
+public import Mathlib.FieldTheory.KrullTopology
+public import GroundTheory.ProfiniteCohomology.GaloisModules.Discrete
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Ramification
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Unramified
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -14,16 +67,16 @@ section Basic
 variable (S : Set (HeightOneSpectrum (𝓞 F)))
 
 theorem le_maxUnramifiedOutside {E : IntermediateField F Ω} [FiniteDimensional F E]
-    (hE : IsUnramifiedOutside S E) : E ≤ maxUnramifiedOutside F Ω S :=
+    (hE : IsUnramifiedOutside S E) : E ≤ maxUnramifiedOutside (F := F) (Ω := Ω) S :=
   le_iSup_of_le E (le_iSup_of_le ‹_› (le_iSup_of_le hE le_rfl))
 
 theorem maxUnramifiedOutside_mono {S T : Set (HeightOneSpectrum (𝓞 F))} (h : S ⊆ T) :
-    maxUnramifiedOutside F Ω S ≤ maxUnramifiedOutside F Ω T :=
+    maxUnramifiedOutside (F := F) (Ω := Ω) S ≤ maxUnramifiedOutside (F := F) (Ω := Ω) T :=
   iSup_mono fun _ => iSup_mono fun _ => iSup_le fun hE =>
     le_iSup_of_le (fun v hv => hE v fun hs => hv (h hs)) le_rfl
 
 theorem maxUnramifiedOutside_eq_iSup :
-    maxUnramifiedOutside F Ω S =
+    maxUnramifiedOutside (F := F) (Ω := Ω) S =
       ⨆ E : {E : IntermediateField F Ω // FiniteDimensional F E ∧ IsUnramifiedOutside S E}, E.1 := by
   apply le_antisymm
   · exact iSup_le fun E => iSup_le fun hf => iSup_le fun hu => le_iSup_of_le ⟨E, hf, hu⟩ le_rfl
@@ -32,7 +85,7 @@ theorem maxUnramifiedOutside_eq_iSup :
 variable [NumberField F] [IsGalois F Ω]
 
 theorem mem_maxUnramifiedOutside_iff {x : Ω} :
-    x ∈ maxUnramifiedOutside F Ω S ↔
+    x ∈ maxUnramifiedOutside (F := F) (Ω := Ω) S ↔
       ∃ E : IntermediateField F Ω, FiniteDimensional F E ∧ IsUnramifiedOutside S E ∧ x ∈ E := by
   constructor
   · intro hx
@@ -52,7 +105,7 @@ theorem mem_maxUnramifiedOutside_iff {x : Ω} :
     exact le_maxUnramifiedOutside S hu hx
 
 theorem exists_subset_of_subset_maxUnramifiedOutside (s : Finset Ω)
-    (hs : ∀ x ∈ s, x ∈ maxUnramifiedOutside F Ω S) :
+    (hs : ∀ x ∈ s, x ∈ maxUnramifiedOutside (F := F) (Ω := Ω) S) :
     ∃ E : IntermediateField F Ω, FiniteDimensional F E ∧ IsUnramifiedOutside S E ∧
       ∀ x ∈ s, x ∈ E := by
   classical
@@ -68,7 +121,8 @@ theorem exists_subset_of_subset_maxUnramifiedOutside (s : Finset Ω)
     · exact le_sup_right (α := IntermediateField F Ω) (hs₂ x hx)
 
 theorem isUnramifiedOutside_iff_le_maxUnramifiedOutside {E : IntermediateField F Ω}
-    [FiniteDimensional F E] : IsUnramifiedOutside S E ↔ E ≤ maxUnramifiedOutside F Ω S := by
+    [FiniteDimensional F E] : IsUnramifiedOutside S E ↔
+      E ≤ maxUnramifiedOutside (F := F) (Ω := Ω) S := by
   refine ⟨le_maxUnramifiedOutside S, fun h => ?_⟩
   classical
   let b := Module.finBasis F E
@@ -80,6 +134,7 @@ theorem isUnramifiedOutside_iff_le_maxUnramifiedOutside {E : IntermediateField F
     intro x hx
     have hx' : x = ∑ i, b.repr ⟨x, hx⟩ i • (b i : Ω) := by
       have := congrArg E.val (b.sum_repr ⟨x, hx⟩)
+
       rw [map_sum] at this
       simp only [map_smul] at this
       exact this.symm
@@ -87,8 +142,8 @@ theorem isUnramifiedOutside_iff_le_maxUnramifiedOutside {E : IntermediateField F
     exact sum_mem fun i _ => E'.smul_mem (hE' _ (Finset.mem_image_of_mem _ (Finset.mem_univ i)))
   exact fun v hv => isUnramifiedIn_of_le hle v (hu v hv)
 
-instance isGalois_maxUnramifiedOutside : IsGalois F (maxUnramifiedOutside F Ω S) := by
-  have hN : Normal F (maxUnramifiedOutside F Ω S) := by
+instance isGalois_maxUnramifiedOutside : IsGalois F (maxUnramifiedOutside (F := F) (Ω := Ω) S) := by
+  have hN : Normal F (maxUnramifiedOutside (F := F) (Ω := Ω) S) := by
     rw [IntermediateField.normal_iff_forall_map_le']
     intro τ x hx
     obtain ⟨y, hy, rfl⟩ := (IntermediateField.mem_map _).1 hx
@@ -99,9 +154,10 @@ instance isGalois_maxUnramifiedOutside : IsGalois F (maxUnramifiedOutside F Ω S
   exact ⟨⟩
 
 theorem galUnramifiedOutside_isProfinite :
-    CompactSpace (galUnramifiedOutside F Ω S) ∧ T2Space (galUnramifiedOutside F Ω S) ∧
-      TotallyDisconnectedSpace (galUnramifiedOutside F Ω S) :=
-  galois_isProfinite F (maxUnramifiedOutside F Ω S)
+    CompactSpace (galUnramifiedOutside (F := F) (Ω := Ω) S) ∧
+      T2Space (galUnramifiedOutside (F := F) (Ω := Ω) S) ∧
+      TotallyDisconnectedSpace (galUnramifiedOutside (F := F) (Ω := Ω) S) :=
+  galois_isProfinite F (maxUnramifiedOutside (F := F) (Ω := Ω) S)
 
 end Basic
 
@@ -142,30 +198,6 @@ theorem isUnramifiedOutside_restrictScalars_iff {L : IntermediateField F Ω} [Fi
     exact (isUnramifiedAt_tower_iff (F := F) (L := L) Q).2 ⟨h2, h1⟩
 
 variable [IsGalois F Ω]
-
-theorem restrictScalars_maxUnramifiedOutside {L : IntermediateField F Ω} [FiniteDimensional F L]
-    (hL : L ≤ maxUnramifiedOutside F Ω S) :
-    (maxUnramifiedOutside L Ω (placesOver S)).restrictScalars F = maxUnramifiedOutside F Ω S := by
-  have := NumberField.of_module_finite F L
-  have hLu : IsUnramifiedOutside S L :=
-    (isUnramifiedOutside_iff_le_maxUnramifiedOutside S).2 hL
-  ext x
-  rw [IntermediateField.mem_restrictScalars]
-  constructor
-  · intro hx
-    obtain ⟨M, hf, hu, hxM⟩ := (mem_maxUnramifiedOutside_iff (placesOver S)).1 hx
-    have : FiniteDimensional F (M.restrictScalars F) := FiniteDimensional.trans F L M
-    exact le_maxUnramifiedOutside S
-      ((isUnramifiedOutside_restrictScalars_iff S hLu M).2 hu) hxM
-  · intro hx
-    obtain ⟨E, hf, hu, hxE⟩ := (mem_maxUnramifiedOutside_iff S).1 hx
-    let M : IntermediateField L Ω := IntermediateField.extendScalars (le_sup_left : L ≤ L ⊔ E)
-    have : FiniteDimensional F M := (inferInstance : FiniteDimensional F ↥(L ⊔ E))
-    have : FiniteDimensional L M := Module.Finite.of_restrictScalars_finite F L M
-    have hMu : IsUnramifiedOutside S (M.restrictScalars F) := hLu.sup hu
-    exact le_maxUnramifiedOutside (placesOver S)
-      ((isUnramifiedOutside_restrictScalars_iff S hLu M).1 hMu)
-      (le_sup_right (α := IntermediateField F Ω) hxE)
 
 end Relative
 

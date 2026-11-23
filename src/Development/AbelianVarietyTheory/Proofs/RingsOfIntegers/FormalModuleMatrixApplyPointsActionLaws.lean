@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpecStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MaximalIdealFormalPointsFormModuleStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MaximalIdealFormalPointsFormModuleStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpecStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -35,10 +78,6 @@ instance : Add (SP B m) :=
 instance : SMul O (SP B m) :=
   ⟨fun a x => ⟨compV (B.A.act a) x.val,
     ((GlobalTheory.T.maximal_ideal_formal_points_form_module V d O B m x.val x.val x.val x.sm x.sm x.sm).2.2.2.2.2.2.2 a a).1⟩⟩
-
-lemma val_zero : (0 : SP B m).val = 0 := rfl
-lemma val_add (x y : SP B m) : (x + y).val = addV B.G.F x.val y.val := rfl
-lemma val_smul (a : O) (x : SP B m) : (a • x).val = compV (B.A.act a) x.val := rfl
 
 lemma add_comm' (x y : SP B m) : x + y = y + x :=
   SP.ext (GlobalTheory.T.maximal_ideal_formal_points_form_module V d O B m x.val y.val x.val x.sm y.sm x.sm).2.1
@@ -108,8 +147,8 @@ lemma evV_const {n : ℕ} (x : Fin n → Pt V m d) (hx : ∀ b i, MvPowerSeries.
   rw [h]
   exact MvPowerSeries.constantCoeff_subst_eq_zero (MvPowerSeries.hasSubst_of_constantCoeff_zero ha) ha hf
 
-variable (B) in
 
+variable (B) in
 def evL {n : ℕ} (x : Fin n → Pt V m d) (hx : ∀ b, Sm (x b)) : SP B n →ₗ[O] SP B m where
   toFun a := ⟨fun i => evV x (a.val i), fun i => evV_sm x hx _ (a.sm i)⟩
   map_add' a b := by
@@ -178,6 +217,7 @@ lemma evV_matV {n : ℕ} (p : Matrix (Fin n) (Fin n) O) (x : Fin n → Pt V m d)
     matV_val B p fun j => (⟨x j, hx j⟩ : SP B m)
   rw [h1, h2]
   show (evL B x hx (∑ j, p b j • (⟨pt V (n := n) d j, sm_pt j⟩ : SP B n))).val i = _
+
   rw [map_sum]
   simp only [map_smul, he]
 

@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AutomorphicArithmetic.WeightCongruences.ProdNegOneZpow
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.NumberField.Norm
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -41,7 +95,7 @@ private theorem descend_mod {F Ω : Type*} [Field F] [CharZero F] [Field Ω] [Al
       rw [map_div₀, map_sub, map_one, map_natCast, h]
       field_simp
       ring
-    rw [← isIntegral_algebraMap_iff (algebraMap F Ω).injective, hmap]
+    rw [← isIntegral_algebraMap_iff (B := Ω), hmap]
     exact hz
 
 theorem UpperTheory.dvd_norm_sub_one_of_idempotent_interpolation_relNorm_one :
@@ -75,7 +129,7 @@ theorem UpperTheory.dvd_norm_sub_one_of_idempotent_interpolation_relNorm_one :
         algebraMap E Ω e * σ δ + (1 - algebraMap E Ω e) + n * σ y := by
       intro σ
       push_cast
-      rw [map_add, map_add, map_mul, map_sub, map_one, map_mul, map_natCast, hσe]
+      rw [map_add (f := _), map_add (f := _), map_mul, map_sub, map_one, map_mul, map_natCast, hσe]
     simp_rw [hσ]
     rw [hprod, hδΩ]
     ring
@@ -87,7 +141,7 @@ theorem UpperTheory.dvd_norm_sub_one_of_idempotent_interpolation_relNorm_one :
   simp only [one_mul, sub_self, add_zero, Finset.prod_const_one] at hprod₂
   have hQ : algebraMap ℚ Ω₂ (Algebra.norm ℚ (1 + n * w)) = 1 + n * z₂ := by
     rw [Algebra.norm_eq_prod_embeddings]
-    simp_rw [map_add, map_one, map_mul, map_natCast]
+    simp_rw [map_add (f := _), map_one, map_mul, map_natCast]
     exact hprod₂
   obtain ⟨w₂, hw₂, hw₂Q⟩ := descend_mod n _ z₂ hz₂ hQ
   obtain ⟨m, hm⟩ := IsIntegrallyClosed.isIntegral_iff.mp hw₂

@@ -1,7 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsFlagRatioTrdeg
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PFlagPivotAlgIndep
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PFlagPivotIdentity
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsFlagRatioTrdeg
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PFlagPivotAlgIndep
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PFlagPivotIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.Intersections.IsSmoothHermFubiniStudyO1
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -53,7 +106,14 @@ theorem ratio_indep (F : Type) [Field F] {ι E : Type} [Field E] [Algebra F E] [
     (g := (IsScalarTower.toAlgHom F (MvPolynomial ι F) Kp).comp (aeval c))
     ((IsFractionRing.injective (MvPolynomial ι F) Kp).comp (algebraicIndependent_iff_injective_aeval.1 hc))
   have hχX : ∀ j, χ (Xk j) = algebraMap (MvPolynomial ι F) Kp (c j) := fun j => by
-    simp [χ, Xk, IsFractionRing.lift_algebraMap]
+    change IsFractionRing.lift (g := ((IsScalarTower.toAlgHom F (MvPolynomial ι F) Kp).comp (aeval c)).toRingHom)
+      ((IsFractionRing.injective (MvPolynomial ι F) Kp).comp (algebraicIndependent_iff_injective_aeval.1 hc))
+      (algebraMap (MvPolynomial ι F) Kp (X j)) = _
+    exact (IsFractionRing.lift_algebraMap (A := MvPolynomial ι F) (K := Kp) (L := Kp)
+      (g := ((IsScalarTower.toAlgHom F (MvPolynomial ι F) Kp).comp (aeval c)).toRingHom)
+      ((IsFractionRing.injective (MvPolynomial ι F) Kp).comp
+        (algebraicIndependent_iff_injective_aeval.1 hc)) (X j)).trans
+      (congrArg (algebraMap (MvPolynomial ι F) Kp) (MvPolynomial.aeval_X (R := F) c j))
   have hχ : ∀ i, χ (d i) = Xk i := by
     intro i
     by_cases h : δ i = i
@@ -197,7 +257,7 @@ theorem flag_mem (F : Type) [Field F] {K : Type} [Field K] [Algebra F K] {m : �
     ext r s
     rw [Matrix.diagonal_mul]
     simp only [Matrix.submatrix_apply, pivotMatrix, Matrix.of_apply, U]
-    rw [dif_pos (by simp only [Fin.val_castLE]; have := r.2; have := j.2; omega)]
+    rw [dite_eq_left (by simp only [Fin.val_castLE]; have := r.2; have := j.2; omega)]
     rw [mul_div_cancel₀ _ (hL _)]
     rfl
   have hdet : flagMinor (pivotMatrix g) j S =

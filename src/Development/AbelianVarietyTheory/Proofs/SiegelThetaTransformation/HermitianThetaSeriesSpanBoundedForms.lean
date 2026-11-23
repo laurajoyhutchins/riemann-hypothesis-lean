@@ -1,18 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.GaussianKernelIntegrableOnThinSlab
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SetIntegralCompOfStable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsMemRowHighestTotalDegreeEqTwo
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsFamilyInvariantOfFockInner
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsFundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FiniteClsAndStab
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.GaussianKernelIntegrableOnThinSlab
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IntegrableTsumOfSummableIntegralNorm
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsOpenFrames
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.KernelIdentity
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LatticeOperatorCoefficients
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.MeasurePreservingMulLeft
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PeriodsLactSymplectic
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FiniteClsAndStab
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsFamilyInvariantOfFockInner
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LatticeOperatorCoefficients
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsFundamentalDomain
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.KernelIdentity
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SummableSetIntegralOfSummableNorm
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsOpenFrames
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IntegrableTsumOfSummableIntegralNorm
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SetIntegralCompOfStable
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SummableSetIntegralOfSummableNorm
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DetOfTriangular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical
@@ -57,16 +108,16 @@ theorem pnorm_of_gram (la : Wt X.Ψ r) (F : Frame X.Ψ r → ℂ) {x : Frame X.�
   unfold Data.pnorm
   simp [h]
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 theorem norm_bchar_le {Ψ : Finset (E →+* ℂ)} (la : Wt Ψ r) (C : ℝ) {b : Frame Ψ r}
     (hb : ∀ τ i, ‖b τ i i‖ ≤ C ∧ ‖(b τ i i)⁻¹‖ ≤ C) :
     ‖bchar la b‖ ≤ ∏ τ, ∏ i, C ^ (la τ i).natAbs := by
   unfold bchar
   rw [norm_prod]
-  refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun τ _ => ?_
+  refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun τ _ => ?_
   rw [norm_prod]
-  refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun i _ => ?_
+  refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun i _ => ?_
   obtain ⟨k, hk | hk⟩ := Int.eq_nat_or_neg (la τ i)
   · rw [hk, zpow_natCast, Int.natAbs_natCast, norm_pow]
     exact pow_le_pow_left₀ (norm_nonneg _) (hb τ i).1 _
@@ -114,8 +165,8 @@ theorem bound_on (la : Wt X.Ψ r) (S : Set (Frame X.Ψ r)) (K B : ℝ)
         (((γ : GL (Fin r) E) : Matrix (Fin r) (Fin r) E).map τ.1 * mat x τ)
     rw [Matrix.map_mul, Matrix.mul_assoc]
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem countable_gl : Countable (GL (Fin r) E) := by
   have : Countable E := Countable.of_equiv _ (Module.finBasis ℚ E).equivFun.toEquiv.symm
   have : Countable (Matrix (Fin r) (Fin r) E) := inferInstanceAs (Countable (Fin r → Fin r → E))
@@ -157,8 +208,8 @@ theorem unfold_frames (Δ : Subgroup (GL (Fin r) E)) (𝓛 : Set (Lt E r)) (hun 
     (fun a ha L => hf a ha L L.2) hs e (fun j L => t j L)
     (fun a ha L => hae.mono fun y hy => hk a ha L L.2 y hy)
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 theorem mp_restrict {Ψ : Finset (E →+* ℂ)} (S : Set (Frame Ψ r)) (hmeas : MeasurableSet S)
     (f : Frame Ψ r → Frame Ψ r) (h3 : MeasurePreserving f volume volume)
     (h4 : ∀ x, f x ∈ S ↔ x ∈ S) : MeasurePreserving f (volume.restrict S) (volume.restrict S) := by

@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,27 +55,37 @@ namespace GlobalTheory.PtExt
 attribute [local instance] cotOp cotCentral cotTower
 
 theorem cotSnd_cotPt_eq_dUnit (R : Type) [CommRing R] (D : Type) [CommRing D] [Bialgebra R D] (z : D) :
-    cotSnd R D (cotPt R D z) = dUnit R z := by
+    cotSnd R D (cotPt R D z) = dUnit (R := R) z := by
   change TrivSqZeroExt.snd (algebraMap R (TrivSqZeroExt R (Cot R D)) (Coalgebra.counit z) +
     TrivSqZeroExt.inr (AugCot.d (Bialgebra.counitAlgHom R D) z)) = _
   rw [TrivSqZeroExt.snd_add, TrivSqZeroExt.algebraMap_eq_inl, TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inr, zero_add]
 
-theorem crystallineCocycleCotangentValue_sub_of_coboundary : ∀ (R : Type) [CommRing R] (X : Over (Sp R)) (D : Type) [CommRing D] [Bialgebra R D] (y : Pt X D) (f f' : Z1 (O (dp0 R) (X.hom ≫ 𝟙 _))) (k : C0 (O (dp0 R) (X.hom ≫ 𝟙 _))), d0 _ k = f.1 - f'.1 → cotVal f y - cotVal f' y = dUnit R (show D from k (trivAt y)) := by
-  intro R _ X D _ _ y f f' k h
+theorem crystallineCocycleCotangentValue_sub_of_coboundary (R : Type) [CommRing R]
+    (X : Over (Sp R)) (D : Type) [CommRing D] [Bialgebra R D] (y : Pt X D)
+    (f f' : Z1 (O (dp0 R) (X.hom ≫ 𝟙 _))) (k : C0 (O (dp0 R) (X.hom ≫ 𝟙 _)))
+    (h : d0 _ k = f.1 - f'.1) :
+    cotVal f y - cotVal f' y = dUnit (R := R) (A := D) (k (trivAt y)) := by
   have hf : f - f' = ⟨d0 _ k, commAlgFunctorCoboundaryZero_mem_cocyclesOne _ k⟩ := Subtype.ext h.symm
-  let y' : Pt X (cotExt R D).C := spOver (cotPt R D) ≫ y
-  have h1 : (cotExt R D).val y'.left y'.w f - (cotExt R D).val y'.left y'.w f' =
-      (k (trivAt y') : (cotExt R D).C) -
-        (cotExt R D).i (k (Thick.triv (cotExt R D).B _ ((cotExt R D).red_w y'.w))) := by
+  let E := cotExt R D
+  let p : D →ₐ[R] E.C := cotPt R D
+  let y' : Pt X E.C := spOver p ≫ y
+  let k₀ : E.B := k (Thick.triv E.B _ (E.red_w y'.w))
+  let i : E.C := E.i k₀
+  have h1 : E.val y'.left y'.w f - E.val y'.left y'.w f' = k (trivAt y') - i := by
     rw [← map_sub, hf]
-    exact SqExt.tangentValue_coboundary _ _ _ k
-  have h2 : fv f D (cotExt R D).C (cotPt R D) y - fv f' D (cotExt R D).C (cotPt R D) y =
-      (show (cotExt R D).C from k (trivAt y')) - cotPt R D (show D from k (trivAt y)) :=
-    (congrFun (congrFun (congrFun h _) _) (trivMap (cotPt R D) y)).symm
-  have key : ∀ a a' b b' c i p : (cotExt R D).C, a - a' = c - i → b - b' = c - p →
-      (a - b) - (a' - b') = p - i := fun a a' b b' c i p e1 e2 ↦ by linear_combination e1 - e2
-  have h3 := congrArg (cotSnd R D) (key _ _ _ _ _ _ _ h1 h2)
-  rw [map_sub, map_sub (cotSnd R D) (cotPt R D _), cotSnd_cotPt_eq_dUnit] at h3
-  exact h3.trans (sub_zero _)
+    exact E.tangentValue_coboundary y'.left y'.w k
+  have h2 : fv f D E.C p y - fv f' D E.C p y = k (trivAt y') - p (k (trivAt y)) := by
+    let τ : trivAt y ⟶ trivAt y' := trivMap p y
+    have e := congrArg (fun g : C1 (O (dp0 R) (X.hom ≫ 𝟙 _)) ↦ g _ _ τ) h
+    change d0 _ k _ _ τ = _ at e
+    rw [amitsur_d0_apply, mp_O] at e
+    exact e.symm
+  have hi : cotSnd R D i = 0 := by
+    exact TrivSqZeroExt.snd_inl (M := Cot R D) k₀
+  change cotSnd R D (E.val y'.left y'.w f - fv f D E.C p y) -
+    cotSnd R D (E.val y'.left y'.w f' - fv f' D E.C p y) = _
+  rw [← map_sub, sub_sub_sub_comm, h1, h2, sub_sub_sub_cancel_left, map_sub]
+  rw [show p (k (trivAt y)) = cotPt R D (k (trivAt y)) from rfl,
+    cotSnd_cotPt_eq_dUnit, hi, sub_zero]
 
 end GlobalTheory.PtExt

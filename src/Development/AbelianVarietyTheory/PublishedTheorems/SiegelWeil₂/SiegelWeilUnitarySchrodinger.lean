@@ -1,8 +1,45 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Development.AbelianVarietyTheory.Definitions.Foundations.EisValueAtIffEisPoleLE
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittDecompSymplInclIsotropicInclAnisotropic
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AnalyticOnNhdTsumNpow
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,8 +66,8 @@ abbrev G : Type := GAd D.sp.cm.sig (Jst D n)
 
 abbrev GF : Subgroup (G D n) := AdelicU.ratPts D.sp.cm.sig (Jst D n)
 
-variable {D n} in
 
+variable {D n} in
 def mat (g : G D n) : Mx D (n + n) (n + n) := (AdelicU.matHom _ D.sp.cm.sig (Jst D n) g).1
 
 def upperHalf : Submodule (AE D) (Fin (n + n) → AE D) :=
@@ -50,17 +87,17 @@ abbrev trA (z : AE D) : AF D.host.F := Algebra.trace (AF D.host.F) (AE D) z
 
 def halfTr (z : AE D) : AF D.host.F := algebraMap D.host.F (AF D.host.F) (1 / 2) * trA z
 
-def inner (V : HSp D) (x y : Mx D V.rank n) : Mx D n n := adj x ⬝ (gA V ⬝ y)
+def inner (V : HSp D) (x y : Mx D V.rank n) : Mx D n n := adj x * (gA V * y)
 
 structure IsWeilSch (ψ : AddChar (AF D.host.F) ℂ) (χ : (AE D)ˣ →* Circle) (θ : InfFam D) (V : HSp D)
     (μ : Measure (Mx D V.rank n)) (ω : G D n →* Module.End ℂ (schwartzA θ V.rank n)) : Prop where
 
   levi : ∀ (g : G D n) (a : GL (Fin n) (AE D)), mat g = blk4 a.1 0 0 (adj (a⁻¹).1) → ∀ Φ x,
     (ω g Φ).1 x = (χ (Matrix.GeneralLinearGroup.det a) : ℂ) *
-      npow (absA D (Matrix.GeneralLinearGroup.det a)) ((V.rank : ℂ) / 2) * Φ.1 (x ⬝ a.1)
+      npow (absA D (Matrix.GeneralLinearGroup.det a)) ((V.rank : ℂ) / 2) * Φ.1 (x * a.1)
 
   unip : ∀ (g : G D n) (b : Mx D n n), mat g = blk4 1 b 0 1 → ∀ Φ x,
-    (ω g Φ).1 x = ψ (halfTr (Matrix.trace (b ⬝ inner V x x : Mx D n n))) * Φ.1 x
+    (ω g Φ).1 x = ψ (halfTr (Matrix.trace (b * inner V x x : Mx D n n))) * Φ.1 x
 
   weyl : ∀ g : G D n, mat g = blk4 0 1 (-1) 0 → ∀ Φ x,
     (ω g Φ).1 x = ∫ y, Φ.1 y * ψ (trA (Matrix.trace (inner V x y))) ∂μ
@@ -93,7 +130,7 @@ def sect (H : G D n → ℝ≥0) (Φ : schwartzA θ V.rank n) (s : ℂ) (g : G D
   npow (H g) (s - s0 V n) * (ω g Φ).1 0
 
 def theta (Φ : schwartzA θ V.rank n) (g : G D n) (h : GA D V) : ℂ :=
-  ∑' ξ : Matrix (Fin V.rank) (Fin n) D.host.E, (ω g Φ).1 (mt V h⁻¹ ⬝ (rat ξ : Mx D V.rank n))
+  ∑' ξ : Matrix (Fin V.rank) (Fin n) D.host.E, (ω g Φ).1 (mt V h⁻¹ * (rat ξ : Mx D V.rank n))
 
 def thetaInt (ν : Measure (GA D V)) (Φ : schwartzA θ V.rank n) (g : G D n) : ℂ :=
   ⨍ q, AutomorphicL2Unitary.descend (GQ V) (theta ω Φ g) q ∂autMeasure V ν

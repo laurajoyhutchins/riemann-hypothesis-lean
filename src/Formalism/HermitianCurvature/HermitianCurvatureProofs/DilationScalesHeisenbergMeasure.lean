@@ -1,8 +1,64 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointnessPolynomiallyBounded
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointnessPolynomiallyBounded
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal
@@ -308,6 +364,7 @@ theorem dilation_scales_heisenberg_measure : Formalism.FourierDecayAlt.B2.DilHei
   have hdet : LinearMap.det (dilL k r' t) ≠ 0 := by rw [det_dilL t ht0]; exact pow_ne_zero _ ht0
   rw [μHeis_eq, Measure.map_map hC hH, hcomp, ← Measure.map_map hH hL, Measure.map_linearMap_addHaar_eq_smul_addHaar _ hdet, Measure.map_smul,
     det_dilL t ht0, abs_of_pos (inv_pos.mpr (pow_pos ht _))]
+  exact hH.aemeasurable
 
 namespace B2x7
 
@@ -372,10 +429,12 @@ lemma dil_step (μ' : Measure (Mt k r')) [SigmaFinite μ'] (t : ℝ) (ht : 0 < t
   have h2 : (μ'.map (levM k r')).map (conjM (aDil k (1 + r') t)) =
       ENNReal.ofReal ((t ^ kap k r')⁻¹) • μ'.map (levM k r') := by
     rw [Measure.map_map hC hL, hlev, ← Measure.map_map hL hC', h', Measure.map_smul]
+    exact hL.aemeasurable
   have : SFinite (μHeis k r') := by rw [μHeis_eq]; infer_instance
   rw [Measure.map_map hC hM, conjM_mulM _ (aDil_inv_mul _ _ _ ht0), ← Measure.map_map hM (hC.prodMap hC),
     ← Measure.map_prod_map _ _ hC hC, dilation_scales_heisenberg_measure k r' t ht, h2, Measure.prod_smul_left, Measure.prod_smul_right,
     smul_smul, Measure.map_smul, ← ENNReal.ofReal_mul (by positivity), ← mul_inv, ← pow_add, ← modular_exponent_recursion k r']
+  exact hM.aemeasurable
 
 theorem dilJacRaw_of (hU : HaarUnique) (hN : ClosedN) (hR : NRecHaar) (hE : HaarNExists) : DilJacRaw := by
   intro k r
@@ -391,11 +450,9 @@ theorem dilJacRaw_of (hU : HaarUnique) (hN : ClosedN) (hR : NRecHaar) (hE : Haar
     have := sigmaFinite_of_haar hμ'
     obtain ⟨c, hc⟩ := hU k (1 + r') (Nset k (1 + r')) _ μN (hN k (1 + r')) (hR k r' μ' hμ') hμ.conc hμ.left hμ.finite_compact
     rw [hc, Measure.map_smul, dil_step μ' t ht (ih μ' hμ' t ht), smul_comm]
+    exact (conjM_cont _).measurable.aemeasurable
 
 theorem dilJacAll_of (h : DilJacRaw) : DilJacAll := fun k r _ _ _ _ _ _ D t ht => h k r D.μN D.haarN t ht
-
-theorem assembleDilJac : AssembleDilJac := fun hU hN hR _ hE _ _ _ =>
-  ⟨dilJacRaw_of hU hN hR hE, dilJacAll_of (dilJacRaw_of hU hN hR hE)⟩
 
 end B2x7
 

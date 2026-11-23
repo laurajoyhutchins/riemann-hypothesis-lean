@@ -1,10 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.SelfConjugateRowData
-import Formalism.LocalToGlobal.CharacterGerms.RowTieLab
-import Formalism.LocalToGlobal.CharacterGerms.CartesianBoundOnCurves
-import Formalism.LocalToGlobal.CharacterGerms.RestNonneg
-import Formalism.LocalToGlobal.Divisibility.Numbers
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsMulInvolutionAddOneMemPow
+module
+
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RealPlaceLabellingInertFrobeniusNotConj
+public import Formalism.LocalToGlobal.CharacterGerms.SelfConjugateRowData
+public import Formalism.LocalToGlobal.Divisibility.Numbers
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsMulInvolutionAddOneMemPow
+public import Formalism.LocalToGlobal.CharacterGerms.CartesianBoundOnCurves
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieLab
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.PID
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+
+@[expose] public section
 
 open scoped BigOperators
 open Classical NumberField IsDedekindDomain Formalism.L2.FormalSeriesBounds Formalism.IncomingBounds Formalism.L2.Pj Formalism.L2.DIV Formalism.BasicNotions
@@ -111,7 +162,7 @@ variable {C : Type} [Field C] (V : VF C) {O : Type} [CommRing O] {A : Type}
 def depthIdeal (em : A → O →+* C) (hi : ∀ a x, V.Ge 0 (em a x)) (w : ℝ) : Ideal O where
   carrier := {x | ∀ a, V.Ge w (em a x)}
   zero_mem' := fun a => by simpa using VF.Ge.zero w
-  add_mem' := fun hx hy a => by rw [map_add]; exact (hx a).add (hy a)
+  add_mem' := fun hx hy a => by rw [map_add (f := _)]; exact (hx a).add (hy a)
   smul_mem' := fun c x hx a => by rw [smul_eq_mul, map_mul]; exact (hi a c).mul_int (hx a)
 
 def resIdeal (em : O →+* C) (hi : ∀ x, V.Ge 0 (em x)) : Ideal O where
@@ -120,13 +171,17 @@ def resIdeal (em : O →+* C) (hi : ∀ x, V.Ge 0 (em x)) : Ideal O where
   add_mem' := fun hx hy => by simpa using mm_add hx hy
   smul_mem' := fun c x hx => by simpa using mm_mul (hi c) hx
 
-theorem resIdeal_prime (em : O →+* C) (hi : ∀ x, V.Ge 0 (em x)) : (resIdeal V em hi).IsPrime where
-  ne_top' := by
-    rw [Ideal.ne_top_iff_one]
+theorem resIdeal_prime (em : O →+* C) (hi : ∀ x, V.Ge 0 (em x)) : (resIdeal V em hi).IsPrime := by
+  refine Ideal.isPrime_iff.mpr ⟨?_, ?_⟩
+  · rw [Ideal.ne_top_iff_one]
     intro h
-    have h' : V.MM (em 1) := h
-    exact not_mm_one (V := V) (by simpa using h')
-  mem_or_mem' := fun {x y} h => mm_or (hi x) (hi y) (by have h' : V.MM (em (x * y)) := h; simpa using h')
+    change V.MM (em 1) at h
+    rw [map_one] at h
+    exact not_mm_one h
+  · intro x y h
+    change V.MM (em (x * y)) at h
+    rw [map_mul] at h
+    exact mm_or (hi x) (hi y) h
 
 theorem depthIdeal_pow (em : A → O →+* C) (hi : ∀ a x, V.Ge 0 (em a x)) (n : ℕ) :
     depthIdeal V em hi 1 ^ n ≤ depthIdeal V em hi n := by
@@ -222,7 +277,7 @@ theorem exists_root {E : Type} [Field E] [NumberField E] {C : Type} [Field C] [C
     have := ((hζ a 0).mono (by simp)).add (hi a (z (e * 0)))
     simpa using this
   have h3 : V.Ge n (em a (z (e * n) * s (z (e * n)) + 1)) := he n (hz1 _) a
-  rw [map_add, map_mul, map_one, ← hconj] at h3
+  rw [map_add (f := _), map_mul, map_one, ← hconj] at h3
   have h4 := (h3.add (hint.mul_int (hζ (a + hd) n))).add ((hi (a + hd) (z (e * n))).mul_int (hζ a n))
   convert h4 using 1
   ring
@@ -402,7 +457,7 @@ def ker (V : VF C) {R : Type} [CommRing R] (f : R →+* C) (hf : ∀ x, V.Ge 0 (
   carrier := {x | V.MM (f x)}
   add_mem' := fun {a b} ha hb => by
     show V.MM (f (a + b))
-    rw [map_add]; exact mm_add ha hb
+    rw [map_add (f := _)]; exact mm_add ha hb
   zero_mem' := by
     show V.MM (f 0)
     simp [VF.MM]
@@ -496,38 +551,7 @@ lemma pos_mod (N : NumDatum) (l : ℕ) (z : RPl N.R) (e : ℕ) :
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E}
 
 lemma inPsi_conj_iff (τ : E →+* ℂ) : InPsi H (ComplexEmbedding.conjugate τ) ↔ ¬ InPsi H τ := by
-  have hd : (H.d : ℂ) ≠ 0 := Nat.cast_ne_zero.2 H.d_prime.ne_zero
-  have h0 : H.rt0 ≠ 0 := fun h => by
-    have := H.sqrt_neg_disc_sq
-    rw [h] at this
-    exact hd (by linear_combination this)
-  have h1 : τ (H.rt : E) ^ 2 = -(H.d : ℂ) := by
-    have : ((H.rt : 𝓞 E) : E) ^ 2 = -(H.d : E) := by
-      have := congrArg (algebraMap (𝓞 E) E) H.rt_sq
-      simpa using this
-    rw [← map_pow, this, map_neg, map_natCast]
-  have h2 : ∀ w : ℂ, w ^ 2 = -(H.d : ℂ) → starRingEnd ℂ w = -w := by
-    intro w hw
-    have hre := congrArg Complex.re hw
-    have him := congrArg Complex.im hw
-    simp [pow_two] at hre him
-    have hdp : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-    have : w.re = 0 := by
-      by_contra hne
-      have : w.im = 0 := by
-        have : w.re * w.im = 0 := by linarith
-        exact (mul_eq_zero.1 this).resolve_left hne
-      rw [this] at hre
-      nlinarith [mul_self_nonneg w.re]
-    apply Complex.ext <;> simp [this]
-  unfold InPsi
-  rw [ComplexEmbedding.conjugate_coe_eq, h2 _ h1]
-  have h3 : τ (H.rt : E) = H.rt0 ∨ τ (H.rt : E) = -H.rt0 := sq_eq_sq_iff_eq_or_eq_neg.1 (h1.trans H.sqrt_neg_disc_sq.symm)
-  constructor
-  · intro a b
-    exact h0 (by linear_combination (-1/2 : ℂ) * a - (1/2 : ℂ) * b)
-  · intro a
-    rw [h3.resolve_left a, neg_neg]
+  apply GlobalTheory.InertLabelling.inPsi_conj_iff <;> assumption
 
 lemma embK_conj_bar {lv : Level H} (c : Coeff lv) (τ : E →+* ℂ) (x : 𝓞 E) :
     embK c τ (H.bar x) = embK c (ComplexEmbedding.conjugate τ) x := by

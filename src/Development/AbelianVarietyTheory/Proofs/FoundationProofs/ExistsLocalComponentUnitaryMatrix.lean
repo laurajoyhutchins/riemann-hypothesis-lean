@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HESmulRight
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIdeleGenerator
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HESmulRight
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleIntegralSeparatedComplete
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIdeleGenerator
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembership
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.InertSign
 open scoped BigOperators
@@ -60,7 +104,7 @@ theorem glue_mul {A : Type} [CommRing A] {n : ℕ} {f : A} (hf : f * f = f) {σ 
   have h1 : (1 - f) * (1 - f) = 1 - f := by linear_combination hf
   have h2 : (1 - f) * f = 0 := by linear_combination -hf
   have h3 : f * (1 - f) = 0 := by linear_combination -hf
-  simp only [add_mul, mul_add, Matrix.smul_mul, Matrix.mul_smul, smul_add, smul_smul, h, h1, h2, h3, hf, zero_smul,
+  simp only [add_mul, mul_add, Matrix.smul_mul, Matrix.mul_smul, smul_smul, h, h1, h2, h3, hf, zero_smul,
     Matrix.mul_one, add_zero, zero_add]
   rw [← add_smul, sub_add_cancel, one_smul]
 
@@ -70,7 +114,7 @@ theorem mulVec_inc_smul (D : D7) {n : ℕ} (H : Matrix (Fin n) (Fin n) (AE D)) (
   simp only [Matrix.mulVec, dotProduct, Pi.smul_apply, smul_eq_mul, map_mul, map_natCast, Finset.mul_sum]
   exact Finset.sum_congr rfl fun j _ => by ring
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_local_component : ∀ (D : D7) (n q : ℕ), q.Prime → ∀ s : Matrix (Fin n) (Fin n) D.host.E, s * cT D s = 1 → ∃ g : GA D n, (∀ p : ℕ, p.Prime → p ≠ q → TrivAt D p (g : GL (Fin n) (AE D))) ∧ ∀ (h : GA D n) (B C : Lat D n), Moves D (h : GL (Fin n) (AE D)) B → EqAway D q B C → SAt D q s B C → Moves D ((g * h : GA D n) : GL (Fin n) (AE D)) C := by
   intro D n q hq s hs
@@ -88,7 +132,7 @@ theorem exists_local_component : ∀ (D : D7) (n q : ℕ), q.Prime → ∀ s : M
       ext i j
       change sgA D ((1 - f) * inc D (s j i) + f * (1 : Matrix (Fin n) (Fin n) (AE D)) j i) =
         (1 - f) * inc D (D.host.conj (s j i)) + f * (1 : Matrix (Fin n) (Fin n) (AE D)) i j
-      rw [map_add, map_mul, map_mul, map_sub, map_one, hsg, PtsMem.sgA_inc]
+      rw [map_add (f := _), map_mul, map_mul, map_sub, map_one, hsg, PtsMem.sgA_inc]
       by_cases hij : i = j
       · subst hij; simp
       · simp [Matrix.one_apply_ne hij, Matrix.one_apply_ne (Ne.symm hij)]
@@ -159,9 +203,8 @@ theorem exists_local_component : ∀ (D : D7) (n q : ℕ), q.Prime → ∀ s : M
       push_cast at huv' c2
       have := add_mem (zsmul_mem c1 u) (zsmul_mem c2 v)
       convert this using 1
-      funext j
-      simp only [Pi.add_apply, Pi.smul_apply]
-      simp only [zsmul_eq_mul, smul_eq_mul]
+      ext j
+      simp only [← Int.cast_smul_eq_zsmul D.host.E, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
       linear_combination (-x j) * huv'
 
 end GlobalTheory.LocalComponent

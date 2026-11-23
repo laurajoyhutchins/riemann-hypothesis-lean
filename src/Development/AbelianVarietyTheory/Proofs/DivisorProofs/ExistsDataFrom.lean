@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
-import Development.AbelianVarietyTheory.Definitions.Divisors.MinSt5OfMinSt4
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMember
-import Development.AbelianVarietyTheory.Definitions.Divisors.TateProductRigidificationTrivial
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TautBaseChangeTripleLiftLeft
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RefinesPolarisedDataBaseChangeSymmetric
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TautBaseChangeTripleLiftLeft
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RefinesPolarisedDataBaseChangeSymmetric
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.GeneratorPullback.PullAlong
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LawsProved
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsMinAt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,8 +82,6 @@ theorem pullSt : ∃ (hL : (T.M.L.pull (cm T iw).F).IsLB) (hr : ((cm T iw).rigPu
 abbrev Mp : RigLB (Bp T iw) := (cm T iw).rigLB T.M (pullSt T iw).fst (pullSt T iw).snd.fst
 
 abbrev cubP : CubicalStr (Bp T iw) (Mp T iw) := CubePf.cubical (cm T iw) T.M T.cub _ _
-
-example : (Mp T iw).L = T.M.L.pull (pullback.fst T.B.hom (spMap iw)) := rfl
 
 end Base
 
@@ -101,8 +142,8 @@ section Charts
 variable {o W V : Type} [CommRing o] [CommRing W] [IsLocalRing W] [CommRing V] [IsDomain V] (T : TautBase o W)
   (iw : W →+* V)
 
-open Classical in
 
+open Classical in
 def Jd {Tt : Over (Sp V)} (z : Tt.left) (J : (Tt.left ⟶ (Bp T iw).left) → PUnit → T.M.L.ι) :
     (Tt.left ⟶ T.B.left) → T.M.L.ι := fun χ =>
   if hχ : χ ≫ T.B.hom = Tt.hom ≫ spMap iw then J ((cart T iw).1.lift χ Tt.hom hχ) PUnit.unit
@@ -113,7 +154,7 @@ theorem Jd_eq {Tt : Over (Sp V)} (z : Tt.left) (J : (Tt.left ⟶ (Bp T iw).left)
     Jd T iw z J (ψ ≫ pullback.fst T.B.hom (spMap iw)) = J ψ PUnit.unit := by
   have hχ : (ψ ≫ pullback.fst T.B.hom (spMap iw)) ≫ T.B.hom = Tt.hom ≫ spMap iw := by
     rw [Category.assoc, (cart T iw).1.w, ← Category.assoc, hψ]
-  rw [Jd, dif_pos hχ]
+  rw [Jd, dite_eq_left hχ]
   congr 1
   exact (cart T iw).1.hom_ext ((cart T iw).1.lift_fst _ _ _) (((cart T iw).1.lift_snd _ _ _).trans hψ.symm)
 
@@ -122,12 +163,12 @@ theorem Jd_good {Tt : Over (Sp V)} {z : Tt.left} {J : (Tt.left ⟶ (Bp T iw).lef
   intro χ
   by_cases hχ : χ ≫ T.B.hom = Tt.hom ≫ spMap iw
   · have := mem_pull.1 (hJ ((cart T iw).1.lift χ Tt.hom hχ))
-    rw [Jd, dif_pos hχ]
+    rw [Jd, dite_eq_left hχ]
     have h2 : ((cart T iw).1.lift χ Tt.hom hχ ≫ pullback.fst T.B.hom (spMap iw)) z ∈
         T.M.L.U (J ((cart T iw).1.lift χ Tt.hom hχ) PUnit.unit) := this
     rw [(cart T iw).1.lift_fst χ Tt.hom hχ] at h2
     exact h2
-  · rw [Jd, dif_neg hχ]
+  · rw [Jd, dite_eq_right hχ]
     exact (exists_chart T.M.isLB (χ z)).choose_spec
 
 theorem val_pullAlong {Tt : Over (Sp V)} {Y₀ Y : Scheme.{0}} {K : Type} [Fintype K]
@@ -238,7 +279,7 @@ theorem kU_symm (hε : ∀ k a b, ε k a b = ε k b a) (a b : Fin T.r → ℤ) :
   simp only [kU, hε _ a b]
 
 theorem kU_add (a a' b : Fin T.r → ℤ) : kU T s hs ε n (a + a') b = kU T s hs ε n a b * kU T s hs ε n a' b := by
-  simp only [kU, ← Finset.prod_mul_distrib, ← zpow_add, map_add, LinearMap.add_apply, mul_add]
+  simp only [kU, ← Finset.prod_mul_distrib, ← zpow_add, map_add (f := _), LinearMap.add_apply, mul_add]
 
 def tauF (a b : Fin T.r → ℤ) :
     LB.Gen (LB.LinComb (Mp T iw).L (lamPts (cK T iw ((n : ℤ) • a)) (cK T iw ((n : ℤ) • b))) negε) :=

@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsSymm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsSymm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct ContDiff
@@ -58,7 +100,7 @@ theorem der_exists {A B C : Type} [CommRing A] [CommRing B] [CommRing C] [Algebr
     ext a
     simp only [RingHom.comp_apply, hΨ, hπ, hψ1]
   have hf' : ∀ b, (Ψ b).fst = φ b := fun b => by rw [← hf, RingHom.comp_apply, hπ]
-  refine ⟨fun b => (Ψ b).snd, fun a b => by simp only [map_add, TrivSqZeroExt.snd_add],
+  refine ⟨fun b => (Ψ b).snd, fun a b => by simp only [map_add (f := _), TrivSqZeroExt.snd_add],
     fun a b => ?_, fun a => by simp only [hΨ, hψ2]⟩
   simp only [map_mul, DualNumber.snd_mul, hf']
   ring
@@ -104,13 +146,13 @@ theorem exists_locDer : ∀ (R : Type) [CommRing R] (Y X : Scheme.{0}) (q : Y �
     intro f
     haveI := hW.isLocalization_basicOpen f
     refine der_exists f (m.app (X.basicOpen f)).hom
-      (fun a => resG Y (pre_le m (X.basicOpen_le f)) (d₀ a)) (fun a b => by simp only [hadd, map_add])
+      (fun a => resG Y (pre_le m (X.basicOpen_le f)) (d₀ a)) (fun a b => by simp only [hadd, map_add (f := _)])
       (fun a b => ?_)
     have e : ∀ a, (m.app (X.basicOpen f)).hom (algebraMap Γ(X, W₀) Γ(X, X.basicOpen f) a) =
         resG Y (pre_le m (X.basicOpen_le f)) ((m.app W₀).hom a) :=
       fun a => app_res m (X.basicOpen_le f) a
     rw [e, e]
-    simp only [hmul, map_add, map_mul]
+    simp only [hmul, map_add (f := _), map_mul]
   choose δ δadd δmul δres using H
   have compat : ∀ (f g : Γ(X, W₀)) (k : X.basicOpen g ≤ X.basicOpen f) (s : Γ(X, X.basicOpen f)),
       resG Y (pre_le m k) (δ f s) = δ g (resG X k s) := by
@@ -119,7 +161,7 @@ theorem exists_locDer : ∀ (R : Type) [CommRing R] (Y X : Scheme.{0}) (q : Y �
     refine der_unique f ((m.app (X.basicOpen g)).hom.comp (resG X k))
       (fun s => resG Y (pre_le m k) (δ f s)) (fun s => δ g (resG X k s)) (fun a b => ?_)
       (fun a b => ?_) (fun a => ?_) s
-    · simp only [δmul, map_add, map_mul, RingHom.comp_apply, app_res m k]
+    · simp only [δmul, map_add (f := _), map_mul, RingHom.comp_apply, app_res m k]
     · simp only [δmul, map_mul, RingHom.comp_apply]
     · change resG Y (pre_le m k) (δ f (resG X (X.basicOpen_le f) a)) =
         δ g (resG X k (resG X (X.basicOpen_le f) a))
@@ -149,11 +191,11 @@ theorem exists_locDer : ∀ (R : Type) [CommRing R] (Y X : Scheme.{0}) (q : Y �
   · intro W h a b
     simp only [dif_pos h]
     refine sep m hW h _ _ (fun f k => ?_)
-    rw [map_add, ht W h _ f k, ht W h _ f k, ht W h _ f k, map_add, δadd]
+    rw [map_add (f := _), ht W h _ f k, ht W h _ f k, ht W h _ f k, map_add (f := _), δadd]
   · intro W h a b
     simp only [dif_pos h]
     refine sep m hW h _ _ (fun f k => ?_)
-    rw [map_add, map_mul, map_mul, ht W h _ f k, ht W h _ f k, ht W h _ f k, map_mul, δmul, app_res m k, app_res m k]
+    rw [map_add (f := _), map_mul, map_mul, ht W h _ f k, ht W h _ f k, ht W h _ f k, map_mul, δmul, app_res m k, app_res m k]
   · intro W W' h' h a
     simp only [dif_pos h, dif_pos (h'.trans h)]
     refine sep m hW (h'.trans h) _ _ (fun f k => ?_)

@@ -1,19 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.NefRR
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
-import Development.AutomorphicSpectrum.Statements.TowerExistence.GoodTowerExistsX
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.VolumeInputs
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.OverLaUnique
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TowerOriginComponentBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TowerWeightOfZeroStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FullIntersectionHeightBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericFrameComponentBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ModelSmallSectionsMulStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CompLawsTowerBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UniformNormTowerBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WeightZeroSectionMembershipStatement
+module
+
+public import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.NefRR
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HeckeSectionsIsotropicCommutatorPairingPower
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GeoRead
+import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyCuspFrame
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CompLawsTowerBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FullIntersectionHeightBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericFrameComponentBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ModelSmallSectionsMulStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TowerOriginComponentBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TowerWeightOfZeroStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UniformNormTowerBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WeightZeroSectionMembershipStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Filter Topology
 open Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Rec GlobalTheory.CompanionTheory.Ar.Plug
@@ -191,14 +230,17 @@ theorem card_le_rank (G : Top.Given) {r : ℕ} {U : ∀ σ : c.F →+* ℂ, Unf 
     refine (Fintype.linearIndependent_iff.1 hli) a (hinj v _ fun i => ?_)
     have h1 : ∑ j, a j • g j i = 0 := by
       have := congrArg (fun w => ((w i : GlobalTheory.AllWt.cuspOn U Z (GlobalTheory.AllWt.wtOf Dw v 0)) : Rul Xo c)) ha
-      simpa [Gm] using this
+      set_option synthInstance.maxHeartbeats 100000 in
+        simpa [Gm] using this
     have h2 : (∑ j, a j • f' j) * f i = ∑ j, a j • (f' j * f i) := by
       rw [Finset.sum_mul]
       exact Finset.sum_congr rfl fun j _ => smul_mul_assoc _ _ _
     have h3 := congrArg (evCAlg h hL.genT Z) h1
-    rw [map_zero, map_sum] at h3
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_zero, map_sum] at h3
     show trHom Rd v _ = 0
-    rw [h2, map_sum, ← h3]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [h2, map_sum, ← h3]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_zsmul, map_zsmul]
     exact congrArg (a j • ·) (hgev j i).symm
@@ -236,7 +278,7 @@ theorem vol_mul_flagDeg_le_growthOn : GlobalTheory.CompanionTheory.Ar.Pub.NefRR 
 
 end GlobalTheory.CompanionTheory.Ar.Plug.IndependentCountBound
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem _root_.GlobalTheory.CompanionTheory.Relay.uniform_norm_height_count : GlobalTheory.CompanionTheory.Ar.Pub.NefRR → Top.Given → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (r : ℕ) (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r) (h : GenFrEx Xo c) (e : Comp Xo c → Rul Xo c), CompLaws U h e → ∀ x : ℝ, (∀ σ, GoodEmb c σ → ∀ k (τ : E →+* ℂ), ‖τ ((U σ).X k).ξ0‖ = x) → ∀ (Y : Model Xo c (algebraMap (𝓞 c.F) c.F)) [DecidableEq (CMType H)] (T : Top.RootTower (CMType H) (Dw.p + Dw.q)) (o : Top.GoodOrigin Y T) (κ : Comp Xo c ≃ T.Comp) (II : IntersectionSystem), CompOf o.toTowerOrigin κ → IsFullIntersectionSystem II → T.Proportional → T.T1 II → ∀ (Z : Comp Xo c) (u : GlobalTheory.AllWt.Weight Dw), (∀ τ, StrictAnti (u τ)) → ENNReal.ofReal (T.vol (κ Z) * Top.flagDeg (reW u)) ≤ GlobalTheory.CompHt.growthOn U Z (GlobalTheory.AllWt.wtOf Dw u 0) :=
   GlobalTheory.CompanionTheory.Ar.Plug.IndependentCountBound.vol_mul_flagDeg_le_growthOn

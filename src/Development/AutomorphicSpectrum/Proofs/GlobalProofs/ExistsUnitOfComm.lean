@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FiniteDimensionalOfSlices
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 open Formalism.UG (cT)
@@ -228,12 +275,12 @@ namespace GlobalTheory.CompanionTheory.LeviGen
 variable {A : Type} [CommRing A] {s : A →+* A} {n r : ℕ} {J : Matrix (Fin n) (Fin n) A}
   {X Y : Matrix (Fin n) (Fin r) A}
 
-variable (s J X Y) in
 
+variable (s J X Y) in
 def prj (d : Fin r → A) : Matrix (Fin n) (Fin n) A := prX s J X Y d + prY s J X Y d
 
-variable (s J X Y) in
 
+variable (s J X Y) in
 def IsComm (G : Matrix (Fin n) (Fin n) A) (d : Fin r → A) : Prop :=
   G * prX s J X Y d = prX s J X Y d * G ∧ G * prY s J X Y d = prY s J X Y d * G
 
@@ -261,9 +308,6 @@ theorem IsComm.mul (hxy : cT s X * J * Y = 1) (hyx : cT s Y * J * X = 1) {d e : 
 
 theorem IsComm.comm_prj {d : Fin r → A} (hd : IsComm s J X Y G d) : G * prj s J X Y d = prj s J X Y d * G := by
   rw [prj, Matrix.mul_add, Matrix.add_mul, hd.1, hd.2]
-
-theorem IsComm.inv {H : Matrix (Fin n) (Fin n) A} (hGH : G * H = 1) (hHG : H * G = 1) {d : Fin r → A}
-    (hd : IsComm s J X Y G d) : IsComm s J X Y H d := ⟨comm_inv hd.1 hGH hHG, comm_inv hd.2 hGH hHG⟩
 
 variable (hxx : cT s X * J * X = 0) (hyy : cT s Y * J * Y = 0) (hxy : cT s X * J * Y = 1)
   (hyx : cT s Y * J * X = 1)

@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VanishingH1InvertingMorphisms
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocalizationOfData
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitMpOmjExtIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CechDeRhamCoefMapOneFormsRestrictAlongFunctor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry KaehlerDifferential GlobalTheory.CatCoh GlobalTheory.CechDR
 
 set_option autoImplicit false
@@ -23,7 +67,7 @@ theorem pullHyp2_restrict_injective {R : Type} [CommRing R] {C : Type} [Category
     (hf : Function.Surjective (pullGlob1 (CoefMap.restrict F G)))
     (hs : ∀ (T : C) (x : Om R (F.obj T) 2), (∀ t (u : T ⟶ G.obj t), pOm F 2 u x = 0) → x = 0) :
     Function.Injective (pullHyp2 (CoefMap.restrict F G)) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨c, rfl⟩ := Hyp2.mk_surjective F x
   rw [pullHyp2_mk, Hyp2.mk_eq_zero] at hx
@@ -70,7 +114,7 @@ theorem pullHyp2_restrict_injective {R : Type} [CommRing R] {C : Type} [Category
   obtain ⟨f₁, hf₁⟩ : ∃ f₁ : C1 F, ∀ T T' φ, f₁ T T' φ = f T T' φ + g.1 T T' φ := ⟨_, fun _ _ _ ↦ rfl⟩
   have hf1' : ∀ ⦃T T' T'' : C⦄ (φ : T ⟶ T') (ψ : T' ⟶ T''),
       mp F ψ (f₁ T T' φ) - f₁ T T'' (φ ≫ ψ) + f₁ T' T'' ψ = c.1.1 T T' T'' φ ψ := fun T T' T'' φ ψ ↦ by
-    rw [hf₁, hf₁, hf₁, map_add]
+    rw [hf₁, hf₁, hf₁, map_add (f := _)]
     linear_combination hf1 φ ψ - Z1.comp g φ ψ
 
   obtain ⟨a₁, ha₁⟩ : ∃ a₁ : A1 F, ∀ T T' φ, a₁ T T' φ = c.1.2.1 T T' φ + D R _ (f₁ T T' φ) :=
@@ -78,8 +122,8 @@ theorem pullHyp2_restrict_injective {R : Type} [CommRing R] {C : Type} [Category
   have hac : ∀ ⦃T T' T'' : C⦄ (φ : T ⟶ T') (ψ : T' ⟶ T''),
       a₁ T T'' (φ ≫ ψ) = p1 F ψ (a₁ T T' φ) + a₁ T' T'' ψ := fun T T' T'' φ ψ ↦ by
     have e := cechDeRhamTotalCocyclesTwo.one c φ ψ
-    rw [← hf1' φ ψ, map_add, map_sub] at e
-    rw [ha₁, ha₁, ha₁, map_add, p1_D, e]
+    rw [← hf1' φ ψ, map_add (f := _), map_sub] at e
+    rw [ha₁, ha₁, ha₁, map_add (f := _), p1_D, e]
     abel
   obtain ⟨θ'', hθ''⟩ : ∃ θ'' : ∀ t, Ω[F.obj (G.obj t)⁄R], ∀ t, θ'' t = θ' t + D R _ (h' t) :=
     ⟨_, fun _ ↦ rfl⟩
@@ -87,9 +131,9 @@ theorem pullHyp2_restrict_injective {R : Type} [CommRing R] {C : Type} [Category
     fun t t' a ↦ by
       have e := ha a
       rw [hfu a] at e
-      simp only [map_add, map_sub] at e
+      simp only [map_add (f := _), map_sub] at e
       rw [ha₁, hθ'', hθ'', hf₁]
-      simp only [map_add, p1_D]
+      simp only [map_add (f := _), p1_D]
       linear_combination (norm := abel1) -e
   obtain ⟨θ, hθ⟩ := hc a₁ hac θ'' hres
 
@@ -112,11 +156,11 @@ theorem pullHyp2_restrict_injective {R : Type} [CommRing R] {C : Type} [Category
     have e1 := cechDeRhamTotalCocyclesTwo.two c φ
     have e2 := congrArg (dOne R _) (hθ1 φ)
     rw [ha₁] at e2
-    simp only [map_add, map_sub, dOne_D, add_zero] at e2
+    simp only [map_add (f := _), map_sub, dOne_D, add_zero] at e2
     rw [hη₂, hη₂, map_sub, pOm_dOne]
     linear_combination (norm := abel1) e1 + e2
   have hη2G : ∀ t, η₂ (G.obj t) = 0 := fun t ↦ by
-    rw [hη₂, hθ1G, hθ'', map_add, dOne_D, add_zero, ← hη t, sub_self]
+    rw [hη₂, hθ1G, hθ'', map_add (f := _), dOne_D, add_zero, ← hη t, sub_self]
   have hη0 : ∀ T, η₂ T = 0 := fun T ↦ hs T _ fun t u ↦ by rw [← hη2 u, hη2G]
   refine Hyp2.mk_eq_zero.2 ⟨(f₁, θ₁), Tot2.ext (fun T T' T'' φ ψ ↦ ?_) (fun T T' φ ↦ ?_) fun T ↦ ?_⟩
   · exact hf1' φ ψ

@@ -1,19 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.QEqColPer
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChainDownEqLiftAlongPath
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselPeriodCorankOneLessEqTopBesselLevelPeriod
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LocalVectorsRowAndColumnPaths
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FlippedFiniteTensorOfRepresentingOppositePath
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselPeriodCorankConvergesColumn
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GridVertexMeasureEqOfSameNormalisation
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsThetaFunctionFockVectorRightwardArrow
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ErrorExponentStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselColumnScalarFunctionContinuousLeftInvariant
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ColconSplitFamAppend
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LiftTOppTens
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevJGridSuccIndep
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIteratedInvariantIntegralLinearAndCongr
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsClosedOfLocallyCompactSpace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsRealFam
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RangeSndRel
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ErrorExponentStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsClosedOfLocallyCompactSpace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPureTensorO
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLowestKTypeFockMapThetaVectors
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsClosedNFlag
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselPeriodCorankOneLessEqTopBesselLevelPeriod
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChainDownEqLiftAlongPath
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FlippedFiniteTensorOfRepresentingOppositePath
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GridVertexMeasureEqOfSameNormalisation
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevJGridSuccIndep
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LocalVectorsRowAndColumnPaths
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.QEqColPer
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TopoAF
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.UnfoldAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,17 +106,21 @@ theorem per_indep {ρ : ℕ} (B : GlobalTheory.Unf.BesLev D ρ) {ψ : AddChar (A
   have hI : IsIsoSub B.V B.d.e := ⟨GlobalTheory.Core.Mi.PerCmp.hyp_linIndep B.d, by rw [cT_sig]; exact B.d.ee⟩
   obtain rfl : ν = B.vN.ν := unitN_unique hI hu B.vN.unit
   subst hA
-  rw [GlobalTheory.Core.Mi.PerCmp.besPer_domN B.d B.o B.ζ hψ 1 _ _ B.vN.ν B.vN.unit.1 hu.2.1 B.vN.unit.2.1 φ f hf]
-  exact GlobalTheory.Core.Mi.PerCmp.besPer_domA B hψ h2 φ f hφ hf
+  exact (GlobalTheory.Core.Mi.PerCmp.besPer_domN B.d B.o B.ζ hψ 1 _ _ B.vN.ν B.vN.unit.1 hu.2.1 B.vN.unit.2.1 φ f hf).trans
+    (GlobalTheory.Core.Mi.PerCmp.besPer_domA B hψ h2 φ f hφ hf)
 
 theorem hN_top {M : Vol G} {t : T} (hM : M.Is t) : NFlag (G.V (.grid D.R.m 0)) G.besTop.e = flagN (topLev G hM).d :=
-  (nFlag_diag (GlobalTheory.RowUnf.rowBes G 0 (by have := D.R.two_le_m; omega) ((D.R.m - 2) / 2)
-    (by have := top_idx (D := D); omega)).e (lam _) (lam_ne _)).symm
+  by
+
+  exact (nFlag_diag (GlobalTheory.RowUnf.rowBes G 0 (by have := D.R.two_le_m; omega) ((D.R.m - 2) / 2)
+   (by have := top_idx (D := D); omega)).e (lam _) (lam_ne _)).symm
 
 def topVNRow {M₀ : Vol G} (h₀ : M₀.IsRow) : GlobalTheory.Unf.VolN (besDecAt G 0 ((D.R.m - 2) / 2) top_idx) :=
-  volNOf (d := GlobalTheory.RowUnf.rowBes G 0 (by have := D.R.two_le_m; omega) ((D.R.m - 2) / 2) (by have := top_idx (D := D); omega))
-    (nFlag_diag _ (lam _) (lam_ne _)).symm
-    (GlobalTheory.RowUnf.topVolN G M₀ h₀ (by have := D.R.two_le_m; omega) (by have := top_idx (D := D); omega))
+  by
+
+  exact volNOf (d := GlobalTheory.RowUnf.rowBes G 0 (by have := D.R.two_le_m; omega) ((D.R.m - 2) / 2) (by have := top_idx (D := D); omega))
+   (nFlag_diag _ (lam _) (lam_ne _)).symm
+   (GlobalTheory.RowUnf.topVolN G M₀ h₀ (by have := D.R.two_le_m; omega) (by have := top_idx (D := D); omega))
 
 theorem bplus_eq_besPer (W : G.Weil) {M₀ : Vol G} (h₀ : M₀.IsRow) {M : Vol G} {t : T} (hM : M.Is t) (φ : Fn G (.top 0))
     (F : Fn G (.grid D.R.m 0)) : Bplus W M₀ φ F = besPer W.ψ 1 (topLev G hM).d (topLev G hM).o (topLev G hM).ζ (M₀.ν (.top 0))
@@ -151,8 +200,10 @@ theorem liftT_oppTens (W : G.Weil) (M : Vol G) (t : T) (τi : PolRow G × PolDow
   let l : TotT G (oppPath t D.R.m) →+ Fn G (.grid D.R.m 0) :=
     AddMonoidHom.mk' (fun τ => liftT W M (oppPath t D.R.m) τ F) fun τ τ' => liftT_add W M _ τ τ' F
   show l (oppTens W t τi τf) = _
+
   rw [oppTens, Finsupp.sum, map_sum, Finset.sum_product]
   refine Finset.sum_congr rfl fun P _ => ?_
+
   rw [Finsupp.sum, map_sum]
   exact Finset.sum_congr rfl fun d _ => liftT_single W M _ _ _ F
 
@@ -175,11 +226,11 @@ def rowLift (P : PolRow G) (d : SchRow G) (F : Fn G (.grid 0 D.R.m)) : Fn G (.gr
 def downPure (P : PolDown G) (d : SchDown G t) : PureT G (downPath t D.R.m D.R.m) :=
   downFam t D.R.m D.R.m fun j => W.fock (.mu t D.R.m j) (d j) (P j)
 
-variable {M t} in
 
+variable {M t} in
 def oppPer (hM : M.Is t) (P : PolRow G × PolDown G) (d : SchRow G × SchDown G t) (φ : Fn G (.top 0)) (F : Fn G (.grid 0 D.R.m)) :
     (chain G W t hM).Var → ℂ :=
-  colPer W hM _ 0 top_idx (topVN hM) (chainData G W t hM (downPure W t P.2 d.2)) (rowLift W M P.1 d.1 F) φ 1
+  GlobalTheory.RowChain.colPer W hM _ 0 top_idx (topVN hM) (chainData G W t hM (downPure W t P.2 d.2)) (rowLift W M P.1 d.1 F) φ 1
 
 theorem pathLift_oppositePure (P : PolRow G × PolDown G) (d : SchRow G × SchDown G t) (F : Fn G (.grid 0 D.R.m)) :
     liftP W M (oppPath t D.R.m) (oppPure W t P d) F =
@@ -288,7 +339,9 @@ theorem exists_rowMeas (j : ℕ) : ∃ ρ : Measure (rowGrp G j), (j < D.R.m →
         fun _ => D.host.xi0 ^ ((D.R.m - 2 - j) / 2),
         GlobalTheory.SeeSaw.Model.isLineVec_nLine (pow_ne_zero _ (GlobalTheory.Unf.Inhab.cmHost_imaginaryGenerator_ne_zero D)), cocpt_top G (by omega), v,
         (GlobalTheory.Unf.Inhab.nonempty_volN _).some⟩
-    have e : rowGrp G j = besGrp B.d B.o := (dif_neg h).trans (dif_pos h')
+    have e : rowGrp G j = besGrp B.d B.o := by
+      simp only [rowGrp, dif_neg h, dif_pos h']
+      rfl
     obtain ⟨ρ, h1, h2⟩ := exists_haar_heq e B.μR (GlobalTheory.QuotZero.bes_haar_inv B).2.1
     refine ⟨ρ, fun _ => h1, fun t M hM => ⟨fun σ hj => by omega, fun σ hj => ?_⟩⟩
     obtain rfl : σ = (D.R.m - 2 - j) / 2 := by omega
@@ -301,45 +354,6 @@ theorem exists_rowMeas (j : ℕ) : ∃ ρ : Measure (rowGrp G j), (j < D.R.m →
 theorem mem_idx {j : ℕ} (hj : j ∈ idx D) : 1 ≤ j ∧ j < D.R.m := by
   simp only [idx, List.mem_range'_1] at hj
   omega
-
-theorem iterAt_big : GlobalTheory.FunPr.Hypotheses₂ → GlobalTheory.IndefiniteRowSideFullHecke.CuspAlongSmoothLifts.LiftsCuspidal → Big fun ch => IterAt ch := by
-  intro hP hL
-  obtain ⟨c0, h0⟩ := (GlobalTheory.T.cuspidal_flip_on_volumes hL hP).and ((GlobalTheory.EndCusp.formTop_isCuspListed hP).and GlobalTheory.RowClaim.colFn_cont_left)
-  refine ⟨c0, fun ε CF hC => ?_⟩
-  obtain ⟨x0, hx⟩ := h0 ε CF hC
-  refine ⟨x0, fun D large₂ he hxx Γ _ _ Pl0 T A Ks _ _ _ R Fc hS ch hch hsc => ?_⟩
-  obtain ⟨hstep, htop, hcol⟩ := hx D large₂ he hxx Γ Pl0 T A Ks R Fc hS ch hch hsc
-  choose ρ hρ hρ' using exists_rowMeas ch.G
-  choose v hv using exists_vol_row ch.G
-  refine ⟨ρ, fun j => (v j).μ, fun j hj => ⟨hρ j (mem_idx hj).2, (v j).haar⟩, ?_⟩
-  intro t a τ hτ M hM P y
-  obtain ⟨e, he, φm, hw, -⟩ := hτ
-  have hu : GlobalTheory.Unf.IsContAut _ (colFn ch a) := ⟨(hcol a).2, (hcol a).1⟩
-  have core : ∀ d ∈ τ.support,
-      BplusConv ch.W ch.M (colFn ch a) (liftP ch.W M (oppPath t D.R.m) (oppPure ch.W t P d) (formTop ch t y)) ∧
-      NIter ρ (fun j => (v j).μ) (fun h => per ch.W M t (conAt ch.W hM (fockD ch.W t d.2 P.2) h) d.1 P.1 (colFn ch a) (formTop ch t y))
-        (idx D) 1 (Bplus ch.W ch.M (colFn ch a) (liftP ch.W M (oppPath t D.R.m) (oppPure ch.W t P d) (formTop ch t y))) := by
-    intro d hd
-    have h2 := hw d hd
-    obtain ⟨-, h1, h3⟩ := pure_core hP.cuspRapidDecay hch.vol hM (hstep t M hM) he (φm d) d h2.1 h2.2 P (htop t y) hu
-    refine ⟨GlobalTheory.RowBplus.bplusConv_col ch.W ch.M hch.vol ch.ξ (ch.col a) (col_mem ch a) _ h1.1.toIsAutFun, ?_⟩
-    exact nIter_meas_congr ρ _ _ _ (fun j hj => hv j (mem_idx hj).1 (mem_idx hj).2.le t M hM)
-      (nIter_conAt_of_colPer ch.G ch.W t hM (fockD ch.W t d.2 P.2) _ _ _ h3 ρ (fun j => (hρ' j t M hM).1)
-        fun j => (hρ' j t M hM).2)
-  have e1 : liftT ch.W M (oppPath t D.R.m) (oppTens ch.W t (Finsupp.single P 1) τ) (formTop ch t y) =
-      ∑ d ∈ τ.support, τ d • liftP ch.W M (oppPath t D.R.m) (oppPure ch.W t P d) (formTop ch t y) := by
-    rw [GlobalTheory.RowVal.liftT_oppTens, Finsupp.support_single_ne_zero _ one_ne_zero, Finset.sum_singleton, Finsupp.single_eq_same,
-      one_smul]
-  have e2 : lhs ch t M (Finsupp.single P 1) τ a y = ∑ d ∈ τ.support,
-      τ d * Bplus ch.W ch.M (colFn ch a) (liftP ch.W M (oppPath t D.R.m) (oppPure ch.W t P d) (formTop ch t y)) := by
-    rw [lhs, e1, (bplus_sum_right ch.W ch.M (colFn ch a) τ.support _
-      fun d hd => (bplus_smul_right ch.W ch.M (τ d) (core d hd).1).1).2]
-    exact Finset.sum_congr rfl fun d hd => (bplus_smul_right ch.W ch.M _ (core d hd).1).2
-  rw [e2]
-  exact (niter_lin_congr _ _ _ ρ _ (idx D) 1).1 _ τ.support τ _ _ fun d hd => (core d hd).2
-
-theorem iterAt_linAt : GlobalTheory.FunPr.Hypotheses₂ → GlobalTheory.IndefiniteRowSideFullHecke.CuspAlongSmoothLifts.LiftsCuspidal → Big fun ch => IterAt ch ∧ LinAt ch :=
-  fun hP hL => (iterAt_big hP hL).and (linAt_big hP hL)
 
 end GlobalTheory.RowChain
 

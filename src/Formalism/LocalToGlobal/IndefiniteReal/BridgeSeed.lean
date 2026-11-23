@@ -1,4 +1,44 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FrameExistence.InitialDataUntwistedOfModelChoice
+module
+
+public import Formalism.LocalToGlobal.Divisibility.HeckeRI
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,44 +61,11 @@ abbrev LiftSideT (A3 : Formalism.L2.DIV.FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) 
   Bridge.SideReal D (Vc D i) (Bridge.envOf (cV i).coef (levEnvOf (Vc D i) (L.βV i) (L.datVt i t) pl (A3.A.ok t)))
     (A3.A.MtCSD i t) (A3.A.leftGroupActionLift i t) (A3.A.heckeL i t) (fun i => i.2)
 
-open Classical in
 
+open Classical in
 def PrIso {D : D7} (MX : DSModel D.sp.X' (parB (Ptw D) D.R.m)) (cX : CoefA D.sp.X') (prX : cX.W →ₗ[ℂ] SmT MX →ₗ[ℂ] ℂ) : Prop :=
   ∀ (ι : D.what₂.Tau → Type) [∀ τ, Fintype (ι τ)] (b : ∀ τ, OrthonormalBasis (ι τ) ℂ (MX.sm τ)) (w w' : cX.W),
     inner ℂ w w' = ∑ f : (∀ τ, ι τ),
       starRingEnd ℂ (prX w (PiTensorProduct.tprod ℂ fun τ => b τ (f τ))) * prX w' (PiTensorProduct.tprod ℂ fun τ => b τ (f τ))
-
-theorem brgAt_of_sides (A3 : Formalism.L2.DIV.FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m) (L : LevCh D T)
-    (h : ∀ eG : G ≃* Formalism.L2.DIV.G0 L.Pg D.R.r, RecL A3 L eG → ∀ θ : InfFam D, IsInfFam θ →
-      ∀ MX : DSModel D.sp.X' (parB (Ptw D) D.R.m),
-      ∃ (cX : CoefA D.sp.X') (cV : ∀ i, CoefA (Vc D i)) (pl : Pl0 → Pl D.host.E) (Sb : Finset (Pl D.host.E)) (plI : I0 → Pl D.host.E)
-        (SF : Finset (HeightOneSpectrum (𝓞 D.host.F))) (prX : cX.W →ₗ[ℂ] SmT MX →ₗ[ℂ] ℂ)
-        (RS : ∀ t, Set (RowSideT A3 L cX pl t)) (LS : ∀ i t, Set (LiftSideT A3 L cV pl i t)),
-        cX.Is ∧ (∀ i, (cV i).Is) ∧ IsDualPair θ MX cX prX ∧ (∀ t, (RS t).Nonempty) ∧ (∀ i t, (LS i t).Nonempty) ∧
-        (D.sp.X'.rank = A3.A.r + D.R.m * A3.A.t ∧ ∀ i : Fin D.R.m, (Vc D i).rank = A3.A.r + A3.A.t) ∧
-        ∀ B : BType A3 L cX cV pl, (∀ t, B.R t ∈ RS t) → (∀ i t, B.L i t ∈ LS i t) → BrgL A3 L eG cX cV pl Sb B plI SF) :
-    BrgAt A3 L := by
-  unfold BrgAt
-  intro eG hrec θ hθ MX
-  obtain ⟨cX, cV, pl, Sb, plI, SF, prX, RS, LS, hcX, hcV, hdual, hRS, hLS, hrk, hB⟩ := h eG hrec θ hθ MX
-  refine ⟨cX, cV, pl, Sb, ⟨fun t => (hRS t).some, fun i t => (hLS i t).some, hrk.1, hrk.2⟩, plI, SF, prX, hcX, hcV, hdual, ?_⟩
-  exact hB _ (fun t => (hRS t).some_mem) (fun i t => (hLS i t).some_mem)
-
-theorem brgAtP_of_sides (A3 : Formalism.L2.DIV.FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m) (L : LevCh D T)
-    (Pr : ∀ (M : DSModel D.sp.X' (parB (Ptw D) D.R.m)) (c : CoefA D.sp.X') (_cv : ∀ i, CoefA (Vc D i)), (c.W →ₗ[ℂ] SmT M →ₗ[ℂ] ℂ) → Prop)
-    (h : ∀ eG : G ≃* Formalism.L2.DIV.G0 L.Pg D.R.r, RecL A3 L eG → ∀ θ : InfFam D, IsInfFam θ →
-      ∀ MX : DSModel D.sp.X' (parB (Ptw D) D.R.m),
-      ∃ (cX : CoefA D.sp.X') (cV : ∀ i, CoefA (Vc D i)) (pl : Pl0 → Pl D.host.E) (Sb : Finset (Pl D.host.E)) (plI : I0 → Pl D.host.E)
-        (SF : Finset (HeightOneSpectrum (𝓞 D.host.F))) (prX : cX.W →ₗ[ℂ] SmT MX →ₗ[ℂ] ℂ)
-        (RS : ∀ t, Set (RowSideT A3 L cX pl t)) (LS : ∀ i t, Set (LiftSideT A3 L cV pl i t)),
-        cX.Is ∧ (∀ i, (cV i).Is) ∧ IsDualPair θ MX cX prX ∧ Pr MX cX cV prX ∧ (∀ t, (RS t).Nonempty) ∧ (∀ i t, (LS i t).Nonempty) ∧
-        (D.sp.X'.rank = A3.A.r + D.R.m * A3.A.t ∧ ∀ i : Fin D.R.m, (Vc D i).rank = A3.A.r + A3.A.t) ∧
-        ∀ B : BType A3 L cX cV pl, (∀ t, B.R t ∈ RS t) → (∀ i t, B.L i t ∈ LS i t) → BrgL A3 L eG cX cV pl Sb B plI SF) :
-    BrgAtP A3 L Pr := by
-  unfold BrgAtP
-  intro eG hrec θ hθ MX
-  obtain ⟨cX, cV, pl, Sb, plI, SF, prX, RS, LS, hcX, hcV, hdual, hPr, hRS, hLS, hrk, hB⟩ := h eG hrec θ hθ MX
-  refine ⟨cX, cV, pl, Sb, ⟨fun t => (hRS t).some, fun i t => (hLS i t).some, hrk.1, hrk.2⟩, plI, SF, prX, hcX, hcV, hdual, hPr, ?_⟩
-  exact hB _ (fun t => (hRS t).some_mem) (fun i t => (hLS i t).some_mem)
 
 end Formalism.IndefR.Seed

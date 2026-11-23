@@ -1,13 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkValEqZeroOrOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CarrierDimLeOfAddCellGenerators
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InRealConeCellOfInFaceOfCellFormCMFieldStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CellLeastDimVanishesWhereFormVanishesDiagonalStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InvFunEvalZAddOfLinearOnRealCone
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InRealConeSummandsOfEvalZAdditiveCell
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteBilinFormAbsLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BilinFormExistsPrimitiveOfNeZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemClosureSumIndecomposableFaceOfAdditiveStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkValEqZeroOrOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BilinFormExistsPrimitiveOfNeZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CarrierDimLeOfAddCellGenerators
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CellLeastDimVanishesWhereFormVanishesDiagonalStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteBilinFormAbsLe
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InRealConeCellOfInFaceOfCellFormCMFieldStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InvFunEvalZAddOfLinearOnRealCone
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemClosureSumIndecomposableFaceOfAdditiveStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -110,7 +152,7 @@ theorem cone_bal {O : Type} [CommRing O] {bar : O → O} [Module O X] (hγ : ∀
 theorem eq_zero_of_diag {x : LinearMap.BilinForm ℤ X} (hs : ∀ y z, x y z = x z y) (h : ∀ y, x y y = 0) : x = 0 := by
   refine LinearMap.ext₂ fun y z => ?_
   have e := h (y + z)
-  simp only [map_add, LinearMap.add_apply, h y, h z, hs z y] at e
+  simp only [map_add (f := _), LinearMap.add_apply, h y, h z, hs z y] at e
   rw [LinearMap.zero_apply, LinearMap.zero_apply]
   omega
 
@@ -139,8 +181,8 @@ theorem exists_min (hl : IsCarrierDim bar q ψ lab) (hX : Module.finrank O X ≤
   rw [hl X hX x (cone_bal hγ.mem hx) (cone_nonneg hγ.nonneg hx)]
   exact_mod_cast hr
 
-omit [Module.Projective O X] in
 
+omit [Module.Projective O X] in
 theorem evalZ_zero' (φ : InvFun O) : φ.evalZ (0 : LinearMap.BilinForm ℤ X) = 0 := by
   have e := φ.eval_comp (X := X) (X₁ := Fin 0 → O) (r := 0) (fun _ => ⟨0, Subsingleton.elim _ _⟩)
     (fun _ _ => (0 : ℝ))
@@ -148,8 +190,8 @@ theorem evalZ_zero' (φ : InvFun O) : φ.evalZ (0 : LinearMap.BilinForm ℤ X) =
   show φ.eval X (fun a b => (((0 : LinearMap.BilinForm ℤ X) a b : ℤ) : ℝ)) = 0
   simpa using e
 
-omit [Module.Projective O X] in
 
+omit [Module.Projective O X] in
 theorem evalZ_sum {m : ℕ} {γ : Fin m → LinearMap.BilinForm ℤ X} (hγ : ψ.LinearOn γ)
     (S : Finset (LinearMap.BilinForm ℤ X)) (h : ∀ x ∈ S, InRCone γ x) :
     ψ.evalZ (∑ x ∈ S, x) = ∑ x ∈ S, ψ.evalZ x := by
@@ -207,8 +249,8 @@ end Face
 
 end Exist
 
-open _root_.GlobalTheory.PolFan.Mark.Exist in
 
+open _root_.GlobalTheory.PolFan.Mark.Exist in
 theorem exists_isMarked_inRCone (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (q : ℕ)
     (ψ lab : InvFun (𝓞 E)) (i : ℕ)
     (hDom : ∀ (X : Type) [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X] [Module.Projective (𝓞 E) X],

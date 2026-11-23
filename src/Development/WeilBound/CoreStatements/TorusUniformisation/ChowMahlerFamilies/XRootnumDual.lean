@@ -1,21 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TrivFlagMod
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.FlagMinor
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.SameGenericSymm
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ClassListMapDomainPerm
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPairCocycle
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PScalarQuotient
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeFiniteProjectiveBaseChange
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SameGenericFlagDifferenceStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SameGenericBundleChainStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SameGenericFlagComparisonStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartBundleBaseExtensionStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TrivFlagMod
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.FlagMinor
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPairCocycle
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartBundleBaseExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeFiniteProjectiveBaseChange
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SameGenericBundleChainStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SameGenericFlagComparisonStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SameGenericFlagDifferenceStatement
 import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XBundleOfFamily
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XPullLine
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XPullPreserve
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XFlagframeDual
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XFlagframeDual
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XPullLine
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XPullPreserve
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ClassListMapDomainPerm
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PScalarQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial GlobalTheory.CompanionTheory.Ar.Num GroundTheory.Heights₂.Heights.NumbersDVR
 open ReciprocityTheory.ChartRestriction.G.Geo (ChartBundle chartRing)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg mcIdeal chartMon joinCoord bcCoord pullDeg liftVar fnField ck rootNum SameGeneric LatLE IsPull IsPullBC IsSubQuot QuotIso IsFrobPres FlagModel modelDeg)
@@ -73,20 +119,18 @@ variable {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
 
 omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem isVerticalDivisor_swap {P : Ideal (MRing ι O)} {ϖ : O} {b : K → ℤ} {f g : MRing ι O}
-    (hD : IsVerticalDivisor P ϖ b f g) : IsVerticalDivisor P ϖ (-b) g f where
-  degrees := by
-    obtain ⟨bf, bg, hf, hg, hb⟩ := hD.degrees
+    (hD : IsVerticalDivisor P ϖ b f g) : IsVerticalDivisor P ϖ (-b) g f := by
+  refine ⟨?_, hD.den_not_mem, hD.num_not_mem, ?_, ?_⟩
+  · obtain ⟨bf, bg, hf, hg, hb⟩ := hD.degrees
     refine ⟨bg, bf, hg, hf, ?_⟩
     rw [← hb]
     funext k
     simp
-  num_not_mem := hD.den_not_mem
-  den_not_mem := hD.num_not_mem
-  vertical := fun W hW => hD.vertical W fun h => hW (by
-    unfold ratDiv at h ⊢
-    linarith)
-  unit_off_special := by
-    intro W hW hPW hrel hϖ
+  · intro W hW
+    apply hD.vertical W
+    unfold ratDiv at hW ⊢
+    exact fun h => hW (sub_eq_zero.mpr (sub_eq_zero.mp h).symm)
+  · intro W hW hPW hrel hϖ
     obtain ⟨u, v, hu, hv, h⟩ := hD.unit_off_special W hW hPW hrel hϖ
     refine ⟨v, u, hv, hu, ?_⟩
     rw [← neg_sub]
@@ -184,7 +228,9 @@ theorem exists_system (R : Subalgebra O Ω) {N : ℕ} (L : AddSubgroup V) (h : L
     exact hv e
   · apply hβ.1
     ext e
+
     rw [LinearMap.flip_apply, LinearMap.flip_apply, map_sum]
+
     conv_rhs => rw [← hv e, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, map_smul, LinearMap.smul_apply, hl', smul_eq_mul, smul_eq_mul, mul_comm]
@@ -206,10 +252,10 @@ theorem dual_closure (R R' : Subalgebra O Ω) (hR : ∀ a ∈ R, a ∈ R') {N : 
         rw [map_smul, map_smul, LinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
         exact R'.mul_mem ha (R'.mul_mem hc (hR _ ((hM e).1 he y hy)))
       | zero => rw [map_zero, LinearMap.zero_apply]; exact R'.zero_mem
-      | add x y _ _ hx hy => rw [map_add, LinearMap.add_apply]; exact R'.add_mem hx hy
+      | add x y _ _ hx hy => rw [map_add (f := _), LinearMap.add_apply]; exact R'.add_mem hx hy
       | neg x _ hx => rw [map_neg, LinearMap.neg_apply]; exact R'.neg_mem hx
     | zero => intro v _; rw [map_zero]; exact R'.zero_mem
-    | add x y _ _ hx hy => intro v hv; rw [map_add]; exact R'.add_mem (hx v hv) (hy v hv)
+    | add x y _ _ hx hy => intro v hv; rw [map_add (f := _)]; exact R'.add_mem (hx v hv) (hy v hv)
     | neg x _ hx => intro v hv; rw [map_neg]; exact R'.neg_mem (hx v hv)
   · intro hw
     obtain ⟨k, v, l, hv, hl, -, hs⟩ := exists_system R L h β hβ

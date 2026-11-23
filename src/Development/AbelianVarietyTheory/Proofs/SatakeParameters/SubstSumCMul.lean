@@ -1,13 +1,57 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.OrbitPlaces
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
-import Formalism.SharpRestriction.ParConsts
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Cobdry
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DualOm
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.JetZ
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WittFractionToCpAlgebraMap
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ConstantCoeffJetLogG
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormPowDivFactorialLe
+import Formalism.SharpRestriction.AdmissibleParameterJoins.GandSp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsPlaceCofactorValuationLowerBound
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ModelsOK
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Cobdry
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DualOm
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.JetZ
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ConstantCoeffJetLogG
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.FrobeniusOrbits GlobalTheory.TwU GlobalTheory.OnePlace Classical
 
 noncomputable section
@@ -29,6 +73,7 @@ theorem comb {κ ι ρ : Type} [Fintype ρ] (S : Finset ι) (a : ι → ℂ_[p])
     ∑ i ∈ S, C (a i) * ∑ r', C (b i r') * L r' = L r := by
   simp_rw [Finset.mul_sum, ← mul_assoc, ← map_mul]
   rw [Finset.sum_comm]
+
   simp_rw [← Finset.sum_mul, ← map_sum, h]
   simp
 
@@ -74,6 +119,7 @@ theorem subst_sum_C_mul {κ τ ι : Type} (x : κ → MvPowerSeries τ ℂ_[p]) 
     (c : ι → ℂ_[p]) (f : ι → MvPowerSeries κ ℂ_[p]) :
     subst x (∑ i ∈ S, C (c i) * f i) = ∑ i ∈ S, C (c i) * subst x (f i) := by
   rw [← coe_substAlgHom hx]
+
   simp only [map_sum, map_mul, coe_substAlgHom, subst_C]
 
 theorem subst_lg {κ τ : Type} [Finite κ] (x : κ → MvPowerSeries τ ℂ_[p]) (hx0 : ∀ r, constantCoeff (x r) = 0) (k : κ) :
@@ -131,8 +177,9 @@ theorem coordZ_jetZ : ∀ {p : ℕ} [Fact p.Prime] (σ : ℂ_[p] →+* ℂ_[p]),
   · have hm : MvPowerSeries.map (Formalism.L2.G.Pend.k0ToC p) (coordZ B (FormalGroupSystem.K0 p) 1 (Sum.inl (r, a, b))) =
         ∑ s ∈ Finset.univ.filter (fun s : Fin n' => ¬ IsOddPos s),
           C ((σ ^ s.val) (Formalism.L2.G.Pend.wToC p (B.omS r))) * (X (s, a, b) : MvPowerSeries (Zidx n' r0 r1) ℂ_[p]) := by
+
       simp only [coordZ, map_sum, map_mul, map_C, map_X, one_mul, Algebra.algebraMap_self, RingHom.id_apply, Formalism.L2.G.Pend.witt_fraction_to_Cp_algebraMap,
-        pow_wToC σ hσ]
+      pow_wToC σ hσ]
     rw [hm, subst_jetZ_lin]
     have hin : ∑ s ∈ Finset.univ.filter (fun s : Fin n' => ¬ IsOddPos s),
         C ((σ ^ s.val) (Formalism.L2.G.Pend.wToC p (B.omS r))) * GlobalTheory.ThStr.laS p n' ((s.val : ℕ) : ZMod n') =
@@ -158,8 +205,9 @@ theorem coordZ_jetZ : ∀ {p : ℕ} [Fact p.Prime] (σ : ℂ_[p] →+* ℂ_[p]),
   · have hm : MvPowerSeries.map (Formalism.L2.G.Pend.k0ToC p) (coordZ B (FormalGroupSystem.K0 p) 1 (Sum.inr (r, a, b))) =
         ∑ s ∈ Finset.univ.filter (fun s : Fin n' => IsOddPos s),
           C ((σ ^ s.val) (Formalism.L2.G.Pend.wToC p (B.om r))) * (X (s, a, b) : MvPowerSeries (Zidx n' r0 r1) ℂ_[p]) := by
+
       simp only [coordZ, map_sum, map_mul, map_C, map_X, one_mul, Algebra.algebraMap_self, RingHom.id_apply, Formalism.L2.G.Pend.witt_fraction_to_Cp_algebraMap,
-        pow_wToC σ hσ]
+      pow_wToC σ hσ]
     rw [hm, subst_jetZ_lin]
     have hin : ∑ s ∈ Finset.univ.filter (fun s : Fin n' => IsOddPos s),
         C ((σ ^ s.val) (Formalism.L2.G.Pend.wToC p (B.om r))) * GlobalTheory.ThStr.laS p n' ((s.val : ℕ) : ZMod n') =
@@ -178,6 +226,7 @@ theorem coordZ_jetZ : ∀ {p : ℕ} [Fact p.Prime] (σ : ℂ_[p] →+* ℂ_[p]),
           σ ((σ ^ (2 * k)) (Formalism.L2.G.Pend.wToC p (B.om r) * Formalism.L2.G.Pend.wToC p (B.omS r'))) := fun k => by
         rw [← map_mul, pow_succ']; rfl
       simp only [hk]
+
       rw [← map_sum, hD.dual r r']
       by_cases h : r = r' <;> simp [h, eq_comm]
     rw [hin, GlobalTheory.BeProps.subst_psubst (hasSubst_copy a b) (hx0 _)]

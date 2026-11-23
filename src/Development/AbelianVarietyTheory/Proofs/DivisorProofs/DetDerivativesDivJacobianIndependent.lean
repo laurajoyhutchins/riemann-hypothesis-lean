@@ -1,7 +1,44 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsKSIffKsRel
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvRFrMapOfIsReduced
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimeSpectrumDualNumberEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BarCompSubsetClosure
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimeSpectrumDualNumberEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj GlobalTheory.CechPic GlobalTheory.Vanishing GlobalTheory.CompHS GlobalTheory.TangentOrigin
 open GlobalTheory.FlagMod GlobalTheory.TopForm
 open GlobalTheory.FlagTan (dimFlag psiSet TIx HIx VIx IsTanFrame IsDef IsVert KSIso kap)
@@ -27,7 +64,7 @@ theorem snd_eq_zero {F K : Type} [Field F] [NumberField F] [Field K] (χ : F →
   letI : Module F K := ((TrivSqZeroExt.fstHom K K K).toRingHom.comp χ).toModule
   let δ : Derivation ℤ F K := Derivation.mk'
     { toFun := fun x => (χ x).snd
-      map_add' := fun x y => by rw [map_add, TrivSqZeroExt.snd_add]
+      map_add' := fun x y => by rw [map_add (f := _), TrivSqZeroExt.snd_add]
       map_smul' := fun n x => by
         rw [map_zsmul, TrivSqZeroExt.snd_smul]
         rfl }
@@ -59,7 +96,7 @@ theorem exists_forms_map {k A K : Type} [CommRing k] [CommRing A] [Field K] {D :
     { toFun := δ
       map_add' := fun f g => by
         funext b
-        simp only [δ, map_add, TrivSqZeroExt.snd_add, Pi.add_apply]
+        simp only [δ, map_add (f := _), TrivSqZeroExt.snd_add, Pi.add_apply]
       map_smul' := fun a f => by
         rw [Algebra.smul_def, hmul, hδc, smul_zero, add_zero, algebraMap_smul]
         rfl } hmul

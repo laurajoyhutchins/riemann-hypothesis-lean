@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralCompChar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharLeftRightMatrixMulAdeleTensor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalThetaIntegralSiegelRuleDoubledWeil
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralCompChar
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousHermPart
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MulVecCEApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharLeftRightMatrixMulAdeleTensor
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalThetaIntegralSiegelRuleDoubledWeil
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddEquivAddHaarCharProdCongrStatement
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRestrictScalarsMatrixLeftRightMulAdeleTens
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddEquivAddHaarCharProdCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WhitKA
+
+@[expose] public section
+
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
@@ -35,14 +78,14 @@ def dbl [IsTopologicalAddGroup M] (S : AddSubgroup M) (P : M →+ M) (hPc : Cont
   left_inv p := by
     refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
     · change P (p.1.1 + L p.2.1) = p.1.1
-      rw [map_add, hPs _ p.1.2, h1 _ p.2.2, add_zero]
+      rw [map_add (f := _), hPs _ p.1.2, h1 _ p.2.2, add_zero]
     · change P (L.symm (p.1.1 + L p.2.1)) = p.2.1
       have hl : L.symm (L p.2.1) = p.2.1 := L.left_inv _
-      rw [map_add, map_add, h2 _ p.1.2, zero_add, hl, hPs _ p.2.2]
+      rw [map_add (f := _), map_add (f := _), h2 _ p.1.2, zero_add, hl, hPs _ p.2.2]
   right_inv x := h3 x
   map_add' p q := by
     change (p.1.1 + q.1.1) + L (p.2.1 + q.2.1) = (p.1.1 + L p.2.1) + (q.1.1 + L q.2.1)
-    rw [map_add]; abel
+    rw [map_add (f := _)]; abel
   continuous_toFun :=
     (continuous_subtype_val.comp continuous_fst).add (L.continuous.comp (continuous_subtype_val.comp continuous_snd))
   continuous_invFun := (hPc.subtype_mk _).prodMk ((hPc.comp L.symm.continuous).subtype_mk _)
@@ -64,7 +107,7 @@ theorem char_sq [IsTopologicalAddGroup M] [LocallyCompactSpace M] [SecondCountab
     have hl : Ψ.symm (Ψ p) = p := Ψ.left_inv p
     rw [hl]
     change U p.1.1 + L (U p.2.1) = U (p.1.1 + L p.2.1)
-    rw [map_add, hUL]
+    rw [map_add (f := _), hUL]
   rw [sq, ← GlobalTheory.T.addEquivAddHaarChar_prodCongr, ← GlobalTheory.ModuLR.addEquivAddHaarChar_transport Ψ (GlobalTheory.ModuLR.prodCE T T), e]
 
 end Abstract
@@ -106,7 +149,7 @@ theorem hermPart_split {d e : AE D} (he : cA D e = -e) (hde : d * e = 1) (x : Mx
     smul_sub]
   exact (add_add_sub_cancel _ _ _).trans (half_smul_add x)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def mulCE (d e : AE D) (hde : d * e = 1) : Mx D n n ≃ₜ+ Mx D n n where
   toFun x := d • x
@@ -123,7 +166,7 @@ def mulCE (d e : AE D) (hde : d * e = 1) : Mx D n n ≃ₜ+ Mx D n n where
 
 def hermPartHom (D : D7) (n : ℕ) : Mx D n n →+ Mx D n n := AddMonoidHom.mk' (hermPart D n) hermPart_add
 
-set_option maxHeartbeats 400000 in
+
 theorem val_det_ad_inv (a : GL (Fin n) (AE D)) :
     ((Matrix.GeneralLinearGroup.det ((ad a)⁻¹ : GL (Fin n) (AE D)) : (AE D)ˣ) : AE D) = cA D (Matrix.GeneralLinearGroup.det a : (AE D)ˣ) := by
   change (adj a.1 : Mx D n n).det = cA D a.1.det
@@ -157,8 +200,8 @@ theorem lr_smul (a : GL (Fin n) (AE D)) (d e : AE D) (hde : d * e = 1) (x : Mx D
   change a.1 * (d • x) * ((ad a)⁻¹ : GL (Fin n) (AE D)).1 = d • (a.1 * x * ((ad a)⁻¹ : GL (Fin n) (AE D)).1)
   rw [Matrix.mul_smul, Matrix.smul_mul]
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 theorem integral_cg : ∀ (D : D7) (n : ℕ) (lam : Measure (hermA D n)), lam.IsAddHaarMeasure → ∀ (a : GL (Fin n) (AE D)) (f : hermA D n → ℂ), ∫ c, f (GlobalTheory.CompanionTheory.IwaAd.cg a c) ∂lam = npow (absA D (Matrix.GeneralLinearGroup.det a)) (-(n : ℂ)) * ∫ c, f c ∂lam := by
   intro D n lam hlam a f
   obtain ⟨i1, i2, i3, i4, -, -⟩ := lattice_Mx D n n

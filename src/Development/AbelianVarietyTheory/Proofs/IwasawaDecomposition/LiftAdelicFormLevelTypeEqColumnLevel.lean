@@ -1,21 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NVNeZero
-import Formalism.LocalToGlobal.IndefiniteReal.BridgeColPts
-import Formalism.LocalToGlobal.Columns.InputsGenus
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockTriangularBlockIndexOfIffColBlockUTTwoBlockStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TopBlockEqOneIffMemColHKStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SecondBlockDetEqBlockDetOfSumPartitionsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftLevelCharacterTypePrimeEqColumnCharacterStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftResidueTwistCharacterEqResCharStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TypePrimesDisjointTwistChosenPrimesStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NVNeZero
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeColPts
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BlockTriangularBlockIndexOfIffColBlockUTTwoBlockStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftLevelCharacterTypePrimeEqColumnCharacterStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftResidueTwistCharacterEqResCharStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SecondBlockDetEqBlockDetOfSumPartitionsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TopBlockEqOneIffMemColHKStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TypePrimesDisjointTwistChosenPrimesStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open Formalism.IndefR.RecTie Formalism.IndefR.Lev Formalism.L2.Rows GlobalTheory.Mem GlobalTheory.Mem.R3 GlobalTheory.Mem.Col2
-set_option maxHeartbeats 4000000
-set_option synthInstance.maxHeartbeats 400000
+
+
 
 noncomputable section
 
@@ -62,7 +100,7 @@ theorem generalLinearGroupCastOfEq_twoBlock_diagBlock_eq {κ : Type} [CommRing �
 section StdSide'
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-  (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (SG : Finset (Pl E)) (H : Subgroup (Formalism.L2.Col.GLG E n SG))
+  (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (SG : Finset (Pl E)) (H : Subgroup (Formalism.L2.Col.GLG (E := E) (n := n) (SG := SG)))
 
 theorem mem_J0_empty (x : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) :
     x ∈ Formalism.L2.Col.J0 hc n ∅ ↔ x ∈ Formalism.L2.Col.UAd hc n ∧ x ∈ St (1 : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) := by
@@ -88,7 +126,7 @@ theorem redG_apply' (x : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) (hx : x �
   rfl
 
 theorem redH_apply' (m : Formalism.L2.Col.JH hc n ∅ SG H) (w : SG) :
-    ((Formalism.L2.Col.redH hc n ∅ SG H m : H) : Formalism.L2.Col.GLG E n SG) w =
+    ((Formalism.L2.Col.redH hc n ∅ SG H m : H) : Formalism.L2.Col.GLG (E := E) (n := n) (SG := SG)) w =
       redFn (1 : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) w.1 ((m : Formalism.L2.Col.J0 hc n ∅) : GL (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) := by
   show Formalism.L2.Col.redG hc n ∅ SG (m : Formalism.L2.Col.J0 hc n ∅) w = _
   exact redG_apply' hc n SG _ (m : Formalism.L2.Col.J0 hc n ∅).2 w
@@ -294,7 +332,7 @@ theorem lev_type_eq : ∀ (X : Stages) (px : PreX X.B.toPre) (I : Col2.ColIn X.B
   have hredw : ∀ w : LiftBrg.sgL X I U t,
       ((Formalism.L2.Col.redH X.toD7.sp.cm X.B.R.nV ∅ (LiftBrg.sgL X I U t) _
         ((Bridge.colJEquiv X.toD7.sp.cm X.B.R.nV ∅ (LiftBrg.sgL X I U t)
-          (Formalism.L2.Col.mtTyKK I.Ch I.sel t.1 ((i : ℕ) + 1)).inv.grp).symm k) : _) : Formalism.L2.Col.GLG _ _ _) w =
+          (Formalism.L2.Col.mtTyKK I.Ch I.sel t.1 ((i : ℕ) + 1)).inv.grp).symm k) : _) : Formalism.L2.Col.GLG (E := _) (n := _) (SG := _)) w =
         redFn (1 : GL (Fin X.B.R.nV) (LiftBrg.EA X)) (w.1 : Pl X.toD7.host.E)
           ((k : Formalism.L2.Col.UAd X.toD7.sp.cm X.B.R.nV) : GL (Fin X.B.R.nV) (LiftBrg.EA X)) := by
     intro w

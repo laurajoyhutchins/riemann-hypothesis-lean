@@ -1,17 +1,58 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqTopOfSpanImage
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HerrAAndNatural
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneNotMemFilOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeGaloisTrivialModUniformizer
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1fKsOntoUpToPow
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeHeightsFromHodgeJumpsStatement
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.KernelDictionary
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqTopOfSpanImage
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1fClassWachPairJumpsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1fKsOntoUpToPow
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HerrAAndNatural
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemWachNOfMapMemSaturatedStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneNotMemFilOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachIntegralComplexCocycleClassFiniteStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeGaloisTrivialModUniformizer
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeHeightsFromHodgeJumpsStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachNCokernelKilledByPowerStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachIntegralComplexCocycleClassFiniteStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1fClassWachPairJumpsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
@@ -124,6 +165,7 @@ theorem φ_mem [NeZero n] (T : LocLat G Qp LL O) (M h : ZMod n → ℕ) (h5 : p5
     (hx : x ∈ W.N T) : W.Q ^ mx M • W.φD T x ∈ W.N T := by
   have hx' : x = ∑ j, (letE j : LetA O n) • x := by
     rw [← Finset.sum_smul, sum_letE_eq_one', one_smul]
+
   rw [hx', map_sum, Finset.smul_sum]
   refine Submodule.sum_mem _ (fun j _ => ?_)
   have hj : (letE j : LetA O n) • x ∈ W.Nl T (j + 1 - 1) := by
@@ -197,7 +239,7 @@ theorem aN_sat (hsat : ∀ x : W.DD T₀, W.map ι x ∈ W.N T₁ → x ∈ W.N 
   have e := X_smul_inj W T₁ hmx
   exact (mem_aN W T₀ W.X _).2 ⟨y, hsat y (e ▸ hm), rfl⟩
 
-set_option maxHeartbeats 1000000 in
+
 private theorem lift_multiple_lemma (l M : ℕ) (c₁ : IsCrys PD T₁.ρ) (c₂ : IsCrys PD T₂.ρ)
     (hnat : W.ClNat) (h2 : p2 W T₁) (hφ : ∀ x ∈ W.N T₁, W.Q ^ M • W.φD T₁ x ∈ W.N T₁)
     (hc : p2c W T₂ M)
@@ -340,8 +382,8 @@ theorem jumpsLet_quot (M h : ZMod n → ℕ)
 
 end Generic
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem defect_torsion : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
     (Cm : CmpOf D.loc D.locA HW F), Pr2d D HW F := by

@@ -1,5 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.PurelyInseparable.Exponent
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.LocalizedModule.Basic
+public import Mathlib.FieldTheory.Minpoly.Basic
+public import Mathlib.FieldTheory.Minpoly.Field
+public import Mathlib.FieldTheory.Minpoly.Finite
+public import Mathlib.RingTheory.Ideal.GoingUp
+public import Mathlib.RingTheory.Polynomial.GaussLemma
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.ComplexSets
@@ -29,11 +86,13 @@ theorem exists_linear_injOn (T : Finset (Fin n → ℂ)) :
     intro x x' hne h
     apply hne
     funext j
-    have hc := congrArg (fun q => Polynomial.coeff q (j : ℕ)) h
+    have hc := congrArg (fun q => _root_.AddMonoidAlgebra.coeff (M := ℕ) q (j : ℕ)) h
     simp only [p, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial, Polynomial.coeff_zero] at hc
     rw [Finset.sum_eq_single j] at hc
     · simpa [sub_eq_zero] using hc
-    · intro b _ hb; rw [if_neg]; exact fun h => hb (Fin.ext h)
+    · intro b _ hb
+      have hbj : (b : ℕ) ≠ (j : ℕ) := fun h => hb (Fin.ext h)
+      simp [hbj]
     · simp
   have hev : ∀ x x' (t : ℂ), (p x x').eval t = ∑ j : Fin n, (x j - x' j) * t ^ (j : ℕ) := by
     intro x x' t
@@ -54,10 +113,10 @@ theorem exists_linear_injOn (T : Finset (Fin n → ℂ)) :
 
 theorem exists_monic_aeval_eq_zero (J : Ideal (MvPolynomial (Fin n) ℂ)) [J.IsPrime]
     (A : Matrix (Fin d) (Fin n) ℂ) (hA : IsFiniteProjection J A) (s : MvPolynomial (Fin n) ℂ ⧸ J) :
-    letI : Algebra (MvPolynomial (Fin d) ℂ) (MvPolynomial (Fin n) ℂ ⧸ J) :=
-      (projHom J A).toRingHom.toAlgebra
-    ∃ g : Polynomial (MvPolynomial (Fin d) ℂ),
-      g.Monic ∧ g.natDegree ≤ projDegree J A ∧ Polynomial.aeval s g = 0 := by
+    (letI : Algebra (MvPolynomial (Fin d) ℂ) (MvPolynomial (Fin n) ℂ ⧸ J) :=
+       (projHom J A).toRingHom.toAlgebra
+     ∃ g : Polynomial (MvPolynomial (Fin d) ℂ),
+       g.Monic ∧ g.natDegree ≤ projDegree J A ∧ Polynomial.aeval s g = 0) := by
   let _ : Algebra (MvPolynomial (Fin d) ℂ) (MvPolynomial (Fin n) ℂ ⧸ J) :=
     (projHom J A).toRingHom.toAlgebra
   let _ : Module (MvPolynomial (Fin d) ℂ) (MvPolynomial (Fin n) ℂ ⧸ J) := Algebra.toModule
@@ -96,7 +155,7 @@ theorem exists_monic_aeval_eq_zero (J : Ideal (MvPolynomial (Fin n) ℂ)) [J.IsP
       exact minpoly.aeval _ t
     obtain ⟨c, hc⟩ := (IsLocalizedModule.eq_zero_iff (nonZeroDivisors (MvPolynomial (Fin d) ℂ))
       (TensorProduct.mk _ (FractionRing (MvPolynomial (Fin d) ℂ)) _ 1)).mp h1
-    rw [Submonoid.smul_def, Algebra.smul_def] at hc
+    change projHom J A (c : MvPolynomial (Fin d) ℂ) * Polynomial.aeval s g = 0 at hc
     refine (mul_eq_zero.mp hc).resolve_left ?_
     intro h0
     apply nonZeroDivisors.coe_ne_zero c

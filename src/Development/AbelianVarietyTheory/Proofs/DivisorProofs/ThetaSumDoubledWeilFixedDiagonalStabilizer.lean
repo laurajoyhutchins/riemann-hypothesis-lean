@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagonalLagrangianInvariantForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSumDiagonalIntegralRationalHeisenbergStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicModuleNormRationalUnitEqOneStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicModuleNormRationalUnitEqOneStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSumDiagonalIntegralRationalHeisenbergStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDiagonalLagrangianInvariantForm
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
 open scoped Matrix TensorProduct
 
@@ -31,7 +76,8 @@ theorem psi_half_rat (ψ : AddChar (AF F) ℂ) (hψ : IsStd ψ) {ι : Type} [Fin
   have e : ⅟(2 : AF F) * ((fun i => algebraMap F (AF F) (a1 i)) ⬝ᵥ (fun i => algebraMap F (AF F) (b2 i)) -
       (fun i => algebraMap F (AF F) (b1 i)) ⬝ᵥ (fun i => algebraMap F (AF F) (a2 i))) =
       algebraMap F (AF F) (1 / 2 * (a1 ⬝ᵥ b2 - b1 ⬝ᵥ a2)) := by
-    simp only [dotProduct, map_sub, map_mul, map_sum, h2]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [dotProduct, map_sub, map_mul, map_sum, h2]
   rw [e]
   exact hψ.2.1 _
 
@@ -160,8 +206,8 @@ theorem exists_ratCoord {F E : Type} [Field F] [NumberField F] [Field E] [Number
 
 end GlobalTheory.ThetaSiegelRat
 
-open GlobalTheory.ThetaSiegelRat in
 
+open GlobalTheory.ThetaSiegelRat in
 theorem GlobalTheory.ThetaSiegelRat.thetaSum_omd_of_fix_diag : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (ψ : AddChar (AF F) ℂ), IsStd ψ → ∀ (a b : ℕ) (JA : Matrix (Fin a) (Fin a) E) (JB : Matrix (Fin b) (Fin b) E) (κ : Type) [Fintype κ], Fintype.card κ = a * b → ∀ (d : Darboux (symp (R := AF F) (cA σ) (-1) (incM F JA) (incM F JB)) κ), (∀ x : Matrix (Fin a) (Fin b) E, ∃ y z : κ → F, d.e (incM F x) = (fun i => algebraMap F (AF F) (y i), fun i => algebraMap F (AF F) (z i))) → ∀ (dd : Darboux (symp (R := AF F) (cA σ) (-1) (incM F JA) (dbl (incM F JB))) (κ ⊕ κ)), IsDblCoord (cA σ) (-1) (incM F JA) (incM F JB) d dd → ∀ (χ : Chr F E), IsHecke F E χ → ∀ (omd : UG (cA σ) (dbl (incM F JB)) →* Module.End ℂ ((κ ⊕ κ → AF F) → ℂ)), IsSplitting (adeleClass F) ψ dd (actB (cA σ)) omd → SiegelRule (cA σ) (adeleClass F) ψ (-1) (incM F JA) (dbl (incM F JB)) dd χ (diagCols (Fin b)) omd → ∀ (p : UG (cA σ) (dbl (incM F JB))) (p₀ : Matrix (Fin b ⊕ Fin b) (Fin b ⊕ Fin b) E), ((p : GL (Fin b ⊕ Fin b) (AE F E)) : Matrix (Fin b ⊕ Fin b) (Fin b ⊕ Fin b) (AE F E)) = incM F p₀ → ∀ (t : GL (Fin b) (AE F E)), ((p : GL (Fin b ⊕ Fin b) (AE F E)) : Matrix (Fin b ⊕ Fin b) (Fin b ⊕ Fin b) (AE F E)) * diagCols (Fin b) = diagCols (Fin b) * (t : Matrix (Fin b) (Fin b) (AE F E)) → ∀ φ ∈ schA F (κ ⊕ κ), thetaSum F (omd p φ) = thetaSum F φ := by
   intro F E _ _ _ _ _ σ hσ ψ hψ a b JA JB κ _ hκ d hrat dd hdd χ hχ omd hS hR p p₀ hp t ht φ hφ
   obtain ⟨P, Q, R, S, rfl⟩ : ∃ P Q R S, p₀ = Matrix.fromBlocks P Q R S :=
@@ -247,7 +293,7 @@ theorem GlobalTheory.ThetaSiegelRat.thetaSum_omd_of_fix_diag : ∀ (F E : Type) 
           (dd.rho ψ (Matrix.fromCols (incM F (x * (P - R)ᵀ)) (0 : Matrix (Fin a) (Fin b) (AE F E))) φ') := by
       intro φ'
       simp only [Darboux.rho]
-      rw [schr_schr', map_add, add_comm (dd.e (Matrix.fromCols (incM F (x * (P - R)ᵀ)) _)), hdd (incM F (x * Rᵀ)),
+      rw [schr_schr', map_add (f := _), add_comm (dd.e (Matrix.fromCols (incM F (x * (P - R)ᵀ)) _)), hdd (incM F (x * Rᵀ)),
         hr (x * Rᵀ), hU (x * (P - R)ᵀ)]
       rw [cocycle_one ψ hψ, one_smul]
     calc GlobalTheory.DiagForm.lDiag F κ (dd.rho ψ (Matrix.fromCols (incM F x) (0 : Matrix (Fin a) (Fin b) (AE F E))) φ)

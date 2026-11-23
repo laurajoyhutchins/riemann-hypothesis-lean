@@ -1,33 +1,62 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChartFromCoordinatesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FilteredCohomologyRestrictionBijectiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechRefinementCohomologyBijectiveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CohomologyVanishingAlongIdealFiltrationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteModulesSerreClassStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SerreClassOfCechSpectralSequenceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AffineCoverCohomologyFiniteStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AffineCoverHigherCohomologyVanishesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechVanishingFromCoverStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsSmoothCoordinateCoverStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpenStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGoodStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartDividedPowersGradedConstantStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationPropertyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FlatBaseChangeCohomologyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenOfThickeningMorphismStatement
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AffineCoverHigherCohomologyVanishesStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechRefinementCohomologyBijectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpenStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormActionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAddStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCocycleStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCoverStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormExistsOfCocycleStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormRestrictStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormSmulStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormVanishOfFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormVectorBundleStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InOpenFiniteInfIffStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCocycleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormExistsOfCocycleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAddStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormSmulStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormRestrictStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormActionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormFrameStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrameStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormVanishOfFrameStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormVectorBundleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCoverStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb
 
@@ -72,10 +101,12 @@ theorem dividedPowerFiltration_bot {K : Type} [CommRing K] {s : ℕ} (hs : 0 < s
   rw [List.prod_eq_zero (List.mem_map.2 ⟨p, hp, h0⟩)]
   exact Ideal.zero_mem _
 
-theorem tfBase {K : Type} [Field K] [CharZero K] {s : ℕ} (hs : 0 < s) : TFBase (dividedPowersBot K) 1 s where
-  nil := dividedPowerFiltration_bot hs
-  tf r x h := by simpa using h
-  dv n hn := ⟨0, (n : K)⁻¹, by simp; exact mul_inv_cancel₀ (Nat.cast_ne_zero.2 hn)⟩
+theorem tfBase {K : Type} [Field K] [CharZero K] {s : ℕ} (hs : 0 < s) : TFBase (dividedPowersBot K) 1 s := by
+  refine ⟨dividedPowerFiltration_bot hs, ?_, ?_⟩
+  · intro r x h
+    simpa using h
+  · intro n hn
+    exact ⟨0, (n : K)⁻¹, by simpa only [pow_zero] using mul_inv_cancel₀ (Nat.cast_ne_zero.2 hn)⟩
 
 def zeroSerre (K : Type) [CommRing K] : Serre.{1} K where
   P M _ _ := Subsingleton M
@@ -113,7 +144,7 @@ theorem cech_pos (hB : StVB) {O : Type} [CommRing O] (l s : ℕ) (hb : TFBase (d
   obtain ⟨vb⟩ := hB l s hb q U d c ha r hr
   exact GlobalTheory.T.affine_cover_higher_cohomology_vanishes (strV q) V hV U hU ha (CrystallineSemistableComparison.Pb.cechH (GF q r) (fun α => SS q l s (U α)) r) vb p
 
-set_option maxHeartbeats 2000000 in
+
 theorem main (hV : StVan) (hB : StVB) (hC : StCover) : KH.GlobSerreSt → ∀ {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (q : X ⟶ Spec (CommRingCat.of K)) [Smooth q]
     (V : X.Opens) (hV : IsAffineOpen V) (s r j : ℕ), r < s → j ≠ r → Subsingleton (HQ (KS q s {V}) r ((r : ℤ) + 1) j) := by
   intro hS K _ _ X q _ V hVa s r j hr hj

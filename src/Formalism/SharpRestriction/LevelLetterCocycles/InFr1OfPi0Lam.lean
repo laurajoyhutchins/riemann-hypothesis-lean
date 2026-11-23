@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeMembershipAevalUniformizer
-import Formalism.SharpRestriction.LevelLetterCocycles.FinLev
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeMembershipPolynomialGamma
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.KillerLevCoreOf
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +60,6 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {PD : PeriodData G Qp K₀ K B BdR}
     {LL O : Type} [Field LL] [Algebra Qp LL] [TopologicalSpace LL] [CommRing O] [Algebra O LL]
     {v : AddValuation LL (WithTop ℚ)} {n : ℕ} (W : LocWach PD LL O v n)
-
-local notation "ιE" => algebraMap (LetA O n) W.EE
 
 section Mod
 
@@ -44,28 +85,13 @@ def Msub : Submodule O (Fin d → W.EE) where
   zero_mem' := ⟨fun _ => inFr1_zero W A c e, fun _ _ => rfl⟩
   smul_mem' := fun o f hf => ⟨fun k => inFr1_smul W A c e o (hf.1 k), fun k hk => by simp [hf.2 k hk]⟩
 
-def Psub : Submodule O (Fin d → W.EE) where
-  carrier := {f | f ∈ Msub W A c e Rst ∧
-    ∃ g, InNL W T c e (abelian₂ W A c e) b g ∧ ∀ k, f k = ιE W.π₀ * g k}
-  add_mem' := by
-    rintro f f' ⟨hf, g, hg, hfg⟩ ⟨hf', g', hg', hfg'⟩
-    exact ⟨(Msub W A c e Rst).add_mem hf hf', g + g',
-      Formalism.MainNotions.UnusedSlot80.UnivC.inNL_add W T A c e b hg hg', fun k => by simp [hfg k, hfg' k, mul_add]⟩
-  zero_mem' := ⟨(Msub W A c e Rst).zero_mem, 0, Formalism.MainNotions.UnusedSlot80.UnivC.inNL_zero W T A c e b,
-    fun k => by simp⟩
-  smul_mem' := by
-    rintro o f ⟨hf, g, hg, hfg⟩
-    exact ⟨(Msub W A c e Rst).smul_mem o hf, fun k => o • g k,
-      Formalism.MainNotions.UnusedSlot80.UnivC.inNL_smul W T A c e b o hg, fun k => by
-        rw [Pi.smul_apply, hfg k, mul_smul_comm]⟩
-
 def Isub : Submodule O (Fin d → W.EE) where
   carrier := {f | f ∈ Msub W A c e Rst ∧ InvNL W T c e (abelian₂ W A c e) b f}
   add_mem' := by
     rintro f f' ⟨hf, g, hg, hfg⟩ ⟨hf', g', hg', hfg'⟩
     refine ⟨(Msub W A c e Rst).add_mem hf hf', g + g',
       Formalism.MainNotions.UnusedSlot80.UnivC.inNL_add W T A c e b hg hg', fun k => ?_⟩
-    simp only [Pi.add_apply, map_add]
+    simp only [Pi.add_apply, map_add (f := _)]
     rw [mul_add, ← hfg k, ← hfg' k]; ring
   zero_mem' := ⟨(Msub W A c e Rst).zero_mem, 0, Formalism.MainNotions.UnusedSlot80.UnivC.inNL_zero W T A c e b,
     fun k => by simp⟩
@@ -85,14 +111,6 @@ theorem inFr1_of_pi0Lam {f : W.EE} (hf : InFr W c (W.π₀ * abelian₂ W A c e)
     W.AΔ.mul_mem (W.AΔ.mul_mem hΛm (W.AΔ.mul_mem (Formalism.MainNotions.UnusedSlot80.UnivC.uniformizer_mem_delta_invariants W) hΛm)) hw, ?_⟩
   rw [map_one, one_mul] at hfw
   rw [hfw, ← map_mul]; congr 1; ring
-
-theorem psub_of_pi0Lam [IsDomain O] (hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP W)
-    (hbij : Function.Bijective (algebraMap K₀ K)) (hA : A.OK) (hc : c ∈ A.cuts) (hT : Win W A T)
-    (hb : Formalism.MainNotions.LiftingTheory.IsFrameΔ W T (c - ((A.len c : ℕ) : ZMod n)) b) (f : Fin d → W.EE)
-    (hf : ∀ k, InFr W c (W.π₀ * abelian₂ W A c (A.len c)) 1 (f k)) (hs : ∀ k ∉ Rst, f k = 0) :
-    f ∈ Psub W T A c (A.len c) b Rst := by
-  obtain ⟨g, hg, hfg⟩ := nl_of_pi0Lam W hR hbij A hA c hc T hT b hb f hf
-  exact ⟨⟨fun k => inFr1_of_pi0Lam W A c _ (hf k), hs⟩, g, hg, hfg⟩
 
 end Mod
 

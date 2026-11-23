@@ -1,5 +1,58 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ArchInt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ArchInt
+public import GroundTheory.GlobalFields.TateThesis.EulerFactorsFourierFinite
+public import GroundTheory.LocalFields.LocalZetaChar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.GlobalFields.TateThesis.RootNumberLocalPlace
+import GroundTheory.LocalFields.LocalZeta
+import GroundTheory.LocalFields.PadicLogHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +88,7 @@ theorem shell_ne_zero (χ : Kˣ →* ℂˣ) (ψ : AddChar K Circle) (hψ : Conti
       ∂multHaar K ≠ 0 := by
   have hχ' : Continuous (χ⁻¹ : Kˣ →* ℂˣ) := continuous_quasiChar_inv hχ
   have hr' : ¬ IsUnramifiedChar χ⁻¹ := by rwa [isUnramifiedChar_inv_iff]
-  obtain ⟨a, ha, k, hk⟩ := exists_localEpsilon_eq_monomial (χ := χ⁻¹) hψ hψ1 hχ'
+  obtain ⟨a, ha, k, hk⟩ := exists_localEpsilon_eq_monomial (χ := χ⁻¹) (ψ := ψ) hψ hψ1 hχ'
   have h0 := hk 0
   rw [localEpsilon_of_not_isUnramified_eq hr', quasiCharConductor_inv, inv_inv] at h0
   set m : ℤ := addCharConductor ψ - quasiCharConductor χ

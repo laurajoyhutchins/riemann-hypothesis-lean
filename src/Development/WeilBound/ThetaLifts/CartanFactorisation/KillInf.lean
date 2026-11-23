@@ -1,5 +1,54 @@
-import Development.WeilBound.ThetaLifts.CartanFactorisation.ActsComp
-import Development.WeilBound.ThetaLifts.CartanFactorisation.UnitDef
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.UnitDef
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsBeta
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ActsComp
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.RadOfZero
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Unimod
+import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,7 +63,7 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
   {n d : ℕ} {X : Spc F E n} {W : Spc F E d}
   {B : Base F E} {M : Model σ X W} {χX χW : Chr F E} {om : Rep σ X W} {r s r' s' : ℕ}
 
-set_option maxHeartbeats 1000000 in
+
 theorem killInf' (hU : Unimod) (hT : ThetaBasic) (hO : ArchOp) (hLie : ArchLie) (hQ : ArchUniq) (hK : KInfGrp) (hp : IsPair B M χX χW om r s r' s')
     (hAd : RadMaxAt B M om) {𝓒} (hc : Cls B M om 𝓒) {N}
     (hN : Maximal (fun P => GlobalTheory.Published.ThetaSubInf M B.ψ B.emb om P ∧ P ≠ M.Pol B.ψ B.emb) N)
@@ -139,7 +188,7 @@ theorem killInf' (hU : Unimod) (hT : ThetaBasic) (hO : ArchOp) (hLie : ArchLie) 
         exact sk δ hδ x y)
       (N.comap Q.subtype ⊔ LinearMap.ker β) le_sup_right (fun δ hδ x hx y h => by
         obtain ⟨x₁, h₁, x₂, h₂, rfl⟩ := Submodule.mem_sup.1 hx
-        rw [show y = D δ hδ (x₁ + x₂) from Subtype.ext ((hD δ hδ _ _).1 h), map_add]
+        rw [show y = D δ hδ (x₁ + x₂) from Subtype.ext ((hD δ hδ _ _).1 h), map_add (f := _)]
         exact Submodule.add_mem_sup (a1.2 _ (Or.inr ⟨δ, hδ, rfl⟩) _ h₁) (a2.2 _ (Or.inr ⟨δ, hδ, rfl⟩) _ h₂)) with h | h
     · exact h (Submodule.mem_sup_left hf)
     · refine absurd ?_ (hsum N _ hN.prop.1 ((hiff _).1 a2) hN.prop.2 fun e => ht (inj (e.trans (Submodule.map_subtype_top Q).symm)))

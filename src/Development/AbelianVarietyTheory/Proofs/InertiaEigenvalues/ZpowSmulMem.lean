@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SubIdBijOfContracting
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SubIdBijOfContracting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.PowerSeries.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.PhiGam.TwistShift
@@ -15,7 +66,7 @@ theorem zpow_one_add (c : k⟦X⟧) (s : ℤ) :
     PowerSeries.mul_invOfUnit _ _ (by simp)
   set w := PowerSeries.invOfUnit (1 + c * PowerSeries.X ^ 2) 1
   have hw' := congrArg (fun a : k⟦X⟧ => (a : k⸨X⸩)) hw
-  simp only [map_mul, map_add, map_one, map_pow, ← vv_eq_coe_X] at hw'
+  simp only [map_mul, map_add (f := _), map_one, map_pow, ← vv_eq_coe_X] at hw'
   have hne : 1 + (c : k⸨X⸩) * vv k ^ 2 ≠ 0 := left_ne_zero_of_mul_eq_one hw'
   induction s using Int.induction_on with
   | zero => exact ⟨0, by simp⟩
@@ -23,7 +74,7 @@ theorem zpow_one_add (c : k⟦X⟧) (s : ℤ) :
     obtain ⟨d, hd⟩ := ih
     refine ⟨d + c + d * c * PowerSeries.X ^ 2, ?_⟩
     rw [zpow_add_one₀ hne, hd]
-    simp only [map_mul, map_add, map_pow, ← vv_eq_coe_X]
+    simp only [map_mul, map_add (f := _), map_pow, ← vv_eq_coe_X]
     ring
   | pred n ih =>
     obtain ⟨d, hd⟩ := ih
@@ -40,7 +91,7 @@ theorem one_add_pow (j : ℕ) :
     obtain ⟨e, he⟩ := ih
     refine ⟨e + (n : k⟦X⟧) + e * PowerSeries.X, ?_⟩
     rw [pow_succ, he]
-    simp only [map_mul, map_add, map_natCast, ← vv_eq_coe_X]
+    simp only [map_mul, map_add (f := _), map_natCast, ← vv_eq_coe_X]
     push_cast
     ring
 
@@ -67,7 +118,7 @@ theorem sub_mem_sh {σ : k⸨X⸩ →ₐ[k] k⸨X⸩} {g : V →ₗ[k] V} (hg : 
       ((1 + d * PowerSeries.X ^ 2 : k⟦X⟧) : k⸨X⸩) • vv k ^ s • (g x - x) +
         (d : k⸨X⸩) • vv k ^ (2 : ℤ) • vv k ^ s • x := by
     rw [hg, map_zpow₀, hc, mul_zpow, hd, zpow_ofNat]
-    simp only [map_mul, map_add, map_one, map_pow, ← vv_eq_coe_X, smul_sub, smul_smul]
+    simp only [map_mul, map_add (f := _), map_one, map_pow, ← vv_eq_coe_X, smul_sub, smul_smul]
     rw [sub_eq_iff_eq_add, mul_comm (vv k ^ s), add_assoc, ← add_smul,
       add_mul _ _ (vv k ^ s), one_mul, mul_assoc, add_comm (_ * _) (vv k ^ s), sub_add_cancel]
   rw [h1]
@@ -86,12 +137,12 @@ theorem bijOn_twist : ∀ {k : Type} [Field k] {V : Type} [AddCommGroup V] [Modu
   let θ : V →+ V :=
     { toFun := fun y => (1 + vv k) ^ j • g y - y
       map_zero' := by simp
-      map_add' := fun a b => by simp only [map_add, smul_add]; abel }
+      map_add' := fun a b => by simp only [map_add (f := _), smul_add]; abel }
   have hθ : ∀ y, θ y = (1 + vv k) ^ j • g y - y := fun _ => rfl
   let E : V →+ V :=
     { toFun := fun y => y - (r : k⸨X⸩) • vv k ^ (-1 : ℤ) • θ y
       map_zero' := by simp
-      map_add' := fun a b => by simp only [map_add, smul_add]; abel }
+      map_add' := fun a b => by simp only [map_add (f := _), smul_add]; abel }
   have hE : ∀ y, E y = y - (r : k⸨X⸩) • vv k ^ (-1 : ℤ) • θ y := fun _ => rfl
   have hθE : ∀ y, θ y = ((j : k⟦X⟧) : k⸨X⸩) • vv k ^ (1 : ℤ) • (y - E y) := by
     intro y
@@ -101,7 +152,7 @@ theorem bijOn_twist : ∀ {k : Type} [Field k] {V : Type} [AddCommGroup V] [Modu
     intro t y hy
     have h1 : θ y = (((1 + PowerSeries.X) ^ j : k⟦X⟧) : k⸨X⸩) • (g y - y) + (e : k⸨X⸩) • vv k ^ (2 : ℤ) • y
         + (j * vv k) • y := by
-      rw [hθ, map_pow, map_add, map_one, ← vv_eq_coe_X, smul_sub, zpow_ofNat]
+      rw [hθ, map_pow, map_add (f := _), map_one, ← vv_eq_coe_X, smul_sub, zpow_ofNat]
       generalize (1 + vv k) ^ j • g y = z
       rw [he, add_smul, add_smul, one_smul, mul_smul (e : k⸨X⸩)]
       abel

@@ -1,7 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.HStable
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.EigenLift
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ActLin
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofComm
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.FormalGroupWitt.FormalGroupWittProofs.SolveV
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ConnectionKillsSeries
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,8 +62,8 @@ section Lin
 
 variable {R : Type} [CommRing R] {d : ℕ}
 
-open Formalism.FG.SolveVAux in
 
+open Formalism.FG.SolveVAux in
 theorem coeff_lin_ev {m n : ℕ} (a : Fin m → Pt R n d) (ha : ∀ j i, constantCoeff (a j i) = 0) (f : PS R m d)
     (q : Fin n × Fin d) :
     coeff (Finsupp.single q 1) (ev a f) =
@@ -25,7 +72,6 @@ theorem coeff_lin_ev {m n : ℕ} (a : Fin m → Pt R n d) (ha : ∀ j i, constan
   unfold ev
   have hs : HasSubst (fun p : Fin m × Fin d => a p.1 p.2) :=
     hasSubst_of_constantCoeff_zero fun p => ha p.1 p.2
-  have hlow : ∀ p : Fin m × Fin d, Low 1 (a p.1 p.2) := fun p => (low_one_iff _).2 (ha p.1 p.2)
   rw [coeff_subst hs, finsum_eq_sum_of_support_subset _
     (s := Finset.univ.image (fun p : Fin m × Fin d => Finsupp.single p 1))]
   · rw [Finset.sum_image (fun p _ q _ h => Finsupp.single_left_injective one_ne_zero h)]
@@ -45,10 +91,17 @@ theorem coeff_lin_ev {m n : ℕ} (a : Fin m → Pt R n d) (ha : ∀ j i, constan
             exact (Finsupp.degree_eq_zero_iff e).1 this
           rw [he0, Finsupp.prod_zero_index, coeff_one, if_neg]
           exact Finsupp.single_ne_zero.2 one_ne_zero
-        · obtain ⟨p, rfl⟩ := degree_eq_one e (by omega)
+        · have hdegree : e.degree = 1 := by omega
+          obtain ⟨p, rfl⟩ := (Finsupp.sum_eq_one_iff e).mp hdegree
           exact absurd (Finset.mem_coe.2 (Finset.mem_image_of_mem _ (Finset.mem_univ p))) hne
-      · have hl := low_P hlow e
-        exact hl _ (by rw [Finsupp.degree_single]; omega)
+      · rw [Finsupp.prod]
+        have hlt : (Finsupp.single q 1).degree < e.degree := by
+          rw [Finsupp.degree_single]
+          omega
+        refine coeff_of_lt_order (lt_of_lt_of_le (Nat.cast_lt.mpr hlt)
+          (le_trans ?_ (le_order_prod _ e.support)))
+        exact mod_cast Finset.sum_le_sum fun p _ =>
+          le_order_pow_of_constantCoeff_eq_zero (e p) (ha p.1 p.2)
     rw [hz, smul_zero]
 
 theorem coeff_X_single {n : ℕ} (q p : Fin n × Fin d) :

@@ -1,7 +1,62 @@
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousActP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StdSideUnique
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClassPresBasic
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.GramCEqTranspose
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.WeTransposeWordTransposeWord
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH NumberField IsDedekindDomain Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links GlobalTheory.Mem GlobalTheory.Mem.R3
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 namespace GlobalTheory
@@ -33,7 +88,7 @@ theorem formsL_exists_baseChange_coordinates : ∀ {L L' Ks : Type} [Field L] [N
   let j' : ∀ σ' : L' →+* ℂ, (Fin n → L') →ₛₗ[σ'] W (σ'.comp ι) := fun σ' =>
     { toFun := fun x' => ∑ k, σ' (x' k) • F.j (σ'.comp ι) (Pi.single k 1)
       map_add' := fun x y => by
-        simp only [Pi.add_apply, map_add, add_smul, Finset.sum_add_distrib]
+        simp only [Pi.add_apply, map_add (f := _), add_smul, Finset.sum_add_distrib]
       map_smul' := fun c x => by
         simp only [Pi.smul_apply, smul_eq_mul, map_mul, mul_smul, Finset.smul_sum] }
   let F' : Formalism.IndefR.Arith.FormsL L' Ks (Fin n → L') (fun σ' => W (σ'.comp ι)) G :=
@@ -41,9 +96,9 @@ theorem formsL_exists_baseChange_coordinates : ∀ {L L' Ks : Type} [Field L] [N
       Pt := F.Pt
       nrm := fun lp y φ' => F.nrm lp y (e.symm φ')
       nrm_nonneg := fun lp y f => F.nrm_nonneg lp y _
-      nrm_zero := fun lp y => by simp only [map_zero]; exact F.nrm_zero lp y
-      nrm_add := fun lp y f g => by simp only [map_add]; exact F.nrm_add lp y _ _
-      nrm_smul := fun lp y a f => by simp only [map_smul]; exact F.nrm_smul lp y a _
+      nrm_zero := fun lp y => by rw [e.symm.map_zero]; exact F.nrm_zero lp y
+      nrm_add := fun lp y f g => by rw [e.symm.map_add]; exact F.nrm_add lp y _ _
+      nrm_smul := fun lp y a f => by rw [e.symm.map_smul]; exact F.nrm_smul lp y a _
       towKs := inferInstance
       ρ := ρ'
       chi := (Units.map ι.toMonoidHom).comp F.chi
@@ -54,6 +109,7 @@ theorem formsL_exists_baseChange_coordinates : ∀ {L L' Ks : Type} [Field L] [N
       funext i; simp [Finset.sum_apply, Pi.single_apply]
     show ∑ k, σ' (ι (x k)) • F.j (σ'.comp ι) (Pi.single k 1) = F.j (σ'.comp ι) x
     conv_rhs => rw [hx]
+
     simp only [map_sum, map_smulₛₗ, RingHom.comp_apply]
   · intro x'
     show x' ∈ F.WK.map m ↔ _

@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.DvdMulOfIdem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.DvdMulOfIdem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Fourier.FiniteAbelian.PontryaginDuality
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.IndexNSmul
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open scoped nonZeroDivisors
 
@@ -61,7 +117,7 @@ theorem mem_of_orth {M : Type} [AddCommGroup M] [Module.Free ℤ M] [Module.Fini
   let D : AddSubgroup M :=
     { carrier := {x | ∀ y ∈ C, (m : ℤ) ∣ B x y}
       add_mem' := fun {a b} ha hb y hy => by
-        rw [map_add, AddMonoidHom.add_apply]; exact (ha y hy).add (hb y hy)
+        rw [map_add (f := _), AddMonoidHom.add_apply]; exact (ha y hy).add (hb y hy)
       zero_mem' := fun y _ => by simp
       neg_mem' := fun {a} ha y hy => by
         rw [map_neg, AddMonoidHom.neg_apply]; exact (ha y hy).neg_right }
@@ -83,7 +139,7 @@ theorem mem_of_orth {M : Type} [AddCommGroup M] [Module.Free ℤ M] [Module.Fini
       choose t ht using h1
       have hm' : (m : ℤ) ≠ 0 := Int.natCast_ne_zero.2 hm
       obtain ⟨z, hz⟩ := hB.2 (AddMonoidHom.mk' t fun a b => mul_left_cancel₀ hm' (by
-        rw [← ht, map_add, ht, ht, mul_add]))
+        rw [← ht, map_add (f := _), ht, ht, mul_add]))
       refine ⟨z, hB.1 (AddMonoidHom.ext fun y => ?_)⟩
       rw [ht, nsmulAddMonoidHom_apply, map_nsmul, hz]
       simp
@@ -119,10 +175,10 @@ theorem exists_unimod_div {R : Type} [CommRing R] {M : Type} [AddCommGroup M] [M
   choose t ht using fun x y : C => hiso x x.2 y y.2
   let B' : C →+ C →+ ℤ := AddMonoidHom.mk'
     (fun x => AddMonoidHom.mk' (t x) fun a b => mul_left_cancel₀ hm' (by
-      rw [mul_add, ← ht, ← ht, ← ht, Submodule.coe_add, map_add]))
+      rw [mul_add, ← ht, ← ht, ← ht, Submodule.coe_add, map_add (f := _)]))
     fun a b => AddMonoidHom.ext fun y => mul_left_cancel₀ hm' (by
       change m * t (a + b) y = m * (t a y + t b y)
-      rw [mul_add, ← ht, ← ht, ← ht, Submodule.coe_add, map_add, AddMonoidHom.add_apply])
+      rw [mul_add, ← ht, ← ht, ← ht, Submodule.coe_add, map_add (f := _), AddMonoidHom.add_apply])
   have hB' : ∀ x y : C, B x y = m * B' x y := ht
   refine ⟨B', ⟨fun x y => mul_left_cancel₀ hm' ?_, fun a x y => mul_left_cancel₀ hm' ?_, ?_, fun f => ?_⟩, hB'⟩
   · rw [mul_neg, ← hB', ← hB', h.skew]

@@ -1,5 +1,45 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
-import Formalism.LocalToGlobal.CharacterGerms.ValBlocksChart
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
+public import Formalism.LocalToGlobal.CharacterGerms.BlockMembershipSelfConjugate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,15 +76,6 @@ section Two
 
 variable (Y : FBChart C V O dd) (p : ∀ o, SelfData Y 2 (I0 o)) (H : ∀ o, (Y.rawSelf (p o)).Hyps V)
   (Ls : LetSys C dd) (n : ℕ)
-
-theorem valBlocksC_chart (ν : ℝ) (hν : (ν : EReal) ≤ Y.nuPlE Ls n) (hs : SelfSep Y p) (hv : ValEqSelfSt Y p H Ls n)
-    {N : ℕ} (pl : Fin N × Fin 2 ↪ Fin n) (F : ∀ o, Flag (rdS Y p H o)) (nW : ℕ) (hn : nW ≤ 2 * N + 1)
-    (gaC : Orb → ZMod 2 → ℕ → ℕ) (hM : BlockMembershipSelfConjugate (fun o => rdS Y p H o) N F (imgFamS Y p Ls n pl) gaC)
-    (hA : ∀ o, (rdS Y p H o).Alt) (hj : ∀ o, (rdS Y p H o).j' < (rdS Y p H o).n)
-    (hga : ∀ o s k, gaC o s k ≠ 0 → k ≤ (rdS Y p H o).rkF 0 s) :
-    ValBlocksC (fun o => rdS Y p H o) F nW gaC ν :=
-  valBlocksC_G (hV := valO_self (hν := hν) (hs := hs) (hv := hv) (pl := pl)) (hJ := jetProd) (F := F) (nW := nW)
-    (hn := hn) (gaC := gaC) (hM := hM) (hA := blkAdmC (F := F) (gaC := gaC) (hA := hA) (hj := hj) (hga := hga))
 
 end Two
 

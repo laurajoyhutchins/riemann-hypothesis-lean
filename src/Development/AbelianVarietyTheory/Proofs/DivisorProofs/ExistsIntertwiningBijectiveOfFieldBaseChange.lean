@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionOfIsPushout
+module
+
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsBasisOfIsExtension
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionOfIsPushout
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,26 +96,7 @@ variable {V W V' W' : Type} [AddCommGroup V] [Module K V] [AddCommGroup W] [Modu
 
 theorem IsExtension.exists_basis {a : V →ₛₗ[algebraMap K F] V'} (h : IsExtension a) {ι : Type}
     (v : Module.Basis ι K V) : ∃ v' : Module.Basis ι F V', ∀ i, v' i = a (v i) := by
-  have li : LinearIndependent F (fun i => a (v i)) := by
-    rw [linearIndependent_iff']
-    intro s g hg i hi
-    refine (Module.forall_dual_apply_eq_zero_iff K (g i)).1 fun ℓ => ?_
-    obtain ⟨Λ, hΛ⟩ := h.coord ℓ
-    have := congrArg Λ hg
-    rw [map_sum, map_zero] at this
-    simp only [hΛ _ _] at this
-    exact linearIndependent_iff'.1 v.linearIndependent s (fun j => ℓ (g j)) this i hi
-  have sp : ⊤ ≤ Submodule.span F (Set.range fun i => a (v i)) := by
-    rw [← h.span, Submodule.span_le]
-    rintro _ ⟨x, rfl⟩
-    have hx : x ∈ Submodule.span K (Set.range v) := v.span_eq ▸ Submodule.mem_top
-    show a x ∈ Submodule.span F _
-    induction hx using Submodule.span_induction with
-    | mem y hy => obtain ⟨i, rfl⟩ := hy; exact Submodule.subset_span ⟨i, rfl⟩
-    | zero => simp
-    | add y z _ _ hy hz => rw [map_add]; exact add_mem hy hz
-    | smul d y _ hy => rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ hy
-  exact ⟨Module.Basis.mk li sp, fun i => by simp⟩
+  apply GlobalTheory.ConstFam.exists_basis_of_isExtension <;> assumption
 
 theorem IsCoord.map_algebraMap_smul {a : V →ₛₗ[algebraMap K F] V'}
     (h : Submodule.span F (Set.range a) = ⊤) {ℓ : F →ₗ[K] K} {Λ : V' →+ V} (hΛ : IsCoord a ℓ Λ)
@@ -90,7 +128,7 @@ theorem exists_intertwining_bijective_of_extension (K F : Type) [Field K] [Field
   obtain ⟨Λ, hΛ⟩ := hW.coord ℓ
   let E : V →ₗ[K] W :=
     { toFun := fun x => Λ (E' (iV x))
-      map_add' := fun x y => by simp only [map_add]
+      map_add' := fun x y => by simp only [map_add (f := _)]
       map_smul' := fun k x => by
         rw [map_smulₛₗ, map_smul, hΛ.map_algebraMap_smul hW.span]; rfl }
   have hM : LinearMap.toMatrix v w E = (LinearMap.toMatrix v' w' E').map ℓ := by
@@ -99,6 +137,7 @@ theorem exists_intertwining_bijective_of_extension (K F : Type) [Field K] [Field
     have : E (v j) = ∑ k, ℓ (w'.repr (E' (v' j)) k) • w k := by
       show Λ (E' (iV (v j))) = _
       rw [← hv']
+
       conv_lhs => rw [← w'.sum_repr (E' (v' j)), map_sum]
       simp only [hw', hΛ _ _]
     rw [this, w.repr_sum_self]

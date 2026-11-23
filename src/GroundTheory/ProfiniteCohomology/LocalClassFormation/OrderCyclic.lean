@@ -1,9 +1,54 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Brauer
-import GroundTheory.TateCohomology.Herbrand
-import GroundTheory.TateCohomology.TateLow
-import GroundTheory.LocalFields.HerbrandLocal
+module
+
+public import GroundTheory.TateCohomology.TateLow
+public import GroundTheory.LocalFields.CompleteTrivial
+public import GroundTheory.ProfiniteCohomology.GaloisModules.CoeGalRootsOfUnityHomApply
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.NumberTheory.LocalField.Basic
+public import GroundTheory.LocalFields.HerbrandLocal
+public import GroundTheory.TateCohomology.Herbrand
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -22,8 +67,8 @@ theorem galUnits_norm_apply (x : Additive Lˣ) :
   rw [Representation.norm, LinearMap.sum_apply, GroundTheory.LocalField.tateNorm_apply, ofMul_prod]
   rfl
 
-omit [FiniteDimensional K L] in
 
+omit [FiniteDimensional K L] in
 theorem mem_invariants_galUnits_iff (x : Additive Lˣ) :
     x ∈ (galUnits.{u} K L).ρ.invariants ↔
       Additive.toMul x ∈ GroundTheory.LocalField.invariants Gal(L/K) Lˣ :=
@@ -70,10 +115,10 @@ theorem natCard_groupCohomology_two_galUnits_of_isCyclic [IsCyclic Gal(L/K)] :
   classical
   obtain ⟨σ, hσ⟩ := IsCyclic.exists_generator (α := Gal(L/K))
   let e : groupCohomology (galUnits.{u} K L) 2 ≅
-      (GroundTheory.GroupCoh.tateZeroFunctor (ULift.{u} ℤ) Gal(L/K)).obj (galUnits.{u} K L) :=
+      (GroundTheory.GroupCoh.tateZeroFunctor (R := ULift.{u} ℤ) (G := Gal(L/K))).obj (galUnits.{u} K L) :=
     ((TateCohomology.isoGroupCohomology 2).app (galUnits.{u} K L)).symm ≪≫
       GroundTheory.GroupCoh.tateCohomologyPeriodicIso (galUnits.{u} K L) hσ 0 ≪≫
-      (GroundTheory.GroupCoh.tateCohomologyZeroIso (ULift.{u} ℤ) Gal(L/K)).app (galUnits.{u} K L)
+      (GroundTheory.GroupCoh.tateCohomologyZeroIso (R := ULift.{u} ℤ) (G := Gal(L/K))).app (galUnits.{u} K L)
   rw [Nat.card_congr e.toLinearEquiv.toEquiv]
   rw [← GroundTheory.LocalField.natCard_tateZero_units (K := K) (L := L)]
   exact Nat.card_congr (tateZeroGalUnitsEquiv K L)

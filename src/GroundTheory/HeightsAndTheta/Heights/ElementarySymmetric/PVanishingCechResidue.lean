@@ -1,10 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.VanishingCechResidue
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.ResidueFiniteModel
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.ResidueChartTransport
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisAltMore
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PTwinEqCech
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CoordIdealXgen
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AssemblyBase
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsBisAltMore
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PTwinEqCech
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.ThetaKeyFormula.RigSymFormTauINontrivial
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.KeyFormula
@@ -19,15 +60,6 @@ theorem serreVanishing_graded_holds : GroundTheory.Heights₂.Heights.Indefinite
   (GroundTheory.Heights₂.Heights.Kleiman.TranslateEq.SerreVanish.equiv
     GroundTheory.Heights₂.Heights.Kleiman.TranslateEq.GradedCech.proof).1
     GroundTheory.Heights₂.Heights.Kleiman.SerreVanish.full.{0, 0}
-
-theorem VanishingCechResidue.proof (hM : ResidueFiniteModel.Statement)
-    (hT : ResidueChartTransport.Statement) : VanishingCechResidue.Statement := by
-  intro P a ha r x hx b hb
-  obtain ⟨𝓜⟩ := hM P a ha r x hx b hb
-  obtain ⟨c₀, hc₀⟩ := serreVanishing_graded_holds ℂ r 𝓜.M 𝓜.G 𝓜.finite
-  refine ⟨c₀.toNat, fun c hc q φ hφ => hT P a b r x 𝓜 c₀ hc₀ c ?_ q φ hφ⟩
-  have := Int.self_le_toNat c₀
-  omega
 
 end
 

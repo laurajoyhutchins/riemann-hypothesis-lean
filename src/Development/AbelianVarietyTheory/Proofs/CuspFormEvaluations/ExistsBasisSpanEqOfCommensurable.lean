@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.FlatMemLatIffStdLat
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.NsmulApplyMemOfMemTensorLat
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IntegrableOnFundamentalDomainOfContinuous
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.FlatMemLatIffStdLat
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IntegrableOnFundamentalDomainOfContinuous
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.NsmulApplyMemOfMemTensorLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ConjSymm
+
+@[expose] public section
 
 namespace GlobalTheory.TensorLat
 
@@ -81,8 +128,8 @@ theorem translate_comp_flat_symm (X : PT E)
     rw [← HC_flat_symm v (flat a), ContinuousLinearEquiv.symm_apply_apply]
   simp only [hU, Function.comp, PT.U, e1, Hf_flat, map_sub, ContinuousLinearEquiv.symm_apply_apply]
 
-open Classical in
 
+open Classical in
 theorem polyDeriv_comp_flat_symm (P : MvPolynomial (Letter n dim) ℂ)
     (F : (Fin n → Vsp dim) → ℂ) (v : Fin n → Vsp dim) :
     polyDeriv P (fun l => EuclideanSpace.single l 1) (F ∘ flat.symm) (flat v) =
@@ -156,7 +203,7 @@ theorem l2_comp_flat_symm_eq_l2 (X : PT E) (Y : GT (Fin n × Idx X.dim))
       rw [← hY, ContinuousLinearEquiv.apply_symm_apply]
       exact hγ
     have h := hper (flat.symm γ) hγ' (flat.symm w)
-    rw [← hg, ← hg, map_add, ContinuousLinearEquiv.apply_symm_apply,
+    rw [← hg, ← hg, map_add (f := _), ContinuousLinearEquiv.apply_symm_apply,
       ContinuousLinearEquiv.apply_symm_apply] at h
     exact h
   have h1 : Y.l2 q (F ∘ flat.symm) =
@@ -194,7 +241,7 @@ theorem comp_flat_symm_mem_sec_iff (X : PT E) (Y : GT (Fin n × Idx X.dim))
       simpa [Function.comp_def] using h
     · intro γ hγ v
       have h := hG.2 (flat γ) ((hY γ).2 hγ) (flat v)
-      simp only [Function.comp, ← map_add, ContinuousLinearEquiv.symm_apply_apply, hka γ hγ,
+      simp only [Function.comp, ← map_add (f := _), ContinuousLinearEquiv.symm_apply_apply, hka γ hγ,
         Hf_flat] at h
       exact h
   · intro hF
@@ -206,7 +253,7 @@ theorem comp_flat_symm_mem_sec_iff (X : PT E) (Y : GT (Fin n × Idx X.dim))
     have h := hF.2 _ hγ (flat.symm w)
     have hk := hka _ hγ
     rw [ContinuousLinearEquiv.apply_symm_apply] at hk
-    simp only [Function.comp, map_add, hk]
+    simp only [Function.comp, map_add (f := _), hk]
     rw [h, HC_flat_symm, HC_flat_symm]
 
 variable [IsCMField E]
@@ -374,7 +421,7 @@ theorem principal_torus_of_selfDual (X : PT E) (Λ' : Submodule (𝓞 E) (Fin n 
     refine ⟨fun x hx => ?_, fun x hx y hy => ?_⟩
     · rw [hka']
       exact tensorEps_sq_of_mem hfg hint hdual w₀ ((hmem x).1 hx)
-    · rw [hka', hka', hka', map_add,
+    · rw [hka', hka', hka', map_add (f := _),
         tensorEps_add_of_mem hfg hint hdual w₀ hw ((hmem x).1 hx) ((hmem y).1 hy), HC_flat_symm]
   · intro heps Y hY hka
     have hY' : ∀ γ, flat γ ∈ lat Y.b ↔ ∀ k, γ k ∈ X.L := fun γ => by
@@ -384,12 +431,5 @@ theorem principal_torus_of_selfDual (X : PT E) (Λ' : Submodule (𝓞 E) (Fin n 
       rw [pow_one, hka, tensorEps_eq_prod_eps X w₀ heps hγ]
     exact ⟨fun F => comp_flat_symm_mem_sec_iff X Y hY' 1 hka1 F, fun F hF =>
       ⟨(comp_flat_symm_mem_sec_iff X Y hY' 1 hka1 F).2 hF, l2_comp_flat_symm_eq_l2 X Y hY' 1 hF⟩⟩
-
-example (X : PT E) (w₀ : 𝓞 E) :
-    ∃ Y : GT (Fin n × Idx X.dim), (∀ γ, flat γ ∈ lat Y.b ↔ ∀ k, γ k ∈ X.L) ∧
-      ∀ γ, Y.ka (flat γ) = tensorEps w₀ γ := by
-  obtain ⟨Y, h1, h2⟩ := exists_tensorTorus (X := X) (n := n) stdLat_fg
-    (fun _ hx => mem_stdLat_iff_herm.1 hx) (fun _ hx => mem_stdLat_iff_herm.2 hx) w₀
-  exact ⟨Y, fun γ => (h1 γ).trans mem_tensorLat_stdLat, h2⟩
 
 end GlobalTheory.TensorLat

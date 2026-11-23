@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CoordLetterEquivApplyConjugate
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsShortHarmonicFamilyLinear
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CoordLetterEquivApplyConjugate
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.PushLettersIntCastOfIsHomogeneous
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsEqMulProdMinors
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.RowAddGenericRowAddTerm
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.Sl2NonnegWeightOfHighestWeightVector
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CommuteRowOpRightMixedOp
+
+@[expose] public section
 
 open MvPolynomial NumberField
 
@@ -39,8 +91,8 @@ theorem typeLetterEquiv_apply {τ : ι} {i : Fin (dim τ)} {t : {τ // Ψ τ}} {
   rw [h]
   rfl
 
-include hσ hΨ in
 
+include hσ hΨ in
 theorem half_cases (τ : ι) : Ψ τ ∨ ∃ τ', Ψ τ' ∧ τ = σ τ' := by
   by_cases h : Ψ τ
   · exact Or.inl h
@@ -60,6 +112,7 @@ theorem rename_lap_one {τ : ι} (h : Ψ τ) (i : Fin (dim τ)) (j : Fin (dim (�
   rw [laplacian_apply]
   simp only [Formalism.L2.Pj.lap, Matrix.one_apply, ite_smul, one_smul, zero_smul, Finset.sum_ite_eq,
     Finset.mem_univ, if_true]
+
   simp only [LinearMap.sum_apply, LinearMap.comp_apply, Derivation.coeFn_coe, map_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [← ex b, ← ey b, pderiv_rename (typeLetterEquiv hσ hΨ hp hq n).injective,
@@ -77,7 +130,7 @@ theorem rename_rowShift {τ : ι} {i i' : Fin (dim τ)} {t : {τ // Ψ τ}} {r r
     simp only [AlgHom.comp_apply, rename_X, Formalism.L2.Pj.rowShift, aeval_X]
     split_ifs with hl
     · obtain ⟨b, rfl⟩ := hl
-      simp only [map_add, map_mul, rename_C, rename_X]
+      simp only [map_add (f := _), map_mul, rename_C, rename_X]
       rw [typeLetterEquiv_apply hσ hΨ hp hq h b, typeLetterEquiv_apply hσ hΨ hp hq h' b,
         rowAdd_X_self]
     · rw [rename_X]
@@ -100,7 +153,7 @@ theorem rowDeg_iff_rename {τ : ι} {i : Fin (dim τ)} {t : {τ // Ψ τ}} {r : 
   have hk : ∀ k : Fin n, (Finsupp.mapDomain (typeLetterEquiv hσ hΨ hp hq n) m) (t, r, k) =
       m ⟨τ, i, k⟩ := fun k => by
     rw [← typeLetterEquiv_apply hσ hΨ hp hq h k,
-      Finsupp.mapDomain_apply (typeLetterEquiv hσ hΨ hp hq n).injective]
+      Finsupp.mapDomain_apply_of_injective (typeLetterEquiv hσ hΨ hp hq n).injective]
   simp only [hk]
 
 theorem mem_HHa_iff_rename [CharZero K] (a : ι → ℕ → ℕ)
@@ -192,6 +245,7 @@ theorem mem_HHa_iff_rename [CharZero K] (a : ι → ℕ → ℕ)
 private theorem X_mul_pderiv_mem_restrictTotalDegree {S' F' : Type*} [Field F'] [DecidableEq S'] {N : ℕ}
     (v u : S') {Q : MvPolynomial S' F'} (hQ : Q ∈ restrictTotalDegree S' F' N) :
     X v * pderiv u Q ∈ restrictTotalDegree S' F' N := by
+
   rw [Q.as_sum, map_sum, Finset.mul_sum]
   refine Submodule.sum_mem _ fun m hm => ?_
   rw [pderiv_monomial]
@@ -203,7 +257,7 @@ private theorem X_mul_pderiv_mem_restrictTotalDegree {S' F' : Type*} [Field F'] 
     have hdeg : Finsupp.degree (Finsupp.single v 1 + (m - Finsupp.single u 1)) =
         Finsupp.degree m := by
       conv_rhs => rw [← add_tsub_cancel_of_le hle]
-      simp only [map_add, Finsupp.degree_single]
+      simp only [map_add (f := _), Finsupp.degree_single]
     calc _ ≤ _ := totalDegree_monomial_le _ _
       _ = Finsupp.degree m := hdeg
       _ ≤ Q.totalDegree := le_totalDegree hm
@@ -289,7 +343,7 @@ theorem HHa_eq_zero_or_rowHighest [CharZero K] [Fintype ι] [Fintype {τ // Ψ �
         fun k l h => hij.ne (Fin.ext (congrArg (fun x : Formalism.L2.Pj.Letter ι dim n => (x.2.1 : ℕ)) h))
       rw [Capelli.rowOp_apply]
       exact ((rowAdd_invariant_iff (fun k : Fin n => (⟨τ, (i, k)⟩ : Formalism.L2.Pj.Letter ι dim n))
-        (fun k : Fin n => (⟨τ, (j, k)⟩ : Formalism.L2.Pj.Letter ι dim n)) hw huw P).out 1 2).1 hall
+        (fun k : Fin n => (⟨τ, (j, k)⟩ : Formalism.L2.Pj.Letter ι dim n)) hw huw P).out 2 3).1 hall
     have hκ : ∀ i : Fin (dim τ),
         Capelli.rowOp K (fun x : Fin (dim τ) × Fin n => (⟨τ, x⟩ : Formalism.L2.Pj.Letter ι dim n)) i i P =
           (((a τ i : ℕ) : ℤ) : K) • P :=
@@ -339,6 +393,7 @@ theorem rename_letB_of_mem {τ : E →+* ℂ} (h : InPsi H τ) (i : Fin (Dw.mult
     rename (thetaLetterEquiv Dw n) (letB c τ i v) =
       xForm ⟨τ, h⟩ (i.cast (mult_of_mem Dw h)) fun k => embF c τ (v k) := by
   rw [xForm_apply]
+
   simp only [Formalism.L2.Pj.letB, map_sum, map_mul, rename_C, rename_X, thetaLetterEquiv_of_mem Dw h]
 
 theorem rename_letB_conjugate {τ : E →+* ℂ} (h : InPsi H τ)
@@ -346,6 +401,7 @@ theorem rename_letB_conjugate {τ : E →+* ℂ} (h : InPsi H τ)
     rename (thetaLetterEquiv Dw n) (letB c (ComplexEmbedding.conjugate τ) i v) =
       yForm ⟨τ, h⟩ (i.cast (mult_conjEmb_of_mem Dw h)) fun k => embF c τ (FD.cc (v k)) := by
   rw [yForm_apply]
+
   simp only [Formalism.L2.Pj.letB, map_sum, map_mul, rename_C, rename_X, thetaLetterEquiv_conjugate Dw h]
   refine Finset.sum_congr rfl fun k _ => ?_
   congr 2
@@ -418,8 +474,8 @@ theorem mem_symO_iff_rename (Λ : GenLat E n) (P : MvPolynomial (LtN Dw n) c.F) 
 
 end Datum
 
-open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj in
 
+open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj in
 theorem theta_letter_dictionary :
     ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H)
       (c : Coeff l) (n : ℕ) [Fintype {τ : E →+* ℂ // InPsi H τ}],

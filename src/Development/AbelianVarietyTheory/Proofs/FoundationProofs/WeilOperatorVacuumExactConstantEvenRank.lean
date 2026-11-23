@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddnessConditionHolds
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddnessConditionHolds
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CharacterTrivialAtInertPrimesStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaTranslationIntertwinerUnitaryStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilOperatorConjHeisenbergMovedLatticeStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilRepresentationVacuumSignInertPlacesStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CharacterTrivialAtInertPrimesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,7 +107,7 @@ theorem split_part {e : AE D} (h1 : e * e = e) (h2 : sgA D e = e)
     ring
   · rw [Units.val_mul, det_cutG, ← hdef]
     change e * x + (1 - e) * 1 = _ * sgA D (e * x + (1 - e) * 1)
-    rw [map_add, map_mul, map_mul, map_sub, map_one, h2]
+    rw [map_add (f := _), map_mul, map_mul, map_sub, map_one, h2]
     linear_combination e * hxv + ((d - 1) * (1 - sgA D x)) * h1
   · have hsplit : x = Units.map (cut e h1) x * Units.map (cut (1 - e) (compl_idem h1)) x :=
       Units.ext (cut_mul_cut e h1 (x : AE D)).1.symm
@@ -82,7 +124,7 @@ theorem vacuum_exact : ∀ (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ), Crv
   have h1 : (ε + sgA D ε) * (ε + sgA D ε) = ε + sgA D ε := by
     have a3 : sgA D ε * sgA D ε = sgA D ε := by rw [← map_mul, a1]
     linear_combination a1 + a3 + 2 * a2
-  have h2 : sgA D (ε + sgA D ε) = ε + sgA D ε := by rw [map_add, VacMove.sgA_sgA, add_comm]
+  have h2 : sgA D (ε + sgA D ε) = ε + sgA D ε := by rw [map_add (f := _), VacMove.sgA_sgA, add_comm]
   generalize ε + sgA D ε = e at h1 h2 h3
   obtain ⟨y, b1, b2, b3⟩ := split_part h1 h2 h3 g hx
   obtain ⟨y', c1, c2, c3⟩ := split_part h1 h2 h3 g' hx'

@@ -1,8 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchT
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatchingTransferOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgEqZeroOfInfiniteRange
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteUnitaryMultiplication
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DoubleCosetMultiplication
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchT
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceConjugationPropertiesCmFieldStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgEqZeroOfInfiniteRange
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DoubleCosetMultiplication
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteUnitaryMultiplication
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatchingTransferOf
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryLevelSubgroupProperties
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,8 +91,8 @@ theorem matchTOf2 : MatchTOf2 := by
       isHecke_lc hoG (GlobalTheory.CompanionTheory.MatchPow.phiX_hecke n w b ϖ _ a), (GlobalTheory.CompanionTheory.MatchPow.phiX_hecke n w b ϖ _ a).1⟩)
     (fun j => (hM4 E hU w hw n a ha b hb ϖ hϖ (x' j) (hx' j).1 (hx' j).2).1)
   have hcon : cR n a w b * GlobalTheory.CompanionTheory.MatchPow.beta a (n - a) w = GlobalTheory.CompanionTheory.MatchPow.alpha n w b := by
-    have h1 : (((iwGL a w).relIndex (GlobalTheory.LFun.KGL w a) : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.2 (GlobalTheory.CompanionTheory.MatchPow.iw_idx a w)
-    have h2 : (((iwGL (n - a) w).relIndex (GlobalTheory.LFun.KGL w (n - a)) : ℕ) : ℂ) ≠ 0 :=
+    have h1 : (((iwGL a w).relIndex (GlobalTheory.LFun.KGL w (n := a)) : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.2 (GlobalTheory.CompanionTheory.MatchPow.iw_idx a w)
+    have h2 : (((iwGL (n - a) w).relIndex (GlobalTheory.LFun.KGL w (n := (n - a))) : ℕ) : ℂ) ≠ 0 :=
       Nat.cast_ne_zero.2 (GlobalTheory.CompanionTheory.MatchPow.iw_idx (n - a) w)
     unfold cR GlobalTheory.CompanionTheory.MatchPow.beta GlobalTheory.CompanionTheory.MatchPow.alpha
     rw [GlobalTheory.CompanionTheory.MatchPow.relIndex_prod, Nat.cast_mul]

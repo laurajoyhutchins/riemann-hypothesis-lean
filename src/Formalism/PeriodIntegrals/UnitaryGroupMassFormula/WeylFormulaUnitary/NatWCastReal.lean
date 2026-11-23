@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.WeylForU
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylProduct.WeylProd
+public import Formalism.PeriodIntegrals.WeylForU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,27 +53,7 @@ open Finset PI.UpqRep Formalism.BasicNotions
 theorem denom_range (n : ℕ) :
     ∏ i ∈ range n, ∏ j ∈ Ico (i + 1) n, ((j : ℝ) - (i : ℝ)) =
       ∏ i ∈ range n, ((i.factorial : ℕ) : ℝ) := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    have h1 : ∀ i ∈ range n, ∏ j ∈ Ico (i + 1) (n + 1), ((j : ℝ) - (i : ℝ)) =
-        (∏ j ∈ Ico (i + 1) n, ((j : ℝ) - (i : ℝ))) * ((n : ℝ) - (i : ℝ)) := by
-      intro i hi
-      exact Finset.prod_Ico_succ_top (Nat.succ_le_of_lt (Finset.mem_range.mp hi)) _
-    have h2 : ∀ k : ℕ, ∏ i ∈ range k, ((k : ℝ) - (i : ℝ)) = ((k.factorial : ℕ) : ℝ) := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ihk =>
-        have e : ∀ i ∈ range k, (((k + 1 : ℕ) : ℝ) - ((i + 1 : ℕ) : ℝ)) = (k : ℝ) - (i : ℝ) := by
-          intro i _
-          push_cast
-          ring
-        rw [Finset.prod_range_succ', Finset.prod_congr rfl e, ihk, Nat.factorial_succ]
-        push_cast
-        ring
-    rw [Finset.prod_range_succ, Finset.prod_range_succ, Finset.Ico_self, Finset.prod_empty, mul_one,
-      Finset.prod_congr rfl h1, Finset.prod_mul_distrib, ih, h2 n]
+  apply PI.WeylProdWork.denom_eq <;> assumption
 
 theorem row_fin (n : ℕ) (a : Fin n) :
     ∏ b ∈ univ.filter (fun b : Fin n => a < b), (((b : ℕ) : ℝ) - ((a : ℕ) : ℝ)) =
@@ -57,10 +80,8 @@ theorem denom_fin (n : ℕ) :
   exact (Fin.prod_univ_eq_prod_range (fun i : ℕ => ∏ j ∈ Ico (i + 1) n, ((j : ℝ) - (i : ℝ))) n).trans
     (denom_range n)
 
-theorem natW_anti {N : ℕ} (lam : DomWeight N) : Antitone lam.natW := by
-  intro i j hij
-  unfold Formalism.BasicNotions.DomWeight.natW
-  exact Int.toNat_le_toNat (sub_le_sub_right (lam.2 hij) _)
+theorem natW_anti {N : ℕ} (lam : DomWeight N) : Antitone lam.natW :=
+  fun _ _ hij => Int.toNat_le_toNat (sub_le_sub_right (lam.anti hij) _)
 
 theorem natW_cast {N : ℕ} (lam : DomWeight N) (i : Fin N) :
     ((lam.natW i : ℕ) : ℤ) = lam.w i - lam.detShift := by
@@ -68,7 +89,7 @@ theorem natW_cast {N : ℕ} (lam : DomWeight N) (i : Fin N) :
   have hle : lam.w ⟨N - 1, by omega⟩ ≤ lam.w i :=
     lam.anti (Fin.le_iff_val_le_val.mpr (by simp only; omega))
   unfold DomWeight.natW DomWeight.detShift
-  rw [dif_pos hN0]
+  rw [dite_eq_left hN0]
   exact Int.toNat_of_nonneg (by omega)
 
 theorem natW_cast_real {N : ℕ} (lam : DomWeight N) (i : Fin N) :

@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AlgDefs
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AlgDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
@@ -24,21 +69,26 @@ private theorem UpperTheory.V.Fr.single_coeff_mul {K : Type} [CommRing K] (p q :
     · rw [Finsupp.notMem_support_iff.mp hm, mul_zero]
   rw [hc]
   ext k
-  simp only [AddMonoidAlgebra.coeff_sum, AddMonoidAlgebra.coeff_single, Finsupp.finset_sum_apply,
+  simp only [AddMonoidAlgebra.coeff_sum, AddMonoidAlgebra.coeff_single, Finsupp.finsetSum_apply,
     Finsupp.single_apply]
   split_ifs with hk
   · rfl
   · simp
 
 theorem UpperTheory.V.Fr.alg_homog :
-    ∀ {C K : Type} [CommRing C] [IsLocalRing C] [CommRing K] [Algebra C K] {P : ℤ → Submodule C K} [SetLike.GradedMonoid P] (h : HasVertex P) (N : ℕ) (p : lauSub P), p ∈ vertex h ^ N → ∀ j : ℤ, (⟨AddMonoidAlgebra.single j (p.1.coeff j), single_mem_lauSub P (p.2 j)⟩ : lauSub P) ∈ vertex h ^ N := by
+    ∀ {C K : Type} [CommRing C] [IsLocalRing C] [CommRing K] [Algebra C K]
+      {P : ℤ → Submodule C K} [SetLike.GradedMonoid P] (h : HasVertex P) (N : ℕ) (p : lauSub P),
+      p ∈ vertex h ^ N → ∀ j : ℤ,
+        (⟨AddMonoidAlgebra.single j (p.1.coeff j), single_mem_lauSub P (p.2 j)⟩ : lauSub P) ∈
+          vertex h ^ N := by
   intro C K _ _ _ _ P _ h N
   let comp : lauSub P → ℤ → lauSub P := fun q k =>
     ⟨AddMonoidAlgebra.single k (q.1.coeff k), single_mem_lauSub P (q.2 k)⟩
   have hcomp : ∀ q k, (comp q k).1 = AddMonoidAlgebra.single k (q.1.coeff k) := fun _ _ => rfl
   have base : ∀ q : lauSub P, q ∈ vertex h → ∀ k : ℤ, comp q k ∈ vertex h := by
     intro q hq k
-    rw [mem_vertex] at hq ⊢
+    change ∃ c ∈ maximalIdeal C, algebraMap C K c = q.1.coeff 0 at hq
+    change ∃ c ∈ maximalIdeal C, algebraMap C K c = (comp q k).1.coeff 0
     obtain ⟨c, hc, hce⟩ := hq
     rw [hcomp, AddMonoidAlgebra.coeff_single]
     by_cases hk : k = 0
@@ -59,7 +109,7 @@ theorem UpperTheory.V.Fr.alg_homog :
       have e : comp (x * y) j =
           ∑ a ∈ x.1.coeff.support, comp x a * comp y (-a + j) := by
         apply Subtype.ext
-        rw [AddSubmonoidClass.coe_finset_sum, hcomp, Subalgebra.coe_mul, single_coeff_mul]
+        rw [AddSubmonoidClass.coe_finsetSum, hcomp, Subalgebra.coe_mul, single_coeff_mul]
         rfl
       rw [e, pow_succ]
       exact Ideal.sum_mem _ fun a _ => Ideal.mul_mem_mul (ih x hx a) (base y hy _)

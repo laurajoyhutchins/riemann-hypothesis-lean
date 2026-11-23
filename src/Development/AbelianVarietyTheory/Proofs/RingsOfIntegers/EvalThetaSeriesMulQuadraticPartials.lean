@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SmallPointsSubstitutionAlgHomSinglePoint
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.GaugeThirdDifferenceSymmetryIntegralExponentials
+module
+
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SmallPointsSubstitutionAlgHomSinglePoint
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.GaugeThirdDifferenceSymmetryIntegralExponentials
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -24,7 +63,7 @@ def noConst : AddSubgroup (PS K n d) where
   zero_mem' := map_zero _
   add_mem' := fun {f g} hf hg => by
     change MvPowerSeries.constantCoeff (f + g) = 0
-    rw [map_add, hf, hg, add_zero]
+    rw [map_add (f := _), hf, hg, add_zero]
   neg_mem' := fun {f} hf => by
     change MvPowerSeries.constantCoeff (-f) = 0
     rw [map_neg, hf, neg_zero]
@@ -89,8 +128,8 @@ theorem constantCoeff_act_eq_zero (o : O) (x : Sm B n) (hx : GP x.1) : GP (Sm.ac
   rw [smallPointsRingAction_coe_eq_comp B o x hx]
   exact gp_comp1 _ _ (fun i => B.A.const o i) hx
 
-variable (n) in
 
+variable (n) in
 def zeroPts : Subgroup (Sm B n) where
   carrier := {x | GP x.1}
   one_mem' := gp_zero₂
@@ -144,7 +183,7 @@ theorem canonicalGauge_first_partial_law_eq (hh : B.IsCanonGauge K h) (a b c : z
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
       ← mp_mul_eq_addOf B K a b, toAdd_div, toAdd_mul, AddSubgroup.coe_sub, AddSubgroup.coe_add, negH_val B K hh]
     abel
-  · rw [map_sub, map_add, gt_const_ev _ (pair_points_zero_constant g0 g2) _ hc, gt_const_ev _ (pair_points_zero_constant g1 g2) _ hc,
+  · rw [map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant g0 g2) _ hc, gt_const_ev _ (pair_points_zero_constant g1 g2) _ hc,
       gt_const_ev _ (pair_points_zero_constant gs g2) _ hc]
     simp
 
@@ -174,7 +213,7 @@ theorem ph2_eq_subst_exp (hh : B.IsCanonGauge K h) (a b c : zeroPts B n) :
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
       ← mp_mul_eq_addOf B K b c, toAdd_div, toAdd_mul, AddSubgroup.coe_sub, AddSubgroup.coe_add, negH_val B K hh]
     abel
-  · rw [map_sub, map_add, gt_const_ev _ (pair_points_zero_constant g0 g1) _ hc, gt_const_ev _ (pair_points_zero_constant g0 g2) _ hc,
+  · rw [map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant g0 g1) _ hc, gt_const_ev _ (pair_points_zero_constant g0 g2) _ hc,
       gt_const_ev _ (pair_points_zero_constant g0 gs) _ hc]
     simp
 

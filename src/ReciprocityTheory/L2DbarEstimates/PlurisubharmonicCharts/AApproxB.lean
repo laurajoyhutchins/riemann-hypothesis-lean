@@ -1,4 +1,51 @@
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.AApproxA
+module
+
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FamilyLeCoords
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.Y
 
@@ -39,17 +86,6 @@ theorem nsq_chart (la : La) (s : ι → Y → ℂ) (i : ι) {y : Y} (hy : y ∈ 
     div_eq_mul_inv]
   linear_combination (‖s i y‖ ^ 2 * (Real.exp (A.ph la i y))⁻¹) * hn
 
-theorem nsq_chart_of_isSec (la : La) (s : ι → Y → ℂ) (hs : A.IsSec la s) (i : ι) {y : Y}
-    (hy : y ∈ (A.chart i).source) : A.nsq la s y = ‖s i y‖ ^ 2 * Real.exp (-A.ph la i y) :=
-  A.nsq_chart la s i hy (hs.2 _ i y (Set.mem_univ _) (A.mem_pick y) hy)
-
-theorem sqn_chart {N : ℕ} (la : La) (w : Fin N → ι → Y → ℂ) (hw : ∀ k, A.IsSec la (w k)) (i : ι)
-    {y : Y} (hy : y ∈ (A.chart i).source) :
-    A.sqn la w y = (∑ k, ‖w k i y‖ ^ 2) * Real.exp (-A.ph la i y) := by
-  unfold sqn
-  rw [Finset.sum_mul]
-  exact Finset.sum_congr rfl fun k _ => A.nsq_chart_of_isSec la (w k) (hw k) i hy
-
 theorem aap_ph_zero (i : ι) {y : Y} (hy : y ∈ (A.chart i).source) : A.ph 0 i y = 0 := by
   have h := A.ph_add 0 0 i y hy
   rw [add_zero] at h
@@ -60,25 +96,6 @@ theorem aap_ph_nsmul (L : La) (k : ℕ) (i : ι) {y : Y} (hy : y ∈ (A.chart i)
   induction k with
   | zero => simp [A.aap_ph_zero i hy]
   | succ k ih => rw [succ_nsmul, A.ph_add _ _ i y hy, ih]; push_cast; ring
-
-theorem ph_eq_sub_nsmul (la L : La) (k : ℕ) (i : ι) {y : Y} (hy : y ∈ (A.chart i).source) :
-    A.ph la i y = A.ph (la - k • L) i y + k * A.ph L i y := by
-  rw [← A.aap_ph_nsmul L k i hy, ← A.ph_add _ _ i y hy, sub_add_cancel]
-
-theorem continuous_of_chart {E : Type*} [TopologicalSpace E] (f : Y → E)
-    (hf : ∀ i, ContinuousOn (f ∘ (A.chart i).symm) (A.chart i).target) : Continuous f := by
-  refine continuous_iff_continuousAt.2 fun y => ?_
-  have hy := A.mem_pick y
-  set φ := A.chart (A.pick y)
-  have h1 : ContinuousAt (f ∘ φ.symm) (φ y) :=
-    (hf _).continuousAt (φ.open_target.mem_nhds (φ.map_source hy))
-  have h2 : ContinuousAt (fun x => (f ∘ φ.symm) (φ x)) y := h1.comp (φ.continuousAt hy)
-  refine h2.congr ?_
-  filter_upwards [φ.open_source.mem_nhds hy] with x hx
-  simp [φ.left_inv hx]
-
-theorem SmoothFn.continuous {f : Y → ℝ} (hf : A.SmoothFn f) : Continuous f :=
-  A.continuous_of_chart f fun i => (hf i).continuousOn
 
 theorem aap_lintegral_chart_le (i : ι) (f : Y → ℝ≥0∞) (hf : Measurable f) (s : Set (V n))
     (hs : s ⊆ (A.chart i).target) :

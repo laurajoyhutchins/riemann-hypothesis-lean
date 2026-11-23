@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockSphereMeanEqOfFrameNormEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsHeightIffOfDegreeEq
+import Development.AbelianVarietyTheory.Definitions.Divisors.IrreducibleOfIrreducibleMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockSphereMeanEqOfFrameNormEq
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinSubstLinSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import ReciprocityTheory.SemistableReduction.LagrangeIdealLiftsFact
+import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -81,20 +128,5 @@ theorem sum_smul {m : ℕ} (M : Matrix (Fin m) (Fin m) ℂ) (c : ℂ) (v : Fin m
 theorem archSize_smul_sq {N : ℕ} (A : Matrix (Fin N) (Fin N) ℂ) (c : ℂ) (x : Fin N → ℂ) :
     GlobalTheory.Adelic.archSize (c • A) x ^ 2 = ‖c‖ ^ 2 * GlobalTheory.Adelic.archSize A x ^ 2 := by
   rw [GlobalTheory.Adelic.archSize, GlobalTheory.Adelic.archSize, Real.sq_sqrt (by positivity), Real.sq_sqrt (by positivity), sum_smul]
-
-theorem log_step {m : ℕ} (M : Matrix (Fin m) (Fin m) ℂ) (r : ℝ) {c : ℂ} (hc : c ≠ 0) (v : Fin m → ℂ)
-    (h : 0 < ∑ a, ‖∑ k, (((Real.exp r : ℝ) : ℂ) • M) k a * v k‖ ^ 2) :
-    Real.log (∑ a, ‖∑ k, M k a * (c * v k)‖ ^ 2) + 2 * r =
-      Real.log (∑ a, ‖∑ k, (((Real.exp r : ℝ) : ℂ) • M) k a * v k‖ ^ 2) + Real.log (‖c‖ ^ 2) := by
-  have e : ∑ a, ‖∑ k, M k a * (c * v k)‖ ^ 2 = ‖c‖ ^ 2 * ∑ a, ‖∑ k, M k a * v k‖ ^ 2 := by
-    rw [← sum_smul]
-    simp only [Matrix.smul_apply, smul_eq_mul, mul_assoc, mul_left_comm c]
-  rw [sum_smul] at h ⊢
-  have h0 : ∑ a, ‖∑ k, M k a * v k‖ ^ 2 ≠ 0 := fun h0 => by rw [h0, mul_zero] at h; exact lt_irrefl _ h
-  have h1 : ‖c‖ ^ 2 ≠ 0 := pow_ne_zero _ (norm_ne_zero_iff.2 hc)
-  rw [e, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos r).le, Real.log_mul h1 h0,
-    Real.log_mul (pow_ne_zero _ (Real.exp_pos r).ne') h0, Real.log_pow (Real.exp r), Real.log_exp]
-  push_cast
-  ring
 
 end PositivityTheory.UnitarySelfGeneration.FrameHeightScaling

@@ -1,4 +1,43 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.RankDefs
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.RankDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,15 +58,15 @@ def IsChain {N r : ℕ} (LL : ChainLetters N) (ka : Fin (N + 1) → Fin r → �
 def ChainOK {N r : ℕ} [NeZero r] {q : ℕ} (J : Fin q → ℕ) (M : Fin q → WithTop ℤ) (ka : Fin (N + 1) → Fin r → ℤ) : Prop :=
   ∀ k, ((ka (finPos N (J k)) 0 : ℤ) : WithTop ℤ) ≤ M k
 
-open Classical in
 
+open Classical in
 def chainSum {N r : ℕ} [NeZero r] (LL : ChainLetters N) {q : ℕ} (J : Fin q → ℕ) (M : Fin q → WithTop ℤ) : ℚ :=
   ∑ᶠ ka : Fin (N + 1) → Fin r → ℤ, if IsChain LL ka ∧ ChainOK J M ka then wdim (ka (Fin.last N)) else 0
 
 def sdXi (r g : ℕ) : ℕ := Nat.choose (g + r - 1) (r - 1)
 
-open Classical in
 
+open Classical in
 def BlockRankAt : Prop :=
   ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (N r : ℕ) [NeZero r] (D : BlockData N),
     Module.finrank (KK O) (Submodule.span (KK O)
@@ -46,8 +85,8 @@ def StWeylAt : Prop :=
   ∀ (n N : ℕ) (LL : Letters (Fin N)) (B : Fin N → ℕ) (P : PPath n N LL B),
     (Nat.card {I : ℤ → Finset (Fin n) // IsSt P.mu I} : ℚ) = wdim (pEnd P.mu)
 
-open Classical in
 
+open Classical in
 def NumBranchAt : Prop :=
   ∀ (r : ℕ) (mu : Fin (r + 1) → ℤ), Antitone mu →
     wdim mu = ∑ᶠ lam : Fin r → ℤ, if (∀ i : Fin r, mu i.succ ≤ lam i ∧ lam i ≤ mu i.castSucc) then wdim lam else 0
@@ -56,8 +95,8 @@ def ChainDimAt : Prop :=
   ∀ (N r : ℕ) [NeZero r] (LL : ChainLetters N),
     chainSum (r := r) LL (q := 0) Fin.elim0 Fin.elim0 = ∏ i, (sdXi r (LL.deg i) : ℚ)
 
-open Classical in
 
+open Classical in
 def chainCount (C0 CE1 CE2 : ℝ) (X : Loc) [NeZero X.m] (j : Fin (numSeg X.TT)) (m : ℝ)
     (rz ry : Fin (segS X.TT j) → Fin (X.m + 1) → ℕ) : ℚ :=
   ∑ᶠ b : SegBlock (segS X.TT j) X.m,

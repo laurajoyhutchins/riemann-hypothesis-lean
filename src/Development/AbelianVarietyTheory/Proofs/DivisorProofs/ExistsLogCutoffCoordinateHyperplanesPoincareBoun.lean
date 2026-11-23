@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.InterPolyProdSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLogCutoffBoundedPoincareGradient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import Development.AbelianVarietyTheory.Definitions.Divisors.EndValuedForm11Coeffs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLogCutoffBoundedPoincareGradient
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -152,10 +197,10 @@ private lemma fderiv_prod_logCutoff_coordVec {n : ℕ} (k : ℕ) (S : Finset (Fi
   have hcoord : ∀ (t : ℝ) (a : Fin n), (v + t • (c • _root_.GlobalTheory.GoodMetric.coordVec b)) a =
       if a = b then v b + (t : ℂ) * c else v a := by
     intro t a
-    simp only [_root_.GlobalTheory.GoodMetric.coordVec, PiLp.add_apply, PiLp.smul_apply, EuclideanSpace.single_apply]
+    simp only [_root_.GlobalTheory.GoodMetric.coordVec, PiLp.add_apply, PiLp.smul_apply, PiLp.single_apply]
     split_ifs with h
     · subst h; simp [Complex.real_smul]
-    · simp
+    · simp [h]
   have hψline : HasDerivAt (fun t : ℝ => _root_.GlobalTheory.GoodTop.logCutoff k (v b + (t : ℂ) * c))
       (fderiv ℝ (_root_.GlobalTheory.GoodTop.logCutoff k) (v b) c) 0 := by
     have hl : HasDerivAt (fun t : ℝ => v b + (t : ℂ) * c) c 0 := by
@@ -190,10 +235,10 @@ private lemma fderiv_prod_logCutoff_coordVec {n : ℕ} (k : ℕ) (S : Finset (Fi
       exact hasDerivAt_const _ _
     exact h1.unique h2
 
+
 open MeasureTheory Filter Topology in
 open scoped ContDiff Matrix in
 set_option autoImplicit false in
-
 theorem _root_.GlobalTheory.GoodTop.exists_logCutoff_hyperplanes {n : ℕ} (S : Finset (Fin n)) :
     ∃ (C : ℝ) (χ : ℕ → _root_.ReciprocityTheory.L2DbarEstimates.V n → ℝ),
     (∀ k, ContDiff ℝ ∞ (χ k)) ∧ (∀ k v, 0 ≤ χ k v ∧ χ k v ≤ 1) ∧
@@ -209,7 +254,7 @@ theorem _root_.GlobalTheory.GoodTop.exists_logCutoff_hyperplanes {n : ℕ} (S : 
     fun k v hv => ?_, fun v hv => ?_, fun k v b => ?_⟩
   · exact contDiff_prod fun a _ => (_root_.GlobalTheory.GoodTop.contDiff_logCutoff k).comp (hproj a)
   · exact ⟨Finset.prod_nonneg fun a _ => (logCutoff_mem_Icc k _).1,
-      Finset.prod_le_one (fun a _ => (logCutoff_mem_Icc k _).1)
+      Finset.prod_le_one₀ (fun a _ => (logCutoff_mem_Icc k _).1)
         (fun a _ => (logCutoff_mem_Icc k _).2)⟩
   · obtain ⟨a, ha, h0⟩ := hv
     have hopen : IsOpen {w : _root_.ReciprocityTheory.L2DbarEstimates.V n | ‖w a‖ < Real.exp (-2 * ((k : ℝ) + 1))} :=
@@ -256,7 +301,7 @@ theorem _root_.GlobalTheory.GoodTop.exists_logCutoff_hyperplanes {n : ℕ} (S : 
     · set P := ∏ a ∈ S.erase b, _root_.GlobalTheory.GoodTop.logCutoff k (v a)
       have hP : |P| ≤ 1 := by
         rw [abs_of_nonneg (Finset.prod_nonneg fun a _ => (logCutoff_mem_Icc k _).1)]
-        exact Finset.prod_le_one (fun a _ => (logCutoff_mem_Icc k _).1)
+        exact Finset.prod_le_one₀ (fun a _ => (logCutoff_mem_Icc k _).1)
           (fun a _ => (logCutoff_mem_Icc k _).2)
       have hw : 0 ≤ ‖v b‖ * |Real.log ‖v b‖| := by positivity
       have b1 := hM k (v b) 1

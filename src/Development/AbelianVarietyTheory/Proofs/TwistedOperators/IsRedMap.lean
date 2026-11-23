@@ -1,5 +1,44 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HalfLinearCocycle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorBasePointNormSq
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +51,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7}
 
-open Classical in
 
+open Classical in
 def gLoc {a b : ℕ} (L : Formalism.L2.DIV.LevDat D.host.E ℂ a) (PP : Formalism.L2.DIV.Pl D.host.E)
     (H : Subgroup (GL (Fin L.r) (Formalism.L2.DIV.kP PP))) (c : H →* ℂˣ) (χ : (Formalism.L2.DIV.kP PP)ˣ →* ℂˣ)
     (y : Matrix (Fin b) (Fin a) (Formalism.L2.DIV.kP PP)) : ℂ :=
@@ -26,8 +65,8 @@ def gLoc {a b : ℕ} (L : Formalism.L2.DIV.LevDat D.host.E ℂ a) (PP : Formalis
       (((χ (Matrix.GeneralLinearGroup.det h.2.choose)) : ℂˣ) : ℂ)⁻¹
   else 0
 
-open Classical in
 
+open Classical in
 def qLoc {a b : ℕ} (r : ℕ) (PP : Formalism.L2.DIV.Pl D.host.E) (ξ : (Formalism.L2.DIV.kP PP)ˣ →* ℂˣ)
     (y : Matrix (Fin b) (Fin a) (Formalism.L2.DIV.kP PP)) : ℂ :=
   if h : LowZero r y ∧ IsUnit (topL r y).det then ((ξ h.2.unit : ℂˣ) : ℂ) else 0
@@ -39,14 +78,14 @@ def IsRedMap {v : FinPl D} (φ : SplitProj D v) (PP : Formalism.L2.DIV.Pl D.host
     ∀ (N : EAf D) (hN : N ∈ Formalism.L2.Herm.intAf D.host.F D.host.E),
       ∃ h : rdE φ N ∈ v.adicCompletionIntegers D.host.F, r ⟨rdE φ N, h⟩ = Formalism.L2.DIV.resS D.host.F PP ⟨N, hN⟩
 
-open Classical in
 
+open Classical in
 def viaRed {v : FinPl D} {k : Type} [CommRing k] {a b : ℕ} (r : v.adicCompletionIntegers D.host.F →+* k)
     (ω : Matrix (Fin b) (Fin a) k → ℂ) (Y : Matrix (Fin b) (Fin a) (Fv D.host.F v)) : ℂ :=
   if h : ∀ i j, Y i j ∈ v.adicCompletionIntegers D.host.F then ω (Matrix.of fun i j => r ⟨Y i j, h i j⟩) else 0
 
-open Classical in
 
+open Classical in
 def locFn (S T : HSp D) (βS : GL (Fin S.rank) (EAf D)) (βT : GL (Fin T.rank) (EAf D)) (e : AE D)
     (PP : Formalism.L2.DIV.Pl D.host.E) (ω : Matrix (Fin T.rank) (Fin S.rank) (Formalism.L2.DIV.kP PP) → ℂ) : WO S T → ℂ :=
   fun x => if IsHalf e x ∧ IsIntM (frMapO S T βS βT x) then ω (redM PP (frMapO S T βS βT x)) else 0

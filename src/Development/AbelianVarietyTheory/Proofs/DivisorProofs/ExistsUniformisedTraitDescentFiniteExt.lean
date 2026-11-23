@@ -1,17 +1,72 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProjOverWeierstrass
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniTrait
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDegenerationDataPullbackInjectiveLocalHom
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSemiAbelianUniformisationOfFiniteExtTrans
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPullDegUniqueAndComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonPullbackFractionFieldFiniteLocalExt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsPrimitiveRootUnitOnIff
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LineBundleSymmetryHypothesisBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniTrait
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.RigGen
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaLevelObjectDescendsFgSubfield
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsDescOfPoints
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EtaleCompletionOfDimOneNormal
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsPrimitiveRootUnitOnIff
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.LineBundleSymmetryHypothesisBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonPullbackFractionFieldFiniteLocalExt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDegenerationDataPullbackInjectiveLocalHom
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSemiAbelianUniformisationOfFiniteExtTrans
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPullDegUniqueAndComp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EtaleCompletionOfDimOneNormal
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.AbelianSchemeDescentSmoothDimensionStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFinsetIsProjOverDescendsStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLineBundleDescentToSubfieldStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GrpObjDescendsToLargeSubfield
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomIffOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LineBundleTrivialIsoDescendField
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.MorphismsDescendToLargeSubfieldStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RelAmpleOfFieldExtensionBaseChange
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RigidifiedSymmetricKernelTrivialDescendFieldExtStatement
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.Integral
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleIdentityIso
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.GeneratorPullback.PullAlong
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -255,7 +310,11 @@ theorem exists_extend {R R₁ F Ω : Type} [CommRing R] [CommRing R₁] [IsDomai
     obtain ⟨a, b, -, rfl⟩ := IsFractionRing.div_surjective (A := R₁) x
     rw [div_eq_mul_inv]
     exact (hint a).isAlgebraic.mul (hint b).isAlgebraic.inv⟩
-  let l : FractionRing R₁ →ₐ[F] Ω := IsAlgClosed.lift
+  let l : FractionRing R₁ →ₐ[F] Ω := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   exact ⟨l.toRingHom, RingHom.ext fun x => l.commutes x⟩
 
 theorem exists_range_le_gen {R R₁ L Ω : Type} [CommRing R] [CommRing R₁] [IsDomain R₁] [CommRing L] [Field Ω]
@@ -270,7 +329,7 @@ theorem exists_range_le_gen {R R₁ L Ω : Type} [CommRing R] [CommRing R₁] [I
     induction hr using Submodule.span_induction with
     | mem x hx => exact subset_gen β le_rfl (Finset.mem_coe.2 (Finset.mem_image_of_mem _ hx))
     | zero => rw [map_zero, map_zero]; exact zero_mem _
-    | add x y _ _ hx hy => rw [map_add, map_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _)]; exact add_mem hx hy
     | smul a x _ hx =>
       rw [Algebra.smul_def, map_mul, map_mul, RingHom.algebraMap_toAlgebra, h]
       exact mul_mem (mem_gen β _ _) hx
@@ -295,7 +354,7 @@ theorem exists_restrict {R R₁ W : Type} [CommRing R] [IsLocalRing R] [CommRing
       map_one' := inj (by simp only [hf, map_one])
       map_mul' := fun a b => inj (by simp only [hf, map_mul])
       map_zero' := inj (by simp only [hf, map_zero])
-      map_add' := fun a b => inj (by simp only [hf, map_add]) }
+      map_add' := fun a b => inj (by simp only [hf, map_add (f := _)]) }
   have hc : φ.comp ρ = χ := RingHom.ext fun r => inj ((hf _).trans (h r))
   refine ⟨φ, fun r => (hf r).symm, hc, fun a b e => ?_, ?_⟩
   · exact IsFractionRing.injective R₁ (FractionRing R₁)
@@ -304,7 +363,7 @@ theorem exists_restrict {R R₁ W : Type} [CommRing R] [IsLocalRing R] [CommRing
       refine Ideal.isMaximal_of_isIntegral_of_isMaximal_comap' ρ (RingHom.IsIntegral.of_finite hρ) _ ?_
       rw [Ideal.comap_comap, hc, IsLocalRing.maximalIdeal_comap]
       infer_instance
-    exact ((IsLocalRing.local_hom_TFAE φ).out 4 0).1 (IsLocalRing.eq_maximalIdeal hm)
+    exact ((IsLocalRing.local_hom_tfae φ).out 5 1).1 (IsLocalRing.eq_maximalIdeal hm)
 
 theorem exists_fib_finite {K Ω : Type} [Field K] [Field Ω] (α : K →+* Ω) (hα : α.IsIntegral) (t : PolAV (Sp Ω))
     (ht : letI := t.isAb.comm; GlobalTheory.ZH.HypS t.A t.L) :

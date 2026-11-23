@@ -1,7 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.Carries
-import GroundTheory.AutomorphicForms.TraceNormComp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.ConvolutionSpectra.ConvSpec
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.ConvolutionSpectra.CutLaws
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.Carries
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.ConvolutionSpectra.ConvSpec
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.ConvolutionSpectra.CutLaws
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Analysis.Fourier.Notation
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 open MeasureTheory GroundTheory.Automorphic PositivityTheory.Rg.Tf.IntegralApplyAeEq Set Filter Topology UpperTheory.V.Z.IntegralApplyAeEq
 open scoped InnerProductSpace FourierTransform ComplexConjugate
@@ -27,7 +71,7 @@ theorem UpperTheory.V.Z.IntegralApplyAeEq.convLaws :
     simp only [ContinuousLinearMap.comp_apply]
     rw [h1, h2, h3]
     refine integral_congr_ae ?_
-    filter_upwards [(q x).ae (sh_ae V a u)] with t ht
+    filter_upwards [Measure.QuasiMeasurePreserving.ae (q x) (sh_ae V a u)] with t ht
     rw [ht, add_right_comm]
   · ext1 u
     have c1 := (cutLaws (V := W) (Iic (T + ρ)) (Ioi (T + ρ)) measurableSet_Iic measurableSet_Ioi).2.2.2.2.2.2.2.1
@@ -41,7 +85,7 @@ theorem UpperTheory.V.Z.IntegralApplyAeEq.convLaws :
       filter_upwards [(convSpec κ hk (cut V (Iic T) u)).1] with x hx hx'
       rw [hx]
       refine integral_eq_zero_of_ae ?_
-      filter_upwards [(q x).ae h0] with t ht
+      filter_upwards [Measure.QuasiMeasurePreserving.ae (q x) h0] with t ht
       by_cases h : ρ < |t|
       · simp [hρ t h]
       · have h2 := (abs_le.1 (not_lt.1 h)).1
@@ -64,7 +108,7 @@ theorem UpperTheory.V.Z.IntegralApplyAeEq.convLaws :
     · filter_upwards [(convSpec κ hk p).1] with x hx hx'
       rw [hx]
       refine integral_eq_zero_of_ae ?_
-      filter_upwards [(q x).ae h0] with t ht
+      filter_upwards [Measure.QuasiMeasurePreserving.ae (q x) h0] with t ht
       by_cases h : R < |t|
       · simp [hR t h]
       · obtain ⟨h2, h3⟩ := abs_le.1 (not_lt.1 h)

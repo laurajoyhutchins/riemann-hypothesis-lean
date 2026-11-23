@@ -1,6 +1,53 @@
-import Development.AutomorphicArithmetic.ThickFrames.MarkedLow
-import Development.AutomorphicArithmetic.ThickFrames.expectationSpec
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ChoiceOfTops
+module
+
+public import Development.AutomorphicArithmetic.ThickFrames.MarkedLow
+public import Formalism.SubspaceCounting.GoodOrbitIntervalTileCondition
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ChoiceOfTops
+public import Development.AutomorphicArithmetic.ThickFrames.expectationSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset UpperTheory.BernoulliSumsFrobeniusOrbits Formalism.G0
 
@@ -16,7 +63,7 @@ private theorem ind_le_one' (q : Prop) : ind q ≤ 1 := by
 private theorem pow_le_prod {p : ℕ → ℝ} {δ : ℝ} (hp : ∀ a, p a ≤ δ) (h1 : δ ≤ 1) (C : Finset ℕ) :
     (1 - δ) ^ C.card ≤ ∏ a ∈ C, (1 - p a) := by
   rw [← Finset.prod_const]
-  exact Finset.prod_le_prod (fun _ _ => by linarith) fun a _ => by linarith [hp a]
+  exact Finset.prod_le_prod₀ (fun _ _ => by linarith) fun a _ => by linarith [hp a]
 
 private theorem one_sub_pow_le_bernoulliExpectation_empty {p : ℕ → ℝ} {δ : ℝ} (hp : ∀ a, p a ≤ δ) (h1 : δ ≤ 1) (C : Finset ℕ) :
     (1 - δ) ^ C.card ≤ exP p C (fun V => ind (V = ∅)) := by
@@ -133,12 +180,12 @@ theorem UpperTheory.BernoulliSumsFrobeniusOrbits.marked_ge :
     · intro T _
       by_cases hM : Marked T r u s
       · rw [ind_pos' hM]
-        exact Finset.prod_le_one (fun j _ => hg0 j _) (fun j _ => hg1 j _)
+        exact Finset.prod_le_one₀ (fun j _ => hg0 j _) (fun j _ => hg1 j _)
       · rw [ind_neg' hM]
         unfold Formalism.G0.Marked at hM
         obtain ⟨c, hc⟩ := Classical.not_forall.1 hM
-        obtain ⟨hc1, hc⟩ := _root_.not_imp.1 hc
-        obtain ⟨hc2, hc⟩ := _root_.not_imp.1 hc
+        obtain ⟨hc1, hc⟩ := Classical.not_imp.1 hc
+        obtain ⟨hc2, hc⟩ := Classical.not_imp.1 hc
         obtain ⟨j, rfl⟩ : ∃ j, c = j + 1 := ⟨c - 1, by omega⟩
         apply le_of_eq
         apply Finset.prod_eq_zero (i := j) (Finset.mem_range.2 (by omega))
@@ -176,7 +223,7 @@ theorem UpperTheory.BernoulliSumsFrobeniusOrbits.marked_ge :
         ring
       rw [hAj]
       simpa only [hg, if_neg hj] using le_bernoulliExpectation_singleton_even hp h0 h1 (s * ((6 * r + 1) * u) + j * u) u
-  have hprod := Finset.prod_le_prod (fun j _ => by split_ifs <;> positivity) hlow
+  have hprod := Finset.prod_le_prod₀ (fun j _ => by split_ifs <;> positivity) hlow
   have h6 : 6 * r + 1 = 2 * (3 * r) + 1 := by ring
   rw [h6, GlobalTheory.RandomTops.prod_alternate] at hprod
   rw [h6]

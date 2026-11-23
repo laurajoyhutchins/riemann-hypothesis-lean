@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.OneSubPhiOntoOfFilZero
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ConductorExponents
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinLatticeExponentsAinfComparisonStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinLatticeExponentsAinfComparisonStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TeichmullerSubOneAinfPropertiesCompatibleRootsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Matrix
 open scoped Formalism.Per
 
@@ -17,8 +56,8 @@ variable {l : ℕ} [hl : Fact l.Prime] {a e : ℕ} [NeZero a] [NeZero e]
   [NormedField K] [IsUltrametricDist K] [Algebra O K] [IsUnitBall O K] [NormedAlgebra ℚ_[l] K]
   [TameDescentExponentData K l e a] (t : Wq l a →ₐ[ℤ_[l]] O) (ϖ : PiSys l e)
 
-variable (O) in
 
+variable (O) in
 def actS (γ : TameGal K l e a) : (ZMod a → S O K e) →+* (ZMod a → S O K e) where
   toFun f τ := ⟨ringAct γ (fun σ => (f σ : K⟦X⟧)) τ, rot_S.ringAct_mem γ (fun σ => (f σ).2) τ⟩
   map_one' := funext fun τ => Subtype.ext (by
@@ -72,6 +111,7 @@ theorem galOCr_iC_of_covers {h : GQ l} {γ : TameGal K l e a} (hc : Covers K t �
     simp only [Pi.mul_apply, Pi.single_eq_same, one_mul]
     rfl
   change F f = F' f
+
   rw [hx, map_sum, map_sum]
   refine Finset.sum_congr rfl fun τ _ => ?_
   rw [map_mul, map_mul, hs, ← RingHom.comp_apply F d, hd]
@@ -88,8 +128,8 @@ variable {l : ℕ} [hl : Fact l.Prime] {a e : ℕ} [NeZero a] [NeZero e]
   [NormedField K] [IsUltrametricDist K] [Algebra O K] [IsUnitBall O K] [NormedAlgebra ℚ_[l] K]
   [TameDescentExponentData K l e a] (t : Wq l a →ₐ[ℤ_[l]] O) (ϖ : PiSys l e)
 
-omit [TameDescentExponentData K l e a] in
 
+omit [TameDescentExponentData K l e a] in
 theorem pow_mul_iB (N : ℕ) (F : ZMod a → invL l (S O K e)) (G : ZMod a → S O K e)
     (hG : ∀ τ, (G τ : K⟦X⟧) = (l : K⟦X⟧) ^ N * F τ) :
     (l : OB l O) ^ N * ϖ.iB t K F = toOB l O (ϖ.iC t K G) := by
@@ -138,7 +178,7 @@ theorem TWact_smul {R : Type} [CommRing R] [Algebra O R] (f : R →ₐ[O] R) (T 
   | zero => simp only [smul_zero, map_zero]
   | tmul w y =>
     simp only [TWact, smul_tmul', TensorProduct.map_tmul, AlgHom.toLinearMap_apply, smul_eq_mul, map_mul]
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
 theorem TWact_TWincl {R R' : Type} [CommRing R] [CommRing R'] [Algebra O R] [Algebra O R'] (φ : R →ₐ[O] R')
     (f : R →ₐ[O] R) (f' : R' →ₐ[O] R') (h : ∀ r, f' (φ r) = φ (f r)) (T : LocLat G ℚ_[l] K O) (g : G)
@@ -147,13 +187,13 @@ theorem TWact_TWincl {R R' : Type} [CommRing R] [CommRing R'] [Algebra O R] [Alg
   | zero => simp only [map_zero]
   | tmul w y =>
     simp only [TWact, TWincl, TensorProduct.map_tmul, AlgHom.toLinearMap_apply, LinearMap.id_apply, h]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end Tensor
 
+
 omit [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] [IsUltrametricDist K] [IsUnitBall O K]
   [TameDescentExponentData K l e a] [NeZero a] [NeZero e] [NormedAlgebra ℚ_[l] K] in
-
 theorem galOB_toB (s : GQ l) (x : OA l O) : galOB O s (toB l O x) = toB l O (galOA O s x) := by
   rw [toB, AlgHom.comp_apply, AlgHom.comp_apply, galOB_toOB, galOCr_toOCr]
 
@@ -260,10 +300,12 @@ theorem actB_jB_toBcris {ι : Type} [Fintype ι] [DecidableEq ι] {P : PhiMod O 
     apply Subtype.ext
     rw [Submodule.coe_sum, hσ]
     conv_lhs => rw [P.eq_sum_phi_bas σ.1]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Δ.act_smul_tot]
     rfl
+
   rw [e1, e2, map_sum, map_sum, map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   have hL := actB_jB_of_mem_L hcmp hdesc hc (hw i) (hw' i) rfl (hwS i) (hwS' i)

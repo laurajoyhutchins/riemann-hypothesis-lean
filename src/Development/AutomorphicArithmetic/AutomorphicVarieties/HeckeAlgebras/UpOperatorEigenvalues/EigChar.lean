@@ -1,7 +1,67 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.HeckeCommRing
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.HeckeRestr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.HeckeModel
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.NormLtOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.HeckeCommRing
+public import Mathlib.NumberTheory.Padics.Complex
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.HeckeModel
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HidaCompleteRings.HeckeRestr
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.NormLtOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Valued.LocallyCompact
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+
+@[expose] public section
+
 open IsLocalRing UpperTheory.V.Hi Matrix
 
 namespace UpperTheory.V.Hi.Up
@@ -29,6 +89,7 @@ theorem eigChar {A M ι K E T : Type} [CommRing A] [AddCommGroup M] [Module A M]
   have hs : ∀ y : Y, sp y = L fun i => φ (b.repr y i) := by
     intro y
     have : s y = s (∑ i, b.repr y i • b i) := by rw [b.sum_repr]
+
     rw [map_sum] at this
     simp only [map_smulₛₗ] at this
     exact this
@@ -71,7 +132,7 @@ theorem eigChar {A M ι K E T : Type} [CommRing A] [AddCommGroup M] [Module A M]
     | add x y _ _ hx hy =>
       obtain ⟨c, hc⟩ := hx
       obtain ⟨d, hd⟩ := hy
-      exact ⟨c + d, by rw [map_add, add_mulVec, hc, hd, add_smul]⟩
+      exact ⟨c + d, by rw [map_add (f := _), add_mulVec, hc, hd, add_smul]⟩
     | mul x y _ _ hx hy =>
       obtain ⟨c, hc⟩ := hx
       obtain ⟨d, hd⟩ := hy
@@ -83,7 +144,7 @@ theorem eigChar {A M ι K E T : Type} [CommRing A] [AddCommGroup M] [Module A M]
             map_one' := hu _ _ (by simp)
             map_mul' := fun x y => hu _ _ (by rw [map_mul, ← mulVec_mulVec, hχ, mulVec_smul, hχ, smul_smul, mul_comm])
             map_zero' := hu _ _ (by simp)
-            map_add' := fun x y => hu _ _ (by rw [map_add, add_mulVec, hχ, hχ, add_smul]) },
+            map_add' := fun x y => hu _ _ (by rw [map_add (f := _), add_mulVec, hχ, hχ, add_smul]) },
     fun a => hu _ _ (hρa a), fun i => hu _ _ (hρt i)⟩
 
 theorem intIff {l : ℕ} [Fact l.Prime] (x : PadicAlgCl l) : IsIntegral ℤ_[l] x ↔ ‖x‖ ≤ 1 := by

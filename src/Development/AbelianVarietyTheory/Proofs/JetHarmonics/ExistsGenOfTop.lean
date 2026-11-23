@@ -1,15 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsNilpotentOfMemKerJetTruncR
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.TopLePreimageWchart
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ValSerGermFnVal
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SmallCharactersSpanJets
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.IntegralDegenerationFamilyBaseChangeExtensionFie
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.BOfNsmulLeft
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ConstBFMul
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GsScalJFK
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.IntegralDegenerationFamilyBaseChangeExtensionFie
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SmallCharactersSpanJets
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsNilpotentOfMemKerJetTruncR
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ValSerGermFnVal
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.TopLePreimageWchart
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.SectionScalarValuation
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
@@ -79,9 +133,11 @@ theorem exists_comb {V F κ : Type} [CommRing V] [Field F] [Finite κ] (φ : V �
     obtain ⟨b, hb⟩ := (Submodule.mem_span_range_iff_exists_fun V).1 hm
     refine ⟨b, fun e he => ?_⟩
     have h2 : JetSer.toJet n (∑ i, b i • gi i) = JetSer.toJet n (MvPowerSeries.monomial m (1 : V)) := by
+
       rw [← hb, ← JetSer.toJetHom_apply, map_sum]
       exact Finset.sum_congr rfl fun i _ => by rw [map_smul, JetSer.toJetHom_apply]
     have h3 := (JetSer.toJet_eq_iff n _ _).1 h2 e (by omega)
+
     rw [MvPowerSeries.coeff_monomial, map_sum] at h3
     simpa using h3
   choose b hb using h
@@ -89,17 +145,20 @@ theorem exists_comb {V F κ : Type} [CommRing V] [Field F] [Finite κ] (φ : V �
   have hc : ∀ i, 0 ≤ v (∑ m ∈ S, MvPowerSeries.coeff m g * φ (b m i)) := fun i =>
     AddValuation.map_le_sum v fun m _ => by rw [AddValuation.map_mul]; exact add_nonneg (hg m) (hφ _)
   refine ⟨fun i => ∑ m ∈ S, MvPowerSeries.coeff m g * φ (b m i), hc, fun mo => ?_, fun mo hmo => ?_⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine AddValuation.map_le_sum v fun i _ => ?_
     rw [MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_map, AddValuation.map_mul]
     exact add_nonneg (hc i) (hφ _)
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     simp only [MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_map, Finset.sum_mul]
     rw [Finset.sum_comm]
     have : ∀ m ∈ S, ∑ i, MvPowerSeries.coeff m g * φ (b m i) * φ (MvPowerSeries.coeff mo (gi i)) =
         if mo = m then MvPowerSeries.coeff m g else 0 := by
       intro m _
       simp only [_root_.mul_assoc, ← map_mul]
+
       rw [← Finset.mul_sum, ← map_sum, hb m mo hmo]
       split_ifs <;> simp
     rw [Finset.sum_congr rfl this, Finset.sum_ite_eq, if_pos]
@@ -181,7 +240,7 @@ theorem exists_jet_map (hrep : JetSer.RepSt) {R : Type} [CommRing R] {G : Over (
     | add p q hp hq =>
       obtain ⟨a, ha⟩ := hp
       obtain ⟨b, hb⟩ := hq
-      exact ⟨a + b, by rw [map_add, map_add, ha, hb]⟩
+      exact ⟨a + b, by rw [map_add (f := _), map_add (f := _), ha, hb]⟩
     | mul_X p i hp =>
       obtain ⟨a, ha⟩ := hp
       obtain ⟨i₀, i⟩ := i
@@ -259,8 +318,9 @@ theorem jets : Laws → Laws4 → TwistBCSpanStatement → JetSer.JetAlgSt → J
     have e1 : ∀ i, JetSer.toJet n (S i * (w⁻¹).val) = ψ (a i) * (ψ u'.val * JetSer.toJetHom V _ n (w⁻¹).val) := fun i => by
       rw [← JetSer.toJetHom_apply, map_mul, JetSer.toJetHom_apply n (S i), hSa, map_mul, _root_.mul_assoc]
     simp only [e1, ← smul_mul_assoc, ← map_smul]
+
     rw [← Finset.sum_mul, ← map_sum, hc, ← _root_.mul_assoc, ← map_mul, Units.inv_mul_cancel_right, ht',
-      _root_.mul_assoc, ← map_mul, Units.mul_inv, map_one, _root_.mul_one]
+    _root_.mul_assoc, ← map_mul, Units.mul_inv, map_one, _root_.mul_one]
   have hθ := fun i => (hΦ i).elim fun Φ hΦ' =>
     FamBaseChange.main hL.globalFns V (maximalIdeal V) y.P.D q Φ (f i) hΦ' F
   choose θ hθ using hθ

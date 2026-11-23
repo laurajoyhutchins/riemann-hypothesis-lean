@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolySubComm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolySubComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
+
+@[expose] public section
+
 open Matrix GlobalTheory.LKRes GlobalTheory.LKMid
 open scoped TensorProduct
 
@@ -12,7 +54,7 @@ variable (p : ℕ) [Fact p.Prime] (K : IntermediateField ℚ_[p] (PadicAlgCl p))
 
 def entries : PolyAlg p K n γ →ₗ[ℚ_[p]] (Fin n × Fin n → K) where
   toFun b ij := val p K n γ b ij.1 ij.2
-  map_add' a b := by funext ij; simp [map_add]
+  map_add' a b := by funext ij; simp [map_add (f := _)]
   map_smul' c b := by funext ij; simp [map_smul]
 
 theorem entries_injective : Function.Injective (entries p K n γ) := by
@@ -27,13 +69,17 @@ theorem eq_zero_of_proj {ι : Type} [Fintype ι] [DecidableEq ι] (y : (ι → K
         TensorProduct.comm _ _ _ ((LinearMap.proj i : (ι → K) →ₗ[ℚ_[p]] K).rTensor (Qr p r) z) := by
     intro z i
     induction z using TensorProduct.induction_on with
-    | zero => simp
+    | zero =>
+      simp only [(TensorProduct.comm ℚ_[p] (ι → K) (Qr p r)).map_zero,
+        (TensorProduct.piRight ℚ_[p] ℚ_[p] (Qr p r) (fun _ : ι => K)).map_zero,
+        Pi.zero_apply, map_zero (f := (LinearMap.proj i : (ι → K) →ₗ[ℚ_[p]] K).rTensor (Qr p r)),
+        (TensorProduct.comm ℚ_[p] K (Qr p r)).map_zero]
     | tmul a q => simp
-    | add a b ha hb => simp only [map_add, Pi.add_apply, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), Pi.add_apply, ha, hb]
   have h0 : TensorProduct.piRight ℚ_[p] ℚ_[p] (Qr p r) (fun _ : ι => K) (TensorProduct.comm _ _ _ y) = 0 := by
     funext i
-    rw [e, h i, map_zero]
-    rfl
+    rw [e, h i]
+    exact (TensorProduct.comm ℚ_[p] K (Qr p r)).map_zero
   exact (LinearEquiv.map_eq_zero_iff _).1 ((LinearEquiv.map_eq_zero_iff _).1 h0)
 
 theorem phi_apply_entry (x : PolyAlg p K n γ ⊗[ℚ_[p]] Qr p r) (j k : Fin n) :
@@ -49,10 +95,10 @@ theorem phi_apply_entry (x : PolyAlg p K n γ ⊗[ℚ_[p]] Qr p r) (j k : Fin n)
     show ((val p K n γ b j k) ⊗ₜ[ℚ_[p]] (1 : Qr p r) : K ⊗[ℚ_[p]] Qr p r) * ((1 : K) ⊗ₜ[ℚ_[p]] q) = _
     rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
     rfl
-  | add a b ha hb => rw [map_add, Matrix.add_apply, ha, hb, map_add]; rfl
+  | add a b ha hb => rw [map_add (f := _), Matrix.add_apply, ha, hb, map_add (f := _)]; rfl
 
 theorem phi_injective_any : Function.Injective (phi p K n γ r) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   have hinj : Function.Injective ((entries p K n γ).rTensor (Qr p r)) :=
     Module.Flat.rTensor_preserves_injective_linearMap _ (entries_injective p K n γ)

@@ -1,15 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
-import Formalism.LocalToGlobal.Divisibility.DefGroupLemmas
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IsometryCarriesCharacter
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralChangeBaseFrameOrthonormal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicUnitaryGroupIso
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIdempotentMulNatPowOfMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicUnitaryGroupIso
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCompatFiniteIsometry
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParahoricLevelLiftsExist
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairGluing.ExistsDenLe
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryPart
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIdempotentMulNatPowOfMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -103,11 +138,9 @@ variable {V V' : HSp D} {M : ℕ} {φ : GfC V ≃* GfC V'}
   {J' : Matrix (Fin V.rank) (Fin V'.rank) (Af D.host.F ⊗[D.host.F] D.host.E)} (h : Link V V' M φ J J')
 include h
 
-theorem symm : Link V' V M φ.symm J' J where
-  rank := h.rank.symm
-  h1 := h.h2
-  h2 := h.h1
-  hc := fun g => by
+theorem symm : Link V' V M φ.symm J' J := by
+  refine ⟨h.rank.symm, h.h2, h.h1, ?_, ?_, h.loc', h.loc⟩
+  · intro g
     have e := h.hc (φ.symm g)
     rw [MulEquiv.apply_symm_apply] at e
     have e' : finMat D.sp.cm.sig V'.gram (g : GA D V') * J = J * finMat D.sp.cm.sig V.gram (φ.symm g : GA D V) := e
@@ -120,11 +153,9 @@ theorem symm : Link V' V M φ.symm J' J where
       _ = J' * (finMat D.sp.cm.sig V'.gram (g : GA D V') * J) * J' := by rw [← e']
       _ = J' * finMat D.sp.cm.sig V'.gram (g : GA D V') * (J * J') := by simp only [Matrix.mul_assoc]
       _ = J' * finMat D.sp.cm.sig V'.gram (g : GA D V') := by rw [h1', Matrix.mul_one]
-  lat := fun f hf y => by
+  · intro f hf y
     have h1' : J * J' = 1 := h.h1
     rw [h.lat f hf (J'.mulVec y), Matrix.mulVec_mulVec, h1', Matrix.one_mulVec]
-  loc := h.loc'
-  loc' := h.loc
 
 theorem supp (f : Formalism.L2.Theta.AE D) (g : GfC V) : SuppF V f (g : GA D V) ↔ SuppF V' f (φ g : GA D V') := by
   have h1' : J * J' = 1 := h.h1

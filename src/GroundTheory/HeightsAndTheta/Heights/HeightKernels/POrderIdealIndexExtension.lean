@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PInvertibleIdealIndex
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsOrderIdealIndexExtension
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PInvertibleIdealIndex
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.Torsion.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -108,8 +163,8 @@ theorem exists_family : ∃ S : Set (𝓞 L), S.Finite ∧ LinearIndepOn B (fun 
 
 end OrderIdealIndexExtensionAlt
 
-open OrderIdealIndexExtensionAlt InvertibleIdealIndexAlt in
 
+open OrderIdealIndexExtensionAlt InvertibleIdealIndexAlt in
 theorem OrderIdealIndexExtension.proof : OrderIdealIndexExtension.Statement := by
   intro L _ _ B hB
   classical
@@ -168,13 +223,13 @@ theorem OrderIdealIndexExtension.proof : OrderIdealIndexExtension.Statement := b
         rw [map_zero, map_zero])
       map_add' := fun x y => RingOfIntegers.ext (by
         show φ (x + y) = algebraMap (𝓞 L) L (_ + _)
-        rw [map_add]
+        rw [map_add (f := _)]
         exact (map_add (algebraMap (𝓞 L) L) (⟨φ x, hint x⟩ : 𝓞 L) ⟨φ y, hint y⟩).symm) }
   have hg1 : Function.Injective g1 := fun a b h => hφinj (congrArg (fun x : 𝓞 L => (x : L)) h)
   have hsurj : ∀ x : 𝓞 L, ∃ β, φ β = (N : L) * (x : L) := fun x => (hrange _).1 (hNF x)
   choose g2 hg2 using hsurj
   have hg2add : ∀ x y, g2 (x + y) = g2 x + g2 y := fun x y => hφinj (by
-    rw [map_add, hg2, hg2, hg2]; push_cast; ring)
+    rw [map_add (f := _), hg2, hg2, hg2]; push_cast; ring)
   let g2' : 𝓞 L →+ (S → B) := AddMonoidHom.mk' g2 hg2add
   have hg2inj : Function.Injective g2' := fun x y h => by
     have h1 := congrArg φ h

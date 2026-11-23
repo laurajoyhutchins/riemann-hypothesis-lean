@@ -1,14 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsOpensEtaleOfUniqueClassicalPoints
+module
+
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StdSmoothMvPolynomial
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
+public import Mathlib.AlgebraicGeometry.AffineSpace
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AbelianSchemeProperClosureDataBasicPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ClassicalPointEqOfReductionCoordsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsCoordReducedFibreClosedPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsOpensEtaleOfUniqueClassicalPoints
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsDominantHomOfVectorOfQuasiFiniteAtStatement
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.JacobsonClosedPointsToolsInt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AbelianSchemeProperClosureDataBasicPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsCoordReducedFibreClosedPointStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.QuasiFiniteAtAffineSpaceHomOfVectorOfCoordStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsDominantHomOfVectorOfQuasiFiniteAtStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ClassicalPointEqOfReductionCoordsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.QuasiFiniteAtAffineSpaceHomOfVectorOfCoordStatement
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -20,22 +68,7 @@ namespace GlobalTheory
 
 theorem isStandardSmoothOfRelativeDimension_mvPolynomial_fin (R : Type) [CommRing R] (n : ℕ) :
     Algebra.IsStandardSmoothOfRelativeDimension n R (MvPolynomial (Fin n) R) := by
-  let P₀ : Algebra.Presentation R (MvPolynomial (Fin n) R) (Fin n) Empty :=
-    { __ := Algebra.Generators.mvPolynomial R (Fin n)
-      relation := Empty.elim
-      span_range_relation_eq_ker := by
-        rw [Algebra.Generators.ker_mvPolynomial]
-        simp }
-  let P₁ : Algebra.PreSubmersivePresentation R (MvPolynomial (Fin n) R) (Fin n) Empty :=
-    { __ := P₀
-      map := Empty.elim
-      map_inj := fun a => a.elim }
-  let P₂ : Algebra.SubmersivePresentation R (MvPolynomial (Fin n) R) (Fin n) Empty :=
-    { __ := P₁
-      jacobian_isUnit := by
-        rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det]
-        simp }
-  exact P₂.isStandardSmoothOfRelativeDimension (by simp [Algebra.Presentation.dimension])
+  apply GlobalTheory.CompanionTheory.Ar.LieInh.stdSmooth_mvPolynomial <;> assumption
 
 theorem smoothOfRelativeDimension_affineSpace_fin (S : Scheme.{0}) (n : ℕ) :
     SmoothOfRelativeDimension n (𝔸(Fin n; S) ↘ S) := by
@@ -106,20 +139,26 @@ theorem Core.exists_opens_smoothOfRelativeDimension (C : Core) (hT : C.HasTests)
     convert this using 1
     ext z
     exact Subtype.ext_iff
-  obtain ⟨V, hV, hE⟩ := exists_opens_etale_of_unique_classical_points 𝔸(Fin C.g; C.Z)
-    (𝔸(Fin C.g; C.Z) ↘ C.Z ≫ C.π) hN W.toScheme v ⟨w, hw⟩ U' hc' hqf hU' (by
-      intro p _ a a' h hp hr hg _
-      refine huniq p a a' ?_ ?_ hp hr fun i => ?_
-      · rintro _ ⟨z, rfl⟩
-        exact hg ⟨z, rfl⟩
-      · change a ≫ t = a' ≫ t
-        rw [← hv, reassoc_of% h]
-      · have e : ∀ b : Sp (OO p) ⟶ W.toScheme,
-            b.appTop.hom (u' i) = (b ≫ v).appTop.hom (AffineSpace.coord C.Z i) := fun b => by
-          rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp, RingHom.comp_apply]
-          exact congrArg _ (AffineSpace.homOfVector_appTop_coord t u' i).symm
-        exact (e a).trans ((congrArg (fun c : Sp (OO p) ⟶ 𝔸(Fin C.g; C.Z) =>
-          c.appTop.hom (AffineSpace.coord C.Z i)) h).trans (e a').symm))
+  have huniq' : ∀ (p : ℕ) [Fact p.Prime] (a a' : Sp (OO p) ⟶ W.toScheme),
+      a ≫ v = a' ≫ v → a (cPt p) = ⟨w, hw⟩ → rPt p ≫ a = rPt p ≫ a' →
+      Set.range (gPt p ≫ a) ⊆ U' → Set.range (gPt p ≫ a') ⊆ U' → a = a' := by
+    intro p _ a a' h hp hr hg _
+    refine huniq p a a' ?_ ?_ hp hr fun i => ?_
+    · change Set.range (gPt p ≫ a ≫ t) ⊆ C.U
+      rintro _ ⟨z, rfl⟩
+      rw [← Category.assoc, Scheme.Hom.comp_apply]
+      exact hg (Set.mem_range_self z)
+    · change a ≫ t = a' ≫ t
+      rw [← hv, reassoc_of% h]
+    · have e : ∀ b : Sp (OO p) ⟶ W.toScheme,
+          b.appTop.hom (u' i) = (b ≫ v).appTop.hom (AffineSpace.coord C.Z i) := fun b => by
+        rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp, RingHom.comp_apply]
+        exact congrArg _ (AffineSpace.homOfVector_appTop_coord t u' i).symm
+      exact (e a).trans ((congrArg (fun c : Sp (OO p) ⟶ 𝔸(Fin C.g; C.Z) =>
+        c.appTop.hom (AffineSpace.coord C.Z i)) h).trans (e a').symm)
+  obtain ⟨V, hV, hE⟩ : ∃ V : W.toScheme.Opens, ⟨w, hw⟩ ∈ V ∧ Etale (V.ι ≫ v) :=
+    exists_opens_etale_of_unique_classical_points 𝔸(Fin C.g; C.Z)
+      (𝔸(Fin C.g; C.Z) ↘ C.Z ≫ C.π) hN W.toScheme v ⟨w, hw⟩ U' hc' hqf hU' huniq'
   have h5 : SmoothOfRelativeDimension (0 + C.g) ((V.ι ≫ v) ≫ 𝔸(Fin C.g; C.Z) ↘ C.Z) :=
     inferInstance
   rw [Category.assoc, hv, zero_add] at h5

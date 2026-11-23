@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,9 +58,9 @@ def IsLaurent (u : ℤ → M) : Prop := ∃ m : ℤ, ∀ k < m, u k = 0
 def serMul (f : PowerSeries L) (u : ℤ → M) : ℤ → M :=
   fun k => ∑ᶠ j : ℕ, PowerSeries.coeff j f • u (k - (j : ℤ))
 
+
 open TensorProduct in
 variable {L M : Type} [Field L] [AddCommGroup M] [Module L M] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.serMul_finite (f : PowerSeries L) {u : ℤ → M}
     (hu : _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.IsLaurent u) (k : ℤ) :
     (Function.support fun j : ℕ => PowerSeries.coeff j f • u (k - (j : ℤ))).Finite := by
@@ -28,12 +70,12 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.serMul_finit
   rw [Function.mem_support] at hj
   rw [Set.mem_Iic]
   by_contra h
-  push_neg at h
+  push Not at h
   exact hj (by rw [hm _ (by omega), smul_zero])
+
 
 open TensorProduct in
 variable {L M : Type} [Field L] [AddCommGroup M] [Module L M] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.serMul_one (u : ℤ → M) :
     _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.serMul (1 : PowerSeries L) u = u := by
   funext k
@@ -42,7 +84,6 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.serMul_one (
   simp
 
 variable (L) in
-
 def serSpan (S : Set (ℤ → M)) : Submodule L (ℤ → M) :=
   Submodule.span L {w | ∃ (f : PowerSeries L) (u : ℤ → M), u ∈ S ∧ IsLaurent u ∧ w = serMul f u}
 
@@ -57,13 +98,6 @@ def shiftSer (a : ℤ) (F : Submodule L M) : Submodule L (ℤ → M) where
     exact ⟨fun k hk => by simp [hu k hk], fun k => F.smul_mem c (hu' k)⟩
 
 def gradedSer (F : ℤ → Submodule L M) : Submodule L (ℤ → M) := ⨆ a : ℤ, shiftSer a (F a)
-
-example (a : ℤ) (F : Submodule L M) (d : M) (hd : d ∈ F) :
-    (Pi.single (-a) d : ℤ → M) ∈ shiftSer a F := by
-  refine ⟨fun k hk => Pi.single_eq_of_ne (ne_of_lt hk) _, fun k => ?_⟩
-  by_cases h : k = -a
-  · subst h; simpa using hd
-  · simp [Pi.single_eq_of_ne h]
 
 end Series
 
@@ -99,10 +133,10 @@ def phiNlev (i : ZMod n) (ζ : LL) : Submodule LL (ℤ → T.V ⊗[Qp] BdR) :=
   serSpan LL {u | ∃ y ∈ W.N T, IsExpansion W T i ζ (W.φD T y) u}
 
 variable (PD) in
-
 def phiSer (j : ℕ) (u : ℤ → T.V ⊗[Qp] B) : ℤ → T.V ⊗[Qp] BdR :=
   fun k => ιV PD (LL := LL) (V := T.V)
     ((((PD.p : LL) ^ j) ^ k) • ((φVB PD (LL := LL) (V := T.V)) ^ j) (u k))
+
 
 open TensorProduct in
 variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp] [Field K₀] [Field K]
@@ -113,7 +147,6 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {PD : _root_.Formalism.WeaklyAdmissibleFiltrations.PeriodData G Qp K₀ K B BdR} {LL O : Type} [Field LL] [Algebra Qp LL]
     [CommRing O] [Algebra O LL] [TopologicalSpace LL] {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
     (W : _root_.Formalism.BasicNotions.LocWach PD LL O v n) (T : _root_.Formalism.BasicNotions.LocLat G Qp LL O) in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.levN_mem_Nlev (i : ZMod n) (ζ : LL) (x : ↥(W.N T)) :
     W.levN T i ζ x ∈ _root_.GlobalTheory.IndefiniteRowSideFullHecke.GradedSeries.Nlev W T i ζ := by
   refine Submodule.subset_span ⟨1, W.levN T i ζ x, ⟨x, rfl⟩, ?_,
@@ -131,8 +164,8 @@ def resEmb {K : FinExt l} {s : ℕ} {LL : FinExt l} (h : Good K s LL)
     (τ : ↥(Ks K s) →ₐ[ℚ_[l]] ↥LL.1) : ↥K.1 →ₐ[ℚ_[l]] ↥LL.1 :=
   τ.comp (IntermediateField.inclusion h.2.2.1)
 
-def LatticeAtLevels (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (H : LocHW l P)
-    (F : LocFon l P AI H) (C : LocCmpT l P AI H F) : Prop :=
+def LatticeAtLevels (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P)
+    (H : LocHW l P) (F : LocFon l P AI H) (C : LocCmpT l P AI H F) : Prop :=
   ∀ (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL)
     (T : LocLat ↥(GK K) ℚ_[l] ↥LL.1 ↥(OL LL)), IsCrys (P.PD K) T.ρ →
     ∀ (i : ZMod (Module.finrank ℚ_[l] ↥(K0 K))) (ζ : ↥LL.1),

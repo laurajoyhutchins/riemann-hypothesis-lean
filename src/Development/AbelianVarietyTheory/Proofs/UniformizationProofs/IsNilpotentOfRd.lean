@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Operations
+public import Mathlib.Algebra.MonoidAlgebra.MapDomain
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Ideal.Operations
+public import Mathlib.RingTheory.Nilpotent.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,7 +90,7 @@ theorem avg_mv_fst (f : X × W →+ X × Y) (φ : W →+ Y) (h₁ : ∀ p, (f p)
     (u : A[X × W]) : avg (mv f u) = mv φ (avg u) := by
   induction u using AddMonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | single p r =>
     obtain ⟨a, b⟩ := p
     rw [mv_single, avg_single, avg_single, h₁]
@@ -50,14 +103,14 @@ theorem avg_mv_inr (f : W →+ X × Y) (φ : W →+ Y) (h : ∀ w, f w = (0, φ 
     avg (mv f u) = mv φ u := by
   induction u using AddMonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | single p r => rw [mv_single, avg_single, h, mv_single, if_pos rfl]
 
 theorem avg_mv_one (f : X →+ X × Y) (h : ∀ a, (f a).1 = a) (u : A[X]) :
     avg (mv f u) = single 0 (u.coeff 0) := by
   induction u using AddMonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb, coeff_add, Finsupp.add_apply, single_add]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb, coeff_add, Finsupp.add_apply, single_add]
   | single p r =>
     rw [mv_single, avg_single, h]
     split_ifs with hp
@@ -73,7 +126,7 @@ theorem eq_of_cocycle (u : A[X × X × W]) (a b : X →+ Y) (w : W →+ Y)
       mv ((a + b).coprod w) (avg u) + mv (a.coprod (b.coprod w)) u := by
   have := congrArg avg (h (.inl X Y) ((AddMonoidHom.inr X Y).comp a) ((AddMonoidHom.inr X Y).comp b)
     ((AddMonoidHom.inr X Y).comp w))
-  rw [map_add, map_add, avg_mv_fst _ (b.coprod w) (by simp) (by simp),
+  rw [map_add (f := _), map_add (f := _), avg_mv_fst _ (b.coprod w) (by simp) (by simp),
     avg_mv_fst _ (a.coprod w) (by simp) (by simp), avg_mv_fst _ ((a + b).coprod w) (by simp) (by simp),
     avg_mv_inr _ (a.coprod (b.coprod w)) (by simp)] at this
   exact this
@@ -101,7 +154,7 @@ theorem add_exists (u : A[X × X × X])
   have e₄ : ∀ a b : X →+ Y, mv b (avg (avg u)) + mv a (avg (avg u)) =
       mv (a + b) (avg (avg u)) + mv (a.coprod b) (avg u) := fun a b => by
     have := congrArg avg (e₃ _ (.inl X Y) ((AddMonoidHom.inr X Y).comp a) ((AddMonoidHom.inr X Y).comp b))
-    rwa [map_add, map_add, avg_mv_fst _ b (by simp) (by simp), avg_mv_fst _ a (by simp) (by simp),
+    rwa [map_add (f := _), map_add (f := _), avg_mv_fst _ b (by simp) (by simp), avg_mv_fst _ a (by simp) (by simp),
       avg_mv_fst _ (a + b) (by simp) (by simp), avg_mv_inr _ (a.coprod b) (by simp)] at this
   linear_combination -e₁ Y a b c - e₄ b c - e₄ a c + e₄ (a + b) c
 
@@ -109,12 +162,12 @@ theorem add_unique (h : A[X]) (H : ∀ (Y : Type) [AddCommGroup Y] (a b c : X �
     mv (a + b + c) h + mv a h + mv b h + mv c h - mv (a + b) h - mv (a + c) h - mv (b + c) h = 0) : h = 0 := by
   have e₁ : ∀ (Y : Type) [AddCommGroup Y] (b c : X →+ Y), mv b h + mv c h = mv (b + c) h := fun Y _ b c => by
     have := congrArg avg (H _ (.inl X Y) ((AddMonoidHom.inr X Y).comp b) ((AddMonoidHom.inr X Y).comp c))
-    simp only [map_add, map_sub, map_zero] at this
+    simp only [map_add (f := _), map_sub, map_zero] at this
     rw [avg_mv_one _ (by simp), avg_mv_one _ (by simp), avg_mv_inr _ b (by simp), avg_mv_inr _ c (by simp),
       avg_mv_one _ (by simp), avg_mv_one _ (by simp), avg_mv_inr _ (b + c) (by simp)] at this
     linear_combination this
   have := congrArg avg (e₁ _ (.inl X X) (.inr X X))
-  rw [map_add, avg_mv_one _ (by simp), avg_mv_inr _ (.id X) (by simp), avg_mv_one _ (by simp), mv_id] at this
+  rw [map_add (f := _), avg_mv_one _ (by simp), avg_mv_inr _ (.id X) (by simp), avg_mv_one _ (by simp), mv_id] at this
   linear_combination this
 
 abbrev rd (I : Ideal A) : A[X] →+* (A ⧸ I)[X] := mapRingHom X (Ideal.Quotient.mk I)

@@ -1,15 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InvVolEqInfMulSupAndMono
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairCommonUnipotentStabiliserSummary
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormalFormFlagLatticesNearUnderStabiliser
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnramStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefiniteThetaLatticeLeFixedIndexBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairCommonUnipotentStabiliserSummary
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairNormalFormGeometrySummaryStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InvVolEqInfMulSupAndMono
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormalFormTerminalDeterminantStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefiniteThetaLatticeLeFixedIndexBoundStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnramStatement
 import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.ExistsHasLeadingCoeffOfMemSpanBelow
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical nonZeroDivisors
@@ -290,7 +341,7 @@ theorem exists_gen_one (n : ℕ) (hn : n ≠ 0) (A : Submodule (𝓞 K) K) (hA :
   have e1 : f ((n : 𝓞 K) * z) = n • f z := by
     rw [← smul_eq_mul, map_smul, Nat.cast_smul_eq_nsmul]
   have e2 : f (a * y) = a • f y := by rw [← smul_eq_mul, map_smul]
-  rw [map_add, e1, e2, add_comm]
+  rw [map_add (f := _), e1, e2, add_comm]
 
 theorem exists_gen [FiniteDimensional K V] (n : ℕ) (hn : n ≠ 0) (k : ℕ) :
     ∀ W : Submodule K V, Module.finrank K W ≤ k → ∀ M : Submodule (𝓞 K) V, M.FG → (∀ x ∈ M, x ∈ W) →
@@ -463,8 +514,8 @@ theorem one_mem_ipow_mul {𝔡 : Ideal (𝓞 K)} (h : 𝔡 ≠ ⊥) (n : ℤ) : 
 
 variable [StarRing K]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem star_mem_one {t : K} (ht : t ∈ (1 : Submodule (𝓞 K) K)) : star t ∈ (1 : Submodule (𝓞 K) K) := by
   obtain ⟨a, rfl⟩ := Submodule.mem_one.1 ht
   refine Submodule.mem_one.2 ⟨⟨star (a : K), ?_⟩, rfl⟩
@@ -497,30 +548,7 @@ private theorem geo_lemma_2 {K : Type} [Field K] [StarRing K] {𝔡 : Ideal (�
 
 theorem star_mem_ipow {𝔡 : Ideal (𝓞 K)} (h : 𝔡 ≠ ⊥) (hs : ∀ x ∈ 𝔡, ∃ y ∈ 𝔡, (y : K) = star (x : K))
     (n : ℤ) {t : K} (ht : t ∈ ipow 𝔡 n) : star t ∈ ipow 𝔡 n := by
-  unfold ipow at ht ⊢
-  rw [FractionalIdeal.mem_coe] at ht ⊢
-  have hI : ((𝔡 : FractionalIdeal (𝓞 K)⁰ K)) ≠ 0 := FractionalIdeal.coeIdeal_ne_zero.2 h
-  have hA : ∀ m : ℕ, ∀ t : K, t ∈ (𝔡 : FractionalIdeal (𝓞 K)⁰ K) ^ m →
-      star t ∈ (𝔡 : FractionalIdeal (𝓞 K)⁰ K) ^ m := by
-    intro m t ht
-    rw [← FractionalIdeal.coeIdeal_pow, FractionalIdeal.mem_coeIdeal] at ht ⊢
-    obtain ⟨x, hx, rfl⟩ := ht
-    obtain ⟨y, hy, e⟩ := geo_lemma_2 hs m x hx
-    exact ⟨y, hy, e⟩
-  have hone : ∀ t : K, t ∈ (1 : FractionalIdeal (𝓞 K)⁰ K) → star t ∈ (1 : FractionalIdeal (𝓞 K)⁰ K) := by
-    intro t ht
-    rw [FractionalIdeal.mem_one_iff] at ht ⊢
-    obtain ⟨x, rfl⟩ := ht
-    have := star_mem_one (K := K) (Submodule.mem_one.2 ⟨x, rfl⟩)
-    exact Submodule.mem_one.1 this
-  obtain ⟨m, rfl | rfl⟩ := Int.eq_nat_or_neg n
-  · rw [zpow_natCast] at ht ⊢
-    exact hA m t ht
-  · rw [zpow_neg, zpow_natCast] at ht ⊢
-    rw [FractionalIdeal.mem_inv_iff (pow_ne_zero m hI)] at ht ⊢
-    intro y hy
-    have h1 := hone _ (ht (star y) (hA m y hy))
-    rwa [star_mul, star_star, mul_comm] at h1
+  apply GlobalTheory.DegCnt.PosJ.star_mem_ipow <;> assumption
 
 end Ideals
 
@@ -530,14 +558,14 @@ variable {K V : Type} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [M
   [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
   {H : HermSpace K V} {r : ℕ} (N : NF H r)
 
-omit [NumberField K] [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 
+omit [NumberField K] [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 theorem isotropicMeet_le_jointSpan (F F' : FlagD H r) : II F F' ≤ V0 F F' := by
   show F.X ⊓ F'.X ≤ F.X ⊔ F'.X ⊔ _
   exact inf_le_left.trans (le_sup_left.trans le_sup_left)
 
-omit [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 
+omit [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] in
 theorem sub_mem_wSp {s : V ≃ₗ[K] V} (hs : s ∈ N.R1) (y : V) : s y - y ∈ wSp N.F N.F' := by
   obtain ⟨hR, hfix⟩ := Subgroup.mem_inf.1 hs
   have hiso : ∀ x y : V, H.B (s x) (s y) = H.B x y := by
@@ -1053,7 +1081,7 @@ theorem invVol_mid_layer_le : ∀ (K V : Type) [Field K] [NumberField K] [StarRi
       add_mem' := by
         rintro x y ⟨i, hi, rfl, hi0⟩ ⟨i', hi', rfl, hi0'⟩
         refine ⟨i + i', add_mem hi hi', map_add _ _ _, fun b hb hab => ?_⟩
-        rw [map_add, hi0 b hb hab, hi0' b hb hab, add_zero]
+        rw [map_add (f := _), hi0 b hb hab, hi0' b hb hab, add_zero]
       zero_mem' := ⟨0, zero_mem _, map_zero _, fun b _ _ => map_zero _⟩
       neg_mem' := by
         rintro x ⟨i, hi, rfl, hi0⟩
@@ -1063,8 +1091,8 @@ theorem invVol_mid_layer_le : ∀ (K V : Type) [Field K] [NumberField K] [StarRi
   let P : Fin r → AddSubgroup (V ⧸ II N.F N.F') := fun a =>
     Q a ⊔ (prodGrp (N.aa a).toAddSubgroup (flagPairDefinitePartLattice N.F N.F' Λ ⊓ rs (𝓞 K) N.Wt).toAddSubgroup).map φ
   have hM_FG : (Λ ⊓ rs (𝓞 K) N.Wt).FG := by
-    have hlat : Submodule.IsLattice K Λ := ((isUnimod_iff H Λ).1 hU).1
-    have := isNoetherian_of_fg_of_noetherian Λ hlat.fg
+    have hfg : Λ.FG := ((isUnimod_iff H Λ).1 hU).1.1
+    have := isNoetherian_of_fg_of_noetherian Λ hfg
     exact (isNoetherian_submodule.1 this) _ inf_le_left
   have hm := main_lemma_2 N g Λ hlift hS hT hg0 hi0
   set m : ℕ := (Λ ⊓ rs (𝓞 K) N.Wt).toAddSubgroup.relIndex
@@ -1092,7 +1120,7 @@ theorem invVol_mid_layer_le : ∀ (K V : Type) [Field K] [NumberField K] [StarRi
         ist_orth_Xa N ((hmemS c).1 hc) ((hmemS c).1 hc) (Submodule.mem_inf.1 hy').2
       refine ⟨z, hz, ?_, fun b hb hab => ?_⟩
       · show H.B (N.ist a) z = H.B (N.ist a) (y + z)
-        rw [map_add, hy0 a ha, zero_add]
+        rw [map_add (f := _), hy0 a ha, zero_add]
       · have h10 := hxb b hb hab
         change H.B (N.ist b) (y + z) = 0 at h10
         rwa [map_add, hy0 b hb, zero_add] at h10)
@@ -1169,7 +1197,7 @@ theorem invVol_mid_layer_le : ∀ (K V : Type) [Field K] [NumberField K] [StarRi
       N.bI Λ ^ Module.finrank K N.Wt * (N.gI g Λ * N.iI g Λ) ^ (r - N.j) := by
     calc ∏ a ∈ S, (Q a).relIndex (P a)
         ≤ ∏ a ∈ S, ((C' a).relIndex (N.aa a).toAddSubgroup ^ Module.finrank K N.Wt * m) :=
-          Finset.prod_le_prod (fun _ _ => Nat.zero_le _) (fun a ha => (hper a ha).2)
+          Finset.prod_le_prod₀ (fun _ _ => Nat.zero_le _) (fun a ha => (hper a ha).2)
       _ = (∏ a ∈ S, (C' a).relIndex (N.aa a).toAddSubgroup) ^ Module.finrank K N.Wt * m ^ S.card := by
           rw [Finset.prod_mul_distrib, Finset.prod_pow, Finset.prod_const]
       _ ≤ N.bI Λ ^ Module.finrank K N.Wt * (N.gI g Λ * N.iI g Λ) ^ (r - N.j) := by

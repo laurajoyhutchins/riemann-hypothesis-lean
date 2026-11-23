@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ToXQFst
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ToXQFst
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsClosureCoords
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Polynomial.CauchyBound
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsClosureCoords
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 open GlobalTheory.CompanionTheory.Ar.TorusUnif
@@ -52,7 +98,7 @@ def bdd {S : Scheme.{0}} {β : Type} (F : Filter β) (p : β → (Sp ℂ ⟶ S))
     rintro a b ⟨A, hA⟩ ⟨B, hB⟩
     refine ⟨A + B, ?_⟩
     filter_upwards [hA, hB] with i h1 h2 h
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (norm_add_le _ _).trans (add_le_add (h1 h) (h2 h))
   zero_mem' := ⟨0, Eventually.of_forall fun i h => by simp⟩
   neg_mem' := by
@@ -153,7 +199,7 @@ theorem limit {S : Scheme.{0}} {W : S.Opens} (hW : IsAffineOpen W) (F : Ultrafil
         rw [hval _ z h, hval _ z h, hval _ z h, map_mul]))
       map_add' := fun s t => tendsto_nhds_unique (ha (s + t)) (((ha s).add (ha t)).congr' (by
         filter_upwards [hF] with z h
-        rw [hval _ z h, hval _ z h, hval _ z h, map_add])) }
+        rw [hval _ z h, hval _ z h, hval _ z h, map_add (f := _)])) }
   obtain ⟨hc, hg⟩ := ArchC.point_of_ringHom hW g
   set z₀ : Sp ℂ ⟶ S := Spec.map (CommRingCat.ofHom g) ≫ hW.fromSpec with hz₀
   have hg' : ∀ t, ev W z₀ hc t = a t := hg

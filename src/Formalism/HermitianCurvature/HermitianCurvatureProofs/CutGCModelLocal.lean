@@ -1,4 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreCut
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Filter Topology
 
@@ -37,15 +87,6 @@ theorem locOp_zero : LocOpQ (0 : Module.End ℂ (MA.SmQ r TT)) :=
 theorem locOp_one : LocOpQ (1 : Module.End ℂ (MA.SmQ r TT)) :=
   fun _ _ _ _ _ hag q hq hqV => hag q hq hqV
 
-theorem locOp_sum {ι : Type} (s : Finset ι) (T : ι → Module.End ℂ (MA.SmQ r TT)) (hT : ∀ i ∈ s, LocOpQ (T i)) :
-    LocOpQ (∑ i ∈ s, T i) := by
-  classical
-  revert hT
-  refine Finset.induction_on s (fun _ => by simpa using locOp_zero) ?_
-  intro i s hi ih hT
-  rw [Finset.sum_insert hi]
-  exact locOp_add (hT i (Finset.mem_insert_self i s)) (ih fun j hj => hT j (Finset.mem_insert_of_mem hj))
-
 theorem locOp_mulOp (f : MA.SmQ r TT) : LocOpQ ((MA.anQ r TT).mulOp f) := by
   intro h₁ h₂ c V hV hag q hq hqV
   show ((f * h₁ : MA.SmQ r TT) : MA.Qp r TT → ℂ) q = ((f * h₂ : MA.SmQ r TT) : MA.Qp r TT → ℂ) q
@@ -54,7 +95,7 @@ theorem locOp_mulOp (f : MA.SmQ r TT) : LocOpQ ((MA.anQ r TT).mulOp f) := by
 
 theorem dirE_zeta (v : M.Var r) (hv : ((ofLex v).1 : ℕ) = r) : MA.dirE v = ((0 : Fin r → ℂ), (1 : ℂ)) := by
   unfold MA.dirE
-  rw [dif_neg (by omega)]
+  rw [dite_eq_right (by omega)]
 
 theorem fderiv_zeta_local {f₁ f₂ : MA.Qp r TT → ℂ} (hf₁ : f₁ ∈ MA.smSub r TT) (hf₂ : f₂ ∈ MA.smSub r TT)
     (c : Fin r → ℂ) (V : Set ℂ) (hV : IsOpen V)
@@ -198,8 +239,6 @@ theorem locOp_dzb : LocOpQ (MA.DQ P).dzbP.1 := by
   show LocOpQ ((MA.DQ P).mulOp ((MA.DQ P).inv ((MA.DQ P).x M.vzb)) * (MA.DQ P).ev M.vzb)
   exact locOp_mul (locOp_mulOp _) (locOp_euler M.vzb (by simp [M.vzb]))
 
-theorem locOp_fnP (f fb : (MA.DQ P).R) : LocOpQ ((MA.DQ P).fnP f fb).1 := locOp_mulOp f
-
 theorem entOK_nab : EntOK P (MA.nabA P (MA.DQ P)) := by
   refine entOK_diag P _ fun π => ?_
   show LocOpQ ((MA.DQ P).dzP.1 + (M.aC P π : ℂ) • ((MA.DQ P).mulOp ((MA.DQ P).x M.vzb) *
@@ -213,10 +252,6 @@ theorem entOK_nabs : EntOK P (MA.nabsA P (MA.DQ P)) := by
   refine locOp_add ?_ (locOp_smul _ (locOp_mul (locOp_mulOp _) (locOp_mulOp _)))
   rw [show -(MA.DQ P).dzbP.1 = (-1 : ℂ) • (MA.DQ P).dzbP.1 by rw [neg_one_smul]]
   exact locOp_smul _ (locOp_dzb P)
-
-theorem entOK_smulA (z : ℂ) {A : MA.A P (MA.DQ P)} (hA : EntOK P A) : EntOK P (z • A) := by
-  intro π π'
-  exact locOp_smul z (hA π π')
 
 private theorem locOpQ_neg {r : ℕ} {TT : ℝ} {T : Module.End ℂ (MA.SmQ r TT)} (hT : LocOpQ T) :
     LocOpQ (-T) := by

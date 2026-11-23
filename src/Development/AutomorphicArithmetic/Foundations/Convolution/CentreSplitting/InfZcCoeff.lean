@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.DefsObj
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CapZcMemOfE
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.DefsObj
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CapZcMemOfE
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -27,15 +70,17 @@ private theorem UpperTheory.ConvolutionTheory.Dp.infZc_coeff {M : Type*} [AddCom
     apply Polynomial.funext
     intro u
     have := congrArg f (h u)
+
     simp only [map_sum, map_smul, map_zero, smul_eq_mul] at this
     simp only [Polynomial.eval_finsetSum, Polynomial.eval_monomial, Polynomial.eval_zero]
     rw [← this]
     exact Finset.sum_congr rfl fun j _ => mul_comm _ _
-  have := congrArg (fun p => Polynomial.coeff p (n - (i + 1))) hp
+  have := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p (n - (i + 1))) hp
   simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_monomial, Polynomial.coeff_zero] at this
   rw [Finset.sum_eq_single i] at this
   · simpa using this
   · intro j _ hj
+    simp only [Finsupp.single_apply]
     rw [if_neg]
     intro e
     apply hj
@@ -51,8 +96,9 @@ theorem UpperTheory.ConvolutionTheory.Dp.infZc :
   have key : ∀ (u : ℂ) (φ : GlobalTheory.CuspRep.Sm E n), GlobalTheory.CuspRep.cap τ u φ =
       u ^ n • φ + ∑ i : Fin n, u ^ (n - (i + 1)) • Cm.uC E n (UpperTheory.ConvolutionTheory.zc τ i) φ := fun u φ => by
     rw [← Cm.uC_capC, hc]
-    simp only [map_add, map_smul, map_one, map_sum, LinearMap.add_apply, LinearMap.smul_apply,
-      LinearMap.sum_apply, Module.End.one_apply]
+
+    simp only [map_add (f := _), map_smul, map_one, map_sum, LinearMap.add_apply, LinearMap.smul_apply,
+    LinearMap.sum_apply, Module.End.one_apply]
   change (m.card = n ∧ ∀ u : ℂ, ∀ φ ∈ π.V, GlobalTheory.CuspRep.cap τ u φ = (m.map fun x => u + x).prod • φ) ↔ _
   refine and_congr_right fun hm => ⟨fun h i φ hφ => ?_, fun h u φ hφ => ?_⟩
   · rw [← sub_eq_zero]

@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ShortVectorEveryPlace
-import Formalism.ThetaLiftIndependence.Statement
-import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +147,7 @@ variable {K : Type} [Field K] [NumberField K] [StarRing K]
 
 theorem inner_comb_orthogonal_pair (x y : V) (hxy : h x y = 0) (hyx : h y x = 0) (a c a' c' : K) :
     h (a • x + c • y) (a' • x + c' • y) = star a * a' * h x x + star c * c' * h y y := by
-  simp only [map_add, LinearMap.add_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hxy, hyx,
+  simp only [map_add (f := _), LinearMap.add_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hxy, hyx,
     starRingEnd_apply, RingHom.id_apply, mul_zero, add_zero, zero_add]
   ring
 
@@ -113,7 +163,7 @@ theorem eq_zero_of_inner_self_eq_zero (hK : IsCMUnram K) (L : Submodule (𝓞 K)
   simp only [if_true, mul_one] at hv
   obtain ⟨φ⟩ : Nonempty (K →+* ℂ) := inferInstance
   have h2 := congrArg φ hv
-  rw [map_add, map_mul, map_mul, hK.2.1, hK.2.1, map_zero] at h2
+  rw [map_add (f := _), map_mul, map_mul, hK.2.1, hK.2.1, map_zero] at h2
   have h3 : ((Complex.normSq (φ (c 0)) + Complex.normSq (φ (c 1)) : ℝ) : ℂ) = 0 := by
     push_cast; rw [Complex.normSq_eq_conj_mul_self, Complex.normSq_eq_conj_mul_self]; exact h2
   have h4 : Complex.normSq (φ (c 0)) + Complex.normSq (φ (c 1)) = 0 := by exact_mod_cast h3
@@ -138,7 +188,7 @@ theorem eq_decomp_orthogonal_pair (hs : h.IsSymm) (hfr : finrank K V = 2) (x y :
     intro s t hst
     have h1 := congrArg (h x) hst
     have h2 := congrArg (h y) hst
-    simp only [map_add, map_smul, smul_eq_mul, hxy, hyx, mul_zero, add_zero, zero_add, map_zero] at h1 h2
+    simp only [map_add (f := _), map_smul, smul_eq_mul, hxy, hyx, mul_zero, add_zero, zero_add, map_zero] at h1 h2
     exact ⟨(mul_eq_zero.1 h1).resolve_right hxx, (mul_eq_zero.1 h2).resolve_right hyy⟩
   have hsp := hli.span_eq_top_of_card_eq_finrank (by simp [hfr])
   have hv : v ∈ Submodule.span K (Set.range ![x, y]) := by rw [hsp]; trivial
@@ -146,7 +196,7 @@ theorem eq_decomp_orthogonal_pair (hs : h.IsSymm) (hfr : finrank K V = 2) (x y :
   rw [Fin.sum_univ_two] at hc
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hc
   subst hc
-  simp only [map_add, map_smul, smul_eq_mul, hxy, hyx, mul_zero, add_zero, zero_add]
+  simp only [map_add (f := _), map_smul, smul_eq_mul, hxy, hyx, mul_zero, add_zero, zero_add]
   rw [mul_div_assoc, div_self hxx, mul_one, mul_div_assoc, div_self hyy, mul_one]
 
 def planeMapAlt (x y x' y' : V) : V →ₗ[K] V :=
@@ -161,7 +211,7 @@ theorem planeMapAlt_alt (hs : h.IsSymm) (hfr : finrank K V = 2) (x y x' y' : V) 
     planeMapAlt h x y x' y' (planeMapAlt h x' y' x y v) = v := by
   have hyx : h y x = 0 := by rw [← hs.eq x y, hxy, map_zero]
   rw [planeMap_apply_alt, planeMap_apply_alt]
-  simp only [map_add, map_smul, smul_eq_mul, hxy, hyx, mul_zero, add_zero, zero_add]
+  simp only [map_add (f := _), map_smul, smul_eq_mul, hxy, hyx, mul_zero, add_zero, zero_add]
   rw [mul_div_assoc, div_self hxx, mul_one, mul_div_assoc, div_self hyy, mul_one]
   exact (eq_decomp_orthogonal_pair h hs hfr x' y' hxy' hxx' hyy' v).symm
 
@@ -273,7 +323,7 @@ theorem natAbs_norm_le_pow_of_bounded (K : Type) [Field K] [NumberField K] (d : 
     rfl
   rw [h1, ← prod_norm_embeddings_eq_abs_norm_alt]
   calc ∏ φ : K →+* ℂ, ‖φ (d : K)‖ ≤ ∏ _φ : K →+* ℂ, B :=
-        Finset.prod_le_prod (fun _ _ => norm_nonneg _) (fun φ _ => hd φ)
+        Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) (fun φ _ => hd φ)
     _ = B ^ finrank ℚ K := by rw [Finset.prod_const, Finset.card_univ, NumberField.Embeddings.card]
 
 theorem class_count_plane_bound (K : Type) [Field K] [NumberField K] [StarRing K] (hK : IsCMUnram K) (V : Type)

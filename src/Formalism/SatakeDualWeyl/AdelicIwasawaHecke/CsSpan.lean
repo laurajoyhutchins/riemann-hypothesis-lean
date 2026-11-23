@@ -1,5 +1,56 @@
-import Formalism.SatakeDualWeyl.DefsCS
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AdelstabL
+module
+
+public import Formalism.SatakeDualWeyl.DefsCS
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Adelstab
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AdelstabL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,7 +89,7 @@ theorem csSpan_approx (hA : Formalism.UG.CS.IntAdApprox) (D : 𝓞 F) (hD : D �
   · exact ⟨0, isIntegral_zero, 0, zero_mem _, by simp⟩
   · exact ⟨1, isIntegral_one, 0, zero_mem _, by simp⟩
   · rintro a b _ _ ⟨x, hx, w, hw, rfl⟩ ⟨y, hy, w', hw', rfl⟩
-    exact ⟨x + y, hx.add hy, w + w', add_mem hw hw', by rw [map_add]; ring⟩
+    exact ⟨x + y, hx.add hy, w + w', add_mem hw hw', by rw [map_add (f := _)]; ring⟩
   · rintro a _ ⟨x, hx, w, hw, rfl⟩
     exact ⟨-x, hx.neg, -w, neg_mem hw, by rw [map_neg]; ring⟩
   · rintro a b _ _ ⟨x, hx, w, hw, rfl⟩ ⟨y, hy, w', hw', rfl⟩
@@ -134,7 +185,7 @@ theorem csSpan_back (hA : Formalism.UG.CS.IntAdApprox) (Λ : Submodule (𝓞 E) 
     refine hM _ fun i => ?_
     by_cases h : i = k
     · subst h; simp only [Pi.single_eq_same]; exact one_mem _
-    · rw [Pi.single_apply, if_neg h]; exact zero_mem _
+    · rw [Pi.single_apply, ite_eq_right h]; exact zero_mem _
   have hdec : u = (fun i => ι (x i)) +
       ∑ k, (⟨w k, hw k⟩ : 𝒮) • (fun i => ι ((Pi.single k β : n → E) i)) := by
     ext i
@@ -143,7 +194,7 @@ theorem csSpan_back (hA : Formalism.UG.CS.IntAdApprox) (Λ : Submodule (𝓞 E) 
       rw [Pi.single_eq_same, Subring.smul_def, smul_eq_mul, hβ, adelstab_incl_C, mul_comm]
     · intro k _ hki
       show (_ : 𝒮) • ι ((Pi.single k β : n → E) i) = 0
-      rw [Pi.single_apply, if_neg (Ne.symm hki), map_zero, smul_zero]
+      rw [Pi.single_apply, ite_eq_right (Ne.symm hki), map_zero, smul_zero]
     · exact fun h => absurd (Finset.mem_univ i) h
   rw [hdec]
   exact add_mem (Submodule.subset_span ⟨x, hxmem, rfl⟩)

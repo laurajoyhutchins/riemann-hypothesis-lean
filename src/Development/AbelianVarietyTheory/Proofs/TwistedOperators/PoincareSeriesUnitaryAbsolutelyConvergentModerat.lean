@@ -1,12 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.DepthPays
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.DepthPays
+public import Formalism.LocalToGlobal.Columns.Adelic
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitaryAdelicHeightCosetLeNormInfPow
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeCharInfinityEqCoeffMulHalfNormPow
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCommonDenominatorSelfDualLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFinitePartDenominatorLeHeightPowStatement
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsModGrowthExpLeNormInfPow
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeckeCharInfinityEqCoeffMulHalfNormPow
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitaryAdelicHeightCosetLeNormInfPow
-import Formalism.LocalToGlobal.Columns.TiedTilA
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SumProductWeightsLeOfSeparatedGeometricMeanStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCommonDenominatorSelfDualLevelStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFinitePartDenominatorLeHeightPowStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SumProductWeightsLeOfSeparatedGeometricMeanStatement
+public import Formalism.LocalToGlobal.Columns.TiedTilA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.Grow
 open GlobalTheory.IndefiniteRowSideFullHecke.LevelPlusSubgroup (coefPlus Cols SizeRows)
@@ -118,8 +160,8 @@ theorem mem_mul_of_mem {n : ℕ} {S : Subring (Lev.EAf D)} (X Y : Matrix (Fin n)
   rw [Matrix.mul_apply]
   exact Subring.sum_mem _ fun k _ => Subring.mul_mem _ (hX i k) (hY k j)
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 800000 in
+
+
 theorem exists_den (D : D7) (V : HSp D) (Λ : Lat V) (hΛ : IsSelfDualC V Λ) (c : GA D V) :
     ∃ (C : ℝ) (A : ℕ), ∀ g : GA D V, ∃ m : ℕ, 0 < m ∧ (m : ℝ) ≤ C * height V g ^ A ∧
       ∀ γ : GA D V, Lev.finE V (c * γ * g) ∈ congLev D.sp.cm V.gram Λ ⊤ →
@@ -251,7 +293,7 @@ theorem poincare_count : ∀ (D : D7) (θ : InfFam D), IsInfFam θ → ∀ (V : 
     have h3 : (1 : ℝ) ≤ (m : ℝ) ^ f * ∏ τ, hsn (x γ τ - x γ' τ) := by
       calc (1 : ℝ) ≤ ∏ τ, ‖tauE D τ ((m : D.host.E) * z)‖ := h1
         _ ≤ ∏ τ, ((m : ℝ) * hsn (x γ τ - x γ' τ)) :=
-          Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun τ _ => h2 τ
+          Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun τ _ => h2 τ
         _ = (m : ℝ) ^ f * ∏ τ, hsn (x γ τ - x γ' τ) := by
           rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ]
     have hmpos : (0 : ℝ) < (m : ℝ) ^ f := by positivity
@@ -261,7 +303,7 @@ theorem poincare_count : ∀ (D : D7) (θ : InfFam D), IsInfFam θ → ∀ (V : 
       (B * H) ^ (N * f) * ∏ τ, ((1 + hsn (x γ τ)) ^ N)⁻¹ := by
     intro γ _
     rw [pow_mul, hf, ← Finset.card_univ, ← Finset.prod_const, ← Finset.prod_mul_distrib]
-    refine Finset.prod_le_prod (fun τ _ => inv_nonneg.2 (pow_nonneg (add_nonneg zero_le_one (Real.sqrt_nonneg _)) _)) fun τ _ => ?_
+    refine Finset.prod_le_prod₀ (fun τ _ => inv_nonneg.2 (pow_nonneg (add_nonneg zero_le_one (Real.sqrt_nonneg _)) _)) fun τ _ => ?_
     set h := hsn (cmp θ τ (c * (γ : GA D V) * g)) with hh
     have hh0 : 0 ≤ h := Real.sqrt_nonneg _
     have e : (γ : GA D V) = c⁻¹ * (c * (γ : GA D V) * g) * g⁻¹ := by group

@@ -1,4 +1,48 @@
-import Formalism.FrobeniusOrbits.Statement
+module
+
+public import Formalism.FrobeniusOrbits.Statement
+public import Mathlib.Data.FunLike.Fintype
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 
@@ -34,10 +78,6 @@ def HostOrdersFrob : Prop :=
       g.2 = hcl e u → orderOf g ≤ 2 ^ j →
       ((l : ZMod (2 ^ (e + 2 - j))) = 1 ∨ (l : ZMod (2 ^ (e + 2 - j))) = -1)
 
-def HostTwoAdicSq : Prop :=
-  (∀ d : ℕ, d % 8 = 7 → IsSquare (-(d : ℤ_[2]))) ∧
-  ∀ (q d : ℕ) [Fact q.Prime], HostHyp q d → IsSquare (-(d : ℤ_[q]))
-
 def DiscrMaximalRealCyclotomic : Prop :=
   ∀ (e : ℕ) (L : Type) [Field L] [NumberField L] (ζ : L), IsPrimitiveRoot ζ (2 ^ (e + 2)) →
     discr (F1 ζ) = 2 ^ (2 ^ e * (e + 1) - 1)
@@ -53,27 +93,15 @@ def HostDiscr : Prop :=
     (|(discr (hostF ζ a b) : ℝ)| ^ ((1 : ℝ) / (2 ^ (e + 1) : ℝ)) =
       (2 : ℝ) ^ ((e : ℝ) + 1 - (2 : ℝ) ^ (-(e : ℝ))) * Real.sqrt ((q : ℝ) * d))
 
-def HostRamified : Prop :=
-  ∀ (e q d : ℕ), 1 ≤ e → HostHyp q d →
-  ∀ (L : Type) [Field L] [NumberField L] (ζ a b : L), IsLayer (e + 2) q d ζ a b →
-  ∀ (p : ℕ) [Fact p.Prime] (P : Ideal (𝓞 (hostE ζ a b))) [P.IsPrime]
-    [P.LiesOver (span {(p : ℤ)})],
-    (∃ σ : hostE ζ a b ≃ₐ[ℚ] hostE ζ a b, σ ≠ 1 ∧ ∀ x : 𝓞 (hostE ζ a b), σ • x - x ∈ P) ↔
-      (p = 2 ∨ p = q ∨ p = d)
-
-def HostOrderD : Prop :=
-  ∀ (e q d : ℕ), 1 ≤ e → HostHyp q d →
-  ∀ ud : (ZMod (2 ^ (e + 2)))ˣ, (ud : ZMod (2 ^ (e + 2))) = (d : ZMod _) →
-    orderOf (hcl e ud) = 2 ^ (e - 1)
-
 def HostPartner : Prop :=
   ∀ (e : ℕ) (τ : GG e), τ ∈ Psi e →
     Set.BijOn (fun g : GG e => cc e * g * τ) {g | g ∉ Psi e} (Psi e : Set (GG e))
 
 def chC (e : ℕ) : GG e →* ℂˣ := (Units.map (Int.castRingHom ℂ).toMonoidHom).comp (chD e)
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def HostCharSum : Prop :=
   ∀ e : ℕ,
     (∀ χ : GG e →* ℂˣ,

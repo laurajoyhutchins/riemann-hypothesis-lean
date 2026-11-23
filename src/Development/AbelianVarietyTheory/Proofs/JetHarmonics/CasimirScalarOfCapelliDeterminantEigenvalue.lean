@@ -1,9 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
-import Formalism.RealPlaceAnalysis.StatementE
-import Formalism.RealPlaceAnalysis.StatementKT
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QdetTopThreeOrders
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QdetTopThreeOrders
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Formalism.HermitianCurvature.BesselNonvanishingReduction
+import Formalism.HermitianCurvature.StatementI
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
+
 open BranchingSupport Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
 
@@ -55,7 +106,7 @@ theorem scalar_core (n : ℕ) (hn : 2 ≤ n) (ρ μ a : Fin n → ℂ) (b : Fin 
     refine Set.Infinite.mono (s := {0}ᶜ) ?_ (Set.finite_singleton (0:ℂ)).infinite_compl
     intro t ht
     have ht : t ≠ 0 := ht
-    simp only [Set.mem_setOf_eq, eval_add, eval_mul, eval_C, eval_X, eval_pow, eval_finset_sum,
+    simp only [Set.mem_setOf_eq, eval_add, eval_mul, eval_C, eval_X, eval_pow, Polynomial.eval_finsetSum,
       eval_one, rev_eval _ _ _ ht, card_univ, Fintype.card_fin]
     have := congrArg (fun z => t ^ n * z) (h t⁻¹)
     simp only [mul_add, mul_sum] at this ⊢
@@ -90,7 +141,7 @@ theorem scalar_core (n : ℕ) (hn : 2 ≤ n) (ρ μ a : Fin n → ℂ) (b : Fin 
   have c2 : ∀ p : ℂ[X], (X * p).coeff 2 = p.coeff 1 := fun p => coeff_X_mul p 1
   rw [c1] at k1
   rw [c2] at k2
-  simp only [finset_sum_coeff, coeff_C_mul, (rev_coeff _ _).1, (rev_coeff _ _).2.1, le_refl, if_true,
+  simp only [Polynomial.finsetSum_coeff, coeff_C_mul, (rev_coeff _ _).1, (rev_coeff _ _).2.1, le_refl, if_true,
     Nat.sub_self, mul_one] at k1 k2
   norm_num at k1 k2
   constructor
@@ -170,13 +221,15 @@ theorem cas_of_capelli : ∀ (M : Type) [AddCommGroup M] [Module ℂ M] (n : ℕ
             = (∏ s, (Y + (mu s : ℂ))) • (1 : Module.End ℂ M) := by
           ext w; simpa using h Y w
         have h2 := congrArg φ ((hR _).symm.trans h1)
-        simp only [map_add, map_sum, map_smul, smul_eq_mul, add_sub_assoc] at h2
+
+        simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, add_sub_assoc] at h2
         exact h2)
   have e1 : ∑ i, E i i = (∑ l, (mu l : ℂ)) • (1 : Module.End ℂ M) := by
     rw [← sub_eq_zero, ← Module.forall_dual_apply_eq_zero_iff ℂ]
     intro φ
     have := (core φ).1
     rw [hρ0] at this
+
     simp only [map_sub, map_sum, map_smul, smul_eq_mul]
     linear_combination this
   have e2 : Formalism.REAL.Cas E = (casG mu : ℂ) • (1 : Module.End ℂ M) := by
@@ -186,6 +239,7 @@ theorem cas_of_capelli : ∀ (M : Type) [AddCommGroup M] [Module ℂ M] (n : ℕ
     have h3 := congrArg φ (sq_sub_cas E hE)
     rw [e1, smul_mul_smul_comm, mul_one] at h3
     simp only [sum_erase_eq_sub (mem_univ _), hρ0] at h2
+
     simp only [map_sub φ, map_sum, map_smul, smul_eq_mul] at h3 h2 ⊢
     have h4 : (casG mu : ℂ) = ∑ l, (mu l : ℂ) ^ 2 - ∑ l, ρ l ^ 2 := by
       simp [casG, Formalism.QuantumDeterminants.rhoStd, hρ]

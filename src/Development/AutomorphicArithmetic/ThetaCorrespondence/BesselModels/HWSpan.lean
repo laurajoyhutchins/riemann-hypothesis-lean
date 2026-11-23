@@ -1,12 +1,72 @@
-import Mathlib
+module
+
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsHighestWeightIrreducibleUnitaryRepU
+public import Formalism.PeriodIntegrals.UpqRep
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactCasimirHighestWeight
+public import Formalism.RealPlaceAnalysis.SmoothOnGVIff
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SetIntegralDifferentiability
+public import Formalism.RealPlaceAnalysis.FinalF
+public import Formalism.RealPlaceAnalysis.QuotientSettingHolds
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactExponentialSurjective
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantCompactSpan
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+public import Mathlib.Analysis.ODE.ExistUnique
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Formalism.HermitianCurvature.BesselNonvanishingReduction
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.RealPlaceAnalysis.QuotientSettingHolds
-import Formalism.RealPlaceAnalysis.FinalF
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactExponentialSurjective
-import Formalism.PeriodIntegrals.UpqRep
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsWtOnIffOfTorus
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SetIntegralDifferentiability
+import Formalism.HermitianCurvature.StatementI
+
+@[expose] public section
 
 open Matrix MeasureTheory Finset
 open scoped InnerProductSpace ContDiff Topology
@@ -389,29 +449,7 @@ theorem stable [FiniteDimensional ℂ W] (U : ℝ → W →L[ℂ] W) (A : W →�
     (hadd : ∀ s t v, U (s + t) v = U s (U t v))
     (hd : ∀ v, HasDerivAt (fun t => U t v) (A v) 0) (S : Submodule ℂ W) (hS : ∀ v ∈ S, A v ∈ S)
     (v : W) (hv : v ∈ S) (t : ℝ) : U t v ∈ S := by
-  set Q : W →L[ℂ] W := ContinuousLinearMap.id ℂ W - S.starProjection with hQ
-  have hQ0 : ∀ y ∈ S, Q y = 0 := fun y hy => by
-    simp [hQ, (Submodule.starProjection_eq_self_iff (K := S)).2 hy]
-  set B : W →L[ℂ] W := Q.comp (LinearMap.toContinuousLinearMap A) with hB
-  have hq : ∀ t, HasDerivAt (fun s => Q (U s v)) (B (Q (U t v))) t := by
-    intro t
-    have h2 : HasDerivAt (fun s => Q (U s v)) (Q (A (U t v))) t :=
-      (Q.restrictScalars ℝ).hasFDerivAt.comp_hasDerivAt t (deriv_left U A hadd hd v t)
-    convert h2 using 1
-    have h3 : Q (A (S.starProjection (U t v))) = 0 :=
-      hQ0 _ (hS _ (Submodule.starProjection_apply_mem S _))
-    have h4 : Q (U t v) = U t v - S.starProjection (U t v) := by simp [hQ]
-    simp only [hB, ContinuousLinearMap.comp_apply, LinearMap.coe_toContinuousLinearMap']
-    rw [h4, map_sub, map_sub, h3, sub_zero]
-  have hz : (fun s => Q (U s v)) = fun _ => (0 : W) := by
-    refine ODE_solution_unique_univ (v := fun _ y => B y) (s := fun _ => Set.univ) (K := ‖B‖₊) (t₀ := 0)
-      (fun _ => B.lipschitz.lipschitzOnWith) (fun t => ⟨hq t, trivial⟩)
-      (fun t => ⟨by simpa using hasDerivAt_const t (0 : W), trivial⟩) ?_
-    simp only [h0]
-    exact hQ0 v hv
-  have h5 : U t v - S.starProjection (U t v) = 0 := by simpa [hQ] using congrFun hz t
-  rw [sub_eq_zero.1 h5]
-  exact Submodule.starProjection_apply_mem S _
+  apply GlobalTheory.UnitaryHighestWeight.stable <;> assumption
 
 end OneParam
 
@@ -453,7 +491,7 @@ theorem diag_skew (θ : Fin k → ℝ) :
     (Matrix.diagonal fun a => (θ a : ℂ) * Complex.I)ᴴ = -Matrix.diagonal fun a => (θ a : ℂ) * Complex.I := by
   rw [Matrix.diagonal_conjTranspose, Matrix.diagonal_neg]
   congr 1
-  funext a
+  ext i
   simp
 
 theorem exp_diag (θ : Fin k → ℝ) (t : ℝ) :
@@ -494,33 +532,7 @@ theorem isWeight_of_isWtOn (E : Fin k → Fin k → Module.End ℂ W)
     (hE : ∀ Z : Matrix (Fin k) (Fin k) ℂ, Zᴴ = -Z → ∀ v,
       HasDerivAt (fun t : ℝ => π (NormedSpace.exp ((t : ℂ) • Z)) v) (∑ a, ∑ b, Z a b • E a b v) 0)
     (μ : Fin k → ℝ) (v : W) (hv : IsWtOn (Kset (allPos k)) π μ v) : Formalism.REAL.IsWeight E μ v := by
-  intro a
-  set θ : Fin k → ℝ := Pi.single a 1 with hθ
-  have h1 := hE _ (diag_skew θ) v
-  rw [sum_diag] at h1
-  have h2 : (fun t : ℝ => π (NormedSpace.exp ((t : ℂ) • Matrix.diagonal fun a => (θ a : ℂ) * Complex.I)) v) =
-      fun t : ℝ => Complex.exp ((μ a * Complex.I) * t) • v := by
-    funext t
-    have hm := exp_mem (diag_skew θ) t
-    rw [exp_diag] at hm ⊢
-    rw [hv (fun b => t * θ b) ((mem_K_iff _).2 hm)]
-    congr 2
-    simp [hθ, Pi.single_apply]
-    ring
-  have h3 : HasDerivAt (fun t : ℝ => Complex.exp ((μ a * Complex.I) * t) • v) ((μ a * Complex.I) • v) 0 := by
-    have h4 : HasDerivAt (fun t : ℝ => (μ a * Complex.I) * (t : ℂ)) (μ a * Complex.I) 0 := by
-      simpa using (Complex.ofRealCLM.hasDerivAt (x := (0 : ℝ))).const_mul (μ a * Complex.I)
-    simpa using h4.cexp.smul_const v
-  rw [h2] at h1
-  have h5 := h1.unique h3
-  have h6 : ∑ b, ((θ b : ℂ) * Complex.I) • E b b v = Complex.I • E a a v := by
-    rw [Finset.sum_eq_single a]
-    · simp [hθ]
-    · intro b _ hb
-      simp [hθ, Pi.single_eq_of_ne hb]
-    · simp
-  rw [h6, mul_comm, ← smul_smul] at h5
-  exact smul_right_injective W Complex.I_ne_zero h5
+  apply GlobalTheory.UnitaryHighestWeight.isWeight_of_isWtOn <;> assumption
 
 theorem stable_of_derived [FiniteDimensional ℂ W] (hπ : IsURepOn (UJset (allPos k)) π)
     (E : Fin k → Fin k → Module.End ℂ W)
@@ -564,7 +576,7 @@ theorem mem_of_skew {k : ℕ} {W : Type} [AddCommGroup W] [Module ℂ W]
     rw [smul_smul, show -Complex.I / 2 * Complex.I = 1 / 2 by
       rw [div_mul_eq_mul_div, neg_mul, Complex.I_mul_I, neg_neg]]
     module
-  rw [e, map_add, map_smul, map_smul]
+  rw [e, map_add (f := _), map_smul, map_smul]
   exact S.add_mem (S.smul_mem _ h1) (S.smul_mem _ h2)
 
 def actL {k : ℕ} {W : Type} [AddCommGroup W] [Module ℂ W] (E : Fin k → Fin k → Module.End ℂ W) (v : W) :
@@ -664,115 +676,6 @@ theorem exists_type_of_highest [FiniteDimensional ℂ W] (hπ : IsURepOn (UJset 
 section
 attribute [local instance] Matrix.linftyOpNormedRing Matrix.linftyOpNormedAlgebra
 
-theorem hasDerivAt_exp_entry (X : Matrix (Fin k) (Fin k) ℂ) (i j : Fin k) :
-    HasDerivAt (fun t : ℝ => NormedSpace.exp ((t : ℂ) • X) i j) (X i j) 0 := by
-  have h := hasDerivAt_exp_smul_const (𝕂 := ℝ) X (0 : ℝ)
-  let L : Matrix (Fin k) (Fin k) ℂ →ₗ[ℝ] ℂ :=
-    { toFun := fun x => x i j
-      map_add' := fun x y => rfl
-      map_smul' := fun c x => rfl }
-  have h2 := (LinearMap.toContinuousLinearMap L).hasFDerivAt.comp_hasDerivAt 0 h
-  simp only [zero_smul, NormedSpace.exp_zero, one_mul] at h2
-  exact h2
-
 end
-
-theorem root_kills (E : Fin k → Fin k → Module.End ℂ W)
-    (hE : ∀ Z : Matrix (Fin k) (Fin k) ℂ, Zᴴ = -Z → ∀ v,
-      HasDerivAt (fun t : ℝ => π (NormedSpace.exp ((t : ℂ) • Z)) v) (∑ a, ∑ b, Z a b • E a b v) 0)
-    (x : W) (hd : DifferentiableAt ℂ (fun B : Fin k → Fin k → ℂ => π (Matrix.of B) x)
-      (Matrix.of.symm (1 : Matrix (Fin k) (Fin k) ℂ)))
-    (a b : Fin k) (hfix : ∀ t : ℝ, π (1 + (t : ℂ) • Matrix.single a b 1) x = x) : E a b x = 0 := by
-  set D := fderiv ℂ (fun B : Fin k → Fin k → ℂ => π (Matrix.of B) x)
-      (Matrix.of.symm (1 : Matrix (Fin k) (Fin k) ℂ)) with hD
-  have hcurve : ∀ (γ : ℝ → Matrix (Fin k) (Fin k) ℂ) (Z : Matrix (Fin k) (Fin k) ℂ), γ 0 = 1 →
-      (∀ i j, HasDerivAt (fun t => γ t i j) (Z i j) 0) →
-      HasDerivAt (fun t => π (γ t) x) (D (Matrix.of.symm Z)) 0 := by
-    intro γ Z h0 hγ
-    have h1 : HasDerivAt (fun t => (Matrix.of.symm (γ t) : Fin k → Fin k → ℂ)) (Matrix.of.symm Z) 0 :=
-      hasDerivAt_pi.2 fun i => hasDerivAt_pi.2 fun j => hγ i j
-    have h2 := (hd.hasFDerivAt.restrictScalars ℝ)
-    rw [← h0] at h2
-    have h3 := h2.comp_hasDerivAt 0 h1
-    rw [h0] at h3
-    exact h3
-  let DL : Matrix (Fin k) (Fin k) ℂ →ₗ[ℂ] W :=
-    (D : (Fin k → Fin k → ℂ) →ₗ[ℂ] W).comp (Matrix.ofLinearEquiv ℂ).symm.toLinearMap
-  have h1 : (actL E x - DL) (Matrix.single a b 1) ∈ (⊥ : Submodule ℂ W) := by
-    refine mem_of_skew _ _ (fun Z hZ => ?_) _
-    rw [Submodule.mem_bot, LinearMap.sub_apply, sub_eq_zero]
-    exact (hE Z hZ x).unique (hcurve _ Z (by simp) (hasDerivAt_exp_entry Z))
-  rw [Submodule.mem_bot, LinearMap.sub_apply, sub_eq_zero, actL_single] at h1
-  have h2 := hcurve (fun t => 1 + (t : ℂ) • Matrix.single a b 1) (Matrix.single a b 1) (by simp) (by
-    intro i j
-    simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul]
-    simpa using ((Complex.ofRealCLM.hasDerivAt (x := (0 : ℝ))).mul_const
-      (Matrix.single a b (1 : ℂ) i j)).const_add ((1 : Matrix (Fin k) (Fin k) ℂ) i j))
-  simp only [hfix] at h2
-  rw [h1]
-  exact h2.unique (hasDerivAt_const (0 : ℝ) x)
-
-theorem exists_isHCTypeU_of_highest : ∀ (k : ℕ) (ν : Fin k → ℤ) (u : Fin k → ℝ) (I : Type) [Fintype I] [DecidableEq I] (ρ : Matrix (Fin k) (Fin k) ℂ → Matrix I I ℂ) (v0 : I → ℂ), (∀ a, u a = ν a + (((k : ℝ) - 1) / 2 - (a : ℕ))) → ρ 1 = 1 → (∀ A B, ρ (A * B) = ρ A * ρ B) → (∀ A, ρ Aᴴ = (ρ A)ᴴ) → (∀ A : Fin k → Fin k → ℂ, (Matrix.of A).det ≠ 0 → ∀ i j, DifferentiableAt ℂ (fun B : Fin k → Fin k → ℂ => ρ (Matrix.of B) i j) A) → v0 ≠ 0 → (∀ b : Matrix (Fin k) (Fin k) ℂ, b.BlockTriangular id → b.det ≠ 0 → ρ b *ᵥ v0 = (∏ a, b a a ^ ν a) • v0) → ∃ (Wp : Type) (_ : NormedAddCommGroup Wp) (_ : InnerProductSpace ℂ Wp) (_ : CompleteSpace Wp) (_ : FiniteDimensional ℂ Wp) (π₀ : Matrix (Fin k) (Fin k) ℂ → (Wp →L[ℂ] Wp)), PI.UpqRep.IsHCTypeU k u π₀ := by
-  intro k ν u I _ _ ρ v0 hu h1 hmul hadj hdiff hv0 hB
-  set π : Matrix (Fin k) (Fin k) ℂ → (EuclideanSpace ℂ I →L[ℂ] EuclideanSpace ℂ I) :=
-    fun g => Matrix.toEuclideanCLM (n := I) (𝕜 := ℂ) (ρ g) with hπdef
-  have hU : ∀ g ∈ UJset (allPos k), gᴴ * g = 1 := fun g hg => by
-    have h : gᴴ * Jm (allPos k) * g = Jm (allPos k) := hg
-    rwa [Jm_allPos, Matrix.mul_one] at h
-  have horb : ∀ (v : EuclideanSpace ℂ I) (A : Fin k → Fin k → ℂ), (Matrix.of A).det ≠ 0 →
-      DifferentiableAt ℂ (fun B : Fin k → Fin k → ℂ => π (Matrix.of B) v) A := by
-    intro v A hA
-    rw [differentiableAt_euclidean]
-    intro i
-    simp only [hπdef, Matrix.ofLp_toEuclideanCLM, Matrix.mulVec, dotProduct]
-    exact DifferentiableAt.fun_sum fun j _ => (hdiff A hA i j).mul_const _
-  have hπ : IsURepOn (UJset (allPos k)) π := by
-    refine ⟨⟨by simp [hπdef, h1], fun a _ b _ => ?_⟩, fun g hg => ?_, fun v g hg => ?_⟩
-    · simp only [hπdef, hmul, map_mul]
-      rfl
-    · refine (ContinuousLinearMap.norm_map_iff_adjoint_comp_self _).2 ?_
-      rw [← ContinuousLinearMap.star_eq_adjoint, ← ContinuousLinearMap.mul_def, hπdef]
-      simp only
-      rw [← map_star, ← map_mul, Matrix.star_eq_conjTranspose, ← hadj, ← hmul, hU g hg, h1, map_one]
-    · have hdet : (Matrix.of (Matrix.of.symm g)).det ≠ 0 := by
-        intro h0
-        have := congrArg Matrix.det (hU g hg)
-        rw [Matrix.det_mul, show g.det = 0 from h0] at this
-        simp at this
-      exact (horb v _ hdet).continuousAt.continuousWithinAt
-  obtain ⟨E, hgl, hun, hE⟩ := Derived.exists_derived_action k _ π hπ
-  set x : EuclideanSpace ℂ I := WithLp.toLp 2 v0 with hx
-  have hx0 : x ≠ 0 := fun h => hv0 (by simpa [hx] using h)
-  have hBx : ∀ b : Matrix (Fin k) (Fin k) ℂ, b.BlockTriangular id → (∀ a, b a a ≠ 0) →
-      π b x = (∏ a, b a a ^ ν a) • x := by
-    intro b hb hb0
-    have := hB b hb (by rw [Matrix.det_of_upperTriangular hb]; exact Finset.prod_ne_zero_iff.2 fun a _ => hb0 a)
-    simp only [hπdef, hx, Matrix.toEuclideanCLM_toLp, this, WithLp.toLp_smul]
-  have hlow : lowK (allPos k) u = fun a => (ν a : ℝ) := by
-    rw [GlobalTheory.KTypeCompare.lowK_allPos]
-    funext a
-    simp [GlobalTheory.IndefiniteRowSideFullHecke.HarishChandraRootData.rhoU, hu a]
-  refine ⟨_, inferInstance, inferInstance, inferInstance, inferInstance, _,
-    exists_type_of_highest hπ E hgl hun hE u x hx0 ⟨?_, fun a b hab _ => ?_⟩⟩
-  · rw [hlow]
-    refine isWeight_of_isWtOn E hE _ x fun θ _ => ?_
-    rw [hBx _ (Matrix.blockTriangular_diagonal _) (fun a => by simp)]
-    congr 1
-    simp only [Matrix.diagonal_apply_eq, ← Complex.exp_int_mul, ← Complex.exp_sum]
-    congr 1
-    push_cast
-    rw [Finset.sum_mul]
-    exact Finset.sum_congr rfl fun a _ => by ring
-  · refine root_kills E hE x (horb x _ (by simp)) a b fun t => ?_
-    have hdiag : ∀ c, (1 + (t : ℂ) • Matrix.single a b (1 : ℂ) : Matrix (Fin k) (Fin k) ℂ) c c = 1 := by
-      intro c
-      have : ¬ (a = c ∧ b = c) := fun h => hab.ne (h.1.trans h.2.symm)
-      simp [Matrix.single, this]
-    rw [hBx _ ?_ (fun c => by rw [hdiag]; exact one_ne_zero)]
-    · rw [Finset.prod_eq_one (fun c _ => by rw [hdiag, _root_.one_zpow]), one_smul]
-    · intro i j hij
-      have hij' : j < i := hij
-      have : ¬ (a = i ∧ b = j) := fun h => absurd hab (by rw [h.1, h.2]; exact hij'.le.not_gt)
-      simp [Matrix.single, this, Matrix.one_apply_ne hij'.ne']
 
 end UpperTheory.Lit.Bur.HWSpanType

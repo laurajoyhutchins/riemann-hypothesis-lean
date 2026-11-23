@@ -1,6 +1,44 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SixthDecomposition
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.StringRepresentations.RowRepAtGN
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.StringRepresentations.AdmissibleTemperedUnramified
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SixthDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,25 +62,22 @@ def IsStringRepN (D : D7) (i : D.nd.Loc) (p : Part D.naut.CG)
 theorem strN' {D : D7} {i : D.nd.Loc} {p : Part D.naut.CG} {R : G D.host.E D.nd.Om →* GL (Fin p.a) (Qbar (D.nd.l i))}
     (h : IsStringRepN D i p R) : IsStringRepN D i p R := h
 
-def HeckeCharacterEqualityOfRealisation : Prop :=
-  ∀ D : D7, Formalism.MainNotions.SumRepresentations.admitted D → ∀ (i : D.nd.Loc) (χ χ' : D.naut.CG 1) (s : ℝ)
-    (ρ : G D.host.E D.nd.Om →* GL (Fin 1) (Qbar (D.nd.l i))),
-    (∀ w, w ∉ placesOver D.host.E (D.nd.l i) →
-      RelW D.nd D.naut (D.naut.wdOf i ρ w) (D.naut.lpTw (D.naut.locG χ w) s)) →
-    (∀ w, w ∉ placesOver D.host.E (D.nd.l i) → D.naut.wdOf i ρ w = D.naut.lpTw (D.naut.locG χ' w) s) →
-    χ = χ'
-
 theorem unr_part {R : Ranks} {H : Host R} {what₂ : Rows.Data R} {N : NData R H what₂} {A : NAut N} {w : PlE H} :
-    ∀ L : List (Part A.CG), A.unr (isoLoc N A L w) → ∀ p ∈ L, 1 ≤ p.d → A.unr (A.locG p.π w)
-  | [], _, _, hp, _ => absurd hp List.not_mem_nil
-  | q :: L, hun, p, hp, hd => by
-    have hun' : A.unr (A.lpSum (spehLoc N A q w) (isoLoc N A L w)) := hun
-    have h12 := (A.unr_sum _ _).1 hun'
+    ∀ L : List (Part A.CG), A.unr (isoLoc N A L w) → ∀ p ∈ L, 1 ≤ p.d → A.unr (A.locG p.π w) := by
+  intro L
+  induction L with
+  | nil =>
+    intro _ _ hp _
+    exact absurd hp List.not_mem_nil
+  | cons q L ih =>
+    intro hun p hp hd
+    have h12 := (A.unr_sum (spehLoc N A q w) (isoLoc N A L w)).1 hun
     rcases List.mem_cons.1 hp with rfl | hp
     · have h := h12.1
       obtain ⟨d, hd'⟩ : ∃ d, p.d = d + 1 := ⟨p.d - 1, by omega⟩
-      rw [GlobalTheory.StringDecomp.spehLoc_eq, hd', List.range_succ_eq_map] at h
-      exact (A.unr_tw _ _).1 ((A.unr_sum _ _).1 h).1
-    · exact unr_part L h12.2 p hp hd
+      rw [GlobalTheory.StringDecomp.spehLoc_eq, hd', List.range_succ_eq_map, List.foldr_cons,
+        A.unr_sum] at h
+      exact (A.unr_tw (A.locG p.π w) _).1 h.1
+    · exact ih h12.2 p hp hd
 
 end UpperTheory.GalN

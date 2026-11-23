@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLatticeStatement
-import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsExtra
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+public import Formalism.FlagUnipotentLattices.CardSubmodulesAndLinearEquivBounds
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsExtra
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLatticeStatement
+public import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LinearFormsBoundedRepresentatives
+
+@[expose] public section
+
 open NumberField Module Matrix Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.Cnt GlobalTheory.LoopC
 open scoped ENNReal Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -40,6 +89,19 @@ theorem exists_smul_mem {E W : Type} [Field E] [NumberField E] [AddCommGroup W] 
   | (intros; apply _root_.GlobalTheory.ClearingDenominatorsInOrder.main <;> assumption)
   | (intros; apply @_root_.GlobalTheory.ClearingDenominatorsInOrder.main <;> first | assumption | infer_instance)
   | (intros; exact _root_.GlobalTheory.ClearingDenominatorsInOrder.main ..)
+
+variable {E : Type} [Field E] [NumberField E] [StarRing E]
+
+theorem exists_vec (S : HSpace E) (φ : S.V →ₗ[E] E) : ∃ w, ∀ x, φ x = S.hT w x := by
+  apply _root_.GlobalTheory.LoopC.FunIdx.exists_vec <;> assumption
+
+
+theorem span_eq_top_of_unimodular {S : HSpace E} (L : Submodule (𝓞 E) S.V)
+    (hL : Submodule.IsLattice E L)
+    (hU : Formalism.HermitianLatticesTheory.IsUnimodular S.hT L) :
+    Submodule.span E (L : Set S.V) = ⊤ := by
+  apply _root_.GlobalTheory.LoopC.FunIdx.span_eq_top_of_unimodular <;> assumption
+
 
 theorem mem_perpE (D : D7) (P : LatW D) (v : (D.sp.X 0).V) :
     v ∈ perpE D P ↔ ∀ p ∈ P, (D.sp.X 0).hT p v = 0 := by
@@ -189,8 +251,25 @@ theorem main : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D),
     rw [← (hw b).2 σ hσ.2]
     have huni : Formalism.HermitianLatticesTheory.dual (hS D).hT Λ = Λ := hrow.2.1.2.1
     exact (mem_dual _ _ _).1 (huni.symm ▸ hfΛ b) _ (iXY_mem D F0 Λ hb.1 hsp σ hσ.1)
-  · obtain ⟨c, hc, hcw⟩ := exists_smul_mem (L0X D Λ (lf D F0)) (w b)
-      (by rw [hlat.span_eq_top]; trivial)
+  · obtain ⟨c, hc, hcΛ⟩ := exists_smul_mem Λ (D.sp.iXY 0 (w b))
+      (by rw [span_eq_top_of_unimodular Λ hrow.2.1.1 hrow.2.1.2.1]; trivial)
+    have hworth : D.sp.iXY 0 (w b) ∈ orth (hS D) (Xplus (lf D F0)) :=
+      hW.1.le (Submodule.mem_sup_left ⟨w b, rfl⟩)
+    have hcorth : D.sp.iXY 0 (c • w b) ∈ orth (hS D) (Xplus (lf D F0)) := by
+      rw [← algebraMap_smul D.host.E c, map_smul]
+      exact (orth (hS D) (Xplus (lf D F0))).smul_mem _ hworth
+    have hcΛ' : D.sp.iXY 0 (c • w b) ∈ Λ := by
+      rw [← algebraMap_smul D.host.E c, map_smul, algebraMap_smul]
+      exact hcΛ
+    have hcX : D.sp.iXY 0 (c • w b) ∈ orth (hS D) (Xsp (lf D F0)) := by
+      apply (mem_orth (hS D) _ _).2
+      intro x hx
+      exact (mem_orth (hS D) _ _).1 hcorth x (Submodule.mem_sup_left hx)
+    have hcz : (hS D).hT F0.z (D.sp.iXY 0 (c • w b)) = 0 :=
+      (mem_orth (hS D) _ _).1 hcorth _
+        (Submodule.mem_sup_right (Submodule.mem_span_singleton_self _))
+    have hcw : c • w b ∈ L0X D Λ (lf D F0) := by
+      exact ⟨⟨Submodule.mem_sup_left ⟨hcΛ', hcX⟩, hcX⟩, hcz⟩
     have hc1 : algebraMap (𝓞 D.host.E) D.host.E c ≠ 0 := by simpa using hc
     have hm : c • w b ∈ perpW D (L0X D Λ (lf D F0)) P :=
       ⟨hcw, ((perpE D P).restrictScalars (𝓞 D.host.E)).smul_mem c (hw b).1⟩
@@ -209,6 +288,7 @@ theorem main : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D),
     have hE : ∀ a, (hS D).hT (F0.e a) om = 0 := fun a => by
       have h := congrFun (Formalism.HermitianLatticeCounting.Final.LatticeSumBounds.kernelRowSpace _ _
         ((Zhat F0 F'.fl).submatrix Fin.castSucc id)).1 a
+
       rw [hom, map_sum]
       simp only [map_smul, smul_eq_mul]
       rw [← hκ] at h
@@ -229,7 +309,7 @@ theorem main : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D),
         rw [map_sub, map_smul, F0.z_norm, hζ, smul_eq_mul]
         field_simp
         ring
-      rw [map_add, LinearMap.add_apply, h1, h2, add_zero]
+      rw [map_add (f := _), LinearMap.add_apply, h1, h2, add_zero]
     rw [← hW.1] at hperp
     obtain ⟨_, ⟨y, rfl⟩, x, hx, hyx⟩ := Submodule.mem_sup.1 hperp
     have hWp : ∀ (σ : (D.sp.X 0).V), ∀ v ∈ Xplus (lf D F0), (hS D).hT v (D.sp.iXY 0 σ) = 0 := fun σ =>
@@ -238,12 +318,13 @@ theorem main : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D),
     have hdec : om = x + D.sp.iXY 0 y + ζ • F0.z := by
       rw [add_comm x, hyx]; abel
     have hσom : ∀ σ, (hS D).hT (D.sp.iXY 0 σ) om = (D.sp.X 0).hT σ y := fun σ => by
-      rw [hdec, map_add, map_add, map_smul, hT_zero _ (hWp σ x (Submodule.mem_sup_left hx)),
+      rw [hdec, map_add (f := _), map_add (f := _), map_smul, hT_zero _ (hWp σ x (Submodule.mem_sup_left hx)),
         hT_zero _ (hWp σ _ hzp), hiso]
       simp
     have hyP : y ∈ perpE D P := by
       refine (mem_perpE D P y).2 fun p hp => ?_
       have h1 : (hS D).hT (D.sp.iXY 0 p + φ ⟨p, hp⟩) om = 0 := by
+
         rw [hom, map_sum]
         refine Finset.sum_eq_zero fun b _ => ?_
         rw [map_smul, horth ⟨p, hp⟩ b, smul_zero]
@@ -253,6 +334,7 @@ theorem main : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D),
         sub_mem hyP (Submodule.sum_mem _ fun b _ => Submodule.smul_mem _ _ (hw b).1)
       refine sub_eq_zero.1 (han _ ?_)
       have h1 : ∀ σ ∈ perpE D P, (D.sp.X 0).hT σ (y - ∑ b, κ b • w b) = 0 := fun σ hσ => by
+
         rw [map_sub, ← hσom, hom, map_sum, map_sum, sub_eq_zero]
         refine Finset.sum_congr rfl fun b _ => ?_
         rw [map_smul, map_smul, ← (hw b).2 σ hσ]

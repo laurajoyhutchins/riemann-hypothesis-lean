@@ -1,5 +1,63 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.RegVert
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.RegAVpt
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Ideal.Height
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.RegAVpt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.RegVert
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Localization.Away.AdjoinRoot
+
+@[expose] public section
 
 namespace Formalism.L2.Pj.RegA
 
@@ -42,7 +100,6 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
   have hPc : P.primeCompl ≤ nonZeroDivisors A := by
     first
     | exact Ideal.primeCompl_le_nonZeroDivisors P
-    | exact le_nonZeroDivisors_of_noZeroDivisors (fun h => (show (0 : A) ∉ P from h) P.zero_mem)
   have hK : ∀ x y : A, algebraMap A (Localization.AtPrime P) x =
       algebraMap A (Localization.AtPrime P) y → x = y :=
     fun x y h => IsLocalization.injective (Localization.AtPrime P) hPc h
@@ -59,8 +116,6 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
       P.map (algebraMap A (Localization.AtPrime P)) := by
     first
     | exact Localization.AtPrime.map_eq_maximalIdeal.symm
-    | exact (Localization.AtPrime.map_eq_maximalIdeal (I := P)).symm
-    | exact (IsLocalization.AtPrime.map_eq_maximalIdeal P (Localization.AtPrime P)).symm
   have hcase1 : ∀ c : Localization.AtPrime P,
       algebraMap A (Localization.AtPrime P) b * c = algebraMap A (Localization.AtPrime P) a →
       ∃ a s : A, s ∉ P ∧ f * algebraMap A (FractionRing A) s = algebraMap A (FractionRing A) a := by
@@ -77,8 +132,6 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
       algebraMap A (Localization.AtPrime P) a * c = algebraMap A (Localization.AtPrime P) b := by
     first
     | exact ValuationRing.cond _ _
-    | exact PreValuationRing.cond _ _
-    | exact ValuationRing.cond' _ _
   obtain ⟨c, hc | hc⟩ := hcond
   · exact hcase1 c hc
   by_cases hcu : IsUnit c
@@ -94,7 +147,6 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
     have h1 : IsUnit (algebraMap A (Localization.AtPrime P) d) := by
       first
       | exact IsLocalization.map_units (M := P.primeCompl) (Localization.AtPrime P) ⟨d, hdP⟩
-      | exact IsLocalization.map_units (Localization.AtPrime P) (⟨d, hdP⟩ : P.primeCompl)
     rw [← hspec] at h1
     exact isUnit_of_mul_isUnit_left h1
   have had : a * d = (b : A) * t := by
@@ -116,7 +168,6 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
       have hu : IsUnit (algebraMap A (Localization.AtPrime P) x) := by
         first
         | exact IsLocalization.map_units (M := P.primeCompl) (Localization.AtPrime P) ⟨x, hxP⟩
-        | exact IsLocalization.map_units (Localization.AtPrime P) (⟨x, hxP⟩ : P.primeCompl)
       exact hQ.ne_top (Ideal.eq_top_of_isUnit_mem _ (Ideal.mem_comap.mp hx) hu)
     have hQ0 : Q.comap (algebraMap A (Localization.AtPrime P)) ≠ ⊥ := by
       intro h
@@ -129,23 +180,19 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
     have hmc : Ideal.map (algebraMap A (Localization.AtPrime P))
         (Q.comap (algebraMap A (Localization.AtPrime P))) = Q := by
       first
-      | exact IsLocalization.map_comap P.primeCompl (Localization.AtPrime P) Q
-      | exact IsLocalization.map_comap (M := P.primeCompl) Q
+      | exact IsLocalization.map_under P.primeCompl (Localization.AtPrime P) Q
     rw [hQeq] at hmc
     exact (hmaxL.trans hmc).le
   haveI hLN : IsNoetherianRing (Localization.AtPrime P) := by
     first
     | infer_instance
-    | exact IsLocalization.isNoetherianRing P.primeCompl (Localization.AtPrime P) hAN
   have hfg : (maximalIdeal (Localization.AtPrime P)).FG := by
     first
     | exact IsNoetherian.noetherian _
-    | exact (isNoetherianRing_iff.mp hLN).noetherian _
   obtain ⟨n, hn⟩ : ∃ n : ℕ, maximalIdeal (Localization.AtPrime P) ^ n ≤
       Ideal.span {algebraMap A (Localization.AtPrime P) (algebraMap O A ϖ)} := by
     first
     | exact Ideal.exists_pow_le_of_le_radical_of_fg hrad hfg
-    | exact Ideal.exists_pow_le_of_le_radical_of_fg_radical hrad hfg
   have hdm : algebraMap A (Localization.AtPrime P) d ∈ maximalIdeal (Localization.AtPrime P) := by
     rw [hmaxL]
     exact Ideal.mem_map_of_mem _ hdP
@@ -179,7 +226,6 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
     haveI : Module.Flat A (Localization.Away s) := by
       first
       | infer_instance
-      | exact IsLocalization.flat (Localization.Away s) (Submonoid.powers s)
     first
     | exact Module.Flat.trans O A (Localization.Away s)
     | infer_instance
@@ -250,14 +296,11 @@ theorem reg_vertical_e {O A : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
   haveI : Algebra.IsIntegral O V := by
     first
     | infer_instance
-    | exact Algebra.IsIntegral.of_finite O V
   have hmaxV : (maximalIdeal V).comap (algebraMap O V) = maximalIdeal O := by
     haveI hmx : ((maximalIdeal V).comap (algebraMap O V)).IsMaximal := by
       first
-      | exact Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (maximalIdeal V)
-      | exact Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := O) (maximalIdeal V)
+      | exact Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) (maximalIdeal V)
       | infer_instance
-      | exact Ideal.IsMaximal.under O (maximalIdeal V)
     exact IsLocalRing.eq_maximalIdeal hmx
   have hmem : ϖ ∈ (maximalIdeal V).comap (algebraMap O V) := by
     rw [hmaxV]

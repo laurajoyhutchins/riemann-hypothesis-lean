@@ -1,12 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSplitFinMulSplitInf
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsAutFormUCoef
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsOpenProductOfLocalLevelsUnitary
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeightEqOfFinitePartNeBot
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousMatrixCoeffInfinitePlacesWeightRepStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteUnitaryRationalPointSplitFiniteInfiniteStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanRealPointsWeightRepresentationEqTopStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FixedVectorFormValuesMemISupFixedPartsStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSplitFinMulSplitInf
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousMatrixCoeffInfinitePlacesWeightRepStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteUnitaryRationalPointSplitFiniteInfiniteStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FixedVectorFormValuesMemISupFixedPartsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsOpenProductOfLocalLevelsUnitary
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanRealPointsWeightRepresentationEqTopStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsAutFormUCoef
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeightEqOfFinitePartNeBot
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT GlobalTheory.BCT.TrKer
 open scoped Classical TensorProduct Topology
@@ -23,7 +69,7 @@ theorem ratSplit : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : �
 
 theorem spanW : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (lam : InfinitePlace E → DomWeight n), Submodule.span ℂ (Set.range ((wInf lam).comp (infU E n).subtype)) = ⊤ := GlobalTheory.T.span_realPoints_weightRepresentation_eq_top
 
-theorem semis : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (W : Type) [AddCommGroup W] [Module ℂ W] [FiniteDimensional ℂ W] (ρ : Representation ℂ (infU E n) W), Submodule.span ℂ (Set.range ρ) = ⊤ → ∀ (K : Subgroup (finU E n)), IsOpen (K : Set (finU E n)) → ∀ f : W →ₗ[ℂ] (UA E n → ℂ), (∀ u, IsAutFormU (f u)) → (∀ (x : infU E n) u, f (ρ x u) = RU E n x (f u)) → (∀ u, f u ∈ fixed (RF E n) K) → ∀ u, f u ∈ ⨆ (π : Submodule ℂ (UA E n → ℂ)) (_ : IsAutRepU π ∧ ∃ f' : W →ₗ[ℂ] (UA E n → ℂ), f' ≠ 0 ∧ (∀ u, f' u ∈ π) ∧ ∀ (x : infU E n) u, f' (ρ x u) = RU E n x (f' u)), π ⊓ fixed (RF E n) K := GlobalTheory.T.fixedVectorForm_values_mem_iSup_fixedParts
+theorem semis : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (W : Type) [AddCommGroup W] [Module ℂ W] [FiniteDimensional ℂ W] (ρ : Representation ℂ (infU E n) W), Submodule.span ℂ (Set.range ρ) = ⊤ → ∀ (K : Subgroup (finU (E := E) (n := n))), IsOpen (K : Set (finU (E := E) (n := n))) → ∀ f : W →ₗ[ℂ] (UA E n → ℂ), (∀ u, IsAutFormU (f u)) → (∀ (x : infU E n) u, f (ρ x u) = RU E n x (f u)) → (∀ u, f u ∈ fixed (RF E n) K) → ∀ u, f u ∈ ⨆ (π : Submodule ℂ (UA E n → ℂ)) (_ : IsAutRepU π ∧ ∃ f' : W →ₗ[ℂ] (UA E n → ℂ), f' ≠ 0 ∧ (∀ u, f' u ∈ π) ∧ ∀ (x : infU E n) u, f' (ρ x u) = RU E n x (f' u)), π ⊓ fixed (RF E n) K := GlobalTheory.T.fixedVectorForm_values_mem_iSup_fixedParts
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
@@ -47,31 +93,31 @@ theorem wInf_inv_rat (lam : InfinitePlace E → DomWeight n) (γ : UA E n) (γ�
   unfold wInf wAt
   simp only [MonoidHom.coe_mk, OneHom.coe_mk, e]
 
-theorem phiFun_wInf (lam : InfinitePlace E → DomWeight n) (F : finU E n → Module.Dual ℂ (Wsp lam)) (x : infU E n)
+theorem phiFun_wInf (lam : InfinitePlace E → DomWeight n) (F : finU (E := E) (n := n) → Module.Dual ℂ (Wsp lam)) (x : infU E n)
     (w : Wsp lam) : phiFun lam F (wInf lam x.1 w) = RU E n x.1 (phiFun lam F w) := by
   funext g
   change F (splitFin E n g) (wInf lam g (wInf lam x.1 w)) = F (splitFin E n (g * x.1)) (wInf lam (g * x.1) w)
   rw [map_mul (splitFin E n), splitFin_inf x, mul_one, map_mul (wInf lam), Module.End.mul_apply]
 
 theorem phiFun_mem_fixed (S : Set (Pl E)) (lam : InfinitePlace E → DomWeight n) (K' : ∀ w : Pl E, Subgroup (UL n w))
-    (F : finU E n → Module.Dual ℂ (Wsp lam)) (hF : F ∈ vecM S lam K') (w : Wsp lam) :
+    (F : finU (E := E) (n := n) → Module.Dual ℂ (Wsp lam)) (hF : F ∈ vecM S lam K') (w : Wsp lam) :
     phiFun lam F w ∈ fixed (RF E n) (globLev S K') := by
   intro k
   simp only [MonoidHom.one_apply, Units.val_one, one_smul]
   funext g
-  change phiFun lam F w (g * ((k : finU E n) : UA E n)) = phiFun lam F w g
+  change phiFun lam F w (g * ((k : finU (E := E) (n := n)) : UA E n)) = phiFun lam F w g
   rw [phiFun_mul_fin]
-  have e : rightReg ℂ (finU E n) (Module.Dual ℂ (Wsp lam)) (k : finU E n) F = F := funext fun x => hF.2 k k.2 x
+  have e : rightReg ℂ (finU (E := E) (n := n)) (Module.Dual ℂ (Wsp lam)) (k : finU (E := E) (n := n)) F = F := funext fun x => hF.2 k k.2 x
   rw [e]
 
 theorem isAutFormU_phiFun (hU : Unr E) (S : Set (Pl E)) (lam : InfinitePlace E → DomWeight n)
     (K' : ∀ w : Pl E, Subgroup (UL n w)) (hK : IsLevelFam (fun w : Pl E => MonoidHom.id (UL n w)) (KL n) K')
-    (F : finU E n → Module.Dual ℂ (Wsp lam)) (hF : F ∈ vecM S lam K') (w : Wsp lam) :
+    (F : finU (E := E) (n := n) → Module.Dual ℂ (Wsp lam)) (hF : F ∈ vecM S lam K') (w : Wsp lam) :
     IsAutFormU (phiFun lam F w) := by
-  have hfin : ∀ k ∈ finU E n, dualW lam k = 1 := by
+  have hfin : ∀ k ∈ finU (E := E) (n := n), dualW lam k = 1 := by
     intro k hk
     refine LinearMap.ext fun φ => LinearMap.ext fun u => ?_
-    rw [dualW_apply, wInf_fin lam ⟨k⁻¹, (finU E n).inv_mem hk⟩]
+    rw [dualW_apply, wInf_fin lam ⟨k⁻¹, (finU (E := E) (n := n)).inv_mem hk⟩]
     rfl
   have hcont : ∀ (u : Module.Dual ℂ (Wsp lam)) (ℓ : Module.Dual ℂ (Module.Dual ℂ (Wsp lam))),
       Continuous fun g => ℓ (dualW lam g u) := by
@@ -91,7 +137,7 @@ theorem isAutFormU_phiFun (hU : Unr E) (S : Set (Pl E)) (lam : InfinitePlace E �
     rw [dualW_apply, wInf_inv_rat lam γ γ₀ h2]
     rfl
   have hsm : ∀ᶠ y in 𝓝 (1 : UA E n), ∀ g, (fun g => F (splitFin E n g)) (g * y) = F (splitFin E n g) := by
-    have ho : IsOpen ((splitFin E n) ⁻¹' (globLev S K' : Set (finU E n))) :=
+    have ho : IsOpen ((splitFin E n) ⁻¹' (globLev S K' : Set (finU (E := E) (n := n)))) :=
       (isOpen_globLev E hU n S K' hK).preimage continuous_splitFin
     filter_upwards [ho.mem_nhds (by simp [(globLev S K').one_mem])] with y hy g
     simp only [map_mul]
@@ -138,7 +184,7 @@ theorem hasWeightAt_of_wInf (lam : InfinitePlace E → DomWeight n) (π : Submod
 
 theorem phiFun_mem_forms (hU : Unr E) (S : Set (Pl E)) (lam : InfinitePlace E → DomWeight n)
     (K' : ∀ w : Pl E, Subgroup (UL n w)) (hK : IsLevelFam (fun w : Pl E => MonoidHom.id (UL n w)) (KL n) K')
-    (F : finU E n → Module.Dual ℂ (Wsp lam)) (hF : F ∈ vecM S lam K') (w : Wsp lam) :
+    (F : finU (E := E) (n := n) → Module.Dual ℂ (Wsp lam)) (hF : F ∈ vecM S lam K') (w : Wsp lam) :
     phiFun lam F w ∈ forms S lam K' := by
   have h := semis E n (Wsp lam) ((wInf lam).comp (infU E n).subtype) (spanW E n lam) (globLev S K')
     (isOpen_globLev E hU n S K' hK) (phiFun lam F) (fun u => isAutFormU_phiFun hU S lam K' hK F hF u)
@@ -152,8 +198,8 @@ end GlobalTheory.BCT.TrKer.RangeLe
 
 namespace GlobalTheory.BCT.TrKer
 
-open GlobalTheory.BCT.TrKer.RangeLe in
 
+open GlobalTheory.BCT.TrKer.RangeLe in
 theorem range_Phi_le_forms : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → ∀ n : ℕ, 1 ≤ n → ∀ (S : Set (Pl E)), IsSection S → ∀ (lam : InfinitePlace E → DomWeight n) (K' : ∀ w : Pl E, Subgroup (UL n w)), IsLevelFam (fun w : Pl E => MonoidHom.id (UL n w)) (KL n) K' → LinearMap.range (Phi S lam K') ≤ forms S lam K' := by
   intro E _ _ _ hU n _ S _ lam K' hK
   rw [LinearMap.range_eq_map, ← TensorProduct.span_tmul_eq_top, Submodule.map_span, Submodule.span_le]

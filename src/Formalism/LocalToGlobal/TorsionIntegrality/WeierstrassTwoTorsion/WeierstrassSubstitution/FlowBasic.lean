@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementF
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 universe u
 
@@ -35,12 +79,6 @@ theorem map_natCast (h : IsDer D) (n : ℕ) : D (n : A) = 0 := by
   | zero => rw [Nat.cast_zero]; exact h.map_zero
   | succ n ih => rw [Nat.cast_succ, h.map_add, ih, h.map_one, add_zero]
 
-theorem map_intCast (h : IsDer D) (n : ℤ) : D (n : A) = 0 := by
-  rcases n with n | n
-  · rw [Int.ofNat_eq_coe, Int.cast_natCast]
-    exact h.map_natCast n
-  · rw [Int.cast_negSucc, h.map_neg, h.map_natCast, neg_zero]
-
 theorem map_ofNat (h : IsDer D) (n : ℕ) [n.AtLeastTwo] : D (OfNat.ofNat n : A) = 0 := by
   have h1 := h.map_natCast (OfNat.ofNat n)
   rwa [Nat.cast_ofNat] at h1
@@ -49,42 +87,10 @@ theorem map_sq (h : IsDer D) (a : A) : D (a ^ 2) = 2 * a * D a := by
   rw [pow_two, h.map_mul]
   ring
 
-theorem map_pow_succ (h : IsDer D) (a : A) (n : ℕ) :
-    D (a ^ (n + 1)) = (n + 1 : A) * a ^ n * D a := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [pow_succ, h.map_mul, ih]
-    push_cast
-    ring
-
-theorem map_pow (h : IsDer D) (a : A) (n : ℕ) : D (a ^ n) = (n : A) * a ^ (n - 1) * D a := by
-  rcases n with _ | n
-  · rw [pow_zero, h.map_one, Nat.cast_zero, zero_mul, zero_mul]
-  · rw [h.map_pow_succ, Nat.add_sub_cancel]
-    push_cast
-    ring
-
 theorem map_of_mul_eq_one (h : IsDer D) {v w : A} (hvw : v * w = 1) : D v = -v ^ 2 * D w := by
   have h2 := h.2 v w
   rw [hvw, h.map_one] at h2
   linear_combination (-D v) * hvw - v * h2
-
-theorem neg (h : IsDer D) : IsDer (fun a => -D a) :=
-  ⟨fun a b => by
-    show -D (a + b) = -D a + -D b
-    rw [h.map_add]
-    ring,
-   fun a b => by
-    show -D (a * b) = a * -D b + b * -D a
-    rw [h.map_mul]
-    ring⟩
-
-def toDerivation (h : IsDer D) : Derivation ℤ A A :=
-  Derivation.mk' (AddMonoidHom.toIntLinearMap ⟨⟨D, h.map_zero⟩, h.1⟩) fun a b => by
-    simpa [smul_eq_mul] using h.2 a b
-
-@[simp] theorem toDerivation_apply (h : IsDer D) (a : A) : h.toDerivation a = D a := rfl
 
 end IsDer
 

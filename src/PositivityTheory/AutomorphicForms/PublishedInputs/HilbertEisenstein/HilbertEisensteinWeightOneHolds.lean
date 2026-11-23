@@ -1,21 +1,59 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ImportsAlt
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.PoissonSummationHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.InvMulVecScalarMul
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ContDiffOnOfContDiffAtOne
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SGrowth
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.LeftInvarianceHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SLevel
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.OpenKernelHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.CentralCharacterHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.KFinitenessHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.WeightHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.EisensteinLowWeight
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.CenterFinitenessHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.FourierExpansionHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ScalarActionHolds
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.Hilbert
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.CenterFinitenessHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.CentralCharacterHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ContDiffOnOfContDiffAtOne
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.EisensteinLowWeight
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.FourierExpansionHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ImportsAlt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.InvMulVecScalarMul
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.KFinitenessHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.LeftInvarianceHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.OpenKernelHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.PoissonSummationHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SGrowth
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SLevel
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.ScalarActionHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.WeightHolds
+
+@[expose] public section
+
 
 open UpperTheory.HilbertEisensteinWeightOne in
-
 theorem UpperTheory.V.Published.hilbert_eisenstein_weight_one_holds : UpperTheory.V.Published.HilbertEisOne :=
   top poisson_summation_holds s_integrality moderate_growth_holds smoothness_holds left_invariance_holds level_holds open_kernel_holds central_character_holds K_finiteness_holds
     weight_holds low_weight_holds center_finiteness_holds fourier_expansion_holds scalar_action_holds

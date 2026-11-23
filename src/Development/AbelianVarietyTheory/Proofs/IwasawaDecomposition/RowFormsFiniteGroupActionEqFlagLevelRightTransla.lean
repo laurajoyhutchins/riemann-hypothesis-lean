@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsDeco
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFlagRTup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DecoratedRowLatticesFlagLevelRightTranslationStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsDeco
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeTie
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DecoratedRowLatticesFlagLevelRightTranslationStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFlagRTup
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RTupQEqOneIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -15,16 +56,16 @@ namespace GlobalTheory.Mem.R3.RowAct
 section Forms
 
 variable {Xf : Formalism.L2.Col.Fields} {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 Xf.E))}
-  (C : Formalism.L2.Col.CoefPk Xf n (Formalism.L2.Col.DecoSet Xf.E n ST SG)) (Λ : Formalism.L2.Col.LevFam Xf.E Xf.K n SG)
+  (C : Formalism.L2.Col.CoefPk Xf n (Formalism.L2.Col.DecoSet (E := Xf.E) (n := n) (ST := ST) (SG := SG))) (Λ : Formalism.L2.Col.LevFam Xf.E Xf.K n SG)
 
-theorem eqFun_smul_grp (φ : (Formalism.L2.Col.formGSD C Λ).EqFun) (u : Λ.grp) (a : Formalism.L2.Col.GLG Xf.E n SG)
-    (d : Formalism.L2.Col.DecoSet Xf.E n ST SG) :
-    (φ : Formalism.L2.Col.DecoSet Xf.E n ST SG → C.V) (((1 : Formalism.L2.Col.UF Xf.E n), (u : Formalism.L2.Col.GLG Xf.E n SG) * a) • d) =
-      ((Λ.chr u : Xf.Kˣ) : Xf.K) • (φ : Formalism.L2.Col.DecoSet Xf.E n ST SG → C.V) (((1 : Formalism.L2.Col.UF Xf.E n), a) • d) := by
+theorem eqFun_smul_grp (φ : (Formalism.L2.Col.formGSD C Λ).EqFun) (u : Λ.grp) (a : Formalism.L2.Col.GLG (E := Xf.E) (n := n) (SG := SG))
+    (d : Formalism.L2.Col.DecoSet (E := Xf.E) (n := n) (ST := ST) (SG := SG)) :
+    (φ : Formalism.L2.Col.DecoSet (E := Xf.E) (n := n) (ST := ST) (SG := SG) → C.V) (((1 : Formalism.L2.Col.UF Xf.E n), (u : Formalism.L2.Col.GLG (E := Xf.E) (n := n) (SG := SG)) * a) • d) =
+      ((Λ.chr u : Xf.Kˣ) : Xf.K) • (φ : Formalism.L2.Col.DecoSet (E := Xf.E) (n := n) (ST := ST) (SG := SG) → C.V) (((1 : Formalism.L2.Col.UF Xf.E n), a) • d) := by
   have e := φ.2 ((1, u) : Formalism.L2.Col.FormG Λ) (((1 : Formalism.L2.Col.UF Xf.E n), a) • d)
   have e' : ((1, u) : Formalism.L2.Col.FormG Λ) • (((1 : Formalism.L2.Col.UF Xf.E n), a) • d) =
-      ((1 : Formalism.L2.Col.UF Xf.E n), (u : Formalism.L2.Col.GLG Xf.E n SG) * a) • d := by
-    show ((1 : Formalism.L2.Col.UF Xf.E n), (u : Formalism.L2.Col.GLG Xf.E n SG)) • (((1 : Formalism.L2.Col.UF Xf.E n), a) • d) = _
+      ((1 : Formalism.L2.Col.UF Xf.E n), (u : Formalism.L2.Col.GLG (E := Xf.E) (n := n) (SG := SG)) * a) • d := by
+    show ((1 : Formalism.L2.Col.UF Xf.E n), (u : Formalism.L2.Col.GLG (E := Xf.E) (n := n) (SG := SG))) • (((1 : Formalism.L2.Col.UF Xf.E n), a) • d) = _
     rw [smul_smul, Prod.mk_mul_mk, one_mul]
   rw [e'] at e
   rw [e]

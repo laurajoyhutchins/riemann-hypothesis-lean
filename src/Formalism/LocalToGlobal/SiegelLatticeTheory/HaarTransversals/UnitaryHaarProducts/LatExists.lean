@@ -1,15 +1,69 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsDefs
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsSat
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsDiff
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SplitRow
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.AdjointActionReduction
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.FrameReduction
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TameSurjectivity.RecUnram
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsVecOfHermRep
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLand
+module
+
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LatExistsOfSteps
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsDefs
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLandSt
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.Saturated
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsVecOfHermRep
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLand
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsDiff
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsSat
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.AdjointActionReduction
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.DualFamilyExists
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.FrameReduction
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.RetractionReduction
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.SecondDualReduction
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.SesquilinearRepresentation
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TameSurjectivity.RecUnram
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +79,7 @@ def PrimesInClasses : Prop :=
 
 def SatBasis : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [StarRing E] (S : HSpace E) (Λ : Submodule (𝓞 E) S.V),
-    Submodule.IsLattice E Λ → ∀ (n : ℕ) (w : Fin (n + 1) → S.V), LinearIndependent E w →
+    Submodule.IsFullLattice E Λ → ∀ (n : ℕ) (w : Fin (n + 1) → S.V), LinearIndependent E w →
     ∀ a : Fin n → FractionalIdeal (nonZeroDivisors (𝓞 E)) E, (∀ i, a i ≠ 0) →
     ∃ (e : Fin (n + 1) → S.V) (c : FractionalIdeal (nonZeroDivisors (𝓞 E)) E),
       LinearIndependent E e ∧ Submodule.span E (Set.range e) = Submodule.span E (Set.range w) ∧ c ≠ 0 ∧
@@ -84,30 +138,7 @@ theorem hsmulL (c : E) (x y : S.V) : S.hT (c • x) y = star c * S.hT x y := by
 
 theorem mem_latSpan {r : ℕ} (c : Fin r → FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (v : Fin r → S.V)
     (y : S.V) : y ∈ latSpan c v ↔ ∃ x : Fin r → E, (∀ i, x i ∈ c i) ∧ y = ∑ i, x i • v i := by
-  constructor
-  · intro hy
-    induction hy using Submodule.span_induction with
-    | mem y hy =>
-      obtain ⟨a, x, hx, rfl⟩ := hy
-      refine ⟨Pi.single a x, fun i => ?_, ?_⟩
-      · by_cases h : i = a
-        · subst h; simpa using hx
-        · rw [Pi.single_eq_of_ne h]; exact PI.SRW.fi_zero _
-      · simp [Pi.single_apply, ite_smul]
-    | zero => exact ⟨0, fun i => PI.SRW.fi_zero _, by simp⟩
-    | add y y' _ _ h1 h2 =>
-      obtain ⟨x, hx, rfl⟩ := h1
-      obtain ⟨x', hx', rfl⟩ := h2
-      exact ⟨x + x', fun i => PI.SRW.fi_add (hx i) (hx' i), by simp [add_smul, Finset.sum_add_distrib]⟩
-    | smul o y _ h1 =>
-      obtain ⟨x, hx, rfl⟩ := h1
-      refine ⟨fun i => (o : E) * x i, fun i => ?_, ?_⟩
-      · have := PI.SRW.fi_smul o (hx i)
-        simpa [Algebra.smul_def] using this
-      · rw [PI.SRW.osmul o, Finset.smul_sum]
-        simp [smul_smul]
-  · rintro ⟨x, hx, rfl⟩
-    exact Submodule.sum_mem _ (fun i _ => Submodule.subset_span ⟨i, x i, hx i, rfl⟩)
+  apply GlobalTheory.St.Lat.mem_latSpan <;> assumption
 
 theorem latSpan_le {r : ℕ} (c : Fin r → FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (v : Fin r → S.V)
     (Λ : Submodule (𝓞 E) S.V) (h : ∀ a, ∀ x ∈ c a, x • v a ∈ Λ) : latSpan c v ≤ Λ :=
@@ -138,10 +169,12 @@ theorem decomp {r : ℕ} (e f : Fin r → S.V) (hee : ∀ a b, S.hT (e a) (e b) 
       S.hT (f b) (y - ∑ a, S.hT (f a) y • e a - ∑ a, S.hT (e a) y • f a) = 0 := by
   have hfe := hfe_of hef
   constructor
+
   · simp only [map_sub, map_sum, map_smul, hee, hef, smul_eq_mul, mul_zero, Finset.sum_const_zero, sub_zero,
-      mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true, sub_self]
+    mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true, sub_self]
+
   · simp only [map_sub, map_sum, map_smul, hff, hfe, smul_eq_mul, mul_zero, Finset.sum_const_zero,
-      mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true, sub_self]
+    mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true, sub_self]
 
 theorem key_split (Λ : Submodule (𝓞 E) S.V) {r : ℕ} (e f : Fin r → S.V)
     (P Q : Fin r → FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (hee : ∀ a b, S.hT (e a) (e b) = 0)
@@ -213,8 +246,9 @@ theorem zero_of_dual {r : ℕ} {e f : Fin r → S.V} (hfe : ∀ a b, S.hT (f a) 
   have ht : ∀ b, t b = 0 := by
     intro b
     have h := h0 b
+
     simp only [map_sum, map_smul, hfe, smul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq,
-      Finset.mem_univ, if_true] at h
+    Finset.mem_univ, if_true] at h
     exact h
   simp [ht]
 
@@ -273,108 +307,7 @@ theorem fi_intm {E : Type} [Field E] [NumberField E] {I : FractionalIdeal (nonZe
   exact FractionalIdeal.mem_coe.1 h1
 
 theorem genFrame_holds : GenFrame := by
-  intro E _ _ _ S Λ hlat hU htr n e c hind hiso hc0 hX
-  obtain ⟨s0, hs0⟩ := htr
-  obtain ⟨s1, hs1⟩ := PI.SRW.star_int s0
-  let N : Submodule (𝓞 E) S.V := Λ ⊓ (Submodule.span E (Set.range e)).restrictScalars (𝓞 E)
-  have hNΛ : N ≤ Λ := inf_le_left
-  have hsat : ∀ (o : 𝓞 E) (x : S.V), o ≠ 0 → x ∈ Λ → o • x ∈ N → x ∈ N := by
-    intro o x ho hx hox
-    have h1 := (Submodule.mem_inf.1 hox).2
-    rw [Submodule.restrictScalars_mem] at h1
-    have hoE : (o : E) ≠ 0 := (RingOfIntegers.coe_ne_zero_iff).2 ho
-    rw [PI.SRW.osmul] at h1
-    have h2 := (Submodule.span E (Set.range e)).smul_mem (o : E)⁻¹ h1
-    rw [smul_smul, inv_mul_cancel₀ hoE, one_smul] at h2
-    exact Submodule.mem_inf.2 ⟨hx, (Submodule.restrictScalars_mem _ _ _).2 h2⟩
-  obtain ⟨ρ, hρN, hρid⟩ := PI.SRW.retraction_reduction E S.V Λ N hNΛ hlat.fg hsat
-  obtain ⟨cf, hcf⟩ := PI.SRW.dualFamilyExists E S.V n e hind
-  have hcfN : ∀ b, ∀ y ∈ N, cf b y ∈ c b := by
-    intro b y hy
-    have hy' : y ∈ latSpan c e := by rw [← hX]; exact hy
-    obtain ⟨x, hx, rfl⟩ := (mem_latSpan c e y).1 hy'
-    simp only [map_sum, map_smul, hcf, smul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq,
-      Finset.mem_univ, if_true]
-    exact hx b
-  have hw := fun b : Fin n =>
-    PI.SRW.sesquilinearRepresentation E S.V S.hT S.nondeg Λ hlat (((cf b).restrictScalars (𝓞 E)).comp ρ)
-  choose f0 hf0 using hw
-  have hf0v : ∀ b, ∀ y (hy : y ∈ Λ), S.hT (f0 b) y = cf b (ρ ⟨y, hy⟩) := fun b y hy => hf0 b ⟨y, hy⟩
-  have hf0Λ : ∀ b, ∀ y ∈ Λ, S.hT (f0 b) y ∈ c b := fun b y hy => by
-    rw [hf0v b y hy]; exact hcfN b _ (hρN _)
-  have hceN : ∀ a, ∀ x ∈ c a, x • e a ∈ N := fun a x hx => by
-    have h1 : x • e a ∈ latSpan c e := Submodule.subset_span ⟨a, x, hx, rfl⟩
-    rw [← hX] at h1; exact h1
-  have hceΛ : ∀ a, ∀ x ∈ c a, x • e a ∈ Λ := fun a x hx => (hceN a x hx).1
-  have hf0e : ∀ b a, S.hT (f0 b) (e a) = if b = a then 1 else 0 := by
-    intro b a
-    have hne : (c a : Submodule (𝓞 E) E) ≠ ⊥ := FractionalIdeal.coeToSubmodule_ne_bot.2 (hc0 a)
-    obtain ⟨x, hx, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hne
-    have hxN := hceN a x hx
-    have h1 := hf0v b (x • e a) hxN.1
-    rw [hρid ⟨_, hxN.1⟩ hxN] at h1
-    simp only [map_smul, hcf, smul_eq_mul] at h1
-    exact mul_left_cancel₀ hx0 h1
-  have hef0 : ∀ a b, S.hT (e a) (f0 b) = if a = b then 1 else 0 := by
-    intro a b
-    rw [← hconj, hf0e b a]
-    by_cases h : a = b
-    · subst h; simp
-    · simp [h, Ne.symm h]
-  have hstar : ∀ k, ∀ y ∈ Λ, S.hT (e k) y • f0 k ∈ Λ := by
-    intro k y hy
-    refine mem_of_dual hU (fun l hl => ?_)
-    obtain ⟨o, ho⟩ := PI.SRW.pair_int S hU hy (hceΛ k _ (hf0Λ k l hl))
-    refine ⟨o, ?_⟩
-    rw [ho, hsmulL, map_smul, smul_eq_mul, ← hconj (f0 k) l]
-    ring
-  let cc : Fin n → Fin n → E := fun a b =>
-    if a < b then -S.hT (f0 a) (f0 b) else if a = b then -(S.hT (f0 b) (f0 b) * (s0 : E)) else 0
-  have hsum : ∀ a b, S.hT (f0 a) (f0 b) + cc a b + star (cc b a) = 0 := by
-    intro a b
-    rcases lt_trichotomy a b with hab | hab | hab
-    · have h1 : ¬ b < a := not_lt.2 hab.le
-      have h2 : b ≠ a := hab.ne'
-      simp [cc, hab, h1, h2]
-    · subst hab
-      simp only [cc, lt_irrefl, ↓reduceIte]
-      rw [star_neg, star_mul', hconj]
-      have h3 : S.hT (f0 a) (f0 a) * (s0 : E) + S.hT (f0 a) (f0 a) * star (s0 : E) = S.hT (f0 a) (f0 a) := by
-        rw [← mul_add, hs0, mul_one]
-      linear_combination -h3
-    · have h1 : ¬ a < b := not_lt.2 hab.le
-      have h2 : a ≠ b := hab.ne'
-      simp [cc, hab, h1, h2, hconj]
-  have hterm : ∀ k b, ∀ y ∈ Λ, star (cc k b) * S.hT (e k) y ∈ c b := by
-    intro k b y hy
-    have hm := hf0Λ b _ (hstar k y hy)
-    rw [map_smul, smul_eq_mul] at hm
-    rcases lt_trichotomy k b with hkb | hkb | hkb
-    · simp only [cc, hkb, ↓reduceIte, star_neg, hconj, neg_mul]
-      exact fi_neg (by rw [mul_comm]; exact hm)
-    · subst hkb
-      have key : star (cc k k) * S.hT (e k) y = -((s1 : E) * (S.hT (e k) y * S.hT (f0 k) (f0 k))) := by
-        simp only [cc, lt_irrefl, ↓reduceIte]
-        rw [star_neg, star_mul', hconj, hs1]
-        ring
-      rw [key]
-      exact fi_neg (fi_intm s1 hm)
-    · have h1 : ¬ k < b := not_lt.2 hkb.le
-      have h2 : k ≠ b := hkb.ne'
-      simp only [cc, h1, h2, ↓reduceIte, star_zero, zero_mul]
-      exact PI.SRW.fi_zero _
-  refine ⟨fun b => f0 b + ∑ k, cc k b • e k, ?_, ?_, ?_⟩
-  · intro a b
-    have h := hsum a b
-    simp [map_sum, hf0e, hef0, hiso, Finset.sum_ite_eq', starRingEnd_apply]
-    linear_combination h
-  · intro a b
-    simp [map_sum, hiso, hef0]
-  · intro b y hy
-    have hexp : S.hT (f0 b + ∑ k, cc k b • e k) y = S.hT (f0 b) y + ∑ k, star (cc k b) * S.hT (e k) y := by
-      simp [map_sum, starRingEnd_apply]
-    rw [hexp]
-    exact PI.SRW.fi_add (hf0Λ b y hy) (fi_sum _ (fun k => hterm k b y hy))
+  apply GlobalTheory.St.Lat.genFrame_holds <;> assumption
 
 end GF
 
@@ -457,13 +390,13 @@ theorem hypRep_holds : HypRep := by
     rw [this]; exact P.sub_mem hb ha'
   let x : 𝓞 E := a + y * s0
   have hxPb : σ x ∈ P := by
-    have : σ x = σ a + y * σ s0 := by simp only [x, map_add, map_mul, hyσ]
+    have : σ x = σ a + y * σ s0 := by simp only [x, map_add (f := _), map_mul, hyσ]
     rw [this]; exact P.add_mem ha' (P.mul_mem_right _ hyP)
   have hx1 : x - 1 ∈ P := by
     have : x - 1 = y * s0 - b := by simp only [x]; rw [← hab]; ring
     rw [this]; exact P.sub_mem (P.mul_mem_right _ hyP) hb
   have hxt : x + σ x = 1 := by
-    have : x + σ x = (a + σ a) + y * (s0 + σ s0) := by simp only [x, map_add, map_mul, hyσ]; ring
+    have : x + σ x = (a + σ a) + y * (s0 + σ s0) := by simp only [x, map_add (f := _), map_mul, hyσ]; ring
     rw [this, hs0']; simp only [y]; ring
   have hxtE : (x : E) + star (x : E) = 1 := by
     have := congrArg (fun o : 𝓞 E => (o : E)) hxt
@@ -509,19 +442,19 @@ theorem hypRep_holds : HypRep := by
     simp only [β, s, map_mul, map_neg, map_natCast]
     rw [show (algebraMap (𝓞 E) E) (σ o) = star (o : E) from rfl, div_mul_eq_mul_div, eq_div_iff hsα]
     linear_combination ((T : ℕ) : E) * h2
-  · simp only [map_add, LinearMap.add_apply, hsmulL, map_smul, smul_eq_mul, hee, hff, hef, hfe]
+  · simp only [map_add (f := _), LinearMap.add_apply, hsmulL, map_smul, smul_eq_mul, hee, hff, hef, hfe]
     simp only [β, s, star_div₀, star_mul', star_neg, star_natCast, star_star]
     field_simp
     linear_combination (-(T : E) * star α * α) * hxtE
   · intro γ hγ
     have hA : γ * α ∈ c := by
       have h1 := hfc _ hγ
-      simp only [map_add, map_smul, smul_eq_mul, hfe, hff] at h1
+      simp only [map_add (f := _), map_smul, smul_eq_mul, hfe, hff] at h1
       simpa [mul_comm] using h1
     have hB : ∃ o : 𝓞 E, (o : E) = γ * s := by
       obtain ⟨o, ho⟩ := PI.SRW.pair_int S hU hγ (hce α hαc)
       refine ⟨o, (show (o : E) = S.hT (α • e) (γ • (α • e + β • f)) from ho).trans ?_⟩
-      simp only [hsmulL, map_add, map_smul, smul_eq_mul, hee, hef, β]
+      simp only [hsmulL, map_add (f := _), map_smul, smul_eq_mul, hee, hef, β]
       field_simp
       ring
     have hC : ∀ p ∈ P, ∃ o : 𝓞 E, (o : E) = (p : E) * γ := by
@@ -569,27 +502,7 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E]
 theorem locgen {I : FractionalIdeal (nonZeroDivisors (𝓞 E)) E} (hI : I ≠ 0) {P : Ideal (𝓞 E)}
     {c : E} (hcI : c ∈ I) (hcP : c ∉ I * (P : FractionalIdeal (nonZeroDivisors (𝓞 E)) E)) :
     ∀ x ∈ I, ∃ s : 𝓞 E, s ∉ P ∧ ∃ o : 𝓞 E, (s : E) * x = (o : E) * c := by
-  intro x hx
-  set J := FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 E)) c * I⁻¹ with hJ
-  have hJ1 : J ≤ 1 := by
-    have h1 : FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 E)) c ≤ I :=
-      FractionalIdeal.spanSingleton_le_iff_mem.2 hcI
-    calc J ≤ I * I⁻¹ := by rw [hJ]; gcongr
-      _ = 1 := mul_inv_cancel₀ hI
-  have hJP : ¬ J ≤ (P : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) := by
-    intro h
-    apply hcP
-    have h2 : J * I ≤ (P : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) * I := by gcongr
-    rw [hJ, mul_assoc, inv_mul_cancel₀ hI, mul_one, mul_comm] at h2
-    exact h2 (FractionalIdeal.mem_spanSingleton_self _ _)
-  obtain ⟨s, hsJ, hsP⟩ := SetLike.not_le_iff_exists.1 hJP
-  obtain ⟨s', rfl⟩ := (FractionalIdeal.mem_one_iff _).1 (hJ1 hsJ)
-  refine ⟨s', fun h => hsP (FractionalIdeal.mem_coeIdeal_of_mem _ h), ?_⟩
-  have h3 : (algebraMap (𝓞 E) E s') * x ∈ J * I := FractionalIdeal.mul_mem_mul hsJ hx
-  rw [hJ, mul_assoc, inv_mul_cancel₀ hI, mul_one, FractionalIdeal.mem_spanSingleton] at h3
-  obtain ⟨o, ho⟩ := h3
-  refine ⟨o, ?_⟩
-  rw [← ho, Algebra.smul_def]
+  apply GlobalTheory.St.Lat.locgen <;> assumption
 
 theorem exists_gen {I : FractionalIdeal (nonZeroDivisors (𝓞 E)) E} (hI : I ≠ 0) {P : Ideal (𝓞 E)} (hP : P ≠ ⊤) :
     ∃ c ∈ I, c ∉ I * (P : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) := by
@@ -686,8 +599,10 @@ theorem posFrameSig (S : HSpace E) (σ : E →+* ℂ)
     have h3 : σ (S.hT y y) = star z ⬝ᵥ G.mulVec z := by
       have := LinearMap.sum_repr_mul_repr_mulₛₗ S.frame S.frame (B := S.hT) y y
       rw [← this, Finsupp.sum_fintype _ _ (by intro i; simp)]
+
       simp only [dotProduct, Matrix.mulVec, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
+
       rw [Finsupp.sum_fintype _ _ (by intro j; simp), map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       simp only [smul_eq_mul, map_mul, RingHom.id_apply, hG, hz, Matrix.map_apply, HSpace.gram, Pi.star_apply]
@@ -720,7 +635,8 @@ theorem totPosDef_of_sig (S : HSpace E) (hσ : ∀ (σ : E →+* ℂ) a, σ (sta
     rw [← hU, ← Units.val_mul, inv_mul_cancel, Units.val_one, Matrix.one_mulVec] at this
     exact this
   obtain ⟨i, hi⟩ := Function.ne_iff.1 hYz
-  have hpos : 0 < ‖(Y.mulVec fun j => σ (S.frame.repr x j)) i‖ ^ 2 := by positivity
+  have hpos : 0 < ‖(Y.mulVec fun j => σ (S.frame.repr x j)) i‖ ^ 2 := by
+    exact pow_pos (norm_pos_iff.mpr hi) _
   calc (0 : ℝ) < ‖(Y.mulVec fun j => σ (S.frame.repr x j)) i‖ ^ 2 := hpos
     _ ≤ ∑ k, ‖(Y.mulVec fun j => σ (S.frame.repr x j)) k‖ ^ 2 :=
       Finset.single_le_sum (f := fun k => ‖(Y.mulVec fun j => σ (S.frame.repr x j)) k‖ ^ 2)
@@ -736,9 +652,9 @@ open NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNo
 
 namespace Formalism.L2.SG.Pf.LatEx
 
-theorem satBasis_of (h : LatEx.SatBasisV) : SatBasis := by
+theorem satBasis_holds : SatBasis := by
   intro E _ _ _ S Λ hΛ n w hw a ha
-  obtain ⟨e, c, h1, h2, h3, h4⟩ := h E S.V Λ hΛ n w hw a ha
+  obtain ⟨e, c, h1, h2, h3, h4⟩ := satBasisV_holds E S.V Λ hΛ n w hw a ha
   exact ⟨e, c, h1, h2, h3, h4⟩
 
 section D7sec
@@ -774,18 +690,18 @@ theorem isoW_holds : IsoW D := by
   refine ⟨D.sp.zm + D.sp.iXY 0 y, ?_, ?_, fun i => ⟨?_, ?_⟩⟩
   · intro h0
     have h4 : (VS D).hT D.sp.zm (D.sp.zm + D.sp.iXY 0 y) = 0 := by rw [h0, map_zero]
-    rw [map_add, D.sp.zm_norm, h3, add_zero, neg_eq_zero] at h4
+    rw [map_add (f := _), D.sp.zm_norm, h3, add_zero, neg_eq_zero] at h4
     exact hT0 h4
   · have h5 := hiso y y
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     rw [D.sp.zm_norm, h2, h3, h5, hy]
     ring
   · have h6 : (VS D).hT (D.sp.hypE i) D.sp.zm = 0 := by rw [← hconj, (D.sp.hyp_orthz i).1, star_zero]
     have h7 : (VS D).hT (D.sp.hypE i) (D.sp.iXY 0 y) = 0 := by rw [← hconj, (D.sp.hyp_orthX i y).1, star_zero]
-    rw [map_add, h6, h7, add_zero]
+    rw [map_add (f := _), h6, h7, add_zero]
   · have h6 : (VS D).hT (D.sp.hypF i) D.sp.zm = 0 := by rw [← hconj, (D.sp.hyp_orthz i).2, star_zero]
     have h7 : (VS D).hT (D.sp.hypF i) (D.sp.iXY 0 y) = 0 := by rw [← hconj, (D.sp.hyp_orthX i y).2, star_zero]
-    rw [map_add, h6, h7, add_zero]
+    rw [map_add (f := _), h6, h7, add_zero]
 
 theorem ddG_of (hSD : LatEx.SplitDiff) : DdG D := by
   intro P hP
@@ -820,36 +736,7 @@ theorem aa_gen_one (hDd : DdG D) (P : HeightOneSpectrum (𝓞 D.host.E))
     (hP : ((gS D : ℕ) : 𝓞 D.host.E) ∈ P.asIdeal) (a : Fin D.R.rS) :
     (1 : D.host.E) ∈ aaS D a ∧
       (1 : D.host.E) ∉ aaS D a * (P.asIdeal : FractionalIdeal (nonZeroDivisors (𝓞 D.host.E)) D.host.E) := by
-  have hd0 : ddS D ≠ 0 := PI.SRW.ddS_ne D
-  have hd1 : ddS D ≤ 1 := FractionalIdeal.coeIdeal_le_one
-  set j : ℕ := D.R.rS - (a : ℕ) with hj
-  have hex : -((D.R.rS : ℤ) - (a : ℕ)) = -(j : ℤ) := by
-    have := a.isLt
-    rw [hj]; push_cast [Nat.cast_sub this.le]; ring
-  have haa : aaS D a = (ddS D ^ j)⁻¹ := by
-    simp only [aaS]
-    rw [hex, zpow_neg, zpow_natCast]
-  have hpow0 : ddS D ^ j ≠ 0 := pow_ne_zero _ hd0
-  have hpow1 : ddS D ^ j ≤ 1 := pow_le_one₀ zero_le hd1
-  rw [haa]
-  constructor
-  · rw [FractionalIdeal.mem_inv_iff hpow0]
-    intro y hy
-    rw [one_mul]
-    exact hpow1 hy
-  · intro h1
-    apply hDd P hP
-    have h2 : FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 D.host.E)) (1 : D.host.E) ≤
-        (ddS D ^ j)⁻¹ * (P.asIdeal : FractionalIdeal (nonZeroDivisors (𝓞 D.host.E)) D.host.E) :=
-      FractionalIdeal.spanSingleton_le_iff_mem.2 h1
-    rw [FractionalIdeal.spanSingleton_one] at h2
-    have h3 : ddS D ^ j * 1 ≤ ddS D ^ j * ((ddS D ^ j)⁻¹ *
-        (P.asIdeal : FractionalIdeal (nonZeroDivisors (𝓞 D.host.E)) D.host.E)) := by gcongr
-    rw [mul_one, ← mul_assoc, mul_inv_cancel₀ hpow0, one_mul] at h3
-    have h4 : (Ideal.map (algebraMap (𝓞 D.host.F) (𝓞 D.host.E)) (differentIdeal ℤ (𝓞 D.host.F))) ^ j ≤ P.asIdeal := by
-      rw [← FractionalIdeal.coeIdeal_le_coeIdeal D.host.E, FractionalIdeal.coeIdeal_pow]
-      exact h3
-    exact P.isPrime.le_of_pow_le h4
+  apply GlobalTheory.St.Lat.aa_gen_one <;> assumption
 
 end D7asm
 
@@ -867,6 +754,67 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable (D : D7)
 
+theorem lat_riesz (φ : (VS D).V →ₗ[D.host.E] D.host.E) : ∃ μ : (VS D).V, ∀ v, (VS D).hT μ v = φ v := by
+  classical
+  obtain ⟨bs, hbs⟩ := Formalism.HermitianLatticesTheory.dualLattice_dualBasis (VS D).hT (VS D).nondeg (VS D).frame
+  refine ⟨∑ j, star (φ ((VS D).frame j)) • bs j, fun v => ?_⟩
+  have key : (VS D).hT (∑ j, star (φ ((VS D).frame j)) • bs j) = φ := by
+    apply (VS D).frame.ext
+    intro i
+
+    rw [map_sum, LinearMap.sum_apply]
+    have hs : ∀ j, (VS D).hT (star (φ ((VS D).frame j)) • bs j) ((VS D).frame i) =
+        φ ((VS D).frame j) * (if i = j then 1 else 0) := by
+      intro j
+      rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, star_star]
+      congr 1
+      rw [← (VS D).herm.eq ((VS D).frame i) (bs j), hbs]
+      split_ifs <;> simp
+    simp only [hs, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  rw [key]
+
+private theorem lat_span_eq_top_of_unimodular {Λ : Submodule (𝓞 D.host.E) (VS D).V}
+    (hL : Λ.FG) (hU : Formalism.HermitianLatticesTheory.IsUnimodular (VS D).hT Λ) :
+    Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ := by
+  by_contra hspan
+  obtain ⟨φ, hφ₀, hφ⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.mpr hspan)
+  obtain ⟨μ, hμ⟩ := lat_riesz D φ
+  have hμ₀ : μ ≠ 0 := by
+    intro h
+    apply hφ₀
+    ext y
+    simpa [h] using (hμ y).symm
+  have hline (a : D.host.E) : a • μ ∈ Λ := by
+    rw [← hU]
+    change a • μ ∈ Formalism.E.hdual (VS D).hT Λ
+    simp only [Formalism.E.hdual, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.restrictScalars_apply]
+    intro y hy
+    have hy₀ := LinearMap.mem_ker.mp (hφ (Submodule.subset_span hy))
+    simp [← (VS D).herm.eq (a • μ) y, LinearMap.map_smulₛₗ, hμ, hy₀]
+  obtain ⟨ψ, hψ, -⟩ := Submodule.exists_le_ker_of_notMem
+    (show μ ∉ (⊥ : Submodule D.host.E (VS D).V) by simpa using hμ₀)
+  let f := ψ.restrictScalars (𝓞 D.host.E)
+  have hmap (x : D.host.E) : x ∈ Λ.map f := by
+    refine ⟨(x / ψ μ) • μ, hline _, ?_⟩
+    change ψ ((x / ψ μ) • μ) = x
+    rw [map_smul, smul_eq_mul, div_mul_cancel₀ _ hψ]
+  obtain ⟨d, hd₀, hd⟩ := FractionalIdeal.isFractional_of_fg
+    (S := nonZeroDivisors (𝓞 D.host.E)) (hL.map f)
+  have hinj := IsFractionRing.injective (𝓞 D.host.E) D.host.E
+  have hne {a : 𝓞 D.host.E} (ha : a ≠ 0) : algebraMap (𝓞 D.host.E) D.host.E a ≠ 0 :=
+    fun h => ha (hinj (h.trans (map_zero _).symm))
+  have hinteger (x : D.host.E) : IsLocalization.IsInteger (𝓞 D.host.E) x := by
+    have hx := hd _ (hmap ((algebraMap (𝓞 D.host.E) D.host.E d)⁻¹ * x))
+    rwa [Algebra.smul_def, ← mul_assoc, mul_inv_cancel₀ (hne (nonZeroDivisors.ne_zero hd₀)),
+      one_mul] at hx
+  apply RingOfIntegers.not_isField D.host.E
+  refine ⟨⟨0, 1, zero_ne_one⟩, mul_comm, ?_⟩
+  intro a ha
+  obtain ⟨b, hb⟩ := hinteger ((algebraMap (𝓞 D.host.E) D.host.E a)⁻¹)
+  refine ⟨b, hinj ?_⟩
+  rw [map_mul, hb, map_one, mul_inv_cancel₀ (hne ha)]
+
+
 variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 theorem latExists_of_steps (hSB : SatBasis) (hPC : PrimesInClasses) (hDd : DdG D) :
     Formalism.L2.SG.SplitPrimeNormLemmas.LatExists D := by
@@ -881,6 +829,7 @@ theorem latExists_of_steps (hSB : SatBasis) (hPC : PrimesInClasses) (hDd : DdG D
     have hc : ∀ j : Fin D.R.rS, g (Fin.castSucc j) = 0 := by
       intro j
       have h1 := congrArg ((VS D).hT (D.sp.hypF j)) hg
+
       rw [map_sum, map_zero, Fin.sum_univ_castSucc] at h1
       simp only [wf, map_smul, Fin.snoc_castSucc, Fin.snoc_last, (hwo j).2, hfe_hyp, smul_eq_mul, mul_zero,
         add_zero, mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true] at h1
@@ -900,8 +849,11 @@ theorem latExists_of_steps (hSB : SatBasis) (hPC : PrimesInClasses) (hDd : DdG D
     · exact (hwo i).1
     · exact D.sp.hyp_ee i j
   have haa := PI.SRW.adjoint_action_reduction D
+  have hfull : Submodule.IsFullLattice D.host.E (VS D).L0 := by
+    letI := (VS D).standardTuple_isLattice
+    exact ⟨lat_span_eq_top_of_unimodular D (VS D).standardTuple_isLattice.fg (VS D).baseLattice_isUnimodular⟩
   obtain ⟨e', c, hind', hspan, hc0, hX⟩ :=
-    hSB D.host.E (VS D) (VS D).L0 (VS D).standardTuple_isLattice D.R.rS wf hind (aaS D) (fun a => (haa a).1)
+    hSB D.host.E (VS D) (VS D).L0 hfull D.R.rS wf hind (aaS D) (fun a => (haa a).1)
   have hmem : ∀ a, e' a ∈ Submodule.span D.host.E (Set.range wf) := fun a =>
     hspan ▸ Submodule.subset_span ⟨a, rfl⟩
   have he'iso : ∀ a b, (VS D).hT (e' a) (e' b) = 0 := fun a b => iso_span hsnoc_iso (hmem a) (hmem b)
@@ -1001,7 +953,7 @@ theorem latExists_of_steps (hSB : SatBasis) (hPC : PrimesInClasses) (hDd : DdG D
     refine ⟨cl, fun a h0 => hclP a (by rw [h0]; exact FractionalIdeal.zero_mem _), fun hg a => hcl1 a hg, ?_⟩
     exact localization_latSpan P.asIdeal (aaS D) eX cl hclI (fun a => locgen (haa a).1 (hclI a) (hclP a))
 
-  have hprim : ∀ u (γ : D.host.E), γ • zu u ∈ Lsub (VS D).L0 (⟨Fu u, zu u⟩ : LFlag (VS D) D.R.rS _) →
+  have hprim : ∀ u (γ : D.host.E), γ • zu u ∈ Lsub (VS D).L0 (⟨Fu u, zu u⟩ : LFlag (D.sp.Y 0) D.R.rS _) →
       ∃ o : 𝓞 D.host.E, (o : D.host.E) = γ := by
     intro u γ hγ
     obtain ⟨h1, -⟩ := Submodule.mem_inf.1 hγ
@@ -1056,9 +1008,9 @@ end Formalism.L2.SG.Pf.LatEx
 
 namespace Formalism.L2.SG.Pf
 
-variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 
+variable [Fact Formalism.HermitianLattices.Ext.L3.HermRepUnram] in
 theorem latExists_of (hPC : LatEx.PrimesInClasses) (D : Formalism.BasicNotions.D7) : Formalism.L2.SG.SplitPrimeNormLemmas.LatExists D :=
-  LatEx.latExists_of_steps D (LatEx.satBasis_of LatEx.satBasisV_holds) hPC (LatEx.ddG_of D LatEx.splitDiff_holds)
+  LatEx.latExists_of_steps D LatEx.satBasis_holds hPC (LatEx.ddG_of D LatEx.splitDiff_holds)
 
 end Formalism.L2.SG.Pf

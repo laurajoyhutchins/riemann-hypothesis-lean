@@ -1,9 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SigLamLeOfKTypes
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.FormulaF
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.PsiFor
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IntegrableOfDecayVG
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceEstimates.IfaceSt
-import Formalism.RealPlaceAnalysis.InstMeasurableSpaceUJ
+module
+
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NormAdditiveCharacterTypePrimeEqOne
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SigLamLeOfKTypes
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.EquivariantL2Space
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.FormulaF
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,55 +65,7 @@ variable {n : ℕ}
 
 theorem cdom_antisymm {ε : Fin n → Bool} {μ Λ : Fin n → ℝ} (h₁ : Formalism.MainNotions.S.CDom ε μ Λ)
     (h₂ : Formalism.MainNotions.S.CDom ε Λ μ) : μ = Λ := by
-  classical
-  let L : (Fin n → ℝ) →ₗ[ℝ] ℝ := ∑ i : Fin n, ((i : ℕ) : ℝ) • LinearMap.proj i
-  have hL1 : ∀ a : Fin n, L (Pi.single a 1) = ((a : ℕ) : ℝ) := by
-    intro a
-    simp [L, LinearMap.sum_apply, Pi.single_apply]
-  have hLr : ∀ a b : Fin n, L (Formalism.REAL.root a b) = ((a : ℕ) : ℝ) - ((b : ℕ) : ℝ) := by
-    intro a b
-    simp only [Formalism.REAL.root, map_sub, hL1]
-  have key : ∀ {x y : Fin n → ℝ}, Formalism.MainNotions.S.CDom ε x y →
-      L (y - x) ≤ 0 ∧ (L (y - x) = 0 → y - x = 0) := by
-    intro x y ⟨c, hc, he⟩
-    have hterm : ∀ a b, (c a b : ℝ) * (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) ≤ 0 := by
-      intro a b
-      by_cases h0 : c a b = 0
-      · simp [h0]
-      · have := (hc a b h0).1
-        have : ((a : ℕ) : ℝ) < ((b : ℕ) : ℝ) := by exact_mod_cast this
-        have : (0 : ℝ) ≤ (c a b : ℝ) := Nat.cast_nonneg _
-        nlinarith
-    have hLe : L (y - x) = ∑ a, ∑ b, (c a b : ℝ) * (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) := by
-      rw [he, map_sum]
-      refine Finset.sum_congr rfl fun a _ => ?_
-      rw [map_sum]
-      refine Finset.sum_congr rfl fun b _ => ?_
-      rw [map_smul, hLr, smul_eq_mul]
-    refine ⟨?_, fun h0 => ?_⟩
-    · rw [hLe]
-      exact Finset.sum_nonpos fun a _ => Finset.sum_nonpos fun b _ => hterm a b
-    · rw [hLe] at h0
-      have h1 := (Finset.sum_eq_zero_iff_of_nonpos fun a _ => Finset.sum_nonpos fun b _ => hterm a b).1 h0
-      rw [he]
-      refine Finset.sum_eq_zero fun a _ => Finset.sum_eq_zero fun b _ => ?_
-      have h2 := (Finset.sum_eq_zero_iff_of_nonpos fun b _ => hterm a b).1 (h1 a (Finset.mem_univ _)) b
-        (Finset.mem_univ _)
-      by_cases h0 : c a b = 0
-      · simp [h0]
-      · have := (hc a b h0).1
-        have : ((a : ℕ) : ℝ) < ((b : ℕ) : ℝ) := by exact_mod_cast this
-        have hc0 : (0 : ℝ) < (c a b : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero h0
-        exfalso
-        have : (c a b : ℝ) * (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) < 0 := mul_neg_of_pos_of_neg hc0 (by linarith)
-        linarith
-  obtain ⟨k1, k1'⟩ := key h₁
-  obtain ⟨k2, -⟩ := key h₂
-  have : L (Λ - μ) = 0 := by
-    have : L (μ - Λ) = -L (Λ - μ) := by rw [← map_neg, neg_sub]
-    linarith
-  have := k1' this
-  exact (sub_eq_zero.1 this).symm
+  apply Formalism.MainNotions.BridgeLemma.cdom_antisymm <;> assumption
 
 theorem stdGap_of {ε : Fin n → Bool} {lam : Fin n → ℝ} {h : ℝ} (hlam : S7.IsHCParam lam)
     (hgap : GapAtLeast ε lam h) (hN : hNeed ε < h) : StdGap ε lam := by

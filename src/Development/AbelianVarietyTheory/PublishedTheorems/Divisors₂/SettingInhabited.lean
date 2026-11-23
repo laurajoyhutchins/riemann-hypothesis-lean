@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.InjectiveOfSmulMemRange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.XiMulNu
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.InjectiveOfSmulMemRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,21 +56,8 @@ namespace GlobalTheory.DieudonneTest
 
 open PDivGroup Sandwich Dieudonne
 
-theorem setting_inhabited (p : ℕ) [Fact p.Prime] :
-    ∃ (C : Type) (_ : Field C) (_ : IsAlgClosed C) (_ : CharZero C) (v : Valuation C NNReal)
-      (O : Type) (_ : CommRing O) (_ : Algebra O C) (_ : v.Integers O)
-      (_ : Fact ¬IsUnit (p : O)) (_ : IsAdicComplete (span {(p : O)}) O) (ε : PreTilt O p),
-      IsPrimitiveRoot (root ε).untilt p := by
-  obtain ⟨h1, h2, ε, hv, hε⟩ := PadicComplexHost.main p
-  exact ⟨ℂ_[p], inferInstance, inferInstance, inferInstance, Valued.v, _, inferInstance,
-    inferInstance, hv, h1, h2, ε, hε⟩
-
 variable {p : ℕ} [Fact p.Prime] {O : Type} [CommRing O] [Fact ¬IsUnit (p : O)]
   [IsAdicComplete (span {(p : O)}) O]
-
-theorem xi_dvd_of_eigen {ε : PreTilt O p} {a : Ainf p O}
-    (h : WittVector.frobenius a = WittVector.frobenius (xi ε) * a) : xi ε ∣ a :=
-  ⟨phiInv p O a, frobenius_injective (by rw [map_mul, frobenius_phiInv, h])⟩
 
 open WittVector Ideal CategoryTheory Opposite Function in
 variable {p : ℕ} [Fact p.Prime] {O : Type} [CommRing O] [Fact ¬IsUnit (p : O)]
@@ -70,10 +104,10 @@ private theorem exists_zmod_mul_of_pow_eq_pow_pred_mul {R : Type*} [CommRing R] 
   have h2 := (Multiset.toFinset_card_le Q.roots).trans (Polynomial.card_roots' Q)
   omega
 
+
 open WittVector Ideal CategoryTheory Opposite Function in
 variable {p : ℕ} [Fact p.Prime] {O : Type} [CommRing O] [Fact ¬IsUnit (p : O)]
   [IsAdicComplete (span {(p : O)}) O] in
-
 theorem _root_.GlobalTheory.DieudonneTest.eigen_step [IsDomain (PreTilt O p)] {ε : PreTilt O p}
     (hε : IsPrimitiveRoot (_root_.GlobalTheory.Sandwich.root ε).untilt p) {a : _root_.GlobalTheory.Sandwich.Ainf p O}
     (h : WittVector.frobenius a = WittVector.frobenius (_root_.GlobalTheory.Sandwich.xi ε) * a) :
@@ -106,6 +140,7 @@ theorem _root_.GlobalTheory.DieudonneTest.eigen_step [IsDomain (PreTilt O p)] {�
   have hξ0 : WittVector.coeff (_root_.GlobalTheory.Sandwich.xi ε) 0 = s := by
     rw [← WittVector.constantCoeff_apply]
     unfold _root_.GlobalTheory.Sandwich.xi
+
     simp [map_sum, map_pow, WittVector.constantCoeff_apply, WittVector.teichmuller_coeff_zero, hs]
   have hμ0 : WittVector.coeff (_root_.GlobalTheory.Sandwich.mu ε) 0 = t := by
     unfold _root_.GlobalTheory.Sandwich.mu
@@ -144,59 +179,5 @@ theorem _root_.GlobalTheory.DieudonneTest.eigen_step [IsDomain (PreTilt O p)] {�
   rw [hb, map_mul, map_natCast] at h4
   rw [h4]
   ring
-
-theorem eigen_approx [IsDomain (PreTilt O p)] {ε : PreTilt O p}
-    (hε : IsPrimitiveRoot (root ε).untilt p) (n : ℕ) {a : Ainf p O}
-    (h : WittVector.frobenius a = WittVector.frobenius (xi ε) * a) :
-    ∃ c : ℤ, (p : Ainf p O) ^ n ∣ a - c * Sandwich.mu ε := by
-  induction n generalizing a with
-  | zero => exact ⟨0, by simp⟩
-  | succ n ih =>
-    obtain ⟨c, b, rfl, hb⟩ := eigen_step hε h
-    obtain ⟨d, e, he⟩ := ih hb
-    refine ⟨c + p * d, e, ?_⟩
-    rw [pow_succ', mul_assoc, ← he]
-    push_cast
-    ring
-
-theorem finrank_add [IsDomain O] {ε : PreTilt O p} (h : CovariantDieudonneAt ε)
-    (G : PDivGroup p O) :
-    Module.finrank O G.dual.omega + Module.finrank O G.Lie = G.height := by
-  obtain ⟨M, H, ψ, r, ι, π, -, -, -, -, -, -, hex, -, -, hf, -⟩ := h
-  obtain ⟨⟨-, h2, h3⟩, -, -⟩ := hf G
-  obtain ⟨hι, he, hπ⟩ := hex G
-  have h4 := Submodule.finrank_quotient_add_finrank (LinearMap.ker (π G))
-  rw [((π G).quotKerEquivOfSurjective hπ).finrank_eq, he.linearMap_ker_eq,
-    LinearMap.finrank_range_of_inj hι, h3] at h4
-  omega
-
-theorem map_const_mu_mem {ε : PreTilt O p} (h : CovariantDieudonneAt ε) :
-    ∃ M : PDivGroup p O ⥤ ModuleCat.{0} (Ainf p O),
-      Module.finrank (Ainf p O) (M.obj (const p O)) = 1 ∧
-      Module.finrank (Ainf p O) (M.obj (PDivGroup.mu p O)) = 1 ∧
-      ∀ (f : const p O ⟶ PDivGroup.mu p O) (m : M.obj (const p O)),
-        ∃ n, M.map f m = xi ε • n := by
-  obtain ⟨M, H, ψ, r, ι, π, -, hM, -, -, hr, nr, hex, nι, nπ, -⟩ := h
-  refine ⟨M, (hM _).2.2, (hM _).2.2, fun f m => ((hr _).2 _).1 ?_⟩
-  rw [← nr]
-  obtain ⟨w, hw⟩ := ((hex _).2.1 (r _ m)).1 (Subsingleton.elim _ _)
-  rw [← hw, nι, Subsingleton.elim (omegaDualMap _ _ f w) 0, map_zero]
-
-def trivialGroup : PDivGroup p O where
-  height := 0
-  A _ := O
-  rank_eq n q := by
-    have := q.nontrivial
-    simp [Module.rankAtStalk_eq_finrank_of_free]
-  res _ := BialgHom.id O O
-  res_surjective _ := surjective_id
-  ker_res n := le_antisymm (fun a ha => by rw [show a = 0 from ha]; exact zero_mem _)
-    ((PDiv.kerIdeal_le_ker_iff _ (AlgHom.id O O)).2 fun a => by
-      simpa using (PDiv.mulBy O O (p ^ n)).toAlgHom.commutes a)
-
-theorem trivialGroup_id : 𝟙 (trivialGroup : PDivGroup p O) = 0 :=
-  hom_ext fun n => BialgHom.ext fun a =>
-    ((Hom.app (𝟙 (trivialGroup : PDivGroup p O)) n).toAlgHom.commutes a).trans
-      ((Hom.app (0 : (trivialGroup : PDivGroup p O) ⟶ trivialGroup) n).toAlgHom.commutes a).symm
 
 end GlobalTheory.DieudonneTest

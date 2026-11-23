@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CharacterNormMatrixInverse.FmatMulInv
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -118,7 +162,7 @@ theorem sigA_sigA (a : I.E ⊗[I.F] Af I.F) : sigA I (sigA I a) = a := by
   induction a using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul x y => rw [sigA_tmul, sigA_tmul, star_star]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem sigA_inclE (a : I.E) : sigA I (Formalism.UG.inclE (F := I.F) (Af I.F) a) =
     Formalism.UG.inclE (F := I.F) (Af I.F) (star a) := by
@@ -154,7 +198,7 @@ theorem hA_smul_right (u v : VA I) (c : I.E ⊗[I.F] Af I.F) : hA I u (c • v) 
   ring
 
 theorem hA_add_left (u u' v : VA I) : hA I (u + u') v = hA I u v + hA I u' v := by
-  simp only [hA, Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [hA, Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hA_smul_left (u v : VA I) (c : I.E ⊗[I.F] Af I.F) : hA I (c • u) v = sigA I c * hA I u v := by
   simp only [hA, Formalism.UG.hform, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
@@ -172,6 +216,7 @@ theorem hA_incl (x y : Fin I.n → I.E) : hA I (incl I x) (incl I y) =
     Formalism.UG.inclE (F := I.F) (Af I.F) (Formalism.UG.hform (starRingEnd I.E) I.J x y) := by
   have key : ∀ a : I.E, Formalism.UG.sigR I.cm.sig (Af I.F) (Formalism.UG.inclE (F := I.F) (Af I.F) a) =
       Formalism.UG.inclE (F := I.F) (Af I.F) (star a) := sigA_inclE I
+
   simp only [hA, Formalism.UG.hform, incl, Matrix.map_apply, map_sum, map_mul, key, starRingEnd_apply]
 
 theorem J_conj (i j : Fin I.n) : star (I.J i j) = I.J j i := by
@@ -186,48 +231,14 @@ theorem hA_symm (u v : VA I) : hA I v u = sigA I (hA I u v) := by
     intro i j
     rw [← J_conj I i j]
     exact sigA_inclE I _
+
   simp only [hA, Formalism.UG.hform, map_sum, map_mul, Matrix.map_apply, hs, hJ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
 
 theorem hA_int {u v : VA I} (hu : u ∈ I.Lf) (hv : v ∈ I.Lf) : hA I u v ∈ IntAf I.F I.E := by
-  have hz : ∀ w : VA I, hA I w 0 = 0 := by
-    intro w
-    simp only [hA, Formalism.UG.hform, Pi.zero_apply, mul_zero, Finset.sum_const_zero]
-  have hz' : ∀ w : VA I, hA I 0 w = 0 := by
-    intro w
-    simp only [hA, Formalism.UG.hform, Pi.zero_apply, map_zero, zero_mul, Finset.sum_const_zero]
-  have hgen : ∀ x ∈ I.L, ∀ w ∈ I.Lf, hA I (incl I x) w ∈ IntAf I.F I.E := by
-    intro x hx w hw
-    have hw2 : w ∈ Submodule.span (IntAf I.F I.E)
-        (Set.range fun y : I.L => fun i => Formalism.UG.inclE (F := I.F) (Af I.F) ((y : Fin I.n → I.E) i)) := hw
-    clear hw
-    induction hw2 using Submodule.span_induction with
-    | mem w hw' =>
-      obtain ⟨⟨y, hy⟩, rfl⟩ := hw'
-      show hA I (incl I x) (incl I y) ∈ _
-      rw [hA_incl]
-      exact inclE_mem I ((I.L_dual y).1 hy x hx)
-    | zero => rw [hz]; exact (IntAf I.F I.E).zero_mem
-    | add a b _ _ ha hb => rw [hA_add_right]; exact add_mem ha hb
-    | smul c w _ hw' =>
-      show hA I _ ((c : I.E ⊗[I.F] Af I.F) • w) ∈ _
-      rw [hA_smul_right]
-      exact mul_mem c.2 hw'
-  have hu2 : u ∈ Submodule.span (IntAf I.F I.E)
-      (Set.range fun y : I.L => fun i => Formalism.UG.inclE (F := I.F) (Af I.F) ((y : Fin I.n → I.E) i)) := hu
-  clear hu
-  induction hu2 using Submodule.span_induction with
-  | mem w hw' =>
-    obtain ⟨⟨y, hy⟩, rfl⟩ := hw'
-    exact hgen y hy v hv
-  | zero => rw [hz']; exact (IntAf I.F I.E).zero_mem
-  | add a b _ _ ha hb => rw [hA_add_left]; exact add_mem ha hb
-  | smul c w _ hw' =>
-    show hA I ((c : I.E ⊗[I.F] Af I.F) • w) _ ∈ _
-    rw [hA_smul_left]
-    exact mul_mem (sigA_mem I c.2) hw'
+  apply PIW.NormChiNBi.hA_int <;> assumption
 
 theorem hA_sub_right (u v w : VA I) : hA I u (v - w) = hA I u v - hA I u w := by
   simp only [hA, Formalism.UG.hform, Pi.sub_apply, mul_sub, Finset.sum_sub_distrib]
@@ -290,7 +301,7 @@ theorem inv_e {x : I.Gf} (hx : x ∈ I.Kset)
       I.fmat x⁻¹ *ᵥ v ∈ Mo I g (e0 '' {b | b.1 < m}) := by
     intro m
     induction m using Nat.strong_induction_on with
-    | h m ih =>
+    | ind m ih =>
       refine mv_mem I _ g _ _ ?_ (mL_mv I (fun y hy => K_mv I hxi hy) g (mL_Mo I))
       rintro _ ⟨b, hb, rfl⟩
       have h1 : I.fmat x⁻¹ *ᵥ e0 b = e0 b + (I.fmat x⁻¹ - 1) *ᵥ e0 b := by
@@ -313,7 +324,7 @@ theorem inv_b {x : I.Gf} (hx : x ∈ I.Kset)
       I.fmat x⁻¹ *ᵥ v ∈ Mo I g (Set.range e0 ∪ bw '' {j | j.1 < m}) := by
     intro m
     induction m using Nat.strong_induction_on with
-    | h m ih =>
+    | ind m ih =>
       refine mv_mem I _ g _ _ ?_ (mL_mv I (fun y hy => K_mv I hxi hy) g (mL_Mo I))
       have hsplit : ∀ w : VA I, I.fmat x⁻¹ *ᵥ w = w + (I.fmat x⁻¹ - 1) *ᵥ w := by
         intro w

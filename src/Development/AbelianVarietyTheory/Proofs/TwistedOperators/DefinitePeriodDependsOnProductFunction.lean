@@ -1,12 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsRealFam
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCombAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspAlongSmoothRows
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowTestDefinitePeriodChangeOfMeasures
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PosDefOfNode
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpecialisedUniversalSeriesEqTwistedThetaSeries
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsRealFam
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PosDefOfNode
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SeeSawWeilBiActionCommutes
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPureTensorO
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpecialisedUniversalSeriesEqTwistedThetaSeries
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteThetaIntegralIntegrableContinuous
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DefiniteUnitaryCocompact
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegrableOnFundamentalDomain
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OmPureTensorOOfFinite
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowTestDefinitePeriodChangeOfMeasures
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaKOContinuousAndRatInvariant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaKernelGridRationalLeftInvariant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryEmbeddingContinuousMulRational
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealLineOfPeriodsOnLine
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.StdFrames GlobalTheory.RowClaim
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.RowUnf GlobalTheory.RowChain GlobalTheory.SeeSaw GlobalTheory.RowVal GlobalTheory.RowReal
@@ -24,12 +75,13 @@ theorem lin_van {X I : Type} (A : Module.End ℂ (X → ℂ)) (S : Finset I) (a 
     funext u
     simpa only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] using h u
   have e2 := congrFun (congrArg A e) x
+
   simpa only [map_sum, map_smul, map_zero, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] using e2
 
 theorem int_van {X I : Type} [MeasurableSpace X] (μ : Measure X) (S : Finset I) (a : I → ℂ) (f : I → X → ℂ)
     (hf : ∀ i ∈ S, Integrable (f i) μ) (h : ∀ u, ∑ i ∈ S, a i * f i u = 0) : ∑ i ∈ S, a i * ∫ x, f i x ∂μ = 0 := by
   simp_rw [← integral_const_mul]
-  rw [← integral_finset_sum _ fun i hi => (hf i hi).const_mul _]
+  rw [← integral_finsetSum _ fun i hi => (hf i hi).const_mul _]
   simp only [h, integral_zero]
 
 variable {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} {G : GridData L sc}
@@ -151,8 +203,11 @@ theorem jPer_van {M : Vol G} (hN : ∀ X, DefNode D.R.m X → X ≠ .top D.R.m �
     (F : I → Fn G (.grid D.R.m D.R.m)) (hF : ∀ i ∈ S, GlobalTheory.Unf.IsContAut _ (F i)) :
     ∀ σ j (hj : j + 2 * σ + 2 = D.R.m), Even j → ∀ φ : I → Fn G (.top j), (∀ i ∈ S, GlobalTheory.Unf.IsContAut _ (φ i)) →
       (∀ g u h', ∑ i ∈ S, a i * F i h' * φ i g * ∏ k ∈ Finset.range (σ + 1), cv (C i) u (j + 2 * k) = 0) →
-      ∑ i ∈ S, a i * jPer W M t (C i) (F i) σ j hj (φ i) = 0
-  | 0, j, hj, hev, φ, hφ, h => by
+      ∑ i ∈ S, a i * jPer W M t (C i) (F i) σ j hj (φ i) = 0 := by
+  intro σ
+  induction σ with
+  | zero =>
+    intro j hj hev φ hφ h
     have h0 := hN (.top j) (show j ≤ D.R.m by omega) (fun e => by injection e; omega)
     have h1 := hN (.top (j + 1)) (show j + 1 ≤ D.R.m by omega) (fun e => by injection e; omega)
     have h2 := hN (.grid D.R.m D.R.m) ⟨le_rfl, rfl⟩ (by simp)
@@ -160,7 +215,7 @@ theorem jPer_van {M : Vol G} (hN : ∀ X, DefNode D.R.m X → X ≠ .top D.R.m �
     refine int_van _ S a (fun i h' => F i h' * biL W M t j (φ i) (C i j) (GlobalTheory.RowChain.topEmb G hm h')) (fun i hi => ?_) fun h' => ?_
     · have hb := biL_contAut W t (by omega) (hC i hi j hev (by omega)) h0 (hφ i hi) h1
       refine h2.intOn _ ((hF i hi).2.mul (hb.2.comp (topEmb_cont hm))) fun γ hγ x => ?_
-      obtain ⟨γ', hγ', e⟩ := topEmb_rat (G := G) hm γ hγ x
+      obtain ⟨γ', hγ', e⟩ := GlobalTheory.RowVal.topEmb_rat (G := G) hm γ hγ x
       rw [e, (hF i hi).1 γ hγ x, hb.1 γ' hγ']
     · simp only [← mul_assoc]
       refine biL_van W t (by omega) h0 h1 S (fun i => a i * F i h') φ (fun i => C i j) hφ
@@ -170,10 +225,11 @@ theorem jPer_van {M : Vol G} (hN : ∀ X, DefNode D.R.m X → X ≠ .top D.R.m �
         show cv (C i) (setPair 0 j u v) j = _
         rw [cv, setPair_fst, setPair_snd]
       simpa only [zero_add, Finset.prod_range_one, e2] using e
-  | σ + 1, j, hj, hev, φ, hφ, h => by
+  | succ σ ih =>
+    intro j hj hev φ hφ h
     have h0 := hN (.top j) (show j ≤ D.R.m by omega) (fun e => by injection e; omega)
     have h1 := hN (.top (j + 1)) (show j + 1 ≤ D.R.m by omega) (fun e => by injection e; omega)
-    refine jPer_van hN S a C hC F hF σ (j + 1 + 1) (by omega) (by rw [add_assoc]; exact hev.add even_two)
+    refine ih (j + 1 + 1) (by omega) (by rw [add_assoc]; exact hev.add even_two)
       (fun i => biL W M t j (φ i) (C i j))
       (fun i hi => biL_contAut W t (by omega) (hC i hi j hev (by omega)) h0 (hφ i hi) h1) fun g u h' => ?_
     have key := biL_van W t (by omega) h0 h1 S

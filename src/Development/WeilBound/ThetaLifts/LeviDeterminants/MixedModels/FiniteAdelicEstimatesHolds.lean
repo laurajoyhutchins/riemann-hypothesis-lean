@@ -1,9 +1,56 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.PureSt
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.CompFinLiftE
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfActs
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictAd
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictMod
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.PsiUnrOfNotLe
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.PureSt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAddCharSymplecticLocalLatticeEqOne
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.CompFinLiftE
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfActs
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictAd
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictMod
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.PsiUnrOfNotLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,7 +86,7 @@ def locT (v : Pl F) (T : ((κ → AF F) × (κ → AF F)) →ₗ[AF F] ((κ → 
     ((κ → Fv F v) × (κ → Fv F v)) →ₗ[Fv F v] ((κ → Fv F v) × (κ → Fv F v)) where
   toFun y := locW v (T (liftW v y))
   map_add' y y' := by
-    rw [← locW_add, ← map_add]
+    rw [← locW_add, ← map_add (f := _)]
     congr 2
     exact Prod.ext (funext fun _ => map_add _ _ _) (funext fun _ => map_add _ _ _)
   map_smul' c y := by
@@ -85,6 +132,7 @@ theorem locT_int (T : ((κ → AF F) × (κ → AF F)) →ₗ[AF F] ((κ → AF 
       simp [liftW, Prod.fst_sum, Prod.snd_sum, Finset.sum_apply, Pi.single_apply]
   have hs : ∀ (c : κ → Fv F v) (z : κ → (κ → AF F) × (κ → AF F)), (∀ i, c i ∈ v.adicCompletionIntegers F) →
       (∀ i, locW v (T (z i)) ∈ intW v) → locW v (T (∑ i, liftV v (c i) • z i)) ∈ intW v := fun c z hc hz => by
+
     rw [map_sum]
     refine Finset.sum_induction _ (fun t => locW v t ∈ intW v) (fun a b ha hb => locW_add a b ▸ add_mem ha hb) ?_ fun i _ => ?_
     · have z0 : evFin F v 0 ∈ v.adicCompletionIntegers F := by rw [map_zero]; exact zero_mem _
@@ -92,7 +140,7 @@ theorem locT_int (T : ((κ → AF F) × (κ → AF F)) →ₗ[AF F] ((κ → AF 
     · rw [map_smul, locW_smul, evFin_liftV]
       exact ⟨fun j => mul_mem (hc i) ((hz i).1 j), fun j => mul_mem (hc i) ((hz i).2 j)⟩
   change locW v (T (liftW v y)) ∈ _
-  rw [e, map_add, locW_add]
+  rw [e, map_add (f := _), locW_add]
   exact add_mem (hs _ _ hy.1 h1) (hs _ _ hy.2 h2)
 
 theorem schr_std {ψ : AddChar (AF F) ℂ} (hψ : PsiUnr ψ v) (h2 : (2 : Fv F v)⁻¹ ∈ v.adicCompletionIntegers F) {y} (hy : y ∈ intW (κ := κ) v) :
@@ -141,6 +189,7 @@ theorem finite_adelic_estimates_holds : FinSt := by
       y.1 ⬝ᵥ y'.2 - y'.1 ⬝ᵥ y.2 := fun v y y' => by
     have := congrArg (evFin F v) (hS (S.symm (liftW v y)) (S.symm (liftW v y')))
     rw [S.apply_symm_apply, S.apply_symm_apply] at this
+
     simp only [dotProduct, map_sub, map_sum, map_mul, liftW, evFin_liftV] at this
     exact this.symm
   choose ι hb hi using fun v : Pl F => Mod.model ((adjoint_statement.psi F ψ hψ).2 v).1 ((adjoint_statement.psi F ψ hψ).2 v).2 (locE v S).symm (hsy v)

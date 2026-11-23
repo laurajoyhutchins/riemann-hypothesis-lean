@@ -1,15 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBoundUnitary
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermInf
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermInf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RatTuple
+import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitarySchrodinger
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermOf
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteAdeleTopologyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RatTuple
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SchwartzBruhatEqSumPure
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicCharacterArchimedeanFormStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.StandardAdelicCharacterStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdeleHaarMapEqScaledVolumeStatement
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.ThetaOrbits
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel GlobalTheory.StdUnn PositivityTheory.GramSchwartzFunctions PositivityTheory.GramSchwartzFunctions.BC GlobalTheory.CompanionTheory.SiegelND
@@ -33,13 +83,13 @@ theorem psiFin_add' (F : Type) [Field F] [NumberField F] (ψ : AddChar (AF F) �
 theorem hR_add_left {F E : Type} [Field F] [Field E] [Algebra F E] (R : Type) [CommRing R] [Algebra F R]
     (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (x x' y : Fin M → R ⊗[F] E) :
     hR R σ J (x + x') y = hR R σ J x y + hR R σ J x' y := by
-  simp [hR, Formalism.UG.hform, Pi.add_apply, map_add, Matrix.mulVec_add, Matrix.add_mulVec, dotProduct_add,
+  simp [hR, Formalism.UG.hform, Pi.add_apply, map_add (f := _), Matrix.mulVec_add, Matrix.add_mulVec, dotProduct_add,
     add_dotProduct, Finset.sum_add_distrib, add_mul, mul_add]
 
 theorem hR_add_right {F E : Type} [Field F] [Field E] [Algebra F E] (R : Type) [CommRing R] [Algebra F R]
     (σ : E →ₐ[F] E) {M : ℕ} (J : Matrix (Fin M) (Fin M) E) (x y y' : Fin M → R ⊗[F] E) :
     hR R σ J x (y + y') = hR R σ J x y + hR R σ J x y' := by
-  simp [hR, Formalism.UG.hform, Pi.add_apply, map_add, Matrix.mulVec_add, Matrix.add_mulVec, dotProduct_add,
+  simp [hR, Formalism.UG.hform, Pi.add_apply, map_add (f := _), Matrix.mulVec_add, Matrix.add_mulVec, dotProduct_add,
     add_dotProduct, Finset.sum_add_distrib, add_mul, mul_add]
 
 theorem pairB_add : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
@@ -63,7 +113,7 @@ theorem pairB_add : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Number
     simp only [gram2, Pi.add_apply, Matrix.add_apply]
     exact hR_add_right _ σ J _ _ _
   refine ⟨fun X X' Y => ?_, fun X Y Y' => ?_⟩
-  · simp only [pairB, hg1, Matrix.mul_add, Matrix.trace_add, map_add, psiFin_add']
-  · simp only [pairB, hg2, Matrix.mul_add, Matrix.trace_add, map_add, psiFin_add']
+  · simp only [pairB, hg1, Matrix.mul_add, Matrix.trace_add, map_add (f := _), psiFin_add']
+  · simp only [pairB, hg2, Matrix.mul_add, Matrix.trace_add, map_add (f := _), psiFin_add']
 
 end GlobalTheory.CompanionTheory.SiegelND.Integ.Weyl.PairAdd

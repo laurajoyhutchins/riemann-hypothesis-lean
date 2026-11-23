@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGramLocPfA
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
+public import Mathlib.NumberTheory.RamificationInertia.Ramification
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.RamificationInertia.Ramification
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,23 +81,7 @@ theorem liesOver_ne_bot (hp : p.Prime) (I : Ideal (𝓞 K)) (hI : I.LiesOver (sp
 theorem img_places (hp : p.Prime) :
     (fun v : HeightOneSpectrum (𝓞 K) => v.asIdeal) '' {v | ((p : ℕ) : 𝓞 K) ∈ v.asIdeal} =
       (span {(p : ℤ)}).primesOver (𝓞 K) := by
-  haveI := pI_max p hp
-  ext P
-  simp only [Set.mem_image, Set.mem_setOf_eq, Ideal.primesOver]
-  constructor
-  · rintro ⟨v, hv, rfl⟩
-    refine ⟨v.isPrime, ⟨?_⟩⟩
-    have hle : (span {(p : ℤ)} : Ideal ℤ) ≤ v.asIdeal.under ℤ := by
-      rw [Ideal.span_le, Set.singleton_subset_iff]
-      show algebraMap ℤ (𝓞 K) (p : ℤ) ∈ v.asIdeal
-      simpa using hv
-    exact (pI_max p hp).eq_of_le (v.isPrime.comap (algebraMap ℤ (𝓞 K))).ne_top hle
-  · rintro ⟨hPp, hPl⟩
-    refine ⟨⟨P, hPp, liesOver_ne_bot K p hp P hPl⟩, ?_, rfl⟩
-    have h1 : (p : ℤ) ∈ P.under ℤ := by
-      rw [← hPl.over]
-      exact Ideal.mem_span_singleton_self _
-    simpa using h1
+  apply Formalism.L2.SG.Pf.SatGramLoc.image_places_primesOver <;> assumption
 
 theorem ncard_places (hp : p.Prime) :
     ({v : HeightOneSpectrum (𝓞 K) | ((p : ℕ) : 𝓞 K) ∈ v.asIdeal}).ncard =
@@ -61,7 +100,7 @@ theorem ef_pos (hp : p.Prime) (P : Ideal (𝓞 K)) (hP : P ∈ IsDedekindDomain.
   obtain ⟨hPp, hPl⟩ := (IsDedekindDomain.mem_primesOverFinset_iff (pI_ne_bot p hp) (𝓞 K)).mp hP
   have he : 0 < (span {(p : ℤ)}).ramificationIdx' P := by
     rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (pI_ne_bot p hp)]
-    exact Ideal.ramificationIdx_pos P ℤ
+    exact Ideal.ramificationIdx_pos (R := ℤ) P
   have hf : 0 < (span {(p : ℤ)}).inertiaDeg' P := Ideal.inertiaDeg'_pos _ _
   exact Nat.mul_pos he hf
 
@@ -137,7 +176,7 @@ theorem splits_sub (hp : p.Prime)
   have hefK := ef_one_sub K p L hp (ef_one_of_card L p hp hL)
   refine ⟨?_, ?_⟩
   · rw [← card_of_ef_one K p hp hefK, ← ncard_places K p hp]
-    exact Nat.card_coe_set_eq _
+    exact Nat.card_coe_set_eq {v : HeightOneSpectrum (𝓞 K) | ((p : ℕ) : 𝓞 K) ∈ v.asIdeal}
   · intro v hv
     have hmem : v.asIdeal ∈ IsDedekindDomain.primesOverFinset (span {(p : ℤ)}) (𝓞 K) := by
       rw [← Finset.mem_coe, IsDedekindDomain.coe_primesOverFinset (pI_ne_bot p hp), ← img_places K p hp]

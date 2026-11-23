@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.MinfDensity
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.IsAutFunDef
+public import Mathlib.Algebra.Lie.BaseChange
+public import Mathlib.Algebra.Lie.UniversalEnveloping
+public import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,8 +82,8 @@ abbrev LieAt (V : HSp D) (τ : D.what₂.Tau) : Type := lieU (gramAt D V τ)
 
 abbrev LieInf (V : HSp D) : Type := ∀ τ : D.what₂.Tau, LieAt V τ
 
-open Classical in
 
+open Classical in
 def atPlace (V : HSp D) (τ : D.what₂.Tau) (X : LieAt V τ) : LieInf V := Pi.single τ X
 
 def IsExpFam (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)) (V : HSp D) (e : LieInf V → GA D V) : Prop :=
@@ -54,9 +97,6 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 def IsSmoothInf (V : HSp D) (e : LieInf V → GA D V) (φ : GA D V → ℂ) : Prop :=
   ∀ g, ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞)
     (fun X : (∀ τ : D.what₂.Tau, (lieU (gramAt D V τ)).toSubmodule) => φ (g * e fun τ => ⟨(X τ).1, (X τ).2⟩))
-
-theorem isSmoothInf_const (V : HSp D) (e : LieInf V → GA D V) (c : ℂ) : IsSmoothInf V e fun _ => c :=
-  fun _ => contDiff_const
 
 end Smooth
 
@@ -127,19 +167,6 @@ def IsSmoothAutForm (V : HSp D) (φ : GA D V → ℂ) : Prop :=
   IsAutFun V φ ∧
     AllSome (IsInfFam (D := D)) fun θ => AllSome (IsExpFam θ V) fun e =>
       IsSmoothInf V e φ ∧ (∀ τ, IsZFiniteAt V e τ φ) ∧ IsUnifModerate θ V e φ
-
-def FormsTied {X : ThetaX D} (T : ThetaTied D X) : Prop :=
-  ∀ (V : HSp D) (φ : GA D V → ℂ), (∃ F : X.AF V, T.ev V F = φ) ↔ IsSmoothAutForm V φ
-
-theorem wordDer_const (V : HSp D) (e : LieInf V → GA D V) (l : List (LieInf V)) (c : ℂ) :
-    ∃ c' : ℂ, wordDer V e l (fun _ => c) = fun _ => c' := by
-  induction l with
-  | nil => exact ⟨c, rfl⟩
-  | cons X l ih =>
-    obtain ⟨c', h⟩ := ih
-    refine ⟨0, ?_⟩
-    change lieDer V e X (wordDer V e l fun _ => c) = _
-    rw [h]; funext g; simp [lieDer]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.LieAlgebraExponentialFamilies
 

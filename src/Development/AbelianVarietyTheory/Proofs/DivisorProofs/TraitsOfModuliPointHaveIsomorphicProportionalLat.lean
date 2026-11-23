@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SpecializesGenericImage
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsMonoFamNontrivial
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonSemiAbelianPullbackTwoUnitaryTraitsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLinearUniformisationBaseChangeCompleteDvrStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinearUniformisationsCharacterIsoAssociatedCoordStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SpecializesGenericImage
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonSemiAbelianPullbackTwoUnitaryTraitsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLinearUniformisationBaseChangeCompleteDvrStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinearUniformisationsCharacterIsoAssociatedCoordStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,8 +87,8 @@ theorem sq_associated {V W : Type} [CommRing V] [CommRing W] [IsDomain W] (f : V
 
 end GlobalTheory.UPoinc.TraitUniq
 
-open GlobalTheory.UPoinc.TraitUniq in
 
+open GlobalTheory.UPoinc.TraitUniq in
 theorem GlobalTheory.UPoinc.uTraitUniqSt_holds : UTraitUniqSt := by
   intro E _ _ _ H Dw l Xo c T T' W _ _ _ f f' fK fK' hB hW hf hf' hfl hfl' hK hK' hy w m m' hw hm hm'
   obtain ⟨tW, ⟨φ⟩, ⟨φ'⟩⟩ := GlobalTheory.T.exists_common_semiAbelian_pullback_two_unitary_traits E H Dw l Xo c T T' W f f' fK fK' hB hW hf hf' hfl hfl' hK hK' hy
@@ -80,7 +118,7 @@ theorem GlobalTheory.UPoinc.uTraitUniqSt_holds : UTraitUniqSt := by
   have hs' : ∀ a b, T'.be a b = T'.be b a := fun a b => (mem_levelForms.1 T'.lev).1 a b
   refine ⟨e, fun a b => ?_⟩
   have h := diag (a + b)
-  simp only [map_add, LinearMap.add_apply] at h
+  simp only [map_add (f := _), LinearMap.add_apply] at h
   have ha := diag a
   have hb := diag b
   rw [hs b a, hs' (e b) (e a)] at h

@@ -1,10 +1,61 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.IsEquivAdicAbvNormAbv
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.NormLeOneOfInteger
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DeRhamPotSemistable
-import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalFilDR
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.IsEquivAdicAbvNormAbv
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.NormLeOneOfInteger
+import Formalism.AlgebraicWeights.IsAlgWeight
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.Automorphisms.PlaceA
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormEqOfSamePlace
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT NumberField IsDedekindDomain Polynomial GlobalTheory.HeightCounting GlobalTheory.RowTie GlobalTheory.SplitRead GlobalTheory.NPin
 open Formalism.BasicNotions.Loc
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -26,8 +77,7 @@ theorem scalarLift_tmul (φ : E →+* Om l) (a : ℚ_[l]) (y : E) :
 
 theorem exists_near (φ ψ : E →+* Om l) (t : ℚ_[l] ⊗[ℚ] E) :
     ∀ ε : ℝ, 0 < ε → ∃ x : E, ‖scalarLift φ t - φ x‖ < ε ∧ ‖scalarLift ψ t - ψ x‖ < ε := by
-  induction t using TensorProduct.induction_on with
-  | zero => intro ε hε; exact ⟨0, by simpa using hε, by simpa using hε⟩
+  induction t using TensorProduct.inductionOn with
   | tmul a y =>
     intro ε hε
     have hM : 0 < ‖φ y‖ + ‖ψ y‖ + 1 := by positivity
@@ -51,10 +101,10 @@ theorem exists_near (φ ψ : E →+* Om l) (t : ℚ_[l] ⊗[ℚ] E) :
     obtain ⟨x₂, a₂, b₂⟩ := h₂ (ε / 2) (half_pos hε)
     refine ⟨x₁ + x₂, ?_, ?_⟩
     · have e : scalarLift φ (t₁ + t₂) - φ (x₁ + x₂) = (scalarLift φ t₁ - φ x₁) + (scalarLift φ t₂ - φ x₂) := by
-        rw [map_add, map_add]; ring
+        rw [map_add (f := _), map_add (f := _)]; ring
       rw [e]; linarith [norm_add_le (scalarLift φ t₁ - φ x₁) (scalarLift φ t₂ - φ x₂)]
     · have e : scalarLift ψ (t₁ + t₂) - ψ (x₁ + x₂) = (scalarLift ψ t₁ - ψ x₁) + (scalarLift ψ t₂ - ψ x₂) := by
-        rw [map_add, map_add]; ring
+        rw [map_add (f := _), map_add (f := _)]; ring
       rw [e]; linarith [norm_add_le (scalarLift ψ t₁ - ψ x₁) (scalarLift ψ t₂ - ψ x₂)]
 
 theorem norm_scalarLift_le (φ ψ : E →+* Om l) (h : ∀ x, ‖φ x‖ = ‖ψ x‖) (t : ℚ_[l] ⊗[ℚ] E) :
@@ -72,23 +122,7 @@ theorem norm_scalarLift_le (φ ψ : E →+* Om l) (h : ∀ x, ‖φ x‖ = ‖ψ
 theorem norm_eq_of_same_place (τ φ : E →+* Om l) (w : HeightOneSpectrum (𝓞 E)) (hw : w ∈ placesOver E l)
     (hτ : ∀ x : 𝓞 E, ‖τ (x : E)‖ < 1 ↔ x ∈ w.asIdeal) (hφ : ∀ x : 𝓞 E, ‖φ (x : E)‖ < 1 ↔ x ∈ w.asIdeal)
     (x : E) : ‖τ x‖ = ‖φ x‖ := by
-  have e1 := PI.CompDegEF.isEquiv_adicAbv_normAbv τ w hw
-    (fun x => ⟨PI.CompDegEF.norm_le_one_of_integer τ x, hτ x⟩)
-  have e2 := PI.CompDegEF.isEquiv_adicAbv_normAbv φ w hw
-    (fun x => ⟨PI.CompDegEF.norm_le_one_of_integer φ x, hφ x⟩)
-  obtain ⟨c, hc, hce⟩ := AbsoluteValue.isEquiv_iff_exists_rpow_eq.1 (e1.symm.trans e2)
-  have hl := congrFun hce ((l : ℕ) : E)
-  simp only [PI.CompDegEF.normAbv_apply, map_natCast] at hl
-  have hpos := PI.CompDegEF.norm_natCast_pos l
-  have hlt := PI.CompDegEF.norm_natCast_lt_one l
-  have hL : Real.log ‖((l : ℕ) : Om l)‖ ≠ 0 := (Real.log_neg hpos hlt).ne
-  have hc1 : c = 1 := by
-    have := congrArg Real.log hl
-    rw [Real.log_rpow hpos] at this
-    exact (mul_eq_right₀ hL).1 this
-  have hx := congrFun hce x
-  simp only [PI.CompDegEF.normAbv_apply, hc1, Real.rpow_one] at hx
-  exact hx
+  apply _root_.GlobalTheory.GalFirstClause.Emb.norm_eq_of_samePlace <;> assumption
 
 theorem main : ∀ (D : D7) (l : ℕ) [Fact l.Prime] (w : PlE D.host) (O : Type) [CommRing O] [Algebra ℤ_[l] O] [TopologicalSpace O] (Bw : LocBridge l D.host.E D.nd.Om (Dec (F := D.host.E) (D.nd.plOm.1 w)) O), GlobalTheory.Pst.Induces Bw → ∀ τ : D.host.E →+* Qbar l, (∀ x : 𝓞 D.host.E, ‖τ (x : D.host.E)‖ < 1 ↔ x ∈ w.asIdeal) → ∀ LL' : FinExt l, Bw.LL.1 ≤ LL'.1 → ∃ τ' : ↥Bw.Kw.1 →ₐ[ℚ_[l]] ↥LL'.1, GlobalTheory.Pst.IsInduced Bw τ τ' := by
   intro D l _ w O _ _ _ Bw hj τ hτ LL' hLL
@@ -103,18 +137,17 @@ theorem main : ∀ (D : D7) (l : ℕ) [Fact l.Prime] (w : PlE D.host) (O : Type)
       (by rw [RingHom.mem_ker.1 ht, norm_zero])) (norm_nonneg _))
   have hrange : (scalarLift jE).range ≤ Bw.Kw.1.toSubalgebra := by
     rintro _ ⟨t, rfl⟩
-    induction t using TensorProduct.induction_on with
-    | zero => simp
+    induction t using TensorProduct.inductionOn with
     | tmul a y =>
       change scalarLift jE (a ⊗ₜ y) ∈ _
       rw [scalarLift_tmul]
       exact mul_mem (Bw.Kw.1.algebraMap_mem a) (Bw.j_E y)
     | add t₁ t₂ h₁ h₂ => rw [map_add]; exact add_mem h₁ h₂
   have hfin : FiniteDimensional ℚ_[l] (Subalgebra.toSubmodule (scalarLift jE).range) := by
-    haveI : FiniteDimensional ℚ_[l] (Subalgebra.toSubmodule Bw.Kw.1.toSubalgebra) := Bw.Kw.2
+    have : FiniteDimensional ℚ_[l] (Subalgebra.toSubmodule Bw.Kw.1.toSubalgebra) := Bw.Kw.2
     exact Submodule.finiteDimensional_of_le (Subalgebra.toSubmodule.monotone hrange)
   have hclosed : IsClosed ((scalarLift jE).range : Set (Om l)) :=
-    Submodule.closed_of_finiteDimensional (Subalgebra.toSubmodule (scalarLift jE).range)
+    Submodule.isClosed_of_finiteDimensional (Subalgebra.toSubmodule (scalarLift jE).range)
   have hle : Bw.Kw.1.toSubalgebra ≤ (scalarLift jE).range := by
     intro y hy
     refine closure_minimal ?_ hclosed (Bw.j_dense hy)

@@ -1,15 +1,61 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.PhiAZero
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.TorsionOfVec
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.NatCastQb
-import Development.AutomorphicArithmetic.EtaleIdempotents.GaloisEquivariantTensorDescentOfPrimePowerUnits
-import Development.AutomorphicArithmetic.EtaleIdempotents.IntegersResidueEqZeroOfNotIsUnit
-import Development.AutomorphicArithmetic.EtaleIdempotents.CrisFrobeniusIterateEvalEtaleFamily
-import Development.AutomorphicArithmetic.EtaleIdempotents.GaloisActionEvalEtaleFamilyExistsDenominator
-import Development.AutomorphicArithmetic.EtaleIdempotents.EvalEtaleFamilyMemLimitOfReduced
-import Development.AutomorphicArithmetic.EtaleIdempotents.IntegersResidueEqThetaCoeffPowOfTeichmuller
+module
 
-set_option synthInstance.maxHeartbeats 200000
-set_option maxHeartbeats 1000000
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AbsInvOf
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.NatCastQb
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.PhiAZero
+public import Development.AutomorphicArithmetic.EtaleIdempotents.CrisFrobeniusIterateEvalEtaleFamily
+public import Development.AutomorphicArithmetic.EtaleIdempotents.EvalEtaleFamilyMemLimitOfReduced
+public import Development.AutomorphicArithmetic.EtaleIdempotents.GaloisActionEvalEtaleFamilyExistsDenominator
+public import Development.AutomorphicArithmetic.EtaleIdempotents.GaloisEquivariantTensorDescentOfPrimePowerUnits
+public import Development.AutomorphicArithmetic.EtaleIdempotents.IntegersResidueEqThetaCoeffPowOfTeichmuller
+public import Development.AutomorphicArithmetic.EtaleIdempotents.IntegersResidueEqZeroOfNotIsUnit
+import GroundTheory.PAdicHodge.ACrisPhi
+public import GroundTheory.PAdicHodge.AInfTopology
+public import GroundTheory.PAdicHodge.BCrisGalois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
+
+
 set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
@@ -32,9 +78,14 @@ private theorem galA_tA (g : K.fixingSubgroup) : ∃ χ : ℤ_[l]ˣ, galA g (tA 
 private theorem phiA_tA : phiA l (tA l) = (l : Acris l) * tA l := ACris.phi_periodT_eq_mul _
 
 private theorem phiA_zA (x : ℤ_[l]) : phiA l (zA l x) = zA l x := by
-  change ACris.phi ℂ_[l] l (algebraMap (Ainf l) (Acris l) (IsPerfectoidField.padicIntToWitt l x)) = _
-  rw [ACris.phi_algebraMap, ACris.frobenius_padicIntToWitt]
-  rfl
+  change ACris.phi (K := ℂ_[l]) (p := l) (algebraMap (Ainf l) (Acris l) (IsPerfectoidField.padicIntToWitt l x)) = _
+  rw [ACris.phi_algebraMap]
+  have h := AInf.isAdicComplete_p (K := ℂ_[l]) (p := l)
+  have he := RingHom.congr_fun (ringHom_ext_padicInt
+    ((WittVector.frobeniusEquiv l (PreTilt (↥(normInteger ℂ_[l])) l)).toRingHom.comp
+      (IsPerfectoidField.padicIntToWitt (K := ℂ_[l]) l))
+    (IsPerfectoidField.padicIntToWitt (K := ℂ_[l]) l)) x
+  exact congrArg _ he
 
 private theorem aux_sub {R Mo : Type*} [CommRing R] [AddCommGroup Mo] [Module R Mo] (A X t : R) (u s : ℕ) (G E : Mo)
     (h : A • G = (A * X ^ s) • E) : A • ((X * t) ^ u • G) - (A * X ^ (u + s)) • (t ^ u • E) = 0 := by

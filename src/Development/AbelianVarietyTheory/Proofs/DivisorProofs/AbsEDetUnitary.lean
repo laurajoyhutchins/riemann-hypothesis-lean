@@ -1,14 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ParOpApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWittBasisCompactStabiliser
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StableRangeOneDetUnitElementary
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModulusOfNormEqAbs
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsWeilFormulas
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsoRows
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWittBasisCompactStabiliser
+
+@[expose] public section
 
 open scoped TensorProduct NNReal ENNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK GlobalTheory.Doubling
-open GlobalTheory.SWLit GlobalTheory.TowU GlobalTheory.SiegelCoefTheta
-open GlobalTheory.WeilEx
+open GlobalTheory.SWLit GlobalTheory.TowU
 attribute [-instance] CStarMatrix.instHMulOfFintypeOfMulOfAddCommMonoid
 
 noncomputable section
@@ -20,22 +59,10 @@ section Alg
 variable {R : Type} [CommRing R] {A : Type} [CommRing A] [Algebra R A] {α β ν X : Type} [Fintype β] [DecidableEq β]
   [AddCommGroup X] [Module R X] {e : ν ⊕ ν ≃ α}
 
-omit [DecidableEq β] in
 
-def lmul [Fintype α] [DecidableEq α] (β : Type) (t : GL α A) : Matrix α β A ≃ₗ[R] Matrix α β A where
-  toFun w := (t : Matrix α α A) * w
-  invFun w := ((t⁻¹ : GL α A) : Matrix α α A) * w
-  map_add' _ _ := Matrix.mul_add _ _ _
-  map_smul' c w := by
-    simp only [RingHom.id_apply]
-    exact Matrix.mul_smul _ c w
-  left_inv w := by
-    simp only [← Matrix.mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, Matrix.one_mul]
-  right_inv w := by
-    simp only [← Matrix.mul_assoc, ← Units.val_mul, mul_inv_cancel, Units.val_one, Matrix.one_mul]
-
-variable [Invertible (2 : R)] {D : Matrix α β A ≃ₗ[R] X × X} (hΔ : ∀ w, LinAct.Del e w → (D w).1 = 0)
-  (hN : ∀ w, LinAct.Nab e w → (D w).2 = 0)
+variable [Invertible (2 : R)] {D : Matrix α β A ≃ₗ[R] X × X}
+  (hΔ : ∀ w, GlobalTheory.SWLit.LinAct.Del e w → (D w).1 = 0)
+  (hN : ∀ w, GlobalTheory.SWLit.LinAct.Nab e w → (D w).2 = 0)
 include hΔ hN
 
 end Alg
@@ -62,7 +89,7 @@ theorem absE_det_unitary {k : ℕ} {J : Matrix (Fin k) (Fin k) E} (hJ : J.det �
     exact hJu.mul_left_cancel (by linear_combination h)
   have hc : Units.map (cA σ : AE F E →* AE F E) d = conjUnit σ d := by
     ext
-    simp only [Units.coe_map, MonoidHom.coe_coe]
+    simp only [Units.coe_map, MonoidHom.coe_ofClass]
     rfl
   have h3 : d * Units.map (cA σ : AE F E →* AE F E) d = 1 := Units.ext (by simpa using h2)
   have h4 : absE F E d * absE F E d = 1 := by

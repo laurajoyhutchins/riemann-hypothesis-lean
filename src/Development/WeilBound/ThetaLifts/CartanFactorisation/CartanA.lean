@@ -1,4 +1,53 @@
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLFrame
+module
+
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLines
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -124,67 +173,17 @@ theorem piInf_cA {σ : E →ₐ[F] E} (h : IsCMExt F E σ) {w : InfinitePlace F}
     piInf τ (cA σ z) = star (piInf τ z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb, star_add]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb, star_add]
   | tmul a e =>
     show piInf τ (a ⊗ₜ[F] σ e) = _
     rw [piInf_tmul, piInf_tmul, h.2.2.2, star_mul']
     congr 1
     exact (Complex.conj_eq_iff_im.2 (im_extension h.1 w _)).symm
 
-omit [NumberField E] in
-theorem continuous_piInf {w : InfinitePlace F} (τ : EmbOver E w) : Continuous (piInf τ) := by
-  let φ : AF F →+* ℂ := (InfinitePlace.Completion.extensionEmbedding w).comp (evInf F w : AF F →+* w.Completion)
-  have hφ : Continuous φ := (InfinitePlace.Completion.isometry_extensionEmbedding w).continuous.comp
-    ((continuous_apply w).comp continuous_fst)
-  let : Algebra (AF F) ℂ := φ.toAlgebra
-  have : ContinuousSMul (AF F) ℂ := ⟨(hφ.comp continuous_fst).mul continuous_snd⟩
-  let L : AE F E →ₗ[AF F] ℂ :=
-    { toFun := piInf τ
-      map_add' := map_add _
-      map_smul' := fun c y => by
-        have : c • y = (c ⊗ₜ[F] (1 : E)) * y := by rw [Algebra.smul_def]; rfl
-        rw [this, map_mul, piInf_tmul, map_one, mul_one]; rfl }
-  exact IsModuleTopology.continuous_of_linearMap L
 
 theorem eq_zero_of_piInf {σ : E →ₐ[F] E} (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E w) (x : AE F E)
     (hx : At (evI F) x) (hinf : ∀ w, piInf (τ w) x = 0) : x = 0 := by
-  obtain ⟨β, hβ⟩ := exists_moved h
-  obtain ⟨B, hB0, hB1⟩ := exists_basis h hβ
-  have hdec := eq_add_tmul B x
-  set C := Algebra.TensorProduct.basis (AF F) B with hC
-  have hu : pairA F 0 1 • x = 0 := hx _ (map_zero (InfiniteAdeleRing.ringEquiv_mixedSpace F))
-  have hfin : ∀ i, (C.repr x i).2 = 0 := fun i => by
-    have h1 : C.repr (pairA F 0 1 • x) i = 0 := by rw [hu]; simp
-    rw [map_smul] at h1
-    have h2 : pairA F 0 1 * C.repr x i = 0 := h1
-    have h3 := congrArg (sndA F) h2
-    rw [map_mul, map_zero] at h3
-    exact (one_mul _).symm.trans h3
-  have hre : ∀ w i, (C.repr x i).1 w = 0 := fun w => by
-    have e := hinf w
-    rw [hdec, map_add, piInf_tmul, piInf_tmul, hB0, hB1, map_one, mul_one] at e
-    have hi := congrArg Complex.im e
-    have him := im_ne_zero h hβ (τ w).1
-    set p := InfinitePlace.Completion.extensionEmbedding w ((C.repr x 0).1 w) with hp
-    set q := InfinitePlace.Completion.extensionEmbedding w ((C.repr x 1).1 w) with hq
-    have hpi : p.im = 0 := im_extension h.1 w _
-    have hqi : q.im = 0 := im_extension h.1 w _
-    simp only [Complex.add_im, Complex.mul_im, Complex.zero_im, hpi, hqi, zero_mul, add_zero, zero_add] at hi
-    have hq0 : q.re = 0 := (mul_eq_zero.1 hi).resolve_right him
-    have hq1 : q = 0 := Complex.ext hq0 hqi
-    rw [hq1, zero_mul, add_zero] at e
-    have inj := (InfinitePlace.Completion.extensionEmbedding w).injective
-    intro i
-    fin_cases i
-    · show (C.repr x 0).1 w = 0
-      exact inj (e.trans (map_zero _).symm)
-    · show (C.repr x 1).1 w = 0
-      exact inj (hq1.trans (map_zero _).symm)
-  have hz : C.repr x = 0 := by
-    ext i
-    show C.repr x i = 0
-    exact Prod.ext (funext fun w => hre w i) (hfin i)
-  simpa using hz
+  apply PositivityTheory.RL.eq_zero_of_piInf <;> assumption
 
 def ofInf (c : ∀ w : InfinitePlace F, w.Completion) : AF F := ((c : Ainf F), (0 : Af F))
 
@@ -200,46 +199,12 @@ theorem mul_ofInf (u : AF F) (hu : evI F u = 0) (c : ∀ w : InfinitePlace F, w.
 
 theorem exists_section {σ : E →ₐ[F] E} (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E w) :
     ∃ s : (InfinitePlace F → ℂ) → AE F E, Continuous s ∧ ∀ z, At (evI F) (s z) ∧ ∀ w, piInf (τ w) (s z) = z w := by
-  have hF := h.1
-  obtain ⟨β, hβ⟩ := exists_moved h
-  have him : ∀ w, ((τ w).1 β).im ≠ 0 := fun w => im_ne_zero h hβ _
-  let e : ∀ w : InfinitePlace F, w.Completion ≃ᵢ ℝ := fun w =>
-    InfinitePlace.Completion.isometryEquivRealOfIsReal (IsTotallyReal.isReal w)
-  have he : ∀ w a, InfinitePlace.Completion.extensionEmbedding w a = ((e w a : ℝ) : ℂ) := fun w a =>
-    (InfinitePlace.Completion.extensionEmbeddingOfIsReal_apply (IsTotallyReal.isReal w) a).symm
-  let s : (InfinitePlace F → ℂ) → InfinitePlace F → ℝ := fun z w => (z w).im / ((τ w).1 β).im
-  let r : (InfinitePlace F → ℂ) → InfinitePlace F → ℝ := fun z w => (z w).re - s z w * ((τ w).1 β).re
-  have hs : ∀ w, Continuous fun z => s z w := fun w => by fun_prop
-  have hr : ∀ w, Continuous fun z => r z w := fun w => by fun_prop
-  refine ⟨fun z => ofInf (fun w => (e w).symm (r z w)) • ((1 : AF F) ⊗ₜ[F] (1 : E)) +
-    ofInf (fun w => (e w).symm (s z w)) • ((1 : AF F) ⊗ₜ[F] β), ?_, fun z => ⟨?_, fun w => ?_⟩⟩
-  · have : ContinuousAdd (AE F E) := IsModuleTopology.toContinuousAdd (AF F) _
-    have : ContinuousSMul (AF F) (AE F E) := inferInstance
-    have c1 : Continuous fun z => ofInf (fun w => (e w).symm (r z w)) :=
-      continuous_ofInf.comp (continuous_pi fun w => (e w).symm.continuous.comp (hr w))
-    have c2 : Continuous fun z => ofInf (fun w => (e w).symm (s z w)) :=
-      continuous_ofInf.comp (continuous_pi fun w => (e w).symm.continuous.comp (hs w))
-    exact (c1.smul (continuous_const (y := ((1 : AF F) ⊗ₜ[F] (1 : E) : AE F E)))).add
-      (c2.smul (continuous_const (y := ((1 : AF F) ⊗ₜ[F] β : AE F E))))
-  · intro u hu
-    rw [smul_add, smul_smul, smul_smul, mul_ofInf u hu, mul_ofInf u hu, zero_smul, zero_smul, add_zero]
-  · have hc : ∀ (c : ∀ w : InfinitePlace F, w.Completion) (y : E),
-        piInf (τ w) (ofInf c • ((1 : AF F) ⊗ₜ[F] y)) = ((e w (c w) : ℝ) : ℂ) * (τ w).1 y := fun c y => by
-      rw [← he, TensorProduct.smul_tmul', smul_eq_mul, mul_one]
-      rfl
-    rw [map_add, hc, hc]
-    simp only [(e w).apply_symm_apply, map_one, mul_one]
-    apply Complex.ext
-    · simp only [Complex.add_re, Complex.ofReal_re, Complex.re_ofReal_mul, r]; ring
-    · simp only [Complex.add_im, Complex.ofReal_im, Complex.im_ofReal_mul, s]
-      have := him w
-      field_simp
-      ring
+  apply PositivityTheory.RL.exists_section <;> assumption
 
 variable {β : Type} [Fintype β] [DecidableEq β]
 
-omit [Fintype β] [DecidableEq β] in
 
+omit [Fintype β] [DecidableEq β] in
 theorem mat_ext {σ : E →ₐ[F] E} (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E w) {X X' : Matrix β β (AE F E)}
     (hx : At (evI F) (X - X')) (hinf : ∀ w, X.map (piInf (τ w)) = X'.map (piInf (τ w))) : X = X' := by
   ext i j
@@ -247,8 +212,8 @@ theorem mat_ext {σ : E →ₐ[F] E} (h : IsCMExt F E σ) (τ : ∀ w : Infinite
   rw [map_sub, sub_eq_zero]
   exact congrFun (congrFun (hinf w) i) j
 
-omit [DecidableEq β] in
 
+omit [DecidableEq β] in
 theorem map_form {σ : E →ₐ[F] E} (h : IsCMExt F E σ) {w : InfinitePlace F} (τ : EmbOver E w) (g J : Matrix β β (AE F E)) :
     (gᵀ * J * g.map (cA σ)).map (piInf τ) = (g.map (piInf τ))ᵀ * J.map (piInf τ) * (g.map (piInf τ)).map star := by
   rw [Matrix.map_mul, Matrix.map_mul, Matrix.transpose_map]

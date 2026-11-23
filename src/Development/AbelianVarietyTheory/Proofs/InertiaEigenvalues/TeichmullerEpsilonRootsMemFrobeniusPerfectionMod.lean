@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EtaleEmbeddingFrobeniusGaloisCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EtaleEmbeddingFrobeniusGaloisCompat
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc GlobalTheory.Decompl
 open scoped TensorProduct
@@ -26,7 +66,7 @@ theorem persist (hψ : ∀ e, io (ψ e) = φ (io e)) {x : R} {n : ℕ}
   | succ k ih =>
     obtain ⟨e, r, h⟩ := ih
     refine ⟨ψ e, φ r, ?_⟩
-    rw [← add_assoc, Function.iterate_succ_apply', h, map_add, map_mul, map_natCast, hψ]
+    rw [← add_assoc, Function.iterate_succ_apply', h, map_add (f := _), map_mul, map_natCast, hψ]
 
 theorem closure_perf (hψ : ∀ e, io (ψ e) = φ (io e)) (h0 : τ 0 = 0)
     (hadd : ∀ x y, ∃ r, τ (x + y) = τ x + τ y + (p : R) * r)
@@ -47,14 +87,14 @@ theorem closure_perf (hψ : ∀ e, io (ψ e) = φ (io e)) (h0 : τ 0 = 0)
     rw [add_comm m n] at h'
     rw [← RingHom.coe_pow] at h h'
     refine ⟨n + m, e + e', r + r' + (φ ^ (n + m)) c, ?_⟩
-    rw [← RingHom.coe_pow, hc, map_add, map_add, map_mul, map_natCast, h, h', map_add]
+    rw [← RingHom.coe_pow, hc, map_add (f := _), map_add (f := _), map_mul, map_natCast, h, h', map_add (f := _)]
     ring
   | neg x _ hx =>
     obtain ⟨n, e, r, h⟩ := hx
     obtain ⟨c, hc⟩ := hneg x
     rw [← RingHom.coe_pow] at h
     refine ⟨n, -e, -r + (φ ^ n) c, ?_⟩
-    rw [← RingHom.coe_pow, hc, map_add, map_neg, map_mul, map_natCast, h, map_neg]
+    rw [← RingHom.coe_pow, hc, map_add (f := _), map_neg, map_mul, map_natCast, h, map_neg]
     ring
   | mul x y _ _ hx hy =>
     obtain ⟨n, hn⟩ := hx
@@ -88,7 +128,7 @@ theorem teichW_coeff (u : OCb l) : (teichW l u).coeff 0 = algebraMap (OCb l) (Cb
 theorem teichW_add (x y : OCb l) :
     ∃ r, teichW l (x + y) = teichW l x + teichW l y + (l : WCb l) * r := by
   obtain ⟨r, hr⟩ := (coeff_zero_eq_zero_iff (teichW l (x + y) - teichW l x - teichW l y)).1 (by
-    rw [sub_coeff_zero, sub_coeff_zero, teichW_coeff, teichW_coeff, teichW_coeff, map_add]
+    rw [sub_coeff_zero, sub_coeff_zero, teichW_coeff, teichW_coeff, teichW_coeff, map_add (f := _)]
     ring)
   exact ⟨r, by linear_combination hr⟩
 
@@ -127,7 +167,7 @@ theorem teichR_εroot {P : LocPrime l} (AI : LocAinf l P) (LL : FinExt l) (s : �
     teichR LL (AI.εroot s) = piR AI LL s + 1 := by
   have h : teichW l (AI.εroot s) = inclW l (piW AI s) + 1 := by
     rw [piW, map_sub, map_one, sub_add_cancel, teichW_apply]
-  rw [teichR_apply, h, map_add, map_one]
+  rw [teichR_apply, h, map_add (f := _), map_one]
   rfl
 
 theorem isIntegral_of_pow_eq_one {A B : Type} [CommRing A] [CommRing B] [Algebra A B] {x : B}
@@ -136,13 +176,13 @@ theorem isIntegral_of_pow_eq_one {A B : Type} [CommRing A] [CommRing B] [Algebra
 
 theorem add_one_pow_eq_ringHom_image_add_prime_mul_zero {E R : Type} [CommRing E] [CommRing R] (io : E →+* R) (p : ℕ) (a : E) (t : R)
     (ha : io a = t) (k : ℕ) : (t + 1) ^ k = io ((a + 1) ^ k) + (p : R) * 0 := by
-  rw [map_pow, map_add, map_one, ha, mul_zero, add_zero]
+  rw [map_pow, map_add (f := _), map_one, ha, mul_zero, add_zero]
 
 theorem gen_aux₀ {E R : Type} [CommRing E] [CommRing R] (φ : R →+* R) (io : E →+* R) (p : ℕ)
     (a : E) (t : R) (ha : io a = t) : ∃ n e r, φ^[n] t = io e + (p : R) * r :=
   ⟨0, a, 0, by simp [ha]⟩
 
-set_option maxHeartbeats 800000 in
+
 
 theorem teich_mem_perfection : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL) (W : Wach P K LL) (E : EtSit P AI K s LL h W), ∀ u ∈ Subring.closure (Set.range AI.εroot ∪ {xb | ∃ c : Om l, c ∈ K0 K ∧ ∃ m : ℕ, 0 < m ∧ ¬ l ∣ m ∧ c ^ m = 1 ∧ IsTiltOf c m xb}), ∃ (n : ℕ) (e : W.EE) (r : RW LL), (φRW LL)^[n] ((1 : ↥(OL LL)) ⊗ₜ[ℤ_[l]] inclW l (WittVector.teichmuller l u)) = E.tie.ioE e + (l : RW LL) * r := by
   intro l _ P AI K s LL h W E
@@ -153,12 +193,12 @@ theorem teich_mem_perfection : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI
   · intro x y
     obtain ⟨r, hr⟩ := teichW_add x y
     refine ⟨rightW LL r, ?_⟩
-    rw [teichR_apply, teichR_apply, teichR_apply, hr, (rightW LL).map_add, (rightW LL).map_add,
+    rw [teichR_apply, teichR_apply, teichR_apply, hr, map_add (f := _), map_add (f := _),
       (rightW LL).map_mul, map_natCast (rightW LL)]
   · intro x
     obtain ⟨r, hr⟩ := teichW_neg x
     refine ⟨rightW LL r, ?_⟩
-    rw [teichR_apply, teichR_apply, hr, (rightW LL).map_add, (rightW LL).map_neg,
+    rw [teichR_apply, teichR_apply, hr, map_add (f := _), (rightW LL).map_neg,
       (rightW LL).map_mul, map_natCast (rightW LL)]
   · rintro u (⟨k, rfl⟩ | ⟨c, hc, m, hm, hlm, hcm, hxb⟩)
     · refine ⟨k, (algebraMap (LetA ↥(OL LL) (Module.finrank ℚ_[l] ↥(K0 K))) W.EE letπ + 1) ^ l ^ s,

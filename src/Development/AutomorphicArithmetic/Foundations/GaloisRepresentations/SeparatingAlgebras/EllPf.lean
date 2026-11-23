@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SeparatingAlgebras.StGlob
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantZmodLift
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SeparatingAlgebras.StGlob
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompactSpaceDefiniteUnitaryInfinitePoints
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantZmodLift
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsOfFinOrderOfCompactConjMemUnitaryRationalPointStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
 open GlobalTheory.GalCut GlobalTheory.UnitaryBC GlobalTheory.Cong GlobalTheory.DefU
@@ -77,7 +120,7 @@ theorem UpperTheory.Gal.Gen.ell_pf :
   · intro γ hγ g
     change φ (ℓ (γ * g)) = φ (ℓ g)
     rw [h1 γ hγ g]
-  · let S : Subgroup (finU E n) :=
+  · let S : Subgroup (finU (E := E) (n := n)) :=
       { carrier := {k | RU E n k (fun g => φ (ℓ g)) = fun g => φ (ℓ g)}
         one_mem' := by
           change RU E n 1 _ = _
@@ -92,9 +135,9 @@ theorem UpperTheory.Gal.Gen.ell_pf :
           conv_lhs => rw [← ha]
           change RU E n ((a : UA E n)⁻¹) (RU E n a _) = _
           rw [← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one]; rfl }
-    change IsOpen (S : Set (finU E n))
+    change IsOpen (S : Set (finU (E := E) (n := n)))
     refine Subgroup.isOpen_of_mem_nhds S (g := 1) ?_
-    have ho : IsOpen ((Subtype.val : finU E n → UA E n) ⁻¹' Wn) := hWo.preimage continuous_subtype_val
+    have ho : IsOpen ((Subtype.val : finU (E := E) (n := n) → UA E n) ⁻¹' Wn) := hWo.preimage continuous_subtype_val
     refine Filter.mem_of_superset (ho.mem_nhds hW1) fun k hk => ?_
     change RU E n k _ = _
     funext g

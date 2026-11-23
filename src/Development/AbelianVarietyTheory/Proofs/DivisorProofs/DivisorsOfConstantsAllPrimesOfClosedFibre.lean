@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DivConstClosedPts
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbsIntClosedLocalizationAndQuotient
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DivConstClosedPts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbsIntClosedLocalizationAndQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open IsLocalRing Polynomial
 
 namespace GlobalTheory.VertUnits
 
+
 open GlobalTheory.LocAcyc in
 open CategoryTheory in
-
 theorem divConstAll_of_divConstLocal : DivConstLocal → DivConstAll := by
   intro hL T O _ _ _ _ _ _ _ _ hAIC P _ φ hφ hSH
   set p : Ideal T := P.comap (C : T →+* T[X]) with hp
@@ -45,14 +90,14 @@ theorem divConstAll_of_divConstLocal : DivConstLocal → DivConstAll := by
   haveI hP'prime : P'.IsPrime :=
     IsLocalization.isPrime_of_isPrime_disjoint _ T'[X] P inferInstance hdisj
   have hcomapP' : P'.comap (algebraMap T[X] T'[X]) = P :=
-    IsLocalization.comap_map_of_isPrime_disjoint _ T'[X] inferInstance hdisj
+    IsLocalization.under_map_of_isPrime_disjoint _ T'[X] inferInstance hdisj
   have hCcomm : ∀ a : T, C (algebraMap T T' a) = algebraMap T[X] T'[X] (C a) := fun a => by
     change _ = (C a).map (algebraMap T T')
     rw [Polynomial.map_C]
   have hmax : P'.comap (C : T' →+* T'[X]) = maximalIdeal T' := by
-    rw [← IsLocalization.map_comap p.primeCompl T' (P'.comap C),
-      ← IsLocalization.map_comap p.primeCompl T' (maximalIdeal T'),
-      IsLocalization.AtPrime.comap_maximalIdeal T' p]
+    rw [← IsLocalization.map_under p.primeCompl T' (P'.comap C),
+      ← IsLocalization.map_under p.primeCompl T' (maximalIdeal T'),
+      IsLocalization.AtPrime.under_maximalIdeal T' p]
     congr 1
     ext a
     change C (algebraMap T T' a) ∈ P' ↔ C a ∈ P

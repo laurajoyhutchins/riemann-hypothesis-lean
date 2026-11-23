@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.ClifMod
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+public import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.RealTrOfAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,10 +68,11 @@ private def eD : (V →L[ℂ] ℂ) ≃ₗ[ℂ] EuclideanSpace ℂ (Fin (Module.f
     ext v
     have h := (stdOrthonormalBasis ℂ V).sum_repr' v
     conv_rhs => rw [← h]
-    simp [ContinuousLinearMap.sum_apply, map_sum, mul_comm]
+
+    simp [sum_apply, map_sum, mul_comm]
   right_inv y := by
     ext j
-    simp [ContinuousLinearMap.sum_apply, OrthonormalBasis.inner_eq_ite]
+    simp [sum_apply, OrthonormalBasis.inner_eq_ite]
 
 private theorem eD_apply (ξ : V →L[ℂ] ℂ) (i) : eD ξ i = ξ (stdOrthonormalBasis ℂ V i) := rfl
 
@@ -52,13 +99,13 @@ private theorem pr_eD (A : V →L[ℂ] V) (ξ : V →L[ℂ] ℂ) : pr A (eD ξ) 
 
 private theorem pr_one : pr (1 : V →L[ℂ] V) = 1 := by
   ext1 y
-  rw [pr_apply, ContinuousLinearMap.one_apply]
+  rw [pr_apply, one_apply_eq_self]
   show eD ((eD.symm y).comp (ContinuousLinearMap.id ℂ V)) = y
   rw [ContinuousLinearMap.comp_id, LinearEquiv.apply_symm_apply]
 
 private theorem pr_mul (A B : V →L[ℂ] V) : pr (A * B) = pr B * pr A := by
   ext1 y
-  rw [ContinuousLinearMap.mul_apply, pr_apply, pr_apply, pr_apply, LinearEquiv.symm_apply_apply,
+  rw [mul_apply_eq_comp, pr_apply, pr_apply, pr_apply, LinearEquiv.symm_apply_apply,
     ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_assoc]
 
 private theorem continuous_pr : Continuous (pr (V := V)) := by
@@ -75,11 +122,11 @@ private theorem trace_pr (A : V →L[ℂ] V) :
   simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   simp only [OrthonormalBasis.coe_toBasis_repr_apply, OrthonormalBasis.coe_toBasis, OrthonormalBasis.repr_apply_apply,
-    EuclideanSpace.basisFun_apply, EuclideanSpace.basisFun_repr, ContinuousLinearMap.coe_coe, pr_apply, eD_apply]
+    EuclideanSpace.basisFun_apply, ContinuousLinearMap.coe_coe, pr_apply]
   rw [EuclideanSpace.inner_single_left, map_one, one_mul, eD_apply, ContinuousLinearMap.comp_apply]
   show (∑ j, (EuclideanSpace.single i (1 : ℂ)) j • innerSL ℂ (stdOrthonormalBasis ℂ V j))
     (A (stdOrthonormalBasis ℂ V i)) = _
-  simp [ContinuousLinearMap.sum_apply, EuclideanSpace.single_apply]
+  simp [PiLp.single_apply]
 
 end SlopeTestRemainingChoices
 
@@ -97,9 +144,7 @@ theorem UpperTheory.RealTr.dualEx :
       _ ≤ ‖ξ‖ * 1 := by gcongr
       _ = ‖ξ‖ := mul_one _
   have hinv : Continuous (fun k : UK n => k⁻¹) := by
-    first
-    | exact continuous_inv
-    | exact Continuous.subtype_mk (continuous_star.comp continuous_subtype_val) _
+    exact continuous_inv
   let ρ' : UK n →* (EuclideanSpace ℂ (Fin (Module.finrank ℂ E.V)) →L[ℂ] EuclideanSpace ℂ (Fin (Module.finrank ℂ E.V))) :=
     { toFun := fun k => pr (E.ρ k⁻¹)
       map_one' := by simp [pr_one]
@@ -129,4 +174,4 @@ theorem UpperTheory.RealTr.dualEx :
     constructor
     · exact trace_pr (E.ρ k⁻¹)
     · show LinearMap.trace ℂ _ ((pr (E.ρ k⁻¹) : E'.V →ₗ[ℂ] E'.V) * (pr T : E'.V →ₗ[ℂ] E'.V)) = _
-      rw [← ContinuousLinearMap.coe_mul, ← pr_mul, trace_pr, hT]
+      rw [← ContinuousLinearMap.toLinearMap_mul, ← pr_mul, trace_pr, hT]

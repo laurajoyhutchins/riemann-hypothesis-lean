@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EMatMulNegCol
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FibreMassEq
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IntegralClosureCompletedCMAlgebraCompactOpen
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.DictionaryStatement
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.SpectralNormIntegrality.SpecInt
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EMatMulNegCol
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CoordinateHaarMeasure
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.DictionaryStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IntegralClosureCompletedCMAlgebraCompactOpen
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.SpectralNormIntegrality.SpecInt
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GramNear
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TrMMemFramesEIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -284,11 +334,11 @@ theorem exists_idems (σ : E →ₐ[F] E) (hσ : IsCMExt F E σ) (v : HeightOneS
     let e₁ : Fv F v ⊗[F] E := (2⁻¹ : Fv F v) • (1 + c⁻¹ • θ)
     let e₂ : Fv F v ⊗[F] E := (2⁻¹ : Fv F v) • (1 - c⁻¹ • θ)
     have v11 : ψ₁ e₁ = 1 := by
-      simp only [e₁, map_smul, map_add, map_one, p1, smul_eq_mul]
+      simp only [e₁, map_smul, map_add (f := _), map_one, p1, smul_eq_mul]
       field_simp
       norm_num
     have v12 : ψ₂ e₁ = 0 := by
-      simp only [e₁, map_smul, map_add, map_one, p2, smul_eq_mul]
+      simp only [e₁, map_smul, map_add (f := _), map_one, p2, smul_eq_mul]
       field_simp
       norm_num
     have v21 : ψ₁ e₂ = 0 := by
@@ -404,8 +454,8 @@ end Local
 end GlobalTheory.CompanionTheory.AvgFree.Ord
 
 open scoped Matrix NNReal ENNReal TensorProduct
-open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.WhitFree GlobalTheory.CompanionTheory.WeilSiegel.Frame GlobalTheory.CompanionTheory.AvgFree MeasureTheory in
 
+open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.WhitFree GlobalTheory.CompanionTheory.WeilSiegel.Frame GlobalTheory.CompanionTheory.AvgFree MeasureTheory in
 theorem GlobalTheory.CompanionTheory.AvgFree.exists_ordData : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (d : ℕ) (b : Module.Basis (Fin d) F E) (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers F)) (lv : Measure (Fv F v)), GlobalTheory.CompanionTheory.SW.IsStdV v lv → ∃ (O : Subring (Fv F v ⊗[F] E)) (S : Finset ((Fv F v ⊗[F] E)ˣ × (Fv F v ⊗[F] E))), IsOrdData (Fv F v) σ b lv O S := by
   intro F E _ _ _ _ _ σ hσ d b v lv hlv
   classical

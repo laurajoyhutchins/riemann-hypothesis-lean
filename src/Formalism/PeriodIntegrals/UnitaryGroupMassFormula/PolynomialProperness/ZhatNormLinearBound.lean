@@ -1,5 +1,55 @@
-import Formalism.HermitianCurvature.FiniteOrderIntersectionInSmooth
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+public import Formalism.HermitianCurvature.FiniteOrderIntersectionInSmooth
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.CharP
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 open scoped ComplexConjugate
@@ -16,9 +66,6 @@ theorem hpk_sq (k r : ℕ) : Hpk k r * Hpk k r = 1 := GBasic.Hpk_sq k r
 
 theorem hpk_isUnit_det (k r : ℕ) : IsUnit (Hpk k r).det :=
   isUnit_det_of_left_inverse (hpk_sq k r)
-
-theorem one_mem (k r : ℕ) : (1 : B.Mat k r) ∈ B.GV k r :=
-  (unitary_group_holds _ _ (hpk_isUnit_det k r)).1
 
 theorem mul_mem {k r : ℕ} {g h : B.Mat k r} (hg : g ∈ B.GV k r) (hh : h ∈ B.GV k r) :
     g * h ∈ B.GV k r :=
@@ -72,7 +119,7 @@ theorem hs_hpk_mul {k r : ℕ} (M : B.Mat k r) : hs (Hpk k r * M) = hs M := by
   unfold hs
   have e : ∀ i j, (Hpk k r * M) i j = GBasic.sgn k r i * M (GBasic.sig k r i) j := by
     intro i j
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     simp only [GBasic.Hpk_eq k r i, ite_mul, zero_mul, Finset.sum_ite_eq', Finset.mem_univ, if_true]
   have hs1 : ∀ i, Complex.normSq (GBasic.sgn k r i) = 1 := by
     intro i; unfold GBasic.sgn; split_ifs <;> simp
@@ -110,25 +157,7 @@ theorem gN_mul_le {k r : ℕ} (a b : B.Mat k r) : B.gN (a * b) ≤ B.gN a * B.gN
   exact Matrix.frobenius_norm_mul a b
 
 theorem gN_ge_one {k r : ℕ} {g : B.Mat k r} (hg : g ∈ B.GV k r) : 1 ≤ B.gN g := by
-  rw [gN_eq_frob]
-  have hH : Hpk k r ≠ 0 := by
-    intro h0
-    have := hpk_sq k r
-    rw [h0, Matrix.zero_mul] at this
-    exact zero_ne_one this
-  have hpos : 0 < ‖Hpk k r‖ := norm_pos_iff.mpr hH
-  have h1 : ‖Hpk k r‖ ≤ ‖g‖ * ‖Hpk k r‖ * ‖g‖ := by
-    have e : gᴴ * Hpk k r * g = Hpk k r := hg
-    calc ‖Hpk k r‖ = ‖gᴴ * Hpk k r * g‖ := by rw [e]
-      _ ≤ ‖gᴴ * Hpk k r‖ * ‖g‖ := Matrix.frobenius_norm_mul _ _
-      _ ≤ ‖gᴴ‖ * ‖Hpk k r‖ * ‖g‖ :=
-          mul_le_mul_of_nonneg_right (Matrix.frobenius_norm_mul _ _) (norm_nonneg _)
-      _ = ‖g‖ * ‖Hpk k r‖ * ‖g‖ := by rw [Matrix.frobenius_norm_conjTranspose]
-  by_contra hlt
-  rw [not_le] at hlt
-  have hg0 : 0 ≤ ‖g‖ := norm_nonneg _
-  have : ‖g‖ * ‖Hpk k r‖ * ‖g‖ < ‖Hpk k r‖ := by nlinarith [mul_nonneg hg0 hpos.le]
-  linarith
+  apply Formalism.FourierDecayAlt.P.BetaSesquilinearity.gN_ge_one <;> assumption
 
 end Frob
 
@@ -148,28 +177,6 @@ theorem normSq_le_hs {ι : Type*} [Fintype ι] (M : Matrix ι ι ℂ) (i j : ι)
 theorem entry_le_gN {k r : ℕ} (g : B.Mat k r) (i j : Fin (2 * r + k + 1)) : ‖g i j‖ ≤ B.gN g := by
   rw [gN_eq, Complex.norm_def]
   exact Real.sqrt_le_sqrt (normSq_le_hs g i j)
-
-theorem hs_le_of_entry {ι : Type*} [Fintype ι] (M : Matrix ι ι ℂ) {c : ℝ}
-    (h : ∀ i j, ‖M i j‖ ≤ c) : hs M ≤ (Fintype.card ι : ℝ) ^ 2 * c ^ 2 := by
-  unfold hs
-  have h1 : ∀ i j, Complex.normSq (M i j) ≤ c ^ 2 := by
-    intro i j
-    rw [Complex.normSq_eq_norm_sq]
-    exact pow_le_pow_left₀ (norm_nonneg _) (h i j) 2
-  calc ∑ i, ∑ j, Complex.normSq (M i j) ≤ ∑ _i : ι, ∑ _j : ι, c ^ 2 :=
-        Finset.sum_le_sum fun i _ => Finset.sum_le_sum fun j _ => h1 i j
-    _ = (Fintype.card ι : ℝ) ^ 2 * c ^ 2 := by
-        simp only [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]; ring
-
-theorem gN_le_of_entry {k r : ℕ} (g : B.Mat k r) {c : ℝ} (hc : 0 ≤ c) (h : ∀ i j, ‖g i j‖ ≤ c) :
-    B.gN g ≤ (2 * r + k + 1 : ℕ) * c := by
-  rw [gN_eq]
-  have h1 := hs_le_of_entry g h
-  rw [Fintype.card_fin] at h1
-  have h2 : (0 : ℝ) ≤ ((2 * r + k + 1 : ℕ) : ℝ) * c := by positivity
-  calc Real.sqrt (hs g) ≤ Real.sqrt ((((2 * r + k + 1 : ℕ) : ℝ) * c) ^ 2) :=
-        Real.sqrt_le_sqrt (by rw [mul_pow]; exact h1)
-    _ = ((2 * r + k + 1 : ℕ) : ℝ) * c := Real.sqrt_sq h2
 
 theorem mx_nonneg {m : ℕ} (M : Matrix (Fin m) (Fin m) ℂ) : 0 ≤ C2.mx M := norm_nonneg _
 
@@ -201,7 +208,7 @@ theorem mx_mul_le {m : ℕ} (A B' : Matrix (Fin m) (Fin m) ℂ) :
   have h0 : 0 ≤ (m : ℝ) * C2.mx A * C2.mx B' := by
     have := mx_nonneg A; have := mx_nonneg B'; positivity
   refine (mx_le_iff _ h0).2 fun i j => ?_
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   calc ‖∑ l, A i l * B' l j‖ ≤ ∑ l, ‖A i l * B' l j‖ := norm_sum_le _ _
     _ ≤ ∑ _l : Fin m, C2.mx A * C2.mx B' := by
         refine Finset.sum_le_sum fun l _ => ?_

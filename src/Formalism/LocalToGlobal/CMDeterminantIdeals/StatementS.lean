@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.CMDeterminantIdeals.HadamardLoc0
-import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
+module
+
+public import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
+public import Formalism.LocalToGlobal.CMDeterminantIdeals.DetIdeal
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +74,7 @@ def CoeffIntegralLoc : Prop :=
       ∀ (Y : ∀ b, Matrix (Fin (m b)) (Fin (m b)) KW) (X : ∀ b, Matrix (Fin (m b)) (Fin (m b)) W), (∀ b, IsUnit (X b).det) →
         (∀ b, ((U b).map f).transpose * Y b = (X b).map (algebraMap W KW)) →
         ∃ w : W, evalFr (MvPolynomial.map f G) Y = f τ * algebraMap W KW w) →
-    ∀ μ : FrVar m →₀ ℕ, ∃ w : V, MvPolynomial.coeff μ G * ∏ v : FrVar m, c v.1 v.2.2 ^ μ v = τ * algebraMap V K' w
+    ∀ μ : FrVar m →₀ ℕ, ∃ w : V, AddMonoidAlgebra.coeff G μ * ∏ v : FrVar m, c v.1 v.2.2 ^ μ v = τ * algebraMap V K' w
 
 def gramBlock {K : Type} [Field K] [NumberField K] {g : ℕ} (e : (Σ b, Fin (m b)) ≃ Fin g) (U : Matrix (Fin g) (Fin g) K)
     (H : Matrix (Fin g) (Fin g) ℂ) (σ : K →+* ℂ) (b : B) : Matrix (Fin (m b)) (Fin (m b)) ℂ :=
@@ -59,17 +104,5 @@ def Step5Arch {K : Type} [Field K] [NumberField K] {g : ℕ} [DecidableEq B] (e 
     (∀ j, ReciprocityTheory.MultiplicativeHeights.hq H (ReciprocityTheory.MultiplicativeHeights.embVec σ (U j)) ≤ (La * (ℓ j).n σ) ^ 2) ∧ IsEquiv a (MvPolynomial.map σ G) ∧
     ∀ Y : ∀ b, Matrix (Fin (m b)) (Fin (m b)) ℂ, (∀ b, (Y b).conjTranspose * gramBlock e U H σ b * Y b = 1) →
       ‖evalFr (MvPolynomial.map σ G) Y‖ * de.n σ ^ n ≤ S
-
-def Step5 : Prop :=
-  KeyCore → ReciprocityTheory.MultiplicativeHeights.LemmaHStatement →
-  ∀ (K : Type) [Field K] [NumberField K] (x : KeyIn K) (T abelian₂ : MLine K) (B : Type) [Fintype B] [DecidableEq B] (m : B → ℕ)
-    (e : (Σ b, Fin (m b)) ≃ Fin x.P.g) (ℓ : Fin x.P.g → MLine K) (U : Matrix (Fin x.P.g) (Fin x.P.g) K)
-    (G : MvPolynomial (FrVar m) K) (a : ∀ b, Fin (m b) → ℕ) (n r : ℕ) (La logOm : ℝ) (S : (K →+* ℂ) → ℝ),
-    T.Good → abelian₂.Good → (∀ p, KeyLocAt x T abelian₂ p) → (∀ σ, KeyArchAt x T abelian₂ σ) → (∀ j, (ℓ j).Good) →
-    (∀ j, (ℓ j).ndeg = logOm / 2) → U.det ≠ 0 → G ≠ 0 → 1 ≤ La → 1 ≤ r → (∀ b, m b ≤ r) → (∀ σ, 0 < S σ) →
-    (∀ p, Step5Loc e T.dual abelian₂ ℓ U G n p) → (∀ σ, Step5Arch e T.dual abelian₂ ℓ U G a n La (S σ) σ) →
-    - ((pDeg logOm + (1 / 2) * Real.log La) * (((∑ b, ∑ i, a b i : ℕ) : ℝ) + (x.P.g : ℝ) * n)) -
-        ((∑ b, ∑ i, a b i : ℕ) : ℝ) * Real.log ((r : ℝ) * La) ≤
-      (∑ σ : K →+* ℂ, Real.log (S σ)) / (Module.finrank ℚ K : ℝ)
 
 end Formalism.L2.LamCM

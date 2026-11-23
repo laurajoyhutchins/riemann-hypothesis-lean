@@ -1,19 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRightInvOfSpan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeDegreeGeHeightPolynomialVectorsDetStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MultiformHeightLowerBoundStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermFamComplexTensorNormColumnUnitSpheresLeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsShortColumnsDetNeZeroHilbertSamuelStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClaimSOfNumbers
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffLinearSubstColumnMemIntegralLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetIsMultiHomogeneous
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetRationalSectionsEqPowProductLinearFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRightInvOfSpan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsShortColumnsDetNeZeroHilbertSamuelStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankDeepestFiltrationStepEqRationalStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowDvdOfSpecialisations
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClaimSOfNumbers
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetRationalSectionsEqPowProductLinearFormsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMultiHomogeneousCofactor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetIsMultiHomogeneous
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffLinearSubstColumnMemIntegralLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermFamComplexTensorNormColumnUnitSpheresLeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMultiHomogeneousCofactor
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeDegreeGeHeightPolynomialVectorsDetStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MonomialCountsDegreeAndWeightedSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MultiformHeightLowerBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowDvdOfSpecialisations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField MvPolynomial ReciprocityTheory.MultiplicativeHeights ReciprocityTheory.GeometryOfNumbersTheory
 open GlobalTheory GlobalTheory.ChowHt GlobalTheory.Adelic GlobalTheory.HermTools GlobalTheory.HilbertSamuel GlobalTheory.HSChoice GlobalTheory.HSShort
@@ -74,14 +117,14 @@ theorem eval_spec {F E : Type} [Field F] [Field E] [Algebra F E] {D N : ℕ} (s 
     | cast i => simp [join_castSucc]
   induction f using MvPolynomial.induction_on with
   | C a => simp [spec]
-  | add p q hp hq => simp only [spec, map_add] at *; rw [hp, hq]
+  | add p q hp hq => simp only [spec, map_add (f := _)] at *; rw [hp, hq]
   | mul_X p q hp => simp only [spec, map_mul, aeval_X] at *; rw [hp, hj]
 
 theorem algebraMap_eval {F E σ : Type} [Field F] [Field E] [Algebra F E] (x : σ → F) (p : MvPolynomial σ F) :
     algebraMap F E (eval x p) = aeval (fun i => algebraMap F E (x i)) p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp [map_add, hp, hq]
+  | add p q hp hq => simp [map_add (f := _), hp, hq]
   | mul_X p q hp => simp [map_mul, hp]
 
 theorem sum_three {d : ℕ} (P Q : Fin d → Prop) [DecidablePred P] [DecidablePred Q] (hPQ : ∀ k, P k → ¬ Q k)

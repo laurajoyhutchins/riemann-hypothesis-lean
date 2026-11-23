@@ -1,5 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.SumTotalLoss
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.TopDegreeComparison
+module
+
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.CardFinRange
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.CoarseLabelFactorisation
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.RestCountOf
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.StrictMonoIntExists
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.TopDegreeComparison
+import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,36 +58,16 @@ section Geo
 variable {n' r : ℕ} [NeZero n'] [NeZero r] {F : Frames n' r} {L₁ N₁ : ℕ}
 
 theorem fr_add_mul_period (hV : F.Valid L₁ N₁) (j : ℤ) (i : ℕ) (m : ℤ) :
-    F.fr (j + m * F.J) i = F.fr j i + m * n' := by
-  have hper := hV.2.1
-  induction m using Int.induction_on with
-  | zero => simp
-  | succ k ih =>
-    have h1 := hper (j + k * F.J) i
-    rw [show j + ((k : ℤ) + 1) * (F.J : ℤ) = j + k * F.J + F.J by ring, h1, ih]
-    ring
-  | pred k ih =>
-    have h1 := hper (j + (-(k : ℤ) - 1) * F.J) i
-    rw [show j + (-(k : ℤ) - 1) * (F.J : ℤ) + F.J = j + -(k : ℤ) * F.J by ring, ih] at h1
-    linarith
+    F.fr (j + m * F.J) i = F.fr j i + m * n' :=
+  fr_period hV j i m
 
 theorem fr_lt_fr_of_lt_of_valid (hV : F.Valid L₁ N₁) (j : ℤ) (i : ℕ) :
-    ∀ i', i < i' → i' < r → F.fr j i < F.fr j i' := by
-  intro i' hii' hi'r
-  induction i' with
-  | zero => omega
-  | succ k ih =>
-    rcases Nat.lt_succ_iff_lt_or_eq.mp hii' with h | h
-    · exact lt_trans (ih h (by omega)) (hV.2.2.1 j k (by omega))
-    · subst h
-      exact hV.2.2.1 j i (by omega)
+    ∀ i', i < i' → i' < r → F.fr j i < F.fr j i' :=
+  TE.fr_lt hV j i
 
 theorem sum_fr_le (hV : F.Valid L₁ N₁) (j : ℤ) (i i' : ℕ) (h : i ≤ i') (h' : i' < r) :
-    F.fr j i ≤ F.fr j i' := by
-  rcases h.lt_or_eq with h | h
-  · exact (fr_lt_fr_of_lt_of_valid hV j i i' h h').le
-  · subst h
-    exact le_rfl
+    F.fr j i ≤ F.fr j i' :=
+  TE.fr_le hV j i i' h h'
 
 theorem sum_posOf_per (x m : ℤ) : posOf n' (x + m * n') = posOf n' x := by
   unfold posOf

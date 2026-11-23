@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.FlagLine
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.HasCoverByOne
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.IsFrameOverLine
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -47,26 +92,6 @@ theorem ofΩHom_apply (x : Ω) : Pl.ofΩHom x = Pl.ofΩ x := rfl
 theorem ofΩHom_injective : Function.Injective Pl.ofΩHom :=
   (IsFractionRing.injective (MvPolynomial (Ψ × Fin D.N × Fin D.N) Ω) Pl.ΩY).comp (C_injective _ _)
 
-theorem mConeMap_yY_rename_xV (f : MRing ι) :
-    mConeMap Pl.yY (rename Pl.xV f) =
-      rename (Sum.inl : K → K ⊕ (Ψ × Fin (D.N - 1))) (MvPolynomial.map Pl.ofΩHom (mConeMap D.y f)) := by
-  induction f using MvPolynomial.induction_on with
-  | C a => simp [mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
-  | mul_X p x hp =>
-    simp only [map_mul, hp, rename_X]
-    congr 1
-    simp [mConeMap, xV, yY, ofΩHom_apply]
-
-theorem imageZ_xV_PY : imageZ Pl.xV Pl.PY = mCoordIdeal D.y := by
-  have hinj : Function.Injective fun g : MvPolynomial K Ω =>
-      rename (Sum.inl : K → K ⊕ (Ψ × Fin (D.N - 1))) (MvPolynomial.map Pl.ofΩHom g) :=
-    (rename_injective _ Sum.inl_injective).comp (map_injective _ Pl.ofΩHom_injective)
-  ext f
-  show mConeMap Pl.yY (rename Pl.xV f) = 0 ↔ mConeMap D.y f = 0
-  rw [mConeMap_yY_rename_xV]
-  exact ⟨fun h => hinj (h.trans (by simp)), fun h => by simp [h]⟩
-
 variable {H : HodgeData D} (B : AdaptedBasis H)
 
 def gvar0 (τ : Ψ) (a b : Fin D.N) : Pl.ΩY :=
@@ -82,14 +107,12 @@ def flagGenericPoint : (Σ k, Pl.ιY k) → Pl.ΩY
 
 def flagPrime : Ideal (MRing Pl.ιY) := mCoordIdeal (Pl.flagGenericPoint B)
 
-instance isPrime_flagPrime : (Pl.flagPrime B).IsPrime := RingHom.ker_isPrime (mConeMap (Pl.flagGenericPoint B))
-
 theorem mConeMap_flagGenericPoint_rename (f : MRing ι) :
     mConeMap (Pl.flagGenericPoint B) (rename Pl.xV f) =
       rename (Sum.inl : K → K ⊕ (Ψ × Fin (D.N - 1))) (MvPolynomial.map Pl.ofΩHom (mConeMap D.y f)) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p x hp =>
     simp only [map_mul, hp, rename_X]
     congr 1
@@ -117,33 +140,6 @@ def HodgeFlagArith.Statement : Prop :=
 
 namespace Line
 
-def lineAdapted (II : IntersectionSystem)
-    (hII : ∀ W : Ideal (MRing (PBlk 2)), IsArithVar W 1 → 0 ≤ II Unit (PBlk 2) W 1 ![fsLine 2]) :
-    AdaptedBasis (lineHodge II hII) where
-  e _ := ⇑(Pi.basisFun Ω (Fin 2))
-  e_indep _ := (Pi.basisFun Ω (Fin 2)).linearIndependent
-  e_span _ := (Pi.basisFun Ω (Fin 2)).span_eq
-  e_head _ := by
-    show Submodule.span Ω (Set.range (⇑(Pi.basisFun Ω (Fin 2)) ∘
-        headIdx (show 1 ≤ 2 by decide))) = lineF
-    have : Set.range (⇑(Pi.basisFun Ω (Fin 2)) ∘ headIdx (show 1 ≤ 2 by decide)) = {Pi.single 0 1} := by
-      ext v
-      simp only [Set.mem_range, Function.comp_apply, Set.mem_singleton_iff]
-      constructor
-      · rintro ⟨a, rfl⟩
-        rw [Fin.fin_one_eq_zero a]
-        simp [headIdx]
-      · rintro rfl
-        exact ⟨0, by simp [headIdx]⟩
-    rw [this]
-    rfl
-
-theorem flagDim0_line : lineDataZero.flagDim0 = 0 := rfl
-
 end Line
-
-theorem HodgeFlagArith.hyps_inhabited :
-    Nonempty (PlueckerData Line.lineDataZero × AdaptedBasis (Line.lineHodge Line.zeroSystem fun _ _ => le_rfl)) :=
-  ⟨(Line.linePl Line.zeroSystem fun _ _ => le_rfl, Line.lineAdapted Line.zeroSystem fun _ _ => le_rfl)⟩
 
 end GroundTheory.Heights₂.Heights.LowerBoundFree

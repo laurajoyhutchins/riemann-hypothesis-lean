@@ -1,6 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CocycleTransportH1fSurjective
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CharFil
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CharFil
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CocycleTransportH1fSurjective
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 namespace UpperTheory.V.Loc
@@ -18,7 +68,6 @@ private noncomputable def spanT (l : ℕ) [Fact l.Prime] {E : Type} [Field E] [A
 private theorem filT_le_spanT : FilT (l := l) E V 0 ≤ spanT l (⊤ : Submodule E V) := by
   rintro _ ⟨z, rfl⟩
   induction z with
-  | zero => simp
   | tmul v b => exact Submodule.subset_span ⟨v, trivial, b.1, b.2, by simp⟩
   | add x y hx hy => rw [map_add]; exact add_mem hx hy
 
@@ -74,9 +123,8 @@ private theorem step (φ : G →* GQ l) (ρ : Representation E G V) (κ : G →*
         (LinearMap.id : Bdr l →ₗ[ℚ_[l]] Bdr l) (L z) := by
     intro z
     induction z with
-    | zero => simp
     | tmul v b => simp [hL, sub_tmul]
-    | add x y hx hy => simp only [map_add, hx, hy]; abel
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]; abel
   rwa [h2, h0, map_zero, sub_zero] at h1
 
 private theorem H0_eq_bot_of_filD_zero_eq_bot (φ : G →* GQ l) (ρ : Representation E G V) [TopologicalSpace G]
@@ -158,7 +206,7 @@ theorem UpperTheory.V.Loc.posBasic :
       have hfil := ((charFil φ hφ κ hcont w hκ).2 0).2 (by omega)
       refine ⟨fun g v hv => ?_, fun y hy hD => hz y (step φ ρ κ hfil (F i) (F (i + 1)) x lam ?_ ?_ y hy hD) hD⟩
       · obtain ⟨u, hu, c, rfl⟩ := hdec v hv
-        rw [map_add, map_smul]
+        rw [map_add (f := _), map_smul]
         refine add_mem (hle (hst g u hu)) (Submodule.smul_mem _ _ ?_)
         have := add_mem (hle (hx g)) (Submodule.smul_mem _ (κ g : E) hx1)
         rwa [sub_add_cancel] at this

@@ -1,15 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvcPowRight
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerEqOfPointsOfGerm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionExtOfApplyEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdealFactorIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalIdealPowLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingHomEqOfCompEqId
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TangentFixLine
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalRingFiniteIdealsOfMaximalIdealPrincipalNilp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapMemMaximalIdealIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsogenyOfDegreeIntActionHarrisTaylor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTangentCoordsBaseChangeSmoothCommGroup
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerEqOfPointsOfGerm
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsTjCorrDiagModel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapMemMaximalIdealIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvcPowRight
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdealFactorIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTangentCoordsBaseChangeSmoothCommGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsogenyOfDegreeIntActionHarrisTaylor
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LieMultIffFinrankCommonEigenspaceCoords
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalRingFiniteIdealsOfMaximalIdealPrincipalNilp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalIdealPowLe
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingHomEqOfCompEqId
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionExtOfApplyEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TangentFixLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Hecke GlobalTheory.UPel.HT.ES GlobalTheory.IwLevel
 open ReciprocityTheory.ChartRestriction.G.Out (RingAct)
@@ -238,6 +287,7 @@ theorem exists_local_idempotents {B : Type} [CommRing B] (c : B) [Finite (B ⧸ 
   · rw [← Ideal.Quotient.eq_zero_iff_mem]
     refine hz _ fun J => ?_
     have := Ideal.sum_mem (J.asIdeal ^ (n + 1)) (t := Finset.univ) fun I _ => he I J
+
     rw [Finset.sum_sub_distrib, Finset.sum_ite_eq, if_pos (Finset.mem_univ _), ← map_sum] at this
     simpa using this
   · rw [← Ideal.Quotient.eq_zero_iff_mem]
@@ -451,7 +501,7 @@ def transp {o o' : Obj b N s} (ψ : o.A ⟶ o'.A) (hψ : IsMonHom ψ)
   add_mem' := by
     intro z z' hz hz'
     simp only [Set.mem_setOf_eq] at hz hz' ⊢
-    rw [map_add, o.act.add, MonObj.comp_mul, MonObj.mul_comp, hz, hz', _root_.mul_one]
+    rw [map_add (f := _), o.act.add, MonObj.comp_mul, MonObj.mul_comp, hz, hz', _root_.mul_one]
   zero_mem' := by
     simp only [Set.mem_setOf_eq]
     rw [map_zero, act_zero, MonObj.comp_one, MonObj.one_comp]
@@ -477,8 +527,8 @@ theorem kill_of_dvd {n : ℕ} {o o' : Obj b N s} {ψ : o.A ⟶ o'.A} (h : IsPIso
 
 end GlobalTheory.UPel.HT.ES.KerFin
 
-open GlobalTheory.UPel.HT.ES.KerFin in
 
+open GlobalTheory.UPel.HT.ES.KerFin in
 theorem GlobalTheory.UPel.HT.ES.KerFin.finite_kernels : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (R : Type) [CommRing R] (b : Base D R) (N : ℕ), 3 ≤ N → N.Coprime p → D.m = 1 → ∀ (c : ℕ) (k : Type) [Field k] [IsAlgClosed k] [CharP k p] (s : Sp k ⟶ Sp R) (o : Obj b N s), Set.Finite {P : ∀ T : Over (Sp k), (T ⟶ o.A) → Prop | ∃ (o' : Obj b N s) (ψ : o.A ⟶ o'.A), IsPIsog c o o' ψ ∧ P = fun T x => x ≫ ψ = 1} := by
   intro p _ D R _ b N _ _ hm c k _ _ _ s o
   classical

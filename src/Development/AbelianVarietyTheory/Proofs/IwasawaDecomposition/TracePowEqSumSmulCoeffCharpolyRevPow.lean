@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SumSumEqSumPair
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NatCastMulCoeffCharpolyRev
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NatCastMulCoeffCharpolyRev
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,7 +61,7 @@ namespace LogTrace
 theorem coeff_sub_one_pow {S : Type} [CommRing S] [Algebra ℝ S] (f : S[X]) (s n : ℕ) (hs : s ≤ n) :
     ((f - 1) ^ s).coeff n =
       ∑ k ∈ Finset.range (n + 1), ((-1 : ℝ) ^ (s - k) * (s.choose k : ℝ)) • (f ^ k).coeff n := by
-  rw [sub_eq_add_neg, add_pow, finset_sum_coeff]
+  rw [sub_eq_add_neg, add_pow, finsetSum_coeff]
   rw [← Finset.sum_subset (Finset.range_subset_range.2 (by omega : s + 1 ≤ n + 1))]
   · refine Finset.sum_congr rfl fun k _ => ?_
     rw [show f ^ k * (-1) ^ (s - k) * ((s.choose k : ℕ) : S[X]) =
@@ -36,7 +82,7 @@ def newtonPoly {R : Type} [CommRing R] {N : ℕ} (M : Matrix (Fin N) (Fin N) R) 
 
 theorem coeff_newtonPoly {R : Type} [CommRing R] {N : ℕ} (M : Matrix (Fin N) (Fin N) R) (m k : ℕ)
     (hk : k ≤ m) : (newtonPoly M m).coeff k = -(M ^ (k + 1)).trace := by
-  simp only [newtonPoly, finset_sum_coeff, coeff_C_mul_X_pow]
+  simp only [newtonPoly, finsetSum_coeff, coeff_C_mul_X_pow]
   rw [Finset.sum_ite_eq]
   simp [Finset.mem_range, Nat.lt_succ_of_le hk]
 
@@ -77,7 +123,7 @@ theorem coeff_logTrunc_charpolyRev {S : Type} [CommRing S] [Algebra ℝ S] {N : 
       (-1) ^ m * (L ^ (m + 1)).trace := by
   set f := Matrix.charpolyRev (-L) with hf
   have hX : (X : S[X]) ∣ f - 1 := by
-    rw [X_dvd_iff, coeff_sub, coeff_one_zero, hf, coeff_zero_charpolyRev, sub_self]
+    simp [X_dvd_iff, hf, coeff_zero_charpolyRev]
   have h1 := X_pow_dvd_derivative_sub (-L) m
   rw [← hf] at h1
   have h2 : (X : S[X]) ^ (m + 1) ∣ derivative f * (-(f - 1)) ^ (m + 1) :=
@@ -100,8 +146,8 @@ theorem coeff_logTrunc_charpolyRev {S : Type} [CommRing S] [Algebra ℝ S] {N : 
 
 end LogTrace
 
-open LogTrace in
 
+open LogTrace in
 theorem trace_pow_eq_sum_smul_coeff_charpolyRev_pow :
     ∀ n : ℕ, 1 ≤ n → ∃ c : ℕ → ℝ, ∀ (S : Type) [CommRing S] [Algebra ℝ S] (N : ℕ)
       (L : Matrix (Fin N) (Fin N) S),
@@ -129,11 +175,11 @@ theorem trace_pow_eq_sum_smul_coeff_charpolyRev_pow :
         refine Finset.sum_congr rfl fun s hs => ?_
         rw [coeff_sub_one_pow f (s + 1) (m + 1) (by simp only [Finset.mem_range] at hs; omega)]
     _ = ((-1 : ℝ) ^ m * ((m : ℝ) + 1)) • (logTrunc m f).coeff (m + 1) := by
-        simp only [logTrunc, finset_sum_coeff, coeff_C_mul, Finset.smul_sum, ← Algebra.smul_def,
+        simp only [logTrunc, finsetSum_coeff, coeff_C_mul, Finset.smul_sum, ← Algebra.smul_def,
           smul_smul]
     _ = (L ^ (m + 1)).trace := by
         rw [Algebra.smul_def]
-        simp only [map_mul, map_pow, map_neg, map_one, map_add, map_natCast]
+        simp only [map_mul, map_pow, map_neg, map_one, map_add (f := _), map_natCast]
         linear_combination (-1 : S) ^ m * key + (L ^ (m + 1)).trace * hsq
 
 end GlobalTheory

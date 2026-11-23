@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsHilbert
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.LengthLocalizedQuotientEqZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsHilbert
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.LengthLocalizedQuotientEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -41,9 +91,11 @@ theorem X_pow_smul_mem (hM : IsMultigrading ι M piece) (v : Σ k, ι k) (n : �
     rw [pow_succ, mul_smul]
     have h := ih _ _ (hM.smul_mem v m x hx)
     convert h using 2
-    funext k
-    simp only [degZ, unitDeg, blockWeight, Pi.add_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply]
-    split_ifs <;> push_cast <;> ring
+    have hdeg : degZ (blockWeight ι v) = unitDeg v.1 := by
+      funext k
+      simp only [degZ, blockWeight, unitDeg, Pi.single_apply]
+      split_ifs <;> simp
+    rw [add_nsmul, one_nsmul, degZ_add, hdeg, add_comm (degZ (n • blockWeight ι v)), ← add_assoc]
 
 theorem monomial_smul_mem (hM : IsMultigrading ι M piece) (d : (Σ k, ι k) →₀ ℕ) :
     ∀ (m : K → ℤ) (x : M), x ∈ piece m →
@@ -58,7 +110,7 @@ theorem monomial_smul_mem (hM : IsMultigrading ι M piece) (d : (Σ k, ι k) →
     rw [e, mul_smul]
     have h := X_pow_smul_mem hM v n _ _ (ih m x hx)
     convert h using 2
-    rw [map_add, Finsupp.weight_single, degZ_add, add_assoc, add_comm (degZ _)]
+    rw [map_add (f := _), Finsupp.weight_single, degZ_add, add_assoc, add_comm (degZ _)]
 
 theorem homog_smul_mem (hM : IsMultigrading ι M piece) {f : MRing ι F} {b : K → ℕ}
     (hf : IsWeightedHomogeneous (blockWeight ι) f b) {m : K → ℤ} {x : M} (hx : x ∈ piece m) :
@@ -68,7 +120,7 @@ theorem homog_smul_mem (hM : IsMultigrading ι M piece) {f : MRing ι F} {b : K 
   rw [Finset.sum_smul]
   refine Submodule.sum_mem _ fun d hd => ?_
   have hw : Finsupp.weight (blockWeight ι) d = b := hf (mem_support_iff.mp hd)
-  have e : (monomial d (coeff d f) : MRing ι F) = coeff d f • monomial d (1 : F) := by
+  have e : (monomial d (AddMonoidAlgebra.coeff f d) : MRing ι F) = AddMonoidAlgebra.coeff f d • monomial d (1 : F) := by
     rw [smul_monomial, smul_eq_mul, mul_one]
   rw [e, smul_assoc]
   exact Submodule.smul_mem _ _ (hw ▸ monomial_smul_mem hM d m x hx)
@@ -81,13 +133,13 @@ theorem decompose_smul (hM : IsMultigrading ι M piece) (f : MRing ι F) {c : K 
     (hx : x ∈ piece c) (m : K → ℤ) :
     (DirectSum.decompose piece (f • x) m : M) =
       (∑ d ∈ f.support with c + degZ (Finsupp.weight (blockWeight ι) d) = m,
-        monomial d (coeff d f)) • x := by
+        monomial d (AddMonoidAlgebra.coeff f d)) • x := by
   have ef := f.as_sum
   conv_lhs => rw [ef]
   rw [Finset.sum_smul, DirectSum.decompose_sum, DFinsupp.finsetSum_apply,
     AddSubmonoidClass.coe_finsetSum, Finset.sum_filter, Finset.sum_smul]
   refine Finset.sum_congr rfl fun d _ => ?_
-  have hd : (monomial d (coeff d f) : MRing ι F) • x ∈
+  have hd : (monomial d (AddMonoidAlgebra.coeff f d) : MRing ι F) • x ∈
       piece (c + degZ (Finsupp.weight (blockWeight ι) d)) :=
     homog_smul_mem hM (isWeightedHomogeneous_monomial _ _ _ rfl) hx
   split_ifs with h
@@ -170,7 +222,7 @@ theorem isPrime_of_forms (q : Ideal (MRing ι F)) (hq : IsMultiHomogIdeal q) (hn
     induction d using Finsupp.induction with
     | zero => simp
     | single_add v n d _ _ ih =>
-      rw [map_add, map_add, ih, Finsupp.weight_single, Finsupp.weight_single, toLex_add, toLex_smul]
+      rw [map_add (f := _), map_add (f := _), ih, Finsupp.weight_single, Finsupp.weight_single, toLex_add, toLex_smul]
       rfl
   have hc : ∀ (i : Lex (K → ℕ)) (r : MRing ι F),
       weightedHomogeneousComponent (fun v => toLex (blockWeight ι v)) i r =

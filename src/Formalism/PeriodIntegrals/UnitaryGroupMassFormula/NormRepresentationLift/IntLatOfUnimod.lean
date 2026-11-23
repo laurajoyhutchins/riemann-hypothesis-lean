@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermDef
-import Formalism.PeriodIntegrals.NormRepLift
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.FrameActOneAdd
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.DiffIdealNeBot
+module
+
+public import Formalism.PeriodIntegrals.NormRepLift
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ActsByFrameAct
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.DiffIdealNeBot
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.FrameActOneAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,9 +104,12 @@ theorem normRepStep_of (D : D7) (u u' : D.what₂.Word) (hS : TermStable D u u')
   obtain ⟨n, hn, M, hM, Q, hQ⟩ := exists_undo Λ hint (lf D F0) (gS D : 𝓞 D.host.E)
     (hV hP F0 Λ hΛ) hfe ξ ⟨hAdm.1, hAdm.2.1⟩
   have hiso : ∀ x y, (VS D).hT (n x) (n y) = (VS D).hT x y := hn.1.1
-  let F2 : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E) := ⟨mapFlag n hiso F1.fl, n F1.zt⟩
+  let F2 : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E) := ⟨mapFlag n hiso F1.fl, n F1.zt⟩
   have hDC : DCRel Λ (lf D F0) F1 F2 :=
-    ⟨n, hn, 1, one_mem_NLam Λ F1, fun a => by simp [F2, frame_mapFlag], by simp [F2]⟩
+    ⟨n, hn, 1, one_mem_NLam Λ F1, fun a => by
+      induction a using Fin.lastCases with
+      | last => simp [F2, frame, FlagG.fvec, mapFlag]
+      | cast i => simp [F2, frame, FlagG.fvec, mapFlag], by simp [F2]⟩
   have hP2 : PD D Λ (lf D F0) u' F2 := hS F0 Λ hΛ ⟨F1, hF1⟩ F2 hDC
   have hq : Formalism.L2.SG.TermDef.mk Λ (lf D F0) (PD D Λ (lf D F0) u') ⟨F2, hP2⟩ =
       Quot.mk (Formalism.L2.SG.TermDef.Rel Λ (lf D F0) (PD D Λ (lf D F0) u')) ⟨F1, hF1⟩ :=
@@ -77,7 +119,9 @@ theorem normRepStep_of (D : D7) (u u' : D.what₂.Word) (hS : TermStable D u u')
   · intro a b hab; exact Matrix.one_apply_ne (ne_of_lt hab).symm
   · intro a; exact Matrix.one_apply_eq a
   · intro b
-    rw [frameAct_one, frame_mapFlag]
+    rw [frameAct_one]
+    change ModG (VS D) Λ (gS D) (frame ⟨mapFlag n hiso F1.fl, n F1.zt⟩ b - frame (lf D F0) b)
+    rw [frame_mapFlag n hiso F1]
     have e1 : n (frame F1 b) - frame (lf D F0) b =
         n (frame F1 b - frameAct (frame (lf D F0)) ξ b) +
           (frameAct (frame (lf D F0)) (M * ξ) b - frame (lf D F0) b) := by

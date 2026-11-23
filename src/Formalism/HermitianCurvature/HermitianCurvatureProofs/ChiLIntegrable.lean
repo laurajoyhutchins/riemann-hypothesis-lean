@@ -1,5 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiCStarMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceContOn
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiCStarMul
+import Aesop.Main
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlkUUMapMuPRn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceContOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.U
 
@@ -16,11 +69,6 @@ instance borelRC : BorelSpace (U.RC k r 0) := Prod.borelSpace
 instance borelXiH : BorelSpace (U.XiH r 0 σ) := by
   have : BorelSpace ((U.LW σ → ℂ) × (G.UT r → ℂ)) := Prod.borelSpace
   have : BorelSpace ((Fin 0 → Fin r → ℂ) × (Fin r → Fin 0 → ℂ)) := Prod.borelSpace
-  exact Prod.borelSpace
-
-instance borelXi : BorelSpace (U.Xi k r 0 0 σ) := by
-  have : BorelSpace (U.RC k r 0 × U.RC k r 0) := Prod.borelSpace
-  have := borelXiH (r := r) σ
   exact Prod.borelSpace
 
 end inst
@@ -146,7 +194,7 @@ theorem chiL_integrable (w0 : Equiv.Perm (Fin r)) : Integrable (chiL w0) := by
   rw [volume_pi, Measure.pi_pi]
   simp [boxC_vol]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem inner_int (S : B.RealPlaceData k r Wp Wq) (z0 z0' : Fin (2 * 0 + k + 1) → ℂ)
     (hz : S.z = liftVec k r 0 z0) (hz' : S.z' = liftVec k r 0 z0')

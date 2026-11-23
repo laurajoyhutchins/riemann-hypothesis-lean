@@ -1,6 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualMapComp
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DiscriminantEigenProjector
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TowerOrigin
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DiscriminantEigenProjector
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualMapComp
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagCoefficientRatioIntegralStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagLabelBasesExist
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCompCompareFlagStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCompCompareGenericStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeSpanProjectionBoundStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogDenominatorBoundPrimesStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootLinesFlagDegreeStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValuationRingCentreInChartStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,6 +89,7 @@ theorem exists_proj (𝔐 : HodgeCpt Y S y) (s : CMType H ⊕ CMType H) (q : Cpt
     simp [T, LinearMap.sum_apply]
   refine ⟨T, fun v hv => ?_, fun e he => ?_, fun e he => ?_⟩
   · have h1 : ∑ m, 𝔐.emb s (cc m) • 𝔐.ρ (a m) v = 𝔐.emb s (∑ m, cc m * a m) • v := by
+
       simp only [(mem_iff v).1 hv, smul_smul, map_sum, map_mul, Finset.sum_smul]
     rw [hT, h1, hσd, smul_smul, inv_mul_cancel₀ hd0, one_smul]
   · rw [hV]
@@ -153,8 +210,8 @@ theorem exists_split (S : Finset ℕ) (m : ℕ) (hm : 0 < m) :
     · exact ((Nat.Prime.dvd_mul hp).1 hd).elim (h1 p hp) (h1' p hp)
     · exact ((Nat.Prime.dvd_mul hp).1 hd).elim (h2 p hp) (h2' p hp)
 
+
 open GlobalTheory.CompanionTheory.Ar.OrVert Top HodgeCpt in
-set_option maxHeartbeats 1000000 in
 
 theorem unit_off (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (l : Level H)
     (Xo : Moduli D l) (c : Coeff l) (Y : Model Xo c (algebraMap (𝓞 c.F) c.F))

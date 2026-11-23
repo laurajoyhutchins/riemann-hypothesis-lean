@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ZsmulGeneratorEqZeroOfProjection
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ZsmulGeneratorEqZeroOfProjection
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 open scoped Pointwise
@@ -169,8 +218,6 @@ structure HostDer {φ : Frame} (H : HostRaw φ) : Prop where
 
   norm_mu : ∀ x : H.E, (∃ m : ℕ, 0 < m ∧ x ^ m = 1) → Algebra.norm H.K x = 1
 
-def DerOfRaw : Prop := ∀ (φ : Frame) (H : HostRaw φ), HostDer H
-
 structure HostAx (φ : Frame) extends HostRaw φ where
   der : HostDer toHostRaw
 
@@ -186,9 +233,6 @@ theorem galE_mul (σ τ : H.E ≃ₐ[ℚ] H.E) : H.galE (σ * τ) = H.galE σ * 
 theorem galE_bijective : Function.Bijective H.galE := H.gal.bijective
 theorem galE_injective : Function.Injective H.galE := H.gal.injective
 theorem galE_one : H.galE 1 = 1 := map_one H.gal
-theorem galE_inv (σ : H.E ≃ₐ[ℚ] H.E) : H.galE σ⁻¹ = (H.galE σ)⁻¹ := map_inv H.gal σ
-theorem galE_pow (σ : H.E ≃ₐ[ℚ] H.E) (k : ℕ) : H.galE (σ ^ k) = H.galE σ ^ k := map_pow H.gal σ k
-theorem exists_galE_eq (g : φ.GG) : ∃ σ : H.E ≃ₐ[ℚ] H.E, H.galE σ = g := ⟨H.gal.symm g, H.gal.apply_symm_apply g⟩
 theorem galE_eq_one_iff (σ : H.E ≃ₐ[ℚ] H.E) : H.galE σ = 1 ↔ σ = 1 := MulEquiv.map_eq_one_iff H.gal
 theorem galE_conjE : H.galE H.conj = φ.cc := H.gal.apply_symm_apply φ.cc
 theorem eq_conjE_iff (σ : H.E ≃ₐ[ℚ] H.E) : σ = H.conj ↔ H.galE σ = φ.cc := by

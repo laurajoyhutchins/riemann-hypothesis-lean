@@ -1,5 +1,70 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.GroupWithZero.Units.Fintype
+public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.Ideal.Maximal
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsHeisTrivial
+public import Mathlib.Algebra.Group.Subgroup.Finite
+public import Mathlib.GroupTheory.Coset.Card
+public import Mathlib.GroupTheory.Index
+public import Mathlib.RingTheory.Ideal.Quotient.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+
+@[expose] public section
+
 open Classical GlobalTheory.FinWeil
 open scoped BigOperators
 
@@ -69,7 +134,7 @@ theorem sum_norm_units {k : Type} [Field k] [Fintype k] (s : k →+* k) (hs : �
         linear_combination -h
       · refine ⟨Units.mk0 _ h, Units.ext ?_⟩
         have h' := hne (Units.mk0 _ h)
-        rw [hD, div_eq_iff h', Units.val_mk0, map_add, map_one]
+        rw [hD, div_eq_iff h', Units.val_mk0, map_add (f := _), map_one]
         linear_combination -hx
     · rintro ⟨y, rfl⟩
       rw [hD, map_div₀, hs]
@@ -110,8 +175,6 @@ theorem sum_norm_units {k : Type} [Field k] [Fintype k] (s : k →+* k) (hs : �
     rw [MonoidHom.card_fiber_eq_of_mem_range N hy' (⟨1, map_one N⟩ : (1 : kˣ) ∈ Set.range N),
       Nat.card_eq_fintype_card, Fintype.card_subtype]
     congr 1
-    ext x
-    simp [MonoidHom.mem_ker]
 
 theorem sum_eq_zero_add_units {k : Type} [Field k] [Fintype k] {M : Type} [AddCommMonoid M]
     (g : k → M) : ∑ x : k, g x = g 0 + ∑ x : kˣ, g x := by
@@ -193,7 +256,7 @@ theorem gauss_quotient : ∀ {R : Type} [CommRing R] (σ : R →+* R) (w : R), (
     (fun a b => by
       obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective a
       obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective b
-      rw [← map_add, hf, hf, hf, mul_add, hadd])
+      rw [← map_add (f := _), hf, hf, hf, mul_add, hadd])
     (by rw [← map_zero (Ideal.Quotient.mk P), hf, mul_zero, h0])
     (Ideal.Quotient.mk P (t + σ t))
     (by rw [hs, map_add σ, hσ, add_comm])

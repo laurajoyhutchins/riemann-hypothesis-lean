@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolFunApply
+module
+
+import Formalism.LocalToGlobal.Columns.PolyFn
+public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolFunApply
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,27 +103,7 @@ theorem exists_det_poly {ι : Type} [Fintype ι] {n : ℕ} :
 theorem eq_of_eval_units {ι : Type} [Fintype ι] {n : ℕ} (Q : MvPolynomial (ι × Fin n × Fin n) ℂ)
     (hQ : ∀ x : ι → Matrix (Fin n) (Fin n) ℂ, (∀ τ, IsUnit (x τ).det) →
       eval (fun k : ι × Fin n × Fin n => x k.1 k.2.1 k.2.2) Q = 0) : Q = 0 := by
-  obtain ⟨D, hD⟩ := exists_det_poly (ι := ι) (n := n)
-  have hQD : Q * D = 0 := by
-    apply MvPolynomial.funext
-    intro x
-    let xm : ι → Matrix (Fin n) (Fin n) ℂ := fun τ a b => x (τ, a, b)
-    rw [map_zero, map_mul]
-    show eval (fun k : ι × Fin n × Fin n => xm k.1 k.2.1 k.2.2) Q *
-      eval (fun k : ι × Fin n × Fin n => xm k.1 k.2.1 k.2.2) D = 0
-    rw [hD]
-    by_cases hu : ∀ τ, IsUnit (xm τ).det
-    · rw [hQ _ hu, zero_mul]
-    · push_neg at hu
-      obtain ⟨τ, hτ⟩ := hu
-      rw [isUnit_iff_ne_zero, not_not] at hτ
-      rw [Finset.prod_eq_zero (Finset.mem_univ τ) hτ, mul_zero]
-  have hD0 : D ≠ 0 := by
-    intro h0
-    have := hD (fun _ => 1)
-    rw [h0, map_zero] at this
-    simp at this
-  exact (mul_eq_zero.mp hQD).resolve_right hD0
+  apply Formalism.L2.Col.eq_zero_of_forall_isUnit <;> assumption
 
 theorem fnOf_inv_iff_twSub_mem : ∀ {E ι : Type} [Field E] [Fintype ι] {n : ℕ} (emb : ι → E →+* ℂ) (M : GL (Fin n) E) (s : ι → ℤ)
     (G : ι → Matrix (Fin n) (Fin n) ℂ) (P0 : MvPolynomial (ι × Fin n × Fin n) ℂ)

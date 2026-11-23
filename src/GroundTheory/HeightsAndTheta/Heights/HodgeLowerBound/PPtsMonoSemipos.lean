@@ -1,7 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsPtsMonoSemipos
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIntegralAgainstPositive
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsPtsMonoSemipos
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIntegralAgainstPositive
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PartsAlg
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ADensStA
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -48,8 +98,8 @@ theorem PtsMonoSemipos.proof : PtsMonoSemipos.Statement := by
   unfold ptsIntegral
   by_cases hΨ : ∃ Ψ : (((k : K) → ι k) → ℂ) →ₗ[ℂ] (Fin (e + 1) → ℂ), IsGoodProj P Ψ
   swap
-  · rw [dif_neg hΨ, dif_neg hΨ]
-  rw [dif_pos hΨ, dif_pos hΨ]
+  · rw [dite_eq_right hΨ, dite_eq_right hΨ]
+  rw [dite_eq_left hΨ, dite_eq_left hΨ]
   have hΨg : IsGoodProj P hΨ.choose := hΨ.choose_spec
   unfold ptsIntegralAt
   refine integral_mono_ae (h1 _ hΨg) (h2 _ hΨg) ?_
@@ -62,12 +112,12 @@ theorem PtsMonoSemipos.proof : PtsMonoSemipos.Statement := by
   refine Finset.sum_le_sum fun w _ => ?_
   unfold sheetDensity
   by_cases hγ : ∃ γ, IsSheet P hΨ.choose y w γ
-  · rw [dif_pos hγ, dif_pos hγ]
+  · rw [dite_eq_left hγ, dite_eq_left hγ]
     obtain ⟨-, hev⟩ := hγ.choose_spec
     obtain ⟨-, hmem, hproj⟩ := hev.self_of_nhds
     have hnot : hγ.choose y ∉ N := fun hN' => hyB ⟨hγ.choose y, hmem, hN', hproj⟩
     exact mul_le_mul_of_nonneg_right (hle _ hmem hnot)
       (maDensity_logDiv_nonneg_of_sheet hL hr hγ.choose_spec)
-  · rw [dif_neg hγ, dif_neg hγ]
+  · rw [dite_eq_right hγ, dite_eq_right hγ]
 
 end GroundTheory.Heights₂.Heights.LowerBoundFree

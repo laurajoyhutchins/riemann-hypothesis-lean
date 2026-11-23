@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ThickFrames
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.WordTens
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatchInf
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ThickFrames
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
+import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.GlueBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatchInf
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.WordTens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory MeasureTheory.Measure NumberField
 open GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.L1 UpperTheory.ConvolutionTheory.C PositivityTheory.Rg.Tf.Geo
@@ -71,6 +112,7 @@ theorem UpperTheory.ConvolutionTheory.L1.pairPosition :
     congr 1
     funext g
     simp [UpperTheory.ConvolutionTheory.L1.glueA]
+  set_option synthInstance.maxHeartbeats 200000 in
   have hc1 : c = 1 := by
     refine UpperTheory.ConvolutionTheory.L1.pairPosition_one (νE.map (archEquiv E n).symm) c ?_
     have h := hμ

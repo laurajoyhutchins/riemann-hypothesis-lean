@@ -1,12 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianFormAtFrameLaws
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FourierCoeffUnitCubeTranslateOfEntirePeriodic
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.EntirePeriodicEqZeroOfFourierCoeffEqZero
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependent
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependentThetaPrincipal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianFormAtFrameLaws
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependent
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependentThetaPrincipal
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.EntirePeriodicEqZeroOfFourierCoeffEqZero
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FourierCoeffUnitCubeTranslateOfEntirePeriodic
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DifferentiableOnLeftInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DifferentiableOnDetHMat
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr
@@ -74,6 +126,7 @@ private theorem exists_mem_bilinForm_eq_of_selfDual {V : Type} [AddCommGroup V] 
   have hexp : ∀ (x : V) (y : L), B x y = ∑ j, (b.repr y j : ℚ) * B x (b j) := by
     intro x y
     conv_lhs => rw [← b.sum_repr y]
+
     rw [Submodule.coe_sum, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Submodule.coe_smul, map_zsmul, zsmul_eq_mul]
@@ -90,8 +143,9 @@ private theorem exists_mem_bilinForm_eq_of_selfDual {V : Type} [AddCommGroup V] 
       rw [show y = ((⟨y, hy⟩ : L) : V) from rfl, hexp]
       refine Finset.sum_eq_zero fun j _ => ?_
       have hj : B xL (b j) = ((∑ i, v i * G i j : ℤ) : ℚ) := by
+
         simp only [xL, Submodule.coe_sum, Submodule.coe_smul, map_sum, map_zsmul,
-          LinearMap.sum_apply, LinearMap.smul_apply, zsmul_eq_mul]
+        LinearMap.sum_apply, LinearMap.smul_apply, zsmul_eq_mul]
         push_cast
         simp [hG]
       have hz : (∑ i, v i * G i j) = 0 := by
@@ -117,13 +171,15 @@ private theorem exists_mem_bilinForm_eq_of_selfDual {V : Type} [AddCommGroup V] 
   have hxb : ∀ j, B x (b j) = ψv j := by
     intro j
     rw [← hc]
+
     simp only [x, map_sum, LinearMap.map_smul₂, LinearMap.sum_apply,
-      LinearMap.smul_apply, smul_eq_mul, Matrix.vecMul, dotProduct, Gq, Matrix.map_apply, hG]
+    LinearMap.smul_apply, smul_eq_mul, Matrix.vecMul, dotProduct, Gq, Matrix.map_apply, hG]
   have hxy : ∀ y : L, B x y = ψ y := by
     intro y
     rw [hexp]
     simp only [hxb, ψv]
     conv_rhs => rw [← b.sum_repr y]
+
     rw [map_sum]
     push_cast
     refine Finset.sum_congr rfl fun j _ => ?_
@@ -168,7 +224,7 @@ private theorem discreteTopology_map_of_integral_bilinForm {V : Type} [AddCommGr
         induction hy using Submodule.span_induction with
         | mem s hs => exact hsT s hs
         | zero => simp
-        | add a c _ _ ha hc => rw [map_add, ha, hc, add_zero]
+        | add a c _ _ ha hc => rw [map_add (f := _), ha, hc, add_zero]
         | smul n a _ ha => rw [map_zsmul, ha, smul_zero]
       have hx0 := eq_zero_of_bilinForm_eq_zero_on_selfDual B L ⟨T, hT⟩ hL x hall
       apply Subtype.ext
@@ -264,7 +320,8 @@ theorem exists_eq_smul_of_isTheta1 : ∀ (E : Type) [Field E] [NumberField E] [I
   obtain ⟨hLfg, hLd⟩ := hL
   set Hm := ThFr.Hm X bas idx x with hHm
   have hform : ∀ z z', hx X bas idx x z z' = z ⬝ᵥ Hm.mulVec (star z') := fun z z' => by
-    rw [hx_eq_hermForm idx x z z']; rfl
+    change hermForm _ _ _ = hermForm (ThFr.Hm X bas idx x) z z'
+    exact RiemannRel.hermForm_mulVec _ _ _ z z'
   have hH : Hm.IsHermitian := Matrix.IsHermitian.ext fun i j => by
     have h := hsymm (Pi.single j 1) (Pi.single i 1)
     rw [hform, hform, SiegelNormalForm.form_single, SiegelNormalForm.form_single] at h
@@ -278,7 +335,7 @@ theorem exists_eq_smul_of_isTheta1 : ∀ (E : Type) [Field E] [NumberField E] [I
     simp only [pv, per, Function.comp_apply, Pi.add_apply]
     split_ifs
     · simp only [Data.emb, hermC]
-      simp [map_add, Finset.sum_add_distrib, mul_add, add_mul, dotProduct_add]
+      simp [map_add (f := _), Finset.sum_add_distrib, mul_add, add_mul, dotProduct_add]
     · first | unfold Data.emb | skip
       simp [Matrix.mulVec, dotProduct, mul_add, Finset.sum_add_distrib]
   let p : (Fin r → E) →ₗ[ℤ] (Fin g → ℂ) := (AddMonoidHom.mk' (pv X idx x) hadd).toIntLinearMap

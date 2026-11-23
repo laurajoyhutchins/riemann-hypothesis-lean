@@ -1,4 +1,52 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
+public import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open Matrix GlobalTheory GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl
@@ -28,11 +76,13 @@ theorem trace_mul_sesq_eq_form (D : Datum H) (a : 𝓞 E) (x y : D.La) :
     rw [show (a : E) * ((D.EF (RingOfIntegers.basis E k • x) y : E) * HT.dualInt E k) =
         (D.EF (RingOfIntegers.basis E k • x) y : ℤ) • (HT.dualInt E k * (a : E)) by rw [zsmul_eq_mul]; ring,
       map_zsmul, zsmul_eq_mul, HT.LatBasic.repr_eq_trace]
+
   simp only [sesq, Finset.mul_sum, map_sum, e]
   have ha : a • x = ∑ k, ((RingOfIntegers.basis E).repr a k : ℤ) • (RingOfIntegers.basis E k • x) := by
     conv_lhs => rw [← (RingOfIntegers.basis E).sum_repr a]
     rw [Finset.sum_smul]
     exact Finset.sum_congr rfl fun k _ => smul_assoc _ _ _
+
   rw [ha, map_sum, LinearMap.sum_apply]
   push_cast
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -42,7 +92,7 @@ theorem trace_mul_sesq_eq_form (D : Datum H) (a : 𝓞 E) (x y : D.La) :
 
 theorem Datum_EF_antisymm (D : Datum H) (x y : D.La) : D.EF y x = -D.EF x y := by
   have h := D.alt (x + y)
-  simp only [map_add, LinearMap.add_apply, D.alt x, D.alt y, zero_add, add_zero] at h
+  simp only [map_add (f := _), LinearMap.add_apply, D.alt x, D.alt y, zero_add, add_zero] at h
   linarith
 
 theorem Host_bar_bar (a : 𝓞 E) : H.bar (H.bar a) = a := by
@@ -72,9 +122,9 @@ theorem sesq_sesquilinear_properties (D : Datum H) :
       ∀ δ ∈ differentIdeal ℤ (𝓞 E), ∀ x y, ∃ b : 𝓞 E, (δ : E) * sesq D x y = b := by
   refine ⟨trace_mul_sesq_eq_form D, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro x x' y
-    simp only [sesq, smul_add, map_add, LinearMap.add_apply, Int.cast_add, add_mul, Finset.sum_add_distrib]
+    simp only [sesq, smul_add, map_add (f := _), LinearMap.add_apply, Int.cast_add, add_mul, Finset.sum_add_distrib]
   · intro x y y'
-    simp only [sesq, map_add, Int.cast_add, add_mul, Finset.sum_add_distrib]
+    simp only [sesq, map_add (f := _), Int.cast_add, add_mul, Finset.sum_add_distrib]
   · intro a x y
     apply eq_of_trace_pairing_eq
     intro c

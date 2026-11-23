@@ -1,9 +1,48 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveAdelic
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveCanonical
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveFunctionField
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveProper
-import GroundTheory.FunctionField.WeilDifferential
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveCanonical
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveFunctionField
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CurveProper
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace Topology Module MonoidalCategory
 
@@ -16,19 +55,15 @@ open GroundTheory.FunctionField
 variable {k : Type u} [Field k] {X : Scheme.{u}} [X.Over (Spec (.of k))]
   [HasExt.{w'} (Sheaf (Opens.grothendieckTopology X.toTopCat) AddCommGrpCat.{u})]
 
-noncomputable def HLinearEquivOfIso [IsIntegral X] {F G : X.Modules} (e : F ≅ G) (n : ℕ) :
-    Sheaf.H.{w'} (modulesAb F) n ≃ₗ[k] Sheaf.H.{w'} (modulesAb G) n :=
-  ((H.moduleFunctor.{w'} k n).mapIso e).toLinearEquiv
-
 variable [IsIntegral X] [IsProper (X ↘ Spec (.of k))] [IsNormalScheme X]
 
 section Instances
 
 variable (hX : topologicalKrullDim X = 1)
 
+
 omit [HasExt.{w'} (Sheaf (Opens.grothendieckTopology X.toTopCat) AddCommGrpCat.{u})] in
 include hX in
-
 theorem curve_instances :
     IsNoetherian X ∧ IsLocallyFactorial X ∧ IsFunctionField k X.functionField := by
   have : IsNoetherian X := isNoetherian_of_finiteType (k := k) X
@@ -38,14 +73,7 @@ end Instances
 
 section Genus
 
-variable (X) in
 
-noncomputable def structureSheafModule : X.Modules := SheafOfModules.unit X.ringCatSheaf
-
-variable (k X) in
-
-noncomputable def genus : ℕ :=
-  finrank k (Sheaf.H.{w'} (modulesAb (structureSheafModule X)) 1)
 
 end Genus
 
@@ -66,27 +94,6 @@ noncomputable def omega (hX : topologicalKrullDim X = 1) : X.Modules :=
   haveI := (curve_instances (k := k) hX).2.1
   haveI := (curve_instances (k := k) hX).2.2
   canonicalSheaf (k := k) hX.le
-
-noncomputable def serreDuality (hX : topologicalKrullDim X = 1) {L : X.Modules}
-    (hL : IsInvertibleSheaf L) :
-    Module.Dual k (Sheaf.H.{w'} (modulesAb L) 1) ≃ₗ[k]
-      Sheaf.H.{w'} (modulesAb (omega (k := k) hX ⊗ dualSheaf L)) 0 := by
-  haveI := (curve_instances (k := k) hX).1
-  haveI := (curve_instances (k := k) hX).2.1
-  haveI := (curve_instances (k := k) hX).2.2
-  let D := divisorOfInvertible hL
-  let e : L ≅ divisorSheaf D := asIso (toDivisorSheaf hL)
-  let KX := canonicalDivisor (k := k) hX.le
-  have hω := canonicalDifferential_ne_zero (k := k) (X := X)
-  have hsub : divisorEquiv (k := k) hX.le (KX - D) =
-      (canonicalDifferential (k := k) (X := X)).divisor - divisorEquiv (k := k) hX.le D := by
-    rw [map_sub, divisorEquiv_canonicalDivisor]
-  let t : divisorSheaf KX ⊗ dualSheaf L ≅ divisorSheaf (KX - D) :=
-    (nonempty_tensor_dualSheaf_iso KX hL e).some
-  exact (((HLinearEquivOfIso e 1).trans (divisorH1EquivAdelic hX.le D)).symm.dualMap.trans
-    (WeilDifferential.dualityEquiv hω (divisorEquiv (k := k) hX.le D)).symm).trans
-    ((LinearEquiv.ofEq _ _ (congrArg Divisor.L hsub.symm)).trans
-      ((divisorH0EquivL hX.le (KX - D)).symm.trans (HLinearEquivOfIso t.symm 0)))
 
 end Canonical
 

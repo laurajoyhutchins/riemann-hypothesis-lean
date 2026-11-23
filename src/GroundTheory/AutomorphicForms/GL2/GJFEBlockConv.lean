@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.IsAddHaarMeasureMatrixMeasureFinSq
+module
+
+public import GroundTheory.AutomorphicForms.GL2.IsAddHaarMeasureMatrixMeasureFinSq
+import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+import GroundTheory.AutomorphicForms.GL2.GJInducedZeta
+import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -122,8 +174,8 @@ theorem tsum_int_lt_top_of_le_geom₂ {a : ℤ → ℝ≥0∞} {M r₁ r₂ : �
 variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F]
   {m : ℕ}
 
-variable (m) in
 
+variable (m) in
 structure IsCentralCoeff (α : ℂ) (c : GL (Fin m) F → ℂ) : Prop where
   continuous : Continuous c
   ne_zero : α ≠ 0
@@ -172,7 +224,7 @@ theorem exists_compact_tile [NeZero m] (hc : IsCentralCoeff m α c) :
   obtain ⟨d₁, hd₁⟩ := (hC.image hcont).bddAbove
   obtain ⟨d₀, hd₀⟩ := (hC.image hcont).bddBelow
   refine ⟨⋃ j ∈ Finset.Icc (-|d₀| - 1) |d₁|, (fun h => centralUnif F m ^ (-j) * h) '' C,
-    (Finset.Icc (-|d₀| - 1) |d₁|).isCompact_biUnion fun j _ => hC.image (continuous_mul_left _),
+    (Finset.Icc (-|d₀| - 1) |d₁|).isCompact_biUnion fun j _ => hC.image (continuous_const_mul _),
     fun g hg hcg => ?_⟩
   obtain ⟨j, hj⟩ := hCs g hcg
   have h1 := hd₁ ⟨_, hj, rfl⟩

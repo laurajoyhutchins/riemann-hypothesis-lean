@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFgIsSeparated
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsProperOfPowerSeriesArcsOverAlgClosed
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsProperOfPowerSeriesArcsOverAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFgIsSeparated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MorphismsSpreadOutToFgSubalgebra
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -54,9 +101,10 @@ theorem range_eq_of_isPullback {Y P Y' P' : Scheme.{0}} {q : Y ⟶ P} {q' : Y' �
 
 theorem isLocallyClosed_range {Y P : Scheme.{0}} {q : Y ⟶ P} (H : ∀ y, GoodAt q y) :
     IsLocallyClosed (Set.range q) := by
-  refine ((isLocallyClosed_tfae (Set.range q)).out 0 2).2 ?_
+  refine isLocallyClosed_iff_isLocallyClosedAt.2 ?_
   rintro _ ⟨y, rfl⟩
   obtain ⟨W, hW, _⟩ := H y
+  apply isLocallyClosedAt_iff_exists_isClosed_preimage_val.2
   refine ⟨W, W.2.mem_nhds hW, ?_⟩
   have := (q ∣_ W).isClosedMap.isClosed_range
   rw [range_eq_of_isPullback (isPullback_morphismRestrict q W).flip] at this
@@ -220,8 +268,8 @@ theorem hasCover_univ {R : Type} [CommRing R] {X : Scheme.{0}} (p : X ⟶ Sp R) 
     have := h.union (hasCover_affine p W.1.ι)
     rwa [Scheme.Opens.range_ι] at this
 
-open GlobalTheory.Spread GlobalTheory.SpreadSep in
 
+open GlobalTheory.Spread GlobalTheory.SpreadSep in
 theorem exists_finset_isProper (k V : Type) [CommRing k] [IsNoetherianRing k] [CommRing V]
     [Algebra k V] {X : Scheme.{0}} (p : X ⟶ Sp k) [LocallyOfFiniteType p] [QuasiCompact p] [IsSeparated p]
     [UniversallyClosed (pullback.snd p (spMap (algebraMap k V)))] :

@@ -1,6 +1,53 @@
-import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlLoc
-import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlDual
-import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlBridge
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAddCharSymplecticLocalLatticeEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAdelicCharacterNontrivialAtPlaces
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ExistsInvariantForm
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlBridge
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlDual
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +77,7 @@ theorem evVac : PositivityTheory.ThK.EvVac := by
   refine core hc hn h1 hS hne (lagr M v Cy) l hl (fun w => ?_) h0 φ hφ
   obtain ⟨u, rfl⟩ := exists_locCo M.co w
   obtain ⟨z, z', e⟩ := space_split hX.lat hW.lat hsp u
-  refine ⟨_, ⟨z, rfl⟩, locCo M.co v (z' * Cxᵀ), by rw [e, map_add], ?_⟩
+  refine ⟨_, ⟨z, rfl⟩, locCo M.co v (z' * Cxᵀ), by rw [e, map_add (f := _)], ?_⟩
   by_cases hz : z' * Cxᵀ ∈ latAtV X W v
   · exact Or.inl ⟨_, ((acts_iff M.co B.ψ (hat _ hz) hS).1 (hvac _ hz)).symm⟩
   · right

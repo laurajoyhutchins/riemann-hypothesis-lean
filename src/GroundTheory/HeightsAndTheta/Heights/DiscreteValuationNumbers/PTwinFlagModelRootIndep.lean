@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitAlt
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitBis
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitAlt
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InhabitBis
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.ScaledRankOneLeStandardRankOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -34,7 +87,7 @@ theorem monoList_mapDomain {m : ℕ} {A : Type*} (deg : Fin ((m + 1) + (m + 1)) 
       omega)
   have h3 : ∀ i : Fin m, Finsupp.mapDomain (fun i : Fin m => Fin.natAdd (m + 1) i.castSucc) ν
       (Fin.natAdd (m + 1) i.castSucc) = ν i :=
-    fun i => Finsupp.mapDomain_apply he ν i
+    fun i => Finsupp.mapDomain_apply_of_injective he ν i
   have hA : (List.ofFn fun i : Fin (m + 1) =>
       List.replicate (Finsupp.mapDomain (fun i : Fin m => Fin.natAdd (m + 1) i.castSucc) ν
         (Fin.castLE (Nat.le_add_right (m + 1) (m + 1)) i))
@@ -73,6 +126,7 @@ theorem divDiff_last {m : ℕ} (P : MvPolynomial (Fin m) ℤ) :
   unfold divDiff
   rw [support_mul_X, support_rename_of_injective hcs, Finset.sum_map,
     Finset.sum_image fun a _ b _ h => Finsupp.mapDomain_injective hcs h]
+
   conv_rhs => rw [P.as_sum, map_sum]
   refine Finset.sum_congr rfl fun ν _ => ?_
   have hl : Finsupp.mapDomain Fin.castSucc ν (Fin.last m) = 0 :=
@@ -80,7 +134,7 @@ theorem divDiff_last {m : ℕ} (P : MvPolynomial (Fin m) ℤ) :
       rintro ⟨j, hj⟩
       exact (Fin.castSucc_lt_last j).ne hj)
   have hc : ∀ i : Fin m, Finsupp.mapDomain Fin.castSucc ν i.castSucc = ν i :=
-    fun i => Finsupp.mapDomain_apply hcs ν i
+    fun i => Finsupp.mapDomain_apply_of_injective hcs ν i
   have hs : ∀ i : Fin m, Finsupp.single (Fin.last m) 1 i.castSucc = 0 := fun i => by
     rw [Finsupp.single_apply, if_neg (Fin.castSucc_lt_last i).ne']
   have hemp : (Finset.univ.filter fun j : Fin (m + 1) => Fin.last m < j) = ∅ :=

@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.UnitsPower
-import GroundTheory.LocalFields.UnitsGalois
-import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeAndRangePowLe
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Additive
+module
+
+public import GroundTheory.LocalFields.UnitsGalois
+public import GroundTheory.LocalFields.NormalLattice
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveSnake
+public import GroundTheory.LocalFields.UnitsPowers
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.UnitsPower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -16,13 +64,13 @@ variable (E F : Type*) [Field E] [ValuativeRel E] [TopologicalSpace E] [IsNonarc
   [Algebra E F] [ValuativeExtension E F] [FiniteDimensional E F]
 
 noncomputable abbrev integerAction : MulSemiringAction (F ≃ₐ[E] F) 𝒪[F] where
-  smul σ x := integerAlgEquiv E F σ x
+  smul σ x := integerAlgEquivLocal σ x
   one_smul x := by ext; rfl
   mul_smul σ τ x := by ext; rfl
-  smul_zero σ := map_zero (integerAlgEquiv E F σ)
-  smul_add σ := map_add (integerAlgEquiv E F σ)
-  smul_one σ := map_one (integerAlgEquiv E F σ)
-  smul_mul σ := map_mul (integerAlgEquiv E F σ)
+  smul_zero σ := map_zero (integerAlgEquivLocal σ)
+  smul_add σ := map_add (integerAlgEquivLocal σ)
+  smul_one σ := map_one (integerAlgEquivLocal σ)
+  smul_mul σ := map_mul (integerAlgEquivLocal σ)
 
 attribute [local instance] integerAction
 
@@ -84,8 +132,8 @@ noncomputable abbrev unitFiltrationAction (k : ℕ) :
   smul_mul σ u v := Subtype.ext (smul_mul' σ (u : 𝒪[F]ˣ) v)
   smul_one σ := Subtype.ext (smul_one σ)
 
-variable {F} in
 
+variable {F} in
 noncomputable def maxPow (F : Type*) [Field F] [ValuativeRel F] (k : ℕ) : AddSubgroup 𝒪[F] :=
   (𝓂[F] ^ k).toAddSubgroup
 
@@ -202,9 +250,9 @@ theorem unitToModN_eq_zero_iff (hp : p.Prime) {k : ℕ} (hk : e + 1 ≤ k)
       Units.val_pow_eq_pow_val] at hyp ⊢
     exact hyp.symm
 
+
 omit hϖ hpe in
 variable (ϖ) in
-
 theorem unitToModN_smul (hϖ : Irreducible ϖ) (hpe : (p : 𝒪[F]) = ϖ ^ e * ε) {k : ℕ}
     (hk : e ≤ k) (σ : F ≃ₐ[E] F) (u : Additive (unitFiltration F k)) :
     unitToModN hϖ hpe hk (σ • u) =
@@ -222,8 +270,8 @@ section Lattice
 variable {E F : Type*} [Field E] [ValuativeRel E] [Field F] [ValuativeRel F] [Algebra E F]
   [FiniteDimensional E F]
 
-variable (E) in
 
+variable (E) in
 noncomputable def normalSub (θ : F) : AddSubgroup 𝒪[F] :=
   (normalLattice (1 : 𝒪[E]) θ 0).toAddSubgroup.comap (𝒪[F].subtype : 𝒪[F] →+* F).toAddMonoidHom
 
@@ -232,8 +280,8 @@ theorem mem_normalSub {θ : F} {x : 𝒪[F]} :
     x ∈ normalSub E θ ↔ (x : F) ∈ normalLattice (1 : 𝒪[E]) θ 0 :=
   Iff.rfl
 
-omit [ValuativeRel F] [FiniteDimensional E F] in
 
+omit [ValuativeRel F] [FiniteDimensional E F] in
 theorem normalLattice_zero_eq (π : 𝒪[E]) (θ : F) :
     normalLattice π θ 0 = normalLattice (1 : 𝒪[E]) θ 0 := by
   simp [normalLattice]
@@ -265,8 +313,10 @@ variable {θ : F} (hθ : LinearIndependent E fun σ : F ≃ₐ[E] F ↦ σ θ)
 omit [TopologicalSpace E] [IsNonarchimedeanLocalField E] [TopologicalSpace F]
   [IsNonarchimedeanLocalField F] in
 include hθO in
-theorem sum_smul_mem_integer (c : (F ≃ₐ[E] F) → 𝒪[E]) : ∑ σ, c σ • σ θ ∈ 𝒪[F] :=
-  mem_integer_of_mem_normalLattice 1 θ hθO (sum_smul_mem_normalLattice c)
+theorem sum_smul_mem_integer (c : (F ≃ₐ[E] F) → 𝒪[E]) : ∑ σ, c σ • σ θ ∈ 𝒪[F] := by
+  refine sum_mem fun σ _ ↦ ?_
+  rw [integer_smul_eq]
+  exact mul_mem ((algebraMap_mem_integer_iff E F (c σ)).mpr (c σ).2) (hθO σ)
 
 noncomputable def normalSubOfCoeff : ((F ≃ₐ[E] F) → 𝒪[E]) →+ normalSub E θ where
   toFun c := ⟨⟨∑ σ, c σ • σ θ, sum_smul_mem_integer hθO c⟩, sum_smul_mem_normalLattice c⟩
@@ -371,9 +421,10 @@ theorem coeffToRegular_perm [Group Γ] (τ : Γ) (c : Γ → O) :
   apply MonoidAlgebra.coeff_injective
   ext ρ
   rw [piRep_apply, coeff_coeffToRegular]
+
   simp only [coeffToRegular, AddMonoidHom.coe_mk, ZeroHom.coe_mk, map_sum,
-    Representation.ofMulAction_single, smul_eq_mul, MonoidAlgebra.coeff_sum,
-    MonoidAlgebra.coeff_single, Finset.sum_apply', Finsupp.single_apply]
+  Representation.ofMulAction_single, smul_eq_mul, MonoidAlgebra.coeff_sum,
+  MonoidAlgebra.coeff_single, Finset.sum_apply', Finsupp.single_apply]
   rw [Finset.sum_eq_single (τ⁻¹ * ρ)]
   · simp
   · intro σ _ hσ

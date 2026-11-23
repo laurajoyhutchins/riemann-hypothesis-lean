@@ -1,10 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisPrescribedUnramifiedKummer
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocF
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsGenIsUnitSub
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisPrescribedUnramifiedKummer
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSumRootsOfUnity
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FundamentalMapSurjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
-import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocA
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,8 +73,8 @@ theorem exists_card : ∃ a : ℕ, a ≠ 0 ∧ Nat.card (ResidueField ↥(OL K))
 
 variable {K} {a : ℕ} [NeZero a]
 
-omit [NeZero a] in
 
+omit [NeZero a] in
 theorem res_pow (h : Nat.card (ResidueField ↥(OL K)) = l ^ a) (x : ResidueField ↥(OL K)) : x ^ l ^ a = x := by
   have := OL_resFinite K
   have := Fintype.ofFinite (ResidueField ↥(OL K))
@@ -70,7 +115,7 @@ theorem exists_toOm (h : Nat.card (ResidueField ↥(OL K)) = l ^ a) (x : Om l) (
       rw [hmem, ← map_pow, hs]
     · rw [Finset.card_image_of_injective _ hinj, Finset.card_univ, ← Nat.card_eq_fintype_card, h]
       refine (Multiset.toFinset_card_le _).trans ((card_roots' _).trans ?_)
-      rw [FiniteField.X_pow_card_sub_X_natDegree_eq _ h1]
+      rw [Polynomial.natDegree_X_pow_sub_X h1]
   obtain ⟨z, -, hz⟩ := Finset.mem_image.1 (hsub ▸ (hmem x).2 hx)
   exact ⟨_, hz⟩
 
@@ -97,8 +142,9 @@ theorem pow_eq_of_root (h : Nat.card (ResidueField ↥(OL K)) = l ^ a) {x : Om l
   have : CharP (ResidueField ↥(OL K)) l := (CharP.charP_iff_prime_eq_zero hl.out).2 (l_res K)
   have hs : ∑ i ∈ Finset.range m, (y ^ k) ^ i ≠ 0 := fun e => hm (by
     have := congrArg (residue _) e
+
     simp only [map_sum, map_pow (residue _) (y ^ k), hr, one_pow, Finset.sum_const, Finset.card_range,
-      nsmul_eq_mul, mul_one, map_zero] at this
+    nsmul_eq_mul, mul_one, map_zero] at this
     exact (CharP.cast_eq_zero_iff _ l m).1 this)
   have h3 : y ^ k = 1 := sub_eq_zero.1 ((mul_eq_zero.1 hg).resolve_right hs)
   have h4 : x ^ k = 1 := congrArg (toOm K) h3
@@ -116,8 +162,8 @@ theorem Kunr_eq (h : Nat.card (ResidueField ↥(OL K)) = l ^ a) : Kunr l a = K0 
   · exact key c hc h1
   · exact inv_mem_iff.1 (key _ (inv_mem hc) (by rw [norm_inv]; exact inv_le_one_of_one_le₀ h1))
 
-variable (l a) in
 
+variable (l a) in
 theorem free_Wq : Module.Free ℤ_[l] (Wq l a) := by
   have := GlobalTheory.TameFrob.finite_Wq l a
   have : FaithfulSMul ℤ_[l] (Wq l a) := (faithfulSMul_iff_algebraMap_injective _ _).2 fun u v h => by
@@ -126,39 +172,22 @@ theorem free_Wq : Module.Free ℤ_[l] (Wq l a) := by
     exact Subtype.val_injective ((algebraMap ℚ_[l] (Om l)).injective this)
   infer_instance
 
-variable (l a) in
 
+variable (l a) in
 theorem finrank_Wq : Module.finrank ℤ_[l] (Wq l a) = a := by
   have := free_Wq l a
   have h := (splitEquiv (AlgHom.id ℤ_[l] (Wq l a))).toLinearEquiv.finrank_eq
   rw [Module.finrank_baseChange] at h
   simpa using h
 
+
 attribute [local instance] GlobalTheory.TameFrob.algK GlobalTheory.TameFrob.isFractionRing in
 variable (l a) in
-
 theorem finrank_Kunr : Module.finrank ℚ_[l] ↥(Kunr l a) = a := by
   have := GlobalTheory.TameFrob.finite_Wq l a
   have : IsScalarTower ℤ_[l] (Wq l a) ↥(Kunr l a) := IsScalarTower.of_algebraMap_eq fun u =>
     Subtype.ext (GlobalTheory.TameFrob.iotaO_algebraMap l a u).symm
   rw [Algebra.IsAlgebraic.finrank_of_isFractionRing ℤ_[l] ℚ_[l] (Wq l a) ↥(Kunr l a), finrank_Wq]
-
-theorem exists_thetaW [HasUnr a K] (h : Nat.card (ResidueField ↥(OL K)) = l ^ a) (x : ↥(OL K)) :
-    ∃ w : Wq l a, residue _ (thetaW a K w) = residue _ x := by
-  obtain ⟨y, hy, hx⟩ := exists_teich h x
-  rw [← hx]
-  rcases eq_or_ne y 0 with rfl | h0
-  · exact ⟨0, by rw [map_zero]⟩
-  obtain ⟨z, ω, hω, hz, -⟩ := exists_gen l a
-  have h1 := one_lt_pow_l l a
-  have : NeZero (l ^ a - 1) := ⟨by omega⟩
-  have h2 : y ^ (l ^ a - 1) = 1 :=
-    mul_right_cancel₀ h0 (by rw [← pow_succ, Nat.sub_add_cancel h1.le, hy, one_mul])
-  obtain ⟨k, -, hk⟩ := hω.eq_pow_of_pow_eq_one (ξ := toOm K y) (by rw [← map_pow, h2, map_one])
-  refine ⟨WittVector.teichmuller l z ^ k, congrArg _ (intToOC_injective K (Subtype.ext ?_))⟩
-  rw [intToOC_thetaW, map_pow, map_pow, wA_teich, WittVector.fontaineTheta_teichmuller, SubmonoidClass.coe_pow,
-    GlobalTheory.MemLoc.IsTiltOf.untilt_eq hz]
-  exact (map_pow (algebraMap (Om l) ℂ_[l]) ω k).symm.trans (congrArg _ hk)
 
 variable (K)
 
@@ -174,8 +203,6 @@ theorem card_res' : fK K ≠ 0 ∧ Nat.card (ResidueField ↥(OL K)) = l ^ fK K 
 instance : NeZero (fK K) := ⟨(card_res' K).1⟩
 
 theorem card_res : Nat.card (ResidueField ↥(OL K)) = l ^ fK K := (card_res' K).2
-
-instance : HasUnr (fK K) K := hasUnr (card_res K)
 
 theorem Kunr_fK : Kunr l (fK K) = K0 K := Kunr_eq (card_res K)
 

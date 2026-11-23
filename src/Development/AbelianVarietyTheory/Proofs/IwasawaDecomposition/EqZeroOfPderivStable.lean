@@ -1,12 +1,60 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefinite
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsRealPlaceSymplecticFormPositiveComplexStru
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsRealPlaceSymplecticFormPositiveComplexStru
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefinite
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HeisenbergDerivativeCommutatorRelation
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.HeisenbergDirectionalDerivFormulaAndSmooth
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HeisenbergDerivativeCommutatorRelation
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCharFamIsVacVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.IndefiniteReal.FockTheta.RealPlaceImaginaryGeneratorReEqZero
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum NumberField Matrix Complex
 open scoped Real Classical
@@ -47,7 +95,7 @@ theorem pure_mem (hadd : ∀ f f', P f → P f' → P (f + f')) (hsm : ∀ (a : 
     (hA : ∀ i f, P f → P (A i f)) {f : X → ℂ} (hf : P f) (Q : MvPolynomial ι ℂ) : P (pureTensorL A f Q) := by
   induction Q using MvPolynomial.induction_on' with
   | monomial k c => rw [pure_monomial]; exact hsm _ _ (foldr_mem hA hf _)
-  | add p q hp hq => rw [map_add]; exact hadd _ _ hp hq
+  | add p q hp hq => rw [map_add (f := _)]; exact hadd _ _ hp hq
 
 theorem pure_X_mul (hadd : ∀ f f', P f → P f' → P (f + f')) (hsm : ∀ (a : ℂ) f, P f → P (a • f))
     (hA : ∀ i f, P f → P (A i f)) (hc : ∀ i j f, P f → A i (A j f) = A j (A i f))
@@ -61,10 +109,10 @@ theorem pure_X_mul (hadd : ∀ f f', P f → P f' → P (f + f')) (hsm : ∀ (a 
       Asm _ _ (opPow A k f) (foldr_mem hA hf _)]
     congr 1
     refine foldr_perm hA hc hf (l' := v :: (Finsupp.toMultiset k).toList) ?_
-    rw [← Multiset.coe_eq_coe, ← Multiset.cons_coe, Multiset.coe_toList, Multiset.coe_toList, map_add,
+    rw [← Multiset.coe_eq_coe, ← Multiset.cons_coe, Multiset.coe_toList, Multiset.coe_toList, map_add (f := _),
       Finsupp.toMultiset_single, one_smul, Multiset.singleton_add]
   | add p q hp hq =>
-    rw [mul_add, map_add, map_add, hp, hq, Aadd _ _ _ (pure_mem hadd hsm hA hf _) (pure_mem hadd hsm hA hf _)]
+    rw [mul_add, map_add (f := _), map_add (f := _), hp, hq, Aadd _ _ _ (pure_mem hadd hsm hA hf _) (pure_mem hadd hsm hA hf _)]
 
 theorem eq_zero_of_pderiv_stable {K : MvPolynomial ι ℂ → Prop} (hd : ∀ Q i, K Q → K (MvPolynomial.pderiv i Q))
     (hc : ∀ a, K (MvPolynomial.C a) → a = 0) (Q : MvPolynomial ι ℂ) (hQ : K Q) : Q = 0 := by
@@ -75,7 +123,7 @@ theorem eq_zero_of_pderiv_stable {K : MvPolynomial ι ℂ → Prop} (hd : ∀ Q 
     | succ n ih =>
       intro Q hQ h
       have h1 : ∀ i, MvPolynomial.pderiv i Q = 0 := fun i => ih _ (hd Q i hQ) fun m hm => by
-        rw [MvPolynomial.coeff_pderiv, h _ (by rw [map_add, Finsupp.degree_single]; omega), zero_mul]
+        rw [MvPolynomial.coeff_pderiv, h _ (by rw [map_add (f := _), Finsupp.degree_single]; omega), zero_mul]
       have h2 : Q = MvPolynomial.C (Q.coeff 0) := by
         refine MvPolynomial.ext _ _ fun m => ?_
         rw [MvPolynomial.coeff_C]
@@ -110,15 +158,15 @@ theorem pure_injective {B : ι → (X → ℂ) → (X → ℂ)} {c : ι → ℂ}
     intro i Q
     induction Q using MvPolynomial.induction_on with
     | C a => rw [hC, Bsm _ _ _ hf, hv, MvPolynomial.pderiv_C, map_zero, smul_zero, smul_zero]
-    | add p q hp hq => rw [map_add, Badd _ _ _ (hm _) (hm _), hp, hq, map_add, map_add, smul_add]
+    | add p q hp hq => rw [map_add (f := _), Badd _ _ _ (hm _) (hm _), hp, hq, map_add (f := _), map_add (f := _), smul_add]
     | mul_X p j hp =>
-      rw [mul_comm, hX, hBA _ _ _ (hm _), hp, Asm _ _ _ (hm _), MvPolynomial.pderiv_mul, map_add, hX,
+      rw [mul_comm, hX, hBA _ _ _ (hm _), hp, Asm _ _ _ (hm _), MvPolynomial.pderiv_mul, map_add (f := _), hX,
         MvPolynomial.pderiv_X, add_comm, smul_add]
       congr 1
       by_cases h : i = j
       · subst h; simp
       · simp [h, Pi.single_apply, Ne.symm h]
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   refine eq_zero_of_pderiv_stable (K := fun Q => pureTensorL A f Q = 0) (fun Q i h => ?_) fun a h => ?_
   · have h1 := key i Q
     have h2 := Bsm i 0 f hf
@@ -164,6 +212,8 @@ include hψ hθ
 theorem dRho_add (τ : D.what₂.Tau) (z : Matrix (Fin T.rank) (Fin S.rank) ℂ) {f f' : WO S T → ℂ}
     (hf : IsThetaFunO ψ S T f) (hf' : IsThetaFunO ψ S T f') :
     dRho (heisO ψ S T) θ τ z (f + f') = dRho (heisO ψ S T) θ τ z f + dRho (heisO ψ S T) θ τ z f' := by
+  have theta_add : ∀ {f g : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T g → IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add
   obtain ⟨σ, h⟩ := GlobalTheory.RealLineAt.exists_inverse_chart hθ
   have hE : ∀ g, Formalism.IndefR.Datum.dRho (heisO ψ S T) θ τ z g =
       FockCompare.hD (iotaW σ T S) (piW θ T S) (omO S T) (piW θ T S (lineAt θ τ z 1)) g := fun g =>
@@ -181,6 +231,8 @@ theorem dRho_add (τ : D.what₂.Tau) (z : Matrix (Fin T.rank) (Fin S.rank) ℂ)
 theorem dRho_smul (τ : D.what₂.Tau) (z : Matrix (Fin T.rank) (Fin S.rank) ℂ) (a : ℂ) {f : WO S T → ℂ}
     (hf : IsThetaFunO ψ S T f) :
     dRho (heisO ψ S T) θ τ z (a • f) = a • dRho (heisO ψ S T) θ τ z f := by
+  have theta_smul : ∀ (c : ℂ) {f : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T (c • f) :=
+    fun c {f} hf => Formalism.IndefR.Fock.CCR.theta_smul hf c
   obtain ⟨σ, h⟩ := GlobalTheory.RealLineAt.exists_inverse_chart hθ
   have hE : ∀ g, Formalism.IndefR.Datum.dRho (heisO ψ S T) θ τ z g =
       FockCompare.hD (iotaW σ T S) (piW θ T S) (omO S T) (piW θ T S (lineAt θ τ z 1)) g := fun g =>
@@ -205,7 +257,7 @@ theorem dRho_comm (τ : D.what₂.Tau) (z : Matrix (Fin T.rank) (Fin S.rank) ℂ
     dLine_eq_hD h hψ (isRealDir_lineAt hθ τ z) g
   have sk : ∀ u v, omO S T v u = -omO S T u v := fun u v => by
     have h1 := omO_self h (S := S) (T := T) (u + v)
-    simp only [LinearMap.map_add, LinearMap.add_apply, omO_self h] at h1
+    simp only [LinearMap.map_add (f := _), LinearMap.add_apply, omO_self h] at h1
     linarith
   apply eq_add_of_sub_eq
   rw [hE, hE, hE, hE, heisenberg_derivative_commutator _ _ _ _ _ (h.pi_iota T S)
@@ -221,6 +273,10 @@ theorem aPlus_eq (f : WO S T → ℂ) : aPlus (heisO ψ S T) θ τ J z f =
 
 theorem aPlus_theta {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) :
     IsThetaFunO ψ S T (aPlus (heisO ψ S T) θ τ J z f) := by
+  have theta_add : ∀ {f g : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T g → IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add
+  have theta_smul : ∀ (c : ℂ) {f : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T (c • f) :=
+    fun c {f} hf => Formalism.IndefR.Fock.CCR.theta_smul hf c
   rw [aPlus_eq]
   exact theta_smul _ (theta_add (theta_dRho hθ hψ τ z hf) (theta_smul _ (theta_dRho hθ hψ τ (J z) hf)))
 
@@ -235,8 +291,12 @@ theorem aPlus_smul (a : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) :
   module
 
 theorem annih_theta {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) :
-    IsThetaFunO ψ S T (annih (heisO ψ S T) θ τ J z f) :=
-  theta_add (theta_dRho hθ hψ τ z hf) (theta_smul _ (theta_dRho hθ hψ τ (J z) hf))
+    IsThetaFunO ψ S T (annih (heisO ψ S T) θ τ J z f) := by
+  have theta_add : ∀ {f g : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T g → IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add
+  have theta_smul : ∀ (c : ℂ) {f : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T (c • f) :=
+    fun c {f} hf => Formalism.IndefR.Fock.CCR.theta_smul hf c
+  exact theta_add (theta_dRho hθ hψ τ z hf) (theta_smul _ (theta_dRho hθ hψ τ (J z) hf))
 
 theorem annih_add {f f' : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hf' : IsThetaFunO ψ S T f') :
     annih (heisO ψ S T) θ τ J z (f + f') = annih (heisO ψ S T) θ τ J z f + annih (heisO ψ S T) θ τ J z f' := by
@@ -252,8 +312,8 @@ variable {sS : D.what₂.Tau → Matrix (Fin S.rank) (Fin S.rank) ℂ} {sT : D.w
   (hS : ∀ τ, IsCartanInv (gramAt D S τ) (sS τ)) (hT : ∀ τ, IsCartanInv (gramAt D T τ) (sT τ))
 include hS hT
 
-omit hψ hθ in
 
+omit hψ hθ in
 theorem omDir_cplx (τ' : D.what₂.Tau) (z' : Matrix (Fin T.rank) (Fin S.rank) ℂ) :
     omDir S T τ (cplxO (sS τ) (sT τ) z) τ' (cplxO (sS τ') (sT τ') z') = omDir S T τ z τ' z' ∧
     omDir S T τ z τ' (cplxO (sS τ') (sT τ') z') = -omDir S T τ (cplxO (sS τ) (sT τ) z) τ' z' := by
@@ -270,6 +330,10 @@ theorem aPlus_comm' (τ' : D.what₂.Tau) (z' : Matrix (Fin T.rank) (Fin S.rank)
     {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) :
     aPlus (heisO ψ S T) θ τ (cplxO (sS τ) (sT τ)) z (aPlus (heisO ψ S T) θ τ' (cplxO (sS τ') (sT τ')) z' f) =
     aPlus (heisO ψ S T) θ τ' (cplxO (sS τ') (sT τ')) z' (aPlus (heisO ψ S T) θ τ (cplxO (sS τ) (sT τ)) z f) := by
+  have theta_add : ∀ {f g : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T g → IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add
+  have theta_smul : ∀ (c : ℂ) {f : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T (c • f) :=
+    fun c {f} hf => Formalism.IndefR.Fock.CCR.theta_smul hf c
   have ht := fun τ z => theta_dRho hθ hψ τ z hf
   have hc := fun τ z τ' z' => dRho_comm hψ hθ τ z τ' z' hf
   obtain ⟨h1, h2⟩ := omDir_cplx τ z hS hT τ' z'
@@ -290,6 +354,10 @@ theorem annih_aPlus (τ' : D.what₂.Tau) (z' : Matrix (Fin T.rank) (Fin S.rank)
     aPlus (heisO ψ S T) θ τ' (cplxO (sS τ') (sT τ')) z' (annih (heisO ψ S T) θ τ (cplxO (sS τ) (sT τ)) z f) +
       ((fockScale D τ' : ℂ)⁻¹ * (-(4 * π * I) * ((omDir S T τ z τ' z' : ℝ) +
         I * (omDir S T τ (cplxO (sS τ) (sT τ) z) τ' z' : ℝ)))) • f := by
+  have theta_add : ∀ {f g : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T g → IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add
+  have theta_smul : ∀ (c : ℂ) {f : WO S T → ℂ}, IsThetaFunO ψ S T f → IsThetaFunO ψ S T (c • f) :=
+    fun c {f} hf => Formalism.IndefR.Fock.CCR.theta_smul hf c
   have ht := fun τ z => theta_dRho hθ hψ τ z hf
   have hc := fun τ z τ' z' => dRho_comm hψ hθ τ z τ' z' hf
   obtain ⟨h1, h2⟩ := omDir_cplx τ z hS hT τ' z'

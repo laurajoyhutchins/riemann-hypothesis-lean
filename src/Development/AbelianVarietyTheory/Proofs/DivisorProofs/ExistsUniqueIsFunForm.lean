@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.KernelNormConstantSpec
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.KernelNormConstantSpec
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PosOkId
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CofactorTwistRelationDualWeightInvolutive
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CofactorTwistRelationRowActEquivariant
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualIsoDetGenMNeZero
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsCofactorTwistDualWeyl
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeylLatticeExistsCofactorTwistDual
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CofactorTwistRelationDualWeightInvolutive
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CofactorTwistRelationRowActEquivariant
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualIsoDetGenMNeZero
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalD
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -211,7 +255,7 @@ theorem funRel_ten {a : ι → ℕ} {f g : ι → MP K n} (h : ∀ τ, (genM K n
 theorem FunRel.add {a : ι → ℕ} {F F' G G' : Pol K ι n} (h : FunRel a F G) (h' : FunRel a F' G') :
     FunRel a (F + F') (G + G') := by
   unfold FunRel at *
-  rw [mul_add, map_add, h, h']
+  rw [mul_add, map_add (f := _), h, h']
 
 theorem FunRel.smul {a : ι → ℕ} {F G : Pol K ι n} (c : K) (h : FunRel a F G) : FunRel a (c • F) (c • G) := by
   unfold FunRel at *
@@ -488,8 +532,8 @@ theorem funEquiv_mem_delStd (F : VV K σ) : F.1 ∈ delStd K σ ↔ (funEquiv σ
   funEquiv_mem_iff σ _ _ (delStd_mem_VV σ)
     (fun τ => funMap_fwd _ _ (funPos_weyl _ (σ τ))) (fun τ => funMap_rev _ _ (funPos_weyl_rev _ (σ τ))) F
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem funForm : ∃ Φ : VV K σ ≃ₗ[K] VV K (fun τ => (σ τ).dual),
     (∀ F f, IsFunForm σ F f ↔ f = Φ F) ∧
     (∀ g F, Φ (rhoK σ g F) = rhoK (fun τ => (σ τ).dual) (invTrK g) (Φ F)) ∧

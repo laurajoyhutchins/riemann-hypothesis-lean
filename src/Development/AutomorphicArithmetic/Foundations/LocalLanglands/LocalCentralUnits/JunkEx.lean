@@ -1,17 +1,67 @@
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ArtEx
-import Development.AutomorphicArithmetic.WhittakerHecke.ExistsUnitResidueLogarithmOfRootsOfUnity
-import Development.AutomorphicArithmetic.WhittakerHecke.ExistsAdicCompletionRingEquivExtendingOfStable
-import Development.AutomorphicArithmetic.WhittakerHecke.CardResidueFieldAdicCompletionIntegersEqAbsNorm
-import Development.AutomorphicArithmetic.WhittakerHecke.ContinuousInertiaRestrictionOfCompat
-import Development.AutomorphicArithmetic.WhittakerHecke.ExistsNumberFieldExtensionPlaceFrobeniusDegree
-import Development.AutomorphicArithmetic.WhittakerHecke.TameInertiaCharacterFrobeniusConjEqPow
-import Development.DiscreteGroups.GlobalIrreducibility.ExistsIneOfVEqOne
-import Development.DiscreteGroups.GlobalIrreducibility.DzGalRes
+module
+
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChevalleyUnits
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConjLMemWeil
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExtensionUnramifiedAtOnePlace
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalArtinMapUniqueTransportPlaceIso
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GlobalArtinReciprocityHolds
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ArtEx
+public import Development.AutomorphicArithmetic.WhittakerHecke.CardResidueFieldAdicCompletionIntegersEqAbsNorm
+public import Development.AutomorphicArithmetic.WhittakerHecke.ContinuousInertiaRestrictionOfCompat
+public import Development.AutomorphicArithmetic.WhittakerHecke.ExistsAdicCompletionRingEquivExtendingOfStable
+public import Development.AutomorphicArithmetic.WhittakerHecke.ExistsNumberFieldExtensionPlaceFrobeniusDegree
+public import Development.AutomorphicArithmetic.WhittakerHecke.ExistsUnitResidueLogarithmOfRootsOfUnity
+public import Development.AutomorphicArithmetic.WhittakerHecke.TameInertiaCharacterFrobeniusConjEqPow
 import Development.DiscreteGroups.GlobalIrreducibility.DzApprox
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalArtinMapUniqueTransportPlaceIso
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConjLMemWeil
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExtensionUnramifiedAtOnePlace
+public import Development.DiscreteGroups.GlobalIrreducibility.DzGalRes
+import Development.DiscreteGroups.GlobalIrreducibility.DzNormV
+public import Development.DiscreteGroups.GlobalIrreducibility.ExistsIneOfVEqOne
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 

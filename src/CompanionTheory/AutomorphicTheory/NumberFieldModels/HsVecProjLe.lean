@@ -1,13 +1,62 @@
-import CompanionTheory.AutomorphicTheory.NumberFieldModels.TransferGaugeGeneratorZbarInv
-import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.TieRad
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopFirstOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateCommuteRaisingConstant
+module
+
+public import CompanionTheory.AutomorphicTheory.NumberFieldModels.TransferGaugeGeneratorZbarInv
+public import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.TieRad
+public import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnipotentEquivHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaCutoffLimit
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellValues
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateCommuteRaisingConstant
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGTrChain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDJDJComm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PsiNormalization
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadJFExists
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellValues
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaCutoffLimit
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDJDJComm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopFirstOfParts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.P.CutMP.Gauge Formalism.FourierDecayAlt.P.CutMP.Gauge.VLem
 
@@ -27,8 +76,9 @@ def trL (hpl : Q.IsPlace P Bs.z Bs.z' Bs.π Bs.π') (hk : 2 ≤ P.k) (he : IsFra
 
 theorem baseTie (hpl : Q.IsPlace P Bs.z Bs.z' Bs.π Bs.π') (hk : 2 ≤ P.k) (he : IsFrameB P Bs e)
     (hG : GaugeQQ P Bs e) (X : Q.ActualOps P.k P.r Bs.z Bs.z' Bs.π Bs.π') :
-    Formalism.FourierDecayAlt.P.NormalFormRelations.BaseTie X (trL hpl hk he) where
-  op l j := by
+    Formalism.FourierDecayAlt.P.NormalFormRelations.BaseTie X (trL hpl hk he) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro l j
     fin_cases j
     · exact transfer_operator_p hpl hk he X l
     · exact transfer_operator_c hpl hk he X l
@@ -36,7 +86,7 @@ theorem baseTie (hpl : Q.IsPlace P Bs.z Bs.z' Bs.π Bs.π') (hk : 2 ≤ P.k) (he
     · exact transfer_operator_pbar hpl hk he X l
     · exact transfer_operator_cbar hpl hk he X l
     · exact transfer_operator_cbar_inv hpl hk he X l
-  fn j := by
+  · intro j
     fin_cases j
     · exact transfer_gauge_generator_z hpl hk he X
     · exact transfer_gauge_generator_z_inv hpl hk he X
@@ -44,7 +94,7 @@ theorem baseTie (hpl : Q.IsPlace P Bs.z Bs.z' Bs.π Bs.π') (hk : 2 ≤ P.k) (he
     · exact transfer_gauge_generator_zbar_inv hpl hk he X
     · exact transfer_gauge_generator_ggi hpl hk he X
     · exact transfer_gauge_generator_gg_inv hpl hk he X
-  t Y a b := transfer_torus_action hpl hk he X hG Y a b
+  · exact transfer_torus_action hpl hk he X hG
 
 theorem tie_cpt (p : KB.Pl P Wp Wq) {e : M.Ty P → ℂ → (Wq →L[ℂ] Wp)} (he : IsFrameB P p.T.base e)
     (hG : GaugeQQ P p.T.base e) {Lm : R.LevelData (MA.A P (MA.DQ P)) P.r} (hM : MA.IsModelLevel P (MA.DQ P) Lm)

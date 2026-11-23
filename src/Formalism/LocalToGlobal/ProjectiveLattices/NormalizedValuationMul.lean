@@ -1,6 +1,51 @@
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.PublishedIntClosHolds
-import Formalism.LocalToGlobal.ProjectiveLattices.ExtendedPointBaseChange
-import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+module
+
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.PublishedIntClosHolds
+public import Formalism.LocalToGlobal.ProjectiveLattices.ExtendedPointBaseChange
+public import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,9 +86,6 @@ structure FromW (ζ : PtsG G la) (y : E.Pt' la) extends SecPt ζ y where
     toOsK (xplus X E hM) la G.w x = (a : OsK (xplus X E hM) la G.w) →
     IsLocalization.Away.lift (sec (xplus X E hM) la G.w 0) toSecPt.s0 (x : Lw (xplus X E hM) la G.w) =
       algebraMap T.V T.Fr (ι (algebraMap _ (Loc ζ) a))
-
-def SecPtSt (G : GlobalFamilyData (xplus X E hM) ka wL wF) (la : HeightOneSpectrum (𝓞 B.KO)) : Prop :=
-  ∀ ζ : PtsG G la, ∃ y : E.Pt' la, Nonempty (SecPt ζ y)
 
 def secQ (y : PtsG G la → E.Pt' la) (hs : ∀ ζ, SecPt ζ (y ζ)) (g0 : B.Cusp j wF) : LocalPointData G la where
   y ζ := .inr (y ζ)
@@ -146,7 +188,7 @@ lemma SecPt.lift_Jid {r : ↥(Frac0 (xplus X E hM) la G.w)} (hr : r ∈ Jid (xpl
     obtain ⟨i, rfl⟩ := hx
     rw [coe_sfr, h.lift_frac, h.onS i, zero_mul]
   | zero => simp
-  | add x y _ _ hx hy => rw [Subalgebra.coe_add, map_add, hx, hy, add_zero]
+  | add x y _ _ hx hy => rw [Subalgebra.coe_add, map_add (f := _), hx, hy, add_zero]
   | smul a x _ hx => rw [smul_eq_mul, Subalgebra.coe_mul, map_mul, hx, mul_zero]
 
 lemma SecPt.lift_JHK {u : WeightFamilies.Wt D j} {z : ↥(HK (xplus X E hM) la G.w u)}
@@ -159,7 +201,7 @@ lemma SecPt.lift_JHK {u : WeightFamilies.Wt D j} {z : ↥(HK (xplus X E hM) la G
     have : h.lift (algebraMap ↥(Frac0 (xplus X E hM) la G.w) (Lw (xplus X E hM) la G.w) r) = 0 := h.lift_Jid hr
     rw [this, zero_mul]
   · intro x y hx hy
-    rw [Submodule.coe_add, map_add, hx, hy, add_zero]
+    rw [Submodule.coe_add, map_add (f := _), hx, hy, add_zero]
 
 end Lift
 

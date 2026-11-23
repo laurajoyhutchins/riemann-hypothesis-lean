@@ -1,6 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.HasBoundedPolesGlobalData
 import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+import Development.AbelianVarietyTheory.Definitions.Divisors.JoinCastSucc
+import Development.AbelianVarietyTheory.Definitions.Divisors.LinearIndependentBasisCoords
+import Development.AbelianVarietyTheory.Definitions.Divisors.MemSubPtsCutBaseChangeIff
+import Development.AbelianVarietyTheory.Definitions.Divisors.PointHeight
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsAddEquivOfSurjectiveOfKerIff
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+import ReciprocityTheory.SemistableReduction.DetGramEqProdGramSchmidt
+
+@[expose] public section
+
 open NumberField MvPolynomial ReciprocityTheory.MultiplicativeHeights ReciprocityTheory.GeometryOfNumbersTheory
 open GlobalTheory GlobalTheory.ChowHt GlobalTheory.Adelic GlobalTheory.HermTools GlobalTheory.HilbertSamuel GlobalTheory.HSChoice GlobalTheory.HSShort
 
@@ -16,15 +70,15 @@ theorem prod_monomial_eq {τ R ι : Type} [CommSemiring R] (s : Finset ι) (f : 
 open Classical in
 theorem coeff_det_eq {F τ : Type} [Field F] {d : ℕ} (P : Matrix (Fin d) (Fin d) (MvPolynomial τ F))
     (s : Finset (τ →₀ ℕ)) (hs : ∀ i k, (P i k).support ⊆ s) (m : τ →₀ ℕ) :
-    coeff m P.det = ∑ g ∈ Fintype.piFinset (fun _ : Fin d => s),
-      if ∑ k, g k = m then (Matrix.of fun i k => coeff (g k) (P i k)).det else 0 := by
+    AddMonoidAlgebra.coeff P.det m = ∑ g ∈ Fintype.piFinset (fun _ : Fin d => s),
+      if ∑ k, g k = m then (Matrix.of fun i k => AddMonoidAlgebra.coeff (P i k) (g k)).det else 0 := by
   classical
-  have hP : ∀ i k, P i k = ∑ n ∈ s, monomial n (coeff n (P i k)) := by
+  have hP : ∀ i k, P i k = ∑ n ∈ s, monomial n (AddMonoidAlgebra.coeff (P i k) n) := by
     intro i k
     conv_lhs => rw [(P i k).as_sum]
     exact Finset.sum_subset (hs i k) (fun n _ hn => by simp [MvPolynomial.notMem_support_iff.mp hn])
   have hprod : ∀ σ : Equiv.Perm (Fin d), ∏ k, P (σ k) k = ∑ g ∈ Fintype.piFinset (fun _ : Fin d => s),
-      monomial (∑ k, g k) (∏ k, coeff (g k) (P (σ k) k)) := by
+      monomial (∑ k, g k) (∏ k, AddMonoidAlgebra.coeff (P (σ k) k) (g k)) := by
     intro σ
     rw [Finset.prod_congr rfl (fun k _ => hP (σ k) k), Finset.prod_univ_sum]
     exact Finset.sum_congr rfl (fun g _ => prod_monomial_eq _ _ _)
@@ -36,16 +90,16 @@ theorem coeff_det_eq {F τ : Type} [Field F] {d : ℕ} (P : Matrix (Fin d) (Fin 
   split_ifs with h
   · subst h
     refine Finset.sum_congr rfl (fun σ _ => ?_)
-    simp only [Units.smul_def, coeff_smul, coeff_monomial, if_pos rfl]
+    simp only [Units.smul_def, MvPolynomial.coeff_smul, coeff_monomial, if_pos rfl]
     rfl
   · refine Finset.sum_eq_zero (fun σ _ => ?_)
-    simp only [Units.smul_def, coeff_smul, coeff_monomial, if_neg h, smul_zero]
+    simp only [Units.smul_def, MvPolynomial.coeff_smul, coeff_monomial, if_neg h, smul_zero]
 
 end GlobalTheory.DetCoeff
 
 namespace GlobalTheory.DetCoeff
 
-theorem coeff_det_mem_span_det : ∀ (F V : Type) [Field F] [NumberField F] [AddCommGroup V] [Module F V] [Module (𝓞 F) V] [IsScalarTower (𝓞 F) F V] (M : Submodule (𝓞 F) V) (d : ℕ) (b : Module.Basis (Fin d) F V) (τ : Type) (P : Matrix (Fin d) (Fin d) (MvPolynomial τ F)), (∀ k m, ∑ i, coeff m (P i k) • b i ∈ M) → ∀ m, coeff m P.det ∈ Submodule.span (𝓞 F) {y | ∃ v : Fin d → V, (∀ i, v i ∈ M) ∧ y = b.det v} := by
+theorem coeff_det_mem_span_det : ∀ (F V : Type) [Field F] [NumberField F] [AddCommGroup V] [Module F V] [Module (𝓞 F) V] [IsScalarTower (𝓞 F) F V] (M : Submodule (𝓞 F) V) (d : ℕ) (b : Module.Basis (Fin d) F V) (τ : Type) (P : Matrix (Fin d) (Fin d) (MvPolynomial τ F)), (∀ k m, ∑ i, AddMonoidAlgebra.coeff (P i k) m • b i ∈ M) → ∀ m, AddMonoidAlgebra.coeff P.det m ∈ Submodule.span (𝓞 F) {y | ∃ v : Fin d → V, (∀ i, v i ∈ M) ∧ y = b.det v} := by
   intro F V _ _ _ _ _ _ M d b τ P hP m
   classical
   have hs : ∀ i k, (P i k).support ⊆ Finset.univ.biUnion (fun ik : Fin d × Fin d => (P ik.1 ik.2).support) :=
@@ -54,11 +108,11 @@ theorem coeff_det_mem_span_det : ∀ (F V : Type) [Field F] [NumberField F] [Add
   refine Submodule.sum_mem _ (fun g _ => ?_)
   split_ifs
   · apply Submodule.subset_span
-    refine ⟨fun k => ∑ i, coeff (g k) (P i k) • b i, fun k => hP k (g k), ?_⟩
+    refine ⟨fun k => ∑ i, AddMonoidAlgebra.coeff (P i k) (g k) • b i, fun k => hP k (g k), ?_⟩
     rw [Module.Basis.det_apply]
     congr 1
     ext i k
-    simp [Module.Basis.toMatrix_apply, Finsupp.finset_sum_apply, Finsupp.single_apply]
+    simp [Module.Basis.toMatrix_apply, Finsupp.finsetSum_apply, Finsupp.single_apply]
   · exact Submodule.zero_mem _
 
 end GlobalTheory.DetCoeff

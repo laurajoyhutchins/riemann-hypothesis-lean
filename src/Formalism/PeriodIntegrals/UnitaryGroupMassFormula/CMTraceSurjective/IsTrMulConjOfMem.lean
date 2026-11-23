@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.CMTraceOnto
+module
+
+public import Formalism.PeriodIntegrals.CMTraceOnto
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,13 +67,13 @@ theorem isTr_zero : IsTr (0 : 𝓞 K) := ⟨0, by rw [map_zero, add_zero]⟩
 theorem isTr_add {s t : 𝓞 K} (hs : IsTr s) (ht : IsTr t) : IsTr (s + t) := by
   obtain ⟨x, rfl⟩ := hs
   obtain ⟨y, rfl⟩ := ht
-  exact ⟨x + y, by rw [map_add]; ring⟩
+  exact ⟨x + y, by rw [map_add (f := _)]; ring⟩
 
 theorem isTr_self (x : 𝓞 K) : IsTr (x + conj x) := ⟨x, rfl⟩
 
 theorem conj_of_isTr {s : 𝓞 K} (hs : IsTr s) : conj s = s := by
   obtain ⟨x, rfl⟩ := hs
-  rw [map_add, conj_conj, add_comm]
+  rw [map_add (f := _), conj_conj, add_comm]
 
 theorem isTr_mul_fixed {b s : 𝓞 K} (hb : conj b = b) (hs : IsTr s) : IsTr (b * s) := by
   obtain ⟨x, rfl⟩ := hs
@@ -55,7 +98,7 @@ theorem isTr_mul_conj_of_mem {u : 𝓞 K} (hu : u ∈ trIdeal K) : IsTr (u * con
     exact isTr_zero
   | add x y _ _ hx hy =>
     have h := isTr_add (isTr_add hx hy) (isTr_mul_conj_add_conj_mul x y)
-    rw [map_add]
+    rw [map_add (f := _)]
     convert h using 1
     ring
   | smul a x _ hx =>

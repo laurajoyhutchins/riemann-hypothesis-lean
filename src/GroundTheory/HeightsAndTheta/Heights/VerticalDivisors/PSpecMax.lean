@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.IntToFracInjective
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsSecIdealOfPrime
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsSecIdealOfPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Vertical
@@ -36,6 +79,7 @@ theorem exists_secCoord_not_mem (e : ℕ) (I : Ideal (MvPolynomial (Fin n) K)) (
   have h1 : Ideal.Quotient.mk (secIdeal (modelR e I v) (parY e n v)) (chartForm (parY e n v)) = 1 := by
     rw [← sub_eq_zero, ← map_one (Ideal.Quotient.mk _), ← map_sub, Ideal.Quotient.eq_zero_iff_mem]
     exact Ideal.mem_sup_right (Ideal.mem_span_singleton_self _)
+
   rw [← h1, chartForm, linForm, map_sum]
   refine J.sum_mem fun j _ => ?_
   rw [map_mul]
@@ -50,7 +94,9 @@ theorem SpecMax.proof (h1 : SecBFinite.Statement) (h2 : SecIdealOfPrime.Statemen
   have hmax : ∀ W ∈ specComps I v, (secIdealOf e I v W).IsMaximal := by
     intro W hW
     obtain ⟨hprime, -⟩ := h2 K n e I f v hI hf W hW
-    refine Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := ParDVR e n v) _ ?_
+    refine Ideal.isMaximal_of_isIntegral_of_isMaximal_comap
+      (algebraMap (ParDVR e n v) (SecB e I v)) (algebraMap_isIntegral_iff.mpr inferInstance)
+      (secIdealOf e I v W) ?_
     have hle : IsLocalRing.maximalIdeal (ParDVR e n v) ≤
         (secIdealOf e I v W).comap (algebraMap (ParDVR e n v) (SecB e I v)) := by
       rw [← Localization.AtPrime.map_eq_maximalIdeal, Ideal.map_le_iff_le_comap]
@@ -66,7 +112,8 @@ theorem SpecMax.proof (h1 : SecBFinite.Statement) (h2 : SecIdealOfPrime.Statemen
 
   set W' := 𝔫.comap (toSecB e I v) with hW'
   have hR : 𝔫.comap (algebraMap (ParDVR e n v) (SecB e I v)) = IsLocalRing.maximalIdeal _ :=
-    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal _)
+    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal
+      (algebraMap (ParDVR e n v) (SecB e I v)) (algebraMap_isIntegral_iff.mpr inferInstance) 𝔫)
   have hle : integralModel I ⊔ Ideal.map C v.asIdeal ≤ W' := by
     refine sup_le (fun p hp => ?_) ?_
     · have h0 : toSecB e I v p = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr

@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EigLat
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapFromSpecStalk
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsVBOnDualAndBidual
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EigLat
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapFromSpecStalk
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsVBOnDualAndBidual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,6 +79,7 @@ theorem exists_isCoord (c : Module.Basis (Fin g) B Ω[B⁄A]) :
   refine ⟨fun k => (c.coord k).compDer (KaehlerDifferential.D A B), w, ?_, ?_⟩
   · intro i k
     have := congrArg (c.coord k) (hw i)
+
     rw [Finsupp.sum, map_sum] at this
     rw [Finsupp.sum]
     simp only [map_smul, smul_eq_mul] at this
@@ -53,12 +103,14 @@ theorem exists_isCoord (c : Module.Basis (Fin g) B Ω[B⁄A]) :
       simp [L, δ', δl]
     have hc : ∀ k, L (c k) = (w k).sum (fun b' a => ε a • δ b') := by
       intro k
+
       rw [← hw k, Finsupp.sum, map_sum, Finsupp.sum]
       refine Finset.sum_congr rfl fun b' _ => ?_
       rw [map_smul, hLD]
       rfl
     rw [← hLD b]
     conv_lhs => rw [← c.sum_repr (KaehlerDifferential.D A B b)]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, hc]
@@ -104,16 +156,16 @@ theorem surj_fst :
   · intro h; simpa using p.asIdeal.sub_mem h hm
   · intro h; simpa using p.asIdeal.add_mem hm h
 
-variable (J J₀) in
 
+variable (J J₀) in
 def IsChart : Prop := J ≫ G.hom = Spec.map (CommRingCat.ofHom (algebraMap A B)) ≫ J₀
 
-variable (J x ε) in
 
+variable (J x ε) in
 def IsUnitIn : Prop := Spec.map (CommRingCat.ofHom ε) ≫ J = (1 : Over.mk x ⟶ G).left
 
-variable (A ε) in
 
+variable (A ε) in
 def Lifts (f : B →+* TrivSqZeroExt T M) : Prop :=
   (∀ b, (f b).fst = ε b) ∧ ∀ a, (f (algebraMap A B a)).snd = 0
 
@@ -180,12 +232,12 @@ theorem mk_rep (hc : IsChart J J₀) (hε : IsUnitIn J x ε) (f : B →+* TrivSq
 
 variable {g : ℕ} {d : Fin g → Derivation A B B} {w : Fin g → B →₀ B}
 
-variable (ε w) in
 
+variable (ε w) in
 def yco (δ : B → M) (i : Fin g) : M := (w i).sum fun b a => ε a • δ b
 
-variable (A J ε w) in
 
+variable (A J ε w) in
 def Co (v : LieEx.ob x M ⟶ G) (y : Fin g → M) : Prop :=
   ∃ f : B →+* TrivSqZeroExt T M, v.left = Spec.map (CommRingCat.ofHom f) ≫ J ∧ Lifts A ε f ∧
     ∀ i, y i = yco ε w (fun b => (f b).snd) i
@@ -243,9 +295,10 @@ theorem co_onto (hc : IsChart J J₀) (hε : IsUnitIn J x ε) (hd : IsCoord d w)
     rw [hd.1 i k]; split_ifs <;> simp
   have e : yco ε w (fun b => (defo d ε y b).snd) i =
       ∑ k, ε ((w i).sum fun b a => a * d k b) • y k := by
+
     simp only [yco, defo, Finsupp.sum, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
-      TrivSqZeroExt.snd_add, TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inr, zero_add, Finset.smul_sum, map_sum,
-      Finset.sum_smul, map_mul, mul_smul]
+    TrivSqZeroExt.snd_add, TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inr, zero_add, Finset.smul_sum, map_sum,
+    Finset.sum_smul, map_mul, mul_smul]
     exact Finset.sum_comm
   rw [e]
   simp [key]
@@ -259,6 +312,7 @@ theorem co_hom (l : M →ₗ[T] N) {v : LieEx.ob x M ⟶ G} {y : Fin g → M} (h
   · simpa using hf.1 b
   · simp [hf.2 a]
   · change l (y i) = _
+
     rw [hy, yco, yco, Finsupp.sum, Finsupp.sum, map_sum]
     simp
 
@@ -310,6 +364,7 @@ theorem co_base (φ : T →+* T') {x' : Spec (CommRingCat.of T') ⟶ X} {v : Lie
   · simpa [dualMap] using congrArg φ (hf.1 b)
   · simp [dualMap, hf.2 a]
   · change φ (y i) = _
+
     rw [hy, yco, yco, Finsupp.sum, Finsupp.sum, map_sum]
     simp [dualMap]
 

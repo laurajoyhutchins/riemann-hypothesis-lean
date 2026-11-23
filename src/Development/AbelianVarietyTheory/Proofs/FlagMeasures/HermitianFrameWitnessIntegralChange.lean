@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsInnerLatticeVectorAnisotropicStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitriangularChangeFrameUnipotentStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnipotentAddIsotropicToAnisotropicStatement
+module
+
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NormAdditiveCharacterTypePrimeEqOne
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsInnerLatticeVectorAnisotropicStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnipotentAddIsotropicToAnisotropicStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitriangularChangeFrameUnipotentStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open ValuativeRel Formalism.MainNotions.S Formalism.MainNotions.S.Loc Formalism.MainNotions.S.LocNG GlobalTheory.LocOver
 open scoped Classical
@@ -49,22 +91,7 @@ lemma frame_projection_last_eq_self (Fr : FrameD H r) : Fr.prF (Fr.f (Fin.last r
 
 lemma frame_mem (Fr : FrameD H r) {L : Submodule M.L.O (H.Wb Fr.f)} (hL : Fr.IsInner L) (b : Fin (r + 1)) :
     Fr.f b ∈ Fr.LamStd L := by
-  apply Submodule.subset_span
-  rcases Fin.eq_castSucc_or_eq_last b with ⟨a, rfl⟩ | rfl
-  · refine ⟨fun c => ?_, fun c => ?_, ⟨0, ?_, ?_⟩⟩
-    · rw [Fr.h_es]; split_ifs
-      · exact M.L.O.one_mem
-      · exact M.L.O.zero_mem
-    · show H.h (Fr.f a.castSucc) (Fr.f c.castSucc) ∈ _
-      rw [Fr.h_iso _ _ (Or.inl (Fin.castSucc_lt_last a).ne)]; exact M.L.O.zero_mem
-    · exact (prF_e Fr a).symm
-    · rw [map_zero]; exact L.zero_mem
-  · obtain ⟨xz, hxz, hxL, _⟩ := hL.2.2
-    refine ⟨fun c => ?_, fun c => ?_, ⟨xz, ?_, hxL⟩⟩
-    · rw [H.h_herm (Fr.es c) _, Fr.h_sz, map_zero]; exact M.L.O.zero_mem
-    · show H.h (Fr.f (Fin.last r)) (Fr.f c.castSucc) ∈ _
-      rw [Fr.h_iso _ _ (Or.inr (Fin.castSucc_lt_last c).ne)]; exact M.L.O.zero_mem
-    · rw [hxz]; exact (frame_projection_last_eq_self Fr).symm
+  apply Formalism.MainNotions.BridgeLemma.f_mem_LamStd <;> assumption
 
 end
 
@@ -101,12 +128,14 @@ theorem witness_change : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalS
   refine ⟨hT, hT', ⟨n * kA, mul_mem hn hkA, ?_, ?_⟩, ⟨n' * kB, mul_mem hn' hkB, ?_, ?_⟩, ?_⟩
   · funext b
     show g b = n (kA (P.A.f b))
+
     rw [hg b, hkAf b, map_sum, hf]
     simp only [map_smul]
   · show t.abelian₂ = _
     rw [img_mul, hkAL, hLam]
   · funext b
     show g' b = n' (kB (P.B.f b))
+
     rw [hg' b, hkBf b, map_sum, hf']
     simp only [map_smul]
   · show t.abelian₂ = _

@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PrimeComplMapLeNonZeroDivisorsQuot
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.LocRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -82,7 +131,7 @@ theorem mem_of_sum_mem {I : Ideal (MRing ι)} (hI : IsMultiHomogIdeal I) {β : T
   convert hgI using 1
   ext m
   rw [hg, coeff_sum]
-  by_cases hm : coeff m (h b) = 0
+  by_cases hm : AddMonoidAlgebra.coeff (h b) m = 0
   · rw [hm]
     split_ifs with hdeg
     · refine (Finset.sum_eq_zero fun b' hb' => ?_).symm
@@ -119,8 +168,8 @@ theorem fracHom_eq_zero_iff {u : MRing ι} : fracHom P u = 0 ↔ u ∈ P := by
 theorem one_notMem_of_isPrime : (1 : MRing ι) ∉ W :=
   (Ideal.ne_top_iff_one W).mp (Ideal.IsPrime.ne_top ‹_›)
 
-variable {P W} in
 
+variable {P W} in
 theorem mem_locRing_iff (hPW : P ≤ W) {x : FractionRing (MRing ι ⧸ P)} :
     x ∈ locRing P W ↔ ∃ (u v : MRing ι) (a : K → ℕ), IsMultiHomog u a ∧ IsMultiHomog v a ∧ v ∉ W ∧
       x * fracHom P v = fracHom P u := by
@@ -139,7 +188,7 @@ theorem mem_locRing_iff (hPW : P ≤ W) {x : FractionRing (MRing ι ⧸ P)} :
       · rw [add_comm a a']
         exact homog_mul hu' hv
       · exact fun h => (Ideal.IsPrime.mem_or_mem ‹_› h).elim hvW hvW'
-      · simp only [map_add, map_mul]
+      · simp only [map_add (f := _), map_mul]
         rw [← hx, ← hy]
         ring
     | neg x _ hx =>
@@ -162,16 +211,16 @@ theorem mem_locRing_iff (hPW : P ≤ W) {x : FractionRing (MRing ι ⧸ P)} :
     rw [IsLocalization.eq_mk'_iff_mul_eq]
     exact hx
 
-variable {P W} in
 
+variable {P W} in
 theorem div_mem_locRing (hPW : P ≤ W) {u v : MRing ι} {a : K → ℕ} (hu : IsMultiHomog u a)
     (hv : IsMultiHomog v a) (hvW : v ∉ W) : fracHom P u / fracHom P v ∈ locRing P W := by
   refine (mem_locRing_iff hPW).mpr ⟨u, v, a, hu, hv, hvW, div_mul_cancel₀ _ ?_⟩
   rw [Ne, fracHom_eq_zero_iff]
   exact fun h => hvW (hPW h)
 
-variable {P W} in
 
+variable {P W} in
 theorem isUnit_iff (hPW : P ≤ W) (x : locRing P W) {u v : MRing ι} {a : K → ℕ} (hu : IsMultiHomog u a)
     (hv : IsMultiHomog v a) (hvW : v ∉ W)
     (hx : (x : FractionRing (MRing ι ⧸ P)) * fracHom P v = fracHom P u) : IsUnit x ↔ u ∉ W := by
@@ -201,8 +250,8 @@ theorem isUnit_iff (hPW : P ≤ W) (x : locRing P W) {u v : MRing ι} {a : K →
     rw [eq_div_of_mul_eq hv0 hx]
     field_simp
 
-variable {P W} in
 
+variable {P W} in
 theorem isLocalRing (hPW : P ≤ W) : IsLocalRing (locRing P W) := by
   refine IsLocalRing.of_nonunits_add fun x y hx hy hxy => ?_
   obtain ⟨u, v, a, hu, hv, hvW, hx'⟩ := (mem_locRing_iff hPW).mp x.2
@@ -221,14 +270,14 @@ theorem isLocalRing (hPW : P ≤ W) : IsLocalRing (locRing P W) := by
   have heq : ((x + y : locRing P W) : FractionRing (MRing ι ⧸ P)) * fracHom P (v * v') =
       fracHom P (u * v' + u' * v) := by
     change ((x : FractionRing (MRing ι ⧸ P)) + y) * _ = _
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
     rw [← hx', ← hy']
     ring
   exact (isUnit_iff hPW (x + y) hnum (homog_mul hv hv') hden heq).mp hxy
     (W.add_mem (W.mul_mem_right _ huW) (W.mul_mem_right _ hu'W))
 
-variable {P W} in
 
+variable {P W} in
 theorem mem_maximalIdeal_iff (hPW : P ≤ W) (x : locRing P W) {u v : MRing ι} {a : K → ℕ}
     (hu : IsMultiHomog u a) (hv : IsMultiHomog v a) (hvW : v ∉ W)
     (hx : (x : FractionRing (MRing ι ⧸ P)) * fracHom P v = fracHom P u) :

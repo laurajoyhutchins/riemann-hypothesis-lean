@@ -1,7 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+module
+
+public import Formalism.RealPlaceAnalysis.StatementA
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.LinearAlgebra.UnitaryGroup
+public import Mathlib.Topology.Instances.Matrix
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GroupGeneratedByExp
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.OneParameterDifferentiable
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GroupGeneratedByExp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Matrix
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLoc
+
+@[expose] public section
 
 noncomputable section
 
@@ -203,7 +262,7 @@ theorem dB_I (hρ : Continuous ρ) {X : (Mn n)} (hX : Xᴴ = -X) : dB (ρ := ρ)
 def gL (hρ : Continuous ρ) : (Mn n) →ₗ[ℂ] (H →L[ℂ] H) where
   toFun Z := dB hρ Z - Complex.I • dB hρ (Complex.I • Z)
   map_add' Z W := by
-    simp only [smul_add, map_add]
+    simp only [smul_add, map_add (f := _)]
     abel
   map_smul' c Z := by
     obtain ⟨r, s, rfl⟩ : ∃ r s : ℝ, c = r + s * Complex.I := ⟨c.re, c.im, (Complex.re_add_im c).symm⟩
@@ -218,7 +277,7 @@ def gL (hρ : Continuous ρ) : (Mn n) →ₗ[ℂ] (H →L[ℂ] H) where
       rw [this, add_smul]
     simp only [RingHom.id_apply]
     rw [e2, e1]
-    simp only [map_add, map_smul]
+    simp only [map_add (f := _), map_smul]
     simp only [← Complex.coe_smul]
     push_cast
     match_scalars <;> ring_nf <;> simp only [Complex.I_sq] <;> ring
@@ -288,9 +347,9 @@ theorem gL_bracket (hρ : Continuous ρ) (Z W : (Mn n)) :
     rw [gL_skew hρ (bracket_skew hX hY), gL_skew hρ hX, gL_skew hρ hY, dA_bracket hρ hX hY]
   obtain ⟨P, Q, hP, hQ, rfl⟩ := decomp Z
   obtain ⟨P', Q', hP', hQ', rfl⟩ := decomp W
-  have e1 : gL (ρ := ρ) hρ (P + Complex.I • Q) = gL hρ P + Complex.I • gL hρ Q := by rw [map_add, map_smul]
-  have e2 : gL (ρ := ρ) hρ (P' + Complex.I • Q') = gL hρ P' + Complex.I • gL hρ Q' := by rw [map_add, map_smul]
-  rw [expand P Q P' Q', e1, e2, expand (gL hρ P) (gL hρ Q) (gL hρ P') (gL hρ Q'), map_add, map_add, map_add,
+  have e1 : gL (ρ := ρ) hρ (P + Complex.I • Q) = gL hρ P + Complex.I • gL hρ Q := by rw [map_add (f := _), map_smul]
+  have e2 : gL (ρ := ρ) hρ (P' + Complex.I • Q') = gL hρ P' + Complex.I • gL hρ Q' := by rw [map_add (f := _), map_smul]
+  rw [expand P Q P' Q', e1, e2, expand (gL hρ P) (gL hρ Q) (gL hρ P') (gL hρ Q'), map_add (f := _), map_add (f := _), map_add (f := _),
     map_smul, map_smul, map_smul, key hP hP', key hP hQ', key hQ hP', key hQ hQ']
 
 end Rep
@@ -320,7 +379,7 @@ theorem gL_adj (hρ : Continuous ρ) (hiso : ∀ k v, ‖ρ k v‖ = ‖v‖) (Z
     rw [conjTranspose_add, conjTranspose_smul, hP, hQ, Complex.star_def, Complex.conj_I]
     simp
   rw [eH]
-  simp only [map_add, map_smul, gL_skew hρ hP, gL_skew hρ hQ, ContinuousLinearMap.add_apply,
+  simp only [map_add (f := _), map_smul, gL_skew hρ hP, gL_skew hρ hQ, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.coe_smul', Pi.smul_apply, inner_add_left, inner_add_right, inner_smul_left, inner_smul_right,
     dA_skewAdj hρ hiso hP x y, dA_skewAdj hρ hiso hQ x y, Complex.conj_I]
   ring
@@ -368,6 +427,7 @@ theorem derivative_of_rep : ∀ {n : ℕ} (H : Type) [NormedAddCommGroup H] [Inn
     obtain rfl : γ = eU X hX := funext fun t => Subtype.ext (hγ t)
     have hs : gL hρ X = ∑ a, ∑ b, X a b • gL hρ (Matrix.single a b 1) := by
       conv_lhs => rw [Matrix.matrix_eq_sum_single X]
+
       simp only [map_sum]
       refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
       rw [← map_smul, Matrix.smul_single, smul_eq_mul, mul_one]

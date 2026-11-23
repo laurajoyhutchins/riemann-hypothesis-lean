@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +68,8 @@ def IsRightTransversal {G : Type*} [Group G] (Γ S : Subgroup G) (D : Set G) : P
 def quotientLIntegral {G : Type*} [MeasurableSpace G] (μ : Measure G) (F : Set G) (Ph : G → ℂ) : ℝ≥0∞ :=
   ∫⁻ y in F, ‖Ph y‖ₑ ∂μ
 
-set_option linter.dupNamespace false in
 
+set_option linter.dupNamespace false in
 def FoldBound (G : Type*) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
     [LocallyCompactSpace G] [SecondCountableTopology G] [MeasurableSpace G] [BorelSpace G]
     (μ : Measure G) [μ.IsHaarMeasure] : Prop :=
@@ -101,7 +153,7 @@ theorem foldBound_holds (G : Type*) [Group G] [TopologicalSpace G] [IsTopologica
   have step3 : ∫⁻ y, ∑' δ : D, Fd ((δ : G) * x) y ∂μ =
       ∫⁻ y in F, ∑' s : S, ∑' δ : D, Fd ((δ : G) * x) ((s : G) * y) ∂μ := by
     refine (hF.lintegral_eq_tsum'' _).trans (lintegral_tsum fun s => ?_).symm
-    exact (Measurable.ennreal_tsum fun δ => (hFdm _).comp (measurable_const_mul _)).aemeasurable
+    exact (Measurable.tsum fun δ => (hFdm _).comp (measurable_const_mul _)).aemeasurable
 
   have step4 : ∀ y, ∑' s : S, ∑' δ : D, Fd ((δ : G) * x) ((s : G) * y) ≤
       mult Γ Ω x * ‖Ph y‖ₑ := by

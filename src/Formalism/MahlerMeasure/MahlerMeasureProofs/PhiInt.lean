@@ -1,4 +1,53 @@
-import Formalism.MahlerMeasure.IsIntegral
+module
+
+public import Formalism.MahlerMeasure.IsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.GM.M.PhiIntegrality
 
@@ -56,6 +105,7 @@ theorem bnd_linear (T : MvPolynomial σ ℚ_[p] →ₗ[ℚ_[p]] MvPolynomial σ 
 
   have e : T u = ∑ v ∈ u.support, u.coeff v • T (monomial v 1) := by
     conv_lhs => rw [u.as_sum]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun v _ => ?_
     rw [← map_smul, MvPolynomial.smul_monomial, smul_eq_mul, mul_one]
@@ -85,11 +135,11 @@ theorem pderiv_comm' (i j : σ) (f : MvPolynomial σ ℚ_[p]) :
   classical
   induction f using MvPolynomial.induction_on with
   | C a => simp
-  | add f g hf hg => simp only [map_add, hf, hg]
+  | add f g hf hg => simp only [map_add (f := _), hf, hg]
   | mul_X f k ih =>
     have h0 : ∀ a b : σ, pderiv a ((Pi.single b (1 : MvPolynomial σ ℚ_[p]) : σ → MvPolynomial σ ℚ_[p]) k) = 0 := by
       intro a b; rw [Pi.single_apply]; split_ifs <;> simp
-    simp only [Derivation.leibniz, map_add, pderiv_X, smul_eq_mul, ih, h0]
+    simp only [Derivation.leibniz, map_add (f := _), pderiv_X, smul_eq_mul, ih, h0]
     ring
 
 theorem commute_pderiv (i j : σ) :
@@ -243,7 +293,7 @@ end
 
 open MvPolynomial Finset
 
-set_option maxHeartbeats 800000 in
+
 
 theorem phi_integrality : PhiInt := by
 

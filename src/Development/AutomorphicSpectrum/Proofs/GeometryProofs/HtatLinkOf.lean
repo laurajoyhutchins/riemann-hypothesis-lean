@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PowValIntCast
-import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatLat
-import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatPol
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.HTChartExists
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.OverZpOfInFibre
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PowValIntCast
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.BtLink
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.Hcptgen
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatLat
 import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatLev
-import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatReg
-import Development.WeilBound.CoreStatements.HodgeTatePoints.Hcptgen
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.HodgeTateNormComparison
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Birational
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatPol
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatReg
 import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfSec
-import Development.WeilBound.CoreStatements.HodgeTatePoints.BtLink
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HTChartExistsHoldsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateChartIntegralStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +88,7 @@ theorem htat_link_of (h758 : type_of% @GlobalTheory.T.HTChartExists_holds) (h576
       ∀ κ : chartRing o (mseg y) s.1, PointHT → IsCp p (κ : Ω) → Dc.HasTestPoints κ := by
     intro s
     obtain ⟨_, _, _, x, hx, hr⟩ := hch s.1 s.2
-    obtain ⟨Dc, h1, h2, h3, h4, h5, h6⟩ := exists_chart Twhopf.sec_inj Twexists.exists_torsion' h758 h576 D 𝔐.t 𝔐.ξ 𝔐.tie.gen 𝔐.all 𝔐.M 𝔐.ρ 𝔐.act
+    obtain ⟨Dc, h1, h2, h3, h4, h5, h6⟩ := GlobalTheory.CompanionTheory.HtLink.exists_chart Twhopf.sec_inj Twexists.exists_torsion' h758 h576 D 𝔐.t 𝔐.ξ 𝔐.tie.gen 𝔐.all 𝔐.M 𝔐.ρ 𝔐.act
       p (𝔐.R p) hev hprop (𝔐.tors p hpS) hrk u hu π e hπ he hsurj hker halt hadj hes hei (chartRing o (mseg y) s.1) x hx
       (fun q hq => chart_le_regAt 𝔐 p o ho s.1 q ((hr q).1 hq).1 ((hr q).1 hq).2)
     exact ⟨Dc, h1, h2, fun w => (h3 w).trans ⟨fun h q a b => h q ((hr q).2 ⟨a, b⟩),

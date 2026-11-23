@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageChi
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageTop
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PResChiIndex
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageChi
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockGraphImage
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageTop
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PResChiIndex
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ResSymGram
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeSt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeStA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -56,7 +110,7 @@ theorem backQ_map (k₀ : K) (M : Matrix (Ix (Fin r)) (ι k₀) ℤ) (g : MvPoly
   rw [back, backQ, map_bind₁]
 
 theorem fst_eq_of_mem_support {f : MRing ι} {k₀ : K} {n : ℕ} (hf : IsMultiHomog f (blockDeg k₀ n))
-    {c : (Σ k, ι k) →₀ ℕ} (hc : coeff c f ≠ 0) {p : Σ k, ι k} (hp : p ∈ c.support) : p.1 = k₀ := by
+    {c : (Σ k, ι k) →₀ ℕ} (hc : AddMonoidAlgebra.coeff f c ≠ 0) {p : Σ k, ι k} (hp : p ∈ c.support) : p.1 = k₀ := by
   by_contra hne
   have h := hf c (mem_support_iff.mpr hc) p.1
   rw [blockDeg, if_neg hne, Finset.sum_eq_zero_iff] at h
@@ -134,7 +188,7 @@ theorem aeval_eq_zero_of_mem {y : (Σ k, ι k) → Ω} {g : MRing ι} (hg : g �
     intro g
     induction g using MvPolynomial.induction_on with
     | C a => simp [mConeMap]
-    | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+    | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
     | mul_X p i hp => rw [map_mul, map_mul, map_mul, hp]; simp [mConeMap]
   rw [mCoordIdeal, RingHom.mem_ker] at hg
   rw [← e, hg, map_zero]
@@ -156,7 +210,9 @@ theorem back_fwd_sub_mem (h : IsBlockImage y k₀ M N x) {f : MRing ι} {n : ℕ
   have hk : k = k₀ := fst_eq_of_mem_support hf hc hp
   subst hk
   have e3 : back k M (∑ j, C (N i j) * X j) = ∑ j, C (N i j) * blockForms k M j := by
-    simp [back]
+    rw [back, map_sum]
+    exact Finset.sum_congr rfl fun j _ => by
+      rw [map_mul, MvPolynomial.bind₁_C_right, MvPolynomial.bind₁_X_right]
   rw [blockSubst_block, e3]
   exact (Ideal.Quotient.eq.mpr (BlockImageTop.sub_mem_mCoordIdeal h i)).symm
 
@@ -179,10 +235,14 @@ theorem eval_fwd (h : IsBlockImage y k₀ M N x) {f : MRing ι} {n : ℕ} (hf : 
     intro g
     induction g using MvPolynomial.induction_on with
     | C a => simp [back]
-    | add p q hp hq => rw [map_add, map_add, map_add, map_add, map_add, hp, hq]
+    | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
     | mul_X p j hp =>
-      rw [map_mul, map_mul, map_mul, map_mul, map_mul, hp]
-      simp [back, blockForms, blockMapC]
+      rw [map_mul, map_mul, map_mul, map_mul, map_mul, hp, back, MvPolynomial.bind₁_X_right,
+        MvPolynomial.map_X, MvPolynomial.eval_X]
+      congr 1
+      first
+        | (simp [blockForms, blockMapC]; done)
+        | (simp [blockForms, blockMapC, mul_comm]; done)
   rw [e]
   have h0 := hz.2 _ (back_fwd_sub_mem h hf)
   rw [map_sub, map_sub, sub_eq_zero] at h0
@@ -251,6 +311,7 @@ theorem conjPt_mem_mcPts {P : Ideal (MRing ι)} {z : (Σ k, ι k) → ℂ} (hz :
 theorem blockMapC_conjPt (k₀ : K) {J : Type} [Fintype J] (M : Matrix J (ι k₀) ℤ) (z : (Σ k, ι k) → ℂ) :
     blockMapC k₀ M (conjPt z) = conjPt (blockMapC k₀ M z) := by
   funext j
+
   simp [blockMapC, conjPt, map_sum]
 
 end Points
@@ -281,6 +342,7 @@ theorem det_resGram_eq {κ : Type} [Fintype κ] (d : HSMDatum D Ω κ) {n s : �
         refine hf'.sub (IsHomogeneous.sum _ _ _ fun l _ => ?_)
         simpa using (isHomogeneous_C (Ix κ) (A k l)).mul (hf l)
       have hq0 : aeval d.x q = 0 := by
+
         simp only [q, map_sub, map_sum, map_mul, eq_intCast]
         rw [← aeval_map_int, ← hbf', ← hA k]
         simp [zsmul_eq_mul, hbf, aeval_map_int, map_intCast]
@@ -324,7 +386,7 @@ theorem resChi_eq_of_basis {κ : Type} [Fintype κ] (d : HSMDatum D Ω κ) {n s 
     resChi d n = -(1 / 2) * Real.log (resGram d n b).det := by
   have h : ∃ p : (Σ r : ℕ, Fin r → MvPolynomial (Ix κ) ℚ), IsSecBasis d.x n p.2 := ⟨⟨s, b⟩, hb⟩
   unfold resChi
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   have hp := h.choose_spec
   generalize h.choose = p at hp ⊢
   obtain ⟨s', b'⟩ := p
@@ -407,13 +469,13 @@ theorem BlockImageChi.proof : BlockImageChi.Statement := by
   by_cases h : ∃ p : (Σ s : ℕ, Fin s → MvPolynomial (Σ k, ι k) ℚ), IsSecBasisM d₀.y d₀.k₀ n p.2
   · have hb := h.choose_spec
     unfold blockChi
-    rw [dif_pos h, BlockImageChi.blockGram_eq d₀ M N d' hIm hmet hint n _ hb.1,
+    rw [dite_eq_left h, BlockImageChi.blockGram_eq d₀ M N d' hIm hmet hint n _ hb.1,
       BlockImageChi.resChi_eq_of_basis d' (BlockImageChi.isSecBasis_fwd hIm hb)]
   · have h' : ¬ ∃ p : (Σ s : ℕ, Fin s → MvPolynomial (Ix (Fin r)) ℚ), IsSecBasis d'.x n p.2 := by
       rintro ⟨p, hp⟩
       exact h ⟨⟨p.1, fun j => BlockImageChi.backQ d₀.k₀ M (p.2 j)⟩, BlockImageChi.isSecBasisM_back hIm hp⟩
     unfold blockChi resChi
-    rw [dif_neg h, dif_neg h']
+    rw [dite_eq_right h, dite_eq_right h']
 
 end
 

@@ -1,4 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.Biextensions.GenericFiberCubeInclusion
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.Biextensions.GenericFiberCubeInclusion
+public import Mathlib.AlgebraicGeometry.Geometrically.Connected
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.Semi
 
@@ -10,10 +56,6 @@ open MonoidalCategory CartesianMonoidalCategory MonObj
 universe u
 
 attribute [local instance] Over.cartesianMonoidalCategory
-
-def lam_isBiextSt : Prop :=
-  ∀ (S : Scheme.{u}) (G : Over S) [GrpObj G] [IsCommMonObj G] (L : RigLB G) (_c : CubicalStr G L),
-    Nonempty (IsBiext G (abelian₂ G L.L))
 
 def extendGenSt : Prop :=
   ∀ (V : Type u) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V]
@@ -46,25 +88,13 @@ def cubical_extendsSt : Prop :=
     t.IsGen →
     ∃! c : LB.Gen (Theta G L.L), c.IsGen ∧ LB.pullGen L.L _ _ c (genericFiberCubeInclusion V K G) = t
 
-def corr_of_genericSt : Prop :=
-  ∀ (V : Type u) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V]
-    (K : Type u) [Field K] [Algebra V K] [IsFractionRing V K]
-    (G : Over (Spec (CommRingCat.of V)))
-    (T : Over (Spec (CommRingCat.of V))) [Flat T.hom] [IsReduced T.left]
-    (L : LB G.left) {Kα Kβ : Type u} [Fintype Kα] [Fintype Kβ]
-    (φ : Kα → (T.left ⟶ G.left)) (ε : Kα → ℤ) (φ' : Kβ → (T.left ⟶ G.left)) (ε' : Kβ → ℤ)
-    (t : LB.Gen (LB.LinComb L φ ε)) (t' : LB.Gen (LB.LinComb L φ' ε')),
-    LB.Gen.Corr L _ _ _ _ (LB.pullGen L _ _ t (pullback.fst T.hom (etaK V K)))
-      (LB.pullGen L _ _ t' (pullback.fst T.hom (etaK V K))) →
-    LB.Gen.Corr L _ _ _ _ t t'
-
 def lemmaBSt : Prop :=
   ∀ (V : Type u) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V]
     (G : Over (Spec (CommRingCat.of V))) [GrpObj G] [IsCommMonObj G]
     [Smooth G.hom] [IsSeparated G.hom] [QuasiCompact G.hom] [GeometricallyConnected G.hom]
     (N : LB G.left), N.IsLB → ∀ (s : LB.Sec N) (π : V), Irreducible π →
-    (∀ i (e : ℕ), s.f i ∈ Ideal.span {(G.left.presheaf.map (homOfLE (le_top :
-        N.U i ≤ ⊤)).op).hom ((G.hom.app ⊤).hom ((Scheme.ΓSpecIso (CommRingCat.of V)).inv.hom π))} ^ e) →
+    (∀ i (e : ℕ), s.f i ∈ Ideal.span (Set.singleton ((G.left.presheaf.map (homOfLE (le_top :
+        N.U i ≤ ⊤)).op).hom ((G.hom.app ⊤).hom ((Scheme.ΓSpecIso (CommRingCat.of V)).inv.hom π)))) ^ e) →
     ∀ i, s.f i = 0
 
 end

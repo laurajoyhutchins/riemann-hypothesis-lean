@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.DensityNumericalFacts
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MeanDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PolynomialDimension.WeylDim
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,8 +104,8 @@ theorem ceil_cast {x : ℝ} (hx : 0 ≤ x) : ((⌈x⌉₊ : ℕ) : ℤ) = ⌈x�
 theorem floor_cast {x : ℝ} (hx : 0 ≤ x) : ((⌊x⌋₊ : ℕ) : ℤ) = ⌊x⌋ := by
   rw [← Int.floor_toNat, Int.toNat_of_nonneg (Int.floor_nonneg.mpr hx)]
 
-open Classical in
 
+open Classical in
 theorem kText_cast (K : Cst) (X : Dat) (R : RS X.p X.n') (hbl : 0 ≤ X.bl) (A B : X.TT → ℕ) :
     X.kText K R (fun s => (A s : ℤ)) (fun s => (B s : ℤ)) =
       (if (∀ s, X.a + X.ccl ≤ A s ∧ X.lb + X.ccl ≤ B s) then
@@ -100,8 +142,8 @@ theorem sum_of_meanN {ι : Type} [Fintype ι] [DecidableEq ι] (Sa Sb : Finset �
   unfold meanN at h
   rwa [div_le_iff₀ hD] at h
 
-open Classical in
 
+open Classical in
 theorem sum_first {ι : Type} [Fintype ι] [DecidableEq ι] (a ua lb ub c : ℕ) (kf : (ι → ℕ) → (ι → ℕ) → ℝ)
     (hkf : ∀ A B, 0 ≤ kf A B) :
     ∑ A ∈ Fintype.piFinset (fun _ : ι => Finset.Icc a ua), ∑ B ∈ Fintype.piFinset (fun _ : ι => Finset.Icc lb ub),

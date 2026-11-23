@@ -1,6 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ConstantCoeffSurjective
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.GaloisTwistIdentitySection
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ConstantCoeffSurjective
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.GaloisTwistIdentitySection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -138,15 +178,15 @@ theorem exists_phi_xi (A : PAlg l) :
   refine ⟨((l - 1).factorial : A.Acr0) * A.dxi0 l + algebraMap A.W A.Acr0 y, ?_⟩
   rw [acrisZero_map_algebraMap]
   change algebraMap A.W A.Acr0 (A.phiW A.xi) = _
-  rw [hy, map_add, map_pow, ← factorial_mul_divided_power_xi, map_mul, map_natCast, mul_add, ← mul_assoc, ← Nat.cast_mul,
+  rw [hy, map_add (f := _), map_pow, ← factorial_mul_divided_power_xi, map_mul, map_natCast, mul_add, ← mul_assoc, ← Nat.cast_mul,
     Nat.mul_factorial_pred (Fact.out : l.Prime).ne_zero]
 
 theorem factorization_factorial_le (k : ℕ) (hk : 1 ≤ k) : (k.factorial).factorization l ≤ k - 1 := by
   have hp : l.Prime := Fact.out
   rw [Nat.factorization_def _ hp]
-  have h : (l - 1) * padicValNat l k.factorial < k := sub_one_mul_padicValNat_factorial_lt_of_ne_zero l (by omega)
+  have h : (l - 1) * multiplicity l k.factorial < k := sub_one_mul_multiplicity_factorial_lt_of_ne_zero l (n := k) (by omega)
   have h1 : 1 ≤ l - 1 := Nat.le_sub_of_add_le hp.two_le
-  have h2 : padicValNat l k.factorial ≤ (l - 1) * padicValNat l k.factorial := Nat.le_mul_of_pos_left _ h1
+  have h2 : multiplicity l k.factorial ≤ (l - 1) * multiplicity l k.factorial := Nat.le_mul_of_pos_left _ h1
   omega
 
 theorem exists_factorial_mul (A : PAlg l) (k : ℕ) (hk : 1 ≤ k) :

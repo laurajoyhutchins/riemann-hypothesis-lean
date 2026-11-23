@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DerInner
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Trace
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DerInner
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Isomorphisms
+
+@[expose] public section
 
 open Polynomial Matrix IsLocalRing TensorProduct
 
@@ -33,7 +82,7 @@ theorem UpperTheory.V.AlgebraTools.cocycle_trace_zero :
   have hkey : ∀ g h, T (m g * r h) = - T (r g * m h) := by
     intro g h
     have : T (m (g * h)) = 0 := by rw [hT]; exact htr _
-    rw [hm, map_add] at this
+    rw [hm, map_add (f := _)] at this
     exact eq_neg_of_add_eq_zero_left this
   let R := Finsupp.linearCombination K (fun g => r g)
   let M := Finsupp.linearCombination K m
@@ -44,7 +93,7 @@ theorem UpperTheory.V.AlgebraTools.cocycle_trace_zero :
     intro f h
     induction f using Finsupp.induction_linear with
     | zero => simp
-    | add f₁ f₂ h₁ h₂ => simp only [map_add, add_mul, h₁, h₂]; ring
+    | add f₁ f₂ h₁ h₂ => simp only [map_add (f := _), add_mul, h₁, h₂]; ring
     | single g a =>
       simp only [R, M, Finsupp.linearCombination_single, smul_mul_assoc, map_smul, hkey, smul_neg]
   have hle : LinearMap.ker R ≤ LinearMap.ker M := by
@@ -58,7 +107,7 @@ theorem UpperTheory.V.AlgebraTools.cocycle_trace_zero :
       obtain ⟨h, rfl⟩ := hx
       rw [hkey2, hf]; simp
     | zero => simp
-    | add x y _ _ h₁ h₂ => rw [mul_add, map_add, h₁, h₂, add_zero]
+    | add x y _ _ h₁ h₂ => rw [mul_add, map_add (f := _), h₁, h₂, add_zero]
     | smul a x _ h₁ => rw [mul_smul_comm, map_smul, h₁, smul_zero]
   let D : (∀ s, Matrix (d s) (d s) K) →ₗ[K] (∀ s, Matrix (d s) (d s) K) :=
     (LinearMap.ker R).liftQ M hle ∘ₗ (R.quotKerEquivOfSurjective hR).symm.toLinearMap
@@ -81,8 +130,8 @@ theorem UpperTheory.V.AlgebraTools.cocycle_trace_zero :
       rw [← map_mul, hDr, hDr, hDr, hm]
     | zero_left => simp
     | zero_right => simp
-    | add_left x y z _ _ _ h₁ h₂ => simp only [add_mul, map_add, h₁, h₂]; abel
-    | add_right x y z _ _ _ h₁ h₂ => simp only [mul_add, map_add, h₁, h₂]; abel
+    | add_left x y z _ _ _ h₁ h₂ => simp only [add_mul, map_add (f := _), h₁, h₂]; abel
+    | add_right x y z _ _ _ h₁ h₂ => simp only [mul_add, map_add (f := _), h₁, h₂]; abel
     | smul_left a x y _ _ h₁ => simp only [smul_mul_assoc, map_smul, h₁, smul_add]
     | smul_right a x y _ _ h₁ => simp only [mul_smul_comm, map_smul, h₁, smul_add]
   obtain ⟨Y, hY⟩ := UpperTheory.V.AlgebraTools.der_inner d (AlgHom.id K _) D hder

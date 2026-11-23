@@ -1,12 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueCoeffAffine
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechGluingOfKodairaSpencerRelation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranslateOfTangentVectorFibreToGroupScheme
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTangentOfFibrePullbackTangentAtChart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GroupPullbackTangentVectorsCompat
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsPolAVPullbackOfIsLocalRing
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsChartOfIsLocalRing
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTransl
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
+import Development.AbelianVarietyTheory.Definitions.Divisors.Pullback1MemHodgeFiltration
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsPolAVPullbackOfIsLocalRing
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueCoeffAffine
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAffineHomOfField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTangentOfFibrePullbackTangentAtChart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranslateOfTangentVectorFibreToGroupScheme
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.InvariantVectorFieldsBasisVerticalDerivations
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.KsCocLinear
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LeISupInfPreimage
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PreimageTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
 open scoped CategoryTheory.Obj
@@ -46,7 +94,7 @@ theorem exists_isTransl_snd {A : Over (Sp K)} [GrpObj A] [IsCommMonObj A] {u : e
   have hz : ⊤ ≤ z.left ⁻¹ᵁ O := fun p _ => h (Set.mem_univ _)
   obtain ⟨h', H⟩ := GlobalTheory.InvFieldBasis.evalPt_translate hu hd (DualNumber.eps : DualNumber S) (by simp) z O hz
   have e1 : valR (v' * z).left O f = GlobalTheory.TangentOrigin.evalPt (v' * z).left O h' f := by
-    rw [valR, dif_pos h']; rfl
+    rw [valR, dite_eq_left h']; rfl
   have e2 : ∀ s, GlobalTheory.TangentOrigin.evalPt z.left O hz s = inl (GlobalTheory.TangentOrigin.evalPt x O h s) := fun s =>
     GlobalTheory.TangentOrigin.evalPt_spMap_comp (algebraMap S (DualNumber S)) x O h hz s
   rw [e1, H, e2, e2]
@@ -74,7 +122,7 @@ theorem exists_polAV_interior {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 theorem valR_eq_evalPt {S : Type} [CommRing S] {Z : Scheme.{0}} (x : Sp S ⟶ Z) (O : Z.Opens) (h : ⊤ ≤ x ⁻¹ᵁ O)
     (s : Γ(Z, O)) : valR x O s = GlobalTheory.TangentOrigin.evalPt x O h s := by
-  rw [valR, dif_pos h]; rfl
+  rw [valR, dite_eq_left h]; rfl
 
 theorem eq_of_evalPt_eq {Z : Scheme.{0}} {O : Z.Opens} (s s' : Γ(Z, O))
     (h : ∀ (S : Type) [CommRing S] (x : Sp S ⟶ Z) (hx : ⊤ ≤ x ⁻¹ᵁ O),
@@ -155,8 +203,10 @@ theorem pull_diff (t : SAB H X) (V : X.Opens) (U : X.affineOpens) {n : ℕ}
     rw [← e1]
     linear_combination (GlobalTheory.TangentOrigin.evalPt x _ hxg (φ b (j i) (j i'))) * e2
   rw [GlobalTheory.CechKS.valR_comp_app, valR_eq_evalPt _ _ hx] at key
+
   rw [key, map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
+
   rw [map_mul, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [ev_g, GlobalTheory.CechKS.valR_comp_app (w a) m O f, hw' a _ hx, map_mul, GlobalTheory.TangentOrigin.evalPt_constFn,

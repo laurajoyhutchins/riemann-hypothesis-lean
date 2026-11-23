@@ -1,8 +1,66 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HHINDA
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HHINDA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HNormDefs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+public import ReciprocityTheory.SemistableReduction.RestBlockSubstIsMultiHomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.RegularityCompacts
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.GoodPrimesProperties
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HNormPtsB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.NormByPlaces
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.NormFactorizationClause
 import ReciprocityTheory.SemistableReduction.AeBlockSphereEvalNeZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.NormByPlaces
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.GoodPrimesProperties
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.NormFactorizationClause
+import ReciprocityTheory.SemistableReduction.LagrangeIdealLiftsFact
+import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -52,12 +110,13 @@ theorem pf_arch (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (a : Ω c) (ha : a ≠ 0)
   have hSF : SFinite (blockSphereProb d.D (d.N + 1)) := by have := hPD; infer_instance
   have hSF1 : SFinite (sphereProb (d.N + 1)) := by have := hP1; infer_instance
   set e := ReciprocityTheory.MultiplicativeHeights.lh0Split d.D (d.N + 1)
-  have hmp : MeasurePreserving e.symm ((sphereProb (d.N + 1)).prod (blockSphereProb d.D (d.N + 1)))
-      (blockSphereProb (d.D + 1) (d.N + 1)) :=
-    (measurePreserving_piFinSuccAbove (fun _ => sphereProb (d.N + 1)) 0).symm _
   have hmp' : MeasurePreserving e (blockSphereProb (d.D + 1) (d.N + 1))
       ((sphereProb (d.N + 1)).prod (blockSphereProb d.D (d.N + 1))) :=
-    measurePreserving_piFinSuccAbove (fun _ => sphereProb (d.N + 1)) 0
+    measurePreserving_piFinSuccAbove
+      (n := d.D) (α := fun _ : Fin (d.D + 1) => UnitSphereC (d.N + 1))
+      (μ := fun _ => sphereProb (d.N + 1)) 0
+  have hmp : MeasurePreserving e.symm ((sphereProb (d.N + 1)).prod (blockSphereProb d.D (d.N + 1)))
+      (blockSphereProb (d.D + 1) (d.N + 1)) := hmp'.symm
   have hsnd : MeasurePreserving (fun z => (e z).2) (blockSphereProb (d.D + 1) (d.N + 1))
       (blockSphereProb d.D (d.N + 1)) :=
     (measurePreserving_snd (μ := sphereProb (d.N + 1)) (ν := blockSphereProb d.D (d.N + 1))).comp hmp'
@@ -68,7 +127,7 @@ theorem pf_arch (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (a : Ω c) (ha : a ≠ 0)
   have hIA := sphereLogIntegrable (d.D + 1) (d.N + 1) eA _ hsA (isMultiHomogeneous_map_ring eA PA hAm sg)
   have hIB := sphereLogIntegrable (d.D + 1) (d.N + 1) eB _ hsB (isMultiHomogeneous_map_ring eB PB hBm sg)
   have hB0 := ae_blockSphere_eval_ne_zero (d.D + 1) (d.N + 1) eB _ hsB (isMultiHomogeneous_map_ring eB PB hBm sg)
-  have hS := hsnd.quasiMeasurePreserving.ae (d.norm_at_sg hd h c sg)
+  have hS := hsnd.quasiMeasurePreserving.ae (d.norm_at_sg_B hd h c sg)
   have hae : (fun z => Real.log ‖eval (blockPoint z) (MvPolynomial.map sg PA)‖ -
       Real.log ‖eval (blockPoint z) (MvPolynomial.map sg PB)‖) =ᵐ[blockSphereProb (d.D + 1) (d.N + 1)]
       fun z => d.lsum c sg a (e z).2 := by

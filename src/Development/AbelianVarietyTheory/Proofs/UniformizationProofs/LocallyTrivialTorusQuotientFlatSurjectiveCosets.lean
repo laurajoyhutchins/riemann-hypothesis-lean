@@ -1,12 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsUniqueTorusCompat
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentation
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGradedStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentation
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGradedStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -134,8 +174,8 @@ variable [IsMonHom i] [IsAffineHom q.left] {V : B.left.Opens} (hV : IsAffineOpen
   (u : Multiplicative X →* Γ(G.left, q.left ⁻¹ᵁ V)ˣ) (hu : ∀ χ, IsWt i _ (u (Multiplicative.ofAdd χ)).val χ)
 include hV h₀ hU
 
-include hu in
 
+include hu in
 theorem exists_sum (a : Γ(G.left, q.left ⁻¹ᵁ V)) : ∃ c : X →₀ Γ(B.left, V),
     a = c.sum fun χ r => (q.left.app V).hom r * (u (Multiplicative.ofAdd χ)).val :=  by
   classical
@@ -159,8 +199,8 @@ theorem exists_sum (a : Γ(G.left, q.left ⁻¹ᵁ V)) : ∃ c : X →₀ Γ(B.l
     · intro χ
       simp
 
-include hu in
 
+include hu in
 theorem eq_zero_of_sum (hinj : Function.Injective (q.left.app V).hom) (c : X →₀ Γ(B.left, V))
     (hc : (c.sum fun χ r => (q.left.app V).hom r * (u (Multiplicative.ofAdd χ)).val) = 0) : c = 0 :=  by
   classical
@@ -186,14 +226,14 @@ theorem eq_zero_of_sum (hinj : Function.Injective (q.left.app V).hom) (c : X →
   have h2 : (q.left.app V).hom (c χ) = 0 := (Units.mul_left_eq_zero _).1 h1
   exact hinj (h2.trans (map_zero _).symm)
 
-omit hV h₀ hU [GrpObj G] [IsMonHom i] [IsAffineHom q.left] in
 
+omit hV h₀ hU [GrpObj G] [IsMonHom i] [IsAffineHom q.left] in
 theorem appLE_app {Z : Over S} (g : Z ⟶ G) (hg : ⊤ ≤ g.left ⁻¹ᵁ (q.left ⁻¹ᵁ V)) :
     q.left.app V ≫ g.left.appLE _ ⊤ hg = (g ≫ q).left.appLE V ⊤ hg :=  by
   exact (Scheme.Hom.comp_appLE g.left q.left V ⊤ hg).symm
 
-omit [IsMonHom i] [IsAffineHom q.left] in
 
+omit [IsMonHom i] [IsAffineHom q.left] in
 theorem comp_eq {Z : Over S} (t : Z ⟶ splitTorus S X) {g : Z ⟶ G} (hg : ⊤ ≤ g.left ⁻¹ᵁ (q.left ⁻¹ᵁ V)) :
     g ≫ q = ((t ≫ i) * g) ≫ q :=  by
   have h₁ := stable hU t hg
@@ -207,8 +247,8 @@ theorem comp_eq {Z : Over S} (t : Z ⟶ splitTorus S X) {g : Z ⟶ G} (hg : ⊤ 
   simp only [CommRingCat.hom_comp, RingHom.comp_apply]
   rw [(h₀ _).2 ⟨c, rfl⟩ Z t g h₁ hg, ← chV_val, chV_zero, Units.val_one, _root_.one_mul]
 
-include hu in
 
+include hu in
 theorem exists_point {Z : Over S} {g g' : Z ⟶ G} (hg : ⊤ ≤ g.left ⁻¹ᵁ (q.left ⁻¹ᵁ V)) (h : g ≫ q = g' ≫ q) :
     ∃ t : Z ⟶ splitTorus S X, g' = (t ≫ i) * g :=  by
   have hg' : ⊤ ≤ g'.left ⁻¹ᵁ (q.left ⁻¹ᵁ V) := by
@@ -250,6 +290,7 @@ theorem exists_point {Z : Over S} {g g' : Z ⟶ G} (hg : ⊤ ≤ g.left ⁻¹ᵁ
   apply CommRingCat.hom_ext
   ext a
   obtain ⟨c, rfl⟩ := exists_sum hV h₀ hU u hu a
+
   simp only [Finsupp.sum, map_sum, map_mul]
   refine Finset.sum_congr rfl fun χ _ => ?_
   rw [(h₀ _).2 ⟨c χ, rfl⟩ Z t g h₁ hg, hu χ Z t g h₁ hg, ← chV_val t (0 : X), chV_zero, Units.val_one,

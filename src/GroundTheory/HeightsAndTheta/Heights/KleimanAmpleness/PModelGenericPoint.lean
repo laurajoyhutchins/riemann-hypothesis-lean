@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsMoreSide
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeMIdealOverGraph
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.ModelSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeMIdealOverGraph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -42,49 +85,21 @@ theorem mIdealOver_genPt [Fintype K] [DecidableEq K] [∀ k, Fintype (ι k)] [P.
   · intro hf
     have hc : ∀ b : K → ℕ, weightedHomogeneousComponent (NumbersDVR.blockWeight ι) b f ∈ P := by
       intro b
-      rw [← aeval_genPt_eq_zero, ← coeff_mConeMapOver, RingHom.mem_ker.mp hf, coeff_zero]
+      rw [← aeval_genPt_eq_zero, ← coeff_mConeMapOver, RingHom.mem_ker.mp hf, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
     rw [← sum_weightedHomogeneousComponent (NumbersDVR.blockWeight ι) f,
       finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f)]
     exact Ideal.sum_mem _ fun b _ => hc b
   · intro hf
     refine RingHom.mem_ker.mpr ?_
     ext m
-    rw [coeff_zero]
+    rw [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
     have h := coeff_mConeMapOver (S := O) (genPt P) (⇑m) f
     rw [Finsupp.equivFunOnFinite_symm_coe] at h
     rw [h, aeval_genPt_eq_zero]
     exact hP f hf _
 
-theorem algebraMap_injective (h : P.comap (C : O →+* NumbersDVR.MRing ι O) = ⊥) :
-    Function.Injective (algebraMap O (FractionRing (NumbersDVR.MRing ι O ⧸ P))) := by
-  have h0 : Function.Injective (algebraMap O (NumbersDVR.MRing ι O ⧸ P)) := by
-    rw [injective_iff_map_eq_zero]
-    intro c hc
-    have hc' : Ideal.Quotient.mk P (C c) = 0 := by
-      exact hc
-    have hmem : c ∈ P.comap (C : O →+* NumbersDVR.MRing ι O) :=
-      Ideal.mem_comap.mpr (Ideal.Quotient.eq_zero_iff_mem.mp hc')
-    rw [h] at hmem
-    exact hmem
-  rw [IsScalarTower.algebraMap_eq O (NumbersDVR.MRing ι O ⧸ P)]
-  exact (IsFractionRing.injective (NumbersDVR.MRing ι O ⧸ P)
-    (FractionRing (NumbersDVR.MRing ι O ⧸ P))).comp h0
-
 end ModelGenericPoint
 
-open ModelGenericPoint in
-
-theorem ModelGenericPoint.proof : ModelGenericPoint.Statement := by
-  intro O _ _ _ K _ _ ι _ P d hP
-  have := hP.multiProj.isPrime
-  have hinj := algebraMap_injective P hP.noTorsion
-  let alg : Algebra (FractionRing O) (FractionRing (NumbersDVR.MRing ι O ⧸ P)) :=
-    (IsFractionRing.lift hinj).toAlgebra
-  refine ⟨FractionRing (NumbersDVR.MRing ι O ⧸ P), inferInstance, inferInstance, alg, ?_, genPt P,
-    mIdealOver_genPt P hP.multiProj.multiHomog, fun k => ?_⟩
-  · exact IsScalarTower.of_algebraMap_eq fun c => (IsFractionRing.lift_algebraMap hinj c).symm
-  · obtain ⟨i, hi⟩ := hP.multiProj.relevant k
-    exact ⟨i, (genPt_ne_zero P _).mpr hi⟩
 
 end
 

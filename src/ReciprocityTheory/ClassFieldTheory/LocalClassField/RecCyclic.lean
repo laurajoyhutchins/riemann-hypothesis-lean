@@ -1,10 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPairDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecPair
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.NormOpen
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecCyclicB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.CyclicBr
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.EqZeroOfMemBrKerOfCoprime
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecCyclicB
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.GalBasic
+import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecCyclicA
+import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -19,7 +62,7 @@ def RecCyc.kerChar (χ : charGrp (GK p K)) : Subgroup (GK p K) where
   one_mem' := map_zero χ.1
   mul_mem' := fun {a b} ha hb => by
     show χ.1 (Additive.ofMul a + Additive.ofMul b) = 0
-    rw [map_add, show χ.1 (Additive.ofMul a) = 0 from ha, show χ.1 (Additive.ofMul b) = 0 from hb, add_zero]
+    rw [map_add (f := _), show χ.1 (Additive.ofMul a) = 0 from ha, show χ.1 (Additive.ofMul b) = 0 from hb, add_zero]
   inv_mem' := fun {a} ha => by
     show χ.1 (- Additive.ofMul a) = 0
     rw [map_neg, show χ.1 (Additive.ofMul a) = 0 from ha, neg_zero]
@@ -33,7 +76,7 @@ theorem normal_of_char (χ : charGrp (GK p K)) (hχ : ∀ g, χ.1 (Additive.ofMu
     (subG p K L).Normal := by
   refine ⟨fun n hn g => ?_⟩
   rw [← hχ] at hn ⊢
-  rw [ofMul_mul, ofMul_mul, ofMul_inv, map_add, map_add, map_neg, hn]
+  rw [ofMul_mul, ofMul_mul, ofMul_inv, map_add (f := _), map_add (f := _), map_neg, hn]
   abel
 
 noncomputable def RecCyc.charBar [(subG p K L).Normal] (χ : charGrp (GK p K)) (hχ : TrivOn p K L χ) :
@@ -44,7 +87,7 @@ noncomputable def RecCyc.charBar [(subG p K L).Normal] (χ : charGrp (GK p K)) (
 theorem RecCyc.charBar_injective [(subG p K L).Normal] (χ : charGrp (GK p K))
     (hχ : ∀ g, χ.1 (Additive.ofMul g) = 0 ↔ g ∈ subG p K L) :
     Injective (RecCyc.charBar χ (fun g hg => (hχ g).2 hg)) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   obtain ⟨g, hg⟩ := QuotientGroup.mk_surjective (Additive.toMul a)
   have ha' : a = Additive.ofMul (QuotientGroup.mk g) := by rw [hg]; rfl

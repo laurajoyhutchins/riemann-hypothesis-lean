@@ -1,9 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.IsVerticalCartier
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PConeTrdeg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedC
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.IsVerticalCartier
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PConeTrdeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.LowerBoundFree
@@ -78,7 +125,7 @@ theorem IsValueAt.unique {a : Ω} {v v' : ℂ} (hz : z ∈ mcPts (mCoordIdeal y)
 theorem valAt_eq {a : Ω} {v : ℂ} (hz : z ∈ mcPts (mCoordIdeal y)) (h : IsValueAt y a z v) :
     valAt y a z = v := by
   have hr : RegularAt y a z := ⟨v, h⟩
-  rw [valAt, dif_pos hr]
+  rw [valAt, dite_eq_left hr]
   exact IsValueAt.unique hz hr.choose_spec h
 
 theorem RegularAt.isValueAt {a : Ω} (hz : z ∈ mcPts (mCoordIdeal y)) (h : RegularAt y a z) :
@@ -113,21 +160,13 @@ theorem IsValueAt.add {a b : Ω} {v w : ℂ} (ha : IsValueAt y a z v) (hb : IsVa
     ProjLine.mhMul hh hh', ?_, ?_, ?_, ?_⟩
   · rw [map_mul]
     exact mul_ne_zero hy hy'
-  · simp only [map_add, map_mul]
+  · simp only [map_add (f := _), map_mul]
     rw [hyg, hyg']
     ring
   · rw [map_mul, eval_mul]
     exact mul_ne_zero hz hz'
-  · simp only [map_add, map_mul, eval_add, eval_mul]
+  · simp only [map_add (f := _), map_mul, eval_add, eval_mul]
     rw [hzg, hzg']
-    ring
-
-theorem IsValueAt.neg {a : Ω} {v : ℂ} (ha : IsValueAt y a z v) : IsValueAt y (-a) z (-v) := by
-  obtain ⟨d, g, h, hg, hh, hy, hyg, hz, hzg⟩ := ha
-  refine ⟨d, -g, h, ProjLine.mhNeg hg, hh, hy, ?_, hz, ?_⟩
-  · rw [map_neg, hyg]
-    ring
-  · rw [map_neg, eval_neg, hzg]
     ring
 
 theorem isValueAt_intCast (n : ℤ) : IsValueAt y (n : Ω) z (n : ℂ) := by
@@ -163,8 +202,8 @@ theorem RegularAt.sum {σ : Type} (s : Finset σ) {a : σ → Ω} (h : ∀ i ∈
     rw [Finset.sum_insert hi]
     exact (h i (Finset.mem_insert_self i s)).add (ih fun j hj => h j (Finset.mem_insert_of_mem hj))
 
-omit [Fintype κ] [∀ k, Fintype (ι k)] in
 
+omit [Fintype κ] [∀ k, Fintype (ι k)] in
 theorem eval_conj (f : MRing ι) (z : (Σ k, ι k) → ℂ) :
     eval (fun p => starRingEnd ℂ (z p)) (map (Int.castRingHom ℂ) f) =
       starRingEnd ℂ (eval z (map (Int.castRingHom ℂ) f)) := by

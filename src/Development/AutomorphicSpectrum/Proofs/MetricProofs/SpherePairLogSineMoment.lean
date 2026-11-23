@@ -1,14 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.CompRightEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.KappaSt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
-import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PDiagFibreFubini
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SphereMeasureStereographicIntegralStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.XiPotentialHessianDecompositionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDiscriminantCofactorExpansionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.EvalW
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.EvalW
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.InFlagDomainOne
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StWWFibrePoly
+import Aesop.Main
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SphereMeasureStereographicIntegralStatement
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PDiagFibreMoment
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PFibreLocal
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.RegularityCompacts
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+import ReciprocityTheory.AnalyticForms.MaIntEmpty
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights
 open scoped ComplexOrder
 open GlobalTheory.CompanionTheory.Ar.PB.FibN ReciprocityTheory.ChartRestriction.G.AI GroundTheory.Heights₂.Heights.Inter
@@ -29,7 +78,7 @@ theorem continuous_crd : Continuous crd :=
 theorem measurable_dens : Measurable dens := by
   have : Continuous dens := by
     unfold dens
-    refine continuous_const.div (by fun_prop) fun a => ?_
+    refine continuous_const.div₀ (by fun_prop) fun a => ?_
     positivity
   exact this.measurable
 
@@ -137,17 +186,18 @@ theorem map_pp {Ω : Type*} (u v : Ω → Fin 3 → ℝ) (Q : MvPolynomial (Fin 
 
 theorem ell_eq (ℓ : MvPolynomial (Fin 3) ℝ →ₗ[ℝ] ℝ) (R : MvPolynomial (Fin 3) ℝ)
     (S : Finset (Fin 3 →₀ ℕ)) (hS : R.support ⊆ S) :
-    ℓ R = ∑ m ∈ S, coeff m R * ℓ (monomial m 1) := by
+    ℓ R = ∑ m ∈ S, AddMonoidAlgebra.coeff R m * ℓ (monomial m 1) := by
   conv_lhs => rw [R.as_sum]
+
   rw [map_sum]
   rw [← Finset.sum_subset hS fun m _ hm => by simp [notMem_support_iff.1 hm]]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [← mul_one (coeff m R), ← smul_eq_mul, ← smul_monomial, map_smul, smul_eq_mul, smul_eq_mul, mul_one]
+  rw [← mul_one (AddMonoidAlgebra.coeff R m), ← smul_eq_mul, ← smul_monomial, map_smul, smul_eq_mul, smul_eq_mul, mul_one]
 
 theorem ell_pp {Ω : Type*} (ℓ : MvPolynomial (Fin 3) ℝ →ₗ[ℝ] ℝ) (u v : Ω → Fin 3 → ℝ)
     (Q : MvPolynomial (Fin 2) ℝ) (p : Ω) :
     ℓ (aeval ![lin3 (u p), lin3 (v p)] Q) =
-      ∑ m ∈ (pp u v Q).support, coeff m (pp u v Q) p * ℓ (monomial m 1) := by
+      ∑ m ∈ (pp u v Q).support, AddMonoidAlgebra.coeff (pp u v Q) m p * ℓ (monomial m 1) := by
   rw [← map_pp, ell_eq ℓ _ _ (support_map_subset _ _)]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [coeff_map]
@@ -155,27 +205,24 @@ theorem ell_pp {Ω : Type*} (ℓ : MvPolynomial (Fin 3) ℝ →ₗ[ℝ] ℝ) (u 
 
 theorem continuous_coeff_pp {Ω : Type*} [TopologicalSpace Ω] (u v : Ω → Fin 3 → ℝ)
     (hu : Continuous u) (hv : Continuous v) (Q : MvPolynomial (Fin 2) ℝ) (m : Fin 3 →₀ ℕ) :
-    Continuous (coeff m (pp u v Q)) := by
+    Continuous (AddMonoidAlgebra.coeff (pp u v Q) m) := by
   set φ : C(Ω, ℝ) →ₐ[ℝ] (Ω → ℝ) := ContinuousMap.coeFnAlgHom (α := Ω) (A := ℝ) ℝ
   set w : Fin 2 → MvPolynomial (Fin 3) C(Ω, ℝ) :=
     ![∑ i, X i * C ⟨fun q => u q i, (continuous_apply i).comp hu⟩,
       ∑ i, X i * C ⟨fun q => v q i, (continuous_apply i).comp hv⟩]
   have hw : ![dp u, dp v] = fun r => mapAlgHom φ (w r) := by
     funext r
-    fin_cases r
-    · simp only [Fin.zero_eta, Matrix.cons_val_zero, w, dp, mapAlgHom_apply, map_sum, map_mul, map_X, map_C]
-      rfl
-    · simp only [Fin.mk_one, Matrix.cons_val_one, Matrix.cons_val_fin_one, w, dp, mapAlgHom_apply, map_sum,
-        map_mul, map_X, map_C]
-      rfl
+
+    fin_cases r <;> simp [w, dp, mapAlgHom_apply] <;>
+      apply Finset.sum_congr rfl <;> intro i hi <;> congr 2 <;> funext q <;> rfl
   rw [pp, hw, ← comp_aeval, AlgHom.comp_apply, mapAlgHom_apply, coeff_map]
-  exact (coeff m (aeval w Q)).continuous
+  exact (AddMonoidAlgebra.coeff (aeval w Q) m).continuous
 
 theorem continuous_ell (ℓ : MvPolynomial (Fin 3) ℝ →ₗ[ℝ] ℝ) (Q : MvPolynomial (Fin 2) ℝ) :
     Continuous fun p : (Fin 3 → ℝ) × (Fin 3 → ℝ) => ℓ (aeval ![lin3 p.1, lin3 p.2] Q) := by
   have h := ell_pp ℓ (Prod.fst : (Fin 3 → ℝ) × (Fin 3 → ℝ) → _) Prod.snd Q
   simp only [h]
-  exact continuous_finset_sum _ fun m _ =>
+  exact continuous_finsetSum _ fun m _ =>
     (continuous_coeff_pp _ _ continuous_fst continuous_snd Q m).mul continuous_const
 
 def ker (p : (Fin 3 → ℝ) × (Fin 3 → ℝ)) : ℝ := (1 / 2) * Real.log ((1 - ∑ i, p.1 i * p.2 i) / 2)
@@ -199,14 +246,15 @@ theorem ell_moment (ℓ : MvPolynomial (Fin 3) ℝ →ₗ[ℝ] ℝ) (Q : MvPolyn
       ∫ p : S2 × S2, wwLogWeight p * ℓ (aeval ![lin3 (crd p.1), lin3 (crd p.2)] Q)
         ∂(sphereMeasure.prod sphereMeasure) := by
   have hI : ∀ m, Integrable (fun p => wwLogWeight p *
-      coeff m (aeval ![dotPoly (Prod.fst : S2 × S2 → S2), dotPoly Prod.snd] Q) p)
+      AddMonoidAlgebra.coeff (aeval ![dotPoly (Prod.fst : S2 × S2 → S2), dotPoly Prod.snd] Q) m p)
       (sphereMeasure.prod sphereMeasure) := fun m =>
     FibreLocal.integrable_mul _ (DiagFibreMoment.continuous_coeff_aeval Q m)
   have h := fun p : S2 × S2 => ell_pp ℓ (fun p : S2 × S2 => crd p.1) (fun p => crd p.2) Q p
   simp only [pp_eq] at h
   simp only [h, Finset.mul_sum]
-  rw [integral_finset_sum _ fun m _ => by
+  rw [integral_finsetSum _ fun m _ => by
     simpa only [mul_assoc] using (hI m).mul_const (ℓ (monomial m 1))]
+
   rw [momentPoly, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   simp only [← mul_assoc]

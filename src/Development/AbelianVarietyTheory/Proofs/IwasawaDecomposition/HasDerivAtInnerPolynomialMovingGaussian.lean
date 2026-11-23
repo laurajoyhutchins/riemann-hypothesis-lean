@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataTheta
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.OscActMonomialOfUnique
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.OscActMonomialOfUnique
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GaussianVectorAnnihilatorEquationsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsNegBaseY
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GaussianVectorAnnihilatorEquationsStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +94,7 @@ theorem derForm_X_inl (A' : Matrix (Fin P) (Fin Q) ℂ) (x' : Ix P Q → ℂ)
     (T : MvPolynomial (Ix P Q) ℂ →+ ℂ) (i : Fin P) (f : MvPolynomial (Ix P Q) ℂ) :
     derForm A' x' T (X (Sum.inl i) * f) = derForm A' x' (fun g => T (X (Sum.inl i) * g)) f +
       (x' (Sum.inl i) * T f + ∑ j, A' i j * T (pderiv (Sum.inr j) f)) := by
-  simp only [derForm, pderiv_X_mul, map_add, apply_ite T, map_zero, mul_add, Finset.sum_add_distrib, mul_ite,
+  simp only [derForm, pderiv_X_mul, map_add (f := _), apply_ite T, map_zero, mul_add, Finset.sum_add_distrib, mul_ite,
     mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true, reduceCtorEq, if_false, add_zero, Sum.inl.injEq]
   rw [Finset.sum_comm (f := fun i' j => if i' = i then A' i' j * T (pderiv (Sum.inr j) f) else 0)]
   simp only [Finset.sum_ite_eq', Finset.mem_univ, if_true]
@@ -61,7 +104,7 @@ theorem derForm_X_inr (A' : Matrix (Fin P) (Fin Q) ℂ) (x' : Ix P Q → ℂ)
     (T : MvPolynomial (Ix P Q) ℂ →+ ℂ) (j : Fin Q) (f : MvPolynomial (Ix P Q) ℂ) :
     derForm A' x' T (X (Sum.inr j) * f) = derForm A' x' (fun g => T (X (Sum.inr j) * g)) f +
       (x' (Sum.inr j) * T f + ∑ i, A' i j * T (pderiv (Sum.inl i) f)) := by
-  simp only [derForm, pderiv_X_mul, map_add, apply_ite T, apply_ite (pderiv _), map_zero, mul_add,
+  simp only [derForm, pderiv_X_mul, map_add (f := _), apply_ite T, apply_ite (pderiv _), map_zero, mul_add,
     Finset.sum_add_distrib, mul_ite,
     mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true, reduceCtorEq, if_false, add_zero, Sum.inr.injEq]
   ring
@@ -119,7 +162,7 @@ theorem hasDerivAt_inner_gauss : ∀ (P Q : ℕ) (F : Fock (Ix P Q)) (A : ℝ �
       obtain ⟨β, rfl⟩ : ∃ β, α = Finsupp.single l 1 + β :=
         exists_add_of_le (Finsupp.single_le_iff.2 (Nat.pos_of_ne_zero hl))
       have hβ : β.degree ≤ N := by
-        rw [map_add, Finsupp.degree_single] at hα
+        rw [map_add (f := _), Finsupp.degree_single] at hα
         omega
       have e : (monomial (Finsupp.single l 1 + β) c : MvPolynomial (Ix P Q) ℂ) = X l * monomial β c := by
         rw [X, monomial_mul, one_mul]
@@ -138,9 +181,9 @@ theorem hasDerivAt_inner_gauss : ∀ (P Q : ℕ) (F : Fock (Ix P Q)) (A : ℝ �
   induction f using MvPolynomial.induction_on' with
   | monomial α c => exact key _ α le_rfl c
   | add f g hf hg =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     refine (hf.fun_add hg).congr_deriv ?_
-    simp only [derForm, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [derForm, map_add (f := _), mul_add, Finset.sum_add_distrib]
     ring
 
 end GlobalTheory.OscPairDer

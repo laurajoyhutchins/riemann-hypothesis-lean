@@ -1,5 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ManyEdges
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.DvdOfAdd
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ManyEdges
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.DvdOfAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +59,7 @@ theorem p_nonunit (hS : HidaSetting p n' W Qq O Kf ι σ j w) : ¬ IsUnit (p : O
   intro hu
   let _ : Algebra W O := j.toAlgebra
   have _ : Module.Finite W O := hS.finite
-  have hmax := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := W) (IsLocalRing.maximalIdeal O)
+  have hmax := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := W) (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) (IsLocalRing.maximalIdeal O)
   have heq : (IsLocalRing.maximalIdeal O).comap (algebraMap W O) = IsLocalRing.maximalIdeal W :=
     IsLocalRing.eq_maximalIdeal hmax
   have hpW : (p : W) ∈ IsLocalRing.maximalIdeal W := hS.p_unif.not_isUnit
@@ -44,7 +86,7 @@ theorem goodRank_of_prim {O Kf X : Type*} [CommRing O] [IsDomain O] [IsDiscreteV
     { carrier := {v | ∃ G ∈ A, ∀ i, algebraMap O Kf (v i) = φ i G}
       add_mem' := by
         rintro v v' ⟨G, hG, hv⟩ ⟨G', hG', hv'⟩
-        exact ⟨G + G', A.add_mem hG hG', fun i => by rw [Pi.add_apply, map_add, hv, hv', hadd]⟩
+        exact ⟨G + G', A.add_mem hG hG', fun i => by rw [Pi.add_apply, map_add (f := _), hv, hv', hadd]⟩
       zero_mem' := ⟨0, A.zero_mem, fun i => by rw [Pi.zero_apply, map_zero, h0]⟩
       smul_mem' := by
         rintro c v ⟨G, hG, hv⟩
@@ -68,6 +110,7 @@ theorem goodRank_of_prim {O Kf X : Type*} [CommRing O] [IsDomain O] [IsDiscreteV
     intro x i
     have hu : (u x : X) = ∑ k, x k • G k := by simp [u]
     rw [hu, hsumφ]
+
     simp_rw [hsmul, ← hG, ← map_mul, ← map_sum]
     congr 1
     simp [Pi.single_apply, mul_comm]
@@ -93,6 +136,7 @@ theorem be_smulK_right (p r : ℕ) (lam0 : Fin n' → Fin (m + 1) → ℤ) (F : 
 theorem be_sum_left (p r : ℕ) (lam0 : Fin n' → Fin (m + 1) → ℤ) {n : ℕ} (c : Fin n → O) (F : Fin n → Vsp Kf lam0)
     (G : Module.Dual Kf (Vsp Kf lam0)) :
     be p r lam0 (∑ i, c i • F i) G = ∑ i, algebraMap O Kf (c i) * be p r lam0 (F i) G := by
+
   simp only [be, Finset.smul_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [← algebraMap_smul Kf (c i) (F i), smul_smul, mul_comm, ← smul_smul, map_smul, smul_eq_mul]
@@ -158,15 +202,15 @@ theorem s7 : S7 := by
     have hrest : ∃ z : O, (∑ e ∈ Finset.univ.erase e0, ∑ i,
         algebraMap O Kf (c (eqv.symm ⟨e, i⟩)) * be p r lam0 (F e.1 i) G) = algebraMap O Kf ((p : O) ^ (D + 1) * z) := by
       refine Finset.sum_induction _ (fun x => ∃ z : O, x = algebraMap O Kf ((p : O) ^ (D + 1) * z))
-        (fun x y ⟨z₁, h₁⟩ ⟨z₂, h₂⟩ => ⟨z₁ + z₂, by rw [h₁, h₂, mul_add, map_add]⟩) ⟨0, by simp⟩ ?_
+        (fun x y ⟨z₁, h₁⟩ ⟨z₂, h₂⟩ => ⟨z₁ + z₂, by rw [h₁, h₂, mul_add, map_add (f := _)]⟩) ⟨0, by simp⟩ ?_
       intro e he
       refine Finset.sum_induction _ (fun x => ∃ z : O, x = algebraMap O Kf ((p : O) ^ (D + 1) * z))
-        (fun x y ⟨z₁, h₁⟩ ⟨z₂, h₂⟩ => ⟨z₁ + z₂, by rw [h₁, h₂, mul_add, map_add]⟩) ⟨0, by simp⟩ ?_
+        (fun x y ⟨z₁, h₁⟩ ⟨z₂, h₂⟩ => ⟨z₁ + z₂, by rw [h₁, h₂, mul_add, map_add (f := _)]⟩) ⟨0, by simp⟩ ?_
       intro i _
       obtain ⟨z, hz⟩ := hterm e i (Finset.ne_of_mem_erase he)
       exact ⟨c (eqv.symm ⟨e, i⟩) * z, by rw [hz, ← map_mul]; congr 1; ring⟩
     obtain ⟨z, hz⟩ := hrest
     obtain ⟨b', hb'⟩ := dvd_of_add (p : O) (p_nonunit hS) D a z ⟨b, hab.symm⟩
-    exact ⟨a + (p : O) ^ (D + 1) * z, b', by rw [hsplit, hva, hz, map_add], hb'.symm⟩
+    exact ⟨a + (p : O) ^ (D + 1) * z, b', by rw [hsplit, hva, hz, map_add (f := _)], hb'.symm⟩
 
 end Formalism.MainNotions.Pf14

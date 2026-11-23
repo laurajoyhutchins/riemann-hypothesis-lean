@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.LocalDensities.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.LocalDensities.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FourB
@@ -17,17 +62,16 @@ theorem HermitianDetMono.one_le_det_one_add {n : ℕ} {M : Matrix (Fin n) (Fin n
       rw [dotProduct_comm, ← EuclideanSpace.inner_eq_star_dotProduct, inner_self_eq_norm_sq_to_K,
         hH.eigenvectorBasis.orthonormal.1 i]
       simp
-    rw [add_mulVec, one_mulVec, dotProduct_add, map_add, hv, RCLike.one_re]
+    rw [add_mulVec, one_mulVec, dotProduct_add, map_add (f := _), hv, RCLike.one_re]
     linarith [hM.re_dotProduct_nonneg (hH.eigenvectorBasis i)]
   rw [hH.det_eq_prod_eigenvalues]
   have hprod : (1 : ℝ) ≤ ∏ i, hH.eigenvalues i := by
     calc (1 : ℝ) = ∏ _i : Fin n, (1 : ℝ) := by simp
       _ ≤ ∏ i, hH.eigenvalues i :=
-        Finset.prod_le_prod (fun _ _ => zero_le_one) (fun i _ => hev i)
+        Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun i _ => hev i)
   have key : ((1 : ℝ) : ℂ) ≤ ((∏ i, hH.eigenvalues i : ℝ) : ℂ) := Complex.real_le_real.mpr hprod
   convert key using 1
   · simp
-  · simp [Complex.ofReal_prod]
 
 theorem HermitianDetMono.proof : HermitianDetMono.Statement := by
   intro n A B hB hAB

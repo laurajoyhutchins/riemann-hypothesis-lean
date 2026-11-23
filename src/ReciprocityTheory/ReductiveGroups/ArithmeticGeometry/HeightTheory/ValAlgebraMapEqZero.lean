@@ -1,5 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraicIndependentResidueOfIsUnit
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HeightIntegralEstimates
+public import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraicIndependentResidueOfIsUnit
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -45,12 +95,12 @@ theorem exists_rename_notMem {K : Type} [Field K] {σ : Type} (p : Ideal (MvPoly
       have hd0 : d = 0 := by
         ext i
         by_contra hi
-        have hiv : i ∈ g.vars := (MvPolynomial.mem_vars i).mpr ⟨d, hd, Finsupp.mem_support_iff.mpr hi⟩
+        have hiv : i ∈ g.vars := (MvPolynomial.mem_vars_iff_mem_support i).mpr ⟨d, hd, Finsupp.mem_support_iff.mpr hi⟩
         rw [hemp] at hiv
         simp at hiv
       simp [hd0]
     rw [MvPolynomial.totalDegree_eq_zero_iff_eq_C] at htd
-    have ha : MvPolynomial.coeff 0 g ≠ 0 := by
+    have ha : AddMonoidAlgebra.coeff g 0 ≠ 0 := by
       intro ha0
       apply hg0
       rw [htd, ha0, map_zero]
@@ -136,7 +186,7 @@ theorem w_eq_scalarRatio_smul (hd : d.AxH 𝒜) (c : ι) (j : Fin (d.N + 1)) :
     have h2 := congrArg Subtype.val ha
     simpa using h2.symm
   unfold ratio
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact hex.choose_spec
 
 theorem exists_integral_base (hd : d.AxH 𝒜) (c : ι) (v : AddValuation (Ω c) (WithTop ℤ)) :
@@ -148,7 +198,7 @@ theorem exists_integral_base (hd : d.AxH 𝒜) (c : ι) (v : AddValuation (Ω c)
     intro f g a hg hfa
     have hex : ∃ b : Ω c, f = b • g := ⟨a, hfa⟩
     unfold ratio
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     by_contra hne
     apply hg
     have h0 : (hex.choose - a) • g = 0 := by rw [sub_smul, ← hex.choose_spec, ← hfa, sub_self]
@@ -219,7 +269,7 @@ theorem genericHomAt_relation (hd : d.AxH 𝒜) (c : ι) (j0 : Fin (d.N + 1)) (h
     intro f g a hg hfa
     have hex : ∃ b : Ω c, f = b • g := ⟨a, hfa⟩
     unfold ratio
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     by_contra hne
     apply hg
     have h0 : (hex.choose - a) • g = 0 := by rw [sub_smul, ← hex.choose_spec, ← hfa, sub_self]
@@ -256,6 +306,7 @@ theorem genericHomAt_relation (hd : d.AxH 𝒜) (c : ι) (j0 : Fin (d.N + 1)) (h
       MvPolynomial.algebraMap_eq]
   have hTjc : T (d.jc c) = -∑ k, T ((d.jc c).succAbove k) * algebraMap (Ω c) (OmS (Ω c) d.D d.N) (d.x c k) := by
     rw [hTX, Fin.succAbove_cases_eq_insertNth, Fin.insertNth_apply_same]
+
     simp only [map_neg, map_sum, map_mul, hCr]
     congr 1
     refine Finset.sum_congr rfl fun k _ => ?_

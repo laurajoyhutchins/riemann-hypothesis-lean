@@ -1,10 +1,65 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsInverseIsogenyRingOfIntegers
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsEqPowOfTorsionCompEqOne
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsEqPowOfTorsionCompEqOne
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueHomExtensionSemiAbelian
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AbelianSchemeHomExtendsDedekindOfIsGrpPullbackAl
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsInverseIsogenyRingOfIntegers
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsMulEquivPointsOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsUniqueHomOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SurjectiveOfComplexPointsLiftOfUniversallyClosed
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SurjectiveOfComplexPointsLiftOfUniversallyClosed
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueHomExtensionSemiAbelian
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LieModel
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open Matrix GlobalTheory GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl
@@ -92,21 +147,22 @@ theorem isogeny_points_kernel_descent {K : Type} [Field K] [NumberField K] (σ :
   intro y hy
   obtain ⟨E, hE⟩ := LamF.exists_mulEquiv_points_of_isGrpPullback _ _ _ A.A Q.A φ hφ (Over.mk (spMap σ))
   obtain ⟨E', hE'⟩ := LamF.exists_mulEquiv_points_of_isGrpPullback _ _ _ B.A Q'.A φ' hφ' (Over.mk (spMap σ))
-  let e : Over.mk (spMap (σ.comp (algebraMap (𝓞 K) K))) ⟶ Over.mk ((Over.mk (spMap σ)).hom ≫ spMap (algebraMap (𝓞 K) K)) :=
-    Over.homMk (𝟙 _) ((Category.id_comp _).trans (spMap_comp_integers σ).symm)
-  let e' : Over.mk ((Over.mk (spMap σ)).hom ≫ spMap (algebraMap (𝓞 K) K)) ⟶ Over.mk (spMap (σ.comp (algebraMap (𝓞 K) K))) :=
-    Over.homMk (𝟙 _) ((Category.id_comp _).trans (spMap_comp_integers σ))
-  have hee : e' ≫ e = 𝟙 _ := Over.OverMorphism.ext (Category.id_comp _)
-  have hz : (e ≫ E y) ^ n = 1 := by
-    rw [← MonObj.comp_pow, ← map_pow, hy, map_one, MonObj.comp_one]
-  have h₂ : E y ≫ f = 1 := by
-    have h₁ := congrArg (fun q => e' ≫ q) (hker _ hz)
-    rw [← Category.assoc, ← Category.assoc, hee, Category.id_comp, MonObj.comp_one] at h₁
-    exact h₁
-  have h₃ : E' (y ≫ f₀) = E y ≫ f := by
+  have hker' : ∀ x : Over.mk (spMap σ ≫ spMap (algebraMap (𝓞 K) K)) ⟶ A.A,
+      x ^ n = 1 → x ≫ f = 1 :=
+    Eq.mp (congrArg (fun t : Sp ℂ ⟶ Sp (𝓞 K) =>
+      ∀ x : Over.mk t ⟶ A.A, x ^ n = 1 → x ≫ f = 1) (spMap_comp_integers σ)) hker
+  have hnE : (E y) ^ n = 1 :=
+    (map_pow E y n).symm.trans ((congrArg (fun x => E x) hy).trans (map_one E))
+  have hEf : E y ≫ f = 1 := hker' (E y) hnE
+  have hcomp : E' (y ≫ f₀) = E y ≫ f := by
     apply Over.OverMorphism.ext
-    rw [hE', Over.comp_left, Over.comp_left, hE, Category.assoc, Category.assoc, hf₀]
-  exact E'.injective (by rw [h₃, h₂, map_one])
+    calc
+      (E' (y ≫ f₀)).left = (y ≫ f₀).left ≫ φ' := hE' _
+      _ = y.left ≫ (f₀.left ≫ φ') := Category.assoc _ _ _
+      _ = y.left ≫ (φ ≫ f.left) := congrArg (y.left ≫ ·) hf₀
+      _ = (y.left ≫ φ) ≫ f.left := (Category.assoc _ _ _).symm
+      _ = (E y ≫ f).left := congrArg (· ≫ f.left) (hE y).symm
+  exact E'.injective (hcomp.trans (hEf.trans (map_one E').symm))
 
 theorem exists_nth_root_homomorphism : ∀ (K : Type) [Field K] [NumberField K] (σ : K →+* ℂ) (n : ℕ) (A B : Out.PolAV (Sp (𝓞 K))) (f : A.A ⟶ B.A), IsMonHom f → 0 < n → (∀ x : Over.mk (spMap (σ.comp (algebraMap (𝓞 K) K))) ⟶ A.A, x ^ n = 1 → x ≫ f = 1) → ∃ f' : A.A ⟶ B.A, IsMonHom f' ∧ f' ^ n = f := by
   intro K _ _ σ n A B f hf hn hker

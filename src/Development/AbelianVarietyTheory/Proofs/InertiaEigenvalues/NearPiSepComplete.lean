@@ -1,10 +1,49 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltSeparatedCompleteEpsilonRootSubOneStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltSeparatedCompleteEpsilonRootSubOneStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.Domain
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc GlobalTheory.Decompl
 open scoped TensorProduct
@@ -35,6 +74,7 @@ theorem sep_complete_of_coord {R A B I : Type} [AddCommGroup R] [CommRing A] [Co
     refine ⟨x, fun m i => ?_⟩
     obtain ⟨d, hd⟩ := hy i m
     refine ⟨d, ?_⟩
+
     rw [map_sub, map_sum, hx i, Finset.sum_congr rfl (fun n _ => hc n i), ← map_sum j, ← map_sub j]
     congr 1
     have e : t ^ k * y i - ∑ n ∈ Finset.range m, t ^ (n + k) * c n i =
@@ -59,7 +99,7 @@ private theorem crd_tmul_lemma {l : ℕ} [Fact l.Prime] (LL : FinExt l)
   unfold crd
   rfl
 
-set_option maxHeartbeats 1000000 in
+
 private theorem crd_mul_lemma_2 {l : ℕ} [Fact l.Prime] (LL : FinExt l)
     (i : Fin (Module.finrank ℤ_[l] ↥(OL LL))) (q : WCb l) (y : RW LL) :
     crd (W := WCb l) (basisO LL) i (((1 : ↥(OL LL)) ⊗ₜ[ℤ_[l]] q) * y) =
@@ -69,7 +109,7 @@ private theorem crd_mul_lemma_2 {l : ℕ} [Fact l.Prime] (LL : FinExt l)
   | tmul o w =>
     rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul, crd_tmul_lemma, crd_tmul_lemma, mul_smul_comm]
   | add y z hy hz =>
-    rw [mul_add, LinearMap.map_add, LinearMap.map_add, hy, hz]
+    rw [mul_add, LinearMap.map_add (f := _), LinearMap.map_add (f := _), hy, hz]
     exact (mul_add q _ _).symm
 
 private theorem expand_lemma_3 {l : ℕ} [Fact l.Prime] (LL : FinExt l) (y : RW LL) :
@@ -81,11 +121,12 @@ private theorem expand_lemma_3 {l : ℕ} [Fact l.Prime] (LL : FinExt l) (y : RW 
     rw [← TensorProduct.sum_tmul]
     simp_rw [Module.Basis.coord_apply]
     rw [Module.Basis.sum_repr]
-  | add y z hy hz => simp only [map_add, TensorProduct.tmul_add, Finset.sum_add_distrib, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), TensorProduct.tmul_add, Finset.sum_add_distrib, hy, hz]
 
 private theorem crd_sum_lemma_4 {l : ℕ} [Fact l.Prime] (LL : FinExt l)
     (i : Fin (Module.finrank ℤ_[l] ↥(OL LL))) (w : Fin (Module.finrank ℤ_[l] ↥(OL LL)) → WCb l) :
     crd (W := WCb l) (basisO LL) i (∑ k, basisO LL k ⊗ₜ[ℤ_[l]] w k) = w i := by
+
   simp [map_sum, crd_tmul_lemma, Finsupp.single_apply]
 
 private theorem wdiv_lemma_5 {l : ℕ} [Fact l.Prime] (w : WCb l) (hw : w.coeff 0 = 0) :
@@ -143,7 +184,7 @@ private theorem cc_inclR_lemma_11 {l : ℕ} [Fact l.Prime] (LL : FinExt l)
     obtain ⟨c2, h2⟩ := hb
     refine ⟨c1 + c2, ?_⟩
     have e : (inclR LL) (a + b) = (inclR LL) a + (inclR LL) b := (inclR LL).toRingHom.map_add a b
-    rw [e, LinearMap.map_add, (algebraMap (OCb l) (Cb l)).map_add, ← h1, ← h2]
+    rw [e, LinearMap.map_add (f := _), map_add (algebraMap (OCb l) (Cb l)), ← h1, ← h2]
     exact WittVector.add_coeff_zero _ _
 
 private theorem coord_of_near_lemma_12 {l : ℕ} [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P)
@@ -154,7 +195,7 @@ private theorem coord_of_near_lemma_12 {l : ℕ} [Fact l.Prime] (P : LocPrime l)
   obtain ⟨a, r, rfl⟩ := h
   obtain ⟨c, hc⟩ := cc_inclR_lemma_11 LL i a
   refine ⟨c, ?_⟩
-  rw [map_add, ← nsmul_eq_mul, map_nsmul, nsmul_eq_mul, crdZero_apply, inclR_piR_lemma_9,
+  rw [map_add (f := _), ← nsmul_eq_mul, map_nsmul, nsmul_eq_mul, crdZero_apply, inclR_piR_lemma_9,
     Algebra.TensorProduct.tmul_pow, one_pow, crd_mul_lemma_2]
   change WittVector.constantCoeff (p := l) (R := Cb l) (_ * _) + _ = _
   rw [map_mul, map_pow]
@@ -173,7 +214,8 @@ private theorem near_of_coord_lemma_13 {l : ℕ} [Fact l.Prime] (P : LocPrime l)
   obtain ⟨r, hr⟩ := rwdiv_lemma_6 LL (y - piR AI LL s ^ n * (inclR LL) a) (fun i => by
     have ha : (inclR LL) a = ∑ k, basisO LL k ⊗ₜ[ℤ_[l]] inclW l (WittVector.teichmuller l (c k)) := by
       change (inclR LL : RA LL →+* RW LL) (∑ k, basisO LL k ⊗ₜ[ℤ_[l]] WittVector.teichmuller l (c k)) = _
-      rw [map_sum]
+      set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sum]
       exact Finset.sum_congr rfl fun k _ => rfl
     rw [LinearMap.map_sub, inclR_piR_lemma_9, Algebra.TensorProduct.tmul_pow, one_pow, crd_mul_lemma_2, ha,
       crd_sum_lemma_4]

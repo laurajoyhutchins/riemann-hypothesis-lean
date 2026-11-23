@@ -1,8 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.DcAt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.OrbIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.DcBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.HodgeTateFromSandwich
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.DcAt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.DcBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.FiniteOrbits.OrbIff
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.UaFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,7 +156,7 @@ theorem UpperTheory.V.Z.Sym.So.prodEig :
   obtain ⟨hsec, hcomm, -, -, hext, hfi, hfac, hK⟩ := UpperTheory.V.Z.Sym.Dict.Br.uaFacts L n
   have hloc0 : ∀ (w : Plc L), ∀ y ∈ locU n w, ∀ u : Plc L, un u ≠ un w → cLoc u y = 1 := fun w y hy u hu =>
     MonoidHom.mem_ker.1 (Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (Subgroup.mem_inf.1 hy).2 u) hu)
-  have hlocF : ∀ (w : Plc L), ∀ y ∈ locU n w, y ∈ finU L n := fun w y hy => (Subgroup.mem_inf.1 hy).1
+  have hlocF : ∀ (w : Plc L), ∀ y ∈ locU n w, y ∈ finU (E := L) (n := n) := fun w y hy => (Subgroup.mem_inf.1 hy).1
   have hne : ∀ w ∈ S, ∀ w' ∈ S, w' ≠ w → un w' ≠ un w := fun w hw w' hw' hww e =>
     hww (hS.inj (by exact_mod_cast hw') (by exact_mod_cast hw) e)
 
@@ -123,7 +166,7 @@ theorem UpperTheory.V.Z.Sym.So.prodEig :
     have hu₀ : u ∈ U₀ := (Subgroup.mem_inf.1 hu).1
     have huJ : ∀ w' ∈ S, cLoc w' u ∈ (VL w').J n := fun w' hw' =>
       Subgroup.mem_comap.1 (Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (Subgroup.mem_inf.1 hu).2 w') hw')
-    have huK : cLoc w u ∈ GlobalTheory.LFun.KGL w n :=
+    have huK : cLoc w u ∈ GlobalTheory.LFun.KGL w (n := n) :=
       Subgroup.mem_comap.1 (Subgroup.mem_iInf.1 (Subgroup.mem_inf.1 (hF.1 hu₀)).2 w)
     have htl := (hsec w hsp).1 (cLoc w u)
     have htc := (hsec w hsp).2.1 (cLoc w u)
@@ -144,7 +187,7 @@ theorem UpperTheory.V.Z.Sym.So.prodEig :
   have hcm : ∀ w ∈ S, ∀ u ∈ lev U₀ S VL, ∀ h, (secW n w (cLoc w u))⁻¹ * u * secW n w h = secW n w h * ((secW n w (cLoc w u))⁻¹ * u) := by
     intro w hw u hu h
     have hsp : IsSplitAt w := hS.split w (by exact_mod_cast hw)
-    have hfu : u ∈ finU L n := (Subgroup.mem_inf.1 (hF.1 (Subgroup.mem_inf.1 hu).1)).1
+    have hfu : u ∈ finU (E := L) (n := n) := (Subgroup.mem_inf.1 (hF.1 (Subgroup.mem_inf.1 hu).1)).1
     obtain ⟨a, hal, hau⟩ := hfac w u hfu
     have haeq : a = secW n w (cLoc w u) := by
       rw [(hsec w hsp).2.2.2 a hal, hau w rfl]

@@ -1,5 +1,49 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.FrobeniusCoefficientMemLp.BigCellConjI
-import Formalism.SharpRestriction.CuspSpanNormBounds.SpanMemOfImage
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.SpanMemOfImage
+public import Formalism.SharpRestriction.CuspSpanNormBounds.FrobeniusCoefficientMemLp.FramesTor
+public import Formalism.SharpRestriction.CuspSpanNormBounds.FrobeniusCoefficientMemLp.BigCellConjI
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedVariables false
 
@@ -33,11 +77,6 @@ theorem conjI_mul (M N : Mx k r) : tTi k r * (M * N) * tT k r = (tTi k r * M * t
   have h : (tTi k r * M * tT k r) * (tTi k r * N * tT k r) = tTi k r * M * (tT k r * tTi k r) * N * tT k r := by
     simp only [Matrix.mul_assoc]
   rw [h, tT_mul_tTi, Matrix.mul_one, Matrix.mul_assoc (tTi k r) M N]
-
-theorem conj_mul (M N : Mx k r) : tT k r * (M * N) * tTi k r = (tT k r * M * tTi k r) * (tT k r * N * tTi k r) := by
-  have h : (tT k r * M * tTi k r) * (tT k r * N * tTi k r) = tT k r * M * (tTi k r * tT k r) * N * tTi k r := by
-    simp only [Matrix.mul_assoc]
-  rw [h, tTi_mul_tT, Matrix.mul_one, Matrix.mul_assoc (tT k r) M N]
 
 theorem cA_cAi (x : Mt k r) : cA k r (cAi k r x) = x := by
   funext i j
@@ -289,7 +328,7 @@ theorem uE_mem : ∀ x ∈ lieE (Nset k r), uE k r x ∈ lieE (Nset k r) := by
     rw [uE_realify]
     exact Submodule.subset_span ⟨_, conjI_mem_lieOf X hX, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul c y _ hy => rw [map_smul]; exact Submodule.smul_mem _ c hy
 
 theorem uEI_mem : ∀ x ∈ lieE (Nset k r), uEI k r x ∈ lieE (Nset k r) := by
@@ -302,7 +341,7 @@ theorem uEI_mem : ∀ x ∈ lieE (Nset k r), uEI k r x ∈ lieE (Nset k r) := by
     rw [uEI_realify]
     exact Submodule.subset_span ⟨_, conj_mem_lieOf X hX, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul c y _ hy => rw [map_smul]; exact Submodule.smul_mem _ c hy
 
 def uL (k r : ℕ) : lieE (Nset k r) ≃ₗᵢ[ℝ] lieE (Nset k r) where
@@ -327,6 +366,7 @@ theorem map_cA_haarLie (κN : ENNReal) : (haarLie (Nset k r) κN).map (cA k r) =
   rw [h0, Measure.map_smul, Measure.map_map continuous_cA.measurable (continuous_expL _).measurable, e,
     ← Measure.map_map (continuous_expL _).measurable (uL k r).continuous.measurable,
     (uL k r).measurePreserving.map_eq]
+  exact continuous_cA.measurable.aemeasurable
 
 theorem map_cA_UW {z : Fin (2 * r + k + 1) → ℂ} {μ : Measure (Mt k r)} (h : IsHaarOn (UWset k r z) μ) :
     μ.map (cA k r) = μ := by

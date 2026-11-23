@@ -1,4 +1,61 @@
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsMahler
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IsScaleStable
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 open GroundTheory.Heights₂.Heights MeasureTheory MvPolynomial Matrix GlobalTheory.CompanionTheory.Ar.Short.Crofton
 open scoped ENNReal
@@ -158,7 +215,7 @@ theorem eval_sectionPoly (g : MvPolynomial (Fin (e + 1) × Fin n) ℂ) (v : Fin 
   unfold sectionPoly
   induction g using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
   | mul_X p ij hp =>
     rw [map_mul, map_mul, hp, map_mul, aeval_X, eval_X]
     congr 1
@@ -186,7 +243,7 @@ theorem sectionPoly_isHomogeneous {δ : ℕ} {g : MvPolynomial (Fin (e + 1) × F
   have hp := IsHomogeneous.prod Finset.univ (fun ij => firstSub v ij ^ d ij) _
     (fun ij _ => (hs ij).pow (d ij))
   rw [h1] at hp
-  simpa using (isHomogeneous_C (Fin n) (coeff d g)).mul hp
+  simpa using (isHomogeneous_C (Fin n) (AddMonoidAlgebra.coeff g d)).mul hp
 
 theorem eval_eq_zero_of_common_zero {W : Ideal (MvPolynomial (Fin n) ℂ)}
     {g : MvPolynomial (Fin (e + 1) × Fin n) ℂ} (hg : IsChowForm W (e + 1) g)
@@ -202,6 +259,7 @@ theorem eval_eq_zero_of_common_zero {W : Ideal (MvPolynomial (Fin n) ℂ)}
     · have h1 : aeval x q = 0 := hW q hq
       rw [aeval_algebraMap_apply, h1, map_zero]
     · have := congrArg a (hw i)
+
       simpa [map_sum] using this
   have h := (hg.2 g).2 dvd_rfl _ hmem
   rw [aeval_algebraMap_apply] at h
@@ -211,8 +269,8 @@ end
 
 end ModelDimension.ChowFactor
 
-open ModelDimension.ChowFactor in
 
+open ModelDimension.ChowFactor in
 theorem ModelDimension.chow_form_product_formula :
     ∀ (n e δ : ℕ) (W : Ideal (MvPolynomial (Fin n) ℂ)) (g : MvPolynomial (Fin (e + 1) × Fin n) ℂ)
   (v : Fin e × Fin n → ℂ) (P : Finset (Fin n → ℂ)) (u₀ : Fin n → ℂ),

@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCubeVolume
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCubeVolume
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD.FourierCubeIntegral
 
@@ -72,7 +122,7 @@ theorem Ich_Zb (hω : X.IsLZBasis g ω)
     let H : Submodule ℝ (X.Ψ → Fin 2 → Fin 2 → ℂ) :=
       { carrier := {b | IsHermFam b}
         add_mem' := fun {a c} ha hc τ i k => by
-          simp only [Pi.add_apply, map_add]
+          simp only [Pi.add_apply, map_add (f := _)]
           rw [ha τ i k, hc τ i k]
         zero_mem' := fun τ i k => by simp
         smul_mem' := fun r a ha τ i k => by
@@ -149,7 +199,7 @@ theorem Ich_Zb (hω : X.IsLZBasis g ω)
         obtain ⟨β', hβ', hint', hb'⟩ := ih
         simp only [cc] at hβ hβ'
         refine ⟨(n j : E) • β + β', fun i k => ?_, fun i k => ?_, ?_⟩
-        · simp [cc, hβ, hβ', map_add, map_mul, map_intCast]
+        · simp [cc, hβ, hβ', map_add (f := _), map_mul, map_intCast]
         · obtain ⟨γ, hγ, hγe⟩ := hint i k
           obtain ⟨γ', hγ', hγe'⟩ := hint' i k
           have hn : IsIntegral ℤ (n j : E) := by
@@ -159,7 +209,7 @@ theorem Ich_Zb (hω : X.IsLZBasis g ω)
           ring
         · rw [hb, hb']
           funext τ i k
-          simp [Data.embH, map_add, map_mul, map_intCast]
+          simp [Data.embH, map_add (f := _), map_mul, map_intCast]
     exact hsum Finset.univ
   have hZc : Continuous fun t : Fin (4 * Fintype.card X.Ψ) → ℝ => X.Zb u (Bv ω t) x := by
     refine continuous_pi fun τ => ?_
@@ -212,6 +262,7 @@ theorem Ich_bound (hω : X.IsLZBasis g ω)
     rw [← hβ i k, cc, NumberField.IsCMField.complexEmbedding_complexConj]
   have hBv : ∀ t : Fin (4 * Fintype.card X.Ψ) → ℝ, IsHermFam (Bv ω t) := by
     intro t τ i k
+
     simp only [Bv, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul, Complex.conj_ofReal]
     exact Finset.sum_congr rfl fun j _ => by rw [hωh j τ i k]
   have hfac : ∀ b, IsHermFam b → fac X la (X.Zb u b x) = fac X la x := by

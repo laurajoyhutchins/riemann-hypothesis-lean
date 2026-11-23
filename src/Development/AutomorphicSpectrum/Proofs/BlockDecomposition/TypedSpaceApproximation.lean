@@ -1,29 +1,73 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.InfinitesimalCharacterGlue
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UfamConst
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteAutomorphicRepGLLocalComponentIsUnitaris
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UfamConst
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.SquareIntegrableCovers.SetLIntegralLeOfCover
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.AutomorphicLipschitz.NiceAut
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UpdateLeUpdate
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousArchimedeanSmoothingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsExponentPolynomialDiscreteStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsOpenIntegralSubgroupStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteLatticePointsSiegelStatement
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsLeftInvariantOfIsAutForm
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelEigenfunctionBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelEigenfunctionEquicontinuousStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KilledByPolynomialSmoothingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothingFundamentalDomainBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothingFundamentalDomainIntegralStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothingLipschitzBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundConstantTermStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundOfArchimedeanLipschitzStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundSiegelSetStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundSmoothingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformFamilySmoothingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UpdateLeUpdate
 import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.NormalisedExistence.ExistsNormed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteAutomorphicRepGLLocalComponentIsUnitaris
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundConstantTermStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundOfArchimedeanLipschitzStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousArchimedeanSmoothingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothingLipschitzBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformFamilySmoothingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundSmoothingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KilledByPolynomialSmoothingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformBoundSiegelSetStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelEigenfunctionBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteLatticePointsSiegelStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsExponentPolynomialDiscreteStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothingFundamentalDomainIntegralStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmoothingFundamentalDomainBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelEigenfunctionEquicontinuousStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsOpenIntegralSubgroupStatement
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.SquareIntegrableCovers.SetLIntegralLeOfCover
+import Formalism.LocalToGlobal.IndefiniteReal.PHeisFCA
+import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped ENNReal
 open NumberField IsDedekindDomain Matrix MeasureTheory Filter Topology Polynomial
 open GlobalTheory.CuspRep GlobalTheory.UnitaryBC PositivityTheory.Rg.Rs GlobalTheory.CompanionTheory.Conc
@@ -185,7 +229,7 @@ theorem iterU {ι : Type} {f : ι → AdelicGLn.AdelicGL K n → ℂ} {M : ℝ} 
 
 end Iter
 
-theorem initU (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (N : ℕ) [MeasurableSpace (GA E N)]
+theorem initU (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (N : ℕ) [MeasurableSpace (GA E N)]
     [BorelSpace (GA E N)] (μ : Measure (GA E N)) [μ.IsHaarMeasure] (α : GA E N → ℂ) (δ : ℝ) (F : Set (GA E N))
     (hα : Continuous α) (hαc : HasCompactSupport α) (hδ : 0 < δ) (hF : IsFundamentalDomain (latticeGL E N) F μ) :
     ∃ M : ℝ, ∀ (ι : Type) (f : ι → GA E N → ℂ), (∀ i, Continuous (f i)) →
@@ -254,7 +298,7 @@ theorem enorm_sq_le (a b : ℂ) : ‖a‖ₑ ^ 2 ≤ 2 * ‖a - b‖ₑ ^ 2 + 2 
 
 section Approx
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
   [MeasurableSpace (archGroup E N)] [BorelSpace (archGroup E N)] (ν : Measure (archGroup E N)) [ν.IsHaarMeasure]
 
 theorem sm_integrable {β : archGroup E N → ℝ} (hβ : Ker ν β) {f : GA E N → ℂ} (hf : Continuous f) (x : GA E N) :
@@ -465,9 +509,9 @@ theorem half_of_cover {F Ω Sl : Set (G)} (hF : IsFundamentalDomain (Γ) F μ) (
 
 end Half
 
+
 open PositivityTheory.Rg.BcB.SpectralAccumulation in
 open scoped Classical in
-
 theorem conc : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (N : ℕ) [MeasurableSpace (GA E N)] [BorelSpace (GA E N)]
   (μ : Measure (GA E N)) [μ.IsHaarMeasure] (K : Subgroup (GL (Fin N) (Af E))) (W : Submodule ℂ (Kinf E N → ℂ))
   (R ε δ : ℝ) (α : GA E N → ℂ) (F : Set (GA E N)), IsOpen (K : Set (GL (Fin N) (Af E))) → FiniteDimensional ℂ W → 0 < ε →
@@ -575,6 +619,7 @@ theorem conc : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (N : ℕ) 
       nlinarith) ω hω hωB (max 0 (-Real.log t)) (1 / 8) h8
   refine ⟨Ω, hΩ, fun V ψ hV hψ hT hI hE hs hn => ?_⟩
   let i : ι := ⟨ψ, V, hV, hψ, hT, hI, hE, hs, hn⟩
+  set_option synthInstance.maxHeartbeats 200000 in
   exact half_of_cover (latticeGL E N) μ hF hΩ (fun g => JSqIntGlue.exists_mem_slab hS hL ht hsieg g)
     (hcont i) ((iter_fam ν hβ hfam k).cont i) (hleft i) (iter_left ν (hleft i) k) hn
     (hβψ _ (hcont i) (hleft i) (hrep i) hn) (hΩf i)

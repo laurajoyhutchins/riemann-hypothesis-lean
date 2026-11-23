@@ -1,7 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcGamLiftCore
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
-import Formalism.SharpRestriction.LevelLetterCocycles.RelayGeneralCaseOfAdmissible
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcGamLiftCore
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfFrame
+
+@[expose] public section
 
 noncomputable section
 
@@ -115,7 +160,7 @@ theorem exists_l_pow_integral (hvl : v (PD.p : LL) = 1) (x : LL) : ∃ t : ℕ, 
 theorem frobenius_pow_mem_pullback (T : LocLat G Qp LL O) (c : ZMod n) (j k : ℕ) :
     ∀ y ∈ Pp W T c j, ((W.φD T) ^ k) y ∈ Pp W T c (k + j) := by
   refine Relay2.Pp_ind W T c j _ (by rw [map_zero]; exact (Pp W T c (k + j)).zero_mem)
-    (fun x y hx hy => by rw [map_add]; exact (Pp W T c (k + j)).add_mem hx hy)
+    (fun x y hx hy => by rw [map_add (f := _)]; exact (Pp W T c (k + j)).add_mem hx hy)
     (fun x hx => by rw [map_neg]; exact (Pp W T c (k + j)).neg_mem hx) ?_
   intro a ha x hx
   rw [Relay2.φpow_smul, ← Module.End.mul_apply, ← pow_add]
@@ -184,6 +229,7 @@ theorem arc_section_map (hinj : Function.Injective (algebraMap O LL))
     have h1 : Formalism.MainNotions.TruncatedSeriesCountingBounds.crisMap B F.f (W.cmp T₁ ⟨b₁ m, hb1N⟩) = W.cmp T₂ ⟨W.map F (b₁ m), hx⟩ :=
       (W.cmp_map F hW₁.1 hW₂.1 ⟨b₁ m, hb1N⟩ hx).symm
     have h2 : (⟨W.map F (b₁ m), hx⟩ : ↥(W.N T₂)) = ⟨∑ k, β m k • b k, hsumN⟩ := Subtype.ext (hβ m).2
+
     rw [h1, h2, ArcF.cmp_sum_letter W T₂ c' b hbN hbl (β m) hsumN, map_sum]
     unfold dvO dv
     refine Finset.sum_congr rfl fun k _ => ?_
@@ -234,7 +280,7 @@ theorem arc_section_map (hinj : Function.Injective (algebraMap O LL))
       obtain ⟨a₀, tt, htt, hsplit⟩ := Formalism.MainNotions.LiftingTheory.invariants_eq_constants_add_uniformizer W h9 (β m k) ((hβ m).1 k).1
       have hμ : μ m k = a₀ c' := by
         show PowerSeries.constantCoeff (β m k c') = a₀ c'
-        rw [hsplit, Pi.add_apply, Pi.mul_apply, map_add, map_mul, Formalism.MainNotions.LiftingTheory.uniformizer_constantCoeff_zero W h9 c', zero_mul,
+        rw [hsplit, Pi.add_apply, Pi.mul_apply, map_add (f := _), map_mul, Formalism.MainNotions.LiftingTheory.uniformizer_constantCoeff_zero W h9 c', zero_mul,
           add_zero, PowerSeries.constantCoeff_C]
       have hCl : ((fun j => PowerSeries.C (a₀ j)) : LetA O n) * letE c' =
           algebraMap O (LetA O n) (a₀ c') * letE c' := by
@@ -275,8 +321,9 @@ theorem arc_section_map (hinj : Function.Injective (algebraMap O LL))
       have hγF : W.γ T₂ (W.map F (Hh₁ m)) = W.map F (W.γ T₁ (Hh₁ m)) := (W.map_γ F W.gam _).symm
       have eγ₁ : W.γ T₁ (Hh₁ m) = Hh₁ m + W.π₀ ^ A.M PD.p • x₁ := by rw [← ex₁]; abel
       have eγ₂ : ∀ k, W.γ T₂ (Hh k) = Hh k + W.π₀ ^ A.M PD.p • x₂ k := fun k => by rw [← ex₂' k]; abel
+
       simp only [E, smul_zero, sub_zero, map_sub, Relay2.γ_lsmul, map_sum, map_smul, hγF, eγ₁, eγ₂,
-        map_add, Relay2.mapA_smul, smul_add, Finset.sum_add_distrib, smul_sub, Finset.smul_sum]
+      map_add, Relay2.mapA_smul, smul_add, Finset.sum_add_distrib, smul_sub, Finset.smul_sum]
       have hc1 : lA W ^ t • W.π₀ ^ A.M PD.p • W.map F x₁ = W.π₀ ^ A.M PD.p • lA W ^ t • W.map F x₁ :=
         smul_comm _ _ _
       have hc2 : ∀ k, μ m k • W.π₀ ^ A.M PD.p • x₂ k = W.π₀ ^ A.M PD.p • μ m k • x₂ k :=
@@ -296,6 +343,7 @@ theorem arc_section_map (hinj : Function.Injective (algebraMap O LL))
       ← pow_add, Nat.sub_add_cancel hje] at h1
     exact inFP_of_mul_unit W T₂ c' e _ u hu h1
   have hXF := Relay2.inMultiple_map W F hW₁.1 hW₂.1 c' e _ hX
+
   simp only [Relay2.mapA_smul, map_sub, map_sum, Relay2.map_φpow] at hXF
   have hA : ∑ m, a₁ m • ((W.φD T₂) ^ e) (E m) =
       lA W ^ t • ∑ m, a₁ m • ((W.φD T₂) ^ e) (W.map F (Hh₁ m)) -
@@ -304,6 +352,7 @@ theorem arc_section_map (hinj : Function.Injective (algebraMap O LL))
         lA W ^ t • (a₁ m • ((W.φD T₂) ^ e) (W.map F (Hh₁ m))) -
           ∑ k, (a₁ m * algebraMap O (LetA O n) (μ m k)) • ((W.φD T₂) ^ e) (Hh k) := by
       intro m
+
       simp only [E, map_sub, Relay2.φpow_lsmul, map_sum, map_smul, smul_sub, Finset.smul_sum]
       congr 1
       · exact smul_comm _ _ _
@@ -316,7 +365,8 @@ theorem arc_section_map (hinj : Function.Injective (algebraMap O LL))
   refine ⟨κ + t, κ' + ∑ m, K m, Hh, fun k => ∑ m, a₁ m * algebraMap O (LetA O n) (μ m k), hHh,
     fun k => ⟨?_, ?_⟩, ?_⟩
   · exact W.AΔ.sum_mem fun m _ => W.AΔ.mul_mem (ha₁ m).1 (W.AΔ.algebraMap_mem _)
-  · rw [Finset.mul_sum, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [Finset.mul_sum, map_sum]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [← mul_assoc, (ha₁ m).2, map_mul, ← IsScalarTower.algebraMap_apply O (LetA O n) W.EE]
   · have hS : ∀ m, InFP W T₂ c' e (W.π₀ * abelian₂ W A (c' + (e : ZMod n)) e ^ 2)

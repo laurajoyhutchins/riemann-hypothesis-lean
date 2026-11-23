@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+module
+
+public import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib.RingTheory.Adjoin.FG
+public import Mathlib.RingTheory.FiniteType
+
+@[expose] public section
 
 noncomputable section
 
@@ -221,7 +270,7 @@ theorem step (hGr : RuleGr) (X : HidaSetting k) (F : X.Mod) (hF : F.IsGr X.𝒜)
     obtain ⟨a, rfl⟩ := Submodule.mem_span_singleton.1 hz
     refine ⟨a, ?_⟩
     show a • N.mkQ x = N.mkQ (n + a • x)
-    rw [map_add, map_smul, (Submodule.Quotient.mk_eq_zero N).2 hn |> (show N.mkQ n = 0 from ·),
+    rw [map_add (f := _), map_smul, (Submodule.Quotient.mk_eq_zero N).2 hn |> (show N.mkQ n = 0 from ·),
       zero_add]
   let g : N' →ₗ[X.R] X.R ⧸ LinearMap.ker φ :=
     (φ.quotKerEquivRange.symm : LinearMap.range φ →ₗ[X.R] X.R ⧸ LinearMap.ker φ) ∘ₗ
@@ -313,7 +362,12 @@ def Good (X : HidaSetting k) (F : X.Mod) (N₀ : Submodule X.R F.M) : Prop :=
 theorem good_bot (X : HidaSetting k) (F : X.Mod) : Good X F ⊥ := by
   refine ⟨0, fun _ => ⊥, fun _ => ⊥, fun _ => 0, rfl, rfl, ?_, fun _ => le_rfl, ?_⟩
   · intro _
-    exact (Submodule.span_eq_bot.2 (fun x hx => (Submodule.mem_bot _).1 hx.1)).symm
+    change (⊥ : Submodule X.R F.M) = Submodule.span X.R
+      {x | x ∈ (⊥ : Submodule X.R F.M) ∧ ∃ m, x ∈ F.gr m}
+    symm
+    apply Submodule.span_eq_bot.2
+    intro x hx
+    exact (Submodule.mem_bot _).1 hx.1
   · intro i hi
     exact absurd hi (Nat.not_lt_zero i)
 

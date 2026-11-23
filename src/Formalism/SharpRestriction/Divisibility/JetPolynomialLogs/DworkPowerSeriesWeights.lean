@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.ProductZerothFirstParts
-import Formalism.GaussJetBounds.ThmAGauss
-import Formalism.GaussJetBounds.OneLetterGauss
-import Formalism.GaussJetBounds.GaussJetProofs.WeightsAddOverOrbitFamily
+module
+
+public import Formalism.SharpRestriction.Divisibility.ProductZerothFirstParts
+public import Formalism.GaussJetBounds.StatementU
+public import Formalism.GaussJetBounds.OneLetterGauss
+public import Formalism.GaussJetBounds.ThmAGauss
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -168,9 +209,9 @@ def TieFrame : Prop :=
     (Th : MvPowerSeries (ZMod d × Fin N0 × Fin N1) ℂ_[l]) (ep : ℂ_[l]) (B : ℝ), ‖ep‖ = 1 →
     (∀ (I : ∀ s (c : Fin ((nu s).rowLen 0)), Fin ((nu s).colLen c) → Fin N1)
       (n : (ZMod d × Fin N0 × Fin N0) →₀ ℕ),
-      ‖MvPolynomial.coeff n (frameJet (fun s => (nu s).rowLen 0) (fun s c => (nu s).colLen c) hp I
+      ‖AddMonoidAlgebra.coeff (frameJet (fun s => (nu s).rowLen 0) (fun s c => (nu s).colLen c) hp I
         (MvPowerSeries.subst (fun v : ZMod d × Fin N0 × Fin N1 =>
-          MvPowerSeries.C ep * (MvPowerSeries.X v : MvPowerSeries (ZMod d × Fin N0 × Fin N1) ℂ_[l])) Th))‖ ≤
+          MvPowerSeries.C ep * (MvPowerSeries.X v : MvPowerSeries (ZMod d × Fin N0 × Fin N1) ℂ_[l])) Th)) n‖ ≤
         (l : ℝ) ^ (-B)) →
     product_zeroth_first_parts.KvalGe N0 N1 l nu Th B
 
@@ -226,9 +267,9 @@ def TieFrameOne : Prop :=
     (hp : ∀ c : Fin (nu.rowLen 0), nu.colLen c ≤ N0)
     (Th : MvPowerSeries (ZMod 1 × Fin N0 × Fin N1) ℂ_[l]) (ep0 : ℂ_[l]) (B : ℝ), ‖ep0‖ = 1 →
     (∀ (I : ∀ c : Fin (nu.rowLen 0), Fin (nu.colLen c) → Fin N1) (n : (Fin N0 × Fin N0) →₀ ℕ),
-      ‖MvPolynomial.coeff n (frameJetOne (fun c : Fin (nu.rowLen 0) => nu.colLen c) hp I
+      ‖AddMonoidAlgebra.coeff (frameJetOne (fun c : Fin (nu.rowLen 0) => nu.colLen c) hp I
         (MvPowerSeries.subst (fun v : ZMod 1 × Fin N0 × Fin N1 =>
-          MvPowerSeries.C ep0 * (MvPowerSeries.X v.2 : MvPowerSeries (Fin N0 × Fin N1) ℂ_[l])) Th))‖ ≤
+          MvPowerSeries.C ep0 * (MvPowerSeries.X v.2 : MvPowerSeries (Fin N0 × Fin N1) ℂ_[l])) Th)) n‖ ≤
         (l : ℝ) ^ (-B)) →
     product_zeroth_first_parts.KvalGe N0 N1 l (fun _ : ZMod 1 => nu) Th B
 

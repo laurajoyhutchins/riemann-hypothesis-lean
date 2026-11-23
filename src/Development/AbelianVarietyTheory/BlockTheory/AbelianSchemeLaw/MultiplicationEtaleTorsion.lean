@@ -1,5 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.Imports
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ConstGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.SplitTori.SplitTorusAff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,49 +63,10 @@ def translDiffPow (A : Over S) [GrpObj A] (L : LB A.left) (N : ℕ) {T : Over S}
     LB (T ⊗ A).left :=
   LB.LinComb L (K := Fin 2) ![(translPt A x).left, (snd T A).left] ![(N : ℤ), -(N : ℤ)]
 
-def MemK (A : Over S) [GrpObj A] (L : LB A.left) (N : ℕ) {T : Over S} (x : T ⟶ A) : Prop :=
-  ∀ p : T.left, ∃ V : T.left.Opens, p ∈ V ∧
-    ∃ c : LB.Gen ((translDiffPow A L N x).pull ((fst T A).left ⁻¹ᵁ V).ι), c.IsGen
-
-def mulPullDiff (A : Over S) [GrpObj A] (L : LB A.left) (n : ℕ) : LB A.left :=
-  LB.LinComb L (K := Fin 2) ![(mulN A n).left, 𝟙 A.left] ![1, -((n : ℤ) ^ 2)]
-
-def KPowEqTorsion : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (N : ℕ), 1 ≤ N →
-    ∀ (T : Over S) (x : T ⟶ P.A), MemK P.A P.L N x ↔ x ^ N = 1
-
-def MulPullIso : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (n : ℕ),
-    ∃ c : LB.Gen (mulPullDiff P.A P.L n), c.IsGen
-
-def MulFiniteFlatOnto : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (n : ℕ), 1 ≤ n →
-    IsFinite (mulN P.A n).left ∧ Flat (mulN P.A n).left ∧ Surjective (mulN P.A n).left
-
-def MulEtale : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (n : ℕ), 1 ≤ n →
-    IsUnit (n : Γ(S, ⊤)) →
-    (IsFinite (mulN P.A n).left ∧ Etale (mulN P.A n).left ∧ Surjective (mulN P.A n).left ∧
-      ∀ a : P.A.left, (mulN P.A n).left.finrank a = n ^ (2 * P.g)) ∧
-    (IsFinite (torsion P.A n).hom ∧ Etale (torsion P.A n).hom ∧
-      ∀ s : S, (torsion P.A n).hom.finrank s = n ^ (2 * P.g))
-
-def TorsionCard : Prop :=
-  ∀ (S : Scheme.{0}) [IsLocallyNoetherian S] (P : PolAV S) (n : ℕ), 1 ≤ n →
-    ∀ (K : Type) [Field K] [IsAlgClosed K] (s : Spec (CommRingCat.of K) ⟶ S), (n : K) ≠ 0 →
-      Nat.card {y : Over.mk s ⟶ P.A // y ^ n = 1} = n ^ (2 * P.g)
-
-def MulMorphism : Prop := MulFiniteFlatOnto ∧ MulEtale ∧ TorsionCard
-
-def Laws : Prop := KPowEqTorsion ∧ MulPullIso ∧ MulMorphism
-
 theorem comp_mulN (A : Over S) [GrpObj A] {T : Over S} (x : T ⟶ A) (n : ℕ) :
     x ≫ mulN A n = x ^ n := by
   induction n with
   | zero => simp [mulN, Hom.one_def]
   | succ n ih => rw [pow_succ, ← ih]; simp [mulN, Hom.mul_def, comp_lift_assoc]
-
-example (A : Over S) [GrpObj A] (L : LB A.left) {T : Over S} (x : T ⟶ A) :
-    translDiffPow A L 1 x = translDiff A L x := rfl
 
 end GlobalTheory.IndefiniteRowSideFullHecke.MultiplicationEtaleTorsion

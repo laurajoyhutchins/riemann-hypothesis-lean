@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemmaCellGroups
-import GroundTheory.AutomorphicForms.GeometricLemmaCount
+module
+
+public import GroundTheory.AutomorphicForms.GeometricLemmaCellGroups
+public import GroundTheory.AutomorphicForms.GeometricLemmaAverage
+public import GroundTheory.AutomorphicForms.GeometricLemmaCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -16,8 +67,8 @@ variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchi
 
 section CellCompact
 
-variable (γ) in
 
+variable (γ) in
 def IsCellCompact (K : Subgroup (GL (Fin n) F)) : Prop :=
   K ≤ unipotentRadical F n γ ∧ IsCompact (K : Set (GL (Fin n) F)) ∧
     ∃ U : Subgroup (GL (Fin n) F), IsOpen (U : Set (GL (Fin n) F)) ∧ unipotentRadical F n γ ⊓ U ≤ K
@@ -68,8 +119,8 @@ end CellCompact
 
 section CellFun
 
-variable (F β γ w) in
 
+variable (F β γ w) in
 def cellNorm (K : Subgroup (GL (Fin n) F)) : ℝ :=
   relVol (unipotentCompactG (F := F) γ 0) K /
     relVol (unipotentCompactG (F := F) γ 0 ⊓ cellUnipotent F β γ w) (K ⊓ cellUnipotent F β γ w)
@@ -101,8 +152,8 @@ theorem cellNorm_eq_of_le {K K' : Subgroup (GL (Fin n) F)} (hK : IsCellCompact �
 
 variable {W : Type*} [AddCommGroup W] [Module ℂ W] (σ : Representation ℂ (levi F n β) W)
 
-variable (w) in
 
+variable (w) in
 def cellFun (f : parabolicIndSpace F n β σ) (m : GL (Fin n) F) : GL (Fin n) F → W :=
   fun y => (f : GL (Fin n) F → W) (permGL F w * y * m)
 
@@ -132,8 +183,8 @@ theorem avgFinite_cellFun (f : parabolicIndSpace F n β σ) (m : GL (Fin n) F)
     change (f : GL (Fin n) F → W) (permGL F w * (y * (m * k * m⁻¹)) * m) = _
     rw [show permGL F w * (y * (m * k * m⁻¹)) * m = permGL F w * y * m * k by group, hUf k hk]
 
-variable (γ w) in
 
+variable (γ w) in
 def CellSupp (f : parabolicIndSpace F n β σ) (m : GL (Fin n) F) (K : Subgroup (GL (Fin n) F)) :
     Prop :=
   ∀ y ∈ unipotentRadical F n γ, cellFun w σ f m y ≠ 0 →
@@ -162,8 +213,8 @@ section CellJacquet
 
 variable {W : Type*} [AddCommGroup W] [Module ℂ W] (σ : Representation ℂ (levi F n β) W)
 
-variable (γ w) in
 
+variable (γ w) in
 def cellEv (f : parabolicIndSpace F n β σ) (m : GL (Fin n) F) (K : Subgroup (GL (Fin n) F)) :
     Representation.Coinvariants (cellRepA β γ w σ) :=
   ((cellNorm F β γ w K : ℝ) : ℂ) •
@@ -217,9 +268,9 @@ theorem exists_cellEv_eventually {f : parabolicIndSpace F n β σ} (hf : f ∈ s
     cellEv_eq_of_le σ f m (isCellCompact_unipotentCompactG e₀) (isCellCompact_unipotentCompactG e)
       (unipotentCompactG_mono he) he₀⟩⟩
 
+
 omit hYo hCY in
 variable (γ w) in
-
 def cellJacquet (f : parabolicIndSpace F n β σ) (m : GL (Fin n) F) :
     Representation.Coinvariants (cellRepA β γ w σ) :=
   Classical.epsilon fun v => ∀ᶠ e in atTop, cellEv γ w σ f m (unipotentCompactG γ e) = v
@@ -284,8 +335,8 @@ theorem cellJacquet_smul (c : ℂ) {f : parabolicIndSpace F n β σ} (hf : f ∈
   rw [this, avgOver_smul c (avgFinite_cellFun σ f m hK.2.1), Pi.smul_apply, map_smul,
     smul_comm]
 
-omit hYo hCY in
 
+omit hYo hCY in
 theorem cellJacquet_parabolicInd (f : parabolicIndSpace F n β σ) (m₀ m : GL (Fin n) F) :
     cellJacquet γ w σ (parabolicInd F n β σ m₀ f) m = cellJacquet γ w σ f (m * m₀) := by
   have : ∀ K, cellEv γ w σ (parabolicInd F n β σ m₀ f) m K = cellEv γ w σ f (m * m₀) K := by
@@ -297,8 +348,8 @@ theorem cellJacquet_parabolicInd (f : parabolicIndSpace F n β σ) (m₀ m : GL 
   unfold cellJacquet
   simp only [this]
 
-omit hYo hCY in
 
+omit hYo hCY in
 theorem exists_cellJacquet_mul_right (f : parabolicIndSpace F n β σ) :
     ∃ U : Subgroup (GL (Fin n) F), IsOpen (U : Set (GL (Fin n) F)) ∧
       ∀ k ∈ U, ∀ m, cellJacquet γ w σ f (m * k) = cellJacquet γ w σ f m := by
@@ -365,8 +416,8 @@ theorem cellNorm_map_conj_eq_of_le {b : GL (Fin n) F} (hb : b ∈ cellLeviParabo
     Nat.cast_ne_zero.2 (relIndex_inf_ne_zero (hK.relIndex_ne_zero hK'))
   field_simp
 
-variable (F β γ w) in
 
+variable (F β γ w) in
 def cellChar (b : GL (Fin n) F) : ℝ :=
   cellNorm F β γ w (unipotentCompactG γ 0) /
     cellNorm F β γ w ((unipotentCompactG γ 0).map (MulAut.conj b⁻¹).toMonoidHom)
@@ -406,8 +457,8 @@ theorem cellChar_mul {b b' : GL (Fin n) F} (hb : b ∈ cellLeviParabolic F β γ
   unfold cellChar
   field_simp
 
-variable (F β γ w) in
 
+variable (F β γ w) in
 def cellCharHom : cellLeviParabolic F β γ w →* ℂ where
   toFun b := ((cellChar F β γ w b : ℝ) : ℂ)
   map_one' := by simp [cellChar_one]
@@ -423,19 +474,19 @@ section JacquetMap
 
 variable {W : Type*} [AddCommGroup W] [Module ℂ W] (σ : Representation ℂ (levi F n β) W)
 
-variable (F β γ w) in
 
+variable (F β γ w) in
 abbrev cellLeviSub : Subgroup (levi F n γ) := (cellLeviParabolic F β γ w).subgroupOf (levi F n γ)
 
-variable (F β γ w) in
 
+variable (F β γ w) in
 def cellLeviSubIncl : cellLeviSub F β γ w →* cellLeviParabolic F β γ w where
   toFun x := ⟨((x : levi F n γ) : GL (Fin n) F), x.2⟩
   map_one' := rfl
   map_mul' _ _ := rfl
 
-variable (β γ w) in
 
+variable (β γ w) in
 def cellInducing : Representation ℂ (cellLeviSub F β γ w)
     (Representation.Coinvariants (cellRepA β γ w σ)) :=
   twist ((cellCharHom F β γ w).comp (cellLeviSubIncl F β γ w))
@@ -507,8 +558,8 @@ theorem cellJacquet_mul_left {f : parabolicIndSpace F n β σ} (hf : f ∈ suppo
   push_cast
   field_simp
 
-omit hYo hCY in
 
+omit hYo hCY in
 def cellJacquetFun (f : parabolicIndSpace F n β σ) :
     levi F n γ → Representation.Coinvariants (cellRepA β γ w σ) :=
   fun m => cellJacquet γ w σ f m
@@ -524,8 +575,8 @@ theorem cellJacquetFun_mem {f : parabolicIndSpace F n β σ} (hf : f ∈ support
 
 variable (hYQ : ∀ g ∈ Y, ∀ q ∈ blockUpper F n γ, g * q ∈ Y)
 
-variable (γ w) in
 
+variable (γ w) in
 def cellJacquetMap : supportedIn σ Y →ₗ[ℂ] indSpace (cellLeviSub F β γ w) (cellInducing β γ w σ) where
   toFun f := ⟨cellJacquetFun σ f, cellJacquetFun_mem σ hYo hCY f.2⟩
   map_add' f g := Subtype.ext (funext fun m => cellJacquet_add σ hYo hCY f.2 g.2 m.2)

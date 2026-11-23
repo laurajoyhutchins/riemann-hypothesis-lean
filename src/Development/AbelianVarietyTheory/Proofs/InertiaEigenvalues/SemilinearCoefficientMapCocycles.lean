@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsDualDualRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +57,7 @@ variable {R R' : Type} [CommRing R] [CommRing R'] {σ : R →+* R'} {Γ : Type} 
 def semilinearCoefficientMapCocycles : Z1 rho →ₛₗ[σ] Z1 rho' where
   toFun z := ⟨fun g => u (z.1 g), hu.comp z.2.1, fun g h => by
     beta_reduce
-    rw [z.2.2, map_add, he]⟩
+    rw [z.2.2, map_add (f := _), he]⟩
   map_add' z w := Subtype.ext (funext fun g => map_add u _ _)
   map_smul' c z := Subtype.ext (funext fun g => map_smulₛₗ u _ _)
 
@@ -55,6 +94,7 @@ def vecMap : (Fin r → K) →ₛₗ[(f : K →+* K')] (Fin r → K') where
 theorem vecMap_repOn {Γ : Type} [Group Γ] {r : ℕ} (ρ : Γ →* GL (Fin r) O) (g : Γ) (m : Fin r → K) :
     vecMap f r (repOn ρ (1 : Γ →* Kˣ) K g m) = repOn ρ (1 : Γ →* K'ˣ) K' g (vecMap f r m) := by
   funext a
+
   simp [vecMap, repOn, matAct, map_sum]
 
 end Coef
@@ -79,7 +119,7 @@ theorem slH1_mem_bkOn (v : PlE D.host) (x : H1 ((repOn ρ (1 : GE N →* Kˣ) K)
       change f ((z : ↥(DecV N v) → Fin r → K) g a) = _
       rw [hz, smul_eq_mul, smul_eq_mul, map_mul, AlgHom.commutes]
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul a x _ hx => rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ hx
   · rw [Submodule.mem_bot] at hx ⊢
     rw [hx, map_zero]

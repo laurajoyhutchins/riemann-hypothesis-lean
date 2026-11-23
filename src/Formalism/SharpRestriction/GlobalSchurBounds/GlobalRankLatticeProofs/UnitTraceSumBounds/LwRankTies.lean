@@ -1,7 +1,45 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.MainSup
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.CountHypothesesIffText
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.MainSup
+public import Formalism.SharpRestriction.AdmissibleParameterJoins.DIVfromGLz
 import Formalism.SharpRestriction.AdmissibleParameterJoins.SfromGLu
-import Formalism.SharpRestriction.AdmissibleParameterJoins.DIVfromGLz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,23 +63,6 @@ theorem rank_conditions_iff_lowest_space {eps : ℝ} (Fm : FamP eps) :
 theorem rank_conditions_of_lowest_space {eps : ℝ} (Fm : FamP eps)
     (h : ∃ x0 : ℝ, ∀ x ≥ x0, ∀ (i : Fm.Ix x) (u : (Fm.D x i).what₂.Word), StandardLattice.Mu0Tie (Fm.D x i) u) : RankTiesF Fm :=
   (rank_conditions_iff_lowest_space Fm).2 h
-
-theorem rankTiesF_of_col {eps : ℝ} (Fm : FamP eps)
-    (h : ∃ x0 : ℝ, ∀ x (hx : Fm.x1 < x), x0 ≤ x → ∀ i : Fm.Ix x,
-      StandardLattice.adm17 (Fm.D x i) (Fm.ex x hx i).lev ∧ StandardLattice.Conclusion4p (Fm.D x i) (Fm.ex x hx i).lev ∧ StandardLattice.AdmittedWeylDimension (Fm.D x i) ∧
-        ∀ u : (Fm.D x i).what₂.Word, ∃ X : StandardLattice.ColRep (Fm.D x i) (Fm.ex x hx i).lev u,
-          StandardLattice.BaseWeightColumnCondition (Fm.D x i) (Fm.ex x hx i).lev u X) :
-    RankTiesF Fm := by
-  obtain ⟨x0, h⟩ := h
-  refine rank_conditions_of_lowest_space Fm ⟨max x0 (max 3 (Fm.x1 + 1)), fun x hx i u => ?_⟩
-  have e0 : x0 ≤ x := (le_max_left _ _).trans hx
-  have e3 : 3 ≤ x := ((le_max_left _ _).trans (le_max_right _ _)).trans hx
-  have e1 : Fm.x1 < x := by
-    have := ((le_max_right 3 (Fm.x1 + 1)).trans (le_max_right x0 _)).trans hx
-    linarith
-  obtain ⟨h17, hp, hW, hX⟩ := h x e1 e0 i
-  obtain ⟨X, hX⟩ := hX u
-  exact StandardLattice.mu0Tie_of_col (Fm.D x i) (Fm.ex x e1 i).lev h17 hp (GlobalTheoryTheory.JDB.gBig_fam Fm x e3 e1 i) hW u X hX
 
 end Formalism.MainNotions.Ext.Lw
 

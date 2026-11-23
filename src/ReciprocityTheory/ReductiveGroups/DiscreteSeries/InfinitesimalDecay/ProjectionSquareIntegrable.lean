@@ -1,6 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.InfinitesimalDecay.FormBSelfLe
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.FormCc
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.ConsumerB
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.EqZeroOfDatumEmbeddingEqZero
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.InfinitesimalDecay.DecBoundJ
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HidaSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumIrr
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RregRep
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.InfinitesimalDecay.FormBSelfLe
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Decomp
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.DecompB
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PoleMatch
+public import Mathlib.LinearAlgebra.Lagrange
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -13,12 +60,7 @@ namespace ReciprocityTheory.ChartRestriction.DS.DecInf
 variable {n : ℕ}
 
 theorem poles_injective {lam : Fin n → ℝ} (hlam : StrictAnti lam) : Function.Injective (poleF false lam) := by
-  intro s t h
-  have h' : lam s + (1 - (n : ℝ)) / 2 = lam t + (1 - (n : ℝ)) / 2 := by
-    have := h
-    simp only [poleF, cond_false, poleV] at this
-    exact_mod_cast this
-  exact hlam.injective (by linarith)
+  simpa only [poleF, Bool.cond_false] using poleV_injective hlam.injective
 
 theorem projection_square_integrable {ε : Fin n → Bool} {lam : Fin n → ℝ} (hlam : S7.IsHCParam lam) {T : S7.KType ε (lowK ε lam)}
     {Ψ : Matrix (Fin n) (Fin n) ℂ → (T.V →L[ℂ] T.V)} {v₀ : T.V}
@@ -49,7 +91,7 @@ theorem projection_square_integrable {ε : Fin n → Bool} {lam : Fin n → ℝ}
   obtain ⟨B, hdec, -⟩ := ee_decomp false hσ hD hgap hV hc hVK hW
   obtain ⟨hpole, -⟩ := pole_match false hσ hD hsm hgap hV hc hVK hW hG
   have hinj : Set.InjOn (poleF false lam) (Finset.univ : Finset (Fin n)) :=
-    (poles_injective hgap.1).injOn
+    (poles_injective hlam.1).injOn
   set a := poleF false lam with ha
   set EE := eeF false (smE ε (rreg ε)) with hEE
   set S := tensSub (genSub (smE ε (rreg ε)) (datumV ε Ψ v₀)) with hS
@@ -86,7 +128,7 @@ theorem projection_square_integrable {ε : Fin n → Bool} {lam : Fin n → ℝ}
   refine ⟨P, fun s => dc_isGKEndo_aeval (isGKEndo_eeF hσ hD _ false) _, ?_, ?_, ?_, ?_, ?_⟩
   · intro s f hf
     obtain ⟨fb, hfb, hfe⟩ := hdec f hf
-    rw [hfe, map_sum, map_sum, Finset.smul_sum]
+    rw [hfe, map_sum (P s), map_sum EE, Finset.smul_sum]
     exact Finset.sum_congr rfl fun b _ => hterm s _ (hfb b).1 _ (hfb b).2
   · intro s f _ hf
     rw [hPe s f _ hf, Lagrange.eval_basis_self hinj (Finset.mem_univ _), one_smul]
@@ -95,14 +137,16 @@ theorem projection_square_integrable {ε : Fin n → Bool} {lam : Fin n → ℝ}
     · subst h0; simp
     obtain ⟨t, rfl⟩ := hpole z' f hf h0 hfz
     have hts : s ≠ t := fun h => hz' (by rw [h])
-    rw [hPe s f _ hfz, hLval s t, if_neg hts, zero_smul]
+    rw [hPe s f _ hfz, hLval s t, ite_eq_right hts, zero_smul]
   · intro f hf
     obtain ⟨fb, hfb, hfe⟩ := hdec f hf
-    conv_lhs => rw [hfe]
-    rw [hfe]
-    simp only [map_sum]
-    rw [Finset.sum_comm]
-    exact (Finset.sum_congr rfl fun b _ => hsum1 _ (hfb b).1 _ (hfb b).2).symm
+    calc
+      f = ∑ b ∈ B, fb b := hfe
+      _ = ∑ b ∈ B, ∑ s, P s (fb b) :=
+        Finset.sum_congr rfl fun b _ => (hsum1 _ (hfb b).1 _ (hfb b).2).symm
+      _ = ∑ s, P s f := by
+        rw [Finset.sum_comm, hfe]
+        exact Finset.sum_congr rfl fun s _ => (map_sum (P s) fb B).symm
   · intro s j
     obtain ⟨C, hC⟩ := NT_poly_le false (smE ε (rreg ε)) (Lagrange.basis Finset.univ a s) j
     have hdeg : (Lagrange.basis Finset.univ a s).natDegree = n - 1 := by

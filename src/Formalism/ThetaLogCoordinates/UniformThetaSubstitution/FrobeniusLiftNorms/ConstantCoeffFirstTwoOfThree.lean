@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FirstDeriv
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FirstDeriv
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -247,11 +297,13 @@ theorem map_Gser (σ : K →+* K) (p : ℕ) (c c' : K) :
     ext n
     rw [MvPowerSeries.coeff_map]
     change σ (Aser K p n) = Aser K p n
+
     simp only [Aser, map_sum, apply_ite σ, map_inv₀, map_pow, map_natCast, map_zero]
   have hA' : MvPowerSeries.map σ (Aser' K p) = Aser' K p := by
     ext n
     rw [MvPowerSeries.coeff_map]
     change σ (Aser' K p n) = Aser' K p n
+
     simp only [Aser', map_sum, apply_ite σ, map_inv₀, map_pow, map_natCast, map_zero]
   unfold Gser
   rw [map_sub, map_mul, map_mul, MvPowerSeries.map_C, MvPowerSeries.map_C, hA, hA']
@@ -296,7 +348,7 @@ theorem StepH_of (h2 : LemmaTwo) (hSw : SwapRules) (_hL : LawSymm) : StepH := by
   · rw [hc, norm_zero]
     exact zero_le_one
   · have hll := coeff_lg_lg_eq_zero (K := K) hp (hsupp n hc).2.2
-    rw [hHR, map_add, MvPowerSeries.coeff_C_mul, hll, mul_zero, zero_add]
+    rw [hHR, map_add (f := _), MvPowerSeries.coeff_C_mul, hll, mul_zero, zero_add]
     exact hR n
 
 private theorem coeff_lgF_one_lemma {K : Type} [Field K] {p : ℕ} (hp : 2 ≤ p) :
@@ -355,7 +407,7 @@ theorem c_add_sigma_c_eq_zero : StepIII := by
   obtain ⟨n, hn⟩ : ∃ n : Fin 2 →₀ ℕ, n = Finsupp.single 1 m + Finsupp.single 0 1 := ⟨_, rfl⟩
 
   have hcoefD : MvPowerSeries.coeff (Finsupp.single 1 m) (MvPowerSeries.pderiv (R := K) 0 G -
-      MvPowerSeries.C c * (at1 0 (PowerSeries.derivative K (lgF K p)) * at1 1 (g0F K p))) =
+      MvPowerSeries.C c * (at1 0 (PowerSeries.derivative (R := K) (lgF K p)) * at1 1 (g0F K p))) =
       MvPowerSeries.coeff n G - c * ((p : K) ^ (i + 1))⁻¹ := by
     have hs0 : (Finsupp.single (1 : Fin 2) m) 0 = 0 := by simp
     have hs1 : (Finsupp.single (1 : Fin 2) m) 1 = m := by simp

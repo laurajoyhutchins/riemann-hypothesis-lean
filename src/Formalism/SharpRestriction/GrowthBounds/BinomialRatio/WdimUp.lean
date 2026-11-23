@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountUp
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountDefs
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountUp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +80,7 @@ def wuLam {r : ℕ} (lam : Fin r → ℤ) (y : ℕ) : ℤ := if h : y < r then l
 
 theorem wuLam_val {r : ℕ} (lam : Fin r → ℤ) (l : Fin r) : wuLam lam l.val = lam l := by
   unfold wuLam
-  rw [dif_pos l.2]
+  rw [dite_eq_left l.2]
 
 def wuDeg {r : ℕ} (lam : Fin r → ℤ) (a : ℕ) : ℕ :=
   if a < r then (wuLam lam a).toNat else if a < 2 * r then (-(wuLam lam (2 * r - 1 - a))).toNat else 0
@@ -76,7 +120,7 @@ theorem wu_step {r : ℕ} (lam : Fin r → ℤ) (hlam : Antitone lam) (a : ℕ) 
       split_ifs <;> omega
     · have e : wuDeg lam a = (lam ⟨a, h1⟩).toNat := by
         unfold wuDeg wuLam
-        rw [if_pos h1, dif_pos h1]
+        rw [if_pos h1, dite_eq_left h1]
       rw [e]
       apply wu_sum _ _ ⟨a, h1⟩
       · unfold wuSt
@@ -100,7 +144,7 @@ theorem wu_step {r : ℕ} (lam : Fin r → ℤ) (hlam : Antitone lam) (a : ℕ) 
         split_ifs <;> omega
       · have e : wuDeg lam a = (-(lam ⟨2 * r - 1 - a, h3⟩)).toNat := by
           unfold wuDeg wuLam
-          rw [if_neg (by omega), if_pos h2, dif_pos h3]
+          rw [if_neg (by omega), if_pos h2, dite_eq_left h3]
         rw [e]
         apply wu_sum _ _ ⟨2 * r - 1 - a, h3⟩
         · unfold wuSt

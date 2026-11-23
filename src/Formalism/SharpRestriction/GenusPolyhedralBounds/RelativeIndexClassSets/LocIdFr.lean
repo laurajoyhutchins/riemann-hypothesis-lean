@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.CompletionIntegersIff
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LevGapLoc
+module
+
+public import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LevGapLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +93,7 @@ theorem exists_spl {K : Type} [Field K] [Algebra F K] (sig : E →ₐ[F] E) (hsi
   refine ⟨φ, fun x => ?_, fun a => ?_, fun x => ?_⟩
   · induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add, map_add, map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
     | tmul x c =>
       have : sigR sig K (x ⊗ₜ[F] c) = sig x ⊗ₜ[F] c := rfl
       rw [this, hφ, hφ, hsig]; rfl
@@ -142,38 +191,10 @@ theorem fr_lat_of {k : ℕ} (w : HeightOneSpectrum (𝓞 F))
           ρ (((N : E) • ((B : Matrix (Fin k) (Fin k) E) *ᵥ Pi.single i 1)) a) = _
         rw [Pi.smul_apply, smul_eq_mul, hB, map_mul, map_natCast]
         field_simp
+
       rw [← hπa, Finset.sum_apply, map_sum, ht]
       simp only [hterm]
       simp [Matrix.mulVec, dotProduct]
-
-theorem fr_lat_LbOf {k : ℕ} (w : HeightOneSpectrum (𝓞 F))
-    (φ : E ⊗[F] w.adicCompletion F ≃+* w.adicCompletion F × w.adicCompletion F)
-    (halg : ∀ a : w.adicCompletion F, φ ((1 : E) ⊗ₜ[F] a) = (a, a))
-    (pz pzc : 𝓞 E) (T : ℕ) (hpz : (pz : E) * (pzc : E) = (T : E)) (hT : (T : 𝓞 F) ∉ w.asIdeal)
-    (t : Fin k → w.adicCompletion F) :
-    (∃ x ∈ Formalism.L2.Herm.locL w (Formalism.MainNotions.Gaps.LG.LbOf k pz), ∀ a, (φ (x a)).1 = t a) ↔
-      ∀ a, (((bc (((RingHom.fst _ _).comp φ.toRingHom).comp (inclE (F := F) (w.adicCompletion F)))
-        (1 : GL (Fin k) E))⁻¹ :
-        GL (Fin k) (w.adicCompletion F)) : Matrix (Fin k) (Fin k) (w.adicCompletion F)).mulVec t a ∈
-          w.adicCompletionIntegers F := by
-  refine fr_lat_of w φ halg _ 1 (fun x hx a => ?_) T hT (fun i => ?_) t
-  · rw [inv_one, Units.val_one, one_mulVec]
-    obtain ⟨y, hy⟩ := Formalism.MainNotions.Gaps.LG.iw_Lb_le_std k pz hx a (Set.mem_univ a)
-    exact ⟨y, hy⟩
-  · rw [Units.val_one, one_mulVec]
-    have h1 : (T : E) • (Pi.single i 1 : Fin k → E) =
-        (if i.1 = 0 then pzc else (T : 𝓞 E)) • Formalism.MainNotions.Gaps.LG.lbVec k pz i := by
-      funext j
-      unfold Formalism.MainNotions.Gaps.LG.lbVec
-      by_cases hj : j = i
-      · subst hj
-        simp only [Pi.smul_apply, Pi.single_eq_same, Algebra.smul_def, mul_one]
-        split_ifs
-        · rw [← hpz, mul_comm]; rfl
-        · simp
-      · simp only [Pi.smul_apply, Pi.single_eq_of_ne hj, smul_zero]
-    rw [h1]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
 
 end Formalism.MainNotions.Gaps.Loc
 

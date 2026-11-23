@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAmpleLBOfRelAmpleOfIsAffine
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LocallyQuasiFiniteOfFiniteGeometricPoints
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverMorphismRestrictOfRelAmple
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAmpleLBOfRelAmpleOfIsAffine
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry Limits
 open ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -59,7 +102,7 @@ theorem exists_ample_model (R : Type) [CommRing R] (X : Scheme.{0}) (f : X ⟶ S
     · rw [Finset.sum_insert hi, ← hc]
       have e := (CechPic.cls_eq_iff (LB.isLB_pull hO1 (ProjSpace.toProj f (t i) (ht i))) (hL i)).2
         (ProjSpace.lbIso_pullback_O1_toProj f (t i) (ht i))
-      rw [← e, CechPic.cls_pull hN' _, CechPic.cls_tens hNp hOq, map_add, CechPic.cls_pull hN.isLB,
+      rw [← e, CechPic.cls_pull hN' _, CechPic.cls_tens hNp hOq, map_add (f := _), CechPic.cls_pull hN.isLB,
         CechPic.cls_pull hO.isLB, ← CechPic.pull_comp, ← CechPic.pull_comp, pullback.lift_fst,
         pullback.lift_snd, CechPic.cls_lbPow hO1, map_nsmul, CechPic.cls_pull hN.isLB,
         CechPic.cls_pull hO1, add_comm, natCast_zsmul]
@@ -77,32 +120,5 @@ theorem exists_ample_model (R : Type) [CommRing R] (X : Scheme.{0}) (f : X ⟶ S
       rcases Finset.mem_insert.1 hj with rfl | hj
       · exact h2
       · exact e2 j hj
-
-theorem isAmpleLB_of_separating : ∀ (R : Type) [CommRing R] (X : Scheme.{0}) (f : X ⟶ Sp R), IsProper f →
-    ∀ (ι : Type) [Fintype ι] (L : ι → LB X) (hL : ∀ i, (L i).IsLB) (M : ι → ℕ)
-    (t : ∀ i, Fin (M i + 1) → (L i).Sec) (ht : ∀ i, ⨆ m, nonzeroLocus (t i m) = ⊤),
-    (∀ (K : Type) [Field K] [IsAlgClosed K] (a a' : Sp K ⟶ X), a ≫ f = a' ≫ f →
-      (∀ i, a ≫ GlobalTheory.ProjSpace.toProj f (t i) (ht i) = a' ≫ GlobalTheory.ProjSpace.toProj f (t i) (ht i)) →
-        a = a') →
-    ∀ (w : ι → ℕ), (∀ i, 1 ≤ w i) → ∀ (N : LB X) (hN : N.IsLB),
-    GlobalTheory.CechPic.cls N hN = ∑ i, w i • GlobalTheory.CechPic.cls (L i) (hL i) → GlobalTheory.IsAmpleLB N := by
-  intro R _ X f hf ι _ L hL M t ht hsep w hw N hN hcls
-  obtain ⟨Q, Ψ, r, P, hP, hr, hΨ, hc, hinj⟩ :=
-    exists_ample_model R X f ι L hL M t ht w hw Finset.univ
-  have : LocallyOfFiniteType (Ψ ≫ r) := by rw [hΨ]; infer_instance
-  have : LocallyOfFiniteType Ψ := locallyOfFiniteType_of_comp Ψ r
-  have : IsProper (Ψ ≫ r) := by rw [hΨ]; infer_instance
-  have : IsProper Ψ := IsProper.of_comp Ψ r
-  have : LocallyQuasiFinite Ψ := GlobalTheory.locallyQuasiFinite_of_finite_geometric_points Ψ fun K _ _ y => by
-    have : Subsingleton {x : Spec (.of K) ⟶ X // x ≫ Ψ = y} := ⟨fun x x' => Subtype.ext (by
-      obtain ⟨e1, e2⟩ := hinj K x.1 x'.1 (x.2.trans x'.2.symm)
-      exact hsep K x.1 x'.1 e1 fun i => e2 i (Finset.mem_univ i))⟩
-    infer_instance
-  have := IsFinite.of_isProper_of_locallyQuasiFinite Ψ
-  have hcls' : CechPic.cls (P.pull Ψ) (LB.isLB_pull hP.isLB Ψ) = CechPic.cls N hN := by
-    rw [hc, hcls]
-    exact Finset.sum_congr rfl fun i _ => natCast_zsmul _ _
-  exact (isAmpleLB_congr (LB.isLB_pull hP.isLB Ψ) hN
-    ((CechPic.cls_eq_iff _ _).1 hcls')).1 (hP.pull_of_isAffineHom Ψ)
 
 end GlobalTheory.AmpleSeparateOverRing

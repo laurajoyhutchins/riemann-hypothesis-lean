@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsUnitarisableOfCharIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SmGL
 open scoped TensorProduct
@@ -27,7 +68,6 @@ theorem vanish_step (f : π.IntertwiningMap σ) {A B : Subrepresentation π}
   have h2 : (GlobalTheory.CompanionTheory.Filtration.descend f B A hA).toLinearMap (Submodule.Quotient.mk ⟨v, hv⟩) = f v := by
     first
       | rfl
-      | simp [GlobalTheory.CompanionTheory.Filtration.descend, Submodule.liftQ_apply]
   rw [← h2, h1, LinearMap.zero_apply]
 
 theorem vanish_climb {N : ℕ} (S : Fin (N + 1) → Subrepresentation π) (f : π.IntertwiningMap σ)
@@ -69,26 +109,16 @@ theorem intertwining_proportional :
     have e0 : (⟨0, Nat.succ_pos N⟩ : Fin (N + 1)) = 0 := by
       first
         | exact Fin.mk_zero
-        | exact Fin.ext (by simp)
     rw [e0, hS0] at hv
     have hv0 : v = 0 := by
       first
         | exact (Submodule.mem_bot ℂ).1 hv
-        | exact hv
-        | simpa using hv
-        | exact (Submodule.mem_bot ℂ).1
-            ((bot_le : (⊥ : Subrepresentation π) ≤
-              ⟨⊥, fun g w hw => by rw [(Submodule.mem_bot ℂ).1 hw, map_zero]; exact Submodule.zero_mem _⟩) hv)
     rw [hv0, ← happ, map_zero]
   have htop : ∀ v : V, v ∈ (S (Fin.last N)).toSubmodule := by
     intro v
     rw [hST]
     first
       | exact Submodule.mem_top
-      | trivial
-      | exact (le_top : (⟨⊤, fun _ _ _ => Submodule.mem_top⟩ : Subrepresentation π) ≤ ⊤)
-          (Submodule.mem_top (x := v))
-      | simp
   have hlow : ∀ f : π.IntertwiningMap σ, ∀ v ∈ (S t₀.castSucc).toSubmodule, f v = 0 := fun f =>
     GlobalTheory.CompanionTheory.Filtration.vanish_climb S f 0 (Nat.succ_pos N) (hbot f)
       t₀.val (Nat.zero_le _) (Nat.lt_succ_of_lt t₀.isLt)
@@ -106,7 +136,6 @@ theorem intertwining_proportional :
     intro f hf v hv
     first
       | rfl
-      | simp [GlobalTheory.CompanionTheory.Filtration.descend, Submodule.liftQ_apply]
   rcases hmult (GlobalTheory.CompanionTheory.Filtration.descend φ (S t₀.succ) (S t₀.castSucc) (hlow φ))
       (GlobalTheory.CompanionTheory.Filtration.descend ψ (S t₀.succ) (S t₀.castSucc) (hlow ψ)) with h | ⟨c, hc⟩
   · left

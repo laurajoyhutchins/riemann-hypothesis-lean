@@ -1,30 +1,78 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsValuationSubringDominatingSubring
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.BijectiveRestrictPointsOfEtaleOfHenselian
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.StalkOfAppLEEq
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SubmatrixMulOfVanish
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KosBlockMulKosD
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SignInsert
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsKeyInvariantAfterDvrExtension
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.TorsSqMap
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KaFormHomogeneous
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.PwIsoIsGen
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.BasisPowerSectionsLocalBaseChangeStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyInvariantBaseChangeStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyInvariantFromIntersectionUniqueStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.PwIsoIsGen
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.BijectiveRestrictPointsOfEtaleOfHenselian
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsValuationSubringDominatingSubring
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.BasisPowerSectionsLocalBaseChange
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.BasisPowerSectionsLocalBaseChangeStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CmpValBaseChangeSimilitudeStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.DiscriminantEqJacobianCompleteIntersectionDvrStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsKeyInvariantAfterDvrExtension
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsKeyPBRing
 import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsL2ValFieldOrDvrSplitKernelStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CmpValBaseChangeSimilitudeStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.DiscriminantEqJacobianCompleteIntersectionDvrStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KaFormHomogeneous
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyInvariantBaseChangeStatement
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyInvariantFromIntersectionUniqueStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KosBlockMulKosD
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SignInsert
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.StalkOfAppLEEq
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SubmatrixMulOfVanish
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.TorsSqMap
+import Development.AbelianVarietyTheory.Statements.FundamentalDomains.ExistsIsAddFundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyViaIsPullback
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -159,44 +207,7 @@ theorem keyVia_trans {R R' R'' : Type} [CommRing R] [CommRing R'] [CommRing R'']
     (H' : KeyVia x'' x' f' φ' w') : ∃ w'', KeyVia x'' x (f'.comp f) (φ' ≫ φ) w'' ∧
       ∀ (l : ℕ) (s : RR x l) (s' : RR x' l) (s'' : RR x'' l), SecVia x' x φ w s' s → SecVia x'' x' φ' w' s'' s' →
         SecVia x'' x (φ' ≫ φ) w'' s'' s := by
-  obtain ⟨he, hg, F, hp, hw, hr, hs, hF, hε, hv⟩ := H
-  obtain ⟨he', hg', F', hp', hw', hr', hs', hF', hε', hv'⟩ := H'
-  have g := (isGen_iff w).1 hw
-  have g' := (isGen_iff w').1 hw'
-  obtain ⟨w'', T⟩ := exists_comp x'.P.isLB w w' g g' x.P.isLB x''.P.isLB
-  have he'' : eSec x''.P.A ≫ φ' ≫ φ = spMap (f'.comp f) ≫ eSec x.P.A := by
-    rw [← Category.assoc, he', Category.assoc, he, spMap_comp, Category.assoc]
-  refine ⟨w'', ⟨he'', hg'.trans hg, F'.comp F, (hp'.comp hp).congr (spMap_comp f f').symm rfl,
-    (isGen_iff w'').2 (T.pgen_comp x'.P.isLB g g'), ?_, ?_, fun a => ?_, ?_, fun i => ?_⟩,
-    fun l s s' s'' h h' j k hle => fn_ext fun y hy => ?_⟩
-  · have r₀ := (maps_iff w _ (fun _ => eSec x.P.A) _ x'.rig x.rig (spMap f) _
-      (rigPull_le φ (spMap f) he x.P.L) (fun _ => rfl)).1 hr
-    have r₁ := (maps_iff w' _ (fun _ => eSec x'.P.A) _ x''.rig x'.rig (spMap f') _
-      (rigPull_le φ' (spMap f') he' x'.P.L) (fun _ => rfl)).1 hr'
-    have r₂ := T.pmaps_comp x'.P.isLB (fun _ => he') r₀ r₁
-    rw [← spMap_comp] at r₂
-    exact (maps_iff w'' _ (fun _ => eSec x.P.A) _ x''.rig x.rig (spMap (f'.comp f)) _
-      (rigPull_le (φ' ≫ φ) (spMap (f'.comp f)) he'' x.P.L) (fun _ => rfl)).2 r₂
-  · refine KeyPow.appLE_eq_of_stalk w'' x.th x''.th fun z j k hj hk => ?_
-    obtain ⟨i, hi⟩ := exists_chart x'.P.isLB (φ' z)
-    have a := KeyComp.stalk_of_appLE_eq w x.th x'.th hs (𝟙 _ ≫ φ') z j i hj hi
-    have b := KeyComp.stalk_of_appLE_eq w' x'.th x''.th hs' (𝟙 _) z i k hi hk
-    rw [T _ (𝟙 _) z j i k hj hi hk, ← Category.assoc, a, b, Units.val_mul, _root_.mul_assoc]
-  · rw [RingHom.comp_apply, hF, hF', RingHom.comp_apply]
-  · rw [RingHom.comp_apply, hε, hε']
-  · rw [← Category.assoc, hv', Category.assoc, hv, spMap_comp, Category.assoc]
-    rfl
-  · obtain ⟨i, hi⟩ := exists_chart x'.P.isLB (φ' y)
-    have hj : φ (φ' y) ∈ x.P.L.U (j PUnit.unit) := mem_pull (F := φ' ≫ φ).1 hy.1
-    have a := KeyBasis.via_val (w := w) (n := l) (a' := s'.f) (a := s.f) h (𝟙 _ ≫ φ') y hj hi
-    have b := KeyBasis.via_val (w := w') (n := l) (a' := s''.f) (a := s'.f) h' (𝟙 _) y hi hy.2
-    have t := T _ (𝟙 _) y (j PUnit.unit) i k hj hi hy.2
-    rw [b, ← _root_.mul_assoc, ← Units.val_mul, ← mul_pow, ← t] at a
-    refine (gs_appLE (φ' ≫ φ) _ _ hle (𝟙 _) y hy _).trans (a.trans ?_)
-    refine Eq.trans (congrArg₂ (· * ·) ?_ (gs_res _ y _ hy _).symm) (gs_mul _ y _ hy _ _).symm
-    let v : Γ(x''.P.A.left, (x.P.L.pull (φ' ≫ φ)).U j ⊓ x''.P.L.U k)ˣ := w''.s (j, k)
-    exact ((congrArg (gs (𝟙 _) y _) (Units.val_pow_eq_pow_val v l).symm).trans
-      ((gs_unit (𝟙 _) y _ hy _).trans (congrArg Units.val (map_pow _ _ _)))).symm
+  apply _root_.GlobalTheory.KeyLine.keyVia_trans <;> assumption
 
 theorem exists_pull_hom {R R' : Type} [CommRing R] [IsDomain R] [CommRing R'] {x : KeyIn R} {x' : KeyIn R'}
     {f : R →+* R'} {φ w} (H : KeyVia x' x f φ w) (hf : Function.Injective f) :
@@ -240,8 +251,8 @@ theorem eq_of_pow_eq_one (laws : Out.Laws) {R : Type} [CommRing R] [IsLocalRing 
   exact Over.OverMorphism.ext (eq_of_isLocalRing_of_unramified (R := CommRingCat.of R) (Out.mulA x.P.A N).left
     (congrArg CommaMorphism.left e₅) (spMap (IsLocalRing.residue R)) ⟨_, e₂⟩ e₄)
 
-open EtBaseChange in
 
+open EtBaseChange in
 theorem exists_unit_val_jac {R R' : Type} [CommRing R] [CommRing R'] {x : KeyIn R} {x' : KeyIn R'} {f : R →+* R'} {φ w}
     {n : ℕ} (hg : x'.P.g = x.P.g) {s : Fin x.P.g → RR x n} {s' : Fin x'.P.g → RR x' n} (H : KeyVia x' x f φ w)
     (hs : ∀ i, SecVia x' x φ w (s' i) (s (i.cast hg))) {z : Pt x} {z' : Pt x'}
@@ -558,10 +569,12 @@ theorem isUnit_of_finite_zeros : Out.Laws → ∀ (O : Type) [CommRing O] [IsDom
       (fun a => sec₃ n _ _ _ (hs' (a.cast hg₃)) (sec₂ n _ _ _ (hs (a.cast hg₁)) (hs₁ a))) ?_ E₁
       (fun a => (hu₃' _ _).1 (hz' a).symm) ?_
     · have hcl : IsClosed {t : x.P.A.left | x.P.A.hom t = IsLocalRing.closedPoint O ∧ ∀ a, t ∉ Out.nonzeroLocus (s a)} := by
-        refine IsClosed.inter ((IsLocalRing.isClosed_singleton_closedPoint O).preimage x.P.A.hom.continuous) ?_
-        change IsClosed {t : x.P.A.left | ∀ a, t ∉ Out.nonzeroLocus (s a)}
-        rw [Set.setOf_forall]
-        exact isClosed_iInter fun a => (Out.nonzeroLocus (s a)).isOpen.isClosed_compl
+        have hzero : IsClosed {t : x.P.A.left | ∀ a, t ∉ Out.nonzeroLocus (s a)} := by
+          rw [Set.setOf_forall]
+          exact isClosed_iInter fun a => (Out.nonzeroLocus (s a)).isOpen.isClosed_compl
+        convert ((IsLocalRing.isClosed_singleton_closedPoint O).preimage x.P.A.hom.continuous).inter hzero using 1
+        ext t
+        rfl
       refine (finite_preimage_fibre hp' hcl hfin (IsLocalRing.closedPoint O')).subset fun t ht => ⟨ht.1, ?_, fun a h => ?_⟩
       · exact (congrArg (fun q => q t) hp'.w).trans ((congrArg (spMap j) ht.1).trans (IsLocalRing.comap_closedPoint j))
       · exact ht.2 (a.cast hg'.symm) (EtBaseChange.mem_nonzeroLocus_via (hs' (a.cast hg'.symm)) t h)

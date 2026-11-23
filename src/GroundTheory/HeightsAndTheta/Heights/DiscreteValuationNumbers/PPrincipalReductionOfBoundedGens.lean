@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsPowReductionCut
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsPowReductionCut
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Mathlib.RingTheory.ReesAlgebra
+public import Mathlib.Algebra.Module.SpanRankOperations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -144,7 +197,7 @@ theorem cls_mul {m n : ℕ} {x y : A} (hx : x ∈ I ^ m) (hy : y ∈ I ^ n) :
 
 theorem cls_add {n : ℕ} {x y : A} (hx : x ∈ I ^ n) (hy : y ∈ I ^ n) :
     cls I n (x + y) = cls I n x + cls I n y := by
-  rw [cls_of_mem hx, cls_of_mem hy, cls_of_mem (Ideal.add_mem _ hx hy), ← map_add]
+  rw [cls_of_mem hx, cls_of_mem hy, cls_of_mem (Ideal.add_mem _ hx hy), ← map_add (f := _)]
   congr 1
   apply Subtype.ext
   simp
@@ -190,8 +243,8 @@ theorem algebraMap_eq_zero {r : A} (hr : r ∈ maximalIdeal A) : algebraMap A (F
   rw [algebraMap_fibreCone, toFC_eq_zero_iff]
   exact Ideal.mem_map_of_mem _ hr
 
-variable (I) in
 
+variable (I) in
 def clsPreimage (n : ℕ) (T : Ideal (FibreCone I)) : Ideal A where
   carrier := {x | x ∈ I ^ n ∧ cls I n x ∈ T}
   add_mem' ha hb := ⟨Ideal.add_mem _ ha.1 hb.1, by rw [cls_add ha.1 hb.1]; exact T.add_mem ha.2 hb.2⟩
@@ -259,6 +312,7 @@ theorem exists_relation {N : Ideal A} {e : ℕ} (hN : N.spanFinrank ≤ e) (v : 
   · rw [← hc i]
     exact Ideal.Quotient.eq_zero_iff_mem.2 h
   · have hsum : (maximalIdeal A • (⊤ : Submodule A N)).mkQ (∑ i, c i • (⟨v i, hv i⟩ : N)) = 0 := by
+
       rw [map_sum, ← hg]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_smul, ← hc i, ← Ideal.Quotient.algebraMap_eq, algebraMap_smul]
@@ -272,8 +326,8 @@ section Reduction
 
 variable {A : Type u} [CommRing A] [IsLocalRing A] {I : Ideal A}
 
-omit [IsLocalRing A] in
 
+omit [IsLocalRing A] in
 theorem form_mem {d : ℕ} {x y : A} (hx : x ∈ I ^ d) (hy : y ∈ I ^ d) (D : ℕ) (r : ℕ → A) :
     ∑ i ∈ Finset.range (D + 1), r i * x ^ i * y ^ (D - i) ∈ I ^ (d * D) := by
   refine Ideal.sum_mem _ fun i hi => ?_
@@ -373,8 +427,8 @@ theorem exists_radical_of_finset {e : ℕ} (he : ∀ n : ℕ, (I ^ n).spanFinran
     · exact h2
     · exact Ideal.radical_le_radical_iff.2 ((Ideal.span_singleton_le_iff_mem _).2 h1) (hall y hy)
 
-omit [IsNoetherianRing A] in
 
+omit [IsNoetherianRing A] in
 theorem cls_mem_pow (n : ℕ) {x : A} (hx : x ∈ I ^ n) :
     cls I n x ∈ (Ideal.span {u | ∃ x ∈ I, u = cls I 1 x}) ^ n := by
   induction n generalizing x with
@@ -422,7 +476,7 @@ theorem proof : PrincipalReductionOfBoundedGens.Statement.{u} := by
       Ideal.mul_mem_mul (Ideal.mem_span_singleton_self c) ((mem_reesAlgebra_iff I _).1 f'.2 L), _, ?_,
       show c * (f' : A[X]).coeff L + (x - (f' : A[X]).coeff L * c) = x by ring⟩
     rw [Ideal.smul_eq_mul, show x - (f' : A[X]).coeff L * c = -((f' : A[X]).coeff L * c - x) by ring]
-    exact neg_mem h2
+    simpa using (neg_mem h2)
   · calc Ideal.span {c} * I ^ L ≤ I ^ m * I ^ L :=
           Ideal.mul_mono_left ((Ideal.span_singleton_le_iff_mem _).2 hc)
       _ = I ^ (L + m) := by rw [pow_add, mul_comm]

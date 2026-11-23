@@ -1,18 +1,59 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+public import Mathlib.Algebra.Group.End
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 noncomputable section
 
 namespace Formalism.L2.S
 
 open Formalism.BasicNotions
-
-def letterOf {R : Ranks} (h : HCParam R) (l : Fin (R.k - 2)) : Bool :=
-  decide (h.u ⟨l.1 + 1, by omega⟩ ≠ h.v ⟨l.1, by omega⟩ - 1 / 2)
-
-def delOf {R : Ranks} (h : HCParam R) (hk : 3 ≤ R.k) : ℚ :=
-  (h.v ⟨0, by omega⟩ - h.v ⟨1, by omega⟩) / 4
 
 def IsPtL {K : Type*} [Zero K] (l : List (ℕ × K)) (i : ℕ) : Prop :=
   (l.map Prod.fst).sum = i ∧ ∀ b ∈ l, 1 ≤ b.1 ∧ b.2 ≠ 0
@@ -49,8 +90,5 @@ def ptEquiv (K : Type*) [Zero K] (i : ℕ) : Formalism.MainNotions.S.Point K i �
   right_inv l := by
     apply Subtype.ext
     simp [ptList, List.map_map]
-
-@[simp] theorem ptEquiv_apply {K : Type*} [Zero K] {i : ℕ} (p : Formalism.MainNotions.S.Point K i) :
-    (ptEquiv K i p).1 = ptList p := rfl
 
 end Formalism.L2.S

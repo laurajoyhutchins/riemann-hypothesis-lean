@@ -1,9 +1,54 @@
-import Formalism.FormalGroupWitt.FormalGroupWittProofs.IntegralSubstVector
-import Formalism.TorsionNormIteration.InverseIntegralClasses.SigmaNormLeOne
-import Formalism.TorsionNormIteration.InverseIntegralClasses.MemSpanOfNormLe
-import Formalism.TorsionNormIteration.InverseIntegralClasses.NormSigmaLeOne
-import Formalism.FormalGroupWitt.FormalGroupWittProofs.CoeffV
-import Lemmata.MultivariateIntegrals.IntegralMv
+module
+
+public import Formalism.FormalGroupWitt.SubstInjectiveV
+public import Formalism.FormalGroupWitt.FormalGroupWittProofs.CoeffV
+public import Formalism.FormalGroupWitt.FormalGroupWittProofs.IntegralSubstVector
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.MemSpanOfNormLe
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.NormSigmaLeOne
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.SigmaNormLeOne
+public import Lemmata.MultivariateIntegrals.IntegralMv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.TorsionNormIteration.InvIntegralOfClass
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,24 +77,6 @@ lemma norm_finsum_le {α : Type v} {g : α → K} {C : ℝ} (hC : 0 ≤ C) (hg :
     exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hC (fun i _ => hg i)
   · rw [finsum_of_infinite_support hfin]
     simpa using hC
-
-lemma bd_add {τ : Type w} {C : ℝ} {A B : MvPowerSeries τ K} (hA : Bd C A) (hB : Bd C B) :
-    Bd C (A + B) := fun d => by rw [map_add]; exact norm_add_le_of (hA d) (hB d)
-
-lemma bd_mul_left {τ : Type w} {C : ℝ} (hC : 0 ≤ C) {A B : MvPowerSeries τ K}
-    (hA : IntegralMv A) (hB : Bd C B) : Bd C (A * B) := by
-  classical
-  intro d
-  rw [MvPowerSeries.coeff_mul]
-  refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hC fun x _ => ?_
-  rw [norm_mul]
-  calc ‖MvPowerSeries.coeff x.1 A‖ * ‖MvPowerSeries.coeff x.2 B‖ ≤ 1 * C :=
-        mul_le_mul (hA _) (hB _) (norm_nonneg _) zero_le_one
-    _ = C := one_mul C
-
-lemma bd_mul_right {τ : Type w} {C : ℝ} (hC : 0 ≤ C) {A B : MvPowerSeries τ K}
-    (hA : Bd C A) (hB : IntegralMv B) : Bd C (A * B) := by
-  rw [mul_comm]; exact bd_mul_left hC hB hA
 
 lemma bd_prod_sub {τ : Type w} {ι : Type v} {C : ℝ} (hC : 0 ≤ C) (X Y : ι → MvPowerSeries τ K)
     (s : Finset ι) (hX : ∀ i ∈ s, IntegralMv (X i)) (hY : ∀ i ∈ s, IntegralMv (Y i))
@@ -128,6 +155,7 @@ theorem main (hC : Formalism.FG.CoeffBoundV.{u, v, v}) : Formalism.FG.FunEqSubst
       MvPowerSeries.subst α (f j) - (p : K)⁻¹ •
         ∑ k, M j k • MvPowerSeries.subst αq (MvPowerSeries.map σ (f k)) := by
     intro j
+
     rw [← MvPowerSeries.substAlgHom_apply hαS, map_sub, map_smul, map_sum]
     simp only [map_smul, MvPowerSeries.substAlgHom_apply, subst_expand q hq hαS, hαq]
 
@@ -185,7 +213,8 @@ theorem main (hC : Formalism.FG.CoeffBoundV.{u, v, v}) : Formalism.FG.FunEqSubst
     simp only [smul_sub, Finset.sum_sub_distrib]; abel
   rw [e]
   intro d
-  rw [map_add, MvPowerSeries.coeff_smul, map_sum]
+
+  rw [map_add (f := _), MvPowerSeries.coeff_smul, map_sum]
   refine norm_add_le_of (hgI d) ?_
   rw [norm_mul, norm_inv]
   have hsum : ‖∑ k, MvPowerSeries.coeff d (M j k • (MvPowerSeries.subst αq

@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits TensorProduct
 
 namespace GlobalTheory
@@ -31,6 +80,7 @@ private theorem flat_quotient_of_mem_ideal_smul_imp_mem_map_smul {V A N : Type*}
   choose n hn using fun i => Submodule.Quotient.mk_surjective K (x i)
   have hzK : ∑ i, f i • n i ∈ K := by
     have h1 : (K.mkQ.restrictScalars V) (∑ i, f i • n i) = 0 := by
+
       rw [map_sum, ← hsum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_smul, LinearMap.restrictScalars_apply, Submodule.mkQ_apply, hn]
@@ -180,8 +230,8 @@ private theorem mem_map_smul_of_maximalIdeal_pow_le {V A N : Type*} [CommRing V]
     · rw [smul_add]; exact Submodule.add_mem _ hx hy
   exact Submodule.add_mem _ hw (key c hcm)
 
-open CategoryTheory CategoryTheory.Limits TensorProduct in
 
+open CategoryTheory CategoryTheory.Limits TensorProduct in
 theorem _root_.GlobalTheory.flat_coker_of_injective_mod_maximalIdeal : ∀ (V A : Type) [CommRing V] [IsNoetherianRing V] [IsLocalRing V] [CommRing A] [IsNoetherianRing A] [IsLocalRing A] [Algebra V A] [IsLocalHom (algebraMap V A)] (M N : Type) [AddCommGroup M] [Module A M] [Module.Finite A M] [AddCommGroup N] [Module A N] [Module V N] [IsScalarTower V A N] [Module.Flat V N] (u : M →ₗ[A] N), (∀ x : M, u x ∈ (((IsLocalRing.maximalIdeal V).map (algebraMap V A)) • ⊤ : Submodule A N) → x ∈ (((IsLocalRing.maximalIdeal V).map (algebraMap V A)) • ⊤ : Submodule A M)) → Module.Flat V (N ⧸ LinearMap.range u) := by
   intro V A _ _ _ _ _ _ _ _ M N _ _ _ _ _ _ _ _ u hu
   have hmA : (IsLocalRing.maximalIdeal V).map (algebraMap V A) ≠ ⊤ := by
@@ -208,7 +258,7 @@ theorem _root_.GlobalTheory.flat_coker_of_injective_mod_maximalIdeal : ∀ (V A 
       hy (fun r hr y _ => ?_) (fun x y hx hy => ?_)
     · rw [map_smul]
       exact Submodule.smul_mem_smul hr (LinearMap.mem_range_self u y)
-    · rw [map_add]; exact Submodule.add_mem _ hx hy
+    · rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   have h0 : ∀ z ∈ LinearMap.range u, z ∈ IsLocalRing.maximalIdeal V • (⊤ : Submodule V N) →
       z ∈ (IsLocalRing.maximalIdeal V).map (algebraMap V A) • LinearMap.range u := by
     rintro _ ⟨x, rfl⟩ hx

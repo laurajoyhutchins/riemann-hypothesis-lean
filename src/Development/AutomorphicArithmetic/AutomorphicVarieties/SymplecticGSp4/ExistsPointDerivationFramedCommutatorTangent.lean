@@ -1,8 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsLocalFirstOrderLifts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.DerHom
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.DerHom
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsLocalFirstOrderLifts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
@@ -102,14 +148,14 @@ private theorem adicCont_mul {Γ R : Type} [TopologicalSpace Γ] [CommRing R] (I
     (hf : AdicCont I f) (hg : AdicCont I g) : AdicCont I (fun x => f x * g x) := by
   intro N
   convert (hf N).mul (hg N) using 1
-  funext x
+  ext x
   simp
 
 private theorem adicCont_add {Γ R : Type} [TopologicalSpace Γ] [CommRing R] (I : Ideal R) (f g : Γ → R)
     (hf : AdicCont I f) (hg : AdicCont I g) : AdicCont I (fun x => f x + g x) := by
   intro N
   convert (hf N).add (hg N) using 1
-  funext x
+  ext x
   simp
 
 private theorem adicCont_const {Γ R : Type} [TopologicalSpace Γ] [CommRing R] (I : Ideal R) (c : R) :
@@ -161,7 +207,7 @@ private theorem dm_lift {Γ : Type} [Group Γ] [TopologicalSpace Γ] {rbar : Γ 
 
 end Dual
 
-set_option maxHeartbeats 800000 in
+
 theorem UpperTheory.exists_pointDerivation_framed_commutator_tangent :
     ∀ {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] {l : ℕ} [Fact l.Prime] {c : Coef l} (D : Raw Ω c), D.Good → ∀ (L : LocBase D) (F : Fr D L), ∀ Y ∈ sp4 c.O, ∀ A : D.T → M4 c.O, (∀ v, A v ∈ sp4 c.O) → A ⟨l, D.residueChar_mem_levelPrimes⟩ = 0 → ∃ δ ∈ PtDer (F.W.origin F.org) c.O, (∀ g a b, δ (F.r.hom g a b) = (Y * D.r0 g - D.r0 g * Y) a b) ∧ ∀ v a b, δ (F.α v a b) = A v a b := by
   intro Ω _ _ _ l _ c D hD L F Y hY A hA hAl

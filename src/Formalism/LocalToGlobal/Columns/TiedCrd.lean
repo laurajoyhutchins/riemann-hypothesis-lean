@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.Columns.WordFin
-import Formalism.LocalToGlobal.Columns.TiedCB
+module
+
+public import Formalism.LocalToGlobal.Columns.WordFin
+public import Formalism.LocalToGlobal.Columns.TiedCG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 open scoped TensorProduct
@@ -42,15 +83,16 @@ theorem gramP_eq (hS : SpStd d.toColBase) : CF.gramP (d.colRec a) = 1 := by
   rw [hS.P_on, Matrix.one_apply]
   simp only [EmbeddingLike.apply_eq_iff_eq]
 
-theorem clsCrd_eq (u : d.what₂.Word) (i : ℕ) (hi : i ≤ d.R.m) (c : StCl (Pr := d.Pr) d.W d.lev u i) :
-    CF.clsCrd (d.colRec a) u i hi c = (d.repr u i c).1.L := by
-  show (d.clsLat u i c).map (((d.crd i hi : (d.sp.X i).V ≃ₗ[d.host.E] (Fin (d.R.N i) → d.host.E)) :
-    (d.sp.X i).V →ₗ[d.host.E] (Fin (d.R.N i) → d.host.E)).restrictScalars (𝓞 d.host.E)) = _
+private theorem map_clsLat_crd (u : d.what₂.Word) (i : ℕ) (hi : i ≤ d.R.m)
+    (c : StCl (Pr := d.Pr) d.W d.lev u i) :
+    (d.clsLat u i c).map ((d.crd i hi).toLinearMap.restrictScalars (𝓞 d.host.E)) = (d.repr u i c).1.L := by
   unfold ColDat.clsLat
-  rw [dif_pos hi, ← Submodule.map_comp]
-  convert Submodule.map_id _
-  ext x j
-  simp
+  rw [dite_eq_left hi, ← Submodule.map_comp, ← LinearMap.restrictScalars_comp,
+    LinearEquiv.comp_symm, LinearMap.restrictScalars_id, Submodule.map_id]
+
+theorem clsCrd_eq (u : d.what₂.Word) (i : ℕ) (hi : i ≤ d.R.m) (c : StCl (Pr := d.Pr) d.W d.lev u i) :
+    CF.clsCrd (d.colRec a) u i hi c = (d.repr u i c).1.L :=
+  map_clsLat_crd u i hi c
 
 theorem embT_eq (hH : HostHyp d) : CF.embT (d.colRec a) = d.X.embC d.σ₀ := by
   funext τ

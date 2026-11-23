@@ -1,5 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.OrdinaryHeckeAlgebraIntegral
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.GaloisRepresentationTypes.TpSingle
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.OrdinaryHeckeAlgebraIntegral
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.GaloisRepresentationTypes.TpSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open UpperTheory.V UpperTheory.V.Th
 
 namespace UpperTheory.V.Th.EtaleDerivations
@@ -19,7 +63,7 @@ private theorem der_adjoin {x : B →ₐ[O] O} {δ : B →ₗ[O] X} (h : IsDer x
   induction ha using Algebra.adjoin_induction with
   | mem s hs => exact hS s hs
   | algebraMap c => exact der_alg h c
-  | add a b _ _ ha hb => rw [map_add, ha, hb, add_zero]
+  | add a b _ _ ha hb => rw [map_add (f := _), ha, hb, add_zero]
   | mul a b _ _ ha hb => rw [h, ha, hb, smul_zero, smul_zero, add_zero]
 
 private theorem der_fg [IsNoetherianRing B] {x : B →ₐ[O] O} {δ : B →ₗ[O] X} (h : IsDer x δ) :
@@ -131,7 +175,7 @@ private theorem det_trick [IsDomain O] [IsNoetherianRing B] (x : B →ₐ[O] O) 
     rw [Submodule.mem_smul_top_iff]
     have : ((φ ⟨_, a, ha, rfl⟩ : N) : B ⧸ I) = Submodule.mkQ I y := by
       show algebraMap O B c • Submodule.mkQ I a = _
-      rw [← map_smul, smul_eq_mul, ← e, map_add]
+      rw [← map_smul, smul_eq_mul, ← e, map_add (f := _)]
       have : Submodule.mkQ I z = 0 := (Submodule.Quotient.mk_eq_zero I).2 hz
       rw [this, add_zero]
     rw [this]
@@ -139,7 +183,7 @@ private theorem det_trick [IsDomain O] [IsNoetherianRing B] (x : B →ₐ[O] O) 
     · rw [← smul_eq_mul, map_smul]
       exact Submodule.smul_mem_smul hm ⟨k, hk, rfl⟩
     · rw [map_add]; exact add_mem hm hk
-  obtain ⟨p, hp, -, hco, hev⟩ := LinearMap.exists_monic_and_coeff_mem_pow_and_aeval_eq_zero_of_range_le_smul B φ P hφ
+  obtain ⟨p, hp, -, hco, hev⟩ := LinearMap.exists_monic_and_natDegree_eq_and_coeff_mem_pow_and_aeval_eq_zero B φ P hφ
   refine ⟨p.eval (algebraMap O B c), ?_, fun a ha => ?_⟩
   · have e : p.map (x : B →+* O) = Polynomial.X ^ p.natDegree := by
       ext k
@@ -194,7 +238,7 @@ private theorem core [IsDomain O] [IsLocalRing O] [IsNoetherianRing B] [IsLocalR
   have hk : ∀ b, x (b - algebraMap O B (x b)) = 0 := fun b => by simp
   have hD : IsDer x δ := by
     intro a b
-    rw [hδ, hδ, hδ, ← map_smul, ← map_smul, ← map_add]
+    rw [hδ, hδ, hδ, ← map_smul, ← map_smul, ← map_add (f := _)]
     apply (Submodule.Quotient.eq N).2
     apply hKN
     have e : a * b - algebraMap O B (x (a * b)) - (x a • (b - algebraMap O B (x b)) + x b • (a - algebraMap O B (x a))) =
@@ -239,7 +283,7 @@ private theorem integ {Λ M : Type} [CommRing Λ] [Algebra O Λ] [Nontrivial O] 
     intro p m
     induction p using Polynomial.induction_on' with
     | add p q hp hq =>
-      rw [Polynomial.map_add, map_add, map_add, add_smul, LinearMap.add_apply, add_sub_add_comm]
+      rw [Polynomial.map_add (f := _), map_add (f := _), map_add (f := _), add_smul, LinearMap.add_apply, add_sub_add_comm]
       exact add_mem hp hq
     | monomial k c =>
       have e : aeval φ (monomial k c) m - aeval a ((monomial k c).map (ξ : Λ →+* O)) • m =

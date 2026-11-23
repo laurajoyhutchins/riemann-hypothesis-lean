@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FiniteMinimalPrimes
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ChPrime
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.AffineChartIdealPrimeAndSaturatedStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinimalPrimesOfMultihomogSupStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularSystemOfParametersLocalRingAltBis
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FiniteMinimalPrimes
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ChPrime
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.AffineChartIdealPrimeAndSaturated
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinimalPrimesOfMultihomogSupStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RegularSystemOfParametersLocalRingAltBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjugateHermitianLineIsometries
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.AnForm.R GlobalTheory.CompanionTheory.Ar.Cmp
 
@@ -42,10 +85,10 @@ theorem renR_sub_deh_mem (S : Ideal (MvPolynomial (Σ k, ι k) ℂ)) (p : (k : K
         have h1 : SncRes.lift p ⟨k, p k⟩ = 1 := by simp [SncRes.lift]
         have h2 := renR_X_sub_one_mem S p k
         rw [map_sub, map_one] at h2
-        simpa [h1] using Ideal.Quotient.eq.2 h2
+        simpa [MvPolynomial.bind₁_X_right, h1] using Ideal.Quotient.eq.2 h2
       · have h1 : SncRes.lift p ⟨k, i⟩ = X (Fintype.equivFin (Σ k, ι k) ⟨k, i⟩) := by
           simp [SncRes.lift, h]
-        simp [h1, renameEquiv_apply]
+        simp [MvPolynomial.bind₁_X_right, h1, renameEquiv_apply]
   exact Ideal.Quotient.eq.1 (RingHom.congr_fun key f)
 
 theorem deh_mem {S : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (p : (k : K) → ι k)
@@ -72,7 +115,7 @@ theorem exists_minimal_below {P D : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (p : 
   classical
   have hle : P ⊔ D ≤ 𝔮.comap (bind₁ (SncRes.lift p) : MvPolynomial (Σ k, ι k) ℂ →ₐ[ℂ] _) :=
     fun g hg => hD (deh_mem p hg)
-  haveI : (𝔮.comap (bind₁ (SncRes.lift p) : MvPolynomial (Σ k, ι k) ℂ →ₐ[ℂ] _)).IsPrime :=
+  have : (𝔮.comap (bind₁ (SncRes.lift p) : MvPolynomial (Σ k, ι k) ℂ →ₐ[ℂ] _)).IsPrime :=
     Ideal.comap_isPrime _ _
   obtain ⟨Q, hQ, hQle⟩ := Ideal.exists_minimalPrimes_le hle
   refine ⟨Q, hQ, fun k hX => ?_, ?_⟩
@@ -95,6 +138,20 @@ theorem components_of_params : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀
   have pr := GlobalTheory.T.regular_system_of_parameters_local_ring_alt _ e (SncRes.ideal P p) (SncRes.ideal (P ⊔ D) p) (renPt (affCoord p z)) r Jf
     hIDc hI reg dim span hprim
   have hmin := GlobalTheory.T.minimal_primes_of_multihomog_sup K ι P D hP hD
+  have chart_prime_and_mem_iff (Q : Ideal (MvPolynomial (Σ k, ι k) ℂ))
+      (hQ : IsMultiHomogIdeal Q) (hprime : Q.IsPrime)
+      (hX : ∀ k, (X ⟨k, p k⟩ : MvPolynomial (Σ k, ι k) ℂ) ∉ Q) :
+      (SncRes.ideal Q p).IsPrime ∧
+        ∀ (f : MvPolynomial (Σ k, ι k) ℂ) (a : K → ℕ), IsMultiHomog f a →
+          (bind₁ (SncRes.lift p) f ∈ SncRes.ideal Q p ↔ f ∈ Q) := by
+    have hker := SncRes.Dict.ker_theta Q hQ p hX
+    refine ⟨?_, fun f a hf => ?_⟩
+    · have : (chartIdeal Q p).IsPrime := hker ▸ RingHom.ker_isPrime (SncRes.Dict.theta Q p)
+      exact Ideal.map_isPrime_of_equiv (renR (Σ k, ι k))
+    · have hquot := Ideal.Quotient.eq.2 (renR_sub_deh_mem Q p f)
+      rw [← Ideal.Quotient.eq_zero_iff_mem, ← hquot, Ideal.Quotient.eq_zero_iff_mem,
+        SncRes.ideal, mem_map_renR_iff, RingEquiv.symm_apply_apply, ← hker, RingHom.mem_ker]
+      exact SncRes.Dict.theta_eq_zero_iff Q p hX hf
   have step : ∀ l (_ : l ∈ Jf), ∃ k, SncRes.ideal (SncRes.compIdeal P D k) p =
         SncRes.Par.chPrime (SncRes.ideal P p) (renPt (affCoord p z)) (r l) ∧
       ∀ k', (X ⟨k', p k'⟩ : MvPolynomial (Σ k, ι k) ℂ) ∉ SncRes.compIdeal P D k := by
@@ -103,7 +160,7 @@ theorem components_of_params : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀
     obtain ⟨Q, hQ, hX, hQle⟩ := exists_minimal_below p hpr hDq
     have hQh := hmin Q hQ
     have hQp : Q.IsPrime := hQ.1.1
-    obtain ⟨hQpr, -⟩ := GlobalTheory.T.affine_chart_ideal_prime_and_saturated K ι Q p hQh hQp hX
+    obtain ⟨hQpr, -⟩ := chart_prime_and_mem_iff Q hQh hQp hX
     have hDQ : SncRes.ideal (P ⊔ D) p ≤ SncRes.ideal Q p := ideal_mono hQ.1.2 p
     have hIQ := hIDc.trans hDQ
     obtain ⟨j, hj, hrj⟩ := (hprim _ hQpr hIQ (hQle.trans hqt)).1 hDQ
@@ -119,15 +176,15 @@ theorem components_of_params : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀
       ∃ h : l ∈ Jf, κ l h = k := by
     intro l k h
     by_cases hl : l ∈ Jf
-    · rw [dif_pos hl] at h
+    · rw [dite_eq_left hl] at h
       exact ⟨hl, Option.some.inj h⟩
-    · rw [dif_neg hl] at h
+    · rw [dite_eq_right hl] at h
       cases h
   refine ⟨fun l => if h : l ∈ Jf then some (κ l h) else none, ?_, ?_, ?_, ?_⟩
   · intro a ha b hb hab
     have ha' : a ∈ Jf := ha
     have hb' : b ∈ Jf := hb
-    simp only [dif_pos ha', dif_pos hb'] at hab
+    simp only [dite_eq_left ha', dite_eq_left hb'] at hab
     have hk := Option.some.inj hab
     have heq : SncRes.Par.chPrime (SncRes.ideal P p) (renPt (affCoord p z)) (r a) =
         SncRes.Par.chPrime (SncRes.ideal P p) (renPt (affCoord p z)) (r b) := by
@@ -148,7 +205,7 @@ theorem components_of_params : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀
     have hX : ∀ k', (X ⟨k', p k'⟩ : MvPolynomial (Σ k, ι k) ℂ) ∉ SncRes.compIdeal P D k := by
       intro k' hx
       exact hzp k' (by simpa using hk _ hx)
-    obtain ⟨hkpr, hdict⟩ := GlobalTheory.T.affine_chart_ideal_prime_and_saturated K ι _ p hkh hkp hX
+    obtain ⟨hkpr, hdict⟩ := chart_prime_and_mem_iff _ hkh hkp hX
     have hzc : z ∈ conePts (SncRes.compIdeal P D k) := ⟨hz.1, hk⟩
     have hpt : SncRes.ideal (SncRes.compIdeal P D k) p ≤ ptIdeal (renPt (affCoord p z)) := by
       intro h hh
@@ -172,6 +229,6 @@ theorem components_of_params : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀
       le_antisymm hsub (hQk.2 ⟨hQ0.1.1, hQ0.1.2⟩ hsub)
     refine ⟨l, hl, ?_⟩
     beta_reduce
-    rw [dif_pos hl, compIdeal_injective P D heq]
+    rw [dite_eq_left hl, compIdeal_injective P D heq]
 
 end GlobalTheory.CompanionTheory.Ar.Cmp.SncRes.Sig

@@ -1,32 +1,65 @@
-import Mathlib
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LValEtaBounds
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.NumberTheory.ZetaValues
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Real
 
 namespace GlobalTheory
 
 theorem zetaTerm_tsum_le_two (i : ℕ) (hi : 2 ≤ i) :
     ∑' n : ℕ, 1/((n:ℝ)+1)^i ≤ 2 := by
-  have h2 : HasSum (fun n : ℕ => (1:ℝ)/((n:ℝ)+1)^2) (π^2/6) := by
-    have := (hasSum_nat_add_iff' 1).mpr hasSum_zeta_two
-    simpa using this
-  have hle : ∀ n : ℕ, (1:ℝ)/((n:ℝ)+1)^i ≤ 1/((n:ℝ)+1)^2 := by
-    intro n
-    have h1 : (1:ℝ) ≤ (n:ℝ)+1 := by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    apply one_div_le_one_div_of_le (by positivity)
-    exact pow_le_pow_right₀ h1 hi
-  have hnn : ∀ n : ℕ, (0:ℝ) ≤ 1/((n:ℝ)+1)^i := fun n => by positivity
-  have hs : Summable (fun n : ℕ => (1:ℝ)/((n:ℝ)+1)^i) :=
-    Summable.of_nonneg_of_le hnn hle h2.summable
-  calc ∑' n : ℕ, 1/((n:ℝ)+1)^i ≤ ∑' n : ℕ, 1/((n:ℝ)+1)^2 := hs.tsum_le_tsum hle h2.summable
-    _ = π^2/6 := h2.tsum_eq
-    _ ≤ 2 := by
-      have := Real.pi_lt_d2
-      have := Real.pi_pos
-      nlinarith
+  apply GlobalTheory.EtaValueBound.zeta_le_two <;> assumption
 
 theorem volumeConstant_le (r : ℕ) (hr : 2 ≤ r) :
     √r * ∏ i ∈ Finset.Icc 2 r, (∑' n : ℕ, 1/((n:ℝ)+1)^i) ≤ 2^(r*(r-1)/2) * (2*π)^(r-1) * √r := by
   have hprod : ∏ i ∈ Finset.Icc 2 r, (∑' n : ℕ, 1/((n:ℝ)+1)^i) ≤ ∏ _i ∈ Finset.Icc 2 r, (2:ℝ) := by
-    apply Finset.prod_le_prod
+    apply Finset.prod_le_prod₀
     · intro i _; exact tsum_nonneg (fun n => by positivity)
     · intro i hi; exact zetaTerm_tsum_le_two i (Finset.mem_Icc.mp hi).1
   rw [Finset.prod_const, Nat.card_Icc] at hprod
@@ -47,8 +80,5 @@ theorem volumeConstant_le (r : ℕ) (hr : 2 ≤ r) :
         apply mul_le_mul_of_nonneg_left _ hsq
         nlinarith
     _ = 2^(r*(r-1)/2) * (2*π)^(r-1) * √r := by ring
-
-example : ∀ r : ℕ, 2 ≤ r → √r * ∏ i ∈ Finset.Icc 2 r, (∑' n : ℕ, 1/((n:ℝ)+1)^i) ≤ 2^(r*(r-1)/2) * (2*π)^(r-1) * √r :=
-  volumeConstant_le
 
 end GlobalTheory

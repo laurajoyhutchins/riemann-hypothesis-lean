@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ContDiffUncentre
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFubiniStudyPositive
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BiholomorphicLiftSystem
+module
+
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncChartLocalNormalForm
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ContDiffUncentre
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Filter Topology ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.AnForm.M GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.HodgeMetric
 open GroundTheory.Heights₂.Heights.LowerBoundFree
@@ -151,28 +195,7 @@ theorem recentre_mem_ball {n : ℕ} (w₀ : Fin n → ℂ) {ρ : ℝ} (hρ : 0 <
 
 theorem exists_perm {n : ℕ} (S : Finset (Fin n)) :
     ∃ π : Equiv.Perm (Fin n), ∀ j, ((π j : Fin n) : ℕ) < S.card ↔ j ∈ S := by
-  classical
-  have hc : S.card ≤ n := by simpa using S.card_le_univ
-  have h1 : Fintype.card {j : Fin n // j ∈ S} = Fintype.card {j : Fin n // (j : ℕ) < S.card} := by
-    rw [Fintype.card_coe, ← Fintype.card_congr (Fin.castLEquiv hc), Fintype.card_fin]
-  have h2 : Fintype.card {j : Fin n // ¬ j ∈ S} = Fintype.card {j : Fin n // ¬ (j : ℕ) < S.card} := by
-    rw [Fintype.card_subtype_compl, Fintype.card_subtype_compl, h1]
-  let e := Fintype.equivOfCardEq h1
-  let e' := Fintype.equivOfCardEq h2
-  let π : Equiv.Perm (Fin n) := ((Equiv.sumCompl (fun j : Fin n => j ∈ S)).symm.trans
-    (e.sumCongr e')).trans (Equiv.sumCompl (fun j : Fin n => (j : ℕ) < S.card))
-  refine ⟨π, fun j => ?_⟩
-  by_cases hj : j ∈ S
-  · have hπ : π j = (e ⟨j, hj⟩ : Fin n) := by
-      simp only [π, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_pos hj, Equiv.sumCongr_apply,
-        Sum.map_inl, Equiv.sumCompl_apply_inl]
-    rw [hπ]
-    exact iff_of_true (e ⟨j, hj⟩).2 hj
-  · have hπ : π j = (e' ⟨j, hj⟩ : Fin n) := by
-      simp only [π, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_neg hj, Equiv.sumCongr_apply,
-        Sum.map_inr, Equiv.sumCompl_apply_inr]
-    rw [hπ]
-    exact iff_of_false (e' ⟨j, hj⟩).2 hj
+  apply GlobalTheory.CompanionTheory.Ar.ChartGeo.exists_perm_prefix <;> assumption
 
 private theorem analyticAt_lift_chart_symm {P : Ideal (MRing ι)} {n : ℕ} (R : AnLogRes P ⊤ n) (B : FinHolAtlas n R.X)
     (hAB : R.A.Compatible B) (k : Fin B.n) (x₀ : R.X) {v : Fin n → ℂ} (hv : v ∈ (B.chart k).target)

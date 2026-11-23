@@ -1,5 +1,56 @@
-import Formalism.QuotientMetricDivisors.ProdFormula
-import Formalism.LogFactorialIndices.SignedSubspaceIndex.LogProductFormula
+module
+
+public import Formalism.QuotientMetricDivisors.ProdFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.FractionalIdeal.Norm
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 
@@ -7,19 +58,7 @@ noncomputable section
 
 namespace Formalism.DivisionValues
 
-theorem sum_log_embeddings_eq (K : Type) [Field K] [NumberField K] (a : K) (ha : a ≠ 0) :
-    ∑ σ : K →+* ℂ, Real.log ‖σ a‖ = Real.log |((Algebra.norm ℚ a : ℚ) : ℝ)| := by
-  have h := Algebra.norm_eq_prod_embeddings ℚ ℂ a
-  have hq : (algebraMap ℚ ℂ) (Algebra.norm ℚ a) = ((Algebra.norm ℚ a : ℚ) : ℂ) := eq_ratCast _ _
-  have hprod : ((Algebra.norm ℚ a : ℚ) : ℂ) = ∏ σ : K →+* ℂ, σ a := by
-    rw [← hq, h]
-    exact Fintype.prod_equiv (RingHom.equivRatAlgHom K ℂ).symm _ _ (fun _ => rfl)
-  have hn : |((Algebra.norm ℚ a : ℚ) : ℝ)| = ∏ σ : K →+* ℂ, ‖σ a‖ := by
-    rw [← norm_prod, ← hprod]
-    simp
-  rw [hn, Real.log_prod (fun σ _ => by simpa using ha)]
-
-theorem log_abs_norm_eq_two_sum (K : Type) [Field K] [NumberField K] [IsTotallyComplex K]
+theorem log_abs_norm_eq_two_sum (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
     (a : K) (ha : a ≠ 0) :
     Real.log |((Algebra.norm ℚ a : ℚ) : ℝ)| =
       2 * ∑ v : InfinitePlace K, Real.log ‖v.embedding a‖ := by

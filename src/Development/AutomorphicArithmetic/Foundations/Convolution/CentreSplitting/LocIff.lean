@@ -1,8 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocalRepresentationL2
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocEmb
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocFlath
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.FixedDense
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.IwasawaCompletion.AwayPartMulIotaWPart
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocalRepresentationL2
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.FixedDense
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocEmb
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocFlath
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.IwasawaCompletion.AwayPartMulIotaWPart
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+import GroundTheory.GlobalFields.LocalAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -50,7 +94,7 @@ private theorem proj_range {G H X Y : Type} [Group G] [TopologicalSpace G] [IsTo
       (by rintro _ ⟨y, hy, rfl⟩; exact Submodule.mem_map_of_mem (mem_fixedVectors.2 hy)) h2 h1
     exact ⟨y, congrArg Subtype.val hy⟩
 
-set_option maxHeartbeats 800000 in
+
 open PositivityTheory.Rg.Rs.C3.Fl in
 theorem UpperTheory.ConvolutionTheory.Dp.locIff :
     UpperTheory.ConvolutionTheory.Dp.LocIff := by
@@ -93,7 +137,7 @@ theorem UpperTheory.ConvolutionTheory.Dp.locIff :
       | smul c u _ h1 => rw [inner_smul_left, h1, mul_zero]
     rcases h.summand.irred (V ⊓ Sᗮ) inf_le_left (h.summand.closed.inter S.isClosed_orthogonal) (fun g v hv =>
       ⟨h.summand.inv g v hv.1, (hS _).2 fun a y ha => by
-        have e : rightRegularRep (rationalGLOne E n) μ g v = RG μ (g⁻¹.1)⁻¹ v := by
+        have e : rightRegularRep (rationalGLOne (K := E) (n := n)) μ g v = RG μ (g⁻¹.1)⁻¹ v := by
           simp only [RG, Subgroup.coe_inv, inv_inv, retractOne_coe]
         rw [e, ← hin, ← hm, ← awayPart_mul_iota_wPart (w := w) (g⁻¹.1 * a), hm, ← hi']
         exact (hS v).1 hv.2 _ _ (wPart_awayPart _)⟩) with hb | hb

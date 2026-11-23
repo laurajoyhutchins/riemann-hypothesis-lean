@@ -1,11 +1,53 @@
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaTW
-import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsEqSubOfMemCob
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamOfLSmulIff
-import Development.AbelianVarietyTheory.Definitions.Foundations.PieceEqPieceT
-import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleHodgeTateZetaClassParams
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.Imports
-import Development.AbelianVarietyTheory.Definitions.Foundations.KumValUnique
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamOfLSmulIff
+public import Development.AbelianVarietyTheory.Definitions.Foundations.PieceEqPieceT
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleHodgeTateZetaClassParams
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.IsThBIff
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsOfEmbedding
+public import Development.AbelianVarietyTheory.Definitions.Foundations.KumValUnique
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
+
+@[expose] public section
 
 open scoped MatrixGroups Matrix
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.KZ GlobalTheory.Ord2 GlobalTheory.K4
@@ -78,7 +120,7 @@ theorem UpperTheory.Kd.L.thcocd :
     unfold sgD
     congr 1
     funext γ
-    simp only [IsDiam, hδu, ZMod.coe_unitOfCoprime, ZMod.natCast_zmod_val, ZMod.natCast_val, ZMod.cast_id', id]
+    simp [IsDiam, hδu]
   have hφ' : GlobalTheory.Glue.IsThB X A N l n (X.diam N l (δu : ZMod N).val
       (GlobalTheory.KA.push (redM l n m (N * N)) (UpperTheory.Kd.L.bTop X l n m N bB) s y)) φ := by
     rw [show X.diam N l ((δu : ZMod N).val) = X.diam N l δ by unfold Tower.diam; rw [hsg]]
@@ -96,4 +138,4 @@ theorem UpperTheory.Kd.L.thcocd :
   clear H hg hB hB' hφ hφ' _hrow key gen hsg hStab hval hzt hP hG1 hAdm hlA hjA hj hOver
   convert this using 2
   · simp [GlobalTheory.KummerEisensteinGalois.seqN]
-  · simp only [map_add, map_mul, map_sub, map_pow, map_natCast, map_ratCast]
+  · simp only [map_add (f := _), map_mul, map_sub, map_pow, map_natCast, map_ratCast]

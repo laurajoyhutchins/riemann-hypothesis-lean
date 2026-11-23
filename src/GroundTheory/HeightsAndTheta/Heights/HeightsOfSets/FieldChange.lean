@@ -1,6 +1,64 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.FiniteSupportHeight
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CardEmbeddingsRestrict
+module
+
+public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CardEmbeddingsRestrict
+public import Mathlib.Algebra.FiniteSupport.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+public import Mathlib.Algebra.Order.Hom.Lattice
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -13,8 +71,9 @@ section Extension
 
 variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 theorem card_embeddings_restrict (τ : K →+* ℂ) :
     (Finset.univ.filter fun σ : L →+* ℂ ↦ σ.comp (algebraMap K L) = τ).card = finrank K L :=
   _root_.UpperTheory.Reformulated.B.CardEmbeddingsRestrict.card_embeddings_restrict τ
@@ -173,77 +232,9 @@ section Cone
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι → ℕ}
 
-omit [DecidableEq ι] in
 
-theorem finsum_finiteTerm_algebraMap {K L : Type*} [Field K] [NumberField K] [Field L]
-    [NumberField L] [Algebra K L] (A : HermLine n) {y : Cone n K} (hy : BlockNonzero y) :
-    ∑ᶠ w : FinitePlace L, finiteTerm A w (fun k i ↦ algebraMap K L (y k i)) =
-      finrank K L * ∑ᶠ v : FinitePlace K, finiteTerm A v y := by
-  have hyL : ∀ k, (fun i ↦ algebraMap K L (y k i)) ≠ 0 := fun k ↦ by
-    obtain ⟨i, hi⟩ := Function.ne_iff.mp (hy k)
-    exact Function.ne_iff.mpr ⟨i, (map_ne_zero _).mpr hi⟩
-  unfold finiteTerm
-  rw [finsum_sum_mul _ _ fun k ↦ support_log_iSup_place_finite (hyL k),
-    finsum_sum_mul _ _ fun k ↦ support_log_iSup_place_finite (hy k), Finset.mul_sum]
-  refine Finset.sum_congr rfl fun k _ ↦ ?_
-  rw [finsum_log_iSup_algebraMap (hy k)]
-  ring
-
-omit [DecidableEq ι] in
-
-theorem height_eq_of_le (A : HermLine n) {x : Cone n (AlgebraicClosure ℚ)} (hx0 : BlockNonzero x)
-    (L : IntermediateField ℚ (AlgebraicClosure ℚ)) [NumberField L] (hx : ∀ k i, x k i ∈ L) :
-    height A x = ((finrank ℚ L : ℝ))⁻¹ *
-      (∑ᶠ w : FinitePlace L, finiteTerm A w (coordIn L x hx) +
-        ∑ σ : L →+* ℂ, Real.log (A.metric fun k i ↦ σ (coordIn L x hx k i))) := by
-  have hKL : coordField x ≤ L :=
-    IntermediateField.adjoin_le_iff.mpr (by rintro _ ⟨v, rfl⟩; exact hx v.1 v.2)
-  let _ : Algebra (coordField x) L := (IntermediateField.inclusion hKL).toRingHom.toAlgebra
-  have hco : coordIn L x hx = fun k i ↦ algebraMap (coordField x) L (coordVec x k i) := rfl
-  have hblock : BlockNonzero (coordVec x) := fun k h ↦ hx0 k (funext fun i ↦ by
-    have := congrFun h i
-    exact congrArg Subtype.val this)
-  have hfin := finsum_finiteTerm_algebraMap (L := L) A hblock
-  have harch := sum_embeddings_restrict (K := coordField x) (L := L)
-    (fun τ ↦ Real.log (A.metric fun k i ↦ τ (coordVec x k i)))
-  have hdeg := Module.finrank_mul_finrank ℚ (coordField x) L
-  rw [hco, hfin]
-  change _ = _ * (_ + ∑ σ : L →+* ℂ, Real.log (A.metric fun k i ↦
-    (σ.comp (algebraMap (coordField x) L)) (coordVec x k i)))
-  rw [harch, ← hdeg]
-  unfold height
-  have h1 : (0 : ℝ) < finrank ℚ (coordField x) := by exact_mod_cast Module.finrank_pos
-  have h2 : (0 : ℝ) < finrank (coordField x) L := by exact_mod_cast Module.finrank_pos
-  push_cast
-  field_simp
-  rfl
-
-theorem heightLocalAgreement : HeightLocalAgreement.Statement := by
-  intro ι ι' _ _ _ _ n n' A A' x x' hx0 hx0' L _ hx hx' hfin harch
-  rw [height_eq_of_le A hx0 L hx, height_eq_of_le A' hx0' L hx', finsum_congr hfin,
-    Finset.sum_congr rfl fun σ _ ↦ by rw [harch σ]]
 
 end Cone
-
-theorem sum_extend_mul {ι ι' : Type} [Fintype ι] [Fintype ι'] {j : ι → ι'}
-    (hj : Function.Injective j) (a : ι → ℤ) (r : ι' → ℝ) :
-    ∑ k', ((Function.extend j a 0 k' : ℤ) : ℝ) * r k' = ∑ k, (a k : ℝ) * r (j k) := by
-  classical
-  symm
-  refine Fintype.sum_of_injective j hj _ _ (fun k' hk' ↦ ?_) (fun k ↦ ?_)
-  · rw [Function.extend_apply' _ _ _ (fun ⟨k, hk⟩ ↦ hk' ⟨k, hk⟩), Pi.zero_apply, Int.cast_zero,
-      zero_mul]
-  · rw [hj.extend_apply]
-
-theorem heightPullback : HeightPullback.Statement := by
-  intro ι ι' _ _ _ _ n' j hj A x hx
-  have hxL : ∀ k i, x k i ∈ coordField x := fun k i ↦
-    IntermediateField.subset_adjoin ℚ _ ⟨⟨k, i⟩, rfl⟩
-  have hpL : ∀ k i, HermLine.project j x k i ∈ coordField x := fun k i ↦ hxL (j k) i
-  refine heightLocalAgreement ι' ι n' (n' ∘ j) (A.pullback j hj) A x (HermLine.project j x) hx
-    (fun k ↦ hx (j k)) (coordField x) hxL hpL (fun v ↦ ?_) (fun σ ↦ rfl)
-  unfold finiteTerm
-  exact sum_extend_mul hj A.deg (fun k' ↦ Real.log (⨆ i, v (coordIn (coordField x) x hxL k' i)))
 
 end
 

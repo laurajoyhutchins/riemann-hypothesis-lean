@@ -1,5 +1,50 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+import Formalism.ThetaLiftIndependence.ThetaOrbitSums.LatLiftIndep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -29,7 +74,7 @@ variable {h : V →ₗ⋆[K] V →ₗ[K] K} {h' : V' →ₗ⋆[K] V' →ₗ[K] K
   (hτ : ∀ g, τ g ∈ isom h' ↔ g ∈ isom h)
   (hg : ∀ g M, Φ (gmap g M) = gmap (τ g) (Φ M))
   (hloc : ∀ p : Ideal (𝓞 K), p.IsMaximal → ∀ M, Φ (loc (K := K) p M) = loc (K := K) p (Φ M))
-  (hlat : ∀ M, Submodule.IsLattice K (Φ M) ↔ Submodule.IsLattice K M)
+  (hlat : ∀ M, Submodule.IsFullLattice K (Φ M) ↔ Submodule.IsFullLattice K M)
 
 include hτ hg hloc hlat
 
@@ -105,8 +150,14 @@ theorem isLattice_mapE (φ : V ≃ₗ[K] V') {M : Submodule (𝓞 K) V} (hM : Su
     Submodule.IsLattice K (mapE φ M) := by
   constructor
   · exact hM.fg.map _
-  · have e : ((mapE φ M : Submodule (𝓞 K) V') : Set V') = (φ : V →ₗ[K] V') '' (M : Set V) := rfl
-    rw [e, Submodule.span_image, hM.span_eq_top, Submodule.map_top, LinearEquiv.range]
+  · exact fun _ _ hli => (LinearIndependent.iff_fractionRing _ _).mp hli
+
+theorem isFullLattice_mapE (φ : V ≃ₗ[K] V') {M : Submodule (𝓞 K) V}
+    (hM : Submodule.IsFullLattice K M) : Submodule.IsFullLattice K (mapE φ M) := by
+  refine { toIsLattice := isLattice_mapE φ hM.toIsLattice, span_eq_top := ?_ }
+  change Submodule.span K ((φ : V →ₗ[K] V') '' (M : Set V)) = ⊤
+  rw [Submodule.span_image, hM.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
+  exact φ.surjective
 
 theorem mapE_symm_mapE (φ : V ≃ₗ[K] V') (M : Submodule (𝓞 K) V) : mapE φ.symm (mapE φ M) = M := by
   ext x; simp [mem_mapE]
@@ -140,8 +191,8 @@ theorem mass_mapE (φ : V ≃ₗ[K] V') {h : V →ₗ⋆[K] V →ₗ[K] K} {h' :
     have : φ.symm (s • y) = s • φ.symm y := (φ.symm.restrictScalars (𝓞 K)).map_smul s y
     rw [this]
   · intro M
-    refine ⟨fun H => ?_, isLattice_mapE φ⟩
-    have := isLattice_mapE φ.symm H
+    refine ⟨fun H => ?_, isFullLattice_mapE φ⟩
+    have := isFullLattice_mapE φ.symm H
     rwa [mapE_symm_mapE] at this
 
 end Formalism.HermitianLattices.Ext.L3.RankOne

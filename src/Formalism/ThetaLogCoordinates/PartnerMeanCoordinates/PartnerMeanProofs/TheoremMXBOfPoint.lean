@@ -1,8 +1,58 @@
-import Formalism.ThetaLogCoordinates.PartnerMeanCoordinates.TheoremMXB
+module
+
+public import Formalism.ThetaLogCoordinates.PartnerMeanCoordinates.TheoremMXB
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.TheoremM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.Finite
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.MC
 
-open Formalism.GM Formalism.GM.TM Formalism.GM.M Formalism.InvariantFactorPaths.OddLevelGainBounds.TB MvPolynomial Finset
+open Formalism.GM Formalism.GM.TM Formalism.GM.M MvPolynomial Finset
 
 theorem theoremMXB_of_point (hMG : MeanGamX) (hMono : WeightSpaceDimMonotone) (hCount : MonoCount) (hSmith : SmithZp)
     (hAd : AdaptedBasisExists) (hPW : PointMX) : TheoremMXB := by
@@ -105,7 +155,7 @@ theorem theoremMXB_of_point (hMG : MeanGamX) (hMono : WeightSpaceDimMonotone) (h
     have hL0tot : ((LL.setTies T n).takeD (T.pos i + 1)).total ≤ n₀ i := hL0S.trans (hS i)
     have hvec : ((LL.setTies T n).takeD (T.pos i + 1)).vec (Fin.last (T.pos i)) = true := by
       simp only [Letters.takeD, Fin.val_last]
-      rw [dif_pos (by omega)]
+      rw [dite_eq_left (by omega)]
       exact hvW
     have h2S : 2 * ((LL.setTies T n).takeD (T.pos i + 1)).total ≤ Xb := by
       exact (Nat.mul_le_mul_left 2 hL0S).trans (hsz i).1
@@ -114,7 +164,7 @@ theorem theoremMXB_of_point (hMG : MeanGamX) (hMono : WeightSpaceDimMonotone) (h
       have h2 : ((LL.setTies T n).takeD (T.pos i + 1)).deg (Fin.last (T.pos i)) =
           (LL.setTies T n).deg ⟨T.pos i, by omega⟩ := by
         simp only [Letters.takeD, Fin.val_last]
-        rw [dif_pos (by omega)]
+        rw [dite_eq_left (by omega)]
       have h3 := setTies_deg_mono LL T n top hnt ⟨T.pos i, by omega⟩
       rw [h2]
       exact (Nat.add_le_add_left h3 _).trans h1

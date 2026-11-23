@@ -1,6 +1,59 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.LeviForms.ConvExpandStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocDensAddOfFunContinuousOn
+module
+
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureB
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocDensAddOfFunContinuousOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.MdiscSt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureA
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MeasureTheory Metric Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.AnForm.M.FinHolAtlas
 open scoped ContDiff
 
@@ -8,7 +61,7 @@ namespace GlobalTheory.CompanionTheory.Ar.Giv
 
 namespace MeasOff
 
-abbrev ov {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X) (U : Set X) (j : Fin A.n) :
+noncomputable abbrev ov {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X) (U : Set X) (j : Fin A.n) :
     Set (Fin e → ℂ) :=
   (A.chart j).target ∩ (A.chart j).symm ⁻¹' U
 
@@ -228,7 +281,7 @@ theorem integrableOn_ov (A : FinHolAtlas e X) (P : ChartPartition A) {U : Set X}
     ((hGm.enorm).mul ((((chi_continuousOn P k j).mono Set.inter_subset_left).aemeasurable
       hVm).ennreal_ofReal)).mul hdm.ennreal_ofReal
   show ∫⁻ y in ov A U j, ‖G ((A.chart j).symm y) * locDens A Φ j y‖ₑ < ⊤
-  rw [hpt, lintegral_finset_sum' _ fun k _ => hHm k]
+  rw [hpt, lintegral_finsetSum' _ fun k _ => hHm k]
   refine ENNReal.sum_lt_top.2 fun k _ => ?_
   refine (lintegral_chart_le A Φ hU hnn hch j k (H k) fun x hx => ?_).trans_lt ?_
   · have : x ∉ tsupport (P.χ k) := fun h => hx (P.tsupport_subset k h)
@@ -258,7 +311,11 @@ theorem mInt_eq_of_dens (A : FinHolAtlas e X) {U : Set X} (Φ : Fin e → LocPot
   have hne : Nonempty (ChartPartition A) := existsPartition A
   set P := hne.some with hPd
   have hG := measurable_indicator hU hgc
-  rw [maMeasure_eq_sum A Φ hne] at hgi ⊢
+  have hmeasure : maMeasure A Φ = ∑ k, chartMeasure A P Φ k := by
+    unfold maMeasure
+    rw [dite_eq_left hne]
+    rfl
+  rw [hmeasure] at hgi ⊢
   have hgk : ∀ k, Integrable g (chartMeasure A P Φ k) := fun k =>
     integrable_finsetSum_measure.mp hgi k (Finset.mem_univ k)
   have hae : ∀ k, U.indicator g =ᵐ[chartMeasure A P Φ k] g := fun k =>
@@ -279,7 +336,10 @@ theorem mInt_eq_of_dens (A : FinHolAtlas e X) {U : Set X} (Φ : Fin e → LocPot
       refine ae_restrict_of_forall_mem (isOpen_ov A hU j).measurableSet fun y hy => ?_
       rw [Set.indicator_of_mem (show (A.chart j).symm y ∈ U from hy.2)]
     exact (h2.mono_set hK).congr (ae_restrict_of_ae_restrict_of_subset hK hev)
-  · rw [mInt_eq_integralWith A Φ hne, integral_finsetSum_measure fun k _ => hgk k]
+  · have hint : mInt A Φ g = integralWith A P Φ g := by
+      unfold mInt
+      rw [dite_eq_left hne]
+    rw [hint, integral_finsetSum_measure fun k _ => hgk k]
     unfold integralWith
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [← integral_congr_ae (hae k), (hfacts k).2, restrict_target_eq A hnull k]

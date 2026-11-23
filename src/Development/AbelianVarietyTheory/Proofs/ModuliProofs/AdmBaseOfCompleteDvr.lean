@@ -1,19 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleIdentityIso
-import Development.AbelianVarietyTheory.BlockTheory.CMModuli.UniformizationLinear
-import Development.AbelianVarietyTheory.Definitions.Degenerations.ToATotal
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
+module
+
+public import Mathlib.FieldTheory.Galois.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Degenerations.PelSt
-import Development.AbelianVarietyTheory.Definitions.Uniformization.NotExistsEvenTwistSymOne
-import Development.AbelianVarietyTheory.Definitions.Uniformization.IsEllipticCurveTwoAdic
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsEvenPull
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PolOfSecondQuotient
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkUInvariantUnderFieldEmbedding
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsQkPullEquiv
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGenericIsoOfUniformisationsIsoData
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsUniqueTorusCompat
+public import Mathlib.FieldTheory.Galois.Infinite
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.CanonGenIsGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,7 +64,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 noncomputable section
 namespace GlobalTheory.UnifDvrCompare
-open GlobalTheory.UU GlobalTheory.LN GlobalTheory.IndefiniteRowSideFullHecke.UniformizationLinear
+open GlobalTheory.UU GlobalTheory.LN
 
 theorem exists_point_of_fixed {F F' : Type} [Field F] [Field F'] [Algebra F F'] [IsGalois F F'] {X : Scheme.{0}}
     (x' : Sp F' ⟶ X) (h : ∀ σ : Gal(F'/F), spMap (σ : F' →+* F') ≫ x' = x') :
@@ -44,7 +84,7 @@ theorem exists_point_of_fixed {F F' : Type} [Field F] [Field F'] [Algebra F F'] 
       map_one' := inj (by rw [hg, map_one, map_one])
       map_mul' := fun a b => inj (by rw [hg, map_mul, map_mul, hg, hg])
       map_zero' := inj (by rw [hg, map_zero, map_zero])
-      map_add' := fun a b => inj (by rw [hg, map_add, map_add, hg, hg]) }
+      map_add' := fun a b => inj (by rw [hg, map_add (f := _), map_add (f := _), hg, hg]) }
   refine ⟨Spec.map (CommRingCat.ofHom g') ≫ X.fromSpecResidueField y, ?_⟩
   rw [← Category.assoc, ← Spec.map_comp]
   congr 2
@@ -70,11 +110,6 @@ section Triples
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 
 end Triples
-
-def PelOver (R : Type) [CommRing R] [IsDomain R] (I : Ideal R) : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (t : SAB H (Sp R)) (D : DegData R I)
-    (A : PolAV (Sp (FractionRing R))) (U : Unif I D A t.G), U.LG = t.PP →
-    ∃ P : PELUnif I t, P.D = D ∧ P.A = A ∧ HEq P.U U ∧ P.TorsionIso
 
 end GlobalTheory.UnifDvrCompare
 end

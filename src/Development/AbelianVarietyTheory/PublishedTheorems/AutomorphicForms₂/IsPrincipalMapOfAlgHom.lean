@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedCoefficientFieldInComplex
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.NonemptyAlgHomOfIsRayOfDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedCoefficientFieldInComplex
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.NonemptyAlgHomOfIsRayOfDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -11,17 +51,17 @@ open NumberField IsDedekindDomain GlobalTheory.NT GlobalTheory.Mem.Fld
 namespace GlobalTheory.Published
 
 def PrincipalIdealSt : Prop :=
-  ∀ (K L : Type) [Field K] [NumberField K] [IsTotallyComplex K] [Field L] [NumberField L] [Algebra K L],
+  ∀ (K L : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [Field L] [NumberField L] [Algebra K L],
     IsRayField K L ⊤ → ∀ 𝔞 : Ideal (𝓞 K), (𝔞.map (algebraMap (𝓞 K) (𝓞 L))).IsPrincipal
 
 end GlobalTheory.Published
 
 namespace GlobalTheory.HilbertClass
 
-variable {K : Type} [Field K] [NumberField K] [IsTotallyComplex K]
+variable {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
+
 
 omit [NumberField K] in
-
 theorem isEmpty_realEmb : IsEmpty (K →+* ℝ) :=
   ⟨fun φ => IsTotallyComplex.complexEmbedding_not_isReal (Complex.ofRealHom.comp φ)
     (ComplexEmbedding.isReal_iff.2 (RingHom.ext fun x => Complex.conj_ofReal _))⟩
@@ -62,12 +102,8 @@ theorem isRayField_self_top_iff : IsRayField K K ⊤ ↔ IsPrincipalIdealRing (�
   · rw [hI]; infer_instance
   · exact (h.2.2.2 I hI).1 (h1 I)
 
-example : IsTotallyComplex (CyclotomicField 3 ℚ) ∧ IsRayField (CyclotomicField 3 ℚ) (CyclotomicField 3 ℚ) ⊤ :=
-  have := IsCyclotomicExtension.Rat.isTotallyComplex (n := 3) (CyclotomicField 3 ℚ) (by norm_num)
-  ⟨this, isRayField_self_top_iff.2 (IsCyclotomicExtension.Rat.three_pid _)⟩
 
-omit [NumberField K] [IsTotallyComplex K] in
-
+omit [NumberField K] [_root_.NumberField.IsTotallyComplex K] in
 theorem isPrincipal_map_of_algHom {L M : Type} [Field L] [Algebra K L] [Field M] [Algebra K M] (f : L →ₐ[K] M)
     {𝔞 : Ideal (𝓞 K)} (h : (𝔞.map (algebraMap (𝓞 K) (𝓞 L))).IsPrincipal) :
     (𝔞.map (algebraMap (𝓞 K) (𝓞 M))).IsPrincipal := by
@@ -83,7 +119,7 @@ namespace GlobalTheory.Published
 
 open GlobalTheory.HilbertClass
 
-variable {K L M : Type} [Field K] [NumberField K] [IsTotallyComplex K] [Field L] [NumberField L] [Algebra K L]
+variable {K L M : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [Field L] [NumberField L] [Algebra K L]
   [Field M] [Algebra K M]
 
 theorem PrincipalIdealSt.of_algHom (H : PrincipalIdealSt) (h : IsRayField K L ⊤) (f : L →ₐ[K] M)
@@ -100,7 +136,7 @@ theorem PrincipalIdealSt.of_isRayField (H : PrincipalIdealSt) (hR : RayField) {�
   exact H.of_algHom h₀ (f.comp g) 𝔞
 
 theorem PrincipalIdealSt.of_isRayFieldIn (H : PrincipalIdealSt) (hR : RayField) {E : Type} [Field E] [NumberField E]
-    [IsTotallyComplex E] {φ : E →+* ℂ} {𝔮 : Ideal (𝓞 E)} (h𝔮 : 𝔮 ≠ ⊥) {R N : IntermediateField ℚ ℂ}
+    [_root_.NumberField.IsTotallyComplex E] {φ : E →+* ℂ} {𝔮 : Ideal (𝓞 E)} (h𝔮 : 𝔮 ≠ ⊥) {R N : IntermediateField ℚ ℂ}
     (h : IsRayFieldIn φ 𝔮 R) (hle : R ≤ N) (𝔞 : Ideal (𝓞 E)) :
     (𝔞.map (RingOfIntegers.mapRingHom (φ.codRestrict N fun x => hle (h.emb_mem x)))).IsPrincipal := by
   have := h.numberField

@@ -1,8 +1,57 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GL3Theta
+public import Mathlib.RingTheory.PowerSeries.Log
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableSqTh
+import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.EvenTheta
 open scoped BigOperators
 
@@ -57,14 +106,14 @@ theorem exp_neg_log_one_var (K : Type*) [Field K] [CharZero K] :
     (exp K).subst (-log K) * (1 + X : PowerSeries K) = 1 := by
   have h0 : constantCoeff (-log K) = 0 := by simp
   have hs := HasSubst.of_constantCoeff_zero' h0
-  have e : (1 + X) * d⁄dX K (log K) = 1 := by
-    rw [deriv_log]
+  have e : (1 + X) * PowerSeries.derivative (log K) = 1 := by
+    rw [derivative_log]
     ext n
     cases n with
     | zero => simp [add_mul]
     | succ n => simp [add_mul, coeff_succ_X_mul, coeff_one, pow_succ]
   refine derivative.ext ?_ ?_
-  · rw [Derivation.leibniz, derivative_subst hs, derivative_exp, map_neg, derivative_one, map_add,
+  · rw [Derivation.leibniz, derivative_subst hs, derivative_exp, map_neg, derivative_one, map_add (f := _),
       derivative_one, derivative_X]
     simp only [smul_eq_mul]
     linear_combination (-(exp K).subst (-log K)) * e
@@ -87,7 +136,7 @@ theorem expMv_neg_logMv_mul : ∀ (p : ℕ) [Fact p.Prime] (σ : Type) (F : MvPo
   have e := congrArg (substAlgHom (R := ℂ_[p]) hs) (exp_neg_log_one_var ℂ_[p])
   have en : subst (F - 1) (-log ℂ_[p]) = -GL3Theta.logMv F := by
     rw [logMv_eq_subst hF, ← coe_substAlgHom hs, map_neg]
-  rw [map_mul, map_add, map_one, substAlgHom_X, coe_substAlgHom, subst_comp_subst_apply hl hs,
+  rw [map_mul, map_add (f := _), map_one, substAlgHom_X, coe_substAlgHom, subst_comp_subst_apply hl hs,
     en, add_sub_cancel] at e
   rw [expMv_eq_subst (by rw [map_neg, h0, neg_zero])]
   exact e

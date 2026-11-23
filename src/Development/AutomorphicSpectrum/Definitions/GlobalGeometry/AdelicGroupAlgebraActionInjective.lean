@@ -1,6 +1,47 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.ProIsoAt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.ProIsoAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +71,7 @@ theorem s_rt (g : HostAut H) : g.s H.rt = H.rt := RingOfIntegers.ext (by rw [coe
 
 theorem integer_automorphism_fixes_weight (g : HostAut H) : g.s H.w0 = H.w0 := by
   have h := congrArg g.s H.two_weight_eq_one_add_root
-  rw [map_mul, map_add, map_one, s_rt, map_ofNat, ← H.two_weight_eq_one_add_root] at h
+  rw [map_mul, map_add (f := _), map_one, s_rt, map_ofNat, ← H.two_weight_eq_one_add_root] at h
   exact mul_left_cancel₀ two_ne_zero h
 
 theorem s_bar (g : HostAut H) (a : 𝓞 E) : g.s (H.bar a) = H.bar (g.s a) := by
@@ -50,7 +91,7 @@ def twistAct {O : Type} [CommRing O] {S : Scheme.{0}} {G : Over S} [GrpObj G] (a
   hom a := act.hom (s a)
   one := by rw [map_one, act.one]
   mul a b := by rw [map_mul, act.mul]
-  add a b := by rw [map_add, act.add]
+  add a b := by rw [map_add (f := _), act.add]
 
 def twistSAB {S : Scheme.{0}} (t : SAB H S) (g : HostAut H) : SAB H S where
   G := t.G
@@ -98,10 +139,10 @@ def twistObj (o : Obj D l b s) (g : HostAut H) (a : TwIso D g) (h : TwOK o g a) 
   ample := o.ample
   ktriv := o.ktriv
   eta x := o.eta (a.a l.M x)
-  eta_add x y := by rw [map_add]; exact o.eta_add _ _
+  eta_add x y := by rw [map_add (f := _)]; exact o.eta_add _ _
   eta_ker := h.1
   etaA x := o.etaA (a.a l.A x)
-  etaA_add x y := by rw [map_add]; exact o.etaA_add _ _
+  etaA_add x y := by rw [map_add (f := _)]; exact o.etaA_add _ _
   etaA_ker x := by rw [map_nsmul]; exact o.etaA_ker _
   geom := h.2
 

@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ChainRuleAndJacobianCriterion
-import Development.AbelianVarietyTheory.Definitions.Divisors.CommGroupMulMulEqMulInvMulMulMul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CommGroupMulMulEqMulInvMulMulMul
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MemSubPtsCutBaseChangeIff
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsQuasiRegularSeqSelfIffLocalizationMaximal
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ChainRuleAndJacobianCriterion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.DivSheaf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,8 +83,8 @@ theorem stalkId_eq_top {y : Y} (hy : y ∉ I.support) : stalkId I y = ⊤ :=
 theorem ι_mem_support (z : I.subscheme) : I.subschemeι z ∈ I.support :=
   I.range_subschemeι.le ⟨z, rfl⟩
 
-variable {I} in
 
+variable {I} in
 theorem exists_ι_eq {y : Y} (hy : y ∈ I.support) : ∃ z : I.subscheme, I.subschemeι z = y :=
   I.range_subschemeι.ge hy
 
@@ -172,8 +216,8 @@ theorem isQuasiRegularSeq_of_isFreeGen {A : Type} [CommRing A] {α : k →+* A} 
       fun i => by rw [Module.Basis.mk_apply, hX]
     simpa only [hX] using (isQuasiRegularSeq_X (R := k) (Fin D)).of_flat A
 
-omit K in
 
+omit K in
 theorem isQuasiRegularSeq_secGer (h : FormallyUnramified ((cutIdeal hL s).subschemeι ≫ p)) {y : Y}
     (hy : y ∈ (cutIdeal hL s).support) (j : L.ι) (hj : y ∈ L.U j) :
     IsQuasiRegularSeq (Y.presheaf.stalk y) (secGer s j y hj) := by

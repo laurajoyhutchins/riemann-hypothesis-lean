@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabRange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonFibre
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRatPointOfFiniteType
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsWithoutCohomology
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsSpecializesIsLocalization
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonFibre
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelQuotientRepresentsReduced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open GlobalTheory.Toroidal GlobalTheory.Models GlobalTheory.LN GlobalTheory.ShFam GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZH GlobalTheory.Poinc
@@ -101,13 +144,17 @@ theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host 
     hW.cancel (hc.congr (Category.id_comp _).symm ec.symm) (by rw [ew, Category.comp_id])
   have hb'' : IsGrpPullback Q.A ρ''.P.A (spMap (σ.comp S''.R.val.toRingHom)) (e ≫ k₀'' ≫ α'') :=
     (he.comp (hk₀''.comp hα'')).congr (by rw [Category.id_comp]; exact sp_comp (RingHom.ext fun _ => rfl)) rfl
-  have hA : pull α (cls ρ'.P.L ρ'.P.isLB) = pull β (cls _ Xo.univ.t.PP.isLB) := by
+  have iso_iff {X Y : Scheme.{0}} {L : LB X} {M : LB Y} (hL : L.IsLB) (hM : M.IsLB) (φ : X ⟶ Y) :
+      LBIso L (M.pull φ) ↔ cls L hL = GlobalTheory.CechPic.pull φ (cls M hM) := by
+    rw [← cls_pull hM φ (pull_isLB hM φ)]
+    exact (cls_eq_iff hL _).symm
+  have hA : GlobalTheory.CechPic.pull α (cls ρ'.P.L ρ'.P.isLB) = GlobalTheory.CechPic.pull β (cls _ Xo.univ.t.PP.isLB) := by
     rw [← cls_pull ρ'.P.isLB α (pull_isLB ρ'.P.isLB α)]
     exact (iso_iff (pull_isLB ρ'.P.isLB α) Xo.univ.t.PP.isLB β).1 hL
-  have hA'' : pull α'' (cls ρ''.P.L ρ''.P.isLB) = pull β'' (cls _ Xo.univ.t.PP.isLB) := by
+  have hA'' : GlobalTheory.CechPic.pull α'' (cls ρ''.P.L ρ''.P.isLB) = GlobalTheory.CechPic.pull β'' (cls _ Xo.univ.t.PP.isLB) := by
     rw [← cls_pull ρ''.P.isLB α'' (pull_isLB ρ''.P.isLB α'')]
     exact (iso_iff (pull_isLB ρ''.P.isLB α'') Xo.univ.t.PP.isLB β'').1 hL''
-  have hk : pull k₀ (pull β (cls _ Xo.univ.t.PP.isLB)) = pull k₀'' (pull β'' (cls _ Xo.univ.t.PP.isLB)) := by
+  have hk : GlobalTheory.CechPic.pull k₀ (GlobalTheory.CechPic.pull β (cls _ Xo.univ.t.PP.isLB)) = GlobalTheory.CechPic.pull k₀'' (GlobalTheory.CechPic.pull β'' (cls _ Xo.univ.t.PP.isLB)) := by
     rw [← pull_comp, ← pull_comp, hkb]
   have lb'' : LBIso Q.L (ρ''.P.L.pull (e ≫ k₀'' ≫ α'')) := by
     rw [iso_iff Q.isLB ρ''.P.isLB, (iso_iff Q.isLB ρ'.P.isLB _).1 lc, ← ec]

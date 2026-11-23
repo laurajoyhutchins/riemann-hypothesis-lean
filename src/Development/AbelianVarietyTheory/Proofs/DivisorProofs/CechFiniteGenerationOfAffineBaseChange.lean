@@ -1,11 +1,49 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RhoIsCoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechGluingOfKodairaSpencerRelation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TranslateUnique
-import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDeRhamSheaf
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CechModulesFunctorShortExactOfIsAffineOpen
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RhoIsCoc
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.LogKS Formalism.L2.Pj
 open GlobalTheory.CatCoh GlobalTheory.CechDR GlobalTheory.CechFin
@@ -47,18 +85,19 @@ theorem cechFG_of_transfer {Z Z' : Scheme.{0}} {J : Type} (W : J → Z.Opens) (W
   · intro k i i' i''
     apply h3 i i' i''
     have := he' k i i' i''
-    rw [map_add, ha, hb, hc, hg, hg, hg]
+    rw [map_add (f := _), ha, hb, hc, hg, hg, hg]
     exact this
   · intro c hcoc
     obtain ⟨r, h', hh⟩ := hc' (fun i i' => φ2 i i' (c i i')) (by
       intro i i' i''
       have := congrArg (φ3 i i' i'') (hcoc i i' i'')
-      rw [map_add, ha, hb, hc] at this
+      rw [map_add (f := _), ha, hb, hc] at this
       exact this)
     choose h hh1 using fun i => h1 i (h' i)
     refine ⟨r, h, fun i i' => (h2 i i').1 ?_⟩
     have e1 := hh i i'
-    rw [map_add, map_sub, map_sum, hl, hr, hh1, hh1]
+
+    rw [map_add (f := _), map_sub, map_sum, hl, hr, hh1, hh1]
     simp only [map_mul, hact, hg]
     exact e1
 

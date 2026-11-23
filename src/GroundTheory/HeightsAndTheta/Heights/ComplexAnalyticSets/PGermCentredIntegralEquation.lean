@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PPrimeGermPrimitivePresentation
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PPrimeGermPrimitivePresentation
+public import Mathlib.Topology.Germ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -42,14 +96,14 @@ theorem exists_monic_map_eq_X_pow {R B K : Type*} [CommRing R] [CommRing B] [Fie
   have ht : IsUnit (aeval x (u.map κ)) := by
     have h1 : u.map κ = C (κ (u.coeff 0)) + X * r := by
       rw [← hr, coeff_map]; ring
-    rw [h1, map_add, aeval_C, map_mul, aeval_X]
+    rw [h1, map_add (f := _), aeval_C, map_mul, aeval_X]
     exact hx _ hu0 _
   have hxa : x ^ a ∈ J := by
     obtain ⟨v, hv⟩ := ht
     have h2 : x ^ a * aeval x (u.map κ) = -aeval x e := by
       have := hχ
       rw [← aeval_def] at this
-      rw [show χ = X ^ a * u.map κ + e by rw [he]; ring, map_add, map_mul, map_pow, aeval_X] at this
+      rw [show χ = X ^ a * u.map κ + e by rw [he]; ring, map_add (f := _), map_mul, map_pow, aeval_X] at this
       linear_combination this
     have h3 : x ^ a = -aeval x e * ↑v⁻¹ := by
       rw [← h2, ← hv, mul_assoc, Units.mul_inv, mul_one]
@@ -71,7 +125,8 @@ theorem exists_monic_map_eq_X_pow {R B K : Type*} [CommRing R] [CommRing B] [Fie
     simpa using this
   have hqmap : q.map ε = X ^ q.natDegree := by
     conv_lhs => rw [hqm.as_sum]
-    rw [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum, add_eq_left]
+
+    rw [Polynomial.map_add (f := _), Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum, add_eq_left]
     refine Finset.sum_eq_zero fun k hk => ?_
     have hk' : q.natDegree - k ≠ 0 := by have := Finset.mem_range.1 hk; omega
     have : q.coeff k ∈ RingHom.ker ε := Ideal.pow_le_self hk' (hqc k)
@@ -120,7 +175,8 @@ theorem toGerm_monic_expr {d : ℕ} (A : (σ → ℂ) →L[ℂ] (Fin d → ℂ))
     (c : Fin n → anFun (A w)) :
     toGerm w (x ^ n + ∑ j, compA A w (c j) * x ^ (j : ℕ)) =
       toGerm w x ^ n + ∑ j, pull A w (toGerm (A w) (c j)) * toGerm w x ^ (j : ℕ) := by
-  simp [map_add, map_sum, map_mul, map_pow, pull_toGerm]
+
+  simp [map_add (f := _), map_sum, map_mul, map_pow, pull_toGerm]
 
 theorem coe_monic_expr {d : ℕ} (A : (σ → ℂ) →L[ℂ] (Fin d → ℂ)) (w : σ → ℂ) (x : anFun w) (n : ℕ)
     (c : Fin n → anFun (A w)) :
@@ -129,8 +185,8 @@ theorem coe_monic_expr {d : ℕ} (A : (σ → ℂ) →L[ℂ] (Fin d → ℂ)) (w
   funext z
   simp [compA, Finset.sum_apply]
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem proof : CentredIntegralEquation.Statement := by
   classical
@@ -151,7 +207,8 @@ theorem proof : CentredIntegralEquation.Statement := by
         Ideal.Quotient.mk I (toGerm w (x ^ n + ∑ j, compA A w (c j) * x ^ (j : ℕ))) := by
     intro x n c
     rw [toGerm_monic_expr]
-    simp only [map_add, map_sum, map_mul, map_pow, aeval_X, aeval_C, halg]
+
+    simp only [map_add (f := _), map_sum, map_mul, map_pow, aeval_X, aeval_C, halg]
   set zc : σ → anFun w := fun i => mkA (fun z => z i)
     ((ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : σ => ℂ) i).analyticAt w)
   set cz : σ → holGerms w ⧸ I := fun i => Ideal.Quotient.mk I (toGerm w (zc i))
@@ -192,6 +249,7 @@ theorem proof : CentredIntegralEquation.Statement := by
       rw [← sub_eq_zero, ← map_sub, ← map_sub]
       exact (hcl _ _ hv).2 hcomb
     rw [h1]
+
     simp only [v, map_sum, map_mul, map_prod, map_pow, ← pull_toGerm]
     refine Subalgebra.sum_mem _ fun m _ => Subalgebra.mul_mem _ ?_ (Subalgebra.prod_mem _ fun i _ =>
       Subalgebra.pow_mem _ (Algebra.subset_adjoin (Set.mem_range_self i)) _)
@@ -212,10 +270,10 @@ theorem proof : CentredIntegralEquation.Statement := by
     have e : algebraMap (holGerms (A w)) (holGerms w ⧸ I) (constGerm (A w) c) + xB * Ideal.Quotient.mk I t =
         Ideal.Quotient.mk I (pull A w (constGerm (A w) c) +
           (toGerm w gA - pull A w (constGerm (A w) (g w))) * t) := by
-      simp only [xB, gcl, halg, map_add, map_mul, map_sub]
+      simp only [xB, gcl, halg, map_add (f := _), map_mul, map_sub]
     rw [e]
     refine (isUnit_of_germEval_ne_zero _ ?_).map _
-    simp only [map_add, map_mul, map_sub, germEval_pull, germEval_constGerm, germEval_toGerm]
+    simp only [map_add (f := _), map_mul, map_sub, germEval_pull, germEval_constGerm, germEval_toGerm]
     simpa [gA, mkA] using hc
   obtain ⟨Q, hQm, hQ0, hQmap⟩ :=
     exists_monic_map_eq_X_pow (germEval (A w)) (constGerm (A w)) (germEval_constGerm _) xB hx
@@ -239,13 +297,15 @@ theorem proof : CentredIntegralEquation.Statement := by
     simp only [toGerm_rep]
     rw [Fin.sum_univ_eq_sum_range (fun i => pull A w (F.coeff i) * toGerm w gA ^ i) n, ← hF0]
     conv_rhs => rw [hFm.as_sum]
-    simp only [map_add, map_sum, map_mul, map_pow, aeval_X, aeval_C, halg, gcl]
+
+    simp only [map_add (f := _), map_sum, map_mul, map_pow, aeval_X, aeval_C, halg, gcl]
     rfl
   · simp only [hrepv]
     rw [Fin.sum_univ_eq_sum_range (fun i => germEval (A w) (F.coeff i) * T ^ i) n]
     have h := congrArg (eval T) hFmap
     conv_lhs at h => rw [hFm.as_sum]
     have hd : F.natDegree = Q.natDegree := hdeg
+
     simpa [Polynomial.map_sum, eval_finsetSum, hd, hdeg] using h
 
 end CentredIntegralEquation

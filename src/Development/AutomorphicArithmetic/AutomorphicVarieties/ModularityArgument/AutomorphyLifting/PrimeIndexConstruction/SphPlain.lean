@@ -1,19 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.PrimeIndexConstruction.GenericR
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.LocCompR
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.HeckeAdjoints.SatLocFree
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSubquotientProdIrrUc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CohomologicalLocalComponentExponents
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FieldPointLiftsGenericFibre
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnitaryDualGLOfTwo
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.PlainAtR
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BzfinHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CohomologicalLocalComponentExponents
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GeometricLemmaFiltrationHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSubquotSmIndCongr
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSphericalFactorOfSphericalSubquotient
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFixedOfMemISup
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FieldPointLiftsGenericFibre
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.PrimeIndexConstruction.GenericR
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.HasSupportOfIsSubquotientProdIrr
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnitaryDualGLOfTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.PrimeIndexConstruction.LocTrans
+
+@[expose] public section
 
 noncomputable section
 
 open NumberField IsDedekindDomain GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.CuspRep GlobalTheory.RoadU GlobalTheory.LocLanglands UpperTheory.V UpperTheory.V.Af UpperTheory.V.Z.Win
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-
-open private UpperTheory.V.Af.RealLocalComponent.isotypic from Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.LocCompR
-open private satLocFree from Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.HeckeAdjoints.SatLocFree
 
 namespace UpperTheory.V.Z.Win.Birth
 
@@ -68,7 +115,7 @@ end Local
 theorem plainTor_of_sph {E : Type} [Field E] [NumberField E] {N : ℕ} (hN : 1 ≤ N) (w : HeightOneSpectrum (𝓞 E))
     (σ : SmIrr (GL (Fin N) (w.adicCompletion E))) (B : Multiset ℂˣ) (hB : GlobalTheory.LFun.HasSatGL w σ.ρ B)
     (hg : IsGeneric σ.ρ) : PlainTor (IrrGL.of σ.ρ σ.smooth σ.irred) := by
-  haveI : CharZero (w.adicCompletion E) := charZero_of_injective_algebraMap (algebraMap E _).injective
+  have : CharZero (w.adicCompletion E) := charZero_of_injective_algebraMap (algebraMap E _).injective
   obtain ⟨ξ, hξ, ϖ, hs, -, -, -⟩ := GlobalTheory.SatSupp.hasSupport_of_hasSatGL E N hN w σ B hB
   obtain ⟨α, -, hα⟩ := (GlobalTheory.LGrp.SatakeCompare.hasSatakeGL_iff _ _ _ σ.ρ B).1
     (GlobalTheory.LFun.SatCompare.hasSatakeGL_iff.2 ⟨⟨σ.smooth, σ.irred⟩, hB⟩)
@@ -111,9 +158,68 @@ theorem plainTor_of_sph {E : Type} [Field E] [NumberField E] {N : ℕ} (hN : 1 �
 
 variable {F : Type} [Field F] [NumberField F] [IsTotallyReal F]
 
+open Matrix in
 theorem plainAtR_of_hasSat {n : ℕ} (hn : 1 ≤ n) (π : TR.CuspSub F n) (v : HeightOneSpectrum (𝓞 F)) (B : Multiset ℂˣ)
-    (hB : π.HasSat v B) : PlainAtR π v := fun σ hσ =>
-  plainTor_of_sph hn v σ B (((satLocFree F n v σ).2 _ π.finPart (UpperTheory.V.Af.RealLocalComponent.isotypic π v σ hσ) B).1 hB)
-    (isGeneric_of_isLocCompR n π v σ hσ)
+    (hB : π.HasSat v B) : PlainAtR π v := by
+  intro σ hσ
+  refine plainTor_of_sph hn v σ B ?_ (isGeneric_of_isLocCompR n π v σ hσ)
+  obtain ⟨f, hf0, hf⟩ := hσ
+  let Intertwiners := {T : σ.V →ₗ[ℂ] π.V // ∀ g x, T (σ.ρ g x) = π.locRep v g (T x)}
+  let W : Submodule ℂ π.V := ⨆ T : Intertwiners, LinearMap.range T.1
+  have commute_mem (T : Module.End ℂ π.V) (hT : ∀ g x, T (π.locRep v g x) = π.locRep v g (T x)) :
+      ∀ x ∈ W, T x ∈ W := by
+    refine iSup_le (a := Submodule.comap T W) (fun S => ?_)
+    rintro _ ⟨x, rfl⟩
+    exact Submodule.mem_iSup_of_mem (⟨T ∘ₗ S.1, fun g y => by
+      rw [LinearMap.comp_apply, S.2, hT]; rfl⟩ : Intertwiners) ⟨x, rfl⟩
+  have loc_mem (g : GL (Fin n) (v.adicCompletion F)) : ∀ x ∈ W, π.locRep v g x ∈ W := by
+    refine iSup_le (a := Submodule.comap (π.locRep v g) W) (fun T => ?_)
+    rintro _ ⟨x, rfl⟩
+    exact Submodule.mem_iSup_of_mem T ⟨σ.ρ g x, T.2 g x⟩
+  have op_mem (o : TR.Op F n) : ∀ x ∈ W, π.op o x ∈ W := by
+    intro x hx
+    cases o with
+    | fin k =>
+      let g := GeneralLinearGroup.map (pLoc F v) k
+      let k' := (locGL F n v g)⁻¹ * k
+      have hk' : GeneralLinearGroup.map (pLoc F v) k' = 1 := GlobalTheory.CuspRep.LocEx.map_pLoc_inv_mul v k
+      have h := loc_mem g _ (commute_mem (π.finPart k') (fun u y => by
+        simp only [TR.CuspSub.locRep, MonoidHom.comp_apply]
+        rw [← mul_apply_eq_comp, ← mul_apply_eq_comp, ← map_mul, ← map_mul,
+          GlobalTheory.CuspRep.LocUniq.comm_locGL v hk']) x hx)
+      change π.finPart k x ∈ W
+      rwa [TR.CuspSub.locRep, MonoidHom.comp_apply, ← mul_apply_eq_comp, ← map_mul,
+        show locGL F n v g * k' = k from mul_inv_cancel_left _ _] at h
+    | cpt k =>
+      exact commute_mem (π.op (.cpt k)) (fun g y => by
+        apply Subtype.ext
+        change (TR.rt F n (TR.infGL F n (Unitary.toUnits k)) * TR.rt F n (finGL F n (locGL F n v g))) y.1 =
+          (TR.rt F n (finGL F n (locGL F n v g)) * TR.rt F n (TR.infGL F n (Unitary.toUnits k))) y.1
+        rw [← map_mul, ← map_mul, TR.infGL_comm]) x hx
+    | lie X =>
+      exact commute_mem (π.op (.lie X)) (fun g y => Subtype.ext
+        (LinearMap.congr_fun (TR.lie_rt_fin X (locGL F n v g)) y.1)) x hx
+  have htop : W = ⊤ := by
+    have hinj := Submodule.map_injective_of_injective π.V.injective_subtype
+    rcases π.irred (W.map π.V.subtype) (Submodule.map_subtype_le _ _) (by
+      rintro o _ ⟨x, hx, rfl⟩
+      exact ⟨_, op_mem o x hx, rfl⟩) with h | h
+    · have hbot : W = ⊥ := hinj (h.trans (Submodule.map_bot _).symm)
+      exact (hf0 (LinearMap.range_eq_bot.1 ((iSup_eq_bot.1 hbot) (⟨f, hf⟩ : Intertwiners)))).elim
+    · exact hinj (h.trans (Submodule.map_subtype_top _).symm)
+  obtain ⟨x, hx⟩ := hB.exists_vec
+  have hxW : x ∈ W := htop ▸ Submodule.mem_top
+  obtain ⟨y, hy0, hy⟩ := GlobalTheory.CuspRep.LocSph.exists_fixed_of_mem_iSup (π.locRep v) σ.ρ σ.irred
+    (fun T : Intertwiners => T.1) (fun T => T.2) (GlobalTheory.LFun.KGL v (n := n) : Set _) x hx.1
+    (fun k hk => GlobalTheory.LGrp.mem_fixed.1 hx.2.1 k hk) hxW
+  refine ⟨(Submodule.ne_bot_iff _).2 ⟨y, GlobalTheory.LGrp.mem_fixed.2 hy, hy0⟩, ?_⟩
+  intro z hz hz0
+  have hker : LinearMap.ker f = ⊥ := ((GlobalTheory.CuspRep.isIrreducible_iff σ.ρ).1 σ.irred).2 _ (fun g u hu => by
+    rw [LinearMap.mem_ker] at hu ⊢
+    rw [hf, hu, map_zero]) |>.resolve_right fun h => hf0 (LinearMap.ker_eq_top.1 h)
+  have hinj := LinearMap.ker_eq_bot.1 hker
+  exact GlobalTheory.LFun.IsSatVecGL.of_map f hf hinj
+    (hB.2 _ (GlobalTheory.LGrp.mem_fixed.2 fun k hk => by rw [← hf, GlobalTheory.LGrp.mem_fixed.1 hz k hk])
+      (fun h => hz0 (hinj (h.trans (map_zero f).symm))))
 
 end UpperTheory.V.Z.Win.Birth

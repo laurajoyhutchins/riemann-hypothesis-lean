@@ -1,10 +1,61 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.FiniteBruhat
-import GroundTheory.AutomorphicForms.Iwasawa
-import GroundTheory.AutomorphicForms.GLnLocal
-import GroundTheory.AutomorphicForms.LocallyProfinite
+module
+
+public import GroundTheory.AutomorphicForms.FiniteBruhat
+public import GroundTheory.AutomorphicForms.Iwasawa
+public import GroundTheory.AutomorphicForms.LocallyProfinite
 import GroundTheory.AutomorphicForms.MeasuresModulus
-import GroundTheory.PowerSubgroups.CountableNeighbourhoods.NormZpow
+public import GroundTheory.PowerSubgroups.CountableNeighbourhoods.NormZpow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -96,15 +147,6 @@ theorem psiN_ne_zero (g : GL (Fin n) F) : psiN ψ₀ g ≠ 0 := by
   rw [h, zero_mul] at this
   exact one_ne_zero this
 
-def psiNHom : Iwasawa.unipotent F n →* ℂ where
-  toFun u := psiN ψ₀ (u : GL (Fin n) F)
-  map_one' := psiN_one ψ₀
-  map_mul' u v := psiN_mul ψ₀ u.2 v.2
-
-@[simp]
-theorem psiNHom_apply (u : Iwasawa.unipotent F n) : psiNHom ψ₀ u = psiN ψ₀ (u : GL (Fin n) F) :=
-  rfl
-
 def sigmaMat (M : Matrix (Fin n) (Fin n) F) : Matrix (Fin n) (Fin n) F :=
   fun i j => M (Fin.rev j) (Fin.rev i)
 
@@ -185,9 +227,6 @@ theorem sigma_inv (g : GL (Fin n) F) : sigma g⁻¹ = (sigma g)⁻¹ := by
   refine eq_inv_of_mul_eq_one_left ?_
   rw [← sigma_mul, mul_inv_cancel, sigma_one]
 
-theorem sigma_involutive : Function.Involutive (sigma : GL (Fin n) F → GL (Fin n) F) :=
-  sigma_sigma
-
 theorem sigma_mem_unipotent {u : GL (Fin n) F} (hu : u ∈ Iwasawa.unipotent F n) :
     sigma u ∈ Iwasawa.unipotent F n := by
   refine ⟨fun i j hij => ?_, fun i => ?_⟩
@@ -195,10 +234,6 @@ theorem sigma_mem_unipotent {u : GL (Fin n) F} (hu : u ∈ Iwasawa.unipotent F n
     exact hu.1 (Fin.rev_lt_rev.2 hij)
   · rw [sigma_apply]
     exact hu.2 (Fin.rev i)
-
-theorem sigma_mem_unipotent_iff {u : GL (Fin n) F} :
-    sigma u ∈ Iwasawa.unipotent F n ↔ u ∈ Iwasawa.unipotent F n :=
-  ⟨fun h => sigma_sigma u ▸ sigma_mem_unipotent h, sigma_mem_unipotent⟩
 
 theorem sigma_mem_borel {b : GL (Fin n) F} (hb : b ∈ borel n F) : sigma b ∈ borel n F := by
   rw [mem_borel_iff] at hb ⊢
@@ -219,9 +254,6 @@ theorem theta_mul (g h : GL (Fin n) F) : theta (g * h) = theta g * theta h := by
 @[simp]
 theorem theta_theta (g : GL (Fin n) F) : theta (theta g) = g := by
   rw [theta, theta, ← sigma_inv g, sigma_sigma, inv_inv]
-
-theorem sigma_theta (g : GL (Fin n) F) : sigma (theta g) = g⁻¹ := by
-  rw [theta, ← sigma_inv g, sigma_sigma]
 
 theorem sigma_mul_mul_inv (a g b : GL (Fin n) F) :
     sigma (a * g * b⁻¹) = theta b * sigma g * (theta a)⁻¹ := by
@@ -281,17 +313,6 @@ theorem sigma_mem_doubleCoset_permGL {g : GL (Fin n) F} {w : Equiv.Perm (Fin n)}
   refine mem_doubleCoset.2 ⟨sigma b₂, sigma_mem_borel hb₂, sigma b₁, sigma_mem_borel hb₁, ?_⟩
   rw [sigma_mul, sigma_mul, sigma_permGL, ← mul_assoc]
 
-theorem sigma_diagGL (t : Fin n → Fˣ) :
-    sigma (Iwasawa.diagGL F n t) = Iwasawa.diagGL F n (t ∘ Fin.rev) := by
-  refine Units.ext ?_
-  ext i j
-  simp only [sigma_apply, Iwasawa.coe_diagGL, Matrix.diagonal_apply, Fin.rev_inj,
-    Function.comp_apply]
-  by_cases h : i = j
-  · subst h
-    simp
-  · rw [if_neg (Ne.symm h), if_neg h]
-
 theorem sigma_diag_mul_permGL_eq (t : Fin n → Fˣ) (w : Equiv.Perm (Fin n))
     (hw : ∀ b, w (Fin.rev (w b)) = Fin.rev b) (ht : ∀ b, t (w b) = t (Fin.rev b)) :
     sigma (Iwasawa.diagGL F n t * permGL F w) = Iwasawa.diagGL F n t * permGL F w := by
@@ -324,10 +345,10 @@ def rootElt (i j : Fin n) (a : F) : GL (Fin n) F :=
 
 theorem coe_rootElt {i j : Fin n} (h : i ≠ j) (a : F) :
     ((rootElt i j a : GL (Fin n) F) : Matrix (Fin n) (Fin n) F) = 1 + Matrix.single i j a := by
-  rw [rootElt, dif_neg h]
+  rw [rootElt, dite_eq_right h]
 
 theorem rootElt_self (i : Fin n) (a : F) : rootElt i i a = 1 := by
-  rw [rootElt, dif_pos rfl]
+  rw [rootElt, dite_eq_left rfl]
 
 theorem rootElt_apply {i j : Fin n} (h : i ≠ j) (a : F) (r c : Fin n) :
     ((rootElt i j a : GL (Fin n) F) : Matrix (Fin n) (Fin n) F) r c =
@@ -349,17 +370,8 @@ theorem rootElt_add (i j : Fin n) (a b : F) :
       mul_one, single_mul_single_self_of_ne h, add_zero, Matrix.single_add]
     abel
 
-def rootEltHom (i j : Fin n) : Multiplicative F →* GL (Fin n) F where
-  toFun a := rootElt i j a.toAdd
-  map_one' := rootElt_zero i j
-  map_mul' a b := rootElt_add i j a.toAdd b.toAdd
-
 theorem rootElt_neg (i j : Fin n) (a : F) : rootElt i j (-a) = (rootElt i j a)⁻¹ :=
   eq_inv_of_mul_eq_one_left (by rw [← rootElt_add, neg_add_cancel, rootElt_zero])
-
-@[simp]
-theorem rootEltHom_apply (i j : Fin n) (a : Multiplicative F) :
-    rootEltHom i j a = rootElt i j a.toAdd := rfl
 
 theorem rootElt_mem_unipotent {i j : Fin n} (h : i < j) (a : F) :
     rootElt i j a ∈ Iwasawa.unipotent F n := by
@@ -474,9 +486,6 @@ def sigmaHomeo : GL (Fin n) F ≃ₜ GL (Fin n) F where
   right_inv := sigma_sigma
   continuous_toFun := continuous_sigma
   continuous_invFun := continuous_sigma
-
-@[simp]
-theorem sigmaHomeo_apply (g : GL (Fin n) F) : sigmaHomeo g = sigma g := rfl
 
 variable [IsTopologicalRing F]
 

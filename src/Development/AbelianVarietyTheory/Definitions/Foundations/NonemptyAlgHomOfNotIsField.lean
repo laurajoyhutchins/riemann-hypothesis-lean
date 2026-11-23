@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemStabLocStdLatticeIffHtFinEqOne
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NotIsFieldAdicCompletionTensorOfSplit
-import ReciprocityTheory.Automorphisms.SplitCoeAlgebraMap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemStabLocStdLatticeIffHtFinEqOne
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NotIsFieldAdicCompletionTensorOfSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.Automorphisms.PlaceA
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +60,8 @@ open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.Genus
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
   {σ : E →ₐ[F] E} {v : HeightOneSpectrum (𝓞 F)}
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 def splitProj (τ : E →ₐ[F] Fv F v) : Fv F v ⊗[F] E →ₐ[Fv F v] Fv F v :=
   Algebra.TensorProduct.lift (AlgHom.id _ _) τ fun _ _ => Commute.all _ _
 
@@ -25,13 +71,13 @@ omit [NumberField E] in
 omit [NumberField E] in
 theorem splitProj_inclR (τ : E →ₐ[F] Fv F v) (x : E) : splitProj τ (inclR (Fv F v) x) = τ x := one_mul _
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem splitProj_comp (τ : E →ₐ[F] Fv F v) (σ : E →ₐ[F] E) (y : Fv F v ⊗[F] E) :
     splitProj (τ.comp σ) y = splitProj τ (sigR _ σ y) := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e => rfl
 
 theorem continuous_splitProj (τ : E →ₐ[F] Fv F v) : Continuous (splitProj τ) :=
@@ -141,7 +187,7 @@ theorem finEmb_ofId_comp (τ : E →ₐ[F] Fv F v) (y : Fv F v ⊗[F] E) :
       algebraMap (Fv F v) (FvBar F v) (splitProj τ y) := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e => simp
 
 theorem nnnorm_le_one_iff_mem {a : Fv F v} : ‖a‖₊ ≤ 1 ↔ a ∈ v.adicCompletionIntegers F :=
@@ -170,8 +216,6 @@ theorem apply_coe_mem (τ : E →ₐ[F] Fv F v) (x : 𝓞 E) : τ x ∈ v.adicCo
 
 def splitInt (τ : E →ₐ[F] Fv F v) : 𝓞 E →+* v.adicCompletionIntegers F :=
   ((τ : E →+* Fv F v).comp (algebraMap (𝓞 E) E)).codRestrict _ (apply_coe_mem τ)
-
-@[simp] theorem coe_splitInt (τ : E →ₐ[F] Fv F v) (x : 𝓞 E) : (splitInt τ x : Fv F v) = τ x := rfl
 
 theorem mem_maximalIdeal_iff_valued {a : v.adicCompletionIntegers F} :
     a ∈ IsLocalRing.maximalIdeal (v.adicCompletionIntegers F) ↔ Valued.v (a : Fv F v) < 1 :=
@@ -283,7 +327,7 @@ theorem splitPrime_comp_ne (h : IsCMExt F E σ) (τ : E →ₐ[F] Fv F v) : spli
       rw [splitProj_tmul, splitProj_tmul, ← mul_sub, map_mul, ← sub_sub_sub_cancel_right _ _
         (algebraMap (𝓞 F) (Fv F v) c)]
       exact lt_of_le_of_lt (mul_le_of_le_one_left' ha) (Valuation.map_sub_lt _ hc h1)
-    · rw [map_add, map_add, add_sub_add_comm]; exact Valuation.map_add_lt _ hy hz
+    · rw [map_add (f := _), map_add (f := _), add_sub_add_comm]; exact Valuation.map_add_lt _ hy hz
     · rwa [map_neg, map_neg, neg_sub_neg, Valuation.map_sub_swap]
   simpa using key _ (splitIdem_mem h τ)
 

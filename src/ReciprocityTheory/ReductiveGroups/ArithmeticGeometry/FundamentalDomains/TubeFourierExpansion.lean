@@ -1,4 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.TubeSummability
+module
+
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.GROWCountStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FourBasic
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FourIndep
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FourSum
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.TubeSummability
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD.TubeFourierExpansion
 
@@ -83,7 +137,7 @@ theorem tube_expansion (Ω : Set (Fin n → ℝ)) (h : (Fin n → ℂ) → ℂ) 
     fun b hb k => four_indep n Ω h hΩ hpre hd hp 0 h0 b hb k
   have htube : ∀ x b : Fin n → ℝ, b ∈ Ω → (fun j => (x j : ℂ) + (b j : ℂ) * I) ∈ tube n Ω := by
     intro x b hb
-    simp only [tube, Set.mem_setOf_eq]
+    simp only [tube, Set.mem_ofPred_eq]
     simpa using hb
 
   have hslice : ∀ b ∈ Ω, ∃ C, ∀ x : Fin n → ℝ, ‖h (fun j => (x j : ℂ) + (b j : ℂ) * I)‖ ≤ C := by
@@ -219,10 +273,10 @@ theorem tube_expansion (Ω : Set (Fin n → ℝ)) (h : (Fin n → ℂ) → ℂ) 
   have hmaps : ∀ t ∈ tube n ((fun b => b + y0) ⁻¹' Ω),
       t + (fun j => (y0 j : ℂ) * I) ∈ tube n Ω := by
     intro t ht
-    simp only [tube, Set.mem_setOf_eq, Set.mem_preimage] at ht ⊢
+    simp only [tube, Set.mem_ofPred_eq, Set.mem_preimage] at ht ⊢
     convert ht using 1
     funext j
-    simp
+    simp only [Pi.add_apply, Complex.add_im, Complex.mul_I_im, Complex.ofReal_re]
   have hdg : DifferentiableOn ℂ (fun t => h (t + fun j => (y0 j : ℂ) * I))
       (tube n ((fun b => b + y0) ⁻¹' Ω)) :=
     hd.comp (differentiable_id.add_const _).differentiableOn (fun t ht => hmaps t ht)
@@ -241,7 +295,7 @@ theorem tube_expansion (Ω : Set (Fin n → ℝ)) (h : (Fin n → ℂ) → ℂ) 
       mul_comm]
   have hs := four_sum n ((fun b => b + y0) ⁻¹' Ω) (fun t => h (t + fun j => (y0 j : ℂ) * I))
     hΩ'o hdg hpg h0' hsummg x0
-  convert hs using 1
+  convert (preTransparency := .reducible) hs using 1
   · funext k
     rw [hcoefg k, hsumu k, hexpu]
     have e : ((2 * Real.pi * (∑ j, (k j : ℝ) * x0 j) : ℝ) : ℂ) * I =

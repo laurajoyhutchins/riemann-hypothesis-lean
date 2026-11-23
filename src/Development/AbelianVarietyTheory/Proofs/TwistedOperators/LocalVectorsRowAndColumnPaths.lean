@@ -1,11 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsWeilDatumAnisotropicKernelPair
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RangeSndRel
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspAlongSmoothRows
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CuspidalFlipOnVolumesStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CuspidalListedTopForms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsWeilDatumAnisotropicKernelPair
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RangeSndRel
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
 import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.UnifModGrowthOfIsUnifModerate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,9 +80,11 @@ theorem getD_zip {S S' S'' : Arrow T → Type} (φ : ∀ a, S a → S' a → S''
     split_ifs with hj
     · rw [hs]
       exact getD_zip φ t i n _ _ j hj
-    · obtain rfl : n = j := by omega
-      rw [hs]
-      rfl
+    · have hnj : n = j := by omega
+      subst j
+      change (splitFam (downPath t i n) (Path.Fam.zip φ d e)).1.2 =
+        φ _ (splitFam (downPath t i n) d).1.2 (splitFam (downPath t i n) e).1.2
+      exact congrArg (fun de => de.1.2) hs
 
 variable {D : D7} {L : LevCh D T} {sc : Consts} {G : GridData L sc}
 
@@ -114,8 +151,10 @@ theorem chain_props (hP : GlobalTheory.Published.CuspRapidDecay) (G : GridData L
     exact step_cusp G Wl t hM j (by omega) (besDecAt G j 0 hj) (rowJac G (j + 1) (by omega) 0 (by omega)) _ _ (hst j (by omega) _
       (last_cusp G Wl t M j _ (hst (j + 1) (by omega)) D.R.m (by omega) F hF))
   | σ + 1, j, hj, vN => by
-    obtain ⟨h1, h2⟩ := chain_props hP G Wl hθ t hM d F hF hst σ (j + 1 + 1) (by omega)
-      (GlobalTheory.Unf.Inhab.nonempty_volN _).some
+    have hj' : (j + 1 + 1) + 2 * σ + 2 = D.R.m := by omega
+    have hrec := chain_props hP G Wl hθ t hM d F hF hst σ (j + 1 + 1) hj'
+      (GlobalTheory.Unf.Inhab.nonempty_volN (besDecAt G (j + 1 + 1) σ hj')).some
+    rcases hrec with ⟨h1, h2⟩
     have h3 := step_cusp G Wl t hM (j + 1) (by omega)
       (rowJac G (j + 1) (by omega) (σ + 1) (by omega)) (besDecAt G (j + 1 + 1) σ (by omega))
       (getD t D.R.m D.R.m d (j + 1) (by omega)) _ (hst (j + 1) (by omega) _ h1)

@@ -1,20 +1,64 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.OrbitPlaces
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementJ
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
-import Formalism.LocalToGlobal.KernelLattices.KerStd
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaZJetsThree
-import Formalism.LocalToGlobal.InertKernelTheory.StatementIota
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ColR
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InertiaInvolutionRealPlacePairsStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntegralEigenCombination
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PadicNormLeOneHostBaseModuleAtDStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LocalBasisUnitScalarsExistStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualFrameHermitianFormTraceRealPlacesStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualFrameColumnsScaledStandardVectorsStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualLocalBasesPairDualModRootMinusDStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PairEmbeddingsCongrModRootMinusDStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualFramePairedBlocksDiagonalModRootStatement
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementJ
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
+public import Formalism.LocalToGlobal.KernelLattices.KerStd
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementIota
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ColR
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualFrameColumnsScaledStandardVectorsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualFrameHermitianFormTraceRealPlacesStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualFramePairedBlocksDiagonalModRootStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualLocalBasesPairDualModRootMinusDStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InertiaInvolutionRealPlacePairsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntegralEigenCombination
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LocalBasisUnitScalarsExistStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PadicNormLeOneHostBaseModuleAtDStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PairEmbeddingsCongrModRootMinusDStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Ker Formalism.L2.Col Classical
 open Formalism.L2.Th1.H (cmL CmOK matH IsIsom taylorMv)
 open Formalism.L2.Th1.GD (LocNorm InMul frameM thetaLin)
@@ -35,7 +79,7 @@ theorem tauEmb_eq_iota : ∀ (D : D7) (p : ℕ) [Fact p.Prime] (lm : TaylorLogMe
   have halg : TaylorLogMetric.embT D τ y ∈ TaylorLogMetric.Qbar :=
     mem_algebraicClosure_iff.2 ((Algebra.IsAlgebraic.isAlgebraic (R := ℚ) y).algHom (TaylorLogMetric.embT D τ).toRatAlgHom)
   unfold TaylorLogMetric.tauEmb TaylorLogMetric.lamC
-  rw [dif_pos halg, ← hι]
+  rw [dite_eq_left halg, ← hι]
 
 theorem outer_mem_YYl : ∀ (D : D7) (N N' : ℕ) (L₁ : Submodule (𝓞 D.host.E) (Fin N → D.host.E)) (L₁' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E)) (a : D.host.E) (u : Fin N' → D.host.E) (w : Fin N → D.host.E), a ∈ D.host.AA0 → u ∈ L₁' → (∀ x ∈ L₁, ∃ o : 𝓞 D.host.E, (o : D.host.E) = ∑ j, w j * x j) → (Matrix.of fun i k => a * u i * w k : Matrix (Fin N') (Fin N) D.host.E) ∈ TaylorLogMetric.YYl D L₁ L₁' := by
   intro D N N' L₁ L₁' a u w ha hu hw

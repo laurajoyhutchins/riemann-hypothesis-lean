@@ -1,4 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDiagExists
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -209,9 +260,9 @@ theorem ell_conj (z : Fin (2 * r + k + 1) → ℂ)
   have hrow : ∀ p, h (eI k r a) p = if eI k r a = p then 1 else 0 :=
     fun p => hh.2 _ p (by simp only [eI]; omega)
   by_cases ha : a.val + 1 < r
-  · rw [dif_pos ha, dif_pos ha, mul_apply_of_col _ _ _ (fun q => hh'.1 q _ (by simp only [eI]; omega)),
+  · rw [dite_eq_left ha, dite_eq_left ha, mul_apply_of_col _ _ _ (fun q => hh'.1 q _ (by simp only [eI]; omega)),
       mul_apply_of_row _ _ _ hrow]
-  · rw [dif_neg ha, dif_neg ha, ← Matrix.mulVec_mulVec, hz, ← Matrix.mulVec_mulVec,
+  · rw [dite_eq_right ha, dite_eq_right ha, ← Matrix.mulVec_mulVec, hz, ← Matrix.mulVec_mulVec,
       mulVec_apply_of_row _ _ hrow]
 
 abbrev mid (k r : ℕ) (i : Fin (2 * r + k + 1)) : Prop := r ≤ i.val ∧ i.val ≤ r + k
@@ -236,7 +287,7 @@ lemma wI_inj {a b : Fin (k + 1)} (h : wI k r a = wI k r b) : a = b := by
 lemma emb_out_col (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * r + k + 1)) (hj : ¬ mid k r j) :
     embWb k r μ q j = if q = j then 1 else 0 := by
   unfold embWb
-  rw [dif_neg (fun h => hj h.2)]
+  rw [dite_eq_right (fun h => hj h.2)]
   by_cases h : q = j
   · subst h; rw [if_pos ⟨rfl, hj⟩, if_pos rfl]
   · rw [if_neg (fun h' => h h'.1), if_neg h]
@@ -244,7 +295,7 @@ lemma emb_out_col (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * 
 lemma emb_out_row (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * r + k + 1)) (hq : ¬ mid k r q) :
     embWb k r μ q j = if q = j then 1 else 0 := by
   unfold embWb
-  rw [dif_neg (fun h => hq h.1)]
+  rw [dite_eq_right (fun h => hq h.1)]
   by_cases h : q = j
   · rw [if_pos ⟨h, hq⟩, if_pos h]
   · rw [if_neg (fun h' => h h'.1), if_neg h]
@@ -252,22 +303,14 @@ lemma emb_out_row (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * 
 lemma emb_mid (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * r + k + 1)) (hq : mid k r q) (hj : mid k r j) :
     embWb k r μ q j = μ (midx hq) (midx hj) := by
   unfold embWb
-  rw [dif_pos ⟨hq, hj⟩]
+  rw [dite_eq_left ⟨hq, hj⟩]
   rfl
 
 def Em (k r : ℕ) : Matrix (Fin (2 * r + k + 1)) (Fin (k + 1)) ℂ := fun i m => if i = wI k r m then 1 else 0
 
 lemma Em_mul_mid {X : Type*} (A : Matrix (Fin (k + 1)) X ℂ) (i : Fin (2 * r + k + 1)) (x : X) (hi : mid k r i) :
     (Em k r * A) i x = A (midx hi) x := by
-  rw [Matrix.mul_apply, Finset.sum_eq_single (midx hi)]
-  · rw [Em, if_pos (wI_midx hi).symm, one_mul]
-  · intro b _ hb
-    rw [Em, if_neg, zero_mul]
-    intro h
-    apply hb
-    apply wI_inj (r := r)
-    rw [wI_midx hi, h]
-  · intro h; exact absurd (Finset.mem_univ _) h
+  apply Formalism.FourierDecayAlt.P.B2x3.Em_mul_mid <;> assumption
 
 lemma Em_mul_out {X : Type*} (A : Matrix (Fin (k + 1)) X ℂ) (i : Fin (2 * r + k + 1)) (x : X) (hi : ¬ mid k r i) :
     (Em k r * A) i x = 0 := by
@@ -280,15 +323,7 @@ lemma Em_mul_out {X : Type*} (A : Matrix (Fin (k + 1)) X ℂ) (i : Fin (2 * r + 
 
 lemma mul_EmT_mid {X : Type*} [Fintype X] (A : Matrix X (Fin (k + 1)) ℂ) (j : Fin (2 * r + k + 1)) (x : X) (hj : mid k r j) :
     (A * (Em k r)ᵀ) x j = A x (midx hj) := by
-  rw [Matrix.mul_apply, Finset.sum_eq_single (midx hj)]
-  · rw [Matrix.transpose_apply, Em, if_pos (wI_midx hj).symm, mul_one]
-  · intro b _ hb
-    rw [Matrix.transpose_apply, Em, if_neg, mul_zero]
-    intro h
-    apply hb
-    apply wI_inj (r := r)
-    rw [wI_midx hj, h]
-  · intro h; exact absurd (Finset.mem_univ _) h
+  apply Formalism.FourierDecayAlt.P.B2x3.mul_EmT_mid <;> assumption
 
 lemma mul_EmT_out {X : Type*} [Fintype X] (A : Matrix X (Fin (k + 1)) ℂ) (j : Fin (2 * r + k + 1)) (x : X) (hj : ¬ mid k r j) :
     (A * (Em k r)ᵀ) x j = 0 := by
@@ -300,32 +335,11 @@ lemma mul_EmT_out {X : Type*} [Fintype X] (A : Matrix X (Fin (k + 1)) ℂ) (j : 
   exact hj (h ▸ mid_wI b)
 
 lemma EmT_Em : (Em k r)ᵀ * Em k r = 1 := by
-  ext a b
-  rw [Matrix.mul_apply, Finset.sum_eq_single (wI k r a)]
-  · simp only [Matrix.transpose_apply, Em, if_true, Matrix.one_apply]
-    by_cases hab : a = b
-    · subst hab; simp
-    · rw [if_neg (fun h => hab (wI_inj h)), if_neg hab, mul_zero]
-  · intro i _ hi
-    simp only [Matrix.transpose_apply, Em]
-    rw [if_neg hi (c := i = wI k r a), zero_mul]
-  · intro h; exact absurd (Finset.mem_univ _) h
+  apply Formalism.FourierDecayAlt.P.B2x3.EmT_Em <;> assumption
 
 lemma emb_eq (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) :
     embWb k r μ = Em k r * μ * (Em k r)ᵀ + (1 - Em k r * (Em k r)ᵀ) := by
-  ext i j
-  rw [Matrix.add_apply, Matrix.sub_apply, Matrix.one_apply]
-  by_cases hj : mid k r j
-  · rw [mul_EmT_mid _ j i hj, mul_EmT_mid _ j i hj]
-    by_cases hi : mid k r i
-    · rw [Em_mul_mid _ i _ hi, emb_mid μ i j hi hj]
-      have : Em k r i (midx hj) = if i = j then 1 else 0 := by rw [Em, wI_midx hj]
-      rw [this, sub_self, add_zero]
-    · rw [Em_mul_out _ i _ hi, emb_out_row μ i j hi]
-      have : Em k r i (midx hj) = if i = j then 1 else 0 := by rw [Em, wI_midx hj]
-      rw [this, sub_self, add_zero, if_neg (fun h => hi (by rw [h]; exact hj))]
-  · rw [mul_EmT_out _ j i hj, mul_EmT_out _ j i hj, emb_out_col μ i j hj]
-    ring
+  apply Formalism.FourierDecayAlt.P.B2x3.emb_eq <;> assumption
 
 lemma EmT_Q : (Em k r)ᵀ * (1 - Em k r * (Em k r)ᵀ) = 0 := by
   rw [Matrix.mul_sub, Matrix.mul_one, ← Matrix.mul_assoc, EmT_Em, Matrix.one_mul, sub_self]
@@ -337,22 +351,7 @@ lemma sandwich (a b N : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (M : Mat k r)
     (h1 : M * Em k r = Em k r * N) (h2 : (Em k r)ᵀ * M = N * (Em k r)ᵀ) :
     embWb k r a * M * embWb k r b =
       Em k r * (a * N * b) * (Em k r)ᵀ + (1 - Em k r * (Em k r)ᵀ) * M * (1 - Em k r * (Em k r)ᵀ) := by
-  rw [emb_eq, emb_eq]
-  set E := Em k r with hE
-  set Q := 1 - E * Eᵀ with hQ
-  have t1 : E * a * Eᵀ * M * (E * b * Eᵀ) = E * (a * N * b) * Eᵀ := by
-    calc E * a * Eᵀ * M * (E * b * Eᵀ) = E * a * (Eᵀ * M) * E * b * Eᵀ := by simp only [Matrix.mul_assoc]
-      _ = E * a * N * (Eᵀ * E) * b * Eᵀ := by rw [h2]; simp only [Matrix.mul_assoc]
-      _ = E * (a * N * b) * Eᵀ := by rw [EmT_Em]; simp only [Matrix.mul_assoc, Matrix.one_mul]
-  have t2 : E * a * Eᵀ * M * Q = 0 := by
-    calc E * a * Eᵀ * M * Q = E * a * (Eᵀ * M) * Q := by simp only [Matrix.mul_assoc]
-      _ = E * a * N * (Eᵀ * Q) := by rw [h2]; simp only [Matrix.mul_assoc]
-      _ = 0 := by rw [EmT_Q, Matrix.mul_zero]
-  have t3 : Q * M * (E * b * Eᵀ) = 0 := by
-    calc Q * M * (E * b * Eᵀ) = Q * (M * E) * b * Eᵀ := by simp only [Matrix.mul_assoc]
-      _ = (Q * E) * N * b * Eᵀ := by rw [h1]; simp only [Matrix.mul_assoc]
-      _ = 0 := by rw [Q_Em]; simp only [Matrix.zero_mul]
-  rw [Matrix.add_mul, Matrix.add_mul, Matrix.mul_add, Matrix.mul_add, t1, t2, t3, add_zero, zero_add]
+  apply Formalism.FourierDecayAlt.P.B2x3.sandwich <;> assumption
 
 lemma emb_one : embWb k r 1 = 1 := by
   rw [emb_eq, Matrix.mul_one, add_sub_cancel]

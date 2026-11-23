@@ -1,22 +1,79 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitHermOfDet
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordForm
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanHaarScalingNorm
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsAdelicHaarCovolumeOne
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.SelfDualMap
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualProdIff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HCoContinuousAddEquivStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianCoordinatesNaturalInRingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianPairingInCoordinatesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinateFormSymmetricNondegenerateStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianCoordinatesMeasurePreservingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CovolumeOneInvariantUnderMatrixStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TestFunctionContinuousCompactSupportAltBis
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixPreservesIntegersAlmostAllStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FourierInversionInvariantMatrixStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ApproximateIdentityProductBumpsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductNeighbourhoodsShrinkCompactOpenStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitHermOfDet
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordForm
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CoefS
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnipotentInvariantCompactlySupportedWeight
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.SelfDualMap
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualProdIff
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ApproximateIdentityProductBumpsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinateFormSymmetricNondegenerateStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CovolumeOneInvariantUnderMatrixStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FourierInversionInvariantMatrixStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HCoContinuousAddEquivStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianCoordinatesMeasurePreservingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianCoordinatesNaturalInRingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianPairingInCoordinatesStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatrixPreservesIntegersAlmostAllStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductNeighbourhoodsShrinkCompactOpenStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TestFunctionContinuousCompactSupportAltBis
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanHaarScalingNorm
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsAdelicHaarCovolumeOne
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import GroundTheory.HeightsAndTheta.Theta.AdelicFourier
+import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.IsSchwartzBruhatOfProd
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.Published.SiegelOneVector GlobalTheory.CompanionTheory.SiegelND GlobalTheory.CompanionTheory.SiegelND.Coef GlobalTheory.CompanionTheory.SiegelND.Coef.TestN
 open scoped TensorProduct ENNReal
 
@@ -50,6 +107,7 @@ theorem eval_mulVec {F : Type} [Field F] [NumberField F] {ι : Type} [Fintype ι
       (B.map (algebraMap F (Fv F v))).mulVec (fun j => (sndA F (y j)) v) i := by
   let φ : AF F →ₐ[F] Fv F v := (evalV F v).comp (sndA F)
   change φ _ = _
+
   simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Matrix.map_apply, AlgHom.commutes]
   rfl
 
@@ -140,7 +198,7 @@ theorem core (F : Type) [Field F] [NumberField F] (hF : IsTotallyReal F) (ψ : A
     exact (hT k).2.1
   · rw [hintP, hint k]
   · rw [hfou, hintP, norm_pow, norm_prod, ← Finset.card_univ, ← Finset.prod_const]
-    exact Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun i _ => hb k _
+    exact Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun i _ => hb k _
   · have e : ∀ k, fouP ψ Bm P (powT (testT (ρ k) S (U k))) y / ∫ x, powT (testT (ρ k) S (U k)) x ∂P =
         ∏ i, fouA ψ ν (testT (ρ k) S (U k)) (Bm.mulVec y i) / ∫ w, testT (ρ k) S (U k) w ∂ν := fun k => by
       rw [hfou, hintP, ← Finset.card_univ, ← Finset.prod_const, Finset.prod_div_distrib]

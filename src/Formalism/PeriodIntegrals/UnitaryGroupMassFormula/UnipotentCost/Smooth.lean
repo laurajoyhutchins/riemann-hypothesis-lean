@@ -1,6 +1,56 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentCost.LetterSize
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentCost.LetterSize
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Filter Topology
 open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.U Formalism.REAL
@@ -108,7 +158,7 @@ lemma sm_of {s : ℕ} (Z : G.Mat s) : ContDiffAt ℝ n (fun Z' : G.Mat s => Matr
   rw [sm_iff]
   intro i j
   simp only [Matrix.of_apply]
-  exact (contDiff_apply_apply ℝ ℂ i j).contDiffAt
+  exact (contDiff_apply_apply ℝ i j).contDiffAt
 
 lemma mMap_sm {k j ρ : ℕ} {M : X → Matrix (Fin j) (Fin j) ℂ} (hM : ContDiffAt ℝ n M x₀)
     (hdet : (M x₀).det ≠ 0) (γ : B.Mat k ρ) : ContDiffAt ℝ n (fun x => mMap k j ρ (M x) γ) x₀ := by
@@ -124,11 +174,6 @@ variable {k p s ρ : ℕ} {σ : Equiv.Perm (Fin p)} {d : Fin p → ℂ}
 lemma permutationMatrix_eq_permMatrix' (σ : Equiv.Perm (Fin p)) : wP σ = σ.permMatrix ℂ := by
   ext a b
   simp [wP, Equiv.Perm.permMatrix, PEquiv.toMatrix_apply]
-
-lemma det_hMat_ne (hd : ∀ i, d i ≠ 0) : (hMat σ d).det ≠ 0 := by
-  rw [hMat, Matrix.det_mul, permutationMatrix_eq_permMatrix', Matrix.det_permutation, Matrix.det_diagonal]
-  refine mul_ne_zero ?_ (Finset.prod_ne_zero_iff.2 fun i _ => hd i)
-  rcases Int.units_eq_one_or (Equiv.Perm.sign σ) with h | h <;> simp [h]
 
 private lemma det_one_add_strictLower {q : ℕ} (M : Matrix (Fin q) (Fin q) ℂ) (h : ∀ a b, a ≤ b → M a b = 0) :
     (1 + M).det = 1 := by
@@ -164,11 +209,9 @@ lemma rn_mem' (hRP : RadicalParam) (j : ℕ) (x : RC k j ρ) : Rn k j ρ x ∈ B
   exact ((hRP k j ρ).2.2 hr).1
 
 private lemma mul_mem_GV' {k r : ℕ} {a b : B.Mat k r} (ha : a ∈ B.GV k r) (hb : b ∈ B.GV k r) :
-    a * b ∈ B.GV k r := by
-  simp only [B.GV, Formalism.QuantumDeterminants.UH, Set.mem_setOf_eq] at ha hb ⊢
-  calc (a * b)ᴴ * Formalism.QuantumDeterminants.Hpk k r * (a * b) = bᴴ * (aᴴ * Formalism.QuantumDeterminants.Hpk k r * a) * b := by
-        simp only [Matrix.conjTranspose_mul, Matrix.mul_assoc]
-    _ = Formalism.QuantumDeterminants.Hpk k r := by rw [ha, hb]
+    a * b ∈ B.GV k r :=
+  (Formalism.QuantumDeterminants.unitary_group_holds _ _
+    (Matrix.isUnit_det_of_left_inverse (Formalism.QuantumDeterminants.GBasic.Hpk_sq k r))).2.1 a ha b hb
 
 lemma gaXi_mem (hSM : SliceMem) (hRP : RadicalParam) (hd : ∀ i, d i ≠ 0) (ξ : Xi k p s ρ σ) {Z : G.Mat s}
     (γ : B.Mat k ρ) (hZ : G.detM Z ≠ 0) (hγ : γ ∈ B.GV k ρ) : gaXi k ρ σ d ξ Z γ ∈ B.GV k (p + s + ρ) := by

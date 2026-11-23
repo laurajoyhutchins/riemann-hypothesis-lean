@@ -1,5 +1,45 @@
-import Formalism.SharpRestriction.GrowthBounds.ChartRank.NuOfAntiEv
-import Formalism.SharpRestriction.GrowthBounds.ChartRank.HypLiftInv
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ChartRank.HypLift
+public import Formalism.SharpRestriction.GrowthBounds.ChartRank.HypLiftInv
+public import Formalism.SharpRestriction.GrowthBounds.ChartRank.NuOfAntiEv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,21 +60,9 @@ theorem evValLe_of_wt (S : StepIn M i hi G) (β : S.Ch) (hw : WtTie (Hc S β).P 
   exact Formalism.L2.G.EvLe.evC_le (Hc S β).P (S.loc β).rk S.pos (gramC (gramN D i hi) (embT D))
     (atInfGL (embT D) (S.loc β).B⁻¹) (M.lam i) hw Q hQ
 
-theorem evValCAt_le (S : StepIn M i hi G) (β : S.Ch) (hw : WtTie (Hc S β).P (S.loc β).rk S.pos (M.lam i)) :
-    (VtupR (Hc S β).P ℂ).map (evC (Hc S β).P (S.loc β).rk S.pos (gramC (gramN D i hi) (embT D))
-      (fun τ => (atInfGL (embT D) (S.loc β).B⁻¹ τ : Matrix _ _ ℂ))) ≤ ValC (gramC (gramN D i hi) (embT D)) (M.lam i) :=
-  Formalism.L2.G.EvLe.evValC_le (Hc S β).P (S.loc β).rk S.pos _ _ (M.lam i) hw
-
 theorem cmpLiftOf_holds (S : StepIn M i hi G) (e : D.what₂.LL →+* G.Kf) : CmpLiftOf S e := by
   intro hS H X
   exact cmpLiftOf_of_evVal S e (fun β => evValLe_of_wt S β (H β).wt) hS H X
-
-theorem invLeOf_holds (S : StepIn M i hi G) (e : D.what₂.LL →+* G.Kf) : InvLeOf S e :=
-  invLeOf_of_cmp S e (cmpLiftOf_holds S e)
-
-theorem chartRankGe_of_ties [IsFractionRing G.O G.Kf] (S : StepIn M i hi G) (e : D.what₂.LL →+* G.Kf) (H : ∀ β, S.Core e β)
-    (hS : BlockRationalityField) (X : KAat.ChX S) : ChartRankGe S :=
-  chartRankGe_of_cmp S e H hS X (cmpLiftOf_holds S e)
 
 end Rec
 
@@ -42,13 +70,6 @@ section Card
 
 variable {D : D7} {Tw : TwForms D} {u : D.what₂.Word} {μ : D.what₂.Tup} {w : D.what₂.places.Pl}
   {h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)} {Fl : Fills (D.gat u w h)} {Lv : Levels Fl}
-
-theorem cmpJHyp_of_ties (c : LatCmp D) {I : CmpJIn Tw u μ w h Lv} (Gt : GatTies D) (hS : BlockRationalityField)
-    (core : ∀ j hj β, (I.at' j hj).st.Core (c.embW u w h) β) (ok : ∀ j hj, (I.at' j hj).st.okW w)
-    (twUnit : ∀ j hj β, (I.at' j hj).st.TwUnit w β) (valIntN : ∀ j hj, (I.at' j hj).st.ValIntN (c.embW u w h) w)
-    (iwF : ∀ j hj β, (I.at' j hj).st.IwF β) (hfin : ∀ j, j + 1 ≤ D.R.m → (gatJ Lv (j + 1)).FinClasses)
-    (X : ∀ j hj, KAat.ChX (I.at' j hj).st) : CmpJHyp c I :=
-  cmpJHyp_of_evVal c Gt hS core ok twUnit valIntN iwF hfin X fun j hj β => evValLe_of_wt _ β (core j hj β).wt
 
 end Card
 

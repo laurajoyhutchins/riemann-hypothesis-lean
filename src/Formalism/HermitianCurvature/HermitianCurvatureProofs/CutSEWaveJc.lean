@@ -1,4 +1,64 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSEJSliceCut
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSEJSliceCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSE2
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.BFCell
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.DerivativeRulesA1
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FsvMulFsvNeg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HasFDerivAtFsvOther
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermMulVecMulVec
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableOfContinuousOnZero
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SendsToAlgMulAlg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThmPActualCptOfStepForm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped Matrix ComplexConjugate
@@ -134,18 +194,18 @@ variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace �
 
 def SuppLocOp (Θ : D.Op (Mx k r → (Wq →L[ℂ] Wp))) : Prop := SuppLoc (fun f => D.ap Θ f)
 
-theorem suppLocOp_closed : Formalism.FourierDecayAlt.P.JCx2.mnClosed (SuppLocOp (k := k) (r := r) (Wp := Wp) (Wq := Wq)) where
-  zero := fun _ _ _ => rfl
-  one := fun f g hg => image_eq_zero_of_notMem_tsupport hg
-  add := fun a b ha hb f g hg => by
-    show D.ap a f g + D.ap b f g = 0
-    have h1 : D.ap a f g = 0 := ha f g hg
-    have h2 : D.ap b f g = 0 := hb f g hg
-    rw [h1, h2, add_zero]
-  mul := fun a b ha hb f g hg => ha (D.ap b f) g fun hg' => hg (tsupport_sub_of (hb f) hg')
-  cop := fun c f g hg => by
-    show c • f g = 0
-    rw [image_eq_zero_of_notMem_tsupport hg, smul_zero]
+theorem suppLocOp_closed : Formalism.FourierDecayAlt.P.JCx2.mnClosed (SuppLocOp (k := k) (r := r) (Wp := Wp) (Wq := Wq)) :=
+  { zero := fun _ _ _ => rfl
+    one := fun f g hg => image_eq_zero_of_notMem_tsupport hg
+    add := fun a b ha hb f g hg => by
+      show D.ap a f g + D.ap b f g = 0
+      have h1 : D.ap a f g = 0 := ha f g hg
+      have h2 : D.ap b f g = 0 := hb f g hg
+      rw [h1, h2, add_zero]
+    mul := fun a b ha hb f g hg => ha (D.ap b f) g fun hg' => hg (tsupport_sub_of (hb f) hg')
+    cop := fun c f g hg => by
+      show c • f g = 0
+      rw [image_eq_zero_of_notMem_tsupport hg, smul_zero] }
 
 theorem suppLocOp_rma (z z' : Fin (2 * r + k + 1) → ℂ) (s Y : ℂ) (a b : Fin 2) :
     SuppLocOp (Formalism.FourierDecayAlt.P.JCx2.rma_Qop (Wp := Wp) (Wq := Wq) k r z z' s Y a b) := fun f g hg => by
@@ -170,7 +230,7 @@ theorem waveJc_wave (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : M
     refine Submodule.subset_span ⟨mul_lc hW x hlc, s + s', ε, G, hε, hN, hG, fun y hy => ?_⟩
     rw [hW x y.1 y.2, hv y hy, smul_smul, fsv_add]
   | zero => rw [map_zero]; exact (waveJc P z z' π π' D l).zero_mem
-  | add x y _ _ hx hy => rw [map_add]; exact (waveJc P z z' π π' D l).add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact (waveJc P z z' π π' D l).add_mem hx hy
   | smul a x _ hx => rw [map_smul]; exact (waveJc P z z' π π' D l).smul_mem a hx
 
 theorem isWaveJc_jf (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : Mx P.k P.r → (Wp →L[ℂ] Wp))
@@ -345,7 +405,7 @@ theorem rr_waveJc (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : Mx 
     rw [hΨΦ, e]
     exact waveJc_wave P z z' π π' D l hWv _ hM
   | zero => rw [map_zero]; exact (waveJc P z z' π π' D l).zero_mem
-  | add x y _ _ hx hy => rw [map_add]; exact (waveJc P z z' π π' D l).add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact (waveJc P z z' π π' D l).add_mem hx hy
   | smul c x _ hx => rw [map_smul]; exact (waveJc P z z' π π' D l).smul_mem c hx
 
 theorem base0_le_waveJc (P : M.Par) (z z' : Fin (2 * P.r + P.k + 1) → ℂ) (π : Mx P.k P.r → (Wp →L[ℂ] Wp))

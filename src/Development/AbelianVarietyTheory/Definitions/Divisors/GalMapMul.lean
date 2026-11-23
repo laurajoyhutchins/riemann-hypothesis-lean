@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsStrictlySemistableAlt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsMatrixForm
+public import Mathlib.Algebra.Homology.HomotopyCategory.HomComplexCohomology
+public import Mathlib.AlgebraicTopology.AlternatingFaceMapComplex
+public import Mathlib.AlgebraicTopology.CechNerve
+public import Mathlib.AlgebraicTopology.SimplicialSet.Nerve
+public import Mathlib.CategoryTheory.Abelian.Injective.Extend
+public import Mathlib.CategoryTheory.Abelian.Injective.Resolution
+public import Mathlib.CategoryTheory.SingleObj
+public import Mathlib.RingTheory.Henselian
+import Mathlib.Algebra.Category.ModuleCat.AB
+import Mathlib.Algebra.Category.ModuleCat.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Abelian.GrothendieckAxioms.Sheaf
+import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex
@@ -192,16 +249,16 @@ def freeGen (P : PSh) (U : Scheme.{0}) (x : P.obj (op U)) : Sec ((free R).obj P)
 def chainsXIso (E : Spc) (p : ℕ) : ((chains R).obj E).X (-(p : ℤ)) ≅ (free R).obj (E.obj (op (SimplexCategory.mk p))) :=
   ((chainsN R).obj E).extendXIso ComplexShape.embeddingDownNat (i := p) rfl
 
-variable {R} in
 
+variable {R} in
 def ev {E : Spc} {I : Cx R} {n : ℤ} (α : Cochain ((chains R).obj E) I n) (p : ℕ) (s : ℤ) (h : -(p : ℤ) + n = s) (U : Scheme.{0})
     (x : Sx E p U) : Sec (I.X s) U :=
   ((((chainsXIso R E p).inv ≫ α.v _ _ h).hom.app (op U))).hom (freeGen R _ U x)
 
 def ofRings (M : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1} R)) : Shv R := (presheafToSheaf _ _).obj (Scheme.Γ ⋙ M)
 
-variable {R} in
 
+variable {R} in
 def ofRings.sec (M : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1} R)) (U : Scheme.{0}) (x : M.obj Γ(U, ⊤)) : Sec (ofRings R M) U :=
   ((toSheafify Scheme.etaleTopology (Scheme.Γ ⋙ M)).app (op U)).hom x
 
@@ -221,10 +278,8 @@ def unitsF : CommRingCat.{0} ⥤ ModuleCat.{1} (ULift.{1} ℤ) where
 
 def Gm : Shv ℤ := ofRings ℤ unitsF
 
-def muSheaf (n : ℕ) [NeZero n] (i : ℕ) : Shv (ZMod n) := (presheafToSheaf _ _).obj (GlobalTheory.Et.muPre n i)
 
 variable {R} in
-
 def restr {S : Type} [CommRing S] (φ : R →+* S) : Shv S ⥤ Shv R :=
   sheafCompose _ (ModuleCat.restrictScalars.{1}
     ((ULift.ringEquiv.symm : S ≃+* ULift.{1} S).toRingHom.comp (φ.comp (ULift.ringEquiv : ULift.{1} R ≃+* R).toRingHom)))
@@ -292,17 +347,6 @@ theorem _root_.GlobalTheory.EtC.galMap_mul (σ τ : Ω ≃ₐ[k] Ω) :
       _root_.GlobalTheory.Et.galMap_snd_assoc]
     rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
     rfl
-
-def gal (F : Shv R) (n : ℤ) : Representation R (Ω ≃ₐ[k] Ω) (H R (sch.obj (geom Ω p)) F n) where
-  toFun σ := pullL R (sch.map (galMap Ω p σ)) F n
-  map_one' := by
-    ext x
-    change pull R (sch.map (galMap Ω p 1)) F n x = x
-    rw [galMap_one, CategoryTheory.Functor.map_id, pull_id]
-  map_mul' σ τ := by
-    ext x
-    change pull R (sch.map (galMap Ω p (σ * τ))) F n x = pull R _ F n (pull R _ F n x)
-    rw [galMap_mul, Functor.map_comp, pull_comp]
 
 end Galois
 

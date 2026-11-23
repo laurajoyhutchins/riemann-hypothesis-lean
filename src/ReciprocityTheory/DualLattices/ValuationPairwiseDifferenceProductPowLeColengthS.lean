@@ -1,4 +1,65 @@
-import ReciprocityTheory.DualLattices.ColengthSqBlockVandermonde
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+public import ReciprocityTheory.DualLattices.DiscriminantColengthStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.LinearAlgebra.Vandermonde
+import ReciprocityTheory.DualLattices.TensorSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,7 +111,7 @@ theorem infinite_residueField [IsAlgClosed C] :
   have hr := congrArg (IsLocalRing.residue v.valuationSubring) hx
   have hpc := FiniteField.pow_card (IsLocalRing.residue v.valuationSubring ⟨α, hmem⟩)
   rw [← hq] at hpc
-  rw [map_pow, map_add, map_one, hpc] at hr
+  rw [map_pow, map_add (f := _), map_one, hpc] at hr
   have h10 : (1 : IsLocalRing.ResidueField v.valuationSubring) = 0 := by
     have := congrArg (· - IsLocalRing.residue v.valuationSubring ⟨α, hmem⟩) hr
     simpa using this.symm
@@ -87,6 +148,7 @@ theorem eval_det_gen {K : Type} [CommRing K] {ι σ : Type} [Fintype ι] [Decida
   rw [RingHom.map_det]
   congr 1
   ext i j
+
   simp [map_sum]
 
 theorem exists_generic [IsAlgClosed C] {ι σ T : Type} [Fintype ι] [DecidableEq ι] [Fintype σ]
@@ -130,6 +192,7 @@ theorem exists_generic [IsAlgClosed C] {ι σ T : Type} [Fintype ι] [DecidableE
       calc ∑ r, IsLocalRing.residue v.valuationSubring (QO t i r) *
             IsLocalRing.residue v.valuationSubring (dO r j)
           = IsLocalRing.residue v.valuationSubring (∑ r, QO t i r * dO r j) := by
+
             simp [map_sum, map_mul]
         _ = (1 : Matrix ι ι (IsLocalRing.ResidueField v.valuationSubring)) i j := by
             rw [hO]
@@ -154,8 +217,9 @@ theorem exists_generic [IsAlgClosed C] {ι σ T : Type} [Fintype ι] [DecidableE
     rw [RingHom.map_det]
     congr 1
     ext i j
+
     simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.mul_apply, Matrix.of_apply, map_sum,
-      map_mul]
+    map_mul]
     rfl
   rw [hcoe]
   apply v_eq_one_of_residue_ne_zero
@@ -167,8 +231,9 @@ theorem exists_generic [IsAlgClosed C] {ι σ T : Type} [Fintype ι] [DecidableE
   have hmat : (IsLocalRing.residue v.valuationSubring).mapMatrix (QO t * cO) =
       Matrix.of fun i j => ∑ r, Qk t i r * z (r, j) := by
     ext i j
+
     simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.mul_apply, Matrix.of_apply,
-      map_sum, map_mul]
+    map_sum, map_mul]
     refine Finset.sum_congr rfl fun r _ => ?_
     rw [← hy (r, j)]
   rw [hmat]
@@ -204,8 +269,8 @@ theorem v_det_le_of_cols {ι : Type} [Fintype ι] [DecidableEq ι] (L : Lat v ι
 
 end DeterminantValuationBounds
 
-open DeterminantValuationBounds in
 
+open DeterminantValuationBounds in
 theorem valuation_pairwiseDifferenceProduct_pow_le_colength_sq (C : Type) [Field C] [IsAlgClosed C] (v : Valuation C NNReal) (n : ℕ)
     (a : Fin n → C) (s : ℕ) (M S : Lat v (Fin n × Fin s)) (Mτ : Fin n → Lat v (Fin s))
     (hM : IsLaStable a M) (hτ : ∀ τ, (Mτ τ).pts = projPts M.pts τ) (hS : S.pts = sumPts Mτ) :
@@ -313,7 +378,7 @@ theorem valuation_pairwiseDifferenceProduct_pow_le_colength_sq (C : Type) [Field
       simp [R, Matrix.mul_apply, Matrix.mulVec, dotProduct]
     show (Mτ τ).B⁻¹ * R τ * _ = 1
     rw [Matrix.mul_assoc, hRd, hB]
-  obtain ⟨c, hcint, hcdet⟩ := exists_generic Q (fun τ i y => hQint τ i y) hsec
+  obtain ⟨c, hcint, hcdet⟩ := DeterminantValuationBounds.exists_generic Q hQint hsec
   let X : Matrix (Fin n × Fin s) (Fin n × Fin s) C :=
     Matrix.of fun x y => a x.1 ^ (y.1 : ℕ) * (M.B * c) x y.2
   have hXcols : ∀ y, (fun x => X x y) ∈ M.pts := by
@@ -322,8 +387,8 @@ theorem valuation_pairwiseDifferenceProduct_pow_le_colength_sq (C : Type) [Field
       refine ⟨fun r => c r y.2, fun r => hcint r y.2, ?_⟩
       ext x
       simp [Matrix.mul_apply, Matrix.mulVec, dotProduct]
-    exact pow_stable hM y.1 hw
-  have hle : v X.det ≤ v M.B.det := v_det_le_of_cols M X hXcols
+    exact DeterminantValuationBounds.pow_stable hM y.1 hw
+  have hle : v X.det ≤ v M.B.det := DeterminantValuationBounds.v_det_le_of_cols M X hXcols
   let G : Fin n → Matrix (Fin s) (Fin s) C := fun τ => (Mτ τ).B * (Q τ * c)
   have hG : ∀ τ i j, (M.B * c) (τ, i) j = G τ i j := by
     intro τ i j

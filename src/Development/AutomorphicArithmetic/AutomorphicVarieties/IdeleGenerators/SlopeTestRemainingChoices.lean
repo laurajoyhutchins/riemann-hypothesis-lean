@@ -1,7 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.BaseChangeUnits.LiftC
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.CyclicBaseChangeC
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Hypotheses2
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcDefs
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CongruenceNumberRankThree
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.ConjStableShaFam
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,12 +50,6 @@ open GlobalTheory.CuspRep GlobalTheory.HeckeGal GlobalTheory.GalOfCusp UpperTheo
 open scoped Matrix
 
 namespace UpperTheory.V.Sd
-
-structure Hypotheses₂ : Prop where
-  af : Af.Hypotheses₂
-  hida : Published.HidaGal
-  adj : Published.AdjointLift
-  bc : Z.Bc.LiftC
 
 section Sym
 
@@ -45,8 +79,6 @@ variable {Γ k : Type} [Group Γ] [Field k]
 def ad0 (ρ : Γ →* GL (Fin 2) k) : Γ →* GL (Fin 3) k :=
   tw ((Units.map (symSquareMatrixHom k)).comp ρ) (Matrix.GeneralLinearGroup.det.comp ρ)⁻¹
 
-def sym3 (ρ : Γ →* GL (Fin 2) k) : Γ →* GL (Fin 4) k := (Units.map (symCubeMatrixHom k)).comp ρ
-
 def IrrOpen [TopologicalSpace Γ] {n : ℕ} (r : Γ →* GL (Fin n) k) : Prop :=
   ∀ H : Subgroup Γ, IsOpen (H : Set Γ) → IsIrr (r.comp H.subtype)
 
@@ -75,24 +107,24 @@ def IsAlgChar (ι : Qbar l ≃+* ℂ) (κ : G F Ω →* (Qbar l)ˣ) : Prop :=
   Continuous κ ∧ ∃ (art : Ideles F →* Gab F Ω) (χ : HChar F) (a : (F →+* ℂ) → ℤ),
     IsGlobalArtin art ∧ IsAlgPos χ a ∧ IsLAdicOf art ι χ a κ
 
-def IsAutC [IsTotallyComplex F] (ι : Qbar l ≃+* ℂ) (r : G F Ω →* GL (Fin n) (Qbar l)) : Prop :=
+def IsAutC [_root_.NumberField.IsTotallyComplex F] (ι : Qbar l ≃+* ℂ) (r : G F Ω →* GL (Fin n) (Qbar l)) : Prop :=
   ∃ π : CuspSub F n, (CG.mk π).IsRegAlg ∧ AttC ι r π
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 def TypeAway (r : G F Ω →* GL (Fin n) (Qbar l)) (τ : Fin n → G F Ω →* (Qbar l)ˣ) : Prop :=
   ∀ A : ValuationSubring Ω, ¬ A.valuation (l : Ω) < 1 → IsDiagOn r (Ine (F := F) A) τ
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 def OrdAt (r : G F Ω →* GL (Fin n) (Qbar l)) (m : Fin n → ℤ) (ψ : Fin n → G F Ω →* (Qbar l)ˣ) (A : ValuationSubring Ω) : Prop :=
   ∃ κ : Fin n → ↥(Dec (F := F) A) →* (Qbar l)ˣ, IsFlagOn r (Dec (F := F) A) κ ∧
     (∀ i (s : ↥(Dec (F := F) A)), (s : G F Ω) ∈ Ine (F := F) A → κ i s = cycBar F Ω l s ^ m i) ∧ ∀ i s, Cong (κ i s) (ψ i s)
 
 variable [CharZero Ω] [IsAlgClosure ℚ Ω]
 
-omit [NumberField F] [IsAlgClosure ℚ Ω] in
 
+omit [NumberField F] [IsAlgClosure ℚ Ω] in
 def IsPair [CharZero F] (c : G ℚ Ω) (r : G F Ω →* GL (Fin n) (Qbar l)) (μ : G F Ω →* (Qbar l)ˣ) (P : GL (Fin n) (Qbar l)) : Prop :=
   ∀ s s' : G F Ω, galEmb ℚ F Ω s' = c * galEmb ℚ F Ω s * c⁻¹ →
     (r s : Matrix (Fin n) (Fin n) (Qbar l))ᵀ * (P : Matrix (Fin n) (Fin n) (Qbar l)) * (r s' : Matrix (Fin n) (Fin n) (Qbar l)) =
@@ -118,8 +150,8 @@ structure SlopeTestRemainingChoices (N w : ℕ) (θ : G ℚ Ω →* (Qbar l)ˣ) 
   pow : θ ^ l = 1
   mu : KillsMu w θ
 
-omit [IsAlgClosure ℚ Ω] in
 
+omit [IsAlgClosure ℚ Ω] in
 def SplitAt (N w : ℕ) (χ : G ℚ Ω →* (Qbar l)ˣ) : Prop :=
   KillsMu N χ ∧ ∀ s : G ℚ Ω, (∀ ζ : Ω, ζ ^ N = 1 → s ζ = ζ ^ w) → χ s = 1
 

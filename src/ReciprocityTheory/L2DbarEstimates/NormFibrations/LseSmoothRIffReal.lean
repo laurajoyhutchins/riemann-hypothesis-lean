@@ -1,6 +1,58 @@
-import ReciprocityTheory.L2DbarEstimates.JacobianInterpolationStatement
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.Imports
-import ReciprocityTheory.L2DbarEstimates.LeviForms.OfRealNormSqSumMul
+module
+
+public import ReciprocityTheory.L2DbarEstimates.JacobianInterpolationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.OfRealNormSqSumMul
+import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.HoloContDiffAtComplex
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.HoloSmooth
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates
 
@@ -57,7 +109,7 @@ private theorem d_eq_wd_of_isLocalHomeomorph_chart {M : Type*} [TopologicalSpace
     d n z j g x = wd n j (g ∘ e.symm) (z x) := by
   have h : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ x ∈ e.source := ⟨e, he, hx⟩
   unfold d
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   apply wd_congr
   filter_upwards [chart_symm_apply_eventually_eq hz (Classical.choose_spec h).1 he (Classical.choose_spec h).2 hx]
     with w hw
@@ -69,7 +121,7 @@ private theorem db_eq_wdb_of_isLocalHomeomorph_chart {M : Type*} [TopologicalSpa
     db n z j g x = wdb n j (g ∘ e.symm) (z x) := by
   have h : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ x ∈ e.source := ⟨e, he, hx⟩
   unfold db
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   apply wdb_congr
   filter_upwards [chart_symm_apply_eventually_eq hz (Classical.choose_spec h).1 he (Classical.choose_spec h).2 hx]
     with w hw

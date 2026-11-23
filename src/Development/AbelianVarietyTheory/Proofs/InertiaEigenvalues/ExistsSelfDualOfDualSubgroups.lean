@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.JR MeasureTheory Filter Topology
 
@@ -7,9 +54,9 @@ namespace GlobalTheory.JR.AbsInv
 
 variable {V : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V]
 
+
 open MeasureTheory Filter Topology Pointwise in
 variable {V : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V] in
-
 theorem _root_.GlobalTheory.JR.AbsInv.exists_nhds_invariant {f : V → ℂ}
     (hf : _root_.GlobalTheory.JR.IsTest f) :
     ∃ U ∈ 𝓝 (0 : V), ∀ M : AddSubgroup V, (M : Set V) ⊆ U → ∀ x, ∀ m ∈ M, f (x + m) = f x := by
@@ -51,10 +98,10 @@ theorem _root_.GlobalTheory.JR.AbsInv.exists_nhds_invariant {f : V → ℂ}
 
 variable [MeasurableSpace V] [BorelSpace V]
 
+
 open MeasureTheory Filter Topology Pointwise in
 variable {V : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V] in
 variable [MeasurableSpace V] [BorelSpace V] in
-
 theorem _root_.GlobalTheory.JR.AbsInv.integral_eq_zero_of_translate (μ : Measure V) [μ.IsAddHaarMeasure] (g : V → ℂ) (m : V) (c : ℂ)
     (hc : c ≠ 1) (h : ∀ x, g (x + m) = c * g x) : ∫ x, g x ∂μ = 0 := by
   have h1 : ∫ x, g x ∂μ = c * ∫ x, g x ∂μ := by
@@ -122,11 +169,11 @@ private theorem integral_indicator_bicharacter_eq_indicator (μ : Measure V) [μ
     · have hyn : y + n ∉ (N : Set V) := fun h => hy (by simpa using N.sub_mem h hn)
       rw [Set.indicator_of_notMem hyn, Set.indicator_of_notMem hy, mul_zero]
 
+
 open MeasureTheory Filter Topology Pointwise in
 variable {V : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V] in
 variable [MeasurableSpace V] [BorelSpace V] in
 variable [T2Space V] [LocallyCompactSpace V] [SecondCountableTopology V] in
-
 theorem _root_.GlobalTheory.JR.AbsInv.fourB_fourB (μ : Measure V) [μ.IsAddHaarMeasure] (B : V → V → ℂ)
     (hB : Continuous (fun p : V × V => B p.1 p.2)) (hs : ∀ x y, B x y = B y x)
     (ha : ∀ x x' y, B (x + x') y = B x y * B x' y) (M N : AddSubgroup V)
@@ -173,7 +220,7 @@ theorem _root_.GlobalTheory.JR.AbsInv.fourB_fourB (μ : Measure V) [μ.IsAddHaar
       · rw [Set.indicator_of_notMem hy]
         ring
   have hpre : MeasurableSet ((fun x => x + z) ⁻¹' (M : Set V)) :=
-    (hMo.preimage (continuous_add_right z)).measurableSet
+    (hMo.preimage (continuous_add_const z)).measurableSet
   calc _root_.GlobalTheory.JR.fourB μ B (_root_.GlobalTheory.JR.fourB μ B f) z
       = ∫ y, _root_.GlobalTheory.JR.fourB μ B f y * B y z ∂μ := rfl
     _ = ∫ y, ∫ x, P x y ∂μ ∂μ := integral_congr_ae (Eventually.of_forall fun y => (hPy y).symm)
@@ -235,11 +282,11 @@ private theorem measureReal_mul_eq_of_dual_pairs_subset (μ : Measure V) [μ.IsA
   rw [h0, mul_one] at h1 h2
   exact_mod_cast h2.symm.trans h1
 
+
 open MeasureTheory Filter Topology Pointwise in
 variable {V : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V] in
 variable [MeasurableSpace V] [BorelSpace V] in
 variable [T2Space V] [LocallyCompactSpace V] [SecondCountableTopology V] in
-
 theorem _root_.GlobalTheory.JR.AbsInv.exists_selfDual (B : V → V → ℂ)
     (hB : Continuous (fun p : V × V => B p.1 p.2)) (hs : ∀ x y, B x y = B y x)
     (ha : ∀ x x' y, B (x + x') y = B x y * B x' y)
@@ -288,11 +335,11 @@ theorem _root_.GlobalTheory.JR.AbsInv.exists_selfDual (B : V → V → ℂ)
 
 end GlobalTheory.JR.AbsInv
 
+
 open MeasureTheory Filter Topology Pointwise in
 variable {V : Type} [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V] in
 variable [MeasurableSpace V] [BorelSpace V] in
 variable [T2Space V] [LocallyCompactSpace V] [SecondCountableTopology V] in
-
 theorem _root_.GlobalTheory.JR.exists_selfDual_of_dual_subgroups : ∀ (V : Type) [AddCommGroup V] [TopologicalSpace V] [IsTopologicalAddGroup V] [T2Space V] [LocallyCompactSpace V] [SecondCountableTopology V] [MeasurableSpace V] [BorelSpace V] (B : V → V → ℂ), Continuous (fun p : V × V => B p.1 p.2) → (∀ x y, B x y = B y x) → (∀ x x' y, B (x + x') y = B x y * B x' y) → (∀ y, B 0 y = 1) → (∀ U ∈ 𝓝 (0 : V), ∃ M N : AddSubgroup V, (M : Set V) ⊆ U ∧ IsOpen (M : Set V) ∧ IsCompact (M : Set V) ∧ IsOpen (N : Set V) ∧ IsCompact (N : Set V) ∧ (∀ y, y ∈ N ↔ ∀ x ∈ M, B x y = 1) ∧ (∀ x, x ∈ M ↔ ∀ y ∈ N, B x y = 1)) → ∃ μ : MeasureTheory.Measure V, _root_.GlobalTheory.JR.SelfDual μ B := by
   intro V _ _ _ _ _ _ _ _ B hB hs ha _ H
   exact _root_.GlobalTheory.JR.AbsInv.exists_selfDual B hB hs ha H

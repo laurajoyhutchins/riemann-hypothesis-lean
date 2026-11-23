@@ -1,6 +1,62 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.OrbitDerivatives.EtaleClosedPointLiftsSimpleRootsMonic
-import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.BetaAtInfinityZero
-import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.CoefEigOfInfChar
+module
+
+public import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.ZuckermanFunctors.IsSimpleFam
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.IntegralMemOfIsClosed
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.OrbitDerivatives.HasDerivAtMatrixExpZero
+public import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeries₂.Poulsen
+public import CompanionTheory.AutomorphicTheory.SchurLimitBounds.SchurOrthogonality.SchurH
+public import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.BetaAtInfinityZero
+public import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.CoefEigOfInfChar
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothCyc
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.HaarBumpFunctions.PoulsenSmoothVectorsDense
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.OrbitDerivatives.EtaleClosedPointLiftsSimpleRootsMonic
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightUniqueness.HpkMulMulHpkApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Filter Topology Set
 open scoped InnerProductSpace
@@ -16,8 +72,8 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 variable {k r : ℕ}
 
-open Classical in
 
+open Classical in
 def ent {X Y : Obj k r} (f : M X →ₗ[ℂ] M Y) (e : Y.1.ι) (c : X.1.ι) (v : X.2.R.H) : Y.2.R.H :=
   if hv : IsSm (GG k r) X.2.R.σ v then (f (Pi.single c ⟨v, hv⟩) e : Y.2.R.H) else 0
 
@@ -26,7 +82,7 @@ theorem ent_coe {X Y : Obj k r} (f : M X →ₗ[ℂ] M Y) (e : Y.1.ι) (c : X.1.
 
 theorem ent_lin {X Y : Obj k r} (f : M X →ₗ[ℂ] M Y) (e : Y.1.ι) (c : X.1.ι) : Lin (GG k r) X.2.R.σ (ent f e c) :=
   ⟨fun v w hv hw => by
-    rw [ent_coe f e c ⟨v, hv⟩, ent_coe f e c ⟨w, hw⟩, ← Submodule.coe_add, ← Pi.add_apply, ← map_add, ← Pi.single_add]
+    rw [ent_coe f e c ⟨v, hv⟩, ent_coe f e c ⟨w, hw⟩, ← Submodule.coe_add, ← Pi.add_apply, ← map_add (f := _), ← Pi.single_add]
     exact ent_coe f e c (⟨v, hv⟩ + ⟨w, hw⟩), fun a v hv => by
     rw [ent_coe f e c ⟨v, hv⟩, ← Submodule.coe_smul, ← Pi.smul_apply, ← map_smul, ← Pi.single_smul]
     exact ent_coe f e c (a • ⟨v, hv⟩)⟩
@@ -52,6 +108,7 @@ theorem ent_bdd {X Y : Obj k r} {f : M X →ₗ[ℂ] M Y} (hf : IsHom X Y f) (e 
 
 theorem apply_eq_ent {X Y : Obj k r} (f : M X →ₗ[ℂ] M Y) (x : M X) (e : Y.1.ι) :
     (f x e : Y.2.R.H) = ∑ c, ent f e c (x c) := by
+
   conv_lhs => rw [← Finset.univ_sum_single x, map_sum, Finset.sum_apply, Submodule.coe_sum]
   exact Finset.sum_congr rfl fun c _ => (ent_coe f e c (x c)).symm
 
@@ -84,6 +141,7 @@ theorem hasDerivAt_lin {X : Obj k r} (hX : X.1.OK) {H' : Type} [NormedAddCommGro
       refine Subtype.ext ?_
       simp only [act_coe X (hLie Z hZ t), Submodule.coe_sum, Submodule.coe_smul, URep.sig_coe _ (hLie Z hZ t)]
     show Tl _ = _
+
     rw [this, map_sum]
     refine Finset.sum_congr rfl fun d _ => ?_
     rw [map_smul, ← URep.sig_coe _ (hLie Z hZ t)]
@@ -97,7 +155,8 @@ theorem hasDerivAt_lin {X : Obj k r} (hX : X.1.OK) {H' : Type} [NormedAddCommGro
     rw [LR_coe X hZ, Submodule.coe_add, URep.dsig_coe _ hZ, Submodule.coe_sum]
     rfl
   show Tl _ = _
-  rw [this, map_add, map_sum]
+
+  rw [this, map_add (f := _), map_sum]
   simp only [ex_zero, hX.one, Matrix.one_apply, ite_smul, one_smul, zero_smul, Finset.sum_add_distrib,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, X.2.repOn.map_one, map_smul]
   congr 1

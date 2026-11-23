@@ -1,4 +1,50 @@
+module
+
+public import Formalism.YangianSpanCharacter.ExchangeGen
+public import Formalism.YangianSpanCharacter.StatementT
+public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.HermitianCurvature.StatementW
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -30,17 +76,5 @@ def RTTIndependence : Prop :=
             else if B = (1, 0) then Y + (β + n) else 1) *
           (((‖c‖ : ℂ) ^ (2 * β)) * c ^ n * (c ^ ((B.1 : ℕ) + (B.2 : ℕ)))⁻¹ * (star c ^ ((A.1 : ℕ) + (A.2 : ℕ)))⁻¹)) • x A B = 0) →
     ∀ A B, x A B = 0
-
-def QdetFromRTT : Prop :=
-  ∀ (A : Type) [Ring A] [Algebra ℂ A] (QQ : ℂ → Matrix (Fin 2) (Fin 2) A), W.IsRTT QQ → ∀ Y : ℂ, ∃ qh : A,
-    (QQ (Y + 1))ᵀ * YangianSpanCharacter.T.J A * QQ Y = qh • YangianSpanCharacter.T.J A ∧ QQ Y * YangianSpanCharacter.T.J A * (QQ (Y + 1))ᵀ = qh • YangianSpanCharacter.T.J A ∧
-    ∀ Y' a b, qh * QQ Y' a b = QQ Y' a b * qh
-
-def LemmaD : Prop :=
-  ∀ (A : Type) [CommRing A] [IsDomain A] (DD : ℕ → Set (A →+ A)), DD 0 = {0} →
-    (∀ n, ∀ D ∈ DD (n + 1), ∀ a : A, ∃ D' ∈ DD n, ∀ b, D' b = D (a * b) - a * D b) →
-    ∀ A' : AddSubgroup A, (∀ x ∈ A', ∀ y ∈ A', x * y ∈ A') →
-    (∀ b : A, ∃ a₁ ∈ A', ∃ a₂ ∈ A', a₂ ≠ 0 ∧ a₂ * b = a₁) →
-    ∀ n, ∀ D ∈ DD n, (∀ x ∈ A', D x = 0) → D = 0
 
 end PI

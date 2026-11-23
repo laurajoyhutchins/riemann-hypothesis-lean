@@ -1,9 +1,54 @@
-import Formalism.LocalToGlobal.InertKernelTheory.FirstKernelGeneratorOfOrthogonal
-import Formalism.GL3MeanSquares.HookFormulaTorsion.ExpSeries
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OneLetterGaussSharpTranslateHolds
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.FirstKernelGeneratorOfOrthogonal
+public import Formalism.GL3MeanSquares.LegendreCoefficient
+public import Formalism.GL3MeanSquares.HookFormulaTorsion.ExpSeries
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OneLetterGaussSharpTranslateHolds
 import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
 import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.LogarithmEquivalence
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,7 +94,7 @@ theorem expS_eq {σ : Type} (f : MvPowerSeries σ (K0 p)) (hf : MvPowerSeries.co
 
 theorem expS_add' {σ : Type} (f g : MvPowerSeries σ (K0 p)) (hf : MvPowerSeries.constantCoeff f = 0)
     (hg : MvPowerSeries.constantCoeff g = 0) : expS p (f + g) = expS p f * expS p g := by
-  rw [expS_eq f hf, expS_eq g hg, expS_eq (f + g) (by rw [map_add, hf, hg, add_zero])]
+  rw [expS_eq f hf, expS_eq g hg, expS_eq (f + g) (by rw [map_add (f := _), hf, hg, add_zero])]
   exact Formalism.HermitianLattices.ExpSeriesBivariate.ExpSeriesAddition.expS_add f g hf hg
 
 theorem expS_zero' {σ : Type} : expS p (0 : MvPowerSeries σ (K0 p)) = 1 := by
@@ -96,6 +141,7 @@ theorem constantCoeff_sub2_eq_zero {τ : Type} {be : MvPowerSeries (Fin 2) (K0 p
 theorem cc_sumBe {ι : Type} [Fintype ι] {be : MvPowerSeries (Fin 2) (K0 p)} (h0 : MvPowerSeries.constantCoeff be = 0) :
     MvPowerSeries.constantCoeff (sumBe p be : MvPowerSeries (ι ⊕ ι) (K0 p)) = 0 := by
   unfold sumBe
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun e _ => constantCoeff_sub2_eq_zero h0 _ _ (by simp) (by simp)
 
@@ -128,10 +174,6 @@ theorem subst_single_var {b : σ → MvPowerSeries τ K} (hb : MvPowerSeries.Has
   rw [PowerSeries.subst_def, MvPowerSeries.subst_comp_subst_apply hX hb, MvPowerSeries.subst_X hb]
   rfl
 
-theorem hasSubst_X_comp [Finite σ] (g : σ → τ) :
-    MvPowerSeries.HasSubst (fun s => (MvPowerSeries.X (g s) : MvPowerSeries τ K)) :=
-  MvPowerSeries.hasSubst_of_constantCoeff_zero fun s => MvPowerSeries.constantCoeff_X _
-
 end Gen
 
 variable {l : ℕ} [Fact l.Prime]
@@ -139,6 +181,7 @@ variable {l : ℕ} [Fact l.Prime]
 theorem map_logF : PowerSeries.map (k0ToC l) (logF l) = lgF ℂ_[l] l := by
   ext n
   rw [PowerSeries.coeff_map]
+
   simp only [logF, lgF, PowerSeries.coeff_mk, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [pow_mul]
@@ -164,9 +207,10 @@ theorem map_expS {σ : Type} (g : MvPowerSeries σ (K0 l)) (hg : MvPowerSeries.c
     MvPowerSeries.map (k0ToC l) (expS l g) = mvExp (MvPowerSeries.map (k0ToC l) g) := by
   rw [expS_eq g hg, mvExp_eq]
   ext d
+
   rw [MvPowerSeries.coeff_map, Formalism.HermitianLattices.ExpSeriesBivariate.ExpSeriesAddition.coeff_expS g hg d (d.degree + 1) (Nat.lt_succ_self _),
-    Formalism.HermitianLattices.ExpSeriesBivariate.ExpSeriesAddition.coeff_expS _ (by rw [MvPowerSeries.constantCoeff_map, hg, map_zero]) d (d.degree + 1)
-      (Nat.lt_succ_self _), map_sum]
+  Formalism.HermitianLattices.ExpSeriesBivariate.ExpSeriesAddition.coeff_expS _ (by rw [MvPowerSeries.constantCoeff_map, hg, map_zero]) d (d.degree + 1)
+    (Nat.lt_succ_self _), map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul, ← map_pow, MvPowerSeries.coeff_map]
   congr 1
@@ -246,6 +290,7 @@ theorem lg_flin (hl : 2 ≤ l) {σ m : Type} [Fintype m] (c : m → ℂ_[l]) (v 
       ∑ k, MvPowerSeries.C (c k) * PowerSeries.subst (v k) lgC := by
   unfold Formalism.L2.Th1.C.flin
   have hA : MvPowerSeries.constantCoeff (∑ k, MvPowerSeries.C (c k) * PowerSeries.subst (v k) lgC) = 0 := by
+
     simp only [map_sum, map_mul, MvPowerSeries.constantCoeff_C]
     exact Finset.sum_eq_zero fun k _ => by rw [PowerSeries.constantCoeff_subst_eq_zero (hv k) _ cc_lgC, mul_zero]
   rw [← PowerSeries.subst_comp_subst_apply (PowerSeries.HasSubst.of_constantCoeff_zero' (expSpec ℂ_[l] l hl).1)
@@ -257,6 +302,7 @@ theorem cc_flin (hl : 2 ≤ l) {σ m : Type} [Fintype m] (c : m → ℂ_[l]) (v 
     MvPowerSeries.constantCoeff (Formalism.L2.Th1.C.flin lgC (expF ℂ_[l] l) c v) = 0 := by
   unfold Formalism.L2.Th1.C.flin
   have hA : MvPowerSeries.constantCoeff (∑ k, MvPowerSeries.C (c k) * PowerSeries.subst (v k) lgC) = 0 := by
+
     simp only [map_sum, map_mul, MvPowerSeries.constantCoeff_C]
     exact Finset.sum_eq_zero fun k _ => by rw [PowerSeries.constantCoeff_subst_eq_zero (hv k) _ cc_lgC, mul_zero]
   exact PowerSeries.constantCoeff_subst_eq_zero hA _ (expSpec ℂ_[l] l hl).1
@@ -283,7 +329,8 @@ theorem coord (hl : 2 ≤ l) (f f' : ι → n → MaximalUnramifiedExtension l) 
   rw [lg_flin hl _ _ fun k => by cases k <;> simp]
   unfold hypLin
   rw [← MvPowerSeries.coe_substAlgHom hasSubst_single_var_log, ← MvPowerSeries.coe_substAlgHom hasSubst_renS]
-  simp only [map_sum, map_add, map_mul]
+
+  simp only [map_sum, map_add (f := _), map_mul]
   simp only [MvPowerSeries.coe_substAlgHom hasSubst_single_var_log, MvPowerSeries.coe_substAlgHom hasSubst_renS,
     MvPowerSeries.subst_C, MvPowerSeries.subst_X hasSubst_single_var_log]
   rw [Fintype.sum_sum_type, sum_extended_index, sum_extended_index, ← Finset.sum_add_distrib]
@@ -321,8 +368,6 @@ section Assembly
 
 variable {l : ℕ} [Fact l.Prime]
 
-local notation "lgC" => lgF ℂ_[l] l
-
 theorem hasSubst_pair_of_constantCoeff_eq_zero {σ R : Type} [CommRing R] [Finite σ] (x y : MvPowerSeries σ R)
     (hx : MvPowerSeries.constantCoeff x = 0) (hy : MvPowerSeries.constantCoeff y = 0) :
     MvPowerSeries.HasSubst (![x, y] : Fin 2 → MvPowerSeries σ R) :=
@@ -336,7 +381,9 @@ theorem M_eq {ι : Type} [Fintype ι] (be : MvPowerSeries (Fin 2) (K0 l)) :
   have hsum : inParam l (∑ e : ι, sub2 l be (MvPowerSeries.X (Sum.inl e)) (MvPowerSeries.X (Sum.inr e))) =
       ∑ e : ι, inParam l (sub2 l be (MvPowerSeries.X (Sum.inl e)) (MvPowerSeries.X (Sum.inr e))) := by
     unfold inParam
+
     rw [← MvPowerSeries.coe_substAlgHom hasSubst_log, map_sum]
+
   rw [hsum, map_sum, ← MvPowerSeries.coe_substAlgHom hasSubst_renS, map_sum, sum_extended_index]
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [MvPowerSeries.coe_substAlgHom hasSubst_renS, map_inParam, map_inParam]
@@ -470,9 +517,9 @@ theorem z_add {ι : Type} [Finite ι] {d1 d2 : MvPowerSeries ι (K0 p)} (h1 : Si
   obtain ⟨c2, u2, hu2, e2⟩ := h2
   have hc1 : MvPowerSeries.constantCoeff d1 = 0 := c1
   have hc2 : MvPowerSeries.constantCoeff d2 = 0 := c2
-  refine ⟨by rw [map_add, hc1, hc2, add_zero], u1 + u2 + u1 * u2, by simp [hu1, hu2], ?_⟩
+  refine ⟨by rw [map_add (f := _), hc1, hc2, add_zero], u1 + u2 + u1 * u2, by simp [hu1, hu2], ?_⟩
   rw [inParam_add, expS_add' _ _ (cc_inParam d1 hc1) (cc_inParam d2 hc2), e1, e2]
-  simp only [map_add, map_mul]
+  simp only [map_add (f := _), map_mul]
   ring
 
 theorem z_neg {ι : Type} [Finite ι] {d : MvPowerSeries ι (K0 p)} (h : Simeq p d 0) : Simeq p (-d) 0 := by
@@ -492,7 +539,7 @@ theorem z_neg {ι : Type} [Finite ι] {d : MvPowerSeries ι (K0 p)} (h : Simeq p
         = expS p (-inParam p d) * (MvPowerSeries.map (algebraMap (WW p) (K0 p)) (1 + u) *
             MvPowerSeries.map (algebraMap (WW p) (K0 p)) v) := by rw [← map_mul, hv, map_one, mul_one]
       _ = (expS p (-inParam p d) * (1 + MvPowerSeries.map (algebraMap (WW p) (K0 p)) u)) *
-            MvPowerSeries.map (algebraMap (WW p) (K0 p)) v := by rw [map_add, map_one, mul_assoc]
+            MvPowerSeries.map (algebraMap (WW p) (K0 p)) v := by rw [map_add (f := _), map_one, mul_assoc]
       _ = MvPowerSeries.map (algebraMap (WW p) (K0 p)) v := by rw [hinv, one_mul]
   rw [inParam_neg, hx, map_sub, map_one, add_sub_cancel]
 
@@ -703,6 +750,7 @@ theorem sum_beta_even : SumBeEven := by
       sumBe p be = ∑ e : ι, MvPowerSeries.subst (sgn (K0 p) ![Sum.inl e, Sum.inr e] ![1, 1])
         (sub2 p be (-MvPowerSeries.X 0) (-MvPowerSeries.X 1) - be) := by
     unfold sumBe
+
     rw [← MvPowerSeries.coe_substAlgHom hN, map_sum, MvPowerSeries.coe_substAlgHom hN, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun e _ => ?_
     have hσ := hasSubst_sgn (R := K0 p) (![Sum.inl e, Sum.inr e] : Fin 2 → ι ⊕ ι) ![1, 1]
@@ -718,62 +766,6 @@ end Even2
 section Iff
 
 variable {p : ℕ} [Fact p.Prime]
-
-theorem intR_mul {ι K1 : Type} [Field K1] {R1 : Subring K1} {f g : MvPowerSeries ι K1} (hf : IntR R1 f)
-    (hg : IntR R1 g) : IntR R1 (f * g) := by
-  classical
-  intro n
-  rw [MvPowerSeries.coeff_mul]
-  exact Subring.sum_mem _ fun x _ => Subring.mul_mem _ (hf _) (hg _)
-
-theorem inParamK_map {ι K1 : Type} [Finite ι] [Field K1] [Algebra (K0 p) K1] (g : MvPowerSeries ι (K0 p)) :
-    inParamK p K1 (MvPowerSeries.map (algebraMap (K0 p) K1) g) =
-      MvPowerSeries.map (algebraMap (K0 p) K1) (inParam p g) := by
-  unfold inParamK inParam
-  rw [MvPowerSeries.map_subst hasSubst_log]
-  congr 1
-  funext i
-  rw [PowerSeries.map_subst (PowerSeries.HasSubst.of_constantCoeff_zero (MvPowerSeries.constantCoeff_X i)),
-    MvPowerSeries.map_X]
-
-theorem inParamK_mul {ι K1 : Type} [Finite ι] [Field K1] [Algebra (K0 p) K1] (f g : MvPowerSeries ι K1) :
-    inParamK p K1 (f * g) = inParamK p K1 f * inParamK p K1 g := by
-  unfold inParamK
-  exact MvPowerSeries.subst_mul (MvPowerSeries.hasSubst_of_constantCoeff_zero
-    fun i => PowerSeries.constantCoeff_subst_eq_zero (MvPowerSeries.constantCoeff_X i) _ (by
-      rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map,
-        PowerSeries.coeff_zero_eq_constantCoeff_apply, cc_log, map_zero])) f g
-
-theorem first_kernel_general_iff : FirstKernelGeneratorIff := by
-  intro p _ hp ι _ K1 _ _ R1 hW be Th
-  refine ⟨fun h => ?_, fun h => first_kernel_of_sum p ι K1 R1 be Th h.1 h.2.1 h.2.2⟩
-  obtain ⟨Ph, U, hTh, hU, -, hB, hPS⟩ := h
-  change Simeq p Ph (sumBe p be) at hPS
-  refine ⟨hB, sum_beta_even p hp ι be hB, ?_⟩
-  have hS0 : MvPowerSeries.constantCoeff (sumBe p be : MvPowerSeries (ι ⊕ ι) (K0 p)) = 0 := cc_sumBe (cc_be hB)
-  have hP0 : MvPowerSeries.constantCoeff Ph = 0 := by
-    have := hPS.1
-    rwa [map_sub, hS0, sub_zero] at this
-  have hz := z_neg ((simeq_iff_zero Ph _).1 hPS)
-  obtain ⟨-, v, -, hv⟩ := hz
-  rw [sub_zero, neg_sub] at hv
-  have hD0 : MvPowerSeries.constantCoeff (sumBe p be - Ph : MvPowerSeries (ι ⊕ ι) (K0 p)) = 0 := by
-    rw [map_sub, hS0, hP0, sub_zero]
-  have key : Th * MvPowerSeries.map (algebraMap (K0 p) K1) (expS p (sumBe p be)) =
-      U * MvPowerSeries.map (algebraMap (K0 p) K1) (expS p (sumBe p be - Ph)) := by
-    rw [hTh, sub_eq_add_neg, expS_add' _ _ hS0 (by rw [map_neg, hP0, neg_zero]), map_mul]
-    ring
-  rw [key, inParamK_mul, inParamK_map, inParam_expS _ hD0, hv]
-  refine intR_mul hU fun n => ?_
-  rw [MvPowerSeries.coeff_map, ← map_one (MvPowerSeries.map (algebraMap (WW p) (K0 p))), ← map_add,
-    MvPowerSeries.coeff_map]
-  exact hW _
-
-theorem first_kernel_of_orthogonal : FirstKernelGeneratorOfOrthogonal := by
-  intro l _ h5 g2 g3 ε s2 hg2 hg3 hε hθ σ hσ F hF hN ι n _ _ _ _ f f' hP be hB hTie Θ hI
-  letI := Formalism.L2.G.Pend.wittFractionAlgebraCp l
-  exact first_kernel_of_sum l ι ℂ_[l] (Formalism.L2.G.Pend.OcC l) be _ hB (sum_beta_even l (by omega) ι be hB)
-    (hyperbolic_of_orthogonal l h5 g2 g3 ε s2 hg2 hg3 hε hθ σ hσ F hF hN ι n f f' hP be (cc_be hB) hTie Θ hI)
 
 end Iff
 

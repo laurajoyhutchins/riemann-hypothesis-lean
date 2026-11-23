@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AbelContinuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SiegelKlingenDeligneRibet
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AbelContinuation
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -48,7 +93,7 @@ theorem exists_complement {𝔣 𝔞 : Ideal (𝓞 F)} (h𝔣 : 𝔣 ≠ ⊥) (h
   have hu : IsUnit (Ideal.Quotient.mk 𝔣 α) := by
     refine IsUnit.of_mul_eq_one (Ideal.Quotient.mk 𝔣 a) ?_
     have : Ideal.Quotient.mk 𝔣 b = 0 := Ideal.Quotient.eq_zero_iff_mem.2 hb
-    rw [mul_comm, ← map_mul, ← map_one (Ideal.Quotient.mk 𝔣), ← hab, map_add, this, add_zero]
+    rw [mul_comm, ← map_mul, ← map_one (Ideal.Quotient.mk 𝔣), ← hab, map_add (f := _), this, add_zero]
   obtain ⟨u, hu⟩ := hu
   set e := Nat.card (𝓞 F ⧸ 𝔣)ˣ with he
   have he0 : 0 < e := Nat.card_pos
@@ -215,6 +260,7 @@ theorem exists_frac {t : ℚ} (h : 0 < t) : ∃ (m : ℕ) (s : ℚ), 0 < s ∧ s
 theorem totPos_sum {r : ℕ} (hr : 0 < r) {u : Fin r → F} (hu : ∀ i, TotPos F (u i)) {t : Fin r → ℚ} (ht : ∀ i, 0 < t i) :
     TotPos F (∑ i, (t i : F) * u i) := fun σ => by
   haveI : Nonempty (Fin r) := ⟨⟨0, hr⟩⟩
+
   rw [map_sum]
   refine Finset.sum_pos (fun i _ => ?_) Finset.univ_nonempty
   rw [map_mul, map_ratCast]
@@ -229,6 +275,7 @@ theorem coneBox_finite (𝔣 𝔟 : Ideal (𝓞 F)) {r : ℕ} (w : Fin r → �
   rintro _ ⟨y, ⟨-, t, ht, e⟩, rfl⟩
   refine ⟨y.isIntegral_coe, fun φ => ?_⟩
   have h1 : ‖φ (y : F)‖ ≤ ∑ i, ‖φ (w i : F)‖ := by
+
     rw [e, map_sum]
     refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
     rw [map_mul, map_ratCast, norm_mul, Complex.norm_ratCast]

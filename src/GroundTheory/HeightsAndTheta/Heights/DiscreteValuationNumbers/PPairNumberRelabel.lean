@@ -1,9 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsPairNumberRelabel
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.IntNumRelabel
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PRenameMultiHomog
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PRenameMultiProjPrime
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PExistsUniqueRelabel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsPairNumberRelabel
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.IntNumRelabel
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PRenameMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PRenameMultiProjPrime
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PExistsUniqueRelabel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -86,14 +130,14 @@ theorem divCycle_map (hσ : ∀ v, (σ v).1 = e v.1) (P W : Ideal (MRing ι₁ R
       (isRelevant_map_iff σ e hσ W)
   unfold divCycle
   by_cases h : W ∈ (P ⊔ Ideal.span {f}).minimalPrimes ∧ IsRelevant W
-  · rw [dif_pos h, dif_pos (hiff.2 h)]
+  · rw [dite_eq_left h, dite_eq_left (hiff.2 h)]
     have : W.IsPrime := h.1.1.1
     have : (W.map (ren (R := R) σ : MRing ι₁ R →+* MRing ι₂ R)).IsPrime := (hiff.2 h).1.1.1
     have hl := GroundTheory.Heights₂.Heights.Targets.ExistsUniqueRelabel.length_map (ren (R := R) σ) P W
       (le_sup_left.trans h.1.1.2) f
     unfold multAt
     exact congrArg (fun n : ℕ∞ => ((n.toNat : ℕ) : ℤ)) hl
-  · rw [dif_neg h, dif_neg (mt hiff.1 h)]
+  · rw [dite_eq_right h, dite_eq_right (mt hiff.1 h)]
 
 theorem ratDiv_map (hσ : ∀ v, (σ v).1 = e v.1) (P W : Ideal (MRing ι₁ R)) (f g : MRing ι₁ R) :
     ratDiv (P.map (ren (R := R) σ : MRing ι₁ R →+* MRing ι₂ R)) (rename σ f) (rename σ g)
@@ -107,16 +151,16 @@ section Numbers
 
 variable {K : Type*} [DecidableEq K] {ι : K → Type*}
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem diffStep_comm (a b : K → ℤ) (h : (K → ℤ) → ℤ) :
     diffStep a (diffStep b h) = diffStep b (diffStep a h) := by
   funext m
   simp only [diffStep, sub_right_comm m a b]
   ring
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem foldr_diffStep_perm {l₁ l₂ : List (K → ℤ)} (p : l₁.Perm l₂) (h : (K → ℤ) → ℤ) :
     l₁.foldr diffStep h = l₂.foldr diffStep h := by
   induction p with
@@ -145,8 +189,8 @@ variable {K₁ K₂ : Type} [DecidableEq K₁] [DecidableEq K₂] {ι₁ : K₁ 
   {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   (e : K₁ ≃ K₂) (σ : (Σ k, ι₁ k) ≃ (Σ k, ι₂ k))
 
-omit [DecidableEq K₁] [DecidableEq K₂] in
 
+omit [DecidableEq K₁] [DecidableEq K₂] in
 theorem specialIdeal_map (W : Ideal (MRing ι₁ O)) :
     specialIdeal (W.map (ren (R := O) σ : MRing ι₁ O →+* MRing ι₂ O)) =
       (specialIdeal W).map (renameEquiv (IsLocalRing.ResidueField O) σ) := by
@@ -160,7 +204,7 @@ theorem specialIdeal_map (W : Ideal (MRing ι₁ O)) :
 theorem vNumL_map (hσ : ∀ v, (σ v).1 = e v.1) (W : Ideal (MRing ι₁ O)) (l : List (K₂ → ℤ)) :
     vNumL (W.map (ren (R := O) σ : MRing ι₁ O →+* MRing ι₂ O)) l = vNumL W (l.map (· ∘ e)) := by
   unfold vNumL vNum
-  rw [specialIdeal_map, GroundTheory.Heights₂.Heights.FieldNumbers.Relabel.intNum_map_rename e σ hσ,
+  rw [specialIdeal_map, GroundTheory.Heights₂.Heights.FieldNumbers.Relabel.intNum_map_rename e σ hσ (specialIdeal W) l.get,
     intNum_get_eq]
   unfold intNum mixedDiff
   have hl : List.ofFn (fun i => l.get i ∘ e) = l.map (· ∘ e) := by
@@ -185,8 +229,8 @@ theorem classNum_map (hσ : ∀ v, (σ v).1 = e v.1) {S : Type*} (cls : S → K�
   rw [← Multiset.map_coe, Multiset.coe_toList, Multiset.coe_toList, Multiset.map_map]
   rfl
 
-omit [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [IsDomain O] [IsDiscreteValuationRing O] in
 theorem isMultiHomog_rename (hσ : ∀ v, (σ v).1 = e v.1) {f : MRing ι₁ O} {a : K₁ → ℕ}
     (h : IsMultiHomog f a) : IsMultiHomog (rename σ f) (a ∘ e.symm) := by
   have h' := GroundTheory.Heights₂.Heights.FieldNumbers.RenameMultiHomog.proof O K₁ K₂ e.toEmbedding ι₁ ι₂ σ
@@ -198,8 +242,8 @@ theorem isMultiHomog_rename (hσ : ∀ v, (σ v).1 = e v.1) {f : MRing ι₁ O} 
     exact e.injective.extend_apply a 0 k₁
   rwa [hext] at h'
 
-omit [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [IsDomain O] [IsDiscreteValuationRing O] in
 theorem isModelOver_map [Fintype K₁] [Fintype K₂] (hσ : ∀ v, (σ v).1 = e v.1)
     (P : Ideal (MRing ι₁ O)) (d : ℕ) (h : IsModelOver P d) :
     IsModelOver (P.map (ren (R := O) σ : MRing ι₁ O →+* MRing ι₂ O)) d := by
@@ -221,8 +265,8 @@ theorem isModelOver_map [Fintype K₁] [Fintype K₂] (hσ : ∀ v, (σ v).1 = e
   · rw [GroundTheory.Heights₂.Heights.Targets.ExistsUniqueRelabel.ringKrullDim_quot_map, hdim,
       Fintype.card_congr e]
 
-omit [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [IsDomain O] [IsDiscreteValuationRing O] in
 theorem isVerticalDivisor_map (hσ : ∀ v, (σ v).1 = e v.1) (P : Ideal (MRing ι₁ O)) (ϖ : O)
     (b : K₂ → ℤ) (f g : MRing ι₁ O) (h : IsVerticalDivisor P ϖ (b ∘ e) f g) :
     IsVerticalDivisor (P.map (ren (R := O) σ : MRing ι₁ O →+* MRing ι₂ O)) ϖ b (rename σ f)

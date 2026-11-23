@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfInnerSmooth
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,9 +63,6 @@ structure IsFrame (ε : Fin n → Bool) (ε' : Fin r → Bool) (ι : UJ ε' →*
   one : star z ⬝ᵥ (Jm ε *ᵥ z) = 1
   act : ∀ h, umat (ι h) * F = F * umat h
   fix : ∀ h, umat (ι h) *ᵥ z = z
-
-def IsStab (ε : Fin n → Bool) (ε' : Fin r → Bool) (ι : UJ ε' →* UJ ε) (z : Fin n → ℂ) : Prop :=
-  ∃ F, IsFrame ε ε' ι z F
 
 def IsStdStab (ε : Fin n → Bool) (ε' : Fin r → Bool) (ι : UJ ε' →* UJ ε) (z : Fin n → ℂ) : Prop :=
   ∃ F, IsFrame ε ε' ι z F ∧ Fᴴ * F = 1 ∧ Fᴴ *ᵥ z = 0 ∧ nsq z = 1
@@ -63,26 +100,7 @@ def onU (ε : Fin n → Bool) (π : Matrix (Fin n) (Fin n) ℂ → (A →L[ℂ] 
 def res {ε : Fin n → Bool} {ε' : Fin r → Bool} (ι : UJ ε' →* UJ ε) (π : Matrix (Fin n) (Fin n) ℂ → (A →L[ℂ] A)) :
     UJ ε' → (A →L[ℂ] A) := fun h => π (umat (ι h))
 
-def sob (π : Matrix (Fin n) (Fin n) ℂ → (A →L[ℂ] A)) (L : List (List (Matrix (Fin n) (Fin n) ℂ))) (x : A) : ℝ :=
-  (L.map fun l => ‖word π l x‖).sum
-
-def InLie (ε : Fin n → Bool) (L : List (List (Matrix (Fin n) (Fin n) ℂ))) : Prop := ∀ l ∈ L, ∀ X ∈ l, X ∈ lieG (Jm ε)
-
-structure IsSmForm {ε : Fin n → Bool} {ε' : Fin r → Bool} (ι : UJ ε' →* UJ ε)
-    (π : Matrix (Fin n) (Fin n) ℂ → (A →L[ℂ] A)) (σ : Matrix (Fin r) (Fin r) ℂ → (B →L[ℂ] B))
-    (β : smSub (Jm ε) π →ₗ[ℂ] smSub (Jm ε') σ →ₗ⋆[ℂ] ℂ) : Prop where
-  cont : ∃ (L : List (List (Matrix (Fin n) (Fin n) ℂ))) (L' : List (List (Matrix (Fin r) (Fin r) ℂ))) (C : ℝ),
-    InLie ε L ∧ InLie ε' L' ∧ ∀ x y, ‖β x y‖ ≤ C * sob π L x * sob σ L' y
-  inv : ∀ (h : UJ ε') (x x' : smSub (Jm ε) π) (y y' : smSub (Jm ε') σ), (x' : A) = res ι π h x → (y' : B) = onU ε' σ h y →
-    β x' y' = β x y
-
 end Reps
-
-def Word (ε : Fin n → Bool) (lam : Fin n → ℝ) (ε' : Fin r → Bool) (mu : Fin r → ℝ) : Prop :=
-  Function.Injective (Sum.elim lam mu) ∧
-    ∀ a b : Fin n ⊕ Fin r, Sum.elim lam mu b < Sum.elim lam mu a →
-      (∀ c, ¬ (Sum.elim lam mu b < Sum.elim lam mu c ∧ Sum.elim lam mu c < Sum.elim lam mu a)) →
-      (a.isLeft = b.isLeft ↔ Sum.elim ε ε' a ≠ Sum.elim ε ε' b)
 
 end GlobalTheory.CompanionTheory.UnitaryFramesMetricPeriods
 

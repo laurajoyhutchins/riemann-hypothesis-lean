@@ -1,8 +1,57 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.SubMemOfCompat
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.RingTheory.DualNumber
+public import Mathlib.RingTheory.Henselian
+public import ReciprocityTheory.DualLattices.FormalChartAtZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,16 +73,18 @@ lemma finOf_local_of_comp {O Q S : Type} [CommRing O] [CommRing Q] [CommRing S] 
     [IsLocalRing Q] [IsLocalRing S] [Algebra O Q] [Algebra.IsIntegral O Q] (g : Q →+* S)
     (h : IsLocalHom (g.comp (algebraMap O Q))) : IsLocalHom g := by
   have h1 : (maximalIdeal S).comap (g.comp (algebraMap O Q)) = maximalIdeal O :=
-    ((local_hom_TFAE (g.comp (algebraMap O Q))).out 0 4).1 h
+    ((local_hom_TFAE (g.comp (algebraMap O Q))).out 1 5).1 h
   have h2 : (((maximalIdeal S).comap g).comap (algebraMap O Q)).IsMaximal := by
     rw [Ideal.comap_comap, h1]; infer_instance
-  have h3 := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap _ h2
-  exact ((local_hom_TFAE g).out 4 0).1 (eq_maximalIdeal h3)
+  have h3 := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (algebraMap O Q)
+    (algebraMap_isIntegral_iff.mpr inferInstance) ((maximalIdeal S).comap g) h2
+  exact ((local_hom_tfae g).out 5 1).1 (eq_maximalIdeal h3)
 
 lemma finOf_local_algebraMap {O Q : Type} [CommRing O] [CommRing Q] [IsLocalRing O]
     [IsLocalRing Q] [Algebra O Q] [Algebra.IsIntegral O Q] : IsLocalHom (algebraMap O Q) :=
-  ((local_hom_TFAE (algebraMap O Q)).out 4 0).1
-    (eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (maximalIdeal Q)))
+  ((local_hom_TFAE (algebraMap O Q)).out 5 1).1
+    (eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap _ _)
+      (algebraMap_isIntegral_iff.mpr inferInstance) (maximalIdeal Q)))
 
 variable {R₀ : Type} [CommRing R₀]
 
@@ -61,7 +112,7 @@ lemma finOf_tangent (B : BX R₀) (p : ℕ) (hp : p ≠ 0) (C : Type) [Field C] 
     (by rw [map_nsmul, hv, smul_sub, hz, hz', sub_self, map_zero])
   have hinj : Function.Injective
       (p • LinearMap.id : (finOf_fst (R₀ := R₀) C).ker →ₗ[R₀] (finOf_fst (R₀ := R₀) C).ker) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     have ha' : p • (a.1 : DualNumber C) = 0 := congrArg Subtype.val ha
     apply Subtype.ext
@@ -145,6 +196,7 @@ lemma finOf_split (B : BX R₀) (p : ℕ) [Module.Free (O : Type) A] [Module.Fin
     have h0 : ∀ i, φ (ε i) = 0 := fun i =>
       (finOf_idem ((hε.idem i).map φ)).resolve_right fun h => hcon ⟨i, h⟩
     have h1 := congrArg φ hε.complete
+
     rw [map_sum, map_one, Finset.sum_eq_zero fun i _ => h0 i] at h1
     exact zero_ne_one h1
   have hmk : ∀ i, Ideal.Quotient.mk (Ideal.span {1 - ε i}) (ε i) = 1 := fun i => by

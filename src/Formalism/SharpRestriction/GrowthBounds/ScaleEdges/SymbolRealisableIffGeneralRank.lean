@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ExistsPolFamilyOfMemGenOfVsDegLe
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.MultidegreeBoundLeA
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.SPtrueHom
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.CoeUntopDLeAlt
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.LeadingDepthOneMemClosure
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.LetterWeightPos
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.EDelApply
+import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.EvensBeforePairwise
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ExistsPolFamilyOfMemGenOfVsDegLe
+public import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.MultidegreeBoundLeA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,14 +121,14 @@ theorem symbol_realisable_general_rank (D : Formalism.BasicNotions.D7) (hW1 : Ge
     unfold G2d
     rw [hdT s]
     by_cases hs : s ∈ F.TT
-    · rw [if_pos hs, if_pos hs]
+    · rw [ite_eq_left hs, ite_eq_left hs]
       have := (hE1 s hs).2
       omega
-    · rw [if_neg hs, if_neg hs, hE0 s hs]
+    · rw [ite_eq_right hs, ite_eq_right hs, hE0 s hs]
   have hd0 : ∀ s, s ∉ F.TT → G2d F deg (eSP p n' F (r + K) c' (p ^ G')) s = 0 := by
     intro s hs
     unfold G2d
-    rw [if_neg hs]
+    rw [ite_eq_right hs]
   have hren : rename (castVK (n' := n') (rfl : r + K = r + K)) P = P := by
     have : (castVK (n' := n') (rfl : r + K = r + K)) = id := by
       funext v

@@ -1,9 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LabRange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimeOfRingOnEqNonunitsAtPointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModelAffinePointEqOfInverseMemIffStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFractionRingOnOfMemModelLocalRingStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingOnPreimageIntegralOfFiniteModelMapStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.InducedModelMorphismCompStructureMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFractionRingOnOfMemModelLocalRingStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ModelAffinePointEqOfInverseMemIffStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimeOfRingOnEqNonunitsAtPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingOnPreimageIntegralOfFiniteModelMapStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartA
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.ZH
@@ -265,7 +322,7 @@ theorem maximal_point (hN : ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsNorma
       · intro hinv
         haveI : Algebra.IsIntegral (M₁.Z.presheaf.stalk z₁) (integralClosure (M₁.Z.presheaf.stalk z₁) Ω₂) :=
           ⟨fun x => integralClosure.isIntegral x⟩
-        have hm1 := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := M₁.Z.presheaf.stalk z₁) 𝔷
+        have hm1 := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := M₁.Z.presheaf.stalk z₁) 𝔷
         have hm2 := IsLocalRing.eq_maximalIdeal hm1
         set s := (M₁.stalkEquiv z₁).symm ⟨a, ringOn_le_O hz' ha⟩ with hs
         have hs1 : s ∈ IsLocalRing.maximalIdeal (M₁.Z.presheaf.stalk z₁) := by
@@ -420,8 +477,8 @@ end GlobalTheory.Poinc.FinPts
 
 end
 
-open GlobalTheory.Poinc.FinPts in
 
+open GlobalTheory.Poinc.FinPts in
 theorem GlobalTheory.Poinc.integralClosure_stalk_fibre : ∀ (o₁ Ω₁ o₂ Ω₂ : Type) [CommRing o₁] [Field Ω₁] [Algebra o₁ Ω₁] [CommRing o₂] [Field Ω₂] [Algebra o₂ Ω₂] [Algebra Ω₁ Ω₂] (M₁ : RatModel o₁ Ω₁) (M₂ : RatModel o₂ Ω₂) (q : M₂.Z ⟶ M₁.Z), ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsNormalScheme M₂.Z → IsFinite q → M₂.pt ≫ q = spMap (algebraMap Ω₁ Ω₂) ≫ M₁.pt → ∀ z₁ : M₁.Z, letI : Algebra (M₁.Z.presheaf.stalk z₁) Ω₂ := ((algebraMap Ω₁ Ω₂).comp (M₁.stalkHom z₁)).toAlgebra; (∀ b : Ω₂, b ∈ integralClosure (M₁.Z.presheaf.stalk z₁) Ω₂ ↔ ∀ z' : M₂.Z, q z' = z₁ → b ∈ M₂.O z') ∧ (∀ 𝔷 : Ideal (integralClosure (M₁.Z.presheaf.stalk z₁) Ω₂), 𝔷.IsMaximal → ∃ z₂ : M₂.Z, q z₂ = z₁ ∧ ∀ b : integralClosure (M₁.Z.presheaf.stalk z₁) Ω₂, b ∈ 𝔷 ↔ ((b : Ω₂) = 0 ∨ (b : Ω₂)⁻¹ ∉ M₂.O z₂)) ∧ (∀ z₂ z₂' : M₂.Z, q z₂ = z₁ → q z₂' = z₁ → (∀ b : integralClosure (M₁.Z.presheaf.stalk z₁) Ω₂, (b : Ω₂)⁻¹ ∈ M₂.O z₂ ↔ (b : Ω₂)⁻¹ ∈ M₂.O z₂') → z₂ = z₂') ∧ ∀ (p : ℕ) [Fact p.Prime] (y₁ : Sp (OO p) ⟶ M₁.Z), y₁ (cPt p) = z₁ → ∀ e : integralClosure (M₁.Z.presheaf.stalk z₁) Ω₂ →+* PadicAlgCl p, (∀ a, e (algebraMap (M₁.Z.presheaf.stalk z₁) _ a) = M₁.val (gPt p ≫ y₁) (M₁.stalkHom z₁ a)) → ∃ y : Sp (OO p) ⟶ M₂.Z, y ≫ q = y₁ ∧ ∀ b, e b = M₂.val (gPt p ≫ y) (b : Ω₂) := by
   intro o₁ Ω₁ o₂ Ω₂ _ _ _ _ _ _ _ M₁ M₂ q hN hF hg z₁
   letI : Algebra (M₁.Z.presheaf.stalk z₁) Ω₂ := ((algebraMap Ω₁ Ω₂).comp (M₁.stalkHom z₁)).toAlgebra

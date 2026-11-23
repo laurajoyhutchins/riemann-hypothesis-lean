@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SmoothingFinite
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.MixedDifference
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Smoothing
+import Aesop.Main
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.MixedDifference
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.QuotientMeasure
+
+@[expose] public section
 
 open MeasureTheory Set Filter Topology Function
 open NumberField IsDedekindDomain
@@ -84,8 +134,8 @@ variable (ν : Measure (ArchUnits K n)) [ν.IsHaarMeasure] {β : ArchMatrix K n 
 
 theorem integrable_archConv_integrand (hβ : Continuous β) (hβc : HasCompactSupport β)
     (hβu : tsupport β ⊆ range (Units.val : ArchUnits K n → ArchMatrix K n))
-    (h : CompactlySupportedContinuousMap (normOneGL K n) ℂ) (C : ArchUnits K n)
-    (w : normOneGL K n) :
+    (h : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ) (C : ArchUnits K n)
+    (w : normOneGL (K := K) (n := n)) :
     Integrable (fun A : ArchUnits K n =>
       (β ((C * A : ArchUnits K n) : ArchMatrix K n) : ℂ) * h ((archProj K n A)⁻¹ * w)) ν := by
   refine Continuous.integrable_of_hasCompactSupport ?_ ?_
@@ -100,9 +150,9 @@ theorem integrable_archConv_integrand (hβ : Continuous β) (hβc : HasCompactSu
 
 theorem sum_altSign_archConvFun_eq (hβ : Continuous β) (hβc : HasCompactSupport β)
     (hβu : tsupport β ⊆ range (Units.val : ArchUnits K n → ArchMatrix K n))
-    (h : CompactlySupportedContinuousMap (normOneGL K n) ℂ) {k : ℕ} {Y : Fin k → ArchMatrix K n}
+    (h : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ) {k : ℕ} {Y : Fin k → ArchMatrix K n}
     (hY : ∀ i j, Y i * Y j = 0) {C : (Fin k → Bool) → ArchUnits K n}
-    (hC : ∀ ε, ((C ε : ArchUnits K n) : ArchMatrix K n) = 1 + altPoint Y ε) (w : normOneGL K n) :
+    (hC : ∀ ε, ((C ε : ArchUnits K n) : ArchMatrix K n) = 1 + altPoint Y ε) (w : normOneGL (K := K) (n := n)) :
     ∑ ε, (altSign ε : ℂ) * archConvFun ν β h ((archProj K n (C ε))⁻¹ * w) =
       ∫ A : ArchUnits K n, ((altSum k β (fun i => -(Y i * (A : ArchMatrix K n)))
         (A : ArchMatrix K n) : ℝ) : ℂ) * h ((archProj K n A)⁻¹ * w) ∂ν := by
@@ -150,10 +200,10 @@ theorem mem_unipBall_of_val_eq {k : ℕ} {Y : Fin k → ArchMatrix K n} (hY : �
 theorem exists_norm_sum_altSign_archConvFun_le (hβ : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) β)
     (hβc : HasCompactSupport β)
     (hβu : tsupport β ⊆ range (Units.val : ArchUnits K n → ArchMatrix K n))
-    (h : CompactlySupportedContinuousMap (normOneGL K n) ℂ) (k : ℕ) (R : ℝ) :
+    (h : CompactlySupportedContinuousMap (normOneGL (K := K) (n := n)) ℂ) (k : ℕ) (R : ℝ) :
     ∃ c : ℝ, ∀ (Y : Fin k → ArchMatrix K n), (∀ i j, Y i * Y j = 0) → (∀ i, ‖Y i‖ ≤ R) →
       ∀ (C : (Fin k → Bool) → ArchUnits K n),
-        (∀ ε, ((C ε : ArchUnits K n) : ArchMatrix K n) = 1 + altPoint Y ε) → ∀ w : normOneGL K n,
+        (∀ ε, ((C ε : ArchUnits K n) : ArchMatrix K n) = 1 + altPoint Y ε) → ∀ w : normOneGL (K := K) (n := n),
         ‖∑ ε, (altSign ε : ℂ) * archConvFun ν β h ((archProj K n (C ε))⁻¹ * w)‖ ≤
           c * ∏ i, ‖Y i‖ := by
   obtain ⟨Bk, hBk⟩ := exists_norm_altSum_le hβ hβc k
@@ -179,7 +229,7 @@ theorem exists_norm_sum_altSign_archConvFun_le (hβ : ContDiff ℝ ((⊤ : ℕ�
         have hA' : ‖(A : ArchMatrix K n)‖ ≤ Rβ' := (hRβ A hA).trans (le_max_left _ _)
         have hprod : ∏ i, ‖-(Y i * (A : ArchMatrix K n))‖ ≤ (∏ i, ‖Y i‖) * Rβ' ^ k := by
           rw [← Fin.prod_const, ← Finset.prod_mul_distrib]
-          refine Finset.prod_le_prod (fun i _ => norm_nonneg _) fun i _ => ?_
+          refine Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) fun i _ => ?_
           rw [norm_neg]
           exact (norm_mul_le _ _).trans (mul_le_mul_of_nonneg_left hA' (norm_nonneg _))
         calc Bk * ∏ i, ‖-(Y i * (A : ArchMatrix K n))‖

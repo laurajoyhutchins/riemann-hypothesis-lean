@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CoprimeFrobeniusUniformizerPowers
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoprimeFrobeniusUniformizerPowers
+public import Formalism.SharpRestriction.LevelLetterCocycles.RelayGeneralCaseOfAdmissible
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,7 +159,7 @@ theorem rv_add (T : LocLat G Qp LL O) (c' : ZMod n) (e : ℕ) (Λ : LetA O n) {d
   obtain ⟨κ₁, a₁, ha₁, hP₁⟩ := hx
   obtain ⟨κ₂, a₂, ha₂, hP₂⟩ := hy
   refine ⟨κ₁ + κ₂, a₁ + a₂, fun k => ⟨W.AΔ.add_mem (ha₁ k).1 (ha₂ k).1, ?_⟩, ?_⟩
-  · rw [Pi.add_apply, mul_add, (ha₁ k).2, (ha₂ k).2, Pi.add_apply, map_add]
+  · rw [Pi.add_apply, mul_add, (ha₁ k).2, (ha₂ k).2, Pi.add_apply, map_add (f := _)]
   · have e1 : lA W ^ (κ₁ + κ₂) • (lA W ^ κ • Λ • (x + y) - ∑ k, (a₁ + a₂) k • ((W.φD T) ^ e) (Hh k)) =
         lA W ^ κ₂ • (lA W ^ κ₁ • (lA W ^ κ • Λ • x - ∑ k, a₁ k • ((W.φD T) ^ e) (Hh k))) +
         lA W ^ κ₁ • (lA W ^ κ₂ • (lA W ^ κ • Λ • y - ∑ k, a₂ k • ((W.φD T) ^ e) (Hh k))) := by

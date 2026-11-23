@@ -1,13 +1,65 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSH2
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSHFamJFOK
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSHFamDeriv
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSHCellTie
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LUFactorOrbitBounds
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThetaConjOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.JfBetaAdjCOfLemmaBNorm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSH2
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSHFamDeriv
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LUFactorOrbitBounds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MemLevelZeroOfMemGroup
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GNConjTranspose
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothnessOnGoodSet
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.CharP
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.UHMulInv
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped ContDiff
@@ -90,7 +142,7 @@ private theorem continuous_psi_of_matrix {k r : ℕ} (z : Fin (2 * r + k + 1) �
   unfold psi ell
   refine Complex.continuous_exp.comp (continuous_const.mul (Complex.continuous_ofReal.comp
     (Complex.continuous_re.comp (continuous_const.mul ?_))))
-  refine continuous_finset_sum _ fun a _ => ?_
+  refine continuous_finsetSum _ fun a _ => ?_
   split_ifs
   · fun_prop
   · simp only [Matrix.mulVec, dotProduct, Matrix.of_apply]

@@ -1,9 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Vanishing
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Trivial
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Devissage
-import GroundTheory.ProfiniteCohomology.EulerCharDefs
-import GroundTheory.ProfiniteCohomology.PoincareDuality
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Vanishing
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Trivial
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Devissage
+public import GroundTheory.ProfiniteCohomology.EulerCharDefs
+public import GroundTheory.ProfiniteCohomology.PoincareDuality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -11,15 +54,15 @@ namespace GroundTheory.ProfCoh
 variable (K Ksep : Type) [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K]
   [Field Ksep] [Algebra K Ksep] [IsSepClosure K Ksep] {n : ℕ} (hn : (n : K) ≠ 0)
 
-include hn in
 
+include hn in
 theorem subsingleton_cohomology_galois (U : OpenSubgroup Gal(Ksep/K))
     (M : Rep (ULift.{0} ℤ) (U : Subgroup Gal(Ksep/K))) [IsDiscreteRep M] (hM : ∀ m : M, n • m = 0)
     (r : ℕ) (hr : 3 ≤ r) : Subsingleton (cohomology M r) :=
   subsingleton_cohomology_of_three_le K Ksep hn U M hM hr
 
-include hn in
 
+include hn in
 theorem finite_cohomology_galois (U : OpenSubgroup Gal(Ksep/K))
     (M : Rep (ULift.{0} ℤ) (U : Subgroup Gal(Ksep/K))) [IsDiscreteRep M] [Finite M]
     (hM : ∀ m : M, n • m = 0) (r : ℕ) : Finite (cohomology M r) := by
@@ -33,30 +76,30 @@ theorem finite_cohomology_galois (U : OpenSubgroup Gal(Ksep/K))
   · have := subsingleton_cohomology_galois K Ksep hn U M hM r hr
     exact Finite.of_subsingleton
 
-include hn in
 
+include hn in
 theorem finite_cohomology_galois_le_two : ∀ (U : OpenSubgroup Gal(Ksep/K))
     (M : Rep (ULift.{0} ℤ) (U : Subgroup Gal(Ksep/K))) [IsDiscreteRep M] [Finite M],
     (∀ m : M, n • m = 0) → ∀ r ≤ 2, Finite (cohomology M r) :=
   fun U M _ _ hM r _ => finite_cohomology_galois K Ksep hn U M hM r
 
-include hn in
 
+include hn in
 theorem subsingleton_cohomology_three_galois : ∀ (U : OpenSubgroup Gal(Ksep/K))
     (M : Rep (ULift.{0} ℤ) (U : Subgroup Gal(Ksep/K))) [IsDiscreteRep M] [Finite M],
     (∀ m : M, n • m = 0) → Subsingleton (cohomology M 3) :=
   fun U M _ _ hM => subsingleton_cohomology_galois K Ksep hn U M hM 3 le_rfl
 
-include hn in
 
+include hn in
 theorem subsingleton_cohomology_galois_top (M : Rep (ULift.{0} ℤ) Gal(Ksep/K)) [IsDiscreteRep M]
     (hM : ∀ m : M, n • m = 0) (r : ℕ) (hr : 3 ≤ r) : Subsingleton (cohomology M r) :=
   have := subsingleton_cohomology_galois K Ksep hn ⊤
     (Rep.res ((⊤ : OpenSubgroup Gal(Ksep/K)) : Subgroup Gal(Ksep/K)).subtype M) hM r hr
   (bijective_cohomologyRes_top M r).1.subsingleton
 
-include hn in
 
+include hn in
 theorem finite_cohomology_galois_top (M : Rep (ULift.{0} ℤ) Gal(Ksep/K)) [IsDiscreteRep M] [Finite M]
     (hM : ∀ m : M, n • m = 0) (r : ℕ) : Finite (cohomology M r) :=
   have : Finite (Rep.res ((⊤ : OpenSubgroup Gal(Ksep/K)) : Subgroup Gal(Ksep/K)).subtype M) :=
@@ -64,11 +107,6 @@ theorem finite_cohomology_galois_top (M : Rep (ULift.{0} ℤ) Gal(Ksep/K)) [IsDi
   have := finite_cohomology_galois K Ksep hn ⊤
     (Rep.res ((⊤ : OpenSubgroup Gal(Ksep/K)) : Subgroup Gal(Ksep/K)).subtype M) hM r
   Finite.of_injective _ (bijective_cohomologyRes_top M r).1
-
-theorem hasFiniteCohomology_galois (U : OpenSubgroup Gal(Ksep/K)) :
-    HasFiniteCohomology (ULift.{0} ℤ) (U : Subgroup Gal(Ksep/K)) (fun m => (m : K) ≠ 0) :=
-  fun A _ _ hA => ⟨finite_cohomology_galois K Ksep hA U A (fun _ => card_nsmul_eq_zero'),
-    fun q hq => subsingleton_cohomology_galois K Ksep hA U A (fun _ => card_nsmul_eq_zero') q hq⟩
 
 theorem hasFiniteCohomology_galois_top :
     HasFiniteCohomology (ULift.{0} ℤ) Gal(Ksep/K) (fun m => (m : K) ≠ 0) :=

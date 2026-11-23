@@ -1,6 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.WeightChange
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.Distinct
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Brauer
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LocIsotypic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.IsCondAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Polynomial
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.HeckeGal UpperTheory.V UpperTheory.V.Af UpperTheory.V.Sd
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -52,13 +93,13 @@ private theorem killed_of_mem_iSup {G V U ι J : Type} [Group G] [AddCommGroup V
         refine ⟨v, fun h => hv (by rw [h, map_zero]; exact zero_mem _), fun j => ?_⟩
         have h4 : S j v ∈ W.comap (f i) := by
           have h5 := hK j
-          rw [← e, map_add] at h5
+          rw [← e, map_add (f := _)] at h5
           rw [Submodule.mem_comap, hTS, eq_neg_of_add_eq_zero_right h5]
           exact neg_mem (hT W hW j x hx)
         rwa [hc, Submodule.mem_bot] at h4
       · refine ih _ (fun g y hy => ?_) h3 h2
         obtain ⟨x, hx, _, ⟨v, rfl⟩, rfl⟩ := Submodule.mem_sup.1 hy
-        rw [map_add, ← hf]
+        rw [map_add (f := _), ← hf]
         exact Submodule.add_mem_sup (hW g x hx) ⟨_, rfl⟩
   exact key s ⊥ (fun g x hx => by simp_all) (by simpa using h0) (by simpa using hs)
 
@@ -74,8 +115,9 @@ private theorem dc_eigen_descend {G V U ι : Type} [Group G] [AddCommGroup V] [M
     (fun j : Option K => j.elim (Hi.dc σ K K x - lam • LinearMap.id) fun k => σ k - LinearMap.id)
     (by
       rintro (_ | k) i u
+
       · simp only [Option.elim, LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.id_apply, map_sub, map_smul, hs,
-          map_sum, hf]
+        map_sum, hf]
       · simp only [Option.elim, LinearMap.sub_apply, LinearMap.id_apply, map_sub, hf])
     (by
       rintro W hW (_ | k) y hy

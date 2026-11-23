@@ -1,8 +1,52 @@
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSatakeParameterOfIsSubquotientOfInjective
-import GroundTheory.AutomorphicForms.CompactModCentre
-import GroundTheory.AutomorphicForms.Cartan
+module
+
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSatakeParameterOfIsSubquotientOfInjective
+public import GroundTheory.AutomorphicForms.CompactModCentre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.LocGL ValuativeRel Matrix
 
@@ -110,7 +154,7 @@ private theorem dOf_comm (i₀ : Fin n) (u : kˣ) (μ : Fin n → ℤ) :
 end SlopeTestRemainingChoices
 
 private theorem tame_of_dz {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
-    (y : IrrGL k) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (h0 : 0 < y.1) (hy : DZ y) (ht : DZ (y.tw χ hχ)) : TameChar χ := by
+    (y : IrrGL (k := k)) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (h0 : 0 < y.1) (hy : DZ y) (ht : DZ (y.tw χ hχ)) : TameChar χ := by
   classical
   unfold DZ at hy ht
   unfold TameChar
@@ -178,7 +222,7 @@ private theorem tame_of_dz {k : Type} [Field k] [ValuativeRel k] [TopologicalSpa
   exact hv0 (GlobalTheory.IwahoriInj.eq_zero_of_fixed y.snd.rep.smooth GlobalTheory.DepthZeroJac.isCompact_KOne hv hvk)
 
 private theorem dz_of_tame {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
-    (y : IrrGL k) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (hy : DZ y) (ht : TameChar χ) : DZ (y.tw χ hχ) := by
+    (y : IrrGL (k := k)) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (hy : DZ y) (ht : TameChar χ) : DZ (y.tw χ hχ) := by
   obtain ⟨v, hv, hv0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hy
   refine fixed_ne_bot (y.twEquiv χ hχ) (v := v) (GlobalTheory.Parabolic.mem_fixed.2 fun g hg => ?_) hv0
   have h1 : χ (GeneralLinearGroup.det g) = 1 := ht _ (val_det_sub_one_lt (n := y.1) hg)

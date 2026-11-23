@@ -1,6 +1,48 @@
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtRec
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOne
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IntSplitOf
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtRec
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtOne
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CastGLSymmApply
+public import Formalism.LocalRingCardinality.DataKerI
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IntSplitOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +98,7 @@ theorem locInt_locAt (u : D.what₂.Word) (w : D.what₂.places.Pl) (hg : GIdx D
     (B : GL (Fin D.R.k) D.host.E) : LocInt (locAt X u w hg B) :=
   fun v x => (X.g u w hg).completion_integers_iff v _ rfl x
 
-set_option maxHeartbeats 4000000 in
+
 theorem locHyp_locAt (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) (hU : SameUloc X T u) (w : D.what₂.places.Pl)
     (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) (B : GL (Fin D.R.k) D.host.E) (hB : FrRat X u w hg B)
     (hT : HypT (X.g u w hg)) : LocHyp ((T u).cls0).lev (locAt X u w hg B) := by
@@ -78,7 +120,7 @@ theorem bad_notOver (u : D.what₂.Word) (w : D.what₂.places.Pl) (hg : GIdx D.
   · exact natCast_notMem _ hp hv (hg' 0) h
   · exact natCast_notMem _ hp hv (hg' 1) h
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem ptOne_rec (T : ∀ u : D.what₂.Word, Forms0 D u) (u : D.what₂.Word) (hU : SameUloc X T u) (w : D.what₂.places.Pl)
     (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) (B : GL (Fin D.R.k) D.host.E) (hB : FrRat X u w hg B)

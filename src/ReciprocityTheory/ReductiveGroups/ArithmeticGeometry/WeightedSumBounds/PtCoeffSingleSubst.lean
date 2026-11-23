@@ -1,6 +1,52 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtOrderProdSub
+module
+
+public import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.Sh
 
@@ -34,7 +80,7 @@ def ptIntSer (σ : Type*) : Subring (MvPowerSeries σ C) where
     split_ifs
     · exact Subring.one_mem _
     · exact Subring.zero_mem _
-  add_mem' {f g} hf hg α := by rw [map_add]; exact Subring.add_mem _ (hf α) (hg α)
+  add_mem' {f g} hf hg α := by rw [map_add (f := _)]; exact Subring.add_mem _ (hf α) (hg α)
   zero_mem' α := by rw [map_zero]; exact Subring.zero_mem _
   neg_mem' {f} hf α := by rw [map_neg]; exact Subring.neg_mem _ (hf α)
 
@@ -90,49 +136,6 @@ theorem ptIntSer_subst {σ τ : Type*} {A : σ → MvPowerSeries τ C} (hA : Has
     · rw [finsum_of_infinite_support hfin]
       exact Subring.zero_mem _
   exact key _ hmem
-
-theorem pt_v_natCast_nonneg (n : ℕ) : (0 : WithTop ℝ) ≤ v (n : C) := by
-  induction n with
-  | zero => rw [Nat.cast_zero, v.map_zero]; exact le_top
-  | succ n ih =>
-    rw [Nat.cast_succ]
-    exact le_trans (le_min ih (by rw [v.map_one])) (v.map_add _ _)
-
-theorem pt_v_intCast_nonneg (n : ℤ) : (0 : WithTop ℝ) ≤ v (n : C) := by
-  cases n with
-  | ofNat m => rw [Int.ofNat_eq_coe, Int.cast_natCast]; exact pt_v_natCast_nonneg m
-  | negSucc m => rw [Int.cast_negSucc, v.map_neg]; exact pt_v_natCast_nonneg (m + 1)
-
-theorem pt_v_natCast_eq_zero {p : ℕ} (hp : p.Prime) (hvp : v (p : C) = 1) {n : ℕ}
-    (hn : ¬ p ∣ n) : v (n : C) = 0 := by
-  have h0 : (0 : WithTop ℝ) ≤ v (n : C) := pt_v_natCast_nonneg n
-  refine (h0.lt_or_eq.resolve_left fun hlt => ?_).symm
-  have hcop : Nat.Coprime n p :=
-    Nat.Coprime.symm ((Nat.Prime.coprime_iff_not_dvd hp).mpr hn)
-  have hz : ((1 : ℤ) : C) = ((n * Nat.gcdA n p + p * Nat.gcdB n p : ℤ) : C) := by
-    rw [← Nat.gcd_eq_gcd_ab, hcop.gcd_eq_one, Nat.cast_one]
-  push_cast at hz
-  have h1 : v (1 : C) = 0 := v.map_one
-  rw [hz] at h1
-  have hmin := v.map_add ((n : C) * (Nat.gcdA n p : C)) ((p : C) * (Nat.gcdB n p : C))
-  rw [h1, v.map_mul, v.map_mul, hvp] at hmin
-  have ha : (0 : WithTop ℝ) < v (n : C) + v (Nat.gcdA n p : C) :=
-    add_pos_of_pos_of_nonneg hlt (pt_v_intCast_nonneg _)
-  have hb : (0 : WithTop ℝ) < 1 + v (Nat.gcdB n p : C) :=
-    add_pos_of_pos_of_nonneg zero_lt_one (pt_v_intCast_nonneg _)
-  exact absurd hmin (not_le.mpr (lt_min ha hb))
-
-theorem pt_inv_natCast_mem {p : ℕ} (hp : p.Prime) (hvp : v (p : C) = 1) {n : ℕ}
-    (hn : ¬ p ∣ n) : ((n : C))⁻¹ ∈ ptIntSub v := by
-  have hv : v (n : C) = 0 := pt_v_natCast_eq_zero hp hvp hn
-  have hne : (n : C) ≠ 0 := by
-    intro h
-    rw [h, v.map_zero] at hv
-    exact absurd hv WithTop.top_ne_zero
-  show (0 : WithTop ℝ) ≤ v ((n : C)⁻¹)
-  have h1 := v.map_mul (n : C) ((n : C)⁻¹)
-  rw [mul_inv_cancel₀ hne, v.map_one, hv, zero_add] at h1
-  rw [← h1]
 
 end Int
 
@@ -289,7 +292,7 @@ theorem pt_F_lin (G : LogFGL v d) (a : Fin d) (i : Fin d ⊕ Fin d) :
     | exact HasSubst.of_constantCoeff_zero fun b => constantCoeff_X _
     | exact hasSubst_of_constantCoeff_zero fun b => constantCoeff_X _
   have key := congrArg (coeff (Finsupp.single i 1)) (G.lg_F a)
-  rw [map_add, pt_coeff_single_subst hF G.F_const (G.lg_const a),
+  rw [map_add (f := _), pt_coeff_single_subst hF G.F_const (G.lg_const a),
     pt_coeff_single_subst (hX Sum.inl) (fun b => constantCoeff_X _) (G.lg_const a),
     pt_coeff_single_subst (hX Sum.inr) (fun b => constantCoeff_X _) (G.lg_const a)] at key
   simp only [G.lg_lin, pt_coeff_single_X, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq,

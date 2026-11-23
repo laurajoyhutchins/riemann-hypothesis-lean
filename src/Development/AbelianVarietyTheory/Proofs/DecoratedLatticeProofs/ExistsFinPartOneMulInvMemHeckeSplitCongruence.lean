@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitLoc
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitLoc
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow
 open scoped TensorProduct
@@ -28,7 +80,7 @@ theorem exists_avoid (c : 𝓞 E ≃+* 𝓞 E) (hc : ∀ x, c (c x) = x) (δ : �
   obtain ⟨t₀, ht₀⟩ : ∃ t₀ : 𝓞 E, y₀ + M * t₀ - c (y₀ + M * t₀) ≠ 0 := by
     by_cases h : c y₀ = y₀
     · refine ⟨δ, fun h2 => hδ (mul_left_cancel₀ hM' ?_)⟩
-      rw [map_add, map_mul, map_natCast, h] at h2
+      rw [map_add (f := _), map_mul, map_natCast, h] at h2
       linear_combination -h2
     · exact ⟨0, by simpa [sub_eq_zero] using Ne.symm h⟩
   set y₁ := y₀ + M * t₀ with hy₁
@@ -37,7 +89,7 @@ theorem exists_avoid (c : 𝓞 E ≃+* 𝓞 E) (hc : ∀ x, c (c x) = x) (δ : �
     (fun P _ Q _ h h' => h (HeightOneSpectrum.ext h')) (fun Q => if y₁ ∈ Q.1.asIdeal then 1 else 0)
   have e1 : y₀ + M * (t₀ + u * c u) = y₁ + M * (u * c u) := by rw [hy₁]; ring
   have e2 : y₁ + M * (u * c u) - c (y₁ + M * (u * c u)) = y₁ - c y₁ := by
-    rw [map_add, map_mul, map_mul, map_natCast, hc]; ring
+    rw [map_add (f := _), map_mul, map_mul, map_natCast, hc]; ring
   refine ⟨t₀ + u * c u, fun h => ht₀ ?_, fun Q hQ hMQ hy => ?_⟩
   · rw [← e2, ← e1, h, map_zero, sub_zero]
   · rw [e1] at hy
@@ -138,7 +190,7 @@ theorem approx_int (c : 𝓞 E ≃+* 𝓞 E) (hc : ∀ x, c (c x) = x) (δ : �
     have e2 : algebraMap E (Q.adicCompletion E) ((y₀ + (N * m * m : ℕ) * t : 𝓞 E) : E) - s Q =
         (N : Q.adicCompletion E) * m * m * (algebraMap E (Q.adicCompletion E) (t : E) - a Q) := by
       rw [e1]
-      simp only [map_add, map_mul, map_natCast, nsmul_eq_mul, Nat.cast_mul]
+      simp only [map_add (f := _), map_mul, map_natCast, nsmul_eq_mul, Nat.cast_mul]
       ring
     rw [e2, Valuation.map_mul]
     exact mul_le_of_le_one_right' (Valuation.map_sub_le _ (val_int_le Q t) (ha Q))
@@ -178,7 +230,7 @@ theorem isSplitIdem_of_delta (hΦ : Comp D Φ) {P : HeightOneSpectrum (𝓞 D.ho
     · subst hQ
       rw [he'.2.2 Q (Ne.symm hc), mul_zero]
     · rw [he.2.2 Q hQ, zero_mul]
-  · refine hΦ.ext' (by rw [RingHom.map_add, he.1, he'.1, add_zero, h0]) fun Q => ?_
+  · refine hΦ.ext' (by rw [RingHom.map_add (f := _), he.1, he'.1, add_zero, h0]) fun Q => ?_
     rw [ev_add]
     by_cases hQ : Q = P
     · subst hQ
@@ -236,7 +288,7 @@ theorem mem_grpH_of_good (hΦ : Comp D Φ) {N : ℕ} (hN : 0 < N) {B : Set (Heig
       linear_combination ((x : AE D) - 1) * hs.1 + ((x : AE D) - 1) * hs.2.1
     have h2 : x * (part hs.1 x)⁻¹ ∈ grpH D N := by
       refine ih (fun Q hQ => hB Q (Set.mem_insert_of_mem _ hQ)) _ ?_ fun Q hQ => ?_
-      · rw [mul_part_inv, RingHom.map_add, RingHom.map_mul, RingHom.map_sub, RingHom.map_one, he.1, h0]
+      · rw [mul_part_inv, RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, RingHom.map_one, he.1, h0]
         simp
       · rw [mul_part_inv, ev_add, ev_mul, ev_sub, ev_one]
         by_cases hQP : Q = P

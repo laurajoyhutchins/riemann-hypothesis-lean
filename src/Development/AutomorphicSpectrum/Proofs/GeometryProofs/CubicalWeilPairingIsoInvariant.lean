@@ -1,20 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.SlopeBoundSt
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AbelianVarietyTheory.PublishedTheorems.SemiabelianTori.GeometricallyConnectedSplitTorusAff
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsAbLift
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CubicalBundlePairingCompatiblePullback
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertUnifTangentWeilPairing
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NonDegAtOfSabMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CubicalTripleTrivialStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CubNRatioTwist
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CubicalTripleTrivialStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 open GlobalTheory.UU
@@ -136,21 +170,21 @@ theorem cube_ratio_faces {w : LB.Iso L₁.L L₂.L} (c₁ : CubicalStr G L₁) (
     obtain ⟨J₁, h₁⟩ := exists_good_pt L₁.isLB z
     obtain ⟨J₂, h₂⟩ := exists_good_pt L₂.isLB z
   · have e := hv T z J₁ J₂ h₁ h₂ _ (fun _ => rfl) 1 x y
-    rw [(isCub_cubV c₁ h₁).face, (isCub_cubV c₂ h₂).face] at e
+    rw [(isCub_cubV c₁ (T := T) h₁).face x y, (isCub_cubV c₂ (T := T) h₂).face x y] at e
     simp only [_root_.one_mul, _root_.mul_one] at e
     apply Additive.ofMul.injective
     have e' := congrArg Additive.ofMul e
     simp only [ofMul_mul, ofMul_one] at e' ⊢
     linear_combination (norm := abel) -e'
   · have e := hv T z J₁ J₂ h₁ h₂ _ (fun _ => rfl) x 1 y
-    rw [(isCub_cubV c₁ h₁).face₂, (isCub_cubV c₂ h₂).face₂] at e
+    rw [(isCub_cubV c₁ (T := T) h₁).face₂ x y, (isCub_cubV c₂ (T := T) h₂).face₂ x y] at e
     simp only [_root_.one_mul, _root_.mul_one] at e
     apply Additive.ofMul.injective
     have e' := congrArg Additive.ofMul e
     simp only [ofMul_mul, ofMul_one] at e' ⊢
     linear_combination (norm := abel) -e'
   · have e := hv T z J₁ J₂ h₁ h₂ _ (fun _ => rfl) x y 1
-    rw [(isCub_cubV c₁ h₁).face₃, (isCub_cubV c₂ h₂).face₃] at e
+    rw [(isCub_cubV c₁ (T := T) h₁).face₃ x y, (isCub_cubV c₂ (T := T) h₂).face₃ x y] at e
     simp only [_root_.one_mul, _root_.mul_one] at e
     apply Additive.ofMul.injective
     have e' := congrArg Additive.ofMul e

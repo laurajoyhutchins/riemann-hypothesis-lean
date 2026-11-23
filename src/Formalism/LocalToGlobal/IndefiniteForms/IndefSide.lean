@@ -1,8 +1,50 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.RatHermLcvTwist
-import Formalism.QuotientMetricDivisors.LatticeGlueUnique
-import Formalism.QuotientMetricDivisors.HeightBoundExactNorms
-import Formalism.MirabolicMackeyTheory.StatementT
+module
+
+public import Formalism.QuotientMetricDivisors.RatHermLcvTwist
+public import Formalism.QuotientMetricDivisors.LatticeGlueUnique
+public import Formalism.QuotientMetricDivisors.HeightBoundExactNorms
+public import Formalism.MirabolicMackeyTheory.StatementT
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -83,13 +125,13 @@ structure WF : Prop where
 
   HV_pos : ∀ t (v : InfinitePlace K), ((Df.HV t).map v.embedding).PosDef
 
-  Mt_lat : ∀ t, Submodule.IsLattice K (Df.Mt t)
+  Mt_lat : ∀ t, Submodule.IsFullLattice K (Df.Mt t)
 
   Pq_surj : ∀ t, Function.Surjective (Df.Pq t).mulVec
 
   XQ_quot : ∀ t, IsQuotMetric (Df.Pq t) (Df.HV t) (Df.XQ t)
 
-  Lam_lat : ∀ t, Submodule.IsLattice K (Df.abelian₂ t)
+  Lam_lat : ∀ t, Submodule.IsFullLattice K (Df.abelian₂ t)
 
   Qp_indep : iSupIndep (Df.Qp Bs.μ0)
 
@@ -97,7 +139,7 @@ structure WF : Prop where
 
   XT_herm : ∀ j t, IsHermAt Bs.v0 (Df.HT j t) (Df.XT j t)
 
-  Tl_lat : ∀ j t, Submodule.IsLattice K (Df.Tl j t)
+  Tl_lat : ∀ j t, Submodule.IsFullLattice K (Df.Tl j t)
 
   Zp_indep : ∀ j, iSupIndep (Df.Zp j Bs.μ0)
 
@@ -295,7 +337,7 @@ def H0 : Prop :=
   (∀ w, S.μ (conjPl w) = S.μ w) ∧ ∀ w, w ∈ S.Tw ↔ S.μ w ≠ Bs.μ0
 
 def Frames : Prop :=
-  (∀ v, IsUnit (S.XE v).det) ∧ (∀ j v, IsUnit (S.XW j v).det) ∧ ∀ j, Submodule.IsLattice K (S.M j)
+  (∀ v, IsUnit (S.XE v).det) ∧ (∀ j v, IsUnit (S.XW j v).det) ∧ ∀ j, Submodule.IsFullLattice K (S.M j)
 
 def BaseTypeSubspacesMapOntoBothSides : Prop :=
   (∀ p, (Df.Qp Bs.μ0 p).map (S.ι Bs.μ0).mulVecLin = S.Ep p) ∧
@@ -457,7 +499,7 @@ structure IndefFace where
 
   [sK : StarRing K]
 
-  [tK : IsTotallyComplex K]
+  [tK : _root_.NumberField.IsTotallyComplex K]
 
   Bs : DefBase K
 
@@ -466,9 +508,5 @@ structure IndefFace where
   fc : DefSub A → DefFace Bs
 
 attribute [instance] IndefFace.fK IndefFace.nK IndefFace.sK IndefFace.tK
-
-def IndefLink (Ix : ℝ → Type) (F : ∀ x, Ix x → IndefFace) (CH : ℝ)
-    (Q : ∀ x (i : Ix x), ℝ → DefSub (F x i).A → (HeightOneSpectrum (𝓞 (F x i).K) → (F x i).Bs.Tup) → Prop) : Prop :=
-  ∃ C x0 : ℝ, ∀ x ≥ x0, ∀ i : Ix x, ∃ P : IndefPkg (F x i).A (F x i).fc C CH, Q x i C P.Zs P.core.base.μ
 
 end Formalism.L2.Indef

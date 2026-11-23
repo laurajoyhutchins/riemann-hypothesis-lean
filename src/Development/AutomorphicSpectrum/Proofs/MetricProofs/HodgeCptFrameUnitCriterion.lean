@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ColFlags
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FunctionFieldRatioGenerators
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameMatrixChartRatios
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsArithVarOfBlockAlgebraic
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericFlagTrdegFormula
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ColFlags
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameMatrixChartRatios
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FunctionFieldRatioGenerators
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericFlagTrdegFormula
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsArithVarOfBlockAlgebraic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,15 +60,15 @@ section Fields
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {G : Type} [Field G] [CharZero G]
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem prod_div_mem (y : (Σ k, ι k) → G) (u v : ∀ k, ι k) :
     (∏ k, y ⟨k, u k⟩) / (∏ k, y ⟨k, v k⟩) ∈ blockFnField y := by
   rw [← Finset.prod_div_distrib]
   exact prod_mem fun k _ => IntermediateField.subset_adjoin _ _ ⟨⟨k, u k⟩, ⟨k, v k⟩, rfl, rfl⟩
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem blockFnField_eq_top [Algebra ℤ G] (y : (Σ k, ι k) → G) {κ : Type} (f : κ → G) (c₀ : κ)
     (hsub : ∀ j, f j / f c₀ ∈ blockFnField y)
     (hgen : ∀ a : G, ∃ g ∈ Algebra.adjoin ℤ (Set.range fun j => f j / f c₀),
@@ -75,7 +117,7 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {G : T
 theorem isArithVar_of_trdeg [Nonempty K] (y : (Σ k, ι k) → G) (c : ∀ k, ι k) (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) (e : ℕ)
     (htr : Algebra.trdeg ℤ (blockFnField y) = e) : IsArithVar (mCoordIdeal y) (e + 1) := by
   refine ⟨‹_›, ⟨RingHom.ker_isPrime _, isMultiHomogIdeal y, relevant y c hc⟩, horizontal y, ?_⟩
-  rw [GlobalTheory.CompanionTheory.Ar.Cmp.ringKrullDim_coord y c hc, htr, map_add, Cardinal.toENat_nat, Cardinal.toENat_nat]
+  rw [GlobalTheory.CompanionTheory.Ar.Cmp.ringKrullDim_coord y c hc, htr, map_add (f := _), Cardinal.toENat_nat, Cardinal.toENat_nat]
   have h4 : (e : ℕ∞) + (Fintype.card K : ℕ∞) + 1 = ((e + 1 + Fintype.card K : ℕ) : ℕ∞) := by
     push_cast
     ring
@@ -95,7 +137,7 @@ theorem trdeg_of_isArithVar (x : (Σ k, ι k) → G) (d : ℕ) (hx : IsArithVar 
   rw [GlobalTheory.CompanionTheory.Ar.Cmp.ringKrullDim_coord x c hc] at hdim
   have h1 : (Algebra.trdeg ℤ (blockFnField x) + (Fintype.card K : Cardinal)).toENat + 1 =
       ((d + 1 + Fintype.card K : ℕ) : ℕ∞) := WithBot.coe_injective hdim
-  rw [map_add, Cardinal.toENat_nat] at h1
+  rw [map_add (f := _), Cardinal.toENat_nat] at h1
   have h3 : (Algebra.trdeg ℤ (blockFnField x)).toENat + ((Fintype.card K + 1 : ℕ) : ℕ∞) =
       (d : ℕ∞) + ((Fintype.card K + 1 : ℕ) : ℕ∞) := by
     push_cast at h1 ⊢
@@ -103,7 +145,7 @@ theorem trdeg_of_isArithVar (x : (Σ k, ι k) → G) (d : ℕ) (hx : IsArithVar 
     ring
   have h2 : (Algebra.trdeg ℤ (blockFnField x)).toENat = (d : ℕ∞) :=
     WithTop.add_right_cancel (ENat.coe_ne_top _) h3
-  exact Cardinal.toENat_eq_nat.mp h2
+  exact Cardinal.toENat_eq_natCast.mp h2
 
 end Dim
 

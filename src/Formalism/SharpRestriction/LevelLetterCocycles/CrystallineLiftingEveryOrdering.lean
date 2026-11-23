@@ -1,11 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ThmELiftAtOf
-import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
-import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
-import Formalism.SharpRestriction.LevelLetterCocycles.FinrankEqOneOfBijective
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ThmELiftAtOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+public import Formalism.SharpRestriction.LevelLetterCocycles.RealExtOfExact
+public import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.ThmEFinal
+public import Formalism.SharpRestriction.LevelLetterCocycles.FinrankEqOneOfBijective
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusCocycleOfRhoData
 import Formalism.SharpRestriction.LevelLetterCocycles.PhiItSmul
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusCocycleOfRhoData
-import Formalism.SharpRestriction.LevelLetterCocycles.RealExtOfExact
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcParametersShiftInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,8 +99,8 @@ def Realised2 (hR : Ring9 W) (e : W.DD W.one) : Prop :=
       ∃ D : BrData2 hR T₁ T₂ F,
         BrProps2 D e (cutsOf hC) (kdOf ty) (bbOf ty) j (gPar Gp S η) Gp S η h
 
-variable (W) in
 
+variable (W) in
 structure BrHyp2 (Cc : ℝ) : Prop where
 
   s_one : W.s = 1
@@ -150,12 +189,6 @@ theorem realised_of {Cc : ℝ} (H : BrHyp2 W Cc) : Realised W := by
           (Mb₂ + hb₂) hb1 hC
         arcs := P.arcs ϖ hϖ }
 
-theorem brHyp_of {Cc : ℝ} (H : BrHyp2 W Cc) (hnat : W.ClKNat) : BrHyp W where
-  s_one := H.s_one
-  herr := fun T hT => (H.herr T hT).2
-  nat := hnat
-  real := realised_of H
-
 theorem crystalline_lifting_second_form {Cc : ℝ} (H : BrHyp2 W Cc) : ThmELiftAt PD (O := O) n W.emb v := by
   intro _ h5 T₁ T₂ F hG hc₁ hc₂ hon j Gp S η h ty cuts arcLen Mb₁ hb₁ Mb₂ hb₂ hK hJ hg hS hC hT hb1 hb2
     hW
@@ -182,11 +215,5 @@ theorem crystalline_lifting_second_form {Cc : ℝ} (H : BrHyp2 W Cc) : ThmELiftA
         _ _, P.ext⟩ P.wprime P.arcs
   rw [parE_eq_ePar] at key
   exact liftF_ofN D.h H.s_one (by omega) (H.herr T₂ hc₂.2.2.2).2 _ key
-
-theorem crystalline_lifting_every_ordering {Cc : ℝ} (H : BrHyp2 W Cc) (emb : ZMod n → (K₀ →ₐ[Qp] LL)) :
-    ThmELiftAt PD (O := O) n emb v := by
-  intro hL
-  obtain ⟨a, rfl⟩ := exists_rot (PD := PD) W.emb_bij.2 hL.2.2.2.2.1 W.emb_σ
-  exact thmELiftAt_rot W.emb a (crystalline_lifting_second_form H) hL
 
 end Formalism.MainNotions.WachCoordinates.Br

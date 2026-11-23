@@ -1,19 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SwapNegApply
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSmulOfCommuteHeisenbergLinearModelSchwartzBruh
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SwapNegApply
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocIsoRefl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSmulOfCommuteHeisenbergLinearModelSchwartzBruh
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAtCoord
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisSliceT
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsRestExtra
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalIdempotentCharacterValue
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchrodingerPreservesSchwartzBruhat
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SliceTransformSchwartzBijective
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAdelicCharacterNontrivialAtPlaces
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisSliceT
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAtCoord
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalIdempotentCharacterValue
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SliceTransformSchwartzBijective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsRestExtra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun
 open scoped Matrix
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -110,7 +148,9 @@ theorem linForm_eq {k : Type} [CommRing k] {m n : ℕ} (l : Matrix (Fin m) (Fin 
       GlobalTheory.FlipMatch.pairM (splitC Y).1 (formL l) := by
   have e : ∀ i j, l (Matrix.single i j (Y i j)) = Y i j * l (Matrix.single i j 1) := fun i j => by
     rw [← smul_eq_mul, ← map_smul, Matrix.smul_single, smul_eq_mul, mul_one]
+
   conv_lhs => rw [Matrix.matrix_eq_sum_single Y, map_sum]
+
   simp only [map_sum, e]
   simp only [GlobalTheory.FlipMatch.pairM, splitC, formR, formL, Fin.sum_univ_add, mul_neg, Finset.sum_neg_distrib,
     sub_neg_eq_add, Finset.sum_add_distrib]
@@ -118,11 +158,11 @@ theorem linForm_eq {k : Type} [CommRing k] {m n : ℕ} (l : Matrix (Fin m) (Fin 
 
 end GlobalTheory.SwapSchur
 
-open GlobalTheory.SwapSchur in
 
+open GlobalTheory.SwapSchur in
 theorem GlobalTheory.SwapSchur.sliceT_swap_eq_smul : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (B : Base F E)
     (a a' : ℕ) (G : Geo σ a a') (X : Chars F E) (om : Rep σ G.V G.W) (om' : Rep σ G.V' G.W), IsTriple B G X om om' →
-    ∀ (v : Pl F) (t : E →ₐ[F] Fv F v)
+    ∀ (v : Pl (F := F)) (t : E →ₐ[F] Fv F v)
     (ι : (((Fin a' × Fin (a + a')) → Fv F v) → ℂ) →ₗ[ℂ] (Matrix (Fin a') (Fin (a + a')) (Fv F v) → ℂ)),
     G.M'.IsLinBar B.ψ t 1 1 ι →
     ∀ (d' : Darboux (symp (cA σ) (-1) (incM F G.W.J) (incM F G.V'.J)) (Fin a' × Fin (a + a'))),
@@ -203,7 +243,7 @@ theorem GlobalTheory.SwapSchur.sliceT_swap_eq_smul : ∀ (F E : Type) [Field F] 
       ∀ y ∈ SB (Fin a' × Fin (a + a') ⊕ Fin a' × Fin (a + a') → Fv F v), ∀ c : ℂ, ι₂ (c • x + y) = c • ι₂ x + ι₂ y := by
     intro x hx y hy c
     funext Y
-    simp only [ι₂, hSlin x hx y hy c, map_add, map_smul, Pi.add_apply, Pi.smul_apply]
+    simp only [ι₂, hSlin x hx y hy c, map_add (f := _), map_smul, Pi.add_apply, Pi.smul_apply]
 
   have tMap : ∀ (π : AE F E →+* Fv F v) (x : Matrix (Fin a') (Fin (a + a')) (AE F E)), x.map π = 0 → xᵀ.map π = 0 := by
     intro π x hx; rw [Matrix.transpose_map, hx, Matrix.transpose_zero]
@@ -217,9 +257,10 @@ theorem GlobalTheory.SwapSchur.sliceT_swap_eq_smul : ∀ (F E : Type) [Field F] 
     intro x₁ x₂ a1 a2 m1 m2 x hx Z
     have c1 : GlobalTheory.FlipMatch.coX t 1 1 x₁ᵀᵀ = 0 := by rw [Matrix.transpose_transpose]; exact coX0 _ m1
     have c2 : GlobalTheory.FlipMatch.coX t 1 1 x₂ᵀᵀ = 0 := by rw [Matrix.transpose_transpose]; exact coX0 _ m2
-    rw [hheis x₁ᵀ x₂ᵀ (atT _ a1) (atT _ a2) (by rw [c1, pairM_zero_left]) (by rw [c2, pairM_zero_left]) x hx, c1, c2,
-      Matrix.transpose_transpose, Matrix.transpose_transpose]
-    simp only [pairM_zero_right, neg_zero, add_zero, AddChar.map_zero_eq_one, one_mul]
+    have h := hheis x₁ᵀ x₂ᵀ (atT _ a1) (atT _ a2) (by rw [c1, pairM_zero_left]) (by rw [c2, pairM_zero_left]) x hx Z
+    rw [c1, c2] at h
+    set_option backward.isDefEq.respectTransparency false in
+    simpa only [Matrix.transpose_transpose, pairM_zero_right, neg_zero, add_zero, AddChar.map_zero_eq_one, one_mul] using h
   have tr2 : ∀ x₁ x₂ : Matrix (Fin a') (Fin (a + a')) (AE F E), At (evFin F v) x₁ → At (evFin F v) x₂ →
       x₁.map (piW t) = 0 → x₂.map (piW t) = 0 →
       ∀ x ∈ SB (Fin a' × Fin (a + a') ⊕ Fin a' × Fin (a + a') → Fv F v), ∀ Z,
@@ -228,10 +269,12 @@ theorem GlobalTheory.SwapSchur.sliceT_swap_eq_smul : ∀ (F E : Type) [Field F] 
     intro x₁ x₂ a1 a2 m1 m2 x hx Z
     have c1 : GlobalTheory.FlipMatch.coX t 1 1 (-x₁ᵀ)ᵀ = 0 := by rw [tNeg, coXneg, coX0 _ m1, neg_zero]
     have c2 : GlobalTheory.FlipMatch.coX t 1 1 (-x₂ᵀ)ᵀ = 0 := by rw [tNeg, coXneg, coX0 _ m2, neg_zero]
-    rw [hS _ (atCols _ _ (atT _ a1) (atT _ a2)) x hx, (hw2 _ _ (atT _ a1) (atT _ a2)).1 (tMap _ _ m1) (tMap _ _ m2),
-      hheis (-x₂ᵀ) (-x₁ᵀ) (atNeg _ (atT _ a2)) (atNeg _ (atT _ a1)) (by rw [c2, pairM_zero_left])
-        (by rw [c1, pairM_zero_left]) (S x) (hSB x hx), c1, c2, tNeg, tNeg, coYneg, coYneg]
-    simp only [pairM_zero_right, neg_zero, add_zero, AddChar.map_zero_eq_one, one_mul, sub_eq_add_neg]
+    rw [hS _ (atCols _ _ (atT _ a1) (atT _ a2)) x hx, (hw2 _ _ (atT _ a1) (atT _ a2)).1 (tMap _ _ m1) (tMap _ _ m2)]
+    have h := hheis (-x₂ᵀ) (-x₁ᵀ) (atNeg _ (atT _ a2)) (atNeg _ (atT _ a1)) (by rw [c2, pairM_zero_left])
+        (by rw [c1, pairM_zero_left]) (S x) (hSB x hx) Z
+    rw [c2, c1] at h
+    set_option backward.isDefEq.respectTransparency false in
+    simpa only [tNeg, coYneg, pairM_zero_right, neg_zero, add_zero, AddChar.map_zero_eq_one, one_mul, sub_eq_add_neg] using h
   have mu1 : ∀ x₁ x₂ : Matrix (Fin a') (Fin (a + a')) (AE F E), At (evFin F v) x₁ → At (evFin F v) x₂ →
       x₁.map (piW (t.comp σ)) = 0 → x₂.map (piW (t.comp σ)) = 0 →
       ∀ x ∈ SB (Fin a' × Fin (a + a') ⊕ Fin a' × Fin (a + a') → Fv F v), ∀ Z,
@@ -241,8 +284,10 @@ theorem GlobalTheory.SwapSchur.sliceT_swap_eq_smul : ∀ (F E : Type) [Field F] 
     intro x₁ x₂ a1 a2 m1 m2 x hx Z
     have c1 : GlobalTheory.FlipMatch.coY σ G.V' G.W t 1 1 x₁ᵀᵀ = 0 := by rw [Matrix.transpose_transpose]; exact coY0 _ m1
     have c2 : GlobalTheory.FlipMatch.coY σ G.V' G.W t 1 1 x₂ᵀᵀ = 0 := by rw [Matrix.transpose_transpose]; exact coY0 _ m2
-    rw [hheis x₁ᵀ x₂ᵀ (atT _ a1) (atT _ a2) (by rw [c1, pairM_zero_right]) (by rw [c2, pairM_zero_right]) x hx, c1, c2,
-      Matrix.transpose_transpose, Matrix.transpose_transpose, add_zero, add_zero]
+    have h := hheis x₁ᵀ x₂ᵀ (atT _ a1) (atT _ a2) (by rw [c1, pairM_zero_right]) (by rw [c2, pairM_zero_right]) x hx Z
+    rw [c1, c2] at h
+    set_option backward.isDefEq.respectTransparency false in
+    simpa only [Matrix.transpose_transpose, add_zero, Prod.mk.eta] using h
   have mu2 : ∀ x₁ x₂ : Matrix (Fin a') (Fin (a + a')) (AE F E), At (evFin F v) x₁ → At (evFin F v) x₂ →
       x₁.map (piW (t.comp σ)) = 0 → x₂.map (piW (t.comp σ)) = 0 →
       ∀ x ∈ SB (Fin a' × Fin (a + a') ⊕ Fin a' × Fin (a + a') → Fv F v), ∀ Z,

@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfD
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +110,6 @@ theorem locInA_prim {ι : Type} (v : ι → V) (h : H.Prim abelian₂ v) : H.Pri
   refine ⟨fun a => locInA_mem e hL (v a) (h1 a), ?_, ?_⟩
   · first
       | exact h2.map' (e : V →ₗ[E] V) (LinearEquiv.ker e)
-      | exact h2.map' (e : V →ₗ[E] V) (LinearMap.ker_eq_bot.2 e.injective)
   · intro x hx hxs
     have hs : e.symm x ∈ Submodule.span E (Set.range v) :=
       locInA_span_mem e.symm (fun i => e (v i)) v (fun i => e.symm_apply_apply (v i)) hxs
@@ -119,14 +161,12 @@ theorem locInA_zhat {r : ℕ} (f f' : Fin (r + 1) → V) :
     H.Zhat (fun a => e (f a)) (fun b => e (f' b)) = H.Zhat f f' := by
   first
     | (ext a b; simp only [Loc.HermSp.Zhat, Matrix.of_apply, hiso])
-    | (unfold Loc.HermSp.Zhat; simp only [hiso])
 
 omit hL in
 theorem locInA_dl {r : ℕ} (f f' : Fin (r + 1) → V) (l : ℕ) :
     H.Dl (fun a => e (f a)) (fun b => e (f' b)) l = H.Dl f f' l := by
   first
     | simp only [Loc.HermSp.Dl, locInA_zhat H e hiso f f']
-    | (unfold Loc.HermSp.Dl; rw [locInA_zhat H e hiso f f'])
 
 theorem locInA_frame {r : ℕ} (f : Fin (r + 1) → V) (T : F) (h : H.IsFrame abelian₂ r f T) :
     H.IsFrame Lam' r (fun a => e (f a)) T := by
@@ -189,8 +229,6 @@ include hf in
 theorem locInA_fs (a : Fin (r + 1)) : e.symm (t₁.f a) = t₁.f a := by
   first
     | exact e.symm_apply_eq.2 (hf a).symm
-    | (conv_lhs => rw [← hf a]
-       exact e.symm_apply_apply _)
 
 include hf' in
 theorem locInA_fs' (b : Fin (r + 1)) : e.symm (f₃' b) = f₂' b := by
@@ -229,11 +267,9 @@ theorem locInA_mk_e (x : ↥(H.perp (H.X t₁.f))) (y : ↥(H.perp (H.X t₁.f))
   have h2 : y - x ∈ (H.X t₁.f).comap (H.perp (H.X t₁.f)).subtype := h1
   first
     | exact (Submodule.Quotient.eq _).2 h2
-    | (simp only [Loc.HermSp.mkW, Submodule.mkQ_apply]
-       exact (Submodule.Quotient.eq _).2 h2)
+
 
 include hf hX in
-
 theorem lset_eq {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam₃ ↔ e.symm x ∈ Lam₂) :
     H.Lset Lam₂ t₁.f = H.Lset Lam₃ t₁.f := by
   ext w
@@ -255,12 +291,9 @@ theorem locInA_q_mk (x : ↥(H.perp (H.X f₂'))) (y : ↥(H.perp (H.X f₃'))) 
       (locInA_Xs' H e hiso hf') x = y := by
     first
       | exact Subtype.ext hy.symm
-      | exact Subtype.ext (by simp [perpEquiv, hy])
   rw [← hxy]
   first
     | rfl
-    | (simp only [qEquiv, Loc.HermSp.mkW, Submodule.mkQ_apply]
-       rfl)
 
 theorem lset_q {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam₃ ↔ e.symm x ∈ Lam₂) :
     qE H e hiso hf' '' H.Lset Lam₂ f₂' = H.Lset Lam₃ f₃' := by
@@ -277,8 +310,8 @@ theorem lset_q {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam₃ ↔
     exact ⟨H.mkW f₂' ⟨e.symm y, hp⟩, ⟨⟨e.symm y, hp⟩, (hL _).1 hy, rfl⟩,
       locInA_q_mk H e hiso hf' ⟨e.symm y, hp⟩ y (e.apply_symm_apply _).symm⟩
 
-include hf hX in
 
+include hf hX in
 theorem iota_q {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam₃ ↔ e.symm x ∈ Lam₂) (g : Loc.SplitG M.L)
     (T T' : F) :
     H.iotaGraph g (⟨Lam₃, t₁.f, f₃', T, T'⟩ : Loc.Term V M r) =
@@ -355,8 +388,8 @@ theorem locInA_dl' (l : ℕ) : H.Dl t₁.f f₃' l = H.Dl t₁.f f₂' l := by
   calc H.Dl t₁.f f₃' l = H.Dl (fun a => e (t₁.f a)) (fun b => e (f₂' b)) l := by rw [h1, h2]
     _ = H.Dl t₁.f f₂' l := locInA_dl H e hiso t₁.f f₂' l
 
-include hf hf' hX in
 
+include hf hf' hX in
 theorem ident_trans (φ' : H.Wb t₁.f' ≃ₗ[E] H.Wb f₂')
     (hI : H.Ident t₁ ⟨⊥, t₁.f, f₂', t₁.T, t₁.T'⟩ (LinearEquiv.refl E _) φ') :
     H.Ident t₁ ⟨⊥, t₁.f, f₃', t₁.T, t₁.T'⟩ (LinearEquiv.refl E _) (φ'.trans (qE H e hiso hf')) := by
@@ -364,9 +397,11 @@ theorem ident_trans (φ' : H.Wb t₁.f' ≃ₗ[E] H.Wb f₂')
   have hz := locInA_zhat' H e hiso t₁ hf hf'
   have hd : ∀ l, H.Dl t₁.f f₃' l = H.Dl t₁.f f₂' l := fun l => locInA_dl' H e hiso t₁ hf hf' l
   have hom' : H.om' t₁.f f₃' = e (H.om' t₁.f f₂') := by
-    simp only [Loc.HermSp.om', hz, map_sum, map_smul, hf']
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [Loc.HermSp.om', hz, map_sum, map_smul, hf']
   have hom : H.om t₁.f f₃' = e (H.om t₁.f f₂') := by
-    simp only [Loc.HermSp.om, hz, map_sum, map_smul, hf]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [Loc.HermSp.om, hz, map_sum, map_smul, hf]
   have h21 : ∀ y ∈ H.Xp t₁.f ⊔ H.Xp f₃', e.symm y ∈ H.Xp t₁.f ⊔ H.Xp f₂' := by
     intro y hy
     have key : H.Xp t₁.f ⊔ H.Xp f₃' ≤ (H.Xp t₁.f ⊔ H.Xp f₂').comap (e.symm : V →ₗ[E] V) := by
@@ -418,8 +453,8 @@ theorem ident_trans (φ' : H.Wb t₁.f' ≃ₗ[E] H.Wb f₂')
     rw [hd, hd]
     exact i6
 
-include hf hf' hX in
 
+include hf hf' hX in
 theorem locSet_back {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam₃ ↔ e.symm x ∈ Lam₂)
     (φ' : H.Wb t₁.f' ≃ₗ[E] H.Wb f₂')
     (hI : H.Ident t₁ ⟨⊥, t₁.f, f₂', t₁.T, t₁.T'⟩ (LinearEquiv.refl E _) φ')
@@ -463,8 +498,6 @@ theorem locSet_back {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam�
       have hinj : Function.Injective (Prod.map (qE H e hiso hf') (id : H.Wb t₁.f → H.Wb t₁.f)) := by
         first
           | exact (qE H e hiso hf').injective.prodMap Function.injective_id
-          | exact (qE H e hiso hf').injective.Prod_map Function.injective_id
-          | exact Prod.map_injective.2 ⟨(qE H e hiso hf').injective, Function.injective_id⟩
       exact Set.image_injective.2 hinj he
 
 end Move

@@ -1,10 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
+module
+
+public import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdempotentPreservesLatticeHatStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -126,6 +165,7 @@ omit [DecidableEq m] [DecidableEq n] [Fintype m] in
 theorem mulVec_map_inv (φ : R' →+* R) (ψ : R →+* R') (h : ∀ x, ψ (φ x) = x) (j : Matrix m n R') (y : n → R) :
     (j.mulVec fun a => ψ (f * y a)) = fun a => ψ (f * (j.map φ).mulVec y a) := by
   funext a
+
   simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Finset.mul_sum, map_sum, map_mul, h]
   exact Finset.sum_congr rfl fun b _ => mul_left_comm _ _ _
 
@@ -183,30 +223,6 @@ theorem swap_unswap (x) : swapAE D (unswap D x) = x :=
 theorem finE_unswap (V : HSp D) (g : GA D V) : (finE V g).val.map (unswap D) = finMat D.sp.cm.sig V.gram g := by
   ext i j
   exact unswap_swap _
-
-theorem isHeckeAt_iff : ∀ {D : D7} (V V' : HSp D) (β : GL (Fin V.rank) (EAf D)) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)) (N : ℕ) (β' : GL (Fin V'.rank) (EAf D)) (Λ' : Submodule (𝓞 D.host.E) (Fin V'.rank → D.host.E)) (N' : ℕ) (Pg : Finset (Pl D.host.E)) (j : Matrix (Fin V'.rank) (Fin V.rank) (EAf D)) (Φ : GfC V ≃ₜ* GfC V') (PP : Pl D.host.E), IsFinIso V V' β β' Pg j Φ → IsBaseFrame V β Λ N → IsBaseFrame V' β' Λ' N' → ((N : ℕ) : 𝓞 D.host.E) ∉ PP.asIdeal → ((N' : ℕ) : 𝓞 D.host.E) ∉ PP.asIdeal → ∀ k (α : GfC V), IsHeckeAt V PP k α ↔ IsHeckeAt V' PP k (Φ α) := by
-  intro D V V' β Λ N β' Λ' N' Pg j Φ PP hI hB hB' hN hN' k α
-  obtain ⟨hr, u, hu, -⟩ := hI.frame
-  obtain ⟨⟨j', h1, h2⟩, hlat⟩ := frame_inv (Formalism.L2.Herm.intAf D.host.F D.host.E) β β' (finCongr hr)
-    (intGL D.host.F D.host.E V'.rank u) u.val (u⁻¹).val rfl rfl j hu
-  have h1' := map_mul_one (unswap D) h1
-  have h2' := map_mul_one (unswap D) h2
-  have hc := map_conj (unswap D) (hI.conj α)
-  rw [finE_unswap, finE_unswap] at hc
-  have hc' := conj_inv h1' h2' hc
-  have hL : ∀ e : Formalism.L2.Theta.AE D, Formalism.L2.NTheta.IsIdemAt e PP → ∀ y, finPart D e • y ∈ Formalism.L2.NTheta.LamHat V ↔
-      finPart D e • (j.map (unswap D)).mulVec y ∈ Formalism.L2.NTheta.LamHat V' := by
-    intro e he y
-    refine ((GlobalTheory.T.idempotent_preserves_lattice_hat V β Λ N PP e hB hN he y).2.trans (hlat _)).trans
-      (Iff.trans ?_ (GlobalTheory.T.idempotent_preserves_lattice_hat V' β' Λ' N' PP e hB' hN' he _).2.symm)
-    rw [mulVec_map_inv (unswap D) (swapAE D) swap_unswap]
-  constructor
-  · rintro ⟨e, ϖ, he, hϖ, hϖ2, h⟩
-    exact ⟨e, ϖ, he, hϖ, hϖ2, transfer he.1 _ _ h1' h2' (Φ α).2 hc (hL e he)
-      (fun y => (GlobalTheory.T.idempotent_preserves_lattice_hat V β Λ N PP e hB hN he y).1) (fun y => (GlobalTheory.T.idempotent_preserves_lattice_hat V' β' Λ' N' PP e hB' hN' he y).1) h⟩
-  · rintro ⟨e, ϖ, he, hϖ, hϖ2, h⟩
-    exact ⟨e, ϖ, he, hϖ, hϖ2, transfer he.1 _ _ h2' h1' α.2 hc' (lat_inv h1' (hL e he))
-      (fun y => (GlobalTheory.T.idempotent_preserves_lattice_hat V' β' Λ' N' PP e hB' hN' he y).1) (fun y => (GlobalTheory.T.idempotent_preserves_lattice_hat V β Λ N PP e hB hN he y).1) h⟩
 
 end GlobalTheory.HeckeTrans
 

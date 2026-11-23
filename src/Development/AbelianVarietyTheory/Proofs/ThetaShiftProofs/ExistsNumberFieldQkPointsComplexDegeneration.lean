@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ModelsAt
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsPullQk
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGtExtOfTorsion
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PsiEvenTauBimultDescendOfInjective
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullDegCancelTowerOfFields
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ModelsAt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsPowEqOfBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGtExtOfTorsion
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsPullDegOfVal
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullDegCancelTowerOfFields
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PsiEvenTauBimultDescendOfInjective
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TauBimultOfIsPullDeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+
+@[expose] public section
 
 noncomputable section
 
@@ -93,8 +135,8 @@ variable {R : Type} [CommRing R] [IsDomain R] {D : DegPre R} {L : Type} [Field L
 theorem val_comp (M : IntermediateField (FractionRing R) L) :
     M.val.toRingHom.comp (algebraMap (FractionRing R) M) = algebraMap (FractionRing R) L := RingHom.ext fun _ => rfl
 
-variable (D) in
 
+variable (D) in
 def definedOver (M : IntermediateField (FractionRing R) L) : AddSubgroup (GtPtF D L) :=
   (gtExt D M.val.toRingHom (val_comp M)).range
 
@@ -162,7 +204,7 @@ theorem exists_finite_qk (hL : Laws) (hB : D.TauBimult) [IsAlgClosed L] {N : ℕ
     | add a b _ _ ha hb =>
       obtain ⟨g, m, e⟩ := ha
       obtain ⟨g', m', e'⟩ := hb
-      exact ⟨g + g', add_mem m m', by rw [nsmul_add, e, e', map_add]⟩
+      exact ⟨g + g', add_mem m m', by rw [nsmul_add, e, e', map_add (f := _)]⟩
     | smul c a _ ha =>
       obtain ⟨g, m, e⟩ := ha
       exact ⟨c • g, zsmul_mem m c, by rw [smul_comm, e, map_zsmul]⟩
@@ -193,8 +235,8 @@ structure IsTower (h₁ : IsPullDeg α D₀ D₁) (h₂ : IsPullDeg β D₁ D) (
   om_eq : ∀ (Z : Scheme.{0}) (z : Z) J J' J'', Good D₀.P.L z J → Good D₁.P.L z J' → Good D.P.L z J'' →
     ∀ x : Z ⟶ D.P.A.left, om h.w z J J'' x = om h₁.w z J J' (x ≫ proj h₂) * om h₂.w z J' J'' x
 
-open GlobalTheory.FieldPull in
 
+open GlobalTheory.FieldPull in
 theorem exists_isTower (h₁ : IsPullDeg α D₀ D₁) (h : IsPullDeg (β.comp α) D₀ D) :
     ∃ h₂ : IsPullDeg β D₁ D, IsTower h₁ h₂ h := by
   have p₁ : IsGrpPullback D₁.P.A D₀.P.A (spMap α) (proj h₁) := pull_grp h₁

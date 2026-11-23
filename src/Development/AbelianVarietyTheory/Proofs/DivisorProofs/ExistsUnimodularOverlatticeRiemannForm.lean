@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HilbertKodairaSpencer
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAHOfIsFactorAH
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsHolFormConst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -95,7 +143,7 @@ theorem exists_selfDual_overlattice {V : Type*} [AddCommGroup V] [Module ℝ V] 
     obtain ⟨n₂, h₂⟩ := hx b₁ hb₁
     obtain ⟨n₃, h₃⟩ := hx a₁ ha₁
     have e : B (a₁ + m • x) (b₁ + k • x) = B a₁ b₁ + k * B a₁ x + m * B x b₁ + m * k * B x x := by
-      simp only [← Int.cast_smul_eq_zsmul ℝ, map_add, map_smul, LinearMap.add_apply,
+      simp only [← Int.cast_smul_eq_zsmul ℝ, map_add (f := _), map_smul, LinearMap.add_apply,
         LinearMap.smul_apply, smul_eq_mul]
       ring
     refine ⟨n₁ - k * n₃ + m * n₂, ?_⟩
@@ -126,8 +174,9 @@ theorem exists_nsmul_mem_of_dual {g : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH
     rw [hGe]; rfl
   have key : ∀ (c : _ → ℝ) i, imForm Hm (∑ j, c j • e j) (e i) = (Matrix.mulVec GR c) i := by
     intro c i
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply,
-      smul_eq_mul, Matrix.mulVec, dotProduct, hGRe]
+    smul_eq_mul, Matrix.mulVec, dotProduct, hGRe]
     exact Finset.sum_congr rfl fun j _ => mul_comm _ _
   have hd : G.det ≠ 0 := by
     intro h0
@@ -207,12 +256,12 @@ theorem exists_unimodular_overlattice : ∀ (g : ℕ) (Λ : Submodule ℤ (Fin g
   have inj : Function.Injective (Int.cast : ℤ → ℝ) := Int.cast_injective
   let Ef : LinearMap.BilinForm ℤ Λ₁ := LinearMap.mk₂ ℤ F
     (fun a a' b => inj (by
-      rw [Int.cast_add, ← hF, ← hF, ← hF, Submodule.coe_add, map_add, LinearMap.add_apply]))
+      rw [Int.cast_add, ← hF, ← hF, ← hF, Submodule.coe_add, map_add (f := _), LinearMap.add_apply]))
     (fun c a b => inj (by
       rw [smul_eq_mul, Int.cast_mul, ← hF, ← hF, Submodule.coe_smul, ← Int.cast_smul_eq_zsmul ℝ,
         map_smul, LinearMap.smul_apply, smul_eq_mul]))
     (fun a b b' => inj (by
-      rw [Int.cast_add, ← hF, ← hF, ← hF, Submodule.coe_add, map_add]))
+      rw [Int.cast_add, ← hF, ← hF, ← hF, Submodule.coe_add, map_add (f := _)]))
     (fun c a b => inj (by
       rw [smul_eq_mul, Int.cast_mul, ← hF, ← hF, Submodule.coe_smul, ← Int.cast_smul_eq_zsmul ℝ,
         map_smul, smul_eq_mul]))
@@ -237,6 +286,7 @@ theorem exists_unimodular_overlattice : ∀ (g : ℕ) (Λ : Submodule ℤ (Fin g
     set x : Fin g → ℂ := ∑ i, (φ (b i) : ℝ) • D i with hx_def
     have hxe : ∀ j, imForm Hm x (e j) = φ (b j) := by
       intro j
+
       rw [hx_def, map_sum, LinearMap.sum_apply]
       simp only [map_smul, LinearMap.smul_apply, smul_eq_mul, hD,
         LinearMap.BilinForm.apply_dualBasis_left, mul_ite, mul_one, mul_zero]

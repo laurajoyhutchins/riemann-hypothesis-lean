@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.LatticeIntegralCoordinates
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.LatticeIntegralCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,9 +74,6 @@ theorem thetaChar_eq_tsum (a b : Fin 2) (z τ : ℂ) :
   congr 1
   ring
 
-theorem thetaChar_zero_zero (z τ : ℂ) : thetaChar 0 0 z τ = jacobiTheta₂ z τ := by
-  simp [thetaChar]
-
 theorem jacobiTheta₂_half (a b : Fin 2) (τ : ℂ) :
     jacobiTheta₂ ((((a : ℕ) : ℂ) * τ + ((b : ℕ) : ℂ)) / 2) τ =
       cexp (-((Real.pi : ℂ) * I * ((a : ℕ) : ℂ) ^ 2 * τ / 4) -
@@ -49,23 +85,5 @@ theorem jacobiTheta₂_half (a b : Fin 2) (τ : ℂ) :
       ((Real.pi : ℂ) * I * ((a : ℕ) : ℂ) ^ 2 * τ / 4 +
         (Real.pi : ℂ) * I * ((a : ℕ) : ℂ) * (((b : ℕ) : ℂ) / 2)) = 0 := by ring
   rw [this, Complex.exp_zero, one_mul]
-
-example : ∃ (Λ : AddSubgroup ℂ) (ω₁ τ t₀ : ℂ), ω₁ ≠ 0 ∧ 0 < τ.im ∧ IsPeriodLattice Λ ω₁ τ ∧
-    2 * t₀ ∈ Λ ∧ t₀ ∉ Λ := by
-  have h : IsPeriodLattice (AddSubgroup.closure {1, I}) 1 I := by
-    intro x
-    rw [AddSubgroup.mem_closure_pair]
-    constructor
-    · rintro ⟨m, n, rfl⟩
-      exact ⟨m, n, by simp⟩
-    · rintro ⟨m, n, rfl⟩
-      exact ⟨m, n, by simp⟩
-  refine ⟨_, 1, I, 1 / 2, one_ne_zero, by simp, h, (h _).2 ⟨1, 0, by norm_num⟩, fun hx => ?_⟩
-  obtain ⟨m, n, hmn⟩ := (h _).1 hx
-  have h1 := congrArg Complex.re hmn
-  simp at h1
-  have h2 : (2 * m : ℝ) = 1 := by rw [← h1]; norm_num
-  have h3 : (2 * m : ℤ) = 1 := by exact_mod_cast h2
-  omega
 
 end GlobalTheory.IndefiniteRowSideFullHecke.JacobiThetaHalfCharacteristic

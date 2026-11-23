@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RDualC
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RDualC
+import Formalism.LocalToGlobal.UnitaryNorms.CharUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,7 +48,7 @@ open NumberField IsDedekindDomain Matrix Formalism.L2.Host GlobalTheory.LFun
 
 namespace GlobalTheory.CuspRep
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem invT_val_eq (g : GA E a) : (invT a (Ad E) g).val = (g.valᵀ)⁻¹ := by
   change (g⁻¹).valᵀ = _
@@ -31,11 +70,7 @@ variable (π : CuspSub E a)
 
 def contra : CuspSub E a := UpperTheory.V.TC.dual π
 
-@[simp] theorem contra_contra : π.contra.contra = π := UpperTheory.V.TC.dual_dual π
-
 variable {π} {π' : CuspSub E a}
-
-theorem Iso.contra (h : Iso π π') : Iso π.contra π'.contra := UpperTheory.V.TC.iso_dual h
 
 theorem HasCentral.contra {ω : HChar E} (h : π.HasCentral ω) : π.contra.HasCentral ω⁻¹ := by
   rintro z _ ⟨ψ, hψ, rfl⟩
@@ -48,30 +83,9 @@ theorem IsUnitary.contra (h : π.IsUnitary) : π.contra.IsUnitary := by
   obtain ⟨ω, h1, h2⟩ := h
   exact ⟨ω⁻¹, h1.inv, h2.contra⟩
 
-theorem HasSatGL.contra {w : HeightOneSpectrum (𝓞 E)} {B : Multiset ℂˣ} (h : HasSatGL w (π.locRep w) B) :
-    HasSatGL w (π.contra.locRep w) (B.map (·⁻¹)) := UpperTheory.V.TC.hasSatGL_dual h
-
 end CuspSub
 
 namespace CG
-
-def contra (π : CG E a) : CG E a :=
-  Quotient.map (sa := CuspSub.setoid E a) (sb := CuspSub.setoid E a) CuspSub.contra (fun _ _ h => h.contra) π
-
-@[simp] theorem contra_mk (π : CuspSub E a) : (mk π).contra = mk π.contra := rfl
-
-theorem IsUnitary.contra {π : CG E a} (h : π.IsUnitary) : π.contra.IsUnitary := by
-  induction π using Quotient.inductionOn with
-  | _ π => exact (isUnitary_mk π.contra).2 ((isUnitary_mk π).1 h).contra
-
-theorem HasSat.contra {π : CG E a} {w : HeightOneSpectrum (𝓞 E)} {B : Multiset ℂˣ} (h : π.HasSat w B) :
-    π.contra.HasSat w (B.map (·⁻¹)) := by
-  induction π using Quotient.inductionOn with
-  | _ π => exact CuspSub.HasSatGL.contra h
-
-@[simp] theorem contra_contra (π : CG E a) : π.contra.contra = π := by
-  induction π using Quotient.inductionOn with
-  | _ π => exact congrArg mk π.contra_contra
 
 end CG
 

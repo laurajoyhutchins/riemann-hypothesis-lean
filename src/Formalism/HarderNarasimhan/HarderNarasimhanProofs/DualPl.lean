@@ -1,14 +1,85 @@
-import Formalism.HarderNarasimhan.QuotRealize
-import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SizeMu
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.PlaceSplit
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.Duality
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.MuChar
+module
+
+import Lemmata.FiberEquations.FiberEq
+public import Formalism.HarderNarasimhan.QuotRealize
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DegSupermodZ
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.Duality
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ExistsSmulMemOfFinrankEq
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.MuChar
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SatBasic
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ExistsSmulMemOfFinrankEq
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ShiftInvariance
-import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DegSupermodZ
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.ShiftInvariance
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SizeMu
+import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
+import Formalism.LatticeSlopes.LatticeSlopesProofs.DegQuot
+import Formalism.LatticeSlopes.LatticeSlopesProofs.DiscreteTopologyOfLe
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Module NumberField
 
@@ -67,32 +138,9 @@ namespace Formalism.HN.DualPolygon
 
 open Formalism.HN
 
-theorem ident_trace_eq {K : Type} [Field K] [NumberField K] [IsTotallyComplex K] (a : K) :
+theorem ident_trace_eq {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (a : K) :
     ((Algebra.trace ℚ K a : ℚ) : ℝ) = ∑ v : InfinitePlace K, 2 * (v.embedding a).re := by
-  classical
-  have h := trace_eq_sum_embeddings (K := ℚ) (L := K) ℂ (x := a)
-  rw [← Fintype.sum_equiv (RingHom.equivRatAlgHom K ℂ) (fun φ => φ a)
-      (fun σ => σ a) (fun _ => by simp [RingHom.equivRatAlgHom_apply])] at h
-  rw [← Finset.sum_fiberwise Finset.univ InfinitePlace.mk (fun φ => φ a)] at h
-  have h2 := congrArg Complex.re h
-  rw [Complex.re_sum] at h2
-  have hq : (algebraMap ℚ ℂ (Algebra.trace ℚ K a)).re = ((Algebra.trace ℚ K a : ℚ) : ℝ) := by
-    simp
-  rw [hq] at h2
-  rw [h2]
-  refine Finset.sum_congr rfl fun w _ => ?_
-  rw [Complex.re_sum]
-  have hfib : ∀ φ ∈ (Finset.univ.filter fun φ : K →+* ℂ => InfinitePlace.mk φ = w),
-      (φ a).re = (w.embedding a).re := by
-    intro φ hφ
-    have hm := (Finset.mem_filter.mp hφ).2
-    rw [← InfinitePlace.mk_embedding w, InfinitePlace.mk_eq_iff] at hm
-    rcases hm with rfl | hc
-    · rfl
-    · rw [← hc, ComplexEmbedding.conjugate_coe_eq, Complex.conj_re]
-  rw [Finset.sum_congr rfl hfib, Finset.sum_const, InfinitePlace.card_filter_mk_eq,
-    (IsTotallyComplex.isComplex w).mult_eq_two]
-  simp
+  apply Bl.FiberEquations.goal1 <;> assumption
 
 section Assumptions
 
@@ -129,11 +177,12 @@ theorem ident_sum_fcoord (b : Basis ι K V) (X : InfinitePlace K → Matrix ι �
   rw [Matrix.mulVec_transpose, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec,
     Matrix.mul_nonsing_inv _ (hX v), Matrix.one_mulVec]
   conv_rhs => rw [← b.sum_repr x]
+
   simp only [map_sum, map_smul, smul_eq_mul, map_mul, dotProduct, Formalism.HermitianLatticesTheory.vecAt]
   refine Finset.sum_congr rfl fun i _ => ?_
   ring
 
-theorem inner_realize_alt [IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
+theorem inner_realize_alt [_root_.NumberField.IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
     (hX : ∀ v, IsUnit (X v).det) (x : V) (f : Module.Dual K V) :
     inner ℝ (Formalism.HermitianLatticesTheory.realize b X x) ((2 : ℝ) • cE (Formalism.HermitianLatticesTheory.realize b.dualBasis (dualFrame X) f)) =
       ((Algebra.trace ℚ K (f x) : ℚ) : ℝ) := by
@@ -151,7 +200,7 @@ theorem ident_mem_zl {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E
     (N : Submodule (𝓞 K) V) (w : E) : w ∈ zl ρ N ↔ ∃ x ∈ N, ρ x = w :=
   Iff.rfl
 
-theorem span_zl_top [IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
+theorem span_zl_top [_root_.NumberField.IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
     (hX : ∀ v, IsUnit (X v).det) (N : Submodule (𝓞 K) V) (hN : N.FG)
     (hsp : Submodule.span K (N : Set V) = ⊤) :
     Submodule.span ℝ (zl (Formalism.HermitianLatticesTheory.realize b X) N :
@@ -193,7 +242,7 @@ theorem ident_inner_spanZ_eq_zero {E : Type*} [NormedAddCommGroup E] [InnerProdu
     rw [show (c • u : E) = (c : ℝ) • u from (Int.cast_smul_eq_zsmul ℝ c u).symm,
       real_inner_smul_left, hu, mul_zero]
 
-theorem dualZ_zl_eq [IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
+theorem dualZ_zl_eq [_root_.NumberField.IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
     (hX : ∀ v, IsUnit (X v).det) (A : Submodule (𝓞 K) V) (hA : A.FG)
     (hsp : Submodule.span K (A : Set V) = ⊤) (N : Submodule (𝓞 K) V) :
     dualZ (zl (Formalism.HermitianLatticesTheory.realize b X) A) ⊓
@@ -239,8 +288,9 @@ theorem dualZ_zl_eq [IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K
     let c : s → K := fun j => ∑ k, ((t j k : ℚ)) • ω' k
     have hc : ∀ j l, Algebra.trace ℚ K (integralBasis K l * c j) = (t j l : ℚ) := by
       intro j l
+
       simp only [c, Finset.mul_sum, mul_smul_comm, map_sum, map_smul, hω, smul_eq_mul, mul_ite,
-        mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+      mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
     have hsp' : ⊤ ≤ Submodule.span K (Set.range e) := by
       rw [show Set.range e = s from Subtype.range_coe, hspan, hsp]
     let eB : Basis s K V := Basis.mk hli hsp'
@@ -596,16 +646,9 @@ theorem twist_le (𝔟 : Ideal (𝓞 K)) (h𝔟 : 𝔟 ≠ ⊥) : ∀ (X : Submo
 
 omit [FiniteDimensional K W] in
 include K in
-theorem twist_torsionFree : IsAddTorsionFree W := ⟨fun n hn a c h => by
+theorem twist_torsionFree : IsAddTorsionFree W := ⟨fun n hn a c _ h => by
   have h' : (n : K) • a = (n : K) • c := by simpa [Nat.cast_smul_eq_nsmul] using h
   exact smul_right_injective W (Nat.cast_ne_zero.2 hn) h'⟩
-
-example (X : Submodule (𝓞 K) W) : Module.IsTorsionFree ℤ X := by
-  have := twist_torsionFree (K := K) (W := W)
-  infer_instance
-example (X : Submodule (𝓞 K) W) (hX : X.FG) : Module.Finite ℤ X := by
-  have : Module.Finite (𝓞 K) X := Module.Finite.iff_fg.mpr hX
-  exact Module.Finite.trans (𝓞 K) X
 
 end Twist
 
@@ -634,7 +677,9 @@ theorem twist_finrank_int [StarRing K] (X : Submodule (𝓞 K) W) (hX : X.FG) :
 theorem twist_int (X : Submodule (𝓞 K) W) (hX : X.FG) (m : ℕ) (hm : m ≠ 0) :
     ((Ideal.span {(m : 𝓞 K)}) • X).toAddSubgroup.relIndex X.toAddSubgroup =
       m ^ finrank ℤ X := by
-  have htf := twist_torsionFree (K := K) (W := W)
+  letI : HasUniqueDiv W := ⟨fun n hn a c h => by
+    apply smul_right_injective W (Nat.cast_ne_zero.2 hn : (n : K) ≠ 0)
+    simpa [Nat.cast_smul_eq_nsmul] using h⟩
   have : Module.Finite (𝓞 K) X := Module.Finite.iff_fg.mpr hX
   have : Module.Finite ℤ X := Module.Finite.trans (𝓞 K) X
   rw [Submodule.ideal_span_singleton_smul]
@@ -658,7 +703,7 @@ theorem twist_int (X : Submodule (𝓞 K) W) (hX : X.FG) (m : ℕ) (hm : m ≠ 0
         have := congrArg (fun z : H.toIntSubmodule => ((z : X) : W)) hxy
         simpa [f] using this
       rw [Submodule.coe_smul_of_tower, Submodule.coe_smul_of_tower] at h1
-      exact Subtype.ext (htf.nsmul_right_injective hm h1)
+      exact Subtype.ext (nsmul_right_injective hm h1)
     · rintro ⟨z, hz⟩
       have hz' : (z : W) ∈ (m : 𝓞 K) • X := by
         have : z ∈ H := hz
@@ -671,10 +716,12 @@ theorem twist_int (X : Submodule (𝓞 K) W) (hX : X.FG) (m : ℕ) (hm : m ≠ 0
       exact hxz
   let e := AddEquiv.ofBijective f hf
   have key := Submodule.natAbs_det_equiv H.toIntSubmodule e
-  have hlin : H.toIntSubmodule.subtype ∘ₗ AddMonoidHom.toIntLinearMap (e : X →+ H.toIntSubmodule) =
+  have hlin : H.toIntSubmodule.subtype ∘ₗ AddMonoidHom.toIntLinearMap e.toAddMonoidHom =
       (m : ℤ) • LinearMap.id := by
     ext x
     simp [e, f]
+  change Int.natAbs (LinearMap.det (H.toIntSubmodule.subtype ∘ₗ
+    AddMonoidHom.toIntLinearMap e.toAddMonoidHom)) = _ at key
   rw [hlin, LinearMap.det_smul, LinearMap.det_id, mul_one] at key
   change H.index = _
   rw [Int.natAbs_pow, Int.natAbs_natCast] at key
@@ -686,7 +733,7 @@ theorem twist_absNorm_nat (m : ℕ) :
   have : (m : 𝓞 K) = algebraMap ℤ (𝓞 K) (m : ℤ) := by simp
   rw [this, Algebra.norm_algebraMap, RingOfIntegers.rank, Int.natAbs_pow, Int.natAbs_natCast]
 
-theorem twist_index {K W : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+theorem twist_index {K W : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
     [AddCommGroup W] [Module K W] [Module (𝓞 K) W] [IsScalarTower (𝓞 K) K W]
     [FiniteDimensional K W] (X : Submodule (𝓞 K) W) (hX : X.FG) (𝔟 : Ideal (𝓞 K))
     (h𝔟 : 𝔟 ≠ ⊥) :
@@ -829,7 +876,7 @@ theorem dualLat_span [FiniteDimensional K V] (A : Submodule (𝓞 K) V) (hA : A.
     | add z w _ _ hz hw =>
       obtain ⟨a, ha⟩ := hz
       obtain ⟨c, hc⟩ := hw
-      exact ⟨a + c, by rw [map_add, map_add, ha, hc]⟩
+      exact ⟨a + c, by rw [map_add (f := _), map_add (f := _), ha, hc]⟩
     | smul r z _ hz =>
       obtain ⟨a, ha⟩ := hz
       refine ⟨r * a, ?_⟩
@@ -856,7 +903,7 @@ theorem eq_mul_of_log_eq_add {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c
 
 section Key
 
-variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] [Fintype ι]
   [DecidableEq ι]
 
@@ -1025,7 +1072,7 @@ theorem ht_alg (f r j : ℕ) (D u cR cL cS : ℝ) (hu : u ^ 2 * D = 1)
 
 section HtDual
 
-variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] [Fintype ι]
   [DecidableEq ι]
 
@@ -1054,7 +1101,7 @@ theorem ht_bot (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ) :
   rw [h1, h2, (Formalism.F.covolBasic _).1]
   simp
 
-omit [StarRing K] [IsTotallyComplex K] [Fintype ι] [DecidableEq ι] in
+omit [StarRing K] [_root_.NumberField.IsTotallyComplex K] [Fintype ι] [DecidableEq ι] in
 theorem annO_bot : annO (⊥ : Submodule (𝓞 K) V) = ⊤ := by
   ext f
   simp only [Submodule.mem_top, iff_true]
@@ -1088,7 +1135,7 @@ open Formalism.HN
 
 section DD
 
-variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] [Fintype ι]
   [DecidableEq ι]
 
@@ -1217,7 +1264,7 @@ open Formalism.HN
 
 section HNDual
 
-variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+variable {K V ι : Type} [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
   [AddCommGroup V] [Module K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] [Fintype ι]
   [DecidableEq ι]
 
@@ -1549,15 +1596,15 @@ theorem dual_polygon_identity : DualPl := by
       have h1 : leastSize b.dualBasis (dualFrame X) (dualLat A) = 0 := by
         unfold leastSize
         convert Real.sInf_empty
-        ext t
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+        change _ ↔ False
+        simp only [iff_false]
         rintro ⟨R, -, hR0, -⟩
         exact hR0 (eq_bot_iff.2 fun f _ => (Submodule.mem_bot _).2 (hdual f))
       have h2 : largestSize b X A = 0 := by
         unfold largestSize
         convert Real.sSup_empty
-        ext t
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+        change _ ↔ False
+        simp only [iff_false]
         rintro ⟨S, hS, hSA, -⟩
         exact hSA (le_antisymm hS.1 (by rw [hA0]; exact bot_le))
       rw [h1, h2, inv_zero]
@@ -1578,15 +1625,15 @@ theorem dual_polygon_identity : DualPl := by
       have h1 : largestSize b.dualBasis (dualFrame X) (dualLat A) = 0 := by
         unfold largestSize
         convert Real.sSup_empty
-        ext t
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+        change _ ↔ False
+        simp only [iff_false]
         rintro ⟨S, -, hSA, -⟩
         exact hSA (by rw [hbot S, hbot (dualLat A)])
       have h2 : leastSize b X A = 0 := by
         unfold leastSize
         convert Real.sInf_empty
-        ext t
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false]
+        change _ ↔ False
+        simp only [iff_false]
         rintro ⟨R, hR, hR0, -⟩
         exact hR0 (le_antisymm (by rw [← hA0]; exact hR) bot_le)
       rw [h1, h2, inv_zero]

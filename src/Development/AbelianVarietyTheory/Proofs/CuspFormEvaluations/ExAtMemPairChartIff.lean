@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsUniqueSecIsFnAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsUniqueSecIsFnAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
 import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertTrivialOfNowhereVanishing
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SemicharacterSqEqOneOfSymmetric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -133,7 +179,7 @@ theorem exists_isPullConst (hL : L.IsLB) {Hm : Matrix (Fin g) (Fin g) ℂ} {χ :
       rw [hrj _ _ hj', hrj _ _ hj, exAt_add_period u p z l l.2]
       simp only [Matrix.cons_val_zero, Matrix.cons_val_one, ContinuousLinearMap.coe_coe,
         LinearMap.coe_toContinuousLinearMap']
-      rw [hAH.2.2.2 l i z hi, hAH.2.2.2 ⟨Φ l, map_mem_period hΦ l.2⟩ i' (Φ z) hi', map_add,
+      rw [hAH.2.2.2 l i z hi, hAH.2.2.2 ⟨Φ l, map_mem_period hΦ l.2⟩ i' (Φ z) hi', map_add (f := _),
         hBf, hBf]
       have n1 := zpow_ne_zero a (hχ l)
       have n2 := zpow_ne_zero b (hχ ⟨Φ l, map_mem_period hΦ l.2⟩)
@@ -208,30 +254,21 @@ theorem IsPullConst.eq_one (hL : L.IsLB) {rig : LB.Gen (L.pull (eSec A))} (hrig 
   rw [ex_zero] at hi
   exact fun _ hy => Set.mem_iInter.2 fun _ => hi hy
 
-theorem IsPullConst.unique (hL : L.IsLB) {m : T ⊗ A ⟶ A} {Φ : (Fin g → ℂ) → Fin g → ℂ}
-    (hΦ : ∀ z, exAt u p z ≫ m.left = (u.ex (Φ z)).left) {a b : ℤ}
-    {α : LB.Gen (LB.LinComb L (K := Fin 2) ![(snd T A).left, m.left] ![a, -b])} {c c' : ℂ}
-    (hc : IsPullConst u p Φ a b α c) (hc' : IsPullConst u p Φ a b α c') : c = c' := by
-  obtain ⟨i, hi⟩ := exists_chart u valueRules hL 0
-  obtain ⟨i', hi'⟩ := exists_chart u valueRules hL (Φ 0)
-  have hj := (exAt_mem_pairChart_iff (hΦ 0) ![i, i']).2 ⟨hi, hi'⟩
-  exact mul_right_cancel₀ (zpow_ne_zero a (u.fr_ne i 0 hi)) ((hc _ 0 hj).symm.trans (hc' _ 0 hj))
 
 variable (p) in
-
 theorem exAt_snd_comp {f : A ⟶ A} {z w : Fin g → ℂ} (h : u.ex w = u.ex z ≫ f) :
     exAt u p z ≫ (snd T A ≫ f).left = (u.ex w).left := by
   rw [Over.comp_left, ← Category.assoc, exAt_snd, h, Over.comp_left]
 
-variable (u) in
 
+variable (u) in
 theorem ex_natCast_smul (k : ℕ) (z : Fin g → ℂ) : u.ex ((k : ℂ) • z) = u.ex z ^ k := by
   induction k with
   | zero => rw [Nat.cast_zero, zero_smul, ex_zero, pow_zero]
   | succ n ih => rw [Nat.cast_succ, add_smul, one_smul, u.ex_add, ih, pow_succ]
 
-variable (u p) in
 
+variable (u p) in
 theorem exAt_mulT (k : ℕ) (z : Fin g → ℂ) :
     exAt u p z ≫ (mulT A T k).left = exAt u p ((k : ℂ) • z) :=
   (Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left (by

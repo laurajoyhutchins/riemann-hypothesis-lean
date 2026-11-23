@@ -1,17 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfUnit
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BplusOfEquivariant
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.NotIsConjPlOfIdemSum
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GridHeckeCharactersExist
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasSignatureFromBlocks
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelCharactersUnramifiedOffLevelPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NegativeIndexAdditive
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemOrth
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
 import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfUnit
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegIdxOfIsStd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TopTie
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfDefinite
-import Development.AbelianVarietyTheory.Definitions.Divisors.BplusOfEquivariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsEtaTildeUnramified
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GridNodeSignatureSelfDual
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OrthogonalSumSelfDualExists
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GridHeckeCharactersExist
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NegativeIndexAdditive
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,8 +112,8 @@ end Sum
 
 section Idem
 
-open Formalism.IndefR.Lev in
 
+open Formalism.IndefR.Lev in
 theorem idem_exists {D : D7} {T : Type} {Lc : LevCh D T} {sc : GlobalTheory.ChiGrid.Consts} (G : GridData Lc sc) {μ₀ : T}
     (hL : Lc.Is μ₀) (W : G.Weil) (t : T) : ∃ e : AE D, IsIdemSum e (locPl G t) := by
   classical
@@ -110,6 +148,7 @@ theorem idem_exists {D : D7} {T : Type} {Lc : LevCh D T} {sc : GlobalTheory.ChiG
     simp only [es, dif_pos h]
     exact (Formalism.IndefR.Fin.idem_exists_at PP h).choose_spec.1
   refine ⟨∑ PP ∈ locPl G t, es PP, ⟨es, hes, rfl⟩, ?_⟩
+
   rw [map_sum, Finset.sum_mul_sum]
   refine Finset.sum_eq_zero fun PP hPP => Finset.sum_eq_zero fun PP' hPP' => ?_
   exact Formalism.IndefR.Fin.idem_orth_conj (hnc PP hPP PP hPP) (hes PP hPP) (hes PP' hPP') (hnc PP hPP PP' hPP')

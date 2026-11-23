@@ -1,8 +1,53 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.Support
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.ImmersionPush
-import GroundTheory.ArithmeticGeometry.EtaleCompletion.PullbackAffine
-import GroundTheory.ArithmeticGeometry.EtaleCompletion.QcohZariski
+module
+
+public import GroundTheory.ArithmeticGeometry.EtaleCompletion.QcohZariski
+public import GroundTheory.ArithmeticGeometry.EtaleCompletion.ModulesPullback
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Quasicoherent
+public import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+public import GroundTheory.ArithmeticGeometry.EtaleCompletion.PullbackAffine
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -22,12 +67,15 @@ lemma isIso_of_bijective_app_affine {M N : X.Modules} (f : M ⟶ N)
   have hB : Opens.IsBasis (Set.range fun U : X.affineOpens => (U : X.Opens)) := by
     rw [Subtype.range_coe]
     exact X.isBasis_affineOpens
-  have : IsIso (modulesAbMap f) := TopCat.Sheaf.isIso_iff_isIso_basis hB
-    fun U => (ConcreteCategory.isIso_iff_bijective _).2 (h U.1 U.2)
-  refine isIso_of_bijective_app f fun U => ?_
-  have h1 : IsIso ((sheafToPresheaf _ _).map (modulesAbMap f)) := inferInstance
-  have h2 := NatIso.isIso_app_of_isIso ((sheafToPresheaf _ _).map (modulesAbMap f)) (op U)
-  exact (ConcreteCategory.isIso_iff_bijective _).1 h2
+  let φ : modulesAb M ⟶ modulesAb N := ⟨f.mapPresheaf⟩
+  have : IsIso φ := TopCat.Sheaf.isIso_iff_isIso_basis hB fun U => by
+    change IsIso (f.mapPresheaf.app (op U.1))
+    rw [Scheme.Modules.mapPresheaf_app]
+    exact (ConcreteCategory.isIso_iff_bijective _).2 (h U.1 U.2)
+  have : IsIso ((Scheme.Modules.toPresheaf X).map f) := by
+    rw [Scheme.Modules.toPresheaf_map]
+    exact Functor.map_isIso (sheafToPresheaf _ _) φ
+  exact isIso_of_reflects_iso f (Scheme.Modules.toPresheaf X)
 
 lemma bijective_app_of_bijective_app_affine {M N : X.Modules} (f : M ⟶ N) (W : X.Opens)
     (h : ∀ V : X.Opens, IsAffineOpen V → V ≤ W → Function.Bijective (f.app V)) :
@@ -195,32 +243,6 @@ theorem bijective_unit_app_of_le (ψ : Y ⟶ X) (F : X.Modules) [F.IsQuasicohere
   have hVtop : V.ι ''ᵁ ⊤ = V := Scheme.Opens.ι_image_top V
   exact bijective_pullbackUnitApp_of_isClosedImmersion ψ F hV fun a ha m =>
     hkill _ (by rw [hVtop]; exact hV) (hVtop.le.trans hVW) a ha m
-
-theorem isIso_counit_of_isClosedImmersion (j : Y ⟶ X) [IsClosedImmersion j] (G : Y.Modules)
-    [G.IsQuasicoherent] :
-    IsIso ((Scheme.Modules.pullbackPushforwardAdjunction j).counit.app G) := by
-  let adj := Scheme.Modules.pullbackPushforwardAdjunction j
-  let P := (Scheme.Modules.pushforward j).obj G
-  have : P.IsQuasicoherent := isQuasicoherent_pushforward_of_isAffineHom j G
-  have : IsClosedImmersion (j ∣_ ⊤) := inferInstance
-  have hu : IsIso (adj.unit.app P) := by
-    refine isIso_of_bijective_app _ fun V => ?_
-    refine bijective_unit_app_of_le j P ⊤ (fun V _ _ a ha m => ?_) V le_top
-    change j.app V a • (show Γ(G, j ⁻¹ᵁ V) from m) = 0
-    rw [ha, zero_smul]
-  have htri := adj.right_triangle_components G
-  have hp : IsIso ((Scheme.Modules.pushforward j).map (adj.counit.app G)) := by
-    have : (Scheme.Modules.pushforward j).map (adj.counit.app G) = inv (adj.unit.app P) := by
-      rw [← cancel_epi (adj.unit.app P), IsIso.hom_inv_id]
-      exact htri
-    rw [this]
-    infer_instance
-  refine isIso_of_bijective_app _ fun V => ?_
-  obtain ⟨U, rfl⟩ : ∃ U : X.Opens, j ⁻¹ᵁ U = V := by
-    obtain ⟨U, hU, hUV⟩ := j.isClosedEmbedding.isInducing.isOpen_iff.1 V.isOpen
-    exact ⟨⟨U, hU⟩, Opens.ext hUV⟩
-  exact ConcreteCategory.bijective_of_isIso
-    (((Scheme.Modules.pushforward j).map (adj.counit.app G)).app U)
 
 end Unit
 

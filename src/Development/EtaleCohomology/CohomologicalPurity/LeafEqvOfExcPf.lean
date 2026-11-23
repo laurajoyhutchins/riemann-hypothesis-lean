@@ -1,4 +1,50 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafExcLevelPf
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafExcLevelPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Types.Pushouts
+import Mathlib.CategoryTheory.Presentable.Type
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits GlobalTheory.EtC AlgebraicGeometry CochainComplex.HomComplex
@@ -61,34 +107,55 @@ section
 variable {P' P : Arrow Spc} (φ : P' ⟶ P)
 open LateralTheory.CohomologicalPurity LateralTheory.CohomologicalPurity.TubeCut
 
-abbrev jj : P.right ⟶ MM φ := pushout.inr _ _
-abbrev ii : P'.right ⟶ MM φ := pushout.inl _ _
-def rr : MM φ ⟶ P.right := pushout.desc φ.right (𝟙 _) (by simp)
-def hh : dbl P' ⟶ MM φ := pushout.desc (ii φ) (φ.right ≫ jj φ) (by
-  exact (pushout.condition).trans (Category.assoc _ _ _))
+abbrev jj : P.right ⟶ MM φ := pushout.inr P'.hom (P'.hom ≫ φ.right)
+abbrev ii : P'.right ⟶ MM φ := pushout.inl P'.hom (P'.hom ≫ φ.right)
+def rr : MM φ ⟶ P.right :=
+  pushout.desc (f := P'.hom) (g := P'.hom ≫ φ.right) φ.right (𝟙 _) (by simp)
+def hh : dbl P' ⟶ MM φ :=
+  pushout.desc (f := P'.hom) (g := P'.hom) (ii φ) (φ.right ≫ jj φ) (by
+    exact (pushout.condition (f := P'.hom) (g := P'.hom ≫ φ.right)).trans
+      (Category.assoc _ _ _))
 abbrev Jr : Arrow Spc := Arrow.mk (jj φ)
-def ss : dbl (Jr φ) ⟶ MM φ := pushout.desc (𝟙 _) (rr φ ≫ jj φ) (by
-  change jj φ ≫ 𝟙 _ = jj φ ≫ rr φ ≫ jj φ
-  rw [← Category.assoc, show jj φ ≫ rr φ = 𝟙 _ from pushout.inr_desc _ _ _]; simp)
 
-theorem jr : jj φ ≫ rr φ = 𝟙 _ := pushout.inr_desc _ _ _
-theorem j_gM : jj φ ≫ gM φ = dbl.inr P := pushout.inr_desc _ _ _
+theorem jr : jj φ ≫ rr φ = 𝟙 _ :=
+  pushout.inr_desc (f := P'.hom) (g := P'.hom ≫ φ.right) _ _ _
+
+def ss : dbl (Jr φ) ⟶ MM φ :=
+  pushout.desc (f := jj φ) (g := jj φ) (𝟙 _) (rr φ ≫ jj φ) (by
+    rw [← Category.assoc, jr, Category.id_comp, Category.comp_id])
+
+theorem j_gM : jj φ ≫ gM φ = dbl.inr P :=
+  pushout.inr_desc (f := P'.hom) (g := P'.hom ≫ φ.right) _ _ _
 theorem gM_fold : gM φ ≫ dbl.fold P = rr φ := by
-  apply pushout.hom_ext
-  · show (pushout.inl _ _ ≫ gM φ) ≫ dbl.fold P = pushout.inl _ _ ≫ rr φ
-    erw [pushout.inl_desc, pushout.inl_desc, Category.assoc, pushout.inl_desc, Category.comp_id]
-  · show (pushout.inr _ _ ≫ gM φ) ≫ dbl.fold P = pushout.inr _ _ ≫ rr φ
-    erw [pushout.inr_desc, pushout.inr_desc, pushout.inr_desc]
+  refine pushout.hom_ext (C := Spc) (f := P'.hom) (g := P'.hom ≫ φ.right) ?_ ?_
+  · change (ii φ ≫ gM φ) ≫ dbl.fold P = ii φ ≫ rr φ
+    have hM : ii φ ≫ gM φ = φ.right ≫ dbl.inl P :=
+      pushout.inl_desc (f := P'.hom) (g := P'.hom ≫ φ.right) _ _ _
+    have hfold : dbl.inl P ≫ dbl.fold P = 𝟙 P.right :=
+      pushout.inl_desc (f := P.hom) (g := P.hom) _ _ _
+    have hrr : ii φ ≫ rr φ = φ.right :=
+      pushout.inl_desc (f := P'.hom) (g := P'.hom ≫ φ.right) _ _ _
+    rw [hM, Category.assoc, hfold, Category.comp_id, hrr]
+  · change (jj φ ≫ gM φ) ≫ dbl.fold P = jj φ ≫ rr φ
+    rw [j_gM, dbl.inr_fold, jr]
+theorem inl_h : dbl.inl P' ≫ hh φ = ii φ :=
+  pushout.inl_desc (f := P'.hom) (g := P'.hom) _ _ _
+theorem inr_h : dbl.inr P' ≫ hh φ = φ.right ≫ jj φ :=
+  pushout.inr_desc (f := P'.hom) (g := P'.hom) _ _ _
 theorem h_gM : hh φ ≫ gM φ = dbl.map φ := by
-  apply pushout.hom_ext
-  · show (pushout.inl _ _ ≫ hh φ) ≫ gM φ = pushout.inl _ _ ≫ dbl.map φ
-    erw [pushout.inl_desc, pushout.inl_desc, pushout.inl_desc]; rfl
-  · show (pushout.inr _ _ ≫ hh φ) ≫ gM φ = pushout.inr _ _ ≫ dbl.map φ
-    erw [pushout.inr_desc, Category.assoc, pushout.inr_desc, pushout.inr_desc]; rfl
-theorem inl_h : dbl.inl P' ≫ hh φ = ii φ := pushout.inl_desc _ _ _
-theorem inr_h : dbl.inr P' ≫ hh φ = φ.right ≫ jj φ := pushout.inr_desc _ _ _
-theorem etale_mapping_cylinder_double_section_inl_comp : dbl.inl (Jr φ) ≫ ss φ = 𝟙 _ := pushout.inl_desc _ _ _
-theorem etale_mapping_cylinder_double_section_inr_comp : dbl.inr (Jr φ) ≫ ss φ = rr φ ≫ jj φ := pushout.inr_desc _ _ _
+  refine pushout.hom_ext (C := Spc) (f := P'.hom) (g := P'.hom) ?_ ?_
+  · change (dbl.inl P' ≫ hh φ) ≫ gM φ = dbl.inl P' ≫ dbl.map φ
+    have hM : ii φ ≫ gM φ = φ.right ≫ dbl.inl P :=
+      pushout.inl_desc (f := P'.hom) (g := P'.hom ≫ φ.right) _ _ _
+    have hmap : dbl.inl P' ≫ dbl.map φ = φ.right ≫ dbl.inl P :=
+      pushout.inl_desc (f := P'.hom) (g := P'.hom) _ _ _
+    rw [inl_h, hM, hmap]
+  · change (dbl.inr P' ≫ hh φ) ≫ gM φ = dbl.inr P' ≫ dbl.map φ
+    rw [inr_h, Category.assoc, j_gM, dbl.inr_map]
+theorem etale_mapping_cylinder_double_section_inl_comp : dbl.inl (Jr φ) ≫ ss φ = 𝟙 _ :=
+  pushout.inl_desc (f := jj φ) (g := jj φ) _ _ _
+theorem etale_mapping_cylinder_double_section_inr_comp : dbl.inr (Jr φ) ≫ ss φ = rr φ ≫ jj φ :=
+  pushout.inr_desc (f := jj φ) (g := jj φ) _ _ _
 
 theorem key (hR : LeafRel) (q : ℕ) (i n : ℤ) (y : Ht q (MM φ) n i)
     (h1 : pull _ (jj φ) (tw q i) n y = 0) (h2 : pull _ (hh φ) (tw q i) n y = 0) : y = 0 := by
@@ -174,7 +241,7 @@ theorem LeafEqvOfExc_of (hR : LeafRel) : LeafEqvOfExc := by
       · rw [map_sub, ← pull_comp, j_gM, hy0, sub_zero]; exact x.2
       · rw [map_sub, ← pull_comp, h_gM, sub_eq_zero]; exact congrArg Subtype.val hx
     refine ⟨x.1 + pull _ (dbl.fold P) (tw q i) n (pull _ (jj φ) (tw q i) n y), ?_⟩
-    rw [map_add, ← pull_comp, gM_fold, sub_eq_zero.mp hd]
+    rw [map_add (f := _), ← pull_comp, gM_fold, sub_eq_zero.mp hd]
     simp [y0]
 
 end LateralTheory.CohomologicalPurity.TubeCut

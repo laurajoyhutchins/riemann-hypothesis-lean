@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDefiniteDatumGoodObj
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDefiniteDatumGoodObj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,48 +69,5 @@ def HasLevelStructureOfLevel {D : Datum F} {p N : ℕ} {X₁ : Scheme.{0}} {s₁
     (α₁ : D.La → (𝟙_ (Over X₁) ⟶ o₁.A)) : Prop :=
   ∀ (S : Scheme.{0}) (s : S ⟶ Sp (D.OEp p)) (o : Obj D p N s) (α : D.La → (𝟙_ (Over S) ⟶ o.A)), IsLevelStructureOfLevel o N₁ α →
     ∃! f : S ⟶ X₁, f ≫ s₁ = s ∧ ∃ m : ObjMap o o₁ f, LevelStructurePullback m α α₁
-
-abbrev LaMod (D : Datum F) (N₁ : ℕ) : Type := ZMod N₁ ⊗[ℤ] D.La
-
-abbrev EFMod (D : Datum F) (N₁ : ℕ) : LinearMap.BilinForm (ZMod N₁) (LaMod D N₁) := D.EF.baseChange (ZMod N₁)
-
-def toLaMod (D : Datum F) (N₁ : ℕ) : D.La →+ LaMod D N₁ :=
-  (TensorProduct.mk ℤ (ZMod N₁) D.La 1).toAddMonoidHom
-
-theorem toLaMod_apply (D : Datum F) (N₁ : ℕ) (a : D.La) : toLaMod D N₁ a = (1 : ZMod N₁) ⊗ₜ a := rfl
-
-theorem toLaMod_surjective (D : Datum F) (N₁ : ℕ) : Function.Surjective (toLaMod D N₁) := by
-  intro x
-  induction x using TensorProduct.induction_on with
-  | zero => exact ⟨0, map_zero _⟩
-  | tmul r a =>
-    obtain ⟨n, rfl⟩ := ZMod.intCast_surjective r
-    refine ⟨n • a, ?_⟩
-    rw [toLaMod_apply, TensorProduct.tmul_smul, TensorProduct.smul_tmul', zsmul_eq_mul, _root_.mul_one]
-  | add x y hx hy =>
-    obtain ⟨a, rfl⟩ := hx
-    obtain ⟨b, rfl⟩ := hy
-    exact ⟨a + b, map_add _ _ _⟩
-
-def simGrp (D : Datum F) (N₁ : ℕ) : Subgroup (LaMod D N₁ ≃ₗ[ZMod N₁] LaMod D N₁) where
-  carrier := {g | ∃ m : (ZMod N₁)ˣ, ∀ x y, EFMod D N₁ (g x) (g y) = m * EFMod D N₁ x y}
-  one_mem' := ⟨1, fun x y => by simp⟩
-  mul_mem' := by
-    rintro g h ⟨m, hm⟩ ⟨m', hm'⟩
-    refine ⟨m * m', fun x y => ?_⟩
-    change EFMod D N₁ (g (h x)) (g (h y)) = _
-    rw [hm, hm', Units.val_mul, _root_.mul_assoc]
-  inv_mem' := by
-    rintro g ⟨m, hm⟩
-    refine ⟨m⁻¹, fun x y => ?_⟩
-    have h := hm (g⁻¹ x) (g⁻¹ y)
-    have e : ∀ z, g (g⁻¹ z) = z := fun z => by
-      change (g * g⁻¹) z = z
-      rw [mul_inv_cancel]; rfl
-    rw [e, e] at h
-    rw [h, ← _root_.mul_assoc, Units.inv_mul, _root_.one_mul]
-
-def twist (D : Datum F) (N₁ : ℕ) {T : Type} (g : simGrp D N₁) (α : D.La → T) : D.La → T :=
-  fun a => α (Function.surjInv (toLaMod_surjective D N₁) ((g : LaMod D N₁ ≃ₗ[ZMod N₁] LaMod D N₁) (toLaMod D N₁ a)))
 
 end GlobalTheory.UPel

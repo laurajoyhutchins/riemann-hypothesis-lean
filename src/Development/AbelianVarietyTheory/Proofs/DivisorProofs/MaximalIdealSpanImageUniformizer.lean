@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitMulPowOfMaximalIdealEqSpan
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Mathlib.RingTheory.Noetherian.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Filtration
+
+@[expose] public section
+
 open IsLocalRing
 
 namespace GlobalTheory
@@ -6,39 +53,7 @@ namespace GlobalTheory
 theorem eq_pow_mul_unit_of_maximalIdeal_eq_span {V : Type} [CommRing V] [IsLocalRing V]
     [IsNoetherianRing V] (T : V) (hm : maximalIdeal V = Ideal.span {T}) (v : V) (hv : v ≠ 0) :
     ∃ (a : ℕ) (c : V), IsUnit c ∧ v = T ^ a * c := by
-  have hK := Ideal.iInf_pow_eq_bot_of_isLocalRing (maximalIdeal V) (maximalIdeal.isMaximal V).ne_top
-  have hex : ∃ n : ℕ, v ∉ Ideal.span {T ^ n} := by
-    by_contra h
-    push_neg at h
-    apply hv
-    have : v ∈ ⨅ n : ℕ, maximalIdeal V ^ n := by
-      rw [Ideal.mem_iInf]
-      intro n
-      rw [hm, Ideal.span_singleton_pow]
-      exact h n
-    rw [hK] at this
-    exact (Ideal.mem_bot).mp this
-  classical
-  have hn₀ : v ∉ Ideal.span {T ^ Nat.find hex} := Nat.find_spec hex
-  have hpos : Nat.find hex ≠ 0 := by
-    intro h0
-    apply hn₀
-    rw [h0, pow_zero, Ideal.span_singleton_one]
-    exact Submodule.mem_top
-  obtain ⟨a, ha⟩ := Nat.exists_eq_succ_of_ne_zero hpos
-  have hmem : v ∈ Ideal.span {T ^ a} := by
-    have := Nat.find_min hex (show a < Nat.find hex by omega)
-    exact not_not.mp this
-  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hmem
-  refine ⟨a, c, ?_, by rw [← hc, mul_comm]⟩
-  by_contra hcu
-  have hcm : c ∈ maximalIdeal V := by
-    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]; exact hcu
-  rw [hm] at hcm
-  obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.mp hcm
-  apply hn₀
-  rw [ha, Ideal.mem_span_singleton']
-  exact ⟨d, by rw [← hc, ← hd, pow_succ]; ring⟩
+  apply GlobalTheory.Pat.unit_mul_pow_of_maximalIdeal_eq_span <;> assumption
 
 theorem maximalIdeal_eq_span_map_of_fractions (V W : Type) [CommRing V] [IsLocalRing V]
     [IsNoetherianRing V] [CommRing W] [IsLocalRing W] (φ : V →+* W) (T : V)
@@ -104,8 +119,5 @@ theorem maximalIdeal_eq_span_map_of_fractions (V W : Type) [CommRing V] [IsLocal
   · intro hw
     obtain ⟨u, rfl⟩ := Ideal.mem_span_singleton'.mp hw
     exact Ideal.mul_mem_left _ _ hTm
-
-example : ∀ (V W : Type) [CommRing V] [IsLocalRing V] [IsNoetherianRing V] [CommRing W] [IsLocalRing W] (φ : V →+* W) (T : V), IsLocalRing.maximalIdeal V = Ideal.span {T} → φ T ∈ IsLocalRing.maximalIdeal W → φ T ∈ nonZeroDivisors W → (∀ w : W, ∃ x z : V, φ z ∈ nonZeroDivisors W ∧ φ z * w = φ x) → IsLocalRing.maximalIdeal W = Ideal.span {φ T} :=
-  maximalIdeal_eq_span_map_of_fractions
 
 end GlobalTheory

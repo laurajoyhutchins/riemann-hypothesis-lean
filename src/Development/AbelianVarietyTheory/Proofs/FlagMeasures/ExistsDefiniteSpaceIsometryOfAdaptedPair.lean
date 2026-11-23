@@ -1,10 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AdaptSelf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AdaptSelf
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagFramesSameGradedDefinitePartLatticeEq
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairNormalFormGeometrySummary
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagFramesSameGradedDefinitePartLatticeEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt GlobalTheory.DegAsm
 open scoped Pointwise ENNReal Classical
@@ -130,8 +171,8 @@ theorem exists_isH : ∀ (K V W : Type) [Field K] [NumberField K] [StarRing K] [
     obtain ⟨y₁, hy₁, hF₁, hG₁⟩ := hf w₁
     obtain ⟨y₂, hy₂, hF₂, hG₂⟩ := hf w₂
     refine ⟨y₁ + y₂, add_mem hy₁ hy₂, ?_, ?_⟩
-    · convert add_mem hF₁ hF₂ using 1; rw [map_add]; abel
-    · convert add_mem hG₁ hG₂ using 1; rw [map_add, map_add]; abel
+    · convert add_mem hF₁ hF₂ using 1; rw [map_add (f := _)]; abel
+    · convert add_mem hG₁ hG₂ using 1; rw [map_add (f := _), map_add (f := _)]; abel
   have hsmul : ∀ (c : K) (w : W), f (c • w) = c • f w := by
     intro c w
     apply hchar
@@ -230,7 +271,7 @@ theorem exists_isH : ∀ (K V W : Type) [Field K] [NumberField K] [StarRing K] [
       exact add_mem (Submodule.mem_sup_left hl) (Submodule.mem_sup_right this)
     · intro h1
       obtain ⟨l, hl, x, hx, hlx⟩ := Submodule.mem_sup.mp h1
-      rw [← hlx, map_add]
+      rw [← hlx, map_add (f := _)]
       refine add_mem (Submodule.mem_sup_left ?_) (Submodule.mem_sup_right (IndIsom.map_mem hG hx))
       rw [← LinearEquiv.smul_def]
       exact Submodule.smul_mem_pointwise_smul _ _ _ hl

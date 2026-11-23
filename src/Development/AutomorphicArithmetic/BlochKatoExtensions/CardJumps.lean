@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WdOfMono0L
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalAdjoinRange
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComponentsCrystallineLettersFinrank
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsConjOverPrime
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVOfNotJump
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.IsEquivAdicAbvNormAbv
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.NormLeOneOfInteger
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WdOfMono0L
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsConjOverPrime
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComponentsCrystallineLettersFinrank
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalAdjoinRange
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.IsEquivAdicAbvNormAbv
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompletionDegrees.NormLeOneOfInteger
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVOfNotJump
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal NumberField IsDedekindDomain Module GlobalTheory.HeightCounting
 
@@ -39,7 +83,11 @@ private theorem cj_embedding {l : ℕ} [Fact l.Prime] {E Ω : Type} [Field E] [N
   letI : Algebra E (Om l) := τ.toAlgebra
   haveI : Algebra.IsAlgebraic E Ω := IsAlgClosure.isAlgebraic
   haveI : IsGalois E Ω := IsAlgClosure.isGalois E Ω
-  let j₀ : Ω →ₐ[E] Om l := IsAlgClosed.lift
+  let j₀ : Ω →ₐ[E] Om l := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   let B : ValuationSubring Ω := ((Valued.v : Valuation (PadicAlgCl l) NNReal).comap j₀.toRingHom).valuationSubring
   have hB : ∀ y, y ∈ B ↔ ‖j₀ y‖ ≤ 1 := fun y => by
     change Valued.v (j₀ y) ≤ 1 ↔ _
@@ -125,7 +173,7 @@ private theorem cj_count {l : ℕ} [Fact l.Prime] (P : LocPrime l) (K L : FinExt
   rw [← hs, ← Multiset.sum_count_eq_card (fun n hn => hsub (Multiset.mem_toFinset.2 hn)), Nat.cast_sum]
   exact Finset.sum_congr rfl fun n _ => hJ n
 
-set_option maxHeartbeats 1000000 in
+
 theorem UpperTheory.Prune.card_jumps :
     ∀ (D : D7) (T : GlobalTheory.RowTie.WDTie D.nd D.naut) (Wd : WDSide D T) (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ) (a : ℕ)
         (r : G D.host.E D.nd.Om →* GL (Fin a) (Qbar l)) (τ : D.host.E →+* Qbar l) (w : PlE D.host)

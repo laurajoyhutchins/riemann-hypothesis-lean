@@ -1,5 +1,53 @@
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.EllipticityFromProductFormula
-import GroundTheory.AutomorphicForms.TraceFormulaGeometric
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.EllipticityFromProductFormula
+public import GroundTheory.AutomorphicForms.TraceFormulaGeometric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.ProperAction.Torsor
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
+
 open PositivityTheory.Rg.Tf.Geo
 open MeasureTheory Topology Filter Set Function
 open scoped ENNReal Pointwise
@@ -173,15 +221,54 @@ private theorem one_class (Γ : Subgroup X) [DiscreteTopology Γ] (μ : Measure 
     intro i
     rw [hE]
     dsimp only
-    rw [setIntegral_smul_set μ]
-    simp_rw [hconj]
+    have hchange := (measurePreserving_mul_left μ (d i : X)).integral_comp
+      (MeasurableEquiv.mulLeft (d i : X)).measurableEmbedding
+      (fun x => (E i).indicator (fun x => f (x⁻¹ * γ * θ x)) x)
+    have hpre : (fun x => (d i : X) * x) ⁻¹' E i = fundamentalDomain Γ := by
+      ext x
+      simp [hE, Set.mem_smul_set_iff_inv_smul_mem]
+    calc
+      ∫ x in E i, f (x⁻¹ * γ * θ x) ∂μ =
+          ∫ x, (E i).indicator (fun x => f (x⁻¹ * γ * θ x)) x ∂μ :=
+        (integral_indicator (hEm i)).symm
+      _ = ∫ x, (E i).indicator (fun x => f (x⁻¹ * γ * θ x)) ((d i : X) * x) ∂μ :=
+        hchange.symm
+      _ = ∫ x in fundamentalDomain Γ, f (((d i : X) * x)⁻¹ * γ * θ ((d i : X) * x)) ∂μ := by
+        rw [← integral_indicator (measurableSet_fundamentalDomain Γ)]
+        congr 1
+        funext x
+        have hx : ((d i : X) * x ∈ E i) ↔ x ∈ fundamentalDomain Γ := by
+          change x ∈ (fun x => (d i : X) * x) ⁻¹' E i ↔ _
+          rw [hpre]
+        simp [Set.indicator, hx]
+      _ = _ := by simp_rw [hconj]
   have hnorm : ∀ i, ∫ x in E i, ‖f (x⁻¹ * γ * θ x)‖ ∂μ =
       ∫ x in fundamentalDomain Γ, ‖f (x⁻¹ * (i.1 : X) * θ x)‖ ∂μ := by
     intro i
     rw [hE]
     dsimp only
-    rw [setIntegral_smul_set μ]
-    simp_rw [hconj]
+    have hchange := (measurePreserving_mul_left μ (d i : X)).integral_comp
+      (MeasurableEquiv.mulLeft (d i : X)).measurableEmbedding
+      (fun x => (E i).indicator (fun x => ‖f (x⁻¹ * γ * θ x)‖) x)
+    have hpre : (fun x => (d i : X) * x) ⁻¹' E i = fundamentalDomain Γ := by
+      ext x
+      simp [hE, Set.mem_smul_set_iff_inv_smul_mem]
+    calc
+      ∫ x in E i, ‖f (x⁻¹ * γ * θ x)‖ ∂μ =
+          ∫ x, (E i).indicator (fun x => ‖f (x⁻¹ * γ * θ x)‖) x ∂μ :=
+        (integral_indicator (hEm i)).symm
+      _ = ∫ x, (E i).indicator (fun x => ‖f (x⁻¹ * γ * θ x)‖) ((d i : X) * x) ∂μ :=
+        hchange.symm
+      _ = ∫ x in fundamentalDomain Γ,
+          ‖f (((d i : X) * x)⁻¹ * γ * θ ((d i : X) * x))‖ ∂μ := by
+        rw [← integral_indicator (measurableSet_fundamentalDomain Γ)]
+        congr 1
+        funext x
+        have hx : ((d i : X) * x ∈ E i) ↔ x ∈ fundamentalDomain Γ := by
+          change x ∈ (fun x => (d i : X) * x) ⁻¹' E i ↔ _
+          rw [hpre]
+        simp [Set.indicator, hx]
+      _ = _ := by simp_rw [hconj]
   have hEi : ∀ i, IntegrableOn (fun x => f (x⁻¹ * γ * θ x)) (E i) μ := by
     intro i
     have h := (measurePreserving_mul_left μ (d i : X)).integrableOn_comp_preimage

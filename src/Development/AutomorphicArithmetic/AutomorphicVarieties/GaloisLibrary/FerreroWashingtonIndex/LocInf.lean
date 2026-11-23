@@ -1,6 +1,62 @@
-import GroundTheory.GlobalFields.HasseNorm
-import GroundTheory.GlobalFields.IdeleGroups.LocalNormGroups
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.FerreroWashingtonIndex.CycRepApply
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.LocalNorms
+public import Mathlib.NumberTheory.NumberField.CMField
+import GroundTheory.GlobalFields.InfiniteNormIndex.LocalSymbol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Completion.Ramification
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.FerreroWashingtonIndex.TwSingle
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.StickelbergerTheorem.StickelbergerAt
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.GaloisCohomology.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.Base UpperTheory.V.Kum UpperTheory.V.Stick UpperTheory.V.FW
 open scoped nonZeroDivisors
@@ -11,13 +67,16 @@ theorem UpperTheory.V.FW.locInf :
   classical
   obtain ⟨W, rfl⟩ := InfinitePlace.comap_surjective (k := maximalRealSubfield K) (K := K) v
   set u := W.comap (algebraMap (maximalRealSubfield K) K) with hu_def
-  have hWu : W.LiesOver u := { comp_eq := rfl }
+  have hWu : W.LiesOver u := { under_eq := rfl }
   have hu : u.IsReal := IsTotallyReal.isReal u
   have hpos : 0 < InfinitePlace.Completion.ringEquivRealOfIsReal hu
       (algebraMap (maximalRealSubfield K) u.Completion (x : maximalRealSubfield K)) := by
     have h0 : InfinitePlace.Completion.ringEquivRealOfIsReal hu
         (algebraMap (maximalRealSubfield K) u.Completion (x : maximalRealSubfield K)) =
-        InfinitePlace.embedding_of_isReal hu (x : maximalRealSubfield K) := by simp
+        InfinitePlace.embedding_of_isReal hu (x : maximalRealSubfield K) := by
+      change InfinitePlace.Completion.extensionEmbeddingOfIsReal hu _ = _
+      rw [InfinitePlace.Completion.algebraMap_apply]
+      exact InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hu _
     rw [h0]
     have h1 := InfinitePlace.embedding_of_isReal_apply hu (x : maximalRealSubfield K)
     have h3 := hx W.embedding
@@ -31,7 +90,7 @@ theorem UpperTheory.V.FW.locInf :
         Complex.conj_re] at h4
       rw [h4, ← h1] at h3
       rwa [Complex.ofReal_re] at h3
-  letI : Algebra u.Completion W.Completion := NumberField.LiesOver.completionMap.toAlgebra
+  letI : Algebra u.Completion W.Completion := AbsoluteValue.Completion.algebraOfLiesOver u.1 W.1
   set e := InfinitePlace.Completion.ringEquivRealOfIsReal hu with he
   set a := algebraMap (maximalRealSubfield K) u.Completion (x : maximalRealSubfield K) with ha
   set d := Module.finrank u.Completion W.Completion with hd_def
@@ -58,5 +117,7 @@ theorem UpperTheory.V.FW.locInf :
   simp only [GroundTheory.Global.IdeleNorm.infiniteLocalNorm, MonoidHom.coe_mk, OneHom.coe_mk]
   rw [Fintype.prod_eq_single w0 (fun w hw => by rw [Pi.mulSingle_eq_of_ne hw, map_one]),
     Pi.mulSingle_eq_same, Units.coe_map, Units.val_mk0]
+  rw [GroundTheory.Global.IdeleGroup.coe_infiniteProj_diagonal]
+  rw [← InfinitePlace.Completion.algebraMap_apply]
   change Algebra.norm u.Completion (algebraMap u.Completion W.Completion r) = a
   rw [Algebra.norm_algebraMap, ← hd_def, hr]

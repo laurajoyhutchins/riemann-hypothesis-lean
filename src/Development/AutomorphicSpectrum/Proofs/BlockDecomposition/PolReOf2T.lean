@@ -1,20 +1,57 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HoweMaximalTori.MaxSplit
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Inertof
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.Vaceigen
-import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasMain
-import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlMain
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.SiegelTransport
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LinearAct
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.HypothesesAtTriple
-import Development.WeilBound.CoreStatements.LocalThetaKernels.Locpair
-import Development.WeilBound.CoreStatements.LocalThetaKernels.LocpairU
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDict
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyCompSideMulEq
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.ExistsFull
-import Development.WeilBound.ThetaLifts.CartanFactorisation.Kills0Of
-import Development.WeilBound.ThetaLifts.CartanFactorisation.KillInf
-import Development.WeilBound.ThetaLifts.Reductions.ArchimedeanMatchedMapsCompare
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HoweMaximalTori.MaxSplit
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.Factor
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.PolCountDef
+public import Development.WeilBound.ThetaLifts.Reductions.JoinDef
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEq
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.Locrep
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ActsComp
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.CountableCompactOpen
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.RealTrans
+import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+public import Development.WeilBound.ThetaLifts.Reductions.ArchimedeanMatchedMapsCompare
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
+
+@[expose] public section
 
 noncomputable section
 
@@ -102,14 +139,16 @@ theorem polRe_of2T (hH : PositivityTheory.ThKR.JoinTri) (hM : MaxFinT) (hO : Arc
     refine ⟨S, hS, k, k', u, φ, fun i => Λ • u' i, φ', fun i => ⟨hu i, (h1 i).2⟩,
       fun i => ⟨Submodule.smul_mem _ _ (hw i), (h2 i).2⟩, rfl, e3, ?_⟩
     have := congrArg (TensorProduct.map e (PiTensorProduct.map fun v : S => ef v)) eq
+
     simp only [map_sum, TensorProduct.map_tmul, PiTensorProduct.map_tprod] at this
     refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) (this.trans (Finset.sum_congr rfl fun j _ => ?_))
     · rw [← fu i, show e (R.p (T (u i))) = R₂.p (u i) from he _ (hu i)]
       simp only [hef _ _ ((h1 i).2.1 _)]
     · rw [← fu' j, show e (R.p' (T' (u' j))) = c • R₂.p' (u' j) from he' _ (hw j)]
       simp only [hef' _ _ ((h2 j).2.1 _)]
-      rw [MultilinearMap.map_smul_univ, TensorProduct.smul_tmul_smul, map_smul, TensorProduct.smul_tmul',
-        Finset.prod_coe_sort S cf, ← Finset.prod_subset hS fun v _ hv => cf1 v hv]
+      rw [MultilinearMap.map_smul_univ, TensorProduct.smul_tmul_smul, map_smul, TensorProduct.smul_tmul']
+      simp only [RingHom.id_apply]
+      rw [Finset.prod_coe_sort S cf, ← Finset.prod_subset hS fun v _ hv => cf1 v hv]
   have := hc _ _ (Submodule.smul_mem _ Λ (so_re V V' W so)) pm (x * h)
   rw [← e1, ← e2, I_move hI p1 s1, I_move hI p2 (so_le p2.good _ so), mul_assoc, ← I_smul]
   exact this

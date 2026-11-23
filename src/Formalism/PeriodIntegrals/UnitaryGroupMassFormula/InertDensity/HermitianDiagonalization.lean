@@ -1,5 +1,67 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InertDensity.FinrankInfKerAddOne
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InertDensity.ExistsTraceNeZero
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InertDensity.AnisoPeelAlt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InertDensity.FinrankInfKerAddOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.Algebra.CharP.Lemmas
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.FieldTheory.Finite.Basic
+
+@[expose] public section
 
 open Finset Module
 
@@ -39,7 +101,7 @@ theorem diag_orth_family {m q : ℕ} {B : Matrix (Fin m) (Fin m) L}
     · obtain ⟨e, he, hee⟩ := h
       have := finrank_perp_aniso W e he hee
       omega
-    · push_neg at h
+    · push Not at h
       exact iso 0 W hW h
   | succ d ih =>
     intro W hW
@@ -58,7 +120,7 @@ theorem diag_orth_family {m q : ℕ} {B : Matrix (Fin m) (Fin m) L}
       · induction i using Fin.cases with
         | zero => simpa using he
         | succ j => simpa using (Submodule.mem_inf.mp (hvW j)).1
-      · rw [linearIndependent_fin_cons]
+      · rw [linearIndependent_finCons]
         refine ⟨hli, fun hmem => hee ?_⟩
         have hle : Submodule.span L (Set.range v) ≤ LinearMap.ker (hfL q B e) := by
           rw [Submodule.span_le]
@@ -81,7 +143,7 @@ theorem diag_orth_family {m q : ℕ} {B : Matrix (Fin m) (Fin m) L}
           simp only [Fin.cons_succ, Fin.val_succ]
           rw [hdiag i]
           omega
-    · push_neg at h
+    · push Not at h
       exact iso _ W hW h
 
 theorem diag_of_hyps {m q : ℕ} (B : Matrix (Fin m) (Fin m) L)
@@ -93,7 +155,7 @@ theorem diag_of_hyps {m q : ℕ} (B : Matrix (Fin m) (Fin m) L)
   obtain ⟨v, r, hr, -, hli, horth, hdiag⟩ := diag_orth_family hadd hinv hB htr m ⊤
     (by rw [finrank_top, Module.finrank_fin_fun])
   refine ⟨Matrix.of fun i => v i, ?_, fun i => hf q B (v i) (v i), r, hr, ?_, hdiag, fun i => ?_⟩
-  · exact (Matrix.isUnit_iff_isUnit_det _).mp (Matrix.linearIndependent_rows_iff_isUnit.mp hli)
+  · exact (Matrix.isUnit_iff_isUnit_det _).mp (Matrix.linearIndependent_row_iff_isUnit.mp hli)
   · ext i j
     have e : (Matrix.of (fun i => v i) * B * ((Matrix.of fun i => v i).map fun y => y ^ q).transpose) i j =
         hf q B (v i) (v j) := by
@@ -124,7 +186,7 @@ theorem hermitianDiagonalization : Diag := by
   have htr : ∀ z : L, z ≠ 0 → ∃ c : L, c * z + (c * z) ^ Fintype.card K ≠ 0 := by
     intro z hz
     by_contra hall
-    push_neg at hall
+    push Not at hall
     let P : Polynomial L := Polynomial.X ^ Fintype.card K + Polynomial.X
     have hroot : ∀ y : L, P.eval y = 0 := fun y => by
       have h := hall (y / z)
@@ -133,7 +195,7 @@ theorem hermitianDiagonalization : Diag := by
       linear_combination h
     have hP0 : P ≠ 0 := by
       intro h0
-      have h := congrArg (Polynomial.coeff · 1) h0
+      have h := congrArg (fun p : Polynomial L => p.coeff 1) h0
       simp only [P, Polynomial.coeff_add, Polynomial.coeff_X_pow, Polynomial.coeff_X_one,
         Polynomial.coeff_zero] at h
       split_ifs at h with hh

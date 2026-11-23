@@ -1,8 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.ScaledRamifiedLattice
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
-import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
-import Formalism.LocalToGlobal.Columns.BaseLemmas
+module
+
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuationPowSubPowLt
+public import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianLattices.StatementJac
+import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
+import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.MainNotions
 
 noncomputable section
@@ -19,43 +68,12 @@ theorem exp_neg_one_lt_one : (WithZero.exp (-1 : ℤ) : WithZero (Multiplicative
 theorem locK_eq_of_tame (χ : HChar L) {v : HeightOneSpectrum (𝓞 L)} (h : χ.TameAt v) (x y : Lˣ)
     (hxy : v.valuation L ((y : L) - x) ≤ WithZero.exp (-1 : ℤ) * v.valuation L (x : L)) :
     χ.locK v y = χ.locK v x := by
-  have hx0 : v.valuation L (x : L) ≠ 0 := by simp
-  have hval : ∀ k : L, Valued.v (algebraMap L (v.adicCompletion L) k) = v.valuation L k := fun k =>
-    HeightOneSpectrum.valuedAdicCompletion_eq_valuation' v k
-  have h1 : v.valuation L (((y * x⁻¹ : Lˣ) : L) - 1) ≤ WithZero.exp (-1 : ℤ) := by
-    have : ((y * x⁻¹ : Lˣ) : L) - 1 = ((y : L) - x) * (x : L)⁻¹ := by
-      rw [Units.val_mul, Units.val_inv_eq_inv_val, _root_.sub_mul, mul_inv_cancel₀ x.ne_zero]
-    rw [this, map_mul, map_inv₀, mul_inv_le_iff₀ (zero_lt_iff.2 hx0)]
-    exact hxy
-  have h2 : v.valuation L ((y * x⁻¹ : Lˣ) : L) = 1 := by
-    have := Valuation.map_one_add_of_lt (v.valuation L) (h1.trans_lt exp_neg_one_lt_one)
-    rwa [add_sub_cancel] at this
-  have h3 : χ.locK v (y * x⁻¹) = 1 := by
-    refine h (atFin v (y * x⁻¹)) ?_ ?_
-    · exact (hval _).trans h2
-    · have : ((atFin v (y * x⁻¹) : (v.adicCompletion L)ˣ) : v.adicCompletion L) - 1 =
-          algebraMap L (v.adicCompletion L) (((y * x⁻¹ : Lˣ) : L) - 1) := by
-        rw [map_sub, map_one]; rfl
-      rw [this, hval]
-      simpa using h1
-  rwa [map_mul, map_inv, mul_inv_eq_one] at h3
+  apply GlobalTheory.GalToHecke.locK_eq_of_tame <;> assumption
 
 theorem exists_approx (S : Finset (HeightOneSpectrum (𝓞 L))) (t : HeightOneSpectrum (𝓞 L) → 𝓞 L)
     (ht : ∀ v, t v ≠ 0) : ∃ y : 𝓞 L, ∀ v ∈ S,
       v.valuation L ((y : L) - (t v : L)) ≤ WithZero.exp (-1 : ℤ) * v.valuation L (t v : L) := by
-  have hn : ∀ v : HeightOneSpectrum (𝓞 L), ∃ n : ℕ, v.intValuation (t v) = WithZero.exp (-(n : ℤ)) :=
-    fun v => ⟨_, v.intValuation_if_neg (ht v)⟩
-  choose n hn using hn
-  obtain ⟨y, hy⟩ := IsDedekindDomain.exists_forall_sub_mem_ideal (s := S) (fun v => v.asIdeal) (fun v => n v + 1)
-    (fun v _ => v.prime) (fun v _ w _ h h' => h (HeightOneSpectrum.ext h')) (fun v => t v.1)
-  refine ⟨y, fun v hv => ?_⟩
-  have h1 := (v.intValuation_le_pow_iff_mem _ _).2 (hy v hv)
-  have e1 : v.valuation L ((y : L) - (t v : L)) = v.intValuation (y - t v) := by
-    rw [← HeightOneSpectrum.valuation_of_algebraMap (K := L)]; simp
-  have e2 : v.valuation L (t v : L) = v.intValuation (t v) := HeightOneSpectrum.valuation_of_algebraMap (K := L) v _
-  rw [e1, e2, hn, ← WithZero.exp_add]
-  convert h1 using 2
-  push_cast; ring
+  apply GlobalTheory.GalToHecke.exists_approx <;> assumption
 
 theorem locK_mem (χ : HChar L) (G : Subgroup ℂˣ) (T : Finset (HeightOneSpectrum (𝓞 L)))
     (htame : ∀ v, χ.TameAt v) (hunr : ∀ v, v ∉ T → χ.UnrAt v) (hval : ∀ v, v ∉ T → χ.val v ∈ G)
@@ -120,35 +138,5 @@ theorem sq_div_norm {z : ℂ} (hz : z ≠ 0) : (z / ((‖z‖ : ℝ) : ℂ)) ^ (
   have h2 : starRingEnd ℂ z ≠ 0 := (map_ne_zero _).2 hz
   rw [zpow_ofNat, div_pow, ← h1]
   field_simp
-
-theorem locK_mem_coeff : ∀ (Z : Dat), Z.Ok → ∀ (m0 : Fin Z.R.m → Formalism.L2.Host.HChar Z.X.E) (eta : Formalism.L2.Host.HChar Z.X.E), Z.Ch.Tied Z.sig0 (fun j τ => (Z.W.row τ).e j) m0 eta → ∀ (j : Fin Z.R.m) (P : HeightOneSpectrum (𝓞 Z.X.E)) (x : Z.X.Eˣ), ∃ k : Z.X.K, Z.sig0 k = (((m0 j).locK P x : ℂˣ) : ℂ) := by
-  intro Z hZ m0 eta hT j P x
-  have hm := hT.mu0 j
-  have hg : ((Z.Pr.g 0 : ℕ) : 𝓞 Z.X.E) * ((Z.Pr.g 1 : ℕ) : 𝓞 Z.X.E) ≠ 0 :=
-    mul_ne_zero (Nat.cast_ne_zero.2 (hZ.primes.g_prime 0).ne_zero) (Nat.cast_ne_zero.2 (hZ.primes.g_prime 1).ne_zero)
-  have hoff : ∀ v : HeightOneSpectrum (𝓞 Z.X.E),
-      v ∉ divs (((Z.Pr.g 0 : ℕ) : 𝓞 Z.X.E) * ((Z.Pr.g 1 : ℕ) : 𝓞 Z.X.E)) →
-      ∀ i, ((Z.Pr.g i : ℕ) : 𝓞 Z.X.E) ∉ v.asIdeal := by
-    intro v hv i hi
-    apply hv
-    rw [Formalism.L2.Col.mem_divs hg]
-    fin_cases i
-    · exact v.asIdeal.mul_mem_right _ hi
-    · exact v.asIdeal.mul_mem_left _ hi
-  refine locK_mem (m0 j) (unitsIn Z.sig0.fieldRange) _ hm.tame (fun v hv => hm.unr v (hoff v hv))
-    (fun v hv => ⟨_, hT.muVal j v (hoff v hv)⟩) (fun k => ?_) P x
-  obtain ⟨n, hn, hinf⟩ := hm.inf
-  change (((m0 j).inf k : ℂˣ) : ℂ) ∈ Z.sig0.fieldRange
-  rw [hinf k]
-  refine prod_mem fun τ _ => ?_
-  obtain ⟨Q, hQ⟩ := hZ.wts.row_ok τ
-  obtain ⟨z, hz⟩ := Q.e_int j
-  have he : (Z.W.row τ).e j = z := by rw [← hQ]; exact hz
-  have hn2 : n τ = 2 * (-z) := by
-    have := hn τ
-    simp only [he] at this
-    exact_mod_cast this
-  rw [hn2, zpow_mul, sq_div_norm ((map_ne_zero _).2 k.ne_zero), ← hZ.fields.conjE]
-  exact zpow_mem (Z.sig0.fieldRange.div_mem ⟨_, rfl⟩ ⟨_, rfl⟩) _
 
 end GlobalTheory.TameVal

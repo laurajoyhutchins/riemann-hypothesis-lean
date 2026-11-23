@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.DefiniteIndexDimensionCounts
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteDimensionalModel
-import Development.AbelianVarietyTheory.Definitions.Foundations.StandardFiveNontrivial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.StandardFiveNontrivial
+public import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.InclusionInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.LocalToGlobal.IndefiniteReal.PartsOrth
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,14 +79,14 @@ theorem finE_mem (V : HSp D) (h : GA D V) : finE V h ∈ UA D.sp.cm V.gram := by
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => simp [swapAE, sigR, Formalism.UG.sigR]
-    | add x y hx hy => simp only [RingHom.comp_apply, map_add] at hx hy ⊢; rw [hx, hy]
+    | add x y hx hy => simp only [RingHom.comp_apply, map_add (f := _)] at hx hy ⊢; rw [hx, hy]
   case c1 =>
     apply RingHom.ext
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => simp [sigR]
-    | add x y hx hy => simp only [RingHom.comp_apply, map_add] at hx hy ⊢; rw [hx, hy]
+    | add x y hx hy => simp only [RingHom.comp_apply, map_add (f := _)] at hx hy ⊢; rw [hx, hy]
 
 def finU (V : HSp D) : GA D V →* UA D.sp.cm V.gram := (finE V).codRestrict _ (finE_mem V)
 
@@ -54,7 +96,7 @@ def clsA (V : HSp D) (K : Subgroup (GL (Fin V.rank) (EAf D))) (h : GA D V) : Cl 
   Quotient.mk'' (finU V h)
 
 def evAt {V : HSp D} {S : D.what₂.Tau → SPar} (M : DSModel V S) (h : GA D V) :
-    MMap M →ₗ[ℂ] MultilinearMap ℂ (fun τ : D.what₂.Tau => M.sm τ) ℂ where
+    MMap M →ₗ[ℂ] MultilinearMap (RingHom.id ℂ) (fun τ : D.what₂.Tau => M.sm τ) ℂ where
   toFun T := (LinearMap.proj h : (GA D V → ℂ) →ₗ[ℂ] ℂ).compMultilinearMap T
   map_add' T T' := by ext v; simp
   map_smul' c T := by ext v; simp

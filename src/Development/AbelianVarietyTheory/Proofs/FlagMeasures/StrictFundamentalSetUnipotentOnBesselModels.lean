@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowsMeanC
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GoodLoc
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsFundOne
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KappaOffDiagonal
+import Formalism.SharpRestriction.CuspSpanNormBounds.JExistsNatSmulMemL
+
+@[expose] public section
+
 open scoped Classical ENNReal Pointwise NNReal
 open MeasureTheory Matrix NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.L2.SG.HidaSetting Formalism.L2.SG.TermOp Formalism.L2.SG.Full
   Formalism.L2.SG.LocWSOf Formalism.MainNotions.S.Cnt Formalism.L2.SG.KappaOffDiagonal Formalism.MainNotions.LatticeGluingRadicals GlobalTheory.TypeAsm
@@ -45,7 +91,7 @@ def mkUJ' (ε : Fin n → Bool) (M : Matrix (Fin n) (Fin n) ℂ) : Formalism.REA
 
 theorem mkUJ'_val (M : Matrix (Fin n) (Fin n) ℂ) (h : Formalism.REAL.inUJ ε M) :
     Formalism.MainNotions.S.uMat (mkUJ' ε M) = M := by
-  rw [mkUJ', dif_pos h]; rfl
+  rw [mkUJ', dite_eq_left h]; rfl
 
 theorem mkUJ'_coe (γ : Formalism.REAL.UJ ε) :
     mkUJ' ε (((γ : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ)) = γ := by
@@ -131,7 +177,7 @@ theorem cont_uMat {n : ℕ} {ε : Fin n → Bool} : Continuous (fun γ : Formali
   Units.continuous_val.comp continuous_subtype_val
 
 theorem measurable_trI : Measurable (trI C) := by
-  refine measurable_pi_lambda _ (fun τ => ?_)
+  refine Measurable.of_eval (fun τ => ?_)
   have hc : Continuous (fun γ : Formalism.REAL.UJ (X.B.I.ε (vOf X τ)) =>
       (Matrix.of.symm (C.Qi τ * Formalism.MainNotions.S.uMat γ * C.Q τ) : Formalism.QuantumDeterminants.Mt D.R.k D.R.rS)) :=
     (continuous_const.matrix_mul cont_uMat).matrix_mul continuous_const
@@ -171,7 +217,7 @@ theorem measurable_mkUJ' {n m : ℕ} (ε : Fin n → Bool) (Q : Matrix (Fin n) (
   exact Measurable.dite hf.measurable measurable_const hSc.measurableSet
 
 theorem measurable_back : Measurable (back C) := by
-  refine measurable_pi_lambda _ (fun v => ?_)
+  refine Measurable.of_eval (fun v => ?_)
   exact (measurable_mkUJ' _ _ _).comp (measurable_pi_apply (X.pl v))
 
 theorem measEmb_trI : MeasurableEmbedding (trI C) :=

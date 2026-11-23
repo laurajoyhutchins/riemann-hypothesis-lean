@@ -1,5 +1,51 @@
-import Formalism.GaussJetBounds.FrameJetEval
-import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+module
+
+public import Formalism.GaussJetBounds.FrameJetEval
+public import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -16,6 +62,7 @@ lemma eval₂_jetPairPoly {F K : Type} [Field F] [Field K] {σ ι : Type} (φ : 
       jetPair (MvPolynomial.map (MvPolynomial.eval₂Hom φ x) P) (MvPowerSeries.map φ Th) := by
   classical
   unfold jetPairPoly jetPair
+
   rw [show MvPolynomial.eval₂ φ x = MvPolynomial.eval₂Hom φ x from rfl, map_sum]
   symm
   rw [Finset.sum_subset (MvPolynomial.support_map_subset _ P)]
@@ -51,6 +98,7 @@ lemma constantCoeff_bSum (M : ZV d N0 N1 → ι → K) (be : MvPowerSeries (ZMod
     (hbe : MvPowerSeries.constantCoeff be = 0) :
     MvPowerSeries.constantCoeff (bSum M be) = 0 := by
   unfold bSum
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun ab _ => ?_
   exact MvPowerSeries.constantCoeff_subst_eq_zero
@@ -60,11 +108,13 @@ lemma constantCoeff_bSum (M : ZV d N0 N1 → ι → K) (be : MvPowerSeries (ZMod
 lemma map_linSub (M : ZV d N0 N1 → ι → F) (z : ZV d N0 N1) :
     MvPowerSeries.map φ (linSub M z) = linSub (fun z i => φ (M z i)) z := by
   unfold linSub
+
   simp [map_sum]
 
 lemma map_bSum (M : ZV d N0 N1 → ι → F) (be : MvPowerSeries (ZMod d) F) :
     MvPowerSeries.map φ (bSum M be) = bSum (fun z i => φ (M z i)) (MvPowerSeries.map φ be) := by
   unfold bSum
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun ab _ => ?_
   rw [MvPowerSeries.map_subst
@@ -124,6 +174,7 @@ lemma theta_subst (M Mg A : ZV d N0 N1 → ZV d N0 N1 → K)
   have hlin : ∀ z, MvPowerSeries.subst aa (linSub M z) = linSub Mg z := subst_linSub _ _ _ h
   have hbS : MvPowerSeries.subst aa (bSum M be) = bSum Mg be := by
     unfold bSum
+
     rw [← MvPowerSeries.coe_substAlgHom hs, map_sum]
     refine Finset.sum_congr rfl fun ab _ => ?_
     rw [MvPowerSeries.coe_substAlgHom hs, MvPowerSeries.subst_comp_subst_apply

@@ -1,10 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.Coords
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperFiniteness
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.NaturalLeray
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.CapOComp
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -36,18 +77,19 @@ def secGroup (W : X.Opens) : AddSubgroup (∀ α, κ α → Γ(X, W ⊓ U α)) w
     ∑ k', rs (le_inf (inf_le_left.trans inf_le_right) inf_le_right : W ⊓ U α ⊓ U β ≤ U α ⊓ U β) (g α β k k') *
       rs (inf_le_inf_right _ inf_le_left : W ⊓ U α ⊓ U β ≤ W ⊓ U β) (s β k')}
   add_mem' := fun {s t} hs ht α β k => by
-    simp only [Pi.add_apply, map_add, hs α β k, ht α β k, mul_add, Finset.sum_add_distrib]
+    simp only [Pi.add_apply, map_add (f := _), hs α β k, ht α β k, mul_add, Finset.sum_add_distrib]
   zero_mem' := fun α β k => by simp only [Pi.zero_apply, map_zero, mul_zero, Finset.sum_const_zero]
   neg_mem' := fun {s} hs α β k => by
     simp only [Pi.neg_apply, map_neg, hs α β k, mul_neg, Finset.sum_neg_distrib]
 
-variable {g} in
 
+variable {g} in
 theorem sec_rel {W : X.Opens} {s : ∀ α, κ α → Γ(X, W ⊓ U α)} (hs : s ∈ secGroup g W) (α β : ι) (k : κ α)
     {V : X.Opens} (h₁ : V ≤ W ⊓ U α) (h₂ : V ≤ W ⊓ U β) (h₃ : V ≤ U α ⊓ U β) :
     rs h₁ (s α k) = ∑ k', rs h₃ (g α β k k') * rs h₂ (s β k') := by
   have hV : V ≤ W ⊓ U α ⊓ U β := le_inf h₁ (h₂.trans inf_le_right)
   have := congrArg (rs hV) (hs α β k)
+
   simp only [map_sum, map_mul, rs_rs _ _ h₁, rs_rs _ _ h₂, rs_rs _ _ h₃] at this
   exact this
 
@@ -67,7 +109,7 @@ instance secModule (W : X.Opens) : Module Γ(X, W) (secGroup g W) where
   smul_add a s t := Subtype.ext <| funext fun α => funext fun k => mul_add _ _ _
   add_smul a b s := Subtype.ext <| funext fun α => funext fun k => by
     change rs _ (a + b) * s.1 α k = rs _ a * s.1 α k + rs _ b * s.1 α k
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
   zero_smul s := Subtype.ext <| funext fun α => funext fun k => by
     change rs _ 0 * s.1 α k = 0
     rw [map_zero, zero_mul]
@@ -125,6 +167,7 @@ theorem isSheaf_secPresheaf : (secPresheaf g).IsSheaf := by
     have hB : W j ⊓ U α ⊓ U β ≤ W j ⊓ U β := inf_le_inf_right _ inf_le_left
     have hC : W j ⊓ U α ⊓ U β ≤ U α ⊓ U β := le_inf (inf_le_left.trans inf_le_right) inf_le_right
     change rs _ (rs _ (b α k)) = rs _ (∑ k', rs _ (g α β k k') * rs _ (b β k'))
+
     rw [rs_rs _ _ (hA.trans (hW α j)), e1 α k hA, sec_rel (sf j).2 α β k hA hB hC, map_sum]
     refine Finset.sum_congr rfl fun k' _ => ?_
     rw [map_mul, rs_rs _ _ hC, rs_rs _ _ (hB.trans (hW β j)), e1 β k' hB]
@@ -162,11 +205,12 @@ theorem coord_res {V W : X.Opens} (h : W ≤ V) (α : ι) (hV : V ≤ U α) (hW 
   change rs _ (rs _ (s.1 α k)) = rs _ (rs _ (s.1 α k))
   simp only [rs_trans]
 
-variable {g} in
 
+variable {g} in
 def ofCoord (hc : Coc g) {W : X.Opens} (α : ι) (h : W ≤ U α) (t : κ α → Γ(X, W)) : secGroup g W :=
   ⟨fun β k => ∑ k', rs (le_inf inf_le_right (inf_le_left.trans h) : W ⊓ U β ≤ U β ⊓ U α) (g β α k k') *
     rs inf_le_left (t k'), fun β γ k => by
+
       simp only [map_sum, map_mul, rs_trans, Finset.mul_sum]
       have := hc.2 β γ α (W ⊓ U β ⊓ U γ)
         (le_inf (inf_le_left.trans inf_le_right) inf_le_right)
@@ -176,8 +220,8 @@ def ofCoord (hc : Coc g) {W : X.Opens} (α : ι) (h : W ≤ U α) (t : κ α →
       simp only [Finset.mul_sum] at this
       exact this.symm⟩
 
-variable {g} in
 
+variable {g} in
 def coordEquiv (hc : Coc g) {W : X.Opens} (α : ι) (h : W ≤ U α) :
     secGroup g W ≃ₗ[Γ(X, W)] (κ α → Γ(X, W)) where
   toFun := coord g α h
@@ -196,6 +240,7 @@ def coordEquiv (hc : Coc g) {W : X.Opens} (α : ι) (h : W ≤ U α) :
     rw [rs_trans]
   right_inv t := funext fun k => by
     change rs _ (∑ k', _ * rs _ (t k')) = t k
+
     simp only [map_sum, map_mul, rs_trans, rs_self]
     exact hc.1 α W (le_inf h h) t k
 

@@ -1,4 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.TransvectionPeriodicity
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.EmbeddingHermitianPairs
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD.RealEmbeddingCharacters
 
@@ -15,7 +68,7 @@ lemma emb_real {τ : E →+* ℂ} {a : E} (ha : cc a = a) : τ a = ((τ a).re : 
   exact (Complex.conj_eq_iff_re.mp h2).symm
 
 lemma cc_add' (a b : E) : cc (a + b) = cc a + cc b := by
-  simp only [cc, map_add]
+  simp only [cc, map_add (f := _)]
 
 lemma cc_neg' (a : E) : cc (-a) = -cc a := by
   simp only [cc, map_neg]
@@ -31,7 +84,7 @@ noncomputable def per (a : E) : X.Ψ → ℝ := fun τ => ((X.m * X.chiOrd la : 
 
 lemma per_add (a b : E) : per X la (a + b) = per X la a + per X la b := by
   funext τ
-  simp only [per, Pi.add_apply, map_add, Complex.add_re, mul_add]
+  simp only [per, Pi.add_apply, map_add (f := _), Complex.add_re, mul_add]
 
 lemma per_neg (a : E) : per X la (-a) = -per X la a := by
   funext τ
@@ -142,7 +195,7 @@ lemma restrict_inj {τ τ' : X.Ψ} (h : ∀ a : E, cc a = a → τ.1 a = τ'.1 a
       2 * σ a = σ (a + cc a) + σ ((a - cc a) * X.ξ0) / σ X.ξ0 := by
     intro σ a
     have e := congrArg σ (hdec a)
-    rw [map_mul, map_add, map_div₀, map_ofNat] at e
+    rw [map_mul, map_add (f := _), map_div₀, map_ofNat] at e
     exact e
   have hsq : τ.1 X.ξ0 ^ 2 = τ'.1 X.ξ0 ^ 2 := by
     rw [← map_pow, ← map_pow]
@@ -185,16 +238,6 @@ lemma restrict_inj {τ τ' : X.Ψ} (h : ∀ a : E, cc a = a → τ.1 a = τ'.1 a
     exact hm τ'.2
 
 def resChar (τ : X.Ψ) : (fixF (E := E)) →* ℂ := (τ.1.comp (fixF (E := E)).subtype).toMonoidHom
-
-lemma resChar_linInd :
-    LinearIndependent ℂ (fun τ : X.Ψ => ((resChar X τ : (fixF (E := E)) →* ℂ) : (fixF (E := E)) → ℂ)) := by
-  have hinj : Function.Injective (fun τ : X.Ψ => resChar X τ) := by
-    intro τ τ' h
-    apply restrict_inj X
-    intro a ha
-    have := DFunLike.congr_fun h ⟨a, ha⟩
-    exact this
-  exact (linearIndependent_monoidHom (fixF (E := E)) ℂ).comp _ hinj
 
 open Classical in
 lemma periods_span : Submodule.span ℝ (X.periods la : Set (X.Ψ → ℝ)) = ⊤ := by

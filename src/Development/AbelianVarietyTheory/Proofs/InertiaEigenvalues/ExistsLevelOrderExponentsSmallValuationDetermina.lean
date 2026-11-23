@@ -1,12 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowSubDvdChoosePrimePowOfLtStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffAevalOneAddXPowSubOneNeZeroStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NotDvdCoeffAevalOneAddXPowSubOneStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValuationPolynomialAtRootOfUnitySubOneStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLowCoeffNotDvdOfCongrMulStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsExponentStrictlyLeastWeightStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLimitFamilyOfFiniteCoefficientsStatement
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffAevalOneAddXPowSubOneNeZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsExponentStrictlyLeastWeightStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLimitFamilyOfFiniteCoefficientsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLowCoeffNotDvdOfCongrMulStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NotDvdCoeffAevalOneAddXPowSubOneStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowSubDvdChoosePrimePowOfLtStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValuationPolynomialAtRootOfUnitySubOneStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped BigOperators
 
@@ -167,7 +210,7 @@ theorem coeff_zero_subst {O σ : Type} [CommRing O] (l : ℕ) (e : σ → ℕ) (
     (MvPolynomial.aeval (fun q => (1 + Polynomial.X : Polynomial O) ^ (l ^ e q) - 1) g).coeff 0
       = g.coeff 0 := by
   rw [Polynomial.coeff_zero_eq_aeval_zero, ← AlgHom.comp_apply, MvPolynomial.comp_aeval]
-  simp only [map_sub, map_pow, map_add, map_one, Polynomial.aeval_X, add_zero, one_pow, sub_self]
+  simp only [map_sub, map_pow, map_add (f := _), map_one, Polynomial.aeval_X, add_zero, one_pow, sub_self]
   rw [MvPolynomial.aeval_zero']
   rfl
 
@@ -178,7 +221,7 @@ theorem map_subst {O k σ : Type} [CommRing O] [CommRing k] (φ : O →+* k) (l 
         (g.map φ) := by
   induction g using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, Polynomial.map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), Polynomial.map_add (f := _), hp, hq]
   | mul_X p q hp => simp [Polynomial.map_mul, hp]
 
 theorem exists_low_coeff_of_factor (O : Type) [CommRing O] [IsDomain O]
@@ -211,7 +254,7 @@ theorem exists_low_coeff_of_factor (O : Type) [CommRing O] [IsDomain O]
       simp only [hS, MvPolynomial.aeval_X]
       exact pow_sub_one_mem_lowIdeal ϖ l hl hd _ _ _ (he2 i)
     · change S _ ∈ lowIdeal _ _
-      simp only [hS, map_sub, map_pow, map_add, map_one, MvPolynomial.aeval_X, add_sub_cancel]
+      simp only [hS, map_sub, map_pow, map_add (f := _), map_one, MvPolynomial.aeval_X, add_sub_cancel]
       rw [← pow_mul, ← pow_add]
       exact pow_sub_one_mem_lowIdeal ϖ l hl hd _ _ _ (by omega)
   haveI : Fact l.Prime := ⟨hl⟩

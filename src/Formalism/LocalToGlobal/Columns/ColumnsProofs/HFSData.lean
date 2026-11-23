@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.RowForms
-import Formalism.LocalToGlobal.Divisibility.TuplesLemmas
-import Formalism.LocalToGlobal.Divisibility.DivisibilityProofs.TuplesP
+module
+
+public import Formalism.LocalToGlobal.Columns.RowForms
+public import Formalism.LocalToGlobal.Divisibility.DivisibilityProofs.TuplesP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -27,7 +70,6 @@ theorem units_map_injective : Function.Injective (Units.map ι.toMonoidHom) := b
   intro a b h
   first
   | exact Units.ext (ι.injective (congrArg Units.val h))
-  | (apply Units.ext; apply ι.injective; have h' := congrArg Units.val h; simpa using h')
 
 theorem chrMap_ker (ξ : Chr F E K) : (chrMap ι ξ).ker = ξ.ker := by
   ext x
@@ -38,54 +80,6 @@ theorem chrMap_ker (ξ : Chr F E K) : (chrMap ι ξ).ker = ξ.ker := by
     rw [h, map_one]
   · intro h
     rw [h, map_one]
-
-theorem chrMap_injective : Function.Injective (chrMap (F := F) (E := E) ι) := by
-  intro a b h
-  refine MonoidHom.ext fun x => units_map_injective ι ?_
-  have hx := DFunLike.congr_fun h x
-  rwa [chrMap_apply, chrMap_apply] at hx
-
-theorem chrMap_mem_tupGrp {S : Set ℕ} {ξ : Chr F E K} (h : ξ ∈ tupGrp F E K S) : chrMap ι ξ ∈ tupGrp F E L S := by
-  have hk : (chrMap ι ξ).ker = ξ.ker := chrMap_ker ι ξ
-  have mk : ∀ (H : Subgroup (AfE F E)ˣ) (ζ : Chr F E L), ζ ∈ kills Lˣ H ↔ H ≤ ζ.ker := fun _ _ => Iff.rfl
-  have mk' : ∀ (H : Subgroup (AfE F E)ˣ) (ζ : Chr F E K), ζ ∈ kills Kˣ H ↔ H ≤ ζ.ker := fun _ _ => Iff.rfl
-  have mo : ∀ ζ : Chr F E L, ζ ∈ openChr F E L ↔ ∃ N : ℕ, 0 < N ∧ congN F E N ≤ ζ.ker := fun _ => Iff.rfl
-  have mo' : ∀ ζ : Chr F E K, ζ ∈ openChr F E K ↔ ∃ N : ℕ, 0 < N ∧ congN F E N ≤ ζ.ker := fun _ => Iff.rfl
-  have hT : ∀ ζ : Chr F E K, IsOfFinOrder ζ → IsOfFinOrder (chrMap ι ζ) := fun ζ hζ => by
-    first
-    | exact hζ.map (chrMap ι)
-    | exact (chrMap ι).isOfFinOrder hζ
-    | exact hζ.map
-  simp only [tupGrp, finChar, Subgroup.mem_inf, Subgroup.mem_iInf, mk, mk', mo, mo', CommGroup.mem_torsion, hk] at h ⊢
-  first
-  | exact ⟨⟨⟨⟨h.1.1.1.1, hT _ h.1.1.1.2⟩, h.1.1.2⟩, h.1.2⟩, h.2⟩
-  | exact ⟨⟨⟨⟨⟨h.1.1.1.1.1, h.1.1.1.1.2⟩, hT _ h.1.1.1.2⟩, h.1.1.2⟩, h.1.2⟩, h.2⟩
-  | (have hT' := hT _ h.1.1.1.2; tauto)
-
-def tupMap (S : Set ℕ) : Tup F E K S →* Tup F E L S :=
-  ((chrMap ι).comp (tupGrp F E K S).subtype).codRestrict (tupGrp F E L S) fun x => chrMap_mem_tupGrp ι x.2
-
-theorem tupMap_coe {S : Set ℕ} (μ : Tup F E K S) : ((tupMap ι S μ : Tup F E L S) : Chr F E L) = chrMap ι μ := rfl
-
-theorem tupMap_injective (S : Set ℕ) : Function.Injective (tupMap (F := F) (E := E) ι S) := by
-  intro a b h
-  apply Subtype.ext
-  apply chrMap_injective ι
-  first
-  | exact congrArg Subtype.val h
-  | rw [← tupMap_coe, ← tupMap_coe, h]
-
-def tupMapEmb (S : Set ℕ) : Tup F E K S ↪ Tup F E L S := ⟨tupMap ι S, tupMap_injective ι S⟩
-
-theorem tupleMap_trivialTuple (S : Set ℕ) : tupMap ι S (mu0 F E K S) = mu0 F E L S := by
-  first
-  | (unfold mu0; exact map_one _)
-  | simp [mu0]
-
-theorem Qprime_chrMap (ξ : Chr F E K) : Qprime (chrMap ι ξ) = Qprime ξ := by
-  first
-  | (unfold Qprime; rw [chrMap_ker])
-  | simp only [Qprime, chrMap_ker]
 
 theorem isResChar_chrMap {ξ : Chr F E K} {P : HeightOneSpectrum (𝓞 E)} {χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ}
     (h : IsResChar ξ P χ) : IsResChar (chrMap ι ξ) P ((Units.map ι.toMonoidHom).comp χ) := by
@@ -116,7 +110,6 @@ theorem tup_tame {S : Set ℕ} (μ : Tup F E K S) : ∀ v : HeightOneSpectrum (�
   have mk' : ∀ (H : Subgroup (AfE F E)ˣ) (ζ : Chr F E K), ζ ∈ kills Kˣ H ↔ H ≤ ζ.ker := fun _ _ => Iff.rfl
   first
   | exact (Subgroup.mem_iInf.mp (Subgroup.mem_inf.mp (Subgroup.mem_inf.mp μ.2).1).2) v
-  | (have h := μ.2; simp only [tupGrp, Subgroup.mem_inf, Subgroup.mem_iInf, mk'] at h; exact h.1.2 v)
 
 end TupMap
 
@@ -131,13 +124,10 @@ theorem coefMap_comp_inv {G : Type} [Group G] (f : G →* Kˣ) :
   refine MonoidHom.ext fun x => ?_
   first
   | simp only [MonoidHom.inv_apply, MonoidHom.comp_apply, map_inv]
-  | simp
 
 theorem Lev.coefMap_inv {κ : Type} [CommRing κ] {n : ℕ} (l : Lev κ K n) : (l.coefMap ι).inv = l.inv.coefMap ι := by
   first
   | exact congrArg (Lev.mk l.H) (coefMap_comp_inv ι l.lam)
-  | (show Lev.mk l.H ((Units.map ι.toMonoidHom).comp l.lam)⁻¹ = Lev.mk l.H ((Units.map ι.toMonoidHom).comp l.lam⁻¹)
-     exact congrArg (Lev.mk l.H) (coefMap_comp_inv ι l.lam))
 
 variable {E : Type} [Field E] [NumberField E] {n : ℕ}
 
@@ -151,12 +141,6 @@ theorem LevFam.coefMap_inv {SG : Finset (HeightOneSpectrum (𝓞 E))} (Λ : LevF
     (Λ.coefMap ι).inv = Λ.inv.coefMap ι := by
   funext w
   exact Lev.coefMap_inv ι (Λ w)
-
-theorem LevFam.coefMap_reidx {SG SG' : Finset (HeightOneSpectrum (𝓞 E))} (h : SG = SG') (Λ : LevFam E K n SG') :
-    (Λ.reidx h).coefMap ι = (Λ.coefMap ι).reidx h := rfl
-
-theorem LevFam.inv_reidx {SG SG' : Finset (HeightOneSpectrum (𝓞 E))} (h : SG = SG') (Λ : LevFam E K n SG') :
-    (Λ.reidx h).inv = Λ.inv.reidx h := rfl
 
 theorem LevFam.glue_coefMap_reidx {SG Q₁ Q₂ : Finset (HeightOneSpectrum (𝓞 E))} (hQ : Q₁ = Q₂) (A : LevFam E K n SG)
     (A' : LevFam E L n SG) (B : LevFam E K n Q₂) (B' : LevFam E L n Q₁) (hA : A' = A.coefMap ι)
@@ -176,13 +160,9 @@ theorem LevFam.coefMap_chr {SG : Finset (HeightOneSpectrum (𝓞 E))} (Λ : LevF
       (∏ i, ((Units.map ι.toMonoidHom).comp (Λ i).lam).comp (piProj (fun w : SG => (Λ w).H) i)) y =
         Units.map ι.toMonoidHom ((∏ i, (Λ i).lam.comp (piProj (fun w : SG => (Λ w).H) i)) y) := by
     intro y
-    first
-    | simp only [MonoidHom.finset_prod_apply, MonoidHom.comp_apply, map_prod]
-    | simp [MonoidHom.finset_prod_apply, map_prod]
+    simp [map_prod]
   first
   | exact key x
-  | (simp only [LevFam.chr, piChar, LevFam.coefMap, Lev.coefMap]
-     exact key x)
 
 end LevMap
 
@@ -221,11 +201,6 @@ theorem lambdaAtPrime_characterMap {F E : Type} [Field F] [NumberField F] [Field
 
 end LevChars
 
-open Classical in
-theorem hfs_dite_finite {α β : Type} (f : α → β) {A B : Set α} (h : A = B) :
-    (if h : A.Finite then h.toFinset.image f else ∅) = (if h : B.Finite then h.toFinset.image f else ∅) := by
-  subst h
-  rfl
 
 section Ext
 
@@ -240,54 +215,9 @@ variable (X : Fields) (L : Type) [Field L] [NumberField L] [StarRing L] (ι : X.
 
 variable {X L ι}
 
-@[reducible] def Primes.coefExt (Pr : Primes X) : Primes (X.coefExt L ι) where
-  cond := Pr.cond
-  g := Pr.g
-  piG := Pr.piG
-  Word := Pr.Word
-  T := Pr.T
-  piT := Pr.piT
-
-@[reducible] def Wts.coefExt {Word : Type} {R : Ranks} (W : Wts X Word R) : Wts (X.coefExt L ι) Word R where
-  row := W.row
-  hc := W.hc
-  tops := W.tops
-
-@[reducible] def Chars.coefMap {Pr : Primes X} {m : ℕ} (Ch : Chars X Pr m) : Chars (X.coefExt L ι) (Pr.coefExt (L := L) (ι := ι)) m where
-  psi0 w := ι.toMonoidHom.compAddChar (Ch.psi0 w)
-  chi j w := (Units.map ι.toMonoidHom).comp (Ch.chi j w)
-  muVal j v := Units.map ι.toMonoidHom (Ch.muVal j v)
-  etaVal v := Units.map ι.toMonoidHom (Ch.etaVal v)
-
 variable {Pr : Primes X} {R : Ranks} (Ch : Chars X Pr R.m)
 
-theorem chiAt_coefMap (w : {w // w ∈ Pr.vGs}) (s : ℕ) :
-    chiAt (Ch.coefMap (L := L) (ι := ι)) w s = (Units.map ι.toMonoidHom).comp (chiAt Ch w s) := by
-  first
-  | (unfold chiAt; exact extChi_coefMap ι (fun j => Ch.chi j w) s)
-  | exact extChi_coefMap ι _ s
 
-private theorem lamK_comp_units_map {κ K₀ L₀ : Type} [CommRing κ] [Field K₀] [Field L₀] (φ : K₀ →+* L₀)
-    (χ : ℕ → κˣ →* K₀ˣ) (χ' : ℕ → κˣ →* L₀ˣ) (h : ∀ s, χ' s = (Units.map φ.toMonoidHom).comp (χ s)) {n : ℕ} (r : ℕ)
-    (bl : List ℕ) : lamK χ' n r bl = (Units.map φ.toMonoidHom).comp (lamK χ n r bl) := by
-  have hχ : χ' = fun s => (Units.map φ.toMonoidHom).comp (χ s) := funext h
-  subst hχ
-  exact lamK_coefMap φ χ r bl
-
-set_option maxHeartbeats 800000 in
-
-theorem rowTyK_coefMap : rowTyK (R := R) (Ch.coefMap (L := L) (ι := ι)) = (rowTyK Ch).coefMap ι := by
-  funext w
-  exact congrArg (Lev.mk _) (lamK_comp_units_map ι (chiAt Ch w) (chiAt (Ch.coefMap (L := L) (ι := ι)) w)
-    (fun s => chiAt_coefMap Ch w s) _ _)
-
-set_option maxHeartbeats 800000 in
-
-theorem mtTyK_coefMap (j : ℕ) : mtTyK (R := R) (Ch.coefMap (L := L) (ι := ι)) j = (mtTyK Ch j).coefMap ι := by
-  funext w
-  exact congrArg (Lev.mk _) (lamK_comp_units_map ι (fun _ => (chiAt Ch w (j - 1))⁻¹)
-    (fun _ => (chiAt (Ch.coefMap (L := L) (ι := ι)) w (j - 1))⁻¹)
-    (fun _ => (congrArg (fun f => f⁻¹) (chiAt_coefMap Ch w (j - 1))).trans (coefMap_comp_inv ι _)) _ _)
 
 variable (R) in
 theorem rowTyQ_coefMap {S : Set ℕ} (μ : Tup X.F X.E X.K S) (Q : Finset (HeightOneSpectrum (𝓞 X.E))) (P : Q) :
@@ -295,56 +225,16 @@ theorem rowTyQ_coefMap {S : Set ℕ} (μ : Tup X.F X.E X.K S) (Q : Finset (Heigh
   first
   | exact congrArg (Lev.mk _) ((congrArg (fun f => f⁻¹) (lambdaAtPrime_characterMap ι _ (tup_tame μ) P.1 _ _ _)).trans
       (coefMap_comp_inv ι _))
-  | (show Lev.mk _ (lamQP (chrMap ι (μ : Chr X.F X.E X.K)) P.1 _ _ _)⁻¹ =
-        Lev.mk _ ((Units.map ι.toMonoidHom).comp (lamQP (μ : Chr X.F X.E X.K) P.1 _ _ _)⁻¹)
-     rw [lambdaAtPrime_characterMap ι _ (tup_tame μ), coefMap_comp_inv])
 
 variable (R) in
 theorem mtTyQ_coefMap {S : Set ℕ} (μ : Tup X.F X.E X.K S) (Q : Finset (HeightOneSpectrum (𝓞 X.E))) (P : Q) :
     mtTyQ (X := X.coefExt L ι) R (chrMap ι (μ : Chr X.F X.E X.K)) Q P = (mtTyQ R (μ : Chr X.F X.E X.K) Q P).coefMap ι := by
   first
   | exact congrArg (Lev.mk _) (lambdaAtPrime_characterMap ι _ (tup_tame μ) P.1 _ _ _)
-  | (show Lev.mk _ (lamQP (chrMap ι (μ : Chr X.F X.E X.K)) P.1 _ _ _) =
-        Lev.mk _ ((Units.map ι.toMonoidHom).comp (lamQP (μ : Chr X.F X.E X.K) P.1 _ _ _))
-     rw [lambdaAtPrime_characterMap ι _ (tup_tame μ)])
 
 variable (sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)) {S : Set ℕ}
 
-theorem QE_coefMap (ξ : Chr X.F X.E X.K) : QE (X := X.coefExt L ι) sel (chrMap ι ξ) = QE sel ξ := by
-  first
-  | (unfold QE; exact hfs_dite_finite sel (Qprime_chrMap ι ξ))
-  | simp only [QE, Qprime_chrMap]
 
-theorem rowSG_coefMap (μ : Tup X.F X.E X.K S) :
-    rowSG (Pr.coefExt (L := L) (ι := ι)) sel (tupMap ι S μ) = rowSG Pr sel μ := by
-  first
-  | exact congrArg (uSG Pr.vGs) (QE_coefMap sel (μ : Chr X.F X.E X.K))
-  | simp only [rowSG, uSG, tupMap_coe, QE_coefMap]
-
-set_option maxHeartbeats 800000 in
-
-theorem rowTyKK_coefMap (μ : Tup X.F X.E X.K S) :
-    rowTyKK (Ch.coefMap (L := L) (ι := ι)) sel (tupMap ι S μ) =
-      ((rowTyKK Ch sel μ).coefMap ι).reidx (rowSG_coefMap sel μ) := by
-  first
-  | exact LevFam.glue_coefMap_reidx ι (QE_coefMap sel (μ : Chr X.F X.E X.K)) _ _ _ _ (rowTyK_coefMap Ch)
-      (fun P => rowTyQ_coefMap R μ _ P)
-  | (unfold rowTyKK
-     exact LevFam.glue_coefMap_reidx ι (QE_coefMap sel (μ : Chr X.F X.E X.K)) _ _ _ _ (rowTyK_coefMap Ch)
-      (fun P => by
-        simp only [rowTyQ, Lev.coefMap, lambdaAtPrime_characterMap ι (μ : Chr X.F X.E X.K) (tup_tame μ), coefMap_comp_inv]))
-
-set_option maxHeartbeats 800000 in
-
-theorem mtTyKK_coefMap (μ : Tup X.F X.E X.K S) (j : ℕ) :
-    mtTyKK (Ch.coefMap (L := L) (ι := ι)) sel (tupMap ι S μ) j =
-      ((mtTyKK Ch sel μ j).coefMap ι).reidx (rowSG_coefMap sel μ) := by
-  first
-  | exact LevFam.glue_coefMap_reidx ι (QE_coefMap sel (μ : Chr X.F X.E X.K)) _ _ _ _ (mtTyK_coefMap Ch j)
-      (fun P => mtTyQ_coefMap R μ _ P)
-  | (unfold mtTyKK
-     exact LevFam.glue_coefMap_reidx ι (QE_coefMap sel (μ : Chr X.F X.E X.K)) _ _ _ _ (mtTyK_coefMap Ch j)
-      (fun P => by simp only [mtTyQ, Lev.coefMap, lambdaAtPrime_characterMap ι (μ : Chr X.F X.E X.K) (tup_tame μ)]))
 
 end Ext
 

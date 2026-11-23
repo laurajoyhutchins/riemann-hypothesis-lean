@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZChartLocalSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZChartSmulSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PAmpleAffineGen
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZChartLocalSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZChartSmulSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PAmpleAffineGen
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PAmpleTwistLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -17,8 +60,8 @@ open AmpleAffineGen AmpleTwistLocal
 variable {S : Type u} [CommRing S] {Ω : Type w} [Field Ω] [Algebra S Ω] {N : ℕ} {x : Fin (N + 1) → Ω}
   {E : Type v} [AddCommGroup E] [Module Ω E] [Module S E] [IsScalarTower S Ω E]
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem smul_mem_twist_pow (F : SubSystem S x E) (H : SubSystem S x Ω) (I : Chart x) {c d : ℕ}
     {y : E} {w : Ω} (hy : y ∈ (F.twist (H.pow c)).sub I) (hw : w ∈ (H.pow d).sub I) :
     w • y ∈ (F.twist (H.pow (c + d))).sub I := by
@@ -47,14 +90,14 @@ theorem prod_mem_pow (H : SubSystem S x Ω) (I : Chart x) {r : ℕ} {h : Fin (r 
       rw [SubSystem.pow_sub, pow_one]; exact (Submodule.mem_iInf _).mp (hh a) I
     exact mul_mem_pow H I ih 1 h1
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem ratio_pow_smul_mem (F : SubSystem S x E) (I K : Chart x) (k : ℕ) {y : E} (hy : y ∈ F.sub I) :
     chartRatio I K ^ k • y ∈ F.sub I :=
   Submodule.smul_mem (F.sub I) (⟨_, pow_mem (chartRatio_mem I K) k⟩ : chartRing S x I) hy
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem loc_subFamily (G : SubFamily S x E) (I K : Chart x) {y : E}
     (hy : y ∈ G.sub (unionChart I K)) : ∃ c : ℕ, chartRatio I K ^ c • y ∈ G.sub I := by
   obtain ⟨a, ha, hay⟩ := (G.mem_iff I (unionChart I K) (subset_unionChart_left I K) y).mp hy
@@ -68,8 +111,8 @@ theorem loc_subFamily (G : SubFamily S x E) (I K : Chart x) {y : E}
   rw [e]
   exact Submodule.smul_mem _ _ hay
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem loc_twist (G : SubFamily S x E) (H : LineBundle S x) (I K : Chart x) (q : ℕ) {y : E}
     (hy : y ∈ (G.toSubSystem.twist (H.toSubSystem.pow q)).sub (unionChart I K)) :
     ∃ c : ℕ, chartRatio I K ^ c • y ∈ (G.toSubSystem.twist (H.toSubSystem.pow q)).sub I := by
@@ -105,8 +148,8 @@ theorem loc_twist (G : SubFamily S x E) (H : LineBundle S x) (I K : Chart x) (q 
 
 end ZChartLocal
 
-open AmpleAffineGen AmpleTwistLocal ZChartLocal in
 
+open AmpleAffineGen AmpleTwistLocal ZChartLocal in
 theorem ZChartLocal.proof (hSmul : ZChartSmul.Statement.{u, v, w}) : ZChartLocal.Statement.{u, v, w} := by
   intro S _ Ω _ _ N x E _ _ _ _ G H r h hh J j hj b hb K hK j₀ hj₀ I I' hI' z hz
   classical

@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTieUpFBrR
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieUpFBrR
+public import Mathlib.RingTheory.AdicCompletion.RingHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -96,21 +145,19 @@ theorem valTie_vmOf : ValTie V (vmOf V) := by
   refine ⟨t, ht, ?_⟩
   rw [vmOf_of hx ht, vmOf_l, NNReal.coe_rpow]
 
-theorem integers_vmOf : (vmOf V).Integers V.RR where
-  hom_inj := Subtype.coe_injective
-  map_le_one := by
-    intro x
+theorem integers_vmOf : (vmOf V).Integers V.RR := by
+  refine ⟨Subtype.coe_injective, ?_, ?_⟩
+  · intro x
     show vmOf V (x : C) ≤ 1
     by_cases hx : (x : C) = 0
-    · rw [hx, map_zero]; exact zero_le_one
+    · simp [hx]
     obtain ⟨t, ht⟩ := exists_real (V := V) hx
     rw [vmOf_of hx ht]
     have h0 : V.Ge 0 (x : C) := x.2
     unfold VF.Ge at h0
     rw [ht] at h0
     exact NNReal.rpow_le_one (bb_lt V).le (WithTop.coe_le_coe.mp h0)
-  exists_of_le_one := by
-    intro r hr
+  · intro r hr
     suffices h : V.Ge 0 r from ⟨⟨r, h⟩, rfl⟩
     by_cases hx : r = 0
     · rw [hx]; exact VF.Ge.zero 0

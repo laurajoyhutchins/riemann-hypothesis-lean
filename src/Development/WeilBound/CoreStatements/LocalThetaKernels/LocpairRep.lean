@@ -1,7 +1,55 @@
-import Development.WeilBound.CoreStatements.LocalThetaKernels.LocpairAlg
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictAd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GlobalUnitScalingHaarProductFormula
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.BoxFunMemSB
+module
+
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.LocpairAlg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+public import GroundTheory.GlobalFields.LocalFieldAtPlace
+public import GroundTheory.LocalFields.PadicLogSeries
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GlobalUnitScalingHaarProductFormula
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicSchrodingerTensorEqLocalOfSupportedAt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,8 +134,8 @@ theorem tens_inj {r : (κ → AF F) → ℂ} (hr : ∀ x z, At (evFin F v) z →
   change φ (evA κ v (putA v x₀ y)) * r (putA v x₀ y) = φ' (evA κ v (putA v x₀ y)) * r (putA v x₀ y) at this
   rwa [ev_put (evA_inA v), inv_putA v hr, h₁, mul_one, mul_one] at this
 
-variable (v) in
 
+variable (v) in
 def IsLocOm {G : Type} [Monoid G] (om : G →* Module.End ℂ ((κ → AF F) → ℂ))
     (omv : G →* Module.End ℂ ((κ → Fv F v) → ℂ)) : Prop :=
   ∀ g, ∀ φ ∈ SB _, omv g φ ∈ SB _ ∧ Acts (evFin F v) (om g) φ (omv g φ)
@@ -117,9 +165,13 @@ theorem putA_zero (x : κ → AF F) : putA v x 0 = (1 - atPlace v (1 : Fv F v)) 
 theorem arg_eq (a : κ → Fv F v) (w : (κ → AF F) × (κ → AF F)) :
     inA κ v a ⬝ᵥ w.2 + ⅟(2 : AF F) * (w.1 ⬝ᵥ w.2 - putA v w.1 0 ⬝ᵥ putA v w.2 0) =
       atPlace v (a ⬝ᵥ (locW v w).2 + ⅟(2 : Fv F v) * ((locW v w).1 ⬝ᵥ (locW v w).2)) := by
+  have evFin_invOf_two : evFin F v (⅟(2 : AF F)) = ⅟(2 : Fv F v) := by
+    refine (invOf_eq_right_inv ?_).symm
+    have h : evFin F v (2 * ⅟(2 : AF F)) = 1 := by rw [mul_invOf_self, map_one]
+    rwa [map_mul, map_ofNat] at h
   refine extF v ?_ ?_
-  · rw [evFin_atPlace, map_add, map_mul, map_sub, ev_dot, ev_dot, ev_dot, evA_inA, ev_put (evA_inA v),
-      GlobalTheory.VacAny.evFin_invOf_two, zero_dotProduct, sub_zero]
+  · rw [evFin_atPlace, map_add (f := _), map_mul, map_sub, ev_dot, ev_dot, ev_dot, evA_inA, ev_put (evA_inA v),
+      evFin_invOf_two, zero_dotProduct, sub_zero]
     rfl
   · have e : ∀ i, awF v (inA κ v a i) = 0 := fun i => awF_at v _
     simp [awF_at, putA_zero, dotProduct, e]

@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.HermitianLattices.FinalNeighbourConstruct
-import Formalism.HermitianLattices.FinalMass
-import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ShortVectorEveryPlace
+module
+
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.FiniteDimensionalOfOrtho
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.HermitianLattices.FinalNeighbourConstruct
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,8 +66,9 @@ theorem star_algebraMap_mem_range (r : 𝓞 K) : star (algebraMap (𝓞 K) K r) 
 theorem inner_sum_orthonormal (h : V →ₗ⋆[K] V →ₗ[K] K) {n : ℕ} (e : Fin n → V)
     (he : ∀ i j, h (e i) (e j) = if i = j then 1 else 0) (a b : Fin n → K) :
     h (∑ i, a i • e i) (∑ j, b j • e j) = ∑ i, star (a i) * b i := by
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, map_smul, he,
-    smul_eq_mul, starRingEnd_apply]
+  smul_eq_mul, starRingEnd_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   simp [mul_comm]
 
@@ -47,26 +94,7 @@ theorem integral_of_orthonormal_basis (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Su
 
 theorem unimodular_of_orthonormal_basis (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Submodule (𝓞 K) V) {n : ℕ} (hL : IsOrthoLattice h L n) :
     IsUnimodular h L := by
-  have hint := integral_of_orthonormal_basis h L hL
-  obtain ⟨e, -, hsp, rfl, he⟩ := hL
-  apply le_antisymm
-  · intro z hz
-    rw [dualBasic_mem_dual] at hz
-    have hz' : z ∈ Submodule.span K (Set.range e) := by rw [hsp]; trivial
-    obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hz'
-    refine Submodule.sum_mem _ fun i _ => ?_
-    have h1 := hz (e i) (Submodule.subset_span ⟨i, rfl⟩)
-    have h2 : h (e i) (∑ j, c j • e j) = c i := by
-      simp only [map_sum, map_smul, he, smul_eq_mul]
-      simp [Finset.sum_ite_eq]
-    rw [h2] at h1
-    obtain ⟨o, ho⟩ := Submodule.mem_one.1 h1
-    rw [← ho, algebraMap_smul]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
-  · intro z hz
-    rw [dualBasic_mem_dual]
-    intro y hy
-    exact hint y hy z hz
+  apply Formalism.HermitianLattices.Ext.L3.isUnimodular_of_ortho <;> assumption
 
 theorem genus_orthonormal_integral_unimodular (h : V →ₗ⋆[K] V →ₗ[K] K) (hs : h.IsSymm) (L : Submodule (𝓞 K) V) {n : ℕ} (hL : IsOrthoLattice h L n)
     (M : Submodule (𝓞 K) V) (hM : M ∈ genus h L) : IsIntegralLat h M ∧ dual h M = M := by

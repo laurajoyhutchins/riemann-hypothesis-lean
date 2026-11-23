@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModelKS
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModelKS
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralReduction
+import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ProdFormulaE
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBound
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.GlobalConditionOfLocalAgreement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,8 +150,6 @@ theorem modK_natUnit {δ : ∀ p : PlF D, (D.s.atP p).Fp} {M : ∀ p : PlF D, Lo
   have hnO : ((n : ℕ) : (D.s.atP p).Fp) ∈ 𝒪[(D.s.atP p).Fp] := by
     first
     | exact natCast_mem _ n
-    | exact Subring.natCast_mem _ n
-    | simpa using (n : 𝒪[(D.s.atP p).Fp]).2
   have hxR := alg_mem_R (M := M) p hnO
   have hyR := alg_mem_R (M := M) p w.2
   have hxy : algebraMap (D.s.atP p).Fp (D.s.atP p).Ep (w : (D.s.atP p).Fp) *
@@ -263,9 +310,6 @@ theorem norm_nat (n : ℕ) : Algebra.norm ℚ ((n : ℕ) : D.host.E) = (n : ℚ)
   | exact Formalism.MainNotions.TwistedPlaces.finrank_E_host D
   | exact Formalism.MainNotions.LatticeGluingRadicals.j_finrank D
   | exact Formalism.MainNotions.BridgeLemma.szf_finrankE D
-  | exact Formalism.L2.SG.Pf.AllRowsRedKer.finrank_cmField D
-  | exact Formalism.L2.Geo.Rec.StarEmbeddingNorm.finrank_E_eq
-  | exact Formalism.MainNotions.BridgeLemma.sza_finrank_host D
 
 theorem modNorm_of (hDP : DeltaProd D) : ModNorm D := by
   intro δ M hA ν s t ht
@@ -319,8 +363,5 @@ namespace Formalism.L2.SG.Pf
 theorem localModelS_of_delta {D : Formalism.BasicNotions.D7} (hDP : LMK.DeltaProd D) : Formalism.L2.SG.DataCut.LocalModelS D := by
   first
   | exact localModelS_of (LMK.modNorm_of hDP)
-  | exact Formalism.L2.SG.Pf.localModelS_of (LMK.modNorm_of hDP)
-  | exact Formalism.L2.SG.localModelS_of (LMK.modNorm_of hDP)
-  | exact Formalism.L2.SG.DataCut.localModelS_of (LMK.modNorm_of hDP)
 
 end Formalism.L2.SG.Pf

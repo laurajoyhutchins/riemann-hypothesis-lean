@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MovedReadingSameMapsBaseReadingAgrees
-import Formalism.LocalToGlobal.Divisibility.FramesLemmas
-import Formalism.LocalToGlobal.Divisibility.ColumnFamilyPlaceCharacterComap
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FrmOfPosDef
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MovedReadingSameMapsBaseReadingAgrees
+public import Formalism.LocalToGlobal.Divisibility.ColumnFamilyPlaceCharacterComap
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FrmOfPosDef
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FgSpanTopOfLatticeCompatibleSemilinearStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormAtStandardFrameEqNormComplexFormStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PosDefMapEmbeddingOfPositiveAtPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FgSpanTopOfLatticeCompatibleSemilinearStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormAtStandardFrameEqNormComplexFormStatement
+import Formalism.LocalToGlobal.Divisibility.FramesLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab Formalism.L2.Host GlobalTheory.EX GlobalTheory.EX.OB GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl
   NumberField IsDedekindDomain
@@ -83,7 +119,30 @@ theorem tie_level (D : D7) {EE : Type} [NormedAddCommGroup EE] [InnerProductSpac
   · exact rNab_rdx D A P ψ (hf s) _
   · exact majAt_rdx D A P ψ (hf s) _ v hv x y
 
-set_option maxHeartbeats 3000000 in
+-- Transport the dependent maps and ties along an explicit family equality.
+private theorem tie_level_of_comap_eq (D : D7) {EE : Type} [NormedAddCommGroup EE]
+    [InnerProductSpace ℂ EE] [FiniteDimensional ℂ EE] (S : RowSide D EE)
+    {G : Type} [Group G] [Fintype G] {Pl0 T T' : Type} {m : ℕ}
+    (A : FamIn D.what₂.LL G Pl0 T m) (P : Subgroup G) (ψ : P →* D.what₂.LLˣ)
+    (tp : D.what₂.Tup → T)
+    (j : ∀ μ, (Fin (rDim D A P ψ (tp μ)) → D.what₂.LL) →ₛₗ[D.what₂.embLL] S.Amb μ)
+    (E : ∀ μ, Matrix (Fin (rDim D A P ψ (tp μ))) (Fin (rDim D A P ψ (tp μ))) D.what₂.LL)
+    (op : ∀ μ, S.Amb μ →ₗ[ℂ] S.Amb μ)
+    (hF : ∀ μ, FormsTie D.what₂.embLL (j μ) (rH D A P ψ (tp μ)) (E μ) (op μ))
+    (hL : ∀ μ, OLatTie D.what₂.embLL (S.Mtilde μ) (j μ) (rNab D A P ψ (tp μ)))
+    (f : T' → T) (μ0' : T') {A' : FamIn D.what₂.LL G Pl0 T' m}
+    (hA : A.comap f μ0' = A') (tup : T' → D.what₂.Tup) (hf : ∀ s, f s = tp (tup s))
+    (j' : ∀ s, (Fin (rDim D A' P ψ s) → D.what₂.LL) →ₛₗ[D.what₂.embLL] S.Amb (tup s))
+    (hs : ∀ s, SameOn (j (tup s)) (j' s)) :
+    ∃ (Fm : AmbForm D S) (J : AmbIds D A' S Fm P ψ tup), AmbTie D A' S Fm P ψ tup j' J := by
+  subst A'
+  exact tie_level D S A P ψ tp j E op hF hL f μ0' tup hf j' hs
+
+private theorem famC_comap_incl {B : Base} {px : PreX B.toPre} (I : ColIn B px)
+    (hX : B.fields.Ok) {U V : Set I.ι} (Xg : Finset (R3.Gc B px → B.LL)) (tr : R3.TrI B px)
+    (h : R3.tuOf I U ⊆ R3.tuOf I V) :
+    (R3.famC I hX V Xg tr).A.comap (TupF.incl h) (mu0F (R3.tuOf I U)) =
+      (R3.famC I hX U Xg tr).A := rfl
 
 theorem ambEx_of_rx : ∀ 𝒮 : Slots, 𝒮.Rx = RX → AmbEx 𝒮 := by
   rintro ⟨Rx, Nx, Sx, Ox⟩ h
@@ -100,10 +159,14 @@ theorem ambEx_of_rx : ∀ 𝒮 : Slots, 𝒮.Rx = RX → AmbEx 𝒮 := by
     show s.1 = w.I.tup (l.what₂.r.Y.tup s)
     have e : l.what₂.r.Y.tup s = R3.ixOf w.I _ s := l.what₂.r.tup_ix s
     rw [e, R3.tup_ixOf]
-  obtain ⟨a, J, hJ⟩ := tie_level (w.st Z).toD7 (RowSide.sharp _) (famAll l.what₂) (R3.lev1 w.I) (R3.chr1 w.I) (tAll w.I)
-    x.all.jA _ _ x.all.formsA x.all.latA (TupF.incl hsub) (mu0F _) l.what₂.r.Y.tup hf l.what₂.r.Y.jA x.jA_use
-  obtain ⟨a0, J0, hJ0⟩ := tie_level (w.st Z).toD7 l.p0.s (famAll l.what₂) (R3.lev0 w.I) (R3.chr0 w.I) (tAll w.I)
-    x.all.jA0 _ _ x.all.formsAtBottomLevel x.all.latA0 (TupF.incl hsub) (mu0F _) l.what₂.r.Y.tup hf l.what₂.r.Y.jA0 x.movedReadingSameMaps_baseReading_agrees
+  have hFam := famC_comap_incl w.I l.what₂.hX l.what₂.r.z.Xg l.what₂.r.z.tr hsub
+  obtain ⟨a, J, hJ⟩ := tie_level_of_comap_eq (w.st Z).toD7 (RowSide.sharp _) (famAll l.what₂)
+    (R3.lev1 w.I) (R3.chr1 w.I) (tAll w.I) x.all.jA _ _ x.all.formsA x.all.latA
+    (TupF.incl hsub) (mu0F _) hFam l.what₂.r.Y.tup hf l.what₂.r.Y.jA x.jA_use
+  obtain ⟨a0, J0, hJ0⟩ := tie_level_of_comap_eq (w.st Z).toD7 l.p0.s (famAll l.what₂)
+    (R3.lev0 w.I) (R3.chr0 w.I) (tAll w.I) x.all.jA0 _ _ x.all.formsAtBottomLevel x.all.latA0
+    (TupF.incl hsub) (mu0F _) hFam l.what₂.r.Y.tup hf l.what₂.r.Y.jA0
+    x.movedReadingSameMaps_baseReading_agrees
   exact ⟨a, a0, ⟨J, hJ⟩, ⟨J0, hJ0⟩⟩
 
 end GlobalTheory.AmbCrd

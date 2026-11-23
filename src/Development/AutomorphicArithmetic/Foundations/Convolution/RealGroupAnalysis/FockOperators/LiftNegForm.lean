@@ -1,21 +1,59 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.XApply
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.SetIntegralMulRight
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.StableOfOrth
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.FW
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.WeilRepresentation.FockSt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.XApply
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.FW
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.SetIntegralMulRight
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.StableOfOrth
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.WeilRepresentation.FockSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.Smooth
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
 open UpperTheory.ConvolutionTheory.R2 UpperTheory.ConvolutionTheory.R2.Fo
 open scoped Classical
 
-private theorem lift_neg_form {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] {D : Dat F E} (W : Weil D) (M : Meas F) (u : GL (Fin 2) (A F) → ℂ) (φ : S4 F) (h : GL (Fin 2) (A E)) :
+private theorem lift_neg_form {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] {D : Dat F E} (W : Weil D) (M : Meas F) (u : GL (Fin 2) (A F) → ℂ) (φ : S4 F) (h : GL (Fin 2) (A E)) :
     lift W M (fun x => -u x) φ h = -lift W M u φ h := by
   unfold lift
   simp only [neg_mul]
   exact integral_neg _
 
-private theorem lift_neg_data {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] {D : Dat F E} (W : Weil D) (M : Meas F) (u : GL (Fin 2) (A F) → ℂ) (φ : S4 F) (h : GL (Fin 2) (A E)) :
+private theorem lift_neg_data {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] {D : Dat F E} (W : Weil D) (M : Meas F) (u : GL (Fin 2) (A F) → ℂ) (φ : S4 F) (h : GL (Fin 2) (A E)) :
     lift W M u (-φ) h = -lift W M u φ h := by
   unfold lift
   have e : ∀ χ : S4 F, Th (-χ).1 = -Th χ.1 := fun χ => by
@@ -25,7 +63,7 @@ private theorem lift_neg_data {F E : Type} [Field F] [NumberField F] [Field E] [
   exact integral_neg _
 
 theorem UpperTheory.ConvolutionTheory.R2.Fo.moveF :
-    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] (D : Dat F E) (W : Weil D) (M : Meas F) (π : TR.CuspSub F 2) (O : Ops F), MoveE O W M π →
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] (D : Dat F E) (W : Weil D) (M : Meas F) (π : TR.CuspSub F 2) (O : Ops F), MoveE O W M π →
     ∀ f ∈ π.V, ∀ φ ∈ Fock D.δ, ∀ w h, lift W M f.1 (O.f D.δ w φ) h = -lift W M (TR.Eop w 1 0 f).1 φ h := by
   intro F E _ _ _ _ _ _ _ D W M π O hE f hf φ hφ v h
   obtain ⟨hV, hAd, hO⟩ := UpperTheory.ConvolutionTheory.R2.Fo.adW F

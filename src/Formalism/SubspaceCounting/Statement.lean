@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.Submodule.Map
+public import Mathlib.Data.Finset.Powerset
+public import Mathlib.LinearAlgebra.Span.Defs
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,16 +57,10 @@ def AllButLE {R X : Type} [CommRing R] [AddCommGroup X] [Module R X] (π : R)
   ∃ C : Finset X, (↑C : Set X) ⊆ M ∧ C.card ≤ g ∧
     ∀ x ∈ M, π ^ E • x ∈ P ⊔ Submodule.span R (↑C : Set X)
 
-def GoodRank {R A B : Type} [CommRing R] [AddCommGroup A] [Module R A] [AddCommGroup B]
-    [Module R B] (π : R) (f : A →ₗ[R] B) (n D : ℕ) : Prop :=
-  ∃ (u : (Fin n → R) →ₗ[R] A) (v : B →ₗ[R] (Fin n → R)),
-    v ∘ₗ f ∘ₗ u = (π ^ D) • LinearMap.id
-
 inductive Slot
   | base
   | ball
   | dual
-  deriving DecidableEq
 
 def vertexLabel {V : ℕ} (B : Finset (Fin V)) : Fin V → Slot :=
   fun v => if v ∈ B then Slot.dual else Slot.base
@@ -63,25 +103,5 @@ def WalkSharp : Prop :=
         (∑ v, (a v + b v + (m - 1) * c v + m * c₀) + β * S) ∧
       AllButLE π (L fun _ => Slot.base) (prodIdealMap π y m Sv (L fun _ => Slot.base)) 0
         (∑ v, Sv v)
-
-def LengthLayers : Prop :=
-  ∀ {O M : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [AddCommGroup M] [Module O M] [Module.Free O M] [Module.Finite O M]
-    (π : O), Irreducible π →
-    ∀ (P : Submodule O M) (τ S Stop β₀ : ℕ) (g : ℕ → ℕ),
-    (∀ β ≤ β₀, AllButLE π ⊤ P (g β) (τ + β * S)) →
-    AllButLE π ⊤ P 0 (τ + Stop) →
-    Module.length O (M ⧸ (P ⊓ (Ideal.span {π ^ τ}) • (⊤ : Submodule O M))) ≤
-      ((Module.finrank O M * τ + S * ∑ β ∈ Finset.range β₀, g β + Stop * g β₀ : ℕ) : ℕ∞)
-
-def SaturatedMember : Prop :=
-  ∀ {O M : Type} [CommRing O] [IsDomain O] [AddCommGroup M] [Module O M]
-    (π : O), π ≠ 0 →
-    ∀ (M' P : Submodule O M) (τ : ℕ),
-    (∀ (r : O) (x : M), r ≠ 0 → r • x ∈ M' → x ∈ M') →
-    P ⊓ (Ideal.span {π ^ τ}) • (⊤ : Submodule O M) ⊓ M' ≤ (Ideal.span {π ^ τ}) • M' ∧
-    Module.length O (M' ⧸ (Submodule.comap M'.subtype
-        (P ⊓ (Ideal.span {π ^ τ}) • (⊤ : Submodule O M)))) ≤
-      Module.length O (M ⧸ (P ⊓ (Ideal.span {π ^ τ}) • (⊤ : Submodule O M)))
 
 end Formalism.G0

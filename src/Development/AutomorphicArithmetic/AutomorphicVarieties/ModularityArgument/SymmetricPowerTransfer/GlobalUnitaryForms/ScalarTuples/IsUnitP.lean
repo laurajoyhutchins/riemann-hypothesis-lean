@@ -1,9 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.FormsFin
-import GroundTheory.GlobalFields.Adele.WeakApprox
-import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
-import Mathlib.Analysis.Calculus.FDeriv.Bilinear
-import Mathlib.Topology.Algebra.Module.FiniteDimension
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
+public import GroundTheory.GlobalFields.Adele.WeakApprox
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,9 +139,10 @@ private theorem int_nhds {K : Type} [NontriviallyNormedField K] [CompleteSpace K
   have hsplit : l x = l o + ∑ i, (x i - o i) • l (e i) := by
     have h1 : x - o = ∑ i, (x - o) i • e i := pi_eq_sum_univ (x - o)
     have h2 : l (x - o) = ∑ i, (x i - o i) • l (e i) := by
+
       rw [h1, map_sum]
       simp [map_smul]
-    rw [← h2, ← map_add, add_sub_cancel]
+    rw [← h2, ← map_add (f := _), add_sub_cancel]
   rw [hsplit]
   refine IsIntegral.add ho (IsIntegral.sum _ fun i _ => ?_)
   obtain ⟨s, hs⟩ := hx i
@@ -247,7 +301,7 @@ private theorem loc_open {K : Type} [NontriviallyNormedField K] [CompleteSpace K
     obtain ⟨a0, ha0⟩ := hy2
     obtain ⟨g', hg'⟩ := ex_mt Δ y ((isUnit_p Δ y).mpr hy3)
     refine ⟨g', mem_KD Δ O g' (by rw [hg']; exact hy) (a0 + 1) ?_, hg'⟩
-    rw [hg', det_p, IsScalarTower.algebraMap_apply O K (Lsq K Δ), map_add, map_one, ha0, sub_add_cancel, ← map_mul, mul_inv_cancel₀ hy3, map_one]
+    rw [hg', det_p, IsScalarTower.algebraMap_apply O K (Lsq K Δ), map_add (f := _), map_one, ha0, sub_add_cancel, ← map_mul, mul_inv_cancel₀ hy3, map_one]
   have hpow := pow_nhds (pD Δ) (qD Δ) (qp Δ) (pq_mul Δ) ![1, 0, 0, 0] (p_one Δ) J'.normalCore.index (Nat.cast_ne_zero.mpr hm0) P hP
   have hT : Tendsto (fun x => qD Δ (pD Δ x * mt g)) (𝓝 (qD Δ (mt g⁻¹))) (𝓝 ![1, 0, 0, 0]) := by
     let T : (Fin 4 → K) →ₗ[K] (Fin 4 → K) := qD Δ ∘ₗ (LinearMap.mulRight K (mt g)) ∘ₗ pD Δ

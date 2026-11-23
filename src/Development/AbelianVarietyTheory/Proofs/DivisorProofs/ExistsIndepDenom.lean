@@ -1,4 +1,54 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.SubsetSpanBy
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SubsetSpanBy
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.Cartier GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef
@@ -40,6 +90,7 @@ theorem descent {R₁ E : Type} [CommRing R₁] [CommRing E] [IsLocalRing E] (a 
   have hy : ∀ c' : Fin k →₀ R₁, y c' = ∑ l ∈ c'.support, a (c' l) * y (Finsupp.single l 1) := by
     intro c'
     conv_lhs => rw [← Finsupp.sum_single c']
+
     rw [Finsupp.sum, map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [← _root_.mul_one (c' l), ← smul_eq_mul, ← Finsupp.smul_single, map_smul, Algebra.smul_def,
@@ -56,8 +107,7 @@ theorem descent {R₁ E : Type} [CommRing R₁] [CommRing E] [IsLocalRing E] (a 
   have h2 := congrArg (fun z : Fin k →₀ R₁ => z l) (LinearMap.congr_fun hαf (ev i))
   simp only [LinearMap.comp_apply, LinearMap.zero_apply, Finsupp.coe_zero, Pi.zero_apply] at h2
   rw [LinearMap.pi_apply_eq_sum_univ α] at h2
-  simp only [Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul,
-    Fin.sum_univ_succ] at h2
+  simp only [Fin.sum_univ_succ] at h2
   have hA : ∀ c, (A.mulVecLin (ev i)) c = A c i := by
     intro c
     simp [Matrix.mulVec, dotProduct, ev]
@@ -65,7 +115,7 @@ theorem descent {R₁ E : Type} [CommRing R₁] [CommRing E] [IsLocalRing E] (a 
   have hs : ∑ j, -(α (ev j.succ) l) * g j i = -∑ j, g j i * α (ev j.succ) l := by
     rw [← Finset.sum_neg_distrib]
     exact Finset.sum_congr rfl fun j _ => by ring
-  simp only [Finsupp.add_apply, Finsupp.smul_apply, Finsupp.finset_sum_apply, smul_eq_mul] at h2
+  simp only [Finsupp.add_apply, Finsupp.smul_apply, Finsupp.finsetSum_apply, smul_eq_mul] at h2
   rw [hs]
   simp only [ev] at h2 ⊢
   linear_combination h2
@@ -136,6 +186,7 @@ theorem gaussAt_descent : ∀ (R₀ R₁ E F F₁ FE : Type) [CommRing R₀] [Is
     · obtain ⟨w, hw⟩ := hu i
       exact ⟨w, by rw [RingHom.comp_apply, hw]⟩
     · have := congrArg θE hsum
+
       simpa [map_sum, hcomp] using this
   rw [← hW, Set.mem_preimage, hG (θE v) hEv]
   constructor
@@ -148,15 +199,18 @@ theorem gaussAt_descent : ∀ (R₀ R₁ E F F₁ FE : Type) [CommRing R₀] [Is
       by_contra h
       exact ht ((mem_maximalIdeal _).2 h)
     have e1 : ∑ i, cE (a (G 0 i)) * θE (b i) = θE (c₁ δ) * θE v := by
+
       rw [← map_mul, hv, map_sum]
       simp [hcomp]
     have e2 : ∀ j, ∑ i, cE (a (G j.succ i)) * θE (b i) = θE (c₁ δ) * z j := by
       intro j
+
       rw [← hwz j, RingHom.comp_apply, ← map_mul, hw' j, map_sum]
       simp [hcomp]
     have hz0 := hL1 m b hb (fun i => t * a (G 0 i) - ∑ j, e j * a (G j.succ i)) (by
       calc ∑ i, cE (t * a (G 0 i) - ∑ j, e j * a (G j.succ i)) * θE (b i)
           = cE t * (∑ i, cE (a (G 0 i)) * θE (b i)) - ∑ j, cE (e j) * (∑ i, cE (a (G j.succ i)) * θE (b i)) := by
+
             simp only [map_sub, map_mul, map_sum, sub_mul, Finset.sum_sub_distrib, Finset.mul_sum, Finset.sum_mul]
             rw [Finset.sum_comm (s := Finset.univ) (t := Finset.univ)
               (f := fun i j => cE (e j) * cE (a (G j.succ i)) * θE (b i))]
@@ -184,6 +238,7 @@ theorem gaussAt_descent : ∀ (R₀ R₁ E F F₁ FE : Type) [CommRing R₀] [Is
           rw [hv, Finset.mul_sum]
           simp only [map_mul, _root_.mul_assoc]
       _ = ∑ i, ∑ j, c₁ (r j) * (c₁ (G j.succ i) * b i) := by
+
           simp only [hr, map_sum, map_mul, Finset.sum_mul, _root_.mul_assoc]
       _ = ∑ j, c₁ (r j) * (c₁ δ * θ (w j)) := by
           rw [Finset.sum_comm]
@@ -197,6 +252,7 @@ theorem gaussAt_descent : ∀ (R₀ R₁ E F F₁ FE : Type) [CommRing R₀] [Is
     · obtain ⟨w, hw, hwz⟩ := hz i
       exact ⟨w, hw, by rw [RingHom.comp_apply, hwz]⟩
     · have := congrArg θE hsum
+
       simpa [map_sum, hcomp] using this
 
 end GlobalTheory.Desc.GaussDown

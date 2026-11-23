@@ -1,14 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchSlotEx
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TypeFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.AmpGrp
-import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.AmpGrp
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchSlotEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDiff
+import GroundTheory.AutomorphicForms.GKModules.KernelCalculus
 import GroundTheory.AutomorphicForms.GKModules.ParametricIntegral
-import GroundTheory.AutomorphicForms.GKModules.Garding
-import GroundTheory.AutomorphicForms.TensorProductTheorem.NonemptyAdelicDecomposition
+import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+public import GroundTheory.AutomorphicForms.L2LocalComponents.ArchHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -132,7 +176,7 @@ private theorem int_surj_pi {A K : Type} [Group A] [TopologicalSpace A] [IsTopol
 
 section Tens
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyComplex F]
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [_root_.NumberField.IsTotallyComplex F]
   {σ : E ≃ₐ[F] E} (D : InfD σ 1) {n : ℕ}
 
 private theorem tens_ec {κF : Measure (archCompact F n)} {eF : archCompact F n → ℂ} {κ : Measure (archCompact E n)}
@@ -153,7 +197,7 @@ private theorem tens_ec {κF : Measure (archCompact F n)} {eF : archCompact F n 
   have hsk : ∀ kk i, compA D n i (s kk : archGroup E n) = kk i := fun kk i => hgc _ i
   have hes : ∀ kk, e (s kk) = ∏ i, eF (kk i) := fun kk => hSq (s kk) kk fun i => (hsk kk i).symm
   have hcf : Continuous fun k : archCompact E n => e k * ((∏ i, β (compA D n i ((k : archGroup E n)⁻¹ * x)) : ℝ) : ℂ) := by
-    refine hE.cont.mul (Complex.continuous_ofReal.comp (continuous_finset_prod _ fun i _ => hβ.comp ((hccont i).comp ?_)))
+    refine hE.cont.mul (Complex.continuous_ofReal.comp (continuous_finsetProd _ fun i _ => hβ.comp ((hccont i).comp ?_)))
     fun_prop
   unfold ec
   haveI : SecondCountableTopology (archCompact F n) := TopologicalSpace.Subtype.secondCountableTopology _
@@ -223,7 +267,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.E.ampEx :
   obtain ⟨νE', _, a, aE, aF, hs⟩ := archPositionEx F E σ 1 D n νF b hbsm hbfin hbn
   have hs' : ArchSlot D νE νF b a aE aF := (hs.meas.trans hν.symm) ▸ hs
   set βE : archGroup E n → ℝ := fun y => ∏ i, β (compA D n i y) with hβE
-  have hβEc : Continuous βE := continuous_finset_prod _ fun i _ => hβc.comp (hccont i)
+  have hβEc : Continuous βE := continuous_finsetProd _ fun i _ => hβc.comp (hccont i)
   have hβEc' : Continuous fun y => (βE y : ℂ) := by fun_prop
   have hbE : ∀ x, ec κ e (fun y => (βE y : ℂ)) x = ∏ i, b (compA D n i x) := fun x => by
     simp only [hbe]

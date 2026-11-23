@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
-import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -39,8 +83,8 @@ theorem completionMap_below_algebraMap (τ : L ≃+* L') (hτ : ∀ l, τ l = al
       algebraMap L' (w'.adicCompletion L') (τ l) := by
   rw [SemiLocal.completionMap_algebraMap, hτ, IsScalarTower.algebraMap_apply L L']
 
-omit [NumberField L] [NumberField L'] in
 
+omit [NumberField L] [NumberField L'] in
 theorem completion_algebraMap_comap_apply (τ : L ≃+* L') (hτ : ∀ l, τ l = algebraMap L L' l)
     (w' : InfinitePlace L') (l : L) :
     algebraMap (w'.comap (algebraMap L L')).Completion w'.Completion
@@ -74,8 +118,8 @@ def infiniteCompletionMap (τ : M ≃+* M') (w' : InfinitePlace M') :
   letI : Algebra M M' := (τ : M →+* M').toAlgebra
   algebraMap (w'.comap (algebraMap M M')).Completion w'.Completion
 
-omit [NumberField M] [NumberField M'] in
 
+omit [NumberField M] [NumberField M'] in
 theorem infiniteCompletionMap_algebraMap (τ : M ≃+* M') (w' : InfinitePlace M') (l : M) :
     infiniteCompletionMap τ w' (algebraMap M _ l) = algebraMap M' w'.Completion (τ l) :=
   letI : Algebra M M' := (τ : M →+* M').toAlgebra
@@ -95,8 +139,8 @@ section Galois
 
 variable {K : Type*} [Field K] [NumberField K] [Algebra K M]
 
-omit [NumberField K] [NumberField M] in
 
+omit [NumberField K] [NumberField M] in
 theorem comapPrime_eq_inv_smul (σ : M ≃ₐ[K] M) (w' : HeightOneSpectrum (𝓞 M)) :
     comapPrime (σ : M ≃+* M) w' = σ⁻¹ • w' := by
   ext1
@@ -105,22 +149,22 @@ theorem comapPrime_eq_inv_smul (σ : M ≃ₐ[K] M) (w' : HeightOneSpectrum (�
   simp only [Ideal.mem_comap]
   constructor <;> intro h <;> convert h using 2 <;> ext <;> rfl
 
-omit [NumberField K] [NumberField M] in
 
+omit [NumberField K] [NumberField M] in
 theorem comap_eq_inv_smul (σ : M ≃ₐ[K] M) (w' : InfinitePlace M) :
     w'.comap ((σ : M ≃+* M) : M →+* M) = σ⁻¹ • w' := by
   ext y
   rw [InfinitePlace.comap_apply, InfinitePlace.smul_apply]
   rfl
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem smul_snd (σ : M ≃ₐ[K] M) (x : 𝔸[M]) (w' : HeightOneSpectrum (𝓞 M)) :
     (σ • x).2 w' = finiteCompletionMap (σ : M ≃+* M) w' (x.2 (comapPrime (σ : M ≃+* M) w')) :=
   adeleRingEquiv_snd_eq _ x w'
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem smul_fst (σ : M ≃ₐ[K] M) (x : 𝔸[M]) (w' : InfinitePlace M) :
     (σ • x).1 w' = infiniteCompletionMap (σ : M ≃+* M) w' (x.1 (w'.comap ((σ : M ≃+* M) : M →+* M))) :=
   adeleRingEquiv_fst_eq _ x w'

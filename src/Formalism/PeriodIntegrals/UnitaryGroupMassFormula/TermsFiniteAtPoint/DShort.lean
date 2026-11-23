@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.CarrierRow
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TraceFormPosOnOrthLiftedFlag
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.CarrierRow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,22 +97,7 @@ theorem qcs_bound {W : Type*} [AddCommGroup W] [Module ℚ W] [FiniteDimensional
 
 theorem trace_pos_of_re_pos {E : Type} [Field E] [NumberField E] (z : E)
     (h : ∀ τ : E →+* ℂ, 0 < (τ z).re) : 0 < Algebra.trace ℚ E z := by
-  haveI : Nonempty (E →ₐ[ℚ] ℂ) := ⟨IsAlgClosed.lift⟩
-  have h1 : algebraMap ℚ ℂ (Algebra.trace ℚ E z) = ∑ σ : E →ₐ[ℚ] ℂ, σ z :=
-    trace_eq_sum_embeddings ℂ
-  have h2 : (algebraMap ℚ ℂ (Algebra.trace ℚ E z)).re = ∑ σ : E →ₐ[ℚ] ℂ, (σ z).re := by
-    rw [h1, Complex.re_sum]
-  have h3 : (algebraMap ℚ ℂ (Algebra.trace ℚ E z)).re = ((Algebra.trace ℚ E z : ℚ) : ℝ) := by
-    simp
-  have hpos : 0 < ∑ σ : E →ₐ[ℚ] ℂ, (σ z).re := by
-    apply Finset.sum_pos
-    · intro σ _
-      exact h σ.toRingHom
-    · exact Finset.univ_nonempty
-  have h4 : (0 : ℝ) < ((Algebra.trace ℚ E z : ℚ) : ℝ) := by
-    rw [← h3, h2]
-    exact hpos
-  exact_mod_cast h4
+  apply GlobalTheory.LoopC.PerpPos.trace_pos <;> assumption
 
 theorem exists_common_den {E : Type} [Field E] [NumberField E] (t : Finset E) :
     ∃ d : ℤ, d ≠ 0 ∧ ∀ e ∈ t, IsIntegral ℤ ((d : E) * e) := by
@@ -165,9 +201,9 @@ theorem shortFin_holds : ShortFin := by
     fun q x => rfl
   let B : LinearMap.BilinForm ℚ P := LinearMap.mk₂ ℚ
     (fun x y : P => Algebra.trace ℚ E (S.hT x y) + Algebra.trace ℚ E (S.hT y x))
-    (fun x1 x2 y => by simp only [Submodule.coe_add, map_add, LinearMap.add_apply]; ring)
+    (fun x1 x2 y => by simp only [Submodule.coe_add, map_add (f := _), LinearMap.add_apply]; ring)
     (fun q x y => by simp only [hcoe, hsl, hsr, htq, smul_eq_mul]; ring)
-    (fun x y1 y2 => by simp only [Submodule.coe_add, map_add, LinearMap.add_apply]; ring)
+    (fun x y1 y2 => by simp only [Submodule.coe_add, map_add (f := _), LinearMap.add_apply]; ring)
     (fun q x y => by simp only [hcoe, hsl, hsr, htq, smul_eq_mul]; ring)
   have hBapp : ∀ x y : P,
       B x y = Algebra.trace ℚ E (S.hT x y) + Algebra.trace ℚ E (S.hT y x) := fun x y => rfl
@@ -192,7 +228,7 @@ theorem shortFin_holds : ShortFin := by
     | zero => intro j; simpa using (isIntegral_zero : IsIntegral ℤ (0 : E))
     | add x y _ _ hx hy =>
       intro j
-      simp only [map_add, Finsupp.add_apply, mul_add]
+      simp only [map_add (f := _), Finsupp.add_apply, mul_add]
       exact (hx j).add (hy j)
     | smul a x _ hx =>
       intro j
@@ -205,7 +241,7 @@ theorem shortFin_holds : ShortFin := by
     intro p
     refine ⟨{ toFun := fun x => Φ x p, map_add' := ?_, map_smul' := ?_ }, fun x => rfl⟩
     · intro x y
-      simp only [Φ, Submodule.coe_add, map_add, Finsupp.add_apply, mul_add]
+      simp only [Φ, Submodule.coe_add, map_add (f := _), Finsupp.add_apply, mul_add]
     · intro q x
       simp only [Φ, hcoe, map_smul, Finsupp.smul_apply, smul_eq_mul, RingHom.id_apply]
       rw [← htq]

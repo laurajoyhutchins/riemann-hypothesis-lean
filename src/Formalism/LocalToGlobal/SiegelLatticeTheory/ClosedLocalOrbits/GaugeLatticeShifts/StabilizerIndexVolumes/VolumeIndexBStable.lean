@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.PairVal
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexFiniteNonzero
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.StClosed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.AtNormRep
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.VolumeIndexAStable
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.AtNormRep
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +69,7 @@ theorem hT_span_zero {T : E} (F : FlagG S r T) (y : S.V) (hy : y ∈ Submodule.s
   | smul c x _ hx => simp [hx]
 
 theorem frame_indep {T : E} (F : FlagG S r T) (hT : T ≠ 0) : LinearIndependent E F.fvec := by
-  rw [FlagG.fvec, linearIndependent_fin_snoc]
+  rw [FlagG.fvec, linearIndependent_finSnoc]
   refine ⟨F.e_indep, fun hz => hT ?_⟩
   have h := hT_span_zero F F.z hz
   rw [F.z_norm] at h
@@ -116,8 +156,9 @@ theorem zhat_conj {T T' : E} (F : FlagG S r T) (F' : FlagG S r T') (s : S.V ≃�
   have key : S.hT (F.fvec a) (F'.fvec b) = S.hT (s (F.fvec a)) (s (F'.fvec b)) := (hs _ _).symm
   simp only [Zhat, brS, Matrix.mul_apply, Matrix.conjTranspose_apply]
   rw [key, hu a, hu' b]
+
   simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, map_smul, LinearMap.smul_apply, smul_eq_mul,
-    starRingEnd_apply, RingHom.id_apply, Finset.mul_sum, Finset.sum_mul]
+  starRingEnd_apply, RingHom.id_apply, Finset.mul_sum, Finset.sum_mul]
   first
   | exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
   | (rw [Finset.sum_comm]; exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring)
@@ -186,7 +227,7 @@ theorem volume_index_b_stable (D : D7) (u u' : D.what₂.Word)
         apply hG'
         have e : Dl F0 F'.fl (D.R.rS + 1) = 0 := by
           unfold Dl leadMinorE
-          rw [dif_pos le_rfl]
+          rw [dite_eq_left le_rfl]
           exact h0
         rw [e, zero_mul]
       rw [Fintype.linearIndependent_iff]
@@ -197,8 +238,9 @@ theorem volume_index_b_stable (D : D7) (u u' : D.what₂.Word)
       refine ⟨fun a => star (g a), fun h => hgi (by simpa using congrFun h i), ?_⟩
       funext b
       have := congrArg (fun v => (VS D).hT v (F'.fl.fvec b)) hg
+
       simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
-        starRingEnd_apply, map_zero, LinearMap.zero_apply] at this
+      starRingEnd_apply, map_zero, LinearMap.zero_apply] at this
       simpa [Matrix.vecMul, dotProduct, Zhat, brS] using this
     · exact frame_indep F0 hT
   intro x hx

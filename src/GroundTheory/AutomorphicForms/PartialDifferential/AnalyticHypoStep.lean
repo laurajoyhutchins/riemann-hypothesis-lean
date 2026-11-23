@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.PartialDifferential.SqrtSumPdTMulSubLe
+module
+
+public import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoBasic
+public import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoCalc
+public import GroundTheory.AutomorphicForms.PartialDifferential.AnalyticHypoCutoff
+public import GroundTheory.AutomorphicForms.PartialDifferential.SqrtSumPdTMulSubLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.Sobolev
 
@@ -19,8 +69,6 @@ theorem powMul_bound_le {B L : ℝ} (hB : 0 ≤ B) (hL : 1 ≤ L) {p q i : ℕ} 
   have h2 : (p : ℝ) ^ i * (p : ℝ) ^ q ≤ (p : ℝ) ^ p := by
     rw [← pow_add]; exact pow_le_pow_right₀ hp' (by omega)
   have h3 : L ^ q ≤ L ^ (p - 1) := pow_le_pow_right₀ hL (by omega)
-  have hpi : 0 ≤ (p : ℝ) ^ i := by positivity
-  have hqq : 0 ≤ (q : ℝ) ^ q := by positivity
   calc (p : ℝ) ^ i * (B * L ^ q * (q : ℝ) ^ q) = B * L ^ q * ((p : ℝ) ^ i * (q : ℝ) ^ q) := by ring
     _ ≤ B * L ^ (p - 1) * ((p : ℝ) ^ i * (p : ℝ) ^ q) := by gcongr
     _ ≤ B * L ^ (p - 1) * (p : ℝ) ^ p := by gcongr
@@ -29,7 +77,6 @@ theorem coefTerm_le {B L Ma : ℝ} (hB : 0 ≤ B) (hL : 1 ≤ L) (hMa : 0 ≤ Ma
     (hp : 1 ≤ p) (hk : k ≤ p) (hqi : q + i ≤ p) :
     (k.choose i : ℝ) * (Ma ^ i * i.factorial) * (B * L ^ q * (q : ℝ) ^ q) ≤
       B * L ^ p * (p : ℝ) ^ p * (Ma / L) ^ i := by
-  have hL0 : 0 < L := by linarith
   have hp' : (1 : ℝ) ≤ p := by exact_mod_cast hp
   have hc : (k.choose i : ℝ) * i.factorial ≤ (p : ℝ) ^ i := by
     have : k.choose i * i.factorial ≤ p ^ i := by
@@ -45,12 +92,7 @@ theorem coefTerm_le {B L Ma : ℝ} (hB : 0 ≤ B) (hL : 1 ≤ L) (hMa : 0 ≤ Ma
     rw [← pow_add]; exact pow_le_pow_right₀ hp' (by omega)
   have h3 : L ^ q ≤ L ^ (p - i) := pow_le_pow_right₀ hL (by omega)
   have hLp : L ^ p = L ^ (p - i) * L ^ i := by rw [← pow_add, Nat.sub_add_cancel hiq]
-  have hLi : 0 < L ^ i := by positivity
   rw [div_pow, hLp]
-  have hqq : 0 ≤ (q : ℝ) ^ q := by positivity
-  have hMi : 0 ≤ Ma ^ i := by positivity
-  have hfac : 0 ≤ (i.factorial : ℝ) := by positivity
-  have hch : 0 ≤ (k.choose i : ℝ) := by positivity
   calc (k.choose i : ℝ) * (Ma ^ i * i.factorial) * (B * L ^ q * (q : ℝ) ^ q)
       = Ma ^ i * B * L ^ q * (((k.choose i : ℝ) * i.factorial) * (q : ℝ) ^ q) := by ring
     _ ≤ Ma ^ i * B * L ^ (p - i) * ((p : ℝ) ^ i * (p : ℝ) ^ q) := by gcongr
@@ -83,7 +125,7 @@ theorem norm_cutoff_pow {χ : EuclideanSpace ℝ (Fin n) → ℝ} (h01 : ∀ x, 
 theorem sqrt_sum_const_mul_hsD_pdT {u : EuclideanSpace ℝ (Fin n) → ℂ} (hu : ContDiff ℝ ∞ u) {c : ℝ}
     (hc : 0 ≤ c) (j k : ℕ) (x : EuclideanSpace ℝ (Fin n)) :
     Real.sqrt (∑ I : Fin k → Fin n, (c * hsD j (pdT I u) x) ^ 2) = c * hsD (j + k) u x := by
-  rw [sqrt_sum_sq_const_mul, abs_of_nonneg hc, ← hsD_add_sq hu, Real.sqrt_sq (hsD_nonneg _ _ _)]
+  rw [sqrt_sum_sq_const_mul, abs_of_nonneg hc, ← hsD_add_sq hu j k x, Real.sqrt_sq (hsD_nonneg _ _ _)]
 
 theorem sqrt_sum_hsD_weight_le {u : EuclideanSpace ℝ (Fin n) → ℂ} (hu : ContDiff ℝ ∞ u)
     {χ : EuclideanSpace ℝ (Fin n) → ℝ} (hχ : ContDiff ℝ ∞ χ) (h01 : ∀ x, 0 ≤ χ x ∧ χ x ≤ 1)
@@ -102,7 +144,10 @@ theorem sqrt_sum_hsD_weight_le {u : EuclideanSpace ℝ (Fin n) → ℂ} (hu : Co
   have hI : ∀ I : Fin k → Fin n, hsD j (fun y ↦ ((χ y : ℂ)) ^ s * pdT I u y) x ≤
       ∑ ij ∈ antidiagonal j, c ij * hsD ij.2 (pdT I u) x := by
     intro I
-    refine (hsD_mul_le j hw (contDiff_pdT hu I) x).trans (Finset.sum_le_sum fun ij hij ↦ ?_)
+    refine le_trans (b := ∑ ij ∈ antidiagonal j,
+      (j.choose ij.1 : ℝ) * hsD ij.1 (fun y ↦ ((χ y : ℂ)) ^ s) x *
+        hsD ij.2 (pdT I u) x) (hsD_mul_le j hw (contDiff_pdT hu I) x) ?_
+    refine Finset.sum_le_sum fun ij hij ↦ ?_
     have h1 : ij.1 + ij.2 = j := mem_antidiagonal.1 hij
     have hb := hK s ij.1 x (by omega) (by omega)
     have := hsD_nonneg ij.2 (pdT I u) x
@@ -243,7 +288,9 @@ theorem sqrt_sum_diffOp_pdT_le {A : Finset (Fin n → ℕ)}
         have := hsD_nonneg ij.1 (a α) x
         calc (k.choose ij.1 : ℝ) * hsD ij.1 (a α) x * hsD ij.2 (pderiv α u) x
             ≤ (k.choose ij.1 : ℝ) * (Ca * Ma ^ ij.1 * ij.1.factorial) *
-                hsD (mabs α + ij.2) u x := by gcongr
+                hsD (mabs α + ij.2) u x := by
+              exact mul_le_mul (mul_le_mul_of_nonneg_left h1 (by positivity)) h2
+                (hsD_nonneg _ _ _) (by positivity)
 
 theorem sqrt_sum_diffOp_weight_le {A : Finset (Fin n → ℕ)}
     {a : (Fin n → ℕ) → EuclideanSpace ℝ (Fin n) → ℂ} (ha : ∀ α ∈ A, ContDiff ℝ ∞ (a α))
@@ -286,8 +333,10 @@ theorem sqrt_sum_diffOp_weight_le {A : Finset (Fin n → ℕ)}
         ((χ x : ℂ)) ^ s * pderiv α (pdT I u) x‖ ≤
       ∑ ij ∈ F (mabs α), c (mabs α) ij * hsD ij.2 (pdT I u) x := by
     intro I α hα
-    refine (norm_pderiv_mul_sub_le hw (contDiff_pdT hu I) α x).trans
-      (Finset.sum_le_sum fun ij hij ↦ ?_)
+    refine le_trans (b := ∑ ij ∈ F (mabs α),
+      ((mabs α).choose ij.1 : ℝ) * hsD ij.1 (fun y ↦ ((χ y : ℂ)) ^ s) x *
+        hsD ij.2 (pdT I u) x) (norm_pderiv_mul_sub_le hw (contDiff_pdT hu I) α x) ?_
+    refine Finset.sum_le_sum fun ij hij ↦ ?_
     have h1 : ij.1 + ij.2 = mabs α := mem_antidiagonal.1 (Finset.mem_filter.1 hij).1
     have hαm := hA α hα
     have hb := hK s ij.1 x (by omega) (by omega)
@@ -370,14 +419,14 @@ theorem sqrt_sum_diffOp_weight_le {A : Finset (Fin n → ℕ)}
 
 theorem hsD_eq_zero_of_eventuallyEq_zero {f : EuclideanSpace ℝ (Fin n) → ℂ}
     {x : EuclideanSpace ℝ (Fin n)} (h : f =ᶠ[nhds x] fun _ ↦ 0) (k : ℕ) : hsD k f x = 0 := by
-  rw [hsD_congr_of_eventuallyEq h]
+  rw [hsD_congr_of_eventuallyEq h k]
   simp [hsD, pdT, dT, iteratedFDeriv_fun_zero]
 
 theorem dT_eventuallyEq_zero_of_not_mem_tsupport {f : EuclideanSpace ℝ (Fin n) → ℂ}
     {x : EuclideanSpace ℝ (Fin n)} (hx : x ∉ tsupport f) {k : ℕ}
     (v : Fin k → EuclideanSpace ℝ (Fin n)) : dT v f =ᶠ[nhds x] fun _ ↦ 0 := by
   filter_upwards [(isClosed_tsupport f).isOpen_compl.mem_nhds hx] with y hy
-  rw [dT_congr_of_eventuallyEq (notMem_tsupport_iff_eventuallyEq.1 hy)]
+  rw [dT_congr_of_eventuallyEq (notMem_tsupport_iff_eventuallyEq.1 hy) v]
   simp [dT]
 
 def wN (χ : EuclideanSpace ℝ (Fin n) → ℝ) (u : EuclideanSpace ℝ (Fin n) → ℂ) (q : ℕ) : ℝ :=
@@ -575,15 +624,11 @@ theorem sum_choose_weight_le {j P k : ℕ} {S : Finset (ℕ × ℕ)} (hS : S ⊆
     (hidx : ∀ ij ∈ S, ij.2 + k + 1 ≤ P ∧ ij.2 + k + ij.1 ≤ P) :
     ∑ ij ∈ S, (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) * w (ij.2 + k) ≤
       2 ^ j * K * (B * L ^ (P - 1) * (P : ℝ) ^ P) := by
-  have hT : 0 ≤ B * L ^ (P - 1) * (P : ℝ) ^ P := by
-    have : (0 : ℝ) ≤ L := by linarith
-    positivity
   calc ∑ ij ∈ S, (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) * w (ij.2 + k)
       ≤ ∑ ij ∈ S, (j.choose ij.1 : ℝ) * K * (B * L ^ (P - 1) * (P : ℝ) ^ P) := by
         refine Finset.sum_le_sum fun ij hij ↦ ?_
         obtain ⟨h1, h2⟩ := hidx ij hij
         have hb := powMul_bound_le hB0 hL1 (p := P) (q := ij.2 + k) (i := ij.1) hP1 h1 h2
-        have hPi : 0 ≤ (P : ℝ) ^ ij.1 := by positivity
         calc (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) * w (ij.2 + k)
             ≤ (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) *
                 (B * L ^ (ij.2 + k) * ((ij.2 + k : ℕ) : ℝ) ^ (ij.2 + k)) := by
@@ -608,7 +653,6 @@ theorem sum_coef_weight_le {k P d : ℕ} (hP1 : 1 ≤ P) (hdk : d + k ≤ P) {Ca
   have hL0 : 0 < L := by linarith
   have hr0 : 0 ≤ Ma / L := div_nonneg hMa hL0.le
   have hr : Ma / L ≤ 1 / 2 := by rw [div_le_iff₀ hL0]; linarith
-  have hT : 0 ≤ B * L ^ P * (P : ℝ) ^ P := by positivity
   calc ∑ ij ∈ (antidiagonal k).filter (fun ij ↦ 0 < ij.1),
         (k.choose ij.1 : ℝ) * (Ca * Ma ^ ij.1 * ij.1.factorial) * w (d + ij.2)
       ≤ ∑ ij ∈ (antidiagonal k).filter (fun ij ↦ 0 < ij.1),

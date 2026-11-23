@@ -1,5 +1,47 @@
-import Formalism.GaloisCohomology.Statement
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.TotallyRealRoots.GalDefs
+module
+
+public import Formalism.GaloisCohomology.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,20 +53,22 @@ section
 
 variable (F : Type) {Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] (l : ℕ) [Fact l.Prime]
 
-def decImage (A : ValuationSubring Ω) : Subgroup ℤ_[l]ˣ := (Dec (F := F) A).map (cycZ F Ω l)
+def decImage (A : ValuationSubring Ω) : Subgroup ℤ_[l]ˣ :=
+  (Dec (F := F) A).map (cycZ (F := F) (Ω := Ω) l)
 
-def ineImage (A : ValuationSubring Ω) : Subgroup ℤ_[l]ˣ := (Ine (F := F) A).map (cycZ F Ω l)
+def ineImage (A : ValuationSubring Ω) : Subgroup ℤ_[l]ˣ :=
+  (Ine (F := F) A).map (cycZ (F := F) (Ω := Ω) l)
 
 theorem ineImage_le_decImage (A : ValuationSubring Ω) : ineImage F l A ≤ decImage F l A := Subgroup.map_mono (Ine_le_Dec A)
 
 variable (Ω) in
-
-def qzG (e : ℤ) : Representation ℤ_[l] (G F Ω) (QZ l) := scalRep (QZ l) (cycZ F Ω l ^ (-e))
+def qzG (e : ℤ) : Representation ℤ_[l] (G F Ω) (QZ l) :=
+  scalRep (QZ l) (cycZ (F := F) (Ω := Ω) l ^ (-e))
 
 variable {F l}
 
 theorem qzG_apply (e : ℤ) (g : G F Ω) (x : QZ l) :
-    qzG F Ω l e g x = ((cycZ F Ω l g ^ (-e) : ℤ_[l]ˣ) : ℤ_[l]) • x := rfl
+    qzG F Ω l e g x = ((cycZ (F := F) (Ω := Ω) l g ^ (-e) : ℤ_[l]ˣ) : ℤ_[l]) • x := rfl
 
 theorem qzTw_comp_toGS (D : LData F Ω l) (e : ℤ) : (qzTw D e).comp (toGS Ω _) = qzG F Ω l e := by
   ext g x
@@ -68,11 +112,7 @@ theorem mk_mem_ShaAbs (ρ : Representation R (G F Ω) M) (S : Set (HeightOneSpec
 end
 
 def shaInv (F : Type) [Field F] [NumberField F] (l : ℕ) [Fact l.Prime] (e : ℤ) : ℕ∞ :=
-  Module.length ℤ_[l] (ShaAbs (qzG F (AlgebraicClosure F) l e) (Above F l))
-
-def levelDec (l N : ℕ) : Subgroup (ZMod N)ˣ :=
-  (Subgroup.closure {u : (ZMod (ordCompl[l] N))ˣ | (u : ZMod (ordCompl[l] N)) = (l : ZMod (ordCompl[l] N))}).comap
-    (ZMod.unitsMap (Nat.ordCompl_dvd N l))
+  Module.length ℤ_[l] (ShaAbs (qzG F (AlgebraicClosure F) l e) (Above (F := F) l))
 
 def nuBound (l N e : ℕ) : ℕ :=
   if l ∣ N ∨ l - 1 ∣ e then max (N.factorization l) (if l = 2 then 2 else 1) + e.factorization l else 0

@@ -1,4 +1,16 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormIteratedFDerivWithinInvOneLe
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralIteratedFDerivEqZero
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormIteratedFDerivWithinInvOneLe
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.MeasureTheory.Covering.Besicovitch
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open MeasureTheory Module
 open scoped Nat
@@ -35,7 +47,6 @@ theorem norm_iteratedFDeriv_w_le (n : ℕ) (x : V) :
     _ = (n.choose i : ℝ) * au i * au (n - i) * ((1 + ‖x‖ ^ 2)⁻¹ * (1 + ‖x‖ ^ 2)⁻¹) := by ring
 
 theorem inv_sq_le (x : V) : (1 + ‖x‖ ^ 2)⁻¹ * (1 + ‖x‖ ^ 2)⁻¹ ≤ 4 * (1 + ‖x‖) ^ (-(4 : ℝ)) := by
-  have ht0 : 0 ≤ ‖x‖ := norm_nonneg x
   have h1 : (0 : ℝ) < 1 + ‖x‖ := by positivity
   have hA : (0 : ℝ) < (1 + ‖x‖ ^ 2) * (1 + ‖x‖ ^ 2) := by positivity
   have hB : (0 : ℝ) < (1 + ‖x‖) ^ 4 := by positivity

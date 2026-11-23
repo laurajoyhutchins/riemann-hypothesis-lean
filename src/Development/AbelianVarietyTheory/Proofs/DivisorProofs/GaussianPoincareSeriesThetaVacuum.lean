@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsHalfIdem
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MapFinNeg
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharacterHalfSymplecticFormRealPointStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefiniteStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsHalfIdem
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExpSeriesContDiffAndHasDerivAt
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteRationalPointsCompletedLatticeStatement
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HomSymplecticHalfFormAlgebraicLawsContinuousStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsOpenNsmulCompletedHomLatticeFiniteAdelicStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MapFinNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefiniteStatement
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharacterHalfSymplecticFormRealPointStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexNeZeroOfFinite
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.SmoothIffRealCoordinatesAndRealLines
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix GlobalTheory.WeilParts GlobalTheory.FinWeil GlobalTheory.FinWeilO GlobalTheory.FockCompare GlobalTheory.VacUnique GlobalTheory.RatAut
 open scoped TensorProduct Kronecker ComplexOrder ContDiff
@@ -133,7 +182,7 @@ theorem quad_identity {w : 𝓞 D.host.E} (hw : w + GlobalTheory.FinWeil.sgO D w
     -symplOH S T (intA D w • u) u + (symplOH S T y u + symplOH S T (intA D w • (y + u)) (y + u)) =
       symplOH S T (intA D w • y) y + symplO S T (intA D w • y) u := by
   have h1 : intA D w • y + cA D (intA D w) • y = y := by
-    rw [← add_smul, cA_intA, ← RingHom.map_add, hw, RingHom.map_one, one_smul]
+    rw [← add_smul, cA_intA, ← RingHom.map_add (f := _), hw, RingHom.map_one, one_smul]
   have h2 := congrArg (fun z => symplOH S T z u) h1
   simp only [symplOH_add_left] at h2
   have h3 := symplOH_smul (intA D w) u y
@@ -154,7 +203,7 @@ theorem chiLat_add_lat (hA : SelfDual (gamF ψ S T) (latF S T LS LT)) {w : 𝓞 
   have hy := fin_smul_fin x
   generalize (1 - realIdem D) • x = y at hy ⊢
   by_cases h : y ∈ latO S T LS LT fun _ => True
-  · rw [if_pos h, if_pos (add_mem h hu)]
+  · rw [ite_eq_left h, ite_eq_left (add_mem h hu)]
     have h0 : ψ (symplO S T (intA D w • y) u) = 1 :=
       (hA _).1 ((latF S T LS LT).smul_mem w (show XF.mk y hy ∈ latF S T LS LT from h)) u hu
     rw [phase, ← AddChar.map_add_eq_mul, ← AddChar.map_add_eq_mul, quad_identity hw, AddChar.map_add_eq_mul, h0,
@@ -162,7 +211,7 @@ theorem chiLat_add_lat (hA : SelfDual (gamF ψ S T) (latF S T LS LT)) {w : 𝓞 
   · have h2 : y + (u : WO S T) ∉ latO S T LS LT fun _ => True := fun h' => h (by
       have h3 := sub_mem h' (mem_latF.1 hu)
       rwa [add_sub_cancel_right] at h3)
-    rw [if_neg h, if_neg h2, mul_zero, mul_zero]
+    rw [ite_eq_right h, ite_eq_right h2, mul_zero, mul_zero]
 
 theorem series_theta_vacuum : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (hψ : IsStdChar D ψ (-1)) (θ : InfFam D) (σ : (D.what₂.Tau → ℂ) →+ AE D), Chart θ σ → ∀ (S T : HSp D) (sS : D.what₂.Tau → Matrix (Fin S.rank) (Fin S.rank) ℂ) (sT : D.what₂.Tau → Matrix (Fin T.rank) (Fin T.rank) ℂ), (∀ τ, IsCartanInv (gramAt D S τ) (sS τ)) → (∀ τ, IsCartanInv (gramAt D T τ) (sT τ)) → ∀ (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E)) (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)), IsSelfDualC S ΛS → IsSelfDualC T ΛT → ∀ w : 𝓞 D.host.E, w + GlobalTheory.FinWeil.sgO D w = 1 → ∀ a : RW T S, ∃ hf : IsThetaFunO ψ S T (serO ψ θ σ S T sS sT ΛS ΛT w a), Fixes (opF hψ.1 S T w) (latF S T ΛS ΛT) (⟨serO ψ θ σ S T sS sT ΛS ΛT w a, hf⟩ : thetaSub ψ S T) ∧ ∀ τ, IsFockVacAt (heisO ψ S T) θ τ (cplxO (sS τ) (sT τ)) (serO ψ θ σ S T sS sT ΛS ΛT w a) := by
   classical
@@ -220,7 +269,7 @@ theorem series_theta_vacuum : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (hψ
       · rw [← comp_incA hθ]
         let y : RW T S := piW θ T S (ratW T S g)
         exact ((norm_le_pi_norm (y τ i) j).trans ((norm_le_pi_norm (y τ) i).trans (norm_le_pi_norm y τ))).trans h2)
-    (fun x hx => if_neg hx)
+    (fun x hx => ite_eq_right hx)
     (fun x => by
       rw [chiLat]
       split_ifs

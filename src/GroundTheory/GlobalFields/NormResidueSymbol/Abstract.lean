@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
-import GroundTheory.GlobalFields.Adele.IdeleBasis
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
+public import GroundTheory.GlobalFields.Adele.IdeleBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -73,14 +120,6 @@ theorem ideleMap_infiniteEmbedding (w : InfinitePlace K) (a : (w.Completion)ˣ) 
   have h : ∀ v, finiteProj v (infiniteEmbedding w a) = 1 := fun v ↦ Units.ext rfl
   simp [h]
 
-theorem ideleMap_comp_finiteEmbedding (v : HeightOneSpectrum (𝓞 K)) :
-    (ideleMap φ φinf hφ).comp (finiteEmbedding v) = φ v :=
-  MonoidHom.ext (ideleMap_finiteEmbedding φ φinf hφ v)
-
-theorem ideleMap_comp_infiniteEmbedding (w : InfinitePlace K) :
-    (ideleMap φ φinf hφ).comp (infiniteEmbedding w) = φinf w :=
-  MonoidHom.ext (ideleMap_infiniteEmbedding φ φinf hφ w)
-
 theorem ideleMap_eq_one_of_forall_mem
     (N : ∀ v : HeightOneSpectrum (𝓞 K), Subgroup (v.adicCompletion K)ˣ)
     (Ninf : ∀ w : InfinitePlace K, Subgroup (w.Completion)ˣ)
@@ -116,17 +155,6 @@ theorem continuous_ideleMap (hφc : ∀ v, Continuous (φ v)) (hφinfc : ∀ w, 
   refine continuous_of_continuousAt_one _ ?_
   rw [ContinuousAt, map_one, nhds_discrete G, tendsto_pure]
   exact eventually_of_mem (hWo.mem_nhds h1W) hψW
-
-def continuousIdeleMap (hφc : ∀ v, Continuous (φ v)) (hφinfc : ∀ w, Continuous (φinf w)) :
-    IdeleGroup K →ₜ* G where
-  toMonoidHom := ideleMap φ φinf hφ
-  continuous_toFun := continuous_ideleMap φ φinf hφ hφc hφinfc
-
-@[simp]
-theorem continuousIdeleMap_apply (hφc : ∀ v, Continuous (φ v))
-    (hφinfc : ∀ w, Continuous (φinf w)) (x : IdeleGroup K) :
-    continuousIdeleMap φ φinf hφ hφc hφinfc x = ideleMap φ φinf hφ x :=
-  rfl
 
 end IdeleMap
 

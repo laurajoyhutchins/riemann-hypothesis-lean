@@ -1,8 +1,64 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.InIZero
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.H2Bound
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ContentBoundLevel
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkFilLevEq
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LemmaDN0
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.H2Bound
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ContentBoundLevel
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LemmaDN0
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemCrit
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExpPowSubOne
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusSqComparisonLetter
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusUniformizerPowDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.InIZero
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LevNOsmul
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemPreG
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.QpEqUnit
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkFilLevEq
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVNonneg
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -259,7 +315,7 @@ theorem length_bound_of_hypotheses [NeZero n] (h3 : Formalism.MainNotions.DeltaI
     hB1 hlow hrk (FilCris PD T₂.ρ (b (c - 1) : ℤ)) F3 (w.comp (Submodule.inclusion hF3))
     (fun f => (hw _).2.1) (fun f => hQK _) (fun f => dd (Submodule.inclusion hF3 f))
     (fun f => hddLB _) (fun f => hdde _) (fun f i hi => hddF _ i hi)
-    (fun f g => by rw [map_add, hdda]) (fun o f => by rw [map_smul, hdds])
+    (fun f g => by rw [map_add (f := _), hdda]) (fun o f => by rw [map_smul, hdds])
     hell (fun ell hell1 hell2 => hLk ell hell1 hell2) hζ₀
   refine ⟨⟨F4, hF4.trans hF3, y, (ch3.trans ch4).mono (by norm_num) (by norm_num), fun f => hres f⟩, ?_⟩
 

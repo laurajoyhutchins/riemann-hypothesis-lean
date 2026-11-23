@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.BetaLUniq
-import Lemmata.GeneralBFactThirdRest.Imports
+module
+
+import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ExtendByIdentitySymmFixOrth
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+public import Lemmata.GeneralBFactThirdRest.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,59 +58,13 @@ theorem mem_orth {U : Submodule E S.V} {v : S.V} : v ∈ orth S U ↔ ∀ x ∈ 
 
 theorem finrank_orth_add (U : Submodule E S.V) :
     finrank E (orth S U) + finrank E U = finrank E S.V := by
-  set d := finrank E U
-  let b := Module.finBasis E U
-  let f : Fin d → Module.Dual E S.V := fun i => S.hT (b i : S.V)
-  have hli : LinearIndependent E f := by
-    rw [Fintype.linearIndependent_iff]
-    intro g hg i
-    have h0 : S.hT (∑ j, star (g j) • (b j : S.V)) = 0 := by
-      rw [map_sum]
-      simp only [LinearMap.map_smulₛₗ, starRingEnd_apply, star_star]
-      exact hg
-    have h1 : ∑ j, star (g j) • (b j : S.V) = 0 :=
-      S.nondeg.1 _ (fun y => by rw [h0]; rfl)
-    have hli' : LinearIndependent E (fun j => (b j : S.V)) :=
-      b.linearIndependent.map' U.subtype (Submodule.ker_subtype U)
-    have := (Fintype.linearIndependent_iff.mp hli') (fun j => star (g j)) h1 i
-    simpa using this
-  let Φ : Submodule E (Module.Dual E S.V) := Submodule.span E (Set.range f)
-  have hΦ : finrank E Φ = d := by
-    rw [finrank_span_eq_card hli]; simp [d]
-  have hco : Φ.dualCoannihilator = orth S U := by
-    ext v
-    rw [Submodule.mem_dualCoannihilator, mem_orth]
-    constructor
-    · intro h x hx
-      have hx' := b.sum_repr ⟨x, hx⟩
-      have : x = ∑ i, (b.repr ⟨x, hx⟩ i) • (b i : S.V) := by
-        have h2 := congrArg Subtype.val hx'
-        rw [Submodule.coe_sum] at h2
-        simp only [Submodule.coe_smul] at h2
-        exact h2.symm
-      rw [this, map_sum, LinearMap.sum_apply]
-      refine Finset.sum_eq_zero fun i _ => ?_
-      rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply]
-      have := h (f i) (Submodule.subset_span ⟨i, rfl⟩)
-      simp only [f] at this
-      rw [this, smul_zero]
-    · intro h φ hφ
-      induction hφ using Submodule.span_induction with
-      | mem x hx =>
-        obtain ⟨i, rfl⟩ := hx
-        exact h _ (b i).2
-      | zero => rfl
-      | add x y _ _ hx hy => simp [hx, hy]
-      | smul c x _ hx => simp [hx]
-  have := Subspace.finrank_add_finrank_dualCoannihilator_eq Φ
-  rw [hco, hΦ] at this
-  omega
+  apply Formalism.MainNotions.BridgeLemma₂.finrank_orth_add_finrank <;> assumption
 
-theorem exists_smul_mem (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ) (x : S.V) :
-    ∃ a : 𝓞 E, a ≠ 0 ∧ a • x ∈ Λ := by
-  first | exact Bl.general_b_fact_third''''.goal1 .. | (apply Bl.general_b_fact_third''''.goal1 <;> assumption) | (intros; apply Bl.general_b_fact_third''''.goal1 <;> assumption) | (apply @Bl.general_b_fact_third''''.goal1 <;> assumption) | (intros; apply @Bl.general_b_fact_third''''.goal1 <;> assumption) | (apply @Bl.general_b_fact_third''''.goal1 <;> first | assumption | infer_instance) | exact @Bl.general_b_fact_third''''.goal1 E ‹_› ‹_› ‹_› S Λ hΛ x | exact @Bl.general_b_fact_third''''.goal1 E ‹_› ‹_› ‹_› S Λ hΛ | exact @Bl.general_b_fact_third''''.goal1 E ‹_› ‹_› ‹_› S Λ | exact @Bl.general_b_fact_third''''.goal1 E ‹_› ‹_› ‹_› S | exact @Bl.general_b_fact_third''''.goal1 E ‹_› ‹_› ‹_› | exact @Bl.general_b_fact_third''''.goal1 E ‹_› ‹_› | exact @Bl.general_b_fact_third''''.goal1 E ‹_› | exact @Bl.general_b_fact_third''''.goal1 E
+theorem exists_smul_mem (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsFullLattice E Λ) (x : S.V) :
+    ∃ a : 𝓞 E, a ≠ 0 ∧ a • x ∈ Λ :=
+  Bl.general_b_fact_third''''.goal1 S Λ hΛ x
 
-theorem span_inf_toO (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ) (U : Submodule E S.V) :
+theorem span_inf_toO (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsFullLattice E Λ) (U : Submodule E S.V) :
     Submodule.span E ((Λ ⊓ toO S U : Submodule (𝓞 E) S.V) : Set S.V) = U := by
   apply le_antisymm
   · rw [Submodule.span_le]
@@ -84,7 +81,7 @@ theorem span_inf_toO (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E 
     rw [hx']
     exact Submodule.smul_mem _ _ (Submodule.subset_span hmem)
 
-theorem Xsp_le_UUE (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ) {r : ℕ} {T T' : E}
+theorem Xsp_le_UUE (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsFullLattice E Λ) {r : ℕ} {T T' : E}
     (F : LFlag S r T) (F' : LFlag S r T') : Xsp F ≤ UUE Λ F F' := by
   rw [← span_inf_toO S Λ hΛ (Xsp F)]
   apply Submodule.span_mono
@@ -92,7 +89,7 @@ theorem Xsp_le_UUE (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ
   simp only [UU]
   exact Submodule.mem_sup_left (Submodule.mem_sup_left (Submodule.mem_sup_left hx))
 
-theorem Xsp_le_UUE' (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsLattice E Λ) {r : ℕ} {T T' : E}
+theorem Xsp_le_UUE' (Λ : Submodule (𝓞 E) S.V) (hΛ : Submodule.IsFullLattice E Λ) {r : ℕ} {T T' : E}
     (F : LFlag S r T) (F' : LFlag S r T') : Xsp F' ≤ UUE Λ F F' := by
   rw [← span_inf_toO S Λ hΛ (Xsp F')]
   apply Submodule.span_mono

@@ -1,14 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFROfIsLamF
-import Development.AbelianVarietyTheory.Definitions.Foundations.LiftApplyOfMemAdmissibleSubalgebra
-import Development.AbelianVarietyTheory.Definitions.Foundations.ThNSpec
-import Development.AbelianVarietyTheory.Definitions.Foundations.OpLDOneSubMemTriv
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRestrict
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeOperatorCommGaloisActionModularTower
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularTowerBAdmissibleHeckeCommute
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CuspFunctionalValueModPrimePowUniqueOddWeight
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeDiamondActionStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsInertiaFixedNearAlmostFixedCoefficientsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFROfIsLamF
+public import Development.AbelianVarietyTheory.Definitions.Foundations.LiftApplyOfMemAdmissibleSubalgebra
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ThNSpec
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EigenOfTwoStep
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsInertiaFixedNearAlmostFixedCoefficientsStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRestrict
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GalBMemKummerInvariantSet
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeOperatorCommGaloisActionModularTower
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCuspFunctionalValueGalBEquivariant
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularTowerBAdmissibleHeckeCommute
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeDiamondActionStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsEqSubOfMemCob
+import Development.AbelianVarietyTheory.Definitions.Foundations.Integral
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeLetterPreservesBasisSet
+
+@[expose] public section
 
 noncomputable section
 
@@ -103,7 +148,7 @@ variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {ε : Ω →+* ℂ}
 def chiPart (X : Tower Ω ε) (N w : ℕ) (χ : ℕ → ℤ_[l]) : Submodule ℤ_[l] (X.Fn l) where
   carrier := {b | InChi X N w χ b}
   zero_mem' := ⟨Submodule.zero_mem _, fun d _ => by simp⟩
-  add_mem' := fun ha hb => ⟨Submodule.add_mem _ ha.1 hb.1, fun d hd => by rw [map_add, ha.2 d hd, hb.2 d hd, smul_add]⟩
+  add_mem' := fun ha hb => ⟨Submodule.add_mem _ ha.1 hb.1, fun d hd => by rw [map_add (f := _), ha.2 d hd, hb.2 d hd, smul_add]⟩
   smul_mem' := fun r _ ha => ⟨Submodule.smul_mem _ r ha.1, fun d hd => by rw [map_smul, ha.2 d hd, smul_comm]⟩
 
 theorem apply_poly_of_stable (X : Tower Ω ε) (N : ℕ) (B' : Submodule ℤ_[l] (X.Fn l))
@@ -126,7 +171,7 @@ theorem apply_poly_of_stable (X : Tower Ω ε) (N : ℕ) (B' : Submodule ℤ_[l]
       simp only [Tower.opV, LinearMap.baseChange_tmul, Submodule.subtype_apply]
       rw [e, e (b : X.Fn l), map_smul, map_smul, hL T hT b b.2, smul_comm]
     | add y z hy hz =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       exact ⟨Submodule.add_mem _ hy.1 hz.1, by rw [hy.2, hz.2, smul_add]⟩
   have h := SSAdm.lift_sub_smul_mem (A := {T | GlobalTheory.KZ.admitted N l T}) (f := X.opV N l (Qbar l)) (lam := ev)
     (W := LinearMap.range (LinearMap.baseChange (Qbar l) B'.subtype) ⊓ LinearMap.ker L)
@@ -148,7 +193,7 @@ theorem act_sgD_one (X : Tower Ω ε) {N w : ℕ} (hN : N ≠ 0) {b : X.Fn l} (h
   induction hb using Submodule.span_induction with
   | mem x hx => exact hx.2 _ hγ
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, hx, hy]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
   | smul a x _ hx => rw [map_smul, hx]
 
 theorem mem_Ine_of_restrict {A : ValuationSubring Ω} {j : Ω →+* Qbar l} (hj : ∀ x, x ∈ A ↔ ‖j x‖ ≤ 1)
@@ -244,8 +289,9 @@ theorem exists_pr_isLamFR : ∀ {Ω : Type} [Field Ω] [Algebra ℚ Ω] [IsAlgCl
   set pr : X.Fn l → Fin 2 → Qbar l := fun b => ∑ i, κ i • π i (1 ⊗ₜ[ℤ_[l]] b) with hpr
   have hLpr : ∀ b ∈ chiPart X N w χ, L (1 ⊗ₜ[ℤ_[l]] b) = per * ((pr b 1 : Qbar l) : ℂ_[l]) := by
     intro b hbB
+
     rw [← apply_poly_of_stable X N (chiPart X N w χ) hst L ev hLT P hP hP1 ((1 : Qbar l) ⊗ₜ[ℤ_[l]] b)
-      ⟨1 ⊗ₜ ⟨b, hbB⟩, by simp⟩, hPσπ _ (hVB b hbB.1), map_sum]
+    ⟨1 ⊗ₜ ⟨b, hbB⟩, by simp⟩, hPσπ _ (hVB b hbB.1), map_sum]
     simp only [hLσ, hpr, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
     rw [← Finset.mul_sum]
     congr 1
@@ -273,6 +319,7 @@ theorem exists_pr_isLamFR : ∀ {Ω : Type} [Field Ω] [Algebra ℚ Ω] [IsAlgCl
       obtain ⟨hsA, hsI⟩ := mem_Ine_of_restrict hj τ hτ s hs
       have h1 := hL n _ (hstG s b hbB).1 _ (GlobalTheory.isThB_galB Ω ε X A N l n w s hlA hsA b hbB.1 φ h)
       have e1 : lam (seqN 1 j (HahnSeries.map φ (s : Ω →+* Ω))) = τ (lam (seqN 1 j φ)) := by
+
         rw [hS, hS (seqN 1 j φ), map_sum]
         refine Finset.sum_congr rfl fun t _ => ?_
         rw [map_mul, hwt t τ ha hτ]

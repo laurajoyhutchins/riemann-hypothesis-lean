@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.Kaehler.Basic
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Etale.Basic
+public import Mathlib.RingTheory.Etale.Kaehler
+
+@[expose] public section
 
 open KaehlerDifferential
 
@@ -21,7 +73,7 @@ theorem UpperTheory.kaehler_functional_vanishing_of_localization_at_prime :
       simp [mul_assoc]⟩
     let D' : Derivation ℂ B ℂ :=
       { toFun := fun b => η (algebraMap B S b)
-        map_add' := fun a b => by simp only [map_add]
+        map_add' := fun a b => by simp only [map_add (f := _)]
         map_smul' := fun c b => by
           simp only [RingHom.id_apply]
           rw [Algebra.smul_def c b, map_mul, ← IsScalarTower.algebraMap_apply, ← Algebra.smul_def,
@@ -50,7 +102,7 @@ theorem UpperTheory.kaehler_functional_vanishing_of_localization_at_prime :
   let F : Ω[S⁄ℂ] →ₗ[S] (Fin d → ℂ) := g.liftBaseChange S ∘ₗ e.symm.toLinearMap
   let δ : S →ₗ[ℂ] (Fin d → ℂ) :=
     { toFun := fun s => F (KaehlerDifferential.D ℂ S s)
-      map_add' := fun a b => by simp only [map_add]
+      map_add' := fun a b => by simp only [map_add (f := _)]
       map_smul' := fun c s => by
         rw [RingHom.id_apply, Derivation.map_smul,
           ← algebraMap_smul S c (KaehlerDifferential.D ℂ S s), map_smul]
@@ -60,7 +112,7 @@ theorem UpperTheory.kaehler_functional_vanishing_of_localization_at_prime :
         rfl }
   have hδL : ∀ a b : S, δ (a * b) = ev a • δ b + ev b • δ a := fun a b => by
     change F (KaehlerDifferential.D ℂ S (a * b)) = _
-    rw [Derivation.leibniz, map_add, map_smul, map_smul]
+    rw [Derivation.leibniz, map_add (f := _), map_smul, map_smul]
     rfl
   have hδB : ∀ b : B, δ (algebraMap B S b) = φ (KaehlerDifferential.D ℂ B b) := fun b => by
     change g.liftBaseChange S (e.symm (KaehlerDifferential.D ℂ S (algebraMap B S b))) = _
@@ -74,6 +126,7 @@ theorem UpperTheory.kaehler_functional_vanishing_of_localization_at_prime :
     intro ω hω
     rw [LinearMap.mem_ker] at hω ⊢
     obtain ⟨m, b, ω', hb, rfl⟩ := hker ω hω
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun i _ => by rw [hLs, hb, zero_mul]
   let φq := (LinearMap.ker φ).liftQ φ le_rfl
@@ -88,7 +141,7 @@ theorem UpperTheory.kaehler_functional_vanishing_of_localization_at_prime :
     rfl
   refine ⟨r, fun s => ?_⟩
   have hrδ : ∀ a b : S, r (δ (a * b)) = ev a * r (δ b) + ev b * r (δ a) := fun a b => by
-    rw [hδL, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul]
+    rw [hδL, map_add (f := _), map_smul, map_smul, smul_eq_mul, smul_eq_mul]
   have hδη : ∀ x : B, r (δ (algebraMap B S x)) = η (algebraMap B S x) := fun x => by
     rw [hδB, ← hr, hLD]
   obtain ⟨⟨b, t⟩, hs⟩ := IsLocalization.surj p.primeCompl s

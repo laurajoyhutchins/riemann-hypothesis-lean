@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BlocksUnique
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseChangeNonempty
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,13 +66,14 @@ abbrev UnrWDFam (N : NData R H what₂) (a : ℕ) : Type :=
     (∀ w, (p.1 w).unr ∧ (p.1 w).lpDim = a) ∧ ∀ τ, Multiset.card (p.2 τ) = a}
 
 theorem lpUnr_negOne_spec (N : NData R H what₂) (w : PlE H) :
-    (WD.lpUnr (N.plOm.2 w) {-1} : WDAt N w).unr ∧ (WD.lpUnr (N.plOm.2 w) {-1} : WDAt N w).frobEig = {-1} ∧
-      (WD.lpUnr (N.plOm.2 w) {-1} : WDAt N w).lpDim = 1 := by
+    (WD.lpUnr (h := N.plOm.2 w) {-1}).unr ∧
+      (WD.lpUnr (h := N.plOm.2 w) {-1}).frobEig = {-1} ∧
+      (WD.lpUnr (h := N.plOm.2 w) {-1}).lpDim = 1 := by
   obtain ⟨hu, he, hd⟩ := WD.lpUnr_spec (h := N.plOm.2 w) ({-1} : Multiset ℂ) (by simp)
   exact ⟨hu, he, hd.trans (Multiset.card_singleton _)⟩
 
 def negOneWDFam (N : NData R H what₂) : UnrWDFam N 1 :=
-  ⟨(fun w => WD.lpUnr (N.plOm.2 w) {-1}, fun _ => {0}),
+  ⟨(fun w => WD.lpUnr (h := N.plOm.2 w) {-1}, fun _ => {0}),
     fun w => ⟨(lpUnr_negOne_spec N w).1, (lpUnr_negOne_spec N w).2.2⟩, fun _ => rfl⟩
 
 theorem UnrWDFam.exists_frobEig {N : NData R H what₂} (χ : UnrWDFam N 1) (w : PlE H) :
@@ -39,8 +83,8 @@ theorem UnrWDFam.exists_frobEig {N : NData R H what₂} (χ : UnrWDFam N 1) (w :
   have hc : Multiset.card (χ.1.1 w).frobEig = 1 := ((WD.unramified_laws (N.plOm.2 w)).2.2.2.2.2.2.2.2.2.2.2.2.1 _ hu).trans hd
   exact Multiset.card_eq_one.mp hc
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 def nAutWD (N : NData R H what₂) (hE : IsEmpty N.Loc) (pl : ∀ k, N.PlG k → PlE H)
     (h1 : ∀ k v, pl k v ∈ placesOver H.E (H.g k)) (h2 : ∀ k, Function.Injective (pl k))
@@ -48,11 +92,11 @@ def nAutWD (N : NData R H what₂) (hE : IsEmpty N.Loc) (pl : ∀ k, N.PlG k →
     (τ : ∀ k, Fb (H.g k) (H.g_prime k) →* ℂ) (γ : Fin 2 → PlE H → G H.E N.Om) : NAut N where
   LP := WDAt N
   lpDim := WD.lpDim
-  lpZero := fun w => WD.lpZero (N.plOm.2 w)
+  lpZero := fun w => WD.lpZero (h := N.plOm.2 w)
   lpSum := WD.lpSum
   lpTw := WD.lpTw
   lpChar := WD.lpChar
-  lpUnr := fun w => WD.lpUnr (N.plOm.2 w)
+  lpUnr := fun w => WD.lpUnr (h := N.plOm.2 w)
   mono0 := WD.mono0
   unr := WD.unr
   frobEig := WD.frobEig
@@ -89,7 +133,10 @@ def nAutWD (N : NData R H what₂) (hE : IsEmpty N.Loc) (pl : ∀ k, N.PlG k →
   inePol_sum := WD.inePol_sum
   inePol_tw := WD.inePol_tw
   unr_iff_ine := WD.unr_iff_ine
-  inertiaCharpoly_zero := fun k _ => haveI : Fact (H.g k).Prime := ⟨H.g_prime k⟩; WD.lab_lpZero _ _
+  inertiaCharpoly_zero := fun k w => by
+    let : Fact (H.g k).Prime := ⟨H.g_prime k⟩
+    have hzero := WD.lpDim_zero (N.plOm.2 w)
+    exact WD.lab_of_lpDim_eq_zero (τ k) (γ k w) hzero
   inertiaCharpoly_add := fun k _ a b => haveI : Fact (H.g k).Prime := ⟨H.g_prime k⟩; WD.lab_lpSum _ _ a b
   CG := UnrWDFam N
   csd := fun π => ∀ w w', IsConjPl H w w' → (π.1.1 w').frobEig = (π.1.1 w).frobEig.map (·⁻¹)
@@ -121,7 +168,8 @@ def nAutWD (N : NData R H what₂) (hE : IsEmpty N.Loc) (pl : ∀ k, N.PlG k →
   etaT_unr := fun w => (lpUnr_negOne_spec N w).1
   etaT_inert := fun w _ => (lpUnr_negOne_spec N w).2.1
   etaTinv_def := fun w => ⟨(lpUnr_negOne_spec N w).1, by
-    show (WD.lpUnr (N.plOm.2 w) {-1} : WDAt N w).frobEig = (WD.lpUnr (N.plOm.2 w) {-1} : WDAt N w).frobEig.map (·⁻¹)
+    show (WD.lpUnr (h := N.plOm.2 w) {-1}).frobEig =
+      (WD.lpUnr (h := N.plOm.2 w) {-1}).frobEig.map (·⁻¹)
     rw [(lpUnr_negOne_spec N w).2.1]
     simp⟩
   etaT_split := fun w w' _ _ a b ha hb => by
@@ -182,21 +230,6 @@ def wdTieWD (N : NData R H what₂) (hE : IsEmpty N.Loc) (pl : ∀ k, N.PlG k �
     GlobalTheory.RowTie.WDTie N (nAutWD N hE pl h1 h2 h3 τ γ) :=
   ⟨fun _ => Equiv.refl _, fun _ _ => rfl, fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ => rfl,
     fun _ _ => Iff.rfl, fun _ _ => Iff.rfl, fun _ _ _ => rfl, fun _ _ => Iff.rfl, fun _ _ _ _ => rfl⟩
-
-theorem exists_nAut_wdTie (N : NData R H what₂) (hE : IsEmpty N.Loc) (pl : ∀ k, N.PlG k → PlE H)
-    (h1 : ∀ k v, pl k v ∈ placesOver H.E (H.g k)) (h2 : ∀ k, Function.Injective (pl k))
-    (h3 : ∀ k v v', ¬ IsConjPl H (pl k v) (pl k v'))
-    (τ : ∀ k, Fb (H.g k) (H.g_prime k) →* ℂ) (t : ∀ k, N.PlG k → G H.E N.Om) :
-    ∃ (A : NAut N) (T : GlobalTheory.RowTie.WDTie N A), A.plGw = pl ∧ ∀ k v (a : A.LP (A.plGw k v)),
-      haveI : Fact (H.g k).Prime := ⟨H.g_prime k⟩
-      A.items₂ k (A.plGw k v) a = WD.lab (τ k) (t k v) (T.e _ a) := by
-  classical
-  let γ : Fin 2 → PlE H → G H.E N.Om := fun k => Function.extend (pl k) (t k) fun _ => 1
-  refine ⟨nAutWD N hE pl h1 h2 h3 τ γ, wdTieWD N hE pl h1 h2 h3 τ γ, rfl, fun k v a => ?_⟩
-  have hγ : γ k (pl k v) = t k v := (h2 k).extend_apply _ _ _
-  have : Fact (H.g k).Prime := ⟨H.g_prime k⟩
-  show WD.lab (τ k) (γ k (pl k v)) a = WD.lab (τ k) (t k v) a
-  rw [hγ]
 
 end
 

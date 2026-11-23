@@ -1,22 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
-import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranslateOfTangentVectorFibreToGroupScheme
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TangentCombinationPreservedByBaseChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLogDerivationExtensionBasicOpen
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KodairaSpencerConditionRestrictBasicOpenOfAffine
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartFrameBaseHolds
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFlagModelBaseChangeIntegralFramedPoint
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.InvariantVectorFieldsBasisVerticalDerivations
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTransl
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualMapCompDualMap
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLogDerivationExtensionBasicOpen
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAffineHomOfField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranslateOfTangentVectorFibreToGroupScheme
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KodairaSpencerConditionRestrictBasicOpenOfAffine
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TangentCombinationPreservedByBaseChange
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartFrameBaseHolds
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFiniteAffineCharts
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSymmOfKsCoc
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueInvariantVectorFieldOfTangent
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LeISupInfPreimage
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LogDerivativePrincipalPolarisationIndependent
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.MatrixIntertwinesAdjoint
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjIsAbelianSchemeDimRigidifiedSym
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjPull
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.TheoremOfCubePolAbelianScheme
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PreimageTranslate
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.TheoremOfCubePolAbelianSchemeStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFlagModelBaseChangeIntegralFramedPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsLinearHomPull
+import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
@@ -39,7 +85,7 @@ section Values
 variable {B : Type} [CommRing B] {Y Z : Scheme.{0}}
 
 theorem valR_eq (x : Sp B ⟶ Y) {O : Y.Opens} (h : ⊤ ≤ x ⁻¹ᵁ O) (f : Γ(Y, O)) : valR x O f = evalPt x O h f := by
-  rw [valR, dif_pos h]; rfl
+  rw [valR, dite_eq_left h]; rfl
 
 theorem valR_pbT (x : Sp B ⟶ Z) (f : Z ⟶ Y) {O : Y.Opens} {O' : Z.Opens} (h : O' ≤ f ⁻¹ᵁ O) (h' : ⊤ ≤ x ⁻¹ᵁ O')
     (s : Γ(Y, O)) : valR x O' (pbT f s O') = valR (x ≫ f) O s := by
@@ -230,7 +276,7 @@ theorem exists_ksCoc {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Hos
     fun a => hΩ a, GlobalTheory.FinAffineCharts.iso_refineLB hP _ _ hle,
     fun a O f => pbT (m ≫ io) (d (κ a) _ (σ O f)) _, fun φ hφ => ⟨fun a => ⟨fun O hO f f' => ?_, fun O hO f f' => ?_,
       fun O O' h hO f => ?_, fun O hO r => ?_⟩, fun a b O hO f => ?_⟩⟩
-  · rw [map_add, (hfld _).1 _ (him a O hO), pbT_add]
+  · rw [map_add (f := _), (hfld _).1 _ (him a O hO), pbT_add]
   · rw [map_mul, (hfld _).2.1 _ (him a O hO), pbT_add, pbT_mul, pbT_mul, happ, happ]
   · have h' := io.image_mono h
     have e : σ O' (resG _ h f) = resG _ h' (σ O f) := by
@@ -273,10 +319,12 @@ theorem exists_ksCoc {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Hos
         ← map_mul, Units.mul_inv, map_one, _root_.one_mul, valR_eq y hy₁]
     simp only [k₁, k₂] at key
     rw [valR_eq _ hy₂, map_sub, ← valR_eq, ← valR_eq, ← valR_pbT _ _ (hpre O) hy, ← valR_pbT _ _ (hpre O) hy] at key
+
     rw [valR_eq y hy, valR_eq y hy, map_sub, map_sum, ← valR_eq, ← valR_eq, ← neg_sub, key, ← Finset.sum_neg_distrib]
     refine Finset.sum_congr rfl fun c _ => ?_
+
     rw [map_mul, ← valR_eq, ← valR_eq, valR_rsT y hab hy, lc, valR_eq y hy₁, map_sum, Finset.sum_mul,
-      ← Finset.sum_neg_distrib]
+    ← Finset.sum_neg_distrib]
     refine Finset.sum_congr rfl fun c' _ => ?_
     rw [map_mul, ← valR_eq, ← valR_eq, valR_constFn A.hom y hy₁ e, map_neg, RingHom.comp_apply]
     ring

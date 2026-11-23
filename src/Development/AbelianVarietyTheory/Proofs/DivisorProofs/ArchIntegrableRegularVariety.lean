@@ -1,10 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineSCShortExact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernPartOverProperClosedEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtLevi
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernMatrixIsForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TopologicalKrullDimEqSucc
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegrableOnOfNormLeSumAbsLogAddLogLog
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsClosedImmersionGenericPoint
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegrableOnOfNormLeSumAbsLogAddLogLog
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChernMatrixIsForm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtLevi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,7 +77,7 @@ theorem integrableOn_of_chart {M : Type} [TopologicalSpace M] [MeasurableSpace M
   refine ⟨hf.aestronglyMeasurable hA, ?_⟩
   refine (lintegral_mono' hle le_rfl).trans_lt ?_
   rw [lintegral_smul_measure, smul_eq_mul]
-  exact ENNReal.mul_lt_top hC.lt_top ((lintegral_map_le _ _).trans_lt hi.2)
+  exact ENNReal.mul_lt_top hC.lt_top ((lintegral_map_le _ hs).trans_lt hi.2)
 
 variable {k : Type} [CommRing k] {X : Scheme.{0}} [IsIntegral X] {p : X ⟶ Sp k} {σ : k →+* ℂ} {D : ℕ}
 
@@ -109,7 +146,7 @@ theorem exists_integrableOn [SecondCountableTopology (CxPts p σ)] (hσ : Functi
     have := (hηs (him (mem_image_of_mem _ hz))).1.2
     rwa [mem_preimage, c.e.left_inv (hSs hz)] at this
   have hm := measurableSet_image c.e hS.measurableSet hSs
-  refine ⟨O, hO.mem_nhds ⟨hy, mem_ball_self hη⟩, integrableOn_of_chart c.e
+  refine ⟨O, hO.mem_nhds ⟨hy, by exact Set.mem_preimage.mpr (mem_ball_self hη)⟩, integrableOn_of_chart c.e
     (fun A hA hAs => Weight.chernPart_apply hψ ε c hA hAs) hS.measurableSet hSs
     (C := ENNReal.ofReal C) ENNReal.ofReal_ne_top (fun v hv => ENNReal.ofReal_le_ofReal ?_) ?_ ?_⟩
   · have h := hC v (him hv)
@@ -135,26 +172,5 @@ theorem exists_integrableOn [SecondCountableTopology (CxPts p σ)] (hσ : Functi
     rw [← hab, div_mul_cancel₀ _ hb1, hab, ratVal_fnOf hzU, ratVal_fnOf hzU] at e
     simp only [Function.comp_apply, Pi.sub_apply, c.e.left_inv (hSs hz)] at hv ⊢
     rw [logNorm_eq φ hr hz.1 (hSi z hz), e, mul_div_cancel_right₀ _ hv.2]
-
-theorem archIntegrable : ∀ {k : Type} [CommRing k] {X : Scheme.{0}} [IsIntegral X] {p : X ⟶ Sp k}
-    {D : ℕ}, GlobalTheory.CxForm.IsRegVar p D → ∀ (M N : HermLB p) {r : N.B.ι → X.functionFieldˣ} (hr : IsRatSec N.B r),
-      M.ArchIntegrable N D hr := by
-  intro k _ X _ p D hX M N r hr σ
-  have := hX.toIsArithVar.compactSpace σ
-  have := CxPts.secondCountableTopology_of_isProjOver σ hX.isProjOver
-  obtain ⟨R⟩ := RegGenSmooth.genSmooth hX.toIsArithVar hX.regular σ
-  have hσ : Function.Injective σ := ChernNull.injective_of_arithVar hX.toIsArithVar σ
-  have key (ε : ℤˣ) : IntegrableOn (logNorm (N.φ σ) r) (offSupp p σ (N.div hr))
-      ((M.φ σ).chernPart D ε) := by
-    have h (y : CxPts p σ) : ∃ O ∈ 𝓝 y, IntegrableOn (logNorm (N.φ σ) r)
-        (offSupp p σ (N.div hr) ∩ O) ((M.φ σ).chernPart D ε) :=
-      have ⟨_, hi⟩ := R.cover y
-      exists_integrableOn hσ (M.cInf σ) (N.cInf σ) hr ε _ hi
-    choose O hO hint using h
-    obtain ⟨t, -, ht⟩ := isCompact_univ.elim_nhds_subcover O fun y _ => hO y
-    refine ((integrableOn_finset_iUnion (s := t)).2 fun y _ => hint y).mono_set fun z hz => ?_
-    obtain ⟨y, hy, hz'⟩ := mem_iUnion₂.1 (ht (mem_univ z))
-    exact mem_iUnion₂.2 ⟨y, hy, hz, hz'⟩
-  exact ⟨key 1, key (-1)⟩
 
 end GlobalTheory.LogNormInt

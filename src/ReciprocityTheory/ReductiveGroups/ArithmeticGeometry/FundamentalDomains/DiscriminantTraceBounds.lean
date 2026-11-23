@@ -1,4 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HermitianTraceFormVanishing
+module
+
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitOA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD
 
@@ -12,56 +65,7 @@ variable {E : Type} [Field E] [NumberField E]
 theorem norm_mul_discr_ge {x : E} (hx : x ≠ 0)
     (htr : ∀ β : 𝓞 E, ∃ m : ℤ, Algebra.trace ℚ E (x * β) = m) :
     1 ≤ |Algebra.norm ℚ x| * |(NumberField.discr E : ℚ)| := by
-  classical
-  have h10 : (1 : FractionalIdeal (𝓞 E)⁰ E) ≠ 0 := by
-    rw [← FractionalIdeal.coeIdeal_top, Ne, FractionalIdeal.coeIdeal_eq_zero]
-    exact top_ne_bot
-  have hD0 : FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E) ≠ 0 :=
-    FractionalIdeal.dual_ne_zero ℤ ℚ h10
-  have hmem : x ∈ FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E) := by
-    rw [FractionalIdeal.mem_dual h10]
-    intro a ha
-    obtain ⟨β, rfl⟩ := (FractionalIdeal.mem_one_iff _).mp ha
-    obtain ⟨m, hm⟩ := htr β
-    refine ⟨m, ?_⟩
-    rw [Algebra.traceForm_apply]
-    simpa using hm.symm
-  have hsp : FractionalIdeal.spanSingleton (𝓞 E)⁰ x ≤ FractionalIdeal.dual ℤ ℚ 1 :=
-    FractionalIdeal.spanSingleton_le_iff_mem.mpr hmem
-  have hdiff := coeIdeal_differentIdeal ℤ ℚ E (𝓞 E)
-  have hJ : FractionalIdeal.spanSingleton (𝓞 E)⁰ x *
-      (differentIdeal ℤ (𝓞 E) : FractionalIdeal (𝓞 E)⁰ E) ≤ 1 := by
-    rw [hdiff]
-    calc _ ≤ FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E) *
-          (FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E))⁻¹ := by
-            first
-            | exact mul_le_mul' hsp le_rfl
-            | exact mul_right_mono hsp
-            | exact FractionalIdeal.mul_right_mono _ hsp
-      _ = 1 := mul_inv_cancel₀ hD0
-  obtain ⟨I, hI⟩ := FractionalIdeal.le_one_iff_exists_coeIdeal.mp hJ
-  have hJ0 : FractionalIdeal.spanSingleton (𝓞 E)⁰ x *
-      (differentIdeal ℤ (𝓞 E) : FractionalIdeal (𝓞 E)⁰ E) ≠ 0 := by
-    refine mul_ne_zero (FractionalIdeal.spanSingleton_ne_zero_iff.mpr hx) ?_
-    rw [hdiff]
-    exact inv_ne_zero hD0
-  have hI0 : I ≠ ⊥ := by
-    rintro rfl
-    apply hJ0
-    rw [← hI]
-    simp
-  have hnorm := congrArg FractionalIdeal.absNorm hI
-  rw [FractionalIdeal.coeIdeal_absNorm, map_mul, FractionalIdeal.absNorm_span_singleton,
-    FractionalIdeal.coeIdeal_absNorm, NumberField.absNorm_differentIdeal E (𝓞 E)] at hnorm
-  have h1 : (1 : ℚ) ≤ (Ideal.absNorm I : ℚ) := by
-    exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun h => hI0 (Ideal.absNorm_eq_zero_iff.mp h))
-  rw [hnorm] at h1
-  have h2 : (((NumberField.discr E).natAbs : ℕ) : ℚ) = |(NumberField.discr E : ℚ)| := by
-    rw [Nat.cast_natAbs]
-    push_cast
-    rfl
-  rw [h2] at h1
-  exact h1
+  apply ReciprocityTheory.ChartRestriction.G.I2.so_norm_ge <;> assumption
 
 theorem abs_norm_eq_pow {x : E} {a : ℝ} (h : ∀ σ : E →+* ℂ, ‖σ x‖ = a) :
     |((Algebra.norm ℚ x : ℚ) : ℝ)| = a ^ finrank ℚ E := by
@@ -253,7 +257,7 @@ theorem trace_int (hr : 0 < r) (c : 𝓞 E) :
       obtain ⟨m2, hm2⟩ := h2 a
       refine ⟨m1 + m2, ?_⟩
       push_cast
-      rw [mul_add, mul_add, map_add, hm1, hm2]
+      rw [mul_add, mul_add, map_add (f := _), hm1, hm2]
     | smul b c _ h =>
       intro a
       obtain ⟨m, hm⟩ := h (a * b)

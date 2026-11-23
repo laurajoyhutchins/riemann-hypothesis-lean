@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsSstResToOfIsPst
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +80,7 @@ theorem actVdR_resQ (g : ↥(GK K)) (x : V ⊗[ℚ_[l]] P.R.BdR) :
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVdR]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem DdR_resQ : DdR (P.PD K) (resQ ρ) = (DdR (P.PD K) ρ).restrictScalars ℚ_[l] := by
   ext x
@@ -54,7 +97,7 @@ theorem stRep_resQ (g : ↥(GK K)) (x : V ⊗[ℚ_[l]] Bst P) : stRep P (resQ ρ
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem mem_Dpst_resQ (x : V ⊗[ℚ_[l]] Bst P) : x ∈ Dpst P (resQ ρ) ↔ x ∈ Dpst P ρ := by
   simp only [mem_Dpst, stRep_resQ]
@@ -63,7 +106,7 @@ theorem mulV_resQ (c : ↥(MaximalUnramifiedExtension l)) (x : V ⊗[ℚ_[l]] Bs
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def dpstUrEquiv : DpstUr P (resQ ρ) ≃ₗ[↥(MaximalUnramifiedExtension l)] DpstUr P ρ where
   toFun x := toUr P ρ ⟨((toUr P (resQ ρ)).symm x).1, (mem_Dpst_resQ P ρ _).mp ((toUr P (resQ ρ)).symm x).2⟩
@@ -108,15 +151,15 @@ theorem of_coords {LL : Type} [Field LL] [Algebra ℚ_[l] LL] [FiniteDimensional
   have e : (fun g => ρ g v) = fun g => ∑ i, b.coord i (ρ g v) • b i :=
     funext fun g => (b.sum_repr _).symm
   rw [e]
-  exact continuous_finset_sum _ fun i _ => (hc v _).smul continuous_const
+  exact continuous_finsetSum _ fun i _ => (hc v _).smul continuous_const
 
 theorem pi {LL : FinExt l} {m : ℕ} (ρ : Representation ↥LL.1 ↥(GK K) (Fin m → ↥LL.1))
     (hc : ∀ v, Continuous fun g => ρ g v) (hV : IsDR (P.PD K) ρ) : IsPst P ρ :=
   haveI := LL.2
   h.of_coords T ρ (fun v f => (LinearMap.continuous_of_finiteDimensional f).comp (hc v)) hV
 
-omit K in
 
+omit K in
 theorem isPstAt {E Ω : Type} [Field E] [Field Ω] [Algebra E Ω] {Gw : Subgroup (Ω ≃ₐ[E] Ω)}
     {O : Type} [CommRing O] [Algebra ℤ_[l] O] [TopologicalSpace O] (Bw : LocBridge l E Ω Gw O) {a : ℕ}
     (r : ↥Gw →* GL (Fin a) (Om l))

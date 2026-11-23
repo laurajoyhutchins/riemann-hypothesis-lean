@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.PhNormUnits
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PowerSeriesNormUnits.Development
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsTerBis
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PowerSeriesNormUnits.Development
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ImportsTerBis
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Mathlib.RingTheory.PowerSeries.Exp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,7 +142,7 @@ theorem coeff_pow_eq_zero {σ R : Type*} [CommRing R] {F : MvPowerSeries σ R}
       simp [hF]
     · have hb : Finsupp.degree β ≠ 0 := fun h0 => hβ ((Finsupp.degree_eq_zero_iff β).1 h0)
       have hdeg : Finsupp.degree α = Finsupp.degree β + Finsupp.degree γ := by
-        rw [← hβγ, map_add]
+        rw [← hβγ, map_add (f := _)]
       rw [ih γ (by omega), mul_zero]
 
 theorem coeff_expMv {σ : Type*} (F : MvPowerSeries σ ℂ_[p]) (α : σ →₀ ℕ) :
@@ -161,7 +212,7 @@ theorem exp_add {σ : Type*} {F G : MvPowerSeries σ ℂ_[p]} (hF : MvPowerSerie
 
 theorem expMv_add {σ : Type*} {F G : MvPowerSeries σ ℂ_[p]} (hF : MvPowerSeries.constantCoeff F = 0)
     (hG : MvPowerSeries.constantCoeff G = 0) : expMv (F + G) = expMv F * expMv G := by
-  rw [expMv_eq (by rw [map_add, hF, hG, add_zero]), expMv_eq hF, expMv_eq hG, exp_add hF hG]
+  rw [expMv_eq (by rw [map_add (f := _), hF, hG, add_zero]), expMv_eq hF, expMv_eq hG, exp_add hF hG]
 
 theorem expMv_zero {σ : Type*} : expMv (0 : MvPowerSeries σ ℂ_[p]) = 1 := by
   have h := expMv_add (F := (0 : MvPowerSeries σ ℂ_[p])) (G := 0) (map_zero _) (map_zero _)
@@ -187,14 +238,14 @@ theorem simeq_symm {σ : Type*} {f g : MvPowerSeries σ ℂ_[p]} (h : Simeq f g)
 theorem simeq_trans {σ : Type*} {f g h : MvPowerSeries σ ℂ_[p]} (h1 : Simeq f g) (h2 : Simeq g h) :
     Simeq f h := by
   have e : f - h = (f - g) + (g - h) := by ring
-  refine ⟨by rw [e, map_add, h1.1, h2.1, add_zero], ?_⟩
+  refine ⟨by rw [e, map_add (f := _), h1.1, h2.1, add_zero], ?_⟩
   rw [e, expMv_add h1.1 h2.1]
   exact integral_mul h1.2 h2.2
 
 theorem simeq_add {σ : Type*} {f g h k : MvPowerSeries σ ℂ_[p]} (h1 : Simeq f g) (h2 : Simeq h k) :
     Simeq (f + h) (g + k) := by
   have e : f + h - (g + k) = (f - g) + (h - k) := by ring
-  refine ⟨by rw [e, map_add, h1.1, h2.1, add_zero], ?_⟩
+  refine ⟨by rw [e, map_add (f := _), h1.1, h2.1, add_zero], ?_⟩
   rw [e, expMv_add h1.1 h2.1]
   exact integral_mul h1.2 h2.2
 
@@ -300,7 +351,7 @@ theorem norm_units_zp_scaling : CalcZpScale := by
       rw [add_zero] at this
       convert this using 1
       push_cast
-      rw [map_add, map_one]
+      rw [map_add (f := _), map_one]
       ring
   obtain ⟨u, hu⟩ := natCast_dense_p_adic p n
   have hlim := (norm_units_closed_form p σ (fun k => MvPowerSeries.C (u k : ℂ_[p]) * (f - g))

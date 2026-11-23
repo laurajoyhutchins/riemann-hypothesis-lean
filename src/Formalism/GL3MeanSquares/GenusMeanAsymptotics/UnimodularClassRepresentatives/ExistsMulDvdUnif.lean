@@ -1,4 +1,59 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ApplyMemSmul
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ApplyMemSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsBasisLocF
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExtPPowLeSpanSup
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MemSmulOfMemSmulLocF
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.StarAlgebraMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -9,8 +64,6 @@ namespace Formalism.HermitianLattices.Ext.L3.D2
 variable {K F : Type} [Field K] [NumberField K] [StarRing K] [Field F] [NumberField F] [Algebra F K]
 variable {V : Type} [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Module (𝓞 K) V]
   [IsScalarTower (𝓞 K) K V]
-
-local notation "ι" => algebraMap (𝓞 F) (𝓞 K)
 
 theorem mem_pK {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {k : ℕ} {a : K} :
     a ∈ pK K 𝔭 k ↔ ∃ t : 𝓞 F, t ∉ 𝔭 ∧ ∃ z ∈ extP K 𝔭 ^ k,
@@ -107,7 +160,7 @@ theorem notMem_ne_zero {𝔭 : Ideal (𝓞 F)} {t : 𝓞 F} (ht : t ∉ 𝔭) : 
 
 theorem unif_pow_mem_pK {𝔭 : Ideal (𝓞 F)} {π : 𝓞 F} (hπ : π ∈ 𝔭) (k : ℕ) :
     algebraMap F K (π : F) ^ k ∈ pK K 𝔭 k := by
-  have h1 : (ι π) ^ k ∈ extP K 𝔭 ^ k := Ideal.pow_mem_pow (Ideal.mem_map_of_mem _ hπ) k
+  have h1 : ((algebraMap (𝓞 F) (𝓞 K)) π) ^ k ∈ extP K 𝔭 ^ k := Ideal.pow_mem_pow (Ideal.mem_map_of_mem _ hπ) k
   have h2 := algebraMap_mem_pK' (K := K) 𝔭 h1
   convert h2 using 1
   rw [map_pow]
@@ -120,12 +173,12 @@ theorem mem_pK_iff_unif {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {π : �
   · intro ha
     obtain ⟨t, ht, z, hz, e⟩ := (mem_pK h𝔭).1 ha
     obtain ⟨s, hs, hdvd⟩ := exists_mul_dvd_unif h𝔭 hπ hπ' k
-    have h1 : Ideal.span {ι s} * extP K 𝔭 ^ k ≤ Ideal.span {ι (π ^ k)} := by
+    have h1 : Ideal.span {(algebraMap (𝓞 F) (𝓞 K)) s} * extP K 𝔭 ^ k ≤ Ideal.span {(algebraMap (𝓞 F) (𝓞 K)) (π ^ k)} := by
       have h2 : Ideal.span {s} * 𝔭 ^ k ≤ Ideal.span {π ^ k} := by
         rw [Ideal.span_singleton_mul_le_iff]
         intro x hx
         exact Ideal.mem_span_singleton.2 (hdvd x hx)
-      have := Ideal.map_mono (f := ι) h2
+      have := Ideal.map_mono (f := algebraMap (𝓞 F) (𝓞 K)) h2
       rwa [Ideal.map_mul, Ideal.map_span, Set.image_singleton, Ideal.map_span, Set.image_singleton,
         Ideal.map_pow] at this
     obtain ⟨w, hw⟩ := Ideal.mem_span_singleton.1
@@ -148,7 +201,7 @@ theorem inv_smul_mem {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) (A₀ : Su
   have := h𝔭.isPrime
   rw [← LocF.locF_idem 𝔭 A₀]
   refine (LocalSpans.mem_locF 𝔭 _ _).2 ⟨t, ht, ?_⟩
-  rw [← algebraMap_smul K (ι t), MeanB.algebraMap_comp, smul_smul,
+  rw [← algebraMap_smul K ((algebraMap (𝓞 F) (𝓞 K)) t), MeanB.algebraMap_comp, smul_smul,
     mul_inv_cancel₀ (notMem_ne_zero ht), one_smul]
   exact hy
 
@@ -172,7 +225,7 @@ theorem mem_smul_iff_unif {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {π :
       exact ⟨x' + y', (locF 𝔭 A₀).add_mem hx' hy', (smul_add _ _ _).symm⟩
   · rintro ⟨y, hy, rfl⟩
     have := Submodule.smul_mem_smul (localizedQuotients.ι_mem_pow (K := K) (Ideal.pow_mem_pow hπ k)) hy
-    rwa [← algebraMap_smul K (ι (π ^ k)), MeanB.algebraMap_comp,
+    rwa [← algebraMap_smul K ((algebraMap (𝓞 F) (𝓞 K)) (π ^ k)), MeanB.algebraMap_comp,
       show ((π ^ k : 𝓞 F) : F) = (π : F) ^ k from rfl, map_pow] at this
 
 theorem pow_zero_smul (𝔭 : Ideal (𝓞 F)) (A : Submodule (𝓞 K) V) : extP K 𝔭 ^ 0 • A = A := by

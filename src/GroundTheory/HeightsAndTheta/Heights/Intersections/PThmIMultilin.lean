@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.IsRatSectionOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -19,8 +61,8 @@ theorem smooth_update {n : ℕ} {L : Fin n → HermLine ι} (hL : ∀ i, IsSmoot
     simpa using hX
   · simpa [Function.update_of_ne h] using hL i
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem update_comp_swap {m : ℕ} (L : Fin (m + 1) → HermLine ι) (j : Fin (m + 1)) (X : HermLine ι) :
     Function.update L j X ∘ Equiv.swap j (Fin.last m) =
       Fin.snoc (fun i : Fin m => L (Equiv.swap j (Fin.last m) i.castSucc)) X := by
@@ -35,21 +77,5 @@ theorem update_comp_swap {m : ℕ} (L : Fin (m + 1) → HermLine ι) (j : Fin (m
     simp [Function.update_of_ne hne]
 
 end ThmIMultilin
-
-theorem ThmIMultilin.proof (hS : ThmISymm.Statement) : ThmIMultilin.Statement := by
-  intro K _ ι _ I hR P n L j A B hP hL hA hB
-  cases n with
-  | zero => exact j.elim0
-  | succ m =>
-    have hAB : IsSmoothHerm (A.tensor B) := isSmoothHerm_tensor hA hB
-    have e : ∀ X : HermLine ι, IsSmoothHerm X →
-        I P (m + 1) (Function.update L j X) =
-          I P (m + 1) (Fin.snoc (fun i : Fin m => L (Equiv.swap j (Fin.last m) i.castSucc)) X) := by
-      intro X hX
-      rw [← ThmIMultilin.update_comp_swap]
-      exact (hS K ι I hR P (m + 1) _ _ hP (ThmIMultilin.smooth_update hL j hX)).symm
-    have hM : ∀ i : Fin m, IsSmoothHerm (L (Equiv.swap j (Fin.last m) i.castSucc)) := fun i => hL _
-    rw [e _ hAB, e A hA, e B hB]
-    exact hR.1 P m _ A B hP hM hA hB
 
 end GroundTheory.Heights₂.Heights.Inter

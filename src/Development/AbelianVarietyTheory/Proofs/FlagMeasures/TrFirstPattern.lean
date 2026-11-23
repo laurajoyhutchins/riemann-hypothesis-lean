@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsMirClass
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsConjRenumber
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsMirClass
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsConjRenumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +98,7 @@ theorem inPat_iff {g : ℕ} [Fact g.Prime] (N k : ℕ) (hk : k < N) (M : Mt g N)
     · subst hab
       rw [h a a (by omega), Matrix.one_apply_eq]
     · have haN : a < N := by omega
-      rw [entN, dif_pos ⟨haN, hk⟩, h _ _ (by simp [ha]), Matrix.one_apply_ne]
+      rw [entN, dite_eq_left ⟨haN, hk⟩, h _ _ (by simp [ha]), Matrix.one_apply_ne]
       intro e
       have := congrArg Fin.val e
       simp only at this
@@ -68,7 +110,7 @@ theorem inPat_iff {g : ℕ} [Fact g.Prime] (N k : ℕ) (hk : k < N) (M : Mt g N)
         by_contra hh
         exact hab ⟨h', hh⟩
       have := hz a h2.1
-      rw [entN, dif_pos ⟨a.2, hk⟩] at this
+      rw [entN, dite_eq_left ⟨a.2, hk⟩] at this
       have hb : b = ⟨k, hk⟩ := Fin.ext h2.2
       rw [Matrix.one_apply_ne h.ne, hb]
       exact this
@@ -85,20 +127,20 @@ theorem sumAt_eq {g : ℕ} [Fact g.Prime] (N k : ℕ) (M : Mt g N) (hz : ∀ a, 
     · rw [Finset.sum_eq_single (⟨a + 1, ha⟩ : Fin N)]
       · by_cases hk : (a : ℕ) + 1 = k
         · rw [if_neg (by simp [hk]), hk, hz a (by omega)]
-        · rw [if_pos (by simp [hk]), entN, dif_pos ⟨a.2, ha⟩]
+        · rw [if_pos (by simp [hk]), entN, dite_eq_left ⟨a.2, ha⟩]
       · intro b _ hb
         rw [if_neg]
         rintro ⟨e, -⟩
         exact hb (Fin.ext e)
       · simp
-    · rw [entN, dif_neg (by omega)]
+    · rw [entN, dite_eq_right (by omega)]
       refine Finset.sum_eq_zero fun b _ => if_neg ?_
       have := b.2
       omega
   have h2 : ∑ i ∈ Finset.range (N - 1), entN M i (i + 1) = ∑ i ∈ Finset.range N, entN M i (i + 1) := by
     refine Finset.sum_subset (Finset.range_subset_range.2 (Nat.sub_le _ _)) fun i _ hi => ?_
     rw [Finset.mem_range] at hi
-    rw [entN, dif_neg (by omega)]
+    rw [entN, dite_eq_right (by omega)]
   rw [h2, Finset.sum_range, sumAt]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [← h1 a]

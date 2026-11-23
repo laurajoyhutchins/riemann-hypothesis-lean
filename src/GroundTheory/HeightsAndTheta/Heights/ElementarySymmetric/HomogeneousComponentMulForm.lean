@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperQuotFiltSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PDomination
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsSnapper
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PDomination
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -74,14 +119,14 @@ section Tilde
 variable {S : Type u} [CommRing S] {Ω : Type w} [Field Ω] [Algebra S Ω] {N : ℕ} {x : Fin (N + 1) → Ω}
   {E : Type v} [AddCommGroup E] [Module Ω E] [Module S E] [IsScalarTower S Ω E]
 
-omit [IsScalarTower S Ω E] in
 
+omit [IsScalarTower S Ω E] in
 theorem tilde_mono {M M' : FinGradedSub (S := S) (x := x) E} (h : ∀ c, M.piece c ≤ M'.piece c) (c : ℤ)
     (I : Chart x) : M.tilde c I ≤ M'.tilde c I :=
   Submodule.span_mono fun _ ⟨m, s, a, e, hs, hse, hm, hae, hy⟩ => ⟨m, s, a, e, hs, hse, h a hm, hae, hy⟩
 
-omit [IsScalarTower S Ω E] in
 
+omit [IsScalarTower S Ω E] in
 def tildeFam (M : FinGradedSub (S := S) (x := x) E) : SubFamily S x E where
   toSubSystem := M.tildeSys 0
   mem_iff I J h y := by
@@ -141,12 +186,9 @@ def tildeFam (M : FinGradedSub (S := S) (x := x) E) : SubFamily S x E where
       rw [hy]
       exact Submodule.smul_mem _ _ hJ
 
-omit [IsScalarTower S Ω E] in
-theorem tildeFam_toSubSystem (M : FinGradedSub (S := S) (x := x) E) :
-    (tildeFam M).toSubSystem = M.tildeSys 0 := rfl
+
 
 omit [Module S E] [IsScalarTower S Ω E] in
-
 theorem fg_of_single (F : SubFamily S x E) (I : Chart x) {i : Fin (N + 1)} (hi : i ∈ I.1) (hxi : x i ≠ 0)
     (hfg : (F.sub (singleChart hxi)).FG) : (F.sub I).FG := by
   obtain ⟨T, hT⟩ := hfg
@@ -176,8 +218,8 @@ theorem fg_of_single (F : SubFamily S x E) (I : Chart x) {i : Fin (N + 1)} (hi :
     rw [hy']
     exact Submodule.smul_mem _ _ h2
 
-omit [Module S E] [IsScalarTower S Ω E] in
 
+omit [Module S E] [IsScalarTower S Ω E] in
 theorem fg_of_le [IsNoetherianRing S] (F G : SubFamily S x E) (hF : ∀ I, (F.sub I).FG)
     (hle : ∀ I, G.sub I ≤ F.sub I) (I : Chart x) : (G.sub I).FG := by
   obtain ⟨i, hi⟩ := I.2.1
@@ -213,8 +255,8 @@ def gsup (M M' : FinGradedSub (S := S) (x := x) E) : FinGradedSub (S := S) (x :=
       · rintro _ ⟨j, f, e, hf, he, rfl⟩
         exact ⟨Fin.natAdd n j, f, e, hf, by rw [Fin.append_right]; exact he, by rw [Fin.append_right]⟩
 
-omit [IsScalarTower S Ω E] in
 
+omit [IsScalarTower S Ω E] in
 theorem tilde_gsup (M M' : FinGradedSub (S := S) (x := x) E) (c : ℤ) (I : Chart x) :
     (gsup M M').tilde c I = M.tilde c I ⊔ M'.tilde c I := by
   refine le_antisymm (Submodule.span_le.mpr ?_)
@@ -264,6 +306,7 @@ def gmul (M : FinGradedSub (S := S) (x := x) E) {s : ℕ} (h : Fin s → Poly S 
 theorem homogeneousComponent_mul_form (c h : Poly S N) {d : ℕ} (hh : h.IsHomogeneous d) (n : ℕ) :
     homogeneousComponent n (c * h) = if d ≤ n then homogeneousComponent (n - d) c * h else 0 := by
   classical
+
   conv_lhs => rw [← sum_homogeneousComponent c, Finset.sum_mul, map_sum]
   have each : ∀ i, homogeneousComponent n (homogeneousComponent i c * h) =
       if i + d = n then homogeneousComponent i c * h else 0 := fun i => by
@@ -294,9 +337,11 @@ theorem smul_mem_gmul (M : FinGradedSub (S := S) (x := x) E) {s : ℕ} (h : Fin 
   rw [← hJ] at hfJ
   obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun _).mp hfJ
   have hf' : f = ∑ l, (if d l ≤ e then homogeneousComponent (e - d l) (c l) * h l else 0) := by
+
     conv_lhs => rw [← homogeneousComponent_eq_self hf, ← hc, map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [smul_eq_mul, homogeneousComponent_mul_form _ _ (hh l)]
+
   rw [hf', map_sum, Finset.sum_smul]
   refine Submodule.sum_mem _ fun l _ => ?_
   by_cases hle : d l ≤ e

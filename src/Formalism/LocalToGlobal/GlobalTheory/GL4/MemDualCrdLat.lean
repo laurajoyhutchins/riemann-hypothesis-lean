@@ -1,10 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.LatticeGeometry.GeometryDefinitions.GaloisCuspidalOfInput
-import Formalism.LocalToGlobal.LatticeGeometry.GeometryDefinitions.ExistsFrameOfSig
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ReductionSecondStep
+module
+
+public import Formalism.LocalToGlobal.LatticeGeometry.GeometryDefinitions.ClsSum
+public import Formalism.QuotientMetricDivisors.Statement
+public import Formalism.SharpRestriction.GlobalSchurBounds.FlipTwoThree
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PMuFrames
+public import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+public import Formalism.LocalToGlobal.LatticeGeometry.GeometryDefinitions.ExistsFrameOfSig
+public import Formalism.LocalToGlobal.LatticeGeometry.GeometryDefinitions.SingleFacts
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.IdxChange
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.LcvBasis
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.LocBasis
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ProdFormula
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.RatHerm
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ReductionSecondStep
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
 import Formalism.SizeWindowBrackets.ChainSlopeWindows.TruncatedLatticeHolds
-import Formalism.SharpRestriction.GlobalSchurBounds.FlipTwoThree
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PMuFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix
@@ -29,9 +78,10 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarR
 private lemma hform_crd_lemma (S : HSpace E) (a b : S.V) :
     Formalism.DivisionValues.hform S.gram (crd S a) (crd S b) = S.hT a b := by
   conv_rhs => rw [← S.frame.sum_equivFun a, ← S.frame.sum_equivFun b]
+
   simp only [Formalism.DivisionValues.hform, Matrix.toLinearMapₛₗ₂'_apply, map_sum, LinearMap.sum_apply,
-    LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, crd, HSpace.gram, RingHom.id_apply,
-    Finset.mul_sum]
+  LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, crd, HSpace.gram, RingHom.id_apply,
+  Finset.mul_sum]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -66,13 +116,73 @@ theorem relIndex_crdLat (hc : CMData F E) (S : HSpace E) (L : Submodule (𝓞 E)
       exact hf hyx ▸ hy
   rw [hD, hL, ← AddSubgroup.relIndex_comap, AddSubgroup.comap_map_eq_self_of_injective hf]
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
+
+open Formalism.DivisionValues Formalism.DivisionValues.RationalHermitianForm in
+private theorem lcv_eq_neg_sum_jw {d : ℕ} {E₀ : Subfield E} (hCM : IsCMSub E₀)
+    {H : Matrix (Fin d) (Fin d) E} {X : InfinitePlace E → Matrix (Fin d) (Fin d) ℂ}
+    (hR : IsRatHerm E₀ H X) (M : Submodule (𝓞 E) (Fin d → E))
+    (hM : Submodule.IsFullLattice E M) :
+    lcv X M = -∑ᶠ w : HeightOneSpectrum (𝓞 E), lw w * (jw H w M : ℝ) := by
+  classical
+  let e (i : Fin d) : Fin d → E := Pi.single i 1
+  let N := Submodule.span (𝓞 E) (Set.range e)
+  have he : LinearIndependent E e := StepBAux.std_li d
+  obtain ⟨hfin, hlcv⟩ := covolume_via_basis E d X (fun v => (hR.2 v).1) M hM e he
+  have hdet := det_ne_zero hR
+  obtain ⟨hfinDet, hprod⟩ := prod_formula' E H.det hdet
+  have hlog (v : InfinitePlace E) : Real.log (gram X v e).det.re = Real.log ‖v.embedding H.det‖ := by
+    have heMat : StepBAux.fmat v.embedding e = 1 := by
+      ext i j
+      simp [StepBAux.fmat, e, Pi.single_apply, Matrix.one_apply]
+    have hgram : (gram X v e).det = v.embedding H.det := by
+      rw [StepBAux.gram_eq_fmat, heMat, Matrix.conjTranspose_one, one_mul, mul_one,
+        StepBAux.met, (hR.2 v).2, ← RingHom.mapMatrix_apply, ← RingHom.map_det]
+    have hnorm : v.embedding H.det = (Complex.normSq ((X v)⁻¹.det) : ℂ) := by
+      rw [emb_det hR v, Complex.normSq_eq_conj_mul_self, starRingEnd_apply]
+    rw [hgram, hnorm, Complex.ofReal_re, Complex.norm_real, Real.norm_of_nonneg (Complex.normSq_nonneg _)]
+  let a (w : HeightOneSpectrum (𝓞 E)) : ℝ := lw w * (idx w N M : ℝ)
+  let c (w : HeightOneSpectrum (𝓞 E)) : ℝ := lw w * (vw w H.det : ℝ)
+  have hpt (w : HeightOneSpectrum (𝓞 E)) : lw w * (jw H w M : ℝ) =
+      -(a w + a (conjPl w) + c w) := by
+    obtain ⟨f, hf⟩ := semilocal_basis_exists E d M hM w
+    have hloc : IsLocBasis M w (fun i => ∑ k, (Matrix.of f)ᵀ k i • e k) := by
+      simpa only [e, expand_std] using hf
+    obtain ⟨i₁, i₂⟩ := index_change_formula E d M hM.toIsLattice e he w _ hloc
+    have hj := jwGram_of index_change_formula E E₀ hCM d H X hR M hM.toIsLattice w f hf
+    have hfdet := det_of_ne_zero hf.1
+    have ⟨hmul, hstar, hlw, _⟩ := valuation_basic_properties E w
+    rw [gramR_eq_std, hmul _ _ (mul_ne_zero (star_ne_zero.mpr hfdet) hfdet) hdet,
+      hmul _ _ (star_ne_zero.mpr hfdet) hfdet, hstar] at hj
+    dsimp only [a, c, N]
+    rw [hj, i₁, i₂, hlw]
+    push_cast
+    ring
+  have ha : (Function.support a).Finite := hfin
+  have ha' : (Function.support (a ∘ conjPl)).Finite := by
+    rw [Function.support_comp_eq_preimage]
+    exact ha.preimage (Function.Involutive.injective ValuationRepresentative.conjPl_conjPl).injOn
+  have haa' := (ha.union ha').subset (Function.support_add a (a ∘ conjPl))
+  have hfun : (fun w => lw w * (jw H w M : ℝ)) = fun w => -(a w + (a ∘ conjPl) w + c w) :=
+    funext hpt
+  have hconj : finsum (a ∘ conjPl) = finsum a := finite_sum_conjugation E a
+  rw [hfun, finsum_neg_distrib, neg_neg, finsum_add_distrib haa' hfinDet,
+    finsum_add_distrib ha ha', hconj, hlcv]
+  simp only [hlog]
+  rw [hprod]
+  change (∑ᶠ w, c w) + 2 * (∑ᶠ w, a w) = (∑ᶠ w, a w) + (∑ᶠ w, a w) + (∑ᶠ w, c w)
+  ring
 
 theorem eLat_mu (hc : CMData F E) (S : HSpace E) (hsig : S.SigOK) (hpos : S.IsPosDef) (hn : 0 < S.rank)
-    (L : Submodule (𝓞 E) S.V) (hL : Submodule.IsLattice E L) (q : ℕ) (hq : q ≠ 0) (hLT : LatT S q L) :
+    (L : Submodule (𝓞 E) S.V) (hL : Submodule.IsFullLattice E L) (q : ℕ) (hq : q ≠ 0) (hLT : LatT S q L) :
     muDef (Pi.basisFun E (Fin S.rank)) (fun v => frameOf (S.gram.map v.embedding)) (crdLat S L) =
       -Real.log q / ((finrank ℚ E : ℝ) * S.rank) := by
-  have hM := crdLat_lattice S L hL
+  have hspan : Submodule.span E (crdLat S L : Set (Fin S.rank → E)) = ⊤ := by
+    change Submodule.span E ((crd S).toLinearMap '' (L : Set S.V)) = ⊤
+    rw [← Submodule.map_span (crd S).toLinearMap, hL.span_eq_top, Submodule.map_top,
+      LinearMap.range_eq_top.mpr (crd S).surjective]
+  have hM : Submodule.IsFullLattice E (crdLat S L) :=
+    { toIsLattice := crdLat_lattice S L hL, span_eq_top := hspan }
   have hY : ∀ v : InfinitePlace E, IsUnit (frameOf (S.gram.map v.embedding)).det ∧
       ((frameOf (S.gram.map v.embedding))⁻¹).conjTranspose * (frameOf (S.gram.map v.embedding))⁻¹ = S.gram.map v.embedding := by
     intro v
@@ -83,8 +193,7 @@ theorem eLat_mu (hc : CMData F E) (S : HSpace E) (hsig : S.SigOK) (hpos : S.IsPo
   have hCM : Formalism.DivisionValues.IsCMSub (⊤ : Subfield E) := fun σ a _ => hc.cmUnram.2.1 σ a
   have hRat : Formalism.DivisionValues.IsRatHerm (⊤ : Subfield E) S.gram (fun v => frameOf (S.gram.map v.embedding)) :=
     ⟨fun _ _ => Subfield.mem_top _, hY⟩
-  obtain ⟨-, h2⟩ := Formalism.DivisionValues.ratHermLcv_of Formalism.DivisionValues.covolume_via_basis Formalism.DivisionValues.index_change_formula
-    Formalism.DivisionValues.semilocal_basis_exists E ⊤ hCM S.rank S.gram _ hRat _ hM
+  have h2 := lcv_eq_neg_sum_jw hCM hRat _ hM
   set M := crdLat S L with hMdef
   set Md := Formalism.HermitianLatticesTheory.dual (Formalism.DivisionValues.hform S.gram) M with hMd
   have hle : M ≤ Md := by
@@ -118,7 +227,7 @@ theorem eLat_mu (hc : CMData F E) (S : HSpace E) (hsig : S.SigOK) (hpos : S.IsPo
   rw [h4, neg_neg] at h2
   have hrk : rkK M = S.rank := by
     show finrank E (Submodule.span E (M : Set (Fin S.rank → E))) = _
-    rw [hM.span_eq_top]
+    rw [hMdef, hspan]
     simp
   have h5 := lcv_eq_mu hn _ (fun v => (hY v).1) M hM.fg hrk
   rw [h2] at h5

@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EvalAtOneExtremalMul
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockSubstitutionIdentitiesStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HoweDualityUnitarySubstitutionSpanUnitStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemSpanTprodOfCommuteAtEachPlaceStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsPiTensorMvPolynomialEquivBlocksStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EvalAtOneExtremalMul
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsPiTensorMvPolynomialEquivBlocksStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockSubstitutionIdentitiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HoweDualityUnitarySubstitutionSpanUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemSpanTprodOfCommuteAtEachPlaceStatement
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeylDeterminantTwistTensorFiniteDimensionalStablStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial Formalism.BasicNotions Formalism.L2.Forms Formalism.L2.Ker GlobalTheory.KJInf MeasureTheory
 open scoped TensorProduct
 
@@ -21,6 +64,7 @@ theorem lft_jY (g : ι → Matrix (Fin a) (Fin a) ℂ) (τ : ι) (F : PY Unit a)
     lft g (jY a τ F) = jY a τ (lft (fun _ => g τ) F) := by
   have : (lft g).comp (jY a τ) = (jY a τ).comp (lft (fun _ : Unit => g τ)) := by
     apply MvPolynomial.algHom_ext; intro v
+
     simp [lft, jY, aeval_X, rename_X, map_sum, map_mul, rename_C]
   exact DFunLike.congr_fun this F
 
@@ -28,6 +72,7 @@ theorem mvZ_jZ (g : ι → Matrix (Fin a) (Fin a) ℂ) (h : ι → Matrix (Fin b
     mvZ g h (jZ a b τ P) = jZ a b τ (mvZ (fun _ => g τ) (fun _ => h τ) P) := by
   have : (mvZ g h).comp (jZ a b τ) = (jZ a b τ).comp (mvZ (fun _ : Unit => g τ) (fun _ => h τ)) := by
     apply MvPolynomial.algHom_ext; intro v
+
     simp [mvZ, jZ, aeval_X, rename_X, map_sum, map_mul, rename_C]
   exact DFunLike.congr_fun this P
 
@@ -35,6 +80,7 @@ theorem subY_jY (hab : a ≤ b) (y' : ι → Matrix (Fin b) (Fin b) ℂ) (τ : �
     subY hab y' (jY a τ F) = jZ a b τ (subY hab (fun _ => y' τ) F) := by
   have : (subY hab y').comp (jY a τ) = (jZ a b τ).comp (subY hab (fun _ : Unit => y' τ)) := by
     apply MvPolynomial.algHom_ext; intro v
+
     simp [subY, jZ, jY, aeval_X, rename_X, map_sum, map_mul, rename_C]
   exact DFunLike.congr_fun this F
 
@@ -195,18 +241,19 @@ theorem pure_rep [Fintype ι] [DecidableEq ι] (hab : a ≤ b) (ha : 0 < a) (lam
     have hy : ∀ τ j, (fun _ : Unit => y' τ j ()) = y' τ j := fun τ j => funext fun u => by cases u; rfl
     have ht' : ∀ τ, t τ (f τ) = ∑ j, s τ j • subY hab (y' τ j) (f τ : PY Unit a) := by
       intro τ; rw [← hT τ]; exact hrep τ _ (f τ).2
+
     simp only [LinearMap.compMultilinearMap_apply, LinearMap.coe_comp, Function.comp_apply,
-      PiTensorProduct.map_tprod, LinearEquiv.coe_coe, hY1, hZ1, LinearMap.sum_apply,
-      LinearMap.smul_apply, AlgHom.toLinearMap_apply, map_prod, subY_jY, ht', map_sum, map_smul, hy,
-      Submodule.coe_subtype]
+    PiTensorProduct.map_tprod, LinearEquiv.coe_coe, hY1, hZ1, LinearMap.sum_apply,
+    LinearMap.smul_apply, AlgHom.toLinearMap_apply, map_prod, subY_jY, ht', map_sum, map_smul, hy,
+    Submodule.coe_subtype]
     rw [Finset.prod_univ_sum, Fintype.piFinset_univ, ← Equiv.sum_comp eC.symm]
     apply Finset.sum_congr rfl; intro i _
     simp only [Algebra.smul_def, Finset.prod_mul_distrib, map_prod]
 
 end GlobalTheory.KJInf.HoweDualityMaps
 
-open GlobalTheory.KJInf.HoweDualityMaps in
 
+open GlobalTheory.KJInf.HoweDualityMaps in
 theorem GlobalTheory.KJInf.howeSpan_all : ∀ (ι : Type) [Fintype ι], HoweSpan ι := by
   intro ι _ a b hab ha lam n Q hQ
   classical
@@ -254,5 +301,3 @@ theorem GlobalTheory.KJInf.howeSpan_all : ∀ (ι : Type) [Fintype ι], HoweSpan
   obtain ⟨v, rfl⟩ := hF
   have := hrep v
   simpa [Q'] using this
-
-example : ∀ (ι : Type) [Fintype ι], HoweSpan ι := GlobalTheory.KJInf.howeSpan_all

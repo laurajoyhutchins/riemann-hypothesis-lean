@@ -1,6 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.WeylLatticeDescent
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.WeylEqSpanInt
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.EvenBlockRowActionEval
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.WeylLatticeDescent
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.EvenBlockRowActionEval
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpLApply
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.DeterminantTwistRowActionMem
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.WeylEqSpanInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Matrix Formalism.GradedWeylDivisibility Formalism.MainNotions.G Formalism.BasicNotions Formalism.L2.Forms
 
@@ -20,11 +63,11 @@ theorem lamStar_anti {m : ℕ} (lam : Fin (m + 1) → ℤ) (hd : Antitone lam) :
 
 theorem lamAt_odd {n' m : ℕ} (lam0 : Fin n' → Fin (m + 1) → ℤ) (s : Fin n') (hs : ¬ Even s.val) :
     lamAt lam0 s = lamStar (lam0 s) := by
-  unfold lamAt; rw [if_neg hs]; rfl
+  unfold lamAt; rw [ite_eq_right hs]; rfl
 
 theorem lamAt_even {n' m : ℕ} (lam0 : Fin n' → Fin (m + 1) → ℤ) (s : Fin n') (hs : Even s.val) :
     lamAt lam0 s = lam0 s := by
-  unfold lamAt; rw [if_pos hs]
+  unfold lamAt; rw [ite_eq_left hs]
 
 theorem lamAt_anti {n' m : ℕ} (lam0 : Fin n' → Fin (m + 1) → ℤ) (hd : IsDominant lam0) (s : Fin n') :
     Antitone (lamAt lam0 s) := by
@@ -47,7 +90,7 @@ theorem rowAct_weyl_mem_span_integral {O Kf : Type} [CommRing O] [Field Kf] [Alg
     show _ = a • rowAct Kf g (map (algebraMap O Kf) (map (Int.castRingHom O) f0))
     rw [MvPolynomial.map_map, int_comp]
   | zero => rw [map_zero, map_zero, smul_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [map_add, map_add, smul_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _), smul_add]; exact add_mem hx hy
   | smul c x _ hx =>
     have e1 : map (algebraMap O Kf) (c • x) = algebraMap O Kf c • map (algebraMap O Kf) x := by
       rw [smul_eq_C_mul, map_mul, map_C, ← smul_eq_C_mul]

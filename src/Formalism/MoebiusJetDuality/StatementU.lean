@@ -1,5 +1,48 @@
-import Formalism.MoebiusJetDuality.StatementV
-import Formalism.SatakeDualWeyl.Statement
+module
+
+public import Mathlib.Analysis.Complex.Order
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,13 +50,6 @@ namespace Formalism.MJ
 
 open Matrix
 open scoped ComplexOrder
-
-def blk {p q : ℕ} (A : GL (Fin p) ℂ) (D : GL (Fin q) ℂ) : GL (Fin p ⊕ Fin q) ℂ where
-  val := fromBlocks (A : Matrix (Fin p) (Fin p) ℂ) 0 0 (D : Matrix (Fin q) (Fin q) ℂ)
-  inv := fromBlocks ((A⁻¹ : GL (Fin p) ℂ) : Matrix (Fin p) (Fin p) ℂ) 0 0
-    ((D⁻¹ : GL (Fin q) ℂ) : Matrix (Fin q) (Fin q) ℂ)
-  val_inv := by simp [fromBlocks_multiply]
-  inv_val := by simp [fromBlocks_multiply]
 
 def moeb {p q : ℕ} (g : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ)
     (z : Matrix (Fin p) (Fin q) ℂ) : Matrix (Fin p) (Fin q) ℂ :=
@@ -23,50 +59,5 @@ def hcDom (p q : ℕ) : Set (Matrix (Fin p) (Fin q) ℂ) :=
   {z | (1 - zᴴ * z).PosDef}
 
 def vecOf {p q : ℕ} (z : Matrix (Fin p) (Fin q) ℂ) : Fin p × Fin q → ℂ := fun x => z x.1 x.2
-
-def moebiusJetDuality : Prop :=
-  ∀ (p q : ℕ) (A : GL (Fin p) ℂ) (D : GL (Fin q) ℂ) (z : Matrix (Fin p) (Fin q) ℂ),
-    moeb (blk A D : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) z =
-      (A : Matrix (Fin p) (Fin p) ℂ) * z * ((D⁻¹ : GL (Fin q) ℂ) : Matrix (Fin q) (Fin q) ℂ)
-
-def moebiusJetDualityReformulated : Prop :=
-  ∀ (p q : ℕ) (A : GL (Fin p) ℂ) (D : GL (Fin q) ℂ),
-    blk A D ∈ Formalism.UG.Upq p q ↔
-      ((A : Matrix (Fin p) (Fin p) ℂ)ᴴ * (A : Matrix (Fin p) (Fin p) ℂ) = 1 ∧
-        (D : Matrix (Fin q) (Fin q) ℂ)ᴴ * (D : Matrix (Fin q) (Fin q) ℂ) = 1)
-
-def StabZero : Prop :=
-  ∀ (p q : ℕ) (g : GL (Fin p ⊕ Fin q) ℂ), g ∈ Formalism.UG.Upq p q →
-    moeb (g : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) 0 = 0 → g ∈ Formalism.UG.blockDiag p q
-
-def MoebTangent : Prop :=
-  ∀ (p q : ℕ) (A : GL (Fin p) ℂ) (D : GL (Fin q) ℂ) (z : Matrix (Fin p) (Fin q) ℂ),
-    vecOf (moeb (blk A D : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) z) =
-      (hcMat (A : Matrix (Fin p) (Fin p) ℂ) ((D⁻¹ : GL (Fin q) ℂ) : Matrix (Fin q) (Fin q) ℂ)).mulVec
-        (vecOf z)
-
-def ActFMoeb : Prop :=
-  ∀ (p q r : ℕ) (ρ : (GL (Fin p) ℂ × GL (Fin q) ℂ) →* GL (Fin r) ℂ)
-    (k : GL (Fin p) ℂ × GL (Fin q) ℂ) (F : (Fin p × Fin q → ℂ) → (Fin r → ℂ))
-    (z : Matrix (Fin p) (Fin q) ℂ),
-    actF ρ k F (vecOf z) = ((ρ k : GL (Fin r) ℂ) : Matrix (Fin r) (Fin r) ℂ).mulVec
-      (F (vecOf (moeb (((blk k.1 k.2)⁻¹ : GL (Fin p ⊕ Fin q) ℂ) :
-        Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) z)))
-
-def MoebDom : Prop :=
-  ∀ (p q : ℕ) (g : GL (Fin p ⊕ Fin q) ℂ) (z : Matrix (Fin p) (Fin q) ℂ),
-    g ∈ Formalism.UG.Upq p q → z ∈ hcDom p q →
-      IsUnit ((g : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ).toBlocks₂₁ * z +
-        (g : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ).toBlocks₂₂).det ∧
-      moeb (g : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) z ∈ hcDom p q
-
-def MoebMul : Prop :=
-  ∀ (p q : ℕ) (g h : GL (Fin p ⊕ Fin q) ℂ) (z : Matrix (Fin p) (Fin q) ℂ),
-    g ∈ Formalism.UG.Upq p q → h ∈ Formalism.UG.Upq p q → z ∈ hcDom p q →
-      moeb ((g * h : GL (Fin p ⊕ Fin q) ℂ) : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) z =
-        moeb (g : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ)
-          (moeb (h : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ) z)
-
-def ZeroMemDom : Prop := ∀ p q : ℕ, (0 : Matrix (Fin p) (Fin q) ℂ) ∈ hcDom p q
 
 end Formalism.MJ

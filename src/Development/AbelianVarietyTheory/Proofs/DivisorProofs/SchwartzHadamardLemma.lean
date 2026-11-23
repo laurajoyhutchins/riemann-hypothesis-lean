@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPairingStdP
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormIteratedFDerivRemCompLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchroedingerPreservesSchwartzReal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzVanishingDecompositionStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPairingStdP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
+
 open scoped SchwartzMap Matrix TensorProduct Classical
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK GlobalTheory.ArchUniq
@@ -19,11 +59,6 @@ def bil {P : V → V → ℝ} (h : IsPairing P) : LinearMap.BilinForm ℝ V :=
 
 theorem bil_apply {P : V → V → ℝ} (h : IsPairing P) (x y : V) : bil h x y = P x y := rfl
 
-theorem schrF_schwartz [FiniteDimensional ℝ V] {P : V → V → ℝ} (h : IsPairing P) (w : V × V) (f : 𝓢(V, ℂ)) :
-    ∃ g : 𝓢(V, ℂ), ⇑g = schrF P w ⇑f := by
-  obtain ⟨g, hg⟩ := GlobalTheory.SchOp.sch_schwartz (bil h) w.1 w.2 f
-  exact ⟨g, hg⟩
-
 theorem exists_right [FiniteDimensional ℝ V] {P : V → V → ℝ} (h : IsPairing P) (L : V →L[ℝ] ℝ) :
     ∃ b, ∀ y, P y b = L y := by
   have hinj : Function.Injective (bil h).flip := by
@@ -34,11 +69,6 @@ theorem exists_right [FiniteDimensional ℝ V] {P : V → V → ℝ} (h : IsPair
     (Subspace.dual_finrank_eq (K := ℝ) (V := V)).symm).1 hinj
   obtain ⟨b, hb⟩ := hsurj (L : V →ₗ[ℝ] ℝ)
   exact ⟨b, fun y => by simpa [bil_apply] using LinearMap.congr_fun hb y⟩
-
-def evAt (x : V) : 𝓢(V, ℂ) →L[ℂ] ℂ :=
-  (BoundedContinuousFunction.evalCLM ℂ x).comp (SchwartzMap.toBoundedContinuousFunctionCLM ℂ V ℂ)
-
-theorem evAt_apply (x : V) (f : 𝓢(V, ℂ)) : evAt x f = f x := rfl
 
 theorem exists_one [FiniteDimensional ℝ V] : ∃ Φ : 𝓢(V, ℂ), Φ 0 = 1 := by
   let b : ContDiffBump (0 : V) := ⟨1, 2, one_pos, one_lt_two⟩
@@ -52,11 +82,6 @@ theorem exists_one [FiniteDimensional ℝ V] : ∃ Φ : 𝓢(V, ℂ), Φ 0 = 1 :
 end GlobalTheory.ArchUniqStd
 
 namespace GlobalTheory.ArchUniqStd
-
-def HadamardLemmaSchwartz : Prop :=
-  ∀ (V : Type) [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
-    (f : SchwartzMap V ℂ), f 0 = 0 → ∃ (n : ℕ) (L : Fin n → V →L[ℝ] ℝ) (h g : Fin n → SchwartzMap V ℂ),
-      (∀ i x, g i x = (L i x : ℂ) * h i x) ∧ ∀ x, f x = ∑ i, g i x
 
 variable {V₁ : Type} [NormedAddCommGroup V₁] [NormedSpace ℝ V₁] [FiniteDimensional ℝ V₁]
 

@@ -1,14 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
+module
+
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLinearEquivLift
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToOfComponents
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IdealSheafComapIdealAffineOpenOfIsAffine
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalHolomorphicExponentialChartStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannFormPeriodDeterminantStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.Analysis.Calculus.FDeriv.OfCompLeft
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolPairA
 import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalHolomorphicExponentialChartStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannFormPeriodDeterminantStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IdealSheafComapIdealAffineOpenOfIsAffine
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolPairA
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToOfComponents
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat Filter Topology Metric
 
@@ -23,22 +71,7 @@ variable {E E' : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] [NormedAddComm
 theorem isHolTo_precomp {X : Scheme.{0}} {B : Set E} {y : E → (Sp ℂ ⟶ X)} (hy : IsHolTo B y)
     {W : Set E'} (hW : IsOpen W) {φ : E' → E} (hφ : DifferentiableOn ℂ φ W) (hm : Set.MapsTo φ W B) :
     IsHolTo W (fun w => y (φ w)) := by
-  intro U f
-  have hset : {w ∈ W | ⊤ ≤ y (φ w) ⁻¹ᵁ U} = W ∩ φ ⁻¹' {b ∈ B | ⊤ ≤ y b ⁻¹ᵁ U} := by
-    ext w
-    constructor
-    · rintro ⟨h1, h2⟩
-      exact ⟨h1, hm h1, h2⟩
-    · rintro ⟨h1, -, h2⟩
-      exact ⟨h1, h2⟩
-  have hopen : IsOpen {w ∈ W | ⊤ ≤ y (φ w) ⁻¹ᵁ U} := by
-    rw [hset]
-    exact hφ.continuousOn.isOpen_inter_preimage hW (hy U f).1
-  refine ⟨hopen, ?_⟩
-  refine DifferentiableOn.comp (g := fun b => valAt' (y b) U f) (t := {b ∈ B | ⊤ ≤ y b ⁻¹ᵁ U})
-    (hy U f).2 (hφ.mono fun w hw => hw.1) ?_
-  intro w hw
-  exact ⟨hm hw.1, hw.2⟩
+  apply GlobalTheory.LocLift.isHolTo_comp <;> assumption
 
 theorem isHolTo_congr {X : Scheme.{0}} {B : Set E} {y y' : E → (Sp ℂ ⟶ X)} (hy : IsHolTo B y)
     (h : ∀ b ∈ B, y' b = y b) : IsHolTo B y' := by
@@ -53,10 +86,6 @@ theorem isHolTo_congr {X : Scheme.{0}} {B : Set E} {y y' : E → (Sp ℂ ⟶ X)}
   rw [hset]
   refine ⟨(hy U f).1, (hy U f).2.congr fun b hb => ?_⟩
   simp only [h b hb.1]
-
-theorem isHolTo_mono {X : Scheme.{0}} {B B' : Set E} {y : E → (Sp ℂ ⟶ X)} (hy : IsHolTo B y)
-    (hB' : IsOpen B') (h : B' ⊆ B) : IsHolTo B' y :=
-  isHolTo_precomp hy hB' differentiableOn_id h
 
 variable {R : Type} [CommRing R] {G : Over (Sp R)} [GrpObj G]
 
@@ -118,7 +147,7 @@ theorem exists_family_inverse (b₀ : Fin n → ℂ) (L : (Fin n → ℂ) × (Fi
   have hsplit : ∀ u v, L' (u, v) = L' (u, 0) + v := by
     intro u v
     have : ((u, v) : (Fin n → ℂ) × (Fin g → ℂ)) = (u, 0) + (0, v) := by simp
-    rw [this, map_add, hinr]
+    rw [this, map_add (f := _), hinr]
   let D : ((Fin n → ℂ) × (Fin g → ℂ)) →L[ℂ] ((Fin n → ℂ) × (Fin g → ℂ)) :=
     (ContinuousLinearMap.fst ℂ _ _).prod L'
   let Di : ((Fin n → ℂ) × (Fin g → ℂ)) →L[ℂ] ((Fin n → ℂ) × (Fin g → ℂ)) :=
@@ -502,8 +531,8 @@ end GlobalTheory.CompanionTheory.Ar.Flat.ExpLoc
 
 namespace GlobalTheory.CompanionTheory.Ar.Flat
 
-open ExpLoc in
 
+open ExpLoc in
 theorem exists_famExp_near : ∀ (R : Type) [CommRing R] (G : Over (Sp R)) [GrpObj G] [IsCommMonObj G] (g n : ℕ) (M : LieModel G (𝟙 (Sp R)) (Fin g → R)) (B : Set (Fin n → ℂ)) (ψ : (Fin n → ℂ) → (R →+* ℂ)), Smooth G.hom → IsHolPts B ψ → ∀ b₀ ∈ B, ∃ ε : ℝ, 0 < ε ∧ ball b₀ ε ⊆ B ∧ Nonempty (FamExp G M (ball b₀ ε) ψ) := by
   intro R _ G _ _ g n M B ψ hsm hψ b₀ hb₀
   obtain ⟨V, t, N, f, ε, Ψ, hε, hsub, hΨ, hfib, δ, hδ, hret⟩ := GlobalTheory.T.local_holomorphic_exponential_chart R G g n M B ψ hsm hψ b₀ hb₀
@@ -541,7 +570,7 @@ theorem exists_famExp_near : ∀ (R : Type) [CommRing R] (G : Over (Sp R)) [GrpO
     refine eventually_all.2 fun j => ?_
     have hc : ContinuousAt (fun b => valAt' (Ψ b 0).left V (f j)) b₀ :=
       ((hs V (f j)).2.differentiableAt
-        ((hs V (f j)).1.mem_nhds ⟨mem_ball_self hε, hV b₀ (mem_ball_self hε) 0 (mem_ball_self hε)⟩)).continuousAt
+        ((hs V (f j)).1.mem_nhds ⟨mem_ball_self hε, hV b₀ (mem_ball_self hε) 0 (by exact Set.mem_preimage.mpr (mem_ball_self hε))⟩)).continuousAt
     have h2 := (Metric.tendsto_nhds.1 hc.tendsto) δ hδ
     filter_upwards [h2] with b hb
     simpa [dist_eq_norm] using hb

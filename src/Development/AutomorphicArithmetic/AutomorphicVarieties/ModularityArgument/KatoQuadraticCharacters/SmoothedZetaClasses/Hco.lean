@@ -1,26 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmValuationNewformCongruence
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.Thdiam
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaTW
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaSystemFixedExponent
-import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsEqSubOfMemCob
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenfunctionalZeroProjection
-import Development.AbelianVarietyTheory.Definitions.Foundations.PieceEqPieceT
-import Development.AbelianVarietyTheory.Definitions.Foundations.HtCoLOfEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleHodgeTateZetaClassParams
-import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleNewformZetaData
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFROfIsLamF
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamOfLSmulIff
-import Development.AbelianVarietyTheory.Definitions.Foundations.ActWBOfInvariant
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GalBMemKummerInvariantSet
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPrimitiveRootEOmLevel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaSystemFixedExponent
+public import Development.AbelianVarietyTheory.Definitions.Foundations.PieceEqPieceT
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HtCoLOfEq
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleHodgeTateZetaClassParams
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleNewformZetaData
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFR2
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmValuationNewformCongruence
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCuspFunctionalOddWeightOddPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCuspFunctionalValueModPrimePowDiamondIndepende
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsThBActSgDDiamIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaBasisLinearCombination
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GalBMemKummerInvariantSet
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeDiamondAction
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFR2
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.Thdiam
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 

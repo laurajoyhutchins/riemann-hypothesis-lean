@@ -1,20 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.QLev
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ProdDat
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilDataDifferBySplittingFactorQuotientStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeCharEqOneOfTrivialFinitePartOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdelicCharacterPowEqOneFiniteIdelesOfOrderDvd
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OpenKernelIdeleCharacterTrivialFinitePartOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsDetRootFinPartOne
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsDetRoot
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NormEmbeddingHostFormConstantEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstRelIffTwistFactorAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilDataDifferBySplittingFactorQuotientStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeCharEqOneOfTrivialFinitePartOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdelicCharacterPowEqOneFiniteIdelesOfOrderDvdStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OpenKernelIdeleCharacterTrivialFinitePartOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Foundations.SimpleSum
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.JointSmooth
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SeeSaw GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.StepData GlobalTheory.LocMod GlobalTheory.MiS ValuativeRel
 open scoped TensorProduct Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.Fam
-set_option maxHeartbeats 1000000
+
 
 noncomputable section
 
@@ -74,61 +118,3 @@ theorem isWeil_rec {ψ : AddChar (AF D.host.F) ℂ} {χS χT : (AE D)ˣ →* Cir
 
 end GlobalTheory.TupRoot
 
-open GlobalTheory.TupRoot in
-
-theorem GlobalTheory.TupRoot.weil_tuple_root : ∀ (D : D7) (L : SizeData₂ D) (hT : GatTies D) (Gi : Formalism.MainNotions.G.Inst D L) (Gl : Formalism.MainNotions.G.LatInst D) (Kc : Formalism.MainNotions.G.Consts) (Yd : DivX D) (cX : ExtraC) (ex : Extra D L hT Gi Gl Kc Yd cX) (W : RealPack ex) (u : D.what₂.Word) (f : FamCh W u), PkHyp W → f.RowOK → ∀ t, ∃ ζ : ℕ → ℂ, (∀ j, ∃ n : ℕ, 0 < n ∧ ζ j ^ n = 1) ∧ (∀ j, j + 1 < D.R.m → f.g.b j ∈ GfC _ → f.g.b (j + 1) ∈ GfC _ → ∀ a ∈ GinfC _, ∀ a' ∈ GinfC _, ∀ g, IsThetaFunO (pk W).ψ _ _ g → (pk W).ωY t j (a * f.g.b j, a' * f.g.b (j + 1)) g = ζ j • (pk W).ωY W.P.A3.A.μ0 j (a * f.g.b j, a' * f.g.b (j + 1)) g) ∧ (∀ j h g, IsThetaFunO (pk W).ψ _ _ g → omT (pk W) t j h (f.g.b (j + 1), f.g.bT) g = ζ (j + 1) • omT (pk W) W.P.A3.A.μ0 j h (f.g.b (j + 1), f.g.bT) g) ∧ ∀ j, ∃ n : ℕ, 0 < n ∧ (pk W).toLevCh.mu t j ^ n = (pk W).toLevCh.mu W.P.A3.A.μ0 j ^ n := by
-  intro D L hT Gi Gl Kc Yd cX ex W u f hP _hR t
-  have hc := hP.bot.hyp.2.2.2.1
-  have hL := hc.lev
-  obtain ⟨n, hn0, hn⟩ := hL.xi_fin t
-  have hxi : ChrEq ((pk W).xi t) ((pk W).xiH t) := hL.xi t
-  have hb : (pk W).xi W.P.A3.A.μ0 = 1 :=
-    MonoidHom.ext (GlobalTheory.TwistFactorCompare.eq_one_of_chrEq_one (hL.xi_base ▸ hL.xi W.P.A3.A.μ0))
-  have hstep : ∀ k, Lift.chrStep ((pk W).toLevCh.mu t) (pk W).eta k =
-      ((Lift.chrStep ((pk W).toLevCh.mu W.P.A3.A.μ0) (pk W).eta k).1 * (pk W).xi t,
-        (Lift.chrStep ((pk W).toLevCh.mu W.P.A3.A.μ0) (pk W).eta k).2 * (pk W).xi t) := by
-    intro k
-    unfold Lift.chrStep
-    split_ifs <;> simp [Formalism.IndefR.Links.LevCh.mu, Lift.tup, hb, mul_right_comm]
-  have hpow : ∀ x, (pk W).xi t x ^ n = 1 := pow_eq_one_of_chrEq hxi hn
-  have hinf : ∀ x : (AE D)ˣ, finPart D (x : AE D) = 1 → (pk W).xi t x = 1 := eq_one_of_finPart hxi hn0 hn
-  choose xr hxr using fun k => GlobalTheory.RecDict.exists_isDetRoot D (Yc D k) (f.g.b k)
-  obtain ⟨xT, hxT⟩ := GlobalTheory.RecDict.exists_isDetRoot D D.sp.X' f.g.bT
-  let w : ℕ → Circle := fun k => if k + 1 < D.R.m then ((pk W).xi t (xr k))⁻¹ * (pk W).xi t (xr (k + 1))
-    else ((pk W).xi t (xr k))⁻¹ * (pk W).xi t xT
-  refine ⟨fun k => (w k : ℂ), ?_, ?_, ?_, ?_⟩
-  · intro k
-    refine ⟨n, hn0, ?_⟩
-    have h1 : w k ^ n = 1 := by
-      simp only [w]
-      split_ifs <;> rw [mul_pow, inv_pow, hpow, hpow, inv_one, one_mul]
-    have := congrArg (fun z : Circle => (z : ℂ)) h1
-    simpa using this
-  · intro j hj _ _ a ha a' ha' g hg
-    have hW0 := hc.chain.ωY W.P.A3.A.μ0 j hj
-    have hWt := hc.chain.ωY t j hj
-    rw [hstep] at hWt
-    obtain ⟨z, hz⟩ := GlobalTheory.RecDict.exists_isDetRoot D (Yc D j) a
-    obtain ⟨y, hy1, hy⟩ := GlobalTheory.TwistFinPart.exists_isDetRoot_finPart_one _ a ha z hz
-    obtain ⟨z', hz'⟩ := GlobalTheory.RecDict.exists_isDetRoot D (Yc D (j + 1)) a'
-    obtain ⟨y', hy1', hy'⟩ := GlobalTheory.TwistFinPart.exists_isDetRoot_finPart_one _ a' ha' z' hz'
-    rw [twist_eq hW0 hWt (GlobalTheory.ExtCore.isDetRoot_mul _ _ _ _ _ hy (hxr j))
-      (GlobalTheory.ExtCore.isDetRoot_mul _ _ _ _ _ hy' (hxr (j + 1))) hg]
-    have e : ((pk W).xi t (y * xr j))⁻¹ * (pk W).xi t (y' * xr (j + 1)) = w j := by
-      simp only [w, if_pos hj, map_mul, hinf _ hy1, hinf _ hy1', one_mul]
-    rw [e]
-  · intro j h g hg
-    have hW0 := isWeil_rec (idx_top h) _ (hc.chain.ωX W.P.A3.A.μ0)
-    have hWt := isWeil_rec (idx_top h) _ (hc.chain.ωX t)
-    rw [hstep] at hWt
-    have e := twist_eq hW0 hWt (hxr (j + 1)) hxT hg
-    have hw : w (j + 1) = ((pk W).xi t (xr (j + 1)))⁻¹ * (pk W).xi t xT := by
-      simp only [w]
-      rw [if_neg (by omega)]
-    show _ = ((w (j + 1) : Circle) : ℂ) • _
-    rw [hw]
-    exact e
-  · intro j
-    refine ⟨n, hn0, ?_⟩
-    have hν : (pk W).xi t ^ n = 1 := MonoidHom.ext fun x => by simpa using hpow x
-    simp only [Formalism.IndefR.Links.LevCh.mu, Lift.tup, hb, mul_one, mul_pow, hν]

@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.ChainFibFinite
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.ChainOfKernelsUnique
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -56,7 +108,7 @@ def tangentHom (π : S → k) (hπ : ∀ s, s - algebraMap k S (π s) ∈ maxima
       simp only [Algebra.smul_def, map_mul]; ring
     have hf : f (s * t) = π s * f t + π t * f s := by
       have huv := hf2 _ (by rw [pow_two]; exact Ideal.mul_mem_mul (hπ s) (hπ t))
-      rw [e, map_add, map_add, map_add, map_smul, map_smul, huv, map_sub, map_sub, hfa, hfa, hfa]
+      rw [e, map_add (f := _), map_add (f := _), map_add (f := _), map_smul, map_smul, huv, map_sub, map_sub, hfa, hfa, hfa]
       simp
     ext <;> simp [hm, hf] <;> ring
   map_zero' := by
@@ -64,7 +116,7 @@ def tangentHom (π : S → k) (hπ : ∀ s, s - algebraMap k S (π s) ∈ maxima
     ext <;> simp [this]
   map_add' s t := by
     have : π (s + t) = π s + π t := residue_eq hπ _ _ (by
-      rw [map_add]; convert add_mem (hπ s) (hπ t) using 1; ring)
+      rw [map_add (f := _)]; convert add_mem (hπ s) (hπ t) using 1; ring)
     ext <;> simp [this]
   commutes' c := by
     have : π (algebraMap k S c) = c := residue_eq hπ _ _ (by simp)

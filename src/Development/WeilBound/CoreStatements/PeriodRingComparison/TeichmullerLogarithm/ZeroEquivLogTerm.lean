@@ -1,9 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.GammaEqDpow
-import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.AcrisNAlgebraMapAinf
+module
+
+public import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.GammaEqDpow
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.ExistsMapEqOfPowMul
 import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.EqZeroOfPMulEqZero
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.ExistsMapEqOfPowMul
-import GroundTheory.PAdicHodge.ACrisLog
+public import Development.WeilBound.CoreStatements.PeriodRingComparison.CrystallinePeriodRings.AcrisNAlgebraMapAinf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,6 +65,7 @@ theorem zeroEquiv_logTerm (u : Reformulated.AutPerF.Ainf l (NC l))
     zeroEquiv l (((-1) ^ n * (n.factorial : Reformulated.AutPerF.AcrisZero l (NC l))) *
         Reformulated.AutPerF.AcrisZero.gamma (n + 1) (u - 1) (by rw [map_sub, hu, map_one, sub_self])) =
       ACris.logTermZero hx n := by
+  set_option synthInstance.maxHeartbeats 100000 in
   rw [ACris.logTermZero, map_mul, map_mul, map_pow, map_neg, map_one, map_natCast]
   congr 1
   apply Subtype.ext
@@ -33,8 +74,8 @@ theorem zeroEquiv_logTerm (u : Reformulated.AutPerF.Ainf l (NC l))
     ACris.dpow (n + 1) (u - 1)
   exact gamma_eq_dpow l (n + 1) (u - 1)
 
-set_option maxHeartbeats 1000000 in
 
+set_option maxHeartbeats 1000000 in
 theorem acrisNHom_log (u : Reformulated.AutPerF.Ainf l (NC l))
     (hu : Reformulated.AutPerF.Ainf.theta l (NC l) u = 1)
     (hx : u - 1 ∈ RingHom.ker (fontaineTheta (normInteger ℂ_[l]) l)) :
@@ -46,7 +87,8 @@ theorem acrisNHom_log (u : Reformulated.AutPerF.Ainf l (NC l))
   have hsum : ∑ n ∈ Finset.range M, ACris.logTerm hx n =
       acrisNHom l (algebraMap _ (Reformulated.AutPerF.Acris l (NC l))
         (Reformulated.AutPerF.Acris.logPartial M u hu)) := by
-    rw [acrisNHom_algebraMap, Reformulated.AutPerF.Acris.logPartial, map_sum, map_sum]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [acrisNHom_algebraMap, Reformulated.AutPerF.Acris.logPartial, map_sum, map_sum]
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [ACris.logTerm, zeroEquiv_logTerm l u hu hx n]
   rw [hsum, ← map_sub]
@@ -65,14 +107,6 @@ theorem cA_logTeich (η : Reformulated.AutPerF.tateModule l (OC l))
   rw [cA_apply, Reformulated.AutPerF.Acris.map_logTeich, Reformulated.AutPerF.Acris.logTeich,
     Reformulated.AutPerF.Acris.log_congr _ hu (by rw [Reformulated.AutPerF.tateModule.coe_map, tiltMap_eq])]
   exact acrisNHom_log l _ hu (ACris.mu_mem_ker h)
-
-theorem untilt_εO : PreTilt.untilt (PositivityTheory.LocInh.εO l) = 1 := by
-  have h1 : Formalism.Per6.tiltMap l (PositivityTheory.LocInh.εO l) = epsilon l := PositivityTheory.LocInh.tiltMap_tiltInv l _
-  have h2 := Reformulated.AutPerF.Tilt.untilt_map (e l).toRingHom (PositivityTheory.LocInh.εO l)
-  rw [tiltMap_eq, h1, untilt_epsilon] at h2
-  apply (e l).injective
-  rw [map_one]
-  exact h2.symm
 
 theorem cA_logTeich_eps (h0 : PreTilt.untilt (PositivityTheory.LocInh.εO l) = 1) :
     cA l (Reformulated.AutPerF.Acris.logTeich ⟨PositivityTheory.LocInh.εO l, h0⟩) = Formalism.Per6.tA l := by

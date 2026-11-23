@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.Circle
+public import Mathlib.Topology.Algebra.OpenSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -110,40 +160,7 @@ theorem isOpen_ker_of_noSmallSubgroups
   refine Subgroup.isOpen_mono (H₁ := V.toSubgroup) ?_ V.isOpen
   rwa [← Subgroup.map_eq_bot_iff]
 
-theorem exists_openSubgroup_subset_of_profinite [CompactSpace G] [T2Space G]
-    [TotallyDisconnectedSpace G] {W : Set G} (hW : W ∈ 𝓝 (1 : G)) :
-    ∃ V : OpenSubgroup G, (V : Set G) ⊆ W := by
-  obtain ⟨C, ⟨hC1, hCc⟩, hCW⟩ := (nhds_basis_clopen (1 : G)).mem_iff.1 hW
-  obtain ⟨V, hV⟩ := IsTopologicalGroup.exist_openSubgroup_sub_clopen_nhds_of_one hCc hC1
-  exact ⟨V, hV.trans hCW⟩
-
 variable [CompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
-
-theorem isOpen_ker_of_profinite (hH : NoSmallSubgroups H) (f : G →* H) (hf : Continuous f) :
-    IsOpen (f.ker : Set G) :=
-  isOpen_ker_of_noSmallSubgroups (fun _ hW ↦ exists_openSubgroup_subset_of_profinite hW) hH f hf
-
-theorem finite_range_of_profinite (hH : NoSmallSubgroups H) (f : G →* H) (hf : Continuous f) :
-    Finite f.range :=
-  have : Finite (G ⧸ f.ker) :=
-    Subgroup.quotient_finite_of_isOpen _ (isOpen_ker_of_profinite hH f hf)
-  Finite.of_equiv _ (QuotientGroup.quotientKerEquivRange f).toEquiv
-
-theorem isOpen_ker_of_profinite_circle (f : G →* Circle) (hf : Continuous f) :
-    IsOpen (f.ker : Set G) :=
-  isOpen_ker_of_profinite Circle.noSmallSubgroups f hf
-
-theorem finite_range_of_profinite_circle (f : G →* Circle) (hf : Continuous f) :
-    Finite f.range :=
-  finite_range_of_profinite Circle.noSmallSubgroups f hf
-
-theorem isOpen_ker_of_profinite_units_complex (f : G →* ℂˣ) (hf : Continuous f) :
-    IsOpen (f.ker : Set G) :=
-  isOpen_ker_of_profinite Complex.units_noSmallSubgroups f hf
-
-theorem finite_range_of_profinite_units_complex (f : G →* ℂˣ) (hf : Continuous f) :
-    Finite f.range :=
-  finite_range_of_profinite Complex.units_noSmallSubgroups f hf
 
 end Kernel
 

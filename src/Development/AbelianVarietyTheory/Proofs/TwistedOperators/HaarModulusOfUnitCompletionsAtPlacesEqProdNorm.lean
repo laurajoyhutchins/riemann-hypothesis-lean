@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MulVecCEApply
-import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HaarModulusProductFormulaTotallyReal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MulVecCEApply
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HaarModulusProductFormulaTotallyReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Topology Matrix NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.GaugeEx GlobalTheory.ModuLR
 open scoped NNReal ENNReal TensorProduct Pointwise
 
@@ -32,7 +80,9 @@ theorem distribHaarChar_pi {ι : Type} [Fintype ι] (A : ι → Type) [∀ i, Co
     refine forall_congr' fun i => ?_
     rw [← map_inv]
     rfl
-  rw [e, hp, hp, ENNReal.coe_finset_prod, ← Finset.prod_mul_distrib]
+  rw [e, hp, hp]
+  push_cast
+  rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun i _ => ?_
   rw [distribHaarChar_mul]
 
@@ -42,11 +92,11 @@ namespace GlobalTheory.ModuPiLocal
 
 theorem modu_sPart : ∀ (F : Type) [Field F] [NumberField F] (S : Finset (HeightOneSpectrum (𝓞 F))) (x : SPart F S), IsUnit x → (modu (SPart F S) x : ℝ) = ∏ v : S, ‖x v‖ := by
   intro F _ _ S x hx
-  rw [modu, dif_pos hx, distribHaarChar_pi (fun v : S => Fv F v.1), NNReal.coe_prod]
+  rw [modu, dite_eq_left hx, distribHaarChar_pi (fun v : S => Fv F v.1), NNReal.coe_prod]
   refine Finset.prod_congr rfl fun v _ => ?_
   have hv : IsUnit (x v) := (Pi.isUnit_iff.1 hx) v
   have h := GlobalTheory.GaugeProdFormula.modu_finite F v.1 (x v) hv.ne_zero
-  rw [modu, dif_pos hv] at h
+  rw [modu, dite_eq_left hv] at h
   rw [← h]
   congr 2
   ext

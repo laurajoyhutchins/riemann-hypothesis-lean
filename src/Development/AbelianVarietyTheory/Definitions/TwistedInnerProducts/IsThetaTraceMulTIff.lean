@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsPointedOfIsHkIsog
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EmbeddingSectionsSpanGeometricFibre
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsPointedOfIsHkIsog
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -38,49 +78,5 @@ theorem sec_eq_of_surjective {S : Scheme.{0}} {A : Over S} [GrpObj A] {L : RigLB
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 variable {Xo : Moduli Dw l} {c : Coeff l}
-
-theorem isThetaTrace_mulT_iff {p : ℕ} (hp : 1 ≤ p) {Ω : Type} [Field Ω] (x : Sp Ω ⟶ Xo.X)
-    (s u : LB.Sec (PPx x)) :
-    IsThetaTrace Xo.univ.t.G Xo.univ.t.PP (x := x) (x' := x) (mulT Xo.univ.t.G (Over.mk x) p).left p s u ↔ u = s := by
-  have hL := abelianSchemeLaws_all.1
-  constructor
-  · intro h
-    have := Xo.univ.t.semi.smooth
-    have : Smooth (fst (Over.mk x) Xo.univ.t.G).left := by
-      show Smooth (pullback.fst x Xo.univ.t.G.hom)
-      infer_instance
-    have : IsReduced (Over.mk x).left := inferInstanceAs (IsReduced (Sp Ω))
-    have : IsReduced (Over.mk x ⊗ Xo.univ.t.G).left :=
-      GlobalTheory.isReduced_of_smooth_of_isReduced (fst (Over.mk x) Xo.univ.t.G).left
-    have : Surjective (mulT Xo.univ.t.G (Over.mk x) p).left :=
-      (GlobalTheory.EmbSpan.pt_pow_and_surjective hL (UnivPol.pol Xo) x p hp).2
-    refine sec_eq_of_surjective (L := Xo.univ.t.PP) (mulT Xo.univ.t.G (Over.mk x) p).left fun w J hJ => ?_
-    have e := h.sv_eq_of_mulT hL.globalFns (UnivPol.pol Xo).isAb (𝟙 _) w hJ
-    rwa [Category.id_comp] at e
-  · rintro rfl
-    obtain ⟨s₁, h⟩ := exists_isMulPull p u
-    exact isThetaTrace_mulT h
-
-def scale {Ω : Type} [Field Ω] [Algebra c.F Ω] (y : FrPt Xo c Ω) (u : LB.Sec (PPx y.x))
-    (hu : ∀ s' : LB.Sec (PPx y.x), ∃! a : Ω, ∀ i, s'.f i = scal y.x a i * u.f i) : FrPt Xo c Ω :=
-  { y with s := u, gen := hu }
-
-theorem hkTr_scale_iff {p : ℕ} (hp : 1 ≤ p) {Ω : Type} [Field Ω] [IsAlgClosed Ω] [Algebra c.F Ω] (y : FrPt Xo c Ω)
-    (u : LB.Sec (PPx y.x)) (hu : ∀ s' : LB.Sec (PPx y.x), ∃! a : Ω, ∀ i, s'.f i = scal y.x a i * u.f i)
-    (a : Ω) (ha : ∀ i, u.f i = scal y.x a i * y.s.f i) :
-    hkTr Xo c p Ω y (scale y u hu) ((conj y.x y.x).symm (mulT Xo.univ.t.G (Over.mk y.x) p).left) ↔ a = 1 := by
-  have e : hkTr Xo c p Ω y (scale y u hu) ((conj y.x y.x).symm (mulT Xo.univ.t.G (Over.mk y.x) p).left) ↔
-      u = y.s := by
-    rw [← isThetaTrace_mulT_iff hp y.x y.s u]
-    show IsThetaTrace _ _ (conj y.x y.x ((conj y.x y.x).symm _)) p y.s u ↔ _
-    rw [Equiv.apply_symm_apply]
-  have h1 : ∀ i, y.s.f i = scal y.x 1 i * y.s.f i := fun i => by
-    simp [Formalism.L2.Pj.scal, liftFun]
-  rw [e]
-  constructor
-  · rintro rfl
-    exact (y.gen y.s).unique ha h1
-  · rintro rfl
-    exact sec_ext fun i => (ha i).trans (h1 i).symm
 
 end GlobalTheory.ThetaTraceTest

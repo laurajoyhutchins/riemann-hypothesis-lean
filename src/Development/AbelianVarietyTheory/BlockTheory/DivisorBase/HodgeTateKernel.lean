@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HodgeTateLatticePointFinrankTateModule
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUniqueIsWeilChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.IsLocallyConstantRankAtStalkEigenSub
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -58,37 +99,9 @@ def LevelReduction : Prop :=
         (unitOf (w ≫ χ) : DualNumber R) =
           TrivSqZeroExt.inl 1 + TrivSqZeroExt.inr (algebraMap O R ((alLeft P t).1 x))
 
-omit [Algebra ℤ_[p] O] in
-
-def RestrictionOnto : Prop := Function.Surjective P.weilChar
-
-def CokernelBound : Prop := ∀ f : omega P.Gt, (p : O) ^ 2 • f ∈ LinearMap.range P.al
 
 variable [Algebra ℤ_[p] C] [IsScalarTower ℤ_[p] O C]
 
-def KernelShape : Prop :=
-  Module.finrank C P.W = P.A.g ∧
-    (∀ (a : Λ), ∀ x ∈ P.W, P.actV a x ∈ P.W) ∧
-    P.tateTorus.baseChange C ≤ P.W ∧
-    P.W ≤ P.tateGt.baseChange C ∧
-    (∀ x : P.V, x ∈ P.W ↔ ∀ y ∈ P.W, P.pairV x y = 0) ∧
-    (∀ τ : Λ →+* O, Module.finrank C (P.eigW τ) = AvDefs.rTau P.Gt P.oGt τ) ∧
-    P.W = Submodule.span C (Set.range P.bLie)
-
-example (a : Λ) (x : P.V) (hx : x ∈ P.W) : P.actV a x ∈ P.W := by
-  change P.alC _ = 0
-  rw [P.isEquivariant_alC a x, show P.alC x = 0 from hx, map_zero]
-
-example (t : P.T) : alLeft P t = 0 ↔ P.al₀ t = 0 := by
-  simp [alLeft]
-
 end AtPoint
-
-def HodgeTateKernelAtPoint : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C ℝ≥0)
-    (O : Type) [CommRing O] [Algebra O C] [Fact ¬IsUnit (p : O)]
-    [IsAdicComplete (Ideal.span {(p : O)}) O] [Algebra ℤ_[p] O] [Algebra ℤ_[p] C]
-    [IsScalarTower ℤ_[p] O C] (Λ : Type) [CommRing Λ] [StarRing Λ] (P : Point p v O Λ),
-    LevelReduction P ∧ RestrictionOnto P ∧ CokernelBound P ∧ KernelShape P
 
 end GlobalTheory.IndefiniteRowSideFullHecke.HodgeTateKernel

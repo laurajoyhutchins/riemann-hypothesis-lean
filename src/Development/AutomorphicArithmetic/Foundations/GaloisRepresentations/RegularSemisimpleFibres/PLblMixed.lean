@@ -1,5 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.SuppBCOfMix
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.ResEmbCompat
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.SuppBCOfMix
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.FixedNeBotOfEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.MatchCut
+
+@[expose] public section
+
 open NumberField IsDedekindDomain ValuativeRel Polynomial Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.L2.Host
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.Shin
 open GroundTheory.Global GroundTheory.Global.SemiLocal UpperTheory.V.Published UpperTheory.CBC UpperTheory.Gal.InertialTypesAlt
@@ -42,7 +84,7 @@ private theorem inert_both {k : Type} [Field k] [ValuativeRel k] [TopologicalSpa
       UpperTheory.Zero.LLC.DZ ⟨m, x⟩ → UpperTheory.Zero.LLC.DZ ⟨m, y⟩ →
       (∀ γ, LinearMap.trace ℂ _ (levelZero x.rep.ρ γ) = LinearMap.trace ℂ _ (levelZero y.rep.ρ γ)) →
       IrrGL.Inert ⟨m, x⟩ ⟨m, y⟩)
-    (θ : AlgebraicClosure 𝓀[k] →* ℂ) (y z : IrrGL k) (hy : y.IsCusp) (hz : z.IsCusp)
+    (θ : AlgebraicClosure 𝓀[k] →* ℂ) (y z : IrrGL (k := k)) (hy : y.IsCusp) (hz : z.IsCusp)
     (hy' : UpperTheory.Zero.LLC.DZ y) (hz' : UpperTheory.Zero.LLC.DZ z) (cy cz : ℕ)
     (ty : ∀ γ, LinearMap.trace ℂ _ (levelZero y.rep γ) = cusp θ y.1 cy γ)
     (tz : ∀ γ, LinearMap.trace ℂ _ (levelZero z.rep γ) = cusp θ z.1 cz γ)
@@ -64,9 +106,9 @@ private theorem core {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] 
       IrrGL.Inert ⟨m, x⟩ ⟨m, y⟩)
     (θ : AlgebraicClosure 𝓀[k] →* ℂ) (hθ : Inj θ) (n : ℕ) {V : Type} [AddCommGroup V] [Module ℂ V]
     (π : Representation ℂ (GL (Fin n) k) V) (hsm : IsSmooth π) (hirr : π.IsIrreducible)
-    (s : Multiset (IrrGL k)) (hs : HasSupport π s) (hU : GlobalTheory.RoadU.Unlinked s)
+    (s : Multiset (IrrGL (k := k))) (hs : HasSupport π s) (hU : GlobalTheory.RoadU.Unlinked s)
     (hP : (s.filter fun y => 2 ≤ y.1).Pairwise fun y z => ¬ y.Inert z)
-    (m : ℕ) (x : Fin m → IrrGL k) (c : Fin m → ℕ) (hxs : Finset.univ.val.map x = s)
+    (m : ℕ) (x : Fin m → IrrGL (k := k)) (c : Fin m → ℕ) (hxs : Finset.univ.val.map x = s)
     (hx : ∀ a, (x a).IsCusp ∧ UpperTheory.Zero.LLC.DZ (x a) ∧ Reg (Nat.card 𝓀[k]) (x a).1 (c a) ∧
         ∀ γ, LinearMap.trace ℂ _ (levelZero (x a).rep γ) = cusp θ (x a).1 (c a) γ)
     (hL : HasLbl θ π ⟨Nat.card 𝓀[k], [], List.ofFn fun a => ((x a).1, c a)⟩) :
@@ -89,8 +131,8 @@ private theorem core {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] 
       omega
     · simp only [c₁, if_neg h]
       exact (hx a).2.2.1
-  let f : IrrGL k × ℕ → ℕ × ℕ := fun t => (t.1.1, t.2)
-  let T₀ : List (IrrGL k × ℕ) := List.ofFn fun a => (x a, c₁ a)
+  let f : IrrGL (k := k) × ℕ → ℕ × ℕ := fun t => (t.1.1, t.2)
+  let T₀ : List (IrrGL (k := k) × ℕ) := List.ofFn fun a => (x a, c₁ a)
   have hmem : ∀ t ∈ T₀, ∃ a, t = (x a, c₁ a) := fun t ht => by
     obtain ⟨a, rfl⟩ := List.mem_ofFn.1 ht
     exact ⟨a, rfl⟩
@@ -103,7 +145,7 @@ private theorem core {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] 
     exact hpos a)
   obtain ⟨T, hTp, hTm⟩ := perm_lift f hDp T₀ rfl
 
-  let x' : Fin T.length → IrrGL k := fun a => (T.get a).1
+  let x' : Fin T.length → IrrGL (k := k) := fun a => (T.get a).1
   let c' : Fin T.length → ℕ := fun a => (T.get a).2
   have hmap : Finset.univ.val.map x' = s := by
     rw [← hxs, Fin.univ_val_map, Fin.univ_val_map, Multiset.coe_eq_coe]

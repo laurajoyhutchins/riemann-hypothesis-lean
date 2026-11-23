@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdmissibleCoordinatesBoundedRise
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.PowerBoundFastDecay
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelL2RowsColumns
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.ExponentialNegativity.GapAbsOf
+import GroundTheory.AutomorphicForms.ReductionBlock
+public import GroundTheory.AutomorphicForms.ReductionDirichlet
+public import GroundTheory.AutomorphicForms.ReductionIwasawa
+public import GroundTheory.AutomorphicForms.ReductionSiegel
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix MeasureTheory
 open GlobalTheory.CuspRep GlobalTheory.UnitaryBC PositivityTheory.Rg.Rs PositivityTheory.Rg.BcB PositivityTheory.Rg.BcB.E PositivityTheory.Rg.BcB.E1 PositivityTheory.Rg.BcB.Desc
 open GroundTheory.Automorphic.Reduction (adelicBorel maxCompact posIdele diagUnits)
@@ -10,49 +57,6 @@ noncomputable section
 namespace GlobalTheory.CompanionTheory.PiVec
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
-
-theorem logSize_nonneg_cm {n : ℕ} (g : GA E n) : 0 ≤ logSize g := by
-  have h : ∀ A : Matrix (Fin n) (Fin n) (Ad E), 0 ≤ logSizeM A := fun A =>
-    add_nonneg (Finset.sum_nonneg fun _ _ => Real.posLog_nonneg)
-      (finsum_nonneg fun _ => Real.posLog_nonneg)
-  exact add_nonneg (h _) (h _)
-
-theorem redSize_ratGL_mul {n : ℕ} (γ : GL (Fin n) E) (g : GA E n) :
-    redSize (ratGL E n γ * g) = redSize g := by
-  unfold redSize
-  rw [← (Equiv.mulRight γ).iInf_comp (g := fun δ : GL (Fin n) E => logSize (ratGL E n δ * g))]
-  refine iInf_congr fun δ => ?_
-  simp [map_mul, mul_assoc]
-
-theorem bddBelow_sizes {n : ℕ} (g : GA E n) :
-    BddBelow (Set.range fun γ : GL (Fin n) E => logSize (ratGL E n γ * g)) :=
-  ⟨0, by rintro _ ⟨γ, rfl⟩; exact logSize_nonneg_cm _⟩
-
-theorem redSize_nonneg {n : ℕ} (g : GA E n) : 0 ≤ redSize g :=
-  le_ciInf fun _ => logSize_nonneg_cm _
-
-theorem redSize_le {n : ℕ} (g : GA E n) : redSize g ≤ logSize g := by
-  have h := ciInf_le (bddBelow_sizes g) (1 : GL (Fin n) E)
-  simp only [map_one, one_mul] at h
-  exact h
-
-theorem redSize_zero (g : GA E 0) : redSize g = 0 := by
-  have h : ∀ A : Matrix (Fin 0) (Fin 0) (Ad E), logSizeM A = 0 := fun A => by
-    simp [logSizeM]
-  have h' : ∀ x : GA E 0, logSize x = 0 := fun x => by simp [logSize, h]
-  simp [redSize, h']
-
-theorem wt_facts : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (x : H E n 0),
-    (∀ γ : GL (Fin n) E, wt ((ratGL E n γ * x.1, x.2) : H E n 0) = wt x) ∧ 1 ≤ wt x ∧ wt x ≤ 1 + logSize x.1 := by
-  intro E _ _ _ n x
-  refine ⟨fun γ => ?_, ?_, ?_⟩
-  · simp only [wt, redSize_ratGL_mul]
-  · have h1 := redSize_nonneg x.1
-    have h2 := redSize_nonneg x.2
-    simp only [wt]; linarith
-  · have h1 := redSize_le x.1
-    have h2 := redSize_zero x.2
-    simp only [wt]; linarith
 
 end GlobalTheory.CompanionTheory.PiVec
 end

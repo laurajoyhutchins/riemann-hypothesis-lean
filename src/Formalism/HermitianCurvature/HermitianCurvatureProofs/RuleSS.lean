@@ -1,4 +1,53 @@
-import Formalism.HermitianCurvature.StatementR
+module
+
+public import Formalism.HermitianCurvature.StatementR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.RuleSS
 
@@ -18,8 +67,6 @@ theorem I_comp {h k a a' a'' : A} (h1 : a * h = h * a') (h2 : a' * k = k * a'') 
     a * (h * k) = (h * k) * a'' := by
   rw [← mul_assoc, h1, mul_assoc, h2, mul_assoc]
 
-theorem I_of_comm {h a : A} (hc : Commute a h) : a * h = h * a := hc.eq
-
 theorem rev_prod_inter {M : Type} [Monoid M] (d : M) :
     ∀ (n : ℕ) (f g : Fin n → M), (∀ i, f i * d = d * g i) →
       (List.ofFn f).reverse.prod * d = d * (List.ofFn g).reverse.prod
@@ -35,7 +82,7 @@ theorem ofFn_shift (x : A) :
   | 0, _, _, _ => by simp
   | n + 1, f, k, h => by
       have ih := ofFn_shift x n (fun i => f i.succ) (fun i => k i.succ) (fun i => h i.succ)
-      rw [List.ofFn_succ, List.prod_cons, Fin.sum_univ_succ, map_add]
+      rw [List.ofFn_succ, List.prod_cons, Fin.sum_univ_succ, map_add (f := _)]
       set P := (List.ofFn fun i => f i.succ).prod
       calc x * (f 0 * P) = (x * f 0) * P := by noncomm_ring
         _ = f 0 * (x * P + algebraMap ℂ A (k 0) * P) := by rw [h 0]; noncomm_ring
@@ -45,7 +92,7 @@ theorem ofFn_shift (x : A) :
 
 theorem add_shift {x h : A} {s : ℂ} (hx : x * h = h * (x + algebraMap ℂ A s)) (Y Y' : ℂ)
     (hY : Y' = Y + s) : (algebraMap ℂ A Y + x) * h = h * (algebraMap ℂ A Y' + x) := by
-  rw [add_mul, hx, Algebra.commutes Y h, hY, map_add]; noncomm_ring
+  rw [add_mul, hx, Algebra.commutes Y h, hY, map_add (f := _)]; noncomm_ring
 
 theorem sub_shift {x h : A} {s : ℂ} (hx : x * h = h * (x + algebraMap ℂ A s)) (Y Y' : ℂ)
     (hY : Y' = Y - s) : (algebraMap ℂ A Y - x) * h = h * (algebraMap ℂ A Y' - x) := by
@@ -160,7 +207,7 @@ theorem lin_shift (n z S : A) (c c' e : ℂ) (hn : n * S = S * n + algebraMap �
     _ = -(S * n) - (algebraMap ℂ A e * S) * z - (algebraMap ℂ A c * S) * z := by noncomm_ring
     _ = -(S * n) - (S * algebraMap ℂ A e) * z - (S * algebraMap ℂ A c) * z := by
         rw [Algebra.commutes e S, Algebra.commutes c S]
-    _ = S * (-n - algebraMap ℂ A (c + e) * z) := by rw [map_add]; noncomm_ring
+    _ = S * (-n - algebraMap ℂ A (c + e) * z) := by rw [map_add (f := _)]; noncomm_ring
     _ = _ := by rw [hc]
 
 theorem four_inter (h : A) (Ya Y1 Yl Yl' Yv Yv' Ym Ym' : ℂ)

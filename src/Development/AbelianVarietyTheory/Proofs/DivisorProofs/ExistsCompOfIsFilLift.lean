@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HilbertKodairaSpencer
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KodairaSpencerUniqueValueAbelianSchemeCommRing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsKodairaSpencerValueEndomorphismLift
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NsmulEqZeroOfRadical
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeLiftAlongNilpotent
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GroupObjectLiftDividedPowers
+module
+
+public import Mathlib.Algebra.TrivSqZeroExt.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Development.AbelianVarietyTheory.Definitions.Divisors.Pullback1MemHodgeFiltration
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsAdditiveOfUniversal
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsHolFormConst
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -22,7 +66,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 namespace GlobalTheory.KSBijection
 
-open TrivSqZeroExt KSSymm
+open TrivSqZeroExt
 
 section Crystal
 
@@ -30,63 +74,9 @@ variable {R : Type} [CommRing R] {A : Over (Sp R)} [GrpObj A] {g : ℕ}
 
 theorem fst_surj : Function.Surjective (fstHom R R R).toRingHom := fun r ↦ ⟨TrivSqZeroExt.inl r, rfl⟩
 
-def Comp (d : Crys (epsDP R) (DeRham.epsRed R) A) (f k : HdR A) : Prop :=
-  ∀ c : primDR A, d ((constMor A).pull c) = TrivSqZeroExt.inl (f c) + TrivSqZeroExt.inr (k c)
-
 variable {d d' : Crys (epsDP R) (DeRham.epsRed R) A} {f f' k k' : HdR A}
 
-theorem Comp.unique (h : Comp d f k) (h' : Comp d f' k') : f = f' ∧ k = k' :=
-  ⟨LinearMap.ext fun c ↦ by simpa using congrArg TrivSqZeroExt.fst ((h c).symm.trans (h' c)),
-    LinearMap.ext fun c ↦ by simpa using congrArg TrivSqZeroExt.snd ((h c).symm.trans (h' c))⟩
-
-theorem comp_zero : Comp (0 : Crys (epsDP R) (DeRham.epsRed R) A) 0 0 := fun _ ↦ by
-  rw [LinearMap.zero_apply, LinearMap.zero_apply]
-  simp
-
-theorem Comp.add (h : Comp d f k) (h' : Comp d' f' k') : Comp (d + d') (f + f') (k + k') := fun c ↦ by
-  rw [LinearMap.add_apply, h, h']
-  ext <;> simp
-
-theorem Comp.smul (h : Comp d f k) (r : DualNumber R) : Comp (r • d) (r.fst • f) (r.fst • k + r.snd • f) :=
-  fun c ↦ by
-  rw [LinearMap.smul_apply, h]
-  ext <;> simp [mul_comm]
-
-theorem Comp.ext (hm : (constMor A).IsBC) (h : Comp d f k) (h' : Comp d' f k) : d = d' :=
-  JetIsotropic.ext_of_isBC hm fun c ↦ (h c).trans (h' c).symm
-
-theorem Comp.corr (hm : (constMor A).IsBC) (h : Comp d f k) : (redMor A).Corr d f := fun c ↦ by
-  obtain ⟨z, rfl⟩ := hm.2 c
-  induction z with
-  | zero => simp only [map_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]
-  | tmul r c =>
-    rw [liftSemi_tmul, LinearMap.map_smul, h, LinearMap.map_smulₛₗ, redMor_constMor, LinearMap.map_smul]
-    simp
-
-theorem Comp.push (h : Comp d f k) (u : A ⟶ A) [IsMonHom u] :
-    Comp (push (epsDP R) (DeRham.epsRed R) u d) (push (dp0 R) (𝟙 _) u f) (push (dp0 R) (𝟙 _) u k) := fun c ↦ by
-  have kk := (homMor (dp0 R) (𝟙 _) u).comp (constMor A)
-  have hM := homMor (epsDP R) (DeRham.epsRed R) u
-  have e1 := GrpMor.pull_pull (constMor A) hM kk (fun _ ↦ rfl) (by simp) c
-  have e2 := GrpMor.pull_pull (homMor (dp0 R) (𝟙 _) u) (constMor A) kk (fun _ ↦ rfl) rfl c
-  rw [push_apply]
-  change d (hM.pull ((constMor A).pull c)) = _
-  rw [e1, ← e2, h]
-  rfl
-
 variable [IsCommMonObj A] {O : Type} [CommRing O] {a : OAct O A} (hL : LieExact A)
-
-def graph (κ : Fil A →ₗ[R] Serre.Lie a) : Submodule (DualNumber R) (Crys (epsDP R) (DeRham.epsRed R) A) where
-  carrier := {d | ∃ (f : Fil A) (k : HdR A), Comp d f k ∧ hL.toLie a k = κ f}
-  zero_mem' := ⟨0, 0, comp_zero, by simp⟩
-  add_mem' := by
-    rintro _ _ ⟨f, k, h, e⟩ ⟨f', k', h', e'⟩
-    exact ⟨f + f', k + k', h.add h', by rw [map_add, map_add, e, e']⟩
-  smul_mem' := by
-    rintro r _ ⟨f, k, h, e⟩
-    have z : hL.toLie a f = 0 := (hL.ker_toLie a).ge f.2
-    exact ⟨r.fst • f, _, h.smul r, by rw [map_add, map_smul, map_smul, map_smul, e, z, smul_zero, add_zero]⟩
 
 variable (κ : Fil A →ₗ[R] Serre.Lie a)
 

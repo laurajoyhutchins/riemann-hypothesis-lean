@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.IndWeakC
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CmBridge
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.ExpIndep
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.ZetaPair
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.BaseChangeUnits.CycCOfCyclic
+import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Archimedean
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,40 +51,9 @@ open GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm
 
 namespace UpperTheory.V.Z.Inf
 
-def SideAt (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] {n : ℕ} (σ : CuspSub K n) : Prop :=
-  ∀ m : (K →+* ℂ) → Multiset ℂ, (∀ τ, σ.HasInfChar τ (m τ)) → ∃ S₀ : Finset (HeightOneSpectrum (𝓞 K)),
-    ∀ S : Finset (HeightOneSpectrum (𝓞 K)), S₀ ⊆ S → ∀ B : HeightOneSpectrum (𝓞 K) → Multiset ℂˣ,
-      (∀ w ∉ S, (CG.mk σ).HasSat w (B w)) → Pair (eulerL K (cx B) S) (eulerLd K (cx B) S) (linPoly (∑ τ, m τ))
-
-def SideCen : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 2 ≤ n → ∀ σ : CuspSub K n,
-    Cm.carrier σ ≤ centralCuspForms K n → SideAt K σ
-
-def Side : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 2 ≤ n → ∀ σ : CuspSub K n, SideAt K σ
-
 def SatBd : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ) (σ : CuspSub K n), ∃ c₀ : ℝ,
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ) (σ : CuspSub K n), ∃ c₀ : ℝ,
     ∀ (w : HeightOneSpectrum (𝓞 K)) (B : Multiset ℂˣ), (CG.mk σ).HasSat w B → ∀ b ∈ B,
       ‖(b : ℂ)‖ ≤ (Ideal.absNorm w.asIdeal : ℝ) ^ c₀ ∧ ‖((b⁻¹ : ℂˣ) : ℂ)‖ ≤ (Ideal.absNorm w.asIdeal : ℝ) ^ c₀
-
-def Union : Prop :=
-  ∀ (K M : Type) [Field K] [NumberField K] [IsTotallyComplex K] [Field M] [NumberField M] [IsTotallyComplex M] [Algebra K M],
-    Module.finrank K M = 2 → ∀ (P : CuspSub K (2 * 2)) (π : CuspSub M 2), IndSys (CG.mk π).HasSat (CG.mk P).HasSat →
-    ∀ (mP : (K →+* ℂ) → Multiset ℂ) (m : (M →+* ℂ) → Multiset ℂ), (∀ φ, P.HasInfChar φ (mP φ)) → (∀ τ, π.HasInfChar τ (m τ)) →
-      ∑ φ, mP φ = ∑ τ, m τ
-
-def CharSep : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K], ∃ χ : HChar K, Function.Injective (expo χ)
-
-def NormChar : Prop :=
-  ∀ (K M : Type) [Field K] [NumberField K] [IsTotallyComplex K] [Field M] [NumberField M] [IsTotallyComplex M] [Algebra K M]
-    (χ : HChar K), ∃ ξ : HChar M, (∀ τ, expo ξ τ = expo χ (τ.comp (algebraMap K M))) ∧
-      ∀ (w : HeightOneSpectrum (𝓞 M)) (f : ℕ), χ.UnrAt (w.under (𝓞 K)) → normV w = normV (w.under (𝓞 K)) ^ f →
-        ξ.UnrAt w ∧ ξ.val w = χ.val (w.under (𝓞 K)) ^ f
-
-def SideOf : Prop := PairOps → SideCen → Side
-def UnionOf : Prop := PairOps → Cross → Side → SatBd → Regroup → Union
-def InfOf : Prop := Sep → Union → CharSep → NormChar → InfOfLC
 
 end UpperTheory.V.Z.Inf

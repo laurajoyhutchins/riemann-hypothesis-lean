@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NullMeasurableSetShearImage
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NullMeasurableSetShearImage
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Function
 open scoped Pointwise
 
@@ -62,7 +110,7 @@ theorem aedisjoint_pairGroup_smul_shear_image : ∀ (H : Type) [Group H] [Topolo
       · apply Subtype.ext
         show v⁻¹ * u' * (n' : H) = v⁻¹ * a * v⁻¹⁻¹
         rw [inv_inv, mul_assoc v⁻¹ (a : H), av _ _ _ e1' e2', mul_assoc]
-    · exact le_antisymm ((Measure.prod_prod_le _ _).trans (by rw [hcW, zero_mul])) bot_le
+    · rw [Measure.prod_prod, hcW, zero_mul]
   · have hZ : ν ((⟨v, hv⟩ : Γ) • 𝓕 ∩ (⟨v', hv'⟩ : Γ) • 𝓕) = 0 :=
       h𝓕.aedisjoint (fun h => hvv (congrArg Subtype.val h))
     refine measure_mono_null (t := Set.univ ×ˢ ((⟨v, hv⟩ : Γ) • 𝓕 ∩ (⟨v', hv'⟩ : Γ) • 𝓕)) ?_ ?_
@@ -71,6 +119,6 @@ theorem aedisjoint_pairGroup_smul_shear_image : ∀ (H : Type) [Group H] [Topolo
       obtain ⟨n', hn', h', hh', e1', e2'⟩ := key _ _ h2
       exact ⟨Set.mem_univ _, Set.mem_smul_set.2 ⟨h, hh, by rw [e2]; rfl⟩,
         Set.mem_smul_set.2 ⟨h', hh', by rw [e2']; rfl⟩⟩
-    · exact le_antisymm ((Measure.prod_prod_le _ _).trans (by rw [hZ, mul_zero])) bot_le
+    · rw [Measure.prod_prod, hZ, mul_zero]
 
 end GlobalTheory.UnfoldNormal

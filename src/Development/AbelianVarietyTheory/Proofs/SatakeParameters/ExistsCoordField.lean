@@ -1,11 +1,48 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+public import Formalism.SatakeDualWeyl.StatementE
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticValTauCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
 import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
-import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
-import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
-import Formalism.LocalToGlobal.Columns.HeckeSp
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticValTauCompat
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice MeasureTheory IsDedekindDomain NumberField Formalism.L2.Theta Formalism.L2.NTheta Formalism.IndefR.Mult
 open scoped TensorProduct
@@ -54,7 +91,7 @@ theorem exists_hom (hi : Function.Injective (algebraMap R T)) (c : T →+* T)
        rw [this, hα]
      map_mul' := fun x y => by rw [trace_mul_idem hi c ht h1 h2, map_mul]
      map_zero' := by rw [mul_zero, map_zero, map_zero]
-     map_add' := fun x y => by rw [mul_add, map_add, map_add] }, fun _ => rfl⟩
+     map_add' := fun x y => by rw [mul_add, map_add (f := _), map_add (f := _)] }, fun _ => rfl⟩
 
 end General
 
@@ -93,12 +130,12 @@ section Field
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-variable (F E) in
 
+variable (F E) in
 def finT : AF F ⊗[F] E →+* Af F ⊗[F] E := (Algebra.TensorProduct.map (sndA F) (AlgHom.id F E)).toRingHom
 
-variable (F E) in
 
+variable (F E) in
 def intT : AddSubgroup (Af F ⊗[F] E) :=
   AddSubgroup.closure {y | ∃ a ∈ intAf F, ∃ x : 𝓞 E, y = a ⊗ₜ[F] (x : E)}
 
@@ -108,7 +145,7 @@ theorem alg_inj (R : Type) [CommRing R] [Algebra F R] : Function.Injective (alge
 theorem finT_sig (σ : E →ₐ[F] E) (z : AF F ⊗[F] E) : finT F E (sigR (AF F) σ z) = sigR (Af F) σ (finT F E z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [RingHom.map_zero]
-  | add a b ha hb => simp only [RingHom.map_add, ha, hb]
+  | add a b ha hb => simp only [RingHom.map_add (f := _), ha, hb]
   | tmul a e => rfl
 
 theorem finT_alg (a : AF F) : finT F E (algebraMap (AF F) _ a) = algebraMap (Af F) _ (sndA F a) := rfl
@@ -141,7 +178,7 @@ theorem trace_mem (v : HeightOneSpectrum (𝓞 F)) {x : Af F ⊗[F] E} (hx : x �
     have hi : IsIntegral ℤ (Algebra.trace F E y) := Algebra.isIntegral_trace y.isIntegral_coe
     exact HeightOneSpectrum.coe_mem_adicCompletionIntegers v (⟨_, hi⟩ : 𝓞 F)
   | zero => rw [map_zero, map_zero]; exact zero_mem _
-  | add x y _ _ h1 h2 => rw [map_add, map_add]; exact add_mem h1 h2
+  | add x y _ _ h1 h2 => rw [map_add (f := _), map_add (f := _)]; exact add_mem h1 h2
   | neg x _ h => rw [map_neg, map_neg]; exact neg_mem h
 
 theorem exists_coord_field (hd : Module.finrank F E = 2) (σ : E →ₐ[F] E) (hσ : ∀ e, σ (σ e) = e)
@@ -157,12 +194,12 @@ theorem exists_coord_field (hd : Module.finrank F E = 2) (σ : E →ₐ[F] E) (h
   have tf := GlobalTheory.FockCompare.SymplVal.trace_tensor hd σ hσ hf (Af F)
   have tt : ∀ z, Algebra.trace (Af F) (Af F ⊗[F] E) (finT F E z) = sndA F (Algebra.trace (AF F) _ z) := fun z => by
     apply alg_inj (F := F) (E := E)
-    rw [tf, ← finT_alg, tA, RingHom.map_add, finT_sig]
+    rw [tf, ← finT_alg, tA, RingHom.map_add (f := _), finT_sig]
   have g1 : finT F E e * finT F E e = finT F E e := by rw [← RingHom.map_mul, h1]
   have g2 : finT F E e * sigR (Af F) σ (finT F E e) = 0 := by
     rw [← finT_sig, ← RingHom.map_mul, h2, RingHom.map_zero]
   have g3 : finT F E e + sigR (Af F) σ (finT F E e) = algebraMap (Af F) _ α := by
-    rw [← finT_sig, ← RingHom.map_add, h3]; rfl
+    rw [← finT_sig, ← RingHom.map_add (f := _), h3]; rfl
   have k := fun b => trace_idem_mul (alg_inj _) _ tf g3 b
   obtain ⟨π, hπ⟩ := exists_hom (alg_inj _) _ tf g1 g2 g3 (evalV F v) hv
   have p3 : ∀ x, finT F E e * algebraMap (Af F) _ (singleV F v (π x)) = finT F E e * x := fun x => by

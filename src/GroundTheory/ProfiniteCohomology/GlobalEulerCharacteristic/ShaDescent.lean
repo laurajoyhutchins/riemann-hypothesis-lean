@@ -1,9 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.MackeyFormula.CompactSupport
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.InnerConj
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Descent
-import GroundTheory.ProfiniteCohomology.PoitouTate.PtCompactDualMapEqZeroOfPtCompactToGlobalEqZero
-import GroundTheory.ProfiniteCohomology.PoitouTate.PoitouTateInfinite.DescentMaps
+module
+
+public import GroundTheory.ProfiniteCohomology.PoitouTate.PtCompactDualMapEqZeroOfPtCompactToGlobalEqZero
+import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.Naturality
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Descent
+public import GroundTheory.ProfiniteCohomology.PoitouTate.PoitouTateInfinite.DescentMaps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -24,7 +68,7 @@ def shaSubmodule (A : Rep.{u} k G) [IsDiscreteRep A] (n : ℕ) : Submodule k (co
   carrier := {x | ∀ v, (cohomologyMapAlong (φ v).toMonoidHom (continuous_toMonoidHom (φ v)) (𝟙 _) n).hom x = 0}
   add_mem' {x y} hx hy v := by
     change (cohomologyMapAlong (φ v).toMonoidHom (continuous_toMonoidHom (φ v)) (𝟙 _) n).hom (x + y) = 0
-    rw [map_add, hx v, hy v, add_zero]
+    rw [map_add (f := _), hx v, hy v, add_zero]
   zero_mem' v := map_zero _
   smul_mem' c x hx v := by
     change (cohomologyMapAlong (φ v).toMonoidHom (continuous_toMonoidHom (φ v)) (𝟙 _) n).hom (c • x) = 0
@@ -126,8 +170,8 @@ theorem cohomologyMap_mackeyTranslateMor_injective (p : MackeyIndex V φ) (n : �
   rw [← ModuleCat.comp_apply, ← cohomologyMap_comp, h, cohomologyMap_id]
   rfl
 
-omit [∀ v, CompactSpace (Hv v)] in
 
+omit [∀ v, CompactSpace (Hv v)] in
 theorem cohomologyMapAlong_mackeyFamily_cohomologyRes (p : MackeyIndex V φ) (n : ℕ) (y : cohomology A n) :
     (cohomologyMapAlong (mackeyFamily V φ p).toMonoidHom (continuous_toMonoidHom (mackeyFamily V φ p)) (𝟙 _) n).hom
         ((cohomologyRes A (V : Subgroup G) n).hom y) =
@@ -181,8 +225,8 @@ theorem cohomologyMapAlong_mackeyFamily_cohomologyRes (p : MackeyIndex V φ) (n 
 
 variable [(V : Subgroup G).Normal]
 
-omit [IsTopologicalGroup G] [CompactSpace G] in
 
+omit [IsTopologicalGroup G] [CompactSpace G] in
 theorem index_mackeySubgroup_dvd {H : Type u} [Group H] (ψ : H →* G) (x : G) :
     (mackeySubgroup (V : Subgroup G) ψ x).index ∣ (V : Subgroup G).index := by
   rw [mackeySubgroup, Subgroup.index_comap]

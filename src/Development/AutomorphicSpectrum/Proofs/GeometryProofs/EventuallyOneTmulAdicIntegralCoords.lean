@@ -1,10 +1,50 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSabCancel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFreeOfSmoothStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LieModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.QuadTie
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,26 +62,7 @@ def lieModelOfEquiv {S : Scheme.{0}} {R : Type} [CommRing R] {G : Over S} [GrpOb
   onto v hv := by
     obtain ⟨w, h⟩ := M.onto v hv
     exact ⟨e.symm w, by simpa using h⟩
-  add v w := by rw [map_add, M.add]
+  add v w := by rw [map_add (f := _), M.add]
   smul c v := by rw [map_smul, M.smul]
-
-theorem exists_bdryChart_point : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H)
-    (l : Level H) (Xo : Moduli D l) (σ : KA l →+* ℂ) (y : Sp ℂ ⟶ Xo.X) (n a : ℕ), a ≤ n → y ≫ Xo.s = spMap σ →
-    ∃ C : BdryChart Xo σ n a, ∀ z, C.pt z ≫ C.k = y := by
-  intro E _ _ _ H D l Xo σ y n a ha hy
-  obtain ⟨t, ⟨m⟩⟩ := exists_sab y Xo.univ.t
-  obtain ⟨i, -⟩ := ObjMaps.exists_sab_id t
-  have := t.semi.smooth
-  have := t.semi.geomConnected
-  have : ConnectedSpace t.G.left :=
-    GeometricallyConnected.geometrically_connectedSpace (f := t.G.hom) (𝟙 _) (𝟙 _) t.G.hom
-      (IsPullback.of_horiz_isIso ⟨by simp⟩)
-  obtain ⟨g, hg⟩ := exists_dim_of_preconnected t.G.hom (eSec t.G (default : PrimeSpectrum ℂ))
-  obtain ⟨F, _, _, ⟨M⟩⟩ := lieModel_exists _ t.G ℂ (𝟙 _)
-  obtain ⟨b⟩ := GlobalTheory.T.lie_model_free_of_smooth _ t.G g hg ℂ (𝟙 _) F M
-  refine ⟨{ a_le := ha, R := ℂ, t := t, g := g, dim := hg, M := lieModelOfEquiv M b.equivFun.symm,
-            ψ := fun _ => RingHom.id ℂ, hol := ⟨Metric.isOpen_ball, fun r => differentiableOn_const _⟩,
-            V := Sp ℂ, j := 𝟙 _, j_open := inferInstance, k := y, tV := t, m₁ := i, m₂ := m,
-            pt := fun _ => 𝟙 _, pt_eq := fun z _ => ⟨by simp [spMap], by simpa using hy⟩ }, fun z => Category.id_comp _⟩
 
 end GlobalTheory.CompanionTheory.Ar.Flat

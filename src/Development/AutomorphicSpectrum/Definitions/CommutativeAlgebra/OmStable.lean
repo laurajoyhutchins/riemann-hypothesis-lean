@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
+public import Mathlib.Algebra.Module.Lattice.Full
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +69,7 @@ structure HTPoint (C O : Type) [Field C] [CommRing O] [Algebra O C] {E : Type} [
   adj : ∀ (a : 𝓞 E) (x y : V), e (ρ a x) y = e x (ρ (RingOfIntegers.mapRingEquiv c a) y)
 
   om : Submodule O Ω
-  om_lat : om.IsLattice C
+  om_lat : om.IsFullLattice C
 
   ρΩ : 𝓞 E →+* Module.End C Ω
   om_stable : ∀ (a : 𝓞 E), ∀ x ∈ om, ρΩ a x ∈ om
@@ -50,33 +93,15 @@ def W : Submodule C V := LinearMap.ker P.ht
 
 def om' : Submodule O Ω := P.T.map (P.ht.restrictScalars O)
 
-def lie : Submodule O V :=
-  dualLat P.e.flip (P.om.comap (P.ht.restrictScalars O)) ⊓ P.W.restrictScalars O
-
 def Wsp (σ : E →+* C) : Submodule C V := P.W ⊓ eigSp P.ρ σ
 
 def Ωsp (σ : E →+* C) : Submodule C Ω := eigSp P.ρΩ σ
 
-def WHT (σ : E →+* C) : Submodule O V := P.W.restrictScalars O ⊓ eigQuot P.ρ σ P.T
-
 def W' (σ : E →+* C) : Submodule O V := P.W.restrictScalars O ⊓ eigSub P.ρ σ P.T
-
-def Wrec (σ : E →+* C) : Submodule O V := eigSub P.ρ σ P.lie
 
 def omHT (σ : E →+* C) : Submodule O Ω := eigQuot P.ρΩ σ P.om'
 
 def omRec (σ : E →+* C) : Submodule O Ω := eigQuot P.ρΩ σ P.om
-
-def dW (v : Valuation C NNReal) (σ : E →+* C) {j : ℕ} (b : Basis (Fin j) C (P.Wsp σ)) (i : Fin j) : ℝ :=
-  grLog v (latIn (P.WHT σ) (P.Wsp σ)) b i - grLog v (latIn (P.Wrec σ) (P.Wsp σ)) b i
-
-def dΩ (v : Valuation C NNReal) (σ : E →+* C) {k : ℕ} (b : Basis (Fin k) C (P.Ωsp σ)) (i : Fin k) : ℝ :=
-  grLog v (latIn (P.omHT σ) (P.Ωsp σ)) b i - grLog v (latIn (P.omRec σ) (P.Ωsp σ)) b i
-
-def phiDiff (v : Valuation C NNReal) {Ψ : Type} [Fintype Ψ] (τ : Ψ → (E →+* C)) {j k : Ψ → ℕ}
-    (bW : ∀ s, Basis (Fin (j s)) C (P.Wsp (τ s))) (bΩ : ∀ s, Basis (Fin (k s)) C (P.Ωsp (τ s)))
-    (lW : ∀ s, Fin (j s) → ℝ) (lΩ : ∀ s, Fin (k s) → ℝ) : ℝ :=
-  ∑ s, ((∑ i, lW s i * P.dW v (τ s) (bW s) i) + ∑ i, lΩ s i * P.dΩ v (τ s) (bΩ s) i)
 
 def tate (x : Fin N → 𝓞 E) : V := ∑ i, P.ρ (x i) (P.t i)
 

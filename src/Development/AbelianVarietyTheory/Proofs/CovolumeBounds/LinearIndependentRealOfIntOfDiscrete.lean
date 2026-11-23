@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.ZLattice.Covolume
+public import Mathlib.Analysis.InnerProductSpace.GramMatrix
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.GramSchmidtOrtho
+public import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
+
+@[expose] public section
 
 open scoped ComplexOrder InnerProductSpace MatrixOrder
 open Module Submodule MeasureTheory Matrix
@@ -30,7 +83,7 @@ theorem det_gram_le_of_finrank_eq {V : Type*} [NormedAddCommGroup V] [InnerProdu
     InnerProductSpace.gramSchmidtOrthonormalBasis_det h' _
   rw [h1, det_gram_eq_normSq_det b, hb, RCLike.ofReal_le_ofReal, norm_prod, ← Finset.prod_pow,
     ← e.prod_comp (fun i ↦ ‖v i‖ ^ 2)]
-  refine Finset.prod_le_prod (fun i _ ↦ by positivity) fun i _ ↦ ?_
+  refine Finset.prod_le_prod₀ (fun i _ ↦ by positivity) fun i _ ↦ ?_
   gcongr
   simpa using norm_inner_le_norm (𝕜 := 𝕜) (b i) (v (e i))
 
@@ -55,17 +108,7 @@ theorem posSemidef_det_le_prod_diag {A : Matrix ι ι 𝕜} (hA : A.PosSemidef) 
     push_cast; rfl
   · push_cast
     refine Finset.prod_congr rfl fun j _ ↦ ?_
-    simp [mul_apply, RCLike.conj_mul]
-
-theorem posSemidef_re_det_le_prod_diag {A : Matrix ι ι 𝕜} (hA : A.PosSemidef) :
-    RCLike.re A.det ≤ ∏ i, RCLike.re (A i i) := by
-  have h := posSemidef_det_le_prod_diag hA
-  have h2 : ∏ i, A i i = ((∏ i, RCLike.re (A i i) : ℝ) : 𝕜) := by
-    push_cast
-    refine Finset.prod_congr rfl fun i _ ↦ ?_
-    exact (hA.isHermitian.coe_re_apply_self i).symm
-  rw [h2] at h
-  simpa only [RCLike.ofReal_re] using (RCLike.le_iff_re_im.1 h).1
+    simp [Matrix.mul_apply, RCLike.conj_mul]
 
 variable {V : Type*} [SeminormedAddCommGroup V] [InnerProductSpace 𝕜 V]
 

@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FiniteDimensionalWdSpace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CommuteIsNilpotentOfUnipotent
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalFilDR
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemFiniteCocyclesIffBcrisTensorCoboundary
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalFilDR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,17 +66,18 @@ theorem tensCoord_mulV (c : ↥(MaximalUnramifiedExtension l)) (x : V' ⊗[ℚ_[
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => rfl
-  | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Pi.add_apply, hx, hy]
 
 variable (hE : ∀ g x i, E (ρ' g x) i = ρ g (E x i))
 include hE
 
 theorem tensCoord_stRep (g : ↥(GK K)) (x : V' ⊗[ℚ_[l]] Bst P) (i : ι) :
     tensCoord E (Bst P) (stRep P ρ' g x) i = stRep P ρ g (tensCoord E (Bst P) x i) := by
-  induction x using TensorProduct.induction_on with
-  | zero => simp
-  | tmul v b => simp [hE]
-  | add x y hx hy => simp only [map_add, Pi.add_apply, hx, hy]
+  change tensCoord E (Bst P) (AlgebraTensorModule.map (ρ' g)
+    (actSt P (g : GQ l)).toLinearMap x) i =
+    AlgebraTensorModule.map (ρ g) (actSt P (g : GQ l)).toLinearMap
+      (tensCoord E (Bst P) x i)
+  exact tensCoord_map E (ρ' g) (ρ g) (hE g) _ x i
 
 theorem mem_Dpst_coord (x : V' ⊗[ℚ_[l]] Bst P) :
     x ∈ Dpst P ρ' ↔ ∀ i, tensCoord E (Bst P) x i ∈ Dpst P ρ := by
@@ -47,6 +89,7 @@ theorem mem_Dpst_coord (x : V' ⊗[ℚ_[l]] Bst P) :
     choose K' hK using fun i => (mem_Dpst P ρ).1 (hx i)
     have hsum : x = ∑ i, (tensCoord E (Bst P)).symm (Pi.single i (tensCoord E (Bst P) x i)) := by
       apply (tensCoord E (Bst P)).injective
+
       rw [map_sum]
       simp only [LinearEquiv.apply_symm_apply]
       exact (Finset.univ_sum_single _).symm
@@ -96,6 +139,6 @@ theorem isPst_enlarge : ∀ {l : ℕ} [Fact l.Prime] (P : LocPrime l) {E Ω : Ty
       ∀ x, Bw.repE L₂ (mapRep (IntermediateField.inclusion hL).toRingHom r₁) g x =
         (M.map (algebraMap ↥L₁.1 ↥L₂.1)).mulVec x :=
     fun g => ⟨r₁ (Bw.e.symm g), fun _ => rfl, fun _ => rfl⟩
-  exact isPst_of_coord P (E := vecCoord ↥L₁.1 ↥L₂.1 m) (vecCoord_rep hρ) h
+  exact isPst_of_coord P (E := GlobalTheory.Pst.vecCoord ↥L₁.1 ↥L₂.1 m) (vecCoord_rep hρ) h
 
 end GlobalTheory.PstExt

@@ -1,8 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ColumnData
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.IsAdmissibleFlagPairOfUnitriangularLeftAutomorph
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdChar
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.Family
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.IsAdmissibleFlagPairOfUnitriangularLeftAutomorph
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.HfArith
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdChar
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.Family
+import Formalism.LocalToGlobal.KernelLattices.ColumnData.StdLat
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.CayleyGaussianIntegralsCongrFact
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.MatrixFormFourfoldBlock
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.MatrixFormFourfoldBlockFirstBlockEmb
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.Th0CharMulOpUTh0HalfPeriodEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -65,6 +113,7 @@ theorem denom (E K : Type*) [Field E] [NumberField E] [Field K] [NumberField K] 
   have hx : (x : E) = ∑ j, (bs.repr x j) • ((bs j : 𝓞 E) : E) := by
     conv_lhs => rw [← bs.sum_repr x]
     simp
+
   rw [hx, map_sum, Finset.mul_sum]
   refine IsIntegral.sum _ fun j _ => ?_
   rw [map_zsmul, mul_smul_comm]
@@ -258,7 +307,7 @@ theorem up : ∃ N : ℕ, 0 < N ∧
   let f : Fin 4 × (Fin 4 × D.what₂.Tau) → D.host.E →+ D.host.K := fun p =>
     { toFun := fun x => B.γ₀.g (Pi.single p.1 x) p.2
       map_zero' := by simp
-      map_add' := fun x y => by rw [Pi.single_add, map_add]; rfl }
+      map_add' := fun x y => by rw [Pi.single_add, map_add (f := _)]; rfl }
   obtain ⟨m, hm, hf⟩ := denom D.host.E D.host.K f
   refine ⟨m * k, Nat.mul_pos hm hk, ?_⟩
   have hle : pow4 B.lamM ≤ ((stdLat B.L (Fin 4 × D.what₂.Tau)).comap
@@ -278,6 +327,7 @@ theorem up : ∃ N : ℕ, 0 < N ∧
       have e : ((m * k : ℕ) : D.host.K) * B.γ₀.g y v
           = ∑ a, (m : D.host.K) * f (a, v) ((k : D.host.E) * y a) := by
         conv_lhs => rw [hy']
+
         rw [map_sum, Finset.sum_apply, Finset.mul_sum]
         refine Finset.sum_congr rfl fun a _ => ?_
         show ((m * k : ℕ) : D.host.K) * B.γ₀.g (Pi.single a (y a)) v

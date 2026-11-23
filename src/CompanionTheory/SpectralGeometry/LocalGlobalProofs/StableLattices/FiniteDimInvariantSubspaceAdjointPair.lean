@@ -1,5 +1,52 @@
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.FarRegularity.LKTExists
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.DifferentialBoundedSupport
+import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.IsSimpleTriv
+
+@[expose] public section
+
 open Finset CompanionTheory.RgExh CompanionTheory.RgExh.U
 open CompanionTheory.D.LK (Pos Cn ann cre lift bd om cpt allT LocFin)
 open Formalism.REAL (GlRel KHighest IsWeight)
@@ -39,7 +86,7 @@ theorem highest_preimage_inner {E : Type*} [NormedAddCommGroup E] [InnerProductS
   have har : ∀ i, a i (D u) = 0 := by
     intro i
     have h1 : a i (D y) = a i (D u) + D (a i w) := by
-      rw [← haD i w hwT, ← map_add, ← map_add, hyuw]
+      rw [← haD i w hwT, ← map_add (f := _), ← map_add (f := _), hyuw]
     rw [hDy i, haw i, map_zero, add_zero] at h1
     exact h1.symm
   have hperp : ∀ z ∈ S, ⟪D u, D z⟫_ℂ = 0 := by
@@ -49,10 +96,10 @@ theorem highest_preimage_inner {E : Type*} [NormedAddCommGroup E] [InnerProductS
       obtain ⟨i, t, ht, rfl⟩ := hz
       rw [← hbD i t ht, ← hadj, har i, inner_zero_left]
     | zero => simp
-    | add x z _ _ hx hz => rw [map_add, inner_add_right, hx, hz, add_zero]
+    | add x z _ _ hx hz => rw [map_add (f := _), inner_add_right, hx, hz, add_zero]
     | smul c x _ hx => rw [map_smul, inner_smul_right, hx, mul_zero]
   have hDu : D u = 0 := inner_self_eq_zero.1 (hperp u huS)
-  exact ⟨w, hwT, haw, by rw [hyuw, map_add, hDu, zero_add]⟩
+  exact ⟨w, hwT, haw, by rw [hyuw, map_add (f := _), hDu, zero_add]⟩
 
 theorem highest_preimage_of_stable : ∀ (n : ℕ) (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (ι : Type) (T : Submodule ℂ (Cn n V))
     (a b : ι → Module.End ℂ (Cn n V)) (D : Module.End ℂ (Cn n V)) (y : Cn n V), FiniteDimensional ℂ T →

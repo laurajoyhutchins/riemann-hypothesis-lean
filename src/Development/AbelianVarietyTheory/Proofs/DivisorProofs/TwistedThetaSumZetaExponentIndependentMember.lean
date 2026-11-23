@@ -1,12 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsStalkZeta
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumFCalculus
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedSumExponentsAffineTwoMembersStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTermsDividingLabelGroupMemberStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistWeightWellDefinedOnLatticeClassStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedThetaSumZetaPowerResidueDividingLabelStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegMemDividingLabelsThetaModelPointStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsStalkZeta
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTermsDividingLabelGroupMemberStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegMemDividingLabelsThetaModelPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistWeightWellDefinedOnLatticeClassStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedSumExponentsAffineTwoMembersStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedThetaSumZetaPowerResidueDividingLabelStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg
@@ -114,7 +152,7 @@ theorem affine_zero {G : Type} [AddCommGroup G] {M : ℕ} (hM : Odd M) (S : Set 
   · simpa using hz x hx
   · exact map_zero h
   · have : (⟨x + y, add_mem hx hy⟩ : AddSubgroup.closure S) = ⟨x, hx⟩ + ⟨y, hy⟩ := rfl
-    rw [this, map_add, h1, h2, add_zero]
+    rw [this, map_add (f := _), h1, h2, add_zero]
   · have : (⟨-x, neg_mem hx⟩ : AddSubgroup.closure S) = -⟨x, hx⟩ := rfl
     rw [this, map_neg, h1, neg_zero]
 
@@ -185,7 +223,39 @@ theorem twistSum_indep : ∀ (g n : ℕ) (F : SFam g n (zetaAway n)) (W : Matrix
   have hA := hS₁ zt (s₁ * r) hzt (by rw [map_mul, hs₁, hr, mul_div_assoc]) wt hwt
   have hB := h1 C₁ lab₁ hlab₁ T₁ hT₁ c₁ τ hτ zt (s₀ * r) hzt (by rw [map_mul, hs₀, hr, mul_div_assoc]) wt hwt
   haveI : IsNoetherianRing V₁ := 𝔪₁.cn.1
-  have hE := GlobalTheory.AdicSum.sumI_unique (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).ge hA hB
+  have unique_sum {R : Type} [CommRing R] [IsNoetherianRing R] {I : Ideal R}
+      {E Ix : Type} [AddCommGroup E] [Module R E] (hI : I ≤ Ideal.jacobson ⊥)
+      {x : Ix → E} {s s' : E} (h : SumI I x s) (h' : SumI I x s') : s = s' := by
+    classical
+    obtain ⟨N, hN, hs, -, hconv⟩ := h
+
+    obtain ⟨N', hN', hs', -, hconv'⟩ := h'
+    set M := N ⊔ N' with hM
+    have hMfg : M.FG := hN.sup hN'
+    haveI : Module.Finite R M := Module.Finite.iff_fg.mpr hMfg
+    have hmem : s - s' ∈ M := M.sub_mem (Submodule.mem_sup_left hs) (Submodule.mem_sup_right hs')
+    have hpow : ∀ n : ℕ, (⟨s - s', hmem⟩ : M) ∈ I ^ n • (⊤ : Submodule R M) := by
+      intro n
+      obtain ⟨S, hS⟩ := hconv n
+      obtain ⟨S', hS'⟩ := hconv' n
+      have h1 := hS (S ∪ S') Finset.subset_union_left
+      have h2 := hS' (S ∪ S') Finset.subset_union_right
+      have h3 : s - s' ∈ I ^ n • M := by
+        have e : s - s' = (s - ∑ i ∈ S ∪ S', x i) - (s' - ∑ i ∈ S ∪ S', x i) := by abel
+        rw [e]
+        exact Submodule.sub_mem _ (Submodule.smul_mono le_rfl le_sup_left h1)
+          (Submodule.smul_mono le_rfl le_sup_right h2)
+      rw [← Submodule.map_subtype_top M, ← Submodule.map_smul''] at h3
+      obtain ⟨y, hy, hyeq⟩ := h3
+      have hy' : y = ⟨s - s', hmem⟩ := Subtype.ext hyeq
+      rwa [← hy']
+    have h0 : (⟨s - s', hmem⟩ : M) = 0 := by
+      rw [Ideal.jacobson_bot] at hI
+      have hK := Ideal.iInf_pow_smul_eq_bot_of_le_jacobson (M := M) I hI
+      rw [← Submodule.mem_bot R, ← hK, Submodule.mem_iInf]
+      exact hpow
+    exact sub_eq_zero.mp (congrArg Subtype.val h0)
+  have hE := unique_sum (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).ge hA hB
   rw [map_mul, map_mul] at hE
   have hE' : ev₁ s₁ = ev₁ s₀ := mul_right_cancel₀ hr0 hE
   have hm : s₁ - s₀ ∈ maximalIdeal (X₁.M.Z.presheaf.stalk z₁) :=

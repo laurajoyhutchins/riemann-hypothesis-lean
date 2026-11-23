@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SectionOfFreeOnUnitComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TlLevSurjKer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsMatrixForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,20 +50,7 @@ namespace GlobalTheory.Et.CovChar
 
 variable (R : Type) [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
 
-def constMor (Y : Scheme.{0}) (a : R) : (freeOn R).obj Y ⟶ coef R :=
-  (sectionOf R Y (coef R)).symm
-    ((toSheafify Scheme.proetaleTopology.{0} (coefPre R)).app (op Y) (ULift.up (ContinuousMap.const Y a)))
-
 variable {R} {X Y : Scheme.{0}} (f : Y ⟶ X)
-
-abbrev kerSc : ShortComplex (Shv R) :=
-  ShortComplex.mk (kernel.ι ((freeOn R).map f)) ((freeOn R).map f) (kernel.condition _)
-
-def CharRel {G : Type} (t : G → (Y ⟶ Y)) (x : H R 1 X) (c : G → R) : Prop :=
-  ∃ (hS : (kerSc (R := R) f).ShortExact) (h : kernel ((freeOn R).map f) ⟶ coef R),
-    (x : HS R (coef R) 1 X) = hS.extClass.comp (Abelian.Ext.mk₀ h) (add_zero 1) ∧
-    ∀ (g : G) (k : (freeOn R).obj Y ⟶ kernel ((freeOn R).map f)),
-      k ≫ kernel.ι _ = (freeOn R).map (t g) - 𝟙 _ → k ≫ h = constMor R Y (c g)
 
 end GlobalTheory.Et.CovChar
 
@@ -36,12 +62,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 variable {K : Type} [Field K]
 
-abbrev torsPts (A : AbVar K) (n : ℕ) : Subgroup A.Pt := (powMonoidHom n).ker
-
 abbrev geomX (A : AbVar K) : Scheme.{0} := GlobalTheory.Et.geom (AlgebraicClosure K) A.X.hom
-
-def mulGeom (A : AbVar K) (n : ℕ) : geomX A ⟶ geomX A :=
-  GlobalTheory.Et.geomMap (AlgebraicClosure K) A.X.hom (n • 𝟙 A : A ⟶ A).hom.left (Over.w _)
 
 abbrev geomOver (A : AbVar K) : Over (Sp K) :=
   Over.mk (pullback.fst A.X.hom (spMap (algebraMap K (AlgebraicClosure K))) ≫ A.X.hom)
@@ -53,8 +74,5 @@ def transl (A : AbVar K) (a : A.Pt) : geomX A ⟶ geomX A :=
         rw [Category.assoc, Over.w a]; exact pullback.condition.symm) : geomOver A ⟶ A.X) ≫ μ[A.X]).left)
     (pullback.snd _ _) (by
       rw [Over.w]; exact pullback.condition)
-
-def levT {l : ℕ} (A : AbVar K) (t : Tl l A) (m : ℕ) : torsPts A (l ^ m) :=
-  ⟨t.lev m, (MonoidHom.mem_ker).2 (by rw [powMonoidHom_apply]; exact GlobalTheory.HTLat.Tate.lev_pow t m)⟩
 
 end GlobalTheory.AV.AbVar

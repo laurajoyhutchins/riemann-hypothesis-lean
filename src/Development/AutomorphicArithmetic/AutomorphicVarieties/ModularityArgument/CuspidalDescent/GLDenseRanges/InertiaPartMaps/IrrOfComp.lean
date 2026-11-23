@@ -1,18 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.EigBoxE
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.LocCFTAll
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.Classical
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.CoreH
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.AuTeichEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.CLocConj
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.DenseU
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.WtBridge
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.HiComm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.SpecIntIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.PointRepUnramifiedAtAuxiliaryPlace
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LevelIso
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.BnRepLin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
+module
+
+public import Mathlib.Data.Nat.Notation
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.BnRepLin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LevelIso
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.HiComm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalDescent.GLDenseRanges.EigBoxE
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.HodgeTateFromSandwich
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.DecompSigmaOrd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.PUnit
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BlochKatoSelmerVanishes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.CoefficientRepTrivialOnUnramified
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Polynomial ValuativeRel IsLocalRing GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.UnitaryBC UpperTheory.V UpperTheory.V.Hi UpperTheory.V.Hi.CaseU
 open UpperTheory.V.W (Plc Lp HidaSetting Vl Resid LamObj UniversalOrdinaryDeterminantRing Pair)
 open UpperTheory.V.HV (Coef)
@@ -165,7 +199,7 @@ private theorem absDimE (hMu : MuZ) (hME : MuZE) (hSp : Spec2) (hU : UnitEv) (hP
   · obtain ⟨g, hg⟩ := hP L Ω l n c H hA A θ hθ ι (x.comp j) lam d ξ c0 sp hsp K a₀ y e1 I _ ψ out.univ ρ hc hi hD Y hY
     exact irr_iso ⟨g, hg⟩ hi
 
-set_option maxHeartbeats 1000000 in
+
 private theorem irrOf {l : ℕ} [Fact l.Prime] {L Ω : Type} [Field L] [NumberField L] [IsCMField L] [Field Ω]
     [Algebra L Ω] [IsAlgClosure L Ω] {s : HidaSetting l L Ω} {n : ℕ} {V : s.Lev} {c : Coef l}
     {r : Resid V.frame c.O n} {B : UniversalOrdinaryDeterminantRing r} (x : B.Pt) (hx : UpperTheory.V.J.IrrPt x)
@@ -184,32 +218,3 @@ private theorem irrOf {l : ℕ} [Fact l.Prime] {L Ω : Type} [Field L] [NumberFi
   have e : Af.RepIso (ρ₀.comp V.pr) ρ := iso_of_det (ss_of_irr hi) (ss_comp hpr hs) (hρ.symm.trans hr)
   exact irr_of_comp V.pr (irr_iso e.symm' hi)
 
-set_option maxHeartbeats 2000000 in
-theorem UpperTheory.V.Z.Desc.V0.numJE :
-    UpperTheory.V.Z.J.D.MuZ → MuZE → EEx → Spec2 → NormS → ZEqDimE → UpperTheory.V.Z.J.D.UnitEv → UpperTheory.V.Z.J.D.PartRep → NumJE := by
-  intro hMu hME hEx hSp hNS hZ hU hP H hM hC l _ L Ω _ _ _ _ _ _ s n hn V hV h4 Q c r ι B Λ R K J hdom hJ hrad
-  rcases hJ with ⟨_, rfl⟩ | ⟨i1, i2, f, -, hmap, hsurj, hlam, rfl⟩
-  · exact ⟨PUnit, inferInstance, inferInstance, inferInstance, datTop _, 0, ⟨by simp, fun _ _ => by simp⟩, fun x _ _ hx =>
-      absurd (hx (Submodule.mem_top (x := 1))) (by simp)⟩
-  have hA := axU H.litN l L Ω s n hn V Q c R.m R.τ₀
-  obtain ⟨-, hfi, hfr⟩ := (hiComm L Ω l n c (hset Q R.τ₀) hA Λ.Λ R.θ R.isWt K).2.2.2 R.a
-  obtain ⟨i3, hact, hdat⟩ := datHecke ((hset Q R.τ₀).MK R.θ R.a K) ((hset Q R.τ₀).op Λ.Λ) (Λ.toPair B.u) f.toRingHom hlam hrad
-  obtain ⟨a, N, hE, hlN, hz⟩ := hZ H hM hC l L Ω s n hn V hV h4
-  have hNK := hNS l L Ω s n hn V hV Q c R.m R.τ₀
-  have hu : IsUnit (N : Λ.Λ) := unitN (c := c) hlN
-  obtain ⟨e, hep, hee, hec⟩ := hEx L Ω l n c (hset Q R.τ₀) hA Λ.Λ R.θ R.isWt K R.a _ _ _ (sec0 n s) a N hNK hE hu
-  refine ⟨_, inferInstance, i3, inferInstance, hdat, e, ⟨hee, fun b m => ?_⟩, fun x y w hx hy ha hg ix iy => ?_⟩
-  · rw [hact, hact]
-    exact LinearMap.congr_fun (hec (f b)) m
-  obtain ⟨⟨lam, hl⟩, hb⟩ := wtBridge H.litN l L Ω s n hn V Q c R.m R.τ₀ r B Λ R.θ R.theta w ha.1
-  have out := coreH H.litN L Ω l n c (hset Q R.τ₀) hA Λ.Λ R.θ R.isWt ι (PU r ι)
-    (autU H l L Ω s n hn V Q c r ι R.m R.τ₀ R.type) lam (Set.mem_univ _)
-    ((denseU H.litN l L Ω s n hn V Q c R.m R.τ₀ r Λ R.θ R.theta).2 lam) R.a K _ _ hmap
-  have h := hz Q c r ι R.m R.τ₀ R.type Λ.Λ R.θ R.isWt lam K _ _
-    (absDimE hMu hME hSp hU hP (hset Q R.τ₀) hA R.θ R.isWt ι R.a K B.u.D (Λ.toPair B.u) f hsurj hlam out hdat.hs hact
-      (sec0 n s) a N hNK hE hu e hep x hx lam (Set.mem_univ _) ((hb lam hl x).1.1 ha)
-      fun ρ _ hs hD => irrOf x ix ρ hs hD)
-    (absDimE hMu hME hSp hU hP (hset Q R.τ₀) hA R.θ R.isWt ι R.a K B.u.D (Λ.toPair B.u) f hsurj hlam out hdat.hs hact
-      (sec0 n s) a N hNK hE hu e hep y hy lam (Set.mem_univ _) ((hb lam hl y).2.1 hg).2.1
-      fun ρ _ hs hD => irrOf y iy ρ hs hD)
-  exact ⟨h.1, h.2.le⟩

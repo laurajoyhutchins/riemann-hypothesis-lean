@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsChartRankAdjoin
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PIntNumPoint
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsChartRankAdjoin
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PIntNumPoint
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -26,7 +77,7 @@ theorem aeval_monomial_mul (hz : ∀ k, z ⟨k, j k⟩ ≠ 0) (m : (Σ k, ι k) 
   induction m using Finsupp.induction_linear with
   | zero => simp
   | add m m' hm hm' =>
-    rw [← mul_one (1 : Φ), ← monomial_mul, map_mul, map_mul, map_add, ← hm, ← hm']
+    rw [← mul_one (1 : Φ), ← monomial_mul, map_mul, map_mul, map_add (f := _), ← hm, ← hm']
     simp only [Pi.add_apply, pow_add, Finset.prod_mul_distrib]
     ring
   | single p n =>
@@ -41,10 +92,11 @@ theorem aeval_mul_of_isMultiHomog [∀ k, Fintype (ι k)] (hz : ∀ k, z ⟨k, j
   have hw := (Bridge.isMultiHomog_iff h a).mpr hh
   conv_rhs => rw [h.as_sum]
   conv_lhs => rw [h.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hw' : Finsupp.weight (NumbersDVR.blockWeight ι) m = a := hw (mem_support_iff.mp hm)
-  have hmon : monomial m (coeff m h) = coeff m h • monomial m (1 : Φ) := by
+  have hmon : monomial m (AddMonoidAlgebra.coeff h m) = AddMonoidAlgebra.coeff h m • monomial m (1 : Φ) := by
     rw [smul_monomial, smul_eq_mul, mul_one]
   rw [hmon, map_smul, map_smul, smul_mul_assoc, ← hw', aeval_monomial_mul hz]
 

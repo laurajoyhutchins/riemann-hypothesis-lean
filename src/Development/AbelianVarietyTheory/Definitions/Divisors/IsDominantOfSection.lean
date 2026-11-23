@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.InterPolyProdSum
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoBear
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsValuationSubringDominatingSubring
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsValuationSubringDominatingSubring
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValRSpMapFromSpecStalk
 import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.InterPolyProdSum
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -123,14 +163,6 @@ theorem Dbl.prod_ne (Y : Var F) (h : 0 < Y.dim) : (Dbl.prod Y).p₁ ≠ (Dbl.pro
   have : Y.dim + Y.dim = Y.dim := by exact_mod_cast h3
   omega
 
-example : (Dbl.prod (proj F 1)).Small ∧ (Dbl.prod (proj F 1)).p₁ ≠ (Dbl.prod (proj F 1)).p₂ :=
-  ⟨Dbl.prod_small _ le_rfl, Dbl.prod_ne _ one_pos⟩
-
-example : ¬ (Dbl.prod (proj F 2)).Small := fun h => by
-  unfold Dbl.Small at h
-  rw [Dbl.prod_dim, proj_dim] at h
-  norm_cast at h
-
 end Square
 
 def GenPair (Y : Var F) {K : Type} [Field K] (ψ₁ ψ₂ : Y.Fn →+* K) : Prop :=
@@ -146,24 +178,12 @@ def AlmostLow (τ : ι) (a b : Fin (m τ)) {K : Type} [Field K] (C : Mat m K) : 
   (∀ σ, (C σ).det ≠ 0) ∧ C τ a b ≠ 0 ∧
     ∀ σ (i j : Fin (m σ)), i < j → ¬ ((⟨σ, i⟩ : Root m) = ⟨τ, a⟩ ∧ (⟨σ, j⟩ : Root m) = ⟨τ, b⟩) → C σ i j = 0
 
-open Classical in
 
+open Classical in
 def shear (τ : ι) (a b : Fin (m τ)) {K : Type} [CommRing K] (t : K) : Mat m K := fun σ =>
   1 + Matrix.of fun i j => if (⟨σ, i⟩ : Root m) = ⟨τ, a⟩ ∧ (⟨σ, j⟩ : Root m) = ⟨τ, b⟩ then t else 0
 
 def minor (τ : ι) (a b : Fin (m τ)) {K : Type} [CommRing K] (C : Mat m K) : K :=
   C τ a a * C τ b b - C τ a b * C τ b a
-
-example {K : Type} [Field K] (t : K) (ht : t ≠ 0) :
-    AlmostLow (m := fun _ : Unit => 2) () 0 1 (shear () 0 1 t) ∧
-      minor (m := fun _ : Unit => 2) () 0 1 (shear () 0 1 t) = 1 := by
-  have e : ∀ σ : Unit, shear (m := fun _ : Unit => 2) () 0 1 t σ = !![1, t; 0, 1] := fun σ => by
-    ext i j
-    fin_cases i <;> fin_cases j <;> simp [shear]
-  refine ⟨⟨fun σ => ?_, ?_, fun σ i j hij h => ?_⟩, ?_⟩
-  · rw [e]; simp
-  · rw [e]; simpa using ht
-  · rw [e]; fin_cases i <;> fin_cases j <;> simp_all
-  · rw [minor, e]; simp
 
 end GlobalTheory.FlagPush

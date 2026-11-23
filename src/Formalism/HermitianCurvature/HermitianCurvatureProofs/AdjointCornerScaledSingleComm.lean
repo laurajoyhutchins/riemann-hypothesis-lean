@@ -1,4 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UpperMinorOfLevelPoint
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroKernel
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousInvUpper
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DirectionsInParabolic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.EmbeddingMapApplyFirstBlock
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UpperMinorOfLevelPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 open scoped ComplexConjugate
@@ -18,8 +72,8 @@ theorem zfull_conjTranspose (Z : Matrix (Fin j) (Fin j) ℂ) (τ : ℂ) :
   ext a b
   rw [Matrix.conjTranspose_apply, zfull_apply, zfull_apply]
   by_cases h1 : a.val < j ∧ b.val < j
-  · rw [dif_pos ⟨h1.2, h1.1⟩, dif_pos h1, Matrix.conjTranspose_apply]
-  · rw [dif_neg (by tauto), dif_neg h1]
+  · rw [dite_eq_left ⟨h1.2, h1.1⟩, dite_eq_left h1, Matrix.conjTranspose_apply]
+  · rw [dite_eq_right (by tauto), dite_eq_right h1]
     by_cases h2 : a.val = j ∧ b.val = j
     · rw [if_pos ⟨h2.2, h2.1⟩, if_pos h2]
     · rw [if_neg (by tauto), if_neg h2, star_zero]
@@ -38,9 +92,9 @@ theorem zfull_one : zfull (1 : Matrix (Fin j) (Fin j) ℂ) 1 = 1 := by
   ext a b
   rw [zfull_apply, Matrix.one_apply]
   by_cases h1 : a.val < j ∧ b.val < j
-  · rw [dif_pos h1, Matrix.one_apply]
+  · rw [dite_eq_left h1, Matrix.one_apply]
     simp [Fin.ext_iff]
-  · rw [dif_neg h1]
+  · rw [dite_eq_right h1]
     by_cases h2 : a.val = j ∧ b.val = j
     · rw [if_pos h2, if_pos (Fin.ext (by omega))]
     · rw [if_neg h2, if_neg]

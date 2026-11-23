@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import ReciprocityTheory.Automorphisms.PlaceA
+
+@[expose] public section
 
 noncomputable section
 
@@ -118,7 +162,7 @@ theorem exists_basis {δ : L} (h0 : δ ≠ 0) (hδ : IsCMField.complexConj L δ 
     intro a t h
     rw [Algebra.smul_def, Algebra.smul_def] at h
     have h' := congrArg (IsCMField.complexConj L) h
-    rw [map_add, map_mul, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, map_one, hδ, map_zero] at h'
+    rw [map_add (f := _), map_mul, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, map_one, hδ, map_zero] at h'
     have h1 : algebraMap L⁺ L a = 0 := by linear_combination (h + h') / 2
     have h2 : algebraMap L⁺ L t * δ = 0 := by linear_combination (h - h') / 2
     exact ⟨(map_eq_zero _).1 h1, (map_eq_zero _).1 ((mul_eq_zero.1 h2).resolve_right h0)⟩
@@ -164,8 +208,8 @@ theorem adele_ext (s : SplitPlace L) {z z' : AL L} (h1 : s.proj z = s.proj z')
   rw [hz] at h1 h2 h3' ⊢
   have hd : s.i δ ≠ 0 := (map_ne_zero s.i).2 h0
   haveI : CharZero (s.v.adicCompletion L⁺) := charZero_of_injective_algebraMap (algebraMap L⁺ _).injective
-  rw [map_add, proj_tmul, proj_tmul, hb0, hb1, map_one] at h1
-  rw [map_add, map_add, conj_tmul, conj_tmul, proj_tmul, proj_tmul, hb0, hb1, map_one, map_one, hδ, map_neg] at h2
+  rw [map_add (f := _), proj_tmul, proj_tmul, hb0, hb1, map_one] at h1
+  rw [map_add (f := _), map_add (f := _), conj_tmul, conj_tmul, proj_tmul, proj_tmul, hb0, hb1, map_one, map_one, hδ, map_neg] at h2
   have key : ∀ u, x u = 0 ∧ y u = 0 := by
     intro u
     by_cases hu : u = s.v
@@ -173,14 +217,14 @@ theorem adele_ext (s : SplitPlace L) {z z' : AL L} (h1 : s.proj z = s.proj z')
       have hy : s.i δ * y s.v = 0 := by linear_combination (h1 - h2) / 2
       exact ⟨by linear_combination (h1 + h2) / 2, (mul_eq_zero.1 hy).resolve_left hd⟩
     · have := h3' u hu
-      rw [map_add, comp_tmul, comp_tmul] at this
+      rw [map_add (f := _), comp_tmul, comp_tmul] at this
       exact coords_eq_zero b this
   have hx : x = 0 := FiniteAdeleRing.ext _ fun u => (key u).1
   have hy : y = 0 := FiniteAdeleRing.ext _ fun u => (key u).2
   rw [hx, hy]; simp
 
-open Classical in
 
+open Classical in
 def single (v : HeightOneSpectrum (𝓞 L⁺)) (a : v.adicCompletion L⁺) : AFplus L :=
   ⟨Pi.single (M := fun u : HeightOneSpectrum (𝓞 L⁺) => u.adicCompletion L⁺) v a, by
     filter_upwards [(Set.finite_singleton v).compl_mem_cofinite] with u hu
@@ -210,7 +254,7 @@ def pair (s : SplitPlace L) (δ : L) (a b : s.v.adicCompletion L⁺) : AL L :=
 theorem proj_pair (s : SplitPlace L) {δ : L} (h0 : δ ≠ 0) (a b : s.v.adicCompletion L⁺) : s.proj (pair s δ a b) = a := by
   have hd : s.i δ ≠ 0 := (map_ne_zero s.i).2 h0
   haveI : CharZero (s.v.adicCompletion L⁺) := charZero_of_injective_algebraMap (algebraMap L⁺ _).injective
-  rw [pair, map_add, proj_tmul, proj_tmul, single_self, single_self, map_one]
+  rw [pair, map_add (f := _), proj_tmul, proj_tmul, single_self, single_self, map_one]
   field_simp
   ring
 
@@ -218,18 +262,18 @@ theorem proj_conj_pair (s : SplitPlace L) {δ : L} (h0 : δ ≠ 0) (hδ : IsCMFi
     (a b : s.v.adicCompletion L⁺) : s.proj (conjAL L (pair s δ a b)) = b := by
   have hd : s.i δ ≠ 0 := (map_ne_zero s.i).2 h0
   haveI : CharZero (s.v.adicCompletion L⁺) := charZero_of_injective_algebraMap (algebraMap L⁺ _).injective
-  rw [pair, map_add, map_add, conj_tmul, conj_tmul, proj_tmul, proj_tmul, single_self, single_self, map_one, map_one,
+  rw [pair, map_add (f := _), map_add (f := _), conj_tmul, conj_tmul, proj_tmul, proj_tmul, single_self, single_self, map_one, map_one,
     hδ, map_neg]
   field_simp
   ring
 
 theorem comp_pair (s : SplitPlace L) (δ : L) (a b : s.v.adicCompletion L⁺) {u : HeightOneSpectrum (𝓞 L⁺)} (h : u ≠ s.v) :
     compAt L u (pair s δ a b) = 0 := by
-  rw [pair, map_add, comp_tmul, comp_tmul, single_ne h, single_ne h, tmul_zero, tmul_zero, add_zero]
+  rw [pair, map_add (f := _), comp_tmul, comp_tmul, single_ne h, single_ne h, tmul_zero, tmul_zero, add_zero]
 
 theorem comp_conj_pair (s : SplitPlace L) (δ : L) (a b : s.v.adicCompletion L⁺) {u : HeightOneSpectrum (𝓞 L⁺)}
     (h : u ≠ s.v) : compAt L u (conjAL L (pair s δ a b)) = 0 := by
-  rw [pair, map_add, map_add, conj_tmul, conj_tmul, comp_tmul, comp_tmul, single_ne h, single_ne h, tmul_zero, tmul_zero,
+  rw [pair, map_add (f := _), map_add (f := _), conj_tmul, conj_tmul, comp_tmul, comp_tmul, single_ne h, single_ne h, tmul_zero, tmul_zero,
     add_zero]
 
 theorem one_tmul_single_mem {v : HeightOneSpectrum (𝓞 L⁺)} {a : v.adicCompletion L⁺}
@@ -275,7 +319,7 @@ def liftMat (s : SplitPlace L) (δ : L) (g : GL (Fin n) (s.v.adicCompletion L⁺
 
 theorem map_one_add {R T : Type} [CommRing R] [CommRing T] (φ : R →+* T) (X : Matrix (Fin n) (Fin n) R) :
     (1 + X).map φ = 1 + X.map φ := by
-  rw [← RingHom.mapMatrix_apply, map_add, map_one, RingHom.mapMatrix_apply]
+  rw [← RingHom.mapMatrix_apply, map_add (f := _), map_one, RingHom.mapMatrix_apply]
 
 theorem liftMat_proj (s : SplitPlace L) {δ : L} (h0 : δ ≠ 0) (g : GL (Fin n) (s.v.adicCompletion L⁺)) :
     (liftMat s δ g).map s.proj = g.val := by
@@ -384,8 +428,8 @@ theorem eventually_cong (s : SplitPlace L) {δ : 𝓞 L} (h0 : (δ : L) ≠ 0) (
 
 end Group
 
-open Formalism.AUTREP Formalism.L2.NG in
 
+open Formalism.AUTREP Formalism.L2.NG in
 theorem exists_local_component {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ} (π : FinTyp L n) (s : SplitPlace L)
     (W : Submodule ℂ (GAf L n → ℂ)) (hW : W ≤ π.S) (h0 : W ≠ ⊥)
     (hst : ∀ x : GAf L n, TrivOutside {s.v} x → ∀ f ∈ W, rt L n x f ∈ W)

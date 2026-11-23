@@ -1,15 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.FamUnif
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HolomorphicMapModuliLiftsLocallyToPeriods
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsRelativeExpOfParts
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LatContMapContinuous
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniformisationOfPoint
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqZeroOfFderivEqZero
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ContinuousOnThetaFrameValueHolomorphicFamily
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomomorphismDescendsToAlgebraic
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAppellHumbertLineBundle
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsComplexArcDatumCmFibre
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.FamUnif
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLinearEquivLift
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsUniqueLinearLiftOfHolomorphicAbelianVariet
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.FamilyUniformisationFibreTheta
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAppellHumbertLineBundle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomomorphismDescendsToAlgebraic
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.EqZeroOfFderivEqZero
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsRelativeExpOfParts
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniformisationOfPoint
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HolomorphicMapModuliLiftsLocallyToPeriods
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LatContMapContinuous
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.TangentLeDim
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ContinuousOnThetaFrameValueHolomorphicFamily
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceSpecOfIsLocalRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -368,7 +415,8 @@ theorem famUnif_holds : FamUnif := by
     simpa using this
   · let β : (I → ℂ) × (Fin g → ℂ) →L[ℂ] (Fin (Fintype.card I) → ℂ) × (Fin g → ℂ) :=
       ContinuousLinearMap.prodMap (ψ.symm : (I → ℂ) →L[ℂ] (Fin (Fintype.card I) → ℂ)) (ContinuousLinearMap.id ℂ _)
-    have h1 := isHolTo_comp hhol (Metric.isOpen_ball.prod isOpen_univ) β.differentiable.differentiableOn
+    have h1 := isHolTo_comp hhol (C := Metric.ball (0 : I → ℂ) r ×ˢ Set.univ)
+      (Metric.isOpen_ball.prod isOpen_univ) β.differentiable.differentiableOn
       (fun q hq => ⟨hmem q.1 hq.1, Set.mem_univ _⟩)
     refine isHolTo_congr (isHolTo_comp_hom h1 (𝟙 _)) ?_
     intro q hq

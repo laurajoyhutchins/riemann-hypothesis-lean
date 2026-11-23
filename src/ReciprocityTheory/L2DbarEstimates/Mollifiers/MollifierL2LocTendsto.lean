@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Analysis.Calculus.BumpFunction.Normed
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.B
 
@@ -59,57 +106,20 @@ def SupportSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDime
     [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
   ∀ (K : Kernel E μ) (u : E → ℂ), Function.support (moll K u) ⊆ Function.support u + ball 0 K.r
 
-def CompactSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
-  ∀ (K : Kernel E μ) (u : E → ℂ), HasCompactSupport u → HasCompactSupport (moll K u)
-
-def CongrSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
-  ∀ (K : Kernel E μ) (u u' : E → ℂ), u =ᵐ[μ] u' → moll K u = moll K u'
-
-def LocalSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
-  ∀ (K : Kernel E μ) (u : E → ℂ) (s : Set E) (x : E), ball x K.r ⊆ s →
-    moll K (s.indicator u) x = moll K u x
-
 def YoungSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
   ∀ (K : Kernel E μ) (u : E → ℂ) (s : Set E), MeasurableSet s → AEStronglyMeasurable u μ →
     eLpNorm (moll K u) 2 (μ.restrict s) ≤ eLpNorm u 2 (μ.restrict (thickening K.r s))
-
-def MollifierMemL2 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
-  ∀ (K : Kernel E μ) (u : E → ℂ), MemLp u 2 μ →
-    MemLp (moll K u) 2 μ ∧ eLpNorm (moll K u) 2 μ ≤ eLpNorm u 2 μ
 
 def MollifierL2Tendsto (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] (ι : Type*) : Prop :=
   ∀ (l : Filter ι) (K : ι → Kernel E μ), Tendsto (fun i => (K i).r) l (𝓝 0) →
     ∀ u : E → ℂ, MemLp u 2 μ → Tendsto (fun i => eLpNorm (moll (K i) u - u) 2 μ) l (𝓝 0)
 
-def MollifierL2LocTendsto (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] (ι : Type*) : Prop :=
-  ∀ (l : Filter ι) (K : ι → Kernel E μ), Tendsto (fun i => (K i).r) l (𝓝 0) →
-    ∀ u : E → ℂ, (∀ C, IsCompact C → MemLp u 2 (μ.restrict C)) →
-      ∀ C, IsCompact C → Tendsto (fun i => eLpNorm (moll (K i) u - u) 2 (μ.restrict C)) l (𝓝 0)
-
-def WeightedTendstoSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] (ι : Type*) : Prop :=
-  ∀ (l : Filter ι) (K : ι → Kernel E μ), Tendsto (fun i => (K i).r) l (𝓝 0) →
-    ∀ u : E → ℂ, (∀ C, IsCompact C → MemLp u 2 (μ.restrict C)) →
-      ∀ C, IsCompact C → ∀ w : E → ℝ, Continuous w →
-        Tendsto (fun i => ∫⁻ x in C, ‖moll (K i) u x - u x‖ₑ ^ 2 * ENNReal.ofReal (w x) ∂μ) l
-          (𝓝 0)
-
 def WeakCommSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
   ∀ (m : ℕ) (c : Fin m → ℂ) (v : Fin m → E) (g : Fin m → E → ℂ) (w : E → ℂ),
     IsWeakD μ c v g w → ∀ K : Kernel E μ, Dop c v (fun k => moll K (g k)) = moll K w
-
-def SmoothWeakSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] : Prop :=
-  ∀ (m : ℕ) (c : Fin m → ℂ) (v : Fin m → E) (g : Fin m → E → ℂ),
-    (∀ k, ContDiff ℝ 1 (g k)) → IsWeakD μ c v g (Dop c v g)
 
 def GraphSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] (ι : Type*) : Prop :=
@@ -125,11 +135,5 @@ def StdSt (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensio
 
 noncomputable example (n : ℕ) : Kernel (EuclideanSpace ℂ (Fin n)) volume :=
   Kernel.std (EuclideanSpace ℂ (Fin n)) volume 1
-
-theorem isWeakD_zero (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure] (m : ℕ) (c : Fin m → ℂ) (v : Fin m → E) :
-    IsWeakD μ c v (fun _ => 0) 0 := by
-  refine ⟨fun _ => locallyIntegrable_zero, locallyIntegrable_zero, fun φ _ _ => ?_⟩
-  simp
 
 end ReciprocityTheory.L2DbarEstimates.B

@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.AlgebraMapMemChartRingLine
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PTildeTailLoc
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PTildeTailCone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -41,9 +85,6 @@ theorem coeffE_omega_smul (a : Ω) (w : ConeE S x E) (c : ℤ) : coeffE S x E c 
   rfl
 
 def suppE (w : ConeE S x E) : Finset ℤ := Finsupp.support (show ℤ →₀ E from w)
-
-theorem mem_suppE {w : ConeE S x E} {d : ℤ} : d ∈ suppE w ↔ coeffE S x E d w ≠ 0 :=
-  Finsupp.mem_support_iff
 
 theorem sum_singleE (w : ConeE S x E) : ∑ c ∈ suppE w, singleE S x E c (coeffE S x E c w) = w :=
   Finsupp.sum_single (show ℤ →₀ E from w)
@@ -132,10 +173,13 @@ variable {S : Type u} [CommRing S] {Ω : Type w} [Field Ω] [Algebra S Ω] {N : 
 
 def FinGradedSub.coneSubE : Submodule (Poly S N) (ConeE S x E) where
   carrier := {w | ∀ c, coeffE S x E c w ∈ M.piece c}
-  add_mem' ha hb c := by rw [map_add]; exact add_mem (ha c) (hb c)
+  add_mem' ha hb c := by
+    rw [(coeffE S x E c).map_add]
+    exact add_mem (ha c) (hb c)
   zero_mem' c := by rw [map_zero]; exact zero_mem _
   smul_mem' p w hw c := by
     change coeffE S x E c (p • w) ∈ M.piece c
+
     rw [← sum_homogeneousComponent p, Finset.sum_smul, map_sum]
     refine Submodule.sum_mem _ fun e _ => ?_
     rw [coeffE_smul_of_isHomogeneous (homogeneousComponent_isHomogeneous e p)]
@@ -150,7 +194,7 @@ theorem FinGradedSub.singleE_mem_coneSubE {c : ℤ} {v : E} (hv : v ∈ M.piece 
 
 def FinGradedSub.conePieceE (a : ℤ) : Submodule S M.coneSubE where
   carrier := {m | ∀ d, d ≠ a → coeffE S x E d (m : ConeE S x E) = 0}
-  add_mem' ha hb d hd := by rw [Submodule.coe_add, map_add, ha d hd, hb d hd, add_zero]
+  add_mem' ha hb d hd := by rw [Submodule.coe_add, map_add (f := _), ha d hd, hb d hd, add_zero]
   zero_mem' d _ := by rw [Submodule.coe_zero, map_zero]
   smul_mem' s m hm d hd := by rw [Submodule.coe_smul_of_tower, map_smul, hm d hd, smul_zero]
 
@@ -206,7 +250,9 @@ theorem FinGradedSub.coneSubE_finite : Module.Finite (Poly S N) M.coneSubE := by
         rw [this]
         exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩)
       · rw [map_zero]; exact zero_mem _
-      · intro a b _ _ ha hb; rw [map_add]; exact add_mem ha hb
+      · intro a b _ _ ha hb
+        rw [(singleE S x E c).map_add]
+        exact add_mem ha hb
       · intro s a _ ha; rw [map_smul]; exact Submodule.smul_of_tower_mem _ s ha
     · rintro _ ⟨j, rfl⟩
       exact M.singleE_mem_coneSubE (hgen j)

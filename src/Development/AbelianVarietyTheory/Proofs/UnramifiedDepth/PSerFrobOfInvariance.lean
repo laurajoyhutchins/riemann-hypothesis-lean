@@ -1,23 +1,72 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.PSerFrobStatement
+module
+
+public import ReciprocityTheory.DualLattices.PSerFrobStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open TensorProduct IsLocalRing Matrix ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Be2
 
 namespace GlobalTheory
 
 private lemma pSerOf_trunc {R₀ : Type} [CommRing R₀] {g : ℕ} (N : ℕ) (G₁ : MvPolynomial (Fin g) R₀) :
     ∃ G : MvPolynomial (Fin g) R₀,
-      (∀ m, MvPolynomial.coeff m G = if ∀ i, m i < N then MvPolynomial.coeff m G₁ else 0) ∧
+      (∀ m, AddMonoidAlgebra.coeff G m = if ∀ i, m i < N then AddMonoidAlgebra.coeff G₁ m else 0) ∧
       ∀ (S : Type) [CommRing S] [Algebra R₀ S] (a : Fin g → S), (∀ i, a i ^ N = 0) →
         MvPolynomial.aeval a G = MvPolynomial.aeval a G₁ := by
   classical
   refine ⟨∑ m ∈ G₁.support.filter (fun m => ∀ i, m i < N),
-    MvPolynomial.monomial m (MvPolynomial.coeff m G₁), ?_, ?_⟩
+    MvPolynomial.monomial m (AddMonoidAlgebra.coeff G₁ m), ?_, ?_⟩
   · intro m
     rw [MvPolynomial.coeff_sum]
     simp only [MvPolynomial.coeff_monomial]
     rw [Finset.sum_ite_eq']
     by_cases h : ∀ i, m i < N
-    · by_cases h0 : MvPolynomial.coeff m G₁ = 0
+    · by_cases h0 : AddMonoidAlgebra.coeff G₁ m = 0
       · simp [h0]
       · simp [h, h0]
     · rw [if_neg h, if_neg]
@@ -25,6 +74,7 @@ private lemma pSerOf_trunc {R₀ : Type} [CommRing R₀] {g : ℕ} (N : ℕ) (G�
       exact h (Finset.mem_filter.1 hm).2
   · intro S _ _ a ha
     conv_rhs => rw [G₁.as_sum]
+
     rw [map_sum, map_sum, Finset.sum_filter]
     refine Finset.sum_congr rfl fun m _ => ?_
     split_ifs with h
@@ -46,7 +96,7 @@ theorem pSerFrob_of_invariance :
   (∀ {R₀ : Type} [CommRing R₀] (p : ℕ) [Fact p.Prime] (g N : ℕ) (G : MvPolynomial (Fin g) R₀),
     (∀ (S : Type) [CommRing S] [Algebra R₀ S], (p : S) = 0 → ∀ a e : Fin g → S, (∀ i, a i ^ N = 0) → (∀ i j, e i * e j = 0) →
       MvPolynomial.aeval (a + e) G = MvPolynomial.aeval a G) →
-    ∀ m : Fin g →₀ ℕ, (∀ i, m i < N) → (∃ i, ¬ p ∣ m i) → ∃ r : R₀, MvPolynomial.coeff m G = p * r) →
+    ∀ m : Fin g →₀ ℕ, (∀ i, m i < N) → (∃ i, ¬ p ∣ m i) → ∃ r : R₀, AddMonoidAlgebra.coeff G m = p * r) →
   (∀ {R₀ : Type} [CommRing R₀] (p : ℕ) [Fact p.Prime] {g : ℕ} {B : BX R₀} (K : LAlg R₀) (ch : FormalChartAtZero B K g), PSerFrobStatement p K ch) := by
   intro hev hinv hcoef R₀ _ p _ g B K ch N
   classical

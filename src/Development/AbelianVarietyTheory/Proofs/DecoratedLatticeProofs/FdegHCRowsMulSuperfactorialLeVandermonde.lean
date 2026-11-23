@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Formalism.FormalDegreeBessel.StatementDS
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.BasicNotions
 
 namespace GlobalTheory.FdegRowsBound
@@ -74,11 +117,11 @@ theorem interlace_bound {K n : ℕ} (hn : K + 1 = n) (u : Fin n → ℝ) (v : Fi
   have hu : StrictAnti u := Fin.strictAnti_iff_succ_lt.2 fun i => (h2 i).trans (h1 i)
   rw [vand_cast]
   simp only [Finset.prod_filter]
-  apply Finset.prod_le_prod
+  apply Finset.prod_le_prod₀
   · intro i _
     exact Finset.prod_nonneg fun j _ => by split_ifs <;> positivity
   intro i _
-  apply Finset.prod_le_prod
+  apply Finset.prod_le_prod₀
   · intro j _; split_ifs <;> positivity
   intro j _
   by_cases hij : i < j
@@ -177,16 +220,16 @@ theorem fdeg_rows_le : ∀ (R : Ranks) (P Q : HCParam R), Q.v = P.v → Q.b = P.
   have hC : ∏ i : Fin (R.k - 1), ∏ j : Fin R.m, |((Q.v i : ℚ) : ℝ) - -((Q.b j : ℚ) : ℝ)| ≤
       B ^ ((R.k - 1) * R.m) := by
     calc _ ≤ ∏ i : Fin (R.k - 1), ∏ j : Fin R.m, B :=
-          Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j _ => abs_nonneg _)
-            (fun i _ => Finset.prod_le_prod (fun j _ => abs_nonneg _) (fun j _ => by
+          Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j _ => abs_nonneg _)
+            (fun i _ => Finset.prod_le_prod₀ (fun j _ => abs_nonneg _) (fun j _ => by
               rw [sub_neg_eq_add, abs_of_pos (hpos i j)]; exact hvb i j))
       _ = B ^ ((R.k - 1) * R.m) := by
           simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin, ← pow_mul, mul_comm]
   have hD : ∏ i : Fin R.m, ∏ j ∈ univ.filter (fun j => i < j),
       |-((Q.b i : ℚ) : ℝ) - -((Q.b j : ℚ) : ℝ)| ≤ B ^ (R.m * (R.m - 1) / 2) := by
     calc _ ≤ ∏ i : Fin R.m, ∏ j ∈ univ.filter (fun j => i < j), B :=
-          Finset.prod_le_prod (fun i _ => Finset.prod_nonneg fun j _ => abs_nonneg _)
-            (fun i _ => Finset.prod_le_prod (fun j _ => abs_nonneg _) (fun j hj => by
+          Finset.prod_le_prod₀ (fun i _ => Finset.prod_nonneg fun j _ => abs_nonneg _)
+            (fun i _ => Finset.prod_le_prod₀ (fun j _ => abs_nonneg _) (fun j hj => by
               simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hj
               have c1 : ((Q.b i : ℚ) : ℝ) < ((Q.b j : ℚ) : ℝ) := by exact_mod_cast hbmono hj
               have c2 := hbb i j

@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.CompRevRev
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.WeightVectorTensorEqDual
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.CompRevRev
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.QuotientHighestWeightTensorStandard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,54 +138,10 @@ end Tens
 section Wt
 
 theorem rhoN_tw (ε : Fin n → Bool) (a : Fin n) : rhoN (ε ∘ Fin.rev) a = -rhoN ε (Fin.rev a) := by
-  unfold rhoN
-  simp only [Function.comp_apply]
-  have h1 : (univ.filter fun b => a < b ∧ ε (Fin.rev b) ≠ ε (Fin.rev a)).card =
-      (univ.filter fun b => b < Fin.rev a ∧ ε b ≠ ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  have h2 : (univ.filter fun b => b < a ∧ ε (Fin.rev b) ≠ ε (Fin.rev a)).card =
-      (univ.filter fun b => Fin.rev a < b ∧ ε b ≠ ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  rw [h1, h2]; ring
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.LemK.DualRepresentationReversal.rhoN_rev <;> assumption
 
 theorem rhoC_tw (ε : Fin n → Bool) (a : Fin n) : rhoC (ε ∘ Fin.rev) a = -rhoC ε (Fin.rev a) := by
-  unfold rhoC
-  simp only [Function.comp_apply]
-  have h1 : (univ.filter fun b => a < b ∧ ε (Fin.rev b) = ε (Fin.rev a)).card =
-      (univ.filter fun b => b < Fin.rev a ∧ ε b = ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  have h2 : (univ.filter fun b => b < a ∧ ε (Fin.rev b) = ε (Fin.rev a)).card =
-      (univ.filter fun b => Fin.rev a < b ∧ ε b = ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  rw [h1, h2]; ring
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.LemK.DualRepresentationReversal.rhoC_rev <;> assumption
 
 theorem lowK_tw (ε : Fin n → Bool) (ν : Fin n → ℝ) :
     lowK (ε ∘ Fin.rev) (fun a => -ν (Fin.rev a)) = fun a => -lowK ε ν (Fin.rev a) := by

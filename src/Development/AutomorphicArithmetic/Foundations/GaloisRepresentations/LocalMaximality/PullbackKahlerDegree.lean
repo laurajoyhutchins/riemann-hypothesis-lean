@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTopDegreeCoefficientFormAndEqOnTopFormsStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FormsBaseChange
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTopDegreeCoefficientFormAndEqOnTopFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FormsBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open KaehlerDifferential GlobalTheory.CechDR GlobalTheory.PD GlobalTheory.WH GlobalTheory.W1 UpperTheory.Gal.productCup_of_system
 open scoped TensorProduct
 
@@ -85,7 +134,7 @@ private theorem val_ring (hV : ValBasic) {L : Type} [Field L] [Algebra ℂ L] (B
   intro v c v' c' h h'
   obtain ⟨hv, rfl⟩ := (hev _ _).1 h
   obtain ⟨hv', rfl⟩ := (hev _ _).1 h'
-  exact ⟨(hev _ _).2 ⟨add_mem hv hv', by rw [← map_add]; rfl⟩,
+  exact ⟨(hev _ _).2 ⟨add_mem hv hv', by rw [← map_add (f := _)]; rfl⟩,
     (hev _ _).2 ⟨mul_mem hv hv', by rw [← map_mul]; rfl⟩⟩
 
 private theorem val_sum (hV : ValBasic) {L : Type} [Field L] [Algebra ℂ L] (B : Subalgebra ℂ L) (e : B →ₐ[ℂ] ℂ)
@@ -124,6 +173,7 @@ private theorem gY_term {ι : Type} (j2 : K →ₐ[ℂ] K') (dK : ι → DR ℂ 
     (hg : ∀ S ∈ P, w' * dK S = g S • dK U) (hb : w = ∑ T ∈ P, b T • dK T) :
     gY j2 (w' ⊗ₜ[ℂ] w) = (∑ T ∈ P, ∑ S ∈ P, j2 (b T) * c T S * algebraMap K K' (g S)) • dL U := by
   have h1 : gY j2 (w' ⊗ₜ[ℂ] w) = mapDR ℂ K K' w' * pr2L j2 w := rfl
+
   rw [h1, hb, map_sum, Finset.mul_sum, Finset.sum_smul]
   refine Finset.sum_congr rfl fun T hT => ?_
   rw [pullback_kahler_smul, hc T hT, Finset.smul_sum, Finset.mul_sum, Finset.sum_smul]
@@ -158,6 +208,7 @@ theorem UpperTheory.Gal.productCup_of_system.valG_of :
     rw [hdt]
     exact smul_ne_zero hg0 hCov.dlogRatioVolumeForm_ne_zero
   have hdeg : gY j2 (∑ k, w' k ⊗ₜ[ℂ] w k) ∈ ⋀[K']^d Ω[K'⁄ℂ] := by
+
     rw [map_sum]
     refine Submodule.sum_mem _ fun k _ => ?_
     have := gY_deg j2 (omB_deg (hww k).1) (omB_deg (hww k).2)
@@ -182,6 +233,7 @@ theorem UpperTheory.Gal.productCup_of_system.valG_of :
   have hsum : gY j2 (∑ k, w' k ⊗ₜ[ℂ] w k) =
       (∑ k, ∑ T ∈ Finset.univ.powersetCard a, ∑ S ∈ Finset.univ.powersetCard a,
         j2 (b k T) * c T S * algebraMap K K' (g k S)) • dtS K' x Finset.univ := by
+
     rw [map_sum, Finset.sum_smul]
     exact Finset.sum_congr rfl fun k _ => gY_term j2 (dtS K x) (dtS K' x) Finset.univ _ hmap c hc' (w' k) (w k) (g k) (b k)
       (fun S hS => hg1 k S (hP hS)) (hb1 k)

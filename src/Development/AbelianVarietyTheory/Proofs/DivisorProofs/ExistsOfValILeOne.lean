@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Block
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RingTheory.Valuation.ValuationRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Basic.PEquiv
+public import Mathlib.Data.Matrix.PEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,17 +65,17 @@ open Matrix
 variable {V F : Type} [CommRing V] [IsDomain V] [ValuationRing V] [Field F] [Algebra V F]
   [IsFractionRing V F]
 
-variable (V) in
 
+variable (V) in
 abbrev valI : Valuation F (ValuationRing.ValueGroup V F) := ValuationRing.valuation V F
 
-theorem exists_of_valI_le_one {x : F} (h : valI V x ≤ 1) : ∃ a : V, algebraMap V F a = x :=
+theorem exists_of_valI_le_one {x : F} (h : valI (V := V) x ≤ 1) : ∃ a : V, algebraMap V F a = x :=
   (ValuationRing.mem_integer_iff V F x).1 h
 
 theorem exists_clear_col {n : ℕ} (A : Matrix (Fin (n + 1)) (Fin (n + 1)) F) (hA : A.det ≠ 0) :
     ∃ Q : Matrix (Fin (n + 1)) (Fin (n + 1)) V, IsUnit Q.det ∧
       ∀ i : Fin n, (Q.map (algebraMap V F) * A) i.succ 0 = 0 := by
-  obtain ⟨p, -, hp⟩ := Finset.exists_max_image Finset.univ (fun r => valI V (A r 0)) Finset.univ_nonempty
+  obtain ⟨p, -, hp⟩ := Finset.exists_max_image Finset.univ (fun r => valI (V := V) (A r 0)) Finset.univ_nonempty
   have hcol : ∃ r, A r 0 ≠ 0 := by
     by_contra h
     push Not at h
@@ -29,14 +85,14 @@ theorem exists_clear_col {n : ℕ} (A : Matrix (Fin (n + 1)) (Fin (n + 1)) F) (h
     intro h0
     have := hp r (Finset.mem_univ _)
     rw [h0, map_zero] at this
-    exact hr ((valI V).zero_iff.1 (le_antisymm this zero_le))
+    exact hr ((valI (V := V)).zero_iff.1 (le_antisymm this zero_le))
   let σ : Equiv.Perm (Fin (n + 1)) := Equiv.swap 0 p
   let P : Matrix (Fin (n + 1)) (Fin (n + 1)) V := σ.toPEquiv.toMatrix
   have hc : ∀ i, ∃ a : V, algebraMap V F a = A (σ i) 0 / A p 0 := by
     intro i
     apply exists_of_valI_le_one
     rw [map_div₀]
-    have hpos : valI V (A p 0) ≠ 0 := by simpa using hp0
+    have hpos : valI (V := V) (A p 0) ≠ 0 := by simpa using hp0
     rw [div_le_one₀ (zero_lt_iff.2 hpos)]
     exact hp _ (Finset.mem_univ _)
   choose c hc using hc
@@ -77,10 +133,15 @@ theorem exists_clear_col {n : ℕ} (A : Matrix (Fin (n + 1)) (Fin (n + 1)) F) (h
 
 theorem iwasawa_matrix : ∀ {n : ℕ} (A : Matrix (Fin n) (Fin n) F), A.det ≠ 0 →
     ∃ (k : Matrix (Fin n) (Fin n) V) (U : Matrix (Fin n) (Fin n) F), IsUnit k.det ∧ U.BlockTriangular id ∧
-      (∀ i, U i i ≠ 0) ∧ A = k.map (algebraMap V F) * U
-  | 0, A, _ => ⟨1, A, by simp, fun i => i.elim0, fun i => i.elim0, by ext i; exact i.elim0⟩
-  | n + 1, A, hA => by
-    obtain ⟨Q, hQ, hQA⟩ := exists_clear_col (V := V) A hA
+      (∀ i, U i i ≠ 0) ∧ A = k.map (algebraMap V F) * U := by
+  intro n
+  induction n with
+  | zero =>
+    intro A _
+    exact ⟨1, A, by simp, fun i => i.elim0, fun i => i.elim0, by ext i; exact i.elim0⟩
+  | succ n ih =>
+    intro A hA
+    obtain ⟨Q, hQ, hQA⟩ := exists_clear_col (V := V) (n := n) A hA
     set B := Q.map (algebraMap V F) * A with hB
     have hdetB : B.det = B 0 0 * (B.submatrix Fin.succ Fin.succ).det := by
       rw [Matrix.det_succ_column_zero, Fin.sum_univ_succ]
@@ -91,7 +152,7 @@ theorem iwasawa_matrix : ∀ {n : ℕ} (A : Matrix (Fin n) (Fin n) F), A.det ≠
       rw [hB, Matrix.det_mul, hQF]
       exact mul_ne_zero (hQ.map (algebraMap V F)).ne_zero hA
     have hB00 : B 0 0 ≠ 0 := by intro h; apply hBne; rw [hdetB, h, zero_mul]
-    obtain ⟨k', U', hk', hU', hd', hA'⟩ := iwasawa_matrix (B.submatrix Fin.succ Fin.succ) (by
+    obtain ⟨k', U', hk', hU', hd', hA'⟩ := ih (B.submatrix Fin.succ Fin.succ) (by
       intro h; apply hBne; rw [hdetB, h, mul_zero])
     let K : Matrix (Fin (n + 1)) (Fin (n + 1)) V := Matrix.of fun i j =>
       Fin.cases (Fin.cases 1 (fun _ => 0) j) (fun i' => Fin.cases 0 (fun j' => k' i' j') j) i

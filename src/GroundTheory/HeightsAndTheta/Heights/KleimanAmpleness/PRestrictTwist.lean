@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsStepTwo
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsStepTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -33,7 +80,7 @@ theorem isFrac_add {x : Fin (N + 1) → Ω} {c : ℤ} {I : Finset (Fin (N + 1))}
   refine ⟨mul_mem hs hs', (hf.mul hse').add ?_, hse.mul hse', by push_cast; omega, ?_⟩
   · have hdeg : e + d' = e' + d := by omega
     rw [← hdeg]; exact hse.mul hf'
-  · simp only [map_add, map_mul]
+  · simp only [map_add (f := _), map_mul]
     rw [div_add_div _ _ (hI s hs) (hI s' hs')]
 
 theorem isFrac_mul {x : Fin (N + 1) → Ω} {c : ℤ} {I : Finset (Fin (N + 1))} {z : Ω}
@@ -93,7 +140,6 @@ theorem div_eq_of_isFrac {x : Fin (N + 1) → Ω} {y : Fin (N + 1) → K'}
   rw [div_eq_div_iff hy hy', hy0]
 
 variable (S) in
-
 def twistRes (x : Fin (N + 1) → Ω) (y : Fin (N + 1) → K') (c : ℤ) (z : Ω) : K' := by
   classical
   exact if h : ∃ (I : Chart y) (t : Poly S N × Poly S N × ℕ × ℕ), IsFrac x c I.1 z t then
@@ -123,20 +169,20 @@ theorem twistRes_mem {x : Fin (N + 1) → Ω} {y : Fin (N + 1) → K'} (hxy : �
 
 theorem restrictData_twistSys {x : Fin (N + 1) → Ω} {y : Fin (N + 1) → K'}
     (hxy : ∀ i, y i ≠ 0 → x i ≠ 0) (hle : primeOf (S := S) x ≤ primeOf (S := S) y) (c : ℤ) :
-    RestrictData (twistSys S x c) hxy (twistSys S y c) (twistRes S x y c) where
-  mem I q hq := twistRes_mem hxy hle c I hq
-  add I q hq q' hq' := by
+    RestrictData (twistSys S x c) hxy (twistSys S y c) (twistRes S x y c) := by
+  refine ⟨twistRes_mem hxy hle c, ?_, ?_, ?_⟩
+  · intro I q hq q' hq'
     obtain ⟨t, ht⟩ := exists_isFrac hq
     obtain ⟨t', ht'⟩ := exists_isFrac hq'
     have hsum := isFrac_add (fun s hs => eval_ne_zero_of_mem_monos (liftChart hxy I) hs) ht ht'
     rw [twistRes_eq hxy hle I hsum, twistRes_eq hxy hle I ht, twistRes_eq hxy hle I ht']
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
     rw [div_add_div _ _ (eval_ne_zero_of_mem_monos I ht.1) (eval_ne_zero_of_mem_monos I ht'.1)]
-  smul I q hq f s e hs hf hse := by
+  · intro I q hq f s e hs hf hse
     obtain ⟨t, ht⟩ := exists_isFrac hq
     rw [twistRes_eq hxy hle I (isFrac_mul hs hf hse ht), twistRes_eq hxy hle I ht]
     simp only [map_mul, div_mul_div_comm]
-  span I := by
+  · intro I
     apply le_antisymm
     · refine Submodule.span_le.mpr ?_
       rintro _ ⟨q, hq, rfl⟩
@@ -201,7 +247,6 @@ theorem map_list_sum_of {Q : SubSystem S x Ω} {Q' : SubSystem S y K'} {r : Ω �
       map_list_sum_of h I l fun q hq => hl q (List.mem_cons_of_mem _ hq)]
 
 variable (S x y) in
-
 def red (I : Finset (Fin (N + 1))) (a : Ω) : K' := by
   classical
   exact if h : ∃ t : Poly S N × Poly S N × ℕ, t.2.1 ∈ monos I ∧ t.1.IsHomogeneous t.2.2 ∧

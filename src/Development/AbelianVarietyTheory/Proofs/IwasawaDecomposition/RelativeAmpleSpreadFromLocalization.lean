@@ -1,7 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsAffineOpenPreimageBasicOpen
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAmpleLBOfRelAmpleOfIsAffine
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqBasicOpen
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsDenomOfIsAffineOpen
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.GenericExistsUniqueOActOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsAffineOpenPreimageBasicOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+
+@[expose] public section
 
 noncomputable section
 
@@ -115,8 +162,8 @@ theorem exists_basicOpen_le {V : (Sp R).Opens} (hV : (q : Sp R) ∈ V) :
   obtain ⟨f, hf, hle⟩ := exists_basicOpen_le' hV
   exact ⟨f, hf, hle⟩
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem spMap_eq_fromSpecStalk (q : PrimeSpectrum R) :
     Spec.map (Spec.stalkIso (CommRingCat.of R) (q : Sp R)).hom ≫ (Sp R).fromSpecStalk (q : Sp R) =
       spMap (algebraMap R (Localization.AtPrime q.asIdeal)) := by
@@ -128,8 +175,8 @@ theorem spMap_eq_fromSpecStalk (q : PrimeSpectrum R) :
   refine (congrArg (Spec.map (Spec.stalkIso (CommRingCat.of R) (q : Sp R)).hom ≫ ·) e).trans ?_
   rw [← Category.assoc, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id, Category.id_comp]
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_isAffineOpen_preimage_basicOpen_of_stalk {x : Sp R} {p' : X' ⟶ Spec ((Sp R).presheaf.stalk x)}
     (H' : IsPullback φ p' p ((Sp R).fromSpecStalk x)) [QuasiCompact p] [QuasiSeparated p] [IsAffine X'] :
     ∃ f : R, x ∈ (PrimeSpectrum.basicOpen f : (Sp R).Opens) ∧ IsAffineOpen (p ⁻¹ᵁ PrimeSpectrum.basicOpen f) := by
@@ -232,13 +279,26 @@ theorem relAmple_spread_at : ∀ (R : Type) [CommRing R] [IsNoetherianRing R] (q
   let ψ := (A.hom ⁻¹ᵁ U).ι
   have : IsAffineHom ψ := MorphismProperty.of_isPullback (P := @IsAffineHom)
     (isPullback_morphismRestrict A.hom U) inferInstance
-  refine (relAmple_iff_isAmpleLB_of_isAffine _ (LB.isLB_pull hM _)).2
-    (isAmpleLB_of_cover (LB.isLB_pull hM _) hn (fun i => secPowPull (θ i) ψ) (top_le_iff.1 fun z _ => ?_) fun i => ?_)
-  · obtain ⟨i, hi⟩ := Opens.mem_iSup.1 (hc z.2)
+  have hs : (⨆ i, Out.nonzeroLocus (secPowPull (θ i) ψ)) = ⊤ := by
+    apply top_le_iff.1
+    intro z _
+    obtain ⟨i, hi⟩ := Opens.mem_iSup.1 (hc z.2)
     exact Opens.mem_iSup.2 ⟨i, (nonzeroLocus_secPowPull (θ i) ψ).ge hi⟩
-  · have e : ψ ⁻¹ᵁ (Out.nonzeroLocus (θ i) ⊓ A.hom ⁻¹ᵁ PrimeSpectrum.basicOpen f) =
+  have ha' : ∀ i, IsAffineOpen (Out.nonzeroLocus (secPowPull (θ i) ψ)) := by
+    intro i
+    have e : ψ ⁻¹ᵁ (Out.nonzeroLocus (θ i) ⊓ A.hom ⁻¹ᵁ PrimeSpectrum.basicOpen f) =
         Out.nonzeroLocus (secPowPull (θ i) ψ) :=
       (le_antisymm (fun z hz => hz.1) fun z hz => ⟨hz, z.2⟩).trans (nonzeroLocus_secPowPull (θ i) ψ).symm
     exact e ▸ (ha i).preimage ψ
+  apply (relAmple_iff_isAmpleLB_of_isAffine _ (LB.isLB_pull hM _)).2
+  refine ⟨LB.isLB_pull hM _, ⟨?_⟩, ?_⟩
+  · have e : (Set.univ : Set (A.hom ⁻¹ᵁ U).toScheme) =
+        ⋃ i, (Out.nonzeroLocus (secPowPull (θ i) ψ) : Set (A.hom ⁻¹ᵁ U).toScheme) := by
+      rw [← Opens.coe_iSup, hs, Opens.coe_top]
+    rw [e]
+    exact isCompact_iUnion fun i => (ha' i).isCompact
+  · intro x
+    obtain ⟨i, hi⟩ := Opens.mem_iSup.1 (hs.ge (Set.mem_univ x))
+    exact ⟨n, hn, secPowPull (θ i) ψ, hi, ha' i⟩
 
 end GlobalTheory.AmpleSpreadAt

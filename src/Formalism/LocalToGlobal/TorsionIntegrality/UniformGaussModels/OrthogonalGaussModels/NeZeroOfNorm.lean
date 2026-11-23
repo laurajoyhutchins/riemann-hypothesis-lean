@@ -1,7 +1,61 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.PairsK
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.NormLeOneOfQuad
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveJetsUnitBall
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.PairsK
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SecondLogDerivativeUnique
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.ConstantCoeffVecConsPairEqZero
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.UnitBall
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveJetsUnitBall
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.PhNormFromDatum
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.SecondCoeffConsistency
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.NormLeOneOfQuad
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -84,17 +138,15 @@ variable (dK : ℕ) (ι : ℂ ≃+* ℂ_[p])
 def em (mn : ℤ × ℤ) : ℂ_[p] × ℂ_[p] :=
   (ι ((mn.1 : ℂ) + (mn.2 : ℂ) * omegaK dK), ι ((mn.1 : ℂ) + (mn.2 : ℂ) * (1 - omegaK dK)))
 
-theorem pairsK_eq : pairsK dK p ι = closure (Set.range (em dK ι)) := rfl
-
 theorem em_add (a b : ℤ × ℤ) : em dK ι a + em dK ι b = em dK ι (a.1 + b.1, a.2 + b.2) := by
   refine Prod.ext ?_ ?_
   · show ι _ + ι _ = ι _
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     push_cast
     ring
   · show ι _ + ι _ = ι _
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     push_cast
     ring
@@ -157,7 +209,7 @@ theorem em_mul (hmod : dK % 4 = 3) (a b : ℤ × ℤ) : em dK ι a * em dK ι b 
 
 theorem em_sum (a : ℤ × ℤ) : (em dK ι a).1 + (em dK ι a).2 = ((2 * a.1 + a.2 : ℤ) : ℂ_[p]) := by
   show ι _ + ι _ = _
-  rw [← map_add, ← map_intCast ι]
+  rw [← map_add (f := _), ← map_intCast ι]
   congr 1
   push_cast
   ring
@@ -188,8 +240,6 @@ def S0 (hmod : dK % 4 = 3) : Subring (ℂ_[p] × ℂ_[p]) where
     exact ⟨_, (em_neg dK ι a).symm⟩
 
 def OO (hmod : dK % 4 = 3) : Subring (ℂ_[p] × ℂ_[p]) := (S0 ι hmod).topologicalClosure
-
-theorem mem_OO (hmod : dK % 4 = 3) {z : ℂ_[p] × ℂ_[p]} : z ∈ OO ι hmod ↔ z ∈ pairsK dK p ι := Iff.rfl
 
 theorem em_mem (hmod : dK % 4 = 3) (a : ℤ × ℤ) : em dK ι a ∈ OO ι hmod :=
   Subring.le_topologicalClosure _ ⟨a, rfl⟩
@@ -288,8 +338,6 @@ theorem norm_of_unit (hmod : dK % 4 = 3) (u : (OO ι hmod)ˣ) :
 def tau (hmod : dK % 4 = 3) : OO ι hmod →+* ℂ_[p] :=
   (RingHom.fst ℂ_[p] ℂ_[p]).comp (OO ι hmod).subtype
 
-theorem tau_apply (hmod : dK % 4 = 3) (z : OO ι hmod) : tau ι hmod z = z.1.1 := rfl
-
 theorem selfadj (hmod : dK % 4 = 3) (h2 : p ≠ 2) {z : ℂ_[p] × ℂ_[p]} (hz : z ∈ OO ι hmod)
     (hs : z.swap = z) : z.1 ∈ Zc p := by
   apply diag_int ι hmod h2
@@ -374,8 +422,8 @@ theorem dense (hmod : dK % 4 = 3) (u : (OO ι hmod)ˣ) : (u : OO ι hmod) ∈ cl
 
 end CalcPAux
 
-open CalcPAux in
 
+open CalcPAux in
 theorem CalcP_of (hD : CMDatum) : CalcP := by
   intro dK L hmod hcm p _ h5 ι hW
   have hp2 : p ≠ 2 := by omega

@@ -1,9 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocGLMemKglob
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCompactDefiniteUnitaryRestrictedProduct
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocEqOneOfMemGam
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedGLMassFormula
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyPcRatFMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCompactDefiniteUnitaryRestrictedProduct
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocEqOneOfMemGam
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocGLMemKglob
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix Filter Topology
 open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT GlobalTheory.LFun
@@ -23,17 +61,17 @@ private theorem cont_thF : Continuous (thF E n) :=
   GlobalTheory.ThetaPull.continuous_thetaGL _ (continuous_conjFin _)
 
 private theorem twist_int (v : Pl E) (x : GL (Fin n) (Af E))
-    (h : GeneralLinearGroup.map (pLoc E (GlobalTheory.EulerTw.cPl E v)) x ∈ KGL (GlobalTheory.EulerTw.cPl E v) n) :
-    GeneralLinearGroup.map (pLoc E v) (thF E n x) ∈ KGL v n := by
+    (h : GeneralLinearGroup.map (pLoc E (GlobalTheory.EulerTw.cPl E v)) x ∈ KGL (GlobalTheory.EulerTw.cPl E v) (n := n)) :
+    GeneralLinearGroup.map (pLoc E v) (thF E n x) ∈ KGL v (n := n) := by
   rw [GlobalTheory.EulerTwU.pc_thF]
   exact GlobalTheory.EulerTwSplit.theta_mem _ (conjLoc_spec _ v).2.2 h
 
 private theorem twist_int_iff (v : Pl E) (x : GL (Fin n) (Af E)) :
-    GeneralLinearGroup.map (pLoc E v) (thF E n x) ∈ KGL v n ↔
-      GeneralLinearGroup.map (pLoc E (GlobalTheory.EulerTw.cPl E v)) x ∈ KGL (GlobalTheory.EulerTw.cPl E v) n := by
+    GeneralLinearGroup.map (pLoc E v) (thF E n x) ∈ KGL v (n := n) ↔
+      GeneralLinearGroup.map (pLoc E (GlobalTheory.EulerTw.cPl E v)) x ∈ KGL (GlobalTheory.EulerTw.cPl E v) (n := n) := by
   refine ⟨fun h => ?_, twist_int v x⟩
   have h1 : GeneralLinearGroup.map (pLoc E (GlobalTheory.EulerTw.cPl E (GlobalTheory.EulerTw.cPl E v))) (thF E n x) ∈
-      KGL (GlobalTheory.EulerTw.cPl E (GlobalTheory.EulerTw.cPl E v)) n := by
+      KGL (GlobalTheory.EulerTw.cPl E (GlobalTheory.EulerTw.cPl E v)) (n := n) := by
     rw [cc]; exact h
   have h2 := twist_int (GlobalTheory.EulerTw.cPl E v) (thF E n x) h1
   rwa [GlobalTheory.EulerTwU.thF_thF] at h2
@@ -45,12 +83,12 @@ private theorem twist_away {u v : Pl E} (h : GlobalTheory.EulerTw.cPl E v ≠ u)
   exact (congrArg (thetaGL n (RingHom.id _)) e).trans (map_one _)
 
 private theorem bad_finite (g : GL (Fin n) (Af E)) :
-    {v : Pl E | GeneralLinearGroup.map (pLoc E v) g ∉ KGL v n}.Finite := by
+    {v : Pl E | GeneralLinearGroup.map (pLoc E v) g ∉ KGL v (n := n)}.Finite := by
   have h1 : ∀ x : Af E, ∀ᶠ v : Pl E in cofinite, pLoc E v x ∈ v.adicCompletionIntegers E :=
     fun x => x.2.mono fun _ h => h
   have h2 := eventually_all.2 fun i => eventually_all.2 fun j => h1 (g.1 i j)
   have h3 := eventually_all.2 fun i => eventually_all.2 fun j => h1 ((g⁻¹).1 i j)
-  have h4 : ∀ᶠ v : Pl E in cofinite, GeneralLinearGroup.map (pLoc E v) g ∈ KGL v n := by
+  have h4 : ∀ᶠ v : Pl E in cofinite, GeneralLinearGroup.map (pLoc E v) g ∈ KGL v (n := n) := by
     filter_upwards [h2, h3] with v a b
     rw [GlobalTheory.EulerTwRestr.mem_KGL_iff]
     exact ⟨fun i j => a i j, fun i j => by rw [GlobalTheory.EulerTwRestr.loc_inv_val]; exact b i j⟩
@@ -134,9 +172,9 @@ theorem slotFacts_pf : UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.Places → S
     rw [hcw] at h1
     exact h1
   · intro g
-    have hL : g ∈ Lev S (fun w : Pl E => KGL w n) ↔ ∀ i : Pl E × Bool, Sl S i → qw n i.1 i.2 g ∈ KGL i.1 n := by
+    have hL : g ∈ Lev S (fun w : Pl E => KGL w (n := n)) ↔ ∀ i : Pl E × Bool, Sl S i → qw n i.1 i.2 g ∈ KGL i.1 (n := n) := by
       simp only [Lev, Subgroup.mem_iInf, Subgroup.mem_comap, Subtype.forall]
-    have hK : g ∈ Kf E n ↔ ∀ w : Pl E, GeneralLinearGroup.map (pLoc E w) g ∈ KGL w n := by
+    have hK : g ∈ Kf E n ↔ ∀ w : Pl E, GeneralLinearGroup.map (pLoc E w) g ∈ KGL w (n := n) := by
       simp only [Kf, Subgroup.mem_iInf, Subgroup.mem_comap]
     rw [hL, hK]
     constructor

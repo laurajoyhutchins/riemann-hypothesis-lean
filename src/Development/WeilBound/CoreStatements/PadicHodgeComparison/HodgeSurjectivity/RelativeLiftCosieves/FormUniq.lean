@@ -1,6 +1,51 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.RelativeLiftCosieves.LiftsNonempty
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.RelativeLiftCosieves.LiftsNonempty
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -317,6 +362,7 @@ theorem d_mkC {n a : ℕ} (z : Cn (modF (AF q V)) n) (hz : InF q V a z) :
   rw [Submodule.coe_sum]
   show _ = Ideal.Quotient.mk _ (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) •
     (tv (AF q V) s z i.succAbove (Fin.strictMono_succAbove i).monotone : (s.obj (Fin.last (n + 1))).obj.B))
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_zsmul]
@@ -327,8 +373,8 @@ theorem mkC_cocycle {a : ℕ} (z : Cn (modF (AF q V)) a) (hz : InF q V a z) (hd 
   rw [d_mkC]
   exact mkC_eq_zero _ _ hd
 
-variable (q V) in
 
+variable (q V) in
 abbrev FL (Λ : Lifts q V) {a : ℕ} (g₀ : Sec q V) (g : Fin a → Sec q V) : Cn (modF (AF q V)) a :=
   Fm (AF q V) (cz fun T => Λ.v T g₀) a fun j => cz fun T => Λ.v T (g j)
 
@@ -341,8 +387,8 @@ theorem FL_dmem (Λ : Lifts q V) {a : ℕ} (g₀ : Sec q V) (g : Fin a → Sec q
     InF q V (a + 1) (d _ a (FL q V Λ g₀ g)) :=
   dFm_mem _ (dcz_mem (isL Λ g₀)) a _ fun j => dcz_mem (isL Λ (g j))
 
-variable (q V) in
 
+variable (q V) in
 def clsL (Λ : Lifts q V) {a : ℕ} (g₀ : Sec q V) (g : Fin a → Sec q V) : CH.H (SqF q V a) a :=
   (CH.cx (SqF q V a)).cls (mkC (FL q V Λ g₀ g) (FL_mem Λ g₀ g)) (mkC_cocycle _ _ (FL_dmem Λ g₀ g))
 

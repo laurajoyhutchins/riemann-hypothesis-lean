@@ -1,6 +1,55 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopDomCore
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopDomVMul
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopDomPtw
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBP
 
@@ -17,13 +66,14 @@ theorem nf_coef_unique {E : Type*} [AddCommGroup E] [Module ℂ E] (M : ℕ) (a 
     refine Set.Infinite.mono ?_ hS
     intro s hs
     have hfs := congrArg f (h s hs)
+
     simp only [map_sum, map_smul, map_zero, smul_eq_mul] at hfs
-    simp only [Set.mem_setOf_eq, Polynomial.IsRoot.def, Polynomial.eval_finset_sum, Polynomial.eval_mul,
+    simp only [Set.mem_setOf_eq, Polynomial.IsRoot.def, Polynomial.eval_finsetSum, Polynomial.eval_mul,
       Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X]
     rw [← hfs]
     exact Finset.sum_congr rfl fun j _ => mul_comm _ _
-  have hc := congrArg (fun q => Polynomial.coeff q i) hp
-  simpa [Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow, Finset.mem_range.mpr hi] using hc
+  have hc := congrArg (fun q => _root_.AddMonoidAlgebra.coeff (M := ℕ) q i) hp
+  simpa [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Finset.mem_range.mpr hi] using hc
 
 section scoef
 
@@ -46,7 +96,7 @@ theorem nf_sum_pad {E : Type*} [AddCommGroup E] [Module ℂ E] {Q M : ℕ} (hQ :
     omega
   · intro i _ hi
     have hi' : ¬ i < Q + 1 := by simpa using hi
-    rw [dif_neg hi', smul_zero]
+    rw [dite_eq_right hi', smul_zero]
 
 theorem nf_scoef_unique (p : KB.Pl P Wp Wq) (w : List C.Letter) (e : Wd.Ix (Fin w.length)) {Q Q' : ℕ}
     {L : Fin (Q + 1) → B.DiffOp P.k P.r Wp Wq} {L' : Fin (Q' + 1) → B.DiffOp P.k P.r Wp Wq}
@@ -68,13 +118,13 @@ theorem nf_scoef_unique (p : KB.Pl P Wp Wq) (w : List C.Letter) (e : Wd.Ix (Fin 
     (Set.range (fun s : ℝ => (s : ℂ))) (Set.infinite_range_of_injective Complex.ofReal_injective) ?_ qq
     (lt_of_lt_of_le qq.isLt hq1)
   · simp only [sub_eq_zero] at hz
-    rw [dif_pos qq.isLt] at hz
+    rw [dite_eq_left qq.isLt] at hz
     by_cases hq : (qq : ℕ) ≤ Q'
-    · rw [dif_pos hq]
-      rw [dif_pos (by omega : (qq : ℕ) < Q' + 1)] at hz
+    · rw [dite_eq_left hq]
+      rw [dite_eq_left (by omega : (qq : ℕ) < Q' + 1)] at hz
       exact hz
-    · rw [dif_neg hq]
-      rw [dif_neg (by omega : ¬ (qq : ℕ) < Q' + 1)] at hz
+    · rw [dite_eq_right hq]
+      rw [dite_eq_right (by omega : ¬ (qq : ℕ) < Q' + 1)] at hz
       exact hz
   · rintro _ ⟨s, rfl⟩
     have e1 : ∑ i ∈ Finset.range (max Q Q' + 1),

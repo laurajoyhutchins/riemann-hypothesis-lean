@@ -1,21 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BottomExistsIntegrable
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfUnit
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeFormAniso
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsBottomTriIs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramAtNegOfGramOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianWittIndexEqZeroDefiniteBottomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPolynomialFockThetaVectorDefiniteBottomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedInnerProductDataDefiniteBottomLargeGri
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstOneMemCuspFormsDefiniteBottomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSatakeParametersConstOneDefiniteBottomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PartialNormalizingFactorNeZeroDefiniteBottomStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PartialLFunctionEqNormalizingFactorDefiniteBotto
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteBottomLocalDoublingIntegralConverges
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstOneMemCuspFormsDefiniteBottomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteBottomLocalDoublingIntegralConverges
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSatakeParametersConstOneDefiniteBottomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramAtNegOfGramOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianWittIndexEqZeroDefiniteBottomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPolynomialFockThetaVectorDefiniteBottomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PartialLFunctionEqNormalizingFactorDefiniteBotto
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PartialNormalizingFactorNeZeroDefiniteBottomStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedInnerProductDataDefiniteBottomLargeGri
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField Finset MeasureTheory
 open GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.FunObj.SqNum GlobalTheory.RowTest GlobalTheory.SqTop
 open GlobalTheory.IndefiniteRowSideFullHecke.UnitCharTriangle (Tri)

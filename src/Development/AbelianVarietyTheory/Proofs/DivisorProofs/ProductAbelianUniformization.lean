@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAHOfIsFactorAH
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolomorphicUniformisationPowerThetaKeyDatu
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsHolomorphicUniformisationPowerThetaKeyDatu
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -119,8 +165,8 @@ def sqUnif {L : LB A.left} (u : HolUnif A L g) : HolUnif (A ⊗ A) (trivLB (A �
   ex v := lift (u.ex (halfL g v)) (u.ex (halfR g v))
   ex_add z w := by
     refine CartesianMonoidalCategory.hom_ext _ _ ?_ ?_
-    · rw [MonObj.mul_comp, lift_fst, lift_fst, lift_fst, map_add, u.ex_add]
-    · rw [MonObj.mul_comp, lift_snd, lift_snd, lift_snd, map_add, u.ex_add]
+    · rw [MonObj.mul_comp, lift_fst, lift_fst, lift_fst, map_add (f := _), u.ex_add]
+    · rw [MonObj.mul_comp, lift_snd, lift_snd, lift_snd, map_add (f := _), u.ex_add]
   ex_onto p := by
     obtain ⟨x, hx⟩ := u.ex_onto (p ≫ fst _ _)
     obtain ⟨y, hy⟩ := u.ex_onto (p ≫ snd _ _)
@@ -159,17 +205,5 @@ def sqUnif {L : LB A.left} (u : HolUnif A L g) : HolUnif (A ⊗ A) (trivLB (A �
   fr_compat i j z h := by
     rw [Units.val_one, valAt'_one _ h, _root_.one_mul]
 
-theorem sqUnif_ex_append {L : LB A.left} (u : HolUnif A L g) (x y : Fin g → ℂ) :
-    (sqUnif A u).ex (Fin.append x y) = lift (u.ex x) (u.ex y) := by
-  change lift (u.ex (halfL g (Fin.append x y))) (u.ex (halfR g (Fin.append x y))) = _
-  rw [halfL_append, halfR_append]
-
 end GlobalTheory.ProdUnifSq
 
-open GlobalTheory.ProdUnifSq in
-
-theorem GlobalTheory.exists_holUnif_tensor_self : ∀ (A : Over (Sp ℂ)) [GrpObj A] [IsCommMonObj A], IsAbelianScheme A → ∀ (L : LB A.left) (g : ℕ) (u : HolUnif A L g),
-    ∃ U : HolUnif (A ⊗ A) (⟨PUnit, fun _ => ⊤, fun _ _ => 1⟩ : LB (A ⊗ A).left) (g + g),
-      ∀ x y : Fin g → ℂ, U.ex (Fin.append x y) = lift (u.ex x) (u.ex y) := by
-  intro A _ _ _ L g u
-  exact ⟨sqUnif A u, sqUnif_ex_append A u⟩

@@ -1,14 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.ThConst
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ThConst
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ComposeLinearAction
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.AppLESpMapJetPt
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CmFrameJetPointsAreExponentialJets
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CorrOfJetsOfAnalyticFrameProducts
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CubicalReadingOneAnalyticFrame
 import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsHolFamPullbackLiftOfCommonBase
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CubicalReadingOneAnalyticFrame
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.JetRdMulInvPow
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CorrOfJetsOfAnalyticFrameProducts
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.AppLESpMapJetPt
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CmFrameJetPointsAreExponentialJets
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.JetReadingLinearSubstitutionPoints
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.JetRdMulInvPow
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.JetReadingLinearSubstitutionPoints
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolJetC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.TaylorMul
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,31 +71,7 @@ open scoped ContDiff
 
 theorem tay_coord {N : ℕ} (k : Fin N) :
     tay (fun v : Fin N → ℂ => v k) 0 = MvPowerSeries.X ((0 : Fin 1), k) := by
-  classical
-  have hθ : ContDiffAt ℂ ω (fun v : Fin N → ℂ => v k) 0 := (contDiff_apply ℂ ℂ k).contDiffAt
-  refine TCPf.eq_of_cc _ _ fun l => ?_
-  induction l using List.reverseRecOn with
-  | nil =>
-    simp only [List.foldr_nil]
-    rw [constantCoeff_tay, TM.mD_zero]
-    simp
-  | append_singleton l q _ =>
-    obtain ⟨a, j⟩ := q
-    have ha : a = 0 := Subsingleton.elim _ _
-    subst ha
-    rw [List.foldr_append, List.foldr_append]
-    simp only [List.foldr_cons, List.foldr_nil]
-    rw [TM.pderiv_tay hθ]
-    have hd : (fun y : Fin N → ℂ => fderiv ℂ (fun v : Fin N → ℂ => v k) y (Pi.single j 1)) =
-        fun _ => (Pi.single j 1 : Fin N → ℂ) k := by
-      funext y
-      have := (ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin N => ℂ) k).fderiv (x := y)
-      exact congrArg (fun L : (Fin N → ℂ) →L[ℂ] ℂ => L (Pi.single j 1)) this
-    rw [hd, TM.tay_const, MvPowerSeries.pderiv_X]
-    congr 2
-    by_cases h : k = j
-    · subst h; simp
-    · simp [Pi.single_apply, h, Prod.ext_iff]
+  apply GlobalTheory.JetLinSub.tay_coord <;> assumption
 
 theorem psJet_X' {κ : Type} [Fintype κ] [DecidableEq κ] (m : ℕ) (p : κ) :
     psJet m (MvPowerSeries.X p : MvPowerSeries κ ℂ) = Ideal.Quotient.mk _ (MvPolynomial.X p) := by
@@ -66,9 +90,9 @@ theorem jetN_coord {n g : ℕ} (m : ℕ) (i : Fin n) (j : Fin g) :
 theorem jetN_coord_add {n g : ℕ} (m : ℕ) (i i' : Fin n) (j : Fin g) :
     jetN m (fun w : Fin n → Fin g → ℂ => w i j + w i' j) =
       Ideal.Quotient.mk _ (MvPolynomial.X (i, j) + MvPolynomial.X (i', j)) := by
-  rw [map_add, ← jetN_coord, ← jetN_coord, jetN, jetN, jetN, ← map_add]
-  exact congrArg _ (jetOf_add m (contDiff_apply ℂ ℂ (finProdFinEquiv (i, j))).contDiffAt
-      (contDiff_apply ℂ ℂ (finProdFinEquiv (i', j))).contDiffAt)
+  rw [map_add (f := _), ← jetN_coord, ← jetN_coord, jetN, jetN, jetN, ← map_add (f := _)]
+  exact congrArg _ (jetOf_add m (contDiff_apply ℂ (fun _ => ℂ) (finProdFinEquiv (i, j))).contDiffAt
+      (contDiff_apply ℂ (fun _ => ℂ) (finProdFinEquiv (i', j))).contDiffAt)
 
 theorem subst_X {κ κ' : Type} [Fintype κ] [DecidableEq κ] (m : ℕ) (sb : κ → MvPolynomial κ' ℂ) (p : κ) :
     (jetSubstP m sb : Jet ℂ κ m →ₐ[ℂ] Jet ℂ κ' m) (psJet m (MvPowerSeries.X p)) =

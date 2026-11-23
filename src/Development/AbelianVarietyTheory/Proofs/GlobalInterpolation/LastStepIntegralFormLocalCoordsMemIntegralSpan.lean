@@ -1,9 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CoP
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocalBasisRepLatticeIntegralCoordsSpecStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemLocWDelAtrIffStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.InvTrKEmbGLApply
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CoP
+public import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.InvTrKEmbGLApply
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocalBasisRepLatticeIntegralCoordsSpecStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemLocWDelAtrIffStatement
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SpanMapNabKDelK
+import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,8 +95,8 @@ theorem latCo_one {B : Base} {X : PreX B.toPre} (I : TC B X) (hI : I.Ok) (l : I.
     rfl
   rw [e1, ← bc_invTrK_embGL, ← GlobalTheory.ValCmp.use₂]
   have hB := (GlobalTheory.T.localBasisRepLattice_integralCoords_spec I hI l u a w c).2.2.2
-  have hM : Submodule.IsLattice B.fields.E (((I.chIn u a).S B.R.m).Lsh (I.perIn u a).b0 ((I.perIn u a).tilPt c)) :=
-    ((l.ch u a).step B.R.m).lsh_lat (I.perIn u a).b0 ((I.perIn u a).tilPt c)
+  have hM : Submodule.IsFullLattice B.fields.E (((I.chIn u a).S B.R.m).Lsh (I.perIn u a).b0 ((I.perIn u a).tilPt c)) :=
+    ((l.ch u a).step B.R.m).lsh_full_lat (I.perIn u a).b0 ((I.perIn u a).tilPt c)
   have hnat : ∀ τ, ((GlobalTheory.Mem.Col2.lamT (B.hcW u) B.R.m) τ).natW = (((I.rec7 l Z).fm u).lam (I.rec7 l Z).R.m τ).natW := by
     intro τ
     show (GlobalTheory.Mem.Col2.shW (Examples₂.lamOf (B.hcW u τ) B.R.m) _).natW = (Examples₂.lamOf (B.hcW u τ) B.R.m).natW
@@ -77,7 +117,7 @@ theorem latCo_gen {B : Base} {X : PreX B.toPre} (I : TC B X) (hI : I.Ok) (l : I.
   induction hy using Submodule.span_induction with
   | mem y hy => exact latCo_one I hI l Z u a w c y hy
   | zero => rw [map_zero, Pi.zero_apply, map_zero]; exact zero_mem _
-  | add y z _ _ hy hz => rw [map_add, Pi.add_apply, map_add]; exact add_mem hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _), Pi.add_apply, map_add (f := _)]; exact add_mem hy hz
   | smul r y _ hy =>
     have e : r • y = (r : B.LL) • y := rfl
     rw [e, LinearMap.map_smulₛₗ, Pi.smul_apply, map_smul]

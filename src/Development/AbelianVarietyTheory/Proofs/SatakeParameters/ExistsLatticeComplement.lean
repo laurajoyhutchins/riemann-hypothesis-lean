@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ColRepSemisimple
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEigenvectorOfTraceEqAddCharacter
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ColRepSemisimple
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEigenvectorOfTraceEqAddCharacter
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,9 +61,9 @@ open Formalism.MainNotions.N Polynomial Matrix
 
 variable {Γ : Type} [Group Γ]
 
+
 open Polynomial Matrix in
 variable {Γ : Type} [Group Γ] in
-
 theorem _root_.GlobalTheory.LatticeComplement.isSSRep_of_intertwine {k : Type} [Field k] {a b : ℕ} (ρ : Γ →* GL (Fin a) k)
     (ρ₁ : Γ →* GL (Fin b) k) (E : Matrix (Fin b) (Fin a) k) (P : Matrix (Fin a) (Fin b) k)
     (hEP : E * P = 1)
@@ -245,9 +295,9 @@ private theorem exists_quotient_of_eigenvector_lemma_2 {O K : Type} [CommRing O]
     simp only [Matrix.one_apply_eq, mul_one, Fin.val_zero, pow_zero, one_mul]
     ring
 
+
 open Polynomial Matrix in
 variable {Γ : Type} [Group Γ] in
-
 theorem _root_.GlobalTheory.LatticeComplement.exists_lattice_complement : ∀ (Γ O K : Type) [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] [CompactSpace Γ] [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [TopologicalSpace O] [IsTopologicalRing O] [Field K] [CharZero K] [Algebra O K] [IsFractionRing O K] (r t : ℕ) (ρ : Γ →* GL (Fin (r + t)) O) (χ : Fin t → Γ →* Oˣ), Continuous (fun g => ((ρ g : GL (Fin (r + t)) O) : Matrix (Fin (r + t)) (Fin (r + t)) O)) → _root_.Formalism.MainNotions.N.IsSSRep (_root_.Formalism.MainNotions.N.mapRep (algebraMap O K) ρ) → (∃ (L : Type) (_ : Field L) (f : K →+* L) (ρ₀ : Γ →* GL (Fin r) L), ∀ g, (((ρ g : GL (Fin (r + t)) O) : Matrix (Fin (r + t)) (Fin (r + t)) O).charpoly).map (f.comp (algebraMap O K)) = ((ρ₀ g : GL (Fin r) L) : Matrix (Fin r) (Fin r) L).charpoly * ∏ c, (X - C (f (algebraMap O K ((χ c g : Oˣ) : O))))) → ∃ ρ' : Γ →* GL (Fin r) O, Continuous (fun g => ((ρ' g : GL (Fin r) O) : Matrix (Fin r) (Fin r) O)) ∧ _root_.Formalism.MainNotions.N.IsSSRep (_root_.Formalism.MainNotions.N.mapRep (algebraMap O K) ρ') ∧ ∀ g, ((ρ g : GL (Fin (r + t)) O) : Matrix (Fin (r + t)) (Fin (r + t)) O).charpoly = ((ρ' g : GL (Fin r) O) : Matrix (Fin r) (Fin r) O).charpoly * ∏ c, (X - C ((χ c g : Oˣ) : O)) := by
   intro Γ O K _ _ _ _ _ _ _ _ _ _ _ _ _ r t
   induction t with

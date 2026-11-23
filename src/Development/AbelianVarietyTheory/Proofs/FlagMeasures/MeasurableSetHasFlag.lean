@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FiniteAdelicUnitaryCongruenceTopology
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutPointLatticeIntersectionSelfDualProperties
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NearTrivialPointwise
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AutPointLatticeIntersectionSelfDualProperties
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FiniteAdelicUnitaryCongruenceTopology
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SatBasic
+public import Formalism.HarderNarasimhan.ShiftInvariance
+import Formalism.LatticeSlopes.ExistsSaturatedSlopeEqMuMax
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.Count Formalism.MainNotions.S Formalism.HN Formalism.REAL Matrix NumberField MeasureTheory Finset
 
@@ -15,21 +63,7 @@ theorem totCx (I : AutInst) : IsTotallyComplex I.E := by
   exact h
 
 theorem frm_unit (I : AutInst) (x : I.GA) (w : InfinitePlace I.E) : IsUnit (frm I x w).det := by
-  have hU : IsUnit (uMat (x.1 (w.comap (algebraMap I.F I.E)))).det :=
-    (Matrix.isUnit_iff_isUnit_det _).1 (Units.isUnit _)
-  have hP : IsUnit (I.P (w.comap (algebraMap I.F I.E))).det :=
-    (Matrix.isUnit_iff_isUnit_det _).1 (I.P_unit _)
-  by_cases h : w.embedding = I.φ (w.comap (algebraMap I.F I.E))
-  · simp only [frm, if_pos h]
-    rw [Matrix.det_mul]
-    exact hP.mul hU
-  · simp only [frm, if_neg h]
-    have hm : ((I.P (w.comap (algebraMap I.F I.E)) * uMat (x.1 (w.comap (algebraMap I.F I.E)))).map
-        (starRingEnd ℂ)).det = starRingEnd ℂ (I.P (w.comap (algebraMap I.F I.E)) *
-          uMat (x.1 (w.comap (algebraMap I.F I.E)))).det := by
-      rw [RingHom.map_det]; rfl
-    rw [hm, Matrix.det_mul]
-    exact (hP.mul hU).map _
+  apply GlobalTheory.NearLowerCompare.frm_isUnit <;> assumption
 
 abbrev rho (I : AutInst) (x : I.GA) := Formalism.HermitianLatticesTheory.realize (bas I) (frm I x)
 
@@ -502,7 +536,7 @@ theorem type_measurable : ∀ (I : AutInst) (a : ℕ) (j : Fin a → ℕ), ∃ s
             (hSm.monotone (show i.castSucc ≤ i.succ from Fin.castSucc_lt_succ.le)) (flag_sat I x0 hf0 i.succ).1)
       have hsm : ∀ i : Fin a, Measurable fun x : I.GA => sizeQ (bas I) (frm I x) (S i.succ) (S i.castSucc) :=
         fun i => measurable_sizeQ I _ _ (fgOf hf0 i.succ) (hsat i) (hSm (show i.castSucc < i.succ from Fin.castSucc_lt_succ)).ne
-      have hszm : Measurable (sz S) := measurable_pi_lambda _ hsm
+      have hszm : Measurable (sz S) := Measurable.of_eval hsm
       have hm1 : MeasurableSet {x | P S x} :=
         (measurableSet_hasFlag I S hsm).inter (MeasurableSet.const _)
       exact ⟨hm1, fun B hB => hm1.inter (hszm hB)⟩
@@ -533,7 +567,7 @@ theorem type_measurable : ∀ (I : AutInst) (a : ℕ) (j : Fin a → ℕ), ∃ s
   have hs : ∀ x τ, HasType I x j τ → s x = τ := by
     intro x τ hx
     show (if h : ∃ τ, HasType I x j τ then h.choose else 0) = τ
-    rw [dif_pos ⟨τ, hx⟩]
+    rw [dite_eq_left ⟨τ, hx⟩]
     exact huniq x _ _ (Exists.choose_spec _) hx
   have hD : {x : I.GA | ∃ τ, HasType I x j τ} =
       ⋃ S' : Fin (a + 1) → ↥{N : Submodule (𝓞 I.E) (Fin I.n → I.E) | N.FG}, {x | P (fun i => (S' i).1) x} := by
@@ -565,7 +599,7 @@ theorem type_measurable : ∀ (I : AutInst) (a : ℕ) (j : Fin a → ℕ), ∃ s
           · exact (hn ⟨τ, hxτ⟩).elim
       · have h0 : s x = 0 := by
           show (if h : ∃ τ, HasType I x j τ then h.choose else 0) = 0
-          rw [dif_neg hx]
+          rw [dite_eq_right hx]
         rw [h0]
         constructor
         · intro hB'

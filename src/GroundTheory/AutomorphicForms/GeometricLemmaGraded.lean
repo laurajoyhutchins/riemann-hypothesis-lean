@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemmaJacquetCell
+module
+
+public import GroundTheory.AutomorphicForms.GeometricLemmaJacquetCell
+import GroundTheory.AutomorphicForms.GeometricLemmaCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -85,8 +134,8 @@ variable {Y : Set (GL (Fin n) F)} (hYo : IsOpen Y)
     (blockUpper F n γ))
   (hYQ : ∀ g ∈ Y, ∀ q ∈ blockUpper F n γ, g * q ∈ Y)
 
-include hYo hCY hYQ in
 
+include hYo hCY hYQ in
 theorem cellJacquet_eq_zero_of_mk_eq_zero {f : parabolicIndSpace F n β σ}
     (hf : f ∈ supportedIn σ Y)
     (h0 : Representation.Coinvariants.mk ((parabolicInd F n β σ).comp
@@ -138,8 +187,8 @@ theorem cellJacquet_eq_zero_of_mk_eq_zero {f : parabolicIndSpace F n β σ}
   unfold cellEv
   rw [avgOver_eq_zero_of_forall (fun k _ => by unfold cellFun; rw [hg0]; rfl), map_zero, smul_zero]
 
-variable (γ w) in
 
+variable (γ w) in
 def jacquetSupported (Y : Set (GL (Fin n) F)) :
     supportedIn σ Y →ₗ[ℂ] jacquetFiltration γ (σ := σ) Y :=
   ((Representation.Coinvariants.mk _).comp (supportedIn σ Y).subtype).codRestrict _
@@ -170,17 +219,17 @@ theorem cellJacquetMap_eq_of_jacquetSupported_eq {f f' : supportedIn σ Y}
   apply ker_jacquetSupported_le σ hYo hCY hYQ
   rw [LinearMap.mem_ker, map_sub, h, sub_self]
 
-variable (γ w) in
 
+variable (γ w) in
 def gradedJacquetMap :
     jacquetFiltration γ (σ := σ) Y →ₗ[ℂ] indSpace (cellLeviSub F β γ w) (cellInducing β γ w σ) where
   toFun x := cellJacquetMap γ w σ hYo hCY
     (Function.surjInv (jacquetSupported_surjective σ Y) x)
   map_add' x y := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     apply cellJacquetMap_eq_of_jacquetSupported_eq σ hYo hCY hYQ
     have hs := jacquetSupported_surjective (γ := γ) σ Y
-    rw [map_add, Function.surjInv_eq hs x, Function.surjInv_eq hs y, Function.surjInv_eq hs (x + y)]
+    rw [map_add (f := _), Function.surjInv_eq hs x, Function.surjInv_eq hs y, Function.surjInv_eq hs (x + y)]
   map_smul' c x := by
     rw [RingHom.id_apply, ← map_smul]
     apply cellJacquetMap_eq_of_jacquetSupported_eq σ hYo hCY hYQ

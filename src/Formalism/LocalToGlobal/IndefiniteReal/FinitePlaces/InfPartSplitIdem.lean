@@ -1,8 +1,51 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FrameInt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemFin
-import Formalism.LocalToGlobal.IndefiniteReal.FockTheta.ConjPurelyImaginaryGenerator
+module
 
-set_option synthInstance.maxHeartbeats 100000
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemFin
+public import Formalism.LocalToGlobal.IndefiniteReal.FockTheta.ConjPurelyImaginaryGenerator
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -15,21 +58,13 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7}
 
-def finInc (D : D7) : Formalism.L2.Herm.Af D.host.F →ₗ[D.host.F] AF D.host.F where
-  toFun a := pairA D.host.F 0 a
-  map_add' a b := Prod.ext (show (0 : Ainf D.host.F) = 0 + 0 from (add_zero 0).symm) rfl
-  map_smul' c a := Prod.ext (show (0 : Ainf D.host.F) = c • 0 from (smul_zero c).symm) rfl
 
-def liftF (D : D7) : (Formalism.L2.Herm.Af D.host.F ⊗[D.host.F] D.host.E) →ₗ[D.host.F] AE D :=
-  TensorProduct.map (finInc D) LinearMap.id
-
-set_option maxHeartbeats 800000 in
 
 theorem infPart_splitIdem {e : AE D} (he : IsSplitIdem D e) : infPart D e = 0 := by
   obtain ⟨h1, -, v, ε, hε, h3⟩ := he
   obtain ⟨α, hα, -, -⟩ := hε
   have hsum : infPart D e + infPart D (cA D e) = 0 := by
-    rw [← map_add, h3, hα]
+    rw [← map_add (f := _), h3, hα]
     show infPart D (pairA D.host.F 0 α ⊗ₜ[D.host.F] (1 : D.host.E)) = 0
     rw [Formalism.IndefR.Fock.DRho.infPart_tmul, show fstA D.host.F (pairA D.host.F 0 α) = 0 from rfl,
       TensorProduct.zero_tmul]
@@ -49,6 +84,7 @@ theorem infPart_splitIdem {e : AE D} (he : IsSplitIdem D e) : infPart D e = 0 :=
 
 theorem infPart_idemSum {P : Finset (Formalism.L2.DIV.Pl D.host.E)} {e : AE D} (he : IsIdemSum e P) : infPart D e = 0 := by
   obtain ⟨es, hes, hsum, -⟩ := idemSum_orth P e he
+
   rw [hsum, map_sum]
   exact Finset.sum_eq_zero fun PP hPP => infPart_splitIdem (hes PP hPP)
 

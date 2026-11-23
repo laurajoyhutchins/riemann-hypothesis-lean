@@ -1,6 +1,53 @@
-import Mathlib
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.CapelliDeterminantBlockProduct
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.DiscreteSeriesCharacters.CapelliDeterminantBlockProduct
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped TensorProduct
 open MvPolynomial
@@ -52,7 +99,7 @@ theorem pd_comm (i j : σ) : pd i * pd j = pd j * pd i := by
   | C a => simp
   | add p q hp hq => simp [hp, hq]
   | mul_X p k hp =>
-    simp only [Derivation.leibniz, map_add, smul_eq_mul, pderiv_X, hp]
+    simp only [Derivation.leibniz, map_add (f := _), smul_eq_mul, pderiv_X, hp]
     by_cases h1 : i = k <;> by_cases h2 : j = k <;> simp [h1, h2, add_comm]
 
 theorem word_monomial (l : List σ) : ∀ (s : σ →₀ ℕ) (c : ℂ), s.degree < l.length →
@@ -72,7 +119,7 @@ theorem word_monomial (l : List σ) : ∀ (s : σ →₀ ℕ) (c : ℂ), s.degre
         rw [Finsupp.single_le_iff]
         omega
       have e2 := congrArg Finsupp.degree e
-      rw [map_add, Finsupp.degree_single] at e2
+      rw [map_add (f := _), Finsupp.degree_single] at e2
       simp only [List.length_append, List.length_singleton] at h
       omega
 
@@ -83,7 +130,7 @@ theorem word_pol (f : MvPolynomial σ ℂ) : ∃ m : ℕ, ∀ l : List σ, m ≤
     obtain ⟨m, hm⟩ := hp
     obtain ⟨k, hk⟩ := hq
     exact ⟨max m k, fun l hl => by
-      rw [map_add, hm l (le_trans (le_max_left _ _) hl), hk l (le_trans (le_max_right _ _) hl), add_zero]⟩
+      rw [map_add (f := _), hm l (le_trans (le_max_left _ _) hl), hk l (le_trans (le_max_right _ _) hl), add_zero]⟩
 
 variable {V : Type} [AddCommGroup V] [Module ℂ V]
 
@@ -105,7 +152,7 @@ theorem word_tens (z : V ⊗[ℂ] MvPolynomial σ ℂ) : ∃ m : ℕ, ∀ l : Li
     obtain ⟨m, hm⟩ := hp
     obtain ⟨k, hk⟩ := hq
     exact ⟨max m k, fun l hl => by
-      rw [map_add, hm l (le_trans (le_max_left _ _) hl), hk l (le_trans (le_max_right _ _) hl), add_zero]⟩
+      rw [map_add (f := _), hm l (le_trans (le_max_left _ _) hl), hk l (le_trans (le_max_right _ _) hl), add_zero]⟩
 
 end Pol
 
@@ -134,7 +181,7 @@ theorem cover : Koszul → Verma → Cover := by
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul v f => simp [EY, hcc, h0]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
   · refine hK n ε (V ⊗[ℂ] P) (fun i => EY i.1.1 i.1.2) (fun i => (pd i).lTensor V) ?_ ?_ ?_ ?_
     · intro i j
       have h := hEY i.1.1 i.1.2 j.1.1 j.1.2

@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsMirClass
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsMirClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +62,7 @@ theorem sum_graph_eq_sum_entN {A : Type} [AddCommMonoid A] {N : ℕ} (M : Matrix
       · rw [Finset.sum_eq_single ⟨f a, hf⟩]
         · split_ifs with hc
           · unfold entN
-            rw [dif_pos ⟨a.isLt, hf⟩]
+            rw [dite_eq_left ⟨a.isLt, hf⟩]
           · exact absurd ⟨ha, rfl⟩ hc
         · intro b _ hb
           rw [if_neg]
@@ -31,7 +72,7 @@ theorem sum_graph_eq_sum_entN {A : Type} [AddCommMonoid A] {N : ℕ} (M : Matrix
           exact absurd (Finset.mem_univ _) h
       · rw [Finset.sum_eq_zero]
         · unfold entN
-          rw [dif_neg (fun hh => hf hh.2)]
+          rw [dite_eq_right (fun hh => hf hh.2)]
         · intro b _
           rw [if_neg]
           intro h
@@ -47,7 +88,7 @@ theorem sum_graph_eq_sum_entN {A : Type} [AddCommMonoid A] {N : ℕ} (M : Matrix
   · intro a haS hnot
     have hlt : ¬ a < N := fun hlt => hnot (Finset.mem_filter.mpr ⟨Finset.mem_range.mpr hlt, haS⟩)
     unfold entN
-    rw [dif_neg (fun hh => hlt hh.1)]
+    rw [dite_eq_right (fun hh => hlt hh.1)]
 
 theorem phI_last_iff {N : ℕ} (k s : ℕ) (a b : Fin N) :
     phI k s s a b ↔ (a : ℕ) < b ∧ ¬ (s ≤ (a : ℕ) ∧ (a : ℕ) < s + k ∧ (b : ℕ) = s + k) := by
@@ -94,7 +135,7 @@ theorem inPat_phI_last_iff {N : ℕ} (k s : ℕ) (M : Mt g N) :
       obtain ⟨hw1, hw2, rfl⟩ := hw
       have h0 := hz a hw1 hw2
       unfold entN at h0
-      rw [dif_pos ⟨ha, hb⟩] at h0
+      rw [dite_eq_left ⟨ha, hb⟩] at h0
       rw [Matrix.one_apply_ne]
       · exact h0
       · intro e

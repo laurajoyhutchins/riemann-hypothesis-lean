@@ -1,7 +1,57 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.FarRegularity.LKTExists
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKTypeMultiplicityOneUnconditional
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.DifferentialCommutesWeightOperator
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.FarRegularity.LKTExists
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.CreAnnApply
+import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.CreApply
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.DifferentialCommutesWeightOperator
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.GeneralizedVermaModulePolynomial
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.CreationOperators.KoszulDifferentialAnticommutator
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.MemFiltOfWords
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset
 
@@ -73,20 +123,19 @@ theorem bd_supp (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End ℂ V)
       show lev i.1.1 < lev i.1.2
       rw [t2, t3]
       have : lev i'.1.2 = lev j.1.1 := by rw [t1]
-      have u1' : lev i'.1.1 < lev i'.1.2 := u1
-      have u2' : lev j.1.1 < lev j.1.2 := u2
       omega
     · exact h _ h5 i (mem_insert_of_mem (mem_insert_of_mem (mem_erase.2 ⟨hk, hi⟩)))
 
 theorem lift_adL (φ : V →ₗ[ℂ] W) (p q : Fin n) (x : Cn n V) :
     lift n φ (adL p q x) = adL p q (lift n φ x) := by
+
   simp only [adL, LinearMap.sum_apply, LinearMap.smul_apply, Module.End.mul_apply, map_sum, map_smul, lift_cre,
-    lift_ann]
+  lift_ann]
 
 theorem lift_lF (φ : V →ₗ[ℂ] W) (E : Fin n → Fin n → Module.End ℂ V) (F : Fin n → Fin n → Module.End ℂ W)
     (h : ∀ a b x, φ (E a b x) = F a b (φ x)) (p q : Fin n) (x : Cn n V) :
     lift n φ (lF E p q x) = lF F p q (lift n φ x) := by
-  simp only [lF, LinearMap.add_apply, map_add, lift_adL]
+  simp only [lF, LinearMap.add_apply, map_add (f := _), lift_adL]
   congr 1
   funext A
   simp [h]
@@ -111,7 +160,8 @@ theorem bd_lift_comm (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End �
     (hT : ∀ i : Pos n, inU lev i → Commute (E i.1.1 i.1.2) T) {x : Cn n V} (hx : SuppIn (inU lev) x) :
     bd (allT n) E (lift n T x) = lift n T (bd (allT n) E x) := by
   funext A
-  rw [lift_apply, bd_apply, bd_apply, map_add, map_sum, map_sum]
+
+  rw [lift_apply, bd_apply, bd_apply, map_add (f := _), map_sum, map_sum]
   congr 1
   · refine Finset.sum_congr rfl fun i _ => ?_
     rw [if_pos rfl, if_pos rfl]
@@ -126,8 +176,10 @@ theorem bd_lift_comm (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End �
         rw [show ann i (lift n T x) A = T (ann i x A) from congrFun (lift_ann T i x).symm A, e, map_zero]
       rw [e, e', map_zero, map_zero]
   · refine Finset.sum_congr rfl fun i _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     split_ifs
@@ -224,7 +276,7 @@ theorem evaluation_lift_degree_zero (lev : Fin n → ℕ) (E : Fin n → Fin n �
     intro x hx
     obtain ⟨h1, h2⟩ := ha x hx
     obtain ⟨h3, h4⟩ := hb x hx
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     refine ⟨deg_add h1 h3, ?_⟩
     rw [h2, h4]; funext A; simp
 
@@ -358,7 +410,6 @@ theorem acycU (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End ℂ Z) (
           intro y hy1 hy2 hs hd hc
           have hne : ((m : ℂ) + (j + 1 : ℕ)) ≠ 0 := by exact_mod_cast (by omega : m + (j + 1) ≠ 0)
           have hHy := hHs y hs hd
-          have hbs : SuppIn (inU lev) (bd (allT n) E y) := bd_supp lev E hs
           have hL : ∀ A, (bd (allT n) E (H y) - Da (H y)) A + H (bd (allT n) E y - Da y) A ∈ G k := fun A =>
             Submodule.add_mem _ (hρ k _ (hHG k y hy1) hHy.1 A) (hHG k _ (hρ (k + 1) y hy1 hs) A)
           have hw : ∀ A, (bd (allT n) E (H y) - ((m : ℂ) + (j + 1 : ℕ)) • y) A =
@@ -376,7 +427,7 @@ theorem acycU (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End ℂ Z) (
               rw [hw]
               obtain ⟨u, hu, g, hg, e⟩ := Submodule.mem_sup.1 (hy2 A)
               refine Submodule.add_mem _ ?_ (Submodule.mem_sup_right (hL A))
-              rw [← e, map_add, smul_add, add_sub_add_comm]
+              rw [← e, map_add (f := _), smul_add, add_sub_add_comm]
               exact Submodule.add_mem_sup
                 (GlobalTheory.CompanionTheory.DSICKoszul.euler_filt (fun i : I => a i.1) _ (fun i j => hF.d_comm _ _) hda m u hu)
                 (Submodule.sub_mem _ (hNG _ _ hg) (Submodule.smul_mem _ _ hg)))
@@ -397,8 +448,8 @@ theorem acycU (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End ℂ Z) (
 
 end Acyc
 
-open scoped TensorProduct in
 
+open scoped TensorProduct in
 theorem coverU (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End ℂ V) (hE : GlRel E) :
     ∃ (Y : Type) (_ : AddCommGroup Y) (_ : Module ℂ Y) (EY : Fin n → Fin n → Module.End ℂ Y) (π : Y →ₗ[ℂ] V),
       GlRel EY ∧ Function.Surjective π ∧ (∀ a b y, π (EY a b y) = E a b (π y)) ∧
@@ -425,7 +476,7 @@ theorem coverU (lev : Fin n → ℕ) (E : Fin n → Fin n → Module.End ℂ V) 
   · induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul v f => simp [h0]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
   · exact fun i j => (hF.a_comm i j).map (Module.End.lTensorAlgHom ℂ Z V)
   · exact fun i j => (hF.d_comm i j).map (Module.End.lTensorAlgHom ℂ Z V)
   · intro i j _
@@ -570,7 +621,7 @@ theorem sum_root {M : Type} [AddCommMonoid M] (f : Pos n → M) (P : Prop) [Deci
     (h : P → x < y) :
     ∑ j : Pos n, (if P ∧ j.1 = (x, y) then f j else 0) = if hP : P then f ⟨(x, y), h hP⟩ else 0 := by
   by_cases hP : P
-  · rw [dif_pos hP, Finset.sum_eq_single ⟨(x, y), h hP⟩]
+  · rw [dite_eq_left hP, Finset.sum_eq_single ⟨(x, y), h hP⟩]
     · simp [hP]
     · intro j _ hj
       refine if_neg fun e => hj (Subtype.ext e.2)
@@ -582,7 +633,6 @@ theorem sum_cU {M : Type} [AddCommGroup M] [Module ℂ M] {lev : Fin n → ℕ} 
     ∑ j, cU lev p q l j • g j =
       (if h : q = l.1.1 then g ⟨(p, l.1.2), hlev.reflect_lt (by rw [hpq, h]; exact hl)⟩ else 0) -
       (if h : l.1.2 = p then g ⟨(l.1.1, q), hlev.reflect_lt (by rw [← hpq, ← h]; exact hl)⟩ else 0) := by
-  have hlt : lev l.1.1 < lev l.1.2 := hl
   rw [← sum_root g (q = l.1.1) p l.1.2 (fun h => hlev.reflect_lt (by rw [hpq, h]; exact hl)),
     ← sum_root g (l.1.2 = p) l.1.1 q (fun h => hlev.reflect_lt (by rw [← hpq, ← h]; exact hl)),
     ← Finset.sum_sub_distrib]
@@ -623,9 +673,9 @@ theorem struct_id {lev : Fin n → ℕ} (hlev : Monotone lev) {p q : Fin n} (hpq
     simp only [e1]
     rw [this]
     by_cases hbc : b = c
-    · rw [dif_pos hbc, if_pos hbc, cU, if_pos (by show lev a < lev d; rw [hbc] at hI'; omega)]
+    · rw [dite_eq_left hbc, if_pos hbc, cU, if_pos (by show lev a < lev d; rw [hbc] at hI'; omega)]
       simp [adC]
-    · rw [dif_neg hbc, if_neg hbc]
+    · rw [dite_eq_right hbc, if_neg hbc]
   have R1 : ∑ j, tU lev ⟨(a, b), hab⟩ j ⟨(e, f), hef⟩ * cU lev p q ⟨(c, d), hcd⟩ j =
       (if q = c ∧ b = p ∧ e = a ∧ f = d then 1 else 0) - (if d = p ∧ b = c ∧ e = a ∧ f = q then 1 else 0) := by
     have := sum_cU hlev hpq (fun j => tU lev ⟨(a, b), hab⟩ j ⟨(e, f), hef⟩) ⟨(c, d), hcd⟩ hJ
@@ -635,18 +685,18 @@ theorem struct_id {lev : Fin n → ℕ} (hlev : Monotone lev) {p q : Fin n} (hpq
     congr 1
     · by_cases hq : q = c
       · have hU : lev p < lev d := by rw [hpq, hq]; exact hJ'
-        rw [dif_pos hq, tU]
+        rw [dite_eq_left hq, tU]
         by_cases h : b = p ∧ e = a ∧ f = d
         · rw [if_pos ⟨hI, hU, h.1, h.2.1, h.2.2⟩, if_pos ⟨hq, h⟩]
         · rw [if_neg fun h' => h ⟨h'.2.2.1, h'.2.2.2.1, h'.2.2.2.2⟩, if_neg fun h' => h h'.2]
-      · rw [dif_neg hq, if_neg fun h => hq h.1]
+      · rw [dite_eq_right hq, if_neg fun h => hq h.1]
     · by_cases hd : d = p
       · have hU : lev c < lev q := by rw [← hpq, ← hd]; exact hJ'
-        rw [dif_pos hd, tU]
+        rw [dite_eq_left hd, tU]
         by_cases h : b = c ∧ e = a ∧ f = q
         · rw [if_pos ⟨hI, hU, h.1, h.2.1, h.2.2⟩, if_pos ⟨hd, h⟩]
         · rw [if_neg fun h' => h ⟨h'.2.2.1, h'.2.2.2.1, h'.2.2.2.2⟩, if_neg fun h' => h h'.2]
-      · rw [dif_neg hd, if_neg fun h => hd h.1]
+      · rw [dite_eq_right hd, if_neg fun h => hd h.1]
   have R2 : ∑ i, tU lev i ⟨(c, d), hcd⟩ ⟨(e, f), hef⟩ * cU lev p q ⟨(a, b), hab⟩ i =
       (if q = a ∧ b = c ∧ e = p ∧ f = d then 1 else 0) - (if b = p ∧ q = c ∧ e = a ∧ f = d then 1 else 0) := by
     have := sum_cU hlev hpq (fun i => tU lev i ⟨(c, d), hcd⟩ ⟨(e, f), hef⟩) ⟨(a, b), hab⟩ hI
@@ -656,18 +706,18 @@ theorem struct_id {lev : Fin n → ℕ} (hlev : Monotone lev) {p q : Fin n} (hpq
     congr 1
     · by_cases hq : q = a
       · have hU : lev p < lev b := by rw [hpq, hq]; exact hI'
-        rw [dif_pos hq, tU]
+        rw [dite_eq_left hq, tU]
         by_cases h : b = c ∧ e = p ∧ f = d
         · rw [if_pos ⟨hU, hJ, h.1, h.2.1, h.2.2⟩, if_pos ⟨hq, h⟩]
         · rw [if_neg fun h' => h ⟨h'.2.2.1, h'.2.2.2.1, h'.2.2.2.2⟩, if_neg fun h' => h h'.2]
-      · rw [dif_neg hq, if_neg fun h => hq h.1]
+      · rw [dite_eq_right hq, if_neg fun h => hq h.1]
     · by_cases hb : b = p
       · have hU : lev a < lev q := by rw [← hpq, ← hb]; exact hI'
-        rw [dif_pos hb, tU]
+        rw [dite_eq_left hb, tU]
         by_cases h : q = c ∧ e = a ∧ f = d
         · rw [if_pos ⟨hU, hJ, h.1, h.2.1, h.2.2⟩, if_pos ⟨hb, h⟩]
         · rw [if_neg fun h' => h ⟨h'.2.2.1, h'.2.2.2.1, h'.2.2.2.2⟩, if_neg fun h' => h h'.2]
-      · rw [dif_neg hb, if_neg fun h => hb h.1]
+      · rw [dite_eq_right hb, if_neg fun h => hb h.1]
   rw [L, R1, R2]
   by_cases h1 : b = c
   · subst h1
@@ -879,7 +929,7 @@ theorem evLc_facts {lev : Fin n → ℕ} (hlev : Monotone lev) {E : Fin n → Fi
     intro x hx
     obtain ⟨h1, h2, h3⟩ := ha x hx
     obtain ⟨h4, h5, h6⟩ := hb x hx
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     exact ⟨supp_add h1 h4, fun j hj => deg_add (h2 j hj) (h5 j hj), by rw [h3, h6]⟩
 
 end Ops

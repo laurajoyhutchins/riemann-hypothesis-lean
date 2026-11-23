@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.LocalFields.HerbrandFunction
-import GroundTheory.LocalFields.LowerIndexQuotient
+module
+
+public import GroundTheory.LocalFields.HerbrandFunction
+public import GroundTheory.LocalFields.LowerIndexQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,8 +77,8 @@ section Fiber
 
 variable {K L : Type*} [Field K] [Field L] [Algebra K L] (M : IntermediateField K L) [Normal K M]
 
-open Classical in
 
+open Classical in
 theorem sum_filter_restrictNormalHom_eq {β : Type*} [AddCommMonoid β] [Fintype (L ≃ₐ[K] L)]
     [Fintype (L ≃ₐ[M] L)] (F : (L ≃ₐ[K] L) → β) (σ : L ≃ₐ[K] L) :
     ∑ ρ ∈ Finset.univ.filter
@@ -107,21 +153,21 @@ theorem exists_lowerIndex_eq_herbrandPhi (σ : L ≃ₐ[K] L) :
       rw [Nat.cast_sum]
       simp_rw [natCast_toNat_min]
     rw [hconv, ← Nat.cast_mul, Nat.cast_inj] at hsum
-    have hsumR : (ramificationIndex M L : ℝ) * k =
+    have hsumR : ((_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) : ℝ) * k =
         ∑ τ : L ≃ₐ[M] L, enatMin (lowerIndex M L τ) (m : ℝ) := by
       simp_rw [← cast_toNat_min]
       exact_mod_cast hsum
     have hm0 : (0 : ℝ) ≤ m := m.cast_nonneg
     have hphi := herbrandPhi_eq_sum_lowerIndex (K := M) (L := L) (u := (m : ℝ) - 1) (by linarith)
     rw [sub_add_cancel, card_lowerRamificationGroup_zero M L, ← hsumR] at hphi
-    have he : (0 : ℝ) < ramificationIndex M L := by exact_mod_cast ramificationIndex_pos M L
+    have he : (0 : ℝ) < (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) := by exact_mod_cast ramificationIndex_pos M L
     rw [hphi]
     field_simp
     ring
 
 theorem sum_enatMin_lowerIndex_coset (σ : L ≃ₐ[K] L) {u : ℝ} (hu : -1 ≤ u) :
     ∑ τ : L ≃ₐ[M] L, enatMin (lowerIndex K L (σ * τ.restrictScalars K)) (u + 1) =
-      ramificationIndex M L *
+      (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) *
         enatMin (lowerIndex K M (AlgEquiv.restrictNormalHom M σ)) (herbrandPhi M L u + 1) := by
   classical
   obtain ⟨σ₀, hres, -, hmin, h1, hne⟩ := exists_lowerIndex_eq_herbrandPhi M σ
@@ -131,9 +177,9 @@ theorem sum_enatMin_lowerIndex_coset (σ : L ≃ₐ[K] L) {u : ℝ} (hu : -1 ≤
       ← sum_filter_restrictNormalHom_eq M (fun ρ ↦ enatMin (lowerIndex K L ρ) (u + 1)) σ₀, hres]
   rw [hre]
   simp_rw [hmin, enatMin_min]
-  have he : (0 : ℝ) < ramificationIndex M L := by exact_mod_cast ramificationIndex_pos M L
+  have he : (0 : ℝ) < (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) := by exact_mod_cast ramificationIndex_pos M L
   have hH : ∀ w : ℝ, 0 ≤ w → ∑ τ : L ≃ₐ[M] L, enatMin (lowerIndex M L τ) w =
-      ramificationIndex M L * (herbrandPhi M L (w - 1) + 1) := by
+      (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) * (herbrandPhi M L (w - 1) + 1) := by
     intro w hw
     rw [herbrandPhi_eq_sum_lowerIndex (K := M) (L := L) (by linarith), sub_add_cancel,
       card_lowerRamificationGroup_zero M L, sub_add_cancel, ← mul_assoc, mul_inv_cancel₀ he.ne',
@@ -159,7 +205,7 @@ theorem herbrandPhi_comp (u : ℝ) :
     rw [herbrandPhi_eq_sum_lowerIndex (K := K) (L := M) hv,
       herbrandPhi_eq_sum_lowerIndex (K := K) (L := L) hu]
     have hfib : ∑ σ : L ≃ₐ[K] L, enatMin (lowerIndex K L σ) (u + 1) =
-        ∑ s : M ≃ₐ[K] M, (ramificationIndex M L : ℝ) *
+        ∑ s : M ≃ₐ[K] M, ((_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) : ℝ) *
           enatMin (lowerIndex K M s) (herbrandPhi M L u + 1) := by
       rw [← Finset.sum_fiberwise Finset.univ (fun σ ↦ AlgEquiv.restrictNormalHom M σ)
         (fun σ ↦ enatMin (lowerIndex K L σ) (u + 1))]
@@ -167,10 +213,12 @@ theorem herbrandPhi_comp (u : ℝ) :
       obtain ⟨σ, rfl⟩ := AlgEquiv.restrictNormalHom_surjective (F := K) (K₁ := M) L s
       rw [sum_filter_restrictNormalHom_eq M (fun ρ ↦ enatMin (lowerIndex K L ρ) (u + 1)) σ,
         sum_enatMin_lowerIndex_coset M σ hu]
+    have ht := ramificationIndex_tower K M L
+    dsimp only [ramificationIndex] at ht
     rw [hfib, ← Finset.mul_sum, card_lowerRamificationGroup_zero K L,
-      card_lowerRamificationGroup_zero K M, ramificationIndex_tower K M L]
-    have h1 : (0 : ℝ) < ramificationIndex K M := by exact_mod_cast ramificationIndex_pos K M
-    have h2 : (0 : ℝ) < ramificationIndex M L := by exact_mod_cast ramificationIndex_pos M L
+      card_lowerRamificationGroup_zero K M, ht]
+    have h1 : (0 : ℝ) < (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation K))) := by exact_mod_cast ramificationIndex_pos K M
+    have h2 : (0 : ℝ) < (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) := by exact_mod_cast ramificationIndex_pos M L
     push_cast
     field_simp
   · have hu0 : u ≤ 0 := by linarith [not_le.mp hu]

@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InvAlg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqLagIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UnitsBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InvAlg
+public import Mathlib.LinearAlgebra.Matrix.Trace
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UnitsBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial Matrix IsLocalRing TensorProduct UpperTheory.V.AlgebraTools
 
@@ -13,13 +59,17 @@ private def theta : E →ₗ[B] (U.oddForm p q).Ext where
   toFun z := (U.oddForm p q).el (T.tr z)
     (cornerProj B (U.ep p) (U.ep q) z + cornerProj B (U.ep p) (U.ep q) (T.st z))
   map_add' z w := by
-    apply OddForm.Ext.ext
-    · simp
-    · simp only [map_add, OddForm.od_el, OddForm.od_add]; abel
+    apply OddForm.ext
+    · simp only [OddForm.ev_add]
+      simp only [OddForm.Ext.ev, OddForm.el, map_add]
+    · simp only [OddForm.od_add]
+      simp only [OddForm.Ext.od, OddForm.el, map_add]; abel
   map_smul' c z := by
-    apply OddForm.Ext.ext
-    · simp
-    · simp only [map_smul, OddForm.od_el, OddForm.od_smul, RingHom.id_apply, smul_add]
+    apply OddForm.ext
+    · simp only [RingHom.id_apply, OddForm.ev_smul]
+      simp only [OddForm.Ext.ev, OddForm.el, map_smul, smul_eq_mul]
+    · simp only [RingHom.id_apply, OddForm.od_smul]
+      simp only [OddForm.Ext.od, OddForm.el, map_smul, smul_add]
 
 private theorem theta_ev (z : E) : (theta U p q z).ev = T.tr z := rfl
 
@@ -27,7 +77,7 @@ private theorem theta_od (z : E) :
     (theta U p q z).od.1 = U.ep p * (z * U.ep q) + U.ep p * (T.st z * U.ep q) := rfl
 
 private theorem theta_st (z : E) : theta U p q (T.st z) = theta U p q z := by
-  apply OddForm.Ext.ext
+  apply OddForm.ext
   · rw [theta_ev, theta_ev, T.tr_st]
   · apply Subtype.ext
     rw [theta_od, theta_od, T.st_st, add_comm]
@@ -36,7 +86,7 @@ variable {p q}
 
 private theorem theta_ep (hpq : p ≠ q) {a : ι} (ha : a = p ∨ a = q) : theta U p q (U.ep a) = 1 := by
   have hpq0 : U.ep p * U.ep q = 0 := U.coi.ortho hpq
-  apply OddForm.Ext.ext
+  apply OddForm.ext
   · rw [theta_ev, OddForm.ev_one, U.tr_ep]
   · apply Subtype.ext
     rw [theta_od, U.st_ep, OddForm.od_one]
@@ -61,7 +111,7 @@ private theorem theta_diag (hpq : p ≠ q) {a : ι} (ha : a = p ∨ a = q) {u : 
     rw [← hw]
     simp only [mul_assoc]
     rw [← mul_assoc (U.ep p), hpq0, zero_mul]
-  apply OddForm.Ext.ext
+  apply OddForm.ext
   · rw [theta_ev, OddForm.ev_smul, OddForm.ev_one, mul_one]
   · apply Subtype.ext
     rw [theta_od, OddForm.od_smul, OddForm.od_one, smul_zero]
@@ -141,7 +191,7 @@ private theorem theta_mul (hpq : p ≠ q) {a b c : ι} (ha : a = p ∨ a = q) (h
     rw [theta_diag U hpq (Or.inl rfl) huv]
     obtain ⟨h1, h2⟩ := theta_pq U hpq hu
     obtain ⟨h3, h4⟩ := theta_qp U hpq hv
-    apply OddForm.Ext.ext
+    apply OddForm.ext
     · rw [OddForm.ev_smul, OddForm.ev_one, mul_one, OddForm.ev_mul, h1, h3, zero_mul, zero_add, hbe, h2, h4, T.st_st]
     · rw [OddForm.od_smul, OddForm.od_one, smul_zero, OddForm.od_mul, h1, h3, zero_smul, zero_smul, add_zero]
   · exact hright (Or.inr rfl) hv hu
@@ -151,7 +201,7 @@ private theorem theta_mul (hpq : p ≠ q) {a b c : ι} (ha : a = p ∨ a = q) (h
     rw [theta_diag U hpq (Or.inr rfl) huv]
     obtain ⟨h1, h2⟩ := theta_qp U hpq hu
     obtain ⟨h3, h4⟩ := theta_pq U hpq hv
-    apply OddForm.Ext.ext
+    apply OddForm.ext
     · rw [OddForm.ev_smul, OddForm.ev_one, mul_one, OddForm.ev_mul, h1, h3, zero_mul, zero_add, hbe, h2, h4, ← T.st_mul, T.tr_st, T.tr_comm]
     · rw [OddForm.od_smul, OddForm.od_one, smul_zero, OddForm.od_mul, h1, h3, zero_smul, zero_smul, add_zero]
   · exact hleft (Or.inr rfl) hu hv
@@ -173,6 +223,7 @@ theorem UpperTheory.V.AlgebraTools.vr_hom :
       calc U.x i * (y * z) * T.st (U.x j) = U.x i * y * (∑ k, T.st (U.x k) * U.x k) * z * T.st (U.x j) := by
             rw [hB, mul_one, mul_assoc (U.x i) y z]
         _ = _ := by simp only [Finset.mul_sum, Finset.sum_mul, mul_assoc]
+
     rw [hs, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     exact theta_mul U hpq (ho i) (ho k) (ho j) (hG i k y) (hG k j z)
@@ -187,7 +238,7 @@ theorem UpperTheory.V.AlgebraTools.vr_hom :
   have hadd : ∀ y z, U.vr p q (y + z) = U.vr p q y + U.vr p q z := by
     intro y z
     refine Matrix.ext fun i j => ?_
-    simp only [hvr, Matrix.add_apply, mul_add, add_mul, map_add]
+    simp only [hvr, Matrix.add_apply, mul_add, add_mul, map_add (f := _)]
   have hzero : U.vr p q 0 = 0 := by
     refine Matrix.ext fun i j => ?_
     simp only [hvr, mul_zero, zero_mul, map_zero, Matrix.zero_apply]

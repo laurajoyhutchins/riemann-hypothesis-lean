@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
-import GroundTheory.ProfiniteCohomology.InflationRestriction.Coinduced
-import GroundTheory.ProfiniteCohomology.Bridge
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.TateCohomology.ConjAction
+public import GroundTheory.ProfiniteCohomology.Bridge
+public import GroundTheory.ProfiniteCohomology.FilteredHomology
+public import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
+import GroundTheory.ProfiniteCohomology.InflationRestriction.DegreeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -40,7 +89,7 @@ theorem IsTgLift.mul_left (hy : IsTgLift A N x y) (n : N) (g : G) :
 theorem IsTgLift.tgDiff_mul_right (hy : IsTgLift A N x y) (g h : G) (n : N) :
     tgDiff A y g (h * n) = tgDiff A y g h := by
   simp only [tgDiff]
-  rw [hy.mul_right, ← mul_assoc, hy.mul_right, map_add, ← Module.End.mul_apply, ← map_mul]
+  rw [hy.mul_right, ← mul_assoc, hy.mul_right, map_add (f := _), ← Module.End.mul_apply, ← map_mul]
   abel
 
 theorem IsTgLift.tgDiff_mul_left (hx : IsCocycleOne A N x) (hy : IsTgLift A N x y) (g : G) (n : N)
@@ -51,14 +100,14 @@ theorem IsTgLift.tgDiff_mul_left (hx : IsCocycleOne A N x) (hy : IsTgLift A N x 
   have hc := hy.conj h n
   have : A.ρ (g * n) (y h) = A.ρ g (A.ρ n (y h)) := by rw [map_mul]; rfl
   rw [this, show A.ρ n (y h) = y h + (A.ρ h (x (GroundTheory.GroupCoh.conjHom N h n)) - x n) by
-    rw [hc]; abel, map_add, map_sub, map_mul (A.ρ) g h, Module.End.mul_apply]
+    rw [hc]; abel, map_add (f := _), map_sub, map_mul (A.ρ) g h, Module.End.mul_apply]
   abel
 
 theorem IsTgLift.tgDiff_mem_invariants (hx : IsCocycleOne A N x) (hy : IsTgLift A N x y)
     (g h : G) (n : N) : A.ρ n (tgDiff A y g h) = tgDiff A y g h := by
   have e1 : tgDiff A y (n * g) h = A.ρ n (tgDiff A y g h) := by
     simp only [tgDiff]
-    rw [mul_assoc, hy.mul_left, hy.mul_left, map_mul, Module.End.mul_apply, map_add, map_sub]
+    rw [mul_assoc, hy.mul_left, hy.mul_left, map_mul, Module.End.mul_apply, map_add (f := _), map_sub]
     abel
   have e2 : (n : G) * g = g * (GroundTheory.GroupCoh.conjHom N g n : G) := by
     simp only [GroundTheory.GroupCoh.coe_conjHom_apply]; group
@@ -75,8 +124,8 @@ section Cochains
 variable [TopologicalSpace G] [IsTopologicalGroup G] (A : Rep.{u} k G) [IsDiscreteRep A]
   (N : Subgroup G) [N.Normal]
 
-omit [IsTopologicalGroup G] in
 
+omit [IsTopologicalGroup G] in
 def liftCochain {y : G → A} (hy : IsLocallyConstant y) : locallyConstantCochains A 1 :=
   ⟨fun g => y (g 0), hy.comp_continuous (continuous_apply 0)⟩
 
@@ -105,8 +154,8 @@ theorem IsTgLift.tgDiff_out (hx : IsCocycleOne A N x) (hy : IsTgLift A N x y) (g
   change tgDiff A y (g : G ⧸ N).out (h : G ⧸ N).out = _
   rw [hm, hn, hy.tgDiff_mul_mul hx]
 
-omit [IsTopologicalGroup G] in
 
+omit [IsTopologicalGroup G] in
 noncomputable def tgCochain (hx : IsCocycleOne A N x) (hy : IsTgLift A N x y)
     (hyc : IsLocallyConstant y) : locallyConstantCochains (A.quotientToInvariants N) 2 :=
   ⟨fun c => ⟨tgDiff A y (c 0).out (c 1).out, fun n => hy.tgDiff_mem_invariants hx _ _ n⟩, by
@@ -124,8 +173,8 @@ noncomputable def tgCochain (hx : IsCocycleOne A N x) (hy : IsTgLift A N x y)
     rw [this]
     exact isLocallyConstant_tgDiff A hyc⟩
 
-variable (A N) in
 
+variable (A N) in
 theorem cochainsMapAlong_mk_injective (n : ℕ) :
     Function.Injective ((cochainsMapAlong (A := A.quotientToInvariants N) (B := A)
       (QuotientGroup.mk' N) (continuous_quotientGroup_mk' N)
@@ -159,7 +208,7 @@ theorem cochainsComplex_d_d_apply {B : Rep.{u} k G} [IsDiscreteRep B] (i j l : �
 
 theorem tgCochain_d (hx : IsCocycleOne A N x) (hy : IsTgLift A N x y) (hyc : IsLocallyConstant y) :
     ((cochainsComplex (A.quotientToInvariants N)).d 2 (2 + 1)).hom (tgCochain hx hy hyc) = 0 := by
-  apply cochainsMapAlong_mk_injective A N 3
+  apply cochainsMapAlong_mk_injective (A := A) (N := N) 3
   rw [map_zero]
   refine (hom_f_d_apply _ 2 3 _).trans ?_
   rw [cochainsMapAlong_tgCochain]

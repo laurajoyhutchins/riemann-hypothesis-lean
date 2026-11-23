@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.PeriodIntegrals.LocJacTyp
+module
+
+public import Formalism.PeriodIntegrals.LocJacTyp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,29 +60,6 @@ def Obox (ι : Type) : Set (ι → Fv F v ⊗[F] E) := Set.univ.pi fun _ => OEv 
 def SplitHyp : Prop :=
   Module.finrank F E = 2 ∧ σ ≠ AlgHom.id F E ∧ ∃ x : Fv F v ⊗[F] E, x * x = x ∧ x ≠ 0 ∧ x ≠ 1
 
-def SdNorm : Prop :=
-  (∀ (ι : Type) [Fintype ι] [Nonempty ι], sdE (E := E) ψ v ι = 0) ∨
-  ∃ m : ℝ, 0 < m ∧ ∀ (ι : Type) [Fintype ι], (sdE (E := E) ψ v ι).IsAddHaarMeasure ∧
-    (sdE (E := E) ψ v ι (Obox (E := E) v ι)).toReal = m ^ Fintype.card ι
-
-def VolZZ : Prop :=
-  ∀ (g r : ℕ) (TF TF' : Matrix (Fin (r + 1)) (Fin (r + 1)) (Fv F v ⊗[F] E)) (m : ℝ),
-    SplitHyp σ v → 0 < g → TF ∈ HermR (Fv F v) σ (r + 1) → TF' ∈ HermR (Fv F v) σ (r + 1) →
-    (∀ i j, (TF' i j - TF i j) * sc (E := E) v (g : Fv F v)⁻¹ ∈ OEv (E := E) v) →
-    ∀ μ : Measure (Fin (r + 1) × Fin (r + 1) → Fv F v ⊗[F] E), μ.IsAddHaarMeasure →
-      (μ (Obox (E := E) v _)).toReal = m ^ ((r + 1) * (r + 1)) →
-      (μ (ZZTyp σ v g r TF TF')).toReal =
-        m ^ ((r + 1) * (r + 1)) * absV v (g : Fv F v) ^ (3 * ((r + 1) * (r + 1))) *
-          ∏ i : Fin (r + 1), ∏ j : Fin (r + 1), ((absV v (alp v r i) * absV v (alp v r j)) ^ 2)⁻¹
-
-def VolU : Prop :=
-  ∀ (g r : ℕ) (m : ℝ), SplitHyp σ v → 0 < g →
-    ∀ μ : Measure (UIdx r → Fv F v ⊗[F] E), μ.IsAddHaarMeasure →
-      (μ (Obox (E := E) v _)).toReal = m ^ Fintype.card (UIdx r) →
-      ((μ.prod μ) (deepCongruenceVolume (E := E) v g r)).toReal =
-        ∏ q : UIdx r, (m ^ 2 * absV v (g : Fv F v) ^ 2 *
-          (absV v (alp v r q.1.1) / absV v (alp v r q.1.2)) ^ 4)
-
 def VolPP : Prop :=
   ∀ (g r T T' : ℕ) (m : ℝ), SplitHyp σ v → 0 < g → (g : ℤ) ∣ ((T : ℤ) - T') →
     ∀ μ : Measure (Unit → Fv F v ⊗[F] E), μ.IsAddHaarMeasure →
@@ -49,42 +68,9 @@ def VolPP : Prop :=
         (μ ((fun c : Unit → Fv F v ⊗[F] E => c ()) ⁻¹' PPTyp σ v g r T T' l)).toReal =
           m * absV v (g : Fv F v) ^ 3 * (absV v (alp v r l) ^ 4)⁻¹
 
-def Arith : Prop :=
-  ∀ (typed : Prop) (g r : ℕ) (m : ℝ), typed → 0 < g →
-    m ^ ((r + 1) * (r + 1)) * absV v (g : Fv F v) ^ (3 * ((r + 1) * (r + 1))) *
-        (∏ i : Fin (r + 1), ∏ j : Fin (r + 1), ((absV v (alp v r i) * absV v (alp v r j)) ^ 2)⁻¹) *
-        jacS v typed g r =
-      (∏ q : UIdx r, (m ^ 2 * absV v (g : Fv F v) ^ 2 *
-          (absV v (alp v r q.1.1) / absV v (alp v r q.1.2)) ^ 4)) *
-        ∏ l : Fin (r + 1), (m * absV v (g : Fv F v) ^ 3 * (absV v (alp v r l) ^ 4)⁻¹)
-
 end Defs
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
   (σ : E →ₐ[F] E) (ψ : AddChar (AF F) ℂ) (v : HeightOneSpectrum (𝓞 F))
-
-theorem locJacTyp_of (h0 : SdNorm (E := E) ψ v) (hZ : VolZZ σ v) (hU : VolU σ v)
-    (hP : VolPP σ v) (hA : Arith (F := F) v) : PI.LocJacTyp.LocJacTyp σ ψ v := by
-  intro typed g r T T' TF TF' hfin hσ ht hg hsplit hTF hTF' hdiff hT
-  have hS : SplitHyp σ v := ⟨hfin, hσ, hsplit⟩
-  rcases h0 with h0 | ⟨m, -, h0⟩
-  · have h1 : sdE (E := E) ψ v (Fin (r + 1) × Fin (r + 1)) = 0 := h0 _
-    have h2 : sdE (E := E) ψ v Unit = 0 := h0 _
-    have h3 : ∏ l : Fin (r + 1), volC (E := E) ψ v (PPTyp σ v g r T T' l) = 0 :=
-      Finset.prod_eq_zero (Finset.mem_univ 0) (by simp [volC, h2])
-    simp [volS, h1, h3]
-  · obtain ⟨hZH, hZv⟩ := h0 (Fin (r + 1) × Fin (r + 1))
-    obtain ⟨hUH, hUv⟩ := h0 (UIdx r)
-    obtain ⟨hCH, hCv⟩ := h0 Unit
-    have hZv' : (sdE (E := E) ψ v (Fin (r + 1) × Fin (r + 1)) (Obox (E := E) v _)).toReal =
-        m ^ ((r + 1) * (r + 1)) := by rw [hZv]; simp [Fintype.card_prod]
-    have hCv' : (sdE (E := E) ψ v Unit (Obox (E := E) v Unit)).toReal = m := by rw [hCv]; simp
-    have eZ := hZ g r TF TF' m hS hg hTF hTF' hdiff _ hZH hZv'
-    have eU := hU g r m hS hg _ hUH hUv
-    have eP := hP g r T T' m hS hg hT _ hCH hCv'
-    unfold volS volU volC
-    rw [eZ, eU]
-    simp only [eP]
-    exact hA typed g r m ht hg
 
 end PI.UnitaryGroupMassFormula.LocJacTyp

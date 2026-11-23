@@ -1,11 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ZhangDimensionPushDownGrassmannianHeightBounds
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsBundles
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.ZhangDimensionPushDownGrassmannianHeightBounds
+public import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
+public import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsBundles
+public import Development.AutomorphicSpectrum.Proofs.AdelicProofs.ShortVectorOfSubmodule
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LineOfKeyDegreeStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PolarizedDataFieldExtensionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LineOfKeyDegreeStatement
-import Development.AutomorphicSpectrum.Proofs.AdelicProofs.ShortVectorOfSubmodule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights TensorProduct
@@ -34,13 +76,13 @@ theorem exists_isometric_ext {K L' : Type} [Field K] [NumberField K] [Field L'] 
         (((B.baseChange L').metric.form σ').inner ((1 : ComplexAt σ') ⊗ₜ[𝓞 L'] x)
           ((1 : ComplexAt σ') ⊗ₜ[𝓞 L'] y) : ℂ) := by
   let f : 𝓞 L' →+ B.carrier →+ B'.carrier :=
-    { toFun := fun a => (DistribMulAction.toAddMonoidHom B'.carrier a).comp io.toAddMonoidHom
+    { toFun := fun a => (DistribSMul.toAddMonoidHom B'.carrier a).comp io.toAddMonoidHom
       map_zero' := by ext e; simp
       map_add' := by intro a b; ext e; simp [add_smul] }
   have hf : ∀ (r : 𝓞 K) (a : 𝓞 L') (e : B.carrier), f (r • a) e = f a (r • e) := by
     intro r a e
     simp only [f, AddMonoidHom.coe_mk, ZeroHom.coe_mk, AddMonoidHom.coe_comp, Function.comp_apply,
-      DistribMulAction.toAddMonoidHom_apply, LinearMap.toAddMonoidHom_coe, LinearMap.map_smulₛₗ,
+      DistribSMul.toAddMonoidHom_apply, LinearMap.toAddMonoidHom_coe, LinearMap.map_smulₛₗ,
       Algebra.smul_def, mul_smul, smul_comm a]
   let Φ0 : 𝓞 L' ⊗[𝓞 K] B.carrier →+ B'.carrier := TensorProduct.liftAddHom f hf
   have hΦ : ∀ (a : 𝓞 L') (e : B.carrier), Φ0 (a ⊗ₜ e) = a • io e := fun a e => by
@@ -76,11 +118,11 @@ theorem exists_isometric_ext {K L' : Type} [Field K] [NumberField K] [Field L'] 
     intro x y
     induction x using TensorProduct.induction_on with
     | zero => simp only [map_zero, tmul_zero, inner_zero_left]
-    | add x x' hx hx' => simp only [map_add, tmul_add, inner_add_left, hx, hx']
+    | add x x' hx hx' => simp only [map_add (f := _), tmul_add, inner_add_left, hx, hx']
     | tmul a e =>
       induction y using TensorProduct.induction_on with
       | zero => simp only [map_zero, tmul_zero, inner_zero_right]
-      | add y y' hy hy' => simp only [map_add, tmul_add, inner_add_right, hy, hy']
+      | add y y' hy hy' => simp only [map_add (f := _), tmul_add, inner_add_right, hy, hy']
       | tmul b e' =>
         rw [h1, h1, h2, h2, map_smul, map_smul, map_smul, map_smul, inner_smul_left, inner_smul_left,
           inner_smul_right, inner_smul_right, hB]

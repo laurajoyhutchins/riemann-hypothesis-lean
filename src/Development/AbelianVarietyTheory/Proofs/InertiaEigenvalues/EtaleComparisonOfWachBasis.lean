@@ -1,10 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapMulLeft
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusSubOneWittTensorLatticeSurjectiveFixed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBasisDD
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBasisDD
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusSubOneWittTensorLatticeSurjectiveFixed
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MapMulLeft
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL Formalism.MainNotions.DeltaInvariantLattices
 
@@ -18,7 +58,7 @@ theorem map_incl_smul {O R R' M : Type} [CommRing O] [CommRing R] [CommRing R'] 
       f a • TensorProduct.map f.toLinearMap (LinearMap.id : M →ₗ[O] M) y := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add x x' hx hx' => simp only [smul_add, map_add, hx, hx']
+  | add x x' hx hx' => simp only [smul_add, map_add (f := _), hx, hx']
   | tmul r u => simp [TensorProduct.smul_tmul']
 
 section Generic
@@ -62,7 +102,7 @@ theorem p5inf_of_sand (T : LocLat G Qp LL O) (c : RW) (m : ℕ) (hc : c = inclR 
   · obtain ⟨y, rfl⟩ := hz
     induction y using TensorProduct.induction_on with
     | zero => rw [map_zero, smul_zero]; exact zero_mem _
-    | add x x' hx hx' => rw [map_add, smul_add]; exact add_mem hx hx'
+    | add x x' hx hx' => rw [map_add (f := _), smul_add]; exact add_mem hx hx'
     | tmul r t =>
       have e : inclR (E.io W.X) ^ m • TensorProduct.map inclR.toLinearMap LinearMap.id (r ⊗ₜ[O] t) =
           inclR r • ((inclR (E.io W.X) ^ m) ⊗ₜ[O] t : TW RW T) := by
@@ -102,7 +142,7 @@ theorem etale_comparison_of_wach_basis (T : LocLat G Qp LL O) (hT : IsCrys PD T.
 
 end Generic
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem main : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW),
     p1eL D.loc D.locA HW F := by

@@ -1,5 +1,50 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset
 open scoped ContDiff
@@ -92,8 +137,8 @@ def SV : Submodule ℂ (Mx k r → E) where
 
 variable {k r i D E}
 
-open Classical in
 
+open Classical in
 def cutF (k r : ℕ) (i : Fin (r + 1)) (D : Set (Mx k r)) (f : Mx k r → E) : Mx k r → E :=
   fun g => if g ∈ Glev k r i ∩ D then f g else 0
 
@@ -125,8 +170,8 @@ theorem SV_ext {φ ψ : SV k r i D E} (h : ∀ g ∈ Glev k r i ∩ D, φ.1 g = 
   · exact h g hg
   · rw [φ.2.2 g hg, ψ.2.2 g hg]
 
-open Classical in
 
+open Classical in
 def opV (k r : ℕ) (i : Fin (r + 1)) (D : Set (Mx k r)) (T : (Mx k r → E) → Mx k r → E) : Module.End ℂ (SV k r i D E) :=
   if h : IsOpen D ∧ Qx2.Good k r i D T then
     { toFun := fun φ => ⟨cutF k r i D (T φ.1), cutF_mem h.1 (h.2.sm _ φ.2.1)⟩
@@ -149,7 +194,7 @@ def opV (k r : ℕ) (i : Fin (r + 1)) (D : Set (Mx k r)) (T : (Mx k r → E) →
 
 theorem opV_apply (hD : IsOpen D) {T : (Mx k r → E) → Mx k r → E} (hT : Qx2.Good k r i D T) (φ : SV k r i D E)
     {g : Mx k r} (hg : g ∈ Glev k r i ∩ D) : (opV k r i D T φ).1 g = T φ.1 g := by
-  rw [opV, dif_pos (show IsOpen D ∧ Qx2.Good k r i D T from ⟨hD, hT⟩)]
+  rw [opV, dite_eq_left (show IsOpen D ∧ Qx2.Good k r i D T from ⟨hD, hT⟩)]
   exact cutF_of_mem hg
 
 def EV (k r : ℕ) (i : Fin (r + 1)) (D : Set (Mx k r)) (E : Type) [NormedAddCommGroup E] [NormedSpace ℂ E]
@@ -167,11 +212,6 @@ def etaV (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (i : Fin (r + 1)) (D : Se
   opV k r i D (mulF fun g => ybv k r z i g c)
 
 end Ring
-
-def MulGood : Prop :=
-  ∀ (E : Type) [NormedAddCommGroup E] [NormedSpace ℂ E] (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (i : Fin (r + 1))
-    (D : Set (Mx k r)) (c : Fin (mdim k r i)),
-    Qx2.Good k r i D (mulF (E := E) fun g => yv k r z i g c) ∧ Qx2.Good k r i D (mulF (E := E) fun g => ybv k r z i g c)
 
 def BridgeRel : Prop :=
   ∀ (E : Type) [NormedAddCommGroup E] [NormedSpace ℂ E] (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (i : Fin (r + 1))

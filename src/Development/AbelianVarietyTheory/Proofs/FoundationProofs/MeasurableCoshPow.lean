@@ -1,6 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.CartanCoshPower
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsContinuousOnPolarLog
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StarMulOfMemKc
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsContinuousOnPolarLog
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.CoshPowMeas
@@ -69,7 +115,7 @@ def coshSum (n : ℕ) (B : Matrix (Fin p) (Fin q) ℂ) : Matrix (Fin q) (Fin q) 
 
 theorem continuous_coshSum (n : ℕ) : Continuous (coshSum n : Matrix (Fin p) (Fin q) ℂ → _) := by
   unfold coshSum
-  refine continuous_finset_sum _ fun k _ => ?_
+  refine continuous_finsetSum _ fun k _ => ?_
   have h : Continuous fun B : Matrix (Fin p) (Fin q) ℂ => Bᴴ * B :=
     continuous_id.matrix_conjTranspose.matrix_mul continuous_id
   exact (h.pow k).const_smul ((((2 * k).factorial : ℕ) : ℂ)⁻¹)
@@ -114,7 +160,7 @@ theorem tendsto_det_coshSum (B : Matrix (Fin p) (Fin q) ℂ) :
     Tendsto (fun n => (coshSum n B).det.re) atTop
       (𝓝 (∏ i ∈ Finset.range (min p q), Real.cosh (singVal B i))) := by
   simp only [det_coshSum, ← prod_cosh_sPad]
-  exact tendsto_finset_prod _ fun j _ => (Real.hasSum_cosh (sPad B j)).tendsto_sum_nat
+  exact tendsto_finsetProd _ fun j _ => (Real.hasSum_cosh (sPad B j)).tendsto_sum_nat
 
 theorem measurable_coshPow : ∀ (p q : ℕ) (c : ℝ), Measurable (coshPow c : UpqT p q → ℝ) := by
   intro p q c
@@ -129,7 +175,7 @@ theorem measurable_coshPow : ∀ (p q : ℕ) (c : ℝ), Measurable (coshPow c : 
   have e : (coshPow c : UpqT p q → ℝ) = fun g =>
       (∏ i ∈ Finset.range (min p q), Real.cosh (singVal (cartanB g) i)) ^ (-c) := by
     funext g
-    exact Real.finset_prod_rpow _ _ (fun i _ => (Real.cosh_pos _).le) _
+    exact Real.finsetProd_rpow _ _ (fun i _ => (Real.cosh_pos _).le) _
   rw [e]
   exact h.pow_const _
 

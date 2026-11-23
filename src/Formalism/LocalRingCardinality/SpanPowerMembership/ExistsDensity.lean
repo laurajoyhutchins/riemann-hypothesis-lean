@@ -1,5 +1,54 @@
-import Formalism.LocalRingCardinality.SpanPowerMembership.LeOfEventuallyDown
-import Formalism.LocalRingCardinality.SpanPowerMembership.HasStrictFDerivAtExpZero
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.LeOfEventuallyDown
+public import Formalism.LocalRingCardinality.SpanPowerMembership.HasStrictFDerivAtExpZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,11 +97,12 @@ theorem expG_cont : Continuous C.expG := by
   exact hc.comp continuous_subtype_val
 
 theorem exists_rho : ∃ ρ > 0, ∀ Z : 𝔸, ‖Z‖ < ρ →
-    logA 𝔸 (exp Z) = Z ∧ ((∃ g, C.mat g = exp Z) → Z ∈ V) := by
-  obtain ⟨ε, hε, h⟩ := Metric.eventually_nhds_iff.1 ((logA_exp (𝔸 := 𝔸)).and C.H2)
+    logA (𝔸 := 𝔸) (exp Z) = Z ∧ ((∃ g, C.mat g = exp Z) → Z ∈ V) := by
+  obtain ⟨ε, hε, h⟩ := Metric.eventually_nhds_iff.1
+    ((logA_exp (𝔸 := 𝔸)).and C.H2)
   exact ⟨ε, hε, fun Z hZ => h (by simpa [dist_zero_right] using hZ)⟩
 
-variable {ρ : ℝ} (hR : ∀ Z : 𝔸, ‖Z‖ < ρ → logA 𝔸 (exp Z) = Z ∧ ((∃ g, C.mat g = exp Z) → Z ∈ V))
+variable {ρ : ℝ} (hR : ∀ Z : 𝔸, ‖Z‖ < ρ → logA (𝔸 := 𝔸) (exp Z) = Z ∧ ((∃ g, C.mat g = exp Z) → Z ∈ V))
 
 include hR in
 theorem injOn : InjOn C.expG (ball (0 : V) ρ) := by
@@ -115,11 +165,12 @@ theorem nu_finite : IsFiniteMeasure (C.nu ρ μ) := by
 include hR in
 theorem nu_pos (hρ : 0 < ρ) (r : ℝ) (hr : 0 < r) : 0 < C.nu ρ μ (closedBall (0 : V) r) := by
   have ht : 0 < min r ρ := lt_min hr hρ
-  have hcont : ContinuousAt (logA 𝔸) 1 := (hasStrict_logA (𝔸 := 𝔸)).hasFDerivAt.continuousAt
-  have hlim : Tendsto (logA 𝔸) (𝓝 1) (𝓝 0) := by
+  have hcont : ContinuousAt (logA (𝔸 := 𝔸)) 1 :=
+    (hasStrict_logA (𝔸 := 𝔸)).hasFDerivAt.continuousAt
+  have hlim : Tendsto (logA (𝔸 := 𝔸)) (𝓝 1) (𝓝 0) := by
     have h := hcont.tendsto
     rwa [logA_one] at h
-  have hev : ∀ᶠ h in 𝓝 (1 : 𝔸), exp (logA 𝔸 h) = h ∧ ‖logA 𝔸 h‖ < min r ρ := by
+  have hev : ∀ᶠ h in 𝓝 (1 : 𝔸), exp (logA (𝔸 := 𝔸) h) = h ∧ ‖logA (𝔸 := 𝔸) h‖ < min r ρ := by
     refine (exp_logA (𝔸 := 𝔸)).and ?_
     filter_upwards [(Metric.tendsto_nhds.1 hlim) _ ht] with h hh
     simpa [dist_zero_right] using hh
@@ -132,9 +183,9 @@ theorem nu_pos (hρ : 0 < ρ) (r : ℝ) (hr : 0 < r) : 0 < C.nu ρ μ (closedBal
   have hsub : C.mat ⁻¹' W ⊆ C.expG '' (closedBall 0 r ∩ ball 0 ρ) := by
     intro g hg
     obtain ⟨he, hn⟩ := hWsub hg
-    have hZρ : ‖logA 𝔸 (C.mat g)‖ < ρ := lt_of_lt_of_le hn (min_le_right _ _)
-    have hZV : logA 𝔸 (C.mat g) ∈ V := (hR _ hZρ).2 ⟨g, he.symm⟩
-    refine ⟨⟨logA 𝔸 (C.mat g), hZV⟩, ⟨?_, ?_⟩, ?_⟩
+    have hZρ : ‖logA (𝔸 := 𝔸) (C.mat g)‖ < ρ := lt_of_lt_of_le hn (min_le_right _ _)
+    have hZV : logA (𝔸 := 𝔸) (C.mat g) ∈ V := (hR _ hZρ).2 ⟨g, he.symm⟩
+    refine ⟨⟨logA (𝔸 := 𝔸) (C.mat g), hZV⟩, ⟨?_, ?_⟩, ?_⟩
     · rw [mem_closedBall_zero_iff]
       exact le_of_lt (lt_of_lt_of_le hn (min_le_left _ _))
     · rw [mem_ball_zero_iff]

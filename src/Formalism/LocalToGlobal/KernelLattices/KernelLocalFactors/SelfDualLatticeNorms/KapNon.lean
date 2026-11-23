@@ -1,10 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.KerStd
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
-import Formalism.LocalToGlobal.GlobalTheory.GL3.NormNatCoprime
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdOK
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.NsmulRelIdxMem
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.KerStd
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.NormNatCoprime
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdOK
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
 import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.QuasiPeriodConstUniqueOf
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitDeterminantRoot.NsmulRelIdxMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PLinkThU
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -226,9 +271,9 @@ theorem nonsplit_conj (p : ℕ) [Fact p.Prime] (hs : ¬ SplitK D p) (ι : ℂ �
       simp
     rw [h, map_neg, map_natCast]
   have e1 : ι (D.host.φ₀ (x : D.host.E)) = (a : ℂ_[p]) + b * ι (Complex.I * (Real.sqrt D.host.d : ℂ)) := by
-    rw [hx, map_add, map_mul, phi_b, map_ratCast, map_ratCast, map_add, map_mul, map_ratCast, map_ratCast]
+    rw [hx, map_add (f := _), map_mul, phi_b, map_ratCast, map_ratCast, map_add (f := _), map_mul, map_ratCast, map_ratCast]
   have e2 : ι (D.host.φ₀ (D.host.conj (x : D.host.E))) = (a : ℂ_[p]) - b * ι (Complex.I * (Real.sqrt D.host.d : ℂ)) := by
-    rw [hx, map_add, map_mul, conj_b, map_ratCast, map_ratCast, mul_neg, ← sub_eq_add_neg, map_sub, map_mul, phi_b,
+    rw [hx, map_add (f := _), map_mul, conj_b, map_ratCast, map_ratCast, mul_neg, ← sub_eq_add_neg, map_sub, map_mul, phi_b,
       map_ratCast, map_ratCast, map_sub, map_mul, map_ratCast, map_ratCast]
   rw [e1, e2]
   exact (core_rat p D.host.d D.host.hyp.2.1 hJ (norm_int_unit p) (norm_p_lt p) _ hr a b).symm
@@ -303,7 +348,7 @@ theorem entries_in_K (hδ0 : δ ≠ 0) (hcc : cc ≠ ⊥) (u : (Fin 4 × D.what�
     (h1 : relIdx (stdLat B.L (Fin 4 × D.what₂.Tau)) (imgLat (u : (Fin 4 × D.what₂.Tau → ℂ) →ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ)) B.latA) ≠ 0)
     (i j : Fin 4 × D.what₂.Tau) :
     ∃ x : D.host.K, u (Pi.single j 1) i = D.host.φ₀ (x : D.host.E) := by
-  obtain ⟨c, hc, hc0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hcc
+  obtain ⟨c, hc, hc0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot (p := cc) hcc
   set ω : ℂ := δ * D.host.φ₀ (((c : D.host.K) : D.host.E)) with hω
   have hωL : ω ∈ B.L.lattice := (Formalism.L2.GlobalTheoryTheory.IntegralLatticeDensity.SO.mem_iff B ω).2 (AddSubgroup.subset_closure ⟨c, hc, rfl⟩)
   set Lt := stdLat B.L (Fin 4 × D.what₂.Tau) with hLt
@@ -334,11 +379,11 @@ theorem entries_in_K (hδ0 : δ ≠ 0) (hcc : cc ≠ ⊥) (u : (Fin 4 × D.what�
   rw [hz] at hc'
   have hcK : ((c : D.host.K)) ≠ 0 := by
     intro h
-    exact hc0 (by exact_mod_cast h)
+    exact hc0 (RingOfIntegers.coe_injective (h.trans (map_zero (algebraMap (𝓞 D.host.K) D.host.K)).symm))
   have hφc : D.host.φ₀ (((c : D.host.K) : D.host.E)) ≠ 0 := by
     rw [Ne, map_eq_zero]
     intro h
-    exact hcK (by exact_mod_cast h)
+    exact hcK ((algebraMap D.host.K D.host.E).injective (h.trans (map_zero (algebraMap D.host.K D.host.E)).symm))
   have hk1C : (relIdx Lt M : ℂ) ≠ 0 := by exact_mod_cast h1
   have hk2C : (relIdx B.latA Lt : ℂ) ≠ 0 := by exact_mod_cast hk2
   refine ⟨(c' : D.host.K) / ((relIdx Lt M : D.host.K) * (relIdx B.latA Lt : D.host.K) * (c : D.host.K)), ?_⟩
@@ -351,7 +396,7 @@ theorem entries_in_K (hδ0 : δ ≠ 0) (hcc : cc ≠ ⊥) (u : (Fin 4 × D.what�
 theorem det_in_K (hδ0 : δ ≠ 0) (hcc : cc ≠ ⊥) (u : (Fin 4 × D.what₂.Tau → ℂ) ≃ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ))
     (h1 : relIdx (stdLat B.L (Fin 4 × D.what₂.Tau)) (imgLat (u : (Fin 4 × D.what₂.Tau → ℂ) →ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ)) B.latA) ≠ 0) :
     ∃ x : D.host.K, LinearMap.det (u : (Fin 4 × D.what₂.Tau → ℂ) →ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ)) = D.host.φ₀ (x : D.host.E) := by
-  choose M hM using fun i j => entries_in_K B hδ0 hcc u h1 i j
+  choose M hM using fun (i j : Fin 4 × D.what₂.Tau) => entries_in_K B hδ0 hcc u h1 i j
   refine ⟨(Matrix.of M).det, ?_⟩
   have e : LinearMap.toMatrix' (u : (Fin 4 × D.what₂.Tau → ℂ) →ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ)) =
       (D.host.φ₀.comp (algebraMap D.host.K D.host.E)).mapMatrix (Matrix.of M) := by

@@ -1,6 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MetaplecticLowRank.LowC
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsJLeviMulJPlus
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MetaplecticLowRank.LowC
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsJLeviMulJPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+
+@[expose] public section
 
 open PositivityTheory.LowerBoundConstant GlobalTheory GlobalTheory.Published GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.SplitRead Topology
 
@@ -30,29 +73,24 @@ theorem kone_factor : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpac
   have hcP : c ∈ GlobalTheory.SplitWeil.KOne k (Fin n) := by
     first
     | exact hc.2
-    | exact hc.1
-    | exact (Subgroup.mem_inf.1 hc).2
-    | exact (Subgroup.mem_inf.1 hc).1
   have hcl : c⁻¹ ∈ GlobalTheory.SmGL.unipRadLower k e := by
     have hci := inv_mem hc
     first
     | exact hci.1
-    | exact hci.2
-    | exact (Subgroup.mem_inf.1 hci).1
-    | exact (Subgroup.mem_inf.1 hci).2
-    | exact hci
-  obtain ⟨p, hp, u, hu, hpu⟩ :=
-    GlobalTheory.LocGL.IwahoriFactor.exists_jLevi_mul_jPlus e hgc (mul_mem hg hcP)
-  have hpP : p ∈ GlobalTheory.SplitWeil.KOne k (Fin n) :=
-    GlobalTheory.LocGL.jLevi_le_KOne e hp
-  obtain ⟨m, rfl⟩ : ∃ m, GlobalTheory.SmGL.leviEmb k e m = p := by
-    first
-    | exact hp.1
-    | exact hp.2
-    | exact hp
-    | (obtain ⟨m, -, hm⟩ := hp; exact ⟨m, hm⟩)
-    | (obtain ⟨⟨m, hm⟩, -⟩ := hp; exact ⟨m, hm⟩)
-    | (obtain ⟨-, ⟨m, hm⟩⟩ := hp; exact ⟨m, hm⟩)
+  obtain ⟨u, hu, hpu⟩ := GlobalTheory.SmGL.exists_levi_mul_unip k e ⟨g * c, hgc⟩
+  let m := GlobalTheory.SmGL.leviProj k e ⟨g * c, hgc⟩
+  have hpP : leviEmb k e m ∈ KOne k (Fin n) := by
+    apply StepData.mem_KOne.2
+    intro i j
+    obtain ⟨⟨a, i⟩, rfl⟩ := e.surjective i
+    obtain ⟨⟨b, j⟩, rfl⟩ := e.surjective j
+    by_cases hab : a = b
+    · subst b
+      have h := StepData.mem_KOne.1 (mul_mem hg hcP) (e ⟨a, i⟩) (e ⟨a, j⟩)
+      rw [Matrix.sub_apply, one_same] at h
+      simpa [Matrix.sub_apply, one_same, m] using h
+    · rw [Matrix.sub_apply, GlobalTheory.SmGL.leviEmb_apply_ne k e m hab, one_ne e hab, sub_zero, map_zero]
+      exact zero_lt_one
   refine ⟨m, hpP, u, ?_, c⁻¹, ?_, eq_mul_inv_of_mul_eq hpu⟩
   · have hug : (GlobalTheory.SmGL.leviEmb k e m)⁻¹ * (g * c) = u := inv_mul_eq_iff_eq_mul.2 hpu
     have huP : u ∈ GlobalTheory.SplitWeil.KOne k (Fin n) := by
@@ -61,10 +99,6 @@ theorem kone_factor : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpac
     have hur : u ∈ GlobalTheory.SmGL.unipRad k e := by
       first
       | exact hu
-      | exact hu.1
-      | exact hu.2
-      | exact (Subgroup.mem_inf.1 hu).1
-      | exact (Subgroup.mem_inf.1 hu).2
     exact Subgroup.mem_inf.2 ⟨hur, huP⟩
   · show _ ∧ _
     exact ⟨inv_mem hcP, fun i j hij => GlobalTheory.CompanionTheory.KOneFactor.sub_one_apply_eq_zero e hcl i j hij⟩

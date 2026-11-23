@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCombAt
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.AllPositions
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SpanSchwartzBruhatProductEqTop
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ProdFnMemSB
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SpanSchwartzBruhatProductEqTop
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.JointSmooth
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.SeeSaw GlobalTheory.LocMod
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -26,6 +70,7 @@ theorem incA_mul_ι (p : Place D k) (a : D.host.E) (x : k) : (incA D a : AE D) *
 theorem rat_mul_ι (p : Place D k) {l m : ℕ} {Y : Type} [Fintype Y] (M : Matrix (Fin l) (Fin m) D.host.E)
     (N : Matrix (Fin m) Y k) : (rat M : Matrix (Fin l) (Fin m) (AE D)) * (N.map p.ι) = (M.map p.pr * N).map p.ι := by
   ext i j
+
   simp only [rat, Matrix.mul_apply, Matrix.map_apply, map_sum, incA_mul_ι]
 
 variable {Z n : Type} [Fintype Z] [DecidableEq Z] [Fintype n] [DecidableEq n]
@@ -74,21 +119,21 @@ theorem hO_add_left' (S T : HSp D) (x x' y : WO S T) : hO S T (x + x') y = hO S 
 
 theorem symplO_add_left' (S T : HSp D) (x x' y : WO S T) :
     symplO S T (x + x') y = symplO S T x y + symplO S T x' y := by
-  unfold symplO; rw [hO_add_left', mul_add, map_add]
+  unfold symplO; rw [hO_add_left', mul_add, map_add (f := _)]
 
 theorem symplO_zero_left' (S T : HSp D) (y : WO S T) : symplO S T 0 y = 0 := by
   have h := symplO_add_left' S T 0 0 y
   simp only [add_zero] at h
   exact left_eq_add.mp h
 
-theorem isThetaFunO_zero' (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) : IsThetaFunO ψ S T 0 where
+theorem isThetaFunO_zero' (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) : IsThetaFunO ψ S T 0 := {
   quasi γ w := by simp
   level := ⟨⊤, isOpen_univ, fun u _ _ => by funext w; simp [heisO]⟩
   cont := continuous_const
-  smooth _ _ _ _ _ := contDiff_const
+  smooth _ _ _ _ _ := contDiff_const }
 
 theorem isThetaFunO_add' {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f)
-    (hg : IsThetaFunO ψ S T g) : IsThetaFunO ψ S T (f + g) where
+    (hg : IsThetaFunO ψ S T g) : IsThetaFunO ψ S T (f + g) := {
   quasi γ w := by simp only [Pi.add_apply]; rw [hf.quasi, hg.quasi]; ring
   level := by
     obtain ⟨U, hUo, hU⟩ := hf.level
@@ -98,10 +143,10 @@ theorem isThetaFunO_add' {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {f g : W
       funext w; simp only [heisO, Pi.add_apply]; ring
     rw [e, hU u hu.1 hi, hU' u hu.2 hi]
   cont := hf.cont.add hg.cont
-  smooth k L hL hfin w := (hf.smooth k L hL hfin w).add (hg.smooth k L hL hfin w)
+  smooth k L hL hfin w := (hf.smooth k L hL hfin w).add (hg.smooth k L hL hfin w) }
 
 theorem isThetaFunO_smul' {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} (c : ℂ) {f : WO S T → ℂ}
-    (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) where
+    (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) := {
   quasi γ w := by simp only [Pi.smul_apply, smul_eq_mul]; rw [hf.quasi]; ring
   level := by
     obtain ⟨U, hUo, hU⟩ := hf.level
@@ -110,7 +155,7 @@ theorem isThetaFunO_smul' {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} (c : �
       funext w; simp only [heisO, Pi.smul_apply, smul_eq_mul]; ring
     rw [e, hU u hu hi]
   cont := continuous_const.mul hf.cont
-  smooth k L hL hfin w := (contDiff_const.mul (hf.smooth k L hL hfin w))
+  smooth k L hL hfin w := (contDiff_const.mul (hf.smooth k L hL hfin w)) }
 
 def heisL (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (u : WO S T) : (WO S T → ℂ) →ₗ[ℂ] (WO S T → ℂ) where
   toFun := heisO ψ S T u
@@ -170,7 +215,7 @@ theorem isModel_boxT : ∀ (D : D7) (k : Type) [Field k] [ValuativeRel k] [Topol
       rw [hTP]
       exact o''.isThetaFunO_boxT (h₂.theta a) (hL.theta b)
     | zero => rw [map_zero]; exact isThetaFunO_zero' ψ S X
-    | add x y _ _ hx hy => rw [map_add]; exact isThetaFunO_add' hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact isThetaFunO_add' hx hy
     | smul c x _ hx => rw [map_smul]; exact isThetaFunO_smul' c hx
   · have hΦ' : Φ' = comapH (Homeomorph.addRight x) Φ := Subtype.ext (funext h)
     subst hΦ'

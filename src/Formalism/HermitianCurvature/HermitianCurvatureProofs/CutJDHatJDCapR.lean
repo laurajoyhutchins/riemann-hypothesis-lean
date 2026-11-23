@@ -1,8 +1,52 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGTrChain
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGQLFam
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGVTr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGVsTr
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpA
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeVLem
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGQLFam
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGRawSmooth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGTrChain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGVsTr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGVTr
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -139,8 +183,22 @@ theorem jdr_tr_at (hD : JDRDrTr) (hM : JDRModelV) (P : M.Par) (Bs : B.RealPlaceD
         MA.actA P (RhM P L y) (Gauge.VLem.trR P Bs.μsec e Φ) ∧
       Gauge.VLem.trR P Bs.μsec e (rhvGrp P.k P.r Bs.z Bs.z' (y : ℂ) Φ) =
         MA.actA P (RhvM P L y) (Gauge.VLem.trR P Bs.μsec e Φ) := by
-  have hV := fun b => Gauge.gauge_vector_transition_holds Wp Wq P Bs hpl hk e he Dc Φ hΦ y b
-  have hVs := fun a => Gauge.gauge_conj_vector_transition Wp Wq P Bs hpl hk e he Dc Φ hΦ y a
+  have hV : Gauge.GVTr := by
+    intro Wp Wq _ _ _ _ _ _ P Bs hpl hk e he Dc Φ hΦ Y b
+    have h := Gauge.VLem.vab_ind hpl hk he Y P.r le_rfl Dc Φ hΦ
+    rw [Gauge.VLem.sitesCommonSpace_v0_eq_Vp]
+    fin_cases b
+    · exact ⟨h.1.1, fun ρ => congrFun h.1.2 ρ⟩
+    · exact ⟨h.2.1, fun ρ => congrFun h.2.2 ρ⟩
+  have hV := fun b => hV Wp Wq P Bs hpl hk e he Dc Φ hΦ y b
+  have hVs : Gauge.GVsTr := by
+    intro Wp Wq _ _ _ _ _ _ P Bs hpl hk e he Dc Φ hΦ Y a
+    have h := Gauge.VLem.vabs_ind hpl hk he Y P.r le_rfl Dc Φ hΦ
+    rw [Gauge.VLem.sitesCommonSpace_v0_eq_Vp]
+    fin_cases a
+    · exact ⟨h.1.1, fun ρ => congrFun h.1.2 ρ⟩
+    · exact ⟨h.2.1, fun ρ => congrFun h.2.2 ρ⟩
+  have hVs := fun a => hVs Wp Wq P Bs hpl hk e he Dc Φ hΦ y a
   have hsm := fun (Dc' : (Fin P.r → ℂ) → Set (Q.Mx P.k P.r)) (Ψ : Q.Fn P.k P.r (Wq →L[ℂ] Wp))
     (hΨ : Gauge.FamR P Bs Dc' Ψ) => Gauge.raw_gauge_smoothness_holds Wp Wq P Bs hpl hk e he Dc' Ψ hΨ
   have hql := fun (Ψ : Q.Fn P.k P.r (Wq →L[ℂ] Wp)) (hΨ : Gauge.FamR P Bs Dc Ψ) (a b : Fin 2) =>

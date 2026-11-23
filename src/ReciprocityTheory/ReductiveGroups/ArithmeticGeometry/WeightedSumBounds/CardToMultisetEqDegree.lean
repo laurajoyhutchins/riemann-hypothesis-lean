@@ -1,5 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.TangentEqLcZero
+module
+
+public import Mathlib.RingTheory.PowerSeries.Expand
+public import ReciprocityTheory.DualLattices.VEqZeroOfPowEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.Sh.PTb
 
@@ -57,7 +106,6 @@ theorem card_toMultiset_eq_degree {ι : Type*} (e : ι →₀ ℕ) :
     Multiset.card e.toMultiset = e.degree := by
   first
   | (rw [Finsupp.card_toMultiset]; rfl)
-  | simp [Finsupp.card_toMultiset, Finsupp.degree, Finsupp.sum]
 
 variable {C : Type} [Field C]
 
@@ -70,11 +118,9 @@ theorem subst_sub_dvd {d : ℕ} (f : MvPowerSeries (Fin d) C)
   have hA : HasSubst α := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun b => hα b)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun b => hα b)
   have hB : HasSubst β := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun b => hβ b)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun b => hβ b)
   have hterm : ∀ e : Fin d →₀ ℕ, ∀ j < k + 1,
       coeff e f • PowerSeries.coeff j (e.prod (fun s n => α s ^ n)) -
         coeff e f • PowerSeries.coeff j (e.prod (fun s n => β s ^ n)) = 0 := by
@@ -114,7 +160,6 @@ theorem coeff_lg_sub_X_low (G : LogFGL v d) (a : Fin d) (e : Fin d →₀ ℕ) (
   · have e0 : e = 0 := by
       first
       | exact (Finsupp.degree_eq_zero_iff e).mp h0
-      | exact Finsupp.degree_eq_zero_iff.mp h0
     subst e0
     have hs : (0 : Fin d →₀ ℕ) ≠ Finsupp.single a 1 := by
       intro h
@@ -129,7 +174,6 @@ theorem coeff_lg_sub_X_low (G : LogFGL v d) (a : Fin d) (e : Fin d →₀ ℕ) (
       rw [← h2, hb]
       first
       | exact Multiset.toFinsupp_singleton b
-      | simp
     subst eb
     rw [G.lg_lin a b]
     by_cases hab : a = b
@@ -149,11 +193,9 @@ theorem lgCurve_sub_dvd (G : LogFGL v d) {α β : Fin d → PowerSeries C}
   have hA : HasSubst α := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun b => hα b)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun b => hα b)
   have hB : HasSubst β := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun b => hβ b)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun b => hβ b)
   have e1 : (G.lgCurve α a - G.lgCurve β a) - (α a - β a) =
       subst α (G.lg a - X a) - subst β (G.lg a - X a) := by
     show subst α (G.lg a) - subst β (G.lg a) - (α a - β a) = _
@@ -171,14 +213,14 @@ theorem dvd_of_lgCurve_low (G : LogFGL v d) {α β : Fin d → PowerSeries C}
       ∀ a, (PowerSeries.X : PowerSeries C) ^ N ∣ α a - β a
   | 0, _, a => by simp
   | N + 1, h, a => by
-      have ih := dvd_of_lgCurve_low G hα hβ N (fun a j hj => h a j (by omega))
-      have h1 := PowerSeries.X_pow_dvd_iff.1 (lgCurve_sub_dvd G hα hβ N ih a) N (by omega)
-      rw [map_sub, map_sub, h a N (by omega), sub_self, zero_sub, neg_eq_zero] at h1
-      rw [PowerSeries.X_pow_dvd_iff]
-      intro j hj
-      rcases Nat.lt_succ_iff.1 hj |>.lt_or_eq with hj | rfl
-      · exact PowerSeries.X_pow_dvd_iff.1 (ih a) j hj
-      · rw [map_sub]; exact h1
+      have ih : ∀ a, (PowerSeries.X : PowerSeries C) ^ N ∣ α a - β a :=
+        dvd_of_lgCurve_low G hα hβ N (fun a j hj => h a j (by omega))
+      have hdiff : (PowerSeries.X : PowerSeries C) ^ (N + 1) ∣
+          G.lgCurve α a - G.lgCurve β a := by
+        rw [PowerSeries.X_pow_dvd_iff]
+        intro j hj
+        rw [map_sub, h a j hj, sub_self]
+      simpa only [sub_sub_cancel] using dvd_sub hdiff (lgCurve_sub_dvd G hα hβ N ih a)
 
 theorem coeff_lgCurve_sub_eq (G : LogFGL v d) {α β : Fin d → PowerSeries C}
     (hα : ∀ b, PowerSeries.constantCoeff (α b) = 0)
@@ -222,11 +264,9 @@ theorem lgCurve_expC (G : LogFGL v d) {q : ℕ} (hq : q ≠ 0) {ga : Fin d → P
   have hga : HasSubst ga := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun b => h0 b)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun b => h0 b)
   have hX : HasSubst (fun _ : Unit => (PowerSeries.X ^ q : PowerSeries C)) := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun _ => by first | simp [hq, PowerSeries.X] | (simp [hq]; exact PowerSeries.constantCoeff_X))
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun _ => by first | simp [hq, PowerSeries.X] | (simp [hq]; exact PowerSeries.constantCoeff_X))
   have e1 : ∀ g : PowerSeries C,
       PowerSeries.expand q hq g = PowerSeries.subst (PowerSeries.X ^ q : PowerSeries C) g :=
     fun g => (expC_apply hq (fun _ => g) a).symm
@@ -235,9 +275,6 @@ theorem lgCurve_expC (G : LogFGL v d) {q : ℕ} (hq : q ≠ 0) {ga : Fin d → P
   | (show MvPowerSeries.subst (expC q ga) (G.lg a) =
         MvPowerSeries.subst (fun _ => (PowerSeries.X ^ q : PowerSeries C))
           (MvPowerSeries.subst ga (G.lg a))
-     rw [MvPowerSeries.subst_comp_subst_apply hga hX]
-     rfl)
-  | (unfold LogFGL.lgCurve PowerSeries.subst
      rw [MvPowerSeries.subst_comp_subst_apply hga hX]
      rfl)
 

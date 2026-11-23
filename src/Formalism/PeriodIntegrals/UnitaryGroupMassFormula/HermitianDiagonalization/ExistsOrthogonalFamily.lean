@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HermitianDiagonalization.HermDiag
+module
+
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+
+@[expose] public section
 
 namespace PI.UnitaryGroupMassFormula.HermConj
 
@@ -19,7 +69,7 @@ variable {σ : E →+* E} {V : Type} [AddCommGroup V] [Module E V] {h : V → V 
 
 theorem IsHermForm.add_left (hh : IsHermForm σ h) (x y z : V) :
     h (x + y) z = h x z + h y z := by
-  rw [hh.herm z (x + y), hh.add, map_add, ← hh.herm z x, ← hh.herm z y]
+  rw [hh.herm z (x + y), hh.add, map_add (f := _), ← hh.herm z x, ← hh.herm z y]
 
 theorem IsHermForm.smul_left (hh : IsHermForm σ h) (a : E) (x y : V) :
     h (a • x) y = σ a * h x y := by
@@ -90,7 +140,7 @@ theorem exists_orthogonal_family [CharZero E] (σ : E →+* E) :
       have hw0 : ∀ i, h v (w i) = 0 := fun i => by
         rw [← hfv]; exact LinearMap.mem_ker.1 (w i).2
       refine ⟨Fin.cons v (fun i => (w i : V)), ?_, ?_⟩
-      · rw [linearIndependent_fin_cons]
+      · rw [linearIndependent_finCons]
         refine ⟨hwi.map' (LinearMap.ker f).subtype (Submodule.ker_subtype _), ?_⟩
         intro hmem
         have hle : Submodule.span E (Set.range fun i => (w i : V)) ≤ LinearMap.ker f :=

@@ -1,13 +1,61 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemOrth
-import Formalism.LocalToGlobal.SiegelLatticeTheory.TraceIntegralEstimates.PsiTrCoreApprox
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DecompositionAlmostEverywhere
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemUniq
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DecompositionAlmostEverywhere
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartPhiE
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.TraceIntegralEstimates.PsiTrCoreApprox
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.EqOfLeOfAbsNormEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta IsDedekindDomain NumberField Polynomial
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 160000
+
 
 namespace Formalism.IndefR.Fin
 
@@ -35,7 +83,7 @@ theorem idemAt_int {P : HeightOneSpectrum (𝓞 D.host.E)} {e : AE D} (he : Form
   have := not_not.1 (mt h.2 h1P)
   rwa [show ((1 : 𝓞 D.host.E) : D.host.E)⁻¹ = 1 by simp, map_one, mul_one] at this
 
-set_option maxHeartbeats 800000 in
+
 
 theorem decomp_AE (hadj : Algebra.adjoin D.host.F {D.host.sqrtMinusD} = ⊤) (z : AE D) :
     ∃ p q : AF D.host.F, z = algebraMap (AF D.host.F) (AE D) p +
@@ -54,7 +102,7 @@ theorem cA_alg (x : AF D.host.F) : cA D (algebraMap (AF D.host.F) (AE D) x) = al
   rw [Algebra.TensorProduct.map_tmul, map_one]
   rfl
 
-set_option maxHeartbeats 800000 in
+
 
 theorem fixed_AE (hadj : Algebra.adjoin D.host.F {D.host.sqrtMinusD} = ⊤) {z : AE D} (hz : cA D z = z) :
     ∃ r : AF D.host.F, z = algebraMap (AF D.host.F) (AE D) r := by
@@ -63,19 +111,19 @@ theorem fixed_AE (hadj : Algebra.adjoin D.host.F {D.host.sqrtMinusD} = ⊤) {z :
   have hcu : cA D (incA D D.host.sqrtMinusD) = -incA D D.host.sqrtMinusD := by rw [cA_incA, star_sqrt, map_neg]
   have hcp : ∀ x : AF D.host.F, cA D (algebraMap (AF D.host.F) (AE D) x) = algebraMap (AF D.host.F) (AE D) x :=
     cA_alg
-  rw [map_add, map_mul, hcp, hcp, hcu] at hz
+  rw [map_add (f := _), map_mul, hcp, hcp, hcu] at hz
   have h0 : (2 : AE D) * (algebraMap (AF D.host.F) (AE D) q * incA D D.host.sqrtMinusD) = 0 := by
     linear_combination -hz
   rw [two_mul_eq_zero h0, add_zero]
 
-set_option synthInstance.maxHeartbeats 200000 in
+
 
 theorem adjoin_top_of (b : D.host.E) (t N : D.host.F)
     (ht : algebraMap D.host.F D.host.E t = b + star b) (hN : algebraMap D.host.F D.host.E N = b * star b)
     (hb : star b ≠ b) : Algebra.adjoin D.host.F {b} = ⊤ := by
   have hbi : IsIntegral D.host.F b := Algebra.IsIntegral.isIntegral b
   have hq : aeval b (X ^ 2 - C t * X + C N : D.host.F[X]) = 0 := by
-    simp only [map_add, map_sub, map_mul, map_pow, aeval_X, aeval_C, ht, hN]
+    simp only [map_add (f := _), map_sub, map_mul, map_pow, aeval_X, aeval_C, ht, hN]
     ring
   have hqm : (X ^ 2 - C t * X + C N : D.host.F[X]).Monic := by monicity!
   have hqd : (X ^ 2 - C t * X + C N : D.host.F[X]).natDegree = 2 := by compute_degree!
@@ -93,7 +141,7 @@ theorem adjoin_top_of (b : D.host.E) (t N : D.host.F)
   rw [← IntermediateField.adjoin_simple_toSubalgebra_of_isAlgebraic hbi.isAlgebraic, htop,
     IntermediateField.top_toSubalgebra]
 
-set_option maxHeartbeats 800000 in
+
 
 theorem approx_int (v : HeightOneSpectrum (𝓞 D.host.F)) (ι : D.host.E →ₐ[D.host.F] v.adicCompletion D.host.F)
     {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intAE D) :
@@ -134,11 +182,11 @@ theorem approx_int (v : HeightOneSpectrum (𝓞 D.host.F)) (ι : D.host.E →ₐ
     obtain ⟨a, ha1, ha2⟩ := hx
     obtain ⟨b, hb1, hb2⟩ := hy
     refine ⟨a + b, ?_, ?_⟩
-    · rw [show ((a + b : 𝓞 D.host.E) : D.host.E) = (a : D.host.E) + (b : D.host.E) from rfl, map_add, map_add,
+    · rw [show ((a + b : 𝓞 D.host.E) : D.host.E) = (a : D.host.E) + (b : D.host.E) from rfl, map_add (f := _), map_add (f := _),
         show compV v ι x + compV v ι y - (ι (a : D.host.E) + ι (b : D.host.E)) =
         (compV v ι x - ι (a : D.host.E)) + (compV v ι y - ι (b : D.host.E)) by ring]
       exact lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt ha1 hb1)
-    · rw [show ((a + b : 𝓞 D.host.E) : D.host.E) = (a : D.host.E) + (b : D.host.E) from rfl, map_add, map_add,
+    · rw [show ((a + b : 𝓞 D.host.E) : D.host.E) = (a : D.host.E) + (b : D.host.E) from rfl, map_add (f := _), map_add (f := _),
         star_add, map_add, show compV v ι (cF D x) + compV v ι (cF D y) -
         (ι (star (a : D.host.E)) + ι (star (b : D.host.E))) = (compV v ι (cF D x) - ι (star (a : D.host.E))) +
         (compV v ι (cF D y) - ι (star (b : D.host.E))) by ring]
@@ -154,7 +202,7 @@ theorem approx_int (v : HeightOneSpectrum (𝓞 D.host.F)) (ι : D.host.E →ₐ
         Valuation.map_neg]
       exact ha2
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem idemAt_split {P : HeightOneSpectrum (𝓞 D.host.E)} {e : AE D} (he : Formalism.L2.NTheta.IsIdemAt e P) :
     ¬ Lev.IsConjPl (D := D) P P := by
@@ -235,7 +283,7 @@ theorem idemAt_split {P : HeightOneSpectrum (𝓞 D.host.E)} {e : AE D} (he : Fo
         _ = e * phiE w (algebraMap D.host.F (w.adicCompletion D.host.F) f * 1) := by
           rw [mul_assoc, mul_comm (phiE w 1), phiE_smul]
         _ = _ := by rw [mul_one]
-    | add x y _ _ hx hy => rw [map_add, mul_add, hx, hy, map_add, phiE_add, mul_add]
+    | add x y _ _ hx hy => rw [map_add (f := _), mul_add, hx, hy, map_add (f := _), phiE_add, mul_add]
     | mul x y _ _ hx hy =>
       calc e * incA D (x * y) = (e * incA D x) * incA D y := by rw [map_mul, mul_assoc]
         _ = (e * phiE w (ι x)) * incA D y := by rw [hx]
@@ -257,7 +305,7 @@ theorem idemAt_split {P : HeightOneSpectrum (𝓞 D.host.E)} {e : AE D} (he : Fo
     · linear_combination h0
   have hkc : compV w ι (finPart D (cA D e)) = 0 := by
     have := congrArg (fun x => compV w ι (finPart D x)) hs
-    simp only [map_add, compV_phiE, hk] at this
+    simp only [map_add (f := _), compV_phiE, hk] at this
     linear_combination this
   have hP_iff : ∀ x : 𝓞 D.host.E, x ≠ 0 → (x ∈ P.asIdeal ↔ Valued.v (ι (x : D.host.E)) < 1) := by
     intro x hx0

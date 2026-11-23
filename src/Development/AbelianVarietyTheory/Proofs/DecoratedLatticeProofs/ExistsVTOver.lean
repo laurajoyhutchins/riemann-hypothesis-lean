@@ -1,14 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsIsComOfOf
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.WeilDatumExistence
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsBuiltAndNot
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SingleMemIdAt
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsNatEqMul
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.EventuallyIncAMulMemIntAt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PrimeDvdAbsNormHalfDifferent
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ModelLatA
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HasResOfValSubLt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsRatDatum
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SingleMemIdAt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.EventuallyIncAMulMemIntAt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsNatEqMul
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBaseChangeFiniteAdeleRingEquiv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PrimeDvdAbsNormHalfDifferent
+import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ModelLatA
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EqPlaceIdemOfIsPrimeIdem
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteDimensionalMram
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FrameTop
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.JointSmooth
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Forms
 open NumberField IsDedekindDomain Matrix MeasureTheory ValuativeRel GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.Core.Rk GlobalTheory.AdForm GlobalTheory.SeeSaw
 open scoped TensorProduct
@@ -114,16 +157,10 @@ theorem sec_mem_idAt (p : SplitPt D k) (a : k) : p.sec a ∈ idAt D (· = p.v) :
     rw [← h1, ← mul_assoc, add_mul, p.split.1, mul_comm (cA D p.e), p.split.2.1, add_zero]
   exact mxAt_of_half p (m := 1) (n := 1) (w := Matrix.of fun _ _ => p.sec a) (fun _ _ => h2) 0 0
 
-theorem idAt_mono {P Q : Pl D → Prop} (h : ∀ v, P v → Q v) : idAt D P ≤ idAt D Q := fun _ ha =>
-  Submodule.mem_inf.2 ⟨(Submodule.mem_inf.1 ha).1, (Submodule.mem_iInf _).2 fun u =>
-    (Submodule.mem_iInf _).1 (Submodule.mem_inf.1 ha).2 ⟨u.1, fun hu => u.2 (h _ hu)⟩⟩
-
 theorem mem_latV_int {S : HSp D} {L : Lat S} (hL : ∀ z, z ∈ L ↔ z ∈ intVec D S.rank) (v : Pl D) (y : Fin S.rank → AE D) :
     y ∈ latV S L (· = v) ↔ ∀ i, y i ∈ intAt D (· = v) :=
   GlobalTheory.FinPl.Model.mem_latV_std S L (fun x => (hL x).trans (forall_congr' fun i =>
     ⟨fun h => ⟨⟨x i, h⟩, rfl⟩, fun ⟨b, hb⟩ => hb ▸ b.isIntegral_coe⟩)) v y
-
-def intLat (S : HSp D) : Lat S := Submodule.pi Set.univ fun _ => (1 : Submodule (𝓞 D.host.E) D.host.E)
 
 end Gen
 
@@ -142,33 +179,6 @@ open GlobalTheory.FinPl
 variable {D : D7} {u : D.what₂.Word} {a : XPart D u} {ζ₀ : Fin a.Lz.rank → D.host.E}
 
 end Level
-
-theorem exists_vT_over {X : Formalism.L2.Col.Fields} {Pr : Formalism.L2.Col.Primes X} (hX : X.Ok) (hPr : Pr.Ok) (u : Pr.Word) (v' : HeightOneSpectrum (𝓞 X.F))
-    (hT : ((Pr.T u : ℕ) : 𝓞 X.F) ∈ v'.asIdeal) : ∃ P ∈ Pr.vT u, P.under (𝓞 X.F) = v' := by
-  have hinj : Function.Injective (algebraMap (𝓞 X.F) (𝓞 X.E)) := by
-    intro x y e
-    apply RingOfIntegers.ext
-    have := congrArg (fun z : 𝓞 X.E => (z : X.E)) e
-    simpa using this
-  haveI : Algebra.IsIntegral (𝓞 X.F) (𝓞 X.E) := inferInstance
-  obtain ⟨Q, -, hQp, hQ⟩ := Ideal.exists_ideal_over_prime_of_isIntegral (S := 𝓞 X.E) v'.asIdeal ⊥ (by
-    rw [Ideal.comap_bot_of_injective _ hinj]; exact bot_le)
-  have hQ0 : Q ≠ ⊥ := by
-    rintro rfl
-    rw [Ideal.comap_bot_of_injective _ hinj] at hQ
-    exact v'.ne_bot hQ.symm
-  let QQ : HeightOneSpectrum (𝓞 X.E) := ⟨Q, hQp, hQ0⟩
-  have hTQ : ((Pr.T u : ℕ) : 𝓞 X.E) ∈ QQ.asIdeal := by
-    have : ((Pr.T u : ℕ) : 𝓞 X.F) ∈ Ideal.comap (algebraMap (𝓞 X.F) (𝓞 X.E)) Q := hQ ▸ hT
-    simpa using this
-  rw [← hPr.piT_norm u] at hTQ
-  rcases hQp.mem_or_mem hTQ with hπ | hπ
-  · exact ⟨QQ, (GlobalTheory.MuOffMove.mem_vT hPr u QQ).2 hπ, HeightOneSpectrum.ext hQ⟩
-  · refine ⟨Formalism.L2.Col.conjPrime₂ QQ, (GlobalTheory.MuOffMove.mem_vT hPr u _).2 ((Formalism.L2.Col.mem_conjP _ _).2 ?_), HeightOneSpectrum.ext ?_⟩
-    · exact hπ
-    · show Ideal.under _ _ = _
-      rw [GlobalTheory.MuOffMove.under_conjP hX]
-      exact hQ
 
 end GlobalTheory.SeeSaw.StdOff
 

@@ -1,4 +1,66 @@
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.GreenSt
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Laplacian
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.SpecialFunctions.PolarCoord
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Constructions.HaarToSphere
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 open MeasureTheory Set Filter Topology InnerProductSpace intervalIntegral
 open scoped Laplacian
@@ -47,7 +109,7 @@ theorem lap_eq_rot (u : ℂ → ℝ) (z : ℂ) (θ : ℝ) :
     Δ u z = fderiv ℝ (fderiv ℝ u) z (ee θ) (ee θ)
       + fderiv ℝ (fderiv ℝ u) z (Complex.I * ee θ) (Complex.I * ee θ) := by
   rw [laplacian_eq_fderiv_fderiv, iee_smul, ee_smul]
-  simp only [map_add, map_smul, ContinuousLinearMap.add_apply, ContinuousLinearMap.coe_smul', Pi.smul_apply,
+  simp only [map_add (f := _), map_smul, ContinuousLinearMap.add_apply, ContinuousLinearMap.coe_smul', Pi.smul_apply,
     smul_eq_mul]
   have hsc := Real.sin_sq_add_cos_sq θ
   set H := fderiv ℝ (fderiv ℝ u) z
@@ -78,13 +140,6 @@ theorem hasDerivAt_rad' (e : ℂ) (r : ℝ) :
     simpa using ((hasDerivAt_id r).smul_const e).const_add a
   have h2 := (((contDiff_fderiv1 hu).differentiable one_ne_zero) _).hasFDerivAt.comp_hasDerivAt r hp
   simpa using h2.clm_apply (hasDerivAt_const r e)
-
-theorem hasDerivAt_ang (r θ : ℝ) :
-    HasDerivAt (fun θ : ℝ => u (a + r • ee θ))
-      (fderiv ℝ u (a + r • ee θ) (r • (Complex.I * ee θ))) θ := by
-  have hp : HasDerivAt (fun θ : ℝ => a + r • ee θ) (r • (Complex.I * ee θ)) θ :=
-    ((hasDerivAt_ee θ).const_smul r).const_add a
-  exact ((hu.differentiable (by norm_num)) _).hasFDerivAt.comp_hasDerivAt θ hp
 
 theorem hasDerivAt_ang' (r θ : ℝ) :
     HasDerivAt (fun θ : ℝ => fderiv ℝ u (a + r • ee θ) (r • (Complex.I * ee θ)))

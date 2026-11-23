@@ -1,5 +1,72 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+module
+
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.PolarCoord
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.MeasureTheory.Function.JacobianOneDim
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal ComplexOrder
@@ -106,9 +173,6 @@ theorem posDef_factor {T : Matrix Q Q ℂ} (hT : T.PosDef) : ∃ a : Matrix Q Q 
         have h0 : 0 ≤ T := Matrix.nonneg_iff_posSemidef.mpr hT.posSemidef
         have hs : (CFC.sqrt T)ᴴ = CFC.sqrt T := IsSelfAdjoint.of_nonneg (CFC.sqrt_nonneg T)
         rw [hs, CFC.sqrt_mul_sqrt_self T h0]⟩
-    | exact Matrix.posSemidef_iff_eq_conjTranspose_mul_self.mp hT.posSemidef
-    | exact Matrix.posSemidef_iff_eq_transpose_mul_self.mp hT.posSemidef
-    | exact Matrix.PosSemidef.exists_eq_conjTranspose_mul_self hT.posSemidef
   refine ⟨a, ?_, ha⟩
   rw [isUnit_iff_ne_zero]
   intro h0
@@ -128,7 +192,6 @@ theorem det_norm_one {g : Matrix m m ℂ} (hH : IsUnit H.det) (hg : g ∈ UH H) 
   have h4 : ‖g.det‖ ^ 2 = 1 := by
     first
     | rw [Complex.sq_norm]; exact h3
-    | rw [← Complex.normSq_eq_norm_sq]; exact h3
   rw [← Real.sqrt_sq (norm_nonneg _), h4, Real.sqrt_one]
 
 theorem frame_trans (F : Frame H Ep Em) (Y : Matrix m Q ℂ) (hY : (Tm H Y).PosDef) :
@@ -226,7 +289,6 @@ theorem mul_H_conj {g : Matrix m m ℂ} (h2 : H * H = 1) (hg : g ∈ UH H) : g *
     first
     | exact Matrix.mul_eq_one_comm.mp h1
     | exact mul_eq_one_comm.mp h1
-    | rw [← Matrix.inv_eq_left_inv h1]; exact Matrix.mul_nonsing_inv _ (Matrix.isUnit_det_of_left_inverse h1)
   calc g * H * gᴴ = g * H * gᴴ * (H * H) := by rw [h2, Matrix.mul_one]
     _ = g * (H * gᴴ * H) * H := by simp only [Matrix.mul_assoc]
     _ = H := by rw [h3, Matrix.one_mul]
@@ -349,22 +411,18 @@ theorem card_sub (F : Frame H Ep Em) : (Fintype.card P : ℂ) - Fintype.card Q =
 
 theorem reindex {P' Q' : Type} [Fintype P'] [DecidableEq P'] [Fintype Q'] [DecidableEq Q']
     (F : Frame H Ep Em) (eP : P' ≃ P) (eQ : Q' ≃ Q) :
-    Frame H (Ep.submatrix id eP) (Em.submatrix id eQ) where
-  pp := by
-    rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pp]
+    Frame H (Ep.submatrix id eP) (Em.submatrix id eQ) := by
+  constructor
+  · rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pp]
     exact Matrix.submatrix_one_equiv eP
-  mm := by
-    rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.mm]
+  · rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.mm]
     exact Matrix.submatrix_one_equiv eQ
-  pm := by
-    rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pm]
+  · rw [Matrix.conjTranspose_submatrix, ← Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, F.pm]
     rfl
-  sum := by
-    rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
+  · rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
       Matrix.submatrix_mul_equiv]
     exact F.sum
-  diff := by
-    rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
+  · rw [Matrix.conjTranspose_submatrix, Matrix.conjTranspose_submatrix, Matrix.submatrix_mul_equiv,
       Matrix.submatrix_mul_equiv]
     exact F.diff
 
@@ -723,14 +781,14 @@ variable {Q : Type} [Fintype Q] [DecidableEq Q]
 lemma meas_gram_sub (G₀ : (Q → Q → ℂ) → ℝ≥0∞) (hG : Measurable G₀) (C : Matrix Q Q ℂ) :
     Measurable fun X : Q → Q → ℂ => G₀ (gram X - C) := by
   have h : Measurable (fun X : Q → Q → ℂ => fun i j => gram X i j - C i j) :=
-    measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j =>
+    Measurable.of_eval fun i => Measurable.of_eval fun j =>
       (gram_cont.matrix_elem i j).measurable.sub_const (C i j)
   exact hG.comp h
 
 lemma meas_gram (G₀ : (Q → Q → ℂ) → ℝ≥0∞) (hG : Measurable G₀) :
     Measurable fun X : Q → Q → ℂ => G₀ (gram X) := by
   have h : Measurable (fun X : Q → Q → ℂ => fun i j => gram X i j) :=
-    measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => (gram_cont.matrix_elem i j).measurable
+    Measurable.of_eval fun i => Measurable.of_eval fun j => (gram_cont.matrix_elem i j).measurable
   exact hG.comp h
 
 def colL (n : Q → ℂ) (c : ℂ) (i₀ : Q) : (Q → ℂ) →ₗ[ℝ] (Q → ℂ) where
@@ -942,7 +1000,6 @@ theorem isAddHaarMeasure_matrix_volume {A B : Type} [Fintype A] [Fintype B] : (v
     rw [MeasureTheory.volume_pi]
     first
     | infer_instance
-    | exact MeasureTheory.Measure.pi.isAddHaarMeasure _
   rw [MeasureTheory.volume_pi]
   first
   | infer_instance
@@ -1066,7 +1123,6 @@ theorem tb_cont : Continuous (tb H Ep : (Q → m → ℂ) → _) := by
   unfold tb
   first
   | exact h1.prodMk h2
-  | exact h1.prod_mk h2
 
 def act (g : m → m → ℂ) (Y : Q → m → ℂ) : Q → m → ℂ := fun j => Matrix.of g *ᵥ Y j
 
@@ -1074,8 +1130,6 @@ theorem act_cont : Continuous (fun p : (m → m → ℂ) × (Q → m → ℂ) =>
   unfold act
   exact continuous_pi fun j =>
     (of_cont.comp continuous_fst).matrix_mulVec ((continuous_apply j).comp continuous_snd)
-
-def adjF (g : m → m → ℂ) : m → m → ℂ := (Matrix.of g).adjugate
 
 def invF (g : m → m → ℂ) : m → m → ℂ := ((Matrix.of g)⁻¹ : Matrix m m ℂ)
 
@@ -1086,7 +1140,7 @@ theorem invF_meas : Measurable (invF : (m → m → ℂ) → m → m → ℂ) :=
     simp only [invF, Matrix.inv_def, Ring.inverse_eq_inv']
     rfl
   rw [h]
-  refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
   exact det_cont.measurable.inv.mul (adj_cont.matrix_elem i j).measurable
 
 theorem bet_cont : Continuous (fun g : m → m → ℂ => bet Ep Em (Matrix.of g)) := by
@@ -1385,7 +1439,6 @@ theorem Kf_slice {T : Q → Q → ℂ} (hT : (Matrix.of T).PosDef ∧ (Matrix.tr
     unfold Kf
     first
     | rw [Set.indicator_of_notMem h1, Set.indicator_of_notMem h2]
-    | rw [Set.indicator_of_not_mem h1, Set.indicator_of_not_mem h2]
 
 theorem Kf_slice_zero {T : Q → Q → ℂ} (hT : ¬ ((Matrix.of T).PosDef ∧ (Matrix.trace (Matrix.of T)).re ≤ 1)) (σ : ℝ)
     (B : Q → P → ℂ) : Kf P Q σ (T, B) = 0 := by
@@ -1411,7 +1464,7 @@ theorem Mv_scale {ρ : ℝ} (hρ : 0 ≤ ρ) :
     Mv P Q ρ = ENNReal.ofReal (ρ ^ (2 * Fintype.card P * Fintype.card Q)) * Mv P Q 1 := by
   have hK : Measurable (fun p : (Q → Q → ℂ) × (Q → P → ℂ) => Kf P Q 1 (gramF p.1, p.2)) := by
     have hg : Measurable (fun X : Q → Q → ℂ => fun i j => gram X i j) :=
-      measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => (gram_cont.matrix_elem i j).measurable
+      Measurable.of_eval fun i => Measurable.of_eval fun j => (gram_cont.matrix_elem i j).measurable
     have h : Measurable (fun p : (Q → Q → ℂ) × (Q → P → ℂ) => (gramF p.1, p.2)) :=
       Measurable.prod (f := fun p : (Q → Q → ℂ) × (Q → P → ℂ) => (gramF p.1, p.2)) (hg.comp measurable_fst) measurable_snd
     exact (Kf_meas 1).comp h
@@ -1430,7 +1483,6 @@ theorem k2map_cont : Continuous (swapBlockPair : (Q → P → ℂ) × (Q → Q �
   unfold swapBlockPair
   first
   | exact h1.prodMk continuous_fst
-  | exact h1.prod_mk continuous_fst
 
 theorem tb_coord (F : Frame H Ep Em) (Y : Q → m → ℂ) : tb H Ep Y = swapBlockPair (coordE F Y) := by
   refine Prod.ext ?_ rfl
@@ -1476,7 +1528,6 @@ theorem entry_bound (C : Matrix P Q ℂ) (M : Matrix Q Q ℂ) (hC : ∑ i, ∑ j
   have hn : ∀ z : ℂ, ‖z‖ ^ 2 = Complex.normSq z := fun z => by
     first
     | exact Complex.sq_norm z
-    | exact (Complex.normSq_eq_norm_sq z).symm
   have hC' : ∑ l, ‖C i l‖ ^ 2 ≤ 1 := by
     rw [Finset.sum_congr rfl fun l _ => hn (C i l)]
     exact le_trans (Finset.single_le_sum (f := fun i => ∑ l, Complex.normSq (C i l))
@@ -1652,7 +1703,6 @@ theorem ball_bound {k r : ℕ} {c : ℝ} (hc : 1 ≤ c) {g : Mt k r} (h : gN (Ma
     have h3 : ‖g i j‖ ^ 2 = Complex.normSq (g i j) := by
       first
       | exact Complex.sq_norm _
-      | exact (Complex.normSq_eq_norm_sq _).symm
     rw [h3]; linarith
   nlinarith [norm_nonneg (g i j), mul_le_mul_of_nonneg_left hc hc0]
 
@@ -1670,7 +1720,6 @@ theorem volExact : VolExact := by
     filter_upwards [conc] with g hg
     have e1 := hsblock k r (Matrix.of g) hg
     have e2 := bet_eq F (Matrix.of g)
-    refine propext ?_
     show gN (Matrix.of g) ^ 2 ≤ _ ↔ bet Ep Em (Matrix.of g) ≤ ρ ^ 2
     rw [e1, e2]
     constructor <;> intro h <;> linarith
@@ -1750,12 +1799,6 @@ theorem matrix_norm_ge_one : Formalism.FourierDecayAlt.B2.GNLower := by
     have : 1 ≤ 2 * r + k + 1 := Nat.le_add_left 1 _
     exact_mod_cast this
   nlinarith [sq_nonneg (B.gN (B2.Ppos k r * g * B2.Pneg k r))]
-
-theorem hilbert_schmidt_block : Formalism.FourierDecayAlt.B2.HSBlock := by
-  exact HermitianFormFactor.hsblock
-
-theorem norm_ball_volume_exact : Formalism.FourierDecayAlt.B2.VolExact := by
-  exact HermitianFormFactor.volExact
 
 theorem norm_ball_volume_sharp : Formalism.FourierDecayAlt.B2.VolSharp := by
   exact HermitianFormFactor.volSharp

@@ -1,8 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Integral
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AlgTwist
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoordGrading
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartClosed
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.LeAdicClosure
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoordGrading
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartClosed
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartSpan
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.AlgTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
@@ -52,7 +105,7 @@ private theorem mono {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] {k : Type}
     refine ⟨b' * b, D.mul_mem hb' hb, x' * x, ?_, ?_⟩
     · have hw : Finsupp.weight W.wt (Finsupp.single a e) = e • W.wt a := by
         simp [Finsupp.weight_apply, Finsupp.sum_single_index]
-      rw [map_add, hw]
+      rw [map_add (f := _), hw]
       exact mono_lemma ρ hx' hx
     · have hm : MvPowerSeries.monomial (Finsupp.single a e + f) (1 : O) =
           MvPowerSeries.X a ^ e * MvPowerSeries.monomial f 1 := by
@@ -90,6 +143,7 @@ private theorem dense {O R : Type} [CommRing O] [CommRing R] [IsLocalRing R] [Al
     intro m hm
     simp only [S, Set.mem_setOf_eq, not_and, not_exists, not_le] at hm
     have hl : MvPowerSeries.coeff m low = if m ∈ Finset.Iic c then MvPowerSeries.coeff m f else 0 := by
+
       simp [low, map_sum, MvPowerSeries.coeff_monomial]
     rw [map_sub, hl]
     by_cases hw : Finsupp.weight W.wt m = 0
@@ -102,9 +156,11 @@ private theorem dense {O R : Type} [CommRing O] [CommRing R] [IsLocalRing R] [Al
   obtain ⟨μ, hμ, hspan⟩ := part_span O R ℤ W S 0 (fun m hm => hm.1)
   obtain ⟨b, hb, hfb⟩ := hspan (f - low) hg
   refine ⟨W.π low, ?_, ?_⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     exact Subalgebra.sum_mem _ fun m _ => key m
-  · rw [← map_sub, hfb, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [← map_sub, hfb, map_sum]
     refine Ideal.sum_mem _ fun m hm => ?_
     obtain ⟨s, hs⟩ := (hμ (Finset.mem_coe.mpr hm)).2
     have e : MvPowerSeries.monomial m (1 : O) =
@@ -346,6 +402,7 @@ theorem UpperTheory.V.Fr.wpres :
       have hw : Finsupp.weight W.wt m = j := hμ (Finset.mem_coe.mpr hm)
       rwa [hw] at this
     · simp only [AlgHom.toLinearMap_apply]
+
       rw [hfb, map_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
       rw [map_mul, hBX, mul_assoc]
@@ -394,7 +451,7 @@ theorem UpperTheory.V.Fr.wpres :
       have hsum : a = ∑ m ∈ μ, (⟨c m, hc m⟩ : S.B) • A' m := by
         apply Subtype.ext
         rw [e]
-        simp only [AddSubmonoidClass.coe_finset_sum]
+        simp only [AddSubmonoidClass.coe_finsetSum]
         refine Finset.sum_congr rfl fun m hm => ?_
         rw [← hA'e m hm]
         rfl

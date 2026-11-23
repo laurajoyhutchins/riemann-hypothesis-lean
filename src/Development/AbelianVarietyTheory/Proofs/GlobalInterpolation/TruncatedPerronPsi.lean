@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronKernel
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.Harmonic.Bounds
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SumIntegralComparisons
+
+@[expose] public section
+
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory
 
 namespace GlobalTheory.PerronPsi
@@ -451,22 +508,18 @@ theorem truncated_perron_psi : ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q] (
   have hB0 : 0 ≤ B := div_nonneg (by linarith) hT0.le
   set a : ℕ → ℂ := fun n => (Λ n : ℂ) * χ (n : ZMod q) with ha
   have ha0 : a 0 = 0 := by simp [ha]
+  have ha_twist : a = (fun n : ℕ => χ (n : ZMod q)) * (fun n => (Λ n : ℂ)) := by
+    funext n
+    exact mul_comm _ _
   have hre : ∀ t : ℝ, 1 < ((σ : ℂ) + t * I).re := fun t => by simpa using hσ1
   have hsum : LSeriesSummable a σ := by
-    have h1 := LSeriesSummable_twist_vonMangoldt χ (s := (σ : ℂ)) (by simpa using hσ1)
-    convert h1 using 1
-    funext n
-    simp only [ha, Pi.mul_apply]
-    ring
+    rw [ha_twist]
+    exact LSeriesSummable_twist_vonMangoldt χ (by simpa using hσ1)
   have hLS : ∀ t : ℝ, -(deriv (LFunction χ) ((σ : ℂ) + t * I) / LFunction χ ((σ : ℂ) + t * I))
       = LSeries a ((σ : ℂ) + t * I) := by
     intro t
     rw [LFunction_eq_LSeries χ (hre t), deriv_LFunction_eq_deriv_LSeries χ (hre t), ← neg_div,
-      ← LSeries_twist_vonMangoldt_eq χ (hre t)]
-    congr 1
-    funext n
-    simp only [ha, Pi.mul_apply]
-    ring
+      ← LSeries_twist_vonMangoldt_eq χ (hre t), ha_twist]
   have hJ : ∫ t in (-T)..T, -(deriv (LFunction χ) ((σ : ℂ) + t * I) / LFunction χ ((σ : ℂ) + t * I))
         * (u : ℂ) ^ ((σ : ℂ) + t * I) / ((σ : ℂ) + t * I)
       = ∫ t in (-T)..T, LSeries a ((σ : ℂ) + t * I) * (u : ℂ) ^ ((σ : ℂ) + t * I) / ((σ : ℂ) + t * I) := by

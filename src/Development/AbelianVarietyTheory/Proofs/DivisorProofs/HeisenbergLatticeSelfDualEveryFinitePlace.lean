@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ActFromBlocks
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensorLatticeInertPlaceSelfDual
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitPrimeAdditiveCharacterUnramified
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallySelfDualLatticeIndicatorIsVacuum
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DualLatticeDifferentIndex
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallySelfDualLatticeIndicatorIsVacuum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAddCharSymplecticLocalLatticeEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensorLatticeInertPlaceSelfDual
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsDualFamilyOfIsLattice
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitPrimeAdditiveCharacterUnramified
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.Idele WithZero
 open scoped TensorProduct Matrix nonZeroDivisors
@@ -14,7 +62,7 @@ namespace GlobalTheory.LatSelfDualAll
 section Scalar
 variable {F : Type} [Field F] [NumberField F]
 
-theorem exists_codiff_sub {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (v : Pl F) (c : Fv F v)
+theorem exists_codiff_sub {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (v : Pl (F := F)) (c : Fv F v)
     (h : ∀ y ∈ v.adicCompletionIntegers F, psiLoc ψ v (c * y) = 1) :
     ∃ f : F, f ∈ codiff F ∧ c - algebraMap F (Fv F v) f ∈ v.adicCompletionIntegers F := by
   set α : Af F := singleFin v c with hα
@@ -90,7 +138,7 @@ section Frame
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 theorem exists_formFrame' (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (hJ : J.det ≠ 0)
-    (L : Submodule (𝓞 E) (Fin n → E)) (hL : L.IsLattice E)
+    (L : Submodule (𝓞 E) (Fin n → E)) (hL : L.IsFullLattice E)
     (hdual : ∀ y, (∀ x ∈ L, form σ J y x ∈ (algebraMap (𝓞 E) E).range) → y ∈ L) :
     ∃ (k : ℕ) (S T : Matrix (Fin n) (Fin k) E), (∀ j, (fun i => S i j) ∈ L) ∧ (∀ j, (fun i => T i j) ∈ L) ∧
       (∀ j, ∀ x ∈ L, form σ J (fun i => T i j) x ∈ (algebraMap (𝓞 E) E).range) ∧ T * (J * S.map σ)ᵀ = 1 := by
@@ -110,7 +158,8 @@ theorem exists_formFrame' (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fi
             rw [Finset.sum_comm]
             exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
         _ = σ ((Φ *ᵥ x) j) := by
-            rw [h2]; simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
+            set_option synthInstance.maxHeartbeats 100000 in
+              rw [h2]; simp [Matrix.mulVec, dotProduct, map_sum, map_mul]
     rw [e]; exact GlobalTheory.AdelicU.SelfDual.sig_mem_range σ (hΦ x hx j)
   refine ⟨k, S, (Jᵀ)⁻¹ * (Φ.map σ)ᵀ, hS, fun j => hdual _ (hT j), hT, ?_⟩
   rw [Matrix.transpose_mul, ← Matrix.mul_assoc, Matrix.mul_assoc _ (Φ.map σ)ᵀ, ← Matrix.transpose_mul,
@@ -123,7 +172,7 @@ section Gen
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 theorem smul_mem_latAtV (σ : E →ₐ[F] E) (B : Base F E) {n d r s r' s' : ℕ} {X : Spc F E n} {W : Spc F E d}
-    (hstd : IsStd B.ψ) (hX : X.IsHerm σ B r s) (hW : W.IsSkew σ B r' s') (v : Pl F) {t : AF F} (ht : At (evFin F v) t)
+    (hstd : IsStd B.ψ) (hX : X.IsHerm σ B r s) (hW : W.IsSkew σ B r' s') (v : Pl (F := F)) {t : AF F} (ht : At (evFin F v) t)
     (hψ : ∀ y ∈ v.adicCompletionIntegers F, psiLoc B.ψ v (evFin F v t * y) = 1) {x : Fin n → E} (hx : x ∈ X.L)
     {y : Fin d → E} (hy : y ∈ W.L) (hyd : ∀ x' ∈ W.L, form σ W.J y x' ∈ (algebraMap (𝓞 E) E).range) :
     t • incM F (Matrix.vecMulVec x y) ∈ latAtV X W v := by
@@ -154,7 +203,7 @@ open GlobalTheory.InertSelfDual (exists_traceFamily det_ne_zero_of_herm det_ne_z
 theorem latAtV_selfDual : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     (σ : E →ₐ[F] E) (B : Base F E) (n d : ℕ) (X : Spc F E n) (W : Spc F E d) (r s r' s' : ℕ), B.IsGood σ →
     X.IsHerm σ B r s → W.IsSkew σ B r' s' →
-    ∀ (v : Pl F) (z : Matrix (Fin n) (Fin d) (AE F E)), At (evFin F v) z →
+    ∀ (v : Pl (F := F)) (z : Matrix (Fin n) (Fin d) (AE F E)), At (evFin F v) z →
       (z ∈ latAtV X W v ↔ ∀ γ ∈ latAtV X W v, B.ψ (symp (R := AF F) (cA σ) (-1) (incM F X.J) (incM F W.J) z γ) = 1) := by
   intro F E _ _ _ _ _ σ B n d X W r₁ s₁ r₂ s₂ hB hX hW v z hz
   constructor

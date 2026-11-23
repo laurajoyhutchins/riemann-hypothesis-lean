@@ -1,7 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AddMonoidHomEqZeroOfEventually
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.HeightFunctions.FiniteDimensionalOfSz
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LFunctionPositiveConductorFourEight
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AddMonoidHomEqZeroOfEventually
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Polynomial GlobalTheory.FieldSize
 open scoped IntermediateField
 
@@ -18,7 +66,7 @@ theorem dbl (L : PeriodPair) {w : ℂ} (hw : w ∉ L.lattice) (h2 : w + w ∉ L.
       (GlobalTheory.latticeCurve L).toAffine.negY (L.weierstrassP w) (L.derivWeierstrassP w / 2) := by
     simp [GlobalTheory.latticeCurve]
     intro h; apply hy; linear_combination h
-  rw [QuotientAddGroup.mk_add, map_add, e1, WeierstrassCurve.Affine.Point.add_self_of_Y_ne hne] at e2
+  rw [QuotientAddGroup.mk_add, map_add (f := _), e1, WeierstrassCurve.Affine.Point.add_self_of_Y_ne hne] at e2
   have e3 := (WeierstrassCurve.Affine.Point.some.inj e2).1
   rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hne] at e3
   simp [GlobalTheory.latticeCurve] at e3
@@ -238,8 +286,8 @@ theorem integral (L : PeriodPair) (W : ValuationSubring ℂ) (m : ℕ) (h2 : (2 
   rw [map_mul, map_natCast, pow_eq_zero_iff two_ne_zero |>.1 ha.symm, zero_mul, map_one] at this
   exact zero_ne_one this
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem torsion_integral_distinct : ∀ (L : PeriodPair) (W : ValuationSubring ℂ) (m : ℕ),
     (2 : ℂ)⁻¹ ∈ W → (3 : ℂ)⁻¹ ∈ W → L.g₂ ∈ W → L.g₃ ∈ W → (L.g₂ ^ 3 - 27 * L.g₃ ^ 2)⁻¹ ∈ W →
     Odd m → (m : ℂ)⁻¹ ∈ W →
@@ -285,7 +333,7 @@ theorem torsion_integral_distinct : ∀ (L : PeriodPair) (W : ValuationSubring �
   have f2 := congrArg (residue W) e2
   have f3 := congrArg (residue W) e3
   have f4 := congrArg (residue W) e4
-  simp only [map_mul, map_add, map_sub, map_pow, map_ofNat, map_one] at f1 f2 f3 f4 e5
+  simp only [map_mul, map_add (f := _), map_sub, map_pow, map_ofNat, map_one] at f1 f2 f3 f4 e5
   rw [sub_eq_zero] at e5
   rw [← e5] at f1 f2
   generalize residue W x1 = x at *

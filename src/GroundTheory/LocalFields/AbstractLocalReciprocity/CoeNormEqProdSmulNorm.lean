@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.NormFormula
-import GroundTheory.LocalFields.AbstractLocalReciprocity.Reciprocity
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.Reciprocity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -126,8 +174,8 @@ namespace ClassFieldData
 variable [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G]
   {D : ClassFieldData G A} {K L : OpenSubgroup G}
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 instance finiteIndex_inf_ker (d : G →* Multiplicative ℤ̂) (K L : OpenSubgroup G) :
     (((L : Subgroup G) ⊓ d.ker).subgroupOf ((K : Subgroup G) ⊓ d.ker)).FiniteIndex := by
   have h : ((L : Subgroup G) ⊓ d.ker).subgroupOf ((K : Subgroup G) ⊓ d.ker) =
@@ -138,8 +186,8 @@ instance finiteIndex_inf_ker (d : G →* Multiplicative ℤ̂) (K L : OpenSubgro
   rw [h]
   infer_instance
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 theorem toAdd_deg_mem_multiples (K : OpenSubgroup G) {k : G} (hk : k ∈ (K : Subgroup G)) :
     Multiplicative.toAdd (D.deg k) ∈ multiples (inertiaDegree D.deg K) := by
   obtain ⟨y, hy⟩ := (D.mem_map_deg_iff K).1 ⟨k, hk, rfl⟩
@@ -155,10 +203,16 @@ theorem coe_norm_field_eq {φ : G} (hφK : φ ∈ (K : Subgroup G))
       ∏ ν : Fin s.deg, φ ^ (ν : ℕ) •
         (norm A ((K : Subgroup G) ⊓ D.deg.ker) ((L : Subgroup G) ⊓ D.deg.ker)
           ⟨a, fixedModule_anti le_frobeniusClosure a.2⟩ : A) := by
-  have hmap := map_frobeniusClosure D.continuous_deg (FrobeniusLift.mem_normalizer hLK s.mem)
-    s.deg_eq (L := (L : Subgroup G))
+  have hnormalizer := FrobeniusLift.mem_normalizer (D := D) hLK s.mem
+  have hmap := map_frobeniusClosure D.continuous_deg hnormalizer s.deg_eq (L := (L : Subgroup G))
+  have hfield_le : (s.field L hLK : Subgroup G) ≤ (K : Subgroup G) :=
+    frobeniusClosure_le K.isClosed s.mem (inf_le_left.trans hLK)
+  have hfield_inf_ker :
+      (s.field L hLK : Subgroup G) ⊓ D.deg.ker = (L : Subgroup G) ⊓ D.deg.ker :=
+    frobeniusClosure_inf_ker D.continuous_deg L.isOpen hnormalizer
+      (mul_ne_zero s.deg_pos.ne' (D.inertiaDegree_ne_zero K)) s.deg_eq
   refine coe_norm_eq_prod_smul_norm D.deg s.deg_pos (Nat.pos_of_ne_zero (D.inertiaDegree_ne_zero K))
-    (fun x hx => s.field_le hLK hx) ?_ ?_ (fun k hk => toAdd_deg_mem_multiples K hk) ?_ hφK hdφ a _
+    hfield_le ?_ ?_ (fun k hk => toAdd_deg_mem_multiples K hk) ?_ hφK hdφ a _
   · intro x hx
     have : D.deg x ∈ (frobeniusClosure D.deg L s.elt).map D.deg := ⟨x, hx, rfl⟩
     rw [hmap] at this
@@ -171,9 +225,7 @@ theorem coe_norm_field_eq {φ : G} (hφK : φ ∈ (K : Subgroup G))
   · intro q hq
     constructor
     · intro hqS
-      have : q ∈ ((s.field L hLK : OpenSubgroup G) : Subgroup G) ⊓ D.deg.ker := ⟨hqS, hq.2⟩
-      rw [s.field_inf_ker hLK] at this
-      exact this
+      exact hfield_inf_ker.le ⟨hqS, hq.2⟩
     · intro hqJ
       exact le_frobeniusClosure hqJ
 

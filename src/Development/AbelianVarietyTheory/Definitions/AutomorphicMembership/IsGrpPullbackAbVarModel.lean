@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MultiplicationLatticeSecond
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicColimitOfIsNilpotent
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicCompleteDualNumber
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsAbsoluteValueOfIsDiscreteValuationRing
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjIsAbelianSchemeDimRigidifiedSym
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicColimitOfIsNilpotent
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicCompleteDualNumber
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjIsAbelianSchemeDimRigidifiedSym
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HodgeTateLatticePointFinrankTateModule
+public import Formalism.LocalToGlobal.ProjectiveLattices.DataAtPointN3
+public import Formalism.LocalToGlobal.ProjectiveLattices.EmbKCoe
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsAbsoluteValueOfIsDiscreteValuationRing
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CotangentBidualToTangentFunctionInjective
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.VtUniq
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -72,7 +120,28 @@ theorem existsUnique_corr_dual : (∀ y : specO O (DualNumber O) ⟶ P.G, ∃! x
   have hp₀ : ¬ IsUnit (p : O) := Fact.out
   have hp : ¬ IsUnit (p : DualNumber O) := fun h => hp₀ (by
     simpa using h.map (TrivSqZeroExt.fstHom O O O))
-  have hc := isAdicComplete_dualNumber (O := O) p
+  have hc : IsAdicComplete (Ideal.span {(p : DualNumber O)}) (DualNumber O) := by
+    have h : IsAdicComplete (Ideal.span {(p : O)}) O := inferInstance
+    refine { haus' := ?_, toIsPrecomplete := ?_ }
+    · intro x hx
+      simp only [SModEq.zero, mem_pow_iff, dual_dvd_iff] at hx
+      refine TrivSqZeroExt.ext (h.toIsHausdorff.haus' x.fst fun n => ?_)
+        (h.toIsHausdorff.haus' x.snd fun n => ?_)
+      · rw [SModEq.zero, mem_pow_iff]
+        exact (hx n).1
+      · rw [SModEq.zero, mem_pow_iff]
+        exact (hx n).2
+    · constructor
+      intro f hf
+      simp only [SModEq.sub_mem, mem_pow_iff, dual_dvd_iff] at hf ⊢
+      obtain ⟨a, ha⟩ := h.toIsPrecomplete.prec' (fun n => (f n).fst) fun {m n} hmn => by
+        rw [SModEq.sub_mem, mem_pow_iff]
+        exact (hf hmn).1
+      obtain ⟨b, hb⟩ := h.toIsPrecomplete.prec' (fun n => (f n).snd) fun {m n} hmn => by
+        rw [SModEq.sub_mem, mem_pow_iff]
+        exact (hf hmn).2
+      simp only [SModEq.sub_mem, mem_pow_iff] at ha hb
+      exact ⟨TrivSqZeroExt.inl a + TrivSqZeroExt.inr b, fun n => ⟨by simpa using ha n, by simpa using hb n⟩⟩
   exact ⟨existsUnique_left (P := P) hp hc, existsUnique_right (P := P) hp hc⟩
 
 theorem exists_lieCmp : ∃ e : LieG P.Gt ≃ LieG P.G, ∀ x, Corr P x.1 (e x).1 := by
@@ -98,37 +167,6 @@ theorem exists_lieCmp : ∃ e : LieG P.Gt ≃ LieG P.G, ∀ x, Corr P x.1 (e x).
 
 def lieCmp : LieG P.Gt ≃ LieG P.G := P.exists_lieCmp.choose
 
-theorem eq_lieCmp_iff (x : LieG P.Gt) (y : specO O (DualNumber O) ⟶ P.G) : y = (P.lieCmp x).1 ↔ Corr P x.1 y :=
-  ⟨fun h => h ▸ P.exists_lieCmp.choose_spec x,
-    fun h => (P.existsUnique_corr_dual.2 x.1).unique h (P.exists_lieCmp.choose_spec x)⟩
-
-theorem corr_lieCmp (x : LieG P.Gt) : Corr P x.1 (P.lieCmp x).1 := (P.eq_lieCmp_iff x _).1 rfl
-
-theorem lieCmp_add (x y : LieG P.Gt) : P.lieCmp (lieAdd x y) = lieAdd (P.lieCmp x) (P.lieCmp y) :=
-  Subtype.ext ((P.eq_lieCmp_iff (lieAdd x y) ((P.lieCmp x).1 * (P.lieCmp y).1)).2
-    ((P.corr_lieCmp x).mul (P.corr_lieCmp y))).symm
-
-theorem lieCmp_scale (c : O) (x : LieG P.Gt) :
-    P.lieCmp (AvDefs.lieScale P.Gt c x) = AvDefs.lieScale P.G c (P.lieCmp x) :=
-  Subtype.ext ((P.eq_lieCmp_iff (AvDefs.lieScale P.Gt c x) (ptMap (dualScale c) ≫ (P.lieCmp x).1)).2
-    ((P.corr_lieCmp x).comp (dualScale c))).symm
-
-def omegaCmp : omega P.G ≃ₗ[O] omega P.Gt where
-  toFun f := ⟨f.1 ∘ P.lieCmp,
-    fun x y _ => (congrArg f.1 (P.lieCmp_add x y)).trans (omega_lieAdd f _ _),
-    fun c x _ => (congrArg f.1 (P.lieCmp_scale c x)).trans (omega_lieScale f _ _)⟩
-  invFun f := ⟨f.1 ∘ P.lieCmp.symm,
-    fun x y _ => (congrArg f.1 (P.lieCmp.symm_apply_eq.2 (by
-      rw [lieCmp_add, Equiv.apply_symm_apply, Equiv.apply_symm_apply]; rfl))).trans (omega_lieAdd f _ _),
-    fun c x _ => (congrArg f.1 (P.lieCmp.symm_apply_eq.2 (by
-      rw [lieCmp_scale, Equiv.apply_symm_apply]; rfl))).trans (omega_lieScale f _ _)⟩
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
-  left_inv f := Subtype.ext (funext fun x => congrArg f.1 (P.lieCmp.apply_symm_apply x))
-  right_inv f := Subtype.ext (funext fun x => congrArg f.1 (P.lieCmp.symm_apply_apply x))
-
-theorem omegaCmp_apply (f : omega P.G) (x : LieG P.Gt) : (P.omegaCmp f).1 x = f.1 (P.lieCmp x) := rfl
-
 end Point
 
 end GlobalTheory.HTLat
@@ -141,14 +179,8 @@ variable {p : ℕ} (C : SCF p)
 
 abbrev fldVal : Valuation ↥C.S ℝ≥0 := NormedField.valuation (K := ↥C.S)
 
-theorem integers_intO : (fldVal C).Integers ↥(intO ↥C.S) where
-  hom_inj := Subtype.val_injective
-  map_le_one x := by
-    rw [NormedField.valuation_apply, ← NNReal.coe_le_coe]
-    exact x.2
-  exists_of_le_one r hr := ⟨⟨r, by
-    rw [NormedField.valuation_apply, ← NNReal.coe_le_coe] at hr
-    exact hr⟩, rfl⟩
+theorem integers_intO : (fldVal C).Integers ↥(intO ↥C.S) :=
+  Valuation.integer.integers (fldVal C)
 
 variable [Fact p.Prime]
 
@@ -240,9 +272,6 @@ def embAt (τ : E →+* ℂ) : E →+* ↥C.S := P.fK.comp (embF c τ)
 
 def embInt (τ : E →+* ℂ) : 𝓞 E →+* ↥(intO ↥C.S) := embO (integers_intO C) (embAt P τ)
 
-theorem coe_embInt (τ : E →+* ℂ) (a : 𝓞 E) : (embInt P τ a : ↥C.S) = P.emb τ a :=
-  algebraMap_embO (integers_intO C) (embAt P τ) a
-
 theorem embAt_injective : Function.Injective (embAt P) := fun _ _ h =>
   RingHom.ext fun x => congrArg Subtype.val (P.fK.injective (RingHom.congr_fun h x))
 
@@ -320,8 +349,5 @@ def htPoint : letI := H.starRing; Point p (fldVal C) ↥(intO ↥C.S) (𝓞 E) :
 
 def htToModel : letI := H.starRing; (htPoint A).G.left ⟶ Y.t.G.left :=
   pullback.fst A.t.G.hom (spMap A.f) ≫ A.m.φ
-
-theorem isGrpPullback_htToModel : letI := H.starRing; IsGrpPullback (htPoint A).G Y.t.G P.yt (htToModel A) :=
-  ((isGrpPullback_pullback A.t.G (spMap A.f)).comp A.m.cart).congr A.fac rfl
 
 end GlobalTheory.LocM

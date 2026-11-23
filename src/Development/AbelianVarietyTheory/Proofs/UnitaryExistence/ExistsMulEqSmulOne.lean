@@ -1,11 +1,66 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.BetaAtSymm
-import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.IsLocallyConstantRankAtStalkEigenSub
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LeftEqIffLieVecSmul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SABBaseChangeSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLaw
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ReductionSurjectiveOfIsNilpotent
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsConstantEigenbasisTangentArc
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisBaseChange
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisEigen
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLawPf
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsConstantEigenbasisTangentArc
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.PowObjGeometricallyConnected
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,8 +136,8 @@ theorem exists_solutions {V : Type} (F : Type) [CommRing V] [IsDomain V] [Field 
       Ideal.mem_span_singleton] at h1
     exact isUnit_of_dvd_one h1
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem exists_mul_eq_one {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R] (e : ℕ) {m n : Type}
     [Fintype m] [DecidableEq m] [Fintype n] (C : Matrix m n R)
     (hC : ∀ u, u ᵥ* C.map (Ideal.Quotient.mk (maximalIdeal R ^ (e + 1))) = 0 → u = 0) :
@@ -111,8 +166,8 @@ theorem exists_mul_eq_one {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuat
     exact pow_ne_zero _ hc
   exact ⟨Matrix.of Q * (C * Matrix.of Q)⁻¹, by rw [← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hu]⟩
 
-open NumberField TensorProduct in
 
+open NumberField TensorProduct in
 theorem finrank_int_eq (E : Type) [Field E] [NumberField E] (X : Type) [AddCommGroup X] [Module (𝓞 E) X] :
     Module.finrank ℤ X = Module.finrank ℚ E * Module.finrank (𝓞 E) X := by
   rw [← (TensorProduct.isBaseChange ℤ X ℚ).finrank_eq, ← (TensorProduct.isBaseChange (𝓞 E) X E).finrank_eq,
@@ -164,9 +219,11 @@ theorem le_finrank_eigenSub {R V F O X : Type} [CommRing R] [CommRing V] [IsDoma
           ext k j
           refine hinj ?_
           have h₁ := hφ' k (o p.1) (b j)
+
           rw [← b.sum_repr (σ (o p.1) • b j), map_sum] at h₁
+
           simp only [Matrix.mul_apply, map_sum, map_mul, hΦ, Matrix.smul_apply, smul_eq_mul, Matrix.map_apply,
-            Matrix.of_apply, map_intCast, mul_assoc, ← Finset.mul_sum]
+          Matrix.of_apply, map_intCast, mul_assoc, ← Finset.mul_sum]
           rw [mul_left_comm]
           congr 1
           simpa [mul_comm] using h₁
@@ -196,7 +253,7 @@ theorem le_finrank_eigenSub {R V F O X : Type} [CommRing R] [CommRing V] [IsDoma
       rw [RingHom.map_vecMul] at h₂
       exact h₂.trans (map_mul _ _ _)
     | zero => simp
-    | add a a' _ _ h h' => rw [map_add, map_add, LinearMap.add_apply, h, h', add_smul]
+    | add a a' _ _ h h' => rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, h, h', add_smul]
     | smul z a _ h => rw [map_zsmul, map_zsmul, LinearMap.smul_apply, h, smul_assoc]
   have li : LinearIndependent F (W.map (algebraMap V F)).row := by
     rw [← Matrix.vecMul_injective_iff]
@@ -256,8 +313,8 @@ theorem exists_matrix_torus {S X : Type} [CommRing S] [AddCommGroup X] {G : Over
   rw [e, funext fun i => (Chart.isLieComb_iff _ _ _).1 (hC i), vecMul_eq_sum]
   exact prodPts_prodPts hv.1 _ fun i => C i
 
-open IsLocalRing ReciprocityTheory.ChartRestriction.G.Out in
 
+open IsLocalRing ReciprocityTheory.ChartRestriction.G.Out in
 theorem exists_matrix_level {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     {D : DegData R (maximalIdeal R)} {P : PolAV (Sp (FractionRing R))} {G : Over (Sp R)} [GrpObj G] [IsCommMonObj G]
     (U : UnifPre (maximalIdeal R) D P G) {O : Type} [CommRing O] [StarRing O] [Module O D.toPre.X] {oD : D.OAct O}
@@ -302,8 +359,8 @@ theorem exists_matrix_level {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValu
   refine h₂.trans ?_
   simp [Matrix.mul_apply, vecMul, dotProduct, Diag.dualBasis_apply]
 
-open IsLocalRing ReciprocityTheory.ChartRestriction.G.Out in
 
+open IsLocalRing ReciprocityTheory.ChartRestriction.G.Out in
 theorem finrank_le_of_lieMult {R : Type} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
     {D : DegData R (maximalIdeal R)} {P : PolAV (Sp (FractionRing R))} {G : Over (Sp R)} [GrpObj G] [IsCommMonObj G]
     (U : UnifPre (maximalIdeal R) D P G) {O : Type} [CommRing O] [IsDomain O] [StarRing O] [Module.Finite ℤ O]
@@ -377,7 +434,7 @@ theorem rank_le_signature : ∀ (E : Type) [Field E] [NumberField E] [IsCMField 
     rw [← map_pow, H.rt_sq] at h2
     exact H.d_prime.ne_zero (by simpa using h2)
   refine ⟨Module.finrank (𝓞 E) U.D.toPre.X, ?_, ?_⟩
-  · have h1 := Module.finrank_mul_finrank ℚ (maximalRealSubfield E) E
+  · have h1 := (letI : Module.Free (maximalRealSubfield E) E := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℚ (maximalRealSubfield E) E)
     rw [Algebra.IsQuadraticExtension.finrank_eq_two (maximalRealSubfield E) E] at h1
     rw [finrank_int_eq E]
     congr 1

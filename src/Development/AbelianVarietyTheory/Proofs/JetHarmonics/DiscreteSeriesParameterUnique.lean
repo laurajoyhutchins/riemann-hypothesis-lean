@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
-import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.MemUnitaryGroupIffMulConjTranspose
+module
+
+import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.BetaAtInfinityZero
+public import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open BranchingSupport Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal ContDiff
@@ -16,28 +62,7 @@ open PI.DSInfCharCap
 lemma eq_of_capP {n : ℕ} (mu mu' : Fin n → ℝ) (h : StrictAnti mu) (h' : StrictAnti mu')
     (e : ∀ Y : ℂ, Formalism.QuantumDeterminants.capP (fun s => (mu s : ℂ)) Y = Formalism.QuantumDeterminants.capP (fun s => (mu' s : ℂ)) Y) :
     mu = mu' := by
-  have key : ∀ (a b : Fin n → ℝ),
-      (∀ Y : ℂ, Formalism.QuantumDeterminants.capP (fun s => (a s : ℂ)) Y = Formalism.QuantumDeterminants.capP (fun s => (b s : ℂ)) Y) →
-      Set.range a ⊆ Set.range b := by
-    rintro a b e _ ⟨s, rfl⟩
-    have h0 : Formalism.QuantumDeterminants.capP (fun s => (a s : ℂ)) (-(a s : ℂ)) = 0 :=
-      Finset.prod_eq_zero (Finset.mem_univ s) (by simp)
-    rw [e] at h0
-    obtain ⟨t, -, ht⟩ := Finset.prod_eq_zero_iff.mp h0
-    refine ⟨t, ?_⟩
-    have : (b t : ℂ) = (a s : ℂ) := by linear_combination ht
-    exact_mod_cast this
-  have hr : Set.range mu = Set.range mu' :=
-    Set.Subset.antisymm (key _ _ e) (key _ _ fun Y => (e Y).symm)
-  have h1 : StrictMono (fun s => -mu s) := fun a b hab => neg_lt_neg (h hab)
-  have h2 : StrictMono (fun s => -mu' s) := fun a b hab => neg_lt_neg (h' hab)
-  have hr' : Set.range (fun s => -mu s) = Set.range (fun s => -mu' s) := by
-    have := congrArg (fun S => Neg.neg '' S) hr
-    simp only [← Set.range_comp] at this
-    exact this
-  have := (h1.range_inj h2).mp hr'
-  funext s
-  exact neg_injective (congrFun this s)
+  apply CompanionTheory.CapEig.eq_of_capelliPolynomial_eq <;> assumption
 
 section
 variable {n : ℕ} {ε : Fin n → Bool} {H H' : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
@@ -68,7 +93,7 @@ lemma dsigC_equiv (V : H ≃L[ℂ] H') (hV : ∀ g, Formalism.REAL.inUJ ε g →
   have hH := Formalism.REAL.Jm_conjTranspose ε
   have hJ' := Formalism.REAL.f1alg_JJ_left ε
   unfold dsigC
-  rw [map_add, map_smul, dsig_equiv V hV, dsig_equiv V hV]
+  rw [map_add (f := _), map_smul, dsig_equiv V hV, dsig_equiv V hV]
   · rw [Formalism.REAL.f1alg_inG_iff]
     have hs : star (1 / (2 * Complex.I) : ℂ) = -(1 / (2 * Complex.I)) := by
       simp [Complex.conj_I]
@@ -92,6 +117,7 @@ lemma dsigCW_equiv (V : H ≃L[ℂ] H') (hV : ∀ g, Formalism.REAL.inUJ ε g �
 lemma actU_equiv (V : H ≃L[ℂ] H') (hV : ∀ g, Formalism.REAL.inUJ ε g → ∀ x, V (τ g x) = τ' g (V x))
     (p : FreeAlgebra ℂ (Fin n × Fin n)) (v : H) : V (actU ε τ p v) = actU ε τ' p (V v) := by
   unfold actU Finsupp.sum
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun w _ => ?_
   rw [map_smul, dsigCW_equiv V hV]

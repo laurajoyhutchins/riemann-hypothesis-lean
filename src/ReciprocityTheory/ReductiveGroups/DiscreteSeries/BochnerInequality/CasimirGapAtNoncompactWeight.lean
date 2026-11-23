@@ -1,4 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBound
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.KUnitB
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBound
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerOrth
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerWeight
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.Numerics
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.IsKUnitaryOfIsInfUnitary
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,16 +124,6 @@ theorem khw_lowK_mem (hE : IsGlRep E) (hU : IsInfUnitary ε E)
   rw [hsum]
   simp [hz, hw₀]
 
-theorem casValK_lowK_lt (hE : IsGlRep E) (hU : IsInfUnitary ε E)
-    (hV : IsKIrrHW ε E (lowK ε lam) V) (hc : ∀ v ∈ V, casimir E v = (casVal lam : ℂ) • v)
-    (hgap : StdGap ε lam) {μ : Fin n → ℝ} {w : M} (hw : w ∈ genSub E V) (hw0 : w ≠ 0)
-    (hμ : IsKHWVec ε E μ w) (hne : μ ≠ lowK ε lam) :
-    casValK ε (lowK ε lam) < casValK ε μ := by
-  obtain ⟨hmono, h, hh, hbig⟩ := hgap
-  obtain ⟨j, -, hpos, hcas⟩ := casimir_gap_at_noncompact_weight hE hU hV hc hmono hh hbig hw hw0 hμ hne
-  have : (0 : ℝ) < 2 * ((j : ℝ) + 1) * (h - n + 1) := mul_pos (by positivity) hpos
-  linarith
-
 theorem vogan_min (hE : IsGlRep E) (hU : IsInfUnitary ε E)
     (hV : IsKIrrHW ε E (lowK ε lam) V) (hc : ∀ v ∈ V, casimir E v = (casVal lam : ℂ) • v)
     (hgap : StdGap ε lam) {μ : Fin n → ℝ} {w : M} (hw : w ∈ genSub E V) (hw0 : w ≠ 0)
@@ -116,15 +158,6 @@ theorem khw_mem_layer (hE : IsGlRep E) (hU : IsInfUnitary ε E)
       nlinarith
     have := hle.trans (Nat.le_ceil _)
     exact_mod_cast this
-
-theorem admissible (hE : IsGlRep E) (hU : IsInfUnitary ε E)
-    (hV : IsKIrrHW ε E (lowK ε lam) V) (hc : ∀ v ∈ V, casimir E v = (casVal lam : ℂ) • v)
-    (hgap : StdGap ε lam) (μ : Fin n → ℝ) :
-    ∃ S : Submodule ℂ M, FiniteDimensional ℂ S ∧ S ≤ genSub E V ∧ IsKStableSub ε E S ∧
-      ∀ w ∈ genSub E V, IsKHWVec ε E μ w → w ∈ S := by
-  obtain ⟨k, hk⟩ := khw_mem_layer hE hU hV hc hgap μ
-  exact ⟨layer ε E V k, finiteDimensional_layer hV.1 k, layer_le_genSub k,
-    layer_kStable hE hV.2.1 k, hk⟩
 
 theorem re_inner_casimirK_layer_le (hE : IsGlRep E) (hU : IsInfUnitary ε E)
     (hV : IsKIrrHW ε E (lowK ε lam) V) (k : ℕ) {x : M} (hx : x ∈ layer ε E V k) :

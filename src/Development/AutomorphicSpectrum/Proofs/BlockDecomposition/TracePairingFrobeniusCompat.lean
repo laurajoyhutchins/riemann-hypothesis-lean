@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.FrobeniusWittActions.PsiApply
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.FrobeniusWittActions.PsiApply
+public import Mathlib.LinearAlgebra.Basis.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open TensorProduct CrystallineSemistableComparison.Pb.Psi
 
@@ -21,7 +66,7 @@ theorem T_phi_expand {W A C₀ : Type} [CommRing W] [CommRing A] [CommRing C₀]
     | zero => simp
     | tmul x' y =>
       rw [TensorProduct.smul_tmul', hD, hD, smul_eq_mul, map_mul, TensorProduct.smul_tmul', smul_eq_mul]
-    | add v₁ v₂ h₁ h₂ => rw [smul_add, map_add, map_add, h₁, h₂, smul_add]
+    | add v₁ v₂ h₁ h₂ => rw [smul_add, map_add (f := _), map_add (f := _), h₁, h₂, smul_add]
   have hTt : ∀ (g : Module.Dual K₀ (K₀ ⊗[W] L)) (a : A) (y : L),
       T c k hk g (a ⊗ₜ y) = c a * k (g (1 ⊗ₜ y)) := fun g a y => rfl
   induction z using TensorProduct.induction_on with
@@ -32,16 +77,18 @@ theorem T_phi_expand {W A C₀ : Type} [CommRing W] [CommRing A] [CommRing C₀]
     have h1 : (1 : K₀) ⊗ₜ[W] φL y = φD (1 ⊗ₜ y) := by rw [hD, map_one]
     have h2 : φD ((1 : K₀) ⊗ₜ[W] y) = ∑ s, fr (b.coord s (1 ⊗ₜ y)) • φD (b s) := by
       conv_lhs => rw [← b.sum_repr ((1 : K₀) ⊗ₜ[W] y)]
+
       rw [map_sum]
       simp_rw [hsmul]
       rfl
+
     rw [h1, h2, map_sum, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [map_smul, smul_eq_mul, map_mul]
     ring
   | add z₁ z₂ h₁ h₂ =>
-    rw [map_add, map_add, h₁, h₂, ← Finset.sum_add_distrib]
+    rw [map_add (f := _), map_add (f := _), h₁, h₂, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun s _ => ?_
-    rw [map_add, map_add, add_mul]
+    rw [map_add (f := _), map_add (f := _), add_mul]
 
 end GlobalTheory.CompanionTheory.FrobPairing

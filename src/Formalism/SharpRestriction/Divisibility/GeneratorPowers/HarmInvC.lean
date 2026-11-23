@@ -1,7 +1,50 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.HarmInvA
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ConstantCoeffPolyAdd
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PsiCover
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.KillAddFin
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ConstantCoeffPolyAdd
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.HarmInvA
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PsiCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.KillAddFin
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,13 +63,11 @@ def sb (b : Fin n) : Fin 1 × Fin d → MvPowerSeries (Fin n × Fin d) S := fun 
 theorem sb_cc (b : Fin n) (p : Fin 1 × Fin d) : MvPowerSeries.constantCoeff (sb (S := S) b p) = 0 := by
   first
   | simp [sb]
-  | exact MvPowerSeries.constantCoeff_X _
 
 theorem rename_col (b : Fin n) (F : MvPowerSeries (Fin 1 × Fin d) S) :
     MvPowerSeries.rename (fun p : Fin 1 × Fin d => ((b, p.2) : Fin n × Fin d)) F = MvPowerSeries.subst (sb b) F := by
   first
   | exact MvPowerSeries.rename_eq_subst _ _
-  | exact (MvPowerSeries.subst_X_comp_eq_rename _ _).symm
   | (rw [MvPowerSeries.rename_eq_subst]; rfl)
   | (rw [← MvPowerSeries.subst_eq_rename]; rfl)
   | (rw [MvPowerSeries.subst_eq_rename]; rfl)
@@ -39,14 +80,12 @@ theorem subst_quadCol (b : Fin n) (r : S) (β : Matrix (Fin d) (Fin d) S) :
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero h0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
   have hC : ∀ (c : S) (f : MvPowerSeries (Fin 1 × Fin d) S), MvPowerSeries.C c * f = c • f :=
     fun c f => by rw [MvPowerSeries.smul_eq_C_mul]
   have hC' : ∀ (c : S) (f : MvPowerSeries (Fin n × Fin d) S), MvPowerSeries.C c * f = c • f :=
     fun c f => by rw [MvPowerSeries.smul_eq_C_mul]
   rw [← MvPowerSeries.coe_substAlgHom hs]
+
   simp only [ReciprocityTheory.ChartRestriction.G.TB.quadCol, Fin.sum_univ_one, mul_assoc, hC, hC', map_smul, map_sum, map_mul]
   simp only [MvPowerSeries.coe_substAlgHom, MvPowerSeries.subst_X hs, sb]
 
@@ -72,9 +111,6 @@ private theorem hasSubst_lemma {S σ τ : Type} [CommRing S] [Finite σ] {a : σ
   first
   | exact MvPowerSeries.HasSubst.of_constantCoeff_zero ha
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
-  | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
 
 private theorem prod_exp_lemma_2 {S σ ι : Type} [CommRing S] [Algebra ℚ S] (s : Finset ι)
     (x : ι → MvPowerSeries σ S) (hx : ∀ i, MvPowerSeries.constantCoeff (x i) = 0) :
@@ -83,8 +119,9 @@ private theorem prod_exp_lemma_2 {S σ ι : Type} [CommRing S] [Algebra ℚ S] (
   refine Finset.induction_on s ?_ ?_
   · rw [Finset.prod_empty, Finset.sum_empty, ReciprocityTheory.ChartRestriction.G.TB.WickVanishing.exp_zero]
   · intro a s ha ih
+
     rw [Finset.prod_insert ha, Finset.sum_insert ha, ih, ReciprocityTheory.ChartRestriction.G.TB.WickVanishing.exp_add (hx a)
-      (by rw [map_sum]; exact Finset.sum_eq_zero (fun i _ => hx i))]
+    (by rw [map_sum]; exact Finset.sum_eq_zero (fun i _ => hx i))]
 
 theorem harm_kill_jet {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
     (c : Coeff l) {S : Type} [CommRing S] [Algebra c.F S] [Algebra ℚ S] (k n D : ℕ)

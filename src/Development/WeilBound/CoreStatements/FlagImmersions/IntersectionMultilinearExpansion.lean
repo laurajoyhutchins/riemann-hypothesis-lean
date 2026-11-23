@@ -1,10 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsUniqueStatement
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HeckeSectionsIsotropicCommutatorPairingPower
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.KleimanSt
-import Development.WeilBound.CoreStatements.FlagImmersions.IntersectionMultilinearOneSlot
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Birational
+public import Development.WeilBound.CoreStatements.FlagImmersions.CombLineSmoothConjInvariant
+public import Development.WeilBound.CoreStatements.FlagImmersions.IntersectionMultilinearOneSlot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo Filter Topology GlobalTheory.CompanionTheory.Ar.Top
 
@@ -26,7 +71,7 @@ theorem intersection_multilinear_expansion : ∀ II : IntersectionSystem, IsFull
         simp
       · simp [Function.update_of_ne h]
     rw [e, intersection_multilinear_one_position II hII K ι P d _ k J ℓ v hP (fun i => hsm _) hℓ]
-  let f : MultilinearMap ℤ (fun _ : Fin d => J → ℤ) ℝ :=
+  let f : MultilinearMap (Int.castRingHom ℝ) (fun _ : Fin d => J → ℤ) ℝ :=
     { toFun := fun c => II K ι P d (fun i => combLine ℓ (c i))
       map_update_add' := by
         intro inst c k x y
@@ -35,11 +80,8 @@ theorem intersection_multilinear_expansion : ∀ II : IntersectionSystem, IsFull
       map_update_smul' := by
         intro inst c k a x
         obtain rfl := Subsingleton.elim inst (instDecidableEqFin d)
-        simp only [key, Finset.smul_sum, Pi.smul_apply, smul_eq_mul]
-        refine Finset.sum_congr rfl (fun j _ => ?_)
-        rw [zsmul_eq_mul]
-        push_cast
-        ring }
+        simp only [key, Pi.smul_apply, smul_eq_mul, Int.cast_mul, Finset.mul_sum, mul_assoc]
+        rfl }
   have hn : (fun k => n k) = fun k => ∑ j, n k j • (Pi.single j (1 : ℤ) : J → ℤ) := by
     funext k
     conv_lhs => rw [← Finset.univ_sum_single (n k)]
@@ -56,9 +98,7 @@ theorem intersection_multilinear_expansion : ∀ II : IntersectionSystem, IsFull
     _ = ∑ r : Fin d → J, f (fun k => n k (r k) • (Pi.single (r k) (1 : ℤ) : J → ℤ)) := f.map_sum _
     _ = ∑ w : Fin d → J, (∏ k, (n k (w k) : ℝ)) * II K ι P d (fun k => ℓ (w k)) := by
         refine Finset.sum_congr rfl (fun w _ => ?_)
-        rw [f.map_smul_univ, zsmul_eq_mul, Int.cast_prod]
-        congr 1
-        show II K ι P d (fun k => combLine ℓ (Pi.single (w k) 1)) = _
-        simp only [combLine_single]
+        rw [f.map_smul_univ]
+        simp [f, smul_eq_mul, combLine_single]
 
 end RootFieldNumerics

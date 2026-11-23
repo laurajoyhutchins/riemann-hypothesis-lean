@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.AdjointDiagonalRepPreservesWeightPiece
+public import Mathlib.Algebra.GradedMonoid
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+
+@[expose] public section
 
 open Matrix IsLocalRing ReciprocityTheory.Gal UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.UnitaryThreeInertia
 
@@ -12,7 +62,7 @@ private theorem ltgs_inv_mem {M : Type} [Group M] [Finite M] (S : Submonoid M) {
 
 theorem UpperTheory.V.UnitaryThreeInertia.lt_grSub :
     ∀ {O R : Type} [CommRing O] [CommRing R] [Algebra O R] [Finite R] (ℬ : ℤ → Submodule O R) [SetLike.GradedMonoid ℬ],
-      ∃ S : Subgroup (GG 3 R), ∀ x, x ∈ S ↔ GrMat ℬ x.mat := by
+      ∃ S : Subgroup (GG (m := 3) (R := R)), ∀ x, x ∈ S ↔ GrMat ℬ x.mat := by
   intro O R _ _ _ _ ℬ _
   classical
   have hwt : ∀ a c b : Fin 3, wt a c + wt c b = wt a b := by
@@ -63,16 +113,17 @@ theorem UpperTheory.V.UnitaryThreeInertia.lt_grSub :
     rcases Int.units_eq_one_or s with rfl | rfl
     · rw [sgnAct_one]; exact hg
     · rw [sgnAct_neg_one]; exact htheta g hg
-  haveI : Finite (GG 3 R) := Finite.of_injective (fun x : GG 3 R => (x.left, x.right))
+  haveI : Finite (GG (m := 3) (R := R)) :=
+    Finite.of_injective (fun x : GG (m := 3) (R := R) => (x.left, x.right))
     (fun x y h => SemidirectProduct.ext (congrArg Prod.fst h) (congrArg Prod.snd h))
-  let S0 : Submonoid (GG 3 R) :=
+  let S0 : Submonoid (GG (m := 3) (R := R)) :=
     { carrier := {x | GrMat ℬ x.mat}
       mul_mem' := fun {x y} hx hy => by
         show GrMat ℬ ((x * y).left : Matrix (Fin 3) (Fin 3) R)
         rw [SemidirectProduct.mul_left, Units.val_mul]
         exact hmul _ _ hx (hact _ _ hy)
       one_mem' := by
-        show GrMat ℬ ((1 : GG 3 R).left : Matrix (Fin 3) (Fin 3) R)
+        show GrMat ℬ ((1 : GG (m := 3) (R := R)).left : Matrix (Fin 3) (Fin 3) R)
         rw [SemidirectProduct.one_left, Units.val_one]
         exact hone }
   exact ⟨{ S0 with inv_mem' := fun {x} hx => ltgs_inv_mem S0 hx }, fun x => Iff.rfl⟩

@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainImageOfMapVecLattice
-import GroundTheory.GlobalFields.TateThesis.AdelicCharDual
+module
+
+public import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainImageOfMapVecLattice
+public import GroundTheory.GlobalFields.TateThesis.AdelicCharLocal
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+public import GroundTheory.GlobalFields.TateThesis.AdelicCharDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField MeasureTheory Topology Set Filter IsDedekindDomain
 open scoped NumberField.AdeleRing FourierTransform
@@ -21,13 +71,11 @@ theorem pair_add (ξ : ι → K) (x y : ι → 𝔸[K]) : pair ξ (x + y) = pair
 theorem pair_neg (ξ : ι → K) (x : ι → 𝔸[K]) : pair ξ (-x) = -pair ξ x := by
   simp [pair, Finset.sum_neg_distrib]
 
-theorem pair_sub (ξ : ι → K) (x y : ι → 𝔸[K]) : pair ξ (x - y) = pair ξ x - pair ξ y := by
-  rw [sub_eq_add_neg, pair_add, pair_neg, ← sub_eq_add_neg]
-
 theorem pair_zero (ξ : ι → K) : pair ξ (0 : ι → 𝔸[K]) = 0 := by simp [pair]
 
 theorem pair_algebraMap (ξ η : ι → K) :
     pair ξ (fun i => algebraMap K 𝔸[K] (η i)) = algebraMap K 𝔸[K] (∑ i, ξ i * η i) := by
+
   simp [pair, map_sum]
 
 theorem adelicChar_pair_of_mem (ξ : ι → K) {x : ι → 𝔸[K]} (hx : x ∈ vecLattice K ι) :
@@ -138,6 +186,7 @@ theorem mul_mem_finiteInvDifferent {a z : FiniteAdeleRing (𝓞 K) K}
 theorem pair_finiteAdeleInr (ξ : ι → K) (z : ι → FiniteAdeleRing (𝓞 K) K) :
     pair ξ (fun i => GroundTheory.Global.finiteAdeleInr (z i)) =
       GroundTheory.Global.finiteAdeleInr (∑ i, algebraMap K (FiniteAdeleRing (𝓞 K) K) (ξ i) * z i) := by
+
   simp [pair, GroundTheory.Global.algebraMap_mul_finiteAdeleInr, map_sum]
 
 theorem adelicChar_pair_finiteAdeleInr {ξ : ι → K} (hξ : IsDual ξ)

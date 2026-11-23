@@ -1,4 +1,55 @@
-import Formalism.GaussJetBounds.StatementM
+module
+
+public import Formalism.GaussJetBounds.StatementM
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Mathlib.RingTheory.Valuation.ExtendToLocalization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators NNReal
@@ -11,23 +62,23 @@ section Gauss
 
 variable {F : Type} [NormedField F] {σ : Type}
 
-def gN (P : MvPolynomial σ F) : ℝ := ⨆ n : σ →₀ ℕ, ‖coeff n P‖
+def gN (P : MvPolynomial σ F) : ℝ := ⨆ n : σ →₀ ℕ, ‖AddMonoidAlgebra.coeff P n‖
 
-lemma gN_bdd (P : MvPolynomial σ F) : BddAbove (Set.range fun n : σ →₀ ℕ => ‖coeff n P‖) := by
-  refine ⟨∑ n ∈ P.support, ‖coeff n P‖, ?_⟩
+lemma gN_bdd (P : MvPolynomial σ F) : BddAbove (Set.range fun n : σ →₀ ℕ => ‖AddMonoidAlgebra.coeff P n‖) := by
+  refine ⟨∑ n ∈ P.support, ‖AddMonoidAlgebra.coeff P n‖, ?_⟩
   rintro _ ⟨n, rfl⟩
   by_cases hn : n ∈ P.support
-  · exact Finset.single_le_sum (f := fun n => ‖coeff n P‖) (fun _ _ => norm_nonneg _) hn
-  · show ‖coeff n P‖ ≤ _
+  · exact Finset.single_le_sum (f := fun n => ‖AddMonoidAlgebra.coeff P n‖) (fun _ _ => norm_nonneg _) hn
+  · show ‖AddMonoidAlgebra.coeff P n‖ ≤ _
     rw [notMem_support_iff.mp hn, norm_zero]
     exact Finset.sum_nonneg fun _ _ => norm_nonneg _
 
-lemma le_gN (P : MvPolynomial σ F) (n : σ →₀ ℕ) : ‖coeff n P‖ ≤ gN P :=
+lemma le_gN (P : MvPolynomial σ F) (n : σ →₀ ℕ) : ‖AddMonoidAlgebra.coeff P n‖ ≤ gN P :=
   le_ciSup (gN_bdd P) n
 
 lemma gN_nonneg (P : MvPolynomial σ F) : 0 ≤ gN P := (norm_nonneg _).trans (le_gN P 0)
 
-lemma gN_le {P : MvPolynomial σ F} {c : ℝ} (h : ∀ n, ‖coeff n P‖ ≤ c) : gN P ≤ c :=
+lemma gN_le {P : MvPolynomial σ F} {c : ℝ} (h : ∀ n, ‖AddMonoidAlgebra.coeff P n‖ ≤ c) : gN P ≤ c :=
   ciSup_le h
 
 lemma gN_zero : gN (0 : MvPolynomial σ F) = 0 :=
@@ -56,17 +107,17 @@ lemma gN_C (z : F) : gN (C z : MvPolynomial σ F) = ‖z‖ := by
   · simpa using le_gN (C z : MvPolynomial σ F) 0
 
 lemma exists_min_gN [LinearOrder σ] {P : MvPolynomial σ F} (hP : P ≠ 0) :
-    ∃ i : σ →₀ ℕ, ‖coeff i P‖ = gN P ∧ ∀ k : σ →₀ ℕ, toLex k < toLex i → ‖coeff k P‖ < gN P := by
+    ∃ i : σ →₀ ℕ, ‖AddMonoidAlgebra.coeff P i‖ = gN P ∧ ∀ k : σ →₀ ℕ, toLex k < toLex i → ‖AddMonoidAlgebra.coeff P k‖ < gN P := by
   classical
   have hne : P.support.Nonempty := support_nonempty.mpr hP
-  obtain ⟨m, hm, hmax⟩ := Finset.exists_max_image P.support (fun n => ‖coeff n P‖) hne
-  have hmg : ‖coeff m P‖ = gN P := by
+  obtain ⟨m, hm, hmax⟩ := Finset.exists_max_image P.support (fun n => ‖AddMonoidAlgebra.coeff P n‖) hne
+  have hmg : ‖AddMonoidAlgebra.coeff P m‖ = gN P := by
     refine le_antisymm (le_gN P m) (gN_le fun n => ?_)
     by_cases hn : n ∈ P.support
     · exact hmax n hn
     · rw [notMem_support_iff.mp hn, norm_zero]
       exact norm_nonneg _
-  let S := P.support.filter fun n => ‖coeff n P‖ = gN P
+  let S := P.support.filter fun n => ‖AddMonoidAlgebra.coeff P n‖ = gN P
   have hS : S.Nonempty := ⟨m, Finset.mem_filter.mpr ⟨hm, hmg⟩⟩
   obtain ⟨i, hi, hmin⟩ := Finset.exists_min_image S (fun n => toLex n) hS
   refine ⟨i, (Finset.mem_filter.mp hi).2, fun k hk => lt_of_le_of_ne (le_gN P k) fun hkg => ?_⟩
@@ -82,7 +133,7 @@ variable [IsUltrametricDist F]
 
 lemma gN_add_le (P Q : MvPolynomial σ F) : gN (P + Q) ≤ max (gN P) (gN Q) := by
   refine gN_le fun n => ?_
-  rw [coeff_add]
+  rw [MvPolynomial.coeff_add]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le_max (le_gN P n) (le_gN Q n))
 
 lemma gN_mul_le (P Q : MvPolynomial σ F) : gN (P * Q) ≤ gN P * gN Q := by
@@ -104,11 +155,11 @@ lemma gN_mul (P Q : MvPolynomial σ F) : gN (P * Q) = gN P * gN Q := by
   obtain ⟨_, _⟩ := exists_wellFoundedLT σ
   obtain ⟨i, hi, hi'⟩ := exists_min_gN hP
   obtain ⟨j, hj, hj'⟩ := exists_min_gN hQ
-  have key : ‖coeff (i + j) (P * Q)‖ = ‖coeff i P * coeff j Q‖ := by
+  have key : ‖AddMonoidAlgebra.coeff (P * Q) (i + j)‖ = ‖AddMonoidAlgebra.coeff P i * AddMonoidAlgebra.coeff Q j‖ := by
     rw [coeff_mul]
     refine IsNonarchimedean.apply_sum_eq_of_lt (f := fun x : F => ‖x‖)
-      (l := fun p : (σ →₀ ℕ) × (σ →₀ ℕ) => coeff p.1 P * coeff p.2 Q) (k := (i, j))
-      IsUltrametricDist.isNonarchimedean_norm (fun a => (norm_neg a).symm)
+      (g := fun p : (σ →₀ ℕ) × (σ →₀ ℕ) => AddMonoidAlgebra.coeff P p.1 * AddMonoidAlgebra.coeff Q p.2) (k := (i, j))
+      IsUltrametricDist.isNonarchimedean_norm (fun a => norm_neg a)
       (by simp) ?_
     rintro ⟨a, b⟩ hab hne
     replace hab : a + b = i + j := by simpa using hab
@@ -130,8 +181,8 @@ lemma gN_mul (P Q : MvPolynomial σ F) : gN (P * Q) = gN P * gN Q := by
         (mul_lt_mul_of_pos_right (hi' a h) (gN_pos hQ))
     · exact (mul_le_mul_of_nonneg_right (le_gN P a) (norm_nonneg _)).trans_lt
         (mul_lt_mul_of_pos_left (hj' b h) (gN_pos hP))
-  calc gN P * gN Q = ‖coeff i P * coeff j Q‖ := by rw [norm_mul, hi, hj]
-    _ = ‖coeff (i + j) (P * Q)‖ := key.symm
+  calc gN P * gN Q = ‖AddMonoidAlgebra.coeff P i * AddMonoidAlgebra.coeff Q j‖ := by rw [norm_mul, hi, hj]
+    _ = ‖AddMonoidAlgebra.coeff (P * Q) (i + j)‖ := key.symm
     _ ≤ gN (P * Q) := le_gN _ _
 
 def gNN (P : MvPolynomial σ F) : ℝ≥0 := Real.toNNReal (gN P)
@@ -207,8 +258,8 @@ lemma gN_map_int (l : ℕ) [Fact l.Prime] {σ : Type} (P : MvPolynomial σ ℤ)
     exact Padic.norm_int_le_one _
   · obtain ⟨n, hn⟩ := ne_zero_iff.mp hP
     rw [coeff_map, eq_intCast] at hn
-    have hnd : ¬ (l : ℤ) ∣ coeff n P := fun h => hn ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mpr h)
-    have h1 : ‖((coeff n P : ℤ) : ℚ_[l])‖ = 1 :=
+    have hnd : ¬ (l : ℤ) ∣ AddMonoidAlgebra.coeff P n := fun h => hn ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mpr h)
+    have h1 : ‖((AddMonoidAlgebra.coeff P n : ℤ) : ℚ_[l])‖ = 1 :=
       le_antisymm (Padic.norm_int_le_one _)
         (not_lt.mp fun h => hnd (Padic.norm_intCast_lt_one_iff.mp h))
     have := le_gN (MvPolynomial.map (Int.castRingHom ℂ_[l]) P) n

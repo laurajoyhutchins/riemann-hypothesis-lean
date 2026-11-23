@@ -1,7 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTieOf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.TermTieOf
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.TermTiesEmptyOfLargeIndex
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTieOf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.TermTieOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,14 +111,6 @@ def loopRowsOf (H : TieHyp W hI) (A : AmpDat X) (hV : PvalForm W hI A) (hRR : Ro
 end AtTermTieOf
 
 section Inhab
-
-theorem parts_nonempty_of_noTerms (D : D7) (large₂ : SizeData₂ D) (T : TermTie D) (u u' : D.what₂.Word) (C1 : ℝ)
-    (h : IsEmpty (D.s.Term u u')) (hR : Formalism.MainNotions.S.Inh.tie_HRows D u) (hA : Formalism.MainNotions.S.Inh.tie_HAmp D large₂ u u' C1) :
-    Nonempty (LoopRowsDat D T u u') ∧ ∃ B : LoopLocDat D large₂ u u' C1, Nonempty (LoopTermDat D large₂ T u u' C1 B) := by
-  obtain ⟨L⟩ := Formalism.MainNotions.S.Inh.tie_loopTie_of_noTerms D large₂ T u u' C1 h hR hA
-  refine ⟨⟨⟨L.F0, L.flag_e_eq_hyperbolic, L.formsAtZero, L.what₂, L.isRows, L.fl_eq, L.Lam_mem, L.frame_ok, L.wRow_eq, L.pair_inj⟩⟩,
-    ⟨L.θ, L.θ_win, L.W, L.goodW, L.A, L.goodS, L.deg_eq⟩, ⟨?_⟩⟩
-  exact ⟨L.γ, L.pt, L.θR, L.νR, L.volR, L.volR_pos, L.gram, L.rel, L.J_irr, L.J_norm⟩
 
 end Inhab
 

@@ -1,9 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TwArgs
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.See
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ToSTiesRPin
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JoinSIOnV0
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TwArgs
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.See
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions NumberField IsDedekindDomain MeasureTheory
 open Formalism.L2 Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Cx Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.AutomorphicEvaluation Formalism.L2.Theta Formalism.L2.SG.RowsJoinPinned
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -17,7 +50,7 @@ def StageAt {D : D7} {G' : Type} [Group G'] [Fintype G'] {Pl0 T : Type} {A : Fam
   SeeAt R F P.X P.inst t ∧ EvalTieT (MP R) R.ν0 R.fd0 (EP R F) P.X P.G (iotaX P.X P.inst).toMulEquiv t c ∧
     RowJ R eE P.X P.inst P.G t S.j
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem stageAt_upd {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 I0 T : Type}
     {A3 : FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL]
@@ -29,7 +62,7 @@ theorem stageAt_upd {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 I0 T : Type}
     StageAt ((R.updS k lam).withErr e).toRealDat (reFace F Dc Sp Zsc).lv2 eE P S t c :=
   ⟨⟨h.1.fin, h.1.conj, h.1.mat⟩, h.2.1, h.2.2⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem spectralStage_point_rowPlacement_transfer : ∀ (K : Ctx) (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T) (Z : w.Lt) (Wt : Set B.places.Pl) (L : SizeData₂ (w.st Z).toD7) (hT : GatTies (w.st Z).toD7) (Gi : Formalism.MainNotions.G.Inst (w.st Z).toD7 L) (Gl : Formalism.MainNotions.G.LatInst (w.st Z).toD7) (Kc : Formalism.MainNotions.G.Consts) (Yd : DivX (w.st Z).toD7) (cX : ExtraC) (ex : Extra (w.st Z).toD7 L hT Gi Gl Kc Yd cX) (t : RowsT K w Z Wt ex.p0) (a : TwArgs ex t) (F0 : ∀ u, Formalism.L2.Forms.Forms0 (w.st Z).toD7 u) (s : SAt (D := (w.st Z).toD7) t.r.z.R.toRealDat t.r.z.F.lv2 t.r.Y.eE F0), SeeAt a.x.R.toRealDat a.x.F.lv2 s.P.X s.P.inst s.t ∧ EvalTieT (MP a.x.R.toRealDat) a.x.R.toRealDat.ν0 a.x.R.toRealDat.fd0 (EP a.x.R.toRealDat a.x.F.lv2) s.P.X s.P.G (iotaX s.P.X s.P.inst).toMulEquiv s.t s.c ∧ RowJ a.x.R.toRealDat a.x.Y.eE s.P.X s.P.inst s.P.G s.t s.S.j := by
   intro K B f T w Z Wt L hT Gi Gl Kc Yd cX ex t a F0 s

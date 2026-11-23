@@ -1,9 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StVarIntGraphCompact
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PVarIntGraph
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongPolyLimit
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PIntegralIndep
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StVarIntGraphCompact
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StChartMassCompact
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StLelongPolyLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StLelongWeightLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StLocalMultComap
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StVarIntGraphInt
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PVarIntAdd
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PIntegralIndep
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PLelongPolyLimit
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PVarIntGraph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -50,7 +103,7 @@ theorem LelongPolyLimit.proof_of_compact (hGraph : VarIntGraphCompact.Statement)
     simp only [Φ, graphPt_init]
   have hF : SmoothNear (zeroSet (graphIdeal J p)) F := by
     obtain ⟨U, hU, hJU, hfU⟩ := smoothNear_comp_init p hf
-    exact ⟨U, hU, hJU, hfU.mul ((χ.contDiff.comp (contDiff_apply ℝ ℂ (Fin.last n))).contDiffOn)⟩
+    exact ⟨U, hU, hJU, hfU.mul ((χ.contDiff.comp (contDiff_apply ℝ (fun _ => ℂ) (Fin.last n))).contDiffOn)⟩
   have hFc : HasCompactSupport F := by
     refine HasCompactSupport.intro ((hfc.isCompact.prod χ.hasCompactSupport.isCompact).image
       (Continuous.finSnoc (A := fun _ => ℂ) continuous_fst continuous_snd :
@@ -87,7 +140,7 @@ theorem LelongPolyLimit.proof_of_compact (hGraph : VarIntGraphCompact.Statement)
     refine ⟨U ∩ k' ⁻¹' Set.Ioi 0, hkU.continuousOn.isOpen_inter_preimage hU isOpen_Ioi,
       fun x hx => ⟨hJU hx, hk0 _ (init_mem_zeroSet p hx)⟩, ?_⟩
     refine ContDiffOn.div_const (ContDiffOn.log ?_ fun x hx => ?_) _
-    · exact ((contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ (Fin.last n))).contDiffOn.add
+    · exact ((contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) (Fin.last n))).contDiffOn.add
         (contDiffOn_const.mul ((hkU.mono Set.inter_subset_left).pow 2))
     · exact (add_pos_of_nonneg_of_pos (sq_nonneg _) (mul_pos hε (pow_pos hx.2 2))).ne'
   rw [hGraph n (d + 1) J p F _ hJ hF hFc (fun j => Fin.cases hG hΦ j), hFγ]

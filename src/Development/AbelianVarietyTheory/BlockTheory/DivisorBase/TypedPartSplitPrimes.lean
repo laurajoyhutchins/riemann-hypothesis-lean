@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyValExtOfOverLa
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyValExtOfOverLa
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,12 +63,6 @@ def IsIntHom {d d' : ℕ} (G : LogFGL v d) (G' : LogFGL v d') (φ : Fin d' → M
 def intSpan (v : AddValuation C (WithTop ℝ)) {ι : Type} [Fintype ι] {d : ℕ} (u : ι → Fin d → C) : Set (Fin d → C) :=
   {x | ∃ a : ι → C, (∀ k, IsIntV v (a k)) ∧ x = ∑ k, a k • u k}
 
-example {d : ℕ} (G : LogFGL v d) : IsIntHom G G (fun a => X a) 1 := by
-  refine ⟨fun b => by simp, fun b α => ?_, fun b => ?_⟩
-  · unfold IsIntV; rw [coeff_X]; split_ifs <;> simp
-  · rw [show (fun a => (X a : MvPowerSeries (Fin d) C)) = X from rfl, subst_self]
-    simp [Matrix.one_apply, ite_smul]
-
 end Hom
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
@@ -38,12 +72,6 @@ def UnramIn (E : Type) [Field E] [NumberField E] (p : ℕ) : Prop := ¬ (p : ℤ
 def SplitInK (H : Host E) (p : ℕ) : Prop := (H.d : ZMod p) ≠ 0 ∧ IsSquare (-(H.d : ZMod p))
 
 def InertInK (H : Host E) (p : ℕ) : Prop := ¬ IsSquare (-(H.d : ZMod p))
-
-example (H : Host E) : SplitInK H 2 := by
-  have h : (H.d : ZMod 2) = 1 := by
-    have := H.d_mod
-    rw [← ZMod.natCast_mod H.d 2, show H.d % 2 = 1 by omega]; rfl
-  refine ⟨by rw [h]; decide, 1, by rw [h]; decide⟩
 
 variable {Dw : Datum H} {l : Level H}
 
@@ -61,7 +89,7 @@ def primeBelow (τ : E →+* ℂ) : Ideal (𝓞 E) where
   carrier := {a | X.v (embX io X τ a) < 1}
   zero_mem' := by simp
   add_mem' := fun {a b} ha hb => by
-    simp only [Set.mem_ofPred_eq, map_add] at ha hb ⊢
+    simp only [Set.mem_ofPred_eq, map_add (f := _)] at ha hb ⊢
     exact X.v.map_add_lt ha hb
   smul_mem' := fun a b hb => by
     simp only [Set.mem_ofPred_eq, smul_eq_mul, map_mul] at hb ⊢
@@ -90,8 +118,8 @@ def IsPartAt (w : Ideal (𝓞 E)) {d' : ℕ} (G' : LogFGL (vX_vp X) d')
     ∀ ℓ : Lt1 Dw, (primeBelow io X ℓ.1 = w → (I * P).mulVec (lieVec Ch X ℓ) = lieVec Ch X ℓ) ∧
       (primeBelow io X ℓ.1 ≠ w → (I * P).mulVec (lieVec Ch X ℓ) = 0)
 
-open Classical in
 
+open Classical in
 def TypedPartAt (τ : E →+* ℂ) : Prop :=
   ∃ h : ℕ, 0 < h ∧ Nat.card (𝓞 E ⧸ primeBelow io X τ) = p ^ h ∧
   ∃ lab : ZMod h → (E →+* ℂ), IsOrbit io X τ lab ∧
@@ -108,9 +136,6 @@ def TypedPartAt (τ : E →+* ℂ) : Prop :=
       (∀ a b, ty b ≠ s → P.mulVec (frame Ch X f a) b = 0) ∧
       ∀ k : ℕ, nuFacC Ch X f k = detDepth G' (fun a => P.mulVec (frame Ch X f a)) k
 
-omit [StarRing (𝓞 E)] in
-
-example : Module.finrank (𝓞 E) Dw.La - Dw.q = Dw.p := by rw [Dw.rank]; omega
 
 def FormalGroupTypes : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l)

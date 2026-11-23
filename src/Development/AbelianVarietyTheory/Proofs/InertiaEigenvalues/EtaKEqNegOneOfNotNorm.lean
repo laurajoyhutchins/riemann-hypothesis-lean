@@ -1,8 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSplitting
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuadraticStarStructure
-import GroundTheory.LocalFields.UnramifiedNormSurj
-import GroundTheory.LocalFields.UnramifiedGalois
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
+public import GroundTheory.LocalFields.UnitsBasic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuadraticStarStructure
+import GroundTheory.LocalFields.FiniteExtension
+import GroundTheory.LocalFields.UnitsPowers
+public import GroundTheory.LocalFields.UnramifiedGalois
+public import GroundTheory.LocalFields.UnramifiedNormSurj
+import GroundTheory.LocalFields.UnramifiedRootsOfUnity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
+public import GroundTheory.LocalFields.UnramifiedDefs
+
+@[expose] public section
+
 open GlobalTheory.JR Matrix MeasureTheory Filter Topology
 
 namespace GlobalTheory.JR.NonNorm
@@ -18,16 +74,19 @@ theorem not_two_dvd_ord_norm (F K L : Type) [Field F] [ValuativeRel F] [Topologi
   obtain ⟨vK, tK, hK, eK⟩ := exists_isNonarchimedeanLocalField_valuativeExtension F K
   obtain ⟨vL, tL, hL, eL⟩ := exists_isNonarchimedeanLocalField_valuativeExtension K L
   have hm : ((Nat.card 𝓀[F] ^ 2 - 1 : ℕ) : 𝓀[K]) ≠ 0 :=
-    natCast_residueField_ne_zero K (natCast_card_pow_sub_one_ne_zero (K := F) two_ne_zero)
+    by
+      have hmF : ((Nat.card 𝓀[F] ^ 2 - 1 : ℕ) : 𝓀[F]) ≠ 0 :=
+        natCast_card_pow_sub_one_ne_zero (K := F) two_ne_zero
+      simpa using (map_ne_zero (algebraMap (𝓀[F]) (𝓀[K]))).2 hmF
   haveI : IsUnramified K L := ⟨ramificationIndex_eq_one_of_adjoin_eq_top hζ hm htop⟩
   have hodd : ¬ (2 : ℤ) ∣ ord s := by
     intro hd
     have h := (mem_range_normUnits_iff (K := K) (L := L) (Units.mk0 s hs0)).2 (by rw [h2]; exact hd)
     obtain ⟨y, hy⟩ := h
     exact hs ⟨y, congrArg Units.val hy⟩
-  have hf : ¬ 2 ∣ residueDegree F K := by
+  have hf : ¬ 2 ∣ ((IsLocalRing.maximalIdeal 𝒪[K]).inertiaDeg (𝒪[F])) := by
     rintro ⟨j, hj⟩
-    have hcard : Nat.card 𝓀[K] = Nat.card 𝓀[F] ^ residueDegree F K := by
+    have hcard : Nat.card 𝓀[K] = Nat.card 𝓀[F] ^ ((IsLocalRing.maximalIdeal 𝒪[K]).inertiaDeg (𝒪[F])) := by
       rw [residueDegree_eq_finrank]
       exact Module.natCard_eq_pow_finrank
     obtain ⟨z, hz⟩ := exists_isPrimitiveRoot_card_residueField_sub_one (L := K)
@@ -56,7 +115,7 @@ theorem not_two_dvd_ord_norm (F K L : Type) [Field F] [ValuativeRel F] [Topologi
   ValuativeRel.ofValuation (NormedField.valuation (K := F))
 
 theorem isLocalField (F : Type) [NontriviallyNormedField F] [IsUltrametricDist F] [LocallyCompactSpace F] :
-    letI := normRel F
+    letI := normRel F;
     IsNonarchimedeanLocalField F := by
   letI := normRel F
   have hc : (NormedField.valuation (K := F)).Compatible := Valuation.Compatible.ofValuation _
@@ -68,8 +127,8 @@ theorem isLocalField (F : Type) [NontriviallyNormedField F] [IsUltrametricDist F
 
 theorem ord_eq_of_norm_eq (F : Type) [NontriviallyNormedField F] [IsUltrametricDist F] [LocallyCompactSpace F]
     (x y : F) (h : ‖x‖ = ‖y‖) :
-    letI := normRel F
-    haveI := isLocalField F
+    letI := normRel F;
+    haveI := isLocalField F;
     ord x = ord y := by
   letI := normRel F
   haveI := isLocalField F
@@ -90,15 +149,15 @@ theorem etaK_eq_neg_one : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivi
   haveI := isLocalField F
   haveI := isLocalField E
   haveI : FiniteDimensional F E := Module.finite_of_finrank_pos (by rw [hU.finrank_eq]; norm_num)
-  haveI : ValuativeExtension F E := ⟨fun a b => by
+  haveI : ValuativeExtension F E := ⟨fun {a b} => by
     change ‖algebraMap F E a‖ ≤ ‖algebraMap F E b‖ ↔ ‖a‖ ≤ ‖b‖
     rw [norm_algebraMap', norm_algebraMap']⟩
-  have he : ramificationIndex F E = 1 := by
+  have he : (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation E))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation F))) = 1 := by
     obtain ⟨π, hπ⟩ := IsDiscreteValuationRing.exists_irreducible 𝒪[E]
     obtain ⟨x, hx⟩ := hU.unram (π : E)
     have h1 := ord_eq_of_norm_eq E (π : E) (algebraMap F E x) (by rw [norm_algebraMap', hx])
     rw [ord_uniformizer hπ, ord_algebraMap] at h1
-    have h2 : (ramificationIndex F E : ℤ) ∣ 1 := ⟨_, h1⟩
+    have h2 : ((_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation E))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation F))) : ℤ) ∣ 1 := ⟨_, h1⟩
     exact Nat.dvd_one.1 (by exact_mod_cast h2)
   obtain ⟨ζ, hζ, htop⟩ := exists_isPrimitiveRoot_adjoin_eq_top_of_unramified F E he
   have hcard : Nat.card 𝓀[E] = Nat.card 𝓀[F] ^ 2 := by
@@ -129,7 +188,6 @@ theorem etaK_eq_neg_one : ∀ (F E : Type) [NontriviallyNormedField F] [Nontrivi
     intro y _
     have hbc := A.push.symm.out
     induction y using hbc.inductionOn with
-    | zero => exact zero_mem _
     | tmul e => exact hE e
     | smul k y hy => exact IntermediateField.smul_mem _ (hy trivial)
     | add y z hy hz => exact add_mem (hy trivial) (hz trivial)

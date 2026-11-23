@@ -1,6 +1,57 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ParabolicBlockForms.ExistsGlCol
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ParabolicBlockForms.BlockHForm
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ParabolicBlockForms.LagrangianConditionParabolicMul
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.LagrangianCondition
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.ContinuousInFrame
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AdelicFormCongruences.ExistsGlCol
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ParabolicBlockForms.BlockHForm
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ParabolicBlockForms.ExistsGlCol
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ParabolicBlockForms.LagrangianConditionParabolicMul
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.MemStabiliserIffFrameLowerBlock
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.FrameInvPf
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.MatrixOfUnipotentFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AdelicFormCongruences.IncMFromBlocks
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,7 +143,63 @@ theorem surj {γ : d.G} (hγ : γ ∈ rat2 σ d.Y) (hS : LagrangianCondition L �
       kfour.incM_mul', kfour.incM_mul']
   have hnq : NQ (Sum.inl L.i₀) (Sum.inr L.i₀) (inFrame d.b (p1 * γ * L.j h⁻¹)) := by
     rw [hnF]
-    exact NQ.map _ (nq_E L hx hy hHH')
+    have padE_emS (N : Matrix (Fin L.n ⊕ Fin L.n) (Fin L.n ⊕ Fin L.n) E) (a a' : Fin L.n ⊕ Fin L.n) :
+        padE L N (emS L a) (emS L a') = N a a' := by
+      have h : (∃ x, emS L x = emS L a) ∧ ∃ x, emS L x = emS L a' := ⟨⟨a, rfl⟩, ⟨a', rfl⟩⟩
+      simp only [padE]
+      rw [dite_eq_left h, emS_inj L h.1.choose_spec, emS_inj L h.2.choose_spec]
+    
+    have padE_out_row (N : Matrix (Fin L.n ⊕ Fin L.n) (Fin L.n ⊕ Fin L.n) E) {r : Fin d.n ⊕ Fin d.n}
+        (hr : ¬ ∃ a, emS L a = r) (c : Fin d.n ⊕ Fin d.n) : padE L N r c = (1 : Matrix _ _ E) r c := by
+      simp only [padE]
+      rw [dite_eq_right (fun h => hr h.1)]
+    
+    have padE_out_col (N : Matrix (Fin L.n ⊕ Fin L.n) (Fin L.n ⊕ Fin L.n) E) (r : Fin d.n ⊕ Fin d.n)
+        {c : Fin d.n ⊕ Fin d.n} (hc : ¬ ∃ a, emS L a = c) : padE L N r c = (1 : Matrix _ _ E) r c := by
+      simp only [padE]
+      rw [dite_eq_right (fun h => hc h.2)]
+    
+    have nq_local {M : Matrix (Fin d.n ⊕ Fin d.n) (Fin d.n ⊕ Fin d.n) E}
+        (hx : ∀ r, M r (Sum.inl L.i₀) = (1 : Matrix (Fin d.n ⊕ Fin d.n) (Fin d.n ⊕ Fin d.n) E) r (Sum.inl L.i₀))
+        (hy : ∀ c, c ≠ Sum.inr L.i₀ → M (Sum.inr L.i₀) c = 0)
+        {H' : Matrix (Fin L.n ⊕ Fin L.n) (Fin L.n ⊕ Fin L.n) E} (hH : M.submatrix (emS L) (emS L) * H' = 1) :
+        NQ (Sum.inl L.i₀) (Sum.inr L.i₀) (M * padE L H') := by
+      have hxo : ¬ ∃ a, emS L a = Sum.inl L.i₀ := not_inl L L.i₀ rfl
+      have hyo : ¬ ∃ a, emS L a = Sum.inr L.i₀ := not_inr L L.i₀ rfl
+      refine ⟨fun k => ?_, fun k l hlx hly hkx => ?_⟩
+      · have : (M * padE L H') k (Sum.inl L.i₀) = (M * (1 : Matrix (Fin d.n ⊕ Fin d.n) (Fin d.n ⊕ Fin d.n) E)) k (Sum.inl L.i₀) := by
+          simp only [Matrix.mul_apply, padE_out_col H' _ hxo]
+        rw [Matrix.sub_apply, this, Matrix.mul_one, hx k, sub_self]
+      · have hl : ∃ c', emS L c' = l := by
+          by_contra hc
+          rcases mem_out L hc with h | h
+          · exact hlx h
+          · exact hly h
+        obtain ⟨c', rfl⟩ := hl
+        have hsum : (M * padE L H') k (emS L c') = ∑ a', M k (emS L a') * H' a' c' := by
+          rw [Matrix.mul_apply, sum_emb (emS L) (emS_inj L)]
+          · simp only [padE_emS]
+          · intro m hm
+            rw [padE_out_row H' (fun h => hm (by obtain ⟨a, ha⟩ := h; exact ⟨a, ha⟩)), Matrix.one_apply_ne, mul_zero]
+            rintro rfl
+            exact hm ⟨c', rfl⟩
+        rw [Matrix.sub_apply, hsum]
+        by_cases hk : ∃ a, emS L a = k
+        · obtain ⟨a, rfl⟩ := hk
+          have := congrFun (congrFun hH a) c'
+          rw [Matrix.mul_apply] at this
+          simp only [Matrix.submatrix_apply] at this
+          rw [this, Matrix.one_apply, Matrix.one_apply]
+          simp [(emS_inj L).eq_iff]
+        · rcases mem_out L hk with h | h
+          · exact (hkx h).elim
+          · have h' : k = Sum.inr L.i₀ := h
+            subst h'
+            rw [Finset.sum_eq_zero fun a' _ => by rw [hy _ (fun he => hyo ⟨a', he⟩), zero_mul], Matrix.one_apply_ne, sub_self]
+            intro he
+            exact hyo ⟨c', he.symm⟩
+    
+    exact NQ.map _ (nq_local hx hy hHH')
   have hnP : p1 * γ * L.j h⁻¹ ∈ par2 σ d.Y := (ComplexParameterFamilyContinuity.mem_stabiliser_iff_frame_lower_block d.ok.frame _).2 hnq.projected_block_lower_sum
   have hnR : p1 * γ * L.j h⁻¹ ∈ rat2 σ d.Y := mul_mem hγ1 (j_rat L (inv_mem hhr))
   refine ⟨p1⁻¹ * (p1 * γ * L.j h⁻¹), mul_mem (inv_mem hp1P) hnP, mul_mem (inv_mem hp1r) hnR, h, hhr, ?_⟩

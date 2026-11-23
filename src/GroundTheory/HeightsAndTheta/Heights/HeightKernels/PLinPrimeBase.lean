@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLinear
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -16,6 +62,7 @@ def firstLin (n : T → ℤ) : MRing (stackedBlocks T) := ∑ t, n t • graphFi
 
 theorem linPointMap_firstLin (α : T → k) (M : T → Fin 1 → k) (n : T → ℤ) :
     linPointMap α M (firstLin n) = C (∑ t, n t • α t) * X none := by
+
   simp only [firstLin, map_sum, map_zsmul, LinPrimeExample.linPointMap_first, Finset.sum_mul, smul_mul_assoc]
 
 theorem exists_comb {α : T → k} (hα : Submodule.span ℤ (Set.range α) = ⊤) (y : k) :
@@ -59,6 +106,7 @@ theorem chart_equiv (α : T → k) (M : T → Fin 1 → k) (hα : Submodule.span
   set N : Submodule ℤ (MRing (stackedBlocks T) ⧸ I) :=
     Submodule.span ℤ (Set.range fun t => mk (graphFirst t)) with hN
   have hLin : ∀ n : T → ℤ, mk (firstLin n) ∈ N := fun n => by
+
     rw [firstLin, map_sum]
     refine Submodule.sum_mem _ fun t _ => ?_
     rw [map_zsmul]
@@ -103,7 +151,7 @@ theorem chart_equiv (α : T → k) (M : T → Fin 1 → k) (hα : Submodule.span
     · have hC : (C a : MRing (stackedBlocks T)) = (a : MRing (stackedBlocks T)) := eq_intCast C a
       rw [hC, map_intCast, ← zsmul_one]
       exact Submodule.smul_mem _ _ hOne
-    · rw [map_add]; exact Submodule.add_mem _ hp hq
+    · rw [map_add (f := _)]; exact Submodule.add_mem _ hp hq
     · rw [map_mul]
       refine hMul _ _ hp ?_
       rcases v with ⟨⟨⟨⟩⟩ | ⟨⟨⟩⟩, t⟩
@@ -126,6 +174,7 @@ theorem chart_equiv (α : T → k) (M : T → Fin 1 → k) (hα : Submodule.span
     rw [RingHom.mem_ker] at hg
     obtain ⟨n, hn⟩ := (Submodule.mem_span_range_iff_exists_fun ℤ).mp (hAll g)
     have hn' : mk (firstLin n) = mk g := by
+
       rw [← hn, firstLin, map_sum]
       simp only [map_zsmul]
     have hd : g - firstLin n ∈ I := Ideal.Quotient.eq.mp hn'.symm
@@ -146,8 +195,8 @@ theorem chart_equiv (α : T → k) (M : T → Fin 1 → k) (hα : Submodule.span
 
 end LinearPrimeBase
 
-open LinearPrimeBase in
 
+open LinearPrimeBase in
 theorem LinPrimeBase.proof : LinPrimeBase.Statement := by
   intro T _ k _ α M hα _hM c hc
   have h₁ : α (c (Sum.inl ())) ≠ 0 := fun h => hc (Sum.inl ()) (by

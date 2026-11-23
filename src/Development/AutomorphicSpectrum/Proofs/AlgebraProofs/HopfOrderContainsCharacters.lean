@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Finiteness.Projective
+
+@[expose] public section
+
 open GlobalTheory.CompanionTheory.Ar.BT TensorProduct
 
 namespace GlobalTheory.CompanionTheory.Ar.BT.CharExt
@@ -62,13 +116,15 @@ lemma conv_mem {A : Subalgebra R (T → R)} (hc : ∀ f ∈ A, (fun z : T × T =
   refine ⟨r, ?_⟩
   rw [hr, sum_conv_mul l m (fun t => algebraMap R K (f t))]
 
-open Classical in
 
+open Classical in
 noncomputable def psi {A : Subalgebra R (T → R)} (d : R) (hd : ∀ f : T → R, d • f ∈ A) :
-    Module.Dual R A →ₗ[R] (T → K) where
-  toFun l t := algebraMap R K (l ⟨d • Pi.single t 1, hd _⟩) / algebraMap R K d
-  map_add' := by intros; ext; simp [add_div]
-  map_smul' := by intros; ext; simp [mul_div_assoc, Algebra.smul_def]
+    Module.Dual R A →ₗ[R] (T → K) := by
+  classical
+  exact {
+    toFun := fun l t => algebraMap R K (l ⟨d • Pi.single t 1, hd _⟩) / algebraMap R K d
+    map_add' := by intros; ext; simp [add_div]
+    map_smul' := by intros; ext; simp [mul_div_assoc, Algebra.smul_def] }
 
 lemma psi_pair [FaithfulSMul R K] {A : Subalgebra R (T → R)} {d : R} (hd0 : d ≠ 0) (hd : ∀ f : T → R, d • f ∈ A)
     (l : Module.Dual R A) (f : T → R) (hf : f ∈ A) :
@@ -81,6 +137,7 @@ lemma psi_pair [FaithfulSMul R K] {A : Subalgebra R (T → R)} {d : R} (hd0 : d 
     funext s
     simp [Finset.sum_apply, Pi.single_apply, mul_comm]
   have e2 := congrArg (fun a => algebraMap R K (l a)) e
+
   simp only [map_smul, map_sum, smul_eq_mul, map_mul] at e2
   simp only [psi, LinearMap.coe_mk, AddHom.coe_mk]
   rw [eq_comm, ← mul_right_inj' hdK, e2, Finset.mul_sum]
@@ -147,8 +204,9 @@ lemma isIntegral_pairWith [FaithfulSMul R K] {A : Subalgebra R (T → R)} (hA : 
 
 end GlobalTheory.CompanionTheory.Ar.BT.CharExt
 
-open GlobalTheory.CompanionTheory.Ar.BT.CharExt in
+open GlobalTheory.CompanionTheory.Ar.BT.CharExt
 
+open GlobalTheory.CompanionTheory.Ar.BT.CharExt in
 theorem GlobalTheory.CompanionTheory.Ar.BT.char_mem_hopfOrder : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T] [Finite T]
     [IsIntegrallyClosed R] (A : Subalgebra R (T → R)), IsHopfOrder A →
     ∀ χ : T →* Rˣ, (fun t => ((χ t : Rˣ) : R)) ∈ A := by

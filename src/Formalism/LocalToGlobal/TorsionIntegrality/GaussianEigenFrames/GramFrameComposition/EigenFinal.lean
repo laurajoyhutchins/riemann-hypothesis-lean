@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementJ
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementJ
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -13,14 +56,6 @@ open Formalism.L2.Th1.A (logSer expSer)
 open Formalism.L2.Th1.G (betaPair)
 open Formalism.L2.Th1.CM (MaximalUnramifiedExtension)
 open Formalism.DworkPowerSeriesWeights (JetsIntegral jetPair jetPairPoly minorProd)
-
-theorem TensorNorm_of (h : TensorBlock) : TensorNorm := by
-  intro p _ ι L n _ hm E _ H _ _ emb Ja Jl Jr _ _ _ v hA hl hr N0 N1 Gc P P' A th u hth hform hAeq hG hu hu1 hP hP' t ab ab'
-  obtain ⟨e, he, heq⟩ := h ℂ_[p] E H emb Ja Jl Jr hA hl hr N0 N1 Gc P P' th u hth hG hu hu1 hP hP' t ab ab'
-  refine ⟨e, he, ?_⟩
-  rw [← heq]
-  refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_
-  rw [hAeq, hAeq, hform]
 
 namespace EigenLocalizationShapes
 
@@ -56,42 +91,5 @@ theorem ShapeEigenLoc_of (hE : EigenFrameE) (hI : IotaOK) (h : ShapeLoc) : Shape
   obtain ⟨-, hth, q, hq⟩ := EigenLocalizationShapes.pair hE hI ha hdK lam hlam hcm hm Λ θ p hpd ι hN v A u E cE s δ emb act hF
   exact h a₀ b₀ c₀ dK ha hdK lam hlam hcm n hm Λ hsd hst θ hθ p hpd ι hW hN κx r t N hr hN0 hpN ht J v H N0 N1 A u _ q
     (le_of_eq hth) hq
-
-theorem ThmBEigenLoc_of (hE : EigenFrameE) (hI : IotaOK) (h : ThmBLoc) : ThmBEigenLoc := by
-  intro a₀ b₀ c₀ dK ha hdK lam hlam hcm n _ _ hm Λ hsd hst θ hθ p _ hpd ι hW hN κx _ r t N hr hN0 hpN ht J _ v H _ _ N0 N1
-    A u E _ _ _ cE s δ emb act hF
-  obtain ⟨-, hth, q, hq⟩ := EigenLocalizationShapes.pair hE hI ha hdK lam hlam hcm hm Λ θ p hpd ι hN v A u E cE s δ emb act hF
-  exact h a₀ b₀ c₀ dK ha hdK lam hlam hcm n hm Λ hsd hst θ hθ p hpd ι hW hN κx r t N hr hN0 hpN ht J v H N0 N1 A u _ q
-    (le_of_eq hth) hq
-
-theorem ThmBGaussEigenLoc_of (hE : EigenFrameE) (hI : IotaOK) (h : ThmBGaussLoc) : ThmBGaussEigenLoc := by
-  intro a₀ b₀ c₀ dK ha hdK lam hlam hcm n _ _ hm Λ hsd hst θ hθ p _ hpd ι hW hN κx _ r t N hr hN0 hpN ht J _ v H _ _ N0 N1
-    A u E _ _ _ cE s δ emb act hF
-  obtain ⟨hp, hth, q, hq⟩ := EigenLocalizationShapes.pair hE hI ha hdK lam hlam hcm hm Λ θ p hpd ι hN v A u E cE s δ emb act hF
-  have hc : (dK : ℂ_[p]) = (p : ℂ_[p]) := congrArg (Nat.cast : ℕ → ℂ_[p]) hp.symm
-  rw [hc] at hth
-  exact h a₀ b₀ c₀ dK ha hdK lam hlam hcm n hm Λ hsd hst θ hθ p hpd ι hW hN κx r t N hr hN0 hpN ht J v H N0 N1 A u _ q
-    (le_of_eq hth) hq
-
-theorem ShapeEigenFree_of (hN : LocNormFree) (h : ShapeEigenLoc) : ShapeEigenFree := by
-  intro a₀ b₀ c₀ dK ha hdK lam hlam hcmok n _ _ hm Λ g₀ hLat
-  obtain ⟨κ, k1, k2, k3, hκ⟩ := hN a₀ b₀ c₀ dK ha hdK lam hlam hcmok n hm Λ g₀ hLat
-  refine ⟨κ, k1, k2, k3, ?_⟩
-  intro θ hθ hten p _ hd ι hW
-  exact h a₀ b₀ c₀ dK ha hdK lam hlam hcmok n hm Λ hLat.2.1 hLat.2.2.1 θ hθ p hd ι hW (hκ θ hθ hten p ι)
-
-theorem ThmBEigenFree_of (hN : LocNormFree) (h : ThmBEigenLoc) : ThmBEigenFree := by
-  intro a₀ b₀ c₀ dK ha hdK lam hlam hcmok n _ _ hm Λ g₀ hLat
-  obtain ⟨κ, k1, k2, k3, hκ⟩ := hN a₀ b₀ c₀ dK ha hdK lam hlam hcmok n hm Λ g₀ hLat
-  refine ⟨κ, k1, k2, k3, ?_⟩
-  intro θ hθ hten p _ hd ι hW
-  exact h a₀ b₀ c₀ dK ha hdK lam hlam hcmok n hm Λ hLat.2.1 hLat.2.2.1 θ hθ p hd ι hW (hκ θ hθ hten p ι)
-
-theorem ThmBGaussEigenFree_of (hN : LocNormFree) (h : ThmBGaussEigenLoc) : ThmBGaussEigenFree := by
-  intro a₀ b₀ c₀ dK ha hdK lam hlam hcmok n _ _ hm Λ g₀ hLat
-  obtain ⟨κ, k1, k2, k3, hκ⟩ := hN a₀ b₀ c₀ dK ha hdK lam hlam hcmok n hm Λ g₀ hLat
-  refine ⟨κ, k1, k2, k3, ?_⟩
-  intro θ hθ hten p _ hd ι hW
-  exact h a₀ b₀ c₀ dK ha hdK lam hlam hcmok n hm Λ hLat.2.1 hLat.2.2.1 θ hθ p hd ι hW (hκ θ hθ hten p ι)
 
 end Formalism.L2.Th1.GD

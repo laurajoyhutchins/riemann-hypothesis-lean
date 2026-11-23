@@ -1,17 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IntFormsSubset
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.XiValIffXiAt
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsValueBelow
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ValuesAlgIffValuesUnitOfNe
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.RuleBaseChangeSectionValuesSemilinear
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTopBaseModel
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HolomorphicCuspFormsFramesLeSpanShortThetaReadin
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsTestRingInjective
-import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasChr
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointBaseChangeClauses
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.WtRedPf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IntFormsSubset
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ValuesAlgIffValuesUnitOfNe
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.WtRedPf
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.FromTestIffOfValAtCx
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointBaseChangeClauses
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocallyNoetherian
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.RuleBaseChangeSectionValuesSemilinear
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.NoCommonZeroIffOfSec
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTopBaseModel
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsTestRingInjective
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HolomorphicCuspFormsFramesLeSpanShortThetaReadin
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsoEqOfMapsAlongSection
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsValueBelow
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasChr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.LeCovCoeff
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointsLiftToLevelCover
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -97,8 +139,8 @@ theorem below_exists (hO : GlobalTheory.ClsVal.Cmp.OverBase d) (hK : KA l ≤ KA
   rw [← hc]
   exact congrArg _ (Subtype.ext rfl)
 
-open Classical in
 
+open Classical in
 def pullRule (f : Rul Xo c) : Rul d.Xo₂ d.c₂ := fun p u =>
   letI := algDn d p.R
   if h : ∃ y : FrPt Xo c p.R, FrOver d u y then evR Xo c f h.choose else 0
@@ -124,7 +166,7 @@ theorem pullRule_eq (f : Rul Xo c) (p : TRing d.c₂.F) (u : FrPt d.Xo₂ d.c₂
   intro y hy
   have h : ∃ y : FrPt Xo c p.R, FrOver d u y := ⟨y, hy⟩
   unfold pullRule
-  rw [dif_pos h, GlobalTheory.ClassSumCompare.frUnder_unique d h.choose_spec hy]
+  rw [dite_eq_left h, GlobalTheory.ClassSumCompare.frUnder_unique d h.choose_spec hy]
 
 end GlobalTheory.CovPull
 
@@ -175,7 +217,7 @@ theorem evR_pullRule (hO : GlobalTheory.ClsVal.Cmp.OverBase d) (hK : KA l ≤ KA
   have e : evR d.Xo₂ d.c₂ (pullRule d f) y₂ =
       hT.choose_spec.choose (pullRule d f hT.choose hT.choose_spec.choose_spec.choose) := by
     unfold evR evalAt
-    rw [dif_pos hT]
+    rw [dite_eq_left hT]
   rw [e]
   exact key _ _ _ hT.choose_spec.choose_spec.choose_spec
 

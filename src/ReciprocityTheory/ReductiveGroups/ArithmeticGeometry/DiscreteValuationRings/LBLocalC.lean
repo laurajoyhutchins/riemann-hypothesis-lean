@@ -1,6 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.WchartLePreimage
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.WchartLePreimage
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -20,32 +68,6 @@ def gw {X Y : Scheme.{0}} (L : LB X) {K : Type} [Fintype K] (ψ : K → (Y ⟶ X
       LB.wchart L ψ j ⊓ LB.wchart L ψ j' ≤ ψ k ⁻¹ᵁ (L.U (j k) ⊓ L.U (j' k)))
     (pullU (ψ k) _ (L.g (j k) (j' k)))) ^ (ε k)
 
-def IsGenW {X Y : Scheme.{0}} (L : LB X) {K : Type} [Fintype K] (ψ : K → (Y ⟶ X)) (ε : K → ℤ)
-    (s : ∀ j : K → L.ι, Γ(Y, LB.wchart L ψ j)ˣ) : Prop :=
-  ∀ j j' : K → L.ι, res (inf_le_left : LB.wchart L ψ j ⊓ LB.wchart L ψ j' ≤ LB.wchart L ψ j) (s j) =
-    gw L ψ ε j j' * res (inf_le_right : LB.wchart L ψ j ⊓ LB.wchart L ψ j' ≤ LB.wchart L ψ j') (s j')
-
-lemma isGen_iff_isGenW {X Y : Scheme.{0}} (L : LB X) {K : Type} [Fintype K] (ψ : K → (Y ⟶ X)) (ε : K → ℤ)
-    (t : LB.Gen (LB.LinComb L ψ ε)) : t.IsGen ↔ IsGenW L ψ ε t.s := Iff.rfl
-
-set_option maxHeartbeats 1000000 in
-private lemma res_pullU_comp_factor_through_open {X Y Z : Scheme.{0}} (h : Z ⟶ Y) (φ : Y ⟶ X) {U : X.Opens} {W : Y.Opens}
-    {T : Z.Opens} (hb : W ≤ φ ⁻¹ᵁ U) (ha : T ≤ (h ≫ φ) ⁻¹ᵁ U) (hW : T ≤ h ⁻¹ᵁ W) (g : Γ(X, U)ˣ) :
-    res ha (pullU (h ≫ φ) U g) = res hW (pullU h W (res hb (pullU φ U g))) := by
-  rw [pullU_res, res_res', pullU_comp]
-  rfl
-
-lemma gw_pull {X Y Z : Scheme.{0}} (L : LB X) {K : Type} [Fintype K] (φ : K → (Y ⟶ X))
-    (ε : K → ℤ) (h : Z ⟶ Y) (j j' : K → L.ι)
-    (hW : LB.wchart L (fun k => h ≫ φ k) j ⊓ LB.wchart L (fun k => h ≫ φ k) j' ≤
-      h ⁻¹ᵁ (LB.wchart L φ j ⊓ LB.wchart L φ j')) :
-    gw L (fun k => h ≫ φ k) ε j j' = res hW (pullU h _ (gw L φ ε j j')) := by
-  simp only [gw, map_prod, map_zpow]
-  refine Finset.prod_congr rfl fun k _ => ?_
-  congr 1
-  beta_reduce
-  exact res_pullU_comp_factor_through_open (U := L.U (j k) ⊓ L.U (j' k)) (W := LB.wchart L φ j ⊓ LB.wchart L φ j') h (φ k) _ _ hW
-    (L.g (j k) (j' k))
 
 lemma eq_top_of_closedPoint_mem {V : Type} [CommRing V] [IsLocalRing V] (U : (Spec (CommRingCat.of V)).Opens)
     (hU : (IsLocalRing.closedPoint V : Spec (CommRingCat.of V)) ∈ U) : U = ⊤ := by
@@ -70,22 +92,6 @@ theorem exists_gen_of_isLB_local {V : Type} [CommRing V] [IsLocalRing V]
   simp only [res_res']
   rw [← hc]
   congr 1
-
-private lemma res_self_discrete_valuation_rings {Y : Scheme.{0}} {U : Y.Opens} (h : U ≤ U) (x : Γ(Y, U)ˣ) :
-    res h x = x := by
-  ext
-  simp [res]
-
-lemma gen_div_const {Y : Scheme.{0}} {X : Scheme.{0}} (L : LB X) {K : Type} [Fintype K] (ψ : K → (Y ⟶ X))
-    (ε : K → ℤ) (s s' : ∀ j : K → L.ι, Γ(Y, LB.wchart L ψ j)ˣ) (hs : IsGenW L ψ ε s) (hs' : IsGenW L ψ ε s')
-    (j₀ : K → L.ι) (htop : LB.wchart L ψ j₀ = ⊤) (j : K → L.ι) :
-    s j = res (by rw [htop]; exact le_top : LB.wchart L ψ j ≤ LB.wchart L ψ j₀) (s j₀ / s' j₀) * s' j := by
-  have hfw : LB.wchart L ψ j ≤ LB.wchart L ψ j ⊓ LB.wchart L ψ j₀ :=
-    le_inf le_rfl (by rw [htop]; exact le_top)
-  have e1 := congrArg (res hfw) (hs j j₀)
-  have e2 := congrArg (res hfw) (hs' j j₀)
-  simp only [map_mul, res_res', res_self_discrete_valuation_rings] at e1 e2
-  rw [map_div, e1, e2, mul_comm (res _ _) (res _ (s' j₀)), ← mul_assoc, div_mul_cancel, mul_comm]
 
 theorem exists_gen_of_local {V : Type} [CommRing V] [IsLocalRing V] {X : Scheme.{0}} (L : LB X) (hL : L.IsLB)
     {K : Type} [Fintype K] (φ : K → (Spec (CommRingCat.of V) ⟶ X)) (ε : K → ℤ) :
@@ -188,15 +194,7 @@ lemma genHasVal_units {X : Scheme.{0}} (L : LB X) {Ix : Type} [Fintype Ix]
       | simp
   · exact (inv_mul_cancel_right _ _).symm
 
-lemma eq_of_unit_zero {R : Type*} [CommRing R] (C : Rˣ) (h : C.val = 0) (a b : R) : a = b := by
-  have h1 : (0 : R) = 1 := by
-    have := C.isUnit
-    rw [h] at this
-    exact isUnit_zero_iff.1 this
-  haveI := subsingleton_of_zero_eq_one h1
-  exact Subsingleton.elim a b
 
-set_option maxHeartbeats 1000000 in
 
 lemma genHasVal_top {X : Scheme.{0}} (L : LB X) {Ix : Type} [Fintype Ix]
     (φ : Ix → (Spec (CommRingCat.of V) ⟶ X)) (ε : Ix → ℤ) (t : LB.Gen (LB.LinComb L (fun k => jK V ≫ φ k) ε)) {n : ℤ}
@@ -235,8 +233,8 @@ lemma genHasVal_top {X : Scheme.{0}} (L : LB X) {Ix : Type} [Fintype Ix]
     rw [CommRingCat.comp_apply]
     congr 1
 
-omit [IsDiscreteValuationRing V] in
 
+omit [IsDiscreteValuationRing V] in
 theorem isDominant_jK : IsDominant (jK V) := by
   constructor
   have hinj : Function.Injective (algebraMap V (FractionRing V)) := IsFractionRing.injective V _

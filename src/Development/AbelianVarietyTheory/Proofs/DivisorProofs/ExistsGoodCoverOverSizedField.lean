@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
-import Development.AbelianVarietyTheory.Definitions.Divisors.UnifOfSpaceEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RayClassFieldDegreeLeAndRootDiscrBound
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RootOneMemOfIsRayFieldIn
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsRayFieldInRestrictScalars
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.CurveOverOfRayFieldAny
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.FieldSizeSupAdd
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricallyIrreducibleComponentsWeberValues
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ClassNumberLeAbsDiscrOfFinrankEqTwo
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGaloisRatComplexImageRayClassField
+module
+
+public import Development.AbelianVarietyTheory.Definitions.HeightFunctions.XiValIffXiAt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.NonemptyAlgHomOfIsRayOfDvd
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.RingOfIntegersSqrtNegThreeModFour
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfOfBasePins
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ClassNumberLeAbsDiscrOfFinrankEqTwo
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.CurveOverOfRayField
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.FieldSizeSupAdd
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.WeberInvariantTorsionValuesSubsetRayClassFieldStatement
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.DedekindZetaEqSumRealEisenstein
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGaloisRatComplexImageRayClassField
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsRayFieldInRestrictScalars
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RayClassFieldDegreeLeAndRootDiscrBound
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RootOneMemOfIsRayFieldIn
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModuliSchemePolarizedAbelianLevel
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsDeltaDatumHigherLevel
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeometricallyIrreducibleComponentsWeberValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.TupleReadBaseTupleEqFamily
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -21,7 +64,7 @@ open scoped IntermediateField
 namespace GlobalTheory.CovTop.SizedCover
 
 theorem stable_of_normal (R : IntermediateField ℚ ℂ) [hN : Normal ℚ R] (s : ℂ ≃+* ℂ) (a : ℂ) (ha : a ∈ R) : s a ∈ R := by
-  have h := @AlgHom.fieldRange_of_normal ℚ ℂ _ _ _ R (by convert hN; exact Subsingleton.elim _ _)
+  have h := @AlgHom.fieldRange_of_normal ℚ ℂ _ _ _ R (by convert hN)
     (s.toRingHom.toRatAlgHom.comp R.val)
   exact h.le ⟨⟨a, ha⟩, rfl⟩
 
@@ -51,7 +94,7 @@ theorem exists_ray (hRF : GlobalTheory.NT.RayField) {E : Type} [Field E] [Number
   let φ : K₀ →+* ℂ := algebraMap K₀ ℂ
   have hw' : φ w = (1 + H.rt0) / 2 := by
     have := congrArg φ hw
-    rw [map_mul, map_add, map_one, map_ofNat] at this
+    rw [map_mul, map_add (f := _), map_one, map_ofNat] at this
     change _ = 1 + H.rt0 at this
     linear_combination this / 2
   have hc : ∀ a b : ℤ, φ ((a : 𝓞 K₀) + b * w : 𝓞 K₀) = a + b * ((1 + H.rt0) / 2) := fun a b => by
@@ -60,7 +103,11 @@ theorem exists_ray (hRF : GlobalTheory.NT.RayField) {E : Type} [Field E] [Number
   have hn0 : (n : 𝓞 K₀) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)
   obtain ⟨L, _, _, _, hL⟩ := GlobalTheory.Mem.Fld.rayField_iff.1 hRF K₀ (Ideal.span {(n : 𝓞 K₀)})
     (by rwa [Ne, Ideal.span_singleton_eq_bot])
-  let ψ : L →ₐ[K₀] ℂ := IsAlgClosed.lift
+  let ψ : L →ₐ[K₀] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   let e₀ : L ≃ₐ[K₀] ψ.fieldRange := AlgEquiv.ofInjectiveField ψ
   have hfR : FiniteDimensional K₀ ψ.fieldRange := e₀.toLinearEquiv.finiteDimensional
   have hLR := fun (_ : NumberField ψ.fieldRange) => hL.of_algEquiv e₀
@@ -106,7 +153,7 @@ theorem exists_ray (hRF : GlobalTheory.NT.RayField) {E : Type} [Field E] [Number
         obtain ⟨a, b, rfl⟩ := hgen a
         exact ⟨(a, b), hc a b⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_good_sized : GlobalTheory.Published.RayClassFieldSt → ∀ (D : D7) (T : Core D), T.Q.Pins → ∀ j : ℕ, InR D j → 5 ≤ D.host.splitBound → Nat.Coprime 15 (D.host.g 0 * D.host.g 1) → ∀ e : ℕ, ∃ Y : Deep T j, Y.Good e (fieldSz T.Q.c.F + 20 * (Real.log ((D.host.g 0 : ℝ) * D.host.g 1 * 15 ^ e) + Real.log D.host.d + 1)) := by
   intro hRF D T hQ j hj h5 h15 e
@@ -140,7 +187,7 @@ theorem exists_good_sized : GlobalTheory.Published.RayClassFieldSt → ∀ (D : 
   haveI : NumberField N := NumberField.mk
   let c' : Coeff T.Q.l := ⟨N, hN, fun τ a => h1 (T.Q.c.conj τ a), h1 T.Q.c.zeta_mem, T.Q.c.le.trans h1⟩
   let c₂ : Coeff l₂ := ⟨N, hN, fun τ a => h1 (T.Q.c.conj τ a), hM' ▸ h2 hz, hKA⟩
-  have hfa : FnAlgClosed Xo₂ c₂ := GlobalTheory.FinalJoin.FieldAlg.fnAlgClosed_of_weberIn D T.Q hQ j hj l₂ Xo₂ c₂ l₂.M
+  have hfa : FnAlgClosed (Xo := Xo₂) (c := c₂) := GlobalTheory.FinalJoin.FieldAlg.fnAlgClosed_of_weberIn D T.Q hQ j hj l₂ Xo₂ c₂ l₂.M
     (by have := l₂.three_le; omega) hM'.dvd (Or.inl (hW N h2))
   have hsize : fieldSz c₂.F ≤ fieldSz T.Q.c.F + 20 * (Real.log ((D.host.g 0 : ℝ) * D.host.g 1 * 15 ^ e) +
       Real.log D.host.d + 1) := by

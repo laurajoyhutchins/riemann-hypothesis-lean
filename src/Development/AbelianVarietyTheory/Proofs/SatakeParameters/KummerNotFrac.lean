@@ -1,19 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LMulBeta
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TwistedShiftFixedRatioConstDomainStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsUnitOfStableLineStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClosEqZeroOfMulMemStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KerPEqSpanBetaStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FilPEqSpanBetaDPowStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AinfAdjoinBetaImageDivBetaPowStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BetaImageDeRhamPlusDvdOfLAdicResiduesStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DivPowerEnvelopeMemAinfAdjoinBetaStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AcrisMemBetaAdicClosureAinfAdjoinBetaStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LogPeriodCongruenceBdrStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLogOnePlusKerThetaDeRhamPlusStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.GaloisLogTeichmullerRatioEqAddKummerStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsKummerFracCoboundaryFullGaloisStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LMulBeta
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KummerNotCoboundary
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AssociatedPowOfUnits
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineBcrisHolds
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BcrisEqAcrisLocalizationPeriodT
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AcrisMemBetaAdicClosureAinfAdjoinBetaStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AinfAdjoinBetaImageDivBetaPowStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BetaImageDeRhamPlusDvdOfLAdicResiduesStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClosEqZeroOfMulMemStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DivPowerEnvelopeMemAinfAdjoinBetaStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsKummerFracCoboundaryFullGaloisStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLogOnePlusKerThetaDeRhamPlusStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FilPEqSpanBetaDPowStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.GaloisLogTeichmullerRatioEqAddKummerStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsUnitOfStableLineStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.KerPEqSpanBetaStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LogPeriodCongruenceBdrStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TwistedShiftFixedRatioConstDomainStatement
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineFormalismOfRegular
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +145,7 @@ theorem StLat.kummer_not_frac : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (A
   have hU : ∀ g : GQ l, P.actQdR g U = U + P.ιB ((kummer P g : ℚ_[l]) • P.tB) := by
     intro g
     apply T.eD.injective
-    rw [T.actD, hUdef, RingEquiv.apply_symm_apply, map_add, RingEquiv.apply_symm_apply, hct]
+    rw [T.actD, hUdef, RingEquiv.apply_symm_apply, map_add (f := _), RingEquiv.apply_symm_apply, hct]
     rw [show Per.σD g (algebraMap (Per.BdRp l) (Per.BdR l) u) =
       algebraMap (Per.BdRp l) (Per.BdR l) (Per.σDp g u) from
         GlobalTheory.RingIface.sigD_alg l g u, hg, map_add]

@@ -1,9 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.DataParams₂
-import Formalism.LocalRingCardinality.DataParams
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.CyclotomicTotient.NuInf
+module
+
+public import Formalism.LocalRingCardinality.DataParams
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.CyclotomicTotient.NuInf
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,9 +117,6 @@ def TwPl (D : D7) (w : D.what₂.places.Pl) : Prop := D.what₂.muAt w ≠ D.wha
 
 def TwLoc (D : D7) (i : D.nd.Loc) : Prop := TwPl D (D.nd.w i)
 
-theorem TwPl.muAt_eq {D : D7} {w : D.what₂.places.Pl} (h : TwPl D w) : D.what₂.muAt w = D.what₂.muTw w :=
-  (D.what₂.muAt_or w).resolve_left h
-
 theorem TwPl.twLoc {D : D7} {w : D.what₂.places.Pl} (h : TwPl D w) {j : ℕ} {i : D.nd.Loc}
     (hi : i ∈ D.nd.locs j w) : TwLoc D i := by
   unfold TwLoc
@@ -94,14 +132,14 @@ structure Tab (L : SizeData₂ D) where
   gcost : ℕ → ℕ → ℝ
   gs : ℕ → ℕ → ℝ
 
-open Classical in
 
+open Classical in
 def etaSum (L : SizeData₂ D) (j : ℕ) : ℝ :=
   ∑ w ∈ L.supp.filter (fun w => D.what₂.muAt w ≠ D.what₂.mu0),
     SizeData₂.lwP w * (D.what₂.places.ramIdx w : ℝ) * (D.what₂.etaJ j w : ℝ)
 
-open Classical in
 
+open Classical in
 def twAt (L : SizeData₂ D) (l : ℕ) : Finset D.what₂.places.Pl :=
   L.supp.filter (fun w => D.what₂.muAt w ≠ D.what₂.mu0 ∧ D.what₂.places.resChar w = l)
 
@@ -170,8 +208,8 @@ def admB : Prop :=
       C * ((nLam D lam : ℝ) + 1) * D.R.r * (hB L / ((l : ℝ) - 1) ^ (jA L l + 1) +
         (GP L + 1) * ((jA L l : ℝ) + 1) + large₂ L))
 
-open Classical in
 
+open Classical in
 def flatCD (i : D.nd.Loc) (lam : HeightOneSpectrum (𝓞 D.host.E)) (l : ℕ) : ℝ :=
   (wP L + eta₃ L) / l + L.Sc + large₂ L + eta₃ L * (if tb.band i lam then 1 else 0)
 
@@ -321,8 +359,6 @@ theorem admissibleMeanCondition_holds (L : SizeData₂ D) : TwistedWeightMeanBou
         field_simp
 
 def admitted (L : SizeData₂ D) (P : ParameterChoice' D L) (C : ℝ) : Prop := ShaFinOdd D → ∃ tb : Tab L, AdmT L tb C P
-
-def Stmt (L : SizeData₂ D) (P : ParameterChoice' D L) (Ca C : ℝ) : Prop := admitted L P Ca → aux₃ L C
 
 end Formalism.MainNotions.TwistedPlaces
 

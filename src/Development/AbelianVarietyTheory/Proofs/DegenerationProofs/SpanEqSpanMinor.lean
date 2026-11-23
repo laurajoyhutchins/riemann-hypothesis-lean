@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.InducedModelMorphismCompStructureMap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.InducedModelMorphismCompStructureMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -36,13 +80,13 @@ private theorem mem_dotDual_iff' (N : Submodule S (J → Ω)) (v : J → Ω) :
     v ∈ _root_.GlobalTheory.ZH.DualLattice.dotDual S N ↔ ∀ w ∈ N, w ⬝ᵥ v ∈ S :=
   Iff.rfl
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open Classical in
 open Matrix in
 variable {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (S : Subalgebra o Ω) {J : Type}
   [Fintype J] in
-
 theorem _root_.GlobalTheory.ZH.DualLattice.mem_dotDual_span {I : Type} (a : I → J → Ω) (v : J → Ω) :
     v ∈ _root_.GlobalTheory.ZH.DualLattice.dotDual S (Submodule.span S (Set.range a)) ↔ ∀ i, a i ⬝ᵥ v ∈ S := by
   rw [mem_dotDual_iff']
@@ -64,13 +108,13 @@ theorem _root_.GlobalTheory.ZH.DualLattice.mem_dotDual_span {I : Type} (a : I �
       rw [smul_dotProduct, Subalgebra.smul_def, smul_eq_mul]
       exact mul_mem c.2 hx
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open Classical in
 open Matrix in
 variable {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (S : Subalgebra o Ω) {J : Type}
   [Fintype J] in
-
 theorem _root_.GlobalTheory.ZH.DualLattice.mem_span_rows (B : Matrix J J Ω) (v : J → Ω) :
     v ∈ Submodule.span S (Set.range B) ↔ ∃ c : J → Ω, (∀ i, c i ∈ S) ∧ c ᵥ* B = v := by
   change v ∈ Submodule.span S (Set.range fun i => B i) ↔ _
@@ -87,6 +131,7 @@ theorem _root_.GlobalTheory.ZH.DualLattice.mem_span_rows (B : Matrix J J Ω) (v 
 
 variable [DecidableEq J]
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open Classical in
@@ -94,7 +139,6 @@ open Matrix in
 variable {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (S : Subalgebra o Ω) {J : Type}
   [Fintype J] in
 variable [DecidableEq J] in
-
 theorem _root_.GlobalTheory.ZH.DualLattice.dotDual_span_rows {A B : Matrix J J Ω} (h : A * Bᵀ = 1) :
     _root_.GlobalTheory.ZH.DualLattice.dotDual S (Submodule.span S (Set.range A)) =
       Submodule.span S (Set.range B) := by
@@ -113,6 +157,7 @@ theorem _root_.GlobalTheory.ZH.DualLattice.dotDual_span_rows {A B : Matrix J J �
     rw [hAc]
     exact hc i
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open Classical in
@@ -120,7 +165,6 @@ open Matrix in
 variable {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (S : Subalgebra o Ω) {J : Type}
   [Fintype J] in
 variable [DecidableEq J] in
-
 theorem _root_.GlobalTheory.ZH.DualLattice.span_eq_span_minor {n : ℕ} (g : Fin n → J → Ω) (k : J → Fin n)
     (h0 : (Matrix.of fun i j => g (k i) j).det ≠ 0)
     (hd : ∀ l : J → Fin n, (Matrix.of fun i j => g (l i) j).det /
@@ -164,6 +208,7 @@ theorem _root_.GlobalTheory.ZH.DualLattice.span_eq_span_minor {n : ℕ} (g : Fin
       (⟨s / t, hst⟩ : S) (Submodule.subset_span ⟨k i, rfl⟩)
     rwa [Subalgebra.smul_def] at hmem
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open Classical in
@@ -171,7 +216,6 @@ open Matrix in
 variable {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] (S : Subalgebra o Ω) {J : Type}
   [Fintype J] in
 variable [DecidableEq J] in
-
 theorem _root_.GlobalTheory.ZH.DualLattice.smul_mul_smul_inv {G : Matrix J J Ω} (h0 : G.det ≠ 0) {t : Ω}
     (ht : t ≠ 0) : (t⁻¹ • G) * (t • G⁻¹ᵀ)ᵀ = 1 := by
   rw [Matrix.transpose_smul, Matrix.transpose_transpose, Matrix.smul_mul, Matrix.mul_smul,
@@ -180,11 +224,11 @@ theorem _root_.GlobalTheory.ZH.DualLattice.smul_mul_smul_inv {G : Matrix J J Ω}
 
 end Algebra
 
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 open scoped CategoryTheory.Obj in
 open Classical in
 open Matrix in
-
 theorem _root_.GlobalTheory.ZH.DualLattice.exists_lat_dual : ∀ (o Ω : Type) [CommRing o] [Field Ω]
     [Algebra o Ω] (M : _root_.GlobalTheory.ZH.RatModel o Ω) (J : Type) [Fintype J]
     [DecidableEq J] (n : ℕ) (g : Fin n → J → Ω) (θ : M.Z → Ω),

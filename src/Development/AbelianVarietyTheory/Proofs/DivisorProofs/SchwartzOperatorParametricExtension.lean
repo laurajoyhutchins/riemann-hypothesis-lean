@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTemperateGrowthProdMkConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSliceSeminormLeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasFderivAtSchwartzOperatorFirstStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTemperateGrowthProdMkConst
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasFderivAtSchwartzOperatorFirstStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzSliceSeminormLeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,14 +164,12 @@ theorem differentiable_opFst (T : 𝓢(V, ℂ) →L[ℂ] 𝓢(W, E)) (f : 𝓢(V
     Differentiable ℝ (opFst T f) := fun p => (GlobalTheory.T.has_fderiv_at_schwartz_operator_first T f p.1 p.2).differentiableAt
 
 variable (W V' E) in
-
 def compFst : (W →L[ℝ] E) →L[ℝ] (W × V' →L[ℝ] E) :=
   (ContinuousLinearMap.compL ℝ (W × V') W E).flip (ContinuousLinearMap.fst ℝ W V')
 
 variable (W V' E) in
-
 def coordSnd (i : Fin (Module.finrank ℝ V')) : E →L[ℝ] (W × V' →L[ℝ] E) :=
-  ContinuousLinearMap.smulRightL ℝ (W × V') E
+  StrongDual.smulRightL ℝ (W × V') E
     ((LinearMap.toContinuousLinearMap ((Module.finBasis ℝ V').coord i)).comp (ContinuousLinearMap.snd ℝ W V'))
 
 theorem fderiv_opFst (T : 𝓢(V, ℂ) →L[ℂ] 𝓢(W, E)) (f : 𝓢(V × V', ℂ)) :
@@ -136,6 +184,7 @@ theorem fderiv_opFst (T : 𝓢(V, ℂ) →L[ℂ] 𝓢(W, E)) (f : 𝓢(V × V', 
   simp [compFst, coordSnd]
   congr 1
   conv_lhs => rw [hv]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, dSndCLM_apply]
@@ -234,7 +283,7 @@ theorem finiteRing_sq_sub_mul_sq_eq_of_card (n : ℕ) : ∀ (E' : Type) [NormedA
 
 def tensorId (T : 𝓢(V, ℂ) →L[ℂ] 𝓢(W, ℂ)) : 𝓢(V × V', ℂ) →L[ℂ] 𝓢(W × V', ℂ) :=
   SchwartzMap.mkCLM (σ := RingHom.id ℂ) (fun f p => opFst T f p)
-    (fun f g p => by simp [opFst, map_add])
+    (fun f g p => by simp [opFst, map_add (f := _)])
     (fun a f p => by simp [opFst, map_smul])
     (fun f => contDiff_infty.2 fun n => (finiteRing_sq_sub_mul_sq_eq_of_card n ℂ T).1 f)
     (fun m => (finiteRing_sq_sub_mul_sq_eq_of_card m.2 ℂ T).2 m.1)

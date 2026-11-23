@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TwistTerms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TwistTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped BigOperators
@@ -133,8 +178,8 @@ theorem IsPrim.tx_sign {w₀ : O} (h : IsPrim B w₀) (la : B.La) :
   have hy : la.y = w₀ • la.y + star w₀ • la.y := by rw [← add_smul, h1, one_smul]
   have hT : B.T la.y la.y = 2 * B.T la.y (w₀ • la.y) := by
     have : B.T la.y la.y = B.T la.y (w₀ • la.y + star w₀ • la.y) := by rw [← hy]
-    rw [this, map_add, ← B.T_adj, B.T_symm (w₀ • la.y), two_mul]
-  have hn : la.n la.y = la.n (w₀ • la.y) + la.n (star w₀ • la.y) := by rw [← map_add, ← hy]
+    rw [this, map_add (f := _), ← B.T_adj, B.T_symm (w₀ • la.y), two_mul]
+  have hn : la.n la.y = la.n (w₀ • la.y) + la.n (star w₀ • la.y) := by rw [← map_add (f := _), ← hy]
   have hm : ∀ z : ℤ, (-1 : ℂ) ^ z = Complex.exp (z * (Real.pi * Complex.I)) := fun z => by
     rw [Complex.exp_int_mul, Complex.exp_pi_mul_I]
   rw [h3, AnArc.ah, h2, hm, hm, eTwoPi, ← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add,
@@ -180,8 +225,8 @@ theorem txSt_of_ptSt (h : PtSt) : TxSt := by
   obtain ⟨c, hc⟩ : (2 * (m : ℤ) ^ 2) ∣ β.be (d.eX la.y + m • d.eX x) (d.eX la.y + m • d.eX x) :=
     (mul_dvd_mul_left 2 (by exact_mod_cast hm)).trans (β.dvd _ _)
   have hc' : 2 * (m : ℤ) ^ 2 * c = B.be la.y la.y + 2 * m * B.be la.y x + m ^ 2 * (2 * B.q x) := by
-    rw [← hc, ← map_nsmul, ← map_add, ← hβ, B.two_mul_q]
-    simp only [map_add, map_nsmul, LinearMap.add_apply, LinearMap.smul_apply, nsmul_eq_mul, B.be_symm x la.y]
+    rw [← hc, ← map_nsmul, ← map_add (f := _), ← hβ, B.two_mul_q]
+    simp only [map_add (f := _), map_nsmul, LinearMap.add_apply, LinearMap.smul_apply, nsmul_eq_mul, B.be_symm x la.y]
     ring
   replace hc' : (c : ℂ) = (B.be la.y la.y + 2 * m * B.be la.y x + m ^ 2 * (2 * B.q x)) / (2 * m ^ 2) := by
     rw [eq_div_iff (mul_ne_zero two_ne_zero (pow_ne_zero _ m0)), mul_comm]

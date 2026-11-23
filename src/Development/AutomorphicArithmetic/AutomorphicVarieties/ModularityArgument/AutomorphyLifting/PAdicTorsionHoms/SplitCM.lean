@@ -1,10 +1,64 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.PlainAtR
-import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.ExistsInfiniteQcmSplitRam
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.ExistsQuadraticSignCharacter
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.CrystallineBaseChange.TwCard
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.CrystallineBaseChange.ResTwo
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.StarEqOfSq
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.PlainAtR
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AlmostNormFinDiag
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.CmInertiaRestrictionHolds
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.ExistsQuadraticSignCharacter
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.CrystallineBaseChange.ResTwo
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.CrystallineBaseChange.TwCard
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.StarEqOfSq
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.GlobalFields.CyclotomicCharacters.ProfinitePadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.LinearDisjoint
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.HeightOneSpectrum
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.ExistsInfiniteQcmSplitRam
+import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.InertiaMovesSquareRoot
+import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.InfinitePrimesNegSquarePadic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BcDefs
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.WeakOfAtt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N Polynomial GlobalTheory.CuspRep
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.LocLanglands GlobalTheory.GalOfCusp UpperTheory.Zero.LLC UpperTheory.V UpperTheory.V.Af UpperTheory.V.Z.Gam UpperTheory.V.Z.Win
@@ -133,14 +187,18 @@ private theorem exists_sq_neg (F K : Type) [Field F] [NumberField F] [IsTotallyR
   by_contra hnn
   letI : Algebra F ℂ := ((algebraMap ℝ ℂ).comp φ).toAlgebra
   haveI : Algebra.IsAlgebraic F K := inferInstance
-  let τ : K →ₐ[F] ℂ := IsAlgClosed.lift
+  let τ : K →ₐ[F] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hF : ∀ a : F, τ (algebraMap F K a) = (φ a : ℂ) := fun a => τ.commutes a
   have ht : star (τ (e 1)) = τ (e 1) := by
     refine star_eq_of_sq (not_lt.1 hnn) ?_
     rw [← map_mul, h1, hF]
   have hall : ∀ x, star (τ x) = τ x := fun x => by
     obtain ⟨a, b, rfl⟩ := hx x
-    simp only [map_add, map_mul, hF, ht, star_add, star_mul', Complex.star_def, Complex.conj_ofReal]
+    simp only [map_add (f := _), map_mul, hF, ht, star_add, star_mul', Complex.star_def, Complex.conj_ofReal]
   have hreal : ComplexEmbedding.IsReal (τ : K →+* ℂ) :=
     ComplexEmbedding.isReal_iff.2 (RingHom.ext hall)
   exact (InfinitePlace.not_isReal_iff_isComplex.2 (IsTotallyComplex.isComplex (InfinitePlace.mk (τ : K →+* ℂ))))
@@ -209,7 +267,7 @@ private theorem cm_of_sq (F M : Type) [Field F] [NumberField F] [IsTotallyReal F
       rw [pow_two, ha]
       exact sub_eq_zero.2 rfl)
     have h2 := natDegree_le_natDegree h1
-    rwa [natDegree_X_pow_sub_C] at h2
+    rwa [natDegree_X_pow_sub_C _] at h2
   have hne : (minpoly K a).natDegree ≠ 1 := fun h => by
     obtain ⟨c, hc'⟩ := minpoly.natDegree_eq_one_iff.1 h
     exact hnot (hc' ▸ c.2)
@@ -293,11 +351,11 @@ private theorem compositum (F E Ω : Type) [Field F] [NumberField F] [IsTotallyR
     · rw [← map_mul, hu, ← IsScalarTower.algebraMap_apply]
     · have hE' : ∀ x : E, algebraMap E M x ∈ L := fun x => by
         obtain ⟨y, z, rfl⟩ := hx x
-        rw [map_add, map_mul, ← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
+        rw [map_add (f := _), map_mul, ← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
         exact add_mem (L.algebraMap_mem y) (mul_mem (L.algebraMap_mem z) haL)
       have hB' : ∀ x : ↥Q.K, algebraMap ↥Q.K M x ∈ L := fun x => by
         obtain ⟨y, z, rfl⟩ := hx' x
-        rw [map_add, map_mul, ← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
+        rw [map_add (f := _), map_mul, ← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply]
         exact add_mem (L.algebraMap_mem y) (mul_mem (L.algebraMap_mem z) hbL)
       have hle : M ≤ L.map M.val := sup_le
         (by rintro _ ⟨x, rfl⟩; exact ⟨algebraMap E M x, hE' x, rfl⟩)

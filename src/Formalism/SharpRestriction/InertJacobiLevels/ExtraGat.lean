@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.DataGChain
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DataG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,12 +86,6 @@ theorem natAct_one : P.natAct (fun _ => 1) = LinearMap.id := by
     subst_one]
   rfl
 
-theorem map_colSpan {R K : Type*} [CommRing R] [Field K] [Algebra R K] {k : ℕ} (A g : Matrix (Fin k) (Fin k) K) :
-    (colSpan R g).map ((Matrix.mulVecLin A).restrictScalars R) = colSpan R (A * g) := by
-  unfold colSpan
-  rw [Submodule.map_span, ← Set.range_comp]
-  congr 1
-
 def sgnEl : (levAll P).Γ := ((1 : ∀ v, GL (Fin (P.m + 1)) (P.Qq v)), (-1 : ℤˣ))
 
 theorem smul_sgnEl (L : P.Tup) : (levAll P).smul (sgnEl P) L = L := by
@@ -75,19 +118,6 @@ theorem levAll_funMod (h2 : (2 : Kf) ≠ 0) (Hv : P.Tup → Submodule O P.Xsp) :
   exact (smul_eq_zero.mp h4).resolve_left h2
 
 theorem levAll_M (h2 : (2 : Kf) ≠ 0) : (levAll P).M = ⊥ := levAll_funMod P h2 _
-
-theorem levAll_trans (L L' : P.Tup) (hL : P.IsLatTup L) (hL' : P.IsLatTup L') :
-    ∃ γ : (levAll P).Γ, L' = (levAll P).smul γ L := by
-  choose g hg hgL using hL
-  choose g' hg' hgL' using hL'
-  refine ⟨((fun v => Matrix.GeneralLinearGroup.mk'' (g' v * (g v)⁻¹) (by
-    rw [Matrix.det_mul]; exact (hg' v).mul (Matrix.isUnit_nonsing_inv_det _ (hg v)))), 1), ?_⟩
-  funext v
-  show L' v = (L v).map ((Matrix.mulVecLin (g' v * (g v)⁻¹)).restrictScalars (P.W v))
-  rw [hgL v, hgL' v, map_colSpan, Matrix.nonsing_inv_mul_cancel_right _ _ (hg v)]
-
-theorem exists_latTup : ∃ L : P.Tup, P.IsLatTup L :=
-  ⟨fun _ => colSpan _ 1, fun _ => ⟨1, by simp, rfl⟩⟩
 
 theorem gat_M_bot (G : GAtP p) (h : ∀ c, (G.lev c).M = ⊥) : G.M = ⊥ := by
   rw [eq_bot_iff]

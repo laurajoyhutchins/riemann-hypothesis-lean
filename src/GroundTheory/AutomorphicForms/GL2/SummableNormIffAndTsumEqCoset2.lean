@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.TraceLatticePoisson
+module
+
+public import GroundTheory.GlobalFields.TateThesis.LatticePoissonBasic
+public import GroundTheory.GlobalFields.TateThesis.TraceDualLattice
+public import GroundTheory.GlobalFields.TateThesis.LatticePoisson
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic.Adele2
 
@@ -17,10 +65,6 @@ def mixedPairing2 (x y : Fin 2 → mixedSpace K) : ℝ := ∑ i, mixedTraceForm 
 theorem mixedPairing2_comm (x y : Fin 2 → mixedSpace K) :
     mixedPairing2 K x y = mixedPairing2 K y x :=
   Finset.sum_congr rfl fun i _ => mixedTraceForm_comm K (x i) (y i)
-
-theorem mixedPairing2_neg_right (x y : Fin 2 → mixedSpace K) :
-    mixedPairing2 K x (-y) = -mixedPairing2 K x y := by
-  simp only [mixedPairing2, Pi.neg_apply, map_neg, Finset.sum_neg_distrib]
 
 def mixedMeasure2 : Measure (Fin 2 → mixedSpace K) := Measure.pi fun _ => selfDualMeasure K
 
@@ -62,18 +106,6 @@ theorem measurePreserving_toEuclid2 :
   rw [h]
   exact h3.comp (h2.comp h1)
 
-theorem measurePreserving_toEuclid2Conj :
-    MeasurePreserving (toEuclid2Conj K) (mixedMeasure2 K) volume := by
-  have h1 := measurePreserving_finTwoArrow (selfDualMeasure K)
-  have h2 := (measurePreserving_mixedToEuclideanConj K).prod
-    (measurePreserving_mixedToEuclideanConj K)
-  have h3 := WithLp.volume_preserving_toLp (euclidean.mixedSpace K) (euclidean.mixedSpace K)
-  have h : ⇑(toEuclid2Conj K) = WithLp.toLp 2 ∘
-      Prod.map (mixedToEuclideanConj K) (mixedToEuclideanConj K) ∘ MeasurableEquiv.finTwoArrow :=
-    rfl
-  rw [h]
-  exact h3.comp (h2.comp h1)
-
 theorem measurePreserving_toEuclid2_symm :
     MeasurePreserving (toEuclid2 K).symm volume (mixedMeasure2 K) := by
   have : MeasurePreserving (toEuclid2 K).toHomeomorph.toMeasurableEquiv
@@ -83,23 +115,12 @@ theorem measurePreserving_toEuclid2_symm :
 def mixedFourier2 (f : (Fin 2 → mixedSpace K) → ℂ) (y : Fin 2 → mixedSpace K) : ℂ :=
   ∫ x, 𝐞 (-mixedPairing2 K x y) • f x ∂mixedMeasure2 K
 
-def mixedFourierInv2 (f : (Fin 2 → mixedSpace K) → ℂ) (x : Fin 2 → mixedSpace K) : ℂ :=
-  ∫ y, 𝐞 (mixedPairing2 K x y) • f y ∂mixedMeasure2 K
-
 theorem mixedFourier2_eq (f : (Fin 2 → mixedSpace K) → ℂ) (y : Fin 2 → mixedSpace K) :
     mixedFourier2 K f y = 𝓕 (f ∘ (toEuclid2 K).symm) (toEuclid2Conj K y) := by
   rw [mixedFourier2, Real.fourier_eq, ← (measurePreserving_toEuclid2 K).integral_comp
     (toEuclid2 K).toHomeomorph.measurableEmbedding]
   refine integral_congr_ae (Eventually.of_forall fun x => ?_)
   simp [mixedPairing2_eq_inner]
-
-theorem mixedFourierInv2_eq (f : (Fin 2 → mixedSpace K) → ℂ) (x : Fin 2 → mixedSpace K) :
-    mixedFourierInv2 K f x = 𝓕⁻ (f ∘ (toEuclid2Conj K).symm) (toEuclid2 K x) := by
-  rw [mixedFourierInv2, Real.fourierInv_eq, ← (measurePreserving_toEuclid2Conj K).integral_comp
-    (toEuclid2Conj K).toHomeomorph.measurableEmbedding]
-  refine integral_congr_ae (Eventually.of_forall fun y => ?_)
-  simp only [Function.comp_apply, ContinuousLinearEquiv.symm_apply_apply]
-  rw [mixedPairing2_eq_inner, real_inner_comm]
 
 def mixedFourier2Schwartz : 𝓢(Fin 2 → mixedSpace K, ℂ) →L[ℂ] 𝓢(Fin 2 → mixedSpace K, ℂ) :=
   (SchwartzMap.compCLMOfContinuousLinearEquiv ℂ (toEuclid2Conj K)).comp
@@ -111,34 +132,6 @@ theorem mixedFourier2Schwartz_apply (f : 𝓢(Fin 2 → mixedSpace K, ℂ)) :
   funext y
   rw [mixedFourier2_eq]
   rfl
-
-theorem mixedFourierInv2_mixedFourier2 (f : 𝓢(Fin 2 → mixedSpace K, ℂ))
-    (x : Fin 2 → mixedSpace K) : mixedFourierInv2 K (mixedFourier2 K f) x = f x := by
-  set F : 𝓢(WithLp 2 (euclidean.mixedSpace K × euclidean.mixedSpace K), ℂ) :=
-    SchwartzMap.compCLMOfContinuousLinearEquiv ℂ (toEuclid2 K).symm f with hFdef
-  have hF : (F : WithLp 2 (euclidean.mixedSpace K × euclidean.mixedSpace K) → ℂ) =
-      f ∘ (toEuclid2 K).symm := rfl
-  have h1 : mixedFourier2 K f ∘ (toEuclid2Conj K).symm =
-      𝓕 (F : WithLp 2 (euclidean.mixedSpace K × euclidean.mixedSpace K) → ℂ) := by
-    funext v
-    rw [Function.comp_apply, mixedFourier2_eq, ContinuousLinearEquiv.apply_symm_apply, hF]
-  have h2 : Integrable
-      (𝓕 (F : WithLp 2 (euclidean.mixedSpace K × euclidean.mixedSpace K) → ℂ)) := by
-    rw [← SchwartzMap.fourier_coe]
-    exact (𝓕 F).integrable
-  rw [mixedFourierInv2_eq, h1, F.continuous.fourierInv_fourier_eq F.integrable h2, hF,
-    Function.comp_apply, ContinuousLinearEquiv.symm_apply_apply]
-
-theorem mixedFourier2_neg (f : (Fin 2 → mixedSpace K) → ℂ) (x : Fin 2 → mixedSpace K) :
-    mixedFourier2 K f (-x) = mixedFourierInv2 K f x := by
-  rw [mixedFourier2, mixedFourierInv2]
-  refine integral_congr_ae (Eventually.of_forall fun y => ?_)
-  dsimp only
-  rw [mixedPairing2_neg_right, neg_neg, mixedPairing2_comm]
-
-theorem mixedFourier2_mixedFourier2 (f : 𝓢(Fin 2 → mixedSpace K, ℂ))
-    (x : Fin 2 → mixedSpace K) : mixedFourier2 K (mixedFourier2 K f) x = f (-x) := by
-  rw [← neg_neg x, mixedFourier2_neg, mixedFourierInv2_mixedFourier2, neg_neg]
 
 variable {K}
 
@@ -331,7 +324,7 @@ theorem idealLattice2_poisson_summation (I : Fin 2 → (FractionalIdeal (𝓞 K)
     rw [← Equiv.tsum_eq eL]
     refine tsum_congr fun α => ?_
     change f ((toEuclid2 K).symm (toEuclid2 K α + toEuclid2 K a)) = _
-    rw [← map_add, ContinuousLinearEquiv.symm_apply_apply]
+    rw [← map_add (f := _), ContinuousLinearEquiv.symm_apply_apply]
   have hrhs : ∑' μ : dualLattice L,
       𝓕 (F : WithLp 2 (euclidean.mixedSpace K × euclidean.mixedSpace K) → ℂ) μ *
         𝐞 ⟪(μ : WithLp 2 (euclidean.mixedSpace K × euclidean.mixedSpace K)), toEuclid2 K a⟫ =
@@ -345,12 +338,12 @@ theorem idealLattice2_poisson_summation (I : Fin 2 → (FractionalIdeal (𝓞 K)
   rw [hlhs, hrhs, covolume_euclidLattice2] at h
   exact h
 
-variable (K) in
 
+variable (K) in
 def emb2 (ξ : Fin 2 → K) : Fin 2 → mixedSpace K := fun i => mixedEmbedding K (ξ i)
 
-variable (K) in
 
+variable (K) in
 def coset2 (I : Fin 2 → (FractionalIdeal (𝓞 K)⁰ K)ˣ) (c : Fin 2 → K) : Set (Fin 2 → K) :=
   {ξ | ∀ i, ξ i - c i ∈ (I i : FractionalIdeal (𝓞 K)⁰ K)}
 
@@ -382,7 +375,7 @@ theorem summable_norm_iff_and_tsum_eq_coset2 (I : Fin 2 → (FractionalIdeal (�
   have hemb : ∀ α, emb2 K (h α) = (α : Fin 2 → mixedSpace K) + emb2 K c := by
     intro α
     funext i
-    simp only [emb2, hh, Pi.add_apply, map_add, hy α i, add_comm]
+    simp only [emb2, hh, Pi.add_apply, map_add (f := _), hy α i, add_comm]
   set G : (Fin 2 → K) → ℂ := (coset2 K I c).indicator (fun ξ => g (emb2 K ξ))
   have hsupp : ∀ ξ ∉ Set.range h, G ξ = 0 := by
     intro ξ hξ

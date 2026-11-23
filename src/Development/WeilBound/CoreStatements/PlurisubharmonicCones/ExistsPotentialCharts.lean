@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.BoundedStatements
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ChartLocalAnalyticTrivializationStatement
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ContinuousAtOfHolo
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
+public import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ContinuousAtOfHolo
+public import Mathlib.Logic.Equiv.Bool
+public import Mathlib.Order.CompletePartialOrder
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ChartLocalAnalyticTrivializationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ExistsIntSmulIsAdicIntegralInTensorBasis
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 namespace LevelTowerAlt.Charts
 
@@ -175,11 +220,11 @@ theorem LevelTowerAlt.exists_potential_charts : ∀ (K : Type) [Fintype K] (J : 
     (fun p => (E _).isOpen_inter_preimage isOpen_ball) (fun x _ => by
       obtain ⟨z, hz, rfl⟩ := M.surj x
       obtain ⟨a, t, ht, c, hc, e⟩ := D.chart_cover z hz
-      have h0 : (0 : Fin D.n → ℂ) ∈ (E (⟨(a, t), ht⟩, false)).target := hEt _ ▸ mem_ball_self one_pos
+      have h0 : (0 : Fin D.n → ℂ) ∈ (E (⟨(a, t), ht⟩, false)).target := hEt _ ▸ by exact Set.mem_preimage.mpr (mem_ball_self one_pos)
       have e0 : g' (⟨(a, t), ht⟩, false) 0 = (D.chart a).γ t := hg0 ⟨(a, t), ht⟩
       have e1 : M.proj z = (E (⟨(a, t), ht⟩, false)).symm 0 := by
         rw [hEs]
-        exact ((M.fibre _ ((hg' _).mem _ (mem_ball_self one_pos)) _ hz).2 ⟨c, hc, by rw [e0]; exact e⟩).symm
+        exact ((M.fibre _ ((hg' _).mem _ (by exact Set.mem_preimage.mpr (mem_ball_self one_pos))) _ hz).2 ⟨c, hc, by rw [e0]; exact e⟩).symm
       refine mem_iUnion.2 ⟨⟨(a, t), ht⟩, ?_⟩
       rw [e1]
       refine ⟨(E _).map_target h0, ?_⟩

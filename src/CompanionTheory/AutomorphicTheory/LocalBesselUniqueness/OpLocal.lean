@@ -1,8 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UsCompose
-import Formalism.FormalDegreeBessel.FinalG
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpA
+public import Formalism.FormalDegreeBessel.FinalG
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UsCompose
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentComposition.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
 
 open Matrix Set
 open scoped ContDiff Topology
@@ -201,9 +252,11 @@ theorem ffl_opApply (D : RealPlaceData k r Wp Wq) {O UU : Set (Mat k r)} (hO : Q
   have hπ1 : D.π 1 = ContinuousLinearMap.id ℂ Wp := D.π_rep.1
   have hπ1' : D.π' 1 = ContinuousLinearMap.id ℂ Wq := D.π'_rep.1
   refine ⟨smoothLev_of_ck (ck_op (m := ⊤) (o := opOrder Θ) (by rw [top_add]; exact hJc) Θ fun T hT =>
-    ⟨ck_mono_set (fun g hg => hOU g hg.2 hg.1) (hS T hT), word_le_opOrder Θ T hT⟩), ?_, ?_, ?_⟩
+    ⟨ck_mono_set (UU := GV k r ∩ O) (VV := UU) (fun g hg => hOU g hg.2 hg.1) (hS T hT),
+      word_le_opOrder Θ T hT⟩), ?_, ?_, ?_⟩
   · intro g hg n hn
-    have hni : n⁻¹ ∈ Nset k r := (Formalism.QuantumDeterminants.nSubgroup k r).2.2 _ hn.1
+    have hni : n⁻¹ ∈ Formalism.QuantumDeterminants.Nset k r :=
+      (Formalism.QuantumDeterminants.nSubgroup k r).2.2 _ hn.1
     let p : SS k r := mkSS 1 n⁻¹ 1 1
     have hp : D.inSS p := inSS_mk D (uw_one _) hni (uw_one _) n1
     have hs : ∀ x, sgs p x = n * x := fun x => by
@@ -262,7 +315,7 @@ theorem contDiff_poly {κ : ℕ} {P : Mat k r → ℂ} (hP : U.IsPolyDeg κ P) :
   have e : P = fun g => MvPolynomial.eval (Sum.elim (fun x => g x.1 x.2) (fun x => star (g x.1 x.2))) q := funext hq
   rw [e]
   clear hq e
-  have hv : ∀ i j, ContDiff ℝ ∞ (fun g : Mat k r => g i j) := fun i j => contDiff_apply_apply ℝ ℂ i j
+  have hv : ∀ i j, ContDiff ℝ ∞ (fun g : Mat k r => g i j) := fun i j => contDiff_apply_apply ℝ i j
   induction q using MvPolynomial.induction_on with
   | C a => simpa using contDiff_const
   | add p q hp hq => simpa using hp.add hq
@@ -306,10 +359,15 @@ theorem polyOp_mono {o κ o' κ' : ℕ} (ho : o ≤ o') (hκ : κ ≤ κ') {Θ :
 theorem exists_polyOp {o κ : ℕ} : ∀ Θ : DiffOp k r Wp Wq,
     (∀ T ∈ Θ, T.word.length ≤ o ∧ ∃ P : Mat k r → ℂ, U.IsPolyDeg κ P ∧
       ∀ g, T.coef g = P g • ContinuousLinearMap.id ℂ (Wq →L[ℂ] Wp)) →
-    ∃ Θ' : DiffOp k r Wp Wq, CutMP.PolyOp o κ Θ' ∧ ∀ F, opApply Θ' F = opApply Θ F
-  | [], _ => ⟨[], fun _ h => absurd h List.not_mem_nil, fun _ => rfl⟩
-  | T :: Θ, h => by
-    obtain ⟨Θ', h1, h2⟩ := exists_polyOp Θ fun T' hT' => h T' (by simp [hT'])
+    ∃ Θ' : DiffOp k r Wp Wq, CutMP.PolyOp o κ Θ' ∧ ∀ F, opApply Θ' F = opApply Θ F := by
+  intro Θ
+  induction Θ with
+  | nil =>
+    intro _
+    exact ⟨[], fun _ h => absurd h List.not_mem_nil, fun _ => rfl⟩
+  | cons T Θ ih =>
+    intro h
+    obtain ⟨Θ', h1, h2⟩ := ih fun T' hT' => h T' (List.mem_cons_of_mem T hT')
     obtain ⟨hl, P, hP, hc⟩ := h T (by simp)
     refine ⟨scalTerm P T.word T.word_lie :: Θ', fun T' hT' => ?_, fun F => ?_⟩
     · rcases List.mem_cons.1 hT' with rfl | h'

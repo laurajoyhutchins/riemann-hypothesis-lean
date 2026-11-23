@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.StatementE
+module
+
+public import Formalism.DistinguishedUnitIdeals.StatementE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Data.ZMod.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,7 +102,7 @@ theorem phiIt_add (i : ZMod n) (k : ℕ) (u v : V) :
     L.phiIt i k (u + v) = L.phiIt i k u + L.phiIt i k v := by
   induction k with
   | zero => rfl
-  | succ k ih => rw [phiIt_succ, ih, map_add]; rfl
+  | succ k ih => rw [phiIt_succ, ih, map_add (f := _)]; rfl
 
 theorem phiIt_map_zero (i : ZMod n) (k : ℕ) : L.phiIt i k (0 : V) = 0 := by
   induction k with
@@ -138,7 +185,7 @@ theorem gam_pull (h1 : ∀ i, ∀ v ∈ L.N i, L.γ i v - v ∈ sm X (L.N i)) (c
     rw [gam_phiIt L c _ k rfl]
     exact mem_pull L c k (gam_N L h1 c hu)
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul a x _ hx => rw [L.γ_semi]; exact Submodule.smul_mem _ _ hx
 
 theorem gam_sm_pull (h1 : ∀ i, ∀ v ∈ L.N i, L.γ i v - v ∈ sm X (L.N i)) (c : ZMod n) (k : ℕ)
@@ -361,11 +408,13 @@ theorem le_dv (a : PowerSeries O) (S : Submodule (PowerSeries O) V) : S ≤ dv a
 theorem dφ_sum {ι : Type} (s : Finset ι) (f : ι → ZMod n → V) :
     L.dφ (∑ c ∈ s, f c) = ∑ c ∈ s, L.dφ (f c) := by
   funext i
+
   simp only [Lat.dφ, Finset.sum_apply, map_sum, Finset.sum_sub_distrib]
 
 theorem dγ_sum {ι : Type} (s : Finset ι) (f : ι → ZMod n → V) :
     L.dγ (∑ c ∈ s, f c) = ∑ c ∈ s, L.dγ (f c) := by
   funext i
+
   simp only [Lat.dγ, Finset.sum_apply, map_sum, Finset.sum_sub_distrib]
 
 theorem phiIt_fixed {e : V} (he : ∀ i, L.φ i e = e) (i : ZMod n) (k : ℕ) : L.phiIt i k e = e := by

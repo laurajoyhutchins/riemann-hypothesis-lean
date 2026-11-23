@@ -1,7 +1,56 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.Taylor
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorWp
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorSigma
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorWp
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.IsogenyP
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.PDeriv
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.Taylor
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorSigma
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.ThreeTermNumEqTwistedGammaOfSigmaZero
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SigmaLogDeriv2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -13,9 +62,6 @@ namespace EndoZ
 
 open PowerSeries TaylorWp
 
-theorem T.congr {f g : ℂ → ℂ} {F : PowerSeries ℂ} (hf : T f F) (h : f =ᶠ[𝓝 0] g) : T g F :=
-  ⟨hf.1.congr h, (taylor_ring.2.2.2 f g h).symm.trans hf.2⟩
-
 private theorem T_const (c : ℂ) : T (fun _ => c) (C c) :=
   ⟨analyticAt_const, taylor_ring.2.1 c⟩
 
@@ -26,9 +72,7 @@ theorem T.neg {f : ℂ → ℂ} {F : PowerSeries ℂ} (hf : T f F) : T (fun z =>
 
 theorem T.sub {f g : ℂ → ℂ} {F G : PowerSeries ℂ} (hf : T f F) (hg : T g G) :
     T (fun z => f z - g z) (F - G) := by
-  convert T.add taylor_ring hf (T.neg hg) using 1
-  · funext z; ring
-  · ring
+  simpa only [sub_eq_add_neg] using T.add taylor_ring hf (T.neg hg)
 
 theorem T.sum {ι : Type} (s : Finset ι) (f : ι → ℂ → ℂ) (F : ι → PowerSeries ℂ)
     (h : ∀ i ∈ s, T (f i) (F i)) : T (fun z => ∑ i ∈ s, f i z) (∑ i ∈ s, F i) := by
@@ -59,7 +103,7 @@ theorem T.prod {ι : Type} (s : Finset ι) (f : ι → ℂ → ℂ) (F : ι → 
     · rw [Finset.prod_insert ha]
 
 theorem T.deriv {f : ℂ → ℂ} {F : PowerSeries ℂ} (hf : T f F) :
-    T (deriv f) (derivative ℂ F) :=
+    T (deriv f) (derivative F) :=
   ⟨hf.1.deriv, by rw [taylor_deriv.1 f hf.1, hf.2]⟩
 
 theorem T.rescale {f : ℂ → ℂ} {F : PowerSeries ℂ} (a : ℂ) (hf : T f F) :
@@ -102,7 +146,7 @@ theorem ev_notMem (L : PeriodPair) : ∀ᶠ z in 𝓝[≠] (0 : ℂ), z ∉ L.la
 theorem tendsto_mul_nhdsNE {α : ℂ} (hα : α ≠ 0) :
     Tendsto (fun z : ℂ => α * z) (𝓝[≠] 0) (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_iff.2 ⟨?_, eventually_nhdsWithin_of_forall fun z hz => ?_⟩
-  · have h0 : Tendsto (fun z : ℂ => α * z) (𝓝 0) (𝓝 (α * 0)) := (continuous_mul_left α).tendsto 0
+  · have h0 : Tendsto (fun z : ℂ => α * z) (𝓝 0) (𝓝 (α * 0)) := (continuous_const_mul α).tendsto 0
     rw [mul_zero] at h0
     exact h0.mono_left nhdsWithin_le_nhds
   · exact mul_ne_zero hα hz
@@ -339,8 +383,8 @@ theorem integer_endomorphism_instance : EndoZInstance := by
     exact EndoZ.clause2 L (hS.1 P P.2).2 (hneg P)
   · exact EndoZ.clause3 L α S hα hm hS
 
-open EndoZ TaylorWp in
 
+open EndoZ TaylorWp in
 theorem isogeny_formula_instance : IsogenyFormulaInstance := by
   intro L α S hα hm hS
   have hX : T (fun z : ℂ => z) PowerSeries.X := ⟨analyticAt_id, taylor_ring.2.2.1⟩

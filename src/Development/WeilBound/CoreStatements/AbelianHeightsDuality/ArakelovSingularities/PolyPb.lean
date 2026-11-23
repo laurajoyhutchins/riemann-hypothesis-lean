@@ -1,5 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ArakelovSingularities.PolyDef
+module
+
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ArakelovSingularities.PolyDef
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.Proper
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.AlgebraicGeometry.PullbackCarrier
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,7 +61,7 @@ variable {k : Type} [CommRing k]
 
 def sumTensEquiv (σ τ : Type) : MvPolynomial (τ ⊕ σ) k ≃+* MvPolynomial σ k ⊗[k] MvPolynomial τ k :=
   (MvPolynomial.sumAlgEquiv k τ σ).toRingEquiv.trans
-    (MvPolynomial.algebraTensorAlgEquiv k (MvPolynomial σ k)).symm.toRingEquiv
+    (MvPolynomial.algebraTensorAlgEquiv (σ := τ) k (MvPolynomial σ k)).symm.toRingEquiv
 
 theorem sumTensEquiv_C (σ τ : Type) (r : k) :
     sumTensEquiv σ τ (MvPolynomial.C r) = algebraMap k (MvPolynomial σ k ⊗[k] MvPolynomial τ k) r := by
@@ -24,7 +70,7 @@ theorem sumTensEquiv_C (σ τ : Type) (r : k) :
     rfl
   have h2 : (MvPolynomial.C (MvPolynomial.C r) : MvPolynomial τ (MvPolynomial σ k)) =
       MvPolynomial.monomial 0 (MvPolynomial.C r) := rfl
-  show (MvPolynomial.algebraTensorAlgEquiv k (MvPolynomial σ k)).symm
+  show (MvPolynomial.algebraTensorAlgEquiv (σ := τ) k (MvPolynomial σ k)).symm
     ((MvPolynomial.sumAlgEquiv k τ σ) (MvPolynomial.C r)) = _
   rw [h1, h2, MvPolynomial.algebraTensorAlgEquiv_symm_monomial, Algebra.TensorProduct.algebraMap_apply]
   rfl

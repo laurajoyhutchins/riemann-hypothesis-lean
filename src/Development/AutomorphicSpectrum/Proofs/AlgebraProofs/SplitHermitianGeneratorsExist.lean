@@ -1,13 +1,67 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TwistApply
+module
+
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TwistApply
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.AlgebraActionBundleFiltrationStepStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FilteredExactSequenceProjectorBundlesStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IdealDescendingOneDimQuotientStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LinearIndependentMapVec
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ModuleBasisLatticeBundleFreeStatement
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ShortExactFirstTermBundle
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LinearIndependentMapVec
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.EigenProjectorsSplitAction
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FilteredExactSequenceProjectorBundlesStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ModuleBasisLatticeBundleFreeStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.AlgebraActionBundleFiltrationStepStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IdealDescendingOneDimQuotientStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Finite.Basic
+
+@[expose] public section
 
 noncomputable section
 open scoped TensorProduct
@@ -86,6 +140,7 @@ theorem frobSub_range (K : Type) [Field K] (p : ℕ) [Fact p.Prime] [CharP K p] 
       · simp [frobVec, h, hp]
     have hu : u = ∑ j, u j • (Pi.single j (1 : K) : Fin d → K) := by
       funext r; simp [Finset.sum_apply, Pi.single_apply]
+
     rw [hu, map_sum]
     refine sum_mem fun j _ => ?_
     rw [map_smul]
@@ -113,7 +168,7 @@ theorem twist_act (K k O : Type) [Field K] [Field k] [Algebra k K] [CommRing O] 
     ext r s
     simp only [Matrix.smul_apply, RingHom.mapMatrix_apply, Matrix.map_apply, smul_eq_mul,
       frobenius_def, mul_pow]
-  | add u w hu hw => simp only [map_add, hu, hw]
+  | add u w hu hw => simp only [map_add (f := _), hu, hw]
 
 theorem idealV_ker (K k O V : Type) [Field K] [Field k] [Algebra k K] [CommRing O]
     [AddCommGroup V] [Module K V] (ρ : O →+* Module.End K V) (χ : O →+* k) :
@@ -132,7 +187,7 @@ theorem idealV_ker (K k O V : Type) [Field K] [Field k] [Algebra k K] [CommRing 
       exact Submodule.smul_mem _ _ (hmem a v)
     | add u w hu hw =>
       have := add_mem hu hw
-      simp only [map_add, LinearMap.add_apply, add_smul]
+      simp only [map_add (f := _), LinearMap.add_apply, add_smul]
       convert this using 1
       abel
   refine le_antisymm (iSup_le fun a => ?_) (iSup_le fun a => ?_)
@@ -183,7 +238,7 @@ theorem act_isHom {K : Type} [Field K] (C : ACurve K) {V : Type} [AddCommGroup V
     exact smul_mem_of_isBun C hL i (hk i c) (hρ a i y hy)
   | add u w hu hw =>
     intro i y hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem (hu i y hy) (hw i y hy)
 
 theorem act_comm {K : Type} [Field K] {V V' : Type} [AddCommGroup V] [Module K V]
@@ -361,8 +416,8 @@ theorem v_le_one_of_finite {K : Type} [Field K] (C : ACurve K) (k : Type) [Field
   have h2 : C.v i (algebraMap k K c) ^ n = 1 := by rw [← map_pow, ← map_pow, h1]; simp
   exact (pow_eq_one_iff_of_nonneg (zero_le') hn.ne').1 h2 |>.le
 
-open NumberField in
 
+open NumberField in
 theorem deg_quot_eq_zero : ∀ (E : Type) [Field E] [NumberField E] [StarRing (𝓞 E)] (K : Type) [Field K] (C : ACurve K) (p : ℕ) [Fact p.Prime] [CharP K p] (d r : ℕ) (D : ConjData C p (𝓞 E) d) (χ : 𝓞 E →+* K), (∀ a : 𝓞 E, ((Algebra.lmul ℤ (𝓞 E) a : Module.End ℤ (𝓞 E)).charpoly.map (Int.castRingHom K)).Splits) → (∀ i, ∃ x : Fin r → (Fin d → K) × (Fin d → K), LinearIndependent K (fun q : Fin r × Module.Free.ChooseBasisIndex ℤ (𝓞 E) => D.ρH (RingOfIntegers.basis E q.2) (x q.1)) ∧ ∀ y, y ∈ D.H i ↔ ∃ c : Fin r × Module.Free.ChooseBasisIndex ℤ (𝓞 E) → K, (∀ q, C.v i (c q) ≤ 1) ∧ y = ∑ q, c q • D.ρH (RingOfIntegers.basis E q.2) (x q.1)) → deg C (quot C D.H (⨆ a : 𝓞 E, LinearMap.range (D.ρH a - χ a • LinearMap.id))) = 0 := by
   intro E _ _ _ K _ C p _ _ d r D χ _ hfr
   obtain ⟨k, hfin, hχ⟩ := exists_finite_subfield K (𝓞 E) p χ

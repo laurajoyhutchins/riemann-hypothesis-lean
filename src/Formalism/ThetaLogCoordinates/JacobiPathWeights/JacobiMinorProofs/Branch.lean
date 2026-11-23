@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.StatementP
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LeIffLtColHeight
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LinearIndependentOfLead
+module
+
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.StatementP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -119,10 +166,11 @@ def stdEquiv {n : ℕ} (μ : Fin n → ℤ) :
 
 def restr {n : ℕ} (A : Finset (Fin (n + 1))) : Finset (Fin n) := univ.filter fun m => m.castSucc ∈ A
 
-open Classical in
 
-def extd {n : ℕ} (A : Finset (Fin n)) (b : Prop) : Finset (Fin (n + 1)) :=
-  A.map Fin.castSuccEmb ∪ if b then {Fin.last n} else ∅
+open Classical in
+def extd {n : ℕ} (A : Finset (Fin n)) (b : Prop) : Finset (Fin (n + 1)) := by
+  classical
+  exact A.map Fin.castSuccEmb ∪ if b then {Fin.last n} else ∅
 
 theorem mem_restr {n : ℕ} (A : Finset (Fin (n + 1))) (m : Fin n) : m ∈ restr A ↔ m.castSucc ∈ A := by
   simp [restr]
@@ -167,9 +215,10 @@ private theorem card_extd_eq {n : ℕ} (A : Finset (Fin n)) (b : Prop) [Decidabl
   unfold extd
   by_cases hb : b
   · have hnm : Fin.last n ∉ A.map Fin.castSuccEmb := by simp [hne]
-    rw [if_pos hb, if_pos hb, Finset.union_comm, ← Finset.insert_eq,
+    simp only [ite_eq_left hb]
+    rw [Finset.union_comm, ← Finset.insert_eq,
       Finset.card_insert_of_notMem hnm, Finset.card_map]
-  · rw [if_neg hb, if_neg hb, Finset.union_empty, Finset.card_map, Nat.add_zero]
+  · simp [hb]
 
 theorem card_restr {n : ℕ} (A : Finset (Fin (n + 1))) : (restr A).card = cnt A n := by
   rw [← cnt_restr A le_rfl]
@@ -376,16 +425,15 @@ def fibEquiv {n : ℕ} {μ : Fin (n + 1) → ℤ} {κ : Fin n → ℤ} (hμ : An
   left_inv T := by
     apply Subtype.ext
     funext c
-    apply extd_restr
+    change extd (restr (T.1 c)) (colHeight κ c < colHeight μ c) = T.1 c
+    refine extd_restr _ _ ?_
     have h1 := card_eq_restr (T.1 c)
     rw [T.2.1.1 c, T.2.2 c] at h1
-    split_ifs at h1 with h
-    · simp only [h, iff_true]; omega
-    · simp only [h, iff_false]; omega
+    by_cases h : Fin.last n ∈ T.1 c <;> simp [h] at h1 ⊢ <;> omega
   right_inv T' := by
     apply Subtype.ext
     funext c
-    exact restr_extd _ _
+    exact restr_extd (T'.1 c) (colHeight κ c < colHeight μ c)
 
 theorem card_of_existsUnique {α β : Type*} (s : Finset β) (P : α → Prop) (Q : β → α → Prop)
     (h : ∀ a, P a → ∃ b ∈ s, Q b a)

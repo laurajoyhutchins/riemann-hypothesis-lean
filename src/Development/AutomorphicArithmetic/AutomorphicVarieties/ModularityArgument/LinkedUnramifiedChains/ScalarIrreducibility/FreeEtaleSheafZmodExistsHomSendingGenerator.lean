@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.RedDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Imports
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.RedDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.overlappingInstances false
 
@@ -90,6 +133,7 @@ private theorem der_mul {A : Type} [CommRing A] {n : ℕ} (ξ : A →+* K) (D : 
     (hD : ∀ f g, D (f * g) = ξ f * D g + ξ g * D f) (P Q : Matrix (Fin n) (Fin n) A) :
     (P * Q).map D = P.map ξ * Q.map D + P.map D * Q.map ξ := by
   ext i j
+
   simp only [Matrix.map_apply, Matrix.add_apply, Matrix.mul_apply, map_sum, hD, Finset.sum_add_distrib]
   congr 1
   exact Finset.sum_congr rfl fun a _ => mul_comm _ _
@@ -374,6 +418,8 @@ private theorem z_ne {k : Type} [Field k] (h2 : (2 : k) ≠ 0) {n : ℕ} (hn : n
 
 end UpperTheory.V.J.TorusDerivation
 
+set_option synthInstance.maxHeartbeats 200000
+
 namespace UpperTheory.V.J.TorusDerivation
 
 open Matrix
@@ -443,11 +489,11 @@ private theorem ne_quad (S : Fr.Space c.O F n) (ξ : S.A →ₐ[c.O] Qbar l) (h�
   · have e : res c.O S.R ((S.aB (g * g) k : S.B) : S.R) =
         res c.O S.R ((S.aB g k : S.B) : S.R) * res c.O S.R ((S.aB g k : S.B) : S.R) := by
       rw [res_aB, res_aB, Subgroup.coe_mul, map_mul, mul_zpow, Units.val_mul]
-    simp only [Subalgebra.coe_add, Subalgebra.coe_sub, Subalgebra.coe_mul, map_add, map_sub, map_mul, e]
+    simp only [Subalgebra.coe_add, Subalgebra.coe_sub, Subalgebra.coe_mul, map_add (f := _), map_sub, map_mul, e]
     have e2 : ∀ z β β' : ResidueField c.O, z * z - (β + β') * z + β * β' = (z - β) * (z - β') := fun _ _ _ => by ring
     rw [e2]
     exact mul_ne_zero (sub_ne_zero.2 hb.symm) (sub_ne_zero.2 hb'.symm)
-  · simp only [map_add, map_sub, map_mul, inc_aB]
+  · simp only [map_add (f := _), map_sub, map_mul, inc_aB]
     rw [← map_mul (ptRep S ξ).r]
     exact h1
 

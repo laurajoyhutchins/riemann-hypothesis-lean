@@ -1,16 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardEmbeddedDataWithGivenFixedLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardIsometriesFixingSubspaceDefiniteLatticesLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DiscriminantOrderCommonFixedLatticeEmbeddedDataStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardSublatticesIndexFixedTraceLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FixedLatticeInfEqAndPairingOfIsometryStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PrimitiveSublatticeMeanCountBound
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardEmbeddedDataWithGivenFixedLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FixedLatticeInfEqAndPairingOfIsometryStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DiscriminantOrderCommonFixedLatticeEmbeddedDataStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardIsometriesFixingSubspaceDefiniteLatticesLeStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EncardSublatticesIndexFixedTraceLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PrimitiveSublatticeMeanCountBound
 import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.MinkowskiNumberDvdFactorial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical nonZeroDivisors
@@ -39,8 +85,8 @@ section
 variable {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V]
   [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem finrank_le [NumberField K] (N : Submodule (𝓞 K) V) : Module.finrank (𝓞 K) N ≤ Module.finrank K V := by
   apply Module.finrank_le_of_rank_le
   rw [Module.finrank_eq_rank, IsLocalization.rank_eq K (𝓞 K)⁰ le_rfl]
@@ -52,7 +98,7 @@ theorem cf_nonneg (K : Type) [Field K] [NumberField K] : 0 ≤ cf K := by
   unfold cf
   linarith
 
-theorem sub_count [IsTotallyComplex K] (N : Submodule (𝓞 K) V) (hN : N.FG) (y : ℕ) (hy : 1 ≤ y) :
+theorem sub_count [_root_.NumberField.IsTotallyComplex K] (N : Submodule (𝓞 K) V) (hN : N.FG) (y : ℕ) (hy : 1 ≤ y) :
     ((({M : Submodule (𝓞 K) V | M ≤ N ∧ GlobalTheory.Mass.idxN N M = y}).encard : ℕ∞) : ℝ≥0∞) ≤
       ENNReal.ofReal ((y : ℝ) ^ ((Module.finrank K V : ℝ) + cf K)) := by
   haveI : Module.Finite (𝓞 K) N := Module.Finite.iff_fg.2 hN
@@ -80,23 +126,29 @@ theorem sub_count [IsTotallyComplex K] (N : Submodule (𝓞 K) V) (hN : N.FG) (y
   have : (Module.finrank (𝓞 K) N : ℝ) ≤ Module.finrank K V := by exact_mod_cast finrank_le N
   linarith
 
-omit [FiniteDimensional K V] in
 
-theorem isLattice_of_idx {L M : Submodule (𝓞 K) V} (hL : Submodule.IsLattice K L) (hM : M ≤ L)
-    (h : idx L M ≠ 0) : Submodule.IsLattice K M := by
-  refine ⟨?_, ?_⟩
-  · haveI : IsNoetherian (𝓞 K) L := isNoetherian_of_fg_of_noetherian L hL.fg
-    exact Submodule.FG.of_le_of_isNoetherian hM
-  · rw [eq_top_iff, ← hL.span_eq_top, Submodule.span_le]
-    intro v hv
-    have h1 : idx L M • v ∈ M := AddSubgroup.nsmul_relIndex_mem M.toAddSubgroup (K := L.toAddSubgroup) hv
-    have h2 : ((idx L M : K)⁻¹) • (idx L M • v) = v := by
-      rw [← Nat.cast_smul_eq_nsmul K, smul_smul, inv_mul_cancel₀ (by exact_mod_cast h), one_smul]
-    rw [← h2]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span h1)
+omit [FiniteDimensional K V] in
+theorem isLattice_of_idx {L M : Submodule (𝓞 K) V} (hL : Submodule.IsFullLattice K L) (hM : M ≤ L)
+    (h : idx L M ≠ 0) : Submodule.IsFullLattice K M := by
+  haveI : Submodule.IsFullLattice K L := hL
+  haveI : Submodule.IsLattice K M := Submodule.IsLattice.mono K hM
+  refine ⟨?_⟩
+  rw [← Submodule.IsFullLattice.span_eq_top (A := K) (M := L)]
+  refine le_antisymm (Submodule.span_mono hM) ?_
+  rw [Submodule.span_le]
+  intro m hm
+  have hn : (M.toAddSubgroup.relIndex L.toAddSubgroup) • m ∈ M :=
+    AddSubgroup.nsmul_relIndex_mem M.toAddSubgroup (K := L.toAddSubgroup) hm
+  have hnK : ((M.toAddSubgroup.relIndex L.toAddSubgroup : ℕ) : K) ≠ 0 :=
+    Nat.cast_ne_zero.mpr h
+  have hm' : m = ((M.toAddSubgroup.relIndex L.toAddSubgroup : ℕ) : K)⁻¹ •
+      (M.toAddSubgroup.relIndex L.toAddSubgroup • m) := by
+    rw [← Nat.cast_smul_eq_nsmul K, smul_smul, inv_mul_cancel₀ hnK, one_smul]
+  rw [SetLike.mem_coe, hm']
+  exact Submodule.smul_mem _ _ (Submodule.subset_span hn)
+
 
 omit [FiniteDimensional K V] [NumberField K] in
-
 theorem idx_latIn_le (U : Submodule K V) (L M : Submodule (𝓞 K) V) (h : idx L M ≠ 0) :
     GlobalTheory.Mass.idxN (GlobalTheory.Mass.latIn U L) (GlobalTheory.Mass.latIn U M) ≤ idx L M := by
   have e : GlobalTheory.Mass.idxN (GlobalTheory.Mass.latIn U L) (GlobalTheory.Mass.latIn U M) =
@@ -105,8 +157,8 @@ theorem idx_latIn_le (U : Submodule K V) (L M : Submodule (𝓞 K) V) (h : idx L
   rw [e, AddSubgroup.relIndex_comap]
   exact AddSubgroup.relIndex_le_of_le_right (AddSubgroup.map_comap_le _ _) h
 
-omit [FiniteDimensional K V] [NumberField K] in
 
+omit [FiniteDimensional K V] [NumberField K] in
 theorem inf_eq_map (U : Submodule K V) (M : Submodule (𝓞 K) V) :
     M ⊓ rs (𝓞 K) U = (GlobalTheory.Mass.latIn U M).map (U.subtype.restrictScalars (𝓞 K)) := by
   ext v
@@ -118,8 +170,8 @@ theorem inf_eq_map (U : Submodule K V) (M : Submodule (𝓞 K) V) :
 
 variable [StarRing K]
 
-omit [FiniteDimensional K V] in
 
+omit [FiniteDimensional K V] in
 theorem hRes_nondeg (h : V →ₗ⋆[K] V →ₗ[K] K) (hP : GlobalTheory.Mass.PD h) (U : Submodule K V) :
     (GlobalTheory.Mass.hRes h U).Nondegenerate := by
   obtain ⟨τ⟩ : Nonempty (K →+* ℂ) := inferInstance
@@ -132,8 +184,8 @@ theorem hRes_nondeg (h : V →ₗ⋆[K] V →ₗ[K] K) (hP : GlobalTheory.Mass.P
     simp at this
   exact ⟨fun x hx => key x (hx x), fun x hx => key x (hx x)⟩
 
-omit [FiniteDimensional K V] in
 
+omit [FiniteDimensional K V] in
 theorem fixLat_le {H : HermSpace K V} {g : ℕ} {L₀ : Submodule (𝓞 K) V} {j x : ℕ}
     {d : Submodule (𝓞 K) V × Submodule (𝓞 K) (V × V)} (hd : IsDat H g L₀ j x d) : fixLat d.2 ≤ L₀ :=
   fun _ hv => (hd.2.2.1.1 hv).2
@@ -160,7 +212,7 @@ theorem dat_count (H : HermSpace K V) (hK : Formalism.HermitianLatticesTheory.Is
       ENNReal.ofReal ((x : ℝ) ^ (2 * (((Module.finrank K V) - Module.finrank K U : ℕ) : ℝ) + cf K)) *
         ((x : ℝ≥0∞) * D₀) ^ (3 * (2 * j + 1)) := by
   haveI : IsTotallyComplex K := hK.1
-  refine encard_le_mul _ _ (fun d => fixLat d.2) _ _ ?_ (GlobalTheory.T.encard_sublattices_index_fixed_trace_le K V L₀ M U x hL.1 hx) ?_
+  refine encard_le_mul _ _ (fun d => fixLat d.2) _ _ ?_ (GlobalTheory.T.encard_sublattices_index_fixed_trace_le K V L₀ M U x hL.1.toIsLattice hx) ?_
   · rintro d ⟨hd, hM⟩
     exact ⟨fixLat_le hd, hd.2.2.2.1, hM⟩
   · intro La _

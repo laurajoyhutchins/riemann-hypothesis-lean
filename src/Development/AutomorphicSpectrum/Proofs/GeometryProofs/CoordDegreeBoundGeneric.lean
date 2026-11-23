@@ -1,12 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GrGenOfIsFlagVBOn
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+module
+
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.LatticeRationalEmbedding
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GradedSandwichDegreeBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeRegularAtLocalPointStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeEvalAtLocalRingStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinearStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelIsBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeEvalAtLocalRingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GradedSandwichDegreeBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeRegularAtLocalPointStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 open GlobalTheory.CompanionTheory.Ar.RootHt GroundTheory.Heights₂.Heights
@@ -31,7 +82,7 @@ theorem flag_coord {Ω E : Type} [Field Ω] [AddCommGroup E] [Module Ω E] {r : 
   | zero => simp
   | add x y _ _ hx hy =>
     refine ⟨?_, fun l hl => by simp [hx.2 l hl, hy.2 l hl]⟩
-    simp only [map_add, add_smul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), add_smul, Finset.sum_add_distrib]
     rw [← hx.1, ← hy.1]
   | smul c x _ hx =>
     refine ⟨?_, fun l hl => by simp [hx.2 l hl]⟩
@@ -44,24 +95,7 @@ variable {L : Type} [Field L] [NumberField L] {B T : Type} [AddCommGroup B] [Mod
   [AddCommGroup T] [Module L T] [Module (𝓞 L) T] [IsScalarTower (𝓞 L) L T]
 
 theorem dvd_nat (c : 𝓞 L) (hc : c ≠ 0) : ∃ (n : ℕ) (d : 𝓞 L), n ≠ 0 ∧ (n : 𝓞 L) = d * c := by
-  obtain ⟨d, k, hk, h⟩ := Algebra.IsAlgebraic.exists_smul_eq_mul ℤ (1 : 𝓞 L) hc
-  refine ⟨k.natAbs, if 0 ≤ k then d else -d, by simpa using hk, ?_⟩
-  have h' : (k : 𝓞 L) = c * d := by simpa [zsmul_eq_mul] using h
-  rcases le_total 0 k with h0 | h0
-  · have : ((k.natAbs : ℤ)) = k := Int.natAbs_of_nonneg h0
-    have e : ((k.natAbs : ℕ) : 𝓞 L) = (k : 𝓞 L) := by
-      rw [← this]; simp
-    by_cases h1 : 0 ≤ k
-    · simp only [h1, if_true]; rw [e, h', mul_comm]
-    · exact absurd h0 h1
-  · have : ((k.natAbs : ℤ)) = -k := Int.ofNat_natAbs_of_nonpos h0
-    have e : ((k.natAbs : ℕ) : 𝓞 L) = -(k : 𝓞 L) := by
-      have := congrArg (fun q : ℤ => (q : 𝓞 L)) this
-      simpa using this
-    by_cases h1 : 0 ≤ k
-    · have : k = 0 := le_antisymm h0 h1
-      exact absurd this hk
-    · simp only [h1, if_false]; rw [e, h']; ring
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.Dict.LatticeCoordinates.exists_nat_eq_mul <;> assumption
 
 theorem clear_int [Module.Projective (𝓞 L) B] (j : B →ₗ[𝓞 L] T) (h : IsBaseChange L j) :
     Function.Injective j ∧ ∀ t : T, ∃ (n : ℕ) (x : B), n ≠ 0 ∧ j x = n • t := by
@@ -96,7 +130,7 @@ theorem clear_span (j : B →ₗ[𝓞 L] T) {A : Type} (v : A → T) (S : Set B)
     obtain ⟨d', a', hd', ha', hja'⟩ := hy
     refine ⟨d * d', d' • a + d • a', mul_ne_zero hd hd',
       add_mem (Submodule.smul_mem _ _ ha) (Submodule.smul_mem _ _ ha'), ?_⟩
-    rw [map_add, map_smul, map_smul, hja, hja', smul_add, smul_smul, smul_smul, mul_comm d' d]
+    rw [map_add (f := _), map_smul, map_smul, hja, hja', smul_add, smul_smul, smul_smul, mul_comm d' d]
   | smul s x _ hx =>
     obtain ⟨d, a, hd, ha, hja⟩ := hx
     obtain ⟨p, q, hq, rfl⟩ := IsFractionRing.div_surjective (A := 𝓞 L) s
@@ -167,7 +201,7 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
       IsSubFibre M (flagStep Ω b₀ (i + 1)) z MB F₁ → ∀ c₀ : (k : K) → J k, (∀ k, w ⟨k, c₀ k⟩ ≠ 0) →
       ∃ φ : F₁ →ₗ[𝓞 L] L, (∀ x, φ x = 0 ↔ (x : B.carrier) ∈ F₀) ∧
         (∀ (x : F₁) (e : Li) (v : epsAt (spMap (algebraMap (𝓞 L) L) ≫ z) ⟶ G) (t : Ω) (u : L),
-          e ∈ flagStep Ω b₀ (i + 1) → M.ValAt _ e v → MB.Lifts (algebraMap (𝓞 L) L) (𝟙 G.left) (x : B.carrier) v →
+          e ∈ flagStep Ω b₀ (i + 1) → M.ValAt _ e v → (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) ≫ (MB.pt (x : B.carrier)).left) →
           IsCls b₀ i e t → ValAt ξ (spMap (algebraMap (𝓞 L) L) ≫ z) (t / gen y a e₀ c₀) u → φ x = u) := by
   intro X Ω _ ξ K _ J _ y G _ _ _ Li _ _ M V r b₀ m i a e₀ _hc hq hT hm hb₀ hS hD L _ _ w z hw B MB F₀ F₁ hF₀ hF₁ c₀ hc₀
   have hξ : IsCptGen ξ := hT.gen
@@ -202,7 +236,7 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
   obtain ⟨j₀, hj₀, -⟩ := GlobalTheory.T.lie_model_existsUnique_semilinear X G (𝓞 L) L (algebraMap (𝓞 L) L) z B.carrier T MB MT
   let j : B.carrier →ₗ[𝓞 L] T :=
     { toFun := j₀, map_add' := j₀.map_add, map_smul' := fun c x => j₀.map_smulₛₗ c x }
-  have hjj : ∀ x, MB.Lifts (algebraMap (𝓞 L) L) (𝟙 G.left) x (MT.pt (j x)) := hj₀
+  have hjj : ∀ x, ((MT.pt (j x)).left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) ≫ (MB.pt x).left) := hj₀
   have hbc : IsBaseChange L j := GlobalTheory.T.lie_model_isBaseChange X G (𝓞 L) L z B.carrier T MB MT j hjj
   obtain ⟨hinj, hclr⟩ := clear_int j hbc
   obtain ⟨ev, hev, hevs, -⟩ := GlobalTheory.T.lie_lattice_eval_at_local_ring X G Ω ξ Li M L _ hp T MT hξ inferInstance
@@ -226,10 +260,11 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
       apply Subtype.ext
       rw [Submodule.coe_sum]
       exact h1
+
     rw [h3, map_sum]
     exact Finset.sum_congr rfl fun l _ => hevs _ _ _ (hρ l)
   have hval : ∀ (x : B.carrier) (e : Li) (v : epsAt (spMap (algebraMap (𝓞 L) L) ≫ z) ⟶ G),
-      M.ValAt _ e v → MB.Lifts (algebraMap (𝓞 L) L) (𝟙 G.left) x v →
+      M.ValAt _ e v → (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) ≫ (MB.pt x).left) →
       ∃ he : e ∈ M.lat ⟨centre _, hp⟩, ev ⟨e, he⟩ = j x := by
     intro x e v h1 h2
     have h3 : v = MT.pt (j x) := by
@@ -264,7 +299,7 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
       Submodule.subset_span ⟨⟨l, hl⟩, rfl⟩
     have hW : ∀ t ∈ Submodule.span (𝓞 L) {x' | ∃ e ∈ flagStep Ω b₀ (i + 1),
         ∃ v : epsAt (spMap (algebraMap (𝓞 L) L) ≫ z) ⟶ G,
-        M.ValAt (spMap (algebraMap (𝓞 L) L) ≫ z) e v ∧ MB.Lifts (algebraMap (𝓞 L) L) (𝟙 G.left) x' v},
+        M.ValAt (spMap (algebraMap (𝓞 L) L) ≫ z) e v ∧ (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) ≫ (MB.pt x').left)},
         j t - g (j t) • ev ⟨b i, hbl i⟩ ∈ W := by
       intro t ht
       induction ht using Submodule.span_induction with
@@ -286,7 +321,7 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
       | add t t' _ _ h1 h2 =>
         have := add_mem h1 h2
         convert this using 1
-        simp only [map_add, add_smul]
+        simp only [map_add (f := _), add_smul]
         abel
       | smul c t _ h1 =>
         have := Submodule.smul_mem _ (algebraMap (𝓞 L) L c) h1
@@ -297,7 +332,7 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
       rwa [hgs, hg0, mul_zero, zero_smul, sub_zero] at this
     have hS₀ : ∀ l : {l : Fin r // (l : ℕ) < i}, ∃ (n : ℕ) (t : B.carrier), n ≠ 0 ∧
         t ∈ {x' | ∃ e ∈ flagStep Ω b₀ i, ∃ v : epsAt (spMap (algebraMap (𝓞 L) L) ≫ z) ⟶ G,
-          M.ValAt (spMap (algebraMap (𝓞 L) L) ≫ z) e v ∧ MB.Lifts (algebraMap (𝓞 L) L) (𝟙 G.left) x' v} ∧
+          M.ValAt (spMap (algebraMap (𝓞 L) L) ≫ z) e v ∧ (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) ≫ (MB.pt x').left)} ∧
         j t = n • ev ⟨b l.1, hbl l.1⟩ := by
       intro l
       obtain ⟨n, t, hn, ht⟩ := hclr (ev ⟨b l.1, hbl l.1⟩)
@@ -313,7 +348,7 @@ theorem exists_phi : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Sp Ω ⟶
   · obtain ⟨a₁, ha₁, hsp⟩ := (hF₀ x).1 hx
     have hZ : ∀ t ∈ Submodule.span (𝓞 L) {x' | ∃ e ∈ flagStep Ω b₀ i,
         ∃ v : epsAt (spMap (algebraMap (𝓞 L) L) ≫ z) ⟶ G,
-        M.ValAt (spMap (algebraMap (𝓞 L) L) ≫ z) e v ∧ MB.Lifts (algebraMap (𝓞 L) L) (𝟙 G.left) x' v},
+        M.ValAt (spMap (algebraMap (𝓞 L) L) ≫ z) e v ∧ (v.left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) ≫ (MB.pt x').left)},
         g (j t) = 0 := by
       intro t ht
       induction ht using Submodule.span_induction with

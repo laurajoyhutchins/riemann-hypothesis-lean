@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
-import Development.AbelianVarietyTheory.Definitions.Foundations.MemSiegelOfIffRightAct
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MemSiegelOfIffRightAct
+public import Formalism.FockGram.StatementLat
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +79,7 @@ theorem orthSum_apply (V W : HSpace E) (x y : V.V × W.V) :
 @[reducible] def hsum (V W : HSpace E) : HSpace E where
   V := V.V × W.V
   hT := Formalism.E.orthSum V.hT W.hT
-  herm := ⟨fun x y => by rw [orthSum_apply, orthSum_apply, map_add, V.herm.eq, W.herm.eq]⟩
+  herm := ⟨fun x y => by rw [orthSum_apply, orthSum_apply, map_add (f := _), V.herm.eq, W.herm.eq]⟩
   nondeg := ⟨fun x h => Prod.ext (V.nondeg.1 _ fun y => by simpa [orthSum_apply] using h (y, 0))
       (W.nondeg.1 _ fun y => by simpa [orthSum_apply] using h (0, y)),
     fun x h => Prod.ext (V.nondeg.2 _ fun y => by simpa [orthSum_apply] using h (y, 0))
@@ -46,9 +89,8 @@ theorem orthSum_apply (V W : HSpace E) (x y : V.V × W.V) :
   frame := (V.frame.prod W.frame).reindex finSumFinEquiv
   sig τ := V.sig τ + W.sig τ
   L0 := V.L0.prod W.L0
-  standardTuple_isLattice := ⟨V.standardTuple_isLattice.fg.prod W.standardTuple_isLattice.fg, by
-    rw [Submodule.prod_coe, Submodule.span_prod_eq E (zero_mem V.L0) (zero_mem W.L0), V.standardTuple_isLattice.span_eq_top,
-      W.standardTuple_isLattice.span_eq_top, Submodule.prod_top]⟩
+  standardTuple_isLattice :=
+    Submodule.IsLattice.of_fg E (V.standardTuple_isLattice.fg.prod W.standardTuple_isLattice.fg)
   baseLattice_isUnimodular := Submodule.ext fun x => by
     have h1 := SetLike.ext_iff.1 V.baseLattice_isUnimodular x.1
     have h2 := SetLike.ext_iff.1 W.baseLattice_isUnimodular x.2
@@ -95,18 +137,8 @@ theorem frameLat_hsum (V W : HSpace E) : frameLat (hsum V W) = sumLat finSumFinE
   rw [sum_pairVec_frame]
   exact Submodule.mem_prod
 
-theorem isLattice_frameLat (V : HSpace E) : Submodule.IsLattice E (frameLat V) := by
-  refine ⟨frameLat_fg V, ?_⟩
-  have key : ((frameLat V : Submodule (𝓞 E) (Fin V.rank → E)) : Set (Fin V.rank → E)) =
-      (V.frame.equivFun.toLinearMap : V.V →ₗ[E] (Fin V.rank → E)) '' (V.L0 : Set V.V) := by
-    ext x
-    constructor
-    · intro hx
-      exact ⟨V.frame.equivFun.symm x, hx, V.frame.equivFun.apply_symm_apply x⟩
-    · rintro ⟨y, hy, rfl⟩
-      show V.frame.equivFun.symm (V.frame.equivFun y) ∈ V.L0
-      simpa using hy
-  rw [key, Submodule.span_image, V.standardTuple_isLattice.span_eq_top, Submodule.map_top, LinearEquiv.range]
+theorem isLattice_frameLat (V : HSpace E) : Submodule.IsLattice E (frameLat V) :=
+  Submodule.IsLattice.of_fg E (frameLat_fg V)
 
 theorem isIsomEmb_inl (V W : HSpace E) : HSpace.IsIsomEmb V (hsum V W) (LinearMap.inl E V.V W.V) := by
   intro x y
@@ -203,12 +235,6 @@ theorem sigOK_hsum {V W : HSpace E} (h : V.SigOK) (h' : W.SigOK) : (hsum V W).Si
   · rcases hk : e2.symm k with a | a <;> simp [hk]
 
 theorem sigOK_hdbl {V : HSpace E} (h : V.SigOK) : (hdbl V).SigOK := sigOK_hsum h (sigOK_hneg h)
-
-example (V : HSpace E) (τ : E →+* ℂ) : (hdbl V).rank = V.rank + V.rank ∧
-    (hdbl V).sig τ = ((V.sig τ).1 + (V.sig τ).2, (V.sig τ).2 + (V.sig τ).1) := ⟨rfl, rfl⟩
-
-example (V : HSpace E) (x y x' y' : V.V) : (hdbl V).hD (x, y) (x', y') = V.hD x x' - V.hD y y' :=
-  (sub_eq_add_neg _ _).symm
 
 end GlobalTheory.Doubling
 

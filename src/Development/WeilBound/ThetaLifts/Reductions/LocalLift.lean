@@ -1,4 +1,59 @@
-import Development.WeilBound.ThetaLifts.Reductions.NormExpSubLe
+module
+
+import CompanionTheory.ThickeningEstimates.LieGroupReduction.LocalLift
+public import Development.WeilBound.ThetaLifts.Reductions.NormExpSubLe
+public import Development.WeilBound.ThetaLifts.Reductions.MetaDef
+public import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Abs
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +66,7 @@ variable {l : Type} [Fintype l] [DecidableEq l]
 
 def bl (i j : l → l ⊕ l) : Matrix (l ⊕ l) (l ⊕ l) ℝ →ₗ[ℝ] (Eu l →L[ℝ] Eu l) where
   toFun g := Matrix.toEuclideanCLM (𝕜 := ℝ) (n := l) (g.submatrix i j)
-  map_add' g h := by rw [← map_add]; rfl
+  map_add' g h := by rw [← map_add (f := _)]; rfl
   map_smul' c g := by rw [RingHom.id_apply, ← map_smul]; rfl
 
 theorem bl_apply (i j : l → l ⊕ l) (g : Matrix (l ⊕ l) (l ⊕ l) ℝ) (x : Eu l) (a : l) :
@@ -90,59 +145,17 @@ theorem fou_mq_fouInv (B : Matrix l l ℝ) (f : Sch l) :
     fou l (mq (-(Matrix.toEuclideanCLM (𝕜 := ℝ) (n := l) B)) (fouInv l f)) =
       (4 * π * I : ℂ)⁻¹ • ∑ j, ∑ k, (B j k : ℂ) • (∂_{(EuclideanSpace.single j 1 : Eu l)}
         (∂_{(EuclideanSpace.single k 1 : Eu l)} f)) := by
-  have e : ∀ u : Sch l, fou l (fouInv l u) = u := fun u => by
-    rw [← ContinuousLinearMap.mul_apply, fou_mul_fouInv, ContinuousLinearMap.one_apply]
-  rw [← e (_ • _)]
-  congr 1
-  have h : ∀ j (u : Sch l), fouInv l (dRho (Pi.single (Sum.inl j) 1) u) = -dRho (Pi.single (Sum.inr j) 1) (fouInv l u) :=
-    fourierInv_dRho_inl
-  simp only [← dRho_single_inl, map_smul, map_sum, h, map_neg, neg_neg]
-  ext x
-  have hπ : (π : ℂ) ≠ 0 := by simp [Real.pi_ne_zero]
-  simp only [mq_apply, SchwartzMap.smul_apply, SchwartzMap.sum_apply, dRho_single_inr, smul_eq_mul,
-    ContinuousLinearMap.neg_apply, inner_neg_right, inner_toEuclideanCLM, dotProduct, mulVec, Finset.mul_sum]
-  push_cast
-  simp only [mul_neg, neg_mul, neg_neg, Finset.mul_sum, Finset.sum_mul]
-  simp only [← Finset.sum_neg_distrib, neg_neg]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  refine Finset.sum_congr rfl fun k _ => ?_
-  have hI : (I : ℂ) ≠ 0 := I_ne_zero
-  field_simp
-  ring
+  apply CompanionTheory.ThKR.LL.fou_mq_fouInv <;> assumption
 
 theorem quad_eq {X : Matrix (l ⊕ l) (l ⊕ l) ℝ} (hX : X ∈ LieAlgebra.Symplectic.sp l ℝ) (f : Sch l) :
     quad X f = mq (bl Sum.inr Sum.inl X) f + vf (-bl Sum.inl Sum.inl X) f +
       fou l (mq (-bl Sum.inl Sum.inr X) (fouInv l f)) - ((X.toBlocks₁₁.trace / 2 : ℝ) : ℂ) • f := by
-  ext x
-  have h := quad_fromBlocks (A := X.toBlocks₁₁) (B := X.toBlocks₁₂) (C := X.toBlocks₂₁) (D := X.toBlocks₂₂)
-    (by rwa [fromBlocks_toBlocks]) f x
-  rw [fromBlocks_toBlocks] at h
-  have h2 := fou_mq_fouInv X.toBlocks₁₂ f
-  have h3 : vf (-bl Sum.inl Sum.inl X) f x =
-      -∑ j, ∑ k, (X.toBlocks₁₁ j k : ℂ) * x k * (∂_{(EuclideanSpace.single j 1 : Eu l)} f) x := by
-    have : bl Sum.inl Sum.inl X x = ∑ j, ∑ k, (X.toBlocks₁₁ j k * x k) • (EuclideanSpace.single j 1 : Eu l) := by
-      ext a
-      simp [bl_apply, Pi.single_apply, toBlocks₁₁, Finset.sum_apply]
-    rw [vf_apply, ContinuousLinearMap.neg_apply, this]
-    simp [lineDerivOp_apply_eq_fderiv]
-  have h4 : mq (bl Sum.inr Sum.inl X) f x = -(π * I * ∑ j, ∑ k, (X.toBlocks₂₁ j k : ℂ) * x j * x k * f x) := by
-    have : ⟪x, bl Sum.inr Sum.inl X x⟫ = x ⬝ᵥ X.toBlocks₂₁ *ᵥ x := inner_toEuclideanCLM _ _ _
-    rw [mq_apply, this]
-    simp only [dotProduct, mulVec]
-    push_cast
-    simp only [Finset.mul_sum, Finset.sum_mul, ← Finset.sum_neg_distrib]
-    exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => by ring
-  simp only [SchwartzMap.sub_apply, SchwartzMap.add_apply]
-  rw [h, h3, h4]
-  erw [h2]
-  simp only [SchwartzMap.smul_apply, SchwartzMap.sum_apply, smul_eq_mul]
-  push_cast
-  ring
+  apply CompanionTheory.ThKR.LL.quad_eq <;> assumption
 
 theorem differentiableAt_det {M : ℝ → Matrix l l ℝ} {t : ℝ} (h : ∀ i j, DifferentiableAt ℝ (fun t => M t i j) t) :
     DifferentiableAt ℝ (fun t => (M t).det) t := by
   simp only [Matrix.det_apply']
-  exact DifferentiableAt.fun_sum fun σ _ => (DifferentiableAt.fun_finset_prod fun i _ => h _ _).const_mul _
+  exact DifferentiableAt.fun_sum fun σ _ => (DifferentiableAt.fun_finsetProd fun i _ => h _ _).const_mul _
 
 end PositivityTheory.ThKR.LL
 
@@ -152,6 +165,9 @@ open LL
 
 theorem localLift_holds : LocalLift := by
   intro l _ _ X hX
+  letI : HasSummableGeomSeries (Eu l →L[ℝ] Eu l) := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      infer_instance
   let g : ℝ → Matrix (l ⊕ l) (l ⊕ l) ℝ := fun t => NormedSpace.exp (t • X)
   have g0 : g 0 = 1 := by simp [g]
   have hd := fun i j t => hasDerivAt_lin_exp (bl i j) X t

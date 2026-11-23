@@ -1,15 +1,62 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsRest
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartRingFormallyUnramified
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPrimitiveElementUnramified
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HenselRootsCompatible
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialApproxPowMaximal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialApproxUniqueness
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.MvPowerSeries.Equiv
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsLinearHomPull
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPrimitiveElementUnramified
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialApproxPowMaximal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialApproxUniqueness
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HenselRootsCompatible
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsRest
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartRingFormallyUnramified
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosure
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeA
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -44,12 +91,12 @@ theorem lift_with_value {A R V : Type} [CommRing A] [IsLocalRing A] [CommRing R]
     have e1 : (P.map φ).eval θ - (P'.map φ).eval θ = (((P - P') %ₘ q).map φ).eval θ := by
       rw [← Polynomial.eval_sub, ← Polynomial.map_sub]
       conv_lhs => rw [← hD]
-      simp only [Polynomial.map_add, Polynomial.map_mul, Polynomial.eval_add,
+      simp only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.eval_add,
         Polynomial.eval_mul, hqθ, zero_mul, add_zero]
     have e2 : (P.map α).eval ζ - (P'.map α).eval ζ = (((P - P') %ₘ q).map α).eval ζ := by
       rw [← Polynomial.eval_sub, ← Polynomial.map_sub]
       conv_lhs => rw [← hD]
-      simp only [Polynomial.map_add, Polynomial.map_mul, Polynomial.eval_add,
+      simp only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.eval_add,
         Polynomial.eval_mul, hqζ, zero_mul, add_zero]
     rw [e2]
     rw [e1] at h
@@ -109,11 +156,11 @@ theorem lift_with_value {A R V : Type} [CommRing A] [IsLocalRing A] [CommRing R]
         refine ⟨Px + Py, ?_, ?_⟩
         · have := Ideal.add_mem _ hx hy
           convert this using 1
-          simp only [Polynomial.map_add, Polynomial.eval_add]
+          simp only [Polynomial.map_add (f := _), Polynomial.eval_add]
           ring
         · have := Ideal.add_mem _ (hψ0 x n Px hx) (hψ0 y n Py hy)
           convert this using 1
-          simp only [Polynomial.map_add, Polynomial.eval_add]
+          simp only [Polynomial.map_add (f := _), Polynomial.eval_add]
           ring
       map_mul' := fun x y => char _ _ fun n => by
         obtain ⟨Px, hx⟩ := happ n x

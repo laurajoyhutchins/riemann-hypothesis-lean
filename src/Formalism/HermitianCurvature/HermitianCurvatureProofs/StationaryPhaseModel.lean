@@ -1,6 +1,74 @@
-import Formalism.HermitianCurvature.StatementG
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GaussianHessianIntegral
-import Lemmata.GeneralBFactSecondBisForm.Goal1
+module
+
+public import Formalism.HermitianCurvature.StatementG
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GaussianHessianIntegral
+public import Lemmata.GeneralBFactSecondBisForm.Goal1
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.ContDiff.Bounds
+public import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
+public import Mathlib.Analysis.Calculus.Deriv.Pi
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
+public import Mathlib.Analysis.Complex.OperatorNorm
+public import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.LineDeriv.Basic
+
+@[expose] public section
 
 section PartD0
 
@@ -467,7 +535,6 @@ theorem B_ibp {φ : E → ℝ} (τ : ℝ) (hφ : ContDiff ℝ 1 φ) {c : E → V
     ∫ x, osc φ τ x • fderiv ℝ c x v ∂μ =
       -∫ x, (Complex.I * osc φ τ x * ((τ⁻¹ * fderiv ℝ φ x v : ℝ) : ℂ)) • c x ∂μ := by
   have hoc : Continuous (osc φ τ) := (B_contDiff_osc τ hφ).continuous
-  have hφ' : Continuous (fun x => fderiv ℝ φ x v) := (hφ.continuous_fderiv (by norm_num)).clm_apply continuous_const
   have hc' : Continuous (fun x => fderiv ℝ c x v) := (hc.continuous_fderiv (by norm_num)).clm_apply continuous_const
   have key := integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable (μ := μ)
     (f := osc φ τ) (f' := fun x => Complex.I * osc φ τ x * ((τ⁻¹ * fderiv ℝ φ x v : ℝ) : ℂ))
@@ -665,7 +732,6 @@ theorem osc_bound (d q : ℕ) (β : ℂ) (hβ : β ≠ 0) (Γ c₁ : ℝ) (hc₁
         Sym A (wt (Real.sqrt τ)) (2 * (q : ℤ)) (d + 1 + q) K b →
         ‖∫ x, osc φ τ x • b x ∂(muPi β (Fin d))‖ ≤ C * K * τ ^ (d + q) := by
   have := isAddHaar_muPi d β hβ
-  have hmin : 0 < min (c₁ ^ 2) 1 := lt_min (by positivity) one_pos
   obtain ⟨C, hC0, hC⟩ := B_reduce (E := Fin d → ℂ) (μ := muPi β (Fin d)) (Fin d × Bool) (d + 1 + q) Γ
     (min (c₁ ^ 2) 1 / 2) (by positivity)
   obtain ⟨C₀, hC₀0, hC₀⟩ := B_weight d β hβ
@@ -799,7 +865,6 @@ theorem C_differentiableOn_fderiv_apply [FiniteDimensional ℂ E] [CompleteSpace
   by_cases hv : v = 0
   · subst hv
     simp
-  have hv' : 0 < ‖v‖ := norm_pos_iff.2 hv
   intro x₁ hx₁
   refine DifferentiableAt.differentiableWithinAt ?_
   obtain ⟨ρ0, hρ0, hball⟩ := Metric.isOpen_iff.1 hU x₁ hx₁
@@ -2579,6 +2644,7 @@ theorem F_fderiv_single {d : ℕ} {g : (Fin d → ℂ) → ℂ} {x : Fin d → �
 theorem F_clm_sum {d : ℕ} (L : (Fin d → ℂ) →L[ℂ] ℂ) (v : Fin d → ℂ) :
     L v = ∑ k, v k * L (Pi.single k 1) := by
   conv_lhs => rw [pi_eq_sum_univ' v]
+
   simp [map_sum]
 
 theorem F_contDiff_mul_cut {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {U : Set E} (hU : IsOpen U)
@@ -2954,7 +3020,6 @@ theorem F_lower (hd : 0 < d) (hr : 0 < r) (hΛ : 0 < Λ) (hg : DifferentiableOn 
   have hx2 : x ∈ Metric.ball (0 : Fin d → ℂ) (2 * r) := Metric.ball_subset_ball (by linarith) hx1
   by_cases hx0 : ‖x‖ = 0
   · exact ⟨(⟨0, hd⟩, false), by rw [hx0, mul_zero]; exact abs_nonneg _⟩
-  have hxpos : 0 < ‖x‖ := lt_of_le_of_ne (norm_nonneg _) (Ne.symm hx0)
   by_contra hcon
   push Not at hcon
   have hk : ∀ k, ‖dg x k‖ < ‖x‖ / Λ := by
@@ -3081,7 +3146,6 @@ theorem F_zero_small (d : ℕ) (hd : 0 < d) (β : ℂ) (hβ : β ≠ 0) (r Λ : 
         (psi β (g 0 / t) * (J - ((‖t‖ ^ d / ‖H.det‖ : ℝ) : ℂ))) • a 0 := by
     rw [mul_sub, sub_smul]; abel
   rw [hsplit]
-  have hpw : 0 ≤ ‖t‖ ^ (d + 1) := by positivity
   have hsecond : ‖(psi β (g 0 / t) * (J - ((‖t‖ ^ d / ‖H.det‖ : ℝ) : ℂ))) • a 0‖ ≤ |CD| * S * ‖t‖ ^ (d + 1) := by
     rw [norm_smul, norm_mul, F_norm_psi, one_mul]
     calc ‖J - ((‖t‖ ^ d / ‖H.det‖ : ℝ) : ℂ)‖ * ‖a 0‖ ≤ (|CD| * ‖t‖ ^ (d + 1)) * S := by
@@ -3186,17 +3250,14 @@ theorem F_zero (d : ℕ) (hd : 0 < d) (β : ℂ) (hβ : β ≠ 0) (r Λ : ℝ) (
   obtain ⟨Sχ, hSχ⟩ := bump_cutoff_deriv_bound d r hr (2 * d + 2)
   obtain ⟨hχc, -, hχs, hχ0⟩ := bump_cutoff_spec d r hr (2 * d + 2)
   set M : ℝ := (muPi β (Fin d) (Metric.closedBall 0 r)).toReal with hM
-  have hM0 : 0 ≤ M := ENNReal.toReal_nonneg
   have hSχ0 : 0 ≤ Sχ := (norm_nonneg _).trans (hSχ 0 (Nat.zero_le _) 0)
   set D₁ : ℝ := Sχ * M + C₀ * Sχ with hD₁
-  have hD₁0 : 0 ≤ D₁ := by positivity
   refine ⟨max C₀ (M + D₁), le_max_of_le_left hC₀, ?_⟩
   intro g dg H hg hb hdg hdg0 hH hgrad V _ _ _ a S ha hsupp hS t ht
   have haS : ∀ x, ‖a x‖ ≤ S := fun x => by
     have := hS 0 (Nat.zero_le _) x
     rwa [norm_iteratedFDeriv_zero] at this
   have hS0 : 0 ≤ S := (norm_nonneg _).trans (haS 0)
-  have hτ : 0 < ‖t‖ := norm_pos_iff.2 ht
   rcases le_total ‖t‖ 1 with h1 | h1
   · refine (h₀ g dg H hg hb hdg hdg0 hH hgrad V a S ha hsupp hS t ht h1).trans ?_
     gcongr

@@ -1,5 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InvariantSchwartzMemSpanLatticeIndicators
+module
+
+public import Mathlib.Analysis.CStarAlgebra.CStarMatrix
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Defs
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGLOfSpanRangeEqLocalRing
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSpanIndicatorLowerSetsFinitePoset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.LocalRing.Quotient
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 namespace GlobalTheory.DownLift.SplitGen
 
@@ -89,10 +149,10 @@ private lemma exists_matrix_vecMul_span_eq_of_smul_mem {R : Type} [CommRing R] [
   rw [Matrix.det_mul, h0, mul_zero, Matrix.det_smul, Matrix.det_one, mul_one] at this
   exact pow_ne_zero _ hc this.symm
 
+
 variable (O K : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   [Finite (IsLocalRing.ResidueField O)] [Field K] [Algebra O K] [IsFractionRing O K] (n r : ℕ) in
 variable {O K n r} in
-
 theorem _root_.GlobalTheory.DownLift.SplitGen.exists_same_images_matrix (hr : r ≤ n) {d : O} (hd : d ≠ 0) {V I : Type}
     [AddCommGroup V] [Module ℂ V]
     (M : I → V →ₗ[ℂ] (Matrix (Fin n) (Fin r) K → ℂ)) (f : V) (G : Submodule ℂ V)
@@ -143,8 +203,9 @@ theorem _root_.GlobalTheory.DownLift.SplitGen.exists_same_images_matrix (hr : r 
             Ideal.Quotient.mk (Ideal.span {d ^ 2}) (c * a) := fun c a => by
           rw [Algebra.smul_def, Ideal.Quotient.algebraMap_eq, ← map_mul]
         have e := congrFun (hh a) b
+
         simp only [red, Finset.sum_apply, Pi.smul_apply, hs, ← map_sum, Ideal.Quotient.eq,
-          Ideal.mem_span_singleton'] at e
+        Ideal.mem_span_singleton'] at e
         obtain ⟨c, hc⟩ := e
         exact ⟨c, by rw [Matrix.mul_apply]; linear_combination -hc⟩
       choose z hz using hdiff
@@ -158,7 +219,8 @@ theorem _root_.GlobalTheory.DownLift.SplitGen.exists_same_images_matrix (hr : r 
         simp only [smul_eq_mul, Matrix.smul_apply, Matrix.add_apply, Matrix.mul_apply, Matrix.map_apply,
           Matrix.of_apply, mul_add, Finset.mul_sum]
         rw [e1, hz a b]
-        simp only [Matrix.mul_apply, map_add, map_sum, map_mul, map_pow, smul_eq_mul]
+
+        simp only [Matrix.mul_apply, map_add (f := _), map_sum, map_mul, map_pow, smul_eq_mul]
         have : ∀ k, ι d * (ι ((h : Matrix (Fin n) (Fin n) O) a k) * x k b) = ι ((h : Matrix (Fin n) (Fin n) O) a k) * ι (hx.choose k b) :=
           fun k => by rw [← e2 k]; ring
         simp only [this]

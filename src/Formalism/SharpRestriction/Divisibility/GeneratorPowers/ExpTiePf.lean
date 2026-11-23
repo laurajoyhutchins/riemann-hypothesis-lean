@@ -1,7 +1,56 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTieGerm
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBCNab
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTie
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBCNab
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTieAlg
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTieGerm
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDVal
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,7 +85,7 @@ private lemma mem_degLE_lemma {κ : Type} [Fintype κ] [DecidableEq κ] (m : ℕ
 
 private lemma coeff_psTrunc_lemma_2 {R κ : Type} [CommRing R] [Fintype κ] [DecidableEq κ] (m : ℕ)
     (f : MvPowerSeries κ R) (e : κ →₀ ℕ) (he : (e.sum fun _ k => k) ≤ m) :
-    MvPolynomial.coeff e (psTrunc m f) = MvPowerSeries.coeff e f := by
+    AddMonoidAlgebra.coeff (psTrunc m f) e = MvPowerSeries.coeff e f := by
   unfold psTrunc
   rw [MvPolynomial.coeff_sum, Finset.sum_eq_single e]
   · simp [MvPolynomial.coeff_monomial]
@@ -46,14 +95,14 @@ private lemma coeff_psTrunc_lemma_2 {R κ : Type} [CommRing R] [Fintype κ] [Dec
     exact absurd ((mem_degLE_lemma m e).2 he) h
 
 private lemma mem_orig_pow_lemma_3 {R κ : Type} [CommRing R] (m : ℕ) (p : MvPolynomial κ R)
-    (hp : ∀ e : κ →₀ ℕ, (e.sum fun _ k => k) ≤ m → MvPolynomial.coeff e p = 0) :
+    (hp : ∀ e : κ →₀ ℕ, (e.sum fun _ k => k) ≤ m → AddMonoidAlgebra.coeff p e = 0) :
     p ∈ orig R κ ^ (m + 1) := by
   rw [p.as_sum]
   refine Ideal.sum_mem _ fun e _ => ?_
   by_cases he : (e.sum fun _ k => k) ≤ m
   · rw [hp e he, map_zero]
     exact Ideal.zero_mem _
-  · have h1 : MvPolynomial.monomial e (MvPolynomial.coeff e p) ∈
+  · have h1 : MvPolynomial.monomial e (AddMonoidAlgebra.coeff p e) ∈
         orig R κ ^ (e.sum fun _ k => k) := by
       rw [MvPolynomial.monomial_eq]
       refine Ideal.mul_mem_left _ _ ?_
@@ -98,7 +147,7 @@ theorem psJet_pow {R κ : Type} [CommRing R] [Fintype κ] [DecidableEq κ] (m : 
 
 private lemma mk_eq_psJet_lemma_6 {R κ : Type} [CommRing R] [Fintype κ] [DecidableEq κ] (m : ℕ)
     (p : MvPolynomial κ R) (g : MvPowerSeries κ R)
-    (h : ∀ e : κ →₀ ℕ, (e.sum fun _ k => k) ≤ m → MvPolynomial.coeff e p = MvPowerSeries.coeff e g) :
+    (h : ∀ e : κ →₀ ℕ, (e.sum fun _ k => k) ≤ m → AddMonoidAlgebra.coeff p e = MvPowerSeries.coeff e g) :
     (Ideal.Quotient.mk (orig R κ ^ (m + 1)) p : Jet R κ m) = psJet m g := by
   unfold psJet
   rw [Ideal.Quotient.eq]
@@ -110,15 +159,15 @@ private lemma psJet_add_lemma_7 {R κ : Type} [CommRing R] [Fintype κ] [Decidab
     (f g : MvPowerSeries κ R) : psJet m (f + g) = psJet m f + psJet m g := by
   have h := mk_eq_psJet_lemma_6 m (psTrunc m f + psTrunc m g) (f + g) (by
     intro e he
-    rw [MvPolynomial.coeff_add, coeff_psTrunc_lemma_2 m f e he, coeff_psTrunc_lemma_2 m g e he, map_add])
-  rw [← h, map_add]
+    rw [MvPolynomial.coeff_add, coeff_psTrunc_lemma_2 m f e he, coeff_psTrunc_lemma_2 m g e he, map_add (f := _)])
+  rw [← h, map_add (f := _)]
   all_goals rfl
 
 private lemma psJet_eq_zero_lemma_8 {R κ : Type} [CommRing R] [Fintype κ] [DecidableEq κ] (m : ℕ)
     (g : MvPowerSeries κ R)
     (h : ∀ e : κ →₀ ℕ, (e.sum fun _ k => k) ≤ m → MvPowerSeries.coeff e g = 0) :
     psJet m g = 0 := by
-  rw [← mk_eq_psJet_lemma_6 m 0 g (fun e he => by rw [h e he, MvPolynomial.coeff_zero]), map_zero]
+  rw [← mk_eq_psJet_lemma_6 m 0 g (fun e he => by rw [h e he, MvPolynomial.coeff_zero]; rfl), map_zero]
 
 private lemma vanish_mul_lemma_9 {R τ : Type} [CommRing R] [DecidableEq τ] (a b : MvPowerSeries τ R)
     (k l : ℕ)
@@ -179,14 +228,6 @@ private lemma coe_C_lemma_12 {R κ : Type} [CommRing R] (c : R) :
     ((MvPolynomial.C c : MvPolynomial κ R) : MvPowerSeries κ R) = algebraMap R _ c := by
   first
     | (rw [MvPolynomial.coe_C, Algebra.algebraMap_eq_smul_one, MvPowerSeries.smul_eq_C_mul, mul_one])
-    | (ext e
-       simp [Algebra.algebraMap_eq_smul_one, MvPowerSeries.coeff_C, MvPowerSeries.coeff_one])
-    | (ext e
-       rw [MvPolynomial.coeff_coe, MvPolynomial.coeff_C, Algebra.algebraMap_eq_smul_one,
-         MvPowerSeries.coeff_smul, MvPowerSeries.coeff_one]
-       by_cases h : e = 0
-       · subst h; simp
-       · simp [h, Ne.symm h])
 
 theorem jetSubstPS_psJet {S : Type} [CommRing S] {d N : ℕ} (φ : Fin d → MvPowerSeries (Fin 1 × Fin N) S)
     (h0 : ∀ j, constantCoeff (φ j) = 0) (m : ℕ) (f : MvPowerSeries (Fin 1 × Fin d) S) :
@@ -195,9 +236,6 @@ theorem jetSubstPS_psJet {S : Type} [CommRing S] {d N : ℕ} (φ : Fin d → MvP
   have hs : MvPowerSeries.HasSubst (fun p : Fin 1 × Fin d => φ p.2) := by
     first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun p => h0 p.2)
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (fun p => h0 p.2)
-      | exact ⟨fun p => by simp [h0 p.2], by simp [Filter.cofinite_eq_bot, Filter.tendsto_bot]⟩
-      | exact ⟨by simp [Filter.cofinite_eq_bot, Filter.tendsto_bot], fun p => by simp [h0 p.2]⟩
   have hpoly : ∀ P : MvPolynomial (Fin 1 × Fin d) S,
       (jetSubstPS (m := m) (fun p : Fin 1 × Fin d => φ p.2))
           (Ideal.Quotient.mk (orig S (Fin 1 × Fin d) ^ (m + 1)) P) =
@@ -213,17 +251,16 @@ theorem jetSubstPS_psJet {S : Type} [CommRing S] {d N : ℕ} (φ : Fin d → MvP
       · intro e _
         rw [← coe_C_lemma_12, MvPolynomial.coeff_coe]
     next p q hp hq =>
-      rw [map_add, map_add, hp, hq, MvPolynomial.coe_add, map_add, psJet_add_lemma_7]
+      rw [map_add (f := _), map_add (f := _), hp, hq, MvPolynomial.coe_add, map_add (f := _), psJet_add_lemma_7]
     next p n hp =>
       rw [map_mul, map_mul, hp, MvPolynomial.coe_mul, map_mul, psJet_mul_lemma_4]
       congr 1
       rw [MvPolynomial.coe_X, MvPowerSeries.coe_substAlgHom, MvPowerSeries.subst_X hs]
       have hc : MvPolynomial.constantCoeff (psTrunc m (φ n.2)) = 0 := by
         rw [show MvPolynomial.constantCoeff (psTrunc m (φ n.2)) =
-            MvPolynomial.coeff 0 (psTrunc m (φ n.2)) from rfl, coeff_psTrunc_lemma_2 m _ 0 (by simp)]
+            AddMonoidAlgebra.coeff (psTrunc m (φ n.2)) 0 from rfl, coeff_psTrunc_lemma_2 m _ 0 (by simp)]
         first
           | (rw [MvPowerSeries.coeff_zero_eq_constantCoeff_apply]; exact h0 n.2)
-          | simpa using h0 n.2
       have hX : (jetSubstPS (m := m) (fun p : Fin 1 × Fin d => φ p.2))
             (Ideal.Quotient.mk (orig S (Fin 1 × Fin d) ^ (m + 1)) (MvPolynomial.X n)) =
           Ideal.Quotient.mk (orig S (Fin 1 × Fin N) ^ (m + 1))
@@ -232,10 +269,6 @@ theorem jetSubstPS_psJet {S : Type} [CommRing S] {d N : ℕ} (φ : Fin d → MvP
           | (simp only [jetSubstPS, jetMap, liftJet, Ideal.Quotient.liftₐ_apply]
              erw [Ideal.Quotient.lift_mk]
              simp)
-          | (simp [jetSubstPS, jetMap, liftJet]
-             erw [Ideal.Quotient.lift_mk]
-             simp)
-          | rfl
       rw [hX, hc, map_zero, sub_zero]
       all_goals rfl
   have hvan : ∀ e : Fin 1 × Fin N →₀ ℕ, (e.sum fun _ j => j) ≤ m →
@@ -251,8 +284,6 @@ theorem jetSubstPS_psJet {S : Type} [CommRing S] {d N : ℕ} (φ : Fin d → MvP
       first
         | exact (congrArg (fun x => MvPowerSeries.coeff u (f - ((psTrunc m f : MvPolynomial (Fin 1 × Fin d) S) :
             MvPowerSeries (Fin 1 × Fin d) S)) • x) hz).trans (smul_zero _)
-        | (rw [show MvPowerSeries.coeff e (u.prod fun s n => φ s.2 ^ n) = 0 from hz, smul_zero])
-        | (simp only [hz, smul_zero])
   have e3 : subst (fun p : Fin 1 × Fin d => φ p.2) f = MvPowerSeries.substAlgHom hs f := by
     rw [MvPowerSeries.coe_substAlgHom]
   have e4 : MvPowerSeries.substAlgHom hs f =
@@ -260,7 +291,7 @@ theorem jetSubstPS_psJet {S : Type} [CommRing S] {d N : ℕ} (φ : Fin d → MvP
           MvPowerSeries (Fin 1 × Fin d) S) +
         MvPowerSeries.substAlgHom hs (f - ((psTrunc m f : MvPolynomial (Fin 1 × Fin d) S) :
           MvPowerSeries (Fin 1 × Fin d) S)) := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     ring
   rw [e3, e4, psJet_add_lemma_7, psJet_eq_zero_lemma_8 m _ hvan, add_zero, ← hpoly]

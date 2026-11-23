@@ -1,16 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicIntegersEqWittZetaSubOne
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormEqZpowOfMemMaxUnramifiedSubfield
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTateMaximalIdealKillsFirstCohomologyStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerFixedIffMemCompletedIntegersStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqOfPowEqOneOfNormSubLtOne
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankCyclotomicExtAndCyclotomicCharSurjective
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPrimitiveRootPrimePowSubOnePadicComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
 import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormMemCyclotomicLayerPrimeRpow
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTateMaximalIdealKillsFirstCohomologyStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerFixedIffMemCompletedIntegersStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqOfPowEqOneOfNormSubLtOne
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc Polynomial
 
@@ -23,60 +74,7 @@ variable {l : ℕ} [Fact l.Prime]
 theorem norm_coeff_le (K : FinExt l) (N : ℕ) (π : Om l)
     (hπ : ‖π‖ = (l : ℝ) ^ (-(1 : ℝ) / (N : ℝ))) (p : (↥(K0 K))[X])
     (hd : p.natDegree < N) (h1 : ‖aeval π p‖ ≤ 1) (a : ℕ) : ‖((p.coeff a : ↥(K0 K)) : Om l)‖ ≤ 1 := by
-  have hl1 : (1 : ℝ) < l := by exact_mod_cast (Fact.out : l.Prime).one_lt
-  have hl0 : (0 : ℝ) < l := by linarith
-  have hN : (0 : ℝ) < N := by exact_mod_cast (Nat.zero_le _).trans_lt hd
-  have key : ∀ i ∈ p.support, ∃ n : ℤ, ‖((p.coeff i : ↥(K0 K)) : Om l)‖ = (l : ℝ) ^ n ∧
-      ‖p.coeff i • π ^ i‖ = (l : ℝ) ^ ((n : ℝ) - (i : ℝ) / N) := by
-    intro i hi
-    have h0 : ((p.coeff i : ↥(K0 K)) : Om l) ≠ 0 := by
-      have := mem_support_iff.1 hi
-      exact fun h => this (Subtype.ext h)
-    obtain ⟨n, hn⟩ := GlobalTheory.UnramValue.norm_of_mem_unramified_subfield l K _ (p.coeff i).2 h0
-    refine ⟨n, hn, ?_⟩
-    change ‖((p.coeff i : ↥(K0 K)) : Om l) * π ^ i‖ = _
-    rw [norm_mul, norm_pow, hn, hπ, ← Real.rpow_natCast, ← Real.rpow_mul hl0.le,
-      ← Real.rpow_intCast, ← Real.rpow_add hl0]
-    congr 1
-    ring
-  have hpw : Set.Pairwise (p.support : Set ℕ)
-      (fun i k => ‖p.coeff i • π ^ i‖₊ ≠ ‖p.coeff k • π ^ k‖₊) := by
-    intro i hi k hk hik h
-    obtain ⟨n, -, hn⟩ := key i hi
-    obtain ⟨m, -, hm⟩ := key k hk
-    have h' : ‖p.coeff i • π ^ i‖ = ‖p.coeff k • π ^ k‖ := congrArg NNReal.toReal h
-    rw [hn, hm] at h'
-    have h2 := (Real.rpow_right_inj hl0 hl1.ne').1 h'
-    have h3 : ((n - m) * N : ℝ) = i - k := by
-      field_simp at h2
-      linarith
-    have h4 : ((n - m) * N : ℤ) = i - k := by exact_mod_cast h3
-    have hi' : i < N := (le_natDegree_of_mem_supp i hi).trans_lt hd
-    have hk' : k < N := (le_natDegree_of_mem_supp k hk).trans_lt hd
-    have h5 : (i : ℤ) - k = 0 := by
-      apply Int.eq_zero_of_abs_lt_dvd (m := N) ⟨n - m, by rw [← h4]; ring⟩
-      rw [abs_lt]; constructor <;> omega
-    omega
-  have hs : ∑ i ∈ p.support, p.coeff i • π ^ i = aeval π p := by
-    rw [aeval_eq_sum_range' (Nat.lt_succ_self _)]
-    apply Finset.sum_subset supp_subset_range_natDegree_succ
-    intro i _ hi
-    rw [notMem_support_iff.1 hi, zero_smul]
-  have h6 := IsUltrametricDist.nnnorm_sum_eq_sup_of_pairwise_ne hpw
-  rw [hs] at h6
-  by_cases ha : a ∈ p.support
-  · obtain ⟨n, hn, hn'⟩ := key a ha
-    have h7 : ‖p.coeff a • π ^ a‖₊ ≤ ‖aeval π p‖₊ := by
-      rw [h6]
-      exact Finset.le_sup (f := fun i => ‖p.coeff i • π ^ i‖₊) ha
-    have h8 : ‖p.coeff a • π ^ a‖ ≤ 1 := le_trans (by exact_mod_cast h7) h1
-    rw [hn', ← Real.rpow_zero (l : ℝ), Real.rpow_le_rpow_left_iff hl1] at h8
-    have ha' : (a : ℝ) < N := by exact_mod_cast (le_natDegree_of_mem_supp a ha).trans_lt hd
-    have h9 : (a : ℝ) / N < 1 := (div_lt_one hN).2 ha'
-    have h10 : n < 1 := by exact_mod_cast (by linarith : (n : ℝ) < 1)
-    rw [hn]
-    exact zpow_le_one_of_nonpos₀ hl1.le (by omega)
-  · rw [notMem_support_iff.1 ha]; simp
+  apply GlobalTheory.PrismS.Poly.norm_coeff_le <;> assumption
 
 theorem mem_of_mem_Ks (K : FinExt l) (j : ℕ) (hj : 1 ≤ j) (ζ : Om l) (hζ : IsPrimitiveRoot ζ (l ^ j))
     (R : Subring (Om l)) (hζR : ζ ∈ R) (h0 : ∀ c ∈ K0 K, ‖c‖ ≤ 1 → c ∈ R)
@@ -138,8 +136,8 @@ theorem exists_level (K : FinExt l) {x : Om l} (hx : x ∈ Kinf K) : ∃ i, 1 �
   obtain ⟨i, hi⟩ : ∃ i, x ∈ Ks K i := by simpa using h3
   exact ⟨i + 1, by omega, hmono (Nat.le_succ i) hi⟩
 
-open GlobalTheory.UnramValue in
 
+open GlobalTheory.UnramValue in
 theorem mem_rootRing {c : Om l} (hc : c ∈ MaximalUnramifiedExtension l) (h1 : ‖c‖ ≤ 1) :
     ∃ m : ℕ, 0 < m ∧ ¬ l ∣ m ∧ c ∈ rootRing l m := by
   have hp : l.Prime := Fact.out
@@ -182,8 +180,8 @@ theorem root_eq_of_norm_lt {m : ℕ} (hm : 0 < m) (hl : ¬ l ∣ m) {a b : Om l}
   | (intros; apply @_root_.GlobalTheory.RootsOfUnityClose.eq_of_pow_eq_one_of_norm_sub_lt_one <;> first | assumption | infer_instance)
   | (intros; exact _root_.GlobalTheory.RootsOfUnityClose.eq_of_pow_eq_one_of_norm_sub_lt_one ..)
 
-open GlobalTheory.UnramValue in
 
+open GlobalTheory.UnramValue in
 theorem exists_root (K : FinExt l) {c : Om l} (hc : c ∈ K0 K) (h1 : ‖c‖ = 1) :
     ∃ ω ∈ K0 K, ∃ m : ℕ, 0 < m ∧ ¬ l ∣ m ∧ ω ^ m = 1 ∧ ‖c - ω‖ < 1 := by
   have hp : l.Prime := Fact.out
@@ -470,9 +468,9 @@ theorem eps_ne_one : AI.ε - 1 ≠ 0 := by
   rw [OneMemClass.coe_one, h2, hl, Real.rpow_le_rpow_left_iff hl1, div_le_iff₀ (by linarith)] at h1
   linarith
 
+
 open scoped Formalism.Per in
 open GlobalTheory.TiltAlgClosed in
-
 theorem invariant_approx : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (K : FinExt l) (x : OCb l), (∀ h ∈ Hinf K, AI.actT h x = x) → ∀ n : ℕ, ∃ y ∈ Subring.closure (Set.range AI.εroot ∪ {xb | ∃ c : Om l, c ∈ K0 K ∧ ∃ m : ℕ, 0 < m ∧ ¬ l ∣ m ∧ c ^ m = 1 ∧ IsTiltOf c m xb}), (AI.ε - 1) ^ n ∣ x - y := by
   intro l _ P AI K x hx n
   have hp : l.Prime := Fact.out

@@ -1,6 +1,55 @@
-import Formalism.HermitianCurvature.StatementTL
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleGD
-import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.TieAlg
+module
+
+public import Formalism.HermitianCurvature.StatementTL
+public import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.TieAlg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FrameOfAdmissibleWord
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleGD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.NormalFormRelations
 
@@ -170,8 +219,8 @@ theorem nfs_left {P : A} {n : ℕ} {b : A} (hb : b ∈ B) {x : A} (hx : x ∈ NF
   | add x y _ _ hx hy => rw [mul_add]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [mul_smul_comm]; exact Submodule.smul_mem _ _ hx
 
-omit [StarRing A] in
 
+omit [StarRing A] in
 theorem nfs_mul_gen {P Q : A} {n : ℕ} (hP : ∀ b ∈ B, Commute b P)
     (hQ : ∀ X ∈ hats L, ∀ b ∈ B, X * (b * Q) ∈ NFs L B Q 1) {x y : A} (hx : x ∈ NFs L B P 1) (hy : y ∈ NFs L B Q n) :
     x * y ∈ NFs L B (P * Q) (n + 1) := by
@@ -209,8 +258,8 @@ theorem nfs_mul_gen {P Q : A} {n : ℕ} (hP : ∀ b ∈ B, Commute b P)
   | add x y _ _ hx hy => rw [add_mul]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [smul_mul_assoc]; exact Submodule.smul_mem _ _ hx
 
-omit [StarRing A] in
 
+omit [StarRing A] in
 theorem nfs_pass {P Q : A} (hP : ∀ b ∈ B, Commute b P) (hQ : ∀ X ∈ hats L, X * Q ∈ NFs L B Q 1) {x : A}
     (hx : x ∈ NFs L B P 1) : x * Q ∈ NFs L B (P * Q) 1 := by
   induction hx using Submodule.span_induction with
@@ -379,7 +428,7 @@ omit [StarRing A] [Algebra ℂ A] in
 theorem io_mul' (x y : A) : (io x : SlopeTestRemainingChoices S A) * io y = io (x * y) := by simp only [io, map_mul]
 
 omit [StarRing A] [Algebra ℂ A] in
-theorem io_add' (x y : A) : (io x : SlopeTestRemainingChoices S A) + io y = io (x + y) := by simp only [io, map_add]
+theorem io_add' (x y : A) : (io x : SlopeTestRemainingChoices S A) + io y = io (x + y) := by simp only [io, map_add (f := _)]
 
 omit [StarRing A] [Algebra ℂ A] in
 theorem io_pow' (x : A) (n : ℕ) : (io x : SlopeTestRemainingChoices S A) ^ n = io (x ^ n) := by simp only [io, map_pow]

@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataSpaces
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismFiniteness.SylvesterLe
-import Lemmata.GeneralBFactUpperAltForm.Imports
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountPositivity.CardLeOfNegFamily
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismFiniteness.SylvesterLe
+public import Lemmata.GeneralBFactUpperAltForm.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,21 +59,7 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] (S : HSpace E)
 
 theorem hT_expand (x y : S.V) :
     S.hT x y = ∑ i, ∑ j, star (S.frame.repr x i) * S.gram i j * S.frame.repr y j := by
-  have hx : ∀ w, S.hT x w = ∑ i, star (S.frame.repr x i) * S.hT (S.frame i) w := by
-    intro w
-    conv_lhs => rw [← S.frame.sum_repr x]
-    rw [map_sum, LinearMap.sum_apply]
-    simp [LinearMap.map_smulₛₗ, starRingEnd_apply]
-  have hy : ∀ w, S.hT w y = ∑ j, S.hT w (S.frame j) * S.frame.repr y j := by
-    intro w
-    conv_lhs => rw [← S.frame.sum_repr y]
-    rw [map_sum]
-    simp [mul_comm]
-  rw [hx]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [hy, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  simp [HSpace.gram, mul_assoc]
+  apply PI.CntNotPosW.hT_expand' <;> assumption
 
 theorem herm_swap (x y : S.V) : S.hT y x = star (S.hT x y) := by
   rw [← S.herm.eq x y]; rfl
@@ -39,8 +71,9 @@ theorem gram_entry (hstar : ∀ (τ : E →+* ℂ) (a : E), τ (star a) = starRi
     {k : Type} (τ : E →+* ℂ) (u : k → S.V) (a b : k) :
     ((coordC S τ u)ᴴ * S.gram.map τ * coordC S τ u) a b = τ (S.hT (u a) (u b)) := by
   rw [hT_expand, Matrix.mul_apply]
+
   simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, coordC, Matrix.of_apply, Matrix.map_apply,
-    map_sum, map_mul, hstar, Finset.sum_mul]
+  map_sum, map_mul, hstar, Finset.sum_mul]
   rw [Finset.sum_comm]
   rfl
 
@@ -58,6 +91,7 @@ theorem coord_injective {k : Type} [Fintype k] (u : k → S.V) (hu : LinearIndep
   intro c d hcd
   have key : ∀ c : k → E, (Matrix.of fun i a => S.frame.repr (u a) i) *ᵥ c = S.frame.repr (∑ a, c a • u a) := by
     intro c; ext i
+
     simp [Matrix.mulVec, dotProduct, map_sum, mul_comm]
   rw [key, key] at hcd
   have h2 := S.frame.repr.injective (Finsupp.ext fun i => congrFun hcd i)
@@ -85,14 +119,14 @@ theorem pos_perp (hstar : ∀ (τ : E →+* ℂ) (a : E), τ (star a) = starRing
     induction hx using Submodule.span_induction with
     | mem x hx => obtain ⟨a, rfl⟩ := hx; exact hze a
     | zero => simp
-    | add x y _ _ h1 h2 => simp [map_add, h1, h2]
+    | add x y _ _ h1 h2 => simp [map_add (f := _), h1, h2]
     | smul c x _ h => simp [h]
   let u : Fin r ⊕ Fin 2 → S.V := Sum.elim e ![z, y]
   have hpair : LinearIndependent E ![z, y] := by
     rw [LinearIndependent.pair_iff]
     intro s t hst
     have h1 := congrArg (S.hT z) hst
-    simp [map_add, hzy] at h1
+    simp [map_add (f := _), hzy] at h1
     have hs : s = 0 := by
       rcases h1 with h1 | h1
       · exact h1
@@ -110,7 +144,7 @@ theorem pos_perp (hstar : ∀ (τ : E →+* ℂ) (a : E), τ (star a) = starRing
       Set.singleton_union, Submodule.mem_span_pair] at hw2
     obtain ⟨s, t, rfl⟩ := hw2
     have h1 := hXz _ hw1
-    simp [map_add, hzy] at h1
+    simp [map_add (f := _), hzy] at h1
     have hs : s = 0 := by
       rcases h1 with h1 | h1
       · exact h1

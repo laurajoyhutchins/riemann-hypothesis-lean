@@ -1,9 +1,63 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTCRefTraceCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NotCdomRaiseOfLt
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTCRefTraceCut
+public import Formalism.HermitianCurvature.CapelliDeterminantAndBranching
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CommonEigenvectors
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DifferentialOperatorBracket
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.IrreducibleCapelliModules
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CommonEigenvectors
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LowKAllPos
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ProductIntervalFrames
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SingleMulVecOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.FrameExists2
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -90,7 +144,6 @@ theorem sum_int {ι : Type*} (s : Finset ι) (f : ι → ℝ) (h : ∀ i ∈ s, 
 theorem sdec (P : M.Par) (hOK : P.OK) :
     SDec (fun j : Fin P.k => ((P.u ((j : ℕ) + 1) : ℝ) : ℂ) - (P.k : ℂ) / 2 + 1 / 2) := by
   intro a b hab
-  have hab' : (a : ℕ) < b := hab
   obtain ⟨na, hna⟩ := u_int P hOK ((a : ℕ) + 1) (by omega) (by have := a.isLt; omega)
   obtain ⟨nb, hnb⟩ := u_int P hOK ((b : ℕ) + 1) (by omega) (by have := b.isLt; omega)
   have hm := u_mono P hOK ((a : ℕ) + 1) (by omega) ((b : ℕ) - a) (by have := b.isLt; omega)
@@ -154,7 +207,7 @@ theorem first_weight_half_integral {Wp : Type} [NormedAddCommGroup Wp] [InnerPro
   have hDg : QrCap.Dg θ = QrCap.Dg (0 : Fin P.k → ℝ) := by
     unfold QrCap.Dg
     congr 1
-    funext c
+    funext a
     simp only [hθ, Pi.zero_apply]
     split_ifs
     · push_cast
@@ -229,7 +282,7 @@ theorem radial_gauge_integrality_holds : GTRInt := by
     intro i hi
     obtain ⟨hi1, hi2⟩ := Finset.mem_Icc.1 hi
     unfold M.rho
-    rw [dif_pos ⟨hi1, hi2⟩]
+    rw [dite_eq_left ⟨hi1, hi2⟩]
     unfold M.Par.lo
     obtain ⟨a, ha⟩ := hOK.int_u (i + 1) (Finset.mem_Icc.2 ⟨by omega, by omega⟩)
     obtain ⟨b, hb⟩ := hOK.int_u' (i + 1) (Finset.mem_Icc.2 ⟨by omega, by omega⟩)

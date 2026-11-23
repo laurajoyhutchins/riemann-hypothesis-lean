@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
-import Formalism.SatakeDualWeyl.StatementE
-import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.RelIndexMulMeasure
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemGUIffAdjJ
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexEqOfSurj
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexUpLatEqSq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexUpLatEqProd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnipLatIsOpenIsCompact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsTerTail
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemGUIffAdjJ
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsTerTail
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexEqOfSurj
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexUpLatEqProd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelIndexUpLatEqSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+
+@[expose] public section
 
 open MeasureTheory GlobalTheory.PRep GlobalTheory.LGrp Formalism.UG
 open scoped NNReal
@@ -29,40 +74,6 @@ theorem relIndex_unipLat {ϖ : L} {σ : L →+* L} {q : ℕ} (h : IsUnramInv ϖ 
 
 theorem v_eq_exp {x : L} (hx : x ≠ 0) : Valued.v x = WithZero.exp (-ordL x) := by
   rw [ordL_eq, neg_neg, WithZero.exp_log (by simpa using hx)]
-
-theorem ord_rev {σ : L →+* L} (hσ : ∀ x, Valued.v (σ x) = Valued.v x) (t : torusU σ n) (i : Fin n) :
-    ordL (t.1 i.rev : L) = -ordL (t.1 i : L) := by
-  have h := (mem_GU_iff σ n _).1 t.2 i i
-  rw [← map_inv, diagHom_val, diagHom_val, Matrix.diagonal_apply_eq, Matrix.diagonal_apply_eq] at h
-  have := congrArg Valued.v h
-  rw [hσ] at this
-  simp [ordL_eq, ← this]
-
-theorem isWeight_ord {σ : L →+* L} (hσ : ∀ x, Valued.v (σ x) = Valued.v x) (t : torusU σ n) :
-    IsWeight fun i j : Fin n => ordL (t.1 i : L) - ordL (t.1 j : L) :=
-  ⟨fun i j => by simp only [ord_rev hσ]; ring, fun i j k _ _ => by simp⟩
-
-theorem conj_entry (t : Fin n → Lˣ) (u : GL (Fin n) L) (i j : Fin n) :
-    ((diagHom L (Fin n) t * u * (diagHom L (Fin n) t)⁻¹).val - 1) i j = t i * (u.val - 1) i j * (t j : L)⁻¹ := by
-  rw [← map_inv, Units.val_mul, Units.val_mul, diagHom_val, diagHom_val]
-  by_cases h : i = j
-  · subst h
-    simp [mul_sub, sub_mul]
-  · simp [Matrix.one_apply, h]
-
-theorem conj_mem_iff {σ : L →+* L} [LocallyCompactSpace (GU σ n)] (hσ : ∀ x, Valued.v (σ x) = Valued.v x)
-    (t : torusU σ n) (u : (borelU σ n).U) :
-    conjAut (borelU σ n).U ⟨(borelU σ n).s t, (borelU σ n).Q_le_normalizer ((borelU σ n).s_mem _)⟩ u ∈
-      unipLat hσ (isWeight_ord hσ t) ↔ u ∈ unipLat hσ isWeight_zero := by
-  rw [mem_unipLat, mem_unipLat, mem_upLat, mem_upLat]
-  have e : ∀ i j, ((conjAut (borelU σ n).U
-      ⟨(borelU σ n).s t, (borelU σ n).Q_le_normalizer ((borelU σ n).s_mem _)⟩ u).1.1.val - 1) i j =
-      t.1 i * (u.1.1.val - 1) i j * (t.1 j : L)⁻¹ := conj_entry t.1 u.1.1
-  simp only [e]
-  refine and_congr (forall₃_congr fun i j _ => by simp) (forall₃_congr fun i j _ => ?_)
-  rw [map_mul, map_mul, map_inv₀, v_eq_exp (t.1 i).ne_zero, v_eq_exp (t.1 j).ne_zero, mul_right_comm,
-    ← WithZero.exp_neg, ← WithZero.exp_add, neg_zero, WithZero.exp_zero, neg_sub', sub_eq_add_neg]
-  exact mul_le_iff_le_one_right WithZero.exp_pos
 
 theorem exists_idealWeight {c : Fin n → Fin n → ℤ} :
     ∃ C : Fin n → Fin n → ℤ, IsWeight C ∧ IsIdealWeight c C ∧ IsIdealWeight (fun _ _ => 0) C := by

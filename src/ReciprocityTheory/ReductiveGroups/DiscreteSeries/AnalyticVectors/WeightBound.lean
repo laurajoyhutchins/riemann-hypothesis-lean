@@ -1,6 +1,64 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.LayerSpan
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.Numerics
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.KUnitB
+module
+
+public import Mathlib.Analysis.Normed.Lp.PiLp
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasValK
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.LayerSpan
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.KUnitB
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.IsKUnitaryOfIsInfUnitary
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,9 +74,6 @@ theorem sqrt_nsq_eq_norm' (x : Fin n → ℝ) :
     | (rw [EuclideanSpace.norm_eq]
        congr 1
        simp [nsq, dot, Real.norm_eq_abs, sq])
-    | (rw [EuclideanSpace.norm_eq]
-       congr 1
-       simp only [nsq, dot, PiLp.toLp_apply, Real.norm_eq_abs, sq_abs, sq])
 
 theorem nsq_nonneg' (x : Fin n → ℝ) : 0 ≤ nsq x := by
   unfold nsq dot
@@ -37,10 +92,9 @@ theorem exists_weight_bound (hU : IsInfUnitary ε E) (hVf : FiniteDimensional �
   haveI := hVf
   have hT : ∀ a, {r : ℝ | Module.End.HasEigenvalue ((E a a).restrict (hVK a a rfl)) (r : ℂ)}.Finite := by
     intro a
-    have hf : Set.Finite (Module.End.HasEigenvalue ((E a a).restrict (hVK a a rfl))) := by
+    have hf : {μ : ℂ | Module.End.HasEigenvalue ((E a a).restrict (hVK a a rfl)) μ}.Finite := by
       first
         | exact Module.End.finite_hasEigenvalue _
-        | exact (Module.End.finite_spectrum _).subset fun μ h => h.mem_spectrum
     exact hf.preimage Complex.ofReal_injective.injOn
   have hW := Set.Finite.pi hT
   obtain ⟨B, hB⟩ := (hW.image fun ν => √(nsq (ν + rhoC ε))).bddAbove
@@ -55,15 +109,12 @@ theorem exists_weight_bound (hU : IsInfUnitary ε E) (hVf : FiniteDimensional �
     first
       | exact Module.End.hasEigenvalue_of_hasEigenvector
           (Module.End.hasEigenvector_iff.2 ⟨Module.End.mem_eigenspace_iff.2 hx, hx0⟩)
-      | exact Module.End.hasEigenvalue_of_hasEigenvector ⟨Module.End.mem_eigenspace_iff.2 hx, hx0⟩
   exact (hB ⟨ν, hmem, rfl⟩).trans (le_max_left _ _)
 
 theorem sqrt_nsq_add_le (x y : Fin n → ℝ) : √(nsq (x + y)) ≤ √(nsq x) + √(nsq y) := by
   rw [sqrt_nsq_eq_norm', sqrt_nsq_eq_norm', sqrt_nsq_eq_norm']
   first
     | (rw [WithLp.toLp_add]; exact norm_add_le _ _)
-    | (have h := norm_add_le (WithLp.toLp 2 x : EuclideanSpace ℝ (Fin n)) (WithLp.toLp 2 y)
-       rwa [← WithLp.toLp_add] at h)
 
 theorem sqrt_nsq_sum_le {ι : Type*} (s : Finset ι) (f : ι → Fin n → ℝ) :
     √(nsq (∑ i ∈ s, f i)) ≤ ∑ i ∈ s, √(nsq (f i)) := by
@@ -171,8 +222,6 @@ theorem exists_re_inner_casimirK_layer_le (hE : IsGlRep E) (hU : IsInfUnitary ε
     rw [← Real.sq_sqrt h0]
     first
       | exact pow_le_pow_left₀ (Real.sqrt_nonneg _) h 2
-      | exact pow_le_pow_left (Real.sqrt_nonneg _) h 2
-      | gcongr
   linarith
 
 end Unitary

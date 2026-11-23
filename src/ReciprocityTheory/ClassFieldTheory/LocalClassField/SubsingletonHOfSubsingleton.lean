@@ -1,7 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.HomFInjective
-import ReciprocityTheory.GroupCohomology.ResNormalHolds
-import ReciprocityTheory.GroupCohomology.Shapiro
+module
+
+public import Mathlib.GroupTheory.PGroup
+public import ReciprocityTheory.GroupCohomology.ContinuousContractNth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.IndexNormal
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.HomFInjective
+public import ReciprocityTheory.GroupCohomology.Shapiro
+public import Mathlib.GroupTheory.Sylow
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.Deg2
 
@@ -42,8 +89,6 @@ theorem exists_normal_index {H : Type*} [Group H] [Finite H] [Nontrivial H] (l :
     exact Nat.eq_of_mul_eq_mul_left (pow_pos hl.1.pos j) this
   refine ⟨K, Subgroup.normal_of_index_eq_minFac_card ?_, hidx⟩
   rw [hidx, hk, Nat.Prime.pow_minFac hl.1 (Nat.succ_ne_zero j)]
-
-def tau (R : Type u) [CommRing R] (n : ℕ) : R := 1 + ∑ j : Fin (n + 1), (-1 : R) ^ ((j : ℕ) + 1)
 
 end
 

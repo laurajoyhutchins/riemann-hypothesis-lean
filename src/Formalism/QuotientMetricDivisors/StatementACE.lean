@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.Statement
+module
+
+public import Formalism.QuotientMetricDivisors.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -17,28 +59,6 @@ def StepA : Prop :=
     (∀ F : Fin n → K, P F = ζ * B (ι.mulVec (π.mulVec F))) →
     (∀ F ∈ M, P F = 0 ∨ σ ≤ vw w (P F)) →
     ∀ x ∈ Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat ι (matLat π M)), B x = 0 ∨ σ ≤ vw w (B x)
-
-def StepC : Prop :=
-  ∀ (Φ Cs Q E : Type) [NormedAddCommGroup Φ] [InnerProductSpace ℂ Φ]
-    [NormedAddCommGroup Cs] [InnerProductSpace ℂ Cs]
-    [NormedAddCommGroup Q] [InnerProductSpace ℂ Q] [FiniteDimensional ℂ Q]
-    [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-    (ι : Q →ₗ[ℂ] E), Function.Surjective ι →
-    ∀ (Ix : Type) [Fintype Ix] (Qp : Ix → Submodule ℂ Q), (⨆ p, Qp p) = ⊤ →
-    ∀ (s : Ix → ℝ) (smin : ℝ), 0 < smin → (∀ p, smin ≤ s p) →
-    (∀ p, ∀ x ∈ Qp p, ∀ y : Q, ⟪ι x, ι y⟫_ℂ = (s p : ℂ) * ⟪x, y⟫_ℂ) →
-    ∀ (col : Φ → Cs) (k : ℝ), (∀ φ, ‖col φ‖ ≤ k * ‖φ‖) →
-    ∀ (P : Cs → Q → ℂ) (p : ℝ), (∀ c F, ‖P c F‖ ≤ p * ‖c‖ * ‖F‖) →
-    ∀ B : Φ → E → ℂ, (∀ φ F, B φ (ι F) = P (col φ) F) →
-      0 ≤ k → 0 ≤ p → ∀ φ e, ‖B φ e‖ ≤ p * k / Real.sqrt smin * ‖φ‖ * ‖e‖
-
-def StepCMean : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (nB p k s : InfinitePlace K → ℝ),
-    (∀ v, 0 < nB v) → (∀ v, 0 < p v) → (∀ v, 0 < k v) → (∀ v, 0 < s v) →
-    (∀ v, nB v ≤ p v * k v / Real.sqrt (s v)) →
-      (1 / (Fintype.card (InfinitePlace K) : ℝ)) * ∑ v, Real.log (nB v ^ 2) ≤
-        (1 / (Fintype.card (InfinitePlace K) : ℝ)) * ∑ v, (Real.log (p v ^ 2) + Real.log (k v ^ 2)) -
-          (1 / (Fintype.card (InfinitePlace K) : ℝ)) * ∑ v, Real.log (s v)
 
 def BoundsSum : Prop :=
   ∀ (Pl J : Type) [Fintype J] (S : Finset Pl) (D : ℕ), 0 < D →

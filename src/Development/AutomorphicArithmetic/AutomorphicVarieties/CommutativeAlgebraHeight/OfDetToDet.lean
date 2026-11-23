@@ -1,5 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.UnopSMul
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.UnopSMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,9 +110,8 @@ def ofRep {ι : Type} [Fintype ι] [DecidableEq ι] (h : Fintype.card ι = n) (r
   nat S T _ _ _ _ φ x := by
     have : repS r T (Algebra.TensorProduct.map φ (AlgHom.id A E) x) = φ.toRingHom.mapMatrix (repS r S x) := by
       induction x with
-      | zero => simp
       | tmul s y => ext a b; simp [repS_tmul]
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
     exact (congrArg Matrix.det this).trans (RingHom.map_det φ.toRingHom _).symm
   homog S _ _ s x := by
     show (repS r S (s • x)).det = s ^ n * (repS r S x).det
@@ -94,13 +142,11 @@ def baseChange (B : Type) [CommRing B] [Algebra A B] : Det n B (B ⊗[A] E) wher
     have : cancel A E B T (Algebra.TensorProduct.map φ (AlgHom.id B _) x) =
         Algebra.TensorProduct.map (φ.restrictScalars A) (AlgHom.id A E) (cancel A E B S x) := by
       induction x with
-      | zero => simp
       | tmul s y =>
         induction y with
-        | zero => simp
         | tmul b z => simp [cancel_tmul]
-        | add a b ha hb => simp only [tmul_add, map_add, ha, hb]
-      | add a b ha hb => simp only [map_add, ha, hb]
+        | add a b ha hb => simp only [tmul_add, map_add (f := _), ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
     exact (congrArg (D.D T) this).trans (D.nat S T (φ.restrictScalars A) _)
   homog S _ _ s x := by
     letI : Algebra A S := ((algebraMap B S).comp (algebraMap A B)).toAlgebra
@@ -126,8 +172,7 @@ def op : Det n A Eᵐᵒᵖ where
     have : unopS A E T (Algebra.TensorProduct.map φ (AlgHom.id A _) x) =
         Algebra.TensorProduct.map φ (AlgHom.id A E) (unopS A E S x) := by
       induction x with
-      | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | tmul s a => simp [unopS]
     exact (congrArg (D.D T) this).trans (D.nat S T φ _)
   homog S _ _ s x := (congrArg (D.D S) (map_smul (unopS A E S) s x)).trans (D.homog S s _)
@@ -161,17 +206,16 @@ theorem ofT_tmul (s : S) (x : MonoidAlgebra A G) :
 theorem ofT_toT (x : MonoidAlgebra S G) : ofT A G S (toT A G S x) = x := by
   induction x using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | single g s => simp [toT_single, ofT_tmul]
 
 theorem toT_ofT (x : S ⊗[A] MonoidAlgebra A G) : toT A G S (ofT A G S x) = x := by
   induction x with
-  | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul s y =>
     induction y using MonoidAlgebra.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [tmul_add, map_add, ha, hb]
+    | add a b ha hb => simp only [tmul_add, map_add (f := _), ha, hb]
     | single g a =>
       rw [ofT_tmul, map_smul, MonoidAlgebra.mapRingHom_single, toT_single, smul_tmul', smul_eq_mul, mul_comm,
         ← Algebra.smul_def, smul_tmul, MonoidAlgebra.smul_single, smul_eq_mul, mul_one]
@@ -188,8 +232,7 @@ def toDet (D : GDet n A G) : Det n A (MonoidAlgebra A G) where
     have h1 : ofT A G T (Algebra.TensorProduct.map ψ (AlgHom.id A _) x) =
         MonoidAlgebra.mapRingHom G (ψ : S →+* T) (ofT A G S x) := by
       induction x with
-      | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | tmul s y => ext g; simp [ofT_tmul]
     exact (congrArg (D.D T) h1).trans (D.nat S T ψ _)
   homog S _ _ s x := (congrArg (D.D S) (map_smul (ofT A G S) s x)).trans (D.homog S s _)
@@ -201,7 +244,7 @@ def ofDet (D : Det n A (MonoidAlgebra A G)) : GDet n A G where
         Algebra.TensorProduct.map ψ (AlgHom.id A _) (toT A G S x) := by
       induction x using MonoidAlgebra.induction_linear with
       | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | single g s => rw [MonoidAlgebra.mapRingHom_single, toT_single, toT_single]; rfl
     exact (congrArg (D.D T) this).trans (D.nat S T ψ _)
   homog S _ _ s x := (congrArg (D.D S) (map_smul (toT A G S) s x)).trans (D.homog S s _)

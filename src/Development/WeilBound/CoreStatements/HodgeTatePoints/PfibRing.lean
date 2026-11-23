@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealEqBotOfFlatQuotientOfMapMaximalIdeal
+module
+
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.FlatOfIsFiniteOfFlatGeometricFibres
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealEqBotOfFlatQuotientOfMapMaximalIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open TensorProduct LinearMap IsLocalRing
 
@@ -11,52 +60,7 @@ theorem lTensor_map_injective {R A M : Type*} [CommRing R] [CommRing A] [Algebra
     [AddCommGroup M] [Module R M] [Module A M] [IsScalarTower R A M] [Module.Flat R M]
     (p : Ideal R) :
     Function.Injective ((p.map (algebraMap R A)).subtype.lTensor M) := by
-  let I := p.map (algebraMap R A)
-  let c : p →ₗ[R] I :=
-    { toFun := fun r => ⟨algebraMap R A r, Ideal.mem_map_of_mem _ r.2⟩
-      map_add' := fun r s => Subtype.ext (by simp)
-      map_smul' := fun r s => Subtype.ext (by simp [Algebra.smul_def]) }
-  let φ : M ⊗[R] p →ₗ[R] M ⊗[A] I :=
-    TensorProduct.mapOfCompatibleSMul A R R M I ∘ₗ c.lTensor M
-  have hφ : ∀ m r, φ (m ⊗ₜ r) = m ⊗ₜ[A] c r := fun _ _ => rfl
-  have hsurj : ∀ x, x ∈ LinearMap.range φ := by
-    intro x
-    induction x with
-    | zero => exact zero_mem _
-    | add a b ha hb => exact add_mem ha hb
-    | tmul m i =>
-      obtain ⟨i, hi⟩ := i
-      induction hi using Submodule.span_induction generalizing m with
-      | mem x hx =>
-        obtain ⟨r, hr, rfl⟩ := hx
-        exact ⟨m ⊗ₜ ⟨r, hr⟩, rfl⟩
-      | zero =>
-        change m ⊗ₜ[A] (0 : I) ∈ _
-        rw [tmul_zero]
-        exact zero_mem _
-      | add x y hx hy ihx ihy =>
-        change m ⊗ₜ[A] ((⟨x, hx⟩ : I) + ⟨y, hy⟩) ∈ _
-        rw [tmul_add]
-        exact add_mem (ihx m) (ihy m)
-      | smul a x hx ih =>
-        change m ⊗ₜ[A] (a • (⟨x, hx⟩ : I)) ∈ _
-        rw [← smul_tmul]
-        exact ih _
-  have hcomp : ∀ y, TensorProduct.rid A M (I.subtype.lTensor M (φ y)) =
-      TensorProduct.rid R M (p.subtype.lTensor M y) := by
-    intro y
-    induction y with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
-    | tmul m r => simp [hφ, c]
-  rw [injective_iff_map_eq_zero]
-  intro x hx
-  obtain ⟨y, rfl⟩ := hsurj x
-  have h0 := hcomp y
-  rw [hx, map_zero, eq_comm, map_eq_zero_iff _ (TensorProduct.rid R M).injective,
-    map_eq_zero_iff _ (Module.Flat.lTensor_preserves_injective_linearMap p.subtype
-      p.injective_subtype)] at h0
-  rw [h0, map_zero]
+  apply GlobalTheory.FiniteFibreFlat.lTensor_map_injective <;> assumption
 
 section Devissage
 
@@ -71,13 +75,13 @@ theorem exists_of_lTensor_eq {F G N : Type} [AddCommGroup F] [Module A F] [AddCo
       (snd A F G ∘ₗ (ker (f.coprod g)).subtype).lTensor M z = y := by
   have hex := lTensor_exact M (f.coprod g).exact_subtype_ker_map hs
   have h0 : (f.coprod g).lTensor M ((inl A F G).lTensor M x + (inr A F G).lTensor M y) = 0 := by
-    rw [map_add, ← lTensor_comp_apply, ← lTensor_comp_apply, coprod_inl, coprod_inr, h]
+    rw [map_add (f := _), ← lTensor_comp_apply, ← lTensor_comp_apply, coprod_inl, coprod_inr, h]
   obtain ⟨z, hz⟩ := (hex _).mp h0
   refine ⟨z, ?_, ?_⟩
-  · rw [lTensor_comp_apply, hz, map_add, ← lTensor_comp_apply, ← lTensor_comp_apply,
+  · rw [lTensor_comp_apply, hz, map_add (f := _), ← lTensor_comp_apply, ← lTensor_comp_apply,
       fst_comp_inl, fst_comp_inr]
     simp
-  · rw [lTensor_comp_apply, hz, map_add, ← lTensor_comp_apply, ← lTensor_comp_apply,
+  · rw [lTensor_comp_apply, hz, map_add (f := _), ← lTensor_comp_apply, ← lTensor_comp_apply,
       snd_comp_inl, snd_comp_inr]
     simp
 
@@ -85,7 +89,7 @@ theorem lTensor_injective_of_le_range {I : Ideal A} (hrel : RelationsLift I M)
     (hI : Function.Injective (I.subtype.lTensor M)) {F : Type} [AddCommGroup F] [Module A F]
     (f : F →ₗ[A] A) (hf : Function.Injective f) (hle : I ≤ range f) :
     Function.Injective (f.lTensor M) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨y, rfl⟩ := hrel F f x (by rw [hx]; simp)
   let e₀ : Submodule.comap f I →ₗ[A] I := f.restrict fun _ h => h
@@ -119,7 +123,7 @@ theorem lTensor_injective_of_pow_le [IsNoetherianRing A] {I : Ideal A} (hrel : R
       obtain ⟨j, hj, c, hc, rfl⟩ := Submodule.mem_sup.mp hb
       obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hc
       exact ⟨(⟨j, hj⟩, c), rfl⟩
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have hfx : f.lTensor M x = 0 := by
       apply h'
@@ -129,7 +133,7 @@ theorem lTensor_injective_of_pow_le [IsNoetherianRing A] {I : Ideal A} (hrel : R
     have hinj : Function.Injective
         ((snd A J A ∘ₗ (ker (f.coprod g)).subtype).lTensor M) := by
       refine lTensor_injective_of_le_range hrel hI _ ?_ fun i hi => ?_
-      · rw [injective_iff_map_eq_zero]
+      · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
         rintro ⟨⟨j, c⟩, hjc⟩ hc
         have hc' : c = 0 := hc
         subst hc'
@@ -182,7 +186,7 @@ theorem relationsLift_of_injective {J : Ideal A}
     exact ⟨(a, ⟨c, hc⟩), rfl⟩
   have h0 : f'.lTensor M x + g.lTensor M (-y) = 0 := by
     apply h J' le_sup_right
-    rw [map_add, ← lTensor_comp_apply, ← lTensor_comp_apply, map_zero, map_neg]
+    rw [map_add (f := _), ← lTensor_comp_apply, ← lTensor_comp_apply, map_zero, map_neg]
     change f.lTensor M x + -(J.subtype.lTensor M y) = 0
     rw [hy', add_neg_cancel]
   obtain ⟨z, hz, -⟩ := exists_of_lTensor_eq f' g hs x (-y) h0

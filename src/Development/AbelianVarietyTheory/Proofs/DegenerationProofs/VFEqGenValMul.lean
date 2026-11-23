@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsNumOf
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ConstOfNormPeriodic
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ConstOfNormPeriodic
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsNumOf
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj BigOperators
@@ -68,7 +109,14 @@ theorem exists_cube_down {S S' : Scheme.{0}} {G : Over S} [GrpObj G] [IsCommMonO
   rw [q, map_one] at e
   have p := prod_cub (1 : G2 G' ⟶ G') (x2 G' 0) (x2 G' 1) (fun q => gw w q y (J (q ≫ F)) (J' q))
   rw [_root_.one_mul, _root_.one_mul] at p
-  have e' := ((isCub_cubV c (T := Over.mk ((G2 G').hom ≫ f)) hJ).face _ _).symm.trans (e.trans (congrArg (· * _) p))
+  have face : val c.t (lift (1 : Over.mk ((G2 G').hom ≫ f) ⟶ G)
+      (lift (pushHom gp _ (x2 G' 0)) (pushHom gp _ (x2 G' 1)))).left y J = 1 := by
+    have h := val_corr hJ (c.face 0) (lift (pushHom gp _ (x2 G' 0)) (pushHom gp _ (x2 G' 1))).left
+    rw [val_one] at h
+    refine Eq.trans ?_ h
+    refine Eq.trans ?_ (val_cub c (lift (pushHom gp _ (x2 G' 0)) (pushHom gp _ (x2 G' 1))) hJ (pzero G _) (x2 G 0) (x2 G 1)).symm
+    congr 1 <;> simp [x2, pzero, Hom.one_def]
+  have e' := face.symm.trans (e.trans (congrArg (· * _) p))
   refine (val_pull hJ' _ _ _).trans (Eq.trans ?_ (val_one _).symm)
   rw [Category.id_comp]
   apply Additive.ofMul.injective

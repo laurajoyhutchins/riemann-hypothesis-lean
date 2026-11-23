@@ -1,4 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.StepForm
+module
+
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.SmoothColumnLifts.FinSumFinEquivSymmEq
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.StepForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,34 +56,16 @@ namespace PositivityTheory.RgUd.Form.Asm
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem blkAt_apply (n N : ℕ) (h : n ≤ N) (g : GL (Fin n) k) (i j : Fin N) :
     (blkAt k n N h g).val i j =
       if hi : (i : ℕ) < n then (if hj : (j : ℕ) < n then g.val ⟨i, hi⟩ ⟨j, hj⟩ else 0)
       else if i = j then 1 else 0 := by
-  have key : ∀ x : Fin N, (finSumFinEquiv.symm (Fin.cast (Nat.add_sub_cancel' h).symm x) : Fin n ⊕ Fin (N - n)) =
-      if hx : (x : ℕ) < n then Sum.inl ⟨x, hx⟩ else Sum.inr ⟨x - n, by omega⟩ := by
-    intro x
-    split_ifs with hx
-    · have : Fin.cast (Nat.add_sub_cancel' h).symm x = Fin.castAdd (N - n) ⟨x, hx⟩ := Fin.ext rfl
-      rw [this, finSumFinEquiv_symm_apply_castAdd]
-    · have : Fin.cast (Nat.add_sub_cancel' h).symm x = Fin.natAdd n ⟨x - n, by omega⟩ := Fin.ext (by simp; omega)
-      rw [this, finSumFinEquiv_symm_apply_natAdd]
-  simp only [blkAt, glCongr, blkGL, MonoidHom.coe_comp, Function.comp_apply, Units.coe_map]
-  simp [blkHom, reindex_apply]
-  rw [key i, key j]
-  by_cases hi : (i : ℕ) < n
-  · by_cases hj : (j : ℕ) < n <;> simp [hi, hj]
-  · by_cases hj : (j : ℕ) < n
-    · have : i ≠ j := fun e => hi (e ▸ hj)
-      simp [hi, hj, this]
-    · have e : ((⟨i - n, by omega⟩ : Fin (N - n)) = ⟨j - n, by omega⟩) ↔ i = j := by
-        rw [Fin.ext_iff, Fin.ext_iff]; simp only; omega
-      simp only [hi, hj, dite_false, fromBlocks_apply₂₂, one_apply, e]
+  apply PositivityTheory.RgUd.Form.U.Lift2.TrM.blkAt_val <;> assumption
+
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
-
 theorem scalAt_eq (m N : ℕ) (h : m ≤ N) (z : kˣ) : scalAt k m N h z = aDiag k N m z := by
   ext i j
   rw [scalAt, blkAt_apply]
@@ -56,8 +86,8 @@ theorem scalAt_eq (m N : ℕ) (h : m ≤ N) (z : kˣ) : scalAt k m N h z = aDiag
       · subst e; simp [hi]
       · simp [hi, e]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem blkAt_comm_aDiag (n m N : ℕ) (hn : n ≤ m) (h : n ≤ N) (g : GL (Fin n) k) (z : kˣ) :
     blkAt k n N h g * aDiag k N m z = aDiag k N m z * blkAt k n N h g := by
   ext i j
@@ -72,8 +102,8 @@ theorem blkAt_comm_aDiag (n m N : ℕ) (hn : n ≤ m) (h : n ≤ N) (g : GL (Fin
     · subst e; simp [hi, mul_comm]
     · simp [hi, e]
 
-omit [ValuativeRel k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [IsNonarchimedeanLocalField k] in
 theorem continuous_blkAt [IsTopologicalRing k] (n N : ℕ) (h : n ≤ N) : Continuous (blkAt k n N h) := by
   have h1 : Continuous (blkGL k n (N - n)) := by
     refine Continuous.units_map _ ?_
@@ -112,23 +142,23 @@ theorem twKer_eq_bot {G V : Type} [Group G] [AddCommGroup V] [Module ℂ V] (ρ 
   subst this
   simp
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem colFix_apply {N n : ℕ} {g : GL (Fin N) k} (hg : g ∈ colFix k N n) (r c : Fin N) (hc : (c : ℕ) < n) :
     g.val r c = (1 : Matrix (Fin N) (Fin N) k) r c := by
   have := congrFun (hg c hc) r
   rw [mulVec_single_one] at this
   simp only [col_apply, Pi.single_apply] at this
-  rw [one_apply, this]
+  rw [Matrix.one_apply, this]
+
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
-
 theorem derUnip_eq_one {N n : ℕ} (h : N ≤ n) (u : derUnip k N n) : (u : GL (Fin N) k) = 1 := by
   ext r c
   exact colFix_apply (u.2.2) r c (by omega)
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem unipB_le_derUnip_one (N : ℕ) : unipB k (Fin N) ≤ derUnip k N 1 := by
   intro g hg
   refine ⟨hg, fun c hc => ?_⟩
@@ -142,8 +172,8 @@ theorem unipB_le_derUnip_one (N : ℕ) : unipB k (Fin N) ≤ derUnip k N 1 := by
   · rw [if_neg e]
     exact h1 r c (Fin.lt_def.2 (by have := Fin.val_ne_of_ne e; omega))
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem lvlChar_eq (ψ : AddChar k Circle) (N n : ℕ) (u : derUnip k N n) :
     lvlChar k ψ N n u = whitChar ψ N (Subgroup.inclusion (derUnip_le_unipB k N n) u) := by
   simp only [lvlChar, whitCharFrom, whitChar, MonoidHom.comp_apply, MonoidHom.coe_mk, OneHom.coe_mk]
@@ -157,15 +187,15 @@ theorem lvlChar_eq (ψ : AddChar k Circle) (N n : ℕ) (u : derUnip k N n) :
     rw [colFix_apply u.2.2 p.1 p.2 (by omega), one_apply_ne]
     intro e; rw [e] at hp; omega
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem twKer_lvl_le {N : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (GL (Fin N) k) V)
     (ψ : AddChar k Circle) (n : ℕ) :
     twKer π (derUnip k N n) (lvlChar k ψ N n) ≤ twKer π (unipB k (Fin N)) (whitChar ψ N) :=
   twKer_mono π (derUnip_le_unipB k N n) _ _ (lvlChar_eq ψ N n)
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem twKer_whit_le {N : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (GL (Fin N) k) V)
     (ψ : AddChar k Circle) :
     twKer π (unipB k (Fin N)) (whitChar ψ N) ≤ twKer π (derUnip k N 1) (lvlChar k ψ N 1) := by
@@ -275,8 +305,8 @@ theorem lvl_all (hS : StepForm k) (hsm : IsSmooth π) (B : V →ₗ[ℂ] V →�
 
 end Desc
 
-variable (k) in
 
+variable (k) in
 theorem asmForm : AsmForm k := by
   intro hS ψ hψc hψ1 N V _ _ π hsm hU
   obtain ⟨B, hh, hp, hi⟩ := hU

@@ -1,15 +1,54 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.JetGauges.ThetaSpanAdjoint
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.BetaExistsOfNeOne
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.TotalDegreeLeOfRowDeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
 import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IntMIffInt
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
-import Development.AbelianVarietyTheory.BlockTheory.JetGauges.ThetaSpanAdjoint
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaChangeOfRepRootOfUnityOfChartIndependenceStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PushforwardPreservesHarmonicPolynomialsAndLattic
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ShortThetaValueExistsUniqueNaturalOfLaws
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.BetaExistsOfNeOne
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUnitaryCongruentLattice
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.TotalDegreeLeOfRowDeg
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
+import Formalism.LocalToGlobal.ProjectiveLattices.JFDFree
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor hiding Level
@@ -75,7 +114,7 @@ theorem fixesDatum_of_congAt (c : Coeff l) {n b : ℕ} (hb : l.M ∣ b) {g : Mat
     have h1 := hu i j
     have h2 := hG i j
     simp only [RingOfIntegers.coe_eq_algebraMap] at h1 h2
-    simp only [map_mul, map_add, map_natCast, h2, apply_ite (algebraMap (𝓞 E) E), map_zero]
+    simp only [map_mul, map_add (f := _), map_natCast, h2, apply_ite (algebraMap (𝓞 E) E), map_zero]
     push_cast at h1
     split_ifs at h1 ⊢ <;> linear_combination (k : E) * h1
   have key : ((t : 𝓞 E) * k) • (q' i - q i) = 0 := by
@@ -116,10 +155,11 @@ theorem map_pushLet (g : Matrix (Fin n) (Fin n) E) (P : MvPolynomial (LtN Dw n) 
   generalize (d.eF : c.F →+* d.c₂.F) = f at he ⊢
   induction P using MvPolynomial.induction_on with
   | C a => simp [pushLet]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, hp, MvPolynomial.map_X]
     congr 1
+
     simp only [pushLet, MvPolynomial.aeval_X, letB, map_sum, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, he]
 
 end Cover

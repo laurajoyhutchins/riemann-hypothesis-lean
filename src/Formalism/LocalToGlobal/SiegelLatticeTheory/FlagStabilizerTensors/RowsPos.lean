@@ -1,7 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KloostermanDiagonalOfType
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DiagCLC
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PairsDegCutCOfSteps
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DimFormC
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.GrowthOfBasic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGramLocPfB
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TypedLoc
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.FullExistsTiedHolds
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.CovolumeSpans
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DiagCLC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ExpQuarterMulExpQuarterLeTwo
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.IsIdentityOfEqualFlags
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KloostermanCosetSumLe
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KloostermanDiagonalOfConditions
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.KloostermanTermANonneg
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.MainEqCut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.MainEqHolds
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RelevantSetZeroGNotIdentity
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UnitaryDimensionFormula
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,39 +106,6 @@ def DiagLP : Prop :=
       ConcTie X Y → (Y.tO u u).AbsConv → large₂.CGam = CG →
       (Y.tO u u).RowBig (epsL D) (ddC X Y u u) → (Y.tO u u).RowNotScalar (epsL D) (ddC X Y u u) →
       Formalism.L2.SG.RowsOther.DiagRow (Y.tO u u) (oneC X Y u) (D.mem u).A.GamP (ddC X Y u u)
-
-theorem typeBound_of_uniformTypeBound (h : TypeC) : TypeP := by
-  intro Cg cb Cw cT CT C0 _ _
-  obtain ⟨CH, Ch, Cp, h1, h2, h3, h4⟩ := h Cg cb Cw cT CT C0
-  refine ⟨CH, Ch, Cp, h1, h2, h3, fun Cs hCs => ?_⟩
-  obtain ⟨C₀, h5⟩ := h4 Cs hCs
-  refine ⟨C₀, fun C hC => ?_⟩
-  obtain ⟨C'₀, Cl₀, h6⟩ := h5 C hC
-  exact ⟨C'₀, Cl₀, fun C' Cl hC' hCl D large₂ X Y u _ hK hT => h6 C' Cl hC' hCl D large₂ X Y u hK hT⟩
-
-theorem diagonalBound_pos_of_diagonalBound (h : KppDiagC) : KppDiagP := by
-  intro Cg cb Cw cT CT C0 _ _
-  obtain ⟨C'₀, Cl₀, h1⟩ := h Cg cb Cw cT CT C0
-  exact ⟨C'₀, Cl₀, fun C' Cl hC' hCl D large₂ X Y u _ hK hT hA => h1 C' Cl hC' hCl D large₂ X Y u hK hT hA⟩
-
-theorem rowNGP_of (h : RowNGC) : RowNGP := by
-  intro Cg cb Cw cT CT C0 _ _
-  obtain ⟨C4, hC4, C'₀, Cl₀, h1⟩ := h Cg cb Cw cT CT C0
-  exact ⟨C4, hC4, C'₀, Cl₀, fun C' Cl hC' hCl D large₂ X Y u u' _ hH hS hT hA =>
-    h1 C' Cl hC' hCl D large₂ X Y u u' hH hS hT hA⟩
-
-theorem rowMainEqP_of (h : RowMainEqC) : RowMainEqP := by
-  intro Cg cb Cw cT CT C0 A _ _
-  obtain ⟨CB, hCB, C'₀, Cl₀, h1⟩ := h Cg cb Cw cT CT C0 A
-  exact ⟨CB, hCB, C'₀, Cl₀, fun C' Cl hC' hCl D large₂ X Y u _ hH hT hA => h1 C' Cl hC' hCl D large₂ X Y u hH hT hA⟩
-
-theorem diagLP_of (h : DiagCL) : DiagLP := by
-  intro Cg cb Cw cT CT C0 A _ _
-  obtain ⟨CB, C4, h1, h2, h3⟩ := h Cg cb Cw cT CT C0 A
-  refine ⟨CB, C4, h1, h2, fun CG hCG => ?_⟩
-  obtain ⟨C'₀, Cl₀, h4⟩ := h3 CG hCG
-  exact ⟨C'₀, Cl₀, fun C' Cl hC' hCl D large₂ X Y u _ hH hP hT hA hG hB hN =>
-    h4 C' Cl hC' hCl D large₂ X Y u hH hP hT hA hG hB hN⟩
 
 section Asm
 

@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalEvSecondPointOfXZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalEvSecondPointOfXZero
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.EqCOfPderivZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -28,7 +77,7 @@ theorem formalFamilyConstantCoeffZero_zero_secondVar : CZ (![0, pt k (n := 1) d 
 
 theorem cc_jac (i b : Fin d) : constantCoeff (Jac G i b) = if i = b then 1 else 0 := by
   rw [Jac, cc_ev cz1, ← cc_ev formalFamilyConstantCoeffZero_zero_secondVar]
-  have h := congrArg (pderiv k ((0 : Fin 1), b)) (G.unit i)
+  have h := congrArg (pderiv (R := k) ((0 : Fin 1), b)) (G.unit i)
   rw [pderiv_ev formalFamilyConstantCoeffZero_zero_secondVar, Fintype.sum_prod_type, Fin.sum_univ_two] at h
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Pi.zero_apply, map_zero, mul_zero,
     Finset.sum_const_zero, zero_add, pderiv_pt] at h
@@ -110,14 +159,14 @@ theorem sw_y (h : PS k 1 d) :
   simp [pt_apply, ev_X czSw]
 
 theorem sw_dF (j b : Fin d) :
-    ev (n := 2) ![pt k d 1, pt k d 0] (pderiv k ((1 : Fin 2), b) (G.F j)) = pderiv k ((0 : Fin 2), b) (G.F j) := by
-  have h := congrArg (pderiv k ((0 : Fin 2), b)) (G.comm j)
+    ev (n := 2) ![pt k d 1, pt k d 0] (pderiv (R := k) ((1 : Fin 2), b) (G.F j)) = pderiv (R := k) ((0 : Fin 2), b) (G.F j) := by
+  have h := congrArg (pderiv (R := k) ((0 : Fin 2), b)) (G.comm j)
   rw [pderiv_ev czSw, Fintype.sum_prod_type, Fin.sum_univ_two] at h
   simp [pderiv_pt] at h
   exact h
 
 theorem om_P (i a : Fin d) :
-    ∑ j, ev (n := 2) ![G.F] (Om G i j) * pderiv k ((0 : Fin 2), a) (G.F j) = ev (n := 2) ![pt k d 0] (Om G i a) := by
+    ∑ j, ev (n := 2) ![G.F] (Om G i j) * pderiv (R := k) ((0 : Fin 2), a) (G.F j) = ev (n := 2) ![pt k d 0] (Om G i a) := by
   have h := congrArg (ev (n := 2) ![pt k d 1, pt k d 0]) (om_Q G i a)
   rw [ev_sum czSw, sw_y] at h
   rw [← h]
@@ -125,7 +174,7 @@ theorem om_P (i a : Fin d) :
   rw [ev_mul czSw, sw_F, Ar, sw_dF]
 
 theorem d_evF (h : PS k 1 d) (v : Fin 2 × Fin d) :
-    pderiv k v (ev (n := 2) ![G.F] h) = ∑ c, ev (n := 2) ![G.F] (pderiv k ((0 : Fin 1), c) h) * pderiv k v (G.F c) := by
+    pderiv (R := k) v (ev (n := 2) ![G.F] h) = ∑ c, ev (n := 2) ![G.F] (pderiv (R := k) ((0 : Fin 1), c) h) * pderiv (R := k) v (G.F c) := by
   rw [pderiv_ev (czFF G), Fintype.sum_prod_type, Fin.sum_univ_one]
   rfl
 
@@ -138,27 +187,28 @@ theorem ez_F (h : PS k 1 d) : ev (n := 1) ![pt k d 0, 0] (ev (n := 2) ![G.F] h) 
   exact formalGroupLaw_ev_x_zero G c
 
 theorem ez_dx (j a : Fin d) :
-    ev (n := 1) ![pt k d 0, 0] (pderiv k ((0 : Fin 2), a) (G.F j)) = if j = a then 1 else 0 := by
-  have h := congrArg (pderiv k ((0 : Fin 1), a)) (formalGroupLaw_ev_x_zero G j)
+    ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((0 : Fin 2), a) (G.F j)) = if j = a then 1 else 0 := by
+  have h := congrArg (pderiv (R := k) ((0 : Fin 1), a)) (formalGroupLaw_ev_x_zero G j)
   rw [pderiv_ev cz1, Fintype.sum_prod_type, Fin.sum_univ_two] at h
   simp [pderiv_pt] at h
   rw [h, pderiv_X]
   simp [Pi.single_apply]
 
-theorem ez_dy (c b : Fin d) : ev (n := 1) ![pt k d 0, 0] (pderiv k ((1 : Fin 2), b) (G.F c)) = Jac G c b := rfl
+theorem ez_dy (c b : Fin d) : ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((1 : Fin 2), b) (G.F c)) = Jac G c b := rfl
 
 theorem om_key (i a b : Fin d) :
-    ∑ j, Jac G j b * pderiv k ((0 : Fin 1), a) (Om G i j) = ∑ c, pderiv k ((0 : Fin 1), c) (Om G i a) * Jac G c b := by
-  have hQ := congrArg (fun g => ev (n := 1) ![pt k d 0, 0] (pderiv k ((0 : Fin 2), a) g)) (om_Q G i b)
-  have hP := congrArg (fun g => ev (n := 1) ![pt k d 0, 0] (pderiv k ((1 : Fin 2), b) g)) (om_P G i a)
+    ∑ j, Jac G j b * pderiv (R := k) ((0 : Fin 1), a) (Om G i j) = ∑ c, pderiv (R := k) ((0 : Fin 1), c) (Om G i a) * Jac G c b := by
+  have hQ := congrArg (fun g => ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((0 : Fin 2), a) g)) (om_Q G i b)
+  have hP := congrArg (fun g => ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((1 : Fin 2), b) g)) (om_P G i a)
   beta_reduce at hQ hP
   rw [pderiv_ev_zero czY _ _ (fun j l => by fin_cases j; simp [pderiv_pt]), ev_zero' cz1] at hQ
   rw [pderiv_ev_zero czX _ _ (fun j l => by fin_cases j; simp [pderiv_pt]), ev_zero' cz1] at hP
+
   simp only [map_sum, Derivation.leibniz, smul_eq_mul, d_evF, ev_sum cz1, ev_add cz1, ev_mul cz1, ez_F, ez_dx,
-    ez_dy, Ar, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true] at hQ hP
+  ez_dy, Ar, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true] at hQ hP
   rw [Finset.sum_add_distrib] at hQ hP
-  have hR : ∑ j, Om G i j * ev (n := 1) ![pt k d 0, 0] (pderiv k ((0 : Fin 2), a) (pderiv k ((1 : Fin 2), b) (G.F j))) =
-      ∑ j, Om G i j * ev (n := 1) ![pt k d 0, 0] (pderiv k ((1 : Fin 2), b) (pderiv k ((0 : Fin 2), a) (G.F j))) := by
+  have hR : ∑ j, Om G i j * ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((0 : Fin 2), a) (pderiv (R := k) ((1 : Fin 2), b) (G.F j))) =
+      ∑ j, Om G i j * ev (n := 1) ![pt k d 0, 0] (pderiv (R := k) ((1 : Fin 2), b) (pderiv (R := k) ((0 : Fin 2), a) (G.F j))) := by
     simp only [pderiv_comm ((0 : Fin 2), a) ((1 : Fin 2), b)]
   simp only [Finset.sum_ite_eq', Finset.mem_univ, if_true, ite_mul, one_mul, zero_mul] at hQ hP
   rw [hR] at hQ

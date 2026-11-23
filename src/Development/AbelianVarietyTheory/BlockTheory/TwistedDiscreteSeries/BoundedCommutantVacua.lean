@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.SqNormIntegralFundamentalDomainEqL2NormSq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCharFamIsVacVec
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MapFinNeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.SqNormIntegralFundamentalDomainEqL2NormSq
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,15 +61,7 @@ section Defs
 
 variable (ψ : AddChar (AF D.host.F) ℂ) (V W : HSp D) (μ : Measure (WO V W)) (𝓕 : Set (WO V W))
 
-structure IsBoundedCommutant (T : Module.End ℂ (WO V W → ℂ)) : Prop where
-  pres : ∀ f, IsThetaFunO ψ V W f → IsThetaFunO ψ V W (T f)
-  bdd : ∃ C : ℝ≥0, ∀ f, IsThetaFunO ψ V W f → l2O μ 𝓕 (T f) ≤ C * l2O μ 𝓕 f
-  comm : ∀ w f, IsThetaFunO ψ V W f → T (heisO ψ V W w f) = heisO ψ V W w (T f)
-
 variable {V W}
-
-def L2DenseIn (M : Submodule ℂ (WO V W → ℂ)) (P : (WO V W → ℂ) → Prop) : Prop :=
-  ∀ f, P f → ∀ ε : ℝ≥0∞, 0 < ε → ∃ g ∈ M, l2O μ 𝓕 (f - g) < ε
 
 variable (V W)
 
@@ -36,43 +69,11 @@ def IsVac (θ : InfFam D) (sV : D.what₂.Tau → Matrix (Fin V.rank) (Fin V.ran
     (sW : D.what₂.Tau → Matrix (Fin W.rank) (Fin W.rank) ℂ) (f : WO V W → ℂ) : Prop :=
   IsThetaFunO ψ V W f ∧ ∀ τ, IsFockVacAt (heisO ψ V W) θ τ (cplxO (sV τ) (sW τ)) f
 
-def finSpan (f : WO V W → ℂ) : Submodule ℂ (WO V W → ℂ) :=
-  Submodule.span ℂ {g | ∃ w : WO V W, w.map (infPart D) = 0 ∧ g = heisO ψ V W w f}
-
-def CommutantScalar : Prop :=
-  ∀ T : Module.End ℂ (WO V W → ℂ), IsBoundedCommutant ψ V W μ 𝓕 T →
-    ∃ c : ℂ, ∀ f, IsThetaFunO ψ V W f → T f = c • f
-
-def StableDense : Prop :=
-  ∀ M : Submodule ℂ (WO V W → ℂ), (∀ f ∈ M, IsThetaFunO ψ V W f) → M ≠ ⊥ →
-    (∀ w, ∀ f ∈ M, heisO ψ V W w f ∈ M) → L2DenseIn μ 𝓕 M (IsThetaFunO ψ V W)
-
-def VacuumDense : Prop :=
-  ∀ (θ : InfFam D), IsInfFam θ →
-    ∀ (sV : D.what₂.Tau → Matrix (Fin V.rank) (Fin V.rank) ℂ) (sW : D.what₂.Tau → Matrix (Fin W.rank) (Fin W.rank) ℂ),
-      (∀ τ, IsCartanInv (gramAt D V τ) (sV τ)) → (∀ τ, IsCartanInv (gramAt D W τ) (sW τ)) →
-      ∀ f, IsVac ψ V W θ sV sW f → f ≠ 0 → L2DenseIn μ 𝓕 (finSpan ψ V W f) (IsVac ψ V W θ sV sW)
-
-def VacuumDenseModel : Prop :=
-  ∀ (θ : InfFam D), IsInfFam θ → ∀ (S S' : D.what₂.Tau → SPar) (M : DSModel V S) (M' : DSModel W S') (f : WO V W → ℂ),
-    GlobalTheory.Chain.IsVacVec ψ θ M M' f → L2DenseIn μ 𝓕 (finSpan ψ V W f) (GlobalTheory.Chain.IsVacVec ψ θ M M')
-
 end Defs
-
-def HeisSchur (D : D7) : Prop :=
-  ∀ (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D ψ (-1) →
-    ∀ (V W : HSp D) (μ : Measure (WO V W)) (𝓕 : Set (WO V W)), μ.IsAddHaarMeasure →
-      IsAddFundamentalDomain (ratL W V) 𝓕 μ →
-      CommutantScalar ψ V W μ 𝓕 ∧ StableDense ψ V W μ 𝓕 ∧ VacuumDense ψ V W μ 𝓕
 
 section Basic₂
 
 variable {ψ : AddChar (AF D.host.F) ℂ} {V W : HSp D} {μ : Measure (WO V W)} {𝓕 : Set (WO V W)} {θ : InfFam D}
-
-theorem VacuumDense.model (h : VacuumDense ψ V W μ 𝓕) : VacuumDenseModel ψ V W μ 𝓕 :=
-  fun θ hθ _ _ M M' f hf g hg =>
-    h θ hθ (cart M) (cart M') (GlobalTheory.Chain.VacVec.cart_isCartanInv M) (GlobalTheory.Chain.VacVec.cart_isCartanInv M') f
-      ⟨hf.theta, hf.vac⟩ hf.ne g ⟨hg.theta, hg.vac⟩
 
 theorem exists_isVac_ne_zero (hψ : IsStdChar D ψ (-1)) (hθ : IsInfFam θ)
     {sV : D.what₂.Tau → Matrix (Fin V.rank) (Fin V.rank) ℂ} {sW : D.what₂.Tau → Matrix (Fin W.rank) (Fin W.rank) ℂ}

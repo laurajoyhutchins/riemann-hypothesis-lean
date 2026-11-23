@@ -1,6 +1,65 @@
-import Mathlib
+module
 
-open TensorProduct
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Smooth.IntegralClosure
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.RingTheory.LocalProperties.IntegrallyClosed
+
+@[expose] public section
+
+open TensorProduct AlgebraicGeometry
 
 universe u
 
@@ -16,7 +75,7 @@ theorem isDomain_and_isIntegrallyClosed_atPrime_of_isLocalization {B : Type*} [C
   have hq : (p.map (algebraMap B T)).IsPrime :=
     IsLocalization.isPrime_of_isPrime_disjoint M T p hp hM
   have hc : (p.map (algebraMap B T)).comap (algebraMap B T) = p :=
-    IsLocalization.comap_map_of_isPrime_disjoint M T hp hM
+    IsLocalization.under_map_of_isPrime_disjoint M T hp hM
   have h1 := IsLocalization.isLocalization_isLocalization_atPrime_isLocalization M
     (Localization.AtPrime (p.map (algebraMap B T))) (p.map (algebraMap B T))
   have h2 : IsLocalization p.primeCompl (Localization.AtPrime (p.map (algebraMap B T))) := by
@@ -107,11 +166,10 @@ theorem isIntegrallyClosedIn_tensor_of_smooth {A B L : Type*} [CommRing A] [Comm
     subst hy'
     clear hx hy
     induction y with
-    | zero => exact ⟨0, by simp⟩
     | add x y hx hy =>
       obtain ⟨a, ha⟩ := hx
       obtain ⟨b, hb⟩ := hy
-      exact ⟨a + b, by rw [map_add, map_add, ha, hb]⟩
+      exact ⟨a + b, by rw [map_add (f := _), map_add (f := _), ha, hb]⟩
     | tmul b y =>
       obtain ⟨a, ha⟩ := hcl y.2
       refine ⟨a • b, ?_⟩
@@ -197,8 +255,8 @@ theorem isReduced_of_smooth_of_isIntegrallyClosed (A B : Type*) [CommRing A] [Co
     have := (isDomain_and_isIntegrallyClosed_atPrime_of_smooth A p (Localization.AtPrime p)).1
     inferInstance
 
-open AlgebraicGeometry in
 
+open AlgebraicGeometry in
 theorem isDomain_and_isIntegrallyClosed_stalk_of_smooth {X Y : Scheme.{u}} (f : X ⟶ Y) [Smooth f]
     (x : X) [IsDomain (Y.presheaf.stalk (f x))] [IsIntegrallyClosed (Y.presheaf.stalk (f x))] :
     IsDomain (X.presheaf.stalk x) ∧ IsIntegrallyClosed (X.presheaf.stalk x) := by
@@ -218,8 +276,8 @@ theorem isDomain_and_isIntegrallyClosed_stalk_of_smooth {X Y : Scheme.{u}} (f : 
   exact isDomain_and_isIntegrallyClosed_atPrime_of_smooth_of_comap (A := Γ(Y, U))
     (hV.primeIdealOf ⟨x, hx⟩).asIdeal (Y.presheaf.stalk (f x)) (X.presheaf.stalk x)
 
-open AlgebraicGeometry in
 
+open AlgebraicGeometry in
 theorem forall_isDomain_and_isIntegrallyClosed_stalk_of_smooth {X Y : Scheme.{u}} (f : X ⟶ Y)
     [Smooth f]
     (hY : ∀ y : Y, IsDomain (Y.presheaf.stalk y) ∧ IsIntegrallyClosed (Y.presheaf.stalk y))

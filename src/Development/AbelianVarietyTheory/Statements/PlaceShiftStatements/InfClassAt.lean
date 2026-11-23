@@ -1,5 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+module
+
+public import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,8 +76,6 @@ theorem LossLe.mono {w : PlL D} {z : ℂ} {a a' : ℝ} (h : LossLe w z a) (ha : 
   let ⟨y, e, h⟩ := h
   ⟨y, e, h.imp_right fun h => (neg_le_neg ha).trans h⟩
 
-example (w : PlL D) (σ : D.what₂.LL →+* ℂ) : LossLe w 0 0 ∧ AbsLe σ 1 0 := ⟨⟨0, map_zero _, Or.inl rfl⟩, 1, map_one _, by simp⟩
-
 variable {T : Type} {L : LevCh D T} {sc : Consts} (G : GridData L sc)
 
 def sig : ℝ := ∑ v ∈ G.pl.S0, (G.pl.depth sc v : ℝ) * Real.log (Ideal.absNorm v.asIdeal)
@@ -50,10 +85,10 @@ def bOne (C b : ℝ) : ℝ := C * D.R.f * D.R.m * (bigN D : ℝ) ^ 2 * (Real.log
 def aOne (C b : ℝ) : ℝ := C * D.R.f * bigN D * b * Real.log b + C * D.R.m * (bigN D : ℝ) ^ 2 * sig G
 
 def Away (t : T) (w : PlL D) : Prop :=
-  ∀ PP ∈ L.Q t, PP.under (𝓞 D.host.F) ∈ G.pl.S0 ∨ ∀ l : ℕ, l.Prime → (l : 𝓞 D.host.E) ∈ PP.asIdeal → (l : 𝓞 D.what₂.LL) ∉ w.asIdeal
+  ∀ PP ∈ L.Q t, (_root_.IsDedekindDomain.HeightOneSpectrum.under (𝓞 D.host.F) PP) ∈ G.pl.S0 ∨ ∀ l : ℕ, l.Prime → (l : 𝓞 D.host.E) ∈ PP.asIdeal → (l : 𝓞 D.what₂.LL) ∉ w.asIdeal
+
 
 open Classical in
-
 def depL (l : ℕ) : ℕ := (G.pl.W0.filter fun PP => (l : 𝓞 D.host.E) ∈ PP.asIdeal).sup (depthAt G)
 
 variable {G} {W : G.Weil} (S : GridChoice W Set.univ)
@@ -70,8 +105,8 @@ def topVal (Ψ : GLf G → WtSp G) (x : FinPt G (.top 0)) : VV ℂ (wt G (.top 0
 def rowVal (v : VV ℂ (listedWt G (.grid 0 D.R.m))) : VV ℂ (wt G (.grid 0 D.R.m)) :=
   rhoVr (tauE D) _ (S.N.fr (.grid 0 D.R.m))⁻¹ (funOf (listedWt G (.grid 0 D.R.m)) v)
 
-variable (G) in
 
+variable (G) in
 abbrev lastPair : VV ℂ (wt G (.top D.R.m)) →ₗ[ℂ] VV ℂ (wt G (.grid D.R.m D.R.m)) →ₗ[ℂ] ℂ :=
   brPair (listedWt G (.grid D.R.m D.R.m)) G.sp.topDec.rank.symm (wt G (.top D.R.m))
 

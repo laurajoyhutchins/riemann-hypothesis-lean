@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.DeltaDatumCombinedCoefficient
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsIntegralSmoothChartFrameModuli
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.NoCommonZeroIffOfSec
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsNotIntegralLie
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.DeltaDatumCombinedCoefficient
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsIntegralSmoothChartFrameModuli
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTanAtOfGenericFibre
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.NoCommonZeroIffOfSec
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+import Formalism.LocalToGlobal.ProjectiveLattices.FrameCharts
+public import Formalism.LocalToGlobal.ProjectiveLattices.GenFrPfS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -105,7 +150,7 @@ theorem evR_eq_of_chart (s : Rul Xo c) (hs : s ∈ sec Xo c 0 0)
   have hT1 := GlobalTheory.TransferCompare.allTest_framed Xo c A u
   have hT2 := GlobalTheory.TransferCompare.allTest_framed Xo c K z
   unfold evR evalAt
-  rw [dif_pos hT2, dif_pos hT1]
+  rw [dite_eq_left hT2, dite_eq_left hT1]
   exact GlobalTheory.TransferCompare.evalWD_framed Xo c s hs.1 K _ _ _ _ _ _ z hT2.choose_spec.choose_spec.choose_spec
     (frMap_trans (Xo := Xo) (c := c) _ _ _ _ χ _ u z hT1.choose_spec.choose_spec.choose_spec hz)
 
@@ -133,8 +178,12 @@ theorem exists_fn : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : 
     letI : Algebra c.F K := (χ.comp (algebraMap c.F (A p))).toAlgebra
     have hsn' : (spMap χ ≫ j p) ≫ pullback.snd _ _ = spMap (algebraMap c.F K) := by
       rw [Category.assoc, hsn, GlobalTheory.LocalFrame.spMap_spMap]
-    obtain ⟨y, hy⟩ := GlobalTheory.NonIntegralFrameExample.exists_framed (c := c) ((spMap χ ≫ j p) ≫ pullback.fst _ _) (by
-      rw [Category.assoc, pullback.condition, ← Category.assoc, hsn', sOf, GlobalTheory.LocalFrame.spMap_spMap])
+    have hx : ((spMap χ ≫ j p) ≫ pullback.fst _ _) ≫ Xo.s = sOf c K := by
+      rw [Category.assoc, pullback.condition, ← Category.assoc, hsn', sOf, GlobalTheory.LocalFrame.spMap_spMap]
+    obtain ⟨y, hy⟩ : ∃ y : FrPt Xo c K, y.x = (spMap χ ≫ j p) ≫ pullback.fst _ _ := by
+      choose u hu using fun τ => GlobalTheory.IntFramesCompare.exists_eigenBasisAt (c := c) hx τ
+      obtain ⟨s, hs⟩ := gfp_gen GlobalTheory.abelianSchemeLaws_all.2.secTwist ((spMap χ ≫ j p) ≫ pullback.fst _ _)
+      exact ⟨⟨_, hx, u, fun τ => (hu τ).1, fun τ => (hu τ).2.1, fun τ => (hu τ).2.2, s, hs⟩, rfl⟩
     have hb : spMap χ ≫ j p = basePt y := by
       refine pullback.hom_ext ?_ ?_
       · rw [← hy]; exact (pullback.lift_fst _ _ _).symm

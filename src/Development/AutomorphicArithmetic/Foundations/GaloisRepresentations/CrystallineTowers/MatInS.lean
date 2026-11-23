@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.LocTower
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.LocTower
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.SplitsSelfOfIso
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,13 +91,13 @@ private theorem core {Q L : Type*} [Field Q] [Field L] [Algebra Q L] {V : ℤ �
         rw [DirectSum.lof_eq_of, DirectSum.of_eq_of_ne _ _ _ (Ne.symm hi), DirectSum.of_eq_of_ne _ _ _ (Ne.symm hi),
           TensorProduct.tmul_zero]
     | add x₁ x₂ h₁ h₂ =>
-      rw [TensorProduct.tmul_add, map_add, h₁, h₂, DirectSum.add_apply, TensorProduct.tmul_add]
+      rw [TensorProduct.tmul_add, map_add (f := _), h₁, h₂, DirectSum.add_apply, TensorProduct.tmul_add]
   have hnat : ∀ σ n w, π n ((DirectSum.lmap (g σ)).baseChange L w) = (g σ n).baseChange L (π n w) := fun σ n w => by
     induction w using TensorProduct.induction_on with
     | zero => simp
     | tmul t x =>
       rw [LinearMap.baseChange_tmul, hπt, hπt, LinearMap.baseChange_tmul, DirectSum.lmap_apply]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have hsupp : ∀ w, ∃ N : ℕ, ∀ n : ℤ, (N : ℤ) ≤ n → π n w = 0 := fun w => by
     refine ⟨(DFinsupp.support (e w)).sup Int.toNat + 1, fun n hn => ?_⟩
     by_contra h
@@ -78,12 +124,14 @@ private theorem core {Q L : Type*} [Field Q] [Field L] [Algebra Q L] {V : ℤ �
     apply hφ
     have h := LinearMap.congr_fun (hc σ) (y j)
     simp only [LinearMap.comp_apply] at h
+
     rw [← h, hy, hρ, map_sum]
     simp only [map_smul, hy]
   have key : ∀ c : Fin d → L, M.mulVec c = 0 → c = 0 := fun c hcz => by
     have hw : (∑ j, c j • y j) = 0 := by
       apply hπ0
       intro m
+
       simp only [map_sum, map_smul]
       rcases lt_or_ge m 0 with hm | hm
       · simp [hnegπ m _ hm]
@@ -95,13 +143,15 @@ private theorem core {Q L : Type*} [Field Q] [Field L] [Algebra Q L] {V : ℤ �
         ext i
         have := congrFun hcz ⟨n, i⟩
         simp only [Matrix.mulVec, dotProduct, Pi.zero_apply] at this
-        simp only [map_sum, map_smul, map_zero, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul,
-          Pi.smul_apply, smul_eq_mul, Finsupp.coe_zero, Pi.zero_apply]
+
+        simp only [map_sum, map_smul, map_zero, Finset.sum_apply', Finsupp.smul_apply, Finsupp.coe_smul,
+        Pi.smul_apply, smul_eq_mul, Finsupp.coe_zero, Pi.zero_apply]
         rw [← this]
         exact Finset.sum_congr rfl fun j _ => mul_comm _ _
       · simp [hbig _ m hN]
     have h0 : ∑ j, c j • v j = 0 := by
       have := congrArg φ hw
+
       simpa [map_sum, hy] using this
     funext j
     exact Fintype.linearIndependent_iff.1 hv c h0 j
@@ -115,11 +165,13 @@ private theorem core {Q L : Type*} [Field Q] [Field L] [Algebra Q L] {V : ℤ �
       simp only [B, LinearMap.toMatrix_baseChange]
       rfl
     have h2 : (g σ ((n : ℕ) : ℤ)).baseChange L (π _ (y j)) = ∑ i', ρ σ i' j • π _ (y i') := by
+
       rw [← hnat, hG, map_sum]
       simp only [map_smul]
     rw [h2] at h1
-    simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul,
-      Pi.smul_apply, smul_eq_mul] at h1
+
+    simp only [map_sum, map_smul, Finset.sum_apply', Finsupp.smul_apply, Finsupp.coe_smul,
+    Pi.smul_apply, smul_eq_mul] at h1
     rw [Matrix.mul_apply, Matrix.mul_apply, Fintype.sum_sigma, Finset.sum_eq_single n]
     · simp only [Matrix.map_apply, Matrix.blockDiagonal'_apply_eq]
       rw [← h1]

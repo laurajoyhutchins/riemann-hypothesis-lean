@@ -1,6 +1,51 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainX1
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinorCellOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinorCellOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -21,8 +66,8 @@ theorem posL_cI (p : Fin (2 * r + k + 1)) : posL k r 0 (cI p) = p := Fin.ext (by
 theorem cI_inj : Function.Injective (cI (k := k) (r := r)) := fun p q h => Fin.ext (by
   have := congrArg Fin.val h; simpa [cI] using this)
 
-variable (E) in
 
+variable (E) in
 abbrev SA (hD : IsOpen D) : Subalgebra ℂ (Module.End ℂ (VS k r 0 D E)) :=
   Algebra.adjoin ℂ (Set.range fun p : Fin (mdim k r 0) × Fin (mdim k r 0) => Eh (E := E) (i := 0) hD p.1 p.2)
 
@@ -110,14 +155,15 @@ theorem map_qminor {A B : Type} [Ring A] [Algebra ℂ A] [Ring B] [Algebra ℂ B
     (E : Fin n → Fin n → A) (a b : Fin t → Fin n) (u : ℂ) :
     φ (qminor E a b u) = qminor (fun p q => φ (E p q)) a b u := by
   unfold qminor
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [map_mul, map_intCast, map_list_prod, List.map_ofFn]
   congr 2
   congr 1
-  funext l
-  simp only [Function.comp_apply, Tm, map_add]
   congr 1
+  funext k
+  simp only [Function.comp_apply, Tm, map_add]
   split_ifs <;> simp
 
 theorem qminor_reindex {A : Type} [Ring A] [Algebra ℂ A] {n n' t : ℕ} (E : Fin n' → Fin n' → A) (ι : Fin n → Fin n')
@@ -127,9 +173,9 @@ theorem qminor_reindex {A : Type} [Ring A] [Algebra ℂ A] {n n' t : ℕ} (E : F
   refine Finset.sum_congr rfl fun σ _ => ?_
   congr 2
   congr 1
-  funext l
-  simp only [Function.comp_apply, Tm]
   congr 1
+  funext l
+  simp only [Tm, Function.comp_apply]
   by_cases h : a (σ l) = b l
   · rw [if_pos h, if_pos (congrArg ι h)]
   · rw [if_neg h, if_neg (fun e => h (hι e))]

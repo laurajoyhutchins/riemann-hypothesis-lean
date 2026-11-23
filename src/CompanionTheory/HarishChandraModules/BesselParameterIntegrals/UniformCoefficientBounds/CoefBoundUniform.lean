@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.PeriodIntegrals.QuotInv
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.IntegralMemOfIsClosed
+module
+
+public import Formalism.PeriodIntegrals.QuotInv
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothVec
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.IntegralMemOfIsClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Filter Topology Set
 open scoped ContDiff InnerProductSpace
@@ -92,6 +141,7 @@ theorem GoodSub.step (hG : IsMatGroup G) (h : RepOn G σ) (hK : K ⊆ G) {T : Su
     rintro _ ⟨X, hX, v, hv, rfl⟩
     rw [show ds σ X v = _ from hexp X hX ⟨v, hv⟩]
     refine B.sum_mem fun i _ => B.smul_mem _ ?_
+
     rw [← e.sum_repr X, map_sum]
     refine B.sum_mem fun j _ => ?_
     rw [map_smul]
@@ -157,8 +207,9 @@ theorem coef_bound_uniform {T : Submodule ℂ H} [FiniteDimensional ℂ T] {ρ :
   have e1 : ⟪a, σ g b⟫_ℂ = ∑ i, ∑ j, (starRingEnd ℂ) ⟪e i, (⟨a, ha⟩ : T)⟫_ℂ *
       (⟪e j, (⟨b, hb⟩ : T)⟫_ℂ * ⟪(e i : H), σ g (e j)⟫_ℂ) := by
     conv_lhs => rw [show a = _ from hx ⟨a, ha⟩, show b = _ from hx ⟨b, hb⟩]
+
     simp only [sum_inner, inner_smul_left, map_sum, map_smul, inner_sum, inner_smul_right,
-      Finset.mul_sum]
+    Finset.mul_sum]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
   rw [e1, Finset.sum_mul, Finset.sum_mul, Finset.sum_mul]
@@ -169,7 +220,6 @@ theorem coef_bound_uniform {T : Submodule ℂ H} [FiniteDimensional ℂ T] {ρ :
   have h1 := hn i ⟨a, ha⟩
   have h2 := hn j ⟨b, hb⟩
   have h3 := (hC i j g hg).trans (mul_le_mul_of_nonneg_right (le_abs_self _) (hρ g hg))
-  have h4 := hρ g hg
   calc _ ≤ ‖a‖ * (‖b‖ * (|C i j| * ρ g)) := by gcongr
     _ = _ := by ring
 

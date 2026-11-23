@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.UnitsInflationCochainsFHomApply
+module
+
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.UnitsInflationCochainsFHomApply
+public import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -20,12 +64,6 @@ noncomputable def unitsTowerHom :
     (Units.map ((algebraMap E F : E →+* F) : E →* F))), fun σ => by
     ext x
     exact AlgEquiv.restrictNormal_commutes σ E ((Additive.toMul (α := Eˣ) x : Eˣ) : E)⟩
-
-@[simp]
-theorem unitsTowerHom_hom_apply (x : Additive Eˣ) :
-    ((Additive.toMul (α := Fˣ) ((unitsTowerHom K E F).hom x) : Fˣ) : F) =
-      algebraMap E F ((Additive.toMul (α := Eˣ) x : Eˣ) : E) :=
-  rfl
 
 noncomputable def unitsInflationTower (n : ℕ) :
     groupCohomology (galUnits.{u} K E) n ⟶ groupCohomology (galUnits.{u} K F) n :=
@@ -54,12 +92,6 @@ noncomputable def unitsOfLE :
   letI : Algebra E F := (IntermediateField.inclusion h).toRingHom.toAlgebra
   haveI : IsScalarTower K E F := IsScalarTower.of_algebraMap_eq' rfl
   unitsTowerHom K E F
-
-@[simp]
-theorem coe_unitsOfLE_hom_apply (x : Additive Eˣ) :
-    (((Additive.toMul (α := Fˣ) ((unitsOfLE h).hom x) : Fˣ) : F) : L) =
-      (((Additive.toMul (α := Eˣ) x : Eˣ) : E) : L) :=
-  rfl
 
 noncomputable def unitsInflationOfLE (n : ℕ) :
     groupCohomology (galUnits.{u} K E) n ⟶ groupCohomology (galUnits.{u} K F) n :=

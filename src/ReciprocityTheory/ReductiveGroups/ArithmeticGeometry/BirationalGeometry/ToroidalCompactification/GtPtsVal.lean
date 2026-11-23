@@ -1,6 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.GtPtsTor
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.FnOfComp
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.CancelSecAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -26,7 +68,7 @@ theorem appTop_eq_of_gm (τ₁ τ₂ : Z ⟶ Y) (c₁ c₂ : Γ(Y, ⊤)ˣ) (h : 
   unfold gm pullU at h1
   have m1 : τ₁ z ∈ (⊤ : Y.Opens) := trivial
   have m2 : τ₂ z ∈ (⊤ : Y.Opens) := trivial
-  rw [dif_pos m1, dif_pos m2] at h1
+  rw [dite_eq_left m1, dite_eq_left m2] at h1
   simp only [MonoidHom.comp_apply, Units.coe_map, MonoidHom.coe_coe] at h1
   exact h1
 
@@ -36,38 +78,11 @@ theorem gm_comp_top (r : W ⟶ Z) (τ : Z ⟶ Y) (w : W) (c : Γ(Y, ⊤)ˣ) (c' 
   unfold gm pullU
   have m1 : (r ≫ τ) w ∈ (⊤ : Y.Opens) := trivial
   have m2 : r w ∈ (⊤ : Z.Opens) := trivial
-  rw [dif_pos m1, dif_pos m2]
+  rw [dite_eq_left m1, dite_eq_left m2]
   simp only [MonoidHom.comp_apply, Units.coe_map, MonoidHom.coe_coe, Scheme.Hom.comp_app,
     CommRingCat.comp_apply]
   rw [← h]
   rfl
-
-theorem appTop_inj_of_epi (p : W ⟶ Z) [Epi p] {a b : Γ(Z, ⊤)} (h : p.appTop.hom a = p.appTop.hom b) : a = b := by
-  classical
-
-  let R := CommRingCat.of (Polynomial ℤ)
-  let g : Γ(Z, ⊤) → (R ⟶ Γ(Z, ⊤)) := fun c =>
-    CommRingCat.ofHom (Polynomial.eval₂RingHom (Int.castRingHom _) c)
-  let φ : Γ(Z, ⊤) → (Z ⟶ Spec R) := fun c => Z.toSpecΓ ≫ Spec.map (g c)
-  have hrec : ∀ c, ((Scheme.ΓSpecIso R).inv ≫ (φ c).appTop).hom Polynomial.X = c := by
-    intro c
-    have e : (Scheme.ΓSpecIso R).inv ≫ (φ c).appTop = g c := by
-      simp only [φ, Scheme.Hom.comp_appTop, Scheme.toSpecΓ_appTop, Scheme.ΓSpecIso_naturality,
-        Iso.inv_hom_id_assoc]
-    rw [e]
-    exact Polynomial.eval₂_X _ _
-  have hg : g a ≫ p.appTop = g b ≫ p.appTop := by
-    apply CommRingCat.hom_ext
-    apply Polynomial.ringHom_ext
-    · intro n
-      simp [g]
-    · simp [g, h]
-  have hφ : φ a = φ b := by
-    rw [← cancel_epi p]
-    simp only [φ]
-    rw [← Category.assoc, ← Category.assoc, Scheme.toSpecΓ_naturality, Category.assoc,
-      Category.assoc, ← Spec.map_comp, ← Spec.map_comp, hg]
-  rw [← hrec a, ← hrec b, hφ]
 
 theorem exists_ratio {X : Scheme.{0}} {L : LB X} (hL : L.IsLB) {K : Type} [Fintype K] {φ φ' : K → (Y ⟶ X)}
     {ε : K → ℤ} (hφ : φ = φ') (t : LB.Gen (LB.LinComb L φ ε)) (t' : LB.Gen (LB.LinComb L φ' ε)) (ht : t.IsGen)
@@ -84,7 +99,7 @@ theorem exists_ratio {X : Scheme.{0}} {L : LB X} (hL : L.IsLB) {K : Type} [Finty
     unfold LB.wchart
     simp
     exact fun i => hJ (r ≫ φ i)
-  rw [dif_pos hm, dif_pos (show r z ∈ (⊤ : Y.Opens) from trivial)]
+  rw [dite_eq_left hm, dite_eq_left (show r z ∈ (⊤ : Y.Opens) from trivial)]
   apply Units.ext
   simp only [MonoidHom.coe_comp, Function.comp_apply, Units.coe_map, MonoidHom.coe_coe]
   try erw [Function.comp_apply]
@@ -99,7 +114,7 @@ theorem val_charGen {S : Scheme.{0}} (X : Type) [AddCommGroup X] (G : Over S) {L
   have hm : w z ∈ L.wchart PEmpty.elim (fun k => J (w ≫ k.elim)) := by
     unfold LB.wchart
     simp
-  rw [dif_pos hm, dif_pos (show (w ≫ (fst (splitTorus S X) G).left) z ∈
+  rw [dite_eq_left hm, dite_eq_left (show (w ≫ (fst (splitTorus S X) G).left) z ∈
     (⊤ : (splitTorus S X).left.Opens) from trivial)]
   apply Units.ext
   simp only [MonoidHom.coe_comp, Function.comp_apply, Units.coe_map, MonoidHom.coe_coe,

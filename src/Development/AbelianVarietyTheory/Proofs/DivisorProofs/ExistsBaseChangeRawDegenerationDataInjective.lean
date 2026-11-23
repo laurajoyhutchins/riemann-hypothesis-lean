@@ -1,7 +1,58 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.EvenDefect
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SiegelToroidalPolCharts
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SecCmp
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullbackDegPreStrictLineBundleIso
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SecCmp
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsStrict
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProjBySmoothIsProperGeometricallyIntegral
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUnifOfIsMumfordOf
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +67,22 @@ namespace GlobalTheory.BaseChangeDeg
 
 theorem exists_baseChange : ∀ (R₁ : Type) [CommRing R₁] [IsDomain R₁] (R₂ : Type) [CommRing R₂] [IsDomain R₂] [IsNoetherianRing R₂] (σ : R₁ →+* R₂) (D₁ : DegPre R₁) (gam : FractionRing R₁ →+* FractionRing R₂), (∀ r, gam (algebraMap R₁ _ r) = algebraMap R₂ _ (σ r)) → ∃ (D₂ : DegPre R₂) (β : D₂.P.A.left ⟶ D₁.P.A.left) (v : LB.Iso D₂.P.L (D₁.P.L.pull β)) (xe : D₂.X ≃+ D₁.X), IsGrpPullback D₂.P.A D₁.P.A (spMap σ) β ∧ v.IsGen ∧ (∀ x, (D₂.c x).left ≫ β = spMap σ ≫ (D₁.c (xe x)).left) ∧ GlobalTheory.PsiRing.RigCmp σ D₁ D₂ β v ∧ GlobalTheory.PsiRing.PsiCmp D₁ D₂ β v xe (spMap gam) := by
   intro R₁ _ _ R₂ _ _ _ σ D₁ gam hgam
-  let P' := polPull D₁.P (spMap σ)
+  let P' : PolAV (Spec (CommRingCat.of R₂)) :=
+    { A := (Over.pullback (spMap σ)).obj D₁.P.A
+      isAb := TLinPf.isAb_pullback (spMap σ) D₁.P.A D₁.P.isAb
+      g := D₁.P.g
+      smoothDim := (smoothOfRelativeDimension_isStableUnderBaseChange _).of_isPullback
+        (isGrpPullback_pullback D₁.P.A (spMap σ)).1 D₁.P.smoothDim
+      L := D₁.P.L.pull (pullback.fst D₁.P.A.hom (spMap σ))
+      isLB := pull_isLB D₁.P.isLB _
+      rigid := PolBaseChange.rigidified_pull (isGrpPullback_pullback D₁.P.A (spMap σ)) D₁.P.rigid
+      sym := PolBaseChange.sym_pull (isGrpPullback_pullback D₁.P.A (spMap σ)) D₁.P.sym
+      ample := by
+        haveI := D₁.P.isAb.proper
+        exact AmpleBaseChange.relAmple_of_isPullback D₁.P.isLB D₁.P.ample (IsPullback.of_hasPullback D₁.P.A.hom (spMap σ))
+      ktriv := by
+        obtain ⟨w, hw⟩ := PolBaseChange.lbIso_refl (pull_isLB D₁.P.isLB (pullback.fst D₁.P.A.hom (spMap σ)))
+        exact kTriv_pull (isGrpPullback_pullback D₁.P.A (spMap σ)) D₁.P.isLB (pull_isLB D₁.P.isLB _) ((isGen_iff w).1 hw) D₁.P.ktriv }
   let F := pullback.fst D₁.P.A.hom (spMap σ)
   have gp : IsGrpPullback P'.A D₁.P.A (spMap σ) F := isGrpPullback_pullback D₁.P.A (spMap σ)
   obtain ⟨w, hw, -⟩ := exists_strict D₁.P.isLB F

@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OfE
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OfE
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
+public import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
+public import GroundTheory.IdeleRoots.TorusPowers.HeckeTensor
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TopoAF
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 set_option synthInstance.maxSize 1000
@@ -22,7 +68,7 @@ theorem map_smul_pi (n : ℕ) (a : IdeleGroup K) :
         Measure.pi fun _ : Fin n ↦ adeleMeasure K := by
   have hsm : Measurable fun y : 𝔸[K] ↦ a • y := (Homeomorph.smul a).continuous.measurable
   have hmeas : Measurable fun x : Fin n → 𝔸[K] ↦ fun i ↦ a • x i :=
-    measurable_pi_lambda _ fun i ↦ hsm.comp (measurable_pi_apply i)
+    Measurable.of_eval fun i ↦ hsm.comp (measurable_pi_apply i)
   set c : ℝ≥0 := Real.toNNReal ((IdeleGroup.ideleModule K a : ℝ))⁻¹ with hcdef
   have hmap : (adeleMeasure K).map (fun y ↦ a • y) = c • adeleMeasure K := by
     rw [map_smul_adeleMeasure]
@@ -76,12 +122,13 @@ theorem ideleModule_ideleEmbedding (x : IdeleGroup K) :
     rfl
   have hsmL : Measurable fun y : 𝔸[L] ↦ X • y := (Homeomorph.smul X).continuous.measurable
   have hsmK : Measurable fun v : Fin n → 𝔸[K] ↦ fun i ↦ x • v i :=
-    measurable_pi_lambda _ fun i ↦
+    Measurable.of_eval fun i ↦
       (Homeomorph.smul x).continuous.measurable.comp (measurable_pi_apply i)
   set c : ℝ≥0 := Real.toNNReal ((IdeleGroup.ideleModule K x : ℝ))⁻¹ with hcdef
   have h1 : ν.map (fun y ↦ X • y) = c ^ n • ν := by
     rw [hν, Measure.map_map hsmL hms, hcomp, ← Measure.map_map hms hsmK, hμ, map_smul_pi,
       Measure.map_smul]
+    exact hms.aemeasurable
   have hc := isAddLeftInvariant_eq_smul ν (adeleMeasure L)
   set C := ν.addHaarScalarFactor (adeleMeasure L)
   have hC0 : (C : ℝ≥0∞) ≠ 0 := by
@@ -92,6 +139,8 @@ theorem ideleModule_ideleEmbedding (x : IdeleGroup K) :
   have hpos : adeleMeasure L S ≠ 0 := (measure_pos_of_mem_nhds _ hS0).ne'
   have htop : adeleMeasure L S ≠ ⊤ := hS.measure_lt_top.ne
   rw [hc, Measure.map_smul, map_smul_adeleMeasure] at h1
+  swap
+  · exact hsmL.aemeasurable
   have h2 := congrArg (fun m : Measure 𝔸[L] ↦ m S) h1
   simp only [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul] at h2
   rw [mul_left_comm] at h2

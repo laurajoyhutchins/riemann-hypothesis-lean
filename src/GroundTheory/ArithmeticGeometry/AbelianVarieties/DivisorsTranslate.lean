@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsValuation
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.Isogeny
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.Isogeny
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsOrd
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsNorm
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsValuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -37,8 +88,8 @@ theorem map_genericPoint_eq (ψ : W.toAffine.FunctionField →ₐ[F] W.toAffine.
     ∃ h, Point.map ψ (genericPoint W) = .some (ψ (genX W)) (ψ (genY W)) h :=
   ⟨_, rfl⟩
 
-omit [DecidableEq F] in
 
+omit [DecidableEq F] in
 theorem algHom_ext_gen {L : Type*} [Field L] [Algebra F L]
     {ψ₁ ψ₂ : W.toAffine.FunctionField →ₐ[F] L} (hx : ψ₁ (genX W) = ψ₂ (genX W))
     (hy : ψ₁ (genY W) = ψ₂ (genY W)) : ψ₁ = ψ₂ := by
@@ -53,8 +104,8 @@ theorem algHom_ext_gen {L : Type*} [Field L] [Algebra F L]
 
 variable [W.IsElliptic]
 
-omit [DecidableEq F] in
 
+omit [DecidableEq F] in
 theorem algHom_eq_of_map_genericPoint
     {ψ₁ ψ₂ : W.toAffine.FunctionField →ₐ[F] W.toAffine.FunctionField}
     (h : Point.map ψ₁ (genericPoint W) = Point.map ψ₂ (genericPoint W)) : ψ₁ = ψ₂ := by
@@ -67,8 +118,8 @@ omit [DecidableEq F] in
 theorem map_id_genericPoint :
     Point.map (AlgHom.id F W.toAffine.FunctionField) (genericPoint W) = genericPoint W := rfl
 
-omit [DecidableEq F] [W.IsElliptic] in
 
+omit [DecidableEq F] [W.IsElliptic] in
 theorem exists_algebraMap_eq_of_isAlgebraic [IsAlgClosed F] {u : W.toAffine.FunctionField}
     (hu : IsAlgebraic F u) : ∃ c : F, algebraMap F W.toAffine.FunctionField c = u := by
   have hint := hu.isIntegral
@@ -117,7 +168,7 @@ theorem transcendental_xOf_translate [IsAlgClosed F] (R : W.toAffine.Point) :
           C (c ^ 3 + W.a₂ * c ^ 2 + W.a₄ * c + W.a₆) : F[X]).natDegree = 2 := by
         compute_degree!
       omega
-    · simp only [map_sub, map_add, map_mul, map_pow, aeval_X, aeval_C, hc]
+    · simp only [map_sub, map_add (f := _), map_mul, map_pow, aeval_X, aeval_C, hc]
       linear_combination heq
   obtain ⟨d, hd⟩ := exists_algebraMap_eq_of_isAlgebraic W hvalg
   have hcd : W.toAffine.Nonsingular c d := by
@@ -152,7 +203,7 @@ theorem translate_zero : translate W 0 = AlgHom.id F W.toAffine.FunctionField :=
 theorem translate_comp_translate_neg (R : W.toAffine.Point) :
     (translate W R).comp (translate W (-R)) = AlgHom.id F W.toAffine.FunctionField := by
   apply algHom_eq_of_map_genericPoint
-  rw [← Point.map_map, map_translate_genericPoint, map_add, map_translate_genericPoint,
+  rw [← Point.map_map, map_translate_genericPoint, map_add (f := _), map_translate_genericPoint,
     map_constPoint, add_assoc, ← map_add, add_neg_cancel, map_zero, add_zero, map_id_genericPoint]
 
 theorem translate_translate_neg (R : W.toAffine.Point) (f : W.toAffine.FunctionField) :
@@ -245,7 +296,7 @@ theorem valuationInfty_translate_genX_sub_lt {xR yR : F} (hR : W.toAffine.Nonsin
       ι (3 * xR ^ 2 + 2 * W.a₂ * xR + W.a₄ - W.a₁ * yR) * genX W +
       ι (W.a₁ * xR * yR - W.a₂ * xR ^ 2 + W.a₆ - 2 * xR ^ 3 + yR ^ 2) := by
     rw [hu]
-    simp only [map_add, map_sub, map_mul, map_neg, map_pow, map_ofNat]
+    simp only [map_add (f := _), map_sub, map_mul, map_neg, map_pow, map_ofNat]
     linear_combination (ℓ * D + (genY W - ι yR)) * hℓ + ι W.a₁ * D * hℓ + genY_sq_add W
   have hN : valuationInfty W (ι (-(W.a₁ * xR + W.a₃ + 2 * yR)) * genY W +
       ι (3 * xR ^ 2 + 2 * W.a₂ * xR + W.a₄ - W.a₁ * yR) * genX W +
@@ -279,7 +330,7 @@ theorem valuationInfty_translate_genY_sub_lt {xR yR : F} (hR : W.toAffine.Nonsin
       ι (3 * xR ^ 2 + 2 * W.a₂ * xR + W.a₄ - W.a₁ * yR) * genX W +
       ι (W.a₁ * xR * yR - W.a₂ * xR ^ 2 + W.a₆ - 2 * xR ^ 3 + yR ^ 2) := by
     rw [hu]
-    simp only [map_add, map_sub, map_mul, map_neg, map_pow, map_ofNat]
+    simp only [map_add (f := _), map_sub, map_mul, map_neg, map_pow, map_ofNat]
     linear_combination (ℓ * D + (genY W - ι yR)) * hℓ + ι W.a₁ * D * hℓ + genY_sq_add W
   have hid2 : D ^ 3 * (vv - ι yR) =
       (ι (W.a₁ * yR - 2 * W.a₂ * xR - W.a₄ - 3 * xR ^ 2) * genX W +
@@ -294,7 +345,7 @@ theorem valuationInfty_translate_genY_sub_lt {xR yR : F} (hR : W.toAffine.Nonsin
         2 * W.a₁ * xR * yR ^ 2 - W.a₂ * xR ^ 2 * yR + W.a₃ * W.a₆ + W.a₃ * xR ^ 3 +
         3 * W.a₆ * yR + yR ^ 3) := by
     rw [hvv]
-    simp only [map_add, map_sub, map_mul, map_neg, map_pow, map_ofNat] at hid ⊢
+    simp only [map_add (f := _), map_sub, map_mul, map_neg, map_pow, map_ofNat] at hid ⊢
     linear_combination (-(D ^ 2 * u) + D ^ 2 * genX W) * hℓ +
       (-(genY W - ι yR) - ι W.a₁ * D) * hid +
       (ι W.a₁ * ι xR + ι W.a₃ + 2 * ι yR) * genY_sq_add W

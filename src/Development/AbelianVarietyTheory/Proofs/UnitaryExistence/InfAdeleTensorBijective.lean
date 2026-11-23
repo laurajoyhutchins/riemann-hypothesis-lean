@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.InfiniteAdeleRing
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,7 +141,7 @@ theorem exists_delta (c : E ≃ₐ[F] E) (h2 : Module.finrank F E = 2) (hc : c �
     have h' := congrArg c hst
     have hsm : ∀ (p : F) (x : E), c (p • x) = p • c x := fun p x => by
       rw [Algebra.smul_def, Algebra.smul_def, map_mul, c.commutes]
-    rw [map_add, hsm, hsm, map_one, hcδ, map_zero, smul_neg] at h'
+    rw [map_add (f := _), hsm, hsm, map_one, hcδ, map_zero, smul_neg] at h'
     have ht : t • δ = 0 := by
       have : (2 : E) * (t • δ) = 0 := by linear_combination hst - h'
       simpa using this
@@ -109,7 +163,7 @@ theorem eq_or_conj (c : E ≃ₐ[F] E) (hτ : ∀ (τ : E →+* ℂ) x, τ (c x)
   have hp : ∀ p, τ (algebraMap F E p) = τ' (algebraMap F E p) := fun p => RingHom.congr_fun h p
   obtain ⟨p, q, hpq⟩ := hs (δ * δ)
   have h' := congrArg c hpq
-  rw [map_mul, map_add, map_mul, hc, c.commutes, c.commutes] at h'
+  rw [map_mul, map_add (f := _), map_mul, hc, c.commutes, c.commutes] at h'
   have hsq : δ * δ = algebraMap F E p := by linear_combination (hpq + h') / 2
   have : τ δ * τ δ = τ' δ * τ' δ := by rw [← map_mul, ← map_mul, hsq, hp]
   rcases mul_self_eq_mul_self_iff.1 this with e | e
@@ -179,7 +233,7 @@ theorem bijective [IsTotallyReal F] (c : E ≃ₐ[F] E) (h2 : Module.finrank F E
       ⟨r _ (a (InfinitePlace.mk (τ.comp (algebraMap F E)))),
         r _ (b (InfinitePlace.mk (τ.comp (algebraMap F E)))) * (τ δ).im⟩ := by
     intro τ a b
-    rw [map_add, hθ, hθ, ext_eq_ofReal, ext_eq_ofReal, map_one, mul_one]
+    rw [map_add (f := _), hθ, hθ, ext_eq_ofReal, ext_eq_ofReal, map_one, mul_one]
     apply Complex.ext
     · simp only [Complex.add_re, Complex.ofReal_re, Complex.re_ofReal_mul, hre, mul_zero, add_zero, r]
     · simp only [Complex.add_im, Complex.ofReal_im, Complex.im_ofReal_mul, zero_add, r]
@@ -229,6 +283,6 @@ theorem infAdele_tensor_bijective : ∀ (F E : Type) [Field F] [NumberField F] [
       simp only [sg, Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id, hθ', map_mul, conj_ext]
       rw [← hτ]
       rfl
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 end GlobalTheory.InfAdeleCM

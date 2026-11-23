@@ -1,6 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StSmallGenHeightsNonneg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.StSmallGenHeightsNonneg
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -43,6 +99,7 @@ theorem killBlocksBelow_of_isMultiHomog (j : ℕ) {f : MRing ι} {a : K → ℕ}
   by_cases h : ∀ k, ((Fintype.equivFin K k : Fin _) : ℕ) < j → a k = 0
   · left
     conv_rhs => rw [f.as_sum]
+
     conv_lhs => rw [f.as_sum, map_sum]
     refine Finset.sum_congr rfl fun m hm ↦ ?_
     rw [killBlocksBelow_monomial, if_pos]
@@ -53,6 +110,7 @@ theorem killBlocksBelow_of_isMultiHomog (j : ℕ) {f : MRing ι} {a : K → ℕ}
   · right
     push Not at h
     obtain ⟨k, hk, hak⟩ := h
+
     conv_lhs => rw [f.as_sum, map_sum]
     refine Finset.sum_eq_zero fun m hm ↦ ?_
     rw [killBlocksBelow_monomial, if_neg]
@@ -189,7 +247,17 @@ theorem not_isHorizontal_of_mem_divSupp {W : Ideal (MRing ι)} {A : HermLine ι}
     (hW : IsArithVar W 1) (hs : IsSectionOn W A s) {V : Ideal (MRing ι)} (hV : V ∈ divSupp W s) :
     ¬ IsHorizontal V := by
   intro hh
-  obtain ⟨-, hVm, hVh, hdim⟩ := (divSuppArith K ι W 0 A s V hW hs hV).1 hh
+  obtain ⟨hK, ⟨hWp, hWh, -⟩, -, hWdim⟩ := hW
+  obtain ⟨a, -, hsa, hsW⟩ := hs
+  obtain ⟨hVmin, hVrel⟩ := hV
+  have hVm : IsMultiProjPrime V := ⟨hVmin.1.1,
+    isMultiHomogIdeal_of_mem_minimalPrimes hWh hsa hVmin, hVrel⟩
+  haveI := hWp
+  have h1 := dim_quot_minimal_add_one W V s hsW hVmin
+  rw [hWdim] at h1
+  have hdim : ringKrullDim (MRing ι ⧸ V) = ((0 + Fintype.card K : ℕ) : WithBot ℕ∞) :=
+    withBot_eq_of_add_one (by simpa [Nat.add_comm] using h1)
+  have hVh := hh
   have key := card_add_one_le_ringKrullDim hVm hVh
   rw [hdim, zero_add] at key
   have : Fintype.card K + 1 ≤ Fintype.card K := by exact_mod_cast key
@@ -228,8 +296,8 @@ theorem arInt_nonpos {W : Ideal (MRing ι)} {A : HermLine ι} {s : MRing ι}
 
 end SmallGenHeightsNonneg
 
-open SmallGenHeightsNonneg in
 
+open SmallGenHeightsNonneg in
 theorem SmallGenHeightsNonneg.proof : SmallGenHeightsNonneg.Statement := by
   intro K _ ι _ P A II q w hII hA hAnn hw hgen hsmall W hW hPW
   obtain ⟨j, hj⟩ := hgen W hW.2.1 hPW

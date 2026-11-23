@@ -1,10 +1,62 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.ChainRows
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GrowthGaloisInvariantsModPrimePowerLattice
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSmulMemBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Definitions.NonGaloisLines.TopLine
-import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.GoodOAdicCompleteCompactBasisStatement
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSmulMemBis
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.LinearAlgebra.Quotient.Pi
+public import Mathlib.RingTheory.Localization.Module
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Module GlobalTheory.CompanionTheory.LocDual
 
 noncomputable section
@@ -13,42 +65,7 @@ namespace GlobalTheory.CompanionTheory.GrowthOfInvariants
 
 theorem card_quot_pow {O : Type} [CommRing O] [IsDomain O] (ϖ : O) (hϖ : ϖ ≠ 0) (n : ℕ) :
     Nat.card (O ⧸ Ideal.span {ϖ ^ n}) = Nat.card (O ⧸ Ideal.span {ϖ}) ^ n := by
-  have key : ∀ a : O, Nat.card (O ⧸ Ideal.span {a}) =
-      (Submodule.toAddSubgroup (Ideal.span {a} : Ideal O)).index := fun a => rfl
-  induction n with
-  | zero =>
-    have : Subsingleton (O ⧸ Ideal.span {ϖ ^ 0}) := by
-      rw [pow_zero, Ideal.span_singleton_one]
-      exact Ideal.Quotient.subsingleton_iff.mpr rfl
-    simp [Nat.card_of_subsingleton (0 : O ⧸ Ideal.span {ϖ ^ 0})]
-  | succ n ih =>
-    let f : O →+ O := AddMonoidHom.mulLeft (ϖ ^ n)
-    have hle : Submodule.toAddSubgroup (Ideal.span {ϖ ^ (n + 1)} : Ideal O) ≤
-        Submodule.toAddSubgroup (Ideal.span {ϖ ^ n} : Ideal O) := by
-      intro x hx
-      have hx' : x ∈ (Ideal.span {ϖ ^ (n + 1)} : Ideal O) := hx
-      change x ∈ (Ideal.span {ϖ ^ n} : Ideal O)
-      rw [Ideal.mem_span_singleton] at hx' ⊢
-      exact (pow_dvd_pow ϖ (Nat.le_succ n)).trans hx'
-    have hrange : f.range = Submodule.toAddSubgroup (Ideal.span {ϖ ^ n} : Ideal O) := by
-      ext x
-      constructor
-      · rintro ⟨y, rfl⟩
-        change ϖ ^ n * y ∈ (Ideal.span {ϖ ^ n} : Ideal O)
-        exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self _)
-      · intro hx
-        have hx' : x ∈ (Ideal.span {ϖ ^ n} : Ideal O) := hx
-        obtain ⟨y, rfl⟩ := Ideal.mem_span_singleton.mp hx'
-        exact ⟨y, rfl⟩
-    have hcomap : (Submodule.toAddSubgroup (Ideal.span {ϖ ^ (n + 1)} : Ideal O)).comap f =
-        Submodule.toAddSubgroup (Ideal.span {ϖ} : Ideal O) := by
-      ext x
-      change ϖ ^ n * x ∈ (Ideal.span {ϖ ^ (n + 1)} : Ideal O) ↔ x ∈ (Ideal.span {ϖ} : Ideal O)
-      rw [Ideal.mem_span_singleton, Ideal.mem_span_singleton, pow_succ]
-      exact mul_dvd_mul_iff_left (pow_ne_zero n hϖ)
-    have h1 := AddSubgroup.relIndex_mul_index hle
-    rw [← hrange, ← AddSubgroup.index_comap, hcomap, hrange, ← key, ← key, ← key, ih] at h1
-    rw [← h1, pow_succ, mul_comm]
+  apply GlobalTheory.GrowthOfInvariants.card_quot_span_pow <;> assumption
 
 theorem card_le_of_fibers {Q R E : Type} [AddCommGroup Q] [AddCommGroup E] [Finite R] [Finite E]
     (g : Q → R) (φ : E →+ Q) (hg : ∀ x y, g x = g y → ∃ e, x - y = φ e) :
@@ -206,7 +223,7 @@ def coW : Submodule O A.V where
   zero_mem' := fun g => by simp
   add_mem' := by
     intro a b ha hb g
-    have : A.ρ g (a + b) - (a + b) = (A.ρ g a - a) + (A.ρ g b - b) := by rw [map_add]; abel
+    have : A.ρ g (a + b) - (a + b) = (A.ρ g a - a) + (A.ρ g b - b) := by rw [map_add (f := _)]; abel
     rw [this]
     exact LA.T.add_mem (ha g) (hb g)
   smul_mem' := by
@@ -271,7 +288,7 @@ def fixQ (I : Submodule O ↥LA.T) (hI : StableSub LA I) : Submodule O (↥LA.T 
   zero_mem' := fun g => map_zero _
   add_mem' := by
     intro a b ha hb g
-    rw [map_add, ha g, hb g]
+    rw [map_add (f := _), ha g, hb g]
   smul_mem' := by
     intro c a ha g
     rw [map_smul, ha g]
@@ -401,13 +418,5 @@ theorem growth [IsDomain O] [IsDiscreteValuationRing O] [IsFractionRing O LL]
     rw [map_sub, map_sub, h4, hsec, hsec, sub_zero]
 
 end Rep
-
-theorem growth_galois_invariants_mod_prime_power_lattice_alt : ∀ (D : D7) (l : ℕ) [Fact l.Prime] (K : FinExt l), TateFiniteness ((D.loc l).PD K) → ∀ (LL : Type) [Field LL] [Algebra ℚ_[l] LL] [TopologicalSpace LL] (O : Type) [CommRing O] [Algebra O LL], GoodO (Qp := ℚ_[l]) LL O → ∀ (A : GRep ↥(GK K) ℚ_[l] LL O) (LA : Lattice (O := O) A.ρ) (ϖ : O), Irreducible ϖ → ∃ C : ℕ, ∀ (r : ℕ) (hI : StableSub LA (Ideal.span {ϖ ^ r} • ⊤ : Submodule O ↥LA.T)), Nat.card (O ⧸ Ideal.span {ϖ}) ^ (r * finrank LL ↥(H0V A.ρ)) ≤ Nat.card {x : ↥LA.T ⧸ (Ideal.span {ϖ ^ r} • ⊤ : Submodule O ↥LA.T) // ∀ g, actQ LA _ hI g x = x} ∧ Nat.card {x : ↥LA.T ⧸ (Ideal.span {ϖ ^ r} • ⊤ : Submodule O ↥LA.T) // ∀ g, actQ LA _ hI g x = x} ≤ C * Nat.card (O ⧸ Ideal.span {ϖ}) ^ (r * finrank LL ↥(H0V A.ρ)) := by
-  intro D l _ K hcore LL _ _ _ O _ _ hG A LA ϖ hϖ
-  obtain ⟨⟨hO, hD, hF⟩, -⟩ := id hG
-  haveI := hO
-  haveI := hD
-  haveI := hF
-  exact growth A LA (hcore LL O hG A LA) hϖ (GlobalTheory.T.goodO_adic_complete_compact_basis l LL O hG ϖ hϖ).2.1
 
 end GlobalTheory.CompanionTheory.GrowthOfInvariants

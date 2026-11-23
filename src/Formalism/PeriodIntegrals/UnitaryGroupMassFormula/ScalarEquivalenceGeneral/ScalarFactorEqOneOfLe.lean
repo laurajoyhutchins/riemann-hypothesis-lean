@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.ScalPairs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.GramNondeg
+module
+
+public import Formalism.PeriodIntegrals.ScalPairs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.GramNondeg
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,7 +103,7 @@ theorem memOrthXplusQ {r : ℕ} {T : E} (F : LFlag S r T) {v : S.V} :
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hx
     obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.mp hb
     have ha' : a ∈ Xsp F := ha
-    rw [map_add, LinearMap.add_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, h2, smul_zero,
+    rw [map_add (f := _), LinearMap.add_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, h2, smul_zero,
       memOrthQ.mp h1 a ha', add_zero]
 
 section Maps
@@ -204,7 +246,7 @@ variable {Λ : Submodule (𝓞 E) S.V} {r k : ℕ} {T T' : E} {F : LFlag S r T}
 def ND (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T) (F' : LFlag S r T') : Prop :=
   finrank E (UUE Λ F F') = 2 * r + 2 ∧ UUE Λ F F' ⊓ orth S (UUE Λ F F') = ⊥
 
-theorem ndOfQ (hΛ : Submodule.IsLattice E Λ) (hL : IsLift Λ F) (hL' : IsLift Λ F')
+theorem ndOfQ (hΛ : Submodule.IsFullLattice E Λ) (hL : IsLift Λ F) (hL' : IsLift Λ F')
     (hG : Gval F F' ≠ 0) : ND Λ F F' :=
   PI.UnitaryGroupMassFormula.BetaLUniq.gram_matrix_nondegenerate S Λ F F' hΛ hL hL' hG
 
@@ -245,7 +287,7 @@ theorem scalar_factor_eq_one_of_le (hdim : finrank E S.V = k + 2 * r + 1) (n : N
   rw [e]
   omega
 
-theorem thEq''Q (hΛ : Submodule.IsLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
+theorem thEq''Q (hΛ : Submodule.IsFullLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
     (n' : ND Λ F F') (n'' : ND Λ F F'') (hs : s0 Λ F F' F'' β k = 1) :
     Th'' Λ F F' F'' β = Hp Λ F F'' := by
   have hTh := thEqQ hdim n' hs
@@ -378,7 +420,7 @@ section Rel
 variable {Λ : Submodule (𝓞 E) S.V} {r k g : ℕ} {T T' : E} {F : LFlag S r T}
   {F' F'' F''' : LFlag S r T'}
 
-theorem relReflQ (hΛ : Submodule.IsLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
+theorem relReflQ (hΛ : Submodule.IsFullLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
     (hF : IsLift Λ F) (hL' : IsLift Λ F') (hG' : Gval F F' ≠ 0) :
     PI.ScalPairs.ScalRel Λ g k F F' F' := by
   have n' := ndOfQ hΛ hF hL' hG'
@@ -388,7 +430,7 @@ theorem relReflQ (hΛ : Submodule.IsLattice E Λ) (hdim : finrank E S.V = k + 2 
   · simp
   · simp
 
-theorem relSymmQ (hΛ : Submodule.IsLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
+theorem relSymmQ (hΛ : Submodule.IsFullLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
     (hF : IsLift Λ F) (hL' : IsLift Λ F') (hG' : Gval F F' ≠ 0) (hL'' : IsLift Λ F'')
     (hG'' : Gval F F'' ≠ 0) (h : PI.ScalPairs.ScalRel Λ g k F F' F'') :
     PI.ScalPairs.ScalRel Λ g k F F'' F' := by
@@ -411,7 +453,7 @@ theorem relSymmQ (hΛ : Submodule.IsLattice E Λ) (hdim : finrank E S.V = k + 2 
     rw [e]
     exact neg_mem (mapXQ (XflagSymmQ hP.2.1) hp.2)
 
-theorem relTransQ (hΛ : Submodule.IsLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
+theorem relTransQ (hΛ : Submodule.IsFullLattice E Λ) (hdim : finrank E S.V = k + 2 * r + 1)
     (hF : IsLift Λ F) (hL' : IsLift Λ F') (hG' : Gval F F' ≠ 0) (hL'' : IsLift Λ F'')
     (hG'' : Gval F F'' ≠ 0) (h1 : PI.ScalPairs.ScalRel Λ g k F F' F'')
     (h2 : PI.ScalPairs.ScalRel Λ g k F F'' F''') :

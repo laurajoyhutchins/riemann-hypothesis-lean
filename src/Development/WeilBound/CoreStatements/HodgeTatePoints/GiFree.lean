@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.BilinearForm.TensorProduct
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct NumberField GlobalTheory GlobalTheory.PDivGroup GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.BT GlobalTheory.CompanionTheory.Ar.HT ReciprocityTheory.ChartRestriction.G.Semi
 
 namespace PositivityTheory.HtPt.Gi
@@ -31,17 +81,15 @@ theorem free_on_lift : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgC
     rw [this]; rfl
   have hskew : ∀ x y, EF x y = -EF y x := fun x y => by
     have := h.alt (x + y)
-    simp only [map_add, LinearMap.add_apply, h.alt] at this
+    simp only [map_add (f := _), LinearMap.add_apply, h.alt] at this
     linarith
   have eskew : ∀ x y, e x y = -e y x := by
     intro x y
     induction x with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]; ring
+    | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]; ring
     | tmul s x =>
       induction y with
-      | zero => simp
-      | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]; ring
+      | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]; ring
       | tmul t y => rw [he, he, hskew]; push_cast; ring
   have hTb : T = Submodule.span O (Set.range B) := by
     apply le_antisymm
@@ -105,17 +153,15 @@ theorem free_on_lift : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgC
         exact ⟨(EF x y : O), by rw [he1, map_intCast]⟩
       | zero => simp
       | add x x' _ _ hx hx' =>
-        rw [map_add, LinearMap.add_apply]; exact Subring.add_mem _ hx hx'
+        rw [map_add (f := _), LinearMap.add_apply]; exact Subring.add_mem _ hx hx'
       | smul o x _ hx =>
         rw [← algebraMap_smul C o x, map_smul, LinearMap.smul_apply, smul_eq_mul]
         exact Subring.mul_mem _ ⟨o, rfl⟩ hx
   · induction x with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
     | tmul s x =>
       induction y with
-      | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | tmul t y => rw [hρ, hρ, he, he, h.adj]
 
 end PositivityTheory.HtPt.Gi

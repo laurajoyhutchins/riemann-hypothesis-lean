@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.PathWeight.PhProdShift
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.GeneratorImageIsSymbol
+import Formalism.PolynomialDimension.DetMulEqSumAdjugate
+public import Formalism.SharpRestriction.GrowthBounds.PathWeight.PhProdShift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +90,7 @@ theorem ph_det_pow_sub (p : ℕ) [Fact p.Prime] (e : ℕ) {n : ℕ} (M : Matrix 
   obtain ⟨h, hh⟩ := ph_det_pow S p e M'
   refine ⟨h.1, h.2, ?_⟩
   have h2 := congrArg S.val hh
-  rw [AlgHom.map_det, map_add, map_pow, AlgHom.map_det, map_mul, map_natCast] at h2
+  rw [AlgHom.map_det, map_add (f := _), map_pow, AlgHom.map_det, map_mul, map_natCast] at h2
   have e1 : S.val.mapMatrix (M'.map (· ^ p ^ e)) = M.map (· ^ p ^ e) := by
     ext i j; simp [M']
   have e2 : S.val.mapMatrix M' = M := by
@@ -62,7 +108,7 @@ theorem Spl_pow (π D h : A) (hπ : π ∈ S) (hD : D ∈ S) (hh : h ∈ S) (P n
   obtain ⟨b, rfl⟩ := Ideal.mem_span_singleton'.1 hz
   refine ⟨a.1, a.2, b.1, b.2, ?_⟩
   have h2 := congrArg S.val hyz
-  simp only [map_add, map_mul, map_pow, Subalgebra.coe_val] at h2
+  simp only [map_add (f := _), map_mul, map_pow, Subalgebra.coe_val] at h2
   rw [← h2]; ring
 
 theorem Spl_one (π : A) : Spl S π 1 1 := ⟨1, one_mem _, 0, zero_mem _, by simp⟩
@@ -92,7 +138,6 @@ variable {p n' r K : ℕ} [Fact p.Prime] [NeZero n'] [NeZero r] [NeZero K] {O : 
     [IsDiscreteValuationRing O] [Algebra (WF p n') O] (X : Ctx p n' r K O)
 
 local notation "AA" => MvPolynomial (TV n' (r + K)) O
-local notation "PP" => MvPolynomial (TV n' (r + K)) (KK O)
 
 def Ctx.SS : Subalgebra O AA := supported O (bc_St X.Fr (r + K))
 
@@ -141,7 +186,7 @@ theorem ph_Ifirst (i : Fin r) :
 
 theorem ph_DlO_map (j : ℤ) : MvPolynomial.map (algebraMap O (KK O)) (X.DlO j) = X.sb (Del p n' O X.Fr X.g j) := by
   unfold Ctx.DlO Del minorI Ctx.sb
-  rw [dif_pos (first_columns_card X.hH.2.2.1), AlgHom.map_det, RingHom.map_det]
+  rw [dite_eq_left (first_columns_card X.hH.2.2.1), AlgHom.map_det, RingHom.map_det]
   refine congrArg Matrix.det (Matrix.ext fun l i => ?_)
   show MvPolynomial.map (algebraMap O (KK O)) (X.DlM j l i) = subst p n' O X.S.w n' r X.g
     (twRow p n' O X.Fr X.g j l.val ((Ifirst r (r + K)).orderEmbOfFin (first_columns_card X.hH.2.2.1) i))
@@ -260,7 +305,7 @@ theorem restPh : RestPh := by
     MvPolynomial.map (algebraMap O (KK O)) Y0,
     bc_IT_of_supp X.Fr _ (mul_mem (prod_mem fun j _ => pow_mem (ph_DlO_mem X _) _) hH0), inWj_map _, ?_⟩
   rw [he]
-  simp only [map_add, map_mul, map_prod, map_pow, ph_DsO_map, ph_DlO_map]
+  simp only [map_add (f := _), map_mul, map_prod, map_pow, ph_DsO_map, ph_DlO_map]
   have E1 : ∏ s ∈ X.Fr.TT, X.sb (Dtop p n' O X.Fr X.hH.2.2.1 X.g (s.val : ℤ)) ^ (X.m1 c' - c') =
       X.sb (DtopProd p n' O X.Fr X.hH.2.2.1 X.g ((2 * X.Q + 3) * c')) * X.DkQ := by
     unfold Ctx.DkQ DtopProd

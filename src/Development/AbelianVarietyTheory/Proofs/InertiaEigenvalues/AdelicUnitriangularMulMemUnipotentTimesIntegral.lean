@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DifferentiableAtChart
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DifferentiableAtChart
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsOpenKerFinIdele
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +69,7 @@ def compV (v : HeightOneSpectrum (𝓞 E)) : GA E n →* GL (Fin n) (v.adicCompl
   GeneralLinearGroup.map ((pLoc E v).comp (pFin E))
 
 def US (S : Finset (HeightOneSpectrum (𝓞 E))) : Subgroup (GA E n) :=
-  ⨅ (v : HeightOneSpectrum (𝓞 E)) (_ : v ∉ S), (GlobalTheory.LFun.KGL v n).comap (compV E n v)
+  ⨅ (v : HeightOneSpectrum (𝓞 E)) (_ : v ∉ S), (GlobalTheory.LFun.KGL v (n := n)).comap (compV E n v)
 
 def C0 (S : Finset (HeightOneSpectrum (𝓞 E))) : Set (GA E n) :=
   {g | ∃ u ∈ NA E n, ∃ k ∈ US E n S, g = u * k}
@@ -31,19 +81,19 @@ variable {E}
 
 def adl (ϖ : ∀ v : HeightOneSpectrum (𝓞 E), (v.adicCompletion E)ˣ) (m : HeightOneSpectrum (𝓞 E) →₀ ℤ) : (Af E)ˣ where
   val := ⟨fun v => ((ϖ v ^ m v : (v.adicCompletion E)ˣ) : v.adicCompletion E), by
-    filter_upwards [m.finite_support.compl_mem_cofinite] with v hv
-    have hv : m v = 0 := by simpa using hv
+    filter_upwards [m.support.finite_toSet.compl_mem_cofinite] with v hv
+    have hv : m v = 0 := Finsupp.notMem_support_iff.mp hv
     rw [hv, zpow_zero, Units.val_one]
     exact one_mem _⟩
   inv := ⟨fun v => ((ϖ v ^ (-m v) : (v.adicCompletion E)ˣ) : v.adicCompletion E), by
-    filter_upwards [m.finite_support.compl_mem_cofinite] with v hv
-    have hv : m v = 0 := by simpa using hv
+    filter_upwards [m.support.finite_toSet.compl_mem_cofinite] with v hv
+    have hv : m v = 0 := Finsupp.notMem_support_iff.mp hv
     rw [hv, neg_zero, zpow_zero, Units.val_one]
     exact one_mem _⟩
-  val_inv := FiniteAdeleRing.ext _ fun v => by
+  val_inv := FiniteAdeleRing.ext E fun v => by
     change ((ϖ v ^ m v : (v.adicCompletion E)ˣ) : v.adicCompletion E) * ((ϖ v ^ (-m v) : (v.adicCompletion E)ˣ) : _) = 1
     rw [← Units.val_mul, ← _root_.zpow_add, add_neg_cancel, zpow_zero, Units.val_one]
-  inv_val := FiniteAdeleRing.ext _ fun v => by
+  inv_val := FiniteAdeleRing.ext E fun v => by
     change ((ϖ v ^ (-m v) : (v.adicCompletion E)ˣ) : v.adicCompletion E) * ((ϖ v ^ m v : (v.adicCompletion E)ˣ) : _) = 1
     rw [← Units.val_mul, ← _root_.zpow_add, neg_add_cancel, zpow_zero, Units.val_one]
 

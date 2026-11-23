@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.SecondCountableTopologyArchUnitary
+module
+
+public import Mathlib.MeasureTheory.Group.Measure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -24,43 +67,6 @@ def SemidirectCovering.Statement (H L N : Type*) [Group H] [TopologicalSpace H]
         ∃ S : Set H, MeasurableSet S ∧ ν S < ⊤ ∧ ∀ g, ∃ γ ∈ Γ, γ * g ∈ S
 
 section Inhabitants
-
-instance : BorelSpace C2 := ⟨(borel_eq_top_of_discrete).symm⟩
-
-theorem SemidirectCovering.hypotheses_met : ∃ (i : C2 →* C2 × C2) (q : C2 × C2 →* C2)
-    (j : C2 →* C2 × C2) (μL : Measure C2) (_ : μL.IsHaarMeasure) (μN : Measure C2)
-    (_ : μN.IsHaarMeasure) (Γ : Subgroup (C2 × C2)) (C : Set C2) (T : Set C2)
-    (ν : Measure (C2 × C2)) (_ : ν.IsHaarMeasure),
-    Continuous i ∧ Continuous q ∧ IsClosedEmbedding j ∧ (∀ l, q (i l) = l) ∧
-    (∀ g, q g = 1 ↔ g ∈ j.range) ∧
-    (∀ l, μN.map (fun n => i l * j n * (i l)⁻¹) = μN.map j) ∧ IsCompact C ∧ MeasurableSet T ∧
-    μL T < ⊤ ∧ (∀ n, ∃ δ, j δ ∈ Γ ∧ δ * n ∈ C) ∧ (∀ l, ∃ γ ∈ Γ, q γ * l ∈ T) ∧
-    i ≠ 1 ∧ j ≠ 1 := by
-  refine ⟨MonoidHom.inl C2 C2, MonoidHom.fst C2 C2, MonoidHom.inr C2 C2, Measure.haar,
-    inferInstance, Measure.haar, inferInstance, ⊤, Set.univ, Set.univ, Measure.haar, inferInstance,
-    continuous_of_discreteTopology, continuous_of_discreteTopology,
-    continuous_of_discreteTopology.isClosedEmbedding (fun a b hab => by simpa using congrArg Prod.snd hab),
-    fun l => rfl, ?_, ?_, isCompact_univ, MeasurableSet.univ, measure_lt_top _ _,
-    fun n => ⟨1, Subgroup.mem_top _, by simp⟩, fun l => ⟨1, Subgroup.mem_top _, by simp⟩, ?_, ?_⟩
-  · rintro ⟨a, b⟩
-    constructor
-    · intro hg
-      refine ⟨b, ?_⟩
-      simp only [MonoidHom.coe_fst] at hg
-      simp [hg]
-    · rintro ⟨n, hn⟩
-      rw [← hn]
-      simp
-  · intro l
-    congr 1
-    funext n
-    ext <;> simp
-  · intro h1
-    have := congrArg (fun f => (f (Multiplicative.ofAdd 1)).1) h1
-    simp at this
-  · intro h1
-    have := congrArg (fun f => (f (Multiplicative.ofAdd 1)).2) h1
-    simp at this
 
 end Inhabitants
 

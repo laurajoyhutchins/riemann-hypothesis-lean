@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.MatrixCharts.Statements
+module
+
+public import Mathlib.Analysis.Complex.Order
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.QuadraticDiscriminant
+public import Mathlib.Basic.Complex.BigOperators
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.MCBounds
@@ -8,43 +58,8 @@ open Matrix
 
 noncomputable section
 
-def entrySum {ι : Type*} [Fintype ι] (A : Matrix ι ι ℝ) : ℝ := ∑ j, ∑ k, |A j k|
-
-theorem entrySum_nonneg {ι : Type*} [Fintype ι] (A : Matrix ι ι ℝ) : 0 ≤ entrySum A :=
-  Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => abs_nonneg _
-
 theorem dot_self_nonneg {ι : Type*} [Fintype ι] (v : ι → ℝ) : 0 ≤ v ⬝ᵥ v :=
   Finset.sum_nonneg fun i _ => mul_self_nonneg (v i)
-
-theorem mul_self_le_dot {ι : Type*} [Fintype ι] (x : ι → ℝ) (j : ι) : x j * x j ≤ x ⬝ᵥ x :=
-  Finset.single_le_sum (f := fun i => x i * x i) (fun i _ => mul_self_nonneg (x i))
-    (Finset.mem_univ j)
-
-theorem abs_mul_le_dot {ι : Type*} [Fintype ι] (x : ι → ℝ) (j k : ι) :
-    |x j| * |x k| ≤ x ⬝ᵥ x := by
-  have hj := mul_self_le_dot x j
-  have hk := mul_self_le_dot x k
-  nlinarith [abs_mul_abs_self (x j), abs_mul_abs_self (x k), sq_nonneg (|x j| - |x k|)]
-
-theorem abs_quad_le {ι : Type*} [Fintype ι] (A : Matrix ι ι ℝ) (x : ι → ℝ) :
-    |x ⬝ᵥ (A *ᵥ x)| ≤ entrySum A * (x ⬝ᵥ x) := by
-  have h : x ⬝ᵥ (A *ᵥ x) = ∑ j, ∑ k, x j * A j k * x k := by
-    simp only [dotProduct, mulVec, Finset.mul_sum]
-    exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => by ring
-  rw [h, entrySum, Finset.sum_mul]
-  refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun j _ => ?_)
-  rw [Finset.sum_mul]
-  refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun k _ => ?_)
-  rw [abs_mul, abs_mul]
-  calc |x j| * |A j k| * |x k| = |A j k| * (|x j| * |x k|) := by ring
-    _ ≤ |A j k| * (x ⬝ᵥ x) := mul_le_mul_of_nonneg_left (abs_mul_le_dot x j k) (abs_nonneg _)
-
-theorem quad_sum {ι κ : Type*} [Fintype ι] (s : Finset κ) (A : κ → Matrix ι ι ℝ) (x : ι → ℝ) :
-    x ⬝ᵥ ((∑ j ∈ s, A j) *ᵥ x) = ∑ j ∈ s, x ⬝ᵥ (A j *ᵥ x) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp
-  | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, add_mulVec, dotProduct_add, ih]
 
 theorem quad_smul_one_sub {ι : Type*} [Fintype ι] [DecidableEq ι] (A : Matrix ι ι ℝ) (l : ℝ)
     (x : ι → ℝ) : x ⬝ᵥ ((l • (1 : Matrix ι ι ℝ) - A) *ᵥ x) = l * (x ⬝ᵥ x) - x ⬝ᵥ (A *ᵥ x) := by
@@ -152,8 +167,8 @@ theorem inv_ge_of_le {ι : Type*} [Fintype ι] [DecidableEq ι] {A : Matrix ι �
       linarith
     · rw [← hzero]; simpa using hxy
 
-open scoped ComplexOrder in
 
+open scoped ComplexOrder in
 theorem posSemidef_map_ofReal {ι : Type*} [Fintype ι] {A : Matrix ι ι ℝ} (hA : A.PosSemidef) :
     (A.map (fun x : ℝ => (x : ℂ))).PosSemidef := by
   have hs : ∀ j k, A k j = A j k := fun j k => by

@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeOfFiniteProjective
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeOfFiniteProjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.BT
 
 noncomputable section
@@ -47,7 +99,7 @@ theorem augIdeal_fg {A : Subalgebra R (T → R)} (hA : IsHopfOrder A) : (augIdea
       induction hx using Submodule.span_induction with
       | mem x h => exact Ideal.subset_span (Finset.mem_coe.2 (Finset.mem_image_of_mem π (Finset.mem_coe.1 h)))
       | zero => simp
-      | add x x' _ _ h h' => rw [map_add]; exact Ideal.add_mem _ h h'
+      | add x x' _ _ h h' => rw [map_add (f := _)]; exact Ideal.add_mem _ h h'
       | smul c x _ h =>
         rw [map_smul, ← algebraMap_smul A c]
         exact Submodule.smul_mem _ _ h
@@ -71,7 +123,7 @@ theorem det_trick {B : Type} [CommRing B] (J : Ideal B) (hfg : J.FG) (c : B) (h 
     have : y = fJ x := Subtype.ext hxy
     exact this ▸ hy
   obtain ⟨q, hmon, -, hcoef, hq⟩ :=
-    LinearMap.exists_monic_and_coeff_mem_pow_and_aeval_eq_zero_of_range_le_smul B fJ J hrange
+    LinearMap.exists_monic_and_natDegree_eq_and_coeff_mem_pow_and_aeval_eq_zero B fJ J hrange
   refine ⟨q.eval c, q.natDegree, fun x hx => ?_, ?_⟩
   · have h2 : Polynomial.aeval fJ q = algebraMap B (Module.End B J) (q.eval c) := by
       change Polynomial.aeval (algebraMap B (Module.End B J) c) q = _
@@ -84,9 +136,9 @@ theorem det_trick {B : Type} [CommRing B] (J : Ideal B) (hfg : J.FG) (c : B) (h 
     have hi' : i < q.natDegree := Finset.mem_range.1 hi
     exact Ideal.pow_le_self (by omega) (hcoef i)
 
+
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1000000 in
-
 theorem mul_mem_sq_of_smul_eq_zero {A : Subalgebra R (T → R)} (n : R) (hn : ∀ x : omega A, n • x = 0) (x : A)
     (hx : x ∈ augIdeal A) : algebraMap R A n * x ∈ augIdeal A ^ 2 := by
   have h1 : (augIdeal A).toCotangent (algebraMap R A n • (⟨x, hx⟩ : augIdeal A)) = 0 := by
@@ -172,8 +224,9 @@ theorem isBaseChange_of_sandwich [Fintype W] (L : Submodule R (W → Ω)) (c : R
       intro a
       rw [hgs]
       exact smul_comm _ _ _
+
     rw [Finset.sum_congr rfl fun a _ => h3 a, ← Finset.smul_sum, ← map_sum, hsum, hgs, smul_smul,
-      inv_mul_cancel₀ hc, one_smul]
+    inv_mul_cancel₀ hc, one_smul]
   · apply LinearMap.ext
     intro h
     have h3 : ∀ a, g'' ((c : Ω) • (Pi.single a (1 : Ω) : W → Ω)) = g (bas a) := fun a =>
@@ -183,6 +236,7 @@ theorem isBaseChange_of_sandwich [Fintype W] (L : Submodule R (W → Ω)) (c : R
       ext x
       simp [Finset.sum_apply, Pi.single_apply, inv_mul_cancel_right₀ hc]
     conv_lhs => rw [h4]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, h3, mul_smul]
@@ -310,7 +364,7 @@ theorem th_clauses {C : Type} [AddCommGroup C] [Module R C] (toN : W → T) (fro
       · have h3 := hf t
         have h4 := hf' t
         simp only [Submodule.coe_add, Pi.add_apply, Prod.fst_add, Subalgebra.coe_add, h3, h4]
-      · rw [map_add, map_add, hu, hu']
+      · rw [map_add (f := _), map_add (f := _), hu, hu']
       · simp [hev, hev']
     | neg z _ h =>
       obtain ⟨hz, hz0, f, u, hf, hu, hev⟩ := h

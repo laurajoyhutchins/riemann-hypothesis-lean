@@ -1,13 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsChartOf
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSabCancel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.ShFam GlobalTheory.LocM GlobalTheory.TorRef
 
 namespace GlobalTheory.TorRef
 
-open IsLocalRing in
 
+open IsLocalRing in
 theorem isEtaleCompletion_comp_bij {B A R : Type} [CommRing B] [IsLocalRing B] [CommRing A] [IsLocalRing A]
     [CommRing R] [IsLocalRing R] (e : B →+* A) (he : Function.Bijective e) (φ : A →+* R)
     (h : Toroidal.IsEtaleCompletion φ) : Toroidal.IsEtaleCompletion (φ.comp e) := by
@@ -21,40 +64,5 @@ theorem isEtaleCompletion_comp_bij {B A R : Type} [CommRing B] [IsLocalRing B] [
 end GlobalTheory.TorRef
 
 namespace GlobalTheory.TorRef
-
-theorem hasCones_of_charts {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Datum H} {l : Level H}
-    {Xo : Moduli D l} {c : Coeff l} {I : Type} [Finite I] {R : I → Type} [∀ i, CommRing (R i)] {a : I → 𝓞 c.F}
-    {b : ∀ i, 𝓞 c.F →+* R i} {ω : ∀ i, R i →+* c.F}
-    (Cn : ∀ (X : Type) [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X] (m : ℕ),
-      (Fin m → LinearMap.BilinForm ℤ X) → Prop) (Z : GMod Xo c) (C : ∀ i, Model Xo c (ω i)) (u : ∀ i, (C i).X ⟶ Z.X)
-    (hcov : IsCover (algebraMap (𝓞 c.F) c.F) R a b ω) (hch : ∀ i, IsChartOf Z (C i) (a i) (b i) (u i))
-    (hC : ∀ i, HasCones Cn (C i)) : HasCones Cn Z := by
-  intro z
-  obtain ⟨i, hi⟩ : ∃ i, a i ∉ (Z.s z).asIdeal := by
-    by_contra hne
-    push_neg at hne
-    have hle : Ideal.span (Set.range a) ≤ (Z.s z).asIdeal := by
-      rw [Ideal.span_le]
-      rintro _ ⟨j, rfl⟩
-      exact hne j
-    rw [hcov.2.2] at hle
-    exact (Z.s z).isPrime.ne_top (top_le_iff.mp hle)
-  obtain ⟨hoi, -, hrange, -, ⟨mu⟩⟩ := hch i
-  have hz : z ∈ Set.range (u i) := by
-    rw [hrange]
-    exact hi
-  obtain ⟨z', rfl⟩ := hz
-  obtain ⟨Rl, _, _, _, ξ, t, m, P, k, γ, hcn, hpt, het, hfu, htor, hcone, hin⟩ := hC i z'
-  obtain ⟨n, -⟩ := ObjMaps.exists_sab_comp mu m
-  have hb : Function.Bijective ((u i).stalkMap (ξ (IsLocalRing.closedPoint (CommRingCat.of Rl)))).hom :=
-    ConcreteCategory.bijective_of_isIso _
-  refine ⟨Rl, inferInstance, inferInstance, inferInstance, ξ ≫ u i, t, n, P, k, γ, hcn, ?_, ?_, ?_, htor, hcone, hin⟩
-  · show (u i) (ξ _) = _
-    rw [hpt]
-  · rw [Scheme.stalkClosedPointTo_comp]
-    exact isEtaleCompletion_comp_bij _ hb _ het
-  · rw [Scheme.stalkClosedPointTo_comp]
-    have h2 := RingHom.FormallyUnramified.comp (RingHom.FormallyUnramified.of_surjective hb.2) hfu
-    exact h2
 
 end GlobalTheory.TorRef

@@ -1,22 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.KappaLambdaEmbedding
-import Formalism.ThetaLiftIndependence.FinalThetaLiftAMFKIndep
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.RowsOfLevel
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplit
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormGoodRowsFiniteGroupActionStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LiftTwistsByLevelCharacter
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChainCompositeLiftIntertwinesFiniteGroupActionsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeterssonAdjointHeckeOperatorEqDualLabel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ISupIInfEigenspaceEqTop
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeOnMemGoodPart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceOffLevelSetProperties
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.DataRows
+import Formalism.LocalRingCardinality.DataTheta
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.WeTransposeWordTransposeWord
+public import Formalism.LocalToGlobal.Divisibility.LiftLat
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 noncomputable section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues
 open Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult
-open GlobalTheory.IndefiniteRowSideFullHecke.KappaLambdaEmbedding
 open scoped TensorProduct InnerProductSpace
 
 namespace GlobalTheory.KappaLevels
@@ -28,14 +74,14 @@ section Abstract
 variable {E H : Type} [NormedAddCommGroup E] [InnerProductSpace ℂ E] [FiniteDimensional ℂ E]
   [NormedAddCommGroup H] [InnerProductSpace ℂ H] [FiniteDimensional ℂ H]
 
-omit [FiniteDimensional ℂ E] [FiniteDimensional ℂ H] in
 
+omit [FiniteDimensional ℂ E] [FiniteDimensional ℂ H] in
 theorem inner_of_normSq (u : E →ₗ[ℂ] H) (n : ℝ) (h : ∀ x, ‖u x‖ ^ 2 = n * ‖x‖ ^ 2) (x y : E) :
     ⟪u x, u y⟫_ℂ = (n : ℂ) * ⟪x, y⟫_ℂ := by
   have h' : ∀ z, ((‖u z‖ : ℝ) : ℂ) ^ 2 = (n : ℂ) * ((‖z‖ : ℝ) : ℂ) ^ 2 := fun z => by exact_mod_cast h z
   have e1 := inner_eq_sum_norm_sq_div_four (𝕜 := ℂ) (u x) (u y)
   have e2 := inner_eq_sum_norm_sq_div_four (𝕜 := ℂ) x y
-  rw [← map_smul, ← map_add, ← map_add, ← map_sub, ← map_sub] at e1
+  rw [← map_smul, ← map_add (f := _), ← map_add (f := _), ← map_sub, ← map_sub] at e1
   rw [e1, e2]
   have h1 := h' (x + y)
   have h2 := h' (x - y)
@@ -76,20 +122,7 @@ end Abstract
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m}
   {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A)
 
-def DownIntertwines (t : T) : Prop :=
-  ∀ g κ, IsLevelLift D.sp.X' R.βX (R.datXt t) (R.eG g) κ → ∀ y y' : (R.HX t).H,
-    (∀ h, (R.HX t).e y' h = (levChi _ R.βX (flagL (R.datXt t)) κ)⁻¹ • (R.HX t).e y (h * (finHom _).rangeRestrict κ)) →
-      R.Th t y' = R.gE g (R.Th t y)
-
-def UpKeepsLevel (t : T) : Prop :=
-  ∀ P, ∀ x ∈ rowsAt R P, LinearMap.adjoint (R.Th t) x ∈ goodAt R t P
-
 variable {R F}
-
-def SchurOnChain : Prop :=
-  ∀ (D : D7) (θ : Datum.InfFam D) (j : ℕ), j < D.R.m → ∀ (M : DSModel (Yc D j) (parB (Ptw D) (min j D.R.m)))
-    (β : GL (Fin (Yc D j).rank) (Lev.EAf D)) (L : LevDat D.host.E ℂ (Yc D j).rank) (μ : Measure (GA D (Yc D j))) (𝓕 : Set (GA D (Yc D j))),
-    SchurMult θ M (levS _ β L) (levChi _ β L) μ 𝓕
 
 end GlobalTheory.KappaLevels
 

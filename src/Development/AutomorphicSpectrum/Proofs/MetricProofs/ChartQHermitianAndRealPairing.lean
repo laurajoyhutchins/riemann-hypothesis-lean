@@ -1,13 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogPeriodLimit
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsIsChart
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeCovolumePositiveStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannLatticeEigenProjectionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsIntPreimageOfOrthogonalKernelStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsIsChart
+import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsAdaptedUnimodular
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RiemannFormHermitianLatticeStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsIntPreimageOfOrthogonalKernelStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.ImLowerOnKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.FubiniLevi
+
+@[expose] public section
 
 noncomputable section
 
@@ -244,7 +289,7 @@ theorem lower_center {L : Flat.LogPeriods n a g Λ} {bas : Module.Basis (Fin g �
       intro i _
       simpa using (h.B_psd i).dotProduct_mulVec_nonneg v
     have h1 := (Finset.sum_eq_zero_iff_of_nonneg hnn).1 h0 j (Finset.mem_univ j)
-    exact ((h.B_psd j).dotProduct_mulVec_zero_iff v).1 (by simpa using h1)
+    exact ((h.B_psd j).dotProduct_mulVec_zero_iff).1 (by simpa using h1)
   have := GlobalTheory.CompanionTheory.ChartBlockLower.im_lower_on_kernel n a g L.a_le (Metric.ball 0 ρ) T0 B c
     Metric.isOpen_ball (h.T_cont.mono (Metric.ball_subset_ball h.ρ_le)) h.B_psd h.c_pos h.im_lower
     0 (Metric.mem_ball_self h.ρ_pos) 0 (fun j hj => (hj rfl).elim) (fun j _ => rfl) v
@@ -352,6 +397,7 @@ theorem limit_form : ∀ (n a g : ℕ) (Λ : Type) [AddCommGroup Λ] (L : Flat.L
       simpa [vCo_mk, uCo_mk, hv0] using h1
     have h2 : star ((A 0)ᵀ *ᵥ cst (uCo bas (x : Λ))) = (A 0)ᴴ *ᵥ cst (uCo bas (x : Λ)) := by
       funext i
+
       simp [cst, mulVec, dotProduct, Matrix.conjTranspose_apply, map_sum]
     rw [hper, hv0, cst_zero, mulVec_zero, add_zero, h2]
     simp only [chartQ]

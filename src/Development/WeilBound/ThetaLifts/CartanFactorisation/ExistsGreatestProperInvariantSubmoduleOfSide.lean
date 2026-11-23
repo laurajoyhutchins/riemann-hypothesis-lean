@@ -1,4 +1,62 @@
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreLM
+module
+
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreDefs
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreCasGl
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreComb
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreCyc
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreMain
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreNonv
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CorePair
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreSide
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.TensorIrr
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -127,6 +185,7 @@ theorem exists_greatest_proper_invariant_submodule_of_side {La : Ix r s → ℚ}
   refine ⟨K, hne, hst, fun N h1 h2 => le_sSup (s := {N : Submodule ℂ M | (∀ W, ∀ x ∈ N, act W x ∈ N) ∧ N ≠ ⊤}) ⟨h1, h2⟩,
     fun β hβ x hx => ?_⟩
   have cas : ∀ u v, β (casK (units act) u) v = β u (casK (units act) v) := fun u v => by
+
     simp only [casK, LinearMap.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
     split_ifs with hab
@@ -140,6 +199,7 @@ theorem exists_greatest_proper_invariant_submodule_of_side {La : Ix r s → ℚ}
       rw [map_sub, LinearMap.sub_apply, cas, hv, map_smul, LinearMap.map_smulₛₗ]
       simp
     · rw [matrix_eq_sum_single W]
+
       simp only [map_sum, LinearMap.sum_apply]
       refine Finset.sum_eq_zero fun a _ => Finset.sum_eq_zero fun b _ => ?_
       have e : single a b (W a b) = W a b • (Eab a b : Mat r s) := by simp [Eab]
@@ -164,7 +224,7 @@ theorem one_of {p q r s : ℕ} {c : ℂ} (τ : ℚ) {La : Ix r s → ℚ} (h : S
   have sj : Function.Surjective (thMkC p q r s c) := Submodule.mkQ_surjective _
   have ak : ∀ W x, thMkC p q r s c (fockAct2 p q r s W x) =
       thAct p q r s c τ W (thMkC p q r s c x) - ((τ : ℂ) * W.trace) • thMkC p q r s c x := fun W x => by
-    rw [thAct_mk, twAct_apply, map_add, map_smul, add_sub_cancel_right]
+    rw [thAct_mk, twAct_apply, map_add (f := _), map_smul, add_sub_cancel_right]
   refine ⟨K.comap (thMkC p q r s c), fun e => h1 (eq_top_iff.2 fun y _ => ?_), fun W x hx => ?_, fun N hN hs => ?_,
     fun β b1 b2 b3 x hx => ?_⟩
   · obtain ⟨x, rfl⟩ := sj y
@@ -201,7 +261,7 @@ theorem one_of {p q r s : ℕ} {c : ℂ} (τ : ℚ) {La : Ix r s → ℚ} (h : S
     have := h4 β' (fun a b u v => by
       obtain ⟨u, rfl⟩ := sj u
       obtain ⟨v, rfl⟩ := sj v
-      rw [thAct_mk, thAct_mk, hβ', hβ', twAct_apply, twAct_apply, map_add, map_add, LinearMap.add_apply, b3, map_smul (β u),
+      rw [thAct_mk, thAct_mk, hβ', hβ', twAct_apply, twAct_apply, map_add (f := _), map_add (f := _), LinearMap.add_apply, b3, map_smul (β u),
         LinearMap.map_smulₛₗ β, mul_add]
       congr 1
       by_cases e : a = b

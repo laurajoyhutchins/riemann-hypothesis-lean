@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.FormsStable
-import Development.AbelianVarietyTheory.Counterexamples.PlaceInjectivity.NotPtIntZeroTarget
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StatementWithTransposeOfBranching
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+public import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NonnegSubOfLt
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StatementWithTransposeOfBranching
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
 import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +57,8 @@ section General
 
 variable {E K ι : Type} [Field E] [NumberField E] [Field K] [NumberField K] [Fintype ι] (emb : ι → E →+* K)
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem mem_dualFr_tauLat {n : ℕ} (τ : ι) (L : Submodule (𝓞 E) (Fin n → E)) (φ : Fin n → K) :
     φ ∈ dualFr (tauLat emb τ L) ↔ ∀ y ∈ L, φ ⬝ᵥ (fun a => emb τ (y a)) ∈ (1 : Submodule (𝓞 K) K) := by
   constructor
@@ -29,8 +71,8 @@ theorem mem_dualFr_tauLat {n : ℕ} (τ : ι) (L : Submodule (𝓞 E) (Fin n →
     | add y z _ _ hy hz => rw [dotProduct_add]; exact Submodule.add_mem _ hy hz
     | smul c y _ hy => rw [dotProduct_smul]; exact Submodule.smul_mem _ c hy
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem dualFr_tauLat_sum {N n : ℕ} (hN : N = n + 1) (τ : ι) {t : E} (ht : t ≠ 0) (L : Submodule (𝓞 E) (Fin N → E))
     (L' : Submodule (𝓞 E) (Fin n → E))
     (hL : ∀ x, x ∈ L ↔ iniH hN x ∈ L' ∧ t * x (Br.iL hN) ∈ (1 : Submodule (𝓞 E) E)) :
@@ -70,8 +112,8 @@ theorem dualFr_tauLat_sum {N n : ℕ} (hN : N = n + 1) (τ : ι) {t : E} (ht : t
     rw [hc, mul_assoc, ← map_mul, ← hr]
     exact Submodule.mem_one.2 ⟨c * RingOfIntegers.mapRingHom (emb τ) r, by rw [map_mul]; rfl⟩
 
-omit [NumberField E] [NumberField K] [Fintype ι] in
 
+omit [NumberField E] [NumberField K] [Fintype ι] in
 theorem invTrK_embGL_apply {n : ℕ} (γ : GL (Fin n) E) (τ : ι) (a b : Fin n) :
     ((invTrK (embGL emb γ) τ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K) a b =
       emb τ (((γ⁻¹ : GL (Fin n) E) : Matrix (Fin n) (Fin n) E) b a) := by
@@ -79,8 +121,8 @@ theorem invTrK_embGL_apply {n : ℕ} (γ : GL (Fin n) E) (τ : ι) (a b : Fin n)
     transpose_apply, ← map_inv]
   rfl
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem brAt_rhoVr {N n : ℕ} (hN : N = n + 1) {lam : ι → DomWeight N} {sg : ι → DomWeight n}
     (hI : ∀ τ, Br.Interlace hN (lam τ) (sg τ)) (hS : ∀ τ, Br.SameShift (lam τ) (sg τ)) (t : ι → K)
     (γ : GL (Fin n) E) (γ' : GL (Fin N) E)
@@ -126,8 +168,8 @@ theorem evV_rho {n : ℕ} (S : GStep E K n) (lam : ι → DomWeight n) (b : S.β
   intro τ
   exact (congrFun this τ).symm
 
-omit [NumberField E] [NumberField K] [StarRing E] [StarRing K] in
 
+omit [NumberField E] [NumberField K] [StarRing E] [StarRing K] in
 theorem polOf_evV {n : ℕ} (lam : ι → DomWeight n) (v : Formalism.L2.DIV.VV K lam) :
     polOf (Gr emb σ n) (shiftOf lam) (fr0 emb σ n) (evV emb (1 : Matrix (Fin n) (Fin n) E) lam σ v) =
       MvPolynomial.map σ v.1 := by
@@ -137,8 +179,8 @@ theorem polOf_evV {n : ℕ} (lam : ι → DomWeight n) (v : Formalism.L2.DIV.VV 
 
 variable {R : Ranks} {I : ChainIn E K ι R} (Q : PerIn I) (hc : ι → HCParam R)
 
-omit [StarRing E] [StarRing K] in
 
+omit [StarRing E] [StarRing K] in
 theorem br_map (v : Formalism.L2.DIV.VV K (lamT hc R.m)) :
     Q.br emb σ hc (MvPolynomial.map σ v.1) =
       MvPolynomial.map σ (Br.brAt (N_m_succ R) (lamT hc R.m) Q.sgT (fun τ => emb τ Q.tz) v).1 := by
@@ -191,8 +233,8 @@ theorem exists_image (h6 : Formalism.MainNotions.PrimeDegreeVariant.Conclusion6)
     rw [← evV_rho, polOf_evV, br_map]
     rfl
 
-omit [StarRing K] in
 
+omit [StarRing K] in
 theorem weights_ok (emb : ι → E →+* K) [StarRing K] (h : ∀ τ, Q.sg τ = (RowPar.of (hc τ)).sg) (τ : ι) :
     Br.Interlace (N_m_succ R) (lamT hc R.m τ) (Q.sgT τ) ∧ Br.SameShift (lamT hc R.m τ) (Q.sgT τ) := by
   classical
@@ -207,23 +249,5 @@ theorem weights_ok (emb : ι → E →+* K) [StarRing K] (h : ∀ τ, Q.sg τ = 
 end General
 
 variable {D : D7} {u : D.what₂.Word}
-
-def IsBuilt (X : Ch D u) : Prop :=
-  ∃ (E : Type) (_ : Field E) (_ : NumberField E) (_ : StarRing E) (emb : D.what₂.Tau → E →+* D.what₂.LL)
-    (I : ChainIn E D.what₂.LL D.what₂.Tau D.R) (J : AtIn I) (Q : PerIn I) (Z : FmIn J D.what₂.places)
-    (hI : I.Ok) (hJ : J.Ok) (hQ : Q.Ok) (l : J.Laws emb D.what₂.embLL (D.hcW u))
-    (lf : FmLaws J Q emb D.what₂.embLL (D.hcW u) D.what₂.places hI hQ) (hT : Q.Over J),
-    (∀ τ, Q.sg τ = (RowPar.of (D.hcW u τ)).sg) ∧
-      X = ⟨_, _, _, forms J Q emb D.what₂.embLL (D.hcW u) Z hI hJ hQ l lf hT⟩
-
-theorem ptInt_of_isBuilt (h6 : Formalism.MainNotions.PrimeDegreeVariant.Conclusion6) {X : Ch D u} (hX : IsBuilt X) : PtInt X := by
-  obtain ⟨E, _, _, _, emb, I, J, Q, Z, hI, hJ, hQ, l, lf, hT, hsg, rfl⟩ := hX
-  refine (PtIntTest.ptInt_iff _).2 fun x hx => ?_
-  exact exists_image emb D.what₂.embLL Q (D.hcW u) h6 hI hQ (fun τ => (weights_ok Q _ emb hsg τ).1)
-    (fun τ => (weights_ok Q _ emb hsg τ).2) (lf.fam _) lf.famP x hx
-
-theorem ptInt_tw (D : D7) (Tw : TwForms D) (u : D.what₂.Word) (μ : D.what₂.Tup) (hX : IsBuilt (tw Tw u μ))
-    (h6 : Formalism.MainNotions.PrimeDegreeVariant.Conclusion6) : PtInt (tw Tw u μ) :=
-  ptInt_of_isBuilt h6 hX
 
 end GlobalTheory.LvT.BuiltChain

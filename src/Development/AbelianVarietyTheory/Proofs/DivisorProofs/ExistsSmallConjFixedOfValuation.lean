@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Polynomial
 
 namespace GlobalTheory.UnitLemma
@@ -15,7 +62,7 @@ noncomputable def UQ.cInt (K : UQ) : K.O ≃+* K.O :=
     left_inv := hdd
     right_inv := hdd
     map_mul' := fun a b => hf (by rw [hd, map_mul, map_mul, map_mul, hd, hd])
-    map_add' := fun a b => hf (by rw [hd, map_add, map_add, map_add, hd, hd]) }
+    map_add' := fun a b => hf (by rw [hd, map_add (f := _), map_add (f := _), map_add (f := _), hd, hd]) }
 
 theorem UQ.cInt_spec (K : UQ) (x : K.O) :
     algebraMap K.O K.E (K.cInt x) = K.c (algebraMap K.O K.E x) :=
@@ -49,14 +96,14 @@ theorem exists_small_val (K : UQ) (k : ℕ) (hk : 1 ≤ k) :
       · have : ϖ + K.cInt ϖ = ϖ * h1.unit := by rw [← hε]; simp [mul_add]
         rw [this]
         exact (associated_mul_unit_right ϖ _ h1.unit.isUnit).irreducible hϖ
-      · rw [map_add, hcc, add_comm]
+      · rw [map_add (f := _), hcc, add_comm]
     · by_cases h2 : IsUnit (x + y * (ε : K.O))
       · refine ⟨x * ϖ + K.cInt (x * ϖ), ?_, ?_⟩
         · have : x * ϖ + K.cInt (x * ϖ) = ϖ * h2.unit := by
             rw [map_mul, hcx, ← hε]; simp; ring
           rw [this]
           exact (associated_mul_unit_right ϖ _ h2.unit.isUnit).irreducible hϖ
-        · rw [map_add, hcc, add_comm]
+        · rw [map_add (f := _), hcc, add_comm]
       · apply absurd _ hunit
         have e : x - y = (x + y * (ε : K.O)) - y * (1 + (ε : K.O)) := by ring
         rw [e]

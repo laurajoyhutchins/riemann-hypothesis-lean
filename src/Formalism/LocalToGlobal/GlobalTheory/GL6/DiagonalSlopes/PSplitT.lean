@@ -1,7 +1,52 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.LocalDiamondOfSplitIdempotent
-import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.CharacterFiniteLevelZeroOfForms
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.LocalDiamondOfSplitIdempotent
+public import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,14 +67,11 @@ theorem valuation_le_of_pow_dvd {ϖ x : v.adicCompletionIntegers K} {n : ℕ} (h
   have hy : Valued.v (y : v.adicCompletion K) ≤ 1 := by
     first
       | exact y.2
-      | exact (IsDedekindDomain.HeightOneSpectrum.mem_adicCompletionIntegers R K).1 y.2
-      | simpa using y.2
   have hc : ((ϖ ^ n * y : v.adicCompletionIntegers K) : v.adicCompletion K) =
       (ϖ : v.adicCompletion K) ^ n * (y : v.adicCompletion K) := by
     first
       | rfl
       | (push_cast; rfl)
-      | simp
   rw [hc, map_mul, map_pow]
   exact mul_le_of_le_one_right' hy
 
@@ -60,7 +102,7 @@ theorem completion_integers_precomplete {ϖ : v.adicCompletionIntegers K} (hϖ :
     intro y _
     obtain ⟨N, hN⟩ := exists_pow_lt₀ hlt
       (Units.map (MonoidWithZeroHom.ValueGroup₀.embedding
-        (f := (.ofClass (Valued.v : Valuation (v.adicCompletion K) (WithZero (Multiplicative ℤ)))))) y)
+        (f := (.ofClass (Valued.v : Valuation (v.adicCompletion K) (WithZero (Multiplicative ℤ)))))).toMonoidHom y)
     refine ⟨N, fun m hm n hn => ?_⟩
     show Valued.v.restrict (g n - g m) < y.1
     rw [Valuation.restrict_lt_iff_lt_embedding]
@@ -116,7 +158,6 @@ theorem mem_maximal_ideal_completion_iff (r : R) :
     rw [hx]
     first
       | simp [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
-      | simp
   have hle : ∀ y : v.adicCompletionIntegers K, Valued.v (y : v.adicCompletion K) ≤ 1 := fun y => y.2
   rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
   constructor
@@ -128,7 +169,6 @@ theorem mem_maximal_ideal_completion_iff (r : R) :
       first
         | exact (IsDedekindDomain.HeightOneSpectrum.intValuation_eq_one_iff v).2 hr
         | exact (v.intValuation_eq_one_iff).2 hr
-        | exact (v.intValuation_eq_one_iff r).2 hr
     have hx0 : (x : v.adicCompletion K) ≠ 0 := by
       intro h0
       rw [h0, map_zero] at h1
@@ -138,16 +178,12 @@ theorem mem_maximal_ideal_completion_iff (r : R) :
       rw [map_inv₀, h1, inv_one]
     first
       | exact IsUnit.of_mul_eq_one (⟨_, hinv⟩ : v.adicCompletionIntegers K) (Subtype.ext (mul_inv_cancel₀ hx0))
-      | exact IsUnit.of_mul_eq_one (a := x) (⟨_, hinv⟩ : v.adicCompletionIntegers K) (Subtype.ext (mul_inv_cancel₀ hx0))
-      | exact ⟨⟨x, ⟨_, hinv⟩, Subtype.ext (mul_inv_cancel₀ hx0), Subtype.ext (inv_mul_cancel₀ hx0)⟩, rfl⟩
   · intro hr hu
     obtain ⟨y, hy⟩ := hu.exists_right_inv
     have h1 : Valued.v (x : v.adicCompletion K) < 1 := by
       rw [hval]
       first
         | exact (IsDedekindDomain.HeightOneSpectrum.intValuation_lt_one_iff_mem v r).2 hr
-        | exact (v.intValuation_lt_one_iff_mem r).2 hr
-        | exact (v.intValuation_lt_one_iff_mem).2 hr
     have h3 : Valued.v ((x : v.adicCompletion K) * (y : v.adicCompletion K)) = 1 := by
       rw [show (x : v.adicCompletion K) * (y : v.adicCompletion K) =
         ((x * y : v.adicCompletionIntegers K) : v.adicCompletion K) from rfl, hy]
@@ -239,7 +275,7 @@ theorem split_idempotent_of_square_root (σ : E →ₐ[F] E) (v : HeightOneSpect
   · have h1 : (1 : v.adicCompletion F) = H + H := by linear_combination -hH2
     have hs1 : sigR σ (v.adicCompletion F) ((1 : E) ⊗ₜ[F] H + (α : E) ⊗ₜ[F] Y) =
         (1 : E) ⊗ₜ[F] H - (α : E) ⊗ₜ[F] Y := by
-      simp only [sigR, RingHom.coe_coe, AlgHom.toRingHom_eq_coe, map_add, Algebra.TensorProduct.map_tmul,
+      simp only [sigR, RingHom.coe_coe, AlgHom.toRingHom_eq_coe, map_add (f := _), Algebra.TensorProduct.map_tmul,
         map_one, AlgHom.id_apply, hσ, TensorProduct.neg_tmul, sub_eq_add_neg]
     rw [hs1, Algebra.TensorProduct.one_def]
     conv_rhs => rw [h1]
@@ -271,7 +307,7 @@ theorem host_conj_involutive (x : D.host.E) : D.host.conj (D.host.conj x) = x :=
     | (letI := D.host.cmStar; rw [← Formalism.L2.Herm.star_conj, ← Formalism.L2.Herm.star_conj, star_star])
     | (letI := D.host.cmStar; rw [← Formalism.L2.Herm.star_conj, ← Formalism.L2.Herm.star_conj]; exact star_star x)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem splitAtT_of_tied (A : AtTTied u) : SplitAtT A := by
   intro v

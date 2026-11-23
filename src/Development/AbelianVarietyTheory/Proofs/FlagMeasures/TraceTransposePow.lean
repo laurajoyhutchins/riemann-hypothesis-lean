@@ -1,7 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ScalarOfMultOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothAddSmul
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.CommuteGelfandInvariantMatrixUnitsOfGlRel
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PhiCentreEigenfunctionDiscreteSeries
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothAddSmul
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PosPartUnitaryMul
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ScalarOfMultOne
+public import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset Formalism.MainNotions.S Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.Count GlobalTheory.Dec
 open scoped InnerProductSpace ComplexOrder
@@ -73,8 +124,8 @@ private lemma sum_mulVec_one_eq_sum_entries {n : ℕ} (P : Matrix (Fin n) (Fin n
     ∑ i, (P *ᵥ fun _ => (1 : ℂ)) i = ∑ a, ∑ b, P a b := by
   simp [Matrix.mulVec, dotProduct]
 
-open Polynomial in
 
+open Polynomial in
 theorem trace_transpose_pow {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ} (E : Fin n → Fin n → Module.End ℂ V)
     (hE : Formalism.REAL.GlRel E) (χ : Fin n → ℂ) (v : V)
     (hv : ∀ k : ℕ, (∑ c, (Matrix.of E ^ k) c c) v = gelfVal χ k • v) (m : ℕ) :
@@ -113,6 +164,7 @@ theorem trace_transpose_pow {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
         (if j = 0 then φ else 0), fun a b => ?_, ?_⟩
       · rw [sum_range_shift_smul_eq_sub_add α m (n : ℂ) φ (fun j => (Matrix.of E ^ j) b a v)]
         rw [pow_succ', Matrix.mul_apply, LinearMap.sum_apply]
+
         simp only [Module.End.mul_apply, Matrix.of_apply, h1, map_sum, map_smul]
         rw [Finset.sum_comm]
         simp only [← Finset.smul_sum]
@@ -168,8 +220,8 @@ theorem trace_transpose_pow {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
 
 variable {n : ℕ}
 
-open GlobalTheory.CapelliCentral in
 
+open GlobalTheory.CapelliCentral in
 lemma word_apply {ε : Fin n → Bool} (w : List (Fin n × Fin n)) (F : smoothSpace ε ℂ) {f : Matrix (Fin n) (Fin n) ℂ → ℂ}
     (h : ∀ g, inUJ ε g → F.1 g = f g) :
     ∀ g, inUJ ε g → ((w.map fun p => eabEnd ε ℂ p.1 p.2).prod F).1 g = Eword ε w f g := by
@@ -210,25 +262,10 @@ private lemma matrix_of_pow_succ_apply_eq_sum_prod {A : Type} [Ring A] (E : Fin 
 
 lemma sum_cycWord {A : Type} [Ring A] (E : Fin n → Fin n → A) (m : ℕ) :
     ∑ a : Fin (m + 1) → Fin n, ((cycWord a).map fun p => E p.1 p.2).prod = ∑ c, (Matrix.of E ^ (m + 1)) c c := by
-  simp_rw [matrix_of_pow_succ_apply_eq_sum_prod E m]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Finset.sum_ite_eq]
-  simp only [Finset.mem_univ, if_true, cycWord, List.map_ofFn]
-  congr 1
-  refine List.ofFn_inj.mpr ?_
-  funext t
-  simp only [Function.comp_apply]
-  by_cases ht : t = Fin.last m
-  · subst ht
-    simp [Fin.snoc_last]
-  · have hs : t.succ = (finRotate (m + 1) t).castSucc := by
-      ext
-      simp [Fin.val_add_one_of_lt (Fin.lt_last_iff_ne_last.2 ht)]
-    rw [hs, Fin.snoc_castSucc, Fin.snoc_castSucc]
+  apply GlobalTheory.PhiEigenfun.sum_cycWord <;> assumption
+
 
 open GlobalTheory.CapelliCentral in
-
 lemma gelf_apply {ε : Fin n → Bool} (m : ℕ) (F : smoothSpace ε ℂ) {f : Matrix (Fin n) (Fin n) ℂ → ℂ}
     (h : ∀ g, inUJ ε g → F.1 g = f g) {g : Matrix (Fin n) (Fin n) ℂ} (hg : inUJ ε g) :
     ((∑ c, (Matrix.of (eabEnd ε ℂ) ^ (m + 1)) c c) F).1 g = gelf ε m f g := by
@@ -416,39 +453,6 @@ lemma Eab_perm (ε : Fin n → Bool) (s : Equiv.Perm (Fin n)) (a b : Fin n) (f :
     simp [Matrix.single_apply, s.injective.eq_iff]
   simp only [Formalism.REAL.Eab, Formalism.REAL.Ec, rd_submatrix_perm, cpart1_submatrix_perm, cpart2_submatrix_perm, hsg]
 
-lemma Eword_perm (ε : Fin n → Bool) (s : Equiv.Perm (Fin n)) (f : Matrix (Fin n) (Fin n) ℂ → ℂ) (w : List (Fin n × Fin n)) :
-    Eword ε (w.map fun p => (s p.1, s p.2)) (fun x => f (x.submatrix s s)) =
-      fun g => Eword (ε ∘ s) w f (g.submatrix s s) := by
-  induction w with
-  | nil => rfl
-  | cons p w ih =>
-    funext g
-    simp only [List.map_cons, Formalism.REAL.Eword]
-    rw [ih]
-    exact Eab_perm ε s p.1 p.2 _ g
-
-attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
-lemma isZEigen_perm {ε : Fin n → Bool} (s : Equiv.Perm (Fin n)) {χ : Fin n → ℂ} {f : Matrix (Fin n) (Fin n) ℂ → ℂ}
-    (h : IsZEigen (ε ∘ s) χ f) : IsZEigen ε χ (fun x => f (x.submatrix s s)) := by
-  obtain ⟨hsm, hev⟩ := h
-  have hc : ∀ {k : WithTop ℕ∞}, ContDiff ℝ k (fun x : Matrix (Fin n) (Fin n) ℂ => x.submatrix s s) :=
-    contDiff_pi.2 fun i => contDiff_pi.2 fun j => contDiff_apply_apply ℝ ℂ (s i) (s j)
-  refine ⟨?_, ?_⟩
-  · intro g₀ hg₀
-    obtain ⟨U, F, hU, hgU, hF, hfF⟩ := hsm (g₀.submatrix s s) (UJ_perm s hg₀)
-    exact ⟨(fun x : Matrix (Fin n) (Fin n) ℂ => x.submatrix s s) ⁻¹' U, fun x => F (x.submatrix s s),
-      hU.preimage (hc (k := 0)).continuous, hgU, hF.comp hc.contDiffOn (fun x hx => hx),
-      fun g hg hgu => hfF _ hg (UJ_perm s hgu)⟩
-  · intro m g hg
-    have hg' : g.submatrix s s ∈ UJset (ε ∘ s) := UJ_perm s hg
-    have key : gelf ε m (fun x => f (x.submatrix s s)) g = gelf (ε ∘ s) m f (g.submatrix s s) := by
-      unfold gelf
-      symm
-      refine Fintype.sum_equiv (Equiv.piCongrRight fun _ => s) _ _ (fun a => ?_)
-      have hw : cycWord ((Equiv.piCongrRight fun _ => s) a) = (cycWord a).map fun p => (s p.1, s p.2) := by
-        simp [cycWord, List.map_ofFn, Function.comp_def]
-      rw [hw, Eword_perm]
-    rw [key, hev m _ hg']
 
 theorem trWord : ∀ (n : ℕ) (ε : Fin n → Bool) (χ : Fin n → ℂ) (f : Matrix (Fin n) (Fin n) ℂ → ℂ), SmoothOnG ε f → IsZEigen ε χ f → ∀ m : ℕ, ∀ g ∈ UJset ε, ∑ a : Fin (m + 1) → Fin n, Eword ε ((cycWord a).map Prod.swap) f g = (-1) ^ (m + 1) * gelfVal (fun a => -χ a) (m + 1) * f g := by
   intro n ε χ f hf hz m g hg
@@ -490,7 +494,7 @@ theorem eigConj : ∀ (n : ℕ) (ε : Fin n → Bool) (χ : Fin n → ℂ) (f : 
     obtain ⟨U, F, hU, hgU, hF, hfF⟩ := hf (g₀.map star) (UJ_star hg₀)
     have hc : ∀ {k : WithTop ℕ∞}, ContDiff ℝ k (fun x : Matrix (Fin n) (Fin n) ℂ => x.map star) :=
       contDiff_pi.2 fun i => contDiff_pi.2 fun j =>
-        (Complex.conjCLE : ℂ →L[ℝ] ℂ).contDiff.comp (contDiff_apply_apply ℝ ℂ i j)
+        (Complex.conjCLE : ℂ →L[ℝ] ℂ).contDiff.comp (contDiff_apply_apply (𝕜 := ℝ) i j)
     refine ⟨(fun x : Matrix (Fin n) (Fin n) ℂ => x.map star) ⁻¹' U, fun x => F (x.map star),
       hU.preimage (hc (k := 0)).continuous, by simpa using hgU, hF.comp hc.contDiffOn (fun x hx => hx), ?_⟩
     intro g hg hgu

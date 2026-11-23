@@ -1,20 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ConductorExponents
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ImagePolynomialAction
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.RepresentationBounds
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CokernelLatticeMapKilledByPrimePowStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NumericalConditionsTheoremTLargePrimeStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ConductorExponents
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentFiniteFreeInvertPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentMonodromyImageValuationStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentPowSmulMonodromyAddPhiMemStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinExactTripleJumpsCharactersLiftStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CokernelLatticeMapKilledByPrimePowStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsMemTameDescentClassEqOfPowMemStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsMonodromyEqLeadingCoeffBreuilKisinDescentStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAdicCompleteTwistedInvariantLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsHausdorffInvariantsQuotientOfFiniteFreeStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LiftImageEulerEInvariantsQuotientStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MaxFrobeniusOrbitLengthDiffBoundsZmodStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinExactTripleJumpsCharactersLiftStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MonodromyMemRangeOfInvariantVectorStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentFiniteFreeInvertPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentMonodromyImageValuationStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentPowSmulMonodromyAddPhiMemStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LiftImageEulerEInvariantsQuotientStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsMemTameDescentClassEqOfPowMemStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsMonodromyEqLeadingCoeffBreuilKisinDescentStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAdicCompleteTwistedInvariantLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsHausdorffInvariantsQuotientOfFiniteFreeStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NumericalConditionsTheoremTLargePrimeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.RepresentationBounds
+
+@[expose] public section
 
 open PowerSeries GlobalTheory.BK
 
@@ -55,7 +95,7 @@ theorem lifting_along_exact_triple : GlobalTheory.IndefiniteRowSideFullHecke.Con
   obtain ⟨m₁, hm₁, hGm₁⟩ := hkMinv m₂ hm₂
   rw [hcast] at hGy₁ hGm₁
   have hG1 : G.app (y₁ + D₁.phi m₁) = (l : K) ^ ρ • (y₂ + D₂.phi m₂) := by
-    rw [map_add, G.app_phi, hGy₁, hGm₁, map_smul, smul_add]
+    rw [map_add (f := _), G.app_phi, hGy₁, hGm₁, map_smul, smul_add]
 
   set ω := D₁.Mon (y₁ + D₁.phi m₁) with hω
   have hω1 : (l : K) ^ (η * (r + 1)) • ω ∈ D₁.Z :=
@@ -97,6 +137,7 @@ theorem lifting_along_exact_triple : GlobalTheory.IndefiniteRowSideFullHecke.Con
 
   have hGF : ∀ v : Vec K a ι₀, G.app (F.app v) = 0 := by
     intro v
+
     rw [eq_sum_bas v, map_sum, map_sum]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [F.app_smul_tot, G.app_smul_tot]

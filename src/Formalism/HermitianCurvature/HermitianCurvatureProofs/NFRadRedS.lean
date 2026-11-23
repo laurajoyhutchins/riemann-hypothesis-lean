@@ -1,4 +1,52 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+public import Formalism.HermitianCurvature.StatementNF
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Filter Topology
 open scoped ContDiff
@@ -136,7 +184,7 @@ theorem phi_val (hπ : IsCRepOn (UWset k r z) π) (hπ' : IsCRepOn (UWset k r z'
   have hex : ∃ p : Q.Mx k r × Q.Mx k r, p.1 ∈ UWset k r z ∧ p.2 ∈ UWset k r z' ∧
       g = p.1 * muZ k r μsec (zetaL k r z z' (Fin.last r) g) * p.2 := ⟨(a, b), ha, hb, hg⟩
   unfold Phi
-  rw [dif_pos ⟨hx, hex⟩]
+  rw [dite_eq_left ⟨hx, hex⟩]
   obtain ⟨h1, h2, h3⟩ := Classical.choose_spec hex
   exact wd hπ hπ' (hφ _ hq) h1 ha h2 hb (h3.symm.trans hg)
 
@@ -169,7 +217,7 @@ theorem radRedSurj_of (hL : LocSec) (hR : RepSmooth) : NF.RadRedSurj := by
   · intro x hx
     show Phi k r z z' μsec π π' φ x.1 x.2 = 0
     unfold Phi
-    rw [dif_neg]
+    rw [dite_eq_right]
     exact fun h => hx h.1
   · rintro ⟨c₀, g₀⟩ ⟨hc₀, hg₀l, hg₀g⟩
     obtain ⟨V, hV, hg₀V, a, b, ha_s, hb_s, hab⟩ := hL k r z z' μsec hk hz hz' hT hT' hsec g₀ hg₀l hg₀g

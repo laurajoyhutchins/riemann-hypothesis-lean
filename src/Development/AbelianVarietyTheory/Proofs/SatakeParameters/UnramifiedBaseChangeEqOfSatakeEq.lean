@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.BcParamEqOfSatUEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeylConjugateOfUnitarySatakeDiagDoubleCosets
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.BcParamEqOfSatUEq
+import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+
+@[expose] public section
 
 noncomputable section
 
@@ -107,9 +150,10 @@ theorem ne_zero_of_symJ (α : Fin m → ℂˣ) (α₀ : Fin m → ℂ) (i₀ : F
     refine hli (funext fun k => ?_)
     have := h k.toAdd
     simp only [symJ, monoJ_single] at this
+
     simpa [map_sum, powersHom_apply] using this
   have h1 := DFunLike.congr_fun e 0
-  rw [Finsupp.finset_sum_apply, Finsupp.finset_sum_apply, Finset.sum_eq_zero (s := Finset.univ)
+  rw [Finsupp.finsetSum_apply, Finsupp.finsetSum_apply, Finset.sum_eq_zero (s := Finset.univ)
     (f := fun w : Sgn m => (Finsupp.single (actJ w (fun j => (α j : ℂ)) i₀) (1 : ℂ)) 0) fun w _ =>
       Finsupp.single_eq_of_ne (zpow_ne_zero _ (Units.ne_zero _)).symm] at h1
   simp only [Finsupp.single_apply, Finset.sum_boole, Nat.cast_eq_zero, Finset.card_eq_zero,
@@ -191,7 +235,7 @@ theorem bcParam_eq_ubc_of_satU_eq : ∀ (L : Type) [Field L] [Valued L (WithZero
   have e : bcParam n α = bcParam n β :=
     bcParam_of_weylConj (GlobalTheory.LFun.weylConj_of_dosetInd hU (by rw [hβ]; exact h))
   rw [e, bcParam, ubc]
-  simp only [Multiset.map_add, Multiset.map_map, Function.comp_def, Units.val_inv_eq_inv_val, Multiset.map_replicate,
+  simp only [Multiset.map_add (f := _), Multiset.map_map, Function.comp_def, Units.val_inv_eq_inv_val, Multiset.map_replicate,
     Units.val_one]
   rw [← hβ]
   congr 1

@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GLnLattice
+module
+
+public import GroundTheory.AutomorphicForms.GLnLocal
+public import GroundTheory.AutomorphicForms.GLnLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,7 +97,7 @@ theorem borel_le_blockUpper {α : Type*} [LinearOrder α] {β : Fin n → α} (h
 
 theorem upper_mul_apply_self {A C : Matrix (Fin n) (Fin n) F} (hA : A.IsUpperTriangular)
     (hC : C.IsUpperTriangular) (i : Fin n) : (A * C) i i = A i i * C i i := by
-  rw [mul_apply, Finset.sum_eq_single i]
+  rw [Matrix.mul_apply, Finset.sum_eq_single i]
   · intro k _ hk
     rcases lt_or_gt_of_ne hk with h | h
     · rw [hA h, zero_mul]
@@ -349,25 +400,11 @@ theorem exists_borel_mul_integralGL (g : GL (Fin n) F) :
   rw [← mapSubmodule_standardLattice_eq_iff, mapSubmodule_mul, ← hL, ← hbL,
     mapSubmodule_inv_mapSubmodule]
 
-theorem borel_mul_integralGL :
-    (borel F n : Set (GL (Fin n) F)) * (integralGL F n : Set (GL (Fin n) F)) = Set.univ := by
-  refine Set.eq_univ_of_forall fun g => ?_
-  obtain ⟨b, hb, k, hk, rfl⟩ := exists_borel_mul_integralGL F n g
-  exact Set.mul_mem_mul hb hk
-
 theorem exists_blockUpper_mul_integralGL {α : Type*} [LinearOrder α] {β : Fin n → α}
     (hβ : Monotone β) (g : GL (Fin n) F) :
     ∃ p ∈ blockUpper F n β, ∃ k ∈ integralGL F n, g = p * k := by
   obtain ⟨b, hb, k, hk, rfl⟩ := exists_borel_mul_integralGL F n g
   exact ⟨b, borel_le_blockUpper F n hβ hb, k, hk, rfl⟩
-
-theorem blockUpper_mul_integralGL {α : Type*} [LinearOrder α] {β : Fin n → α}
-    (hβ : Monotone β) :
-    (blockUpper F n β : Set (GL (Fin n) F)) * (integralGL F n : Set (GL (Fin n) F)) =
-      Set.univ := by
-  refine Set.eq_univ_of_forall fun g => ?_
-  obtain ⟨p, hp, k, hk, rfl⟩ := exists_blockUpper_mul_integralGL F n hβ g
-  exact Set.mul_mem_mul hp hk
 
 end Decomposition
 

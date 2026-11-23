@@ -1,11 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EmbLLMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PairIntAt
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SumFinsuppAntidiagProdPowDivMultiFactorial
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMulOfApprox
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FockNormExtremalVectorEqBoundedNat
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MonomialDerivCauchyBoundGaussianGrowth
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SumFinsuppAntidiagProdPowDivMultiFactorial
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsMulOfApprox
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SubDSharpInDeg
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FockNormExtremalVectorEqBoundedNat
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MonomialDerivCauchyBoundGaussianGrowth
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.SumIcoTsubTelescope
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EmbLLMem
+
+@[expose] public section
 
 open MvPolynomial Formalism.BasicNotions Formalism.L2.DIV Formalism.L2.Ker GlobalTheory.MvPoly
 open GlobalTheory.IndefiniteRowSideFullHecke.SubstitutionAdjoint (sharp)
@@ -281,7 +323,7 @@ theorem prod_eNorm_le (lam : ι → DomWeight a) {T : ℝ} (ha : (a : ℝ) ≤ T
     ∏ τ, eNorm (lam τ) ≤ T ^ (3 * ∑ τ, ∑ i, (lam τ).natW i) := by
   have hT : (0 : ℝ) ≤ T := le_trans (Nat.cast_nonneg _) ha
   rw [Finset.mul_sum, ← Finset.prod_pow_eq_pow_sum]
-  apply Finset.prod_le_prod
+  apply Finset.prod_le_prod₀
   · intro τ _
     exact le_trans zero_le_one (one_le_eNorm _)
   · intro τ _
@@ -345,10 +387,10 @@ theorem jetOp_le (lam : ι → DomWeight a) (lam' : ι → DomWeight b) (n : ι 
   have hQV : jetMap J n (v : Pol ℂ ι a) ∈ Formalism.L2.DIV.VV ℂ lam' := hV J _ hPV
   rw [GlobalTheory.JetPoint.coe_jetOp lam lam' J n v hQV]
   have hone : ∀ lm : ι → DomWeight a, (1 : ℝ) ≤ ∏ τ, eNorm (lm τ) := fun lm => by
-    simpa using Finset.prod_le_prod (s := Finset.univ) (f := fun _ => (1 : ℝ))
+    simpa using Finset.prod_le_prod₀ (s := Finset.univ) (f := fun _ => (1 : ℝ))
       (g := fun τ => eNorm (lm τ)) (fun _ _ => zero_le_one) (fun τ _ => one_le_eNorm _)
   have hone' : (1 : ℝ) ≤ ∏ τ, eNorm (lam' τ) := by
-    simpa using Finset.prod_le_prod (s := Finset.univ) (f := fun _ => (1 : ℝ))
+    simpa using Finset.prod_le_prod₀ (s := Finset.univ) (f := fun _ => (1 : ℝ))
       (g := fun τ => eNorm (lam' τ)) (fun _ _ => zero_le_one) (fun τ _ => one_le_eNorm _)
   have hEpos : (0 : ℝ) < ∏ τ, eNorm (lam τ) := lt_of_lt_of_le zero_lt_one (hone lam)
   have hPh : (v : Pol ℂ ι a).IsHomogeneous (∑ τ, ∑ i, (lam τ).natW i) :=

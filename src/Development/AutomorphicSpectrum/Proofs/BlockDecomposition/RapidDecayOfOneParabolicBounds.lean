@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspRapidDecaySiegelGL
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStable
+module
+
+public import GroundTheory.AutomorphicForms.ReductionSiegel
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
+
 open NumberField GlobalTheory.CuspRep GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.Reduction
 open scoped NumberField.AdeleRing
 
@@ -60,7 +105,7 @@ theorem le_of_ratio_le {n : ℕ} {ρ : Fin n → ℝ} (hρ : ∀ i, 0 < ρ i) (h
   have h2 : ρ i ^ n ≤ R ^ n := by
     rw [h1]
     calc ∏ j, ρ i / ρ j ≤ ∏ _j : Fin n, R :=
-          Finset.prod_le_prod (fun j _ => (div_pos (hρ i) (hρ j)).le) (fun j _ => h i j)
+          Finset.prod_le_prod₀ (fun j _ => (div_pos (hρ i) (hρ j)).le) (fun j _ => h i j)
       _ = R ^ n := by simp
   exact (pow_le_pow_iff_left₀ (hρ i).le (by linarith) hn).1 h2
 
@@ -80,7 +125,7 @@ theorem one_le_rpow_mul_prod {n : ℕ} {ρ : Fin n → ℝ} (hρ : ∀ i, 0 < ρ
   have hR0 : 0 < R := by linarith
   rw [Real.rpow_sum_of_pos hR0, ← Finset.prod_mul_distrib]
   calc (1 : ℝ) = ∏ _i : Fin n, (1 : ℝ) := by simp
-    _ ≤ _ := Finset.prod_le_prod (fun _ _ => zero_le_one) (fun i _ => ?_)
+    _ ≤ _ := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun i _ => ?_)
   rcases le_total 0 (lam i) with hl | hl
   · rw [abs_of_nonneg hl, ← Real.mul_rpow hR0.le (hρ i).le]
     refine Real.one_le_rpow ?_ hl
@@ -141,7 +186,7 @@ theorem rapid_decay_of_one_parabolic_bounds : ∀ (K : Type) [Field K] [NumberFi
       have h1 : (fun i => posIdele (K := K) (r i) (hr i)) = 1 := by
         funext i
         have h2 : (⟨r i, hr i⟩ : {x : ℝ // 0 < x}) = 1 := Subtype.ext (hr1 i)
-        change posIdeleHom K ⟨r i, hr i⟩ = 1
+        change posIdeleHom (K := K) ⟨r i, hr i⟩ = 1
         rw [h2, map_one]
       rw [h1, map_one]
     have hP : ∏ i, r i ^ lam i = 1 :=

@@ -1,11 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiP
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiPart
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.TauPart
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DerivG
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ByParts
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiM
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirAlgebra.RhoEqRhoCAddRhoN
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiM
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiP
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DTauFacts
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFactsA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiPart
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.TauPart
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,14 +86,6 @@ lemma lowMinusUp_expand {B : Matrix (Fin n) (Fin n) ℂ} (hB : IsBlock ε B) :
     first
     | simp only [Matrix.sum_apply, Matrix.smul_apply, Matrix.single_apply, smul_eq_mul, mul_ite,
         mul_one, mul_zero]
-    | (simp only [Matrix.sum_apply]
-       refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
-       by_cases h : a = i ∧ b = j
-       · rw [if_pos h]
-         obtain ⟨rfl, rfl⟩ := h
-         simp
-       · rw [if_neg h]
-         simp [Matrix.single_apply, h])
   rw [hsum]
   rw [Finset.sum_eq_single i (fun a _ ha => Finset.sum_eq_zero fun b _ => if_neg fun h => ha h.1)
     (fun h => absurd (Finset.mem_univ i) h)]
@@ -74,9 +115,6 @@ lemma isBlock_single {a b : Fin n} (h : ε b = ε a) : IsBlock ε (Matrix.single
     exact absurd h.symm hne
   · first
     | rw [Matrix.single_apply, if_neg h']
-    | simp [Matrix.single_apply, h']
-    | (simp only [Matrix.single_apply]
-       exact if_neg h')
 
 lemma scal (μ : Fin n → ℤ) (hμ : IsMu lam μ) (B : Matrix (Fin n) (Fin n) ℂ) :
     2 * ∑ a, (μ a : ℂ) * B a a =
@@ -106,12 +144,9 @@ lemma scal (μ : Fin n → ℤ) (hμ : IsMu lam μ) (B : Matrix (Fin n) (Fin n) 
       first
       | (rw [Finset.filter_lt_eq_Ioi, Fin.card_Ioi]
          omega)
-      | (simp only [Finset.filter_lt_eq_Ioi, Fin.card_Ioi]
-         omega)
     have hc2 : (univ.filter (fun b : Fin n => b < a)).card = (a : ℕ) := by
       first
       | rw [Finset.filter_gt_eq_Iio, Fin.card_Iio]
-      | simp [Finset.filter_gt_eq_Iio]
     have hr : ((μ a : ℤ) : ℝ) = lowK ε lam a + 2 * rhoC ε a := by
       rw [hμ a]
       delta lowK rhoC rhoN rho
@@ -146,11 +181,11 @@ lemma integral_Ssum [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n → ℤ
       InfKA.Ek T μ x (InfKA.entryCLM a b) A (Matrix.single a b 1) k) (muK ε) := fun a b =>
     InfKA.integrable_of_cont ((InfKA.continuous_Ek T μ hx (InfKA.entryCLM a b) A
       (Matrix.single a b 1)).const_smul (if b < a then (1 : ℂ) else -1))
-  refine ⟨integrable_finset_sum _ fun a _ => integrable_finset_sum _ fun b _ => hI a b, ?_⟩
+  refine ⟨MeasureTheory.integrable_finsetSum _ fun a _ => MeasureTheory.integrable_finsetSum _ fun b _ => hI a b, ?_⟩
   unfold Ssum
-  rw [integral_finset_sum _ fun a _ => integrable_finset_sum _ fun b _ => hI a b]
+  rw [MeasureTheory.integral_finsetSum _ fun a _ => MeasureTheory.integrable_finsetSum _ fun b _ => hI a b]
   refine sum_eq_zero fun a _ => ?_
-  rw [integral_finset_sum _ fun b _ => hI a b]
+  rw [MeasureTheory.integral_finsetSum _ fun b _ => hI a b]
   refine sum_eq_zero fun b hb => ?_
   rw [integral_smul (if b < a then (1 : ℂ) else -1)
     (fun k => InfKA.Ek T μ x (InfKA.entryCLM a b) A (Matrix.single a b 1) k), InfKA.integral_Ek_block T μ hx _ A (isBlock_single (mem_filter.mp hb).2.1), smul_zero]

@@ -1,8 +1,74 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IncludeLInjective
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CayleyTransformMemRationalUnitaryGroup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFinBasisCoeffsEmbeddingsEvalStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNormOneCmFieldDetOneAddNeZeroCharZeroStatement
+module
+
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import ReciprocityTheory.Automorphisms.Unitary
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CayleyTransformMemRationalUnitaryGroup
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFinBasisCoeffsEmbeddingsEvalStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNormOneCmFieldDetOneAddNeZeroCharZeroStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExponentAndTwistData
+import Formalism.AlgebraicWeights.IsAlgWeight
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.Objects
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Mathlib.Algebra.MvPolynomial.Funext
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX GlobalTheory.HeightCounting GlobalTheory.HeightCounting.FormsStep NumberField IsDedekindDomain Polynomial
 open scoped TensorProduct
 
@@ -78,12 +144,14 @@ theorem eval_skewPoly (σ : L →+* K) (x : Fin (Module.finrank ℚ L) × Fin n 
     MvPolynomial.eval x (skewPoly L K n σ a b) =
       ∑ i, σ (Module.finBasis ℚ L i) * x (i, a, b) -
         ∑ i, σ ((IsCMField.complexConj L : L →+* L) (Module.finBasis ℚ L i)) * x (i, b, a) := by
+
   simp [skewPoly, linPoly, Matrix.sub_apply, Matrix.transpose_apply, map_sum]
 
 theorem skewRat_map (σ : L →+* K) (x : Fin (Module.finrank ℚ L) × Fin n × Fin n → ℚ) :
     (skewRat L n x).map σ = (skewPoly L K n σ).map (MvPolynomial.eval (fun v => (x v : K))) := by
   ext a b
   rw [Matrix.map_apply, Matrix.map_apply, eval_skewPoly]
+
   simp [skewRat, map_sum, map_sub, mul_comm]
 
 theorem skewRat_skew (x : Fin (Module.finrank ℚ L) × Fin n × Fin n → ℚ) :
@@ -104,7 +172,7 @@ theorem clear_denom : ∀ {V W K : Type} [Field K] (g : MvPolynomial V K) (f : W
     obtain ⟨q1, k1, h1⟩ := hp
     obtain ⟨q2, k2, h2⟩ := hq
     refine ⟨q1 * g ^ k2 + q2 * g ^ k1, k1 + k2, fun x hx => ?_⟩
-    rw [map_add, map_add, map_mul, map_mul, map_pow, map_pow, ← h1 x hx, ← h2 x hx]
+    rw [map_add (f := _), map_add (f := _), map_mul, map_mul, map_pow, map_pow, ← h1 x hx, ← h2 x hx]
     ring
   | mul_X p w hp =>
     obtain ⟨q1, k1, h1⟩ := hp
@@ -187,7 +255,7 @@ theorem generic_vanish [Nonempty (L →+* K)] (P : MvPolynomial ((L →+* K) × 
   have hd : ∀ y σ, MvPolynomial.eval y (d σ) = (1 + (skewPoly L K n σ).map (MvPolynomial.eval y)).det := by
     intro y σ
     simp only [d]
-    rw [RingHom.map_det, map_add, map_one, RingHom.mapMatrix_apply]
+    rw [RingHom.map_det, map_add (f := _), map_one, RingHom.mapMatrix_apply]
   have hg : ∀ y, MvPolynomial.eval y g = ∏ σ, MvPolynomial.eval y (d σ) := fun y => map_prod _ _ _
   have hev : ∀ y, (∀ σ, MvPolynomial.eval y (d σ) ≠ 0) → ∀ p : (L →+* K) × Fin n × Fin n,
       MvPolynomial.eval y (f p) / MvPolynomial.eval y g =
@@ -204,7 +272,7 @@ theorem generic_vanish [Nonempty (L →+* K)] (P : MvPolynomial ((L →+* K) × 
       have e : (MvPolynomial.eval y).mapMatrix ((1 - skewPoly L K n p.1) * (1 + skewPoly L K n p.1).adjugate) =
           (1 - (skewPoly L K n p.1).map (MvPolynomial.eval y)) *
             (1 + (skewPoly L K n p.1).map (MvPolynomial.eval y)).adjugate := by
-        rw [map_mul, map_sub, map_one, RingHom.map_adjugate, map_add, map_one]; rfl
+        rw [map_mul, map_sub, map_one, RingHom.map_adjugate, map_add (f := _), map_one]; rfl
       exact congrFun (congrFun e _) _
     simp only [f]
     rw [map_mul, hN, hsplit, mul_div_mul_right _ _ hE, hd]

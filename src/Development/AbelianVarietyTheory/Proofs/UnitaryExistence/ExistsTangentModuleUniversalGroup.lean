@@ -1,9 +1,54 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,10 +151,6 @@ theorem smT_smT (a b : S) (v : overAt x0 (DualNumber S) ⟶ G) : smT x0 a (smT x
 theorem smT_unit (v : overAt x0 (DualNumber S) ⟶ G) : smT x0 1 v = v := by
   simp only [smT, one_smul, tm]
   rw [TrivSqZeroExt.map_id, homAt_id, Category.id_comp]
-
-theorem smT_comp {G' : Over X0} (a : S) (v : overAt x0 (DualNumber S) ⟶ G) (φ : G ⟶ G') :
-    homAt x0 (tm (a • (LinearMap.id : S →ₗ[S] S))) ≫ (v ≫ φ) = smT x0 a v ≫ φ := by
-  simp only [smT, Category.assoc]
 
 theorem smT_add (v : overAt x0 (DualNumber S) ⟶ G) (h0 : smT x0 0 v = 1) (a b : S) :
     smT x0 (a + b) v = smT x0 a v * smT x0 b v := by
@@ -216,8 +257,8 @@ def smHom (a : S) : (overAt x0 (DualNumber S) ⟶ G) →* (overAt x0 (DualNumber
   map_one' := smT_one' x0 a
   map_mul' := smT_mul x0 a
 
-variable (G) in
 
+variable (G) in
 def TanSp : Type := Additive (smHom (G := G) x0 0).ker
 
 instance : AddCommGroup (TanSp x0 G) := inferInstanceAs (AddCommGroup (Additive (smHom (G := G) x0 0).ker))
@@ -230,8 +271,6 @@ def TanSp.pt (m : TanSp x0 G) : overAt x0 (DualNumber S) ⟶ G :=
 def TanSp.mk (W : overAt x0 (DualNumber S) ⟶ G) (h : smT x0 0 W = 1) : TanSp x0 G :=
   (Additive.ofMul (⟨W, h⟩ : (smHom (G := G) x0 0).ker) : Additive (smHom (G := G) x0 0).ker)
 
-theorem TanSp.pt_mk (W : overAt x0 (DualNumber S) ⟶ G) (h : smT x0 0 W = 1) : (TanSp.mk W h).pt = W := rfl
-
 theorem TanSp.tan (m : TanSp x0 G) : smT x0 0 m.pt = 1 :=
   (Additive.toMul (show Additive (smHom (G := G) x0 0).ker from m)).2
 
@@ -239,12 +278,8 @@ theorem TanSp.ext {m n : TanSp x0 G} (h : m.pt = n.pt) : m = n := Subtype.ext h
 
 theorem TanSp.pt_add (m n : TanSp x0 G) : (m + n).pt = m.pt * n.pt := rfl
 
-theorem TanSp.pt_zero : (0 : TanSp x0 G).pt = 1 := rfl
-
 instance : SMul S (TanSp x0 G) where
   smul a m := TanSp.mk (smT x0 a m.pt) (by rw [smT_smT, zero_mul, m.tan])
-
-theorem TanSp.pt_smul (a : S) (m : TanSp x0 G) : (a • m).pt = smT x0 a m.pt := rfl
 
 instance : Module S (TanSp x0 G) where
   one_smul m := TanSp.ext (smT_unit x0 _)
@@ -261,8 +296,8 @@ theorem TanSp.pt_sum {κ : Type} (s : Finset κ) (f : κ → TanSp x0 G) :
   | empty => rfl
   | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, TanSp.pt_add, ih]
 
-variable (x0) in
 
+variable (x0) in
 def TanSp.post (φ : G ⟶ G) (hφ : IsMonHom φ) : Module.End S (TanSp x0 G) where
   toFun m := TanSp.mk (m.pt ≫ φ) (by rw [smT_post, m.tan, MonObj.one_comp])
   map_add' m n := TanSp.ext (MonObj.mul_comp _ _ φ)
@@ -271,8 +306,8 @@ def TanSp.post (φ : G ⟶ G) (hφ : IsMonHom φ) : Module.End S (TanSp x0 G) wh
 theorem TanSp.pt_post (φ : G ⟶ G) (hφ : IsMonHom φ) (m : TanSp x0 G) :
     (TanSp.post x0 φ hφ m).pt = m.pt ≫ φ := rfl
 
-variable (x0) in
 
+variable (x0) in
 def TanSp.act {O : Type} [CommRing O] (A : OAct O G) : O →+* Module.End S (TanSp x0 G) :=
   RingHom.mk'
     { toFun := fun a => TanSp.post x0 (A.act a) (A.hom a)

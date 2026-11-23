@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import Mathlib.Topology.Instances.ZMod
+public import Mathlib.Topology.LocallyConstant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,12 +90,7 @@ def tpowT (r : ℕ) (A : Type) [CommRing A] (j : Wt r) : (TA r A)ˣ :=
 def tpow {A : Type} [CommRing A] {r : ℕ} (t : Fin r → Aˣ) (j : Wt r) : A :=
   ((∏ s, t s ^ j s : Aˣ) : A)
 
-def IsEigen {O A : Type} [CommRing O] [CommRing A] [Algebra O A] {r : ℕ} (c : A →ₐ[O] TA r A)
-    (j : Wt r) (x : A) : Prop :=
-  c x = (tpowT r A j : TA r A) * MvPowerSeries.C x
-
 inductive GGKind | typeThree | typeTwo | GSp4
-  deriving DecidableEq
 
 def GGKind.n : GGKind → ℕ
   | .typeThree => 3
@@ -310,16 +356,6 @@ open scoped Classical
 section Prob
 
 variable (P : LiftProb)
-
-def nIdeal : Ideal P.Rbox.C :=
-  Ideal.span (Set.range fun i => nEqG (P.nx i) (P.npos i) (P.ncst i) P.uBox)
-
-structure AQuot where
-  Ahat : TR P.O
-  q : P.Rbox.C →ₐ[P.O] Ahat.C
-  surj : Function.Surjective q
-  n_ker : nIdeal P ≤ RingHom.ker q
-  stable : ∀ x ∈ RingHom.ker q, MvPowerSeries.map q.toRingHom (P.coBox x) = 0
 
 end Prob
 

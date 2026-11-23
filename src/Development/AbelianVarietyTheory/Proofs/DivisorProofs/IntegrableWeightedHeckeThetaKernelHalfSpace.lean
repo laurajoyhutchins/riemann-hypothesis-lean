@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.CompletedLStripBounds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormWt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussZero
+public import Mathlib.MeasureTheory.Function.L1Space.Integrable
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+public import Mathlib.MeasureTheory.Integral.ExpDecay
+
+@[expose] public section
+
 open NumberField MeasureTheory
 
 noncomputable section
@@ -54,7 +106,7 @@ theorem norm_gauss_le (n : I → ℤ) (w : I → ℂ) :
     ‖gauss n w‖ ≤ gC n * Real.exp (-Real.pi * ∑ i, ‖w i‖ ^ 2) := by
   unfold gauss gC
   rw [norm_prod, Finset.mul_sum, Real.exp_sum, ← Finset.prod_mul_distrib]
-  apply Finset.prod_le_prod (fun i _ => norm_nonneg _)
+  apply Finset.prod_le_prod₀ (fun i _ => norm_nonneg _)
   intro i _
   rw [norm_mul, norm_hmon, Complex.norm_exp_ofReal]
   have := pow_mul_exp_le (n i).natAbs (norm_nonneg (w i))
@@ -115,7 +167,7 @@ theorem continuous_theta {ι : Type} (e : ι → I → ℂ) (a : ι → ℂ) (n 
     · apply Continuous.continuousOn
       apply continuous_const.mul
       unfold gauss
-      refine continuous_finset_prod _ fun i _ => ?_
+      refine continuous_finsetProd _ fun i _ => ?_
       have hd : Continuous fun y : I → ℝ => dil y (e j) i := by unfold dil; fun_prop
       exact ((continuous_hmon _).comp hd).mul (by fun_prop)
     · exact (ha _ (by positivity)).mul_left _
@@ -280,7 +332,7 @@ theorem integrable_weight_theta : ∀ (I : Type) [Fintype I] {ι : Type} (e : ι
         rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
         exact Finset.sum_congr rfl fun i _ => by ring
       rw [e1, Real.exp_sum]
-      apply Finset.prod_le_prod (fun i _ => (Real.exp_pos _).le)
+      apply Finset.prod_le_prod₀ (fun i _ => (Real.exp_pos _).le)
       intro i _
       rw [← Real.exp_add]
       apply Real.exp_le_exp.mpr

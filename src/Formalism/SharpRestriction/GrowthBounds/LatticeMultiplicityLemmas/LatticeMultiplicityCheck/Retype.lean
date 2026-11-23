@@ -1,4 +1,43 @@
-import Formalism.SharpRestriction.SmoothDesignExistence.SumOverPrimesHypotheses
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,44 +82,5 @@ structure KerAtMu (D : D7) (c : LatCmp D) (Tw : TwForms D) (u : D.what₂.Word) 
 
   val : ∀ (y : ((Tw.fm u μ).lat D.R.m).V) (s : ℝ),
     vGeLat (D.gat u w h) (Lv.Int D.R.m) (cmp D.R.m y) s → WeilJacquetShalikaLaw.VGe D w ((Tw.fm u μ).lat D.R.m).L y s
-
-structure TwistedUnitaryExtraData {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : G.Inst D L} {Gl : G.LatInst D} {K : G.Consts}
-    {Dx : DivX D} {cX : ExtraC} (E : Extra D L hT Gi Gl K Dx cX) where
-  LC : D.what₂.Tup → ∀ u (w : D.what₂.places.Pl) (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)),
-    Σ Lv : Levels (Gl.Fl u w hg), Chain Lv
-  ker : ∀ (μ : D.what₂.Tup), DV.Used D μ → ∀ u (w : D.what₂.places.Pl)
-    (h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)),
-    D.what₂.places.resChar w ∉ Dx.Qp μ → KerAtMu D E.cmp E.tw u μ w h (((Pk.reW Gl LC).Yt μ).Ch u w h)
-
-  twisted_e0_at_mu0_eq_eMu0 : ∀ u, E.tw.e0 u D.what₂.mu0 = E.tw.eMu0 u 0 (Nat.zero_le _)
-
-def TwistedUnitaryFamilyCondition {eps : ℝ} (Fm : FamP eps) : Prop :=
-  ∃ x0 : ℝ, ∀ x ≥ x0, ∀ (hx : Fm.x1 < x) (i : Fm.Ix x), Nonempty (TwistedUnitaryExtraData (Fm.ex x hx i))
-
-def TwistedUnitaryFamilyClosed (𝒞 : FamClass) : Prop :=
-  Closed 𝒞 fun Fm _ => ∃ x0 : ℝ, ∀ x ≥ x0, ∀ (hx : Fm.x1 < x) (i : Fm.Ix x), ∃ T : TwistedUnitaryExtraData (Fm.ex x hx i),
-    Pk.SysTw (Fm.D x i) (Fm.L x i) (Fm.Gx x i) Fm.GK (Fm.X x i) (Pk.reW (Fm.Gy x i) T.LC) (Fm.ex x hx i).lev
-      (Fm.ex x hx i).errX Fm.cX.err 1
-
-def LatticeMultiplicityComparison : Prop :=
-  ∀ {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : G.Inst D L} {Gl : G.LatInst D} {K : G.Consts} {Dx : DivX D}
-    {cX : ExtraC} (E : Extra D L hT Gi Gl K Dx cX) (T : TwistedUnitaryExtraData E), WeilJacquetShalikaLaw.CmpV E.cmp Dx E.tw (Pk.reW Gl T.LC)
-
-theorem twU_of_tied (𝒞 : FamClass) (hV : LatticeMultiplicityComparison) (h : TwistedUnitaryFamilyClosed 𝒞) :
-    Closed 𝒞 fun Fm _ => ∃ x0 : ℝ, ∀ x ≥ x0, ∀ (hx : Fm.x1 < x) (i : Fm.Ix x),
-      ∃ LC, WeilJacquetShalikaLaw.CmpV (Fm.ex x hx i).cmp (Fm.X x i) (Fm.ex x hx i).tw (Pk.reW (Fm.Gy x i) LC) ∧ Pk.SysTw (Fm.D x i) (Fm.L x i)
-        (Fm.Gx x i) Fm.GK (Fm.X x i) (Pk.reW (Fm.Gy x i) LC) (Fm.ex x hx i).lev (Fm.ex x hx i).errX Fm.cX.err 1 := by
-  obtain ⟨a, ha, hP⟩ := h
-  refine ⟨a, ha, fun e he hle => ?_⟩
-  obtain ⟨K, hK⟩ := hP e he hle
-  refine ⟨K, fun Fm CH hcl hL => ?_⟩
-  obtain ⟨x0, h0⟩ := hK Fm CH hcl hL
-  refine ⟨x0, fun x hx hx1 i => ?_⟩
-  obtain ⟨T, hT⟩ := h0 x hx hx1 i
-  exact ⟨T.LC, hV _ T, hT⟩
-
-theorem mm_of_latTied {D : D7} {L : SizeData₂ D} (hT : GatTies D) (X : G.Inst D L) (Y : G.LatInst D) (h : G.LatTied hT X Y)
-    (u : D.what₂.Word) (w : D.what₂.places.Pl) (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) :
-    (Y.Fl u w hg).mm = D.R.m := (h u w hg).1
 
 end Formalism.MainNotions.G.TwTie

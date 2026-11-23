@@ -1,9 +1,58 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.WeylLatDual
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolFunApply
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeylRowActionMemWeylLatticeSquare
+module
+
+public import Formalism.UnipotentAdelicQuotients.WeylLatDual
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ClosedBallValuationSubringToSubring
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeylRowActionMemWeylLatticeSquare
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ClosedBallValuationSubringToSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -124,7 +173,7 @@ theorem expands_rowSubst (ν : Fin N → ℕ) (g : Matrix (Fin N) (Fin N) ℂ_[p
       rw [← Formalism.GradedWeylDivisibility.lclosedeq_hw_map (Int.castRingHom O), Formalism.GradedWeylDivisibility.lclosedeq_applyWord_map, map_map, hsub]
   | zero =>
     convert expands_zero (p := p) ν using 1
-    funext z
+    funext y
     simp
   | add x y _ _ hx hy =>
     have := expands_add hx hy
@@ -164,7 +213,7 @@ theorem subst_mem {ν : T → Fin N → ℕ} (g : T → Matrix (Fin N) (Fin N) �
     have hb : ∀ x : ∀ τ, Fin (m τ), ‖c * r * ∏ τ, o τ (x τ)‖ ≤ 1 := fun x => by
       rw [norm_mul, norm_mul, norm_prod]
       exact mul_le_one₀ (mul_le_one₀ hc (norm_nonneg _) hr) (Finset.prod_nonneg fun _ _ => norm_nonneg _)
-        (Finset.prod_le_one (fun _ _ => norm_nonneg _) fun τ _ => ho τ _)
+        (Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) fun τ _ => ho τ _)
     have hgen : ∀ x : ∀ τ, Fin (m τ), (fun y : T → Matrix (Fin N) (Fin N) ℂ_[p] => (c * r * ∏ τ, o τ (x τ)) *
         ∏ τ, eval (fun k : Fin N × Fin N => y τ k.1 k.2) (map (Int.castRingHom ℂ_[p]) (h τ (x τ)))) ∈
         WeylLatticeDuality.DelW p T N ν := fun x =>
@@ -205,7 +254,10 @@ theorem subst_mem_iff (p : ℕ) [Fact p.Prime] (T : Type) [Fintype T] (N : ℕ) 
       (fun τ => inv_entry_le (hg τ) (hd τ)) h
     convert this using 1
     funext y
-    simp only [← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ (hu _), Matrix.one_mul, inv_mul_cancel_left₀ hc0]
+    have hy : (fun τ => g τ * ((g τ)⁻¹ * y τ)) = y := by
+      funext τ
+      exact Matrix.mul_nonsing_inv_cancel_left (g τ) (y τ) (hu τ)
+    simp [hy, hc0]
   · exact subst_mem g c hc.le hg
 
 end GlobalTheory.WeylTensorSubst

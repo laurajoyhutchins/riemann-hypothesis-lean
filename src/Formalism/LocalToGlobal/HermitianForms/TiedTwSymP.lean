@@ -1,5 +1,45 @@
-import Formalism.LocalToGlobal.HermitianForms.TiedTwSym
-import Formalism.LocalToGlobal.HermitianForms.TiedTwP
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwSym
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwP
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwPGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +50,7 @@ namespace Formalism.L2.Forms
 
 variable {D : D7} {inQ : D.what₂.Tup → HeightOneSpectrum (𝓞 D.host.F) → Prop}
 
-set_option maxHeartbeats 4000000 in
+
 
 structure SymmetricTwistedTiltedData {Tw : TwForms D} {T : Formalism.L2.Herm.TwChTied D inQ} {H : Formalism.L2.Herm.HermColsCh D} {J : Formalism.L2.Herm.TwChJointS T H}
     {F : ∀ u, FormsTiedSym D u (H.Ch u) (H.chOf u)} {W : TwFormsTiedS D Tw T J F}
@@ -36,7 +76,7 @@ structure SymmetricTwistedTiltedData {Tw : TwForms D} {T : Formalism.L2.Herm.TwC
     bc (inclE (F := D.host.F) (FiniteAdeleRing (𝓞 D.host.F) D.host.F)) (ga c).1 *
       ((W.ch u μ hμ D.R.m h1 le_rfl (T.chOf u μ D.R.m ((Tw.fm u μ).til c))).y ⟨(Tw.fm u μ).til c, rfl⟩).1 = g * (ka c).1
 
-set_option maxHeartbeats 4000000 in
+
 
 structure TwPTiedS {Tw : TwForms D} {T : Formalism.L2.Herm.TwChTied D inQ} {H : Formalism.L2.Herm.HermColsCh D} {J : Formalism.L2.Herm.TwChJointS T H}
     {F : ∀ u, FormsTiedSym D u (H.Ch u) (H.chOf u)} {W : TwFormsTiedS D Tw T J F} (Lv : SymmetricTwistedLevelData W) where
@@ -59,7 +99,7 @@ structure TwPAtGS {Tw : TwForms D} {T : Formalism.L2.Herm.TwChTied D inQ} {H : F
   chi_g : ∀ u μ hμ (κ : (P.cls u μ hμ).lev.U) (κ' : (F u).clsP.lev.U), κ.1 = κ'.1 →
     (∀ v ∈ T.Q μ, bc (prV (E := D.host.E) v) κ.1 = 1) → (P.cls u μ hμ).lev.chi κ = (F u).clsP.lev.chi κ'
 
-set_option maxHeartbeats 4000000 in
+
 
 structure TwPEvzS {Tw : TwForms D} {T : Formalism.L2.Herm.TwChTied D inQ} {H : Formalism.L2.Herm.HermColsCh D} {J : Formalism.L2.Herm.TwChJointS T H}
     {F : ∀ u, FormsTiedSym D u (H.Ch u) (H.chOf u)} {W : TwFormsTiedS D Tw T J F} {Lv : SymmetricTwistedLevelData W} (P : TwPTiedS Lv) where
@@ -73,26 +113,6 @@ structure TwPEvzS {Tw : TwForms D} {T : Formalism.L2.Herm.TwChTied D inQ} {H : F
   per : ∀ u μ, μ ≠ D.what₂.mu0 →
     (∀ z ∈ (Tw.fm u μ).ptC, ∃ G, jM u μ G = z) ∧ (∀ G, jM u μ G ∈ (Tw.fm u μ).ptC) ∧
       ∀ w G, (D.PTw u μ).period w G = (Tw.fm u μ).ipP (jM u μ G) w
-
-theorem TwPTiedS.sg_eq {Tw : TwForms D} {T : Formalism.L2.Herm.TwChTied D inQ} {H : Formalism.L2.Herm.HermColsCh D} {J : Formalism.L2.Herm.TwChJointS T H}
-    {F : ∀ u, FormsTiedSym D u (H.Ch u) (H.chOf u)} {W : TwFormsTiedS D Tw T J F} {Lv : SymmetricTwistedLevelData W} (P : TwPTiedS Lv)
-    (u : D.what₂.Word) (μ : D.what₂.Tup) (hμ : μ ≠ D.what₂.mu0) :
-    (Tw.fm u μ).sg = (D.fm u).sg := by
-  funext τ
-
-  have hw : ((Tw.fm u μ).sg τ).w = ((D.fm u).sg τ).w := by
-    funext i
-    have h1 := (P.val u μ hμ).sg τ i
-    have h2 := (F u).valP.sg τ i
-    exact_mod_cast h1.trans h2.symm
-  revert hw
-  generalize (Tw.fm u μ).sg τ = a
-  generalize (D.fm u).sg τ = b
-  intro hw
-  cases a
-  cases b
-  cases hw
-  rfl
 
 end Formalism.L2.Forms
 

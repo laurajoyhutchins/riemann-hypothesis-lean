@@ -1,20 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompEqOneOfTransl
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeSubAFiniteFree
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ConstGen
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelPosOfCoprime
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGenMovePow
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.BiadditiveOfTrivAxes
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilIsDiagRoot
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueWeilIs
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ProdSurjectiveGeometricPoints
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.MixCore
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompEqOneOfTransl
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeSubAFiniteFree
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ProdSurjectiveGeometricPoints
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CommutatorPairingHeckeTranslateEqZeta
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTateSimilitudeHeckeTranslateGeometric
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilCommutatorPairingTorsionGeometricPoint
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CommutatorPairingHeckeTranslateEqZeta
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTateSimilitudeHeckeTranslateGeometric
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelPosOfCoprime
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGenMovePow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.MixCore
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueWeilIs
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +90,7 @@ theorem exists_nsmul_of_dvd_EF {p : ℕ} [Fact p.Prime] (D : Datum p) {e : ℕ} 
       rw [hx, LinearMap.smul_apply, nsmul_eq_mul]
     have h2 : D.EF x a = - D.EF a x := by
       have := D.alt (x + a)
-      simp only [map_add, LinearMap.add_apply, D.alt] at this
+      simp only [map_add (f := _), LinearMap.add_apply, D.alt] at this
       linarith
     obtain ⟨t, ht⟩ := ha x
     have h3 : (e : ℤ) * bs.coord i a = (e : ℤ) * (n * (-t)) := by
@@ -71,8 +118,8 @@ theorem exists_nsmul_of_map_eq {p : ℕ} [Fact p.Prime] (D : Datum p) (h : ℕ �
   have epos : 0 < e := levelPos_of_coprime hep
   have hnk : 0 < n * k := Nat.mul_pos hn kpos
   have hce : 0 < c * e := Nat.mul_pos cpos epos
-  have hcep : (c * e).Coprime p := Nat.Coprime.mul hcp hep
-  have hMp : (n * k * (c * e)).Coprime p := Nat.Coprime.mul (Nat.Coprime.mul hnp hkp) hcep
+  have hcep : (c * e).Coprime p := Nat.Coprime.mul_left hcp hep
+  have hMp : (n * k * (c * e)).Coprime p := Nat.Coprime.mul_left (Nat.Coprime.mul_left hnp hkp) hcep
   have hM : 0 < n * k * (c * e) := Nat.mul_pos hnk hce
   set M := n * k * (c * e) with hMdef
   obtain ⟨z1, hz1⟩ := (hcomp (n * k) (c * e) hnk hce hMp).1 w
@@ -140,11 +187,11 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
     MonoidHom.mk' (fun t => t ≫ ψ) (fun a a' => MonObj.mul_comp a a' ψ)
   have hΨ : ∀ t, Ψ t = t ≫ ψ := fun _ => rfl
   have hlev : ∀ n, 0 < n → n.Coprime p → ∀ w, I.ev (n * k) (n • w) = I.ev k w := fun n hn hnp w =>
-    ev_mul_nsmul I n k hn kpos (Nat.Coprime.mul hkp hnp) w
+    ev_mul_nsmul I n k hn kpos (Nat.Coprime.mul_left hkp hnp) w
 
   have hk_eq : ∀ n, 0 < n → n.Coprime p → ∀ z, I.ev k (h (n * k) z) = I.ev k (h k z) := by
     intro n hn hnp z
-    obtain ⟨z', hz'⟩ := (hcomp k n kpos hn (Nat.Coprime.mul hkp hnp)).1 z
+    obtain ⟨z', hz'⟩ := (hcomp k n kpos hn (Nat.Coprime.mul_left hkp hnp)).1 z
     rw [mul_comm n k, hz', I.add, (I.ker k kpos hkp (k • z')).2 ⟨z', rfl⟩, _root_.mul_one]
   have hker : ∀ t : Over.mk x ⟶ o.A, t ≫ ψ = 1 ↔ ∃ z, t = I.ev (N * k) (N • h (N * k) z) := by
     intro t
@@ -171,7 +218,7 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
   have ker' : ∀ n, 0 < n → n.Coprime p → ∀ y, I.ev (n * k) (h (n * k) y) ≫ ψ = 1 ↔ ∃ z, y = n • z := by
     intro n hn hnp y
     have hnk : 0 < n * k := Nat.mul_pos hn kpos
-    have hnkp : (n * k).Coprime p := Nat.Coprime.mul hnp hkp
+    have hnkp : (n * k).Coprime p := Nat.Coprime.mul_left hnp hkp
     rw [hkerN n hn hnp]
     constructor
     · rintro ⟨z, hz⟩
@@ -200,7 +247,7 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
       have han : (a ^ n) ≫ ψ = 1 := by rw [← hΨ, map_pow, hΨ, ha, hq]
       obtain ⟨z, hz⟩ := (hkerN n hn hnp _).1 han
       have hnk : 0 < n * k := Nat.mul_pos hn kpos
-      have hnkp : (n * k).Coprime p := Nat.Coprime.mul hnp hkp
+      have hnkp : (n * k).Coprime p := Nat.Coprime.mul_left hnp hkp
       have hak : a ^ (n * k) = 1 := by
         rw [pow_mul, hz, ← TateTransl.ev_nsmul, I.ker _ hnk hnkp]
         exact ⟨h (n * k) z, by rw [smul_smul, mul_comm]⟩
@@ -213,7 +260,7 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
         exact (smul_eq_zero.1 e3).resolve_left (by exact_mod_cast hn.ne')
       have e4 : w = h (n * k) z + k • v := by rw [sub_sub, sub_eq_zero] at e2; exact e2
       obtain ⟨y'', z'', hy''⟩ := hsurj (n * k) hnk hnkp v
-      have e5 : h (n * k) (z + y'') = w + (n * k) • z'' := by rw [map_add, hy'', e4, add_assoc]
+      have e5 : h (n * k) (z + y'') = w + (n * k) • z'' := by rw [map_add (f := _), hy'', e4, add_assoc]
       refine ⟨z + y'', ?_⟩
       rw [e5, I.add, (I.ker _ hnk hnkp ((n * k) • z'')).2 ⟨z'', rfl⟩, _root_.mul_one, hw, ha]
     · rintro ⟨y, rfl⟩
@@ -257,13 +304,13 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
   · intro n y y'
     simp only [ev']
     split_ifs with hn
-    · rw [map_add, I.add, MonObj.mul_comp]
+    · rw [map_add (f := _), I.add, MonObj.mul_comp]
     · rw [_root_.mul_one]
   · intro n b' y
     simp only [ev']
     split_ifs with hn
     · have hnk : 0 < n * k := Nat.mul_pos hn.1 kpos
-      have hnkp : (n * k).Coprime p := Nat.Coprime.mul hn.2 hkp
+      have hnkp : (n * k).Coprime p := Nat.Coprime.mul_left hn.2 hkp
       obtain ⟨z, hz⟩ := hlin (n * k) hnk hnkp b' y
       rw [hz, I.add, (I.ker _ hnk hnkp _).2 ⟨z, rfl⟩, _root_.mul_one, I.lin, Category.assoc, hact,
         ← Category.assoc]
@@ -278,15 +325,15 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
   · intro n m hn hm hnm y
     have hn' : n.Coprime p := Nat.Coprime.coprime_dvd_left (dvd_mul_right n m) hnm
     have hnk : 0 < n * k := Nat.mul_pos hn kpos
-    have hnkm : (n * k * m).Coprime p := by rw [Nat.mul_right_comm]; exact Nat.Coprime.mul hnm hkp
+    have hnkm : (n * k * m).Coprime p := by rw [Nat.mul_right_comm]; exact Nat.Coprime.mul_left hnm hkp
     rw [hev' (n * m) (Nat.mul_pos hn hm) hnm, hev' n hn hn', ← hΨ, ← map_pow, hΨ, Nat.mul_right_comm n m k,
       I.tower (n * k) m hnk hm hnkm]
     obtain ⟨z, hz⟩ := (hcomp (n * k) m hnk hm hnkm).1 y
-    rw [hz, I.add, (I.ker _ hnk (Nat.Coprime.mul hn' hkp) _).2 ⟨z, rfl⟩, _root_.mul_one]
+    rw [hz, I.add, (I.ker _ hnk (Nat.Coprime.mul_left hn' hkp) _).2 ⟨z, rfl⟩, _root_.mul_one]
   · intro n hn hnp y y'
     have hnk : 0 < n * k := Nat.mul_pos hn kpos
-    have hnkp : (n * k).Coprime p := Nat.Coprime.mul hnp hkp
-    have hnkc : (n * k * c).Coprime p := Nat.Coprime.mul hnkp hcp
+    have hnkp : (n * k).Coprime p := Nat.Coprime.mul_left hnp hkp
+    have hnkc : (n * k * c).Coprime p := Nat.Coprime.mul_left hnkp hcp
     have hrep : ∀ y, I.ev (n * k) (h (n * k) y) = I.ev (n * k) (h (n * k * c) y) := fun y => by
       obtain ⟨z, hz⟩ := (hcomp (n * k) c hnk cpos hnkc).1 y
       rw [hz, I.add, (I.ker _ hnk hnkp _).2 ⟨z, rfl⟩, _root_.mul_one]
@@ -297,7 +344,7 @@ theorem exists_tateIsoO_transl_sys : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) 
       hiso2 he
     rw [hrep y, hrep y'] at h2
     have hNp' : (n * (k ^ 2 / c * k ^ 2)).Coprime p :=
-      Nat.Coprime.mul hnp (Nat.Coprime.mul hmp (Nat.Coprime.pow_left 2 hkp))
+      Nat.Coprime.mul_left hnp (Nat.Coprime.mul_left hmp (Nat.Coprime.pow_left 2 hkp))
     have h3 := weilIs_ev_value o I k (k ^ 2 / c) n kpos hm0 hn hNp' _ _ e (by rw [Nat.cast_mul]; exact h2)
     have h4 : I.ζ (n * (k ^ 2 / c * k ^ 2)) ^ (2 * D.EF ((k ^ 2 / c) • h (n * k * c) y) ((k ^ 2 / c) • h (n * k * c) y'))
         = (I.ζ n ^ u n) ^ (2 * D.EF y y') := by

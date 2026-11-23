@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCycCycChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Fourier.FiniteAbelian.PontryaginDuality
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc GlobalTheory.Cyc.TwistLift
 open Filter Topology
@@ -54,7 +98,7 @@ theorem eval_bijective : Function.Bijective (Module.Dual.eval (ZMod n) M) := by
   have := finite_dual (n := n) (M := M)
   have := finite_dual (n := n) (M := Module.Dual (ZMod n) M)
   have hinj : Function.Injective (Module.Dual.eval (ZMod n) M) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     by_contra h
     obtain ⟨φ, hφ⟩ := exists_dual_ne_zero (n := n) h
@@ -189,7 +233,7 @@ theorem Gen.step [ContinuousMul G] (hχ : Continuous fun g => (χ g : ℤ_[l])) 
   refine ⟨_, h'.twist hχ hu (β := fun g => (((b g).val : ℕ) : ℤ_[l]))
     (hb.comp fun a => ((a.val : ℕ) : ℤ_[l])), fun p => ?_⟩
   rw [dvd_iff_toZModPow, ← hπ]
-  simp only [cob, smul_eq_mul, map_sub, map_add, map_mul π, map_natCast, ZMod.natCast_zmod_val, hx p,
+  simp only [cob, smul_eq_mul, map_sub, map_add (f := _), map_mul π, map_natCast, ZMod.natCast_zmod_val, hx p,
     sub_self]
 
 theorem exists_lim (a : ℕ → ℤ_[l]) (h : ∀ n, (l : ℤ_[l]) ^ n ∣ a (n + 1) - a n) :
@@ -230,7 +274,7 @@ theorem IsCoc.map {N : Type} [AddCommGroup N] [Module ℤ_[l] N] (f : M →ₗ[�
     (h : IsCoc χ z) : IsCoc χ fun p => f (z p) :=
   ⟨h.1.comp f, fun g k m => by
     have e := congrArg f (h.2 g k m)
-    simpa only [map_sub, map_add, map_smul, map_zero] using e⟩
+    simpa only [map_sub, map_add (f := _), map_smul, map_zero] using e⟩
 
 theorem finite_span (htor : ∀ a : M, ∃ r : ℕ, (l : ℤ_[l]) ^ r • a = 0) {S : Set M} (hS : S.Finite) :
     ∃ r : ℕ, Finite (Submodule.span ℤ_[l] S) ∧
@@ -282,7 +326,7 @@ theorem h2_equiv_of_torsion_character [CompactSpace G] {c : G × G → ℤ_[l]} 
       map_add' := fun x y => Subtype.ext (funext fun p => smul_add _ _ _)
       map_smul' := fun a x => Subtype.ext (funext fun p => smul_comm _ _ _) }
   refine ⟨(LinearEquiv.ofBijective ((Submodule.mkQ _).comp Φ) ⟨?_, fun y => ?_⟩).symm⟩
-  · rw [injective_iff_map_eq_zero]
+  · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨b, hb, hbx⟩ := (Submodule.Quotient.mk_eq_zero _).1 hx
     rw [hd] at hbx
@@ -337,8 +381,8 @@ def scalRep {R : Type} [CommRing R] (ψ : G →* Rˣ) (M : Type) [AddCommGroup M
   map_one' := by ext; simp
   map_mul' g k := by ext; simp [smul_smul, mul_comm]
 
-open ReciprocityTheory.Gal in
 
+open ReciprocityTheory.Gal in
 theorem exists_gen (hχ : Continuous fun g => (χ g : ℤ_[l]))
     (h1 : Nonempty (H2 ((charRep (redChar χ r)).comp (MonoidHom.id G)) ≃ₗ[ZMod (l ^ r)] ZMod (l ^ r)))
     (h2 : ∀ (M : Type) [AddCommGroup M] [Module (ZMod (l ^ r)) M] [Finite M] [TopologicalSpace M]
@@ -388,7 +432,7 @@ theorem exists_gen (hχ : Continuous fun g => (χ g : ℤ_[l]))
         mul_one]
   let inv : Module.Dual (ZMod (l ^ r)) M →ₗ[ZMod (l ^ r)]
       H0 ((twDual (redChar χ r) rho).comp (MonoidHom.id G)) :=
-    { toFun := fun φ => ⟨TDual.mk φ, fun g => TDual.ext fun m => by
+    { toFun := fun φ => ⟨TDual.mk φ, fun g => DFunLike.ext _ _ fun m => by
         change (redChar χ r g : ZMod (l ^ r)) * φ ((redChar χ r g⁻¹ : ZMod (l ^ r)) • m) = φ m
         rw [map_smul, smul_eq_mul, ← mul_assoc, ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one,
           Units.val_one, one_mul]⟩
@@ -451,7 +495,7 @@ theorem exists_ringHom (hO : GoodO (Qp := ℚ_[l]) LL O) :
       rw [eq_add_of_sub_eq hw]
       push_cast
       rw [← eq_add_of_sub_eq hw]
-    rw [map_add, ho, mul_one, h1, map_add, map_natCast, map_natCast]
+    rw [map_add (f := _), ho, mul_one, h1, map_add (f := _), map_natCast, map_natCast]
   choose f hf using h
   exact ⟨{ toFun := f
            map_one' := hinj (by simp [hf])

@@ -1,7 +1,47 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.MemConePtsIffChartIdeal
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.LocTransfer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.LocTransfer
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace PositivityTheory.Xgp.c_bm_exists_boundary
 
@@ -15,25 +55,6 @@ def blkDeg (m : (Σ k, ι k) →₀ ℕ) (k : K) : ℕ := ∑ i, m ⟨k, i⟩
 
 def padExp (p : (k : K) → ι k) (T : ℕ) (m : (Σ k, ι k) →₀ ℕ) : (Σ k, ι k) →₀ ℕ :=
   ∑ k, Finsupp.single ⟨k, p k⟩ (T - blkDeg m k)
-
-theorem sum_single_blk (q : Σ k, ι k) (a : ℕ) (k : K) :
-    ∑ i, (Finsupp.single q a : (Σ k, ι k) →₀ ℕ) ⟨k, i⟩ = if q.1 = k then a else 0 := by
-  classical
-  obtain ⟨k', i'⟩ := q
-  by_cases h : k' = k
-  · subst h
-    rw [if_pos rfl, Finset.sum_eq_single i']
-    · simp
-    · intro b _ hb
-      rw [Finsupp.single_apply, if_neg]
-      intro e
-      exact hb (eq_of_heq (Sigma.mk.inj_iff.1 e).2).symm
-    · simp
-  · rw [if_neg h]
-    refine Finset.sum_eq_zero fun i _ => ?_
-    rw [Finsupp.single_apply, if_neg]
-    intro e
-    exact h (Sigma.mk.inj_iff.1 e).1
 
 theorem padExp_apply (p : (k : K) → ι k) (T : ℕ) (m : (Σ k, ι k) →₀ ℕ) (k : K) (i : ι k) :
     padExp p T m ⟨k, i⟩ = if i = p k then T - blkDeg m k else 0 := by
@@ -81,7 +102,7 @@ theorem exists_homogenize (p : (k : K) → ι k) (Q : MvPolynomial (Fin (Fintype
   set T := Q'.totalDegree + 1 with hT
   have hlt : ∀ m ∈ Q'.support, ∀ k, blkDeg m k < T := fun m hm k =>
     Nat.lt_succ_of_le (blkDeg_le_totalDegree hm k)
-  refine ⟨∑ m ∈ Q'.support, monomial (m + padExp p T m) (coeff m Q'), T, ?_, ?_, ?_⟩
+  refine ⟨∑ m ∈ Q'.support, monomial (m + padExp p T m) (AddMonoidAlgebra.coeff Q' m), T, ?_, ?_, ?_⟩
   · intro n hn k
     obtain ⟨m, hm, hn'⟩ := Finset.mem_biUnion.1 (MvPolynomial.support_sum hn)
     have hn'' := support_monomial_subset hn'
@@ -98,7 +119,9 @@ theorem exists_homogenize (p : (k : K) → ι k) (Q : MvPolynomial (Fin (Fintype
     unfold blkDeg at h2
     omega
   · intro z hz
+
     rw [map_sum]
+
     conv_rhs => rw [hren, Q'.as_sum, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun m hm => ?_
     rw [eval_monomial, eval_monomial, Finsupp.prod_fintype _ _ (fun _ => pow_zero _),
@@ -125,6 +148,7 @@ theorem exists_homogenize (p : (k : K) → ι k) (Q : MvPolynomial (Fin (Fintype
       Finset.prod_ne_zero_iff.2 fun k _ => pow_ne_zero _ (hz k)
     field_simp
   · rintro z ⟨k, hk⟩
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun m hm => ?_
     rw [eval_monomial, Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]

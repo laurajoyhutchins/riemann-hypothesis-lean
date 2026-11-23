@@ -1,15 +1,93 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramFrMulInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatVectorThreeStepsConjugatePlaces
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatVectorEqUnitSmulCentralTranslatePlacePart
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemCompletedPairLatticeIffFrameMatrixIntegralOnH
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GramFrMulInv
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TupPrimeEmpty
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NabBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SuppAtMul
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.ActsLinOfSplitLin
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceS
+import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.TotallyPositiveExponents
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatVectorEqUnitSmulCentralTranslatePlacePart
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatVectorThreeStepsConjugatePlaces
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCharacterConjHalfIdeleEqProdLocalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatTranslateOfPrime
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemCompletedPairLatticeIffAdjointFrameMatrixInte
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemCompletedPairLatticeIffFrameMatrixIntegralOnH
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLatticeIffUniformiserReductionVanishes
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ScalarDilationElementSupportDetPullback
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumHeisenbergTranslatesBaseVectorEqCardSmulStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TameKernelTypePlaceThetaVectorLatticeFixedStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedSplittingCharacterUnitOffPlaces
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepApplyEqSmulOfHalfIndicatorBaseStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowEqSpan
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteRamifiedPlacesHeckeCharacter
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FlatVecExistsUnique
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FlatVectorEqUnitMulCentralTranslateLiftVector
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemLatOfIsIntMAdjConjHalf
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WeilOperatorIdempotentSumVacuumNormalisedSumStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WeilRepCentralActsByDilationUnit
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNonvanishingFiniteDatumDefiniteLift
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GramMapMulInv
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsAdelicUnitarySplitPlaceComponent
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HeisOFixOfIsThetaAt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceAt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatSelf
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulOfResSNeOne
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCoordLatticeOfSelfDualFrame
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatIffOfSelfDual
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TameHeckeCharSplitSupportedEqProdResidue
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryExistsWithPrescribedParts
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAlgebraMapOfSigRFixed
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.ExistsNatSmulSingle
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartDetAtInvInt
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatSelf
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Schreier
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.CentralInvolutionRing
+
+@[expose] public section
+
 set_option autoImplicit false
 noncomputable section
 open NumberField IsDedekindDomain
@@ -19,8 +97,8 @@ open Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.BasicNot
 open GlobalTheory.ConjTwist (BaseOf UnitOff)
 open GlobalTheory.FlatVecSum (princ)
 open scoped TensorProduct
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1600000
+
+
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open Classical
 open GlobalTheory.BigOn.Exp.TupLe.Swap
@@ -175,7 +253,7 @@ theorem X_pval : ∀ (D : D7) (Q : Finset (Pl D.host.E)) (ϖ : 𝓞 D.host.E), (
         have e2 : (h2 P.1 P.2).2.unit = (h P.1 P.2).unit * (hu P.1).unit := Units.ext (key P.1 P.2).2
         rw [e1, hξ P.1 P.2, e2, map_mul, Units.val_mul, zpow_neg_one, Units.val_inv_eq_inv_val]
         field_simp
-    · rw [dif_neg, dif_neg, mul_zero]
+    · rw [dite_eq_right, dite_eq_right, mul_zero]
       · intro h2
         exact h fun PP hPP => isUnit_of_mul_isUnit_left (by rw [← (key PP hPP).2]; exact (h2 PP hPP).2)
       · intro h1
@@ -208,8 +286,8 @@ theorem exists_idF_of_fixed {D : D7} (V : HSp D) (y : (AE D)ˣ) (hy : cA D (y : 
   obtain ⟨a, ha⟩ := (GlobalTheory.Member.isDetRoot_laws D V).2.1 1 1 y (h1 1 (map_one _)) (h1 y hy)
   exact ⟨a, by rw [ha, one_mul]⟩
 
-open GlobalTheory.ConjTwist in
 
+open GlobalTheory.ConjTwist in
 theorem isLocUnit_conj {D : D7} {PP : Pl D.host.E} (h : Formalism.L2.NTheta.IsIdemAt (idemAt PP) PP) {u : (kP PP)ˣ} {x : (AE D)ˣ}
     (hx : IsLocUnit PP u x) :
     IsLocUnit (conjPl PP) (Units.map (conjK PP).toMonoidHom u) (Units.map (cA D).toMonoidHom x) := by
@@ -230,8 +308,8 @@ theorem isLocUnit_conj {D : D7} {PP : Pl D.host.E} (h : Formalism.L2.NTheta.IsId
     rw [resS_conj PP ⟨_, k1⟩ _ (GlobalTheory.AdelicLatMove.toEAf_cA _), k2]
     rfl
 
-open GlobalTheory.ConjTwist in
 
+open GlobalTheory.ConjTwist in
 theorem X_chr : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.Hk3.Core R F → ∀ (i : Fin D.R.m) (t : T0) (B : Base (Vc D i) (Wc D i)) (ψ : Twist D Circle), B.Good → ψ.Good → B.admitted ψ.Q → R.xi t = B.de.chi * ψ.chi → ∀ PP ∈ R.Q t, conjPl PP ∈ B.de.Q ∪ ψ.Q → ∀ u : (kP PP)ˣ, (B.de.locC (conjPl PP) * ψ.locC (conjPl PP)) (Units.map (conjK PP).toMonoidHom u) = (R.xiR t PP u)⁻¹ := by
   intro D G _ _ Pl0 T0 A Ks _ _ _ R F hC i t B ψ hB hψ hQ hxi PP hPP hm u
   obtain ⟨P, -, h2, hP⟩ := hQ.1.split
@@ -329,8 +407,8 @@ theorem isRes_one {D : D7} {χ : Formalism.L2.Host.HChar D.host.E} {P : Pl D.hos
   rw [GlobalTheory.TypeValues.val_atFin P k a hk]
   exact (P.intValuation_eq_one_iff).2 ha
 
-open GlobalTheory.ChiUnit GlobalTheory.DilChi in
 
+open GlobalTheory.ChiUnit GlobalTheory.DilChi in
 theorem X_det : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.Hk3.Core R F → ∀ (i : Fin D.R.m) (t : T0) (Q : Finset (Pl D.host.E)), Q ⊆ R.Q t → ∀ N : ℕ, (∀ PP ∈ Q, (N : 𝓞 D.host.E) ∈ PP.asIdeal) → ∀ e : AE D, IsIdemSum e Q → ∀ ϖ : 𝓞 D.host.E, ϖ ≠ 0 → (∀ PP ∈ Q, ϖ ∈ PP.asIdeal ∧ ϖ ∉ PP.asIdeal ^ 2) → ∀ (m : ℕ) (d d' : Datum.EAf D), d ∈ Formalism.L2.Herm.intAf D.host.F D.host.E → d' ∈ Formalism.L2.Herm.intAf D.host.F D.host.E → d * d' = 1 → ∀ x : (AE D)ˣ, (1 - e) * (x : AE D) = 1 - e → toEAf D e * toEAf D (x : AE D) = toEAf D e * (eToEAf D (ϖ : D.host.E) ^ m * d) → UnitOff N ((((Lift.chrTh (Lift.tup R.mu0 (R.xi t)) R.eta ((i : ℕ) + 1)).2 x : Circle) : ℂ))⁻¹ := by
   intro D G _ _ Pl0 T0 A Ks _ _ _ R F hC i t Q hQ N hNQ e he ϖ hϖ0 hϖ m d d' hd hd' hdd x hx1 hx2
   have hK := kerDat_tuple (i := i) hC.lev hC.thP t
@@ -354,7 +432,7 @@ theorem X_det : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A
     rw [Units.val_mul, hy']
     refine eq_of_parts ?_ ?_
     · have h1 := congrArg (infPart D) hx1
-      simp only [map_mul, map_sub, map_add, map_one, hinf, sub_zero, one_mul, zero_mul, add_zero, zero_add] at h1 ⊢
+      simp only [map_mul, map_sub, map_add (f := _), map_one, hinf, sub_zero, one_mul, zero_mul, add_zero, zero_add] at h1 ⊢
       exact h1
     · have h1 := congrArg (toEAf D) hx1
       have h2 := congrArg (toEAf D) hk
@@ -362,7 +440,7 @@ theorem X_det : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A
       have h4 : toEAf D (incA D ((u ^ m : D.host.Eˣ) : D.host.E)) = eToEAf D (ϖ : D.host.E) ^ m := by
         rw [← map_pow, Units.val_pow_eq_pow_val]; rfl
       rw [← h4] at hx2
-      simp only [map_mul, map_sub, map_add, map_one, ha] at h1 h2 h3 ⊢
+      simp only [map_mul, map_sub, map_add (f := _), map_one, ha] at h1 h2 h3 ⊢
       linear_combination h1 + toEAf D (incA D (((u ^ m)⁻¹ : D.host.Eˣ) : D.host.E)) * hx2 + toEAf D e * d * h2
   have hun : ∀ PP : Pl D.host.E, IsUnit (resS D.host.F PP ⟨d, hd⟩) := fun PP =>
     (IsUnit.of_mul_eq_one (⟨d', hd'⟩ : Formalism.L2.Herm.intAf D.host.F D.host.E) (Subtype.ext hdd)).map _
@@ -670,7 +748,9 @@ theorem isSBHalf_flatDat (hC : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) {Q : F
   have hinf := GlobalTheory.PlaceVec.idemSum_infPart he
   refine GlobalTheory.PlaceDatum.isSBHalf_of_red _ _ (frMapO (Vc D i) (Wc D i) (R.βV i) (R.βW i)) (GlobalTheory.PlaceDatum.frMapO_add _ _)
       (GlobalTheory.PlaceDatum.exists_den_frMapO sV.1.fg sW.1.fg _ _) ?_ Q _ fun y y' h => GlobalTheory.FlatVecExist.omegaFlat_congr _ _ _ h
-  obtain ⟨K, hK, h'⟩ := GlobalTheory.PlaceDatum.exists_nsmul_of_frMapO sV.1 sW.1 (R.βV i) (R.βW i)
+  obtain ⟨K, hK, h'⟩ := GlobalTheory.PlaceDatum.exists_nsmul_of_frMapO
+    (Formalism.IndefR.Fin.PDA.selfDual_isFullLattice _ _ sV)
+    (Formalism.IndefR.Fin.PDA.selfDual_isFullLattice _ _ sW) (R.βV i) (R.βW i)
   exact ⟨K, hK, fun t ht => h' t (GlobalTheory.PlaceDatum.infPart_of_half hinf ht)⟩
 
 theorem base_facts (hC : GlobalTheory.Hk3.Core R F) (hG : QGuard R) {i : Fin D.R.m} {t : T0} (hV : VStd D i)
@@ -698,6 +778,7 @@ theorem base_facts (hC : GlobalTheory.Hk3.Core R F) (hG : QGuard R) {i : Fin D.R
     rw [← idem_eq hea, ← idem_eq het, show idem K = ∑ PP ∈ K, idemAt PP from rfl, Finset.sum_mul]
     exact Finset.sum_eq_zero fun j hj => GlobalTheory.FlatThreeSteps.idemAt_mul_idem hsp hL (hK hj) (Finset.disjoint_left.1 hd hj)
   have h2 : ea * cA D et = 0 := by
+
     rw [← idem_eq hea, ← idem_eq het, idem, idem, map_sum, Finset.sum_mul_sum]
     exact Finset.sum_eq_zero fun a ha => Finset.sum_eq_zero fun c hc => hsp.mul_conj (hK ha) (hL hc)
   have h3 : cA D ea * cA D et = 0 := by rw [← map_mul, h1, map_zero]
@@ -734,7 +815,7 @@ theorem pull_flat (hC : GlobalTheory.Hk3.Core R F) (i : Fin D.R.m) {Q : Finset (
   · rw [if_neg fun h => hi h.2]
     split_ifs with h
     · unfold omegaQ
-      rw [dif_neg, mul_zero]
+      rw [dite_eq_right, mul_zero]
       intro h'
       have := int_ct (X_pint D Q e he ϖ hϖ hϖ0 _ _ _ _ iW' (gramFr_mul_inv _ _) _ hy h.2 fun PP hPP => (h' PP hPP).1)
       rw [ct_ct] at this

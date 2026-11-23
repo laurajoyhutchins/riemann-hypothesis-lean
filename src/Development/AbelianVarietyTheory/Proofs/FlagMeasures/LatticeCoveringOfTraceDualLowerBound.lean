@@ -1,12 +1,69 @@
-import Mathlib
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Formalism.RealPlaceAnalysis.Complexify
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TransferenceCoverHolds
+module
+
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DualPl
+public import Mathlib.Algebra.Module.LinearMap.Rat
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TransferenceCoverHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.HarderNarasimhan.Statement
+import Formalism.HermitianLattices.StatementLat
+
+@[expose] public section
+
 open Formalism.HN Formalism.HermitianLatticesTheory Matrix NumberField Finset
 
 namespace GlobalTheory.TraceCover
 
-variable {K : Type} [Field K] [NumberField K] [IsTotallyComplex K]
+variable {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
 
 theorem eq_zero_of_sum_re (a : InfinitePlace K → ℂ)
     (h : ∀ x : K, ∑ w, (w.embedding x * a w).re = 0) : a = 0 := by
@@ -56,26 +113,10 @@ theorem eq_zero_of_sum_re_lin {ι : Type} [Fintype ι] (g : InfinitePlace K → 
 
 theorem trace_eq_sum (a : K) :
     ((Algebra.trace ℚ K a : ℚ) : ℝ) = ∑ w : InfinitePlace K, 2 * (w.embedding a).re := by
-  classical
-  have e := congrArg Complex.re (trace_eq_sum_embeddings ℂ (K := ℚ) (L := K) (x := a))
-  simp only [eq_ratCast, Complex.ratCast_re, Complex.re_sum] at e
-  rw [e, ← (RingHom.equivRatAlgHom (R := K) (S := ℂ)).sum_comp,
-    ← Finset.univ.sum_fiberwise (fun φ : K →+* ℂ => InfinitePlace.mk φ)]
-  refine Finset.sum_congr rfl fun w _ => ?_
-  have : ∀ φ ∈ Finset.univ.filter (fun φ : K →+* ℂ => InfinitePlace.mk φ = w),
-      ((RingHom.equivRatAlgHom (R := K) (S := ℂ)) φ a).re = (w.embedding a).re := by
-    intro φ hφ
-    have h1 : InfinitePlace.mk φ = InfinitePlace.mk w.embedding := by
-      rw [InfinitePlace.mk_embedding]; simpa using hφ
-    rcases InfinitePlace.mk_eq_iff.1 h1 with h2 | h2
-    · rw [← h2]; rfl
-    · rw [← h2]; simp [RingHom.equivRatAlgHom]
-  rw [Finset.sum_congr rfl this, Finset.sum_const, InfinitePlace.card_filter_mk_eq,
-    (IsTotallyComplex.isComplex w).mult_eq_two]
-  simp
+  apply Formalism.HN.DualPolygon.ident_trace_eq <;> assumption
 
-omit [IsTotallyComplex K] in
 
+omit [_root_.NumberField.IsTotallyComplex K] in
 theorem exists_basis {ι : Type} [Fintype ι] (L : Submodule (𝓞 K) (ι → K)) (hfg : L.FG)
     (hsp : Submodule.span K (L : Set (ι → K)) = ⊤) :
     ∃ (κ : Type) (_ : Fintype κ) (b : Module.Basis κ ℚ (ι → K)),
@@ -120,14 +161,16 @@ theorem exists_basis {ι : Type} [Fintype ι] (L : Submodule (𝓞 K) (ι → K)
   rw [Module.Basis.coe_mk]
   exact hmem y
 
-omit [IsTotallyComplex K] in
 
+omit [_root_.NumberField.IsTotallyComplex K] in
 theorem exists_trace_form {ι : Type} [Fintype ι] (φ : (ι → K) →ₗ[ℚ] ℚ) :
     ∃ f : ι → K, ∀ y, Algebra.trace ℚ K (f ⬝ᵥ y) = φ y := by
   classical
   let D := (Algebra.traceForm ℚ K).toDual (traceForm_nondegenerate ℚ K)
   refine ⟨fun i => D.symm (φ ∘ₗ LinearMap.single ℚ (fun _ => K) i), fun y => ?_⟩
+
   rw [dotProduct, map_sum]
+
   conv_rhs => rw [← Finset.univ_sum_single y, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [← Algebra.traceForm_apply]
@@ -150,15 +193,15 @@ noncomputable def rho (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' �
       ext p
       have : (fun j : ι => p.1.embedding ((x + y) j)) =
           (fun j => p.1.embedding (x j)) + (fun j => p.1.embedding (y j)) := by funext j; simp
-      simp only [this, map_add]; rfl }
+      simp only [this, map_add (f := _)]; rfl }
 
 noncomputable def form (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → ℂ)))
     (u : PiLp 2 (fun _ : InfinitePlace K × ι' => ℂ)) (w : InfinitePlace K) : (ι → ℂ) →ₗ[ℂ] ℂ where
   toFun z := (fun i => starRingEnd ℂ (u (w, i))) ⬝ᵥ M w z
-  map_add' x y := by rw [map_add, dotProduct_add]
+  map_add' x y := by rw [map_add (f := _), dotProduct_add]
   map_smul' c x := by rw [map_smul, dotProduct_smul]; rfl
 
-omit [IsTotallyComplex K] [Fintype ι] in
+omit [_root_.NumberField.IsTotallyComplex K] [Fintype ι] in
 theorem inner_rho (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → ℂ)))
     (u : PiLp 2 (fun _ : InfinitePlace K × ι' => ℂ)) (y : ι → K) :
     inner ℝ (rho M y) u = ∑ w, (form M u w (fun j => w.embedding (y j))).re := by
@@ -169,7 +212,7 @@ theorem inner_rho (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → �
   rw [Complex.inner, mul_comm]
   rfl
 
-omit [IsTotallyComplex K] [Fintype ι] [NumberField K] in
+omit [_root_.NumberField.IsTotallyComplex K] [Fintype ι] [NumberField K] in
 theorem eq_zero_of_form (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → ℂ)))
     (u : PiLp 2 (fun _ : InfinitePlace K × ι' => ℂ)) (h : ∀ w, form M u w = 0) : u = 0 := by
   classical
@@ -207,7 +250,7 @@ theorem span_rho (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → ℂ
 
 end Main
 
-theorem cover : ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (ι ι' : Type) [Fintype ι] [Fintype ι'] (L : Submodule (𝓞 K) (ι → K)) (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → ℂ))) (lam : ℝ), L.FG → Submodule.span K (L : Set (ι → K)) = ⊤ → 0 < lam → (∀ (f : ι → K) (c : InfinitePlace K → ι' → ℂ), f ≠ 0 → (∀ y ∈ L, ∃ m : ℤ, Algebra.trace ℚ K (f ⬝ᵥ y) = m) → (∀ (w : InfinitePlace K) (y : ι → ℂ), (fun i => w.embedding (f i)) ⬝ᵥ y = c w ⬝ᵥ M w y) → lam ^ 2 ≤ ∑ w, ∑ i, ‖c w i‖ ^ 2) → ∀ t : InfinitePlace K → ι' → ℂ, ∃ y ∈ L, Real.sqrt (∑ w, ∑ i, ‖t w i - M w (fun j => w.embedding (y j)) i‖ ^ 2) ≤ (Fintype.card (InfinitePlace K) : ℝ) * (Fintype.card ι : ℝ) / (2 * lam) := by
+theorem cover : ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (ι ι' : Type) [Fintype ι] [Fintype ι'] (L : Submodule (𝓞 K) (ι → K)) (M : InfinitePlace K → ((ι → ℂ) ≃ₗ[ℂ] (ι' → ℂ))) (lam : ℝ), L.FG → Submodule.span K (L : Set (ι → K)) = ⊤ → 0 < lam → (∀ (f : ι → K) (c : InfinitePlace K → ι' → ℂ), f ≠ 0 → (∀ y ∈ L, ∃ m : ℤ, Algebra.trace ℚ K (f ⬝ᵥ y) = m) → (∀ (w : InfinitePlace K) (y : ι → ℂ), (fun i => w.embedding (f i)) ⬝ᵥ y = c w ⬝ᵥ M w y) → lam ^ 2 ≤ ∑ w, ∑ i, ‖c w i‖ ^ 2) → ∀ t : InfinitePlace K → ι' → ℂ, ∃ y ∈ L, Real.sqrt (∑ w, ∑ i, ‖t w i - M w (fun j => w.embedding (y j)) i‖ ^ 2) ≤ (Fintype.card (InfinitePlace K) : ℝ) * (Fintype.card ι : ℝ) / (2 * lam) := by
   intro K _ _ _ ι ι' _ _ L M lam hfg hsp hlam hdual t
   classical
   obtain ⟨κ, _, b, hb⟩ := exists_basis L hfg hsp

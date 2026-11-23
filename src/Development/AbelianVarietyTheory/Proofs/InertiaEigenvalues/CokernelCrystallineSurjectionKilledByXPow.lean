@@ -1,16 +1,63 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeHeightsFromHodgeJumpsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachNCokernelKilledByPowerStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneNotMemFilOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RingsCyclotomic
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValOfPowAssociated
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.XXPowMemOfQQPowMulMemMapPhi
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PhiFree
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OfShortExact
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardTorsionMulFinrank
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OfShortExact
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneNotMemFilOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PhiFree
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RingsCyclotomic
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionXQFrobenius
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeHeightsFromHodgeJumpsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachNCokernelKilledByPowerStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.XXPowMemOfQQPowMulMemMapPhi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,6 +137,7 @@ theorem decomp_unique {κ : Type} [Fintype κ] (ht : ∀ z : ι → A, ∑ j, t 
   rw [Fintype.linearIndependent_iff] at hb
   have h1 : ∀ k, ∑ j, t j * φ (z j k) = 0 := hb (fun k => ∑ j, t j * φ (z j k)) (by
     rw [← h]
+
     simp only [← hz, map_sum, hΦ, Finset.sum_smul, Finset.smul_sum, mul_smul]
     exact Finset.sum_comm)
   rw [← hz]
@@ -271,6 +319,7 @@ theorem key_inclusion {ι κ : Type} [Fintype ι] [Fintype κ] (t : ι → Power
       rw [← hspan, SetLike.mem_coe, Submodule.mem_span_range_iff_exists_fun] at hx
       obtain ⟨c, rfl⟩ := hx
       change Φ _ ∈ _
+
       rw [map_sum]
       refine Submodule.sum_mem _ fun k _ => ?_
       rw [hΦ]
@@ -406,8 +455,8 @@ theorem exists_kernel_padic {l : ℕ} [Fact l.Prime] (K LL : FinExt l) (T₁ T�
 
 end GlobalTheory.NL.CokerKill
 
-open GlobalTheory.NL.CokerKill in
 
+open GlobalTheory.NL.CokerKill in
 theorem GlobalTheory.NL.CokerKill.X_pow_kills_coker : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F), lem3 D HW F := by
   intro D HW F Cm l _ K s LL hG T₁ T₂ π M h c1 c2
   obtain ⟨_, hcomp, hu⟩ := GlobalTheory.FinExtIntegers.dvr_complete LL

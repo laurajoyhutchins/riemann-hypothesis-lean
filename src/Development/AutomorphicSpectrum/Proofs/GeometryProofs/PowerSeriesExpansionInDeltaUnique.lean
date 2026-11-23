@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TranslDiffEq
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TranslDiffEq
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1 GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Coc
 open scoped CategoryTheory.Obj
@@ -47,6 +97,7 @@ theorem sections_of_affine (e : ∀ U : Z.Opens, Fin n → Γ(Y, π ⁻¹ᵁ U))
       (Y.presheaf.map (homOfLE (π.preimage_mono h)).op).hom g =
         ∑ i, (π.app U).hom ((Z.presheaf.map (homOfLE h).op).hom (c i)) * e U i := by
     intro U V h g c hg
+
     rw [hg, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, app_res π h, he U V h]
@@ -105,7 +156,7 @@ open Polynomial in
 theorem jet_basis (k : Type) [Field k] (m : ℕ) :
     ∃ b : Module.Basis (Fin (m + 1)) k (Jet k Unit m),
       ∀ i : Fin (m + 1), b i = (Ideal.Quotient.mk (orig k Unit ^ (m + 1)) (MvPolynomial.X ())) ^ (i : ℕ) := by
-  let φ : MvPolynomial Unit k ≃ₐ[k] k[X] := MvPolynomial.pUnitAlgEquiv k
+  let φ : MvPolynomial Unit k ≃ₐ[k] k[X] := MvPolynomial.uniqueAlgEquiv k Unit
   have hX : φ (MvPolynomial.X ()) = X := by simp [φ]
   have hI : Ideal.span {(X : k[X]) ^ (m + 1)} = (orig k Unit ^ (m + 1)).map (φ : MvPolynomial Unit k →+* k[X]) := by
     rw [Ideal.map_pow, orig, Ideal.map_span, ← Ideal.span_singleton_pow]
@@ -157,6 +208,7 @@ theorem spec_case {Y : Scheme.{0}} (p : Y ⟶ Sp A) (q : Y ⟶ Sp J)
   let B := Algebra.TensorProduct.basis A b
   have key : ∀ c : I → A, ∑ i, p.appTop.hom (toΓ A (c i)) * q.appTop.hom (toΓ J (b i)) = Φ (∑ i, c i • B i) := by
     intro c
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [hl, hr, ← map_mul, Algebra.TensorProduct.basis_apply]
@@ -271,6 +323,7 @@ theorem prZ_affine (U : (pullback G.hom x).Opens) (hU : IsAffineOpen U) (f : Γ(
         ((prZ G x m ⁻¹ᵁ U).ι ≫ (fst (Tm x m) G).left).appTop.hom (toΓ _ (b i))) =
       ∑ i, ((prZ G x m).app U).hom (U.topIso.hom.hom (c i)) * dltOn G x m _ ^ (i : ℕ) := by
     intro c
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, restrict_appTop, fm]

@@ -1,5 +1,58 @@
-import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ArakelovDegreeEqDegreeOfFamily
-import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.CountStA
+module
+
+public import Mathlib.Algebra.Module.ZLattice.Covolume
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.CanonicalEmbedding.Basic
+public import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ConjSymm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ArakelovDegreeEqDegreeOfFamily
+public import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.CountStA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.GeometryOfNumbersTheory
 
@@ -62,14 +115,14 @@ noncomputable def crdEmb {r : ℕ} {v : Fin r → V} (hli : LinearIndependent K 
 theorem crdEmb_apply {r : ℕ} {v : Fin r → V} (hli : LinearIndependent K v) (x : V) (i : Fin r) :
     crdEmb hli x i = mixedEmbedding K (crd hli x i) := rfl
 
-variable (K) in
 
+variable (K) in
 noncomputable def latB (r : ℕ) :
     Basis (Σ _ : Fin r, Free.ChooseBasisIndex ℤ (𝓞 K)) ℝ (Fin r → mixedEmbedding.mixedSpace K) :=
   Pi.basis fun _ => mixedEmbedding.latticeBasis K
 
-variable (K) in
 
+variable (K) in
 noncomputable def lat0 (r : ℕ) : Submodule ℤ (Fin r → mixedEmbedding.mixedSpace K) :=
   Submodule.span ℤ (Set.range (latB K r))
 
@@ -197,9 +250,13 @@ theorem discrete_latE {E : Submodule (𝓞 K) V} (hE : E.FG) {r : ℕ} {v : Fin 
     exact Subtype.ext (smul_right_injective _ (Nat.cast_ne_zero.mpr hn) h2)
 
 theorem isZLattice_latE {E : Submodule (𝓞 K) V} (hE : E.FG) {r : ℕ} {v : Fin r → V}
-    (hv : IsFrame K E v) : haveI := discrete_latE hE hv; IsZLattice ℝ (latE hv.2.1 E) :=
-  haveI := discrete_latE hE hv
-  ⟨by rw [eq_top_iff, ← IsZLattice.span_top (L := lat0 K r)]; exact Submodule.span_mono (standardLattice_le_frameLattice hv)⟩
+    (hv : IsFrame K E v) :
+    letI := discrete_latE hE hv
+    IsZLattice ℝ (latE hv.2.1 E) := by
+  have := discrete_latE hE hv
+  refine ⟨?_⟩
+  rw [eq_top_iff, ← IsZLattice.span_top (L := lat0 K r)]
+  exact Submodule.span_mono (standardLattice_le_frameLattice hv)
 
 theorem covolume_standardLattice (r : ℕ) :
     ZLattice.covolume (lat0 K r) = (ZLattice.covolume (mixedEmbedding.integerLattice K)) ^ r := by
@@ -217,10 +274,10 @@ theorem covolume_standardLattice (r : ℕ) :
 
 theorem covolume_latE {E : Submodule (𝓞 K) V} (hE : E.FG) {r : ℕ} {v : Fin r → V}
     (hv : IsFrame K E v) :
-    haveI := discrete_latE hE hv; haveI := isZLattice_latE hE hv
     ZLattice.covolume (latE hv.2.1 E) = ZLattice.covolume (lat0 K r) /
       ((Submodule.span (𝓞 K) (Set.range v)).toAddSubgroup.relIndex E.toAddSubgroup : ℝ) := by
-  haveI := discrete_latE hE hv; haveI := isZLattice_latE hE hv
+  have := discrete_latE hE hv
+  have := isZLattice_latE hE hv
   have h := covol_div_covol_eq_relIndex volume (lat0 K r) (latE hv.2.1 E) (standardLattice_le_frameLattice hv)
   rw [relIndex_lat hv] at h
   have hn : ((Submodule.span (𝓞 K) (Set.range v)).toAddSubgroup.relIndex E.toAddSubgroup : ℝ) ≠ 0 :=

@@ -1,15 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.LocCFTAll
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.CLocConjAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.DcSumEqOfMk
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.SphComm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSphericalOfIsCompAlongSplit
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Polynomial ValuativeRel IsLocalRing GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.UnitaryBC UpperTheory.V UpperTheory.V.Hi UpperTheory.V.Hi.CaseU
 open UpperTheory.V.W (Plc Lp HidaSetting Vl Resid LamObj UniversalOrdinaryDeterminantRing Pair)
 open UpperTheory.V.HV (Coef)
 open scoped TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Hi.Pu
 
@@ -47,7 +79,7 @@ theorem l_iff (w : Plc L) : ((l : ℕ) : 𝓞 (Lp L)) ∈ (w.under (𝓞 (Lp L))
 theorem cmp_of {w : Plc L} (h : ((l : ℕ) : 𝓞 L) ∉ w.asIdeal) (x : UA L n) :
     cmp n w ((away l L n).rangeRestrict x) = cLoc w x := by
   unfold CaseU.cmp
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
 variable (V : s.Lev)
@@ -63,7 +95,7 @@ noncomputable def tf (i : Fin m) (ℓ : Module.Dual ℂ (⨂[ℂ] e : Emb l (fun
   toFun F := toForm ι e (F i) ℓ
   map_add' F F' := funext fun g => by
     change ℓ (infRep ι lam g⁻¹ (e (F i _ + F' i _))) = _
-    rw [map_add, map_add, map_add]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _)]
     rfl
   map_smul' a F := funext fun g => by
     change ℓ (infRep ι lam g⁻¹ (e (a • F i _))) = _
@@ -73,6 +105,7 @@ noncomputable def tf (i : Fin m) (ℓ : Module.Dual ℂ (⨂[ℂ] e : Emb l (fun
 theorem mem_Y {ξ : GV n (fun v : V.frame.Vl => s.w v.1) →* GL (Fin d) ℂ} {σ : Submodule ℂ (UA L n → ℂ)}
     {F : Fin m → (hset Q τ₀).X.Fn ℂ d} :
     F ∈ YOf Q ι τ₀ e ξ σ ↔ F ∈ (hset Q τ₀).Big ι ξ ∧ ∀ i ℓ, tf Q τ₀ ι e i ℓ F ∈ σ := by
+  change F ∈ (hset Q τ₀).Big ι ξ ∧ F ∈ Submodule.span ℂ {F | ∀ i ℓ, tf Q τ₀ ι e i ℓ F ∈ σ} ↔ _
   refine and_congr Iff.rfl ⟨fun h i ℓ => ?_, fun h => Submodule.subset_span h⟩
   exact (Submodule.span_le (p := σ.comap (tf Q τ₀ ι e i ℓ))).2 (fun F hF => by exact hF i ℓ) h
 
@@ -83,7 +116,7 @@ theorem RU_form (F : Ga l L n × GV n (fun v : V.frame.Vl => s.w v.1) → Fin d 
   have : JU V (g * x) = JU V g * JU V x := Prod.ext (map_mul _ _ _) (funext fun v => map_mul _ _ _)
   rw [this, mul_inv_rev, map_mul, Module.End.mul_apply]
 
-theorem RU_fin (F : Ga l L n × GV n (fun v : V.frame.Vl => s.w v.1) → Fin d → ℂ) (ℓ) {x : UA L n} (hx : x ∈ finU L n) :
+theorem RU_fin (F : Ga l L n × GV n (fun v : V.frame.Vl => s.w v.1) → Fin d → ℂ) (ℓ) {x : UA L n} (hx : x ∈ finU (E := L) (n := n)) :
     RU L n x (toForm ι e F ℓ) = toForm ι e (fun g => F (g * JU V x)) ℓ := by
   have h : infRep (V := V) ι lam x⁻¹ = 1 := by
     have h1 : cInf x⁻¹ = 1 := inv_mem hx

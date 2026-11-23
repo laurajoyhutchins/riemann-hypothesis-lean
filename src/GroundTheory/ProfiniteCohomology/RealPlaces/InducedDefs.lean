@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.LocalCohomologyIsoHomologyMapNormCochains
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.LocalCohomologyIsoHomologyMapNormCochains
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -26,12 +69,6 @@ noncomputable def tateForget (n : ℕ) :
     tateCompactCohomology φ ψ A Aᵥ a Aᵣ ar n ⟶ compactCohomology φ A Aᵥ a n :=
   HomologicalComplex.homologyMap (tateForgetCochains φ ψ A Aᵥ a Aᵣ ar) n
 
-@[reassoc (attr := simp)]
-theorem tateForget_compactToGlobal (n : ℕ) :
-    tateForget φ ψ A Aᵥ a Aᵣ ar n ≫ compactToGlobal φ A Aᵥ a n = tateToGlobal φ ψ A Aᵥ a Aᵣ ar n := by
-  exact (HomologicalComplex.homologyMap_comp _ _ n).symm.trans
-    (congrArg (fun f => HomologicalComplex.homologyMap f n) (mappingCoconeNat.map_fst _ _ _))
-
 noncomputable def tateLocalFst (n : ℕ) :
     ModuleCat.of k ((∀ v, cohomology (Aᵥ v) n) × (∀ w, cohomology (Aᵣ w) n)) ⟶
       ModuleCat.of k (∀ v, cohomology (Aᵥ v) n) :=
@@ -51,7 +88,6 @@ theorem tateLocalCohomologyIso_inv_homologyMap_prodFst (n : ℕ) :
   rw [← h1]
   exact (hom_apply_hom_apply_of_comp_eq (Iso.hom_inv_id (localCohomologyIso Aᵥ n)) _).symm
 
-@[reassoc]
 theorem tateLocalToCompact_tateForget (n : ℕ) :
     tateLocalToCompact φ ψ A Aᵥ a Aᵣ ar n ≫ tateForget φ ψ A Aᵥ a Aᵣ ar (n + 1) =
       tateLocalFst Aᵥ Aᵣ n ≫ localToCompact φ A Aᵥ a n := by

@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistedJacquetClosedOpenSequence
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistedJacquetClosedOpenSequence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.BZMir GlobalTheory.BZMir.Leib GlobalTheory.RgGu.Leib GlobalTheory.CompanionTheory.BZPhiPG
 open scoped TensorProduct
 set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 100000 in
 theorem _root_.GlobalTheory.T.twisted_jacquet_closed_open_sequence : ∀ {G M Z VC VO AC AO : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Group M]
     [AddCommGroup Z] [Module ℂ Z] [AddCommGroup VC] [Module ℂ VC] [AddCommGroup VO] [Module ℂ VO]
     [AddCommGroup AC] [Module ℂ AC] [AddCommGroup AO] [Module ℂ AO]
@@ -32,4 +75,50 @@ theorem _root_.GlobalTheory.T.twisted_jacquet_closed_open_sequence : ∀ {G M Z 
     (hlocC : ∀ f, eC f = 0 → ∀ p ∈ C, AvgVanish H σ U θ f p)
     (hlocO : ∀ f, eO f = 0 → ∀ p, p ∉ C → AvgVanish H σ U θ f p),
   ∃ S : Subrepresentation ρ, Nonempty ((subQuot S ⊥).Equiv πO) ∧ Nonempty ((subQuot ⊤ S).Equiv πC) := by
-  first | exact @GlobalTheory.CompanionTheory.BZPhiPG.Glue.extension | exact GlobalTheory.CompanionTheory.BZPhiPG.Glue.extension | (intros; apply GlobalTheory.CompanionTheory.BZPhiPG.Glue.extension <;> assumption)
+  intro G M Z VC VO AC AO _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    H σ U hUn θ hθ hdir s c ρ hρ C hCc hHC hCU πC πO aC aO jC jO hjC hjO hjCe hjOe
+    eC eO hC1 hO1 hCs hOs hCmem hOmem hConto hOonto hCoff hlocC hlocO
+  have kC : twKer (cInd H σ) U θ ≤ LinearMap.ker eC := Submodule.span_le.2 (by
+    rintro _ ⟨u, v, rfl⟩
+    show eC _ = 0
+    rw [map_sub, hC1, map_smul, sub_self])
+  have kO : twKer (cInd H σ) U θ ≤ LinearMap.ker eO := Submodule.span_le.2 (by
+    rintro _ ⟨u, v, rfl⟩
+    show eO _ = 0
+    rw [map_sub, hO1, map_smul, sub_self])
+  have ECmk : ∀ f, (twKer (cInd H σ) U θ).liftQ eC kC (Submodule.Quotient.mk f) = eC f := fun f => rfl
+  have EOmk : ∀ f, (twKer (cInd H σ) U θ).liftQ eO kO (Submodule.Quotient.mk f) = eO f := fun f => rfl
+  refine Glue.extension_of_maps ρ πC πO aC aO jC jO hjC hjO hjCe hjOe
+    ((twKer (cInd H σ) U θ).liftQ eC kC) ((twKer (cInd H σ) U θ).liftQ eO kO) ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  · intro m y
+    obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ y
+    rw [hρ, map_smul, ECmk, ECmk, hCs]
+  · intro m y
+    obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ y
+    rw [hρ, map_smul, EOmk, EOmk, hOs]
+  · intro y
+    obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ y
+    exact hCmem f
+  · intro v
+    obtain ⟨f, hf⟩ := hConto v
+    exact ⟨Submodule.Quotient.mk f, hf⟩
+  · intro y hy
+    obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ y
+    obtain ⟨g, hg, hv⟩ := Glue.glue H σ U hUn θ hθ hdir C hCc hHC hCU f (hlocC f hy)
+    have e : (Submodule.Quotient.mk f : TwJacquet (cInd H σ) U θ) = Submodule.Quotient.mk g :=
+      (Submodule.Quotient.eq _).2 hg
+    obtain ⟨v, hv'⟩ := hOmem g hv
+    exact ⟨v, by rw [e, EOmk, hv']⟩
+  · intro y hyC hyO
+    obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ y
+    obtain ⟨g, hg, hv⟩ := Glue.glue H σ U hUn θ hθ hdir Set.univ isClosed_univ (fun _ _ _ _ => trivial)
+      (fun _ _ _ _ => trivial) f (fun p _ => by
+        by_cases hp : p ∈ C
+        · exact hlocC f hyC p hp
+        · exact hlocO f hyO p hp)
+    have hg0 : g = 0 := Subtype.ext (Subtype.ext (Subtype.ext (funext fun x => hv x trivial)))
+    rw [hg0, sub_zero] at hg
+    exact (Submodule.Quotient.mk_eq_zero _).2 hg
+  · intro v
+    obtain ⟨f, hf, he⟩ := hOonto v
+    exact ⟨Submodule.Quotient.mk f, hCoff f hf, he⟩

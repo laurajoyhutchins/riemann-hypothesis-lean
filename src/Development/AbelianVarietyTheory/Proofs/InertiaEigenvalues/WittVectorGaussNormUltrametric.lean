@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UltraSumLe
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.RingTheory.WittVector.Teichmuller
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UltraSumLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.WittVector.TeichmullerSeries
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.WittVector.Complete
+
+@[expose] public section
 
 namespace GlobalTheory.WittGauss
 open WittVector
@@ -115,7 +164,7 @@ theorem weight_add (p : ℕ) [Fact p.Prime] (c : ℝ) (hc : 0 ≤ c) (x y : Witt
   obtain ⟨Y, hY⟩ := key y hy
   have h : WittVector.map (weightRing a hb h0 h1 hm ha c hc).subtype (X + Y) =
       scaleCoeff p Polynomial.X (WittVector.map Polynomial.C (x + y)) := by
-    rw [← teichmuller_mul_eq, map_add, map_add, mul_add, hX, hY]
+    rw [← teichmuller_mul_eq, map_add (f := _), map_add (f := _), mul_add, hX, hY]
   have h2 := congrArg (fun z => WittVector.coeff z n) h
   simp only [WittVector.map_coeff, scaleCoeff, WittVector.coeff_mk] at h2
   have h3 := ((X + Y).coeff n).2 (p ^ n)
@@ -132,7 +181,7 @@ theorem weight_add_trunc (p : ℕ) [Fact p.Prime] (c : ℝ) (hc : 0 ≤ c) (x y 
     intro z hz
     refine ⟨WittVector.mk p fun i => if i ≤ n then z.coeff i else 0, ?_, fun i => ?_⟩
     · ext i
-      rw [coeff_truncate, coeff_truncate, WittVector.coeff_mk, if_pos (Nat.lt_succ_iff.1 i.2)]
+      simp only [coeff_truncate, WittVector.coeff_mk, if_pos (Nat.lt_succ_iff.1 i.2)]
     · rw [WittVector.coeff_mk]
       split_ifs with h
       · exact hz i h
@@ -140,7 +189,7 @@ theorem weight_add_trunc (p : ℕ) [Fact p.Prime] (c : ℝ) (hc : 0 ≤ c) (x y 
   obtain ⟨x', hx1, hx2⟩ := key x hx
   obtain ⟨y', hy1, hy2⟩ := key y hy
   have h : truncate (n + 1) (x + y) = truncate (n + 1) (x' + y') := by
-    rw [map_add, map_add, hx1, hy1]
+    rw [map_add (f := _), map_add (f := _), hx1, hy1]
   have h2 := congrArg (TruncatedWittVector.coeff (Fin.last n)) h
   rw [coeff_truncate, coeff_truncate, Fin.val_last] at h2
   rw [h2]

@@ -1,8 +1,61 @@
-import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ColumnOperationTripleForm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelNonzeroModulusDeterminantEq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelExplicitFormula
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LatticeAverageIdentity
+module
+
+public import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FirstKernelExplicitFormula
+import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.IsIntOfLatOfLe
+import Formalism.DoubleCosetMeasures.LowerUnipotentOrbits.LowUniMulVecELast
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.AddedBlockKernelSupport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ColumnOperationTripleForm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelNonzeroModulusDeterminantEq
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelQuotientFinite
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LatticeAverageIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Formalism.DoubleCosetMeasures Formalism.FourierDecayAlt.A5 Formalism.FourierDecayAlt.A6 Filter Topology
 open scoped ComplexConjugate
@@ -312,29 +365,35 @@ theorem Kp_scale (ψ : AddChar K ℂ) (hψ : ∀ r ∈ R, ψ r = 1)
     (w' : Point K) :
     Kp R ψ ((S, T * c) : Point K) w' = Kp R ψ ((S, T) : Point K) w' := by
   have hd : ∀ b, ((dg S c b : Kˣ) : K) ∈ R ∧ (((dg S c b)⁻¹ : Kˣ) : K) ∈ R := fun b => hc _
-  rw [A5x8.Kp_eq_section R ψ hψ ((S, T * c) : Point K) w' (Cos R ((S, T) : Point K)) (Cos R w')
-    (fun q => fm S T c (rep R q)) (fun q => rep R q) (fm_bij R S T c hc)
-    (by simp only [A5x8.inv_toCos_rep]; exact Function.bijective_id)]
+  let f (q : Cos R ((S, T) : Point K)) :=
+    A5x8.toCos R (w := ((S, T * c) : Point K)) (fm S T c (rep R q))
   unfold Kp
+  rw [← finsum_comp (Prod.map f (id : Cos R w' → Cos R w'))
+    ((fm_bij R S T c hc).prodMap Function.bijective_id)]
   refine finsum_congr fun q => ?_
-  show A5x8.Gterm R ψ ((S, T * c) : Point K) w' (fm S T c (rep R q.1)) (rep R q.2) =
-    A5x8.Gterm R ψ ((S, T) : Point K) w' (rep R q.1) (rep R q.2)
-  generalize rep R q.1 = p
+  change pairTerm R ψ ((S, T * c) : Point K) w' (f q.1, q.2) = _
+  have hCos := (A5x8.inv_toCos_rep R (f q.1)).symm
+  change A5x8.toCos R (fm S T c (rep R q.1)) = A5x8.toCos R (rep R (f q.1)) at hCos
+  simp only [pairTerm]
+  generalize rep R q.1 = p at hCos ⊢
+  generalize rep R (f q.1) = p₁ at hCos ⊢
   generalize rep R q.2 = p'
-  unfold A5x8.Gterm
-  by_cases hZ : IsInt R (orbZ ((S, T) : Point K) p)
-  · rw [phase_fm R S T c ψ hψ p (hB p hZ), orbZ_fm,
-      ← A5x4.card_isoZZ_congr R (iso_mul_DG R (dg S c) hd _ (hA p hZ)) (A5x4.isoZZ_refl R _)]
-    have hi := (isInt_mul_DG R (dg S c) hd (orbZ ((S, T) : Point K) p)).2 hZ
-    by_cases h' : IsInt R (orbZ w' p')
-    · rw [if_pos ⟨hi, h'⟩, if_pos ⟨hZ, h'⟩]
-    · rw [if_neg (fun h => h' h.2), if_neg (fun h => h' h.2)]
-  · have hZ' : ¬ IsInt R (orbZ ((S, T * c) : Point K) (fm S T c p)) := by
-      intro h1
-      rw [orbZ_fm] at h1
-      exact hZ ((isInt_mul_DG R (dg S c) hd _).1 h1)
-    rw [if_neg (fun h => hZ' h.1), if_neg (fun h => hZ h.1)]
-    simp
+  obtain ⟨a, ha, b, hb, rfl⟩ := A5x8.inv_exists R (fm S T c p) p₁ hCos
+  have hRepInt := A5x4.isInt_orbZ_inv R ((S, T * c) : Point K) a ha b hb
+    (fm S T c p).1 (fm S T c p).2
+  have hScaleInt : IsInt R (orbZ ((S, T * c) : Point K) (fm S T c p)) ↔
+      IsInt R (orbZ ((S, T) : Point K) p) := by
+    rw [orbZ_fm, isInt_mul_DG R _ hd]
+  have hInt := and_congr (hRepInt.trans hScaleInt) (Iff.refl (IsInt R (orbZ w' p')))
+  by_cases hZ : IsInt R (orbZ ((S, T) : Point K) p) ∧ IsInt R (orbZ w' p')
+  · obtain ⟨φ, hφ⟩ := A5x8.inv_iso R ((S, T * c) : Point K) a ha b hb
+      (fm S T c p).1 (fm S T c p).2
+    have hrefl := A5x4.isoZZ_refl R (orbZ w' p')
+    simp only [hInt.mpr hZ, hZ, if_true, A5x8.inv_phase R ψ hψ _ a ha b hb,
+      ← A5x4.card_isoZZ_congr R hφ hrefl]
+    rw [phase_fm R S T c ψ hψ p (hB p hZ.1), orbZ_fm,
+      ← A5x4.card_isoZZ_congr R (iso_mul_DG R (dg S c) hd _ (hA p hZ.1)) hrefl]
+  · simp [hZ, mt hInt.mp hZ]
 
 end Main
 

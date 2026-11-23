@@ -1,4 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.OwnerNoneIff
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.OwnerNoneIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -8,11 +52,6 @@ variable {E : Type} [Field E] [NumberField E] {n nb : ℕ}
 
 section Col
 variable {dim : (E →+* ℂ) → ℕ}
-
-theorem iteratedDeriv_cast (s : (Fin 1 → Vsp dim) → ℂ) {N M : ℕ} (h : N = M) (v : Fin N → Vsp dim) :
-    d1 s N v = d1 s M (fun k => v (k.cast h.symm)) := by
-  subst h
-  rfl
 
 theorem iteratedDeriv_list_bound (s : (Fin 1 → Vsp dim) → ℂ) (c : ℕ) (μ : ℂ) (y : Vsp dim) (ε : ℝ)
     (σ : E →+* ℂ)
@@ -59,9 +98,9 @@ section Main
 variable {dim : (E →+* ℂ) → ℕ} (bs : Fin nb → Block E n dim)
 
 open Classical in
-
-def eU (j : Fin nb) (a : Fin (bs j).i) : Vsp dim :=
-  EuclideanSpace.single (⟨(bs j).τ, Fin.castLE (bs j).hi a⟩ : Idx dim) (1 : ℂ)
+def eU (j : Fin nb) (a : Fin (bs j).i) : Vsp dim := by
+  classical
+  exact EuclideanSpace.single (⟨(bs j).τ, Fin.castLE (bs j).hi a⟩ : Idx dim) (1 : ℂ)
 
 def idealA (μ : (Σ j : Fin nb, Fin (bs j).i) → ℂ) (y : (Σ j : Fin nb, Fin (bs j).i) → Vsp dim)
     (ee : Fin n → ℂ) (T : Choice bs) (k : Fin n) : ℂ :=
@@ -91,7 +130,7 @@ theorem main_term (hD : Disj bs) (μ : (Σ j : Fin nb, Fin (bs j).i) → ℂ)
     intro p
     have hex : ∃ p', colB bs p' = colB bs p := ⟨p, rfl⟩
     unfold owner
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     exact congrArg some (hinj hex.choose_spec)
   have hnone : ∀ k, owner bs k = none ↔ k ∉ Finset.univ.image (colB bs) := by
     intro k
@@ -102,7 +141,7 @@ theorem main_term (hD : Disj bs) (μ : (Σ j : Fin nb, Fin (bs j).i) → ℂ)
       exact Option.some_ne_none _ h
     · intro h
       unfold owner
-      rw [dif_neg]
+      rw [dite_eq_right]
       rintro ⟨p, rfl⟩
       exact h (Finset.mem_image_of_mem _ (Finset.mem_univ p))
   have hT : ∀ T : Choice bs, ∏ k, idealA bs μ y ee T k =

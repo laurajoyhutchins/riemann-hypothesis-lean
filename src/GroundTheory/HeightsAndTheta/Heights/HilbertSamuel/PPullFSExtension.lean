@@ -1,7 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsProjFrameBasePtFree
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CNormSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsProjFrameBasePtFree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CNormSt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -171,8 +224,9 @@ theorem pr_ne_zero (hBP : ProjFrameBasePtFree.Statement) (hfr : IsProjFrame x e)
     rintro _ ⟨k, rfl⟩
     have hk : z (e k) = 0 := congrFun h0 k
     have he : (⟨(), (e k).2⟩ : Ix κ) = e k := rfl
+
     simp only [SetLike.mem_coe, RingHom.mem_ker, hψ, RingHom.comp_apply, linForm, map_sum, map_mul,
-      map_C, map_X, eval_C, eval_X, projMat]
+    map_C, map_X, eval_C, eval_X, projMat]
     simp only [eq_intCast, Int.cast_ite, Int.cast_one, Int.cast_zero, ite_mul, one_mul, zero_mul]
     rw [Finset.sum_eq_single (e k).2 (fun i _ hi => if_neg (Ne.symm hi))
       (fun h => absurd (Finset.mem_univ _) h), if_pos rfl, he]
@@ -242,8 +296,8 @@ theorem exists_ratio_lb (hBP : ProjFrameBasePtFree.Statement) (hfr : IsProjFrame
 
 end PullFSExtension
 
-open PullFSExtension in
 
+open PullFSExtension in
 theorem PullFSExtension.proof (hBP : ProjFrameBasePtFree.Statement) : PullFSExtension.Statement := by
   intro D Ω _ _ κ _ x e hfr
   obtain ⟨δ, hδ, hlb⟩ := exists_ratio_lb hBP hfr
@@ -257,7 +311,7 @@ theorem PullFSExtension.proof (hBP : ProjFrameBasePtFree.Statement) : PullFSExte
       ⟨fun h0 => by obtain ⟨i, hi⟩ := hz.1 (); exact hi (congrFun h0 _), hz.2⟩
     have hpz := pr_ne_zero hBP hfr hzp
     have hev : (fun y => Real.log ((HermLine.ofCone (metric e δ)).h y)) =ᶠ[𝓝 z]
-        fun y => Real.log ((fsMetric (Fin (D + 1))).ρ (pr e y)) := by
+        fun y => Real.log ((fsMetric (ι := Fin (D + 1))).ρ (pr e y)) := by
       have hr : ∀ᶠ y in 𝓝 z, δ / 2 < ratio e y :=
         (contDiffAt_ratio e hzp.1 (n := 0)).continuousAt.eventually
           (lt_mem_nhds (by linarith [hlb z hzp]))
@@ -266,10 +320,10 @@ theorem PullFSExtension.proof (hBP : ProjFrameBasePtFree.Statement) : PullFSExte
       rw [metric_of_ge e hδ hy0 hy.le, congrFun log_fs_eq (pr e y),
         Real.log_sqrt (by rw [normSqE_eq]; positivity)]
       ring
-    have hφ : ContDiffAt ℝ 2 (fun u => Real.log ((fsMetric (Fin (D + 1))).ρ u)) (pr e z) := by
+    have hφ : ContDiffAt ℝ 2 (fun u => Real.log ((fsMetric (ι := Fin (D + 1))).ρ u)) (pr e z) := by
       rw [log_fs_eq]
       exact contDiffAt_const.mul (contDiff_normSqE.contDiffAt.log (normSqE_pos hpz).ne')
-    have key := leviForm_comp_clm (pr e) (fun u => Real.log ((fsMetric (Fin (D + 1))).ρ u)) z w hφ
+    have key := leviForm_comp_clm (pr e) (fun u => Real.log ((fsMetric (ι := Fin (D + 1))).ρ u)) z w hφ
     beta_reduce at key
     rw [leviForm_congr hev w, key]
     exact leviForm_log_fs_nonneg hpz (pr e w)

@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.DatumF
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumF
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwoMulInvOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 
@@ -44,15 +89,15 @@ theorem pairA_mul_eq_zero_iff_fst' (a : AF F) : pairA F 1 0 * a = 0 ↔ fstA F a
 
 def incFin : Af F →ₗ[F] AF F where
   toFun y := pairA F 0 y
-  map_add' y y' := af_ext' (by rw [map_add, fstA_pairA', fstA_pairA', fstA_pairA', add_zero])
-    (by rw [map_add, sndA_pairA', sndA_pairA', sndA_pairA'])
+  map_add' y y' := af_ext' (by rw [map_add (f := _), fstA_pairA', fstA_pairA', fstA_pairA', add_zero])
+    (by rw [map_add (f := _), sndA_pairA', sndA_pairA', sndA_pairA'])
   map_smul' c y := af_ext' (by rw [map_smul, fstA_pairA', fstA_pairA', RingHom.id_apply, smul_zero])
     (by rw [map_smul, sndA_pairA', sndA_pairA', RingHom.id_apply])
 
 def incInf : Ainf F →ₗ[F] AF F where
   toFun y := pairA F y 0
-  map_add' y y' := af_ext' (by rw [map_add, fstA_pairA', fstA_pairA', fstA_pairA'])
-    (by rw [map_add, sndA_pairA', sndA_pairA', sndA_pairA', add_zero])
+  map_add' y y' := af_ext' (by rw [map_add (f := _), fstA_pairA', fstA_pairA', fstA_pairA'])
+    (by rw [map_add (f := _), sndA_pairA', sndA_pairA', sndA_pairA', add_zero])
   map_smul' c y := af_ext' (by rw [map_smul, fstA_pairA', fstA_pairA', RingHom.id_apply])
     (by rw [map_smul, sndA_pairA', sndA_pairA', RingHom.id_apply, smul_zero])
 

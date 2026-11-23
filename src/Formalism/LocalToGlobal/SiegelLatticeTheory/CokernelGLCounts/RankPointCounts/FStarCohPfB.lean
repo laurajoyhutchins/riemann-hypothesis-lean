@@ -1,5 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarCohPf
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarCohPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +59,7 @@ variable (u u' F0 what₂)
 
 def CohLp : Prop :=
   CtxP u u' F0 what₂ →
-  ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D) (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+  ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D) (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
     (φ' : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂)),
     CohHyp Zd γ Z F'₂ φ' →
     {p | ⇑(φ' p) '' (locH Zd p).Lset (lattice₂ D Zd.M p γ.lam) (tLoc Zd p γ).f' ≠
@@ -28,7 +67,7 @@ def CohLp : Prop :=
 
 def CohIota : Prop :=
   CtxP u u' F0 what₂ →
-  ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D) (F'₂ : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+  ∀ (γ : TermDef.Term D u u' F0 what₂) (Z : PairVal.MatR D) (F'₂ : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
     (φ' : ∀ p, (locH Zd p).Wb (tLoc Zd p γ).f' ≃ₗ[(D.s.atP p).Ep] (locH Zd p).Wb (locF' Zd p F'₂)),
     CohHyp Zd γ Z F'₂ φ' →
     {p | ¬ ∀ g, (Zd.M p).split = some g →
@@ -37,24 +76,5 @@ def CohIota : Prop :=
         (locH Zd p).iotaGraph g (t2 Zd p γ F'₂ (lattice₂ D Zd.M p γ.lam))}.Finite
 
 variable {u u' F0 what₂}
-
-theorem cohResp_of (hLp : CohLp Zd u u' F0 what₂) (hIo : CohIota Zd u u' F0 what₂) : CohResp Zd u u' F0 what₂ := by
-  intro hP γ Z F'₂ φ' hH
-  refine ((hLp hP γ Z F'₂ φ' hH).union (hIo hP γ Z F'₂ φ' hH)).subset ?_
-  intro p hp
-  by_contra hn
-  simp only [Set.mem_union, Set.mem_ofPred_eq, not_or, not_not, ne_eq] at hn
-  obtain ⟨h3, h5⟩ := hn
-  apply hp
-  refine ⟨?_, ?_, h3, (hH.2.2.2 p).2.2.2.2.2, h5⟩
-  · exact Set.image_id _
-  · intro x x₂ hx hx₂
-    rw [one_smul, one_smul]
-    show (locH Zd p).mkW _ x = (locH Zd p).mkW _ x₂
-    exact congrArg _ (Subtype.ext (hx.trans hx₂.symm))
-
-theorem starCoh_of_P' (hGen : CohGen Zd u u' F0 what₂) (hLp : CohLp Zd u u' F0 what₂) (hIo : CohIota Zd u u' F0 what₂)
-    (hGood : CohGood Zd u u' F0 what₂) : CtxP u u' F0 what₂ → StarCoh Zd u u' F0 what₂ :=
-  starCoh_of_P Zd hGen (cohResp_of Zd hLp hIo) hGood
 
 end Formalism.L2.SG.Pf.FrameGlobalPatching.FStar

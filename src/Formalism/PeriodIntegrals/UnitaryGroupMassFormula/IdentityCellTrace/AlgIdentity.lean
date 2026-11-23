@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IdentityCellTrace.ExistsSmulMem
-import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+module
+
+public import Formalism.HermitianLattices.StatementLat
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IdentityCellTrace.ExistsSmulMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,7 +144,7 @@ theorem core (h : V →ₗ⋆[E] V →ₗ[E] E) (hs : h.IsSymm) (hnd : h.Nondege
   let ψ : Fin r → (Λ →ₗ[𝓞 E] E) := fun a =>
     { toFun := fun y => φ a (ρ y : V)
       map_add' := fun y₁ y₂ => by
-        rw [map_add, Submodule.coe_add, hφadd a _ (hρX y₁) _ (hρX y₂)]
+        rw [map_add (f := _), Submodule.coe_add, hφadd a _ (hρX y₁) _ (hρX y₂)]
       map_smul' := fun o y => by
         rw [map_smul, Submodule.coe_smul, ← algebraMap_smul E o, hφsmul a _ _ (hρX y),
           RingHom.id_apply, Algebra.smul_def] }
@@ -165,9 +215,10 @@ theorem core (h : V →ₗ⋆[E] V →ₗ[E] E) (hs : h.IsSymm) (hnd : h.Nondege
   have K1 : ∀ v a, h (v + ∑ b, h (e b) v • w b) (e' a) = star (h (e a) v) := by
     intro v a
     have hk := congrArg (h v) (key a)
+
     rw [map_sum, map_sub] at hk
     simp only [hr] at hk
-    rw [map_add, LinearMap.add_apply, LinearMap.map_sum₂]
+    rw [map_add (f := _), LinearMap.add_apply, LinearMap.map_sum₂]
     simp only [hl]
     have e1 : h v (e' a) = h v (e a) - ∑ b, h (w b) (e' a) * h v (e b) := by rw [hk]; ring
     rw [e1, ← hsy]
@@ -183,6 +234,7 @@ theorem core (h : V →ₗ⋆[E] V →ₗ[E] E) (hs : h.IsSymm) (hnd : h.Nondege
     set P' := v' + ∑ b, h (e b) v' • w b with hP'
     have hBB : h (∑ a, cc a v • e' a) (∑ a, cc a v' • e' a) = 0 := hiso _ (hBX v) _ (hBX v')
     have hPB : h P (∑ a, cc a v' • e' a) = ∑ a, cc a v' * star (h (e a) v) := by
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun a _ => by rw [hr, K1]
     have hBP : h (∑ a, cc a v • e' a) P' = ∑ a, star (cc a v) * h (e a) v' := by
@@ -199,11 +251,12 @@ theorem core (h : V →ₗ⋆[E] V →ₗ[E] E) (hs : h.IsSymm) (hnd : h.Nondege
         rw [Finset.sum_comm]
         exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by simp only [G]; ring
       rw [hP, hP']
-      simp only [map_add, LinearMap.add_apply, map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ,
-        LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, e1, RingHom.id_apply, mul_add]
+
+      simp only [map_add (f := _), LinearMap.add_apply, map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ,
+      LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, e1, RingHom.id_apply, mul_add]
       rw [Finset.sum_add_distrib, hdbl]
       ring
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     rw [hBB, hPB, hBP, hPP]
     have := alg_identity (fun a => h (e a) v) (fun a => h (e a) v') (fun a => h (w a) v)
       (fun a => h (w a) v') G s hsG

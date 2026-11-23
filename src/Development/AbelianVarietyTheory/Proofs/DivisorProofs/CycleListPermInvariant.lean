@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentreCompat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentreCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct
 open GlobalTheory.LKInvGood
 
@@ -36,41 +79,5 @@ theorem exists_nat_integral {F : Type} [Field F] [NumberField F] (s : Finset F) 
 end GlobalTheory.SepModel
 
 namespace GlobalTheory.SepModel
-
-theorem exists_lift {F : Type} [Field F] [NumberField F] (ℓ : ℕ) [Fact ℓ.Prime] {N : ℕ}
-    (hN : ¬ ℓ ∣ N) (r : Polynomial F) (hr : ∀ n, IsIntegral ℤ ((N : F) * r.coeff n)) :
-    ∃ q : Polynomial (cenOrder ℓ F), q.map ((cenOrder ℓ F).val : cenOrder ℓ F →+* ℚ_[ℓ] ⊗[ℚ] F) =
-      r.map (Algebra.TensorProduct.includeRight : F →ₐ[ℚ] ℚ_[ℓ] ⊗[ℚ] F).toRingHom := by
-  have hl : r.map (Algebra.TensorProduct.includeRight : F →ₐ[ℚ] ℚ_[ℓ] ⊗[ℚ] F).toRingHom ∈
-      Polynomial.lifts ((cenOrder ℓ F).val : cenOrder ℓ F →+* ℚ_[ℓ] ⊗[ℚ] F) := by
-    rw [Polynomial.lifts_iff_coeff_lifts]
-    intro n
-    rw [Polynomial.coeff_map]
-    exact ⟨⟨_, tmul_mem_cenOrder ℓ hN (hr n)⟩, rfl⟩
-  obtain ⟨q, hq⟩ := hl
-  exact ⟨q, hq⟩
-
-theorem separable_model (F : Type) [Field F] [NumberField F] (p : Polynomial F) (hp : p.Separable) :
-    ∃ N : ℕ, 0 < N ∧ ∀ (ℓ : ℕ) [Fact ℓ.Prime], ¬ ℓ ∣ N →
-      ∃ q : Polynomial (cenOrder ℓ F), q.map ((cenOrder ℓ F).val : cenOrder ℓ F →+* ℚ_[ℓ] ⊗[ℚ] F) =
-        p.map (Algebra.TensorProduct.includeRight : F →ₐ[ℚ] ℚ_[ℓ] ⊗[ℚ] F).toRingHom ∧ q.Separable := by
-  classical
-  obtain ⟨a, b, hab⟩ := hp
-  obtain ⟨N, hN0, hN⟩ := exists_nat_integral (p.coeffs ∪ a.coeffs ∪ b.coeffs)
-  have hcoef : ∀ r : Polynomial F, r.coeffs ⊆ p.coeffs ∪ a.coeffs ∪ b.coeffs →
-      ∀ n, IsIntegral ℤ ((N : F) * r.coeff n) := by
-    intro r hs n
-    by_cases h0 : r.coeff n = 0
-    · rw [h0, mul_zero]; exact isIntegral_zero
-    · exact hN _ (hs (Polynomial.coeff_mem_coeffs h0))
-  refine ⟨N, hN0, fun ℓ _ hℓ => ?_⟩
-  obtain ⟨q, hq⟩ := exists_lift ℓ hℓ p (hcoef p (fun x hx => by simp [hx]))
-  obtain ⟨a', ha'⟩ := exists_lift ℓ hℓ a (hcoef a (fun x hx => by simp [hx]))
-  obtain ⟨b', hb'⟩ := exists_lift ℓ hℓ b (hcoef b (fun x hx => by simp [hx]))
-  refine ⟨q, hq, a', b', ?_⟩
-  apply Polynomial.map_injective ((cenOrder ℓ F).val : cenOrder ℓ F →+* ℚ_[ℓ] ⊗[ℚ] F) Subtype.val_injective
-  rw [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul, ← Polynomial.derivative_map,
-    ha', hb', hq, Polynomial.derivative_map, ← Polynomial.map_mul, ← Polynomial.map_mul,
-    ← Polynomial.map_add, hab, Polynomial.map_one, Polynomial.map_one]
 
 end GlobalTheory.SepModel

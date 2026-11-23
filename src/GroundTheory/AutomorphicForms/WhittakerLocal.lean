@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.WhittakerDistribution
-import GroundTheory.AutomorphicForms.WhittakerCriterion
-import GroundTheory.AutomorphicForms.MeasuresGL
+module
+
+public import GroundTheory.AutomorphicForms.WhittakerCriterion
+public import GroundTheory.AutomorphicForms.WhittakerGroups
+public import Mathlib.Topology.Algebra.Group.Units
+public import GroundTheory.AutomorphicForms.MeasuresGL
+public import GroundTheory.AutomorphicForms.WhittakerDistribution
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -53,6 +99,7 @@ theorem map_sigma_eq (μ : Measure (GL (Fin n) F)) [μ.IsHaarMeasure] : μ.map s
       rw [this, Measure.map_id]
     have h2 : (μ.map theta).map theta = (c * c) • μ := by
       rw [e, Measure.map_smul, e, smul_smul]
+      exact hθm.aemeasurable
     exact h1.symm.trans h2
   set K := GLnLocal.integralGL F n
   have hK0 : μ K ≠ 0 := (GLnLocal.isOpen_integralGL F n).measure_ne_zero μ ⟨1, K.one_mem⟩
@@ -74,19 +121,6 @@ theorem map_sigma_eq (μ : Measure (GL (Fin n) F)) [μ.IsHaarMeasure] : μ.map s
   exact Measures.inv_eq_self_GL F n μ
 
 end Measure
-
-theorem rank_whittaker_mul_rank_whittaker_contragredient_le_one (ψ₀ : AddChar F ℂ)
-    (hψ : Continuous ψ₀) (hψ₁ : ψ₀ ≠ 1) {V : Type*} [AddCommGroup V] [Module ℂ V]
-    (π : Representation ℂ (GL (Fin n) F) V) (hπ : IsAdmissible π) [π.IsIrreducible] :
-    Module.rank ℂ (equivariantFunctionals π
-        (fun u : Iwasawa.unipotent F n => psiN ψ₀ (u : GL (Fin n) F))) *
-      Module.rank ℂ (equivariantFunctionals (contragredient π)
-        (fun u : Iwasawa.unipotent F n => (psiN ψ₀ (u : GL (Fin n) F))⁻¹)) ≤ 1 := by
-  let _ : MeasurableSpace (GL (Fin n) F) := _root_.borel _
-  have : BorelSpace (GL (Fin n) F) := ⟨rfl⟩
-  have : (haar : Measure (GL (Fin n) F)).IsInvInvariant := ⟨Measures.inv_eq_self_GL F n _⟩
-  exact rank_mul_rank_le_one (haar : Measure (GL (Fin n) F)) (σ := sigmaHomeo)
-    (fun x y => sigma_mul x y) (map_sigma_eq _) (biEquivariantSigmaInvariant_GL ψ₀ hψ hψ₁) hπ
 
 theorem rank_whittaker_le_one_of_contragredient (ψ₀ : AddChar F ℂ) (hψ : Continuous ψ₀)
     (hψ₁ : ψ₀ ≠ 1) {V : Type*} [AddCommGroup V] [Module ℂ V]

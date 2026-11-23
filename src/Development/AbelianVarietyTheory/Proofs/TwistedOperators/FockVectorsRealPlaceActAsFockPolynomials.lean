@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.L2UnitaryRepresentationData
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.L2UnitaryRepresentationData
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AtPlaceIffEqAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,6 +117,7 @@ private theorem a_dI_add_trace_smul_of_weight {p q : ℕ} {V : Type} [AddCommGro
     a (dI x) v + ((c : ℂ) * (dI x).trace) • v =
       (((∑ j, ((μ j + c : ℚ) : ℝ) * x j : ℝ) : ℂ) * Complex.I) • v := by
   have htr : (dI x).trace = ∑ j, (x j : ℂ) * Complex.I := Matrix.trace_diagonal _
+
   rw [htr, dI_eq_sum x, map_sum, LinearMap.sum_apply]
   simp only [map_smul, LinearMap.smul_apply, hw, smul_smul, ← Finset.sum_smul, ← add_smul]
   congr 1
@@ -297,6 +343,7 @@ theorem trace_bar {p q : ℕ} {Y : Mat p q} (hY : Y ∈ upq p q) : (Y.map (starR
     rw [← Matrix.trace_neg, ← h1, Matrix.trace_mul_comm, ← Matrix.mul_assoc, hJJ, Matrix.one_mul,
       Matrix.trace_conjTranspose]
   have h3 : (Y.map (starRingEnd ℂ)).trace = starRingEnd ℂ Y.trace := by
+
     simp [Matrix.trace, map_sum]
   rw [h3, h2]
   rfl
@@ -342,7 +389,7 @@ theorem side_at : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) 
     obtain ⟨h0, -, huniq⟩ := GlobalTheory.PointAtPlace.existsUnique_isAtTau V τ θ hθ _ (GlobalTheory.Mem.Lift.exp_mem hX t)
     have hc : ∃ x, IsAtTau θ V τ (NormedSpace.exp (t • X)) x := ⟨_, hex⟩
     unfold atTau
-    rw [dif_pos hc]
+    rw [dite_eq_left hc]
     exact (huniq _ hc.choose_spec).trans (huniq _ hex).symm
   have memS : ∀ Y ∈ upq p q, phiFr frS true e Y ∈ lieAt S τ := fun Y hY => phiFr_mem hfS hS true hY
   have memT : ∀ Y ∈ upq r s, phiFr frT false e' Y ∈ lieAt T τ := fun Y hY => phiFr_mem hfT hT false hY
@@ -386,7 +433,7 @@ theorem side_at : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) 
         exact trace_reindex e' Y
       refine ⟨locT εS εT (frT * phiFr frT false e' Y * frT⁻¹) P +
         ((aS : ℂ) * (phiFr frT false e' Y).trace) • P, ?_, ?_⟩
-      · rw [conj_phiFr huT, hpl, map_add, map_smul, hκ.2, htr]
+      · rw [conj_phiFr huT, hpl, map_add (f := _), map_smul, hκ.2, htr]
       · intro g z
         have := (hL.2 _ (memT Y hY) P).1 (1, g) z
         simpa only [MonoidHom.comp_apply, MonoidHom.inr_apply, L (memT Y hY), Prod.mk_mul_mk, one_mul] using this

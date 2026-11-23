@@ -1,15 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PIncIdealBelow
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocDomain
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartKernel
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartIncDomain
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsChartNormSep
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.StatementsSectionOrder
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartIncDomain
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartKernel
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartLocDomain
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PIncIdealBelow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
 
-open MvPolynomial LineChowForm SectionLine
+open MvPolynomial
 
 noncomputable section
 
@@ -19,72 +62,10 @@ theorem chartLocDomain : ChartLocDomain.Statement :=
   ChartLocDomain.proof (IncIdealBelow.proof ChowFormMultiHomog.full) ChartIncDomain.proof
     (ChartKernel.proof IncidenceGeneric.full ChartIncDomain.proof)
 
-theorem line_domain (F : Type) [Field F] (p : Ideal (MvPolynomial (Fin 1 × Fin 2) F)) [p.IsPrime] :
-    IsDomain (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p) ∧
-      Function.Injective (algebraMap (Localization.AtPrime p)
-        (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p)) := by
-  obtain ⟨hdom, hinj, -⟩ := chartLocDomain F 2 1 ⊥ D2 (coeffX1 F) p isProjPrime_line isChowForm_line
-    (linearFormX1_ne_zero F)
-  exact ⟨hdom, hinj⟩
-
-scoped instance line_isDomain (F : Type) [Field F] (p : Ideal (MvPolynomial (Fin 1 × Fin 2) F)) [p.IsPrime] :
-    IsDomain (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p) :=
-  (line_domain F p).1
-
-scoped instance line_isTorsionFree (F : Type) [Field F] (p : Ideal (MvPolynomial (Fin 1 × Fin 2) F)) [p.IsPrime] :
-    Module.IsTorsionFree (Localization.AtPrime p) (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p) :=
-  Module.isTorsionFree_iff_algebraMap_injective.mpr (line_domain F p).2
-
-set_option synthInstance.maxHeartbeats 400000 in
-
-scoped instance line_faithfulSMul (F : Type) [Field F] (p : Ideal (MvPolynomial (Fin 1 × Fin 2) F)) [p.IsPrime] :
-    FaithfulSMul (Localization.AtPrime p) (FractionRing (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p)) := by
-  rw [faithfulSMul_iff_algebraMap_injective, IsScalarTower.algebraMap_eq (Localization.AtPrime p)
-    (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p)]
-  rw [RingHom.coe_comp]
-  exact (IsFractionRing.injective _ _).comp (line_domain F p).2
 
 end ChartFracSeparableInhabited
 
-open ChartFracSeparableInhabited in
 
-theorem ChartFracSeparable.hypotheses_inhabited_full (F : Type) [Field F] [PerfectField F]
-    (p : Ideal (MvPolynomial (Fin 1 × Fin 2) F)) [p.IsPrime] :
-    IsProjPrime (⊥ : Ideal (MvPolynomial (Fin 2) F)) ∧
-      IsChowForm (⊥ : Ideal (MvPolynomial (Fin 2) F)) (1 + 1) (D2 : MvPolynomial (Fin (1 + 1) × Fin 2) F) ∧
-      linForm (coeffX1 F) ∉ (⊥ : Ideal (MvPolynomial (Fin 2) F)) ∧
-      IsDomain (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p) ∧
-      Function.Injective (algebraMap (Localization.AtPrime p)
-        (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p)) :=
-  ⟨isProjPrime_line, isChowForm_line, linearFormX1_ne_zero F, line_domain F p⟩
-
-set_option synthInstance.maxHeartbeats 400000 in
-open ChartFracSeparableInhabited in
-
-theorem ChartFracSeparable.applies_line (h : ChartFracSeparable.Statement) (F : Type) [Field F] [PerfectField F]
-    (p : Ideal (MvPolynomial (Fin 1 × Fin 2) F)) [p.IsPrime] :
-    letI := FractionRing.liftAlgebra (Localization.AtPrime p)
-      (FractionRing (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p))
-    Algebra.IsSeparable (FractionRing (Localization.AtPrime p))
-      (FractionRing (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p)) := by
-  let _ := FractionRing.liftAlgebra (Localization.AtPrime p)
-    (FractionRing (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p))
-  have hs : Algebra.IsSeparable (FractionRing (Localization.AtPrime p))
-      (FractionRing (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) F)) (coeffX1 F) 1 p)) :=
-    @h F _ _ 2 1 ⊥ D2 (coeffX1 F) p _ _ _ _ _ OreLocalization.instAlgebra Localization.isLocalization _
-      Localization.isLocalization _ _ (FractionRing.isScalarTower_liftAlgebra _ _) _ isProjPrime_line
-      isChowForm_line (linearFormX1_ne_zero F)
-  exact hs
-
-theorem ChartFracSeparable.hypotheses_inhabited_zmod2_full :
-    IsProjPrime (⊥ : Ideal (MvPolynomial (Fin 2) (ZMod 2))) ∧
-      IsChowForm (⊥ : Ideal (MvPolynomial (Fin 2) (ZMod 2))) (1 + 1)
-        (D2 : MvPolynomial (Fin (1 + 1) × Fin 2) (ZMod 2)) ∧
-      linForm (coeffX1 (ZMod 2)) ∉ (⊥ : Ideal (MvPolynomial (Fin 2) (ZMod 2))) ∧
-      IsDomain (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) (ZMod 2))) (coeffX1 (ZMod 2)) 1 ⊥) ∧
-      Function.Injective (algebraMap (Localization.AtPrime (⊥ : Ideal (MvPolynomial (Fin 1 × Fin 2) (ZMod 2))))
-        (ChartLoc (⊥ : Ideal (MvPolynomial (Fin 2) (ZMod 2))) (coeffX1 (ZMod 2)) 1 ⊥)) :=
-  ChartFracSeparable.hypotheses_inhabited_full (ZMod 2) ⊥
 
 end
 

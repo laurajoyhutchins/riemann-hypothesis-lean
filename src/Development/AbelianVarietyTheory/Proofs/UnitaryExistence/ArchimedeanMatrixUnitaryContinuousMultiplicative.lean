@@ -1,13 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplitStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RealAdelesCmFieldEquivComplexCmTypeStatement
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Formalism.LocalToGlobal.ProjectiveLattices.ParCanon
-import Formalism.LocalToGlobal.ProjectiveLattices.ExistsParameterConditions
-import Formalism.LocalToGlobal.ProjectiveLattices.ValSetAlgSubset
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAll
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.LocalToGlobal.ProjectiveLattices.VolProofs
+module
+
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelSubgroup
+public import Formalism.LocalToGlobal.ProjectiveLattices.EquivariantFiniteGroup
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplitStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RealAdelesCmFieldEquivComplexCmTypeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Pj
 open scoped TensorProduct Matrix Topology
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -59,21 +92,7 @@ theorem exists_lift {A : Type} [CommRing A] {n ι : Type} [Fintype n] [Decidable
 
 theorem gram_det_ne_zero {E : Type} [Field E] [NumberField E] [StarRing E] (S : Formalism.BasicNotions.HSpace E) :
     S.gram.det ≠ 0 := by
-  intro h
-  obtain ⟨v, hv, h0⟩ := Matrix.exists_mulVec_eq_zero_iff.2 h
-  apply hv
-  have hy : S.frame.equivFun.symm v = 0 := by
-    apply S.nondeg.2
-    intro x
-    have hi : ∀ i, S.hT (S.frame i) (S.frame.equivFun.symm v) = 0 := by
-      intro i
-      have := congrFun h0 i
-      rw [Module.Basis.equivFun_symm_apply, map_sum]
-      simpa [Matrix.mulVec, dotProduct, Formalism.BasicNotions.HSpace.gram, mul_comm] using this
-    rw [← S.frame.sum_repr x, map_sum, LinearMap.sum_apply]
-    refine Finset.sum_eq_zero fun i _ => ?_
-    rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hi, smul_zero]
-  exact S.frame.equivFun.symm.map_eq_zero_iff.1 hy
+  apply GlobalTheory.RecDict.det_gram_ne_zero <;> assumption
 
 theorem continuous_inf (F E : Type) [Field F] [NumberField F] [Field E] [Algebra F E] :
     Continuous (Algebra.TensorProduct.map (fstA F) (AlgHom.id F E) : AF F ⊗[F] E → Ainf F ⊗[F] E) := by
@@ -98,7 +117,7 @@ theorem inf_mem {F E : Type} [Field F] [NumberField F] [Field E] [Algebra F E] (
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp only [map_zero]
-    | add a b ha hb => rw [map_add, map_add, ha, hb, map_add, map_add]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, map_add (f := _), map_add (f := _)]
     | tmul a x => rfl
   have hg' : Formalism.UG.cT (sigR (AF F) σ) g.1 * JR (AF F) J * g.1 = JR (AF F) J := hg
   have hJ : (JR (F := F) (AF F) J).map π = JR (Ainf F) J := rfl

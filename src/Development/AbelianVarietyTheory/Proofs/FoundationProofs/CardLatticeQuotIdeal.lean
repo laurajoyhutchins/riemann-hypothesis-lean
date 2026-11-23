@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.PolarLatticePairs
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmThetaLatticePointMemThetaLatticeOfAdelic
-import Formalism.LocalToGlobal.CMDeterminantIdeals.CMIdealValuations.AbsNormEqRelIndexMul
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.PolarLatticePairs
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmThetaLatticePointMemThetaLatticeOfAdelic
+public import Formalism.LocalToGlobal.CMDeterminantIdeals.CMIdealValuations.AbsNormEqRelIndexMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.IndefiniteRowSideFullHecke.PolarLatticePairs
 open scoped Pointwise
@@ -63,8 +101,8 @@ theorem relIndex_smul {K : Type} [Field K] [NumberField K]
   have h0 : FractionalIdeal.absNorm J ≠ 0 := fun h' => hJ (FractionalIdeal.absNorm_eq_zero_iff.1 h')
   exact_mod_cast (mul_right_cancel₀ h0 h).symm
 
-open GlobalTheory.NormSum.MovedLattice in
 
+open GlobalTheory.NormSum.MovedLattice in
 theorem coefLat_eq (D : D7) (cc : Ideal (𝓞 D.host.K)) :
     coefLat D cc = ((ext D cc * D.host.AA0 : FractionalIdeal (nonZeroDivisors (𝓞 D.host.E)) D.host.E) :
       Submodule (𝓞 D.host.E) D.host.E) := by
@@ -81,15 +119,10 @@ theorem coefLat_eq (D : D7) (cc : Ideal (𝓞 D.host.K)) :
       obtain ⟨c, hc, rfl⟩ := hb
       exact Submodule.subset_span ⟨c, hc, y, hy, rfl⟩
     | zero => rw [map_zero, zero_mul]; exact zero_mem _
-    | add b b' _ _ hb hb' => rw [map_add, add_mul]; exact add_mem hb hb'
+    | add b b' _ _ hb hb' => rw [map_add (f := _), add_mul]; exact add_mem hb hb'
     | smul r b _ hb =>
       rw [smul_eq_mul, map_mul, mul_assoc, ← Algebra.smul_def]
       exact Submodule.smul_mem _ r hb
 
 end GlobalTheory.MatrixLatticeIndex
 
-open GlobalTheory.NormSum.MovedLattice GlobalTheory.MatrixLatticeIndex in
-
-theorem GlobalTheory.MatrixLatticeIndex.card_lattice_quot_ideal : ∀ (D : D7) (cc : Ideal (𝓞 D.host.K)) (a d : ℕ) (q : Ideal (𝓞 D.host.E)), cc ≠ ⊥ → q ≠ ⊥ → Nat.card (lat0 D cc a d ⧸ (latQ D cc a d q).addSubgroupOf (lat0 D cc a d)) = Ideal.absNorm q ^ (a * d) := by
-  intro D cc a d q hcc hq
-  rw [card_matIn, coefLat_eq, relIndex_smul _ (mul_ne_zero (ext_ne_zero D hcc) (inverseHalfDifferent_ne_zero D)) q hq]

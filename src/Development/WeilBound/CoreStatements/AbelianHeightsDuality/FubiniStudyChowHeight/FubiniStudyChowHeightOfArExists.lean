@@ -1,9 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.FubiniStudyChowHeight
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.ChowFormHeightOfArch
-import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.IntegralOfLintegral
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MahlerSectionStatementHolds
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.FubiniStudyChowHeight
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.GenIdeal
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MahlerSectionStatementHolds
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.ChowDegreeSection
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.EvaluationGenEqZero
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.FormHeightOneEq
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.IntegralOfLintegral
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.IsClosedOfCoheight
+import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.ResGAppLE
+import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.SpecializesIff
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.StCharts
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.SumNormSqUnitary
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Assembly
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.OfLeaves
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -104,8 +158,8 @@ private theorem isFS_fsBasis_normOf {k : Type} [CommRing k] {Z : Scheme} (p : Z 
   rw [Weight.fsBasis_φ, dualNorm_normOf, Real.sq_sqrt (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
   rfl
 
-open FubiniStudyChowHeightFormula₂.Fs GroundTheory.Heights₂.Heights in
 
+open FubiniStudyChowHeightFormula₂.Fs GroundTheory.Heights₂.Heights in
 theorem FubiniStudyChowHeightFormula₂.fubiniStudyChowHeight_of_arExists (hE : GlobalTheory.Published.ArExists) : GlobalTheory.Published.FubiniStudyChowHeight := by
   intro K _ _ N e δ Y _ i _ hvar A hA hc f hf
   let Lfs := HermLB.fs (PSpace.str (𝓞 K) N) (O1_isLB (𝓞 K) N) (coord (𝓞 K) N) (FubiniStudyChowHeightFormula₂.Fs.emb (𝓞 K) N).cover A hA hc
@@ -151,6 +205,3 @@ theorem FubiniStudyChowHeightFormula₂.fubiniStudyChowHeight_of_arExists (hE : 
 
 theorem FubiniStudyChowHeightFormula₂.fubiniStudyChowHeight_of (h : GlobalTheory.Published.ArCalc) : GlobalTheory.Published.FubiniStudyChowHeight :=
   FubiniStudyChowHeightFormula₂.fubiniStudyChowHeight_of_arExists h.arExists
-
-theorem FubiniStudyChowHeightFormula₂.fubiniStudyChowHeight_of_hypotheses (h : GlobalTheory.CovTop.Hypotheses2) : GlobalTheory.Published.FubiniStudyChowHeight :=
-  FubiniStudyChowHeightFormula₂.fubiniStudyChowHeight_of h.p4

@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,13 +53,8 @@ namespace GlobalTheory.IndefiniteRowSideFullHecke.MassFormulaPositivity
 
 open NumberField Formalism.BasicNotions
 
-def MassPlane : Prop :=
-  ∀ (D : D7), letI := D.host.cmStar
-    ∀ W : HSpace D.host.E, W.rank = 2 → W.SigOK → (∀ τ : D.host.E →+* ℂ, W.sig τ = (2, 0)) →
-      Formalism.HermitianLatticesTheory.mass W.hT W.L0 = Formalism.MainNotions.StandardLattice.massI D 2
 
 open scoped ComplexOrder in
-
 theorem posDef_of_hasSignature {n : Type} [Fintype n] [DecidableEq n] {J : Matrix n n ℂ} {p : ℕ}
     (h : Formalism.UG.HasSignature J p 0) : J.PosDef := by
   obtain ⟨e, P, hP⟩ := h
@@ -56,9 +95,10 @@ theorem trace_pos {E : Type} [Field E] [NumberField E] [StarRing E]
     have h2 : τ (W.hT x x) = star (fun i => τ (W.frame.repr x i)) ⬝ᵥ
         (W.gram.map τ).mulVec (fun i => τ (W.frame.repr x i)) := by
       conv_lhs => rw [← W.frame.sum_repr x]
+
       simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply,
-        smul_eq_mul, map_mul, RingHom.id_apply, starRingEnd_apply, hst, dotProduct, Matrix.mulVec,
-        Matrix.map_apply, HSpace.gram, Pi.star_apply, Finset.mul_sum]
+      smul_eq_mul, map_mul, RingHom.id_apply, starRingEnd_apply, hst, dotProduct, Matrix.mulVec,
+      Matrix.map_apply, HSpace.gram, Pi.star_apply, Finset.mul_sum]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
       ring
@@ -71,25 +111,5 @@ theorem trace_pos {E : Type} [Field E] [NumberField E] [StarRing E]
     Finset.sum_pos (fun σ _ => hloc (σ : E →+* ℂ)) ⟨IsAlgClosed.lift, Finset.mem_univ _⟩
   rw [← hre] at hpos
   simpa using hpos
-
-theorem mass_formula₂ (D : D7) : letI := D.host.cmStar
-    ∀ W : HSpace D.host.E, W.SigOK → (∀ τ : D.host.E →+* ℂ, W.sig τ = (2, 0)) →
-      (∃ s, Formalism.ThetaLiftIndependence.IsClassReps W.hT W.L0 s) ∧
-      (∀ L ∈ Formalism.HermitianLatticesTheory.genus W.hT W.L0, 0 < Nat.card (Formalism.ThetaLiftIndependence.autL W.hT L)) ∧
-      (∀ s, Formalism.ThetaLiftIndependence.IsClassReps W.hT W.L0 s →
-        Formalism.HermitianLatticesTheory.mass W.hT W.L0 = ∑ L ∈ s, ((Nat.card (Formalism.ThetaLiftIndependence.autL W.hT L) : ℕ) : ℝ)⁻¹) ∧
-      0 < Formalism.HermitianLatticesTheory.mass W.hT W.L0 := by
-  letI := D.host.cmStar
-  intro W hs hp
-  have hpos := trace_pos D.sp.cm.cmUnram.2.1 W hs hp
-  obtain ⟨h1, h2, h3⟩ := Formalism.HermitianLatticesTheory.massBasic _ _ W.hT W.herm hpos W.L0 W.standardTuple_isLattice
-  obtain ⟨-, hwt, -⟩ := Formalism.ThetaLiftIndependence.classRepsDefinite _ _ W.hT W.herm hpos W.L0 W.standardTuple_isLattice
-  refine ⟨h1, fun L hL => ?_, h2, h3⟩
-  obtain ⟨n, hn, hLn⟩ := hwt L hL
-  have hc : Nat.card (Formalism.ThetaLiftIndependence.autL W.hT L) = n := by
-    unfold Formalism.ThetaLiftIndependence.latWt at hLn
-    exact_mod_cast inv_inj.mp hLn
-  rw [hc]
-  exact hn
 
 end GlobalTheory.IndefiniteRowSideFullHecke.MassFormulaPositivity

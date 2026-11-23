@@ -1,7 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.PlaceData
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TranscendenceTraces.AllHolds
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.PResClosed
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProperSemiAbelianFamily
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.PlaceData
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProperSemiAbelianFamily
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.BasicOpenSections.PResClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC GlobalTheory.Et NumberField IsDedekindDomain TensorProduct
 open GlobalTheory.GalV (HTower Htot hop galV Splits IsCorrOp IsGalois pullTot galTot galTotRep pullTot_comp)
@@ -13,13 +57,6 @@ namespace UpperTheory.Gal.Mod.EtaleTowerBaseChange
 
 section Lin
 variable {R : Type*} [CommSemiring R] {ι : Type*} {M : ι → Type*} [∀ i, AddCommMonoid (M i)] [∀ i, Module R (M i)]
-
-private theorem lmap_pow_lof [DecidableEq ι] (G : ∀ i, Module.End R (M i)) (m : ℕ) (k : ι) (x : M k) :
-    ((DirectSum.lmap G : Module.End R (DirectSum ι fun i => M i)) ^ m) (DirectSum.lof R ι M k x) =
-      DirectSum.lof R ι M k ((G k ^ m) x) := by
-  induction m with
-  | zero => simp
-  | succ m ih => rw [pow_succ', Module.End.mul_apply, ih, DirectSum.lmap_lof, pow_succ', Module.End.mul_apply]
 
 private theorem directSum_lmap_pow_apply (G : ∀ i, Module.End R (M i)) (m : ℕ) (x : DirectSum ι fun i => M i) (i : ι) :
     ((DirectSum.lmap G : Module.End R (DirectSum ι fun i => M i)) ^ m) x i = (G i ^ m) (x i) := by
@@ -34,7 +71,7 @@ private theorem lmap_sum_zero {J : Type*} [Fintype J] (c : J → R) (A : J → �
   refine LinearMap.ext fun x => DFinsupp.ext fun i => ?_
   have hk := congrArg (fun f : Module.End R (M i) => f (x i)) (h i)
   simp only [LinearMap.sum_apply, LinearMap.smul_apply, Module.End.mul_apply, LinearMap.zero_apply] at hk ⊢
-  rw [DFinsupp.finset_sum_apply]
+  rw [DFinsupp.finsetSum_apply, DFinsupp.zero_apply]
   refine Eq.trans (Finset.sum_congr rfl fun j _ => ?_) hk
   rw [DFinsupp.smul_apply, DirectSum.lmap_apply, directSum_lmap_pow_apply]
 
@@ -101,6 +138,7 @@ private theorem core {n : ℕ} (P : B →ₗ[Q] A) (G : A →ₗ[Q] A) (G' : Mod
   have hsum := map_sum (LinearMap.baseChangeHom Q L B B)
     (fun j : Fin (n + 1) => (c j : Q) • (T j * G' ^ (n - (j : ℕ)))) Finset.univ
   simp only [LinearMap.baseChangeHom_apply] at hsum
+
   rw [hsum, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [mul_smul, key j, LinearMap.baseChange_smul, LinearMap.smul_apply, Int.cast_smul_eq_zsmul Q, map_zsmul,

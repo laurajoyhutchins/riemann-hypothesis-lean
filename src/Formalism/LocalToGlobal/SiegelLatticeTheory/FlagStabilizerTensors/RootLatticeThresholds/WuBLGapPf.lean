@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuBesselLoc
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.WuBesselLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,7 +107,7 @@ theorem gap_lt (R : Ranks) (P : HCParam R)
     have hodd : (b.val - (R.k - 1)) % 2 ≠ 0 := by
       intro h
       exact he (by simp [h])
-    rw [dif_pos hak, dif_neg hbk, dif_pos hjb]
+    rw [dite_eq_left hak, dite_eq_right hbk, dite_eq_left hjb]
     have h1 := bmono (b.val - (R.k - 1) - 1) ⟨0, by omega⟩ ⟨b.val - (R.k - 1), hjb⟩ (by first | omega | (simp; omega))
     have h2 := umono (R.k - 1 - (a.val + 1)) ⟨a.val + 1, by omega⟩ (by first | omega | (simp; omega))
     have h3 := P.v_gt_u ⟨a.val, hak⟩
@@ -79,7 +123,7 @@ theorem gap_lt (R : Ranks) (P : HCParam R)
     have hne : a.val - (R.k - 1) ≠ b.val - (R.k - 1) := by
       intro h
       exact he (by simp [h])
-    rw [dif_neg hak, dif_neg hbk, dif_pos hja, dif_pos hjb]
+    rw [dite_eq_right hak, dite_eq_right hbk, dite_eq_left hja, dite_eq_left hjb]
     have h1 := bmono (b.val - (R.k - 1) - (a.val - (R.k - 1)) - 1) ⟨a.val - (R.k - 1), hja⟩
       ⟨b.val - (R.k - 1), hjb⟩ (by first | omega | (simp; omega))
     have hq' := (Rat.cast_le (K := ℝ)).2 h1
@@ -96,7 +140,7 @@ theorem gapAtLeast_of (R : Ranks) (P : HCParam R)
   · rw [abs_sub_comm]
     exact (gap_lt R P hg b a hab (Ne.symm he)).trans (le_abs_self _)
 
-set_option maxHeartbeats 800000 in
+
 
 theorem gapOK_of (R : Ranks) (h1801 : 1801 ≤ R.r) :
     Formalism.FourierDecayAlt.ThreeDimData.GapOK R.k R.rS (16 * (R.r : ℝ) ^ 19) := by

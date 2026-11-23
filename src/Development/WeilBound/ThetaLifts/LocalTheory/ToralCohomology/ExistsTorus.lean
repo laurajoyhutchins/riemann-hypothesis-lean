@@ -1,5 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfPiInf
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfPiInf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,16 +78,15 @@ theorem exists_inf (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E
   · rw [smul_add, TensorProduct.smul_tmul', TensorProduct.smul_tmul', smul_eq_mul, smul_eq_mul, hs u hu, ht u hu,
       TensorProduct.zero_tmul, TensorProduct.zero_tmul, add_zero]
   · have := im_ne_zero h hβ (τ w).1
-    rw [map_add, piInf_tmul, piInf_tmul, hs', ht', map_one, mul_one]
+    rw [map_add (f := _), piInf_tmul, piInf_tmul, hs', ht', map_one, mul_one]
     apply Complex.ext
     · simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]; ring
     · simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]; field_simp; ring
 
 theorem piInf_cA (h : IsCMExt F E σ) {w : InfinitePlace F} (τ : EmbOver E w) (z : AE F E) :
     piInf τ (cA σ z) = star (piInf τ z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp only [map_zero, star_zero]
-  | add x y hx hy => simp only [map_add, hx, hy, star_add]
+  induction z using TensorProduct.inductionOn with
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, star_add]
   | tmul a x =>
     change piInf τ (a ⊗ₜ[F] σ x) = _
     rw [piInf_tmul, piInf_tmul, h.2.2.2, star_mul', show star (InfinitePlace.Completion.extensionEmbedding w (a.1 w)) = _ from
@@ -105,7 +148,7 @@ theorem exists_torus (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver
       fun s : ℝ => Complex.exp (s * ∑ w, ((l w - (l w).re) * m w + 2 * (l w).re * r)) := by
     funext s
     rw [hχ _ (ht s), absE_inf h τ (ht s), Finset.mul_sum, Complex.exp_sum,
-      ← Real.finset_prod_rpow _ _ fun _ _ => by positivity, Complex.ofReal_prod, ← Finset.prod_mul_distrib]
+      ← Real.finsetProd_rpow _ _ fun _ _ => by positivity, Complex.ofReal_prod, ← Finset.prod_mul_distrib]
     refine Finset.prod_congr rfl fun w _ => ?_
     rw [ht', Complex.norm_exp, ← Real.exp_nat_mul, ← Real.exp_mul, Complex.ofReal_exp, Complex.ofReal_exp, ← Complex.exp_sub,
       ← Complex.exp_int_mul, ← Complex.exp_add]

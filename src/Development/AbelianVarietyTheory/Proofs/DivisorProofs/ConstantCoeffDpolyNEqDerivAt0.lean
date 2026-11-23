@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyValExtOfOverLa
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralInvariantDerivationLog
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivAt0EqSumOfSubset
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralInvariantDerivationLog
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.FormalGroupLawLogarithm
+public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DerivAt0EqSumOfSubset
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsExpEqOfSubstLg
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantCoeffInvariantOperatorAlongMatrix
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantCoeffInvariantOperatorAlongMatrix
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FoldPermutation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LogChain
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -22,7 +66,6 @@ variable {C : Type} [Field C] {σ : Type}
 theorem mfact_eq_prod [Fintype σ] (α : σ →₀ ℕ) : (mfact α : C) = ∏ s, ((α s).factorial : C) := by
   first
   | exact Finsupp.prod_fintype α _ (fun _ => by simp)
-  | (unfold mfact; rw [Finsupp.prod_fintype]; intro; simp)
 
 theorem mfact_add_single [Fintype σ] (α : σ →₀ ℕ) (l : σ) :
     (mfact (α + Finsupp.single l 1) : C) = mfact α * ((α l : C) + 1) := by
@@ -49,48 +92,39 @@ theorem derivAt0_monomial (α : σ →₀ ℕ) (a : C) (S : MvPowerSeries σ C) 
   first
   | (rw [derivAt0_eq_sum_of_subset _ _ MvPolynomial.support_monomial_subset, Finset.sum_singleton,
       MvPolynomial.coeff_monomial, if_pos rfl]; done)
-  | (by_cases ha : a = 0 <;> simp [derivAt0, ha, MvPolynomial.support_monomial]; done)
 
 private lemma hasSubst_lemma {ι τ : Type} [Finite ι] {a : ι → MvPowerSeries τ C}
     (ha : ∀ i, constantCoeff (a i) = 0) : HasSubst a := by
   first
   | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [ha]; exact IsNilpotent.zero)
 
 private lemma cc_subst_lemma_2 {σ τ : Type} [Finite σ] {a : σ → MvPowerSeries τ C}
     (ha : ∀ s, constantCoeff (a s) = 0) {f : MvPowerSeries σ C} (hf : constantCoeff f = 0) :
     constantCoeff (subst a f) = 0 := by
   first
   | exact constantCoeff_subst_eq_zero (hasSubst_lemma ha) ha hf
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_lemma ha) ha hf
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_lemma ha) hf
 
 private lemma subst_zero_lemma_3 {σ τ : Type} {a : σ → MvPowerSeries τ C} (ha : HasSubst a) :
     subst a (0 : MvPowerSeries σ C) = 0 := by
   first
   | (rw [← MvPowerSeries.coe_substAlgHom ha]; exact map_zero _)
-  | simp
 
 private lemma subst_C_eq_C' {σ τ : Type} {a : σ → MvPowerSeries τ C} (ha : HasSubst a) (r : C) :
     subst a (MvPowerSeries.C r : MvPowerSeries σ C) = MvPowerSeries.C r := by
   first
   | (rw [← MvPowerSeries.coe_substAlgHom ha, MvPowerSeries.c_eq_algebraMap, AlgHom.commutes,
       MvPowerSeries.c_eq_algebraMap])
-  | (rw [← MvPowerSeries.coe_substAlgHom ha]; exact AlgHom.commutes _ r)
-  | simp [ha]
 
 private lemma subst_subst_eq_subst_comp {σ τ ρ : Type} {a : σ → MvPowerSeries τ C} {b : τ → MvPowerSeries ρ C}
     (ha : HasSubst a) (hb : HasSubst b) (f : MvPowerSeries σ C) :
     subst b (subst a f) = subst (fun s => subst b (a s)) f := by
   first
   | exact MvPowerSeries.subst_comp_subst_apply ha hb f
-  | exact (MvPowerSeries.subst_comp_subst_apply ha hb f).symm
-  | exact congrFun (MvPowerSeries.subst_comp_subst ha hb) f
 
 private lemma pderiv_inr_subst_twoVars {d : ℕ} (f : MvPowerSeries (Fin 2 × Fin d) C) (k : Fin d) :
-    pderiv C (Sum.inr k) (subst (GlobalTheory.LawLog.twoVars C d) f) =
-      subst (GlobalTheory.LawLog.twoVars C d) (pderiv C ((1 : Fin 2), k) f) := by
+    pderiv (Sum.inr k) (subst (GlobalTheory.LawLog.twoVars C d) f) =
+      subst (GlobalTheory.LawLog.twoVars C d) (pderiv ((1 : Fin 2), k) f) := by
   classical
   rw [pderiv_subst GlobalTheory.LawLog.cc_twoVars, Finset.sum_eq_single ((1 : Fin 2), k)]
   · simp [GlobalTheory.LawLog.twoVars, MvPowerSeries.pderiv_X, Pi.single_apply]
@@ -105,7 +139,7 @@ variable [CharZero C] (v : AddValuation C (WithTop ℝ))
 include v
 
 theorem derivAt0_pderiv [Fintype σ] (Q : MvPolynomial σ C) (l : σ) (S : MvPowerSeries σ C) :
-    derivAt0 Q (pderiv C l S) = derivAt0 (Q * MvPolynomial.X l) S := by
+    derivAt0 Q (pderiv l S) = derivAt0 (Q * MvPolynomial.X l) S := by
   classical
   first
   | (unfold derivAt0
@@ -114,8 +148,6 @@ theorem derivAt0_pderiv [Fintype σ] (Q : MvPolynomial σ C) (l : σ) (S : MvPow
      simp only [addRightEmbedding_apply, MvPolynomial.coeff_mul_X, mfact_add_single]
      first
      | (rw [MvPowerSeries.coeff_pderiv]; ring)
-     | (simp [MvPowerSeries.coeff_pderiv]; ring)
-     | (simp [MvPowerSeries.coeff_pderiv])
      done)
 
 end Deriv
@@ -128,7 +160,7 @@ theorem subst_jacEntry (G : FGLaw C d) (L : LogFGL v d)
     (hL : ∀ a, L.F a = subst (twoVars C d) (G.F a)) {n : ℕ} {Λ : Type} [Finite Λ]
     (ψ : Fin n × Fin d → MvPowerSeries Λ C) (hψ : ∀ q, constantCoeff (ψ q) = 0) (j : Fin n) (k e : Fin d) :
     subst (fun i => ψ (j, i)) (GlobalTheory.LogJacobian.jacEntry L k e) =
-      subst ψ (ev (n := n) ![pt C d j, 0] (pderiv C ((1 : Fin 2), k) (G.F e))) := by
+      subst ψ (ev (n := n) ![pt C d j, 0] (pderiv ((1 : Fin 2), k) (G.F e))) := by
   classical
   have hA : HasSubst (GlobalTheory.LogJacobian.substSecondBlockZero (C := C) d) := hasSubst_lemma (GlobalTheory.LogJacobian.constantCoeff_substSecondBlockZero d)
   have hT : HasSubst (GlobalTheory.LawLog.twoVars C d) := hasSubst_lemma GlobalTheory.LawLog.cc_twoVars
@@ -162,44 +194,35 @@ def psi : Fin n × Fin d → MvPowerSeries Λ C :=
 theorem cc_lin (j : Fin n) (e : Fin d) : constantCoeff (lin β w j e) = 0 := by
   first
   | (simp [lin, MvPowerSeries.smul_eq_C_mul]; done)
-  | (unfold lin
-     rw [map_sum]
-     refine Finset.sum_eq_zero fun l _ => ?_
-     rw [MvPowerSeries.smul_eq_C_mul, map_mul, MvPowerSeries.constantCoeff_X, mul_zero])
 
 theorem cc_psi (q : Fin n × Fin d) : constantCoeff (psi L β w q) = 0 := by
   have hs : MvPowerSeries.HasSubst (lin β w q.1) := by
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (cc_lin β w q.1)
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (cc_lin β w q.1)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [cc_lin]; exact IsNilpotent.zero)
   first
   | exact constantCoeff_subst_eq_zero hs (cc_lin β w q.1) ((isExp_expOf L).1 q.2)
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero hs (cc_lin β w q.1) ((isExp_expOf L).1 q.2)
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero hs ((isExp_expOf L).1 q.2)
 
 theorem pderiv_lin (l : Λ) (j : Fin n) (e : Fin d) :
-    pderiv C l (lin β w j e) = MvPowerSeries.C (β l j * w l e) := by
+    pderiv l (lin β w j e) = MvPowerSeries.C (β l j * w l e) := by
   classical
   first
   | (simp only [lin, map_sum, Derivation.map_smul, MvPowerSeries.pderiv_X]
      simp [Pi.single_apply, MvPowerSeries.smul_eq_C_mul]
      done)
-  | (simp [lin, MvPowerSeries.pderiv_X, Pi.single_apply, MvPowerSeries.smul_eq_C_mul]; done)
 
 theorem pderiv_subst_psi (G : FGLaw C d) (hL : ∀ a, L.F a = subst (twoVars C d) (G.F a)) (l : Λ) (g : PS C n d) :
-    pderiv C l (subst (psi L β w) g) =
+    pderiv l (subst (psi L β w) g) =
       subst (psi L β w) (∑ j, MvPowerSeries.C (β l j) * DofN G.F j (w l) g) := by
   classical
   have hΨ : HasSubst (psi L β w) := hasSubst_lemma (cc_psi L β w)
-  have hpt : ∀ (j : Fin n) (i : Fin d), constantCoeff (pt C d j i) = 0 := fun j i => by simp [pt]
-  have hcol : ∀ (j : Fin n) (c : Fin d), pderiv C l (psi L β w (j, c)) =
-      ∑ e, subst (psi L β w) (ev ![pt C d j, 0] (pderiv C ((1 : Fin 2), e) (G.F c))) *
+  have hcol : ∀ (j : Fin n) (c : Fin d), pderiv l (psi L β w (j, c)) =
+      ∑ e, subst (psi L β w) (ev ![pt C d j, 0] (pderiv ((1 : Fin 2), e) (G.F c))) *
         MvPowerSeries.C (β l j * w l e) := by
     intro j c
     have hlin : HasSubst (lin β w j) := hasSubst_lemma (cc_lin β w j)
     have hE : HasSubst (expOf L) := hasSubst_lemma (isExp_expOf L).1
-    show pderiv C l (subst (lin β w j) (expOf L c)) = _
+    show pderiv l (subst (lin β w j) (expOf L c)) = _
     rw [pderiv_subst (cc_lin β w j)]
     refine Finset.sum_congr rfl fun e _ => ?_
     rw [pderiv_lin, GlobalTheory.LogJacobian.pderiv_expOf, subst_subst_eq_subst_comp hE hlin]
@@ -207,22 +230,21 @@ theorem pderiv_subst_psi (G : FGLaw C d) (hL : ∀ a, L.F a = subst (twoVars C d
     exact subst_jacEntry G L hL (psi L β w) (cc_psi L β w) j e c
   rw [pderiv_subst (cc_psi L β w), Fintype.sum_prod_type]
   simp only [hcol]
-  simp only [GlobalTheory.MatChain.dofN_eq G, GlobalTheory.MatChain.jv]
+  simp only [DofN]
   rw [← MvPowerSeries.coe_substAlgHom hΨ]
+
   simp only [map_sum, map_mul, MvPowerSeries.coe_substAlgHom, subst_C_eq_C' hΨ]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [Finset.mul_sum, Finset.sum_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl fun e _ => ?_
-  rw [GlobalTheory.MatChain.ev_jac G (hpt j)]
-  try rw [map_mul]
   ring
 
 end Chain
 
-open Formalism.MainNotions.ModuliIntegralCharts.H1.FormalGroupCopies GlobalTheory.MatChain in
 
+open Formalism.MainNotions.ModuliIntegralCharts.H1.FormalGroupCopies GlobalTheory.MatChain in
 theorem constantCoeff_dpolyN_eq_derivAt0 : ∀ (C : Type) [Field C] [CharZero C] (v : AddValuation C (WithTop ℝ)) (d : ℕ) (G : FGLaw C d) (L : LogFGL v d), (∀ a, L.F a = MvPowerSeries.subst (twoVars C d) (G.F a)) → ∀ (n : ℕ) (ι Λ : Type) [Fintype ι] [Fintype Λ] (cp : ι → Fin n) (u : ι → Fin d → C) (β : Λ → Fin n → C) (t : Λ → Fin n → ι) (w : Λ → Fin d → C), (∀ l j, cp (t l j) = j) → (∀ l j, u (t l j) = w l) → ∀ (P : MvPolynomial Λ C) (g : PS C n d), MvPowerSeries.constantCoeff (DpolyN G.F cp u (MvPolynomial.aeval (fun l => ∑ j, MvPolynomial.C (β l j) * (MvPolynomial.X (t l j) : MvPolynomial ι C)) P) g) = derivAt0 P (MvPowerSeries.subst (fun q : Fin n × Fin d => (MvPowerSeries.subst (fun e : Fin d => ∑ l, (β l q.1 * w l e) • (MvPowerSeries.X l : MvPowerSeries Λ C)) (expOf L q.2) : MvPowerSeries Λ C)) g) := by
   intro C _ _ v d G L hL n ι Λ _ _ cp u β t w hcp hu P g
   classical
@@ -234,7 +256,7 @@ theorem constantCoeff_dpolyN_eq_derivAt0 : ∀ (C : Type) [Field C] [CharZero C]
     intro f
     simp [DmonN]
   have hsub : ∀ (Q : MvPolynomial ι C) (s : Finset (ι →₀ ℕ)) (f : PS C n d), Q.support ⊆ s →
-      DpolyN G.F cp u Q f = ∑ m ∈ s, MvPowerSeries.C (MvPolynomial.coeff m Q) * DmonN G.F cp u m f := by
+      DpolyN G.F cp u Q f = ∑ m ∈ s, MvPowerSeries.C (AddMonoidAlgebra.coeff Q m) * DmonN G.F cp u m f := by
     intro Q s f hs
     unfold DpolyN
     refine Finset.sum_subset hs fun m _ hm => ?_
@@ -247,7 +269,7 @@ theorem constantCoeff_dpolyN_eq_derivAt0 : ∀ (C : Type) [Field C] [CharZero C]
       hsub Q1 (Q1.support ∪ Q2.support) f Finset.subset_union_left,
       hsub Q2 (Q1.support ∪ Q2.support) f Finset.subset_union_right, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun m _ => ?_
-    rw [MvPolynomial.coeff_add, map_add, add_mul]
+    rw [MvPolynomial.coeff_add, map_add (f := _), add_mul]
   have hC : ∀ (a : C) (f : PS C n d), DpolyN G.F cp u (MvPolynomial.C a) f = MvPowerSeries.C a * f := by
     intro a f
     rw [hsub (MvPolynomial.C a) {0} f (by rw [MvPolynomial.C_apply]; exact MvPolynomial.support_monomial_subset),
@@ -278,6 +300,7 @@ theorem constantCoeff_dpolyN_eq_derivAt0 : ∀ (C : Type) [Field C] [CharZero C]
   have hlinD : ∀ (Q : MvPolynomial Λ C) (b : Fin n → C) (s : Fin n → MvPowerSeries Λ C),
       derivAt0 Q (∑ j, MvPowerSeries.C (b j) * s j) = ∑ j, b j * derivAt0 Q (s j) := by
     intro Q b s
+
     simp only [derivAt0, map_sum, MvPowerSeries.coeff_C_mul, Finset.mul_sum]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun α _ => by ring
@@ -289,7 +312,7 @@ theorem constantCoeff_dpolyN_eq_derivAt0 : ∀ (C : Type) [Field C] [CharZero C]
     simp [mfact, hccs, MvPowerSeries.coeff_zero_eq_constantCoeff_apply]
   next P1 P2 h1 h2 =>
     intro g
-    rw [map_add, hadd, map_add, h1, h2,
+    rw [map_add (f := _), hadd, map_add (f := _), h1, h2,
       (derivAt0_linear C v Λ P1 P2 (subst (psi L β w) g) (subst (psi L β w) g) 0).2.2.1]
   next Q l h =>
     intro g
@@ -303,6 +326,7 @@ theorem constantCoeff_dpolyN_eq_derivAt0 : ∀ (C : Type) [Field C] [CharZero C]
     rw [hφ, hfin]
     simp only [GlobalTheory.MatChain.dpoly_C_mul, GlobalTheory.MatChain.dpoly_mul_X, hcp, hu, hcomm1]
     rw [← derivAt0_pderiv v Q l, pderiv_subst_psi L β w G hL l g, ← MvPowerSeries.coe_substAlgHom hΨ]
+
     simp only [map_sum, map_mul, MvPowerSeries.coe_substAlgHom, subst_C_eq_C' hΨ, MvPowerSeries.constantCoeff_C, h]
     rw [hlinD]
 

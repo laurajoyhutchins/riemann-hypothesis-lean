@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeightNE
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeight
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassHeightNE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -29,6 +79,7 @@ theorem homog_mem (y : (Σ k, ι k) → ℂ) (k : K) (i i₀ : ι k) (ha : y ⟨
     conv_rhs => rw [← pow_mul_pow_sub (MvPolynomial.X k) hle]
     rw [aeval_C, eq_intCast (algebraMap ℤ (MvPolynomial K ℂ))]
     ring
+
   rw [homog, map_sum, Finset.sum_congr rfl hterm, ← Finset.sum_mul, ← map_sum]
   have : ∑ n ∈ Finset.range (q.natDegree + 1), (q.coeff n : ℂ) * y ⟨k, i⟩ ^ n = 0 := by
     rw [← hq, Polynomial.eval₂_eq_sum_range]; rfl
@@ -37,6 +88,7 @@ theorem homog_mem (y : (Σ k, ι k) → ℂ) (k : K) (i i₀ : ι k) (ha : y ⟨
 theorem homog_eval (z : (Σ k, ι k) → ℂ) (p a : Σ k, ι k) (hza : z a ≠ 0) (q : Polynomial ℤ) :
     eval z (map (Int.castRingHom ℂ) (homog q p a)) =
       z a ^ q.natDegree * q.eval₂ (Int.castRingHom ℂ) (z p / z a) := by
+
   rw [Polynomial.eval₂_eq_sum_range, Finset.mul_sum, homog, map_sum, map_sum]
   refine Finset.sum_congr rfl fun n hn => ?_
   have hle : n ≤ q.natDegree := by simpa [Nat.lt_succ_iff] using hn
@@ -63,8 +115,8 @@ theorem rootCoord_isIntegral {f j m : ℕ} (ζ : Fin f → Matrix (Fin j) (Fin m
 
 end RootPointsFiniteAlt
 
-open RootPointsFiniteAlt in
 
+open RootPointsFiniteAlt in
 theorem RootPointsFinite.proof (h : RootAnchorNonzero.Statement) : RootPointsFinite.Statement := by
   intro f j m ζ hζ
   have hint : ∀ p, ∃ q : Polynomial ℤ, q.Monic ∧ q.eval₂ (Int.castRingHom ℂ) (rootCoord ζ p) = 0 := by

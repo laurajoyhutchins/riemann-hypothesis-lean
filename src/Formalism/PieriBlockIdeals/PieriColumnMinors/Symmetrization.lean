@@ -1,5 +1,59 @@
-import Formalism.PieriBlockIdeals.IntegralQuotient
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.InnerProductFormulaField
+module
+
+public import Formalism.PieriBlockIdeals.IntegralQuotient
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.Perm.DomMulAct
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial
 
@@ -183,7 +237,8 @@ theorem exists_mvPolynomial_algHom_commuting {O M : Type*} [CommRing O] [AddComm
     ∃ φ : MvPolynomial (Fin n) O →ₐ[O] Module.End O M,
       (∀ a, φ (MvPolynomial.X a) = c a) ∧ ∀ p, φ p ∈ Algebra.adjoin O (Set.range c) := by
   have : IsMulCommutative (Algebra.adjoin O (Set.range c)) := Algebra.isMulCommutative_adjoin O (by
-    rintro _ ⟨a, rfl⟩ _ ⟨b, rfl⟩; exact (hc a b).eq)
+    rintro _ ⟨a, rfl⟩ _ ⟨b, rfl⟩ _
+    exact hc a b)
   let ψ := MvPolynomial.aeval (R := O) (S₁ := Algebra.adjoin O (Set.range c))
     fun a : Fin n => (⟨c a, Algebra.subset_adjoin ⟨a, rfl⟩⟩ : Algebra.adjoin O (Set.range c))
   refine ⟨(Algebra.adjoin O (Set.range c)).val.comp ψ, ?_, ?_⟩
@@ -209,7 +264,7 @@ theorem integral_quotient_holds : IntegralQuotient := by
       simp [ψ]
     | add p q hp hq =>
       intro m hm
-      rw [map_add, map_add, LinearMap.add_apply, add_smul, hp m hm, hq m hm]
+      rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, add_smul, hp m hm, hq m hm]
     | mul_X p a hp =>
       intro m hm
       rw [map_mul, map_mul, hφX, Module.End.mul_apply, hχ τ a m hm, hp _ ((Mt τ).smul_mem _ hm), smul_smul]
@@ -223,6 +278,7 @@ theorem integral_quotient_holds : IntegralQuotient := by
       ext r
       simp [ψ, MvPolynomial.algebraMap_eq]
     have e2 : AAp.map (ψ τ) = X ^ n + ∑ a : Fin n, C (χ τ a) * X ^ a.val := by
+
       simp [hAAp, ψ, Polynomial.map_sum]
     rw [e1, e2]; exact hdiv τ
   obtain ⟨W0, hW0⟩ : ∃ p : MvPolynomial (Fin n) O, p = algebraMap O _ w := ⟨_, rfl⟩
@@ -233,8 +289,9 @@ theorem integral_quotient_holds : IntegralQuotient := by
     rw [hDnA, hW0, eval_map, eval₂_at_apply]; exact φ.commutes _
   have hA : φ (AAp.eval W0) = w ^ n • (1 : Module.End O M) + ∑ a : Fin n, w ^ a.val • c a := by
     have hW : φ W0 = algebraMap O (Module.End O M) w := by rw [hW0]; exact φ.commutes w
-    simp only [hAAp, eval_add, eval_pow, eval_X, eval_finsetSum, eval_mul, eval_C, map_add, map_pow, map_sum,
-      map_mul, hφX, hW]
+
+    simp only [hAAp, eval_add, eval_pow, eval_X, eval_finsetSum, eval_mul, eval_C, map_add (f := _), map_pow, map_sum,
+    map_mul, hφX, hW]
     congr 1
     · rw [← map_pow, Algebra.algebraMap_eq_smul_one]
     · refine Finset.sum_congr rfl fun a _ => ?_
@@ -248,10 +305,10 @@ theorem integral_quotient_holds : IntegralQuotient := by
       rw [hact τ _ m hm, ← eval₂_at_apply, ← eval_map, hRem τ, eval_zero, zero_smul]
     calc Dn.eval w • m = (algebraMap O (Module.End O M) (Dn.eval w)) m := by rw [Module.algebraMap_end_apply]
       _ = φ (DnA.eval W0) m := by rw [hD]
-      _ = _ := by rw [hdivid, map_add, map_mul, LinearMap.add_apply, h0, zero_add, Module.End.mul_apply, hA]
+      _ = _ := by rw [hdivid, map_add (f := _), map_mul, LinearMap.add_apply, h0, zero_add, Module.End.mul_apply, hA]
   · simp
   · intro x y hx hy
-    rw [smul_add, map_add, map_add, hx, hy]
+    rw [smul_add, map_add (f := _), map_add (f := _), hx, hy]
 
 end Formalism.CohomologicalDescent.Symmetrization
 
@@ -840,6 +897,7 @@ theorem symMap_zero_eq_default (z : Tens R P S.W 0) : S.mu 0 z = (z default : V)
 
 theorem symMap_succ_eq_sum_contract (n : ℕ) (j : Fin (n + 1)) (z : Tens R P S.W (n + 1)) :
     S.mu (n + 1) z = ∑ v, S.f v (S.mu n (contr k j v z)) := by
+
   simp only [symMap_apply_sum_words, map_sum, contract_apply_insertNth]
   rw [← (Fin.insertNthEquiv (fun _ => R × P) j).sum_comp, Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun v _ => Finset.sum_congr rfl fun g _ => ?_
@@ -907,6 +965,7 @@ theorem symMap_diagSecond_intertwines : ∀ (n : ℕ) (c d : R) (z : Tens R P S.
     simp [diagY, onModule_apply_eval, HidaSetting.EW]
   | succ n ih =>
     intro c d z
+
     rw [symMap_succ_eq_sum_contract S n 0 z, symMap_succ_eq_sum_contract S n 0 (diagY k S.EW c d z), map_sum]
     have hv : ∀ v : R × P, S.f v (S.mu n (contr k 0 v (diagY k S.EW c d z))) =
         S.f v (S.mu n (diagY k S.EW c d (contr k 0 v z))) +
@@ -931,6 +990,7 @@ theorem symMap_diagFirst_intertwines : ∀ (n : ℕ) (α β : P) (z : Tens R P S
     by_cases h : α = β <;> simp [diagX, h]
   | succ n ih =>
     intro α β z
+
     rw [symMap_succ_eq_sum_contract S n 0 z, symMap_succ_eq_sum_contract S n 0 (diagX k S.w α β z), map_sum]
     have hv : ∀ v : R × P, S.f v (S.mu n (contr k 0 v (diagX k S.w α β z))) =
         S.f v (S.mu n (diagX k S.w α β (contr k 0 v z))) -
@@ -957,10 +1017,12 @@ def leviRemainder (n : ℕ) (v0 : R × P) (z : Tens R P S.W (n + 1)) : Tens R P 
 theorem raising_symMap_succ_eq (n : ℕ) (v0 : R × P) (z : Tens R P S.W (n + 1)) :
     S.e v0 (S.mu (n + 1) z) =
       ∑ v, S.f v (S.e v0 (S.mu n (contr k 0 v z))) + S.mu n (leviRemainder S n v0 z) := by
+
   rw [symMap_succ_eq_sum_contract S n 0 z, map_sum]
   simp_rw [raising_lowering_commutator, Finset.sum_add_distrib, Finset.sum_sub_distrib]
   congr 1
   unfold leviRemainder
+
   rw [map_sub, map_sum, map_sum]
   congr 1
   · rw [Fintype.sum_prod_type, Finset.sum_comm]
@@ -1047,7 +1109,8 @@ theorem symMap_firstPositionRemainder_eq (n : ℕ) (v0 : R × P) (z : Tens R P S
     S.mu n (firstPositionRemainder S n v0 z) = S.mu n (leviRemainder S n v0 z) := by
   rw [contraction_remainder_eq]
   unfold firstPositionRemainder
-  simp only [map_sub, map_sum, map_add, Finset.sum_add_distrib]
+
+  simp only [map_sub, map_sum, map_add (f := _), Finset.sum_add_distrib]
   have h : ∀ t : Fin n, S.mu n (flippedLetterTerm S n v0 z t) =
       S.mu n (contr k t.succ v0 (permY k (Equiv.swap 0 t.succ) z)) := by
     cases n with
@@ -1082,8 +1145,9 @@ theorem contract_zero_permSecond_swap_succ (m : ℕ) (j l : Fin m) (v : R × P) 
 theorem contract_zero_tailRemainder (m : ℕ) (v v0 : R × P) (z : Tens R P S.W (m + 2)) :
     contr k 0 v (tailRemainder S (m + 1) v0 z) = raisingRemainder S m v0 (contr k 0 v z) := by
   unfold tailRemainder raisingRemainder
-  simp only [map_sub, map_sum, map_add, map_smul, contract_zero_contract_succ_comm, contract_zero_positionCasimir_succ,
-    contract_zero_permSecond_swap_succ]
+
+  simp only [map_sub, map_sum, map_add (f := _), map_smul, contract_zero_contract_succ_comm, contract_zero_positionCasimir_succ,
+  contract_zero_permSecond_swap_succ]
 
 theorem raising_symMap_eq_one_level_down : ∀ (n : ℕ) (v0 : R × P) (z : Tens R P S.W (n + 1)),
     S.e v0 (S.mu (n + 1) z) = S.mu n (raisingRemainder S n v0 z) := by
@@ -1091,7 +1155,7 @@ theorem raising_symMap_eq_one_level_down : ∀ (n : ℕ) (v0 : R × P) (z : Tens
   induction n with
   | zero =>
     intro v0 z
-    rw [raising_symMap_succ_eq, raisingRemainder_eq_first_add_tail, map_add, symMap_firstPositionRemainder_eq, add_comm]
+    rw [raising_symMap_succ_eq, raisingRemainder_eq_first_add_tail, map_add (f := _), symMap_firstPositionRemainder_eq, add_comm]
     congr 1
     have h1 : tailRemainder S 0 v0 z = 0 := by simp [tailRemainder]
     rw [h1, map_zero]
@@ -1102,7 +1166,7 @@ theorem raising_symMap_eq_one_level_down : ∀ (n : ℕ) (v0 : R × P) (z : Tens
     rw [h2, map_zero]
   | succ m ih =>
     intro v0 z
-    rw [raising_symMap_succ_eq, raisingRemainder_eq_first_add_tail, map_add, symMap_firstPositionRemainder_eq, add_comm]
+    rw [raising_symMap_succ_eq, raisingRemainder_eq_first_add_tail, map_add (f := _), symMap_firstPositionRemainder_eq, add_comm]
     congr 1
     rw [symMap_succ_eq_sum_contract S m 0]
     refine Finset.sum_congr rfl fun v _ => ?_
@@ -1157,7 +1221,8 @@ theorem raisingRemainder_of_perm_invariant (n : ℕ) (v : R × P) (z : Tens R P 
   simp only [hA]
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, jucysMurphy_last_eq, ← smul_sub]
   congr 1
-  simp only [map_sub, map_add, map_sum]
+
+  simp only [map_sub, map_add (f := _), map_sum]
   abel
 
 end Set4
@@ -1312,6 +1377,7 @@ theorem generators_satisfy_gl_relations {k V P R : Type*} [CommRing k] [AddCommG
 theorem perm_sum_over_perms_eq {k R P M : Type*} [CommRing k] [AddCommGroup M] [Module k M] {n : ℕ}
     (z : Tens R P M n) (τ : Equiv.Perm (Fin n)) :
     perm k τ (∑ σ : Equiv.Perm (Fin n), perm k σ z) = ∑ σ : Equiv.Perm (Fin n), perm k σ z := by
+
   rw [map_sum]
   refine Fintype.sum_equiv (Equiv.mulLeft τ) _ _ fun σ => ?_
   funext g
@@ -1346,9 +1412,11 @@ theorem Iteration_of (h1 : OneStepInv) (h2 : AAComm) (h3 : MuEquivariant) : Iter
     have hAR : AA k S.EW n S.w Rr = contr k (Fin.last n) v X := jucysMurphyProduct_contract_last S.EW S.w v z
     set Y := ∑ σ : Equiv.Perm (Fin n), perm k σ Rr with hY
     have hmuY : S.mu n Y = n.factorial • S.mu n Rr := by
+
       rw [hY, map_sum, Finset.sum_congr rfl (fun σ _ => (h3 k V P R S n Rr).2.2 σ)]
       simp [Fintype.card_perm]
     have hAY : AA k S.EW n S.w Y = n.factorial • contr k (Fin.last n) v X := by
+
       rw [hY, map_sum]
       have : ∀ σ : Equiv.Perm (Fin n), AA k S.EW n S.w (perm k σ Rr) = contr k (Fin.last n) v X := by
         intro σ
@@ -1365,10 +1433,8 @@ theorem Iteration_of (h1 : OneStepInv) (h2 : AAComm) (h3 : MuEquivariant) : Iter
       exact Fin.snoc_init_self h
     rw [hmuY, hAY, map_nsmul] at hIH
     have hc : S.Ew h' (S.mu n Rr) = n.factorial • ((X h : S.W) : V) := by
-      apply nsmul_right_injective (Nat.factorial_ne_zero n)
-      simp only
-      rw [hIH, Pi.smul_apply, hval]
-      simp
+      apply eq_of_nsmul_eq_nsmul_of_addCommute (Nat.factorial_ne_zero n) (AddCommute.all _ _)
+      simpa only [Pi.smul_apply, hval, Submodule.coe_smul_of_tower] using hIH
     rw [hEw, Module.End.mul_apply, h1 k V P R S n v z hz, map_nsmul, hc, Nat.factorial_succ, mul_smul]
 
 end Formalism.CohomologicalDescent.Symmetrization
@@ -1510,6 +1576,7 @@ theorem toSym_single_eq_single_content (g : Fin n → R × P) (u : M) :
 theorem toSym_surjective : Function.Surjective (toSym k : Tens R P M n →ₗ[k] (Sym (R × P) n → M)) := by
   intro y
   refine ⟨∑ m, Pi.single (Function.surjInv content_surjective m) (y m), ?_⟩
+
   rw [map_sum]
   simp only [toSym_single_eq_single_content, Function.surjInv_eq]
   funext m
@@ -1522,12 +1589,13 @@ variable {k V P R : Type} [Field k] [CharZero k] [AddCommGroup V] [Module k V] [
   [Fintype P] [Fintype R]
 
 theorem isAddTorsionFree_of_charZero_module (k : Type) {V : Type} [Field k] [CharZero k] [AddCommGroup V] [Module k V] : IsAddTorsionFree V :=
-  ⟨fun n hn a b hab => by
+  ⟨fun n hn a b _ hab => by
     simp only [← Nat.cast_smul_eq_nsmul k] at hab
     exact smul_right_injective V (Nat.cast_ne_zero.2 hn : (n : k) ≠ 0) hab⟩
 
 theorem symMap_norm_toSym_eq_factorial_smul (h3 : MuEquivariant) (S : HidaSetting k V P R) (n : ℕ) (z : Tens R P S.W n) :
     S.mu n (NmS k (toSym k z)) = n.factorial • S.mu n z := by
+
   rw [norm_toSym_eq_sum_perm, map_sum, Finset.sum_congr rfl (fun σ _ => (h3 k V P R S n z).2.2 σ)]
   simp [Fintype.card_perm]
 
@@ -1554,6 +1622,7 @@ theorem ActSpec_of (h3 : MuEquivariant) (h4 : WordSpec) : ActSpec := by
 
 theorem jucysMurphyProduct_norm_toSym_comm (h2 : AAComm) (S : HidaSetting k V P R) (n : ℕ) (z : Tens R P S.W n) :
     AA k S.EW n S.w (NmS k (toSym k z)) = NmS k (toSym k (AA k S.EW n S.w z)) := by
+
   rw [norm_toSym_eq_sum_perm, norm_toSym_eq_sum_perm, map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   have := ((h2 k R P S.W S.EW (generators_satisfy_gl_relations S) n σ).2.2 S.w).2
@@ -1571,7 +1640,7 @@ theorem IotaMu_of (h2 : AAComm) (h3 : MuEquivariant) (h4 : WordSpec) (h5 : Itera
     intro σ; rw [norm_toSym_eq_sum_perm]; exact perm_sum_over_perms_eq z σ
   have h6 := h5 k V P R S n h (NmS k (toSym k z)) hinv
   rw [symMap_norm_toSym_eq_factorial_smul h3, map_nsmul, jucysMurphyProduct_norm_toSym_comm h2, norm_apply_eq_mfact_smul] at h6
-  have h7 := nsmul_right_injective (Nat.factorial_ne_zero n) h6
+  have h7 := eq_of_nsmul_eq_nsmul_of_addCommute (Nat.factorial_ne_zero n) (AddCommute.all _ _) h6
   rw [h7, Submodule.coe_smul_of_tower, ← Nat.cast_smul_eq_nsmul k, smul_smul, inv_mul_cancel₀, one_smul]
   unfold mfact
   exact Nat.cast_ne_zero.2 (Finset.prod_ne_zero_iff.2 fun v _ => Nat.factorial_ne_zero _)
@@ -1675,6 +1744,7 @@ theorem descendToCoinvariants_toSym (T : Module.End K (Tens R P M n)) (hT : ∀ 
     descendToCoinvariants T (toSym K z) = toSym K (T z) := by
   have hn : ((n.factorial : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
   unfold descendToCoinvariants
+
   rw [LinearMap.smul_apply, LinearMap.comp_apply, LinearMap.comp_apply, norm_toSym_eq_sum_perm, map_sum, map_sum]
   have : ∀ σ : Equiv.Perm (Fin n), toSym K (T (perm K σ z)) = toSym K (T z) := by
     intro σ
@@ -1711,8 +1781,9 @@ theorem coefficient_operators_hold : CoeffOps := by
     rw [this]
   · intro t z
     rw [jucysMurphyProduct_expand_coeff]
-    simp only [LinearMap.add_apply, LinearMap.smul_apply, Module.End.one_apply, LinearMap.sum_apply, map_add,
-      map_smul, map_sum, h1, ← hp]
+
+    simp only [LinearMap.add_apply, LinearMap.smul_apply, Module.End.one_apply, LinearMap.sum_apply, map_add (f := _),
+    map_smul, map_sum, h1, ← hp]
   · intro L hL a y hy m
     let abelian₂ : AddSubgroup (Tens R P M n) :=
       { carrier := {z | ∀ g, z g ∈ L (cont g)}
@@ -1894,6 +1965,7 @@ theorem ActLattice_of (h3 : MuEquivariant) (h4 : WordSpec) : ActLattice := by
   have hA := (ActSpec_of h3 h4 K V P R S n).1
   have hadd : S.act n (∑ m, Pi.single m (y m)) = ∑ m, S.act n (Pi.single m (y m)) := by
     unfold HidaSetting.act
+
     rw [map_sum, map_sum, Finset.smul_sum]
   have hy' : S.act n y = ∑ m, S.act n (Pi.single m (y m)) := by
     rw [← hadd, Finset.univ_sum_single]

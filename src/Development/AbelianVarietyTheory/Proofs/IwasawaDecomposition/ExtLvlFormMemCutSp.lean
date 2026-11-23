@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DatVtEq
-import Formalism.LocalToGlobal.IndefiniteReal.BridgeLemmas
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DatVtEq
+public import Formalism.LocalToGlobal.Divisibility.ClassSumLemmas
+public import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,8 +105,8 @@ theorem lvlForm_eq_sum (x : Fin (S.lvlDim act P ψ) → K) :
     lvlForm S act P ψ x = ∑ i, ((S.lvlE act P ψ).mulVec x) i • S.basis i := by
   simp only [lvlForm, Module.Basis.equivFun_symm_apply]
 
-open Classical in
 
+open Classical in
 def lvlAvgF (act : Representation K G₀ S.Forms) (P : Subgroup G₀) (ψ : P →* Kˣ) (f : S.Forms) : S.Forms :=
   ∑ p : P, ((Nat.card P : K)⁻¹ * ((ψ p⁻¹ : Kˣ) : K)) • act (p : G₀) f
 
@@ -70,6 +114,7 @@ theorem lvlAvgF_eig (f : S.Forms) (q : P) :
     act (q : G₀) (lvlAvgF act P ψ f) = ((ψ q : Kˣ) : K) • lvlAvgF act P ψ f := by
   classical
   unfold lvlAvgF
+
   rw [map_sum, Finset.smul_sum]
   refine Fintype.sum_equiv (Equiv.mulLeft q) _ _ fun p => ?_
   rw [map_smul, ← Module.End.mul_apply, ← map_mul, Equiv.coe_mulLeft, smul_smul, Subgroup.coe_mul]
@@ -88,8 +133,8 @@ section Avg
 variable {G : Type} [Group G] {W : Type} [AddCommGroup W] [Module ℂ W]
   {K : Type} [Field K] {G₀ : Type} [Group G₀] [Fintype G₀]
 
-open Classical in
 
+open Classical in
 def cutAvgL {Q : Subgroup G} (ch : Q →* ℂˣ) (red : Q →* G₀) (hred : Function.Surjective red) (σ : K →+* ℂ)
     (P : Subgroup G₀) (ψ : P →* Kˣ) (W : Type) [AddCommGroup W] [Module ℂ W] : (G → W) →ₗ[ℂ] (G → W) :=
   ∑ p : P, (σ ((Nat.card P : K)⁻¹ * ((ψ p⁻¹ : Kˣ) : K)) * (((ch (hred (p : G₀)).choose)⁻¹ : ℂˣ) : ℂ)) •
@@ -122,6 +167,7 @@ theorem cutAvgL_ext (f : S.Forms) :
   funext h
   rw [cutAvgL_apply, ← Bridge.ClassPres.extL_apply pres (lvlAvgF act P ψ f)]
   unfold lvlAvgF
+
   rw [map_sum, Finset.sum_apply]
   refine Finset.sum_congr rfl fun p _ => ?_
   rw [map_smulₛₗ, Bridge.ClassPres.extL_apply,
@@ -161,6 +207,7 @@ theorem ext_lvlForm_mem_span (x : Fin (S.lvlDim act P ψ) → K) :
     simp [Finset.sum_apply, Pi.single_apply]
   have e : pres.ext (lvlForm S act P ψ x).1 =
       ∑ a, σ (x a) • pres.ext (lvlForm S act P ψ (Pi.single a 1)).1 := by
+
     rw [← lvlFormL_apply, ← Bridge.ClassPres.extL_apply, hx, map_sum, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, map_smulₛₗ, Bridge.ClassPres.extL_apply, lvlFormL_apply]
@@ -198,6 +245,7 @@ variable {G Γ W K : Type} [Group G] [Group Γ] [NormedAddCommGroup W] [InnerPro
 
 theorem ext_lvlForm_single (a : Fin (S.lvlDim act P ψ)) :
     pres.ext (lvlForm S act P ψ (Pi.single a 1)).1 = ∑ i, σ (S.lvlE act P ψ i a) • pres.ext (S.basis i).1 := by
+
   rw [← Bridge.ClassPres.extL_apply, lvlForm_eq_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smulₛₗ, Bridge.ClassPres.extL_apply]

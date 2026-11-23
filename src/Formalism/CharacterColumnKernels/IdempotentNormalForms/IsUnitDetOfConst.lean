@@ -1,4 +1,61 @@
-import Formalism.CharacterColumnKernels.StatementN
+module
+
+public import Formalism.CharacterColumnKernels.StatementN
+public import Mathlib.Data.Finsupp.Interval
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+
+@[expose] public section
 
 open Finset
 
@@ -35,7 +92,7 @@ def goodS (T' : Subalgebra O (X' → O)) : Subring (PowerSeries (X' → Fraction
     · exact Subring.one_mem _
     · exact Subring.zero_mem _
   add_mem' {a b} ha hb n := by
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Subring.add_mem _ (ha n) (hb n)
   zero_mem' n := by
     rw [map_zero]
@@ -53,8 +110,9 @@ def coefMat (n : ℕ) (a : Matrix d d (PowerSeries (X' → FractionRing O))) :
 lemma coefMat_mul (n : ℕ) (a b : Matrix d d (PowerSeries (X' → FractionRing O))) :
     coefMat n (a * b) = ∑ p ∈ antidiagonal n, coefMat p.1 a * coefMat p.2 b := by
   ext x' i j
+
   simp only [coefMat, Matrix.mul_apply, map_sum, PowerSeries.coeff_mul, Finset.sum_apply, Matrix.sum_apply,
-    Pi.mul_apply]
+  Pi.mul_apply]
   exact Finset.sum_comm
 
 lemma coefMat_add (n : ℕ) (a b : Matrix d d (PowerSeries (X' → FractionRing O))) :
@@ -128,7 +186,7 @@ def psi (m : ℕ) : MvPolynomial (Fin m) K →+* PowerSeries K :=
 
 lemma coeff_psi (m : ℕ) (P : MvPolynomial (Fin m) K) :
     PowerSeries.coeff m (psi m P) =
-      ∑ e ∈ Finset.Iic (bnd m), if wt e = m then MvPolynomial.coeff e P else 0 := by
+      ∑ e ∈ Finset.Iic (bnd m), if wt e = m then AddMonoidAlgebra.coeff P e else 0 := by
   classical
   have hbnd : ∀ e : Fin m →₀ ℕ, wt e = m → e ∈ Finset.Iic (bnd m) := by
     intro e he
@@ -149,15 +207,16 @@ lemma coeff_psi (m : ℕ) (P : MvPolynomial (Fin m) K) :
     rw [Finset.prod_pow_eq_pow_sum]
     rfl
   conv_lhs => rw [P.as_sum]
+
   rw [map_sum, map_sum]
   simp only [hpsi, PowerSeries.coeff_C_mul_X_pow]
-  have h1 : ∑ e ∈ P.support, (if m = wt e then MvPolynomial.coeff e P else 0) =
-      ∑ e ∈ P.support ∪ Finset.Iic (bnd m), (if m = wt e then MvPolynomial.coeff e P else 0) :=
+  have h1 : ∑ e ∈ P.support, (if m = wt e then AddMonoidAlgebra.coeff P e else 0) =
+      ∑ e ∈ P.support ∪ Finset.Iic (bnd m), (if m = wt e then AddMonoidAlgebra.coeff P e else 0) :=
     Finset.sum_subset Finset.subset_union_left (fun e _ he => by
       rw [MvPolynomial.notMem_support_iff.1 he]
       simp)
-  have h2 : ∑ e ∈ Finset.Iic (bnd m), (if wt e = m then MvPolynomial.coeff e P else 0) =
-      ∑ e ∈ P.support ∪ Finset.Iic (bnd m), (if wt e = m then MvPolynomial.coeff e P else 0) :=
+  have h2 : ∑ e ∈ Finset.Iic (bnd m), (if wt e = m then AddMonoidAlgebra.coeff P e else 0) =
+      ∑ e ∈ P.support ∪ Finset.Iic (bnd m), (if wt e = m then AddMonoidAlgebra.coeff P e else 0) :=
     Finset.sum_subset Finset.subset_union_right (fun e _ he => if_neg (fun h => he (hbnd e h)))
   rw [h1, h2]
   refine Finset.sum_congr rfl fun e _ => ?_
@@ -173,8 +232,8 @@ def HypDet (T' : Subalgebra O (X' → O)) (R' : Subalgebra O (X' → Matrix d d 
     Prop :=
   ∀ (m : ℕ) (r : Fin m → R') (s : Fin m →₀ ℕ), ∃ f ∈ T', ∀ x',
     algebraMap O (FractionRing O) (f x') =
-      MvPolynomial.coeff s (Matrix.det (∑ i, (MvPolynomial.X i : MvPolynomial (Fin m) (FractionRing O)) •
-        ((r i : X' → Matrix d d (FractionRing O)) x').map MvPolynomial.C))
+      AddMonoidAlgebra.coeff (Matrix.det (∑ i, (MvPolynomial.X i : MvPolynomial (Fin m) (FractionRing O)) •
+        ((r i : X' → Matrix d d (FractionRing O)) x').map MvPolynomial.C)) s
 
 lemma coeff_det_eq (R' : Subalgebra O (X' → Matrix d d (FractionRing O)))
     (a : Matrix d d (PowerSeries (X' → FractionRing O))) (ha : a ∈ goodM R') (n : ℕ) (x' : X') :
@@ -194,8 +253,9 @@ lemma coeff_det_eq (R' : Subalgebra O (X' → Matrix d d (FractionRing O)))
       (PowerSeries.X : PowerSeries (FractionRing O)) • ∑ j : Fin (n + Fintype.card d),
         (PowerSeries.X : PowerSeries (FractionRing O)) ^ j.1 • (coefMat j.1 a x').map PowerSeries.C := by
     ext i k
+
     simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.sum_apply, Matrix.smul_apply, smul_eq_mul,
-      map_sum, map_mul, psi, MvPolynomial.eval₂Hom_X', MvPolynomial.eval₂Hom_C, Finset.mul_sum]
+    map_sum, map_mul, psi, MvPolynomial.eval₂Hom_X', MvPolynomial.eval₂Hom_C, Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [pow_succ]
     ring
@@ -205,8 +265,9 @@ lemma coeff_det_eq (R' : Subalgebra O (X' → Matrix d d (FractionRing O)))
   apply coeff_det_congr
   intro i j k hk
   have hd0 : 0 < Fintype.card d := Fintype.card_pos_iff.2 ⟨i⟩
+
   simp only [Matrix.sum_apply, Matrix.smul_apply, Matrix.map_apply, smul_eq_mul, map_sum,
-    RingHom.mapMatrix_apply, PowerSeries.coeff_map]
+  RingHom.mapMatrix_apply, PowerSeries.coeff_map]
   rw [Finset.sum_eq_single ⟨k, by omega⟩]
   · rw [mul_comm, PowerSeries.coeff_C_mul_X_pow, if_pos rfl]
     rfl
@@ -231,13 +292,14 @@ lemma detGood (T' : Subalgebra O (X' → O)) (R' : Subalgebra O (X' → Matrix d
     split_ifs
     · exact hF e
     · exact Subalgebra.zero_mem _
-  · rw [coeff_det_eq R' a ha n x', coeff_psi, Finset.sum_apply, map_sum]
-    refine Finset.sum_congr rfl fun e _ => ?_
-    by_cases h : wt e = n + Fintype.card d
-    · rw [if_pos h, if_pos h]
-      exact hFx e x'
-    · rw [if_neg h, if_neg h]
-      simp
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [coeff_det_eq R' a ha n x', coeff_psi, Finset.sum_apply, map_sum]
+      refine Finset.sum_congr rfl fun e _ => ?_
+      by_cases h : wt e = n + Fintype.card d
+      · rw [if_pos h, if_pos h]
+        exact hFx e x'
+      · rw [if_neg h, if_neg h]
+        simp
 end Good
 
 section Inv

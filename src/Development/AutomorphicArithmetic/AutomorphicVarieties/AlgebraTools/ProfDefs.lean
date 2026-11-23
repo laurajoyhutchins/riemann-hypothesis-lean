@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.GroupTheory.PGroup
+public import Mathlib.Topology.Algebra.OpenSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,19 +75,16 @@ theorem mem_proLRes {g : G} :
     g ∈ proLRes l G ↔ ∀ N : OpenNormalSubgroup G, IsPGroup l (G ⧸ N.toSubgroup) → g ∈ N.toSubgroup := by
   simp only [proLRes, Subgroup.mem_iInf, Subtype.forall]
 
-instance : (proLRes l G).Normal :=
-  ⟨fun _ h g => mem_proLRes.2 fun N hN => N.isNormal'.conj_mem _ (mem_proLRes.1 h N hN) g⟩
-
 theorem isClosed_proLRes [ContinuousMul G] : IsClosed (proLRes l G : Set G) := by
   rw [proLRes, Subgroup.coe_iInf]
   exact isClosed_iInter fun N => N.1.toOpenSubgroup.isClosed
 
-variable {G} in
 
+variable {G} in
 def proLResOf (H : Subgroup G) : Subgroup G := (proLRes l H).map H.subtype
 
-variable {G} in
 
+variable {G} in
 def TopGen (s : Set G) : Prop := Dense (Subgroup.closure s : Set G)
 
 def TopFG : Prop := ∃ s : Set G, s.Finite ∧ TopGen s
@@ -53,8 +95,8 @@ theorem topGen_iff [IsTopologicalGroup G] (s : Set G) :
   rw [TopGen, dense_iff_closure_eq, ← Subgroup.topologicalClosure_coe, ← Subgroup.coe_top,
     SetLike.coe_set_eq]
 
-variable {G} in
 
+variable {G} in
 def limKer {ι : Type} (F : Filter ι) (K : ι → Subgroup G) : Subgroup G where
   carrier := {g | ∀ O : OpenNormalSubgroup G, ∀ᶠ i in F, g ∈ K i ⊔ O.toSubgroup}
   mul_mem' ha hb O := ((ha O).and (hb O)).mono fun _ h => mul_mem h.1 h.2

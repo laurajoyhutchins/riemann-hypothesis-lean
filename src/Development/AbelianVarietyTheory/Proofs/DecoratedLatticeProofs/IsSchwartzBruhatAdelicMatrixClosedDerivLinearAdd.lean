@@ -1,7 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SchwartzBruhatMixedFamilies
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RealSizeNonneg
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SchwartzBruhatMixedFamilies
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalVolumeLift
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalZero
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+import Development.AbelianVarietyTheory.Definitions.Foundations.WittIndexEqZeroIff
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HeckeFormNSOfHeckeForm
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MixSDblDecZero
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open scoped ComplexConjugate Matrix NNReal ENNReal
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cusp GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel
@@ -127,7 +181,7 @@ theorem exists_schwartz_deriv (F : Type) [DivisionRing F] [CharZero F] [Module F
     have hd := hasDerivAt_line G v s
     have heq : (fun t : ℝ => G (s + t • v)) = fun t => φ (x + L s + M t) := by
       funext t
-      rw [hG, hMv, map_add, add_assoc]
+      rw [hG, hMv, map_add (f := _), add_assoc]
     rw [heq] at hd
     exact hd
 
@@ -138,39 +192,37 @@ open GlobalTheory.IndefiniteRowSideFullHecke.SchwartzBruhatMixedFamilies
 variable {D : D7} {m n : ℕ}
 
 theorem isSchwartzBruhat_add {φ φ' : Mx D m n → ℂ} (h : IsSchwartzBruhat φ) (h' : IsSchwartzBruhat φ') :
-    IsSchwartzBruhat (φ + φ') where
-  level := by
-    obtain ⟨U, hU, hφU⟩ := h.level
+    IsSchwartzBruhat (φ + φ') := by
+  refine { level := ?_, supp := ?_, schwartz := ?_ }
+  · obtain ⟨U, hU, hφU⟩ := h.level
     obtain ⟨U', hU', hφU'⟩ := h'.level
-    refine ⟨U ⊓ U', by simpa [AddSubgroup.coe_inf] using hU.inter hU', fun u hu hu0 x => ?_⟩
-    have hu' := AddSubgroup.mem_inf.mp hu
-    simp [hφU u hu'.1 hu0 x, hφU' u hu'.2 hu0 x]
-  supp := by
-    obtain ⟨K, hK, hφK⟩ := h.supp
+    refine ⟨U ⊓ U', ?_, fun u hu hu0 x => ?_⟩
+    · change IsOpen ((U : Set (Mx D m n)) ∩ (U' : Set (Mx D m n)))
+      exact hU.inter hU'
+    · have hu' := AddSubgroup.mem_inf.mp hu
+      simp [hφU u hu'.1 hu0 x, hφU' u hu'.2 hu0 x]
+  · obtain ⟨K, hK, hφK⟩ := h.supp
     obtain ⟨K', hK', hφK'⟩ := h'.supp
     refine ⟨K ∪ K', hK.union hK', fun x hx => ?_⟩
     by_cases h1 : φ x = 0
     · have h2 : φ' x ≠ 0 := by simpa [h1] using hx
       exact Or.inr (hφK' x h2)
     · exact Or.inl (hφK x h1)
-  schwartz := by
-    intro k L hL hi x
+  · intro k L hL hi x
     obtain ⟨g, hg⟩ := h.schwartz k L hL hi x
     obtain ⟨g', hg'⟩ := h'.schwartz k L hL hi x
     exact ⟨g + g', fun t => by simp [hg, hg']⟩
 
 theorem isSchwartzBruhat_linear_mul {φ : Mx D m n → ℂ} (h : IsSchwartzBruhat φ) (ℓ : Mx D m n →+ ℂ) (hc : Continuous ℓ)
-    (h0 : ∀ u : Mx D m n, u.map (infPart D) = 0 → ℓ u = 0) : IsSchwartzBruhat fun x => ℓ x * φ x where
-  level := by
-    obtain ⟨U, hU, hφU⟩ := h.level
+    (h0 : ∀ u : Mx D m n, u.map (infPart D) = 0 → ℓ u = 0) : IsSchwartzBruhat fun x => ℓ x * φ x := by
+  refine { level := ?_, supp := ?_, schwartz := ?_ }
+  · obtain ⟨U, hU, hφU⟩ := h.level
     refine ⟨U, hU, fun u hu hu0 x => ?_⟩
     show ℓ (x + u) * φ (x + u) = ℓ x * φ x
-    rw [map_add, h0 u hu0, add_zero, hφU u hu hu0 x]
-  supp := by
-    obtain ⟨K, hK, hφK⟩ := h.supp
+    rw [map_add (f := _), h0 u hu0, add_zero, hφU u hu hu0 x]
+  · obtain ⟨K, hK, hφK⟩ := h.supp
     exact ⟨K, hK, fun x hx => hφK x (right_ne_zero_of_mul hx)⟩
-  schwartz := by
-    intro k L hL hi x
+  · intro k L hL hi x
     obtain ⟨g, hg⟩ := h.schwartz k L hL hi x
 
     let A : (Fin k → ℝ) →L[ℝ] ℂ := (ℓ.comp L).toRealLinearMap (hc.comp hL.1)

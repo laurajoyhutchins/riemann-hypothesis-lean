@@ -1,14 +1,53 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceTransforms
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialPrincipalization
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceTransforms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -28,30 +67,6 @@ def pullbackOverField (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : T
   ideal := T.ideal.comap h
   mult := T.mult
   boundary := T.boundary.map fun D => D.comap h
-
-theorem pullbackOverField_baseField (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : Type u) [Field k']
-    (q : Y ⟶ Spec (CommRingCat.of k')) (h : Y ⟶ T.scheme) :
-    (T.pullbackOverField Y k' q h).base = k' := rfl
-
-@[simp] theorem pullbackOverField_scheme (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : Type u) [Field k']
-    (q : Y ⟶ Spec (CommRingCat.of k')) (h : Y ⟶ T.scheme) :
-    (T.pullbackOverField Y k' q h).scheme = Y := rfl
-
-theorem pullbackOverField_structureMorphism (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : Type u) [Field k']
-    (q : Y ⟶ Spec (CommRingCat.of k')) (h : Y ⟶ T.scheme) :
-    (T.pullbackOverField Y k' q h).structMap = q := rfl
-
-@[simp] theorem pullbackOverField_ideal (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : Type u) [Field k']
-    (q : Y ⟶ Spec (CommRingCat.of k')) (h : Y ⟶ T.scheme) :
-    (T.pullbackOverField Y k' q h).ideal = T.ideal.comap h := rfl
-
-@[simp] theorem pullbackOverField_mult (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : Type u) [Field k']
-    (q : Y ⟶ Spec (CommRingCat.of k')) (h : Y ⟶ T.scheme) :
-    (T.pullbackOverField Y k' q h).mult = T.mult := rfl
-
-@[simp] theorem pullbackOverField_boundary (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u}) (k' : Type u)
-    [Field k'] (q : Y ⟶ Spec (CommRingCat.of k')) (h : Y ⟶ T.scheme) :
-    (T.pullbackOverField Y k' q h).boundary = T.boundary.map fun D => D.comap h := rfl
 
 theorem pullbackOverField_eq_pullbackAlong (T : MarkedIdealWithBoundary.{u}) (Y : Scheme.{u})
     (q : Y ⟶ Spec (CommRingCat.of T.base)) (h : Y ⟶ T.scheme) :

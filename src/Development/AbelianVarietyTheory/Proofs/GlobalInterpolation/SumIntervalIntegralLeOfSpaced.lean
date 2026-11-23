@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Linear
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import Mathlib.NumberTheory.DirichletCharacter.Basic
+
+@[expose] public section
+
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory
 
 namespace GlobalTheory
@@ -70,6 +130,7 @@ theorem integral_norm_sq_expSum (s : Finset ℕ) (b : ℕ → ℂ) (y : ℝ) :
       = ∑ n ∈ s, ∑ m ∈ s, b n * (starRingEnd ℂ) (b m) *
         Complex.exp (2 * Real.pi * I * ((n : ℂ) - m) * t) := by
     intro t
+
     rw [Complex.ofReal_pow, ← Complex.mul_conj', map_sum, Finset.sum_mul_sum]
     refine Finset.sum_congr rfl fun n _ => Finset.sum_congr rfl fun m _ => ?_
     rw [map_mul, ← Complex.exp_conj]
@@ -80,10 +141,10 @@ theorem integral_norm_sq_expSum (s : Finset ℕ) (b : ℕ → ℂ) (y : ℝ) :
   apply Complex.ofReal_injective
   rw [← intervalIntegral.integral_ofReal]
   simp_rw [key]
-  rw [intervalIntegral.integral_finset_sum (fun n _ => Continuous.intervalIntegrable (by fun_prop) _ _)]
+  rw [intervalIntegral.integral_finsetSum (fun n _ => Continuous.intervalIntegrable (by fun_prop) _ _)]
   push_cast
   refine Finset.sum_congr rfl fun n hn => ?_
-  rw [intervalIntegral.integral_finset_sum (fun n _ => Continuous.intervalIntegrable (by fun_prop) _ _)]
+  rw [intervalIntegral.integral_finsetSum (fun n _ => Continuous.intervalIntegrable (by fun_prop) _ _)]
   simp_rw [intervalIntegral.integral_const_mul, integral_exp_two_pi_sub]
   simp [hn, Complex.mul_conj']
 
@@ -100,7 +161,7 @@ theorem sum_intervalIntegral_le_of_spaced (g : ℝ → ℝ) (hg : Continuous g) 
   rw [← integral_biUnion_finset S (s := fun x => Set.Ioc (p x) (p x + δ))
     (fun _ _ => measurableSet_Ioc) ?_ (fun x _ => hi _ _)]
   · apply setIntegral_mono_set (hi _ _) (Filter.Eventually.of_forall h0)
-    apply HasSubset.Subset.eventuallyLE
+    apply Filter.Eventually.of_forall
     intro t ht
     simp only [Set.mem_iUnion] at ht
     obtain ⟨x, hx, ht⟩ := ht

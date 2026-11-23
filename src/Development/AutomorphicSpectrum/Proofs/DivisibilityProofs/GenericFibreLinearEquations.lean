@@ -1,7 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.IsChainFirst
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.IsBlockMapDrop
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.AlgebraicIndependentLinearForms
+module
+
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.IsChainFirst
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.AlgebraicIndependentLinearForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +75,7 @@ theorem exists_int_poly {σ : Type} (p : MvPolynomial σ ℚ) :
     obtain ⟨n, f, hn, hf⟩ := hp
     obtain ⟨m, g, hm, hg⟩ := hq
     refine ⟨n * m, C m * f + C n * g, mul_ne_zero hn hm, ?_⟩
-    simp only [map_add, map_mul, hf, hg, map_C, Int.coe_castRingHom, Int.cast_mul]
+    simp only [map_add (f := _), map_mul, hf, hg, map_C, Int.coe_castRingHom, Int.cast_mul]
     ring
   | mul_X p i hp =>
     obtain ⟨n, f, hn, hf⟩ := hp
@@ -154,14 +207,14 @@ abbrev CF : Type := FractionRing (MvPolynomial K (ΩFl Ψ N))
 def thF : GRing Ψ N →+* CF Ψ N K :=
   (algebraMap (ΩFl Ψ N) (CF Ψ N K)).comp (algebraMap (GRing Ψ N) (ΩFl Ψ N))
 
-variable {K} in
 
+variable {K} in
 def tF (k : K) : CF Ψ N K := algebraMap (MvPolynomial K (ΩFl Ψ N)) (CF Ψ N K) (X k)
 
 variable {Ψ N K}
 
-omit [Fintype Ψ] in
 
+omit [Fintype Ψ] in
 theorem minorPolynomial_succ (τ : Ψ) (r : ℕ) (hr : r + 1 ≤ N) (A : Fin (r + 1) → Fin N) :
     minorPolynomial Ψ N τ (r + 1) hr A = ∑ b : Fin (r + 1), (-1) ^ (r + (b : ℕ)) * X (τ, ⟨r, hr⟩, A b) *
       minorPolynomial Ψ N τ r (by omega) (fun a => A (b.succAbove a)) := by
@@ -186,7 +239,7 @@ theorem aeval_xP [Fintype K] (j : K → FlBlock Ψ N) (f : MRing (PIdx j)) :
     aeval (xP j) f = algebraMap _ (CF Ψ N K) (mConeMap (yPart j) f) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p q hp =>
     simp only [map_mul, hp, aeval_X]
     simp only [mConeMap, aeval_X, xP_eq, map_mul]
@@ -198,8 +251,8 @@ theorem ker_xP [Fintype K] (j : K → FlBlock Ψ N) :
   rw [RingHom.mem_ker, aeval_xP, map_eq_zero_iff _ (IsFractionRing.injective _ _), PPart, mCoordIdeal,
     RingHom.mem_ker]
 
-variable (Ψ N K) in
 
+variable (Ψ N K) in
 def eF : K ⊕ (Ψ × Fin N × Fin N) → CF Ψ N K :=
   Sum.elim (tF Ψ N) (fun v => thF Ψ N K (X v))
 
@@ -244,6 +297,7 @@ theorem tF_mem_rest (j : K → FlBlock Ψ N) {k₀ k : K} (hk : k ≠ k₀) : tF
 
 theorem det_mem {R E S : Type} [CommRing R] [Field E] [SetLike S E] [SubringClass S E] (A : S) (θ : R →+* E) {n : ℕ}
     (M : Matrix (Fin n) (Fin n) R) (h : ∀ a b, θ (M a b) ∈ A) : θ M.det ∈ A := by
+
   rw [Matrix.det_apply', map_sum]
   refine sum_mem fun σ _ => ?_
   rw [map_mul, map_prod]
@@ -288,8 +342,8 @@ theorem xP_eq_minor (j : K → FlBlock Ψ N) (k : K) (τ : Ψ) (r : ℕ) (hr : r
   obtain ⟨B', h⟩ := key (j k) h1 h2
   exact ⟨B', by simp only [xP]; rw [h]⟩
 
-omit [Fintype Ψ] in
 
+omit [Fintype Ψ] in
 theorem exists_scale (j : K → FlBlock Ψ N) (hj : IsChain j) (k₀ : K) (s : ℕ) (hs : s = (j k₀).2) (hsN : s ≤ N) :
     ∃ w : CF Ψ N K, w ≠ 0 ∧ w ∈ restF j k₀ ∧ ∀ B : Fin s → Fin N, StrictMono B →
       thF Ψ N K (minorPolynomial Ψ N (j k₀).1 s hsN B) * w ∈ PhiF j k₀ := by
@@ -327,6 +381,7 @@ theorem xP_mem_span (j : K → FlBlock Ψ N) (k₀ : K) (w : CF Ψ N K) (hw0 : w
       thF Ψ N K (minorPolynomial Ψ N (j k₀).1 (j k₀).2 (by have := (j k₀).2.2; omega) B) * w ∈ PhiF j k₀)
     (A : PIdx j k₀) : xP j ⟨k₀, A⟩ ∈ Submodule.span (PhiF j k₀) (Set.range (uF j k₀ w)) := by
   simp only [xP]
+
   rw [minorPolynomial_succ, map_sum, Finset.sum_mul]
   refine Submodule.sum_mem _ fun b _ => ?_
   have hm := hB (fun a => A.1 (b.succAbove a)) (A.2.comp (Fin.strictMono_succAbove b))

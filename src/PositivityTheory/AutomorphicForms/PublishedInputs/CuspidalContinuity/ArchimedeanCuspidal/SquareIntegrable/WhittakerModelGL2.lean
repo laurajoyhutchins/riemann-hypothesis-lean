@@ -1,5 +1,57 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.AdFormOf
-import GroundTheory.AutomorphicForms.GL2.GodementSectionLocal
+module
+
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.LocallyProfinite
+import GroundTheory.LocalFields.FilteredSurj
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
+public import Mathlib.NumberTheory.LocalField.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,32 +81,5 @@ end Mat
 
 variable {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F]
   [MeasurableSpace F] [BorelSpace F]
-
-def W2 (ψ : AddChar F Circle) (μ₁ μ₂ : Fˣ →* ℂˣ) (φ : (Fin 2 → F) → ℂ) (g : GL (Fin 2) F) : ℂ :=
-  ((μ₂ (GeneralLinearGroup.det g) : ℂˣ) : ℂ) * mp (GeneralLinearGroup.det g) (1 / 2) *
-    ∫ h : Fˣ, (((μ₁ h)⁻¹ * μ₂ h : ℂˣ) : ℂ) * mp h 1 *
-      (∫ x, φ (![(h : F), h * x] ᵥ* (g : Matrix (Fin 2) (Fin 2) F)) * (ψ (-x) : ℂ) ∂selfDualMeasure ψ) ∂multHaar F
-
-def V2 (ψ : AddChar F Circle) (μ₁ μ₂ : Fˣ →* ℂˣ) : Submodule ℂ (GL (Fin 2) F → ℂ) :=
-  Submodule.span ℂ (W2 ψ μ₁ μ₂ '' GodementSectionLocal.schwartzBruhat2 F)
-
-structure WhittakerModelGL2 (ψ : AddChar F Circle) (μ₁ μ₂ : Fˣ →* ℂˣ) (V : Submodule ℂ (GL (Fin 2) F → ℂ)) : Prop where
-  ne : ∃ W ∈ V, W 1 ≠ 0
-  stable : ∀ W ∈ V, ∀ h, (fun g => W (g * h)) ∈ V
-  psi : ∀ W ∈ V, ∀ x g, W (uni2 x * g) = (ψ x : ℂ) * W g
-  cen : ∀ W ∈ V, ∀ (a : Fˣ) g, W (dg2 a a * g) = ((μ₁ a * μ₂ a : ℂˣ) : ℂ) * W g
-  smooth : ∀ W ∈ V, ∃ U : OpenSubgroup (GL (Fin 2) F), ∀ g, ∀ u ∈ U, W (g * u) = W g
-  bound : ∀ W ∈ V, ∀ ε : ℝ, 0 < ε → ∃ C B : ℝ, ∀ (a : Fˣ), ∀ k ∈ GLnLocal.integralGL F 2,
-    ‖W (dg2 a 1 * k)‖ ≤ C * (modulus (a : F) : ℝ) ^ (1 / 2 - ε) ∧ (W (dg2 a 1 * k) ≠ 0 → (modulus (a : F) : ℝ) ≤ B)
-  fe : ∀ W ∈ V, ∀ c, IsUnit1 c → ∀ s : ℂ, 0 < s.re → s.re < 1 →
-    ∫ a, W (dg2 a 1 * w0) * (((μ₁ a * μ₂ a * c a)⁻¹ : ℂˣ) : ℂ) * mp a (1 / 2 - s) ∂multHaar F =
-      gam ψ (μ₁ * c) s * gam ψ (μ₂ * c) s * ∫ a, W (dg2 a 1) * ((c a : ℂˣ) : ℂ) * mp a (s - 1 / 2) ∂multHaar F
-
-def Loc2 : Prop :=
-  ∀ (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] [MeasurableSpace F] [BorelSpace F]
-    (ψ : AddChar F Circle), IsStd ψ → ∀ μ₁ μ₂ : Fˣ →* ℂˣ, IsUnit1 μ₁ → IsUnit1 μ₂ → WhittakerModelGL2 ψ μ₁ μ₂ (V2 ψ μ₁ μ₂) ∧
-    (IsUnramifiedChar μ₁ → IsUnramifiedChar μ₂ →
-      W2 ψ μ₁ μ₂ (Set.indicator {x | ∀ i, x i ∈ 𝒪[F]} 1) =
-        Spherical.sphericalWhittaker (Circle.coeHom.compAddChar ψ) ![μ₁ (unifUnit F), μ₂ (unifUnit F)])
 
 end Ad3

@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.ExponentGrids.SecondComplementColumnExponents
+module
+
+public import Formalism.QuotientMetricDivisors.Statement
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.QuotientMetricDivisors.Complement2Normaliser
 import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.SecondComplementParameterBounds
-import Formalism.TranslateCocycles.TranslateCocycleProofs.TranslateScale
-import Formalism.TranslateCocycles.TranslateCocycleProofs.NetGLMapSurjective
-import Formalism.TranslateCocycles.TranslateCocycleProofs.HcBlockSumBounds
+public import Formalism.TranslateCocycles.StatementHC
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open Formalism.DivisionValues (vw conjPl lw PlOver IsConjAt)
@@ -58,49 +104,6 @@ theorem vw_add (w : HeightOneSpectrum (𝓞 K)) (a b : K) (ha : a ≠ 0) (hb : b
   · have h2 := WithZero.exp_le_exp.mp h
     exact le_trans (min_le_right _ _) (by linarith)
 
-open Classical in
-
-def fQ (w : HeightOneSpectrum (𝓞 K)) (e : ℚ) (a : K) : WithTop ℚ :=
-  if a = 0 then ⊤ else (((vw w a : ℚ) / e : ℚ) : WithTop ℚ)
-
-theorem fQ_ne (w : HeightOneSpectrum (𝓞 K)) (e : ℚ) (a : K) (ha : a ≠ 0) :
-    fQ w e a = (((vw w a : ℚ) / e : ℚ) : WithTop ℚ) := by
-  unfold fQ
-  exact if_neg ha
-
-theorem fQ_zero (w : HeightOneSpectrum (𝓞 K)) (e : ℚ) : fQ w e (0 : K) = ⊤ := by
-  unfold fQ
-  exact if_pos rfl
-
-def valQ (w : HeightOneSpectrum (𝓞 K)) (e : ℚ) (he : 0 < e) : AddValuation K (WithTop ℚ) :=
-  AddValuation.of (fQ w e) (fQ_zero w e)
-    (by rw [fQ_ne w e 1 one_ne_zero, vw_one]; simp)
-    (by
-      intro x y
-      by_cases hx : x = 0
-      · subst hx; simp
-      by_cases hy : y = 0
-      · subst hy; simp
-      by_cases hxy : x + y = 0
-      · rw [hxy]; simp [fQ]
-      rw [fQ_ne w e x hx, fQ_ne w e y hy, fQ_ne w e _ hxy, ← WithTop.coe_min, WithTop.coe_le_coe]
-      have h := vw_add w x y hx hy hxy
-      rcases min_le_iff.mp h with h | h
-      · refine le_trans (min_le_left _ _) ?_
-        exact div_le_div_of_nonneg_right (by exact_mod_cast h) he.le
-      · refine le_trans (min_le_right _ _) ?_
-        exact div_le_div_of_nonneg_right (by exact_mod_cast h) he.le)
-    (by
-      intro x y
-      by_cases hx : x = 0
-      · subst hx; simp [fQ]
-      by_cases hy : y = 0
-      · subst hy; simp [fQ]
-      rw [fQ_ne w e x hx, fQ_ne w e y hy, fQ_ne w e _ (mul_ne_zero hx hy), vw_mul w x y hx hy,
-        ← WithTop.coe_add]
-      congr 1
-      push_cast
-      ring)
 
 end ValuationJets
 

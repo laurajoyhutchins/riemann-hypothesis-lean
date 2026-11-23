@@ -1,5 +1,57 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.FockOperatorsKernel
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.RedDefs
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OneDegOfHalves
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.FockOperatorsKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +65,7 @@ def wtv {p q r s : ℕ} (β : Ln p q r s →₀ ℕ) (c : Ix p q) : ℚ :=
   ∑ d : Ix r s, sgnL ((c, d) : Ln p q r s) * (β (c, d) : ℚ) + kShift r s c
 
 theorem coeff_X_mul_pderiv_self {σ : Type*} (l : σ) (P : MvPolynomial σ ℂ) (β : σ →₀ ℕ) :
-    coeff β (X l * pderiv l P) = (β l : ℂ) * coeff β P := by
+    AddMonoidAlgebra.coeff (X l * pderiv l P) β = (β l : ℂ) * AddMonoidAlgebra.coeff P β := by
   classical
   rw [coeff_X_mul']
   by_cases h : l ∈ β.support
@@ -30,7 +82,7 @@ theorem coeff_X_mul_pderiv_self {σ : Type*} (l : σ) (P : MvPolynomial σ ℂ) 
     simp [h0]
 
 theorem coeff_X_mul_pderiv_ne {σ : Type*} (l l' : σ) (P : MvPolynomial σ ℂ) (γ : σ →₀ ℕ)
-    (h : coeff γ (X l * pderiv l' P) ≠ 0) :
+    (h : AddMonoidAlgebra.coeff (X l * pderiv l' P) γ ≠ 0) :
     ∃ β ∈ P.support, β + Finsupp.single l 1 = γ + Finsupp.single l' 1 := by
   classical
   rw [coeff_X_mul'] at h
@@ -80,23 +132,23 @@ theorem sameBlock_refl' {p q : ℕ} (c : Ix p q) : sameBlock c c := by
   cases c <;> trivial
 
 theorem coeff_Ecc {p q r s : ℕ} (c : Ix p q) (P : Pol p q r s) (β : Ln p q r s →₀ ℕ) :
-    coeff β (fockAct1 p q r s (Eab c c) P) = ((wtv β c : ℚ) : ℂ) * coeff β P := by
+    AddMonoidAlgebra.coeff (fockAct1 p q r s (Eab c c) P) β = ((wtv β c : ℚ) : ℂ) * AddMonoidAlgebra.coeff P β := by
   classical
-  have hline : ∀ l : Ln p q r s, coeff β (omE l l P) =
-      (((sgnL l * β l + sgnL l / 2 : ℚ)) : ℂ) * coeff β P := by
+  have hline : ∀ l : Ln p q r s, AddMonoidAlgebra.coeff (omE l l P) β =
+      (((sgnL l * β l + sgnL l / 2 : ℚ)) : ℂ) * AddMonoidAlgebra.coeff P β := by
     intro l
     by_cases hl : linePos l = true
     · simp only [omE, raiB, lowB, hl, if_true, LinearMap.add_apply, Module.End.mul_apply,
         LinearMap.mulLeft_apply, Derivation.coeFn_coe, LinearMap.smul_apply,
-        Module.End.one_apply, coeff_add, coeff_smul, smul_eq_mul, coeff_X_mul_pderiv_self, sgnL]
+        Module.End.one_apply, MvPolynomial.coeff_add, MvPolynomial.coeff_smul, smul_eq_mul, coeff_X_mul_pderiv_self, sgnL]
       push_cast
       ring
     · have hl' : linePos l = false := by simpa using hl
-      have e : coeff β (pderiv l (X l * P)) = ((β l : ℂ) + 1) * coeff β P := by
+      have e : AddMonoidAlgebra.coeff (pderiv l (X l * P)) β = ((β l : ℂ) + 1) * AddMonoidAlgebra.coeff P β := by
         rw [coeff_pderiv, add_comm β, coeff_X_mul, mul_comm]
       simp only [omE, raiB, lowB, hl', Bool.false_eq_true, if_false, if_true, LinearMap.add_apply,
         Module.End.mul_apply, LinearMap.mulLeft_apply, LinearMap.neg_apply, Derivation.coeFn_coe,
-        LinearMap.smul_apply, Module.End.one_apply, coeff_add, coeff_neg, coeff_smul, smul_eq_mul, e, sgnL]
+        LinearMap.smul_apply, Module.End.one_apply, MvPolynomial.coeff_add, MvPolynomial.coeff_neg, MvPolynomial.coeff_smul, smul_eq_mul, e, sgnL]
       push_cast
       ring
   rw [fockAct1_Eab_apply, coeff_sum]
@@ -137,7 +189,7 @@ theorem wt_Eab {p q r s : ℕ} (a b : Ix p q) (hab : sameBlock a b) (hne : a ≠
       rw [Derivation.leibniz, pderiv_X, Pi.single_apply, if_neg hne'.symm]
       simp [mul_comm]
     simp only [raiB, lowB, hl1, hl2, Bool.false_eq_true, if_false, LinearMap.mulLeft_apply,
-      LinearMap.neg_apply, Derivation.coeFn_coe, e, coeff_neg, ne_eq, neg_eq_zero] at hd
+      LinearMap.neg_apply, Derivation.coeFn_coe, e, MvPolynomial.coeff_neg, ne_eq, neg_eq_zero] at hd
     obtain ⟨β, hβ, hsum⟩ := coeff_X_mul_pderiv_ne _ _ P γ hd
     refine ⟨β, hβ, fun c => ?_⟩
     rw [wtv_shift _ _ β γ hsum c]
@@ -150,10 +202,10 @@ def IsWt {p q r s : ℕ} (ν : Ix p q → ℚ) (P : Pol p q r s) : Prop :=
 theorem Ecc_of_wt {p q r s : ℕ} {ν : Ix p q → ℚ} {P : Pol p q r s} (hP : IsWt ν P) (c : Ix p q) :
     fockAct1 p q r s (Eab c c) P = ((ν c : ℚ) : ℂ) • P := by
   ext β
-  rw [coeff_Ecc, coeff_smul, smul_eq_mul]
+  rw [coeff_Ecc, MvPolynomial.coeff_smul, smul_eq_mul]
   by_cases hβ : β ∈ P.support
   · rw [hP β hβ c]
-  · have h0 : coeff β P = 0 := by simpa [mem_support_iff] using hβ
+  · have h0 : AddMonoidAlgebra.coeff P β = 0 := by simpa [mem_support_iff] using hβ
     rw [h0, mul_zero, mul_zero]
 
 theorem wt_Eab_of {p q r s : ℕ} {ν : Ix p q → ℚ} {P : Pol p q r s} (hP : IsWt ν P)

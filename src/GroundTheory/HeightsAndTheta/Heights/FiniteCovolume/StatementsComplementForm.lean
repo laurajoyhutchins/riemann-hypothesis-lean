@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.SecondCountableTopologyArchUnitary
+module
+
+public import GroundTheory.AutomorphicForms.HermitianSpaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -30,37 +73,6 @@ def ComplementForm.Statement (h : HermitianForm F E W) : Prop :=
 end Complement
 
 namespace GaussianPlane
-
-def w0G : Fin 2 → Eg := ![1 / 2, -1 / 2]
-
-theorem conj_two_G : conj ℚ Eg (2 : Eg) = 2 := map_ofNat _ 2
-
-theorem eq_zero_of_mem_hypComplementG {x : Fin 2 → Eg} (hx : x ∈ hypComplement hG v0 w0G) :
-    x = 0 := by
-  rw [mem_hypComplement, hG_apply, hG_apply] at hx
-  obtain ⟨h1, h2⟩ := hx
-  simp [v0, w0G, conj_two_G] at h1 h2
-  have e0 : x 0 = 0 := by linear_combination h2 + (1 / 2 : Eg) * h1
-  have e1 : x 1 = 0 := by linear_combination h2 - (1 / 2 : Eg) * h1
-  funext i
-  fin_cases i
-  · exact e0
-  · exact e1
-
-instance : Subsingleton (hypComplement hG v0 w0G) :=
-  ⟨fun a b => Subtype.ext ((eq_zero_of_mem_hypComplementG a.2).trans
-    (eq_zero_of_mem_hypComplementG b.2).symm)⟩
-
-def complementFormG : HermitianForm ℚ Eg (hypComplement hG v0 w0G) where
-  toSesq := 0
-  isSymm := ⟨fun x y => by
-    change conjHom ℚ Eg (0 : Eg) = (0 : Eg)
-    exact map_zero _⟩
-  nonsingular := by
-    refine ⟨fun a b _ => Subsingleton.elim a b, fun φ => ⟨0, ?_⟩⟩
-    ext x
-    rw [Subsingleton.elim x 0]
-    simp
 
 end GaussianPlane
 

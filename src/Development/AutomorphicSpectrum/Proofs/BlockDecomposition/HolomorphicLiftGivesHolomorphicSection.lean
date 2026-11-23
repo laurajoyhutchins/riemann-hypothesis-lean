@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothHermCombLine
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrableOnSourceIffOfDensity
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUniqueComplexPointUnder
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothHermCombLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
+
+@[expose] public section
+
 set_option autoImplicit false
 open CategoryTheory AlgebraicGeometry Limits TopologicalSpace MvPolynomial MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -18,8 +58,8 @@ namespace GlobalTheory.CompanionTheory.MixZ.Holo
 
 variable {m : ℕ} {n : Fin (m + 1) → ℕ}
 
-open GlobalTheory.QCoh.Qcqs in
 
+open GlobalTheory.QCoh.Qcqs in
 theorem baseRingHom_toSpecΓ {Y : Scheme.{0}} {B : CommRingCat.{0}} (ψ : B ⟶ Γ(Y, ⊤)) :
     baseRingHom (Y.toSpecΓ ≫ Spec.map ψ) ⊤ = ψ := by
   rw [baseRingHom_comp_SpecMap, baseRingHom_top, Scheme.toSpecΓ_appTop, Iso.inv_hom_id, Category.comp_id]
@@ -83,7 +123,7 @@ theorem rho_coordVal (k : Fin (m + 1)) (j : Bk n k) :
   by_cases h : j = c k
   · subst h
     rw [coordVal_self, map_one, pullRatio_self]
-  · rw [coordVal, dif_neg h]
+  · rw [coordVal, dite_eq_right h]
     simp only [rho, RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, rename_X, dehomog, eval₂Hom_X']
     exact resG_pullRatio _
 
@@ -103,7 +143,7 @@ theorem tau_comp_rho :
     exact (map_intCast _ r).trans (map_intCast _ r).symm
   · obtain ⟨⟨k, j⟩, h⟩ := q
     have e : (X ⟨⟨k, j⟩, h⟩ : CRing c) = coordVal c k j := by
-      rw [coordVal, dif_neg (show ¬ j = c k from h)]
+      rw [coordVal, dite_eq_right (show ¬ j = c k from h)]
     rw [e]
     exact tau_rho_coordVal c k j
 
@@ -131,8 +171,8 @@ theorem toC_tau : toC c ≫ tau c = (mchart c).ι := by
 
 end Chart
 
-open GlobalTheory.QCoh.Qcqs in
 
+open GlobalTheory.QCoh.Qcqs in
 theorem affine_surj (c : ∀ k, Bk n k) : IsAffineOpen (mchart c) ∧ Function.Surjective (dehomog c) := by
   have hr : Set.range (tau c) ⊆ Set.range (mchart c).ι := by
     rintro _ ⟨x, rfl⟩
@@ -194,7 +234,7 @@ theorem differentiableOn_eval₂ {E ι : Type*} [NormedAddCommGroup E] [NormedSp
     DifferentiableOn ℂ (fun v => eval₂Hom (Int.castRingHom ℂ) (g v) P) T := by
   induction P using MvPolynomial.induction_on with
   | C a => simpa only [eval₂Hom_C] using differentiableOn_const _
-  | add p q hp hq => simpa only [map_add] using hp.fun_add hq
+  | add p q hp hq => simpa only [map_add (f := _)] using hp.fun_add hq
   | mul_X p q hp => simpa only [map_mul, eval₂Hom_X'] using hp.fun_mul (hg q)
 
 theorem holo_near (m : ℕ) (n : Fin (m + 1) → ℕ) (X : Scheme.{0}) (i : X ⟶ MP ℤ m n) [IsClosedImmersion i] (D : ℕ)

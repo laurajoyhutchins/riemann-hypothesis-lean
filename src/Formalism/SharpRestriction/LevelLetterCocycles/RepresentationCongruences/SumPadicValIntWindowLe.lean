@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsGaloisExtendingAlgHom
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsSumPadicValIntWindowEq
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+public import Mathlib.Algebra.Order.Field.GeomSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,7 +60,7 @@ theorem padicValNat_eq_card_dvd_pows (l : ℕ) (hl : 2 ≤ l) (N b : ℕ) (hN : 
   have key : ∀ i, l ^ i ∣ N ↔ i ≤ padicValNat l N := by
     intro i
     have hfin : FiniteMultiplicity l N := Nat.finiteMultiplicity_iff.2 ⟨by omega, hN0⟩
-    rw [padicValNat_def' (by omega) hN]
+    rw [padicValNat_def']
     exact hfin.pow_dvd_iff_le_multiplicity
   have hv : padicValNat l N < b := by
     have h1 : l ^ padicValNat l N ≤ N := Nat.le_of_dvd hN0 ((key _).2 le_rfl)
@@ -132,7 +178,7 @@ theorem sum_padicValInt_Ico_le_div_sub_one_add_logb (l : ℕ) (hl2 : 2 ≤ l) (a
     have hr : ∑ k ∈ range S, padicValInt l (a + (k:ℤ)) = ∑ k ∈ range S, padicValNat l (m + 1 + k) := by
       refine Finset.sum_congr rfl (fun k _ => ?_)
       have e : a + (k:ℤ) = ((m + 1 + k : ℕ) : ℤ) := by push_cast; omega
-      rw [show padicValInt l (a + (k:ℤ)) = padicValNat l (a + (k:ℤ)).natAbs from rfl, e, Int.natAbs_cast]
+      rw [show padicValInt l (a + (k:ℤ)) = padicValNat l (a + (k:ℤ)).natAbs by simp [padicValInt, padicValNat_def'], e, Int.natAbs_cast]
     rw [hr]
     refine (sum_padicVal_window_le l hl2 m S).trans (add_le_add le_rfl ?_)
     exact Real.logb_le_logb_of_le hl1 (by exact_mod_cast (show 0 < m + S by omega))
@@ -148,7 +194,7 @@ theorem sum_padicValInt_Ico_le_div_sub_one_add_logb (l : ℕ) (hl2 : 2 ≤ l) (a
       simp only [Finset.mem_range] at hk
       have e : a + (((S - 1 - k : ℕ)) : ℤ) = -((m + 1 + k : ℕ) : ℤ) := by omega
       show padicValInt l (a + ((S - 1 - k : ℕ) : ℤ)) = _
-      rw [e, show padicValInt l (-((m + 1 + k : ℕ) : ℤ)) = padicValNat l (-((m + 1 + k : ℕ) : ℤ)).natAbs from rfl,
+      rw [e, show padicValInt l (-((m + 1 + k : ℕ) : ℤ)) = padicValNat l (-((m + 1 + k : ℕ) : ℤ)).natAbs by simp [padicValInt, padicValNat_def'],
         Int.natAbs_neg, Int.natAbs_cast]
     rw [hr]
     refine (sum_padicVal_window_le l hl2 m S).trans (add_le_add le_rfl ?_)

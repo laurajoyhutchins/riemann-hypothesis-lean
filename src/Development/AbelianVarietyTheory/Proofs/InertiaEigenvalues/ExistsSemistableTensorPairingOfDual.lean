@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TwistStep
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RTensorPairingEqZeroOfFlipInjectiveStatement
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RTensorPairingEqZeroOfFlipInjectiveStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdmSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +73,7 @@ theorem tensorPairing_one (m : V →ₗ[F] V' →ₗ[F] F) (v : V) (y : V' ⊗[F
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul v' b => simp [tensorPairing_tmul]
-  | add y y' hy hy' => simp only [map_add, hy, hy']
+  | add y y' hy hy' => simp only [map_add (f := _), hy, hy']
 
 theorem induction_two {p : V ⊗[F] B → V' ⊗[F] B → Prop} (h0 : ∀ y, p 0 y) (h0' : ∀ x, p x 0)
     (ht : ∀ v a v' b, p (v ⊗ₜ[F] a) (v' ⊗ₜ[F] b))
@@ -58,9 +104,9 @@ theorem exists_stPairing : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K : Fi
     · intro v a v' b
       simp [tensorPairing_tmul, map_mul, map_smul]
     · intro x x' y hx hx'
-      simp only [map_add, LinearMap.add_apply, hx, hx']
+      simp only [map_add (f := _), LinearMap.add_apply, hx, hx']
     · intro x y y' hy hy'
-      simp only [map_add, hy, hy']
+      simp only [map_add (f := _), hy, hy']
   · intro x y
     refine induction_two (p := fun x y => tensorPairing m (monV P ℚ_[l] V x) y +
       tensorPairing m x (monV P ℚ_[l] V' y) = monSt P (tensorPairing m x y)) (by simp) (by simp) ?_ ?_ ?_ x y
@@ -71,10 +117,10 @@ theorem exists_stPairing : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K : Fi
       simp only [monSt_apply, Polynomial.derivative_mul]
       ring
     · intro x x' y hx hx'
-      simp only [map_add, LinearMap.add_apply, ← hx, ← hx']
+      simp only [map_add (f := _), LinearMap.add_apply, ← hx, ← hx']
       abel
     · intro x y y' hy hy'
-      simp only [map_add, ← hy, ← hy']
+      simp only [map_add (f := _), ← hy, ← hy']
       abel
   · intro g x y
     refine induction_two (p := fun x y => tensorPairing m (stRep P ρ g x) (stRep P ρ' g y) =
@@ -84,9 +130,9 @@ theorem exists_stPairing : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K : Fi
       rw [stRep_tmul, stRep_tmul, tensorPairing_tmul, tensorPairing_tmul, hg, hcyc, map_smul, map_mul,
         smul_smul]
     · intro x x' y hx hx'
-      simp only [map_add, LinearMap.add_apply, hx, hx', smul_add]
+      simp only [map_add (f := _), LinearMap.add_apply, hx, hx', smul_add]
     · intro x y y' hy hy'
-      simp only [map_add, hy, hy', smul_add]
+      simp only [map_add (f := _), hy, hy', smul_add]
   · intro a x y
     refine induction_two (p := fun x y => tensorPairing m (onB P ℚ_[l] V (LinearMap.mulLeft ℚ_[l] a) x) y =
       a * tensorPairing m x y) (by simp) (by simp) ?_ ?_ ?_ x y
@@ -94,9 +140,9 @@ theorem exists_stPairing : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K : Fi
       rw [onB_tmul, tensorPairing_tmul, tensorPairing_tmul, LinearMap.mulLeft_apply, mul_smul_comm,
         mul_assoc]
     · intro x x' y hx hx'
-      simp only [map_add, LinearMap.add_apply, hx, hx', mul_add]
+      simp only [map_add (f := _), LinearMap.add_apply, hx, hx', mul_add]
     · intro x y y' hy hy'
-      simp only [map_add, hy, hy', mul_add]
+      simp only [map_add (f := _), hy, hy', mul_add]
   · intro y hy
     refine GlobalTheory.T.eq_zero_of_rTensor_pairing_eq_zero ℚ_[l] (Bst P) V V' m hr y fun v => ?_
     rw [← tensorPairing_one]

@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.FormalDegreeBessel.StatementBF
+module
+
+public import Formalism.FormalDegreeBessel.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.QuantumDeterminants
 
@@ -28,64 +75,6 @@ lemma gram_sq (k r : ℕ) : Hpk k r * Hpk k r = 1 := by
   · intro b _ hb
     rw [gram_apply k r i b, if_neg hb, zero_mul]
   · simp
-
-lemma isUnit_det_of_mem {k r : ℕ} {g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ}
-    (hg : g ∈ UH (Hpk k r)) : IsUnit g.det := by
-  have h : (Hpk k r * (gᴴ * Hpk k r)) * g = 1 := by
-    rw [mul_assoc, show gᴴ * Hpk k r * g = Hpk k r from hg, gram_sq]
-  exact Matrix.isUnit_det_of_left_inverse h
-
-lemma inv_mulVec_fixed {m : ℕ} {g : Matrix (Fin m) (Fin m) ℂ} (hg : IsUnit g.det) {v : Fin m → ℂ}
-    (hv : g *ᵥ v = v) : g⁻¹ *ᵥ v = v := by
-  conv_lhs => rw [← hv]
-  rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hg, Matrix.one_mulVec]
-
-lemma inv_mem {k r : ℕ} {z : Fin (2 * r + k + 1) → ℂ}
-    {g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ}
-    (hg : g ∈ UWset k r z) : g⁻¹ ∈ UWset k r z := by
-  have hu := isUnit_det_of_mem hg.1
-  refine ⟨?_, fun a => ⟨inv_mulVec_fixed hu (hg.2.1 a).1, inv_mulVec_fixed hu (hg.2.1 a).2⟩,
-    inv_mulVec_fixed hu hg.2.2⟩
-  have h1 : gᴴ * Hpk k r * g = Hpk k r := hg.1
-  show (g⁻¹)ᴴ * Hpk k r * g⁻¹ = Hpk k r
-  calc (g⁻¹)ᴴ * Hpk k r * g⁻¹ = (g⁻¹)ᴴ * (gᴴ * Hpk k r * g) * g⁻¹ := by rw [h1]
-    _ = (g * g⁻¹)ᴴ * Hpk k r * (g * g⁻¹) := by
-        rw [Matrix.conjTranspose_mul]; simp only [mul_assoc]
-    _ = Hpk k r := by rw [Matrix.mul_nonsing_inv _ hu]; simp
-
-def mulEquiv {k r : ℕ} (a b : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ)
-    (ha : IsUnit a.det) (hb : IsUnit b.det) : Mt k r ≃ᵐ Mt k r where
-  toFun x := a * Matrix.of x * b
-  invFun x := a⁻¹ * Matrix.of x * b⁻¹
-  left_inv x := by
-    show a⁻¹ * (a * Matrix.of x * b) * b⁻¹ = Matrix.of x
-    rw [← mul_assoc, ← mul_assoc, Matrix.nonsing_inv_mul _ ha, one_mul, mul_assoc,
-      Matrix.mul_nonsing_inv _ hb, mul_one]
-  right_inv x := by
-    show a * (a⁻¹ * Matrix.of x * b⁻¹) * b = Matrix.of x
-    rw [← mul_assoc, ← mul_assoc, Matrix.mul_nonsing_inv _ ha, one_mul, mul_assoc,
-      Matrix.nonsing_inv_mul _ hb, mul_one]
-  measurable_toFun := by
-    refine Continuous.measurable ?_
-    exact (continuous_const.matrix_mul continuous_id).matrix_mul continuous_const
-  measurable_invFun := by
-    refine Continuous.measurable ?_
-    exact (continuous_const.matrix_mul continuous_id).matrix_mul continuous_const
-
-def repEquiv {W : Type} [NormedAddCommGroup W] [NormedSpace ℂ W] {k r : ℕ}
-    {z : Fin (2 * r + k + 1) → ℂ}
-    {π : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → (W →L[ℂ] W)}
-    (hπ : IsCRepOn (UWset k r z) π) {h : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ}
-    (hh : h ∈ UWset k r z) : W ≃L[ℂ] W :=
-  ContinuousLinearEquiv.equivOfInverse (π h) (π h⁻¹)
-    (fun x => by
-      have := hπ.2 _ (inv_mem hh) _ hh
-      rw [Matrix.nonsing_inv_mul _ (isUnit_det_of_mem hh.1), hπ.1] at this
-      exact (congrArg (fun T : W →L[ℂ] W => T x) this).symm)
-    (fun x => by
-      have := hπ.2 _ hh _ (inv_mem hh)
-      rw [Matrix.mul_nonsing_inv _ (isUnit_det_of_mem hh.1), hπ.1] at this
-      exact (congrArg (fun T : W →L[ℂ] W => T x) this).symm)
 
 end GlobalTheory.BesselUnitary
 

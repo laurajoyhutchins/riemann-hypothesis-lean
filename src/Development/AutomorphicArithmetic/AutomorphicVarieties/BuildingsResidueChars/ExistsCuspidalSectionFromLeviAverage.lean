@@ -1,8 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.UnipBlocks
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdMeas
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TensInterp
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.UnipBlocks
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.TensInterp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.ContinuousEntryCharacters.UnipBlocks
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeilStabilizerVolume.UnfoldAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSConjSpaceR
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IwahoriHeckeInjectivity.HeckeInj
+import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
+import GroundTheory.AutomorphicForms.ArchimedeanWhittaker.ComplexWhittaker.ExpEqOfHasDerivAt
+
+@[expose] public section
 
 open MeasureTheory NumberField Filter Topology Matrix
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
@@ -43,7 +93,7 @@ private theorem avg_mem {X Y : Type} [MeasurableSpace Y] (E : Submodule ℂ (X �
     have : ∀ w, h w u = ∑ l : Fin a × Fin b × Fin a × Fin b,
         (s l.1 l.2.2.1 * t l.2.1 l.2.2.2 * ψ l.2.1 ()) * h w (x l.1 l.2.2.1) * φ l.1 u := fun w => e _ (hE w) u
     simp only [this]
-    rw [integral_finset_sum _ fun l _ => ((hi _).const_mul _).mul_const _]
+    rw [integral_finsetSum _ fun l _ => ((hi _).const_mul _).mul_const _]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [integral_mul_const, integral_const_mul]
   rw [key]
@@ -53,27 +103,33 @@ private def repSub {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure 
     (τ : Submodule ℂ (L2 μ)) : Submodule ℂ (G1 K n → ℂ) where
   carrier := {f | ∃ v ∈ τ, Reps μ v f}
   zero_mem' := ⟨0, τ.zero_mem, by
-    filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae (Lp.coeFn_zero ℂ 2 (quotientMeasure (Gam K n) μ))] with y e
-    simpa using e⟩
+    filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae_eq_comp
+      (quasiMeasurePreserving_mk (Gam K n) μ) (Lp.coeFn_zero ℂ 2 (quotientMeasure (Gam K n) μ))] with y e
+    exact e⟩
   add_mem' := by
     rintro f g ⟨v, hv, hf⟩ ⟨w, hw, hg⟩
     refine ⟨v + w, τ.add_mem hv hw, ?_⟩
-    filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae (Lp.coeFn_add v w), hf, hg] with y e1 e2 e3
+    filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae_eq_comp
+      (quasiMeasurePreserving_mk (Gam K n) μ) (Lp.coeFn_add v w), hf, hg] with y e1 e2 e3
+    simp only [Function.comp_apply] at e1
     rw [e1, Pi.add_apply, e2, e3, Pi.add_apply]
   smul_mem' := by
     rintro c f ⟨v, hv, hf⟩
     refine ⟨c • v, τ.smul_mem c hv, ?_⟩
-    filter_upwards [(quasiMeasurePreserving_mk (Gam K n) μ).ae (Lp.coeFn_smul c v), hf] with y e1 e2
+    filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae_eq_comp
+      (quasiMeasurePreserving_mk (Gam K n) μ) (Lp.coeFn_smul c v), hf] with y e1 e2
+    simp only [Function.comp_apply] at e1
     rw [e1, Pi.smul_apply, e2, Pi.smul_apply, smul_eq_mul]
 
 private theorem reps_tr {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (G1 K n)) [μ.IsHaarMeasure]
     {v : L2 μ} {φ : G1 K n → ℂ} (h : Reps μ v φ) (g : G1 K n) :
     Reps μ (rightRegularRep (Gam K n) μ g v) (fun y => φ (y * g)) := by
-  have h1 := (quasiMeasurePreserving_mk (Gam K n) μ).ae (coeFn_rightRegularRep (Gam K n) μ g v)
-  have h2 := (measurePreserving_mul_right μ g).quasiMeasurePreserving.ae h
+  have h1 := MeasureTheory.QuasiMeasurePreserving.ae_eq_comp
+    (quasiMeasurePreserving_mk (Gam K n) μ) (coeFn_rightRegularRep (Gam K n) μ g v)
+  have h2 := MeasureTheory.QuasiMeasurePreserving.ae
+    (measurePreserving_mul_right μ g).quasiMeasurePreserving h
   filter_upwards [h1, h2] with y e1 e2
-  rw [e1]
-  exact e2
+  exact e1.trans e2
 
 private theorem span_le_rep {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (G1 K n)) [μ.IsHaarMeasure]
     (τ : Submodule ℂ (L2 μ)) (hτ : CuspIrr μ τ) (S : Subgroup (G1 K n)) {φ : G1 K n → ℂ} (h : ∃ v ∈ τ, Reps μ v φ) :

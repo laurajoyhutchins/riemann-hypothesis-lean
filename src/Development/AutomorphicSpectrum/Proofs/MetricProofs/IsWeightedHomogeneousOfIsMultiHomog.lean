@@ -1,30 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheetB
+module
+
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ProjChartSetEqSetChartSet
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsConeAvoid
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFibB
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SetSegreConeSmul
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PConeAvoidsFinite
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PFiniteProjHomInjective
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PGoodChartModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ConeChart
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgDim
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxPosDens
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxSimple
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreChartZeroSet
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSegreChartDim
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PGoodChartZeroSet
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PGoodChartDim
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PGoodChartModel
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PConeVanishingHomog
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PConeSliceIdeal
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PChartDehomogPrime
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PComponentsGenericCount
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PSheetLift
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsGenericCount
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsSheetSimpleNull
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SetSegreConeSmul
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -37,7 +67,7 @@ open ReciprocityTheory.ChartRestriction.G.Geo (MRingOver segre scaleBlock)
 open ReciprocityTheory.AnForm.R (conePts)
 
 open GoodChartModel Matrix
-open ReciprocityTheory.ChartRestriction.G.Geo (blkW weight_blkW segMono eval_segMono segMono_homog psiPoly eval_psiPoly psiPoly_homog
+open ReciprocityTheory.ChartRestriction.G.Geo (blkW weight_blkW segMono eval_segMono psiPoly eval_psiPoly
   comp_mul_homog diag_of_homog)
 
 section Rel
@@ -68,6 +98,17 @@ theorem cone_segre_rel {e : ℕ} {Q : Ideal (MRingOver ℂ ι)} (hP : Reciprocit
       (∀ j, (G j).totalDegree ≤ r - 1) ∧
       ∀ z ∈ conePts Q, segre z i ^ r = ∑ j, Ψ (segre z) j * eval (segre z) (G j) := by
   classical
+  have hsegMono (a : (k : K) → ι k) : IsWeightedHomogeneous (blkW ι) (segMono ι a) (fun _ => 1) := by
+    have hprod := IsWeightedHomogeneous.prod (w := blkW ι) Finset.univ
+      (fun k => (X ⟨k, a k⟩ : MvPolynomial (Σ k, ι k) ℂ))
+      (fun k => blkW ι ⟨k, a k⟩) (fun k _ => isWeightedHomogeneous_X ℂ _ _)
+    unfold segMono
+    convert hprod using 1
+    funext k
+    simp [blkW, Finset.sum_apply, Pi.single_apply]
+  have hpsiPoly (j : Fin (e + 1)) : IsWeightedHomogeneous (blkW ι) (psiPoly Ψ j) (fun _ => 1) := by
+    unfold psiPoly
+    exact IsWeightedHomogeneous.sum _ _ _ fun a _ => (hsegMono a).C_mul _
   set I := Q ⊔ Ideal.span (Set.range (psiPoly Ψ)) with hI
   have hrad : segMono ι i ∈ I.radical := by
     rw [← vanishingIdeal_zeroLocus_eq_radical (K := ℂ), mem_vanishingIdeal_iff]
@@ -91,12 +132,13 @@ theorem cone_segre_rel {e : ℕ} {Q : Ideal (MRingOver ℂ ι)} (hP : Reciprocit
   let D : K → ℕ := fun _ => r0
   let comp := weightedHomogeneousComponent (R := ℂ) (blkW ι) (D + fun _ => 1)
   have hpow : IsWeightedHomogeneous (blkW ι) (segMono ι i ^ (r0 + 1)) (D + fun _ => 1) := by
-    have := (segMono_homog (ι := ι) i).pow (r0 + 1)
+    have := (hsegMono i).pow (r0 + 1)
     convert this using 1
     funext k; simp [D]
   have hcomp := congrArg comp hab
-  rw [map_add, map_sum, weightedHomogeneousComponent_eq_self hpow] at hcomp
-  simp only [comp, comp_mul_homog (psiPoly_homog Ψ _)] at hcomp
+
+  rw [map_add (f := _), map_sum, weightedHomogeneousComponent_eq_self hpow] at hcomp
+  simp only [comp, comp_mul_homog (hpsiPoly _)] at hcomp
   have hcd : ∀ j, ∃ G : MvPolynomial ((k : K) → ι k) ℂ, G.totalDegree ≤ r0 ∧
       ∀ z : (Σ k, ι k) → ℂ, eval z (weightedHomogeneousComponent (blkW ι) D (c j)) =
         eval (segre z) G :=
@@ -104,8 +146,9 @@ theorem cone_segre_rel {e : ℕ} {Q : Ideal (MRingOver ℂ ι)} (hP : Reciprocit
   choose G hG hGz using hcd
   refine ⟨r0 + 1, Nat.succ_pos _, G, fun j => by simpa using hG j, fun z hz => ?_⟩
   have h0 := congrArg (eval z) hcomp
-  rw [map_add, hz.2 _ (weightedHomogeneousComponent_mem_of_mem _ _ (cone_homog hP) ha _),
-    zero_add, map_sum, map_pow, eval_segMono] at h0
+
+  rw [map_add (f := _), hz.2 _ (weightedHomogeneousComponent_mem_of_mem _ _ (cone_homog hP) ha _),
+  zero_add, map_sum, map_pow, eval_segMono] at h0
   rw [← h0]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, hGz, eval_psiPoly, mul_comm]
@@ -131,8 +174,9 @@ theorem cone_pow_mem {Q : Ideal (MRingOver ℂ ι)} {e m : ℕ} {σ : Fin m ≃ 
     have h := hrel z hz
     rw [Fin.sum_univ_succ, hz1, one_mul] at h
     change eval (fun a => segre z (σ a)) f = 0
-    simp only [f, Gx, map_sub, map_add, map_pow, map_sum, map_mul, eval_X, eval_rename, hw,
-      eval_linPoly, hA, chartProjMatrix_mulVec]
+
+    simp only [f, Gx, map_sub, map_add (f := _), map_pow, map_sum, map_mul, eval_X, eval_rename, hw,
+    eval_linPoly, hA, chartProjMatrix_mulVec]
     rw [h]
     simp [Equiv.apply_symm_apply, mul_comm]
   have hdeg : f.totalDegree ≤ r := by
@@ -151,8 +195,9 @@ theorem cone_pow_mem {Q : Ideal (MRingOver ℂ ι)} {e m : ℕ} {σ : Fin m ≃ 
     homogeneousComponent_eq_zero (n := r) (φ := Gx 0) (by have := hGx 0; omega)
   have hcomp : homogeneousComponent r f =
       X a ^ r - ∑ j : Fin e, homogeneousComponent (r - 1) (Gx j.succ) * linPoly A j := by
-    simp only [f, map_sub, map_add, map_sum, hX, h0, zero_add,
-      homogeneousComponent_mul_of_isHomogeneous_right _ _ (isHomogeneous_linPoly A _), h1, if_true]
+
+    simp only [f, map_sub, map_add (f := _), map_sum, hX, h0, zero_add,
+    homogeneousComponent_mul_of_isHomogeneous_right _ _ (isHomogeneous_linPoly A _), h1, if_true]
   have hmem : homogeneousComponent r f + ∑ j : Fin e, homogeneousComponent (r - 1) (Gx j.succ) * linPoly A j ∈
       leadIdeal J ⊔ linIdeal A :=
     add_mem (Ideal.mem_sup_left (homogeneousComponent_mem_leadIdeal hfJ hdeg))

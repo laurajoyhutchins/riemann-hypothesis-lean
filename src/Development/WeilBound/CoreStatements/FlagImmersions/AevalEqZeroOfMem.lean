@@ -1,11 +1,66 @@
-import Development.WeilBound.CoreStatements.VolumeEquality.DegPushDim
-import Development.WeilBound.CoreStatements.VolumeEquality.DegPushUnit
-import Development.WeilBound.CoreStatements.VolumeEquality.DegPushNumEq
-import Development.WeilBound.CoreStatements.VolumeEquality.DegPushMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsArithVarOfBlockAlgebraic
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BlockJoinInclusionsCompat
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsC2AtOfIsPotential
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeGenericOfDegree
+module
+
+public import Development.WeilBound.CoreStatements.VolumeEquality.DegPushDefs
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BlockJoinInclusionsCompat
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsArithVarOfBlockAlgebraic
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.DegreeGenericOfDegree
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralCongrPotentialsStatement
+public import Development.WeilBound.CoreStatements.VolumeEquality.DegPushDim
+public import Development.WeilBound.CoreStatements.VolumeEquality.DegPushMap
+public import Development.WeilBound.CoreStatements.VolumeEquality.DegPushNumEq
+public import Development.WeilBound.CoreStatements.VolumeEquality.DegPushUnit
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLiftBirationalNef
+import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PConeTrdeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.AnalyticSubsetChartLocal
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeIntA
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridge
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
+import Development.WeilBound.CoreStatements.VolumeEquality.RootBranches
+
+@[expose] public section
 
 noncomputable section
 
@@ -141,8 +196,8 @@ theorem isPt_of_birational {z : (Σ k, ι k) → L} (hb : Birational z) {d : ℕ
     exact Module.finrank_pos
   exact (numMap L L (RingHom.id L) K ι z d hb hz h0).1
 
-open Classical in
 
+open Classical in
 theorem intNum_cmp (hP : NumPull) {K₂ : Type} [Fintype K₂] {ι₂ : K₂ → Type} [∀ k, Fintype (ι₂ k)] (y : (Σ k, ι k) → Ω)
     {κ₁ : K₁ → K} {v₁ : (Σ k, ι₁ k) → Σ k, ι k} {κ₂ : K₂ → K} {v₂ : (Σ k, ι₂ k) → Σ k, ι k} (h₁ : IsBlockMap κ₁ v₁)
     (h₂ : IsBlockMap κ₂ v₂) {d : ℕ} (hy : IsArithVar (mCoordIdeal y) (d + 1))
@@ -163,13 +218,65 @@ theorem intNum_cmp (hP : NumPull) {K₂ : Type} [Fintype K₂] {ι₂ : K₂ →
   obtain ⟨f, g, hfg⟩ := h j
   exact valEq_of_lineIso hz.1 hfg
 
-open Classical in
 
+open Classical MeasureTheory ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M in
 theorem degNum_eq (hI : PB.Inputs) {d : ℕ} {σ : Type} {S : PB.AnSys d σ} {P : Ideal (MRing ι)} (Re : PB.Realis S P)
     (w : Fin d → σ) :
     (Re.deg : ℝ) * S.degNum w =
       (NumbersDVR.intNum ℚ (P.map (MvPolynomial.map (Int.castRingHom ℚ))) fun j => (Re.ref (w j)).a : ℤ) := by
-  rw [← mInt_ref_eq Re w, ← ptsIntegral_one_eq_mInt hI.resExists resBridge Re.R Re.arith fun j => Re.ref_smooth _]
+  have href : mInt Re.R.A (fun j => potOf Re.R (Re.ref (w j))) (fun _ => 1) = Re.deg * S.degNum w := by
+    have hth : ∀ a, IsPotential S.A (S.th a) := fun a => (S.sing a).1
+    have hpb : ∀ a, IsPotential Re.R.A ((S.th a).pullback Re.π Re.holo.1) := fun a =>
+      isPotentialPullback S.A Re.R.A Re.π Re.holo (S.th a) (hth a)
+    have hC2 (a : σ) (x : Re.R.X) : PB.IsTwiceDifferentiableAt Re.R.A ((S.th a).pullback Re.π Re.holo.1) x := by
+      intro j hj
+      let P' := (S.th a).pullback Re.π Re.holo.1
+      let chart := Re.R.A.chart j
+      have hx : chart x ∈ chart.target ∩ chart.symm ⁻¹' P'.U x :=
+        ⟨chart.map_source hj, by
+          rw [Set.mem_preimage, chart.left_inv hj]
+          exact P'.mem_U x⟩
+      exact (contDiffAt_of_isPotential Re.R.A P' (hpb a) x j hx).of_le (by simp)
+    rw [(GlobalTheory.T.monge_ampere_integral_congr_potentials d Re.R.X Re.R.A Set.univ
+      (fun j => potOf Re.R (Re.ref (w j))) (fun j => (S.th (w j)).pullback Re.π Re.holo.1)
+      (fun _ => 1) (fun _ => 1) (fun j => by simp) (fun j => Re.ref_pot (w j))
+      (fun j x _ => hC2 (w j) x) (fun _ _ => rfl)).1]
+    let Φ : Fin d → LocPot S.X := fun j => S.th (w j)
+    let Ψ : Fin d → LocPot Re.R.X := fun j => (Φ j).pullback Re.π Re.holo.1
+    change mInt Re.R.A Ψ (fun _ => 1) = Re.deg * mInt S.A Φ (fun _ => 1)
+    rcases isEmpty_or_nonempty S.X with hX | hX
+    · have hY : IsEmpty Re.R.X := ⟨fun y => hX.false (Re.π y)⟩
+      have hA : ∀ k, (S.A.chart k).target = ∅ := fun k => by
+        rw [← (S.A.chart k).image_source_eq_target, Set.eq_empty_of_isEmpty (S.A.chart k).source, Set.image_empty]
+      have hB : ∀ k, (Re.R.A.chart k).target = ∅ := fun k => by
+        rw [← (Re.R.A.chart k).image_source_eq_target, Set.eq_empty_of_isEmpty (Re.R.A.chart k).source, Set.image_empty]
+      simp [mInt, integralWith, hA, hB]
+    · let : MeasurableSpace S.X := borel S.X
+      have : BorelSpace S.X := ⟨rfl⟩
+      let : MeasurableSpace Re.R.X := borel Re.R.X
+      have : BorelSpace Re.R.X := ⟨rfl⟩
+      obtain ⟨A⟩ := existsPartition S.A
+      obtain ⟨B⟩ := existsPartition Re.R.A
+      obtain ⟨E, V, k, W, j, hEm, hEd, hEU, hEV, hsh⟩ := exists_sheet_partition Re.holo Re.degree
+      have hΦ := mIntegrableCont S.A Φ (fun j => hth (w j)) (fun _ => 1) continuous_const
+      have hΨ := mIntegrableCont Re.R.A Ψ (fun j => hpb (w j)) (fun _ => 1) continuous_const
+      have hXsum := dI_hasSum S.A A Φ (fun _ => 1) (integrableOn_weight S.A A Φ _ hΦ) E hEm hEd Re.br
+        (analyticNull S.A Re.br Re.degree.1 Re.degree.2.1) hEU
+      have hYsum := dI_hasSum Re.R.A B Ψ (fun _ => 1) (integrableOn_weight Re.R.A B Ψ _ hΨ)
+        (fun m => Re.π ⁻¹' E m) (fun m => Re.holo.1.measurable (hEm m))
+        (fun m n hmn => (hEd hmn).preimage Re.π) (Re.π ⁻¹' Re.br)
+        (analyticNull Re.R.A _ Re.degree.2.2.1 Re.degree.2.2.2.1)
+        (by rw [← Set.preimage_iUnion, hEU, Set.preimage_compl])
+      have hp (m : ℕ) : integralWith Re.R.A B Ψ ((Re.π ⁻¹' E m).indicator (fun _ => 1)) =
+          Re.deg * integralWith S.A A Φ ((E m).indicator (fun _ => 1)) := by
+        rw [show (Re.π ⁻¹' E m).indicator (fun _ => (1 : ℝ)) = fun y => (E m).indicator (fun _ => 1) (Re.π y) from
+          funext fun y => Set.indicator_comp_right Re.π (s := E m) (g := fun _ => (1 : ℝ)) (x := y)]
+        obtain ⟨hV, hVk, hW, hdis, hpre, hbij⟩ := hsh m
+        exact (degree_piece Re.holo Φ (fun j => hth (w j)) A B (hEm m) (hEV m) hV hVk hW hdis hpre hbij _ hΦ).2
+      simp only [hp] at hYsum
+      rw [mIntEq Re.R.A B Ψ (fun j => hpb (w j)) _ hΨ, mIntEq S.A A Φ (fun j => hth (w j)) _ hΦ]
+      exact HasSum.unique hYsum (hXsum.mul_left _)
+  rw [← href, ← ptsIntegral_one_eq_mInt hI.resExists resBridge Re.R Re.arith fun j => Re.ref_smooth _]
   exact Giv.degreeGeneric_of_degree hI.degree K ι P d _ Re.arith fun j => Re.ref_smooth _
 
 end RootFieldNumerics.Sq

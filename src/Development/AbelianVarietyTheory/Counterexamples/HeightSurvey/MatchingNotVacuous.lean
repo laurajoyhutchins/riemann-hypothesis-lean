@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThetaFramePf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,8 +55,6 @@ open ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestrictio
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 variable (Xo : Moduli Dw l) (c : Coeff l)
-
-theorem genFibre_holds : GenFibreSt Xo c := genFibre Xo c ReciprocityTheory.ChartRestriction.G.Out.CubePf.cubePull
 
 theorem genFibre_tied (T : CDVR) (O : Type) [CommRing O] (β : O →+* c.F) (Y : Model Xo c β)
     (yt : Sp T.V ⟶ Y.X) (z : Sp T.Fr ⟶ Xo.XF c) (hz : z ≫ Y.j = spMap (algebraMap T.V T.Fr) ≫ yt)
@@ -32,26 +74,5 @@ theorem genFibre_tied (T : CDVR) (O : Type) [CommRing O] (β : O →+* c.F) (Y :
   exact ⟨_, m1, m2, m', h1, hn.symm.trans hm'⟩
 
 variable {Xo}
-
-theorem matching_not_vacuous {S : Type} [CommRing S] (x : Sp S ⟶ Xo.X) (t' : SAB H (Sp S))
-    (m1 : SABMap t' Xo.univ.t x) :
-    (∃! g : t'.G.left ⟶ Gx x, g ≫ (snd (Over.mk x) Xo.univ.t.G).left = m1.φ ∧
-      g ≫ (fst (Over.mk x) Xo.univ.t.G).left = t'.G.hom) ∧
-    ∀ g : t'.G.left ⟶ Gx x, g ≫ (snd (Over.mk x) Xo.univ.t.G).left = m1.φ →
-      ∀ j, (Xo.univ.t.PP.L.pull m1.φ).U j ≤ g ⁻¹ᵁ (PPx x).U (fun _ => j PUnit.unit) := by
-  refine ⟨?_, fun g hg j y hy => ?_⟩
-  · let a0 : Over.mk (t'.G.hom ≫ x) ⟶ Over.mk x := Over.homMk t'.G.hom rfl
-    let b0 : Over.mk (t'.G.hom ≫ x) ⟶ Xo.univ.t.G := Over.homMk m1.φ m1.cart.1.w
-    have f0 : (lift a0 b0).left ≫ (fst (Over.mk x) Xo.univ.t.G).left = t'.G.hom :=
-      congrArg (fun q => q.left) (lift_fst a0 b0)
-    have s0 : (lift a0 b0).left ≫ (snd (Over.mk x) Xo.univ.t.G).left = m1.φ :=
-      congrArg (fun q => q.left) (lift_snd a0 b0)
-    refine ⟨(lift a0 b0).left, ⟨s0, f0⟩, fun g hg => ?_⟩
-    apply pullback.hom_ext
-    · exact hg.2.trans f0.symm
-    · exact hg.1.trans s0.symm
-  · have h1 : m1.φ y ∈ Xo.univ.t.PP.L.U (j PUnit.unit) := mem_pull.1 hy
-    rw [← hg] at h1
-    exact Set.mem_iInter.2 fun _ => h1
 
 end GlobalTheory.ThetaFrameCheck

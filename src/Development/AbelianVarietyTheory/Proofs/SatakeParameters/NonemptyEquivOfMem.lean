@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.UnitaryNorms.MemFIffReal
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OverOnePrimeOfCardLeOne
-open NumberField IsDedekindDomain GlobalTheory.Formalism.L2.Col
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.Divisibility.Tuples
+public import Formalism.LocalToGlobal.UnitaryNorms.AdjoinCycZeta
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+public import Formalism.LocalToGlobal.UnitaryNorms.MemFIffReal
+
+@[expose] public section
+
+open NumberField IsDedekindDomain
 open _root_.Formalism.BasicNotions _root_.Formalism.L2.Host _root_.Formalism.FrobeniusOrbits
 open _root_.Formalism.L2.DIV
 
@@ -16,14 +62,6 @@ theorem sigma_conj (σ : H.E ≃ₐ[ℚ] H.E) (x : H.E) : σ (H.conj x) = H.conj
   have h1 := H.conjE_apply (H.φ₀.comp (σ : H.E →+* H.E)) x
   have h2 := H.conjE_apply H.φ₀ (σ x)
   exact h1.trans h2.symm
-
-theorem conj_conj (x : H.E) : H.conj (H.conj x) = x := by
-  apply H.φ₀.injective
-  have h1 := H.conjE_apply H.φ₀ (H.conj x)
-  have h2 := H.conjE_apply H.φ₀ x
-  refine h1.trans ?_
-  show starRingEnd ℂ (H.φ₀ (H.conj x)) = _
-  rw [h2, Complex.conj_conj]
 
 theorem galE_sigmaOf (g : R.GG) : H.galE (H.sigmaOf g) = g :=
   (H.gal).apply_symm_apply g
@@ -56,10 +94,6 @@ theorem b_ne (H : _root_.Formalism.BasicNotions.Host R) : H.sqrtMinusD ≠ -H.sq
   exact (d_pos H).ne' h3
 
 variable (ι : Qb →+* ℂ) (LL : Fld) [FiniteDimensional ℚ LL] [Normal ℚ LL] (hE : H.EQ ≤ LL)
-
-theorem conjK : ∃ σ₀ : (hostFields H.toHostRaw ι LL hE).K →+* ℂ, ∀ x : (hostFields H.toHostRaw ι LL hE).K,
-    σ₀ (star x) = starRingEnd ℂ (σ₀ x) :=
-  ⟨sig0 ι LL, fun x => (congrArg ι (CoF.val_star ι LL x)).trans (conjQb_spec ι _)⟩
 
 end HostOk
 

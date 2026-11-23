@@ -1,47 +1,58 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.GL3Columns
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IsoDualPair
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IsoFunV
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IsoScaleA
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IsoInvMetric
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.ScalDeg
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IsoDerivB
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwCauchyBinet
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwMinorExpand
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwMain
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwEval
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwInjective
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GL3Columns
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwCauchyBinet
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwInjective
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.WwMain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.MainNotions.GL3Columns
 
 open Formalism.BasicNotions Formalism.MainNotions.G Formalism.MainNotions.GL3Theta Formalism.MainNotions.TaylorLogMetric
 
-theorem dual_pair_isometry (D : D7) : IsometryOntoDualFrames D := fun N nu => isometry_dual_pair (Bool × HH D) N nu
-
-theorem isoFun_holds (D : D7) : isoFun D := fun N N' nu s Θ => isometry_function_v (Bool × HH D) D.what₂.Tau (tauPl D) N N' nu s Θ
-
-theorem isoScale_holds (D : D7) : isoScale D := fun N N' nu c s Θ φ => isometry_scaling (Bool × HH D) D.what₂.Tau (tauPl D) N N' nu c s Θ φ
-
-theorem inverse_metric_isometry (D : D7) : InducedNormInvariantMetric D := fun N nu => isometry_invariant_metric (Bool × HH D) N nu
-
-theorem scal_holds (D : D7) : scal D := fun N N' s s' Qp dg hH y' => scalar_degree D.what₂.Tau N N' s s' Qp dg hH y'
-
-theorem isoB_holds (D : D7) : isoB D :=
-  fun N N' nu s Θ φ Q hQ y' => isometry_derivative_bound (Bool × HH D) D.what₂.Tau (tauPl D) N N' nu s Θ φ Q hQ y'
-
 theorem wwCB_holds (D : D7) : wwCB D := fun k _ N nu y => cauchy_binet_minors (Bool × HH D) k N nu y
-
-theorem wwKt_holds (D : D7) : wwKt D := fun N0 N1 nu I => minor_expansion (Bool × HH D) N0 N1 nu I
 
 theorem ww_holds (D : D7) : ww D :=
   fun l _ N0 N1 nu Th ph Q hQ y' => minor_identity (Bool × HH D) l N0 N1 nu Th ph Q hQ y'
 
-theorem wwEv_holds (D : D7) : wwEv D := fun l _ N0 N1 nu Th x I => minor_evaluation (Bool × HH D) l N0 N1 nu Th x I
-
 theorem wwInj_holds (D : D7) : wwInj D :=
   fun l _ N nu ph hy J => wwInjective_of cauchy_binet_minors (Bool × HH D) l N nu ph hy J
-
-theorem theta_isometry_facts_hold (D : D7) : ConclusionW D :=
-  ⟨wwCB_holds D, wwInj_holds D, wwKt_holds D, ww_holds D, wwEv_holds D, inverse_metric_isometry D, dual_pair_isometry D, isoB_holds D, isoFun_holds D,
-    isoScale_holds D⟩
 
 end Formalism.MainNotions.GL3Columns

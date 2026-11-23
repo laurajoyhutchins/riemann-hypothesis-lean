@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ReframeSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open scoped BigOperators
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -66,7 +110,7 @@ theorem Dict.existsUnique_isPt (v : B.V) : ∃! g, d.IsPt v g := by
     rw [← map_add d.eX, d.c_eq, d.c_eq]
     have h := d.cube_val (B.ct x) (B.ct x') v.2
     ext
-    simp only [s, E, AddEquiv.symm_apply_apply, map_add, Units.val_mul, Units.val_inv_eq_inv_val,
+    simp only [s, E, AddEquiv.symm_apply_apply, map_add (f := _), Units.val_mul, Units.val_inv_eq_inv_val,
       Units.val_mk0, AnArc.e_add]
     have hθ : (N.θ (d.ex (B.ct x)) (d.ex (B.ct x')) (d.ex v.2) : ℂ) =
         d.fr (B.ct x + B.ct x' + v.2) * d.fr (B.ct x) * d.fr (B.ct x') * d.fr v.2 /
@@ -98,7 +142,7 @@ theorem Dict.exists_isPt (g : N.Gt) : ∃ v, d.IsPt v g := by
     push_cast at hm'
     have h := d.cube_val (B.ct x) (B.ct y) w
     ext
-    simp only [φ, map_add, Units.val_mul, Units.val_inv_eq_inv_val, mul_inv]
+    simp only [φ, map_add (f := _), Units.val_mul, Units.val_inv_eq_inv_val, mul_inv]
     have hS : (g.s (d.eX x + d.eX y) : ℂ) =
         g.s (d.eX x) * g.s (d.eX y) / N.θ (d.ex (B.ct x)) (d.ex (B.ct y)) (d.ex w) := by
       rw [eq_div_iff (Units.ne_zero _)]
@@ -223,7 +267,7 @@ theorem Dict.isPt_one_iff (v : B.V) : d.IsPt v 1 ↔ ∃ la : B.La, la.y = 0 ∧
           simp)
         map_add' := fun x y => Int.cast_injective (α := ℂ) (by
           rw [Int.cast_add, (hint (x + y)).choose_spec, (hint x).choose_spec, (hint y).choose_spec]
-          simp only [map_add, AnArc.H_add_left]
+          simp only [map_add (f := _), AnArc.H_add_left]
           ring) }
     refine ⟨AnArc.La.mk 0 n l, AnArc.La.mk_y _ _ _, ?_⟩
     refine Prod.ext (AddMonoidHom.ext fun x => ?_) ?_

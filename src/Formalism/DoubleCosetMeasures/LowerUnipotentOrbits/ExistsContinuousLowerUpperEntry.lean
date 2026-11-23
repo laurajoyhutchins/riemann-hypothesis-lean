@@ -1,4 +1,52 @@
-import Formalism.DoubleCosetMeasures.Statement
+module
+
+public import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,44 +165,62 @@ end LU
 
 section Pt
 
-theorem revIn_lt : ∀ (s : List ℕ) (j : ℕ), j < s.sum → revIn s j < s.sum
-  | [], j, h => by simp at h
-  | a :: s, j, h => by
+theorem revIn_lt : ∀ (s : List ℕ) (j : ℕ), j < s.sum → revIn s j < s.sum := by
+  intro s
+  induction s with
+  | nil =>
+    intro j h
+    simp at h
+  | cons a s ih =>
+    intro j h
     simp only [List.sum_cons] at h ⊢
     by_cases hj : j < a
-    · simp only [revIn, hj, if_true]; omega
-    · simp only [revIn, hj, if_false]
-      have := revIn_lt s (j - a) (by omega); omega
+    · rw [revIn, ite_eq_left hj]
+      omega
+    · have htail : j - a < s.sum := by omega
+      have hrev := ih (j - a) htail
+      rw [revIn, ite_eq_right hj]
+      omega
 
-theorem revIn_revIn : ∀ (s : List ℕ) (j : ℕ), j < s.sum → revIn s (revIn s j) = j
-  | [], j, h => by simp at h
-  | a :: s, j, h => by
+theorem revIn_revIn : ∀ (s : List ℕ) (j : ℕ), j < s.sum → revIn s (revIn s j) = j := by
+  intro s
+  induction s with
+  | nil =>
+    intro j h
+    simp at h
+  | cons a s ih =>
+    intro j h
     simp only [List.sum_cons] at h
     by_cases hj : j < a
-    · have e : revIn (a :: s) j = a - 1 - j := by simp [revIn, hj]
-      rw [e]
+    · have e : revIn (a :: s) j = a - 1 - j := by rw [revIn, ite_eq_left hj]
       have h1 : a - 1 - j < a := by omega
-      simp only [revIn, h1, if_true]; omega
-    · have e : revIn (a :: s) j = a + revIn s (j - a) := by simp [revIn, hj]
-      rw [e]
+      rw [e, revIn, ite_eq_left h1]
+      omega
+    · have e : revIn (a :: s) j = a + revIn s (j - a) := by rw [revIn, ite_eq_right hj]
       have h1 : ¬ (a + revIn s (j - a) < a) := by omega
-      simp only [revIn, h1, if_false, Nat.add_sub_cancel_left]
-      rw [revIn_revIn s (j - a) (by omega)]; omega
+      have htail : j - a < s.sum := by omega
+      rw [e, revIn, ite_eq_right h1, Nat.add_sub_cancel_left, ih (j - a) htail]
+      omega
 
-theorem blk_revIn : ∀ (s : List ℕ) (j : ℕ), j < s.sum → blk s (revIn s j) = blk s j
-  | [], j, h => by simp at h
-  | a :: s, j, h => by
+theorem blk_revIn : ∀ (s : List ℕ) (j : ℕ), j < s.sum → blk s (revIn s j) = blk s j := by
+  intro s
+  induction s with
+  | nil =>
+    intro j h
+    simp at h
+  | cons a s ih =>
+    intro j h
     simp only [List.sum_cons] at h
     by_cases hj : j < a
-    · have e : revIn (a :: s) j = a - 1 - j := by simp [revIn, hj]
+    · have e : revIn (a :: s) j = a - 1 - j := by rw [revIn, ite_eq_left hj]
       rw [e]
       have h1 : a - 1 - j < a := by omega
-      simp only [blk, h1, hj, if_true]
-    · have e : revIn (a :: s) j = a + revIn s (j - a) := by simp [revIn, hj]
+      simp only [blk, ite_eq_left h1, ite_eq_left hj]
+    · have e : revIn (a :: s) j = a + revIn s (j - a) := by rw [revIn, ite_eq_right hj]
       rw [e]
       have h1 : ¬ (a + revIn s (j - a) < a) := by omega
-      simp only [blk, h1, hj, if_false, Nat.add_sub_cancel_left]
-      rw [blk_revIn s (j - a) (by omega)]
+      have htail : j - a < s.sum := by omega
+      simp only [blk, ite_eq_right h1, ite_eq_right hj, Nat.add_sub_cancel_left, ih (j - a) htail]
 
 theorem pt_mul_pt {K : Type} [CommRing K] (s : List ℕ) (t t' : ℕ → Kˣ)
     (htt : ∀ b, ((t b : Kˣ) : K) * ((t' b : Kˣ) : K) = 1) : pt s t * pt s t' = 1 := by
@@ -249,15 +315,15 @@ theorem coe_inv_of_det {K : Type} [CommRing K] {n : ℕ} (g : GL (Fin n) K)
 
 end Supp
 
-open Supp in
 
+open Supp in
 theorem suppCompact : Formalism.DoubleCosetMeasures.SuppCompact := by
   intro K _ _ _ _ R hRo hRc s t ψ C _ _ e lam
   let P := pt s t
   let P' := pt s (fun b => (t b)⁻¹)
-  have hPP' : P * P' = 1 := pt_mul_pt s t _ (fun b => Units.mul_inv (t b))
-  have hP'P : P' * P = 1 := pt_mul_pt s _ t (fun b => Units.inv_mul (t b))
-  obtain ⟨Ph, Pu, hPhc, hPuc, hPhu⟩ := lu_rec (K := K) (n := s.sum)
+  have hPP' : P * P' = 1 := Supp.pt_mul_pt s t _ (fun b => Units.mul_inv (t b))
+  have hP'P : P' * P = 1 := Supp.pt_mul_pt s _ t (fun b => Units.inv_mul (t b))
+  obtain ⟨Ph, Pu, hPhc, hPuc, hPhu⟩ := Supp.lu_rec (K := K) (n := s.sum)
   let G : Matrix (Fin s.sum) (Fin s.sum) K → Matrix (Fin s.sum) (Fin s.sum) K :=
     fun M => P * Ph (P' * M) * P'
   let U : Matrix (Fin s.sum) (Fin s.sum) K → Matrix (Fin s.sum) (Fin s.sum) K :=
@@ -275,9 +341,9 @@ theorem suppCompact : Formalism.DoubleCosetMeasures.SuppCompact := by
     rw [hset]
     exact isCompact_univ_pi fun _ => isCompact_univ_pi fun _ => hRc
   have hDc : IsCompact D := hIntc.inter_right
-    (((isClosed_lowUni.preimage hGc).inter (isClosed_lowUni.preimage
+    (((Supp.isClosed_lowUni.preimage hGc).inter (Supp.isClosed_lowUni.preimage
       ((continuous_const.matrix_mul hGc).matrix_mul continuous_const))).inter
-      (isClosed_upUni.preimage hUc))
+      (Supp.isClosed_upUni.preimage hUc))
   have hGdet : ∀ M ∈ D, (G M).det = 1 := fun M hM => isLowUni_det K hM.2.1.1
   have hUdet : ∀ M ∈ D, (U M).det = 1 := fun M hM => isUpUni_det K hM.2.2
   let gU : D → GL (Fin s.sum) K := fun M => ⟨G M.1, (G M.1).adjugate,
@@ -291,7 +357,7 @@ theorem suppCompact : Formalism.DoubleCosetMeasures.SuppCompact := by
   have huU : Continuous uU := Units.continuous_iff.mpr
     ⟨hUc.comp continuous_subtype_val, (hUc.comp continuous_subtype_val).matrix_adjugate⟩
   have hgmem : ∀ M : D, gU M ∈ lowW K s t := fun M =>
-    (mem_lowW_iff s t P' hP'P hPP' (gU M)).mpr ⟨M.2.2.1.1, M.2.2.1.2⟩
+    (Supp.mem_lowW_iff s t P' hP'P hPP' (gU M)).mpr ⟨M.2.2.1.1, M.2.2.1.2⟩
   have humem : ∀ M : D, uU M ∈ upUniG K s.sum := fun M => M.2.2.2
   let F : D → lowW K s t × upUniG K s.sum := fun M => (⟨gU M, hgmem M⟩, ⟨uU M, humem M⟩)
   have hF : Continuous F := (hgU.subtype_mk hgmem).prodMk (huU.subtype_mk humem)
@@ -305,7 +371,7 @@ theorem suppCompact : Formalism.DoubleCosetMeasures.SuppCompact := by
     apply hp
     let gm : Matrix (Fin s.sum) (Fin s.sum) K := g
     let um : Matrix (Fin s.sum) (Fin s.sum) K := u
-    obtain ⟨hgl, hhl⟩ := (mem_lowW_iff s t P' hP'P hPP' g).mp hg
+    obtain ⟨hgl, hhl⟩ := (Supp.mem_lowW_iff s t P' hP'P hPP' g).mp hg
     have hu' : IsUpUni um := hu
     have hM : P' * (gm * P * um) = (P' * gm * P) * um := by
       simp only [Matrix.mul_assoc]
@@ -322,6 +388,6 @@ theorem suppCompact : Formalism.DoubleCosetMeasures.SuppCompact := by
       ⟨hInt, ⟨⟨by rw [Set.mem_ofPred_eq, hGM]; exact hgl, by rw [Set.mem_ofPred_eq, hGM]; exact hhl⟩,
         by rw [Set.mem_ofPred_eq, hUM]; exact hu'⟩⟩
     exact ⟨⟨_, hMD⟩, Prod.ext (Subtype.ext (Units.ext hGM)) (Subtype.ext (Units.ext hUM))⟩
-  rw [phi, if_neg hnot, zero_mul]
+  rw [Formalism.DoubleCosetMeasures.phi, if_neg hnot, zero_mul]
 
 end Formalism.DoubleCosetMeasures.P

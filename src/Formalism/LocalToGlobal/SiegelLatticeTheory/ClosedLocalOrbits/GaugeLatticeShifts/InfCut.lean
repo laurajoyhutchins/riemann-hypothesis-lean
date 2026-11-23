@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,15 +68,6 @@ def HaarDisintegrationReal : Prop :=
 def StepReal : Prop :=
   ∀ (D : D7) (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (u u' : D.what₂.Word) (sc : ℝ), 0 < sc →
     ∀ c ∈ Good X u u', ∃ γ, HasDiag X u u' sc c γ
-
-def StepInt : Prop :=
-  ∀ (D : D7) (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (u u' : D.what₂.Word) (sc : ℝ), 0 < sc →
-    ∀ c ∈ Good X u u', ∀ γ, HasDiag X u u' sc c γ →
-      TermOp.OOInt (Formalism.L2.SG.ProjRows.muInf X.B.I) Set.univ (X.Wu u) (X.Wu u') γ
-
-def StepEnergy : Prop :=
-  ∀ (D : D7) (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (u u' : D.what₂.Word) (sc : ℝ), 0 < sc →
-    DisintegrationConstantPositive X u u' sc → CoordOK X u u' sc → intOOe X u u' sc ≤ ENNReal.ofReal (1 / degX X)
 
 def StepDiagDC : Prop :=
   ∀ (D : D7) (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (u u' : D.what₂.Word) (sc : ℝ),
@@ -271,17 +311,14 @@ theorem dl_cont {r : ℕ} (l : ℕ) : Continuous (fun Z : Matrix (Fin (r + 1)) (
 
 theorem wt_cont (u u' : D.what₂.Word) : Continuous (wt X u u') := by
   unfold wt
-  refine continuous_finset_prod _ fun v _ => ?_
+  refine continuous_finsetProd _ fun v _ => ?_
   have hd : Continuous (fun c : Cinf X => Matrix.diagonal (c v)) := (continuous_apply v).matrix_diagonal
   have hD : ∀ l, Continuous (fun c : Cinf X => Dl (Matrix.diagonal (c v)) l) := fun l => (dl_cont l).comp hd
   refine Continuous.mul ?_ ?_
   · unfold Gv
     exact ((((hD _).norm.pow 2).sub (continuous_const.mul ((hD _).norm.pow 2)))).pow _
   · unfold JacV modC
-    exact continuous_finset_prod _ fun l _ => ((hD l).norm.pow 2).pow 2
-
-theorem inNuX (u u' : D.what₂.Word) (sc : ℝ) : InNuX X u u' sc :=
-  inNuX_of_meas X u u' sc (wt_cont X u u').measurable
+    exact continuous_finsetProd _ fun l _ => ((hD l).norm.pow 2).pow 2
 
 end Conc
 

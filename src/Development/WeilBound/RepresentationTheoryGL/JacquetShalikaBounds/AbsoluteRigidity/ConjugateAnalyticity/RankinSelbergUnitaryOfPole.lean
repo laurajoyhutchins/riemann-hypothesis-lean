@@ -1,4 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.CauchyLoc
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.CauchyLoc
+import Formalism.LocalToGlobal.UnitaryNorms.CharUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +101,7 @@ theorem LS_shift {E : Type} [Field E] [NumberField E] {S : Finset (HeightOneSpec
   simp only [Units.val_mul, hα, hβ]
   rw [shift_term _ (nq_ne_zero w)]
 
-theorem transfer {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (hT : SatTw) {m : ℕ} (ρ : CG E m)
+theorem transfer {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (hT : SatTw) {m : ℕ} (ρ : CG E m)
     (χ : HChar E) (S : Finset (HeightOneSpectrum (𝓞 E))) (hχ : ∀ w, χ.UnrAt w) (α : Off E S → Fin m → ℂˣ)
     (hα : SatOff (ρ.twist χ) S α) : SatOff ρ S (fun w a => α w a * (χ⁻¹).val w.1) := by
   intro w
@@ -74,9 +121,9 @@ theorem re_mem {z : ℂ} (hz : 0 < z.re) : {s : ℂ | 0 < s.re} ∈ nhds z := op
 
 theorem re_shift (σ u : ℝ) : ((σ : ℂ) + (u : ℂ) * Complex.I).re = σ := by simp
 
-open Classical in
 
-theorem core (hR : RSPole) {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (a b : ℕ) (ρ : CuspSub E a)
+open Classical in
+theorem core (hR : RSPole) {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a b : ℕ) (ρ : CuspSub E a)
     (ρ' : CuspSub E b) (u : ℝ) (hb : 1 ≤ b) (hab : b ≤ a) (hn : GlobalTheory.DiscSpec.IsNormalised ρ)
     (hn' : GlobalTheory.DiscSpec.IsNormalised ρ') :
     ∃ S₀ : Finset (HeightOneSpectrum (𝓞 E)), ∀ S, S₀ ⊆ S → ∀ (α : Off E S → Fin a → ℂˣ) (β : Off E S → Fin b → ℂˣ),
@@ -221,7 +268,7 @@ theorem rankin_selberg_unitary_of_pole : NormEx → SatTw → RSPole → RSU := 
         unfold LS
         rw [conj_eul]
         congr 1
-        simp only [map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
+        simp only [map_add (f := _), map_mul, Complex.conj_ofReal, Complex.conj_I]
         push_cast
         ring
       rw [hL, LS_shift α β _ _ τ τ' (hval τ) (hval τ') σ]

@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnipotentUpperInvUpperTriangularBounded
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnipotentUpperInvUpperTriangularBounded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix GlobalTheory.ClassFin
 
 namespace GlobalTheory.ReducedBasisBound
@@ -69,7 +116,7 @@ lemma integral_entry_eq_zero (hC : 1 ≤ C₁) (hCm : 0 ≤ Cm) (hT : 0 ≤ T)
         _ = a p * (N * (T * C₁ ^ 3 * ε)) := by ring
     exact le_of_mul_le_mul_left this (ha p)
   have hentry : ((M' j i : ℤ) : ℝ) = (M'.map (Int.cast : ℤ → ℝ)) j i := by simp
-  rw [hentry, hM', mul_apply]
+  rw [hentry, hM', Matrix.mul_apply]
   refine lt_of_le_of_lt (abs_sum_le_card _ _ (fun p => ?_)) hK
   rcases le_or_gt j p with hp | hp
   · rw [abs_mul]
@@ -98,13 +145,13 @@ lemma conj_entry_eq_zero (hC : 1 ≤ C₁) (ha : ∀ i, 0 < a i) (hle : ∀ i j,
   have e := congrFun (congrFun h j) i
   rw [diagonal_mul, mul_diagonal, transpose_apply] at e
   have hz : (n * (M'.map (Int.cast : ℤ → ℝ) * m)) j i = 0 := by
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     apply Finset.sum_eq_zero
     intro p _
     rcases lt_or_ge p j with hp | hp
     · rw [hn_low j p hp, zero_mul]
     · have hin : (M'.map (Int.cast : ℤ → ℝ) * m) p i = 0 := by
-        rw [mul_apply]
+        rw [Matrix.mul_apply]
         apply Finset.sum_eq_zero
         intro q _
         rcases lt_or_ge i q with hq | hq
@@ -155,7 +202,7 @@ lemma entry_bound_of_vanishing (hC : 1 ≤ C₁) (hCm : 0 ≤ Cm) (hT : 0 ≤ T)
         _ = a p * (N * (T * C₁ / δ)) := by ring
     exact le_of_mul_le_mul_left this (ha p)
   have hentry : ((M i j : ℤ) : ℝ) = (M.map (Int.cast : ℤ → ℝ)) i j := by simp
-  rw [hentry, hM, mul_apply]
+  rw [hentry, hM, Matrix.mul_apply]
   exact abs_sum_le_card _ _ (fun p => by
     rw [abs_mul]; exact mul_le_mul (hm i p) (hE p) (abs_nonneg _) hCm)
 
@@ -166,7 +213,7 @@ namespace GlobalTheory.ReducedBasisBound
 lemma abs_entry_le_one {N : ℕ} (k : Matrix (Fin N) (Fin N) ℝ) (h : kᵀ * k = 1) (l i : Fin N) :
     |k l i| ≤ 1 := by
   have e := congrFun (congrFun h i) i
-  rw [mul_apply, one_apply_eq] at e
+  rw [Matrix.mul_apply, one_apply_eq] at e
   simp only [transpose_apply] at e
   have : k l i ^ 2 ≤ 1 := by
     rw [← e, sq]
@@ -177,12 +224,12 @@ lemma abs_entry_le_one {N : ℕ} (k : Matrix (Fin N) (Fin N) ℝ) (h : kᵀ * k 
 lemma conj_bound {N : ℕ} (k X : Matrix (Fin N) (Fin N) ℝ) (hk : ∀ l i, |k l i| ≤ 1) (R : ℝ)
     (hR : 0 ≤ R) (hX : ∀ i j, |X i j| ≤ R) (i j : Fin N) :
     |(kᵀ * X * k) i j| ≤ N * (N * R) := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   apply abs_sum_le_card
   intro q
   rw [abs_mul]
   have hin : |(kᵀ * X) i q| ≤ N * R := by
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     apply abs_sum_le_card
     intro l
     rw [abs_mul, transpose_apply]

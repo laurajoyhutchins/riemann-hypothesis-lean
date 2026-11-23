@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.ExteriorPower.Basis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module Function
 open scoped TensorProduct Pointwise
@@ -13,9 +63,9 @@ end Union
 
 section Pick
 
+
 open Module Function in
 open scoped TensorProduct Pointwise in
-
 theorem _root_.GlobalTheory.Avoid.exists_basis_map_one_tmul_of_surjective {K L V W ι : Type*} [CommRing K] [Field L]
     [Algebra K L] [AddCommGroup V] [Module K V] [AddCommGroup W] [Module L W]
     [Module.Finite L W] {d : ℕ} (hd : finrank L W = d) (G : L ⊗[K] V →ₗ[L] W)
@@ -59,60 +109,10 @@ section Minor
 
 open exteriorPower
 
-theorem pairingDual_ιMulti_comp {R M N : Type*} [CommRing R] [AddCommGroup M] [Module R M]
-    [AddCommGroup N] [Module R N] {r : ℕ} (φ : M →ₗ[R] N) (f : Fin r → Dual R N)
-    (x : ⋀[R]^r M) :
-    pairingDual R M r (ιMulti R r fun k => f k ∘ₗ φ) x =
-      pairingDual R N r (ιMulti R r f) (exteriorPower.map r φ x) := by
-  have : pairingDual R M r (ιMulti R r fun k => f k ∘ₗ φ) =
-      pairingDual R N r (ιMulti R r f) ∘ₗ exteriorPower.map r φ := by
-    apply exteriorPower.linearMap_ext
-    ext v
-    simp [pairingDual_ιMulti_ιMulti]
-  rw [this, LinearMap.comp_apply]
-
-theorem exists_minor_ne_zero_of_separating {K V ι : Type*} [Field K] [AddCommGroup V]
-    [Module K V] [Finite ι] [LinearOrder ι] (c : ι → Dual K V)
-    (hc : ∀ v : V, (∀ j, c j v = 0) → v = 0) {r : ℕ} (x : ⋀[K]^r V) (hx : x ≠ 0) :
-    ∃ J : Set.powersetCard ι r, pairingDual K V r (ιMulti_family K r c J) x ≠ 0 := by
-  let φ : V →ₗ[K] (ι → K) := LinearMap.pi c
-  have hφ : Injective φ := by
-    rw [injective_iff_map_eq_zero]
-    intro v hv
-    exact hc v fun j => congrFun hv j
-  have hinj : Injective (exteriorPower.map r φ) := map_injective_field hφ
-  by_contra! h
-  apply hx
-  apply hinj
-  rw [map_zero]
-  apply ((Pi.basisFun K ι).exteriorPower r).repr.injective
-  ext J
-  rw [basis_repr_apply, ιMultiDual, ιMulti_family, ← pairingDual_ιMulti_comp, map_zero,
-    Finsupp.zero_apply, ← h J, ιMulti_family]
-  congr 3
-
-theorem exists_minor_ne_zero_of_span {K V ι : Type*} [Field K] [AddCommGroup V]
-    [Module K V] [Finite ι] [LinearOrder ι] (c : ι → Dual K V)
-    (hc : Submodule.span K (Set.range c) = ⊤) {r : ℕ} (x : ⋀[K]^r V) (hx : x ≠ 0) :
-    ∃ J : Set.powersetCard ι r, pairingDual K V r (ιMulti_family K r c J) x ≠ 0 := by
-  refine exists_minor_ne_zero_of_separating c (fun v hv => ?_) x hx
-  rw [← forall_dual_apply_eq_zero_iff K v]
-  have : Dual.eval K V v = 0 := by
-    apply LinearMap.ext_on_range hc
-    simpa using hv
-  intro f
-  simpa using DFunLike.congr_fun this f
-
-theorem exists_minor_ne_zero {K V ι : Type*} [Field K] [AddCommGroup V]
-    [Module K V] [Finite ι] [LinearOrder ι] (c : Basis ι K (Dual K V))
-    {r : ℕ} (x : ⋀[K]^r V) (hx : x ≠ 0) :
-    ∃ J : Set.powersetCard ι r, pairingDual K V r (ιMulti_family K r c J) x ≠ 0 :=
-  exists_minor_ne_zero_of_span c c.span_eq x hx
 
 open Module Function in
 open scoped TensorProduct Pointwise in
 open exteriorPower in
-
 theorem _root_.GlobalTheory.Avoid.exists_orderEmbedding_minor_ne_zero {K V ι : Type*} [Field K] [AddCommGroup V]
     [Module K V] [Finite ι] [LinearOrder ι] (c : ι → Dual K V)
     (hc : Submodule.span K (Set.range c) = ⊤) {r : ℕ} (x : ⋀[K]^r V) (hx : x ≠ 0) :
@@ -145,12 +145,6 @@ theorem _root_.GlobalTheory.Avoid.exists_orderEmbedding_minor_ne_zero {K V ι : 
   refine B.ext_elem fun s => ?_
   rw [map_zero, Finsupp.zero_apply, ← B.coord_apply, hcoord]
   exact hall _
-
-theorem minor_ιMulti {R V ι : Type*} [CommRing R] [AddCommGroup V] [Module R V] [LinearOrder ι]
-    (c : ι → Dual R V) {r : ℕ} (J : Set.powersetCard ι r) (v : Fin r → V) :
-    pairingDual R V r (ιMulti_family R r c J) (ιMulti R r v) =
-      (Matrix.of fun i j => c (Set.powersetCard.ofFinEmbEquiv.symm J j) (v i)).det := by
-  simp [ιMulti_family, pairingDual_ιMulti_ιMulti]
 
 end Minor
 

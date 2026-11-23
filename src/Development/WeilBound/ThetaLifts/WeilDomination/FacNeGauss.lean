@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GaussSumNeZeroOfRamified
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonarchimedeanGroupOfIsCompactIsOpen
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,8 +142,8 @@ section Sums
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-open Classical in
 
+open Classical in
 def gS (ψl : k → ℂ) (ν : kˣ →* ℂˣ) {ϖ : kˣ} (hϖ : IsUnif ϖ) {c : ℕ} (hc : 1 ≤ c) (x : k) : ℂ :=
   ∑ y : (Res k c)ˣ, (((ν (uRep hϖ hc y))⁻¹ : ℂˣ) : ℂ) * ψl (x * rep (y : Res k c) / (ϖ : k) ^ c)
 
@@ -110,8 +151,8 @@ variable {ψl : k → ℂ} (hadd : ∀ x y, ψl (x + y) = ψl x * ψl y) (hO : �
   {ϖ : kˣ} (hϖ : IsUnif ϖ) {c : ℕ} (hc1 : 1 ≤ c) {ν : kˣ →* ℂˣ} (hc : CondLE ϖ c ν)
 include hadd hO hc
 
-open Classical in
 
+open Classical in
 theorem gS_mul_unit (x : k) (hx : valuation k x ≤ 1) (u : kˣ) (hu : valuation k (u : k) = 1) :
     gS ψl ν hϖ hc1 (x * u) = ν u * gS ψl ν hϖ hc1 x := by
   classical
@@ -163,8 +204,8 @@ theorem gS_mul_unit (x : k) (hx : valuation k x ≤ 1) (u : kˣ) (hu : valuation
     exact Finset.sum_congr rfl (fun y _ => hterm y)
   rw [hsum, ← mul_assoc, ← Units.val_mul, mul_inv_cancel, Units.val_one, one_mul]
 
-open Classical in
 
+open Classical in
 theorem gS_eq_zero_of_lt (hmin : ∃ u ∈ unitCong (ϖ ^ (c - 1)), ν u ≠ 1) (x : k) (hx : valuation k x < 1) :
     gS ψl ν hϖ hc1 x = 0 := by
   classical
@@ -229,8 +270,8 @@ section Main
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-open Classical in
 
+open Classical in
 theorem gS_one_ne_zero {ψl : k → ℂ} (hadd : ∀ x y, ψl (x + y) = ψl x * ψl y)
     (hO : ∀ x : k, valuation k x ≤ 1 → ψl x = 1)
     (hcond : ∀ x : k, (∀ y : k, valuation k y ≤ 1 → ψl (x * y) = 1) → valuation k x ≤ 1)
@@ -268,7 +309,7 @@ theorem gS_one_ne_zero {ψl : k → ℂ} (hadd : ∀ x y, ψl (x + y) = ψl x * 
       intro x
       have hmk : Ideal.Quotient.mk (IsLocalRing.maximalIdeal 𝒪[k] ^ c) (Quotient.out (x + tb)) =
           Ideal.Quotient.mk (IsLocalRing.maximalIdeal 𝒪[k] ^ c) (Quotient.out x + (⟨t, ht1⟩ : 𝒪[k])) := by
-        rw [map_add]
+        rw [map_add (f := _)]
         rw [show Ideal.Quotient.mk (IsLocalRing.maximalIdeal 𝒪[k] ^ c) (Quotient.out (x + tb)) = x + tb from
             Quotient.out_eq _,
           show Ideal.Quotient.mk (IsLocalRing.maximalIdeal 𝒪[k] ^ c) (Quotient.out x) = x from Quotient.out_eq _]
@@ -466,7 +507,7 @@ theorem gauss_ne_zero : ∀ {F : Type} [Field F] [NumberField F] (ψ : AddChar (
     intro a b
     have harg : (LinearMap.inr F (Ainf F) (Af F)) ((singleFin v) (a + b)) =
         (LinearMap.inr F (Ainf F) (Af F)) ((singleFin v) a) + (LinearMap.inr F (Ainf F) (Af F)) ((singleFin v) b) := by
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
     exact (congrArg ψ harg).trans (ψ.map_add_eq_mul _ _)
   have hO : ∀ a : Fv F v, valuation (Fv F v) a ≤ 1 → psiLoc ψ v a = 1 := by
     intro a ha

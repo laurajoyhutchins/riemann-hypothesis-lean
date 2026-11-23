@@ -1,4 +1,55 @@
-import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.LatticeSumBounds
+module
+
+public import Formalism.FlagUnipotentLattices.CardSubmodulesAndLinearEquivBounds
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.LatticeSumBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Module Matrix Formalism.HermitianLatticeCounting.LatticeSumBounds
 open scoped BigOperators ComplexConjugate
@@ -26,16 +77,9 @@ lemma submatrix_mul_castLE_of_upper {R : Type*} [CommRing R] {N l : ℕ} {α : T
     (hUp : ∀ i j : Fin N, l ≤ (i : ℕ) → (j : ℕ) < l → Up i j = 0) :
     (X * Up).submatrix g (Fin.castLE hl) =
       X.submatrix g (Fin.castLE hl) * Up.submatrix (Fin.castLE hl) (Fin.castLE hl) := by
-  ext a b
-  simp only [Matrix.submatrix_apply, Matrix.mul_apply]
-  symm
-  apply Fintype.sum_of_injective (Fin.castLE hl) (Fin.castLE_injective hl)
-  · intro k hk
-    have : l ≤ (k : ℕ) := by
-      by_contra hlt
-      exact hk ⟨⟨k, by omega⟩, by ext; simp⟩
-    rw [hUp _ _ this (by simp), mul_zero]
-  · intro k; rfl
+  have h := congrArg Matrix.transpose
+    (submatrix_mul_castLE_of_lower hl Upᵀ Xᵀ g fun i j hi hj => hUp j i hj hi)
+  simpa only [Matrix.transpose_submatrix, Matrix.transpose_mul, Matrix.transpose_transpose] using h
 
 lemma det_submatrix_castLE_of_unitLower {R : Type*} [CommRing R] {N l : ℕ} (hl : l ≤ N)
     (Lo : Matrix (Fin N) (Fin N) R) (h1 : ∀ i, Lo i i = 1) (h0 : ∀ i j, i < j → Lo i j = 0) :
@@ -48,10 +92,8 @@ lemma det_submatrix_castLE_of_unitLower {R : Type*} [CommRing R] {N l : ℕ} (hl
 lemma det_submatrix_castLE_of_unitUpper {R : Type*} [CommRing R] {N l : ℕ} (hl : l ≤ N)
     (Up : Matrix (Fin N) (Fin N) R) (h1 : ∀ i, Up i i = 1) (h0 : ∀ i j, j < i → Up i j = 0) :
     (Up.submatrix (Fin.castLE hl) (Fin.castLE hl)).det = 1 := by
-  rw [Matrix.det_of_upperTriangular]
-  · simp [h1]
-  · intro i j hij
-    exact h0 _ _ (by simpa using hij)
+  rw [← Matrix.det_transpose, Matrix.transpose_submatrix]
+  exact det_submatrix_castLE_of_unitLower hl Upᵀ h1 (fun i j hij => h0 j i hij)
 
 theorem leadingMinorTriangularInvariant : LeadingMinorInvariant := by
   intro R _ N l hl Lo W Up hL1 hL0 hU1 hU0
@@ -132,6 +174,7 @@ theorem complementNormIdentity : OmegaNorm := by
 
   have h1 : h om z = Z.det := by
     rw [hom']
+
     simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, smul_eq_mul]
     have : (Z * Z.adjugate) (Fin.last r) (Fin.last r) = Z.det := by
       rw [Matrix.mul_adjugate]; simp
@@ -140,7 +183,7 @@ theorem complementNormIdentity : OmegaNorm := by
     rw [mul_comm]; rfl
   have h2 : h om z = -(ζ * T) := by
     rw [hom]
-    simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.smul_apply, smul_eq_mul, hxz, hwz,
+    simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.smul_apply, smul_eq_mul, hxz, hwz,
       hzz, ← hz]
     ring
   have hdet : Z.det = -(ζ * T) := h1.symm.trans h2
@@ -148,8 +191,9 @@ theorem complementNormIdentity : OmegaNorm := by
   have h3 : h om om = -(T' * (Z.adjugate (Fin.last r) (Fin.last r) *
       star (Z.adjugate (Fin.last r) (Fin.last r)))) := by
     rw [hom']
+
     simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, smul_eq_mul,
-      LinearMap.map_smulₛₗ, starRingEnd_apply, hG']
+    LinearMap.map_smulₛₗ, starRingEnd_apply, hG']
     rw [Finset.sum_eq_single (Fin.last r)]
     · rw [Finset.sum_eq_single (Fin.last r)]
       · simp; ring
@@ -160,7 +204,7 @@ theorem complementNormIdentity : OmegaNorm := by
     · simp
   have h4 : h om om = h w w - ζ * star ζ * T := by
     rw [hom]
-    simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.smul_apply, smul_eq_mul,
+    simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.smul_apply, smul_eq_mul,
       LinearMap.map_smulₛₗ, starRingEnd_apply, hxx, hxw, hwx, hxz, hwz, hzx, hzw, hzz, ← hz]
     ring
   have hadj : Z.adjugate (Fin.last r) (Fin.last r) = (Z.submatrix Fin.castSucc Fin.castSucc).det := by
@@ -370,7 +414,7 @@ theorem normMinorMonomialLe : MonomialMinor := by
     have hgle : ∀ π, g π ≤ P := by
       intro π
       calc g π ≤ ∏ i, max 1 ‖c (I (π i))‖ := by
-            refine Finset.prod_le_prod (fun i _ => norm_nonneg _) fun i _ => ?_
+            refine Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) fun i _ => ?_
             simp only [hW, Matrix.submatrix_apply, Matrix.of_apply]
             split_ifs
             · exact le_max_right _ _
@@ -408,18 +452,15 @@ theorem normMinorMonomialLe : MonomialMinor := by
 
 lemma det_mul_eq_sum_prod_mul_det_submatrix {t N : ℕ} (X : Matrix (Fin t) (Fin N) ℂ) (Y : Matrix (Fin N) (Fin t) ℂ) :
     (X * Y).det = ∑ f : Fin t → Fin N, (∏ i, X i (f i)) * (Y.submatrix f id).det := by
-  have h1 : (X * Y) = Matrix.of (fun i => ∑ k, X i k • Y k) := by
-    ext i j; simp [Matrix.mul_apply, Finset.sum_apply]
-  rw [h1]
-  have h2 := (Matrix.detRowAlternating (n := Fin t) (R := ℂ)).toMultilinearMap.map_sum
-    (fun i k => X i k • Y k)
-  have h3 : (Matrix.of (fun i => ∑ k, X i k • Y k)).det =
-      ∑ f : Fin t → Fin N, Matrix.detRowAlternating (fun i => X i (f i) • Y (f i)) := h2
-  rw [h3]
-  refine Finset.sum_congr rfl fun f _ => ?_
-  have h4 := (Matrix.detRowAlternating (n := Fin t) (R := ℂ)).toMultilinearMap.map_smul_univ
-    (fun i => X i (f i)) (fun i => Y (f i))
-  exact h4
+  rw [show X * Y = Matrix.of (fun i => ∑ k, X i k • Y k) by
+    ext i j
+    simp [Matrix.mul_apply, Finset.sum_apply]]
+  change (Matrix.detRowAlternating (n := Fin t) (R := ℂ)).toMultilinearMap
+    (fun i => ∑ k, X i k • Y k) = _
+  rw [MultilinearMap.map_sum]
+  exact Finset.sum_congr rfl fun f _ =>
+    (Matrix.detRowAlternating (n := Fin t) (R := ℂ)).toMultilinearMap.map_smul_univ
+      (fun i => X i (f i)) (fun i => Y (f i))
 
 lemma card_injective_fin_le_factorial (t N : ℕ) :
     (Finset.univ.filter (fun f : Fin t → Fin N => Function.Injective f)).card ≤ N.factorial := by
@@ -445,7 +486,7 @@ lemma norm_det_mul_le {t N : ℕ} (X : Matrix (Fin t) (Fin N) ℂ) (Y : Matrix (
       rw [norm_mul, norm_prod]
       apply mul_le_mul _ (hY f) (norm_nonneg _) (by positivity)
       calc ∏ i, ‖X i (f i)‖ ≤ ∏ _i : Fin t, ρ :=
-            Finset.prod_le_prod (fun _ _ => norm_nonneg _) (fun i _ => hX _ _)
+            Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) (fun i _ => hX _ _)
         _ = ρ ^ t := by simp
         _ ≤ ρ ^ N := pow_le_pow_right₀ hρ htN
     · obtain ⟨a, b, hab, hne⟩ : ∃ a b, f a = f b ∧ a ≠ b := by

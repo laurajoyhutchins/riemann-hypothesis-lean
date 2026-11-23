@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverAlg
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.L2 NumberField IsDedekindDomain Module
 
 namespace GlobalTheory
@@ -37,7 +83,7 @@ theorem projection_span_extend_scalars
     exact Submodule.mem_sup.mp this
   have hpdiff : ∀ v, p v - v ∈ U' := fun v => by
     obtain ⟨u, hu, u', hu', rfl⟩ := hdec v
-    rw [map_add, hpU u hu, hpU' u' hu', add_zero]
+    rw [map_add (f := _), hpU u hu, hpU' u' hu', add_zero]
     simpa using U'.neg_mem hu'
 
   let W : Submodule F V' := Submodule.span F (Set.range fun a => iV (b a))
@@ -62,7 +108,7 @@ theorem projection_span_extend_scalars
       obtain ⟨u, hu, rfl⟩ := hy
       rw [hqi, hpU u hu]
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, hx, hy]
+    | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
     | smul c x _ hx => rw [map_smul, hx]
   have hqU' : ∀ x ∈ Submodule.span F (iV '' (U' : Set V)), q x = 0 := by
     intro x hx
@@ -71,7 +117,7 @@ theorem projection_span_extend_scalars
       obtain ⟨u, hu, rfl⟩ := hy
       rw [hqi, hpU' u hu, map_zero]
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+    | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
     | smul c x _ hx => rw [map_smul, hx, smul_zero]
   apply le_antisymm
   · rw [Submodule.span_le]
@@ -81,14 +127,14 @@ theorem projection_span_extend_scalars
     obtain ⟨a, ha, u', hu', rfl⟩ := Submodule.mem_sup.mp hwA
     refine Submodule.mem_inf.mpr ⟨?_, ?_⟩
     · exact Submodule.subset_span ⟨_, hwU, rfl⟩
-    · rw [map_add]
+    · rw [map_add (f := _)]
       refine Submodule.add_mem_sup (Submodule.subset_span ⟨a, ha, rfl⟩) ?_
       exact Submodule.subset_span ⟨u', hu', rfl⟩
   · intro x hx
     obtain ⟨hxU, hxs⟩ := Submodule.mem_inf.mp hx
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.mp hxs
     have hxq : q (y + z) = y + z := hqU _ hxU
-    rw [map_add, hqU' z hz, add_zero] at hxq
+    rw [map_add (f := _), hqU' z hz, add_zero] at hxq
     rw [← hxq]
     have hmap : q y ∈ Submodule.map (q.restrictScalars O) (Submodule.span O (iV '' (A : Set V))) :=
       ⟨y, hy, rfl⟩

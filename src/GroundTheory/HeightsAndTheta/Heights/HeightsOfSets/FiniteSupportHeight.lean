@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Points
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Slopes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -15,23 +62,6 @@ theorem evalCone_map {ι : Type} {n : ι → ℕ} {F F' : Type*} [CommRing F] [C
   rw [MvPolynomial.eval₂_comp_left φ]
   congr 1
   exact RingHom.ext_int _ _
-
-theorem sigma_mem_points {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι → ℕ} (P : ArithVariety n)
-    {x : Cone n (AlgebraicClosure ℚ)} (hx : x ∈ P.points (AlgebraicClosure ℚ))
-    (σ : coordField x →+* ℂ) : (fun k i ↦ σ (coordVec x k i)) ∈ P.points ℂ := by
-  refine ⟨fun k h ↦ hx.1 k ?_, fun f hf ↦ ?_⟩
-  · funext i
-    have h1 : σ (coordVec x k i) = 0 := congrFun h i
-    have h2 : coordVec x k i = 0 := (map_eq_zero σ).mp h1
-    exact congrArg Subtype.val h2
-  · rw [evalCone_map σ (coordVec x) f]
-    have h0 : evalCone x f = 0 := hx.2 f hf
-    have h1 := evalCone_map (coordField x).val.toRingHom (coordVec x) f
-    have h2 : evalCone (coordVec x) f = 0 := by
-      apply (coordField x).val.toRingHom.injective
-      rw [map_zero, ← h1]
-      exact h0
-    rw [h2, map_zero]
 
 theorem finite_support_height {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι → ℕ} (A : HermLine n)
     (x : Cone n (AlgebraicClosure ℚ)) (hx : BlockNonzero x) :
@@ -60,28 +90,6 @@ theorem finite_support_height {ι : Type} [Fintype ι] [DecidableEq ι] {n : ι 
     · exact (h1 i0 hi0').ge
   rw [hs, Real.log_one, mul_zero]
 
-theorem heightMetricChange : HeightMetricChange.Statement := by
-  intro ι _ _ n P A A' hdeg B hB x hx
-  have key : height A x - height A' x =
-      ((Module.finrank ℚ (coordField x) : ℝ))⁻¹ *
-        ∑ σ : coordField x →+* ℂ, (Real.log (A.metric fun k i ↦ σ (coordVec x k i)) -
-          Real.log (A'.metric fun k i ↦ σ (coordVec x k i))) := by
-    unfold height
-    rw [hdeg, Finset.sum_sub_distrib]
-    ring
-  have hpos : (0 : ℝ) < Module.finrank ℚ (coordField x) := by
-    exact_mod_cast Module.finrank_pos (R := ℚ) (M := coordField x)
-  rw [key, abs_mul, abs_of_pos (inv_pos.mpr hpos)]
-  have hs : |∑ σ : coordField x →+* ℂ, (Real.log (A.metric fun k i ↦ σ (coordVec x k i)) -
-      Real.log (A'.metric fun k i ↦ σ (coordVec x k i)))| ≤
-      Module.finrank ℚ (coordField x) * B := by
-    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
-    refine (Finset.sum_le_card_nsmul _ _ B fun σ _ ↦ hB _ (sigma_mem_points P hx σ)).trans ?_
-    rw [Finset.card_univ, NumberField.Embeddings.card, nsmul_eq_mul]
-  calc _ ≤ ((Module.finrank ℚ (coordField x) : ℝ))⁻¹ * (Module.finrank ℚ (coordField x) * B) :=
-        mul_le_mul_of_nonneg_left hs (inv_pos.mpr hpos).le
-    _ = B := by field_simp
-
 theorem HermitianBundle.degree_bot {K : Type} [Field K] [NumberField K] (E : HermitianBundle.{0} K) :
     E.degree ⊥ = 0 := by
   unfold HermitianBundle.degree HermitianBundle.degreeWith
@@ -97,34 +105,6 @@ theorem HermitianBundle.degree_bot {K : Type} [Field K] [NumberField K] (E : Her
     subst hm
     simp [HermitianBundle.gramDet]
   simp [hg _ hz]
-
-theorem flagDegreeBound : FlagDegreeBound.Statement := by
-  intro K _ _ E r F _ _ hr i
-  by_cases hi : (i : ℕ) = 0
-  · have hrk : E.rank (F i) = 0 := by rw [hr i, hi]
-    have hbot : F i = ⊥ := (Submodule.finrank_eq_zero (R := 𝓞 K) (S := F i)).mp hrk
-    have hdeg : E.normDegree (F i) = 0 := by
-      rw [HermitianBundle.normDegree, hbot, HermitianBundle.degree_bot, zero_div]
-    rw [hdeg, hi]
-    simp
-  · have hne : F i ≠ ⊥ := by
-      intro h
-      apply hi
-      rw [← hr i, h]
-      simp [HermitianBundle.rank]
-    have hle : ((E.slope (F i) : ℝ) : EReal) ≤ E.slopeMax :=
-      le_iSup₂_of_le (F i) hne le_rfl
-    have hipos : (0 : ℝ) < (i : ℕ) := by exact_mod_cast Nat.pos_of_ne_zero hi
-    have hd : ((E.normDegree (F i) : ℝ) : EReal) =
-        (((i : ℕ) : EReal)) * ((E.slope (F i) : ℝ) : EReal) := by
-      have : E.normDegree (F i) = ((i : ℕ) : ℝ) * E.slope (F i) := by
-        unfold HermitianBundle.slope
-        rw [hr i]
-        field_simp
-      rw [this]
-      simp
-    rw [hd, ge_iff_le, EReal.neg_le_neg_iff]
-    exact mul_le_mul_of_nonneg_left hle (by positivity)
 
 end
 

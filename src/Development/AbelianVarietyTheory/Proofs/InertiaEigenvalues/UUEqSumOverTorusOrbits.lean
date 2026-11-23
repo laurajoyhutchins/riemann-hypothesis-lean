@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TorusSubmoduleMulLeftImageMemSelfDualStableLatti
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,52 +90,19 @@ theorem herm_torus_mul_right_eq_inv_mul_middle (x y : B.A) (t : B.Aˣ) (ht : t �
 
 theorem torusOrb_mulLat_mem_X (x : B.A) (t : B.Aˣ) (ht : t ∈ B.T) (L : Submodule K.O B.A) (hL : L ∈ B.X x) :
     mulLat K.O (t : B.A) L ∈ B.X x := by
-  obtain ⟨⟨hfg, hsp⟩, hg, hsd⟩ := hL
-  refine ⟨⟨hfg.map _, ?_⟩, ?_, ?_⟩
-  · rw [eq_top_iff]
-    intro a _
-    have hmem : ((t⁻¹ : B.Aˣ) : B.A) * a ∈ Submodule.span K.E (L : Set B.A) := by rw [hsp]; trivial
-    have h2 := Submodule.mem_map_of_mem (f := LinearMap.mulLeft K.E (t : B.A)) hmem
-    rw [Submodule.map_span] at h2
-    have h3 : (LinearMap.mulLeft K.E (t : B.A)) ((((t⁻¹ : B.Aˣ) : B.A) * a)) = a := by
-      simp [LinearMap.mulLeft_apply, ← mul_assoc]
-    rw [h3] at h2
-    have e : ((mulLat K.O (t : B.A) L : Submodule K.O B.A) : Set B.A) =
-        (LinearMap.mulLeft K.E (t : B.A)) '' (L : Set B.A) := by
-      show ((L.map (LinearMap.mulLeft K.O (t : B.A)) : Submodule K.O B.A) : Set B.A) = _
-      rw [Submodule.map_coe]
-      rfl
-    rw [e]
-    exact h2
-  · intro y hy
-    rw [torusOrb_mem_mulLat_unit] at hy ⊢
-    rw [mul_left_comm]
-    exact hg _ hy
-  · intro y
-    rw [torusOrb_mem_mulLat_unit, hsd]
-    constructor
-    · intro h z hz
-      rw [torusOrb_mem_mulLat_unit] at hz
-      have := h _ hz
-      rw [← herm_torus_mul_right_eq_inv_mul_middle B x y t ht] at this
-      simpa [← mul_assoc] using this
-    · intro h z hz
-      rw [← herm_torus_mul_right_eq_inv_mul_middle B x y t ht]
-      apply h
-      rw [torusOrb_mem_mulLat_unit]
-      simpa [← mul_assoc] using hz
+  apply GlobalTheory.UnitLemma.TorusAction.torus_mem_X <;> assumption
 
 def torusOrbRel (x : B.A) (L M : B.X x) : Prop :=
   ∃ t ∈ B.T, (M : Submodule K.O B.A) = mulLat K.O (t : B.A) (L : Submodule K.O B.A)
 
-theorem torusOrb_orbRel_equivalence (x : B.A) : Equivalence (B.torusOrbRel x) where
-  refl L := ⟨1, B.T.one_mem, by rw [Units.val_one, torusOrb_mulLat_one]⟩
-  symm := by
-    rintro L M ⟨t, ht, h⟩
+theorem torusOrb_orbRel_equivalence (x : B.A) : Equivalence (B.torusOrbRel x) := by
+  refine { refl := ?_, symm := ?_, trans := ?_ }
+  · intro L
+    exact ⟨1, B.T.one_mem, by rw [Units.val_one, torusOrb_mulLat_one]⟩
+  · rintro L M ⟨t, ht, h⟩
     refine ⟨t⁻¹, B.T.inv_mem ht, ?_⟩
     rw [h, torusOrb_mulLat_inv]
-  trans := by
-    rintro L M N ⟨s, hs, h1⟩ ⟨t, ht, h2⟩
+  · rintro L M N ⟨s, hs, h1⟩ ⟨t, ht, h2⟩
     refine ⟨t * s, B.T.mul_mem ht hs, ?_⟩
     rw [h2, h1, torusOrb_mulLat_mul]
 

@@ -1,8 +1,53 @@
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LocalDef
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LinearActInt
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LinearActAlg
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DblCoordUnique
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.SplitQuadraticAlgebraOrderStatement
+module
+
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LocalDef
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LinearActAlg
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.DblCoordUnique
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ExistsInvariantForm
+import Development.AutomorphicSpectrum.Proofs.MembershipProofs.LagrangianStabilizerCharacterTrivial
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.SplitQuadraticAlgebraOrderStatement
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LinearActInt
+import Development.WeilBound.CoreStatements.LocalThetaKernels.EvlLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,7 +114,7 @@ theorem dbl_fix (hc : Continuous ψ) (h1 : ψ ≠ 1) (hq : IsQuad c ξ₀) (hA :
     obtain ⟨x, hx⟩ := e.surjective (M * z).toRows₂
     have hz : z = Cy * (M * z).toRows₁ + Cx * e x := by
       rw [hx, ← fromCols_mul_fromRows, fromRows_toRows, ← Matrix.mul_assoc, hM1, Matrix.one_mul]
-    rw [Darboux.rho, hz, Matrix.add_mul, map_add, ← schr_add (hisoD _ _), hLY _ (mem_lagY.2 ⟨_, by rw [Matrix.mul_assoc]⟩)
+    rw [Darboux.rho, hz, Matrix.add_mul, map_add (f := _), ← schr_add (hisoD _ _), hLY _ (mem_lagY.2 ⟨_, by rw [Matrix.mul_assoc]⟩)
       (fun x => hisoD _ _) _ (schr_mem hc _ hφ), ← hX, hLX _ _ hφ]
   have hA1 := GlobalTheory.T.lagrangian_stabilizer_character_trivial k K c ξ₀ _ _ _ _ hq (GlobalTheory.CompanionTheory.WeilOneMember.isHerm_dbl hA) hD A.toHomUnits fun p t hp => by
     obtain ⟨g, hg, hdet⟩ := he t

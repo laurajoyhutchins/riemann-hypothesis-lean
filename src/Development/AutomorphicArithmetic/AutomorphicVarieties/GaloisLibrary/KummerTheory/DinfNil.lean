@@ -1,6 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.LevCompact
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.QzBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.LDataCardLeFinrank UpperTheory.V.Base UpperTheory.V.Kum
 
@@ -37,7 +86,7 @@ private theorem exists_prime_pow_smul_eq_zero_qz (l : ℕ) [Fact l.Prime] (v : Q
   rw [← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero]
   unfold ZlSub
   refine ⟨(⟨(l : ℚ_[l]) ^ m * q, ?_⟩ : ℤ_[l]), ?_⟩
-  · rw [norm_mul, norm_pow, Padic.norm_p, inv_pow, inv_mul_le_iff₀ (pow_pos (by exact_mod_cast (Fact.out : l.Prime).pos) m)]
+  · rw [PadicInt.mem_subring_iff, norm_mul, norm_pow, Padic.norm_p, inv_pow, inv_mul_le_iff₀ (pow_pos (by exact_mod_cast (Fact.out : l.Prime).pos) m)]
     simpa using hm.le
   · show (l : ℚ_[l]) ^ m * q = _
     simp [Algebra.smul_def]
@@ -183,7 +232,7 @@ theorem UpperTheory.V.Kum.dinfNil :
   let J : Ideal (Polynomial ℤ) :=
     { carrier := {p | Polynomial.aeval Tm p φ = 0}
       add_mem' := fun {a b} ha hb => by
-        simp only [Set.mem_setOf_eq, map_add, LinearMap.add_apply] at *
+        simp only [Set.mem_setOf_eq, map_add (f := _), LinearMap.add_apply] at *
         rw [ha, hb, add_zero]
       zero_mem' := by simp
       smul_mem' := fun c p hp => by
@@ -191,7 +240,7 @@ theorem UpperTheory.V.Kum.dinfNil :
         rw [hp, map_zero] }
   have hB : (Polynomial.X + 1) ^ q - 1 ∈ J := by
     show (Polynomial.aeval Tm ((Polynomial.X + 1) ^ q - 1)) φ = 0
-    simp only [map_sub, map_pow, map_add, Polynomial.aeval_X, map_one]
+    simp only [map_sub, map_pow, map_add (f := _), Polynomial.aeval_X, map_one]
     rw [show Tm + 1 = ρ γ from sub_add_cancel _ _, ← map_pow, LinearMap.sub_apply,
       Module.End.one_apply, sub_eq_zero]
     funext x
@@ -207,11 +256,11 @@ theorem UpperTheory.V.Kum.dinfNil :
     intro i
     have hmap : Polynomial.map (Int.castRingHom (ZMod l))
         ((Polynomial.X + 1) ^ q - Polynomial.X ^ q - 1) = 0 := by
-      simp only [Polynomial.map_sub, Polynomial.map_pow, Polynomial.map_add, Polynomial.map_X,
+      simp only [Polynomial.map_sub, Polynomial.map_pow, Polynomial.map_add (f := _), Polynomial.map_X,
         Polynomial.map_one]
       rw [hqdef, add_pow_char_pow, one_pow]
       ring
-    have h2 := congrArg (fun P => Polynomial.coeff P i) hmap
+    have h2 := congrArg (fun P => _root_.AddMonoidAlgebra.coeff (M := ℕ) P i) hmap
     simp only [Polynomial.coeff_map, Polynomial.coeff_zero, eq_intCast] at h2
     exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp h2
   obtain ⟨Qp, hQp⟩ := hP

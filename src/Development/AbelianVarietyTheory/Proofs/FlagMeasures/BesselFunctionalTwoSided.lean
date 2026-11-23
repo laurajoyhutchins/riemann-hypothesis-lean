@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupRepTwistedIsUnitaryRepStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupsClosedUnitaryWCompactStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnimodularBesselSubgroupsUWNStatement
 import Formalism.FormalDegreeBessel.FinalG
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupsClosedUnitaryWCompactStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselSubgroupRepTwistedIsUnitaryRepStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnimodularBesselSubgroupsUWNStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 open MeasureTheory Matrix Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf
 open scoped InnerProductSpace
@@ -17,8 +61,8 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 variable {Wp : Type*} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp]
 variable {Wq : Type*} [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq]
 
-omit [CompleteSpace H] in
 
+omit [CompleteSpace H] in
 theorem integrable_inner_prod {μ : Measure α} {ν : Measure β} [SFinite μ] [SFinite ν]
     {F : α → H} {G : β → H} (hF : Integrable F μ) (hG : Integrable G ν) :
     Integrable (fun p : α × β => ⟪F p.1, G p.2⟫_ℂ) (μ.prod ν) := by
@@ -33,8 +77,8 @@ theorem inner_integral_integral {μ : Measure α} {ν : Measure β} [SFinite μ]
   rw [← inner_conj_symm, ← integral_inner hF, ← integral_conj]
   simp_rw [inner_conj_symm]
 
-omit [CompleteSpace H] in
 
+omit [CompleteSpace H] in
 theorem integrable_coord_smul {μ : Measure α} [IsFiniteMeasure μ] {u : α → H} {a : α → Wp} {C D : ℝ}
     (hu : AEStronglyMeasurable u μ) (ha : AEStronglyMeasurable a μ)
     (huC : ∀ᵐ s ∂μ, ‖u s‖ ≤ C) (haD : ∀ᵐ s ∂μ, ‖a s‖ ≤ D) (η : Wp) :
@@ -47,7 +91,7 @@ theorem integrable_coord_smul {μ : Measure α} [IsFiniteMeasure μ] {u : α →
 
 theorem continuous_rankOneOperator : Continuous fun p : Wp × Wq => rk1 p.1 p.2 := by
   have : (fun p : Wp × Wq => rk1 p.1 p.2) =
-      fun p => ContinuousLinearMap.smulRightL ℂ Wq Wp (innerSL ℂ p.2) p.1 := by
+      fun p => StrongDual.smulRightL ℂ Wq Wp (innerSL ℂ p.2) p.1 := by
     funext p; ext η; simp [rk1]
   rw [this]
   fun_prop
@@ -93,7 +137,7 @@ theorem sum_inner_self {ι : Type*} [Fintype ι] (e : OrthonormalBasis ι ℂ Wp
       ∫ p, ⟪u p.1, u p.2⟫_ℂ * ⟪a p.2, a p.1⟫_ℂ ∂(μ.prod μ) := by
   have hF := fun i => integrable_coord_smul hu ha huC haD (e i)
   simp_rw [fun i => inner_integral_integral (hF i) (hF i)]
-  rw [← integral_finset_sum _ fun i _ => integrable_inner_prod (hF i) (hF i)]
+  rw [← MeasureTheory.integral_finsetSum _ fun i _ => integrable_inner_prod (hF i) (hF i)]
   refine integral_congr_ae (Filter.Eventually.of_forall fun p => ?_)
   simp only [inner_smul_left, inner_smul_right, inner_conj_symm]
   rw [← e.sum_inner_mul_inner (a p.2) (a p.1), Finset.mul_sum]
@@ -103,6 +147,7 @@ theorem eq_sum_entries {ι κ : Type*} [Fintype ι] [Fintype κ] (e : Orthonorma
     (f : OrthonormalBasis κ ℂ Wq) (A : Wq →L[ℂ] Wp) :
     A = ∑ j, ∑ i, ⟪e i, A (f j)⟫_ℂ • rk1 (e i) (f j) := by
   ext η
+
   conv_lhs => rw [← f.sum_repr' η, map_sum]
   simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, rankOneInnerOperator_apply, map_smul]
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -320,21 +365,21 @@ theorem truncated_norm_sq : ∀ (k r : ℕ) {H : Type} [NormedAddCommGroup H] [I
     exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun i _ => by rw [hent _ hg i j]
   have hint : ∀ j, Integrable (fun g : Mt k r =>
       ∑ i, coef σ (X j) (Y i) (Matrix.of g) * star (coef σ (X j) (Y i) (Matrix.of g))) μG :=
-    fun j => integrable_finset_sum _ fun i _ => (hSch _ _ _ _).1
+    fun j => MeasureTheory.integrable_finsetSum _ fun i _ => (hSch _ _ _ _).1
   refine ⟨?_, ?_, ?_⟩
   · have hc : ContinuousOn (fun g => ∑ j, ∑ i, coef σ (X j) (Y i) g • rk1 (e i) (f j)) (GG k r) :=
-      continuousOn_finset_sum _ fun j _ => continuousOn_finset_sum _ fun i _ =>
+      continuousOn_finsetSum _ fun j _ => continuousOn_finsetSum _ fun i _ =>
         (ContinuousOn.inner (𝕜 := ℂ) continuousOn_const (hσ.2.2 (X j))).smul continuousOn_const
     refine hc.congr fun g hg => ?_
     rw [eq_sum_entries e f (I g)]
     simp only [hent g hg]
   · have h1 : Integrable (fun g : Mt k r => ((hsNormSq (I (Matrix.of g)) : ℝ) : ℂ)) μG :=
-      (integrable_finset_sum _ fun j _ => hint j).congr (Filter.EventuallyEq.symm hhs)
+      (MeasureTheory.integrable_finsetSum _ fun j _ => hint j).congr (Filter.EventuallyEq.symm hhs)
     exact h1.re
-  · rw [← integral_complex_ofReal, integral_congr_ae hhs, integral_finset_sum _ fun j _ => hint j, ← hX, ← hY,
+  · rw [← integral_complex_ofReal, integral_congr_ae hhs, MeasureTheory.integral_finsetSum _ fun j _ => hint j, ← hX, ← hY,
       Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [integral_finset_sum _ fun i _ => (hSch _ _ _ _).1, Finset.mul_sum, Finset.sum_mul]
+    rw [MeasureTheory.integral_finsetSum _ fun i _ => (hSch _ _ _ _).1, Finset.mul_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [(hSch _ _ _ _).2]
     ring

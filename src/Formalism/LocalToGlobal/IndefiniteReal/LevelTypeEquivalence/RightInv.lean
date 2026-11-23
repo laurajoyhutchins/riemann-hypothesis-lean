@@ -1,4 +1,43 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.PeterssonNormOfUpLift
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.PeterssonNormOfUpLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,48 +77,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7}
 
-theorem rightInvGA_holds (V : HSp D) : RightInvGA V := by
-  intro hM hC hU K μ 𝓕 h ψ hψ k
-  have := hM
-  have := hC
-  have hH : μ.IsHaarMeasure := h.1.1
-  have := hU μ hH
-  exact rightInv_holds (GA D V) (GQ V) μ 𝓕 h.2 ψ hψ k
-
 end GA
-
-theorem ioExistsOf_holds : IoExistsOf := by
-  intro G H S Sinf Ds Dt _ _ _ _ _ _ _ ν 𝓕 th pt T CCs CCt hint hglob huniq
-  choose U hU using hglob
-  have key : ∀ (F : CCs) (u : CCt), (∀ φ v g, (u : Dt →ₗ[ℂ] (G → ℂ)) (T φ v) g =
-      Lift.liftInt ν 𝓕 th (pt φ) ((F : Ds →ₗ[ℂ] (H → ℂ)) v) g) → u = U F := by
-    intro F u hu
-    refine sub_eq_zero.1 (huniq _ fun φ v => ?_)
-    funext g
-    simp [hu, hU]
-  refine ⟨{ toFun := U, map_add' := ?_, map_smul' := ?_ }, ⟨hint, fun F φ v g => (hU F φ v g).symm⟩⟩
-  · intro F1 F2
-    symm
-    apply key
-    intro φ v g
-    simp only [Submodule.coe_add, LinearMap.add_apply, Pi.add_apply, hU]
-    unfold Lift.liftInt
-    rw [← integral_add (hint F1 φ v g) (hint F2 φ v g)]
-    congr 1
-    funext h
-    simp only [Pi.add_apply]
-    ring
-  · intro c F
-    symm
-    apply key
-    intro φ v g
-    simp only [Submodule.coe_smul, LinearMap.smul_apply, Pi.smul_apply, smul_eq_mul, hU, RingHom.id_apply]
-    unfold Lift.liftInt
-    rw [← integral_const_mul]
-    congr 1
-    funext h
-    simp only [Pi.smul_apply, smul_eq_mul]
-    ring
 
 end Formalism.IndefR.Eqv
 

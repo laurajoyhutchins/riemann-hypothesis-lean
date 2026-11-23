@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.Letter
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.IsRootOne
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenOfTwoStep
+
+@[expose] public section
+
 open GlobalTheory.KZ GlobalTheory.KZ.H3 Matrix
 open scoped MatrixGroups TensorProduct
 
@@ -67,7 +112,7 @@ theorem phi_tmul (n : ℕ) (c : ℤ_[l]) (g : G) : phi n (c ⊗ₜ[ℤ] g) = psi
 
 theorem phi_eq_zero (n : ℕ) (x : ℤ_[l] ⊗[ℤ] G) (hx : x ∈ (idl l) ^ n • (⊤ : Submodule ℤ_[l] (ℤ_[l] ⊗[ℤ] G))) :
     phi n x = 0 := by
-  refine Submodule.smul_induction_on hx (fun a ha m hm => ?_) (fun x y hx hy => by rw [map_add, hx, hy, add_zero])
+  refine Submodule.smul_induction_on hx (fun a ha m hm => ?_) (fun x y hx hy => by rw [map_add (f := _), hx, hy, add_zero])
   clear hm
   rw [idl_pow_eq_ker, RingHom.mem_ker] at ha
   induction m using TensorProduct.induction_on with
@@ -75,7 +120,7 @@ theorem phi_eq_zero (n : ℕ) (x : ℤ_[l] ⊗[ℤ] G) (hx : x ∈ (idl l) ^ n �
   | tmul c g =>
     rw [TensorProduct.smul_tmul', phi_tmul, smul_eq_mul]
     simp [psi, ha]
-  | add x y hx hy => rw [smul_add, map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [smul_add, map_add (f := _), hx, hy, add_zero]
 
 theorem mk_eq_iff (n : ℕ) (g g' : G) :
     (Submodule.Quotient.mk ((1 : ℤ_[l]) ⊗ₜ[ℤ] g) : Q l n G) = Submodule.Quotient.mk ((1 : ℤ_[l]) ⊗ₜ[ℤ] g') ↔
@@ -97,8 +142,8 @@ theorem mk_eq_iff (n : ℕ) (g g' : G) :
 
 end GlobalTheory.KZ.ClsMod
 
-open GlobalTheory.KZ.ClsMod in
 
+open GlobalTheory.KZ.ClsMod in
 theorem GlobalTheory.KZ.H3.cls_props : ∀ (Ω : Type) [Field Ω] [Algebra ℚ Ω] (ε : Ω →+* ℂ) (X : Tower Ω ε) (l : ℕ) [Fact l.Prime], ∀ n : ℕ, (∀ y, ∃ f, X.cls l n f = y) ∧ (∀ f f' : X.Kˣ, X.cls l n f = X.cls l n f' ↔ ∃ g : X.Kˣ, f = f' * g ^ (l ^ n)) ∧ (∀ f f' : X.Kˣ, X.cls l n (f * f') = X.cls l n f + X.cls l n f') ∧ X.cls l n 1 = 0 ∧ (∀ (c : ℤ_[l]) (f : X.Kˣ), c • X.cls l n f = X.cls l n (f ^ (PadicInt.toZModPow n c).val)) ∧ (∀ (φ : X.K ≃+* X.K) (x : X.Khat l) (f : X.Kˣ), AdicCompletion.eval (idl l) (X.Kl l) n x = X.cls l n f → AdicCompletion.eval (idl l) (X.Kl l) n (X.kmap l φ x) = X.cls l n (Units.map φ.toMonoidHom f)) ∧ (∀ (x : X.Khat l) (f : X.Kˣ), AdicCompletion.eval (idl l) (X.Kl l) (n + 1) x = X.cls l (n + 1) f → AdicCompletion.eval (idl l) (X.Kl l) n x = X.cls l n f) := by
   intro Ω _ _ ε X l _ n
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩

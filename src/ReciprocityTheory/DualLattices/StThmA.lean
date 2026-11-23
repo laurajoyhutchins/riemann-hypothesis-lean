@@ -1,4 +1,49 @@
-import ReciprocityTheory.DualLattices.TangentPairingStatement
+module
+
+public import ReciprocityTheory.DualLattices.SqZeroOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,48 +70,6 @@ variable (B : BX R₀)
 def ev {R' : LAlg R₀} (h : B.gg →ₗ[R₀] R') (v : B.gg ⊗[R₀] (R' : Type u)) : R' :=
   LinearMap.mul' R₀ R' (TensorProduct.map h LinearMap.id v)
 
-lemma evK_ξmul {R' R : LAlg R₀} (π : LHom R' R) (ξ : (R' : Type u)) (hξ : ξ ∈ π.ker)
-    (h : B.gg →ₗ[R₀] R') (v : B.gg ⊗[R₀] (R' : Type u)) :
-    B.evK π h (TensorProduct.map LinearMap.id (ξmul π ξ hξ) v) = ξ * B.ev h v := by
-  induction v using TensorProduct.induction_on with
-  | zero => simp [evK, ev]
-  | tmul g r =>
-    simp only [evK, ev, TensorProduct.map_tmul, LinearMap.id_apply, LinearMap.mul'_apply,
-      Submodule.subtype_apply]
-    show h g * (ξ * r) = ξ * (h g * r)
-    ring
-  | add x y hx hy =>
-    simp only [evK, ev, map_add] at hx hy ⊢
-    rw [hx, hy, mul_add]
-
 end BX
-
-def ThmALevelStatement (B : BX R₀) : Prop :=
-  ∀ (R' R : LAlg R₀) (π : LHom R' R) (ξ : (R' : Type u)) (hξ : ξ ∈ π.ker) (Dp : DualPair R)
-    (N : ℕ) (hsurj : Function.Surjective π.1) (hker : RingHom.ker π.1 = Ideal.span {ξ})
-    (hsq : ξ * ξ = 0),
-    (∀ a, a * ξ = 0 → a ∈ Ideal.span {ξ}) → (N : (R' : Type u)) = 0 →
-    ∀ (sh th : B.G R') (v w : B.gg ⊗[R₀] (R' : Type u)) (hs ht : B.gg →ₗ[R₀] R')
-      (zh : (R' : Type u)ˣ) (z : (R : Type u)ˣ) (c : (R' : Type u)) (e₀ : ℤ),
-      N • sh = B.tg π (π.sqZero_of_span ξ hsurj hker hsq) (TensorProduct.map LinearMap.id (ξmul π ξ hξ) v) →
-      N • th = B.tg π (π.sqZero_of_span ξ hsurj hker hsq) (TensorProduct.map LinearMap.id (ξmul π ξ hξ) w) →
-      B.IsHeight Dp N (B.map π sh) (π.1.toLinearMap ∘ₗ hs) →
-      B.IsHeight Dp N (B.map π th) (π.1.toLinearMap ∘ₗ ht) →
-      B.IsPairing N (B.map π sh) (B.map π th) z → Units.map (π.1 : R' →* R) zh = z →
-      (zh : (R' : Type u)) ^ N = 1 + e₀ * c * ξ →
-      π.1 (e₀ * c) = π.1 (B.ev ht v) - π.1 (B.ev hs w)
-
-theorem thmA_level (B : BX R₀) (hB3 : TangentPairingStatement B) : ThmALevelStatement B := by
-  intro R' R π ξ hξ Dp N hsurj hker hsq hann hN sh th v w hs ht zh z c e₀ hsh hth hhs hht hpair
-    hzh hzN
-  have h3 := hB3 R' R π ξ Dp N hsurj hker hsq hann hN sh th
-    (TensorProduct.map LinearMap.id (ξmul π ξ hξ) v) (TensorProduct.map LinearMap.id (ξmul π ξ hξ) w)
-    hs ht zh z hsh hth hhs hht hpair hzh
-  rw [B.evK_ξmul, B.evK_ξmul, hzN] at h3
-  have h4 : ((e₀ : (R' : Type u)) * c - (B.ev ht v - B.ev hs w)) * ξ = 0 := by
-    linear_combination h3
-  have h5 := hann _ h4
-  rw [← hker, RingHom.mem_ker, map_sub, map_sub] at h5
-  exact sub_eq_zero.mp h5
 
 end ReciprocityTheory.PGsh

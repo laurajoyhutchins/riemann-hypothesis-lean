@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeReferenceFrame.GlobWIff
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeReferenceFrame.HANegRight
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeReferenceFrame.GlobWIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +64,7 @@ theorem hG_add_left (x y z : Fin I.n → I.E) : hG I (x + y) z = hG I x z + hG I
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  simp only [Pi.add_apply, map_add]
+  simp only [Pi.add_apply, map_add (f := _)]
   ring
 
 theorem hG_add_right (x y z : Fin I.n → I.E) : hG I x (y + z) = hG I x y + hG I x z := by
@@ -30,7 +73,7 @@ theorem hG_add_right (x y z : Fin I.n → I.E) : hG I x (y + z) = hG I x y + hG 
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun j _ => ?_)
-  simp only [Pi.add_apply, map_add]
+  simp only [Pi.add_apply, map_add (f := _)]
   ring
 
 theorem hG_zsmul_left (q : ℤ) (x y : Fin I.n → I.E) : hG I (q • x) y = (q : I.E) * hG I x y := by
@@ -90,7 +133,7 @@ theorem crt_ge {g₁ g₂ : ℕ} {A B q₁ q₂ : ℤ} (hq₁ : q₁ = g₂ * B)
   refine ⟨(g₂ : 𝓞 I.E) * (B : 𝓞 I.E) ^ 2 * t1 + (B : 𝓞 I.E) * (A : 𝓞 I.E) * s +
     (g₁ : 𝓞 I.E) * (A : 𝓞 I.E) ^ 2 * t2, ?_⟩
   rw [hx, hq₁, hq₂, ht1, ht2, ← hs]
-  simp only [hc, map_add, map_mul, map_pow, map_natCast, map_intCast]
+  simp only [hc, map_add (f := _), map_mul, map_pow, map_natCast, map_intCast]
   push_cast
   try ring
 

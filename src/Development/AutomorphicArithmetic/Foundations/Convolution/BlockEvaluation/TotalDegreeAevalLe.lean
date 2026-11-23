@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.TruncSpec
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.TruncSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Classical
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial Filter Topology GroundTheory.Automorphic GroundTheory.Automorphic.Reduction UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.C UpperTheory.ConvolutionTheory.Ci PositivityTheory.Rg.Fx PositivityTheory.Rg.Tf.Core
@@ -6,10 +53,11 @@ open MeasureTheory NumberField IsDedekindDomain MvPolynomial Filter Topology Gro
 private theorem totalDegree_aeval_le {σ : Type*} (q : MvPolynomial σ ℂ) (hq : q.totalDegree ≤ 1) (p : Polynomial ℂ) :
     (Polynomial.aeval q p).totalDegree ≤ p.natDegree := by
   rw [Polynomial.aeval_eq_sum_range]
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun i hi => ?_)
+  refine totalDegree_finsetSum_le fun i hi => ?_
   have hi' : i ≤ p.natDegree := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
   refine (totalDegree_smul_le _ _).trans ((totalDegree_pow _ _).trans ?_)
-  calc i * q.totalDegree ≤ i * 1 := Nat.mul_le_mul_left _ hq
+  calc
+    i * q.totalDegree ≤ i * 1 := Nat.mul_le_mul_left _ hq
     _ ≤ p.natDegree := by simpa using hi'
 
 private theorem exists_fin_map (n : ℕ) (s : Multiset ℂ) (hs : s.card = n) :
@@ -37,8 +85,8 @@ theorem UpperTheory.ConvolutionTheory.Ci.bdLem :
       · exact Finset.mem_union_right _ (h1' x h)
     · intro β
       rw [coeff_mul]
-      refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun p _ => ?_)
-      exact (totalDegree_mul _ _).trans (Nat.add_le_add (h3 _) (h3' _))
+      exact totalDegree_finsetSum_le fun _ _ =>
+        (totalDegree_mul _ _).trans (Nat.add_le_add (h3 _) (h3' _))
   · intro η m
     have hq : (C ((2 / η : ℝ) : ℂ) * X none - 1 : MvPolynomial (Option (Ix K n)) ℂ).totalDegree ≤ 1 := by
       refine (totalDegree_sub _ _).trans (max_le ?_ (by simp))

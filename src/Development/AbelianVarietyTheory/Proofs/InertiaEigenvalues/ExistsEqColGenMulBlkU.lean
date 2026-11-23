@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WhittakerLawUpperTriangularUnipotentAdelic
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnipotentBlockColumnIndex
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsNhdsZeroPrincipalEqZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WhittakerLawUpperTriangularUnipotentAdelic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
 
 noncomputable section
 
@@ -103,10 +154,10 @@ theorem blkU_add {n : ℕ} (x y : UnipotentBlockColumnIndex a n n → R) : (blkU
 
 theorem blkU_mem_mirU (m : ℕ) {n : ℕ} (y : UnipotentBlockColumnIndex a n n → R) : blkU y ∈ mirU R a m := fun i k _ hk => by
   have : (k : ℕ) ≤ i := hk
-  rw [blkU_apply, dif_neg (by omega), add_zero]
+  rw [blkU_apply, dite_eq_right (by omega), add_zero]
 
 theorem blkU_mem_lateU {m n : ℕ} (h : m ≤ n) (y : UnipotentBlockColumnIndex a n n → R) : blkU y ∈ lateU R a m :=
-  ⟨blkU_mem_mirU m y, fun i k hk => by rw [blkU_apply, dif_neg (by omega), add_zero]⟩
+  ⟨blkU_mem_mirU m y, fun i k hk => by rw [blkU_apply, dite_eq_right (by omega), add_zero]⟩
 
 def colGen (R : Type) [CommRing R] (a n : ℕ) : Subgroup (GL (Fin a) R) :=
   Subgroup.closure {u | ∃ k, n ≤ k ∧ ∃ y : UnipotentBlockColumnIndex a k k → R, u = blkU y}
@@ -148,7 +199,7 @@ theorem exists_peel {m n : ℕ} (hmn : m ≤ n) {g : GL (Fin a) R} (hg : g ∈ m
         by_cases hkn : n + 1 ≤ (k : ℕ)
         · exact h1 i k hkn
         · exact hg₁ i k (by omega) (by change (k : ℕ) ≤ i; omega)
-    · rw [hval, dif_neg (by omega), sub_zero, h2 i k (by omega)]
+    · rw [hval, dite_eq_right (by omega), sub_zero, h2 i k (by omega)]
 
 theorem exists_eq_colGen_mul_blkU {n : ℕ} {u : GL (Fin a) R} (hu : u ∈ lateU R a n) :
     ∃ v ∈ colGen R a (n + 1), ∃ y : UnipotentBlockColumnIndex a n n → R, u = v * blkU y := by

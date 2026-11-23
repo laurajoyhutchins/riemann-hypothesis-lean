@@ -1,16 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
-import Formalism.LocalToGlobal.Divisibility.DefGroupLemmas
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.IsometryCarriesCharacter
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralChangeBaseFrameOrthonormal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCompatFiniteIsometry
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OpFullImp
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicUnitaryGroupIso
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeCompatFiniteIsometry
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParahoricLevelLiftsExist
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SquarePairGluing.ExistsDenLe
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryPart
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIdempotentMulNatPowOfMul
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OpFullImp
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryPart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +115,7 @@ theorem levelVL_conj {F E : Type} [Field F] [NumberField F] [Field E] [NumberFie
   exact h1
 
 open GlobalTheory.HeckeTrans in
-set_option maxHeartbeats 800000 in
+
 theorem link_of_isLatIsom {V V' : HSp D} (h : V.rank = V'.rank)
     {Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)} {Λ' : Submodule (𝓞 D.host.E) (Fin V'.rank → D.host.E)}
     {β : GL (Fin V.rank) (EAf D)} {β' : GL (Fin V'.rank) (EAf D)} {N N' : ℕ}
@@ -101,6 +132,7 @@ theorem link_of_isLatIsom {V V' : HSp D} (h : V.rank = V'.rank)
       (fun a => swapAE D (f * ((j.map (unswap D)).mulVec y) a)) = j.mulVec (fun b => swapAE D (f * y b)) := by
     intro f y
     funext a
+
     simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Finset.mul_sum, map_sum, map_mul, swap_unswap]
     exact Finset.sum_congr rfl fun b _ => by ring
   have gN : ∀ f, Good (D := D) (N * N') f → Good (N ^ c) f := fun f hf => hf.pow c
@@ -156,13 +188,32 @@ private theorem finE_mem_UPts (V : HSp D) (g : GA D V) :
   ext a b
   simp only [Formalism.UG.cT, Matrix.transpose_apply, Matrix.map_apply, GlobalTheory.FinIsoGrp.qFin_sig]
 
-set_option maxHeartbeats 1600000 in
+
 theorem inducedIso (D : D7) : InducedIso D := by
   intro V V' h Λ Λ' β β' N N' hβ hβ' T j hj hm
   obtain ⟨j', h1, h2⟩ := exists_inv hj.1.1
   obtain ⟨φ, hφ⟩ := GlobalTheory.FinIsoGrp.exists_finIso V V' j j' h1 h2 hj.1.2
   have hφ' : IsConjBy V V' j φ := hφ
   have L := link_of_isLatIsom h hβ hβ' hj h1 h2 hφ'
+  have Lsymm : Link V' V (N * N') φ.toMulEquiv.symm (j'.map (GlobalTheory.HeckeTrans.unswap D)) (j.map (GlobalTheory.HeckeTrans.unswap D)) := by
+    refine ⟨L.rank.symm, L.h2, L.h1, ?_, ?_, L.loc', L.loc⟩
+    · intro g
+      have e := L.hc (φ.toMulEquiv.symm g)
+      rw [MulEquiv.apply_symm_apply] at e
+      have h1' := L.h1
+      have h2' := L.h2
+      dsimp [mmul] at e h1' h2' ⊢
+      change finMat D.sp.cm.sig V'.gram (g : GA D V') * j.map (GlobalTheory.HeckeTrans.unswap D) = j.map (GlobalTheory.HeckeTrans.unswap D) * finMat D.sp.cm.sig V.gram (φ.toMulEquiv.symm g : GA D V) at e
+      calc finMat D.sp.cm.sig V.gram (φ.toMulEquiv.symm g : GA D V) * j'.map (GlobalTheory.HeckeTrans.unswap D)
+          = (j'.map (GlobalTheory.HeckeTrans.unswap D) * j.map (GlobalTheory.HeckeTrans.unswap D)) * finMat D.sp.cm.sig V.gram (φ.toMulEquiv.symm g : GA D V) * j'.map (GlobalTheory.HeckeTrans.unswap D) := by rw [h2', Matrix.one_mul]
+        _ = j'.map (GlobalTheory.HeckeTrans.unswap D) * (j.map (GlobalTheory.HeckeTrans.unswap D) * finMat D.sp.cm.sig V.gram (φ.toMulEquiv.symm g : GA D V)) * j'.map (GlobalTheory.HeckeTrans.unswap D) := by simp only [Matrix.mul_assoc]
+        _ = j'.map (GlobalTheory.HeckeTrans.unswap D) * (finMat D.sp.cm.sig V'.gram (g : GA D V') * j.map (GlobalTheory.HeckeTrans.unswap D)) * j'.map (GlobalTheory.HeckeTrans.unswap D) := by rw [← e]
+        _ = j'.map (GlobalTheory.HeckeTrans.unswap D) * finMat D.sp.cm.sig V'.gram (g : GA D V') * (j.map (GlobalTheory.HeckeTrans.unswap D) * j'.map (GlobalTheory.HeckeTrans.unswap D)) := by simp only [Matrix.mul_assoc]
+        _ = j'.map (GlobalTheory.HeckeTrans.unswap D) * finMat D.sp.cm.sig V'.gram (g : GA D V') := by rw [h1', Matrix.mul_one]
+    · intro f hf y
+      have h1' := L.h1
+      dsimp [mmul] at h1'
+      rw [L.lat f hf ((j'.map (GlobalTheory.HeckeTrans.unswap D)).mulVec y), Matrix.mulVec_mulVec, h1', Matrix.one_mulVec]
   obtain ⟨c, hB⟩ := id hβ
   obtain ⟨c', hB'⟩ := id hβ'
   obtain ⟨u, hu, hT⟩ := hm
@@ -213,24 +264,24 @@ theorem inducedIso (D : D7) : InducedIso D := by
       · rintro ⟨-, hp', hr'⟩
         have hp := H.1.2 hp'
         exact ⟨g.2, hp, (H.2 hp).1.symm.trans hr'⟩
-    sph := fun S hS g => ⟨L.sph_imp S hS g, fun hg => by simpa using L.symm.sph_imp S hS (φ g) hg⟩
+    sph := fun S hS g => ⟨L.sph_imp S hS g, fun hg => by simpa using Lsymm.sph_imp S hS (φ g) hg⟩
     heckeElt := fun P e ϖ k hM he g =>
-      ⟨L.hecke_imp he hM g, fun hg => by simpa using L.symm.hecke_imp he hM (φ g) hg⟩
+      ⟨L.hecke_imp he hM g, fun hg => by simpa using Lsymm.hecke_imp he hM (φ g) hg⟩
     heckeAt := fun P k hM g => by
       unfold IsHeckeAt
       constructor
       · rintro ⟨e, ϖ, he, h1', h2', h3⟩
         exact ⟨e, ϖ, he, h1', h2', L.hecke_imp he hM g h3⟩
       · rintro ⟨e, ϖ, he, h1', h2', h3⟩
-        exact ⟨e, ϖ, he, h1', h2', by simpa using L.symm.hecke_imp he hM (φ g) h3⟩
+        exact ⟨e, ϖ, he, h1', h2', by simpa using Lsymm.hecke_imp he hM (φ g) h3⟩
     divAt := fun P e f ϖ d hM hP g =>
-      ⟨L.div_imp hP hM g, fun hg => by simpa using L.symm.div_imp hP hM (φ g) hg⟩
+      ⟨L.div_imp hP hM g, fun hg => by simpa using Lsymm.div_imp hP hM (φ g) hg⟩
     opAt := fun L0 hL0 S P k hM R =>
       ⟨fun H => L.opAt_imp (hK L0 hL0) (hchi L0 hL0) (corr_inA φ R) S hM H,
-        fun H => L.symm.opAt_imp (hK L0 hL0).symm (chi_symm (hK L0 hL0) (hchi L0 hL0)) (corr_inA φ R).symm S hM H⟩
+        fun H => Lsymm.opAt_imp (hK L0 hL0).symm (chi_symm (hK L0 hL0) (hchi L0 hL0)) (corr_inA φ R).symm S hM H⟩
     opFull := fun L0 hL0 S P d hM R =>
       ⟨fun H => L.opFull_imp (hK L0 hL0) (hchi L0 hL0) (corr_inA φ R) S hM H,
-        fun H => L.symm.opFull_imp (hK L0 hL0).symm (chi_symm (hK L0 hL0) (hchi L0 hL0)) (corr_inA φ R).symm S hM H⟩ }
+        fun H => Lsymm.opFull_imp (hK L0 hL0).symm (chi_symm (hK L0 hL0) (hchi L0 hL0)) (corr_inA φ R).symm S hM H⟩ }
 
 end GlobalTheory.FinAdIdent
 

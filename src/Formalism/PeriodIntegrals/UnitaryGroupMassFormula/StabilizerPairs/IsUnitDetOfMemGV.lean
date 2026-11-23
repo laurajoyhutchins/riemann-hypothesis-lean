@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.ConverseStep
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MapConjLebesgueCommonStabilizerNormalForm
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.ConverseStep
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 
@@ -36,24 +85,7 @@ lemma sgI_eq_iff (i : Fin (2 * r + k + 1)) : sgI k r i.val = r + k ↔ i.val = r
   split_ifs <;> constructor <;> intro <;> omega
 
 theorem hpk_mul_self : Hpk k r * Hpk k r = 1 := by
-  ext i l
-  rw [Matrix.mul_apply, Matrix.one_apply]
-  simp_rw [hpk_apply]
-  rw [Finset.sum_eq_single (⟨sgI k r i.val, sgI_lt i⟩ : Fin (2 * r + k + 1))]
-  · simp only [if_true, sgI_sgI]
-    by_cases hil : i = l
-    · subst hil
-      by_cases hi : i.val = r + k
-      · have h2 : sgI k r (r + k) = r + k := hi ▸ (sgI_eq_iff i).2 hi
-        simp [hi, h2]
-      · have h2 : ¬ sgI k r i.val = r + k := fun h => hi ((sgI_eq_iff i).1 h)
-        simp [hi, h2]
-    · have h3 : ¬ l.val = i.val := fun h => hil (Fin.ext h.symm)
-      simp [h3, hil]
-  · intro j _ hj
-    have h4 : ¬ j.val = sgI k r i.val := fun h => hj (Fin.ext h)
-    simp [h4]
-  · simp
+  apply GlobalTheory.Amp.RConj.H_sq <;> assumption
 
 theorem hpk_det_ne : (Hpk k r).det ≠ 0 := by
   intro h
@@ -196,9 +228,6 @@ theorem herm_es (v : Fin (2 * r + k + 1) → ℂ) (a : Fin r) :
   congr 1
   ext
   simp [esI, eI, h2]
-
-theorem bvec_apply (i j : Fin (2 * r + k + 1)) : bvec i j = if j = i then 1 else 0 := by
-  simp [bvec, Pi.single_apply]
 
 theorem herm_sum_left (v : Fin (r + 1) → Fin (2 * r + k + 1) → ℂ) (c : Fin (r + 1) → ℂ)
     (w : Fin (2 * r + k + 1) → ℂ) :

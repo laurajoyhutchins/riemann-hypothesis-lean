@@ -1,5 +1,59 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+module
+
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.CompanionTheory.FlDecomp
@@ -36,7 +90,8 @@ theorem adapted_pull {h : V → V → L} {l : ℕ} {e f e' f' : Fin l → V} {W 
   intro a b w hw
   rw [mem_pull]
   have : k (∑ i, a i • e i + ∑ i, b i • f i + w) = ∑ i, a i • e' i + ∑ i, b i • f' i + k w := by
-    simp [map_add, map_sum, he, hf]
+
+    simp [map_add (f := _), map_sum, he, hf]
   rw [this, hA a b (k w) (hW w hw), hk]
 
 theorem adapted_reindex {h : V → V → L} {l l' : ℕ} {e f : Fin l' → V} {W : Submodule L V} {u : Fin l' → L}
@@ -60,7 +115,8 @@ theorem adapted_tor {s : L →+* L} (hs : IsInv s) {h : V → V → L} {l : ℕ}
   rw [mem_pull]
   have : t (∑ i, a i • e i + ∑ i, b i • f i + w) =
       ∑ i, (a i * u i) • e i + ∑ i, (b i * (s (u i))⁻¹) • f i + w := by
-    simp [map_add, map_sum, ht.1, ht.2.1, ht.2.2 w hw, smul_smul]
+
+    simp [map_add (f := _), map_sum, ht.1, ht.2.1, ht.2.2 w hw, smul_smul]
   rw [this, hA _ _ w hw]
   have hn : ∀ i, ‖s (u i)‖ = ‖u i‖ := fun i => hs.2.1 _
   have hp : ∀ i, 0 < ‖u i‖ := fun i => norm_pos_iff.2 (hu i)
@@ -77,7 +133,6 @@ theorem norm_discrete {p : L} (hp0 : p ≠ 0) (hp1 : ‖p‖ < 1) (hpu : ∀ a :
   have hc : 1 < ‖p‖⁻¹ := (one_lt_inv₀ hpp).2 hp1
   obtain ⟨n, hn1, hn2⟩ := exists_mem_Ico_zpow (norm_pos_iff.2 hx) hc
   refine ⟨-n, ?_⟩
-  have hcn : 0 < ‖p‖⁻¹ ^ n := zpow_pos (inv_pos.2 hpp) n
   set y : L := x * p ^ n with hy
   have hyn : ‖y‖ = ‖x‖ * ‖p‖ ^ n := by simp [hy, norm_zpow]
   have hinv : ‖p‖ ^ n * ‖p‖⁻¹ ^ n = 1 := by
@@ -163,13 +218,15 @@ theorem h_fe (hh : IsHerm s h) (hF : IsFrame h δ e f W) (i j : Fin l) :
 theorem form_e (hh : IsHerm s h) (hF : IsFrame h δ e f W) (a b : Fin l → L) {w : V} (hw : w ∈ W) (i : Fin l) :
     h (e i) (∑ j, a j • e j + ∑ j, b j • f j + w) = b i * δ := by
   change hl hh (e i) _ = _
-  simp only [map_add, map_sum, map_smul, smul_eq_mul, hl_apply, hF.1, hF.2.2.1, (hF.2.2.2.1 w hw i).1]
+
+  simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, hl_apply, hF.1, hF.2.2.1, (hF.2.2.2.1 w hw i).1]
   simp
 
 theorem form_f (hh : IsHerm s h) (hF : IsFrame h δ e f W) (a b : Fin l → L) {w : V} (hw : w ∈ W) (i : Fin l) :
     h (f i) (∑ j, a j • e j + ∑ j, b j • f j + w) = a i * s δ := by
   change hl hh (f i) _ = _
-  simp only [map_add, map_sum, map_smul, smul_eq_mul, hl_apply, h_fe hh hF, hF.2.1, (hF.2.2.2.1 w hw i).2]
+
+  simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, hl_apply, h_fe hh hF, hF.2.1, (hF.2.2.2.1 w hw i).2]
   simp
 
 theorem form_w (hh : IsHerm s h) (hF : IsFrame h δ e f W) (a b : Fin l → L) {w v : V} (hw : w ∈ W) (hv : v ∈ W) :
@@ -179,7 +236,8 @@ theorem form_w (hh : IsHerm s h) (hF : IsFrame h δ e f W) (a b : Fin l → L) {
   have h2 : ∀ j, h v (f j) = 0 := fun j => by
     rw [hh.2.2.1 (f j) v, (hF.2.2.2.1 v hv j).2, map_zero]
   change hl hh v _ = _
-  simp only [map_add, map_sum, map_smul, smul_eq_mul, hl_apply, h1, h2]
+
+  simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, hl_apply, h1, h2]
   simp
 
 theorem frame_form (hh : IsHerm s h) (hF : IsFrame h δ e f W) (a b a' b' : Fin l → L) {w w' : V} (hw : w ∈ W)
@@ -194,7 +252,8 @@ theorem frame_form (hh : IsHerm s h) (hF : IsFrame h δ e f W) (a b a' b' : Fin 
   have h3 : h y w = s (h w w') := by
     rw [hh.2.2.1 w y, hy, form_w hh hF a' b' hw' hw]
   change hl hh y _ = _
-  simp only [map_add, map_sum, map_smul, smul_eq_mul, hl_apply, h1, h2, h3]
+
+  simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, hl_apply, h1, h2, h3]
 
 def permMap (hh : IsHerm s h) (δ : L) (e f : Fin l → V) (τ : Equiv.Perm (Fin l)) : V →ₗ[L] V :=
   LinearMap.id + ∑ i, (((s δ)⁻¹ • hl hh (f i)).smulRight (e (τ i) - e i) +
@@ -325,14 +384,12 @@ theorem frame_flip (hs : IsInv s) (hδ : δ ≠ 0) (hh : IsHerm s h)
     (hn : ∀ i, ‖u i‖ = ‖p‖ ^ n i) (hp0 : p ≠ 0) :
     ∃ (e' f' : Fin l → V) (m : Fin l → ℕ), IsFrame h δ e' f' W ∧ IsAdapted h e' f' W (fun _ => 1) Λ ∧
       IsAdapted h e' f' W (fun i => p ^ m i) Λ' := by
-  have hsδ : s δ ≠ 0 := (map_ne_zero s).2 hδ
   have hc : ‖δ / s δ‖ = 1 := by
     rw [norm_div, hs.2.1, div_self (norm_ne_zero_iff.2 hδ)]
   refine ⟨_, _, fun i => (n i).natAbs, hermitian_frame_partial_flip hs hδ hh hF (fun i => n i < 0),
     adapted_flip (fun i => n i < 0) hc (fun i => ?_) h1, adapted_flip (fun i => n i < 0) hc (fun i => ?_) h2⟩
   · simp
   · rw [hn i, norm_pow]
-    have hpp : ‖p‖ ≠ 0 := norm_ne_zero_iff.2 hp0
     by_cases hi : n i < 0
     · rw [if_pos hi, ← zpow_neg, ← zpow_natCast]
       congr 1

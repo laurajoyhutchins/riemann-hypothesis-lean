@@ -1,7 +1,56 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AnalyticIntertwiners.PCDesc
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.OrbitDerivatives.EtaleClosedPointLiftsSimpleRootsMonic
-import Development.WeilBound.HeckeVectors.SmoothVectors.SobolevApproximation.SobApproxHolds
-import Formalism.LocalToGlobal.IndefiniteReal.SmExpSmulContDiff
+module
+
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.DenseKFiniteVectorsUnitaryGroupRep
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothVec
+public import Formalism.LocalToGlobal.IndefiniteReal.SobolevIteration.ArvOSobPfSt
+public import Formalism.PeriodIntegrals.QuotInv
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.OrbitDerivatives.EtaleClosedPointLiftsSimpleRootsMonic
+public import Development.WeilBound.HeckeVectors.SmoothVectors.SobolevApproximation.SobApproxHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BesselDerivatives.ExpSup
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChainRuleSmooth.ExpIntertwine
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.KFiniteSmoothVectors.Garding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Topology
 open scoped ComplexOrder
@@ -62,9 +111,54 @@ theorem repOnC (hσ : Formalism.MainNotions.S.IsURepOn (Formalism.MainNotions.S.
 theorem smoothVec_of_isSmC {w : H} (hw : CompanionTheory.D.Upq.Sm.IsSm (Formalism.MainNotions.S.UJset ε) σ w) :
     Formalism.L2.Theta.SmoothVec (Formalism.IndefR.Tow.SobPf.lieG (Formalism.REAL.Jm ε)) σ w := by
   intro m Xs hX
-  have hc := Formalism.IndefR.PeterssonHilbertSpace.sm_prod_exp_contDiff m Xs
+  have hc : ∀ (k : ℕ) (Ys : Fin k → Matrix (Fin n) (Fin n) ℂ),
+      ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun t : Fin k → ℝ =>
+        (List.ofFn fun i => NormedSpace.exp (t i • Ys i)).prod) := by
+    intro k
+    induction k with
+    | zero =>
+      intro Ys
+      simpa using (contDiff_const : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) fun _ : Fin 0 → ℝ =>
+        (1 : Matrix (Fin n) (Fin n) ℂ))
+    | succ k ih =>
+      intro Ys
+      have h1 : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun t : Fin (k + 1) → ℝ =>
+          NormedSpace.exp (t 0 • Ys 0)) := by
+        have he : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun s : ℝ => NormedSpace.exp (s • Ys 0)) := by
+          simpa only [Complex.coe_smul] using PI.BesselDerivW.exp_contDiff (Ys 0)
+        exact he.comp (contDiff_apply ℝ (fun _ => ℝ) (0 : Fin (k + 1)))
+      have h2 : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun t : Fin (k + 1) → ℝ =>
+          (List.ofFn fun i : Fin k => NormedSpace.exp (t i.succ • Ys i.succ)).prod) :=
+        (ih (fun i => Ys i.succ)).comp
+          (contDiff_pi.2 fun i => contDiff_apply ℝ (fun _ => ℝ) i.succ)
+      simp only [List.ofFn_succ, List.prod_cons]
+      exact PI.KFinSmoothW.Gard.contDiff_mat_mul h1 h2
+  have hc := hc m Xs
   have hmem : ∀ t : Fin m → ℝ, (List.ofFn fun i => NormedSpace.exp (t i • Xs i)).prod ∈ Formalism.MainNotions.S.UJset ε :=
-    fun t => Formalism.IndefR.PeterssonHilbertSpace.sm_prod_exp_mem _ m Xs (fun i => hX i) t
+    by
+      intro t
+      have hm : ∀ (k : ℕ) (Ys : Fin k → Matrix (Fin n) (Fin n) ℂ),
+          (∀ i, (Ys i)ᴴ * Formalism.REAL.Jm ε + Formalism.REAL.Jm ε * Ys i = 0) →
+          ∀ t : Fin k → ℝ,
+          ((List.ofFn fun i => NormedSpace.exp (t i • Ys i)).prod)ᴴ * Formalism.REAL.Jm ε *
+            (List.ofFn fun i => NormedSpace.exp (t i • Ys i)).prod = Formalism.REAL.Jm ε := by
+        intro k
+        induction k with
+        | zero => intro Ys hYs t; simp
+        | succ k ih =>
+          intro Ys hYs t
+          have hi := ih (fun i => Ys i.succ) (fun i => hYs i.succ) (fun i => t i.succ)
+          have hl : (t 0 • Ys 0)ᴴ * Formalism.REAL.Jm ε +
+              Formalism.REAL.Jm ε * (t 0 • Ys 0) = 0 := by
+            have h := CCRuleCW.lie_smul
+              (Formalism.REAL.Jm ε) (Ys 0) (hYs 0) (t 0)
+            simpa only [Complex.coe_smul] using h
+          have he := CCRuleCW.exp_mem_UH
+            (Formalism.REAL.Jm ε) (t 0 • Ys 0) hl
+          have hp := CCRuleCW.UH_mul
+            (Formalism.REAL.Jm ε) _ _ he hi
+          simpa only [Formalism.QuantumDeterminants.UH, Set.mem_setOf_eq, List.ofFn_succ, List.prod_cons] using hp
+      exact hm m Xs (fun i => hX i) t
   rw [contDiff_iff_contDiffAt]
   intro t0
   obtain ⟨U, F, hU, h0, hF, hEq⟩ := hw _ (hmem t0)
@@ -75,31 +169,7 @@ theorem smoothVec_of_isSmC {w : H} (hw : CompanionTheory.D.Upq.Sm.IsSm (Formalis
   exact ((hF.contDiffAt (hU.mem_nhds h0)).comp t0 hc.contDiffAt).congr_of_eventuallyEq hev
 
 theorem kfinDense_UJC (hσ : Formalism.MainNotions.S.IsURepOn (Formalism.MainNotions.S.UJset ε) σ) : Dense {v : H | Formalism.MainNotions.S.IsKFin ε σ v} := by
-  have hsm := CompanionTheory.D.gk.FinalFormK.dense_sm' (isMatGroupC ε) (thetaC ε) (fun x hx => thetaC_eq ε hx) (repOnC hσ) hσ.2.2
-  have hG : Formalism.IndefR.Tow.SobPf.IsGRep (Formalism.REAL.Jm ε) σ := ⟨hσ.1.1, hσ.1.2, hσ.2.1, hσ.2.2⟩
-  have hC : Formalism.IndefR.Datum.IsCartanInv (Formalism.REAL.Jm ε) (Formalism.REAL.Jm ε) := by
-    have hJ : (Formalism.REAL.Jm ε)ᴴ = Formalism.REAL.Jm ε := by
-      ext i j; simp only [Formalism.REAL.Jm, diagonal_conjTranspose, diagonal_apply]; split_ifs <;> simp_all
-    refine ⟨Formalism.REAL.Jm_mul_self ε, ?_, ?_⟩
-    · rw [hJ, Matrix.mul_assoc, Formalism.REAL.Jm_mul_self, Matrix.mul_one]
-    · rw [Formalism.REAL.Jm_mul_self]; exact Matrix.PosDef.one
-  rw [Metric.dense_iff]
-  intro h δ hδ
-  obtain ⟨w, hw, hwh⟩ := Metric.dense_iff.1 hsm h (δ / 2) (half_pos hδ)
-  obtain ⟨v, -, hvK, hvw⟩ := CompanionTheory.D.gk.HC.sobApprox_holds (Formalism.REAL.Jm ε) (Formalism.REAL.Jm ε) σ hC hG w
-    (smoothVec_of_isSmC hwh) [[]] (by simp) (δ / 2) (half_pos hδ)
-  refine ⟨v, ?_, ?_⟩
-  · have h1 := hvw [] (by simp)
-    simp only [Formalism.IndefR.Tow.SobPf.dL, List.foldr_nil] at h1
-    rw [Metric.mem_ball] at hw ⊢
-    calc dist v h ≤ dist v w + dist w h := dist_triangle _ _ _
-      _ < δ / 2 + δ / 2 := add_lt_add (by rw [dist_eq_norm]; exact h1) hw
-      _ = δ := add_halves δ
-  · obtain ⟨W, hW, hvW, hst⟩ := hvK
-    refine ⟨W, hW, hvW, fun g hg x hx => hst g ⟨?_, hg.2⟩ x hx⟩
-    show gᴴ * Formalism.REAL.Jm ε * g = Formalism.REAL.Jm ε
-    rw [Matrix.mul_assoc, ← hg.2, ← Matrix.mul_assoc, ← Matrix.star_eq_conjTranspose,
-      (Matrix.mem_unitaryGroup_iff').1 hg.1, Matrix.one_mul]
+  apply GlobalTheory.CompactRep.dense_isKFin <;> assumption
 
 end UJ
 

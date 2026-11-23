@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.AllPositions
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TypeChainPrincipalEntryNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.StandardOrderExtendedBasisApplyLowBlock
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TypeChainPrincipalEntryNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.OnesRepresent
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.StepData GlobalTheory.SymChain
 
@@ -39,7 +88,7 @@ theorem mem_R_of_pattern (r : GL (n ⊕ Fin c) k)
     rw [Units.val_mul, mul_toBlocks₁₁, Units.val_one, ← fromBlocks_one, toBlocks_fromBlocks₁₁] at this
     rw [← this, left_eq_add]
     ext x x'
-    simp only [mul_apply, toBlocks₁₂, toBlocks₂₁, of_apply, Matrix.zero_apply]
+    simp only [Matrix.mul_apply, toBlocks₁₂, toBlocks₂₁, of_apply, Matrix.zero_apply]
     refine Finset.sum_eq_zero fun j _ => ?_
     rcases le_total (j.val + 1) p with hj | hj
     · rw [hz x j hj, zero_mul]
@@ -52,11 +101,15 @@ theorem mem_R_of_pattern (r : GL (n ⊕ Fin c) k)
     rcases a with x | i
     · rcases b with x' | j
       · have := congrFun (congrFun e2 x) x'
-        simpa [mul_apply, Fintype.sum_sum_type, toBlocks₁₁, one_apply] using this
+        simpa [Matrix.mul_apply, Fintype.sum_sum_type, toBlocks₁₁, Matrix.one_apply] using this
       · have hj : j.val + 1 ≤ p := by simpa [lev] using hab
-        simp [mul_apply, Fintype.sum_sum_type, hz _ _ hj]
-    · have := hr (.inr i) b hab (by simp)
-      simpa [mul_apply, Fintype.sum_sum_type, one_apply] using this
+        simp [Matrix.mul_apply, Fintype.sum_sum_type, hz _ _ hj]
+    · rw [Matrix.mul_apply, Fintype.sum_sum_type]
+      simp only [fromBlocks_apply₂₁, fromBlocks_apply₂₂, Matrix.zero_apply, zero_mul,
+        Finset.sum_const_zero, zero_add]
+      change ((1 : Matrix (Fin c) (Fin c) k) *ᵥ (fun j => r.val (.inr j) b)) i = _
+      rw [Matrix.one_mulVec]
+      exact hr (.inr i) b hab (by simp)
   have : r = embX c γ * ((embX c γ)⁻¹ * r) := by group
   rw [this]
   exact mul_mem (Subgroup.mem_sup_left ⟨γ, rfl⟩) (Subgroup.mem_sup_right (Subgroup.subset_closure hm))

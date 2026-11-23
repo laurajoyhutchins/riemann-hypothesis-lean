@@ -1,20 +1,65 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.NondegenerateCharts
-import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
-import Formalism.LocalToGlobal.CharacterGerms.BlockAdmissibleChart
-import Formalism.LocalToGlobal.CharacterGerms.NegMem
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
-import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntSOfMulEqOne
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.InvariantDerivationsConstantInLogCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ConstantCoeffDerivationPolynomialEqJetAt0Statement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.JetAt0ProdSubstDisjointVariablesStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.AdmissibleRowsValueEqRowGaugeStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralEndOfActionLinearPartStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GaugeBiadditiveSymmAdjointIntegralEndStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntegralGermEqGaugedFormalGroupLawExpIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsOrthogonalAdjointProjectorsPlacePairsStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IsIntegralGaugedFormalGroupLawPairDataStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntSOfMulEqOne
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieVal
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.AdmissibleRowsValueEqRowGaugeStatement
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.CocycleIntegral
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ConstantCoeffDerivationPolynomialEqJetAt0Statement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralEndOfActionLinearPartStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsOrthogonalAdjointProjectorsPlacePairsStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GaugeBiadditiveSymmAdjointIntegralEndStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntegralGermEqGaugedFormalGroupLawExpIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.InvariantDerivationsConstantInLogCoordinatesStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IsIntegralGaugedFormalGroupLawPairDataStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.JetAt0ProdSubstDisjointVariablesStatement
+import Formalism.LocalToGlobal.CharacterGerms.RowTieAxes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ConstantCoeffAddFirstSecond
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,9 +87,9 @@ theorem pairing_sum {R G : Type} [Ring R] [AddCommGroup G] (N : AddSubgroup G) (
     rw [← sub_eq_zero, ← map_sub]
     exact (QuotientAddGroup.eq_zero_iff _).2 h
   have b1 : ∀ A A' B, IE A → IE A' → IE B → q (H (A + A') B) = q (H A B) + q (H A' B) := fun A A' B a a' b => by
-    rw [← map_add, qe _ _ (hb A A' B a a' b).1]
+    rw [← map_add (f := _), qe _ _ (hb A A' B a a' b).1]
   have b2 : ∀ A A' B, IE A → IE A' → IE B → q (H B (A + A')) = q (H B A) + q (H B A') := fun A A' B a a' b => by
-    rw [← map_add, qe _ _ (hb A A' B a a' b).2]
+    rw [← map_add (f := _), qe _ _ (hb A A' B a a' b).2]
   have ies : ∀ (s : Finset (Orb × Fin 2)) (A : Orb × Fin 2 → R), (∀ i, IE (A i)) → IE (∑ i ∈ s, A i) := by
     intro s A hA
     induction s using Finset.induction_on with
@@ -65,8 +110,9 @@ theorem pairing_sum {R G : Type} [Ring R] [AddCommGroup G] (N : AddSubgroup G) (
   have hWM : ∀ x : Orb × Fin 2, IE (W * M x.1 x.2) := fun x => hmul _ _ hW (hM _ _)
   rw [← QuotientAddGroup.eq_zero_iff]
   change q _ = 0
+
   rw [map_sub, map_sum, Finset.mul_sum, s1 _ _ _ (fun x => hM x.1 x.2) (ies _ _ hWM), sub_eq_zero,
-    Fintype.sum_prod_type]
+  Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun o _ => ?_
   have one : ∀ g : Fin 2, q (H (M o g) (∑ x : Orb × Fin 2, W * M x.1 x.2)) = q (H (M o g) (W * M o (1 - g))) := by
     intro g
@@ -105,6 +151,7 @@ theorem subst_sum_smul {σ τ α : Type} [Finite σ] [Fintype α] {a : σ → Mv
     (ha : ∀ s, constantCoeff (a s) = 0) (c : α → C) (F : α → MvPowerSeries σ C) :
     subst a (∑ i, c i • F i) = ∑ i, c i • subst a (F i) := by
   have hs := hasSubst_of_constantCoeff_zero ha
+
   rw [← coe_substAlgHom hs, map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [coe_substAlgHom hs, subst_smul hs]
 
@@ -118,6 +165,7 @@ theorem subst_sum'' {σ τ α : Type} [Finite σ] [Fintype α] {a : σ → MvPow
     (ha : ∀ s, constantCoeff (a s) = 0) (F : α → MvPowerSeries σ C) :
     subst a (∑ i, F i) = ∑ i, subst a (F i) := by
   have hs := hasSubst_of_constantCoeff_zero ha
+
   rw [← coe_substAlgHom hs, map_sum]
 
 theorem subst_subst {σ τ υ : Type} [Finite σ] [Finite τ] {a : σ → MvPowerSeries τ C} {b : τ → MvPowerSeries υ C}
@@ -135,6 +183,7 @@ theorem cc_lg (hX : RLaw X V) (i : κ) : constantCoeff (X.lg i) = 0 := by
 
 theorem cc_lin (A : Matrix κ κ C) {τ : Type} {Z : κ → MvPowerSeries τ C} (hZ : ∀ i, constantCoeff (Z i) = 0) (x : κ) :
     constantCoeff (∑ y, A x y • Z y) = 0 := by
+
   simp [map_sum, hZ]
 
 theorem endP_X (A : Matrix κ κ C) (i : κ) :
@@ -196,6 +245,7 @@ def genVec {τ : Type} (v : WVO I → τ) (j : Fin dd) : MvPowerSeries τ C :=
 
 omit [NeZero d] in
 theorem cc_genVec {τ : Type} (v : WVO I → τ) (j : Fin dd) : constantCoeff (genVec Y p v j) = 0 := by
+
   simp [genVec, map_sum]
 
 omit [NeZero d] in
@@ -230,7 +280,7 @@ theorem cc_hRow (o : Orb) : constantCoeff (Y.raw (p o)).hRow = 0 := by
   show _ • constantCoeff Y.h = 0
   rw [ReciprocityTheory.ChartRestriction.G.TB.WickVanishing.Nab.cc_h Y.gauge, smul_zero]
 
-set_option maxHeartbeats 400000 in
+
 
 theorem one_row (hs : PairsSep Y p) (gr : ∀ o, MvPowerSeries (WV (I o)) C)
     (hg : ∀ o, gr o ∈ ExpInt (Y.raw (p o)) V) :
@@ -375,7 +425,7 @@ theorem one_row (hs : PairsSep Y p) (gr : ∀ o, MvPowerSeries (WV (I o)) C)
       fin_cases g <;> rfl
     rw [hEnd_eq (M o 0) (M o 1), e2, proj o, RawChart.hRow, subst_smul (hasSubst_of_constantCoeff_zero (cU o))]
     rfl
-  rw [mul_assoc, ← mvExp_add kD.1 cL, subst_mul hEs, subst_mvExp hE (by rw [map_add, kD.1, cL, add_zero]),
+  rw [mul_assoc, ← mvExp_add kD.1 cL, subst_mul hEs, subst_mvExp hE (by rw [map_add (f := _), kD.1, cL, add_zero]),
     subst_prod' hE, subst_add hEs, subst_smul hEs, subst_smul hEs, hL, hD, subst_sub hEs, same, ← smul_add,
     sub_add_cancel, subst_sum'' hE, Finset.smul_sum]
   simp only [hrow]
@@ -394,13 +444,14 @@ omit [NeZero d] in
 theorem deriv_genVec {n : ℕ} (b : Fin n) (u : Fin dd → C) (co : WVO I → C)
     (hu : u = ∑ w : WVO I, co w • (p w.1).u w.2.1 w.2.2) (b' : Fin n) (j : Fin dd) :
     ∑ x : Fin n × WVO I, (if x.1 = b then co x.2 else 0) •
-        pderiv C x (genVec Y p (fun w : WVO I => (b', w)) j) =
+        pderiv (R := C) x (genVec Y p (fun w : WVO I => (b', w)) j) =
       if b' = b then MvPowerSeries.C (u j) else 0 := by
   classical
-  have h1 : ∀ x : Fin n × WVO I, pderiv C x (genVec Y p (fun w : WVO I => (b', w)) j) =
+  have h1 : ∀ x : Fin n × WVO I, pderiv (R := C) x (genVec Y p (fun w : WVO I => (b', w)) j) =
       if x.1 = b' then MvPowerSeries.C ((p x.2.1).u x.2.2.1 x.2.2.2 j) else 0 := by
     rintro ⟨ρ, w⟩
     unfold genVec
+
     rw [map_sum, Finset.sum_eq_single w]
     · rw [Derivation.map_smul]
       by_cases h : ρ = b'
@@ -414,6 +465,7 @@ theorem deriv_genVec {n : ℕ} (b : Fin n) (u : Fin dd → C) (co : WVO I → C)
   rw [Fintype.sum_prod_type, Finset.sum_eq_single b]
   · by_cases h : b' = b
     · subst h
+
       simp [hu, map_sum, smul_eq_C_mul]
     · simp [h, Ne.symm h]
   · intro ρ _ hρ
@@ -448,8 +500,9 @@ theorem all_rows (n : ℕ) (gr : ∀ o, Fin n → MvPowerSeries (WV (I o)) C) (f
     rfl
   have c2 : ∀ b : Fin n, constantCoeff (subst (fun i : Fin dd => (X (b, i) : PS C n dd))
       ((Y.k : C) • un1 (Y.B.hL C Y.h Y.w0))) = 0 := fun b => by rw [cc_subst (cX b), cL]
+
   rw [e1, FB.expS, ← mvExp_eq_subst (by rw [map_sum]; exact Finset.sum_eq_zero fun b _ => c2 b), mvExp_sum _ c2,
-    ← Finset.prod_mul_distrib, subst_prod' hE]
+  ← Finset.prod_mul_distrib, subst_prod' hE]
   have cU : ∀ o (x : Fin n × WV (I o)),
       constantCoeff (X (x.1, (⟨o, x.2⟩ : WVO I)) : MvPowerSeries (Fin n × WVO I) C) = 0 :=
     fun _ _ => constantCoeff_X _

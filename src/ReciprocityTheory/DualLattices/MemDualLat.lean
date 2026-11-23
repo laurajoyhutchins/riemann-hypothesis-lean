@@ -1,6 +1,64 @@
-import ReciprocityTheory.DualLattices.SubgroupQuotientStatement
-import ReciprocityTheory.DualLattices.ExistsSmulMemOfMemSpan
-import ReciprocityTheory.DualLattices.MapTensorSpan
+module
+
+public import ReciprocityTheory.DualLattices.SubgroupQuotientStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.MapTensorSpan
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Basis.Basic
+public import Mathlib.LinearAlgebra.Dimension.StrongRankCondition
+public import Mathlib.LinearAlgebra.Matrix.Adjugate
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+
+@[expose] public section
 
 noncomputable section
 
@@ -130,7 +188,7 @@ private theorem mem_dualLat_span_lemma_2 {C R : Type} [Field C] [CommRing R] [Al
       add_mem' := by
         rintro f g ⟨r, hr⟩ ⟨s, hs⟩
         refine ⟨r + s, ?_⟩
-        rw [map_add, hr, hs, ← Finset.sum_add_distrib]
+        rw [map_add (f := _), hr, hs, ← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl fun a _ => ?_
         simp only [Pi.add_apply]
         ring
@@ -229,6 +287,7 @@ private theorem isLat_map_lemma_5 {C R : Type} [Field C] [CommRing R] [Algebra R
           simp only [Finset.sum_mul]
           rw [Finset.sum_comm]
           exact Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => by ring
+
   rw [hf, map_sum]
   refine Submodule.sum_mem _ fun j _ => ?_
   rw [map_smul]
@@ -246,7 +305,7 @@ private theorem tensor_pair_lemma_6 {C R : Type} [Field C] [CommRing R] [Algebra
       add_mem' := by
         rintro F G ⟨r, hr⟩ ⟨s, hs⟩
         refine ⟨r + s, ?_⟩
-        rw [map_add, hr, hs, ← Finset.sum_add_distrib]
+        rw [map_add (f := _), hr, hs, ← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl fun a _ => ?_
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl fun b _ => ?_
@@ -346,7 +405,7 @@ theorem h2 (C R : Type) [Field C] [CommRing R] [Algebra R C] :
     refine ⟨extK (R := C) (C := C) K u, ?_⟩
     funext k
     show (if h : (k : N) ∈ K then u ⟨k, h⟩ else 0) = u k
-    rw [dif_pos k.2]
+    rw [dite_eq_left k.2]
   have hAK_lat : IsLat R (AA.carrier.map (resK (R := R) K)) :=
     isLat_map_lemma_5 v hv AA.carrier AA.lat (resK (R := C) (C := C) K) hres_surj
       (resK (R := R) K) (fun _ => rfl)

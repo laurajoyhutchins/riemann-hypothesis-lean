@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Group.MinimalAxioms
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.HlCoc
 
@@ -34,12 +86,10 @@ def sndHom : SD M G →* G where
   map_one' := rfl
   map_mul' _ _ := rfl
 
-@[simp] lemma sndHom_apply (p : SD M G) : sndHom p = p.2 := rfl
-
 lemma pow_fst_of_fixed (p : SD M G) (h : p.2 • p.1 = p.1) (n : ℕ) :
     (p ^ n).1 = n • p.1 := by
   have hs : ∀ k : ℕ, (p ^ k).2 = p.2 ^ k := fun k => by
-    simpa using map_pow (sndHom : SD M G →* G) p k
+    exact map_pow (sndHom : SD M G →* G) p k
   have hf : ∀ k : ℕ, p.2 ^ k • p.1 = p.1 := by
     intro k
     induction k with
@@ -160,7 +210,7 @@ theorem main (l : ℕ) [Fact l.Prime] [CompactSpace G] [T2Space G] [T2Space M]
   have hl : 0 < l := (Fact.out : l.Prime).pos
   obtain ⟨e, he1, he2⟩ : ∃ e : SD M G, e.1 = z ∧ e.2 = g₀ := ⟨SD.mk z g₀, rfl, rfl⟩
   have hsn : ∀ (p : SD M G) (n : ℕ), (p ^ n).2 = p.2 ^ n := fun p n => by
-    simpa using map_pow (sndHom : SD M G →* G) p n
+    exact map_pow (sndHom : SD M G →* G) p n
 
   let F : Subgroup (SD M G) :=
     { carrier := {p | ∀ h : G, lam h = 1 → h • p.1 = p.1}

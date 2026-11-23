@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TransPtBase
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TransPtBase
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishingStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped ComplexOrder Classical
 open GlobalTheory.CompanionTheory.Ar.PB.CovGraph
@@ -31,7 +80,7 @@ theorem mConeMap_eq {A F : Type} [CommRing A] [Field F] (f : A →+* F) (Y : (Σ
     mConeMap z p = scaleBy c (MvPolynomial.map f (coneOver Y p)) := by
   induction p using MvPolynomial.induction_on with
   | C a => simp [mConeMap, coneOver]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p q hp =>
     rw [map_mul, map_mul, map_mul, map_mul, hp]
     congr 1
@@ -94,7 +143,8 @@ theorem exists_scale (M : FlagModel y Ψ N j) {F : Type} [Field F] (f : MvPolyno
     · have e := hbase ⟨⟨k, h⟩, m⟩
       simp only [polyPt, dif_pos h, one_mul, hfC]
       exact e
-    · simp only [polyPt, dif_neg h, map_sum, map_mul, hfC, map_minorIJ, hmap]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [polyPt, dif_neg h, map_sum, map_mul, hfC, map_minorIJ, hmap]
       rw [hstep _ k (blk_stepOf M k h) m, Finset.mul_sum]
       refine Finset.sum_congr rfl fun I _ => ?_
       rw [(GlobalTheory.T.block_diagonal_minor_vanishing F N j (stepOf M k h).2 M.j_le).2.2.1 _ _ I (hB _).1 (hB _).2.1]
@@ -102,20 +152,3 @@ theorem exists_scale (M : FlagModel y Ψ N j) {F : Type} [Field F] (f : MvPolyno
 
 end GlobalTheory.CompanionTheory.Ar.PB.CovGraph.GenIdeal
 
-open GlobalTheory.CompanionTheory.Ar.PB.CovGraph.GenIdeal in
-
-theorem GlobalTheory.CompanionTheory.Ar.PB.CovGraph.mCoordIdeal_transPt : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (Φ : Type) [Field Φ] (y : (Σ k, ι k) → Φ) (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N j : ℕ) (M : FlagModel y Ψ N j) (K' : Type) [Fintype K'] (ι' : K' → Type) [∀ k, Fintype (ι' k)] (Φ' : Type) [Field Φ'] (y' : (Σ k, ι' k) → Φ') (M' : FlagModel y' Ψ N j) (Cv : FlagCover M' M), mCoordIdeal (transPt Cv) = mCoordIdeal y := by
-  intro K _ ι _ Φ _ y Ψ _ _ N j M K' _ ι' _ Φ' _ y' M' Cv
-  obtain ⟨B, hB, hind⟩ := M.g_indep
-  obtain ⟨B', hB', hind'⟩ := M'.g_indep
-  let ev : MvPolynomial (LowIdx Ψ N j) M.Ω →ₐ[M.Ω] Φ := aeval fun q => (M.g q.1.1 * B q.1.1) q.1.2.1 q.1.2.2
-  let ev₀ : MvPolynomial (LowIdx Ψ N j) M'.Ω →ₐ[M'.Ω] Φ' := aeval fun q => (M'.g q.1.1 * B' q.1.1) q.1.2.1 q.1.2.2
-  let ev' : MvPolynomial (LowIdx Ψ N j) M.Ω →+* Φ' := ev₀.toRingHom.comp (MvPolynomial.map Cv.φ)
-  have hev' : Function.Injective ev' :=
-    (show Function.Injective ev₀ from hind').comp (MvPolynomial.map_injective Cv.φ Cv.φ.injective)
-  obtain ⟨c, hc, hz⟩ := exists_scale M ev.toRingHom (algebraMap M.Ω Φ) (fun a => aeval_C _ a) M.g B M.g_block hB
-    (fun q => aeval_X _ q) y M.y_base M.y_step
-  obtain ⟨c', hc', hz'⟩ := exists_scale M ev' ((algebraMap M'.Ω Φ').comp Cv.φ)
-    (fun a => by simp [ev', ev₀]) M'.g B' M'.g_block hB' (fun q => by simp [ev', ev₀]) (transPt Cv)
-    (transPt_base Cv) (fun p k hp m => transPt_step Cv p k hp m)
-  rw [mCoordIdeal_eq ev' hev' _ _ c' hc' hz', mCoordIdeal_eq ev.toRingHom hind _ _ c hc hz]

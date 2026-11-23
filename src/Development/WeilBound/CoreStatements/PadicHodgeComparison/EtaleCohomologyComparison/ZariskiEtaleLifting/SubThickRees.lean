@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsStrictlySemistable
-import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.XSmulSucc
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.XSmulSucc
+public import Aesop.BuiltinRules
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsDPMorphismBot
+public import Mathlib.RingTheory.RingHom.Etale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -70,8 +115,8 @@ structure Sub (F : Fn O) where
   In : ∀ {B : CommRingCat.{0}}, F.Pt.obj B → Prop
   in_map : ∀ {B B' : CommRingCat.{0}} (φ : B ⟶ B') {y : F.Pt.obj B}, In y → In (F.Pt.map φ y)
 
-variable {F} in
 
+variable {F} in
 def Sub.fn (V : F.Sub) : Fn O where
   Pt := { obj := fun B => {y : F.Pt.obj B // V.In y}
           map := fun φ => TypeCat.ofHom fun y => ⟨F.Pt.map φ y.1, V.in_map φ y.2⟩
@@ -85,8 +130,8 @@ def Sub.fn (V : F.Sub) : Fn O where
   ov_map φ _ _ h := F.ov_map φ h
   ov_uniq h h' := F.ov_uniq h h'
 
-variable {F} in
 
+variable {F} in
 def Sub.inter {A : Type} (V : A → F.Sub) (S : Set A) : F.Sub :=
   ⟨fun y => ∀ α ∈ S, (V α).In y, fun φ _ h α hα => (V α).in_map φ (h α hα)⟩
 
@@ -152,8 +197,6 @@ structure RootExt (p : ℕ) (D : Type) [CommRing D] {d : ℕ} (t : Fin d → D) 
 
 attribute [instance] RootExt.ring RootExt.alg
 
-def Raises {Λ : Type} [CommRing Λ] (I : ℕ → Ideal Λ) (ξ : Λ) : Prop := ∀ r, ∀ x ∈ I r, ξ * x ∈ I (r + 1)
-
 def Slow (ρ : ℕ → ℕ) : Prop := ρ 0 = 0 ∧ ∀ r, ρ (r + 1) ≤ ρ r + 1
 
 section Thick
@@ -212,8 +255,8 @@ def pdFlt (ρ : ℕ → ℕ) (hρ : Slow ρ) (μ : Λ) (hμ : c μ ∈ b.I) : Fl
 
 theorem pdPow_eq_fil (T : Thick L) (r : ℕ) : T.pdPow r = GlobalTheory.PDA.fil T.δ r := rfl
 
-variable {L c} in
 
+variable {L c} in
 def omMor {b' : Base} {L' : b'.Fun} {σ : b.R →+* b'.R} (m : GlobalTheory.LogCris.Mor L L' σ) {Λ' : Type} [CommRing Λ'] {c' : Λ' →+* b'.R}
     (σ₀ : Λ →+* Λ') (h : ∀ a, σ (c a) = c' (σ₀ a)) : CH.Mor (OM L c) (OM L' c') σ₀ where
   G := m.functor
@@ -257,8 +300,6 @@ def subThick : Thick (V.fn.cr b ht κ) ⥤ Thick (F.cr b ht κ) where
   map_comp _ _ := rfl
 
 variable {Λ : Type} [CommRing Λ] (c : Λ →+* b.R)
-
-theorem subThick_OM : subThick V b ht κ ⋙ OM _ c = OM _ c := rfl
 
 theorem subThick_rees (ρ : ℕ → ℕ) (hρ : Slow ρ) (μ : Λ) (hμ : c μ ∈ b.I) :
     subThick V b ht κ ⋙ (pdFlt _ c ρ hρ μ hμ).rees = (pdFlt _ c ρ hρ μ hμ).rees := rfl

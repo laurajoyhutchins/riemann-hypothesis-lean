@@ -1,13 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.KerIsTerm
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ExistsAboveNe
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExtUHInjective
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HermitianCodeWordWeilElementMemQuadraticField
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LawsAll
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPreHasLetters
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PlacesOverConjPrimes
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.KerIsTerm
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.HermitianCodeWordWeilElementMemQuadraticField
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemUnitOff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ProdAbsNormDivsDvd
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CharacterValueAtT
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PlacesOverConjPrimes
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsDefiniteLaws
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LawsAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,13 +63,6 @@ theorem val_tauAt {X : Fields} {Pr : Primes X} (hPr : Pr.Ok) (u : Pr.Word) (hX :
   · rw [if_pos h, show pullW _ w = P.1 from seesP_tauAt hPr u hX (hs.1 h) P]
   · rw [if_neg h, show pullW _ w = conjPrime₂ P.1 from seesPbar_tauAt hPr u hX hw (mt hs.2 h) P,
       GlobalTheory.CharVal.valuation_conjP, star_star]
-
-structure NonDeg {D : D7} {u : D.what₂.Word} (A : Dat D u) : Prop where
-  sees : A.Sees
-  T_eq : A.J.T = (D.mem u).A.T
-  cl : ∀ i, Nonempty (A.I.S i).Cl
-  split : ∀ i, Nonempty (Split (A.J.A i) A.J.T)
-  forms : A.ch.fm.Fi 0 ≠ ⊥
 
 local instance starHost (B : Base) : StarRing B.host.E := B.fields.starE
 

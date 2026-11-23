@@ -1,4 +1,49 @@
-import Formalism.LocalToGlobal.CharacterGerms.Interface
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.Interface
+public import Mathlib.Algebra.MvPolynomial.Variables
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +75,7 @@ theorem kindAll_pl {pl : (Σ i : Fin K, Fin (what₂ i)) → Fin N} (hpl : Funct
     (kind : ∀ i, Fin (what₂ i) → Knd d) (s : Σ i : Fin K, Fin (what₂ i)) : kindAll pl kind (pl s) = kind s.1 s.2 := by
   unfold kindAll
   have hex : ∃ s', pl s' = pl s := ⟨s, rfl⟩
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   have hc : hex.choose = s := hpl hex.choose_spec
   rw [hc]
 
@@ -60,10 +105,10 @@ private lemma forall_support_ne_zero_iff_forall_mem_vars {R0 : Type} [Field R0] 
     (∀ μ ∈ Q.support, ∀ w, μ (ρ, w) ≠ 0 → T w) ↔ (∀ w, (ρ, w) ∈ Q.vars → T w) := by
   constructor
   · intro H w hw
-    obtain ⟨μ, hμ, hx⟩ := (MvPolynomial.mem_vars _).1 hw
+    obtain ⟨μ, hμ, hx⟩ := (MvPolynomial.mem_vars_iff_mem_support _).1 hw
     exact H μ hμ w (Finsupp.mem_support_iff.1 hx)
   · intro H μ hμ w hx
-    exact H w ((MvPolynomial.mem_vars _).2 ⟨μ, hμ, Finsupp.mem_support_iff.2 hx⟩)
+    exact H w ((MvPolynomial.mem_vars_iff_mem_support _).2 ⟨μ, hμ, Finsupp.mem_support_iff.2 hx⟩)
 
 theorem rowsOK_iff (G : ∀ g, Cart V d (I g) (J g)) (alt : Prop) {N : ℕ} (P : MvPolynomial (Fin N × WV I) C)
     (kind : Fin N → Knd d) : RowsOK G alt P kind ↔
@@ -103,7 +148,7 @@ theorem rowsOK_prodAll (G : ∀ g, Cart V d (I g) (J g)) (alt : Prop)
       exact h3 w hw'
     · exfalso
       unfold kindAll at hk
-      rw [dif_neg hex] at hk
+      rw [dite_eq_right hex] at hk
       cases hk
   · by_cases hex : ∃ s, pl s = ρ
     · obtain ⟨s, rfl⟩ := hex

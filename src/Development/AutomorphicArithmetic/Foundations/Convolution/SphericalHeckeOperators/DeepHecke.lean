@@ -1,12 +1,60 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.SymSum
-import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.Match
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DeepAbs
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.ThMatch
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.SigInv
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DefBridge
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.SymSum
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.Match
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.QuotFubiniHolds
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.TwistedOrbitalIntegrals.ConvTest
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.TwistedOrbitalIntegrals.HeckeRepresentationSatake
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DcoShape
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DeepAbs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DefBridge
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.SigInv
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.ThMatch
 import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.UnrQ
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DcoShape
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.OrbitalIntegrals.QuotFubiniHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory GroundTheory.Automorphic GroundTheory.Automorphic.Spherical GroundTheory.Automorphic.GLnLocal GroundTheory.Automorphic.Iwasawa UpperTheory.ConvolutionTheory.H
 
@@ -86,8 +134,8 @@ theorem UpperTheory.ConvolutionTheory.H.deepHecke :
       ∀ (n : ℕ) [MeasurableSpace (GL (Fin n) E)] [BorelSpace (GL (Fin n) E)] [MeasurableSpace (GL (Fin n) k)] [BorelSpace (GL (Fin n) k)]
         (μE : Measure (GL (Fin n) E)) (μk : Measure (GL (Fin n) k)) [μE.IsHaarMeasure] [μk.IsHaarMeasure],
       μE (PositivityTheory.Rg.Tf.Loc.unitGL (n := Fin n) E : Set (GL (Fin n) E)) = 1 → μk (PositivityTheory.Rg.Tf.Loc.unitGL (n := Fin n) k : Set (GL (Fin n) k)) = 1 →
-      ∀ P : Finset (LaurentRing n), (∀ p ∈ P, p ∈ symmetricLaurent n) → ∀ z : Fin n → ℂˣ,
-      ∃ g ∈ symmetricLaurent n, g ∈ (polyEmb n).range ∧ evalAt z g ≠ 0 ∧ ∀ p ∈ Submodule.span ℂ (P : Set (LaurentRing n)),
+      ∀ P : Finset (LaurentRing n), (∀ p ∈ P, p ∈ symmetricLaurent (n := n)) → ∀ z : Fin n → ℂˣ,
+      ∃ g ∈ symmetricLaurent (n := n), g ∈ (polyEmb (n := n)).range ∧ evalAt z g ≠ 0 ∧ ∀ p ∈ Submodule.span ℂ (P : Set (LaurentRing n)),
         ∀ (h : SphericalHecke μE (F := E) (n := n)) (f : SphericalHecke μk (F := k) (n := n)),
           satakeTransform μE h = g * p → satakeTransform μk f = bc (Module.finrank k E) (g * p) →
           UpperTheory.ConvolutionTheory.Loc.Match σ μE μk (fun x => (h : HeckeAlgebra μE) x) fun x => (f : HeckeAlgebra μk) x := by

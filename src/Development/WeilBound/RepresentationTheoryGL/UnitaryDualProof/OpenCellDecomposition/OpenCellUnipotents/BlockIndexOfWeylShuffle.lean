@@ -1,5 +1,55 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.LevZZero
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.LevZZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenFns
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.BernsteinExponentBounds.IsInvForm
+public import GroundTheory.AutomorphicForms.GLnLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,8 +69,8 @@ theorem blk_two (i : Fin (r + m)) :
     simp [hj]
   · simp at hj ⊢
 
-variable (r m) in
 
+variable (r m) in
 def w2 : Equiv.Perm (Fin (r + m)) := (finCongr (add_comm r m)).trans finAddFlip
 
 theorem weyl_shuffle_val (j : Fin (r + m)) : (w2 r m j : ℕ) = if (j : ℕ) < m then r + j else j - m := by
@@ -53,10 +103,9 @@ theorem wOpen_two : wOpen (dd r m) (hdd r m) = w2 r m := by
     · left; simp [hi, hj]
     · omega
     · simp [hi, hj]; omega
-  · exfalso
-    have h2 := congrArg (fun p => (ofLex p).2) he
+  · have h2 := congrArg (fun p => (ofLex p).2) he
     simp only [wKey, ofLex_toLex] at h2
-    exact hij.ne ((w2 r m).injective h2)
+    exact le_of_eq h2
 
 variable (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
@@ -90,16 +139,16 @@ theorem aDiag_conj_mem_unipB (N n : ℕ) (z : kˣ) {u : GL (Fin N) k} (hu : u �
     · exact Units.mul_inv z
     · exact one_mul 1
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem levZ_apply (z : kˣ) (a : Fin 2) (i j : Fin (dd r m a)) :
     ((levZ k r m z a : GL (Fin (dd r m a)) k) : Matrix (Fin (dd r m a)) (Fin (dd r m a)) k) i j =
       if i = j then (if a = 0 then 1 else (z : k)) else 0 := by
   unfold levZ
   split_ifs <;> simp_all [Matrix.one_apply, Matrix.scalar_apply, Matrix.diagonal_apply]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem conj_aDiag (z : kˣ) :
     pm k (wOpen (dd r m) (hdd r m)) * aDiag k (r + m) m z * (pm k (wOpen (dd r m) (hdd r m)))⁻¹ =
       leviEmb k (stdBlocks (dd r m) (hdd r m)) (levZ k r m z) := by
@@ -115,7 +164,11 @@ theorem conj_aDiag (z : kˣ) :
   rw [show (w2 r m)⁻¹ = (w2 r m).symm from rfl]
   by_cases hab : a = b
   · subst hab
-    rw [leviEmb_apply_same, levZ_apply]
+    have he : ((leviEmb k (stdBlocks (dd r m) (hdd r m)) (levZ k r m z) : GL (Fin (r + m)) k) : Matrix _ _ k)
+        ((stdBlocks (dd r m) (hdd r m)) ⟨a, i'⟩) ((stdBlocks (dd r m) (hdd r m)) ⟨a, j'⟩) =
+        ((levZ k r m z a : GL _ k) : Matrix _ _ k) i' j' := by
+      simp [leviEmb, Matrix.blockDiagonal'_apply_eq]
+    rw [he, levZ_apply]
     by_cases hij : i' = j'
     · subst hij
       rw [if_pos rfl, if_pos rfl]
@@ -124,7 +177,10 @@ theorem conj_aDiag (z : kˣ) :
       · rw [if_neg (fun h => absurd (key.1 h) (by decide)), if_pos rfl]
       · rw [if_pos (key.2 rfl), if_neg (by decide)]
     · rw [if_neg (fun h => hij (by simpa using (w2 r m).symm.injective h)), if_neg hij]
-  · rw [leviEmb_apply_ne _ _ _ hab, if_neg]
+  · have he : ((leviEmb k (stdBlocks (dd r m) (hdd r m)) (levZ k r m z) : GL (Fin (r + m)) k) : Matrix _ _ k)
+        ((stdBlocks (dd r m) (hdd r m)) ⟨a, i'⟩) ((stdBlocks (dd r m) (hdd r m)) ⟨b, j'⟩) = 0 := by
+      simp [leviEmb, Matrix.blockDiagonal'_apply, hab]
+    rw [he, if_neg]
     intro h
     have := (stdBlocks (dd r m) (hdd r m)).injective ((w2 r m).symm.injective h)
     exact hab (congrArg Sigma.fst this)
@@ -134,7 +190,12 @@ theorem aDiag_conj_mem_unipU (z : kˣ) {u : GL (Fin (r + m)) k} (hu : u ∈ unip
   refine ⟨aDiag_conj_mem_unipB k _ _ z hu.1, ?_⟩
   have h2 : pm k (wOpen (dd r m) (hdd r m)) * u * (pm k (wOpen (dd r m) (hdd r m)))⁻¹ ∈
       unipRadLower k (stdBlocks (dd r m) (hdd r m)) := hu.2
-  have hN := leviEmb_mem_normalizer_lower k (stdBlocks (dd r m) (hdd r m)) (levZ k r m z)
+  have hN : leviEmb k (stdBlocks (dd r m) (hdd r m)) (levZ k r m z) ∈
+      Subgroup.normalizer (unipRadLower k (stdBlocks (dd r m) (hdd r m)) : Set _) := by
+    apply parab_le_normalizer k (opp (stdBlocks (dd r m) (hdd r m)))
+    apply (mem_parabLower_iff k).2
+    intro a b i j hab
+    simp [leviEmb, Matrix.blockDiagonal'_apply, hab.ne]
   have h3 := (Subgroup.mem_normalizer_iff.1 hN _).1 h2
   rw [← conj_aDiag] at h3
   show pm k (wOpen (dd r m) (hdd r m)) * (aDiag k (r + m) m z * u * (aDiag k (r + m) m z)⁻¹) *
@@ -142,8 +203,8 @@ theorem aDiag_conj_mem_unipU (z : kˣ) {u : GL (Fin (r + m)) k} (hu : u ∈ unip
   convert h3 using 1
   group
 
-open ValuativeRel GroundTheory.Automorphic.GLnLocal in
 
+open ValuativeRel GroundTheory.Automorphic.GLnLocal in
 theorem aDiag_conj_apply_unipB (N n : ℕ) (z : kˣ) {u : GL (Fin N) k} (hu : u ∈ unipB k (Fin N)) (i j : Fin N) :
     ((aDiag k N n z * u * (aDiag k N n z)⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) i j =
       (if (i : ℕ) < n ∧ ¬ (j : ℕ) < n then (z : k) else 1) * (u : Matrix (Fin N) (Fin N) k) i j := by
@@ -158,8 +219,8 @@ theorem aDiag_conj_apply_unipB (N n : ℕ) (z : kˣ) {u : GL (Fin N) k} (hu : u 
     simp
   · simp [hi, hj]
 
-open ValuativeRel GroundTheory.Automorphic.GLnLocal in
 
+open ValuativeRel GroundTheory.Automorphic.GLnLocal in
 theorem aDiag_conj_mem_congr (N n : ℕ) (z : kˣ) (hz : valuation k (z : k) ≤ 1) (c : ℕ) {u : GL (Fin N) k}
     (hu : u ∈ unipB k (Fin N)) (hK : u ∈ congruenceSubgroup k N c) :
     aDiag k N n z * u * (aDiag k N n z)⁻¹ ∈ congruenceSubgroup k N c := by

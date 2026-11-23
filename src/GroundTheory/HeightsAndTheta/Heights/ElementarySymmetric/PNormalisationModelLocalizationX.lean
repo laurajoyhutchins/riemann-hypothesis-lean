@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StNormalisationModelLocalization
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StNormalisationModelLocalization
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -93,7 +143,7 @@ theorem clear (h : MvPolynomial (Fin n ⊕ Fin M.m) ℂ) :
         rename Sum.inl (denProd M ^ N₂ * g₁ + denProd M ^ N₁ * g₂) =
         rename Sum.inl (denProd M) ^ N₂ * (rename Sum.inl (denProd M) ^ N₁ * p - rename Sum.inl g₁) +
           rename Sum.inl (denProd M) ^ N₁ * (rename Sum.inl (denProd M) ^ N₂ * r - rename Sum.inl g₂) := by
-      simp only [map_add, map_mul, map_pow]
+      simp only [map_add (f := _), map_mul, map_pow]
       ring
     rw [e]
     exact add_mem (Ideal.mul_mem_left _ _ h₁) (Ideal.mul_mem_left _ _ h₂)
@@ -189,7 +239,7 @@ theorem modelToFrac_mk (hJ : J.IsPrime) (hq : q ∈ zeroSet J) (h : MvPolynomial
   Ideal.Quotient.lift_mk _ _ _
 
 theorem modelToFrac_injective (hJ : J.IsPrime) (hq : q ∈ zeroSet J) : Function.Injective (modelToFrac M hJ hq) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨h, rfl⟩ := Ideal.Quotient.mk_surjective x
   rw [modelToFrac_mk, ← RingHom.mem_ker, ker_toFracModel hJ hq] at hx
@@ -215,7 +265,7 @@ theorem locToFrac_algebraMap (hJ : J.IsPrime) (hq : q ∈ zeroSet J) (r : MvPoly
   exact IsLocalization.lift_eq _ _
 
 theorem locToFrac_injective (hJ : J.IsPrime) (hq : q ∈ zeroSet J) : Function.Injective (locToFrac M hJ hq) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro z hz
   obtain ⟨⟨r, s⟩, rfl⟩ := IsLocalization.mk'_surjective (normalModelSubmonoid M q) z
   rw [locToFrac, IsLocalization.lift_mk'_spec, mul_zero] at hz
@@ -287,7 +337,7 @@ theorem toFracModel_mem (hJ : J.IsPrime) (hq : q ∈ zeroSet J) (h : MvPolynomia
     rw [← rename_C (R := ℂ) (Sum.inl : Fin n → Fin n ⊕ Fin M.m) c, toFracModel_rename]
     exact toFrac_mem _
   | add p r hp hr =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hp hr
   | mul_X p s hp =>
     rw [map_mul]
@@ -348,8 +398,8 @@ theorem exists_locToFrac (hJ : J.IsPrime) (hq : q ∈ zeroSet J) (x : FractionRi
 
 end NormalisationModelLocalization
 
-open NormalisationModelLocalization in
 
+open NormalisationModelLocalization in
 theorem NormalisationModelLocalization.proof : NormalisationModelLocalization.Statement := by
   intro n J q M hJ
   by_cases hq : q ∈ zeroSet J

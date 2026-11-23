@@ -1,4 +1,43 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,12 +48,12 @@ open NumberField IsDedekindDomain MeasureTheory Filter Topology GlobalTheory.Wei
 
 variable {F : Type} [Field F] [NumberField F] {κ : Type} [Fintype κ]
 
-variable (F κ) in
 
+variable (F κ) in
 abbrev V : Type := κ → mixedEmbedding.mixedSpace F
 
-variable (F κ) in
 
+variable (F κ) in
 abbrev Pt : Type := (κ → AF F) × (κ → AF F)
 
 def inf (a : mixedEmbedding.mixedSpace F) : AF F := ((InfiniteAdeleRing.ringEquiv_mixedSpace F).symm a, 0)
@@ -51,7 +90,7 @@ variable {E : Type} [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
 
 def sOf (M : Model σ X W) (g : UA σ X.J) (h : UA σ W.J) : Pt F (Fin n × Fin d) →ₗ[AF F] Pt F (Fin n × Fin d) where
   toFun w := M.co.e (mat g⁻¹ * M.co.e.symm w * (mat h⁻¹)ᵀ)
-  map_add' a b := by rw [map_add, Matrix.mul_add, Matrix.add_mul, map_add]
+  map_add' a b := by rw [map_add (f := _), Matrix.mul_add, Matrix.add_mul, map_add (f := _)]
   map_smul' c a := by rw [map_smul, Matrix.mul_smul, Matrix.smul_mul, map_smul]; rfl
 
 theorem impl_sOf {B : Base F E} {M : Model σ X W} {χX χW : Chr F E} {om : Rep σ X W} (hw : M.IsWeil B.ψ χX χW om)

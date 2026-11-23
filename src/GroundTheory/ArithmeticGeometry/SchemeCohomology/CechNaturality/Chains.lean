@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ConsCompSuccAboveZero
+module
+
+public import Mathlib.Algebra.Category.Grp.Preadditive
+public import Mathlib.AlgebraicTopology.AlternatingFaceMapComplex
+public import Mathlib.LinearAlgebra.Finsupp.Supported
+public import Mathlib.Tactic.Continuity
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ConsCompSuccAboveZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -56,7 +111,7 @@ lemma aug_single (j : Fin 1 → ι) (z : ℤ) : aug (Finsupp.single j z) = z :=
 lemma aug_bd (c : Chain ι 1) : aug (bd 0 c) = 0 := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => rw [map_add, map_add, hf, hg, add_zero]
+  | add f g hf hg => rw [map_add (f := _), map_add (f := _), hf, hg, add_zero]
   | single i z =>
     rw [bd_single, Fin.sum_univ_two]
     simp [aug_single]
@@ -72,12 +127,14 @@ lemma map_mem_supported {m n : ℕ} (L : Chain ι m →+ Chain ι n) {S : Set (F
     {T : Set (Fin (n + 1) → ι)}
     (h : ∀ j ∈ S, ∀ z : ℤ, L (Finsupp.single j z) ∈ Finsupp.supported ℤ ℤ T) {c : Chain ι m}
     (hc : c ∈ Finsupp.supported ℤ ℤ S) : L c ∈ Finsupp.supported ℤ ℤ T := by
+
   rw [← Finsupp.sum_single c, Finsupp.sum, map_sum]
   exact Submodule.sum_mem _ fun j hj => h j ((Finsupp.mem_supported ℤ c).1 hc hj) _
 
 lemma eq_of_supported {m : ℕ} {M : Type*} [AddCommGroup M] (L L' : Chain ι m →+ M)
     {S : Set (Fin (m + 1) → ι)} (h : ∀ j ∈ S, ∀ z : ℤ, L (Finsupp.single j z) = L' (Finsupp.single j z))
     {c : Chain ι m} (hc : c ∈ Finsupp.supported ℤ ℤ S) : L c = L' c := by
+
   rw [← Finsupp.sum_single c, Finsupp.sum, map_sum, map_sum]
   exact Finset.sum_congr rfl fun j hj => h j ((Finsupp.mem_supported ℤ c).1 hc hj) _
 
@@ -121,9 +178,10 @@ lemma bd_cone_add_cone_bd (n : ℕ) (s : ι) (c : Chain ι (n + 1)) :
   induction c using Finsupp.induction_linear with
   | zero => simp
   | add f g hf hg =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     rw [add_add_add_comm, hf, hg]
   | single i z =>
+
     rw [cone_single, bd_single, Fin.sum_univ_succ, bd_single, map_sum]
     simp only [Fin.val_zero, pow_zero, one_smul, cons_comp_succAbove_zero,
       cons_comp_succAbove_succ, Fin.val_succ, pow_succ, mul_neg_one, neg_smul, map_zsmul,
@@ -200,6 +258,7 @@ lemma bd_ocone_add_ocone_bd (n : ℕ) (s : ι) {c : Chain ι (n + 1)}
   · have h1 : ocone s (Finsupp.single j z) = cone s (Finsupp.single j z) := by
       rw [ocone_single_of_lt hlt, cone_single]
     have h2 : ocone s (bd n (Finsupp.single j z)) = cone s (bd n (Finsupp.single j z)) := by
+
       rw [bd_single, map_sum, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_zsmul, map_zsmul, ocone_single_of_lt (i := j ∘ k.succAbove)
@@ -208,6 +267,7 @@ lemma bd_ocone_add_ocone_bd (n : ℕ) (s : ι) {c : Chain ι (n + 1)}
     rw [h1, h2]
     exact bd_cone_add_cone_bd n s _
   · have hs : s = j 0 := le_antisymm hsj (not_lt.1 hlt)
+
     rw [ocone_single_of_not_lt hlt, map_zero, zero_add, bd_single, map_sum, Fin.sum_univ_succ]
     have h0 : s < (j ∘ (0 : Fin (n + 2)).succAbove) 0 := by
       rw [hs]
@@ -285,7 +345,7 @@ noncomputable def rho : (n : ℕ) → (Fin (n + 1) → ι) → Chain ι n
 lemma lin_rho_zero (c : Chain ι 0) : lin (rho (ι := ι) 0) c = c := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => rw [map_add, hf, hg]
+  | add f g hf hg => rw [map_add (f := _), hf, hg]
   | single i z => rw [lin_single, rho, Finsupp.smul_single_one]
 
 theorem rho_mem : ∀ (n : ℕ) (i : Fin (n + 1) → ι),
@@ -305,15 +365,13 @@ theorem bd_rho : ∀ (n : ℕ) (i : Fin (n + 2) → ι),
     have hx : lin (rho (ι := ι) 0) (bd 0 (Finsupp.single i 1)) ∈
         Finsupp.supported ℤ ℤ (ordFrom (minIdx i)) := by
       rw [lin_rho_zero]
-      refine map_mem_supported _ (fun j hj z => ?_) (single_mem_rangeIn i 1)
-      rw [bd_single]
-      refine Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _
-        (Finsupp.single_mem_supported ℤ z (mem_ordFrom.2 ⟨strictMono_of_fin_one _, ?_⟩))
-      have hmem : (j ∘ k.succAbove) 0 ∈ Set.range i := (mem_rangeIn.1 hj) ⟨k.succAbove 0, rfl⟩
-      obtain ⟨a, ha⟩ := hmem
-      rw [← ha]
-      exact minIdx_le i a
-    rw [rho, bd_ocone_zero _ hx, lin_rho_zero, aug_bd, zero_smul, sub_zero]
+      have hsubset : rangeIn (n := 0) (Set.range i) ⊆ ordFrom (minIdx i) := by
+        intro j hj
+        exact ordIn_subset_ordFrom i
+          (mem_ordIn.2 ⟨strictMono_of_fin_one j, mem_rangeIn.1 hj⟩)
+      exact Finsupp.supported_mono hsubset (bd_mem_rangeIn (single_mem_rangeIn i 1))
+    change bd 0 (ocone (minIdx i) (lin (rho 0) (bd 0 (Finsupp.single i 1)))) = _
+    rw [bd_ocone_zero _ hx, lin_rho_zero, aug_bd, zero_smul, sub_zero]
   | n + 1, i => by
     have ih := bd_rho n
     have hlin : ∀ c : Chain ι (n + 1), bd n (lin (rho (n + 1)) c) = lin (rho n) (bd n c) := by
@@ -342,6 +400,7 @@ theorem rho_of_strictMono : ∀ (n : ℕ) (i : Fin (n + 1) → ι), StrictMono i
   | 0, _, _ => rfl
   | n + 1, i, hi => by
     have h1 : lin (rho n) (bd n (Finsupp.single i 1)) = bd n (Finsupp.single i 1) := by
+
       rw [bd_single, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_zsmul, lin_single, one_smul,
@@ -369,7 +428,7 @@ theorem hmt_mem : ∀ (n : ℕ) (i : Fin (n + 1) → ι),
 lemma lin_hmt_zero (c : Chain ι 0) : lin (hmt (ι := ι) 0) c = 0 := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => rw [map_add, hf, hg, add_zero]
+  | add f g hf hg => rw [map_add (f := _), hf, hg, add_zero]
   | single i z => rw [lin_single, hmt, smul_zero]
 
 theorem boundary_homotopy : ∀ (n : ℕ) (i : Fin (n + 2) → ι),

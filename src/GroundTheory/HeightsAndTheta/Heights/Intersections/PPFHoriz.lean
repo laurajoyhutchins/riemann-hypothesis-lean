@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsPFHoriz
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsPFHoriz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -22,8 +67,9 @@ theorem genMap_mk (G : GenFibre v P') (f : MRing ι) :
     genMap G (Ideal.Quotient.mk _ f) = aeval G.x f := rfl
 
 theorem genMap_injective (G : GenFibre v P') : Function.Injective (genMap G) := by
-  refine (injective_iff_map_eq_zero _).2 fun a ha => ?_
+  refine (injective_iff_map_eq_zero (genMap G).toAddMonoidHom).2 fun a ha => ?_
   obtain ⟨f, rfl⟩ := Ideal.Quotient.mk_surjective a
+  change genMap G (Ideal.Quotient.mk _ f) = 0 at ha
   rw [genMap_mk] at ha
   rw [Ideal.Quotient.eq_zero_iff_mem, ← G.ker_x]
   exact RingHom.mem_ker.mpr ha
@@ -77,7 +123,12 @@ theorem aeval_xW (W : Ideal (MRing ι')) [W.IsPrime] (f : MRing ι') :
     rw [aeval_C, eq_intCast (algebraMap ℤ (FractionRing (MRing ι' ⧸ W))) a]
     exact (eq_intCast (((algebraMap (MRing ι' ⧸ W) (FractionRing (MRing ι' ⧸ W))).comp
       (Ideal.Quotient.mk W)).comp C) a).symm
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq =>
+    change (aeval (R := ℤ) (xW W)).toRingHom (p + q) = _
+    change (aeval (R := ℤ) (xW W)).toRingHom p = _ at hp
+    change (aeval (R := ℤ) (xW W)).toRingHom q = _ at hq
+    rw [(aeval (R := ℤ) (xW W)).map_add, (Ideal.Quotient.mk W).map_add,
+      (algebraMap (MRing ι' ⧸ W) (FractionRing (MRing ι' ⧸ W))).map_add, hp, hq]
   | mul_X p n hp => rw [map_mul, map_mul, map_mul, hp, aeval_X, xW]
 
 theorem ker_aeval_xW (W : Ideal (MRing ι')) [W.IsPrime] :
@@ -114,7 +165,7 @@ theorem baseSubst_rename (hκv : IsBlockMap κ v) (G : GenFibre v P') (f : MRing
     · have h1 : (v p).1 ∈ Set.range κ := ⟨p.1, (hκv.2.2.1 p).symm⟩
       have h2 : v p ∈ Set.range v := ⟨p, rfl⟩
       simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, rename_X, aeval_X]
-      rw [baseSubst, eval₂Hom_X', dif_pos h1, dif_pos h2, hκv.2.1 h2.choose_spec]
+      rw [baseSubst, eval₂Hom_X', dite_eq_left h1, dite_eq_left h2, hκv.2.1 h2.choose_spec]
   exact RingHom.congr_fun e f
 
 theorem exists_clear (hκv : IsBlockMap κ v) (G : GenFibre v P') (g : MRingOver G.Φ (fibreIdx ι' κ)) :
@@ -128,14 +179,14 @@ theorem exists_clear (hκv : IsBlockMap κ v) (G : GenFibre v P') (g : MRingOver
     obtain ⟨b₁, F₁, h₁, e₁⟩ := hp
     obtain ⟨b₂, F₂, h₂, e₂⟩ := hq
     refine ⟨b₁ * b₂, rename v b₂ * F₁ + rename v b₁ * F₂, by rw [map_mul]; exact mul_ne_zero h₁ h₂, ?_⟩
-    simp only [map_add, map_mul, baseSubst_rename hκv, ← e₁, ← e₂]
+    simp only [map_add (f := _), map_mul, baseSubst_rename hκv, ← e₁, ← e₂]
     ring
   | mul_X p n hp =>
     obtain ⟨b, F, h, e⟩ := hp
     refine ⟨b, F * X ⟨n.1.1, n.2⟩, h, ?_⟩
     rw [map_mul, ← e, mul_assoc]
     congr 2
-    rw [baseSubst, eval₂Hom_X', dif_neg n.1.2]
+    rw [baseSubst, eval₂Hom_X', dite_eq_right n.1.2]
 
 theorem ker_eq_map {σ τ Φ Φ' : Type} [Field Φ] [Field Φ'] [Algebra Φ Φ']
     (β : MvPolynomial τ ℤ →+* MvPolynomial σ Φ) (y : σ → Φ') (φ : MvPolynomial τ ℤ →+* Φ')
@@ -174,9 +225,9 @@ theorem aeval_baseSubst (hκv : IsBlockMap κ v) (G : GenFibre v P') (f : MRing 
       rw [baseSubst, eval₂Hom_X']
       by_cases h : q.1 ∈ Set.range κ
       · have h' : q ∈ Set.range v := hκv.2.2.2 q h
-        rw [dif_pos h, dif_pos h', aeval_C, RingHom.algebraMap_toAlgebra, genAlg_alt, h'.choose_spec]
+        rw [dite_eq_left h, dite_eq_left h', aeval_C, RingHom.algebraMap_toAlgebra, genAlg_alt, h'.choose_spec]
         rfl
-      · rw [dif_neg h, aeval_X]
+      · rw [dite_eq_right h, aeval_X]
   exact RingHom.congr_fun e f
 
 theorem fibreIdeal_genFibreOf (hκv : IsBlockMap κ v) (G : GenFibre v P') :

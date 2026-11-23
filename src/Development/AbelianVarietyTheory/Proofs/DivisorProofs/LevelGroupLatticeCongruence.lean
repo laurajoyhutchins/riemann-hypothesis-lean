@@ -1,8 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.UniformLevelMultiplicity
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelLiftConditions
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CramerMemAdelicCompletionOfElementSet
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletion
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicCompletionFractionalIdealProperties
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CramerMemAdelicCompletionOfElementSet
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemOfMemSpanFraction
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.MemAdelicCompletionPseudoBasisIff
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 open NumberField
 
@@ -22,18 +78,20 @@ theorem det_quot_eq {R M : Type} [CommRing R] [AddCommGroup M] [Module R M] (I :
   have hexp : ∀ v, q v = ∑ i, Ideal.Quotient.mk I (φ v i) • q (a i) := by
     intro v
     simp only [hsm]
+
     rw [← map_sum]
     exact ((Submodule.Quotient.eq _).2 (h2 v)).symm
   have hφ : ∀ v ∈ I • (⊤ : Submodule R M), ∀ i, φ v i ∈ I := by
     intro v hv i
     refine Submodule.smul_induction_on hv (fun r hr m _ => ?_) (fun x y hx hy => ?_)
     · rw [map_smul]; exact I.mul_mem_right _ hr
-    · rw [map_add]; exact I.add_mem hx hy
+    · rw [map_add (f := _)]; exact I.add_mem hx hy
   have hli : LinearIndependent (R ⧸ I) (fun j => q (a j)) := by
     rw [Fintype.linearIndependent_iff]
     intro g hg i
     choose r hr using fun j => Ideal.Quotient.mk_surjective (g j)
     have h3 : q (∑ j, r j • a j) = 0 := by
+
       rw [map_sum, ← hg]
       exact Finset.sum_congr rfl fun j _ => by rw [← hr j, hsm]
     have h4 := hφ _ ((Submodule.Quotient.mk_eq_zero _).1 h3) i
@@ -153,7 +211,7 @@ theorem det_sub_mem_completedIdeal_of_level (F : Type) {E : Type} [Field F] [Num
         funext i
         apply RingOfIntegers.coe_injective
         have := hφ0 (v + w) i
-        rw [map_add, map_add, Finsupp.add_apply, mul_add, ← hφ0, ← hφ0] at this
+        rw [map_add (f := _), map_add (f := _), Finsupp.add_apply, mul_add, ← hφ0, ← hφ0] at this
         simpa using this
       map_smul' := fun r v => by
         funext i
@@ -176,7 +234,7 @@ theorem det_sub_mem_completedIdeal_of_level (F : Type) {E : Type} [Field F] [Num
         simp only [map_sub, map_neg, map_one]
         rw [show algebraMap (𝓞 E) E (φ (a i) i) = _ from h3]
         ring
-      rw [if_pos rfl, this]
+      simp only [↓reduceIte, this]
       exact I.neg_mem (hm i)
     · have : φ (a j) i = 0 := by
         apply RingOfIntegers.coe_injective
@@ -188,6 +246,7 @@ theorem det_sub_mem_completedIdeal_of_level (F : Type) {E : Type} [Field F] [Num
     choose w hw using fun j => hsingle j _ ((hL _).1 (hιL v) j)
     have : (∑ i, φ v i • a i) - v = - ∑ i, m i • w i := by
       apply hinj
+
       rw [map_sub, map_neg, map_sum, map_sum]
       conv_lhs => rw [← e.sum_repr (ι v)]
       rw [← Finset.sum_sub_distrib, ← Finset.sum_neg_distrib]

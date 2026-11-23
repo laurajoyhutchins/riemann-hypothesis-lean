@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.IsMultiHomogIdealSpanSingleton
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -14,8 +68,10 @@ section Helpers
 
 variable {K : Type*} [DecidableEq K] {ι : K → Type*} {R : Type*} [CommRing R]
 
-open Classical in
+local instance (p : Prop) : Decidable p := Classical.propDecidable p
 
+
+open Classical in
 theorem weightedHomogeneousComponent_mul_form {x y : MRing ι R} {j : K → ℕ}
     (hy : IsMultiHomog y j) (n : K → ℕ) :
     weightedHomogeneousComponent (blockWeight ι) n (x * y) =
@@ -103,8 +159,8 @@ theorem exists_form_not_mem_of_isRelevant [Fintype K] {H : Ideal (MRing ι R)} [
     obtain ⟨k, -, hk⟩ := Ideal.IsPrime.prod_mem_iff.mp hm
     exact hi k (hH.mem_of_pow_mem _ hk)
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem divCycle_eq_of_sub_mem {P : Ideal (MRing ι R)} {x y : MRing ι R} (h : x - y ∈ P) :
     divCycle P x = divCycle P y := by
   have hI : P ⊔ Ideal.span {x} = P ⊔ Ideal.span {y} := by
@@ -121,10 +177,37 @@ theorem divCycle_eq_of_sub_mem {P : Ideal (MRing ι R)} {x y : MRing ι R} (h : 
   unfold divCycle
   by_cases hW : W ∈ (P ⊔ Ideal.span {x}).minimalPrimes ∧ IsRelevant W
   · have hW' : W ∈ (P ⊔ Ideal.span {y}).minimalPrimes ∧ IsRelevant W := hI ▸ hW
-    rw [dif_pos hW, dif_pos hW']
+    rw [dite_eq_left hW, dite_eq_left hW']
     simp only [hI]
   · have hW' : ¬ (W ∈ (P ⊔ Ideal.span {y}).minimalPrimes ∧ IsRelevant W) := hI ▸ hW
-    rw [dif_neg hW, dif_neg hW']
+    rw [dite_eq_right hW, dite_eq_right hW']
+
+theorem isVerticalDivisorOfUnitOffSpecial [IsDomain R] [IsDiscreteValuationRing R]
+    {P : Ideal (MRing ι R)} {ϖ : R}
+    {b : K → ℤ} {f g : MRing ι R}
+    (degrees : ∃ bf bg : K → ℕ, IsMultiHomog f bf ∧ IsMultiHomog g bg ∧
+      (fun k => (bf k : ℤ) - bg k) = b)
+    (hf : f ∉ P) (hg : g ∉ P)
+    (hunit : ∀ W : Ideal (MRing ι R), W.IsPrime → P ≤ W → IsRelevant W →
+      (C ϖ : MRing ι R) ∉ W → ∃ u v : MRing ι R, u ∉ W ∧ v ∉ W ∧ u * f - v * g ∈ P) :
+    IsVerticalDivisor P ϖ b f g := by
+  have hvertical : ∀ W, ratDiv P f g W ≠ 0 → (C ϖ : MRing ι R) ∈ W := by
+    intro W hW
+    by_contra hϖ
+    have hsupp : W.IsPrime ∧ P ≤ W ∧ IsRelevant W := by
+      by_cases h1 : divCycle P f W = 0
+      · have h2 : divCycle P g W ≠ 0 := by
+          intro h2
+          apply hW
+          unfold ratDiv
+          rw [h1, h2, sub_zero]
+        exact le_and_isRelevant_of_divCycle_ne_zero h2
+      · exact le_and_isRelevant_of_divCycle_ne_zero h1
+    obtain ⟨u, v, hu, hv, h⟩ := hunit W hsupp.1 hsupp.2.1 hsupp.2.2 hϖ
+    apply hW
+    unfold ratDiv
+    rw [divCycle_eq_of_mul_sub_mem hu hv h, sub_self]
+  exact ⟨degrees, hf, hg, hvertical, hunit⟩
 
 end Helpers
 
@@ -264,7 +347,7 @@ theorem Representative.proof (h1 : DivCycleMul.Statement.{u}) : Representative.S
       rw [e2]
       exact P.add_mem (P.mul_mem_left _ hmem) (P.mul_mem_left _ h)
     exact (hP.isPrime.mem_or_mem h').resolve_left hV.den_not_mem
-  refine ⟨f₁, g₁, IsVerticalDivisor.of_unit_off_special hdeg hf₁ hg₁ hunitP, ?_, fun H hH => ?_⟩
+  refine ⟨f₁, g₁, isVerticalDivisorOfUnitOffSpecial hdeg hf₁ hg₁ hunitP, ?_, fun H hH => ?_⟩
   · have hx := h1 O K ι P f₁ g hP.isPrime hf₁ hV.den_not_mem
     have hy := h1 O K ι P g₁ f hP.isPrime hg₁ hV.num_not_mem
     have hxy : divCycle P (f₁ * g) = divCycle P (g₁ * f) := divCycle_eq_of_sub_mem hmem
@@ -274,7 +357,7 @@ theorem Representative.proof (h1 : DivCycleMul.Statement.{u}) : Representative.S
     unfold ratDiv
     linarith
   · obtain ⟨hH1, hPH, -, -⟩ := hT H hH
-    exact IsVerticalDivisor.of_unit_off_special hdeg (hT₁ H hH).1 (hT₁ H hH).2
+    exact isVerticalDivisorOfUnitOffSpecial hdeg (hT₁ H hH).1 (hT₁ H hH).2
       fun W hW hHW hrel hϖW =>
         let ⟨u, v, hu, hv, h⟩ := hunitP W hW (hPH.trans hHW) hrel hϖW
         ⟨u, v, hu, hv, hPH h⟩

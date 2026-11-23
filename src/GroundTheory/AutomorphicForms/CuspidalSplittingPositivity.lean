@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalSplittingCoeff
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalSplittingCoeff
+import GroundTheory.AutomorphicForms.LocallyProfinite
+import GroundTheory.AutomorphicForms.SmoothRepSchur
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -39,8 +94,8 @@ theorem scalarDet_mem_center (g : GL (Fin n) F) :
     scalarDet g ∈ Subgroup.center (GL (Fin n) F) :=
   Matrix.GeneralLinearGroup.mem_center_iff_val_mem_range_scalar.2 ⟨_, (coe_scalarDet g).symm⟩
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem scalarDet_of_mem_center {z : GL (Fin n) F} (hz : z ∈ Subgroup.center (GL (Fin n) F)) :
     scalarDet z = z ^ n := by
   obtain ⟨a, ha⟩ := Matrix.GeneralLinearGroup.mem_center_iff_val_mem_range_scalar.1 hz
@@ -105,8 +160,8 @@ theorem map_pow_of_mem_center {z : GL (Fin n) F} (hz : z ∈ Subgroup.center (GL
   | zero => rw [pow_zero, pow_zero, hωπ.one hv]
   | succ m ih => rw [pow_succ, hωπ.mul hv (pow_mem hz m) hz, ih, pow_succ]
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem normChar_of_mem_center {z : GL (Fin n) F} (hz : z ∈ Subgroup.center (GL (Fin n) F)) :
     normChar ω z = ‖ω z‖ := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -116,8 +171,8 @@ theorem normChar_of_mem_center {z : GL (Fin n) F} (hz : z ∈ Subgroup.center (G
     rw [scalarDet_of_mem_center hz, map_pow_of_mem_center hωπ hv hz, norm_pow,
       Real.pow_rpow_inv_natCast (norm_nonneg _) hn.ne']
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem normChar_eq_one {k : GL (Fin n) F} (hk : π (scalarDet k) v = v) : normChar ω k = 1 := by
   have h1 : ω (scalarDet k) • v = (1 : ℂ) • v := by
     rw [one_smul, ← hωπ _ (scalarDet_mem_center k), hk]
@@ -131,8 +186,8 @@ section Twisted
 variable {V : Type*} [AddCommGroup V] [Module ℂ V] {π : Representation ℂ (GL (Fin n) F) V}
   {ω : GL (Fin n) F → ℂ} {K : Subgroup (GL (Fin n) F)} {f : Module.Dual ℂ V}
 
-variable (π ω) in
 
+variable (π ω) in
 def twVec (x : V) (g : GL (Fin n) F) : V :=
   ((normChar ω g : ℂ)⁻¹) • π g x
 
@@ -189,8 +244,8 @@ theorem norm_twVec_unit {z : GL (Fin n) F} (hz : z ∈ Subgroup.center (GL (Fin 
   rw [norm_div, Complex.norm_real, norm_norm,
     div_self (norm_ne_zero_iff.2 (hωπ.ne_zero hv hz))]
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem normSq_twVec_rightInv {x : V} (hx : x ∈ fixedVectors π K)
     (hK : ∀ k ∈ K, normChar ω k = 1) :
     ∀ g, ∀ h ∈ centerSup K, ‖f (twVec π ω x (g * h))‖ ^ 2 = ‖f (twVec π ω x g)‖ ^ 2 := by

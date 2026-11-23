@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.ResFin
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.AdjointActionReduction
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.ResFin
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,12 +68,10 @@ theorem ndS_mul_int (D : D7) (a : Fin D.R.rS) (t : D.host.E) (ht : t ∈ aaS D a
       first
         | (rw [FractionalIdeal.inv_zero', FractionalIdeal.mem_zero_iff] at ht; exact ht)
         | (rw [inv_zero, FractionalIdeal.mem_zero_iff] at ht; exact ht)
-        | simpa using ht
     exact ⟨0, by rw [ht0, map_zero, mul_zero]⟩
   · rw [FractionalIdeal.inv_eq] at ht
     first
       | rw [FractionalIdeal.mem_div_iff_of_ne_zero hJ] at ht
-      | rw [FractionalIdeal.mem_div_iff_of_nonzero hJ] at ht
     have hN : ((Ideal.absNorm (Ideal.map (algebraMap (𝓞 D.host.F) (𝓞 D.host.E)) (differentIdeal ℤ (𝓞 D.host.F))) : (𝓞 D.host.E)) ^ m) ∈ ((Ideal.map (algebraMap (𝓞 D.host.F) (𝓞 D.host.E)) (differentIdeal ℤ (𝓞 D.host.F))) ^ m : Ideal (𝓞 D.host.E)) :=
       Ideal.pow_mem_pow (Ideal.absNorm_mem _) m
     have hy : algebraMap (𝓞 D.host.E) D.host.E ((Ideal.absNorm (Ideal.map (algebraMap (𝓞 D.host.F) (𝓞 D.host.E)) (differentIdeal ℤ (𝓞 D.host.F))) : (𝓞 D.host.E)) ^ m) ∈
@@ -41,8 +79,6 @@ theorem ndS_mul_int (D : D7) (a : Fin D.R.rS) (t : D.host.E) (ht : t ∈ aaS D a
       by
         first
           | exact FractionalIdeal.mem_coeIdeal_of_mem _ hN
-          | exact FractionalIdeal.mem_coeIdeal_of_mem hN
-          | exact (FractionalIdeal.mem_coeIdeal _).mpr ⟨_, hN, rfl⟩
     have h1 := ht _ hy
     rw [FractionalIdeal.mem_one_iff] at h1
     obtain ⟨o', ho'⟩ := h1
@@ -61,12 +97,9 @@ theorem fInt_holds : FInt := by
     have hd : differentIdeal ℤ (𝓞 D.host.F) ≠ ⊥ := by
       first
         | exact differentIdeal_ne_bot
-        | exact differentIdeal_ne_bot (K := ℚ) (L := D.host.F)
-        | exact differentIdeal_ne_bot ℤ ℚ D.host.F (𝓞 D.host.F)
     have hinj : Function.Injective (algebraMap (𝓞 D.host.F) (𝓞 D.host.E)) := by
       first
         | exact FaithfulSMul.algebraMap_injective _ _
-        | exact NoZeroSMulDivisors.algebraMap_injective _ _
         | (have h1 : Function.Injective (algebraMap (𝓞 D.host.F) D.host.E) := by
              rw [IsScalarTower.algebraMap_eq (𝓞 D.host.F) D.host.F D.host.E, RingHom.coe_comp]
              exact (algebraMap D.host.F D.host.E).injective.comp (IsFractionRing.injective _ _)
@@ -85,14 +118,13 @@ theorem fInt_holds : FInt := by
       have hs : starRingEnd D.host.E ((VS D).hT (F0.e a) (f c)) = (VS D).hT (f c) (F0.e a) := by
         first
           | exact (VS D).herm.eq _ _
-          | exact (VS D).herm _ _
       rw [← hs, hef]
       split_ifs <;> simp
     let P : Submodule (𝓞 D.host.E) (VS D).V :=
       { carrier := {y | ∃ o : (𝓞 D.host.E), algebraMap (𝓞 D.host.E) D.host.E o = (ndS D : D.host.E) * (VS D).hT (f c) (y)}
         add_mem' := by
           rintro y z ⟨o1, h1⟩ ⟨o2, h2⟩
-          exact (show ∃ o : (𝓞 D.host.E), algebraMap (𝓞 D.host.E) D.host.E o = (ndS D : D.host.E) * (VS D).hT (f c) (y + z) from ⟨o1 + o2, by rw [map_add, map_add, mul_add, h1, h2]⟩)
+          exact (show ∃ o : (𝓞 D.host.E), algebraMap (𝓞 D.host.E) D.host.E o = (ndS D : D.host.E) * (VS D).hT (f c) (y + z) from ⟨o1 + o2, by rw [map_add (f := _), map_add (f := _), mul_add, h1, h2]⟩)
         zero_mem' := by
           exact (show ∃ o : (𝓞 D.host.E), algebraMap (𝓞 D.host.E) D.host.E o = (ndS D : D.host.E) * (VS D).hT (f c) (0) from ⟨0, by rw [map_zero, map_zero, mul_zero]⟩)
         smul_mem' := by

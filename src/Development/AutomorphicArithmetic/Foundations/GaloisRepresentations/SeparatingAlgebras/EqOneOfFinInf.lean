@@ -1,12 +1,57 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SeparatingAlgebras.StGlob
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompactSpaceDefiniteUnitaryInfinitePoints
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SeparatingAlgebras.StGlob
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompactSpaceDefiniteUnitaryInfinitePoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
 open GlobalTheory.GalCut GlobalTheory.UnitaryBC GlobalTheory.Cong GlobalTheory.DefU
 open MeasureTheory GroundTheory.Automorphic.Spherical UpperTheory.Gal.Gen
 
 private theorem eq_one_of_fin_inf {E : Type} [Field E] [NumberField E] [IsCMField E] {a : ℕ} {x : UA E a}
-    (hf : x ∈ finU E a) (hi : x ∈ infU E a) : x = 1 := by
+    (hf : x ∈ finU (E := E) (n := a)) (hi : x ∈ infU E a) : x = 1 := by
   have h1 : Matrix.GeneralLinearGroup.map (pInf E) x.1 = 1 := hf
   have h2 : Matrix.GeneralLinearGroup.map (pFin E) x.1 = 1 := hi
   exact Subtype.ext (ga_ext (by rw [h1]; simp) (by rw [h2]; simp))
@@ -78,10 +123,10 @@ theorem UpperTheory.Gal.Gen.sep_pf :
   have hcJ : cLoc w₀ c ∈ J n := hcl c hc
   have hcC0 : c ∈ lev K w₀ (J 0) := hmono (J 0) c hc (hJ.anti (Nat.zero_le n) hcJ)
   have hjC0 : j ∈ lev K w₀ (J 0) := (hmem0 j).2 ⟨1, K.one_mem, j, hjL, hjJ, (one_mul j).symm⟩
-  have hgF : g ∈ finU E a := (hT g hg).1
-  have hgF' : g' ∈ finU E a := (hT g' hg').1
-  have hcF : c ∈ finU E a := hLn.fin hc
-  have hjF : j ∈ finU E a := (Subgroup.mem_inf.1 hjL).1
+  have hgF : g ∈ finU (E := E) (n := a) := (hT g hg).1
+  have hgF' : g' ∈ finU (E := E) (n := a) := (hT g' hg').1
+  have hcF : c ∈ finU (E := E) (n := a) := hLn.fin hc
+  have hjF : j ∈ finU (E := E) (n := a) := (Subgroup.mem_inf.1 hjL).1
   have hg1 : cLoc w₀ g = 1 := (hT g hg).2 w₀ (not_apart_self w₀)
   have hg1' : cLoc w₀ g' = 1 := (hT g' hg').2 w₀ (not_apart_self w₀)
   have hx1 : cLoc w₀ x = 1 := cLoc_of_inf w₀ hx
@@ -107,7 +152,7 @@ theorem UpperTheory.Gal.Gen.sep_pf :
     have : s * j * g' = s * j * (g * x * c) := by
       rw [h]; group
     exact mul_left_cancel this
-  have hxF : x ∈ finU E a := by
+  have hxF : x ∈ finU (E := E) (n := a) := by
     have e : x = g⁻¹ * g' * c⁻¹ := by
       rw [h2]; group
     rw [e]

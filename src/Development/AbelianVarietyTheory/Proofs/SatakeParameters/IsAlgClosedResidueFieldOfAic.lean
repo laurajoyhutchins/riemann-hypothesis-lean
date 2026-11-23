@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,14 +126,6 @@ abbrev genFib (p : X ⟶ Spec (CommRingCat.of T)) : Scheme.{0} :=
 
 abbrev genInc (p : X ⟶ Spec (CommRingCat.of T)) : genFib p ⟶ X := pullback.fst _ _
 
-abbrev spMapOf {Y : Scheme.{0}} {p : X ⟶ Spec (CommRingCat.of T)} {p' : Y ⟶ Spec (CommRingCat.of T)} (u : X ⟶ Y)
-    (h : u ≫ p' = p) : spFib p ⟶ spFib p' :=
-  pullback.map _ _ _ _ u (𝟙 _) (𝟙 _) (by simp [h]) (by simp)
-
-abbrev genMapOf {Y : Scheme.{0}} {p : X ⟶ Spec (CommRingCat.of T)} {p' : Y ⟶ Spec (CommRingCat.of T)} (u : X ⟶ Y)
-    (h : u ≫ p' = p) : genFib p ⟶ genFib p' :=
-  pullback.map _ _ _ _ u (𝟙 _) (𝟙 _) (by simp [h]) (by simp)
-
 end Fibres
 
 end GlobalTheory.GenusTwoPureComparison.Cmp
@@ -154,8 +193,6 @@ open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC
 section Main
 variable {T : Type} [CommRing T] [IsDomain T] [IsLocalRing T] (l : ℕ) [Fact l.Prime]
 
-instance neZero_pow (k : ℕ) : NeZero (l ^ k) := ⟨pow_ne_zero _ (Fact.out : l.Prime).ne_zero⟩
-
 end Main
 
 end GlobalTheory.GenusTwoPureComparison.Cmp
@@ -164,8 +201,6 @@ namespace GlobalTheory.GenusTwoPureComparison.Cmp
 
 theorem aic_of_isAlgClosed' (K : Type) [Field K] [IsAlgClosed K] : GlobalTheory.EtC.AIC K := fun p hp hd =>
   IsAlgClosed.exists_root p (by rw [Polynomial.degree_eq_natDegree hp.ne_zero]; exact_mod_cast hd.ne')
-
-example : GlobalTheory.EtC.AIC ℂ ∧ IsUnit ((2 : ℕ) : ℂ) := ⟨aic_of_isAlgClosed' ℂ, by norm_num⟩
 
 end GlobalTheory.GenusTwoPureComparison.Cmp
 

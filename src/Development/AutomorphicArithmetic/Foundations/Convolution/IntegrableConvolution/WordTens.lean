@@ -1,14 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ThickFrames
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactTens
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactCv
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ThickFrames
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvPowers
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.JUnique
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactCv
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactLaws
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactTens
 import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmoothAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvPowers
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.JUnique
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactLaws
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,10 +70,10 @@ private theorem conv_apply (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (β
     γ.continuous γ.hasCompactSupport
   have hex : ∃ δ : TI K n, ∀ g, δ g = ∫ x, β x * γ (x⁻¹ * g) ∂ν := ⟨⟨⟨cv ν β γ, hb.1⟩, hb.2.1⟩, fun _ => rfl⟩
   unfold GM.conv
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact hex.choose_spec g
 
-variable [IsTotallyComplex K]
+variable [_root_.NumberField.IsTotallyComplex K]
 
 private theorem lact_step (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (α β γ : TI K n) (hα : SmoothT α)
     (hβ : SmoothT β) (h : ∀ g, γ g = cv ν α β g) (y z : UC K n) (hz : z ∈ Subalgebra.center ℂ (UC K n))
@@ -119,7 +160,7 @@ private theorem conv_tens (hm : νE = Measure.map (glueA D n) (Measure.pi fun _ 
       fun_prop
     exact this.aestronglyMeasurable
 
-variable [IsTotallyComplex F] [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex F] [_root_.NumberField.IsTotallyComplex E]
 
 private theorem a_smooth (hs : ArchSlot D νE νF b a aE aF) : SmoothT a := by
   have hc : Continuous fun x : archGroup F n => conj (b x⁻¹) := by

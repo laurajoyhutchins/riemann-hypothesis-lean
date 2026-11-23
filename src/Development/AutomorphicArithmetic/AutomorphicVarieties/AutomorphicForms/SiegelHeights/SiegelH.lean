@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.SiegelHeight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormVecMulGeOfHeight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormDetLeHeightPow
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+module
+
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelSetHeightBound
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.SiegelHeight
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormDetLeHeightPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormVecMulGeOfHeight
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+public import GroundTheory.AutomorphicForms.Reduction
+import GroundTheory.AutomorphicForms.ReductionCore
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Global GroundTheory.Global.IdeleGroup
 
@@ -50,64 +95,6 @@ private theorem lastRow {m : ℕ} {ω : Set (AdelicGLn.AdelicGL K (m + 1))} (hω
   exact mul_le_mul_of_nonneg_right h1 (pow_nonneg (hr _).le _)
 
 theorem siegelHeight : SiegelHeight := by
-  intro K _ _ n ω hω hB t ht
-  cases n with
-  | zero => exact ⟨1, 1, fun g γ _ => by rw [Subsingleton.elim (_ * g) g, one_mul, pow_one]⟩
-  | succ m =>
-  obtain ⟨C₁, N₁, hC₁, h₁⟩ := UpperTheory.adelicNorm_vecMul_ge_of_height K (m + 1)
-  obtain ⟨C₂, N₂, hC₂, h₂⟩ := UpperTheory.adelicNorm_det_le_height_pow K (m + 1)
-  obtain ⟨P, hP, h₃⟩ := lastRow hω hB
-  obtain ⟨M, h₄⟩ := CuspidalSpectrum.exists_height_le_of_isCompact hω
-  obtain ⟨p, q, hp, -, h₅⟩ := exists_pos_bounds hω (f := fun b => (ideleModule K (AdelicGLn.det K _ b) : ℝ))
-    (continuous_subtype_val.comp (continuous_ideleModule.comp (AdelicGLn.continuous_det K _)))
-    fun b _ => (ideleModule K (AdelicGLn.det K _ b)).2
-  set d := Module.finrank ℚ K with hd
-  have hs : 0 < min t 1 := lt_min ht one_pos
-  set s := (min t 1 ^ m) ^ d with hsd
-  have hs0 : 0 < s := by positivity
-  set A := max 1 (C₁ * P / s)
-  set B := max 1 (C₂ / p)
-  set e := 2 * Fintype.card (InfinitePlace K)
-  set c := AutomorphicForm.heightConst K (m + 1)
-  have hc : 0 ≤ c := zero_le_one.trans AutomorphicForm.one_le_heightConst
-  refine ⟨c * (c * M * (B * A ^ (m + 1)) ^ e), (N₂ + N₁ * (m + 1)) * e, ?_⟩
-  rintro g γ ⟨b, hb, _, ⟨r, hr, hch, rfl⟩, k, hk, heq⟩
-  have hH := AutomorphicForm.one_le_height g
-  set H := AutomorphicForm.height g
-  have hA : 1 ≤ A * H ^ N₁ := one_le_mul_of_one_le_of_one_le (le_max_left _ _) (one_le_pow₀ hH)
-  have hB' : 1 ≤ B * H ^ N₂ := one_le_mul_of_one_le_of_one_le (le_max_left _ _) (one_le_pow₀ hH)
-  have hx : (Pi.single (Fin.last m) 1 ᵥ* γ.val : Fin (m + 1) → K) ≠ 0 := fun h0 => by
-    have := congrArg (fun y => (y ᵥ* (γ⁻¹).val) (Fin.last m)) h0
-    simp only [vecMul_vecMul, Units.mul_inv, vecMul_one, zero_vecMul] at this
-    simp at this
-  have l1 := h₁ g _ hx
-  rw [← height_diagonal_mul, heq, height_mul_maxCompact _ hk] at l1
-  have l2 : ∀ i, 1 ≤ A * H ^ N₁ * r i ^ d := fun i => by
-    have h6 := pow_le_pow_left₀ (mul_pos (pow_pos hs m) (hr _)).le
-      (pow_mul_le_of_chain hs.le (min_le_right _ _) (min_le_left _ _) hr hch i) d
-    rw [mul_pow] at h6
-    calc 1 ≤ C₁ * H ^ N₁ * (P * r (Fin.last m) ^ d) := l1.trans (mul_le_mul_of_nonneg_left (h₃ b hb r hr) (by positivity))
-      _ = C₁ * P / s * H ^ N₁ * (s * r (Fin.last m) ^ d) := by field_simp
-      _ ≤ _ := mul_le_mul (mul_le_mul_of_nonneg_right (le_max_right _ _) (by positivity)) h6
-          (mul_pos hs0 (pow_pos (hr _) d)).le (zero_le_one.trans hA)
-  have l3 : (∏ i, r i) ^ d ≤ B * H ^ N₂ := by
-    have h6 := det_mul_mul b (diagUnits (m + 1) fun i => posIdele (K := K) (r i) (hr i)) k
-    rw [← heq, map_mul, map_mul, Positive.val_mul, mem_normOneGL.1 (rationalGL_le_normOneGL ⟨γ, rfl⟩), one_mul,
-      ideleModule_det_diagUnits_posIdele r hr, mem_normOneGL.1 (maxCompact_le_normOneGL hk), mul_one] at h6
-    refine le_trans ?_ (mul_le_mul_of_nonneg_right (le_max_right _ _) (by positivity))
-    rw [div_mul_eq_mul_div, le_div_iff₀' hp]
-    exact (mul_le_mul_of_nonneg_right (h₅ b hb).1 (pow_nonneg (Finset.prod_pos fun i _ => hr i).le _)).trans
-      (h6.symm.le.trans (h₂ g))
-  have l4 := CuspidalSpectrum.height_diagUnits_posIdele_le (K := K) hr
-    (one_le_mul_of_one_le_of_one_le hB' (one_le_pow₀ hA)) (box Module.finrank_pos.ne' hr hA hB' l2 l3)
-  rw [heq]
-  refine (AutomorphicForm.height_mul_le _ _).trans ?_
-  rw [AutomorphicForm.height_eq_one_of_mem_maxCompact hk, mul_one, mul_assoc]
-  refine mul_le_mul_of_nonneg_left ((AutomorphicForm.height_mul_le _ _).trans ?_) hc
-  refine (mul_le_mul (mul_le_mul_of_nonneg_left (h₄ b hb) hc) l4 (AutomorphicForm.height_pos _).le
-    (mul_nonneg hc ((AutomorphicForm.height_pos b).le.trans (h₄ b hb)))).trans (le_of_eq ?_)
-  rw [pow_mul H, pow_add H, pow_mul H, mul_assoc (c * M), ← mul_pow, mul_pow A]
-  congr 2
-  ring
+  apply UpperTheory.siegelSet_height_bound <;> assumption
 
 end UpperTheory.V.Fb

@@ -1,7 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.ProdSmulPowT
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.SingleWeightLatticeComparison
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.OneMemDualWeyl
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FactorizationBoundMonoLattices
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.ProdSmulPowT
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.SingleWeightLatticeComparison
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.LatticeMapsOfFunctorComparison
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.FactorizationBoundMonoLattices
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.OneMemDualWeyl
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.Tensor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -133,7 +176,7 @@ theorem functor_comparison_of_single_weight (hIOe : ExistsIO) (hPRe : ExistsPR) 
         intro j
         rw [hPR j, prodTopsT TT (fun s => pr1 s (j s) (Y s))]
         have := hIO j (fun s => if h : s ∈ TT then pr1 ⟨s, h⟩ (j ⟨s, h⟩) (Y ⟨s, h⟩) else 1)
-          (fun s hs => by rw [dif_neg hs])
+          (fun s hs => by rw [dite_eq_right hs])
         rw [show (∏ s : Fin n', blockEmb R.Kf s (if h : s ∈ TT then pr1 ⟨s, h⟩ (j ⟨s, h⟩) (Y ⟨s, h⟩) else 1)) =
           ∏ s : Fin n', rename (fun v => (s, v)) (if h : s ∈ TT then pr1 ⟨s, h⟩ (j ⟨s, h⟩) (Y ⟨s, h⟩) else 1) from rfl,
           this]
@@ -145,10 +188,11 @@ theorem functor_comparison_of_single_weight (hIOe : ExistsIO) (hPRe : ExistsPR) 
       rw [hJf, ← Finset.prod_univ_sum (fun s : TT => Finset.range (min (A s) (B s) + 1))
         (fun s j => rename (fun v : Bool × (Fin (m + 1) × Fin (m + 1)) => ((s, v.1), v.2)) (i1 s j (pr1 s j (Y s))))]
       refine Finset.prod_congr rfl fun s _ => ?_
+
       rw [← map_sum, ← hmin s, hsum1 s (Y s) (hYm s)]
     · simp
     · intro x y _ _ hx hy
-      simp only [map_add, Finset.sum_add_distrib, hx, hy]
+      simp only [map_add (f := _), Finset.sum_add_distrib, hx, hy]
     · intro c x _ hx
       simp only [map_smul]
       rw [← Finset.smul_sum, hx]

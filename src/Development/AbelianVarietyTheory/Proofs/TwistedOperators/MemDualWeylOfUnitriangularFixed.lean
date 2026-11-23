@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IrreducibleDistinctUnitary
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenericDetPowMulHw
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonemptyDirectSumEquivOfFinrankLe
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSemisimpleRepresentationTprodOfIsIrreducibleAl
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IrreducibleDistinctUnitary
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MvPolynomial Formalism.BasicNotions Formalism.GradedWeylDivisibility GlobalTheory.Branching GlobalTheory.GLDuality
 open Formalism.REAL (fockF)
 open scoped DirectSum TensorProduct Kronecker Matrix
@@ -24,7 +68,7 @@ theorem matRep_diagGL_monomial_colChar {n n' : ℕ} (t : Fin n → ℂˣ) (d : F
 
 theorem coeff_matRep_diagGL_colChar {n n' : ℕ} (t : Fin n → ℂˣ) (v : MvPolynomial (Fin n' × Fin n) ℂ)
     (d : Fin n' × Fin n →₀ ℕ) :
-    coeff d (matRep n n' (diagGL ℂ n t, 1) v) = (d.prod fun x e => (t x.2 : ℂ) ^ e) * coeff d v := by
+    AddMonoidAlgebra.coeff (matRep n n' (diagGL ℂ n t, 1) v) d = (d.prod fun x e => (t x.2 : ℂ) ^ e) * AddMonoidAlgebra.coeff v d := by
   classical
   induction v using MvPolynomial.induction_on' with
   | monomial u a =>
@@ -32,7 +76,7 @@ theorem coeff_matRep_diagGL_colChar {n n' : ℕ} (t : Fin n → ℂˣ) (v : MvPo
     split_ifs with h
     · rw [h]
     · simp
-  | add p q hp hq => rw [map_add, coeff_add, coeff_add, hp, hq, mul_add]
+  | add p q hp hq => rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, mul_add]
 
 theorem colAdd_eq_matRep_of_transvection {n n' : ℕ} (l j : Fin n) (c : ℂ) (g : GL (Fin n) ℂ)
     (hg : (g : Matrix (Fin n) (Fin n) ℂ) = Matrix.transvection l j c)
@@ -58,8 +102,8 @@ theorem mem_dualWeyl_of_unitriangular_fixed :
   refine ⟨fun d hd => ?_, fun l j hlj c => ?_⟩
   · funext i
     let t : Fin n → ℂˣ := fun s => if s = i then Units.mk0 2 two_ne_zero else 1
-    have h1 := congrArg (coeff d) (hT t)
-    rw [coeff_matRep_diagGL_colChar, coeff_smul, smul_eq_mul] at h1
+    have h1 := congrArg (AddMonoidAlgebra.coeff · d) (hT t)
+    rw [coeff_matRep_diagGL_colChar, AddMonoidAlgebra.coeff_smul_apply, smul_eq_mul] at h1
     have h2 := mul_right_cancel₀ hd h1
     have h3 : (∏ a, (t a : ℂ) ^ ν a) = 2 ^ ν i := by
       rw [Finset.prod_eq_single i]

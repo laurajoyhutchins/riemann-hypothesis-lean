@@ -1,19 +1,59 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftUnit
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.OEpsEx
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.ODownEx
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsGenericModuliPoint
-import Development.AutomorphicArithmetic.CommutativeAlgebra.LatticeGeneration
-import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientModuliObjectExists
-import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientMapComp
-import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientUniqueOfComp
-import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientModuliIso
-import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientLevelOfLatticeGeneration
-import Development.AutomorphicArithmetic.CommutativeAlgebra.IsogenyClassExistsOfQuotient
-import Development.AutomorphicArithmetic.CommutativeAlgebra.TraceEtaIdentity
-import Development.AutomorphicArithmetic.CommutativeAlgebra.MultiplierIsUnit
-import Development.AutomorphicArithmetic.CommutativeAlgebra.TracePullbackIdentity
-import Development.AutomorphicArithmetic.CommutativeAlgebra.TraceUnitOfPullbackMultiplier
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelPosOfCoprime
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.BaseOnto
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsGenericModuliPoint
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.IsogenyClassExistsOfQuotient
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.LatticeGeneration
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.MultiplierIsUnit
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientLevelOfLatticeGeneration
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientMapComp
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientModuliIso
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientModuliObjectExists
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.QuotientUniqueOfComp
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.TraceEtaIdentity
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.TracePullbackIdentity
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.TraceUnitOfPullbackMultiplier
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.ODownEx
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.OEpsEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelPosOfCoprime
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftUnit
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,7 +65,7 @@ open UpperTheory.Gal.Int.Geo
 
 namespace UpperTheory.Gal.FiniteEtaleModels.O
 
-set_option maxHeartbeats 400000 in
+
 private theorem stepF_of (hGen : GenEx) (hComp : QComp) (hIso : QIso) (hCls : ClsEx) (hEta : TrEta) (hUnit : TrUnit)
     (hEps : EpsEx) (hDown : DownEx) : UpperTheory.Gal.FiniteEtaleModels.StepF := by
   intro p _ D G L hSc E _ _ gb w q _ r 𝔴 𝔫 S k T N₀ κ 𝔟₁ 𝔟₂ X₁ X₂ hle M₁ M₂ c₁ c₂ a₁ a₂ hN₁ hN₂ hM C₁ C₂ W
@@ -77,7 +117,7 @@ private theorem stepF_of (hGen : GenEx) (hComp : QComp) (hIso : QIso) (hCls : Cl
     have e1 : (algebraMap (𝓞 D.F) D.O) (a₁ * ε) • y = (algebraMap (𝓞 D.F) D.O) ((t : 𝓞 D.F) * a₂) • y +
         (M₁ : ℕ) • ((algebraMap (𝓞 D.F) D.O) z • y) := by
       have h' : a₁ * ε = (t : 𝓞 D.F) * a₂ + ((M₁ : ℕ) : 𝓞 D.F) * z := by linear_combination hz
-      rw [h', map_add, add_smul, map_mul (algebraMap (𝓞 D.F) D.O) ((M₁ : ℕ) : 𝓞 D.F) z, mul_smul,
+      rw [h', map_add (f := _), add_smul, map_mul (algebraMap (𝓞 D.F) D.O) ((M₁ : ℕ) : 𝓞 D.F) z, mul_smul,
         map_natCast, Nat.cast_smul_eq_nsmul]
     have h1 := (T.M M₁).univ.eta_add ((algebraMap (𝓞 D.F) D.O) ((t : 𝓞 D.F) * a₂) • y)
       ((M₁ : ℕ) • ((algebraMap (𝓞 D.F) D.O) z • y))

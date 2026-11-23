@@ -1,7 +1,50 @@
-import Formalism.LocalToGlobal.Columns.TiedXpT
-import Formalism.LocalToGlobal.Columns.TiedLv
-import Formalism.LocalToGlobal.Columns.TiedValFi
-import Formalism.LocalToGlobal.Columns.RecordInst
+module
+
+public import Formalism.LocalToGlobal.Columns.TiedXpT
+public import Formalism.LocalToGlobal.Columns.TiedLv
+import Formalism.LocalToGlobal.Columns.CoefColLemmas
+import Formalism.LocalToGlobal.Columns.RowFormsAdelic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 open scoped TensorProduct
@@ -24,7 +67,7 @@ theorem lastVector_eq_single (n : ℕ) (p : E) : z0 E n p = (Pi.single (lastIdx 
   funext j
   simp [z0, eLast, Pi.single_apply]
 
-theorem xp_tilH_f {N n : ℕ} (hN : N = n + 1) [NeZero N] {ST SG : Finset (Pl E)} (d : DecoSet E n ∅ SG) {pi : 𝓞 E}
+theorem xp_tilH_f {N n : ℕ} (hN : N = n + 1) [NeZero N] {ST SG : Finset (Pl E)} (d : DecoSet (E := E) (n := n) (ST := ∅) (SG := SG)) {pi : 𝓞 E}
     (hT : ∀ P : ST, cO E pi ∉ P.1.asIdeal) (hG : ∀ w : SG, pi ∉ w.1.asIdeal) {b : 𝓞 E} (hb : SepElt ST b) (P : ST)
     (y : Sp E N) (hy : y ∈ (DecoSet.tilH (ST := ST) hN pi d).1.Lsh) (r : 𝓞 E)
     (hr : algebraMap (𝓞 E) E r = hStd E N (Pi.single (lastIdx N) (algebraMap (𝓞 E) E pi)) y) :
@@ -39,9 +82,9 @@ theorem xp_tilH_f {N n : ℕ} (hN : N = n + 1) [NeZero N] {ST SG : Finset (Pl E)
   have h2 : (d.1.til (ST := ST) pi).f P y = redP P.1 (hStd E (n + 1) (z0 E n (algebraMap (𝓞 E) E pi)) y) := if_pos h1
   rw [h2, lastVector_eq_single, ← hr, reduction_coe]
 
-theorem xp_til_f_core {N n : ℕ} (hN : N = n + 1) [NeZero N] {ST SG SG' : Finset (Pl E)} (hSG : SG ⊆ SG') {H : Subgroup (GLG E N SG)}
-    (d : DecoSet E n ∅ SG') {pi : 𝓞 E} (hT : ∀ P : ST, cO E pi ∉ P.1.asIdeal) (hG : ∀ w : SG', pi ∉ w.1.asIdeal) {b : 𝓞 E}
-    (hb : SepElt ST b) (g : UF E N × H) (e : DecoSet E N ST SG) (hge : g • e = (DecoSet.tilH (ST := ST) hN pi d).res hSG) (P : ST)
+theorem xp_til_f_core {N n : ℕ} (hN : N = n + 1) [NeZero N] {ST SG SG' : Finset (Pl E)} (hSG : SG ⊆ SG') {H : Subgroup (GLG (E := E) (n := N) (SG := SG))}
+    (d : DecoSet (E := E) (n := n) (ST := ∅) (SG := SG')) {pi : 𝓞 E} (hT : ∀ P : ST, cO E pi ∉ P.1.asIdeal) (hG : ∀ w : SG', pi ∉ w.1.asIdeal) {b : 𝓞 E}
+    (hb : SepElt ST b) (g : UF E N × H) (e : DecoSet (E := E) (n := N) (ST := ST) (SG := SG)) (hge : g • e = (DecoSet.tilH (ST := ST) hN pi d).res hSG) (P : ST)
     (x : Sp E N) (hx : x ∈ e.1.Lsh) (r : 𝓞 E)
     (hr : algebraMap (𝓞 E) E r = hStd E N (Pi.single (lastIdx N) (algebraMap (𝓞 E) E pi)) (g.1.1 x)) :
     e.1.f P x = Ideal.Quotient.mk P.1.asIdeal r := by
@@ -70,12 +113,12 @@ theorem xp_hform_one (hc : CMData F E) {N : ℕ} (x y : Fin N → E) :
   · rw [Matrix.one_apply_eq, mul_one]
     rfl
   · intro j _ hj
-    rw [Matrix.one_apply_ne (Ne.symm hj), mul_zero, zero_mul]
+    simp only [Matrix.one_apply_ne' hj, mul_zero, zero_mul]
   · intro h; exact absurd (Finset.mem_univ i) h
 
 theorem xp_til_f_coreJ (hc : CMData F E) {N n : ℕ} (hN : N = n + 1) [NeZero N] {ST SG SG' : Finset (Pl E)} (hSG : SG ⊆ SG')
-    {H : Subgroup (GLG E N SG)} (d : DecoSet E n ∅ SG') {pi : 𝓞 E} (hT : ∀ P : ST, cO E pi ∉ P.1.asIdeal)
-    (hG : ∀ w : SG', pi ∉ w.1.asIdeal) {b : 𝓞 E} (hb : SepElt ST b) (g : UF E N × H) (e : DecoSet E N ST SG)
+    {H : Subgroup (GLG (E := E) (n := N) (SG := SG))} (d : DecoSet (E := E) (n := n) (ST := ∅) (SG := SG')) {pi : 𝓞 E} (hT : ∀ P : ST, cO E pi ∉ P.1.asIdeal)
+    (hG : ∀ w : SG', pi ∉ w.1.asIdeal) {b : 𝓞 E} (hb : SepElt ST b) (g : UF E N × H) (e : DecoSet (E := E) (n := N) (ST := ST) (SG := SG))
     (hge : g • e = (DecoSet.tilH (ST := ST) hN pi d).res hSG) (P : ST) (x : Sp E N) (hx : x ∈ e.1.Lsh) (r : 𝓞 E)
     {J : Matrix (Fin N) (Fin N) E} (hJ : J = 1)
     (hr : algebraMap (𝓞 E) E r = hform (hc.sig : E →+* E) J (Pi.single (lastIdx N) (algebraMap (𝓞 E) E pi))
@@ -96,16 +139,11 @@ variable {X : Fields} {Pr : Primes X} (hc : CMData X.F X.E) (hX : X.Ok) (hPr : P
 
 section Step
 
-variable (c₀ : DiaG X.E (Pr.vT u)) (s : DecoCl n (Pr.vT u) Pr.vGs Λ.grp → DecoSet X.E n (Pr.vT u) Pr.vGs)
+variable (c₀ : DiaG (E := X.E) (ST := Pr.vT u)) (s : DecoCl n (Pr.vT u) Pr.vGs Λ.grp → DecoSet (E := X.E) (n := n) (ST := Pr.vT u) (SG := Pr.vGs))
   (hS : DecoPtSurj hc n (Pr.vT u) Pr.vGs) (hs : ∀ c, decoCls n (Pr.vT u) Pr.vGs Λ.grp (s c) = c)
   (Q : StepCrd Pr σ₀ n fun c => (s c).1.L)
 
 theorem xp_clsG_U : (clsG hc hX hPr σ₀ u Λ c₀ s hS hs Q).lev.U = levU hc n (Pr.vT u) Pr.vGs Λ.grp := by
-  obtain ⟨J, f, bad, emb, lat, l0, rfl, rfl, rfl, rfl, rfl, rfl⟩ := Q
-  rfl
-
-theorem xp_clsG_chi (x : (clsG hc hX hPr σ₀ u Λ c₀ s hS hs Q).lev.U) (hx : x.1 ∈ levU hc n (Pr.vT u) Pr.vGs Λ.grp) :
-    (clsG hc hX hPr σ₀ u Λ c₀ s hS hs Q).lev.chi x = levTyp ((Units.map σ₀.toMonoidHom).comp Λ.chr) ⟨x.1, hx⟩ := by
   obtain ⟨J, f, bad, emb, lat, l0, rfl, rfl, rfl, rfl, rfl, rfl⟩ := Q
   rfl
 
@@ -118,7 +156,7 @@ end Step
 
 section P
 
-variable (s : DecoCl n (∅ : Finset (Pl X.E)) Pr.vGs Λ.grp → DecoSet X.E n (∅ : Finset (Pl X.E)) Pr.vGs)
+variable (s : DecoCl n (∅ : Finset (Pl X.E)) Pr.vGs Λ.grp → DecoSet (E := X.E) (n := n) (ST := (∅ : Finset (Pl X.E))) (SG := Pr.vGs))
   (hS : DecoPtSurj hc n (∅ : Finset (Pl X.E)) Pr.vGs) (hs : ∀ c, decoCls n ∅ Pr.vGs Λ.grp (s c) = c)
   (Q : StepCrd Pr σ₀ n fun c => (s c).1.N)
 
@@ -138,15 +176,8 @@ variable {d : ColDat} (a : ColArgs d) (hS : SpStd d.toColBase) (hH : HostHyp d)
 abbrev ColDat.tilC (d : ColDat) (u : d.what₂.Word) (c : PCl d) : StCl (Pr := d.Pr) d.W d.lev u d.R.m :=
   tilCl (Pr := d.Pr) d.W d.lev (Finset.Subset.refl _) d.levP u c
 
-theorem tilGa_mulVec (u : d.what₂.Word) (c : PCl d) (x : Fin (d.R.N d.R.m) → d.host.E) :
-    ((d.tilGa u c : GL (Fin (d.R.N d.R.m)) d.host.E) : Matrix _ _ d.host.E) *ᵥ x = (d.tilMv u c).1.1 x := by
-  rw [← rlc_ratHom_apply d.sp.cm (d.R.N d.R.m)]
-  have : ratHom d.sp.cm (d.R.N d.R.m) (d.tilGa u c) = (d.tilMv u c).1 :=
-    (ratEquiv d.sp.cm (d.R.N d.R.m)).apply_symm_apply _
-  rw [this]
 
 include hS hH in
-set_option maxHeartbeats 1000000 in
 
 theorem xp_Ld_eq (u : d.what₂.Word) (c : StCl (Pr := d.Pr) d.W d.lev u d.R.m) :
     CF.Ld (d.colRec a) u d.R.m le_rfl c = (d.repr u d.R.m c).1.Lsh :=
@@ -154,7 +185,7 @@ theorem xp_Ld_eq (u : d.what₂.Word) (c : StCl (Pr := d.Pr) d.W d.lev u d.R.m) 
 
 variable (hP : PtSurjP d)
 
-set_option maxHeartbeats 2000000 in
+
 
 def tildeLatticeAgreement (u : d.what₂.Word) :
     CF.TilTied (D := d.colRec a) u (atTTied a hH u) (parabolicClassAgreement a hS hH hP u) (levelAgreement a hS hH u d.R.m le_rfl) where
@@ -196,19 +227,6 @@ def tilAd (u : d.what₂.Word) (hM : TilMove a u) :
       rw [← h1]; exact hg
     have h3 := (hM c).choose_spec.2 g hg'
     exact (congrArg (fun t => bc (inclE (F := d.host.F) (FiniteAdeleRing (𝓞 d.host.F) d.host.F)) (d.tilGa u c).1 * t) h2).trans h3
-
-def tieEWz (u : d.what₂.Word) : ((d.colRec a).mem u).P.Wz ≃ₗ[ℂ]
-    (((d.colRec a).fm u).clsP → ((d.colRec a).mem u).C.Y d.R.m → ℂ) := LinearEquiv.refl _ _
-
-def PerOnto (d : ColDat) (a : ColArgs d) : Prop :=
-  (∀ z ∈ (ptEv (Pr := d.Pr) d.W d.levP d.σ₀ d.star_cx).Fi, ∃ F, jMCL (Pr := d.Pr) d.W d.levP d.σ₀ d.star_cx a.rowOk F = z) ∧
-    ∀ F, jMCL (Pr := d.Pr) d.W d.levP d.σ₀ d.star_cx a.rowOk F ∈ (ptEv (Pr := d.Pr) d.W d.levP d.σ₀ d.star_cx).Fi
-
-def tieJM (u : d.what₂.Word) : ((d.colRec a).mem u).P.Mt →ₛₗ[starRingEnd ℂ] ((d.colRec a).mem u).P.Wrow :=
-  jMCL (Pr := d.Pr) d.W d.levP d.σ₀ d.star_cx a.rowOk
-
-theorem perTied (u : d.what₂.Word) (hO : PerOnto d a) : CF.PerTie (D := d.colRec a) u (tieJM a u) :=
-  ⟨hO.1, hO.2, fun w F => periodC_eq_ipCl' (Pr := d.Pr) d.W d.levP d.hX d.σ₀ d.star_cx a.rowOk w F⟩
 
 end Rec
 

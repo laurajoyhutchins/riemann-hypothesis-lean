@@ -1,56 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SemiAbelianHomExtension
-import Development.WeilBound.CoreStatements.RegularisedThetaMirabolic.CuspidalMirabolic.CuspidalMirabolic
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsPrimeMemAsIdeal
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DualityForAbsGal
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CardH1EqCardH0MulCardH2
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ComplexMultiplicationJacquetShalika
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IdealInvariantsOneOrbit
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.KFiniteVectorsIrreducibleUnitaryUnitaryGroupPQ
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.OneLeNormOneSub
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiscreteSeriesHermitianUnique
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiscreteSeriesLowestKType
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.InfinitesimalEquivalenceUnitaryGroupPQ
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.UnramifiedOrthogonality
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.PartialZetaFunctionalEquation
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.HilbertClassFieldJ
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MoyPrasadJacquetIso
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExplZeta
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DigammaBoundVerticalStrip
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IntegralLeftVerticalLineBound
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExplicitFormulaClosed
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiagonalMulMemCongruenceSubgroup
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.EllipticMainTheoremCM
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DixmierMalliavin.DixmierMalliavinFactorisationHolds
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExplChi
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DirichletLogDerivBoundLeftHalfPlane
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdmissibleUnitaryIrreducibleRep
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdmissibleOfLinearReductive
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IwasawaOfLinearReductive
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsAvoidOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HaarMeasureIwasawaQuotient
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarSubgroupBiInvariant
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsRiemannianHaarOnSubgroupMapMulRightUnitary
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IwasawaIntegrationFormulaUpToConstant
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ParabolicStabilizerHomeomorph
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetBlockChangeOfBasisViaTwoFamiliesImplicit
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspDiscreteDecompositionGL
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ImportsBis
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsEqOfNatCastMulMem
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PartialZetaFunctionalEquation
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SiegelKlingenDeligneRibet
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.MoyPrasadJacquetIsoTrivial
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesHermitianUniqueOfClassification
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesLowestKTypeOfClassification
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsClosedEmbeddingOfLocallyCompact
+public import Development.AbelianVarietyTheory.PublishedTheorems.WeberRayClassFields.WeberRayFieldSt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MoyPrasadJacquetIso
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiagonalMulMemCongruenceSubgroup
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiscreteSeriesHermitianUnique
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DiscreteSeriesLowestKType
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.EllipticMainTheoremCM
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsAvoidOne
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IdealInvariantsOneOrbit
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.PartialZetaFunctionalEquation
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DixmierMalliavin.DixmierMalliavinFactorisationHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace PositivityTheory.Prw
 
-theorem semiAbelianHomExtension_holds : GlobalTheory.Published.SemiAbelianHomExtension :=
-  GlobalTheory.CompanionTheory.SAH.semiAbelianHomExtension
-
-theorem cuspidalMirabolic_holds : GlobalTheory.Published.CuspidalMirabolic :=
-  PositivityTheory.Mirab.cuspidalMirabolic
-
 theorem idealInvariantsOneOrbitSt_holds : GlobalTheory.Published.IdealInvariantsOneOrbitSt :=
   GlobalTheory.CompanionTheory.CM.idealInvariantsOneOrbit
-
-theorem logDerOne_holds : GlobalTheory.Mem.An.LogDerOne :=
-  GlobalTheory.CompanionTheory.An.logDerOne_holds
 
 theorem discreteSeriesHermitianUnique_holds : GlobalTheory.Published.DiscreteSeriesHermitianUnique :=
   GlobalTheory.CompanionTheory.Front.discreteSeriesHermitianUnique
@@ -60,9 +67,6 @@ theorem discreteSeriesLowestKType_holds : GlobalTheory.Published.DiscreteSeriesL
 
 theorem bernsteinZelevinskyFiniteness_holds : GlobalTheory.Published.BernsteinZelevinskyFiniteness :=
   GlobalTheory.CompanionTheory.Published.bernsteinZelevinskyFiniteness
-
-theorem unramifiedOrthogonality_holds : ReciprocityTheory.Gal.UnramifiedOrthogonality :=
-  GlobalTheory.CompanionTheory.Hypotheses₂.unramifiedOrthogonality
 
 theorem partialZetaFunctionalEquation_holds : GlobalTheory.Published.PartialZetaFunctionalEquation :=
   GlobalTheory.CompanionTheory.Hypotheses₂.partialZetaFunctionalEquation

@@ -1,20 +1,84 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.HodgeTateNormComparison
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenericCentreSpecializes
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ThmFlatA
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.GagaSections
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsCoordsAtOfCoordTie
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ProjectiveLinePlaceTrivialOnConstants
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HermitianSignatureCharacterStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AdaptedSpan
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BaseConstantsRegularStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CharpolySplitsOfEmbeddingsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DvrModelOfNumberFieldPlace
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigProjMemOfFree
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLinePAdicBound
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsGermSystemStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsHodgeLatticeGermSystemStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExtFrameOfQuotientKernel
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibreCurveGermPowersStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibrePowerFreePullbackStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FiniteTypeOverIntegersModel
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GermSystemHeightFreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GlobalModelPowerFreeStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeDvrDegree
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLinePAdicBound
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeGenericAgree
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DvrModelOfNumberFieldPlace
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueEquiv
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GlobalModelPowerFreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FibrePowerFreePullbackStatement
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.AdaptedEigenbasisExists
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeGenericAgree
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeGermEigenStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeSpanIndependentStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeTransportEquivStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntersectionHiddenSecondStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeEigenVectorBundle
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueEquivStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PowFnsOfAbelianGenericStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValuationBoundedFrameStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeEqSpanOfIsFrameAt
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.AdaptedEigenbasisExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,8 +91,8 @@ open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.S
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 
-open GlobalTheory.CompanionTheory.Ar.Flat.DegZ in
 
+open GlobalTheory.CompanionTheory.Ar.Flat.DegZ in
 theorem germ_degZero_prime : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) [StarRing (𝓞 E)], (∀ a : 𝓞 E, star a = H.bar a) → ∀ (X : Scheme.{0}) (t : SAB H X) (Ω : Type) [Field Ω] [CharZero Ω] (ξ : Sp Ω ⟶ X) (d r : ℕ) (M : LieModel t.G ξ (Fin d → Ω)) (S : GermSys t ξ M) (ρ : 𝓞 E →+* Module.End Ω (Fin d → Ω)) (𝓗 : HodgeLat M.lat ρ H.bar r) (O : Type) [CommRing O] [Algebra O Ω] (O' : Type) [CommRing O'] (s : X ⟶ Sp O') [IsSeparated s] [LocallyOfFiniteType s] (p : ℕ) (σ : E →+* Ω), p.Prime → Function.Injective (algebraMap O Ω) → (∀ (q : Cpt ξ) (o : O), algebraMap O Ω o ∈ regAt ξ q) → IsCptGen ξ → PowFns t → S.Gives 𝓗 → (∀ q : Cpt ξ, (p : X.residueField q.1) = 0 → FibPF t q.1) → Nat.card (E →+* Ω) = Module.finrank ℚ E → (∀ (s' : E →+* Ω) (a : 𝓞 E), s' (a : E) ∈ (algebraMap O Ω).range) → 𝓗.DegZero σ (p : Ω) := by
   intro E _ _ _ H _ hstar X t Ω _ _ ξ d r M S ρ 𝓗 O _ _ O' _ s _ _ p σ hp hinj hreg hξ hpow hgive hfib hcard hrange
     u hu hsp Γ
@@ -218,6 +282,7 @@ theorem key_dual (𝓗 : HodgeLat L ρ bar (p + q)) {σ σ' : E →+* Ω} {v : F
   have hψinv : ∀ j, ψ j ∘ₗ HT.eigProj ρ σ' = ψ j := fun j => hinv (ψ j) (hc j ▸ hceig j)
   have hψb : ∀ j l, ψ j (b l) = if j = l then 1 else 0 := fun j l => by
     have e1 : ∀ k, φ k (b l) = Q l k := fun k => by
+
       simp only [b, map_sum, map_smul, φ, (had.2.2 k).2, smul_eq_mul, mul_ite, mul_one, mul_zero]
       simp
     have e2 : ψ j (b l) = (C * Q.transpose) j l := by
@@ -241,6 +306,7 @@ theorem key_dual (𝓗 : HodgeLat L ρ bar (p + q)) {σ σ' : E →+* Ω} {v : F
     have e2 : HT.eigProj ρ σ' z ∈ (L.inter (HT.eigSp ρ σ')) x := ⟨hL' z hz, HT.LatBasic.eigProj_mem ρ σ' z⟩
     rw [hQ.2] at e2
     obtain ⟨r, hr⟩ := (Submodule.mem_span_range_iff_exists_fun _).1 e2
+
     rw [e1, ← hr, map_sum]
     refine sum_mem fun l _ => ?_
     have e3 : ψ j ((r l) • b l) = (r l : Ω) * ψ j (b l) := by
@@ -270,8 +336,10 @@ theorem key_dual (𝓗 : HodgeLat L ρ bar (p + q)) {σ σ' : E →+* Ω} {v : F
         have e1 : θ z = θ (HT.eigProj ρ σ' z) := (LinearMap.congr_fun hθ z).symm
         have e2 : ∀ j, ψ j z = d j := fun j => by
           have : ψ j z = ψ j (HT.eigProj ρ σ' z) := (LinearMap.congr_fun (hψinv j) z).symm
+
           rw [this, ← hd, map_sum]
           simp [hψb]
+
         rw [e1, ← hd, map_sum, LinearMap.sum_apply]
         refine Finset.sum_congr rfl fun j _ => ?_
         simp only [LinearMap.smul_apply, map_smul, e2, smul_eq_mul]
@@ -322,6 +390,7 @@ theorem dualInt_mem {K E : Type} [Field K] [Field E] [NumberField E] (A : Subrin
     rw [← map_intCast σ, map_ne_zero]
     exact_mod_cast NumberField.discr_ne_zero E
   have h3 := congrArg σ h2
+
   rw [map_mul, map_intCast, map_sum] at h3
   rw [← inv_mul_cancel_left₀ h0 (σ (HT.dualInt E k)), h3]
   refine mul_mem hd (sum_mem fun j _ => ?_)
@@ -484,8 +553,6 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Da
   {Xo : Moduli D l} {c : Coeff l} {Y : Model Xo c (algebraMap (𝓞 c.F) c.F)} {S : Finset ℕ}
   {Ω : Type} [Field Ω] {K : Type} [Fintype K] {J : K → Type} [∀ k, Fintype (J k)] {y : (Σ k, J k) → Ω}
 
-theorem emb_inl (𝔐 : HodgeCpt Y S y) (τ : CMType H) : 𝔐.emb (.inl τ) = 𝔐.cst.comp (tauIn c τ.1) := rfl
-
 theorem emb_inr (𝔐 : HodgeCpt Y S y) (τ : CMType H) :
     𝔐.emb (.inr τ) = 𝔐.cst.comp (tauIn c (ComplexEmbedding.conjugate τ.1)) :=
   RingHom.ext fun a => congrArg 𝔐.cst (CptHodge.tauIn_conj c τ.1 a).symm
@@ -494,8 +561,8 @@ theorem cst_mem (𝔐 : HodgeCpt Y S y) (q : Cpt 𝔐.ξ) (o : 𝓞 c.F) : 𝔐.
   letI algΩ : Algebra (𝓞 c.F) Ω := (𝔐.cst.comp (algebraMap (𝓞 c.F) c.F)).toAlgebra
   exact GlobalTheory.T.base_constants_regular 𝔐.X Ω 𝔐.ξ (𝓞 c.F) (𝔐.f ≫ Y.s) 𝔐.cst_over q o
 
-open CptHodge in
 
+open CptHodge in
 theorem exists_hodgeLat (𝔐 : HodgeCpt Y S y)
     (hFibY : ∀ (p : ℕ), p.Prime → ∀ z : Y.X, (p : Y.X.residueField z) = 0 → FibPF Y.t z) (p : ℕ) (hp : p.Prime) :
     ∃ 𝓗 : HodgeLat 𝔐.M.lat 𝔐.ρ H.bar (D.p + D.q), ∀ σ : E →+* Ω, 𝓗.DegZero σ (p : Ω) := by

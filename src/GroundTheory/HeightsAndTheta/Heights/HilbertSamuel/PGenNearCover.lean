@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenNearCover
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGradedSubmodules
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenNearCover
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGradedSubmodules
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -19,8 +68,8 @@ variable {S : Type*} [CommRing S] {K : Type*} [Fintype K] [DecidableEq K] {ι : 
 
 def blockDeg (p : Σ k, ι k) : K → ℕ := Pi.single p.1 1
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem weight_blockDeg_apply [∀ k, Fintype (ι k)] (m : (Σ k, ι k) →₀ ℕ) (k : K) :
     Finsupp.weight (blockDeg (ι := ι)) m k = ∑ i, m ⟨k, i⟩ := by
   rw [Finsupp.weight_apply, Finsupp.sum_fintype _ _ (by intro; simp), Finset.sum_apply,
@@ -40,9 +89,8 @@ theorem isWeightedHomogeneous_iff {f : MRingOver S ι} {a : K → ℕ} :
     rw [weight_blockDeg_apply]
     exact h m (mem_support_iff.2 hm) k
 
-omit [∀ k, Fintype (ι k)] in
-open Classical in
 
+open Classical in
 theorem component_mul {g f : MRingOver S ι} {E : K → ℕ}
     (hf : IsWeightedHomogeneous (blockDeg (ι := ι)) f E) (D : K → ℕ) :
     weightedHomogeneousComponent (blockDeg (ι := ι)) D (g * f) =
@@ -78,25 +126,25 @@ theorem isMultiHomogIdeal_of_mem_minimalPrimes {J W : Ideal (MRingOver S ι)} (h
   cyc_isMultiHomogIdeal_of_isHomogeneous fun k =>
     cyc_isHomogeneous_of_mem_minimalPrimes _ (cyc_isHomogeneous_of_isMultiHomogIdeal hJ k) hW
 
-omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 
+omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 def cellProd (S : Type*) [CommRing S] (I : ∀ k, Finset (ι k)) : MRingOver S ι :=
   ∏ k, ∏ i ∈ I k, X ⟨k, i⟩
 
-omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 
+omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 theorem cellProd_mem (I : ∀ k, Finset (ι k)) : cellProd S I ∈ KH.cellMon S I :=
   Submonoid.prod_mem _ fun k _ => Submonoid.prod_mem _ fun i hi => Submonoid.subset_closure ⟨k, i, hi, rfl⟩
 
-omit [∀ k, Fintype (ι k)] in
 
+omit [∀ k, Fintype (ι k)] in
 theorem cellProd_isWeightedHomogeneous (I : ∀ k, Finset (ι k)) :
     IsWeightedHomogeneous (blockDeg (ι := ι)) (cellProd S I) (∑ k, ∑ i ∈ I k, blockDeg ⟨k, i⟩) :=
   IsWeightedHomogeneous.prod _ _ _ fun _ _ =>
     IsWeightedHomogeneous.prod _ _ _ fun _ _ => isWeightedHomogeneous_X (R := S) _ _
 
-omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 
+omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 theorem isRelevant_of_cellProd_notMem {I : ∀ k, Finset (ι k)} (hI : ∀ k, (I k).Nonempty)
     {W : Ideal (MRingOver S ι)} (hW : cellProd S I ∉ W) : IsRelevant W := by
   intro k
@@ -110,8 +158,8 @@ theorem isRelevant_of_cellProd_notMem {I : ∀ k, Finset (ι k)} (hI : ∀ k, (I
   rw [hc]
   exact W.mul_mem_right c hX
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem exists_isClosedMultiPt_ge [IsNoetherianRing S] {W : Ideal (MRingOver S ι)} (hW : IsMultiProjPrime W) :
     ∃ Q, IsClosedMultiPt Q ∧ W ≤ Q := by
   obtain ⟨Q, ⟨hQ, hWQ⟩, hmax⟩ :=
@@ -121,8 +169,8 @@ theorem exists_isClosedMultiPt_ge [IsNoetherianRing S] {W : Ideal (MRingOver S �
   by_contra hne
   exact hmax Q' ⟨hQ', hWQ.trans hle⟩ (lt_of_le_of_ne hle (Ne.symm hne))
 
-omit [Fintype K] [DecidableEq K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [DecidableEq K] [∀ k, Fintype (ι k)] in
 theorem smul_eq_zero_of_mem_annihilator {M : Type*} [AddCommGroup M] [Module (MRingOver S ι) M]
     {T : Submonoid (MRingOver S ι)} {v : MRingOver S ι} (hv : v ∈ Module.annihilator (MRingOver S ι) M)
     (y : LocalizedModule T M) : v • y = 0 := by
@@ -131,8 +179,8 @@ theorem smul_eq_zero_of_mem_annihilator {M : Type*} [AddCommGroup M] [Module (MR
 
 end GenNearCover
 
-open GenNearCover in
 
+open GenNearCover in
 theorem GenNearCover.proof (hG : GradedSubmodules.Statement) : GenNearCover.Statement := by
   intro S _ K _ _ ι _ _ V M _ _ _ _ 𝓜 deg hS hgr hV hP
   classical
@@ -199,7 +247,8 @@ theorem GenNearCover.proof (hG : GradedSubmodules.Statement) : GenNearCover.Stat
           rw [weightedHomogeneousComponent_of_mem ((mem_weightedHomogeneousSubmodule _ _ _ _).2 hXk), if_pos rfl]
       _ = weightedHomogeneousComponent (blockDeg (ι := ι)) D (v + ∑ P, g P * F P.1 ^ N) := by rw [hg, hvy]
       _ = _ := by
-          rw [map_add, map_sum]
+
+          rw [map_add (f := _), map_sum]
           congr 1
           refine Finset.sum_congr rfl fun P _ => ?_
           rw [component_mul (hFN P) D]

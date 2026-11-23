@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Function.LpSpace.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Operator.Extend
+
+@[expose] public section
+
 open MeasureTheory
 
 namespace GlobalTheory
@@ -7,6 +56,7 @@ theorem lintegral_enorm_sq_Lp {Q E : Type} [MeasurableSpace Q] [NormedAddCommGro
     (ν : Measure Q) (f : Lp E 2 ν) :
     ∫⁻ x, ‖f x‖ₑ ^ 2 ∂ν = ENNReal.ofReal (‖f‖ ^ 2) := by
   have h := eLpNorm_nnreal_pow_eq_lintegral (f := f) (μ := ν) (p := 2) (by norm_num)
+    (Lp.aestronglyMeasurable f)
   rw [ENNReal.ofReal_pow (norm_nonneg _), Lp.norm_def, ENNReal.ofReal_toReal (Lp.eLpNorm_ne_top f)]
   simp only [NNReal.coe_ofNat, ENNReal.coe_ofNat, ENNReal.rpow_ofNat] at h
   exact h.symm
@@ -14,9 +64,10 @@ theorem lintegral_enorm_sq_Lp {Q E : Type} [MeasurableSpace Q] [NormedAddCommGro
 theorem eLpNorm_two_le_of_lintegral {Q E : Type} [MeasurableSpace Q] [NormedAddCommGroup E]
     (ν : Measure Q) (g : Q → E) (B : ℝ) (hB : 0 ≤ B)
     (h : ∫⁻ x, ‖g x‖ₑ ^ 2 ∂ν ≤ ENNReal.ofReal (B ^ 2)) :
-    eLpNorm g 2 ν ≤ ENNReal.ofReal B := by
-  have e := eLpNorm_nnreal_pow_eq_lintegral (f := g) (μ := ν) (p := 2) (by norm_num)
-  simp only [NNReal.coe_ofNat, ENNReal.coe_ofNat, ENNReal.rpow_ofNat] at e
+    eLpNorm' g 2 ν ≤ ENNReal.ofReal B := by
+  have e := lintegral_rpow_eNorm_eq_rpow_eLpNorm' (f := g) (μ := ν) (q := 2) (by norm_num)
+  simp only [ENNReal.rpow_ofNat] at e
+  have e := e.symm
   rw [← e, ENNReal.ofReal_pow hB] at h
   exact (ENNReal.pow_le_pow_left_iff two_ne_zero).1 h
 
@@ -88,9 +139,12 @@ theorem extend_ae_linear_of_local_sq : ∀ {X : Type} [MeasurableSpace X] (μ : 
           nlinarith [mul_nonneg (pow_nonneg (by norm_num : (0:ℝ) ≤ 2⁻¹) n) (sq_nonneg ‖u‖)]
   have hae : ∀ u ∈ D, AEStronglyMeasurable (F u) ν := fun u hu =>
     aestronglyMeasurable_sum_measure_iff.2 fun n => (hC n u hu).1.smul_measure _
-  have hmem : ∀ u ∈ D, MemLp (F u) 2 ν := fun u hu =>
-    ⟨hae u hu, (eLpNorm_two_le_of_lintegral ν _ _ (by positivity) (hsq u hu)).trans_lt
-      ENNReal.ofReal_lt_top⟩
+  have hmem : ∀ u ∈ D, MemLp (F u) 2 ν := by
+    intro u hu
+    have hb : eLpNorm (F u) 2 ν ≤ ENNReal.ofReal (Real.sqrt 2 * ‖u‖) := by
+      rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) (hae u hu)]
+      exact eLpNorm_two_le_of_lintegral ν _ _ (by positivity) (hsq u hu)
+    exact hb.trans_lt ENNReal.ofReal_lt_top
   let L : D →ₗ[ℂ] Lp E 2 ν :=
     { toFun := fun u => (hmem u u.2).toLp (F u)
       map_add' := fun u v => by
@@ -103,8 +157,9 @@ theorem extend_ae_linear_of_local_sq : ∀ {X : Type} [MeasurableSpace X] (μ : 
   have hLb : ∃ c, ∀ u : D, ‖L u‖ ≤ c * ‖D.subtype u‖ := by
     refine ⟨Real.sqrt 2, fun u => ?_⟩
     rw [show L u = (hmem u u.2).toLp (F u) from rfl, Lp.norm_toLp]
-    exact ENNReal.toReal_le_of_le_ofReal (by positivity)
-      (eLpNorm_two_le_of_lintegral ν _ _ (by positivity) (hsq u u.2))
+    apply ENNReal.toReal_le_of_le_ofReal (by positivity)
+    rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) (hae u u.2)]
+    exact eLpNorm_two_le_of_lintegral ν _ _ (by positivity) (hsq u u.2)
   have hdense : DenseRange D.subtype := hD.denseRange_val
   set Ext : H →L[ℂ] Lp E 2 ν := L.extendOfNorm D.subtype with hExtdef
   have hExt : ∀ u (hu : u ∈ D), Ext u = (hmem u hu).toLp (F u) := fun u hu => by
@@ -125,7 +180,7 @@ theorem extend_ae_linear_of_local_sq : ∀ {X : Type} [MeasurableSpace X] (μ : 
   · refine hμν.ae_le ?_
     filter_upwards [hTae (u + u'), hTae u, hTae u', Lp.coeFn_add (Ext u) (Ext u')]
       with x h1 h2 h3 h4
-    rw [h1, map_add, h4, Pi.add_apply, ← h2, ← h3]
+    rw [h1, map_add (f := _), h4, Pi.add_apply, ← h2, ← h3]
   · refine hμν.ae_le ?_
     filter_upwards [hTae (b • u), hTae u, Lp.coeFn_smul b (Ext u)] with x h1 h2 h4
     rw [h1, map_smul, h4, Pi.smul_apply, ← h2]

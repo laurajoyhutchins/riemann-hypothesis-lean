@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 open scoped NNReal ENNReal
@@ -59,11 +105,13 @@ def Free (p : ℕ) : (n ⊕ Fin c) × (n' ⊕ Fin (c + 1)) → Prop
 def basePt (c : ℕ) (x₀ : Matrix n n' k) : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k :=
   fromBlocks x₀ 0 0 (Matrix.of fun l i => if l.val = i.val then 1 else 0)
 
-open Classical in
 
+open Classical in
 def affPt (p : ℕ) (x₀ : Matrix n n' k) (e : {rs : (n ⊕ Fin c) × (n' ⊕ Fin (c + 1)) // Free p rs} → k) :
     Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k :=
-  basePt c x₀ + Matrix.of fun r s => if h : Free p (r, s) then e ⟨(r, s), h⟩ else 0
+  by
+    classical
+    exact basePt c x₀ + Matrix.of fun r s => if h : Free p (r, s) then e ⟨(r, s), h⟩ else 0
 
 def ch (x : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k) : k := ∑ i : Fin c, x (Sum.inr i) (Sum.inr i.succ)
 
@@ -86,14 +134,16 @@ def exUp (ν : Measure k) (p : ℕ) (σ : Representation ℂ (GL (n ⊕ Fin c) k
 def exDown (ν : Measure k) (p : ℕ) (σ : Representation ℂ (GL (n ⊕ Fin c) k) A) (l : A → ℂ) (v : A) : ℂ :=
   ∫ β : n → k, l (σ (colE c (p + 1) β) v) ∂(Measure.pi fun _ => ν)
 
-open Classical in
 
+open Classical in
 def opE (ψ : AddChar k Circle) (ν : Measure k) (p : ℕ) (Φ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ)
     (x₀ : Matrix n n' k) : ℂ :=
-  ∫ e, Φ (affPt p x₀ e) * (ψ (-ch (affPt p x₀ e)) : ℂ) ∂(Measure.pi fun _ => ν)
+  by
+    classical
+    exact ∫ e, Φ (affPt p x₀ e) * (ψ (-ch (affPt p x₀ e)) : ℂ) ∂(Measure.pi fun _ => ν)
+
 
 open Classical in
-
 def volN (ν : Measure k) (n : Type*) [Fintype n] [DecidableEq n] (c p : ℕ) : Measure (N k n c p) :=
   (Measure.pi fun _ : {rs : (n ⊕ Fin c) × (n ⊕ Fin c) // lev p rs.1 < lev p rs.2} => ν).comap
     fun g rs => (g : GL (n ⊕ Fin c) k).val rs.1.1 rs.1.2

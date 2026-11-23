@@ -1,20 +1,74 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StAvDefs
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CardOrthogonalIdempotentsLeNcardPrimesOver
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPowOfFiniteField
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPrimitiveIdempotentMapEqOne
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IdempotentEmbeddingsCard
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EmbeddingsCongruentEq
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TauBasisUnitDeterminant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Jets.DepthNumbersThresholdEq
 import Development.AbelianVarietyTheory.Definitions.Jets.IsSelfOf
-import Development.AbelianVarietyTheory.Definitions.Jets.TwoPlaces
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CardOrthogonalIdempotentsLeNcardPrimesOver
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IdempotentEmbeddingsCard
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPrimitiveIdempotentMapEqOne
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsPowOfFiniteField
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EmbeddingsCongruentEq
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TauBasisUnitDeterminant
+import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
+import Formalism.IncomingBounds.IncomingBound
+import Formalism.LocalToGlobal.CharacterGerms.GeNatCast
+import Formalism.LocalToGlobal.Divisibility.Numbers
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open scoped BigOperators TensorProduct
 open Classical NumberField IsDedekindDomain Formalism.L2.FormalSeriesBounds Formalism.IncomingBounds Formalism.L2.Pj Formalism.L2.DIV Formalism.BasicNotions GlobalTheory.RowLaw GlobalTheory.RowAt GlobalTheory.GoodDepth
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ
 
 namespace GlobalTheory.OrbitPlace
 
-open ReciprocityTheory.ChartRestriction.G.Pdiv.AvDefs in
 
+open ReciprocityTheory.ChartRestriction.G.Pdiv.AvDefs in
 theorem mem_emb_of_congr_pow (A : Type) [CommRing A] (p : ℕ) [Fact p.Prime] (O : Type)
     [CommRing O] [IsLocalRing O] [Algebra ℤ_[p] O] (hp : ¬ IsUnit (p : O))
     (e : ℤ_[p] ⊗[ℤ] A) (he : e * e = e) (σ σ' : A →+* O)
@@ -27,7 +81,7 @@ theorem mem_emb_of_congr_pow (A : Type) [CommRing A] (p : ℕ) [Fact p.Prime] (O
       IsLocalRing.residue O (tauExt ρ e) = IsLocalRing.residue O (ρ x) := by
     intro ρ
     have h1 : tauExt (p := p) ρ ((1 : ℤ_[p]) ⊗ₜ[ℤ] x) = ρ x := by simp [tauExt]
-    rw [hx, map_add, map_mul, map_natCast, h1, map_add, map_mul, hp0, zero_mul, zero_add]
+    rw [hx, map_add (f := _), map_mul, map_natCast, h1, map_add (f := _), map_mul, hp0, zero_mul, zero_add]
   have h1 : IsLocalRing.residue O (σ x) = 1 := by
     have : tauExt σ e = 1 := hσ
     rw [← key, this, map_one]

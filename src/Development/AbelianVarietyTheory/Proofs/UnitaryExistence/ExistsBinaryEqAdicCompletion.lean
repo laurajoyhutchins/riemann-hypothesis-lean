@@ -1,7 +1,61 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsEqTransposeMulMapOfIdempotent
+module
+
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsEqTransposeMulMapOfIdempotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.MetricSpace.Contracting
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Mathlib.Topology.Algebra.Valued.NormedValued
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors
@@ -59,7 +113,7 @@ theorem exists_binary_eq_adicCompletion {F : Type*} [Field F] [NumberField F]
   obtain ⟨s, rfl⟩ := Ideal.Quotient.mk_surjective s
   have hN : u - (r ^ 2 + a * r * s + n * s ^ 2) ∈ v.asIdeal := by
     rw [← Ideal.Quotient.eq]
-    simpa only [map_add, map_mul, map_pow] using hrs.symm
+    simpa only [map_add (f := _), map_mul, map_pow] using hrs.symm
   have hN' : r ^ 2 + a * r * s + n * s ^ 2 ∉ v.asIdeal := fun h => hu (by
     simpa using v.asIdeal.add_mem hN h)
   set φ : 𝓞 F →+* v.adicCompletion F := (algebraMap F _).comp (algebraMap (𝓞 F) F) with hφ
@@ -84,7 +138,7 @@ theorem exists_binary_eq_adicCompletion {F : Type*} [Field F] [NumberField F]
     (e := φ (u - (r ^ 2 + a * r * s + n * s ^ 2)) / φ (r ^ 2 + a * r * s + n * s ^ 2))
     (by rw [norm_neg, norm_div, hD1, div_one]; exact hle n)
     (by rw [norm_div, hN1, div_one]; exact hlt _ hN)
-  simp only [map_sub, map_add, map_mul, map_pow, map_ofNat] at ht hD0 hN0
+  simp only [map_sub, map_add (f := _), map_mul, map_pow, map_ofNat] at ht hD0 hN0
   change ∃ r' s', r' ^ 2 + φ a * r' * s' + φ n * s' ^ 2 = φ u
   generalize φ a = A, φ n = N, φ u = U, φ r = R, φ s = S at *
   obtain ⟨y, hy⟩ : ∃ y, (A ^ 2 - 4 * N) * y = 1 := ⟨_, mul_inv_cancel₀ hD0⟩
@@ -111,14 +165,13 @@ theorem exists_sub_notMem {A B : Type*} [CommRing A] [CommRing B] [IsDomain B] [
   have h1 : ∀ z, Algebra.TensorProduct.lmul' A z - ψ z ∈ P := by
     intro z
     induction z with
-    | zero => simp
     | tmul x y =>
       simp only [hψ, Algebra.TensorProduct.productMap_apply_tmul, AlgHom.id_apply,
         Algebra.TensorProduct.lmul'_apply_tmul, ← mul_sub]
       exact P.mul_mem_left _ (hcon y)
     | add x y hx hy =>
       have := P.add_mem hx hy
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       convert this using 1
       ring
   have := h1 t
@@ -187,7 +240,7 @@ theorem exists_coords (H : Host E) (z : E) : ∃ α β : maximalRealSubfield E,
   refine ⟨⟨(z + IsCMField.complexConj E z) / 2, (IsCMField.complexConj_eq_self_iff E _).1 ?_⟩,
     ⟨(z - IsCMField.complexConj E z) / (2 * H.rt), (IsCMField.complexConj_eq_self_iff E _).1 ?_⟩,
     ?_, ?_⟩
-  · simp only [map_div₀, map_add, map_ofNat, IsCMField.complexConj_apply_apply, add_comm]
+  · simp only [map_div₀, map_add (f := _), map_ofNat, IsCMField.complexConj_apply_apply, add_comm]
   · simp only [map_div₀, map_sub, map_mul, map_ofNat, IsCMField.complexConj_apply_apply,
       complexConj_rt]
     field_simp
@@ -314,7 +367,7 @@ theorem exists_eq_sq_add_of_notMem (H : Host E)
   have hcc : ∀ y, IsCMField.ringOfIntegersComplexConj E (IsCMField.ringOfIntegersComplexConj E y)
       = y := fun y => RingOfIntegers.ext (IsCMField.complexConj_apply_apply E (y : E))
   obtain ⟨a, ha⟩ := (IsCMField.ringOfIntegersComplexConj_eq_self_iff E
-    (w + IsCMField.ringOfIntegersComplexConj E w)).1 (by rw [map_add, hcc, add_comm])
+    (w + IsCMField.ringOfIntegersComplexConj E w)).1 (by rw [map_add (f := _), hcc, add_comm])
   obtain ⟨n, hn⟩ := (IsCMField.ringOfIntegersComplexConj_eq_self_iff E
     (w * IsCMField.ringOfIntegersComplexConj E w)).1 (by rw [map_mul, hcc, mul_comm])
   have hD : a ^ 2 - 4 * n ∉ v.asIdeal := by
@@ -332,7 +385,7 @@ theorem exists_eq_sq_add_of_notMem (H : Host E)
   have hn' : (n : maximalRealSubfield E) = α ^ 2 + H.d * β ^ 2 :=
     Subtype.ext ((congrArg (algebraMap (𝓞 E) E) hn).trans hβ.symm)
   rw [ha', hn'] at hrs
-  simp only [map_add, map_mul, map_pow, map_ofNat, map_natCast] at hrs
+  simp only [map_add (f := _), map_mul, map_pow, map_ofNat, map_natCast] at hrs
   refine ⟨r + algebraMap (maximalRealSubfield E) _ α * s,
     algebraMap (maximalRealSubfield E) _ β * s, ?_⟩
   linear_combination -hrs
@@ -341,14 +394,14 @@ end GlobalTheory.LocalNorm
 
 namespace GlobalTheory
 
-open LocalNorm in
 
+open LocalNorm in
 theorem local_norm_of_ideal_norm : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (x : maximalRealSubfield E), x ≠ 0 → (∃ I J : Ideal (𝓞 E), I ≠ ⊥ ∧ J ≠ ⊥ ∧ FractionalIdeal.spanSingleton (𝓞 E)⁰ ((x : E)) * ((I * I.map (H.bar : 𝓞 E →+* 𝓞 E) : Ideal (𝓞 E)) : FractionalIdeal (𝓞 E)⁰ E) = ((J * J.map (H.bar : 𝓞 E →+* 𝓞 E) : Ideal (𝓞 E)) : FractionalIdeal (𝓞 E)⁰ E)) → (∀ v : IsDedekindDomain.HeightOneSpectrum (𝓞 (maximalRealSubfield E)), ∃ a b : v.adicCompletion (maximalRealSubfield E), algebraMap (maximalRealSubfield E) (v.adicCompletion (maximalRealSubfield E)) x = a ^ 2 - algebraMap (maximalRealSubfield E) (v.adicCompletion (maximalRealSubfield E)) (-(H.d : maximalRealSubfield E)) * b ^ 2) := by
   rintro E _ _ _ H x hx ⟨I, J, hI, hJ, h⟩ v
-  obtain ⟨z₁, z₂, u, hz, hu, hxu⟩ := exists_mul_norm_eq x hx hI hJ _ H.bar_eq h v
-  obtain ⟨a₀, b₀, h₀⟩ := exists_eq_sq_add_of_notMem H v hu
-  obtain ⟨a₁, b₁, -, h₁⟩ := exists_coords H z₁
-  obtain ⟨a₂, b₂, -, h₂⟩ := exists_coords H z₂
+  obtain ⟨z₁, z₂, u, hz, hu, hxu⟩ := LocalNorm.exists_mul_norm_eq x hx hI hJ _ H.bar_eq h v
+  obtain ⟨a₀, b₀, h₀⟩ := LocalNorm.exists_eq_sq_add_of_notMem H v hu
+  obtain ⟨a₁, b₁, -, h₁⟩ := LocalNorm.exists_coords H z₁
+  obtain ⟨a₂, b₂, -, h₂⟩ := LocalNorm.exists_coords H z₂
   have hne : a₁ ^ 2 + H.d * b₁ ^ 2 ≠ 0 := fun h0 => by
     rw [h0] at h₁
     exact mul_ne_zero hz ((map_ne_zero _).2 hz) h₁.symm
@@ -357,8 +410,8 @@ theorem local_norm_of_ideal_norm : ∀ (E : Type) [Field E] [NumberField E] [IsC
     exact Subtype.ext hxu
   have hv := congrArg (algebraMap _ (v.adicCompletion (maximalRealSubfield E))) hF
   have hne' := (map_ne_zero (algebraMap _ (v.adicCompletion (maximalRealSubfield E)))).2 hne
-  simp only [map_add, map_mul, map_pow, map_natCast, h₀] at hv hne'
-  obtain ⟨a, b, hab⟩ := exists_eq_sq_add_of_mul_eq hne' hv
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast, h₀] at hv hne'
+  obtain ⟨a, b, hab⟩ := LocalNorm.exists_eq_sq_add_of_mul_eq hne' hv
   exact ⟨a, b, by rw [hab, map_neg, map_natCast]; ring⟩
 
 end GlobalTheory

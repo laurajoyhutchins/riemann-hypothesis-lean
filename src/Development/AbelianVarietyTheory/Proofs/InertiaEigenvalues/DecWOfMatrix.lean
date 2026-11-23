@@ -1,10 +1,49 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroEqZeroIff
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBasisDD
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc GlobalTheory.Decompl
 open scoped TensorProduct
@@ -25,7 +64,7 @@ private theorem tensorProduct_map_algHom_smul {O A M N : Type} [CommRing O] [Com
     rw [TensorProduct.smul_tmul', TensorProduct.map_tmul, TensorProduct.map_tmul,
       TensorProduct.smul_tmul', AlgHom.toLinearMap_apply, AlgHom.toLinearMap_apply, smul_eq_mul,
       smul_eq_mul, map_mul]
-  | add x y hx hy => rw [smul_add, map_add, hx, hy, map_add, smul_add]
+  | add x y hx hy => rw [smul_add, map_add (f := _), hx, hy, map_add (f := _), smul_add]
 
 private theorem coeffs_eq_of_sum_smul_eq_of_span_eq {R M : Type} [CommRing R] [AddCommGroup M] [Module R M] {n : ℕ}
     (B : Module.Basis (Fin n) R M) (c : Fin n → M) (hc : Submodule.span R (Set.range c) = ⊤)
@@ -80,6 +119,7 @@ theorem decW_of_matrix (S : Sit) (E : S.Comparison₂)
   have hexp : ∀ x : S.W.DD T, E.jD T x = ∑ i, E.ioE (bD.repr x i) • E.jD T (bD i) := by
     intro x
     conv_lhs => rw [← bD.sum_repr x]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ => E.jD_smul T _ _
   have hspan : Submodule.span S.RW (Set.range fun i => E.jD T (bD i)) = ⊤ := by
@@ -107,6 +147,7 @@ theorem decW_of_matrix (S : Sit) (E : S.Comparison₂)
   have hact : ∀ g ∈ Hker S, ∀ v : Fin d → S.RW,
       TWact (S.gR g) T g (∑ i, v i • E.jD T (bD i)) = ∑ i, S.gR g (v i) • E.jD T (bD i) := by
     intro g hg v
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ => by rw [actS, hfix g hg]
   have hinv : ∀ v : Fin d → S.RW,
@@ -126,6 +167,7 @@ theorem decW_of_matrix (S : Sit) (E : S.Comparison₂)
   have hφ : ∀ z : Fin d → S.RW, TWmap S.φR T (∑ k, z k • E.jD T (bD k)) =
       ∑ i, (∑ k, E.ioE (bD.repr (S.W.φD T (bD k)) i) * S.φR (z k)) • E.jD T (bD i) := by
     intro z
+
     rw [map_sum]
     simp only [mapS, hk, Finset.smul_sum, smul_smul]
     rw [Finset.sum_comm]
@@ -143,6 +185,7 @@ theorem decW_of_matrix (S : Sit) (E : S.Comparison₂)
     · intro hv
       choose e he using hv
       refine ⟨∑ i, e i • bD i, ?_⟩
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun i _ => by rw [E.jD_smul, he i]
 

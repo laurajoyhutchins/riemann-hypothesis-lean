@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ExistsRingEquivExtendOfIsTranscendenceBasis
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+public import GroundTheory.GlobalFields.ComplexMultiplication.ExistsRingEquivExtendOfIsTranscendenceBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Minpoly.IsConjRoot
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.Hom.Rat
+public import Mathlib.RingTheory.AlgebraicIndependent.AlgebraicClosure
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -9,8 +64,8 @@ section General
 
 variable {Ω : Type*} [Field Ω] [IsAlgClosed Ω] {F : Type*} [Field F] [Algebra F Ω]
 
-omit [IsAlgClosed Ω] in
 
+omit [IsAlgClosed Ω] in
 theorem IsTranscendenceBasis.extendScalars_of_isAlgebraic {E : Type*} [Field E] [Algebra F E]
     [Algebra E Ω] [IsScalarTower F E Ω] [Algebra.IsAlgebraic F E] {ι : Type*} {v : ι → Ω}
     (hv : IsTranscendenceBasis F v) : IsTranscendenceBasis E v := by
@@ -89,15 +144,15 @@ theorem infinite_range_apply_of_transcendental {x : Ω} (hx : Transcendental ℚ
     induction n with
     | zero => simp
     | succ n ih =>
-      rw [pow_succ', AlgEquiv.mul_apply, ih, map_add, hσ, map_natCast]
+      rw [pow_succ', AlgEquiv.mul_apply, ih, map_add (f := _), hσ, map_natCast]
       push_cast; ring
   refine Set.infinite_of_injective_forall_mem (f := fun n : ℕ => x + n) ?_ fun n =>
     ⟨(σ ^ n).toRingEquiv, hpow n⟩
   intro m n hmn
   exact_mod_cast add_left_cancel hmn
 
-omit [IsAlgClosed Ω] in
 
+omit [IsAlgClosed Ω] in
 theorem finite_range_apply_of_isAlgebraic {x : Ω} (hx : IsAlgebraic ℚ x) :
     (Set.range fun σ : Ω ≃+* Ω => σ x).Finite := by
   refine ((minpoly ℚ x).rootSet_finite Ω).subset ?_

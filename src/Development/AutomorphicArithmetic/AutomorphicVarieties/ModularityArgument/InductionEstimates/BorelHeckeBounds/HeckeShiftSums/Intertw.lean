@@ -1,14 +1,64 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.BorelHeckeBounds.Full
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecCrit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecFun
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BfFun
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SwapInt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.LongCell
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdMeas
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.UnipotentBlockPairs
+import Aesop.Main
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.RepsIntegralMemClosedSubmodule
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.AdMeas
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BfFun
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.BlkInvVal
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.HpSpec
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecStr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.RepsIntegralMemClosedSubmodule
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.LongCell
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.PkLaws
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecCrit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.SecFun
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.UnipBlocks
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.Carries
+
+@[expose] public section
 
 open MeasureTheory NumberField Set Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -256,10 +306,10 @@ private theorem lvc₁ (a : G1 K 2) : Continuous fun m : G1 K 2 => lv m a 0 := b
 
 end UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.Cell
 
-set_option maxHeartbeats 1000000 in
+
 open UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.Cell in
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.intertw :
-    ∀ {K : Type} [Field K] [NumberField K] [IsTotallyComplex K] (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)) (D : TypeDat K (2 + 2)), CuspIrr μ₂ τ₁ → CuspIrr μ₂ τ₂ →
+    ∀ {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (μ₂ : Measure (G1 K 2)) [μ₂.IsHaarMeasure] (τ₁ τ₂ : Submodule ℂ (L2 μ₂)) (D : TypeDat K (2 + 2)), CuspIrr μ₂ τ₁ → CuspIrr μ₂ τ₂ →
       ∀ (f : G1 K (2 + 2) → ℂ) (β : ℝ → ℂ) (s : ℝ), IsSec τ₁ τ₂ f → D.Fix f → Continuous β → HasCompactSupport β →
         IsSec τ₂ τ₁ (fun g => ∫ X, bf β f (w0 K * nn X * (lv 1 1 (s - HH g) * g)) ∂unipMeasure K (2 + 2) 2) ∧
         D.Fix fun g => ∫ X, bf β f (w0 K * nn X * (lv 1 1 (s - HH g) * g)) ∂unipMeasure K (2 + 2) 2 := by
@@ -303,12 +353,10 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.intertw :
     rw [hTk g k hk]
   have hP₁ : ∀ γ ∈ Gam K 2, lv γ 1 0 ∈ PK K := fun γ hγ =>
     (pkLaws (K := K)).2.1 _ |>.2 ⟨0, ⟨γ, hγ⟩, 1, by
-      rw [show nn (0 : unipLattice K (2 + 2) 2).1 = 1 from unipOne_zero 2, one_mul]
-      rfl⟩
+      simp [unipOne_zero]⟩
   have hP₂ : ∀ γ ∈ Gam K 2, lv 1 γ 0 ∈ PK K := fun γ hγ =>
     (pkLaws (K := K)).2.1 _ |>.2 ⟨0, 1, ⟨γ, hγ⟩, by
-      rw [show nn (0 : unipLattice K (2 + 2) 2).1 = 1 from unipOne_zero 2, one_mul]
-      rfl⟩
+      simp [unipOne_zero]⟩
   refine ⟨(secCrit μ₂ τ₂ τ₁ D h₂ h₁ _ hfix).2 ⟨?_, ?_, ?_, ?_, ?_⟩, hfix⟩
   · have hΦc : Continuous Φ := by
       rw [hΦ]
@@ -353,7 +401,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.intertw :
         (fun y => by
           obtain ⟨v, hv, hr⟩ := (hsl y).2 m₂
           refine ⟨w (HH y) • v, τ₂.smul_mem _ hv, ?_⟩
-          filter_upwards [(quasiMeasurePreserving_mk (Gam K 2) μ₂).ae (Lp.coeFn_smul (w (HH y)) v), hr] with m e1 e2
+          filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae (quasiMeasurePreserving_mk (Gam K 2) μ₂) (Lp.coeFn_smul (w (HH y)) v), hr] with m e1 e2
           rw [e1, Pi.smul_apply, e2, hbf, hh_lv, zero_add, smul_eq_mul])
         (T g)
       simpa only [key] using this
@@ -366,7 +414,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.intertw :
         (fun y => by
           obtain ⟨v, hv, hr⟩ := (hsl y).1 m₁
           refine ⟨w (HH y) • v, τ₁.smul_mem _ hv, ?_⟩
-          filter_upwards [(quasiMeasurePreserving_mk (Gam K 2) μ₂).ae (Lp.coeFn_smul (w (HH y)) v), hr] with m e1 e2
+          filter_upwards [MeasureTheory.QuasiMeasurePreserving.ae (quasiMeasurePreserving_mk (Gam K 2) μ₂) (Lp.coeFn_smul (w (HH y)) v), hr] with m e1 e2
           rw [e1, Pi.smul_apply, e2, hbf, hh_lv, zero_add, smul_eq_mul])
         (T g)
       simpa only [key] using this

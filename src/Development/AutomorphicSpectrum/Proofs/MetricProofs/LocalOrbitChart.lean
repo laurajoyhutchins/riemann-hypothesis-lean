@@ -1,7 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsLocalOrbitChart
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PLevelSetLocalInj
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsAnalyticLogResolution
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsLocalOrbitChart
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ConeChartB
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsAnalyticLogResolution
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PLevelSetLocalInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterAlgRes
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterMinor
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,7 +69,7 @@ theorem exists_injective_linear {W : Type} [AddCommGroup W] [Module ℂ W] [Fini
   let e : W ≃ₗ[ℂ] (Fin (Module.finrank ℂ W) → ℂ) := LinearEquiv.ofFinrankEq _ _ (by simp)
   let s : Fin (Module.finrank ℂ W) → Fin n := Fin.castLE h
   have hs : Function.Injective s := Fin.castLE_injective h
-  refine ⟨(Function.ExtendByZero.linearMap ℂ s).comp e.toLinearMap, fun a b hab => e.injective ?_⟩
+  refine ⟨(Function.ExtendByZero.linearMap ℂ ℂ s).comp e.toLinearMap, fun a b hab => e.injective ?_⟩
   funext i
   have := congrFun hab (s i)
   change Function.extend s (e a) 0 (s i) = Function.extend s (e b) 0 (s i) at this
@@ -74,7 +129,7 @@ theorem exists_linear_separation {σ : Type} [Fintype σ] (I : Ideal (MvPolynomi
   let W : Submodule ℂ (σ → ℂ) := LinearMap.ker M.mulVecLin
   have hW : Module.finrank ℂ W ≤ n := by
     have h := LinearMap.finrank_range_add_finrank_ker M.mulVecLin
-    have h' : Module.finrank ℂ (LinearMap.range M.mulVecLin) = M.rank := rfl
+    have h' : Module.finrank ℂ (LinearMap.range M.mulVecLin) = M.rank := Matrix.finrank_range_mulVecLin M
     simp only [Module.finrank_fintype_fun_eq_card] at h
     show Module.finrank ℂ (LinearMap.ker M.mulVecLin) ≤ n
     omega

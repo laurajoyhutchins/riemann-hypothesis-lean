@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.Statement
+module
+
+public import Formalism.HermitianLattices.StatementLat
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix
@@ -15,72 +58,11 @@ def glueLat {K : Type} [Field K] [NumberField K] {D : ℕ}
 def LatticeGlue : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (D : ℕ) (L0 : Submodule (𝓞 K) (Fin D → K))
     (L : HeightOneSpectrum (𝓞 K) → Submodule (𝓞 K) (Fin D → K)),
-    Submodule.IsLattice K L0 → (∀ w, Submodule.IsLattice K (L w)) →
+    Submodule.IsFullLattice K L0 → (∀ w, Submodule.IsFullLattice K (L w)) →
     {w : HeightOneSpectrum (𝓞 K) |
       Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (L w) ≠ Formalism.HermitianLatticesTheory.localization₂ w.asIdeal L0}.Finite →
-    Submodule.IsLattice K (glueLat L) ∧
+    Submodule.IsFullLattice K (glueLat L) ∧
       ∀ w : HeightOneSpectrum (𝓞 K),
         Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (glueLat L) = Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (L w)
-
-def LatticeGlueUnique : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (D : ℕ) (R R' : Submodule (𝓞 K) (Fin D → K)),
-    ((∀ w : HeightOneSpectrum (𝓞 K),
-      Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R = Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R') → R = R') ∧
-    ((∀ w : HeightOneSpectrum (𝓞 K),
-      Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R ≤ Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R') → R ≤ R') ∧
-    glueLat (fun _ => R) = R
-
-def LatticeGlueIndep : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (D : ℕ) (L0 L1 : Submodule (𝓞 K) (Fin D → K)),
-    Submodule.IsLattice K L0 → Submodule.IsLattice K L1 →
-    ∀ S : Set (HeightOneSpectrum (𝓞 K)), S.Finite →
-    ∃! R : Submodule (𝓞 K) (Fin D → K), Submodule.IsLattice K R ∧
-      (∀ w ∈ S, Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R = Formalism.HermitianLatticesTheory.localization₂ w.asIdeal L1) ∧
-      (∀ w ∉ S, Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R = Formalism.HermitianLatticesTheory.localization₂ w.asIdeal L0)
-
-def LatticeGlueSemi : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (D : ℕ),
-    (∀ (L0 : Submodule (𝓞 K) (Fin D → K))
-      (L : HeightOneSpectrum (𝓞 K) → Submodule (𝓞 K) (Fin D → K)),
-      Submodule.IsLattice K L0 → (∀ w, Submodule.IsLattice K (L w)) →
-      (∀ w, L (conjPl w) = L w) →
-      {w : HeightOneSpectrum (𝓞 K) |
-        Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal (L w) ≠ Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal L0}.Finite →
-      Submodule.IsLattice K (glueLat L) ∧
-      (∀ w : HeightOneSpectrum (𝓞 K),
-        Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal (glueLat L) = Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal (L w)) ∧
-      glueLat L = ⨅ w : HeightOneSpectrum (𝓞 K), Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal (L w)) ∧
-    (∀ R R' : Submodule (𝓞 K) (Fin D → K),
-      (∀ w : HeightOneSpectrum (𝓞 K),
-        Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal R = Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal R') → R = R')
-
-def StepBGlue : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (D : ℕ)
-    (Tup : Type) (μ0 : Tup) (μ : HeightOneSpectrum (𝓞 K) → Tup), (∀ w, μ (conjPl w) = μ w) →
-    {w | μ w ≠ μ0}.Finite →
-    ∀ (abelian₂ : Tup → Submodule (𝓞 K) (Fin D → K)), (∀ t, Submodule.IsLattice K (abelian₂ t)) →
-    ∀ (ι : Tup → Matrix (Fin D) (Fin D) K), (∀ t, IsUnit (ι t).det) →
-    (∃! R : Submodule (𝓞 K) (Fin D → K), ∀ w : HeightOneSpectrum (𝓞 K),
-      Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R = Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (ι (μ w)) (abelian₂ (μ w)))) ∧
-    ∀ R : Submodule (𝓞 K) (Fin D → K),
-      (∀ w : HeightOneSpectrum (𝓞 K),
-        Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R = Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (ι (μ w)) (abelian₂ (μ w)))) →
-      Submodule.IsLattice K R ∧
-      R = glueLat (fun w => matLat (ι (μ w)) (abelian₂ (μ w))) ∧
-      (∀ w : HeightOneSpectrum (𝓞 K), Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal R =
-        Formalism.HermitianLatticesTheory.loc (K := K) w.asIdeal (matLat (ι (μ w)) (abelian₂ (μ w)))) ∧
-      {w : HeightOneSpectrum (𝓞 K) | Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R ≠
-        Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (ι μ0) (abelian₂ μ0))}.Finite
-
-def DivIntoDualGlue : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (D : ℕ)
-    (Tup : Type) (μ0 : Tup) (μ : HeightOneSpectrum (𝓞 K) → Tup), {w | μ w ≠ μ0}.Finite →
-    ∀ (n : Tup → ℕ) (M : ∀ t, Submodule (𝓞 K) (Fin (n t) → K)),
-    (∀ t, Submodule.IsLattice K (M t)) →
-    ∀ (π : ∀ t, Matrix (Fin D) (Fin (n t)) K), (∀ t, Function.Surjective (π t).mulVec) →
-    ∀ (ι : Tup → Matrix (Fin D) (Fin D) K), (∀ t, IsUnit (ι t).det) →
-    ∃! R : Submodule (𝓞 K) (Fin D → K), Submodule.IsLattice K R ∧
-      ∀ w : HeightOneSpectrum (𝓞 K), Formalism.HermitianLatticesTheory.localization₂ w.asIdeal R =
-        Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (ι (μ w)) (matLat (π (μ w)) (M (μ w))))
 
 end Formalism.DivisionValues

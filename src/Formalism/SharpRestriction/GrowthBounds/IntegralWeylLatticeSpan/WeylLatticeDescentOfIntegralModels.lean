@@ -1,6 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.RowActWeylMemDescentLattice
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.CoreDesc
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IsUnitDetBlockPreimage
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.RowActWeylMemDescentLattice
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IsUnitDetBlockPreimage
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.CoreDesc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Matrix Formalism.GradedWeylDivisibility Formalism.MainNotions.G Formalism.BasicNotions Formalism.L2.Forms
 
@@ -55,7 +98,7 @@ theorem oddZ (m : ℕ) (lam : Fin (m + 1) → ℤ) (hlam : Antitone lam) (hodd :
 
 theorem detShift_eq {m : ℕ} (lam : DomWeight (m + 1)) : lam.detShift = lam.w (Fin.last m) := by
   unfold DomWeight.detShift
-  rw [dif_pos (Nat.succ_pos m)]
+  rw [dite_eq_left (Nat.succ_pos m)]
   rfl
 
 theorem natW_eq {m : ℕ} (lam : DomWeight (m + 1)) : lam.natW = nuOf lam.w := by
@@ -216,7 +259,7 @@ theorem span_to_int (hodd : ∀ (m : ℕ) (lam : Fin (m + 1) → ℤ), Antitone 
     obtain ⟨A, hA, e1⟩ := ha
     obtain ⟨B, hB, e2⟩ := hb
     exact ⟨A + B, add_mem hA hB, fun z => by
-      rw [map_add, map_add, map_add, Pi.add_apply, Pi.add_apply, e1 z, e2 z]⟩
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), Pi.add_apply, Pi.add_apply, e1 z, e2 z]⟩
   | smul r a _ ha =>
     obtain ⟨A, hA, e1⟩ := ha
     refine ⟨embLL r.1 • A, core_intSpanG_smul embLL R0 lam r.1 r.2 hA, fun z => ?_⟩
@@ -243,7 +286,7 @@ theorem int_to_span (hodd : ∀ (m : ℕ) (lam : Fin (m + 1) → ℤ), Antitone 
     obtain ⟨A, hA, e1⟩ := ha
     obtain ⟨B, hB, e2⟩ := hb
     exact ⟨A + B, add_mem hA hB, fun z => by
-      rw [map_add, map_add, map_add, Pi.add_apply, Pi.add_apply, e1 z, e2 z]⟩
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), Pi.add_apply, Pi.add_apply, e1 z, e2 z]⟩
   | neg a _ ha =>
     obtain ⟨A, hA, e1⟩ := ha
     exact ⟨-A, neg_mem hA, fun z => by

@@ -1,8 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsSplitTorusPointsMulEquiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsSplitTorusPointsMulEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.TensorProduct.IncludeLeftSubRight
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out
@@ -29,16 +78,16 @@ theorem comp_ev (f : R →+* R') (θ : C →+* R) (φ : Multiplicative X →* R�
     f.comp (ev θ φ) = ev (f.comp θ) ((Units.map f.toMonoidHom).comp φ) := by
   apply AddMonoidAlgebra.ringHom_ext <;> intro a <;> simp [ev_single]
 
-variable (C X) in
 
+variable (C X) in
 noncomputable def univ : Multiplicative X →* (AddMonoidAlgebra C X)ˣ :=
   (AddMonoidAlgebra.of C X).toHomUnits
 
 theorem univ_val (x : X) :
     (univ X C (Multiplicative.ofAdd x)).val = AddMonoidAlgebra.single x 1 := rfl
 
-variable (C X) in
 
+variable (C X) in
 noncomputable abbrev cst : C →+* AddMonoidAlgebra C X := AddMonoidAlgebra.singleZeroRingHom
 
 theorem cst_apply (c : C) : cst X C c = AddMonoidAlgebra.single 0 c := rfl
@@ -61,7 +110,7 @@ theorem coeff_ev (δ : C →+* R) (ψ : Multiplicative X →* Rˣ) (f : AddMonoi
       δ (f.coeff x) * (ψ (Multiplicative.ofAdd x)).val := by
   induction f using AddMonoidAlgebra.induction_linear with
   | zero => simp
-  | add f g hf hg => simp only [map_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hf, hg, add_mul]
+  | add f g hf hg => simp only [map_add (f := _), AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hf, hg, add_mul]
   | single y c =>
     rw [ev_single]
     change (AddMonoidAlgebra.single 0 (δ c) * (AddMonoidAlgebra.single y 1 *
@@ -72,8 +121,8 @@ theorem coeff_ev (δ : C →+* R) (ψ : Multiplicative X →* Rˣ) (f : AddMonoi
     · subst h; simp
     · simp [Finsupp.single_eq_of_ne' h]
 
-variable (R) in
 
+variable (R) in
 def IsTorsorOn (α : A →+* C) (ρ : C →+* AddMonoidAlgebra C X) : Prop :=
   (∀ (θ : C →+* R) (φ φ' : Multiplicative X →* Rˣ),
     (ev θ (φ * φ')).comp ρ = (ev ((ev θ φ').comp ρ) φ).comp ρ) ∧
@@ -377,8 +426,8 @@ theorem faithfullyFlat_appLE {Y B : Scheme.{0}} (q : Y ⟶ B) [Flat q] [Surjecti
 
 end TorsorUnit
 
-open TorsorUnit SplitTorusPoints in
 
+open TorsorUnit SplitTorusPoints in
 theorem exists_local_unit_of_weight :
     ∀ (S : Scheme.{0}) (X : Type) [AddCommGroup X] (G B : Over S) [GrpObj G] [GrpObj B] (q : G ⟶ B) (i : splitTorus S X ⟶ G), IsMonHom q → IsMonHom i → Flat q.left → Surjective q.left → QuasiCompact q.left → IsPullback i (toUnit _) q (η[B]) → IsAffineHom q.left → ∀ (χ : X) (b : B.left), ∃ (V : B.left.Opens) (_ : b ∈ V) (u : Γ(G.left, q.left ⁻¹ᵁ V)ˣ), ∀ (Z : Over S) (t : Z ⟶ splitTorus S X) (g : Z ⟶ G) (h₁ : ⊤ ≤ ((t ≫ i) * g).left ⁻¹ᵁ (q.left ⁻¹ᵁ V)) (h₂ : ⊤ ≤ g.left ⁻¹ᵁ (q.left ⁻¹ᵁ V)), (((t ≫ i) * g).left.appLE _ ⊤ h₁).hom u.val = t.left.appTop.hom (charUnit S X χ).val * (g.left.appLE _ ⊤ h₂).hom u.val := by
   intro S X _ G B _ _ q i _ _ _ _ _ hi _ χ b

@@ -1,7 +1,47 @@
-import Mathlib
-import GroundTheory.GlobalFields.NormResidueSymbol.Functorial
-import GroundTheory.GlobalFields.NormResidueSymbol.Rational
-import GroundTheory.GlobalFields.NormResidueSymbol.Surjective
+module
+
+public import GroundTheory.GlobalFields.NormResidueSymbol.RangeIdeleNormLeKerIdeleSymbol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -16,34 +56,6 @@ section Roots
 variable {K : Type*} [Field K] [NumberField K] {L : Type*} [Field L] [NumberField L] [Algebra K L]
   [IsGalois K L] [IsMulCommutative (L ≃ₐ[K] L)]
 
-theorem ideleSymbol_diagonal_apply_of_pow_eq_one (a : Kˣ) {n : ℕ} (hn : n ≠ 0) {ζ : L}
-    (hζ : ζ ^ n = 1) : ideleSymbol K L (diagonal K a) ζ = ζ := by
-  have hk : orderOf ζ ≠ 0 := (orderOf_pos_iff.2 (isOfFinOrder_iff_pow_eq_one.2
-    ⟨n, Nat.pos_of_ne_zero hn, hζ⟩)).ne'
-  have : NeZero (orderOf ζ) := ⟨hk⟩
-  have hprim : IsPrimitiveRoot ζ (orderOf ζ) := IsPrimitiveRoot.orderOf ζ
-  set L₀ : IntermediateField ℚ L := ℚ⟮ζ⟯ with hL₀
-  have : IsCyclotomicExtension {orderOf ζ} ℚ L₀ :=
-    hprim.intermediateField_adjoin_isCyclotomicExtension ℚ
-  have : IsGalois ℚ L₀ := IsCyclotomicExtension.isGalois {orderOf ζ} ℚ L₀
-  have : IsMulCommutative (L₀ ≃ₐ[ℚ] L₀) := IsCyclotomicExtension.isMulCommutative {orderOf ζ} ℚ L₀
-  have h := restrictNormal_restrictScalars_ideleSymbol (K := ℚ) (L := L₀) (L' := L) (diagonal K a)
-  rw [ideleNorm_diagonal, RationalSymbol.ideleSymbol_diagonal_eq_one L₀ {orderOf ζ}] at h
-  have h' := congrArg (fun σ : L₀ ≃ₐ[ℚ] L₀ ↦ ((σ ⟨ζ, mem_adjoin_simple_self ℚ ζ⟩ : L₀) : L)) h
-  simp only [AlgEquiv.one_apply] at h'
-  exact (AlgEquiv.restrictNormal_commutes ((ideleSymbol K L (diagonal K a)).restrictScalars ℚ) L₀
-    ⟨ζ, mem_adjoin_simple_self ℚ ζ⟩).symm.trans h'
-
-theorem ideleSymbol_diagonal_eq_one (S : Set ℕ) [IsCyclotomicExtension S K L] (a : Kˣ) :
-    ideleSymbol K L (diagonal K a) = 1 :=
-  IsCyclotomicExtension.algEquiv_eq_of_apply_eq S K L fun m hm hm0 ↦ by
-    obtain ⟨r, hr⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot K L hm hm0
-    exact ⟨r, hr, ideleSymbol_diagonal_apply_of_pow_eq_one a hm0 hr.pow_eq_one⟩
-
-theorem ideleSymbol_diagonal_eq_one_of_isCyclotomicExtension_singleton (m : ℕ)
-    [IsCyclotomicExtension {m} K L] (a : Kˣ) : ideleSymbol K L (diagonal K a) = 1 :=
-  ideleSymbol_diagonal_eq_one {m} a
-
 end Roots
 
 section Sub
@@ -51,16 +63,6 @@ section Sub
 variable {K : Type*} [Field K] [NumberField K] (L M : Type*) [Field L] [NumberField L] [Field M]
   [NumberField M] [Algebra K L] [Algebra L M] [Algebra K M] [IsScalarTower K L M]
   [IsGalois K L] [IsGalois K M] [IsMulCommutative (L ≃ₐ[K] L)] [IsMulCommutative (M ≃ₐ[K] M)]
-
-theorem ideleSymbol_diagonal_eq_one_of_le (S : Set ℕ) [IsCyclotomicExtension S K M] (a : Kˣ) :
-    ideleSymbol K L (diagonal K a) = 1 := by
-  rw [← restrictNormal_ideleSymbol L M, ideleSymbol_diagonal_eq_one S a]
-  exact map_one (AlgEquiv.restrictNormalHom (F := K) (K₁ := M) L)
-
-theorem range_diagonal_le_ker_ideleSymbol (S : Set ℕ) [IsCyclotomicExtension S K M] :
-    (diagonal K).range ≤ (ideleSymbol K L).ker := by
-  rintro _ ⟨a, rfl⟩
-  exact ideleSymbol_diagonal_eq_one_of_le L M S a
 
 end Sub
 
@@ -87,13 +89,6 @@ theorem continuous_ideleClassSymbol (h : (diagonal K).range ≤ (ideleSymbol K L
 end ClassSymbol
 
 universe u
-
-theorem ideleClassSymbol_surjective {K L : Type u} [Field K] [NumberField K] [Field L]
-    [NumberField L] [Algebra K L] [IsGalois K L] [IsMulCommutative (L ≃ₐ[K] L)]
-    (h : (diagonal K).range ≤ (ideleSymbol K L).ker) :
-    Function.Surjective (ideleClassSymbol L h) := fun σ ↦
-  let ⟨x, hx⟩ := ideleSymbol_surjective (K := K) (L := L) σ
-  ⟨IdeleClassGroup.mk K x, hx⟩
 
 end CyclotomicSymbol
 

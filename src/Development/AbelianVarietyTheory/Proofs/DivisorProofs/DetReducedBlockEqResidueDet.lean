@@ -1,13 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
-import Formalism.LocalToGlobal.ProjectiveLattices.FamilyUniformisationBasePointOrthogonalBis
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIdeleExistsLocalApprox
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBaseChangeFiniteAdeleRingEquiv
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeCharEqProdLocalComponentsApproximating
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNormOneRootCongruentOddHostField
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CharacterAtDetRootCongOneOddEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Formalism.LocalToGlobal.ProjectiveLattices.FamilyUniformisationBasePointOrthogonalBis
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsRootNear
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsOpenCongruenceIdelesAndRealFiniteParts
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CharacterAtDetRootCongOneOddEqOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsBaseChangeFiniteAdeleRingEquiv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinitePlaceIdempotentBaseChangeAdeles
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIdeleExistsLocalApprox
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeCharEqProdLocalComponentsApproximating
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIntegralUnitRootNormOneAdeleStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 section
 open NumberField IsDedekindDomain GlobalTheory.AdLat GlobalTheory.AdLat.RootNear
@@ -52,7 +95,7 @@ theorem finite_root_near (F E : Type) [Field F] [NumberField F] [Field E] [Numbe
     mul_mem hfO (sub_mem hx₁' hwO), ?_⟩
   · linear_combination e' * hy₀' + (1 - e') * hxy₁ + e' * y' * hww +
       (w * w' * y' - w * y₁ - x₁ * w' * y' + x₁ * y₁ - n * z * y') * hee'
-  · rw [map_add, map_mul _ (1 - e'), map_mul _ e', map_sub, map_one, hse]
+  · rw [map_add (f := _), map_mul _ (1 - e'), map_mul _ e', map_sub, map_one, hse]
     linear_combination e' * hw + (1 - e') * hr₁
   · linear_combination (x₁ - w) * hef'
 
@@ -106,10 +149,10 @@ theorem valued_sub_le (ι : (Af D.host.F ⊗[D.host.F] D.host.E) ≃+* FiniteAde
       simpa using this
     · simp
     · intro x y _ _ hx hy
-      rw [map_add]
+      rw [φ.map_add x y]
       exact Valuation.map_add_le _ hx hy
     · intro c x _ hx
-      rw [smul_eq_mul, map_mul, map_mul]
+      rw [smul_eq_mul, map_mul φ, map_mul]
       calc _ ≤ 1 * WithZero.exp (-1 : ℤ) := mul_le_mul' ((h2 _).1 (unswap_int c) P) hx
         _ = _ := one_mul _
   have hm : X - oToS D.host.F D.host.E a ∈ idS D.host.F P.asIdeal := by
@@ -213,7 +256,7 @@ theorem swap_int {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intAE D) :
     obtain ⟨a, ha, x, rfl⟩ := hz
     exact GlobalTheory.PlaceDatum.tmul_mem_int ⟨x, rfl⟩ ha
   | zero => rw [RingHom.map_zero]; exact zero_mem _
-  | add a b _ _ ha hb => rw [RingHom.map_add]; exact add_mem ha hb
+  | add a b _ _ ha hb => rw [RingHom.map_add (f := _)]; exact add_mem ha hb
   | neg a _ ha => rw [RingHom.map_neg]; exact neg_mem ha
 
 theorem det_frGL {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n : ℕ}
@@ -232,7 +275,7 @@ theorem det_reduced_block_eq_residue_det {F E : Type} [Field F] [NumberField F] 
 
 theorem root_sum {R : Type} [CommRing R] (σ : R →+* R) {a b u : R} (ha : σ a = b) (hb : σ b = a) (hu : u * σ u = 1) :
     a + b * u = u * σ (a + b * u) := by
-  rw [map_add, map_mul, ha, hb]
+  rw [map_add (f := _), map_mul, ha, hb]
   linear_combination (-a) * hu
 
 theorem root_sum_mul {R : Type} [CommRing R] {a b u u' m s s' : R} (hu : u * u' = 1) (e1 : a + b = 1 + m * s)
@@ -267,7 +310,7 @@ theorem isDetRoot_of_fin {V : HSp D} {k : GA D V} (hk : k ∈ GfC V) {x : (AE D)
   · rw [RingHom.map_mul, e2]
     exact h2.trans (congrArg _ (GlobalTheory.PlaceIdem.finPart_cA D _).symm)
 
-set_option maxHeartbeats 400000 in
+
 
 theorem exists_root_half (m : ℕ) (U : Formalism.L2.Herm.intAf D.host.F D.host.E) (a b s s' : 𝓞 D.host.E)
     (hb : (b : D.host.E) = star (a : D.host.E)) (hs : a + b = 1 + m * s) (hs' : a * b = m * s')
@@ -300,7 +343,7 @@ theorem exists_root_half (m : ℕ) (U : Formalism.L2.Herm.intAf D.host.F D.host.
     rw [hb, star_star]
   have hu := (hO _).2 (unswap_int U)
   have hu' := (hO _).2 (GlobalTheory.PlaceIdem.sig_mem D (unswap_int U))
-  have e1 : j a + j b = 1 + m * j s := by rw [← map_add, hs, map_add, map_one, map_mul, map_natCast]
+  have e1 : j a + j b = 1 + m * j s := by rw [← map_add (f := _), hs, map_add (f := _), map_one, map_mul, map_natCast]
   have e2 : j a * j b = m * j s' := by rw [← map_mul, hs', map_mul, map_natCast]
   have key := finite_root_near D.host.F D.host.E (GlobalTheory.Member.cF D) D.sp.cm.deg2 hc1 hP m
     (unswap D U) (j a + j b * unswap D U) (j a + j b * σ (unswap D U))
@@ -318,8 +361,8 @@ theorem resS_sum {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E
       Ideal.Quotient.mk P.asIdeal a + Ideal.Quotient.mk _ b = 1 := by
   have h0 := Ideal.Quotient.eq_zero_iff_mem.2 hm
   constructor
-  · rw [map_add, map_add, map_mul, map_mul, resS_oToS, resS_oToS, resS_oToS, h0, zero_mul, add_zero]
-  · rw [← map_add, hs, map_add, map_mul, h0, zero_mul, add_zero, map_one]
+  · rw [map_add (f := _), map_add (f := _), map_mul, map_mul, resS_oToS, resS_oToS, resS_oToS, h0, zero_mul, add_zero]
+  · rw [← map_add (f := _), hs, map_add (f := _), map_mul, h0, zero_mul, add_zero, map_one]
 
 theorem resS_sum_left {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (P : Pl E) {a b s m : 𝓞 E}
     (U p : Formalism.L2.Herm.intAf F E) (hs : a + b = 1 + m * s) (hm : m ∈ P.asIdeal) (ha : a ∈ P.asIdeal) :
@@ -342,7 +385,7 @@ theorem map_coe_sum {R B : Type} [CommRing R] [CommRing B] (S : Subring R) (f : 
   subst hm
   simp
 
-set_option maxHeartbeats 400000 in
+
 
 theorem exists_root_char {V : HSp D} {β : GL (Fin V.rank) (EAf D)} {L : LevDat D.host.E ℂ V.rank} (hr : L.r = V.rank)
     {g₀ : G0 L.Pg L.r} {k : GA D V} (hk : IsLevelLift V β L g₀ k) {c : (AE D)ˣ →* Circle} {χ : HChar D.host.E} (hc : ChrEq c χ)
@@ -381,7 +424,7 @@ theorem exists_half_elements {E : Type} [Field E] [NumberField E] [IsCMField E] 
   have hb' : H.bar a' ∈ l.Mb := by
     obtain ⟨t, ht, rfl⟩ := (Ideal.mem_map_iff_of_surjective (H.bar : 𝓞 E →+* 𝓞 E) H.bar.surjective).1 ha'
     exact (hbb t).symm ▸ ht
-  have hbb' : H.bar a + H.bar a' = 1 := by rw [← map_add, haa, map_one]
+  have hbb' : H.bar a + H.bar a' = 1 := by rw [← map_add (f := _), haa, map_one]
   have h1 : a + H.bar a - 1 ∈ Ideal.span {(l.M : 𝓞 E)} := by
     rw [← l.prod, Ideal.mul_eq_inf_of_isCoprime (Ideal.isCoprime_iff_sup_eq.2 l.coprime)]
     refine ⟨?_, ?_⟩

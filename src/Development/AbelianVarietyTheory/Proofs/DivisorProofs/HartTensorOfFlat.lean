@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsionFreeOver
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsionFreeOver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+
+@[expose] public section
+
 open IsLocalRing Polynomial
 open scoped TensorProduct
 
@@ -10,7 +54,7 @@ def divIdeal (A S X : Type) [CommRing A] [CommRing S] [Algebra A S] [AddCommGrou
   carrier := {u | ∃ x : X, algebraMap A S u • y = algebraMap A S a • x}
   add_mem' := by
     rintro u v ⟨x, hx⟩ ⟨x', hx'⟩
-    exact ⟨x + x', by rw [map_add, add_smul, hx, hx', smul_add]⟩
+    exact ⟨x + x', by rw [map_add (f := _), add_smul, hx, hx', smul_add]⟩
   zero_mem' := ⟨0, by simp⟩
   smul_mem' := by
     rintro c u ⟨x, hx⟩
@@ -23,7 +67,7 @@ theorem lTensor_smul_id_apply (R M O : Type) [CommRing R] [AddCommGroup M] [Modu
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul o n => simp [LinearMap.lTensor_tmul, algebraMap_smul, TensorProduct.tmul_smul]
-  | add x y hx hy => rw [map_add, hx, hy, smul_add]
+  | add x y hx hy => rw [map_add (f := _), hx, hy, smul_add]
 
 end GlobalTheory.HartFlatBaseChange
 
@@ -66,7 +110,7 @@ theorem GlobalTheory.GoodEtale.hart_tensor_of_flat : ∀ (A R M O : Type) [CommR
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul o n => simp [TensorProduct.piRight_apply, TensorProduct.piRightHom_tmul]
-    | add x y hx hy => rw [map_add, Pi.add_apply, hx, hy, map_add]
+    | add x y hx hy => rw [map_add (f := _), Pi.add_apply, hx, hy, map_add (f := _)]
   have hg : g.lTensor O m = 0 := by
     apply (TensorProduct.piRight R R O (fun _ : s => M ⧸ N)).injective
     funext i

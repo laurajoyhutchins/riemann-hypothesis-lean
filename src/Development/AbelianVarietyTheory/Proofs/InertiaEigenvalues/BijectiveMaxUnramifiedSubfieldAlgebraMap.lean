@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.JSmul
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InvariantsStableLatticeModIrreducibleEqBot
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntegralOfNormLeOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InvariantsStableLatticeModIrreducibleEqBot
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsOpenOfFgOfSpanEqTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,10 +107,7 @@ theorem tw_crysWith (hC : S.CrysCalc) :
   have h1 := (hC.2.1 S.Γ.T₀ S.D.U S.Γ.χ₁ S.D.w hρ hχ).2
   exact (hC.2.1 S.Γ.T₀ S.D.U S.Γ.χ₁⁻¹ _ hρ h1).1
 
-theorem tw_h0V (hC : S.CrysCalc) (hV : S.Vanish) : H0V (tw S hC).ρ = ⊥ := by
-  obtain ⟨⟨-, -, -, -, -, hlam⟩, -⟩ := S.hyp
-  exact h0V_tw (GlobalTheory.LocalIntegers.good_integers l S.LL).1 S.Γ (cont_inv S hC) hlam hV.1
-
+set_option synthInstance.maxHeartbeats 100000 in
 theorem tw_finrank_h0V (hC : S.CrysCalc) (hV : S.Vanish) : finrank ↥S.LL.1 ↥(H0V (tw S hC).ρ) = 0 := by
   obtain ⟨⟨-, -, -, -, -, hlam⟩, -⟩ := S.hyp
   exact finrank_h0V_tw (GlobalTheory.LocalIntegers.good_integers l S.LL).1 S.Γ (cont_inv S hC) hlam hV.1
@@ -94,6 +136,7 @@ theorem fSummand_of_finrank (hC : S.CrysCalc) (hH : S.FreeH)
     (hd : finrank ↥S.LL.1 (FiniteCohomology (P.PD S.K) (tw S hC).ρ) = S.D.dsum) : S.FSummand :=
   ⟨exists_isCompl S hC hH, (finrank_hf S hC).trans hd⟩
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem fSummand_of_dim (hC : S.CrysCalc) (hV : S.Vanish) (hH : S.FreeH)
     (hd : (finrank ↥S.LL.1 (FiniteCohomology (P.PD S.K) (tw S hC).ρ) : ℤ) = (finrank ↥S.LL.1 ↥(H0V (tw S hC).ρ) : ℤ) +
       ∑ i, (Multiset.card (((S.D.U i).map (· + -S.D.w i)).filter (· < 0)) : ℤ)) : S.FSummand := by
@@ -105,15 +148,5 @@ theorem fSummand_of_dim (hC : S.CrysCalc) (hV : S.Vanish) (hH : S.FreeH)
     intro a b c s h h' h''
     omega
   exact key _ _ _ _ hd h0 h1
-
-theorem fSummand_of_codim (hC : S.CrysCalc) (hV : S.Vanish) (hH : S.FreeH)
-    (hD : Module.Finite ↥S.LL.1 ↥(DdR (P.PD S.K) (tw S hC).ρ))
-    (hd : (finrank ↥S.LL.1 (FiniteCohomology (P.PD S.K) (tw S hC).ρ) : ℤ) = (finrank ↥S.LL.1 ↥(H0V (tw S hC).ρ) : ℤ) +
-      ((finrank ↥S.LL.1 ↥(DdR (P.PD S.K) (tw S hC).ρ) : ℤ) -
-        finrank ↥S.LL.1 ↥(DdR (P.PD S.K) (tw S hC).ρ ⊓
-          FilV (P.PD S.K) (LL := ↥S.LL.1) (V := (tw S hC).V) 0))) : S.FSummand := by
-  obtain ⟨⟨-, -, hn, hemb, -⟩, -⟩ := S.hyp
-  exact fSummand_of_dim S hC hV hH (hd.trans (congrArg _
-    (codim_fil_zero (P.PD S.K) S.emb hemb (bijective_maxUnramifiedSubfield_algebraMap S) hn _ (tw_crysWith S hC).2)))
 
 end GlobalTheory.TopSteps.FinSummandDim

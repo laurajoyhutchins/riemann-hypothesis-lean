@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.Algebra.Module.LinearMap.Star
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.SL.IwahoriBlocks
 
@@ -8,62 +53,5 @@ def IsHerm (h : V →ₗ[E] V →ₗ⋆[E] E) : Prop := ∀ v w, h w v = star (h
 
 def eich (h : V →ₗ[E] V →ₗ⋆[E] E) (x u : V) (s : E) (v : V) : V :=
   v + h v u • x - h v x • (u + s • x)
-
-def EichIsom : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x u : V) (s : E),
-    IsHerm h → h x x = 0 → h u x = 0 → s + star s = h u u →
-    ∀ v w, h (eich h x u s v) (eich h x u s w) = h v w
-
-def EichInv : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x u : V) (s : E),
-    IsHerm h → h x x = 0 → h u x = 0 → s + star s = h u u →
-    ∀ v, eich h x (-u) (star s) (eich h x u s v) = v ∧ eich h x u s (eich h x (-u) (star s) v) = v
-
-def EichComp : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x a b : V) (s t : E),
-    IsHerm h → h x x = 0 → h a x = 0 → h b x = 0 →
-    ∀ v, eich h x a s (eich h x b t v) = eich h x (a + b) (s + t + h b a) v
-
-def EichShift : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x u : V) (s c : E),
-    ∀ v, eich h x (u + c • x) s v = eich h x u (s + c - star c) v
-
-def EichEquiv : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (g : V →ₗ[E] V), (∀ v w, h (g v) (g w) = h v w) →
-    ∀ (x u : V) (s : E) (v : V), g (eich h x u s v) = eich h (g x) (g u) s (g v)
-
-def EichMove : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x x' u : V) (s : E),
-    IsHerm h → h u x = 0 → h u x' = 0 →
-    ∀ v, h v x' = 0 →
-      eich h x u s (eich h x' u s v) = v + h v u • (x + x') - (h v x + h v u * h x' x) • (u + s • x)
-
-def EichNew : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x x' u : V) (s : E),
-    (h u x = 0 → eich h x u s u = u + h u u • x) ∧
-    (h x' u = 0 → eich h x u s x' = x' - h x' x • (u + s • x))
-
-def EichPair : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (x x' u : V) (s : E),
-    IsHerm h → h u x = 0 → h u x' = 0 →
-    ∀ y z, h y x = 0 → h y u = 0 → h z x' = 0 →
-      h y (eich h x u s (eich h x' u s z)) = h y z + star (h z u) * h y x'
-
-def EichInt : Prop :=
-  ∀ (E : Type) [CommRing E] [StarRing E] (V : Type) [AddCommGroup V] [Module E V]
-    (h : V →ₗ[E] V →ₗ⋆[E] E) (O : Subring E) (abelian₂ : AddSubgroup V) (x x' u : V) (s : E),
-    IsHerm h →
-    (∀ a ∈ O, ∀ v ∈ abelian₂, a • v ∈ abelian₂) →
-    (∀ v ∈ abelian₂, ∀ w ∈ abelian₂, h v w ∈ O) →
-    u ∈ abelian₂ → x + x' ∈ abelian₂ → s • x ∈ abelian₂ → h x' x ∈ O → h u x = 0 → h u x' = 0 →
-    ∀ v ∈ abelian₂, h v x' = 0 → eich h x u s (eich h x' u s v) ∈ abelian₂
 
 end Formalism.SL.IwahoriBlocks

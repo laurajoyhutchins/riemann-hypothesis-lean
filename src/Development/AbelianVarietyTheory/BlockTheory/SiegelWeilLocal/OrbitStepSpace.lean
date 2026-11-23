@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -58,22 +99,5 @@ theorem stepSpace_mono (ε : Fin n → Bool) (lam : Fin n → ℝ) (σ : Matrix 
   exact ⟨l, u, hl.trans h, h1, h2, h3⟩
 
 end Defs
-
-example (ε : Fin 1 → Bool) : IsONFamily ε (fun _ => Complex.I • (1 : Matrix (Fin 1) (Fin 1) ℂ)) := by
-  refine ⟨fun _ => ?_, fun i j => ?_⟩
-  · simp [Formalism.REAL.inG, Matrix.conjTranspose_smul]
-  · have : i = j := Subsingleton.elim (α := Fin 1) i j
-    simp [this, Matrix.conjTranspose_smul, smul_smul]
-
-def StepBound : Prop :=
-  ∀ (n : ℕ) (ε : Fin n → Bool) (lam : Fin n → ℝ) (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-    (σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)) (b : ℝ) (P : ℕ),
-    Formalism.QuantumDeterminants.IsHCParam lam → IsDS ε lam σ → (∀ a, |lam a| ≤ b ^ 2) →
-      FiniteDimensional ℂ (stepSpace ε lam σ P) ∧
-      (∀ w ∈ stepSpace ε lam σ P, IsDiffVec ε σ w) ∧
-      (∀ E : Fin (n ^ 2) → Matrix (Fin n) (Fin n) ℂ, IsONFamily ε E → ∀ w ∈ stepSpace ε lam σ P,
-        ∑ i, ‖dAct σ (E i) w‖ ^ 2 ≤ stepConst n b P ^ 2 * ‖w‖ ^ 2) ∧
-      ∀ E, Formalism.REAL.inG ε E → ∀ w ∈ stepSpace ε lam σ P,
-        ‖dAct σ E w‖ ≤ Real.sqrt (Formalism.REAL.hs E) * stepConst n b P * ‖w‖
 
 end GlobalTheory.IndefiniteRowSideFullHecke.OrbitDifferenceSpace

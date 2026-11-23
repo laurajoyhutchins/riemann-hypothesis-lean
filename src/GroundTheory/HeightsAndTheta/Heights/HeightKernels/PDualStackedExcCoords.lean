@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcChart
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcResidueExists
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcChart
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLatticeIndex
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcGeoFirst
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcResidueExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -116,7 +167,7 @@ def redAt (F : HermLattice K i) {k : Type} [CommRing k] (ρ : 𝓞 K →+* k) (w
     dualLattice F →+ k where
   toFun φ := ρ (intAt F w hw φ)
   map_zero' := by rw [intAt_zero, map_zero]
-  map_add' φ ψ := by rw [intAt_add, map_add]
+  map_add' φ ψ := by rw [intAt_add, map_add (f := _)]
 
 theorem redAt_apply (F : HermLattice K i) {k : Type} [CommRing k] (ρ : 𝓞 K →+* k) (w : Fin i → K)
     (hw : w ∈ F.lattice) (φ : dualLattice F) : redAt F ρ w hw φ = ρ (intAt F w hw φ) := rfl
@@ -150,7 +201,7 @@ theorem forall_mem_of (hle : F'.lattice ≤ F.lattice)
     | add x z _ _ hx hz =>
       obtain ⟨c, hc, e⟩ := hx
       obtain ⟨d, hd, f⟩ := hz
-      exact ⟨c + d, add_mem hc hd, by rw [map_add, e, f, dotProduct_add]⟩
+      exact ⟨c + d, add_mem hc hd, by rw [map_add (f := _), e, f, dotProduct_add]⟩
     | smul μ x _ hx =>
       obtain ⟨c, hc, e⟩ := hx
       exact ⟨μ * c, 𝔪.mul_mem_left μ hc, by
@@ -160,7 +211,7 @@ theorem forall_mem_of (hle : F'.lattice ≤ F.lattice)
   obtain ⟨c, hc, e⟩ := hF' z hz
   obtain ⟨d, hd⟩ := hφ y hyF
   exact ⟨c + ν * d, add_mem hc (𝔪.mul_mem_left ν (h0 d hd)), by
-    rw [map_add, map_mul, e, hd, dotProduct_add, ← algebraMap_smul K ν y, dotProduct_smul, smul_eq_mul]⟩
+    rw [map_add (f := _), map_mul, e, hd, dotProduct_add, ← algebraMap_smul K ν y, dotProduct_smul, smul_eq_mul]⟩
 
 theorem mem_span_of_forall {𝔪 B : Ideal (𝓞 K)} {π : 𝓞 K} (hπ0 : π ≠ 0) (hB : Ideal.span {π} = 𝔪 * B)
     {φ : Fin i → K} (hφ : ∀ x ∈ F.lattice, ∃ c ∈ 𝔪, algebraMap (𝓞 K) K c = φ ⬝ᵥ x) :
@@ -188,7 +239,7 @@ theorem mem_span_of_forall {𝔪 B : Ideal (𝓞 K)} {π : 𝓞 K} (hπ0 : π �
       refine Submodule.subset_span ⟨a, Ideal.Quotient.eq_zero_iff_mem.mpr ha, _, hχ, ?_⟩
       rw [smul_smul, map_mul, mul_div_assoc]
     · intro x y hx hy
-      rw [map_add, add_div, add_smul]
+      rw [map_add (f := _), add_div, add_smul]
       exact add_mem hx hy
   have hπB : π ∈ 𝔪 * B := by
     rw [← hB]
@@ -198,8 +249,8 @@ theorem mem_span_of_forall {𝔪 B : Ideal (𝓞 K)} {π : 𝓞 K} (hπ0 : π �
 
 end StackedExceptionalCoordinates
 
-open StackedExceptionalCoordinates in
 
+open StackedExceptionalCoordinates in
 theorem DualStackedExcCoords.proof : DualStackedExcCoords.Statement := by
   intro K _ _ i F F' T _ _ b b' a _ hlt hcov _
   have hle := hlt.le
@@ -258,7 +309,7 @@ theorem DualStackedExcCoords.proof : DualStackedExcCoords.Statement := by
     have hc₀𝔪 : c₀ ∉ 𝔪 := hkey c₀ (by rw [hc₀, dotProduct_smul, smul_eq_mul])
     have hsum : c = π * s + l * c₀ := by
       apply FaithfulSMul.algebraMap_injective (𝓞 K) K
-      rw [map_add, map_mul, map_mul, hs, hc₀, hcdef]
+      rw [map_add (f := _), map_mul, map_mul, hs, hc₀, hcdef]
       simp only [dotProduct_smul, sub_dotProduct, smul_dotProduct, smul_eq_mul]
       ring
     have hl𝔪 : l ∈ 𝔪 := by

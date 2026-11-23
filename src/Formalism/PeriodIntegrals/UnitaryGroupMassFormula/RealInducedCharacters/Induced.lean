@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RealInducedCharacters.InducedCharRealised
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RealInducedCharacters.InducedCharRealised
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -11,34 +60,36 @@ section Induced
 
 variable {G : Type*} [Group G] {K : Type*} [Field K] (H : Subgroup G) (ψ : H →* Kˣ)
 
-open scoped Classical in
 
-noncomputable def dot (x : G) : K := if hx : x ∈ H then ((ψ ⟨x, hx⟩ : Kˣ) : K) else 0
+open scoped Classical in
+noncomputable def dot (x : G) : K := by
+  classical
+  exact if hx : x ∈ H then ((ψ ⟨x, hx⟩ : Kˣ) : K) else 0
 
 theorem dot_mul_of_mem {a b : G} (hb : b ∈ H) : dot H ψ a * dot H ψ b = dot H ψ (a * b) := by
   classical
   unfold dot
   by_cases ha : a ∈ H
-  · rw [dif_pos ha, dif_pos hb, dif_pos (H.mul_mem ha hb), ← Units.val_mul, ← map_mul]
+  · rw [dite_eq_left ha, dite_eq_left hb, dite_eq_left (H.mul_mem ha hb), ← Units.val_mul, ← map_mul]
     rfl
   · have hab : a * b ∉ H := fun h => ha (by
       have := H.mul_mem h (H.inv_mem hb)
       rwa [mul_inv_cancel_right] at this)
-    rw [dif_neg ha, dif_neg hab, zero_mul]
+    rw [dite_eq_right ha, dite_eq_right hab, zero_mul]
 
 theorem dot_conj {h : G} (hh : h ∈ H) (y : G) : dot H ψ (h⁻¹ * y * h) = dot H ψ y := by
   classical
   unfold dot
   by_cases hy : y ∈ H
   · have hm : h⁻¹ * y * h ∈ H := H.mul_mem (H.mul_mem (H.inv_mem hh) hy) hh
-    rw [dif_pos hy, dif_pos hm]
+    rw [dite_eq_left hy, dite_eq_left hm]
     have e : (⟨h⁻¹ * y * h, hm⟩ : H) = (⟨h, hh⟩ : H)⁻¹ * ⟨y, hy⟩ * ⟨h, hh⟩ := rfl
     rw [e, map_mul, map_mul, map_inv, mul_comm, mul_inv_cancel_left]
   · have hm : h⁻¹ * y * h ∉ H := fun hm => hy (by
       have e : y = h * (h⁻¹ * y * h) * h⁻¹ := by group
       rw [e]
       exact H.mul_mem (H.mul_mem hh hm) (H.inv_mem hh))
-    rw [dif_neg hy, dif_neg hm]
+    rw [dite_eq_right hy, dite_eq_right hm]
 
 variable {m : ℕ} (t : Fin m → G)
 
@@ -75,7 +126,7 @@ theorem indMat_mul (ht : ∀ i j, (t i)⁻¹ * t j ∈ H ↔ i = j) (hc : ∀ x 
     have hz : dot H ψ ((t j)⁻¹ * g' * t k) = 0 := by
       classical
       unfold dot
-      rw [dif_neg]
+      rw [dite_eq_right]
       intro hm
       apply hj
       rw [← ht j j0]

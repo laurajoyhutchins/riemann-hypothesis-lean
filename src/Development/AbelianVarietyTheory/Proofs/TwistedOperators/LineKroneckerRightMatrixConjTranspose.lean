@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ISupEigenspaceEqTop
+module
+
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineMatrixKroneckerLeftFactorEqZeroOfIsPC
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CommuteRowOpRightMixedOp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.EulerIdentity
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,43 +66,7 @@ theorem monomial_eq_smul (m : σ →₀ ℕ) (c : ℂ) :
 
 theorem inner_X_mul (h : IsFockIP ι) (i : σ) (P Q : MvPolynomial σ ℂ) :
     inner ℂ (ι (X i * P)) (ι Q) = inner ℂ (ι P) (ι (pderiv i Q)) := by
-  induction P using MvPolynomial.induction_on' with
-  | add P P' hP hP' => simp only [mul_add, map_add, inner_add_left, hP, hP']
-  | monomial α c =>
-    induction Q using MvPolynomial.induction_on' with
-    | add Q Q' hQ hQ' => simp only [map_add, inner_add_right, hQ, hQ']
-    | monomial β d =>
-      rw [monomial_eq_smul α c, monomial_eq_smul β d, mul_smul_comm, Derivation.map_smul]
-      simp only [map_smul, inner_smul_left, inner_smul_right]
-      congr 2
-      rw [pderiv_monomial, monomial_eq_smul (β - _), map_smul, inner_smul_right, X, monomial_mul,
-        one_mul, h, h, one_mul]
-      by_cases e : Finsupp.single i 1 + α = β
-      · subst e
-        rw [if_pos rfl, if_pos (by simp)]
-        rw [Finsupp.prod_of_support_subset _ (s := insert i α.support) _ _ (by simp),
-          Finsupp.prod_of_support_subset α (s := insert i α.support)
-            (Finset.subset_insert _ _) _ (by simp),
-          ← Finset.mul_prod_erase _ _ (Finset.mem_insert_self i _),
-          ← Finset.mul_prod_erase (insert i α.support) _ (Finset.mem_insert_self i _), ← mul_assoc]
-        · congr 1
-          · simp [add_comm 1, Nat.factorial_succ]
-          · refine Finset.prod_congr rfl fun j hj => ?_
-            simp [Finsupp.single_apply, (Finset.ne_of_mem_erase hj).symm]
-        · intro j hj
-          by_cases hji : j = i
-          · simp [hji]
-          · simpa [hji, Finsupp.single_apply, Ne.symm hji] using hj
-      · rw [if_neg e]
-        by_cases hb : β i = 0
-        · simp [hb]
-        · rw [if_neg, mul_zero]
-          rintro rfl
-          apply e
-          ext j
-          by_cases hji : j = i
-          · subst hji; simp; omega
-          · simp [Ne.symm hji]
+  apply GlobalTheory.FockDeg.inner_X_mul <;> assumption
 
 theorem inner_pderiv (h : IsFockIP ι) (i : σ) (P Q : MvPolynomial σ ℂ) :
     inner ℂ (ι (pderiv i P)) (ι Q) = inner ℂ (ι P) (ι (X i * Q)) := by
@@ -66,6 +79,7 @@ theorem inner_polar (h : IsFockIP ι) (u v : σ) (P Q : MvPolynomial σ ℂ) :
 theorem inner_colOp (h : IsFockIP ι) {I J : Type*} [Fintype I] (z : I × J → σ) (k l : J)
     (P Q : MvPolynomial σ ℂ) :
     inner ℂ (ι (colOp ℂ z k l P)) (ι Q) = inner ℂ (ι P) (ι (colOp ℂ z l k Q)) := by
+
   simp only [colOp, LinearMap.sum_apply, map_sum, sum_inner, inner_sum, inner_polar h]
 
 theorem inner_mixedOp (h : IsFockIP ι) {I I' J : Type*} [Fintype I] [Fintype I'] (z : I × J → σ)
@@ -100,19 +114,20 @@ theorem parts_of_add (U D : Module.End ℂ (MvPolynomial σ ℂ))
   have key : ∀ (T : Module.End ℂ (MvPolynomial σ ℂ)),
       ∑ᶠ d, T (homogeneousComponent d P) = T P := by
     intro T
+
     rw [finsum_eq_sum_of_support_subset (s := Finset.range (P.totalDegree + 1)), ← map_sum,
-      sum_homogeneousComponent]
+    sum_homogeneousComponent]
     intro d hd
     by_contra h
     exact hd (by simp only; rw [homogeneousComponent_eq_zero _ _ (by simpa using h), map_zero])
   constructor
   · rw [← key U, plusPart]
     refine finsum_congr fun d => ?_
-    rw [LinearMap.add_apply, map_add, homogeneousComponent_of_mem (hU _ _ (hh d)), if_pos rfl,
+    rw [LinearMap.add_apply, map_add (f := _), homogeneousComponent_of_mem (hU _ _ (hh d)), if_pos rfl,
       homogeneousComponent_of_mem (hD _ _ (hh d)), if_neg (by omega), add_zero]
   · have h2 : ∀ d, homogeneousComponent d ((U + D) (homogeneousComponent (d + 2) P)) =
         D (homogeneousComponent (d + 2) P) := fun d => by
-      rw [LinearMap.add_apply, map_add, homogeneousComponent_of_mem (hU _ _ (hh _)),
+      rw [LinearMap.add_apply, map_add (f := _), homogeneousComponent_of_mem (hU _ _ (hh _)),
         if_neg (by omega), homogeneousComponent_of_mem (hD _ _ (hh _)), if_pos (by omega), zero_add]
     rw [minusPart, finsum_congr h2, ← key D]
     rw [finsum_eq_sum_of_support_subset (s := Finset.range (P.totalDegree + 1)),
@@ -208,6 +223,7 @@ theorem inner_upOp {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     (h : Odd' M) (Q P : Pol p q r s) :
     inner ℂ (ι (upOp M Q)) (ι P) = -inner ℂ (ι Q) (ι (dnOp M.conjTranspose P)) := by
   rw [upOp_apply, dnOp_apply, Finset.sum_comm]
+
   simp only [map_sum, sum_inner, inner_sum, ← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun l _ => Finset.sum_congr rfl fun l' _ => ?_
   by_cases e : linePos l' = linePos l

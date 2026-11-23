@@ -1,9 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenDegAmple
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenericFibreVar
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsMultiDegreePositive
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenDegTwist
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIntersectionRecursion
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenDegAmple
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGenericFibreVar
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsMultiDegreePositive
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsHilbert
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDivPrincipalDegree
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenDegTwist
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIntersectionRecursion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -83,9 +132,11 @@ theorem GenDegAmple.proof (hVar : GenericFibreVar.Statement) (hPos : MultiDegree
     simp [unitDeg, Finset.sum_apply, Pi.single_apply]
   have expand : ∀ b : K → ℤ,
       f (fun _ => b) = ∑ r : Fin D → K, (∏ j, b (r j)) * f (fun j => unitDeg (r j)) := fun b => by
+
     rw [hsum b, f.map_sum]
     refine Finset.sum_congr rfl fun r _ => ?_
     rw [f.map_smul_univ (fun j => b (r j)) (fun j => unitDeg (r j)), smul_eq_mul]
+    simp only [RingHom.id_apply]
   rw [hg, expand d]
   have hH' := hH
   rw [expand (fun _ => (1 : ℤ))] at hH'
@@ -93,7 +144,7 @@ theorem GenDegAmple.proof (hVar : GenericFibreVar.Statement) (hPos : MultiDegree
   refine lt_of_lt_of_le hH' (Finset.sum_le_sum fun r _ => ?_)
   have hp : (1 : ℤ) ≤ ∏ j, d (r j) := by
     calc (1 : ℤ) = ∏ _j : Fin D, (1 : ℤ) := Finset.prod_const_one.symm
-      _ ≤ ∏ j, d (r j) := Finset.prod_le_prod (fun _ _ => zero_le_one) (fun j _ => hd (r j))
+      _ ≤ ∏ j, d (r j) := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun j _ => hd (r j))
   exact le_mul_of_one_le_left (hN r) hp
 
 end

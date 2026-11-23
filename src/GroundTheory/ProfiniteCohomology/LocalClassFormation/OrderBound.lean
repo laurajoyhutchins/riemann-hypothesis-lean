@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderCyclic
-import GroundTheory.TateCohomology.InfRes
-import GroundTheory.LocalFields.RamificationStructure
+module
+
+public import GroundTheory.ProfiniteCohomology.GaloisModules.CoeGalRootsOfUnityHomApply
+public import Mathlib.FieldTheory.KrullTopology
+public import Mathlib.NumberTheory.LocalField.Basic
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Functoriality
 import GroundTheory.LocalFields.IntermediateField
+public import GroundTheory.LocalFields.RamificationStructure
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.IsZeroGroupCohomologyQuotientToInvariantsGalAdd
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderCyclic
+public import GroundTheory.TateCohomology.InfRes
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -68,7 +118,7 @@ theorem natCard_groupCohomology_two_galUnits_dvd_of_normal (N : Subgroup Gal(L/K
       Nat.card (groupCohomology (galUnits.{u} (fixedField N) L) 2) := by
     rw [← Nat.card_congr (groupCohomologyResGalUnitsIso N 2).toLinearEquiv.toEquiv]
     exact AddSubgroup.card_addSubgroup_dvd_card (LinearMap.range res).toAddSubgroup
-  rw [hcard, hker, ← Module.finrank_mul_finrank K (fixedField N) L, mul_comm (Module.finrank K _)]
+  rw [hcard, hker, ← (letI : Module.Free (fixedField N) L := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank K (fixedField N) L), mul_comm (Module.finrank K _)]
   exact Nat.mul_dvd_mul (hrange.trans hLE) hEK
 
 end Step
@@ -112,7 +162,7 @@ theorem natCard_groupCohomology_two_galUnits_dvd_of_finrank (n : ℕ) :
   obtain ⟨N, hN, hbot, htop⟩ := exists_normal_ne_bot_ne_top_of_not_isCyclic hcyc
   have hpos : 0 < Module.finrank K (fixedField N) := Module.finrank_pos
   have hLE : Module.finrank (fixedField N) L = Nat.card N := finrank_fixedField_eq_card N
-  have hmul := Module.finrank_mul_finrank K (fixedField N) L
+  have hmul := (letI : Module.Free (fixedField N) L := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank K (fixedField N) L)
   have hcardG : Nat.card Gal(L/K) = Module.finrank K L := IsGalois.card_aut_eq_finrank K L
   have hNlt : Nat.card N < Module.finrank K L := by
     rw [← hcardG]

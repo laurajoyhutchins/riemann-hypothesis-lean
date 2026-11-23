@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsIsoQuotToImOmegaLieOfSplit
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHomOfDerivation
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsIsoQuotToImOmegaLieOfSplit
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHomOfDerivation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -37,8 +77,8 @@ theorem val_res {W W' : X.Opens} (k : W' ≤ W) (f : Γ(X, W)) :
     val D (le_refl (e ⁻¹ᵁ W')) (resG X k f) = resG S (e.preimage_mono k) (val D le_rfl f) :=
   (D.app_res _ k f).trans (D.res_app le_rfl (e.preimage_mono k) f).symm
 
-include hε in
 
+include hε in
 theorem res_sq (U : T.Opens) : resG T (le_top : U ≤ ⊤) ε * resG T (le_top : U ≤ ⊤) ε = 0 := by
   rw [← map_mul, hε, map_zero]
 
@@ -47,12 +87,12 @@ def psi (W : X.Opens) : Γ(X, W) →+* Γ(T, p ⁻¹ᵁ e ⁻¹ᵁ W) where
     p.appLE _ _ le_rfl (val D le_rfl f) * resG T le_top ε
   map_one' := by simp only [val_one, map_one, map_zero, zero_mul, add_zero]
   map_mul' f g := by
-    simp only [val_mul, map_mul, map_add]
+    simp only [val_mul, map_mul, map_add (f := _)]
     linear_combination -(p.appLE _ _ le_rfl (val D le_rfl f) * p.appLE _ _ le_rfl (val D le_rfl g)) *
       res_sq ε hε (p ⁻¹ᵁ e ⁻¹ᵁ W)
   map_zero' := by simp only [map_zero, zero_mul, add_zero]
   map_add' f g := by
-    simp only [map_add]
+    simp only [map_add (f := _)]
     ring
 
 theorem psi_apply (W : X.Opens) (f : Γ(X, W)) : psi p ε hε D W f =
@@ -62,7 +102,7 @@ theorem psi_apply (W : X.Opens) (f : Γ(X, W)) : psi p ε hε D W f =
 theorem psi_nat (W W' : X.Opens) (h : W' ≤ W) (f : Γ(X, W)) :
     psi p ε hε D W' (resG X h f) =
       resG T (p.preimage_mono (e.preimage_mono h)) (psi p ε hε D W f) := by
-  rw [psi_apply, psi_apply, val_res, map_add, map_mul, resG_resG, resG_appLE, resG_appLE,
+  rw [psi_apply, psi_apply, val_res, map_add (f := _), map_mul, resG_resG, resG_appLE, resG_appLE,
     appLE_resG e, appLE_resG p, ← resG_appLE e (e.preimage_mono h) le_rfl, appLE_resG p]
 
 theorem psi_nil (W : X.Opens) (f : Γ(X, W)) :
@@ -99,7 +139,7 @@ theorem comp_deform {z : S ⟶ T} (hz : z ≫ p = 𝟙 S) (h0 : z.appLE ⊤ ⊤ 
   have k' : e ⁻¹ᵁ W ≤ z ⁻¹ᵁ p ⁻¹ᵁ e ⁻¹ᵁ W := k
   refine (appLE_appLE (f := z) (g := deform p ε hε D) (V := p ⁻¹ᵁ e ⁻¹ᵁ W)
     rfl le_rfl k' k f).symm.trans ?_
-  rw [deform_appLE, resG_self, psi_apply, map_add, map_mul, appLE_resG,
+  rw [deform_appLE, resG_self, psi_apply, map_add (f := _), map_mul, appLE_resG,
     ← resG_appLE z le_top le_top ε, h0, map_zero, mul_zero, add_zero,
     appLE_base hz _ _ le_rfl, resG_self, Scheme.Hom.appLE_eq_app]
 

@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreBis
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreMore
-import GroundTheory.HeightsAndTheta.Heights.Intersections.LocQuotCard
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreBis
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsMoreMore
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.LocQuotCard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -10,8 +56,8 @@ open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo
 
 noncomputable section
 
-set_option maxHeartbeats 1000000 in
 
+set_option maxHeartbeats 1000000 in
 theorem RegularityLocal.proof (hO : RegularityOrder.Statement) (hE : RegularityMaximalSpectrum.Statement) :
     RegularityLocal.Statement := by
   classical
@@ -29,7 +75,22 @@ theorem RegularityLocal.proof (hO : RegularityOrder.Statement) (hE : RegularityM
     fun W => by
       let _ := (ψ W).toAlgebra
       have := (e W).isMaximal
-      exact isLocalization_of_mem_iff φ hφ (locRing P W.1) (fun _ => rfl) (e W).asIdeal (he W)
+      have hL : ∀ x : regRing P, ((algebraMap (regRing P) (locRing P W.1) x : locRing P W.1) : FractionRing (MRing ι ⧸ P)) = φ x := fun _ => rfl
+      refine (isLocalization_iff (e W).asIdeal.primeCompl (locRing P W.1)).2 ⟨?_, ?_, ?_⟩
+      · rintro ⟨s, hs⟩
+        have hs0 : φ s ≠ 0 := fun h0 => hs (by rw [(map_eq_zero_iff φ hφ).1 h0]; exact (e W).asIdeal.zero_mem)
+        refine IsUnit.of_mul_eq_one ⟨(φ s)⁻¹, (he W _).2 ⟨1, s, hs, by change (φ s)⁻¹ * φ s = φ 1; rw [map_one, inv_mul_cancel₀ hs0]⟩⟩ ?_
+        apply Subtype.ext
+        simp only [Subring.coe_mul, hL, Subring.coe_one]
+        exact mul_inv_cancel₀ hs0
+      · intro z
+        obtain ⟨x, s, hs, hxs⟩ := (he W z).1 z.2
+        change (z : FractionRing (MRing ι ⧸ P)) * φ s = φ x at hxs
+        exact ⟨⟨x, ⟨s, hs⟩⟩, Subtype.ext (by simp only [Subring.coe_mul, hL]; exact hxs)⟩
+      · intro x y hxy
+        have h1 := congrArg Subtype.val hxy
+        rw [hL, hL] at h1
+        exact ⟨1, by rw [hφ h1]⟩
 
   have hone : ∀ W : {W : Ideal (MRing ι) // IsClosedPt W ∧ P ≤ W}, b ∉ (e W).asIdeal →
       Nat.card (locRing P W.1 ⧸ locIdeal P W.1 (φ b)) = 1 := fun W hbW => by
@@ -43,7 +104,9 @@ theorem RegularityLocal.proof (hO : RegularityOrder.Statement) (hE : RegularityM
   set I : Ideal (regRing P) := Ideal.span {b} with hI
   have : Finite (regRing P ⧸ I) :=
     Ideal.finiteQuotientOfFreeOfNeBot I (by rwa [hI, Ne, Ideal.span_singleton_eq_bot])
-  have : Fintype (PrimeSpectrum (regRing P ⧸ I)) := Fintype.ofFinite _
+  have : Fintype (PrimeSpectrum (regRing P ⧸ I)) := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact Fintype.ofFinite _
   let m : PrimeSpectrum (regRing P ⧸ I) → MaximalSpectrum (regRing P) := fun p =>
     ⟨p.asIdeal.comap (Ideal.Quotient.mk I),
       Ideal.comap_isMaximal_of_surjective _ Ideal.Quotient.mk_surjective (K := p.asIdeal)⟩

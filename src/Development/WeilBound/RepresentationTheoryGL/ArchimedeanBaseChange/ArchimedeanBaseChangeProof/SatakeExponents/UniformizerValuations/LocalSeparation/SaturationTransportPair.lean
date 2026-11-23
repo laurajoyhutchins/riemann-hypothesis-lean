@@ -1,6 +1,45 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.ReadMod
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsNormalisedOfDualIsConj
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatGLOfInvT
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatGLOfInvT
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.ReadSplit
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsNormalisedOfDualIsConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,8 +71,8 @@ theorem biInv_prod {P : Pl E} {p q : P.adicCompletion E} (hp : IsUnifV E P p) (h
   simp only [Prod.fst_mul, Prod.snd_mul]
   rw [(Tj_mem_hecke hp i).1 ⟨_, h11⟩ ⟨_, h21⟩ g.1, (Tj_mem_hecke hq j).1 ⟨_, h12⟩ ⟨_, h22⟩ g.2]
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem saturation_transport_pair {P P' : Pl E} {V : Type} [AddCommGroup V] [Module ℂ V]
     {ρ : Representation ℂ (GLw a P × GLw b P) V} {x : V} {Ba Bb : Multiset ℂˣ}
     (f : (GLw a P × GLw b P) ≃* (GLw a P' × GLw b P'))
@@ -88,9 +127,9 @@ theorem cloc_symm_v (y : x.adicCompletion E) : Valued.v ((cloc x).symm y) = Valu
   rw [e] at h
   exact h.symm
 
-theorem mem_fx_iff (g : GLw n x) : g ∈ KGL x n ↔ fx x n g ∈ KGL (cw x) n := by
+theorem mem_fx_iff (g : GLw n x) : g ∈ KGL x (n := n) ↔ fx x n g ∈ KGL (cw x) (n := n) := by
   have hO := map_mem_Ov_iff (cloc x).symm (cloc_symm_v x)
-  have hΦ : PhiU n (x.adicCompletion E) ∈ KGL x n := phiU_mem _ n
+  have hΦ : PhiU n (x.adicCompletion E) ∈ KGL x (n := n) := phiU_mem _ n
   change _ ↔ GlobalTheory.LFun.ConjPlace.invT (cloc x).symm n ((MulAut.conj (PhiU n (x.adicCompletion E))).symm g) ∈ _
   rw [← mem_iff_invT (cloc x).symm hO, MulAut.conj_symm_apply, Subgroup.mul_mem_cancel_right _ hΦ,
     Subgroup.mul_mem_cancel_left _ (inv_mem hΦ)]
@@ -100,7 +139,7 @@ theorem Tj_fx {p : x.adicCompletion E} (hp : IsUnifV E x p) (hp0 : p ≠ 0) {j :
       Tj ℂ n (Ov E x) ((Units.mk0 p hp0 : (x.adicCompletion E)ˣ) : x.adicCompletion E) (n - j)
         (dGL n (Units.mk0 p hp0) n * g) := by
   have hO := map_mem_Ov_iff (cloc x).symm (cloc_symm_v x)
-  have hΦ : PhiU n (x.adicCompletion E) ∈ KGL x n := phiU_mem _ n
+  have hΦ : PhiU n (x.adicCompletion E) ∈ KGL x (n := n) := phiU_mem _ n
   change Tj ℂ n (Ov E (cw x)) ((cloc x).symm ((Units.mk0 p hp0 : (x.adicCompletion E)ˣ) : x.adicCompletion E)) j
     (GlobalTheory.LFun.ConjPlace.invT (cloc x).symm n ((MulAut.conj (PhiU n (x.adicCompletion E))).symm g)) = _
   rw [Tj_invT (cloc x).symm hO _ hj, MulAut.conj_symm_apply]
@@ -129,15 +168,15 @@ theorem pairRtT_cw {a b : ℕ} (x : Pl E) :
 
 end JetMatrixAlgebra
 
-open JetMatrixAlgebra GlobalTheory.ThetaSatake in
 
+open JetMatrixAlgebra GlobalTheory.ThetaSatake in
 theorem thetaSat2_holds : ThetaSat2 := by
   intro E _ _ _ a b w u G Ba Bb _ hwu hs
   obtain ⟨x, rfl⟩ : ∃ x, cw x = w := ⟨cw w, GlobalTheory.ThetaPull.conjSrc_conjSrc w⟩
   obtain rfl : u = x := (GlobalTheory.CompanionTheory.OneExDatum.eq_cw_of_conjPl hwu).trans (GlobalTheory.ThetaPull.conjSrc_conjSrc x)
   rw [pairRtT_cw]
   refine saturation_transport_pair _ (fun g => ?_) (absNorm_cw u) (fun ϖ' hϖ' => ?_) hs
-  · show g ∈ (KGL u a).prod (KGL u b) ↔ ((fx u a).prodCongr (fx u b)) g ∈ (KGL (cw u) a).prod (KGL (cw u) b)
+  · show g ∈ (KGL u (n := a)).prod (KGL u (n := b)) ↔ ((fx u a).prodCongr (fx u b)) g ∈ (KGL (cw u) (n := a)).prod (KGL (cw u) (n := b))
     rw [Subgroup.mem_prod, Subgroup.mem_prod]
     exact and_congr (mem_fx_iff u a g.1) (mem_fx_iff u b g.2)
   · obtain ⟨p, rfl⟩ := (cloc u).symm.surjective ϖ'

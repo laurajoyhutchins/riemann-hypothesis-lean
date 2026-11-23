@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.OrientEv
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.OrientEv
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.CodiffUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen GlobalTheory.LKTrip GlobalTheory.LKGeo UpperTheory.Gal.W2.Seed UpperTheory.Gal.W2.Seed.Ori
 open scoped TensorProduct
@@ -19,7 +60,7 @@ private theorem R_add_r {K : Type} [Fintype K] (c u v v' : K → ℂ) :
   unfold R
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun k _ => ?_
-  simp only [Pi.add_apply, map_add, mul_add, add_mul, Complex.add_re]
+  simp only [Pi.add_apply, map_add (f := _), mul_add, add_mul, Complex.add_re]
 
 private theorem R_smul_l {K : Type} [Fintype K] (c u v : K → ℂ) (r : ℝ) :
     R c (r • u) v = r * R c u v := by
@@ -46,6 +87,7 @@ private theorem core0 (hT : TraceType) {E : Type} [Field E] [NumberField E] [IsC
   rw [← Finset.mul_sum, ← Complex.re_sum]
   congr 2
   push_cast
+
   simp only [Arith.bar_eq, Finset.mul_sum, map_sum, map_mul, IsCMField.complexEmbedding_complexConj]
   refine Finset.sum_congr rfl fun i _ => ?_
   ring
@@ -65,12 +107,12 @@ private theorem core1 (hT : TraceType) {E : Type} [Field E] [NumberField E] [IsC
   induction w using TensorProduct.induction_on with
   | zero => simp [R]
   | add a b ha hb =>
-    rw [TensorProduct.tmul_add, map_add, map_add, LinearMap.add_apply, Rat.cast_add, ha, hb, R_add_l]
+    rw [TensorProduct.tmul_add, map_add (f := _), map_add (f := _), LinearMap.add_apply, Rat.cast_add, ha, hb, R_add_l]
   | tmul q a =>
     induction w' using TensorProduct.induction_on with
     | zero => simp [R]
     | add a b ha hb =>
-      rw [TensorProduct.tmul_add, map_add, map_add, Rat.cast_add, ha, hb, R_add_r]
+      rw [TensorProduct.tmul_add, map_add (f := _), map_add (f := _), Rat.cast_add, ha, hb, R_add_r]
     | tmul t b =>
       rw [LinearMap.BilinForm.baseChange_tmul, e1 q a, e1 t b, map_smul, map_smul, R_smul_l, R_smul_r]
       have h : R (fun k : Phi A × Fin n => k.1.1 A.δ * k.1.1 (A.hd n k.2 : E))
@@ -90,11 +132,11 @@ theorem UpperTheory.cmField_hermitianForm_baseChange_real_eq_sum :
     (Th (fun τ : Phi A => τ.1) β x) (Th (fun τ : Phi A => τ.1) β y)
   induction x using TensorProduct.induction_on with
   | zero => simp [R]
-  | add a b ha hb => rw [map_add, map_add, LinearMap.add_apply, ha, hb, R_add_l]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, ha, hb, R_add_l]
   | tmul r w =>
     induction y using TensorProduct.induction_on with
     | zero => simp [R]
-    | add a b ha hb => rw [map_add, map_add, ha, hb, R_add_r]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, R_add_r]
     | tmul s w' =>
       have e : ∀ (r : ℝ) (w : ℚ ⊗[ℤ] (Fin n → 𝓞 E)), r ⊗ₜ[ℚ] w = r • ((1 : ℝ) ⊗ₜ[ℚ] w) := by
         intro r w

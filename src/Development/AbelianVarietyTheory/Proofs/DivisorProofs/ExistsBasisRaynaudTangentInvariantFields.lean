@@ -1,12 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveSpMapFst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualNumberSectionsUniqueDecomposition
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothRayQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLawPf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeG
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasRigidChart
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveSpMapFst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualNumberSectionsUniqueDecomposition
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothRayQuotient
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeG
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLawPf
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -91,7 +131,7 @@ theorem real_partR {u : epsR R ⟶ G} (hu : IsTangent u) (O : G.left.Opens) (f a
   have hjO : O ≤ (fib G).left ⁻¹ᵁ ((snd (epsR R) G).left ⁻¹ᵁ O) := by
     rw [← Scheme.Hom.comp_preimage, fib_snd, Scheme.Hom.id_preimage]
   have k := congrArg ((fib G).left.appLE _ _ hjO).hom h
-  simp only [map_add, map_mul, Scheme.Hom.app_eq_appLE, appLE_appLE, appLE_constFn] at k
+  simp only [map_add (f := _), map_mul, Scheme.Hom.app_eq_appLE, appLE_appLE, appLE_constFn] at k
   rw [appLE_eq_of_eq (fib_transl hu) O O _ le_rfl, appLE_eq_of_eq fib_snd O O _ le_rfl, fib_fst] at k
   have h0 : (TrivSqZeroExt.fstHom R R R).toRingHom DualNumber.eps = 0 := by simp
   rw [constFn_spMap, h0] at k
@@ -129,19 +169,19 @@ theorem exists_isInv (v : TanM (𝟙 (Sp R)) G) : ∃ dd : Fld G.left, IsInv G v
   refine ⟨fun O f => (ab O f).2, ⟨?_, ?_, ?_⟩, ?_⟩
   · intro W _ f f'
     refine huniq W _ (f + f') _ ?_
-    rw [map_add, hab W f, hab W f', hre, hre]
-    simp only [map_add]
+    rw [map_add (f := _), hab W f, hab W f', hre, hre]
+    simp only [map_add (f := _)]
     ring
   · intro W _ f f'
     refine huniq W _ (f * f') _ ?_
     rw [map_mul, hab W f, hab W f', hre, hre]
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
     linear_combination (((snd (epsR R) G).left.app W).hom (ab W f).2 *
       ((snd (epsR R) G).left.app W).hom (ab W f').2) * hee W
   · intro W W' h _ f
     refine huniq W' _ (resG _ h f) _ ?_
     have h' : (snd (epsR R) G).left ⁻¹ᵁ W' ≤ (snd (epsR R) G).left ⁻¹ᵁ W := (snd (epsR R) G).left.preimage_mono h
-    rw [appLE_res _ h h' (preimage_translR hu W).ge, hab W f, hre, map_add, map_mul, res_app _ h h',
+    rw [appLE_res _ h h' (preimage_translR hu W).ge, hab W f, hre, map_add (f := _), map_mul, res_app _ h h',
       res_app _ h h', res_constFn]
   · intro S _ φ g₀ w O f hg hgO htr
     obtain ⟨g', v', hg', hv', rfl⟩ := htr
@@ -177,8 +217,8 @@ theorem tv_sum {κ : Type} (s : Finset κ) (f : κ → TanM (𝟙 (Sp R)) G) : t
   | empty => rfl
   | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, ReciprocityTheory.ChartRestriction.G.PullbackSections.tv_add, ih]
 
-open ReciprocityTheory.ChartRestriction.G.PullbackSections in
 
+open ReciprocityTheory.ChartRestriction.G.PullbackSections in
 theorem exists_basis [IsLocalRing R] (hG : Smooth G.hom) :
     ∃ n : ℕ, Nonempty (Module.Basis (Fin n) R (TanM (𝟙 (Sp R)) G)) := by
   have hS := isGrpPullback_pullback G (𝟙 (Sp R))

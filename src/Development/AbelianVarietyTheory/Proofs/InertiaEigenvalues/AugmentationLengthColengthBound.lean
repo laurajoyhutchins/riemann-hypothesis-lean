@@ -1,22 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadNatZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RsTermZero
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ZintZero
-import Development.AbelianVarietyTheory.Definitions.Divisors.MemMspan
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPsiLocNeOne
+public import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffDiagonalBlockGLEqVecCoeff
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GlobalWhittakerCoeffEqIteratedColumnTransform
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGenericOfIsLocComp
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.QuotientAverageMapLatticeEquiv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RsIntegralEntireTheta
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WhittakerLawUpperTriangularUnipotentAdelic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.Divisors.UnrOutside
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsRapidInf
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAddHaarMeasureVolumeLie
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SchurDir
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdelicUnitriangularMulMemUnipotentTimesIntegral
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
-import GroundTheory.AutomorphicForms.MultiplicityOne.Injective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnfoldMirabolic
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LintegralThetaSeriesUnfoldMirabolic
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPsiLocNeOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GlobalWhittakerCoeffEqIteratedColumnTransform
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGenericOfIsLocComp
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RsIntegralEntireTheta
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory GlobalTheory.CuspRep GlobalTheory.JSW Formalism.UG GlobalTheory.LFun Formalism.L2.Host
 open scoped ENNReal ComplexConjugate ContDiff
 open GlobalTheory.MirTower GlobalTheory.CuspGeneric
@@ -89,12 +120,12 @@ theorem blockGL_blkU {n m : ℕ} (h : m + 1 ≤ n) (r : ℕ) (x : UnipotentBlock
   rw [coe_blockGL, blockMat_apply, blkU_entry]
   by_cases hi : (i : ℕ) < m + 1
   · by_cases hj : (j : ℕ) < m + 1
-    · rw [dif_pos hi, dif_pos hj, blkU_entry]
+    · rw [dite_eq_left hi, dite_eq_left hj, blkU_entry]
       congr 1
       simp only [Matrix.one_apply, Fin.ext_iff]
     · have hne : i ≠ j := fun e => hj (e ▸ hi)
-      rw [dif_pos hi, dif_neg hj, dif_neg (by omega), Matrix.one_apply_ne hne, add_zero]
-  · rw [dif_neg hi, dif_neg (by omega), add_zero, Matrix.one_apply]
+      rw [dite_eq_left hi, dite_eq_right hj, dite_eq_right (by omega), Matrix.one_apply_ne hne, add_zero]
+  · rw [dite_eq_right hi, dite_eq_right (by omega), add_zero, Matrix.one_apply]
 
 omit [NumberField E] in
 theorem isMir_blockGL {n m : ℕ} (h : m + 1 ≤ n) {γ : GL (Fin (m + 1)) E} (hγ : IsMir m γ) :
@@ -103,11 +134,11 @@ theorem isMir_blockGL {n m : ℕ} (h : m + 1 ≤ n) {γ : GL (Fin (m + 1)) E} (h
   rw [coe_blockGL, blockMat_apply]
   by_cases hi : (i : ℕ) < m + 1
   · by_cases hj : (j : ℕ) < m + 1
-    · rw [dif_pos hi, dif_pos hj, hγ _ _ hij]
+    · rw [dite_eq_left hi, dite_eq_left hj, hγ _ _ hij]
       simp only [Matrix.one_apply, Fin.ext_iff]
     · have hne : i ≠ j := fun e => hj (e ▸ hi)
-      rw [dif_pos hi, dif_neg hj, Matrix.one_apply_ne hne]
-  · rw [dif_neg hi, Matrix.one_apply]
+      rw [dite_eq_left hi, dite_eq_right hj, Matrix.one_apply_ne hne]
+  · rw [dite_eq_right hi, Matrix.one_apply]
 
 theorem good_restrict {ψ : AddChar (Ad E) ℂ} {n m : ℕ} (h : m + 1 ≤ n) {F : GA E n → ℂ} (hF : Good ψ m F) :
     Good ψ m (fun g : GA E (m + 1) => F (blockGL h g)) := by

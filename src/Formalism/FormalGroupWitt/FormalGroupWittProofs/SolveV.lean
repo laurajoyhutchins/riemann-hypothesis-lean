@@ -1,4 +1,48 @@
-import Formalism.FormalGroupWitt.SubstInjectiveV
+module
+
+public import Formalism.FormalGroupWitt.SubstInjectiveV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +68,7 @@ theorem low_of_zero (N : ℕ) : Low N (0 : MvPowerSeries τ R) := fun d _ => by 
 
 theorem low_add {N : ℕ} {p q : MvPowerSeries τ R} (hp : Low N p) (hq : Low N q) :
     Low N (p + q) :=
-  fun d hd => by rw [map_add, hp d hd, hq d hd, add_zero]
+  fun d hd => by rw [map_add (f := _), hp d hd, hq d hd, add_zero]
 
 theorem low_neg {N : ℕ} {p : MvPowerSeries τ R} (hp : Low N p) : Low N (-p) :=
   fun d hd => by rw [map_neg, hp d hd, neg_zero]
@@ -92,7 +136,7 @@ theorem low_P {k : ι → MvPowerSeries τ R} (hk : ∀ i, Low 1 (k i)) (e : ι 
   induction e using Finsupp.induction_linear with
   | zero => exact low_zero _
   | add e₁ e₂ h₁ h₂ =>
-    rw [P_add, map_add]; exact low_mul h₁ h₂
+    rw [P_add, map_add (f := _)]; exact low_mul h₁ h₂
   | single i n =>
     rw [P_single, Finsupp.degree_single]; exact low_pow (hk i) n
 
@@ -121,7 +165,7 @@ theorem low_pow_sub_succ {M : ℕ} {k k' : ι → MvPowerSeries τ R} (hk : ∀ 
   have hsplit : e = e' + Finsupp.single i 1 := (tsub_add_cancel_of_le hle).symm
   have hdeg : e.degree = e'.degree + 1 := by
     conv_lhs => rw [hsplit]
-    rw [map_add, Finsupp.degree_single]
+    rw [map_add (f := _), Finsupp.degree_single]
   have h1 : Low 1 (P k' e') := low_mono (by omega) (low_P hk' e')
   rw [hsplit, P_add, P_add, P_single, P_single, pow_one, pow_one]
   have e2 : P k e' * k i - P k' e' * k' i =
@@ -178,7 +222,7 @@ theorem degree_eq_one {ι : Type v} (d : ι →₀ ℕ) (hd : d.degree = 1) :
     (tsub_add_cancel_of_le hle).symm
   have hdeg : d.degree = (d - Finsupp.single i 1).degree + 1 := by
     conv_lhs => rw [hsplit]
-    rw [map_add, Finsupp.degree_single]
+    rw [map_add (f := _), Finsupp.degree_single]
   have h0 : d - Finsupp.single i 1 = 0 := (Finsupp.degree_eq_zero_iff _).1 (by omega)
   refine ⟨i, ?_⟩
   rw [hsplit, h0, zero_add]

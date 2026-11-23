@@ -1,4 +1,44 @@
-import Formalism.LocalToGlobal.CharacterGerms.HostTraceIdentity
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.HostTraceIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -11,32 +51,6 @@ namespace Formalism.L2.FormalSeriesBounds
 
 open Formalism.IncomingBounds Formalism.L2.Pj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ
-
-def LogExSt : Prop :=
-  ∀ (C : Type) [Field C] [CharZero C] (dd : ℕ) (G : FGLaw C dd), ∃ lg ex : Pt C 1 dd,
-    (∀ i (μ : Fin 1 × Fin dd →₀ ℕ), μ.degree ≤ 1 →
-      MvPowerSeries.coeff μ (lg i) = MvPowerSeries.coeff μ (MvPowerSeries.X ((0 : Fin 1), i) : PS C 1 dd)) ∧
-    (∀ i, ev (n := 2) ![addOf G.F (pt C dd 0) (pt C dd 1)] (lg i) =
-      ev (n := 2) ![pt C dd 0] (lg i) + ev (n := 2) ![pt C dd 1] (lg i)) ∧
-    (∀ i, MvPowerSeries.constantCoeff (ex i) = 0) ∧ comp1 lg ex = pt C dd 0 ∧ comp1 ex lg = pt C dd 0
-
-structure IsMapFB {K C : Type} [Field K] [Field C] (φ : K →+* C) {O : Type} [CommRing O] [StarRing O] {dd : ℕ}
-    (B : FB K dd O) (B' : FB C dd O) : Prop where
-  F : ∀ j, B'.G.F j = MvPowerSeries.map φ (B.G.F j)
-  act : ∀ a j, B'.A.act a j = MvPowerSeries.map φ (B.A.act a j)
-  ph1 : B'.ph1 = MvPowerSeries.map φ B.ph1
-  ph2 : B'.ph2 = MvPowerSeries.map φ B.ph2
-  sy : B'.sy = MvPowerSeries.map φ B.sy
-  ad : ∀ a, B'.ad a = MvPowerSeries.map φ (B.ad a)
-
-def FBMapSt : Prop :=
-  ∀ (K C : Type) [Field K] [Field C] (φ : K →+* C) (O : Type) [CommRing O] [StarRing O] (dd : ℕ) (B : FB K dd O),
-    ∃ B' : FB C dd O, IsMapFB φ B B'
-
-def GaugeMapSt : Prop :=
-  ∀ (K C : Type) [Field K] [Field C] [CharZero K] [CharZero C] (φ : K →+* C) (O : Type) [CommRing O] [StarRing O]
-    (dd : ℕ) (B : FB K dd O) (B' : FB C dd O), IsMapFB φ B B' →
-    ∀ h : PS K 2 dd, B.IsCanonGauge K h → B'.IsCanonGauge C (MvPowerSeries.map φ h)
 
 def EmbIntSt : Prop :=
   ∀ (T : CDVR) (C : Type) [Field C] (V : VF C) (ι : T.Fr →+* C), EmbOK T V ι →

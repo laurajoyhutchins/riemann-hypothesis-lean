@@ -1,9 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardAdelicCharacterLocalComponentNeOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharOfTrace
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SymplecticAdelicFormBiadditiveAlternatingRationa
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SymplecticAdelicFormBiadditiveAlternatingRationa
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharOfTrace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardAdelicCharacterLocalComponentNeOne
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.IndefR.Datum
@@ -32,17 +82,19 @@ theorem inf_rat (L : Ainf F →+ ℂ) (hL : Continuous L)
   have key : (fun w : Ainf F => φ w) = fun w => ∑ i, L (w * algebraMap F _ (integralBasis F i)) *
       φ (algebraMap F _ ((integralBasis F).traceDual i)) := by
     refine (InfiniteAdeleRing.denseRange_algebraMap F).equalizer hφ
-      (continuous_finset_sum _ fun i _ => (hL.comp (continuous_id.mul continuous_const)).mul continuous_const) ?_
+      (continuous_finsetSum _ fun i _ => (hL.comp (continuous_id.mul continuous_const)).mul continuous_const) ?_
     funext x
     simp only [Function.comp_apply, ← map_mul, hT]
     conv_lhs => rw [← (integralBasis F).traceDual.sum_repr x]
+
     simp only [map_sum, Module.Basis.traceDual_repr_apply, Algebra.traceForm_apply, Algebra.smul_def, map_mul,
-      eq_ratCast]
+    eq_ratCast]
     exact Finset.sum_congr rfl fun i _ => by
       rw [← RingHom.comp_apply φ (algebraMap F (Ainf F)), map_ratCast]
   apply (InfinitePlace.Completion.extensionEmbedding v).injective
   change φ y = φ (algebraMap F (Ainf F) _)
   rw [congrFun key y]
+
   simp only [hn, map_sum, map_mul, map_intCast]
 
 theorem fin_eq_zero {ψ : AddChar (AF F) ℂ} (hψ : Continuous ψ) (hv : ∀ v, ∃ y, psiV F ψ v y ≠ 1) (l : Af F)
@@ -122,7 +174,7 @@ theorem adele_rat {ψ : AddChar (AF F) ℂ} (hψ : IsCharAF F ψ) (hv : ∀ v, �
     change 0 = fstA F (a - algebraMap F _ x - algebraMap F _ d) * _
     rw [h7, zero_mul]
   refine ⟨x + d, ?_⟩
-  rw [map_add, ← sub_eq_zero, ← sub_sub]
+  rw [map_add (f := _), ← sub_eq_zero, ← sub_sub]
   exact Prod.ext h7 h8
 
 end Scalar
@@ -139,7 +191,7 @@ theorem tensor_rat {F E : Type} [Field F] [CharZero F] [Field E] [Algebra F E] [
     induction z using TensorProduct.induction_on with
     | zero => simp
     | add x y hx hy =>
-      simp only [mul_add, map_add, TensorProduct.add_tmul, Finset.sum_add_distrib]
+      simp only [mul_add, map_add (f := _), TensorProduct.add_tmul, Finset.sum_add_distrib]
       rw [← hx, ← hy]
     | tmul a e =>
       conv_lhs => rw [← b.traceDual.sum_repr e, TensorProduct.tmul_sum]
@@ -170,6 +222,7 @@ theorem sum_single {E A : Type} [Field E] [CommRing A] (ι : E →+* A) {m n : �
   have h2 : ∀ a, ∑ b, ∑ c, ∑ d, ι (P⁻¹ a b) * ι (M b c) * ι (Q c d) * x d a =
       ∑ d, ι (Matrix.single a₀ d₀ e a d) * x d a := fun a => by
     rw [← h1]
+
     simp only [Matrix.mul_apply, map_sum, map_mul, Finset.sum_mul]
     rw [Finset.sum_comm]
     refine (Finset.sum_congr rfl fun c _ => Finset.sum_comm).trans Finset.sum_comm
@@ -204,9 +257,9 @@ theorem ratL_annihilator : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsStdC
   · intro h
     obtain ⟨θ, hθ⟩ := hψ.2.1
     let L : Ainf D.host.F →+ ℂ := AddMonoidHom.mk' (fun x => ∑ ρ, θ ρ (x ⊗ₜ[D.host.F] (1 : D.host.E))) fun a b => by
-      simp only [map_add, TensorProduct.add_tmul, Finset.sum_add_distrib]
+      simp only [map_add (f := _), TensorProduct.add_tmul, Finset.sum_add_distrib]
     have hrat := adele_rat hψ.1 (GlobalTheory.StdCharLocal.psiV_ne_one D ψ hψ) L
-      (continuous_finset_sum _ fun ρ _ => (hθ ρ).2)
+      (continuous_finsetSum _ fun ρ _ => (hθ ρ).2)
       (fun x => by
         show ∑ ρ, θ ρ (algebraMap D.host.F (Ainf D.host.F) x ⊗ₜ[D.host.F] (1 : D.host.E)) = _
         rw [GlobalTheory.StdRat.tmul_one_eq, Finset.sum_congr rfl fun ρ _ => (hθ ρ).1 _, GlobalTheory.StdRat.sum_tauE_eq_trace])

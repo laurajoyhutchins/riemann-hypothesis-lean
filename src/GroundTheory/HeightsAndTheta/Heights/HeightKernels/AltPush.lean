@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KernelsRest
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KernelsRest
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -52,6 +98,7 @@ theorem antisym_permTerm (e : ι → ℕ) (π : Equiv.Perm ι) :
 
 theorem antisym_sum {κ : Type*} (s : Finset κ) (f : κ → MvPolynomial ι ℚ) :
     antisym (∑ x ∈ s, f x) = ∑ x ∈ s, antisym (f x) := by
+
   simp only [antisym, map_sum, smul_sum]
   rw [sum_comm]
 
@@ -68,6 +115,7 @@ theorem rename_mul_rename (α : Fin r → ℕ) (β : Fin s → ℕ) :
         rename (Sum.inr : Fin s → Fin r ⊕ Fin s) (alternant β) =
       ∑ σ : Equiv.Perm (Fin r), ∑ τ : Equiv.Perm (Fin s),
         sgnP (Equiv.Perm.sumCongr σ τ) * permTerm (Sum.elim α β) (Equiv.Perm.sumCongr σ τ) := by
+
   rw [alternant_eq_sum, alternant_eq_sum, map_sum, map_sum, sum_mul_sum]
   refine sum_congr rfl fun σ _ => sum_congr rfl fun τ _ => ?_
   simp only [sgnP, permTerm, map_mul, map_intCast, map_prod, map_pow, rename_X,
@@ -85,31 +133,6 @@ theorem antisym_rename_mul_rename (α : Fin r → ℕ) (β : Fin s → ℕ) :
   rw [mul_smul, Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul]
 
 end KAlt
-
-theorem AlternantPush.intersectionNumber_baseChange : AlternantPush.Statement := by
-  intro r s
-  refine ⟨1, Or.inl rfl, fun la hla => ?_⟩
-  rw [KAlt.antisym_rename_mul_rename]
-  split_ifs with h
-  · rw [one_mul]
-  · simp only [not_forall, not_le] at h
-    obtain ⟨a, ha⟩ := h
-    have hr : 0 < r := Fin.pos a
-    set a0 : Fin r := ⟨r - 1, by omega⟩ with ha0
-    have hle : la a0 ≤ la a := hla (show a ≤ a0 from by
-      rw [Fin.le_def]; simp only [ha0]; have := a.isLt; omega)
-    have hlt : la a0 < s := lt_of_le_of_lt hle ha
-    set b0 : Fin s := ⟨s - 1 - la a0, by omega⟩ with hb0
-    have hdet : alternant (Sum.elim (fun a : Fin r => la a + (r - 1 - (a : ℕ)))
-        fun b : Fin s => s - 1 - (b : ℕ)) = 0 := by
-      unfold alternant
-      refine Matrix.det_zero_of_column_eq (i := Sum.inl a0) (j := Sum.inr b0) Sum.inl_ne_inr ?_
-      intro k
-      simp only [Matrix.of_apply, Sum.elim_inl, Sum.elim_inr]
-      congr 1
-      show la a0 + (r - 1 - (r - 1)) = s - 1 - (s - 1 - la a0)
-      omega
-    rw [hdet, smul_zero]
 
 end
 

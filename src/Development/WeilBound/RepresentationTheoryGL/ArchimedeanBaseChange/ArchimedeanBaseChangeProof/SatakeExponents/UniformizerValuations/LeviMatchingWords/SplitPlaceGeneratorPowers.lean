@@ -1,5 +1,43 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.SetupEig
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,17 +77,6 @@ def RegPowT : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Un
 
 def SepPowT : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → ∀ (n : ℕ) (d : LocData E n), d.Ok → MOk d →
   ∀ (m : ℕ), ∀ w ∈ d.T, ∀ y, d.gU (m + 1) w y ≠ 0 → y.1.val.charpoly.Separable
-
-def MacInv : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (d : LocData E n), d.Ok → MOk d →
-  ∀ (a : ℕ) (ha : a ≤ n), ∀ w ∈ d.S₀, ∀ x y : d.kap w, IsHecke (d.L a w) ((d.betaL a ha).m w x y) ∧
-    ∀ m : ℕ, PositivityTheory.Rg.BcN.F2.mconv ((((d.fixL a).mul (pw (d.betaL a ha) m)).tr d.P d.one w)) (idem (d.L a w)) =
-      ((d.fixL a).mul (pw (d.betaL a ha) m)).tr d.P d.one w
-
-def SplitPlaceGeneratorPowers : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (d : LocData E n), d.Ok → MOk d →
-  ∀ w ∈ d.S₀, ∀ (N : ℕ) (u : UL n w), d.gU (N + 1) w u = MS.gpow (d.e w) N (u : GLw n w)
-
-def MacInvOf : Prop := (∀ (E : Type) [Field E] [NumberField E] [IsCMField E], PositivityTheory.Rg.BcN.F2.LocOpUniformizer E) → IdemAlg → MacInv
-def SplitPowersOfIdempotents : Prop := IdemAlg → SplitPlaceGeneratorPowers
 
 def MatchLMB3Of : Prop := MT.MatchT → MS.MatchSplitPlace → MB.MatchBadS → MB.MatchBadI → MB.FixIdem → IdemAlg → MatchLMB2
 

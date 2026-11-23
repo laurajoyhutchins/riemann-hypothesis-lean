@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemma
-import GroundTheory.AutomorphicForms.LeviStagesInduction
-import GroundTheory.AutomorphicForms.LeviStagesExact
+module
+
+public import GroundTheory.AutomorphicForms.LeviStagesInduction
+import GroundTheory.AutomorphicForms.AdmissibleInduction
+import GroundTheory.AutomorphicForms.SmoothRepSchur
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -233,8 +282,8 @@ theorem Refines.trans {β γ δ : Fin n → ℕ} (h₁ : Refines β γ) (h₂ : 
     Refines β δ :=
   fun i j h => h₂ i j (h₁ i j h)
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem eq_one_of_mem_leviUnipotent_self (u : leviUnipotent F n β β) :
     ((u : levi F n β) : GL (Fin n) F) = 1 := by
   have hu := mem_unipotentRadical.1 (Subgroup.mem_subgroupOf.1 u.2)
@@ -245,8 +294,8 @@ theorem eq_one_of_mem_leviUnipotent_self (u : leviUnipotent F n β β) :
   · exact hu.2 i j hij
   · rw [hl i j hij, Units.val_one, one_apply_ne fun e => hij (by rw [e])]
 
-omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 
+omit [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] in
 theorem nontrivial_leviJacquetModule_self {U : Type*} [AddCommGroup U] [Module ℂ U]
     [Nontrivial U] (ρ : Representation ℂ (levi F n β) U) :
     Nontrivial (LeviJacquetModule β β ρ) := by
@@ -260,7 +309,7 @@ theorem nontrivial_leviJacquetModule_self {U : Type*} [AddCommGroup U] [Module �
     simp [hu]
   exact (Submodule.mem_bot ℂ).1 (hle hmem)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_embedding_leviParabolicInd {U : Type u} [AddCommGroup U] [Module ℂ U]
     {ρ : Representation ℂ (levi F n β) U} [ρ.IsIrreducible] (hρ : IsSmooth ρ) :

@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.HodgePeriodGram
-import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.HodgePeriodGram
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+
+@[expose] public section
+
 open Matrix Complex Filter Topology
 open scoped ComplexOrder ContDiff
 open GlobalTheory.IndefiniteRowSideFullHecke.HodgePeriodGram GlobalTheory.HermFrame
@@ -42,9 +89,9 @@ theorem uniform_posDef {X : Type} [TopologicalSpace X] {ι : Type} [Fintype ι] 
   have hS : IsCompact S := hK.prod (isCompact_sphere 0 1)
   have hq : ContinuousOn (fun p : X × (ι → ℝ) => p.2 ⬝ᵥ F p.1 *ᵥ p.2) S := by
     simp only [dotProduct, mulVec]
-    refine continuousOn_finset_sum _ fun j _ => ?_
+    refine continuousOn_finsetSum _ fun j _ => ?_
     refine ContinuousOn.mul (continuous_apply j |>.comp continuous_snd).continuousOn ?_
-    refine continuousOn_finset_sum _ fun k _ => ?_
+    refine continuousOn_finsetSum _ fun k _ => ?_
     refine ContinuousOn.mul ?_ (continuous_apply k |>.comp continuous_snd).continuousOn
     exact (hF j k).comp continuous_fst.continuousOn (fun p hp => hp.1)
   have hyy : ∀ y : ι → ℝ, y ⬝ᵥ y ≤ Fintype.card ι * ‖y‖ ^ 2 := by
@@ -215,7 +262,7 @@ theorem uniform_consts : ∀ (n a g rk : ℕ) (τ₀ : (Fin n → ℂ) → Matri
     refine (le_abs_self _).trans ((quad_abs_le _ (Fintype.card {j : Fin g // j.val < rk} * E ^ 2)
       ?_ y).trans ?_)
     · intro j k
-      rw [mul_apply]
+      rw [Matrix.mul_apply]
       refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
       calc ∑ i, |bMᵀ j i * bM i k| ≤ ∑ _i : Fin (Fintype.card {j : Fin g // j.val < rk}), E ^ 2 :=
             Finset.sum_le_sum fun i _ => by

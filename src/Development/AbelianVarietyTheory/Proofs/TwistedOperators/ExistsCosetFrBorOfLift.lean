@@ -1,20 +1,85 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCosetOfSelfDual
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeKerLatticeBounds
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsSimilitudeTriangularPeriodsOfHeckePoint
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PlaceOverTypePrimeDividesOrConjugate
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PlaceIdempotentUnderEqOfLiesOver
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCoordLatticeOfSelfDualFrame
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ReductionTrivialOfConjugatePlaceSelfDual
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilDatumPowersUnramifiedEtaTilde
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HeckePrimeDetection
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.RealPoints
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsCan
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CongruenceActionMemFrameOrbit
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilDatumPowersUnramifiedEtaTilde
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelCharacterEmbeddingCompat
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfOfBasePins
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.MarkedIsometryHalf
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLinearEquivOfPeriod
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HeckeKernelSchemeGeometricPointsEqKernels
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ArithmeticCMKnownTheoremsProof
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.PointExpEqOfIsometry
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCosetOfSelfDual
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsLiftKer
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeKerLatticeBounds
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCoordLatticeOfSelfDualFrame
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PlaceIdempotentUnderEqOfLiesOver
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PlaceOverTypePrimeDividesOrConjugate
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ReductionTrivialOfConjugatePlaceSelfDual
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletion
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryLatticeRationalTranslateInvariance
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryLatticeSelfDualTraceForm
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ArchimedeanMatrixUnitaryContinuousMultiplicativeStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CongruenceLatticeFractionalMultipleAgree
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyTransferEquiv
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.HalfDepthValuations
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.HkSupSizedOfHkSup
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HeckePrimeDetection
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsTangentModuleUniversalGroup
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExponentialDerivativeAtZeroIsTangent
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameUniformEmbeddingSecond
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0CompLinear
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0OfIsPullback
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RealAdelesCmFieldEquivComplexCmType
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ExpRowsPf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -28,7 +93,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 namespace GlobalTheory.HeckePointIdent
 
-set_option maxHeartbeats 800000 in
+
 
 theorem levG_cong {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T0 : Type} {A : FamIn D.what₂.LL G Pl0 T0 D.R.m}
     {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (hL : R.toLevCh.Is A.μ0)
@@ -90,7 +155,7 @@ theorem map_sub_one {A B : Type} [CommRing A] [CommRing B] {n : ℕ} (f : A →+
   rw [Matrix.sub_apply, Matrix.sub_apply, map_sub, Matrix.one_apply, Matrix.one_apply]
   split_ifs <;> simp
 
-set_option maxHeartbeats 800000 in
+
 
 theorem exists_split_of_suppAt {D : D7} (V : HSp D) {e : AE D} {P : Pl D.host.E} (he : Formalism.L2.NTheta.IsIdemAt e P)
     {a : GA D V} (ha : SuppAt e V a) {M : ℕ} (hM : (M : 𝓞 D.host.E) ∉ P.asIdeal) :
@@ -142,7 +207,7 @@ theorem exists_split_of_suppAt {D : D7} (V : HSp D) {e : AE D} {P : Pl D.host.E}
     rw [TensorProduct.sub_tmul]
     exact this
 
-set_option maxHeartbeats 800000 in
+
 
 theorem mark_keep {D : D7} (V : HSp D) {e : AE D} {P : Pl D.host.E} (he : Formalism.L2.NTheta.IsIdemAt e P)
     {a a₀ : GA D V} (ha : SuppAt e V a₀) {M p p' : ℕ} (hp : (p : 𝓞 D.host.E) ∈ P.asIdeal) (hpp : p * p' ≡ 1 [MOD M])
@@ -244,7 +309,7 @@ theorem frBor_one_of_eq {c : Coeff l} {S : Type} [CommRing S] [Algebra c.F S] (y
   · rw [hu, hu' τ, hcomb]
     simp [Pi.single_apply]
 
-set_option maxHeartbeats 800000 in
+
 
 theorem exists_lift_all {σ' : KA l →+* ℂ} {g : ℕ} {ty : Fin g → (E →+* ℂ)} (F : FamilyUnif Xo σ' ty)
     (i j : Fin F.n) (P : (F.Di i).La →+ (Fin g → ℂ)) (P' : (F.Di j).La →+ (Fin g → ℂ))
@@ -277,7 +342,7 @@ theorem exists_lift_all {σ' : KA l →+* ℂ} {g : ℕ} {ty : Fin g → (E →+
   choose θ₀ hθ₀ using h3
   let θ : (F.Di j).La →ₗ[𝓞 E] (F.Di i).La :=
     { toFun := θ₀
-      map_add' := fun a b => hinj (by rw [map_add, hθ₀, hθ₀, hθ₀, smul_add])
+      map_add' := fun a b => hinj (by rw [map_add (f := _), hθ₀, hθ₀, hθ₀, smul_add])
       map_smul' := fun s a => hinj (by rw [map_smul, hθ₀, hθ₀, smul_comm]; rfl) }
   have hθ : ∀ b, gam (θ b) = (p ^ 2) • b := hθ₀
   have hp0 : (p : ℤ) ^ 2 ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.2 hpp.ne_zero)
@@ -345,19 +410,19 @@ theorem point_deriv_eq {σ' : KA l →+* ℂ} {g : ℕ} {ty : Fin g → (E →+*
 
 def trForm {n : ℕ} (G : Matrix (Fin n) (Fin n) E) (ξ : E) : (Fin n → E) →+ (Fin n → E) →+ ℚ :=
   AddMonoidHom.mk' (fun v => AddMonoidHom.mk' (fun y => Algebra.trace ℚ E (ξ * herm G v y)) fun y y' => by
-      rw [← map_add, ← mul_add]
+      rw [← map_add (f := _), ← mul_add]
       congr 2
       simp [herm, cc, mul_add, Finset.sum_add_distrib]) fun v v' => by
     ext y
     show Algebra.trace ℚ E _ = Algebra.trace ℚ E _ + Algebra.trace ℚ E _
-    rw [← map_add, ← mul_add]
+    rw [← map_add (f := _), ← mul_add]
     congr 2
     simp [herm, add_mul, Finset.sum_add_distrib]
 
 theorem trForm_apply {n : ℕ} (G : Matrix (Fin n) (Fin n) E) (ξ : E) (v y : Fin n → E) :
     trForm G ξ v y = Algebra.trace ℚ E (ξ * herm G v y) := rfl
 
-set_option maxHeartbeats 800000 in
+
 
 theorem exists_quot_lattice {n : ℕ} (G : Matrix (Fin n) (Fin n) E) (ξ : E) (A A' : Datum H)
     (Λ : Submodule (𝓞 E) (Fin n → E)) (φ : A.La ≃ₗ[𝓞 E] Λ)
@@ -418,7 +483,7 @@ theorem exists_quot_lattice {n : ℕ} (G : Matrix (Fin n) (Fin n) E) (ξ : E) (A
   · choose f hf using fun b => hv (j b) (LinearMap.mem_range_self j b)
     have hf' : ∀ b, (f b : ℚ) = trForm G ξ v (j b) := fun b => (hf b).symm
     let f' : A'.La →+ ℤ := AddMonoidHom.mk' f fun a b => by
-      have : ((f (a + b) : ℤ) : ℚ) = f a + f b := by rw [hf', hf', hf', map_add, map_add]
+      have : ((f (a + b) : ℤ) : ℚ) = f a + f b := by rw [hf', hf', hf', map_add (f := _), map_add (f := _)]
       exact_mod_cast this
     obtain ⟨b₀, hb₀⟩ := A'.unimod.2 f'.toIntLinearMap
     have hz : ∀ a, trForm G ξ (v - j b₀) (φ a : Fin n → E) = 0 := fun a => by
@@ -470,7 +535,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar GlobalTheory.Hecke
 
 namespace GlobalTheory.HeckePointIdent
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_frBor_of_dictLat {D : D7} {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E} {Dw : Datum H} {V W : HSp D} (hV : V = W)
     {l : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Level H} {Xo : Moduli Dw l}
@@ -559,7 +624,7 @@ theorem exists_frBor_of_dictLat {D : D7} {H : ReciprocityTheory.ChartRestriction
     { toFun := fun b => ⟨δ.1 *ᵥ jm b, (hmove _).1 (LinearMap.mem_range_self jm b)⟩
       map_add' := fun u v => Subtype.ext (by
         show δ.1 *ᵥ jm (u + v) = δ.1 *ᵥ jm u + δ.1 *ᵥ jm v
-        rw [map_add, Matrix.mulVec_add])
+        rw [map_add (f := _), Matrix.mulVec_add])
       map_smul' := fun s v => Subtype.ext (by
         show δ.1 *ᵥ jm (s • v) = s • δ.1 *ᵥ jm v
         rw [map_smul]
@@ -611,7 +676,7 @@ theorem exists_frBor_of_dictLat {D : D7} {H : ReciprocityTheory.ChartRestriction
       have h5 : (φ _ (F.t (ik (dict (h * a)).1) v) : Fin V.rank → D.host.E) =
           δ.1 *ᵥ ((p * p') • (φ _ (F.t (ik (dict h).1) v) : Fin V.rank → D.host.E) + l.M • jm b) := by
         rw [hb, ← sub_eq_iff_eq_add'.1 e', hri]
-      rw [hgm, map_add, map_nsmul, Submodule.coe_add, Submodule.coe_smul_of_tower, hgm, h5, ← hδn, ← Matrix.mulVec_add,
+      rw [hgm, map_add (f := _), map_nsmul, Submodule.coe_add, Submodule.coe_smul_of_tower, hgm, h5, ← hδn, ← Matrix.mulVec_add,
         hx, map_add, hjg, map_nsmul, map_nsmul, map_nsmul, map_sub, Submodule.coe_smul_of_tower, smul_smul, smul_sub,
         add_add_sub_cancel])
     (fun b => by
@@ -662,7 +727,7 @@ theorem conjP_asIdeal {D : D7} (Hh : ReciprocityTheory.ChartRestriction.G.Geo.To
     rw [Hh.bar_eq]
     rfl
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_coset_frBor : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m)
     (T : CoreJ D) [Algebra T.Q.c.F D.what₂.LL] (R : RealDat D A T.Q.c.F),
@@ -707,7 +772,7 @@ theorem exists_coset_frBor : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 
     · rw [hlat, ← Nat.cast_smul_eq_nsmul (𝓞 D.host.E)]
       exact h1 (Submodule.smul_mem_smul hpP hv)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_coset_frBor_of_lift : ∀ (D : D7), GlobalTheory.IndefiniteRowSideFullHecke.HeckePrimeDetection.HeckePointLaws → GlobalTheory.IndefiniteRowSideFullHecke.SplitLinearModelNorm.SplitLinearModel D → GlobalTheory.IndefiniteRowSideFullHecke.UnramifiedCharacter.VacFixed D →
     ∀ (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m)

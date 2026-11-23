@@ -1,8 +1,50 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.UnitaryAdmissible.Scalar
-import GroundTheory.AutomorphicForms.TensorProductTheorem.NonemptyAdelicDecomposition
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableLaplacian
+module
+
+public import GroundTheory.AutomorphicForms.UnitaryAdmissible.Scalar
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.NonemptyAdelicDecomposition
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableCartan
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableLaplacian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -19,8 +61,8 @@ variable (U : Submodule ℂ (cuspForms K n))
   (hρ : ∀ X, ∀ φ ∈ U, (gkModuleCusp K n).ρ X φ ∈ U) (hσ : ∀ k, ∀ φ ∈ U, (gkModuleCusp K n).σ k φ ∈ U)
   (hτ : ∀ g, ∀ φ ∈ U, finRepCusp K n g φ ∈ U)
 
-include hρ in
 
+include hρ in
 theorem uActionCusp_mem (u : UEnv K n) {φ : cuspForms K n}
     (hφ : φ ∈ U) : uActionCusp K n u φ ∈ U := by
   obtain ⟨t, rfl⟩ : ∃ t, UniversalEnvelopingAlgebra.mkAlgHom ℝ _ t = u :=
@@ -34,7 +76,7 @@ theorem uActionCusp_mem (u : UEnv K n) {φ : cuspForms K n}
     rw [map_mul, map_mul, Module.End.mul_apply]
     exact ha (hb hφ)
   | add a b ha hb =>
-    rw [map_add, map_add, LinearMap.add_apply]
+    rw [map_add (f := _), map_add (f := _), LinearMap.add_apply]
     exact U.add_mem (ha hφ) (hb hφ)
 
 theorem archTraceForm_AdLie (g : archGroup K n) (X Y : (isExpLieAlgebra K n).lieSubalgebra) :
@@ -48,7 +90,7 @@ theorem archTraceForm_AdLie (g : archGroup K n) (X Y : (isExpLieAlgebra K n).lie
     rfl
   have hgi' : mat (((g⁻¹ : archGroup K n) : (ArchMatrix K n)ˣ) : ArchMatrix K n) *
       mat (((g : archGroup K n) : (ArchMatrix K n)ˣ) : ArchMatrix K n) = 1 := by
-    rw [← mat_mul, hgi, mat_one]
+    exact hgi
   set A := mat (((g : archGroup K n) : (ArchMatrix K n)ˣ) : ArchMatrix K n)
   set C := mat (((g⁻¹ : archGroup K n) : (ArchMatrix K n)ˣ) : ArchMatrix K n)
   change Matrix.trace (A * mat (X : ArchMatrix K n) * C * (A * mat (Y : ArchMatrix K n) * C)) =
@@ -115,7 +157,7 @@ theorem exists_uActionCusp_eq_smul (hirr : (cuspSubmodule K n U hρ hσ hτ).IsI
             show uActionCusp K n (u * z) (v : cuspForms K n) = _
             rw [map_mul, Module.End.mul_apply]
           | zero => rw [map_zero]; exact S₀.zero_mem
-          | add x y _ _ hx hy => rw [map_add]; exact S₀.add_mem hx hy
+          | add x y _ _ hx hy => rw [map_add (f := _)]; exact S₀.add_mem hx hy
           | smul a x _ hx => rw [map_smul]; exact S₀.smul_mem a hx
         intro w hw
         exact key _ hw)
@@ -127,6 +169,7 @@ theorem casimirOp_gkModuleCusp {ι : Type*} [Fintype ι]
     (b : Module.Basis ι ℝ (isExpLieAlgebra K n).lieSubalgebra) (ε : ι → ℝ) :
     casimirOp (gkModuleCusp K n) b ε = uActionCusp K n (casimir b ε) := by
   unfold casimirOp casimir
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, map_mul]
@@ -210,8 +253,9 @@ theorem aeval_laplacian_eq_zero {d : ℕ}
     have e1 : L ψ = ω • ψ + ∑ i, (1 - ε i) • uActionCusp K n (UniversalEnvelopingAlgebra.ι ℝ (b i))
           (uActionCusp K n (UniversalEnvelopingAlgebra.ι ℝ (b i)) ψ) := by
       show uActionCusp K n (laplacianU K n b) ψ = _
-      rw [laplacianU_eq_casimir_add b ε, map_add, LinearMap.add_apply, hω _ hψ, map_sum,
-        LinearMap.sum_apply]
+
+      rw [laplacianU_eq_casimir_add b ε, map_add (f := _), LinearMap.add_apply, hω _ hψ, map_sum,
+      LinearMap.sum_apply]
       congr 1
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_smul, map_mul, LinearMap.smul_apply, Module.End.mul_apply]
@@ -231,6 +275,7 @@ theorem aeval_laplacian_eq_zero {d : ℕ}
   rw [e2, aeval_apply_eq_of_eqOn (L - ω • 1) B U hAU hAB q φ.2]
   have h3 := AutomorphicForm.map_aeval_apply_of_intertwine U.subtype
     (A := ∑ i, M.ρ (lapZ b ε i) * M.ρ (lapZ b ε i)) (B := B) (fun x => by
+
       simp only [B, LinearMap.sum_apply, Module.End.mul_apply, map_sum]
       rfl) q φ
   rw [Submodule.subtype_apply, Submodule.subtype_apply, hq] at h3

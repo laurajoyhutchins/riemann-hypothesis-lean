@@ -1,4 +1,50 @@
-import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+module
+
+public import Mathlib.FieldTheory.AlgebraicClosure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.IsAlgClosed.Classification
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.IrreducibleCountingLemmas.GaloisIrreducibility
 
@@ -33,21 +79,5 @@ theorem exists_algEquiv_extending {F E : Type} [Field F] [Field E] [Algebra F E]
   have h1 : algebraMap F E r = ((algebraMap F (algebraicClosure F E) r : algebraicClosure F E) : E) :=
     rfl
   rw [h1, hσ, AlgEquiv.commutes]
-
-theorem fixed_by_automorphism_in_field : FixedByAutInField := by
-  intro F z hz hfix
-  have hzF : IsAlgebraic F z := hz.tower_top F
-  have hzA : z ∈ algebraicClosure F ℂ := (mem_algebraicClosure_iff).2 hzF
-  have : IsGalois F (algebraicClosure F ℂ) := inferInstance
-  obtain ⟨r, hr⟩ := (InfiniteGalois.mem_range_algebraMap_iff_fixed
-    (k := F) (K := algebraicClosure F ℂ) ⟨z, hzA⟩).2 (by
-      intro σ₀
-      obtain ⟨σ, hσ⟩ := exists_algEquiv_extending σ₀
-      apply Subtype.ext
-      rw [← hσ]
-      exact hfix σ)
-  have : (r : ℂ) = z := congrArg Subtype.val hr
-  rw [← this]
-  exact r.2
 
 end Formalism.IrreducibleCountingLemmas.GaloisIrreducibility

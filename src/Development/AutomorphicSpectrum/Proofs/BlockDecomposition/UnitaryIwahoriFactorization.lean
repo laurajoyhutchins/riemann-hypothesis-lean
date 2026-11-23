@@ -1,8 +1,59 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.StrictDominance.UnitaryExtremality.SatPowNonvan
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsStrictDom
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsPermWOne
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemIwUIff
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.StrictDominance.UnitaryExtremality.IsStrictDom
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemIwUIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.PRep Formalism.UG GlobalTheory.LFun PositivityTheory.SphericalProduct GlobalTheory.CompanionTheory.SatPow
 
 noncomputable section
@@ -155,6 +206,7 @@ def tau (σ : L →+* L) (A : Matrix (Fin n) (Fin n) L) : Matrix (Fin n) (Fin n)
 omit [Valued L (WithZero (Multiplicative ℤ))] in
 theorem tau_mul (σ : L →+* L) (A B : Matrix (Fin n) (Fin n) L) : tau σ (A * B) = tau σ B * tau σ A := by
   ext a b
+
   simp only [tau, Matrix.mul_apply, map_sum, map_mul]
   refine Fintype.sum_equiv Fin.revPerm _ _ fun k => ?_
   simp [mul_comm]
@@ -200,7 +252,7 @@ theorem v_lt_of_ordL_lt {x y : L} (hx : x ≠ 0) (hy : y ≠ 0) (h : ordL x < or
   have hx0 : Valued.v x ≠ 0 := (Valuation.ne_zero_iff _).2 hx
   have hy0 : Valued.v y ≠ 0 := (Valuation.ne_zero_iff _).2 hy
   unfold ordL at h
-  rw [dif_neg hx0, dif_neg hy0] at h
+  rw [dite_eq_right hx0, dite_eq_right hy0] at h
   rw [← WithZero.coe_unzero hx0, ← WithZero.coe_unzero hy0, WithZero.coe_lt_coe]
   show Multiplicative.toAdd (WithZero.unzero hy0) < Multiplicative.toAdd (WithZero.unzero hx0)
   omega

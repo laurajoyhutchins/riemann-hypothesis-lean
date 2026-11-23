@@ -1,11 +1,61 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobeniusFactor
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyRamification
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsTranslate
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsOrd
+public import GroundTheory.GlobalFields.ComplexMultiplication.Differential
 import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsValuation
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsPic
-import GroundTheory.GlobalFields.ComplexMultiplication.VariableChangePoints
-import GroundTheory.GlobalFields.ComplexMultiplication.DualDescentBase
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyRamification
+public import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobeniusFactor
+public import GroundTheory.GlobalFields.ComplexMultiplication.VariableChangePoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsPic
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyPoints
+public import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialBaseChange
+public import GroundTheory.GlobalFields.ComplexMultiplication.DualDescentBase
+public import GroundTheory.GlobalFields.ComplexMultiplication.InseparableFrobenius
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -37,15 +87,15 @@ theorem eq_of_equation_genX_genY {W' : WeierstrassCurve F}
   set Q : F[X] := C (W.a₁ - W'.a₁) * X + C (W.a₃ - W'.a₃) with hQ
   have key : algebraMap F[X] W.toAffine.FunctionField P +
       algebraMap F[X] W.toAffine.FunctionField Q * genY W = 0 := by
-    simp only [hP, hQ, map_add, map_mul, map_neg, map_pow, algebraMap_C_functionField, ← genX_eq,
+    simp only [hP, hQ, map_add (f := _), map_mul, map_neg, map_pow, algebraMap_C_functionField, ← genX_eq,
       map_sub]
     linear_combination eW - eW'
   obtain ⟨hP0, hQ0⟩ := eq_zero_of_algebraMap_add_mul_genY W key
-  have c2 := congrArg (Polynomial.coeff · 2) hP0
-  have c1 := congrArg (Polynomial.coeff · 1) hP0
-  have c0 := congrArg (Polynomial.coeff · 0) hP0
-  have d1 := congrArg (Polynomial.coeff · 1) hQ0
-  have d0 := congrArg (Polynomial.coeff · 0) hQ0
+  have c2 := congrArg (AddMonoidAlgebra.coeff · 2) hP0
+  have c1 := congrArg (AddMonoidAlgebra.coeff · 1) hP0
+  have c0 := congrArg (AddMonoidAlgebra.coeff · 0) hP0
+  have d1 := congrArg (AddMonoidAlgebra.coeff · 1) hQ0
+  have d0 := congrArg (AddMonoidAlgebra.coeff · 0) hQ0
   simp [hP, hQ, coeff_X, coeff_C, coeff_X_pow, -map_sub] at c2 c1 c0 d1 d0
   ext
   · linear_combination -d1
@@ -61,8 +111,8 @@ section Poles
 variable {F : Type u} [Field F] [IsAlgClosed F] [DecidableEq F] {W : WeierstrassCurve F}
   [W.IsElliptic]
 
-omit [DecidableEq F] in
 
+omit [DecidableEq F] in
 theorem valuationPoint_genY_le_one {P : W.toAffine.Point} (hP : P ≠ 0) :
     valuationPoint W P (genY W) ≤ 1 := by
   cases P with
@@ -101,7 +151,7 @@ theorem exists_eq_linear_of_valuation {f : W.toAffine.FunctionField}
     · rintro rfl
       simp at hp1
     · rw [algebraMap_smul_basis, map_zero, zero_mul, add_zero]
-      simp only [map_add, map_mul, algebraMap_C_functionField, ← genX_eq]
+      simp only [map_add (f := _), map_mul, algebraMap_C_functionField, ← genX_eq]
   · exfalso
     by_cases hp : p = 0
     · subst hp
@@ -142,7 +192,7 @@ theorem exists_eq_genY_form_of_valuation {g : W.toAffine.FunctionField}
   · rintro rfl
     exact hq (map_zero C)
   · rw [algebraMap_smul_basis]
-    simp only [map_add, map_mul, algebraMap_C_functionField, ← genX_eq]
+    simp only [map_add (f := _), map_mul, algebraMap_C_functionField, ← genX_eq]
     ring
 
 end Poles
@@ -199,10 +249,10 @@ theorem exists_variableChange_of_degree_eq_one_of_isAlgClosed (ψ : Isogeny A B)
       C (2 * γ * ε + B.a₁ * γ * β + B.a₃ * γ - γ ^ 2 * A.a₃) with hQ
     have key : algebraMap F[X] A.toAffine.FunctionField P +
         algebraMap F[X] A.toAffine.FunctionField Q * genY A = 0 := by
-      simp only [hP, hQ, map_add, map_mul, map_pow, algebraMap_C_functionField, ← genX_eq, map_sub,
+      simp only [hP, hQ, map_add (f := _), map_mul, map_pow, algebraMap_C_functionField, ← genX_eq, map_sub,
         map_ofNat]
       linear_combination eB - ι γ ^ 2 * eA
-    have c3 := congrArg (Polynomial.coeff · 3) (eq_zero_of_algebraMap_add_mul_genY A key).1
+    have c3 := congrArg (AddMonoidAlgebra.coeff · 3) (eq_zero_of_algebraMap_add_mul_genY A key).1
     simp [hP, coeff_X_pow, -map_sub] at c3
     linear_combination c3
   have hu2 : (α / γ) ^ 2 * α = 1 := by

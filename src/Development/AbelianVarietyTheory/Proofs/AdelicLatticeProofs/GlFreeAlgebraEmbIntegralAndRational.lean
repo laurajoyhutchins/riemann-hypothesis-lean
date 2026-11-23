@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix GlobalTheory.ClassFin
 open scoped Kronecker ComplexOrder TensorProduct
 
@@ -9,8 +53,9 @@ theorem res_mul' {R A β κ : Type} [CommRing R] [CommRing A] [Algebra R A] [Fin
     [Fintype κ] [DecidableEq κ] (b : Module.Basis β R A) (g h : Matrix κ κ A) :
     res b (g * h) = res b g * res b h := by
   ext p q
+
   simp only [res, Matrix.of_apply, Matrix.mul_apply, map_sum, map_mul, Matrix.sum_apply,
-    Fintype.sum_prod_type]
+  Fintype.sum_prod_type]
 
 theorem res_one' {R A β κ : Type} [CommRing R] [CommRing A] [Algebra R A] [Fintype β] [DecidableEq β]
     [Fintype κ] [DecidableEq κ] (b : Module.Basis β R A) :
@@ -34,8 +79,9 @@ theorem repr_mem {R A β : Type} [CommRing R] [CommRing A] [Algebra R A] [Fintyp
     exact Finset.sum_congr rfl fun i _ => mul_smul_comm _ _ _
   have hk : b.repr x k = ∑ i, b.repr 1 i * Algebra.leftMulMatrix b x k i := by
     conv_lhs => rw [hsum]
+
     simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
-      smul_eq_mul, Algebra.leftMulMatrix_eq_repr_mul]
+    smul_eq_mul, Algebra.leftMulMatrix_eq_repr_mul]
   rw [hk]
   exact Subring.sum_mem _ fun i _ => Subring.mul_mem _ (h1 i) (hx k i)
 
@@ -66,6 +112,7 @@ theorem repr_map {F β : Type} [Field F] [Algebra ℚ F] [Fintype β] [Decidable
       ((algebraMap F A).comp (algebraMap ℚ F))) c
   have hx : algebraMap F A x = ∑ i, algebraMap ℚ R (ω.repr x i) • b i := by
     conv_lhs => rw [← ω.sum_repr x]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Algebra.smul_def, Algebra.smul_def, map_mul, hq, hb]

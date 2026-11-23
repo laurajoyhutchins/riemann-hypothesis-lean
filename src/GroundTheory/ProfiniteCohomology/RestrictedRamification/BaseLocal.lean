@@ -1,15 +1,58 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseDefs
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseFormal
-import GroundTheory.ProfiniteCohomology.LocalTateDuality.TensorHomDualRepRootsOfUnityIsoCartierPairing
-import GroundTheory.ProfiniteCohomology.PoincareDuality
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseDefs
+public import GroundTheory.ProfiniteCohomology.PoincareDuality
+public import GroundTheory.ProfiniteCohomology.LocalTateDuality.MainDefs
+public import GroundTheory.ProfiniteCohomology.LocalTateDuality.TensorHomDualRepRootsOfUnityIsoCartierPairing
+import GroundTheory.ProfiniteCohomology.PoincareDuality.Induced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open IsDedekindDomain NumberField CategoryTheory MonoidalCategory GroundTheory.Global GroundTheory.LocalField
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -55,8 +98,8 @@ section IsoOfBijective
 
 variable {k Γ : Type u} [CommRing k] [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ]
 
-omit [TopologicalSpace Γ] [IsTopologicalGroup Γ] in
 
+omit [TopologicalSpace Γ] [IsTopologicalGroup Γ] in
 def invOfBijective {A B : Rep.{u} k Γ} (f : A ⟶ B) (hf : Function.Bijective f.hom) : B ⟶ A :=
   Rep.ofHom ⟨(LinearEquiv.ofBijective f.hom.toLinearMap hf).symm.toLinearMap, fun g => LinearMap.ext fun b => by
     set e := LinearEquiv.ofBijective f.hom.toLinearMap hf
@@ -132,6 +175,8 @@ theorem brauerInvZOfIsSepClosure_cohomologyMap_uliftInt_base (A : Rep.{0} (ULift
 
 end AbstractLocal
 
+local notation "ℚ̄" => AlgebraicClosure ℚ
+
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   (ιs : ∀ v : S, ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1)) (n : ℕ)
 
@@ -153,7 +198,7 @@ theorem gsRootsLocalMor_hom_apply (v : S) (ζ : Additive (rootsOfUnity n (maxUnr
       ιs v ((Additive.toMul ζ).val.val : ℚ̄) :=
   rfl
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem bijective_gsRootsLocalMor [NeZero n] (hμ : ∀ ζ : ℚ̄, ζ ^ n = 1 → ζ ∈ K.1) (v : S) :
     Function.Bijective (gsRootsLocalMor S ιs n v).hom := by

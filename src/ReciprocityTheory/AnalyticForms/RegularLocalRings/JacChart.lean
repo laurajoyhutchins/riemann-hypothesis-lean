@@ -1,5 +1,53 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartC
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartB
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -34,7 +82,7 @@ theorem locRing_isLocalRing_isNoetherian (K : Ideal (MvPolynomial (Fin n) ℂ)) 
     rw [Ideal.map_le_iff_le_comap]
     intro h hh
     have h2 : h ∈ ptIdeal p := (RingHom.mem_ker).2 (hp h hh)
-    rw [← Localization.AtPrime.comap_maximalIdeal (I := ptIdeal p)] at h2
+    rw [← Localization.AtPrime.under_maximalIdeal (I := ptIdeal p)] at h2
     exact h2
   have hne : Ideal.map (algebraMap (MvPolynomial (Fin n) ℂ) (locPt p)) K ≠ ⊤ :=
     ne_top_of_le_ne_top (IsLocalRing.maximalIdeal.isMaximal _).ne_top hK
@@ -57,13 +105,6 @@ theorem exists_jacobian_cut (K : Ideal (MvPolynomial (Fin n) ℂ)) (p : Fin n �
       ∃ h : MvPolynomial (Fin n) ℂ, eval p h ≠ 0 ∧ ∀ g ∈ K, h * g ∈ Ideal.span (Set.range F) := by
   exact @JacobianCriterionAlt.exists_jacobian_cut' n K p e
     (inferInstanceAs (IsRegularLocalRing (locRing K p))) he
-
-theorem isRegularLocalRing_of_jacobian (K : Ideal (MvPolynomial (Fin n) ℂ)) (p : Fin n → ℂ)
-    (hp : ∀ h ∈ K, eval p h = 0) {c : ℕ} (F : Fin c → MvPolynomial (Fin n) ℂ) (hF : ∀ i, F i ∈ K)
-    (hlin : LinearIndependent ℂ (fun i => grad p (F i)))
-    (hq : ∃ 𝔮 ∈ K.minimalPrimes, 𝔮 ≤ ptIdeal p ∧ 𝔮.height ≤ c) :
-    IsRegularLocalRing (locRing K p) ∧ ringKrullDim (locRing K p) = ((n - c : ℕ) : WithBot ℕ∞) := by
-  exact JacobianCriterionAlt.isRegularLocalRing_of_jacobian' K p hp F hF hlin hq
 
 end
 

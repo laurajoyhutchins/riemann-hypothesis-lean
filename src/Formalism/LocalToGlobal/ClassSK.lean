@@ -1,5 +1,43 @@
-import Formalism.LocalToGlobal.ClassS
-import Formalism.LocalToGlobal.KernelLattices.FirstKernelLawReading
+module
+
+public import Formalism.LocalToGlobal.ClassS
+public import Formalism.LocalToGlobal.KernelLattices.FirstKernelLawReading
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,32 +66,6 @@ structure TiedDataSK (ex : Extra D L hT Gi Gl K Y cX) extends toTiedDataS : Link
   ker_frm : ∀ u μ i (hi : i ≤ D.R.m) (y : (D.chTw u μ).Y i) (τ : D.what₂.Tau),
     (ker.O u μ).frm i y τ = Forms.atInf (Forms.embT D) (crd u i hi).1 τ * (Forms.twYS tw.ch cols.forms u μ i hi y).1 τ
 
-def LinkedFamilyKernelCondition (ex : Extra D L hT Gi Gl K Y cX) : Prop := Nonempty (TiedDataSK ex)
-
-theorem TiedDataSK.kernel_frame_at_infinity {ex : Extra D L hT Gi Gl K Y cX} (T : TiedDataSK ex) (u : D.what₂.Word) (i : ℕ) (hi : i ≤ D.R.m)
-    (y : (D.mem u).C.Y i) (τ : D.what₂.Tau) :
-    (T.ker.O u D.what₂.mu0).frm i (Herm.yCast D u i y) τ =
-      Forms.atInf (Forms.embT D) (T.crd u i hi).1 τ * (Forms.eYS (T.cols.forms u) i hi y).1 τ := by
-  rw [T.ker_frm]
-  congr 2
-  simp only [Forms.twYS, Equiv.trans_apply]
-  rw [T.tw.chM.eY u i hi, Equiv.symm_apply_apply]
-
-theorem TiedDataSK.ker_de {ex : Extra D L hT Gi Gl K Y cX} (T : TiedDataSK ex) (u : D.what₂.Word) (μ : D.what₂.Tup) (i : ℕ)
-    (hi : i ≤ D.R.m) (y : (D.chTw u μ).Y i) (τ : D.what₂.Tau) :
-    (D.chTw u μ).de i y τ = Forms.embT D τ (T.crd u i hi).1.det * ((Forms.twYS T.tw.ch T.cols.forms u μ i hi y).1 τ).det := by
-  rw [(T.ker.O u μ).frm_de i hi y τ, T.ker_frm u μ i hi y τ, Matrix.det_mul]
-  congr 1
-  simp only [Forms.atInf]
-  exact (RingHom.map_det _ _).symm
-
 end
-
-def LinkedFamiliesKernelFrame : FamClass := fun {_} Fm =>
-  ∃ x0 : ℝ, ∀ x (hx : Fm.x1 < x), x0 ≤ x → ∀ i : Fm.Ix x, LinkedFamilyKernelCondition (Fm.ex x hx i)
-
-theorem LinkedFamiliesKernelFrame.c2s {eps : ℝ} {Fm : FamP eps} (h : LinkedFamiliesKernelFrame Fm) : LinkedFamiliesLevelClass Fm := by
-  obtain ⟨x0, h⟩ := h
-  exact ⟨x0, fun x hx hx0 i => let ⟨T⟩ := h x hx hx0 i; ⟨T.toTiedDataS⟩⟩
 
 end Formalism.L2

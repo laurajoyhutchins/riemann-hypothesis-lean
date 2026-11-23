@@ -1,10 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGramActLStmt
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.Vanish
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LevelSubgroupCharacterUnitary
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.InclusionInjective
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGramActLStmt
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGramActRRep
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TermDefPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.Vanish
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,11 +72,11 @@ variable {D : D7} {X : HidaSetting D} {u u' : D.what₂.Word}
 
 theorem mapLF_mul_act {Λ : Submodule (𝓞 D.host.E) (VS D).V} {β γ : (VS D).V ≃ₗ[D.host.E] (VS D).V}
     (hβ : β ∈ Saturated.AutF Λ (lf D F0)) (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT) {T : D.host.E}
-    (F : LFlag (VS D) D.R.rS T) :
+    (F : LFlag (D.sp.Y 0) D.R.rS T) :
     mapLF (β * γ) F = Saturated.act (⟨β, hβ⟩ : Saturated.AutF Λ (lf D F0)) (mapLF γ F) := by
   have hβi : β ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT := (Saturated.mem_AutF.1 hβ).1.1
   have hβγ : β * γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT := (Formalism.HermitianLatticesTheory.isom (VS D).hT).mul_mem hβi hγ
-  have ext : ∀ {G H : LFlag (VS D) D.R.rS T}, G.fl.e = H.fl.e → G.fl.z = H.fl.z → G.zt = H.zt → G = H := by
+  have ext : ∀ {G H : LFlag (D.sp.Y 0) D.R.rS T}, G.fl.e = H.fl.e → G.fl.z = H.fl.z → G.zt = H.zt → G = H := by
     rintro ⟨⟨e, z, _, _, _, _⟩, zt⟩ ⟨⟨e', z', _, _, _, _⟩, zt'⟩ he hz hzt
     dsimp only at he hz hzt
     subst he hz hzt
@@ -40,8 +88,8 @@ theorem mapLF_mul_act {Λ : Submodule (𝓞 D.host.E) (VS D).V} {β γ : (VS D).
   rw [h1, h2]
   exact ext rfl rfl rfl
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def actC (hPD : Saturated.PDIso D) {Λ Λ' : Submodule (𝓞 D.host.E) (VS D).V} (x0 : X.B.I.GA)
     (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (hx : RatLink X x0 β) (hβ : β ∈ Saturated.AutF Λ (lf D F0))
     (p : GCar X u u' F0 F0' Λ Λ') : GCar X u u' F0 F0' Λ Λ' :=
@@ -61,8 +109,8 @@ theorem grel_actC (hPD : Saturated.PDIso D) {Λ Λ' : Submodule (𝓞 D.host.E) 
   rw [hq]
   simp only [mul_assoc, inv_mul_cancel_left]
 
-variable (F0 F0') in
 
+variable (F0 F0') in
 def actQ (hPD : Saturated.PDIso D) {Λ Λ' : Submodule (𝓞 D.host.E) (VS D).V} (x0 : X.B.I.GA)
     (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (hx : RatLink X x0 β) (hβ : β ∈ Saturated.AutF Λ (lf D F0)) :
     GQ X u u' F0 F0' Λ Λ' → GQ X u u' F0 F0' Λ Λ' :=
@@ -86,8 +134,8 @@ theorem actQ_comp (hPD : Saturated.PDIso D) {Λ Λ' : Submodule (𝓞 D.host.E) 
     show (x1 * (x0 * p.1.1), β1 * (β * p.1.2)) = p.1
     rw [← mul_assoc, ← mul_assoc, e1, e2, one_mul, one_mul]
 
-variable (what₂ rows') in
 
+variable (what₂ rows') in
 def phiT (hPD : Saturated.PDIso D) (x0 : X.B.I.GA) (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (hx : RatLink X x0 β)
     (t : GTerm X u u' F0 F0' what₂ rows') : GTerm X u u' F0 F0' what₂ rows' :=
   if h : β ∈ Saturated.AutF t.lam (lf D F0) then
@@ -123,8 +171,8 @@ theorem phiT_comp (hPD : Saturated.PDIso D) (x0 x1 : X.B.I.GA) (β β1 : (VS D).
       rw [hb1, autF_inv_iff]; exact h
     simp only [phiT, dif_neg h, dif_neg h1]
 
-variable (what₂ rows') in
 
+variable (what₂ rows') in
 def phiE (hPD : Saturated.PDIso D) (x0 : X.B.I.GA) (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (hx : RatLink X x0 β) :
     GTerm X u u' F0 F0' what₂ rows' ≃ GTerm X u u' F0 F0' what₂ rows' where
   toFun := phiT what₂ rows' hPD x0 β hx
@@ -360,6 +408,7 @@ theorem crd_linM (M : Matrix (Fin X.B.I.n) (Fin X.B.I.n) X.B.I.E) (y : (VS D).V)
   simp only [linM, LinearMap.toMatrix_toLin] at h
   simp only [HidaSetting.crd, crdOf, linM]
   rw [← h]
+
   simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum, map_mul, RingEquiv.symm_apply_apply]
   rfl
 
@@ -471,9 +520,6 @@ def piUe (w : D.what₂.Word) (s : X.B.I.Ginf) (hs : s ∈ Hinf X w) : X.Vpi w �
         simpa using this)
     norm_map' := (LinearMap.isometryOfInner (X.piU w s).toLinearMap
       (fun x y => (X.piU_rep w).2.2.1 s hsS x y)).norm_map }
-
-theorem piUe_apply (w : D.what₂.Word) (s : X.B.I.Ginf) (hs : s ∈ Hinf X w) (v : X.Vpi w) :
-    piUe w s hs v = X.piU w s v := rfl
 
 end HS
 

@@ -1,8 +1,55 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.GlobalEulerCharacteristic.Reduce
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseFixed
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerLocalVal
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.StabilizersDefs
-import GroundTheory.ProfiniteCohomology.PoitouTate.PoitouTateInfinite.LevelModulesDefs
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalLimits.IsScalarTowerFiniteSubfieldAlgebraicClosure
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseChangeDefs
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.StabilizersDefs
+public import GroundTheory.ProfiniteCohomology.PoitouTate.PoitouTateInfinite.LevelModulesDefs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerLocalVal
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.SUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain CategoryTheory GroundTheory.ProfCoh GroundTheory.Global
 
@@ -36,13 +83,14 @@ theorem exists_split (ℓ : ℕ) [Fact ℓ.Prime] (K : FiniteSubfield) (S : Set 
   have hW1 : (1 : galUnramifiedOutside K.1 ℚ̄ S) ∈ W := M.ρ.ker.one_mem
   obtain ⟨E, hEf, hEU⟩ := (krullTopology_mem_nhds_one_iff K.1 (maxUnramifiedOutside K.1 ℚ̄ S) W).1
     (hWo.mem_nhds hW1)
-  let bE := Module.finBasis K.1 E
+  set_option synthInstance.maxHeartbeats 100000 in
+    let bE := Module.finBasis K.1 E
 
   let n : ℕ := if ℓ = 2 then 4 else ℓ
   have hn0 : n ≠ 0 := by
     by_cases h2 : ℓ = 2
     · simp [n, h2]
-    · simp only [n, h2, if_false]; exact hℓ.ne_zero
+    · simp only [n, h2, ite_false]; exact hℓ.ne_zero
   have hnS : ∀ v ∉ S, ((n : ℕ) : 𝓞 K.1) ∉ v.asIdeal := by
     intro v hv hmem
     apply hv
@@ -50,12 +98,12 @@ theorem exists_split (ℓ : ℕ) [Fact ℓ.Prime] (K : FiniteSubfield) (S : Set 
     by_cases h2 : ℓ = 2
     · subst h2
       have h4 : ((4 : ℕ) : 𝓞 K.1) = ((2 : ℕ) : 𝓞 K.1) * ((2 : ℕ) : 𝓞 K.1) := by push_cast; ring
-      simp only [n, if_true] at hmem
+      simp only [n, ite_true] at hmem
       rw [h4] at hmem
       rcases v.isPrime.mem_or_mem hmem with h | h <;> exact h
     · simpa [n, h2] using hmem
-  haveI : NeZero n := ⟨hn0⟩
-  obtain ⟨ξ, hξ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℚ̄ n
+  have : NeZero n := ⟨hn0⟩
+  obtain ⟨ξ, hξ⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot ℚ̄ n
   have hξS : ξ ∈ maxUnramifiedOutside K.1 ℚ̄ S :=
     mem_maxUnramifiedOutside_of_pow_eq_one S hn0 hnS hξ.pow_eq_one
   let T : Finset ℚ̄ := insert ξ (Finset.univ.image fun i => ((bE i : maxUnramifiedOutside K.1 ℚ̄ S) : ℚ̄))
@@ -110,7 +158,8 @@ theorem exists_split (ℓ : ℕ) [Fact ℓ.Prime] (K : FiniteSubfield) (S : Set 
         have := congrArg (fun e : E => (e : maxUnramifiedOutside K.1 ℚ̄ S)) (bE.sum_repr ⟨x, hx⟩)
         simp only [IntermediateField.coe_sum, IntermediateField.coe_smul] at this
         exact this.symm
-      rw [hsum, map_sum]
+      set_option synthInstance.maxHeartbeats 100000 in
+        rw [hsum, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [show ∀ (r : K.1) (y : maxUnramifiedOutside K.1 ℚ̄ S), g (r • y) = r • g y from
         fun r y => g.toLinearEquiv.map_smul r y, hb i]

@@ -1,4 +1,63 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PairedDualFirstOrderDualMatrixSpace
 import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.CjApply
+import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.OrdinaryHeckeAlgebraIntegral
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
+
 open IsLocalRing Matrix NumberField Formalism.ConjugateSelfDual ReciprocityTheory.Gal UpperTheory.V UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Pa UpperTheory.V.HV UpperTheory.V.Th UpperTheory.V.Th.Nm GlobalTheory.GalOfCusp
 
 private theorem UpperTheory.V.Th.Nm.trZero_inner {K : Type} [Field K] {n : ℕ}
@@ -34,8 +93,9 @@ private theorem UpperTheory.V.Th.Nm.trZero_inner {K : Type} [Field K] {n : ℕ}
     rw [Finset.mul_sum, Finset.sum_congr rfl fun i _ => e1 i, Finset.sum_sub_distrib,
       ← Finset.mul_sum, h3, mul_one, Finset.sum_mul]
     congr 1
+
     simp only [h1, map_sum, map_smul, Finset.sum_mul, mul_assoc, h2, Finset.mul_sum,
-      smul_mul_assoc, mul_smul_comm]
+    smul_mul_assoc, mul_smul_comm]
     exact Finset.sum_comm
   rw [mul_neg, neg_mul, h4]; abel
 
@@ -63,7 +123,7 @@ theorem UpperTheory.V.Th.Nm.trZero :
       induction y using Finsupp.induction_linear with
       | zero => simp
       | add a b ha hb =>
-        simp only [map_add, mul_add, trace_add]
+        simp only [map_add (f := _), mul_add, trace_add]
         linear_combination ha + hb
       | single g a =>
         have := ht (h * g)
@@ -106,10 +166,10 @@ theorem UpperTheory.V.Th.Nm.trZero :
         obtain ⟨h, rfl⟩ := hx
         rw [← hmul, hDg, hDg, hDg, hd]
       | zero => simp
-      | add a b _ _ ha hb => simp only [mul_add, map_add, ha, hb]; abel
+      | add a b _ _ ha hb => simp only [mul_add, map_add (f := _), ha, hb]; abel
       | smul a b _ hb => simp only [mul_smul_comm, map_smul, hb, smul_add]
     | zero => simp
-    | add a b _ _ ha hb => simp only [add_mul, map_add, ha, hb]; abel
+    | add a b _ _ ha hb => simp only [add_mul, map_add (f := _), ha, hb]; abel
     | smul a b _ hb => simp only [smul_mul_assoc, map_smul, hb, smul_add]
   obtain ⟨Y, hY⟩ := UpperTheory.V.Th.Nm.trZero_inner D hD
   refine ⟨Y, fun g => ?_⟩

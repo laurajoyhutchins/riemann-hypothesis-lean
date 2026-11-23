@@ -1,5 +1,56 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.BaseChangeCA
-import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.HeightAddRingKrullDimQuotientMvPolynomialField
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Ideal.Height
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.HeightAddRingKrullDimQuotientMvPolynomialField
+public import Mathlib.RingTheory.Flat.Stability
+public import Mathlib.RingTheory.Ideal.GoingDown
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R.BaseChangeC
 
@@ -7,36 +58,7 @@ open MvPolynomial TensorProduct
 
 variable {σ : Type} [Fintype σ]
 
-noncomputable def quotExtEquiv (𝔭 : Ideal (MvPolynomial σ ℚ)) :
-    (ℂ ⊗[ℚ] (MvPolynomial σ ℚ ⧸ 𝔭)) ≃+* (MvPolynomial σ ℂ ⧸ Ideal.map (MvPolynomial.map (algebraMap ℚ ℂ)) 𝔭) :=
-  (Algebra.TensorProduct.tensorQuotientEquiv (R := ℚ) ℂ (MvPolynomial σ ℚ) ℂ 𝔭).toRingEquiv.trans
-    (Ideal.quotientEquiv _ _ (algebraTensorAlgEquiv ℚ ℂ).toRingEquiv (by
-      have h : (algebraTensorAlgEquiv (σ := σ) ℚ ℂ).toRingEquiv.toRingHom.comp
-          (Algebra.TensorProduct.includeRight : MvPolynomial σ ℚ →ₐ[ℚ] ℂ ⊗[ℚ] MvPolynomial σ ℚ).toRingHom
-          = MvPolynomial.map (algebraMap ℚ ℂ) := by
-        apply RingHom.ext
-        intro p
-        simp [Algebra.TensorProduct.includeRight_apply, algebraTensorAlgEquiv_tmul]
-      rw [← h, ← Ideal.map_map]
-      rfl))
-
 section Rad
-
-theorem isRadical_map (𝔭 : Ideal (MvPolynomial σ ℚ)) [𝔭.IsPrime] : (Ideal.map (MvPolynomial.map (algebraMap ℚ ℂ)) 𝔭).IsRadical := by
-  rw [Ideal.isRadical_iff_quotient_reduced]
-  set A := MvPolynomial σ ℚ ⧸ 𝔭
-  set K := FractionRing A
-  have : Algebra.EssFiniteType ℚ K := inferInstanceAs (Algebra.EssFiniteType ℚ (Localization _))
-  have h1 : IsReduced (K ⊗[ℚ] ℂ) := isReduced_tensor_of_essFiniteType K ℂ
-  have h2 : IsReduced (ℂ ⊗[ℚ] K) :=
-    isReduced_of_injective (Algebra.TensorProduct.comm ℚ ℂ K).toRingEquiv.toRingHom
-      (Algebra.TensorProduct.comm ℚ ℂ K).injective
-  have hinj : Function.Injective (Algebra.TensorProduct.map (AlgHom.id ℚ ℂ)
-      (IsScalarTower.toAlgHom ℚ A K)) :=
-    Module.Flat.lTensor_preserves_injective_linearMap _ (IsFractionRing.injective _ _)
-  have h3 : IsReduced (ℂ ⊗[ℚ] A) := isReduced_of_injective (Algebra.TensorProduct.map (AlgHom.id ℚ ℂ)
-      (IsScalarTower.toAlgHom ℚ A K)).toRingHom hinj
-  exact isReduced_of_injective (quotExtEquiv 𝔭).symm.toRingHom (quotExtEquiv 𝔭).symm.injective
 
 end Rad
 

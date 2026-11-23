@@ -1,9 +1,53 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WeylIntegralCovariance.RpSmulLeft
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnitaryChartEquiv.CEquivApply
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WhittakerCovolume.CovolUnique
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WhittakerCovolume.MeasTop
-import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainImageOfMapVecLattice
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicFourierRealisesWeylElement
+module
+
+public import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainImageOfMapVecLattice
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaBijections.SymplecticFormCoordinates
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixCoord
+public import GroundTheory.HeightsAndTheta.Theta.AdelicFourier
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnitaryChartEquiv.CEquivApply
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WhittakerCovolume.CovolUnique
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.WhittakerCovolume.MeasTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,8 +93,8 @@ theorem ratM_iff (d : SD σ) (X : Mx F E d.m d.n) :
     rw [← e2]
     exact AddSubgroup.subset_closure ⟨_, rfl⟩
 
-attribute [-instance] Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.measAF in
 
+attribute [-instance] Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.measAF in
 theorem integral_cov_gen {G : Type} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G] [LocallyCompactSpace G]
     [SecondCountableTopology G] {mG : MeasurableSpace G} [hBor : BorelSpace G] {ι : Type} [Fintype ι] (Γ : AddSubgroup G) [Countable Γ]
     (e : G ≃ₜ+ (ι → AdeleRing (𝓞 F) F)) (he : ∀ x, x ∈ Γ ↔ e x ∈ GroundTheory.Automorphic.FourierWhittaker.vecLattice F ι)
@@ -71,12 +115,12 @@ theorem integral_cov_gen {G : Type} [AddCommGroup G] [TopologicalSpace G] [IsTop
       exact g'.2
     refine ⟨⟨_, hg⟩, ?_, ?_⟩
     · show e.symm (g' : ι → AdeleRing (𝓞 F) F) + x ∈ e ⁻¹' GroundTheory.Automorphic.FourierWhittaker.vecDomain F ι
-      rw [Set.mem_preimage, map_add, e.apply_symm_apply]
+      rw [Set.mem_preimage, map_add (f := _), e.apply_symm_apply]
       exact hg'
     · rintro ⟨y, hy⟩ hyx
       have hy' : e y ∈ GroundTheory.Automorphic.FourierWhittaker.vecLattice F ι := (he y).1 hy
       have hyx' : e y + e x ∈ GroundTheory.Automorphic.FourierWhittaker.vecDomain F ι := by
-        rw [← map_add]
+        rw [← map_add (f := _)]
         exact hyx
       have := hu ⟨e y, hy'⟩ hyx'
       apply Subtype.ext

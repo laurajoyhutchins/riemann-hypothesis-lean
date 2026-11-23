@@ -1,5 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.SplitTori.SplitTorusIsCommMonObjSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsaRos
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.SplitTori.SplitTorusAff
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 universe u
 
@@ -25,8 +78,6 @@ theorem isUnit_eq_single {R A : Type*} [CommRing R] [IsDomain R] [AddCommMonoid 
     intro p q hpq
     first
     | exact AddMonoidAlgebra.coeff_injective hpq
-    | exact AddMonoidAlgebra.coeff_inj.1 hpq
-    | exact AddMonoidAlgebra.ext hpq
     | (cases p; cases q; simp_all)
   have key : ∀ a0 b0 : A, UniqueAdd u.coeff.support v.coeff.support a0 b0 →
       (u * v).coeff (a0 + b0) = u.coeff a0 * v.coeff b0 := by
@@ -36,13 +87,10 @@ theorem isUnit_eq_single {R A : Type*} [CommRing R] [IsDomain R] [AddCommMonoid 
     | exact AddMonoidAlgebra.mul_coeff_add_eq_mul_of_uniqueAdd h
     | exact AddMonoidAlgebra.coeff_mul_of_uniqueAdd h
     | exact AddMonoidAlgebra.coeff_mul_add_of_uniqueAdd h
-    | exact Finsupp.mul_apply_add_eq_mul_of_uniqueAdd h
   have hone : (u * v).coeff = Finsupp.single 0 1 := by
     rw [huv]
     first
     | (simp [AddMonoidAlgebra.one_def]; done)
-    | exact AddMonoidAlgebra.coeff_one
-    | rfl
   have hcard : u.coeff.support.card * v.coeff.support.card ≤ 1 := by
     by_contra hlt
     push_neg at hlt
@@ -73,12 +121,10 @@ theorem isUnit_eq_single {R A : Type*} [CommRing R] [IsDomain R] [AddCommMonoid 
   have cu : u.coeff.support.card = 1 := by
     first
     | exact Nat.eq_one_of_mul_eq_one_right hprod
-    | exact (mul_eq_one.1 hprod).1
     | nlinarith
   have cv : v.coeff.support.card = 1 := by
     first
     | exact Nat.eq_one_of_mul_eq_one_left hprod
-    | exact (mul_eq_one.1 hprod).2
     | nlinarith
   obtain ⟨a, hc0, hca⟩ := Finsupp.card_support_eq_one.1 cu
   obtain ⟨b, hd0, hdb⟩ := Finsupp.card_support_eq_one.1 cv
@@ -117,21 +163,16 @@ theorem ringHom_ext_ZU {A Y : Type*} [Semiring A] [AddCommGroup Y]
 theorem cr_iso_bij {R S : CommRingCat.{u}} (e : R ≅ S) : Function.Bijective e.hom.hom := by
   first
   | exact ConcreteCategory.bijective_of_isIso e.hom
-  | exact e.commRingCatIsoToRingEquiv.bijective
-  | exact ⟨fun x y hxy => by simpa using congrArg e.inv.hom hxy, fun y => ⟨e.inv.hom y, by simp⟩⟩
 
 theorem isIso_appTop_bij {A B : Scheme.{u}} (e : A ≅ B) : Function.Bijective e.hom.appTop.hom := by
   first
   | exact cr_iso_bij (Scheme.Γ.mapIso e.op)
-  | exact ConcreteCategory.bijective_of_isIso e.hom.appTop
-  | exact cr_iso_bij (asIso e.hom.appTop)
 
 private theorem comp_appTop_lemma {A B C : Scheme.{u}} (f : A ⟶ B) (g : B ⟶ C) :
     (f ≫ g).appTop = g.appTop ≫ f.appTop := by
   first
   | rfl
   | (simp; done)
-  | exact Scheme.Hom.comp_appTop f g
 
 theorem appTop_comp_apply {A B C : Scheme.{u}} (f : A ⟶ B) (g : B ⟶ C) (x : Γ(C, ⊤)) :
     (f ≫ g).appTop.hom x = f.appTop.hom (g.appTop.hom x) := by
@@ -164,8 +205,6 @@ theorem coord_injective {Z : Over S} {Y : Type u} [AddCommGroup Y] {g g' : Z ⟶
   have h2 : g.left ≫ torusFst S Y = g'.left ≫ torusFst S Y := by
     first
     | exact ext_of_isAffine h1
-    | exact Scheme.ext_of_isAffine h1
-    | exact Scheme.Hom.ext_of_isAffine h1
   apply Over.OverMorphism.ext
   apply pullback.hom_ext
   · exact h2
@@ -174,9 +213,7 @@ theorem coord_injective {Z : Over S} {Y : Type u} [AddCommGroup Y] {g g' : Z ⟶
 theorem toUnit_left (Z : Over S) : (toUnit Z).left = Z.hom := by
   first
   | simpa using Over.w (toUnit Z)
-  | exact (Category.comp_id _).symm.trans (Over.w (toUnit Z))
   | (simp; done)
-  | rfl
 
 theorem over_appTop_comp {W Z V : Over S} (p : W ⟶ Z) (q : Z ⟶ V) (x : Γ(V.left, ⊤)) :
     p.left.appTop.hom (q.left.appTop.hom x) = (p ≫ q).left.appTop.hom x := by
@@ -188,7 +225,6 @@ theorem toUnit_comp_appTop (Z : Over S) {V : Over S} (e : 𝟙_ (Over S) ⟶ V) 
     (toUnit Z ≫ e).left.appTop.hom x = Z.hom.appTop.hom (e.left.appTop.hom x) := by
   first
   | (rw [← over_appTop_comp, toUnit_left])
-  | exact (over_appTop_comp (toUnit Z) e x).symm.trans (by rw [toUnit_left])
 
 theorem coord_toUnit_comp (Z : Over S) {Y : Type u} [AddCommGroup Y]
     (e : 𝟙_ (Over S) ⟶ splitTorus S Y) (x : torusRing ZU Y) :
@@ -209,8 +245,6 @@ theorem chi_zero (X : Type u) [AddCommGroup X] : chi (S := S) X 0 = 1 := by
   | (simp only [chi]; rw [← AddMonoidAlgebra.one_def, map_one])
   | (simp [chi, AddMonoidAlgebra.one_def]; done)
 
-theorem isUnit_chi (X : Type u) [AddCommGroup X] (a : X) : IsUnit (chi (S := S) X a) := by
-  exact (isUnit_single_one (R := ULift.{u} ℤ) a).map (coord (𝟙 (splitTorus S X))).hom
 end
 
 section
@@ -224,8 +258,6 @@ open scoped AlgebraMonoidAlgebra
 theorem toZ_eq : toZ (Spec (.of K)) = Spec.map (CommRingCat.ofHom (algebraMap ZU.{u} K)) := by
   first
   | exact specULiftZIsTerminal.hom_ext _ _
-  | exact AlgebraicGeometry.specULiftZIsTerminal.hom_ext _ _
-  | exact IsTerminal.hom_ext specULiftZIsTerminal _ _
 
 instance isScalarTower_torus :
     IsScalarTower ZU.{u} (AddMonoidAlgebra ZU.{u} X) (AddMonoidAlgebra K X) :=
@@ -241,7 +273,6 @@ theorem isPushout_torusRing :
       (CommRingCat.ofHom (algebraMap K (AddMonoidAlgebra K X))) := by
   first
   | exact CommRingCat.isPushout_of_isPushout ZU.{u} (AddMonoidAlgebra ZU.{u} X) K (AddMonoidAlgebra K X)
-  | exact (CommRingCat.isPushout_iff_isPushout).2 inferInstance
   | (haveI := Algebra.IsPushout.symm
         (inferInstance : Algebra.IsPushout ZU.{u} K (AddMonoidAlgebra ZU.{u} X) (AddMonoidAlgebra K X))
      exact CommRingCat.isPushout_of_isPushout ZU.{u} (AddMonoidAlgebra ZU.{u} X) K (AddMonoidAlgebra K X))
@@ -253,9 +284,6 @@ theorem isPullback_torus :
   rw [toZ_eq]
   first
   | exact isPullback_SpecMap_of_isPushout _ _ _ _ (isPushout_torusRing K X)
-  | exact isPullback_Spec_map_isPushout _ _ _ _ (isPushout_torusRing K X)
-  | exact (isPushout_torusRing K X).op.map Scheme.Spec
-  | exact (isPushout_torusRing K X).op.flip.map Scheme.Spec
 
 noncomputable def torusIso :
     Spec (.of (AddMonoidAlgebra K X)) ≅ (splitTorus (Spec (.of K)) X).left :=
@@ -299,7 +327,6 @@ theorem torusGamma_chi (a : X) : (torusGamma K X).hom (chi X a) = single a 1 := 
   refine h.trans ?_
   first
   | (simp; done)
-  | rfl
 
 theorem torusGamma_const (c : Γ(Spec (.of K), ⊤)) :
     (torusGamma K X).hom ((splitTorus (Spec (.of K)) X).hom.appTop.hom c) =
@@ -358,7 +385,6 @@ theorem torus_const_injective :
   first
   | exact (cr_iso_bij (Scheme.ΓSpecIso (.of K))).1 (AddMonoidAlgebra.single_injective (0 : X) h')
   | exact (cr_iso_bij (Scheme.ΓSpecIso (.of K))).1 (by simpa using h')
-  | exact (cr_iso_bij (Scheme.ΓSpecIso (.of K))).1 (AddMonoidAlgebra.single_inj.1 h')
 
 theorem isPullback_torus2 :
     IsPullback
@@ -387,9 +413,6 @@ theorem isPullback_torus2 :
       (Spec.map (CommRingCat.ofHom (algebraMap K (AddMonoidAlgebra K X)))) := by
     first
     | exact isPullback_SpecMap_of_isPushout _ _ _ _ hp
-    | exact isPullback_Spec_map_isPushout _ _ _ _ hp
-    | exact hp.op.map Scheme.Spec
-    | exact hp.op.flip.map Scheme.Spec
   refine IsPullback.of_iso h (Iso.refl _) (torusIso K X) (torusIso K X) (Iso.refl _) ?_ ?_ ?_ ?_
   · simp
   · simp
@@ -445,7 +468,6 @@ theorem torus2Gamma_fst (x : Γ((splitTorus (Spec (.of K)) X).left, ⊤)) :
   refine (congrArg (fun φ => φ.hom x) e1).trans ?_
   first
   | (simp; done)
-  | rfl
 
 theorem torus2Gamma_snd (x : Γ((splitTorus (Spec (.of K)) X).left, ⊤)) :
     (torus2Gamma K X).hom
@@ -461,7 +483,6 @@ theorem torus2Gamma_snd (x : Γ((splitTorus (Spec (.of K)) X).left, ⊤)) :
   refine (congrArg (fun φ => φ.hom x) e1).trans ?_
   first
   | (simp; done)
-  | rfl
 
 theorem torus2_units [TwoUniqueSums X]
     {w : Γ((splitTorus (Spec (.of K)) X ⊗ splitTorus (Spec (.of K)) X).left, ⊤)} (hw : IsUnit w) :
@@ -515,14 +536,14 @@ theorem torus_hom_coord [TwoUniqueSums X] {Y : Type u} [AddCommGroup Y]
 end
 end Rosenlicht
 
-open Rosenlicht in
 
+open Rosenlicht in
 theorem splitTorus_rigidity (K : Type u) [Field K] (X : Type u) [AddCommGroup X] [TwoUniqueSums X]
     (Y : Type u) [AddCommGroup Y]
     (f : splitTorus (Spec (.of K)) X ⊗ splitTorus (Spec (.of K)) X ⟶ splitTorus (Spec (.of K)) Y)
     (h1 : lift (𝟙 _) (toUnit _ ≫ η) ≫ f = toUnit _ ≫ η)
     (h2 : lift (toUnit _ ≫ η) (𝟙 _) ≫ f = toUnit _ ≫ η) :
-    f = toUnit _ ≫ η := by
+    f = toUnit _ ≫ η := open Rosenlicht in by
   apply coord_injective
   apply CommRingCat.hom_ext
   apply ringHom_ext_ZU

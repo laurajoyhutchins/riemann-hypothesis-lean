@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittCoreEmbeddingPreservesSupportedUnitarySubgro
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittCoreEmbeddingPreservesSupportedUnitarySubgro
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LatticeLocalEqIntegralAlmostAll
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PlaceIdempotentActsOnSupportedAndOff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,8 +52,8 @@ open NumberField GlobalTheory.FinPl.FrameLat
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 
 namespace GlobalTheory.IwaPlace.LocSD
 
@@ -35,6 +78,7 @@ theorem hermAt_mul_inc (y : Fin S.rank → AE D) (a : AE D) (s : Fin S.rank → 
   unfold hermAt pairing FrameLat.row
   rw [Finset.sum_comm, Finset.mul_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
+
   rw [map_sum, Finset.sum_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [RingHom.map_mul, RingHom.map_mul, cA_incA, show gA S i j = incA D (S.gram i j) from rfl]
@@ -43,6 +87,7 @@ theorem hermAt_mul_inc (y : Fin S.rank → AE D) (a : AE D) (s : Fin S.rank → 
 theorem hermAt_sum_right {m : ℕ} (y : Fin S.rank → AE D) (x : Fin m → Fin S.rank → AE D) :
     hermAt S y (fun i => ∑ l, x l i) = ∑ l, hermAt S y (x l) := by
   unfold hermAt
+
   simp only [map_sum, Finset.sum_mul]
   rw [Finset.sum_comm (s := Finset.univ (α := Fin m))]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -56,7 +101,33 @@ variable {L : Lat S}
 
 theorem exists_mul_mem (hL : IsSelfDualC S L) (v : Pl D) :
     ∃ m : ℕ, 0 < m ∧ ∀ y : Fin S.rank → AE D, (∀ i, y i ∈ intAt D (· = v)) → (m : AE D) • y ∈ latV S L (· = v) := by
-  obtain ⟨N, hN, -, h⟩ := GlobalTheory.LatAlmostStd.exists_commensurable L hL.1
+  have hfull : Submodule.IsFullLattice D.host.E L := by
+    haveI : Submodule.IsLattice D.host.E L := hL.1
+    refine ⟨?_⟩
+    obtain ⟨m, s, s', hs, _, hd⟩ := GlobalTheory.FinPl.LatMem.exists_dualBasis S hL
+    apply eq_top_iff.mpr
+    intro y _
+    have hy : y = ∑ l, (∑ b, (∑ k, star (s' l k) * S.gram k b) * y b) • s l := by
+      funext a
+      simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+      have heq : (∑ l, (∑ b, (∑ k, star (s' l k) * S.gram k b) * y b) * s l a) =
+          ∑ b, ∑ l, (∑ k, star (s' l k) * S.gram k b) * y b * s l a := by
+        rw [Finset.sum_comm]
+        exact Finset.sum_congr rfl fun l _ => Finset.sum_mul ..
+      rw [heq]
+      have hterm : ∀ b, (∑ l, (∑ k, star (s' l k) * S.gram k b) * y b * s l a) =
+          (if a = b then 1 else 0) * y b := by
+        intro b
+        calc
+          _ = ∑ l, (s l a * ∑ k, star (s' l k) * S.gram k b) * y b := by
+            refine Finset.sum_congr rfl fun l _ => ?_
+            ring
+          _ = _ := by rw [← Finset.sum_mul, hd]
+      simp_rw [hterm]
+      simp
+    rw [hy]
+    exact Submodule.sum_mem _ fun l _ => Submodule.smul_mem _ _ (Submodule.subset_span (hs l))
+  obtain ⟨N, hN, -, h⟩ := GlobalTheory.LatAlmostStd.exists_commensurable L hfull
   refine ⟨N.natAbs, Int.natAbs_pos.2 hN, fun y hy => ?_⟩
   have h1 : (N : AE D) • y ∈ latV S L (· = v) := by
     have e : (N : AE D) • y = ∑ i, fun k => y i * incA D ((Pi.single i (N • ((1 : 𝓞 D.host.E) : D.host.E)) :
@@ -81,6 +152,7 @@ theorem isSDAt_latV : ∀ (D : D7) (S : HSp D) (L : Lat S) (v : Pl D), IsSelfDua
   · refine ⟨hermAt_mem_idAt hy x, ?_⟩
     obtain ⟨m, s, s', hs, hs', hd⟩ := exists_expansion hL
     have e : x = fun i => ∑ l, (fun l i => pairing S (s' l) x * incA D (s l i)) l i := funext fun i => hd x i
+
     rw [e, hermAt_sum_right, map_sum]
     refine sum_mem fun l _ => ?_
     rw [hermAt_mul_inc, RingHom.map_mul]

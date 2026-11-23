@@ -1,7 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasSubstEv
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FormalExpMulFormalExpNeg
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.MemAnalyticAtZeroOfEventuallyDifferentiableAt
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.NatCastMulCoeffOfPderivEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+
+@[expose] public section
 
 open Filter Topology MvPowerSeries
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ
@@ -13,8 +61,8 @@ section Comp
 variable {σ τ W : Type*} [Fintype σ] [DecidableEq σ] [Fintype τ] [NormedAddCommGroup W]
   [NormedSpace ℂ W]
 
-omit [DecidableEq σ] in
 
+omit [DecidableEq σ] in
 theorem hasSubst_taylorDir (u : τ → W) {φ : W → σ → ℂ} (h0 : φ 0 = 0) :
     HasSubst fun i => taylorDir u fun z => φ z i := by
   refine hasSubst_of_constantCoeff_zero fun i => ?_
@@ -30,6 +78,7 @@ private theorem fderiv_comp_apply_eq_sum_pi_single {φ : W → σ → ℂ} {f : 
   simp_rw [hi]
   rw [fderiv_comp z hf hφ, ContinuousLinearMap.comp_apply]
   conv_lhs => rw [← Finset.univ_sum_single (fderiv ℂ φ z v)]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [show (Pi.single i (fderiv ℂ φ z v i) : σ → ℂ) = fderiv ℂ φ z v i • Pi.single i 1 by
@@ -60,11 +109,11 @@ private theorem taylorDir_comp_eq_subst_taylor_of_analyticAt (u : τ → W) {φ 
         fderiv ℂ f (φ z) (Pi.single i 1) * fderiv ℂ (fun y => φ y i) z (u j))
       (fun i _ => ((hg i).comp_of_eq hφ h0).mul (analyticAt_fderiv_apply (hφi i) _))
     beta_reduce at hsum
-    have key : pderiv ℂ j (taylorDir u (f ∘ φ) -
+    have key : pderiv (R := ℂ) j (taylorDir u (f ∘ φ) -
         subst (fun i => taylorDir u fun z => φ z i) (taylor f)) =
         ∑ i, (taylorDir u ((fun y => fderiv ℂ f y (Pi.single i 1)) ∘ φ) -
           subst (fun i => taylorDir u fun z => φ z i) (taylor fun y => fderiv ℂ f y (Pi.single i 1))) *
-            pderiv ℂ j (taylorDir u fun z => φ z i) := by
+            pderiv (R := ℂ) j (taylorDir u fun z => φ z i) := by
       rw [map_sub, FormalCalc.pderiv_subst hs, ← taylorDir_fderiv u hfφ j, taylorDir_congr u hev,
         hsum, ← Finset.sum_sub_distrib]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -98,27 +147,6 @@ end Points
 section Curried
 
 variable {m n d d' : ℕ}
-
-noncomputable def taylorPts (n : ℕ) (F : (Fin n → Fin d → ℂ) → ℂ) : PS ℂ n d :=
-  taylor fun z : Fin n × Fin d → ℂ => F fun j i => z (j, i)
-
-noncomputable def curryPts (n d : ℕ) : (Fin n × Fin d → ℂ) →L[ℂ] (Fin n → Fin d → ℂ) :=
-  ContinuousLinearMap.pi fun j => ContinuousLinearMap.pi fun i => ContinuousLinearMap.proj (j, i)
-
-@[simp] theorem curryPts_apply (z : Fin n × Fin d → ℂ) (j : Fin n) (i : Fin d) :
-    curryPts n d z j i = z (j, i) := rfl
-
-@[simp] theorem constantCoeff_taylorPts (F : (Fin n → Fin d → ℂ) → ℂ) :
-    constantCoeff (taylorPts n F) = F 0 := by
-  unfold taylorPts
-  rw [constantCoeff_taylor]
-  rfl
-
-@[simp] theorem taylorPts_coord (j : Fin n) (i : Fin d) :
-    taylorPts n (fun z : Fin n → Fin d → ℂ => z j i) = X (j, i) := taylor_coord (j, i)
-
-@[simp] theorem taylorPts_const (c : ℂ) :
-    taylorPts n (fun _ : Fin n → Fin d → ℂ => c) = C c := taylor_const c
 
 section Algebra
 

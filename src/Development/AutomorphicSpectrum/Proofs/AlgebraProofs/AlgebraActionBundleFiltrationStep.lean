@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TwistApply
+module
+
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.TwistApply
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ShortExactFirstTermBundle
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SubAndQuotientBundles
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ShortExactFirstTermBundle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -130,6 +177,7 @@ theorem exists_local (τ : A →+* Module.End K V) {r : ℕ} (χ : A →ₐ[k] k
       P y = ∑ s, d s • x s := fun d y hy => by
     have h1 : ∀ s, Θ s y = d s := fun s => by
       have h2 := hW1 s _ hy
+
       rw [map_sub, map_sum, sub_eq_zero] at h2
       rw [h2]
       simp [hΘT]
@@ -140,6 +188,7 @@ theorem exists_local (τ : A →+* Module.End K V) {r : ℕ} (χ : A →ₐ[k] k
     obtain ⟨d, hd⟩ := exists_coords τ x χ hc hspan z
     refine ⟨d, hd, ?_⟩
     have := apply_mem_of_mul_mem τ hmt hd
+
     simpa [map_sub, map_sum] using this
   have hPT : ∀ z, P (τ t z) - z ∈ idealV τ (RingHom.ker χ) := fun z => by
     obtain ⟨d, h1, h2⟩ := hT z
@@ -152,6 +201,7 @@ theorem exists_local (τ : A →+* Module.End K V) {r : ℕ} (χ : A →ₐ[k] k
       have := add_mem hz h2
       simpa using this
     rw [hPc d _ h3]
+
     simpa [map_sum] using h3
   · rw [hPa]
     exact sum_mem fun s _ => smul_mem_of_isBun C hL i (hint l s y hy) (hx s)

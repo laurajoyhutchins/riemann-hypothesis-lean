@@ -1,4 +1,69 @@
+module
+
+public import Mathlib.Basic.NNReal.Defs
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+public import Mathlib.RingTheory.Valuation.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
 import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+import Development.AbelianVarietyTheory.Definitions.Divisors.XiMulNu
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsCounitDerivationCounitComp
+public import Mathlib.RingTheory.Idempotents
+
+@[expose] public section
+
 open CategoryTheory Opposite Matrix GlobalTheory GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
 namespace GlobalTheory.FiniteAlgIdem
@@ -58,8 +123,8 @@ theorem exists_mem_eq {O : Type} [CommRing O] {A K : Type} [CommRing A] [Algebra
   simp only [Function.comp_apply, map_sub, AlgHom.commutes] at hx0
   exact sub_eq_zero.1 hx0
 
-open Classical in
 
+open Classical in
 theorem exists_idempotent {O : Type} [CommRing O] [IsLocalRing O] {A : Type} [CommRing A]
     [Algebra O A] {a : A} {r : Multiset O} (hr : (r.map fun x => a - algebraMap O A x).prod = 0)
     (ρ : IsLocalRing.ResidueField O) :
@@ -72,7 +137,7 @@ theorem exists_idempotent {O : Type} [CommRing O] [IsLocalRing O] {A : Type} [Co
       h = ((r.filter fun x => ¬ IsLocalRing.residue O x = ρ).map fun x => X - C x).prod :=
     ⟨_, rfl⟩
   have hgh : g * h = (r.map fun x => X - C x).prod := by
-    rw [hg, hh, ← Multiset.prod_add, ← Multiset.map_add, Multiset.filter_add_not]
+    rw [hg, hh, ← Multiset.prod_add, ← Multiset.map_add (f := _), Multiset.filter_add_not]
   have hcop : IsCoprime g h := by
     rw [hg]
     apply isCoprime_multiset_prod_left
@@ -101,7 +166,7 @@ theorem exists_idempotent {O : Type} [CommRing O] [IsLocalRing O] {A : Type} [Co
     obtain ⟨x, hx, hcx⟩ := exists_mem_eq c hr
     rw [IsLocalRing.ResidueField.algebraMap_eq] at hcx
     have h1 := congrArg (aeval (c a)) huw
-    rw [map_add, map_mul, map_mul, map_one] at h1
+    rw [map_add (f := _), map_mul, map_mul, map_one] at h1
     by_cases hρ : IsLocalRing.residue O x = ρ
     · have hg0 : aeval (c a) g = 0 := by
         rw [hg, map_multiset_prod, Multiset.map_map]
@@ -214,6 +279,7 @@ theorem finite_and_idempotents {L : Type} [Field L] [IsAlgClosed L] {v : Valuati
     have horth : OrthogonalIdempotents e := ⟨hei, fun c c' h => hort c c' h⟩
     have hsum := horth.isIdempotentElem_sum (s := Finset.univ)
     have h0 := idempotent_eq_zero hv hsum.one_sub (fun c'' => by
+
       rw [map_sub, map_one, map_sum]
       simp [hec])
     exact (sub_eq_zero.1 h0).symm

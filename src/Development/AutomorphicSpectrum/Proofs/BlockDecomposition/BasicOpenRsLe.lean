@@ -1,17 +1,63 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.LocDefs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.LocDefs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpen
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CupListRepresentativeOfForms
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsDerivationExt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsLocalFrameOfCoords
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormSumRepresentativeLift
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGradedClassRepresentative
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MinorGroupMul
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationProperty
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpen
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormSumRepresentativeLift
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CupListRepresentativeOfForms
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGradedClassRepresentative
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsDerivationExt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsLocalFrameOfCoords
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MinorGroupMul
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TaylorOfLocalFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TaylorOfLocalFrame
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 set_option linter.unusedVariables false
@@ -279,6 +325,7 @@ theorem cmp_coef : ∀ {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (q : X
       sgn I i.2 • (εW (rs hWU (z i.1)) * ∏ k, εW (p (i.2 k) (rs hWU (tU (i.1.1 k))))) = εW (y' I) := by
     intro I
     rw [Fintype.sum_prod_type]
+
     simp only [y', map_sum, map_mul]
     refine Finset.sum_congr rfl fun L _ => ?_
     have e3 : ∀ J : Fin m → Fin d, sgn I J • (εW (rs hWU (z L)) * ∏ k, εW (p (J k) (rs hWU (tU (L.1 k))))) =

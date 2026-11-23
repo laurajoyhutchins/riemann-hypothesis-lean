@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundaryChartHodgeMatrix
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundaryChartHodgeMatrix
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardOpenCoordinateRingIsFractionRingIsNoetheStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -11,8 +60,8 @@ open scoped TensorProduct
 
 namespace UpperTheory.Gal.productCup_of_system
 
-open scoped IntermediateField.algebraAdjoinAdjoin in
 
+open scoped IntermediateField.algebraAdjoinAdjoin in
 private theorem tb_F {F : Type} [Field F] [Algebra ℂ F] {d : ℕ} {x : Fin (d + 1) → F} (pd : IsPd ℂ x) :
     IsTranscendenceBasis ℂ (fun j : Fin d => x j.succ / x 0) := by
   refine pd.indep.isTranscendenceBasis_iff_isAlgebraic.mpr ⟨fun a => ?_⟩
@@ -84,8 +133,9 @@ private theorem fg_rB {F L : Type} [Field F] [Field L] [Algebra ℂ F] [Algebra 
     haveI : IsFractionRing (rA ℂ x J) F := (GlobalTheory.T.standardOpenCoordinateRing_isFractionRing_isNoetherianRing ℂ F d x pd J ⟨i, hi⟩).1
     haveI : IsNoetherianRing (rA ℂ x J) := (GlobalTheory.T.standardOpenCoordinateRing_isFractionRing_isNoetherianRing ℂ F d x pd J ⟨i, hi⟩).2
     haveI := rA_isIntegrallyClosed pd hi
-    haveI : Module.Finite (rA ℂ x J) (integralClosure (rA ℂ x J) L) :=
-      IsIntegralClosure.finite (rA ℂ x J) F L (integralClosure (rA ℂ x J) L)
+    set_option synthInstance.maxHeartbeats 200000 in
+      haveI : Module.Finite (rA ℂ x J) (integralClosure (rA ℂ x J) L) :=
+        IsIntegralClosure.finite (rA ℂ x J) F L (integralClosure (rA ℂ x J) L)
     have hfg : (rA ℂ x J).FG := by
       refine Subalgebra.fg_def.2 ⟨_, ?_, rfl⟩
       refine ((J.finite_toSet.prod (Set.finite_univ (α := Fin (d + 1)))).image
@@ -93,8 +143,9 @@ private theorem fg_rB {F L : Type} [Field F] [Field L] [Algebra ℂ F] [Algebra 
       rintro _ ⟨i', hi', j, rfl⟩
       exact ⟨(i', j), ⟨hi', trivial⟩, rfl⟩
     haveI : Algebra.FiniteType ℂ (rA ℂ x J) := (Subalgebra.fg_iff_finiteType _).1 hfg
-    have hft : Algebra.FiniteType ℂ (integralClosure (rA ℂ x J) L) :=
-      Algebra.FiniteType.trans (S := rA ℂ x J) inferInstance inferInstance
+    set_option synthInstance.maxHeartbeats 200000 in
+      have hft : Algebra.FiniteType ℂ (integralClosure (rA ℂ x J) L) :=
+        Algebra.FiniteType.trans (S := rA ℂ x J) inferInstance inferInstance
     exact (Subalgebra.fg_iff_finiteType (rB ℂ L x J)).2 hft
 
 private theorem integralClosure_finiteGenerated {F K L : Type} [Field F] [Field K] [Field L] [Algebra ℂ F] [Algebra ℂ K] [Algebra ℂ L]
@@ -127,7 +178,7 @@ private theorem integralClosure_finiteGenerated {F K L : Type} [Field F] [Field 
     have h1 : IsIntegral A (algebraMap K L c) := IsIntegral.algebraMap hc
     have h2 : algebraMap B L b = algebraMap K L c := hb.symm
     rw [← h2] at h1
-    exact (isIntegral_algebraMap_iff (Subtype.val_injective : Function.Injective (algebraMap B L))).1 h1⟩
+    exact (isIntegral_algebraMap_iff ).1 h1⟩
   have e : R2 x j2 J = rB ℂ L x J := by
     ext y
     constructor

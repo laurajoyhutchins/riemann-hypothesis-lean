@@ -1,18 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NVNeZero
-import Formalism.LocalToGlobal.Columns.MtHeckeSum
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitHeckeElementLabelZerosThenNegOnes
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelCharEqOneInertPrimeOffLevel
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NVNeZero
+public import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.HeckeIntertwinersInert
+public import Formalism.LocalToGlobal.Columns.MtHeckeKv
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPartConjMem
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelCharEqOneInertPrimeOffLevel
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsPrimeIdemOfInert
-import Formalism.LocalToGlobal.Columns.RecLevelLocP
-import Formalism.LocalToGlobal.Columns.DecoFin
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitHeckeElementLabelZerosThenNegOnes
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+import Formalism.LocalToGlobal.Columns.AdelicLemmas
+public import Formalism.LocalToGlobal.Columns.MtHeckeLoc
+public import Formalism.LocalToGlobal.Columns.RecLevelLocP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open Formalism.IndefR.RecTie Formalism.IndefR.Lev Formalism.L2.Rows GlobalTheory.Mem GlobalTheory.Mem.R3 GlobalTheory.Mem.Col2
 open GlobalTheory.Mem.R3.LiftBrg
 
-set_option maxHeartbeats 2000000
+
 
 namespace GlobalTheory.Mem.R3.LiftBrg.SplitLoc
 
@@ -54,7 +101,7 @@ theorem prV_swap {D : D7} (w : HeightOneSpectrum (𝓞 D.host.F))
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul a x => rfl
-  | add x y hx hy => rw [RingHom.map_add (swapAE D), RingHom.map_add, hx, hy, map_add, map_add]
+  | add x y hx hy => rw [RingHom.map_add (swapAE D), RingHom.map_add (f := _), hx, hy, map_add (f := _), map_add (f := _)]
 
 theorem bc_prV_swap_eq_one_iff {D : D7} {m : ℕ} (w : HeightOneSpectrum (𝓞 D.host.F))
     (M : GL (Fin m) (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Af D.host.F ⊗[D.host.F] D.host.E)) :
@@ -116,7 +163,7 @@ namespace GlobalTheory.Mem.R3.LiftBrg.SplitLoc
 theorem mem_levJ_iff {D : D7} (V : HSp D) (β : GL (Fin V.rank) (Formalism.IndefR.Lev.EAf D)) (L : LevDat D.host.E ℂ V.rank)
     (x : Bridge.Gf V) (v : HeightOneSpectrum (𝓞 D.host.F)) (hloc : GlobalTheory.IndefiniteRowSideFullHecke.HeckeIntertwinersInert.LocAt V v x)
     (hU : Formalism.UG.bc (swapAE D) (x : GL (Fin V.rank) _) ∈ UA D.sp.cm V.gram)
-    (hoff : ∀ PP, PP ∈ L.Pg ∨ PP ∈ L.Q → PP.under (𝓞 D.host.F) ≠ v) :
+    (hoff : ∀ PP, PP ∈ L.Pg ∨ PP ∈ L.Q → (_root_.IsDedekindDomain.HeightOneSpectrum.under (𝓞 D.host.F) PP) ≠ v) :
     x ∈ (levEnv V β L).J ↔ Formalism.UG.bc (swapAE D) (x : GL (Fin V.rank) _) ∈ Formalism.L2.DIV.St β := by
   constructor
   · intro h

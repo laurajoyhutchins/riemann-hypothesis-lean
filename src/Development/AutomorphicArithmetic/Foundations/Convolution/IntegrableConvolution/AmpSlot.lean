@@ -1,12 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ThickFrames
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmoothAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensOp
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.IntPow
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactCv
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CommInt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ThickFrames
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CommInt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.CvBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.IntPow
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.LactCv
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensOp
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmoothAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +87,7 @@ private lemma pow_ok {T : H →L[ℂ] H} (h : 0 ≤ T ∧ ‖T‖ ≤ 1) (k : �
 
 end Ops
 
-private lemma smooth_pow {F : Type} [Field F] [NumberField F] [IsTotallyComplex F] {n : ℕ}
+private lemma smooth_pow {F : Type} [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] {n : ℕ}
     (ν : Measure (archGroup F n)) [ν.IsHaarMeasure] (a : TI F n) (h1 : SmoothT a) (h2 : LeftFin a) (k : ℕ) :
     ∃ c : TI F n, (∀ g, c g = cvPow ν (a : archGroup F n → ℂ) k g) ∧ SmoothT c ∧ LeftFin c := by
   induction k with
@@ -134,10 +176,10 @@ theorem _root_.UpperTheory.ConvolutionTheory.L1.ampPosition :
   obtain ⟨-, -, hmul, -, -, ⟨s, hs, hsc⟩, -, -⟩ := UpperTheory.ConvolutionTheory.L1.archBasic F E σ m D n
   refine ⟨fun μE _ => ?_, fun μF _ => ?_⟩
   · have hok := tens_ok h.meas h.sq hc h.norm h.tens hs hsc hmul (LL μE)
-      ((rightRegularRep (rationalGLOne E n) μE).compHom (archP E n) continuous_archP)
+      ((rightRegularRep (rationalGLOne (K := E) (n := n)) μE).compHom (archP E n) continuous_archP)
     exact ⟨hE.1 fun _ => hsa, hE.2 fun _ => hla, hok.1, hok.2⟩
   · have hok := pow_op h.sq hc h.norm (LL μF)
-      ((rightRegularRep (rationalGLOne F n) μF).compHom (archP F n) continuous_archP)
+      ((rightRegularRep (rationalGLOne (K := F) (n := n)) μF).compHom (archP F n) continuous_archP)
     exact ⟨hcs, hcl, hok.1, hok.2⟩
 
 end UpperTheory.ConvolutionTheory.L1

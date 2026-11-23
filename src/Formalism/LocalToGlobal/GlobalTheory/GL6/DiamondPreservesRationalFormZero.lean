@@ -1,4 +1,44 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.Statement
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,51 +47,6 @@ namespace Formalism.L2.GlobalTheoryTheory.LocalLatticeBases
 open Formalism.BasicNotions Formalism.MainNotions.product_first_zeroth_parts Classical
 
 variable (D : D7) (u : D.what₂.Word)
-
-def t1A : Prop :=
-  (∀ i, i ≤ D.R.m → ∀ v, ∀ φ ∈ (D.fm u).Fi i,
-    Uop D u i v φ ∈ (D.fm u).Fi i ∧ Dop D u i v φ ∈ (D.fm u).Fi i ∧ ∀ a, dia D u i v a φ ∈ (D.fm u).Fi i) ∧
-  (∀ i, i ≤ D.R.m → ∀ v v', v ≠ v' → ∀ φ ∈ (D.fm u).Fi i,
-    Uop D u i v (Uop D u i v' φ) = Uop D u i v' (Uop D u i v φ)) ∧
-  (∀ i, i ≤ D.R.m → ∀ v, ∀ φ ∈ (D.fm u).Fi i, ∀ ψ ∈ (D.fm u).Fi i,
-    (D.fm u).ipC i (Uop D u i v φ) ψ = (D.fm u).ipC i φ (Dop D u i v ψ)) ∧
-  (∀ i, i ≤ D.R.m → ∀ w, OverT D u w → (D.fm u).seenP w = true → ∀ v,
-    Into D u w (Uop D u i v) ((D.fm u).Bw i w v) ((D.fm u).S i w) ∧
-    Into D u w (Dop D u i v) ((D.fm u).S i w) ((D.fm u).Bw i w v)) ∧
-  (∀ i, i ≤ D.R.m → ∀ w, ¬ OverT D u w → ∀ v,
-    Into D u w (Uop D u i v) ((D.fm u).S i w) ((D.fm u).S i w) ∧ Into D u w (Dop D u i v) ((D.fm u).S i w) ((D.fm u).S i w)) ∧
-  (∀ i, i ≤ D.R.m → ∀ v, ∀ φ ∈ (D.fm u).Fi i, Dop D u i v (Uop D u i v φ) =
-    ((D.mem u).A.T : ℂ) ^ (D.R.N i - 1) • φ - ((D.mem u).A.T : ℂ) ^ (D.R.N i - 2) • Nm D u i v φ
-      + ((D.mem u).A.T : ℂ) ^ (D.R.N i - 2) • trp D u i v φ)
-
-def t1c7 : Prop :=
-  ∀ v, ∀ x ∈ (D.fm u).ramSub,
-    (∃ y ∈ (D.fm u).ramSub, (D.fm u).emb 0 y = Uop D u 0 v ((D.fm u).emb 0 x)) ∧
-    (∃ y ∈ (D.fm u).ramSub, (D.fm u).emb 0 y = Dop D u 0 v ((D.fm u).emb 0 x)) ∧
-    ∀ a, ∃ y ∈ (D.fm u).ramSub, (D.fm u).emb 0 y = dia D u 0 v a ((D.fm u).emb 0 x)
-
-def t1c8 : Prop :=
-  ∀ w, ¬ OverT D u w → ∀ v,
-    Into D u w (Uop D u 0 v) (Sram D u w) (Sram D u w) ∧
-    Into D u w (Dop D u 0 v) (Sram D u w) (Sram D u w) ∧
-    ∀ a, Into D u w (dia D u 0 v a) (Sram D u w) (Sram D u w)
-
-def t1c9 : Prop :=
-  ∀ i, i ≤ D.R.m → ∀ v, ∀ φ ∈ MramI D u i,
-    Uop D u i v φ ∈ MramI D u i ∧ Dop D u i v φ ∈ MramI D u i ∧
-    (∀ a, dia D u i v a φ ∈ MramI D u i) ∧ trp D u i v φ = 0 ∧
-    Dop D u i v (Uop D u i v φ) = ((D.mem u).A.T : ℂ) ^ (D.R.N i - 1) • φ ∧
-    Uop D u i v (Dop D u i v φ) = ((D.mem u).A.T : ℂ) ^ (D.R.N i - 1) • φ
-
-def DiamondCommutesHecke : Prop :=
-  ∀ i, i ≤ D.R.m → ∀ v v' (a : ((D.mem u).A.Fv v')ˣ), ∀ φ ∈ (D.fm u).Fi i,
-    dia D u i v' a (Uop D u i v φ) = Uop D u i v (dia D u i v' a φ) ∧
-    dia D u i v' a (Dop D u i v φ) = Dop D u i v (dia D u i v' a φ) ∧
-    ∀ b : ((D.mem u).A.Fv v)ˣ, dia D u i v' a (dia D u i v b φ) = dia D u i v b (dia D u i v' a φ)
-
-def TraceDiamondInvariant : Prop :=
-  ∀ i, i ≤ D.R.m → ∀ v (a : ((D.mem u).A.Fv v)ˣ), ∀ φ ∈ (D.fm u).Fi i,
-    trp D u i v (dia D u i v a φ) = trp D u i v φ
 
 def HeckeRationalLevelZero : Prop :=
   ∀ v x, (∃ y, (D.fm u).emb 0 y = Uop D u 0 v ((D.fm u).emb 0 x)) ∧
@@ -87,13 +82,6 @@ theorem forms_finite_dimensional (i : ℕ) : FiniteDimensional ℂ ((D.fm u).Fi 
 theorem ramified_forms_finite_dimensional (i : ℕ) : FiniteDimensional ℂ (MramI D u i) := by
   have := forms_finite_dimensional D u i
   exact Submodule.finiteDimensional_of_le (inf_le_left : MramI D u i ≤ (D.fm u).Fi i)
-
-theorem two_le_rank_of_level (i : ℕ) : 2 ≤ D.R.N i := by
-  have := D.R.m_add_three_le_k; unfold Ranks.N; omega
-
-def HeckeRelationsInputs : Prop :=
-  ∀ (D : D7) (u : D.what₂.Word), FormsCompatible D u → HidaSetting D u →
-    t1A D u ∧ DiamondCommutesHecke D u ∧ TraceDiamondInvariant D u ∧ HeckeRationalLevelZero D u
 
 end Formalism.L2.GlobalTheoryTheory.LocalLatticeBases
 

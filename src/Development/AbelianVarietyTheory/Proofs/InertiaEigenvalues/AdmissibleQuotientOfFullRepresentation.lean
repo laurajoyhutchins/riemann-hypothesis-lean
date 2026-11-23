@@ -1,9 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionSameSSOfLattices
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFrobeniusGenDegreeHomToZl
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdmissibleClassesPropsOfFlatCoefficient
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdmissibleClassesPropsOfFlatCoefficient
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFrobeniusGenDegreeHomToZl
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionSameSSOfLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.AddChar
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.BasicDefinitions.ExistsUnique
+
+@[expose] public section
 
 open GlobalTheory.PhiGam GlobalTheory.AdmLoc GlobalTheory.Models GlobalTheory.TopSteps Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc
 open scoped LaurentSeries PowerSeries TensorProduct Pointwise
@@ -28,7 +79,7 @@ theorem asModule_equiv {M N : Type} [AddCommGroup M] [Module O M] [AddCommGroup 
   rw [Representation.asModuleEquiv_map_smul, Representation.asModuleEquiv_map_smul, LinearEquiv.apply_symm_apply]
   induction r using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
   | single g a => simp [he]
 
 theorem sameSS_of_surj [IsDomain O] [IsDiscreteValuationRing O] [IsFractionRing O LL] {lam : O}
@@ -239,8 +290,8 @@ theorem sameSS_sumLat (hl : Irreducible Γ.lam) (hinj : Function.Injective (alge
     obtain ⟨d, hd⟩ := hc c g
     exact ⟨d * (e x).2 c, by rw [smul_eq_mul, smul_eq_mul, ← sub_mul, hd, mul_assoc]⟩
 
-omit [IsTopologicalRing LL] in
 
+omit [IsTopologicalRing LL] in
 theorem admissible_quotient_of_fullRepresentation {t : ℕ} {Ut : ZMod n → Multiset ℤ} {T : LocLat G Qp LL O} (hT : Full PD emb Γ t Ut T)
     {M : Type} [AddCommGroup M] [Module O M] [Finite M] (π : Representation O G M) (q : ↥T.L.T →ₗ[O] M)
     (hs : Function.Surjective q) (hq : ∀ g x, q (latRep T.L g x) = π g (q x)) {c : O} (hc : c ≠ 0)
@@ -437,7 +488,7 @@ theorem exists_mu {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup 
   let z₁ : G →* Multiplicative M := MonoidHom.mk' (fun g => Multiplicative.ofAdd (z g)) fun g h => congrArg _ (hm g h)
   let z₂ : G →* Multiplicative M := MonoidHom.mk'
     (fun g => Multiplicative.ofAdd (algebraMap ℤ_[l] O (w (ν g)) • z F)) fun g h => by
-      rw [← ofAdd_add, ← add_smul, ← map_add]
+      rw [← ofAdd_add, ← add_smul, ← map_add (f := _)]
       refine congrArg _ (hcong _ _ ⟨w (ν g) * w (ν h), mul_left_cancel₀ h0 ?_⟩)
       have := map_mul κ (ν g) (ν h)
       rw [← map_mul, hw, hw, hw] at this

@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergmanIntegrable
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.BergmanSectionPairing
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergmanIntegrable
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.BergmanSectionPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -32,8 +85,8 @@ theorem val_mem (v : SectionInnerProductSpace V) : val V v ∈ V := (show V from
 variable [CompactSpace X] [T2Space X] [MeasurableSpace X] [BorelSpace X]
   (W : Weight L) (dV : SmoothVolume A) (n : ℕ)
 
-omit [CompactSpace X] [T2Space X] [BorelSpace X] in
 
+omit [CompactSpace X] [T2Space X] [BorelSpace X] in
 theorem integral_pairing_self (s : Fin A.n → X → ℂ) :
     ∫ x, pairing W n s s x ∂dV.μ = ((sectionL2NormSq W dV n s : ℝ) : ℂ) := by
   simp_rw [pairing_self]
@@ -67,16 +120,14 @@ def core (hV : V ≤ L.sections n) : InnerProductSpace.Core ℂ (SectionInnerPro
       (pairing_integrable W dV n (hV (val_mem V v)) (hV (val_mem V w))), map_add]
     congr 1
     funext x
-    simp only [pairing, Pi.add_apply, map_add]
-    ring
+    simp only [pairing, Pi.add_apply, map_add, add_mul]
   smul_left u w r := by
     show ∫ x, pairing W n (val V (r • u)) (val V w) x ∂dV.μ =
       conj r * ∫ x, pairing W n (val V u) (val V w) x ∂dV.μ
     rw [← integral_const_mul, map_smul]
     congr 1
     funext x
-    simp only [pairing, Pi.smul_apply, smul_eq_mul, map_mul]
-    ring
+    simp only [pairing, Pi.smul_apply, smul_eq_mul, map_mul, mul_assoc]
   definite v h := by
     have hs : val V v ∈ L.sections n := hV (val_mem V v)
     have hl : sectionL2NormSq W dV n (val V v) = 0 := by
@@ -129,6 +180,7 @@ theorem bergman_eq_sum (hV : V ≤ L.sections n) [FiniteDimensional ℂ V] :
   have hr : ∀ v, ev v = ⟪r, v⟫_ℂ := fun v ↦ by
     calc ev v = ev (∑ i, ⟪b i, v⟫_ℂ • b i) := by rw [b.sum_repr']
       _ = ∑ i, ev (b i) * ⟪b i, v⟫_ℂ := by
+
           rw [map_sum]
           exact Finset.sum_congr rfl fun i _ ↦ by rw [map_smul, smul_eq_mul, mul_comm]
       _ = ⟪r, v⟫_ℂ := by

@@ -1,17 +1,66 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.CotangentSurjective
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.Basic.NNReal.Defs
+public import Mathlib.RingTheory.Valuation.Integers
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.ExistsLiftAddOfIsReducedEq
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsGrpObjPolarised
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisionPoints
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.ExistsUniqueEqConstMulOriginSec
 import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsFinFlatSub
-import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.QuotientByFiniteFlatStatement
-import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.ZarhinStatement
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.HodgeTateDatumStatement
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.OrdinaryCurveStatement
-import Development.AutomorphicSpectrum.Statements.AlgebraStatements.PolarisedFlagStatement
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.ExistsLiftAddOfIsReducedEq
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsGrpObjPolarised
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisionPoints
+import ReciprocityTheory.DualLattices.CotangentSurjective
+import ReciprocityTheory.DualLattices.TensorSpan
+
+@[expose] public section
+
 open ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar.GR
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi
@@ -33,10 +82,10 @@ theorem equation_map {A B : Type} [CommRing A] [CommRing B] (f : A →+* B)
     (W.map f).toAffine.Equation (f x) (f y) := by
   rw [WeierstrassCurve.Affine.equation_iff] at h ⊢
   have := congrArg f h
-  simpa only [map_add, map_mul, map_pow, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] using this
+  simpa only [map_add (f := _), map_mul, map_pow, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] using this
+
 
 open GlobalTheory.WeierstrassCurve in
-
 theorem exists_polAV_of_root (p : ℕ) {R C : Type} [CommRing R] [IsDomain R] [Field C] [Algebra R C]
     (hinj : Function.Injective (algebraMap R C)) (W : _root_.WeierstrassCurve R) (hΔ : IsUnit W.Δ)
     (x y : R) (hE : W.toAffine.Equation x y)
@@ -471,8 +520,8 @@ theorem isAlgClosed_residueField {C : Type} [Field C] [IsAlgClosed C] (v : Valua
 
 end GlobalTheory.CompanionTheory.Ar.GR.OrdPt
 
-open GlobalTheory.CompanionTheory.Ar.GR.OrdPt in
 
+open GlobalTheory.CompanionTheory.Ar.GR.OrdPt in
 theorem GlobalTheory.CompanionTheory.Ar.GR.exists_ord_point : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal) (R : Type) [CommRing R] [Algebra R C], v.Integers R → v (p : C) < 1 → IsAdicComplete (Ideal.span {(p : R)}) R → ∃ (P : Out.PolAV (Spec (CommRingCat.of R))) (z : sp (R₀ := R) R ⟶ P.A), P.g = 1 ∧ z ^ p = 1 ∧ ∀ (k : Type) [Field k] [Algebra R k], spMap (Algebra.ofId R k) ≫ z ≠ 1 := by
   intro p _ C _ _ _ v R _ _ hv hp _
   have hinj := hv.hom_inj
@@ -482,7 +531,7 @@ theorem GlobalTheory.CompanionTheory.Ar.GR.exists_ord_point : ∀ (p : ℕ) [Fac
     exact ⟨fun h => lt_of_le_of_ne (hv.map_le_one a) h, fun h => h.ne⟩
   haveI : IsLocalRing R := IsLocalRing.of_nonunits_add fun a b ha hb => by
     rw [hnon] at ha hb ⊢
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (Valuation.map_add v _ _).trans_lt (max_lt ha hb)
   haveI : IsAlgClosed (IsLocalRing.ResidueField R) := isAlgClosed_residueField v hv
   haveI : CharP (IsLocalRing.ResidueField R) p := by

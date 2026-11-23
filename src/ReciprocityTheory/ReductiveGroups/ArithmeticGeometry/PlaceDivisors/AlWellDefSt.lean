@@ -1,6 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
-import Mathlib.Algebra.DualNumber
-import Mathlib.RingTheory.Valuation.Integers
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+public import Mathlib.Algebra.DualNumber
+public import Mathlib.Basic.NNReal.Defs
+public import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -118,28 +164,6 @@ def HTChar (p : ℕ) {C : Type} [Field C] (v : Valuation C NNReal) {O : Type} [C
     [Algebra O C] (G : Over (Spec (CommRingCat.of O))) [GrpObj G] : Prop :=
   ∀ c : O, v (algebraMap O C c) ^ (p - 1) ≤ v (p : C) →
     ∀ f ∈ omega G, c • f ∈ htSpan G p
-
-def AlWellDefSt (p : ℕ) [Fact p.Prime] : Prop :=
-  ∀ (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal)
-    (O : Type) [CommRing O] [Algebra O C], v.Integers O →
-    ∀ [Fact ¬IsUnit (p : O)] [IsAdicComplete (Ideal.span {(p : O)}) O]
-      (G : Over (Spec (CommRingCat.of O))) [GrpObj G] [IsCommMonObj G], Smooth G.hom →
-      ∀ χ : Tv G p, ∃! f : LieG G → O, f ∈ omega G ∧ IsAl χ f
-
-def AlNatSt (p : ℕ) [Fact p.Prime] : Prop :=
-  ∀ (O : Type) [CommRing O] (G : Over (Spec (CommRingCat.of O))) [GrpObj G] (a : G ⟶ G),
-    IsMonHom a → ∀ (χ χa : Tv G p) (f : LieG G → O),
-      (∀ (n : ℕ) (T : Over (Spec (CommRingCat.of O))) (x y : T ⟶ torsion G (p ^ n)),
-        x ≫ torsion.ι G (p ^ n) ≫ a = y ≫ torsion.ι G (p ^ n) → x ≫ χa.χ n = y ≫ χ.χ n) →
-      IsAl χ f →
-      ∀ (da : LieG G → LieG G), (∀ x, (da x).1 = x.1 ≫ a) → IsAl χa (f ∘ da)
-
-def StBad (p : ℕ) [Fact p.Prime] : Prop :=
-  ∀ (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal)
-    (O : Type) [CommRing O] [Algebra O C], v.Integers O →
-    ∀ [Fact ¬IsUnit (p : O)] [IsAdicComplete (Ideal.span {(p : O)}) O]
-      (E : SplitExt (Spec (CommRingCat.of O))) (G : Over (Spec (CommRingCat.of O))) [GrpObj G],
-      E.IsGt G → HTChar p v E.B → HTChar p v G
 
 end Statements
 

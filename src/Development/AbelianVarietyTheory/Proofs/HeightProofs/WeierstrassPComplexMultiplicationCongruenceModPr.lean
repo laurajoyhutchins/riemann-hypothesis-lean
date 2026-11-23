@@ -1,10 +1,68 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsWeierstrassPMulOde
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuotientEqLinearPowCharOfDerivativeEqZero
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ThreeDistinctRoots
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.WeierstrassPTorsionIntegralAndDistinctMod
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.HeightFunctions.FiniteDimensionalOfSz
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LFunctionPositiveConductorFourEight
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsWeierstrassPMulOde
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.QuotientEqLinearPowCharOfDerivativeEqZero
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.WeierstrassPTorsionIntegralAndDistinctMod
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ThreeDistinctRoots
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Polynomial GlobalTheory.FieldSize
 open scoped IntermediateField
 
@@ -14,13 +72,7 @@ lemma exists_three_roots {K : Type} [Field K] [IsAlgClosed K] (g₂ g₃ : K) (h
     (hd : g₂ ^ 3 - 27 * g₃ ^ 2 ≠ 0) :
     ∃ x y z : K, x ≠ y ∧ x ≠ z ∧ y ≠ z ∧ 4 * x ^ 3 - g₂ * x - g₃ = 0 ∧
       4 * y ^ 3 - g₂ * y - g₃ = 0 ∧ 4 * z ^ 3 - g₂ * z - g₃ = 0 := by
-  first
-  | exact @_root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots
-  | exact _root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots
-  | (apply _root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots <;> assumption)
-  | (intros; apply _root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots ..)
+  exact _root_.GlobalTheory.ThreeDistinctRoots.three_distinct_roots g₂ g₃ h2 hd
 
 lemma coeff_of_dvd {k : Type} [Field k] (p : ℕ) [Fact p.Prime] [CharP k p] (g₂ g₃ a b : k)
     (h2 : (2 : k) ≠ 0) (h3 : (3 : k) ≠ 0) (hd : g₂ ^ 3 - 27 * g₃ ^ 2 ≠ 0) (ha : a ≠ 0)
@@ -48,7 +100,7 @@ lemma coeff_of_dvd {k : Type} [Field k] (p : ℕ) [Fact p.Prime] [CharP k p] (g�
     intro e he
     obtain ⟨q, hq⟩ := hdvd
     have e1 := congrArg (Polynomial.eval₂RingHom ι e) hq
-    simp only [map_mul, map_sub, map_add, map_pow, map_ofNat, coe_eval₂RingHom, eval₂_C,
+    simp only [map_mul, map_sub, map_add (f := _), map_pow, map_ofNat, coe_eval₂RingHom, eval₂_C,
       eval₂_X] at e1
     rw [he, zero_mul] at e1
     have e2 := congrArg (frobenius K p) he
@@ -173,8 +225,8 @@ lemma exists_scaling (W : ValuationSubring ℂ) (A D : ℂ[X]) (hD : D ≠ 0) :
     obtain ⟨B₀, hB₀⟩ := (mem_lifts _).mp this
     refine ⟨B₀, hB₀, fun hsB h0 => ?_⟩
     obtain ⟨n, -, hn⟩ := mem_coeffs_iff.mp hsB
-    have e1 := congrArg (fun q => coeff q n) hB₀
-    have e2 := congrArg (fun q => coeff q n) h0
+    have e1 := congrArg (fun q => AddMonoidAlgebra.coeff q n) hB₀
+    have e2 := congrArg (fun q => AddMonoidAlgebra.coeff q n) h0
     simp only [coeff_map, coeff_C_mul, ← hn, inv_mul_cancel₀ hs0, coeff_zero] at e1 e2
     have : B₀.coeff n = 1 := Subtype.ext e1
     rw [this, map_one] at e2

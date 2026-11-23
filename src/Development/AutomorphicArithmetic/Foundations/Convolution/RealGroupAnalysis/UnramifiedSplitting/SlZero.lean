@@ -1,6 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SplitAt
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.WeilRepresentation.HatSt
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SgLaws
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SplitAt
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.UnramifiedSplitting.SgLaws
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.WeilRepresentation.HatSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.Smooth
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -10,11 +53,9 @@ open scoped Classical
 
 namespace UpperTheory.ConvolutionTheory.R2.H
 
-local notation "Γv" => WithZero (Multiplicative ℤ)
+private def eV : WithZero (Multiplicative ℤ) := ↑(Multiplicative.ofAdd (-1 : ℤ))
 
-private def eV : Γv := ((Multiplicative.ofAdd (-1 : ℤ) : Multiplicative ℤ) : Γv)
-
-private lemma val_le_one_of (m : Γv) (h : eV * m ^ 2 ≤ 1) : m ≤ 1 := by
+private lemma val_le_one_of (m : WithZero (Multiplicative ℤ)) (h : eV * m ^ 2 ≤ 1) : m ≤ 1 := by
   rcases eq_or_ne m 0 with rfl | hm
   · exact zero_le'
   obtain ⟨k, rfl⟩ := WithZero.ne_zero_iff_exists.mp hm
@@ -30,7 +71,7 @@ private lemma val_le_one_of (m : Γv) (h : eV * m ^ 2 ≤ 1) : m ≤ 1 := by
     omega
   exact_mod_cast this
 
-private lemma val_le_e_of (m : Γv) (h : eV⁻¹ * m ^ 2 ≤ 1) : m ≤ eV := by
+private lemma val_le_e_of (m : WithZero (Multiplicative ℤ)) (h : eV⁻¹ * m ^ 2 ≤ 1) : m ≤ eV := by
   rcases eq_or_ne m 0 with rfl | hm
   · exact zero_le'
   obtain ⟨k, rfl⟩ := WithZero.ne_zero_iff_exists.mp hm
@@ -47,7 +88,7 @@ private lemma val_le_e_of (m : Γv) (h : eV⁻¹ * m ^ 2 ≤ 1) : m ≤ eV := by
   unfold eV
   exact_mod_cast this
 
-private lemma one_lt_eV : (1 : Γv) < eV⁻¹ := by
+private lemma one_lt_eV : (1 : WithZero (Multiplicative ℤ)) < eV⁻¹ := by
   have h : (1 : Multiplicative ℤ) < (Multiplicative.ofAdd (-1 : ℤ))⁻¹ := by
     apply Multiplicative.toAdd_lt.mp
     simp
@@ -61,7 +102,7 @@ private lemma cp_rt {K : Type} [Field K] [NumberField K] (v : P K) (x : K) :
     cp v (rt x) = algebraMap K (Kv v) x := rfl
 
 private lemma key {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    [IsTotallyReal F] [IsTotallyComplex E] (D : Dat F E) (W : Weil D) (v : P F) (hG : Gd D.δ v)
+    [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] (D : Dat F E) (W : Weil D) (v : P F) (hG : Gd D.δ v)
     (a : Kv v) (φ : S4 F) (hfix : ∀ c, IsInt c → W.Om (nU (sg v (a * c))) φ = φ) (u t : A F)
     (h : hat φ.1 ![0, 0, u, t] ≠ 0) :
     IsInt (a * (cp v u ^ 2 - algebraMap F (Kv v) D.δ * cp v t ^ 2)) := by
@@ -97,7 +138,7 @@ private lemma supp_le {F E : Type} [Field F] [NumberField F] [Field E] [NumberFi
 end UpperTheory.ConvolutionTheory.R2.H
 
 theorem UpperTheory.ConvolutionTheory.R2.H.slZero :
-    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] (D : Dat F E) (W : Weil D) (v : P F) (ϖ : (Kv v)ˣ), IsU ϖ → Gd D.δ v → Aniso D.δ v → ∀ φ : S4 F,
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] (D : Dat F E) (W : Weil D) (v : P F) (ϖ : (Kv v)ˣ), IsU ϖ → Gd D.δ v → Aniso D.δ v → ∀ φ : S4 F,
       (∀ b, IsInt b → W.Om (nU (sg v ((ϖ : Kv v) * b))) φ = φ) →
       (∀ c, IsInt c → W.Om (wW F * nU (sg v (((ϖ⁻¹ : (Kv v)ˣ) : Kv v) * c)) * (wW F)⁻¹) φ = φ) → Sl0 φ.1 := by
   intro F E _ _ _ _ _ _ _ D W v ϖ hU hG hA φ h1 h2 u t
@@ -166,7 +207,7 @@ theorem UpperTheory.ConvolutionTheory.R2.H.slZero :
     exact (le_max_left _ _).trans (val_le_one_of _ h3)
   have hb1 := hint u hne
   have hb2 := hint (u + sg v ((ϖ⁻¹ : (Kv v)ˣ) : Kv v)) (by rw [hshift]; exact hne)
-  rw [map_add, hcp] at hb2
+  rw [map_add (f := _), hcp] at hb2
   have hb3 : Valued.v (((ϖ⁻¹ : (Kv v)ˣ) : Kv v)) ≤ 1 := by
     have e5 : ((ϖ⁻¹ : (Kv v)ˣ) : Kv v) = (cp v u + ((ϖ⁻¹ : (Kv v)ˣ) : Kv v)) - cp v u := by ring
     rw [e5]

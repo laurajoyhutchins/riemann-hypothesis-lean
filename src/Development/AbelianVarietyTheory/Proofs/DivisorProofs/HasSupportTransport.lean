@@ -1,24 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTypeGroupBlockLift
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.GoodIdempotentFixesOfOnlySeriesOfLabelActs
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroInertia
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceLocalComponentExistsUniqueClassStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitPlaceGoodSignature
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSplitPlaceEqFixedTypePrimePlace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ConjugateSplitPlaceEqConjugatePlaceAndEmbedding
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLevelCharacterAtConjugateSplitPlace
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EquivContra
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqOrIsConjPlaceOfOverSplitPlace
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsRecTLocRecT
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.Langlands
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousRingEquivLocalFieldPreservesValuation
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportIrrGLBijectiveDegreeCharZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PlaceOverTransportRingIsoSymm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportKeepsProductsCosocles
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.IsRecTOfIsRec
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FixedNeBotOfEquiv
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousRingEquivLocalFieldPreservesValuationStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalLanglandsTransport
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsTheRecOfIsRecLit
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportKeepsProductsCosocles
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FixedNeBotOfEquiv
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportIrrGLBijectiveDegreeCharZeroStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TransportKeepsCuspidalTwistsCharacters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CoeffRingsHaveRootsOfUnity
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT NumberField IsDedekindDomain Polynomial GlobalTheory.HeightCounting GlobalTheory.RowTie GlobalTheory.SplitRead GlobalTheory.NPin GlobalTheory.PendOf
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 open GlobalTheory.LocLanglands GlobalTheory.WeilDeligne GlobalTheory.LocGL
@@ -48,9 +78,9 @@ section Fields
 variable {k k' : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [CharZero k]
   [Field k'] [ValuativeRel k'] [TopologicalSpace k'] [IsNonarchimedeanLocalField k'] [CharZero k']
 
-theorem hasSupport_transport (i : k ≃+* k') (hi : Continuous i) {x : IrrGL k} {x' : IrrGL k'} (hx : RepRel i x x')
-    {s : Multiset (IrrGL k)} (hs : HasSupport x.rep s) :
-    ∃ s' : Multiset (IrrGL k'), HasSupport x'.rep s' ∧ ∀ y' ∈ s', ∃ y ∈ s, RepRel i y y' := by
+theorem hasSupport_transport (i : k ≃+* k') (hi : Continuous i) {x : IrrGL (k := k)} {x' : IrrGL (k := k')} (hx : RepRel i x x')
+    {s : Multiset (IrrGL (k := k))} (hs : HasSupport x.rep s) :
+    ∃ s' : Multiset (IrrGL (k := k')), HasSupport x'.rep s' ∧ ∀ y' ∈ s', ∃ y ∈ s, RepRel i y y' := by
   have T1 := GlobalTheory.T.continuous_ringEquiv_localField_preserves_valuation k k' i hi
   have hi' : Continuous i.symm := T1.1
   have T2 := GlobalTheory.T.continuous_ringEquiv_localField_preserves_valuation k' k i.symm hi'
@@ -89,10 +119,10 @@ theorem hasSupport_transport (i : k ≃+* k') (hi : Continuous i) {x : IrrGL k} 
   exact ⟨xs a, Multiset.mem_map_of_mem _ (Finset.mem_univ a), hrel a⟩
 
 theorem goodCusp_transport (i : k ≃+* k') (hi : Continuous i)
-    (hfixT : ∀ (z : IrrGL k) (z' : IrrGL k'), RepRel i z z' →
+    (hfixT : ∀ (z : IrrGL (k := k)) (z' : IrrGL (k := k')), RepRel i z z' →
       GlobalTheory.PRep.fixed z.rep (GlobalTheory.SplitWeil.KOne k (Fin z.1)) ≠ ⊥ →
       GlobalTheory.PRep.fixed z'.rep (GlobalTheory.SplitWeil.KOne k' (Fin z'.1)) ≠ ⊥)
-    {y : IrrGL k} {y' : IrrGL k'} (hy : RepRel i y y')
+    {y : IrrGL (k := k)} {y' : IrrGL (k := k')} (hy : RepRel i y y')
     (h : UpperTheory.Zero.LLC.GoodCusp y) : UpperTheory.Zero.LLC.GoodCusp y' := by
   have hi' : Continuous i.symm := (GlobalTheory.T.continuous_ringEquiv_localField_preserves_valuation k k' i hi).1
   obtain ⟨T, hT, hTd⟩ := GlobalTheory.T.transportIrrGL_bijective_degree_charZero k k' i hi
@@ -115,7 +145,7 @@ end Fields
 
 theorem good_transport : ∀ (k k' : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] [CharZero k]
     [Field k'] [ValuativeRel k'] [TopologicalSpace k'] [IsNonarchimedeanLocalField k'] [CharZero k'] (i : k ≃+* k'),
-    Continuous i → ∀ (x : GlobalTheory.LocGL.IrrGL k) (x' : GlobalTheory.LocGL.IrrGL k'), GlobalTheory.LocLanglands.RepRel i x x' →
+    Continuous i → ∀ (x : GlobalTheory.LocGL.IrrGL (k := k)) (x' : GlobalTheory.LocGL.IrrGL (k := k')), GlobalTheory.LocLanglands.RepRel i x x' →
       UpperTheory.Zero.LLC.Good x → UpperTheory.Zero.LLC.Good x' := by
   intro k k' _ _ _ _ _ _ _ _ _ _ i hi x x' hx ⟨s, hs, hg⟩
   obtain ⟨s', hs', hrel⟩ := hasSupport_transport i hi hx hs

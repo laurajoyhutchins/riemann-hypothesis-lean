@@ -1,14 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsSymm
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsSymm
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFibreCoordsStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueSectionOfLocallyRegularStatement
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueUniformisingVectorVerticalTangentStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFibreCoordsStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.InvariantVectorFieldAbelianVarietyAlgebraicStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueSectionOfLocallyRegularStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.InvariantVectorFieldAbelianVarietyAlgebraicStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -50,7 +92,7 @@ private theorem valAt'_app_eq_valAt'_comp_moduli {Y Z : Scheme.{0}} (x : Sp ℂ 
     rw [Scheme.Hom.comp_appLE]
     rfl
   · have hh' : ¬ ⊤ ≤ (x ≫ φ) ⁻¹ᵁ U := hh
-    rw [dif_neg hh, dif_neg hh']
+    rw [dite_eq_right hh, dite_eq_right hh']
 
 private theorem valAt'_constFn' {Y : Scheme.{0}} (y : Sp ℂ ⟶ Y) (q : Y ⟶ Sp ℂ) (hq : y ≫ q = 𝟙 _) (U : Y.Opens)
     (h : ⊤ ≤ y ⁻¹ᵁ U) (c : ℂ) : valAt' y U (constFn q U c) = c := by
@@ -159,22 +201,22 @@ theorem val_res {D : R → ℂ} (h : LocDer q p m D W₀ d) (y : Sp ℂ ⟶ Y) {
   exact valAt'_resG_of_le y (fun _ hx => hW hx) hy1 (d W f)
 
 theorem ptDer_ptOf {D : R → ℂ} (h : LocDer q p m D W₀ d) (y : Sp ℂ ⟶ Y) (hy : ⊤ ≤ (y ≫ m) ⁻¹ᵁ W₀) :
-    PtDer (y ≫ m) (ptOf W₀ d y) where
-  add W _ f f' := by
-    rename_i hW
+    PtDer (y ≫ m) (ptOf W₀ d y) := by
+  constructor
+  · intro W hW f f'
     obtain ⟨φ, hφ⟩ := exists_ringHom_eq_valAt'' y (m ⁻¹ᵁ (W ⊓ W₀)) (top_le_preimage_preimage_inf y m hW hy)
     unfold ptOf
-    rw [map_add, h.add _ inf_le_right]
-    simp only [hφ, map_add]
-  mul W hW f f' := by
+    rw [map_add (f := _), h.add _ inf_le_right]
+    simp only [hφ, map_add (f := _)]
+  · intro W hW f f'
     have hh : ⊤ ≤ y ⁻¹ᵁ m ⁻¹ᵁ (W ⊓ W₀) := top_le_preimage_preimage_inf y m hW hy
     obtain ⟨φ, hφ⟩ := exists_ringHom_eq_valAt'' y (m ⁻¹ᵁ (W ⊓ W₀)) hh
     have e1 : ∀ g : Γ(X, W), valAt' (y ≫ m) W g = φ ((m.app (W ⊓ W₀)).hom (resG X inf_le_left g)) := fun g => by
       rw [← hφ, valAt'_app_eq_valAt'_comp_moduli, valAt'_resG_of_le (y ≫ m) inf_le_left hh]
     unfold ptOf
     rw [e1 f, e1 f', map_mul, h.mul _ inf_le_right]
-    simp only [hφ, map_add, map_mul]
-  res W W' hle hW' f := by
+    simp only [hφ, map_add (f := _), map_mul]
+  · intro W W' hle hW' f
     unfold ptOf
     rw [resG_resG, ← val_res h y (inf_le_inf_right W₀ hle) inf_le_right (top_le_preimage_preimage_inf y m hW' hy)
       (resG X inf_le_left f), resG_resG]
@@ -208,6 +250,7 @@ theorem locDer_regular_coeff : ∀ (P₀ : Out.PolAV (Sp ℂ)) (u : HolUnif P₀
   have lin : ∀ (L : (Fin P₀.g → ℂ) →L[ℂ] ℂ) (v : Fin P₀.g → ℂ), L v = ∑ i, v i * L (Pi.single i 1) := by
     intro L v
     conv_lhs => rw [← Finset.univ_sum_single v]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     have hs : (Pi.single i (v i) : Fin P₀.g → ℂ) = v i • (Pi.single i (1 : ℂ) : Fin P₀.g → ℂ) := by

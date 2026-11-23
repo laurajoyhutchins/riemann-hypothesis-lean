@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementR
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.GramFormula
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -28,42 +69,17 @@ def linSub {n m : Type} [Fintype m] (A : n → m → K) (f : MvPowerSeries n K) 
   MvPowerSeries.subst
     (fun i => (∑ x, MvPowerSeries.C (A i x) * MvPowerSeries.X x : MvPowerSeries m K)) f
 
-def phIso {O : Type} [CommRing O] (τ : O →+* K) (l linv ph : PowerSeries K) {m ν : Type} [Fintype m]
-    [Fintype ν] (δ : m → ν → O) : MvPowerSeries ν K :=
-  ∑ i, PowerSeries.subst
-    (flin l linv (fun a => τ (δ i a)) (fun a => (MvPowerSeries.X a : MvPowerSeries ν K))) ph
-
-def pairMat {ι : Type} [DecidableEq ι] (I : K) (i y : Bool × ι) : K :=
-  if i.2 = y.2 then (if i.1 = false then 1 else if y.1 = false then I else -I) else 0
-
 end DefsS
 
 def ShapeOrth : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l linv ph : PowerSeries K) (d : ℕ),
-    IsLogPair l linv → IsOneUnit (unitBall K) (PowerSeries.derivative K l) →
+    IsLogPair l linv → IsOneUnit (unitBall K) (PowerSeries.derivative (R := K) l) →
     PowerSeries.constantCoeff ph = 0 → ShapeAt l linv ph d →
     ∀ (n : Type) [Fintype n] (c : n → K), (∀ i, ‖c i‖ ≤ 1) →
     ∀ G : MvPowerSeries n K, IntMv (unitBall K) G →
     ∃ J : MvPowerSeries n K, JetsIntegral J ∧
       toZ linv (mvExp (-(phSum c ph)) * G) =
         mvExp (-(MvPowerSeries.C (jet l ph 2 / 2) * sqSum c)) * J
-
-def IntAtD : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l linv ph : PowerSeries K) (d : ℕ),
-    Frame (unitBall K) l linv ph → IsOneUnit (unitBall K) (PowerSeries.derivative K l) →
-    F1 (unitBall K) l linv ph → ShapeAt l linv ph d →
-    ∀ (O : Type) [CommRing O] [StarRing O] (τ : O →+* K),
-    (∀ α, EndInt (unitBall K) l linv (τ α)) →
-    (∀ z : O, star z = z → IsBinomScalar (unitBall K) (τ z)) →
-    (∀ α : O, PhNormAt (unitBall K) l linv ph (τ α) (τ (star α))) →
-    (∀ α : O, AdjAt (unitBall K) l linv ph (τ α) (τ (star α))) →
-    ∀ (n m : Type) [Fintype n] [DecidableEq n] [Fintype m] (w : n → O), (∀ j, star (w j) = w j) →
-    ∀ δ : m → Fin 4 × n → O,
-      (∀ a b, ∑ i, star (δ i a) * δ i b = if a = b then w a.2 else 0) →
-    ∀ (Th : MvPowerSeries n K) (G : MvPowerSeries (Fin 4 × n) K), IntMv (unitBall K) G →
-      tens4 Th = toZ linv (mvExp (-(phIso τ l linv ph δ)) * G) →
-    ∃ J : MvPowerSeries n K, JetsIntegral J ∧
-      Th = mvExp (-(MvPowerSeries.C (jet l ph 2 / 2) * sqSum (fun j => τ (w j)))) * J
 
 def EigenSplit : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] (ι T X : Type) [DecidableEq T] (ty : ι → T) (pr : T → T)
@@ -83,10 +99,5 @@ def ShapeCong : Prop :=
     ∀ J : MvPowerSeries n K, JetsIntegral J →
     ∃ sg : MvPowerSeries m K, JetsIntegral sg ∧
       linSub A (mvExp (-(MvPowerSeries.C (S0 / 2) * sqSum c)) * J) = mvExp ((-S0) • be) * sg
-
-def PairedSquares : Prop :=
-  ∀ (K : Type) [Field K] (ι : Type) [Fintype ι] [DecidableEq ι] (I : K), I ^ 2 = -1 →
-    linSub (pairMat (ι := ι) I) (sqSum (fun _ => (1 : K))) =
-      MvPowerSeries.C 2 * ∑ x : ι, MvPowerSeries.C 2 * MvPowerSeries.X (false, x) * MvPowerSeries.X (true, x)
 
 end Formalism.L2.Th1.G

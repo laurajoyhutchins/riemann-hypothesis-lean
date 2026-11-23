@@ -1,6 +1,48 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.LatDefs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SplittingFieldLattices.GrSplit
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LatticeIdealIsPrime
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.LatDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open DividedPowers CrystallineSemistableComparison.Pb
 
@@ -23,36 +65,7 @@ theorem dpE_succ_mem_IB (i : ℕ) : Lat.dpE f ξ l M (i + 1) ∈ Lat.IB f ξ := 
 theorem dpE_zero_eq : Lat.dpE f ξ l M 0 = 1 := by simp [Lat.dpE]
 
 theorem exists_rep_B (x : B) (hx : x ∈ Lat.sub f ξ l M) : ∃ a : W, x - f a ∈ Lat.IB f ξ := by
-  unfold Lat.sub at hx
-  induction hx using Subring.closure_induction with
-  | mem x hx =>
-    rcases hx with ⟨w, rfl⟩ | ⟨i, rfl⟩
-    · exact ⟨w, by simp⟩
-    · cases i with
-      | zero => exact ⟨1, by simp [dpE_zero_eq]⟩
-      | succ i => exact ⟨0, by simpa using dpE_succ_mem_IB f ξ l M i⟩
-  | zero => exact ⟨0, by simp⟩
-  | one => exact ⟨1, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨a, ha⟩ := hx
-    obtain ⟨b, hb⟩ := hy
-    refine ⟨a + b, ?_⟩
-    have h := Ideal.add_mem _ ha hb
-    have e : x + y - f (a + b) = x - f a + (y - f b) := by rw [map_add]; ring
-    rw [e]; exact h
-  | neg x _ hx =>
-    obtain ⟨a, ha⟩ := hx
-    refine ⟨-a, ?_⟩
-    have h := Ideal.neg_mem_iff _ |>.2 ha
-    have e : -x - f (-a) = -(x - f a) := by rw [map_neg]; ring
-    rw [e]; exact h
-  | mul x y _ _ hx hy =>
-    obtain ⟨a, ha⟩ := hx
-    obtain ⟨b, hb⟩ := hy
-    refine ⟨a * b, ?_⟩
-    have h := Ideal.add_mem _ (Ideal.mul_mem_right y _ ha) (Ideal.mul_mem_left _ (f a) hb)
-    have e : x * y - f (a * b) = (x - f a) * y + f a * (y - f b) := by rw [map_mul]; ring
-    rw [e]; exact h
+  apply GlobalTheory.CompanionTheory.LatPrime.exists_sub_mem_IB <;> assumption
 
 theorem exists_rep (x : Lat.A f ξ l M) : ∃ a : W, Lat.ι f ξ l M x - f a ∈ Lat.IB f ξ :=
   exists_rep_B f ξ l M _ x.2

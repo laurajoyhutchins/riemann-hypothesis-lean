@@ -1,7 +1,52 @@
+module
+
 import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.DenomBound
-import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.DenomBound
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+public import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +85,7 @@ theorem local_den (v : HeightOneSpectrum (𝓞 F)) (x : v.adicCompletion F) :
     · refine le_max_of_le_right (le_of_eq ?_)
       apply NNReal.eq
       rw [coe_nnnorm, FinitePlace.norm_def, he, WithZeroMulInt.toNNReal_neg_apply _ WithZero.exp_ne_zero]
-      simp [WithZero.exp]
+      simp only [WithZero.log_exp, zpow_natCast, Nat.cast_pow, NNReal.coe_pow]
     · rw [HeightOneSpectrum.mem_adicCompletionIntegers, map_mul, he, Nat.cast_pow, map_pow]
       calc _ ≤ (WithZero.exp (-1 : ℤ)) ^ k * WithZero.exp (k : ℤ) := by
             gcongr; exact valued_absNorm_le v
@@ -193,9 +238,41 @@ theorem denomBound (D : D7) (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F]
   classical
   obtain ⟨A, hA0, hA⟩ := exists_nat_mem D.host.AA (Formalism.L2.Pj.AA_ne_zero Formalism.IndefR.Fin.factPrincipalDatum D)
   set b := Module.finBasis D.host.F D.host.E with hb
+  have hspan : Submodule.span D.host.E (V.L0 : Set V.V) = ⊤ := by
+    classical
+    let W := Submodule.span D.host.E (V.L0 : Set V.V)
+    change W = ⊤
+    by_contra h
+    let e : V.V ≃ₗ⋆[D.host.E] V.V :=
+      V.frame.equivFun.trans ((starLinearEquiv D.host.E).trans V.frame.equivFun.symm)
+    let g : V.V →ₗ[D.host.E] Module.Dual D.host.E W :=
+      (LinearMap.domRestrict' W).comp (V.hT.comp e.toLinearMap)
+    have hdim : Module.finrank D.host.E (Module.Dual D.host.E W) <
+        Module.finrank D.host.E V.V := by
+      rw [Subspace.dual_finrank_eq]
+      exact Submodule.finrank_lt h
+    obtain ⟨x, hx, hx₀⟩ :=
+      Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+    have hsmul (a : D.host.E) : a • e x ∈ V.L0 := by
+      rw [← V.baseLattice_isUnimodular]
+      simp only [Formalism.HermitianLatticesTheory.dual, Formalism.E.hdual,
+        Submodule.mem_iInf, Submodule.mem_comap, LinearMap.restrictScalars_apply]
+      intro y hy
+      have hxy : V.hT (e x) y = 0 :=
+        congrArg (fun f : Module.Dual D.host.E W => f ⟨y, Submodule.subset_span hy⟩)
+          (LinearMap.mem_ker.mp hx)
+      have hyx : V.hT y (e x) = 0 := V.herm.eq_iff.mp hxy
+      simp [map_smul, hyx]
+    let i : D.host.E →ₗ[𝓞 D.host.E] V.L0 :=
+      ((LinearMap.toSpanSingleton D.host.E _ (e x)).restrictScalars (𝓞 D.host.E)).codRestrict V.L0 hsmul
+    let : Module.Finite (𝓞 D.host.E) V.L0 := Module.Finite.iff_fg.mpr V.standardTuple_isLattice.fg
+    let : Module.Finite (𝓞 D.host.E) D.host.E := Module.Finite.of_injective i fun a b hab =>
+      smul_left_injective D.host.E (fun hzero => hx₀ (e.map_eq_zero_iff.mp hzero)) (congrArg Subtype.val hab)
+    exact RingOfIntegers.not_isField D.host.E
+      (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 D.host.E) D.host.E) (Field.toIsField D.host.E))
   obtain ⟨B, hB0, hB⟩ : ∃ B : ℕ, 0 < B ∧ ∀ j k, ((B : D.host.E) * b k) • V.frame j ∈ V.L0 := by
     choose m hm0 hm using fun p : Fin V.rank × Fin (Module.finrank D.host.F D.host.E) =>
-      exists_nat_smul_mem V.L0 V.standardTuple_isLattice.span_eq_top (b p.2 • V.frame p.1)
+      exists_nat_smul_mem V.L0 hspan (b p.2 • V.frame p.1)
     refine ⟨∏ p, m p, Finset.prod_pos fun p _ => hm0 p, fun j k => ?_⟩
     rw [← Finset.prod_erase_mul _ _ (Finset.mem_univ (j, k)), Nat.cast_mul, mul_assoc, mul_smul, mul_smul,
       Nat.cast_smul_eq_nsmul]

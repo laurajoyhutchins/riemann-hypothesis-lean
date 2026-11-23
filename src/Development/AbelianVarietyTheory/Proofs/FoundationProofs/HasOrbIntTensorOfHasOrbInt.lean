@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsAuxiliaryPlaceNotMemFinset
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsAuxiliaryPlaceNotMemFinset
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsRestrictedProdFinAwayIffIsProdMeasureFinAway
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LintegralFintypeProdEqProd
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Set Filter GlobalTheory.AutomorphicL2Unitary GlobalTheory.RestrMeas
 open scoped ENNReal NNReal Topology Pointwise
@@ -50,7 +96,7 @@ theorem hasQuotInt_indicator_mul [IsFiniteMeasureOnCompacts dh] {K : Subgroup H}
       (hT.isClosedEmbedding_subtypeVal.isCompact_preimage hc).measure_ne_top⟩
   have h := (weil_integral (dt := dt) (dh := dh) hT (f := (K : Set H).indicator fun _ => (dt.real (K.subgroupOf T) : ℂ)⁻¹)
     ((integrable_indicator_iff ho.measurableSet).2 (integrableOn_const hc.measure_ne_top))).2
-  convert h using 1
+  convert (preTransparency := .reducible) h using 1
   · funext x
     by_cases hx : x ∈ (T : Set H) * (K : Set H)
     · obtain ⟨s, hs, k, hk, rfl⟩ := hx
@@ -100,10 +146,10 @@ theorem HasQuotInt.mul_of_measurePreserving (hT : IsClosed (T : Set H)) (hT₁ :
   · rw [← integral_prod_mul, ← mp.map_eq, integral_map mp.aemeasurable (mp.map_eq ▸ hi.aestronglyMeasurable)]
     rfl
 
+
 omit [MeasurableSpace H₁] [IsTopologicalGroup H₁] [SecondCountableTopology H₁] [BorelSpace H₁] [LocallyCompactSpace H₁]
   [T2Space H₁] [MeasurableSpace H₂] [IsTopologicalGroup H₂] [SecondCountableTopology H₂] [BorelSpace H₂]
   [LocallyCompactSpace H₂] [T2Space H₂] in
-
 def prodSub {U : Subgroup (H₁ × H₂)} (h : ∀ x, x ∈ U ↔ x.1 ∈ T₁ ∧ x.2 ∈ T₂) : T₁ × T₂ ≃ₜ* U where
   toFun t := ⟨(t.1, t.2), (h _).2 ⟨t.1.2, t.2.2⟩⟩
   invFun t := (⟨t.1.1, ((h _).1 t.2).1⟩, ⟨t.1.2, ((h _).1 t.2).2⟩)
@@ -126,10 +172,10 @@ theorem HasQuotInt.prod (hT₁ : IsClosed (T₁ : Set H₁)) (hT₂ : IsClosed (
     (MeasurePreserving.id _)
     ⟨(map_continuous _).measurable, (prodSub h).toHomeomorph.toMeasurableEquiv.map_symm_map⟩ i₁ i₂ h₁ h₂
 
+
 omit [MeasurableSpace H₁] [IsTopologicalGroup H₁] [SecondCountableTopology H₁] [BorelSpace H₁] [LocallyCompactSpace H₁]
   [T2Space H₁] [MeasurableSpace H₂] [IsTopologicalGroup H₂] [SecondCountableTopology H₂] [BorelSpace H₂]
   [LocallyCompactSpace H₂] [T2Space H₂] [TopologicalSpace H₁] [TopologicalSpace H₂] in
-
 theorem mem_cent_prod (γ₁ : H₁) (γ₂ : H₂) (x : H₁ × H₂) : x ∈ cent (γ₁, γ₂) ↔ x.1 ∈ cent γ₁ ∧ x.2 ∈ cent γ₂ := by
   simp only [mem_cent, Prod.ext_iff, Prod.fst_mul, Prod.snd_mul]
 
@@ -237,7 +283,7 @@ section Adelic
 open GlobalTheory.AdelicU NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n : ℕ}
-  {J : Matrix (Fin n) (Fin n) E} {L : Submodule (𝓞 E) (Fin n → E)} [Submodule.IsLattice E L]
+  {J : Matrix (Fin n) (Fin n) E} {L : Submodule (𝓞 E) (Fin n → E)} [Submodule.IsFullLattice E L]
   {μa : ∀ w, Measure (GArch σ J w)} {μf : ∀ v, Measure (GLoc σ J v)} {μ : Measure (GAd σ J)} {γ : GAd σ J}
   {dta : ∀ w, Measure (cent (projArch σ J w γ))} {dtf : ∀ v, Measure (cent (proj σ J v γ))} {dt : Measure (cent γ)}
   {fa : ∀ w, GArch σ J w → ℂ} {ff : ∀ v, GLoc σ J v → ℂ}
@@ -289,11 +335,6 @@ theorem hasOrbInt_tensor (hμ : IsRestrictedProd σ J L μa μf μ) (hdt : IsCen
   exact ⟨IsHaarProd.isMulRightInvariant hdt (restrGroup_cent L γ), ha', hf',
     hasOrbInt_tensor_of_hasOrbInt hμ hdt hff.2 hK ha' hf'⟩
 
-omit [Submodule.IsLattice E L] in
-
-example (v : HeightOneSpectrum (𝓞 F)) : {x | x⁻¹ * proj σ J v 1 * x ∈ stabLoc σ J L v} =
-    (cent (proj σ J v 1) : Set (GLoc σ J v)) * (stabLoc σ J L v : Set (GLoc σ J v)) :=
-  Set.ext fun x => iff_of_true (by simp) ⟨x, mem_cent.2 (by simp), 1, one_mem _, mul_one x⟩
 
 end Adelic
 

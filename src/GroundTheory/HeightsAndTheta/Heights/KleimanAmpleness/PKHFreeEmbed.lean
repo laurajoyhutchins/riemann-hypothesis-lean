@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeEmbedSt
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeEmbedSt
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -22,7 +67,7 @@ theorem cellRes_monoFrac {J I : ∀ k, Finset (ι k)} (hJI : ∀ k, J k ⊆ I k)
     KH.cellRes S (MRingOver S ι ⧸ (⊥ : Ideal (MRingOver S ι))) J I (monoFrac S J a) = monoFrac S I a := by
   have hI : ∀ k, negSet a k ⊆ I k := fun k => (hJ k).trans (hJI k)
   unfold monoFrac
-  rw [dif_pos hJ, dif_pos hI, cellRes_mk (cellMon_mono hJI)]
+  rw [dite_eq_left hJ, dite_eq_left hI, cellRes_mk (cellMon_mono hJI)]
 
 theorem blockSum_add_negExp (a : (Σ k, ι k) → ℤ) (k : K) :
     blockSum a k + ((∑ i, negExp a ⟨k, i⟩ : ℕ) : ℤ) = ((∑ i, posExp a ⟨k, i⟩ : ℕ) : ℤ) := by
@@ -53,16 +98,16 @@ theorem update_erase_subset (I : ∀ k, Finset (ι k)) (k : K) (i : ι k) (l : K
   · subst hl; rw [Function.update_self]; exact Finset.erase_subset _ _
   · rw [Function.update_of_ne hl]
 
-open Classical in
 
+open Classical in
 theorem embed_apply (a : (Σ k, ι k) → ℤ) (n : ℕ) (f : CombC S (negSet a) n) (I : KH.Cell K ι n) :
     embed S a n f I = if h : ∀ k, negSet a k ⊆ I.1 k then f ⟨I, h⟩ • monoFrac S I.1 a else 0 := by
   unfold embed
   rw [LinearMap.pi_apply]
   split_ifs <;> rfl
 
-open Classical in
 
+open Classical in
 theorem cechD_apply (n : ℕ) (x : KH.CechC S ι (MRingOver S ι ⧸ (⊥ : Ideal (MRingOver S ι))) n)
     (I : KH.Cell K ι (n + 1)) :
     KH.cechD S ι (MRingOver S ι ⧸ (⊥ : Ideal (MRingOver S ι))) n x I = ∑ k, ∑ i ∈ I.1 k,
@@ -78,8 +123,8 @@ theorem cechD_apply (n : ℕ) (x : KH.CechC S ι (MRingOver S ι ⧸ (⊥ : Idea
   refine Finset.sum_congr rfl fun i _ => ?_
   split_ifs <;> rfl
 
-open Classical in
 
+open Classical in
 theorem combD_apply (J : ∀ k, Finset (ι k)) (n : ℕ) (f : CombC S J n) (I : CombCell ι J (n + 1)) :
     combD S J n f I = ∑ k, ∑ i ∈ I.1.1 k,
       if h : ((∀ l, (Function.update I.1.1 k ((I.1.1 k).erase i) l).Nonempty) ∧
@@ -101,7 +146,7 @@ theorem embed_comm (a : (Σ k, ι k) → ℤ) (n : ℕ) (f : CombC S (negSet a) 
   funext I
   rw [cechD_apply, embed_apply]
   by_cases hI : ∀ k, negSet a k ⊆ I.1 k
-  · rw [dif_pos hI]
+  · rw [dite_eq_left hI]
     erw [combD_apply]
     rw [Finset.sum_smul]
     refine Finset.sum_congr rfl fun k _ => ?_
@@ -109,19 +154,19 @@ theorem embed_comm (a : (Σ k, ι k) → ℤ) (n : ℕ) (f : CombC S (negSet a) 
     refine Finset.sum_congr rfl fun i _ => ?_
     by_cases hc : (∀ l, (Function.update I.1 k ((I.1 k).erase i) l).Nonempty) ∧
         ∑ l, ((Function.update I.1 k ((I.1 k).erase i) l).card - 1) = n
-    · rw [dif_pos hc]
+    · rw [dite_eq_left hc]
       erw [embed_apply]
       by_cases hJ : ∀ l, negSet a l ⊆ Function.update I.1 k ((I.1 k).erase i) l
-      · rw [dif_pos hJ, dif_pos ⟨hc, hJ⟩, LinearMap.map_smul_of_tower,
+      · rw [dite_eq_left hJ, dite_eq_left ⟨hc, hJ⟩, LinearMap.map_smul_of_tower,
           cellRes_monoFrac (update_erase_subset I.1 k i) a hJ, smul_assoc]
-      · rw [dif_neg hJ, dif_neg (fun h => hJ h.2), map_zero]
+      · rw [dite_eq_right hJ, dite_eq_right (fun h => hJ h.2), map_zero]
         simp
-    · rw [dif_neg hc, dif_neg (fun h => hc h.1), zero_smul]
-  · rw [dif_neg hI]
+    · rw [dite_eq_right hc, dite_eq_right (fun h => hc h.1), zero_smul]
+  · rw [dite_eq_right hI]
     refine Finset.sum_eq_zero fun k _ => Finset.sum_eq_zero fun i _ => ?_
     split_ifs with hc
     · erw [embed_apply]
-      rw [dif_neg (fun hJ => hI fun l => (hJ l).trans (update_erase_subset I.1 k i l)), map_zero]
+      rw [dite_eq_right (fun hJ => hI fun l => (hJ l).trans (update_erase_subset I.1 k i l)), map_zero]
       simp
     · rfl
 
@@ -135,7 +180,7 @@ theorem embed_mem (a : (Σ k, ι k) → ℤ) (c d : K → ℤ) (h : blockSum a =
   split_ifs with hI
   · refine Submodule.smul_mem _ _ ?_
     unfold monoFrac
-    rw [dif_pos hI]
+    rw [dite_eq_left hI]
     refine Submodule.subset_span ⟨_, _, fun k => ∑ i, negExp a ⟨k, i⟩,
       isMultiHomog_monomial _ _ _ fun _ => rfl, ?_, rfl⟩
     refine mk_posExp_mem a _ fun k => ?_
@@ -162,7 +207,7 @@ theorem monoFrac_of_nonneg (a : (Σ k, ι k) → ℤ) (ha : ∀ p, 0 ≤ a p) :
     simpa using hk
   · have hI : ∀ k, negSet a k ⊆ I k := fun k => by rw [hneg k]; exact Finset.empty_subset _
     unfold monoFrac
-    rw [dif_pos hI]
+    rw [dite_eq_left hI]
     congr 1
     exact Subtype.ext (by simp [hnegExp])
 

@@ -1,9 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.EnInParamKProd
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.SubstitutionOfVariables
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.EnInParamKProd
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.SubstitutionOfVariables
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsPlaceCofactorValuationLowerBound
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.FrobeniusOrbits GlobalTheory.TwU Classical
 
@@ -18,7 +58,7 @@ private theorem lowZero_mul {ι K : Type} [Field K] {a b : ℕ} {f g : MvPowerSe
   rw [MvPowerSeries.coeff_mul]
   refine Finset.sum_eq_zero fun x hx => ?_
   have hx' : x.1 + x.2 = m := Finset.HasAntidiagonal.mem_antidiagonal.mp hx
-  have hdeg : x.1.degree + x.2.degree = m.degree := by rw [← hx', map_add]
+  have hdeg : x.1.degree + x.2.degree = m.degree := by rw [← hx', map_add (f := _)]
   by_cases h : x.1.degree < a
   · rw [hf _ h, zero_mul]
   · rw [hg _ (by omega), mul_zero]
@@ -87,18 +127,21 @@ theorem low_coeff_of_param (p : ℕ) [Fact p.Prime] (ι : Type) [Fintype ι] (K1
   have hWlow : ∀ k : ι →₀ ℕ, k.degree ≤ d → MvPowerSeries.coeff k W = 0 := by
     intro k hk
     have hkS := hS k hk
+
     rw [hWdef, map_sub, map_sum]
     simp only [MvPowerSeries.coeff_smul, MvPowerSeries.coeff_monomial, smul_eq_mul, mul_ite, mul_one, mul_zero]
     rw [Finset.sum_ite_eq S k]
     simp [hkS, hc]
   have hV : MvPowerSeries.subst (Pf.en_Ec p K1) W =
       U - ∑ n ∈ S, c n • MvPowerSeries.map (algebraMap (K0 p) K1) (Un n) := by
+
     rw [← MvPowerSeries.coe_substAlgHom hs, hWdef, map_sub, map_sum, MvPowerSeries.coe_substAlgHom hs,
-      Pf.en_Ec_inParamK]
+    Pf.en_Ec_inParamK]
     congr 1
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [← MvPowerSeries.coe_substAlgHom hs, map_smul, MvPowerSeries.coe_substAlgHom hs, hmon n]
   have h0 := coeff_subst_low (Pf.en_Ec p K1) hs (Pf.en_Ec_zero p K1) W d hWlow m hm
+
   rw [hV, map_sub, map_sum, sub_eq_zero] at h0
   rw [h0]
   refine Finset.sum_congr rfl fun n _ => ?_

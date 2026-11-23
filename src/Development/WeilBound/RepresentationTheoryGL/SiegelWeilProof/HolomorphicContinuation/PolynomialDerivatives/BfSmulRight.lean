@@ -1,4 +1,59 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.CoreSt
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Star.BigOperators
+public import Mathlib.Basic.Complex.BigOperators
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +86,7 @@ theorem gf_add_left (p p' q : MvPolynomial τ ℂ) : gf w (p + p') q = gf w p q 
     gf_eq w (p.support ∪ p'.support ∪ q.support) ((Finset.subset_union_right).trans Finset.subset_union_left)
       Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun s _ => ?_
-  simp [coeff_add, star_add]; ring
+  simp [MvPolynomial.coeff_add, star_add]; ring
 
 theorem gf_add_right (p q q' : MvPolynomial τ ℂ) : gf w p (q + q') = gf w p q + gf w p q' := by
   classical
@@ -42,21 +97,21 @@ theorem gf_add_right (p q q' : MvPolynomial τ ℂ) : gf w p (q + q') = gf w p q
     gf_eq w (p.support ∪ (q.support ∪ q'.support)) Finset.subset_union_left
       ((Finset.subset_union_right).trans Finset.subset_union_right), ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun s _ => ?_
-  simp [coeff_add]; ring
+  simp [MvPolynomial.coeff_add]; ring
 
 theorem gf_smul_left (r : ℂ) (p q : MvPolynomial τ ℂ) : gf w (r • p) q = star r * gf w p q := by
   classical
   rw [gf_eq w (p.support ∪ q.support) ((MvPolynomial.support_smul).trans Finset.subset_union_left) Finset.subset_union_right,
     gf_eq w (p.support ∪ q.support) Finset.subset_union_left Finset.subset_union_right, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
-  simp [coeff_smul, star_mul]; ring
+  simp [MvPolynomial.coeff_smul, star_mul]; ring
 
 theorem gf_smul_right (r : ℂ) (p q : MvPolynomial τ ℂ) : gf w p (r • q) = r * gf w p q := by
   classical
   rw [gf_eq w (p.support ∪ q.support) Finset.subset_union_left ((MvPolynomial.support_smul).trans Finset.subset_union_right),
     gf_eq w (p.support ∪ q.support) Finset.subset_union_left Finset.subset_union_right, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
-  simp [coeff_smul]; ring
+  simp [MvPolynomial.coeff_smul]; ring
 
 theorem gf_neg_left (p q : MvPolynomial τ ℂ) : gf w (-p) q = -gf w p q := by
   rw [show -p = (-1 : ℂ) • p by simp, gf_smul_left]; simp
@@ -126,7 +181,7 @@ theorem gf_X_mul (k : τ) (p q : MvPolynomial τ ℂ) : gf w (X k * p) q = κ * 
         simp [this]
       · rw [if_neg h']; ring
   · rw [mul_add, gf_add_left, gf_add_left, h1, h2, mul_add]
-  · rw [gf_add_right, map_add, gf_add_right, h1, h2, mul_add]
+  · rw [gf_add_right, map_add (f := _), gf_add_right, h1, h2, mul_add]
 
 theorem gf_pderiv (k : τ) (p q : MvPolynomial τ ℂ) : κ * gf w (pderiv k p) q = gf w p (X k * q) := by
   revert p q
@@ -137,7 +192,7 @@ theorem gf_pderiv (k : τ) (p q : MvPolynomial τ ℂ) : κ * gf w (pderiv k p) 
       rw [if_pos rfl, if_pos (add_tsub_cancel_left _ _), hw, add_tsub_cancel_left]
       simp only [Finsupp.add_apply, Finsupp.single_eq_same, star_mul]
       push_cast
-      simp only [Complex.star_def, Complex.conj_natCast, map_add, map_one]
+      simp only [Complex.star_def, Complex.conj_natCast, map_add (f := _), map_one]
       ring
     · rw [if_neg h]
       by_cases h' : s - Finsupp.single k 1 = t
@@ -148,7 +203,7 @@ theorem gf_pderiv (k : τ) (p q : MvPolynomial τ ℂ) : κ * gf w (pderiv k p) 
           rw [← h', add_tsub_cancel_of_le (Finsupp.single_le_iff.mpr (Nat.one_le_iff_ne_zero.mpr h0))]
         simp [this]
       · rw [if_neg h']; ring
-  · rw [map_add, gf_add_left, gf_add_left, ← h1, ← h2, mul_add]
+  · rw [map_add (f := _), gf_add_left, gf_add_left, ← h1, ← h2, mul_add]
   · rw [gf_add_right, mul_add, mul_add, gf_add_right, h1, h2]
 
 theorem gf_adj (k l : τ) (p q : MvPolynomial τ ℂ) : gf w (X k * pderiv l p) q = gf w p (X l * pderiv k q) := by
@@ -242,7 +297,7 @@ theorem bf_add_left (w : (τ →₀ ℕ) → ℂ) (p p' q : MvPolynomial τ ℂ)
     bf_eq w (p.support ∪ p'.support ∪ q.support) ((Finset.subset_union_right).trans Finset.subset_union_left)
       Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun s _ => ?_
-  simp [coeff_add]; ring
+  simp [MvPolynomial.coeff_add]; ring
 
 theorem bf_add_right (w : (τ →₀ ℕ) → ℂ) (p q q' : MvPolynomial τ ℂ) : bf w p (q + q') = bf w p q + bf w p q' := by
   classical
@@ -253,7 +308,7 @@ theorem bf_add_right (w : (τ →₀ ℕ) → ℂ) (p q q' : MvPolynomial τ ℂ
     bf_eq w (p.support ∪ (q.support ∪ q'.support)) Finset.subset_union_left
       ((Finset.subset_union_right).trans Finset.subset_union_right), ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun s _ => ?_
-  simp [coeff_add]; ring
+  simp [MvPolynomial.coeff_add]; ring
 
 theorem bf_monomial (w : (τ →₀ ℕ) → ℂ) (s t : τ →₀ ℕ) (a b : ℂ) :
     bf w (monomial s a) (monomial t b) = if s = t then a * b * w s else 0 := by
@@ -283,7 +338,7 @@ theorem bf_X_mul {w : (τ →₀ ℕ) → ℂ} (κ : ℂ) (hw : ∀ s k, w (Fins
         simp [this]
       · rw [if_neg h']; ring
   · rw [mul_add, bf_add_left, bf_add_left, h1, h2, mul_add]
-  · rw [bf_add_right, map_add, bf_add_right, h1, h2, mul_add]
+  · rw [bf_add_right, map_add (f := _), bf_add_right, h1, h2, mul_add]
 
 theorem bf_pderiv {w : (τ →₀ ℕ) → ℂ} (κ : ℂ) (hw : ∀ s k, w (Finsupp.single k 1 + s) = κ * ((s k : ℂ) + 1) * w s)
     (k : τ) (p q : MvPolynomial τ ℂ) : κ * bf w (pderiv k p) q = bf w p (X k * q) := by
@@ -304,7 +359,7 @@ theorem bf_pderiv {w : (τ →₀ ℕ) → ℂ} (κ : ℂ) (hw : ∀ s k, w (Fin
           rw [← h', add_tsub_cancel_of_le (Finsupp.single_le_iff.mpr (Nat.one_le_iff_ne_zero.mpr h0))]
         simp [this]
       · rw [if_neg h']; ring
-  · rw [map_add, bf_add_left, bf_add_left, ← h1, ← h2, mul_add]
+  · rw [map_add (f := _), bf_add_left, bf_add_left, ← h1, ← h2, mul_add]
   · rw [bf_add_right, mul_add, mul_add, bf_add_right, h1, h2]
 
 theorem bf_sum_left (w : (τ →₀ ℕ) → ℂ) {ι : Type} (I : Finset ι) (f : ι → MvPolynomial τ ℂ) (q : MvPolynomial τ ℂ) :

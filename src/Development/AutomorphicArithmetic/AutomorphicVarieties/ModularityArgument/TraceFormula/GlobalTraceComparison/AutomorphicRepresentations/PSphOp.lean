@@ -1,6 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.IsCompactMaximalPairPlace
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.SlotBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.FinprodSplitAlt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinsumOutOfLe
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Cartan
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Heckecomm
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi UpperTheory.Zero.ConvolutionTheory.EB PositivityTheory.Rg.BcB.Desc
 
@@ -23,11 +67,11 @@ private theorem biInv_of_hecke {G : Type} [Group G] [TopologicalSpace G] {K : Su
   rw [(hf.2 b b.2 _).2, (hf.2 a a.2 x).1]
 
 private theorem cv_comm {E : Type} [Field E] [NumberField E] (n : ℕ) (w : GlobalTheory.BCT.Pl E)
-    {f g : GlobalTheory.BCT.GLw n w → ℂ} (hf : GlobalTheory.BCT.IsHecke (GlobalTheory.LFun.KGL w n) f)
-    (hg : GlobalTheory.BCT.IsHecke (GlobalTheory.LFun.KGL w n) g) :
-    UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.cv (GlobalTheory.LFun.KGL w n) f g = UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.cv (GlobalTheory.LFun.KGL w n) g f := by
+    {f g : GlobalTheory.BCT.GLw n w → ℂ} (hf : GlobalTheory.BCT.IsHecke (GlobalTheory.LFun.KGL w (n := n)) f)
+    (hg : GlobalTheory.BCT.IsHecke (GlobalTheory.LFun.KGL w (n := n)) g) :
+    UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.cv (GlobalTheory.LFun.KGL w (n := n)) f g = UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.cv (GlobalTheory.LFun.KGL w (n := n)) g f := by
   rw [cv_eq_conv _ hf hg, cv_eq_conv _ hg hf]
-  exact Formalism.UG.P.heckecomm_gelfand (GlobalTheory.LFun.KGL w n) Formalism.UG.P.heckecomm_tr Formalism.UG.P.heckecomm_tr_mul
+  exact Formalism.UG.P.heckecomm_gelfand (GlobalTheory.LFun.KGL w (n := n)) Formalism.UG.P.heckecomm_tr Formalism.UG.P.heckecomm_tr_mul
     Formalism.UG.P.heckecomm_tr_tr (fun x hx => Formalism.UG.P.heckecomm_tr_mem _ x hx)
     (Formalism.UG.P.heckecomm_tr_dc Formalism.UG.P.cartan_decomposition_holds E w n) f g (biInv_of_hecke hf) (biInv_of_hecke hg)
 

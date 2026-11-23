@@ -1,6 +1,46 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.SquareUnits
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.JetApproximation
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -13,45 +53,6 @@ namespace ReciprocityTheory.ChartRestriction.G.H1.LocalResidues
 open ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 
 variable {k : Type} [Field k] {X W Z : Scheme.{0}}
-
-def kappa (p : X ⟶ Spec (CommRingCat.of k)) (y : X) : k →+* X.presheaf.stalk y :=
-  (X.presheaf.germ (p ⁻¹ᵁ ⊤) y trivial).hom.comp
-    ((p.app ⊤).hom.comp (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom)
-
-theorem exists_frac (h0 : X ⟶ W) [IsIso h0] (D : W.Opens) (hD : IsAffineOpen D) (y : X) (hy : h0 y ∈ D)
-    (f : X.presheaf.stalk y) :
-    ∃ g g' : Γ(W, D), IsUnit (gs h0 y D g') ∧ f * gs h0 y D g' = gs h0 y D g := by
-  have hiso : IsIso (h0.stalkMap y) := ((isIso_iff_isIso_stalkMap h0).1 inferInstance).2 y
-  obtain ⟨f0, rfl⟩ := (ConcreteCategory.bijective_of_isIso (h0.stalkMap y)).2 f
-  let _ : Algebra Γ(W, D) (W.presheaf.stalk (h0 y)) := TopCat.Presheaf.algebra_section_stalk W.presheaf ⟨h0 y, hy⟩
-  have := hD.isLocalization_stalk ⟨h0 y, hy⟩
-  obtain ⟨⟨g, g'⟩, hmk⟩ := IsLocalization.mk'_surjective (hD.primeIdealOf ⟨h0 y, hy⟩).asIdeal.primeCompl f0
-  have hmk' : IsLocalization.mk' (W.presheaf.stalk (h0 y)) g g' = f0 := hmk
-  have hspec := IsLocalization.mk'_spec (W.presheaf.stalk (h0 y)) g g'
-  have hunit := IsLocalization.map_units (W.presheaf.stalk (h0 y)) g'
-  have ge : ∀ a : Γ(W, D), gs h0 y D a = (h0.stalkMap y).hom (algebraMap Γ(W, D) (W.presheaf.stalk (h0 y)) a) :=
-    fun a => (gs_stalkMap h0 y D hy a).trans (congrArg _ (gs_eq (𝟙 W) (h0 y) D hy a))
-  refine ⟨g, g'.1, ?_, ?_⟩
-  · rw [ge]; exact hunit.map _
-  · rw [ge, ge, ← map_mul, ← hmk', hspec]
-
-theorem gs_const {Y' : Scheme.{0}} (p : X ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Y') (e : Y' ⟶ Spec (CommRingCat.of k))
-    [IsIso e] (hq : q ≫ e = p) (y : X) (a : Γ(Y', ⊤)) : ∃ c : k, gs q y ⊤ a = kappa p y c := by
-  subst hq
-  refine ⟨(Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom ((inv (e.app ⊤)).hom a), ?_⟩
-  have h1 : (e.app ⊤).hom ((inv (e.app ⊤)).hom a) = a := by
-    exact congrArg (fun f => f.hom a) (IsIso.inv_hom_id (e.app ⊤))
-  have h2 : (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
-      ((Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom ((inv (e.app ⊤)).hom a)) = (inv (e.app ⊤)).hom a := by
-    exact congrArg (fun f => f.hom ((inv (e.app ⊤)).hom a)) (Scheme.ΓSpecIso (CommRingCat.of k)).hom_inv_id
-  simp only [kappa, gs, RingHom.comp_apply, h2]
-  rw [dif_pos (show q y ∈ (⊤ : Y'.Opens) from trivial)]
-  first
-    | (show _ = (X.presheaf.germ _ y _).hom ((q.app ⊤).hom ((e.app ⊤).hom ((inv (e.app ⊤)).hom a)))
-       rw [h1])
-    | (simp [Scheme.Hom.comp_app, h1]; done)
-    | (erw [Scheme.Hom.comp_app, CommRingCat.hom_comp, RingHom.comp_apply, h1]; rfl)
-    | (simp only [Scheme.Hom.comp_app, CommRingCat.hom_comp, RingHom.comp_apply, h1]; clear * -; done)
 
 theorem sval_rel {L : LB X} {K : Type} [Fintype K] {φ : K → (W ⟶ X)} {ε : K → ℤ}
     (s s₀ : LB.Sec (LB.LinComb L φ ε)) (D : W.Opens) (rr : Γ(W, D))

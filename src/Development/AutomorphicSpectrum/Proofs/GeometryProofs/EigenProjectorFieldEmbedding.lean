@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -24,6 +71,7 @@ theorem sum_repr_smul_dual (E : Type) [Field E] [NumberField E] {ι : Type} [Fin
     intro k
     rw [hB k, ← map_mul]
     conv_lhs => rw [← b.sum_repr (a * b k)]
+
     simp [map_sum, hB, zsmul_eq_mul]
   have hterm : ∀ k i, Algebra.trace ℚ E (D l * (((b.repr (a * b k) i : ℤ) : E) * B i)) =
       (b.repr (a * b k) i : ℚ) * (if i = l then 1 else 0) := by
@@ -34,8 +82,9 @@ theorem sum_repr_smul_dual (E : Type) [Field E] [NumberField E] {ι : Type} [Fin
       LinearMap.map_smul, smul_eq_mul]
   have hcoord : ∀ k, D.repr (algebraMap (𝓞 E) E a * D l) k = (b.repr (a * b k) l : ℚ) := by
     intro k
+
     rw [hrepr, Algebra.traceForm_apply, mul_comm (algebraMap (𝓞 E) E a) (D l), mul_assoc, hB' k,
-      Finset.mul_sum, map_sum]
+    Finset.mul_sum, map_sum]
     simp only [hterm, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
   calc ∑ k, ((b.repr (a * b k) l : ℤ) : E) * D k
       = ∑ k, D.repr (algebraMap (𝓞 E) E a * D l) k • D k := by
@@ -61,8 +110,9 @@ theorem exists_coeff (E : Type) [Field E] [NumberField E] (K : Type) [Field K] [
   have h1 : ∑ k, D k * B k = 1 := by
     have h0 : ∑ k, D k * B k - 1 = 0 := by
       refine hnd.1 _ fun x => ?_
+
       rw [Algebra.traceForm_apply, sub_mul, one_mul, map_sub, sub_eq_zero, Finset.sum_mul, map_sum,
-        Algebra.trace_eq_matrix_trace D x, Matrix.trace]
+      Algebra.trace_eq_matrix_trace D x, Matrix.trace]
       simp only [Matrix.diag, Algebra.leftMulMatrix_eq_repr_mul, hrepr, Algebra.traceForm_apply]
       refine Finset.sum_congr rfl fun k _ => ?_
       ring_nf
@@ -71,6 +121,7 @@ theorem exists_coeff (E : Type) [Field E] [NumberField E] (K : Type) [Field K] [
   · calc ∑ k, σ' (D k) * σ (b k) = σ' (∑ k, D k * B k) := by simp [map_sum, hB, hσ']
       _ = 1 := by rw [h1, map_one]
   · have h := congrArg σ' (sum_repr_smul_dual E b B D hB hD hrepr a l)
+
     simpa [map_sum, map_mul, hσ'] using h
 
 theorem exists_eigen_projector : ∀ (E : Type) [Field E] [NumberField E] (K : Type) [Field K] [CharZero K]
@@ -92,13 +143,16 @@ theorem exists_eigen_projector : ∀ (E : Type) [Field E] [NumberField E] (K : T
       intro i
       rw [← Module.End.mul_apply, ← map_mul]
       conv_lhs => rw [← b.sum_repr (a * b i)]
+
       simp [map_sum, LinearMap.sum_apply, Int.cast_smul_eq_zsmul]
     have hj : ∀ l, ∑ i, j (c i) * ((b.repr (a * b i) l : ℤ) : L) = j (σ a) * j (c l) := by
       intro l
       have h := congrArg j (hc2 a l)
+
       simp only [map_sum, map_mul, map_intCast] at h
       rw [← h]
       exact Finset.sum_congr rfl fun i _ => mul_comm _ _
+
     simp only [map_sum, map_smul, hmul, Finset.smul_sum, smul_smul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun l _ => ?_

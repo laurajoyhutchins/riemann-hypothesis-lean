@@ -1,9 +1,64 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsIrreducibleIff
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CentralExponentBoundOver
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIrreducibleIffOfLinearEquiv
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSplitAtOfIsSplitPl
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIrreducibleFixed
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CentralExponentBoundOver
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsIrreducibleIffOfLinearEquiv
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
+
 open NumberField ReciprocityTheory.Gal Formalism.ConjugateSelfDual IsDedekindDomain GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.LocGL GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.CuspRep GlobalTheory.DefiniteBC
 
 open Topology
@@ -136,9 +191,12 @@ theorem isIrreducible_of_prod₂ : ∀ (k : Type) [Field k] [ValuativeRel k] [To
   have hW : Nontrivial W := by
     by_contra hW
     rw [not_nontrivial_iff_subsingleton] at hW
-    have h0 : ∀ z : V ⊗[ℂ] W, z = 0 := fun z => z.induction_on rfl
-      (fun x w => by rw [Subsingleton.elim w 0, TensorProduct.tmul_zero])
-      (fun a b ha hb => by rw [ha, hb, add_zero])
+    have h0 : ∀ z : V ⊗[ℂ] W, z = 0 := by
+      intro z
+      induction z using TensorProduct.induction_on with
+      | zero => rfl
+      | tmul x w => rw [Subsingleton.elim w 0, TensorProduct.tmul_zero]
+      | add a b ha hb => rw [ha, hb, add_zero]
     obtain ⟨f₁, f₂, hne⟩ := hX
     exact hne (Subtype.ext (Subtype.ext (funext fun x => (h0 _).trans (h0 _).symm)))
   rw [isIrreducible_iff]
@@ -156,13 +214,13 @@ theorem isIrreducible_of_prod₂ : ∀ (k : Type) [Field k] [ValuativeRel k] [To
       exact ⟨σ₀ ((leviTwo k (Fin r) (Fin t)).symm l).1 x ⊗ₜ
         ⟨τ ((leviTwo k (Fin r) (Fin t)).symm l).2 w, hS _ _ w.2⟩, by simp [ρ']⟩
     | add a b ha hb =>
-      rw [map_add, map_add]; exact add_mem ha hb
+      rw [map_add (f := _), map_add (f := _)]; exact add_mem ha hb
   have hLR : ∀ y ∈ R, L y ∈ S := by
     rintro _ ⟨z, rfl⟩
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul x w => rw [LinearMap.lTensor_tmul, hL]; exact S.smul_mem _ w.2
-    | add a b ha hb => rw [map_add, map_add]; exact add_mem ha hb
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _)]; exact add_mem ha hb
   let Y : Submodule ℂ (IndSp (two (stdSum (rfl : r + t = r + t))) ρ') :=
     { carrier := {f | ∀ g, f.1.1 g ∈ R}
       add_mem' := fun ha hb g => add_mem (ha g) (hb g)

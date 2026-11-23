@@ -1,11 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsTopWTopWOfExists
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsOfEmbedding
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIndexStabilizer
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueNormalizedCyclotomicTrace
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SubOneMulSumEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowPrimeStep
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
+public import ReciprocityTheory.GaloisValuations.Global
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsOfEmbedding
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsTopWTopWOfExists
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueNormalizedCyclotomicTrace
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIndexStabilizer
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowPrimeStep
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SubOneMulSumEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.Integral
+
+@[expose] public section
 
 open scoped MatrixGroups
 open GlobalTheory.KZ GlobalTheory.Glue GlobalTheory.K5 GlobalTheory.KummerEisensteinGalois
@@ -181,7 +233,7 @@ theorem pows_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (L m : ℕ) (hm : 1 ≤
   have hp3 : 3 ≤ p := by have := hpp.two_le; omega
   have hord : orderOf u = p ^ (L - m) := by
     rw [← orderOf_units, hu]
-    have h := ZMod.orderOf_one_add_mul_prime_pow hpp m (by omega) (by nlinarith) 1
+    have h := ZMod.orderOf_one_add_mul_prime_pow hpp m (by nlinarith) 1
       (by exact_mod_cast hpp.not_dvd_one) (L - m)
     rw [Nat.sub_add_cancel hmL, Int.cast_one, mul_one] at h
     exact h
@@ -193,7 +245,7 @@ theorem pows_eq (p : ℕ) [Fact p.Prime] (hp2 : p ≠ 2) (L m : ℕ) (hm : 1 ≤
     refine ⟨Finset.mem_univ _, ?_⟩
     have hd : p ^ m ∣ p ^ L := pow_dvd_pow p hmL
     have h1 : (((u ^ k : (ZMod (p ^ L))ˣ) : ZMod (p ^ L)).val : ZMod (p ^ m)) = ((1 : ℕ) : ZMod (p ^ m)) := by
-      rw [← ZMod.cast_eq_val, ← ZMod.castHom_apply (h := hd), Units.val_pow_eq_pow_val, map_pow, hu, map_add, map_one,
+      rw [← ZMod.cast_eq_val, ← ZMod.castHom_apply (h := hd), Units.val_pow_eq_pow_val, map_pow, hu, map_add (f := _), map_one,
         map_pow, map_natCast, ← Nat.cast_pow, ZMod.natCast_self, add_zero, one_pow, Nat.cast_one]
     exact (ZMod.natCast_eq_natCast_iff _ _ _).1 h1
   · rw [Finset.card_image_of_injOn, Finset.card_range, IsNTr.card_filter p L m hm hmL]
@@ -343,6 +395,7 @@ theorem shapiro {G : Type} [CommGroup G] (χ : (Ω ≃ₐ[ℚ] Ω) →* G) (z : 
       (s (∑ k ∈ Finset.range N, ((g ^ k) ξ - z (g ^ k) (χ g ^ k))) - (∑ k ∈ Finset.range N, ((g ^ k) ξ - z (g ^ k) (χ g ^ k))) +
         ∑ k ∈ Finset.range N, (g ^ k) (w k)) := by
   nth_rewrite 1 [← sum_shift N j hj (fun k => (g ^ k) ξ - z (g ^ k) (χ g ^ k))]
+
   rw [map_sum, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
   refine cg_sum _ _ _ fun k hk => ?_
   replace hk := Finset.mem_range.1 hk
@@ -350,7 +403,7 @@ theorem shapiro {G : Type} [CommGroup G] (χ : (Ω ≃ₐ[ℚ] Ω) →* G) (z : 
   have a2 := hz _ _ (stab_pow hg k) (stab_mul (stab_mul (stab_inv (stab_pow hg k)) hs) (stab_pow hg ((k + N - j) % N))) (χ g ^ k)
   have a3 := cg_map (stab_pow hg k) (h1 k hk)
   have e : g ^ k * ((g ^ k)⁻¹ * s * g ^ ((k + N - j) % N)) = s * g ^ ((k + N - j) % N) := by group
-  rw [map_add, map_sub, ← AlgEquiv.mul_apply (g ^ k) (_ * _), e, AlgEquiv.mul_apply] at a3
+  rw [map_add (f := _), map_sub, ← AlgEquiv.mul_apply (g ^ k) (_ * _), e, AlgEquiv.mul_apply] at a3
   rw [e, map_pow, mul_inv_cancel] at a2
   rw [hx k hk] at a1
   have a4 := cg_sub (cg_trans (cg_symm a1) (cg_trans a2 (cg_add (cg_refl _) a3)))
@@ -504,7 +557,7 @@ theorem cores_law : ∀ (p : ℕ) [Fact p.Prime], p ≠ 2 → ∃ c : ℕ, ∀ {
   have k2 := cg_mul _ hpc key
   rw [mul_add, hterm] at k2
   refine cg_congr (cg_trans k2 (cg_add (cg_refl _) hab)) rfl ?_
-  simp only [map_add, map_mul, map_pow, map_natCast]
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast]
   ring
 
 end GlobalTheory.Glue.CorShap

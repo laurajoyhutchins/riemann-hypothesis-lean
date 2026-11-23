@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.InertJacobiLevels.AsmIface
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.PairRowIffQdRows
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.PairRowIffQdRows
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.LevelStarExponents Formalism.MainNotions Formalism.MainNotions.Inhab GlobalTheory.EX NumberField
 
@@ -19,7 +57,11 @@ theorem lA_le_pow_seven {C : FC} {cD ch : ℝ} {D : D7} {L : SizeData₂ D} (hV 
     linarith
   have hm : (2 : ℝ) ≤ D.R.m := by exact_mod_cast D.R.two_le_m
   have hn : (0 : ℝ) < D.R.n := by
-    have : 0 < D.R.n := by unfold Ranks.n; positivity
+    have : 0 < D.R.n := by
+      have := D.R.two_le_m
+      have := D.R.m_le_f
+      unfold Ranks.n
+      omega
     exact_mod_cast this
   have hd : L.sc.x ^ (-L.sc.eps) ≤ L.de2 := by
     rw [L.typeDensity_eq_card_div, le_div_iff₀ hn]
@@ -104,7 +146,11 @@ theorem szRow_windowLength : SzRow (fun C D L => (∀ l : ℕ, 11 ≤ l → ∃ 
     have hm2 := D.R.two_le_m
     have hm : (0 : ℝ) < D.R.m := by exact_mod_cast (by omega : 0 < D.R.m)
     have hn : (0 : ℝ) < D.R.n := by
-      have : 0 < D.R.n := by unfold Ranks.n; positivity
+      have : 0 < D.R.n := by
+        have := D.R.two_le_m
+        have := D.R.m_le_f
+        unfold Ranks.n
+        omega
       exact_mod_cast this
     have hN : (0 : ℝ) < D.R.N D.R.m := by
       have h := D.R.m_add_three_le_k

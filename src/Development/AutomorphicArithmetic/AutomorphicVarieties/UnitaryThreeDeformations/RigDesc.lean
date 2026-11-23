@@ -1,6 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.HostNumber
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.UnitaryThreeReflectionRight
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.Algebra.DualNumber
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicCases.AutomorphyClauseStatement
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField Matrix IsLocalRing Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.GalOfCusp UpperTheory.V.HV UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.Aut UpperTheory.V.UnitaryThreeInertia
 
@@ -50,7 +105,7 @@ private theorem gl_desc (K : IntermediateField F E) (u : GL (Fin 3) (DualNumber 
     exact h1 (by rw [h0]; rfl)
   exact ⟨((Matrix.isUnit_iff_isUnit_det _).2 hd).unit, Units.ext hA⟩
 
-private theorem gg_range_iff (K : IntermediateField F E) (x : GG 3 (DualNumber E)) :
+private theorem gg_range_iff (K : IntermediateField F E) (x : GG (m := 3) (R := DualNumber E)) :
     x ∈ (GG.map (m := 3) (dualIncl K)).range ↔
       ∀ a b, (x.mat a b).fst ∈ K ∧ (x.mat a b).snd ∈ K := by
   constructor
@@ -81,7 +136,16 @@ private theorem of_ents {A : Matrix (Fin 3) (Fin 3) (DualNumber E)} {K : Interme
 end SlopeTestRemainingChoices
 
 theorem UpperTheory.V.UnitaryThreeInertia.rig_desc :
-    ∀ {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] [CompactSpace Γ] [T2Space Γ] (r' : Γ →* GG 3 (DualNumber (PadicAlgCl l))) (h : GL (Fin 3) (DualNumber (PadicAlgCl l))), (∀ a b, Continuous fun g => ((r' g).mat a b).fst) → (∀ a b, Continuous fun g => ((r' g).mat a b).snd) → ∃ (L : Formalism.BasicNotions.Loc.FinExt l) (f : DualNumber ↥L.1 →+* DualNumber (PadicAlgCl l)) (r₁ : Γ →* GG 3 (DualNumber ↥L.1)) (h₁ : GL (Fin 3) (DualNumber ↥L.1)), (∀ x, (f x).fst = ((x.fst : ↥L.1) : PadicAlgCl l) ∧ (f x).snd = ((x.snd : ↥L.1) : PadicAlgCl l)) ∧ (GG.map f).comp r₁ = r' ∧ Matrix.GeneralLinearGroup.map f h₁ = h := by
+    ∀ {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalSpace Γ]
+      [IsTopologicalGroup Γ] [CompactSpace Γ] [T2Space Γ]
+      (r' : Γ →* GG (m := 3) (R := DualNumber (PadicAlgCl l)))
+      (h : GL (Fin 3) (DualNumber (PadicAlgCl l))),
+      (∀ a b, Continuous fun g => ((r' g).mat a b).fst) →
+      (∀ a b, Continuous fun g => ((r' g).mat a b).snd) →
+      ∃ (L : Formalism.BasicNotions.Loc.FinExt l) (f : DualNumber ↥L.1 →+* DualNumber (PadicAlgCl l))
+        (r₁ : Γ →* GG (m := 3) (R := DualNumber ↥L.1)) (h₁ : GL (Fin 3) (DualNumber ↥L.1)),
+        (∀ x, (f x).fst = ((x.fst : ↥L.1) : PadicAlgCl l) ∧ (f x).snd = ((x.snd : ↥L.1) : PadicAlgCl l)) ∧
+        (GG.map f).comp r₁ = r' ∧ Matrix.GeneralLinearGroup.map f h₁ = h := by
   intro l _ Γ _ _ _ _ _ r' h hc1 hc2
   obtain ⟨ι, _, K, hK, hcov⟩ := GlobalTheory.CompactRepField.exists_countable_family l
   let S : IntermediateField ℚ_[l] (PadicAlgCl l) → Subgroup Γ := fun M =>

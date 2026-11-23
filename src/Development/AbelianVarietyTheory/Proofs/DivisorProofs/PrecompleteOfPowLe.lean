@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalEnd
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ArcGenericPointDescendsToPowerSeries
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsCompleteDvrFiniteSubalgebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,13 +55,14 @@ theorem isLocalHom_of_finite {R R₂ V : Type*} [CommRing R] [IsLocalRing R] [Co
   haveI : Algebra.IsIntegral R R₂ := Algebra.IsIntegral.of_finite R R₂
 
   have hc : (maximalIdeal V).comap (ψ.comp ρ) = maximalIdeal R :=
-    ((IsLocalRing.local_hom_TFAE (ψ.comp ρ)).out 0 4).mp h
+    ((IsLocalRing.local_hom_tfae (ψ.comp ρ)).out 1 5).mp h
   have hP : ((maximalIdeal V).comap ψ).IsMaximal := by
-    apply Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := R)
+    apply Ideal.isMaximal_of_isIntegral_of_isMaximal_under (R := R)
     have hc' : ((maximalIdeal V).comap ψ).comap (algebraMap R R₂) = maximalIdeal R := hc
+    change (((maximalIdeal V).comap ψ).comap (algebraMap R R₂)).IsMaximal
     rw [hc']
     infer_instance
-  exact ((IsLocalRing.local_hom_TFAE ψ).out 0 4).mpr (IsLocalRing.eq_maximalIdeal hP)
+  exact ((IsLocalRing.local_hom_tfae ψ).out 1 5).mpr (IsLocalRing.eq_maximalIdeal hP)
 
 theorem exists_extension : ∀ (R R₂ W : Type) [CommRing R] [IsDomain R] [IsLocalRing R] [CommRing R₂] [IsDomain R₂]
     [IsLocalRing R₂] [CommRing W] [IsDomain W] [IsLocalRing W], GlobalTheory.LN.CDvr W → ∀ (φ : R →+* W), IsLocalHom φ →

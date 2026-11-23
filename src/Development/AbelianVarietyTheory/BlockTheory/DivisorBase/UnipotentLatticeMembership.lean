@@ -1,9 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.GramCEqTranspose
-import Formalism.LocalToGlobal.ProjectiveLattices.BaseEmbeddingInclusion
-import Formalism.LocalToGlobal.ProjectiveLattices.FamilyUniformisationBasePointOrthogonalBis
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.Divisibility.DefGroup
+public import Formalism.LocalToGlobal.IndefiniteReal.GramCEqTranspose
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
 import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.KaSmallNonpos
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,16 +58,6 @@ variable {WL : Type} [AddCommGroup WL] [Module LL WL] [Module Ks WL] [IsScalarTo
 variable {W : (LL →+* ℂ) → Type} [∀ σ, NormedAddCommGroup (W σ)] [∀ σ, InnerProductSpace ℂ (W σ)]
 variable {G0 : Type} [Group G0] [Fintype G0]
 variable (A : FormsL LL Ks WL W G0) (J0 : Subgroup G0) (lam0 : J0 →* LLˣ) (eC : G0 → LL)
-
-def IsCoord {d : ℕ} (b : Fin d → WL) : Prop :=
-  LinearIndependent LL b ∧ Submodule.span LL (Set.range b) = A.Wgood J0 lam0 eC
-
-def MjLatticeIn {d : ℕ} (b : Fin d → WL) : Prop :=
-  IsCoord A J0 lam0 eC b ∧ Submodule.IsLattice LL (A.Mcoord J0 lam0 eC b)
-
-def MjLattice : Prop :=
-  (∃ (d : ℕ) (b : Fin d → WL), IsCoord A J0 lam0 eC b) ∧
-    ∀ (d : ℕ) (b : Fin d → WL), IsCoord A J0 lam0 eC b → MjLatticeIn A J0 lam0 eC b
 
 variable {A J0 lam0 eC}
 
@@ -46,20 +75,6 @@ instance finiteLevelGroupFintype : Fintype (G0g D.nd) :=
   haveI : ∀ k, NeZero (D.host.g k) := fun k => ⟨(D.host.g_prime k).ne_zero⟩
   Fintype.ofFinite _
 
-def unipG : Subgroup (G0g D.nd) :=
-  Subgroup.pi Set.univ fun v : TypePl D => unip (ZMod (D.host.g v.1)) D.R.r
-
-def unipAt (v : TypePl D) : unipG D →* unip (ZMod (D.host.g v.1)) D.R.r :=
-  ((Pi.evalMonoidHom (fun v : TypePl D => GL (Fin D.R.r) (ZMod (D.host.g v.1))) v).comp
-    (unipG D).subtype).codRestrict _ fun x => x.2 v (Set.mem_univ _)
-
-def unipotentCharacterOfAddChars (ψ : ∀ v : TypePl D, AddChar (ZMod (D.host.g v.1)) LL) : unipG D →* LLˣ :=
-  (∏ v : TypePl D, (addCharHom (ψ v) (supHom (ZMod (D.host.g v.1)) D.R.r)).comp (unipAt D v))⁻¹
-
-def chiDetG (χ : ∀ v : TypePl D, (ZMod (D.host.g v.1))ˣ →* LLˣ) : G0g D.nd →* LLˣ :=
-  ∏ v : TypePl D, ((χ v).comp Matrix.GeneralLinearGroup.det).comp
-    (Pi.evalMonoidHom (fun v : TypePl D => GL (Fin D.R.r) (ZMod (D.host.g v.1))) v)
-
 end Level
 
 section Rec
@@ -67,29 +82,6 @@ section Rec
 open Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Pj Formalism.MainNotions.DIV.Cons
 
 variable {D : D7}
-
-def IsFormsOf (T : Core D) (j : ℕ) (a : (D.host.E →+* ℂ) × ℕ → ℕ) (n : ℕ)
-    {LL : Type} [Field LL] [NumberField LL] [Algebra T.Q.c.F LL]
-    {WL : Type} [AddCommGroup WL] [Module LL WL] [Module T.Q.c.F WL] [IsScalarTower T.Q.c.F LL WL]
-    [Module (𝓞 T.Q.c.F) WL] [IsScalarTower (𝓞 T.Q.c.F) T.Q.c.F WL]
-    {W : (LL →+* ℂ) → Type} [∀ σ, NormedAddCommGroup (W σ)] [∀ σ, InnerProductSpace ℂ (W σ)]
-    {G0 : Type} [Group G0] (A : FormsL LL T.Q.c.F WL W G0) (ι : T.cuspA j a n →ₗ[T.Q.c.F] WL) : Prop :=
-  IsBaseChange LL ι ∧ A.WK = LinearMap.range ι ∧
-    ∀ f : T.cuspA j a n, ι f ∈ A.MK ↔ ∀ la (y : T.PtM j la), T.nrmM j la y (f : T.R j) ≤ 1
-
-def MjLatticeRec (D : D7) : Prop :=
-  ∀ (T : CoreJ D), LawsJ T → ∀ (hK : DV.KapDef D) (hn : Even D.R.nV) (j : ℕ), InR D j →
-  ∀ (LL : Type) [Field LL] [NumberField LL] [Algebra T.Q.c.F LL] (σ₀ : LL →+* ℂ), BaseEmbeddingInclusion T.Q.c.F σ₀ →
-  ∀ (WL : Type) [AddCommGroup WL] [Module LL WL] [Module T.Q.c.F WL] [IsScalarTower T.Q.c.F LL WL]
-    [Module (𝓞 LL) WL] [IsScalarTower (𝓞 LL) LL WL] [Module (𝓞 T.Q.c.F) WL] [IsScalarTower (𝓞 T.Q.c.F) T.Q.c.F WL]
-    (W : (LL →+* ℂ) → Type) [∀ σ, NormedAddCommGroup (W σ)] [∀ σ, InnerProductSpace ℂ (W σ)]
-    (A : FormsL LL T.Q.c.F WL W (G0g D.nd))
-    (ι : T.cuspA j (wtA (kaWt D hK hn j)) (kaWt D hK hn j).n →ₗ[T.Q.c.F] WL),
-    IsFormsOf T.toCore j (wtA (kaWt D hK hn j)) (kaWt D hK hn j).n A ι →
-  ∀ (χ : ∀ v : TypePl D, (ZMod (D.host.g v.1))ˣ →* LLˣ), A.chi = chiDetG D χ →
-  ∀ (ψ : ∀ v : TypePl D, AddChar (ZMod (D.host.g v.1)) LL), (∀ v, ψ v ≠ 1) →
-  ∀ (eC : G0g D.nd → LL), (∀ g, σ₀ (eC g) = D.ntypes.e0.coeff g) →
-    MjLattice A (unipG D) (unipotentCharacterOfAddChars D ψ) eC
 
 end Rec
 

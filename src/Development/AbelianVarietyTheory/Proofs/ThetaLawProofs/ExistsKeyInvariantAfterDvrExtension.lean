@@ -1,22 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsCompleteDiscreteValuationRingWithResidues
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.DualNumberRingHomExt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompletionPointClosedPointMemOfSmooth
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.BasisPowerSectionsLocalBaseChange
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.DualNumberRingHomExt
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsCompleteDiscreteValuationRingWithResidues
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsInvariantOfSplitZerosTorsionStatement
 import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsKeyPBRing
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.PwIsoIsGen
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.BasisPowerSectionsLocalBaseChange
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompletionPointClosedPointMemOfSmooth
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.TransversalZerosLiftOfIsAdicCompleteStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsInvariantOfSplitZerosTorsionStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.TransversalZerosLiftOfIsAdicCompleteStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyViaIsPullback
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -120,69 +163,7 @@ theorem keyVia_cancel {R R' R'' : Type} [CommRing R] [CommRing R'] [CommRing R''
     (H'' : KeyVia x'' x (f'.comp f) φ'' w'') : ∃ φ' w', KeyVia x'' x' f' φ' w' ∧ φ' ≫ φ = φ'' ∧
       ∀ (l : ℕ) (s : RR x l) (s' : RR x' l) (s'' : RR x'' l), SecVia x' x φ w s' s → SecVia x'' x φ'' w'' s'' s →
         SecVia x'' x' φ' w' s'' s' := by
-  obtain ⟨he, hg, F, hc, hw, hr, hs, hF, hFe, hv⟩ := H
-  obtain ⟨he'', hg'', F'', hc'', hw'', hr'', hs'', hF'', hFe'', hv''⟩ := H''
-  have hsp : spMap (f'.comp f) = spMap f' ≫ spMap f := spMap_comp f f'
-  have hp := hc.1
-  obtain ⟨φ', hφ, hw0⟩ : ∃ φ' : x''.P.A.left ⟶ x'.P.A.left, φ' ≫ φ = φ'' ∧
-      φ' ≫ x'.P.A.hom = x''.P.A.hom ≫ spMap f' :=
-    ⟨hp.lift φ'' (x''.P.A.hom ≫ spMap f') (by rw [hc''.1.w, Category.assoc, hsp]), hp.lift_fst _ _ _,
-      hp.lift_snd _ _ _⟩
-  subst hφ
-  have he' : eSec x''.P.A ≫ φ' = spMap f' ≫ eSec x'.P.A := by
-    apply hp.hom_ext
-    · rw [Category.assoc, he'', hsp, Category.assoc, Category.assoc, he]
-    · have a₁ : eSec x''.P.A ≫ x''.P.A.hom = 𝟙 _ := Over.w η[x''.P.A]
-      have a₂ : eSec x'.P.A ≫ x'.P.A.hom = 𝟙 _ := Over.w η[x'.P.A]
-      rw [Category.assoc, hw0, ← Category.assoc, a₁, Category.assoc, a₂]; simp
-  have g := (isGen_iff w).1 hw
-  have g'' := (isGen_iff w'').1 hw''
-  obtain ⟨w', T⟩ := exists_cancel x.P.isLB w w'' g g'' x'.P.isLB x''.P.isLB
-  have r := (maps_iff w _ (fun _ => eSec x.P.A) _ x'.rig x.rig (spMap f) _ (rigPull_le φ (spMap f) he x.P.L)
-    (fun _ => rfl)).1 hr
-  have r'' := (maps_iff w'' _ (fun _ => eSec x.P.A) _ x''.rig x.rig (spMap (f'.comp f)) _
-    (rigPull_le (φ' ≫ φ) (spMap (f'.comp f)) he'' x.P.L) (fun _ => rfl)).1 hr''
-  rw [hsp] at r''
-  have hFF : (Chart.dualMapR f').comp F = F'' := KeyCancel.dualNumber_ringHom_ext
-    (fun a => by
-      rw [RingHom.comp_apply, hF, hF'']
-      ext <;> simp [Chart.dualMapR, TrivSqZeroExt.algebraMap_eq_inl])
-    (by
-      rw [RingHom.comp_apply, hFe, hFe'']
-      ext <;> simp [Chart.dualMapR])
-  refine ⟨φ', w', ⟨he', hg''.trans hg.symm, Chart.dualMapR f', hc.cancel (hc''.congr hsp rfl) hw0,
-    (isGen_iff w').2 (T.pgen_cancel x.P.isLB g g''),
-    (maps_iff w' _ (fun _ => eSec x'.P.A) _ x''.rig x'.rig (spMap f') _ (rigPull_le φ' (spMap f') he' x'.P.L)
-      (fun _ => rfl)).2 (T.pmaps_cancel x.P.isLB (fun _ => he') r r''),
-    (KeyCancel.appLE_eq_iff_stalk w' x'.th x''.th).2 fun Z q z i k hi hk => ?_, fun a => ?_, ?_, fun i => ?_⟩, rfl,
-    fun l s s' s'' h h'' i k hle => fn_ext fun y hy => ?_⟩
-  · obtain ⟨j, hj⟩ := exists_chart x.P.isLB (φ (φ' (q z)))
-    have a := (KeyCancel.appLE_eq_iff_stalk w x.th x'.th).1 hs Z (q ≫ φ') z j i hj hi
-    have b := (KeyCancel.appLE_eq_iff_stalk w'' x.th x''.th).1 hs'' Z q z j k hj hk
-    rw [T Z q z j i k hj hi hk, ← Category.assoc, a, Units.val_mul, _root_.mul_assoc] at b
-    exact (Units.mul_right_inj _).1 b
-  · ext <;> simp [Chart.dualMapR, TrivSqZeroExt.algebraMap_eq_inl]
-  · ext <;> simp [Chart.dualMapR]
-  · apply hp.hom_ext
-    · rw [Category.assoc, hv'', Category.assoc, hv, ← hFF, ← Category.assoc]
-      congr 1
-      show Spec.map _ = Spec.map _ ≫ Spec.map _
-      rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
-    · rw [Category.assoc, hw0, ← Category.assoc, Over.w, Category.assoc, Over.w]
-      show Spec.map _ ≫ Spec.map _ = Spec.map _ ≫ Spec.map _
-      rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
-      congr 2
-      ext a <;> simp [Chart.dualMapR, TrivSqZeroExt.algebraMap_eq_inl]
-  · obtain ⟨j, hj⟩ := exists_chart x.P.isLB (φ (φ' y))
-    have hi : φ' y ∈ x'.P.L.U (i PUnit.unit) := mem_pull.1 hy.1
-    have a := KeyBasis.via_val (w := w) (n := l) (a' := s'.f) (a := s.f) h (𝟙 _ ≫ φ') y hj hi
-    have b := KeyBasis.via_val (w := w'') (n := l) (a' := s''.f) (a := s.f) h'' (𝟙 _) y hj hy.2
-    rw [T _ (𝟙 _) y j _ k hj hi hy.2, ← Category.assoc, a, mul_pow, Units.val_mul, _root_.mul_assoc] at b
-    refine (gs_appLE φ' _ _ hle (𝟙 _) y hy _).trans (((Units.mul_right_inj _).1 b).trans ?_)
-    refine Eq.trans (congrArg₂ (· * ·) ?_ (gs_res _ y _ hy _).symm) (gs_mul _ y _ hy _ _).symm
-    let v : Γ(x''.P.A.left, (x'.P.L.pull φ').U i ⊓ x''.P.L.U k)ˣ := w'.s (i, k)
-    exact ((congrArg (gs (𝟙 _) y _) (Units.val_pow_eq_pow_val v l).symm).trans
-      ((gs_unit (𝟙 _) y _ hy _).trans (congrArg Units.val (map_pow _ _ _)))).symm
+  apply _root_.GlobalTheory.KeyLine.keyVia_cancel <;> assumption
 
 theorem exists_torsion_lift {O O' : Type} [CommRing O] [CommRing O'] [IsLocalRing O']
     [IsAdicComplete (IsLocalRing.maximalIdeal O') O'] {G : Over (Sp O)} {G' : Over (Sp O')} [GrpObj G] [GrpObj G']
@@ -232,8 +213,8 @@ theorem mem_nonzeroLocus_of_via {R R' : Type} [CommRing R] [CommRing R'] {x : Ke
     · exact (Scheme.basicOpen_res _ _ _).ge ⟨hm, hi⟩
   exact TopologicalSpace.Opens.mem_iSup.2 ⟨k, ((Scheme.basicOpen_appLE φ _ (x.P.L.U k) hle (s.f k)).le h1).2⟩
 
-open EtBaseChange in
 
+open EtBaseChange in
 theorem etZ_descend {R R' : Type} [Field R] [Field R'] {x : KeyIn R} {x' : KeyIn R'} {f : R →+* R'} {φ w} {n d : ℕ}
     (hg : x.P.g = x'.P.g) {s : Fin x.P.g → RR x n} {s' : Fin x'.P.g → RR x' n} (z : Fin d → Pt x)
     {z' : Fin d → Pt x'} {ch' : Fin d → x'.P.L.ι} (H : KeyVia x' x f φ w)

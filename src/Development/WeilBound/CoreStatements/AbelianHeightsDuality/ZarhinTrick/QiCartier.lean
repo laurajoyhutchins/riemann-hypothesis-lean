@@ -1,5 +1,58 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ZarhinTrick.QiCoreDefs
+module
+
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.ZarhinTrick.QiCoreDefs
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -29,7 +82,7 @@ theorem qc_functional (ε : H →ₐ[K] K) {x : H} (hx : x ∈ RingHom.ker ε) (
     have hc : c = 0 := by
       have h1 : ε x = 0 := hx
       have h2 : ε z = 0 := hz'
-      rw [← hyz, map_add, map_smul, map_one, h2] at h1
+      rw [← hyz, map_add (f := _), map_smul, map_one, h2] at h1
       simpa using h1
     subst hc
     apply hx2
@@ -56,7 +109,7 @@ theorem qc_leib (ε : H →ₐ[K] K) (l : H →ₗ[K] K) (h1 : l 1 = 0) (h2 : �
       (ε a * ε b) • (1 : H) := by
     simp only [Algebra.smul_def, map_mul, mul_one]
     ring
-  rw [e, map_sub, map_add, map_add, hab, map_smul, map_smul, map_smul, h1]
+  rw [e, map_sub, map_add (f := _), map_add (f := _), hab, map_smul, map_smul, map_smul, h1]
   simp only [smul_eq_mul, mul_zero, sub_zero, zero_add]
   ring
 
@@ -85,8 +138,8 @@ theorem aug_le_sq {K H : Type} [Field K] [CharZero K] [CommRing H] [Algebra K H]
           AlgHom.coe_id, id_eq, Algebra.TensorProduct.lmul'_apply_tmul, Algebra.ofId_apply,
           qc_leib ε l hl1 hl2, Algebra.smul_def, map_add, map_mul]
         ring
-      | add t₁ t₂ h₁ h₂ => simp only [mul_add, map_add, h₁, h₂]; ring
-    | add s₁ s₂ h₁ h₂ => simp only [add_mul, map_add, h₁, h₂]; ring
+      | add t₁ t₂ h₁ h₂ => simp only [mul_add, map_add (f := _), h₁, h₂]; ring
+    | add s₁ s₂ h₁ h₂ => simp only [add_mul, map_add (f := _), h₁, h₂]; ring
   have hεΦ : ∀ t : H ⊗[K] H, ε (Φ t) = l (mL t) := by
     intro t
     induction t using TensorProduct.induction_on with
@@ -96,7 +149,7 @@ theorem aug_le_sq {K H : Type} [Field K] [CharZero K] [CommRing H] [Algebra K H]
         AlgHom.comp_apply, Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq,
         Algebra.TensorProduct.lmul'_apply_tmul, Algebra.ofId_apply, map_smul, smul_eq_mul]
       rw [← Algebra.smul_def, map_smul, smul_eq_mul, mul_comm]
-    | add s t h₁ h₂ => simp only [map_add, h₁, h₂]
+    | add s t h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
   have hRa : ∀ a, mR (Δ a) = a := fun a => DFunLike.congr_fun hR a
   have hLa : ∀ a, mL (Δ a) = a := fun a => DFunLike.congr_fun hL a
   let D : H →ₗ[K] H := Φ ∘ₗ Δ.toLinearMap
@@ -123,7 +176,7 @@ theorem aug_le_sq {K H : Type} [Field K] [CharZero K] [CommRing H] [Algebra K H]
     refine Submodule.mul_induction_on hy (fun a ha b hb => ?_) (fun a b ha hb => ?_)
     · rw [hD]
       exact Ideal.add_mem _ (Ideal.mul_mem_right _ _ ha) (Ideal.mul_mem_left _ _ hb)
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact Ideal.add_mem _ ha hb
   have hJ2 : RingHom.ker ε ^ (k + 2) ≤ RingHom.ker ε ^ 2 := Ideal.pow_le_pow_right (by omega)
   have hJ1 : RingHom.ker ε ^ (k + 2) ≤ RingHom.ker ε := Ideal.pow_le_self (by omega)
@@ -145,14 +198,15 @@ theorem aug_le_sq {K H : Type} [Field K] [CharZero K] [CommRing H] [Algebra K H]
   let π := Ideal.Quotient.mk (RingHom.ker ε ^ (k + 2))
   have hu1 : IsUnit (π ((((M + 1 : ℕ) : H)) + 1)) := by
     have e : π ((((M + 1 : ℕ) : H)) + 1) = algebraMap K (H ⧸ RingHom.ker ε ^ (k + 2)) ((M + 2 : ℕ) : K) := by
-      simp only [map_add, map_natCast, map_one]
+      simp only [map_add (f := _), map_natCast, map_one]
       push_cast
       ring
     rw [e]
     exact (IsUnit.mk0 _ (Nat.cast_ne_zero.2 (by omega))).map _
   have hu2 : IsUnit (π (D x)) := by
     have hm : D x - 1 ∈ RingHom.ker ε := by
-      rw [RingHom.mem_ker, map_sub, hεD, hlx, map_one, sub_self]
+      change ε (D x - 1) = 0
+      rw [map_sub, hεD, hlx, map_one, sub_self]
     have hnil : IsNilpotent (π (D x - 1)) :=
       ⟨k + 2, by rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]; exact Ideal.pow_mem_pow hm _⟩
     have := hnil.isUnit_one_add

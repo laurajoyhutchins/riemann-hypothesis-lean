@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
-import Formalism.LocalToGlobal.Columns.KOneCharacterTrivialNearOne
-import Formalism.LocalToGlobal.Columns.UnfoldingNonvanishingDoubleCosetHolds
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Formalism.LocalToGlobal.Columns.ChainTwOk
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormalFormAtPrime
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RationalFractionsRepresentPrimeNormQuotient
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotMemVGsOfMemQE
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TameHeckeCharLocalEqInvTypeCharacter
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotMemVGsOfMemQE
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.Columns.ChainFrmOk
+public import Formalism.LocalToGlobal.Columns.ChainInstY
+public import Formalism.LocalToGlobal.Columns.ChainTwCst
+public import Formalism.LocalToGlobal.Columns.ChainTwFin
+public import Formalism.LocalToGlobal.Columns.ThetaOpenTwLevQ
+public import Formalism.LocalToGlobal.Columns.UnfoldingNonvanishingDoubleCosetHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,9 +72,6 @@ def IsTw : Prop := ∀ a, I.cst a = twCst I.Ch I.sel (I.tup a) I.glob ∧
 
 theorem canon_isTw : I.canon.IsTw := fun _ => ⟨rfl, rfl⟩
 
-abbrev idxFull (a : I.ι) : ChIdx B.fields (B.primes X) B.R (I.Q a) :=
-  (I.idx a).withTop (B.R.m - 2) (twLt I.Ch) (twTt I.sel (I.tup a))
-
 def Deep : Prop := ∀ a (P : rowSG (B.primes X) I.sel (I.tup a)), P.1 ∉ (B.primes X).vGs → 2 * B.R.m ≤ (I.cst a).D P
 
 variable {I}
@@ -36,20 +81,6 @@ theorem IsTw.cst_eq (h : I.IsTw) (a : I.ι) : I.cst a = twCst I.Ch I.sel (I.tup 
 theorem IsTw.idx_eq (h : I.IsTw) (a : I.ι) :
     I.idx a = twIdx I.Ch I.sel (I.tup a) (twCst I.Ch I.sel (I.tup a) I.glob) (B.R.m - 2) := by
   rw [(h a).2, (h a).1]
-
-theorem IsTw.idxFull_eq (h : I.IsTw) (a : I.ι) :
-    I.idxFull a = twIdxTop I.Ch I.sel (I.tup a) (I.cst a) (B.R.m - 2) (twLt I.Ch) (twTt I.sel (I.tup a)) := by
-  unfold idxFull
-  rw [(h a).2]
-  rfl
-
-theorem isTw_iff_canon_eq : I.IsTw ↔ I.canon = I := by
-  refine ⟨fun h => ?_, fun h => h ▸ I.canon_isTw⟩
-  have h1 : (fun a => twCst I.Ch I.sel (I.tup a) I.glob) = I.cst := funext fun a => (h.cst_eq a).symm
-  have h2 : (fun a => twIdx I.Ch I.sel (I.tup a) (twCst I.Ch I.sel (I.tup a) I.glob) (B.R.m - 2)) = I.idx :=
-    funext fun a => (h.idx_eq a).symm
-  unfold canon
-  rw [h2, h1]
 
 theorem IsTw.deep (h : I.IsTw) : I.Deep := fun a P hP => by
   rw [h.cst_eq a, twCst_D_Q hP]
@@ -121,19 +152,6 @@ theorem IsTw.chF_ok (ht : I.IsTw) (h : I.Ok) (W : Wts B.fields (B.primes X).Word
     exact thetaOpen_twIdx I.Ch I.sel (I.tup a) (I.cst a) (h.idx_ok a).cst_ok (Q_notMem_of_ok h a) _ j
   exact chF_ok_of_finIdx W I.sel (I.tup a) _ (base_fields_primes_ok B X).1 u j
     (fun b P => thetaOpen_finIdx _ (ho b) P) (fun b c => thetaOpen_root _ (ho b) c)
-
-theorem IsTw.chF_full_ok (ht : I.IsTw) (h : I.Ok) (W : Wts B.fields (B.primes X).Word B.R) (a : I.ι) (u : (B.primes X).Word) (j : ℕ) :
-    (chF W I.sel (I.tup a) (I.idxFull a) u j).Ok := by
-  rw [ht.idxFull_eq]
-  exact twTop_chF_ok I.Ch I.sel (I.tup a) W (base_fields_primes_ok B X).1 (h.idx_ok a).cst_ok (Q_notMem_of_ok h a) _ u j
-
-example (h : I.IsTw) (a : I.ι) : (I.cst a).sharp = true ∧ (I.cst a).M = B.R.m := by
-  rw [h.cst_eq a]; exact ⟨rfl, rfl⟩
-
-example (a : I.ι) (h : (I.cst a).sharp = false) : ¬ I.IsTw := fun ht => by
-  rw [ht.cst_eq a] at h; exact Bool.noConfusion h
-
-example : I.canon.C = I.C ∧ I.canon.xi = I.xi ∧ I.canon.glob = I.glob := ⟨rfl, rfl, rfl⟩
 
 end GlobalTheory.Mem.Col2.TC
 

@@ -1,8 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.AbelianDeRham.AbelianHodgeDeRham.H1DimGeAbelianDim
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsGenOfSmallExtension
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CechHOneVanishesOnOpenOfIsAffineOpen
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TrMulTrInv
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TrMulTrInv
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CechHOneVanishesOnOpenOfIsAffineOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,7 +83,7 @@ theorem exists_split {U : Y.Opens} (hU : IsAffineOpen U) {I : Type} (O : I → Y
     (fun a b => (ch _).symm (φ a b)) (by
       intro a b d W ha hb hd
       apply (ch W).injective
-      rw [map_add, hr, hr, hr]
+      rw [map_add (f := _), hr, hr, hr]
       simpa only [LinearEquiv.apply_symm_apply] using hφ a b d W ha hb hd)
   refine ⟨fun a => ch _ (ψ a), fun a b => ?_⟩
   have h := (LinearEquiv.symm_apply_eq _).1 (hψ a b)
@@ -56,7 +99,7 @@ theorem cocycle_on {α : ∀ a b, Γ(Y, V a ⊓ V b)}
     (a b d : A) (W : Y.Opens) (ha : W ≤ V a) (hb : W ≤ V b) (hd : W ≤ V d) :
     rs Y (le_inf ha hb) (α a b) + rs Y (le_inf hb hd) (α b d) = rs Y (le_inf ha hd) (α a d) := by
   have h := congrArg (rs Y (le_inf (le_inf ha hb) hd)) (hα a b d)
-  simpa only [map_add, rs_rs] using h
+  simpa only [map_add (f := _), rs_rs] using h
 
 def IsPot (α : ∀ a b, Γ(Y, V a ⊓ V b)) (U : Y.Opens) (p : ∀ a, Γ(Y, U ⊓ V a)) : Prop :=
   ∀ a b (W : Y.Opens) (h : W ≤ U) (ha : W ≤ V a) (hb : W ≤ V b),
@@ -128,7 +171,7 @@ theorem diffF_comp (T T' T'' : Y.affineOpens) (h : T'.1 ≤ T.1) (h' : T''.1 ≤
   have e1 := congrArg (rs Y (inf_le_inf_right (V a) h')) (diffF_spec hV hP T T' h a)
   have e2 := diffF_spec hV hP T' T'' h' a
   simp only [map_sub, rs_rs] at e1
-  rw [map_add, rs_rs, e2]
+  rw [map_add (f := _), rs_rs, e2]
   rw [show rs Y _ (diffF hV hP T T' h) = _ from e1]
   abel
 
@@ -156,6 +199,7 @@ theorem depSt : DepSt := by
     omega
   obtain ⟨c, hc, i₀, hi₀⟩ := Fintype.not_linearIndependent_iff.1 hnot
   have h0 : CatCoh.H1.mk (OAff s₀) (∑ i, c i • f i) = 0 := by
+
     rw [map_sum]
     simpa only [map_smul] using hc
   obtain ⟨g, hg⟩ := CatCoh.H1.mk_eq_zero.1 h0
@@ -176,16 +220,19 @@ theorem depSt : DepSt := by
       (hb : W ≤ V b), rs Y (le_inf h ha) (P T a) - rs Y (le_inf h hb) (P T b) =
         rs Y (le_inf ha hb) (∑ i, GlobalTheory.SmallExtLift.cst s₀ _ (c i) * α i a b) := by
     intro T a b W h ha hb
-    simp only [P, map_add, map_sum, map_mul, rs_rs, rs_cst]
+
+    simp only [P, map_add (f := _), map_sum, map_mul, rs_rs, rs_cst]
     simp only [← hp _ T a b W h ha hb, mul_sub, Finset.sum_sub_distrib]
     ring
   have hPres : ∀ (T T' : Y.affineOpens) (h : T'.1 ≤ T.1) (a : A),
       rs Y (inf_le_inf_right _ h) (P T a) = P T' a := by
     intro T T' h a
     have e := congrArg (rs Y (inf_le_left : T'.1 ⊓ V a ≤ T'.1)) (hG T T' h)
+
     simp only [map_sub, map_sum, map_mul, rs_rs, rs_cst, diffF_spec, mul_sub,
-      Finset.sum_sub_distrib] at e
-    simp only [P, map_add, map_sum, map_mul, rs_rs, rs_cst]
+    Finset.sum_sub_distrib] at e
+
+    simp only [P, map_add (f := _), map_sum, map_mul, rs_rs, rs_cst]
     linear_combination -e
   refine ⟨c, fun a => rs Y (le_inf le_rfl le_rfl) (P ⟨V a, hVa a⟩ a),
     fun h => hi₀ (by rw [h]; rfl), fun a b => ?_⟩

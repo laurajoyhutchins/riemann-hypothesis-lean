@@ -1,14 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmHostRootComplexEqPmSqrt
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ModelDominatedOfMapToBaseModel
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGlobalModelOfLocalModels
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTransitionMapRaisedModels
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelDescentCoefficientField
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsNormalModelAboveFiniteCover
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModelBaseChangeOverring
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmHostRootComplexEqPmSqrt
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CoefficientFieldIntegersDedekindFractionField
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModelBaseChangeOverring
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsNormalModelAboveFiniteCover
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSabCancel
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSabMapOfBaseEq
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTransitionMapRaisedModels
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GenericPartDenseProOpen
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsReducedIsNormalSchemeIsLocallyNoetherianOfSmoo
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelDescentCoefficientField
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelMapFiniteEtaleSurjective
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.MapToUniversalObjectUnique
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ModelDominatedOfMapToBaseModel
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ModuliSchemeLevelMapsHeckePoints
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ObjPull
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.OpenImmersionCompStructureEqGeneric
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -208,9 +260,59 @@ theorem dominates_up {O₁ O V₁ V : Type} [CommRing O₁] [CommRing O] [CommRi
       ← spMap_comp, ← spMap_comp, hbb]
   obtain ⟨g₀, hg₀⟩ : ∃ g₀ : pullback Y.s (spMap b) ⟶ pullback Y₁.s (spMap b₁),
       g₀ ≫ pullback.fst _ _ = pullback.fst _ _ ≫ ρ := ⟨_, pullback.lift_fst _ _ w₀⟩
-  obtain ⟨τ, ⟨n₁⟩⟩ : ∃ τ, Nonempty (SABMap τ Y.t (pullback.fst Y.s (spMap b))) := by
-    obtain ⟨_, _, _, _, _, n₁, -⟩ := sabPull Out.CubePf.cubePull (pullback.fst Y.s (spMap b)) Y.t
-    exact ⟨_, ⟨n₁⟩⟩
+  have hpull {S S' : Scheme.{0}} (f : S' ⟶ S) (t : SAB H S) : ∃ t' : SAB H S', Nonempty (SABMap t' t f) := by
+    have hC := Out.CubePf.cubePull
+    have hsemi : IsSemiAbelian ((Over.pullback f).obj t.G) := by
+      refine { comm := ?_, smooth := ?_, separated := ?_, quasiCompact := ?_, geomConnected := ?_, fibres := ?_ }
+      · have := t.semi.comm
+        infer_instance
+      · have := t.semi.smooth
+        change Smooth (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.separated
+        change IsSeparated (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.quasiCompact
+        change QuasiCompact (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.geomConnected
+        change GeometricallyConnected (pullback.snd t.G.hom f)
+        infer_instance
+      · intro Ω _ _ q
+        obtain ⟨A⟩ := t.semi.fibres Ω (q ≫ f)
+        exact ⟨torusExtOfIso (pullCompIso q f t.G) A⟩
+    have hp : ∃ (PP' : RigLB ((Over.pullback f).obj t.G)) (cub : CubicalStr _ PP') (sym : PP'.IsSymmetric) (adj : _) (prim : _)
+        (m : SABMap ⟨(Over.pullback f).obj t.G, hsemi, OAct.pullback f t.G t.act, PP', cub,
+          sym, adj, prim⟩ t f), m.φ = pullback.fst t.G.hom f := by
+      have h := isGrpPullback_pullback t.G f
+      obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := hC S S' t.G _ (cubeMapOf h) t.PP t.cub
+      have hact : ∀ a, ((OAct.pullback f t.G t.act).act a).left ≫ pullback.fst t.G.hom f =
+          pullback.fst t.G.hom f ≫ (t.act.act a).left := fun a => pullback.lift_fst _ _ _
+      have pa : ∀ {T : Over S'} (x : T ⟶ (Over.pullback f).obj t.G) a,
+          pushPt h.1.w (x ≫ (OAct.pullback f t.G t.act).act a) = pushPt h.1.w x ≫ t.act.act a := fun x a =>
+        Over.OverMorphism.ext (by
+          show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+          rw [Category.assoc, hact, Category.assoc])
+      refine ⟨(cubeMapOf h).rigLB t.PP hL hr, c', hs t.sym, fun a => ?_, ?_, ⟨cubeMapOf h, h, rfl, hact, hc'⟩, rfl⟩
+      · let U := lift (pushPt h.1.w (fst ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+          (pushPt h.1.w (snd ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+        refine LBIso.chartPull (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+          (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (t.adj a)
+        · fin_cases i
+          · exact (pa _ a).trans (by simp [U])
+          · simp [U]
+        · fin_cases i
+          · simp [U]
+          · exact (pa _ _).trans (by simp [U])
+      · let U := pushPt h.1.w (𝟙 ((Over.pullback f).obj t.G))
+        refine LBIso.chartPull (chartPullPull t.PP.L _)
+          (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) t.prim
+        fin_cases i
+        · simp [U]
+        · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
+    obtain ⟨_, _, _, _, _, m, -⟩ := hp
+    exact ⟨_, ⟨m⟩⟩
+  obtain ⟨τ, ⟨n₁⟩⟩ := hpull (pullback.fst Y.s (spMap b)) Y.t
   obtain ⟨k₁, hk₁⟩ := LevelCover.sab_comp n₁ mu rfl
   obtain ⟨k₂, hk₂⟩ := LevelCover.sab_cancel p₁ k₁ g₀ hg₀
   obtain ⟨n₂, hn₂⟩ := LevelCover.sab_comp k₂ p₂ rfl

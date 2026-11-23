@@ -1,13 +1,50 @@
-import Formalism.FilteredPoleLength.ReducedBasisBounds.ReductionQuotient
+module
+
+public import Formalism.FilteredPoleLength.ReducedBasisBounds.ReductionQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.LatticeBaseChangeAlt
-
-theorem ordCeil : OrdCeil := by
-  intro n x h
-  have h1 : x ≤ (⌈x⌉ : ℝ) := Int.le_ceil x
-  have h2 : (-(⌈x⌉ : ℝ) - 1) < (n : ℝ) := by linarith
-  have h3 : (-⌈x⌉ - 1 : ℤ) < n := by exact_mod_cast h2
-  omega
 
 theorem poleOrderGood : PoleOrderGood := by
   intro ep T ν νs c' vet e hep hc hv hν ⟨n, hn⟩ he
@@ -40,40 +77,5 @@ theorem poleOrderBad : PoleOrderBad := by
   apply max_le
   · simpa [mul_comm] using hy
   · nlinarith
-
-theorem shareExponent : ShareExponent := by
-  intro D T δ xL xF hδ h1 h2
-  have hD : (0 : ℝ) ≤ D := by positivity
-  nlinarith
-
-theorem heightAbsorb : HeightAbsorb := by
-  intro HL Hde X Y a ha ha2 hY h1 h2
-  have hm : X ≤ max X 0 := le_max_left _ _
-  have hm0 : 0 ≤ max X 0 := le_max_right _ _
-  nlinarith
-
-theorem filIntegerStep : FilIntegerStep := by
-  intro νF νE T c φ μ h1 h2 h3
-  have hT : (0 : ℝ) ≤ T := by positivity
-  have : ((T : ℤ) * νE : ℤ) < νF := by
-    have : ((T : ℝ) * νE) < νF := by nlinarith
-    exact_mod_cast this
-  omega
-
-theorem sFChain : SFChain := by
-  intro ξn lam d' ρ φ t p RR T c hξ hl hd hρ hφ hφ2 ht hRR hTc hc1
-  have h1 : ξn ^ 2 * lam ^ 2 ≤ d' ^ 2 := by
-    have : 0 ≤ ξn * lam := by positivity
-    nlinarith
-  have hξ2 : 0 < ξn ^ 2 := by positivity
-
-  have h2 : 2 * (RR * (T * c)) * (d' ^ 2 * ρ) < ξn ^ 2 * p := by nlinarith
-  have h3 : T * c ≤ RR * (T * c) := by nlinarith
-  have h4 : (T * c) * (ξn ^ 2 * lam ^ 2 * ρ) ≤ (RR * (T * c)) * (d' ^ 2 * ρ) := by
-    apply mul_le_mul h3 (mul_le_mul_of_nonneg_right h1 hρ) (by positivity) (by nlinarith)
-  have h5 : (T * c) * (ξn ^ 2 * φ) ≤ (T * c) * (ξn ^ 2 * (2 * ρ * lam ^ 2)) :=
-    mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hφ2 hξ2.le) hTc
-  have h6 : ξn ^ 2 * (T * c * φ) < ξn ^ 2 * p := by nlinarith
-  exact lt_of_mul_lt_mul_left h6 hξ2.le
 
 end Formalism.LatticeBaseChangeAlt

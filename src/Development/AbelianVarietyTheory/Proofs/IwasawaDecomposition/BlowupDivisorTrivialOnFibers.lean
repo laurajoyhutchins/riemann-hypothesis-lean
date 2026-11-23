@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BlowPolSt
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.CoeNonzeroLocusCanonicalEqComplRange
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsIsGenOfUniqueFactorizationMonoid
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsIsGenOfUniqueFactorizationMonoid
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Degenerations.MorAlgSt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartA
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits NumberField IsLocalRing TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R Formalism.L2.Pj
 open GlobalTheory.Toroidal GlobalTheory.Models GlobalTheory.LN GlobalTheory.ShFam GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.TorRef
@@ -12,32 +61,5 @@ namespace GlobalTheory
 theorem cechPic_sp_field_eq_zero (K : Type) [Field K] (c : GlobalTheory.CechPic.Pic (Sp K)) : c = 0 := by
   obtain ⟨L, hL, rfl⟩ := GlobalTheory.CechPic.cls_surj c
   exact (GlobalTheory.CechPic.cls_eq_zero_iff hL).2 (GlobalTheory.LB.exists_isGen_of_isLocalRing hL)
-
-theorem pull_nsmul_cls_eq_zero_of_comap : ∀ {S S' X' : Scheme.{0}} (B : GlobalTheory.EffCartierData S') (n : ℕ) (h : S ⟶ S') (q : S ⟶ X')
-    (I : X'.IdealSheafData), IsIso h → FinalTheorems.EffCartier I → I.comap q = (B.idealSheaf ^ n).comap h →
-    ∀ (W : Scheme.{0}) (K : Type) [Field K] (g : W ⟶ S) (a : W ⟶ Sp K) (x0 : Sp K ⟶ X'), g ≫ q = a ≫ x0 →
-    GlobalTheory.CechPic.pull (g ≫ h) (n • GlobalTheory.CechPic.cls B.lb B.isLB_lb) = 0 := by
-  intro S S' X' B n h q I hh hI hc W K _ g a x0 hg
-  obtain ⟨D, hD⟩ := GlobalTheory.EffCartierData.exists_idealSheaf_eq hI
-  have kh : (B.nsmul n).KeepsRegular h := (B.nsmul n).keepsRegular_of_flat h
-  have e1 : ((B.nsmul n).pull h kh).idealSheaf = D.idealSheaf.comap q := by
-    rw [GlobalTheory.EffCartierData.idealSheaf_pull, GlobalTheory.EffCartierData.idealSheaf_nsmul, hD, hc]
-  have kq : D.KeepsRegular q := (D.keepsRegular_iff_effCartier q).2
-    (e1 ▸ ((B.nsmul n).pull h kh).effCartier_idealSheaf)
-  have e2 : ((B.nsmul n).pull h kh).idealSheaf = (D.pull q kq).idealSheaf := by
-    rw [e1, GlobalTheory.EffCartierData.idealSheaf_pull]
-  have i1 := ((B.nsmul n).pull h kh).lbIso_of_idealSheaf_eq (D.pull q kq) e2
-  have key : GlobalTheory.CechPic.pull h (n • GlobalTheory.CechPic.cls B.lb B.isLB_lb) =
-      GlobalTheory.CechPic.pull q (GlobalTheory.CechPic.cls D.lb D.isLB_lb) := by
-    rw [← GlobalTheory.CechPic.cls_lbPow B.isLB_lb n (B.isLB_lbPow n),
-      ← (GlobalTheory.CechPic.cls_eq_iff (B.nsmul n).isLB_lb (B.isLB_lbPow n)).2 (B.lbIso_nsmul n),
-      ← GlobalTheory.CechPic.cls_pull (B.nsmul n).isLB_lb h (pull_isLB (B.nsmul n).isLB_lb h),
-      ← GlobalTheory.CechPic.cls_pull D.isLB_lb q (pull_isLB D.isLB_lb q),
-      ← (GlobalTheory.CechPic.cls_eq_iff ((B.nsmul n).pull h kh).isLB_lb (pull_isLB (B.nsmul n).isLB_lb h)).2
-        ((B.nsmul n).lbIso_pull h kh),
-      ← (GlobalTheory.CechPic.cls_eq_iff (D.pull q kq).isLB_lb (pull_isLB D.isLB_lb q)).2 (D.lbIso_pull q kq)]
-    exact (GlobalTheory.CechPic.cls_eq_iff _ _).2 i1
-  rw [GlobalTheory.CechPic.pull_comp, key, ← GlobalTheory.CechPic.pull_comp, hg, GlobalTheory.CechPic.pull_comp,
-    cechPic_sp_field_eq_zero K (GlobalTheory.CechPic.pull x0 _), map_zero]
 
 end GlobalTheory

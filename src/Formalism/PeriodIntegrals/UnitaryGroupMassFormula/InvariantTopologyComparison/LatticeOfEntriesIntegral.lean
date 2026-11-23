@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InvariantTopologyComparison.EntriesLat
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InvariantTopologyComparison.EntriesLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,10 +65,6 @@ private theorem exists_nat_mul_lemma {E : Type} [Field E] [NumberField E] (x : E
     first
     | (obtain ⟨m, hm⟩ := IsIntegral.exists_multiple_integral_of_isLocalization (nonZeroDivisors ℤ) x hq
        exact ⟨m, nonZeroDivisors.coe_ne_zero m, by rw [← zsmul_eq_mul]; exact hm⟩)
-    | (obtain ⟨m, hm⟩ := IsIntegral.exists_multiple_integral_of_isLocalization (Rₘ := ℚ) (nonZeroDivisors ℤ) x hq
-       exact ⟨m, nonZeroDivisors.coe_ne_zero m, by rw [← zsmul_eq_mul]; exact hm⟩)
-    | (obtain ⟨y, hy, h⟩ := ((IsFractionRing.isAlgebraic_iff ℤ ℚ E).2 hq.isAlgebraic).exists_integral_multiple
-       exact ⟨y, hy, by rw [← zsmul_eq_mul]; exact h⟩)
   obtain ⟨y, hy0, hint⟩ := H
   have hmem : (y : E) * x ∈ Formalism.UG.intOE E :=
     RingHom.mem_range.2 ((IsIntegralClosure.isIntegral_iff (A := 𝓞 E)).1 hint)
@@ -47,7 +92,6 @@ theorem algebraMap_mem_intOE {E : Type} [Field E] [NumberField E] (a : 𝓞 E) :
     algebraMap (𝓞 E) E a ∈ Formalism.UG.intOE E := by
   first
   | exact RingHom.mem_range_self _ a
-  | exact ⟨a, rfl⟩
 
 theorem exists_den_lat {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L : Submodule (𝓞 E) (Fin n → E)) (hL : L.FG) :
@@ -141,8 +185,6 @@ theorem inclE_mem_int (x : E) (hx : x ∈ Formalism.UG.intOE E) :
     Formalism.UG.inclE (F := F) (Formalism.MainNotions.S.Af F) x ∈ Formalism.MainNotions.S.IntAf F E := by
   first
   | exact Subring.subset_closure (Or.inl ⟨⟨x, hx⟩, rfl⟩)
-  | (unfold Formalism.MainNotions.S.IntAf Formalism.UG.tensInt Formalism.UG.inclE
-     exact Subring.subset_closure (Or.inl ⟨⟨x, hx⟩, rfl⟩))
 
 theorem lat_den {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E)) (c : ℕ)
     (hc : ∀ x ∈ L, ∀ i, (c : E) * x i ∈ Formalism.UG.intOE E) :
@@ -238,9 +280,6 @@ theorem entries_integral_of_lattice : EntriesLat := by
   have hM'M : M' * M = 1 := by
     first
     | exact mul_eq_one_comm.1 hMM'
-    | exact Matrix.mul_eq_one_comm.1 hMM'
-    | (letI := Matrix.invertibleOfRightInverse M M' hMM'
-       exact invOf_mul_self M)
   refine ⟨fun y => ⟨fun hy => ?_, fun hy => ?_⟩, fun y hy => matrix_entries_integral I c g h1 h2 (M - 1) hM y hy⟩
   · obtain ⟨z, hz, e⟩ := matrix_entries_integral I c g h1 h2 (M - 1) hM y hy
     have h3 : M *ᵥ y = y + (M - 1) *ᵥ y := by

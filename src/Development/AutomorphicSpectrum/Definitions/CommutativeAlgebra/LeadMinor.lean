@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,17 +56,6 @@ variable {A K : Type} [CommRing A] [Field K] [Algebra A K] {E : Type} [Field E] 
   {Ω : Type} [AddCommGroup Ω] [Module K Ω] [Module A Ω] [IsScalarTower A K Ω]
   (D : HTChart A K c p R N Ω)
 
-structure PullsBack {A' K' : Type} [CommRing A'] [Field K'] [Algebra A' K'] [Algebra K K']
-    {Ω' : Type} [AddCommGroup Ω'] [Module K' Ω'] [Module A' Ω'] [IsScalarTower A' K' Ω']
-    [Module K Ω'] [IsScalarTower K K' Ω']
-    (D' : HTChart A' K' c p R N Ω') (f : A →+* A') (ψ : Ω →ₗ[K] Ω') : Prop where
-  comm : ∀ a : A, algebraMap A' K' (f a) = algebraMap K K' (algebraMap A K a)
-  base : IsBaseChange K' ψ
-  om_eq : D'.om = Submodule.span A' (ψ '' (D.om : Set Ω))
-  lin : ∀ (a : 𝓞 E) (x : Ω), ψ (D.ρΩ a x) = D'.ρΩ a (ψ x)
-  e_eq : D'.e = D.e
-  h_eq : ∀ x, ∃ y ∈ D'.om, D'.h x = ψ (D.h x) + (p ^ R) • y
-
 def IsFrame (σ : E →+* K) (m : ℕ)
     (i : Module.Dual A (D.omHT (σ.comp c.toRingHom)) →ₗ[A] (Fin N → A)) {j k : ℕ}
     (bW : Basis (Fin j) A (Module.Dual A (D.omHT (σ.comp c.toRingHom))))
@@ -33,9 +64,5 @@ def IsFrame (σ : E →+* K) (m : ℕ)
   ∀ a, ∃ y ∈ D.omHT σ, D.q σ (fun l => g l (Sum.inr a)) = (bM a : Ω) + ((p : A) ^ m) • y
 
 end HTChart
-
-def leadMinor {B : Type} [CommRing B] {N : ℕ} (g : Matrix (Fin N) (Fin N) B) (i : ℕ) (hi : i ≤ N)
-    (J : Fin i → Fin N) : B :=
-  (g.submatrix J (Fin.castLE hi)).det
 
 end GlobalTheory.CompanionTheory.Ar.HT

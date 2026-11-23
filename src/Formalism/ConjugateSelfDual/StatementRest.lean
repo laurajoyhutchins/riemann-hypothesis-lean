@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.ConjugateSelfDual.Statement
+module
+
+public import Formalism.ConjugateSelfDual.Statement
+public import Mathlib.NumberTheory.DirichletCharacter.Basic
+public import Mathlib.NumberTheory.ModularForms.QExpansion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,13 +64,6 @@ variable {F Ω : Type*} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] {n l
 def UnramAt {R : Type*} [CommRing R] (ρ : G F Ω →* GL (Fin n) R) (v : HeightOneSpectrum (𝓞 F)) :
     Prop :=
   ∀ A, IsPlaceOver A v → ∀ σ ∈ Inertia A, ρ σ = 1
-
-def AlmostUnram {R : Type*} [CommRing R] (ρ : G F Ω →* GL (Fin n) R) : Prop :=
-  {v : HeightOneSpectrum (𝓞 F) | ¬ UnramAt ρ v}.Finite
-
-def Irred (ρ : G F Ω →* GL (Fin n) (Qbar l)) : Prop :=
-  0 < n ∧ ∀ W : Submodule (Qbar l) (Fin n → Qbar l),
-    (∀ σ, ∀ w ∈ W, Matrix.mulVec (ρ σ : Matrix (Fin n) (Fin n) (Qbar l)) w ∈ W) → W = ⊥ ∨ W = ⊤
 
 def FrobMatch (ρ : G F Ω →* GL (Fin n) (Qbar l)) (ι : Qbar l →+* ℂ)
     (P : HeightOneSpectrum (𝓞 F) → ℂ[X]) : Prop :=
@@ -49,26 +86,6 @@ def conjGal {K Ω : Type*} [Field K] [Field Ω] [Algebra K Ω] (s : K ≃+* K) (
 
 variable {n l : ℕ} [Fact l.Prime]
 
-def IsConjSelfDualSym {K Ω : Type*} [Field K] [Field Ω] [Algebra K Ω] (ρ : G K Ω →* GL (Fin n) (Qbar l)) : Prop :=
-  ∃ s : K ≃+* K, s ≠ RingEquiv.refl K ∧
-    ∃ (τ : Ω ≃+* Ω)
-      (hτ : ∀ x : K, τ (algebraMap K _ x) = algebraMap K _ (s x)), (∀ x, τ (τ x) = x) ∧
-    ∃ J : Matrix (Fin n) (Fin n) (Qbar l), J.det ≠ 0 ∧ J.transpose = J ∧
-    ∃ μ : G K Ω → Qbar l, ∀ σ : G K Ω,
-      (ρ σ : Matrix (Fin n) (Fin n) (Qbar l)).transpose * J * (ρ (conjGal s τ hτ σ) : Matrix _ _ _) = μ σ • J
-
-def IsComplexConj {Ω : Type*} [Field Ω] [Algebra ℚ Ω] (c : G ℚ Ω) : Prop :=
-  ∃ j : Ω →+* ℂ, ∀ x, j (c x) = starRingEnd ℂ (j x)
-
-def IsOddSymplectic {Ω : Type*} [Field Ω] [Algebra ℚ Ω] (ρ : G ℚ Ω →* GL (Fin n) (Qbar l)) : Prop :=
-  ∃ J : Matrix (Fin n) (Fin n) (Qbar l), J.det ≠ 0 ∧ J.transpose = -J ∧
-    ∃ ν : G ℚ Ω → Qbar l,
-      (∀ σ, (ρ σ : Matrix (Fin n) (Fin n) (Qbar l)).transpose * J * (ρ σ : Matrix _ _ _) = ν σ • J) ∧
-      ∀ c, IsComplexConj c → ν c = -1
-
-def IsOdd {Ω : Type*} [Field Ω] [Algebra ℚ Ω] (ρ : G ℚ Ω →* GL (Fin 2) (Qbar l)) : Prop :=
-  ∀ c, IsComplexConj c → (ρ c : Matrix (Fin 2) (Fin 2) (Qbar l)).det = -1
-
 end polar
 
 structure CuspSpectrum (F : Type*) [Field F] [NumberField F] (n : ℕ) where
@@ -84,17 +101,6 @@ structure CuspSpectrum (F : Type*) [Field F] [NumberField F] (n : ℕ) where
   finite : ∀ (M : ℕ) (w : (F →+* ℂ) → Fin n → ℤ), {π | level π M ∧ wt π = w}.Finite
 
 abbrev SpectrumFamily := ∀ (F : Type) [Field F] [NumberField F] (n : ℕ), CuspSpectrum F n
-
-def CuspSpectrum.empty (F : Type*) [Field F] [NumberField F] (n : ℕ) : CuspSpectrum F n where
-  Rep := Empty
-  wt π := π.elim
-  level π := π.elim
-  hecke π := π.elim
-  level_exists π := π.elim
-  level_dvd π := π.elim
-  hecke_monic π := π.elim
-  mult_one π := π.elim
-  finite _ _ := Set.toFinite _
 
 def IsNormEigenform {N : ℕ} {k : ℤ} (f : CuspForm (CongruenceSubgroup.Gamma1 N) k)
     (χ : DirichletCharacter ℂ N) : Prop :=

@@ -1,4 +1,58 @@
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Mathlib.Analysis.SpecialFunctions.SmoothTransition
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DefsRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.RealPlaceAnalysis.QuotientSettingHolds
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CasComm
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.MeasurePreservingMulRight
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,12 +97,10 @@ theorem isClosedEmbedding_umatA (ε : Fin n → Bool) :
   have hJ : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => Formalism.REAL.Jm ε * Mᴴ * Formalism.REAL.Jm ε) := by
     first
     | exact (continuous_const.matrix_mul continuous_id.matrix_conjTranspose).matrix_mul continuous_const
-    | continuity
   have hF : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ =>
       (M, MulOpposite.op (Formalism.REAL.Jm ε * Mᴴ * Formalism.REAL.Jm ε))) := by
     first
     | exact continuous_id.prodMk (MulOpposite.continuous_op.comp hJ)
-    | exact continuous_id.prod_mk (MulOpposite.continuous_op.comp hJ)
   have h2 : ((fun M : Matrix (Fin n) (Fin n) ℂ =>
       (M, MulOpposite.op (Formalism.REAL.Jm ε * Mᴴ * Formalism.REAL.Jm ε))) ∘ (fun g : Formalism.REAL.UJ ε => Formalism.MainNotions.S.umat g))
       = Units.embedProduct (Matrix (Fin n) (Fin n) ℂ) ∘ Subtype.val := by
@@ -61,7 +113,6 @@ theorem isClosedEmbedding_umatA (ε : Fin n → Bool) :
     have he : IsInducing (Units.embedProduct (Matrix (Fin n) (Fin n) ℂ)) := by
       first
       | exact Units.isEmbedding_embedProduct.isInducing
-      | exact ⟨rfl⟩
     exact he.comp IsInducing.subtypeVal
   have hrange : Set.range (fun g : Formalism.REAL.UJ ε => Formalism.MainNotions.S.umat g)
       = {M : Matrix (Fin n) (Fin n) ℂ | Mᴴ * Formalism.REAL.Jm ε * M = Formalism.REAL.Jm ε} := by
@@ -77,8 +128,6 @@ theorem isClosedEmbedding_umatA (ε : Fin n → Bool) :
       have hr : M * (Formalism.REAL.Jm ε * Mᴴ * Formalism.REAL.Jm ε) = 1 := by
         first
         | exact mul_eq_one_comm.mp hl
-        | exact (Matrix.invertibleOfLeftInverse M _ hl).mul_invOf_self
-        | (letI := Matrix.invertibleOfLeftInverse M _ hl; exact mul_invOf_self M)
       exact ⟨⟨⟨M, _, hr, hl⟩, hM⟩, rfl⟩
   refine ⟨⟨IsInducing.of_comp hc hF hind, ?_⟩, ?_⟩
   · intro a b h
@@ -87,7 +136,6 @@ theorem isClosedEmbedding_umatA (ε : Fin n → Bool) :
     have hq : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => Mᴴ * Formalism.REAL.Jm ε * M) := by
       first
       | exact (continuous_id.matrix_conjTranspose.matrix_mul continuous_const).matrix_mul continuous_id
-      | continuity
     exact isClosed_eq hq continuous_const
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
@@ -99,8 +147,6 @@ theorem continuous_orbitA (hσ : IsURepOn (UJset ε) σ) (v : H) :
 private theorem muG_fin_lemma_3 (e : Fin n → Bool) : IsFiniteMeasureOnCompacts (Formalism.REAL.muG e) := by
   first
   | infer_instance
-  | (unfold Formalism.REAL.muG; infer_instance)
-  | (simp only [Formalism.REAL.muG]; infer_instance)
 
 theorem integrable_cvA (hσ : IsURepOn (UJset ε) σ) {α : Matrix (Fin n) (Fin n) ℂ → ℂ} (hα : Continuous α)
     (hαc : HasCompactSupport α) (v : H) :
@@ -142,7 +188,7 @@ theorem cvA_zero_fun (v : H) : cvA ε σ 0 v = 0 := by
 theorem cvA_add_vec (hσ : IsURepOn (UJset ε) σ) {α : Matrix (Fin n) (Fin n) ℂ → ℂ} (hα : Continuous α)
     (hαc : HasCompactSupport α) (v w : H) :
     cvA ε σ α (v + w) = cvA ε σ α v + cvA ε σ α w := by
-  simp only [cvA, map_add, smul_add]
+  simp only [cvA, map_add (f := _), smul_add]
   exact integral_add (integrable_cvA hσ hα hαc v) (integrable_cvA hσ hα hαc w)
 
 theorem cvA_smul_vec (α : Matrix (Fin n) (Fin n) ℂ → ℂ) (c : ℂ) (v : H) :
@@ -197,10 +243,7 @@ def hsdA (g : Matrix (Fin n) (Fin n) ℂ) : ℝ := ∑ i, ∑ j, ‖(g - 1) i j�
 
 theorem contDiff_entryA (i j : Fin n) : ContDiff ℝ ∞ (fun g : Matrix (Fin n) (Fin n) ℂ => g i j) := by
   first
-  | exact (contDiff_apply ℝ ℂ j).comp (contDiff_apply ℝ (Fin n → ℂ) i)
-  | fun_prop
-  | exact ((ContinuousLinearMap.proj j).comp (ContinuousLinearMap.proj i :
-      (Fin n → Fin n → ℂ) →L[ℝ] (Fin n → ℂ))).contDiff
+  | exact (contDiff_apply ℝ (fun _ => ℂ) j).comp (contDiff_apply ℝ (fun _ => (Fin n → ℂ)) i)
 
 theorem contDiff_hsdA : ContDiff ℝ ∞ (hsdA (n := n)) := by
   unfold hsdA
@@ -208,7 +251,6 @@ theorem contDiff_hsdA : ContDiff ℝ ∞ (hsdA (n := n)) := by
   show ContDiff ℝ ∞ (fun g : Matrix (Fin n) (Fin n) ℂ => ‖g i j - (1 : Matrix (Fin n) (Fin n) ℂ) i j‖ ^ 2)
   first
   | exact (contDiff_norm_sq ℂ).comp ((contDiff_entryA i j).sub contDiff_const)
-  | exact (contDiff_norm_sq ℝ).comp ((contDiff_entryA i j).sub contDiff_const)
 
 theorem hsdA_one : hsdA (1 : Matrix (Fin n) (Fin n) ℂ) = 0 := by
   simp [hsdA]
@@ -236,9 +278,6 @@ theorem hsdA_eq_trace (g : Matrix (Fin n) (Fin n) ℂ) :
   refine Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun i _ => ?_))
   first
   | (rw [Complex.star_def, Complex.conj_mul']; norm_cast)
-  | (simp only [Complex.star_def, Complex.mul_re, Complex.conj_re, Complex.conj_im, Complex.sq_norm,
-      Complex.normSq_apply]; ring)
-  | (simp [Complex.mul_re, Complex.sq_abs, Complex.normSq_apply]; ring)
 
 theorem hsdA_conj {k : Matrix (Fin n) (Fin n) ℂ} (hk : k ∈ Matrix.unitaryGroup (Fin n) ℂ)
     (g : Matrix (Fin n) (Fin n) ℂ) : hsdA (k * g * star k) = hsdA g := by
@@ -283,8 +322,6 @@ theorem hasCompactSupport_bumpA (δ : ℝ) : HasCompactSupport (bumpA (n := n) �
   haveI : ProperSpace (Matrix (Fin n) (Fin n) ℂ) := by
     first
     | infer_instance
-    | exact (inferInstance : ProperSpace (Fin n → Fin n → ℂ))
-    | exact FiniteDimensional.proper_real _
   have hsub : tsupport (bumpA (n := n) δ) ⊆ Metric.closedBall 1 (Real.sqrt δ) := by
     intro g hg
     rw [Metric.mem_closedBall, dist_eq_norm]
@@ -306,9 +343,6 @@ theorem AdmA.add {U : Set (Matrix (Fin n) (Fin n) ℂ)} {α β : Matrix (Fin n) 
   · have ht : tsupport (α + β) ⊆ tsupport α ∪ tsupport β := by
       first
       | exact tsupport_add α β
-      | exact closure_minimal ((Function.support_add α β).trans
-          (Set.union_subset_union (subset_tsupport α) (subset_tsupport β)))
-          ((isClosed_tsupport α).union (isClosed_tsupport β))
     exact ht.trans (Set.union_subset h3 k3)
   · show α (k * g * star k) + β (k * g * star k) = α g + β g
     rw [h4 k hk g, k4 k hk g]
@@ -325,20 +359,16 @@ theorem AdmA.zero (U : Set (Matrix (Fin n) (Fin n) ℂ)) : AdmA ε U 0 := by
   refine ⟨?_, HasCompactSupport.zero, ?_, fun _ _ _ => rfl⟩
   · first
     | exact contDiff_zero_fun
-    | exact contDiff_const
   · rw [tsupport_zero]
     exact Set.empty_subset _
 
 theorem one_mem_UJsetA (ε : Fin n → Bool) : (1 : Matrix (Fin n) (Fin n) ℂ) ∈ UJset ε := by
   first
   | exact umat_mem_UJset ε 1
-  | (show (1 : Matrix (Fin n) (Fin n) ℂ)ᴴ * Formalism.REAL.Jm ε * 1 = Formalism.REAL.Jm ε; simp)
 
 private theorem muG_pos_lemma_4 (e : Fin n → Bool) : Measure.IsOpenPosMeasure (Formalism.REAL.muG e) := by
   first
   | infer_instance
-  | (unfold Formalism.REAL.muG; infer_instance)
-  | (simp only [Formalism.REAL.muG]; infer_instance)
 
 theorem integral_bumpA_pos (ε : Fin n → Bool) {δ : ℝ} (hδ : 0 < δ) :
     0 < ∫ g : Formalism.REAL.UJ ε, bumpA δ (Formalism.MainNotions.S.umat g) ∂(Formalism.REAL.muG ε) := by

@@ -1,12 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.Transport
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SpanSingletonEqTopIffIsUnitOfIsBaseChange
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.Transport
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SpanSingletonEqTopIffIsUnitOfIsBaseChange
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
+public import Mathlib.CategoryTheory.EffectiveEpi.Comp
+public import Mathlib.CategoryTheory.ExtremalEpi
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -85,12 +135,12 @@ variable (L : LB X)
 def secGroup (V : X.Opens) : AddSubgroup (∀ i, Γ(X, V ⊓ L.U i)) where
   carrier := secOn L V
   add_mem' := fun {s t} hs ht i j => by
-    simp only [Pi.add_apply, map_add, hs i j, ht i j, mul_add]
+    simp only [Pi.add_apply, map_add (f := _), hs i j, ht i j, mul_add]
   zero_mem' := fun i j => by simp only [Pi.zero_apply, map_zero, mul_zero]
   neg_mem' := fun {s} hs i j => by simp only [Pi.neg_apply, map_neg, hs i j, mul_neg]
 
-variable {L} in
 
+variable {L} in
 theorem secOn_rel {V : X.Opens} {s : ∀ i, Γ(X, V ⊓ L.U i)} (hs : s ∈ secOn L V) (i j : L.ι)
     {W : X.Opens} (hi : W ≤ V ⊓ L.U i) (hj : W ≤ V ⊓ L.U j) (hij : W ≤ L.U i ⊓ L.U j) :
     resG X hi (s i) = resG X hij (L.g i j : Γ(X, L.U i ⊓ L.U j)) * resG X hj (s j) := by
@@ -110,7 +160,7 @@ instance secGroupModule (V : X.Opens) : Module Γ(X, V) (secGroup L V) where
   smul_add a s t := Subtype.ext <| funext fun i => mul_add _ _ _
   add_smul a b s := Subtype.ext <| funext fun i => by
     change resG X _ (a + b) * s.1 i = resG X _ a * s.1 i + resG X _ b * s.1 i
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
   zero_smul s := Subtype.ext <| funext fun i => by
     change resG X _ 0 * s.1 i = 0
     rw [map_zero, zero_mul]
@@ -188,8 +238,8 @@ def mkSec {V : X.Opens} (f : ∀ i, Γ(X, V ⊓ L.U i)) (hf : f ∈ secOn L V) :
 @[ext] theorem sec_ext {V : X.Opens} {s t : Γ(toMod L, V)} (h : ∀ i, coord s i = coord t i) :
     s = t := Subtype.ext (funext h)
 
-variable (L) in
 
+variable (L) in
 def secOnEquiv (V : X.Opens) : Γ(toMod L, V) ≃ secOn L V where
   toFun s := ⟨coord s, coord_mem s⟩
   invFun f := mkSec f.1 f.2
@@ -200,12 +250,6 @@ def secOnEquiv (V : X.Opens) : Γ(toMod L, V) ≃ secOn L V where
 
 @[simp] theorem coord_add {V : X.Opens} (s t : Γ(toMod L, V)) (i : L.ι) :
     coord (s + t) i = coord s i + coord t i := rfl
-
-@[simp] theorem coord_neg {V : X.Opens} (s : Γ(toMod L, V)) (i : L.ι) :
-    coord (-s) i = - coord s i := rfl
-
-@[simp] theorem coord_sub {V : X.Opens} (s t : Γ(toMod L, V)) (i : L.ι) :
-    coord (s - t) i = coord s i - coord t i := rfl
 
 @[simp] theorem coord_smul {V : X.Opens} (a : Γ(X, V)) (s : Γ(toMod L, V)) (i : L.ι) :
     coord (a • s) i = resG X inf_le_left a * coord s i := rfl
@@ -277,7 +321,7 @@ instance secModuleTop : Module Γ(X, ⊤) (LB.Sec L) where
   mul_smul a b s := SecOps.sec_ext fun i => by rw [smul_f, smul_f, smul_f, map_mul, mul_assoc]
   smul_zero a := SecOps.sec_ext fun i => by rw [smul_f, zero_f, mul_zero]
   smul_add a s t := SecOps.sec_ext fun i => by simp only [smul_f, add_f, mul_add]
-  add_smul a b s := SecOps.sec_ext fun i => by simp only [smul_f, add_f, map_add, add_mul]
+  add_smul a b s := SecOps.sec_ext fun i => by simp only [smul_f, add_f, map_add (f := _), add_mul]
   zero_smul s := SecOps.sec_ext fun i => by rw [smul_f, map_zero, zero_mul, zero_f]
 
 theorem sec_rel (s : LB.Sec L) (i j : L.ι) {W : X.Opens} (hi : W ≤ L.U i) (hj : W ≤ L.U j)
@@ -298,8 +342,8 @@ def ofSec (s : LB.Sec L) (V : X.Opens) : Γ(toMod L, V) :=
     (toMod L).presheaf.map (homOfLE h).op (ofSec s V) = ofSec s W :=
   sec_ext fun i => by rw [coord_map, coord_ofSec, resG_resG, coord_ofSec]
 
-variable (L) in
 
+variable (L) in
 def globalEquiv : Γ(toMod L, ⊤) ≃ₗ[Γ(X, ⊤)] LB.Sec L where
   toFun s := ⟨fun i => resG X (le_inf le_top le_rfl) (coord s i), fun i j => by
     change resG X _ (resG X _ _) = _ * resG X _ (resG X _ _)
@@ -339,9 +383,6 @@ def globalEquivSecM : Γ(toMod (LPow A L₀ a T), ⊤) ≃+ SecM A L₀ a T wher
   right_inv f := congrArg (SecM.ofSec A) ((globalEquiv _).apply_symm_apply (SecM.toSec A f))
   map_add' s t := congrArg (SecM.ofSec A) (map_add (globalEquiv _) s t)
 
-theorem globalEquivSecM_apply (s : Γ(toMod (LPow A L₀ a T), ⊤)) :
-    globalEquivSecM A L₀ a T s = SecM.ofSec A (globalEquiv _ s) := rfl
-
 theorem globalEquivSecM_smul (r : Γ(T.left, ⊤)) (s : Γ(toMod (LPow A L₀ a T), ⊤)) :
     globalEquivSecM A L₀ a T ((show Γ((T ⊗ A).left, ⊤) from (fst T A).left.appTop r) • s) =
       r • globalEquivSecM A L₀ a T s :=
@@ -370,7 +411,7 @@ def chartEquiv (hL : L.IsLB) (i : L.ι) {V : X.Opens} (h : V ≤ L.U i) :
     simp only [coord_smul, coord_map, coord_chartSec, resG_resG]
     rw [mul_comm, ← coord_rel s j i le_rfl, resG_self]
   right_inv a := by
-    simp only [coord_smul, coord_map, coord_chartSec, map_mul, resG_resG, resG_self,
+    simp only [coord_smul, coord_map, coord_chartSec, resG_resG, resG_self,
       resG_g_self hL, map_one, mul_one]
 
 theorem chartEquiv_apply (hL : L.IsLB) (i : L.ι) {V : X.Opens} (h : V ≤ L.U i)
@@ -401,14 +442,8 @@ def chartIso (hL : L.IsLB) (i : L.ι) :
     unitMod (L.U i).toScheme ≅ (toMod L).restrict (L.U i).ι :=
   Descent.freeIso (Descent.bijective_smul_stalk (bijective_smul_chartSec hL i))
 
-theorem chartIso_hom_app (hL : L.IsLB) (i : L.ι) (W : (L.U i).toScheme.Opens)
-    (a : Γ(X, (L.U i).ι ''ᵁ W)) :
-    ((chartIso hL i).hom.app W a : Γ(toMod L, (L.U i).ι ''ᵁ W)) =
-      a • (toMod L).presheaf.map (homOfLE ((L.U i).ι_image_le W)).op (chartSec hL i) :=
-  Descent.sectionHom_app _ W a
 
 set_option backward.isDefEq.respectTransparency false in
-
 def chartOverIso (hL : L.IsLB) (i : L.ι) :
     SheafOfModules.free (R := X.ringCatSheaf.over (L.U i)) PUnit.{1} ≅ (toMod L).over (L.U i) :=
   let e := Scheme.Modules.overEquiv (L.U i)
@@ -418,8 +453,8 @@ def chartOverIso (hL : L.IsLB) (i : L.ι) :
     e.inverse.mapIso ((Scheme.Modules.overFunctorEquiv (L.U i)).app (toMod L)).symm ≪≫
       (e.unitIso.app ((toMod L).over (L.U i))).symm
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem isIso_ofEpi_π.{v, u} {C : Type u} [Category.{v} C] {J : GrothendieckTopology C}
     {R : Sheaf J RingCat.{0}} [HasWeakSheafify J AddCommGrpCat.{0}]
     [J.WEqualsLocallyBijective AddCommGrpCat.{0}] {M : SheafOfModules.{0} R} {I : Type}
@@ -428,8 +463,8 @@ theorem isIso_ofEpi_π.{v, u} {C : Type u} [Category.{v} C] {J : GrothendieckTop
   rw [SheafOfModules.GeneratingSections.ofEpi_π, SheafOfModules.free.generatingSections_π]
   exact inferInstanceAs (IsIso (𝟙 (SheafOfModules.free I) ≫ e.hom))
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 def generatorsOfIso {F : X.Modules} {ι : Type} {U : ι → X.Opens} (hU : ⨆ i, U i = ⊤)
     (e : ∀ i, SheafOfModules.free (R := X.ringCatSheaf.over (U i)) PUnit.{1} ≅ F.over (U i)) :
     SheafOfModules.LocalGeneratorsData.{0} F where
@@ -440,8 +475,8 @@ def generatorsOfIso {F : X.Modules} {ι : Type} {U : ι → X.Opens} (hU : ⨆ i
     exact hU
   generators i := (SheafOfModules.free.generatingSections PUnit.{1}).ofEpi (e i).hom
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem isLocallyFree_of_iso {F : X.Modules} {ι : Type} {U : ι → X.Opens} (hU : ⨆ i, U i = ⊤)
     (e : ∀ i, SheafOfModules.free (R := X.ringCatSheaf.over (U i)) PUnit.{1} ≅ F.over (U i)) :
     F.IsLocallyFree ∧ F.IsFiniteType :=
@@ -452,8 +487,8 @@ theorem isLocallyFree_of_iso {F : X.Modules} {ι : Type} {U : ι → X.Opens} (h
 theorem isLocallyFree_toMod (hL : L.IsLB) : (toMod L).IsLocallyFree :=
   (isLocallyFree_of_iso hL.cover (chartOverIso hL)).1
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem isQuasicoherent_toMod (hL : L.IsLB) : (toMod L).IsQuasicoherent :=
   haveI := isLocallyFree_toMod hL
   inferInstance
@@ -542,7 +577,7 @@ def mulLinear (hL : L.IsLB) (hM : M.IsLB) (w : LB.Sec (LB.div M L)) (V : X.Opens
     Γ(toMod L, V) →ₗ[Γ(X, V)] Γ(toMod M, V) where
   toFun := mulFun hL hM w
   map_add' s t := sec_ext_of_cover hL.cover fun p q => by
-    simp only [coord_add, map_add, coord_mulFun', mul_add]
+    simp only [coord_add, map_add (f := _), coord_mulFun', mul_add]
   map_smul' a s := sec_ext_of_cover hL.cover fun p q => by
     simp only [coord_smul, map_mul, coord_mulFun', resG_resG, RingHom.id_apply]
     ring
@@ -606,21 +641,6 @@ theorem nonempty_iso_of_lbIso (hL : L.IsLB) (hM : M.IsLB) (h : LBIso L M) :
   let ⟨w, hw⟩ := h
   ⟨isoOfGen hL hM w hw⟩
 
-theorem isoOfGen_hom_app_genSec (hL : L.IsLB) (hM : M.IsLB) (w : LB.Iso L M) (hw : w.IsGen)
-    {a : LB.Gen L} {b : LB.Gen M} (ha : a.IsGen) (hb : b.IsGen) (h : LB.Gen.Maps w a b)
-    (V : X.Opens) :
-    (isoOfGen hL hM w hw).hom.app V (ofSec (DVR.genSec a ha) V) = ofSec (DVR.genSec b hb) V :=
-  sec_ext_of_cover hL.cover fun p q => by
-    have l : V ⊓ M.U p ⊓ L.U q ≤ M.U p ⊓ L.U q := inf_le_inf_right _ inf_le_right
-    rw [coord_isoOfGen_hom_app hL hM w hw _ p q _ (inf_le_inf_right _ inf_le_left) l]
-    have e : resG X inf_le_left ((b.s p : Γ(X, M.U p))) =
-        ((show Γ(X, M.U p ⊓ L.U q)ˣ from w.s (p, q)) : Γ(X, M.U p ⊓ L.U q)) *
-          resG X inf_le_right (a.s q : Γ(X, L.U q)) := congrArg Units.val (h (p, q))
-    have := congrArg (resG X l) e
-    simp only [map_mul, resG_resG] at this
-    simp only [coord_ofSec, resG_resG]
-    exact this.symm
-
 end Hom
 
 def unitHom (σ : LB.Sec L) : unitMod X ⟶ toMod L :=
@@ -628,9 +648,6 @@ def unitHom (σ : LB.Sec L) : unitMod X ⟶ toMod L :=
     fun {V W} h (a : Γ(X, V)) => by
       change resG X h a • ofSec σ W = (toMod L).presheaf.map (homOfLE h).op (a • ofSec σ V)
       rw [Scheme.Modules.map_smul, map_ofSec]
-
-theorem unitHom_app (σ : LB.Sec L) (V : X.Opens) (a : Γ(X, V)) :
-    (unitHom σ).app V a = a • ofSec σ V := rfl
 
 theorem bijective_smul_genSec (hL : ⨆ i, L.U i = ⊤) {t : LB.Gen L} (ht : t.IsGen) (V : X.Opens) :
     Function.Bijective fun a : Γ(X, V) => a • ofSec (DVR.genSec t ht) V := by
@@ -660,9 +677,6 @@ def unitIso (hL : L.IsLB) (t : LB.Gen L) (ht : t.IsGen) : unitMod X ≅ toMod L 
     Scheme.Modules.Hom.isIso_iff_isIso_app.2 fun V =>
       (ConcreteCategory.isIso_iff_bijective _).2 (bijective_smul_genSec hL.cover ht V)
   asIso (unitHom (DVR.genSec t ht))
-
-theorem unitIso_hom_app (hL : L.IsLB) (t : LB.Gen L) (ht : t.IsGen) (V : X.Opens) (a : Γ(X, V)) :
-    (unitIso hL t ht).hom.app V a = a • ofSec (DVR.genSec t ht) V := rfl
 
 section Pull
 
@@ -701,8 +715,8 @@ theorem pull_inf_le (V : X.Opens) (j : (L.pull f).ι) :
     f ⁻¹ᵁ V ⊓ (L.pull f).U j ≤ f ⁻¹ᵁ (V ⊓ L.U (j PUnit.unit)) :=
   inf_le_inf_left _ (pull_U_le f j)
 
-variable (L) in
 
+variable (L) in
 def pullSec (V : X.Opens) :
     Γ(toMod L, V) →ₛₗ[(f.app V).hom] Γ(toMod (L.pull f), f ⁻¹ᵁ V) where
   toFun s := mkSec (fun j => (f.appLE _ _ (pull_inf_le f V j)).hom (coord s (j PUnit.unit)))
@@ -752,8 +766,8 @@ theorem globalEquiv_pullSec_f (s : LB.Sec L) (j : (L.pull f).ι) :
     (coord (pullSec L f ⊤ (ofSec s ⊤)) j) = _
   rw [coord_pullSec, resG_appLE, coord_ofSec, appLE_resG]
 
-variable (L) in
 
+variable (L) in
 def toPushforward : toMod L ⟶ (Scheme.Modules.pushforward f).obj (toMod (L.pull f)) :=
   homOfLinear (G := (Scheme.Modules.pushforward f).obj (toMod (L.pull f)))
     (fun V =>
@@ -765,8 +779,8 @@ def toPushforward : toMod L ⟶ (Scheme.Modules.pushforward f).obj (toMod (L.pul
 theorem toPushforward_app (V : X.Opens) (s : Γ(toMod L, V)) :
     (toPushforward L f).app V s = pullSec L f V s := rfl
 
-variable (L) in
 
+variable (L) in
 def pullbackHom : (Scheme.Modules.pullback f).obj (toMod L) ⟶ toMod (L.pull f) :=
   ((Scheme.Modules.pullbackPushforwardAdjunction f).homEquiv _ _).symm (toPushforward L f)
 
@@ -775,11 +789,6 @@ end Pull
 def trivIso (X : Scheme.{0}) : unitMod X ≅ toMod (Out.Inh.trivLB X) :=
   unitIso (Out.Inh.trivLB_isLB X) ⟨fun _ => 1⟩ fun _ _ => by
     exact (one_mul _).symm
-
-theorem coord_trivIso_hom_app (V : X.Opens) (a : Γ(X, V)) (i : PUnit.{1}) :
-    coord (L := Out.Inh.trivLB X) ((trivIso X).hom.app V a) i = resG X inf_le_left a := by
-  change resG X _ a * resG X _ 1 = _
-  rw [map_one, mul_one]
 
 def twoChart (U₀ U₁ : X.Opens) (u : Γ(X, U₀ ⊓ U₁)ˣ) : LB X where
   ι := Bool
@@ -791,11 +800,10 @@ def twoChart (U₀ U₁ : X.Opens) (u : Γ(X, U₀ ⊓ U₁)ˣ) : LB X where
     | false, false => 1
 
 theorem twoChart_isLB {U₀ U₁ : X.Opens} (h : U₀ ⊔ U₁ = ⊤) (u : Γ(X, U₀ ⊓ U₁)ˣ) :
-    (twoChart U₀ U₁ u).IsLB where
-  cover := (iSup_bool_eq (f := fun i => cond i U₀ U₁)).trans h
-  g_self := by rintro (_ | _) <;> exact map_one _
-  cocycle := by
-    have aux {W : X.Opens} (h₁ : W ≤ U₁ ⊓ U₀) (h₂ : W ≤ U₀ ⊓ U₁) :
+    (twoChart U₀ U₁ u).IsLB := by
+  refine ⟨(iSup_bool_eq (f := fun i => cond i U₀ U₁)).trans h, ?_, ?_⟩
+  · rintro (_ | _) <;> exact map_one _
+  · have aux {W : X.Opens} (h₁ : W ≤ U₁ ⊓ U₀) (h₂ : W ≤ U₀ ⊓ U₁) :
         res h₁ (res (le_inf inf_le_right inf_le_left) u)⁻¹ * res h₂ u = 1 := by
       rw [map_inv, Semi.LB.res_res, inv_mul_cancel]
     rintro (_ | _) (_ | _) (_ | _)
@@ -830,28 +838,6 @@ theorem mem_secOn_twoChart {U₀ U₁ : X.Opens} (u : Γ(X, U₀ ⊓ U₁)ˣ) (V
   · change resG X _ a = resG X _ 1 * resG X _ a
     rw [map_one, one_mul]
 
-example (V : X.Opens) :
-    (fun i : Bool => match i with | true => -1 | false => 1) ∈
-      secOn (twoChart (X := X) ⊤ ⊤ (-1)) V :=
-  (mem_secOn_twoChart (-1) V (-1) 1).2 (by
-    simp only [map_one, Units.val_neg, Units.val_one, map_neg, mul_one]
-    exact congrArg Neg.neg (map_one _))
-
-example (V : X.Opens) :
-    (fun i : Bool => match i with | true => 1 | false => 1) ∈
-      secOn (twoChart (X := X) ⊤ ⊤ (-1)) V ↔ (2 : Γ(X, V ⊓ ⊤ ⊓ ⊤)) = 0 := by
-  refine (mem_secOn_twoChart (-1) V 1 1).trans ?_
-  simp only [map_one, Units.val_neg, Units.val_one, map_neg, mul_one]
-  rw [eq_neg_iff_add_eq_zero, one_add_one_eq_two]
-
-example {U₀ U₁ : X.Opens} (h : U₀ ⊔ U₁ = ⊤) (u : Γ(X, U₀ ⊓ U₁)ˣ) :
-    coord (chartSec (twoChart_isLB h u) false) true =
-      resG X (le_inf inf_le_right inf_le_left : U₁ ⊓ U₀ ≤ U₀ ⊓ U₁) (u : Γ(X, U₀ ⊓ U₁)) := rfl
-
-example {U₀ U₁ : X.Opens} (h : U₀ ⊔ U₁ = ⊤) (u : Γ(X, U₀ ⊓ U₁)ˣ) :
-    (toMod (twoChart U₀ U₁ u)).IsQuasicoherent :=
-  isQuasicoherent_toMod (twoChart_isLB h u)
-
 theorem twoChart_isGen {U₀ U₁ : X.Opens} (u : Γ(X, U₀ ⊓ U₁)ˣ) (a : Γ(X, U₀)ˣ) (b : Γ(X, U₁)ˣ)
     (h : res inf_le_left a = u * res inf_le_right b) :
     LB.Gen.IsGen (L := twoChart U₀ U₁ u)
@@ -863,17 +849,6 @@ theorem twoChart_isGen {U₀ U₁ : X.Opens} (u : Γ(X, U₀ ⊓ U₁)ˣ) (a : �
     exact eq_inv_mul_of_mul_eq e.symm
   · exact h
   · exact (one_mul _).symm
-
-example (a : Γ(X, ⊤)) : ∃ u : Γ(X, X.basicOpen a ⊓ X.basicOpen (1 - a))ˣ,
-    (u : Γ(X, X.basicOpen a ⊓ X.basicOpen (1 - a))) = resG X le_top a ∧
-      (twoChart _ _ u).IsLB ∧ Nonempty (unitMod X ≅ toMod (twoChart _ _ u)) := by
-  have h : X.basicOpen a ⊔ X.basicOpen (1 - a) = ⊤ := by
-    refine eq_top_iff.2 (le_trans ?_ (X.basicOpen_add_le a (1 - a)))
-    rw [add_sub_cancel, X.basicOpen_of_isUnit isUnit_one]
-  obtain ⟨v, hv⟩ : IsUnit (resG X (le_top : X.basicOpen a ≤ ⊤) a) :=
-    X.toRingedSpace.isUnit_res_basicOpen a
-  refine ⟨res inf_le_left v, by rw [val_res, hv, resG_resG], twoChart_isLB h _,
-    ⟨unitIso (twoChart_isLB h _) _ (twoChart_isGen _ v 1 (by rw [map_one, mul_one]))⟩⟩
 
 end LB
 

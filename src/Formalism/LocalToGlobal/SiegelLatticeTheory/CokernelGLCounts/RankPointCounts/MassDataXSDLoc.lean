@@ -1,6 +1,51 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SelfDualLoc
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.InclR
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.HRSmulERight
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
+public import Formalism.PeriodIntegrals.SelfDualLoc
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SelfDualLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +80,7 @@ theorem sig_swap (σ : E →ₐ[F] E) (t : E ⊗[F] Fv F v) :
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul x a => simp [sigR, PI.SelfDualLoc.sigR, swp, Algebra.TensorProduct.comm_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem incl_swap (e : E) : swp v (PI.SelfDualLoc.inclE (F := F) (Fv F v) e) = inclR (F := F) (Fv F v) e := by
   simp [swp, PI.SelfDualLoc.inclE, inclR, Algebra.TensorProduct.comm_tmul]
@@ -43,6 +88,7 @@ theorem incl_swap (e : E) : swp v (PI.SelfDualLoc.inclE (F := F) (Fv F v) e) = i
 theorem hR_swap (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (z y : Fin n → E ⊗[F] Fv F v) :
     hR (Fv F v) σ J (swVv v z) (swVv v y) =
       swp v (PI.SelfDualLoc.hform (PI.SelfDualLoc.sigR σ (Fv F v)) (J.map (PI.SelfDualLoc.inclE (F := F) (Fv F v))) z y) := by
+
   simp only [hR, Formalism.UG.hform, PI.SelfDualLoc.hform, map_sum, map_mul, JR, Matrix.map_apply]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   simp only [swVv, sig_swap, incl_swap]
@@ -60,7 +106,7 @@ theorem oev_gen (a : 𝓞 E) : inclR (F := F) (Fv F v) (a : E) ∈ OEv (E := E) 
 
 theorem oev_mul {s t : Fv F v ⊗[F] E} (hs : s ∈ OEv (E := E) v) (ht : t ∈ OEv (E := E) v) :
     s * t ∈ OEv (E := E) v := by
-  first | exact UpperTheory.Reformulated.B.Qh24.oev_mul .. | (apply UpperTheory.Reformulated.B.Qh24.oev_mul <;> assumption) | (intros; apply UpperTheory.Reformulated.B.Qh24.oev_mul <;> assumption) | (apply @UpperTheory.Reformulated.B.Qh24.oev_mul <;> assumption) | (intros; apply @UpperTheory.Reformulated.B.Qh24.oev_mul <;> assumption) | (apply @UpperTheory.Reformulated.B.Qh24.oev_mul <;> first | assumption | infer_instance) | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› ‹_› v s t hs ht | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› ‹_› v s t hs | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› ‹_› v s t | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› ‹_› v s | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› ‹_› v | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› ‹_› | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› ‹_› | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› ‹_› | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› ‹_› | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E ‹_› | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F E | exact @UpperTheory.Reformulated.B.Qh24.oev_mul F
+  apply Formalism.L2.SG.Pf.NcVal.OmVSt.OmW.oev_mul <;> assumption
 
 theorem oev_alg (c : v.adicCompletionIntegers F) : ((c : Fv F v) ⊗ₜ[F] (1 : E)) ∈ OEv (E := E) v := by
   have h : ((c : Fv F v) ⊗ₜ[F] (1 : E)) = c • inclR (F := F) (Fv F v) ((1 : 𝓞 E) : E) := by

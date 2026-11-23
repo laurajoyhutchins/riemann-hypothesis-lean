@@ -1,10 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AdaptSelf
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnram
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagFramesSameGradedDefinitePartLatticeEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AdaptSelf
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnram
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagFramesSameGradedDefinitePartLatticeEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Localization.Finiteness
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt GlobalTheory.DegAsm
 open scoped Pointwise ENNReal Classical
@@ -115,7 +171,8 @@ theorem Hyp.pair {e y : Fin r → V} (h : Hyp H e y) (s t s' t' : Fin r → K) {
       ∑ a, s a * star (t' a) + ∑ a, t a * star (s' a) + H.B n n' := by
   have h3' := fun a => swap_zero (h3 a)
   have h4' := fun a => swap_zero (h4 a)
-  simp [map_add, map_sum, LinearMap.add_apply, LinearMap.sum_apply, h.1, h.2.1, h.2.2, h.ye, h1, h2, h3', h4', mul_comm]
+
+  simp [map_add (f := _), map_sum, LinearMap.add_apply, LinearMap.sum_apply, h.1, h.2.1, h.2.2, h.ye, h1, h2, h3', h4', mul_comm]
   exact add_comm _ _
 
 noncomputable def mid (H : HermSpace K V) (e y : Fin r → V) : V →ₗ[K] V :=
@@ -155,6 +212,7 @@ theorem move_isom {e y e' y' : Fin r → V} (h : Hyp H e y) (h' : Hyp H e' y')
   have hp' : ∀ u a, H.B (e' a) (mid H e y u) = 0 := fun u a => swap_zero (hp u a)
   have hm : H.B (mid H e' y' (mid H e y v)) (mid H e' y' (mid H e y w)) = H.B (mid H e y v) (mid H e y w) := by
     rw [mid_apply e' y' (mid H e y w)]
+
     simp only [map_sub, map_sum, LinearMap.map_smulₛₗ, h'.mid_e, h'.mid_y, smul_zero, Finset.sum_const_zero, sub_zero]
     rw [mid_apply e' y' (mid H e y v)]
     simp [hp, hp']
@@ -268,7 +326,7 @@ theorem exists_dual [FiniteDimensional K V] (G : FlagD H r) {Λ : Submodule (�
     simp [hc]
   obtain ⟨g, hg⟩ := LinearMap.exists_leftInverse_of_injective L hinj
   have hg' : ∀ p, g (L p) = p := fun p => LinearMap.congr_fun hg p
-  obtain ⟨P, hP1, hP2, hP3⟩ := exists_proj Λ hL.fg hL.span_eq_top (LinearMap.range L)
+  obtain ⟨P, hP1, hP2, hP3⟩ := exists_proj Λ hL.1 hL.2 (LinearMap.range L)
   choose y hy using fun b : Fin r => exists_rep H (LinearMap.proj b ∘ₗ LinearMap.fst K _ K ∘ₗ g ∘ₗ P)
   have hy' : ∀ b p, H.B (L p) (y b) = p.1 b := fun b p => by
     rw [hy]; simp [hP2 _ ⟨p, rfl⟩, hg']
@@ -326,7 +384,8 @@ theorem exists_hyp [FiniteDimensional K V] (hK : Formalism.HermitianLatticesTheo
     linear_combination (-H.B (y a) (y b)) * hw2
   · simp [G.iso, hy1]
   · simp [hy2, hz]
-  · rw [map_sub, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+    rw [map_sub, map_sum]
     refine Submodule.sub_mem _ (hy3 x hx a) (Submodule.sum_mem _ fun b _ => ?_)
     have e1 := hy3 _ (smul_dual_mem hU (fun x' hx' => h2 b _ (hy3 x' hx' b)) hx) a
     have e2 := (aa a).smul_mem (1 - w) e1
@@ -358,7 +417,7 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
   set M := move H e y e' y' with hM
   have hiso : ∀ v w, H.B (M v) (M w) = H.B v w := move_isom hy hy' fun a => hX ▸ heX' a
   have hinj : Function.Injective M := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro v hv
     exact H.nondeg v fun w => by rw [← hiso, hv]; simp
   have hbij : Function.Bijective M := ⟨hinj, LinearMap.injective_iff_surjective.1 hinj⟩

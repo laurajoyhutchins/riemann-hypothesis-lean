@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.ThetaConstantWeber
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaLine
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DifferentiableOddTheta
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.ThetaConstantWeber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Complex
 
 open Polynomial
@@ -65,7 +107,7 @@ lemma cubic_eq (j F0 F1 F2 : ℂ)
   obtain ⟨s1, s2, s3⟩ := h
   have e : ((X - C F0) * (X - C (-F1)) * (X - C (-F2)) : ℂ[X]) =
       X ^ 3 - C (F0 - F1 - F2) * X ^ 2 + C (-(F0 * F1) - F0 * F2 + F1 * F2) * X - C (F0 * F1 * F2) := by
-    simp only [map_sub, map_neg, map_mul, map_add]
+    simp only [map_sub, map_neg, map_mul, map_add (f := _)]
     ring
   rw [e, s1, s2, s3]
   simp only [map_sub, map_ofNat]
@@ -75,8 +117,8 @@ end GlobalTheory.WeberCubicAlgebra
 
 namespace GlobalTheory.WeberCubicAlgebra
 
-open GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber in
 theorem weberCubic_of_halfPeriodDiff : ∀ τ : UpperHalfPlane, GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.HalfPeriodDiff τ →
     GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.JacobiProduct τ → GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.ThetaWeber τ → GlobalTheory.IndefiniteRowSideFullHecke.ThetaConstantWeber.WeberCubic τ := by
   intro τ hd hj hw

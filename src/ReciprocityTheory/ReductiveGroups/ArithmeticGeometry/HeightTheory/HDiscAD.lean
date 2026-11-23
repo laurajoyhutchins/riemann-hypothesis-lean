@@ -1,5 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscDefs
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.OpIsDVR
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscDefs
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.OpIsDVR
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Mathlib.RingTheory.MvPolynomial.Localization
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -17,6 +68,7 @@ noncomputable abbrev algOpKT (la : HeightOneSpectrum (𝓞 K)) : Algebra (Op D N
 theorem isFractionRing_OT :
     letI := algOTKT (K := K) D N
     IsFractionRing (OT K D N) (KTf K D N) := by
+  set_option synthInstance.maxHeartbeats 200000 in
   letI := algOTKT (K := K) D N
   have hinj : Function.Injective (algebraMap (OT K D N) (KTf K D N)) :=
     (IsFractionRing.injective (KTp K D N) (KTf K D N)).comp
@@ -51,6 +103,7 @@ theorem isFractionRing_OT :
 theorem isFractionRing_Op (la : HeightOneSpectrum (𝓞 K)) :
     letI := algOpKT (K := K) D N la
     IsFractionRing (Op D N la) (KTf K D N) := by
+  set_option synthInstance.maxHeartbeats 200000 in
   letI := algOTKT (K := K) D N
   letI := algOpKT (K := K) D N la
   haveI := isFractionRing_OT (K := K) D N
@@ -77,7 +130,7 @@ theorem unif_mem [NumberField K] (la : HeightOneSpectrum (𝓞 K)) :
       norm_num
     · rw [← la.intValuation_le_pow_iff_mem, hπ, WithZero.exp_le_exp]
       norm_num
-  rw [Data.unif, dif_pos hex]
+  rw [Data.unif, dite_eq_left hex]
   exact hex.choose_spec
 
 noncomputable def unifOp (la : HeightOneSpectrum (𝓞 K)) : Op D N la :=
@@ -124,8 +177,8 @@ theorem unifOp_irreducible (la : HeightOneSpectrum (𝓞 K)) : Irreducible (unif
     obtain ⟨mm, hmm⟩ := hs'
     have h3 := ha mm
     rw [MvPolynomial.coeff_C_mul] at h3
-    have v1 : la.intValuation (Data.unif la) = la.intValuation (Data.unif la) * la.intValuation (MvPolynomial.coeff mm s) := by
-      have : la.intValuation (MvPolynomial.coeff mm s) = 1 := by
+    have v1 : la.intValuation (Data.unif la) = la.intValuation (Data.unif la) * la.intValuation (AddMonoidAlgebra.coeff s mm) := by
+      have : la.intValuation (AddMonoidAlgebra.coeff s mm) = 1 := by
         apply le_antisymm (la.intValuation_le_one _)
         rw [← not_lt, la.intValuation_lt_one_iff_mem]
         exact hmm
@@ -181,7 +234,7 @@ theorem gOrd_eq (d : Data K ι Ω WT A) (la : HeightOneSpectrum (𝓞 K)) {q : K
   have hex : ∃ m : ℤ, ∃ u : Op d.D d.N la, IsUnit u ∧
       q = (algebraMap K (KTf K d.D d.N) ((unif la : 𝓞 K) : K)) ^ m * OpToKT d.D d.N la u :=
     ⟨m, u, hu, hq⟩
-  rw [gOrd, dif_pos hex]
+  rw [gOrd, dite_eq_left hex]
   obtain ⟨u', hu', hq'⟩ := hex.choose_spec
   exact exp_unique d.D d.N la hu' hu (hq'.symm.trans hq)
 

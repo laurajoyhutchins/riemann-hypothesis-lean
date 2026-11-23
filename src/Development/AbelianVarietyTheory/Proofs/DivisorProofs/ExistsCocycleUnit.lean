@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.QuasiCompact
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsPullbackPow
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsPointOfIffThick
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsGtPtGenRelRField
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGrpPullbackThick
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.QuasiCompact
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGrpPullbackThick
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsSmulPtSmulPt
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsPullbackPow
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsGtPtGenRelRField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -130,7 +169,7 @@ theorem exists_gtPt_up {T' : Over (Sp R')} (g' : GtPt D' T') : ∃ g : GtPt D (O
       have v₁ := vt' y z J J' hJ hJ'
       have v₂ := vt' y' z J J' hJ hJ'
       have v₃ := vt' (y + y') z J J' hJ hJ'
-      rw [cPoint_add, map_add] at v₃
+      rw [cPoint_add, map_add (f := _)] at v₃
       have e := cv_add g' hJ' y y'
       refine (congrArg₂ (fun a b : (T'.left.presheaf.stalk z)ˣ => a * b) v₃ c).trans
         (Eq.trans ?_ (congrArg₂ (· * ·) v₁ v₂).symm)
@@ -157,8 +196,8 @@ theorem hom_ext (hΦ : Represents Φ) {Z : Scheme.{0}} {r r' : Z ⟶ Y.left}
   exact congrArg (·.left) ((Φ _).injective (pt_ext (h₁.1.trans ((Over.OverMorphism.ext hb).trans h₂.1.symm))
     fun χ z J hJ => (h₁.2 χ z J hJ).trans ((hv χ z J hJ).trans (h₂.2 χ z J hJ).symm)) : k = k')
 
-variable (hE) in
 
+variable (hE) in
 def Carries {e : ℕ} (c : GtCoord I E.toPre e G') (g : GtPt D Y) (φ : (thickObj R' I e G').left ⟶ Y.left) : Prop :=
   c.pG.left ≫ hE.e.hom.left ≫ pullback.fst D.P.A.hom (specOf ρ) = φ ≫ g.b.left ∧
     ∀ y (Z : Scheme.{0}) (r : Z ⟶ (thickObj R' I e G').left) (z : Z) J J', Good D.P.L z J → Good E.toPre.P.L z J' →

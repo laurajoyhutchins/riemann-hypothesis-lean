@@ -1,10 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.CosInj
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PhiTopAgree
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.TwistPlaceCouplingIndexFiniteLevelStable
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.EmbHInjective
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FullOfSpanEqTop
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.EmbHInjective
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FullOfSpanEqTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix ValuativeRel Formalism.L2.Col
 open scoped Classical
 
@@ -64,7 +102,7 @@ def homInto (S₀ : Set (Sp E a)) (g : Sp E b →ₗ[E] Sp E b) (N : Submodule (
   carrier := {z | ∀ y ∈ S₀, g (z y) ∈ N}
   zero_mem' := fun y _ => by simp
   add_mem' := fun {z z'} hz hz' y hy => by
-    rw [LinearMap.add_apply, map_add]; exact N.add_mem (hz y hy) (hz' y hy)
+    rw [LinearMap.add_apply, map_add (f := _)]; exact N.add_mem (hz y hy) (hz' y hy)
   smul_mem' := fun c z hz y hy => by
     rw [LinearMap.smul_apply, LinearMap.map_smul_of_tower]; exact N.smul_mem _ (hz y hy)
 
@@ -86,7 +124,7 @@ theorem apply_mem_of_mem_locP {S₀ : Set (Sp E a)} {g : Sp E b →ₗ[E] Sp E b
     induction hw using Submodule.span_induction with
     | mem w hw => exact hz w hw
     | zero => simp
-    | add u v _ _ hu hv => rw [map_add, map_add]; exact N.add_mem hu hv
+    | add u v _ _ hu hv => rw [map_add (f := _), map_add (f := _)]; exact N.add_mem hu hv
     | smul c u _ hu => rw [LinearMap.map_smul_of_tower, LinearMap.map_smul_of_tower]; exact N.smul_mem _ hu
   refine ⟨s * t, P.asIdeal.primeCompl.mul_mem hs ht, ?_⟩
   have := h _ hy
@@ -125,6 +163,40 @@ theorem exists_transport (K : Type) [Field K] {ST SG SG' SB : Finset (HeightOneS
     ∃ x' : HomE E a b, phiT K d d' x' = phiT K d d' x ∧
       ∀ (P : SB) s l, IntAt P.1 (c P * (inFr (f₀ P) (f P) x' - inFr (f₀ P) (f' P) x) (Pi.single s 1) l) := by
   obtain ⟨S₀, hS₀⟩ := hd.lat.fg
+  obtain ⟨S₁, hS₁⟩ := hd'.lat.fg
+  have hone : Full (1 : Submodule (𝓞 E) E) := by
+    intro x
+    obtain ⟨n, hn, hnx⟩ := full_stdLat (E := E) 1 (fun _ => x)
+    refine ⟨n, hn, ?_⟩
+    simpa [stdLat, Submodule.mem_pi] using hnx (0 : Fin 1) (Set.mem_univ _)
+  have hfull : Full d'.N := by
+    let M : Sp E b → Submodule (𝓞 E) (Sp E b) := fun y =>
+      (1 : Submodule (𝓞 E) E).comap ((hStd E b y).restrictScalars (𝓞 E))
+    have hM : ∀ y, Full (M y) := by
+      intro y x
+      obtain ⟨n, hn, hx⟩ := hone (hStd E b y x)
+      refine ⟨n, hn, ?_⟩
+      simpa [M] using hx
+    have hle : S₁.inf M ≤ d'.N := by
+      intro x hx
+      rw [← hd'.uni]
+      simp only [dual, Formalism.E.hdual, Submodule.mem_iInf, Submodule.mem_comap,
+        LinearMap.restrictScalars_apply]
+      intro y hy
+      rw [← hS₁] at hy
+      induction hy using Submodule.span_induction with
+      | mem y hy => exact (show S₁.inf M ≤ M y from Finset.inf_le hy) hx
+      | zero => simp
+      | add y z hy hz ihy ihz => simpa using Submodule.add_mem (1 : Submodule (𝓞 E) E) ihy ihz
+      | smul r y hy ih =>
+        let r' : 𝓞 E := ⟨star (r : E), r.isIntegral_coe.map (starRingEnd E).toIntAlgHom⟩
+        rw [← algebraMap_smul E r y, LinearMap.map_smulₛₗ, LinearMap.smul_apply]
+        have hr := (1 : Submodule (𝓞 E) E).smul_mem r' ih
+        change star (r : E) * hStd E b y x ∈ (1 : Submodule (𝓞 E) E) at hr
+        simpa [starRingEnd_apply, smul_eq_mul] using hr
+    intro x
+    obtain ⟨n, hn, hx⟩ := full_finset_inf S₁ M hM x
+    exact ⟨n, hn, hle hx⟩
   obtain ⟨t, ht⟩ := exists_approx_family (W := HomE E a b) (ST ∪ SB)
     (fun P => if h : P ∈ SB then
         homInto ((Finset.univ.image fun s : Fin a => f₀ ⟨P, h⟩ (Pi.single s 1) : Finset (Sp E a)) : Set (Sp E a))
@@ -133,7 +205,7 @@ theorem exists_transport (K : Type) [Field K] {ST SG SG' SB : Finset (HeightOneS
     (fun P => by
       by_cases h : P ∈ SB
       · simp only [dif_pos h]; exact full_homInto _ _ (full_stdLat b)
-      · simp only [dif_neg h]; exact full_homInto _ _ (full_of_span _ hd'.lat.span_eq_top))
+      · simp only [dif_neg h]; exact full_homInto _ _ hfull)
     (fun P => if h : P ∈ SB then (f ⟨P, h⟩).toLinearMap ∘ₗ (f' ⟨P, h⟩).symm.toLinearMap ∘ₗ x else x)
   refine ⟨t, ?_, fun P s l => ?_⟩
   · rw [← add_sub_cancel x t]

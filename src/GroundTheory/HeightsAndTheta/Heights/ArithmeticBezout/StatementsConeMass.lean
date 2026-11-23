@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeFibre
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsConeFibre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -16,44 +61,6 @@ def ConeMassOfFibre.Statement : Prop :=
           {y : EuclideanSpace ℂ (Fin n) | ‖y‖ < 1 ∧ ∀ q ∈ J, eval (h.pointOf y) q = 0} =
         (δ : ENNReal) * Measure.hausdorffMeasure ((2 * m : ℕ) : ℝ)
           {y : EuclideanSpace ℂ (Fin n) | ‖y‖ < 1 ∧ ∀ j : Fin n, m ≤ (j : ℕ) → y j = 0}
-
-theorem ConeMassOfFibre.hypotheses_inhabited :
-    IsProjPrime (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) ∧
-      ∀ᵐ π : Fin 1 → Fin 1 → ℂ, ∀ᵐ w : EuclideanSpace ℂ (Fin 1),
-        fibreCount (HermNorm.std 1) ⊥ π w = ((1 : ℕ) : ℕ∞) := by
-  refine ⟨isProjPrime_point ℂ, ?_⟩
-  have hnull : ∀ᵐ π : Fin 1 → Fin 1 → ℂ, π 0 0 ≠ 0 := by
-    have hp : MeasurePreserving (fun π : Fin 1 → Fin 1 → ℂ => π 0 0) :=
-      (volume_preserving_funUnique (Fin 1) ℂ).comp
-        (volume_preserving_funUnique (Fin 1) (Fin 1 → ℂ))
-    rw [ae_iff]
-    have hset : {π : Fin 1 → Fin 1 → ℂ | ¬ π 0 0 ≠ 0} = (fun π => π 0 0) ⁻¹' {0} := by
-      ext π; simp
-    rw [hset, hp.measure_preimage (measurableSet_singleton 0).nullMeasurableSet]
-    simp
-  filter_upwards [hnull] with π hπ
-  refine Filter.Eventually.of_forall fun w => ?_
-  have hfib : {y | y ∈ coneSet (HermNorm.std 1) ⊥ ∧ linProj π y = w} =
-      {WithLp.toLp 2 fun _ => w 0 / π 0 0} := by
-    ext y
-    simp only [Set.mem_ofPred_eq, Set.mem_singleton_iff, coneSet, Ideal.mem_bot]
-    constructor
-    · rintro ⟨-, hy⟩
-      have h0 := congrArg (fun v : EuclideanSpace ℂ (Fin 1) => v 0) hy
-      simp only [linProj, Fin.sum_univ_one] at h0
-      ext i
-      fin_cases i
-      simp only [Fin.zero_eta, Fin.isValue]
-      rw [← h0]
-      field_simp
-    · rintro rfl
-      refine ⟨fun q hq => by simp [hq], ?_⟩
-      ext i
-      fin_cases i
-      simp [linProj]
-      field_simp
-  rw [fibreCount, hfib, Set.encard_singleton]
-  rfl
 
 end
 

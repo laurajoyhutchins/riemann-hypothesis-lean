@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RInv2
-import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.AntisymmetrizedProductEqFactorialSmulQdet
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RInv2
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.AntisymmetrizedProductEqFactorialSmulQdet
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ShiftedGeneratorEqIteSmulAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,8 +74,8 @@ theorem invT_mem_Sm {φ : GA E a → ℂ} (hφ : φ ∈ Sm E a) : (fun y => φ (
   ((hφ (invT a (Ad E) g)).comp (fun _ hx => (contDiffAt_invTL hx).contDiffWithinAt) fun _ hx => isUnit_invTL hx).congr
     fun _ hx => chart_invT φ g hx
 
-variable (E a) in
 
+variable (E a) in
 def dualFn : Sm E a ≃ₗ[ℂ] Sm E a where
   toFun φ := ⟨fun y => φ.1 (invT a (Ad E) y), invT_mem_Sm φ.2⟩
   invFun φ := ⟨fun y => φ.1 (invT a (Ad E) y), invT_mem_Sm φ.2⟩
@@ -38,8 +85,6 @@ def dualFn : Sm E a ≃ₗ[ℂ] Sm E a where
   right_inv φ := Subtype.ext <| funext fun x => congrArg φ.1 (invT_invT x)
 
 @[simp] theorem dualFn_apply (φ : Sm E a) (g : GA E a) : (dualFn E a φ).1 g = φ.1 (invT a (Ad E) g) := rfl
-
-@[simp] theorem dualFn_dualFn (φ : Sm E a) : dualFn E a (dualFn E a φ) = φ := (dualFn E a).left_inv φ
 
 theorem rt_dualFn (h : GA E a) (φ : Sm E a) : rt E a h (dualFn E a φ) = dualFn E a (rt E a (invT a (Ad E) h) φ) :=
   Subtype.ext <| funext fun g => congrArg φ.1 (map_mul (invT a (Ad E)) g h)
@@ -55,8 +100,8 @@ theorem lie_dualFn (X : Lie E a) (φ : Sm E a) :
     ((contDiffAt_invTL (x := oneL E a) isUnit_one).differentiableAt (by simp)), e1, ContinuousLinearMap.comp_apply]
   exact congrArg _ (fderiv_invTL_one X)
 
-omit [IsTotallyReal E] in
 
+omit [IsTotallyReal E] in
 def invTOp : Op E a → Op E a
   | .fin k => .fin (invT a (Af E) k)
   | .cpt k => .cpt k
@@ -69,8 +114,8 @@ theorem invTOp_invTOp (o : Op E a) : invTOp (invTOp o) = o := by
   | cpt k => rfl
   | lie X => exact congrArg Op.lie (funext fun i => funext fun j => neg_neg (X i j))
 
-omit [NumberField E] [IsTotallyReal E] in
 
+omit [NumberField E] [IsTotallyReal E] in
 theorem invT_toUnits (k : Kinf E a) : invT a (Rinf E) (Unitary.toUnits k) = Unitary.toUnits k :=
   Units.ext (Matrix.ext fun i j => star_trivial (k.1 i j))
 
@@ -100,6 +145,7 @@ private theorem qdet_conj {V : Type} [AddCommGroup V] [Module ℂ V] (e : V ≃�
     rw [h0, h]
   rw [← h0, map_qdet, e1]
 
+open Formalism.REAL Finset in
 private theorem qdet_dual {V : Type} [AddCommGroup V] [Module ℂ V] (e : V ≃ₗ[ℂ] V) (X : Fin a → Fin a → Module.End ℂ V)
     (hX : Formalism.REAL.GlRel X) (h : ∀ i j φ, X i j (e φ) = e ((-X j i) φ)) (u : ℂ) (φ : V) :
     Formalism.REAL.qdet X (u + ((a : ℂ) - 1) / 2) (e φ) =
@@ -129,32 +175,31 @@ theorem Zalg_dualFn {z : Module.End ℂ (Sm E a)} (hz : z ∈ Zalg E a) :
     obtain ⟨y', h3, h4⟩ := hy
     exact ⟨x' * y', mul_mem h1 h3, fun φ => by simp [h2, h4]⟩
 
-omit [IsTotallyReal E] in
 
+omit [IsTotallyReal E] in
 theorem height_invT (y : GL (Fin a) (Rinf E)) : height (invT a _ y) = height y := by
   unfold height
   rw [invT_val, invT_inv_val, InvT.norm_transpose, InvT.norm_transpose, add_right_comm]
 
-theorem isAutForm_dualFn {φ : Sm E a} (h : IsAutForm φ) : IsAutForm (dualFn E a φ) where
-  left γ g := by rw [dualFn_apply, dualFn_apply, map_mul, ← ratGL_invT, h.left]
-  level := by
-    convert h.level.preimage (continuous_invT (R := Af E) (a := a)) using 1
+theorem isAutForm_dualFn {φ : Sm E a} (h : IsAutForm φ) : IsAutForm (dualFn E a φ) := by
+  refine { left := ?_, level := ?_, kfin := ?_, zfin := ?_, growth := ?_ }
+  · intro γ g
+    rw [dualFn_apply, dualFn_apply, map_mul, ← ratGL_invT, h.left]
+  · convert h.level.preimage (continuous_invT (R := Af E) (a := a)) using 1
     ext k
     exact (Iff.of_eq (congrArg (· = dualFn E a φ) (act_dualFn (.fin k) φ))).trans (dualFn E a).injective.eq_iff
-  kfin := by
-    have := h.kfin
+  · have := h.kfin
     refine Submodule.finiteDimensional_of_le (S₂ := (Submodule.span ℂ (Set.range fun k => cptRep E a k φ)).map
       (dualFn E a).toLinearMap) (Submodule.span_le.2 ?_)
     rintro _ ⟨k, rfl⟩
     exact ⟨_, Submodule.subset_span ⟨_, rfl⟩, (act_dualFn (.cpt k) φ).symm⟩
-  zfin := by
-    have := h.zfin
+  · have := h.zfin
     refine Submodule.finiteDimensional_of_le (S₂ := (Submodule.span ℂ ((fun z : Module.End ℂ (Sm E a) => z φ) ''
       Zalg E a)).map (dualFn E a).toLinearMap) (Submodule.span_le.2 ?_)
     rintro _ ⟨z, hz, rfl⟩
     obtain ⟨z', h1, h2⟩ := Zalg_dualFn hz
     exact ⟨_, Submodule.subset_span ⟨z', h1, rfl⟩, (h2 φ).symm⟩
-  growth g := by
+  · intro g
     obtain ⟨C, N, h1⟩ := h.growth (invT a (Ad E) g)
     refine ⟨C, N, fun y => ?_⟩
     rw [dualFn_apply, map_mul, ← infGL_invT, ← height_invT]
@@ -162,9 +207,6 @@ theorem isAutForm_dualFn {φ : Sm E a} (h : IsAutForm φ) : IsAutForm (dualFn E 
 
 theorem isCuspForm_dualFn {φ : Sm E a} (h : IsCuspForm φ) : IsCuspForm (dualFn E a φ) :=
   ⟨isAutForm_dualFn h.1, isCuspidal_invT h.1.left h.2⟩
-
-theorem dualFn_mulChi (χ : HChar E) (φ : Sm E a) : dualFn E a (mulChi a χ φ) = mulChi a χ⁻¹ (dualFn E a φ) :=
-  Subtype.ext <| funext fun g => by simp only [dualFn_apply, mulChi_apply, chiDet_invT]
 
 namespace CuspSub
 
@@ -188,12 +230,7 @@ def dual : CuspSub E a where
     have e := Submodule.map_comap_eq_of_surjective (f := (dualFn E a).toLinearMap) (dualFn E a).surjective W
     exact h.imp (fun h => by rw [← e, h, Submodule.map_bot]) fun h => by rw [← e, h]
 
-theorem mem_dual {φ : Sm E a} : φ ∈ π.dual.V ↔ dualFn E a φ ∈ π.V :=
-  ⟨fun ⟨ψ, h, e⟩ => by rw [← e]; exact (dualFn_dualFn ψ).symm ▸ h, fun h => ⟨_, h, dualFn_dualFn φ⟩⟩
-
 def toDual : π.V ≃ₗ[ℂ] π.dual.V := (dualFn E a).submoduleMap π.V
-
-@[simp] theorem toDual_val (φ : π.V) : (toDual π φ).1 = dualFn E a φ.1 := rfl
 
 theorem op_toDual (o : Op E a) (φ : π.V) : π.dual.op o (toDual π φ) = toDual π (π.op (invTOp o) φ) :=
   Subtype.ext (act_dualFn o φ.1)
@@ -205,22 +242,7 @@ theorem locRep_toDual (w : HeightOneSpectrum (𝓞 E)) (g : GL (Fin a) (w.adicCo
     π.dual.locRep w g (toDual π φ) = toDual π (π.locRep w (invT a _ g) φ) :=
   (finPart_toDual π (locGL E a w g) φ).trans (by rw [← locGL_invT]; rfl)
 
-@[simp] theorem dual_dual : dual π.dual = π := CuspSub.ext <| by
-  ext φ
-  rw [mem_dual, mem_dual, dualFn_dualFn]
-
-theorem dual_twist (χ : HChar E) : dual (π.twist χ) = π.dual.twist χ⁻¹ := CuspSub.ext <| by
-  change (π.V.map _).map _ = (π.V.map _).map _
-  rw [← Submodule.map_comp, ← Submodule.map_comp]
-  exact congrArg (fun f => π.V.map f) (LinearMap.ext (dualFn_mulChi χ))
-
 variable {π} {π' : CuspSub E a}
-
-theorem Iso.dual (h : π.Iso π') : π.dual.Iso π'.dual := by
-  obtain ⟨T, hT⟩ := h
-  refine ⟨((toDual π).symm.trans T).trans (toDual π'), fun o φ => ?_⟩
-  obtain ⟨φ, rfl⟩ := (toDual π).surjective φ
-  simp only [op_toDual, LinearEquiv.trans_apply, LinearEquiv.symm_apply_apply, hT]
 
 theorem HasInfChar.dual {τ : InfinitePlace E} {m : Multiset ℂ} (h : π.HasInfChar τ m) :
     π.dual.HasInfChar τ (m.map Neg.neg) := by
@@ -231,35 +253,13 @@ theorem HasInfChar.dual {τ : InfinitePlace E} {m : Multiset ℂ} (h : π.HasInf
   congr 1
   rw [← h.1, ← Multiset.prod_replicate, ← Multiset.map_const', ← Multiset.prod_map_mul]
   congr 2
-  funext z
-  simp only [Function.comp_apply]; ring
+  funext x
+  change -1 * (-u + x) = u + -x
+  ring
 
 theorem HasSat.dual {w : HeightOneSpectrum (𝓞 E)} {B : Multiset ℂˣ} (h : π.HasSat w B) :
     π.dual.HasSat w (B.map (·⁻¹)) :=
   hasSatGL_invT (toDual π) (locRep_toDual π w) h
-
-theorem IsLocComp.dual {w : HeightOneSpectrum (𝓞 E)} {σ : SmIrr (GL (Fin a) (w.adicCompletion E))}
-    (h : π.IsLocComp w σ) : π.dual.IsLocComp w (smIrrInvT σ) := by
-  obtain ⟨f, h0, hf⟩ := h
-  refine ⟨(toDual π).toLinearMap ∘ₗ f, fun h => h0 (LinearMap.ext fun v => (toDual π).injective ?_), fun g v => ?_⟩
-  · rw [LinearMap.zero_apply, map_zero]; exact LinearMap.congr_fun h v
-  · change toDual π (f (σ.ρ (invT a _ g) v)) = π.dual.locRep w g (toDual π (f v))
-    rw [locRep_toDual]
-    exact congrArg _ (hf _ v)
-
-theorem hasFixed_dual {U : Subgroup (GL (Fin a) (Af E))} (hU : ∀ u ∈ U, invT a (Af E) u ∈ U)
-    (h : Af.HasFixed π.finPart U) : Af.HasFixed π.dual.finPart U :=
-  hasFixed_invT (toDual π) (finPart_toDual π) hU h
-
-theorem hasFixed_KLev_dual {M : ℕ} (h : Af.HasFixed π.finPart (Af.KLev E a M)) :
-    Af.HasFixed π.dual.finPart (Af.KLev E a M) := hasFixed_dual (fun _ => invT_mem_KLev) h
-
-theorem IsRegAlg.dual (h : π.IsRegAlg) : π.dual.IsRegAlg := fun v => by
-  obtain ⟨m, h1, h2, h3⟩ := h v
-  refine ⟨_, h1.dual, h2.map neg_injective, fun z hz => ?_⟩
-  obtain ⟨y, hy, rfl⟩ := Multiset.mem_map.1 hz
-  obtain ⟨k, rfl⟩ := h3 y hy
-  exact ⟨-k - (a - 1), by push_cast; ring⟩
 
 theorem isSelfDualBy_of_iso {χ : HChar E} (B : π.V →ₗ[ℂ] π.V →ₗ[ℂ] ℂ) (h1 : ∀ φ, (∀ ψ, B φ ψ = 0) → φ = 0)
     (h2 : ∀ ψ, (∀ φ, B φ ψ = 0) → ψ = 0)
@@ -272,7 +272,7 @@ theorem isSelfDualBy_of_iso {χ : HChar E} (B : π.V →ₗ[ℂ] π.V →ₗ[ℂ
   have hS : ∀ o ψ, S (π.op o ψ) = ((opMul χ o : ℂˣ) : ℂ) • π.op (invTOp o) (S ψ) + opAdd χ o • S ψ := fun o ψ => by
     have e : T ψ = π.dual.toTwist χ (π.toDual (S ψ)) := by simp [S]
     generalize S ψ = y at e
-    simp only [S, LinearEquiv.trans_apply, hT, e, op_toTwist, op_toDual, LinearEquiv.symm_apply_apply, map_add, map_smul]
+    simp only [S, LinearEquiv.trans_apply, hT, e, op_toTwist, op_toDual, LinearEquiv.symm_apply_apply, map_add (f := _), map_smul]
   refine ⟨B.compl₂ S.toLinearMap, (dchi χ).toLinearMap, fun φ h => h1 φ fun ψ => ?_,
     fun ψ h => (map_eq_zero_iff S S.injective).1 (h2 _ h), fun z u hu => ?_, fun k φ ψ => ?_, fun k φ ψ => ?_,
     fun X φ ψ => ?_⟩
@@ -286,7 +286,7 @@ theorem isSelfDualBy_of_iso {χ : HChar E} (B : π.V →ₗ[ℂ] π.V →ₗ[ℂ
     rw [hS, opAdd, zero_smul, add_zero, map_smul, invTOp, hc]
     rfl
   · change B _ (S _) + B _ (S _) = dchi χ _ * B φ (S ψ)
-    rw [hS, opMul, Units.val_one, one_smul, map_add, map_smul, invTOp, ← add_assoc, hl, zero_add]
+    rw [hS, opMul, Units.val_one, one_smul, map_add (f := _), map_smul, invTOp, ← add_assoc, hl, zero_add]
     rfl
 
 end CuspSub

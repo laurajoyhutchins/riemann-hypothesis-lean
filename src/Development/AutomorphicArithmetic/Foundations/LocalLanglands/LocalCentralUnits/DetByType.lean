@@ -1,11 +1,57 @@
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.WeilBound.RepresentationTheoryGL.GaloisPermutationReps.SubquotientEquivalence.ConjTorusSubApply
-import Development.DiscreteGroups.GlobalIrreducibility.DzIsoKO
-import Development.DiscreteGroups.GlobalIrreducibility.DzIsoRes
-import Development.DiscreteGroups.GlobalIrreducibility.DzLCusp
-import Development.DiscreteGroups.GlobalIrreducibility.DzKSchur
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdmissibleLabelWeightsOfGreenCuspidalParametrisa
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SimpleIffIrreducibleStatement
+module
+
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdmissibleLabelWeightsOfGreenCuspidalParametrisa
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SimpleIffIrreducibleStatement
+public import Development.DiscreteGroups.GlobalIrreducibility.DzIsoKO
+public import Development.DiscreteGroups.GlobalIrreducibility.DzIsoRes
+public import Development.DiscreteGroups.GlobalIrreducibility.DzKSchur
+public import Development.DiscreteGroups.GlobalIrreducibility.DzLcFin
+public import Development.DiscreteGroups.GlobalIrreducibility.DzLcPerm
+public import Development.WeilBound.RepresentationTheoryGL.GaloisPermutationReps.SubquotientEquivalence.ConjTorusSubApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,7 +111,7 @@ private theorem equiv_of_typeMaps [Nontrivial W] {T : Representation ℂ (GL (Fi
       exact ⟨γ * γ', w, by rw [map_mul]; rfl⟩
     | zero => simp
     | add x y _ _ hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact U.add_mem hx hy
     | smul c x _ hx =>
       rw [map_smul]
@@ -309,5 +355,5 @@ theorem UpperTheory.Zero.LLC.detByType :
   have h1 := isTypeMap_of i hi τ hτ σ.ρ φ hφ0 hφ
   have h2 := isTypeMap_of i hi τ hτ σ'.ρ ψ hψ0 hψ
   obtain ⟨q⟩ := equiv_of_typeMaps (finCusp_comp i hi τ hτ) σ' σ hω' hω h2 h1
-  show (⟨n, σ'.cl⟩ : GlobalTheory.LocGL.IrrGL _) = ⟨n, σ.cl⟩
+  show (⟨n, σ'.cl⟩ : GlobalTheory.LocGL.IrrGL (k := _)) = ⟨n, σ.cl⟩
   rw [GlobalTheory.SmGL.IrrRep.cl_eq_iff.mpr ⟨q⟩]

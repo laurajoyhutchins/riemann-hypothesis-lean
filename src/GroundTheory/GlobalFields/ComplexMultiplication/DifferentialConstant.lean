@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.Differential
-import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialSeparable
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.Differential
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsTranslate
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyPoints
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.WeilFixedField
+public import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialSeparable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -73,7 +123,7 @@ theorem exists_isogCoeff_eq_algebraMap (φ : Isogeny E E') :
     induction hz using IntermediateField.adjoin_induction with
     | mem x hx => rw [Set.mem_singleton_iff.mp hx]; exact translate_isogCoeff φ R
     | algebraMap x => exact (translate E R).commutes x
-    | add x y _ _ hx hy => rw [map_add, hx, hy]
+    | add x y _ _ hx hy => rw [map_add (f := _), hx, hy]
     | inv x _ hx => rw [map_inv₀, hx]
     | mul x y _ _ hx hy => rw [map_mul, hx, hy]
   let T : E.toAffine.Point → (K →ₐ[F⟮c⟯] K) := fun R =>
@@ -92,20 +142,6 @@ theorem algebraMap_isogConst (φ : Isogeny E E') :
     algebraMap F E.toAffine.FunctionField (isogConst φ) = isogCoeff φ :=
   (exists_isogCoeff_eq_algebraMap φ).choose_spec
 
-theorem isogenyPullback_invariantDifferential_eq_const_smul (φ : Isogeny E E') :
-    isogenyPullback φ (invariantDifferential E') = isogConst φ • invariantDifferential E := by
-  rw [isogenyPullback_invariantDifferential_eq_smul, ← algebraMap_isogConst, algebraMap_smul]
-
-theorem isogConst_add {φ ψ χ : Isogeny E E'} (h : χ.1 = φ.1 + ψ.1) :
-    isogConst χ = isogConst φ + isogConst ψ :=
-  (algebraMap F E.toAffine.FunctionField).injective (by
-    rw [map_add, algebraMap_isogConst, algebraMap_isogConst, algebraMap_isogConst, isogCoeff_add h])
-
-variable (E) in
-
-theorem isogConst_mulIsogeny (n : ℤ) (hn : n ≠ 0) : isogConst (mulIsogeny E n hn) = n :=
-  (algebraMap F E.toAffine.FunctionField).injective (by
-    rw [algebraMap_isogConst, isogCoeff_mulIsogeny, map_intCast])
 
 theorem isSeparable_iff_isogConst_ne_zero (φ : Isogeny E E') :
     φ.IsSeparable ↔ isogConst φ ≠ 0 := by
@@ -118,14 +154,14 @@ theorem exists_homCoeff_eq_algebraMap (Q : isogHom E E') :
   · exact ⟨0, by rw [hQ, map_zero, map_zero]⟩
   · exact exists_isogCoeff_eq_algebraMap (isogOfHom Q hQ)
 
-variable (E E') in
 
+variable (E E') in
 noncomputable def homConst : isogHom E E' →+ F where
   toFun Q := (exists_homCoeff_eq_algebraMap Q).choose
   map_zero' := (algebraMap F E.toAffine.FunctionField).injective (by
     rw [(exists_homCoeff_eq_algebraMap (0 : isogHom E E')).choose_spec, map_zero, map_zero])
   map_add' Q₁ Q₂ := (algebraMap F E.toAffine.FunctionField).injective (by
-    rw [(exists_homCoeff_eq_algebraMap (Q₁ + Q₂)).choose_spec, map_add, map_add,
+    rw [(exists_homCoeff_eq_algebraMap (Q₁ + Q₂)).choose_spec, map_add (f := _), map_add (f := _),
       (exists_homCoeff_eq_algebraMap Q₁).choose_spec, (exists_homCoeff_eq_algebraMap Q₂).choose_spec])
 
 theorem algebraMap_homConst (Q : isogHom E E') :

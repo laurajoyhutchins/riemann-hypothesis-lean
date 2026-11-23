@@ -1,13 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulTransposeInjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticIsotropicPlaneVanishesAdelicStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticIsotropicEmbeddedVanishesAdelicStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticFormRestrictedPlaneStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrangianDimensionBoundStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalModelCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalLagrangianSubspaceExistsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SkewDeterminantNeZeroFirstSpaceStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuadraticInjectivePlaneCoordinatesStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrangianDimensionBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuadraticInjectivePlaneCoordinatesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalLagrangianSubspaceExistsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalModelCoordinatesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SkewDeterminantNeZeroFirstSpaceStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticFormRestrictedPlaneStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticIsotropicEmbeddedVanishesAdelicStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticIsotropicPlaneVanishesAdelicStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulTransposeInjective
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -24,7 +64,7 @@ theorem exists_ratLagr : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
       H'.IsAdapted σ B W W₁ i₀ i₁ → IsPair B M₁ χX χW om₁ r s r₁ s₁ →
       ∃ L : Submodule F ((Fin n × Fin d → F) × (Fin n × Fin d → F)), (∀ a ∈ L, ∀ b ∈ L, a.1 ⬝ᵥ b.2 = b.1 ⬝ᵥ a.2) ∧
         Module.finrank F L = Fintype.card (Fin n × Fin d) ∧
-        ∀ (t : AF F), ∀ w ∈ L, ∃ u ∈ (iso0 n H' : Set (Matrix (Fin n) (Fin d) (AE F E))), ∃ z : Matrix (Fin n) (Fin d₁) (AE F E),
+        ∀ (t : AF F), ∀ w ∈ L, ∃ u ∈ (iso0 n H' : Set (Matrix (Fin n) (Fin d) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)))), ∃ z : Matrix (Fin n) (Fin d₁) (_root_.GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.AE (F := F) (E := E)),
           (M₁.co.e z).1 = 0 ∧ ∀ φ : Fn F n d,
             schr B.ψ (t • ((fun i => algebraMap F (AF F) (w.1 i)), (fun i => algebraMap F (AF F) (w.2 i)))) φ =
               M.co.rho B.ψ u (M.co.rho B.ψ (incM F (1 : Matrix (Fin n) (Fin n) E) * z * (incM F H'.ι)ᵀ) φ) := by
@@ -45,7 +85,17 @@ theorem exists_ratLagr : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
     have h2 := hcross u' hu' z
     have h3 := hcross u hu z'
     have h4 := GlobalTheory.T.symplectic_form_restricted_plane F E σ n d d₁ X.J W.J W₁.J H'.ι hH.gram z z'
+    change symp (cA σ) (-1) (incM F X.J) (incM F W.J)
+      (incM F (1 : Matrix (Fin n) (Fin n) E) * z * (incM F H'.ι)ᵀ)
+      (incM F (1 : Matrix (Fin n) (Fin n) E) * z' * (incM F H'.ι)ᵀ) =
+      symp (cA σ) (-1) (incM F X.J) (incM F W₁.J) z z' at h4
     rw [M₁.co.form, hz, hz', zero_dotProduct, zero_dotProduct, sub_zero] at h4
+    change symp (cA σ) (-1) (incM F X.J) (incM F W.J) _ _ = 0 at h4
+    change symp (cA σ) (-1) (incM F X.J) (incM F W.J) u u' = 0 at h1
+    change symp (cA σ) (-1) (incM F X.J) (incM F W.J)
+      (incM F (1 : Matrix (Fin n) (Fin n) E) * z * (incM F H'.ι)ᵀ) u' = 0 at h2
+    change symp (cA σ) (-1) (incM F X.J) (incM F W.J)
+      (incM F (1 : Matrix (Fin n) (Fin n) E) * z' * (incM F H'.ι)ᵀ) u = 0 at h3
     rw [hD] at h1 h2 h3 h4
     apply (AdeleRing.algebraMap_injective (𝓞 F) F)
     have ha1 : (fun i => algebraMap F (AF F) (a.1 i)) = (hat a).1 := rfl
@@ -55,7 +105,7 @@ theorem exists_ratLagr : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
     rw [RingHom.map_dotProduct, RingHom.map_dotProduct]
     simp only [Function.comp_def]
     rw [ha1, ha2, hb1, hb2, ea, eb]
-    simp only [map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
+    simp only [map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
     linear_combination h1 + h2 - h3 + h4
   refine ⟨lagr M M₁ H', hiso, ?_, ?_⟩
   ·
@@ -78,8 +128,11 @@ theorem exists_ratLagr : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
       rw [← he, LinearEquiv.apply_symm_apply]
     refine ⟨Matrix.vecMulVec (t • y) (incV F H'.x), ⟨t • y, rfl⟩, t • z, by simp [hz], fun φ => ?_⟩
     have h0 := hcross _ ⟨t • y, rfl⟩ (t • z)
+    change symp (cA σ) (-1) (incM F X.J) (incM F W.J)
+      (incM F (1 : Matrix (Fin n) (Fin n) E) * (t • z) * (incM F H'.ι)ᵀ)
+      (Matrix.vecMulVec (t • y) (incV F H'.x)) = 0 at h0
     rw [hD] at h0
-    rw [Darboux.rho, Darboux.rho, schr_comp, ← map_add]
+    rw [Darboux.rho, Darboux.rho, schr_comp, ← map_add (f := _)]
     have hs : (M.co.e (Matrix.vecMulVec (t • y) (incV F H'.x))).1 ⬝ᵥ
           (M.co.e (incM F (1 : Matrix (Fin n) (Fin n) E) * (t • z) * (incM F H'.ι)ᵀ)).2 -
         (M.co.e (incM F (1 : Matrix (Fin n) (Fin n) E) * (t • z) * (incM F H'.ι)ᵀ)).1 ⬝ᵥ

@@ -1,5 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.StrongApproximation.EichAlongSub
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.StrongApproximation.SAOpenStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.SA
 
@@ -24,7 +75,7 @@ theorem hf_sum_right {α : Type*} (s : Finset α) (v : α → ι → K) (x : ι 
   | empty => simp [hf]
   | insert i s hi ih =>
     rw [Finset.sum_insert hi, Finset.sum_insert hi, ← ih]
-    simp only [hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem nondeg (hdet : IsUnit J.det) {x : ι → K} (h : ∀ z, hf σ J x z = 0) : x = 0 := by
   have hv : Matrix.vecMul x J = 0 := by
@@ -42,8 +93,8 @@ theorem nondeg (hdet : IsUnit J.det) {x : ι → K} (h : ∀ z, hf σ J x z = 0)
   have h2 := congrArg (fun v => Matrix.vecMul v J⁻¹) hv
   simpa [Matrix.vecMul_vecMul, Matrix.mul_nonsing_inv J hdet] using h2
 
-variable (σ J) in
 
+variable (σ J) in
 structure OFam (e f : ι → K) (r : ℕ) where
   a : Fin r → ι → K
   inv : Fin r → K
@@ -54,17 +105,17 @@ structure OFam (e f : ι → K) (r : ℕ) where
 
 variable {e f : ι → K}
 
-def OFam.proj {r : ℕ} (F : OFam σ J e f r) (x : ι → K) : ι → K :=
+def OFam.proj {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (x : ι → K) : ι → K :=
   hf σ J x f • e + hf σ J x e • f + ∑ j, (hf σ J x (F.a j) * F.inv j) • F.a j
 
-def OFam.Spans {r : ℕ} (F : OFam σ J e f r) : Prop := ∀ x, F.proj x = x
+def OFam.Spans {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) : Prop := ∀ x, F.proj x = x
 
 section
 variable (hσ : ∀ x, σ (σ x) = x) (hJ : Jᵀ = J.map σ) (he : hf σ J e e = 0) (hff : hf σ J f f = 0)
   (hef : hf σ J e f = 1)
 include hσ hJ he hff hef
 
-theorem OFam.sub_proj_orth {r : ℕ} (F : OFam σ J e f r) (x : ι → K) :
+theorem OFam.sub_proj_orth {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (x : ι → K) :
     hf σ J (x - F.proj x) e = 0 ∧ hf σ J (x - F.proj x) f = 0 ∧
       ∀ k, hf σ J (x - F.proj x) (F.a k) = 0 := by
   have hadd : ∀ x y z, hf σ J (x + y) z = hf σ J x z + hf σ J y z := by
@@ -80,6 +131,7 @@ theorem OFam.sub_proj_orth {r : ℕ} (F : OFam σ J e f r) (x : ι → K) :
     ring
   have hsym : ∀ x y, hf σ J y x = σ (hf σ J x y) := by
     intro x y
+
     simp only [hf, map_sum, map_mul, hσ]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -107,7 +159,7 @@ theorem OFam.sub_proj_orth {r : ℕ} (F : OFam σ J e f r) (x : ι → K) :
 
 end
 
-theorem OFam.proj_add {r : ℕ} (F : OFam σ J e f r) (x y : ι → K) :
+theorem OFam.proj_add {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (x y : ι → K) :
     F.proj (x + y) = F.proj x + F.proj y := by
   have hadd : ∀ z, hf σ J (x + y) z = hf σ J x z + hf σ J y z := by
     intro z
@@ -115,7 +167,7 @@ theorem OFam.proj_add {r : ℕ} (F : OFam σ J e f r) (x y : ι → K) :
   simp only [OFam.proj, hadd, add_smul, add_mul, Finset.sum_add_distrib]
   abel
 
-theorem OFam.proj_smul {r : ℕ} (F : OFam σ J e f r) (c : K) (x : ι → K) :
+theorem OFam.proj_smul {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (c : K) (x : ι → K) :
     F.proj (c • x) = c • F.proj x := by
   have hsmul : ∀ z, hf σ J (c • x) z = c * hf σ J x z := by
     intro z
@@ -138,7 +190,7 @@ theorem polar {p p' : ι → K} (hp : hf σ J p p = 0) (hp' : hf σ J p' p' = 0)
     simp only [hf, Pi.add_apply, add_mul, Finset.sum_add_distrib]
   have hadd2 : ∀ x y z, hf σ J x (y + z) = hf σ J x y + hf σ J x z := by
     intro x y z
-    simp only [hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
   have hsm1 : ∀ (c : K) x y, hf σ J (c • x) y = c * hf σ J x y := by
     intro c x y
     simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
@@ -157,23 +209,15 @@ theorem polar {p p' : ι → K} (hp : hf σ J p p = 0) (hp' : hf σ J p' p' = 0)
   exact h2.mul_right_eq_zero.mp e4
 
 include hσ hJ he hff hef hdet hfix h2 hδ hσδ in
-theorem OFam.extend {r : ℕ} (F : OFam σ J e f r) (hns : ¬ F.Spans) :
-    Nonempty (OFam σ J e f (r + 1)) := by
+theorem OFam.extend {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (hns : ¬ F.Spans) :
+    Nonempty (OFam (σ := σ) (J := J) e f (r + 1)) := by
   classical
-  have hadd1 : ∀ x y z, hf σ J (x + y) z = hf σ J x z + hf σ J y z := by
-    intro x y z
-    simp only [hf, Pi.add_apply, add_mul, Finset.sum_add_distrib]
   have hadd2 : ∀ x y z, hf σ J x (y + z) = hf σ J x y + hf σ J x z := by
     intro x y z
-    simp only [hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
   have hsub2 : ∀ x y z, hf σ J x (y - z) = hf σ J x y - hf σ J x z := by
     intro x y z
     simp only [hf, Pi.sub_apply, map_sub, mul_sub, Finset.sum_sub_distrib]
-  have hsm1 : ∀ (c : K) x y, hf σ J (c • x) y = c * hf σ J x y := by
-    intro c x y
-    simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
-    ring
   have hsm2 : ∀ (c : K) x y, hf σ J x (c • y) = σ c * hf σ J x y := by
     intro c x y
     simp only [hf, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
@@ -181,6 +225,7 @@ theorem OFam.extend {r : ℕ} (F : OFam σ J e f r) (hns : ¬ F.Spans) :
     ring
   have hsym : ∀ x y, hf σ J y x = σ (hf σ J x y) := by
     intro x y
+
     simp only [hf, map_sum, map_mul, hσ]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -262,29 +307,16 @@ theorem OFam.extend {r : ℕ} (F : OFam σ J e f r) (hns : ¬ F.Spans) :
       exact F.hinv i
 
 include hσ hJ he hff hef in
-theorem OFam.card_le [Nontrivial K] {r : ℕ} (F : OFam σ J e f r) : r + 2 ≤ Fintype.card ι := by
+theorem OFam.card_le [Nontrivial K] {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) : r + 2 ≤ Fintype.card ι := by
   classical
-  have hadd1 : ∀ x y z, hf σ J (x + y) z = hf σ J x z + hf σ J y z := by
-    intro x y z
-    simp only [hf, Pi.add_apply, add_mul, Finset.sum_add_distrib]
-  have hadd2 : ∀ x y z, hf σ J x (y + z) = hf σ J x y + hf σ J x z := by
-    intro x y z
-    simp only [hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
-  have hsub2 : ∀ x y z, hf σ J x (y - z) = hf σ J x y - hf σ J x z := by
-    intro x y z
-    simp only [hf, Pi.sub_apply, map_sub, mul_sub, Finset.sum_sub_distrib]
   have hsm1 : ∀ (c : K) x y, hf σ J (c • x) y = c * hf σ J x y := by
     intro c x y
     simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
-  have hsm2 : ∀ (c : K) x y, hf σ J x (c • y) = σ c * hf σ J x y := by
-    intro c x y
-    simp only [hf, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
-    ring
   have hsym : ∀ x y, hf σ J y x = σ (hf σ J x y) := by
     intro x y
+
     simp only [hf, map_sum, map_mul, hσ]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -332,9 +364,9 @@ theorem OFam.card_le [Nontrivial K] {r : ℕ} (F : OFam σ J e f r) : r + 2 ≤ 
   simpa [Module.finrank_fintype_fun_eq_card] using hcard
 
 include hσ hJ he hff hef hdet hfix h2 hδ hσδ in
-theorem exists_spans [Nontrivial K] : ∃ r, ∃ F : OFam σ J e f r, F.Spans := by
+theorem exists_spans [Nontrivial K] : ∃ r, ∃ F : OFam (σ := σ) (J := J) e f r, F.Spans := by
   classical
-  let Pr : ℕ → Prop := fun r => Nonempty (OFam σ J e f r)
+  let Pr : ℕ → Prop := fun r => Nonempty (OFam (σ := σ) (J := J) e f r)
   have h0 : Pr 0 := ⟨⟨Fin.elim0, Fin.elim0, fun j => j.elim0, fun j => j.elim0,
     fun i => i.elim0, fun j => j.elim0⟩⟩
   have hr : Pr (Nat.findGreatest Pr (Fintype.card ι)) := Nat.findGreatest_spec (Nat.zero_le _) h0

@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+import Mathlib.Algebra.Category.ModuleCat.Biproducts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.Limits.FunctorCategory.BinaryBiproducts
+import Mathlib.CategoryTheory.Limits.Types.Pushouts
+import Mathlib.CategoryTheory.Presentable.Type
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 
@@ -39,9 +90,9 @@ private theorem nonempty_iso_shortComplex_map_of_squares {A B : Type*} [Category
         biprod.inr_desc_assoc, ← Functor.map_comp_assoc, hg]
   exact ⟨ShortComplex.isoMk iW (T.mapBiprod X Y ≪≫ biprod.mapIso iX iY) iZ h₁ h₂⟩
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex in
 universe u in
-
 theorem _root_.GlobalTheory.EtC.mv_map_shortExact {A B : Type*} [Category A] [Category B] [Abelian A] [Abelian B] (T : A ⥤ B) [T.Additive]
     {W X Y Z : A} {a : W ⟶ X} {b : W ⟶ Y} {f : X ⟶ Z} {g : Y ⟶ Z}
     {W' X' Y' Z' : B} {a' : W' ⟶ X'} {b' : W' ⟶ Y'} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
@@ -53,9 +104,9 @@ theorem _root_.GlobalTheory.EtC.mv_map_shortExact {A B : Type*} [Category A] [Ca
   ShortComplex.shortExact_of_iso
     (Classical.choice (nonempty_iso_shortComplex_map_of_squares T iW iX iY iZ ha hb hf hg w w')).symm h
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex in
 universe u in
-
 theorem _root_.GlobalTheory.EtC.chainsXIso_naturality (R : Type) [CommRing R] {E E' : _root_.GlobalTheory.EtC.Spc} (f : E ⟶ E') (p : ℕ) :
     ((_root_.GlobalTheory.EtC.chains R).map f).f (-(p : ℤ)) ≫ (_root_.GlobalTheory.EtC.chainsXIso R E' p).hom =
       (_root_.GlobalTheory.EtC.chainsXIso R E p).hom ≫ (_root_.GlobalTheory.EtC.free R).map (f.app (op (SimplexCategory.mk p))) := by
@@ -63,12 +114,10 @@ theorem _root_.GlobalTheory.EtC.chainsXIso_naturality (R : Type) [CommRing R] {E
     ComplexShape.Embedding.extendFunctor_map]
   rw [HomologicalComplex.extendMap_f _ _ (i := p) (by simp)]
   simp [_root_.GlobalTheory.EtC.chainsN]
-  erw [Category.assoc, Category.assoc, Iso.inv_hom_id, Category.comp_id]
-  rfl
+
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex in
 universe u in
-
 theorem _root_.GlobalTheory.EtC.chains_isZero_pos (R : Type) [CommRing R] (E : _root_.GlobalTheory.EtC.Spc) (i : ℤ) (hi : 0 < i) : IsZero (((_root_.GlobalTheory.EtC.chains R).obj E).X i) := by
   apply HomologicalComplex.isZero_extend_X
   intro n hn
@@ -89,7 +138,7 @@ private theorem exists_mapDomain_eq_of_pullback_square {S : Type*} [Ring S] {W A
     have hn : Finsupp.mapDomain b n (r a) ≠ 0 := by
       intro h0
       have h1 := congrArg (fun v => v (r a)) h
-      simp only [Finsupp.add_apply, Finsupp.mapDomain_apply hr, h0, add_zero, Finsupp.coe_zero,
+      simp only [Finsupp.add_apply, Finsupp.mapDomain_apply_of_injective hr, h0, add_zero, Finsupp.coe_zero,
         Pi.zero_apply] at h1
       exact hma h1
     obtain ⟨c, hc⟩ : r a ∈ Set.range b := by
@@ -151,7 +200,7 @@ private theorem moduleCat_free_pullback_exact {S : Type u} [Ring S] {W A B C : T
           ConcreteCategory.hom (-(ModuleCat.free S).map l) z :=
       fun z => by rw [← ConcreteCategory.comp_apply, biprod.lift_snd]
     dsimp only at x₂ hx₂ ⊢
-    rw [← htot x₂, map_add, e1, e2] at hx₂
+    rw [← htot x₂, map_add (f := _), e1, e2] at hx₂
     obtain ⟨z, hz1, hz2⟩ := exists_mapDomain_eq_of_pullback_square (S := S) _ _ _ _ hr hb hcomm ht hex _ _ hx₂
     refine ⟨z, ?_⟩
     rw [← htot x₂, ← htot (ConcreteCategory.hom (biprod.lift ((ModuleCat.free S).map t) (-(ModuleCat.free S).map l)) z)]
@@ -236,9 +285,9 @@ private theorem freeSheaf_pullback_shortExact (R : Type) [CommRing R]
     exact @mono_comp _ _ _ _ _ e.inv.τ₁ inferInstance _ this
   exact mono_of_mono _ e.inv.τ₂
 
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex in
 universe u in
-
 theorem _root_.GlobalTheory.EtC.mv_shortExact : ∀ (R : Type) [CommRing R] {U V E : _root_.GlobalTheory.EtC.Spc} (f : U ⟶ E) (g : V ⟶ E), _root_.GlobalTheory.EtC.Cover2 R f g → ∃ w, (ShortComplex.mk (biprod.lift ((_root_.GlobalTheory.EtC.chains R).map (pullback.fst f g)) (-(_root_.GlobalTheory.EtC.chains R).map (pullback.snd f g))) (biprod.desc ((_root_.GlobalTheory.EtC.chains R).map f) ((_root_.GlobalTheory.EtC.chains R).map g)) w).ShortExact := by
   intro R _ U V E f g hcov
   obtain ⟨hf, hg, hepi⟩ := hcov

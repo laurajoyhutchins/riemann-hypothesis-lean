@@ -1,22 +1,51 @@
-import Formalism.HyperbolicPlaceProducts.DetIndexProductHyperbolicInequality
-import Formalism.HyperbolicPlaceProducts.SubgroupIndexCounts.DetIndexProductHyperbolicInequality
-import Formalism.HyperbolicPlaceProducts.SubgroupIndexCounts.ArithmeticLatticeHypothesis
-import Formalism.HyperbolicPlaceProducts.SubgroupIndexCounts.ProdInfinitePlaceLeOfIntegral
-import Formalism.HyperbolicPlaceProducts.SubgroupIndexCounts.TheoremBEntryFormula
+module
+
+public import Formalism.HyperbolicPlaceProducts.DetIndexProductHyperbolicInequality
+public import Formalism.HyperbolicPlaceProducts.SubgroupIndexCounts.DetIndexProductHyperbolicInequality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.SLP.GlobalBoundRefinements.Final
 
-theorem polarise : Formalism.SLP.GlobalBoundRefinements.Polarise := Formalism.SLP.GlobalBoundRefinements.P.polarization_of_orthogonal_splittings
-theorem formCoeff : Formalism.SLP.GlobalBoundRefinements.FormCoeff := Formalism.SLP.GlobalBoundRefinements.P.coefficients_of_form_preserving
 theorem autCount : Formalism.SLP.GlobalBoundRefinements.AutCount := Formalism.SLP.GlobalBoundRefinements.P.card_linearEquiv_le
-theorem prod_places_hyperbolic_inequality' : Formalism.SLP.GlobalBoundRefinements.ProdPlacesHyperbolicInequality := Formalism.SLP.GlobalBoundRefinements.P.prod_places_hyperbolic_inequality
-theorem det_index_product_hyperbolic_inequality' : Formalism.SLP.GlobalBoundRefinements.DetIndexProductHyperbolicInequality := Formalism.SLP.GlobalBoundRefinements.P.det_index_product_hyperbolic_inequality
-theorem local_integral_entries_of_signature_preserving : Formalism.SLP.GlobalBoundRefinements.EntriesOfSignaturePreserving := Formalism.SLP.GlobalBoundRefinements.P.unipotent_upper_entries
-theorem alHyp : Formalism.SLP.GlobalBoundRefinements.AlHyp := Formalism.SLP.GlobalBoundRefinements.P.arithmetic_lattice_hypothesis
-theorem rootUnityTriv : Formalism.SLP.GlobalBoundRefinements.RootUnityTriv := Formalism.SLP.GlobalBoundRefinements.P.eq_one_of_sub_one_mem_prime
-theorem thmBNorm : Formalism.SLP.GlobalBoundRefinements.ThmBNorm := Formalism.SLP.GlobalBoundRefinements.P.prod_infinitePlace_le_of_integral
-theorem rootUnityModT : Formalism.SLP.GlobalBoundRefinements.RootUnityModT := Formalism.SLP.GlobalBoundRefinements.P.root_of_unity_mod_t
-theorem thmBEntry : Formalism.SLP.GlobalBoundRefinements.ThmBEntry := Formalism.SLP.GlobalBoundRefinements.P.theorem_B_entry_formula
-theorem sEntry : Formalism.SLP.GlobalBoundRefinements.SEntry := Formalism.SLP.GlobalBoundRefinements.P.s_matrix_entry_formula
 
 end Formalism.SLP.GlobalBoundRefinements.Final

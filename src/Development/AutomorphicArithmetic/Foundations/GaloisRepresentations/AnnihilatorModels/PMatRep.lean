@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.SameNormBasic
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.SameNormBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory AlgebraicGeometry TensorProduct
 open UpperTheory.Gal.crystallineComparison
@@ -13,6 +59,7 @@ theorem UpperTheory.Gal.crystallineComparison.matRep_of :
     intro s
     have h1 : f (g s) = s := LinearMap.congr_fun hfg s
     conv_rhs => rw [← h1, pi_eq_sum_univ (g s)]
+
     simp only [map_sum, map_smul, e]
     refine Finset.sum_congr rfl fun x _ => ?_
     congr 2
@@ -34,15 +81,17 @@ theorem UpperTheory.Gal.crystallineComparison.matRep_of :
       rw [splitMap_tmul]
       simp only [hG]
       conv_rhs => rw [← hsum s]
+
       rw [map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_smul, Algebra.smul_def]
       ring
     | add x y hx hy =>
-      simp only [map_add, mul_add, Finset.sum_add_distrib, hx, hy, Pi.add_apply]
+      simp only [map_add (f := _), mul_add, Finset.sum_add_distrib, hx, hy, Pi.add_apply]
   have hL : ∀ t : S, ∑ i, z i t • φ.symm (Pi.single i 1) = (1 : B) ⊗ₜ t := by
     intro t
     apply φ.injective
+
     rw [map_sum]
     simp only [map_smul, AlgEquiv.apply_symm_apply]
     funext i'
@@ -61,6 +110,7 @@ theorem UpperTheory.Gal.crystallineComparison.matRep_of :
     simp only [Matrix.mul_diagonal, Matrix.of_apply, Matrix.map_apply]
     have h3 : (algebraMap R B) (g (s * e k) j) = G j ((1 : B) ⊗ₜ (s * e k)) := by
       rw [hG, mul_one]
+
     rw [h3, ← hL, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, smul_eq_mul, map_mul]

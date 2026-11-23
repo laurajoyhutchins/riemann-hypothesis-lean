@@ -1,12 +1,75 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.DepthZeroSupport
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GeometricLemmaOfFiltration
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Brauer
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.HypothesesX
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoAndThreeForFamily
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DiscreteSeriesCoverExistsIff
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.FormalDegreeCompactDualIff
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ChebotarevDegreeOneIffCheb
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroInertia
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroSupport
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.DepthZeroWild
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExistsIdealsPrimeToEqSpan
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HeckeLAdicParameterAbove
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweDualityGL
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.LocalGlobalAboveL
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.RegularAlgebraicPurity
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.UnlinkedProductIrreducible
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelEisensteinContinuationOfDoublingMethod
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelEisensteinSimplePoleOfDoublingMethod
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitaryConvergent
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitarySchrodinger
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.BesselFormsTrivialNeBot
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.GeometricLemmaFiltration
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SchurOrthogonalitySquareIntegrable
+public import Development.AbelianVarietyTheory.PublishedTheorems.WeberRayClassFields.WeberRayFieldSt
+public import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Lean.Meta.Injective
+
+@[expose] public section
 
 namespace GlobalTheory.Fc.S0
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure HypothesesU : Prop where
   clozelCohomological : GlobalTheory.Published.ClozelCohomological
   greenCuspidal : GlobalTheory.Published.GreenCuspidal
@@ -79,19 +142,5 @@ structure HypothesesU : Prop where
   localFiniteness : ReciprocityTheory.Gal.LocalFiniteness
   localTateDuality : ReciprocityTheory.Gal.LocalTateDuality
   localEulerChar : ReciprocityTheory.Gal.LocalEulerChar
-
-theorem Hypotheses2.toU (P : Hypotheses2) : HypothesesU :=
-  ⟨P.clozelCohomological, P.greenCuspidal, P.cohomologicalCsdTempered, P.heckeLAdicCharacter, P.chebotarevDegreeOne, P.discreteSpectrumGL, P.galoisRepOfPolarizedCuspidal, P.baseChangeDefiniteUnitary, P.bhattScholzeCrystallineLattices, P.heckeLAdicCharacterAbove, P.cuspRapidDecay, P.weilSiegelFormulaUnitary, P.siegelWeilUnitaryConvergent, P.doublingMethod, P.unramifiedDoublingGL, P.bernsteinZelevinskyFiniteness, P.formalDegreeCompactDual, P.bernsteinUnitaryProductIrreducible, P.geometricLemmaFiltration, P.unlinkedProductIrreducible, P.depthZeroJacquetInjective, P.howeDualityGL, P.jacquetShalika, P.automorphicFormsFiniteGL, P.localGlobalAboveL, P.regularAlgebraicPurity, P.globalArtinReciprocity, P.heckeLAdicParameterAbove, P.deRhamPotSemistable, P.harishChandraFinite, P.greenRegularCharacters, P.zelevinskyPolynomialRing, P.depthZeroInertia, P.rayClassFieldSt, P.rayCharacterArtin, P.genericUnitaryDualGL, P.standardCosocleGL, P.cheb, P.discreteSeriesCover, P.harishChandraModules, P.casselmanWallach, P.weilRepresentationUnitaryPair, P.discreteSeriesExists, P.discreteSeriesClassification, P.strongApproxSU, P.siegelWeilUnitaryConvergent2, P.harishChandraAnalyticity, P.cuspTraceClass, P.dixmierMalliavinFactorisation, P.flathFactorisation, P.pseudoCoefficientUpq, P.harishChandraCharacters, P.langlandsClassification, P.labesseWaldspurger, P.cMCurveGoodOutsidePrimeSt, P.weberRayFieldSt, P.discreteSeriesCoverExists, P.besselUniquenessReal, P.siegelWeilUnitarySchrodinger, P.siegelEisensteinContinuation, P.siegelEisensteinSimplePole, P.schurOrthogonalitySquareIntegrable, P.regularisedSiegelWeilFirstTerm, P.litN, P.toHypothesesX, P.nLink, P.depthZeroWild', P.depthZeroSupport', P.localFiniteness, P.localTateDuality, P.localEulerChar⟩
-
-theorem HypothesesU.geometricLemma (P : HypothesesU) : GlobalTheory.Published.GeometricLemma :=
-  GlobalTheory.geometricLemma_of_filtration P.bernsteinZelevinskyFiniteness P.geometricLemmaFiltration
-
-example (P : Hypotheses2) : GlobalTheory.Published.GeometricLemmaFiltration := P.toU.geometricLemmaFiltration
-
-example (P : Hypotheses2) : GlobalTheory.Published.SiegelWeilUnitarySchrodinger := P.toU.siegelWeilUnitarySchrodinger
-
-example (P : Hypotheses2) : GlobalTheory.NLink.Hypotheses₂ := P.toU.nLink
-
-example (P : Hypotheses2) : GlobalTheory.Published.GeometricLemma := P.toU.geometricLemma
 
 end GlobalTheory.Fc.S0

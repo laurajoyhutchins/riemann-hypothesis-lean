@@ -1,5 +1,51 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.LevZZero
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.LevZZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenFns
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,15 +64,24 @@ theorem translate_apply (a : GL (Fin N) k) (l : Levi k fun a => Fin (d a))
     (f : IndSp (stdBlocks d hd) ρ) (u : GL (Fin N) k) :
     (parInd (stdBlocks d hd) ρ a f).1.1 (pm k (wOpen d hd) * u) =
       (deltaHalf k (fun a => Fin (d a)) l : ℂ) • ρ l (f.1.1 (pm k (wOpen d hd) * (a⁻¹ * u * a))) := by
+  letI : DecidableEq (Fin h) := Classical.typeDecidableEq _
   have hx : pm k (wOpen d hd) * u * a =
       leviEmb k (stdBlocks d hd) l * (pm k (wOpen d hd) * (a⁻¹ * u * a)) := by
     rw [← hl]
     group
-  have hf := f.1.2 ⟨leviEmb k (stdBlocks d hd) l, leviEmb_mem_parab k _ l⟩ (pm k (wOpen d hd) * (a⁻¹ * u * a))
+  have hm : leviEmb k (stdBlocks d hd) l ∈ parab k (stdBlocks d hd) :=
+    mem_parab_iff.2 fun _ _ i j hab => by
+      simp [leviEmb]
+      exact Matrix.blockDiagonal'_apply_ne _ _ _ hab.ne'
+  have hp : leviProj k (stdBlocks d hd) ⟨leviEmb k (stdBlocks d hd) l, hm⟩ = l := by
+    funext a
+    ext i j
+    simp [leviProj_apply, leviEmb, Matrix.blockDiagonal'_apply_eq]
+  have hf := f.1.2 ⟨leviEmb k (stdBlocks d hd) l, hm⟩ (pm k (wOpen d hd) * (a⁻¹ * u * a))
   change f.1.1 (pm k (wOpen d hd) * u * a) = _
   rw [hx]
   refine hf.trans ?_
-  rw [MonoidHom.comp_apply, leviProj_leviEmb]
+  rw [MonoidHom.comp_apply, hp]
   rfl
 
 theorem translate_mem_openFns (a : GL (Fin N) k) (l : Levi k fun a => Fin (d a))
@@ -34,12 +89,17 @@ theorem translate_mem_openFns (a : GL (Fin N) k) (l : Levi k fun a => Fin (d a))
     (haB : ∀ u ∈ unipB k (Fin N), a * u * a⁻¹ ∈ unipB k (Fin N))
     {f : IndSp (stdBlocks d hd) ρ} (hf : f ∈ openFns d hd ρ) :
     parInd (stdBlocks d hd) ρ a f ∈ openFns d hd ρ := by
+  letI : DecidableEq (Fin h) := Classical.typeDecidableEq _
   have hf' : ∀ g : GL (Fin N) k, f.1.1 g ≠ 0 → g ∈ cell k d hd (wOpen d hd) := hf
   show ∀ g : GL (Fin N) k, (parInd (stdBlocks d hd) ρ a f).1.1 g ≠ 0 → g ∈ cell k d hd (wOpen d hd)
   intro g hg
   obtain ⟨p, hp, n, hn, hpn⟩ := hf' (g * a) hg
+  have hm : leviEmb k (stdBlocks d hd) l ∈ parab k (stdBlocks d hd) :=
+    mem_parab_iff.2 fun _ _ i j hab => by
+      simp [leviEmb]
+      exact Matrix.blockDiagonal'_apply_ne _ _ _ hab.ne'
   refine ⟨p * (leviEmb k (stdBlocks d hd) l)⁻¹,
-    (parab k _).mul_mem hp ((parab k _).inv_mem (leviEmb_mem_parab k _ l)), a * n * a⁻¹, haB n hn, ?_⟩
+    (parab k _).mul_mem hp ((parab k _).inv_mem hm), a * n * a⁻¹, haB n hn, ?_⟩
   have hg' : g = p * pm k (wOpen d hd) * n * a⁻¹ := by
     rw [← hpn]
     group
@@ -69,7 +129,7 @@ theorem deltaHalf_levZ (r m : ℕ) (z : kˣ) :
   have key : (deltaHalf k (fun a => Fin (dd r m a)) (levZ k r m z) : ℂ) =
       ((nabs k (GeneralLinearGroup.det (levZ k r m z 0)) : ℂ) ^ ((modExp (fun a => Fin (dd r m a)) 0 : ℂ) / 2)) *
       ((nabs k (GeneralLinearGroup.det (levZ k r m z 1)) : ℂ) ^ ((modExp (fun a => Fin (dd r m a)) 1 : ℂ) / 2)) := by
-    simp only [deltaHalf, Fin.prod_univ_two, MonoidHom.finset_prod_apply, Units.val_mul]
+    simp only [deltaHalf, Fin.prod_univ_two]
     rfl
   rw [key, h0, h1, hdet, map_one, modExp_two_one, nabs_pow]
   have hx : 0 ≤ nabs k z := by simp [nabs]

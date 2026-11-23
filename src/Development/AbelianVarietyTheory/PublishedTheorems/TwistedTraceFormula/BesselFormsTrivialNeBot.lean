@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfInnerSmooth
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfInnerSmooth
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -90,34 +132,6 @@ end Forms
 variable {J : Matrix (Fin n) (Fin n) ℂ} {J₀ : Matrix (Fin m) (Fin m) ℂ} {F : Matrix (Fin n) (Fin m) ℂ}
   {e : Matrix (Fin n) (Fin r) ℂ} {z : Fin n → ℂ}
 
-theorem IsFrame.exists_emb (hf : IsFrame J J₀ F e z) {h : Matrix (Fin m) (Fin m) ℂ} (hh : h ∈ UH J₀) :
-    ∃ g ∈ UH J, IsEmb J F g h := by
-  have hd := (Matrix.isUnit_iff_isUnit_det J₀).1 hf.unit₀
-  have hh' : hᴴ * J₀ * h = J₀ := hh
-  have h0 : J₀ᴴ = J₀ := by
-    rw [← hf.gram]; simp only [conjTranspose_mul, conjTranspose_conjTranspose, hf.herm, Matrix.mul_assoc]
-  obtain ⟨P, hP⟩ : ∃ P, P = J₀⁻¹ * (Fᴴ * J) := ⟨_, rfl⟩
-  have h1 : Fᴴ * J = J₀ * P := by rw [hP, ← Matrix.mul_assoc, mul_nonsing_inv _ hd, Matrix.one_mul]
-  have h2 : J * F = Pᴴ * J₀ := by
-    have := congrArg conjTranspose h1
-    rwa [conjTranspose_mul, conjTranspose_mul, conjTranspose_conjTranspose, hf.herm, h0] at this
-  have h3 : P * F = 1 := by rw [hP, Matrix.mul_assoc, hf.gram, nonsing_inv_mul _ hd]
-  refine ⟨1 + F * (h - 1) * P, ?_, ?_, fun x hx => ?_⟩
-  · show _ * J * _ = J
-    have e1 : (1 + F * (h - 1) * P)ᴴ * J * (1 + F * (h - 1) * P) =
-        J + (J * F) * (h - 1) * P + Pᴴ * (hᴴ - 1) * (Fᴴ * J) + Pᴴ * (hᴴ - 1) * (Fᴴ * J * F) * (h - 1) * P := by
-      simp only [conjTranspose_add, conjTranspose_mul, conjTranspose_sub, conjTranspose_one, Matrix.add_mul,
-        Matrix.mul_add, Matrix.one_mul, Matrix.mul_one, Matrix.mul_assoc]
-      abel
-    have e2 : J₀ * (h - 1) + (hᴴ - 1) * J₀ + (hᴴ - 1) * J₀ * (h - 1) = 0 := by
-      simp only [Matrix.mul_sub, Matrix.sub_mul, Matrix.one_mul, Matrix.mul_one, hh']
-      abel
-    have e3 : Pᴴ * (J₀ * (h - 1) + (hᴴ - 1) * J₀ + (hᴴ - 1) * J₀ * (h - 1)) * P = 0 := by rw [e2]; simp
-    rw [e1, hf.gram, h2, h1, add_assoc, add_assoc, add_eq_left, ← e3]
-    simp only [Matrix.add_mul, Matrix.mul_add, Matrix.mul_assoc, add_assoc]
-  · rw [Matrix.add_mul, Matrix.mul_assoc, h3, Matrix.mul_sub]; simp
-  · rw [add_mulVec, ← mulVec_mulVec, hP, ← mulVec_mulVec x J₀⁻¹, hx]; simp
-
 theorem IsFrame.exists_coords (hf : IsFrame J J₀ F e z) {u : Matrix (Fin n) (Fin n) ℂ} (hu : u ∈ unipRad J e) :
     ∃ a : Fin r → Fin r → ℂ, ∀ j : Fin r, (u - 1) *ᵥ flagVec e z j.succ = e *ᵥ a j := by
   have : ∀ i : Fin (r + 1), ∃ a, (u - 1) *ᵥ flagVec e z i = e *ᵥ a := fun i => by
@@ -143,19 +157,6 @@ def BesselUniquenessReal : Prop :=
       (π₀ : Matrix (Fin m) (Fin m) ℂ → Module.End ℂ W), IsContIrred (UH J₀) π₀ →
       Module.rank ℂ (besselForms J J₀ F e χ σ π₀ (smSub J σ)) ≤ 1
 
-open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.IndefR.Mult in
-
-theorem BesselUniquenessReal.model (hB : BesselUniquenessReal) {D : D7} {V : HSp D} {S : D.what₂.Tau → SPar}
-    (M : DSModel V S) (τ : D.what₂.Tau) {m r : ℕ} {J₀ : Matrix (Fin m) (Fin m) ℂ} {F : Matrix (Fin V.rank) (Fin m) ℂ}
-    {e : Matrix (Fin V.rank) (Fin r) ℂ} {z : Fin V.rank → ℂ} (hf : IsFrame (gramAt D V τ) J₀ F e z)
-    {χ : Matrix (Fin V.rank) (Fin V.rank) ℂ → ℂ} (hχ : IsGeneric (gramAt D V τ) e z χ)
-    {W : Type} [AddCommGroup W] [Module ℂ W] [FiniteDimensional ℂ W]
-    {π₀ : Matrix (Fin m) (Fin m) ℂ → Module.End ℂ W} (hπ : IsContIrred (UH J₀) π₀) :
-    Module.rank ℂ (besselForms (gramAt D V τ) J₀ F e χ (M.rep τ) π₀ (M.sm τ)) ≤ 1 := by
-  obtain ⟨hc, -, hU, hI, -⟩ := M.ds τ
-  rw [sm_eq M τ]
-  exact hB _ _ _ _ _ _ _ _ hf χ hχ _ _ (isURepOn_trRep (M.fr_unit τ) (M.fr_gram τ) hU)
-    (isIrredOn_trRep (M.fr_unit τ) (M.fr_gram τ) hI) W π₀ hπ
 
 end GlobalTheory.Published
 

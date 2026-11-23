@@ -1,19 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open MeasureTheory Matrix
 
 namespace Formalism.DoubleCosetMeasures
-
-def IntRightInv : Prop :=
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [MeasurableSpace G]
-    [BorelSpace G] (μ : Measure G) [μ.IsMulLeftInvariant] (K₀ : Subgroup G),
-    IsOpen (K₀ : Set G) →
-    ∀ (E : Type) [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] (f : G → E),
-      (∀ g : G, ∀ k ∈ K₀, f (g * k) = f g) → HasCompactSupport f →
-      (Function.support (fun x : G ⧸ K₀ => f x.out)).Finite ∧
-      ∫ g, f g ∂μ = ∑ᶠ x : G ⧸ K₀, (μ (K₀ : Set G)).toReal • f x.out
 
 def IntTwoSided : Prop :=
   ∀ (G₁ G₂ : Type) [Group G₁] [TopologicalSpace G₁] [IsTopologicalGroup G₁] [MeasurableSpace G₁]
@@ -29,26 +71,6 @@ def IntTwoSided : Prop :=
       ∫ p, f p ∂(μ₁.prod μ₂) =
         ∑ᶠ p : Quotient (QuotientGroup.rightRel K₁) × (G₂ ⧸ K₂),
           ((μ₁ (K₁ : Set G₁)).toReal * (μ₂ (K₂ : Set G₂)).toReal) • f (p.1.out, p.2.out)
-
-def DosetVol : Prop :=
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [MeasurableSpace G]
-    [BorelSpace G] (μ : Measure G) [μ.IsMulLeftInvariant] (K₀ : Subgroup G),
-    IsOpen (K₀ : Set G) → IsCompact (K₀ : Set G) → ∀ g : G,
-      (K₀.map (MulAut.conj g).toMonoidHom).relIndex K₀ ≠ 0 ∧
-      μ (DoubleCoset.doubleCoset g (K₀ : Set G) (K₀ : Set G)) =
-        ((K₀.map (MulAut.conj g).toMonoidHom).relIndex K₀ : ENNReal) * μ (K₀ : Set G)
-
-def IntBiInv : Prop :=
-  ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [MeasurableSpace G]
-    [BorelSpace G] (μ : Measure G) [μ.IsMulLeftInvariant] (K₀ : Subgroup G),
-    IsOpen (K₀ : Set G) → IsCompact (K₀ : Set G) →
-    ∀ (E : Type) [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] (f : G → E),
-      (∀ a ∈ K₀, ∀ b ∈ K₀, ∀ g : G, f (a * g * b) = f g) → HasCompactSupport f →
-      (Function.support (fun x : DoubleCoset.Quotient (K₀ : Set G) (K₀ : Set G) =>
-          f (Quotient.out x))).Finite ∧
-      ∫ g, f g ∂μ = ∑ᶠ x : DoubleCoset.Quotient (K₀ : Set G) (K₀ : Set G),
-        (((K₀.map (MulAut.conj (Quotient.out x)).toMonoidHom).relIndex K₀ : ℝ) *
-          (μ (K₀ : Set G)).toReal) • f (Quotient.out x)
 
 section Mat
 
@@ -202,12 +224,6 @@ theorem isLowUni_one {n : ℕ} : IsLowUni (1 : Matrix (Fin n) (Fin n) K) := ⟨M
 
 theorem isUpUni_one {n : ℕ} : IsUpUni (1 : Matrix (Fin n) (Fin n) K) := ⟨Matrix.blockTriangular_one, fun a => Matrix.one_apply_eq a⟩
 
-def lowUniG (n : ℕ) : Subgroup (GL (Fin n) K) where
-  carrier := {g | IsLowUni (g : Matrix (Fin n) (Fin n) K)}
-  one_mem' := by simpa using isLowUni_one K
-  mul_mem' := by intro a b ha hb; simpa using isLowUni_mul K ha hb
-  inv_mem' := by intro a ha; simpa [Matrix.coe_units_inv] using isLowUni_inv K ha
-
 def upUniG (n : ℕ) : Subgroup (GL (Fin n) K) where
   carrier := {g | IsUpUni (g : Matrix (Fin n) (Fin n) K)}
   one_mem' := by simpa using isUpUni_one K
@@ -267,11 +283,12 @@ variable {K : Type} [CommRing K] [TopologicalSpace K] [IsTopologicalRing K]
 instance instMeasGL (n : ℕ) : MeasurableSpace (GL (Fin n) K) := borel _
 instance instBorelGL (n : ℕ) : BorelSpace (GL (Fin n) K) := ⟨rfl⟩
 
-open Classical in
 
+open Classical in
 def phi (R : Subring K) (s : List ℕ) (t : ℕ → Kˣ) (ψ : AddChar K ℂ) (C : Type) [AddCommGroup C]
-    [Module R C] (e : C) (lam : C →ₗ[R] KR R) (p : lowW K s t × upUniG K s.sum) : ℂ :=
-  (if IsInt R (((p.1 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K) * pt s t * ((p.2 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K))
+    [Module R C] (e : C) (lam : C →ₗ[R] KR R) (p : lowW K s t × upUniG K s.sum) : ℂ := by
+  classical
+  exact (if IsInt R (((p.1 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K) * pt s t * ((p.2 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K))
     then (Nat.card (isoSet R (((p.1 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K) * pt s t *
       ((p.2 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K)) C e lam) : ℂ) else 0) *
     ψ (sLow ((p.1 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K) + sUp ((p.2 : GL (Fin s.sum) K) : Matrix (Fin s.sum) (Fin s.sum) K))
@@ -318,23 +335,6 @@ def SuppCompact : Prop :=
       (C : Type) [AddCommGroup C] [Module R C] (e : C) (lam : C →ₗ[R] KR R),
       HasCompactSupport (phi R s t ψ C e lam)
 
-def SectionBij : Prop :=
-  ∀ (K : Type) [CommRing K] (s : List ℕ) (t : ℕ → Kˣ) (x y : Matrix (Fin s.sum) (Fin s.sum) K),
-    IsLowUni x → IsUpUni y →
-    ∃! p : Matrix (Fin s.sum) (Fin s.sum) K × Matrix (Fin s.sum) (Fin s.sum) K,
-      (IsLowUni p.1 ∧ ∃ h : Matrix (Fin s.sum) (Fin s.sum) K, IsLowUni h ∧ p.1 * pt s t = pt s t * h) ∧
-      IsUpUni p.2 ∧ p.1 * pt s t * p.2 = x * pt s t * y
-
-def latOf {K : Type} [CommRing K] (R : Subring K) {n : ℕ} (g : GL (Fin n) K) :
-    Submodule R (Fin n → K) :=
-  Submodule.map (((g : Matrix (Fin n) (Fin n) K).mulVecLin.restrictScalars R).comp (coeLin R)) ⊤
-
-def LatticeCoset : Prop :=
-  ∀ (K : Type) [CommRing K] (R : Subring K) (n : ℕ) (g h : GL (Fin n) K),
-    latOf R g = latOf R h ↔
-      (IsInt R (((g⁻¹ * h : GL (Fin n) K)) : Matrix (Fin n) (Fin n) K) ∧
-        IsInt R (((h⁻¹ * g : GL (Fin n) K)) : Matrix (Fin n) (Fin n) K))
-
 def IsoFinite : Prop :=
   ∀ (K : Type) [CommRing K] (R : Subring K),
     (∀ d : R, IsUnit (d : K) → Finite (R ⧸ Ideal.span {d})) →
@@ -342,15 +342,5 @@ def IsoFinite : Prop :=
     Finite (coker R Z) ∧
     ∀ (C : Type) [AddCommGroup C] [Module R C] (e : C) (lam : C →ₗ[R] KR R),
       (isoSet R Z C e lam).Finite
-
-def HaarExists : Prop :=
-  ∀ (K : Type) [CommRing K] [TopologicalSpace K] [IsTopologicalRing K] [T2Space K]
-    [LocallyCompactSpace K] (R : Subring K), IsOpen (R : Set K) → IsCompact (R : Set K) →
-    (∃ ϖ : Kˣ, (ϖ : K) ∈ R ∧ ∀ x : K, ∃ m : ℕ, (ϖ : K) ^ m * x ∈ R) →
-    ∀ (s : List ℕ) (t : ℕ → Kˣ),
-      (∃ μ₁ : Measure (lowW K s t), μ₁.IsMulLeftInvariant ∧ μ₁.IsMulRightInvariant ∧
-        SFinite μ₁ ∧ μ₁ (intSub R (lowW K s t) : Set (lowW K s t)) = 1) ∧
-      (∃ μ₂ : Measure (upUniG K s.sum), μ₂.IsMulLeftInvariant ∧ μ₂.IsMulRightInvariant ∧
-        SFinite μ₂ ∧ μ₂ (intSub R (upUniG K s.sum) : Set (upUniG K s.sum)) = 1)
 
 end Formalism.DoubleCosetMeasures

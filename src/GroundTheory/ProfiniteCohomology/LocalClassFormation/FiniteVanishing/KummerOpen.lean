@@ -1,14 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormationAlt
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
-import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.QuotientToInvariantsFunctorPreservesZeroMorphism
-import GroundTheory.ProfiniteCohomology.ClassFormations.Corestriction
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormationAlt
+public import GroundTheory.ProfiniteCohomology.ContinuousCochains.Functoriality
 import GroundTheory.LocalFields.UnitsPowers
-import GroundTheory.LocalFields.SeparableClosure
-import GroundTheory.LocalFields.IntermediateField
-import GroundTheory.ProfiniteCohomology.TorsionDualFinite
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Devissage
+public import GroundTheory.ProfiniteCohomology.ClassFormations.Corestriction
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.QuotientToInvariantsFunctorPreservesZeroMorphism
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Devissage
+public import GroundTheory.ProfiniteCohomology.TorsionDualFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -60,16 +101,12 @@ instance isDiscreteRep_res_galRootsOfUnity (W : Subgroup Gal(Ksep/K)) :
     IsDiscreteRep (Rep.res W.subtype (galRootsOfUnity.{0} K Ksep n)) :=
   isDiscreteRep_res_subtype _ _
 
-instance isDiscreteRep_res_galUnits (W : Subgroup Gal(Ksep/K)) :
-    IsDiscreteRep (Rep.res W.subtype (galUnits.{0} K Ksep)) :=
-  isDiscreteRep_res_subtype _ _
-
 theorem subsingleton_cohomology_one_galUnits_open :
     Subsingleton (cohomology (Rep.res (V : Subgroup Gal(Ksep/K)).subtype (galUnits.{0} K Ksep)) 1) :=
   (ModuleCat.isZero_iff_subsingleton).1 ((localClassFormationOfIsSepClosure K Ksep).isZero_H1_open_subgroups V)
 
-include hn in
 
+include hn in
 theorem finite_cohomology_one_rootsOfUnity_open :
     Finite (cohomology (Rep.res (V : Subgroup Gal(Ksep/K)).subtype (galRootsOfUnity.{0} K Ksep n)) 1) := by
   let := GroundTheory.LocalField.algebraicValuativeRel K Ksep
@@ -133,8 +170,8 @@ theorem finite_cohomology_one_rootsOfUnity_open :
   rw [QuotientGroup.lift_mk]
   rfl
 
-include hn in
 
+include hn in
 theorem finite_cohomology_two_rootsOfUnity_open :
     Finite (cohomology (Rep.res (V : Subgroup Gal(Ksep/K)).subtype (galRootsOfUnity.{0} K Ksep n)) 2) := by
   set F := localClassFormationOfIsSepClosure K Ksep
@@ -153,8 +190,8 @@ theorem finite_cohomology_two_rootsOfUnity_open :
   exact Finite.of_injective (fun x => (⟨_, htors x⟩ : {q : QZ | n • q = 0}))
     fun x y h => hinj ((F.inv_bijective V).1 (congrArg Subtype.val h))
 
-include hn in
 
+include hn in
 theorem subsingleton_cohomology_three_rootsOfUnity_open
     (h3 : Subsingleton (cohomology (Rep.res (V : Subgroup Gal(Ksep/K)).subtype (galUnits.{0} K Ksep)) 3)) :
     Subsingleton (cohomology (Rep.res (V : Subgroup Gal(Ksep/K)).subtype (galRootsOfUnity.{0} K Ksep n)) 3) := by
@@ -176,8 +213,8 @@ theorem subsingleton_cohomology_three_rootsOfUnity_open
   rw [← hz, hzw]
   exact congrArg (fun φ => φ.hom w) (comp_δ hS 2 3 rfl)
 
-include hn in
 
+include hn in
 theorem finite_cohomology_rootsOfUnity_open (r : ℕ) (hr : r ≤ 2) :
     Finite (cohomology (Rep.res (V : Subgroup Gal(Ksep/K)).subtype (galRootsOfUnity.{0} K Ksep n)) r) := by
   have hn0 : n ≠ 0 := fun h => hn (by simp [h])

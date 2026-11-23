@@ -1,7 +1,46 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExtId
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MumfordBundleIsoAdditiveCubicalStructureStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExtId
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MumfordBundleIsoAdditiveCubicalStructureStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
+import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg GlobalTheory.TChart GlobalTheory.UT GlobalTheory.Mum.Two
@@ -59,7 +98,7 @@ theorem tautPt_isAdd : ∀ {o W : Type} [CommRing o] [CommRing W] [IsLocalRing W
   have hkk : k'' = k * k' := by
     refine Units.ext ?_
     rw [Units.val_mul, hk'', hk, hk']
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact prod_zpow_add _ _ _ (hk ▸ k.ne_zero) (hk' ▸ k'.ne_zero)
   have hG : gm (𝟙 (TF (R := V) F).left) y ⊤ (unitOn k'') =
       gm (𝟙 (TF (R := V) F).left) y ⊤ (unitOn k) * gm (𝟙 (TF (R := V) F).left) y ⊤ (unitOn k') := by
@@ -71,9 +110,22 @@ theorem tautPt_isAdd : ∀ {o W : Type} [CommRing o] [CommRing W] [IsLocalRing W
     (ρ ≫ T.c₀ a) (ρ ≫ T.c₀ a') (ρ ≫ T.c₀ ((n : ℤ) • e χ)) (hpt _ _ hg.1) (hpt _ _ hg'.1) hyc y J₀ J hJ₀ hJ).2
   simp only [id] at wa
 
-  have C := isCub_cubV T.cub hJ₀ (T := Over.mk ((TF (R := V) F).hom ≫ spMap ω))
-  have hC := (C.s01 (ρ ≫ T.c₀ ((n : ℤ) • e χ)) (ρ ≫ T.c₀ a) (ρ ≫ T.c₀ a')).trans
-    (C.s12 (ρ ≫ T.c₀ a) (ρ ≫ T.c₀ ((n : ℤ) • e χ)) (ρ ≫ T.c₀ a'))
+  have hs01 : ∀ x y' z : Over.mk ((TF (R := V) F).hom ≫ spMap ω) ⟶ T.B,
+      cubV T.cub y J₀ x y' z = cubV T.cub y J₀ y' x z := by
+    intro x y' z
+    have h := (val_corr hJ₀ T.cub.cubeSymmetric_swap_first (lift x (lift y' z)).left).trans
+      (val_cub T.cub (lift x (lift y' z)) hJ₀ _ _ _)
+    refine h.trans ?_
+    congr 1 <;> simp [x3]
+  have hs12 : ∀ x y' z : Over.mk ((TF (R := V) F).hom ≫ spMap ω) ⟶ T.B,
+      cubV T.cub y J₀ x y' z = cubV T.cub y J₀ x z y' := by
+    intro x y' z
+    have h := (val_corr hJ₀ T.cub.cubeSymmetric_swap_last (lift x (lift y' z)).left).trans
+      (val_cub T.cub (lift x (lift y' z)) hJ₀ _ _ _)
+    refine h.trans ?_
+    congr 1 <;> simp [x3]
+  have hC := (hs01 (ρ ≫ T.c₀ ((n : ℤ) • e χ)) (ρ ≫ T.c₀ a) (ρ ≫ T.c₀ a')).trans
+    (hs12 (ρ ≫ T.c₀ a) (ρ ≫ T.c₀ ((n : ℤ) • e χ)) (ρ ≫ T.c₀ a'))
   have corr := corr_of_val T.M.isLB
     (t := LB.mulGen T.M.L _ _ _ _ (T.τ₀ (a + a') ((n : ℤ) • e χ))
       (LB.pullGen T.M.L (thφ T.B (x3 T.B)) thε T.cub.t

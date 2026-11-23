@@ -1,4 +1,63 @@
-import Development.EtaleCohomology.EtaleSheaves.CompPf
+module
+
+public import Mathlib.Algebra.Category.Ring.Basic
+public import Mathlib.Algebra.MvPolynomial.Variables
+public import Mathlib.CategoryTheory.Limits.Types.Filtered
+public import Mathlib.CategoryTheory.ObjectProperty.ColimitsOfShape
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.FinitePresentation
+public import Mathlib.Tactic.Linter.Style
+import Mathlib.Algebra.Category.Ring.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Filtered
+import Mathlib.CategoryTheory.Limits.Preserves.Over
+import Mathlib.CategoryTheory.WithTerminal.Cone
+import Mathlib.CategoryTheory.WithTerminal.Lemmas
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.EtaleCohomology.EtaleSheaves.CompPf
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits MvPolynomial
@@ -25,8 +84,6 @@ variable {R A}
 
 instance : Preorder (Idx R A) := Preorder.lift (fun i => (i.s, i.T))
 
-theorem Idx.le_iff {i j : Idx R A} : i ≤ j ↔ i.s ⊆ j.s ∧ i.T ⊆ j.T := Iff.rfl
-
 def Idx.join (i j : Idx R A) : Idx R A where
   s := i.s ∪ j.s
   T := i.T ∪ j.T
@@ -44,8 +101,6 @@ instance : IsDirected (Idx R A) (· ≤ ·) :=
     ⟨Finset.subset_union_right, Finset.subset_union_right⟩⟩⟩
 
 instance : Nonempty (Idx R A) := ⟨⟨∅, ∅, by simp, by simp⟩⟩
-
-example : IsFiltered (Idx R A) := inferInstance
 
 def rel (i : Idx R A) : Ideal (MvPolynomial i.s R) :=
   Ideal.comap (rename (R := R) (Subtype.val : i.s → A)) (Ideal.span (i.T : Set (MvPolynomial A R)))
@@ -154,9 +209,6 @@ def cocone : Cocone (diag (X := X) A) where
            simp only [Functor.const_obj_obj, Functor.const_obj_map]
            show uHom (trans i j f.le) ≫ uHom (toA j) = uHom (toA i)
            rw [← uHom_comp, toA_trans] }
-
-theorem cocone_app (i : Idx X A) (x : D i) :
-    ((Under.forget X ⋙ forget CommRingCat).mapCocone (cocone A)).ι.app i x = toA i x := rfl
 
 def isColimitCocone : IsColimit (cocone (X := X) A) := by
   have : ReflectsColimitsOfShape (Idx X A) (Under.forget X ⋙ forget CommRingCat) :=

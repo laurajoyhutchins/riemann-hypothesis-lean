@@ -1,19 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
-import Formalism.LocalToGlobal.ProjectiveLattices.SpMapAlgHomId
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CXiValIff
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.IoOverLeftUnique
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.AdmissibleSmulIffOfCoprime
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.SecBCAndCuspBC
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ActLevAndActBC
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.RuleBaseChangeSectionValuesSemilinear
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsEmbExt
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsThClsDDdBCIff
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.EqOfForallAlgClosed
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsIntegralCoeffCof
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartIndependenceUnconditional
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CXiValIff
+public import Formalism.LocalToGlobal.IndefiniteReal.ThPinsR
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.AdmissibleSmulIffOfCoprime
+public import Development.AbelianVarietyTheory.Definitions.ThetaValues.IoOverLeftUnique
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsThClsDDdBCIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option synthInstance.maxHeartbeats 200000
@@ -59,7 +92,7 @@ theorem exists_coef_ext {K K' : Type} [Field K] [Field K'] (j : K →+* K') {σ 
     { toFun := fun F => Finsupp.sum ((MvPolynomial.basisMonomials _ K').repr F)
         fun m a => σ' a • c₀ (p (MvPolynomial.monomial m 1))
       map_add' := fun F F' => by
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => by simp [add_smul])
       map_smul' := fun a F => by
         rw [map_smul, Finsupp.sum_smul_index' (fun _ => by simp), Finsupp.smul_sum]
@@ -77,7 +110,7 @@ theorem exists_coef_ext {K K' : Type} [Field K] [Field K'] (j : K →+* K') {σ 
     induction F using MvPolynomial.induction_on' with
     | monomial m a =>
       rw [MvPolynomial.map_monomial, hC, hσ, ← map_smulₛₗ, ← map_smul, MvPolynomial.smul_monomial, smul_eq_mul, mul_one]
-    | add F F' h h' => rw [map_add, map_add, h, h', map_add, map_add]
+    | add F F' h h' => rw [map_add (f := _), map_add (f := _), h, h', map_add (f := _), map_add (f := _)]
   exact ⟨C.comp (VV K' lam).subtype, fun v v' h => by
     show C v' = _
     rw [h, key, hp']⟩
@@ -170,8 +203,8 @@ theorem place_unique (hV : R.models_HV) {J' : Subgroup (Bridge.Gf (Vc D i))} (hJ
   exact (hV i t).1 (adForms_ext ((hV i t).2.1.le (LinearMap.mem_range_self (R.HV i t).e y))
     ((hV i t).2.1.le (LinearMap.mem_range_self (R.HV i t).e y')) hJ hr fun k => (hy k).trans (hy' k).symm)
 
-open Classical in
 
+open Classical in
 def thAdOf (v₀ : (R.MW i (sg0 D A)).Vec) (x : Cl → VsV D i K') : AutQ (Wc D i) → ℂ :=
   if hx : ∃ y, Place R i t h c0' y x then onQ (Wc D i) (R.thF i t hx.choose v₀) else 0
 

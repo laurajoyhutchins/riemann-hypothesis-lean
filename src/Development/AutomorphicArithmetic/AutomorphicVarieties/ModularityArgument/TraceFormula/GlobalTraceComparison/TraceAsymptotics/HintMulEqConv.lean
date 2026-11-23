@@ -1,7 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.ShiftSupport
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintSph
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDimensionalFixedOpenSubgroupGLw
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.SphericalVectorMemFixedRight
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.HintSph
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.ShiftSupport
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.SphericalVectorMemFixedRight
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Heckebasic
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,13 +152,13 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.exAct :
     UpperTheory.V.Z.Tf.GlobalTraceComparison.Asm.ExAct := by
   intro E _ _ _ n w e
   have hu : IsUnifV E w (unif w) := Classical.epsilon_spec (exists_isUnifV w)
-  have hK : IsCommensurated (KGL w n) := Formalism.UG.Final.GLintComm E w n
-  have hT : ∀ j : Fin (n + 1), Tj ℂ n (Ov E w) (unif w) j ∈ Formalism.UG.Hecke ℂ (KGL w n) :=
+  have hK : IsCommensurated (KGL w (n := n)) := Formalism.UG.Final.GLintComm E w n
+  have hT : ∀ j : Fin (n + 1), Tj ℂ n (Ov E w) (unif w) j ∈ Formalism.UG.Hecke ℂ (KGL w (n := n)) :=
     fun j => Tj_mem_hecke hu j
   obtain ⟨ho, hc⟩ := GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL (E := E) w n
-  have hmem : fn1 n w e ∈ Formalism.UG.Hecke ℂ (KGL w n) := fn_mem _ hK _ hT e
-  have hH : IsHecke (KGL w n) (fn1 n w e) := isHecke_of_mem hc hmem
+  have hmem : fn1 n w e ∈ Formalism.UG.Hecke ℂ (KGL w (n := n)) := fn_mem _ hK _ hT e
+  have hH : IsHecke (KGL w (n := n)) (fn1 n w e) := isHecke_of_mem hc hmem
   refine ⟨hH, fun V _ _ ρ x B hx => ?_⟩
-  have hfix : x ∈ fixed ρ (KGL w n) := hx.2.1
+  have hfix : x ∈ fixed ρ (KGL w (n := n)) := hx.2.1
   rw [(cvOp _ _ ho hc V ρ _ _ hH hH x hfix).2.2]
   exact heckeVec_fn _ hK _ hT ρ hfix _ (fun j => hx.2.2.2 (unif w) hu j (Nat.lt_succ_iff.1 j.2)) e

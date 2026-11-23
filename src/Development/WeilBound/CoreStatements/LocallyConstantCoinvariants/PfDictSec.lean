@@ -1,11 +1,55 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
-import Development.WeilBound.CoreStatements.TorusUniformisation.SiegelCompactSupport.ExistsRouteDatumTranslationCombinationGoodPlace
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdeleCharacterEqOneIntegralUnitsUnramifiedAdelic
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+module
+
+public import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictDef
+public import Development.WeilBound.CoreStatements.TorusUniformisation.SiegelCompactSupport.ExistsRouteDatumTranslationCombinationGoodPlace
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GlobalUnitScalingHaarProductFormula
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocallyConstantSplitOm
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdeleCharacterEqOneIntegralUnitsUnramifiedAdelic
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaHeisenbergTranslatesSeparate
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.GlobalUnitScalingHaarProductFormula
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,9 +124,9 @@ theorem norm_eq (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) {z : AE F E} {x : 
     change _ = (1 - ep v) * (1 - ep v + sgl v x)
     rw [es x]
     linear_combination (1 - sgl v x) * (-ep_ep (v := v))
-  · rw [map_mul, piW_cA, h1, h2, e, piW_smul, map_add, map_sub, ev, ev, map_one, map_one]
+  · rw [map_mul, piW_cA, h1, h2, e, piW_smul, map_add (f := _), map_sub, ev, ev, map_one, map_one]
     ring
-  · rw [map_mul, piW_cA, comp_conj_conj h, h1, h2, e, piW_smul, map_add, map_sub, ev, ev, map_one, map_one]
+  · rw [map_mul, piW_cA, comp_conj_conj h, h1, h2, e, piW_smul, map_add (f := _), map_sub, ev, ev, map_one, map_one]
     ring
 
 theorem eq_locIdele (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) {z : (AE F E)ˣ} {x : (Fv F v)ˣ} (hz : At (evFin F v) ((z : AE F E) - 1))

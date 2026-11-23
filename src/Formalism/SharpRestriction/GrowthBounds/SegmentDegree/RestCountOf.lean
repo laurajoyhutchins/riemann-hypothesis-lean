@@ -1,4 +1,43 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.Coarse
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.Coarse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +53,8 @@ variable {n' r : ℕ} [NeZero n'] (X : Dat n' r) (p K : ℕ)
 
 def Pz (j x : ℤ) : ℕ := p ^ (X.F.dist j x + X.Rj p K j)
 
-open Classical in
 
+open Classical in
 def laSet (t : Fin n') : Finset (Fin (r + K) → ℕ) :=
   (Fintype.piFinset fun _ : Fin (r + K) => Finset.range (X.a' p K t + 1)).filter fun v =>
     ∑ c, v c ≤ X.a' p K t ∧ ∀ j : ℤ, ∀ x ∈ X.toLate j, posOf n' x = t →
@@ -26,20 +65,20 @@ def LA : Finset (Fin n' → Fin (r + K) → ℕ) := Fintype.piFinset (X.laSet p 
 def nz (la : Fin n' → Fin (r + K) → ℕ) (j x : ℤ) : ℕ :=
   (X.a' p K (posOf n' x) - ∑ c, la (posOf n' x) c) / X.Pz p K j x
 
-open Classical in
 
+open Classical in
 def EE (la : Fin n' → Fin (r + K) → ℕ) : Finset (Fin X.F.J → Fin r → ℕ) :=
   Fintype.piFinset fun j : Fin X.F.J => Fintype.piFinset fun i : Fin r =>
     (Finset.range (r * X.Qc p K (j.val : ℤ))).filter fun e =>
       e % X.Qc p K (j.val : ℤ) = X.nz p K la (j.val : ℤ) (X.F.fr (j.val : ℤ) i.val) % X.Qc p K (j.val : ℤ)
 
-omit [NeZero n'] in
 
+omit [NeZero n'] in
 def eZ (e : Fin X.F.J → Fin r → ℕ) (j : ℤ) : Fin r → ℕ :=
   if h : 0 < X.F.J then e ⟨(j % (X.F.J : ℤ)).toNat % X.F.J, Nat.mod_lt _ h⟩ else 0
 
-open Classical in
 
+open Classical in
 def bfam (la : Fin n' → Fin (r + K) → ℕ) (e : Fin X.F.J → Fin r → ℕ) (j : ℤ) : ℤ → ℕ := fun x =>
   if x ∈ X.F.letters j then
     if X.F.IsW j x then
@@ -49,8 +88,8 @@ def bfam (la : Fin n' → Fin (r + K) → ℕ) (e : Fin X.F.J → Fin r → ℕ)
     else X.nz p K la j x
   else 0
 
-open Classical in
 
+open Classical in
 def setTau (j : ℤ) (b : ℤ → ℕ) (e : Fin r → ℕ) : ℤ → ℕ := fun x =>
   if X.F.fr j 0 ≤ x ∧ x ≤ X.F.fr j (r - 1) then ∑ i : Fin r, if x = X.F.fr j i.val then e i else 0 else b x
 
@@ -64,8 +103,8 @@ def segBound (j : ℤ) (b : ℤ → ℕ) : ℝ :=
     (∏ i : Fin r, ((Nat.choose ((X.Bw p K j (X.F.fr (j - 1) i.val) - (X.m0 K : ℤ)).toNat + (r + K) - 1) (r + K - 1) : ℕ) : ℝ)) *
     (((X.Qc p K j : ℕ) : ℝ) ^ (r - 1) * max 0 (1 - (r : ℝ) / (2 * X.Y))) ^ r
 
-open Classical in
 
+open Classical in
 def SegOK [NeZero r] [NeZero K] (O : Type) [CommRing O] (j : ℤ) (G : (ℤ → ℕ) → ℝ) : Prop :=
   (∀ b, 0 ≤ G b) ∧
   (∀ b b' : ℤ → ℕ, (∀ x ∈ X.toLate j, b x = b' x) → G b = G b') ∧
@@ -118,7 +157,7 @@ theorem restCount_of (C₀ Crk : ℝ) (hL : RestLam C₀) (hS : RestSeg C₀) (h
   refine le_trans ?_ (Nat.cast_le.mpr (hL p n' r K X O S hX hLa hk))
   push_cast
   refine Finset.sum_le_sum fun la hla => Finset.sum_le_sum fun e he => ?_
-  refine Finset.prod_le_prod (fun j _ => (hG _).1 _) fun j _ => ?_
+  refine Finset.prod_le_prod₀ (fun j _ => (hG _).1 _) fun j _ => ?_
   obtain ⟨h1, h2⟩ := hP p n' r K X hX hLa hk la hla e he (j.val : ℤ)
   refine (hG _).2.2.1 _ ?_ h1 h2
   intro x hx

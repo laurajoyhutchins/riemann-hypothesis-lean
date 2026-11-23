@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PKerAtP
-import Formalism.LocalToGlobal.GroupLattices.DownNaturalLevelZero
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.EqGlobOfHat
+public import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PFrames
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLcInt
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PKerAtP
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocV
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocW
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsScale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +59,8 @@ section Gen
 
 variable {D : D7} {u : D.what₂.Word} {i : ℕ} {hi : i ≤ D.R.m}
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 theorem class_lattice_le_dual (K : ClsTied u i hi) (c : (D.mem u).C.cls i) : clsCrd D u i hi c ≤ Ld D u i hi c := by
   intro x hx
@@ -27,20 +72,20 @@ theorem class_lattice_le_dual (K : ClsTied u i hi) (c : (D.mem u).C.cls i) : cls
   have hm : ∀ a ∈ K.lev.Lb, ∀ b ∈ K.lev.Lb,
       IsIntegral ℤ (((1 : ℤ) : D.host.E) * Formalism.UG.hform (sigD D : D.host.E →+* D.host.E) (gramN D i hi) a b) := by
     intro a ha b hb
-    obtain ⟨r, hr⟩ := K.lev.Lb_int b hb a ha
+    refine Exists.elim (K.lev.Lb_int b hb a ha) fun r hr => ?_
     rw [Int.cast_one, one_mul, ← hr]
     exact RingOfIntegers.isIntegral_coe r
   have h := Formalism.UG.P.csScale_glob (sigD D) (gramN D i hi) K.lev.Lb 1 hm (K.y c).1
     (K.y c).2 (hglob x' hx') (hglob x hx)
   rw [Int.cast_one, one_mul] at h
-  exact bwL_descent _ _ _ h
+  exact bwL_descent D.host.F D.host.E _ h
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem dual_base_lattice_full (K : ClsTied u i hi) :
     Formalism.L2.GlobalTheoryTheory.Comp.IsLat (Formalism.L2.GlobalTheoryTheory.Comp.dl (sigD D) (gramN D i hi) K.lev.Lb) := by
   have hLb : Submodule.IsLattice D.host.E K.lev.Lb :=
-    ⟨Module.Finite.iff_fg.1 K.lev.Lb_fin, K.lev.Lb_span⟩
+    Submodule.IsLattice.of_fg D.host.E (Module.Finite.iff_fg.1 K.lev.Lb_fin)
   have := Formalism.L2.GlobalTheoryTheory.TraceIntegrality.isLattice_between K.lev.Lb
     (Formalism.L2.GlobalTheoryTheory.Comp.dl (sigD D) (gramN D i hi) K.lev.Lb) hLb
     (fun x hx => Submodule.subset_span (K.lev.Lb_int x hx)) _ (D.mem u).A.T_prime.ne_zero (by
@@ -50,10 +95,12 @@ theorem dual_base_lattice_full (K : ClsTied u i hi) :
       | zero => rw [smul_zero]; exact zero_mem _
       | add x z _ _ hx hz => rw [smul_add]; exact add_mem hx hz
       | smul b x _ hx => rw [smul_comm]; exact Submodule.smul_mem _ b hx)
-  exact ⟨Module.Finite.iff_fg.2 this.fg, this.span_eq_top⟩
+  refine ⟨Module.Finite.iff_fg.2 this.fg, ?_⟩
+  rw [eq_top_iff, ← K.lev.Lb_span]
+  exact Submodule.span_mono (fun x hx => Submodule.subset_span (K.lev.Lb_int x hx))
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem dual_class_lattice_eq_global (K : ClsTied u i hi) (c : (D.mem u).C.cls i) :
     Ld D u i hi c = Formalism.UG.CS.globLat (K.y c).1
@@ -79,8 +126,8 @@ theorem dual_class_lattice_eq_global (K : ClsTied u i hi) (c : (D.mem u).C.cls i
     rw [← hc] at h
     exact h
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem mem_local_dual_lattice_iff (K : ClsTied u i hi) (c : (D.mem u).C.cls i)
     (v : HeightOneSpectrum (𝓞 D.host.F)) (x : Fin (D.R.N i) → D.host.E ⊗[D.host.F] v.adicCompletion D.host.F) :
@@ -93,8 +140,8 @@ theorem mem_local_dual_lattice_iff (K : ClsTied u i hi) (c : (D.mem u).C.cls i)
     rw [dual_class_lattice_eq_global K c]
     exact Formalism.L2.GlobalTheoryTheory.Comp.mem_hat_glob (dual_base_lattice_full K) _ x) x
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem mem_local_dual_lattice_iff' (K : ClsTied u i hi) (c : (D.mem u).C.cls i) (v : HeightOneSpectrum (𝓞 D.host.F))
     (x : Fin (D.R.N i) → D.host.E ⊗[D.host.F] v.adicCompletion D.host.F) :
@@ -111,9 +158,9 @@ section Fun
 
 variable {D : D7} {u : D.what₂.Word} {i : ℕ} {hi : i ≤ D.R.m}
 
+
 set_option maxHeartbeats 20000000 in
 set_option synthInstance.maxHeartbeats 400000 in
-
 theorem local_dual_lattice_transport {A : AtTTied u} (K : ClsTied u i hi) (L : LvTied u A i hi)
     (fMe : ∀ v, K.lev.fM (A.eV v).1 (A.eV v).2 ≃+ (D.mem u).A.Fv v) (hfv : FvTie L K fMe)
     (v : (D.mem u).A.vT) (c c2 : (D.mem u).C.cls i) (Γ : Matrix (Fin (D.R.N i)) (Fin (D.R.N i)) D.host.E)
@@ -138,13 +185,17 @@ theorem local_dual_lattice_transport {A : AtTTied u} (K : ClsTied u i hi) (L : L
             (Formalism.L2.GlobalTheoryTheory.Comp.dl (sigD D) (gramN D i hi) K.lev.Lb)),
         K.lev.fT (A.eV v).1 (A.eV v).2 ⟨_, h1⟩ = K.lev.fT (A.eV v).1 (A.eV v).2 ⟨_, h2⟩ := by
   intro z hz
-  obtain ⟨a, ha, h, hfa⟩ := hF z hz
-  exact ⟨a, ha, h, fun h1 h2 => (fMe v).injective
-    ((hfv v c ⟨_, h⟩ h1).symm.trans (hfa.trans (hfv v c2 ⟨_, Submodule.smul_mem _ _ hz⟩ h2)))⟩
+  refine (hF z hz).elim fun a ha => ha.2.elim fun h hfa => ?_
+  refine ⟨a, ha.1, h, ?_⟩
+  intro h1 h2
+  have hz' := (Ld D u i hi c2).smul_mem (algebraMap (𝓞 D.host.F) (𝓞 D.host.E) a) hz
+  have hf₁ := hfv v c ⟨_, h⟩ h1
+  have hf₂ := hfv v c2 ⟨_, hz'⟩ h2
+  exact (fMe v).injective (hf₁.symm.trans (hfa.trans hf₂))
+
 
 set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 400000 in
-
 theorem stabiliser_of_local_transport {A : AtTTied u} (K : ClsTied u i hi) (L : LvTied u A i hi)
     (fMe : ∀ v, K.lev.fM (A.eV v).1 (A.eV v).2 ≃+ (D.mem u).A.Fv v) (hfv : FvTie L K fMe)
     (v : (D.mem u).A.vT) (c c2 : (D.mem u).C.cls i) (Γ : GL (Fin (D.R.N i)) D.host.E)

@@ -1,8 +1,50 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisOfPolarized
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSplitAtOfIsSplitPl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsUnitarisableTrivChar
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsNormalisedThetaSub
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteAutomorphicRepGLLocalComponentIsUnitarisStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +86,7 @@ theorem isUnitarisable_of_isSpeh_one {a : ℕ} {X Y : Type} [AddCommGroup X] [Mo
     {τ : Representation ℂ (GL (Fin a) k) Y} (h : IsSpeh (IrrGL.of ρ hs hi) 1 τ) (hu : IsUnitarisable τ) :
     IsUnitarisable ρ := by
   obtain ⟨hd, hτ, p, hp, -⟩ := h
-  have key : ∀ y : Fin 1 → IrrGL k, y = (fun _ => IrrGL.of ρ hs hi) → ∀ hd : ∑ i, (y i).1 = a,
+  have key : ∀ y : Fin 1 → IrrGL (k := k), y = (fun _ => IrrGL.of ρ hs hi) → ∀ hd : ∑ i, (y i).1 = a,
       Nonempty ((IrrGL.of ρ hs hi).rep.Equiv (prodIrr y hd)) := by
     rintro _ rfl hd
     exact nonempty_equiv_prodIrr_one _ hd
@@ -82,7 +124,7 @@ end Speh
 
 section Inf
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
 
 theorem hasInfCharGL_unique {V : Submodule ℂ (Sm E N)} (hV : V ≠ ⊥) {τ : E →+* ℂ} {m m' : Multiset ℂ}
     (h : HasInfCharGL V τ m) (h' : HasInfCharGL V τ m') : m = m' := by
@@ -104,26 +146,6 @@ theorem spehInf_eq (d : ℕ) (m : Multiset ℂ) : GlobalTheory.SphGal.spehInf d 
   rfl
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-
-theorem discreteSpectrum_of_discreteSpectrumGL : GlobalTheory.Published.DiscreteSpectrumGL →
-    ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], DiscreteSpectrum E := by
-  intro H E _ _ _ N hN V hV
-  obtain ⟨a, d, π, -, hπ, hS⟩ := (H E N hN).1 V hV
-  have hSp := hS
-  obtain ⟨h, -⟩ := hSp
-  have hda : d * a = N := hS.mul_eq
-  have ha : 1 ≤ a := Nat.pos_of_mul_pos_left (by omega : 0 < d * a)
-  have hC := (H E N hN).2.2.2.2 V hV a d π hπ hS
-  obtain ⟨V₁, ⟨hV₁, hS₁⟩, -⟩ := (H E a ha).2.1 a 1 π (one_mul a) hπ
-  have hC₁ := (H E a ha).2.2.2.2 V₁ hV₁ a 1 π hπ hS₁
-  refine ⟨a, d, h, π, fun hc => GlobalTheory.DiscSpec.isCsd_of_isSpehOf H hN hV hc hπ hS, fun w σ' hσ' => ?_, fun τ m' hm' => ?_⟩
-  · refine ⟨GlobalTheory.T.discreteAutomorphicRepGL_localComponent_isUnitarisable E N V hV w σ' hσ', ?_⟩
-    obtain ⟨σ, -, hσ, -⟩ := hC.exLoc w
-    obtain ⟨-, τ, -, hτ⟩ := hC₁.exLoc w
-    refine ⟨σ, hσ, isUnitarisable_of_isSpeh_one σ.smooth σ.irred (hC₁.loc w σ τ hσ hτ)
-      (GlobalTheory.T.discreteAutomorphicRepGL_localComponent_isUnitarisable E a V₁ hV₁ w τ hτ), isSpehQuot_of_isSpeh h σ σ' (hC.loc w σ σ' hσ hσ')⟩
-  · obtain ⟨m, hm, hm''⟩ := hC.inf τ
-    exact ⟨m, hm, (hasInfCharGL_unique hV.ne_bot hm' hm'').trans (spehInf_eq d m)⟩
 
 end GlobalTheory.DiscreteSpectrumCM
 

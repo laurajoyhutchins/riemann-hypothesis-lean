@@ -1,23 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ZhangDimensionPushDownGrassmannianHeightBounds
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsBundles
-import GroundTheory.HeightsAndTheta.Heights.KernelsMatrix
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.AssemblyAnalytic
-import GroundTheory.HeightsAndTheta.Heights.FactorialBounds.Assembly
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HasSumPolyDerivMulProdAddMatrix
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFundamentalDomainMeanNormSqThetaChar
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.CoordSiegel
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsSymplecticBasisPrincipalPolarizationStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.HermitianFormPeriodMatrixNormalFormStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RealPartGramInSymplecticGroupStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SemicharacterThetaCharacteristicStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaFunctionCanonicalMultiplierStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaFunctionCanonicalFormStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaNormInPeriodCoordinatesStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaZeroDivisorJetBoundStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
+public import GroundTheory.HeightsAndTheta.Heights.KernelsMatrix
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HasSumPolyDerivMulProdAddMatrix
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFundamentalDomainMeanNormSqThetaChar
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsSymplecticBasisPrincipalPolarizationStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HermitianFormPeriodMatrixNormalFormStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RealPartGramInSymplecticGroupStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SemicharacterThetaCharacteristicStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaFunctionCanonicalFormStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaFunctionCanonicalMultiplierStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaNormInPeriodCoordinatesStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ThetaZeroDivisorJetBoundStatement
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.AssemblyAnalytic
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.CoordSiegel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights TensorProduct
@@ -118,7 +161,7 @@ theorem exists_reduced (g : ℕ) [NeZero g] (Λ : Submodule ℤ (Fin g → ℂ))
   have hτim : (periodMatrix X Y).map Complex.im = Y := periodMatrix_im X Y
   have hexp : ∀ x : Λ, (x : Fin g → ℂ) = ∑ α, (bs.repr x α) • (bs α : Fin g → ℂ) := fun x => by
     have := congrArg Subtype.val (bs.sum_repr x)
-    simp only [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul] at this
+    simp only [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul] at this
     exact this.symm
   have hYe : ∀ i j, Y⁻¹ i j = (hermForm Hm (bs (Sum.inl i) : Fin g → ℂ) (bs (Sum.inl j) : Fin g → ℂ)).re := by
     intro i j

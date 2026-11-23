@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex
@@ -69,16 +112,16 @@ def IsTwRes (q : ℕ) (i : ℤ) (T : Cx (ZMod q)) (e : ∀ U : Scheme.{0}, Prim 
 def unitSec {U : Scheme.{0}} (u : (Γ(U, ⊤))ˣ) : Sec Gm U := ofRings.sec unitsF U (ULift.up (Additive.ofMul u))
 
 def secClass (F : Shv R) {X : Scheme.{0}} (s : Sec F X) : H R (sch.obj X) F 0 :=
-  pick fun c => ∃ α : Cocycle _ _ 0, CohomologyClass.mk α = c ∧ ev α.1 0 0 (by simp) X (𝟙 X) = Sec.map (resι R F) s
+  pick fun c => ∃ α : Cocycle _ _ 0, CohomologyClass.mk α = c ∧ ev (R := R) α.1 0 0 (by simp) X (𝟙 X) = Sec.map (resι R F) s
 
 def picClass {E : Spc} (L : E ⟶ ofCat (glCat 1)) : H ℤ E Gm 1 :=
   pick fun c => ∃ γ : Cocycle _ _ 1, CohomologyClass.mk γ = c ∧
-    (∀ (U : Scheme.{0}) (x : Sx E 0 U), ev γ.1 0 1 (by simp) U x = 0) ∧
-    ∀ (U : Scheme.{0}) (x : Sx E 1 U), ev γ.1 1 0 (by simp) U x = Sec.map (resι ℤ Gm) (unitSec (lineUnit L x))
+    (∀ (U : Scheme.{0}) (x : Sx E 0 U), ev (R := ℤ) γ.1 0 1 (by simp) U x = 0) ∧
+    ∀ (U : Scheme.{0}) (x : Sx E 1 U), ev (R := ℤ) γ.1 1 0 (by simp) U x = Sec.map (resι ℤ Gm) (unitSec (lineUnit L x))
 
 def SemiMap.IsImage {S : Type} [CommRing S] {I : Cx S} {J : Cx R} (ρ : SemiMap I J) {E : Spc} {n : ℤ}
     (α : Cochain ((chains S).obj E) I n) (β : Cochain ((chains R).obj E) J n) : Prop :=
-  ∀ (p : ℕ) (s : ℤ) (h : -(p : ℤ) + n = s) (U : Scheme.{0}) (x : Sx E p U), ev β p s h U x = ρ.app U s (ev α p s h U x)
+    ∀ (p : ℕ) (s : ℤ) (h : -(p : ℤ) + n = s) (U : Scheme.{0}) (x : Sx E p U), ev (R := R) β p s h U x = ρ.app U s (ev (R := S) α p s h U x)
 
 abbrev Pr (N : ℕ) : Type := Σ p r : ℕ, (SimplexCategory.mk p ⟶ SimplexCategory.mk N) × (SimplexCategory.mk r ⟶ SimplexCategory.mk N)
 

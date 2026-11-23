@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SameOffRefl
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.JointCmpEmbeddingY
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SameOffRefl
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.JointCmpEmbeddingY
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,8 +62,8 @@ abbrev A0 (J : Joint t H X) : LocAt D.host.F D.host.E (D.R.N 0) (D.gat u w hg) :
 
 def Spl (J : Joint t H X) : Prop := SplAlg (A0 J) ∧ ∀ j hj β, SplAlg ((I.at' j hj).st.loc β)
 
-open Classical in
 
+open Classical in
 def chiI (J : Joint t H X) (x : (AfE D.host.F D.host.E)ˣ) : ℂ :=
   if h : ∃ y : Formalism.L2.Herm.unitaryOneFiniteAdeles D.sp.cm, Matrix.GeneralLinearGroup.det y.1 = x then ((D.chiD (J.dtU h.choose) : ℂˣ) : ℂ) else 0
 
@@ -54,8 +92,8 @@ def SameAway (v : (sysS H X std).Pl) (j : ℕ) (La Lb : (sysS H X std).Lt j) : P
   ((sysS H X std).Pj j).IsLatTup La.2 ∧ ((sysS H X std).Pj j).IsLatTup Lb.2 ∧ La.1 = Lb.1 ∧
     Function.update La.2 ((sysS H X std).vJ j v) ⊥ = Function.update Lb.2 ((sysS H X std).vJ j v) ⊥
 
-omit [Fact (D.what₂.places.resChar w).Prime] in
 
+omit [Fact (D.what₂.places.resChar w).Prime] in
 def Sites (Q : ∀ {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : G.Inst D L} {Gl : G.LatInst D} {Kc : G.Consts} {Dx : DivX D} {cX : ExtraC}
     {ex : Extra D L hT Gi Gl Kc Dx cX} {u : D.what₂.Word} {μ : D.what₂.Tup} {w : D.what₂.places.Pl}
     {hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)} {Lv : Levels (Gl.Fl u w hg)} {I : CmpJIn ex.tw u μ w hg Lv}

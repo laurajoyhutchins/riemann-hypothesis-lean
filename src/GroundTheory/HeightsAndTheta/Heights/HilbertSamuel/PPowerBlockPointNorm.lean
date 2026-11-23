@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPowerBlockPointNorm
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionPointValue
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsLocalRep
+module
+
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockImageInverse
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPowerBlockPointNorm
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionPointValue
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsLocalRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -98,17 +150,7 @@ theorem pn_aeval_smul {S : Type*} [CommRing S] [Algebra ℤ S] {f : MRing ι} {a
 theorem pn_aeval_congr_block [DecidableEq K] {S : Type*} [CommRing S] [Algebra ℤ S] {h : MRing ι} {k₀ : K} {n : ℕ}
     (hh : IsMultiHomog h (blockDeg k₀ n)) {v w : (Σ k, ι k) → S} (hvw : ∀ i, v ⟨k₀, i⟩ = w ⟨k₀, i⟩) :
     aeval v h = aeval w h := by
-  rw [aeval_def, aeval_def, eval₂_eq', eval₂_eq']
-  refine Finset.sum_congr rfl fun d hd => congrArg _ (Finset.prod_congr rfl fun p _ => ?_)
-  obtain ⟨k, i⟩ := p
-  by_cases hk : k = k₀
-  · subst hk
-    rw [hvw]
-  · have h0 : d ⟨k, i⟩ = 0 := by
-      have := hh d hd k
-      simp only [blockDeg, if_neg hk] at this
-      exact (Finset.sum_eq_zero_iff.mp this) i (Finset.mem_univ _)
-    rw [h0, pow_zero, pow_zero]
+  apply _root_.GroundTheory.Heights₂.Heights.HilbertSamuel.BlockImageInverse.aeval_congr_block <;> assumption
 
 theorem pn_eval_map_int {σ : Type*} (z : σ → ℂ) (f : MvPolynomial σ ℤ) :
     eval z (map (Int.castRingHom ℂ) f) = aeval z f := by
@@ -121,7 +163,7 @@ theorem pn_aeval_mem {S : Type*} [CommRing S] (T : Subalgebra ℤ S) {σ : Type*
     rw [aeval_C]
     exact T.algebraMap_mem r
   | add f g hf hg =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact T.add_mem hf hg
   | mul_X f p hf =>
     rw [map_mul, aeval_X]
@@ -167,6 +209,7 @@ theorem aeval_scale_new {S : Type*} [CommRing S] [Algebra ℤ S] {N q : ℕ} {F 
 theorem homog_bind_new {N q : ℕ} {e : K → ℕ} (G : Fin N → MRing ι) (hG : ∀ j, IsMultiHomog (G j) e)
     {F : MRing (addIdx ι N)} (hF : IsMultiHomog F (blockDeg (none : Option K) q)) :
     IsMultiHomog (bind₁ (newSubst G) F) (q • e) := by
+
   rw [F.as_sum, map_sum]
   refine pn_sum _ fun μ hμ => ?_
   rw [bind₁_monomial]
@@ -287,8 +330,8 @@ end Block
 
 end PowerBlockPointNorm
 
-open PowerBlockPointNorm in
 
+open PowerBlockPointNorm in
 theorem PowerBlockPointNorm.proof (h1 : SectionPointValue.Statement) (h2 : LocalRep.Statement) :
     PowerBlockPointNorm.Statement := by
   intro K _ _ ι _ Ω _ y A m N v B hA _ hv hmet q F hF

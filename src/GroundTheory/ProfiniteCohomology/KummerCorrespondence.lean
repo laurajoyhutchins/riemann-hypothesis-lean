@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.KummerBasic
-import GroundTheory.ProfiniteCohomology.KummerFinite
+module
+
+public import GroundTheory.ProfiniteCohomology.KummerBasic
+public import Mathlib.FieldTheory.IsSepClosed
+public import GroundTheory.ProfiniteCohomology.KummerFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.KummerExtension
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.ProfCoh
 
@@ -11,8 +64,8 @@ section Generated
 variable {K : Type*} [Field K] {n : ℕ} [NeZero n] [HasEnoughRootsOfUnity K n]
 variable {L : Type*} [Field L] [Algebra K L]
 
-omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 
+omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 lemma eq_one_of_forall_mem_fixed {T : Set L} (hT : adjoin K T = ⊤) {σ : Gal(L/K)}
     (h : ∀ α ∈ T, σ α = α) : σ = 1 := by
   have hle : adjoin K T ≤ fixedField (Subgroup.zpowers σ) := by
@@ -177,15 +230,15 @@ section Correspondence
 variable (K : Type*) [Field K] (n : ℕ) [NeZero n] [HasEnoughRootsOfUnity K n]
 variable (Ω : Type*) [Field Ω] [Algebra K Ω]
 
-omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 
+omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 lemma pow_eq_algebraMap_iff (E : IntermediateField K Ω) (x : E) (a : K) :
     x ^ n = algebraMap K E a ↔ (x : Ω) ^ n = algebraMap K Ω a := by
   rw [← Subtype.val_inj, IntermediateField.coe_pow]
   rfl
 
-omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 
+omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 lemma adjoin_preimage_eq_top (S : Set Ω) :
     adjoin K (((↑) : adjoin K S → Ω) ⁻¹' S) = ⊤ := by
   apply IntermediateField.map_injective (adjoin K S).val
@@ -198,25 +251,7 @@ lemma adjoin_preimage_eq_top (S : Set Ω) :
   · intro hx
     exact ⟨⟨x, subset_adjoin K S hx⟩, hx, rfl⟩
 
-omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 
-lemma kummerField_mono {Δ Δ' : Subgroup (UnitsModPow K n)} (h : Δ ≤ Δ') :
-    kummerField K n Ω Δ ≤ kummerField K n Ω Δ' := by
-  apply adjoin.mono
-  rintro α ⟨a, ha, hα⟩
-  exact ⟨a, h ha, hα⟩
-
-omit [NeZero n] [HasEnoughRootsOfUnity K n] in
-
-lemma kummerGroup_mono {E E' : IntermediateField K Ω} (h : E ≤ E') :
-    kummerGroup K n E ≤ kummerGroup K n E' := by
-  intro y hy
-  induction y using QuotientGroup.induction_on with
-  | H b =>
-    obtain ⟨β, hβ⟩ := mk_mem_kummerGroup.mp hy
-    refine mk_mem_kummerGroup.mpr ⟨⟨β, h β.2⟩, ?_⟩
-    rw [pow_eq_algebraMap_iff] at hβ ⊢
-    exact hβ
 
 omit [NeZero n] [HasEnoughRootsOfUnity K n] in
 lemma kummerField_generators (Δ : Subgroup (UnitsModPow K n)) :
@@ -287,56 +322,6 @@ theorem kummerGroup_kummerField [IsSepClosed Ω] (Δ : Subgroup (UnitsModPow K n
       exact mk_mem_kummerGroup.mpr ⟨⟨α, subset_adjoin _ _ ⟨b, hy, hα⟩⟩,
         (pow_eq_algebraMap_iff K n Ω _ _ _).mpr hα⟩
 
-theorem kummerField_kummerGroup_eq (E : IntermediateField K Ω) [IsGalois K E]
-    [IsMulCommutative Gal(E/K)] (hexp : Monoid.exponent Gal(E/K) ∣ n) :
-    kummerField K n Ω (kummerGroup K n E) = E := by
-  apply le_antisymm
-  · rw [kummerField, adjoin_le_iff]
-    rintro α ⟨a, ha, hα⟩
-    obtain ⟨β, hβ⟩ := mk_mem_kummerGroup.mp ha
-    rw [pow_eq_algebraMap_iff] at hβ
-    obtain ⟨c, hc⟩ := exists_eq_algebraMap_mul (K := K) rfl hα hβ
-    rw [SetLike.mem_coe, hc]
-    exact mul_mem (IntermediateField.algebraMap_mem _ _) β.2
-  · intro x hx
-    set x' : E := ⟨x, hx⟩
-    set p := minpoly K x'
-    let F : IntermediateField K E := adjoin K (p.rootSet E)
-    have : p.IsSplittingField K F := adjoin_rootSet_isSplittingField (Normal.splits inferInstance x')
-    have : IsGalois K F :=
-      IsGalois.of_separable_splitting_field (Algebra.IsSeparable.isSeparable K x')
-    have : FiniteDimensional K F := IsSplittingField.finiteDimensional F p
-    have hxF : x' ∈ F := subset_adjoin _ _ (by
-      rw [mem_rootSet]
-      exact ⟨minpoly.ne_zero (Algebra.IsIntegral.isIntegral x'), minpoly.aeval K x'⟩)
-
-    have hsurj := AlgEquiv.restrictNormalHom_surjective (F := K) (K₁ := F) (E := E)
-    have : IsMulCommutative Gal(F/K) := ⟨⟨fun σ τ => by
-      obtain ⟨σ', rfl⟩ := hsurj σ
-      obtain ⟨τ', rfl⟩ := hsurj τ
-      rw [← map_mul, ← map_mul, (IsMulCommutative.is_comm (M := Gal(E/K))).comm σ' τ']⟩⟩
-    have hexpF : Monoid.exponent Gal(F/K) ∣ n := by
-      refine Monoid.exponent_dvd_of_forall_pow_eq_one fun σ => ?_
-      obtain ⟨σ', rfl⟩ := hsurj σ
-      rw [← map_pow, Monoid.exponent_dvd_iff_forall_pow_eq_one.mp hexp σ', map_one]
-    have htop := adjoin_nthRoots_eq_top K n F hexpF
-
-    let φ : F →ₐ[K] Ω := E.val.comp F.val
-    have hmap : (⊤ : IntermediateField K F).map φ ≤ kummerField K n Ω (kummerGroup K n E) := by
-      rw [← htop, adjoin_map, kummerField, adjoin_le_iff]
-      rintro _ ⟨γ, ⟨hγ0, b, hb⟩, rfl⟩
-      have hb0 : b ≠ 0 := by
-        rintro rfl
-        rw [map_zero] at hb
-        exact pow_ne_zero n hγ0 hb.symm
-      refine subset_adjoin _ _ ⟨Units.mk0 b hb0, ?_, ?_⟩
-      · refine mk_mem_kummerGroup.mpr ⟨F.val γ, ?_⟩
-        rw [← map_pow, ← hb, AlgHom.commutes]
-        rfl
-      · change (φ γ) ^ n = algebraMap K Ω b
-        rw [← map_pow, ← hb, AlgHom.commutes]
-    exact hmap ((IntermediateField.map_mem_map _ φ).mpr (IntermediateField.mem_top (x := ⟨x', hxF⟩)))
-
 lemma exists_finite_generators_kummerField [IsSepClosed Ω] (Δ : Subgroup (UnitsModPow K n)) :
     ∃ r : Δ → Ω, (∀ x : Δ, ∃ a : Kˣ, (a : UnitsModPow K n) = x ∧ r x ^ n = algebraMap K Ω a) ∧
       kummerField K n Ω Δ = adjoin K (Set.range r) := by
@@ -368,33 +353,6 @@ theorem finrank_kummerField [IsSepClosed Ω] (Δ : Subgroup (UnitsModPow K n)) [
   have := kummerField_isGalois K n Ω Δ
   have := kummerField_isMulCommutative K n Ω Δ
   rw [← card_kummerGroup K n _ (kummerField_exponent_dvd K n Ω Δ), kummerGroup_kummerField]
-
-noncomputable def kummerCorrespondence [IsSepClosed Ω] :
-    Subgroup (UnitsModPow K n) ≃o {E : IntermediateField K Ω //
-      IsGalois K E ∧ IsMulCommutative Gal(E/K) ∧ Monoid.exponent Gal(E/K) ∣ n} where
-  toFun Δ := ⟨kummerField K n Ω Δ, kummerField_isGalois K n Ω Δ,
-    kummerField_isMulCommutative K n Ω Δ, kummerField_exponent_dvd K n Ω Δ⟩
-  invFun E := kummerGroup K n E.1
-  left_inv Δ := kummerGroup_kummerField K n Ω Δ
-  right_inv := by
-    rintro ⟨E, h1, h2, h3⟩
-    exact Subtype.ext (kummerField_kummerGroup_eq K n Ω E h3)
-  map_rel_iff' {Δ Δ'} := by
-    constructor
-    · intro h
-      have h' : kummerField K n Ω Δ ≤ kummerField K n Ω Δ' := h
-      rw [← kummerGroup_kummerField K n Ω Δ, ← kummerGroup_kummerField K n Ω Δ']
-      exact kummerGroup_mono K n Ω h'
-    · intro h
-      exact kummerField_mono K n Ω h
-
-@[simp] lemma kummerCorrespondence_apply [IsSepClosed Ω] (Δ : Subgroup (UnitsModPow K n)) :
-    (kummerCorrespondence K n Ω Δ : IntermediateField K Ω) = kummerField K n Ω Δ := rfl
-
-@[simp] lemma kummerCorrespondence_symm_apply [IsSepClosed Ω]
-    (E : {E : IntermediateField K Ω //
-      IsGalois K E ∧ IsMulCommutative Gal(E/K) ∧ Monoid.exponent Gal(E/K) ∣ n}) :
-    (kummerCorrespondence K n Ω).symm E = kummerGroup K n E.1 := rfl
 
 end Correspondence
 

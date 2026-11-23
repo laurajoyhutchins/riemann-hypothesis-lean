@@ -1,17 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
+module
+
+public import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PPtsAbsIntegrable
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PSemiPosTwist
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PTorusInvLevi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxPosDens
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxSimple
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MemChartComponents
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsPosDensIntegrable
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MemChartComponents
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory ReciprocityTheory.ChartRestriction.G.Geo GlobalTheory.CompanionTheory.Ar.Pub.CxInt GlobalTheory.CompanionTheory.Ar.Pub.CxComp Filter Topology
 open ReciprocityTheory.AnForm.R (conePts)
 open GlobalTheory.CompanionTheory.Ar.Pub.CxChart (chartSet chartComponents chartSection domCell absLogNorm)
@@ -60,7 +100,7 @@ theorem exists_dominating_twist : ∀ (K : Type) [Fintype K] (ι : K → Type) [
     · exact le_rfl
   · unfold setSheetDensity
     by_cases hγ : ∃ γ, IsSetSheet S Ψ y w γ
-    · rw [dif_pos hγ, dif_pos hγ]
+    · rw [dite_eq_left hγ, dite_eq_left hγ]
       have hs := hγ.choose_spec
       have hmem : hγ.choose y ∈ S := hs.2.self_of_nhds.2.1
       have hg := hgg _ hmem
@@ -71,7 +111,7 @@ theorem exists_dominating_twist : ∀ (K : Type) [Fintype K] (ι : K → Type) [
             mul_le_mul hg (hab hs) (abs_nonneg _) ((abs_nonneg _).trans hg)
         _ = 3 ^ e * (g' (hγ.choose y) * maDensity
               (fun j y' => pot (fun j => ((L j).tensor (T j)).tensor (T j)) j (hγ.choose y')) y) := by ring
-    · rw [dif_neg hγ, dif_neg hγ]
+    · rw [dite_eq_right hγ, dite_eq_right hγ]
       simp
 
 end GlobalTheory.CompanionTheory.Ar.Pub.CxTwist

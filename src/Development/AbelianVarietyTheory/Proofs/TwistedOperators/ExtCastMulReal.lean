@@ -1,11 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DefPerEqGenPer
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EqConjOfInFrame
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SetIntegralFdMulRight
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaKernelGridRationalLeftInvariant
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryEmbeddingContinuousMulRational
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MovedVectorDefinitePairThetaFockVacuum
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PtYAndItYOfPair
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DefPerEqGenPer
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SetIntegralFdMulRight
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaKernelGridRationalLeftInvariant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ToPairMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.MinorOrderedEntries
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealLineOfPeriodsOnLine
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,9 +128,14 @@ theorem pathLift_column_translate (W : G.Weil) (M : Vol G) (t : T) (κ : ∀ n :
     (∀ j : Fin n, W.om (.top t j) (G.toPair (.top t j) (κ j) (κ (j + 1))) (f j) = f' j) →
     ∀ (φ : Fn G (.top 0)), (∀ γ ∈ GQ (G.V (.top 0)), ∀ g, φ (γ * g) = φ g) →
     ∀ h, liftP W M (colPath t n) (colFam t n f) φ (h * κ n) =
-      liftP W M (colPath t n) (colFam t n f') (fun x => φ (x * κ 0)) h
-  | 0, _, _, _, _, _, _, _, _, _ => rfl
-  | n + 1, hn, hκ, f, f', hf, hff, φ, hφ, h => by
+      liftP W M (colPath t n) (colFam t n f') (fun x => φ (x * κ 0)) h := by
+  intro n
+  induction n with
+  | zero =>
+    intros
+    rfl
+  | succ n ih =>
+    intro hn hκ f f' hf hff φ hφ h
     obtain ⟨⟨K, hK⟩, hm, hm'⟩ := hκ n (Nat.lt_succ_self n)
     show liftA W M (.col t n) (f (Fin.last n)) (liftP W M (colPath t n) (colFam t n fun j => f j.castSucc) φ) (h * κ (n + 1)) =
       liftA W M (.col t n) (f' (Fin.last n))
@@ -105,7 +147,7 @@ theorem pathLift_column_translate (W : G.Weil) (M : Vol G) (t : T) (κ : ∀ n :
     rw [← hff (Fin.last n)]
     congr 1
     funext g
-    rw [pathLift_column_translate W M t κ n (by omega) (fun j hj => hκ j (by omega)) _ _ (fun j => hf j.castSucc)
+    rw [ih (by omega) (fun j hj => hκ j (by omega)) _ _ (fun j => hf j.castSucc)
       (fun j => hff j.castSucc) φ hφ g]
     rfl
 
@@ -118,9 +160,14 @@ theorem pathLift_row_translate (W : G.Weil) (M : Vol G) (κ : ∀ n : ℕ, GA D 
     (∀ i : Fin n, W.om (.chi i D.R.m) (G.toPair (.chi i D.R.m) (κ i) (κ (i + 1))) (f i) = f' i) →
     ∀ (F : Fn G (.grid 0 D.R.m)), (∀ γ ∈ GQ (G.V (.grid 0 D.R.m)), ∀ g, F (γ * g) = F g) →
     ∀ h, liftP W M (rowPath T D.R.m n) (rowFam D.R.m n f) F (h * κ n) =
-      liftP W M (rowPath T D.R.m n) (rowFam D.R.m n f') (fun x => F (x * κ 0)) h
-  | 0, _, _, _, _, _, _, _, _, _ => rfl
-  | n + 1, hn, hκ, f, f', hf, hff, F, hF, h => by
+      liftP W M (rowPath T D.R.m n) (rowFam D.R.m n f') (fun x => F (x * κ 0)) h := by
+  intro n
+  induction n with
+  | zero =>
+    intros
+    rfl
+  | succ n ih =>
+    intro hn hκ f f' hf hff F hF h
     obtain ⟨⟨K, hK⟩, hm, hm'⟩ := hκ n (Nat.lt_succ_self n)
     show liftA W M (.right n D.R.m) (f (Fin.last n)) (liftP W M (rowPath T D.R.m n) (rowFam D.R.m n fun i => f i.castSucc) F)
         (h * κ (n + 1)) =
@@ -133,7 +180,7 @@ theorem pathLift_row_translate (W : G.Weil) (M : Vol G) (κ : ∀ n : ℕ, GA D 
     rw [← hff (Fin.last n)]
     congr 1
     funext g
-    rw [pathLift_row_translate W M κ n (by omega) (fun i hi => hκ i (by omega)) _ _ (fun i => hf i.castSucc)
+    rw [ih (by omega) (fun i hi => hκ i (by omega)) _ _ (fun i => hf i.castSucc)
       (fun i => hff i.castSucc) F hF g]
     rfl
 

@@ -1,6 +1,42 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacNeZero
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CJDefs
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.FiniteDimensionalTranslationCoordinates
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CJDefs
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.FiniteDimensionalTranslationCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacNeZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +72,8 @@ def CSteps : Prop :=
     G.ParabolicJacquetProp ∧ G.AnnihilationProp ∧ G.NonIntegralProp ∧ G.TorusCentreEigenProp ∧ G.TorusPowerProp ∧ G.JacquetKernelProp ∧ G.TorusCentreInjectiveProp ∧
     G.JacquetImageProp ∧ G.JacquetModuleFiniteProp ∧ G.SubquotientProp ∧ G.TensorProductProp ∧ G.SupportOfProductProp
 
-open UpperTheory.NonzeroTypeTheory in
 
+open UpperTheory.NonzeroTypeTheory in
 theorem need_CMain (hC : CSteps) (hlL : LeviSubgroupRestriction) (L : GlobalTheory.Mem.LiteralAutomorphy.LitN) :
     ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (n : ℕ) (G : Grp k n)
     (V : Type) [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ (GL (Fin n) k) V), IsSmooth ρ → ρ.IsIrreducible →
@@ -49,8 +85,8 @@ theorem need_CMain (hC : CSteps) (hlL : LeviSubgroupRestriction) (L : GlobalTheo
   exact G.cMain hcb hccB hJone hJmul hJinv hKC hΔU hΔM hlM hlB hlU hiw hPJ hkill hni hTE hTp hjK hTI hun hlL hjI
     (G.jacProd_of hjF hsub hten hsupp) L V ρ hs hi hx
 
-open UpperTheory.NonzeroTypeTheory in
 
+open UpperTheory.NonzeroTypeTheory in
 theorem need_CProps (hC : CSteps) : Need_CProps := by
   intro k _ _ _ _ n G
   obtain ⟨hcb, -, -, hG⟩ := hC k
@@ -64,8 +100,8 @@ theorem need_CProps (hC : CSteps) : Need_CProps := by
   rw [← hK.1]
   exact (KCg k n G.lev).one_mem
 
-open UpperTheory.NonzeroTypeTheory in
 
+open UpperTheory.NonzeroTypeTheory in
 theorem need_Grp (hC : CSteps) : Need_Grp := by
   intro k _ _ _ _ n μ hμ
   obtain ⟨-, -, hex, -⟩ := hC k

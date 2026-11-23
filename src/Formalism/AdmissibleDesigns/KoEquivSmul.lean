@@ -1,4 +1,48 @@
-import Formalism.AdmissibleDesigns.TrivialBoundTargetOfDict
+module
+
+public import Formalism.AdmissibleDesigns.TrCMemZ1D
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -36,8 +80,6 @@ def epsHom (e : ℕ) : G →* Matrix (Fin 1) (Fin 1) LL where
     subst ha hb
     simp [Formalism.MainNotions.N.epsTw, Matrix.mul_apply, mul_pow]
     ring
-
-theorem epsHom_apply (e : ℕ) (g : G) : epsHom PD (LL := LL) e g = Formalism.MainNotions.N.epsTw PD e g := rfl
 
 theorem matRep_eps (e : ℕ) (g : G) (v : Fin 1 → LL) :
     Formalism.MainNotions.N.matRep (epsHom PD (LL := LL) e) g v =
@@ -80,11 +122,6 @@ variable {PD}
     · intro hv
       choose u hu using hv
       exact ⟨u, funext fun j => hu j⟩
-
-theorem twLat_V (hinj : Function.Injective (algebraMap O LL)) (ε' : G → O)
-    (hε : ∀ g, algebraMap O LL (ε' g) = algebraMap Qp LL (((PD.χ g)⁻¹ : Qpˣ) : Qp)) (e : ℕ)
-    (hcont : Continuous fun g => (algebraMap O LL (ε' g)) ^ e) :
-    (twLat hinj ε' hε e hcont).V = (Fin 1 → LL) := rfl
 
 theorem actD_twLat (hinj : Function.Injective (algebraMap O LL)) (ε' : G → O)
     (hε : ∀ g, algebraMap O LL (ε' g) = algebraMap Qp LL (((PD.χ g)⁻¹ : Qpˣ) : Qp)) (e : ℕ)
@@ -164,9 +201,6 @@ def koEquiv : KO O' ≃+ ((Fin 1 → LL) ⧸ Formalism.MainNotions.N.stdG O LL 1
 theorem koEquiv_smul (a : O') (x : KO O') : koEquiv σ eK heK (a • x) = σ a • koEquiv σ eK heK x := by
   show koTo σ eK heK (a • x) = σ a • koTo σ eK heK x
   exact (koTo σ eK heK).map_smulₛₗ a x
-
-theorem koEquiv_mk (x : FractionRing O') :
-    koEquiv σ eK heK (Submodule.Quotient.mk x) = Submodule.Quotient.mk (fun _ => eK x) := rfl
 
 end KO
 

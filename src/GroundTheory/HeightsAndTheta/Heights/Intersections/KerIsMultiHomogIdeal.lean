@@ -1,6 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ExistsIntValuationLtOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ExistsIntValuationLtOne
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.FunFieldLeLocRing
+import GroundTheory.HeightsAndTheta.Heights.Intersections.NotMemOfNonZeroDivisor
+import GroundTheory.HeightsAndTheta.Heights.Intersections.PLocRingFrac
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -29,8 +83,8 @@ theorem ltIdeal_one_isPrime {R Γ : Type*} [CommRing R] [LinearOrderedCommGroupW
 
 def tWeight [DecidableEq K] (k : K) : K → ℕ := fun k' => if k' = k then 1 else 0
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem specMap_component [DecidableEq K] {E : Type*} [Field E] (ψ : MRing ι →+* E) (k : K) (d : ℕ)
     (g : MRing ι) :
     RegularityFunctionFieldNumber.specMap ψ ∅ (weightedHomogeneousComponent (blockWeight k) d g) =
@@ -40,7 +94,7 @@ theorem specMap_component [DecidableEq K] {E : Type*} [Field E] (ψ : MRing ι �
     have hX : ∀ p : Σ k, ι k, IsWeightedHomogeneous (tWeight k)
         (RegularityFunctionFieldNumber.cS E ∅ p.1 * MvPolynomial.C (ψ (X p))) (tWeight k p.1) := by
       intro p
-      simp only [RegularityFunctionFieldNumber.cS, Finset.notMem_empty, if_false]
+      simp only [RegularityFunctionFieldNumber.cS, Finset.notMem_empty, ite_false]
       rw [mul_comm]
       exact (isWeightedHomogeneous_X E (tWeight k) p.1).C_mul _
     have hh : IsWeightedHomogeneous (tWeight k) (RegularityFunctionFieldNumber.specMap ψ ∅ (monomial m c))
@@ -54,11 +108,11 @@ theorem specMap_component [DecidableEq K] {E : Type*} [Field E] (ψ : MRing ι �
     · rw [h, hm.weightedHomogeneousComponent_same, hh.weightedHomogeneousComponent_same]
     · rw [hm.weightedHomogeneousComponent_ne d h, hh.weightedHomogeneousComponent_ne d h, map_zero]
   | add p q hp hq =>
-    rw [map_add, map_add, hp, hq, map_add (RegularityFunctionFieldNumber.specMap ψ ∅) p q]
+    rw [map_add (f := _), map_add (f := _), hp, hq, map_add (RegularityFunctionFieldNumber.specMap ψ ∅) p q]
     exact ((weightedHomogeneousComponent (R := E) (tWeight k) d).map_add _ _).symm
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem ker_isMultiHomogIdeal [DecidableEq K] {E : Type*} [Field E] (ψ : MRing ι →+* E) :
     IsMultiHomogIdeal (RingHom.ker (RegularityFunctionFieldNumber.specMap ψ ∅)) := by
   refine isMultiHomogIdeal_of_isHomogeneous fun k d g hg => ?_
@@ -70,9 +124,9 @@ theorem ker_isMultiHomogIdeal [DecidableEq K] {E : Type*} [Field E] (ψ : MRing 
 
 end RegularityValuationCentre
 
-set_option maxHeartbeats 400000 in
-open regularityEmbedding_holds in
 
+
+open regularityEmbedding_holds in
 theorem RegularityValuationCentre.proof : RegularityValuationCentre.Statement := by
   intro K _ ι _ P hP Γ _ v n hn
   classical

@@ -1,11 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
-import Formalism.LocalRingCardinality.Params
-import Formalism.LocalRingCardinality.DataHost
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Formalism.LocalToGlobal.BesselHermitianTheta.IsAutFunDef
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Geometry.Manifold.StructureGroupoid
+
+@[expose] public section
 
 open scoped IntermediateField Algebra TensorProduct Matrix Pointwise NumberField Topology ContDiff NNReal ENNReal Polynomial DirectSum BigOperators InnerProductSpace Manifold
 attribute [local instance] Formalism.L2.Theta.IsVolMeasG._proof_2 Formalism.L2.Theta.IsVolMeasG._proof_1 Formalism.L2.Theta.IsDsig._proof_2 Formalism.L2.Theta.IsVolMeasG._proof_3
@@ -33,8 +67,8 @@ theorem UpperTheory.Reformulated.B.DecompositionAlmostEverywhere.decomp_AE :
   induction hz using Algebra.adjoin_induction with
   | mem x hx => exact ⟨0, 1, by rw [map_zero, map_one, zero_add, one_mul]; exact hx⟩
   | algebraMap r => exact ⟨r, 0, by simp⟩
-  | add x y _ _ hx hy => obtain ⟨⟨a, b, rfl⟩, c, e, rfl⟩ := And.intro hx hy; exact ⟨a + c, b + e, by rw [map_add, map_add]; ring⟩
+  | add x y _ _ hx hy => obtain ⟨⟨a, b, rfl⟩, c, e, rfl⟩ := And.intro hx hy; exact ⟨a + c, b + e, by rw [map_add (f := _), map_add (f := _)]; ring⟩
   | mul x y _ _ hx hy =>
     obtain ⟨⟨a, b, rfl⟩, c, e, rfl⟩ := And.intro hx hy
     exact ⟨a * c - D.host.d * (b * e), a * e + b * c, by
-      simp only [map_add, map_sub, map_mul, map_natCast]; linear_combination (algebraMap _ _ b * algebraMap _ _ e) * hs⟩
+      simp only [map_add (f := _), map_sub, map_mul, map_natCast]; linear_combination (algebraMap _ _ b * algebraMap _ _ e) * hs⟩

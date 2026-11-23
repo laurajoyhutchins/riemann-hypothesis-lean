@@ -1,6 +1,45 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DerivativeProdSubEval
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
-import Formalism.SharpRestriction.LevelLetterCocycles.CancelUnitMulUniformizerPow
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,45 +84,5 @@ theorem lemmaGD_cc {l : ℕ} [Fact l.Prime] {P : LocPrime l} (H : LocHW l P) {K 
       (H.W K 1 LL hg).χΓ (H.W K 1 LL hg).gam := Units.ext hz
   rw [← hzu, ← map_zpow]
   rfl
-
-theorem lemGB_L (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
-    (Cm : CmpOf D.loc D.locA HW F) (CR CA CB CK C₀ : ℝ) (hA : Formalism.MainNotions.CrystallineLiftingInputs.admitted D HW F Cm CR CA CB CK C₀)
-    (hC4 : Formalism.MainNotions.N.LetterConditionGlobal D HW F)
-    (h56 : ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], WachGammaDerivation ((HW l).W K 1 LL hg)) :
-    ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], LemGB ((HW l).W K 1 LL hg) := by
-  intro l _ K LL hg _
-  have hQ := hA.2.2.2.2.2.2.2.2.2.2.2.2.1 l K LL hg
-  have h9 := (hA.1 l K 1 LL hg).2.2.2.2.2.2.2.2.1
-  refine lemGB_of _ hQ (fun hCA => Formalism.MainNotions.CrystallineLiftingInputs.RToolNum_holds (D.loc l) (HW l) K LL hg hCA)
-    (hC4 l K 1 LL hg) h9 (Formalism.MainNotions.LiftingTheory.lattice_clause_every_situation D HW F l K 1 LL hg)
-    (fun _ => lemmaGD_cc (HW l) hg) (fun _ => ?_) (h56 l K LL hg)
-  rw [(D.loc l).PD_p K]
-  exact Formalism.MainNotions.UnusedSlot80.Split2.isUnit_pred l LL
-
-theorem lemmaGs_L (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
-    (Cm : CmpOf D.loc D.locA HW F) (CR CA CB CK C₀ : ℝ)
-    (hA : Formalism.MainNotions.CrystallineLiftingInputs.admitted D HW F Cm CR CA CB CK C₀) (hC4 : Formalism.MainNotions.N.LetterConditionGlobal D HW F)
-    (h56 : ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], WachGammaDerivation ((HW l).W K 1 LL hg))
-    (hGA : ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], LemGA ((HW l).W K 1 LL hg)) :
-    ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], LemmaGs ((HW l).W K 1 LL hg) := by
-  intro l _ K LL hg _
-  exact lemmaGs_of_lemGAB _ (hGA l K LL hg)
-    (lemGB_L D HW F Cm CR CA CB CK C₀ hA hC4 h56 l K LL hg)
-
-theorem local_clause_of_gamma_lemmas (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
-    (Cm : CmpOf D.loc D.locA HW F) (CR CA CB CK C₀ : ℝ)
-    (hA : Formalism.MainNotions.CrystallineLiftingInputs.admitted D HW F Cm CR CA CB CK C₀) (hC4 : Formalism.MainNotions.N.LetterConditionGlobal D HW F)
-    (h56 : ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], WachGammaDerivation ((HW l).W K 1 LL hg))
-    (hGA : ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hg : Good K 1 LL)
-      [NeZero (Module.finrank ℚ_[l] ↥(K0 K))], LemGA ((HW l).W K 1 LL hg)) :
-    Formalism.MainNotions.CrystallineLiftingInputs.adm18 D HW F Cm := by
-  intro l _ K LL hg _
-  exact lemmaG_of_sharp _ (lemmaGs_L D HW F Cm CR CA CB CK C₀ hA hC4 h56 hGA l K LL hg)
 
 end Formalism.MainNotions.RamifiedCoefficientChains.S9

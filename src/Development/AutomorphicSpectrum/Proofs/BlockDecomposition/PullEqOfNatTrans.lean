@@ -1,5 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalSystemQuotients.ModFSW
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.InstAddCommGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -21,12 +68,10 @@ def cyl {G₁ G₂ : C' ⥤ C} (α : G₁ ⟶ G₂) : Fin 2 × C' ⥤ C := Funct
 theorem cyl_top {G₁ G₂ : C' ⥤ C} (α : G₁ ⟶ G₂) {T T' : C'} (φ : T ⟶ T') :
     G₂.map φ = (cyl α).map ((𝟙 (Fin.last 1), φ) : (Fin.last 1, T) ⟶ (Fin.last 1, T')) := by
   simp [cyl]
-  exact (Category.id_comp _).symm
 
 theorem cyl_bot {G₁ G₂ : C' ⥤ C} (α : G₁ ⟶ G₂) {T T' : C'} (φ : T ⟶ T') :
     G₁.map φ = (cyl α).map ((𝟙 (0 : Fin 2), φ) : ((0 : Fin 2), T) ⟶ ((0 : Fin 2), T')) := by
   simp [cyl]
-  exact (Category.id_comp _).symm
 
 theorem cyl_step {G₁ G₂ : C' ⥤ C} (α : G₁ ⟶ G₂) (T : C') :
     α.app T = (cyl α).map ((homOfLE (Fin.zero_le _), 𝟙 T) : ((0 : Fin 2), T) ⟶ (Fin.last 1, T)) := by
@@ -88,6 +133,7 @@ theorem val_d (s : ComposableArrows C' n) (f : CH.Cn F p) {a : Fin (p + 2) → F
     rw [← s.map_comp]; rfl
   unfold val
   change m₂.τ _ ((F.map _).hom (∑ k : Fin (p + 2), (-1 : ℤ) ^ (k : ℕ) • (F.map (toLast k (chain α ha ht s))).hom (f (face k (chain α ha ht s))))) = _
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_zsmul, map_zsmul]
@@ -316,6 +362,7 @@ theorem dh_eq (s : ComposableArrows C' (n + 1)) (f : CH.Cn F (n + 1)) :
       val m₂ α s f (pa_mono l) ((sa_mono j).comp (pt_mono l)) := by
   change ∑ j : Fin (n + 2), (-1 : ℤ) ^ (j : ℕ) • (F'.map (toLast j s)).hom
     (∑ l : Fin (n + 1), (-1 : ℤ) ^ (l : ℕ) • val m₂ α (face j s) f (pa_mono l) (pt_mono l)) = _
+
   simp only [map_sum, map_zsmul, val_face, Finset.smul_sum]
 
 theorem htpy_spec (m₁ : CH.Mor F F' σ) (α : m₁.G ⟶ m₂.G)

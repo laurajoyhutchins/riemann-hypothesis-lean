@@ -1,9 +1,56 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataCD
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.PerpendicularEmbedding
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousMatrixEntryAbsSum
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousMatrixEntryAbsSum
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,18 +66,6 @@ def blk (e : Option (Fin P' ⊕ Fin Q') ≃ (Fin P ⊕ Fin Q))
     (m : Matrix (Fin P' ⊕ Fin Q') (Fin P' ⊕ Fin Q') ℂ) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ :=
   Matrix.of fun i l => (e.symm i).elim ((e.symm l).elim 1 fun _ => 0)
     fun a => (e.symm l).elim 0 fun b => m a b
-
-theorem ext_e (e : Option (Fin P' ⊕ Fin Q') ≃ (Fin P ⊕ Fin Q))
-    {u v : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ} (h : ∀ x y, u (e x) (e y) = v (e x) (e y)) :
-    u = v := by
-  ext i l
-  simpa using h (e.symm i) (e.symm l)
-
-theorem blk_mul (e : Option (Fin P' ⊕ Fin Q') ≃ (Fin P ⊕ Fin Q))
-    (m n : Matrix (Fin P' ⊕ Fin Q') (Fin P' ⊕ Fin Q') ℂ) : blk e (m * n) = blk e m * blk e n := by
-  refine ext_e e fun x y => ?_
-  rw [Matrix.mul_apply, ← e.sum_comp, Fintype.sum_option]
-  rcases x with _ | x <;> rcases y with _ | y <;> simp [blk, Matrix.mul_apply, -Fintype.sum_sum_type]
 
 open MeasureTheory Matrix Filter Topology in
 open scoped ENNReal NNReal in
@@ -148,10 +183,10 @@ private lemma blk_mul_global_interpolation (e : Option (Fin P' ⊕ Fin Q') ≃ (
     simp [blk_none_none, blk_none_some, blk_some_none, blk_some_some,
       Matrix.mul_apply]
 
+
 open MeasureTheory Matrix Filter Topology in
 open scoped ENNReal NNReal in
 variable {P Q P' Q' : ℕ} in
-
 theorem _root_.GlobalTheory.BlockEmbedding.exists_blockEmb : ∀ (P Q P' Q' : ℕ) (e : Option (Fin P' ⊕ Fin Q') ≃ (Fin P ⊕ Fin Q)),
     _root_.GlobalTheory.CompactDualQuot.SignCompat e → ∃ j : _root_.Formalism.BasicNotions.UpqT P' Q' →* _root_.Formalism.BasicNotions.UpqT P Q, _root_.GlobalTheory.CompactDualQuot.IsBlockEmb e j ∧ Topology.IsClosedEmbedding j ∧
       Set.range j = {g | _root_.GlobalTheory.IndefiniteRowSideFullHecke.PerpendicularEmbedding.act g (_root_.GlobalTheory.CompactDualQuot.baseVec e) = _root_.GlobalTheory.CompactDualQuot.baseVec e} := by

@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StNormalModel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StNormalModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -32,52 +75,6 @@ def NormalDoublePointsOnDivisor {J : Ideal (MvPolynomial (Fin n) ℂ)} (M : Inde
   ∃ N ∈ 𝓝 q, ∀ w ∈ IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn M.ideal, ∀ w' ∈ IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn M.ideal,
     IndefiniteRowSideFullHecke.ComplexSets.firstCoords w = IndefiniteRowSideFullHecke.ComplexSets.firstCoords w' →
       IndefiniteRowSideFullHecke.ComplexSets.firstCoords w ∈ N → w ≠ w' → linEval u (IndefiniteRowSideFullHecke.ComplexSets.firstCoords w) = 0
-
-theorem eq_const_of_mem_zeroSetIn_lineDiagonal {z : Fin 1 ⊕ Fin 1 → ℂ}
-    (hz : z ∈ IndefiniteRowSideFullHecke.ComplexSets.zeroSetIn IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalIdeal) :
-    z = fun _ => z (Sum.inl 0) := by
-  have hzd : z (Sum.inr 0) = z (Sum.inl 0) := by
-    have h1 := hz (X (Sum.inr 0) - X (Sum.inl 0)) (by
-      show IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalMap (X (Sum.inr 0) - X (Sum.inl 0)) = 0
-      rw [IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalMap, map_sub, aeval_X, aeval_X]
-      simp)
-    simp only [map_sub, eval_X] at h1
-    exact sub_eq_zero.mp h1
-  funext s
-  rcases s with i | i
-  · rw [Subsingleton.elim i 0]
-  · rw [Subsingleton.elim i 0, hzd]
-
-theorem lineNormalDivisorChartAt :
-    NormalDivisorChartAt IndefiniteRowSideFullHecke.ComplexSets.lineDiagonalModel (fun _ => (1 : ℂ)) 0 0 := by
-  intro w hw hw0
-  have hw' : w = 0 := by
-    rw [eq_const_of_mem_zeroSetIn_lineDiagonal hw]
-    have h0 : w (Sum.inl 0) = 0 := congrFun hw0 0
-    funext _
-    exact h0
-  subst hw'
-  refine ⟨1, fun t _ => t 0, 1, one_pos, Differentiable.differentiableOn (by fun_prop), ?_, rfl,
-    fun t _ => IndefiniteRowSideFullHecke.ComplexSets.const_mem_zeroSetIn_lineDiagonal (t 0), ?_, ?_, ?_⟩
-  · intro s _ t _ hst
-    funext i
-    rw [show i = 0 from Fin.ext (by omega)]
-    exact congrFun hst (Sum.inl 0)
-  · intro s hs
-    refine ⟨Metric.ball 0 s, Metric.ball_mem_nhds 0 hs, ?_⟩
-    rintro z ⟨hz, hzB⟩
-    refine ⟨fun _ => z (Sum.inl 0), ?_, (eq_const_of_mem_zeroSetIn_lineDiagonal hz).symm⟩
-    rw [mem_ball_zero_iff] at hzB ⊢
-    refine lt_of_le_of_lt ?_ hzB
-    rw [pi_norm_le_iff_of_nonneg (norm_nonneg _)]
-    intro _
-    exact norm_le_pi_norm z (Sum.inl 0)
-  · refine ⟨fun _ => 1, differentiableOn_const _, fun _ _ => one_ne_zero, fun t _ => ?_⟩
-    simp [linEval, IndefiniteRowSideFullHecke.ComplexSets.firstCoords]
-  · intro v hv _
-    funext i
-    rw [show i = 0 from Fin.ext (by omega)]
-    exact hv
 
 end
 

@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.AdelePoisson
+module
+
+public import GroundTheory.GlobalFields.TateThesis.SchwartzBruhat
+public import GroundTheory.GlobalFields.TateThesis.AdelePoisson
+import GroundTheory.GlobalFields.TateThesis.AdeleScaling
+import GroundTheory.GlobalFields.TateThesis.LatticePoissonBasic
+import Mathlib.Algebra.Module.ZLattice.Summable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -66,7 +112,8 @@ theorem summable_ite_mem_of_summable_idealLattice (J : (FractionalIdeal (𝓞 K)
   rw [← hinj.summable_iff hsupp]
   convert hh using 1
   funext α
-  simp only [Function.comp_apply, g]
+  change (if ((e.symm α : _) : K) ∈ (J : FractionalIdeal (𝓞 K)⁰ K) then
+    h (mixedEmbedding K ((e.symm α : _) : K)) else 0) = h α
   rw [if_pos (show ((e.symm α : _) : K) ∈ (J : FractionalIdeal (𝓞 K)⁰ K) from (e.symm α).2)]
   have he := coe_idealLatticeEquiv J (e.symm α)
   rw [Equiv.apply_symm_apply] at he
@@ -192,29 +239,6 @@ theorem exists_summable_bound_smul_algebraMap {F : 𝔸[K] → ℂ} (hF : F ∈ 
     refine ⟨fun ξ ↦ ‖r‖ * u ξ, hu.mul_left _, fun a ha ξ ↦ ?_⟩
     rw [Pi.smul_apply, smul_eq_mul, norm_mul]
     exact mul_le_mul_of_nonneg_left (hGu a ha ξ) (norm_nonneg r)
-
-theorem tendstoUniformlyOn_tsum_smul_algebraMap {F : 𝔸[K] → ℂ} (hF : F ∈ schwartzBruhat K)
-    {C : Set (IdeleGroup K)} (hC : IsCompact C) :
-    TendstoUniformlyOn (fun (s : Finset K) (a : IdeleGroup K) ↦ ∑ ξ ∈ s, F (a • algebraMap K 𝔸[K] ξ))
-      (fun a ↦ ∑' ξ : K, F (a • algebraMap K 𝔸[K] ξ)) atTop C := by
-  obtain ⟨u, hu, hFu⟩ := exists_summable_bound_smul_algebraMap hF hC
-  exact tendstoUniformlyOn_tsum hu fun ξ a ha ↦ hFu a ha ξ
-
-theorem exists_summable_bound_adelicFourier_inv_smul_algebraMap {F : 𝔸[K] → ℂ}
-    (hF : F ∈ schwartzBruhat K) {C : Set (IdeleGroup K)} (hC : IsCompact C) :
-    ∃ u : K → ℝ, Summable u ∧ ∀ a ∈ C, ∀ ξ : K,
-      ‖adelicFourier K F (a⁻¹ • algebraMap K 𝔸[K] ξ)‖ ≤ u ξ := by
-  obtain ⟨u, hu, hFu⟩ := exists_summable_bound_smul_algebraMap
-    (adelicFourier_mem_schwartzBruhat hF) hC.inv
-  exact ⟨u, hu, fun a ha ξ ↦ hFu a⁻¹ (Set.inv_mem_inv.mpr ha) ξ⟩
-
-theorem tendstoUniformlyOn_tsum_adelicFourier_inv_smul_algebraMap {F : 𝔸[K] → ℂ}
-    (hF : F ∈ schwartzBruhat K) {C : Set (IdeleGroup K)} (hC : IsCompact C) :
-    TendstoUniformlyOn (fun (s : Finset K) (a : IdeleGroup K) ↦
-        ∑ ξ ∈ s, adelicFourier K F (a⁻¹ • algebraMap K 𝔸[K] ξ))
-      (fun a ↦ ∑' ξ : K, adelicFourier K F (a⁻¹ • algebraMap K 𝔸[K] ξ)) atTop C := by
-  obtain ⟨u, hu, hFu⟩ := exists_summable_bound_adelicFourier_inv_smul_algebraMap hF hC
-  exact tendstoUniformlyOn_tsum hu fun ξ a ha ↦ hFu a ha ξ
 
 end
 

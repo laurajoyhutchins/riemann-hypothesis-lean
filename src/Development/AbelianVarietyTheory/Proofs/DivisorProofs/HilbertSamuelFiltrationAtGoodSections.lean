@@ -1,19 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.InclEquiv
-import Development.AbelianVarietyTheory.Definitions.Divisors.IntegralBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemSubPtsIffOfToBaseEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NefBigBaseChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplexifyStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FilMonoOfKerRes
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictedSectionChartCoords
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NefBigSecondBaseChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoordinatesSpecialisedFormProdLinearFormsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.InclEquiv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplexifyStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoordinatesSpecialisedFormProdLinearFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FilMonoOfKerRes
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelDegreeZeroResiduesRangeEqTopStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelFiltrationSymbolMonomialProductStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelSectionBaseChangePropertiesStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelSectionShiftCommSingleMonomialStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelSectionBaseChangePropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelDegreeZeroResiduesRangeEqTopStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TotFilTotSymKer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelFiltrationSymbolMonomialProductStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelVanishingFiltrationDeepestStepSpanStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HilbertSamuelVanishingFiltrationDeepestStepSpanStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemSubPtsIffOfToBaseEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NefBigBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NefBigSecondBaseChange
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictedSectionChartCoords
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TotFilTotSymKer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
 open GlobalTheory.CechPic GlobalTheory.CxPts GlobalTheory.HermTools GlobalTheory.Vanishing GlobalTheory.Adelic GlobalTheory.HilbertSamuel GlobalTheory.ChowHt GlobalTheory.TangentOrigin

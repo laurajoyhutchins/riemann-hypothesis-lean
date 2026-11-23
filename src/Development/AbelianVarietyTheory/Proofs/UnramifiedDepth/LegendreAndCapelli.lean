@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.BiadditiveInSingleVariables
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LegendreBoundsFactorialMultiIndexCapelli
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.BiadditiveInSingleVariables
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LegendreBoundsFactorialMultiIndexCapelli
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.L2.FormalSeriesBounds Formalism.IncomingBounds
 
 namespace GlobalTheory.LegendreFacts
@@ -12,12 +58,6 @@ theorem mfact_eq_prod {σ : Type} [Fintype σ] (A : σ →₀ ℕ) :
   unfold mfact
   exact Finsupp.prod_fintype A _ (fun _ => Nat.factorial_zero)
 
-theorem degree_eq_sum' {σ : Type} [Fintype σ] (A : σ →₀ ℕ) : A.degree = ∑ j, A j := by
-  rw [Finsupp.degree_apply]
-  refine Finset.sum_subset (Finset.subset_univ _) ?_
-  intro j _ hj
-  simpa using hj
-
 theorem capNat_mul (n0 x : ℕ) :
     capNat n0 x * ∏ c ∈ Finset.range n0, c.factorial
       = ∏ c ∈ Finset.range n0, (x + c).factorial := by
@@ -26,50 +66,6 @@ theorem capNat_mul (n0 x : ℕ) :
   refine Finset.prod_congr rfl ?_
   intro c _
   exact Nat.div_mul_cancel (Nat.factorial_dvd_factorial (Nat.le_add_left c x))
-
-private lemma padicValNat_factorial_eq_div_of_lt_sq (l : ℕ) (hl : l.Prime) (N : ℕ) (hN : N < l ^ 2) :
-    padicValNat l N.factorial = N / l := by
-  have : Fact l.Prime := ⟨hl⟩
-  rcases Nat.eq_zero_or_pos N with h0 | hpos
-  · subst h0
-    simp
-  · rw [padicValNat_factorial (b := 2) (Nat.log_lt_of_lt_pow hpos.ne' hN)]
-    simp
-
-theorem legendre_facts : F2 := by
-  intro l hl
-  have hl1 : (1 : ℝ) < l := by exact_mod_cast hl.one_lt
-  have hden : (0 : ℝ) < (l : ℝ) - 1 := by linarith
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · intro N
-    have h := legendre_real l hl N
-    simpa using h
-  · intro N _
-    have h := digitSum_le l N hl.one_lt
-    rw [Real.natFloor_logb_natCast]
-    have hc : (((Nat.digits l N).sum : ℕ) : ℝ) ≤ (((Nat.log l N + 1) * (l - 1) : ℕ) : ℝ) := by
-      exact_mod_cast h
-    rw [Nat.cast_mul, Nat.cast_sub hl.one_lt.le, Nat.cast_add, Nat.cast_one] at hc
-    rw [mul_comm]
-    exact hc
-  · intro σ _ A hA
-    rw [mfact_eq_prod, degree_eq_sum']
-    rw [degree_eq_sum'] at hA
-    constructor
-    · have h := ((legendre_bounds l hl).2.1) σ (fun j => A j) hA
-      simpa using h
-    · rw [padicValNat_prod_factorial l hl Finset.univ (fun j => A j)]
-      have hterm : ∀ j ∈ (Finset.univ : Finset σ),
-          (padicValNat l (A j).factorial : ℝ) ≤ (A j : ℝ) / ((l : ℝ) - 1) :=
-        fun j _ => upper l hl (A j)
-      calc ∑ j, (padicValNat l (A j).factorial : ℝ)
-          ≤ ∑ j, (A j : ℝ) / ((l : ℝ) - 1) := Finset.sum_le_sum hterm
-        _ = ((∑ j, A j : ℕ) : ℝ) / ((l : ℝ) - 1) := by
-          rw [← Finset.sum_div]
-          push_cast
-          rfl
-  · intro N hN
-    exact padicValNat_factorial_eq_div_of_lt_sq l hl N hN
 
 theorem capelli_bound : F3 := by
   intro l hl n0 n x hn hn0
@@ -85,7 +81,7 @@ theorem capelli_bound : F3 := by
       exact (Finset.prod_ne_zero_iff.mpr (fun c _ => Nat.factorial_ne_zero (x + c))) h.symm
     have hv : padicValNat l (capNat n0 x) + padicValNat l (∏ c ∈ Finset.range n0, c.factorial)
         = padicValNat l (∏ c ∈ Finset.range n0, (x + c).factorial) := by
-      rw [← padicValNat.mul hC hP, capNat_mul]
+      rw [← (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) hC hP, capNat_mul]
     have hvR : (padicValNat l (capNat n0 x) : ℝ)
         = (padicValNat l (∏ c ∈ Finset.range n0, (x + c).factorial) : ℝ)
           - (padicValNat l (∏ c ∈ Finset.range n0, c.factorial) : ℝ) := by

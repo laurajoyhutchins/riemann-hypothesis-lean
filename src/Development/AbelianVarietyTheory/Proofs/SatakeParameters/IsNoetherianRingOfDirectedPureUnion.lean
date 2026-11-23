@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsNoetherianRingOfIsAdicComplete
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Algebra
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsNoetherianRingOfIsAdicComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.LocalRing
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.AdicCompletion.Completeness
+
+@[expose] public section
 
 open IsLocalRing
 
@@ -22,7 +72,7 @@ theorem mem_of_forall_mem_sup_pow (T : Subring S) [IsNoetherianRing T]
       have h1 : T.subtype (y * z) ∈ maximalIdeal S := by
         rw [map_mul]; exact Ideal.mul_mem_right _ _ hy
       have h2 := Ideal.sub_mem _ h h1
-      rw [map_add, add_sub_cancel_left, map_one] at h2
+      rw [map_add (f := _), add_sub_cancel_left, map_one] at h2
       exact (maximalIdeal.isMaximal S).ne_top ((Ideal.eq_top_iff_one _).mpr h2)
     have hunit : IsUnit (T.subtype (y * z + 1)) := by
       by_contra h
@@ -31,7 +81,8 @@ theorem mem_of_forall_mem_sup_pow (T : Subring S) [IsNoetherianRing T]
       rw [← hpure (Ideal.span {y * z + 1}), Ideal.map_span, Set.image_singleton,
         Ideal.span_singleton_eq_top.mpr hunit, Ideal.comap_top]
     exact Ideal.span_singleton_eq_top.mp h2
-  have hK := Ideal.iInf_pow_smul_eq_bot_of_le_jacobson (M := T ⧸ A) m hjac
+  have hK := Ideal.iInf_pow_smul_eq_bot_of_le_jacobson (M := T ⧸ A) m
+    (by simpa only [Ideal.jacobson_bot] using hjac)
   have hxn : ∀ n : ℕ, x ∈ A ⊔ m ^ n := by
     intro n
     have h := hx n
@@ -43,7 +94,7 @@ theorem mem_of_forall_mem_sup_pow (T : Subring S) [IsNoetherianRing T]
     intro n
     obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.mp (hxn n)
     have : Ideal.Quotient.mk A x = b • (1 : T ⧸ A) := by
-      rw [← hab, map_add, Ideal.Quotient.eq_zero_iff_mem.mpr ha, zero_add, Algebra.smul_def,
+      rw [← hab, map_add (f := _), Ideal.Quotient.eq_zero_iff_mem.mpr ha, zero_add, Algebra.smul_def,
         mul_one, Ideal.Quotient.algebraMap_eq]
     rw [this]
     exact Submodule.smul_mem_smul hb trivial
@@ -85,8 +136,8 @@ end GlobalTheory.DirectedNoeth
 
 namespace GlobalTheory
 
-open GlobalTheory.DirectedNoeth in
 
+open GlobalTheory.DirectedNoeth in
 theorem isNoetherianRing_of_directed_pure_union : ∀ (S : Type) [CommRing S] [IsLocalRing S] (ι : Type)
     [Preorder ι] [IsDirected ι (· ≤ ·)] [Nonempty ι] (R : ι → Subring S), Monotone R →
     (∀ x : S, ∃ i, x ∈ R i) → (∀ i, IsNoetherianRing (R i)) →

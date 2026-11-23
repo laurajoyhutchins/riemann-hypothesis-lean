@@ -1,5 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Order.Antidiag.Finsupp
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open MvPolynomial Filter Topology GlobalTheory.CompanionTheory.Ar.Top
 
 namespace RootFieldNumerics
@@ -32,7 +82,7 @@ theorem pa_neg_lin_pow {J : Type} [Fintype J] [DecidableEq J] (d : ℕ) (c : J �
       map_neg, map_one]
     ring
 
-theorem polarization_coefficients_bound : ∀ (J : Type) [Fintype J] [DecidableEq J] (d : ℕ) (Φ : MvPolynomial J ℝ →ₗ[ℝ] ℝ), ∃ Pl : MvPolynomial J ℝ, Pl.IsHomogeneous d ∧ (∀ c : J → ℝ, eval c Pl = Φ ((-∑ x, C (c x) * X x) ^ d)) ∧ (∀ m : J →₀ ℕ, m.degree = d → coeff m Pl = (-1) ^ d * (m.multinomial : ℝ) * Φ (monomial m 1)) ∧ ∀ m : J →₀ ℕ, m.degree = d → |Φ (monomial m 1)| ≤ |coeff m Pl| := by
+theorem polarization_coefficients_bound : ∀ (J : Type) [Fintype J] [DecidableEq J] (d : ℕ) (Φ : MvPolynomial J ℝ →ₗ[ℝ] ℝ), ∃ Pl : MvPolynomial J ℝ, Pl.IsHomogeneous d ∧ (∀ c : J → ℝ, eval c Pl = Φ ((-∑ x, C (c x) * X x) ^ d)) ∧ (∀ m : J →₀ ℕ, m.degree = d → AddMonoidAlgebra.coeff Pl m = (-1) ^ d * (m.multinomial : ℝ) * Φ (monomial m 1)) ∧ ∀ m : J →₀ ℕ, m.degree = d → |Φ (monomial m 1)| ≤ |Pl.coeff m| := by
   intro J _ _ d Φ
   set S := Finset.finsuppAntidiag (Finset.univ : Finset J) d with hSdef
   have hS : ∀ m : J →₀ ℕ, m ∈ S ↔ m.degree = d := by
@@ -40,12 +90,12 @@ theorem polarization_coefficients_bound : ∀ (J : Type) [Fintype J] [DecidableE
     simp [hSdef, Finset.mem_finsuppAntidiag, Finsupp.degree_eq_sum]
   set a : (J →₀ ℕ) → ℝ := fun m => (-1) ^ d * (m.multinomial : ℝ) * Φ (monomial m 1) with ha
   set Pl : MvPolynomial J ℝ := ∑ m ∈ S, monomial m (a m) with hPl
-  have hcoeff : ∀ m : J →₀ ℕ, m.degree = d → coeff m Pl = a m := by
+  have hcoeff : ∀ m : J →₀ ℕ, m.degree = d → AddMonoidAlgebra.coeff Pl m = a m := by
     intro m hm
     rw [hPl, coeff_sum, Finset.sum_eq_single m]
     · simp
     · intro b _ hb
-      rw [coeff_monomial, if_neg hb]
+      rw [coeff_monomial, ite_eq_right hb]
     · intro hm'
       exact absurd ((hS m).2 hm) hm'
   refine ⟨Pl, ?_, ?_, hcoeff, ?_⟩
@@ -53,6 +103,7 @@ theorem polarization_coefficients_bound : ∀ (J : Type) [Fintype J] [DecidableE
     intro m hm
     exact isHomogeneous_monomial _ ((hS m).1 hm)
   · intro c
+
     rw [pa_neg_lin_pow, hPl, map_sum (eval c), map_sum Φ]
     refine Finset.sum_congr hSdef fun m _ => ?_
     rw [eval_monomial, map_smul, smul_eq_mul, ha]

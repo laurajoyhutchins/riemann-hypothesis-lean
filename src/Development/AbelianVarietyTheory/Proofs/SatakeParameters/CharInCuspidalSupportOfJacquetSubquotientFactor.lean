@@ -1,13 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.UnlinkedProductIrreducible
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsInSupportOfMultiProd
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JacquetModuleMapInjectiveOfInjective
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JordanHolderMultiplicityJacquetEqBorelJacquetOfS
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SubsingletonJacquetOfPerm
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCovBySubmodule
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsInSupportOfMultiProd
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JacquetModuleMapInjectiveOfInjective
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JordanHolderMultiplicityJacquetEqBorelJacquetOfS
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SubsingletonJacquetOfPerm
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantOrbit
+
+@[expose] public section
 
 noncomputable section
 
@@ -116,6 +164,7 @@ theorem Flag.piTensor {α : Type} [Fintype α] [DecidableEq α] {Γ Y : α → T
       · simp [Pi.mulSingle_eq_of_ne hb, Function.update_of_ne hb]
     rw [piTensor_tprod, h1, MultilinearMap.map_update_sub, MultilinearMap.map_update_smul,
       Function.update_eq_self]
+    rfl
   refine ⟨U S, U T, fun h => h1 fun x₀ hx₀ => by_contra fun hT => ?_, hU S h2, hU T h3, ?_, fun z => ?_⟩
   · have h1 : ∀ a, ∃ (x : Y a) (l : Module.Dual ℂ (Y a)), l x = 1 := fun a => by
       obtain ⟨x, hx⟩ := exists_ne (0 : Y a)
@@ -141,7 +190,7 @@ theorem Flag.piTensor {α : Type} [Fintype α] [DecidableEq α] {Γ Y : α → T
     · simp [Function.update_of_ne hba, hl] at hb
   · rintro _ ⟨u, hu, rfl⟩ y
     induction y using PiTensorProduct.induction_on with
-    | add x y hx hy => rw [map_add, add_sub_add_comm]; exact add_mem hx hy
+    | add x y hx hy => rw [map_add (f := _), add_sub_add_comm]; exact add_mem hx hy
     | smul_tprod r x =>
       rw [map_smul, ← smul_sub]
       refine Submodule.smul_mem _ _ ?_
@@ -169,8 +218,8 @@ theorem deltaHalf_mulSingle (a : α) (g : GL (m a) k) :
     rw [Pi.mulSingle_eq_of_ne hb, map_one, map_one]
   · simp
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem det_leviEmb_mulSingle (e : (Σ a, m a) ≃ n) (a : α) (g : GL (m a) k) :
     GeneralLinearGroup.det (leviEmb k e (Pi.mulSingle a g)) = GeneralLinearGroup.det g := by
   rw [det_leviEmb, Finset.prod_eq_single a, Pi.mulSingle_eq_same]
@@ -178,8 +227,8 @@ theorem det_leviEmb_mulSingle (e : (Σ a, m a) ≃ n) (a : α) (g : GL (m a) k) 
     rw [Pi.mulSingle_eq_of_ne hb, map_one]
   · simp
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem val_blockScalar (e : (Σ a, m a) ≃ n) (a : α) (z : kˣ) :
     (blockScalar e a z : Matrix n n k) = diagonal fun i => if blk e i = a then (z : k) else 1 := by
   ext i j
@@ -191,13 +240,13 @@ theorem val_blockScalar (e : (Σ a, m a) ≃ n) (a : α) (z : kˣ) :
     by_cases hb : b = a
     · subst hb
       simp [GeneralLinearGroup.scalar, diagonal_apply]
-    · simp [Pi.mulSingle_eq_of_ne hb, diagonal_apply, hb, one_apply]
+    · simp [Pi.mulSingle_eq_of_ne hb, diagonal_apply, hb, Matrix.one_apply]
   · rw [blockScalar, leviEmb_apply_ne k e _ h, diagonal_apply_ne]
     intro h'
     exact h (congrArg Sigma.fst (e.injective h'))
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem mem_range_leviEmb {e : (Σ a, m a) ≃ n} {g : GL n k} :
     g ∈ Set.range (leviEmb k e) ↔ ∀ i j, blk e i ≠ blk e j → (g : Matrix n n k) i j = 0 := by
   constructor
@@ -373,7 +422,7 @@ theorem inSupport_of_flag_jac (π : Representation ℂ (GL n k) V) (f : (Σ j, c
     have h0 : leviProj k f ⟨u, hp⟩ j₀ ∈ unipRad k e :=
       CuspMax.mem_unipRad_iff_entries.2 fun x y hxy => by
         rw [leviProj_apply, hu _ _ (by simpa [hE, hlt, ht0] using hxy)]
-        simp [one_apply]
+        simp [Matrix.one_apply, f.injective.eq_iff]
     have h1 : leviProj k f ⟨u, hp⟩ = Pi.mulSingle j₀ (leviProj k f ⟨u, hp⟩ j₀) := by
       funext j
       by_cases hj : j = j₀
@@ -382,7 +431,7 @@ theorem inSupport_of_flag_jac (π : Representation ℂ (GL n k) V) (f : (Σ j, c
       · rw [Pi.mulSingle_eq_of_ne hj]
         ext x y
         rw [leviProj_apply, hu _ _ (by simp [hE, hlt, ht j hj])]
-        simp [one_apply]
+        simp [Matrix.one_apply, f.injective.eq_iff]
     refine ⟨_, ⟨_, h0, rfl⟩, fun x => ?_⟩
     have h2 : Submodule.mkQ (twKer π (unipRad k f) 1) (π v x) = Submodule.mkQ _ x :=
       (Submodule.Quotient.eq _).2 (IwahoriInj.sub_mem_twKer hv x)
@@ -401,7 +450,7 @@ theorem inSupport_of_flag_jac (π : Representation ℂ (GL n k) V) (f : (Σ j, c
         by_cases hj : b = j₀
         · subst hj
           simp [val_blockScalar, diagonal_apply, hE, heq, ht0]
-        · simp [Pi.mulSingle_eq_of_ne hj, diagonal_apply, hE, heq, hj, one_apply]
+        · simp [Pi.mulSingle_eq_of_ne hj, diagonal_apply, hE, heq, hj, Matrix.one_apply]
       · rw [leviEmb_apply_ne k f _ hb, diagonal_apply_ne]
         intro h'
         exact hb (congrArg Sigma.fst (f.injective h'))

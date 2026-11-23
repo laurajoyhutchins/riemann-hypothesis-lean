@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DatumEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DatumEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +112,7 @@ lemma ev_conjTranspose_mem (P : Poly n) :
       have := Submodule.add_mem _ hp hq
       convert this using 1
       funext k h
-      simp [map_add]
+      simp [map_add (f := _)]
   | mul_X p i hp =>
       have hx : (fun (k : Mat n) (h : KG ε) => ev (kᴴ * toMK h) (MvPolynomial.X i)) ∈
           Submodule.span ℂ (Gen (ε := ε)) := by
@@ -103,7 +151,7 @@ lemma integral_span {Φ : Mat n → KG ε → ℂ} (hΦ : Φ ∈ Submodule.span 
     obtain ⟨c1, Q1, e1⟩ := h1
     obtain ⟨c2, Q2, e2⟩ := h2
     refine ⟨fun k => (c1 k).add (c2 k), Q1 + Q2, fun k => ?_⟩
-    simp only [Pi.add_apply, add_mul, map_add]
+    simp only [Pi.add_apply, add_mul, map_add (f := _)]
     rw [integral_add (f := fun h => Φ k h * c h) (g := fun h => Ψ k h * c h) (integ ((c1 k).mul hc))
       (integ ((c2 k).mul hc)), e1, e2]
   | smul a Φ _ h1 =>
@@ -140,7 +188,7 @@ lemma polyAlg_poly {φ : C(KG ε, ℂ)} (hφ : φ ∈ polyAlg ε) : ∃ P : Poly
   | add x y _ _ hx hy =>
     obtain ⟨P, hP⟩ := hx
     obtain ⟨Q, hQ⟩ := hy
-    exact ⟨P + Q, fun h => by simp [hP, hQ, map_add]⟩
+    exact ⟨P + Q, fun h => by simp [hP, hQ, map_add (f := _)]⟩
   | mul x y _ _ hx hy =>
     obtain ⟨P, hP⟩ := hx
     obtain ⟨Q, hQ⟩ := hy
@@ -279,7 +327,7 @@ lemma coef_avgSpan {T : Mat n → (W →L[ℂ] W)} (hT : Formalism.MainNotions.S
   | add x y _ _ hx hy =>
     obtain ⟨P, hP⟩ := hx
     obtain ⟨Q, hQ⟩ := hy
-    exact ⟨P + Q, fun k hk => by rw [map_add, inner_add_right, hP k hk, hQ k hk, map_add]⟩
+    exact ⟨P + Q, fun k hk => by rw [map_add (f := _), inner_add_right, hP k hk, hQ k hk, map_add (f := _)]⟩
   | smul a x _ hx =>
     obtain ⟨P, hP⟩ := hx
     exact ⟨MvPolynomial.C a * P, fun k hk => by rw [map_smul, inner_smul_right, hP k hk, map_mul, ev_C]⟩

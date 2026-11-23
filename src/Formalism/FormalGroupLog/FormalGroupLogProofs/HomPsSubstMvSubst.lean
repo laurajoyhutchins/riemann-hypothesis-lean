@@ -1,4 +1,55 @@
-import Formalism.FormalGroupLog.Statement
+module
+
+public import Formalism.FormalGroupLog.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,23 +146,12 @@ private theorem hom_substInj {R : Type*} [CommRing R] {ι : Type*} (f : PowerSer
   have hU : IsUnit (MvPowerSeries.subst ![a, b] H) := by
     rw [MvPowerSeries.isUnit_iff_constantCoeff]
     have hsplit : H = 1 + (H - 1) := by ring
-    rw [hsplit, ← MvPowerSeries.coe_substAlgHom hv, map_add, map_one, MvPowerSeries.coe_substAlgHom,
+    rw [hsplit, ← MvPowerSeries.coe_substAlgHom hv, map_add (f := _), map_one, MvPowerSeries.coe_substAlgHom,
       map_add, map_one,
       MvPowerSeries.constantCoeff_subst_eq_zero hv (fun i => by fin_cases i <;> simp [ha, hb]) c1,
       add_zero]
     exact isUnit_one
   exact sub_eq_zero.1 (hU.mul_left_eq_zero.1 key2)
-
-theorem homId_statement : HomId := by
-  unfold HomId
-  intro R _ F
-  refine ⟨by simp, ?_⟩
-  rw [PowerSeries.subst_X (PowerSeries.HasSubst.of_constantCoeff_zero F.zero_constantCoeff)]
-  have hXY : ![atX (PowerSeries.X : PowerSeries R), atY PowerSeries.X] = MvPowerSeries.X := by
-    funext s
-    fin_cases s <;> simp [atX, atY, PowerSeries.subst_X (PowerSeries.HasSubst.X _)]
-  rw [hXY, MvPowerSeries.subst_self]
-  rfl
 
 theorem homComp_statement : HomComp := by
   unfold HomComp
@@ -152,7 +192,7 @@ theorem log_iff_hom_additive : LogIffHomGa := by
     have hv : MvPowerSeries.HasSubst ![atX f, atY f] :=
       hom_hasSubst_pair _ _ (hom_cc_at f 0 h0) (hom_cc_at f 1 h0)
     show MvPowerSeries.subst _ (MvPowerSeries.X 0 + MvPowerSeries.X 1) = _
-    rw [← MvPowerSeries.coe_substAlgHom hv, map_add, MvPowerSeries.coe_substAlgHom,
+    rw [← MvPowerSeries.coe_substAlgHom hv, map_add (f := _), MvPowerSeries.coe_substAlgHom,
       MvPowerSeries.subst_X hv, MvPowerSeries.subst_X hv]
     rfl
   unfold IsLog IsHom
@@ -166,12 +206,5 @@ theorem substInjective_statement : SubstInjective := by
   unfold SubstInjective
   intro R _ ι f a b h0 h1 ha hb h
   exact hom_substInj f a b h0 h1 ha hb h
-
-theorem log_determines_law : LogDeterminesLaw := by
-  unfold LogDeterminesLaw
-  intro R _ F G f hF hG
-  apply FormalGroup.ext
-  apply hom_substInj f _ _ hF.1 hF.2.1 F.zero_constantCoeff G.zero_constantCoeff
-  rw [hF.2.2, hG.2.2]
 
 end Formalism.G

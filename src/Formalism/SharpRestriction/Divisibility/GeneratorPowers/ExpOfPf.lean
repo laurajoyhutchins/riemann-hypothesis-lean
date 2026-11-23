@@ -1,7 +1,54 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTie
+module
+
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpActPf
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTie
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+public import Formalism.FormalGroupWitt.FormalGroupWittProofs.SolveV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ActLin
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ExpLaw
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.PderivSecondEvFirstPointEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ActLin
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.PderivSecondEvFirstPointEqZero
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,36 +63,13 @@ namespace ExpOf
 
 variable {R : Type} [CommRing R]
 
-open Formalism.FG.SolveVAux in
 
+open Formalism.FG.SolveVAux in
 theorem coeff_single_subst {σ τ : Type} [Fintype σ] [DecidableEq σ] [DecidableEq τ]
     (a : σ → MvPowerSeries τ R) (ha : ∀ s, constantCoeff (a s) = 0) (f : MvPowerSeries σ R) (t : τ) :
     coeff (Finsupp.single t 1) (subst a f) =
       ∑ s, coeff (Finsupp.single s 1) f * coeff (Finsupp.single t 1) (a s) := by
-  classical
-  have hs : HasSubst a := hasSubst_of_constantCoeff_zero ha
-  have hlow : ∀ s, Low 1 (a s) := fun s => (low_one_iff _).2 (ha s)
-  rw [coeff_subst hs, finsum_eq_sum_of_support_subset _ (s := Finset.univ.image (fun s : σ => Finsupp.single s 1))]
-  · rw [Finset.sum_image (fun p _ q _ h => Finsupp.single_left_injective one_ne_zero h)]
-    refine Finset.sum_congr rfl fun s _ => ?_
-    rw [Finsupp.prod_single_index (h := fun (s : σ) (e : ℕ) => a s ^ e) (pow_zero _), pow_one, smul_eq_mul]
-  · intro e he
-    rw [Function.mem_support] at he
-    by_contra hne
-    apply he
-    have hz : coeff (Finsupp.single t 1) (e.prod fun s n => a s ^ n) = 0 := by
-      rcases Nat.lt_or_ge e.degree 2 with hd | hd
-      · rcases Nat.lt_or_ge e.degree 1 with hd1 | hd1
-        · have he0 : e = 0 := by
-            have : e.degree = 0 := by omega
-            exact (Finsupp.degree_eq_zero_iff e).1 this
-          rw [he0, Finsupp.prod_zero_index, coeff_one, if_neg]
-          exact Finsupp.single_ne_zero.2 one_ne_zero
-        · obtain ⟨p, rfl⟩ := degree_eq_one e (by omega)
-          exact absurd (Finset.mem_coe.2 (Finset.mem_image_of_mem _ (Finset.mem_univ p))) hne
-      · have hl := low_P hlow e
-        exact hl _ (by rw [Finsupp.degree_single]; omega)
-    rw [hz, smul_zero]
+  apply Formalism.MainNotions.ModuliIntegralCharts.H1.ExpActPf.coeff_single_subst <;> assumption
 
 end ExpOf
 
@@ -72,6 +96,7 @@ theorem cc_linPt {n : ℕ} (uvec : Lt1 Dw → Fin d → S) (b : Fin n) (i : Fin 
 theorem subst_linPt {n m : ℕ} (uvec : Lt1 Dw → Fin d → S) (b : Fin n)
     (a : Fin n × Fin (dL Dw) → MvPowerSeries (Fin m × Fin (dL Dw)) S) (ha : HasSubst a) (i : Fin d) :
     subst a (linPt uvec b i) = ∑ ℓ : Lt1 Dw, MvPowerSeries.C (uvec ℓ i) * a (b, ltIdx Dw ℓ) := by
+
   rw [linPt, ← coe_substAlgHom ha, map_sum]
   refine Finset.sum_congr rfl fun ℓ _ => ?_
   rw [map_mul, coe_substAlgHom, subst_X ha]
@@ -88,6 +113,7 @@ theorem hasSubst_linPt {n : ℕ} (uvec : Lt1 Dw → Fin d → S) (b : Fin n) :
 theorem coeff_linPt (uvec : Lt1 Dw → Fin d → S) (ℓ : Lt1 Dw) (i : Fin d) :
     coeff (Finsupp.single ((0 : Fin 1), ltIdx Dw ℓ) 1) (linPt uvec (0 : Fin 1) i) = uvec ℓ i := by
   classical
+
   rw [linPt, map_sum]
   simp only [coeff_C_mul, coeff_X]
   rw [Finset.sum_eq_single ℓ]
@@ -220,7 +246,7 @@ theorem expPhi_hom (G : FGLaw S d) (uvec : Lt1 Dw → Fin d → S) (ℓ ε : Pt 
     fin_cases k
     show _ = subst (fun p : Fin 2 × Fin d => linPt uvec p.1 p.2)
       (X ((0 : Fin 2), i) + X ((1 : Fin 2), i) : MvPowerSeries (Fin 2 × Fin d) S)
-    rw [subst_linPt uvec 0 _ hasSubst_XX, ← coe_substAlgHom (hasSubst_Λ uvec), map_add, coe_substAlgHom,
+    rw [subst_linPt uvec 0 _ hasSubst_XX, ← coe_substAlgHom (hasSubst_Λ uvec), map_add (f := _), coe_substAlgHom,
       subst_X (hasSubst_Λ uvec), subst_X (hasSubst_Λ uvec), linPt, linPt, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun ℓ' _ => ?_
     rw [mul_add]

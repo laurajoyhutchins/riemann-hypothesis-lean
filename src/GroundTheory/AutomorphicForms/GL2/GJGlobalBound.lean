@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJGlobalTheta
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ConstantTerm
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixSchwartz
+import Aesop.Main
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalLatticeBounds
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalMellin
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Set Filter NumberField ComplexConjugate
 open scoped NumberField.AdeleRing
@@ -90,7 +140,7 @@ theorem rpow_le_of_one_lt {s M : ℝ} (hs : 1 ≤ s) : s ^ M ≤ s ^ max M 0 :=
 theorem exists_bound_GL (hn0 : 0 < n) {Φ : Matrix (Fin n) (Fin n) 𝔸[K] → ℂ}
     (hΦ : Φ ∈ matrixSchwartzBruhat K n) {φ₁ φ₂ : AdelicGLn.AdelicGL K n → ℂ}
     (h₁ : φ₁ ∈ cuspForms K n) (h₂ : φ₂ ∈ cuspForms K n) (N : ℝ) :
-    ∃ C M D : ℝ, ∀ (t : {r : ℝ // 0 < r}) (x y : normOneGL K n),
+    ∃ C M D : ℝ, ∀ (t : {r : ℝ // 0 < r}) (x y : normOneGL (K := K) (n := n)),
       Summable (fun γ : GL (Fin n) K => ‖Φ ((centralSection K n t * (x : AdelicGLn.AdelicGL K n)⁻¹ *
         AdelicGLn.diagonal K n γ * (y : AdelicGLn.AdelicGL K n) : AdelicGLn.AdelicGL K n) :
           Matrix (Fin n) (Fin n) 𝔸[K])‖) ∧
@@ -134,7 +184,7 @@ theorem exists_bound_GL (hn0 : 0 < n) {Φ : Matrix (Fin n) (Fin n) 𝔸[K] → �
 theorem exists_bound_GL_inv (hn0 : 0 < n) {Φ : Matrix (Fin n) (Fin n) 𝔸[K] → ℂ}
     (hΦ : Φ ∈ matrixSchwartzBruhat K n) {φ₁ φ₂ : AdelicGLn.AdelicGL K n → ℂ}
     (h₁ : φ₁ ∈ cuspForms K n) (h₂ : φ₂ ∈ cuspForms K n) (N : ℝ) :
-    ∃ C M D : ℝ, ∀ (t : {r : ℝ // 0 < r}) (x y : normOneGL K n),
+    ∃ C M D : ℝ, ∀ (t : {r : ℝ // 0 < r}) (x y : normOneGL (K := K) (n := n)),
       Summable (fun γ : GL (Fin n) K => ‖adelicMatrixFourier K Φ
         (((centralSection K n t * (x : AdelicGLn.AdelicGL K n)⁻¹ * AdelicGLn.diagonal K n γ *
           (y : AdelicGLn.AdelicGL K n))⁻¹ : AdelicGLn.AdelicGL K n) :
@@ -201,12 +251,12 @@ theorem exists_bound_GL_inv (hn0 : 0 < n) {Φ : Matrix (Fin n) (Fin n) 𝔸[K] �
           rw [hti, inv_inv, max_eq_right h1]
           exact mul_le_mul_of_nonneg_left (rpow_le_of_one_lt h1) hC₂0
 
-variable (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+local notation "Γ₁" => rationalGLOne (K := K) (n := n)
 
-local notation "Γ₁" => rationalGLOne K n
+variable (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 theorem norm_thetaPairing_le {φ₁ φ₂ Ξ : AdelicGLn.AdelicGL K n → ℂ} (t : {r : ℝ // 0 < r}) {b : ℝ}
-    (hb : ∀ x y : normOneGL K n,
+    (hb : ∀ x y : normOneGL (K := K) (n := n),
       Summable (fun γ : GL (Fin n) K => ‖Ξ (centralSection K n t * (x : AdelicGLn.AdelicGL K n)⁻¹ *
         AdelicGLn.diagonal K n γ * (y : AdelicGLn.AdelicGL K n))‖) ∧
       ‖φ₂ (x : AdelicGLn.AdelicGL K n)‖ * ‖φ₁ (y : AdelicGLn.AdelicGL K n)‖ *
@@ -214,7 +264,7 @@ theorem norm_thetaPairing_le {φ₁ φ₂ Ξ : AdelicGLn.AdelicGL K n → ℂ} (
           AdelicGLn.diagonal K n γ * (y : AdelicGLn.AdelicGL K n))‖ ≤ b) :
     ‖thetaPairing μ φ₁ φ₂ Ξ t‖ ≤ (μ (fundamentalDomain Γ₁)).toReal ^ 2 * b := by
   have hF : μ (fundamentalDomain Γ₁) < ⊤ := measure_fundamentalDomain_rationalGLOne_lt_top μ
-  have hT : ∀ x y : normOneGL K n, ‖conj (φ₂ (x : AdelicGLn.AdelicGL K n)) *
+  have hT : ∀ x y : normOneGL (K := K) (n := n), ‖conj (φ₂ (x : AdelicGLn.AdelicGL K n)) *
       φ₁ (y : AdelicGLn.AdelicGL K n) * ∑' γ : GL (Fin n) K,
         Ξ (centralSection K n t * (x : AdelicGLn.AdelicGL K n)⁻¹ *
           AdelicGLn.diagonal K n γ * (y : AdelicGLn.AdelicGL K n))‖ ≤ b := by
@@ -224,7 +274,7 @@ theorem norm_thetaPairing_le {φ₁ φ₂ Ξ : AdelicGLn.AdelicGL K n → ℂ} (
     exact le_trans (mul_le_mul_of_nonneg_left (norm_tsum_le_tsum_norm hs)
       (mul_nonneg (norm_nonneg _) (norm_nonneg _))) hle
   unfold thetaPairing
-  have hin : ∀ x : normOneGL K n, ‖∫ y in fundamentalDomain Γ₁,
+  have hin : ∀ x : normOneGL (K := K) (n := n), ‖∫ y in fundamentalDomain Γ₁,
       conj (φ₂ (x : AdelicGLn.AdelicGL K n)) * φ₁ (y : AdelicGLn.AdelicGL K n) *
         ∑' γ : GL (Fin n) K, Ξ (centralSection K n t * (x : AdelicGLn.AdelicGL K n)⁻¹ *
           AdelicGLn.diagonal K n γ * (y : AdelicGLn.AdelicGL K n)) ∂μ‖ ≤

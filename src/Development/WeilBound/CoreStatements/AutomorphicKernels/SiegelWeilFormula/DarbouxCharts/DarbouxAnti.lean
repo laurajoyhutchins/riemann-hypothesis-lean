@@ -1,5 +1,46 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.THeis
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaParabolic.TThetaSum
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.THeis
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaParabolic.InvMulSelfMatrixDoubled
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaParabolic.LRhoOm
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaParabolic.TThetaSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,13 +98,22 @@ theorem tHeis : THeis := by
   obtain ⟨t0, -, hBx, hf, -⟩ := frameData d
   constructor
   · simp only [SD.T]
-    rw [rho_rho, map_smul, smul_eq_mul, symp_cols, frame_yy_A d.ok.frame, Matrix.mul_zero, Matrix.zero_mul,
+    erw [(congrArg d.l (Tpar.rho_rho (σ := σ) (A := d.A) (Y := d.Y) (dd := d.dd) (ψ := d.B.ψ) (X * (incM F d.b.1.toCols₂)ᵀ) (Z * (incM F d.b.1.toCols₂)ᵀ) Φ))]
+    rw [map_smul, smul_eq_mul]
+    erw [symp_cols]
+    erw [frame_yy_A d.ok.frame]
+    rw [Matrix.mul_zero, Matrix.zero_mul,
       Matrix.zero_mul, Matrix.trace_zero, neg_zero, map_zero, mul_zero, AddChar.map_zero_eq_one, one_mul, ← Matrix.add_mul]
+    rfl
   · simp only [SD.T, SD.tt, SD.gram]
-    rw [hBx, Matrix.transpose_mul, ← Matrix.mul_assoc, rho_rho, map_smul, smul_eq_mul, add_comm,
+    rw [hBx, Matrix.transpose_mul, ← Matrix.mul_assoc]
+    erw [(congrArg d.l (Tpar.rho_rho (σ := σ) (A := d.A) (Y := d.Y) (dd := d.dd) (ψ := d.B.ψ) (X * (incM F d.b.1.toCols₂)ᵀ) (Z * (incM F t0.1)ᵀ * (diagCols (Fin d.n))ᵀ) Φ))]
+    rw [map_smul, smul_eq_mul, add_comm,
       l_shift h hψ _ _ hΦ, ← mul_assoc, ← AddChar.map_add_eq_mul]
     congr 2
-    rw [darboux_anti d.dd, Matrix.mul_assoc Z, ← Matrix.transpose_mul, symp_cols, hf, Matrix.mul_one, trace_gram,
+    change ⅟(2 : AF F) * symp (cA σ) (-1) (incM F d.A.J) (dbl (incM F d.Y.J)) (X * (incM F d.b.1.toCols₂)ᵀ) (Z * (incM F t0.1)ᵀ * (diagCols (Fin d.n))ᵀ) + -(⅟(2 : AF F) * symp (cA σ) (-1) (incM F d.A.J) (dbl (incM F d.Y.J)) (Z * (incM F t0.1)ᵀ * (diagCols (Fin d.n))ᵀ) (X * (incM F d.b.1.toCols₂)ᵀ)) = _
+    rw [darboux_anti d.dd]
+    rw [Matrix.mul_assoc Z, ← Matrix.transpose_mul, symp_cols, hf, Matrix.mul_one, trace_gram,
       map_neg]
     linear_combination (Algebra.trace (AF F) (AE F E) (Matrix.trace (Z * (X.map (cA σ))ᵀ * (incM F d.A.J)ᵀ))) *
       (invOf_two_add_invOf_two : (⅟(2 : AF F) + ⅟2 = 1))

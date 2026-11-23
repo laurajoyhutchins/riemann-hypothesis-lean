@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LeadMinor
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DifferentGeneratorDualIntegral
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsCompactUnitaryPointsAtPlaceFstMemCompact
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DifferentGeneratorDualIntegral
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,10 +62,6 @@ open Module NumberField GlobalTheory.CompanionTheory.Ar.HT TensorProduct
 section
 
 variable {E : Type} [Field E] [NumberField E] {N : ℕ}
-
-def vb (E : Type) [Field E] [NumberField E] {N : ℕ}
-    (q : Fin N × Module.Free.ChooseBasisIndex ℤ (𝓞 E)) : Fin N → 𝓞 E :=
-  Pi.single q.1 (RingOfIntegers.basis E q.2)
 
 theorem exists_left_inv {B : Type} [CommRing B] {n : ℕ} (φ : ZMod n →+* B) (c : 𝓞 E ≃+* 𝓞 E)
     (hc : ∀ a, c (c a) = a) (e : (Fin N → 𝓞 E) →+ (Fin N → 𝓞 E) →+ ZMod n)
@@ -32,7 +78,7 @@ theorem exists_left_inv {B : Type} [CommRing B] {n : ℕ} (φ : ZMod n →+* B) 
   let Λ : (Fin N → 𝓞 E) → (Fin N → 𝓞 E) → B := fun x y => ∑ k, cc k * φ (e (b k • x) y)
   have Λadd : ∀ x x' y, Λ (x + x') y = Λ x y + Λ x' y := by
     intro x x' y
-    simp only [Λ, smul_add, map_add, AddMonoidHom.add_apply, mul_add, Finset.sum_add_distrib]
+    simp only [Λ, smul_add, map_add (f := _), AddMonoidHom.add_apply, mul_add, Finset.sum_add_distrib]
   have Λsmul : ∀ (a : 𝓞 E) x y, Λ (a • x) y = s a * Λ x y := by
     intro a x y
     have h1 : ∀ k, b k • a • x = ∑ l, (b.repr (a * b k) l) • (b l • x) := by
@@ -44,8 +90,12 @@ theorem exists_left_inv {B : Type} [CommRing B] {n : ℕ} (φ : ZMod n →+* B) 
       rw [smul_assoc]
     have h2 : ∀ k, φ (e (b k • a • x) y) = ∑ l, ((b.repr (a * b k) l : ℤ) : B) * φ (e (b l • x) y) := by
       intro k
-      rw [h1, map_sum, AddMonoidHom.finset_sum_apply, map_sum]
+
+      rw [h1, map_sum]
+      change φ ((AddMonoidHom.eval y) (∑ l, e ((b.repr (a * b k) l) • (b l • x)))) = _
+      rw [map_sum, map_sum]
       refine Finset.sum_congr rfl fun l _ => ?_
+      change φ (e ((b.repr (a * b k) l) • (b l • x)) y) = _
       rw [map_zsmul, AddMonoidHom.zsmul_apply, map_zsmul, zsmul_eq_mul]
     simp only [Λ, h2, Finset.mul_sum]
     rw [Finset.sum_comm]
@@ -63,12 +113,13 @@ theorem exists_left_inv {B : Type} [CommRing B] {n : ℕ} (φ : ZMod n →+* B) 
       funext j
       simp [Pi.single_apply]
     have := congrArg (Λh y) hx
+
     rw [map_sum] at this
     simpa [Λh, Λsmul] using this
   let f : Fin N × Module.Free.ChooseBasisIndex ℤ (𝓞 E) → (Fin N → 𝓞 E) →+ ZMod n := fun q =>
     AddMonoidHom.mk' (fun y => ((b.repr (c (y q.1)) q.2 : ℤ) : ZMod n)) (by
       intro y y'
-      simp only [Pi.add_apply, map_add, Finsupp.add_apply, Int.cast_add])
+      simp only [Pi.add_apply, map_add (f := _), Finsupp.add_apply, Int.cast_add])
   choose x hx using fun q => surj (f q)
   have hΛx : ∀ j₀ l j, Λ (x (j₀, l)) (Pi.single j 1) = if j₀ = j then cc l else 0 := by
     intro j₀ l j
@@ -169,19 +220,23 @@ theorem gram_unit : ∀ (A K : Type) [CommRing A] [Field K] [Algebra A K] [CharZ
   have hu' : ∑ k, uB k * cc k = 1 := by
     have : ∑ k, u k * g k = 1 := by
       apply hAK
+
       rw [map_sum, map_one, ← hu]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_mul, hg]
+
     simp only [uB, cc, ← map_mul, ← map_sum, this, map_one]
   have hcc : ∀ (a : 𝓞 E) l, ∑ k, cc k * (((b.repr (a * b k) l : ℤ)) : A ⧸ I) = s a * cc l := by
     intro a l
     have : ∑ k, g k * (((b.repr (a * b k) l : ℤ)) : A) = ψ a * g l := by
       apply hAK
+
       rw [map_sum, map_mul, hψ, hg, mul_left_comm, ← map_mul, GlobalTheory.CompanionTheory.Ar.HT.ProjEig.mul_dualInt_eq,
-        map_sum, Finset.mul_sum]
+      map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_mul T, hg, map_mul σ, map_intCast σ, map_intCast T]
       ring
+
     simp only [cc, s, RingHom.comp_apply, ← map_intCast mkB, ← map_mul, ← map_sum, this]
   have hc' : ∀ a, RingOfIntegers.mapRingEquiv c (RingOfIntegers.mapRingEquiv c a) = a := by
     intro a
@@ -191,6 +246,7 @@ theorem gram_unit : ∀ (A K : Type) [CommRing A] [Field K] [Algebra A K] [CharZ
   have hΓ : mkB.mapMatrix Gm = Matrix.of fun i j =>
       ∑ k, cc k * φ (D.e (Pi.single i (b k)) (Pi.single j 1)) := by
     ext i j
+
     simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, Gm, map_sum, map_mul, hφ, cc]
   have hβΓ : β * mkB.mapMatrix Gm = 1 := by
     rw [hΓ]
@@ -210,6 +266,7 @@ theorem gram_unit : ∀ (A K : Type) [CommRing A] [Field K] [Algebra A K] [CharZ
     exact hβΓ)
   refine ⟨Gm, H, Z, Z', ?_, hZ, hZ'⟩
   intro i j
+
   simp only [Gm, Matrix.of_apply, map_sum, map_mul, map_natCast, hg]
   unfold GlobalTheory.CompanionTheory.Ar.HT.HTChart.gram
   rfl

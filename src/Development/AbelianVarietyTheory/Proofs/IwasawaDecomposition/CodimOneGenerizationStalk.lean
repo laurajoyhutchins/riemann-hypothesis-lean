@@ -1,6 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StalkGenerizationGermCompat
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TraitOrdOfTraitOrdPt
+module
+
+public import Mathlib.AlgebraicGeometry.Stalk
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StalkGenerizationGermCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Degenerations.MorAlgSt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.JacChartA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.CanonGenIsGen
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits NumberField IsLocalRing TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R Formalism.L2.Pj
 open GlobalTheory.Toroidal GlobalTheory.Models GlobalTheory.LN GlobalTheory.ShFam GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.TorRef GlobalTheory.Cartier
@@ -29,49 +86,5 @@ theorem stalk_fromSpecStalk_equiv (X : Scheme.{0}) (x : X) (p : Ideal (X.preshea
   rw [← h2]
   simp only [← CommRingCat.comp_apply, Category.assoc, TopCat.Presheaf.germ_res]
   erw [TopCat.Presheaf.germ_res]
-
-theorem exists_generisation_height_one : ∀ (X : Scheme.{0}) {R : Type} [CommRing R] [IsLocalRing R] (ξ : Sp R ⟶ X) (q : Ideal (X.presheaf.stalk (ξ (closedPoint R)))) [q.IsPrime], q.height = 1 → ∃ (z : X) (hs : z ⤳ ξ (closedPoint R)), ringKrullDim (X.presheaf.stalk z) = 1 ∧ q.map (X.presheaf.stalkSpecializes hs).hom = maximalIdeal (X.presheaf.stalk z) ∧ ∀ (W : Type) [CommRing W] [IsLocalRing W] (g : R →+* W), (maximalIdeal W).comap (g.comp (Scheme.stalkClosedPointTo ξ).hom) = q → (spMap g ≫ ξ) (closedPoint W) = z := by
-  intro X R _ _ ξ q _ hq
-  let y : PrimeSpectrum (X.presheaf.stalk (ξ (closedPoint R))) := ⟨q, inferInstance⟩
-  obtain ⟨e, he⟩ := stalk_fromSpecStalk_equiv X (ξ (closedPoint R)) q
-  have hs : X.fromSpecStalk (ξ (closedPoint R)) y ⤳ ξ (closedPoint R) := by
-    have : X.fromSpecStalk (ξ (closedPoint R)) y ∈ Set.range (X.fromSpecStalk (ξ (closedPoint R))) := ⟨y, rfl⟩
-    rwa [Scheme.range_fromSpecStalk] at this
-  have hcomp : X.presheaf.stalkSpecializes hs ≫ CommRingCat.ofHom e.toRingHom =
-      CommRingCat.ofHom (algebraMap (X.presheaf.stalk (ξ (closedPoint R))) (Localization.AtPrime q)) := by
-    apply TopCat.Presheaf.stalk_hom_ext
-    intro U hxU
-    ext s
-    have h3 := congrArg (fun f => f.hom s) (TopCat.Presheaf.germ_stalkSpecializes X.presheaf hxU hs)
-    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h3
-    change e ((X.presheaf.stalkSpecializes hs).hom ((X.presheaf.germ U _ hxU).hom s)) =
-      algebraMap _ (Localization.AtPrime q) ((X.presheaf.germ U _ hxU).hom s)
-    rw [h3]
-    exact he U _ hxU s
-  have hf : (X.presheaf.stalkSpecializes hs).hom = e.symm.toRingHom.comp (algebraMap _ (Localization.AtPrime q)) := by
-    ext a
-    have h5 : e ((X.presheaf.stalkSpecializes hs).hom a) =
-        algebraMap _ (Localization.AtPrime q) a := congrArg (fun f => f.hom a) hcomp
-    change _ = e.symm (algebraMap _ (Localization.AtPrime q) a)
-    rw [← h5, e.symm_apply_apply]
-  refine ⟨X.fromSpecStalk (ξ (closedPoint R)) y, hs, ?_, ?_, ?_⟩
-  · rw [ringKrullDim_eq_of_ringEquiv e, IsLocalization.AtPrime.ringKrullDim_eq_height q, hq]
-    rfl
-  · rw [hf, ← Ideal.map_map, Localization.AtPrime.map_eq_maximalIdeal]
-    have : (Ideal.map e.symm.toRingHom (maximalIdeal (Localization.AtPrime q))).IsMaximal :=
-      Ideal.map_isMaximal_of_equiv e.symm
-    exact IsLocalRing.eq_maximalIdeal this
-  · intro W _ _ g hg
-    have h4 := Scheme.Spec_stalkClosedPointTo_fromSpecStalk ξ
-    have h6 : (Spec.map (Scheme.stalkClosedPointTo ξ)) ((spMap g) (closedPoint W)) = y := by
-      apply PrimeSpectrum.ext
-      change _ = q
-      rw [← hg]
-      rfl
-    have h7 : (spMap g ≫ ξ) (closedPoint W) = X.fromSpecStalk (ξ (closedPoint R))
-        ((Spec.map (Scheme.stalkClosedPointTo ξ)) ((spMap g) (closedPoint W))) := by
-      conv_lhs => rw [← h4]
-      rfl
-    rw [h7, h6]
 
 end GlobalTheory.LocalRingGeneralisation

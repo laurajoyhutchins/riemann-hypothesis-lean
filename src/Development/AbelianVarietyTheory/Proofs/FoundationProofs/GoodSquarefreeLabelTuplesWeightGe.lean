@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.SamePartIffOfNeZero
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassDivisorBoundStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OneSubTwoDivLeSquarefreeLabelMassStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassRootsNotDistinctLeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MassNotRootsAvoidLeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassHasDivisorOfDegreeLeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassNoLargePrimeFactorLeStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SamePartIffOfNeZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MassNotRootsAvoidLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OneSubTwoDivLeSquarefreeLabelMassStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassDivisorBoundStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassHasDivisorOfDegreeLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassNoLargePrimeFactorLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SquarefreeLabelTorusMassRootsNotDistinctLeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Polynomial Classical GlobalTheory.BadShare
@@ -80,7 +128,7 @@ theorem tupleMass_single_le (h1 : (mass g N fun _ => True) ≤ 1) (v : ι) (A : 
     · rw [if_neg h, if_neg (mt hiff.mpr h)]
   rw [key, tupleMass_forall, ← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ v), if_pos rfl]
   have hrest : ∏ w ∈ Finset.univ.erase v, mass g N (if w = v then A else fun _ => True) ≤ 1 := by
-    apply Finset.prod_le_one
+    apply Finset.prod_le_one₀
     · exact fun w _ => hm _
     · intro w hw
       rw [if_neg (Finset.ne_of_mem_erase hw)]
@@ -109,7 +157,7 @@ theorem goodSet_weight_ge : ∀ (g : ℕ) [Fact g.Prime], ∀ (N m q d : ℕ) (�
       _ ≤ (1 + (-2 / (g : ℝ))) ^ Fintype.card ι := one_add_mul_le_pow h3 _
       _ = ∏ _v : ι, (1 - 2 / (g : ℝ)) := by rw [Finset.prod_const, Finset.card_univ]; ring
       _ ≤ ∏ _v : ι, mass g N (fun _ => True) :=
-        Finset.prod_le_prod (fun _ _ => h2) (fun _ _ => GlobalTheory.T.one_sub_two_div_le_squarefreeLabelMass g N)
+        Finset.prod_le_prod₀ (fun _ _ => h2) (fun _ _ => GlobalTheory.T.one_sub_two_div_le_squarefreeLabelMass g N)
   have hsq : ∀ f ∈ sqSet g N, (f.Monic ∧ f.natDegree = N ∧ f.coeff 0 ≠ 0) ∧ Squarefree f := by
     intro f hf
     unfold sqSet at hf
@@ -150,7 +198,7 @@ theorem goodSet_weight_ge : ∀ (g : ℕ) [Fact g.Prime], ∀ (N m q d : ℕ) (�
           refine Finset.sum_le_sum fun a ha => ?_
           rw [Finset.mem_Icc] at ha
           calc ∏ _v : ι, mass g N (HasDiv g a) ≤ ∏ _v : ι, ((7 : ℝ) / 8) :=
-                Finset.prod_le_prod (fun _ _ => hm _) (fun _ _ => GlobalTheory.T.squarefreeLabelTorusMass_hasDivisorOfDegree_le g N a (by omega) (by omega))
+                Finset.prod_le_prod₀ (fun _ _ => hm _) (fun _ _ => GlobalTheory.T.squarefreeLabelTorusMass_hasDivisorOfDegree_le g N a (by omega) (by omega))
             _ = _ := by rw [Finset.prod_const, Finset.card_univ]
       _ = ((N / 2 : ℕ) : ℝ) * (7 / 8) ^ Fintype.card ι := by
           rw [Finset.sum_const, Nat.card_Icc, nsmul_eq_mul, Nat.add_sub_cancel]
@@ -165,7 +213,7 @@ theorem goodSet_weight_ge : ∀ (g : ℕ) [Fact g.Prime], ∀ (N m q d : ℕ) (�
     calc _ = ∏ _v : ι, mass g N (fun f => ¬ HasPrimeFactor g N f) :=
           tupleMass_forall (fun _ f => ¬ HasPrimeFactor g N f)
       _ ≤ ∏ _v : ι, (1 - 1 / (10 * Real.log N)) :=
-          Finset.prod_le_prod (fun _ _ => hm _) (fun _ _ => GlobalTheory.T.squarefreeLabelTorusMass_no_large_prime_factor_le g N hN)
+          Finset.prod_le_prod₀ (fun _ _ => hm _) (fun _ _ => GlobalTheory.T.squarefreeLabelTorusMass_no_large_prime_factor_le g N hN)
       _ = (1 + (-(1 / (10 * Real.log N)))) ^ Fintype.card ι := by
           rw [Finset.prod_const, Finset.card_univ]; ring
       _ ≤ (Real.exp (-(1 / (10 * Real.log N)))) ^ Fintype.card ι := by

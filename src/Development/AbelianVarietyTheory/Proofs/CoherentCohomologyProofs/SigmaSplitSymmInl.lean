@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.LinearAlgebra.Matrix.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.InnerAutomorphism
 
@@ -15,9 +66,6 @@ def innerAut (u : Aˣ) : A ≃ₐ[R] A where
   map_add' x y := by simp [mul_add, add_mul]
   commutes' r := by rw [← Algebra.commutes, mul_assoc, Units.mul_inv, mul_one]
 
-@[simp] theorem innerAut_apply (u : Aˣ) (x : A) :
-    innerAut R u x = (u : A) * x * ((u⁻¹ : Aˣ) : A) := rfl
-
 end Inner
 
 section Bounded
@@ -26,22 +74,6 @@ variable {K n : Type*} [NormedField K]
 
 def EntriesBounded (M : Matrix n n K) (c : ℝ) : Prop :=
   ∀ i j, ‖M i j‖ ≤ c
-
-theorem EntriesBounded.mono {M : Matrix n n K} {c d : ℝ} (h : EntriesBounded M c)
-    (hcd : c ≤ d) : EntriesBounded M d :=
-  fun i j => (h i j).trans hcd
-
-theorem EntriesBounded.mul [IsUltrametricDist K] [Fintype n] {M N : Matrix n n K} {c d : ℝ}
-    (hM : EntriesBounded M c) (hN : EntriesBounded N d) :
-    EntriesBounded (M * N) (c * d) := by
-  intro i j
-  have hc : 0 ≤ c := (norm_nonneg _).trans (hM i j)
-  have hd : 0 ≤ d := (norm_nonneg _).trans (hN i j)
-  rw [Matrix.mul_apply]
-  refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (mul_nonneg hc hd) ?_
-  intro k _
-  rw [norm_mul]
-  exact mul_le_mul (hM i k) (hN k j) (norm_nonneg _) hc
 
 end Bounded
 
@@ -53,9 +85,6 @@ def dropLast : (Fin (d + 1) → K) →ₗ[K] (Fin d → K) where
   toFun x i := x i.castSucc
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
-
-@[simp] theorem dropLast_apply (x : Fin (d + 1) → K) (i : Fin d) :
-    dropLast K d x i = x i.castSucc := rfl
 
 end DropLast
 

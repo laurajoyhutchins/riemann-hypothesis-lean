@@ -1,6 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ShortValDesc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.PlaceIntegralUnramified
-import Formalism.LocalToGlobal.ProjectiveLattices.ChartDirectionsIntegral
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.Divisibility.WeightAlgebra
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -28,46 +71,5 @@ def IntFrBCSt (Xo : Moduli Dw l) (c : Coeff l) : Prop :=
       letI := io.toAlgebra
       letI := (iT.comp io).toAlgebra
       ∃ φ : T.Fr →ₐ[c.F] T'.Fr, φ.toRingHom = iT ∧ FrMap φ yI.1 yI'.1
-
-def CoverPtSt : Prop :=
-  ∀ (D : D7) (T : Full D) (_hF : LawsFull T) (j : ℕ) (_hj : InR D j) (n : ℕ)
-    (Tc : CDVR) (io : T.Q.c.F →+* Tc.Fr) (yI : IntFr (T.Q.Xo j) T.Q.c Tc io), yI.IsAlg →
-    ∃ (T' : CDVR) (iT : Tc.Fr →+* T'.Fr) (e' : ℕ), 0 < e' ∧
-      (∀ a : Tc.Fr, a ≠ 0 → vV T'.V (iT a) = (e' : ℤ) * vV Tc.V a) ∧
-      ∃ (io₂ : (T.dδ j n).c₂.F →+* T'.Fr), (∀ (a : (T.dδ j n).c₂.F) (b : T.Q.c.F), (a : ℂ) = b → io₂ a = iT (io b)) ∧
-      ∃ (yI₂ : IntFr (T.dδ j n).Xo₂ (T.dδ j n).c₂ T' io₂), yI₂.IsAlg ∧
-        letI := io.toAlgebra
-        letI := (iT.comp io).toAlgebra
-        letI := io₂.toAlgebra
-        ∃ (yI' : IntFr (T.Q.Xo j) T.Q.c T' (iT.comp io)) (φ : Tc.Fr →ₐ[T.Q.c.F] T'.Fr), φ.toRingHom = iT ∧
-          FrMap φ yI.1 yI'.1 ∧ FrOver (T.dδ j n) yI₂.1 yI'.1
-
-def ShortSplitSt : Prop :=
-  ∀ (D : D7) (T : Full D) (_hF : LawsFull T) (j : ℕ) (_hj : InR D j) (n : ℕ) (Λ : GenLat D.host.E n) (N : ℕ),
-    Λ.Unimod → badN D ≠ 0 → Λ.TrivAt (badN D) → Λ.TrivAt (T.dδ j n).l₂.M → Λ.LevOK N (T.dδ j n).l₂.M →
-    ∀ (K : Type) [Field K] [Algebra (T.dδ j n).c₂.F K] (y : FrPt (T.dδ j n).Xo₂ (T.dδ j n).c₂ K),
-    ∃ (K' : Type) (_ : Field K') (jK : K →+* K'), (letI := jK.toAlgebra; FiniteDimensional K K') ∧
-      ∀ (L : Type) [Field L] [Algebra (T.dδ j n).c₂.F L] (ψ : K →ₐ[(T.dδ j n).c₂.F] L),
-        (∃ ψ' : K' →+* L, ψ'.comp jK = ψ.toRingHom) →
-        ∀ yL : FrPt (T.dδ j n).Xo₂ (T.dδ j n).c₂ L, FrMap ψ y yL →
-        ∃ (z : Fin (Λ.zCard N ((T.Q.Dw j).p + (T.Q.Dw j).q)) → Fin n →
-              (ptO (T.dδ j n).Xo₂ yL.x ⟶ (T.dδ j n).Xo₂.univ.t.G))
-          (tp : (Fin n → LevQ (T.Q.Dw j) (T.dδ j n).l₂) → Fin n →
-              (ptO (T.dδ j n).Xo₂ yL.x ⟶ (T.dδ j n).Xo₂.univ.t.G))
-          (F : (Fin n → LevQ (T.Q.Dw j) (T.dδ j n).l₂) → Fin (Λ.zCard N ((T.Q.Dw j).p + (T.Q.Dw j).q)) → Fin n →
-              LB.Sec (LPow (T.dδ j n).Xo₂.univ.t.G (T.dδ j n).Xo₂.univ.t.PP.L ((N : ℤ) ^ 2)
-                (ptO (T.dδ j n).Xo₂ yL.x))),
-          ShortData Λ N yL z tp F
-
-def VtSplitSt : Prop :=
-  ∀ (D : D7) (T : Top D) (_h : LawsP T) (j : ℕ) (_hj : InR D j) (n : ℕ) (x : Fin n → (T.Q.Dw j).La)
-    (K : Type) [Field K] [Algebra T.Q.c.F K] (y : FrPt (T.Q.Xo j) T.Q.c K),
-    ∃ (K' : Type) (_ : Field K') (jK : K →+* K'), (letI := jK.toAlgebra; FiniteDimensional K K') ∧
-      ∀ (L : Type) [Field L] [Algebra T.Q.c.F L] (ψ : K →ₐ[T.Q.c.F] L), (∃ ψ' : K' →+* L, ψ'.comp jK = ψ.toRingHom) →
-        ∀ yL : FrPt (T.Q.Xo j) T.Q.c L, FrMap ψ y yL →
-        ∃ F : Fin n → LB.Sec (LPow (T.Q.Xo j).univ.t.G (T.Q.Xo j).univ.t.PP.L ((T.Q.l.M : ℤ) ^ 2)
-            (ptO (T.Q.Xo j) yL.x)),
-          ∀ b, IsVtOver (T.Q.Xo j).univ.t.G (T.Q.Xo j).univ.t.PP T.Q.l.M (KilledBy (T.Q.Xo j) (T.Q.l.Mb ^ 2))
-            yL.s (levPt (T.Q.Xo j) yL.x (x b)) (F b)
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections

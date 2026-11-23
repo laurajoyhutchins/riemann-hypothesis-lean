@@ -1,7 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.CoeffOneSubstCurve
-import Formalism.LocalToGlobal.CharacterGerms.ConstantZeroCompCoordinate
-import Formalism.LocalToGlobal.CharacterGerms.PderivDoubleMultiplicationJacobian
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePOActSelf
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.CoeffOneSubstCurve
+public import Formalism.LocalToGlobal.CharacterGerms.ConstantZeroCompCoordinate
+public import Formalism.LocalToGlobal.CharacterGerms.FirstVanishingAt
+import Formalism.LocalToGlobal.CharacterGerms.CoeffLMulCvFrob
+import Formalism.LocalToGlobal.CharacterGerms.MaximalOfValuationGeOne
+public import Formalism.LocalToGlobal.CharacterGerms.PderivDoubleMultiplicationJacobian
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePOActSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -122,7 +170,7 @@ theorem idx_apply (μ : Fin 1 × Fin dd →₀ ℕ) (i j : Fin dd) :
     intro h
     exact h10 (congrArg Prod.fst h)
   rw [Finsupp.add_apply, Finsupp.single_apply, if_neg hne, add_zero]
-  exact Finsupp.mapDomain_apply hinj μ ((0 : Fin 1), i)
+  exact Finsupp.mapDomain_apply_of_injective hinj μ ((0 : Fin 1), i)
 
 theorem aLin_eq (Y : FBChart C V O dd) (u w : Fin dd → C) :
     Y.aLin u w = ∑ i, coeff (Finsupp.single ((0 : Fin 1), i) V.l) (zl w Y.u1) * u i ^ V.l := by
@@ -153,8 +201,8 @@ theorem linear_part_unit_frobenius (Y : FBChart C V O dd) {w : Fin dd → C} (hw
 
 end PairPointEvaluation
 
-open ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ PartialDerivEval MaximalIdealCongruence FirstVanishing SelfAdjointCongruence PairPointEvaluation MvPowerSeries in
 
+open ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ PartialDerivEval MaximalIdealCongruence FirstVanishing SelfAdjointCongruence PairPointEvaluation MvPowerSeries in
 theorem aLinAdj_holds : ALinAdjSt := by
   intro C _ _ V O _ _ dd Y e eb heI hebI he0 heb0 hhom hW u hu hV1 v hv
   have hl := V.l_prime.two_le
@@ -221,7 +269,7 @@ theorem aLinAdj_holds : ALinAdjSt := by
   have k2 := congrArg (subst (fun q : Fin 1 × Fin dd => γ0 q.2)) key
   rw [subst_add hG, subst_add hG, ← MvPowerSeries.smul_eq_C_mul, subst_smul hG, hcomp e he0, hcomp M hM0] at k2
   have k3 := congrArg (PowerSeries.coeff V.l) k2
-  rw [map_add, map_add, map_smul, smul_eq_mul] at k3
+  rw [map_add (f := _), map_add (f := _), map_smul, smul_eq_mul] at k3
 
   have hA1 := coeff_l_frob (hSI v hv) (hS0 v) (linear_part_unit_frobenius Y hv) (hδcv e he0 heI)
   have hlin : ∀ i, PowerSeries.coeff 1 (subst (fun q : Fin 1 × Fin dd => γ0 q.2) (e i)) = linAct e u i := fun i => by

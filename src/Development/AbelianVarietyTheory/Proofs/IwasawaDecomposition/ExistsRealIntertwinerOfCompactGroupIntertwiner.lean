@@ -1,8 +1,56 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffSetIntegralNat
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TotalDegreeSubstFLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffSetIntegralNat
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.S Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum GlobalTheory.Chain GlobalTheory.CompactHowe Matrix
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -47,6 +95,7 @@ theorem hasDerivAt_bilin {E G : Type*} [AddCommGroup E] [Module ℂ E] [AddCommG
   let b := Module.finBasis ℂ G
   have e : ∀ a u, B a u = ∑ i, B.flip (b i) a * b.coord i u := by
     intro a u
+
     conv_lhs => rw [← b.sum_repr u, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, smul_eq_mul, mul_comm]
@@ -108,6 +157,7 @@ theorem continuous_tprod (M : DSModel V S) (h : ∀ τ, FiniteDimensional ℂ (M
   let b := Basis.piTensorProduct o
   have e : ∀ v : ∀ τ, M.H τ, f (PiTensorProduct.tprod ℂ v) = ∑ i, (∏ τ, (o τ).coord (i τ) (v τ)) * f (b i) := by
     intro v
+
     conv_lhs => rw [← b.sum_repr (PiTensorProduct.tprod ℂ v), map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, smul_eq_mul, Basis.piTensorProduct_repr_tprod_apply]
@@ -147,7 +197,7 @@ theorem exists_isItW : ∀ (D : D7) (V W : HSp D) (S S' : D.what₂.Tau → SPar
     simpa using this.symm
   · intro φ w
     haveI := fun τ => (hM' τ).1
-    let m : MultilinearMap ℂ (fun τ => M'.H τ) ℂ :=
+    let m : (Π τ, M'.H τ) →ₘₗ[ℂ] ℂ :=
       (ellT M w ∘ₗ I φ).compMultilinearMap (PiTensorProduct.tprod ℂ)
     obtain ⟨c, -, hc⟩ := m.exists_bound_of_continuous (continuous_tprod M' this (ellT M w ∘ₗ I φ))
     refine ⟨c, fun v => ?_⟩
@@ -177,7 +227,7 @@ theorem exists_isItW : ∀ (D : D7) (V W : HSp D) (S S' : D.what₂.Tau → SPar
       rw [← hω' τ 1 (one_mem_UH _), GlobalTheory.PointAtPlaceHom.atTau_one hθ]
       exact congrArg (fun f : Module.End ℂ (WO V W → ℂ) => f (pt ψ)) (map_one ω))
     apply hinj
-    rw [map_add, hIt, hIt, map_zero]
+    rw [map_add (f := _), hIt, hIt, map_zero]
     refine ellT_sep M (fun τ => (hM τ).1) _ fun w => ?_
     have hB := hasDerivAt_bilin (I.compr₂ (ellT M w)) (fun t : ℝ => ρ' τ (NormedSpace.exp (t • X)) φ) φ'
       (fun t : ℝ => actT M' τ (NormedSpace.exp (t • X)) (inclT M' v)) (inclT M' v')
@@ -187,7 +237,7 @@ theorem exists_isItW : ∀ (D : D7) (V W : HSp D) (S S' : D.what₂.Tau → SPar
     have h2 := hρ' τ 1 (one_mem_UH _) φ' (inclT M' v)
     rw [h1] at h2
     rw [h2] at hB
-    rw [map_add]
+    rw [map_add (f := _)]
     exact hB.unique (hasDerivAt_const _ _)
 
 end GlobalTheory.CompactIntertwiner

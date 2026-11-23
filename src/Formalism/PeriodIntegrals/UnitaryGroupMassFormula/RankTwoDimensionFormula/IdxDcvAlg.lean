@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.Statement
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -32,7 +78,7 @@ theorem h_sum_right {ι : Type} (s : Finset ι) (x : n → A) (v : ι → n → 
 
 theorem h_add_left (x x' y : n → A) :
     Formalism.UG.hform σ J (x + x') y = Formalism.UG.hform σ J x y + Formalism.UG.hform σ J x' y := by
-  simp only [Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem h_smul_left (x y : n → A) (a : A) :
     Formalism.UG.hform σ J (a • x) y = σ a * Formalism.UG.hform σ J x y := by
@@ -55,6 +101,7 @@ theorem h_symm (hJ : Formalism.UG.cT σ J = J) (hσ : ∀ a, σ (σ a) = a) (x y
     have h := congrFun (congrFun hJ i) j
     simp only [Formalism.UG.cT, Matrix.transpose_apply, Matrix.map_apply] at h
     exact h.symm
+
   simp only [Formalism.UG.hform, map_sum, map_mul, hσ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -66,13 +113,6 @@ variable {r : ℕ}
 def Q (e f : Fin r → n → A) (z y : n → A) : n → A :=
   (-Formalism.UG.hform σ J z z) • (y - ∑ a, (Formalism.UG.hform σ J (f a) y • e a + Formalism.UG.hform σ J (e a) y • f a)) +
     Formalism.UG.hform σ J z y • z
-
-structure Hyp (e f : Fin r → n → A) (z : n → A) : Prop where
-  ee : ∀ a b, Formalism.UG.hform σ J (e a) (e b) = 0
-  ff : ∀ a b, Formalism.UG.hform σ J (f a) (f b) = 0
-  ef : ∀ a b, Formalism.UG.hform σ J (e a) (f b) = if a = b then 1 else 0
-  ez : ∀ a, Formalism.UG.hform σ J (e a) z = 0
-  fz : ∀ a, Formalism.UG.hform σ J (f a) z = 0
 
 private theorem Q_eq_hform_expansion (e f : Fin r → n → A) (z y w : n → A) :
     Formalism.UG.hform σ J w (Q σ J e f z y) =

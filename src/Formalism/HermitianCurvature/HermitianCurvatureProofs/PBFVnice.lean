@@ -1,6 +1,52 @@
-import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PositiveDensityModerateGrowth
+module
+
+public import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PositiveDensityModerateGrowth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Calculus.ContDiff.RestrictScalars
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +73,7 @@ variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace �
 def phaseL (s : ℂ) (D : Mat k r →L[ℝ] ℂ) : Mat k r →L[ℝ] ℂ :=
   LinearMap.toContinuousLinearMap
     { toFun := fun g => s * D g - starRingEnd ℂ (s * D g)
-      map_add' := by intro g g'; simp only [map_add, mul_add]; ring
+      map_add' := by intro g g'; simp only [map_add (f := _), mul_add]; ring
       map_smul' := by
         intro c g
         simp only [map_smul, Complex.real_smul, map_mul, Complex.conj_ofReal, RingHom.id_apply]
@@ -78,7 +124,7 @@ theorem good_cexp (Bs : RealPlaceData k r Wp Wq) (ε : ℝ) (θ : Mat k r →L[�
       have h3 := ContinuousMultilinearMap.norm_compContinuousLinearMap_le
         (iteratedFDeriv ℝ i Complex.exp (θ g)) (fun _ : Fin i => θ)
       have h5 := h3.trans (mul_le_mul (le_of_eq (by rw [norm_iter_cexp, hθ, Real.exp_zero]))
-        (Finset.prod_le_prod (fun _ _ => norm_nonneg _) (fun _ _ => hθK))
+        (Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) (fun _ _ => hθK))
         (Finset.prod_nonneg fun _ _ => norm_nonneg _) zero_le_one)
       rw [one_mul, Finset.prod_const, Finset.card_univ, Fintype.card_fin] at h5
       calc ‖iteratedFDeriv ℝ i Λ g‖ ≤ ‖Lid‖ * ‖iteratedFDeriv ℝ i (fun g => Complex.exp (θ g)) g‖ := h1

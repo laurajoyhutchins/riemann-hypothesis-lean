@@ -1,4 +1,57 @@
-import ReciprocityTheory.SemistableReduction.SemiDegBA
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.FreeModule.Finite.CardQuotient
+public import Mathlib.RingTheory.Norm.Basic
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,10 +103,11 @@ theorem relIndex_span_comb {K : Type} [Field K] [NumberField K] {r k : ℕ}
   have : Module.Finite ℤ P := Module.Finite.of_basis ((RingOfIntegers.basis K).smulTower bP)
   set N : Submodule ℤ P := (LinearMap.range f).toAddSubgroup.toIntSubmodule with hN
   let e : P ≃+ N := (LinearEquiv.ofInjective f hf).toAddEquiv
-  have hdet : N.subtype ∘ₗ (e : P →+ N).toIntLinearMap = f.restrictScalars ℤ := by
+  have hdet : N.subtype ∘ₗ e.toAddMonoidHom.toIntLinearMap = f.restrictScalars ℤ := by
     ext x
     rfl
-  have key := Submodule.natAbs_det_equiv N e
+  have key : (LinearMap.det (N.subtype ∘ₗ e.toAddMonoidHom.toIntLinearMap)).natAbs =
+      Nat.card (P ⧸ N) := Submodule.natAbs_det_equiv N e
   rw [hdet, LinearMap.det_restrictScalars, LinearMap.det_toLin] at key
   rw [AddSubgroup.relIndex, hR]
   change ((Nat.card (P ⧸ N) : ℕ) : ℤ) = _

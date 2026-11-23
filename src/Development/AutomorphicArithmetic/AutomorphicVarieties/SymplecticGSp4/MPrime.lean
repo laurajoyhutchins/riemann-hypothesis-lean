@@ -1,7 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ShaCoc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.DerHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoSqz
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoSqz
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.DerHom
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ShaCoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
 namespace UpperTheory.V.GradeZeroInterpolatingElement
@@ -15,7 +62,7 @@ private theorem der_zero {O : Type} [CommRing O] [IsLocalRing O] [IsNoetherianRi
   haveI : IsCO O (TrivSqZeroExt O (O ⧸ I)) := co_sqz O O _ fun _ => rfl
   have hd' : I.mkQ ∘ₗ d ∈ PtDer x (O ⧸ I) := fun f g => by
     have := hd f g
-    simp only [LinearMap.comp_apply, this, map_add, map_smul]
+    simp only [LinearMap.comp_apply, this, map_add (f := _), map_smul]
   obtain ⟨y, hy⟩ := (der_hom O R O (O ⧸ I) x _).1 ⟨_, hd', rfl⟩
   obtain ⟨y', hy'⟩ := (der_hom O R O (O ⧸ I) x _).1 ⟨_, (PtDer x (O ⧸ I)).zero_mem, rfl⟩
   have key : ∀ f, d f ∈ I ↔ y f = y' f := fun f => by
@@ -66,7 +113,7 @@ private theorem len_le (hM : LemmaM') {O : Type} [CommRing O] [IsDomain O] [IsDi
   choose δ h1 h2 h3 h4 using der
   have hadd : ∀ μ ν f, Ideal.Quotient.mk (Ideal.span {a}) (δ (μ + ν) f) =
       Ideal.Quotient.mk _ (δ μ f) + Ideal.Quotient.mk _ (δ ν f) := fun μ ν f => by
-    rw [← map_add, Ideal.Quotient.eq]
+    rw [← map_add (f := _), Ideal.Quotient.eq]
     refine der_zero π hπ r hr x hx (Ideal.span {a}) (δ (μ + ν) - (δ μ + δ ν))
       (sub_mem (h1 _) (add_mem (h1 _) (h1 _)))
       (fun f hf => sub_mem (h3 _ f hf) (add_mem (h3 _ f hf) (h3 _ f hf))) (fun g i j => ?_) f
@@ -74,10 +121,10 @@ private theorem len_le (hM : LemmaM') {O : Type} [CommRing O] [IsDomain O] [IsDi
     refine ⟨f, hf', ?_⟩
     show δ (μ + ν) f - (δ μ f + δ ν f) ∈ _
     by_cases hw : wt i j = -wPs
-    · rw [← Ideal.Quotient.eq, map_add]
+    · rw [← Ideal.Quotient.eq, map_add (f := _)]
       rcases wt_eq_neg i j hw with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-      · rw [(h4 _ g f).1 hf', (h4 _ g f).1 hf', (h4 _ g f).1 hf', map_add, Pi.add_apply, mul_add]
-      · rw [(h4 _ g f).2 hf', (h4 _ g f).2 hf', (h4 _ g f).2 hf', map_add, Pi.add_apply, mul_add]
+      · rw [(h4 _ g f).1 hf', (h4 _ g f).1 hf', (h4 _ g f).1 hf', map_add (f := _), Pi.add_apply, mul_add]
+      · rw [(h4 _ g f).2 hf', (h4 _ g f).2 hf', (h4 _ g f).2 hf', map_add (f := _), Pi.add_apply, mul_add]
     · rw [h2 _ _ hw f hf, h2 _ _ hw f hf, h2 _ _ hw f hf]; simp
   let Dm : N →+ (A →ₗ[O] O ⧸ Ideal.span {a}) :=
     AddMonoidHom.mk' (fun μ => (Ideal.span {a}).mkQ ∘ₗ δ μ ∘ₗ A.val.toLinearMap) fun μ ν =>
@@ -108,10 +155,11 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.mPrime :
     exact IsLocalRing.ResidueField.finite_of_finite ‹_›
   have hx : ∀ f, M.π f = 0 → M.W.origin M.org f = 0 := fun f hf => by
     obtain ⟨e, -, he⟩ := M.hom 1 0 0
-    have h1 := M.at0 1 0 0 (f + e) (by rw [map_add, hf, he, zero_add])
-    rw [map_add, M.at0 1 0 0 e he] at h1
+    have h1 := M.at0 1 0 0 (f + e) (by rw [map_add (f := _), hf, he, zero_add])
+    rw [map_add (f := _), M.at0 1 0 0 e he] at h1
     exact add_eq_right.1 h1
-  exact len_le hM M.π M.surj M.ru M.gen (M.W.origin M.org) hx M.W.part M.hom M.A M.gr (fun _ _ => Iff.rfl)
+  set_option synthInstance.maxHeartbeats 200000 in
+   exact len_le hM M.π M.surj M.ru M.gen (M.W.origin M.org) hx M.W.part M.hom M.A M.gr (fun _ _ => Iff.rfl)
     (fun n f hf => M.aPart_le hf) (fun f hf => origin_part M.W M.org (by decide) hf) M.eqns.F M.eqns.hF
     (fun i => by
       show M.F i ∈ RingHom.ker M.π

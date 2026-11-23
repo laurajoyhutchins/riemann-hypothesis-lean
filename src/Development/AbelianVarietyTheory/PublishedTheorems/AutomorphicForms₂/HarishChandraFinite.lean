@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.Lemmas
-import Formalism.RealPlaceAnalysis.SmoothOnGVIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ImportsRest
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedSmooth
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ImportsRest
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,8 +84,8 @@ def forms (U : Subgroup (GA D V)) (ε : D.what₂.Tau → Fin V.rank → Bool)
 
 end AutFin
 
-open AutFin in
 
+open AutFin in
 def HarishChandraFinite : Prop :=
   ∀ (D : D7) (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ)), IsInfFam θ →
   ∀ (V : HSp D) (U : Subgroup (GA D V)), IsOpen (U : Set (GA D V)) →
@@ -73,8 +112,8 @@ theorem conj_mem_UH {n : ℕ} {e : Fin n → Bool} {P G : Matrix (Fin n) (Fin n)
         rw [← h]; simp only [conjTranspose_mul, Matrix.mul_assoc]
     _ = G := by rw [h1, mul_nonsing_inv _ hd, Matrix.mul_one, Matrix.mul_one, hk, h]
 
-open Classical in
 
+open Classical in
 theorem isAtTau_kAt (hθ : IsInfFam θ) (τ : D.what₂.Tau) {e : Fin V.rank → Bool}
     {P : Matrix (Fin V.rank) (Fin V.rank) ℂ} (hP : IsUnit P) (h : Pᴴ * Formalism.REAL.Jm e * P = gramAt D V τ)
     (k : Formalism.REAL.KG e) : IsAtTau θ V τ (P⁻¹ * Formalism.REAL.toMK k * P) (kAt θ V τ e P k) := by
@@ -87,7 +126,7 @@ theorem isAtTau_kAt (hθ : IsInfFam θ) (τ : D.what₂.Tau) {e : Fin V.rank →
         rw [conjTranspose_one, Matrix.one_mul, Matrix.mul_one])
   have hex : ∃ x, IsAtTau θ V τ (P⁻¹ * Formalism.REAL.toMK k * P) x :=
     ⟨g, hg, by rw [h1, Function.update_self], fun τ' c => by rw [h1, Function.update_of_ne c]⟩
-  rw [kAt, atTau, dif_pos hex]
+  rw [kAt, atTau, dite_eq_left hex]
   exact hex.choose_spec
 
 theorem hasTypeAt_of_map (τ : D.what₂.Tau) (e : Fin V.rank → Bool) (P : Matrix (Fin V.rank) (Fin V.rank) ℂ) {W : Type}
@@ -119,24 +158,6 @@ theorem exists_isFrameFam (hV : V.SigOK) : ∃ ε fr, IsFrameFam V ε fr := by
       rfl
   choose ε fr h using key
   exact ⟨ε, fr, h⟩
-
-theorem const_mem_forms (U : Subgroup (GA D V)) (ε : D.what₂.Tau → Fin V.rank → Bool)
-    (fr : D.what₂.Tau → Matrix (Fin V.rank) (Fin V.rank) ℂ) (a : ℂ) :
-    (fun _ => a) ∈ forms θ V U ε fr (fun τ => Representation.trivial ℂ (Formalism.REAL.KG (ε τ)) ℂ) (fun _ _ => 0) := by
-  refine ⟨isAutFunSm_const θ V a, fun _ _ _ _ => rfl, fun τ x => Submodule.subset_span ⟨LinearMap.id, a, rfl⟩,
-    fun τ k => ?_⟩
-  rw [zero_smul, gelf]
-  refine Finset.sum_eq_zero fun idx _ => ?_
-  rw [List.ofFn_succ, List.foldr_cons]
-  obtain ⟨b, hb⟩ := foldr_const V (List.ofFn fun i : Fin k =>
-    RderC θ V τ (Matrix.single (idx i.succ) (idx (i.succ + 1)) 1)) (fun f hf c₀ => by
-      obtain ⟨i, rfl⟩ := List.mem_ofFn.1 hf
-      exact ⟨0, RderC_const θ V τ _ c₀⟩) a
-  rw [hb, RderC_const]
-  rfl
-
-theorem isContRep_trivial {K : Type} [Group K] [TopologicalSpace K] : IsContRep (Representation.trivial ℂ K ℂ) :=
-  fun ℓ w => (continuous_const : Continuous fun _ : K => ℓ w)
 
 end AutFin
 

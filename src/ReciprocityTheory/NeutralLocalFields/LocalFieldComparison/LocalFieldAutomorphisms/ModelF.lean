@@ -1,5 +1,53 @@
-import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.LocalFieldAutomorphisms.ModelA
-import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.LocalFieldAutomorphisms.Inertia
+module
+
+public import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.LocalFieldAutomorphisms.ModelA
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,11 +60,11 @@ theorem card_quot_natCast_padicInt (p : ℕ) [Fact p.Prime] {n : ℕ} (hn : n �
   have hp := (Fact.out : p.Prime)
   have hdec : n = p ^ padicValNat p n * (n / p ^ padicValNat p n) := by
     have h1 := Nat.ordProj_mul_ordCompl_eq_self n p
-    rw [Nat.factorization_def n hp] at h1
+    rw [Nat.factorization_def n hp, ← Nat.padicValNat_def] at h1
     exact h1.symm
   have hnd : ¬ p ∣ n / p ^ padicValNat p n := by
     have h1 := Nat.not_dvd_ordCompl hp hn
-    rwa [Nat.factorization_def n hp] at h1
+    rwa [Nat.factorization_def n hp, ← Nat.padicValNat_def] at h1
   have hu : IsUnit (((n / p ^ padicValNat p n : ℕ) : ℤ_[p])) := by
     rw [PadicInt.isUnit_iff]
     by_contra hne
@@ -91,45 +139,5 @@ def zpToInteger (ι : Ω →+* PadicAlgCl p) : ℤ_[p] →+* 𝒪[Kloc F ι] :=
 def zpAlgInteger (ι : Ω →+* PadicAlgCl p) : Algebra ℤ_[p] 𝒪[Kloc F ι] := (zpToInteger (F := F) ι).toAlgebra
 
 attribute [local instance] zpAlgInteger
-
-theorem isScalarTower_zp_integer (ι : Ω →+* PadicAlgCl p) : IsScalarTower ℤ_[p] 𝒪[Kloc F ι] (Kloc F ι) :=
-  IsScalarTower.of_algebraMap_eq fun _ => rfl
-
-theorem isScalarTower_zp_Kloc_alg (ι : Ω →+* PadicAlgCl p) : IsScalarTower ℤ_[p] (Kloc F ι) (PadicAlgCl p) :=
-  IsScalarTower.of_algebraMap_eq fun _ => rfl
-
-theorem isTorsionFree_zp_Kloc (ι : Ω →+* PadicAlgCl p) : Module.IsTorsionFree ℤ_[p] (Kloc F ι) := by
-  refine Module.IsTorsionFree.of_smul_eq_zero fun r m h => ?_
-  rw [Algebra.smul_def, mul_eq_zero] at h
-  refine h.imp (fun h => ?_) id
-  rw [IsScalarTower.algebraMap_apply ℤ_[p] ℚ_[p] (Kloc F ι), map_eq_zero] at h
-  exact PadicInt.ext (by simpa using h)
-
-theorem isIntegral_zp_Kloc_iff (ι : Ω →+* PadicAlgCl p) (x : Kloc F ι) :
-    IsIntegral ℤ_[p] x ↔ IsIntegral (PadicInt.subring p) (x : PadicAlgCl p) := by
-  have := isScalarTower_zp_Kloc_alg (F := F) ι
-  rw [← isIntegral_algebraMap_iff (A := Kloc F ι) (B := PadicAlgCl p) (algebraMap (Kloc F ι) (PadicAlgCl p)).injective]
-  exact Iff.rfl
-
-theorem isIntegralClosure_Kloc (ι : Ω →+* PadicAlgCl p) :
-    IsIntegralClosure 𝒪[Kloc F ι] ℤ_[p] (Kloc F ι) where
-  algebraMap_injective := Subtype.val_injective
-  isIntegral_iff {x} := by
-    rw [isIntegral_zp_Kloc_iff, ← norm_le_one_iff_isIntegral, ← mem_integer_Kloc]
-    exact ⟨fun h => ⟨⟨x, h⟩, rfl⟩, by rintro ⟨y, rfl⟩; exact y.2⟩
-
-theorem card_quot_natCast_Kloc (ι : Ω →+* PadicAlgCl p) {n : ℕ} (hn : n ≠ 0) :
-    Nat.card (𝒪[Kloc F ι] ⧸ Ideal.span {(n : 𝒪[Kloc F ι])}) =
-      p ^ (padicValNat p n * Module.finrank ℚ_[p] (Kloc F ι)) := by
-  have := finiteDimensional_Kloc (F := F) ι
-  have := isScalarTower_zp_integer (F := F) ι
-  have := isIntegralClosure_Kloc (F := F) ι
-  have := isTorsionFree_zp_Kloc (F := F) ι
-  have : Module.Free ℤ_[p] 𝒪[Kloc F ι] := IsIntegralClosure.module_free ℤ_[p] ℚ_[p] (Kloc F ι) _
-  have : Module.Finite ℤ_[p] 𝒪[Kloc F ι] := IsIntegralClosure.finite ℤ_[p] ℚ_[p] (Kloc F ι) _
-  have hr := IsIntegralClosure.rank ℤ_[p] ℚ_[p] (Kloc F ι) 𝒪[Kloc F ι]
-  have hn' : (n : 𝒪[Kloc F ι]) = algebraMap ℤ_[p] 𝒪[Kloc F ι] n := (map_natCast _ _).symm
-  rw [hn', card_quot_span_algebraMap (Module.finBasis ℤ_[p] 𝒪[Kloc F ι]), card_quot_natCast_padicInt p hn,
-    Fintype.card_fin, hr, pow_mul]
 
 end ReciprocityTheory.Neutral.Cmp

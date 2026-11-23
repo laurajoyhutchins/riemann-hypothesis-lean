@@ -1,6 +1,48 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementK
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementV
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementN
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementK
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementN
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -29,7 +71,7 @@ def GramSeries : Prop :=
 
 def ShapeLin : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l linv ph : PowerSeries K) (d : ℕ),
-    IsLogPair l linv → IsOneUnit (unitBall K) (PowerSeries.derivative K l) →
+    IsLogPair l linv → IsOneUnit (unitBall K) (PowerSeries.derivative (R := K) l) →
     PowerSeries.constantCoeff ph = 0 → ShapeAt l linv ph d → (d : K) ≠ 0 → ‖(2 : K)‖ = 1 →
     ∀ (n : Type) [Fintype n] (T : MvPowerSeries n K) (γ : Fin 4 × n → Fin 4 × n → K)
       (G : MvPowerSeries (Fin 4 × n) K), IntMv (unitBall K) G →
@@ -50,7 +92,7 @@ def ShapeLin : Prop :=
 
 def JetsLin : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l linv ph : PowerSeries K),
-    IsLogPair l linv → IsOneUnit (unitBall K) (PowerSeries.derivative K l) →
+    IsLogPair l linv → IsOneUnit (unitBall K) (PowerSeries.derivative (R := K) l) →
     PowerSeries.constantCoeff ph = 0 → (∀ i : ℕ, 1 ≤ i → ‖jet l ph i‖ ≤ 1) → ‖(2 : K)‖ = 1 →
     ∀ (n : Type) [Fintype n] (T : MvPowerSeries n K) (γ : Fin 4 × n → Fin 4 × n → K)
       (G : MvPowerSeries (Fin 4 × n) K), IntMv (unitBall K) G →

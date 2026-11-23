@@ -1,17 +1,85 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.KmapEq
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.KmapOfOkOfVecP
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ThetaStepDistributionEquivariantRational
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.XiEntryInvariant
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FirstCoupledKernelEquivariantCosets
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.KAtTopEquiv
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThetaLocalEquivalence.ThEquivPOf
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThetaLocalEquivalence.ThEquivPStepCIff
-import Formalism.LocalToGlobal.KernelLattices.ENatEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdSubConjEqNeg
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.KmapEq
+public import Formalism.LocalToGlobal.KernelLattices.ENatEq
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.IndexExponentDegree
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmulCompSmul
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThetaLocalEquivalence.AtZeroCompProdX
+public import Formalism.LocalToGlobal.KernelLattices.ThEquiv
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormEqOfSplit
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FirstCoupledKernelEquivariantCosets
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IntAtOfLocTop
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.KmapOfOkOfVecP
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NotDvdDifferent
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RelIndexLocPNeZero
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StepBoxIffStepSuppDeg
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ThetaStepDistributionEquivariantRational
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.XiEntryInvariant
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsDefiniteLaws
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GmapToAddSubgroup
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.RkVolLaHyp
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.RkConj
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmEmbeddingProperties
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalIdeleSndSelf
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdFNonnegOfIsInteger
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdSubConjEqNeg
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteDivLatticeQuotient
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaSupportInDivLattice
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.AmbOfENeSd
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.ColumnDataEquations.SplitPairOfGen
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.KerEquivGen
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.RkConj
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.RkVolLaHyp
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThetaLocalEquivalence.ThEquivPOf
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThetaLocalEquivalence.ThEquivPStepCIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -124,13 +192,43 @@ theorem amb_eq (B : GlobalTheory.Mem.Base) (J : AmbIn B.host) (χ : Submodule (�
 theorem thCEq_of_ind {X : Fields} (A : Amb X) (a b : ℕ) (Sa : Finset (HeightOneSpectrum (𝓞 X.E))) (hL : A.LaHyp a b Sa) (h0 : A.AA ≠ ⊥)
     (hT : ∀ D, 0 < D → A.ThIndEq a b Sa D) : A.ThCEq a b Sa := by
   intro γ γ' N N' cA cB Ξ hN hN' hA hB hΞ hS z
+  open Formalism.HermitianLatticesTheory in
+  have full_of_sd : ∀ {n : ℕ} {L : Submodule (𝓞 X.E) (Sp X.E n)}, IsSdLat L → Submodule.IsFullLattice X.E L := by
+    intro n L hL
+    let := hL.1
+    refine { span_eq_top := ?_ }
+    let W := Submodule.span X.E (L : Set (Sp X.E n))
+    change W = ⊤
+    by_contra hW
+    let e : Sp X.E n ≃ₗ⋆[X.E] Sp X.E n := starLinearEquiv X.E
+    let g : Sp X.E n →ₗ[X.E] Module.Dual X.E W :=
+      (LinearMap.domRestrict' W).comp ((hStd X.E n).comp e.toLinearMap)
+    have hdim : Module.finrank X.E (Module.Dual X.E W) < Module.finrank X.E (Sp X.E n) := by
+      rw [Subspace.dual_finrank_eq]
+      exact Submodule.finrank_lt hW
+    obtain ⟨x, hx, hx₀⟩ :=
+      Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+    have hsmul (a : X.E) : a • e x ∈ L := by
+      rw [← hL.2, dualBasic_mem_dual]
+      intro y hy
+      apply hStd_mem_one_symm
+      have hxy : hStd X.E n (e x) y = 0 :=
+        congrArg (fun f : Module.Dual X.E W => f ⟨y, Submodule.subset_span hy⟩) (LinearMap.mem_ker.mp hx)
+      simp [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hxy]
+    let i : X.E →ₗ[𝓞 X.E] L :=
+      ((LinearMap.toSpanSingleton X.E _ (e x)).restrictScalars (𝓞 X.E)).codRestrict L hsmul
+    let : Module.Finite (𝓞 X.E) L := Module.Finite.iff_fg.mpr hL.1.fg
+    let : Module.Finite (𝓞 X.E) X.E := Module.Finite.of_injective i fun a b hab =>
+      smul_left_injective X.E (fun hz => hx₀ (e.map_eq_zero_iff.mp hz)) (congrArg Subtype.val hab)
+    exact RingOfIntegers.not_isField X.E
+      (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 X.E) X.E) (Field.toIsField X.E))
   have key : ∀ (M : Submodule (𝓞 X.E) (Sp X.E a)) (M' : Submodule (𝓞 X.E) (Sp X.E b)) (Φ : HomE X.E a b → ℂ), IsSdLat M → IsSdLat M' →
       (∀ x, Φ x ≠ 0 → x ∈ divLat cA (homAt Sa M M')) → (∀ x y, y ∈ mulLat cB (homAt Sa M M') → Φ (x + y) = Φ x) → ∀ w,
       thC (X.embC A.σ₀) A.δ A.d A.sc A.AA Sa M M' (cA * cB) Φ (A.e a b M M') w =
         latSum (divLat cA (homAt Sa M M')) (mulLat cB (homAt Sa M M')) fun x => Φ x * A.thInd Sa M M' cB x w :=
     fun M M' Φ hM hM' h1 h2 w => (GlobalTheory.latSum_thInd_eq_thC X A a b Sa M M' cA cB Φ (indTieD_of_la A a b Sa _ (Nat.mul_pos hA hB) hL)
-      hM hM' hA hB (GlobalTheory.ThetaMove.VolumePos.volC_pos X.E a b A.AA Sa M M' hM.1.fg hM'.1.fg hM.1.span_eq_top hM'.1.span_eq_top
-        hL.2.2.2.2.1 h0) (GlobalTheory.finite_divLat_quot_mulLat_homAt X.E a b Sa M M' cA cB hM.1 hM'.1 hA hB) h1 h2 w).symm
+      hM hM' hA hB (GlobalTheory.ThetaMove.VolumePos.volC_pos X.E a b A.AA Sa M M' hM.1.fg hM'.1.fg (full_of_sd hM).span_eq_top (full_of_sd hM').span_eq_top
+        hL.2.2.2.2.1 h0) (GlobalTheory.finite_divLat_quot_mulLat_homAt X.E a b Sa M M' cA cB (full_of_sd hM) hM'.1 hA hB) h1 h2 w).symm
   have hmul : mulLat cB (homAt Sa (Formalism.HermitianLatticesTheory.gmap γ.1 N) (Formalism.HermitianLatticesTheory.gmap γ'.1 N')) =
       (mulLat cB (homAt Sa N N')).map (conjE γ.1 γ'.1 : HomE X.E a b →ₗ[𝓞 X.E] HomE X.E a b) := by rw [homAt_gmap, mulLat_map]
   have hdiv : divLat cA (homAt Sa (Formalism.HermitianLatticesTheory.gmap γ.1 N) (Formalism.HermitianLatticesTheory.gmap γ'.1 N')) =
@@ -139,7 +237,7 @@ theorem thCEq_of_ind {X : Fields} (A : Amb X) (a b : ℕ) (Sa : Finset (HeightOn
       Ξ ((conjE γ.1 γ'.1).symm (x + w)) = Ξ ((conjE γ.1 γ'.1).symm x) := fun x w hw => by
     rw [hmul] at hw
     obtain ⟨y, hy, rfl⟩ := hw
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (congrArg (fun t => Ξ (_ + t)) (LinearEquiv.symm_apply_apply _ y)).trans (hΞ _ y hy)
   have hadd : ∀ x w, w ∈ mulLat cB (homAt Sa (Formalism.HermitianLatticesTheory.gmap γ.1 N) (Formalism.HermitianLatticesTheory.gmap γ'.1 N')) →
       A.thInd Sa (Formalism.HermitianLatticesTheory.gmap γ.1 N) (Formalism.HermitianLatticesTheory.gmap γ'.1 N') cB (x + w) = A.thInd Sa (Formalism.HermitianLatticesTheory.gmap γ.1 N) (Formalism.HermitianLatticesTheory.gmap γ'.1 N') cB x :=
@@ -351,11 +449,11 @@ theorem xiOver_law (hX : X.Ok) (hPr : Pr.Ok) (hsel : IsSel X sel) (hL : L.Ok Ch 
   obtain rfl := hΘ.trans (topLev_levQ_m_eq Ch sel mu cst _)
   exact xiTop_law default hX hPr hsel hL (Or.inr ⟨hs, rfl⟩) hp1 hp2 hκ hκ' ha ha' x e0
 
-variable (Ch sel mu cst L u) in
 
+variable (Ch sel mu cst L u) in
 abbrev St (j : ℕ) : GStep X.E X.K (R.N j) := stepAt sel mu cst L (topLev Ch sel mu cst (rPsymF (R := R) Ch)) u j
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem xiAt_law (hX : X.Ok) (hPr : Pr.Ok) (hsel : IsSel X sel) (hT : Pr.T u ∈ S) (hg : ∀ k, Pr.g k ∈ S)
     (hL : L.Ok Ch sel mu cst G m2) (hs : cst.sharp = true) {i : ℕ} (hi : i < R.m) (b : Idx sel mu L i) (b' : Idx sel mu L (i + 1))
@@ -457,8 +555,8 @@ attribute [local instance] GlobalTheory.Mem.Col2.starE
 variable {B : GlobalTheory.Mem.Base} {X : PreX B.toPre} (I : TC B X) (l : I.Laws) (h : I.Ok) (u : B.Word) (a : I.ι) (i : ℕ)
   {b : (I.stp u a i).β} {b' : (I.stp u a (i + 1)).β} (q : (I.stp u a i).D b) (q' : (I.stp u a (i + 1)).D b')
 
-include h in
 
+include h in
 theorem th_contDiff : ContDiff ℂ ⊤ (I.th u a i b b' q q') :=
   thC_contDiff _ _ _ _ _ _ _ _ _ _ ((ana I h a u i (i + 1)).2.2 _ _ ⟨q.1.1.deco.2.lat, q.1.1.deco.2.uni⟩
     ⟨q'.1.1.deco.2.lat, q'.1.1.deco.2.uni⟩)
@@ -470,8 +568,8 @@ theorem half_cast (R : Ranks) (k : ℕ) : (((R.N k / 2 : ℕ) : ℤ) : ℚ) = (R
   push_cast
   ring
 
+
 include h in
-set_option maxHeartbeats 1000000 in
 
 theorem th_move (g : (I.stp u a i).G b) (g' : (I.stp u a (i + 1)).G b') (z : VCx B.fields.Tau (B.R.N i) (B.R.N (i + 1))) :
     I.rho u a i b ((I.stp u a i).act b g q) * I.rho' u a i b' ((I.stp u a (i + 1)).act b' g' q') *

@@ -1,5 +1,64 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ContinuousRepresentations.DerivExistsAllPosStatement
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.HasDerivAtRealOfComplex
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ContinuousRepresentations.DerivExistsAllPosStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,15 +132,6 @@ private theorem KRep.rel_op_curve {ε : Fin n → Bool} (R : KRep ε)
         rw [mul_assoc]
     _ = NormedSpace.exp ((t : ℂ) • A) := by
         rw [hconst t 0, hg0, one_mul]
-
-private theorem KRep.rel_op_inv {ε : Fin n → Bool} (R : KRep ε) (k : KG ε) :
-    R.op k⁻¹ = star (R.op k) := by
-  show ((R.τ k⁻¹ : unitary (R.V →L[ℂ] R.V)) : R.V →L[ℂ] R.V) = star ((R.τ k : unitary (R.V →L[ℂ] R.V)) : R.V →L[ℂ] R.V)
-  rw [map_inv]
-  first
-    | rfl
-    | simp [Unitary.coe_star]
-    | simp [Unitary.coe_inv]
 
 private theorem exists_curve_toMK_eq_exp_smul_of_inK {ε : Fin n → Bool} {X : Matrix (Fin n) (Fin n) ℂ} (hX : inK ε X) :
     ∃ γ : ℝ → KG ε, ∀ t : ℝ, toMK (γ t) = NormedSpace.exp ((t : ℂ) • X) := by
@@ -369,9 +419,9 @@ private theorem KRep.rel_dτ_bracket_single {ε : Fin n → Bool} (R : KRep ε)
   set D : Matrix (Fin n) (Fin n) ℂ → Matrix (Fin n) (Fin n) ℂ → (R.V →L[ℂ] R.V) :=
     fun X Y => R.dτ X * R.dτ Y - R.dτ Y * R.dτ X - R.dτ (X * Y - Y * X) with hD
   have Dal : ∀ X X' Y, D (X + X') Y = D X Y + D X' Y := by
-    intro X X' Y; simp only [hD, map_add, add_mul, mul_add, map_sub]; abel
+    intro X X' Y; simp only [hD, map_add (f := _), add_mul, mul_add, map_sub]; abel
   have Dar : ∀ X Y Y', D X (Y + Y') = D X Y + D X Y' := by
-    intro X Y Y'; simp only [hD, map_add, add_mul, mul_add, map_sub]; abel
+    intro X Y Y'; simp only [hD, map_add (f := _), add_mul, mul_add, map_sub]; abel
   have Dsl : ∀ (c : ℂ) X Y, D (c • X) Y = c • D X Y := by
     intro c X Y; simp only [hD, map_smul, smul_mul_assoc, mul_smul_comm, smul_sub, map_sub]
   have Dsr : ∀ (c : ℂ) X Y, D X (c • Y) = c • D X Y := by
@@ -408,7 +458,7 @@ private theorem KRep.rel_star_dτ_single {ε : Fin n → Bool} (R : KRep ε)
   have h2 := (inK_single_sub_single_and_I_smul_add_of_sign_eq (ε := ε) hab).2
   have s1 := R.rel_star_dτ h1
   have s2 := R.rel_star_dτ h2
-  simp only [map_sub, map_add, map_smul, star_sub, star_add, star_smul, Complex.star_def, Complex.conj_I] at s1 s2
+  simp only [map_sub, map_add (f := _), map_smul, star_sub, star_add, star_smul, Complex.star_def, Complex.conj_I] at s1 s2
   set A := R.dτ (Matrix.single a b 1)
   set B := R.dτ (Matrix.single b a 1)
   have h3 : star A - star B = B - A := by rw [s1]; abel

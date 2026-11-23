@@ -1,12 +1,52 @@
-import Mathlib
-import Formalism.HermitianCurvature.StatementC
-import Formalism.SharpRestriction.CuspSpanNormBounds.LocalGroupInFamilyNontrivial
-import Formalism.SharpRestriction.CuspSpanNormBounds.LocalModelPeriodLattices
-import Formalism.LocalToGlobal.SiegelLatticeTheory.PtEquivApply
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.PairVal
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.Corank
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+module
+
+public import Formalism.HermitianCurvature.StatementC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.PtEquivApply
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.PairVal
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.Corank
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalModelPeriodLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -99,20 +139,6 @@ private theorem isPtL_of_ptOfList_ne_none {i : ℕ} {z : TB.Pt D.host.E} (hz : p
   · exact (isPtL_signPt _ _ _).mp hh
   · exact absurd rfl hz
 
-theorem KrOf_of_not (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep)
-    (T T' : ℕ) {i : ℕ} (hi : i ≠ 0) {x y : TB.Pt D.host.E}
-    (h : ¬ (Formalism.L2.S.IsPtL x i ∧ Formalism.L2.S.IsPtL y i)) : KrOf δ M T T' i x y = 0 := by
-  simp only [KrOf, if_neg hi]
-  split_ifs
-  · rfl
-  · cases hx : ptOfList i x with
-    | none => rfl
-    | some a =>
-      cases hy : ptOfList i y with
-      | none => rfl
-      | some b =>
-        exact absurd ⟨isPtL_of_ptOfList_ne_none (by simp [hx]), isPtL_of_ptOfList_ne_none (by simp [hy])⟩ h
-
 def ThOf : ℕ → ℕ → D.host.E → TB.Pt D.host.E → TB.Pt D.host.E → ℂ := fun _ _ _ _ _ => 0
 
 def eOf : ℕ → ℝ := fun _ => 0
@@ -147,14 +173,6 @@ theorem inst_dOf (S : C.HidaSetting D.host.E Wp Wq) (δ : ∀ p : PlF D, (D.s.at
     fun _ _ => rfl, fun _ _ _ => rfl, fun _ _ => rfl⟩
 
 theorem unram_host (D : Formalism.BasicNotions.D7) : S6.Unram D.host.E := MainNotions.LocalModelPeriodLattices.unramE D
-
-def KrFinite (D : Formalism.BasicNotions.D7) : Prop :=
-  ∀ (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
-    (∀ p, Agree δ M p) → ∀ u u' : D.what₂.Word,
-    (∀ (n : ℕ) (w w' : Point D.host.E n), n ≤ D.R.rS →
-      (Function.mulSupport fun p => locK M δ (D.mem u).A.T (D.mem u').A.T p n w w').Finite) ∧
-    (∀ w w' : Point D.host.E (D.R.rS + 1),
-      (Function.mulSupport fun p => KtopP M δ (D.mem u).A.T (D.mem u').A.T p w w').Finite)
 
 def LocalModelAt (D : Formalism.BasicNotions.D7) : Prop :=
   ∀ (Wp Wq : InfinitePlace D.host.E → Type) [∀ x, NormedAddCommGroup (Wp x)] [∀ x, InnerProductSpace ℂ (Wp x)]
@@ -278,21 +296,6 @@ def RowLabelExists (D : Formalism.BasicNotions.D7) : Prop :=
   ∀ (u u' : D.what₂.Word) (F0 : FlagG (VS D) D.R.rS (CntLocal.Tn u))
     (what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)), IsRowReps D F0 what₂ →
     ∃ κ : TermDef.Term D u u' F0 what₂ → ℕ, RowLabel κ
-
-def RowsInputAt (D : Formalism.BasicNotions.D7) : Prop :=
-  ∀ (Wp Wq : InfinitePlace D.host.E → Type) [∀ x, NormedAddCommGroup (Wp x)] [∀ x, InnerProductSpace ℂ (Wp x)]
-    [∀ x, NormedAddCommGroup (Wq x)] [∀ x, InnerProductSpace ℂ (Wq x)] (S : C.HidaSetting D.host.E Wp Wq) (δ : ∀ p : PlF D, (D.s.atP p).Fp)
-    (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep), (∀ p, Agree δ M p) →
-    ∀ (L : CntLocal.LocSp D M) (u u' : D.what₂.Word),
-    (D.mem u).A.T ≡ (D.mem u').A.T [MOD (Formalism.MainNotions.S.Lat.gS D) ^ 2] → Compat S u u' →
-    ∀ (F0 : FlagG (VS D) D.R.rS (CntLocal.Tn u)) (what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)),
-      IsRowReps D F0 what₂ →
-    ∀ ϖ : ∀ p : PlF D, 𝒪[(D.s.atP p).Fp], (∀ p, Irreducible (ϖ p)) →
-    ∀ nc : ℝ, CntLocal.Formula δ L u u' F0 what₂ nc → ∀ α : ℝ, 0 < α →
-    BddAbove (densSet L δ ϖ u u' F0 what₂) →
-      (∃ κ : TermDef.Term D u u' F0 what₂ → ℕ, RowLabel κ) ∧
-      ∀ κ : TermDef.Term D u u' F0 what₂ → ℕ, RowLabel κ →
-        RowsPSD S δ M L u u' F0 what₂ ϖ (PairVal.vRdef D u u' F0 what₂ δ M) κ nc α
 
 end RowsStmt
 

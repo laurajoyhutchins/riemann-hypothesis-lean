@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotCoboundaryConstantOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotCoboundaryConstantOne
+public import Mathlib.Algebra.DualNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open GlobalTheory.K5 Polynomial TrivSqZeroExt
 
 noncomputable section
@@ -13,7 +64,7 @@ theorem aeval_dual {S : Type*} [CommRing S] [Algebra R S] (a m : S) (f : R[X]) :
     (aeval (inl a + inr m : DualNumber S) f).snd = aeval a (derivative f) * m := by
   induction f using Polynomial.induction_on' with
   | add f g hf hg =>
-    rw [map_add, fst_add, snd_add, hf.1, hf.2, hg.1, hg.2, map_add, map_add, map_add, add_mul]
+    rw [map_add (f := _), fst_add, snd_add, hf.1, hf.2, hg.1, hg.2, map_add (f := _), map_add (f := _), map_add (f := _), add_mul]
     exact ⟨rfl, rfl⟩
   | monomial k c =>
     rw [aeval_monomial, aeval_monomial, derivative_monomial, aeval_monomial]
@@ -94,7 +145,7 @@ theorem exists_derivation (Φ : R[X]) (N : ℕ) (q : R) (I : Ideal R[X][X])
     rw [hC, (aeval_dual _ _ _).2]; simp
   let L : (R[X][X] ⧸ I) →ₗ[R] S :=
     { toFun := fun z => (ψ z).snd
-      map_add' := fun a b => by rw [map_add, snd_add]
+      map_add' := fun a b => by rw [RingHom.map_add ψ, snd_add]
       map_smul' := fun c z => by
         rw [Algebra.smul_def, hleib, halg, smul_zero, add_zero, RingHom.id_apply, algebraMap_smul] }
   refine ⟨Derivation.mk' L hleib, ?_, ?_⟩
@@ -148,7 +199,7 @@ theorem derivative_cyclotomic_mul (m : ℕ) :
       (p : On p (m + 1)) ^ (m + 1) * xn p (m + 1) ^ (p ^ (m + 1) - 1) := by
   have h := congrArg (fun f => aeval (xn p (m + 1)) (derivative f))
     (cyclotomic_prime_pow_mul_X_pow_sub_one (O0 p) p m)
-  simp only [derivative_mul, map_add, map_mul, aeval_xn_cyclotomic, zero_mul, add_zero] at h
+  simp only [derivative_mul, map_add (f := _), map_mul, aeval_xn_cyclotomic, zero_mul, add_zero] at h
   simpa [derivative_X_pow] using h
 
 end GlobalTheory.K5.DlogUniq

@@ -1,10 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.TsumNormEisensteinTranslate
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EisCoef
 import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EisSlash
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EisVan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EisCoef
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EulerianNumeratorThree
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.LevelOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EisVan
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.EulerianNumeratorThree
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.LevelOne
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.TsumNormEisensteinTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,15 +88,17 @@ private lemma Good.coef_mul {k k' : ℤ} {f g : (ZMod N)ˣ → ℍ → ℂ} (hf 
   simp [PowerSeries.coeff_zero_eq_constantCoeff]
 
 private lemma Good.mul {k k' : ℤ} {f g : (ZMod N)ˣ → ℍ → ℂ} (hf : Good ι k f) (hg : Good ι k' g) :
-    Good ι (k + k') (fun a => f a * g a) where
-  mf a := by
+    Good ι (k + k') (fun a => f a * g a) := by
+  refine { mf := ?_, fam := ?_, int := ?_ }
+  · intro a
     obtain ⟨F, hF⟩ := hf.mf a
     obtain ⟨G, hG⟩ := hg.mf a
     exact ⟨F.mul G, by rw [ModularForm.coe_mul, hF, hG]⟩
-  fam a b γ hγ h := by
+  · intro a b γ hγ h
     rw [ModularForm.mul_slash_SL2, hf.fam a b γ hγ h, hg.fam a b γ hγ h]
-  int a n := by
+  · intro a n
     unfold coef
+
     rw [hf.q_mul hg, PowerSeries.coeff_mul, map_sum]
     refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun p _ => ?_
     rw [map_mul, norm_mul]
@@ -70,15 +117,16 @@ private lemma Good.coef_comb {k : ℤ} {f g : (ZMod N)ˣ → ℍ → ℂ} (hf : 
   simp
 
 private lemma Good.comb {k : ℤ} {f g : (ZMod N)ˣ → ℍ → ℂ} (hf : Good ι k f) (hg : Good ι k g) (c : ℂ)
-    (hc : ‖ι.symm c‖ ≤ 1) : Good ι k (fun a => f a + c • g a) where
-  mf a := by
+    (hc : ‖ι.symm c‖ ≤ 1) : Good ι k (fun a => f a + c • g a) := by
+  refine { mf := ?_, fam := ?_, int := ?_ }
+  · intro a
     obtain ⟨F, hF⟩ := hf.mf a
     obtain ⟨G, hG⟩ := hg.mf a
     exact ⟨F + c • G, by rw [FunLike.coe_add, FunLike.coe_smul, hF, hG]⟩
-  fam a b γ hγ h := by
+  · intro a b γ hγ h
     rw [SlashAction.add_slash, ModularForm.SL_smul_slash, hf.fam a b γ hγ h, hg.fam a b γ hγ h]
-  int a n := by
-    rw [hf.coef_comb hg, map_add, map_mul]
+  · intro a n
+    rw [hf.coef_comb hg, map_add (f := _), map_mul]
     refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hf.int a n) ?_)
     rw [norm_mul]
     exact mul_le_one₀ hc (norm_nonneg _) (hg.int a n)
@@ -139,16 +187,17 @@ private lemma eis_coef0 (hN : 3 ≤ N) (k : ℕ) (hk : 3 ≤ k) (a : (ZMod N)ˣ)
   rfl
 
 private lemma good_eis (hl : l ≠ 2) (hN : 3 ≤ N) (hlN : ¬ l ∣ N) (k : ℕ) (hk : 3 ≤ k) :
-    Good ι (k : ℤ) (fun a : (ZMod N)ˣ => eisFun N k a) where
-  mf a := eisMF N k hk a
-  fam a b γ hγ h := by
+    Good ι (k : ℤ) (fun a : (ZMod N)ˣ => eisFun N k a) := by
+  refine { mf := fun a => eisMF N k hk a, fam := ?_, int := ?_ }
+  · intro a b γ hγ h
     rw [h]; exact eisSlash N k hk a γ hγ
-  int a n := by
+  · intro a n
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · rw [eis_coef0 hN k hk]
       refine (lkSep l hl N (by omega) hlN).1 k _ (rt_powN _) fun h => rt_sq (ι := ι) hN a ?_
       rw [h, one_pow]
-    · rw [(eisCoef N k hk a (unit_ne_zero hN a)).2 n hn, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [(eisCoef N k hk a (unit_ne_zero hN a)).2 n hn, map_sum]
       refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun e _ => ?_
       have hr : ∀ b : ZMod N, ‖ι.symm (ZMod.stdAddChar b : ℂ)‖ = 1 := fun b => rt_norm (ι := ι) b
       rw [map_mul ι.symm, norm_mul, map_pow ι.symm, map_natCast ι.symm, norm_pow, map_add ι.symm, map_mul ι.symm]

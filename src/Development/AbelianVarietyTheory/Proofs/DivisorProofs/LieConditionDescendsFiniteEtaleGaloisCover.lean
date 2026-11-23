@@ -1,17 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToRepFam
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGaloisCoverQuotientFreeFiniteAction
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsQProjOverTargetGaloisCoverNoetherian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsQProjOverOfRelAmpleOverQprojNoetherian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeDescendsGaloisCoverNoetherianBase
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PullClsDiag
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSquareBundleDescentGaloisCover
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GaloisCoverDescentAndCartesianSquares
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTanScalIffOfLeftEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenProjectionsOfComaximalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineGaloisCoverDualNumberEpiStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrpObjTangentVectorAddAtPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTanScalIffOfLeftEq
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenProjectionsOfComaximalStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrpObjTangentVectorAddAtPointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineGaloisCoverDualNumberEpiStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT
 open scoped TensorProduct
@@ -156,7 +194,7 @@ def psiR {O : Type} [Ring O] (F : Type) [CommRing F] [Algebra F O] (act : OActN 
     rw [map_zero, h0, comp_one])
   map_add' c d := AddMonoidHom.ext fun u => Subtype.ext (by
     show _ ≫ act.act (algebraMap F O (c + d)) = (_ ≫ act.act (algebraMap F O c)) * (_ ≫ act.act (algebraMap F O d))
-    rw [map_add, act.add, comp_mul])
+    rw [map_add (f := _), act.add, comp_mul])
 
 def theta {O : Type} [Ring O] (F : Type) [CommRing F] [Algebra F O] (act : OActN O G) {R : Type} [CommRing R]
     (β₁ : R →+* R₁) (y : Sp R₁ ⟶ S) : R ⊗[ℤ] F →+* AddMonoid.End (TM G y) :=
@@ -191,10 +229,10 @@ theorem pullM_theta {O : Type} [Ring O] (F : Type) [CommRing F] [Algebra F O] (a
     show j ≫ scaleAt y (β₁ r) ≫ (_ ≫ _) = scaleAt y' (g₁ (β₁ r)) ≫ (j ≫ _) ≫ _
     rw [← Category.assoc, hs, Category.assoc, Category.assoc]
   | add z z' hz hz' =>
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     show pullM G y y' j g₀ hj (theta G F act β₁ y z u + theta G F act β₁ y z' u) =
       theta G F act (g₁.comp β₁) y' z (pullM G y y' j g₀ hj u) + theta G F act (g₁.comp β₁) y' z' (pullM G y y' j g₀ hj u)
-    rw [map_add, hz, hz']
+    rw [map_add (f := _), hz, hz']
 
 end Theta
 
@@ -254,8 +292,8 @@ theorem lie_descends : ∀ (p : ℕ) [Fact p.Prime] (D : GlobalTheory.UPel.HT.Da
     apply Additive.toMul.injective
     rw [toMul_sum]
     apply Subtype.ext
-    rw [SubmonoidClass.coe_finset_prod]
-    exact hjv
+    change j ≫ v = (↑(∏ l, Additive.toMul (m₃ l)) : epsPtR (x'' ≫ π) ⟶ A₀)
+    simpa [m₃] using hjv
   have eig₃ : ∀ l (c : 𝓞 D.F), Θ' (1 ⊗ₜ c) (m₃ l) = Θ' (b.t l c ⊗ₜ 1) (m₃ l) := fun l c => by
     rw [theta_tmul, theta_tmul]
     apply Subtype.ext
@@ -265,6 +303,7 @@ theorem lie_descends : ∀ (p : ℕ) [Fact p.Prime] (D : GlobalTheory.UPel.HT.Da
     rfl
   have hw : ∀ i, j ≫ w i = E (w₃ i) := fun i => by
     have h1 : P (Θ (e i) m) = m₃ i := by
+
       rw [hP, hPm, map_sum]
       simp only [he _ _ i _ _ (eig₃ _), Finset.sum_ite_eq, Finset.mem_univ, if_true]
     exact congrArg (fun z : TM A₀ (x'' ≫ π) => (Additive.toMul z).1) h1

@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.KerEntHyp
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.PeriodLatticeFinitelyGenerated
-import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.KerEntHyp
+public import Formalism.LocalRingCardinality.CoeNeZeroOfNotMem
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsHomOfBasis
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.PeriodLatticeFinitelyGenerated
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.BasicNotions Classical
 
@@ -28,12 +71,6 @@ theorem canInv_spec (D : D7) (w : D.what₂.places.Pl) (N : ℕ) (nu : Bool × H
 section Obj
 
 variable {D : D7} (P : Examples₂.EntPl D) (O : ∀ u μ, GL3Theta.LiftObj D (D.chTw u μ)) (B : PlaceMatrixFamily D)
-
-theorem basC_spec (h : BasEx P O) (u : D.what₂.Word) (μ : D.what₂.Tup) (w : D.what₂.places.Pl) (i : ℕ) (hi : i ≤ D.R.m) (c : (D.chTw u μ).cls i)
-    (τ : D.what₂.Tau) : IsBasC P O u μ w i c τ (basC P O u μ w i c τ) :=
-  Classical.epsilon_spec (h u μ w i hi c τ)
-
-theorem basC_ok (h : BasEx P O) : BasOk P O (basC P O) := fun u μ w i hi c τ => (basC_spec P O h u μ w i hi c τ).1
 
 theorem secC_spec (u : D.what₂.Word) (μ : D.what₂.Tup) (i : ℕ) (v : ValQ O u μ i) : (LinearMap.ker (evP O u μ i)).mkQ (secC O u μ i v) = v :=
   LinearMap.congr_fun (Classical.choose_spec ((LinearMap.ker (evP O u μ i)).mkQ.exists_rightInverse_of_surjective (Submodule.range_mkQ _))) v
@@ -112,7 +149,7 @@ def kfTieC (hB : BasOk P O B) (hS : CanS P B) (hT : CanT P B) (hL : TwLe D) (h :
 
 theorem lamC_ne {p : ℕ} [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) {x : ℂ} (hx : x ∈ Qbar) (h0 : x ≠ 0) : lamC lam x ≠ 0 := by
   unfold lamC
-  rw [dif_pos hx]
+  rw [dite_eq_left hx]
   exact (map_ne_zero lam).2 fun h => h0 (congrArg Subtype.val h)
 
 theorem unF_ne (hB : BasOk P O B) (u : D.what₂.Word) (μ : D.what₂.Tup) (hR : GL3Columns.RhoAlg (O u μ)) (w : D.what₂.places.Pl) (i : ℕ) (hi : i < D.R.m)
@@ -203,11 +240,11 @@ theorem nuStep (D : D7) (u : D.what₂.Word) (μ : D.what₂.Tup) (j : ℕ) (hj 
   have hR := (nu_t_identity D u (j + 1) hj τ r).1
   have w2 : DV.wSz D (j + 1 + 1) τ = (((D.hcW u τ).e ⟨j + 1, hj⟩ : ℚ) : ℝ) := by
     unfold DV.wSz
-    rw [dif_pos ⟨by omega, by omega⟩, D.hcW_e u τ]
+    rw [dite_eq_left ⟨by omega, by omega⟩, D.hcW_e u τ]
     rfl
   have w1 : DV.wSz D (j + 1) τ = (((D.hcW u τ).e ⟨j, by omega⟩ : ℚ) : ℝ) := by
     unfold DV.wSz
-    rw [dif_pos ⟨by omega, by omega⟩, D.hcW_e u τ]
+    rw [dite_eq_left ⟨by omega, by omega⟩, D.hcW_e u τ]
     rfl
   have key : ((extNu (D.R.N (j + 1)) (nuT D u j) τ r : ℕ) : ℝ) +
       ((((D.chTw u μ).sSharp (j + 1) τ - (D.chTw u μ).sDiv j τ).toNat : ℕ) : ℝ) = ((nuT D u (j + 1) τ r : ℕ) : ℝ) := by
@@ -217,7 +254,7 @@ theorem nuStep (D : D7) (u : D.what₂.Word) (μ : D.what₂.Tup) (j : ℕ) (hj 
     by_cases hr : r.1 < D.R.N j
     · have hL := (nu_t_identity D u j (by omega) τ ⟨r.1, hr⟩).1
       unfold extNu
-      rw [dif_pos hr, hL]
+      rw [dite_eq_left hr, hL]
       unfold DV.nuRow
       rw [w1]
       simp only [Nat.add_sub_cancel]
@@ -225,7 +262,7 @@ theorem nuStep (D : D7) (u : D.what₂.Word) (μ : D.what₂.Tup) (j : ℕ) (hj 
       push_cast
       ring
     · unfold extNu
-      rw [dif_neg hr]
+      rw [dite_eq_right hr]
       have hr2 := r.2
       unfold Ranks.N at hr hr2
       obtain ⟨a, ha⟩ : ∃ a, r.1 = D.R.k + j * (D.R.t + 1) + a := ⟨r.1 - (D.R.k + j * (D.R.t + 1)), by omega⟩
@@ -240,7 +277,7 @@ theorem nuStep (D : D7) (u : D.what₂.Word) (μ : D.what₂.Tup) (j : ℕ) (hj 
       have hb : (r.1 - D.R.k) / (D.R.t + 1) < D.R.m := by rw [hdiv]; omega
       have he : (D.hcW u τ).e ⟨(r.1 - D.R.k) / (D.R.t + 1), hb⟩ = (D.hcW u τ).e ⟨j, by omega⟩ := congrArg _ (Fin.ext hdiv)
       unfold DV.srcPar
-      rw [dif_neg (by omega), dif_pos hb, he, hmod]
+      rw [dite_eq_right (by omega), dite_eq_left hb, he, hmod]
       simp only [Nat.add_sub_cancel]
       unfold Ranks.N
       rw [ha]
@@ -273,9 +310,9 @@ theorem nuFits_tgt (D : D7) (u : D.what₂.Word) (i : ℕ) (hi : i < D.R.m) :
   refine ⟨fun z r => ?_, fun z r hr => ?_⟩
   · unfold extNu
     by_cases h : r.1 < D.R.N i
-    · rw [dif_pos h]
+    · rw [dite_eq_left h]
       exact (diagram_fits_source_rank D u i hi).1 z ⟨r.1, h⟩
-    · rw [dif_neg h]
+    · rw [dite_eq_right h]
       exact (diagram_fits_source_rank D u i hi).2 z r.1 (by omega)
   · exact (diagram_fits_source_rank D u i hi).2 z r (le_trans (N_le_succ D.R i) hr)
 
@@ -294,12 +331,6 @@ theorem kfTieOf_un {D : D7} (P : Examples₂.EntPl D) (O : ∀ u μ, GL3Theta.Li
     (hC : CanOnto P) (h : KerEntHyp P O B Dx Tw) (u : D.what₂.Word) (μ : D.what₂.Tup) (hR : GL3Columns.RhoAlg (O u μ)) (w : D.what₂.places.Pl) :
     (kfTieOf P O B hB hC h u μ w).UnIs :=
   kfTieC_un P O B hB (canS_of P B hC) (canT_of P B hC) (twLe D) h u μ hR w
-
-theorem kfPair_of_field {D : D7} {Dx : DivX D} {Tw : TwForms D} (E : KerEnt D Dx Tw) {u : D.what₂.Word} {μ : D.what₂.Tup}
-    {O : GL3Theta.LiftObj D (D.chTw u μ)} {w : D.what₂.places.Pl} (T : GL3Columns.KFTie E O w) (hw : LevFree Dx u μ w) (hU : T.UnIs) : T.kfPair :=
-  fun i hi c c' v v' h I => by
-    rw [← hU i hi c c']
-    exact E.kform u μ w hw i hi c c' v v' h I
 
 end Formalism.L2.Ker
 

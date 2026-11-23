@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpandsAtSecIsMul
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpandsAtSub
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsFETranslateFeTranslate
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsFETranslateFeTranslate
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueFamOfReps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -84,10 +124,10 @@ theorem exists_basis_constFam {C : Type} (rep : C → a.D₀.X) (hrep : ∀ α, 
   · refine fam_ext fun χ i => ?_
     obtain ⟨x, ⟨mu, hmu⟩, -⟩ := hrep (e.symm χ)
     have hχ : ∃ nu, e (rep x) + j • nu = χ :=
-      ⟨e mu, by rw [← map_nsmul, ← map_add, hmu, LinearEquiv.apply_symm_apply]⟩
+      ⟨e mu, by rw [← map_nsmul, ← map_add (f := _), hmu, LinearEquiv.apply_symm_apply]⟩
     exact congrArg (fun q => LB.Sec.f q i) (FamFree.eq_of_eq_add_nsmul hG m 0 hχ (hm x))
   · refine constFam_off hW F hG hj _ _ _ fun mu hmu => h ?_
     refine (hrep (rep y)).unique ⟨0, by rw [smul_zero, add_zero]⟩ ⟨e.symm mu, e.injective ?_⟩
-    rw [map_add, map_nsmul, LinearEquiv.apply_symm_apply, hmu]
+    rw [map_add (f := _), map_nsmul, LinearEquiv.apply_symm_apply, hmu]
 
 end GlobalTheory.ConstFam

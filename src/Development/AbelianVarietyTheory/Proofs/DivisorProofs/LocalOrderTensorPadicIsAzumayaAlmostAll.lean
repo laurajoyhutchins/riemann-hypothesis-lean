@@ -1,9 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentreCompat
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsScalarTowerCenAlgebra
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CycleListPermInvariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveIffIsUnitDet
-import GroundTheory.Brauer.IsBrauerEquivalentIffNonemptyAlgEquiv
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalOrderTensorPadicFreeAlmostAll
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsScalarTowerCenAlgebra
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveIffIsUnitDet
+public import Mathlib.Algebra.Central.Defs
+public import Mathlib.CategoryTheory.Category.Basic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CycleListPermInvariant
+public import GroundTheory.Brauer.IsBrauerEquivalentIffNonemptyAlgEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Flat.Basic
+
+@[expose] public section
 
 noncomputable section
 open scoped TensorProduct
@@ -14,38 +69,7 @@ namespace GlobalTheory.LocAzumaya
 theorem exists_den_coords : ∀ (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra F B] (Λ : Subring B),
     Module.Finite ℤ Λ → ∀ (ι : Type) [Fintype ι] (e : Module.Basis ι F B),
     ∃ D : ℕ, 0 < D ∧ ∀ x ∈ Λ, ∀ k, IsIntegral ℤ ((D : F) * e.repr x k) := by
-  intro F B _ _ _ _ Λ hfin ι _ e
-  classical
-  obtain ⟨n, s, hs⟩ := Module.Finite.exists_fin (R := ℤ) (M := Λ)
-  obtain ⟨D, hD, hDi⟩ := GlobalTheory.SepModel.exists_nat_integral
-    (Finset.univ.image fun p : Fin n × ι => e.repr (s p.1 : B) p.2)
-  refine ⟨D, hD, fun x hx => ?_⟩
-  have key : ∀ y : Λ, y ∈ Submodule.span ℤ (Set.range s) →
-      ∀ k, IsIntegral ℤ ((D : F) * e.repr (y : B) k) := by
-    intro y hy
-    induction hy using Submodule.span_induction with
-    | mem z hz =>
-      obtain ⟨j, rfl⟩ := hz
-      intro k
-      exact hDi _ (Finset.mem_image.2 ⟨(j, k), Finset.mem_univ _, rfl⟩)
-    | zero => intro k; simpa using isIntegral_zero
-    | add y z _ _ hy hz =>
-      intro k
-      simpa [mul_add] using (hy k).add (hz k)
-    | smul a y _ hy =>
-      intro k
-      have : (D : F) * e.repr ((a • y : Λ) : B) k = (a : F) * ((D : F) * e.repr (y : B) k) := by
-        have hc : ((a • y : Λ) : B) = (a : F) • (y : B) := by
-          have h0 : ((a • y : Λ) : B) = a • (y : B) := rfl
-          rw [h0, zsmul_eq_mul, Algebra.smul_def, map_intCast]
-        rw [hc]
-        simp only [map_smul, Finsupp.smul_apply, smul_eq_mul]
-        ring
-      rw [this]
-      have ha : IsIntegral ℤ (a : F) := by simpa using (isIntegral_algebraMap : IsIntegral ℤ (algebraMap ℤ F a))
-      exact ha.mul (hy k)
-  intro k
-  exact key ⟨x, hx⟩ (by rw [hs]; trivial) k
+  apply GlobalTheory.LocMatrix.exists_den <;> assumption
 theorem exists_coords_of_mem_locOrder : ∀ (ℓ : ℕ) [Fact ℓ.Prime] (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra F B] [Algebra ℚ B]
     [IsScalarTower ℚ F B] (Λ : Subring B) (ι : Type) [Fintype ι] (e : Module.Basis ι F B),
     (∀ i, e i ∈ Λ) → (∀ x ∈ Λ, ∀ k, (1 : ℚ_[ℓ]) ⊗ₜ[ℚ] e.repr x k ∈ cenOrder ℓ F) →
@@ -79,7 +103,7 @@ theorem exists_coords_of_mem_locOrder : ∀ (ℓ : ℕ) [Fact ℓ.Prime] (F B : 
     obtain ⟨c, hc, rfl⟩ := hy
     obtain ⟨c', hc', rfl⟩ := hz
     refine ⟨fun i => c i + c' i, fun i => Subalgebra.add_mem _ (hc i) (hc' i), ?_⟩
-    simp only [map_add, add_mul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), add_mul, Finset.sum_add_distrib]
   | mul y z _ _ hy hz =>
     obtain ⟨c, hc, rfl⟩ := hy
     obtain ⟨c', hc', rfl⟩ := hz
@@ -102,6 +126,7 @@ theorem exists_coords_of_mem_locOrder : ∀ (ℓ : ℕ) [Fact ℓ.Prime] (F B : 
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [← mul_assoc, ← map_mul]
       rw [Finset.sum_mul_sum]
+
       simp only [hprod, map_sum, Finset.sum_mul]
       conv_rhs => rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => ?_
@@ -122,7 +147,7 @@ theorem exists_coordProj (ℓ : ℕ) [Fact ℓ.Prime] (F B : Type) [Field F] [Nu
       Basis.repr_self, Finsupp.single_apply, smul_eq_mul]
     split_ifs <;> simp
   | add a a' ha ha' =>
-    rw [map_add, add_mul, map_add, ha, ha']
+    rw [map_add (f := _), add_mul, map_add (f := _), ha, ha']
     split_ifs <;> simp
 
 theorem basisLoc : ∀ (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra F B] [Algebra ℚ B]
@@ -130,7 +155,7 @@ theorem basisLoc : ∀ (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra 
     (hΛ : ∀ a : NumberField.RingOfIntegers F, algebraMap F B (a : F) ∈ Λ), Module.Finite ℤ Λ →
     ∀ (ι : Type) [Fintype ι] (e : Module.Basis ι F B), (∀ i, e i ∈ Λ) →
     ∃ D : ℕ, 0 < D ∧ ∀ (ℓ : ℕ) [Fact ℓ.Prime], ¬ ℓ ∣ D →
-      letI := GlobalTheory.LocMatrix.cenAlgebra ℓ F B Λ hΛ
+      letI := GlobalTheory.LocMatrix.cenAlgebra ℓ F B Λ hΛ;
       ∃ f : Module.Basis ι (cenOrder ℓ F) (locOrder ℓ Λ),
         (∀ i, (f i : ℚ_[ℓ] ⊗[ℚ] B) = (1 : ℚ_[ℓ]) ⊗ₜ[ℚ] e i) ∧
         ∀ (y : locOrder ℓ Λ) (b : B), (y : ℚ_[ℓ] ⊗[ℚ] B) = (1 : ℚ_[ℓ]) ⊗ₜ[ℚ] b →
@@ -157,6 +182,7 @@ theorem basisLoc : ∀ (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra 
     intro c b h k
     obtain ⟨π, hπ1, hπ2⟩ := exists_coordProj ℓ F B e k
     have h' := congrArg π h
+
     rw [hsum, map_sum, hπ1] at h'
     simp only [hπ2, Finset.sum_ite_eq', Finset.mem_univ, if_true] at h'
     exact h'
@@ -206,7 +232,7 @@ theorem cenMap_injective (ℓ : ℕ) [Fact ℓ.Prime] (F B : Type) [Field F] [Nu
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul q f => simp [cenMap, g]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   rw [heq]
   exact Module.Flat.lTensor_preserves_injective_linearMap g hg
 
@@ -219,7 +245,7 @@ theorem locOrder_isAzumaya : ∀ (F B : Type) [Field F] [NumberField F] [Ring B]
     (Λ : Subring B) (hΛ : ∀ a : NumberField.RingOfIntegers F, algebraMap F B (a : F) ∈ Λ),
     Module.Finite ℤ Λ → (∀ b : B, ∃ m : ℕ, 0 < m ∧ (m : B) * b ∈ Λ) →
     ∃ N : ℕ, 0 < N ∧ ∀ (ℓ : ℕ) [Fact ℓ.Prime], ¬ ℓ ∣ N →
-      letI := GlobalTheory.LocMatrix.cenAlgebra ℓ F B Λ hΛ
+      letI := GlobalTheory.LocMatrix.cenAlgebra ℓ F B Λ hΛ;
       IsAzumaya (cenOrder ℓ F) (locOrder ℓ Λ) := by
   intro F B _ _ _ _ _ _ _ _ _ Λ hΛ hfin hspan
   classical
@@ -257,8 +283,8 @@ theorem locOrder_isAzumaya : ∀ (F B : Type) [Field F] [NumberField F] [Ring B]
   haveI : FaithfulSMul (cenOrder ℓ F) (locOrder ℓ Λ) := by
     rw [faithfulSMul_iff_algebraMap_injective]
     intro a b hab
-    have h := congrArg (fun x : locOrder ℓ Λ => (x : ℚ_[ℓ] ⊗[ℚ] B)) hab
-    simp only [GlobalTheory.LocMatrix.algebraMap_cenAlgebra, GlobalTheory.LocMatrix.coe_cenIncl] at h
+    have h : cenMap ℓ F B a = cenMap ℓ F B b :=
+      congrArg (fun x : locOrder ℓ Λ => (x : ℚ_[ℓ] ⊗[ℚ] B)) hab
     exact Subtype.ext (cenMap_injective ℓ F B h)
   haveI := Module.Projective.of_basis f
   haveI := Module.Finite.of_basis f

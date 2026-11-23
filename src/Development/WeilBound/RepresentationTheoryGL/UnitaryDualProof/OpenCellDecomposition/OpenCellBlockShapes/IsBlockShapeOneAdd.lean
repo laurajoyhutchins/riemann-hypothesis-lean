@@ -1,5 +1,57 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellBlockShapes.DistribHaarCharPi
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+public import Mathlib.NumberTheory.LocalField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix GlobalTheory.SmGL ValuativeRel
 open scoped Pointwise
@@ -16,8 +68,8 @@ def rowI (i : Fin m) : Fin (r + m) := ⟨i, by omega⟩
 
 def colI (j : Fin r) : Fin (r + m) := ⟨m + j, by omega⟩
 
-variable (r) in
 
+variable (r) in
 def blockE (Y : Fin m × Fin r → k) : Matrix (Fin (r + m)) (Fin (r + m)) k := fun i j =>
   if h : (i : ℕ) < m ∧ m ≤ (j : ℕ) then Y (⟨i, h.1⟩, ⟨j - m, by omega⟩) else 0
 
@@ -37,7 +89,7 @@ theorem blockE_apply (Y : Fin m × Fin r → k) (i : Fin m) (j : Fin r) :
   unfold blockE
   have hc : ((rowI (r := r) i : Fin (r + m)) : ℕ) < m ∧ m ≤ ((colI (m := m) j : Fin (r + m)) : ℕ) := by
     simp [rowI, colI]
-  rw [dif_pos hc]
+  rw [dite_eq_left hc]
   congr 2
   all_goals
     apply Fin.ext
@@ -61,7 +113,7 @@ theorem eq_one_add_blockE {u : Matrix (Fin (r + m)) (Fin (r + m)) k} (hu : IsBlo
   rw [Matrix.add_apply]
   unfold blockE
   by_cases hij : (i : ℕ) < m ∧ m ≤ (j : ℕ)
-  · rw [dif_pos hij]
+  · rw [dite_eq_left hij]
     have hne : i ≠ j := by
       intro h
       rw [h] at hij
@@ -73,7 +125,7 @@ theorem eq_one_add_blockE {u : Matrix (Fin (r + m)) (Fin (r + m)) k} (hu : IsBlo
       apply Fin.ext
       simp only [rowI, colI]
       try omega
-  · rw [dif_neg hij, add_zero]
+  · rw [dite_eq_right hij, add_zero]
     by_contra h
     exact hij (hu i j h)
 
@@ -82,7 +134,7 @@ theorem isBlockShape_one_add (Y : Fin m × Fin r → k) : IsBlockShape (1 + bloc
   rw [Matrix.add_apply] at h
   unfold blockE at h
   by_contra hc
-  rw [dif_neg hc, add_zero] at h
+  rw [dite_eq_right hc, add_zero] at h
   exact h rfl
 
 def blockGL (Y : Fin m × Fin r → k) : GL (Fin (r + m)) k :=
@@ -96,11 +148,11 @@ theorem blockGL_mem_unipB (Y : Fin m × Fin r → k) : blockGL Y ∈ unipB k (Fi
     have hlt : (j : ℕ) < i := Fin.lt_iff_val_lt_val.mp hji
     rw [Matrix.add_apply, Matrix.one_apply_ne (ne_of_lt hji).symm, zero_add]
     unfold blockE
-    rw [dif_neg (by omega)]
+    rw [dite_eq_right (by omega)]
   · show (1 + blockE r Y) i i = 1
     rw [Matrix.add_apply, Matrix.one_apply_eq]
     unfold blockE
-    rw [dif_neg (by omega), add_zero]
+    rw [dite_eq_right (by omega), add_zero]
 
 def blockEquiv (U : Subgroup (GL (Fin (r + m)) k))
     (hU : ∀ u, u ∈ U ↔ u ∈ unipB k (Fin (r + m)) ∧ IsBlockShape (u : Matrix (Fin (r + m)) (Fin (r + m)) k)) :

@@ -1,7 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsDiscreteValuationRingOfMaximalIdealEqSpa
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsDiscreteValuationRingOfMaximalIdealEqSpa
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -27,6 +77,7 @@ private lemma mem_smul_top_iff_of_linearEquiv_pi {V M ι : Type*} [CommRing V] [
   · intro hx
     have hsum : x = ∑ i, e x i • e.symm (fun j => if i = j then 1 else 0) := by
       apply e.injective
+
       simp only [map_sum, map_smul, LinearEquiv.apply_symm_apply]
       exact pi_eq_sum_univ (e x)
     rw [hsum]
@@ -58,8 +109,8 @@ private lemma isAdicComplete_of_linearEquiv_pi {V M ι : Type*} [CommRing V] [Ad
     refine ⟨e.symm L, fun n => (key n _ _).2 fun i => ?_⟩
     simpa using hL i n
 
-open Polynomial IsLocalRing in
 
+open Polynomial IsLocalRing in
 theorem _root_.GlobalTheory.unramExt : _root_.ReciprocityTheory.ChartRestriction.G.Out.UnramExtSt := by
   unfold _root_.ReciprocityTheory.ChartRestriction.G.Out.UnramExtSt
   intro V _ _ _ _ k' _ _ _ _
@@ -98,7 +149,7 @@ theorem _root_.GlobalTheory.unramExt : _root_.ReciprocityTheory.ChartRestriction
     exact hw (_root_.GlobalTheory.isUnit_adjoinRoot_mk_of_aeval_ne_zero hint hμ hμmap hne)
   haveI : IsLocalRing (AdjoinRoot μ) := IsLocalRing.of_nonunits_add fun a b ha hb => by
     rw [hnon] at ha hb ⊢
-    rw [map_add, ha, hb, add_zero]
+    rw [map_add (f := _), ha, hb, add_zero]
   have hmax : maximalIdeal (AdjoinRoot μ) = RingHom.ker φ := by
     ext w
     rw [mem_maximalIdeal, hnon, RingHom.mem_ker]
@@ -134,7 +185,7 @@ theorem _root_.GlobalTheory.unramExt : _root_.ReciprocityTheory.ChartRestriction
   haveI : Module.Free V (AdjoinRoot μ) := Module.Free.of_basis pb.basis
   haveI : IsNoetherianRing (AdjoinRoot μ) := inferInstance
   have hinj : Function.Injective (algebraMap V (AdjoinRoot μ)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro v hv
     rw [← hCm, RingHom.comp_apply, AdjoinRoot.mk_eq_zero] at hv
     by_contra hne

@@ -1,8 +1,58 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalComponentsNontrivialAdelicCharacter
+module
+
+import Development.WeilBound.ThetaLifts.FrameEstimates.IsCompactIntV
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinPartIdemMulMemIff
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNeZeroAdeleCharEqCompMulTotallyReal
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU Filter Topology
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels (pure tens SInf evI At Rest Acts piW IsStd)
@@ -167,29 +217,7 @@ theorem isCompact_intV (u : HeightOneSpectrum (𝓞 F)) :
 
 theorem isCompact_box (C : ∀ u : HeightOneSpectrum (𝓞 F), Set (Fv F u)) (hC : ∀ u, IsCompact (C u))
     (h : ∀ᶠ u in cofinite, C u ⊆ u.adicCompletionIntegers F) : IsCompact {a : Af F | ∀ u, evalV F u a ∈ C u} := by
-  let S : Set (HeightOneSpectrum (𝓞 F)) := {u | C u ⊆ u.adicCompletionIntegers F}
-  have hS : cofinite ≤ 𝓟 S := le_principal_iff.2 h
-  let P := RestrictedProduct (fun u : HeightOneSpectrum (𝓞 F) => u.adicCompletion F)
-      (fun u => (u.adicCompletionIntegers F : Set (u.adicCompletion F))) (𝓟 S)
-  have h1 : IsCompact {x : P | ∀ u, x u ∈ C u} := by
-    rw [RestrictedProduct.isEmbedding_coe_of_principal.isCompact_iff]
-    convert isCompact_univ_pi hC
-    ext x
-    constructor
-    · rintro ⟨y, hy, rfl⟩ u -
-      exact hy u
-    · intro hx
-      exact ⟨⟨x, fun u hu => hu (hx u trivial)⟩, fun u => hx u trivial, rfl⟩
-  have h2 := h1.image (RestrictedProduct.continuous_inclusion hS)
-  have e : {a : Af F | ∀ u, evalV F u a ∈ C u} = RestrictedProduct.inclusion _ _ hS '' {x : P | ∀ u, x u ∈ C u} := by
-    ext a
-    constructor
-    · intro ha
-      exact ⟨⟨a.1, fun u hu => hu (ha u)⟩, ha, rfl⟩
-    · rintro ⟨y, hy, rfl⟩
-      exact hy
-  rw [e]
-  exact h2
+  apply PositivityTheory.ThKEst.FiniteAdelicSupportCompactness.isCompact_box <;> assumption
 
 theorem pf_eq_prod {φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ → Fv F u) → ℂ} (S : Finset (HeightOneSpectrum (𝓞 F)))
     (y : κ → Af F) (h : ∀ u ∉ S, φ u = stdF κ u ∧ ∀ i, evalV F u (y i) ∈ u.adicCompletionIntegers F) :
@@ -209,35 +237,7 @@ theorem exists_fin {φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ → Fv F u) →
     exact hu (Set.Finite.mem_toFinset _ |>.2 hn)⟩
 
 theorem pf_mem {φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ → Fv F u) → ℂ} (hφ : Good φ) : pf φ ∈ SB (κ → Af F) := by
-  have hc : ∀ u, Continuous fun (y : κ → Af F) i => evalV F u (y i) := fun u =>
-    continuous_pi fun i => (cont_evalV u).comp (continuous_apply i)
-  constructor
-  · rw [IsLocallyConstant.iff_eventually_eq]
-    intro x
-    obtain ⟨S, hS⟩ := exists_fin hφ.2 x
-    have h1 : ∀ᶠ y in 𝓝 x, ∀ i v, evalV F v (y i - x i) ∈ v.adicCompletionIntegers F :=
-      eventually_all.2 fun i => (isOpen_intAf.preimage (f := fun y : κ → Af F => y i - x i) (by fun_prop)).mem_nhds
-        (by intro v; simp)
-    have h2 : ∀ᶠ y in 𝓝 x, ∀ u ∈ S, φ u (fun i => evalV F u (y i)) = φ u fun i => evalV F u (x i) :=
-      (eventually_all_finset S).2 fun u _ => ((hφ.1 u).1.comp_continuous (hc u)).eventually_eq x
-    filter_upwards [h1, h2] with y h1 h2
-    rw [pf_eq_prod S x hS, pf_eq_prod S y fun u hu => ⟨(hS u hu).1, fun i => ?_⟩]
-    · exact Finset.prod_congr rfl h2
-    · have := add_mem (h1 i u) ((hS u hu).2 i)
-      rwa [map_sub, sub_add_cancel] at this
-  · have hK : ∀ i : κ, IsCompact {a : Af F | ∀ u, evalV F u a ∈ (fun x => x i) '' tsupport (φ u)} := fun i =>
-      isCompact_box _ (fun u => (hφ.1 u).2.isCompact.image (continuous_apply i)) (by
-        filter_upwards [hφ.2] with u hu
-        rintro _ ⟨x, hx, rfl⟩
-        rw [hu] at hx
-        exact closure_minimal Set.support_indicator_subset (isCompact_intV u).isClosed hx i)
-    refine HasCompactSupport.intro (isCompact_univ_pi hK) fun y hy => ?_
-    by_contra h0
-    refine hy fun i _ u => ⟨fun i => evalV F u (y i), subset_tsupport _ (fun h => h0 ?_), rfl⟩
-    obtain ⟨S, hS⟩ := exists_fin hφ.2 y
-    classical
-    rw [pf_eq_prod (insert u S) y fun v hv => hS v fun h => hv (Finset.mem_insert_of_mem h)]
-    exact Finset.prod_eq_zero (Finset.mem_insert_self _ _) h
+  apply PositivityTheory.ThKEst.FiniteAdelicSupportCompactness.pf_mem <;> assumption
 
 theorem pure_mem (f : SInf F κ) {φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ → Fv F u) → ℂ} (hφ : Good φ) :
     pure f φ ∈ schA F κ := Submodule.subset_span ⟨f, pf φ, pf_mem hφ, rfl⟩
@@ -251,34 +251,27 @@ def off (a : AF F) : AF F := a - atPlace v (evFin F v a)
 
 theorem ev_off (a : AF F) : evFin F v (off v a) = 0 := by simp [off, evFin_atPlace]
 
-theorem off_add (a b : AF F) : off v (a + b) = off v a + off v b := by simp only [off, map_add]; ring
+theorem off_add (a b : AF F) : off v (a + b) = off v a + off v b := by simp only [off, map_add (f := _)]; ring
 
 theorem off_mul (a b : AF F) : off v (a * b) = a * off v b := by
   rw [off, off, mul_sub, mul_comm a (atPlace v _), atPlace_mul_right, map_mul, mul_comm (evFin F v a)]
 
 theorem off_off (a : AF F) : off v (off v a) = off v a := by rw [off, ev_off, map_zero, sub_zero]
 
-theorem at_mul_off (t : Fv F v) (a : AF F) : atPlace v t * off v a = 0 := by
-  rw [atPlace_mul_right, ev_off, mul_zero, map_zero]
-
 theorem off_add_at (a : AF F) : off v a + atPlace v (evFin F v a) = a := sub_add_cancel _ _
 
 theorem off_dot (x y : κ → AF F) : off v (x ⬝ᵥ y) = x ⬝ᵥ fun i => off v (y i) := by
+
   simp only [off, dotProduct, map_sum, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun i _ => off_mul v _ _
 
 theorem ev_dot (x y : κ → AF F) : evFin F v (x ⬝ᵥ y) = (fun i => evFin F v (x i)) ⬝ᵥ fun i => evFin F v (y i) := by
+
   simp only [dotProduct, map_sum, map_mul]
 
 def Indep (r : (κ → AF F) → ℂ) : Prop := ∀ x (t : κ → Fv F v), r (x + fun i => atPlace v (t i)) = r x
 
 variable {v}
-
-theorem Indep.off {r : (κ → AF F) → ℂ} (h : Indep v r) (x : κ → AF F) : r (fun i => off v (x i)) = r x := by
-  rw [← h _ fun i => evFin F v (x i)]
-  congr 1
-  funext i
-  exact off_add_at v _
 
 open Classical in
 theorem pure_update (f : SInf F κ) {φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ → Fv F u) → ℂ}
@@ -317,7 +310,7 @@ theorem indep_pure (f : SInf F κ) (φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ
     by_cases h : u = v
     · subst h; simp
     · refine congrArg _ (funext fun i => ?_)
-      rw [Pi.add_apply, map_add]
+      rw [Pi.add_apply, map_add (f := _)]
       exact add_eq_left.2 (evalV_singleFin_ne h _)
 
 open Classical in
@@ -330,9 +323,9 @@ theorem Good.update {φ : ∀ u : HeightOneSpectrum (𝓞 F), (κ → Fv F u) �
   · filter_upwards [hφ.2, (Set.finite_singleton v).compl_mem_cofinite] with u hu e
     rwa [Function.update_of_ne e]
 
+
 open Classical in
 variable (v) in
-
 def psv (ψ : AddChar (AF F) ℂ) : AddChar (Fv F v) ℂ := ψ.compAddMonoidHom (atPlace v).toAddMonoidHom
 
 theorem psv_apply (ψ : AddChar (AF F) ℂ) (t : Fv F v) : psv v ψ t = ψ (atPlace v t) := rfl
@@ -341,12 +334,12 @@ scoped instance invTwoV : Invertible (2 : Fv F v) :=
   ⟨evFin F v (⅟2), by rw [← map_ofNat (evFin F v) 2, ← map_mul, invOf_mul_self, map_one],
     by rw [← map_ofNat (evFin F v) 2, ← map_mul, mul_invOf_self, map_one]⟩
 
-variable (v) in
 
+variable (v) in
 def evP (w : (κ → AF F) × (κ → AF F)) : (κ → Fv F v) × (κ → Fv F v) := (fun i => evFin F v (w.1 i), fun i => evFin F v (w.2 i))
 
-variable (v) in
 
+variable (v) in
 def offP (w : (κ → AF F) × (κ → AF F)) : (κ → AF F) × (κ → AF F) := (fun i => off v (w.1 i), fun i => off v (w.2 i))
 
 theorem schr_tens (ψ : AddChar (AF F) ℂ) (w : (κ → AF F) × (κ → AF F)) (φ : (κ → Fv F v) → ℂ) {r : (κ → AF F) → ℂ}
@@ -363,23 +356,15 @@ theorem schr_tens (ψ : AddChar (AF F) ℂ) (w : (κ → AF F) × (κ → AF F))
       ψ (x ⬝ᵥ (offP v w).2 + ⅟(2 : AF F) * ((offP v w).1 ⬝ᵥ (offP v w).2)) := by
     rw [psv_apply, ← AddChar.map_add_eq_mul, ← off_add_at v (x ⬝ᵥ w.2 + _), add_comm (off v _)]
     congr 2
-    · rw [map_add, map_mul, ev_dot, ev_dot]; rfl
+    · rw [map_add (f := _), map_mul, ev_dot, ev_dot]; rfl
     · rw [off_add, off_mul, off_dot, ← off_off v (w.1 ⬝ᵥ w.2), off_dot v w.1 w.2, dotProduct_comm w.1, off_dot,
         dotProduct_comm (fun i => off v (w.2 i))]
       rfl
   simp only [schr, tens]
   rw [e1, e2]
-  simp only [Pi.add_apply, map_add]
+  simp only [Pi.add_apply, map_add (f := _)]
   show _ = _ * φ (fun i => evFin F v (x i) + evFin F v (w.1 i)) * _
   ring
-
-theorem Indep.schr (ψ : AddChar (AF F) ℂ) (w : (κ → AF F) × (κ → AF F)) {r : (κ → AF F) → ℂ}
-    (h : Indep v r) : Indep v (schr ψ (offP v w) r) := by
-  intro x t
-  simp only [GlobalTheory.WeilM.schr]
-  rw [add_right_comm, h, add_dotProduct]
-  congr 3
-  refine add_eq_left.2 (Finset.sum_eq_zero fun i _ => at_mul_off v _ _)
 
 theorem schr_zero {R : Type} [CommRing R] [Invertible (2 : R)] (ψ : AddChar R ℂ) (φ : (κ → R) → ℂ) :
     schr ψ 0 φ = φ := funext fun x => by simp [schr]
@@ -428,7 +413,7 @@ theorem piW_inc (t : E →ₐ[F] Fv F v) (x : E) : piW t (inclR (F := F) (AF F) 
 theorem piW_cA (t : E →ₐ[F] Fv F v) (z : AE F E) : piW t (cA σ z) = piW (t.comp σ) z := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x => rfl
 
 theorem trace_cm (h : IsCMExt F E σ) (x : E) : algebraMap F E (Algebra.trace F E x) = x + σ x := by
@@ -440,7 +425,7 @@ theorem trace_cm (h : IsCMExt F E σ) (x : E) : algebraMap F E (Algebra.trace F 
     simpa using eq_or_eq_comp_conj h τ τ'
   rw [h2, Finset.sum_pair (comp_conj_ne h τ).symm] at h1
   apply (algebraMap E (AlgebraicClosure E)).injective
-  rw [← IsScalarTower.algebraMap_apply, h1, map_add]
+  rw [← IsScalarTower.algebraMap_apply, h1, map_add (f := _)]
   rfl
 
 theorem trace_tmul {R : Type} [CommRing R] [Algebra F R] (r : R) (x : E) :
@@ -454,13 +439,13 @@ theorem ev_trace (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) (z : AE F E) :
     evFin F v (Algebra.trace (AF F) (AE F E) z) = piW t z + piW (t.comp σ) z := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero, add_zero]
-  | add x y hx hy => simp only [map_add, hx, hy]; ring
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]; ring
   | tmul a x =>
-    rw [trace_tmul, map_mul, AlgHom.commutes, piW_tmul, piW_tmul, ← t.commutes, trace_cm h, map_add, mul_add]
+    rw [trace_tmul, map_mul, AlgHom.commutes, piW_tmul, piW_tmul, ← t.commutes, trace_cm h, map_add (f := _), mul_add]
     rfl
 
-variable (v) in
 
+variable (v) in
 def ep : AF F := atPlace v 1
 
 theorem ep_mul (a : AF F) : ep v * a = atPlace v (evFin F v a) := by rw [ep, atPlace_mul_right, one_mul]

@@ -1,18 +1,69 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsPeriodOn
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishingStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.AevalNeZeroOfNotMem
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsValueAtOfTorus
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.FiniteEtaleSurjectiveOfPullback
+module
+
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverBasePointRegular
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GenericBlockMatrixIsBlockDiag
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.IsFieldIntersection
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.FiniteEtaleSurjectiveOfPullback
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.AevalNeZeroOfNotMem
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagValuationNormalizationStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishingStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.GenericFlagAlgebraicallyIndependentStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorSumIdentityBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.StepRowsInverseNonzeroEntryStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ValuationRingExtensionSpecializationStatement
 import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PChartNormPtsA
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.Values
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MinorSumIdentityBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagValuationNormalizationStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ValuationRingExtensionSpecializationStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.StepRowsInverseNonzeroEntryStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.GenericFlagAlgebraicallyIndependentStatement
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.Values
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PChartNormPtsA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped ComplexOrder Classical
 
@@ -30,29 +81,7 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 theorem sum_mapDomain_block {κ : K → K'} {v : (Σ k, ι k) → Σ k, ι' k} (hv : ∀ p, (v p).1 = κ p.1)
     (m : (Σ k, ι k) →₀ ℕ) (k' : K') :
     ∑ i, (Finsupp.mapDomain v m) ⟨k', i⟩ = ∑ p : Σ k, ι k, if κ p.1 = k' then m p else 0 := by
-  induction m using Finsupp.induction_linear with
-  | zero => simp
-  | add f g hf hg =>
-    rw [Finsupp.mapDomain_add]
-    simp only [Finsupp.add_apply, Finset.sum_add_distrib, hf, hg]
-    rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl fun p _ => ?_
-    split_ifs <;> simp
-  | single p n =>
-    have hR : (∑ q : Σ k, ι k, if κ q.1 = k' then (Finsupp.single p n) q else 0) =
-        if κ p.1 = k' then n else 0 := by
-      rw [Finset.sum_eq_single p]
-      · simp
-      · intro q _ hq
-        simp [Finsupp.single_apply, Ne.symm hq]
-      · simp
-    have hL : ∀ q : Σ k, ι' k, ∑ i, (Finsupp.single q n) ⟨k', i⟩ = if q.1 = k' then n else 0 := by
-      rintro ⟨kq, iq⟩
-      by_cases h : kq = k'
-      · subst h
-        simp [Finsupp.single_apply]
-      · simp [Finsupp.single_apply, h]
-    rw [Finsupp.mapDomain_single, hL, hR, hv]
+  apply GlobalTheory.CompanionTheory.Ar.PB.CovGraph.RegPhi.sum_mapDomain_block <;> assumption
 
 theorem isMultiHomog_rename_block {κ : K → K'} {v : (Σ k, ι k) → Σ k, ι' k} (hb : IsBlockMap κ v) {f : MRing ι}
     {b : K → ℕ} (hf : IsMultiHomog f b) : IsMultiHomog (rename v f) (Function.extend κ b 0) := by
@@ -74,7 +103,7 @@ theorem mConeMap_rename {Ω : Type} [Field Ω] {κ : K → K'} {v : (Σ k, ι k)
     (y : (Σ k, ι' k) → Ω) (g : MRing ι) : mConeMap y (rename v g) = rename κ (mConeMap (y ∘ v) g) := by
   induction g using MvPolynomial.induction_on with
   | C a => simp [mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p n hp =>
     simp only [map_mul, hp, rename_X]
     congr 1
@@ -84,7 +113,7 @@ theorem mConeMap_comp {Ω Ω' : Type} [Field Ω] [Field Ω'] (φ : Ω →+* Ω')
     mConeMap (φ ∘ x) g = map φ (mConeMap x g) := by
   induction g using MvPolynomial.induction_on with
   | C a => simp [mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p n hp =>
     simp only [map_mul, hp]
     congr 1
@@ -94,7 +123,7 @@ theorem aeval_comp_ringHom {Ω Ω' : Type} [Field Ω] [Field Ω'] (φ : Ω →+*
     aeval (φ ∘ x) g = φ (aeval x g) := by
   induction g using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p n hp => simp only [map_mul, hp, aeval_X, Function.comp]
 
 theorem eval_rename_block (v : (Σ k, ι k) → Σ k, ι' k) (z : (Σ k, ι' k) → ℂ) (f : MRing ι) :
@@ -210,7 +239,7 @@ theorem mem_mcPts_of_ringHom {L R : Type} [Field L] [CommRing R] (i : R →+* L)
       intro R' R'' _ _ φ w f
       induction f using MvPolynomial.induction_on with
       | C a => simp
-      | add p q hp hq => simp only [map_add, hp, hq]
+      | add p q hp hq => simp only [map_add (f := _), hp, hq]
       | mul_X p n hp => simp only [map_mul, hp, aeval_X]
     have h2 : aeval s g = 0 := hi (by rw [← comp, h1, map_zero])
     have h3 : eval (fun p => t p.1 * zt p) (map (Int.castRingHom ℂ) g) = 0 := by
@@ -221,7 +250,7 @@ theorem mem_mcPts_of_ringHom {L R : Type} [Field L] [CommRing R] (i : R →+* L)
     have hne : (∏ k, t k ^ d k) ≠ 0 := Finset.prod_ne_zero_iff.2 fun k _ => pow_ne_zero _ (ht k)
     exact (mul_eq_zero.1 h3).resolve_left hne
   | zero => simp
-  | add x y _ _ hx hy => simp [map_add, hx, hy]
+  | add x y _ _ hx hy => simp [map_add (f := _), hx, hy]
   | smul r x _ hx => simp [smul_eq_mul, map_mul, hx]
 
 end Reg
@@ -251,7 +280,7 @@ theorem det_mem {L : Type} [Field L] (P : Subring L) {A : Matrix (Fin N) (Fin N)
 
 theorem minorIJ_one (I : Finset (Fin N)) : minorIJ (1 : Matrix (Fin N) (Fin N) R) I I = 1 := by
   unfold minorIJ
-  rw [dif_pos rfl, Matrix.submatrix_one _ (I.orderEmbOfFin rfl).injective, Matrix.det_one]
+  rw [dite_eq_left rfl, Matrix.submatrix_one _ (I.orderEmbOfFin rfl).injective, Matrix.det_one]
 
 theorem detFac_one (j : ℕ) (i : Fin N) : detFac j i (1 : Matrix (Fin N) (Fin N) R) = 1 := by
   simp only [detFac, minorIJ_one]
@@ -285,8 +314,8 @@ section Flag
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)] {Φ : Type} [Field Φ] {y : (Σ k, ι k) → Φ}
   {Ψ : Type} [Fintype Ψ] [DecidableEq Ψ] {N j : ℕ} (M : FlagModel y Ψ N j)
 
-include M in
 
+include M in
 theorem blockMap_base : IsBlockMap (ι := baseIdx ι M.blk) (ι' := ι) (Subtype.val : NonPluckerBlocks M.blk → K)
     (fun q => (⟨q.1.1, q.2⟩ : Σ k, ι k)) := by
   refine ⟨Subtype.val_injective, ?_, fun _ => rfl, ?_⟩
@@ -342,6 +371,7 @@ theorem frame_gen {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {S : Typ
     rw [(GlobalTheory.T.block_diagonal_minor_vanishing S N j p.2 M.j_le).2.2.1 _ bb I hbb hbt, minorIJ_map]
   simp only [h2] at h1
   have h3 : f (y ⟨k, m⟩) = ∑ I, algebraMap M.Ω S (M.coef ⟨k, m⟩ I) * f (minorIJ (M.g p.1) I (stepCols N j p.2)) := by
+
     rw [M.y_step p k hp m, map_sum]
     exact Finset.sum_congr rfl fun I _ => by rw [map_mul]; rfl
   have ha : algebraMap M.Ω S (detFac j p.2 (F.T p.1)) = f (algebraMap M.Ω Φ (detFac j p.2 (F.T p.1))) := rfl
@@ -380,6 +410,7 @@ theorem flag_nonzero {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {z : 
         have := hF.2.2.1 p k hp I I' hI hI'
         split_ifs at this ⊢ <;> simpa [uA, vA] using this
       have e' := congrArg val e
+
       rw [map_sum] at e'
       simp only [map_mul] at e'
       rw [e']
@@ -408,7 +439,7 @@ theorem flag_back {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {z : (Σ
     intro r
     induction r using MvPolynomial.induction_on with
     | C a => simp [iS]
-    | add p q hp hq => simp only [map_add, hp, hq]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq]
     | mul_X p n hp => simp only [map_mul, hp, map_X, aeval_X]; simp [iS]
   have hiS : Function.Injective iS := fun a b e => by
     refine MvPolynomial.map_injective A.subtype Subtype.val_injective
@@ -459,6 +490,7 @@ theorem flag_back {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {z : (Σ
           algebraMap S L (∑ I, C (algebraMap M.Ω Φ (F.u ⟨k, m⟩ I)) * minorIJ (G' p.1) I (stepCols N j p.2)) := fun m => by
         show algebraMap S L (iS _) = _
         congr 1
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun I _ => ?_
         rw [map_mul, ← minorIJ_map, hiG]
@@ -483,7 +515,8 @@ theorem flag_back {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {z : (Σ
         · show _ = φL _ * algebraMap S L D * φL _
           ring
         · rfl
-      · rw [map_sum, hz m, inv_mul_cancel_left₀ ha]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_sum, hz m, inv_mul_cancel_left₀ ha]
         refine Finset.sum_congr rfl fun I _ => ?_
         rw [map_mul, ← minorIJ_map, hρ]
         congr 1
@@ -557,6 +590,7 @@ theorem flag_fwd {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {z : (Σ 
         (fun I m => am (F.u' I ⟨k, m⟩)) M.j_le (hHB p.1) (hbV p.1) (hbdet p.1) (hbinv p.1)
         (fun I m => hOV _ (hO (hG.2.1 _ I).2)) (fun m I => hOV _ (hO (hG.2.1 _ I).1)) (fun I I' hI hI' => by
           have := congrArg am (hF.2.2.1 p k hp I I' hI hI')
+
           rw [map_sum] at this
           simp only [map_mul] at this
           rw [this]
@@ -622,10 +656,12 @@ theorem flag_fwd {F : FrameData ι Ψ N M.Ω M.blk} (hF : M.IsFrame F) {z : (Σ 
     let rR : R := Subring.inclusion hOR ⟨r, _, hr⟩
     have e1 : ∑ I, uR I * minorIJ (HR p.1) I (stepCols N j p.2) = rR * wR := Subtype.ext (by
       show R.subtype _ = r * wc p
+
       rw [map_sum]
       simp only [map_mul, ← minorIJ_map, hHR]
       exact hw)
     have e2 := congrArg ψ e1
+
     rw [map_sum] at e2
     simp only [map_mul, ← minorIJ_map] at e2
     have e3 : ∀ I, ψ (uR I) = valAt M.x (F.u ⟨k, m⟩ I) (basePart M.blk z) := fun I =>

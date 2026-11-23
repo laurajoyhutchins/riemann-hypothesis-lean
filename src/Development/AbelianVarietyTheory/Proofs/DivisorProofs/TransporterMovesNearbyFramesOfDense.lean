@@ -1,9 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranspOfMovesAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTransporterMovesFrameReadsInverse
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniqueUpToTargetGroup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolToOfOpenImmersion
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FrameActionUpperTriangularBlockExists
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTranspOfMovesAt
+import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.LatticeAndConstantUnique
+import Development.AbelianVarietyTheory.Counterexamples.ThetaValuation.UniformMultiplier
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTransporterMovesFrameReadsInverse
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UniqueUpToTargetGroup
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsFramesOfHolPeriods
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ImNegOfFramePeriodVector
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FrameActionUpperTriangularBlockExists
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolToOfOpenImmersion
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PtOfFrameEqOfPointEq
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ActLevFullLevelGroupFramedPoints
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrMoveTransfer
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.HolPairA
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.Generic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -35,7 +87,7 @@ theorem eventually_comp (hσ : GoodEmb c σ) (hU : IsUnf U) (ρ : Xo.X ⟶ Xo.X)
   have hB : IsOpen (L.symm ⁻¹' (U.X k).dom) := (FourierCoefficientDomain.isOpen_dom _).preimage L.symm.continuous
   let x : (Fin n → ℂ) → (U.X k).dom := fun b => if h : L.symm b ∈ (U.X k).dom then ⟨_, h⟩ else z₀
   have hxb : ∀ b ∈ L.symm ⁻¹' (U.X k).dom, (x b).1 = L.symm b := fun b hb => by
-    simp only [x]; rw [dif_pos (show L.symm b ∈ (U.X k).dom from hb)]
+    simp only [x]; rw [dite_eq_left (show L.symm b ∈ (U.X k).dom from hb)]
   have hxL : ∀ z : (U.X k).dom, x (L z.1) = z := fun z =>
     Subtype.ext ((hxb _ (by simp)).trans (L.symm_apply_apply _))
   have hd : ∀ τ a c, DifferentiableOn ℂ (fun b => mat (x b).1 τ a c) (L.symm ⁻¹' (U.X k).dom) := fun τ a c =>

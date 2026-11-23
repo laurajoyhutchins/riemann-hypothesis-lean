@@ -1,5 +1,60 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.DiscrMaximalRealCyclotomic
+module
+
+public import Formalism.FrobeniusOrbits.DiscrMaximalRealCyclotomic
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Polynomial
 
@@ -20,7 +75,7 @@ lemma real_theta {K : Type*} [Field K] {m : ℕ} (hm : m ≠ 0) {ζ : K} (hζ : 
     (ψ : K →+* ℂ) : starRingEnd ℂ (ψ (ζ + ζ⁻¹)) = ψ (ζ + ζ⁻¹) := by
   have hw : (ψ ζ) ^ m = 1 := by rw [← map_pow, hζ.pow_eq_one, map_one]
   have hc := conj_root hm hw
-  simp only [map_add, map_inv₀, hc, inv_inv, add_comm]
+  simp only [map_add (f := _), map_inv₀, hc, inv_inv, add_comm]
 
 lemma not_real_zeta {K : Type*} [Field K] {m : ℕ} (hm : m ≠ 0) (h2 : ¬ m ∣ 2) {ζ : K}
     (hζ : IsPrimitiveRoot ζ m) (ψ : K →+* ℂ) : starRingEnd ℂ (ψ ζ) ≠ ψ ζ := by
@@ -80,7 +135,7 @@ lemma minpoly_eq (hz : IsPrimitiveRoot z (2 ^ (e + 2))) :
   have hz0 : z ≠ 0 := hz.ne_zero hm
   have hq : (X ^ 2 - C (th z) * X + 1 : ℚ⟮z + z⁻¹⟯[X]).Monic := by monicity!
   have hev : aeval z (X ^ 2 - C (th z) * X + 1 : ℚ⟮z + z⁻¹⟯[X]) = 0 := by
-    simp only [map_add, map_sub, map_mul, aeval_X, aeval_C, map_pow, map_one]
+    simp only [map_add (f := _), map_sub, map_mul, aeval_X, aeval_C, map_pow, map_one]
     rw [IntermediateField.algebraMap_apply, th_coe, add_mul, inv_mul_cancel₀ hz0]
     ring
   have hdeg : (X ^ 2 - C (th z) * X + 1 : ℚ⟮z + z⁻¹⟯[X]).natDegree = 2 := by compute_degree!
@@ -203,7 +258,11 @@ lemma totallyReal_F (hz : IsPrimitiveRoot z (2 ^ (e + 2))) : IsTotallyReal ℚ�
   refine RingHom.ext fun y => ?_
   rw [NumberField.ComplexEmbedding.conjugate_coe_eq]
   letI : Algebra ℚ⟮z + z⁻¹⟯ ℂ := v.embedding.toAlgebra
-  let Φ : K →ₐ[ℚ⟮z + z⁻¹⟯] ℂ := IsAlgClosed.lift
+  let Φ : K →ₐ[ℚ⟮z + z⁻¹⟯] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have h1 := real_on_adjoin (z + z⁻¹) (Φ : K →+* ℂ) (real_theta hm hz (Φ : K →+* ℂ)) (y : K) y.2
   have h2 : (Φ : K →+* ℂ) (y : K) = v.embedding y := Φ.commutes y
   rw [h2] at h1

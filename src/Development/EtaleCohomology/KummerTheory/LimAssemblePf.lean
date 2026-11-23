@@ -1,4 +1,48 @@
-import Development.EtaleCohomology.KummerTheory.LimitPf
+module
+
+public import Development.EtaleCohomology.KummerTheory.LimitPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -71,7 +115,7 @@ theorem hl_sub (hA9 : A9) (l : ℕ) [Fact l.Prime] (E : Spc) (m j : ℤ) (hm : m
   funext k
   exact ((hA9 (ZMod (l ^ k)) (tw (l ^ k) j)).1 E m hm).elim _ _
 
-set_option maxHeartbeats 800000 in
+
 theorem limRatAssemble : LimRatAssemble := by
   intro hA9 l _ X Y S pX pY n i M r c hnM hB e Φ hΦ hbij
   let T := fun a : ℤ => HQ l (sch.obj X) a i ⊗[ℚ_[l]] HQ l (sch.obj Y) (n - a) 0
@@ -98,7 +142,7 @@ theorem limRatAssemble : LimRatAssemble := by
     { toFun := fun y => ∑ a : Fin (M + 1), ∑ s : Fin (r a), DirectSum.lof ℚ_[l] ℤ T ((a : ℕ) : ℤ)
         (((1 : ℚ_[l]) ⊗ₜ[ℤ_[l]] c a s) ⊗ₜ[ℚ_[l]] ((1 : ℚ_[l]) ⊗ₜ[ℤ_[l]] y a s))
       map_add' := fun y z => by
-        simp only [Pi.add_apply, TensorProduct.tmul_add, map_add, Finset.sum_add_distrib]
+        simp only [Pi.add_apply, TensorProduct.tmul_add, map_add (f := _), Finset.sum_add_distrib]
       map_smul' := fun t y => by
         simp only [Pi.smul_apply, RingHom.id_apply, Finset.smul_sum]
         refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun s _ => ?_
@@ -108,11 +152,12 @@ theorem limRatAssemble : LimRatAssemble := by
     intro u
     induction u using TensorProduct.induction_on with
     | zero => simp only [map_zero]
-    | add u v hu hv => rw [map_add, map_add, hu, hv, map_add]
+    | add u v hu hv => rw [map_add (f := _), map_add (f := _), hu, hv, map_add (f := _)]
     | tmul q y =>
       rw [LinearMap.liftBaseChange_tmul, map_smul, LinearMap.baseChange_tmul]
       change q • κ₀ (∑ a : Fin (M + 1), ∑ s : Fin (r a), _) = _
       rw [hΦ y, TensorProduct.tmul_sum]
+
       simp only [map_sum, hκ₀, TensorProduct.tmul_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun s _ => ?_
       rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
@@ -179,7 +224,7 @@ theorem limRatAssemble : LimRatAssemble := by
       intro t
       induction t using TensorProduct.induction_on with
       | zero => rw [map_zero]; exact Submodule.zero_mem _
-      | add u v hu hv => rw [map_add]; exact Submodule.add_mem _ hu hv
+      | add u v hu hv => rw [map_add (f := _)]; exact Submodule.add_mem _ hu hv
       | tmul u v =>
         have hu : u ∈ Submodule.span ℚ_[l] (Set.range fun s => ((1 : ℚ_[l]) ⊗ₜ[ℤ_[l]] c m s : HQ l (sch.obj X) (m : ℤ) i)) := by
           rw [hspan]; exact Submodule.mem_top
@@ -188,10 +233,10 @@ theorem limRatAssemble : LimRatAssemble := by
           obtain ⟨s, rfl⟩ := hu
           induction v using TensorProduct.induction_on with
           | zero => rw [TensorProduct.tmul_zero, map_zero]; exact Submodule.zero_mem _
-          | add v w hv hw => rw [TensorProduct.tmul_add, map_add]; exact Submodule.add_mem _ hv hw
+          | add v w hv hw => rw [TensorProduct.tmul_add, map_add (f := _)]; exact Submodule.add_mem _ hv hw
           | tmul q y => exact hbase s q y
         | zero => rw [TensorProduct.zero_tmul, map_zero]; exact Submodule.zero_mem _
-        | add u w _ _ hu hw => rw [TensorProduct.add_tmul, map_add]; exact Submodule.add_mem _ hu hw
+        | add u w _ _ hu hw => rw [TensorProduct.add_tmul, map_add (f := _)]; exact Submodule.add_mem _ hu hw
         | smul k u _ hu => rw [← TensorProduct.smul_tmul', map_smul]; exact Submodule.smul_mem _ k hu
   have hbijκ : Function.Bijective κ₀ := by
     constructor

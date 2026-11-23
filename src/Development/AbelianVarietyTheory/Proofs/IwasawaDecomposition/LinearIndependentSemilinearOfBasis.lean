@@ -1,12 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NuInRange
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
-import Formalism.LocalRingCardinality.Lemmas
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFramesNormAtEqNorm
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsComplexExtension
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsRestrictedFrames
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SemilinearBasisImageIndepOfBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NuInRange
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFramesNormAtEqNorm
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsComplexExtension
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsRestrictedFrames
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SemilinearBasisImageIndepOfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +65,7 @@ theorem linearIndependent_semilinear_of_basis {K : Type} [Field K] (e : K →+* 
     induction hx using Submodule.span_induction with
     | mem y hy => obtain ⟨i, rfl⟩ := hy; exact Submodule.subset_span ⟨i, rfl⟩
     | zero => simp
-    | add y z _ _ hy hz => rw [map_add]; exact S.add_mem hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact S.add_mem hy hz
     | smul a y _ hy => rw [map_smulₛₗ]; exact S.smul_mem _ hy
   let j' : V →ₛₗ[e] S := j.codRestrict S hmem
   have h1 : LinearIndependent ℂ (fun i => j' (b i)) :=
@@ -67,7 +106,7 @@ def ramForm {B : Base} {C : Cols B} (W : RowsRest B C) (u : B.Word) :
     (C.fm u).ramSub →ₛₗ[B.embLL] W.Mu u where
   toFun x := (W.eMu u).symm ⟨(C.fm u).emb 0 x, x.2⟩
   map_add' x y := by
-    rw [← map_add]; congr 1; ext1; simp
+    rw [← map_add (f := _)]; congr 1; ext1; simp
   map_smul' a x := by
     rw [← map_smul]; congr 1; ext1; simp [map_smulₛₗ]
 
@@ -101,7 +140,7 @@ theorem ramForm_basis {B : Base} {C : Cols B} (W : RowsRest B C) (u : B.Word) {�
       induction hx using Submodule.span_induction with
       | mem y hy => obtain ⟨i, rfl⟩ := hy; exact Submodule.subset_span ⟨i, rfl⟩
       | zero => simp
-      | add y z _ _ hy hz => rw [map_add]; exact S.add_mem hy hz
+      | add y z _ _ hy hz => rw [map_add (f := _)]; exact S.add_mem hy hz
       | smul a y _ hy => rw [map_smulₛₗ]; exact S.smul_mem _ hy
     rw [eq_top_iff]
     intro φ _

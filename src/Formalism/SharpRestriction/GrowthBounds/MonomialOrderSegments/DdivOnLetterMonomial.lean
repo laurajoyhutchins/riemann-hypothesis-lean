@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.DigitPartMonomial
-import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.CgeZeroIffIntegral
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.DigitPartMonomial
+public import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.CgeZeroIffIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -85,7 +132,7 @@ theorem onLetter_apply (i : L) (β : Fin r →₀ ℕ) (j : L) (a : Fin r) :
   by_cases h : j = i
   · subst h
     rw [if_pos rfl]
-    exact Finsupp.mapDomain_apply (fun x y hxy => by simpa using hxy) β a
+    exact Finsupp.mapDomain_apply_of_injective (fun x y hxy => by simpa using hxy) β a
   · rw [if_neg h]
     have hne : (j, a) ∉ Set.range (fun b : Fin r => (i, b)) := by
       rintro ⟨b, hb⟩
@@ -263,6 +310,7 @@ theorem appMon_eq (i : L) (P : ℕ) (cls : I → Fin r → ℕ) (cf : I → K) (
     appMon i P cls cf ρ' δ κ α = putL i α (∑ s, if cls s = (fun a => letE α i a % P) then
       monomial (ρ' s + P • (δ s + (divE P (letE α i) - κ s))) (cf s * bin (κ s) (divE P (letE α i)))
       else 0) := by
+
   rw [map_sum, appMon]
   refine Finset.sum_congr rfl fun s _ => ?_
   by_cases h : cls s = (fun a => α (i, a) % P)
@@ -365,7 +413,7 @@ theorem digitPart_dg (ρ : D.Tau → Fin D.r → ℕ) (f : D.EA → K) (G : MvPo
     by_cases h : D.InClass p ρ α
     · rw [if_pos h, if_pos h, Formalism.MainNotions.PlaneGram.dg_monomial, D.emb_liftE p ρ α h]
     · rw [if_neg h, if_neg h, map_zero]
-  · rw [map_add, digitPart_add, digitPart_add, map_add, h₁, h₂]
+  · rw [map_add (f := _), digitPart_add, digitPart_add, map_add (f := _), h₁, h₂]
 
 theorem cge_digitPart (v : AddValuation K (WithTop ℚ)) (ρ : D.Tau → Fin D.r → ℕ) {a : ℝ}
     {G : MvPolynomial (D.OL × Fin D.r) K} (hG : cge v a G) : cge v a (D.digitPart p ρ G) := by
@@ -517,10 +565,10 @@ theorem digitPart_appL {I : Type} [Fintype I] (hP : 0 < D.P p t) (ρ'' : D.Tau �
   · rw [Formalism.MainNotions.PlaneGram.appL, Formalism.MainNotions.PlaneGram.lsup_monomial, digitPart_smul, Formalism.MainNotions.PlaneGram.appMon, digitPart_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
     exact digitPart_approx_term_lemma_4 D p t hP ρ'' (cls s) (cf s) (ρ' s) (δ s) (κ s) α c
-  · rw [map_add, digitPart_add, h₁, h₂, ← Finset.sum_add_distrib]
+  · rw [map_add (f := _), digitPart_add, h₁, h₂, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun s _ => ?_
     by_cases h : (fun a => ρ' s a % D.P p t) = ρ'' t
-    · rw [if_pos h, if_pos h, if_pos h, digitPart_add, map_add]
+    · rw [if_pos h, if_pos h, if_pos h, digitPart_add, map_add (f := _)]
     · rw [if_neg h, if_neg h, if_neg h, add_zero]
 
 end TwistData

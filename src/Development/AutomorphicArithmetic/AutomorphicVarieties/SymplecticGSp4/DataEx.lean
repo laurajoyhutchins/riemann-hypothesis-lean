@@ -1,22 +1,75 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicCases.SymplecticGSp4
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.UnramifiedCocycleIsCoboundaryOfBernoulliUnit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ReFrob
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcXvan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcPrimProd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcOmDir
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcDirVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.Th1Facts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.PsiBar
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.HostOdd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.HostSb
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.BchiFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.CompIne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.PlacesQ
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.PlaceBasic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsPrimitiveOddDirichletCharacterTwoPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsDirichletCharacterPrimeOfOrderOfDvd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.TwoPowLtSqMulOfPrimitiveCharPowEqOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsPrimitiveTwoPowTwistMul
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicCases.SymplecticGSp4
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.UnramifiedCocycleIsCoboundaryOfBernoulliUnit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CMFieldExponentialBounds.primesex
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.ClsFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CharacterLevelBounds.PlacesQ
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.BchiFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.CompAlg
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.CompCond
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.CompIne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.CongrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.ExistsStrictHenselianAbsolutelyClosedLocalRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.HostOdd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.HostSb
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.OrdProjNDvd
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.PartOrd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.PsiBar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcDirVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcOmDir
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcPrimProd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.HcXvan
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.Th1Facts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PrimitiveFrobeniusFixed.PlaceBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsDirichletCharacterPrimeOfOrderOfDvd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsPrimitiveOddDirichletCharacterTwoPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExistsPrimitiveTwoPowTwistMul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ReFrob
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.TwoPowLtSqMulOfPrimitiveCharPowEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
 private theorem dirX {O : Type} [CommRing O] [IsDomain O] {l d N p n c : ℕ} [NeZero l] [NeZero N] [NeZero p]
@@ -197,7 +250,7 @@ private theorem dirG_pow {O : Type} [CommRing O] {N : ℕ} [NeZero N] (χ : Diri
 private theorem dirG_one {O : Type} [CommRing O] {N : ℕ} [NeZero N] (g : G ℚ Ω) :
     Chr.dirG ℚ Ω (1 : DirichletCharacter O N) g = 1 := Units.ext (MulChar.one_apply_coe _)
 
-set_option maxHeartbeats 800000 in
+
 private theorem core (hX : X.CorX) (h : Host) (e : ℕ) (hl2 : l ≠ 2) (he : 2 ≤ e) (ψ : DirichletCharacter c.O h.N)
     (hψ : h.IsChar ψ) (hev : PsiEven e ψ) (hchi : chiP l ψ ≠ 1) {p n : ℕ} [NeZero p] (hp : Odd p)
     (ξ₀ : DirichletCharacter c.O p) (ξ : DirichletCharacter c.O (2 ^ n)) (hξ : ξ.IsPrimitive) (hξo : ξ (-1) = -1)
@@ -407,7 +460,6 @@ theorem UpperTheory.V.GradeZeroInterpolatingElement.dataEx :
       calc v ^ 2 * 2 ^ (c2 ψ + 1 + h.o.factorization 2) = v ^ 2 * 2 ^ h.o.factorization 2 * 2 ^ (c2 ψ + 1) * 1 := by ring
         _ ≤ (l * h.q) ^ 2 * h.o * 2 ^ (c2 ψ + 6) * l := by
           gcongr
-          · norm_num
           · omega
           · exact hlp.one_le
         _ = _ := by ring

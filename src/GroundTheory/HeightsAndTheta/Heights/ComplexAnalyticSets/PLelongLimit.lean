@@ -1,9 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimit
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimitOffZero
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimitOnZero
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StVarIntAdd
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.LocalLimitGlue
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimit
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimitOffZero
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLelongLimitOnZero
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StVarIntAdd
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.LocalLimitGlue
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -23,12 +70,12 @@ theorem varInt_eq_zero_of_vanish {n k : ℕ} (W : Ideal (MvPolynomial (Fin n) �
       refine finsum_eq_zero_of_forall_eq_zero fun x => ?_
       rw [finsum_eq_dif]
       by_cases hx : x ∈ fibre W h.choose y
-      · rw [dif_pos hx]
+      · rw [dite_eq_left hx]
         split_ifs
         · show f x * _ = 0
           rw [hf x hx.1, zero_mul]
         · rfl
-      · rw [dif_neg hx]
+      · rw [dite_eq_right hx]
     simp [chartInt, h0]
   · rfl
 
@@ -76,10 +123,10 @@ theorem LelongLimit.proof (hOff : LelongLimitOffZero.Statement) (hOn : LelongLim
         refine finsum_eq_zero_of_forall_eq_zero fun W => ?_
         rw [finsum_eq_dif]
         by_cases hWm : W ∈ S
-        · rw [dif_pos hWm, varInt_eq_zero_of_vanish W g φ fun x hx =>
+        · rw [dite_eq_left hWm, varInt_eq_zero_of_vanish W g φ fun x hx =>
             image_eq_zero_of_notMem_tsupport fun hxs =>
               hgN hxs ⟨(hW W hWm).2.1 hx, (hW W hWm).2.2 x hx⟩, mul_zero]
-        · rw [dif_neg hWm]
+        · rw [dite_eq_right hWm]
       simp only [h0]
       exact hOff n d J u g φ hJ hdim hu hg hgc hφ (Set.disjoint_left.2 fun x hx hx' => hgN hx hx')
 

@@ -1,4 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.HeckeDoubleCosets.PHeckeFormal
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.HeckeDoubleCosets.PHeckeFormal
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,13 +151,13 @@ theorem mem_Gq_iff (N : ℕ) (π : 𝓞 L) (hπ : π ≠ 0) (γ : Gm L N) :
       ext i j
       simp only [Matrix.mul_diagonal, Matrix.diagonal_mul, Matrix.map_apply, M, Matrix.of_apply]
       by_cases hj : (j : ℕ) = 0 <;> by_cases hi : (i : ℕ) = 0
-      · rw [dif_neg (by tauto), if_neg (by tauto), if_pos hj, if_pos hi, mul_comm]
-      · rw [dif_pos ⟨hj, hi⟩, if_pos hj, if_neg hi, one_mul]
+      · rw [dite_eq_right (by tauto), if_neg (by tauto), if_pos hj, if_pos hi, mul_comm]
+      · rw [dite_eq_left ⟨hj, hi⟩, if_pos hj, if_neg hi, one_mul]
         have hs := Classical.choose_spec (hd i j ⟨hj, hi⟩)
         calc _ = algebraMap (𝓞 L) L (Classical.choose (hd i j ⟨hj, hi⟩) * π) := by rw [map_mul]
           _ = _ := by rw [hs]
-      · rw [dif_neg (by tauto), if_pos ⟨hi, hj⟩, if_neg hj, if_pos hi, mul_one, map_mul]
-      · rw [dif_neg (by tauto), if_neg (by tauto), if_neg hj, if_neg hi, mul_one, one_mul]
+      · rw [dite_eq_right (by tauto), if_pos ⟨hi, hj⟩, if_neg hj, if_pos hi, mul_one, map_mul]
+      · rw [dite_eq_right (by tauto), if_neg (by tauto), if_neg hj, if_neg hi, mul_one, one_mul]
     have hdet : M.det = (γ : Matrix (Fin N) (Fin N) (𝓞 L)).det := by
       apply algebraMap_inj
       have e := congrArg Matrix.det hM
@@ -229,7 +285,7 @@ theorem pGqStab : PGqStab := by
   constructor
   · intro h i j hj hi
     have := h (Fin.castAdd r i) (Fin.castAdd r j) hj hi
-    rwa [stab_apply, dif_pos ⟨i.2, j.2⟩] at this
+    rwa [stab_apply, dite_eq_left ⟨i.2, j.2⟩] at this
   · intro h i j hj hi
     rw [stab_apply]
     split_ifs with h1 h2
@@ -323,17 +379,17 @@ theorem pLow : PLow := by
         (Fin.castAdd r i') (Fin.natAdd n b) *
         ((c⁻¹ : Gm L (n + r)) : Matrix (Fin (n + r)) (Fin (n + r)) (𝓞 L)) (Fin.natAdd n b) z0 = 0 := by
       refine Finset.sum_eq_zero fun b _ => ?_
-      rw [stab_apply, dif_neg (by simp), if_neg (fun h => by have := congrArg Fin.val h; simp at this; omega),
+      rw [stab_apply, dite_eq_right (by simp), if_neg (fun h => by have := congrArg Fin.val h; simp at this; omega),
         zero_mul]
     rw [e, add_zero]
     have := hc' i' hi'
     simp only [Matrix.mulVec, dotProduct] at this
     convert this using 2 with b _
-    rw [stab_apply, dif_pos ⟨by simp, by simp⟩]
+    rw [stab_apply, dite_eq_left ⟨by simp, by simp⟩]
     rfl
   | right i' =>
     refine Ideal.add_mem _ (Ideal.sum_mem _ fun b _ => ?_) (Ideal.sum_mem _ fun b _ => ?_)
-    · rw [stab_apply, dif_neg (by simp), if_neg (fun h => by have := congrArg Fin.val h; simp at this; omega),
+    · rw [stab_apply, dite_eq_right (by simp), if_neg (fun h => by have := congrArg Fin.val h; simp at this; omega),
         zero_mul]
       exact Submodule.zero_mem _
     · exact Ideal.mul_mem_left _ _ (hc b)

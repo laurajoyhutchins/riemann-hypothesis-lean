@@ -1,7 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.InclStd
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsDPMorphismBot
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -36,9 +80,6 @@ theorem Vals.dQ {a : IdF A} {j : ℕ} {x : Q A j} (hx : Vals a x) : Vals a (dQ A
 def cl (a b : IdF A) {j : ℕ} (x : Q A j) (hx : Vals a x) : CH.Cn (sq a b) j :=
   fun s => sqMk a b (val x s) (hx s)
 
-theorem cl_val (a b : IdF A) {j : ℕ} (x : Q A j) (hx : Vals a x) (s : ComposableArrows C j) :
-    (show sqM a b _ from cl a b x hx s).1 = Ideal.Quotient.mk _ (val x s) := rfl
-
 theorem cl_surj (a b : IdF A) {j : ℕ} (f : CH.Cn (sq a b) j) : ∃ (x : Q A j) (hx : Vals a x), cl a b x hx = f := by
   have h : ∀ s : ComposableArrows C j, ∃ x : A.obj (s.obj (Fin.last j)), ∃ hx : x ∈ a.S _, sqMk a b x hx = f s := by
     intro s
@@ -57,6 +98,7 @@ theorem d_cl (a b : IdF A) {j : ℕ} (x : Q A j) (hx : Vals a x) :
   apply Subtype.ext
   change Subtype.val (∑ i : Fin (j + 2), (-1 : ℤ) ^ (i : ℕ) • (sqMap a b (toLast i s)) (sqMk a b (val x (face i s)) (hx _)) :
     sqM a b _) = Ideal.Quotient.mk _ (∑ i : Fin (j + 2), (-1 : ℤ) ^ (i : ℕ) • (A.map (toLast i s)).hom (val x (face i s)))
+
   rw [map_sum, Submodule.coe_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_zsmul]
@@ -111,7 +153,7 @@ theorem exists_seq (a : ℕ → IdF A) {n : ℕ} (h : ∀ k, Subsingleton (CH.H 
     induction k with
     | zero => simp [w]
     | succ k ih =>
-      rw [Finset.sum_range_succ, map_add, ← sub_sub, ← ih]
+      rw [Finset.sum_range_succ, map_add (f := _), ← sub_sub, ← ih]
   rw [← e]
   exact (w k).2.1
 
@@ -170,8 +212,8 @@ theorem exists_primitive (a : ℕ → IdF A) (ha : ∀ k T, (a (k + 1)).S T ≤ 
 
 end GlobalTheory.CompanionTheory.TowerEnd
 
-open GlobalTheory.CompanionTheory.TowerEnd in
 
+open GlobalTheory.CompanionTheory.TowerEnd in
 theorem GlobalTheory.CompanionTheory.TowerEnd.vanish {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {A : C ⥤ CommAlgCat.{0} R} (a : ℕ → IdF A) :
     (∀ k T, (a (k + 1)).S T ≤ (a k).S T) → (∀ T, ∃ k, (a k).S T = ⊥) →
     (∀ k j, Subsingleton (CH.H (sq (a k) (a (k + 1))) j)) → ∀ j, Subsingleton (CH.H (sq (a 0) (IdF.bot A)) j) := by

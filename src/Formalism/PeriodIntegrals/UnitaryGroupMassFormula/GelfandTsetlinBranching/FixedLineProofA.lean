@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.ProdMkPtA
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.ProdMkPtA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.CoeffRowActDiagA
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.ExtremalFactsProofA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +70,7 @@ theorem eps_A (kap : Fin n → ℕ) (ν : Fin (n + 1) → ℕ) (f : MvPolynomial
     (hcol : IsWeightedHomogeneous (colW (n + 1) (n + 1)) f ν)
     (hrow : ∀ m ∈ f.support, ∀ a : Fin n, ∑ s, m (Fin.castSucc a, s) = kap a)
     (hR : RInvA (fun x => eval x f)) (hC : lhwline_CInv (fun x => eval x f))
-    (hc : coeff (mStarA kap ν) f ≠ 0) (i i' : Fin n) (hii : i'.val = i.val + 1)
+    (hc : AddMonoidAlgebra.coeff f (mStarA kap ν) ≠ 0) (i i' : Fin n) (hii : i'.val = i.val + 1)
     (hle : kap i' ≤ ν (Fin.castSucc i')) : ν (Fin.castSucc i') ≤ kap i := by
   by_contra hlt
   push Not at hlt
@@ -96,7 +146,7 @@ theorem eps_A (kap : Fin n → ℕ) (ν : Fin (n + 1) → ℕ) (f : MvPolynomial
                 simp [ha, ha', hk, Ne.symm ha', Ne.symm ha]
               · by_cases hka : k = a <;> simp [ha, ha', hk, hk', hka, Ne.symm ha, Ne.symm ha']
   have hval : ∀ e : ℂ, e ≠ 0 →
-      (aeval Y f).eval e = coeff (mStarA kap ν) f * (e ^ kap i * (-1 / e) ^ νp) := by
+      (aeval Y f).eval e = AddMonoidAlgebra.coeff f (mStarA kap ν) * (e ^ kap i * (-1 / e) ^ νp) := by
     intro e he
     have e1 := hR (lhwline_colOp (Fin.castSucc i) (Fin.castSucc i') (1 / e) (mkPtA (dv e) (zz e)))
       (Fin.castSucc i) (Fin.castSucc i') (1 / e) hlt' (by simp)
@@ -131,7 +181,7 @@ theorem eps_A (kap : Fin n → ℕ) (ν : Fin (n + 1) → ℕ) (f : MvPolynomial
     rw [h1, h2, h3, one_pow, mul_one, mul_assoc, ← pow_add, Nat.add_sub_cancel' hle]
   set p := aeval Y f with hp
   set q : Polynomial ℂ := p * Polynomial.X ^ νp -
-    Polynomial.C (coeff (mStarA kap ν) f * (-1) ^ νp) * Polynomial.X ^ (kap i) with hq
+    Polynomial.C (AddMonoidAlgebra.coeff f (mStarA kap ν) * (-1) ^ νp) * Polynomial.X ^ (kap i) with hq
   have hq0 : q = 0 := by
     apply Polynomial.eq_zero_of_infinite_isRoot
     apply Set.Infinite.mono _ (Set.finite_singleton (0 : ℂ)).infinite_compl
@@ -157,13 +207,13 @@ theorem fixedLine_proof_A : FixedLine := by
   subst h
   obtain ⟨hcol₁, hR₁, hC₁, hrow₁⟩ := props_A lam mu f₁ hf₁ hx₁
   obtain ⟨hcol₂, hR₂, hC₂, hrow₂⟩ := props_A lam mu f₂ hf₂ hx₂
-  have hc₂ : coeff (mStarA (kapA lam mu) lam.natW) f₂ ≠ 0 := by
+  have hc₂ : AddMonoidAlgebra.coeff f₂ (mStarA (kapA lam mu) lam.natW) ≠ 0 := by
     intro h0
     apply hne
     exact vanishA f₂ hR₂ hC₂ (fun D hD => by
       rw [eval_D_A (kapA lam mu) lam.natW f₂ hcol₂ hrow₂ D hD, h0, zero_mul])
-  refine ⟨⟨coeff (mStarA (kapA lam mu) lam.natW) f₁ / coeff (mStarA (kapA lam mu) lam.natW) f₂, ?_⟩, ?_⟩
-  · set c := coeff (mStarA (kapA lam mu) lam.natW) f₁ / coeff (mStarA (kapA lam mu) lam.natW) f₂ with hcdef
+  refine ⟨⟨AddMonoidAlgebra.coeff f₁ (mStarA (kapA lam mu) lam.natW) / AddMonoidAlgebra.coeff f₂ (mStarA (kapA lam mu) lam.natW), ?_⟩, ?_⟩
+  · set c := AddMonoidAlgebra.coeff f₁ (mStarA (kapA lam mu) lam.natW) / AddMonoidAlgebra.coeff f₂ (mStarA (kapA lam mu) lam.natW) with hcdef
     have hg : f₁ - c • f₂ = 0 := by
       apply vanishA
       · intro x a b t hab hb
@@ -218,7 +268,7 @@ theorem fixedLine_proof_A : FixedLine := by
       · have hlast : (⟨i.1 + 1, by omega⟩ : Fin (n + 1)) = Fin.last n := Fin.ext (by simp; omega)
         have hds : lam.w (Fin.last n) = lam.detShift := by
           unfold DomWeight.detShift
-          rw [dif_pos (by omega)]
+          rw [dite_eq_left (by omega)]
           congr 1
         rw [hlast, hds]
         omega

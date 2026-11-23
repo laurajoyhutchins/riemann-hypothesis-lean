@@ -1,12 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SkewHermitianDiagonalizableStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsRealDifferentGeneratorStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PadicIntegralIffDenominatorStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsNotMemSubConjStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.GramDeterminantLogDifferentStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsLocalBasisStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
+public import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsLocalBasisStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsNotMemSubConjStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsRealDifferentGeneratorStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.GramDeterminantLogDifferentStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PadicIntegralIffDenominatorStatement
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SesqSesquilinearSkewHermitianStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SkewHermitianDiagonalizableStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,7 +84,7 @@ def locRing (ℓ : Nat.Primes) : Subring E where
     · rcases (Nat.Prime.dvd_mul ℓ.2).1 h with h | h
       exacts [hn h, hm h]
     · rw [Nat.cast_mul, show (((m : 𝓞 E) * a + (n : 𝓞 E) * b : 𝓞 E) : E) = (m : E) * (a : E) + (n : E) * (b : E) by
-        simp [map_add, map_mul (algebraMap (𝓞 E) E)], ← ha, ← hb]
+        simp [map_add (f := _), map_mul (algebraMap (𝓞 E) E)], ← ha, ← hb]
       ring
   zero_mem' := ⟨1, 0, by simpa using ℓ.2.one_lt.ne', by simp⟩
   neg_mem' := by
@@ -80,8 +132,6 @@ variable {E}
 def ofInt (ℓ : Nat.Primes) : 𝓞 E →+* locRing E ℓ :=
   (algebraMap (𝓞 E) E).codRestrict (locRing E ℓ) (coe_mem_locRing ℓ)
 
-@[simp] theorem coe_ofInt (ℓ : Nat.Primes) (a : 𝓞 E) : ((ofInt ℓ a : locRing E ℓ) : E) = (a : E) := rfl
-
 theorem isUnit_natCast_loc {ℓ : Nat.Primes} {n : ℕ} (hn : ¬ (ℓ : ℕ) ∣ n) :
     IsUnit ((n : locRing E ℓ)) := by
   have h0 : (n : E) ≠ 0 := fun h => hn (by simp [Nat.cast_eq_zero.1 h])
@@ -91,7 +141,7 @@ theorem isUnit_natCast_loc {ℓ : Nat.Primes} {n : ℕ} (hn : ¬ (ℓ : ℕ) ∣
 theorem exists_natCast_mul_eq {ℓ : Nat.Primes} (x : locRing E ℓ) :
     ∃ (n : ℕ) (a : 𝓞 E), ¬ (ℓ : ℕ) ∣ n ∧ (n : locRing E ℓ) * x = ofInt ℓ a := by
   obtain ⟨n, a, hn, ha⟩ := x.2
-  exact ⟨n, a, hn, Subtype.ext (by simpa using ha)⟩
+  exact ⟨n, a, hn, Subtype.ext (by simpa [ofInt, RingOfIntegers.coe_eq_algebraMap] using ha)⟩
 
 theorem comap_injective {ℓ : Nat.Primes} {m m' : Ideal (locRing E ℓ)} (hm' : m'.IsPrime) (hm : m.IsPrime)
     (h : m.comap (ofInt ℓ) = m'.comap (ofInt ℓ)) : m ≤ m' := by
@@ -267,8 +317,17 @@ theorem exists_common_denom {ℓ : Nat.Primes} {ι : Type} [Fintype ι] (f : ι 
   choose n a hn ha using fun i => (f i).2
   refine ⟨∏ i, n i, fun i => ((∏ k ∈ Finset.univ.erase i, n k : ℕ) : 𝓞 E) * a i, ?_, fun i => ?_⟩
   · intro h
-    obtain ⟨i, -, hi⟩ := (Prime.dvd_finset_prod_iff (Nat.Prime.prime ℓ.2) _).1 h
-    exact hn i hi
+    have hprod : ∀ s : Finset ι, ¬ (ℓ : ℕ) ∣ ∏ i ∈ s, n i := by
+      intro s
+      induction s using Finset.induction_on with
+      | empty => simpa using ℓ.2.one_lt.ne'
+      | @insert i s hi ih =>
+        simp only [Finset.prod_insert hi]
+        intro hd
+        rcases (Nat.Prime.dvd_mul ℓ.2).1 hd with hd | hd
+        · exact hn i hd
+        · exact ih hd
+    exact hprod Finset.univ h
   · rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ i), show (((∏ k ∈ Finset.univ.erase i, n k : ℕ) : 𝓞 E) * a i : 𝓞 E).val = ((∏ k ∈ Finset.univ.erase i, n k : ℕ) : E) * (a i : E) by
       simp [RingOfIntegers.coe_eq_algebraMap] , ← ha i]
     push_cast

@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBlowUpOverLocMaxCut
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBlowUpOverLocMaxCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -53,6 +102,7 @@ theorem aeval_blowUpSubst_eq_C_blowUpEval_mul_X_pow (P : Ideal (MRing ι R)) (u 
     aeval (blowUpSubst P u) G = Polynomial.C (blowUpEval P u G) * Polynomial.X ^ b none := by
   conv_lhs => rw [G.as_sum]
   conv_rhs => rw [G.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun d hd => ?_
   rw [aeval_blowUpSubst_monomial, hG (mem_support_iff.mp hd)]
@@ -66,8 +116,14 @@ theorem algebraMap_blowUpEval_ne_zero {P : Ideal (MRing ι R)} [P.IsPrime] {u : 
     {Q : Ideal (MRing (extIdx ι J) R)} (hle : blowUpOf P u ≤ Q) {G : MRing (extIdx ι J) R}
     {b : Option K → ℕ} (hG : IsMultiHomog G b) (hGQ : G ∉ Q) :
     algebraMap (MRing ι R ⧸ P) (FractionRing (MRing ι R ⧸ P)) (blowUpEval P u G) ≠ 0 := by
-  rw [ne_eq, map_eq_zero_iff _ (IsFractionRing.injective _ _)]
-  exact fun h => hGQ (hle (mem_blowUpOf_of_isMultiHomog hG h))
+  intro h
+  have hmap : algebraMap (MRing ι R ⧸ P) (FractionRing (MRing ι R ⧸ P)) (blowUpEval P u G) =
+      algebraMap (MRing ι R ⧸ P) (FractionRing (MRing ι R ⧸ P)) 0 := by
+    rw [map_zero]
+    exact h
+  have hzero : blowUpEval P u G = 0 :=
+    IsFractionRing.injective (MRing ι R ⧸ P) (FractionRing (MRing ι R ⧸ P)) hmap
+  exact hGQ (hle (mem_blowUpOf_of_isMultiHomog hG hzero))
 
 theorem exists_eq_div_of_mem_blowUpLocRing {P : Ideal (MRing ι R)} [P.IsPrime] {u : J → MRing ι R}
     {Q : Ideal (MRing (extIdx ι J) R)} (hQ : Q.IsPrime) (hle : blowUpOf P u ≤ Q)
@@ -90,11 +146,11 @@ theorem exists_eq_div_of_mem_blowUpLocRing {P : Ideal (MRing ι R)} [P.IsPrime] 
       IsWeightedHomogeneous.mul hG₁ hG₂, fun h => (hQ.mem_or_mem h).elim hG₁Q hG₂Q, ?_⟩
     rw [div_add_div _ _ (algebraMap_blowUpEval_ne_zero hle hG₁ hG₁Q)
       (algebraMap_blowUpEval_ne_zero hle hG₂ hG₂Q)]
-    simp only [map_add, map_mul]
+    simp only [RingHom.map_add, RingHom.map_mul]
   | neg x _ hx =>
     obtain ⟨b, F, G, hF, hG, hGQ, rfl⟩ := hx
-    refine ⟨b, -F, G, fun d hd => hF (by rwa [coeff_neg, neg_ne_zero] at hd), hG, hGQ, ?_⟩
-    rw [map_neg, map_neg, neg_div]
+    refine ⟨b, -F, G, fun d hd => hF (by rwa [MvPolynomial.coeff_neg, neg_ne_zero] at hd), hG, hGQ, ?_⟩
+    rw [RingHom.map_neg, RingHom.map_neg, neg_div]
   | mul x y _ _ hx hy =>
     obtain ⟨b₁, F₁, G₁, hF₁, hG₁, hG₁Q, rfl⟩ := hx
     obtain ⟨b₂, F₂, G₂, hF₂, hG₂, hG₂Q, rfl⟩ := hy

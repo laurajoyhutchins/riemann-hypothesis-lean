@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.PulledRead
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EpsZeroPtEpsScalePt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.PairCalc
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EpsZeroPtEpsScalePt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Hecke GlobalTheory.UPel.HT.ES
@@ -24,7 +72,7 @@ private lemma alg_core {F κ V : Type} [CommRing F] [Field κ] [AddCommGroup V] 
     rw [map_mul, map_natCast]
     have hz : ((p : ℕ) : Module.End κ V) = 0 := by
       ext y
-      rw [Module.End.natCast_apply, ← Nat.cast_smul_eq_nsmul κ, CharP.cast_eq_zero, zero_smul]
+      rw [natCast_apply_eq_smul, ← Nat.cast_smul_eq_nsmul κ, CharP.cast_eq_zero, zero_smul]
       rfl
     rw [hz, mul_zero]
   have key : ∀ a ∈ u, T a = T (a * α') := by
@@ -32,7 +80,7 @@ private lemma alg_core {F κ V : Type} [CommRing F] [Field κ] [AddCommGroup V] 
     have e1 : T (a * (α + α' - 1)) = 0 := hp _ (Ideal.mul_mem_left _ _ h2)
     have e2 : T (a * α) = 0 := hp _ (h1 a ha)
     have hs : a * α' = a + a * (α + α' - 1) - a * α := by ring
-    rw [hs, map_sub, map_add, e1, e2]
+    rw [hs, map_sub, map_add (f := _), e1, e2]
     simp
   intro a ha
   have step : ∀ k : ℕ, T a = T (a * α' ^ k) ∧ a * α' ^ k ∈ u ^ (k + 1) := by
@@ -92,9 +140,9 @@ theorem UpperTheory.Gal.crystallineComparison.Mod.tanOne_of :
   let Tm : 𝓞 D.F →+* Module.End κ (GlobalTheory.TanPtMod.Tan (𝟙 (Sp κ)) o.A) :=
     (GlobalTheory.TanPtMod.actEnd o.act).comp (algebraMap (𝓞 D.F) D.O)
   let toE : (algPt κ (DualNumber κ) ⟶ o.A) → (epsPtR (𝟙 (Sp κ)) ⟶ o.A) :=
-    fun v => Over.homMk v.left (by simpa using Over.w v)
+    fun v => Over.homMk v.left (by simp)
   let frE : (epsPtR (𝟙 (Sp κ)) ⟶ o.A) → (algPt κ (DualNumber κ) ⟶ o.A) :=
-    fun v => Over.homMk v.left (by simpa using Over.w v)
+    fun v => Over.homMk v.left (by simp)
   have eig : ∀ v : algPt κ (DualNumber κ) ⟶ o.A, Inf (TrivSqZeroExt.fstHom κ κ κ) v →
       (∃ e', KilledBy o (uIdeal D r ^ e') v) →
       IsLieEigen (OActN.toF D o.act) (𝟙 (Sp κ)) (β.comp (b.t i0)) (toE v) := by
@@ -104,7 +152,6 @@ theorem UpperTheory.Gal.crystallineComparison.Mod.tanOne_of :
     have hkill : ∀ a ∈ uIdeal D r ^ e', Tm a (GlobalTheory.TanPtMod.Tan.mk (toE v) hmem) = 0 := by
       intro a ha'
       apply GlobalTheory.TanPtMod.Tan.ext
-      rw [GlobalTheory.TanPtMod.Tan.hom_zero]
       show toE v ≫ o.act.act (algebraMap _ _ a) = 1
       ext1
       have h4 := congrArg Over.Hom.left (hk a ha')
@@ -119,7 +166,7 @@ theorem UpperTheory.Gal.crystallineComparison.Mod.tanOne_of :
       · have hz := hu _ (sub_mem_uIdeal D r)
         rw [map_sub, LinearMap.sub_apply, sub_eq_zero, map_intCast] at hz
         have hz2 := congrArg GlobalTheory.TanPtMod.Tan.hom hz
-        rw [Module.End.intCast_apply, ← Int.cast_smul_eq_zsmul κ, GlobalTheory.TanPtMod.Tan.hom_smul] at hz2
+        rw [intCast_apply_eq_smul, ← Int.cast_smul_eq_zsmul κ, GlobalTheory.TanPtMod.Tan.hom_smul] at hz2
         rw [hρ]
         exact congrArg Over.Hom.left hz2
     obtain ⟨w', hw', hprod⟩ := o.lie κ β (𝟙 (Sp κ)) (Category.id_comp _) (toE v) hsc

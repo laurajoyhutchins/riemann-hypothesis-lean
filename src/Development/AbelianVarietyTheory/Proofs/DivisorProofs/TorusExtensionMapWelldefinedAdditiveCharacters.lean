@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusHomOfIff
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TwistBaseChangeAndValuationStatements
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformizationEndomorphismCalculus
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusHomOfIff
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsNsmulIffEq
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniformizationEndomorphismOfLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.CancelSecAct
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.DVR
@@ -18,7 +65,7 @@ variable {R : Type} [CommRing R] [IsDomain R] {D₁ D₂ : DegPre R}
 
 section Rep
 
-open FreeAbelianGroup
+open FreeAddCommGroup
 
 variable {T₀ : Over (Sp R)}
 
@@ -27,18 +74,18 @@ abbrev JVals (D₁ D₂ : DegPre R) (T₀ : Over (Sp R)) :=
     (T.left.presheaf.stalk z)ˣ
 
 def fsEval {U : Type} [CommGroup U] (h : (T₀.left ⟶ D₁.P.A.left ⨿ D₂.P.A.left) → U)
-    (s : FreeAbelianGroup (T₀ ⟶ D₁.P.A) × FreeAbelianGroup (T₀ ⟶ D₂.P.A)) : U :=
-  (FreeAbelianGroup.lift (fun q : T₀ ⟶ D₁.P.A => Additive.ofMul (h (q.left ≫ coprod.inl))) s.1 +
-    FreeAbelianGroup.lift (fun q : T₀ ⟶ D₂.P.A => Additive.ofMul (h (q.left ≫ coprod.inr))) s.2).toMul
+    (s : FreeAddCommGroup (T₀ ⟶ D₁.P.A) × FreeAddCommGroup (T₀ ⟶ D₂.P.A)) : U :=
+  (FreeAddCommGroup.lift (fun q : T₀ ⟶ D₁.P.A => Additive.ofMul (h (q.left ≫ coprod.inl))) s.1 +
+    FreeAddCommGroup.lift (fun q : T₀ ⟶ D₂.P.A => Additive.ofMul (h (q.left ≫ coprod.inr))) s.2).toMul
 
 theorem fsEval_add {U : Type} [CommGroup U] (h : (T₀.left ⟶ D₁.P.A.left ⨿ D₂.P.A.left) → U)
-    (s s' : FreeAbelianGroup (T₀ ⟶ D₁.P.A) × FreeAbelianGroup (T₀ ⟶ D₂.P.A)) :
+    (s s' : FreeAddCommGroup (T₀ ⟶ D₁.P.A) × FreeAddCommGroup (T₀ ⟶ D₂.P.A)) :
     fsEval h (s + s') = fsEval h s * fsEval h s' := by
-  simp only [fsEval, Prod.fst_add, Prod.snd_add, map_add]
+  simp only [fsEval, Prod.fst_add, Prod.snd_add, map_add (f := _)]
   rw [add_add_add_comm]
   rfl
 
-def JRep (s : FreeAbelianGroup (T₀ ⟶ D₁.P.A) × FreeAbelianGroup (T₀ ⟶ D₂.P.A)) (v : JVals D₁ D₂ T₀) : Prop :=
+def JRep (s : FreeAddCommGroup (T₀ ⟶ D₁.P.A) × FreeAddCommGroup (T₀ ⟶ D₂.P.A)) (v : JVals D₁ D₂ T₀) : Prop :=
   ∃ (K : Type) (_ : Fintype K) (φ : K → (T₀.left ⟶ D₁.P.A.left ⨿ D₂.P.A.left)) (ε : K → ℤ)
     (t : LB.Gen (LB.LinComb (JN D₁ D₂) φ ε)), t.IsGen ∧
     (∀ (U : Type) [CommGroup U] (h : (T₀.left ⟶ D₁.P.A.left ⨿ D₂.P.A.left) → U), ∏ k, h (φ k) ^ ε k = fsEval h s) ∧
@@ -78,7 +125,7 @@ theorem JRep.cub₁ (x x' y : T₀ ⟶ D₁.P.A) :
     fun T ρ z J hJ => ((isPart_inl D₁.P.L D₂.P.L).val_gen _ _ z hJ).trans
       (val_cub D₁.cub ρ ((isPart_inl D₁.P.L D₂.P.L).good hJ) _ _ _)⟩
   refine (prod_cub x x' y (fun q => h (q ≫ coprod.inl))).trans ?_
-  simp only [fsEval, map_add, map_sub, map_zero, lift_apply_of, add_zero, toMul_add, toMul_sub, toMul_ofMul,
+  simp only [fsEval, map_add (f := _), map_sub, map_zero, lift_apply_of, add_zero, toMul_add, toMul_sub, toMul_ofMul,
     div_eq_mul_inv]
 
 theorem JRep.cub₂ (x x' y : T₀ ⟶ D₂.P.A) :
@@ -90,7 +137,7 @@ theorem JRep.cub₂ (x x' y : T₀ ⟶ D₂.P.A) :
     fun T ρ z J hJ => ((isPart_inr D₁.P.L D₂.P.L).val_gen _ _ z hJ).trans
       (val_cub D₂.cub ρ ((isPart_inr D₁.P.L D₂.P.L).good hJ) _ _ _)⟩
   refine (prod_cub x x' y (fun q => h (q ≫ coprod.inr))).trans ?_
-  simp only [fsEval, map_add, map_sub, map_zero, lift_apply_of, zero_add, toMul_add, toMul_sub, toMul_ofMul,
+  simp only [fsEval, map_add (f := _), map_sub, map_zero, lift_apply_of, zero_add, toMul_add, toMul_sub, toMul_ofMul,
     div_eq_mul_inv]
 
 theorem JRep.cmp {b : D₁.P.A ⟶ D₂.P.A} {p : D₁.X} {χ : D₂.X} {u : LB.Gen (CmpLB D₁ D₂ b p χ)} (hu : u.IsGen)
@@ -112,7 +159,7 @@ theorem JRep.cmp {b : D₁.P.A ⟶ D₂.P.A} {p : D₁.X} {χ : D₂.X} {u : LB.
     ((Finset.prod_congr rfl fun k _ => congrArg (fun q => h q ^ Oinvε k) (a₂ k)).trans
       (OLinEnd.prod_Oφ_inv D₂ (x ≫ b) χ (fun q => h (q ≫ coprod.inr))))).trans ?_
   apply Additive.ofMul.injective
-  simp only [fsEval, map_add, map_sub, map_neg, lift_apply_of, ofMul_mul, ofMul_inv, ofMul_toMul]
+  simp only [fsEval, map_add (f := _), map_sub, map_neg, lift_apply_of, ofMul_mul, ofMul_inv, ofMul_toMul]
   abel
 
 end Rep
@@ -125,7 +172,7 @@ variable {R : Type} [CommRing R] [IsDomain R] {D₁ D₂ : DegPre R}
 
 section Cmp
 
-open FreeAbelianGroup
+open FreeAddCommGroup
 
 variable {b : D₁.P.A ⟶ D₂.P.A} {p p' p'' : D₁.X} {χ χ' χ'' : D₂.X} {T : Over (Sp R)} {z : T.left}
   {J : (T.left ⟶ D₁.P.A.left ⨿ D₂.P.A.left) → (JN D₁ D₂).ι}
@@ -261,7 +308,7 @@ theorem jexists_act (hG : GlobalFnsSt) [IsMonHom b] (u : ∀ χ, LB.Gen (CmpLB D
       have e₁ := congrArg Additive.ofMul
         (jcmp_add_char hG (hu χ) (hu χ') (hu (χ + χ')) (map_add _ _ _) hJ g.b)
       have e₂ := charVal_add g ((isPart_inl D₁.P.L D₂.P.L).good hJ) (hh χ) (hh χ')
-      rw [← map_add] at e₂
+      rw [← map_add (f := _)] at e₂
       have e₃ := congrArg Additive.ofMul e₂
       rw [VV _ y J hJ, VV _ y J hJ, VV _ y J hJ]
       apply Additive.ofMul.injective

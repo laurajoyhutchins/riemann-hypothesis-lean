@@ -1,5 +1,52 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.StandardValuations.SplitProd
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.ExistsUpperProjectionInverseTranspose
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.StandardValuations.SplitProd
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.SplitLoc
+public import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.ExistsUpperProjectionInverseTranspose
+import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -136,7 +183,7 @@ theorem pRam_low (hϖ : IsUnif ϖ) (y : Matrix (Fin a') (Fin a) k) : pRam a a' �
     if ∀ i j, valuation k (y i j) ≤ valuation k ((ϖ : k) ^ c) then 1 else 0 := by
   have e := low_X (k := k) y
   rw [pRam, bigZetaIntegral_eq, gdet_low, bigF_std hϖ (by
-    ext i j; rw [submatrix_apply, eA, id]; erw [e]; simp [one_apply, eq_comm])]
+    ext i j; rw [submatrix_apply, eA, id]; erw [e]; simp [Matrix.one_apply, eq_comm])]
   simp only [map_one, Units.val_one, apow_one, one_mul]
   refine if_congr ⟨fun h i j => ?_, fun h i j => ?_⟩ rfl rfl
   · have := h j (finSumFinEquiv (Sum.inr i))
@@ -144,7 +191,7 @@ theorem pRam_low (hϖ : IsUnif ϖ) (y : Matrix (Fin a') (Fin a) k) : pRam a a' �
     simpa using this
   · obtain ⟨j | j, rfl⟩ := finSumFinEquiv.surjective j
     · erw [e, show finSumFinEquiv (Sum.inl j) = eA a a' j from rfl, rad_e]
-      simp only [fromBlocks_apply₁₁, one_apply]; split_ifs <;> simp
+      simp only [fromBlocks_apply₁₁, Matrix.one_apply]; split_ifs <;> simp
     · erw [e, rad_AB]; simpa using h j i
 
 open Classical in
@@ -163,7 +210,7 @@ theorem pRam'_low (y : Matrix (Fin a') (Fin a) k) : pRam' a a' ν α (std ν ϖ 
   · obtain ⟨j | j, rfl⟩ := finSumFinEquiv.surjective j
     · erw [e, rad_BA]; simpa using h i j
     · erw [e, show finSumFinEquiv (Sum.inr j) = eB a a' j from rfl, rad_e]
-      simp only [fromBlocks_apply₂₂, one_apply]; split_ifs <;> simp
+      simp only [fromBlocks_apply₂₂, Matrix.one_apply]; split_ifs <;> simp
 
 theorem pRam_ne (hϖ : IsUnif ϖ) : pRam a a' ϖ ν β (std ν ϖ c (eA a a')) ≠ 0 := fun h => by
   have := congrFun h (low 0)

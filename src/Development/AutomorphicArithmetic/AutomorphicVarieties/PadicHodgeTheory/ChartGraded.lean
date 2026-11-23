@@ -1,5 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.PredMulSumPadicValNatFactorialAddCardLe
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.PredMulSumPadicValNatFactorialAddCardLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open UpperTheory.V.Loc UpperTheory.V.Alg IsLocalRing
 
@@ -34,7 +79,7 @@ private theorem cg_ext {O R E : Type} [CommRing O] [IsDomain O] [CommRing R] [Al
     intro N b hb
     obtain ⟨u, hu, v, hv, rfl⟩ := Submodule.mem_sup.mp hb
     have hv0 : α v - β v = 0 := sub_eq_zero.mpr (hI v hv)
-    rw [map_add, map_add, add_sub_add_comm, hv0, add_zero]
+    rw [map_add (f := _), map_add (f := _), add_sub_add_comm, hv0, add_zero]
     exact Ideal.sub_mem _ (hA α hα N u hu) (hA β hβ N u hu)
   have hC : ∀ p : MvPolynomial (Fin n) O, α (MvPolynomial.aeval z p) = β (MvPolynomial.aeval z p) := by
     intro p
@@ -50,7 +95,7 @@ private theorem cg_ext {O R E : Type} [CommRing O] [IsDomain O] [CommRing R] [Al
     | C c =>
       rw [MvPolynomial.aeval_C, AlgHom.commutes, MvPolynomial.map_C, MvPolynomial.coe_C,
         MvPowerSeries.algebraMap_apply]
-    | add p q hp hq => simp only [map_add, hp, hq, MvPolynomial.coe_add]
+    | add p q hp hq => simp only [map_add (f := _), hp, hq, MvPolynomial.coe_add]
     | mul_X p i hp =>
       simp only [map_mul, hp, MvPolynomial.aeval_X, hz i, MvPolynomial.map_X, MvPolynomial.coe_mul,
         MvPolynomial.coe_X]
@@ -70,7 +115,7 @@ private theorem cg_ext {O R E : Type} [CommRing O] [IsDomain O] [CommRing R] [Al
       have hds : d ∈ s := by
         rw [hs, Set.Finite.mem_toFinset]
         exact hd
-      have hcp : MvPolynomial.coeff d p = k d := by
+      have hcp : AddMonoidAlgebra.coeff p d = k d := by
         rw [hp, MvPolynomial.coeff_sum]
         simp only [MvPolynomial.coeff_monomial]
         rw [Finset.sum_ite_eq' s d (fun e => k e), if_pos hds]

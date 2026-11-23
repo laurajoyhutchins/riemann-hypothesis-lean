@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsAlgebraMapEqRoot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSmulMemMMOfEqLphiUAdd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsAlgebraMapEqRoot
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSmulMemMMOfEqLphiUAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,9 +56,10 @@ open PowerSeries
 
 theorem padicValNat_factorial_le_sub (l i j : ℕ) [hp : Fact l.Prime] (hji : j ≤ i) (hjl : j < l) :
     padicValNat l i.factorial ≤ i - j := by
-  have hL := sub_one_mul_padicValNat_factorial (p := l) i
+  have hL : (l - 1) * padicValNat l i.factorial = i - (l.digits i).sum := by
+    simpa only [Nat.padicValNat_def] using (Nat.Prime.sub_one_mul_multiplicity_factorial (n := i) hp.out)
   rcases Nat.eq_zero_or_pos i with rfl | hi
-  · simp
+  · simp [_root_.Nat.padicValNat_def (n := 1)]
   have hpos : 0 < (l.digits i).sum := by
     rcases Nat.eq_zero_or_pos (l.digits i).sum with h0 | h0
     · exfalso
@@ -40,15 +87,16 @@ section Padic
 variable {O K : Type} [CommRing O] [NormedField K] [IsUltrametricDist K] [Algebra O K]
   [IsUnitBall O K] (l : ℕ) [Fact l.Prime] [NormedAlgebra ℚ_[l] K]
 
-omit [IsUltrametricDist K] in
 
+omit [IsUltrametricDist K] in
 theorem norm_pow_sub_le_norm_factorial {i j : ℕ} (hji : j ≤ i) (hjl : j < l) :
     ‖(l : K)‖ ^ (i - j) ≤ ‖(i.factorial : K)‖ := by
   rw [norm_l, norm_natCast_eq l, Padic.norm_eq_zpow_neg_valuation (by
     exact_mod_cast i.factorial_ne_zero), Padic.valuation_natCast, inv_pow, zpow_neg, zpow_natCast]
   have h1 : (1 : ℝ) ≤ l := by exact_mod_cast (Fact.out : l.Prime).one_le
   exact inv_anti₀ (by positivity)
-    (pow_le_pow_right₀ h1 (padicValNat_factorial_le_sub l i j hji hjl))
+    (pow_le_pow_right₀ h1 (by
+      simpa only [Nat.padicValNat_def] using padicValNat_factorial_le_sub l i j hji hjl))
 
 theorem C_mem_S {e : ℕ} {c : K} (hc : ‖c‖ ≤ 1) : C c ∈ S O K e := by
   rw [← monomial_zero_eq_C_apply]
@@ -60,7 +108,7 @@ theorem exists_frob_E_eq (e : ℕ) [NeZero e] : ∃ d ∈ S O K e, frob K l (E K
     have h0 : 0 < ‖(l : K)‖ := norm_pos_iff.2 (l_ne_zero l)
     rw [inv_mul_le_one₀ h0]
     exact norm_natCast_le_of_dvd (Nat.dvd_factorial (Fact.out : l.Prime).pos le_rfl)
-  · rw [E, map_add, map_pow, frob_X, map_natCast, monomial_eq_C_mul_X_pow, mul_add, mul_one,
+  · rw [E, map_add (f := _), map_pow, frob_X, map_natCast, monomial_eq_C_mul_X_pow, mul_add, mul_one,
       ← mul_assoc, ← map_mul, mul_inv_cancel₀ (l_ne_zero l), map_one, one_mul, ← pow_mul,
       mul_comm l e, add_comm, map_natCast]
 
@@ -92,14 +140,14 @@ theorem exists_frob_eq_of_mem_Fil (e : ℕ) [NeZero e] {j : ℕ} (hjl : j < l) {
     | add x y _ _ hx hy =>
       obtain ⟨s, hs, h1⟩ := hx
       obtain ⟨t, ht, h2⟩ := hy
-      exact ⟨s + t, add_mem hs ht, by rw [Subalgebra.coe_add, map_add, h1, h2, mul_add]⟩
+      exact ⟨s + t, add_mem hs ht, by rw [Subalgebra.coe_add, map_add (f := _), h1, h2, mul_add]⟩
     | smul c x _ hx =>
       obtain ⟨s, hs, h1⟩ := hx
       exact ⟨frob K l c * s, mul_mem (frob_mem_S l c.2) hs, by
         rw [smul_eq_mul, Subalgebra.coe_mul, map_mul, h1]; ring⟩
   obtain ⟨s, hs, h1⟩ := key g hg
   refine ⟨s + frob K l h, add_mem hs (frob_mem_S l h.2), ?_⟩
-  rw [Subalgebra.coe_add, Subalgebra.coe_mul, map_add, map_mul, h1, mul_add]
+  rw [Subalgebra.coe_add, Subalgebra.coe_mul, map_add (f := _), map_mul, h1, mul_add]
   congr 2
   simp
 
@@ -116,6 +164,6 @@ theorem phi_FilMM_mem : ∀ (O K : Type) [CommRing O] [NormedField K] [IsUltrame
       smul_comm ((l : K) ^ η) ((l : K) ^ j), smul_comm ((l : K) ^ η) s]
   · obtain ⟨v₁, h₁, e₁⟩ := hx
     obtain ⟨v₂, h₂, e₂⟩ := hy
-    exact ⟨v₁ + v₂, add_mem h₁ h₂, by rw [map_add, smul_add, e₁, e₂, smul_add]⟩
+    exact ⟨v₁ + v₂, add_mem h₁ h₂, by rw [map_add (f := _), smul_add, e₁, e₂, smul_add]⟩
 
 end GlobalTheory.BK

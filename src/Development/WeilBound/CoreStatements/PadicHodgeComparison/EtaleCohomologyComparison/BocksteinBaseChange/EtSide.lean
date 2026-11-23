@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HarishChandraFormulaStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HarishChandraFormulaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -59,14 +100,14 @@ structure EtSide : Prop where
     (hu : ∀ a, u a ≫ M.p = (P a).p), (∀ a, G (P a) ∧ (P a).Conn (d a)) ∧
     ∀ (j : ℕ) (v : M.V j), (∀ a, Model.pullV (u a) (hu a) j v = 0) → v = 0
 
-open GlobalTheory.EtC in
 
+open GlobalTheory.EtC in
 def InBock : Prop := ∀ (p a b : ℕ) [Fact p.Prime] (X : Scheme.{0}), IsUnit (p : Γ(X, ⊤)) → ∀ (n i : ℤ)
   (z : Ht (p ^ (a + b)) (sch.obj X) n i), red (p ^ (a + b)) (p ^ b) _ n i z = 0 →
     p ^ a • z = 0 ∧ ∃ w : Ht (p ^ a) (sch.obj X) n i, red (p ^ (a + b)) (p ^ a) _ n i z = p ^ b • w
 
-open GlobalTheory.EtC in
 
+open GlobalTheory.EtC in
 def InRoot : Prop := ∀ (q : ℕ) [NeZero q] (X : Scheme.{0}), Nonempty (Prim q Γ(X, ⊤)) → ∀ i : ℤ,
   ∃ (u : Ht q (sch.obj X) 0 i) (v : Ht q (sch.obj X) 0 (-i)), cup q v u = (one q (sch.obj X)).cast (by ring) (by ring)
 
@@ -74,8 +115,8 @@ def IsSum {X : Scheme.{0}} {r : ℕ} {Y : Fin r → Scheme.{0}} (j : ∀ s, Y s 
   (∀ s, IsOpenImmersion (j s)) ∧ (∀ x : X, ∃ s, x ∈ Set.range (j s)) ∧
     ∀ s s', s ≠ s' → Disjoint (Set.range (j s)) (Set.range (j s'))
 
-open GlobalTheory.EtC in
 
+open GlobalTheory.EtC in
 def InSum : Prop := ∀ (R : Type) [CommRing R] (F : Shv R) {X : Scheme.{0}} {r : ℕ} {Y : Fin r → Scheme.{0}} (j : ∀ s, Y s ⟶ X),
   IsSum j → ∀ n : ℤ, Function.Bijective fun (x : H R (sch.obj X) F n) (s : Fin r) => pull R (sch.map (j s)) F n x
 

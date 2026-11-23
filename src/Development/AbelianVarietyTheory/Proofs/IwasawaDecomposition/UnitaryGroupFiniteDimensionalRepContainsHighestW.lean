@@ -1,12 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.FiniteIntertwining
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsGoodFamily
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIrreducibleSmallRepUnitary
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHarishChandraTypeDualWeylModuleFockNorm
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIntertwinerOfSameHarishChandraParamUnitary
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsHighestWeightIrreducibleUnitaryRepU
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHarishChandraTypeDualWeylModuleFockNorm
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIntertwinerOfSameHarishChandraParamUnitary
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIrreducibleSmallRepUnitary
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasModelOfAntitone
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsGoodFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.PRep GlobalTheory.UnitaryBC Formalism.UG Formalism.BasicNotions GlobalTheory.DefU
 open scoped InnerProductSpace
@@ -48,8 +98,8 @@ theorem star_permMat {n : ℕ} (s : Equiv.Perm (Fin n)) : star (permMat s) = per
 theorem permMat_mem {n : ℕ} (s : Equiv.Perm (Fin n)) : permMat s ∈ Matrix.unitaryGroup (Fin n) ℂ := by
   rw [Matrix.mem_unitaryGroup_iff, star_permMat, permMat_mul]
 
-open Formalism.MainNotions.S in
 
+open Formalism.MainNotions.S in
 theorem weight_int_dom {n : ℕ} {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     {π : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} (hπ : IsURepOn (UJset (allPos n)) π) {Λ : Fin n → ℝ}
     (hK : IsKTypeOf (allPos n) π Λ ⊤) :
@@ -142,10 +192,6 @@ def restr {G V : Type} [Monoid G] [AddCommGroup V] [Module ℂ V] (ρ : Represen
   map_one' := by ext v; simp
   map_mul' a b := by ext v; simp
 
-@[simp] theorem restr_apply {G V : Type} [Monoid G] [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ G V)
-    (S : Submodule ℂ V) (hS : ∀ g, ∀ v ∈ S, ρ g v ∈ S) (g : G) (v : S) :
-    ((restr ρ S hS g v : S) : V) = ρ g v := rfl
-
 theorem exists_minimal {G V : Type} [Monoid G] [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V]
     [Nontrivial V] (ρ : Representation ℂ G V) :
     ∃ S : Submodule ℂ V, S ≠ ⊥ ∧ (∀ g, ∀ v ∈ S, ρ g v ∈ S) ∧
@@ -190,7 +236,7 @@ theorem exists_intertwining_of_minimal {n : ℕ} {V : Type} [AddCommGroup V] [Mo
       funext u
       exact (b.sum_repr (σ u v)).symm
     rw [e]
-    exact continuous_finset_sum _ fun i _ => (hcS (b.coord i) v).smul continuous_const
+    exact continuous_finsetSum _ fun i _ => (hcS (b.coord i) v).smul continuous_const
   let π : Matrix (Fin n) (Fin n) ℂ → (S →L[ℂ] S) := fun g =>
     if hg : g ∈ Matrix.unitaryGroup (Fin n) ℂ then LinearMap.toContinuousLinearMap (σ ⟨g, hg⟩) else 0
   have hπu : ∀ g (hg : g ∈ Matrix.unitaryGroup (Fin n) ℂ) (v : S), π g v = σ ⟨g, hg⟩ v := by

@@ -1,17 +1,60 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.LocalComparisonSplitting.EulerFactorLevels.EulerFinOf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralEqSumSmallerLevelStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralTwistedConjInvariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PLocPrjGOfNotMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousInvolutiveLocalTransposeInverse
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalSupportFacts
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeIntegralFiniteSumStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDiagonalDoubleCosetsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompactPartDiagonalMapStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCompactConjugacyTransversalStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeConvolutionSupportStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RelIndexNeZeroOfOpenLeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SwapTwistedCentralizerDiagonalStatement
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.LocalComparisonSplitting.EulerFactorLevels.EulerFinOf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDiagonalDoubleCosets
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralEqSumSmallerLevelStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompactPartDiagonalMapStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDiagonalDoubleCosetsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeConvolutionSupportStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HeckeIntegralFiniteSumStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalSupportFacts
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RelIndexNeZeroOfOpenLeStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SwapTwistedCentralizerDiagonalStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open GlobalTheory.BCT PositivityTheory.Rg.BcB.G8.Fin
 open scoped Classical
 
@@ -19,14 +62,12 @@ noncomputable section
 
 namespace GlobalTheory.CompanionTheory.SplitSwap
 
+open GlobalTheory.CompanionTheory.OrbitCount (dg dg_injective)
 open scoped Pointwise
 
 variable {H : Type} [Group H]
 
-set_option quotPrecheck false in
-local notation "dg" => ((MonoidHom.id H).prod (MonoidHom.id H))
-set_option quotPrecheck false in
-local notation "sw" => ((MulEquiv.prodComm : H × H ≃* H × H).toMonoidHom)
+local notation "sw" => MulEquiv.toMonoidHom (MulEquiv.prodComm : H × H ≃* H × H)
 
 theorem relIndex_sq (A B : Subgroup H) :
     (A.prod A).relIndex (B.prod B) = A.relIndex B * A.relIndex B := by
@@ -49,12 +90,11 @@ theorem stab_pair (Z C K L : Subgroup H)
     (hL : ∀ x : H, (Z ⊓ L.map (MulAut.conj x).toMonoidHom).relIndex C ≠ 0) (x : H × H) :
     Z.map dg ⊓ (K.prod K).map (MulAut.conj x).toMonoidHom ≤ C.map dg ∧
       (Z.map dg ⊓ (L.prod L).map (MulAut.conj x).toMonoidHom).relIndex (C.map dg) ≠ 0 := by
-  have hinj : Function.Injective dg := fun a b h => congrArg Prod.fst h
   constructor
   · rintro _ ⟨⟨t, ht, rfl⟩, ⟨⟨k₁, k₂⟩, ⟨hk₁, -⟩, he⟩⟩
     refine ⟨t, hK x.1 ⟨ht, k₁, hk₁, congrArg Prod.fst he⟩, rfl⟩
   · have h0 := Subgroup.relIndex_inf_ne_zero (hL x.1) (hL x.2)
-    rw [← Subgroup.relIndex_map_map_of_injective _ _ hinj] at h0
+    rw [← Subgroup.relIndex_map_map_of_injective _ _ (dg_injective (H := H))] at h0
     refine ne_zero_of_dvd_ne_zero h0 (Subgroup.relIndex_dvd_of_le_left _ ?_)
     rintro _ ⟨t, ⟨⟨ht, l₁, hl₁, e₁⟩, ⟨-, l₂, hl₂, e₂⟩⟩, rfl⟩
     refine ⟨⟨t, ht, rfl⟩, (l₁, l₂), ⟨hl₁, hl₂⟩, Prod.ext e₁ e₂⟩

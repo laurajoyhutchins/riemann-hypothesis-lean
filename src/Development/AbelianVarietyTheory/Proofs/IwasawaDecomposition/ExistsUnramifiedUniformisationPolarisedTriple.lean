@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BlowPolSt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolynomialSupportHolds
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ModuliModelUltrametricPoints
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DegenerationDataCoordsNeZeroLatticesIsomorphic
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformisationTriplesCompleteDVRTorsion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.IsPrecompleteOfBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ModuliModelUltrametricPoints
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformisationTriplesCompleteDVRTorsion
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DegenerationDataCoordsNeZeroLatticesIsomorphic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.IsPrecompleteOfBasis
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -139,15 +185,66 @@ theorem exists_unif_unram : ∀ (E : Type) [Field E] [NumberField E] [IsCMField 
     simp [β]
   have hsp := h W (algebraMap V W) β hβ fun x hx =>
     ⟨e ⟨x, IntermediateField.subset_adjoin _ _ hx⟩, by simp [β]⟩
-  obtain ⟨PP', cub, sym, adj, prim, m, -⟩ := sabPull CubePf.cubePull (spMap (algebraMap V W)) t
-  have j : Function.Injective ((algebraMap W (FractionRing W)).comp (algebraMap V W)) :=
-    (IsFractionRing.injective W _).comp hinj
-  let g : FractionRing V →+* FractionRing W := IsFractionRing.lift j
-  have hp' := GlobalTheory.DatUniq.polAt_pull m hp (jK W) (spMap g)
-    ((GlobalTheory.Ex.UnifModel.spMap_comp (IsFractionRing.lift_algebraMap j)).trans
-      (GlobalTheory.Ex.UnifModel.spMap_comp fun _ => rfl).symm)
-  have hW : CDvr W := (cDvr_iff W).2 ⟨inferInstance, hcW, hzW⟩
-  obtain ⟨P, -⟩ := GlobalTheory.LN.uDvrSt_holds E H W hW _ hp' hsp
-  exact ⟨W, inferInstance, inferInstance, inferInstance, algebraMap V W, hW, hinj, hloc, hirr ϖ hϖ, _, m, ⟨P⟩⟩
+  open scoped CategoryTheory.Obj in
+    let f := spMap (algebraMap V W)
+    have hC := Out.CubePf.cubePull
+    have hsemi : IsSemiAbelian ((Over.pullback f).obj t.G) := by
+      refine { comm := ?_, smooth := ?_, separated := ?_, quasiCompact := ?_, geomConnected := ?_, fibres := ?_ }
+      · have := t.semi.comm
+        infer_instance
+      · have := t.semi.smooth
+        change Smooth (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.separated
+        change IsSeparated (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.quasiCompact
+        change QuasiCompact (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.geomConnected
+        change GeometricallyConnected (pullback.snd t.G.hom f)
+        infer_instance
+      · intro Ω _ _ q
+        obtain ⟨A⟩ := t.semi.fibres Ω (q ≫ f)
+        exact ⟨torusExtOfIso (pullCompIso q f t.G) A⟩
+    have hp : ∃ (PP' : RigLB ((Over.pullback f).obj t.G)) (cub : CubicalStr _ PP') (sym : PP'.IsSymmetric) (adj : _) (prim : _)
+        (m : SABMap ⟨(Over.pullback f).obj t.G, hsemi, OAct.pullback f t.G t.act, PP', cub,
+          sym, adj, prim⟩ t f), m.φ = pullback.fst t.G.hom f := by
+      have h := isGrpPullback_pullback t.G f
+      obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := hC (Sp V) (Sp W) t.G _ (cubeMapOf h) t.PP t.cub
+      have hact : ∀ a, ((OAct.pullback f t.G t.act).act a).left ≫ pullback.fst t.G.hom f =
+          pullback.fst t.G.hom f ≫ (t.act.act a).left := fun a => pullback.lift_fst _ _ _
+      have pa : ∀ {T : Over (Sp W)} (x : T ⟶ (Over.pullback f).obj t.G) a,
+          pushPt h.1.w (x ≫ (OAct.pullback f t.G t.act).act a) = pushPt h.1.w x ≫ t.act.act a := fun x a =>
+        Over.OverMorphism.ext (by
+          show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+          rw [Category.assoc, hact, Category.assoc])
+      refine ⟨(cubeMapOf h).rigLB t.PP hL hr, c', hs t.sym, fun a => ?_, ?_, ⟨cubeMapOf h, h, rfl, hact, hc'⟩, rfl⟩
+      · let U := CartesianMonoidalCategory.lift (pushPt h.1.w (CartesianMonoidalCategory.fst ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+          (pushPt h.1.w (CartesianMonoidalCategory.snd ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+        refine LBIso.chartPull (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+          (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (t.adj a)
+        · fin_cases i
+          · exact (pa _ a).trans (by simp [U])
+          · simp [U]
+        · fin_cases i
+          · simp [U]
+          · exact (pa _ _).trans (by simp [U])
+      · let U := pushPt h.1.w (𝟙 ((Over.pullback f).obj t.G))
+        refine LBIso.chartPull (chartPullPull t.PP.L _)
+          (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) t.prim
+        fin_cases i
+        · simp [U]
+        · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
+    obtain ⟨_, _, _, _, _, m, -⟩ := hp
+    have j : Function.Injective ((algebraMap W (FractionRing W)).comp (algebraMap V W)) :=
+      (IsFractionRing.injective W _).comp hinj
+    let g : FractionRing V →+* FractionRing W := IsFractionRing.lift j
+    have hp' := GlobalTheory.DatUniq.polAt_pull m hp (jK W) (spMap g)
+      ((GlobalTheory.Ex.UnifModel.spMap_comp (IsFractionRing.lift_algebraMap j)).trans
+        (GlobalTheory.Ex.UnifModel.spMap_comp fun _ => rfl).symm)
+    have hW : CDvr W := (cDvr_iff W).2 ⟨inferInstance, hcW, hzW⟩
+    obtain ⟨P, -⟩ := GlobalTheory.LN.uDvrSt_holds E H W hW _ hp' hsp
+    exact ⟨W, inferInstance, inferInstance, inferInstance, algebraMap V W, hW, hinj, hloc, hirr ϖ hϖ, _, m, ⟨P⟩⟩
 
 end GlobalTheory.TorRef

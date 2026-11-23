@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullbackBijectiveDegreesOneTwo
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullbackBijectiveDegreesOneTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,7 +78,7 @@ theorem qAt_comp {T T' T'' : C} (a : T ⟶ T') (b : T' ⟶ T'') (ha : K.QAt a) (
   · obtain ⟨x', w', hx', rfl⟩ := hb.surj1 y hy
     obtain ⟨x, w, hx, rfl⟩ := ha.surj1 x' hx'
     refine ⟨x, K.M0.map b w + w', hx, ?_⟩
-    simp only [map_add, K.M1.map_comp, K.diffZero_natural]
+    simp only [map_add (f := _), K.M1.map_comp, K.diffZero_natural]
     abel
   · rw [K.M2.map_comp] at h
     obtain ⟨w', hw'⟩ := hb.inj2 _ y (by rw [K.diffTwo_natural, hx, map_zero]) h
@@ -44,7 +86,7 @@ theorem qAt_comp {T T' T'' : C} (a : T ⟶ T') (b : T' ⟶ T'') (ha : K.QAt a) (
   · obtain ⟨x', w', hx', rfl⟩ := hb.surj2 y hy
     obtain ⟨x, w, hx, rfl⟩ := ha.surj2 x' hx'
     refine ⟨x, K.M1.map b w + w', hx, ?_⟩
-    simp only [map_add, K.M2.map_comp, K.diffOne_natural]
+    simp only [map_add (f := _), K.M2.map_comp, K.diffOne_natural]
     abel
 
 theorem qAt_of_comp_retract {T T' T'' : C} (a : T ⟶ T') (b : T' ⟶ T'') (c : T'' ⟶ T')
@@ -66,13 +108,13 @@ theorem qAt_of_comp_retract {T T' T'' : C} (a : T ⟶ T') (b : T' ⟶ T'') (c : 
   · obtain ⟨x, w, hx, hw⟩ := h.surj1 (K.M1.map b y) (by rw [K.diffOne_natural, hy, map_zero])
     refine ⟨x, K.M0.map c w, hx, ?_⟩
     have := congrArg (K.M1.map c) hw
-    rw [map_add, K.M1.map_comp, e1, e1, ← K.diffZero_natural] at this
+    rw [map_add (f := _), K.M1.map_comp, e1, e1, ← K.diffZero_natural] at this
     exact this
   · exact h.inj2 x (K.M1.map b y) hx (by rw [K.M2.map_comp, hxy, K.diffOne_natural])
   · obtain ⟨x, w, hx, hw⟩ := h.surj2 (K.M2.map b y) (by rw [K.diffTwo_natural, hy, map_zero])
     refine ⟨x, K.M1.map c w, hx, ?_⟩
     have := congrArg (K.M2.map c) hw
-    rw [map_add, K.M2.map_comp, e2, e2, ← K.diffOne_natural] at this
+    rw [map_add (f := _), K.M2.map_comp, e2, e2, ← K.diffOne_natural] at this
     exact this
 
 theorem qAt_of_isIso {T T' : C} (a : T ⟶ T') [IsIso a] : K.QAt a :=

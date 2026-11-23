@@ -1,15 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.UniformLevelMultiplicity
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelLiftConditions
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelSubgroup
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.UniformLevelMultiplicity
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelLiftConditions
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalVectorMemIdealCompletedLatticeIffStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletion
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CongruenceLatticeFractionalMultipleAgree
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitDeterminantCongruentElement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalVectorMemIdealCompletedLatticeIffStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelGroupLatticeCongruence
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeAutomorphismModHalfLevelStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteUnitChineseRemainder
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CongruenceLatticeFractionalMultipleAgree
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -181,8 +218,8 @@ theorem M_mem : (l.M : 𝓞 D.host.E) ∈ l.Mb := by
 theorem exists_split : ∃ m ∈ l.Mb, ∃ c ∈ Mc l, m + c = 1 :=
   Submodule.mem_sup.1 (by rw [show l.Mb ⊔ Mc l = ⊤ from l.coprime]; exact Submodule.mem_top)
 
-variable (V) in
 
+variable (V) in
 def Ind (ι : Dw.La →ₗ[𝓞 D.host.E] (Fin V.rank → D.host.E)) (γ : LevGrp Dw l) (κ : GA D V) : Prop :=
   κ ∈ IndefiniteRowSideFullHecke.EmbeddingLevelSets.levSet V 1 ∧ ∀ a : Dw.La, (finHom V κ).1 *ᵥ finVec V (ι a) - finVec V (ι (liftLa γ a)) ∈ idl V l.Mb
 
@@ -288,10 +325,6 @@ theorem ind_one_iff (hι : LatEmb V ι) {Kf : Subgroup (GA D V)} (hK : IsLevelK 
 end Lev
 
 section Char
-
-theorem ext_AE {z z' : AE D} (h1 : infPart D z = infPart D z') (h2 : finPart D z = finPart D z') : z = z' := by
-  obtain ⟨e, he, -⟩ := GlobalTheory.AdSplit.exists_adele_equiv D.host.F D.host.E
-  exact e.injective (Prod.ext ((he z).1.trans (h1.trans (he z').1.symm)) ((he z).2.trans (h2.trans (he z').2.symm)))
 
 variable {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E} {Dw : Datum H} {l : Level H}
 

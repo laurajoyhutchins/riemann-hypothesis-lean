@@ -1,5 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PropAA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GaussianTailBound
+module
+
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PropAA
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -44,7 +97,6 @@ theorem cab_J_le (η : EuclideanSpace ℂ ι) (hη : ‖η‖ ≤ 1) (c q : ℕ)
     ∫ v : EuclideanSpace ℂ ι, ‖MvPolynomial.eval (fun i => v i) (cabPoly η c)‖ ^ 2 *
       Real.exp (-(q * Real.pi) * ‖v‖ ^ 2) ≤
       c.factorial * (2 / (q * Real.pi)) ^ c * (2 / q) ^ Fintype.card ι := by
-  have hq' : (0 : ℝ) < q := by exact_mod_cast hq
   set s : ℝ := q * Real.pi / 2 with hs
   have hs0 : 0 < s := by positivity
   have hpt : ∀ v : EuclideanSpace ℂ ι, ‖MvPolynomial.eval (fun i => v i) (cabPoly η c)‖ ^ 2 *
@@ -124,7 +176,6 @@ theorem cab_sup (hS : GSupStatement) (Y : GT ι) (q c : ℕ) (hq : 2 ≤ q) (R0 
     (w : EuclideanSpace ℂ ι) :
     Y.ptN2 q β w ≤ 12 * (5.12 : ℝ) ^ Fintype.card ι * c.factorial * (2 / (q * Real.pi)) ^ c := by
   have hq1 : 1 ≤ q := by omega
-  have hq0 : (0 : ℝ) < q := by exact_mod_cast (by omega : 0 < q)
   have h := hS ι Y q hq1 β hβ w
   set G := Fintype.card ι with hG
   set A := 4 * Real.sqrt (2 * G) / (Real.sqrt (q * Real.pi) * Y.la1) with hA
@@ -151,7 +202,6 @@ theorem cab_sup (hS : GSupStatement) (Y : GT ι) (q c : ℕ) (hq : 2 ≤ q) (R0 
     rw [MeasureTheory.setAverage_eq]
     exact smul_nonneg (inv_nonneg.2 MeasureTheory.measureReal_nonneg)
       (MeasureTheory.integral_nonneg fun v => mul_nonneg (sq_nonneg _) (Real.exp_pos _).le)
-  have hqG : (0 : ℝ) ≤ 2 * (q : ℝ) ^ G := by positivity
   calc Y.ptN2 q β w ≤ 2 * (q : ℝ) ^ G * (1 + A) ^ (2 * G) * Y.l2 q β := h
     _ ≤ 2 * (q : ℝ) ^ G * 2.56 ^ G * (6 * (c.factorial * (2 / (q * Real.pi)) ^ c * (2 / q) ^ G)) := by
         gcongr
@@ -202,9 +252,6 @@ theorem cab_key (c gA : ℕ) (q t0 : ℝ) (hq : 2 ≤ q) (dst : ℝ) (hd : 0 ≤
   have hexp : Real.exp (gA / 4) * Real.exp (c * Real.log (q * c)) * Real.exp (5 * Real.pi * c) *
       Real.exp (-((Real.pi - 2) * t0)) ≤ 1 := by
     rw [← Real.exp_add, ← Real.exp_add, ← Real.exp_add, Real.exp_le_one_iff]
-    have hcl : (c : ℝ) * Real.log (q * c) = c * Real.log (q * c) := rfl
-    have hc0 : (0 : ℝ) ≤ c := Nat.cast_nonneg c
-    have hg0 : (0 : ℝ) ≤ gA := Nat.cast_nonneg gA
     nlinarith [mul_le_mul_of_nonneg_left hC5 (by linarith : (0 : ℝ) ≤ (Real.pi - 2) / 2),
       mul_le_mul_of_nonneg_left hC6 (by linarith : (0 : ℝ) ≤ (Real.pi - 2) / 2)]
   calc (5.12 : ℝ) ^ gA * (2 * (c + 1) / Real.pi) ^ c * Real.exp (5 * Real.pi * c) *
@@ -222,7 +269,6 @@ theorem cab_numeric (c G gA g' dst : ℕ) (q t0 : ℝ) (hq : 2 ≤ q) (hG : G �
         (q * (c + 1)) ^ ((c : ℝ) / 2) * Real.exp (5 * Real.pi * c / 2) *
         (2 * 9 ^ g' * Real.exp (-(Real.pi / 2 * t0))) ≤
       7 * 2 ^ gA * (4.3 : ℝ) ^ dst * Real.exp (-t0) * c.factorial := by
-  have hq0 : 0 < q := by linarith
   have hqc : 0 < q * (c + 1) := by positivity
   have hf1 : (1 : ℝ) ≤ c.factorial := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero c)
   set Y := (q * (c + 1)) ^ ((c : ℝ) / 2) * Real.exp (5 * Real.pi * c / 2) *
@@ -265,7 +311,6 @@ theorem cab_numeric (c G gA g' dst : ℕ) (q t0 : ℝ) (hq : 2 ≤ q) (hG : G �
         Real.exp (-((Real.pi - 2) * t0)) ≤ 4 ^ gA := by
       refine le_trans ?_ hK
       gcongr
-    have hE : 0 ≤ Real.exp (-2 * t0) := (Real.exp_pos _).le
     calc 48 * (c.factorial : ℝ) * 81 ^ g' * Real.exp (-2 * t0) *
           ((5.12 : ℝ) ^ G * (2 * (c + 1) / Real.pi) ^ c * Real.exp (5 * Real.pi * c) *
             Real.exp (-((Real.pi - 2) * t0)))
@@ -294,69 +339,6 @@ end
 section
 
 noncomputable section
-
-theorem cab_tail (hP : Ext.PackingCount) (hA : Ext.GaussianTailBound) {κ : Type}
-    {W : Type*} [NormedAddCommGroup W] [InnerProductSpace ℝ W] [FiniteDimensional ℝ W]
-    (g' : ℕ) (hN : Module.finrank ℝ W = 2 * g') (U : κ → W) (δ k : ℝ) (hδ : 0 < δ) (hk : 0 < k)
-    (hsep : ∀ a b, a ≠ b → δ ≤ ‖U a - U b‖) (hlow : ∀ a, δ ≤ ‖U a‖)
-    (hbig : 2 * (g' : ℝ) + 1 ≤ k * δ ^ 2) :
-    Summable (fun a => Real.exp (-(k * ‖U a‖ ^ 2))) ∧
-      ∑' a, Real.exp (-(k * ‖U a‖ ^ 2)) ≤ 2 * 9 ^ g' * Real.exp (-(k * δ ^ 2)) := by
-  classical
-  set sk := Real.sqrt k with hsk
-  have hsk0 : 0 < sk := Real.sqrt_pos.mpr hk
-  have hsk2 : sk ^ 2 = k := Real.sq_sqrt hk.le
-  set R0 := 4 * sk * δ with hR0
-  have hR00 : 0 < R0 := by positivity
-  let h : κ → ℝ := fun a => 4 * sk * ‖U a‖
-  have hsq : ∀ t : ℝ, Real.exp (-(4 * sk * t) ^ 2 / 16) = Real.exp (-(k * t ^ 2)) := by
-    intro t; congr 1; rw [mul_pow, mul_pow, hsk2]; ring
-  let e := stdOrthonormalBasis ℝ W
-  have hcount : ∀ R : ℝ, R0 ≤ R → ∀ S : Finset κ, (∀ i ∈ S, h i ≤ R) →
-      (S.card : ℝ) ≤ (3 * R / R0) ^ (2 * g') := by
-    intro R hR S hS
-    set R' := R / (4 * sk) with hR'
-    have h4 : 0 < 4 * sk := by positivity
-    have hδR : δ ≤ R' := by
-      rw [hR', le_div_iff₀ h4]; rw [hR0] at hR; linarith
-    let P : Finset (EuclideanSpace ℝ (Fin (Module.finrank ℝ W))) := S.image (fun a => e.repr (U a))
-    have hinj : Set.InjOn (fun a => e.repr (U a)) S := by
-      intro a _ b _ hab
-      by_contra hne
-      have h1 := hsep a b hne
-      simp only at hab
-      have h2 : U a = U b := e.repr.injective hab
-      rw [h2, sub_self, norm_zero] at h1
-      linarith
-    have hcard : P.card = S.card := Finset.card_image_of_injOn hinj
-    have hPn : ∀ x ∈ P, ‖x‖ ≤ R' := by
-      intro x hx
-      obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp hx
-      rw [LinearIsometryEquiv.norm_map, hR', le_div_iff₀ h4]
-      have := hS a ha
-      simp only [h] at this; linarith
-    have hPs : ∀ x ∈ P, ∀ y ∈ P, x ≠ y → δ ≤ dist x y := by
-      intro x hx y hy hxy
-      obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp hx
-      obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hy
-      have hab : a ≠ b := fun hab => hxy (by rw [hab])
-      rw [dist_eq_norm, ← map_sub, LinearIsometryEquiv.norm_map]
-      exact hsep a b hab
-    have := hP _ P δ R' hδ hδR hPn hPs
-    rw [hcard, hN] at this
-    refine this.trans (le_of_eq ?_)
-    congr 1
-    rw [hR', hR0]; field_simp
-  have hlowh : ∀ a, R0 ≤ h a := fun a => by
-    simp only [h, hR0]; exact mul_le_mul_of_nonneg_left (hlow a) (by positivity)
-  have hbig' : 16 * (2 * (g' : ℝ) + 1) ≤ R0 ^ 2 := by
-    rw [hR0, mul_pow, mul_pow, hsk2]; nlinarith
-  obtain ⟨hs, hle⟩ := hA κ h g' R0 hR00 hbig' hlowh hcount
-  have hfun : (fun a => Real.exp (-(h a) ^ 2 / 16)) = fun a => Real.exp (-(k * ‖U a‖ ^ 2)) := by
-    funext a; exact hsq _
-  rw [hfun] at hs hle
-  refine ⟨hs, hle.trans (le_of_eq ?_)⟩
-  rw [hR0, hsq]
 
 end
 

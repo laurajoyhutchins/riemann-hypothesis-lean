@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KernelsMatrix
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KernelsMatrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -57,40 +100,6 @@ def ThetaConstants.Statement : Prop :=
     ∀ (g : ℕ) (ρ d : ℝ), 1 ≤ g → 0 < ρ → 0 < d → ρ ^ 2 ≤ 2 * g → d⁻¹ ≤ ρ ^ 2 * (2 * g) ^ (g - 1) →
       (C₃ * g) ^ ((g : ℝ) / 2) * d ^ (-(1 / 2 : ℝ)) * (1 + 1 / ρ) ^ g ≤
         ((2 : ℝ) ^ g * d) ^ (-(1 / 4 : ℝ)) * exp (g * log (1 + 1 / ρ) + C * g * log (2 * g))
-
-example {g : ℕ} (X Y : Matrix (Fin g) (Fin g) ℝ) (a b : Fin g → ℝ) (z : Fin g → ℂ) :
-    thetaChar X Y a b z = ∑' k, thetaSummand X Y a b z k := rfl
-
-example {g : ℕ} (X Y : Matrix (Fin g) (Fin g) ℝ) (a b u₁ u₂ : Fin g → ℝ) :
-    thetaNorm X Y a b u₁ u₂ = ‖∑' k, thetaSummand X Y a b
-      (periodMatrix X Y *ᵥ (fun i => (u₁ i : ℂ)) + fun i => (u₂ i : ℂ)) k‖ * exp (-π * qf Y u₁) := rfl
-
-example : (1 : Matrix (Fin 2) (Fin 2) ℝ).IsSymm := Matrix.isSymm_one
-
-example : (!![2, 1; 1, 2] : Matrix (Fin 2) (Fin 2) ℝ).PosDef := by
-  rw [Matrix.posDef_iff_dotProduct_mulVec]
-  refine ⟨by ext i j; fin_cases i <;> fin_cases j <;> rfl, fun x hx => ?_⟩
-  have h : x 0 ≠ 0 ∨ x 1 ≠ 0 := by
-    by_contra h; push_neg at h; apply hx; ext i; fin_cases i <;> simp [h.1, h.2]
-  simp only [dotProduct, mulVec, Fin.sum_univ_two, Matrix.of_apply, Matrix.cons_val',
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one,
-    star_trivial]
-  rcases h with h | h
-  · have := pow_pos (abs_pos.mpr h) 2
-    nlinarith [sq_nonneg (x 0 + x 1), sq_abs (x 0)]
-  · have := pow_pos (abs_pos.mpr h) 2
-    nlinarith [sq_nonneg (x 0 + x 1), sq_abs (x 1)]
-
-example : Summable (fun k : Fin 1 → ℤ => ‖(if k = 0 then (1 : ℂ) else 0)‖) :=
-  summable_of_ne_finset_zero (s := {0}) (fun k hk => by simp_all)
-
-example : (1 : Matrix (Fin 1) (Fin 1) ℝ).PosDef ∧ (0 : ℝ) < 1 ∧
-    (1 : Matrix (Fin 1) (Fin 1) ℝ)⁻¹ 0 0 = 1 ^ 2 :=
-  ⟨Matrix.PosDef.one, one_pos, isReducedImaginaryPart_one.first⟩
-
-example : (0 : ℝ) < 1 ∧ 1 ≤ (2 : ℕ) ∧ (0 : ℝ) < 1 ∧ (0 : ℝ) < 1 / 2 ∧
-    (1 : ℝ) ^ 2 ≤ 2 * ((2 : ℕ) : ℝ) ∧ (1 / 2 : ℝ)⁻¹ ≤ 1 ^ 2 * (2 * ((2 : ℕ) : ℝ)) ^ (2 - 1) := by
-  norm_num
 
 end
 

@@ -1,14 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.FiniteSetOfNsmulEqZeroQZ
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ABHNPrep
 import GroundTheory.ProfiniteCohomology.GlobalClassFormation.RealPlaces
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.FiniteSetOfNsmulEqZeroQZ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open NumberField IsDedekindDomain GroundTheory.Global DirectSum
-
-local notation "ℚ̄" => AlgebraicClosure ℚ
 
 noncomputable section
 
@@ -17,8 +58,8 @@ theorem QZ.nsmul_mk (j : ℕ) (r : ℚ) : j • QZ.mk r = QZ.mk (j * r) := by
   rw [nsmul_eq_mul] at h
   exact h.symm
 
-open Classical in
 
+open Classical in
 def qzDiv (ℓ : ℕ) (q : QZ) : QZ :=
   if q = 0 then 0 else QZ.mk ((QZ.mk_surjective q).choose / ℓ)
 
@@ -52,8 +93,8 @@ theorem eq_zero_inl_of_pow_nsmul_eq_zero {ℓ : ℕ} (hℓ : ℓ.Prime) (v : Inf
 variable (K) (S : Set (HeightOneSpectrum (𝓞 K.1))) (ℓ : ℕ) (hℓ : ℓ.Prime)
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
 
-include hℓ hS in
 
+include hℓ hS in
 theorem exists_nsmul_eq_localPrimaryKernel (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.1)
     (t : localPrimaryKernel K S ℓ) : ∃ s : localPrimaryKernel K S ℓ, ℓ • s = t := by
   classical
@@ -104,12 +145,13 @@ theorem exists_nsmul_eq_localPrimaryKernel (hK : ℓ ≠ 2 ∨ IsTotallyComplex 
     change c - e v₀ ((e v₀).symm c) = 0
     rw [AddEquiv.apply_symm_apply, sub_self]
 
-set_option maxHeartbeats 1000000 in
-include hℓ hS in
 
+
+include hℓ hS in
 theorem exists_nsmul_eq_h2SUnits (hK : ℓ ≠ 2 ∨ IsTotallyComplex K.1)
-    (y : AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 ℚ̄ S) 2) ℓ) :
-    ∃ z : AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 ℚ̄ S) 2) ℓ, ℓ • z = y := by
+    (y : AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 (AlgebraicClosure ℚ) S) 2) ℓ) :
+    ∃ z : AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 (AlgebraicClosure ℚ) S) 2) ℓ,
+      ℓ • z = y := by
   obtain ⟨ιs⟩ := nonempty_localEmbeddings K
   let E := sUnitsH2PrimaryEquiv K S ℓ hℓ hS ιs
   obtain ⟨s, hs⟩ := exists_nsmul_eq_localPrimaryKernel K S ℓ hℓ hS hK (E y)

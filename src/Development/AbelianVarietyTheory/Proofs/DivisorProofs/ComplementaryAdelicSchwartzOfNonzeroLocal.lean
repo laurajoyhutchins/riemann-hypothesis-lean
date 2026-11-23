@@ -1,13 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchroedingerOperatorHeisenbergLawApplyStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationLocalityUnitaryGroupVStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalWeilOperatorIsometrySchwartzBruhatStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfComponentTensorAdelicFunctionEqStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchrodingerPreservesSchwartzBruhatStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHeisenbergActsByLocalSchrodingerStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartzStatement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
+
+@[expose] public section
+
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun
 open scoped Matrix GlobalTheory.VacAny
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -17,22 +49,22 @@ namespace GlobalTheory.RestCofactor
 
 variable {F : Type} [Field F] [NumberField F]
 
-def shiftFin (v : Pl F) {κ : Type} (x₀ : κ → Fv F v) (y : κ → Af F) : κ → Af F :=
+def shiftFin (v : Pl (F := F)) {κ : Type} (x₀ : κ → Fv F v) (y : κ → Af F) : κ → Af F :=
   fun i => y i + (singleFin v (x₀ i) - singleFin v (evalV F v (y i)))
 
-theorem evalV_shiftFin (v : Pl F) {κ : Type} (x₀ : κ → Fv F v) (y : κ → Af F) (i : κ) :
+theorem evalV_shiftFin (v : Pl (F := F)) {κ : Type} (x₀ : κ → Fv F v) (y : κ → Af F) (i : κ) :
     evalV F v (shiftFin v x₀ y i) = x₀ i := by
-  simp only [shiftFin, map_add, map_sub, evalV_singleFin_self]
+  simp only [shiftFin, map_add (f := _), map_sub, evalV_singleFin_self]
   abel
 
-theorem shiftFin_back (v : Pl F) {κ : Type} (x₀ : κ → Fv F v) (y : κ → Af F) :
+theorem shiftFin_back (v : Pl (F := F)) {κ : Type} (x₀ : κ → Fv F v) (y : κ → Af F) :
     shiftFin v (fun i => evalV F v (y i)) (shiftFin v x₀ y) = y := by
   funext i
   rw [shiftFin, evalV_shiftFin]
   simp only [shiftFin]
   abel
 
-theorem continuous_shiftFin (v : Pl F) {κ : Type} :
+theorem continuous_shiftFin (v : Pl (F := F)) {κ : Type} :
     Continuous fun p : (κ → Fv F v) × (κ → Af F) => shiftFin v p.1 p.2 := by
   have hev : Continuous (evalV F v) := RestrictedProduct.continuous_eval v
   refine continuous_pi fun i => ?_
@@ -40,7 +72,7 @@ theorem continuous_shiftFin (v : Pl F) {κ : Type} :
   have h1 : Continuous fun p : (κ → Fv F v) × (κ → Af F) => p.1 i := (continuous_apply i).comp continuous_fst
   exact h2.add (((continuous_singleFin v).comp h1).sub ((continuous_singleFin v).comp (hev.comp h2)))
 
-theorem mem_SB_shift (v : Pl F) {κ : Type} (x₀ : κ → Fv F v) {φ' : (κ → Fv F v) → ℂ}
+theorem mem_SB_shift (v : Pl (F := F)) {κ : Type} (x₀ : κ → Fv F v) {φ' : (κ → Fv F v) → ℂ}
     (hφ' : φ' ∈ SB (κ → Fv F v)) {g : (κ → Af F) → ℂ} (hg : g ∈ SB (κ → Af F)) :
     (fun y : κ → Af F => φ' (fun i => evalV F v (y i)) * g (shiftFin v x₀ y)) ∈ SB (κ → Af F) := by
   have hev : Continuous (evalV F v) := RestrictedProduct.continuous_eval v
@@ -58,7 +90,7 @@ theorem mem_SB_shift (v : Pl F) {κ : Type} (x₀ : κ → Fv F v) {φ' : (κ �
   exact hy ⟨(fun i => evalV F v (y i), shiftFin v x₀ y),
     ⟨subset_tsupport _ ha, subset_tsupport _ hb⟩, shiftFin_back v x₀ y⟩
 
-theorem rest_of_rest : ∀ {F : Type} [Field F] [NumberField F] {κ : Type} [Fintype κ] (v : Pl F)
+theorem rest_of_rest : ∀ {F : Type} [Field F] [NumberField F] {κ : Type} [Fintype κ] (v : Pl (F := F))
     (φ φ' : (κ → Fv F v) → ℂ) (r : (κ → AF F) → ℂ), φ ≠ 0 → φ' ∈ SB (κ → Fv F v) →
     Rest (evFin F v) φ r → Rest (evFin F v) φ' r := by
   intro F _ _ κ _ v φ φ' r hφ hφ' hr

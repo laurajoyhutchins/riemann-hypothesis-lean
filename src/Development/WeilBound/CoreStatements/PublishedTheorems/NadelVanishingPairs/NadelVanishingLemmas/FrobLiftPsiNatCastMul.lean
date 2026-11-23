@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsFlatLift
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobeniusDerivationFactorsThroughKaehlerStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsFlatLift
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -87,13 +136,13 @@ theorem frobLiftPsi_add (hL : IsFlatLift p π) (hF : IsFrob p π F) (z z' : Kt) 
     rw [this]
     ring
   rw [frobLiftPsi_spec hL hF hw, frobLiftPsi_spec hL hF hw',
-    frobLiftPsi_spec hL hF (w := w + w' - aeval ![z, z'] C) (by rw [map_add, hw, hw', hc]; ring)]
+    frobLiftPsi_spec hL hF (w := w + w' - aeval ![z, z'] C) (by rw [map_add (f := _), hw, hw', hc]; ring)]
   have hD : KaehlerDifferential.D ℤ K (π (aeval ![z, z'] C)) =
       ((π z + π z') ^ (p - 1) - π z ^ (p - 1)) • KaehlerDifferential.D ℤ K (π z) +
       ((π z + π z') ^ (p - 1) - π z' ^ (p - 1)) • KaehlerDifferential.D ℤ K (π z') := by
     rw [ringHom_aeval_fin_two, kaehlerD_aeval_fin_two, Fin.sum_univ_two, hpd0, hpd1]
     simp
-  simp only [map_add, map_sub, hD, smul_add, sub_smul]
+  simp only [map_add (f := _), map_sub, hD, smul_add, sub_smul]
   abel
 
 theorem frobLiftPsi_mul (hL : IsFlatLift p π) (hF : IsFrob p π F) (z z' : Kt) :
@@ -106,7 +155,7 @@ theorem frobLiftPsi_mul (hL : IsFlatLift p π) (hF : IsFrob p π F) (z z' : Kt) 
   rw [frobLiftPsi_spec hL hF hw, frobLiftPsi_spec hL hF hw',
     frobLiftPsi_spec hL hF (w := w * z' ^ p + z ^ p * w' + p * w * w')
       (by rw [map_mul, hw, hw']; ring)]
-  simp only [map_add, map_mul, map_pow, map_natCast, hpK, zero_mul, add_zero, Derivation.leibniz,
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast, hpK, zero_mul, add_zero, Derivation.leibniz,
     kaehlerD_pow_char p, smul_zero, zero_add]
   have e1 : (π z * π z') ^ (p - 1) * π z = π z ^ p * π z' ^ (p - 1) := by
     rw [mul_pow, mul_right_comm, ← pow_succ, Nat.sub_add_cancel hp1]
@@ -141,7 +190,7 @@ def frobLiftPhi (hL : IsFlatLift p π) (hF : IsFrob p π F) : K →+ Ω[K⁄ℤ]
     rw [frobLiftPsi_congr hL hF (z' := 0) (by rw [Function.surjInv_eq hL.surj, map_zero]), h0]
   map_add' a b := by
     rw [← frobLiftPsi_add, frobLiftPsi_congr hL hF (z' := Function.surjInv hL.surj a + Function.surjInv hL.surj b)
-      (by rw [map_add, Function.surjInv_eq hL.surj, Function.surjInv_eq hL.surj, Function.surjInv_eq hL.surj])]
+      (by rw [map_add (f := _), Function.surjInv_eq hL.surj, Function.surjInv_eq hL.surj, Function.surjInv_eq hL.surj])]
 
 theorem frobLiftPhi_apply (hL : IsFlatLift p π) (hF : IsFrob p π F) (z : Kt) :
     frobLiftPhi hL hF (π z) = frobLiftPsi p π F hL hF z :=

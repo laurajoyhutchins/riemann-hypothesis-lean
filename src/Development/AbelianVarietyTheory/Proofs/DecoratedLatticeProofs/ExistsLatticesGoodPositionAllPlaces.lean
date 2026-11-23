@@ -1,11 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SmallPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FinitePartTraceCharacterIdempotentInverseDiffere
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittProjAnisotropicMulVecLeviEq
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSumFrame
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsTameFinitePlaceHermitianAll
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SmulColMul
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IncAdjYZeroMulVec
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IncAdjYZeroMulVec
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.VacOfShape
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSumFrame
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FinitePartTraceCharacterIdempotentInverseDiffere
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsTameFinitePlaceHermitianAll
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PeriodIdealZpowCompletionAdeleConjIff
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittProjAnisotropicMulVecLeviEq
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ConjugateHalfCommutantActsOnCosetVectorByScalar
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilDatumAtPlaceEqLatticeIntertwinerMulDetChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SmallPair
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +56,8 @@ open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.Lat
 open scoped TensorProduct nonZeroDivisors
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option synthInstance.maxHeartbeats 200000
-set_option maxHeartbeats 1000000
+
+
 
 namespace GlobalTheory.GoodPos
 
@@ -62,7 +104,8 @@ theorem top_idele (hc : c.Is) (pre : PreT v o)
     rintro rfl
     rw [zero_mul, zero_mul] at hn
     exact mul_ne_zero (neg_ne_zero.2 (mul_ne_zero hξ (star_ne_zero.2 hξ))) pre.line.2 hn.symm
-  obtain ⟨μ, hμ⟩ := line_idele (c.oT (j + 1 + 1) h) pre.line (hc.x (j + 1 + 1) (by omega)).sd.1 v.NT (· ∈ v.tP)
+  obtain ⟨μ, hμ⟩ := line_idele (c.oT (j + 1 + 1) h) pre.line
+    (GlobalTheory.CosScalar.selfDual_full _ _ (hc.x (j + 1 + 1) (by omega)).sd) v.NT (· ∈ v.tP)
     (hs (j + 1 + 1) h)
   obtain ⟨m₀, m1, m2⟩ := patch v.tP (fun _ => 1) (α * μ * inU lam hlam * (xiU D * cU α)⁻¹)
   refine ⟨m₀, fun x hx a ha => by rw [m1 x hx a ha, Units.val_one, one_mul], fun j' h' => ?_⟩

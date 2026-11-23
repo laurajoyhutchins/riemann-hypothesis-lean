@@ -1,11 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeanSquareEvenThetaTwelfthRootInvariant
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GalStarComplexMultiplicationPoints
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.LinkTiesTh
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Retie
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ExistsPowPrincipalFractionalIdeal
+public import Formalism.LocalToGlobal.GlobalTheory.LinkTiesOm
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EisGEqZeroOfInfinite
 import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.LatticeDeterminedByInvariants
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIntegerMapEqHalfOneAddSqrt
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTwoTorsionCMPointAllConjugates
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GalStarComplexMultiplicationPoints
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HalfPeriodThetaDifferentiableAndSignedTranslateI
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeInvariantsPeriodPairDictionary
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumTranslateConjugateJetBound
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsRingEquivOfIsTranscendenceBasis
 import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HasRationalTorsionIffMemRange
-import Formalism.LocalToGlobal.GlobalTheory.LinkTiesTh
-import Formalism.LocalToGlobal.GlobalTheory.NormSqLatticeFunctionEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HalfPeriodThetaDifferentiableAndSignedTranslateI
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeanSquareEvenThetaTwelfthRootInvariant
+public import Formalism.LocalToGlobal.GlobalTheory.NormSqLatticeFunctionEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -168,7 +222,7 @@ theorem map_g₃ (L : PeriodPair) (hΔ : L.g₂ ^ 3 - 27 * L.g₃ ^ 2 = 1) {w : 
   generalize ℘[L] (w * t) = x at *
   generalize ℘[L] ((1 - w) * t) = y at *
   have hP : σ (4 * ((x - y) * (2 * x + y) * (x + 2 * y))) = η ^ 3 * (4 * ((x - y) * (2 * x + y) * (x + 2 * y))) := by
-    simp only [map_mul, map_add, map_sub, map_ofNat, fa, fb]; ring
+    simp only [map_mul, map_add (f := _), map_sub, map_ofNat, fa, fb]; ring
   have : η ^ 3 = 1 := by
     rcases sq_eq_sq_iff_eq_or_eq_neg.1 (hd.trans (one_pow 2).symm) with e | e <;> rw [e] at hP
     · simpa using hP.symm
@@ -225,7 +279,7 @@ theorem exists_map_g₂ (L : PeriodPair) (hΔ : L.g₂ ^ 3 - 27 * L.g₃ ^ 2 = 1
   obtain ⟨t', h⟩ := h t
   have t3' := (h 3 (map_ofNat σ 3) fun l hl => by simpa using nsmul_mem hl 3).1.1 t3
   have ta' := mt (h (β - 1) (by rw [map_sub, map_one, hσ]) hs1).1.2 ta
-  have tb' := mt (h (β + 1) (by rw [map_add, map_one, hσ]) hs2).1.2 tb
+  have tb' := mt (h (β + 1) (by rw [map_add (f := _), map_one, hσ]) hs2).1.2 tb
   have tn' : t' ∉ L.lattice := fun h => ta' (hs1 _ h)
   have fx := (h 1 (map_one σ) fun l hl => by simpa using hl).2 (by simpa using tn)
   rw [one_mul, one_mul] at fx
@@ -242,7 +296,7 @@ theorem exists_map_g₂ (L : PeriodPair) (hΔ : L.g₂ ^ 3 - 27 * L.g₃ ^ 2 = 1
     rw [quartic_sum hx hy (quartic_eq_zero L tn' t3') (quartic_eq_zero L (hnβ _ t3' tn') (h3β _ t3'))
       (hne t t3 ta tb) c1 c2 c3 c4 (hne t' t3' ta' tb'), neg_sq]
   have hσv : σ (L.g₂ - 3 * (℘[L] t + ℘[L] (β * t)) ^ 2) = η ^ 2 * (L.g₂ - 3 * (℘[L] t + ℘[L] (β * t)) ^ 2) := by
-    rw [map_sub, map_mul, map_pow, map_add, map_ofNat, fx, fy, e2, ← hsq]; ring
+    rw [map_sub, map_mul, map_pow, map_add (f := _), map_ofNat, fx, fy, e2, ← hsq]; ring
   generalize L.g₂ - 3 * (℘[L] t + ℘[L] (β * t)) ^ 2 = v at hv hσv
   have hv0 : v ≠ 0 := by rintro rfl; simp at hv
   have hη : η ^ 2 ≠ 0 := left_ne_zero_of_mul (hσv ▸ (map_ne_zero σ).2 hv0)
@@ -348,8 +402,8 @@ theorem isTheta0_lamConj {D : D7} {cc : Ideal (𝓞 D.host.K)} {δ t : ℂ} {M :
       Complex.conj_conj] at h2
     exact h2
 
-open Formalism.L2.GlobalTheoryTheory in
 
+open Formalism.L2.GlobalTheoryTheory in
 theorem ties_of_data {D : D7} {δ : ℂ} (hF : FieldOK D.host D.what₂.embLL D.embE) (h : IsDiscriminantTwelfthRootOfIdealLattice D D.host.ccK δ)
     (h2 : g2 (lamOf D D.host.ccK δ) ∈ coefM D) (h3 : g3 (lamOf D D.host.ccK δ) ∈ coefM D) :
     OmegaCompatible (retie D) δ ∧ DataIn D (tor0 D D.host.ccK δ) (coefM D) ∧ ∀ s : D.what₂.LL →+* ℂ,

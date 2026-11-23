@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix ValuativeRel GlobalTheory.WeilM MeasureTheory
 open scoped ComplexConjugate NNReal
@@ -41,7 +94,7 @@ theorem lower_triv (hsm : ∀ (a : E) (x : R), σ (a • x) = c a • σ x) (h1 
     rw [← nsmul_eq_mul, ← Nat.cast_smul_eq_nsmul E, smul_smul]
   have hunit : ∀ t : R, σ t = -t → t * t = 0 → σ (1 + t) * (1 + t) = 1 := by
     intro t hts htt
-    rw [map_add, h1, hts]
+    rw [map_add (f := _), h1, hts]
     calc (1 + -t) * (1 + t) = 1 - t * t := by noncomm_ring
       _ = 1 := by rw [htt, sub_zero]
   have h2' : i2 * 2 = 1 := by rw [mul_comm, h2]
@@ -58,7 +111,7 @@ theorem lower_triv (hsm : ∀ (a : E) (x : R), σ (a • x) = c a • σ x) (h1 
       simp only [add_mul, mul_add, smul_mul_smul_comm, hee, hff, hef0, hfe0, smul_zero, add_zero,
         zero_add, h2, h2', one_smul, hef]
     have hσd : σ d * d = 1 := by
-      rw [hd, map_add, hsm, hsm, c2, ci2, hse, hsf]
+      rw [hd, map_add (f := _), hsm, hsm, c2, ci2, hse, hsf]
       simp only [add_mul, mul_add, smul_mul_smul_comm, hee, hff, hef0, hfe0, smul_zero, add_zero,
         zero_add, h2, h2', one_smul]
       first
@@ -328,10 +381,10 @@ theorem triv_of_cell {F : Type} [Field F] [Infinite F] {E : Type} [CommRing E] [
       exact Commute.add_left (Commute.add_right (Commute.refl _) (hc0.neg_right.smul_right _))
         (Commute.add_right (hc0.symm.smul_left _) (((Commute.refl (x - 1)).neg_right.smul_left _).smul_right _))
     have hσN : σ N = σ x * D := by
-      rw [hNdef, hDdef, map_add, map_add, h1, hσF, map_sub, h1, mul_add, mul_add, mul_one, hσx,
+      rw [hNdef, hDdef, map_add (f := _), map_add (f := _), h1, hσF, map_sub, h1, mul_add, mul_add, mul_one, hσx,
         mul_smul_comm, mul_neg, mul_sub, mul_one, hσx, neg_sub, add_comm 1 (σ x)]
     have hσD : σ D = σ x * N := by
-      rw [hNdef, hDdef, map_add, map_add, h1, hσF, map_neg, map_sub, h1, mul_add, mul_add, mul_one, hσx,
+      rw [hNdef, hDdef, map_add (f := _), map_add (f := _), h1, hσF, map_neg, map_sub, h1, mul_add, mul_add, mul_one, hσx,
         mul_smul_comm, mul_sub, mul_one, hσx, neg_sub, add_comm 1 (σ x)]
     have hA : σ (N * Di) * (N * Di) = 1 := by
       calc σ (N * Di) * (N * Di) = σ Di * (σ x * ((D * N) * Di)) := by
@@ -399,12 +452,12 @@ theorem triv_of_cell {F : Type} [Field F] [Infinite F] {E : Type} [CommRing E] [
   obtain ⟨cw, hcw⟩ : ∃ cw : E, cw = 1 + ξ * algebraMap F E t := ⟨_, rfl⟩
   rw [← hw] at ht2
   rw [← hcw] at ht3
-  have hcw' : c w = cw := by rw [hw, hcw, map_add, map_one, map_mul, map_neg, hc, neg_neg, hcF]
+  have hcw' : c w = cw := by rw [hw, hcw, map_add (f := _), map_one, map_mul, map_neg, hc, neg_neg, hcF]
   obtain ⟨wi, hwwi⟩ := ht2.exists_right_inv
   obtain ⟨z, hz⟩ : ∃ z : E, z = cw * wi := ⟨_, rfl⟩
   have hcwi : c wi * cw = 1 := by rw [← hcw', ← map_mul, mul_comm, hwwi, map_one]
   have hcz : c z * z = 1 := by
-    have hccw : c cw = w := by rw [hw, hcw, map_add, map_one, map_mul, hc, hcF]
+    have hccw : c cw = w := by rw [hw, hcw, map_add (f := _), map_one, map_mul, hc, hcF]
     rw [hz, map_mul, hccw]
     calc w * c wi * (cw * wi) = (c wi * cw) * (w * wi) := by ring
       _ = 1 := by rw [hcwi, hwwi, one_mul]
@@ -451,7 +504,7 @@ theorem char_trivial : ∀ (F : Type) [Field F] [CharZero F] [Invertible (2 : F)
   have hcm : ∀ x : Matrix β β E, cm x = x.map c := fun x => rfl
   let σ : Matrix β β E →+ Matrix β β E := AddMonoidHom.mk' (fun x => (J * cm x * Ji)ᵀ) (by
     intro x y
-    simp only [map_add, Matrix.mul_add, Matrix.add_mul, Matrix.transpose_add])
+    simp only [map_add (f := _), Matrix.mul_add, Matrix.add_mul, Matrix.transpose_add])
   have hσ : ∀ x, σ x = (J * cm x * Ji)ᵀ := fun x => rfl
   have hcm_smul : ∀ (a : E) (x : Matrix β β E), cm (a • x) = c a • cm x := by
     intro a x
@@ -515,7 +568,7 @@ theorem char_trivial : ∀ (F : Type) [Field F] [CharZero F] [Invertible (2 : F)
       Matrix.mul_zero]
   have hefc : Cy.map c * Mt.map c + Cx.map c * Mb.map c = 1 := by
     have h := congrArg cm hPM'
-    rw [map_add, map_one, hcm, hcm, Matrix.map_mul, Matrix.map_mul] at h
+    rw [map_add (f := _), map_one, hcm, hcm, Matrix.map_mul, Matrix.map_mul] at h
     exact h
   have heft : Mtᵀ * Cyᵀ + Mbᵀ * Cxᵀ = 1 := by
     have h := congrArg Matrix.transpose hPM'

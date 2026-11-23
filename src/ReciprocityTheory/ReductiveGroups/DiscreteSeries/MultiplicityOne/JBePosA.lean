@@ -1,6 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StSchurW
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.UnitaryGroupStructuralFacts
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JPairs
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JPairsA
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,9 +96,9 @@ theorem bp_meas_inv : Measurable (invM (k := k) (r := r)) := by
     h1.smul h2.measurable
   convert h3 using 1
   funext g
-  simp only [invM]
+  change (Matrix.of g : Mat k r)⁻¹ =
+    (Matrix.of g : Mat k r).det⁻¹ • (Matrix.of g : Mat k r).adjugate
   rw [Matrix.inv_def, Ring.inverse_eq_inv']
-  rfl
 
 theorem bp_cont_mul : Continuous (mulM (k := k) (r := r)) := by
   unfold mulM
@@ -82,25 +126,12 @@ theorem sP_Lq {z : Fin (2 * r + k + 1) → ℂ} {q : Mt k r × Mt k r} (hq : q �
   simp only [mul_assoc]
   rw [← mul_assoc ((Matrix.of q.1 : Mat k r)⁻¹), h1, one_mul]
 
-theorem Lq_mem {z : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (hCW : ClosedW) (hCN : ClosedN) (hUN : UWNormal)
-    {q p : Mt k r × Mt k r} (hq : q ∈ SS z) (hp : p ∈ SS z) : Lq q p ∈ SS z :=
-  ⟨(hCW k r z).mul_mem _ hq.1 _ hp.1, (hCN k r).mul_mem _ hq.2 _ (hUN k r z hz _ hq.1 _ hp.2).1⟩
-
 theorem sP_Iv {z : Fin (2 * r + k + 1) → ℂ} {p : Mt k r × Mt k r} (hp : p ∈ SS z) : sP (Iv p) = (sP p)⁻¹ := by
   have hu := det_unit_G hp.1.1
   have h1 := mul_inv_G hp.1.1
   show (Matrix.of p.1 : Mat k r)⁻¹ * (Matrix.of p.2 : Mat k r)⁻¹ * ((Matrix.of p.1 : Mat k r)⁻¹)⁻¹ *
       (Matrix.of p.1 : Mat k r)⁻¹ = ((Matrix.of p.2 : Mat k r) * Matrix.of p.1)⁻¹
   rw [Matrix.mul_inv_rev, Matrix.nonsing_inv_nonsing_inv _ hu, mul_assoc, h1, mul_one]
-
-theorem Iv_mem {z : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (hCW : ClosedW) (hCN : ClosedN) (hUN : UWNormal)
-    {p : Mt k r × Mt k r} (hp : p ∈ SS z) : Iv p ∈ SS z := by
-  have hi : (Matrix.of p.1 : Mat k r)⁻¹ ∈ UWset k r z := (hCW k r z).inv_mem _ hp.1
-  refine ⟨hi, ?_⟩
-  have h2 := (hUN k r z hz _ hi _ ((hCN k r).inv_mem _ hp.2)).1
-  have e : ((Matrix.of p.1 : Mat k r)⁻¹)⁻¹ = Matrix.of p.1 := Matrix.nonsing_inv_nonsing_inv _ (det_unit_G hp.1.1)
-  show (Matrix.of p.1 : Mat k r)⁻¹ * (Matrix.of p.2 : Mat k r)⁻¹ * ((Matrix.of p.1 : Mat k r)⁻¹)⁻¹ ∈ Nset k r
-  exact h2
 
 theorem meas_lmul (a : Mat k r) : Measurable (lmulM (k := k) (r := r) a) := by
   apply Continuous.measurable

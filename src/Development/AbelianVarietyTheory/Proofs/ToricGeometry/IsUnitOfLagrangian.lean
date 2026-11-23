@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+public import Mathlib.Algebra.Module.ZLattice.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+
+@[expose] public section
 
 open Complex Matrix Filter Topology
 open scoped BigOperators Real
@@ -8,10 +63,10 @@ namespace GlobalTheory.SiegelNormalForm
 
 variable {g : ℕ}
 
+
 open Complex Matrix Filter Topology in
 open scoped BigOperators Real in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.SiegelNormalForm.form_pull (P Hm : Matrix (Fin g) (Fin g) ℂ)
     (z w : Fin g → ℂ) :
     (P *ᵥ z) ⬝ᵥ Hm *ᵥ star (P *ᵥ w) = z ⬝ᵥ (Pᵀ * Hm * P.map star) *ᵥ star w := by
@@ -35,10 +90,10 @@ theorem _root_.GlobalTheory.SiegelNormalForm.form_conj {Hm : Matrix (Fin g) (Fin
     star (z ⬝ᵥ Hm *ᵥ star w) = w ⬝ᵥ Hm *ᵥ star z := by
   rw [← star_dotProduct_star, star_mulVec, star_star, hH.eq, dotProduct_mulVec]
 
+
 open Complex Matrix Filter Topology in
 open scoped BigOperators Real in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.SiegelNormalForm.isUnit_of_lagrangian (P Hm : Matrix (Fin g) (Fin g) ℂ)
     (f : Fin g → Fin g → ℂ)
     (hpos : ∀ z : Fin g → ℂ, z ≠ 0 → 0 < (z ⬝ᵥ Hm *ᵥ (star z)).re)
@@ -88,10 +143,10 @@ theorem _root_.GlobalTheory.SiegelNormalForm.isUnit_of_lagrangian (P Hm : Matrix
     Finset.sum_ite_eq', Finset.mem_univ, if_true] at h
   simpa using h.symm
 
+
 open Complex Matrix Filter Topology in
 open scoped BigOperators Real in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.SiegelNormalForm.siegel_of_relations (Y : Matrix (Fin g) (Fin g) ℝ)
     (hY : Y.PosDef) (τ : Matrix (Fin g) (Fin g) ℂ)
     (h₁ : ∀ i j, ((Pi.single i 1 : Fin g → ℂ) ⬝ᵥ Y.map (↑) *ᵥ star (τ *ᵥ Pi.single j 1)).im =
@@ -110,7 +165,7 @@ theorem _root_.GlobalTheory.SiegelNormalForm.siegel_of_relations (Y : Matrix (Fi
     split_ifs at this ⊢ <;> linarith
   have hYB : Y * B = 1 := by
     ext a i
-    simp only [mul_apply, one_apply, hBdef, map_apply]
+    simp only [Matrix.mul_apply, one_apply, hBdef, map_apply]
     exact hrow a i
   have hBY : B * Y = 1 := mul_eq_one_comm.mp hYB
   have hYt : Yᵀ = Y := by
@@ -170,10 +225,10 @@ theorem _root_.GlobalTheory.SiegelNormalForm.quad_add_sub {Y : Matrix (Fin g) (F
   simp only [_root_.GlobalTheory.SiegelNormalForm.quad, mulVec_add, dotProduct_add, add_dotProduct, hwz]
   ring
 
+
 open Complex Matrix Filter Topology in
 open scoped BigOperators Real in
 variable {g : ℕ} in
-
 theorem _root_.GlobalTheory.SiegelNormalForm.exists_normal_form : (∀ (g : ℕ) (Λ : Submodule ℤ (Fin g → ℂ)), DiscreteTopology Λ → Submodule.span ℝ (Λ : Set (Fin g → ℂ)) = ⊤ → ∀ (Hm : Matrix (Fin g) (Fin g) ℂ) (χ : Λ → ℂ) (Ef : LinearMap.BilinForm ℤ Λ), Hm.IsHermitian → (∀ z : Fin g → ℂ, z ≠ 0 → 0 < (z ⬝ᵥ Hm.mulVec (star z)).re) → (∀ l, ‖χ l‖ = 1) → (∀ l m : Λ, (Ef l m : ℝ) = ((l : Fin g → ℂ) ⬝ᵥ Hm.mulVec (star (m : Fin g → ℂ))).im) → Function.Bijective Ef → ∃ (φ : (Fin g → ℂ) ≃ₗ[ℂ] (Fin g → ℂ)) (τ : Matrix (Fin g) (Fin g) ℂ) (Q : (Fin g → ℂ) → ℂ) (b : Fin g → ℂ), τ.IsSymm ∧ (τ.map Complex.im).PosDef ∧ (∀ z, φ z ∈ Λ ↔ ∃ m n : Fin g → ℤ, z = (fun i => (m i : ℂ)) + τ.mulVec (fun i => (n i : ℂ))) ∧ Differentiable ℂ Q ∧ Q 0 = 0 ∧ (∀ j, b j ≠ 0) ∧ (∀ (i : Fin g) (l : Λ) z, (l : Fin g → ℂ) = φ (Pi.single i 1) → (χ l * cexp (Real.pi * (φ z ⬝ᵥ Hm.mulVec (star (l : Fin g → ℂ))) + Real.pi / 2 * ((l : Fin g → ℂ) ⬝ᵥ Hm.mulVec (star (l : Fin g → ℂ))))) = cexp (Q (z + Pi.single i 1) - Q z)) ∧ (∀ (j : Fin g) (l : Λ) z, (l : Fin g → ℂ) = φ (τ.mulVec (Pi.single j 1)) → (χ l * cexp (Real.pi * (φ z ⬝ᵥ Hm.mulVec (star (l : Fin g → ℂ))) + Real.pi / 2 * ((l : Fin g → ℂ) ⬝ᵥ Hm.mulVec (star (l : Fin g → ℂ))))) = b j * cexp (-(2 * Real.pi * I) * z j) * cexp (Q (z + τ.mulVec (Pi.single j 1)) - Q z))) := by
   intro g Λ hdisc hspan Hm χ Ef hH hpos hχ hEf hbij
   haveI : IsZLattice ℝ Λ := ⟨hspan⟩
@@ -299,10 +354,11 @@ theorem _root_.GlobalTheory.SiegelNormalForm.exists_normal_form : (∀ (g : ℕ)
         Pi.single j 1 := by
       ext k
       have h := congrFun (congrFun hYB k) j
-      simp only [mul_apply, map_apply, one_apply] at h
+      simp only [Matrix.mul_apply, map_apply, one_apply] at h
       simp only [mulVec, dotProduct, map_apply, Pi.single_apply]
       have h' : ((∑ i, Y k i * (τ i j).im : ℝ) : ℂ) = ((if k = j then 1 else 0 : ℝ) : ℂ) := by
         rw [h]
+        simp [Matrix.one_apply]
       push_cast at h'
       rw [h']
       split_ifs <;> simp

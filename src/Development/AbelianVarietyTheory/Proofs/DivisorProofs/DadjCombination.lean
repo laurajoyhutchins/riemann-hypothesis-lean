@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DlogRatioVolumeFormNeZero
+module
+
+public import Mathlib.RingTheory.Kaehler.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CupPair
+import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+
+@[expose] public section
+
 open GlobalTheory.PD GlobalTheory.CechDR KaehlerDifferential
 
 namespace GlobalTheory
@@ -22,12 +69,12 @@ theorem dadj_combination : ∀ (k F K : Type) [Field k] [Field F] [Field K] [Alg
     obtain ⟨cx, hcx, ex⟩ := ihx
     obtain ⟨cy, hcy, ey⟩ := ihy
     refine ⟨cx + cy, fun j => add_mem (hcx j) (hcy j), ?_⟩
-    simp only [map_add, ex, ey, Pi.add_apply, add_smul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), ex, ey, Pi.add_apply, add_smul, Finset.sum_add_distrib]
   | mul x y hx hy ihx ihy =>
     obtain ⟨cx, hcx, ex⟩ := ihx
     obtain ⟨cy, hcy, ey⟩ := ihy
     refine ⟨fun j => x * cy j + y * cx j, fun j => add_mem (mul_mem hx (hcy j)) (mul_mem hy (hcx j)), ?_⟩
     rw [map_mul, Derivation.leibniz, ex, ey]
-    simp only [Finset.smul_sum, smul_smul, map_add, map_mul, add_smul, Finset.sum_add_distrib]
+    simp only [Finset.smul_sum, smul_smul, map_add (f := _), map_mul, add_smul, Finset.sum_add_distrib]
 
 end GlobalTheory

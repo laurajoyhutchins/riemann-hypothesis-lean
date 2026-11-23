@@ -1,5 +1,57 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.UnipotentFundamentalDomain
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.FrameStd
+module
+
+public import Mathlib.Algebra.Field.Defs
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.LinearAlgebra.Span.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.Submodule.Basic
+public import Mathlib.Data.Matrix.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,6 +107,7 @@ theorem down_span (hψ : Function.Injective ψ) (e K : Fin r → Fin n → E)
       have h1 : ∀ b, (∑ j, ψ (K b j) * ψ (e c j)) = if b = c then 1 else 0 := by
         intro b
         have := congrArg ψ (hK b c)
+
         simp only [map_sum, map_mul] at this
         rw [this]; split_ifs <;> simp
       simp only [h1, ite_smul, one_smul, zero_smul]
@@ -80,6 +133,7 @@ theorem down_span (hψ : Function.Injective ψ) (e K : Fin r → Fin n → E)
   have h2 : (fun i => ψ (w i)) = fun i => ψ ((∑ b ∈ T, (∑ j, K b j * w j) • e b) i) := by
     rw [h]
     funext i
+
     simp [Finset.sum_apply, map_sum, map_mul]
   have h3 : w = ∑ b ∈ T, (∑ j, K b j * w j) • e b := by
     funext i
@@ -112,8 +166,9 @@ theorem perp_up (M : Matrix (Fin n) (Fin n) E) (e f K : Fin r → Fin n → E)
     rw [h1, h2, sub_self]
   have hy' : y = ∑ j, y j • (fun i => ψ (p j i)) := by
     funext i
+
     simp only [hp, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.sub_apply, map_sub, map_sum, map_mul,
-      mul_sub, Finset.sum_sub_distrib, Finset.mul_sum]
+    mul_sub, Finset.sum_sub_distrib, Finset.mul_sum]
     have h1 : ∑ j, y j * ψ ((Pi.single j (1 : E) : Fin n → E) i) = y i := by
       simp [Pi.single_apply]
     have h2 : ∑ j, ∑ b, y j * (ψ (K b j) * ψ (f b i)) = 0 := by

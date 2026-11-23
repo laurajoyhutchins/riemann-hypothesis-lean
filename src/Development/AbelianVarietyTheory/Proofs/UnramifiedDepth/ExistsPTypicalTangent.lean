@@ -1,7 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.WtSubOneLe
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtRescaleGood
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PtRescaleGood
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.NsmulCoprimeBijectiveCurves
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.TangentEqLcZero
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
 
 namespace GlobalTheory.PTypicalTangent
 
@@ -67,7 +123,7 @@ theorem lg_agree (G : LogFGL v d) {τ : Type*} {x y : Fin d → MvPowerSeries τ
   have split : ∀ z : Fin d → MvPowerSeries τ C, HasSubst z →
       subst z (G.lg a) = z a + subst z (G.lg a - X a) := by
     intro z hz; rw [subst_sub hz, subst_X hz]; ring
-  rw [split x hsx, split y hsy, map_add, map_add, h a e he,
+  rw [split x hsx, split y hsy, map_add (f := _), map_add (f := _), h a e he,
     pt_subst_agree hsx hsy hx hy (G.lg a - X a) k h (pt_hK_of_low (lg_low G a) x y) e
       (by omega)]
 
@@ -158,6 +214,7 @@ theorem delete_step [IsAlgClosed C] [CharZero C] (G : LogFGL v d) {p : ℕ} (hp 
   have hlgδ : ∀ a m, PowerSeries.coeff m (G.lgCurve (G.sumF g) a) =
       (if l ∣ m then (l : C) else 0) * PowerSeries.coeff m (G.lgCurve ga a) := by
     intro a m
+
     rw [sumF_lg G g hgg a, map_sum]
     simp only [g, pt_lg_rescale G _ (fun b => (hg b).1) a, PowerSeries.coeff_rescale]
     rw [← Finset.sum_mul, root_sum hζ m]
@@ -177,7 +234,7 @@ theorem delete_step [IsAlgClosed C] [CharZero C] (G : LogFGL v d) {p : ℕ} (hp 
       if l ∣ m then 0 else PowerSeries.coeff m (G.lgCurve ga a) := by
     intro a m
     have h1 := congrArg (PowerSeries.coeff m) (hsum a)
-    rw [map_add, hlgε] at h1
+    rw [map_add (f := _), hlgε] at h1
     split_ifs at h1 ⊢ with hd
     · linear_combination -h1
     · linear_combination -h1

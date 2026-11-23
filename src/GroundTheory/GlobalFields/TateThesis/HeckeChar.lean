@@ -1,6 +1,49 @@
-import Mathlib
-import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
-import GroundTheory.GlobalFields.TateThesis.ConductorIdeal
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
+public import GroundTheory.GlobalFields.TateThesis.ConductorIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Topology Filter NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum WithZero
   FractionalIdeal Function
@@ -32,10 +75,6 @@ theorem primeIdealUnit_mem_idealsPrimeTo {𝔪 : Ideal (𝓞 K)} {v : HeightOneS
   rw [count_primeIdealUnit, if_neg]
   rintro rfl
   exact hv hw
-
-theorem idealsPrimeTo_top : idealsPrimeTo (⊤ : Ideal (𝓞 K)) = ⊤ := by
-  exact eq_top_iff.2 fun I _ v hv ↦
-    absurd (top_le_iff.1 (Ideal.le_of_dvd hv)) v.isPrime.ne_top
 
 namespace IdeleGroup
 
@@ -106,12 +145,6 @@ theorem finiteEmbedding_mem_primeToLevel {𝔪 : Ideal (𝓞 K)} {v : HeightOneS
   rw [finiteProj_finiteEmbedding_of_ne hwv]
   exact one_mem _
 
-theorem toFractionalIdeal_mem_idealsPrimeTo {𝔪 : Ideal (𝓞 K)} {x : IdeleGroup K}
-    (hx : x ∈ primeToLevel 𝔪) : toFractionalIdeal x ∈ idealsPrimeTo 𝔪 := by
-  intro v hv
-  rw [count_toFractionalIdeal]
-  exact ord_eq_zero_of_mem_unitsLevel ((mem_primeToLevel.1 hx).2 v hv)
-
 theorem exists_mem_primeToLevel {𝔪 : Ideal (𝓞 K)} {I : (FractionalIdeal (𝓞 K)⁰ K)ˣ}
     (hI : I ∈ idealsPrimeTo 𝔪) : ∃ x ∈ primeToLevel 𝔪, toFractionalIdeal x = I := by
   have key : ∀ v : HeightOneSpectrum (𝓞 K), primeIdealUnit v ^ count K v
@@ -141,7 +174,7 @@ theorem mem_map_idealLevel_of_mem_primeToLevel {𝔪 : Ideal (𝓞 K)} {x : Idel
   · have hord : ord v x = 0 := by
       rw [← count_toFractionalIdeal, h1, Units.val_one, count_one]
     change finiteProj v x ∈ unitsLevel v (multiplicity v.asIdeal 𝔪)
-    rw [multiplicity_eq_zero.2 hv, unitsLevel_zero, Submonoid.mem_units_iff]
+    rw [multiplicity_eq_zero_of_not_dvd hv, unitsLevel_zero, Submonoid.mem_units_iff]
     exact (ord_eq_zero_iff v x).1 hord
 
 end IdeleGroup

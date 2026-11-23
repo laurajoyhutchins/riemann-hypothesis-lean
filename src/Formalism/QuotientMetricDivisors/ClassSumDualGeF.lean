@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.ClassSumDualLe
+module
+
+public import Formalism.QuotientMetricDivisors.ClassSumDualLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder
@@ -30,7 +72,7 @@ def ClassSumDualLeF : Prop :=
     ∀ I : (Fin n → K) →ₗ[K] (Cl → V),
     (∀ f : Cl → V, (∃ x, I x = f) ↔ ∀ c γ, ρ c γ (f c) = f c) →
     IsClassSum H I pair (fun c => Fintype.card (Gam c)) →
-    ∀ Nab Del : Cl → Submodule (𝓞 K) V, (∀ c, Submodule.IsLattice K (Nab c)) →
+    ∀ Nab Del : Cl → Submodule (𝓞 K) V, (∀ c, Submodule.IsFullLattice K (Nab c)) →
     ∀ s : ℕ, (∀ c, ∀ y ∈ Formalism.HermitianLatticesTheory.dual pair (Nab c), (s : 𝓞 K) • y ∈ Del c) →
     (∀ c γ, ∀ y ∈ Del c, ρ c γ y ∈ Del c) →
     ∀ y ∈ Formalism.HermitianLatticesTheory.dual (hform H) (valLatF I Nab), (s : 𝓞 K) • y ∈ valLatF I Del
@@ -58,13 +100,13 @@ def BoundsIClassF : Prop :=
     ∀ I : (Fin n' → K) →ₗ[K] (Cl → V), Function.Injective I →
     (∀ f : Cl → V, (∃ x, I x = f) ↔ ∀ c γ, ρ c γ (f c) = f c) →
     IsClassSum H' I pair (fun c => Fintype.card (Gam c)) →
-    ∀ Nab Del : Cl → Submodule (𝓞 K) V, (∀ c, Submodule.IsLattice K (Nab c)) →
+    ∀ Nab Del : Cl → Submodule (𝓞 K) V, (∀ c, Submodule.IsFullLattice K (Nab c)) →
     ∀ s : ℕ, (∀ c, ∀ y ∈ Formalism.HermitianLatticesTheory.dual pair (Nab c), (s : 𝓞 K) • y ∈ Del c) →
     (∀ c, Del c ≤ Nab c) → (∀ c γ, ∀ y ∈ Del c, ρ c γ y ∈ Del c) →
     ∀ (G0 : Type) [Fintype G0] (r : G0 → Matrix (Fin n') (Fin n') K) (c : G0 → K) (G : ℕ),
     E * Pr = ∑ t, c t • r t → (∀ t, ∃ a : 𝓞 K, (a : K) = (G : K) * c t) →
     (∀ t, ∀ x ∈ valLatF I Del, (r t).mulVec x ∈ valLatF I Del) →
-      Submodule.IsLattice K (valLatF I Nab) ∧ Submodule.IsLattice K (cutLat E (valLatF I Nab)) ∧
+      Submodule.IsFullLattice K (valLatF I Nab) ∧ Submodule.IsFullLattice K (cutLat E (valLatF I Nab)) ∧
       ∀ x ∈ Formalism.HermitianLatticesTheory.dual (hform (Eᴴ * H' * E)) (cutLat E (valLatF I Nab)),
         ((G * s : ℕ) : 𝓞 K) • x ∈ cutLat E (valLatF I Nab)
 
@@ -76,13 +118,13 @@ def BoundsIVClassF : Prop :=
     [IsScalarTower (𝓞 K) K V] (pair : V →ₗ⋆[K] V →ₗ[K] K)
     (I : (Fin n → K) →ₗ[K] (Cl → V)) (g : Cl → ℕ), Function.Injective I → (∀ c, 0 < g c) →
     IsClassSum H I pair g →
-    ∀ Nab Del : Cl → Submodule (𝓞 K) V, (∀ c, Submodule.IsLattice K (Nab c)) →
+    ∀ Nab Del : Cl → Submodule (𝓞 K) V, (∀ c, Submodule.IsFullLattice K (Nab c)) →
     ∀ s : ℕ, 0 < s → (∀ c, ∀ y ∈ Del c, (s : 𝓞 K) • y ∈ Formalism.HermitianLatticesTheory.dual pair (Nab c)) →
     ∀ DG : ℕ, 0 < DG → (∀ c, g c ∣ DG) →
     ∀ (w : HeightOneSpectrum (𝓞 K)) (ϖ : 𝓞 K) (J : ℕ), vw w (ϖ : K) = 1 →
     (∀ z ∈ cutLat E (valLatF I Nab),
       (ϖ ^ J) • z ∈ Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (cutLat E (valLatF I Del))) →
-      Submodule.IsLattice K (matLat Pr (valLatF I Nab)) ∧
+      Submodule.IsFullLattice K (matLat Pr (valLatF I Nab)) ∧
       jw (Eᴴ * H * E) w (matLat Pr (valLatF I Nab)) ≤
         (Formalism.HermitianLatticesTheory.locLen w.asIdeal (matLat Pr (valLatF I Nab)) (cutLat E (valLatF I Nab)) : ℤ) +
           (d : ℤ) * ((J : ℤ) + vw w (DG : K) + vw w (s : K))

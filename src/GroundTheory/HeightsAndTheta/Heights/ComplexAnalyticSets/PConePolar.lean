@@ -1,10 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StConePolar
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceDim
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StConeChartGram
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLinearNoetherNormalization
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PChartGramMA
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeLogBound
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsChartGram
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PChartGramMA
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PConeLogBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -30,6 +74,7 @@ theorem maDens_log_dualNorm_sheet {n e : ℕ} (h : HermNorm n) (J : Ideal (MvPol
     rintro rfl
     have h1 : eval (0 : Fin n → ℂ) (linForm ℓ - 1) = 0 :=
       hxZ _ (Ideal.mem_sup_right (Ideal.subset_span rfl))
+
     rw [map_sub, map_one, linForm, map_sum] at h1
     simp at h1
   have hdual : ∀ z, h.dualNorm z = ‖WithLp.toLp 2 ((h.matᵀ)⁻¹ *ᵥ z)‖ := fun z => by
@@ -49,21 +94,6 @@ theorem maDens_log_dualNorm_sheet {n e : ℕ} (h : HermNorm n) (J : Ideal (MvPol
     funext k y'
     simp only [Function.comp_apply, hdual]
   rw [hF, anForm_maDens_eq_geo_maDensity, key, hsx, ← hdual]
-
-theorem ConePolar.proof (h₁ : SliceDim.Statement) (h₂ : LinearNoetherNormalization.Statement)
-    (h₃ : ConeChartGram.Statement) : ConePolar.Statement := by
-  intro e
-  refine ⟨1, fun n h J ℓ g hJ hdim hℓ hg hgc => ?_⟩
-  have hex : ∃ A : Matrix (Fin e) (Fin n) ℂ, IsFiniteProjection (J ⊔ Ideal.span {linForm ℓ - 1}) A :=
-    h₂ n e _ (h₁ n e J ℓ hJ hdim hℓ)
-  rw [one_mul, varInt, dif_pos hex, h₃ n e h J ℓ g hex.choose hJ hdim hℓ hg hgc hex.choose_spec,
-    chartInt]
-  refine integral_congr_ae (Eventually.of_forall fun y => ?_)
-  simp only [chartDens, sheetSum]
-  refine finsum_congr fun x => finsum_congr fun hx => ?_
-  split_ifs with hs
-  · rw [maDens_log_dualNorm_sheet h J ℓ _ y x _ hx hs.choose_spec]
-  · rfl
 
 end
 

@@ -1,10 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.TraceIntegralEstimates.FolnerAbs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.ModBase
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnipotentRadicalContracting
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnitaryWeylCompact
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.IsClosedS
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.MaximalCompactIsCompact
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.TraceIntegralEstimates.FolnerAbs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.ModBase
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnipotentRadicalContracting
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.MaximalCompactIsCompact
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.IsClosedS
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnitaryWeylCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedVariables false
 
@@ -109,7 +153,8 @@ theorem isCompact_sublevel (hz : inWb k r z) (hT : 0 < Tz k r z) (ρ : ℝ) :
     le_csInf (Set.Nonempty.image _ ⟨1, one_mem_Cg⟩) (by rintro _ ⟨c', hc', rfl⟩; exact hmin hc')
   exact ⟨(c, c * g), ⟨hc, show nrm ((c * g).toM - 1) ≤ ρ from le_trans hle hg⟩, by simp⟩
 
-def aT (k r : ℕ) : GH k r := mk (unitary_hermitian_group k r) (dS k r 2) (dS_mem_UH (by norm_num))
+def aT (k r : ℕ) : GH k r :=
+  MG.mk (unitary_hermitian_group k r) (dS k r 2) (dS_mem_UH (by norm_num))
 
 theorem toM_pow (x : GH k r) (m : ℕ) : (x ^ m).toM = x.toM ^ m := by
   induction m with
@@ -158,7 +203,7 @@ theorem contractV (hz : inWb k r z) (hT : 0 < Tz k r z) (K : Set (GH k r)) (hK :
   filter_upwards [hlim.eventually (eventually_lt_nhds hδ)] with m hm
   intro x hx
   obtain ⟨h, hh, n, hn, hxn⟩ := (hKS hx : x.toM ∈ Sset k r z)
-  set c : GH k r := mk (unitary_hermitian_group k r) h hh.1 with hcdef
+  set c : GH k r := MG.mk (unitary_hermitian_group k r) h hh.1 with hcdef
   have hcC : c ∈ Cg k r z := by show c.toM ∈ UWset k r z; rw [hcdef, toM_mk]; exact hh
   set ν : GH k r := c⁻¹ * x with hνdef
   have hνL : ν ∈ L := ⟨(c, x), ⟨hcC, hx⟩, rfl⟩
@@ -170,7 +215,7 @@ theorem contractV (hz : inWb k r z) (hT : 0 < Tz k r z) (K : Set (GH k r)) (hK :
   have hs0 : (0 : ℝ) < (1 / 2) ^ m := by positivity
   have hs1 : ((1 / 2 : ℝ)) ^ m ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
   have hcfix : cjB (aT k r ^ m) c = c := by
-    ext1
+    apply MG.toM_injective
     rw [toM_cjB_aT, dS_inv_eq hs0.ne', hcdef, toM_mk]
     exact dS_conj_UW hs0.ne' hh
   rw [hxe, cjB_mul, hcfix]

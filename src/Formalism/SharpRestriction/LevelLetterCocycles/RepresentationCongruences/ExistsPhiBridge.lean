@@ -1,6 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ConstantCoeffResidueUXPow
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ConstantCoeffSubstAlgHom
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ConstantLeRpowOfThreeLe
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ConstantCoeffSubstAlgHom
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,12 +98,6 @@ theorem cst_C (x : O) : Br.cst (C x) = algebraMap O (LetA O n) x := by
   show Br.ι (C x) = algebraMap O (LetA O n) x i
   rw [show (C x : PowerSeries O) = algebraMap O (PowerSeries O) x from rfl, AlgHom.commutes]
   rfl
-theorem cst_prod {ι' : Type*} (s : Finset ι') (F : ι' → PowerSeries O) :
-    Br.cst (∏ i ∈ s, F i) = ∏ i ∈ s, Br.cst (F i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => rw [Finset.prod_empty, Finset.prod_empty, Br.cst_one]
-  | insert a s ha ih => rw [Finset.prod_insert ha, Finset.prod_insert ha, Br.cst_mul, ih]
 
 theorem qA_eq : qA W = Br.cst X := by
   funext i
@@ -97,27 +135,6 @@ theorem ps_eq (s : ℕ) : ps W s = Br.cst (Br.P.p s) := by
     show Br.cst (Br.P.φ ((Br.P.φ : PowerSeries O → PowerSeries O)^[s] X)) =
       Br.cst ((Br.P.φ : PowerSeries O → PowerSeries O)^[s + 1] X)
     rw [Function.iterate_succ_apply']
-
-theorem inFr_alg_iff (c : ZMod n) (N D G : PowerSeries O) :
-    InFr W c (Br.cst N) (Br.cst D) (algebraMap (LetA O n) W.EE (letE c * Br.cst G)) ↔
-      ∃ U : PowerSeries O, D * G = N * U := by
-  constructor
-  · rintro ⟨u, hu, h⟩
-    rw [← _root_.map_mul] at h
-    have h2 := congrFun (W.EE_inj h) c
-    obtain ⟨U, hU⟩ := Br.range u hu c
-    refine ⟨U, Br.inj ?_⟩
-    simp only [Pi.mul_apply, letE, Pi.single_eq_same, one_mul, cst] at h2
-    rw [_root_.map_mul, _root_.map_mul, ← hU, h2]
-  · rintro ⟨U, hU⟩
-    refine ⟨Br.cst U, Br.cst_mem U, ?_⟩
-    rw [← _root_.map_mul]
-    congr 1
-    funext i
-    have h := congrArg Br.ι hU
-    rw [_root_.map_mul, _root_.map_mul] at h
-    simp only [Pi.mul_apply, cst]
-    linear_combination (letE (O := O) c i) * h
 
 theorem inFr_const (c : ZMod n) {N₁ N₂ D : PowerSeries O} {f : W.EE} {κ : ℕ} {x : O}
     (hf : InFr W c (Br.cst N₁) (Br.cst D) f)
@@ -247,12 +264,12 @@ theorem exists_phiBridge [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (W : Lo
     rw [_root_.map_sub, hτX, hτC']; ring
   set u := τ.symm W'
   have hφX0 : φX (X - C ((PD.p : ℕ) : O)) = u * (X - C ((PD.p : ℕ) : O)) * X ^ (PD.p - 1) := by
-    rw [hφXapp, hτXl, hφYX, _root_.map_mul, _root_.map_mul, _root_.map_pow, _root_.map_add, hτsX, hτC]
+    rw [hφXapp, hτXl, hφYX, _root_.map_mul, _root_.map_mul, _root_.map_pow, _root_.map_add (f := _), hτsX, hτC]
     ring
   have hφXX : φX X = u * (X - C ((PD.p : ℕ) : O)) * X ^ (PD.p - 1) + C ((PD.p : ℕ) : O) := by
     have : X = (X - C ((PD.p : ℕ) : O)) + C ((PD.p : ℕ) : O) := by ring
     conv_lhs => rw [this]
-    rw [_root_.map_add, hφX0, PB.algC]
+    rw [_root_.map_add (f := _), hφX0, PB.algC]
   have hφred : ∀ f : PowerSeries O, (φX f).map (IsLocalRing.residue O) =
       PowerSeries.subst ((u * X ^ PD.p).map (IsLocalRing.residue O)) (f.map (IsLocalRing.residue O)) := by
     have hc0 : constantCoeff ((u * X ^ PD.p).map (IsLocalRing.residue O)) = 0 := by
@@ -304,7 +321,7 @@ theorem exists_phiBridge [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (W : Lo
     P := P
     ι := ι
     inj := hσinj.comp τ.injective
-    ι_X := by rw [hιapp, hτX, _root_.map_add, hσX, PB.algC]
+    ι_X := by rw [hιapp, hτX, _root_.map_add (f := _), hσX, PB.algC]
     ι_φ := fun F => by
       rw [hιapp, hιapp]
       show σ (τ (τ.symm (φY (τ F)))) = W.φ₀ (σ (τ F))

@@ -1,9 +1,70 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsModulePieceHilbert
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PModulePieceHilbertChain
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PGeoNumCut
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsModulePieceHilbert
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.DimOfMinimal
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PModulePieceHilbertChain
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PGeoNumCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.HasympAll
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.HilbertMultidegreePieceDivisorSum
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogIdealChain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.MultAtEqCount
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.NotRelevantOfDimZero
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.SupportSubsetMonoBox
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -132,13 +193,11 @@ theorem pow_shift_le {a s b : K → ℕ} (h : tdeg b ≤ tdeg a + tdeg s) (m : �
     ((tdeg b : ℝ) + 1) ^ m ≤ ((tdeg s : ℝ) + 1) ^ m * ((tdeg a : ℝ) + 1) ^ m := by
   rw [← mul_pow]
   have h' : (tdeg b : ℝ) ≤ tdeg a + tdeg s := by exact_mod_cast h
-  have ha : (0 : ℝ) ≤ tdeg a := by positivity
-  have hs : (0 : ℝ) ≤ tdeg s := by positivity
   gcongr
   nlinarith
 
-open Classical in
 
+open Classical in
 theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN : 0 < N) (hq : q.IsPrime)
     (hqm : IsMultiHomogIdeal q) (hNq : (N : MRing ι) ∈ q) (hJq : J₂ ≤ q)
     (hdim : ∀ W : Ideal (MRing ι), W.IsPrime → J₂ ≤ W → IsRelevant W →
@@ -188,7 +247,6 @@ theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN :
     rw [add_tsub_cancel_right] at h3
     have m1 := pow_shift_le (htb a) (d - 1)
     have m2 := pow_shift_le (a := a) (s := s) (b := a + s) (tdeg_add a s).le (d - 1)
-    have hd0 : (0 : ℝ) ≤ d := by positivity
     have e1 := le_abs_self (lg q (a + s - c) - appr (Real.log (charOf q)) d q (a + s - c))
     have e1' := neg_abs_le (lg q (a + s - c) - appr (Real.log (charOf q)) d q (a + s - c))
     have e2 := le_abs_self (appr (Real.log (charOf q)) d q (a + s) -
@@ -199,8 +257,6 @@ theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN :
     have e3' := neg_abs_le (appr (Real.log (charOf q)) d q (a + s) - appr (Real.log (charOf q)) d q a)
     set P := ((tdeg a : ℝ) + 1) ^ (d - 1)
     set Q := ((tdeg s : ℝ) + 1) ^ (d - 1)
-    have hP : 0 ≤ P := by positivity
-    have hQ : 0 ≤ Q := by positivity
     have b1 : C' * d * ((tdeg (a + s - c) : ℝ) + 1) ^ (d - 1) ≤ C' * d * (Q * P) := by gcongr
     have b2 : K1 * d * ((tdeg (a + s) : ℝ) + 1) ^ (d - 1) ≤ K1 * d * (Q * P) := by gcongr
     have b3 : K2 * d * ((tdeg (a + s) : ℝ) + 1) ^ (d - 1) ≤ K2 * d * (Q * P) := by gcongr
@@ -244,16 +300,12 @@ theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN :
     have m1 := pow_shift_le (htb a) (d - 1)
     set P := ((tdeg a : ℝ) + 1) ^ (d - 1)
     set Q := ((tdeg s : ℝ) + 1) ^ (d - 1)
-    have hP : 0 ≤ P := by positivity
-    have hQ : 0 ≤ Q := by positivity
     have hd1 : (1 : ℝ) ≤ d := by exact_mod_cast (show 1 ≤ d by omega)
     have hlg : |lg q b| ≤ (C' * d' + Real.log (charOf q) * coefB d' q) * ((tdeg b : ℝ) + 1) ^ (d - 1) := by
       have e := abs_sub_abs_le_abs_sub (lg q b) (appr (Real.log (charOf q)) d' q b)
-      have hC'd : 0 ≤ C' * d' := by positivity
       have : C' * d' * ((tdeg b : ℝ) + 1) ^ (d' - 1) ≤ C' * d' * ((tdeg b : ℝ) + 1) ^ (d - 1) := by
         gcongr
       nlinarith
-    have hM : 0 ≤ C' * d' + Real.log (charOf q) * coefB d' q := by positivity
     calc |lg q b| ≤ (C' * d' + Real.log (charOf q) * coefB d' q) * ((tdeg b : ℝ) + 1) ^ (d - 1) := hlg
       _ ≤ (C' * d' + Real.log (charOf q) * coefB d' q) * (Q * P) := by gcongr
       _ = (C' * d' + Real.log (charOf q) * coefB d' q) * Q * 1 * P := by ring

@@ -1,6 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantCoeffEv
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantCoeffEv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPowerSeries ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ ReciprocityTheory.ChartRestriction.G.TB
 
@@ -17,6 +63,7 @@ theorem ev_mul {a : Fin m → Pt R n d} (ha : ∀ j i, constantCoeff (a j i) = 0
 theorem ev_sum {a : Fin m → Pt R n d} (ha : ∀ j i, constantCoeff (a j i) = 0) {ι : Type}
     (t : Finset ι) (f : ι → PS R m d) : ev a (∑ i ∈ t, f i) = ∑ i ∈ t, ev a (f i) := by
   unfold ev
+
   rw [← coe_substAlgHom (hasSubst_pts ha), map_sum]
 
 theorem ev_self_one (f : PS R 1 d) : ev (n := 1) ![pt R d 0] f = f := by
@@ -46,19 +93,19 @@ theorem axis_law (G : FGLaw R d) :
 theorem partial_eq (G : FGLaw R d) (s : PS R 1 d)
     (h : ev (n := 2) ![G.add (pt R d 0) (pt R d 1)] s =
       ev (n := 2) ![pt R d 0] s * ev (n := 2) ![pt R d 1] s) (i : Fin d) :
-    ∑ j, ev (n := 1) ![pt R d 0, 0] (pderiv R ((1 : Fin 2), i) (G.F j)) *
-        pderiv R ((0 : Fin 1), j) s =
+    ∑ j, ev (n := 1) ![pt R d 0, 0] (pderiv (R := R) ((1 : Fin 2), i) (G.F j)) *
+        pderiv (R := R) ((0 : Fin 1), j) s =
       C (coeff (Finsupp.single ((0 : Fin 1), i) 1) s) * s := by
   have hadd : G.add (pt R (n := 2) d 0) (pt R d 1) = G.F := funext fun j => ev_self_two _
   rw [hadd] at h
-  have h0 : pderiv R ((1 : Fin 2), i) (ev (n := 2) ![pt R d 0] s) = 0 := by
+  have h0 : pderiv (R := R) ((1 : Fin 2), i) (ev (n := 2) ![pt R d 0] s) = 0 := by
     rw [pderiv_ev (const_one (const_pt 0))]
     simp [pderiv_pt]
-  have h1 : pderiv R ((1 : Fin 2), i) (ev (n := 2) ![pt R d 1] s) =
-      ev (n := 2) ![pt R d 1] (pderiv R ((0 : Fin 1), i) s) := by
+  have h1 : pderiv (R := R) ((1 : Fin 2), i) (ev (n := 2) ![pt R d 1] s) =
+      ev (n := 2) ![pt R d 1] (pderiv (R := R) ((0 : Fin 1), i) s) := by
     rw [pderiv_ev (const_one (const_pt 1))]
     simp [pderiv_pt]
-  have hd := congrArg (fun f => ev (n := 1) ![pt R d 0, 0] (pderiv R ((1 : Fin 2), i) f)) h
+  have hd := congrArg (fun f => ev (n := 1) ![pt R d 0, 0] (pderiv (R := R) ((1 : Fin 2), i) f)) h
   beta_reduce at hd
   rw [Derivation.leibniz, h0, h1, smul_zero, add_zero, smul_eq_mul, ev_mul const_axis,
     axis_pderiv, ev_ev_one (const_pt 0) const_axis, axis_pt_zero, ev_self_one,
@@ -73,6 +120,7 @@ theorem main :
     ev (n := 2) ![G.add (pt R d 0) (pt R d 1)] s = ev (n := 2) ![pt R d 0] s * ev (n := 2) ![pt R d 1] s →
     ∀ u : Fin d → R, Dof G.F u s = C (∑ i, u i * coeff (Finsupp.single ((0 : Fin 1), i) 1) s) * s) := by
   intro R _ d G s h u
+
   rw [Dof, map_sum, Finset.sum_mul]
   simp only [Finset.sum_mul]
   rw [Finset.sum_comm]

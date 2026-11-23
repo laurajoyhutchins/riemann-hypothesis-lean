@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.CmpPrime
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.DerivativeDivisibility.CmpPrime
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.DerivativeDivisibility.CondField
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.CmpPrime
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.DerivativeDivisibility.CondField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial UpperTheory.V.Alg
 
@@ -30,7 +76,7 @@ private theorem derivation_eval2_eq_eval2_derivative_mul {O Λ B K : Type} [Comm
     δ (eval₂ (lam : Λ →+* B) t q) = x (eval₂ (lam : Λ →+* B) t (derivative q)) * δ t := by
   induction q using Polynomial.induction_on' with
   | add p r hp hr =>
-    rw [eval₂_add, map_add, hp, hr, derivative_add, eval₂_add, map_add, add_mul]
+    rw [eval₂_add, map_add (f := _), hp, hr, derivative_add, eval₂_add, map_add (f := _), add_mul]
   | monomial n c =>
     rw [derivative_monomial, eval₂_monomial, eval₂_monomial]
     change δ (lam c * t ^ n) = x (lam (c * n) * t ^ (n - 1)) * δ t
@@ -80,7 +126,7 @@ theorem UpperTheory.V.J.derZero :
       rw [UpperTheory.V.J.cmp, Submodule.mem_colon_singleton, smul_eq_mul, ← eval₂_mul, ← hprod]
       exact hC.kill
     exact RingHom.mem_ker.mp (hker hm)
-  rw [hprod, derivative_mul, eval₂_add, eval₂_mul, eval₂_mul, map_add, map_mul, map_mul, hgi,
+  rw [hprod, derivative_mul, eval₂_add, eval₂_mul, eval₂_mul, map_add (f := _), map_mul, map_mul, hgi,
     zero_mul, add_zero] at hF'
   have hgd := left_ne_zero_of_mul hF'
   have hEn := right_ne_zero_of_mul hF'

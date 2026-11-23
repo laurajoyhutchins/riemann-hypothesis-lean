@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.InClassOfExp
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,16 +85,16 @@ theorem natCast_inv_mem_Rp (vp : K') (m : ℕ) (hm : ¬ p ∣ m) : ((m : K'))⁻
   exact W_mem_Rp p K' vp w
 
 private lemma exists_not_dvd_eq_pow_padicValNat_mul (n : ℕ) (hn : n ≠ 0) : ∃ m, ¬ p ∣ m ∧ n = p ^ padicValNat p n * m := by
-  obtain ⟨m, hm⟩ := (pow_padicValNat_dvd : p ^ padicValNat p n ∣ n)
+  obtain ⟨m, hm⟩ := ((_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _)) : p ^ padicValNat p n ∣ n)
   refine ⟨m, fun ⟨c, hc⟩ => pow_succ_padicValNat_not_dvd (p := p) hn ⟨c, ?_⟩, hm⟩
   conv_lhs => rw [hm]
-  rw [hc]
+  rw [hc, Nat.padicValNat_def]
   ring
 
 theorem piFact (vp : K') (hvp : vp ^ (p ^ 2 - 1) = (p : K')) (k : ℕ) :
     (vp ^ (p + 1)) ^ k * ((k.factorial : K'))⁻¹ ∈ Rp p K' vp := by
   have hle : (p - 1) * padicValNat p k.factorial ≤ k := by
-    rw [sub_one_mul_padicValNat_factorial]
+    rw [Nat.padicValNat_def, hp.out.sub_one_mul_multiplicity_factorial]
     exact Nat.sub_le _ _
   obtain ⟨m, hmp, hm⟩ := exists_not_dvd_eq_pow_padicValNat_mul p k.factorial (Nat.factorial_ne_zero k)
   generalize padicValNat p k.factorial = v at hle hm

@@ -1,7 +1,58 @@
-import Formalism.GaussJetBounds.GenLogInverse
-import Formalism.GaussJetBounds.StatementK
-import Formalism.GaussJetBounds.GaussJetProofs.NormDetLeOneOfEntries
-import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+module
+
+public import Formalism.GaussJetBounds.StatementK
+public import Formalism.GaussJetBounds.StatementJ
+public import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+public import Formalism.GaussJetBounds.GaussJetProofs.NormDetLeOneOfEntries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -106,11 +157,11 @@ theorem frameA_letter {K : Type u} [NormedField K] [IsUltrametricDist K] (J N0 :
     have hex : ∃ i', e i' = e i := ⟨i, rfl⟩
     have hch : hex.choose = i := he hex.choose_spec
     simp only [x]
-    rw [if_neg (htop i), dif_pos hex, hch]
+    rw [if_neg (htop i), dite_eq_left hex, hch]
   have hxn : ∀ k a, ¬ top k → (¬ ∃ i, e i = k) → x k a = y k a - ∑ i', c k i' * z i' a := by
     intro k a h1 h2
     simp only [x]
-    rw [if_neg h1, dif_neg h2]
+    rw [if_neg h1, dite_eq_right h2]
   have hsumT : ∀ i k, (∑ i', if k = e i' then c i i' else 0) = 0 ∨
       ∃ i', (∑ i', if k = e i' then c i i' else 0) = c i i' := by
     intro i k
@@ -209,13 +260,13 @@ theorem thmAFrame_of : ThmAGen.{u} → ThmAFrame.{u} := by
     have hex : ∃ i', e s i' = e s i := ⟨i, rfl⟩
     have hch : hex.choose = i := he s hex.choose_spec
     show (if h : ∃ i', e s i' = e s i then some (lab s h.choose) else none) = _
-    rw [dif_pos hex, hch]
+    rw [dite_eq_left hex, hch]
   have hspec_some : ∀ s k, spec (s, k) ≠ none → ∃ i, k = e s i := by
     intro s k h
     by_contra hcon
     apply h
     show (if h : ∃ i', e s i' = k then some (lab s h.choose) else none) = _
-    rw [dif_neg (fun ⟨i, hi⟩ => hcon ⟨i, hi.symm⟩)]
+    rw [dite_eq_right (fun ⟨i, hi⟩ => hcon ⟨i, hi.symm⟩)]
   refine hGen K l d N0 N1 hl hl3 hd hde hlK h0 K0 hK0 ζ hζ be hbe x (fun y => hxs _ _ _) g hg0 hg U hU
     ε hε TT colN p hp hp1 I T hT xg ?_ nu1 nu2 size hnu1 hnu2 hsize a ha hsa spec ?_ ?_ ?_
   · intro s i b

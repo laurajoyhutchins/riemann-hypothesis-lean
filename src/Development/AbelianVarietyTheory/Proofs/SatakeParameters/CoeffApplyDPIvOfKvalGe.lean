@@ -1,11 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.OrbitPlaces
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
-import Formalism.SharpRestriction.ParConsts
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsPlaceCofactorValuationLowerBound
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ModelsOK
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.Cobdry
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DualOm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsPlaceCofactorValuationLowerBound
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WittFractionToCpAlgebraMap
+public import Formalism.SharpRestriction.Divisibility.ProductZerothFirstParts
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.FrobeniusOrbits GlobalTheory.TwU Classical
 
@@ -95,7 +136,7 @@ open Formalism.L2.G.Pend (k0ToC)
 theorem applyD_eq_sum {σ τ Kc : Type} [Field Kc] (P : MvPolynomial σ (MvPolynomial τ ℤ)) (f : MvPowerSeries σ Kc)
     (S : Finset (σ →₀ ℕ)) (hS : P.support ⊆ S) :
     applyD P f = ∑ n ∈ S, ((∏ x ∈ n.support, ((n x).factorial : Kc)) * MvPowerSeries.coeff n f) •
-      MvPolynomial.map (Int.castRingHom Kc) (MvPolynomial.coeff n P) := by
+      MvPolynomial.map (Int.castRingHom Kc) (AddMonoidAlgebra.coeff P n) := by
   unfold applyD
   refine Finset.sum_subset hS fun n _ hn => ?_
   rw [MvPolynomial.notMem_support_iff.1 hn]
@@ -107,7 +148,7 @@ theorem applyD_add {σ τ Kc : Type} [Field Kc] (P Q : MvPolynomial σ (MvPolyno
     applyD_eq_sum P f (P.support ∪ Q.support) Finset.subset_union_left,
     applyD_eq_sum Q f (P.support ∪ Q.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun n _ => ?_
-  rw [MvPolynomial.coeff_add, map_add, smul_add]
+  rw [MvPolynomial.coeff_add, map_add (f := _), smul_add]
 
 theorem applyD_zero {σ τ Kc : Type} [Field Kc] (f : MvPowerSeries σ Kc) :
     applyD (0 : MvPolynomial σ (MvPolynomial τ ℤ)) f = 0 := by
@@ -124,7 +165,7 @@ variable {Lt : Type} [Fintype Lt] [DecidableEq Lt] {N0 N1 : ℕ} {p : ℕ} [Fact
 theorem applyAt0_eq_sum (Th : MvPowerSeries (Lt × Fin N0 × Fin N1) ℂ_[p]) (P : MvPolynomial (product_zeroth_first_parts.XZ Lt N0 N1) ℤ)
     (S : Finset (product_zeroth_first_parts.XZ Lt N0 N1 →₀ ℕ)) (hS : P.support ⊆ S) :
     product_zeroth_first_parts.applyAt0 N0 N1 p Th P = ∑ μ ∈ S, MvPolynomial.monomial (Finsupp.sumFinsuppEquivProdFinsupp μ).1
-      (((MvPolynomial.coeff μ P : ℤ) : ℂ_[p]) *
+      (((AddMonoidAlgebra.coeff P μ : ℤ) : ℂ_[p]) *
         ((Finsupp.sumFinsuppEquivProdFinsupp μ).2.prod fun _ n => (n.factorial : ℂ_[p])) *
         MvPowerSeries.coeff (Finsupp.sumFinsuppEquivProdFinsupp μ).2 Th) := by
   unfold product_zeroth_first_parts.applyAt0
@@ -138,7 +179,7 @@ theorem applyAt0_add (Th : MvPowerSeries (Lt × Fin N0 × Fin N1) ℂ_[p]) (P Q 
     applyAt0_eq_sum Th P (P.support ∪ Q.support) Finset.subset_union_left,
     applyAt0_eq_sum Th Q (P.support ∪ Q.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun n _ => ?_
-  rw [← map_add, MvPolynomial.coeff_add, Int.cast_add, add_mul, add_mul]
+  rw [← map_add (f := _), MvPolynomial.coeff_add, Int.cast_add, add_mul, add_mul]
 
 def psi {σ τ : Type} (zi : Lt × Fin N0 × Fin N1 → σ) (fi : Lt × ℕ × Fin N0 → τ) :
     MvPolynomial (product_zeroth_first_parts.XZ Lt N0 N1) ℤ →+* MvPolynomial σ (MvPolynomial τ ℤ) :=
@@ -185,7 +226,7 @@ theorem map_applyD_psi {σ τ : Type} (zi : Lt × Fin N0 × Fin N1 → σ) (fi :
     (G : MvPolynomial (product_zeroth_first_parts.XZ Lt N0 N1) ℤ) :
     MvPolynomial.map (k0ToC p) (applyD (psi zi fi G) f) = MvPolynomial.rename fi (product_zeroth_first_parts.applyAt0 N0 N1 p Th G) := by
   induction G using MvPolynomial.induction_on' with
-  | add P Q hP hQ => rw [map_add, applyD_add, applyAt0_add, map_add, map_add, hP, hQ]
+  | add P Q hP hQ => rw [map_add (f := _), applyD_add, applyAt0_add, map_add (f := _), map_add (f := _), hP, hQ]
   | monomial μ c =>
     rw [psi_monomial, applyD_eq_sum _ f _ MvPolynomial.support_monomial_subset,
       applyAt0_eq_sum Th _ _ MvPolynomial.support_monomial_subset, Finset.sum_singleton, Finset.sum_singleton,
@@ -301,7 +342,7 @@ theorem colDet_alt (s : ZMod (X.G.P.n' v)) (h : ℕ) (J : ℕ → Fin (NN X.G.P.
 end Main
 
 open Formalism.L2.G.Pend (k0ToC) in
-theorem coeff_applyD_PIv_of_KvalGe : ∀ (p : ℕ) [Fact p.Prime] (X : Sys p) (j : ℕ) (v : X.Pl) [NeZero (X.G.P.n' v)] (nu : ZMod (X.G.P.n' v) → YoungDiagram), (∀ s r, (((nu s).rowLen r : ℕ) : ℤ) = X.nuv v (j + 1) (toFin s) (r + 1)) → ∀ (f : MvPowerSeries (X.ZA j) (FormalGroupSystem.K0 p)) (g : ℝ), product_zeroth_first_parts.KvalGe (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) p nu (MvPowerSeries.map (Formalism.L2.G.Pend.k0ToC p) (inLetters (resV (fun z : Zidx (X.G.P.n' v) (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) => (⟨v, z⟩ : X.ZA j)) f))) g → ∀ (I : X.ColCh j) (n : X.FrI j →₀ ℕ), ∃ a : FormalGroupSystem.WW p, MvPolynomial.coeff n (applyD (X.PIv j I v) f) = (p : FormalGroupSystem.K0 p) ^ ⌈g⌉ * algebraMap (FormalGroupSystem.WW p) (FormalGroupSystem.K0 p) a := by
+theorem coeff_applyD_PIv_of_KvalGe : ∀ (p : ℕ) [Fact p.Prime] (X : Sys p) (j : ℕ) (v : X.Pl) [NeZero (X.G.P.n' v)] (nu : ZMod (X.G.P.n' v) → YoungDiagram), (∀ s r, (((nu s).rowLen r : ℕ) : ℤ) = X.nuv v (j + 1) (toFin s) (r + 1)) → ∀ (f : MvPowerSeries (X.ZA j) (FormalGroupSystem.K0 p)) (g : ℝ), product_zeroth_first_parts.KvalGe (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) p nu (MvPowerSeries.map (Formalism.L2.G.Pend.k0ToC p) (inLetters (resV (fun z : Zidx (X.G.P.n' v) (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) => (⟨v, z⟩ : X.ZA j)) f))) g → ∀ (I : X.ColCh j) (n : X.FrI j →₀ ℕ), ∃ a : FormalGroupSystem.WW p, AddMonoidAlgebra.coeff (applyD (X.PIv j I v) f) n = (p : FormalGroupSystem.K0 p) ^ ⌈g⌉ * algebraMap (FormalGroupSystem.WW p) (FormalGroupSystem.K0 p) a := by
   intro p _ X j v _ nu hnu f g hK I n
   have hTh : ∀ m, MvPowerSeries.coeff m (MvPowerSeries.map (Formalism.L2.G.Pend.k0ToC p) (inLetters (resV (fun z : Zidx (X.G.P.n' v) (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) => (⟨v, z⟩ : X.ZA j)) f))) =
       k0ToC p (MvPowerSeries.coeff (Finsupp.mapDomain (zi X j v) m) f) := by
@@ -342,8 +383,8 @@ theorem coeff_applyD_PIv_of_KvalGe : ∀ (p : ℕ) [Fact p.Prime] (X : Sys p) (j
       rw [hP]
       unfold product_zeroth_first_parts.Gxz
       simp only [he, map_prod, Finset.prod_mul_distrib, Units.coe_prod, Int.cast_prod]
-    have hkey : ∃ a : FormalGroupSystem.WW p, MvPolynomial.coeff n (applyD (psi (zi X j v) (fi X j v)
-        (product_zeroth_first_parts.Gxz (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) nu (fun s c => e s c))) f) =
+    have hkey : ∃ a : FormalGroupSystem.WW p, AddMonoidAlgebra.coeff (applyD (psi (zi X j v) (fi X j v)
+        (product_zeroth_first_parts.Gxz (NN X.G.P.m X.t j) (NN X.G.P.m X.t (j + 1)) nu (fun s c => e s c))) f) n =
         (p : FormalGroupSystem.K0 p) ^ ⌈g⌉ * algebraMap (FormalGroupSystem.WW p) (FormalGroupSystem.K0 p) a := by
       apply mem_of_norm_le
       rw [← MvPolynomial.coeff_map, map_applyD_psi (zi X j v) (fi X j v) (zi_injective X j v) f _ hTh]

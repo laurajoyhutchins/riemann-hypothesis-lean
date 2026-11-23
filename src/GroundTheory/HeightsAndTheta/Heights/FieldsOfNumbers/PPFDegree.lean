@@ -1,8 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsDivPushForward
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PExistsForm
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PCutRational
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsDivPushForward
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PCutRational
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PExistsForm
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsExamples
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -38,8 +85,8 @@ theorem weight_apply_eval {σ : Type*} (w : σ → K' → ℕ) (d : σ →₀ �
 
 variable [DecidableEq K] [DecidableEq K']
 
-omit [DecidableEq K] [DecidableEq K'] in
 
+omit [DecidableEq K] [DecidableEq K'] in
 theorem weight_mapDomain {σ τ M : Type*} [AddCommMonoid M] (w : τ → M) (g : σ → τ)
     (d : σ →₀ ℕ) : Finsupp.weight w (Finsupp.mapDomain g d) = Finsupp.weight (w ∘ g) d := by
   simp only [Finsupp.weight_apply]
@@ -104,25 +151,22 @@ theorem rename_component (a : MRing (fun k => ι' (j k)) F) (b : K → ℕ) :
     simp
 
 theorem isMultiProjPrime_contractPrime {P' : Ideal (MRing ι' F)} (hP' : IsMultiProjPrime P') :
-    IsMultiProjPrime (contractPrime j P') where
-  isPrime := by
-    have := hP'.isPrime
-    exact contractPrime.isPrime j P'
-  multiHomog := by
-    intro f hf b
+    IsMultiProjPrime (contractPrime j P') := by
+  have := hP'.isPrime
+  refine ⟨contractPrime.isPrime j P', ?_, ?_⟩
+  · intro f hf b
     show rename (blockIncl j ι') _ ∈ P'
     rw [rename_component]
     exact hP'.multiHomog _ hf _
-  relevant := by
-    intro k
+  · intro k
     obtain ⟨i, hi⟩ := hP'.relevant (j k)
     refine ⟨i, ?_⟩
     show rename (blockIncl j ι') (X ⟨k, i⟩) ∉ P'
     rw [rename_X]
     exact hi
 
-omit [DecidableEq K] [DecidableEq K'] in
 
+omit [DecidableEq K] [DecidableEq K'] in
 theorem contractFracMap_algebraMap (P' : Ideal (MRing ι' F)) [P'.IsPrime]
     (a : MRing (fun k => ι' (j k)) F) :
     contractFracMap j P' (algebraMap _ _ (Ideal.Quotient.mk (contractPrime j P') a)) =
@@ -145,8 +189,8 @@ theorem map_homFracDegZero_le (P' : Ideal (MRing ι' F)) [P'.IsPrime] :
     isMultiHomog_rename j ι' hf, isMultiHomog_rename j ι' hg, hgP, ?_⟩
   rw [map_div₀, contractFracMap_algebraMap, contractFracMap_algebraMap]
 
-omit [DecidableEq K] [DecidableEq K'] in
 
+omit [DecidableEq K] [DecidableEq K'] in
 theorem pullDeg_sub (bf bg : K → ℕ) :
     pullDeg j (fun k => (bf k : ℤ) - bg k) =
       fun k' => ((Function.extend j bf 0 k' : ℕ) : ℤ) - ((Function.extend j bg 0 k' : ℕ) : ℤ) := by

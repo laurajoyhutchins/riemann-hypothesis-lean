@@ -1,8 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveDegreeVert
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsHorizontalOfDimOne
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ArithVarZero
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ExistsIsSheetFinZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveDegreeVert
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ArithVarZero
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ExistsIsSheetFinZero
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsHorizontalOfDimOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import GroundTheory.HeightsAndTheta.Heights.Intersections.Statements
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Targets
@@ -16,7 +67,7 @@ namespace CurveDegreeVert
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
 def fsLine (b : K → ℕ) : HermLine ι :=
-  HermLine.ofMetrics (fun k => fsMetric (ι k)) (fun k => (b k : ℤ))
+  HermLine.ofMetrics (fun k => fsMetric (ι := ι k)) (fun k => (b k : ℤ))
 
 theorem isSmoothHerm_fsLine (b : K → ℕ) : IsSmoothHerm (fsLine b : HermLine ι) := by
   have hfun : (fsLine b : HermLine ι).h =
@@ -27,7 +78,7 @@ theorem isSmoothHerm_fsLine (b : K → ℕ) : IsSmoothHerm (fsLine b : HermLine 
   rw [hfun]
   refine contDiffOn_prod fun k _ => (ContDiffOn.sqrt ?_ fun z hz => ?_).pow (b k)
   · exact (ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp
-      (contDiff_apply ℝ ℂ (⟨k, i⟩ : Σ k, ι k))).contDiffOn
+      (contDiff_apply ℝ (fun _ => ℂ) (⟨k, i⟩ : Σ k, ι k))).contDiffOn
   · obtain ⟨i, hi⟩ := hz k
     exact (Finset.sum_pos' (fun j _ => sq_nonneg ‖z ⟨k, j⟩‖)
       ⟨i, Finset.mem_univ _, pow_pos (norm_pos_iff.mpr hi) 2⟩).ne'
@@ -50,8 +101,8 @@ theorem sameOrbit_trans {z z' z'' : (Σ k, ι k) → ℂ} (h : SameOrbit z z') (
   obtain ⟨d, hd, rfl⟩ := h'
   exact ⟨fun k => c k * d k, fun k => mul_ne_zero (hc k) (hd k), by funext p; simp [mul_assoc]⟩
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem sum_eq_of_transversal {P : Ideal (MRing ι)} {R R' : Finset ((Σ k, ι k) → ℂ)}
     (hRP : ∀ t ∈ R, t ∈ mcPts P) (hRu : ∀ z ∈ mcPts P, ∃! t, t ∈ R ∧ SameOrbit z t)
     (hR'P : ∀ t ∈ R', t ∈ mcPts P) (hR'u : ∀ z ∈ mcPts P, ∃! t, t ∈ R' ∧ SameOrbit z t)

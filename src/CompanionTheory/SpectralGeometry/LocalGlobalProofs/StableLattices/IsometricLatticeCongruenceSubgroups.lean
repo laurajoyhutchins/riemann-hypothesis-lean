@@ -1,6 +1,62 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.InhabitedFinite
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedStandardAddCharConductorProperties
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.InhabitedFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open CompanionTheory.Rg.FlB CompanionTheory.Rg.Fl
 
@@ -23,6 +79,7 @@ theorem form_isHerm (s : L →+* L) (J : Matrix (Fin n) (Fin n) L) (hs : ∀ x, 
   · have hJ' : ∀ i j, s (J i j) = J j i := fun i j => by
       have := congrFun (congrFun hJ j) i
       simpa [Matrix.transpose_apply, Matrix.map_apply] using this
+
     simp only [form, dotProduct, Matrix.mulVec, Function.comp, map_sum, map_mul, hs, Finset.mul_sum, hJ']
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -115,21 +172,7 @@ end Tor
 
 theorem exists_unif (L : Type) [NontriviallyNormedField L] [IsUltrametricDist L] [ProperSpace L] :
     ∃ p : L, p ≠ 0 ∧ ‖p‖ < 1 ∧ ∀ a : L, ‖a‖ < 1 → ‖a‖ ≤ ‖p‖ := by
-  obtain ⟨x, hx0, hx1⟩ := NormedField.exists_norm_lt_one L
-  have hclosed : IsClosed ({a : L | ‖x‖ ≤ ‖a‖} ∩ Metric.ball 0 1) :=
-    (isClosed_le continuous_const continuous_norm).inter (IsUltrametricDist.isClopen_ball (0 : L) 1).isClosed
-  have hcomp : IsCompact ({a : L | ‖x‖ ≤ ‖a‖} ∩ Metric.ball 0 1) :=
-    (isCompact_closedBall (0 : L) 1).of_isClosed_subset hclosed
-      (fun a ha => Metric.ball_subset_closedBall ha.2)
-  obtain ⟨p, hpA, hmax⟩ := hcomp.exists_isMaxOn ⟨x, le_refl ‖x‖, by simpa using hx1⟩
-    continuous_norm.continuousOn
-  have hp1 : ‖p‖ < 1 := by simpa using hpA.2
-  have hxp : ‖x‖ ≤ ‖p‖ := hpA.1
-  refine ⟨p, fun h => ?_, hp1, fun a ha => ?_⟩
-  · rw [h, norm_zero] at hxp; linarith
-  · by_cases h : ‖x‖ ≤ ‖a‖
-    · exact hmax ⟨h, by simpa using ha⟩
-    · exact (not_le.1 h).le.trans hxp
+  apply GlobalTheory.StdChar.exists_unif <;> assumption
 
 theorem exists_cover {G : Type} [Group G] [TopologicalSpace G] [ContinuousMul G] (K K₀ : Subgroup G)
     (hK : IsOpen (K : Set G)) (hc : IsCompact (K₀ : Set G)) :

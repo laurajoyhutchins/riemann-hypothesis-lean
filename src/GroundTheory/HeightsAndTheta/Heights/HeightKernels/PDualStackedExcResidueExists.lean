@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcResidue
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualLatticeModPrime
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcGeoFirst
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLatticeIndex
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcResidue
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualLatticeModPrime
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLatticeIndex
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcGeoFirst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -28,7 +71,7 @@ def annIdeal (F : HermLattice K i) (φc : Fin i → K) : Ideal (𝓞 K) where
   carrier := {μ | algebraMap (𝓞 K) K μ • φc ∈ dualLattice F}
   add_mem' {a b} ha hb := by
     show algebraMap (𝓞 K) K (a + b) • φc ∈ dualLattice F
-    rw [map_add, add_smul]
+    rw [map_add (f := _), add_smul]
     exact add_mem ha hb
   zero_mem' := by
     show algebraMap (𝓞 K) K 0 • φc ∈ dualLattice F
@@ -87,13 +130,13 @@ def rhoDual (hlt : F'.lattice < F.lattice)
     rw [map_zero, zero_smul, sub_zero]
     exact zero_mem _
   map_add' φ ψ := by
-    rw [← map_add]
+    rw [← map_add (f := _)]
     refine mk_eq_of (coeff_spec hlt hcov hc hc' (φ + ψ)) ?_
     have e : ((φ + ψ : dualLattice F') : Fin i → K) - algebraMap (𝓞 K) K
         (coeff hlt hcov hc hc' φ + coeff hlt hcov hc hc' ψ) • φc =
         ((φ : Fin i → K) - algebraMap (𝓞 K) K (coeff hlt hcov hc hc' φ) • φc) +
         ((ψ : Fin i → K) - algebraMap (𝓞 K) K (coeff hlt hcov hc hc' ψ) • φc) := by
-      rw [Submodule.coe_add, map_add, add_smul]
+      rw [Submodule.coe_add, map_add (f := _), add_smul]
       abel
     rw [e]
     exact add_mem (coeff_spec hlt hcov hc hc' φ) (coeff_spec hlt hcov hc hc' ψ)
@@ -107,8 +150,8 @@ theorem rhoDual_eq (hlt : F'.lattice < F.lattice)
 
 end StackedExceptionalResidueExists
 
-open StackedExceptionalResidueExists in
 
+open StackedExceptionalResidueExists in
 theorem DualStackedExcResidueExists.proof (hσ : DualLatticeModPrime.Statement) :
     DualStackedExcResidueExists.Statement := by
   intro K _ _ i F F' T _ _ b b' a _ hlt hcov _

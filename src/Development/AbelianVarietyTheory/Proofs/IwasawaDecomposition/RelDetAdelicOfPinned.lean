@@ -1,17 +1,64 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.TaylorLogMetric
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitary
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdFNonnegOfIsInteger
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdUnifMulUnitIdl
+public import Formalism.LocalToGlobal.HermitianColumns.InLocalDiscriminantKernel
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemKDSupUnitIdlIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdSubDetSubSelfDual
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SpanValuationLe
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsPowEqSpanNormOne
 import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalToGlobal.HermitianColumns.HermCols
-import Formalism.SharpRestriction.GlobalSchurBounds.TaylorLogMetric
-import Formalism.SharpRestriction.GlobalSchurBounds.GL3Theta
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitary
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemKDSupUnitIdlIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdFNonnegOfIsInteger
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrdSubDetSubSelfDual
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsPowEqSpanNormOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SpanValuationLe
+import Formalism.LocalToGlobal.CMDeterminantIdeals.CMIdealValuations.ProdMulLeDetIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,6 +221,8 @@ theorem span_det_eq {M M' : Submodule (𝓞 L) (Fin N → L)} (h : M.FG)
           Matrix.det_smul_inv_mulVec_eq_cramer _ _ hd']
         ext j
         simp [Matrix.mulVec, dotProduct, Matrix.cramer_transpose_apply, Finset.mul_sum, mul_comm, mul_left_comm]
+        change ∑ i, s * (y i j * (Matrix.of x).transpose.cramer v i) = _
+        simp_rw [Matrix.cramer_transpose_apply]
       rw [e1]
       refine Submodule.sum_mem _ fun i _ => ?_
       have hm : ((Matrix.of x).updateRow i v).det ∈ detFI M h :=
@@ -231,6 +280,7 @@ theorem val_det_hat_le {M : Submodule (𝓞 E) (Fin N → E)} (h : M.FG)
     funext i
     rw [← e i]
     exact Finset.sum_congr rfl fun k _ => by rw [← ex i k]; rfl
+
   rw [e1, MultilinearMap.map_sum]
   refine ν.map_sum_le fun r _ => ?_
   rw [MultilinearMap.map_smul_univ, smul_eq_mul, map_mul]
@@ -289,8 +339,8 @@ theorem val_det_of_mem_int (hc : Formalism.BasicNotions.CMData F E) {u : GL (Fin
   rw [← c]
   exact mul_le_of_le_one_right' (key _ (inv_mem hu))
 
-omit h1 h2 in
 
+omit h1 h2 in
 theorem exists_u1Af (hc : Formalism.BasicNotions.CMData F E) (z : unitary E) : ∃ x : unitaryOneFiniteAdeles hc,
     Matrix.GeneralLinearGroup.det (x : GL (Fin 1) (E ⊗[F] Af F)) = unitaryOneRationalAdele F z := by
   refine ⟨⟨Matrix.GeneralLinearGroup.scalar (Fin 1) (unitaryOneRationalAdele F z), ?_⟩, Units.ext ?_⟩
@@ -303,8 +353,8 @@ theorem exists_u1Af (hc : Formalism.BasicNotions.CMData F E) (z : unitary E) : �
     rw [starRingEnd_apply, hz]
   · simp
 
-omit h1 h2 in
 
+omit h1 h2 in
 theorem val_eq_pow (hc : Formalism.BasicNotions.CMData F E) {G : Type} [Group G] (dt : unitaryOneFiniteAdeles hc →* G)
     (hker : ∀ x : unitaryOneFiniteAdeles hc, dt x = 1 → (x : GL (Fin 1) (E ⊗[F] Af F)) ∈ IntegralUnitGroup hc) {z : unitary E} {x : unitaryOneFiniteAdeles hc}
     {U : Subgroup G} (hU : U = ((IntegralUnitGroup hc).subgroupOf (unitaryOneFiniteAdeles hc)).map dt) {t k : G} (hk : k ∈ U)
@@ -584,8 +634,8 @@ theorem relDet_eq_of_pinned (D : D7) (idl : D.Dt ⧸ D.UO → IdE D) (hp : RelDe
     (mul_ne_zero (detFI_ne_zero L'.2.1 L'.2.2.1) (inv_ne_zero (detFI_ne_zero L.2.1 L.2.2.1))) hz0 hh hJz
     (val_eq_pow hc dt hker hUO hk (hrat z) e L.2.1 L.2.2.1 L'.2.1 L'.2.2.1 hg hx)
 
-open GlobalTheory.Mem.Col2 in
 
+open GlobalTheory.Mem.Col2 in
 theorem pinned_of_finer (D : D7) (SQ : Finset (HeightOneSpectrum (𝓞 D.host.E))) (ε : DtQ D.host SQ ≃* D.Dt)
     (hU : D.UO = (UOQ D.host SQ).map ε.toMonoidHom) (h1 : ∀ z, D.e1Dt z = ε (e1Q D.host SQ z))
     (h2 : ∀ (N : ℕ) (L L' : SDLat D.host.E N) (t : DtQ D.host SQ), relDetQ D.host SQ N L.1 L'.1 = QuotientGroup.mk t →

@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.IncomingBounds.StatementThmP
-import Formalism.IncomingBounds.FlowDegreeBounds.ThmPExp
-import Formalism.IncomingBounds.FlowDegreeBounds.Cayley
+module
+
+public import Formalism.IncomingBounds.StatementThmP
+public import Mathlib.RingTheory.MvPowerSeries.Derivative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,9 +71,10 @@ def linF (lam : τ → K) : MvPowerSeries τ K := ∑ w, lam w • (X w : MvPowe
 theorem constantCoeff_linF (lam : τ → K) : constantCoeff (linF lam) = 0 := by
   simp [linF, MvPowerSeries.smul_eq_C_mul]
 
-theorem pderiv_linF (lam : τ → K) (w : τ) : pderiv K w (linF lam) = C (lam w) := by
+theorem pderiv_linF (lam : τ → K) (w : τ) : pderiv (R := K) w (linF lam) = C (lam w) := by
   classical
-  rw [linF, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [linF, map_sum]
   simp only [Derivation.map_smul, pderiv_X]
   rw [Finset.sum_eq_single w]
   · simp [MvPowerSeries.smul_eq_C_mul]
@@ -34,7 +85,7 @@ theorem pderiv_linF (lam : τ → K) (w : τ) : pderiv K w (linF lam) = C (lam w
 theorem coeff_linF_pow_step (lam : τ → K) (w : τ) (m : τ →₀ ℕ) (k : ℕ) :
     coeff (m + Finsupp.single w 1) (linF lam ^ (k + 1)) * ((m w : K) + 1)
       = ((k : K) + 1) * lam w * coeff m (linF lam ^ k) := by
-  have h := congrArg (coeff m) (Derivation.leibniz_pow (pderiv K w) (linF lam) (k + 1))
+  have h := congrArg (coeff m) (Derivation.leibniz_pow (pderiv (R := K) w) (linF lam) (k + 1))
   rw [coeff_pderiv, pderiv_linF] at h
   rw [h]
   rw [Nat.add_sub_cancel, smul_eq_mul, map_nsmul, MvPowerSeries.coeff_mul_C, nsmul_eq_mul]

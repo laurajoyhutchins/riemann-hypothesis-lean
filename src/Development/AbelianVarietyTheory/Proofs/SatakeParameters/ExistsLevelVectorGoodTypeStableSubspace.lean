@@ -1,9 +1,68 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.Divisibility.GoodPartHermitianSpec
+public import Formalism.LocalRingCardinality.DataHost
+public import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues Polynomial
 open Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
@@ -26,6 +85,7 @@ theorem sum_char_conj_mul {K G : Type} [Field K] [CharZero K] [Group G] [Fintype
   set T : Module.End (AlgebraicClosure K) (Fin n → AlgebraicClosure K) := ∑ g : G, ρ (g * y * g⁻¹) with hTdef
   have hT : ∀ a v, T (ρ a v) = ρ a (T v) := by
     intro a v
+
     simp only [hTdef, LinearMap.sum_apply, map_sum]
     rw [← Equiv.sum_comp (Equiv.mulLeft a)]
     refine Finset.sum_congr rfl fun g _ => ?_
@@ -36,6 +96,7 @@ theorem sum_char_conj_mul {K G : Type} [Field K] [CharZero K] [Group G] [Fintype
     intro u
     have : LinearMap.trace _ _ (T * ρ u) = c * ρ.character u := by
       rw [hc]; simp [Representation.character, Module.End.mul_eq_comp]
+
     rw [← this, hTdef, Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl fun g _ => ?_
     rw [Representation.character, map_mul]
@@ -47,6 +108,7 @@ theorem sum_char_conj_mul {K G : Type} [Field K] [CharZero K] [Group G] [Fintype
   have h3 : j (∑ g : G, χ (g * y * g⁻¹ * s)) = c * j (χ s) := by
     have := h1 s
     simp only [hρ] at this
+
     rw [map_sum, this]
   apply hj
   rw [map_mul, h3, map_mul _ _ (χ s), h2]
@@ -65,6 +127,7 @@ theorem class_sum_apply {χ : G → K} (h : IsAbsIrrChar χ) (h1 : χ 1 ≠ 0) (
   have e1 : ∀ g : G, ρ (g * y * g⁻¹) (∑ r : G, σ ((chiIdem χ).coeff r) • ρ r u) =
       ∑ s : G, σ ((chiIdem χ).coeff ((g * y * g⁻¹)⁻¹ * s)) • ρ s u := by
     intro g
+
     rw [map_sum, ← Equiv.sum_comp (Equiv.mulLeft (g * y * g⁻¹)⁻¹)]
     refine Finset.sum_congr rfl fun s _ => ?_
     rw [map_smul, ← Module.End.mul_apply, ← map_mul]
@@ -72,6 +135,7 @@ theorem class_sum_apply {χ : G → K} (h : IsAbsIrrChar χ) (h1 : χ 1 ≠ 0) (
   simp only [e1]
   rw [Finset.sum_comm, Finset.smul_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
+
   rw [← Finset.sum_smul, ← map_sum, smul_smul, ← map_mul]
   congr 2
   have e2 : ∀ g : G, (chiIdem χ).coeff ((g * y * g⁻¹)⁻¹ * s) =
@@ -94,8 +158,8 @@ end Op
 def lvlCoef {K G : Type} [Field K] [Group G] (P : Subgroup G) (ψ : P →* Kˣ) (h : P) : K :=
   (Nat.card P : K)⁻¹ * ((ψ h⁻¹ : Kˣ) : K)
 
-open Classical in
 
+open Classical in
 theorem coeff_chiIdem_mul_lvlIdem {K G : Type} [Field K] [Group G] [Fintype G] (χ : G → K) (P : Subgroup G)
     (ψ : P →* Kˣ) (t : G) :
     (chiIdem χ * lvlIdem P ψ).coeff t =
@@ -112,8 +176,8 @@ end GlobalTheory.Hk3.Meet
 
 namespace GlobalTheory.Hk3
 
-open GlobalTheory.Hk3.Meet in
 
+open GlobalTheory.Hk3.Meet in
 theorem exists_level_vector : ∀ {K G W : Type} [Field K] [CharZero K] [Group G] [Fintype G] [AddCommGroup W] [Module ℂ W]
     [FiniteDimensional ℂ W] (σ : K →+* ℂ) (X : Finset (G → K)) (P : Subgroup G) (ψ : P →* Kˣ) (ρ : Representation ℂ G W)
     (U : Submodule ℂ W), (∀ χ ∈ X, IsAbsIrrChar χ) → (∀ χ ∈ X, chiIdem χ * lvlIdem P ψ ≠ 0) → (∀ g, U.map (ρ g) ≤ U) →
@@ -131,6 +195,7 @@ theorem exists_level_vector : ∀ {K G W : Type} [Field K] [CharZero K] [Group G
     have e : (idemOf X).coeff g = ∑ φ ∈ X, (chiIdem φ).coeff g := by
       unfold idemOf
       simp
+
     rw [← Finset.sum_smul, ← map_sum, e]
   obtain ⟨χ, hχ, hw⟩ : ∃ χ ∈ X, ∑ g, σ ((chiIdem χ).coeff g) • ρ g u₀ ≠ 0 := by
     by_contra hcon
@@ -155,6 +220,7 @@ theorem exists_level_vector : ∀ {K G W : Type} [Field K] [CharZero K] [Group G
   have hLU : ∀ w ∈ U, L w ∈ U := fun w hw => Submodule.sum_mem _ fun h _ => Submodule.smul_mem _ _ (hmem _ _ hw)
   have hLe : ∀ (p : P) w, ρ p (L w) = σ (ψ p : K) • L w := by
     intro p w
+
     simp only [hL, map_sum, map_smul, Finset.smul_sum]
     refine (Equiv.sum_comp (Equiv.mulLeft p⁻¹) _).symm.trans (Finset.sum_congr rfl fun h _ => ?_)
     simp only [Equiv.coe_mulLeft]
@@ -179,6 +245,7 @@ theorem exists_level_vector : ∀ {K G W : Type} [Field K] [CharZero K] [Group G
     have e : ∀ g : G, ρ g (L (ρ (t⁻¹ * g⁻¹) w₀)) =
         ∑ h : P, σ (lvlCoef P ψ h) • ρ (g * ((h : G) * t⁻¹) * g⁻¹) w₀ := by
       intro g
+
       simp only [hL, map_sum, map_smul]
       refine Finset.sum_congr rfl fun h _ => ?_
       rw [← Module.End.mul_apply (ρ (h : G)), ← map_mul, ← Module.End.mul_apply (ρ g), ← map_mul]
@@ -192,6 +259,7 @@ theorem exists_level_vector : ∀ {K G W : Type} [Field K] [CharZero K] [Group G
       congr 1
       exact class_sum_apply σ ρ (hX χ hχ) h1 _ u₀
     simp only [e2]
+
     rw [← Finset.sum_smul, ← map_sum, Finset.mul_sum]
     congr 2
     refine Finset.sum_congr rfl fun h _ => ?_

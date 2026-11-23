@@ -1,7 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergmanDensChartSum
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
-import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergmanDensChartSum
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
+public import Mathlib.Topology.OpenPartialHomeomorph.Composition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -153,8 +203,8 @@ theorem lintegral_dens_trans (dV : SmoothVolume A) (j k : Fin A.n)
   refine setLIntegral_congr_fun T.open_source.measurableSet fun y hy => ?_
   simp only [T.left_inv hy]
 
-omit [MeasurableSpace X] [BorelSpace X] in
 
+omit [MeasurableSpace X] [BorelSpace X] in
 theorem jacC_trans_continuousOn (j k : Fin A.n) :
     ContinuousOn (jacC ((A.chart j).symm.trans (A.chart k)))
       ((A.chart j).symm.trans (A.chart k)).source := by
@@ -236,8 +286,8 @@ theorem densIn_eq (W : Weight L) (dV : SmoothVolume A) (j k : Fin A.n) {x : X}
   rw [hc, hd, show (D.factorial : ℝ) * (n * dV.dens k (A.chart k x)) =
     n * ((D.factorial : ℝ) * dV.dens k (A.chart k x)) by ring, mul_div_mul_left _ _ hn]
 
-omit [BorelSpace X] in
 
+omit [BorelSpace X] in
 theorem densIn_continuousAt (W : Weight L) (dV : SmoothVolume A) (j : Fin A.n) {x : X}
     (hx : x ∈ (A.chart j).source) : ContinuousAt (densIn W dV j) x := by
   have hy : A.chart j x ∈ (A.chart j).target := (A.chart j).map_source hx
@@ -264,8 +314,8 @@ theorem bergmanDens_continuous (W : Weight L) (dV : SmoothVolume A) :
     exact densIn_eq W dV _ _ ⟨hx', Classical.choose_spec (A.cover x')⟩
   exact (densIn_continuousAt W dV _ hx).congr hev
 
-omit [MeasurableSpace X] [BorelSpace X] in
 
+omit [MeasurableSpace X] [BorelSpace X] in
 theorem continuous_of_smooth {f : X → ℝ} (hf : A.Smooth f) : Continuous f := by
   rw [continuous_iff_continuousAt]
   intro p

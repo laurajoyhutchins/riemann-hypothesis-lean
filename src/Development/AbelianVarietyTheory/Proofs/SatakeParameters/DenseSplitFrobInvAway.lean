@@ -1,17 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.EllipticCurveLevels.HasLevel
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RegPolOfRepOf
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.Imports
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSpanFormsNeBot
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.ArthurClozelStrongTC
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DenseSplitFrobenius
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChebotarevDegreeOne
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ChebotarevDegreeOneIffCheb
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsSplitAtOfUnramifiedOfInertiaDegEqOne
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsNatUnramifiedOverRealOfCmSubfield
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EventuallyResidueDegreeOnePrimeMovedByGalois
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsInertiaCharpolyFactorOfTameType
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BlochKatoSelmerVanishes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExistsInertiaCharpolyFactorOfTameType
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Univ
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsWeight
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RestrictsSelf
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -29,26 +65,6 @@ private theorem contCoeff {K : Type} [CommRing K] [TopologicalSpace K] [IsTopolo
   rw [h]
   exact (MvPolynomial.continuous_eval _).comp
     (continuous_pi fun ij => (continuous_apply ij.2).comp (continuous_apply ij.1))
-
-theorem dense_splitFrobInv_away (E Ω : Type) [Field E] [NumberField E] [IsCMField E] [Field Ω] [Algebra E Ω]
-    [IsAlgClosure E Ω] (l : ℕ) (hl : l.Prime) (S : Set (HeightOneSpectrum (𝓞 E))) (hS : S.Finite) :
-    Dense {g : G E Ω | ∃ w : HeightOneSpectrum (𝓞 E), w ∉ S ∧ IsSplitAt w ∧ ((l : ℕ) : 𝓞 E) ∉ w.asIdeal ∧
-      ∃ A : ValuationSubring Ω, IsPlaceOver A w ∧ IsFrob A (normV w) g⁻¹} := by
-  obtain ⟨N, hN0, hN⟩ := GlobalTheory.exists_nat_unramified_over_real_of_cm_subfield E
-  have hne : (((l * N : ℕ) : 𝓞 E)) ≠ 0 := Nat.cast_ne_zero.2 (mul_ne_zero hl.ne_zero hN0)
-  have hT : (S ∪ {w : HeightOneSpectrum (𝓞 E) | ((l * N : ℕ) : 𝓞 E) ∈ w.asIdeal}).Finite :=
-    hS.union (GlobalTheory.HeckeSplit.finite_setOf_mem_asIdeal E _ hne)
-  have hD := GlobalTheory.Published.ChebotarevDegreeOne.dense (F := E) (Ω := Ω) GlobalTheory.Published.chebotarevDegreeOne' hT
-  have hD' := hD.preimage (Homeomorph.inv (G E Ω)).isOpenMap
-  refine hD'.mono ?_
-  rintro g ⟨v, hv, hd, A, hA, hσ⟩
-  simp only [Set.mem_union, Set.mem_setOf_eq, not_or] at hv
-  have hlN : ((l : ℕ) : 𝓞 E) ∉ v.asIdeal ∧ ((N : ℕ) : 𝓞 E) ∉ v.asIdeal := by
-    constructor <;> intro h <;> apply hv.2 <;> rw [Nat.cast_mul]
-    · exact v.asIdeal.mul_mem_right _ h
-    · exact v.asIdeal.mul_mem_left _ h
-  have hu := hN E v hlN.2
-  exact ⟨v, hv.1, UpperTheory.isSplitAt_of_unramified_of_inertiaDeg_eq_one E v hu hd, hlN.1, A, hA, hσ⟩
 
 theorem repIso_of_dense {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] {l : ℕ} [Fact l.Prime] {a : ℕ}
     (r r' : G E Ω →* GL (Fin a) (Qbar l)) (hc : Continuous r) (hc' : Continuous r') (hs : IsSSRep r) (hs' : IsSSRep r')

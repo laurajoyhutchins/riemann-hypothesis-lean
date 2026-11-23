@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.HermitianForms.BothSym
-import Formalism.LocalToGlobal.HermitianColumns.FullSym
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.BothSym
+public import Formalism.LocalToGlobal.HermitianColumns.FullSym
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,29 +53,6 @@ def ColsExtraTiedS {D : D7} {C : ColsTiedSym D} (Fu : ColsFullS C) {L : SizeData
     {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {K : Formalism.MainNotions.G.Consts} {Y : DivX D} {cX : ExtraC}
     (ex : Extra D L hT Gi Gl K Y cX) : Prop :=
   Formalism.L2.Herm.SymmetricExtraCompatibility Fu.1 ex
-
-theorem ColsExtraTiedS.lev_eq {D : D7} {C : ColsTiedSym D} {Fu : ColsFullS C} {L : SizeData₂ D} {hT : GatTies D}
-    {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {K : Formalism.MainNotions.G.Consts} {Y : DivX D} {cX : ExtraC}
-    {ex : Extra D L hT Gi Gl K Y cX} (h : ColsExtraTiedS Fu ex) : ex.lev = C.herm.base.lev0 :=
-  h.join.lev_eq.trans (congrArg (fun H => H.base.lev0) Fu.2)
-
-theorem ColsExtraTiedS.piG_lev {D : D7} {C : ColsTiedSym D} {Fu : ColsFullS C} {L : SizeData₂ D} {hT : GatTies D}
-    {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {K : Formalism.MainNotions.G.Consts} {Y : DivX D} {cX : ExtraC}
-    {ex : Extra D L hT Gi Gl K Y cX} (h : ColsExtraTiedS Fu ex) : PiGLevel D ex.lev ex.errX := by
-  letI := D.host.cmStar
-  rw [h.join.lev_eq, h.join.errX_eq]
-  intro u i v hv
-  have key := (Fu.1.levelZeroCompatibility u).splitG_pi i v hv
-  rw [Fu.1.piG u D.u₀] at key
-  simpa [Formalism.L2.Herm.toErrXS, Formalism.L2.Herm.star_conj, UG.inclE] using key
-
-theorem ColsExtraTiedS.piT_lev {D : D7} {C : ColsTiedSym D} {Fu : ColsFullS C} {L : SizeData₂ D} {hT : GatTies D}
-    {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {K : Formalism.MainNotions.G.Consts} {Y : DivX D} {cX : ExtraC}
-    {ex : Extra D L hT Gi Gl K Y cX} (h : ColsExtraTiedS Fu ex) : PiTLevel D ex.lev ex.errX := by
-  letI := D.host.cmStar
-  rw [h.join.lev_eq, h.join.errX_eq]
-  intro u v z hz y
-  exact (Fu.1.levelZeroCompatibility u).fM_pi _ _ z hz y
 
 end Formalism.L2.Forms
 

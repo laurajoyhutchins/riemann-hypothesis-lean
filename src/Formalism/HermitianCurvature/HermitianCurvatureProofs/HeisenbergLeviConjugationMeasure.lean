@@ -1,5 +1,64 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.FormalDegreeBessel.FinalG
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.FormalDegreeBessel.FinalG
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal
@@ -17,9 +76,6 @@ variable {ι : Type*} [Fintype ι] (H : Matrix ι ι ℂ)
 lemma herm_add_left (u u' v : ι → ℂ) : herm H (u + u') v = herm H u v + herm H u' v := by
   simp only [herm, mulVec_add, dotProduct_add]
 
-lemma herm_sub_left (u u' v : ι → ℂ) : herm H (u - u') v = herm H u v - herm H u' v := by
-  simp only [herm, mulVec_sub, dotProduct_sub]
-
 lemma herm_smul_left (c : ℂ) (u v : ι → ℂ) : herm H (c • u) v = c * herm H u v := by
   simp only [herm, mulVec_smul, dotProduct_smul, smul_eq_mul]
 
@@ -28,9 +84,6 @@ lemma herm_neg_left (u v : ι → ℂ) : herm H (-u) v = -herm H u v := by
 
 lemma herm_add_right (u v v' : ι → ℂ) : herm H u (v + v') = herm H u v + herm H u v' := by
   simp only [herm, star_add, add_dotProduct]
-
-lemma herm_neg_right (u v : ι → ℂ) : herm H u (-v) = -herm H u v := by
-  simp only [herm, star_neg, neg_dotProduct]
 
 lemma herm_zero_right (u : ι → ℂ) : herm H u 0 = 0 := by
   simp [herm]
@@ -154,29 +207,7 @@ lemma H_lev_iL (k r' : ℕ) (i : Fin (2 * r' + k + 1)) : Hpk k (1 + r') (levPos 
 
 lemma H_lev_lev (k r' : ℕ) (i j : Fin (2 * r' + k + 1)) :
     Hpk k (1 + r') (levPos k 1 r' i) (levPos k 1 r' j) = Hpk k r' i j := by
-  have hi := i.isLt
-  have hj := j.isLt
-  have hij : levPos k 1 r' i = levPos k 1 r' j ↔ i = j := by
-    rw [Fin.ext_iff, Fin.ext_iff, lev_val, lev_val]
-    exact ⟨fun h => by omega, fun h => by omega⟩
-  have e1 : ((levPos k 1 r' i).val < 1 + r' ∧
-      (levPos k 1 r' i).val + (levPos k 1 r' j).val = 2 * (1 + r') + k) ↔
-      (i.val < r' ∧ i.val + j.val = 2 * r' + k) := by
-    rw [lev_val, lev_val]
-    exact ⟨fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩, fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩⟩
-  have e2 : ((levPos k 1 r' j).val < 1 + r' ∧
-      (levPos k 1 r' i).val + (levPos k 1 r' j).val = 2 * (1 + r') + k) ↔
-      (j.val < r' ∧ i.val + j.val = 2 * r' + k) := by
-    rw [lev_val, lev_val]
-    exact ⟨fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩, fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩⟩
-  have e3 : (1 + r' ≤ (levPos k 1 r' i).val ∧ (levPos k 1 r' i).val ≤ 1 + r' + k ∧
-      levPos k 1 r' i = levPos k 1 r' j) ↔ (r' ≤ i.val ∧ i.val ≤ r' + k ∧ i = j) := by
-    rw [hij, lev_val]
-    exact ⟨fun ⟨h1, h2, h3⟩ => ⟨by omega, by omega, h3⟩, fun ⟨h1, h2, h3⟩ => ⟨by omega, by omega, h3⟩⟩
-  have e4 : (levPos k 1 r' i).val = 1 + r' + k ↔ i.val = r' + k := by
-    rw [lev_val]
-    exact ⟨fun h => by omega, fun h => by omega⟩
-  exact if_congr e1 rfl (if_congr e2 rfl (if_congr e3 (if_congr e4 rfl rfl) rfl))
+  apply Formalism.FourierDecayAlt.P.B2x4.Hpk_levPos <;> assumption
 
 lemma hermitian_matrix_mul_first (k r' : ℕ) (u : Fin (2 * (1 + r') + k + 1) → ℂ) : (Hpk k (1 + r') *ᵥ u) (i0 k r') = u (iL k r') := by
   simp [mulVec, dotProduct, hermitian_form_first_basis]

@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionNormSqExtension
+module
+
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.IsBoundedAtOfIsBoundedH
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -129,6 +181,7 @@ theorem mConeMap_homog (y : (Σ k, ι k) → Ω) {g : MRing ι} {d : K → ℕ} 
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hdeg := hg m hm
@@ -155,38 +208,7 @@ theorem vanish {y : (Σ k, ι k) → Ω} {z : (Σ k, ι k) → ℂ} (hz : z ∈ 
 theorem exists_form_of_mem_chartRingZ (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) {x : Ω}
     (hx : x ∈ chartRingZ y c) :
     ∃ (δ : K → ℕ) (e : MRing ι), IsMultiHomog e δ ∧ aeval y e = x * ∏ k, y ⟨k, c k⟩ ^ δ k := by
-  classical
-  have hpow : ∀ δ₁ δ₂ : K → ℕ, ∏ k, y ⟨k, c k⟩ ^ (δ₁ + δ₂) k =
-      (∏ k, y ⟨k, c k⟩ ^ δ₁ k) * ∏ k, y ⟨k, c k⟩ ^ δ₂ k := fun δ₁ δ₂ => by
-    rw [← Finset.prod_mul_distrib]
-    exact Finset.prod_congr rfl fun k _ => by rw [Pi.add_apply, pow_add]
-  rw [chartRingZ] at hx
-  induction hx using Algebra.adjoin_induction with
-  | mem x hx =>
-    obtain ⟨p, rfl⟩ := hx
-    refine ⟨Pi.single p.1 1, X p, homog_X p, ?_⟩
-    have h1 : ∏ k, y ⟨k, c k⟩ ^ (Pi.single p.1 1 : K → ℕ) k = y ⟨p.1, c p.1⟩ := by
-      rw [Finset.prod_eq_single p.1 (fun k _ hk => by simp [hk])
-        (fun h => absurd (Finset.mem_univ _) h)]
-      simp
-    rw [aeval_X, h1, div_mul_cancel₀ _ (hc p.1)]
-  | algebraMap r =>
-    exact ⟨0, C r, homog_C r, by simp⟩
-  | add x z _ _ hx hz =>
-    obtain ⟨δ₁, e₁, h₁, v₁⟩ := hx
-    obtain ⟨δ₂, e₂, h₂, v₂⟩ := hz
-    refine ⟨δ₁ + δ₂, e₁ * chartMon c δ₂ + e₂ * chartMon c δ₁,
-      homog_add (homog_mul h₁ (homog_chartMon c δ₂)) ?_, ?_⟩
-    · rw [add_comm δ₁]
-      exact homog_mul h₂ (homog_chartMon c δ₁)
-    · rw [map_add, map_mul, map_mul, v₁, v₂, aeval_chartMon, aeval_chartMon, hpow]
-      ring
-  | mul x z _ _ hx hz =>
-    obtain ⟨δ₁, e₁, h₁, v₁⟩ := hx
-    obtain ⟨δ₂, e₂, h₂, v₂⟩ := hz
-    refine ⟨δ₁ + δ₂, e₁ * e₂, homog_mul h₁ h₂, ?_⟩
-    rw [map_mul, v₁, v₂, hpow]
-    ring
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.SectionBounded.exists_form_of_mem_chartRingZ <;> assumption
 
 theorem exists_chartForm (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) (e : K → ℤ) {t : Ω}
     (ht : t * ∏ k, y ⟨k, c k⟩ ^ (-e k) ∈ chartRingZ y c) :
@@ -268,7 +290,7 @@ theorem val_spec {y : (Σ k, ι k) → Ω} {A : HermLine ι} {n : ℕ} {s : Ω} 
     eval z (map (Int.castRingHom ℂ) g) =
       val y A n s z * eval z (map (Int.castRingHom ℂ) h) * (A.h z : ℂ) ^ n := by
   have H := (exists_rep_at hs hz).choose_spec
-  rw [val, dif_pos ⟨hs, hz⟩]
+  rw [val, dite_eq_left ⟨hs, hz⟩]
   have hc := cross hr H.1 hz
   have h1 := H.2
   have h2 := metric_ne (A := A) hz n
@@ -296,7 +318,7 @@ theorem rep_add {y : (Σ k, ι k) → Ω} {a : K → ℤ} {n : ℕ} {s t : Ω} {
   · simp only [Pi.add_apply]
     push_cast
     linear_combination hd₁ k
-  · rw [map_add, map_mul, map_mul, map_mul, hy₁, hy₂]
+  · rw [map_add (f := _), map_mul, map_mul, map_mul, hy₁, hy₂]
     ring
 
 def w (y : (Σ k, ι k) → Ω) (A : HermLine ι) (n : ℕ) : chartLat y A.a n →+ (((Σ k, ι k) → ℂ) → ℂ) :=
@@ -309,7 +331,7 @@ def w (y : (Σ k, ι k) → Ω) (A : HermLine ι) (n : ℕ) : chartLat y A.a n �
       have hT := metric_ne (A := A) hz n
       rw [AddSubgroup.coe_add, val_eq (add_mem s.2 t.2) hz (rep_add r₁ r₂) (by simpa using mul_ne_zero n₁ n₂),
         val_eq s.2 hz r₁ n₁, val_eq t.2 hz r₂ n₂]
-      simp only [map_add, map_mul]
+      simp only [map_add (f := _), map_mul]
       field_simp
     · simp [val, hz]
 
@@ -373,10 +395,10 @@ theorem exists_chartData [DecidableEq K] (y : (Σ k, ι k) → Ω) (A : HermLine
 
 def blockDeg (μ : (Σ k, ι k) →₀ ℕ) : K → ℕ := fun k => ∑ i, μ ⟨k, i⟩
 
-open Classical in
 
+open Classical in
 def comp (g : MRing ι) (δ : K → ℕ) : MRing ι :=
-  ∑ μ ∈ g.support.filter (fun μ => blockDeg μ = δ), monomial μ (coeff μ g)
+  ∑ μ ∈ g.support.filter (fun μ => blockDeg μ = δ), monomial μ (AddMonoidAlgebra.coeff g μ)
 
 theorem homog_comp (g : MRing ι) (δ : K → ℕ) : IsMultiHomog (comp g δ) δ := by
   classical
@@ -418,12 +440,13 @@ theorem comp_mem {y : (Σ k, ι k) → Ω} {g : MRing ι} (hg : g ∈ mCoordIdea
   suffices aeval y (comp g δ) = 0 by rw [this]; simp
   by_cases hδ : δ ∈ g.support.image blockDeg
   · have h0 : mConeMap y g = 0 := hg
+
     rw [← sum_comp g, map_sum] at h0
     have h1 : ∀ δ' ∈ g.support.image blockDeg, mConeMap y (comp g δ') =
         MvPolynomial.C (aeval y (comp g δ')) * monomial (Finsupp.equivFunOnFinite.symm δ') 1 := fun δ' _ => by
       erw [mConeMap_homog y (homog_comp g δ'), prod_X_pow_eq_monomial']
     rw [Finset.sum_congr rfl h1] at h0
-    have h2 := congrArg (MvPolynomial.coeff (Finsupp.equivFunOnFinite.symm δ)) h0
+    have h2 := congrArg (AddMonoidAlgebra.coeff · (Finsupp.equivFunOnFinite.symm δ)) h0
     rw [MvPolynomial.coeff_sum, MvPolynomial.coeff_zero] at h2
     simp only [MvPolynomial.coeff_C_mul, MvPolynomial.coeff_monomial, mul_ite, mul_one, mul_zero,
       EmbeddingLike.apply_eq_iff_eq] at h2
@@ -514,15 +537,17 @@ theorem exists_G_ne {y : (Σ k, ι k) → Ω} {A : HermLine ι} {m N : ℕ} {v :
           rw [Finset.prod_congr rfl fun k _ => h3 k, Finset.prod_mul_distrib]
           ring
   have hFy : aeval y F = 0 := by
+
     rw [hF, map_sub, map_sum, Finset.sum_congr rfl fun j _ => e1 j, ← Finset.sum_mul, hsum, one_mul,
-      aeval_chartMon]
+    aeval_chartMon]
     simp only [Pi.add_apply, sub_self]
   have hFx := vanish hx hFh hFy
   by_contra hne
   push Not at hne
   rw [hF] at hFx
+
   simp only [map_sub, map_sum, map_mul, hne, mul_zero, Finset.sum_const_zero, zero_sub, neg_eq_zero,
-    eval_chartMon] at hFx
+  eval_chartMon] at hFx
   exact (Finset.prod_ne_zero_iff.mpr fun k _ => pow_ne_zero _ (hxc k)) hFx
 
 end SectionNormSqExtension

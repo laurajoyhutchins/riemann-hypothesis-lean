@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.CharacterGerms.FirstVanishingAt
-import Formalism.LocalToGlobal.CharacterGerms.CoeffLMulCvFrob
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.IntSubst
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieDefs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+public import Formalism.LocalToGlobal.CharacterGerms.CoeffLMulCvFrob
+import Formalism.LocalToGlobal.CharacterGerms.MaximalOfValuationGeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,9 +60,6 @@ namespace SelfAdjointCongruence
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ PartialDerivEval MaximalIdealCongruence FirstVanishing
 
 variable {C : Type} [Field C] [CharZero C] {V : VF C} {dd : ℕ}
-
-def sub1 (γ : Fin dd → PowerSeries C) (P : PS C 1 dd) : PowerSeries C :=
-  MvPowerSeries.subst (fun q : Fin 1 × Fin dd => γ q.2) P
 
 def FrobX (V : VF C) (P : PS C 1 dd) : Prop :=
   ∀ μ : Fin 1 × Fin dd →₀ ℕ, (∃ i, ¬ V.l ∣ μ ((0 : Fin 1), i)) → V.MM (MvPowerSeries.coeff μ P)
@@ -45,6 +87,7 @@ theorem coeff_l_frob {P : PS C 1 dd} (hP : IntS V P) (hPz : MvPowerSeries.consta
   have hsq : ∀ (s : Fin 1 × Fin dd), s = ((0 : Fin 1), s.2) := fun s => Prod.ext (Subsingleton.elim _ _) rfl
   have hD2 : Agr (2 * V.l) (P - D1 - D3) 0 := by
     intro μ hμ
+
     rw [map_sub, map_sub, map_zero, hD1def, hD3def, map_sum]
     simp only [MvPowerSeries.coeff_monomial]
     by_cases hex : ∃ i, ¬ V.l ∣ μ ((0 : Fin 1), i)
@@ -95,6 +138,7 @@ theorem coeff_l_frob {P : PS C 1 dd} (hP : IntS V P) (hPz : MvPowerSeries.consta
     hB1' (Finsupp.single () V.l)
   have hD3 : MvPowerSeries.subst (fun q : Fin 1 × Fin dd => γ q.2) D3 =
       ∑ i, MvPowerSeries.C (MvPowerSeries.coeff (Finsupp.single ((0 : Fin 1), i) V.l) P) * γ i ^ V.l := by
+
     rw [hD3def, ← MvPowerSeries.coe_substAlgHom hG, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [MvPowerSeries.coe_substAlgHom hG, MvPowerSeries.subst_monomial hG, Finsupp.prod_single_index (by simp)]
@@ -113,7 +157,8 @@ theorem coeff_l_frob {P : PS C 1 dd} (hP : IntS V P) (hPz : MvPowerSeries.consta
           MvPowerSeries.subst (fun q : Fin 1 × Fin dd => γ q.2) D3 := by
     conv_lhs => rw [hsplit]
     rw [MvPowerSeries.subst_add hG, MvPowerSeries.subst_add hG]
-  rw [eP, map_add, map_add, hA2', add_zero, hD3, map_sum]
+
+  rw [eP, map_add (f := _), map_add (f := _), hA2', add_zero, hD3, map_sum]
   have e : ∀ (a : C) (s t : Fin dd → C),
       a + ∑ i, s i - ∑ i, t i = a + ∑ i, (s i - t i) := fun a s t => by
     rw [Finset.sum_sub_distrib]
@@ -171,7 +216,7 @@ theorem coeff_lt_frob {P : PS C 1 dd} (hPz : MvPowerSeries.constantCoeff P = 0) 
         MvPowerSeries.subst (fun q : Fin 1 × Fin dd => γ q.2) (P - D1) := by
     conv_lhs => rw [show P = D1 + (P - D1) by ring]
     rw [MvPowerSeries.subst_add hG]
-  rw [eP, map_add, hA2', add_zero]
+  rw [eP, map_add (f := _), hA2', add_zero]
   exact hB1
 
 def LowMM (V : VF C) (f : PowerSeries C) : Prop := ∀ n ≤ V.l, V.MM (PowerSeries.coeff n f)
@@ -220,6 +265,7 @@ theorem coeff_one_subst_curve {P : PS C 1 dd} (hPz : MvPowerSeries.constantCoeff
       (MvPowerSeries.coeff (Finsupp.single ((0 : Fin 1), i) 1) P) := ⟨_, rfl⟩
   have hD2 : Agr 2 P D3 := by
     intro μ hμ
+
     rw [hD3def, map_sum]
     simp only [MvPowerSeries.coeff_monomial]
     rcases Nat.lt_succ_iff.1 hμ |>.lt_or_eq with h1 | h1
@@ -248,10 +294,12 @@ theorem coeff_one_subst_curve {P : PS C 1 dd} (hPz : MvPowerSeries.constantCoeff
       PowerSeries.coeff 1 (MvPowerSeries.subst (fun q : Fin 1 × Fin dd => γ q.2) D3) := hA
   have hD3 : MvPowerSeries.subst (fun q : Fin 1 × Fin dd => γ q.2) D3 =
       ∑ i, MvPowerSeries.C (MvPowerSeries.coeff (Finsupp.single ((0 : Fin 1), i) 1) P) * γ i ^ 1 := by
+
     rw [hD3def, ← MvPowerSeries.coe_substAlgHom hG, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [MvPowerSeries.coe_substAlgHom hG, MvPowerSeries.subst_monomial hG, Finsupp.prod_single_index (by simp)]
     rfl
+
   rw [hA', hD3, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [pow_one]

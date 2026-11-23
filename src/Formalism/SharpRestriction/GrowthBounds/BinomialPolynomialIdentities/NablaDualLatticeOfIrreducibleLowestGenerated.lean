@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.DualWeightVectorApplyEqZeroOfNeNeg
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.DeltaIntegralEnvelopingStable
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.DualWeightVectorApplyEqZeroOfNeNeg
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.ContragredientIrreducibleGeneratedByHighestWeigh
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.DeltaIntegralEnvelopingStable
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.IntegralEnvelopingPreservesSubmodule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +63,7 @@ def NSub (E : GLOps n (KK O) V) (x0 : V) : Submodule O (Module.Dual (KK O) V) wh
   carrier := {ψ | ∀ u' ∈ UZmon (dualOps E), Oval O (u' ψ x0)}
   zero_mem' := fun u' _ => by rw [map_zero]; exact Oval.zero
   add_mem' := fun {a b} ha hb u' hu => by
-    rw [map_add, LinearMap.add_apply]; exact (ha u' hu).add (hb u' hu)
+    rw [map_add (f := _), LinearMap.add_apply]; exact (ha u' hu).add (hb u' hu)
   smul_mem' := fun c ψ hψ u' hu => by
     rw [← algebraMap_smul (KK O) c ψ, map_smul, LinearMap.smul_apply, smul_eq_mul]
     exact Oval.mul ⟨c, rfl⟩ (hψ u' hu)
@@ -77,7 +122,7 @@ theorem nablaDualLattice_of_irreducible_lowest_generated (hIrr : ContragredientI
           have : -lowWt mu = -nu := (dualWeight_eq_neg_lowestWeight mu).symm.trans h
           exact (neg_injective this).symm
       | zero => simp
-      | add a b _ _ ha hb => rw [map_add, ha, hb]; simp
+      | add a b _ _ ha hb => rw [map_add (f := _), ha, hb]; simp
     rw [hs, hy0z, zero_add]
     exact hrest
   have hNab : Nabla (O := O) (dualOps E) (dualWt mu) v' = (NSub (O := O) E x0 : Set _) := by
@@ -104,7 +149,7 @@ theorem nablaDualLattice_of_irreducible_lowest_generated (hIrr : ContragredientI
       have h2 := h1 1 (Submonoid.one_mem _)
       exact h2
     | zero => rw [map_zero]; exact Oval.zero
-    | add a b _ _ ha hb => rw [map_add]; exact Oval.add ha hb
+    | add a b _ _ ha hb => rw [map_add (f := _)]; exact Oval.add ha hb
     | smul c a _ ha =>
       rw [← algebraMap_smul (KK O) c a, map_smul, smul_eq_mul]
       exact Oval.mul ⟨c, rfl⟩ ha

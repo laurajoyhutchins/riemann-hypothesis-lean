@@ -1,13 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.RegModelC
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.SCharts
-import Formalism.LocalToGlobal.ProjectiveLattices.FrameCharts
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Formalism.LocalToGlobal.ProjectiveLattices.RegQFree
-import Formalism.LocalToGlobal.ProjectiveLattices.FnTrdegOf
-import Formalism.LocalToGlobal.ProjectiveLattices.RealPtGeo
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAllProofFree
+module
+
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CombinedBoundAtTrivialValuationsOfCharts
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.SCharts
+public import Formalism.LocalToGlobal.ProjectiveLattices.RegQFree
+public import Formalism.LocalToGlobal.ProjectiveLattices.RegModelC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj GlobalTheory.Reg
 
@@ -80,58 +117,12 @@ variable {A : Type} [CommRing A] [IsDomain A]
 theorem chval_eq (φ : A →+* V) (e : ℕ) (f : FractionRing A) (r : EReal) (h : ChV φ e f r) (a b : A)
     (hab : f * algebraMap A (FractionRing A) b = algebraMap A (FractionRing A) a) (hb : φ b ≠ 0) :
     r = nval V e (algebraMap V (FractionRing V) (φ a)) - nval V e (algebraMap V (FractionRing V) (φ b)) := by
-  obtain ⟨x, s, hs, hfs, rfl⟩ := h
-  have has : a * s = x * b := by
-    apply IsFractionRing.injective A (FractionRing A)
-    rw [map_mul, map_mul, ← hab, ← hfs]
-    ring
-  have hφ : φ a * φ s = φ x * φ b := by rw [← map_mul, ← map_mul, has]
-  by_cases ha : φ a = 0
-  · have hx : φ x = 0 := by
-      rw [ha, zero_mul] at hφ
-      exact (mul_eq_zero.1 hφ.symm).resolve_right hb
-    rw [ha, hx, map_zero, nval_zero, nval_of_ne (ne_zero_map hs), nval_of_ne (ne_zero_map hb),
-      EReal.top_sub_coe, EReal.top_sub_coe]
-  · have hx : φ x ≠ 0 := by
-      intro hx
-      rw [hx, zero_mul] at hφ
-      exact mul_ne_zero ha hs hφ
-    have hv := congrArg (vV V) (congrArg (algebraMap V (FractionRing V)) hφ)
-    rw [map_mul, map_mul, vV_mul (ne_zero_map ha) (ne_zero_map hs),
-      vV_mul (ne_zero_map hx) (ne_zero_map hb)] at hv
-    rw [nval_of_ne (ne_zero_map ha), nval_of_ne (ne_zero_map hb), nval_of_ne (ne_zero_map hx),
-      nval_of_ne (ne_zero_map hs), ← EReal.coe_sub, ← EReal.coe_sub, div_sub_div_same, div_sub_div_same]
-    congr 2
-    have : ((vV V (algebraMap V (FractionRing V) (φ x)) : ℤ) : ℝ) -
-        (vV V (algebraMap V (FractionRing V) (φ s)) : ℤ) =
-        ((vV V (algebraMap V (FractionRing V) (φ a)) : ℤ) : ℝ) - (vV V (algebraMap V (FractionRing V) (φ b)) : ℤ) := by
-      have : (vV V (algebraMap V (FractionRing V) (φ x)) : ℤ) - vV V (algebraMap V (FractionRing V) (φ s)) =
-          vV V (algebraMap V (FractionRing V) (φ a)) - vV V (algebraMap V (FractionRing V) (φ b)) := by omega
-      exact_mod_cast this
-    exact this
+  apply GlobalTheory.Reg.TrivBound.chval_eq <;> assumption
 
 theorem chval_div (φ : A →+* V) (e : ℕ) (he : 0 < e) (f : FractionRing A) (r : EReal) (h : ChV φ e f r)
     (hr : 0 ≤ r) (a b : A) (hab : f * algebraMap A (FractionRing A) b = algebraMap A (FractionRing A) a)
     (hb : φ b ≠ 0) : ∃ w : V, φ a = w * φ b := by
-  by_cases ha : φ a = 0
-  · exact ⟨0, by rw [ha, zero_mul]⟩
-  rw [chval_eq φ e f r h a b hab hb, nval_of_ne (ne_zero_map ha), nval_of_ne (ne_zero_map hb),
-    ← EReal.coe_sub, EReal.coe_nonneg, div_sub_div_same] at hr
-  have he' : (0 : ℝ) < e := by exact_mod_cast he
-  have hle : (vV V (algebraMap V (FractionRing V) (φ b)) : ℝ) ≤ vV V (algebraMap V (FractionRing V) (φ a)) := by
-    have := (div_nonneg_iff.1 hr)
-    rcases this with ⟨h1, -⟩ | ⟨-, h2⟩
-    · linarith
-    · linarith
-  have hle' : vV V (algebraMap V (FractionRing V) (φ b)) ≤ vV V (algebraMap V (FractionRing V) (φ a)) := by
-    exact_mod_cast hle
-  set y := algebraMap V (FractionRing V) (φ a) / algebraMap V (FractionRing V) (φ b)
-  have hy0 : y ≠ 0 := div_ne_zero (ne_zero_map ha) (ne_zero_map hb)
-  have hyv : vV V y + vV V (algebraMap V (FractionRing V) (φ b)) = vV V (algebraMap V (FractionRing V) (φ a)) := by
-    rw [← vV_mul hy0 (ne_zero_map hb), div_mul_cancel₀ _ (ne_zero_map hb)]
-  obtain ⟨w, hw⟩ := mem_of_vV_nonneg y hy0 (by omega)
-  refine ⟨w, IsFractionRing.injective V (FractionRing V) ?_⟩
-  rw [map_mul, hw, div_mul_cancel₀ _ (ne_zero_map hb)]
+  apply GlobalTheory.Reg.TrivBound.chval_div <;> assumption
 
 theorem chval_nonneg (φ : A →+* V) (e : ℕ) (f : FractionRing A) (r : EReal) (h : ChV φ e f r) (a s : A)
     (hfs : f * algebraMap A (FractionRing A) s = algebraMap A (FractionRing A) a) (hs : φ s ∉ maximalIdeal V) :

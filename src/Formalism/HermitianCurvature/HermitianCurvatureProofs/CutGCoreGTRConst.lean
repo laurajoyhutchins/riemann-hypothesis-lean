@@ -1,6 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTCRefTraceCut
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTCRefTraceCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.cut_GCore_GenTransferKapCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTKLine
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGenTransferKAsm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTKLine
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGenTransferKPt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -29,14 +77,14 @@ private theorem toSm_smul_hermitian_curvature (P : M.Par) (c : ℂ) (u : MA.Qp P
     MA.toSm P (c • u) = c • MA.toSm P u := by
   unfold MA.toSm
   by_cases hu : u ∈ MA.smSub P.r P.TT
-  · rw [dif_pos hu, dif_pos (Subalgebra.smul_mem _ hu c)]
+  · rw [dite_eq_left hu, dite_eq_left (Subalgebra.smul_mem _ hu c)]
     rfl
-  · rw [dif_neg hu]
+  · rw [dite_eq_right hu]
     by_cases hc : c = 0
     · subst hc
-      rw [zero_smul, smul_zero, dif_pos (Subalgebra.zero_mem _)]
+      rw [zero_smul, smul_zero, dite_eq_left (Subalgebra.zero_mem _)]
       rfl
-    · rw [smul_zero, dif_neg]
+    · rw [smul_zero, dite_eq_right]
       intro hm
       apply hu
       have := Subalgebra.smul_mem _ hm c⁻¹

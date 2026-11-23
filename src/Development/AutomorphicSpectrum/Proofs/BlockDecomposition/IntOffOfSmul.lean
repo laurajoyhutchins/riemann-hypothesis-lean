@@ -1,14 +1,52 @@
-import Mathlib
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TranslationInvariantFunctionalRestrict
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TemperateMultiplierPreservesSchwartz
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ZeroCoefficientTotal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.EmDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzBoundFiniteInfinite
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TemperateMultiplierPreservesSchwartz
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ZeroCoefficientTotal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsEqSmulOfInvariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TranslationInvariantFunctionalRestrict
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.UnipotentAtTauMemStabilizer
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSmallCompactLevelSymplecticCharacterTrivia
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExtensionAdeleRealComponentsCmType
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsClopenCompactNbhdZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,16 +130,14 @@ theorem fin_mul_mem (θ : InfFam D) {h : (Fin a → Fin n → Af D.host.F ⊗[D.
     funext x
     ring
   | zero =>
-    convert (schwartzA θ a n).zero_mem using 1
-    funext x
-    simp
+    convert (schwartzA θ a n).zero_mem using 1 <;> ext x <;> simp
   | add Φ₁ Φ₂ _ _ h₁ h₂ =>
     convert (schwartzA θ a n).add_mem h₁ h₂ using 1
     funext x
     simp [mul_add]
   | smul c Φ _ h₁ =>
     convert (schwartzA θ a n).smul_mem c h₁ using 1
-    funext x
+    ext x
     simp only [Pi.smul_apply, smul_eq_mul]
     ring
 
@@ -115,9 +151,7 @@ theorem mul_mem (θ : InfFam D) {Φ Φ' : Mx D a n → ℂ} (hΦ : Φ ∈ schwar
     funext x
     ring
   | zero =>
-    convert (schwartzA θ a n).zero_mem using 1
-    funext x
-    simp
+    convert (schwartzA θ a n).zero_mem using 1 <;> ext x <;> simp
   | add Φ₁ Φ₂ _ _ h₁ h₂ =>
     convert (schwartzA θ a n).add_mem h₁ h₂ using 1
     funext x
@@ -137,17 +171,11 @@ theorem conj_mem (θ : InfFam D) {Φ : Mx D a n → ℂ} (hΦ : Φ ∈ schwartzA
     funext x
     simp
   | zero =>
-    convert (schwartzA θ a n).zero_mem using 1
-    funext x
-    simp
+    convert (schwartzA θ a n).zero_mem using 1 <;> ext x <;> simp
   | add Φ₁ Φ₂ _ _ h₁ h₂ =>
-    convert (schwartzA θ a n).add_mem h₁ h₂ using 1
-    funext x
-    simp
+    convert (schwartzA θ a n).add_mem h₁ h₂ using 1 <;> ext x <;> simp
   | smul c Φ _ h₁ =>
-    convert (schwartzA θ a n).smul_mem (conj c) h₁ using 1
-    funext x
-    simp
+    convert (schwartzA θ a n).smul_mem (conj c) h₁ using 1 <;> ext x <;> simp
 
 theorem row_mem (θ : InfFam D) {Φ : Mx D a n → ℂ} {φ : Mx D 1 n → ℂ} (hΦ : Φ ∈ schwartzA θ a n)
     (hφ : φ ∈ schwartzA θ 1 n) :
@@ -179,22 +207,18 @@ theorem row_mem (θ : InfFam D) {Φ : Mx D a n → ℂ} {φ : Mx D 1 n → ℂ} 
         rw [e3, e4]
         ring
     | zero =>
-      convert (schwartzA θ (a + 1) n).zero_mem using 1
-      funext x
-      simp
+      convert (schwartzA θ (a + 1) n).zero_mem using 1 <;> ext x <;> simp
     | add Φ₁ Φ₂ _ _ h₁ h₂ =>
       convert (schwartzA θ (a + 1) n).add_mem h₁ h₂ using 1
       funext x
       simp [mul_add]
     | smul c Φ _ h₁ =>
       convert (schwartzA θ (a + 1) n).smul_mem c h₁ using 1
-      funext x
+      ext x
       simp only [Pi.smul_apply, smul_eq_mul]
       ring
   | zero =>
-    convert (schwartzA θ (a + 1) n).zero_mem using 1
-    funext x
-    simp
+    convert (schwartzA θ (a + 1) n).zero_mem using 1 <;> ext x <;> simp
   | add Φ₁ Φ₂ _ _ h₁ h₂ =>
     convert (schwartzA θ (a + 1) n).add_mem h₁ h₂ using 1
     funext x

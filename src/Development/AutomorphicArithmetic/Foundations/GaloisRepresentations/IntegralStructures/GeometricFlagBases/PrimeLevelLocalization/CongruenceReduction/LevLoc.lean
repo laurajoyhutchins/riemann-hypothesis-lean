@@ -1,8 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.CongruenceReduction.LevLocAlt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.CongruenceReduction.ValSimInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocEqOneOfMemGam
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteAdelicUnitaryPointEqOfSectionComponentsEq
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.CongruenceReduction.LevLocAlt
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteAdelicUnitaryPointEqOfSectionComponentsEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocEqOneOfMemGam
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.CongruenceReduction.ValSimInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.DefU Formalism.L2.Host GlobalTheory.HeckeGal
 open GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKGeo GlobalTheory.LKDef
@@ -47,7 +86,7 @@ private theorem inId_of_unit {u : Plc E} {𝔟 : Ideal (𝓞 E)} {b : 𝓞 E} (h
   show algebraMap (𝓞 E) (u.adicCompletion E) b * ((algebraMap (𝓞 E) (u.adicCompletion E) b)⁻¹ * y) = y
   rw [mul_inv_cancel_left₀ hne]
 
-private theorem int_of_mem {u : Plc E} {x : GLw n u} (h : x ∈ KGL u n) (i k : Fin n) :
+private theorem int_of_mem {u : Plc E} {x : GLw n u} (h : x ∈ KGL u (n := n)) (i k : Fin n) :
     (x.val - 1) i k ∈ u.adicCompletionIntegers E := by
   refine sub_mem ((GlobalTheory.EulerTwRestr.mem_KGL_iff.1 h).1 i k) ?_
   rw [Matrix.one_apply]
@@ -110,7 +149,7 @@ private theorem site_ne {N : Lv p} {w : Plc E} (σ : Site S N w) :
   omega
 
 private theorem comp_int (hD : Dict) (F : Frame S) {N : Lv p} {w : Plc E} (σ : Site S N w) {u : Plc E}
-    (hq : (σ.q : 𝓞 E) ∈ u.asIdeal) {k : GUf E n} (hk : F.j k ∈ S.L.KN 1) : comp u k ∈ KGL u n := by
+    (hq : (σ.q : 𝓞 E) ∈ u.asIdeal) {k : GUf E n} (hk : F.j k ∈ S.L.KN 1) : comp u k ∈ KGL u (n := n) := by
   have h := (hD E A n p S F k).2.1.1 hk u (site_p σ hq)
   have ha := F.a_int u σ.q σ.atp.prime σ.good hq
   have e : comp u k = (F.a u)⁻¹ * (F.a u * comp u k * (F.a u)⁻¹) * F.a u := by group
@@ -118,13 +157,13 @@ private theorem comp_int (hD : Dict) (F : Frame S) {N : Lv p} {w : Plc E} (σ : 
   exact mul_mem (mul_mem (inv_mem ha) h) ha
 
 private theorem conj_int (F : Frame S) {N : Lv p} {w : Plc E} (σ : Site S N w) {u : Plc E}
-    (hq : (σ.q : 𝓞 E) ∈ u.asIdeal) {k : GUf E n} (hk : comp u k ∈ KGL u n) :
-    F.a u * comp u k * (F.a u)⁻¹ ∈ KGL u n := by
+    (hq : (σ.q : 𝓞 E) ∈ u.asIdeal) {k : GUf E n} (hk : comp u k ∈ KGL u (n := n)) :
+    F.a u * comp u k * (F.a u)⁻¹ ∈ KGL u (n := n) := by
   have ha := F.a_int u σ.q σ.atp.prime σ.good hq
   exact mul_mem (mul_mem ha hk) (inv_mem ha)
 
 private theorem core (hS : Sides) (hD : Dict) {x : E} (hx : Gen A x) (F : Frame S) {N : Lv p} {w : Plc E} (σ : Site S N w)
-    {k k₀ : GUf E n} (hk₀ : F.j k₀ ∈ σ.K₀) (hw : comp w k ∈ KGL w n) (hc : comp (cj w) k ∈ KGL (cj w) n)
+    {k k₀ : GUf E n} (hk₀ : F.j k₀ ∈ σ.K₀) (hw : comp w k ∈ KGL w (n := n)) (hc : comp (cj w) k ∈ KGL (cj w) (n := n))
     (hu : ∀ u, u ≠ w → u ≠ cj w → comp u k = comp u k₀) : F.j k ∈ σ.K₀ := by
   have hqw := site_q σ
   have hqc := nat_mem_cj w σ.q hqw

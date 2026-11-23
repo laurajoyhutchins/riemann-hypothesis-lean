@@ -1,6 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchedSupportCompletions
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.UltraDefs
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsWeaklyRegularIffIsQuasiRegularSeqOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsQuasiRegularSeqSelfIffLocalizationMaximal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ThetaCoefficientMapEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.IsCplAtSelf
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,8 +105,8 @@ structure Tup (R : Type) [CommRing R] [Algebra O R] [IsCO O R] : Type 1 where
   y : Fin T.q → Fin n → R
   y_mem : ∀ j i, y j i ∈ maximalIdeal R
 
-variable {Λ A} in
 
+variable {Λ A} in
 def Tup.Maps {R R' : Type} [CommRing R] [Algebra O R] [IsCO O R] [CommRing R'] (t : Tup Λ A R) (f : R →+* R')
     (D' : GDet n R' (Ph0 Λ)) (ψ' : ∀ v, Fin n → L.Gv v →* R'ˣ) (s' : R') (U' y' : Fin T.q → Fin n → R') : Prop :=
   t.D.map f = D' ∧ (∀ v i, pushCh f (t.ψ v i) = ψ' v i) ∧ f t.s = s' ∧ (∀ j i, f (t.U j i) = U' j i) ∧
@@ -136,7 +179,6 @@ instance : Module (Spo A) (X0 m) := inferInstanceAs (Module (Spo A) (Spo A ⊗[B
 instance : Module W.R (X0 m) := Module.compHom (X0 m) m.π.toRingHom
 instance : Module (abelian₂ O Unit D) (X0 m) := Module.compHom (X0 m) ((algebraMap B (Spo A)).comp A.b.lam.toRingHom)
 
-theorem X0.smul_def (a : W.R) (x : X0 m) : a • x = m.π a • x := rfl
 theorem X0.lam_smul_def (a : abelian₂ O Unit D) (x : X0 m) : a • x = algebraMap B (Spo A) (A.b.lam a) • x := rfl
 
 def IsApproximateAnnihilatorAtLevels (a : W.R) : Prop :=

@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.CoprimeProd
-import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.GroundTheory
-import Formalism.GaussValuationBounds.GaussValueContraction.PhiIterXProof
+module
+
+public import Formalism.DistinguishedUnitIdeals.Statement
+public import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.GroundTheory
+public import Formalism.GaussValuationBounds.GaussValueContraction.PhiIterXProof
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 noncomputable section
 
@@ -146,6 +196,7 @@ theorem extF_apply {r : ℕ} (φ : (Fin r → O) →ₗ[O] O) (y : Fin r → Pow
 
 theorem extF_cst {r : ℕ} (φ : (Fin r → O) →ₗ[O] O) (v : Fin r → O) :
     extF φ (cst v) = PowerSeries.C (φ v) := by
+
   rw [extF_apply, LinearMap.pi_apply_eq_sum_univ φ v, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   simp [cst, smul_eq_mul, mul_comm]
@@ -244,7 +295,7 @@ theorem extF_mem_of_levelCond {ϖ : O} (hϖ : Irreducible ϖ) {r : ℕ} (φ : (F
   | up =>
     obtain ⟨N, c, z, hc, hz⟩ := h
     have e := congrArg (extF φ) hz
-    simp only [map_smul, map_sub, map_add, extF_cst, smul_eq_mul] at e
+    simp only [map_smul, map_sub, map_add (f := _), extF_cst, smul_eq_mul] at e
     rw [if_pos rfl]
     have hH : q ^ H = q ^ (H - bb) * q ^ bb := by rw [← pow_add, Nat.sub_add_cancel (hkb rfl)]
     apply mem_span_pow_of_uniformizer_mul O ϖ hϖ dd q hq _ (N + k)
@@ -255,7 +306,7 @@ theorem extF_mem_of_levelCond {ϖ : O} (hϖ : Irreducible ϖ) {r : ℕ} (φ : (F
   | down =>
     obtain ⟨N, c, z, hc, hz⟩ := h
     have e := congrArg (extF φ) hz
-    simp only [map_smul, map_sub, map_add, extF_cst, smul_eq_mul] at e
+    simp only [map_smul, map_sub, map_add (f := _), extF_cst, smul_eq_mul] at e
     rw [if_neg (by decide)]
     apply mem_span_pow_of_uniformizer_mul O ϖ hϖ dd q hq _ (N + k)
     rw [Ideal.mem_span_singleton]
@@ -303,7 +354,7 @@ theorem down_scalar {ϖ : O} (hϖ : Irreducible ϖ) {ℓ ell r : ℕ} {p : ℕ �
   rw [hk₁] at h₁
   obtain ⟨N, c, z, hc, hz⟩ := h₁
   have e := congrArg (extF φ) hz
-  simp only [map_smul, map_sub, map_add, extF_cst, smul_eq_mul, extF_eq_zero φ hφ hc, mul_zero,
+  simp only [map_smul, map_sub, map_add (f := _), extF_cst, smul_eq_mul, extF_eq_zero φ hφ hc, mul_zero,
     zero_add] at e
   rw [← hw, hΛ, hPE] at e
   have hne : p s₁ ^ H s₁ ≠ 0 := pow_ne_zero _ (unitDist_ne_zero (hP.1 s₁ hs₁))

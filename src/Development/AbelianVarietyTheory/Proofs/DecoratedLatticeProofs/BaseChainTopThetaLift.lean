@@ -1,16 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.StageY
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FrameTopAlt
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.RatioOKOfRootOfUnity
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExtraColumnRangeMembershipStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualFrameVacuumStepStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.TopStepVectorPropertyStatement
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.JointSmooth
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.OnesRepresent
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PairForm
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsBicharPairing
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.WeTransposeWordTransposeWord
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SeeSaw GlobalTheory.StepData GlobalTheory.SymChain GlobalTheory.LocMod GlobalTheory.MiS GlobalTheory.MiTop GlobalTheory.Fam ValuativeRel
 open scoped TensorProduct Classical
@@ -23,39 +75,6 @@ namespace GlobalTheory.BaseChain
 theorem setIntegral_smul_measure_complex {H : Type*} [MeasurableSpace H] (c : ENNReal) (ν : Measure H) (s : Set H) (f : H → ℂ) :
     ∫ y in s, f y ∂(c • ν) = c.toReal • ∫ y in s, f y ∂ν := by
   rw [Measure.restrict_smul, integral_smul_measure]
-
-theorem stepX_isIo : ∀ {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D} {Kc : Formalism.MainNotions.G.Consts} {Yd : DivX D} {cX : ExtraC} {ex : Extra D L hT Gi Gl Kc Yd cX} (W : RealPack ex) (u : D.what₂.Word) (f : FamCh W u), PkHyp W → f.RowOK → ∀ j (h : j + 2 * 0 + 2 = D.R.m), Lift.IsIo (GlobalTheory.BaseChain.stageX W).ν (GlobalTheory.BaseChain.stageX W).fd (thetaKO (GlobalTheory.BaseChain.stepX f j h).ω) (GlobalTheory.BaseChain.stepX f j h).pt (GlobalTheory.BaseChain.stepX f j h).It ((GlobalTheory.BaseChain.stageX W).CC (GlobalTheory.BaseChain.com W)) ((GlobalTheory.BaseChain.stageY W (j + 1)).CC (GlobalTheory.BaseChain.com W)) (GlobalTheory.BaseChain.stepX f j h).io := by
-  intro D L hT Gi Gl Kc Yd cX ex W u f hP hf j h
-  have hcard : Nat.card (lvP W).H ≠ 0 := by
-    have hf' : ∀ PP : (pk W).Pg, Finite (kP PP.1) := fun PP => Ideal.finiteQuotientOfFreeOfNeBot _ PP.1.ne_bot
-    exact Nat.card_pos.ne'
-  have hcH : GlobalTheory.BaseChain.cH W ≠ ⊤ := by
-    simp [GlobalTheory.BaseChain.cH]
-  refine ⟨fun F φ v g => ?_, fun F φ v g => ?_⟩
-  · have h1 := GlobalTheory.T.top_step_vector_property W hP j h _ ((hf.row W.P.A3.A.μ0).vT j h) F φ v g
-    unfold IntegrableOn at h1 ⊢
-    change Integrable _ ((GlobalTheory.BaseChain.cH W • (pk W).νX W.P.A3.A.μ0).restrict ((pk W).fdX W.P.A3.A.μ0))
-    rw [Measure.restrict_smul]
-    exact h1.smul_measure hcH
-  · obtain ⟨h', -, hL⟩ := GlobalTheory.T.extra_column_range_membership W u hP f.g W.P.A3.A.μ0 j h F
-    obtain ⟨h'', he⟩ := (hf.row W.P.A3.A.μ0).ioT j h F
-    have e1 := congrFun (hL _ ((hf.row W.P.A3.A.μ0).vT j h) φ v) g
-    have key : ∀ X : ℂ, (GlobalTheory.BaseChain.cH W).toReal • ((Nat.card (lvP W).H : ℂ) * X) = X := by
-      intro X
-      have e3 : (GlobalTheory.BaseChain.cH W).toReal = ((Nat.card (lvP W).H : ℝ))⁻¹ := by
-        simp [GlobalTheory.BaseChain.cH, ENNReal.toReal_inv]
-      have hc : ((Nat.card (lvP W).H : ℂ)) ≠ 0 := Nat.cast_ne_zero.2 hcard
-      rw [e3, Complex.real_smul, ← mul_assoc]
-      push_cast
-      rw [inv_mul_cancel₀ hc, one_mul]
-    change ∫ y in (pk W).fdX W.P.A3.A.μ0, _ ∂(GlobalTheory.BaseChain.cH W • (pk W).νX W.P.A3.A.μ0) =
-      ((f.row W.P.A3.A.μ0).ioT j h F).1 (f.c.ItT j h φ v) g
-    rw [setIntegral_smul_measure_complex, he]
-    have e2 : (∫ y in (pk W).fdX W.P.A3.A.μ0, thetaKO (omT (pk W) W.P.A3.A.μ0 j h) g y
-        (pureTensorO (pk W).ψ (pk W).θ (Yc D (j + 1)) D.sp.X' (cart ((pk W).MY (j + 1))) (cart (pk W).MX)
-          (onb ((pk W).MY (j + 1))) (onb (pk W).MX) ((f.row W.P.A3.A.μ0).vT j h) φ) * F.1 v y ∂(pk W).νX W.P.A3.A.μ0) =
-        (Nat.card (lvP W).H : ℂ) * (ioXT (pk W) W.P.A3.A.μ0 j h ⟨F.1, h''⟩).1 (f.c.ItT j h φ v) g := e1
-    exact (congrArg (fun z : ℂ => (GlobalTheory.BaseChain.cH W).toReal • z) e2).trans (key _)
 
 end GlobalTheory.BaseChain
 

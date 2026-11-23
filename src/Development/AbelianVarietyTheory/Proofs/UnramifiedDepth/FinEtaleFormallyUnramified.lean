@@ -1,8 +1,72 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.SubMemOfCompat
+module
+
+public import Mathlib.Algebra.DualNumber
+public import Mathlib.Basic.NNReal.Defs
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.Valuation.Integers
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.IdempotentFG
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.RingTheory.Flat.Basic
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.DualLattices.CotangentSurjective
+import ReciprocityTheory.DualLattices.FormalChartAtZero
+import ReciprocityTheory.DualLattices.SqZeroOfSpan
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+
+@[expose] public section
+
 open TensorProduct IsLocalRing Matrix CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Be2 ReciprocityTheory.ChartRestriction.G.Chart
 open scoped CategoryTheory.Obj CategoryTheory.MonObj
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -58,7 +122,7 @@ private theorem exists_algHom_apply_ne_zero_of_pointDerivation_eq_zero {C B : Ty
             (a - algebraMap C B (φ a)) * (b - algebraMap C B (φ b)) := by
         rw [map_mul, map_mul, Algebra.smul_def, Algebra.smul_def]
         ring
-      rw [hDapp, hDapp, hDapp, key, map_add, map_add, map_smul, map_smul,
+      rw [hDapp, hDapp, hDapp, key, map_add (f := _), map_add (f := _), map_smul, map_smul,
         hℓ0 _ (Ideal.mul_mem_mul (hφa a) (hφa b)), smul_eq_mul, smul_eq_mul, add_zero]
     have hD0 := hder φ D hD
     apply hℓx
@@ -102,10 +166,10 @@ private theorem finrank_eq_card_algHom_of_pointDerivation_eq_zero {C B : Type} [
     _ = Nat.card (B →ₐ[C] C) := by
         rw [Module.finrank_fintype_fun_eq_card, Nat.card_eq_fintype_card]
 
+
 open TensorProduct IsLocalRing Matrix CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj in
 open scoped CategoryTheory.Obj CategoryTheory.MonObj in
 attribute [local instance] Over.cartesianMonoidalCategory in
-
 theorem _root_.GlobalTheory.finEtale_main :
     (∀ (C O A : Type) [Field C] [IsAlgClosed C] (v : Valuation C NNReal) [CommRing O]
       [Algebra O C], v.Integers O →
@@ -158,7 +222,7 @@ theorem _root_.GlobalTheory.finEtale_main :
       have hca : c ⊗ₜ[O] a = c • ((1 : C) ⊗ₜ[O] a) := by
         rw [TensorProduct.smul_tmul', smul_eq_mul, _root_.mul_one]
       rw [hca, map_smul, hDA, smul_zero, LinearMap.zero_apply]
-    | add x y hx hy => simp only [map_add, hx, hy, LinearMap.zero_apply, add_zero]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy, LinearMap.zero_apply, add_zero]
   obtain ⟨_, hrankB⟩ := finrank_eq_card_algHom_of_pointDerivation_eq_zero hder
   let Ψ : (A →ₐ[O] O) → (C ⊗[O] A →ₐ[C] C) := fun ψ =>
     Algebra.TensorProduct.lift (Algebra.ofId C C) ((Algebra.ofId O C).comp ψ)

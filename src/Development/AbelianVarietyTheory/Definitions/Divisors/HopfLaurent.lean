@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
+module
+
+public import Mathlib.Algebra.TrivSqZeroExt.Basic
+public import Mathlib.AlgebraicGeometry.Group.Affine
+public import Mathlib.RingTheory.HopfAlgebra.MonoidAlgebra
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -41,28 +88,6 @@ structure TanRep (A : Over (Sp R)) [GrpObj A] (W : Type) [AddCommGroup W] [Modul
     [Module B'ᵐᵒᵖ M'] [IsCentralScalar B' M'] [Module R M'] [IsScalarTower R B' M'] (α : B →ₐ[R] B') (f : M →ₗ[R] M')
     (β : TrivSqZeroExt B M →+* TrivSqZeroExt B' M'), IsSum β α f →
     ∀ z : Sp (TrivSqZeroExt B M) ⟶ A.left, Lifts A.hom (unitPt A B) z → Φ (spMap β ≫ z) = f ∘ₗ Φ z
-
-example {X : Scheme.{0}} (s : X ⟶ Sp R) {B M : Type} [CommRing B] [Algebra R B] [AddCommGroup M] [Module B M]
-    [Module Bᵐᵒᵖ M] [IsCentralScalar B M] (P : Sp B ⟶ X) (h : P ≫ s = spMap (algebraMap R B)) :
-    (spMap (TrivSqZeroExt.inlHom B M) ≫ P) ≫ s = spMap ((TrivSqZeroExt.inlHom B M).comp (algebraMap R B)) := by
-  rw [Category.assoc, h, GlobalTheory.Cris.spMap_comp]
-
-theorem lifts_const {X : Scheme.{0}} (s : X ⟶ Sp R) {B : Type} (M : Type) [CommRing B] [Algebra R B] [AddCommGroup M]
-    [Module B M] [Module Bᵐᵒᵖ M] [IsCentralScalar B M] (P : Sp B ⟶ X) (h : P ≫ s = spMap (algebraMap R B)) :
-    Lifts s P (spMap (TrivSqZeroExt.inlHom B M) ≫ P) := by
-  refine ⟨?_, ?_⟩
-  · rw [Category.assoc, h]
-    simp only [spMap, ← Spec.map_comp]
-    rfl
-  · rw [← Category.assoc]
-    simp only [spMap, ← Spec.map_comp]
-    have : (CommRingCat.ofHom (TrivSqZeroExt.inlHom B M) ≫
-        CommRingCat.ofHom (TrivSqZeroExt.fstHom B B M).toRingHom : CommRingCat.of B ⟶ CommRingCat.of B) = 𝟙 _ := by
-      ext b; rfl
-    rw [this, Spec.map_id, Category.id_comp]
-
-example {B M : Type} [CommRing B] [AddCommGroup M] [Module B M] [Module Bᵐᵒᵖ M] [IsCentralScalar B M] :
-    IsSum (RingHom.id (TrivSqZeroExt B M)) id id := ⟨fun _ => rfl, fun _ => rfl⟩
 
 end GlobalTheory.AbTan
 
@@ -123,7 +148,7 @@ theorem hom_ext' {C : Type} [CommRing C] {φ ψ : R[T;T⁻¹] →+* C}
     | pred k ih => rw [sub_eq_add_neg, T_add, map_mul, map_mul, ih, hinv]
   refine RingHom.ext fun p => ?_
   induction p using LaurentPolynomial.induction_on' with
-  | add p q hp hq => rw [map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq]
   | C_mul_T n a => rw [map_mul, map_mul, hC, hT]
 
 theorem lifts_iff {B M : Type} [CommRing B] [Algebra R B] [AddCommGroup M] [Module B M]
@@ -190,13 +215,7 @@ def tanRep : TanRep (G R) R where
       rfl
     ext
     simp only [this, LinearMap.toSpanSingleton_apply, one_smul, LinearMap.comp_apply, RingHom.comp_apply]
-    rw [← TrivSqZeroExt.inl_fst_add_inr_snd_eq (pre z (T 1)), map_add, hβ.1, hβ.2]
+    rw [← TrivSqZeroExt.inl_fst_add_inr_snd_eq (pre z (T 1)), map_add (f := _), hβ.1, hβ.2]
     simp
-
-example {B M : Type} [CommRing B] [Algebra R B] [AddCommGroup M] [Module B M] [Module Bᵐᵒᵖ M] [IsCentralScalar B M]
-    [Module R M] [IsScalarTower R B M] (φ : R[T;T⁻¹] →+* TrivSqZeroExt B M) :
-    (tanRep (R := R)).Φ (spMap φ) 1 = (φ (T 1)).snd := by
-  change LinearMap.toSpanSingleton R _ (pre (R := R) (spMap φ) (T 1)).snd 1 = _
-  simp [pre_spMap]
 
 end GlobalTheory.AbTan.MultGroup

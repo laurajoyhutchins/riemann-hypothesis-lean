@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.BasisBlock0
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.DecompBlock0
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+import Mathlib.Algebra.MvPolynomial.Nilpotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.BasisBlock0
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -8,7 +58,7 @@ theorem hx4v2_ratio_smul {Ω V : Type*} [Field Ω] [AddCommGroup V] [Module Ω V
     (hg : g ≠ 0) (s : Ω) : ratio (Ω := Ω) (s • g) g = s := by
   unfold ratio
   have hex : ∃ a : Ω, s • g = a • g := ⟨s, rfl⟩
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact (smul_left_injective Ω hg hex.choose_spec).symm
 
 theorem hx4v2_eq_ratio_smul {Ω V : Type*} [Field Ω] [AddCommGroup V] [Module Ω V]
@@ -18,7 +68,7 @@ theorem hx4v2_eq_ratio_smul {Ω V : Type*} [Field Ω] [AddCommGroup V] [Module �
   obtain ⟨a, ha⟩ := (finrank_eq_one_iff_of_nonzero' (⟨g, hgW⟩ : W) hg').mp hW ⟨f, hf⟩
   have hex : ∃ a : Ω, f = a • g := ⟨a, (congrArg Subtype.val ha).symm⟩
   unfold ratio
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact hex.choose_spec
 
 variable {K : Type} [Field K] [NumberField K] {ι : Type} [Fintype ι]
@@ -60,7 +110,8 @@ theorem norm_generic_ratio_spec (hd : d.AxH 𝒜) (h : d.S1) (c : ι) :
               Algebra.norm (KTf K d.D d.N) (algebraMap (Ω c) (OmS (Ω c) d.D d.N)
                 (ratio (Ω := Ω c) (d.wx x c) (d.w (d.jc c) c)))) := by
   let _ : Algebra (KTf K d.D d.N) (OmS (Ω c) d.D d.N) := (d.KTtoS h c).toAlgebra
-  obtain ⟨n, b, Q0, M, hQ0, hQ0s, hMs, hM⟩ := d.basis_block0 hd h c
+  obtain ⟨n, b, Q0, M, hQ0, hQ0s, hMs, hM⟩ :=
+    ReciprocityTheory.ChartRestriction.G.T0.Data.basis_block0 d hd h c
   let r : Fin (d.N + 1) → OmS (Ω c) d.D d.N := fun j =>
     algebraMap (Ω c) (OmS (Ω c) d.D d.N) (ratio (Ω := Ω c) (d.w j c) (d.w (d.jc c) c))
   let ι0 : KTp K d.D d.N →+* KTf K d.D d.N := algebraMap (KTp K d.D d.N) (KTf K d.D d.N)
@@ -69,13 +120,15 @@ theorem norm_generic_ratio_spec (hd : d.AxH 𝒜) (h : d.S1) (c : ι) :
   have key : ∀ a : Fin (d.N + 1) → KTp K d.D d.N,
       Algebra.norm (KTf K d.D d.N) (∑ j, ι0 (a j) • r j) = ι0 (∑ j, a j • M j).det / ι0 Q0 ^ n := by
     intro a
+
     rw [Algebra.norm_eq_matrix_det b, map_sum]
     simp_rw [map_smul]
     have hmat : (∑ j, ι0 (a j) • Algebra.leftMulMatrix b (r j)) =
         (ι0 Q0)⁻¹ • (∑ j, a j • M j).map ι0 := by
       ext i i'
+
       rw [Matrix.smul_apply, Matrix.map_apply, Matrix.sum_apply, Matrix.sum_apply, map_sum,
-        Finset.smul_sum]
+      Finset.smul_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [hM j, Matrix.smul_apply, Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul,
         smul_eq_mul, map_mul]
@@ -104,11 +157,13 @@ theorem norm_generic_ratio_spec (hd : d.AxH 𝒜) (h : d.S1) (c : ι) :
       rw [hmd]
       congr 1
       ext i i'
+
       simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.sum_apply, Matrix.smul_apply,
-        smul_eq_mul, map_sum, map_mul, RingHom.coe_coe, hMs]
+      smul_eq_mul, map_sum, map_mul, RingHom.coe_coe, hMs]
       simp
     have hr : algebraMap (Ω c) (OmS (Ω c) d.D d.N) (ratio (Ω := Ω c) (d.wx x c) (d.w (d.jc c) c)) =
         ∑ j, ι0 (MvPolynomial.C (x j) : KTp K d.D d.N) • r j := by
+
       rw [d.hx4v2_ratio_wx hd c x, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_mul, Algebra.smul_def, RingHom.algebraMap_toAlgebra]

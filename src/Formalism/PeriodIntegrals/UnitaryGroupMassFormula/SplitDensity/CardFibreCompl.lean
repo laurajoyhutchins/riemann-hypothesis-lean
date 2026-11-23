@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Finiteness
+public import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+
+@[expose] public section
 
 open Module Submodule
 
@@ -10,14 +68,15 @@ theorem card_fibre {K V U : Type} [Field K] [Fintype K] [AddCommGroup V] [Module
     Nat.card {x : V // φ x = a} = Fintype.card K ^ finrank K (LinearMap.ker φ) := by
   have e : {x : V // φ x = a} ≃ LinearMap.ker φ :=
     { toFun := fun x => ⟨x.1 - x0, by rw [LinearMap.mem_ker, map_sub, x.2, hx0, sub_self]⟩
-      invFun := fun y => ⟨y.1 + x0, by rw [map_add, LinearMap.mem_ker.mp y.2, zero_add, hx0]⟩
+      invFun := fun y => ⟨y.1 + x0, by rw [map_add (f := _), LinearMap.mem_ker.mp y.2, zero_add, hx0]⟩
       left_inv := fun x => Subtype.ext (sub_add_cancel _ _)
       right_inv := fun y => Subtype.ext (add_sub_cancel_right _ _) }
   haveI : Finite V := Module.finite_of_finite K
   rw [Nat.card_congr e, Module.natCard_eq_pow_finrank (K := K), Nat.card_eq_fintype_card]
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 theorem card_fibre_compl {K V U : Type} [Field K] [Fintype K] [AddCommGroup V] [Module K V]
     [FiniteDimensional K V] [AddCommGroup U] [Module K U] (φ : V →ₗ[K] U)
     (hφ : Function.Surjective φ) {k : ℕ} (z : Fin k → V) (hz : LinearIndependent K z)
@@ -33,7 +92,7 @@ theorem card_fibre_compl {K V U : Type} [Field K] [Fintype K] [AddCommGroup V] [
   let ψ : (Fin k → K) →ₗ[K] U :=
     { toFun := fun c => φ (∑ j, c j • z j)
       map_add' := fun c d => by
-        simp only [Pi.add_apply, add_smul, Finset.sum_add_distrib, map_add]
+        simp only [Pi.add_apply, add_smul, Finset.sum_add_distrib, map_add (f := _)]
       map_smul' := fun t c => by
         simp only [Pi.smul_apply, smul_eq_mul, mul_smul, ← Finset.smul_sum, map_smul,
           RingHom.id_apply] }
@@ -42,6 +101,7 @@ theorem card_fibre_compl {K V U : Type} [Field K] [Fintype K] [AddCommGroup V] [
     rw [LinearMap.mem_range, Submodule.mem_span_range_iff_exists_fun]
     refine exists_congr fun c => ?_
     show φ (∑ j, c j • z j) = u ↔ _
+
     rw [map_sum]
     simp only [map_smul]
 
@@ -130,9 +190,9 @@ theorem fiber_card {K V U : Type} [Field K] [Fintype K] [AddCommGroup V] [Module
         Σ z' : {z' : Fin k → V // LinearIndependent K z' ∧ ∀ j, φ (z' j) = gk j},
           {x : V // x ∉ span K (Set.range z'.1) ∧ φ x = g (Fin.last k)} :=
       { toFun := fun z =>
-          have hs := linearIndependent_fin_snoc.mp (by rw [Fin.snoc_init_self]; exact z.2.1)
+          have hs := linearIndependent_finSnoc.mp (by rw [Fin.snoc_init_self]; exact z.2.1)
           ⟨⟨Fin.init z.1, hs.1, fun j => z.2.2 _⟩, ⟨z.1 (Fin.last k), hs.2, z.2.2 _⟩⟩
-        invFun := fun p => ⟨Fin.snoc p.1.1 p.2.1, linearIndependent_fin_snoc.mpr ⟨p.1.2.1, p.2.2.1⟩,
+        invFun := fun p => ⟨Fin.snoc p.1.1 p.2.1, linearIndependent_finSnoc.mpr ⟨p.1.2.1, p.2.2.1⟩,
           fun j => by
             refine Fin.lastCases ?_ (fun i => ?_) j
             · rw [Fin.snoc_last]; exact p.2.2.2

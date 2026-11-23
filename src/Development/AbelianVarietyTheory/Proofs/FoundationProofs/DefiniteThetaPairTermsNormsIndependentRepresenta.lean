@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ApplyAtOriginMinorProductLinearStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryDoubleCosetClassesFiniteCardLeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryRationalConjIntersectionCardDvdInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembershipStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPointStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilOperatorRationalTranslateMemThetaFunctions
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ApplyAtOriginMinorProductLinearStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPointStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembershipStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryDoubleCosetClassesFiniteCardLeStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryRationalConjIntersectionCardDvdInvariantStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators
@@ -27,6 +71,7 @@ theorem hf_nsmul (n : ℕ) (x z : VC D N N') : Hf D T (n • x) z = Hf D T x (n 
     Finset.sum_congr rfl fun _ _ => by ring
 
 theorem hf_conj (x z : VC D N N') : Hf D T z x = (starRingEnd ℂ) (Hf D T x z) := by
+
   simp only [Hf, map_div₀, map_sum, map_mul, Complex.conj_conj, Complex.conj_ofReal]
   congr 1
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ =>
@@ -44,23 +89,7 @@ theorem differentiable_wd (x : VC D N N') {G : VC D N N' → ℂ} (hG : Differen
 
 theorem wd_wd_of_int {x z : VC D N N'} {G : VC D N N' → ℂ} (hx : Wd D T x G = G) (m : ℤ)
     (hm : (Hf D T x z).im = m) (w : VC D N N') : Wd D T x (Wd D T z G) w = Wd D T z G w := by
-  have h1 := congrFun hx (w + z)
-  have h2 : Hf D T x z = Hf D T z x + 2 * Complex.I * m := by
-    rw [hf_conj x z]
-    apply Complex.ext <;> simp [hm]
-    ring
-  have h3 : Complex.exp (-(Real.pi : ℂ) * Hf D T (w + x) z - (Real.pi : ℂ) * Hf D T z z / 2) *
-      Complex.exp (-(Real.pi : ℂ) * Hf D T w x - (Real.pi : ℂ) * Hf D T x x / 2) =
-      Complex.exp (-(Real.pi : ℂ) * Hf D T (w + z) x - (Real.pi : ℂ) * Hf D T x x / 2) *
-      Complex.exp (-(Real.pi : ℂ) * Hf D T w z - (Real.pi : ℂ) * Hf D T z z / 2) := by
-    rw [← Complex.exp_add, ← Complex.exp_add, Complex.exp_eq_exp_iff_exists_int]
-    refine ⟨-m, ?_⟩
-    rw [hf_add_left, hf_add_left, h2]
-    push_cast
-    ring
-  simp only [Wd, U] at h1 ⊢
-  rw [← h1, add_right_comm w x z]
-  linear_combination (wdPh D T x * wdPh D T z * G (w + z + x)) * h3
+  apply _root_.GlobalTheory.FinWeil.RatTransl.wd_wd_of_int <;> assumption
 
 end Translates
 
@@ -244,10 +273,10 @@ theorem rep_indep : ∀ (D : D7), Inp D → ∀ (cc : Ideal (𝓞 D.host.K)) (δ
   refine ⟨fun γ hγ k hk x h T => term_inv hI P hF hγ hk x h T, fun γ hγ j hj h => sq_inv hI P hF hγ hj h,
     fun s hs h T => ?_, fun s hs => ?_, ?_⟩
   · refine finsum_congr fun q => ?_
-    obtain ⟨γ, hγ, k, hk, e⟩ := (DoubleCoset.eq _ _ _ _).1 ((hs q).trans (DoubleCoset.out_eq' _ _ q).symm)
+    obtain ⟨γ, hγ, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 ((hs q).trans (DoubleCoset.out_eq' q).symm)
     rw [e, term_inv hI P hF hγ hk, (GlobalTheory.T.unitaryRationalConjIntersectionCard_dvd_invariant D _ _ le_rfl (s q)).2.2 γ hγ k hk]
   · refine finsum_congr fun q => ?_
-    obtain ⟨γ, hγ, k, hk, e⟩ := (DoubleCoset.eq _ _ _ _).1 ((hs q).trans (DoubleCoset.out_eq' _ _ q).symm)
+    obtain ⟨γ, hγ, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 ((hs q).trans (DoubleCoset.out_eq' q).symm)
     rw [e, sq_inv hI P hF hγ hk, (GlobalTheory.T.unitaryRationalConjIntersectionCard_dvd_invariant D _ _ P.J_le (s q)).2.2 γ hγ k hk]
   · rintro ⟨h, T, hT⟩
     haveI := ((GlobalTheory.T.unitaryDoubleCosetClasses_finite_card_le D P.d).2.2 P.J P.J_le P.idx_ne).1
@@ -258,8 +287,8 @@ theorem rep_indep : ∀ (D : D7), Inp D → ∀ (cc : Ideal (𝓞 D.host.K)) (δ
     rw [Pair.norm, finsum_eq_sum_of_fintype]
     refine Finset.sum_pos' (fun q _ => mul_nonneg (by positivity) (h1 _))
       ⟨DoubleCoset.mk _ _ h, Finset.mem_univ _, ?_⟩
-    obtain ⟨γ, hγ, k, hk, e⟩ := (DoubleCoset.eq _ _ _ _).1
-      (DoubleCoset.out_eq' _ _ (DoubleCoset.mk (ratG D P.d) P.J h)).symm
+    obtain ⟨γ, hγ, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1
+      (DoubleCoset.out_eq' (DoubleCoset.mk (ratG D P.d) P.J h)).symm
     rw [e, sq_inv hI P hF hγ hk]
     have h2 := (GlobalTheory.T.unitaryRationalConjIntersectionCard_dvd_invariant D _ _ P.J_le (γ * h * k)).1
     positivity

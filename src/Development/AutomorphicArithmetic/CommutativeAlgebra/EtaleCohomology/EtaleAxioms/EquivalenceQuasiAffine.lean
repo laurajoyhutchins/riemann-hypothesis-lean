@@ -1,38 +1,75 @@
-import Mathlib
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.CoverPf
+public import Development.EtaleCohomology.EtaleSheaves.EtAICPf
+public import Development.EtaleCohomology.EtaleSheaves.FinEtSectionPf
+public import Development.EtaleCohomology.EtaleSheaves.LCSurjPf
+public import Development.EtaleCohomology.EtaleSheaves.PullInjOfIso
+public import Development.EtaleCohomology.EtaleSheaves.TorEtPf
+public import Development.EtaleCohomology.EtaleSheaves.ZarLocalPf
 import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsOrthogonalIdempotentsIsDomainOfEtale
-import Development.EtaleCohomology.EtaleSheaves.AcycQAPf
-import Development.EtaleCohomology.EtaleSheaves.CoverPf
-import Development.EtaleCohomology.EtaleSheaves.PrimMapComp
 import Development.EtaleCohomology.EtaleSheaves.DescentPf
 import Development.EtaleCohomology.EtaleSheaves.DomOpenPf
 import Development.EtaleCohomology.EtaleSheaves.EmptyVan2
 import Development.EtaleCohomology.EtaleSheaves.EqvQAPf
-import Development.EtaleCohomology.EtaleSheaves.EtAICPf
-import Development.EtaleCohomology.EtaleSheaves.EtLiftPf
-import Development.EtaleCohomology.EtaleSheaves.FinEtSectionPf
+public import Development.EtaleCohomology.EtaleSheaves.EtLiftPf
 import Development.EtaleCohomology.EtaleSheaves.FinOpenPf
 import Development.EtaleCohomology.EtaleSheaves.GlueOf
-import Development.EtaleCohomology.EtaleSheaves.LocallyConstantH0
-import Development.EtaleCohomology.EtaleSheaves.LCBijPf
 import Development.EtaleCohomology.EtaleSheaves.LCGoodPf
 import Development.EtaleCohomology.EtaleSheaves.LCMapPf
-import Development.EtaleCohomology.EtaleSheaves.LCSplitPf
-import Development.EtaleCohomology.EtaleSheaves.LCSurjPf
-import Development.EtaleCohomology.EtaleSheaves.LeafMVVanishPf
+public import Development.EtaleCohomology.EtaleSheaves.LeafMVVanishPf
 import Development.EtaleCohomology.EtaleSheaves.LocDiagPf
 import Development.EtaleCohomology.EtaleSheaves.LocFormPf
 import Development.EtaleCohomology.EtaleSheaves.LocSHPf
-import Development.EtaleCohomology.EtaleSheaves.PullInjOfIso
 import Development.EtaleCohomology.EtaleSheaves.PiecesPf
-import Development.EtaleCohomology.EtaleSheaves.ProjFPf
+import Development.EtaleCohomology.EtaleSheaves.PrimMapComp
+public import Development.EtaleCohomology.EtaleSheaves.ProjFPf
 import Development.EtaleCohomology.EtaleSheaves.ProjGPf
-import Development.EtaleCohomology.EtaleSheaves.QAClosedPf
+public import Development.EtaleCohomology.EtaleSheaves.QAClosedPf
 import Development.EtaleCohomology.EtaleSheaves.StdCoverPf
 import Development.EtaleCohomology.EtaleSheaves.StdPBPf
-import Development.EtaleCohomology.EtaleSheaves.TorEtPf
 import Development.EtaleCohomology.EtaleSheaves.TorSecPf
-import Development.EtaleCohomology.EtaleSheaves.TwGenNZACPf
-import Development.EtaleCohomology.EtaleSheaves.ZarLocalPf
+public import Development.EtaleCohomology.EtaleSheaves.TwGenNZACPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace UpperTheory.Et.QuasiAffineEquivalence
 

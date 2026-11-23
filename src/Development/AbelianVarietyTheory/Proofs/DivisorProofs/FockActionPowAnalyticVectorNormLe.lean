@@ -1,7 +1,53 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockNormBoundsMulXPderivStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockNormBoundsMulXPderivStatement
+
+@[expose] public section
+
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible GlobalTheory.FockAlg MvPolynomial
 
 noncomputable section
@@ -11,7 +57,7 @@ theorem totalDegree_pderiv_le_self {σ : Type} (i : σ) (Q : MvPolynomial σ ℂ
     (pderiv i Q).totalDegree ≤ Q.totalDegree := by
   classical
   refine Finset.sup_le fun m hm => ?_
-  have hc : coeff (m + Finsupp.single i 1) Q ≠ 0 := by
+  have hc : AddMonoidAlgebra.coeff Q (m + Finsupp.single i 1) ≠ 0 := by
     rw [mem_support_iff, coeff_pderiv] at hm
     intro h
     rw [h, zero_mul] at hm
@@ -87,7 +133,7 @@ theorem omE_bound (h : IsFockIP ι) (l l' : Ln p q r s) (d : ℕ) (P : Pol p q r
   split_ifs
   · rw [LinearMap.add_apply, LinearMap.smul_apply, Module.End.one_apply]
     refine ⟨(totalDegree_add _ _).trans (max_le h1 ((totalDegree_smul_le _ _).trans (by omega))), ?_⟩
-    rw [map_add, map_smul]
+    rw [map_add (f := _), map_smul]
     refine (norm_add_le _ _).trans ?_
     rw [norm_smul]
     have : ‖(1 / 2 : ℂ)‖ = 1 / 2 := by simp
@@ -107,8 +153,10 @@ theorem omAct_bound (h : IsFockIP ι) (Y : Matrix (Ln p q r s) (Ln p q r s) ℂ)
   · refine (totalDegree_finsetSum _ _).trans (Finset.sup_le fun l _ => ?_)
     refine (totalDegree_finsetSum _ _).trans (Finset.sup_le fun l' _ => ?_)
     exact (totalDegree_smul_le _ _).trans (omE_bound h l l' d P hP).1
-  · rw [map_sum, Finset.sum_mul]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum, Finset.sum_mul]
     refine norm_sum_le_of_le _ fun l _ => ?_
+
     rw [map_sum, Finset.sum_mul]
     refine norm_sum_le_of_le _ fun l' _ => ?_
     rw [map_smul, norm_smul]

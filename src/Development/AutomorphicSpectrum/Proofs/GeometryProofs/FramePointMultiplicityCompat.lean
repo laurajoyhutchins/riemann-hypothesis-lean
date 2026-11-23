@@ -1,12 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
-import Formalism.LocalToGlobal.ProjectiveLattices.RulInst
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEig
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EigenBasisIffTangentBasis
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsTangentVectorBasisAtPointBaseChange
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeCommBaseChange
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.PullGt
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEig
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EigenBasisIffTangentBasis
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsTangentModuleUniversalGroupStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeCommBaseChange
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsTangentVectorBasisAtPointBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.PullGt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLineGenOn
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.LocFn
 
@@ -24,7 +69,7 @@ theorem exists_away_lift {X : Scheme.{0}} {S R : Type} [CommRing S] [CommRing R]
   let p : PrimeSpectrum S := ⟨q, inferInstance⟩
   let t : Sp (Localization.AtPrime q) := (IsLocalRing.closedPoint (Localization.AtPrime q) : PrimeSpectrum _)
   have hcl : (spMap (algebraMap S (Localization.AtPrime q))) t = (p : Sp S) :=
-    PrimeSpectrum.ext (Localization.AtPrime.comap_maximalIdeal)
+    PrimeSpectrum.ext (Localization.AtPrime.under_maximalIdeal)
   have hmem : w (p : Sp S) ∈ Set.range x := by
     refine ⟨(spMap θ) t, ?_⟩
     have := congrArg (fun f : Sp (Localization.AtPrime q) ⟶ X => f t) h
@@ -133,8 +178,8 @@ theorem exists_spread {S : Type} [CommRing S] (q : Ideal S) [hq : q.IsPrime] (g�
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Datum H} {l : Level H}
   {Xo : Moduli D l} {c : Coeff l} {O : Type} [CommRing O] {β : O →+* c.F}
 
-open MonoidalCategory CartesianMonoidalCategory MonObj in
 
+open MonoidalCategory CartesianMonoidalCategory MonObj in
 theorem one_left_eq {X : Scheme.{0}} {A : Type} [CommRing A] (G : Over X) [GrpObj G] (x : Sp A ⟶ X) :
     (1 : Over.mk x ⟶ G).left = x ≫ η[G].left := by
   simp [Hom.one_def, Out.PullGtPf.toUnit_left']
@@ -149,8 +194,8 @@ theorem dualMap_comp {A B C : Type} [CommRing A] [CommRing B] [CommRing C] (f : 
   RingHom.ext fun a => by
     ext <;> simp [Formalism.L2.Pj.dualMap]
 
-open MonoidalCategory CartesianMonoidalCategory MonObj in
 
+open MonoidalCategory CartesianMonoidalCategory MonObj in
 theorem exists_tied (Y : Model Xo c β) {B : Type} [CommRing B] (y : Sp B ⟶ Xo.XF c)
     (v' : Sp (DualNumber B) ⟶ Y.t.G.left)
     (hv : v' ≫ Y.t.G.hom = spMap (algebraMap B (DualNumber B)) ≫ y ≫ Y.j)
@@ -229,8 +274,8 @@ theorem isTanAt_of_comb {B : Type} [CommRing B] {xB : Sp B ⟶ Xo.X} {m : ℕ}
   rw [(hcomb _ b _ _).1 h]
   exact (htan _).2 ⟨_, rfl⟩
 
-open MonoidalCategory CartesianMonoidalCategory MonObj in
 
+open MonoidalCategory CartesianMonoidalCategory MonObj in
 theorem tan_pull (Y : Model Xo c β) {R B : Type} [CommRing R] [CommRing B] {x : Sp R ⟶ Y.X} (θ₀ : R →+* B)
     (y : Sp B ⟶ Xo.XF c) (h : spMap θ₀ ≫ x = y ≫ Y.j) (v : epsAt x ⟶ Y.t.G) (hv : IsTanAt Y.t.G x v) :
     ∃ V, Tied Y y V (spMap (Formalism.L2.Pj.dualMap θ₀) ≫ v.left) ∧ Formalism.L2.Pj.IsTanAt (y ≫ pullback.fst _ _) V := by

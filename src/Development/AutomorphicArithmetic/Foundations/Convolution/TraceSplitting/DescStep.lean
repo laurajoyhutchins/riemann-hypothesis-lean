@@ -1,20 +1,59 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.FamParts
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PowTwist
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExTwist
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExCusp
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursIff
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursBasics
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExCusp
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.ExTwist
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursBasics
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursIff
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.CarryLift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.FamParts
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.PowTwist
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DetAdmA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
 open GroundTheory.Automorphic.CuspidalSpectrum GroundTheory.Global GroundTheory.Global.SemiLocal
 open UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.C UpperTheory.ConvolutionTheory.T Formalism.BasicNotions GlobalTheory.PRep GlobalTheory.CuspRep GlobalTheory.SmGL UpperTheory.CBC
 
-private theorem occ_basic {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+private theorem occ_basic {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
     (V : Submodule ℂ (LL μ)) (hV : IsSummand μ V) (w : Pl K) :
     (∃ σ, Occurs μ V w σ) ∧ (∀ σ σ', Occurs μ V w σ → Occurs μ V w σ' → Nonempty (σ.ρ.Equiv σ'.ρ)) := by
   letI : MeasurableSpace (Gw n w) := borel _
@@ -22,7 +61,7 @@ private theorem occ_basic {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : M
   have h := occursBasics K n μ V w Measure.haar hV
   exact ⟨h.1, h.2.1⟩
 
-private theorem loc_iff {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {n : ℕ} (μ : Measure (normOneGL E n))
+private theorem loc_iff {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {n : ℕ} (μ : Measure (normOneGL (K := E) (n := n)))
     [μ.IsHaarMeasure] (π : CuspSub E n) (V : Submodule ℂ (LL μ)) (h : Dp.Carries μ π V) (w : Pl E) (σ : SmIrr (Gw n w)) :
     (Cusp.cx π).locComp w σ ↔ Occurs μ V w σ :=
   (Dp.locIff E n μ π V h w σ).trans (occursIff E n μ V h.summand w σ).symm
@@ -42,9 +81,10 @@ private theorem locIso_congr {F E : Type} [Field F] [NumberField F] [Field E] [N
 theorem UpperTheory.ConvolutionTheory.T.descStep :
     UpperTheory.ConvolutionTheory.T.CoreDesc → UpperTheory.ConvolutionTheory.T.LiftAll → UpperTheory.ConvolutionTheory.T.DescStep := by
   intro hD hL F E _ _ _ _ _ _ _ _ σ hσ hp n hn P hP v w hv
-  let μE : Measure (normOneGL E n) := Measure.haar
-  let μF : Measure (normOneGL F n) := Measure.haar
-  obtain ⟨χ', ⟨s, hs'⟩, V, hV⟩ := Dp.exTwist E n μE P hn
+  let μE : Measure (normOneGL (K := E) (n := n)) := Measure.haar
+  let μF : Measure (normOneGL (K := F) (n := n)) := Measure.haar
+  obtain ⟨χ', hχ', V, hV⟩ := Dp.exTwist E n μE P hn
+  obtain ⟨s, hs'⟩ := hχ'
   obtain ⟨hex, htw⟩ := powTwist F E
   obtain ⟨χ, hs⟩ := (hex s).1
   obtain ⟨hi, hi', h1⟩ := htw s χ χ' hs hs'

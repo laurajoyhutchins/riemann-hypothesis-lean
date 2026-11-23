@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousAlgebraMapPadicInt
+public import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.WeilDeligne
 
@@ -20,35 +65,7 @@ theorem val_lt_iff_of_dec {σ : G E Ω} (hσ : σ ∈ Dec (F := E) A) {a b : Ω}
   exact valuation_apply_lt_one_iff hσ (a / b)
 
 theorem val_apply_eq {σ : G E Ω} (hσ : σ ∈ Dec (F := E) A) (x : Ω) : A.valuation (σ x) = A.valuation x := by
-  classical
-  rcases eq_or_ne x 0 with rfl | hx
-  · simp
-  have key : ∀ τ ∈ Dec (F := E) A, ∀ y : Ω, y ≠ 0 → A.valuation (τ y) < A.valuation y → False := by
-    intro τ hτ y hy hlt
-    have hne : ∀ k : ℕ, (τ ^ k) y ≠ 0 := fun k => (map_ne_zero _).mpr hy
-    have hdec : ∀ k : ℕ, A.valuation ((τ ^ (k + 1)) y) < A.valuation ((τ ^ k) y) := by
-      intro k
-      induction k with
-      | zero => simpa using hlt
-      | succ k ih =>
-        have := (val_lt_iff_of_dec hτ (hne k)).mpr ih
-        simpa only [← AlgEquiv.mul_apply, ← pow_succ'] using this
-    have hanti : StrictAnti fun k : ℕ => A.valuation ((τ ^ k) y) := strictAnti_nat_of_succ_lt hdec
-    have hinj : Function.Injective fun k : ℕ => (τ ^ k) y := fun i j hij =>
-      hanti.injective (by simp only at hij ⊢; rw [hij])
-    have hint : IsIntegral E y := (Algebra.IsAlgebraic.isAlgebraic (R := E) y).isIntegral
-    have hfin := (minpoly E y).rootSet_finite Ω
-    apply Set.infinite_of_injective_forall_mem hinj (s := (minpoly E y).rootSet Ω) ?_ hfin
-    intro k
-    rw [Polynomial.mem_rootSet]
-    refine ⟨minpoly.ne_zero hint, ?_⟩
-    rw [show (τ ^ k) y = ((τ ^ k : G E Ω) : Ω →ₐ[E] Ω) y from rfl, Polynomial.aeval_algHom_apply, minpoly.aeval,
-      map_zero]
-  rcases lt_trichotomy (A.valuation (σ x)) (A.valuation x) with h | h | h
-  · exact (key σ hσ x hx h).elim
-  · exact h
-  · refine (key σ⁻¹ ((Dec (F := E) A).inv_mem hσ) (σ x) ((map_ne_zero σ).mpr hx) ?_).elim
-    rwa [show (σ⁻¹ : G E Ω) (σ x) = x by simp]
+  apply GlobalTheory.PrimeToInertia.valuation_apply_eq <;> assumption
 
 theorem val_ratio {σ : G E Ω} (hσ : σ ∈ Dec (F := E) A) {x : Ω} (hx : x ≠ 0) : A.valuation (σ x / x) = 1 := by
   rw [map_div₀, val_apply_eq hσ, div_self ((Valuation.ne_zero_iff _).mpr hx)]
@@ -119,13 +136,6 @@ theorem isWild_of_tameSym {σ : Ine (F := E) A} (h : ∀ (x : Ω) (hx : x ≠ 0)
   calc A.valuation ((σ : G E Ω) x / x - 1) * A.valuation x < 1 * A.valuation x :=
         mul_lt_mul_of_pos_right h2 hv
     _ = A.valuation x := one_mul _
-
-theorem isWild_commutator (s t : Ine (F := E) A) :
-    Formalism.MainNotions.BlochKatoReduction.IsWild A ((s * t * s⁻¹ * t⁻¹ : Ine (F := E) A) : G E Ω) := by
-  refine isWild_of_tameSym fun x hx => ?_
-  simp only [map_mul, map_inv]
-  rw [mul_comm (tameSym hx s) (tameSym hx t)]
-  group
 
 theorem isWild_frob {q : ℕ} {φ : G E Ω} (hφ : IsFrob A q φ) (s : Ine (F := E) A) :
     Formalism.MainNotions.BlochKatoReduction.IsWild A (((⟨φ * s * φ⁻¹, conj_mem_Ine hφ.1 s.2⟩ : Ine (F := E) A) * (s ^ q)⁻¹ :

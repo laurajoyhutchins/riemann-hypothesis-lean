@@ -1,5 +1,56 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.DataS
-import Formalism.SharpRestriction.GrowthBounds.DataG
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.DataS
+public import Formalism.SharpRestriction.GrowthBounds.DataG
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,12 +132,6 @@ theorem toySData_HH (Del : ℚ) (hDel hgap hlet) (loc : ∀ p, Formalism.MainNot
   show Module.finrank ℂ (EuclideanSpace ℂ (Fin 0)) = 0
   simp
 
-theorem toySData_atP (Del : ℚ) (hDel hgap hlet) (loc : ∀ p, Formalism.MainNotions.S.Loc.LocAt F E sig p) (p) :
-    (toySData sig hc Del hDel hgap hlet loc).atP p = loc p := rfl
-
-theorem toySData_Del (Del : ℚ) (hDel hgap hlet) (loc : ∀ p, Formalism.MainNotions.S.Loc.LocAt F E sig p) :
-    (toySData sig hc Del hDel hgap hlet loc).Del = Del := rfl
-
 def toySData_Cu (Del : ℚ) (hDel hgap hlet) (loc : ∀ p, Formalism.MainNotions.S.Loc.LocAt F E sig p) (u : Word)
     {V : Type} [AddCommGroup V] [Module ℂ V] (M : Submodule ℂ V) (hM : M = ⊥) :
     (toySData sig hc Del hDel hgap hlet loc).Cu u ≃ₗ[ℂ] M := by
@@ -149,12 +194,6 @@ def gAtPExample (p : ℕ) : GAtP p where
   comp := Unit
   lev := fun _ => toySignLevel p
   e := 0
-
-instance (p : ℕ) : Unique (gAtPExample p).P.Tup := inferInstanceAs (Unique (emptyPlaces p).Tup)
-
-theorem toySignLevel_fin (p : ℕ) : (toySignLevel p).FinClasses := by
-  refine ⟨{default}, fun _ _ v => v.elim0, fun L _ => ⟨default,
-    Finset.mem_singleton_self _, 1, Subsingleton.elim _ _⟩⟩
 
 theorem toySignLevel_M (p : ℕ) : (toySignLevel p).M = ⊥ := by
   rw [eq_bot_iff]

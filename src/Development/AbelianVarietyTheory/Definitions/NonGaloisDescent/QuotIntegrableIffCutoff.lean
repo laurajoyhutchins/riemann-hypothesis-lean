@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.BruhatFunctionExistsClosedSubgroup
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.BruhatFunctionExistsClosedSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 open MeasureTheory Topology
 open scoped ENNReal
@@ -30,8 +78,8 @@ def QuotIntegrable {E : Type} [NormedAddCommGroup E] (T : Subgroup G) (μ : Meas
     (F : G → E) : Prop :=
   Integrable (fun c : RCoset T => F (Quotient.out c)) (quotMeas T μ μT)
 
-omit [MeasurableSpace G] in
 
+omit [MeasurableSpace G] in
 theorem apply_out_mk {T : Subgroup G} {α : Type} {F : G → α} (hF : ∀ t ∈ T, ∀ x, F (t * x) = F x) (x : G) :
     F (Quotient.out (Quotient.mk (QuotientGroup.rightRel T) x)) = F x := by
   have h := Quotient.mk_out (s := QuotientGroup.rightRel T) x
@@ -52,8 +100,8 @@ section Exist
 variable {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [SecondCountableTopology G]
   [MeasurableSpace G] [BorelSpace G] {T : Subgroup G} {μ : Measure G} {μT : Measure T}
 
-omit [SecondCountableTopology G] in
 
+omit [SecondCountableTopology G] in
 theorem exists_isCosetCutoff [LocallyCompactSpace G] [T2Space G] (hT : IsClosed (T : Set G)) [μT.IsHaarMeasure]
     [μT.IsInvInvariant] : ∃ β : G → NNReal, Continuous β ∧ IsCosetCutoff T μT β := by
   obtain ⟨β, hc, h0, -, h1⟩ := GlobalTheory.bruhatFunctionExists_closedSubgroup G T hT μT inferInstance
@@ -102,8 +150,8 @@ theorem IsCosetCutoff.isQuotMeasure [SFinite μ] [μ.IsMulLeftInvariant] [SFinit
   rw [lintegral_mul_const _ (f := fun t : T => (β ((t⁻¹ : T) * x) : ℝ≥0∞)) (hb.comp (hmul'.comp (measurable_prodMk_left))),
     lintegral_inv_eq_self (μ := μT) (fun t : T => (β (t * x) : ℝ≥0∞)), hβ.2, one_mul]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] [SecondCountableTopology G] [BorelSpace G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] [SecondCountableTopology G] [BorelSpace G] in
 theorem IsQuotMeasure.eq_map {ν : Measure (RCoset T)} (hν : IsQuotMeasure T μ μT ν) {β : G → NNReal}
     (hβ : IsCosetCutoff T μT β) :
     ν = (μ.withDensity fun x => β x).map (Quotient.mk (QuotientGroup.rightRel T)) := by
@@ -129,11 +177,6 @@ theorem isQuotMeasure_quotMeas (hT : IsClosed (T : Set G)) : IsQuotMeasure T μ 
   have : SecondCountableTopology T := TopologicalSpace.Subtype.secondCountableTopology (T : Set G)
   exact Classical.epsilon_spec ⟨_, hβ.isQuotMeasure⟩
 
-theorem IsQuotMeasure.eq_quotMeas (hT : IsClosed (T : Set G)) {ν : Measure (RCoset T)} (hν : IsQuotMeasure T μ μT ν) :
-    ν = quotMeas T μ μT := by
-  obtain ⟨β, -, hβ⟩ := exists_isCosetCutoff (μT := μT) hT
-  rw [hν.eq_map hβ, (isQuotMeasure_quotMeas hT).eq_map hβ]
-
 theorem quotInt_eq_cutoff (hT : IsClosed (T : Set G)) {β : G → NNReal} (hβ : IsCosetCutoff T μT β) {F : G → ℂ}
     (hm : Measurable F) (hF : ∀ t ∈ T, ∀ x, F (t * x) = F x) : quotInt T μ μT F = ∫ x, (β x : ℝ) • F x ∂μ := by
   rw [quotInt, (isQuotMeasure_quotMeas hT).eq_map hβ,
@@ -149,20 +192,6 @@ theorem quotIntegrable_iff_cutoff (hT : IsClosed (T : Set G)) {β : G → NNReal
     integrable_withDensity_iff_integrable_smul hβ.1]
   exact integrable_congr (Filter.Eventually.of_forall fun x => by simp only [Function.comp, apply_out_mk hF]; rfl)
 
-theorem quotInt_of_isCompact (hT : IsCompact (T : Set G)) {F : G → ℂ} (hm : Measurable F)
-    (hF : ∀ t ∈ T, ∀ x, F (t * x) = F x) : quotInt T μ μT F = ((μT.real Set.univ : ℝ) : ℂ)⁻¹ * ∫ x, F x ∂μ := by
-  have : CompactSpace T := isCompact_iff_compactSpace.1 hT
-  have h0 : μT Set.univ ≠ 0 := (isOpen_univ.measure_pos μT ⟨1, trivial⟩).ne'
-  have h1 : μT Set.univ ≠ ⊤ := measure_ne_top _ _
-  have hβ : IsCosetCutoff T μT fun _ => (μT Set.univ).toNNReal⁻¹ := ⟨measurable_const, fun x => by
-    rw [lintegral_const, ENNReal.coe_inv (ENNReal.toNNReal_ne_zero.2 ⟨h0, h1⟩), ENNReal.coe_toNNReal h1,
-      ENNReal.inv_mul_cancel h0 h1]⟩
-  rw [quotInt_eq_cutoff hT.isClosed hβ hm hF, integral_smul]
-  simp [Measure.real, ENNReal.toReal]
-
 end Exist
-
-example {G : Type} [Group G] [MeasurableSpace G] : IsCosetCutoff (⊥ : Subgroup G) (Measure.dirac 1) fun _ => 1 :=
-  ⟨measurable_const, fun _ => by simp⟩
 
 end GlobalTheory.Tw

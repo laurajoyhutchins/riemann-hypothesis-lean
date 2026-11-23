@@ -1,13 +1,64 @@
-import Mathlib
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsHecke
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsHecke
+public import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.XiNeZeroOfIsStdGeneric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotBaseCondFalse
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RowsRestWordColumnUnitBaseTupleAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCharDescent
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsReadsAtOfCover
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FunKilled
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut NumberField IsDedekindDomain GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl GlobalTheory.Mem.R3 GlobalTheory.Mem.R3.Rw GlobalTheory.HeightCounting GlobalTheory.HeightCounting.Up
 open Formalism.AUTREP (GAf)
 open Neutral.B1 (Ideles)
 open GlobalTheory.HeckeGal (Gab IsGlobalArtin)
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1000000
+
+
 open GlobalTheory.LevCmp
 open GlobalTheory.TwistChoice (Reading ReadsAt)
 
@@ -50,7 +101,7 @@ private theorem intLift_coe (v : HeightOneSpectrum (𝓞 (maximalRealSubfield L)
     (y : v.adicCompletionIntegers (maximalRealSubfield L)) :
     NX.intLift v (y : v.adicCompletion (maximalRealSubfield L)) = y := by
   unfold NX.intLift
-  rw [dif_pos y.2]
+  rw [dite_eq_left y.2]
 
 private theorem sum_top {R : Type} [CommRing R] {n r : ℕ} (h : r ≤ n) (X : Matrix (Fin n) (Fin n) R) :
     (∑ a : Fin n, ∑ b : Fin n, if a.val + 1 = b.val ∧ b.val < r then X a b else 0) = NX.supSum r (NX.topR h X) := by
@@ -120,6 +171,7 @@ private theorem loc_read (s : SplitPlace L) {n r : ℕ} (h : r ≤ n) {q : ℕ} 
     · exact (hX _ _).symm
     · rfl
   · unfold NX.supSum
+
     simp only [map_sum]
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
     split_ifs
@@ -157,7 +209,7 @@ theorem _root_.GlobalTheory.T.complex_typePlaceCharacter_eq_superdiag_addChar_mu
   obtain ⟨h1, h2, h3, y, hy, hry⟩ := GlobalTheory.XUniRead.loc_read s (n := D.R.nV) (Nat.le_add_right D.R.r D.R.t : D.R.r ≤ D.R.nV)
     (D.host.g_prime kv0.1) red x hx
   unfold NX.gVal
-  erw [dif_pos h2]
+  erw [dite_eq_left h2]
   rw [map_mul, hτ, he, hξ _ h2 uu (huu.trans h3.symm)]
   congr 1
   generalize hM : NX.redMat s.v red (NX.topR (Nat.le_add_right D.R.r D.R.t : D.R.r ≤ D.R.nV) x.val) = M
@@ -175,7 +227,7 @@ theorem _root_.GlobalTheory.T.complex_typePlaceCharacter_eq_superdiag_addChar_mu
     · rw [hu1 kv hkv]; exact ⟨Matrix.blockTriangular_one, fun a => Matrix.one_apply_eq a⟩
   have hm : u ∈ D.nexp.U := by rw [X.U_eq]; exact hm'
   unfold NX.psiUTot
-  rw [dif_pos hm, hpsi u hm hm', he, psiUOf_apply, Fintype.prod_eq_single kv0 (fun kv hkv => by
+  rw [dite_eq_left hm, hpsi u hm hm', he, psiUOf_apply, Fintype.prod_eq_single kv0 (fun kv hkv => by
     rw [hu1 kv hkv, NX.supSum_one, mul_zero, ofAdd_zero, map_one]), hu0, ← hy]
   by_cases hr : 2 ≤ D.R.r
   · rw [hψ₀ hr y, hry]

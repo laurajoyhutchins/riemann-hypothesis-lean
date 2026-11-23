@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
-import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NonemptyAlgHomOfNotIsField
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +69,7 @@ theorem sigR_extZero (y : Af F ⊗[F] E) :
   | tmul a e =>
     rw [sigR_tmul_adelic_iwasawa_hecke, extZero_tmul, extZero_tmul]
     exact sigR_tmul_adelic_iwasawa_hecke (R := AF F) (LinearMap.inr F (Ainf F) (Af F) a) e
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 omit [NumberField E] in
 theorem evalV_sigR (y : Af F ⊗[F] E) :
@@ -38,7 +78,7 @@ theorem evalV_sigR (y : Af F ⊗[F] E) :
   induction y using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul a e => simp [Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sigR]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 private lemma map_evalV_eq_of_finAdEquiv_eq {v' : HeightOneSpectrum (𝓞 F)} {y₁ y₂ : Af F ⊗[F] E}
     (H : ∀ u : HeightOneSpectrum (𝓞 E), u.under (𝓞 F) = v' → finAdEquiv F E y₁ u = finAdEquiv F E y₂ u) :
@@ -157,7 +197,7 @@ theorem sigR_locIdele (hE : IsCMExt F E σ) (h : w.under (𝓞 F) = v) (h' : w'.
     (a : (Fv F v)ˣ) :
     Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.sigR (AF F) σ (locIdele F w (Units.map (complMap h).toMonoidHom a) : AF F ⊗[F] E) =
       locIdele F w' (Units.map (complMap h').toMonoidHom a) := by
-  rw [coe_locIdele', coe_locIdele', map_add, map_sub, map_one, sigR_extZero, sigR_extZero, map_one,
+  rw [coe_locIdele', coe_locIdele', map_add (f := _), map_sub, map_one, sigR_extZero, sigR_extZero, map_one,
     sigR_single hE h h' hne a]
 
 theorem val_mul_val_eq_one : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (μ : (TensorProduct F (AF F) E)ˣ →* Circle) (b : ℕ), ResEta F E μ b → ∀ (w w' : HeightOneSpectrum (𝓞 E)), w.under (𝓞 F) = w'.under (𝓞 F) → w ≠ w' → UnrAt μ w → UnrAt μ w' → val μ w * val μ w' = 1 := by

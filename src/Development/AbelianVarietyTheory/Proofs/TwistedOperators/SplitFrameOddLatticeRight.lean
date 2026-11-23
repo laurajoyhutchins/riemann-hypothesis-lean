@@ -1,11 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceHermitianFrameProperties
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SelfDualModulusShiftHalfMemCompletedModulusHom
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdempotentSmulMemHatLattice
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitComponentIntegerResidueZeroIffMemPrime
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceCharacterConductorIntegers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatticeColumnsOffFiniteSet
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsClearingIntegersPrincipalDatumHost
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitComponentIntegerResidueZeroIffMemPrime
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceCharacterConductorIntegers
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPointComponentMemSpanOfLatticeGenerators
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DependenceFixed
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsValuationOneElementAtGridPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdempotentSmulMemHatLattice
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatticeColumnsOffFiniteSet
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PsiPrimitiveStandardFramesBesselLevel
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SelfDualModulusShiftHalfMemCompletedModulusHom
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows GlobalTheory.Asc
 open scoped TensorProduct
@@ -53,6 +100,7 @@ theorem pair_rat_int {T : HSp D} {LT : Lat T} (hT : IsSelfDualC T LT) {P : Globa
         p.pr (pairA D.host.F 0 α ⊗ₜ[D.host.F] (1 * x l)) =
         p.pr (pairA D.host.F 0 α ⊗ₜ[D.host.F] (1 : D.host.E)) * p.pr (incA D (b : D.host.E)) := by
       rw [hb]
+
       simp only [map_sum, Finset.mul_sum, RingHom.map_mul]
       refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun l _ => ?_
       rw [one_mul, tmul_split _ (x l), RingHom.map_mul]
@@ -61,11 +109,11 @@ theorem pair_rat_int {T : HSp D} {LT : Lat T} (hT : IsSelfDualC T LT) {P : Globa
     exact mul_mem (pr_one_int p hα) (GlobalTheory.LocMod.FullLatFrame.pr_int_mem p b)
   | zero => simp
   | add x y _ _ hx hy =>
-    simp only [Pi.add_apply, RingHom.map_add, mul_add, Finset.sum_add_distrib]; exact add_mem hx hy
+    simp only [Pi.add_apply, RingHom.map_add (f := _), mul_add, Finset.sum_add_distrib]; exact add_mem hx hy
   | neg x _ hx =>
     simp only [Pi.neg_apply, RingHom.map_neg, mul_neg, Finset.sum_neg_distrib]; exact neg_mem hx
 
-set_option maxHeartbeats 800000 in
+
 
 theorem pair_int {S T : HSp D} {LS : Lat S} {LT : Lat T} (hS : IsSelfDualC S LS) (hT : IsSelfDualC T LT)
     (hA : ∀ a ∈ D.host.AA, p.pr (incA D (star a)) ∈ 𝒪[k]) {P : GlobalTheory.FinPl.Pl D → Prop}
@@ -79,6 +127,7 @@ theorem pair_int {S T : HSp D} {LS : Lat S} {LT : Lat T} (hS : IsSelfDualC S LS)
     obtain ⟨ε, hε, hε', hs⟩ := exists_factor p hα
     have e : ∀ j, ∑ m, ε * incA D (a * t j * ∑ k, star (s k) * S.gram k m) * incA D (x m) =
         ε * incA D (a * (b : D.host.E) * t j) := fun j => by
+
       rw [hb, Finset.sum_comm, Finset.mul_sum, Finset.sum_mul, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
       rw [mul_assoc, ← RingHom.map_mul, ← Finset.sum_mul]
@@ -99,7 +148,7 @@ theorem pair_int {S T : HSp D} {LS : Lat S} {LT : Lat T} (hS : IsSelfDualC S LS)
     simp only [this, zero_mul, Finset.sum_const_zero, RingHom.map_zero]; exact zero_mem _
   | add u v _ _ hx hy =>
     have : ∀ j m, (u + v) j m = u j m + v j m := fun _ _ => rfl
-    simp only [this, RingHom.map_add, add_mul, Finset.sum_add_distrib]; exact add_mem hx hy
+    simp only [this, RingHom.map_add (f := _), add_mul, Finset.sum_add_distrib]; exact add_mem hx hy
   | neg u _ hx =>
     have : ∀ j m, (-u) j m = -u j m := fun _ _ => rfl
     simp only [this, RingHom.map_neg, neg_mul, Finset.sum_neg_distrib]; exact neg_mem hx
@@ -117,7 +166,7 @@ theorem Bd.mul {I J : FractionalIdeal (𝓞 D.host.E)⁰ D.host.E} {c d : k} (h 
     obtain ⟨z', hz', e'⟩ := h' b hb
     exact ⟨z * z', mul_mem hz hz', by rw [star_mul', RingHom.map_mul, RingHom.map_mul, e, e']; ring⟩
   · rintro a b ⟨z, hz, e⟩ ⟨z', hz', e'⟩
-    exact ⟨z + z', add_mem hz hz', by rw [star_add, RingHom.map_add, RingHom.map_add, e, e']; ring⟩
+    exact ⟨z + z', add_mem hz hz', by rw [star_add, RingHom.map_add (f := _), RingHom.map_add (f := _), e, e']; ring⟩
 
 theorem Bd.one : Bd p 1 1 := fun x hx => by
   obtain ⟨o, rfl⟩ := (FractionalIdeal.mem_one_iff _).1 hx
@@ -189,7 +238,7 @@ theorem bd_of_mul {I : FractionalIdeal (𝓞 D.host.E)⁰ D.host.E} (h0 : I ≠ 
       obtain ⟨z, hz, e⟩ := h b hb
       exact ⟨_, mul_mem (hV a ha) hz, by rw [star_mul', (incA D).map_mul, p.pr.map_mul, e]; ring⟩
     · rintro a b ⟨z, hz, e⟩ ⟨z', hz', e'⟩
-      exact ⟨z + z', add_mem hz hz', by rw [star_add, (incA D).map_add, p.pr.map_add, add_mul, e, e']; ring⟩
+      exact ⟨z + z', add_mem hz hz', by rw [star_add, map_add, map_add, add_mul, e, e']; ring⟩
   rwa [star_one, RingHom.map_one, RingHom.map_one, one_mul] at key
 
 variable {T : Type} {L : LevCh D T} {sc : Consts}
@@ -265,7 +314,7 @@ theorem latO_of_latRow (G : GridData L sc) (i : ℕ) {Y : WO (G.V (.grid (i + 1)
     Y ∈ latO (negSp (G.V (.grid (i + 1) 0))) (G.V (.grid i 0)) (G.Λ (.grid (i + 1) 0) : Set _) (G.Λ (.grid i 0) : Set _)
       fun _ => True := hY.1
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem bessel_step_conj_place_column_functional_bound : OnStd fun {D} _ _ {sc} {G} W F => ∀ σ (h : 2 * (σ + 1) + 2 ≤ D.R.m), ∀ v ∈ G.pl.S0, ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     (p : GlobalTheory.FinPl.SplitPt D k) (β : GlobalTheory.FinPl.Frame p (G.V (.grid (2 * (σ + 1) + 1) 0)) (Fin (G.V (.grid (2 * (σ + 1) + 1) 0)).rank)) (ϖ : 𝒪[k])
@@ -306,6 +355,7 @@ theorem bessel_step_conj_place_column_functional_bound : OnStd fun {D} _ _ {sc} 
     rw [g1] at g
     have g2 : ∑ l, (∑ j, star (dW.a j qW) * (G.V (.grid (2 * (σ + 1) + 1) 0)).gram j l) * dW.a l r = 1 := g
     have g3 := congrArg (fun c => p.pr (incA D c)) g2
+
     simp only [map_sum, RingHom.map_mul, RingHom.map_one, Finset.sum_mul] at g3
     have x1 : ∀ j, p.pr (cA D (xZero (F.dJ (σ + 1) h) j q)) = ξ * p.pr (incA D (star (dW.a j qW))) := fun j => by
       have : xZero (F.dJ (σ + 1) h) j q = incA D ((-D.host.xi0) ^ (q.1 + 1) * dW.a j qW) := by

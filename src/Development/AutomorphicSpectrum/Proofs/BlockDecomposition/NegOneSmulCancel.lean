@@ -1,8 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.CechDefs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DvMemOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConeZigzagCompat
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.CechDefs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DvMemOf
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -127,7 +171,7 @@ theorem res_bm {U V T : ObjectProperty C} (h : V ≤ U) (h' : T ≤ V) (h'' : T 
 
 theorem bm_add {U V : ObjectProperty C} (h : V ≤ U) (l l' : Ch A V 1) {q : ℕ} (x : Ch A U q) :
     bm h (l + l') q x = bm h l q x + bm h l' q x := by
-  simp only [bm_apply, map_add]
+  simp only [bm_apply, map_add (f := _)]
 
 theorem bm_congr {ι : Type} {f : ι → ObjectProperty C} {V : ObjectProperty C} {q : ℕ} (x : ∀ i, Ch A (f i) q)
     {i i' : ι} (e : i = i') (h : V ≤ f i) (h' : V ≤ f i') (l : Ch A V 1) : bm h l q (x i) = bm h' l q (x i') := by
@@ -164,6 +208,7 @@ theorem neg_one_smul_cancel {M : Type*} [AddCommGroup M] (s : ℤ) (X Y : M) :
 theorem BB_dh (p q : ℕ) (x : (KK A W).X p q) :
     (KK A W).dh (p + 1) (q + 1) (BB b p q x) = BB b (p + 1) q ((KK A W).dh p q x) := by
   funext i
+
   rw [dh_apply, BB_apply, dh_apply, map_sum]
   have hS : ∀ k : Fin (p + 2), bm (cap_le W (Fin.last (p + 2)) i)
       (LL b i (Fin.last (p + 1)).castSucc (Fin.last (p + 2))) q

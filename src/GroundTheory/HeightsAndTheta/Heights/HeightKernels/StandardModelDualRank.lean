@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualStdModelField
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualStdModelField
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -85,15 +135,16 @@ theorem indep_int {n : ℕ} (B : Module.Basis (Fin n) ℚ K) (q : Fin n → MvPo
     (h : ∑ k, embK K i (B k) * psiZ K i (q k) = 0) : ∀ k, q k = 0 := by
   have h' : ∑ k, C (B k) * MvPolynomial.map (Int.castRingHom K) (q k) = 0 := by
     apply psi_injective
+
     rw [map_sum, map_zero]
     simpa [psiZ, psi_C] using h
   have hB : LinearIndependent ℤ B := B.linearIndependent.restrict_scalars' ℤ
   intro k
   ext m
-  have hm := congrArg (coeff m) h'
-  rw [coeff_sum, coeff_zero] at hm
+  have hm := congrArg (AddMonoidAlgebra.coeff · m) h'
+  rw [coeff_sum, AddMonoidAlgebra.coeff_zero] at hm
   simp only [coeff_C_mul, coeff_map, eq_intCast] at hm
-  have := Fintype.linearIndependent_iff.mp hB (fun k => coeff m (q k)) (by simpa [zsmul_eq_mul, mul_comm] using hm) k
+  have := Fintype.linearIndependent_iff.mp hB (fun k => AddMonoidAlgebra.coeff (q k) m) (by simpa [zsmul_eq_mul, mul_comm] using hm) k
   simpa using this
 
 theorem exists_int_smul_mem (F : HermLattice K i) (v : Fin i → K) :
@@ -112,7 +163,7 @@ theorem exists_int_smul_mem (F : HermLattice K i) (v : Fin i → K) :
   | add x y _ _ hx hy =>
     obtain ⟨a, ha⟩ := hx
     obtain ⟨c, hc⟩ := hy
-    exact ⟨a + c, by rw [dotProduct_add, map_add, ha, hc]⟩
+    exact ⟨a + c, by rw [dotProduct_add, map_add (f := _), ha, hc]⟩
   | smul r x _ hx =>
     obtain ⟨a, ha⟩ := hx
     refine ⟨r * a, ?_⟩
@@ -146,6 +197,7 @@ theorem w_ne_zero (b : Module.Basis T ℤ (dualLattice (HermLattice.standard K i
 
 theorem w_eq (b : Module.Basis T ℤ (dualLattice (HermLattice.standard K i))) (t : T) :
     w b t = ∑ j, embK K i ((b t : Fin i → K) j) * u K i j := by
+
   simp only [w, u, dualLatticeCoord, map_sum, map_mul, Finset.sum_mul, embK, RingHom.comp_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [← MvPolynomial.algebraMap_eq, ← IsScalarTower.algebraMap_apply, mul_assoc, mul_assoc, mul_assoc]
@@ -158,9 +210,11 @@ theorem exists_int_comb [Fintype T] (b : Module.Basis T ℤ (dualLattice (HermLa
   refine ⟨N, hN, fun t => b.repr φ t, ?_⟩
   have hrepr := congrArg (fun ψ : dualLattice (HermLattice.standard K i) => evalForm i (ψ : Fin i → K))
     (b.sum_repr φ)
+
   simp only [Submodule.coe_sum, Submodule.coe_smul, map_sum, map_zsmul, hφ, map_smul] at hrepr
   simp only [← dualLatticeCoord_eq b, zsmul_eq_mul, Algebra.smul_def, map_intCast] at hrepr
   have h2 := congrArg (fun y => dualStdModelEmb K i y * dualStdModelS K i * dualStdModelT K i) hrepr
+
   simp only [map_sum, map_mul, map_intCast, Finset.sum_mul] at h2
   simp only [w, embK, RingHom.comp_apply, mul_assoc] at h2 ⊢
   rw [h2]
@@ -199,6 +253,7 @@ theorem adjoin_embK_eq_span {n : ℕ} (B : Module.Basis (Fin n) ℚ K) (Φ₀ : 
   apply le_antisymm
   · rw [Submodule.span_le]
     rintro _ ⟨a, rfl⟩
+
     rw [← B.sum_repr a, map_sum]
     refine Submodule.sum_mem _ fun k _ => ?_
     rw [Rat.smul_def, map_mul, map_ratCast, hq, ← Algebra.smul_def]

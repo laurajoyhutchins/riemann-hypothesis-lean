@@ -1,25 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
-import Development.AutomorphicSpectrum.Statements.TowerExistence.GoodTowerExistsX
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.VolumeInputs
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.OverLaUnique
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.GenFrExAndGenFromTest
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsBijectiveKappa
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.MemRangeOfIsAlgebraicRatFun
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntAll
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntFrExtOfGoodLevel
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NumberFieldFinitePlaceCompletionEmbedding
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ModuliExistsNumberFieldPointStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CInfGood
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplexUniformizationLawsOfGoodDeepCover
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCuspOnRestrict
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplexUniformizationLawsOfGoodDeepCover
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCuspOnRestrict
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsBijectiveKappa
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.GenFrExAndGenFromTest
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.NoCommonZeroIffOfSec
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CardLower
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CompNonemptyFiniteGenFrTrdeg
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntAll
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntFrExtOfGoodLevel
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ModuliExistsNumberFieldPointStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NumberFieldFinitePlaceCompletionEmbedding
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CardLower
+import Formalism.LocalToGlobal.ProjectiveLattices.IntAllProof
+public import Formalism.LocalToGlobal.ProjectiveLattices.ModelAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.DefiniteFormStabilizerFiniteAwayFromP
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ModelSmall
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Filter Topology
 open Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions
 open GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Rec GlobalTheory.CompanionTheory.Ar.Plug
@@ -41,7 +77,7 @@ theorem idem_val (h : GenFrEx Xo c) (Z : Comp Xo c) :
     fun Z' hZ => GlobalTheory.AllWt.evC_eq_zero h hZ (GlobalTheory.FlatLine.idem_mem_suppOn Z)⟩
 
 theorem compLaws_of (hN : N1ab) (hN' : N1c) (U : ∀ σ : c.F →+* ℂ, Unf Xo c σ r)
-    (hpq : 1 ≤ Dw.p + Dw.q) (hg : ∀ p : ℕ, p.Prime → l.GoodAt p) (hF : FnAlgClosed Xo c)
+    (hpq : 1 ≤ Dw.p + Dw.q) (hg : ∀ p : ℕ, p.Prime → l.GoodAt p) (hF : FnAlgClosed (Xo := Xo) (c := c))
     (hU : ∀ σ, GoodEmb c σ → IsUnf (U σ))
     (hT : ∀ σ, GoodEmb c σ → ∀ k x,
       FromTest (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) ((U σ).un k x))

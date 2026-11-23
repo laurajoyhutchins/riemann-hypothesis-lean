@@ -1,8 +1,50 @@
-import Mathlib
-import GroundTheory.PAdicHodge.UntiltFrobeniusEquivSymmEpsilonNeOne
-import GroundTheory.PAdicHodge.BdRTGalois
-import GroundTheory.PAdicHodge.BdRField
-import GroundTheory.PAdicHodge.BdRAlgCl
+module
+
+public import GroundTheory.PAdicHodge.UntiltFrobeniusEquivSymmEpsilonNeOne
+public import GroundTheory.PAdicHodge.BdRField
+public import GroundTheory.PAdicHodge.TateCpTwist
+public import GroundTheory.PAdicHodge.BdRTGalois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -15,11 +57,6 @@ variable {p : ℕ} [Fact p.Prime]
 
 local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
 local notation "𝔹dR" => BDeRham (normInteger ℂ_[p]) p
-
-theorem isLocalization_away_tBdR : IsLocalization.Away (tBdR p) 𝔹dR :=
-  IsPerfectoidField.isLocalization_away_bDeRham maximalIdeal_eq_span_tBdR
-
-theorem isField_bDeRham : IsField 𝔹dR := Field.toIsField _
 
 theorem algebraMap_tBdR_ne_zero : algebraMap 𝔹 𝔹dR (tBdR p) ≠ 0 :=
   IsPerfectoidField.algebraMap_ne_zero_of_maximalIdeal_eq_span maximalIdeal_eq_span_tBdR
@@ -39,9 +76,6 @@ variable {L : IntermediateField ℚ_[p] (PadicAlgCl p)}
 
 def cycloUnitBdR (σ : Gal(PadicAlgCl p/L)) : 𝔹ˣ :=
   Units.map ((algebraMap ℚ_[p] 𝔹).toMonoidHom.comp PadicInt.Coe.ringHom.toMonoidHom) (cycloChar L σ)
-
-theorem coe_cycloUnitBdR (σ : Gal(PadicAlgCl p/L)) :
-    (cycloUnitBdR σ : 𝔹) = algebraMap ℚ_[p] 𝔹 ((cycloChar L σ : ℤ_[p]) : ℚ_[p]) := rfl
 
 theorem thetaBDeRhamPlusField_cycloUnitBdR_zpow (σ : Gal(PadicAlgCl p/L)) (i : ℤ) :
     IsPerfectoidField.thetaBDeRhamPlusField p ((cycloUnitBdR σ ^ i : 𝔹ˣ) : 𝔹) = twistScalar L i σ := by
@@ -78,20 +112,6 @@ theorem grMap_tBdR_gal_smul (σ : Gal(PadicAlgCl p/L)) {i : ℤ}
   have e2 : x = ⟨_, hmemx⟩ := Subtype.ext hb
   rw [e1, IsPerfectoidField.grMap_mk, e2, IsPerfectoidField.grMap_mk, map_mul,
     thetaBDeRhamPlusField_cycloUnitBdR_zpow, thetaBDeRhamPlusField_gal_smul, cpTwistRep_apply]
-
-theorem grEquiv_tBdR_gal_smul (σ : Gal(PadicAlgCl p/L)) {i : ℤ}
-    (x : IsPerfectoidField.fil ℂ_[p] p i) :
-    IsPerfectoidField.grEquiv maximalIdeal_eq_span_tBdR i
-        (Submodule.Quotient.mk ⟨σ • (x : 𝔹dR), gal_smul_mem_fil σ x.2⟩) =
-      cpTwistRep L i σ
-        (IsPerfectoidField.grEquiv maximalIdeal_eq_span_tBdR i (Submodule.Quotient.mk x)) := by
-  rw [IsPerfectoidField.grEquiv_mk, IsPerfectoidField.grEquiv_mk, grMap_tBdR_gal_smul]
-
-theorem gal_smul_sub_mem_fil_succ (σ : Gal(PadicAlgCl p/L)) {i : ℤ} {x y : 𝔹dR}
-    (h : x - y ∈ IsPerfectoidField.fil ℂ_[p] p (i + 1)) :
-    σ • x - σ • y ∈ IsPerfectoidField.fil ℂ_[p] p (i + 1) := by
-  rw [← smul_sub]
-  exact gal_smul_mem_fil σ h
 
 end Galois
 

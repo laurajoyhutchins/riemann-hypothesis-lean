@@ -1,6 +1,49 @@
-import ReciprocityTheory.GroupCohomology.CupConnRightStatement
-import ReciprocityTheory.GroupCohomology.HomogExistsStatement
-import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
+module
+
+public import ReciprocityTheory.GroupCohomology.HomogExistsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.Coh
 
@@ -59,6 +102,7 @@ theorem hd_mem (M : TRep R G) (X : Type u) [TopologicalSpace X] [MulAction G X] 
   refine ⟨?_, fun g x => ?_⟩
   · exact continuous_finsetSum _ fun i _ => (continuous_const_smul ((-1 : ℤ) ^ (i : ℕ))).comp
       (hF.1.comp (continuous_pi fun j => continuous_apply (i.succAbove j)))
+
   · simp only [hd, hF.2, map_sum, map_zsmul]
 
 def hcx (M : TRep R G) (X : Type u) [TopologicalSpace X] [MulAction G X] : Cx R where
@@ -88,7 +132,7 @@ def eIso (M : TRep R G) (n : ℕ) : M.coch.X n ≃ₗ[R] hcoch M G n where
   toFun f := ⟨eFun M n f.1, eFun_mem M n f.1 f.2⟩
   map_add' f f' := Subtype.ext (funext fun x => by
     show M.rho (x 0) ((f.1 + f'.1) fun i => _) = _
-    rw [Pi.add_apply, map_add]; rfl)
+    rw [Pi.add_apply, map_add (f := _)]; rfl)
   map_smul' r f := Subtype.ext (funext fun x => by
     show M.rho (x 0) ((r • f.1) fun i => _) = _
     rw [Pi.smul_apply, map_smul]; rfl)
@@ -136,7 +180,8 @@ theorem eFun_dn (M : TRep R G) (n : ℕ) (f : (Fin n → G) → M.V) :
   rw [hd, Fin.sum_univ_succ, eFun_zero]
   simp only [eFun_succ, Fin.val_zero, pow_zero, one_smul, Fin.val_succ]
   show M.rho (x 0) (dn M.rho n f _) = _
-  rw [dn_apply, map_add, map_sum]
+
+  rw [dn_apply, map_add (f := _), map_sum]
   congr 1
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [hgi_negpow, map_zsmul]

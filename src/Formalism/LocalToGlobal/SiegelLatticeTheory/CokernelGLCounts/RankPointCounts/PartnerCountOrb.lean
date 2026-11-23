@@ -1,6 +1,54 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCountLoc
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCount
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModelKS
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCountLoc
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportLoc
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SupportDatum.DeterminantFormIdentity
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModelKS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -224,8 +272,8 @@ theorem inOrbP_of_orb {δ : ∀ p : PlF D, (D.s.atP p).Fp} {T T' : ℕ} {p : PlF
     · subst hab; rw [if_pos rfl, hLβ.1]
     · rw [if_neg hab]
       by_cases hlt : b < a
-      · rw [dif_pos hlt]
-      · rw [dif_neg hlt]
+      · rw [dite_eq_left hlt]
+      · rw [dite_eq_right hlt]
         exact hLβ.2 a b (lt_of_le_of_ne (not_lt.1 hlt) hab)
   · ext a b
     simp only [Loc.uUp]
@@ -235,8 +283,8 @@ theorem inOrbP_of_orb {δ : ∀ p : PlF D, (D.s.atP p).Fp} {T T' : ℕ} {p : PlF
       simpa [bdM] using this
     · rw [if_neg hab]
       by_cases hc : a < b ∧ Loc.sameBlock w₀.blocks a b = false
-      · rw [dif_pos hc]
-      · rw [dif_neg hc]
+      · rw [dite_eq_left hc]
+      · rw [dite_eq_right hc]
         by_cases hlt : a < b
         · have hsb : Loc.sameBlock w₀.blocks a b = true := by
             by_contra hf; exact hc ⟨hlt, by simpa using hf⟩
@@ -260,7 +308,7 @@ theorem exists_shift_gen (p : PlF D) (c : (D.s.atP p).Ep) (hns : (D.s.atP p).spl
       have h1 := H ⟨n, hn⟩
       simp only at h1
       rw [← MulEquiv.isUnit_map sg.e.toRingEquiv.toMulEquiv] at h1
-      simp only [RingEquiv.toMulEquiv_eq_coe, RingEquiv.coe_toMulEquiv, AlgEquiv.coe_ringEquiv, map_add, map_natCast,
+      simp only [RingEquiv.toMulEquiv_eq_coe, RingEquiv.coe_toMulEquiv, AlgEquiv.coe_ringEquiv, map_add (f := _), map_natCast,
         Prod.isUnit_iff, Prod.fst_add, Prod.snd_add, Prod.fst_natCast, Prod.snd_natCast, isUnit_iff_ne_zero, not_and_or,
         not_not] at h1
       exact h1
@@ -278,9 +326,13 @@ theorem exists_shift_gen (p : PlF D) (c : (D.s.atP p).Ep) (hns : (D.s.atP p).spl
 
 theorem modBlocks_full {δ : ∀ p : PlF D, (D.s.atP p).Fp} (T T' : ℕ) (p : PlF D) (hδ : δ p ≠ 0) :
     ∀ (a : ℕ) (l : List (D.host.E × ℕ)), (∀ b ∈ l, b.1 ≠ 0 ∧ 1 ≤ b.2) →
-      ∃ l', modBlocks (blkTop δ T T' p) a l = some l'
-  | a, [], _ => ⟨[], rfl⟩
-  | a, (t, s) :: rest, hb => by
+      ∃ l', modBlocks (blkTop δ T T' p) a l = some l' := by
+  intro a l
+  induction l generalizing a with
+  | nil => intro _; exact ⟨[], rfl⟩
+  | cons b rest ih =>
+    obtain ⟨t, s⟩ := b
+    intro hb
     have h1 := hb (t, s) List.mem_cons_self
     have hu : IsUnit (blkTop δ T T' p a s t) := by
       by_cases hnt : a + s - 1 = D.R.rS + 1 ∧ s = 1
@@ -294,11 +346,11 @@ theorem modBlocks_full {δ : ∀ p : PlF D, (D.s.atP p).Fp} (T T' : ℕ) (p : Pl
         exact LMK.nSh_unit hx
       · rw [LMK.blkTop_nonTop δ T T' p hnt]
         exact (LMK.isUnit_ιE p h1.1).mul (LMK.isUnit_hF p hδ _ _)
-    obtain ⟨l', hl'⟩ := modBlocks_full T T' p hδ (a + s) rest fun b hb' => hb b (List.mem_cons_of_mem _ hb')
+    obtain ⟨l', hl'⟩ := ih (a + s) fun b hb' => hb b (List.mem_cons_of_mem _ hb')
     have hs0 : 0 < s := by omega
     have e : modBlocks (blkTop δ T T' p) a ((t, s) :: rest) = some ((hu.unit, ⟨s, hs0⟩) :: l') := by
       simp only [modBlocks]
-      rw [dif_pos ⟨hu, hs0⟩, hl']
+      rw [dite_eq_left ⟨hu, hs0⟩, hl']
       rfl
     exact ⟨_, e⟩
 

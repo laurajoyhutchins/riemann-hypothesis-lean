@@ -1,4 +1,53 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitaryGramLifts.SecondProjConjEqFirstProj
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.ZzMinusSecondProjTranspose
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.DeterminantUnitTheta.MemSpanOfSharpG
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitaryGramLifts.SecondProjConjEqFirstProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumA
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,6 +90,7 @@ theorem duU_core (hs : M.split = some g) {T T' : F} {TT : M.R} {Zh : Matrix (Fin
   have hrow : ∀ i, ∑ j, ph1 g (G i j) * ph1 g (c j) = ph1 g (v i) := by
     intro i
     have := congrArg (ph1 g) (congrFun hGc i)
+
     simp only [Matrix.mulVec, dotProduct, map_sum, map_mul] at this
     exact this
   have hG11 : ∀ a b, ph1 g (G (Sum.inl a) (Sum.inl b)) = cor r a b (-T) := by
@@ -106,6 +156,7 @@ theorem duU_core (hs : M.split = some g) {T T' : F} {TT : M.R} {Zh : Matrix (Fin
   apply (eq_iff_ph (g := g) _ _).2
   constructor
   · rw [hcoe a]
+
     simp only [map_sub, map_sum, map_mul, hZσ, firstProj_zzPlus_conj hs, hm1, hTT1, firstProj_algebraMap, heV1]
     rw [← E1 a]
     have hk : T * ph1 g (c (Sum.inl (Fin.last r))) * (if a = Fin.last r then (1 : F) else 0) =
@@ -116,6 +167,7 @@ theorem duU_core (hs : M.split = some g) {T T' : F} {TT : M.R} {Zh : Matrix (Fin
     refine Finset.sum_congr rfl fun b _ => ?_
     unfold cor; split_ifs <;> ring
   · rw [hcoe a]
+
     simp only [map_sub, map_sum, map_mul, hZσ, secondProj_zzPlus_conj hs, hm2, hTT2, ph2_algebraMap_eq, heV2]
     have hD2 : ph2 g (((w - w') a : M.R) : E) = ph1 g (((w - w') a : M.R) : E) +
         (g.q : F) * ((ph2 g (((w - w') a : M.R) : E) - ph1 g (((w - w') a : M.R) : E)) / (g.q : F)) := by

@@ -1,8 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+module
+
+public import Mathlib.LinearAlgebra.BilinearForm.Properties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.InfUniv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GroupObjectLiftDividedPowers
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensorModOfTmul
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Development.AbelianVarietyTheory.Definitions.Divisors.Pullback1MemHodgeFiltration
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.UPel.Sm GlobalTheory.Cris GlobalTheory.DeRham
@@ -101,7 +154,7 @@ theorem lagrangian_of_idempotent_split_univ :
     have hy : e y ∈ G ⊔ M := by rw [hGMr]; exact LinearMap.mem_range_self e y
     obtain ⟨g, hg, m, hm, hgm⟩ := Submodule.mem_sup.1 hy
     have : y = g + m + (y - e y) := by rw [hgm]; abel
-    rw [this, map_add, map_add, hrefl _ _ (hkG g hg), hrefl _ _ (hkM m hm),
+    rw [this, map_add (f := _), map_add (f := _), hrefl _ _ (hkG g hg), hrefl _ _ (hkM m hm),
       hkk k hk _ (hker y)]
     simp
   refine ⟨⟨M ⊔ (K ⊓ ⨅ x ∈ M, LinearMap.ker (φ x)), ?_, ?_⟩, ?_, ?_, ?_⟩
@@ -109,8 +162,8 @@ theorem lagrangian_of_idempotent_split_univ :
     intro x hxE hxN
     obtain ⟨g, hg, k₁, hk₁, rfl⟩ := Submodule.mem_sup.1 hxE
     obtain ⟨m, hm, k₂, hk₂, hmk⟩ := Submodule.mem_sup.1 hxN
-    have he1 : e (g + k₁) = g := by rw [map_add, hG g hg, LinearMap.mem_ker.1 hk₁.1, add_zero]
-    have he2 : e (m + k₂) = m := by rw [map_add, hM m hm, LinearMap.mem_ker.1 hk₂.1, add_zero]
+    have he1 : e (g + k₁) = g := by rw [map_add (f := _), hG g hg, LinearMap.mem_ker.1 hk₁.1, add_zero]
+    have he2 : e (m + k₂) = m := by rw [map_add (f := _), hM m hm, LinearMap.mem_ker.1 hk₂.1, add_zero]
     have hgm : g = m := by rw [← he1, ← he2, hmk]
     have hg0 : g = 0 := by
       have : g ∈ G ⊓ M := ⟨hg, hgm ▸ hm⟩
@@ -132,7 +185,7 @@ theorem lagrangian_of_idempotent_split_univ :
     · rintro x ⟨hxE, hxr⟩
       obtain ⟨g, hg, k₁, hk₁, rfl⟩ := Submodule.mem_sup.1 hxE
       have h1 := hrange _ hxr
-      rw [map_add, hG g hg, LinearMap.mem_ker.1 hk₁.1, add_zero] at h1
+      rw [map_add (f := _), hG g hg, LinearMap.mem_ker.1 hk₁.1, add_zero] at h1
       have : k₁ = 0 := by
         have := congrArg (· - g) h1
         simpa using this.symm
@@ -150,7 +203,7 @@ theorem lagrangian_of_idempotent_split_univ :
     simp [h1, h2, h3, h4]
   · intro a x hx
     obtain ⟨g, hg, k, hk, rfl⟩ := Submodule.mem_sup.1 hx
-    rw [map_add]
+    rw [map_add (f := _)]
     refine Submodule.add_mem_sup (hGst a g hg) ⟨?_, ?_⟩
     · show e (ρ a k) = 0
       have := LinearMap.congr_fun (hρe a) k
@@ -254,6 +307,7 @@ theorem lagrangian_completion_sup_smul_eq : ∀ (C : Type) [CommRing C] (I : Ide
     have hfI : ∀ x, f x ∈ I := fun x => by rw [hf]; exact hFiso _ (hGF' (hPmem x)) _ hkF
     refine ⟨∑ j, f (v j) • (y j - e (y j)), ?_, ?_, ?_⟩
     · exact Submodule.sum_mem _ fun j _ => Submodule.smul_mem_smul (hfI _) Submodule.mem_top
+
     · simp [map_sum, map_smul, hker]
     · intro g hg
       have h1 : ∀ j, φ g (y j - e (y j)) = s g j := by
@@ -263,7 +317,9 @@ theorem lagrangian_completion_sup_smul_eq : ∀ (C : Type) [CommRing C] (I : Ide
         rw [← this, hy]
       have h2 : f g = ∑ j, f (v j) * s g j := by
         conv_lhs => rw [hexp g]
+
         simp [map_sum, map_smul, mul_comm]
+
       rw [map_sub, map_sum]
       simp only [map_smul, h1, smul_eq_mul]
       rw [← h2, hf, hPG g hg, sub_self]
@@ -277,7 +333,7 @@ theorem lagrangian_completion_sup_smul_eq : ∀ (C : Type) [CommRing C] (I : Ide
       intro z hz
       obtain ⟨g, hg, t, ht, hgt⟩ := hdecomp z hz
       have hz' : z = g + t + (z - e z) := by rw [hgt]; abel
-      rw [hz', map_add, map_add, hskew w g, hwp' g hg, neg_zero, zero_add,
+      rw [hz', map_add (f := _), map_add (f := _), hskew w g, hwp' g hg, neg_zero, zero_add,
         hkk w _ hwk (hker z), add_zero]
       exact hIfun (φ w) t ht
     · intro z hz
@@ -291,7 +347,7 @@ theorem lagrangian_completion_sup_smul_eq : ∀ (C : Type) [CommRing C] (I : Ide
       · exact (memPerp _).2 ht'p
   · intro x hx
     obtain ⟨g, hg, k, hk, rfl⟩ := Submodule.mem_sup.1 hx
-    rw [map_add, hG g hg, LinearMap.mem_ker.1 hk.1, add_zero]
+    rw [map_add (f := _), hG g hg, LinearMap.mem_ker.1 hk.1, add_zero]
     exact le_sup_left (a := G) hg
 
 end GlobalTheory

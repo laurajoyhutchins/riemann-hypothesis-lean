@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.SiegelHeight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormVecMulGeOfHeight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormDetLeHeightPow
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SiegelHeights.SiegelHeight
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormDetLeHeightPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AdelicNormVecMulGeOfHeight
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+public import GroundTheory.AutomorphicForms.Reduction
+import GroundTheory.AutomorphicForms.ReductionCore
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Matrix GlobalTheory.CuspRep GroundTheory.Automorphic GroundTheory.Automorphic.AutomorphicForm UpperTheory.V UpperTheory.V.Fb
 open GroundTheory.Global GroundTheory.Global.IdeleGroup
 
@@ -20,7 +65,7 @@ private theorem two_sided {m : ℕ} {r : Fin (m + 1) → ℝ} {A D : ℝ} (hr : 
       rw [← Finset.mul_prod_erase _ r (Finset.mem_univ i), Finset.prod_inv_distrib,
         mul_inv_cancel_right₀ hQ.ne']
     have h3 : ∏ j ∈ Finset.univ.erase i, (r j)⁻¹ ≤ A ^ (m + 1) := by
-      refine (Finset.prod_le_prod (fun j _ => (inv_pos.2 (hr j)).le) fun j _ => h1 j).trans ?_
+      refine (Finset.prod_le_prod₀ (fun j _ => (inv_pos.2 (hr j)).le) fun j _ => h1 j).trans ?_
       rw [Finset.prod_const]
       exact pow_le_pow_right₀ hA ((Finset.card_le_univ _).trans (by simp))
     rw [e]
@@ -79,7 +124,7 @@ theorem UpperTheory.siegelSet_height_bound :
     have ha₁1 : 1 ≤ a₁ := le_max_left _ _
     have ha₂1 : 1 ≤ a₂ := le_max_left _ _
     set e := 2 * Fintype.card (InfinitePlace K) with he
-    set c := heightConst K (m + 1) with hc
+    set c := AutomorphicForm.heightConst (K := K) (n := m + 1) with hc
     have hc0 : 0 ≤ c := zero_le_one.trans one_le_heightConst
     refine ⟨c * (c * M * (a₂ * ((s ^ m)⁻¹ * a₁) ^ (m + 1)) ^ e), (N₂ + N₁ * (m + 1)) * e, ?_⟩
     rintro g γ ⟨b, hb, _, ⟨r, hr, hratio, rfl⟩, k, hk, heq⟩

@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.KummerTheory.Degree
-import GroundTheory.GlobalFields.KummerTheory.Splitting
-import GroundTheory.GlobalFields.KummerTheory.SplittingInfinite
+module
+
+public import GroundTheory.GlobalFields.KummerTheory.Degree
+public import GroundTheory.GlobalFields.KummerTheory.Splitting
+public import GroundTheory.GlobalFields.KummerTheory.SplittingInfinite
+import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +65,8 @@ variable {K : Type*} [Field K] {n : ℕ} [NeZero n] [HasEnoughRootsOfUnity K n]
   {F E : Type*} [Field F] [Field E] [Algebra K F] [Algebra F E] [Algebra K E]
   [IsScalarTower K F E]
 
-omit [NeZero n] [HasEnoughRootsOfUnity K n] [IsScalarTower K F E] in
 
+omit [NeZero n] [HasEnoughRootsOfUnity K n] [IsScalarTower K F E] in
 theorem kummerExtension_pow_eq {y : kummerExtension K n Ω Δ} {a : K}
     (hy : (y : Ω) ^ n = algebraMap K Ω a) :
     y ^ n = algebraMap K (kummerExtension K n Ω Δ) a :=
@@ -31,7 +79,7 @@ theorem algHom_kummerExtension_mem_fieldRange (ι : kummerExtension K n Ω Δ �
       ι y ∈ (algebraMap F E).fieldRange := by
     intro y a ha hy
     obtain ⟨x, hx⟩ := h a ha
-    obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot K n
+    obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot K n
     have hζ' : IsPrimitiveRoot (algebraMap K E ζ) n :=
       hζ.map_of_injective (algebraMap K E).injective
     have hx0 : algebraMap F E x ≠ 0 := by
@@ -57,7 +105,7 @@ theorem algHom_kummerExtension_mem_fieldRange (ι : kummerExtension K n Ω Δ �
     exact (ι.commutes x).symm
   | add x y hx hy ihx ihy =>
     show ι (⟨x, hx⟩ + ⟨y, hy⟩) ∈ _
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem ihx ihy
   | inv x hx ih =>
     show ι (⟨x, hx⟩⁻¹) ∈ _
@@ -68,8 +116,8 @@ theorem algHom_kummerExtension_mem_fieldRange (ι : kummerExtension K n Ω Δ �
     rw [map_mul]
     exact mul_mem ihx ihy
 
-omit [Algebra K E] [IsScalarTower K F E] in
 
+omit [Algebra K E] [IsScalarTower K F E] in
 theorem finrank_eq_one_of_tensor_surjective {A : Type*} [CommRing A] [Algebra K A]
     (g : F ⊗[K] A →ₐ[F] E) (hg : Function.Surjective g)
     (hA : ∀ m : A, g (1 ⊗ₜ m) ∈ (algebraMap F E).fieldRange) : finrank F E = 1 := by
@@ -77,8 +125,7 @@ theorem finrank_eq_one_of_tensor_surjective {A : Type*} [CommRing A] [Algebra K 
   refine eq_top_iff.2 fun e he ↦ ?_
   clear he
   obtain ⟨t, rfl⟩ := hg e
-  induction t using TensorProduct.induction_on with
-  | zero => rw [map_zero]; exact zero_mem _
+  induction t using TensorProduct.inductionOn with
   | tmul c m =>
     have : c ⊗ₜ[K] m = c • ((1 : F) ⊗ₜ[K] m) := by
       rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
@@ -95,7 +142,7 @@ theorem finrank_eq_one_iff_of_kummerExtension [IsSepClosed Ω]
   · intro h1 a ha
     have hsurj : Function.Surjective (algebraMap F E) :=
       (Algebra.finrank_eq_one_iff_bijective_algebraMap.1 h1).2
-    obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot K n
+    obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot K n
     have hnK : NeZero ((n : ℕ) : K) := hζ.neZero'
     have hnΩ : NeZero ((n : ℕ) : Ω) :=
       ⟨by rw [← map_natCast (algebraMap K Ω)]; exact (map_ne_zero _).2 hnK.out⟩
@@ -120,8 +167,8 @@ variable {K : Type*} [Field K] [NumberField K] {n : ℕ} [NeZero n] [HasEnoughRo
 instance numberField_kummerExtension : NumberField (kummerExtension K n Ω Δ) :=
   NumberField.of_module_finite K _
 
-open SemiLocal in
 
+open SemiLocal in
 theorem splitsCompletely_kummerExtension_iff (v : HeightOneSpectrum (𝓞 K)) :
     SplitsCompletely (kummerExtension K n Ω Δ) v ↔
       ∀ a ∈ Δ, ∃ x : v.adicCompletion K, x ^ n = algebraMap K (v.adicCompletion K) (a : K) := by
@@ -135,8 +182,8 @@ theorem splitsCompletely_kummerExtension_iff (v : HeightOneSpectrum (𝓞 K)) :
   obtain ⟨w⟩ := nonempty_placesOver (kummerExtension K n Ω Δ) v
   exact (key w).1 (h w)
 
-open scoped NumberField.LiesOver in
 
+open scoped NumberField.LiesOver in
 theorem InfinitePlace.splitsCompletely_kummerExtension_iff (v : NumberField.InfinitePlace K) :
     InfinitePlace.SplitsCompletely (kummerExtension K n Ω Δ) v ↔
       ∀ a ∈ Δ, ∃ x : v.Completion, x ^ n = algebraMap K v.Completion (a : K) := by

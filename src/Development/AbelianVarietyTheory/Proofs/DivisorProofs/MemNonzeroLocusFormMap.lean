@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasBoundedPolesGlobalData
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasBoundedPolesGlobalData
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsFiniteLengthOfIsArtinianRingAnnihilator
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverCompOfIsClosedImmersion
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NonemptyHomologyEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -79,13 +126,13 @@ section Nef
 
 variable {k : Type} [Field k] {X Y : Scheme.{0}} [Algebra k Γ(X, ⊤)] {H H' L M : LB X}
 
-theorem exists_hasNonzeroSec [IsProper (strHom k X)] (hH : IsAmpleLB H) (hM : M.IsLB) {Z : Closeds X}
+theorem exists_hasNonzeroSec [IsProper (strHom k (X := X))] (hH : IsAmpleLB H) (hM : M.IsLB) {Z : Closeds X}
     (hi : IsIrreducible (Z : Set X)) (hd : topologicalKrullDim (Z : Set X) ≤ 1)
     (hp : IsCompleteCurve k Z → 0 < interNumRed k Z ![M]) :
     ∃ r, 1 ≤ r ∧ HasNonzeroSec ((lbPow M r).pull (redι Z)) := by
   letI := algebraΓAlong k (redι Z)
   have := isIntegral_red hi
-  have : IsProper (strHom k (Scheme.IdealSheafData.vanishingIdeal Z).subscheme) := by
+  have : IsProper (strHom k (X := (Scheme.IdealSheafData.vanishingIdeal Z).subscheme)) := by
     rw [← comp_strHom (appTop_algebraMap_along k (redι Z))]
     infer_instance
   have hH' := hH.pull_of_isClosedImmersion (redι Z)
@@ -122,7 +169,7 @@ theorem exists_hasNonzeroSec [IsProper (strHom k X)] (hH : IsAmpleLB H) (hM : M.
     exact (lineBundleGlobalSectionsDim_pos_iff (finite_coh_zero_twist_of_isProjOver (algebraMap_eq_strHom k _) hproj (LB.isLB_triv _))).2
       (isGenerated_triv _).hasNonzeroSec
 
-theorem isNef_pull {E : Type} [Field E] [Algebra E Γ(Y, ⊤)] [IsProper (strHom k X)] (h : IsNef k L)
+theorem isNef_pull {E : Type} [Field E] [Algebra E Γ(Y, ⊤)] [IsProper (strHom k (X := X))] (h : IsNef k L)
     (hH : IsAmpleLB H) {H' : LB Y} (hH' : IsAmpleLB H') (g : Y ⟶ X) (hg : IsClosedMap g) : IsNef E (L.pull g) := by
   have hL := LB.isLB_pull h.isLB g
   have hA := LB.isLB_pull hH.isLB g
@@ -188,8 +235,8 @@ include H
 theorem isFinite_proj : IsFinite π :=
   MorphismProperty.of_isPullback H.flip ((IsFinite.SpecMap_iff _).2 (RingHom.finite_algebraMap.2 inferInstance))
 
-omit [FiniteDimensional k E] in
 
+omit [FiniteDimensional k E] in
 theorem surjective_proj : Function.Surjective π :=
   have : Surjective (spMap (algebraMap k E)) := ⟨Function.surjective_to_subsingleton _⟩
   have : Surjective π := MorphismProperty.of_isPullback H.flip this
@@ -200,8 +247,8 @@ theorem dim_eq : topologicalKrullDim X' = topologicalKrullDim X :=
   le_antisymm (dim_le_of_isDiscrete π.continuous π.isDiscrete_preimage_singleton)
     (dim_le_of_isClosedMap π.isClosedMap (surjective_proj H))
 
-omit [FiniteDimensional k E] in
 
+omit [FiniteDimensional k E] in
 theorem isProjOver_of_isPullback (hf : IsProjOver f) : IsProjOver f' := by
   obtain ⟨N, i, hi, e⟩ := ProjSpace.isProjOver_pullback_snd (algebraMap k E) hf
   exact ⟨N, H.isoPullback.hom ≫ i, inferInstance, by rw [Category.assoc, e, H.isoPullback_hom_snd]⟩
@@ -215,7 +262,7 @@ theorem isNef_baseChange (hf : IsProjOver f) {L : LB X} :
   intro h
   have := isFinite_proj H
   obtain ⟨hp, A, hA⟩ := (isProjOver_iff_isProper_and_exists_isAmpleLB f).1 hf
-  have : IsProper (strHom k X) := by rwa [strHom_eq (f := f) fun _ => rfl]
+  have : IsProper (strHom k (X := X)) := by rwa [strHom_eq (f := f) fun _ => rfl]
   exact isNef_pull h hA (hA.pull_of_isAffineHom π) π π.isClosedMap
 
 theorem isBig_baseChange (hf : IsProjOver f) {L : LB X} :
@@ -355,8 +402,8 @@ theorem isNef_baseChange (h : IsNef F G.LA) : IsNef E (G.baseChange E).LA :=
 theorem isBig_baseChange (h : IsBig F G.LA) : IsBig E (G.baseChange E).LA :=
   PosBaseChange.isBig_baseChange (G.isPullback_fst E) G.geom.alg.variety.proj h
 
-variable {G} in
 
+variable {G} in
 theorem Positivity.baseChange (h : G.Positivity) : (G.baseChange E).Positivity :=
   ⟨h.bir.baseChange G.geom.alg.variety E, G.isNef_baseChange E h.nef, G.isBig_baseChange E h.big⟩
 

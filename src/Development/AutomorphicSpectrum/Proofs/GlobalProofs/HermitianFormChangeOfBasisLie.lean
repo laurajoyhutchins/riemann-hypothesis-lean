@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CTFrameMatMulGram
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CTFrameMatMulGram
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Matrix
 open scoped TensorProduct ContDiff
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -28,6 +71,7 @@ theorem prM_kills_colSpan
     rw [h1]
     funext k
     have h2 := congrArg (inclR (F := D.host.F) (AF D.host.F)) (congrFun h0 k)
+
     simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Pi.zero_apply, map_zero] at h2
     simpa [Matrix.mulVec, dotProduct] using h2
   exact hle hz
@@ -58,8 +102,8 @@ theorem frameMat_mem_colPerp
 theorem prM_unip_frameMat (hι : HSpace.IsIsomEmb V' V ι)
     (h : ∀ i ∈ upTo T, ∀ v' : V'.V, V.hT (V.frame.equivFun.symm fun j => X j i) (ι v') = 0)
     {a : GA D V} (ha : a ∈ unip D.sp.cm.sig V.gram X T) :
-    adMat D.host.F (prM V V' ι) ⬝ (matHom V a).1 ⬝ adMat D.host.F (frameMat V V' ι) = 1 := by
-  have hPI : adMat D.host.F (prM V V' ι) ⬝ adMat D.host.F (frameMat V V' ι) = 1 := by
+    adMat D.host.F (prM V V' ι) * (matHom V a).1 * adMat D.host.F (frameMat V V' ι) = 1 := by
+  have hPI : adMat D.host.F (prM V V' ι) * adMat D.host.F (frameMat V V' ι) = 1 := by
     rw [← Matrix.map_mul, prM_mul_frameMat hι]
     exact Matrix.map_one _ (map_zero _) (map_one _)
   refine Matrix.ext_of_mulVec_single fun j => ?_
@@ -75,12 +119,12 @@ theorem mt_eq_of_mem (hι : HSpace.IsIsomEmb V' V ι)
     (h : ∀ i ∈ upTo T, ∀ v' : V'.V, V.hT (V.frame.equivFun.symm fun j => X j i) (ι v') = 0)
     {s : GA D V' →* GA D V} (hs : ∀ h, EmbRel V V' ι (s h) h) {v : GA D V} {u : GA D V'}
     (hvu : v * (s u)⁻¹ ∈ unip D.sp.cm.sig V.gram X T) :
-    (matHom V' u).1 = adMat D.host.F (prM V V' ι) ⬝ (matHom V v).1 ⬝ adMat D.host.F (frameMat V V' ι) := by
+    (matHom V' u).1 = adMat D.host.F (prM V V' ι) * (matHom V v).1 * adMat D.host.F (frameMat V V' ι) := by
   have hv : v = (v * (s u)⁻¹) * s u := by group
   have h1 : (matHom V v).1 = (matHom V (v * (s u)⁻¹)).1 * (matHom V (s u)).1 := by
     conv_lhs => rw [hv]
     exact congrArg Units.val (map_mul (matHom V) _ _)
-  have h2 : (matHom V (s u)).1 ⬝ adMat D.host.F (frameMat V V' ι) = adMat D.host.F (frameMat V V' ι) ⬝ (matHom V' u).1 := (hs u).1
+  have h2 : (matHom V (s u)).1 * adMat D.host.F (frameMat V V' ι) = adMat D.host.F (frameMat V V' ι) * (matHom V' u).1 := (hs u).1
   rw [h1, Matrix.mul_assoc, Matrix.mul_assoc, h2, ← Matrix.mul_assoc, ← Matrix.mul_assoc,
     prM_unip_frameMat hι h hvu, Matrix.one_mul]
 
@@ -102,7 +146,7 @@ theorem exists_proj : ∀ (D : D7) (V : HSp D) (m : ℕ) (X Y : Matrix (Fin V.ra
     rw [e]
     exact mul_mem (hN a.1 a.2 _ (hf2 _ b.2)) (hf2 _ a.2)
   have hmat : ∀ v : N, (matHom V' (π v : GA D V')).1 =
-      adMat D.host.F (prM V V' ι) ⬝ (matHom V (v : GA D V)).1 ⬝ adMat D.host.F (frameMat V V' ι) := fun v =>
+      adMat D.host.F (prM V V' ι) * (matHom V (v : GA D V)).1 * adMat D.host.F (frameMat V V' ι) := fun v =>
     mt_eq_of_mem hι h hs (hf2 v.1 v.2)
   refine ⟨π, ?_, fun v u => ⟨fun e => e ▸ hf2 v.1 v.2, fun e => Subtype.ext (uniq v.1 _ _ (hf2 v.1 v.2) e)⟩, ?_⟩
   · refine Continuous.subtype_mk (GlobalTheory.MixModel.continuous_of_mt V' ?_) _

@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Archimedean.Defs
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,27 +75,13 @@ theorem cv_vanish (f : PowerSeries R) (g : ℤ → M) (hg : ∀ k < 0, g k = 0) 
   intro j hj
   rw [PowerSeries.X_pow_dvd_iff.mp hf j (Finset.mem_range.mp hj), zero_smul]
 
-theorem cv_zero_term (f : PowerSeries R) (g : ℤ → M) (hg : ∀ k < 0, g k = 0) :
-    cv f g 0 = constantCoeff f • g 0 := by
-  rw [cv_eq_sum f g 0 hg 0 1 (by omega), Finset.sum_range_one]
-  simp [PowerSeries.coeff_zero_eq_constantCoeff_apply]
-
-theorem cv_add (f : PowerSeries R) (g g' : ℤ → M) (m : ℤ) (hg : ∀ k < m, g k = 0)
-    (hg' : ∀ k < m, g' k = 0) (k : ℤ) : cv f (g + g') k = cv f g k + cv f g' k := by
-  obtain ⟨N, hN⟩ := exists_nat_gt (k - m)
-  have hs : ∀ j < m, (g + g') j = 0 := fun j hj => by
-    rw [Pi.add_apply, hg j hj, hg' j hj, add_zero]
-  rw [cv_eq_sum f (g + g') m hs k N hN, cv_eq_sum f g m hg k N hN,
-    cv_eq_sum f g' m hg' k N hN, ← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  rw [Pi.add_apply, smul_add]
-
 theorem cv_map {M' : Type} [AddCommGroup M'] [Module R M'] (L : M →ₗ[R] M') (f : PowerSeries R) (g : ℤ → M)
     (m : ℤ) (hg : ∀ k < m, g k = 0) (k : ℤ) : L (cv f g k) = cv f (fun k => L (g k)) k := by
   obtain ⟨N, hN⟩ := exists_nat_gt (k - m)
+
   rw [cv_eq_sum f g m hg k N hN,
-    cv_eq_sum f (fun j => L (g j)) m (fun j hj => by rw [hg j hj, map_zero]) k N hN,
-    map_sum]
+  cv_eq_sum f (fun j => L (g j)) m (fun j hj => by rw [hg j hj, map_zero]) k N hN,
+  map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul]
 

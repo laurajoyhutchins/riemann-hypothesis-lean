@@ -1,16 +1,65 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Splits
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
-import Development.AbelianVarietyTheory.Statements.HeckeInFamilies.GenericMemChart
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.OpenImmersionCompStructureEqGeneric
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.MapToUniversalObjectUnique
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelDescentCoefficientField
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsReducedIsNormalSchemeIsLocallyNoetherianOfSmoo
+module
+
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ModelDominatedOfMapToBaseModel
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AuxiliaryInertOddPrime
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsReducedIsNormalSchemeIsLocallyNoetherianOfSmoo
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelDescentCoefficientField
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LevelMapFiniteEtaleSurjective
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.MapToUniversalObjectUnique
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.OpenImmersionCompStructureEqGeneric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -92,54 +141,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 theorem eq_of_RZ {T : Scheme.{0}} {l : Level H} {S A : ℕ} (hA : l.A = A) {β : RZ H S A →+* KA l}
     (hβ : IsInc (RZ H S A).subtype (KA l).val.toRingHom β) (u v : T ⟶ Sp (KA l))
     (h : u ≫ spMap β = v ≫ spMap β) : u = v := by
-  apply toRing_inj
-  have h1 : (toRing u).comp β = (toRing v).comp β := by
-    rw [← toRing_comp, ← toRing_comp, h]
-  set f := toRing u
-  set g := toRing v
-  have hinv : ∀ x : KA l, f x = g x → f x⁻¹ = g x⁻¹ := by
-    intro x hx
-    by_cases h0 : x = 0
-    · simp [h0]
-    · have e1 : f x * f x⁻¹ = 1 := by rw [← map_mul, mul_inv_cancel₀ h0, map_one]
-      have e2 : g x * g x⁻¹ = 1 := by rw [← map_mul, mul_inv_cancel₀ h0, map_one]
-      calc f x⁻¹ = f x⁻¹ * (g x * g x⁻¹) := by rw [e2, _root_.mul_one]
-        _ = (f x⁻¹ * f x) * g x⁻¹ := by rw [hx, _root_.mul_assoc]
-        _ = g x⁻¹ := by rw [_root_.mul_comm (f x⁻¹), e1, _root_.one_mul]
-  have hrange : ∀ (y : KA l) (r : RZ H S A), (y : ℂ) = (r : ℂ) → f y = g y := by
-    intro y r e
-    have hy : y = β r := Subtype.ext (by rw [e]; exact (hβ r).symm)
-    rw [hy]
-    exact RingHom.congr_fun h1 r
-  have key : ∀ (x : ℂ) (hx : x ∈ IntermediateField.adjoin ℚ {H.rt0, zeta l.A}),
-      f ⟨x, hx⟩ = g ⟨x, hx⟩ := by
-    intro x hx
-    induction hx using IntermediateField.adjoin_induction with
-    | mem x hx =>
-      rcases hx with rfl | rfl
-      · have hm : (1 + H.rt0) / 2 ∈ RZ H S A := Subring.subset_closure (by simp)
-        have hr : (1 + H.rt0) / 2 + (1 + H.rt0) / 2 - 1 ∈ RZ H S A :=
-          sub_mem (add_mem hm hm) (one_mem _)
-        exact hrange _ ⟨_, hr⟩ (by change H.rt0 = _; ring)
-      · have hz : zeta l.A ∈ RZ H S A := by
-          rw [hA]
-          exact Subring.subset_closure (by simp)
-        exact hrange _ ⟨_, hz⟩ rfl
-    | algebraMap q =>
-      change f (algebraMap ℚ (KA l) q) = g (algebraMap ℚ (KA l) q)
-      exact RingHom.congr_fun (RingHom.ext_rat (f.comp (algebraMap ℚ (KA l)))
-        (g.comp (algebraMap ℚ (KA l)))) q
-    | add x y hx hy ihx ihy =>
-      change f (⟨x, hx⟩ + ⟨y, hy⟩) = g (⟨x, hx⟩ + ⟨y, hy⟩)
-      rw [map_add, map_add, ihx, ihy]
-    | inv x hx ih =>
-      change f (⟨x, hx⟩⁻¹) = g (⟨x, hx⟩⁻¹)
-      exact hinv _ ih
-    | mul x y hx hy ihx ihy =>
-      change f (⟨x, hx⟩ * ⟨y, hy⟩) = g (⟨x, hx⟩ * ⟨y, hy⟩)
-      rw [map_mul, map_mul, ihx, ihy]
-  ext x
-  exact key x.1 x.2
+  apply GlobalTheory.Models.Domination.eq_of_RZ <;> assumption
 
 theorem exists_isInc {O : Type} [CommRing O] (i : O →+* ℂ) (hi : Function.Injective i) {S S' A A' : ℕ}
     (b₀ : RZ H S A →+* O) (b₁ : RZ H S' A' →+* O) (h₀ : IsInc (RZ H S A).subtype i b₀)
@@ -314,7 +316,59 @@ theorem exists_finite_map : Out.Laws → Out.Laws2 → Out.Laws3 → ∀ (E : Ty
     | exact L₂.cubePull
     | exact L₃.cubePull
   have key : ∃ tU : SAB H (g ⁻¹ᵁ T.U).toScheme, Nonempty (SABMap tU Y.t (g ⁻¹ᵁ T.U).ι) := by
-    obtain ⟨_, _, _, _, _, m, -⟩ := sabPull hcp (g ⁻¹ᵁ T.U).ι Y.t
+    let f := (g ⁻¹ᵁ T.U).ι
+    let t := Y.t
+    let S := Y.X
+    let S' := (g ⁻¹ᵁ T.U).toScheme
+    have hsemi : IsSemiAbelian ((Over.pullback f).obj t.G) := by
+      refine { comm := ?_, smooth := ?_, separated := ?_, quasiCompact := ?_, geomConnected := ?_, fibres := ?_ }
+      · have := t.semi.comm
+        infer_instance
+      · have := t.semi.smooth
+        change Smooth (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.separated
+        change IsSeparated (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.quasiCompact
+        change QuasiCompact (pullback.snd t.G.hom f)
+        infer_instance
+      · have := t.semi.geomConnected
+        change GeometricallyConnected (pullback.snd t.G.hom f)
+        infer_instance
+      · intro Ω _ _ q
+        obtain ⟨A⟩ := t.semi.fibres Ω (q ≫ f)
+        exact ⟨torusExtOfIso (pullCompIso q f t.G) A⟩
+    have hp : ∃ (PP' : RigLB ((Over.pullback f).obj t.G)) (cub : CubicalStr _ PP') (sym : PP'.IsSymmetric) (adj : _) (prim : _)
+        (m : SABMap ⟨(Over.pullback f).obj t.G, hsemi, OAct.pullback f t.G t.act, PP', cub,
+          sym, adj, prim⟩ t f), m.φ = pullback.fst t.G.hom f := by
+      have h := isGrpPullback_pullback t.G f
+      obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := hcp S S' t.G _ (cubeMapOf h) t.PP t.cub
+      have hact : ∀ a, ((OAct.pullback f t.G t.act).act a).left ≫ pullback.fst t.G.hom f =
+          pullback.fst t.G.hom f ≫ (t.act.act a).left := fun a => pullback.lift_fst _ _ _
+      have pa : ∀ {T : Over S'} (x : T ⟶ (Over.pullback f).obj t.G) a,
+          pushPt h.1.w (x ≫ (OAct.pullback f t.G t.act).act a) = pushPt h.1.w x ≫ t.act.act a := fun x a =>
+        Over.OverMorphism.ext (by
+          show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+          rw [Category.assoc, hact, Category.assoc])
+      refine ⟨(cubeMapOf h).rigLB t.PP hL hr, c', hs t.sym, fun a => ?_, ?_, ⟨cubeMapOf h, h, rfl, hact, hc'⟩, rfl⟩
+      · let U := lift (pushPt h.1.w (fst ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+          (pushPt h.1.w (snd ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+        refine LBIso.chartPull (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+          (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (t.adj a)
+        · fin_cases i
+          · exact (pa _ a).trans (by simp [U])
+          · simp [U]
+        · fin_cases i
+          · simp [U]
+          · exact (pa _ _).trans (by simp [U])
+      · let U := pushPt h.1.w (𝟙 ((Over.pullback f).obj t.G))
+        refine LBIso.chartPull (chartPullPull t.PP.L _)
+          (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) t.prim
+        fin_cases i
+        · simp [U]
+        · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
+    obtain ⟨_, _, _, _, _, m, -⟩ := hp
     exact ⟨_, ⟨m⟩⟩
   obtain ⟨tU, ⟨m₁⟩⟩ := key
   obtain ⟨n₁, hn₁⟩ := GlobalTheory.LevelCover.sab_comp m₁ mu rfl

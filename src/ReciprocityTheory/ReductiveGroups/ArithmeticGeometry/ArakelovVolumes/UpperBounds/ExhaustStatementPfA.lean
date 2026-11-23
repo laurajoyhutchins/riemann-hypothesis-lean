@@ -1,6 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LiftFactorization
-import ReciprocityTheory.L2DbarEstimates.LeviForms.DetMonoDetOneAdd
-import Lemmata.PosDefOfRealQuadratic.QuadFormRealSmul
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LiftFactorization
+public import Lemmata.PosDefOfRealQuadratic.QuadFormRealSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.DetMonoDetOneAdd
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.ExhA
 
@@ -79,8 +123,9 @@ open ReciprocityTheory.L2DbarEstimates ReciprocityTheory.ChartRestriction.G.AR.U
 theorem quad_im {m : ℕ} {A : Matrix (Fin m) (Fin m) ℂ} (hA : A.IsHermitian) (x : Fin m → ℂ) :
     (star x ⬝ᵥ (A *ᵥ x)).im = 0 := by
   rw [← Complex.conj_eq_iff_im]
+
   simp only [dotProduct, mulVec, map_sum, map_mul, Pi.star_apply, Complex.star_def,
-    Complex.conj_conj, Finset.mul_sum]
+  Complex.conj_conj, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   have h := hA.apply i j
@@ -114,14 +159,6 @@ theorem isOpen_of {X : Type*} [TopologicalSpace X] {f p q : ℕ} (g : X → V (n
   refine isOpen_iff_mem_nhds.2 fun x0 hx0 => ?_
   exact Filter.eventually_all.2 fun k => posDef_eventually _ (cont_entry g hg k)
     (fun x => herm_one_sub _) x0 (hx0 k)
-
-theorem zPart_apply {f p q N' : ℕ} (v : V (nD f p q + N')) (j : Fin (nD f p q)) :
-    zPart v j = v (Fin.castAdd N' j) := by
-  simp [zPart]
-
-theorem tPart_apply {f p q N' : ℕ} (v : V (nD f p q + N')) (j : Fin N') :
-    tPart v j = v (Fin.natAdd (nD f p q) j) := by
-  simp [tPart]
 
 theorem isOpen_Dset (f p q : ℕ) : IsOpen (Dset f p q) :=
   isOpen_of (fun v : V (nD f p q) => v) cont_coord

@@ -1,4 +1,57 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqSum2
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqOf
+import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqSum2
+import Formalism.LocalToGlobal.CharacterGerms.RowTiePGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,6 +128,7 @@ theorem cEq_of {V : VF C} (X : RawChart C d I κ) (H : ∀ g, X.CartHyp V g) (hS
     X.sg1 (X.u g c) (X.u (1 - g) k) • (MvPowerSeries.X c : MvPowerSeries (I g) C) else 0 with hsig0
   set L := toLeafL (fun g => RawChart.cart (H g)) g a a' with hL
   have hsig : L (upG g sig0) = 0 := by
+
     rw [hsig0, upG_eq, map_sum, map_sum]
     refine Finset.sum_eq_zero fun c _ => ?_
     split_ifs with hc
@@ -105,14 +159,14 @@ theorem cEq_of {V : VF C} (X : RawChart C d I κ) (H : ∀ g, X.CartHyp V g) (hS
     rw [dVar_hLf X H g a a' _ hw, hpair, hder, hJ', hsg, hσ]
     have e1 : upG g ((S g).ze (t g) k + MvPowerSeries.subst (t g) Λ + sig0) =
         upG g ((S g).ze (t g) k) + MvPowerSeries.subst (tW t) (upG g Λ) + upG g sig0 := by
-      rw [upG_eq, map_add, map_add, ← upG_eq, ← upG_eq, ← upG_eq, subst_tW_upG ht0]
+      rw [upG_eq, map_add (f := _), map_add (f := _), ← upG_eq, ← upG_eq, ← upG_eq, subst_tW_upG ht0]
     have e2 : MvPowerSeries.subst (tW t) ((X.k : C) • (MvPowerSeries.subst Φ' J - upG g Λ)) =
         (X.k : C) • (MvPowerSeries.subst (tW t) (MvPowerSeries.subst Φ' J) -
           MvPowerSeries.subst (tW t) (upG g Λ)) := by
       rw [← MvPowerSeries.coe_substAlgHom hT, map_smul, map_sub]
     rw [e1, e2]
     show L _ - L _ = L _
-    simp only [map_smul, map_sub, map_add, hsig]
+    simp only [map_smul, map_sub, map_add (f := _), hsig]
     module
 
 theorem sumCvK {V : VF C} (X : RawChart C d I κ) (hA : AddM V X)
@@ -175,6 +229,7 @@ theorem sumAt_of {V : VF C} (X : RawChart C d I κ) (hA : AddM V X)
       MvPowerSeries.X x := by
     intro x
     ext μ
+
     rw [map_sum, MvPowerSeries.coeff_X]
     simp only [hc]
     rw [Finset.sum_comm]
@@ -183,6 +238,7 @@ theorem sumAt_of {V : VF C} (X : RawChart C d I κ) (hA : AddM V X)
       -S.ze t q := by
     intro q
     ext μ
+
     rw [map_sum, map_neg]
     simp only [hc]
     rw [Finset.sum_comm]
@@ -225,6 +281,7 @@ theorem sumAt_of {V : VF C} (X : RawChart C d I κ) (hA : AddM V X)
   have hpush : ∀ f : MvPowerSeries (κ) C, MvPowerSeries.subst t (∑ c, MvPowerSeries.subst (γt c) f) =
       ∑ c, MvPowerSeries.subst (fun _ : Unit => t c) (alongCv (γ c) f) := by
     intro f
+
     rw [← MvPowerSeries.coe_substAlgHom htS, map_sum, MvPowerSeries.coe_substAlgHom]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [key1, key2]
@@ -268,7 +325,8 @@ theorem sumAt_of {V : VF C} (X : RawChart C d I κ) (hA : AddM V X)
             X.sg1 (X.u g c') v • tyS V.l (fun s => S.cur c s (Sum.inl c')) else 0 := by
         rw [h2 c q]
         ring
-      rw [e, ← MvPowerSeries.coe_substAlgHom (hasSubst_unit (ht0 c)), map_add, map_sub, map_sum]
+
+      rw [e, ← MvPowerSeries.coe_substAlgHom (hasSubst_unit (ht0 c)), map_add (f := _), map_sub, map_sum]
       congr 1
       refine Finset.sum_congr rfl fun c' _ => ?_
       split_ifs
@@ -297,7 +355,8 @@ theorem sumAt_of {V : VF C} (X : RawChart C d I κ) (hA : AddM V X)
         MvPowerSeries.subst t (MvPowerSeries.subst Γ (X.sg v)) -
           ∑ c, MvPowerSeries.subst (fun _ : Unit => t c) (alongCv (γ c) (X.sg v)) +
           ∑ c, MvPowerSeries.subst (fun _ : Unit => t c) (lam c q) := by
-      rw [← hpush, ← MvPowerSeries.coe_substAlgHom htS, map_add, map_sub, map_sum, map_sum]
+
+      rw [← hpush, ← MvPowerSeries.coe_substAlgHom htS, map_add (f := _), map_sub, map_sum, map_sum]
       simp only [MvPowerSeries.coe_substAlgHom, key2]
     rw [hexp, hsum, hsplit, hAll]
     ring

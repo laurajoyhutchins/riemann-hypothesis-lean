@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowMulMemAdd
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.SoLevFacts
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1000000
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowMulMemAdd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LevelCohomology.SoLevFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
+
+
 
 noncomputable section
 
@@ -15,8 +56,8 @@ variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] {l : ℕ} [Fact l.Prime]
 
 abbrev ResL (c : Coef l) : Type := c.O ⧸ Ideal.span {((l : ℕ) : c.O)}
 
-open Classical in
 
+open Classical in
 def redL (c : Coef l) (x : Qbar l) : ResL c :=
   if h : x ∈ c.O then Ideal.Quotient.mk _ ⟨x, h⟩ else 0
 
@@ -26,7 +67,7 @@ theorem redL_of_mem (c : Coef l) {x : Qbar l} (h : x ∈ c.O) :
 
 theorem redL_add (c : Coef l) {x y : Qbar l} (hx : x ∈ c.O) (hy : y ∈ c.O) :
     redL c (x + y) = redL c x + redL c y := by
-  rw [redL_of_mem c hx, redL_of_mem c hy, redL_of_mem c (c.O.add_mem hx hy), ← map_add]; rfl
+  rw [redL_of_mem c hx, redL_of_mem c hy, redL_of_mem c (c.O.add_mem hx hy), ← map_add (f := _)]; rfl
 
 theorem redL_sub (c : Coef l) {x y : Qbar l} (hx : x ∈ c.O) (hy : y ∈ c.O) :
     redL c (x - y) = redL c x - redL c y := by

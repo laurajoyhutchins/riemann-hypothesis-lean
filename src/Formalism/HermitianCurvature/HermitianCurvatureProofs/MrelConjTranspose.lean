@@ -1,4 +1,47 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftVectorZeroBlock
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftVectorZeroBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ContDiff
@@ -42,9 +85,9 @@ theorem rel_add {A B : Pr V} {A' B' : Pr V'} (hA : Rel T A A') (hB : Rel T B B')
   intro v
   constructor
   · show A'.1 (T v) + B'.1 (T v) = T (A.1 v + B.1 v)
-    rw [map_add, (hA v).1, (hB v).1]
+    rw [map_add (f := _), (hA v).1, (hB v).1]
   · show A'.2.unop (T v) + B'.2.unop (T v) = T (A.2.unop v + B.2.unop v)
-    rw [map_add, (hA v).2, (hB v).2]
+    rw [map_add (f := _), (hA v).2, (hB v).2]
 
 theorem rel_neg {A : Pr V} {A' : Pr V'} (hA : Rel T A A') : Rel T (-A) (-A') := by
   rw [rel_iff_forall_apply] at *
@@ -208,16 +251,16 @@ theorem tprod_rel {t : ℂ} (ht : t ≠ 0)
   induction m with
   | zero =>
     intro n hn
-    have e1 : P5.tprod L Y (n + 1) = 1 := by rw [P5.tprod, dif_neg (by omega)]
-    have e2 : P5.tprod Ls Y n = 1 := by rw [P5.tprod, dif_neg (by omega)]
+    have e1 : P5.tprod L Y (n + 1) = 1 := by rw [P5.tprod, dite_eq_right (by omega)]
+    have e2 : P5.tprod Ls Y n = 1 := by rw [P5.tprod, dite_eq_right (by omega)]
     rw [e1, e2]
     exact mrel_one
   | succ m ih =>
     intro n hn
     have e1 : P5.tprod L Y (n + 1) = P5.tprod L Y (n + 1 + 1) * Wd.Ts (P5.site L ⟨n + 1, by omega⟩) Y := by
-      rw [P5.tprod, dif_pos (by omega)]
+      rw [P5.tprod, dite_eq_left (by omega)]
     have e2 : P5.tprod Ls Y n = P5.tprod Ls Y (n + 1) * Wd.Ts (P5.site Ls ⟨n, by omega⟩) Y := by
-      rw [P5.tprod, dif_pos (by omega)]
+      rw [P5.tprod, dite_eq_left (by omega)]
     rw [e1, e2]
     refine mrel_mul (ih (n + 1) (by omega)) ?_
     have e : (⟨n + 1, by omega⟩ : Fin (1 + ρ)) = shS ⟨n, by omega⟩ := rfl

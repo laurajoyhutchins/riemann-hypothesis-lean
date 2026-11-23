@@ -1,5 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Complex.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 open NumberField Finset
 
@@ -10,24 +54,5 @@ namespace GlobalTheory.IndefiniteRowSideFullHecke.PointwiseKernelBound
 open Formalism.MainNotions.S GlobalTheory.Count
 
 def decHS (q : ℕ) (h t : ℝ) : ℝ := Real.exp (-(h / 8) * min (t ^ 2) (t / Real.sqrt (2 * (q : ℝ))))
-
-def PointwiseBound : Prop :=
-  ∀ (B : RowsAut) (d : InfinitePlace B.I.F → ℝ) (p q : ℕ) (h : ℝ),
-    IsDSData B d → SigIs B p q → GapGe B h → 8 * (B.I.n : ℝ) * ((min p q : ℕ) : ℝ) < h →
-      (1 ≤ min p q → ∀ y : B.I.GA,
-          ‖phe B d y‖ ≤ (∏ v, d v) * (B.e 1).re * ∏ v, decHS (min p q) h (dHS (uMat (y.1 v)))) ∧
-      (∀ y : B.I.GA, ‖phe B d y‖ ≤ (∏ v, d v) * (B.e 1).re) ∧
-      phe B d 1 = ((∏ v, d v : ℝ) : ℂ) * B.e 1 ∧
-      (B.e 1).im = 0 ∧ 0 ≤ (B.e 1).re ∧
-      (∀ x : B.I.Gf, ‖B.e x‖ ≤ (B.e 1).re) ∧
-      ∀ y : B.I.GA, phe B d y ≠ 0 → y.2 ∈ B.I.Kset
-
-example (q : ℕ) (h : ℝ) : decHS q h 0 = 1 := by simp [decHS]
-
-example (q : ℕ) (h t : ℝ) (hh : 0 ≤ h) (ht : 0 ≤ t) : decHS q h t ≤ 1 := by
-  unfold decHS
-  rw [Real.exp_le_one_iff]
-  have : 0 ≤ min (t ^ 2) (t / Real.sqrt (2 * (q : ℝ))) := le_min (by positivity) (by positivity)
-  nlinarith [mul_nonneg hh this]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.PointwiseKernelBound

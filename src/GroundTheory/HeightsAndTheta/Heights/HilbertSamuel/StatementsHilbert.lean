@@ -1,10 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
 
-open MvPolynomial GroundTheory.Heights₂.Heights.NumbersDVR
+open MvPolynomial GroundTheory.Heights₂.Heights.NumbersDVR Classical
 
 noncomputable section
 
@@ -28,8 +73,8 @@ def modMultAt {R : Type*} [CommRing R] (M : Type*) [AddCommGroup M] [Module (MRi
     (W : Ideal (MRing ι R)) [W.IsPrime] : ℕ∞ :=
   Module.length (Localization.AtPrime W) (LocalizedModule W.primeCompl M)
 
-open Classical in
 
+open Classical in
 def topCycleNum (F : Type*) [Field F] (ι : K → Type*) (M : Type*) [AddCommGroup M] [Module (MRing ι F) M] (d : ℕ) (bs : Fin d → K → ℤ) :
     ℤ :=
   ∑ᶠ W : Ideal (MRing ι F),
@@ -88,8 +133,6 @@ def HilbertModule.AtDim (d : ℕ) : Prop :=
           (topCycleNum F ι M d (fun _ : Fin d => fun k => (a k : ℤ)) : ℝ) / d.factorial| ≤
         C * ((∑ k, (a k : ℝ)) + 1) ^ ((d : ℝ) - 1)
 
-def HilbertModule.Statement : Prop := ∀ d : ℕ, HilbertModule.AtDim.{u, v} d
-
 def ModulesFromPrimes.Statement : Prop :=
   ∀ d : ℕ, (∀ e ≤ d, HilbertPrime.AtDim.{u} e) → HilbertModule.AtDim.{u, v} d
 
@@ -104,8 +147,8 @@ def HilbertIncrement.Statement : Prop :=
             d.factorial| ≤
         C * ((∑ k, (a k : ℝ)) + 1) ^ ((d : ℝ) - 1)
 
-open Classical in
 
+open Classical in
 def IntersectionRecursion.Statement : Prop :=
   ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
     [∀ k, Fintype (ι k)] (q : Ideal (MRing ι F)) (d : ℕ), IsMultiProjPrime q →
@@ -155,19 +198,16 @@ def intWeight : (Σ k, ι k) → K → ℤ := fun v => unitDeg v.1
 def ringPiece (m : K → ℤ) : Submodule F (MRing ι F) :=
   weightedHomogeneousSubmodule F (intWeight (ι := ι)) m
 
-omit [∀ k, Fintype (ι k)] in
 
-theorem isMultigrading_ring : IsMultigrading ι (MRing ι F) (ringPiece (F := F) (ι := ι)) where
-  internal := (weightedDecomposition F (intWeight (ι := ι))).isInternal
-  smul_mem := by
-    intro v m x hx
-    rw [smul_eq_mul]
-    have hX : IsWeightedHomogeneous (intWeight (ι := ι)) (X v : MRing ι F) (unitDeg v.1) :=
-      isWeightedHomogeneous_X F _ v
-    have := hX.mul hx
-    change X v * x ∈ weightedHomogeneousSubmodule F intWeight (m + unitDeg v.1)
-    rw [mem_weightedHomogeneousSubmodule, add_comm]
-    exact this
+omit [∀ k, Fintype (ι k)] in
+theorem isMultigrading_ring : IsMultigrading ι (MRing ι F) (ringPiece (F := F) (ι := ι)) := by
+  refine ⟨(weightedDecomposition F (intWeight (ι := ι))).isInternal, ?_⟩
+  intro v m x hx
+  change IsWeightedHomogeneous (intWeight (ι := ι)) x m at hx
+  rw [smul_eq_mul]
+  change IsWeightedHomogeneous (intWeight (ι := ι)) (X v * x) (m + unitDeg v.1)
+  rw [add_comm m (unitDeg v.1)]
+  exact (isWeightedHomogeneous_X F (intWeight (ι := ι)) v).mul hx
 
 end Examples
 

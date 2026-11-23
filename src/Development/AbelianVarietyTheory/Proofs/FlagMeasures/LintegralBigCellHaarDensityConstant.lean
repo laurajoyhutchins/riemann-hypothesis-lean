@@ -1,20 +1,75 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.Dchart
-import Formalism.LocalRingCardinality.DataCD
-import Formalism.FormalDegreeBessel.FinalBF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsHaarOnIffGroupsUnitaryUnipotent
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LieAlgebraBesselModelMiddleUnitaryEntriesStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.Dchart
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LieAlgebraBesselModelMiddleUnitaryEntriesStatement
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+public import Formalism.PeriodIntegrals.QuotInv
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselBigCellCoordinatesUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BigCellChartDifferentialSkewAndFrobeniusStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BigCellChartDifferentialSurjectiveSkewStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BigCellExponentialChartStrictDifferentiableSummaStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExpInjectiveStrictUpperTriangularStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieIsHaarOnUnipotentRadicalStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LieEntriesUnipotentBesselNCharacterizationStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselBigCellCoordinatesUniqueStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExpInjectiveStrictUpperTriangularStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BigCellChartDifferentialSkewAndFrobeniusStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BigCellChartDifferentialSurjectiveSkewStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.VolumeImageOfSqrtTwoIsometricLinearEquivStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BigCellExponentialChartStrictDifferentiableSummaStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TendstoBallMeanBigCellWeightStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TendstoBallMeanBigCellWeightStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.VolumeImageOfSqrtTwoIsometricLinearEquivStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsHaarOnIffGroupsUnitaryUnipotent
+public import Formalism.FormalDegreeBessel.FinalBF
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,7 +128,7 @@ def dL (k r : ℕ) : EE k r →ₗ[ℝ] lieE (GG k r) where
   map_add' v v' := by
     apply Subtype.ext
     show (umL _).symm _ = (umL _).symm _ + (umL _).symm _
-    rw [← map_add]; congr 1
+    rw [← map_add (f := _)]; congr 1
     simp only [dchart, Prod.fst_add, Prod.snd_add, um_add, torD_add, Matrix.mul_add, Matrix.add_mul]
     abel
   map_smul' c v := by

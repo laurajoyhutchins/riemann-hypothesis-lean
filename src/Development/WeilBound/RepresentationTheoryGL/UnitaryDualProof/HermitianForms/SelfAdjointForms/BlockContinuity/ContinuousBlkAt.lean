@@ -1,5 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.SelfAdjointForms.FixK
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.BlockHomomorphism
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.SelfAdjointForms.FixK
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.AvgData
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.BlockHomomorphism
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.TransversalSums.ContinuousBlkAtApply
+
+@[expose] public section
 
 noncomputable section
 
@@ -102,7 +149,7 @@ theorem dens_exists_of (hB : Lv ψ h π s B)
       obtain ⟨hA, h1, h2, h3⟩ := big (L (v₁ + v₂) w) (L v₁ w) (L v₂ w) (hL _ _) (hL _ _) (hL _ _)
       rw [hf _ _ _ hA h1, hf _ _ _ hA h2, hf _ _ _ hA h3]
       simp only [T]
-      rw [hadj _ hA, hadj _ hA, hadj _ hA, map_add, LinearMap.add_apply, mul_add])
+      rw [hadj _ hA, hadj _ hA, hadj _ hA, map_add (f := _), LinearMap.add_apply, mul_add])
     (fun c v w => by
       obtain ⟨hA, h1, h2, -⟩ := big (L (c • v) w) (L v w) (L v w) (hL _ _) (hL _ _) (hL _ _)
       rw [hf _ _ _ hA h1, hf _ _ _ hA h2]
@@ -113,7 +160,7 @@ theorem dens_exists_of (hB : Lv ψ h π s B)
       obtain ⟨hA, h1, h2, h3⟩ := big (L v (w₁ + w₂)) (L v w₁) (L v w₂) (hL _ _) (hL _ _) (hL _ _)
       rw [hf _ _ _ hA h1, hf _ _ _ hA h2, hf _ _ _ hA h3]
       simp only [T]
-      rw [map_add, mul_add])
+      rw [map_add (f := _), mul_add])
     (fun c v w => by
       obtain ⟨hA, h1, h2, -⟩ := big (L v (c • w)) (L v w) (L v w) (hL _ _) (hL _ _) (hL _ _)
       rw [hf _ _ _ hA h1, hf _ _ _ hA h2]

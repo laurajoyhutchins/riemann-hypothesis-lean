@@ -1,32 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ExistsSecTieFOfTies
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.LocalToGlobal.ProjectiveLattices.RecPJThAllNeBot
-import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
-import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.ExistsSecTieFOfTies
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+public import Formalism.LocalToGlobal.ProjectiveLattices.RecPJThAllNeBot
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.EmbEqOfInPsi
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsProductDataCopiesTrivialisationValuation
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsShortBasisUniformizationLattice
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsUniformisedModelIntegralChartAtPointStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HalfPrincipalAndSplit
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SplitsInLevelPrime
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.StarRingExtOfStar
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThetaDepthLeScaledRuleValue
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThetaGeneratorsLeastValueOverLevelPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.WeightOnDatum
+import Formalism.LocalToGlobal.ProjectiveLattices.CrudeVal
+import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
 import Formalism.SharpRestriction.Divisibility.GeneratorPowers.RPfVal
 import Formalism.SharpRestriction.Divisibility.GeneratorPowers.SpanResCharNeBot
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ConjugateMinimaInstance
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GramSpace
-import Formalism.SharpRestriction.Divisibility.WeightAlgebra
-import Formalism.LocalToGlobal.ProjectiveLattices.DepRun
-import Formalism.LocalToGlobal.ProjectiveLattices.RegXInst
-import Formalism.LocalToGlobal.ProjectiveLattices.Adm3OfExtension
-import Formalism.LocalToGlobal.ProjectiveLattices.ExistsParameterConditions
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
-import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.TheoremZeroSplitOfLocalAndSum
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.StarRingExtOfStar
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThetaGeneratorsLeastValueOverLevelPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsProductDataCopiesTrivialisationValuation
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HalfPrincipalAndSplit
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SplitsInLevelPrime
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.WeightOnDatum
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.EmbEqOfInPsi
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ThetaDepthLeScaledRuleValue
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsShortBasisUniformizationLattice
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsUniformisedModelIntegralChartAtPointStatement
+import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -101,7 +132,7 @@ theorem vLa_sWt {D : D7} {j : ℕ} (B : WeightFamilies.Prov D) (hinj : Function.
     show algebraMap (𝓞 B.KO) B.KO (_ * _) = _
     rw [map_mul, map_natCast]
   rw [hc, Crude.crv_vLa_mul la hnn0 (Nat.cast_ne_zero.2 hN), hP, RPfVal.vLa_pPow la D.host.QS_pos.ne' hq hd, hl,
-    padicValNat.eq_zero_of_not_dvd (fun h => hnd (h.trans D.host.QS_dvd_condN)),
+    Nat.padicValNat_def, multiplicity_eq_zero_of_not_dvd (fun h => hnd (h.trans D.host.QS_dvd_condN)),
     if_neg (D.host.ne_q_of_not_dvd hnd), if_neg (D.host.ne_d_of_not_dvd hnd)]
   simp
 
@@ -113,7 +144,7 @@ theorem nusOf_of_mem {D : D7} {j : ℕ} (B : WeightFamilies.Prov D) (w : WeightF
     ((RPfVal.prime_mem_iff la (D.host.g_prime _)).1 (Classical.choose_spec h)).symm.trans
       ((RPfVal.prime_mem_iff la (D.host.g_prime i)).1 hg)
   unfold nusOf
-  rw [dif_pos h, h1, H1algLink.eWL_eq]
+  rw [dite_eq_left h, h1, H1algLink.eWL_eq]
 
 theorem wtA_antitone {D : D7} {j : ℕ} (w : WeightFamilies.Wt D j) (τ : D.host.E →+* ℂ) : Antitone fun i => wtA w (τ, i) := by
   intro i i' hii

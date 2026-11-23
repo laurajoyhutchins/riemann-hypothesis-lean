@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupSplitting.Development
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupSplitting.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +65,7 @@ theorem compositionalInverseSymm : S1 := by
       PowerSeries.constantCoeff_subst_eq_zero hex _ (by simp)
     have key : MvPowerSeries.constantCoeff (PowerSeries.subst ex l) = PowerSeries.constantCoeff l := by
       conv_lhs => rw [hsplit]
-      rw [PowerSeries.subst_add hsub, map_add, h0, PowerSeries.subst_C]
+      rw [PowerSeries.subst_add hsub, map_add (f := _), h0, PowerSeries.subst_C]
       simp
     rw [hinv] at key
     rw [← key]
@@ -50,42 +98,6 @@ theorem compositionalInverseSymm : S1 := by
   exact hexQ
 
 variable {K : Type} [Field K]
-
-theorem subst_zero_of {τ : Type} (f : PowerSeries K) (hf : PowerSeries.constantCoeff f = 0) :
-    PowerSeries.subst (0 : MvPowerSeries τ K) f = 0 := by
-  rw [PowerSeries.subst_zero_eq_C_constantCoeff, hf]
-  simp
-
-theorem pt_lg (g : Dat K) {τ : Type} (hl0 : PowerSeries.constantCoeff g.l = 0)
-    (hinv : PowerSeries.subst g.l g.ex = PowerSeries.X) {y : MvPowerSeries τ K}
-    (hy : MvPowerSeries.constantCoeff y = 0) : g.pt (g.lg y) = y := by
-  have hy' : PowerSeries.HasSubst y := PowerSeries.HasSubst.of_constantCoeff_zero hy
-  simp only [Dat.pt, Dat.lg]
-  rw [← PowerSeries.subst_comp_subst_apply (PowerSeries.HasSubst.of_constantCoeff_zero' hl0) hy', hinv,
-    PowerSeries.subst_X (R := K) hy']
-
-theorem be_mulBy_zero (g : Dat K) {τ : Type} (hex0 : PowerSeries.constantCoeff g.ex = 0)
-    (hph0 : PowerSeries.constantCoeff g.ph = 0) (hl0 : PowerSeries.constantCoeff g.l = 0)
-    (hinv : PowerSeries.subst g.l g.ex = PowerSeries.X) (x : MvPowerSeries τ K)
-    {y : MvPowerSeries τ K} (hy : MvPowerSeries.constantCoeff y = 0) :
-    g.be (g.mulBy 0 x) y = 0 := by
-  have hm : g.mulBy 0 x = 0 := by
-    simp only [Dat.mulBy, map_zero, zero_mul, Dat.pt]
-    exact subst_zero_of g.ex hex0
-  have hlg0 : g.lg (0 : MvPowerSeries τ K) = 0 := subst_zero_of g.l hl0
-  have hadd : g.add 0 y = y := by
-    simp only [Dat.add, hlg0, zero_add]
-    exact pt_lg g hl0 hinv hy
-  have hph : g.phAt (0 : MvPowerSeries τ K) = 0 := subst_zero_of g.ph hph0
-  simp only [Dat.be, hm, hadd, hph, sub_zero, sub_self]
-
-theorem orthogonalSplitPolarizationVanishes : S2 := by
-  intro K _ g hex hinv0 hph κ ι ι' _ _ _ a a' ha
-  obtain ⟨hl0, hinv⟩ := compositionalInverseSymm K g.l g.ex hex hinv0
-  simp only [Dat.sdR]
-  refine Finset.sum_eq_zero fun f _ => Finset.sum_eq_zero fun f' _ => ?_
-  simp only [ha f f', Prod.fst_zero]
-  exact be_mulBy_zero g hex hph hl0 hinv _ (by simp)
 
 end PI.FglPhSplit.Wk
 

@@ -1,9 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.MacdonaldAlternant
-import GroundTheory.AutomorphicForms.SatakeNormalized
-import GroundTheory.AutomorphicForms.WhittakerGroups
-import GroundTheory.AutomorphicForms.AffineBruhat
-import GroundTheory.AutomorphicForms.MeasuresGL
+module
+
+public import GroundTheory.AutomorphicForms.MacdonaldAlternant
+public import GroundTheory.AutomorphicForms.SatakeNormalized
+public import GroundTheory.AutomorphicForms.WhittakerGroups
+public import GroundTheory.AutomorphicForms.AffineBruhat
+import GroundTheory.AutomorphicForms.HaarCosets
+import GroundTheory.AutomorphicForms.MacdonaldRecursion
+import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+
+@[expose] public section
 
 noncomputable section
 
@@ -127,8 +178,8 @@ theorem sum_gMat_torusPow {f : GL (Fin n) F → ℂ}
   simp only [torusPow_mul_gMat, hN _ (torusPow_conj_unipC_mem hl S _), Finset.sum_const,
     Finset.card_univ, nsmul_eq_mul, kappa, Nat.card_eq_fintype_card]
 
-omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 
+omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 theorem kappa_mul_halfModulus {r : ℕ} (hr : r ≤ n) {S : Finset (Fin n)} (hS : S.card = r) :
     (kappa F S : ℂ) * halfModulus F (lamS S) = sqrtQ F ^ (r * (n - r)) := by
   classical
@@ -170,6 +221,7 @@ omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 theorem evalAt_esymmL (z : Fin n → ℂˣ) (r : ℕ) :
     evalAt z (esymmL n r) = ∑ S ∈ (Finset.univ : Finset (Fin n)).powersetCard r,
       monomialChar (lamS S) z := by
+
   rw [esymmL, map_sum]
   simp only [monomial, evalAt_single, one_mul]
 
@@ -179,6 +231,7 @@ theorem evalAt_satakeTransform_minusculeHecke (z : Fin n → ℂˣ) {r : ℕ} (h
         evalAt z (esymmL n r) := by
   classical
   rw [satakeTransform_apply, satake_minusculeHecke]
+
   simp only [map_smul, map_sum, smul_eq_mul, evalAt_esymmL]
   rw [mul_assoc]
   congr 1
@@ -194,9 +247,9 @@ theorem exists_lt_succ_of_not_antitone {μ : Fin n → ℤ} (h : ¬ Antitone μ)
   push Not at hne
   exact h (antitone_of_forall_succ_le hne)
 
+
 omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] [TopologicalSpace F]
   [IsNonarchimedeanLocalField F] in
-
 theorem psiN_eq_one_of_mem {ψ₀ : AddChar F ℂ} (hψ : ∀ x ∈ 𝒪[F], ψ₀ x = 1) {u : GL (Fin n) F}
     (hu : u ∈ unipotent F n ⊓ integralGL F n) : Whittaker.psiN ψ₀ u = 1 := by
   rw [Whittaker.psiN]
@@ -205,8 +258,8 @@ theorem psiN_eq_one_of_mem {ψ₀ : AddChar F ℂ} (hψ : ∀ x ∈ 𝒪[F], ψ�
   · exact ((mem_unipotent_inf_integralGL_iff F n).1 hu).2 i j
   · exact Subring.zero_mem _
 
-omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 
+omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 theorem eq_zero_of_not_antitone {ψ₀ : AddChar F ℂ} (hψ₁ : ∃ x : F, π * x ∈ 𝒪[F] ∧ ψ₀ x ≠ 1)
     {W : GL (Fin n) F → ℂ} (hWN : ∀ u ∈ unipotent F n, ∀ g, W (u * g) = Whittaker.psiN ψ₀ u * W g)
     (hWK : ∀ g, ∀ k ∈ integralGL F n, W (g * k) = W g) {μ : Fin n → ℤ} (hμ : ¬ Antitone μ) :
@@ -249,8 +302,8 @@ theorem eq_zero_of_not_antitone {ψ₀ : AddChar F ℂ} (hψ₁ : ∃ x : F, π 
   have : (ψ₀ x - 1) * W (torusPow F n μ) = 0 := by rw [sub_mul, h1, one_mul, sub_self]
   exact (mul_eq_zero.1 this).resolve_left (sub_ne_zero.2 hψx)
 
-omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 
+omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 theorem permGL_conj_torusPow (σ : Equiv.Perm (Fin n)) (μ : Fin n → ℤ) :
     (permGL F σ)⁻¹ * torusPow F n μ * permGL F σ = torusPow F n (μ ∘ σ) := by
   refine Units.ext (Matrix.ext fun a b => ?_)
@@ -258,8 +311,8 @@ theorem permGL_conj_torusPow (σ : Equiv.Perm (Fin n)) (μ : Fin n → ℤ) :
     coe_torusPow, coe_torusPow, diagonal_apply, diagonal_apply]
   simp only [Function.comp_apply, σ.injective.eq_iff]
 
-omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 
+omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 theorem continuous_of_mul_right_invariant {f : GL (Fin n) F → ℂ}
     (hf : ∀ g, ∀ k ∈ integralGL F n, f (g * k) = f g) : Continuous f := by
   refine IsLocallyConstant.continuous ((IsLocallyConstant.iff_exists_open f).2 fun g => ?_)

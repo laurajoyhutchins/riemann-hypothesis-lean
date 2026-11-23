@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MonoSpMapRingOfIntegersAlt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MajorantHarnackHolomorphicHalfPlaneStatement
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MajLactRmul
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MonoSpMapRingOfIntegersAlt
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MajorantHarnackHolomorphicHalfPlaneStatement
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MajLactRmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Matrix
+import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajorantConjugateTransfer
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits NumberField ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.BasicNotions Formalism.L2.Pj GlobalTheory.Toroidal GlobalTheory.Cartier GlobalTheory.ShFam GlobalTheory.ShFam.BdArc Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (Data Frame Bor rmul lact mat col dmin Wt)
@@ -69,7 +115,7 @@ theorem LinGrowth.sq_eq_zero {N : ℕ} {n : Matrix (Fin N) (Fin N) ℂ} (h : Lin
       intro k hk1
       have h1 := hC k
       have e : ((k : ℂ) * (k - 1) / 2) * L (n ^ 2 *ᵥ v) = L ((1 + n) ^ k *ᵥ v) - L v - k * L (n *ᵥ v) := by
-        rw [hk]; simp only [map_add, map_smul, smul_eq_mul]; ring
+        rw [hk]; simp only [map_add (f := _), map_smul, smul_eq_mul]; ring
       have hk' : (1 : ℝ) ≤ k := by exact_mod_cast hk1
       have e' : ‖((k : ℂ) * (k - 1) / 2)‖ = (k : ℝ) * (k - 1) / 2 := by
         rw [show ((k : ℂ) * (k - 1) / 2) = (((k : ℝ) * (k - 1) / 2 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
@@ -212,8 +258,8 @@ theorem linGrowth (h : IsOrbit X T M γ x) (τ : X.Ψ) : LinGrowth ((γ : Matrix
         mul_le_mul_of_nonneg_right (h2.trans (mul_le_mul_of_nonneg_right h4 hv0)) hu0.le
     _ = _ := by ring
 
-open Polynomial in
 
+open Polynomial in
 theorem exists_monic (Λ : Submodule (𝓞 E) (Fin N → E)) (hfg : Λ.FG) (hsp : Submodule.span E (Λ : Set (Fin N → E)) = ⊤)
     (A : Matrix (Fin N) (Fin N) E) (hA : ∀ v ∈ Λ, A *ᵥ v ∈ Λ) : ∃ q : (𝓞 E)[X], q.Monic ∧ aeval A q = 0 := by
   have : Module.Finite (𝓞 E) Λ := Module.Finite.iff_fg.2 hfg

@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntPoly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntPoly
+import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogIntCircle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -84,15 +136,15 @@ def normT (h : HermNorm n) (T : Finset (Fin k)) (u : Fin k × Fin n → ℂ) : F
 
 theorem measurable_groupNorm (h : HermNorm n) (i : Fin k) :
     Measurable fun u : Fin k × Fin n → ℂ => h.norm fun j => u (i, j) :=
-  h.li_continuous_norm.measurable.comp (measurable_pi_lambda _ fun _ => measurable_pi_apply _)
+  h.li_continuous_norm.measurable.comp (Measurable.of_eval fun _ => measurable_pi_apply _)
 
 theorem measurable_normT (h : HermNorm n) (T : Finset (Fin k)) : Measurable (normT h T) := by
-  refine measurable_pi_lambda _ fun ij => ?_
+  refine Measurable.of_eval fun ij => ?_
   by_cases hT : ij.1 ∈ T
-  · simp only [normT, hT, if_true]
+  · simp only [normT, hT, ite_true]
     exact (Complex.measurable_ofReal.comp (measurable_groupNorm h ij.1)).inv.mul
       (measurable_pi_apply _)
-  · simp only [normT, hT, if_false]
+  · simp only [normT, hT, ite_false]
     exact measurable_pi_apply _
 
 theorem scale_inGroup_apply_same (i : Fin k) (c : ℂ) (u : Fin k × Fin n → ℂ) (j : Fin n) :
@@ -138,14 +190,14 @@ theorem normT_mem_polydisc (h : HermNorm n) (C : ℝ) (hC0 : 0 ≤ C)
   simp only [polydisc, mem_univ_pi, Metric.mem_closedBall, dist_zero_right] at hu ⊢
   intro ij
   by_cases hT : ij.1 ∈ T
-  · simp only [normT, hT, if_true, norm_mul, norm_inv, Complex.norm_real, Real.norm_eq_abs,
+  · simp only [normT, hT, ite_true, norm_mul, norm_inv, Complex.norm_real, Real.norm_eq_abs,
       abs_of_nonneg (h.li_norm_nonneg _)]
     by_cases h0 : (h.norm fun j => u (ij.1, j)) = 0
     · rw [h0, _root_.inv_zero, zero_mul]; exact hC0
     · rw [inv_mul_le_iff₀ (lt_of_le_of_ne (h.li_norm_nonneg _) (Ne.symm h0))]
       have := hC (fun j => u (ij.1, j)) ij.2
       simpa [mul_comm] using this
-  · simp only [normT, hT, if_false]
+  · simp only [normT, hT, ite_false]
     exact hu ij
 
 theorem integrableOn_log_groupNorm (h : HermNorm n) (r : ℝ) (i : Fin k) :
@@ -291,9 +343,9 @@ theorem logNormT (h : HermNorm n) (C : ℝ) (hC0 : 0 ≤ C)
       set g' := weightedHomogeneousComponent w d0 g with hg'
       have hg'0 : g' ≠ 0 := by
         intro h0
-        have := congrArg (coeff m0) h0
-        rw [hg', coeff_weightedHomogeneousComponent, if_pos rfl, coeff_zero] at this
-        exact mem_support_iff.mp hm0 this
+        have := congrArg (AddMonoidAlgebra.coeff · m0) h0
+        rw [hg', coeff_weightedHomogeneousComponent, ite_eq_left rfl, AddMonoidAlgebra.coeff_zero] at this
+        exact mem_support_iff.mp hm0 (by simpa using this)
       obtain ⟨ih1, ih2⟩ := logNormT_insert_of_homog h C T i hi g' hg'0 d0
         (weightedHomogeneousComponent_isWeightedHomogeneous _ _) (ih g' hg'0).1 (ih g' hg'0).2
       obtain ⟨M, hM⟩ := (isCompact_polydisc (ι := Fin k × Fin n) C).exists_bound_of_continuousOn

@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.Wcount
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.Order.Filter.Cofinite
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,8 +119,9 @@ structure IsTest (f : G → ℂ) : Prop where
 
 def opF (f : G → ℂ) (φ : G → V) (g : G) : V := ∑ᶠ x : G ⧸ B.U, f (s.θ x.out) • s.Θ (φ (s.θ.symm g * x.out))
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def R (f : G → ℂ) : Module.End ℂ B.Forms :=
   if h : ∃ L : Module.End ℂ B.Forms, ∀ φ, (L φ).1 = s.opF f φ.1 then h.choose else 0
 
@@ -124,9 +175,5 @@ def mass {H T : Type} [Group H] [Group T] (φ : H →* T) (H₀ : Subgroup H) (C
 
 def IsGenEig {Λ M : Type} [AddCommGroup M] [Module ℂ M] (u : Λ → Module.End ℂ M) (χ : Λ → ℂ) : Prop :=
   (⨅ a, (u a).maxGenEigenspace (χ a)) ≠ ⊥
-
-example : Base PUnit PUnit ℂ := ⟨1, ⊤, 1, 1, ⊥, bot_le, fun _ _ => Subgroup.mem_center_iff.2 fun _ => rfl, fun _ _ => trivial, fun _ _ _ => by simp⟩
-
-example : RPG (I := Unit) PUnit (fun _ => PUnit) fun _ => ⊤ := ⟨fun _ => 1, fun _ _ => rfl, fun _ => by simp, fun _ _ => ⟨1, fun _ => rfl⟩⟩
 
 end UpperTheory.V.Z.Sym

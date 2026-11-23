@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.Cartan
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechToDerived
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.SheafH
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.Cartan
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.SheafH
+public import Mathlib.Algebra.Category.Grp.FilteredColimits
+public import Mathlib.Topology.Sheaves.Abelian
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechToDerived
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.InjectiveCech
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.EnoughInjectives
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Sheaves.LocallySurjective
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -85,8 +133,8 @@ lemma DeltaRel.add {n : ℕ} {σ σ' : Cochain Q U n} {c c' : cechH F U (n + 1)}
     DeltaRel U f g n (σ + σ') (c + c') := by
   obtain ⟨τ, ρ, hρ, hτ, hρτ, rfl⟩ := h
   obtain ⟨τ', ρ', hρ', hτ', hρτ', rfl⟩ := h'
-  exact ⟨τ + τ', ρ + ρ', by rw [map_add, hρ, hρ', add_zero], by rw [map_add, hτ, hτ'],
-    by rw [map_add, map_add, hρτ, hρτ'], (cls_add _ _ hρ hρ' _).symm⟩
+  exact ⟨τ + τ', ρ + ρ', by rw [map_add (f := _), hρ, hρ', add_zero], by rw [map_add (f := _), hτ, hτ'],
+    by rw [map_add (f := _), map_add (f := _), hρτ, hρτ'], (cls_add _ _ hρ hρ' _).symm⟩
 
 namespace IsCechShortExact
 
@@ -94,7 +142,7 @@ variable (hS : IsCechShortExact U f g)
 include hS
 
 lemma push_injective' (n : ℕ) : Function.Injective (push U f n) :=
-  push_injective U f n fun i => hS.injective i
+  fun _ _ h => funext fun i => hS.injective i (congrFun h i)
 
 lemma push_surjective (n : ℕ) (σ : Cochain Q U n) : ∃ τ, push U g n τ = σ := by
   choose τ hτ using fun i => hS.surjective i (σ i)
@@ -106,7 +154,10 @@ lemma push_exact (n : ℕ) (τ : Cochain I U n) (hτ : push U g n τ = 0) :
   exact ⟨α, funext hα⟩
 
 lemma push_push (n : ℕ) (α : Cochain F U n) : push U g n (push U f n α) = 0 := by
-  rw [push_comp, hS.zero, push_zero']
+  funext i
+  change g.app _ (f.app _ (α i)) = 0
+  rw [← ConcreteCategory.comp_apply, ← NatTrans.comp_app, hS.zero]
+  rfl
 
 lemma exists_deltaRel {n : ℕ} (σ : Cochain Q U n) (hσ : d Q U n σ = 0) :
     ∃ c, DeltaRel U f g n σ c := by
@@ -280,7 +331,9 @@ theorem surjective_of_goodAcyclic (hF : GoodAcyclic B Good S.X₁) (V : Opens X)
   choose ρ hρ using fun j => app_exact_of_shortExact hS _ _ (congrFun hdτ0 j)
   have hρ' : push U S.f.hom 1 ρ = d _ U 0 τ0 := funext hρ
   have hρc : d S.X₁.obj U 1 ρ = 0 := by
-    apply push_injective U S.f.hom 2 (fun j => app_injective_of_shortExact hS _)
+    have hinj : Function.Injective (push U S.f.hom 2) :=
+      fun _ _ h => funext fun j => app_injective_of_shortExact hS _ (congrFun h j)
+    apply hinj
     rw [map_zero, push_d, hρ', d_d]
   obtain ⟨β, hβ⟩ := hF V hV κ U hgood 0 ρ hρc
   have hc : d S.X₂.obj U 0 (τ0 - push U S.f.hom 0 β) = 0 := by
@@ -340,24 +393,25 @@ def hDeltaEquiv (m : ℕ) : Sheaf.H.{w'} S.X₃ (m + 1) ≃+ Sheaf.H.{w'} S.X₁
         rw [← hx, H.eq_zero_of_injective S.X₂ x, map_zero],
       fun x => H.exact₁ hS rfl x (H.eq_zero_of_injective S.X₂ _)⟩
 
-include hS in
 
+include hS in
 theorem nonempty_cechH_one_equiv (U : ι → Opens X) (hU : iSup U = ⊤)
     (hC : IsCechShortExact U S.f.hom S.g.hom) (hI : CechAcyclic S.X₂.obj U) :
     Nonempty (cechH S.X₁.obj U 1 ≃+ Sheaf.H.{w'} S.X₁ 1) := by
   let pC : S.X₃.obj.obj (op ⊤) →+ cechH S.X₁.obj U 1 :=
     (hC.delta 0).comp (globalCocycle S.X₃.obj U)
-  let pH : S.X₃.obj.obj (op ⊤) →+ Sheaf.H.{w'} S.X₁ 1 :=
-    (H.δ hS 0 1 rfl).comp (Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm.toAddMonoidHom
+  let δ : Sheaf.H.{w'} S.X₃ 0 →+ Sheaf.H.{w'} S.X₁ 1 := H.δ hS 0 1 rfl
+  let e : Sheaf.H.{w'} S.X₃ 0 ≃+ S.X₃.obj.obj (op ⊤) :=
+    Sheaf.H.equiv₀ S.X₃ isTerminalTop
+  let pH := δ.comp e.symm.toAddMonoidHom
   have hpC : Function.Surjective pC :=
     (hC.delta_surjective hI 0).comp (globalCocycle_surjective _ U S.X₃.property hU)
   have hpH : Function.Surjective pH := by
     intro x
     obtain ⟨y, hy⟩ := H.exact₁ hS rfl x (H.eq_zero_of_injective S.X₂ _)
-    exact ⟨Sheaf.H.equiv₀ S.X₃ isTerminalTop y, by simp [pH, hy]⟩
-  have hker : pC.ker = pH.ker := by
-    ext s
-    rw [AddMonoidHom.mem_ker, AddMonoidHom.mem_ker]
+    exact ⟨e y, (congrArg δ (e.symm_apply_apply y)).trans hy⟩
+  have hker : pC.ker = pH.ker := AddSubgroup.ext fun s => by
+    change pC s = 0 ↔ pH s = 0
     have e1 : pC s = 0 ↔ ∃ t, S.g.hom.app (op ⊤) t = s := by
       change hC.delta 0 (globalCocycle S.X₃.obj U s) = 0 ↔ _
       rw [hC.delta_eq_zero_iff]
@@ -372,17 +426,17 @@ theorem nonempty_cechH_one_equiv (U : ι → Opens X) (hU : iSup U = ⊤)
         exact ⟨(globalCocycle S.X₂.obj U t).1, (mem_cocycles _).1 (globalCocycle _ U t).2,
           push_globalCocycle U _ t⟩
     have e2 : pH s = 0 ↔ ∃ t, S.g.hom.app (op ⊤) t = s := by
-      change H.δ hS 0 1 rfl ((Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm s) = 0 ↔ _
+      change δ (e.symm s) = 0 ↔ _
       constructor
       · intro h
         obtain ⟨x, hx⟩ := H.exact₃ hS rfl _ h
         refine ⟨Sheaf.H.equiv₀ S.X₂ isTerminalTop x, ?_⟩
-        apply (Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm.injective
-        rw [← Sheaf.H.equiv₀_symm_naturality, AddEquiv.symm_apply_apply, hx]
+        exact (Sheaf.H.equiv₀_naturality isTerminalTop S.g x).trans
+          ((congrArg e hx).trans (e.apply_symm_apply s))
       · rintro ⟨t, rfl⟩
-        rw [← Sheaf.H.equiv₀_symm_naturality]
-        exact H.δ_map_g hS rfl _
-    rw [e1, e2]
+        exact (congrArg δ (Sheaf.H.equiv₀_symm_naturality isTerminalTop S.g t).symm).trans
+          (H.δ_map_g hS rfl _)
+    exact e1.trans e2.symm
   exact ⟨(QuotientAddGroup.quotientKerEquivOfSurjective pC hpC).symm.trans
     ((QuotientAddGroup.quotientAddEquivOfEq hker).trans
       (QuotientAddGroup.quotientKerEquivOfSurjective pH hpH))⟩
@@ -398,30 +452,33 @@ theorem nonempty_cechH_equiv (hC : IsCoverSystem B Good) (U : ι → Opens X) (h
     (hUB : ∀ {n : ℕ} (i : Fin (n + 1) → ι), B (inter U i)) (n : ℕ)
     (G : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) (hG : GoodAcyclic B Good G) :
     Nonempty (cechH G.obj U n ≃+ Sheaf.H.{w'} G n) := by
-  cases n with
-  | zero => exact ⟨cechHZeroEquivH G U hU⟩
-  | succ n =>
-    induction n generalizing G with
-    | zero =>
-      have hS := injectiveSequence_shortExact G
-      have hI : CechAcyclic (injectiveSequence G).X₂.obj U :=
-        @cechAcyclic_of_injective X (injectiveSequence G).X₂
-          (inferInstanceAs (Injective (Injective.under G))) ι U
-      exact nonempty_cechH_one_equiv hS U hU (isCechShortExact_of_surjective hS U
-        fun i => surjective_of_goodAcyclic hC hS hG _ (hUB i)) hI
-    | succ m ih =>
-      have hS := injectiveSequence_shortExact G
-      have hI : CechAcyclic (injectiveSequence G).X₂.obj U :=
-        @cechAcyclic_of_injective X (injectiveSequence G).X₂
-          (inferInstanceAs (Injective (Injective.under G))) ι U
-      have hSC := isCechShortExact_of_surjective hS U
-        fun i => surjective_of_goodAcyclic hC hS hG _ (hUB i)
-      have hQ : GoodAcyclic B Good (injectiveSequence G).X₃ :=
-        goodAcyclic_of_shortExact hC hS hG fun κ V =>
-          @cechAcyclic_of_injective X (injectiveSequence G).X₂
-            (inferInstanceAs (Injective (Injective.under G))) κ V
-      obtain ⟨e⟩ := ih _ hQ
-      exact ⟨((hSC.deltaEquiv hI m).symm.trans e).trans (hDeltaEquiv hS m)⟩
+  let P (k : ℕ) (F : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+    Nonempty (cechH F.obj U k ≃+ Sheaf.H.{w'} F k)
+  have hzero (F) : P 0 F := ⟨cechHZeroEquivH F U hU⟩
+  -- Transport at the level of sheaves to avoid unfolding cohomology in the comparison.
+  have hbase (F) (hF : GoodAcyclic B Good F) : P 1 F := by
+    let S := injectiveSequence F
+    have hS : S.ShortExact := injectiveSequence_shortExact F
+    have hI : CechAcyclic S.X₂.obj U :=
+      @cechAcyclic_of_injective X S.X₂ (inferInstanceAs (Injective (Injective.under F))) ι U
+    have hF' : P 1 S.X₁ := nonempty_cechH_one_equiv hS U hU
+      (isCechShortExact_of_surjective hS U fun i => surjective_of_goodAcyclic hC hS hF _ (hUB i)) hI
+    exact Eq.mp (congrArg (P 1) (show S.X₁ = F from rfl)) hF'
+  have hstep (m : ℕ) (ih : ∀ F, GoodAcyclic B Good F → P (m + 1) F)
+      (F) (hF : GoodAcyclic B Good F) : P (m + 2) F := by
+    let S := injectiveSequence F
+    have hS : S.ShortExact := injectiveSequence_shortExact F
+    have hInj : Injective S.X₂ := inferInstanceAs (Injective (Injective.under F))
+    have hI : CechAcyclic S.X₂.obj U := @cechAcyclic_of_injective X S.X₂ hInj ι U
+    have hSC := isCechShortExact_of_surjective hS U
+      fun i => surjective_of_goodAcyclic hC hS hF _ (hUB i)
+    have hQ := goodAcyclic_of_shortExact hC hS hF (@cechAcyclic_of_injective X S.X₂ hInj)
+    obtain ⟨e⟩ := ih S.X₃ hQ
+    have hF' : P (m + 2) S.X₁ :=
+      ⟨((hSC.deltaEquiv hI m).symm.trans e).trans (hDeltaEquiv hS m)⟩
+    exact Eq.mp (congrArg (P (m + 2)) (show S.X₁ = F from rfl)) hF'
+  exact (Nat.twoStepInduction (motive := fun k => ∀ F, GoodAcyclic B Good F → P k F)
+    (fun F _ => hzero F) hbase (fun m _ ih => hstep m ih) n) G hG
 
 end LerayTheorem
 

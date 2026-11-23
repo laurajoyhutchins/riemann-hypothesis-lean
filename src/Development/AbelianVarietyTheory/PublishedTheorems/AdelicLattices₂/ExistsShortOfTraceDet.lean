@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MinkowskiLinearForms
+module
+
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MinkowskiLinearForms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.HermClass
 
@@ -71,6 +123,7 @@ theorem exists_short_of_trace_det {F : Type} [Field F] [NumberField F] [IsTotall
   have hqe : ∀ x y, q x y = ∑ k, e.repr x k * e.repr y k * q (e k) (e k) := by
     intro x y
     conv_lhs => rw [← e.sum_repr x, ← e.sum_repr y]
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Finset.sum_eq_single k]
@@ -99,6 +152,7 @@ theorem exists_short_of_trace_det {F : Type} [Field F] [NumberField F] [IsTotall
     rw [Fintype.sum_equiv ε _ (fun p => ρ p.1 (e.repr (b i) p.2) * ρ p.1 (q (e p.2) (e p.2)) *
       ρ p.1 (e.repr (b i') p.2)) (fun _ => rfl), Fintype.sum_prod_type]
     refine Finset.sum_congr rfl fun φ _ => ?_
+
     rw [hqe, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     simp only [map_mul]; ring
@@ -123,6 +177,7 @@ theorem exists_short_of_trace_det {F : Type} [Field F] [NumberField F] [IsTotall
   obtain ⟨z, hz0, hz⟩ := exists_int_vecMul_lt A hA0 ht hA1
   refine ⟨z, hz0, fun φ => ?_⟩
   set v := ∑ i, z i • b i with hv
+
   rw [← hρc, Complex.norm_real, hqe, map_sum]
   refine (norm_sum_le _ _).trans ?_
   have : ∀ k, ‖ρ φ (e.repr v k * e.repr v k * q (e k) (e k))‖ ≤ t ^ 2 := by
@@ -131,9 +186,11 @@ theorem exists_short_of_trace_det {F : Type} [Field F] [NumberField F] [IsTotall
     have h3 : ∑ i, (z i : ℝ) * A i (ε.symm (φ, k)) =
         ρ φ (e.repr v k) * Real.sqrt |ρ φ (q (e k) (e k))| := by
       have hc : e.repr v k = ∑ i, (z i : F) * e.repr (b i) k := by
+
         rw [← e.coord_apply, hv, map_sum]
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [map_zsmul, zsmul_eq_mul, e.coord_apply]
+
       rw [hc, map_sum, Finset.sum_mul]
       refine Finset.sum_congr rfl fun i _ => ?_
       simp only [A, Matrix.mul_diagonal, B, a, Matrix.of_apply, Equiv.apply_symm_apply,

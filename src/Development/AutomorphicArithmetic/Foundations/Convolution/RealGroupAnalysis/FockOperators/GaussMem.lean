@@ -1,5 +1,46 @@
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ThetaLiftTrivialOrbitTermsVanish
+public import GroundTheory.GlobalFields.TateThesis.GaussianSchwartz
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.FockOperators.XApply
-import GroundTheory.GlobalFields.TateThesis.GaussianSchwartz
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -14,7 +55,10 @@ private theorem mixed_coord {F : Type} [Field F] [NumberField F] [IsTotallyReal 
 private theorem pInf_rt_neg {F : Type} [Field F] [NumberField F] [IsTotallyReal F] (δ : F)
     (hδ : ∀ φ : F →+* ℝ, φ δ < 0) (w : InfinitePlace F) : TR.pInf F (rt δ) w < 0 := by
   have h : TR.pInf F (rt δ) w = InfinitePlace.embedding_of_isReal (IsTotallyReal.isReal w) δ :=
-    InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe (IsTotallyReal.isReal w) (WithAbs.toAbs _ δ)
+    by
+      change InfinitePlace.Completion.extensionEmbeddingOfIsReal (IsTotallyReal.isReal w) (algebraMap F w.Completion δ) = _
+      rw [AbsoluteValue.Completion.algebraMap_def]
+      exact InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe (IsTotallyReal.isReal w) (WithAbs.toAbs _ δ)
   rw [h]
   exact hδ _
 
@@ -66,7 +110,7 @@ private theorem exists_sch {F : Type} [Field F] [NumberField F] [IsTotallyReal F
     refine Finset.sum_congr rfl fun w _ => ?_
     have hs : ∀ i, (T (infPartPi v) (i, w)) ^ 2 = k (i, w) * TR.pInf F (v i) w ^ 2 := fun i => by
       rw [hT, coordLin_apply, mixed_coord, mul_pow, Real.sq_sqrt (hk _).le]
-    simp only [hs, Fin.sum_univ_four, k, map_add, map_mul, map_sub, map_pow, map_ofNat, Pi.add_apply,
+    simp only [hs, Fin.sum_univ_four, k, map_add (f := _), map_mul, map_sub, map_pow, map_ofNat, Pi.add_apply,
       Pi.mul_apply, Pi.sub_apply, Pi.pow_apply, Pi.ofNat_apply]
     simp
     ring
@@ -75,7 +119,7 @@ private theorem exists_sch {F : Type} [Field F] [NumberField F] [IsTotallyReal F
   rfl
 
 theorem UpperTheory.ConvolutionTheory.R2.Fo.gaussMem :
-    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] (D : Dat F E), ∀ g ∈ finiteSchwartzBruhatPi F (ι := Fin 4), (fun v => gauss D.δ v * g (finPartPi v)) ∈ schwartzBruhatPi F (Fin 4) := by
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyReal F] [IsTotallyComplex E] (D : Dat F E), ∀ g ∈ finiteSchwartzBruhatPi F (ι := Fin 4), (fun v => gauss D.δ v * g (finPartPi v)) ∈ schwartzBruhatPi (K := F) (ι := Fin 4) := by
   intro F E _ _ _ _ _ _ _ D g hg
   obtain ⟨f, hf⟩ := exists_sch D.δ D.neg
   have h : (fun v => gauss D.δ v * g (finPartPi v)) = schwartzBruhatTensorPi f g := by

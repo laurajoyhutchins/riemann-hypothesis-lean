@@ -1,5 +1,49 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.IdeleModuleInfIdDetLe
-import GroundTheory.GlobalFields.Adele.IntegersLattice
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.HilbertEisenstein.SSmooth
+public import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
+public import GroundTheory.GlobalFields.TateThesis.TateThetaDecay
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -91,7 +135,7 @@ theorem arch_bound (k m : ℕ) : ∃ C : ℝ, 0 < C ∧ ∀ x y : UpperTheory.V.
   obtain ⟨C, hC0, hC⟩ := arch_factor_bound k m
   refine ⟨C ^ Fintype.card (InfinitePlace F), by positivity, fun x y => ?_⟩
   rw [arch, norm_prod, ← Finset.prod_mul_distrib, ← Finset.card_univ, ← Finset.prod_const]
-  refine Finset.prod_le_prod (fun v _ => by positivity) fun v _ => ?_
+  refine Finset.prod_le_prod₀ (fun v _ => by positivity) fun v _ => ?_
   rw [← mul_assoc]
   exact hC (x v) (y v)
 
@@ -129,7 +173,7 @@ theorem summable_beta (D : 𝓞 F) (hD : D ≠ 0) : ∃ m : ℕ, Summable (fun x
         intro v
         rw [hP, ← Finset.mul_prod_erase Finset.univ (fun v => 1 + sig v x ^ 2) (Finset.mem_univ v)]
         have h1 : (1 : ℝ) ≤ ∏ w ∈ Finset.univ.erase v, (1 + sig w x ^ 2) := by
-          have := Finset.prod_le_prod (s := Finset.univ.erase v) (f := fun _ => (1 : ℝ))
+          have := Finset.prod_le_prod₀ (s := Finset.univ.erase v) (f := fun _ => (1 : ℝ))
             (g := fun w => 1 + sig w x ^ 2) (fun _ _ => zero_le_one) (fun w _ => by nlinarith [sq_nonneg (sig w x)])
           simpa using this
         nlinarith [sq_nonneg (sig v x)]
@@ -152,8 +196,8 @@ theorem summable_beta (D : 𝓞 F) (hD : D ≠ 0) : ∃ m : ℕ, Summable (fun x
       linarith
     · rw [if_neg hx, if_neg (fun h => hx ((hmem x).1 h))]
 
-omit [IsTotallyReal F] in
 
+omit [IsTotallyReal F] in
 theorem exists_bound_inf {K : Set (Ideles F)} (hK : IsCompact K) : ∃ B : ℝ, 1 ≤ B ∧ ∀ a ∈ K, ∀ v,
     ‖((a : Ideles F) : Ad F).1 v‖ ≤ B ∧ ‖((a⁻¹ : Ideles F) : Ad F).1 v‖ ≤ B := by
   set f : Ideles F → ℝ := fun a => ∑ v, (‖((a : Ideles F) : Ad F).1 v‖ + ‖((a⁻¹ : Ideles F) : Ad F).1 v‖)

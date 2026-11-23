@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.DiagZEqNegAddY
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.SubMulOriginD
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.DiagZEqNegAddY
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open WeierstrassCurve WeierstrassCurve.Projective
 
@@ -15,10 +65,6 @@ def Proportional (T U : Fin 3 → R) : Prop :=
 
 lemma Proportional.symm {T U : Fin 3 → R} (h : Proportional T U) : Proportional U T :=
   fun i j => by linear_combination h j i
-
-lemma Proportional.smul_left {T U : Fin 3 → R} (h : Proportional T U) (u : R) :
-    Proportional (u • T) U :=
-  fun i j => by simp only [Pi.smul_apply, smul_eq_mul]; linear_combination u * h i j
 
 lemma proportional_negY (W : Projective R) {X N Z X' N' Z' : R} (hxz : X * Z' = Z * X')
     (hnz : N * Z' = Z * N') (hxn : X * N' = N * X') :
@@ -64,38 +110,11 @@ lemma proportional_diagXYZ_addXYZ {P Q : Fin 3 → R} (hP : W.Equation P) (hQ : 
     Proportional (diagXYZ W P Q) (W.addXYZ P Q) :=
   proportional_negY W (diagX_mul_addZ hP hQ) (negDiagY_mul_addZ hP hQ) (diagX_mul_negAddY hP hQ)
 
-variable (W) in
 
-def chordN (x₁ y₁ x₂ : R) : R :=
-  x₁ ^ 2 + x₁ * x₂ + x₂ ^ 2 + W.a₂ * (x₁ + x₂) + W.a₄ - W.a₁ * y₁
 
-variable (W) in
 
-def chordD (y₁ x₂ y₂ : R) : R :=
-  y₁ + y₂ + W.a₁ * x₂ + W.a₃
 
-variable (W) in
 
-def slopeXYZ (x₁ y₁ x₂ n d : R) : Fin 3 → R :=
-  W.neg ![d * (n ^ 2 + W.a₁ * n * d - (W.a₂ + x₁ + x₂) * d ^ 2),
-    n * (n ^ 2 + W.a₁ * n * d - (W.a₂ + x₁ + x₂) * d ^ 2 - x₁ * d ^ 2) + y₁ * d ^ 3, d ^ 3]
-
-variable (W) in
-
-def chordXYZ (x₁ y₁ x₂ y₂ : R) : Fin 3 → R :=
-  slopeXYZ W x₁ y₁ x₂ (chordN W x₁ y₁ x₂) (chordD W y₁ x₂ y₂)
-
-variable (W) in
-
-def thirdXYZ (s n v d : R) : Fin 3 → R :=
-  ![d * (-lineQuadCoeff W n v d - lineCubicCoeff W n d * s), -(d * lineCubicCoeff W n d),
-    n * (-lineQuadCoeff W n v d - lineCubicCoeff W n d * s) + v * lineCubicCoeff W n d]
-
-variable (W) in
-
-def originXYZ (z₁ w₁ z₂ w₂ : R) : Fin 3 → R :=
-  W.neg (thirdXYZ W (z₁ + z₂) (originN W z₁ w₁ z₂)
-    (w₁ * originD W w₁ z₂ w₂ - originN W z₁ w₁ z₂ * z₁) (originD W w₁ z₂ w₂))
 
 end Ring
 
@@ -130,25 +149,6 @@ lemma equiv_of_proportional {T U : Fin 3 → F} (h : Proportional T U) (hT : T �
   have hu : T j / U j ≠ 0 := fun h0 => hT <| by rw [← e, h0, zero_smul]
   exact ⟨Units.mk0 _ hu, e⟩
 
-variable (W) in
-
-def Represents (T : Fin 3 → F) (p : W.toAffine.Point) : Prop :=
-  W.Nonsingular T ∧ Point.toAffine W T = p
-
-lemma Represents.ne_zero {T : Fin 3 → F} {p : W.toAffine.Point} (h : Represents W T p) : T ≠ 0 :=
-  ne_zero_of_nonsingular h.left
-
-lemma Represents.of_equiv {T U : Fin 3 → F} {p : W.toAffine.Point} (h : Represents W U p)
-    (e : T ≈ U) : Represents W T p :=
-  ⟨(nonsingular_of_equiv e).mpr h.left, (Point.toAffine_of_equiv e).trans h.right⟩
-
-lemma Represents.equiv {T U : Fin 3 → F} {p : W.toAffine.Point} (hT : Represents W T p)
-    (hU : Represents W U p) : T ≈ U := by
-  classical
-  have h : (⟨(nonsingularLift_iff T).mpr hT.left⟩ : W.Point) =
-      ⟨(nonsingularLift_iff U).mpr hU.left⟩ :=
-    (Point.toAffineAddEquiv W).injective (hT.right.trans hU.right.symm)
-  exact Quotient.exact (congrArg Point.point h)
 
 lemma addXYZ_ne_zero_iff {P Q : Fin 3 → F} (hP : W.Nonsingular P) (hQ : W.Nonsingular Q) :
     W.addXYZ P Q ≠ 0 ↔ ¬P ≈ Q := by

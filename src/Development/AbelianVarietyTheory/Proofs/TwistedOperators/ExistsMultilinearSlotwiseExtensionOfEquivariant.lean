@@ -1,6 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.LinearAlgebra.BilinearMap
+public import Mathlib.LinearAlgebra.Multilinear.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+
+@[expose] public section
 
 open Function
+
+-- Mathlib now indexes multilinear maps by a ring homomorphism.
+local notation "MultilinearMap " "ℂ " M:max N:max => _root_.MultilinearMap (RingHom.id ℂ) M N
 
 namespace GlobalTheory.FactorwiseExtension
 
@@ -41,7 +94,7 @@ theorem toLinearMap_update_smul (T : MultilinearMap ℂ H E) {i j : ι} (h : i �
     (c : ℂ) (x : H i) : T.toLinearMap (update w i (c • x)) j = c • T.toLinearMap (update w i x) j := by
   ext a
   simp only [MultilinearMap.toLinearMap_apply, LinearMap.smul_apply]
-  rw [update_comm h, update_comm h, T.map_update_smul]
+  rw [update_comm h, update_comm h, T.map_update_smul, RingHom.id_apply]
 
 end GlobalTheory.FactorwiseExtension
 
@@ -100,7 +153,7 @@ theorem invariant_insert (A B : ∀ τ, Submodule ℂ (H τ)) (hAB : ∀ τ, A �
     intro L₁ L₂ h₁ h₂ b hb
     have h₁₂ : ∀ r ∈ Rk τ₀, ∀ x ∈ A τ₀, (L₁ + L₂) (r.1 x) = r.2 ((L₁ + L₂) x) := by
       intro r hr x hx
-      simp only [LinearMap.add_apply, map_add, h₁ r hr x hx, h₂ r hr x hx]
+      simp only [LinearMap.add_apply, map_add (f := _), h₁ r hr x hx, h₂ r hr x hx]
     have := huniq τ₀ (Ext (L₁ + L₂) - Ext L₁ - Ext L₂)
       (sub_mem (sub_mem (hExtC _ h₁₂) (hExtC _ h₁)) (hExtC _ h₂))
       (by
@@ -155,11 +208,12 @@ theorem invariant_insert (A B : ∀ τ, Submodule ℂ (H τ)) (hAB : ∀ τ, A �
       intro v i x y
       by_cases hi : i = τ₀
       · subst hi
-        rw [h0position, h0position, h0position, map_add, map_add]
-      · rw [hiposition i hi, hiposition i hi, hiposition i hi, map_add, toLinearMap_update_add T hi,
+        rw [h0position, h0position, h0position, map_add (f := _), map_add (f := _)]
+      · rw [hiposition i hi, hiposition i hi, hiposition i hi, map_add (f := _), toLinearMap_update_add T hi,
           ExtAdd _ _ (hgU v i x) (hgU v i y) _ (hRB _)])
     (by
       intro v i c x
+      simp only [RingHom.id_apply]
       by_cases hi : i = τ₀
       · subst hi
         rw [h0position, h0position, map_smul, map_smul]
@@ -241,9 +295,9 @@ theorem invariant_insert (A B : ∀ τ, Submodule ℂ (H τ)) (hAB : ∀ τ, A �
     constructor
     · let F : H τ →ₗ[ℂ] H τ₀ →ₗ[ℂ] E := LinearMap.mk₂ ℂ (fun w b => T' (update (update u τ w) τ₀ b))
         (by intro w₁ w₂ b; rw [update_comm hne, update_comm hne, update_comm hne, T'.map_update_add])
-        (by intro c w b; rw [update_comm hne, update_comm hne, T'.map_update_smul])
+        (by intro c w b; rw [update_comm hne, update_comm hne, T'.map_update_smul, RingHom.id_apply])
         (by intro w b₁ b₂; rw [T'.map_update_add])
-        (by intro c w b; rw [T'.map_update_smul])
+        (by intro c w b; rw [T'.map_update_smul, RingHom.id_apply])
       have hF1 : ∀ w ∈ B τ, F w ∈ C τ₀ := by
         intro w hw
         have h := (hposition0 (update u τ w) (fun τ' _ => hgen τ u hu w (hBDτ w hw) τ')).1

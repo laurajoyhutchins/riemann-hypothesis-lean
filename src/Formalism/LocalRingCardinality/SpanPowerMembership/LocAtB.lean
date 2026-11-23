@@ -1,8 +1,61 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
-import Formalism.LocalRingCardinality.SpanPowerMembership.Places
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+public import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Places
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Algebra.Polynomial.SpecificDegree
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Padics.Hensel
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.LocalRingCardinality.DataArith
+import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +84,6 @@ theorem resChar_prime : (resChar v).Prime := by
   haveI : Finite (𝓞 F ⧸ v.asIdeal) := by
     first
     | exact Ideal.finiteQuotientOfFreeOfNeBot v.asIdeal v.ne_bot
-    | exact Ideal.finiteQuotientOfFreeOfNeBot _ v.ne_bot
     | infer_instance
   exact (CharP.char_is_prime_or_zero (𝓞 F ⧸ v.asIdeal) (ringChar (𝓞 F ⧸ v.asIdeal))).resolve_right
     (CharP.char_ne_zero_of_finite (𝓞 F ⧸ v.asIdeal) _)
@@ -41,7 +93,6 @@ theorem resChar_mem : ((resChar v : ℕ) : 𝓞 F) ∈ v.asIdeal := by
   rw [← Ideal.Quotient.eq_zero_iff_mem, map_natCast]
   first
   | exact ringChar.Nat.cast_ringChar
-  | exact CharP.cast_eq_zero _ _
 
 def cjT : (v.adicCompletion F ⊗[F] E) ≃ₐ[v.adicCompletion F] (v.adicCompletion F ⊗[F] E) :=
   AlgEquiv.ofAlgHom (Algebra.TensorProduct.map (AlgHom.id _ _) sig)
@@ -68,7 +119,9 @@ def locAtC : LocAt F E sig v :=
     dense := v.denseRange_algebraMap F
     val := fun x y => by
       show Valued.v (algebraMap F (v.adicCompletion F) x) ≤ Valued.v (algebraMap F (v.adicCompletion F) y) ↔ _
-      rw [adicCompl_val_algebraMap, adicCompl_val_algebraMap]
+      have hval (a : F) : Valued.v (algebraMap F (v.adicCompletion F) a) = v.valuation F a :=
+        valuedAdicCompletion_eq_valuation' v a
+      rw [hval x, hval y]
     free := inferInstance
     rank := by rw [Module.finrank_baseChange, h2]
     span := by
@@ -111,7 +164,7 @@ theorem splitAt_nonempty (φ : E →ₐ[F] v.adicCompletion F) (b : E) (hb0 : b 
     rintro ⟨x, y⟩
     refine ⟨((x + y) / 2) ⊗ₜ 1 + ((x - y) / (2 * φ b)) ⊗ₜ b, ?_⟩
     have h2K : (2 : K) ≠ 0 := two_ne_zero
-    rw [map_add, he, he, hb, map_one sig, map_one φ, map_neg]
+    rw [map_add (f := _), he, he, hb, map_one sig, map_one φ, map_neg]
     have aux : ∀ r : K, r ≠ 0 → ((x + y) / 2 * 1 + (x - y) / (2 * r) * r = x ∧
         (x + y) / 2 * 1 + (x - y) / (2 * r) * -r = y) := fun r hr => by
       have h1 : (x - y) / (2 * r) * r = (x - y) / 2 := by
@@ -127,7 +180,8 @@ theorem splitAt_nonempty (φ : E →ₐ[F] v.adicCompletion F) (b : E) (hb0 : b 
   have hinj : Function.Injective e :=
     (LinearMap.injective_iff_surjective_of_finrank_eq_finrank hdim (f := e.toLinearMap)).mpr hsurj
   have hval : Valued.v ((resChar v : ℕ) : K) = exp (-1 : ℤ) := by
-    rw [← map_natCast (algebraMap F K), adicCompl_val_algebraMap, hv]
+    rw [← map_natCast (algebraMap F K)]
+    exact (valuedAdicCompletion_eq_valuation' v ((resChar v : ℕ) : F)).trans hv
   have hmem : ∀ x : K, x ∈ 𝒪[K] ↔ x ∈ v.adicCompletionIntegers F := fun x => by
     rw [Valuation.mem_integer_iff, mem_adicCompletionIntegers]
     exact (ValuativeRel.isEquiv (valuation K) (Valued.v : Valuation K ℤᵐ⁰)).le_one_iff_le_one
@@ -138,14 +192,25 @@ theorem splitAt_nonempty (φ : E →ₐ[F] v.adicCompletion F) (b : E) (hb0 : b 
       right_inv := fun _ => rfl
       map_mul' := fun _ _ => rfl
       map_add' := fun _ _ => rfl }
-  have hirr : Irreducible ((resChar v : ℕ) : v.adicCompletionIntegers F) :=
-    (IsDiscreteValuationRing.irreducible_iff_uniformizer _).mpr
-      (adicInt_max_eq_span v _ (by simpa using hval))
+  have hirr : Irreducible ((resChar v : ℕ) : v.adicCompletionIntegers F) := by
+    apply (IsDiscreteValuationRing.irreducible_iff_uniformizer _).mpr
+    have hI := adicCompletionIntegers.integers (K := F) (v := v)
+    ext x
+    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff, Ideal.mem_span_singleton,
+      hI.isUnit_iff_valuation_eq_one, hI.dvd_iff_le]
+    change Valued.v (x : K) ≠ 1 ↔ Valued.v (x : K) ≤ Valued.v ((resChar v : ℕ) : K)
+    have hle : Valued.v (x : K) ≤ 1 := hI.map_le_one x
+    rw [hval, ← hle.lt_iff_ne]
+    generalize Valued.v (x : K) = γ
+    rcases eq_or_ne γ 0 with rfl | hγ
+    · exact iff_of_true zero_lt_one zero_le'
+    · rw [← WithZero.exp_log hγ, WithZero.exp_lt_one_iff, WithZero.exp_le_exp]
+      omega
   refine ⟨⟨AlgEquiv.ofBijective e ⟨hinj, hsurj⟩, fun x => ?_, ((resChar v : ℕ) : 𝒪[K]), ?_, ?_⟩⟩
   · show e (cjT sig hsig v x) = (e x).swap
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add a b ha hb => rw [map_add, map_add, map_add, ha, hb, Prod.swap_add]
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _), map_add (f := _), ha, hb, Prod.swap_add]
     | tmul a x => rw [cjT_tmul, he, he, hsig]; rfl
   · show Irreducible ((resChar v : ℕ) : 𝒪[K])
     rw [← MulEquiv.irreducible_iff ι.toMulEquiv]
@@ -168,7 +233,6 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
   have hmonic : (Polynomial.X ^ 2 + Polynomial.C (d : F) : Polynomial F).Monic := by
     first
     | exact Polynomial.monic_X_pow_add_C _ two_ne_zero
-    | exact Polynomial.monic_X_pow_add_C _ (by norm_num)
     | monicity!
   have haeval : Polynomial.aeval b (Polynomial.X ^ 2 + Polynomial.C (d : F) : Polynomial F) = 0 := by
     simp [hb2]
@@ -180,7 +244,7 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
       apply hbF
       have ha' : a ^ 2 + (d : F) = 0 := by simpa using ha
       have hx : (algebraMap F E a) ^ 2 + (d : E) = 0 := by
-        rw [← map_pow, ← map_natCast (algebraMap F E) d, ← map_add, ha', map_zero]
+        rw [← map_pow, ← map_natCast (algebraMap F E) d, ← map_add (f := _), ha', map_zero]
       have hsq : (b - algebraMap F E a) * (b + algebraMap F E a) = 0 := by
         linear_combination hb2 - hx
       rcases mul_eq_zero.mp hsq with h | h
@@ -193,14 +257,13 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
     rw [eq_top_iff]
     intro x _
     have hA : sig ((x + sig x) / 2) = (x + sig x) / 2 := by
-      rw [map_div₀, map_add, hsig, map_ofNat]
+      rw [map_div₀, map_add (f := _), hsig, map_ofNat]
       ring
     have hB : sig ((x - sig x) / (2 * b)) = (x - sig x) / (2 * b) := by
       rw [map_div₀, map_sub, map_mul, hsig, map_ofNat, hb]
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     obtain ⟨a1, ha1⟩ := hfix _ hA
     obtain ⟨a2, ha2⟩ := hfix _ hB
     have hx : x = algebraMap F E a1 + algebraMap F E a2 * b := by
@@ -208,7 +271,6 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     rw [hx]
     exact add_mem (IntermediateField.algebraMap_mem _ a1)
       (mul_mem (IntermediateField.algebraMap_mem _ a2) (IntermediateField.mem_adjoin_simple_self F b))
@@ -301,10 +363,8 @@ theorem conjF_conjF (x : H.E) : conjF H (conjF H x) = x := by
     · first
       | decide
       | rfl
-      | simp [Formalism.HC.Frame.cc]
     · first
       | exact mul_one _
-      | simp [Formalism.HC.Frame.cc]
   have hc2 : H.conj * H.conj = 1 := by
     show H.gal.symm R.toFrame.cc * H.gal.symm R.toFrame.cc = 1
     rw [← map_mul, hcc, map_one]
@@ -329,8 +389,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
     have hc : (((R.toFrame.cc.1.2 : ℤˣ) : ℤ)) = -1 := by
       first
       | rfl
-      | decide
-      | simp [Formalism.HC.Frame.cc]
     rw [h1, hc]
     simp
   have hfix : ∀ x, conjF H x = x → ∃ a, algebraMap H.F H.E a = x :=
@@ -344,7 +402,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
   have hmonic : (Polynomial.X ^ 2 + Polynomial.C (H.d : H.F) : Polynomial H.F).Monic := by
     first
     | exact Polynomial.monic_X_pow_add_C _ two_ne_zero
-    | exact Polynomial.monic_X_pow_add_C _ (by norm_num)
     | monicity!
   have haeval : Polynomial.aeval H.sqd (Polynomial.X ^ 2 + Polynomial.C (H.d : H.F) : Polynomial H.F) = 0 := by
     simp [H.sqd_sq]
@@ -356,7 +413,7 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
       apply hbF
       have ha' : a ^ 2 + (H.d : H.F) = 0 := by simpa using ha
       have hx : (algebraMap H.F H.E a) ^ 2 + (H.d : H.E) = 0 := by
-        rw [← map_pow, ← map_natCast (algebraMap H.F H.E) H.d, ← map_add, ha', map_zero]
+        rw [← map_pow, ← map_natCast (algebraMap H.F H.E) H.d, ← map_add (f := _), ha', map_zero]
       have hsq : (H.sqd - algebraMap H.F H.E a) * (H.sqd + algebraMap H.F H.E a) = 0 := by
         linear_combination H.sqd_sq - hx
       rcases mul_eq_zero.mp hsq with h | h
@@ -369,14 +426,13 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
     rw [eq_top_iff]
     intro x _
     have hA : conjF H ((x + conjF H x) / 2) = (x + conjF H x) / 2 := by
-      rw [map_div₀, map_add, hcc, map_ofNat]
+      rw [map_div₀, map_add (f := _), hcc, map_ofNat]
       ring
     have hB : conjF H ((x - conjF H x) / (2 * H.sqd)) = (x - conjF H x) / (2 * H.sqd) := by
       rw [map_div₀, map_sub, map_mul, hcc, map_ofNat, hb]
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     obtain ⟨a1, ha1⟩ := hfix _ hA
     obtain ⟨a2, ha2⟩ := hfix _ hB
     have hx : x = algebraMap H.F H.E a1 + algebraMap H.F H.E a2 * H.sqd := by
@@ -384,7 +440,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     rw [hx]
     exact add_mem (IntermediateField.algebraMap_mem _ a1)
       (mul_mem (IntermediateField.algebraMap_mem _ a2) (IntermediateField.mem_adjoin_simple_self H.F H.sqd))
@@ -397,8 +452,8 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
 def slocH (v : HeightOneSpectrum (𝓞 H.F)) : LocAt H.F H.E (conjF H) v :=
   locAtC (conjF H) (conjF_conjF H) (finrank_FE H) v
 
-open Ideal in
 
+open Ideal in
 theorem val_eq_of_split (p : ℕ) (hp : p.Prime)
     (h : (placesOver H.E p).ncard = Module.finrank ℚ H.E) (v : HeightOneSpectrum (𝓞 H.F))
     (hv : (p : 𝓞 H.F) ∈ v.asIdeal) : v.valuation H.F (p : H.F) = exp (-1 : ℤ) := by
@@ -489,8 +544,6 @@ theorem splH (hg : ∀ k, (placesOver H.E (H.g k)).ncard = Module.finrank ℚ H.
     have hc : (((R.toFrame.cc.1.2 : ℤˣ) : ℤ)) = -1 := by
       first
       | rfl
-      | decide
-      | simp [Formalism.HC.Frame.cc]
     rw [h1, hc]
     simp
   have hfix : ∀ x, conjF H x = x → ∃ a, algebraMap H.F H.E a = x :=

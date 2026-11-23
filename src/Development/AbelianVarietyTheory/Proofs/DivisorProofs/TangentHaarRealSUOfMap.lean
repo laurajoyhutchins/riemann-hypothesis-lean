@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EmbGLMemRealSU
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDensityOfImmersion
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousMatrixEntryAbsSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RealIndependentSkewMatricesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinearIndependentComplexMapStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryLieAlgebraSpannedStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EmbGLMemRealSU
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousMatExp
+public import Mathlib.Analysis.Matrix.Normed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDensityOfImmersion
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonemptyCompactDualHaar
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousMatrixEntryAbsSum
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -282,7 +334,7 @@ theorem tangentHaar_realSU_of_det [NumberField E] [NumberField.IsCMField E] (hG 
     rw [hν ε hε]
   have hlim : limsup (fun ε : ℝ => (lam.map Subtype.val) (tanBall Ψ r ε) /
       (Measure.haar : Measure (realSU Ψ G)) (grpBall (realSU Ψ G) ε)) (𝓝[>] 0) = c⁻¹ := by
-    refine Tendsto.limsup_eq ((ENNReal.tendsto_inv_iff.2 hA).congr' ?_)
+    refine Tendsto.limsup_eq ((tendsto_inv_iff.2 hA).congr' ?_)
     filter_upwards [self_mem_nhdsWithin] with ε hε
     have hε : (0 : ℝ) < ε := hε
     rw [hν ε hε]
@@ -407,46 +459,6 @@ def coordMap {n : ℕ} (e : Fin n → Matrix (Fin r) (Fin r) E) :
 theorem coordMap_apply {n : ℕ} (e : Fin n → Matrix (Fin r) (Fin r) E) (c : Ψ → Fin n → ℝ) (τ : Ψ) :
     Matrix.of (coordMap Ψ e c τ) = ∑ i, c τ i • (e i).map τ.1 := by
   ext a b; simp [coordMap, Matrix.sum_apply, Complex.real_smul]
-
-theorem tangentHaar_formLie [NumberField E] [NumberField.IsCMField E] (hG : G.det ≠ 0)
-    (e : Fin (r ^ 2 - 1) → Matrix (Fin r) (Fin r) E)
-    (he : ∀ i, (e i).trace = 0 ∧ ∀ x y, herm G (e i *ᵥ x) y + herm G x (e i *ᵥ y) = 0)
-    (hli : LinearIndependent (NumberField.maximalRealSubfield E) e)
-    [MeasurableSpace (realSU Ψ G)] [BorelSpace (realSU Ψ G)] :
-    (tangentHaar (realSU Ψ G) (formLie Ψ e)).IsHaarMeasure ∧
-      HasDensityOne (realSU Ψ G) (tangentHaar (realSU Ψ G) (formLie Ψ e)) (formLie Ψ e) := by
-  have hsk : ∀ i, (e i)ᵀ * G + G * (e i).map cc = 0 := fun i => skew_matrix G (he i).2
-  have hE : LinearIndependent E e := GlobalTheory.T.real_independent_skew_matrices G hG e hsk hli
-  have hR : ∀ τ : Ψ, LinearIndependent ℝ (fun i => (e i).map τ.1) := fun τ => GlobalTheory.T.linear_independent_complex_map τ.1 e hE
-  have hmem : ∀ (τ : Ψ) i, ((e i).map τ.1)ᵀ * G.map τ.1 + G.map τ.1 * ((e i).map τ.1).map (starRingEnd ℂ) = 0 ∧
-      ((e i).map τ.1).trace = 0 := by
-    intro τ i
-    refine ⟨map_skew G (hsk i) τ.1, ?_⟩
-    have h1 : ((e i).map τ.1).trace = τ.1 (e i).trace := by simp [Matrix.trace, map_sum]
-    rw [h1, (he i).1, map_zero]
-  unfold formLie
-  refine tangentHaar_realSU_of_map Ψ G hG volume (coordMap Ψ e) ?_ fun X => ⟨fun hX => ?_, ?_⟩
-  · refine (injective_iff_map_eq_zero (coordMap Ψ e)).2 fun c hc => funext fun τ => funext fun i => ?_
-    have h1 := coordMap_apply Ψ e c τ
-    rw [hc] at h1
-    exact Fintype.linearIndependent_iff.1 (hR τ) (c τ) h1.symm i
-  · have hX' := (mem_realLie_iff Ψ G X).1 hX
-    have hspan : ∀ τ : Ψ, Matrix.of (X τ) ∈ Submodule.span ℝ (Set.range fun i => (e i).map τ.1) :=
-      fun τ => GlobalTheory.T.unitary_lie_algebra_spanned (G.map τ.1) (det_map_ne G hG τ.1) _ (hR τ) (hmem τ) _ (hX' τ).1 (hX' τ).2
-    choose c hc using fun τ => (Submodule.mem_span_range_iff_exists_fun ℝ).1 (hspan τ)
-    refine ⟨c, funext fun τ => ?_⟩
-    have h1 := coordMap_apply Ψ e c τ
-    rw [hc τ] at h1
-    exact h1
-  · rintro ⟨c, rfl⟩
-    refine (mem_realLie_iff Ψ G _).2 fun τ => ?_
-    rw [coordMap_apply]
-    have h1 : (fun _ : Unit => ∑ i, c τ i • (e i).map τ.1) = ∑ i, c τ i • (fun _ : Unit => (e i).map τ.1) := by
-      ext u; simp [Finset.sum_apply]
-    have hS : (fun _ : Unit => ∑ i, c τ i • (e i).map τ.1) ∈ suLie (fun _ : Unit => G.map τ.1) := by
-      rw [h1]
-      exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ fun _ => hmem τ i
-    exact hS ()
 
 end FormLie
 

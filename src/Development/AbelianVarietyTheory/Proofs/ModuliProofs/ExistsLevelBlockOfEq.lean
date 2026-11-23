@@ -1,10 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HermFormConjDiag
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameOfPeriodLinear
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DetOfTriangular
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsEqNsmulOfDvdPairing
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DetOfTriangular
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsEqNsmulOfDvdPairing
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameOfPeriodLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory NumberField Matrix
 open scoped nonZeroDivisors
@@ -25,7 +70,7 @@ theorem exists_smul_eq {L : Type} [AddCommGroup L] [Module (𝓞 E) L] (φ : L �
     obtain ⟨c, v, hc, hv⟩ := hx
     obtain ⟨d, w, hd, hw⟩ := hy
     refine ⟨c * d, d • v + c • w, mul_ne_zero hc hd, ?_⟩
-    rw [map_add, map_smul, map_smul, ← hv, ← hw]
+    rw [map_add (f := _), map_smul, map_smul, ← hv, ← hw]
     ext k
     simp [Algebra.smul_def]
     ring
@@ -165,8 +210,8 @@ theorem exists_level_block_of_eq : ∀ (E : Type) [Field E] [NumberField E] [IsC
     apply (Matrix.mulVec_injective_of_isUnit γ.isUnit)
     rw [hγ, LinearEquiv.apply_symm_apply, hv]
   · obtain ⟨e, he⟩ := hM v
-    exact ⟨e, by rw [hγ, he, map_add, map_nsmul]⟩
+    exact ⟨e, by rw [hγ, he, map_add (f := _), map_nsmul]⟩
   · obtain ⟨e, he⟩ := hA v
-    exact ⟨e, by rw [hγ, he, map_add, map_nsmul]⟩
+    exact ⟨e, by rw [hγ, he, map_add (f := _), map_nsmul]⟩
 
 end GlobalTheory.FrameFibre

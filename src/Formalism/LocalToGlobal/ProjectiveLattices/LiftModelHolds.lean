@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.LiftModelPf
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.LiftModelPf
+public import Formalism.LocalToGlobal.ProjectiveLattices.LiftInSt
+public import Formalism.LocalToGlobal.ProjectiveLattices.LiftModelSt
+import Formalism.LocalToGlobal.ProjectiveLattices.CurveSec
+import Formalism.LocalToGlobal.ProjectiveLattices.LiftUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,11 +121,11 @@ theorem ball_of {g0 : B.Cusp j wF} (C : CurveModel G la g0) (FP FQ : ↥(Frac0 (
   | add a b _ _ iha ihb =>
     obtain ⟨r1, hr1, x1, hx1, h1⟩ := iha
     obtain ⟨r2, hr2, x2, hx2, h2⟩ := ihb
-    refine ⟨r1 + r2, (RGW hw).add_mem hr1 hr2, x1 + x2, by rw [map_add, hx1, hx2], ?_⟩
+    refine ⟨r1 + r2, (RGW hw).add_mem hr1 hr2, x1 + x2, by rw [map_add (f := _), hx1, hx2], ?_⟩
     have e : ιW (hsW hw) ((x1 + x2 : ↥(HK (xplus X E hM) la G.w wF)) : Lw (xplus X E hM) la G.w) - (r1 + r2) * e' =
         (ιW (hsW hw) (x1 : Lw (xplus X E hM) la G.w) - r1 * e') +
           (ιW (hsW hw) (x2 : Lw (xplus X E hM) la G.w) - r2 * e') := by
-      rw [Submodule.coe_add, map_add]; ring
+      rw [Submodule.coe_add, map_add (f := _)]; ring
     rw [e]; exact Ideal.add_mem _ h1 h2
   | smul b a _ iha =>
     obtain ⟨r, hr, x, hx, hxr⟩ := iha
@@ -168,7 +214,7 @@ theorem ball_of {g0 : B.Cusp j wF} (C : CurveModel G la g0) (FP FQ : ↥(Frac0 (
       rw [e]
       exact Ideal.mul_mem_left _ _ hzI
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem liftModelSt_of (G : GlobalFamilyData (xplus X E hM) ka wL wF) (la : HeightOneSpectrum (𝓞 B.KO)) (hL : LocRingSt G la) :
     LiftModelSt G la := by

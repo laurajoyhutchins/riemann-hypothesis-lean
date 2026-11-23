@@ -1,21 +1,80 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.HodgeTatePoints.MhBase
+module
+
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueBtOrderEmbedding
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.MhBase
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.TranslateMemIndOrder
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FiniteOpenHopfOrder
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfInd
+import Development.WeilBound.CoreStatements.HodgeTatePoints.TwhopfSec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct
-open GlobalTheory.CompanionTheory.Ar.BT GroundTheory.PAdicHodge
+open GlobalTheory.CompanionTheory.Ar.BT
 
 noncomputable section
 
 namespace PositivityTheory.HtPt.Mh
 
 theorem emb : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T), ∃! j : Γ.G.left ⟶ Spec (CommRingCat.of (Γ.btOrder ⊤)), Γ.IsEmb (Γ.btOrder ⊤) j := by
-  intro R _ _ T _ _ Γ
-  refine exists_emb Γ _ fun a => ?_
-  simpa using (mem_top_iff Γ a.1).1 a.2 1
+  apply GlobalTheory.CompanionTheory.Ar.BT.exists_unique_emb_btOrder_top <;> assumption
 
 theorem emb_square : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (R' : Type) [CommRing R'] [IsDomain R'] [Algebra R R'] (Γ' : QFGroup R' T) (F : Γ'.G.left ⟶ Γ.G.left), Γ'.IsBaseChange Γ (algebraMap R R') F → ∀ (A : Subalgebra R (T → R)) (A' : Subalgebra R' (T → R')) (ψ : A →+* A'), (∀ (a : A) t, (ψ a).1 t = algebraMap R R' (a.1 t)) → ∀ (j : Γ.G.left ⟶ Spec (CommRingCat.of A)) (j' : Γ'.G.left ⟶ Spec (CommRingCat.of A')), Γ.IsEmb A j → Γ'.IsEmb A' j' → F ≫ j = j' ≫ Spec.map (CommRingCat.ofHom ψ) := by
   intro R _ _ T _ _ Γ R' _ _ _ Γ' F hF A A' ψ hψ j j' hj hj'
   obtain ⟨B, _, i, k, k', σ, hk, hki, hki', -, hσ, hσ'⟩ := hF.pts
-  refine hom_ext_pt Γ' fun t => ?_
+  have hhom_ext {f g : Γ'.G.left ⟶ Spec (CommRingCat.of A)}
+      (h : ∀ t, (Γ'.pt t).left ≫ f = (Γ'.pt t).left ≫ g) : f = g := by
+    apply pb_ext
+    intro a
+    rw [← sub_eq_zero]
+    refine Twhopf.sec_inj R' T Γ' ⊤ _ fun t ht => ?_
+    unfold valAt
+    change val (Γ'.pt t).left (pb f a - pb g a) = 0
+    rw [map_sub, val_pb_comp, h, ← val_pb_comp, sub_self]
+  refine hhom_ext fun t => ?_
   have h1 : σ t ≫ j = Spec.map (CommRingCat.ofHom
       (i.comp ((Pi.evalRingHom (fun _ : T => R) t).comp A.val.toRingHom))) := by
     obtain ⟨c, hc⟩ := Spec.map_surjective (σ t ≫ j)
@@ -39,6 +98,10 @@ theorem exists_den_of_open {A : Type} [CommRing A] {X : Scheme.{0}} (j : X ⟶ S
     [IsOpenImmersion j] (g : X) (s : Γ(X, ⊤)) :
     ∃ u a : A, u ∉ (j g).asIdeal ∧ ∀ (K : Type) [Field K] (x : Spec (CommRingCat.of K) ⟶ X),
       val x (pb j u) * val x s = val x (pb j a) := by
+  have htop {K : Type} [CommRing K] {Y : Scheme.{0}} (x : Spec (CommRingCat.of K) ⟶ Y)
+      (h : ⊤ ≤ x ⁻¹ᵁ ⊤) (b : Γ(Y, ⊤)) : valAt x ⊤ h b = val x b := by
+    simp only [valAt, val, Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
+    rfl
   have hY := isAffineOpen_top (Spec (CommRingCat.of A))
   obtain ⟨r, hr, hg⟩ := hY.exists_basicOpen_le (V := j.opensRange) ⟨j g, g, rfl⟩ trivial
   let D := (Spec (CommRingCat.of A)).basicOpen r
@@ -66,21 +129,36 @@ theorem exists_den_of_open {A : Type} [CommRing A] {X : Scheme.{0}} (j : X ⟶ S
       simpa using hu.map (Scheme.ΓSpecIso (CommRingCat.of K)).inv.hom
     have e := congrArg (SubOrder.valHom (x ≫ j) D hx) ha
     have hres : ∀ b, SubOrder.valHom (x ≫ j) D hx (algebraMap Γ(Spec (CommRingCat.of A), ⊤) _ b) = val (x ≫ j) b :=
-      fun b => (Twhopf.valAt_restrict (x ≫ j) (homOfLE (le_top : D ≤ ⊤)) hx le_top b).trans (valAt_top _ _ _)
+      fun b => (Twhopf.valAt_restrict (x ≫ j) (homOfLE (le_top : D ≤ ⊤)) hx le_top b).trans (htop _ _ _)
     rw [map_mul, hres, hres, SubOrder.valHom_apply, valAt_comp] at e
     have e2 : valAt x (j ⁻¹ᵁ D) hx ((j.app D).hom s') = val x s :=
       (congrArg (valAt x (j ⁻¹ᵁ D) hx) hs').trans
-        ((Twhopf.valAt_restrict x (homOfLE (le_top : j ⁻¹ᵁ D ≤ ⊤)) hx le_top s).trans (valAt_top _ _ _))
+        ((Twhopf.valAt_restrict x (homOfLE (le_top : j ⁻¹ᵁ D ≤ ⊤)) hx le_top s).trans (htop _ _ _))
     rw [e2, map_pow] at e
     rw [← e]
     ring
 
 theorem char : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (A : Subalgebra R (T → R)), IsHopfOrder A → ∀ (j : Γ.G.left ⟶ Spec (CommRingCat.of A)), Γ.IsEmb A j → IsOpenImmersion j → Γ.TranslatesCover A j ⊤ → Γ.btOrder ⊤ = A := by
   intro R _ _ T _ _ Γ A hA j hj hopen hcov
+  have htop (t : T) (h : ⊤ ≤ (Γ.pt t).left ⁻¹ᵁ ⊤) (s : Γ(Γ.G.left, ⊤)) :
+      valAt (Γ.pt t).left ⊤ h s = val (Γ.pt t).left s := by
+    simp only [valAt, val, Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
+    rfl
+  have hmem (f : T → R) : f ∈ Γ.btOrder ⊤ ↔
+      ∀ t, ∃ s : Γ(Γ.G.left, ⊤), ∀ h,
+        val (Γ.pt h).left s = algebraMap R (FractionRing R) (f (t * h)) := by
+    rw [Twhopf.mem_order]
+    change (∀ t, ∀ g ∈ (⊤ : Γ.G.left.Opens), Γ.RegularAt
+      (fun h => algebraMap R (FractionRing R) (f (t * h))) g) ↔ _
+    simp only [Twhopf.reg_iff, htop]
+    simp
+  have hval (t : T) (a : A) :
+      val (Γ.pt t).left (pb j a) = algebraMap R (FractionRing R) (a.1 t) :=
+    val_pb (hj.pt t) a
   have tr := Twhopf.translate_mem R T A hA
   apply le_antisymm
   · intro f hf
-    rw [mem_top_iff] at hf
+    rw [hmem] at hf
     let I : Ideal A :=
       { carrier := {a | a.1 * f ∈ A}
         add_mem' := fun {a b} ha hb => by
@@ -103,7 +181,7 @@ theorem char : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T]
       obtain ⟨u, a, hu, hua⟩ := exists_den_of_open j g s
       have h1 : ∀ h, u.1 h * f (t * h) = a.1 h := fun h => by
         have := hua _ (Γ.pt h).left
-        rw [val_emb hj, val_emb hj, hs, ← map_mul] at this
+        rw [hval, hval, hs, ← map_mul] at this
         exact IsFractionRing.injective R (FractionRing R) this
       let u' : A := ⟨_, tr _ u.2 t⁻¹⟩
       refine hu ((hg u' u fun h => by simp [u']).1 (hIP ?_))
@@ -116,7 +194,7 @@ theorem char : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T]
     have h2 : (1 : T → R) * f ∈ A := h1
     rwa [_root_.one_mul] at h2
   · intro f hf
-    rw [mem_top_iff]
-    exact fun t => ⟨pb j ⟨_, tr f hf t⟩, fun h => val_emb hj h _⟩
+    rw [hmem]
+    exact fun t => ⟨pb j ⟨_, tr f hf t⟩, fun h => hval h _⟩
 
 end PositivityTheory.HtPt.Mh

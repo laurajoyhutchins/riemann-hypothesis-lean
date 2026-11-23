@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.SplitIntLoc
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SplitPrimeIntegers.EmbMemOfIsIntegral
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SplitPrimeIntegers.EmbMemOfIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain IsDedekindDomain.HeightOneSpectrum
 open scoped TensorProduct
@@ -65,12 +113,12 @@ lemma approx (hspl : ∀ a : (v.adicCompletion F), spl ((1 : E) ⊗ₜ[F] a) = (
     obtain ⟨y1, h1, h1'⟩ := hx
     obtain ⟨y2, h2, h2'⟩ := hy
     refine ⟨y1 + y2, ?_, ?_⟩
-    · rw [map_add, map_add, Prod.fst_add,
+    · rw [map_add (f := _), map_add (f := _), Prod.fst_add,
         show (spl x).1 + (spl y).1 - (emb spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F)) y1 + emb spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F)) y2)
           = ((spl x).1 - emb spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F)) y1) + ((spl y).1 - emb spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F)) y2)
           by ring]
       exact Valuation.map_add_lt _ h1 h2
-    · rw [map_add, map_add, Prod.snd_add,
+    · rw [map_add (f := _), map_add (f := _), Prod.snd_add,
         show (spl x).2 + (spl y).2 - (emb spl (RingHom.snd (v.adicCompletion F) (v.adicCompletion F)) y1 + emb spl (RingHom.snd (v.adicCompletion F) (v.adicCompletion F)) y2)
           = ((spl x).2 - emb spl (RingHom.snd (v.adicCompletion F) (v.adicCompletion F)) y1) + ((spl y).2 - emb spl (RingHom.snd (v.adicCompletion F) (v.adicCompletion F)) y2)
           by ring]
@@ -173,7 +221,7 @@ lemma exists_unit_diff (hspl : ∀ a : (v.adicCompletion F), spl ((1 : E) ⊗ₜ
   obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.1 h1mem
   refine ⟨b, ?_⟩
   have hsum := congrArg (phi spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F))) hab
-  rw [map_add, map_one] at hsum
+  rw [map_add (f := _), map_one] at hsum
   have heq : phi spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F)) b - phi spl (RingHom.snd (v.adicCompletion F) (v.adicCompletion F)) b =
       1 - (phi spl (RingHom.fst (v.adicCompletion F) (v.adicCompletion F)) a + phi spl (RingHom.snd (v.adicCompletion F) (v.adicCompletion F)) b) := by
     rw [← hsum]; ring
@@ -211,7 +259,7 @@ theorem sup_dir (hspl : ∀ a : (v.adicCompletion F), spl ((1 : E) ⊗ₜ[F] a) 
       rw [sub_self, zero_mul]
   have hx' : spl x = spl ((1 : E) ⊗ₜ[F] (((⟨_, h2⟩ : (v.adicCompletionIntegers F))) : (v.adicCompletion F)) +
       w * ((1 : E) ⊗ₜ[F] ((((⟨_, h1⟩ : (v.adicCompletionIntegers F)) - ⟨_, h2⟩ : (v.adicCompletionIntegers F))) : (v.adicCompletion F)))) := by
-    rw [map_add, map_mul, hsw, hspl, hspl]
+    rw [map_add (f := _), map_mul, hsw, hspl, hspl]
     refine Prod.ext ?_ ?_
     · show (spl x).1 = (spl x).2 + 1 * ((spl x).1 - (spl x).2)
       ring

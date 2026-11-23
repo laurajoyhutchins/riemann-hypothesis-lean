@@ -1,8 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPowerHeightsirational
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsKodairaGeneric
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsChartDenominator
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGeneratedNefGeneric
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPowerHeightsirational
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsChartDenominator
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGeneratedNefGeneric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -146,17 +196,17 @@ theorem homog_X_block (k₀ : K) (i₀ : ι k₀) : IsMultiHomog (X ⟨k₀, i�
   subst hm
   by_cases hk : k = k₀
   · subst hk
-    simp only [blockDeg, if_true]
+    simp only [blockDeg, ite_true]
     rw [Finset.sum_eq_single i₀]
     · simp
     · intro b _ hb
-      rw [Finsupp.single_apply, if_neg]
+      rw [Finsupp.single_apply, ite_eq_right]
       intro h
       exact hb (eq_of_heq (Sigma.mk.inj_iff.mp h).2).symm
     · simp
-  · rw [blockDeg, if_neg hk]
+  · rw [blockDeg, ite_eq_right hk]
     refine Finset.sum_eq_zero fun i _ => ?_
-    rw [Finsupp.single_apply, if_neg]
+    rw [Finsupp.single_apply, ite_eq_right]
     intro h
     exact hk (Sigma.mk.inj_iff.mp h).1.symm
 
@@ -169,7 +219,7 @@ def blockFrac (Y : (Σ k, ι k) → Ω) (k₀ : K) : Subfield Ω where
     rintro s s' ⟨t, g, h, hg, hh, hh0, he⟩ ⟨t', g', h', hg', hh', hh0', he'⟩
     refine ⟨t + t', g * h' + h * g', h * h', homog_add (homog_mul_block hg hh') (homog_mul_block hh hg'),
       homog_mul_block hh hh', by rw [map_mul]; exact mul_ne_zero hh0 hh0', ?_⟩
-    rw [map_add, map_mul, map_mul, map_mul, he, he']
+    rw [map_add (f := _), map_mul, map_mul, map_mul, he, he']
     ring
   neg_mem' := by
     rintro s ⟨t, g, h, hg, hh, hh0, he⟩
@@ -208,8 +258,8 @@ end Forms
 
 end PowerHeightsirational
 
-open PowerHeightsirational in
 
+open PowerHeightsirational in
 theorem PowerHeightsirational.proof (hN : GeneratedNefGeneric.Statement) (hK : KodairaGeneric.Statement)
     (hC : ChartDenominator.Statement) : PowerHeightsirational.Statement := by
   intro K _ _ ι _ Ω _ _ y D a q w hD hV hB hw hgen hdeg

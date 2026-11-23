@@ -1,10 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PoincareDeRhamDuality
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ZeroSectionBase
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsDeRhamSheaf
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsQuasicoherentEigenQuot
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsQuasicoherentEigenQuot
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -32,7 +67,9 @@ theorem frob_sp (R : Type) [CommRing R] (hR : (p : R) = 0) (h : (p : Γ(Sp R, �
 theorem frob_comp_hom (R : Type) [CommRing R] (hR : (p : R) = 0) {X : Scheme.{0}} (f : X ⟶ Sp R)
     (h : (p : Γ(X, ⊤)) = 0) : GlobalTheory.VB.frob X p h ≫ f = f ≫ spMap (frobR p R hR) := by
   have h0 : (p : Γ(Sp R, ⊤)) = 0 := GlobalTheory.SS.FrobField.cast_zero_sp R hR
-  rw [GlobalTheory.VB.frob_naturality p h0 f h, frob_sp p R hR h0]
+  have hn : GlobalTheory.VB.frob X p h ≫ f = f ≫ GlobalTheory.VB.frob (Sp R) p h0 :=
+    GlobalTheory.SS.FrobField.absFrob_nat f p 1 Fact.out h h0
+  rw [hn, frob_sp p R hR h0]
 
 theorem cast_left (R : Type) [CommRing R] (hR : (p : R) = 0) (A : Over (Sp R)) :
     (p : Γ(A.left, ⊤)) = 0 :=
@@ -41,22 +78,25 @@ theorem cast_left (R : Type) [CommRing R] (hR : (p : R) = 0) (A : Over (Sp R)) :
 theorem frobMor (R : Type) [CommRing R] (hR : (p : R) = 0) (A : Over (Sp R)) [GrpObj A]
     (h : (p : Γ(A.left, ⊤)) = 0) :
     GrpMor (dp0 R) (𝟙 _) A (dp0 R) (𝟙 _) A (frobR p R hR) (spMap (frobR p R hR))
-      (GlobalTheory.VB.frob A.left p h) where
-  dp := isDPMorphism_of_eq_bot _ rfl _ _
-  base := by simp
-  w := frob_comp_hom p R hR A.hom h
-  mul T x y x₀ y₀ hx hy := by
+      (GlobalTheory.VB.frob A.left p h) := by
+  refine { dp := isDPMorphism_of_eq_bot _ rfl _ _, base := ?_,
+           w := frob_comp_hom p R hR A.hom h, mul := ?_ }
+  · simp
+  · intro T x y x₀ y₀ hx hy
     have hT : (p : Γ(T.left, ⊤)) = 0 := cast_left p R hR T
+    have hn (f : T.left ⟶ A.left) :
+        GlobalTheory.VB.frob T.left p hT ≫ f = f ≫ GlobalTheory.VB.frob A.left p h :=
+      GlobalTheory.SS.FrobField.absFrob_nat f p 1 Fact.out hT h
     let j : Over.mk (T.hom ≫ spMap (frobR p R hR)) ⟶ T :=
       Over.homMk (GlobalTheory.VB.frob T.left p hT) (by simpa using frob_comp_hom p R hR T.hom hT)
     have ex : x₀ = j ≫ x := Over.OverMorphism.ext (by
-      simp [j, hx, GlobalTheory.VB.frob_naturality p h x.left hT])
+      simp only [hx, Over.comp_left, Over.homMk_left, j, hn])
     have ey : y₀ = j ≫ y := Over.OverMorphism.ext (by
-      simp [j, hy, GlobalTheory.VB.frob_naturality p h y.left hT])
+      simp only [hy, Over.comp_left, Over.homMk_left, j, hn])
     subst ex ey
     rw [← MonObj.comp_mul]
     simp only [Over.comp_left, Over.homMk_left, j]
-    exact GlobalTheory.VB.frob_naturality p h (x * y).left hT
+    exact hn (x * y).left
 
 def frobDR (R : Type) [CommRing R] (hR : (p : R) = 0) (A : Over (Sp R)) [GrpObj A] :
     primDR A →ₛₗ[frobR p R hR] primDR A :=
@@ -73,16 +113,5 @@ namespace GlobalTheory.DeRhamSheaf
 open Limits
 
 variable {T : Scheme.{0}} (A : Over T) [GrpObj A]
-
-def IsDRIso (H : T.Modules)
-    (e : ∀ (V : T.Opens) (hV : IsAffineOpen V), Γ(H, V) ≃ₗ[Γ(T, V)] primDR (onAff A hV)) : Prop :=
-  ∀ (V V' : T.Opens) (hV : IsAffineOpen V) (hV' : IsAffineOpen V') (h : V' ≤ V),
-    letI := resAlg h
-    ∀ (φ : (onAff A hV').left ⟶ (onAff A hV).left)
-      (hφ : IsGrpPullback (onAff A hV') (onAff A hV) (spMap (algebraMap Γ(T, V) Γ(T, V'))) φ),
-      φ ≫ pullback.fst A.hom hV.fromSpec = pullback.fst A.hom hV'.fromSpec →
-      ∀ s : Γ(H, V), e V' hV' (GlobalTheory.Twist.resM H h s) = (GlobalTheory.Published.AbelianDeRham.bcMor hφ).pull (e V hV s)
-
-theorem isDeRhamSheaf_iff (H : T.Modules) : IsDeRhamSheaf A H ↔ ∃ e, IsDRIso A H e := Iff.rfl
 
 end GlobalTheory.DeRhamSheaf

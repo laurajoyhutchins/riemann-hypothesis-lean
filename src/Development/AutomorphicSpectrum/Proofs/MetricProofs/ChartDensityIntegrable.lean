@@ -1,17 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.PoincareLelong
-import Development.AutomorphicSpectrum.PublishedTheorems.Metrics₂.SheetDensityEqSetSheetDensity
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterGood
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MemChartComponents
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheetA
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PDiscriminantSheetCover
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsSegreChartFibreSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSheet
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterFib
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxPosDens
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CxSimple
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.SegreChartProjObjects
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MemChartComponents
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PPtsSegreChartFibreSum
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -168,7 +205,7 @@ theorem term_eq {e m : ℕ} {Q : Ideal (MRingOver ℂ ι)} {σ : Fin m ≃ ((k :
         exact h
   have hex : ∃ γ, IsSetSheet (conePts Q) Ψ y w γ := ⟨_, hγ'⟩
   unfold setSheetDensity
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   set γ := hex.choose with hγ_def
   have hγ : IsSetSheet (conePts Q) Ψ y w γ := hex.choose_spec
   have hγan := sheet_analyticAt osgood (isSheet_bot_of_isSetSheet hγ)
@@ -318,7 +355,7 @@ theorem fibreSum : ∀ (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type) 
         refine Finset.sum_congr rfl fun J hJ => ?_
         simp only [chartDens, sheetSum]
         refine finsum_mem_congr rfl fun x hx => ?_
-        rw [dif_pos (hy1 J hJ x hx)]
+        rw [dite_eq_left (hy1 J hJ x hx)]
         exact (term_eq hMH hL hg hΨ0 hsub hcov hJ hx (fun J' hJ' h => hy2 J hJ J' hJ' h x hx)
           (hy1 J hJ x hx)).symm
 

@@ -1,5 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.SemiCharBasic
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.SemiCharBasic
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.QuasiPeriodConstUniqueOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -30,7 +82,7 @@ theorem heisenbergMul : OpUMul := by
   simp only [opU]
   rw [mul_assoc, ← Complex.exp_add, mul_left_comm, ← Complex.exp_add, add_assoc z x y]
   congr 2
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
   linear_combination (-(Real.pi : ℂ) / 2) * hs
 
 theorem heisenbergComm : OpUComm := by
@@ -45,24 +97,9 @@ theorem heisenbergComm : OpUComm := by
   push_cast
   ring
 
-theorem heisenbergNorm : OpUNorm := by
-  intro V _ _ H hH x F z
-  have hre := re_swap H hH z x
-  have hE : (-(Real.pi : ℂ) * H z x - (Real.pi : ℂ) * H x x / 2).re =
-      -Real.pi * (H z x).re - Real.pi * (H x x).re / 2 := by
-    simp [Complex.sub_re, Complex.mul_re]
-  have hzz : (H (z + x) (z + x)).re = (H z z).re + 2 * (H z x).re + (H x x).re := by
-    simp only [map_add, LinearMap.add_apply, Complex.add_re]
-    linarith
-  simp only [opU, norm_mul, Complex.norm_exp, hE]
-  rw [hzz, mul_pow, ← Real.exp_nat_mul, mul_assoc, ← Real.exp_add]
-  congr 2
-  push_cast
-  ring
-
 theorem heisenbergIsometry : OpUIsom := by
   intro V W _ _ _ _ H H' g hg x G z
-  simp only [opU, map_add]
+  simp only [opU, map_add (f := _)]
   rw [hg z x, hg x x]
 
 theorem precompHeisenberg : PullOpU := by
@@ -74,7 +111,7 @@ theorem precompHeisenberg : PullOpU := by
   have h2 : H (δ x) (δ x) = H x x := by
     have h := hδ x x
     simpa only [LinearEquiv.coe_coe] using h
-  simp only [pullInv, opU, map_add, LinearEquiv.symm_apply_apply, h1, h2]
+  simp only [pullInv, opU, map_add (f := _), LinearEquiv.symm_apply_apply, h1, h2]
 
 theorem semicharacterBasic : SemiCharBasic := by
   intro V _ _ H hH Λ α hα
@@ -142,7 +179,7 @@ theorem heisenbergAnalytic : OpUAnalytic := by
   intro V _ _ _ H x F hF z _
   let L : V →ₗ[ℂ] ℂ :=
     { toFun := fun v => H v x
-      map_add' := fun a b => by simp only [map_add, LinearMap.add_apply]
+      map_add' := fun a b => by simp only [map_add (f := _), LinearMap.add_apply]
       map_smul' := fun c a => by simp only [map_smul, LinearMap.smul_apply, RingHom.id_apply] }
   have hlin : AnalyticAt ℂ (fun v => H v x) z := (LinearMap.toContinuousLinearMap L).analyticAt z
   have hF' : AnalyticAt ℂ (fun v => F (v + x)) z :=
@@ -159,7 +196,9 @@ theorem matH_apply {n : Type*} [Fintype n] (h : Matrix n n ℂ) (z w : n → ℂ
 theorem matrixFormBasic : MatHBasic := by
   intro n _ h
   refine ⟨fun z w => rfl, fun hh x y => ?_⟩
+
   rw [matH_apply, matH_apply, map_sum]
+
   simp_rw [map_sum, map_mul, Complex.conj_conj]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -181,7 +220,8 @@ theorem standardFormBasic : StdHBasic := by
   intro L n _ _
   have harea := Formalism.L2.Th1.F.PeriodAreaSignLemmas.area_pos L
   refine ⟨stdH_apply L n, fun x y => ?_, fun x hx => ?_⟩
-  · rw [stdH_apply, stdH_apply, map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [stdH_apply, stdH_apply, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     simp only [Formalism.L2.Th1.F.herm, map_div₀, map_mul, Complex.conj_conj, Complex.conj_ofReal]
     ring

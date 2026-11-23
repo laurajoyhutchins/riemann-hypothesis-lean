@@ -1,11 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HoldsUIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsBare
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CopyLIntegral
-import Development.AbelianVarietyTheory.Definitions.Divisors.Hypotheses2
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonzeroPlacesOverPrimesLifts
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TwistedDataOffBaseLevel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FieldValuesMemFixedField
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TwistedDataOffBaseLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH NumberField IsDedekindDomain Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.Mem GlobalTheory.Mem.Top GlobalTheory.Mem.Top.Bl GlobalTheory.Mem.Col2 GlobalTheory.Mem.R3
@@ -26,16 +61,16 @@ theorem GlobalTheory.RowEx.dat_choice_exists : GlobalTheory.RowEx.ExField → �
   · intro P f _ _ Ξ z hz
     by_cases h : Ξ.Finite
     · dsimp only at hz
-      rw [dif_pos h] at hz
+      rw [dite_eq_left h] at hz
       exact (Classical.choose_spec (hF P f Ξ h)).1 z hz
     · dsimp only at hz
-      rw [dif_neg h] at hz
+      rw [dite_eq_right h] at hz
       simp at hz
   · intro B f T _ hH _ _ w Z hX Wt z L hL hS
     obtain ⟨hq, hC, hfin, hmem⟩ := GlobalTheory.RowEx.twisted_data_off_base_level B f T w Z hX Wt z
     have hS2 := hH.2
     dsimp only at hS2
-    rw [dif_pos hfin] at hS2
+    rw [dite_eq_left hfin] at hS2
     rw [hL]
     exact (Classical.choose_spec (hF B.toPre f (T.set f) hfin)).2 (w.st Z) f rfl HEq.rfl L hL _ _ _ _ _ _ _ hS hC hq
       (fun t => ⟨_, hmem t, HEq.rfl⟩) (fun y hy => hS2 y hy)

@@ -1,4 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ArchimedeanH0Cards.ObstructionBoundFromDuality
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ArchimedeanH0Cards.ObstructionBoundFromDuality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Filter ReciprocityTheory.Gal UpperTheory.V.W UpperTheory.V.Pa UpperTheory.V.Pa.B2
 
@@ -70,7 +122,7 @@ private theorem comm_span {M : Type} [AddCommGroup M] (φ : Od A X n a →+ M) (
       simp
     have e₁ : Y₁ = P + Q := Subtype.ext (by rw [h₁, hmap, add_mul]; rfl)
     have e₂ : Y₂ = P' + Q' := Subtype.ext (by rw [h₂, hmap, mul_add]; rfl)
-    rw [e₁, e₂, map_add, map_add, hx.2 Y P P' rfl rfl, hy.2 Y Q Q' rfl rfl]
+    rw [e₁, e₂, map_add (f := _), map_add (f := _), hx.2 Y P P' rfl rfl, hy.2 Y Q Q' rfl rfl]
   | smul c x _ hx =>
     refine ⟨Submodule.smul_mem _ c hx.1, fun Y Y₁ Y₂ h₁ h₂ => ?_⟩
     apply hx.2 (c • Y) Y₁ Y₂
@@ -159,7 +211,7 @@ private theorem kill {M : Type} [AddCommGroup M] (φ : Od A X n a →+ M) (c : A
       show c • (Y.1 * e1 X n a) i j = (Y.1 * e1 X n a * dc) i j
       rw [Matrix.mul_diagonal, e1, Matrix.mul_diagonal]
       by_cases hj : (j : ℕ) < a <;> simp [hj, Algebra.smul_def, mul_comm]
-  rw [hdec, smul_add, map_add, hU, hW, add_zero]
+  rw [hdec, smul_add, map_add (f := _), hU, hW, add_zero]
 
 private noncomputable def pol {K : Type} [Field K] {s : ℕ} (c : Fin s → K) : PowerSeries K :=
   PowerSeries.mk fun k => if h : k < s then c ⟨k, h⟩ else 0
@@ -168,7 +220,7 @@ private theorem pol_spec {K : Type} [Field K] (s : ℕ) (b : PowerSeries K) :
     ∃ (c : Fin s → K) (d : PowerSeries K), b = pol c + PowerSeries.X ^ s * d := by
   refine ⟨fun k => PowerSeries.coeff (k : ℕ) b, PowerSeries.mk fun k => PowerSeries.coeff (k + s) b, ?_⟩
   ext k
-  rw [map_add, PowerSeries.coeff_X_pow_mul', pol, PowerSeries.coeff_mk]
+  rw [map_add (f := _), PowerSeries.coeff_X_pow_mul', pol, PowerSeries.coeff_mk]
   by_cases hk : k < s
   · simp [hk, Nat.not_le.mpr hk]
   · have hle : s ≤ k := Nat.le_of_not_lt hk
@@ -191,7 +243,7 @@ private theorem od_dec {K : Type} [Field K] {X : Type} [CommRing X] [Algebra (Po
   by_cases hij : ((i : ℕ) < a ↔ (j : ℕ) < a)
   · simp [hij, (od_iff _).1 Y.2 i j hij]
   · simp only [hij, if_false]
-    rw [← hb i j, hcd i j, map_add, Algebra.smul_def, map_mul]
+    rw [← hb i j, hcd i j, map_add (f := _), Algebra.smul_def, map_mul]
 
 end SlopeTestRemainingChoices
 
@@ -271,9 +323,9 @@ theorem UpperTheory.V.Pa.B2.dualBound :
         · simp
         · have : pol (fun k => (c + c') (i, j, k)) = pol (fun k => c (i, j, k)) + pol (fun k => c' (i, j, k)) := by
             ext k
-            simp only [pol, PowerSeries.coeff_mk, map_add, Pi.add_apply]
+            simp only [pol, PowerSeries.coeff_mk, map_add (f := _), Pi.add_apply]
             split_ifs <;> simp
-          rw [this, map_add] }
+          rw [this, map_add (f := _)] }
   have hkill : ∀ f : {f : D.M.X →+ ZMod l // ∀ g m, f (D.M.ρ g m) = PadicInt.toZMod ((G.ε g : ℤ_[l]ˣ) : ℤ_[l]) * f m},
       ∀ Y : Od x.A (x.Am e) n x.a, f.1 (hD.e.symm ((PowerSeries.X : x.A) ^ s • Y)) = 0 := by
     intro f Y
@@ -295,7 +347,8 @@ theorem UpperTheory.V.Pa.B2.dualBound :
   let Φ : {f : D.M.X →+ ZMod l // ∀ g m, f (D.M.ρ g m) = PadicInt.toZMod ((G.ε g : ℤ_[l]ˣ) : ℤ_[l]) * f m} →
       (Fin n × Fin n × Fin s → x.K → {y : ZMod l // Nat.card x.K • y = 0}) :=
     fun f t v => ⟨f.1 (hD.e.symm (Ψ (Pi.single t v))), by
-      rw [← map_nsmul, ← map_nsmul, ← map_nsmul, hsmul0, map_zero, map_zero, map_zero]⟩
+      change Nat.card x.K • (f.1.comp (hD.e.symm.toLinearMap.toAddMonoidHom.comp Ψ)) (Pi.single t v) = 0
+      rw [← map_nsmul, hsmul0, map_zero]⟩
   have hinj : Function.Injective Φ := by
     intro f f' hff
     apply Subtype.ext
@@ -307,14 +360,15 @@ theorem UpperTheory.V.Pa.B2.dualBound :
       intro f
       have hm : m = hD.e.symm (Ψ (fun t => c t.1 t.2.1 t.2.2))
           + hD.e.symm ((PowerSeries.X : x.A) ^ s • Y') := by
-        rw [← map_add]
+        rw [← map_add (f := _)]
         apply hD.e.injective
         rw [LinearEquiv.apply_symm_apply, hY]
         rfl
       conv_lhs => rw [hm]
       have hsum : (fun t => c t.1 t.2.1 t.2.2 : Fin n × Fin n × Fin s → x.K)
           = ∑ t, Pi.single t (c t.1 t.2.1 t.2.2) := (Finset.univ_sum_single _).symm
-      rw [map_add, hkill f Y', add_zero, hsum, map_sum, map_sum, map_sum]
+      set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_add (f := _), hkill f Y', add_zero, hsum, map_sum, map_sum, map_sum]
     rw [key f, key f', hff]
   calc _ ≤ Nat.card (Fin n × Fin n × Fin s → x.K → {y : ZMod l // Nat.card x.K • y = 0}) :=
         Nat.card_le_card_of_injective Φ hinj

@@ -1,5 +1,58 @@
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.HlinVsqPos
-import ReciprocityTheory.L2DbarEstimates.SkodaWeights.LeviVA
+module
+
+public import ReciprocityTheory.L2DbarEstimates.SkodaWeights.SkodaWeightStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.CommFderivApply
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.IntegralFderivApplyEqZero
+import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.TsupportDbSubset
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.H
 
@@ -125,8 +178,9 @@ theorem skodaDbar (n : ℕ) (M : Type*) [TopologicalSpace M] [T2Space M] :
         (starRingEnd ℂ) (g i x) *
           (∑ l, g l x * ∑ j, (starRingEnd ℂ) (d n z j (g l) x) * (starRingEnd ℂ) (ξ j)) /
             ((vsq (gv g x) : ℝ) : ℂ) := by
+
     simp only [perp, jacM, gv, map_sub, map_mul, map_sum, map_div₀, Complex.conj_ofReal,
-      Complex.conj_conj]
+    Complex.conj_conj]
     ring
   rw [hL, hsplit, hswap, hconj]
   ring
@@ -137,7 +191,7 @@ private theorem db_log_eq_inv_mul_db {M : Type*} [TopologicalSpace M] (n : ℕ) 
       ((ph y : ℝ) : ℂ)⁻¹ * db n z k (fun y => ((ph y : ℝ) : ℂ)) y := by
   unfold db
   by_cases hex : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ y ∈ e.source
-  · rw [dif_pos hex, dif_pos hex]
+  · rw [dite_eq_left hex, dite_eq_left hex]
     have hs := Classical.choose_spec hex
     generalize Classical.choose hex = e at hs ⊢
     have hzy : z y = e y := hs.1 hs.2
@@ -166,7 +220,7 @@ private theorem db_log_eq_inv_mul_db {M : Type*} [TopologicalSpace M] (n : ℕ) 
     simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
       Complex.ofRealCLM_apply, smul_eq_mul, Complex.ofReal_mul, Complex.ofReal_inv]
     ring
-  · rw [dif_neg hex, dif_neg hex, mul_zero]
+  · rw [dite_eq_right hex, dite_eq_right hex, mul_zero]
 
 private theorem ofReal_vsq_perp_eq {p : ℕ} (g w : Fin p → ℂ) (hS : vsq g ≠ 0) :
     ((vsq (perp g w) : ℝ) : ℂ) = ∑ l, w l * (starRingEnd ℂ) (w l) -
@@ -183,6 +237,7 @@ private theorem ofReal_vsq_perp_eq {p : ℕ} (g w : Fin p → ℂ) (hS : vsq g �
       ((∑ j, g j * (starRingEnd ℂ) (w j)) / ((vsq g : ℝ) : ℂ)) *
         ((∑ j, (starRingEnd ℂ) (g j) * w j) / ((vsq g : ℝ) : ℂ)) * ((starRingEnd ℂ) (g l) * g l) := by
     intro l
+
     simp only [perp, map_sub, map_mul, map_div₀, map_sum, Complex.conj_ofReal, Complex.conj_conj]
     ring
   rw [e1, Finset.sum_congr rfl (fun l _ => e2 l), Finset.sum_add_distrib, Finset.sum_sub_distrib,
@@ -204,11 +259,13 @@ private theorem levi_form_expand_eq_neg_sq_mul_add_sum {n p : ℕ} (a : Fin n �
     exact Finset.sum_congr rfl (fun _ _ => Finset.sum_congr rfl (fun _ _ => by ring))
   have h2 : ∑ l, G l * (starRingEnd ℂ) (∑ j, a j l * ξ j) =
       ∑ k, (∑ l, (starRingEnd ℂ) (a k l) * G l) * (starRingEnd ℂ) (ξ k) := by
+
     simp only [map_sum, map_mul, Finset.mul_sum, Finset.sum_mul]
     refine (Finset.sum_comm).trans ?_
     exact Finset.sum_congr rfl (fun _ _ => Finset.sum_congr rfl (fun _ _ => by ring))
   have h3 : ∑ l, (∑ j, a j l * ξ j) * (starRingEnd ℂ) (∑ j, a j l * ξ j) =
       ∑ j, ∑ k, (∑ l, (starRingEnd ℂ) (a k l) * a j l) * ξ j * (starRingEnd ℂ) (ξ k) := by
+
     simp only [map_sum, map_mul, Finset.sum_mul_sum]
     simp only [Finset.sum_mul]
     refine (Finset.sum_comm).trans ?_

@@ -1,6 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusUniformizerPowDvd
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusUniformizerPowDvd
 import Formalism.SharpRestriction.LevelLetterCocycles.SaturationPullbackOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.RelayGeneralCaseOfAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -152,7 +196,7 @@ theorem cmp_of_mem_X [IsDomain O] (hs : W.s = 1) (hR : Formalism.MainNotions.Unu
         (Formalism.MainNotions.RamifiedCoefficientChains.S9.NDl W T (c - 1)).add_mem hy₁ hy₂, ?_⟩
       have hy₁' : y₁ ∈ W.N T ∧ Formalism.MainNotions.CrystallineLiftingInputs.DL W T (c - 1) y₁ := hy₁
       have hy₂' : y₂ ∈ W.N T ∧ Formalism.MainNotions.CrystallineLiftingInputs.DL W T (c - 1) y₂ := hy₂
-      rw [smul_add, cmpD_add W T hN₁ hN₂, e₁, e₂, cmpD_add W T hy₁'.1 hy₂'.1, map_add, smul_add]
+      rw [smul_add, cmpD_add W T hN₁ hN₂, e₁, e₂, cmpD_add W T hy₁'.1 hy₂'.1, map_add (f := _), smul_add]
     | smul o z _ h =>
       obtain ⟨hN, y, hy, e⟩ := h
       have hy' : y ∈ W.N T ∧ Formalism.MainNotions.CrystallineLiftingInputs.DL W T (c - 1) y := hy
@@ -204,7 +248,7 @@ theorem cmp_up [IsDomain O] (hs : W.s = 1) (h3 : Formalism.MainNotions.DeltaInva
       have hy₂' : y₂ ∈ W.N T ∧ Formalism.MainNotions.CrystallineLiftingInputs.DL W T (c - 1 - 1) y₂ := hy₂
       refine ⟨by rw [smul_add, hl₁, hl₂], by rw [smul_add]; exact (W.N T).add_mem hN₁ hN₂, y₁ + y₂,
         (Formalism.MainNotions.RamifiedCoefficientChains.S9.NDl W T (c - 1 - 1)).add_mem hy₁ hy₂, ?_⟩
-      rw [smul_add, cmpD_add W T hN₁ hN₂, e₁, e₂, cmpD_add W T hy₁'.1 hy₂'.1, map_add, smul_add]
+      rw [smul_add, cmpD_add W T hN₁ hN₂, e₁, e₂, cmpD_add W T hy₁'.1 hy₂'.1, map_add (f := _), smul_add]
     | smul a z _ h =>
       obtain ⟨hl, hN, y₂, hy₂, e⟩ := h
       have hy₂' : y₂ ∈ W.N T ∧ Formalism.MainNotions.CrystallineLiftingInputs.DL W T (c - 1 - 1) y₂ := hy₂

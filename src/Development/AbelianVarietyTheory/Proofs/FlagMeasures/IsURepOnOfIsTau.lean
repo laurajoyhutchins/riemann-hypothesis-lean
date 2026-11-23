@@ -1,7 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.DiscreteSpectrumKFiniteDecomposition
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ProdLeadMinorDecay
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PosPartUnitaryMul
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ProdLeadMinorDecay
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ScalarOfMultOne
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactHaarRightInvariantInst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset Formalism.MainNotions.S Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.Count GlobalTheory.Dec GlobalTheory.Dec.FormF
 open scoped InnerProductSpace ComplexOrder
@@ -63,7 +117,7 @@ lemma norm_Phi_le {n : ℕ} {ε : Fin n → Bool} {lam : Fin n → ℝ} {h : ℝ
     congr 1
     have hi : (Fin.castSucc i).val + 1 < m + 1 := by simp
     unfold sInt
-    rw [dif_pos hi]
+    rw [dite_eq_left hi]
     push_cast
     rw [muInt_cast hlam, muInt_cast hlam]
     unfold Formalism.QuantumDeterminants.rhoStd
@@ -134,7 +188,7 @@ lemma isURepOn_of_isTau (h : IsTau ε abelian₂ τ w) : IsURepOn (Kset ε) τ :
     have e : (fun k => τ k v) = fun k => ∑ i, ⟪b i, τ k v⟫_ℂ • b i :=
       funext fun k => (b.sum_repr' _).symm
     rw [e]
-    refine continuousOn_finset_sum _ fun i _ => ContinuousOn.smul ?_ continuousOn_const
+    refine continuousOn_finsetSum _ fun i _ => ContinuousOn.smul ?_ continuousOn_const
     exact (hdiff (b i) v).continuousOn.mono fun k hk => K_KC hk
 
 lemma schur_norm (h : IsTau ε abelian₂ τ w) (x : W) :
@@ -153,7 +207,7 @@ lemma schur_norm (h : IsTau ε abelian₂ τ w) (x : W) :
         (Module.finrank ℂ W : ℂ) * c := by
       simp only [hc', inner_self_eq_norm_sq_to_K, b.orthonormal.1]
       simp
-    rw [← h2, ← integral_finset_sum _ fun i _ =>
+    rw [← h2, ← MeasureTheory.integral_finsetSum _ fun i _ =>
       ((h1.inner continuous_const).mul (continuous_const.inner h1)).integrable_of_hasCompactSupport
         (HasCompactSupport.of_compactSpace _)]
     have h3 : ∀ k : KG ε, ‖τ (toMK k) w‖ = 1 := fun k => (hU.2.1 _ k.2 w).trans hw
@@ -181,7 +235,7 @@ lemma ps_entry (h : IsTau ε abelian₂ τ w) (lam : Fin n → ℝ) {x : Matrix 
     have e : ∀ k : KG ε, (toMK k)⁻¹ = (toMK k)ᴴ := fun k => K_inv k.2
     simp only [e]
     unfold Phi
-    refine continuous_finset_prod _ fun i _ => Continuous.zpow₀ ?_ _ fun k => Or.inl ?_
+    refine continuous_finsetProd _ fun i _ => Continuous.zpow₀ ?_ _ fun k => Or.inl ?_
     · unfold leadMinor
       exact (((hk.matrix_conjTranspose.matrix_mul continuous_const).matrix_mul hk).matrix_submatrix
         _ _).matrix_det
@@ -189,7 +243,7 @@ lemma ps_entry (h : IsTau ε abelian₂ τ w) (lam : Fin n → ℝ) {x : Matrix 
         (Fin.castLE_injective _)).det_pos.ne'
   have h3 : Continuous (fun k : KG ε => Phi lam ((toMK k)⁻¹ * x * toMK k) •
       (innerSL ℂ (τ (toMK k) w)).smulRight (τ (toMK k) w)) :=
-    h2.smul (((ContinuousLinearMap.smulRightL ℂ W W).continuous.comp
+    h2.smul (((StrongDual.smulRightL ℂ W W).continuous.comp
       ((innerSL ℂ).continuous.comp h1)).clm_apply h1)
   have h4 := h3.integrable_of_hasCompactSupport (μ := muK ε) (HasCompactSupport.of_compactSpace _)
   unfold ps

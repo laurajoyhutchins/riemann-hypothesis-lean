@@ -1,8 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormMax
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedG
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormMax
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFibreNormPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ProjDefs
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -15,8 +68,8 @@ namespace FibreNormMax
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_mul {f g : MRing ι} {a b : K → ℕ} (hf : IsMultiHomog f a) (hg : IsMultiHomog g b) :
     IsMultiHomog (f * g) (a + b) := by
   classical
@@ -116,17 +169,17 @@ theorem exists_comparison {P : Ideal (MRing ι)} (hP : IsMultiHomogIdeal P) {m :
     (h0 : ∀ z ∈ mcPts P, ∃ j, eval z (map (Int.castRingHom ℂ) (L j)) ≠ 0)
     (a : K → ℤ) (q : ℕ) (b : K → ℕ) (hb : ∀ k, (b k : ℤ) = q * e k - a k) (i : ∀ k, ι k) :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ z ∈ mcPts P,
-      (HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).h z * ‖eval z (map (Int.castRingHom ℂ) (secOf i b))‖ ≤
+      (HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).h z * ‖eval z (map (Int.castRingHom ℂ) (secOf i b))‖ ≤
         C * ‖fun j => eval z (map (Int.castRingHom ℂ) (L j))‖ ^ q := by
   obtain ⟨δ, hδ0, hδ⟩ := exists_lower hP e L hL h0
   refine ⟨max 1 (δ⁻¹ ^ q), le_max_left _ _, fun z hz => ?_⟩
   have hn : ∀ k, 0 < ‖(fun i => z ⟨k, i⟩)‖ := fun k => by
     obtain ⟨i, hi⟩ := hz.1 k
     exact norm_pos_iff.mpr fun h => hi (congrFun h i)
-  have hh0 : (HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).h z = ∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ a k := rfl
+  have hh0 : (HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).h z = ∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ a k := rfl
   have hW : ‖eval z (map (Int.castRingHom ℂ) (secOf i b))‖ ≤ ∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ b k := by
     simp only [secOf, map_prod, map_pow, map_X, eval_X, norm_prod, norm_pow]
-    exact Finset.prod_le_prod (fun k _ => pow_nonneg (norm_nonneg _) _) fun k _ =>
+    exact Finset.prod_le_prod₀ (fun k _ => pow_nonneg (norm_nonneg _) _) fun k _ =>
       pow_le_pow_left₀ (norm_nonneg _) (norm_le_pi_norm (fun i => z ⟨k, i⟩) (i k)) _
   have hk : ∀ k, ‖(fun i => z ⟨k, i⟩)‖ ^ a k * ‖(fun i => z ⟨k, i⟩)‖ ^ b k =
       (‖(fun i => z ⟨k, i⟩)‖ ^ e k) ^ q := fun k => by
@@ -140,7 +193,7 @@ theorem exists_comparison {P : Ideal (MRing ι)} (hP : IsMultiHomogIdeal P) {m :
     rw [le_inv_mul_iff₀ hδ0]
     exact hδ z hz
   have hE0 : 0 ≤ ∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ e k := Finset.prod_nonneg fun k _ => pow_nonneg (norm_nonneg _) _
-  calc (HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).h z * ‖eval z (map (Int.castRingHom ℂ) (secOf i b))‖
+  calc (HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).h z * ‖eval z (map (Int.castRingHom ℂ) (secOf i b))‖
       ≤ (∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ a k) * ∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ b k := by
         rw [hh0]; exact mul_le_mul_of_nonneg_left hW hh0n
     _ = (∏ k, ‖(fun i => z ⟨k, i⟩)‖ ^ e k) ^ q := hprod
@@ -227,14 +280,14 @@ theorem proof (h : FibreNormPullback.Statement) : FibreNormMax.Statement := by
     · rw [map_mul, map_pow, hgh]
       ring
     · have hcz := hCz z hz
-      have hh0 : 0 ≤ (HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).h z :=
-        ((HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).pos z hz.1).le
+      have hh0 : 0 ≤ (HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).h z :=
+        ((HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).pos z hz.1).le
       simp only [map_mul, map_pow, norm_mul, norm_pow]
       calc ‖eval z (map (Int.castRingHom ℂ) g)‖ * ‖eval z (map (Int.castRingHom ℂ) W)‖ ^ τ
-          ≤ (M * (HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).h z ^ τ *
+          ≤ (M * (HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).h z ^ τ *
               ‖eval z (map (Int.castRingHom ℂ) h)‖) * ‖eval z (map (Int.castRingHom ℂ) W)‖ ^ τ :=
             mul_le_mul_of_nonneg_right hle (pow_nonneg (norm_nonneg _) _)
-        _ = M * ((HermLine.ofMetrics (fun k => maxMetric ℂ (ι k)) a).h z *
+        _ = M * ((HermLine.ofMetrics (fun k => maxMetric (C := ℂ) (ι := ι k)) a).h z *
               ‖eval z (map (Int.castRingHom ℂ) W)‖) ^ τ * ‖eval z (map (Int.castRingHom ℂ) h)‖ := by ring
         _ ≤ M * (C * ‖fun j => eval z (map (Int.castRingHom ℂ) (L j))‖ ^ q) ^ τ *
               ‖eval z (map (Int.castRingHom ℂ) h)‖ :=

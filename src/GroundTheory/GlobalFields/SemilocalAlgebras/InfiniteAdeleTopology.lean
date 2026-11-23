@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.SemilocalAlgebras.InfiniteAdele
+module
+
+public import GroundTheory.GlobalFields.SemilocalAlgebras.InfiniteAdele
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,6 +78,7 @@ theorem sum_piPlacesOverCoord {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Mo
     ((tensorPiEquiv (L := L) v).symm y)
   have h2 := congrArg (fun z => tensorPiEquiv (L := L) v z w) h
   simp only [AlgEquiv.apply_symm_apply] at h2
+
   rw [← h2, map_sum, Finset.sum_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Algebra.TensorProduct.basis_apply, map_smul, Pi.smul_apply, tensorPiEquiv_apply,
@@ -53,6 +100,7 @@ theorem tensorInfiniteAdeleRingEquiv_sum_adeleCoord {ι : Type*} [Fintype ι] [D
   funext w
   have ev : ∀ f : ι → InfiniteAdeleRing L, (∑ i, f i) w = ∑ i, f i w := fun f =>
     map_sum (Pi.evalAddMonoidHom (fun w : InfinitePlace L => w.Completion) w) f Finset.univ
+
   rw [map_sum, ev]
   simp_rw [tensorInfiniteAdeleRingEquiv_tmul]
   have := sum_piPlacesOverCoord b (w.comap (algebraMap K L)) (fun w' => y w') ⟨w, liesOver_comap w⟩
@@ -95,10 +143,6 @@ def tensorInfiniteAdeleRingHomeomorph :
       exact continuous_finsetSum _ fun i _ =>
         (IsModuleTopology.continuous_of_linearMap (tmulLeft (b i))).comp
           (continuous_adeleCoord b i) }
-
-@[simp]
-theorem tensorInfiniteAdeleRingHomeomorph_apply (x : L ⊗[K] InfiniteAdeleRing K) :
-    tensorInfiniteAdeleRingHomeomorph x = tensorInfiniteAdeleRingEquiv x := rfl
 
 end InfinitePlace
 

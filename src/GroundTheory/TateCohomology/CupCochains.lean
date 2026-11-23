@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Basic
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -198,9 +248,10 @@ theorem d_cupCochain (h : p + q = n) (f : (Fin p → G) → A) (g : (Fin q → G
     simp only [Fin.succ_mk, Fin.castSucc_mk] at this
     rw [this]
     rfl
-  rw [hlast, hT, hG, map_add, TensorProduct.tmul_add, smul_add, hP, TensorProduct.add_tmul,
-    TensorProduct.add_tmul, ← TensorProduct.smul_tmul', TensorProduct.sum_tmul, map_sum,
-    TensorProduct.tmul_sum, Finset.smul_sum, Fin.val_last, pow_succ, mul_neg_one, neg_smul]
+
+  rw [hlast, hT, hG, map_add (f := _), TensorProduct.tmul_add, smul_add, hP, TensorProduct.add_tmul,
+  TensorProduct.add_tmul, ← TensorProduct.smul_tmul', TensorProduct.sum_tmul, map_sum,
+  TensorProduct.tmul_sum, Finset.smul_sum, Fin.val_last, pow_succ, mul_neg_one, neg_smul]
   abel
 
 theorem partialProd_prefix {M : Type*} [Monoid M] {m m' j : ℕ} (x : Fin m' → M) (hm : m ≤ m')
@@ -223,11 +274,6 @@ theorem tensor_ρ_tmul (X Y : Rep k G) (s : G) (a : X) (b : Y) :
     (X ⊗ Y).ρ s (a ⊗ₜ[k] b) = X.ρ s a ⊗ₜ[k] Y.ρ s b :=
   rfl
 
-theorem associator_hom_tmul (X Y Z : Rep k G) (a : X) (b : Y) (c : Z) :
-    (α_ X Y Z).hom.hom (((a ⊗ₜ[k] b : (X ⊗ Y : Rep k G)) ⊗ₜ[k] c : ((X ⊗ Y) ⊗ Z : Rep k G))) =
-      a ⊗ₜ[k] (b ⊗ₜ[k] c) :=
-  rfl
-
 theorem leftUnitor_hom_tmul (X : Rep k G) (c : k) (a : X) :
     (λ_ X).hom.hom ((c ⊗ₜ[k] a : (𝟙_ (Rep k G) ⊗ X : Rep k G))) = c • a :=
   rfl
@@ -244,21 +290,6 @@ def cupₗ (h : p + q = n) :
     (fun f g g' => by funext x; simp [cupCochain_apply, TensorProduct.tmul_add])
     (fun c f g => by funext x; simp [cupCochain_apply, TensorProduct.tmul_smul])
 
-@[simp]
-theorem cupₗ_apply (h : p + q = n) (f : (Fin p → G) → A) (g : (Fin q → G) → B) :
-    cupₗ h f g = cupCochain h f g :=
-  rfl
-
-variable (A B p q) in
-
-def cupCochainsTensor :
-    ((Fin p → G) → A) ⊗[k] ((Fin q → G) → B) →ₗ[k] ((Fin (p + q) → G) → (A ⊗ B : Rep k G)) :=
-  TensorProduct.lift (cupₗ rfl)
-
-@[simp]
-theorem cupCochainsTensor_tmul (f : (Fin p → G) → A) (g : (Fin q → G) → B) :
-    cupCochainsTensor A B p q (f ⊗ₜ g) = cupCochain rfl f g :=
-  rfl
 
 theorem tensorHom_cupCochain {A' B' : Rep k G} (φ : A ⟶ A') (ψ : B ⟶ B') (h : p + q = n)
     (f : (Fin p → G) → A) (g : (Fin q → G) → B) (x : Fin n → G) :
@@ -267,20 +298,6 @@ theorem tensorHom_cupCochain {A' B' : Rep k G} (φ : A ⟶ A') (ψ : B ⟶ B') (
   change φ.hom _ ⊗ₜ[k] ψ.hom _ = _
   rw [Rep.hom_comm_apply]
   rfl
-
-theorem associator_cupCochain {C : Rep k G} {r m l : ℕ} (h₁ : p + q = m) (h₂ : m + r = n)
-    (h₃ : q + r = l) (h₄ : p + l = n) (f : (Fin p → G) → A) (g : (Fin q → G) → B)
-    (e : (Fin r → G) → C) (x : Fin n → G) :
-    (α_ A B C).hom.hom (cupCochain h₂ (cupCochain h₁ f g) e x) =
-      cupCochain h₄ f (cupCochain h₃ g e) x := by
-  subst h₁ h₂ h₃
-  simp only [cupCochain_apply]
-  rw [associator_hom_tmul, tensor_ρ_tmul, ← Module.End.mul_apply,
-    ← map_mul, ← partialProd_add x (fun j : Fin (q + r) => x ⟨p + j, by omega⟩) (by omega)
-      (fun j => rfl) (by omega), partialProd_prefix x (by omega) (by omega)]
-  have hE : (fun j : Fin r => x ⟨p + (q + j), by omega⟩) = fun j : Fin r => x ⟨p + q + j, by omega⟩ :=
-    funext fun j => congrArg x (Fin.ext (by simp only; omega))
-  rw [hE]
 
 def oneCochain : (Fin 0 → G) → (𝟙_ (Rep k G) : Rep k G) := fun _ => (1 : k)
 

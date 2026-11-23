@@ -1,4 +1,52 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothOnHOfLoc
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothOnHOfLoc
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoeffOfValues
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RaisingCompactSupport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.VecVSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbSplitPt
+
+@[expose] public section
 
 open Matrix MeasureTheory
 
@@ -47,6 +95,7 @@ theorem polyTop_of (hKA : KrAA) : PBN.PolyTop := by
             rw [hc, map_smul, smul_comm]
             rfl
           · show a • L (PBG.Kr Bs (PBN.aaTop Bs y G) _) = _
+
             rw [hcy y, map_sum, Finset.smul_sum]
             apply Finset.sum_congr rfl
             intro n _
@@ -59,18 +108,18 @@ theorem polyTop_of (hKA : KrAA) : PBN.PolyTop := by
     · refine ⟨fun _ => 0, ?_, fun y => ?_⟩
       · show (0 : Wq →L[ℂ] Wp) = _ • D.vecV Bs p.ν' p.m₀ G q
         unfold D.vecV
-        rw [dif_pos hpos, dif_neg h', smul_zero]
+        rw [dite_eq_left hpos, dite_eq_right h', smul_zero]
       · show D.vecV Bs p.ν' p.m₀ _ q = _
         unfold D.vecV
-        rw [dif_pos hpos, dif_neg h']
+        rw [dite_eq_left hpos, dite_eq_right h']
         simp
   · refine ⟨fun _ => 0, ?_, fun y => ?_⟩
     · show (0 : Wq →L[ℂ] Wp) = _ • D.vecV Bs p.ν' p.m₀ G q
       unfold D.vecV
-      rw [dif_neg hpos, smul_zero]
+      rw [dite_eq_right hpos, smul_zero]
     · show D.vecV Bs p.ν' p.m₀ _ q = _
       unfold D.vecV
-      rw [dif_neg hpos]
+      rw [dite_eq_right hpos]
       simp
 
 end Formalism.FourierDecayAlt.P.VandermondePolynomialIntegral

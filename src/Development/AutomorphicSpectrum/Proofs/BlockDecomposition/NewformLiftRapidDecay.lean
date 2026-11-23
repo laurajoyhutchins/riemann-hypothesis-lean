@@ -1,5 +1,58 @@
-import Mathlib
-import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.VerticalStrips.UnramifiedEulerProductIntegral
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.VerticalStrips.UnramifiedEulerProductIntegral
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Translation
+public import GroundTheory.AutomorphicForms.GL2Classical.Growth
+public import GroundTheory.AutomorphicForms.GL2Classical.KFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.ModularForms.Bounds
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +120,7 @@ theorem unit_entry {N : ℕ} [NeZero N] {u : FiniteAdelicGL ℚ 2} (hu : u ∈ G
   have hti : Valued.v (t v) ≤ 1 := ht v
   have hrel : c * y + d * x = 1 := by
     have h := congrArg (fun M : Matrix (Fin 2) (Fin 2) Af => adeleAt v (M 1 1)) (Units.mul_inv u)
-    simp only [Matrix.mul_apply, Fin.sum_univ_two, map_add, map_mul, Matrix.one_apply_eq, map_one] at h
+    simp only [Matrix.mul_apply, Fin.sum_univ_two, map_add (f := _), map_mul, Matrix.one_apply_eq, map_one] at h
     exact h
   have hcv : c = (N : Qv v) * t v := by
     have h := congrArg (adeleAt v) hc
@@ -127,7 +180,6 @@ theorem pow_mul_exp_le (c : ℝ) (hc : 0 < c) (n : ℕ) :
   have h := Real.pow_div_factorial_le_exp (c * y) (by positivity) n
   rw [div_le_iff₀ (by positivity)] at h
   rw [le_div_iff₀ (by positivity), neg_mul, Real.exp_neg]
-  have hE := Real.exp_pos (c * y)
   rw [mul_pow] at h
   calc y ^ n * (Real.exp (c * y))⁻¹ * c ^ n = (c ^ n * y ^ n) * (Real.exp (c * y))⁻¹ := by ring
     _ ≤ (Real.exp (c * y) * n.factorial) * (Real.exp (c * y))⁻¹ := by gcongr
@@ -142,13 +194,10 @@ theorem real_decay {F : ℍ → ℂ} {k : ℤ} {c C₁ : ℝ} (hc : 0 < c)
   rw [atImInfty, eventually_comap, eventually_atTop] at hD0
   obtain ⟨A₀, hA⟩ := hD0
   set A := max A₀ 1 with hAdef
-  have hA1 : 1 ≤ A := le_max_right _ _
   obtain ⟨K, hK0, hK⟩ := pow_mul_exp_le c hc (k.natAbs + M)
   refine ⟨|D0| * K + |C₁| * A ^ M, fun z hz => ?_⟩
   have hy : 0 < z.im := z.im_pos
   have hsq1 : 1 ≤ Real.sqrt z.im := Real.one_le_sqrt.2 hz
-  have hsq0 : 0 < Real.sqrt z.im ^ k := zpow_pos (by linarith) _
-  have hinv : 0 ≤ (z.im⁻¹) ^ M := by positivity
   rcases le_total A z.im with h1 | h1
   · have h2 := hA z.im ((le_max_left _ _).trans h1) z rfl
     rw [Real.norm_of_nonneg (Real.exp_pos _).le] at h2
@@ -267,8 +316,6 @@ theorem idele_split (a : Jd) : ∃ (α : ℚˣ) (t : ℝˣ) (b : Afˣ), (t : ℝ
     have hs := (IdeleGroup.mem_standardOpenSubgroup ℚ).1 h1
     have hb : ((IdeleGroup.toFinite ℚ p.1 : Afˣ) : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := fun v => (hs v).1
     have hbi : (((IdeleGroup.toFinite ℚ p.1)⁻¹ : Afˣ) : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := fun v => (hs v).2
-    have h0 : (0 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := zero_mem _
-    have h1' : (1 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := one_mem _
     rw [GroundTheory.Automorphic.AdelicGLn.mem_integralFiniteGL_iff]
     have hi : ((dg2 (IdeleGroup.toFinite ℚ p.1) 1)⁻¹ : GL (Fin 2) Af) = dg2 (IdeleGroup.toFinite ℚ p.1)⁻¹ 1 := by
       refine inv_eq_of_mul_eq_one_right (Units.ext (Matrix.ext fun i j => ?_))
@@ -400,9 +447,6 @@ theorem selfDualLattice_projection_mem_of_unit_length (x : 𝔸[ℚ]) (a : Jd) (
     rw [ht]; exact (IdeleGroup.ideleModule ℚ a).2
   have he' : uni2 e ∈ integralFiniteGL ℚ 2 := by
     rw [GroundTheory.Automorphic.AdelicGLn.mem_integralFiniteGL_iff]
-    have h0 : (0 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := zero_mem _
-    have h1 : (1 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := one_mem _
-    have hn : -e ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := neg_mem he
     refine ⟨fun i j => ?_, fun i j => ?_⟩
     · fin_cases i <;> fin_cases j <;> simpa [uni2]
     · have hi : ((uni2 e)⁻¹ : GL (Fin 2) Af) = uni2 (-e) := by

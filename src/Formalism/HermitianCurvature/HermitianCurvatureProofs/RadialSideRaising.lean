@@ -1,8 +1,55 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadAATopOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadAATopOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAlgebraFacts
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAlgebraFacts
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix
 
@@ -173,7 +220,7 @@ theorem radSide_chain (X : Q.ActualOps k r z z' π π') (L : R.LevelData (Q.Pr (
       simp only [Wd.Ts, YangianSpanCharacter.T.Tm, P5.site, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.head_cons]
       rw [hp, hc]
-      simp only [map_add, map_mul, map_neg, AlgHom.commutes, LinearMap.add_apply, LinearMap.neg_apply,
+      simp only [map_add (f := _), map_mul, map_neg, AlgHom.commutes, LinearMap.add_apply, LinearMap.neg_apply,
         Module.End.mul_apply, Module.algebraMap_end_apply]
       rw [sub_eq_add_neg]
       rfl
@@ -184,7 +231,7 @@ theorem radSide_chain (X : Q.ActualOps k r z z' π π') (L : R.LevelData (Q.Pr (
       simp only [Wd.Ts, YangianSpanCharacter.T.Tm, P5.site, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.head_cons]
       rw [hci]
-      simp only [map_add, map_mul, map_zero, zero_mul, add_zero, Module.End.mul_apply]
+      simp only [map_add (f := _), map_mul, map_zero, zero_mul, add_zero, Module.End.mul_apply]
       rfl
     rw [e0, e1]
     simp only [Q.vAB, dif_pos hnr, Q.crd]

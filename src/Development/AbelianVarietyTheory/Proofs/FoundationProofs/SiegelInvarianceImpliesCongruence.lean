@@ -1,11 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsTopWTopWOfExists
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitInTowerSlActionRowVectorStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitQExpansionCoefficientsStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitQExpansionCoeffsIntegral
+module
+
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitJPolynomialBoundedDenominators
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitQExpansionCoeffsIntegral
+public import Development.AbelianVarietyTheory.Definitions.Foundations.Imports
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SgC
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasQExpansionOfLevelCoeffAndFunctionUnique
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitInTowerSlActionRowVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitQExpansionCoefficientsStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitIndexAddIntVector
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AdmissibleOfSl2Action
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
+import Development.AbelianVarietyTheory.Definitions.Foundations.Integral
+public import Mathlib.RingTheory.RootsOfUnity.Complex
+
+@[expose] public section
 
 open scoped MatrixGroups UpperHalfPlane
 open GlobalTheory.KZ GlobalTheory.Glue GlobalTheory.K5 GlobalTheory.KummerEisensteinGalois
@@ -77,25 +134,7 @@ theorem ee_add (x y : ℂ) : ee (x + y) = ee x * ee y := by
 
 theorem hasQ_shift {M : ℕ} {f : ℍ → ℂ} {α : ℕ → ℂ} (h : HasQ M f α) (d : ℕ) :
     HasQ M (fun τ => f τ * ee (((d : ℂ) / M) * (τ : ℂ))) (fun n => if d ≤ n then α (n - d) else 0) := by
-  intro τ
-  have h1 := (h τ).mul_right (ee (((d : ℂ) / M) * (τ : ℂ)))
-  have e : ∀ n : ℕ, α n * Complex.exp (2 * Real.pi * Complex.I * n * τ / M) * ee (((d : ℂ) / M) * (τ : ℂ)) =
-      α n * Complex.exp (2 * Real.pi * Complex.I * ((n + d : ℕ) : ℂ) * τ / M) := fun n => by
-    rw [mul_assoc, ee, ← Complex.exp_add]; push_cast; ring_nf
-  simp only [e] at h1
-  have h2 := (hasSum_extend_zero (f := fun n : ℕ => α n * Complex.exp (2 * Real.pi * Complex.I * ((n + d : ℕ) : ℂ) * τ / M))
-    (g := fun n : ℕ => n + d) (add_left_injective d)).mpr h1
-  convert h2 using 1
-  funext n
-  by_cases hn : d ≤ n
-  · obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hn
-    dsimp only
-    rw [if_pos hn, show d + m = m + d by ring, (add_left_injective d).extend_apply]
-    simp
-  · dsimp only
-    rw [if_neg hn, zero_mul, Function.extend_apply']
-    · rfl
-    · rintro ⟨m, rfl⟩; omega
+  apply GlobalTheory.FracBd.shift_hasQ <;> assumption
 
 theorem exp_siegel_ord {Ω : Type} [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω] (ε : Ω →+* ℂ) (T : Tower Ω ε)
     (c M a b : ℕ) (hM : 0 < M) (ha : a < M) (hadm : admitted c ![(a : ℚ) / M, (b : ℚ) / M]) :

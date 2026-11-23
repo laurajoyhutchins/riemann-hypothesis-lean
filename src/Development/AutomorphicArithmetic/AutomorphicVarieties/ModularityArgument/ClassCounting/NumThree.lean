@@ -1,5 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LemmaKOfSteps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GeneratorCountTuples.NumGens
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LemmaKOfSteps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GeneratorCountTuples.NumGens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain UpperTheory.V UpperTheory.V.KL UpperTheory.V.ZK
 
@@ -48,7 +95,6 @@ private theorem num_poly (u Y t b g c v : ℝ) (hu : 2 ≤ u) (hY : 1 / 2 ≤ Y)
     (hb0 : 0 ≤ b) (hb : b ≤ u + 2 * u ^ 2) (hg0 : 0 ≤ g) (hg : g ≤ u + 2 * u * Y + 2) (hc0 : 0 ≤ c) (hc : c ≤ u)
     (hv0 : 0 ≤ v) (hv : v ≤ u) : ((b + v) * g + c + v) * t ≤ u ^ 9 * Y := by
   have hu0 : (0:ℝ) ≤ u := by linarith
-  have hY0 : (0:ℝ) < Y := by linarith
   have huY : 1 ≤ u * Y := by nlinarith
   have hu2 : 2 * u ≤ u ^ 2 := by nlinarith
   have hbv : b + v ≤ 3 * u ^ 2 := by nlinarith
@@ -75,7 +121,7 @@ private theorem num_poly (u Y t b g c v : ℝ) (hu : 2 ≤ u) (hY : 1 / 2 ≤ Y)
     exact mul_le_mul_of_nonneg_right (by linarith) h4Y
   linarith
 
-set_option maxHeartbeats 800000 in
+
 private theorem num_down (C : ℝ) (hC : 0 ≤ C) (E n D n' D' d w : ℕ) (hE : 1 ≤ E) (hn : 1 ≤ n) (hD : 1 ≤ D)
     (hD' : 1 ≤ D') (h1 : n' = d * n) (hn' : 1 ≤ n') (h2 : d ≤ (n + 1) * (4 * E + 4)) (hw : w ≤ 2 * n')
     (h3 : D' ≤ D ^ d * w ^ n') : kBound C E n' D' ≤ kBound (5 * C + 11) E n D := by
@@ -97,7 +143,6 @@ private theorem num_down (C : ℝ) (hC : 0 ≤ C) (E n D n' D' d w : ℕ) (hE : 
   have h2R : (d:ℝ) ≤ (n + 1) * (4 * E + 4) := by exact_mod_cast h2
   have hwR : (w:ℝ) ≤ 2 * n' := by exact_mod_cast hw
   have h3R : (D':ℝ) ≤ D ^ d * w ^ n' := by exact_mod_cast h3
-  have hd0 : (0:ℝ) ≤ d := Nat.cast_nonneg d
   have hd16 : (d:ℝ) ≤ 16 * E * n := by
     have : ((n:ℝ) + 1) * (4 * E + 4) ≤ (2 * n) * (8 * E) :=
       mul_le_mul (by linarith) (by linarith) (by positivity) (by positivity)
@@ -120,9 +165,7 @@ private theorem num_down (C : ℝ) (hC : 0 ≤ C) (E n D n' D' d w : ℕ) (hE : 
   have hbase : 2 * (E:ℝ) * n' ≤ x ^ 5 := by
     have a1 : 2 * (E:ℝ) * n' ≤ 2 * E * (16 * E * n ^ 2) :=
       mul_le_mul_of_nonneg_left hn'16 (by positivity)
-    have a2 : 2 * (E:ℝ) * (16 * E * n ^ 2) = 8 * x ^ 2 := by rw [hx]; ring
     have a3 : 8 * x ^ 2 ≤ x ^ 3 * x ^ 2 := mul_le_mul_of_nonneg_right hx3 (by positivity)
-    have a4 : x ^ 3 * x ^ 2 = x ^ 5 := by ring
     linarith
   have hbase0 : (0:ℝ) ≤ 2 * E * n' := by positivity
   have hpowC : (2 * (E:ℝ) * n') ^ C ≤ (x ^ 5) ^ C := Real.rpow_le_rpow hbase0 hbase hC
@@ -155,7 +198,6 @@ private theorem num_down (C : ℝ) (hC : 0 ≤ C) (E n D n' D' d w : ℕ) (hE : 
     mul_le_mul hd8 hlogD hlogD0 (by positivity)
   have t2 : (n':ℝ) * Real.log w ≤ 4 * x ^ 2 * (8 * x ^ 2) :=
     mul_le_mul hn'x hlogw hlogw0 (by positivity)
-  have t2' : 4 * x ^ 2 * (8 * x ^ 2) = 32 * x ^ 4 := by ring
   have hLD1 : 1 ≤ 2 * LD := by linarith
   have hx40 : 0 ≤ 32 * x ^ 4 := by positivity
   have t3 : 32 * x ^ 4 * 1 ≤ 32 * x ^ 4 * (2 * LD) := mul_le_mul_of_nonneg_left hLD1 hx40
@@ -167,10 +209,6 @@ private theorem num_down (C : ℝ) (hC : 0 ≤ C) (E n D n' D' d w : ℕ) (hE : 
   have hLD0 : 0 ≤ LD := by linarith
   have s1 : 1 * LD ≤ x ^ 4 * LD := mul_le_mul_of_nonneg_right hx4 hLD0
   have s2 : x * LD ≤ x ^ 4 * LD := mul_le_mul_of_nonneg_right hxx4 hLD0
-  have tsum : Real.log (2 * (D':ℝ)) ≤ 73 * (x ^ 4 * LD) := by
-    have e1 : 8 * x * LD = 8 * (x * LD) := by ring
-    have e2 : 32 * x ^ 4 * (2 * LD) = 64 * (x ^ 4 * LD) := by ring
-    linarith
   have tfin : Real.log (2 * (D':ℝ)) ≤ x ^ (11:ℕ) * LD := by
     have e : x ^ (11:ℕ) * LD = x ^ 7 * (x ^ 4 * LD) := by ring
     have h0 : 0 ≤ x ^ 4 * LD := by positivity
@@ -207,7 +245,7 @@ private theorem gens_le (L : Type) [Field L] [NumberField L] :
   push_cast
   linarith
 
-set_option maxHeartbeats 800000 in
+
 theorem UpperTheory.V.ZK.sNum :
     UpperTheory.V.ZK.SNum := by
   unfold UpperTheory.V.ZK.SNum
@@ -298,7 +336,6 @@ theorem UpperTheory.V.ZK.sNum :
   set n' : ℝ := (Module.finrank ℚ L' : ℝ) with hn'
   set Y := Real.log (2 * ((discr L').natAbs : ℝ)) with hY
   set u : ℝ := 2 * ((k + 1 : ℕ) : ℝ) * n' with hu
-  have hkR : (0:ℝ) ≤ k := Nat.cast_nonneg k
   have hn'bigR : 2 * (k:ℝ) + 4 ≤ n' := by rw [hn']; exact_mod_cast hn'big
   have hk1 : ((k + 1 : ℕ) : ℝ) = k + 1 := by push_cast; ring
   have hu' : u = 2 * ((k:ℝ) + 1) * n' := by rw [hu, hk1]
@@ -306,11 +343,6 @@ theorem UpperTheory.V.ZK.sNum :
   have hn'u : 2 * n' ≤ u := by
     rw [hu']
     have := mul_le_mul_of_nonneg_right (show (2:ℝ) ≤ 2 * ((k:ℝ) + 1) by linarith) hn'0
-    linarith
-  have hku : 2 * ((k:ℝ) + 1) ≤ u := by
-    rw [hu']
-    have := mul_le_mul_of_nonneg_left (show (1:ℝ) ≤ n' by linarith)
-      (show (0:ℝ) ≤ 2 * ((k:ℝ) + 1) by positivity)
     linarith
   have hu2 : 2 ≤ u := by linarith
   have hL2 : (0.6931471803:ℝ) < Real.log 2 := Real.log_two_gt_d9
@@ -334,11 +366,8 @@ theorem UpperTheory.V.ZK.sNum :
     rw [hbR]
     have a1 : (2 * (k:ℝ) + 3) * (c + (2 * k + 3)) ≤ n' * (3 * n') :=
       mul_le_mul (by linarith) (by linarith) (by positivity) (by linarith)
-    have a2 : 2 * (k:ℝ) + 2 ≤ u := by linarith
     have a3 : n' * (3 * n') ≤ 2 * u ^ 2 := by
       have h4 : (2 * n') ^ 2 ≤ u ^ 2 := pow_le_pow_left₀ (by positivity) hn'u 2
-      have e1 : (2 * n') ^ 2 = 4 * n' ^ 2 := by ring
-      have e2 : n' * (3 * n') = 3 * n' ^ 2 := by ring
       have h5 : 0 ≤ n' ^ 2 := by positivity
       linarith
     linarith
@@ -348,7 +377,6 @@ theorem UpperTheory.V.ZK.sNum :
     have : 2 * (2 * n') * Y ≤ 2 * u * Y := by
       have := mul_le_mul_of_nonneg_right hn'u hY0
       linarith
-    have hgl' : (g:ℝ) ≤ 2 * n' + 2 * (2 * n') * Y + 2 := hgl
     linarith
   have hc0R : (0:ℝ) ≤ c := Nat.cast_nonneg _
   have hcu : (c:ℝ) ≤ u := by linarith
@@ -358,8 +386,6 @@ theorem UpperTheory.V.ZK.sNum :
   have hXR : (X:ℝ) = ((bN:ℝ) + fN) * g + c + fN := by rw [hX]; push_cast; ring
   have hP' : (X:ℝ) * Real.log l ≤ u ^ 9 * Y := by rw [hXR]; exact hP
   have ht : (s:ℝ) * Real.log l ≤ 2 * Real.exp (u ^ C0 * Y) + (X:ℝ) * Real.log l := by
-    have e1 : Real.log (T1:ℝ) ≤ Real.exp (u ^ C0 * Y) := hT1b
-    have e2 : Real.log (T2:ℝ) ≤ Real.exp (u ^ C0 * Y) := hT2b
     linarith
   have h3 := num_three C0 u Y ((s:ℝ) * Real.log l) hu2 hYh _ hP' ht
   have hs0R : (s0:ℝ) * Real.log l ≤ (s:ℝ) * Real.log l :=

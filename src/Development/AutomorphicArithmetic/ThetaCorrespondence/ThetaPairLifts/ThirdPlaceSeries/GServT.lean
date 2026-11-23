@@ -1,10 +1,46 @@
-import Formalism.LocalToGlobal.GroupLattices.ServiceOfTiedSelection
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.CohomologicalCsdTempered
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TSelF
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LayerTwoFamilyClass
-import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.LinkedFamiliesKernelFrame
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.TSelF
+public import Formalism.SharpRestriction.SmoothDesignExistence.SumOverPrimesHypotheses
+public import Formalism.LocalToGlobal.GroupLattices.ServiceOfTiedSelection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.SmoothDesignExistence.DGamSmooth
+
+@[expose] public section
+
+
 
 section
 noncomputable section
@@ -25,9 +61,12 @@ structure SelectionServed (𝒞 : FamClass) (sel : _root_.Formalism.L2.TwistSele
         OrbitPlaces.ThetaKernelShapeAtD (OrbitPlaces.ofKer (nuRowOK (Fm.D x i)) ((sel Fm hc).2 x hx h0 i).T.ker.ent ep be sg) (Fm.X x i) ∧
         OrbitPlaces.Shape (Fm.D x i) (Fm.L x i) (Fm.Gx x i)
           (OrbitPlaces.ofKer (nuRowOK (Fm.D x i)) ((sel Fm hc).2 x hx h0 i).T.ker.ent ep be sg))
-theorem sumOverPrimesService_of_servT {𝒞 : FamClass} (sel : _root_.Formalism.L2.TwistSelection 𝒞) (h : _root_.Formalism.L2.G.ServT.SelectionServed 𝒞 sel) : SumOverPrimesHypotheses 𝒞 where
-  twU := h.twU
-  pdv := closed_imp_class h.pdv fun Fm _ hc hp => ⟨(sel Fm hc).1, fun x hx0 hx i => ⟨_, hp hc x hx hx0 i⟩⟩
+theorem sumOverPrimesService_of_servT {𝒞 : FamClass} (sel : _root_.Formalism.L2.TwistSelection 𝒞) (h : _root_.Formalism.L2.G.ServT.SelectionServed 𝒞 sel) : SumOverPrimesHypotheses 𝒞 := by
+  refine ⟨h.twU, closed_imp_class h.pdv ?_⟩
+  intro eps Fm CH hc hp
+  refine ⟨(sel Fm hc).1, ?_⟩
+  intro x hx0 hx i
+  exact ⟨((sel Fm hc).2 x hx hx0 i).T.ker.ent, hp hc x hx hx0 i⟩
 theorem closed_servF_of_servT_of_dGamSize {𝒞 : FamClass} (sel : _root_.Formalism.L2.TwistSelection 𝒞) (hD : Closed 𝒞 fun Fm _ => DGamSize Fm) (h : _root_.Formalism.L2.G.ServT.SelectionServed 𝒞 sel) :
     Closed 𝒞 fun Fm _ => WeilJacquetShalikaLaw.ServF Fm :=
   sum_over_primes_service 𝒞 hD (_root_.Formalism.L2.G.ServT.sumOverPrimesService_of_servT sel h)

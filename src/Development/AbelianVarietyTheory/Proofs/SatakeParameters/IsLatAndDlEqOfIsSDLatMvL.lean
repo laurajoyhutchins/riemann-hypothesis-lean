@@ -1,10 +1,54 @@
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Formalism.LocalToGlobal.GlobalTheory.EqGlobOfHat
+public import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ToLEInvApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LocSpBot
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaSeriesDataHypothesesBelowMaximalLevel
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsMidLevIff
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.FrecAt
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.MovDXiAtRecStep
-import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.LocalClassDataOfTrivialStabilizers
-import Formalism.LocalToGlobal.GlobalTheory.BaseLatticeSelfDual
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.MemMoveLevUloc
+import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WittFractionToCpAlgebraMap
+import Formalism.LocalToGlobal.InertKernelTheory.SecondKernelEntrywiseLastLevel
+import Formalism.LocalToGlobal.InertKernelTheory.StatementInt
+import Formalism.LocalToGlobal.KernelLattices.TopLawQ
+import Formalism.SharpRestriction.GrowthBounds.ChartComparison.NrmAMemAdForms
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.CoeffProdRename
+
+@[expose] public section
 
 open Formalism.BasicNotions NumberField IsDedekindDomain Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.L2.G.Pend Formalism.MainNotions Formalism.L2.Ker Formalism.L2.PairingIndexBounds.F Formalism.L2.KerInert Formalism.UG Formalism.MainNotions.G.KAat Formalism.MainNotions.G.CmpJ Formalism.L2.G Formalism.L2.G.Cmp Formalism.L2.Forms Formalism.L2.KerInert.SecondKernelInstances GlobalTheory.TwU GlobalTheory.TwV
 open scoped TensorProduct Matrix
@@ -41,21 +85,19 @@ theorem isLat_and_dl_eq_of_isSDLat_mvL : ∀ {R : Ranks} {F E : Type} [Field F] 
       Module.Finite.iff_fg.mpr hfg
     exact Module.Finite.equiv (Submodule.equivMapOfInjective _ hinj M).symm
   ·
-    rw [eq_top_iff]
-    intro v _
-    have hv : toLE co v ∈ Submodule.span E ((mvL co M : Submodule (𝓞 E) (Fin N → E)) : Set (Fin N → E)) := by
-      rw [hspan]
-      exact Submodule.mem_top
-    have hset : ((mvL co M : Submodule (𝓞 E) (Fin N → E)) : Set (Fin N → E)) =
-        ((toLE co : (Fin N → E) ≃ₗ[E] (Fin N → E)) : (Fin N → E) →ₗ[E] (Fin N → E)) '' (M : Set (Fin N → E)) := by
-      unfold mvL
-      rw [Submodule.map_coe]
-      rfl
-    rw [hset, Submodule.span_image] at hv
-    obtain ⟨w, hw, hwv⟩ := Submodule.mem_map.mp hv
-    have hwv' : w = v := (toLE co).injective hwv
-    rw [hwv'] at hw
-    exact hw
+    have himage : (↑(mvL co M) : Set (Fin N → E)) = (toLE co) '' (↑M : Set (Fin N → E)) := by
+      ext x
+      simp [mvL]
+    rw [himage] at hspan
+    apply top_unique
+    intro x hx
+    apply (Submodule.apply_mem_span_image_iff_mem_span
+      (R := E) (R₂ := E)
+      (f := ((toLE co : (Fin N → E) ≃ₗ[E] (Fin N → E)) : (Fin N → E) →ₗ[E] (Fin N → E)))
+      (toLE co).injective).mp
+    change toLE co x ∈ Submodule.span E ((toLE co) '' (↑M : Set (Fin N → E)))
+    rw [hspan]
+    trivial
   ·
     ext y
     rw [Formalism.L2.GlobalTheoryTheory.Comp.mem_dl, ← toLE_mem_mvL co M y, hdual (toLE co y)]

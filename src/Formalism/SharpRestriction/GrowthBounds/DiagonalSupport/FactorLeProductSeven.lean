@@ -1,6 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickVal
-import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.DigAbs
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickDefs
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.DecompositionOfThreeParts
+public import Formalism.SharpRestriction.GrowthBounds.DiagonalSupport.PickLem
+public import Formalism.SharpRestriction.GrowthBounds.GLWeightTheory
 import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.ValuationNonnegIffIntegral
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightConditionFromIntegralForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,8 +75,8 @@ theorem coeff_mon_divDer (m a : σ →₀ ℕ) (F : MvPolynomial σ Kf) :
     unfold divDer
     rw [coeff_sum]
     have hsingle : ∀ b ∈ F.support, b ≠ a →
-        coeff (a - m) (if m ≤ b then monomial (b - m) (F.coeff b * ((m.prod fun k j => (b k).choose j : ℕ) : Kf))
-          else 0) = 0 := by
+        AddMonoidAlgebra.coeff (if m ≤ b then monomial (b - m) (F.coeff b * ((m.prod fun k j => (b k).choose j : ℕ) : Kf))
+          else 0) (a - m) = 0 := by
       intro b _ hb
       split_ifs with hmb
       · rw [coeff_monomial, if_neg]
@@ -40,7 +84,7 @@ theorem coeff_mon_divDer (m a : σ →₀ ℕ) (F : MvPolynomial σ Kf) :
         apply hb
         have h1 : b - m + m = a - m + m := by rw [h]
         rwa [tsub_add_cancel_of_le hmb, tsub_add_cancel_of_le hma] at h1
-      · rw [coeff_zero]
+      · simp
     by_cases ha : a ∈ F.support
     · rw [Finset.sum_eq_single a hsingle (fun h => absurd ha h), if_pos hma, coeff_monomial, if_pos rfl]
       unfold Finsupp.prod
@@ -71,7 +115,7 @@ theorem diagK_binomCombF (lam : (σ →₀ ℕ) →₀ O) (F : MvPolynomial σ (
   unfold binomCombF
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun m _ => ?_
-  rw [coeff_smul, coeff_mon_divDer, smul_eq_mul]
+  rw [MvPolynomial.coeff_smul, coeff_mon_divDer, smul_eq_mul]
   ring
 
 theorem geQ_binomCombF (S : UniformizedDVR p O) (lam : (σ →₀ ℕ) →₀ O) (a : σ →₀ ℕ) :
@@ -106,7 +150,7 @@ theorem padicVal_expFact_le' (p : ℕ) [hp : Fact p.Prime] {ι : Type} [Fintype 
   have hE0 : expFact α ≠ 0 := by
     rw [h2]
     exact Finset.prod_ne_zero_iff.2 fun s _ => Finset.prod_ne_zero_iff.2 fun c _ => Nat.factorial_ne_zero _
-  rw [h3, padicValNat.mul hMn0 hE0]
+  rw [h3, (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) hMn0 hE0]
   omega
 
 section St
@@ -117,7 +161,7 @@ theorem coefGe_of_inBB [hp : Fact p.Prime] (S : UniformizedDVR p O) (w : O) (hw2
     {k : ℕ} (d : ι → ℕ) (Z : MvPolynomial (ι × Fin k) (KK O)) (hZ : Z ∈ Pol (KK O) k d) (hBB : InBB (O := O) p Z) :
     CoefGe p (((algebraMap O (KK O) w) ^ (padicValNat p (∏ s, (d s).factorial))) • Z) 0 := by
   intro bn
-  rw [coeff_smul, smul_eq_mul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul]
   by_cases hbn : bn ∈ Z.support
   · have hdeg : ∀ s, multideg bn s = d s := ((mem_restrictSupport_iff (KK O)).1 hZ) hbn
     have h1 := padicVal_expFact_le' p d bn hdeg

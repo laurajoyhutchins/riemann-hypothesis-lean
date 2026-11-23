@@ -1,9 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.ToYIsFirstChernIff
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.GaloisTTransform
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.SmoothQ
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DividedPowerReduction.RedInEx
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.ChainOf
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.ToYIsFirstChernIff
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.GaloisTTransform
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.ChainOf
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.TiltedDrinfeld.Base
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.TranscendentalPeriodUnits.IsUOfIsUnit
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.SmoothQ
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DividedPowerReduction.RedInEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -37,17 +79,23 @@ def thP : period_ring_base.Plus l →+* ℂ_[l] where
 theorem θD_algCl (x : PadicAlgCl l) : θD l (algClToBdR l x) = clToC l x := thetaAlgHom_algClToBdR l x
 
 theorem br (ht : TFil l) (hs : CrisSurj l) : Br (per l K) (cb K ht hs) (RingHom.id (Acris l)) (thP l)
-    (fun σ => ACris.galCris (IntermediateField.fixingSubgroupEquiv K σ)) (fun σ => galBase (IntermediateField.fixingSubgroupEquiv K σ))
-    (fun σ => (period_ring_base.σC σ.1).toRingHom) fun σ => qC l (period_ring_base.χ σ.1) where
-  et := rfl
-  t_ne := DeRhamTwist.Twist.tQ_ne
-  θ_i x := ⟨⟨_, ⟨ACris.iota ℂ_[l] l x, rfl⟩⟩, rfl, th_alg _⟩
-  θ_o k := ⟨⟨_, ⟨algClToBdR l k.1, rfl⟩⟩, rfl, (th_alg _).trans (θD_algCl l k.1)⟩
-  ker x := ((period_ring_base.base l).th_zero x.1 x.2).trans ⟨fun ⟨y, hy, e⟩ => ⟨⟨y, hy⟩, e⟩, fun ⟨y, e⟩ => ⟨y.1, y.2, e⟩⟩
-  θ_σ g x := ⟨⟨_, (period_ring_base.base l).plus_σ g.1 x.1 x.2⟩, rfl, (period_ring_base.base l).th_σ g.1 x.1 x.2⟩
-  galois_t_transform g := ⟨⟨_, ((period_ring_base.base l).th_q (period_ring_base.χ g.1)).1⟩, σD_tQ g.1, th_qQ _⟩
-  eσ _ _ := rfl
-  cris g n x := galBase_cris _ n x
+    (fun σ => ACris.galCris (IntermediateField.fixingSubgroupEquiv K σ))
+    (fun σ => galBase (IntermediateField.fixingSubgroupEquiv K σ))
+    (fun σ => (period_ring_base.σC σ.1).toRingHom) (fun σ => qC l (period_ring_base.χ σ.1)) := by
+  exact {
+    et := rfl
+    t_ne := DeRhamTwist.Twist.tQ_ne
+    θ_i x := ⟨⟨_, ⟨ACris.iota ℂ_[l] l x, rfl⟩⟩, rfl, th_alg _⟩
+    θ_o k := ⟨⟨_, ⟨algClToBdR l k.1, rfl⟩⟩, rfl, (th_alg _).trans (θD_algCl l k.1)⟩
+    ker x := ((period_ring_base.base l).th_zero x.1 x.2).trans
+      ⟨fun ⟨y, hy, e⟩ => ⟨⟨y, hy⟩, e⟩, fun ⟨y, e⟩ => ⟨y.1, y.2, e⟩⟩
+    θ_σ g x :=
+      ⟨⟨_, (period_ring_base.base l).plus_σ g.1 x.1 x.2⟩, rfl, (period_ring_base.base l).th_σ g.1 x.1 x.2⟩
+    galois_t_transform g :=
+      ⟨⟨_, ((period_ring_base.base l).th_q (period_ring_base.χ g.1)).1⟩, σD_tQ g.1, th_qQ _⟩
+    eσ _ _ := rfl
+    cris g n x := galBase_cris _ n x
+  }
 
 theorem red_ex {m : ℕ} (L : Lev (per l K) m) (hL : L.Good) (hC : L.CrisOK) (n : ℕ) :
     ∃ d : RedIn (B.DD false (base l) n) (B.κb (okToOC l K) false n) L.γ l n,

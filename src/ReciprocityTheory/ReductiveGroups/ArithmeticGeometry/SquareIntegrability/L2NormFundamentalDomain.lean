@@ -1,8 +1,63 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PolyDerivMonomialOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GaussianTailBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.LemmaS
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.RCauchy
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GaussianTailBound
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.RCauchy
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -16,7 +71,6 @@ theorem contDiff_of_diff {W : Type*} [NormedAddCommGroup W] [NormedSpace ℂ W] 
   have h1 : Differentiable ℂ (f ∘ e.symm) := by
     first
     | exact hf.comp e.symm.differentiable
-    | exact hf.comp (e.symm.contDiff.differentiable (by simp))
   have h3 := (contDiff_of_differentiable h1 (n := ((⊤ : ℕ∞) : WithTop ℕ∞))).comp e.contDiff
   convert h3 using 1
   funext v; simp
@@ -27,21 +81,11 @@ theorem jof_Hf_self_re {ι : Type} [Fintype ι] (x : EuclideanSpace ℂ ι) : (H
   refine Finset.sum_congr rfl fun i _ => ?_
   first
   | rw [← Complex.ofReal_pow, Complex.ofReal_re]
-  | norm_cast
-  | simp [sq]
 
 variable {E : Type} [Field E] [NumberField E] (X : PT E)
 
 def tens {n : ℕ} (s : Fin n → (Fin 1 → Vsp X.dim) → ℂ) : (Fin n → Vsp X.dim) → ℂ :=
   fun v => ∏ k, s k (fun _ => v k)
-
-theorem col_contDiff {q : ℕ} {s : (Fin 1 → Vsp X.dim) → ℂ} (hs : s ∈ X.Sec q 1) :
-    ContDiff ℂ (⊤ : ℕ∞) (fun z : Vsp X.dim => s (fun _ => z)) := by
-  have hd : Differentiable ℂ s := (show Differentiable ℂ s ∧ _ from hs).1
-  apply contDiff_of_diff
-  first
-  | exact hd.comp (differentiable_pi.mpr fun _ => differentiable_id)
-  | fun_prop
 
 theorem sec_contDiff {q n : ℕ} {F : (Fin n → Vsp X.dim) → ℂ} (hF : F ∈ X.Sec q n) :
     ContDiff ℂ (⊤ : ℕ∞) F := by
@@ -90,7 +134,6 @@ theorem avg_fd_prod {n : ℕ} (f : Fin n → Vsp X.dim → ℝ) :
   rw [MeasureTheory.Measure.pi_pi, ENNReal.toReal_prod, ← Finset.prod_inv_distrib]
   first
   | rw [MeasureTheory.integral_fintype_prod_eq_prod, ← Finset.prod_mul_distrib]
-  | rw [MeasureTheory.integral_fintype_prod_eq_prod (μ := fun _ => _), ← Finset.prod_mul_distrib]
 
 theorem l2_norm_fundamental_domain (q : ℕ) (s : (Fin 1 → Vsp X.dim) → ℂ) :
     X.l2 q s = ⨍ x in ZSpan.fundamentalDomain X.b, X.ptN2 q s (fun _ => x) := by
@@ -116,8 +159,6 @@ theorem l2_smul {n : ℕ} (q : ℕ) (c : ℂ) (F : (Fin n → Vsp X.dim) → ℂ
   simp only [PT.l2, h]
   first
   | exact MeasureTheory.integral_const_mul _ _
-  | exact MeasureTheory.integral_mul_left _ _
-  | simp [MeasureTheory.average, MeasureTheory.integral_const_mul]
 
 def gtOf (q : ℕ) : GT (Idx X.dim) where
   b := X.b
@@ -165,8 +206,6 @@ theorem eq_zero_of_l2_eq_zero (hP : Ext.PackingCount) {q : ℕ} (hq : 1 ≤ q) {
   have hcont : Continuous fun x : Vsp X.dim => ‖g x‖ ^ 2 * Real.exp (-(q * Real.pi) * ‖x‖ ^ 2) := by
     first
     | fun_prop
-    | exact ((continuous_norm.comp hgc).pow 2).mul
-        (Real.continuous_exp.comp (continuous_const.mul (continuous_norm.pow 2)))
   have hint : MeasureTheory.IntegrableOn
       (fun x : Vsp X.dim => ‖g x‖ ^ 2 * Real.exp (-(q * Real.pi) * ‖x‖ ^ 2)) D :=
     (hcont.continuousOn.integrableOn_compact hDb.isCompact_closure).mono_set subset_closure
@@ -197,8 +236,6 @@ theorem eq_zero_of_l2_eq_zero (hP : Ext.PackingCount) {q : ℕ} (hq : 1 ≤ q) {
     have e : (-γ) +ᵥ y = y + -(γ : Vsp X.dim) := by
       first
       | (rw [Submodule.vadd_def, add_comm]; rfl)
-      | simp [Submodule.vadd_def, add_comm]
-      | (show ((-γ : Submodule.span ℤ (Set.range X.b)) : Vsp X.dim) + y = _; simp [add_comm])
     rw [e]
     exact not_congr (hne _ (neg_mem γ.2) y)
   have ht0 := hfd.measure_zero_of_invariant {x | g x ≠ 0} hinv h2
@@ -227,7 +264,6 @@ theorem polyDeriv_smul_fun {σ W : Type*} [NormedAddCommGroup W] [NormedSpace �
   refine Finset.sum_congr rfl fun m _ => ?_
   first
   | rw [iteratedFDeriv_const_smul_apply ((hF.of_le (by exact_mod_cast le_top)).contDiffAt)]
-  | rw [iteratedFDeriv_const_smul_apply (hF.of_le (by exact_mod_cast le_top))]
   simp only [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 

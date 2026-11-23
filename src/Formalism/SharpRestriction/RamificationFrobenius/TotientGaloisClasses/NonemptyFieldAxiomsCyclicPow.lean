@@ -1,5 +1,71 @@
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ArtinMapSecondEqJacobiSymOfModEq
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.EqOfPowEqOne
+module
+
+public import Formalism.FrobeniusOrbits.HostDiffSupport
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ArtinMapSecondEqJacobiSym
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Decomp
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.DiscrB
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.DiscriminantRealSubfield
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Inertia
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.NcardEqTwoIff
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.OrdUnimod
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Principal
+import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
+public import Formalism.FrobeniusOrbits.HostCorollaries
+public import Formalism.GL3MeanSquares.HookFormulaTorsion.DifferentIdealConditions
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ArtinMapSecondEqJacobiSymOfModEq
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.EqOfPowEqOne
+import Formalism.TameInertiaTowers.CentralOrderTwo.Galois
+import Formalism.TameInertiaTowers.CentralOrderTwo.OddEqOneOfSubOneMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 open scoped Pointwise
@@ -373,7 +439,7 @@ theorem exact_art (he : 1 ≤ e) : ∃ u : (ZMod (2 ^ (e + 2) * q * d))ˣ,
     have hc1 : Nat.Coprime (2 ^ (e + 1)) q :=
       Nat.Coprime.pow_left _ ((Nat.coprime_primes Nat.prime_two hqp).mpr (Ne.symm hq2))
     have hc2 : Nat.Coprime (2 ^ (e + 1) * q) d :=
-      Nat.Coprime.mul (Nat.Coprime.pow_left _ ((Nat.coprime_primes Nat.prime_two hdp).mpr (Ne.symm hd2)))
+      Nat.Coprime.mul_left (Nat.Coprime.pow_left _ ((Nat.coprime_primes Nat.prime_two hdp).mpr (Ne.symm hd2)))
         ((Nat.coprime_primes hqp hdp).mpr hqd)
     exact (Nat.modEq_and_modEq_iff_modEq_mul hc2).mp
       ⟨(Nat.modEq_and_modEq_iff_modEq_mul hc1).mp ⟨hx1, huy⟩, huz⟩
@@ -609,7 +675,7 @@ theorem hostDer : HostDer (hostRaw φ hinj hH he h) := by
     refine ⟨?_, g2, v, g3, (hH_ggIso φ hinj _).trans g4⟩
     have h1 := (gal_eq_art φ hinj hH he h σ _).mpr
       ((frob_art hH h p hp P σ (ZMod.unitOfCoprime p hcop) (ZMod.coe_unitOfCoprime _ _)).mp hσ)
-    rw [h1, HostRaw.psAt, dif_pos (show Nat.Coprime p (hostRaw φ hinj hH he h).condN from hcop)]
+    rw [h1, HostRaw.psAt, dite_eq_left (show Nat.Coprime p (hostRaw φ hinj hH he h).condN from hcop)]
     rfl
   · have hm : ((l : ℤ) : 𝓞 (hostE ζ a b)) ∈ P := by
       have : Fact l.Prime := ⟨hl⟩
@@ -650,30 +716,9 @@ theorem hostDer : HostDer (hostRaw φ hinj hH he h) := by
 
 def hostAx : HostAx φ := ⟨hostRaw φ hinj hH he h, hostDer φ hinj hH he h⟩
 
-include hinj in
-theorem twoGroup : φ.TwoGroup := ⟨φ.e, ord_eq φ hinj⟩
 
-theorem muPM (hq : q ≠ 3) : (hostRaw φ hinj hH he h).MuPM := fun x hx => Formalism.FrobeniusOrbits.Final.host_field.2.2.2.2.2.2.2.2.2.2.1 φ.e q d hH hq L ζ a b h x hx
-
-theorem coprimeFifteen_of_coprime : (hostRaw φ hinj hH he h).CoprimeFifteen := by
-  show Nat.Coprime (2 ^ (φ.e + 2)) 15
-  exact Nat.Coprime.pow_left _ (by norm_num)
-
-include hinj he in
-theorem qs_le : 2 ^ (φ.e + 2) ≤ φ.ord ^ 2 := by
-  rw [ord_eq φ hinj, ← pow_mul]
-  exact Nat.pow_le_pow_right (by norm_num) (by omega)
 
 end D7
-
-theorem exists_hostAx (φ : Frame) (hinj : Function.Injective φ.h) (he : 2 ≤ φ.e) {q d : ℕ} (hH : FrobeniusOrbits.HostHyp q d) :
-    ∃ H : HostAx φ, H.q = q ∧ H.d = d ∧ H.QS = 2 ^ (φ.e + 2) ∧ φ.TwoGroup ∧ H.toHostRaw.CoprimeFifteen ∧
-      (q ≠ 3 → H.toHostRaw.MuPM) ∧ H.toHostRaw.PsQ ∧ H.toHostRaw.Exact ∧
-      ∃ s : H.E, s ^ 2 = -(H.q : H.E) ∧ ∀ σ : H.E ≃ₐ[ℚ] H.E, σ s = ((((H.gal σ).1.1 : ℤˣ) : ℤ) : H.E) * s := by
-  obtain ⟨L, hF, hN, ζ, a, b, h⟩ := Formalism.TwoAdicCyclotomicDecomposition.layerExists (φ.e + 2) q d
-  exact ⟨D7.hostAx φ hinj hH he h, rfl, rfl, rfl, D7.twoGroup φ hinj, D7.coprimeFifteen_of_coprime φ hinj hH he h,
-    fun hq => D7.muPM φ hinj hH he h hq, D7.psQ φ hinj hH he h, D7.exact φ hinj hH he h,
-    D7.sqq φ hinj hH he h, D7.sqq_sq φ hinj hH he h, fun σ => D7.gal_sqq φ hH h σ⟩
 
 end Formalism.HC
 

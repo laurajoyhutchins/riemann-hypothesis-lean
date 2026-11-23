@@ -1,5 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.GradedDegreeZeroIsLocal
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,16 +49,6 @@ open Matrix
 namespace Formalism.L2.SG.RealObj.InfCut.JacobianCoordinates.JL
 
 open Formalism.L2.SG.RealObj Formalism.L2.SG.HidaSetting
-
-theorem hJ_sum_sum' {n : ℕ} (ε : Fin n → Bool) {ι : Type} [Fintype ι] (a b : ι → ℂ) (x y : ι → Fin n → ℂ) :
-    hJ ε (∑ j, a j • x j) (∑ k, b k • y k) = ∑ j, ∑ k, conj (a j) * b k * hJ ε (x j) (y k) := by
-  simp only [Formalism.L2.SG.HidaSetting.hJ, Matrix.mulVec_sum, Matrix.mulVec_smul, star_sum, star_smul,
-    dotProduct_sum, sum_dotProduct, smul_dotProduct, dotProduct_smul, smul_eq_mul, starRingEnd_apply]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  ring
 
 theorem hJ_adj {n : ℕ} {ε : Fin n → Bool} (s : Formalism.REAL.UJ ε) (x y : Fin n → ℂ) :
     hJ ε x (uMat s *ᵥ y) = hJ ε (uMat s⁻¹ *ᵥ x) y := by
@@ -41,29 +70,5 @@ theorem hJ_adj {n : ℕ} {ε : Fin n → Bool} (s : Formalism.REAL.UJ ε) (x y :
     rw [Matrix.conjTranspose_mul, Matrix.conjTranspose_mul, Matrix.conjTranspose_conjTranspose, hJc] at h2
     exact h2.symm
   simp only [Formalism.L2.SG.HidaSetting.hJ, Matrix.star_mulVec, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec, key]
-
-theorem zAct : ZAct := by
-  intro n r ε f f' s s' g P P' hP hP'
-  ext a b
-  have hu : uMat (s * g * s'⁻¹) = uMat s * uMat g * uMat s'⁻¹ := by
-    simp [Formalism.MainNotions.S.uMat]
-  have hw : uMat g *ᵥ (uMat s'⁻¹ *ᵥ f' b) = ∑ d, P' d b • (uMat g *ᵥ f' d) := by
-    rw [hP' b, Matrix.mulVec_sum]
-    simp only [Matrix.mulVec_smul]
-  rw [Formalism.L2.SG.RealObj.Zhat, hu, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, hJ_adj, hP a, hw,
-    hJ_sum_sum']
-  simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, Formalism.L2.SG.RealObj.Zhat, Finset.sum_mul]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => ?_
-  simp only [starRingEnd_apply]
-  ring
-
-theorem upMat_lower {r : ℕ} (y : UC r) (a b : Fin (r + 1)) (h : b < a) : upMat y a b = 0 := by
-  have h1 : a ≠ b := ne_of_gt h
-  have h2 : ¬ a < b := not_lt.mpr h.le
-  simp [upMat, h1, h2]
-
-theorem upMat_diag {r : ℕ} (y : UC r) (a : Fin (r + 1)) : upMat y a a = 1 := by
-  simp [upMat]
 
 end Formalism.L2.SG.RealObj.InfCut.JacobianCoordinates.JL

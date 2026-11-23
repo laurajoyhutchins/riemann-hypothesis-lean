@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.PeriodIntegrals.CntLocalParts
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,14 +50,6 @@ open NumberField Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.M
 open Classical
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-
-def IntOnEZ : Prop :=
-  ∀ (D : Formalism.BasicNotions.D7) (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
-    (∀ p, Agree δ M p) → ∀ (u u' : D.what₂.Word),
-    (D.mem u).A.T ≡ (D.mem u').A.T [MOD (Lat.gS D) ^ 2] →
-    ∀ (F0 : FlagG (VS D) D.R.rS (Tn u)) (what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)),
-      RowsOf u F0 what₂ → ∀ Λ ∈ what₂, ∀ (Z : MatZ D) (F' : LFlag (VS D) D.R.rS (Tn u')),
-        F' ∈ EZ (Tn u') F0 Λ Z → ∀ p a b, ZZP (M := M) δ u u' p Z a b ∈ (M p).R
 
 theorem cntE_eq_zero_of_empty {D : Formalism.BasicNotions.D7} {T : D.host.E} (T' : D.host.E) (F0 : FlagG (VS D) D.R.rS T)
     (Λ : Submodule (𝓞 D.host.E) (VS D).V) (Z : MatZ D) (h : EZ T' F0 Λ Z = ∅) : cntE T' F0 Λ Z = 0 := by
@@ -29,13 +62,5 @@ theorem nu_eq_zero_of_empty {D : Formalism.BasicNotions.D7} {T : D.host.E} (T' :
     Formalism.L2.SG.CntLocal.nu T' F0 what₂ Z = 0 := by
   unfold Formalism.L2.SG.CntLocal.nu
   rw [Finset.sum_eq_zero (fun Λ hΛ => by rw [cntE_eq_zero_of_empty T' F0 Λ Z (h Λ hΛ)]; simp), zero_div]
-
-theorem notIntAll_of (h : IntOnEZ) : PI.CntLocalParts.NotIntAll := by
-  intro D δ M hA _L u u' hT F0 what₂ hR Z hZ
-  obtain ⟨p, a, b, hn⟩ := hZ
-  refine nu_eq_zero_of_empty (Tn u') F0 what₂ Z fun Λ hΛ => ?_
-  rw [Set.eq_empty_iff_forall_notMem]
-  intro F' hF'
-  exact hn (h D δ M hA u u' hT F0 what₂ hR Λ hΛ Z F' hF' p a b)
 
 end PI.CntNotIntW

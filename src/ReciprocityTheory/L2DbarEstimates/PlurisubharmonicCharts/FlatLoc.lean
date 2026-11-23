@@ -1,5 +1,66 @@
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FlatCalc
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FlatLocA
+module
+
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FlatCalc
+public import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Calculus.ContDiff.WithLp
+public import Mathlib.Analysis.Calculus.FDeriv.OfCompLeft
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FlatLocA
+import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.ExistsClmOfI
+import ReciprocityTheory.L2DbarEstimates.WeakHolomorphy.HoloContDiffAtComplex
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.Y
 
@@ -27,14 +88,6 @@ theorem denominator_ne_zero_on_chart (hD : A.D0 L w w0 s) {x : Y} (hx : x ∈ A.
   unfold WeightedAtlas.IsSec WeightedAtlas.IsSecOn at hw
   rw [hw.2 i (A.pick x) x trivial hi (A.mem_pick x)]
   exact mul_ne_zero (A.g_ne L i (A.pick x) x hi (A.mem_pick x)) hx.1
-
-theorem denominator_ne_zero_of_overlap (hD : A.D0 L w w0 s) {y : Y} {i j : ι} (hi : y ∈ (A.chart i).source)
-    (hj : y ∈ (A.chart j).source) (h : w0 j y ≠ 0) : w0 i y ≠ 0 := by
-
-  have hw := hD.isSection_denom
-  unfold WeightedAtlas.IsSec WeightedAtlas.IsSecOn at hw
-  rw [hw.2 i j y trivial hi hj]
-  exact mul_ne_zero (A.g_ne L i j y hi hj) h
 
 theorem flL_zLoc_chart (hD : A.D0 L w w0 s) {y : Y} {i : ι} (hi : y ∈ (A.chart i).source)
     (_hne : w0 i y ≠ 0) : A.zLoc w0 s i (A.chart i y) = A.zmap w0 s y := by
@@ -284,7 +337,7 @@ private theorem d_eq_wd_comp_chart_symm' {n : ℕ} {M : Type*} [TopologicalSpace
     d n z j G x = wd n j (G ∘ E.symm) (z x) := by
   unfold d
   have h : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ x ∈ e.source := ⟨E, hE, hx⟩
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   obtain ⟨hc, hxc⟩ := Classical.choose_spec h
   apply wd_congr
   filter_upwards [chart_symm_eventuallyEq_of_isChart' hc hE hxc hx] with v hv
@@ -295,7 +348,7 @@ private theorem db_eq_wdb_comp_chart_symm' {n : ℕ} {M : Type*} [TopologicalSpa
     db n z j G x = wdb n j (G ∘ E.symm) (z x) := by
   unfold db
   have h : ∃ e : OpenPartialHomeomorph M (V n), IsChart n z e ∧ x ∈ e.source := ⟨E, hE, hx⟩
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   obtain ⟨hc, hxc⟩ := Classical.choose_spec h
   apply wdb_congr
   filter_upwards [chart_symm_eventuallyEq_of_isChart' hc hE hxc hx] with v hv
@@ -368,6 +421,7 @@ private theorem ofLp_apply_toLp_eq_sum_mul_basis {n : ℕ} (T : V n →L[ℂ] V 
   have h := (EuclideanSpace.basisFun (Fin n) ℂ).sum_repr (WithLp.toLp 2 η)
   simp only [EuclideanSpace.basisFun_repr, EuclideanSpace.basisFun_apply] at h
   conv_lhs => rw [← h]
+
   simp [map_sum, bas, smul_eq_mul]
 
 theorem dbar_flat_loc {n : ℕ} {Y : Type u} [TopologicalSpace Y] [T2Space Y] [SecondCountableTopology Y] [MeasurableSpace Y] [BorelSpace Y] {ι : Type*} {La : Type*} [AddCommGroup La] (A : WeightedAtlas n Y ι La) {L : La} {N : ℕ} {w : Fin N → ι → Y → ℂ} {w0 : ι → Y → ℂ} {s : Fin n → ι → Y → ℂ} {De : MvPolynomial (Fin n) ℂ} (hD : A.D0 L w w0 s) (hF : A.Flat w0 s De) (u : Y → ℂ) (i : ι) (x : A.Mset w0 s De)
@@ -413,6 +467,7 @@ theorem dbar_flat_loc {n : ℕ} {Y : Type u} [TopologicalSpace Y] [T2Space Y] [S
       (fun k => jz A w0 s i x (WithLp.toLp 2 ξ) k) b
     rw [hJ'] at h1
     exact h1
+
   rw [hb, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul]

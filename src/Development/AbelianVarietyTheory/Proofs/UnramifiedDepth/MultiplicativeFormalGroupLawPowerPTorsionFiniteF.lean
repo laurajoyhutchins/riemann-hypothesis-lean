@@ -1,14 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.LengthDegreeAbelianVariety
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.IsEigBasisIff
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GmLawCharsMul
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesExistsPolynomialTotalDegreeLeSubMem
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesEvalOfPowMem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.IsEigBasisIff
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesEvalOfPowMem
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesExistsPolynomialTotalDegreeLeSubMem
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GmLawCharsMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
 
 set_option autoImplicit false
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ ReciprocityTheory.ChartRestriction.G.Pdiv.ChartF GlobalTheory.ChF
@@ -78,7 +121,7 @@ private theorem map_coe_mem_span {O Q : Type} [CommRing O] [CommRing Q] [Algebra
       exact ψ.commutes a
     rw [this]
     exact S.smul_mem a h1
-  | add f g hf hg => rw [MvPolynomial.coe_add, map_add]; exact S.add_mem hf hg
+  | add f g hf hg => rw [MvPolynomial.coe_add, map_add (f := _)]; exact S.add_mem hf hg
   | mul_X f j hf =>
     rw [MvPolynomial.coe_mul, MvPolynomial.coe_X, map_mul]
     have := S.sub_mem (hmul j _ hf) hf
@@ -142,7 +185,7 @@ theorem fh_gmF : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed 
     refine map_coe_mem_span hN π (fun i => ?_) P
     have h0 : π ((1 + MvPowerSeries.X i : PS O 1 r) ^ p ^ k - 1) = 0 :=
       Ideal.Quotient.eq_zero_iff_mem.2 (hrel i)
-    rw [map_sub, map_pow, map_add, map_one] at h0
+    rw [map_sub, map_pow, map_add (f := _), map_one] at h0
     exact sub_eq_zero.1 h0
 
   have hpt : ∀ b : Fin 1 × Fin r → ℕ, ∃ φ : (PS O 1 r ⧸ I) →ₐ[O] O,
@@ -161,7 +204,7 @@ theorem fh_gmF : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed 
       rw [hI, Ideal.span_le]
       rintro _ ⟨i, rfl⟩
       show ψ _ = 0
-      rw [hmul, map_sub, map_pow, map_add, map_one, hψ]
+      rw [hmul, map_sub, map_pow, map_add (f := _), map_one, hψ]
       exact hone _
     exact ⟨Ideal.Quotient.liftₐ I ψ (fun a ha => hker ha), fun i => hψ i⟩
   have hsep : ∀ c : (Fin 1 × Fin r → Fin (p ^ k)) → O,
@@ -170,8 +213,9 @@ theorem fh_gmF : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed 
     refine coeff_eq_zero_of_roots hζ c fun b => ?_
     obtain ⟨φ, hφ⟩ := hpt b
     have := hcφ φ
-    simpa only [map_sum, map_smul, m, map_prod, map_pow, map_add, map_one, hφ, add_sub_cancel,
-      smul_eq_mul] using this
+
+    simpa only [map_sum, map_smul, m, map_prod, map_pow, map_add (f := _), map_one, hφ, add_sub_cancel,
+    smul_eq_mul] using this
   have hli : LinearIndependent O m := by
     rw [Fintype.linearIndependent_iff]
     intro c h0

@@ -1,6 +1,56 @@
-import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Wlocal
-import Formalism.SharpRestriction.GrowthBounds.DataG
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalC
+import Formalism.GradedWeylDivisibility.FinalD
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.NablaLTwist
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Wlocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GroupLattices.FockModels.OperatorsPreserveLattices
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +97,7 @@ theorem gShift_one {R : Type*} [CommRing R] {n : ℕ} (δ : ℤ) :
       simp
     · exact absurd rfl hd
   · intro d hd
-    exact absurd (MvPolynomial.coeff_zero d) hd
+    simp at hd
 
 theorem gShift_pow {R : Type*} [CommRing R] {n : ℕ}
     {P : Polynomial (MvPolynomial (Fin r × Fin n) R)} {μ δ : ℤ}
@@ -86,7 +136,7 @@ theorem gShift_algebraMap {R : Type*} [CommRing R] {n : ℕ} (c : R) (δ : ℤ) 
       simp
     · exact absurd rfl hd
   · intro d hd
-    exact absurd (MvPolynomial.coeff_zero d) hd
+    simp at hd
 
 theorem gShift_gen {R : Type*} [CommRing R] {n : ℕ} (a b : Fin r) (v : Fin r × Fin n) :
     GShift ht (Polynomial.C (X v) +
@@ -96,7 +146,7 @@ theorem gShift_gen {R : Type*} [CommRing R] {n : ℕ} (a b : Fin r) (v : Fin r �
   have hX : ∀ u : Fin r × Fin n, IsWeightedHomogeneous (htW ht n) (X u : MvPolynomial (Fin r × Fin n) R) (ht u.1) :=
     fun u => isWeightedHomogeneous_X R (htW ht n) u
   have h0 : ∀ m : ℤ, IsWeightedHomogeneous (htW ht n) (0 : MvPolynomial (Fin r × Fin n) R) m :=
-    fun m d hd => absurd (MvPolynomial.coeff_zero d) hd
+    fun m d hd => by simp at hd
   split_ifs with hb
   · rw [Polynomial.coeff_add, Polynomial.coeff_C, Polynomial.X_mul_C, Polynomial.coeff_C_mul_X]
     by_cases hk0 : k = 0
@@ -132,10 +182,11 @@ theorem g_rowDiv_shift (R : Type*) [CommRing R] {n : ℕ} (H : ℤ) (a b : Fin r
     (f : MvPolynomial (Fin r × Fin n) R) (hf : IsWeightedHomogeneous (htW ht n) f H) :
     IsWeightedHomogeneous (htW ht n) (rowDiv R a b k f) (H + k * (ht a - ht b)) := by
   unfold rowDiv
-  conv => enter [2, 1, 2]; rw [f.as_sum]
+  rw [f.as_sum]
+
   rw [map_sum, Polynomial.finsetSum_coeff]
   refine IsWeightedHomogeneous.sum _ _ _ fun d hd => ?_
-  have := gShift_rowGen_monomial (ht := ht) R a b d (coeff d f) k
+  have := gShift_rowGen_monomial (ht := ht) R a b d (AddMonoidAlgebra.coeff f d) k
   rwa [hf (mem_support_iff.mp hd)] at this
 
 theorem g_weight {n : ℕ} (d : Fin r × Fin n →₀ ℕ) :
@@ -143,9 +194,9 @@ theorem g_weight {n : ℕ} (d : Fin r × Fin n →₀ ℕ) :
   refine Finsupp.induction_linear d ?_ ?_ ?_
   · simp
   · intro f g hf hg
-    rw [map_add, hf, hg, ← Finset.sum_add_distrib]
+    rw [map_add (f := _), hf, hg, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun a _ => ?_
-    rw [map_add, Pi.add_apply, Nat.cast_add, mul_add]
+    rw [map_add (f := _), Pi.add_apply, Nat.cast_add, mul_add]
   · intro v k
     simp only [Finsupp.weight_apply, Finsupp.sum_single_index, zero_smul, implies_true]
     rw [Finset.sum_eq_single v.1]
@@ -203,7 +254,7 @@ private theorem finsupp_weight_rowW_eq_rowDeg {k n : ℕ} (d : Fin k × Fin n �
   refine Finsupp.induction_linear d ?_ ?_ ?_
   · simp [rowDeg]
   · intro f g hf hg
-    rw [map_add, Pi.add_apply, hf, hg]
+    rw [map_add (f := _), Pi.add_apply, hf, hg]
     simp only [rowDeg, Finsupp.add_apply, Finset.sum_add_distrib]
   · intro v c
     simp only [Finsupp.weight_apply, Finsupp.sum_single_index, zero_smul, implies_true]
@@ -255,6 +306,7 @@ theorem diag_monomial {K : Type} [Field K] {k n : ℕ} (r : ℕ) (c : K) (d : Fi
 theorem diag_const {K : Type} [Field K] {k n : ℕ} (r : ℕ) (c : K) (G : MvPolynomial (Fin k × Fin n) K) (π0 : ℕ)
     (h : ∀ d ∈ G.support, piR r d = π0) : rowAct K (lb_D k r c) G = (c⁻¹) ^ π0 • G := by
   conv_lhs => rw [G.as_sum]
+
   rw [map_sum]
   conv_rhs => rw [G.as_sum]
   rw [Finset.smul_sum]
@@ -292,7 +344,7 @@ theorem weyl_diag (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O 
       obtain ⟨z, hz⟩ := g_applyWord (ht := fun a : Fin k => if a.val < r then (1 : ℤ) else 0) O (le_refl k) ν hν wd
       have hπ : ∀ d' ∈ (map (algebraMap O Kf) Wd).support, piR r d' = piR r d := by
         intro d' hd'
-        have h1 : coeff d' Wd ≠ 0 := by
+        have h1 : AddMonoidAlgebra.coeff Wd d' ≠ 0 := by
           intro h
           rw [mem_support_iff, coeff_map, h, map_zero] at hd'
           exact hd' rfl
@@ -329,49 +381,8 @@ theorem dl_P (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf] (
     (w : O) (hw : algebraMap O Kf w ≠ 0) (g : Matrix (Fin (m + 1)) (Fin (m + 1)) Kf)
     (F : MvPolynomial (Fin (m + 1) × Fin (m + 1)) Kf) (hF : F ∈ deltaLTw O Kf m lam g) :
     (algebraMap O Kf w ^ (∑ i : Fin (m + 1) with i.val < r, lam i)) • F ∈
-      deltaLTw O Kf m lam (g * lb_D (m + 1) r (algebraMap O Kf w)) := by
-  classical
-  set c : Kf := algebraMap O Kf w with hc
-  set ν : Fin (m + 1) → ℕ := nuOf lam with hν
-  set e : ℤ := lam (Fin.last m) with he
-  have hνa : Antitone ν := by
-    intro x y hxy
-    simp only [hν, nuOf]
-    exact Int.toNat_le_toNat (sub_le_sub_right (hlam hxy) _)
-  obtain ⟨F0, hF0, rfl⟩ := hF
-  obtain ⟨f, hf, hfe⟩ := mem_deltaL.1 hF0
-  set Nν : ℕ := ∑ t : Fin (m + 1) with t.val < r, ν t with hNν
-  set A : ℤ := ∑ i : Fin (m + 1) with i.val < r, lam i with hA
-  obtain ⟨f1, hf1, hf1e⟩ := weyl_diag O Kf (m + 1) r ν hνa w hw f hf
-  refine ⟨c ^ Nν • F0, mem_deltaL.2 ⟨f1, hf1, ?_⟩, ?_⟩
-  · have h5 := rowActMul Kf (m + 1) (m + 1) (lb_D (m + 1) r c) g
-    have h6 : rowAct Kf (g * lb_D (m + 1) r c) F0 = rowAct Kf (lb_D (m + 1) r c) (rowAct Kf g F0) := by
-      rw [← h5]
-      rfl
-    rw [map_smul, h6, ← hfe]
-    exact hf1e
-  · show (g * lb_D (m + 1) r c).det ^ (-e) • (c ^ Nν • F0) = c ^ A • (g.det ^ (-e) • F0)
-    rw [smul_smul, smul_smul]
-    congr 1
-    set ρ : ℕ := (Finset.univ.filter fun a : Fin (m + 1) => a.val < r).card with hρ
-    have h1 : (g * lb_D (m + 1) r c).det = g.det * (c⁻¹) ^ ρ := by
-      rw [Matrix.det_mul, lb_D, Matrix.det_diagonal, Finset.prod_ite, Finset.prod_const,
-        Finset.prod_const_one, mul_one]
-    have h3 : A = (Nν : ℤ) + ρ * e := by
-      rw [hA, hNν, hρ]
-      push_cast
-      rw [Finset.card_eq_sum_ones]
-      push_cast
-      rw [Finset.sum_mul, ← Finset.sum_add_distrib]
-      apply Finset.sum_congr rfl
-      intro a _
-      have : 0 ≤ lam a - lam (Fin.last m) := sub_nonneg.2 (hlam (Fin.le_last a))
-      simp only [hν, nuOf, Int.toNat_of_nonneg this, he]
-      ring
-    have h5 : ((c⁻¹) ^ ρ) ^ (-e) = c ^ ((ρ : ℤ) * e) := by
-      rw [inv_pow, inv_zpow, zpow_neg, inv_inv, ← zpow_natCast c ρ, ← zpow_mul]
-    rw [h1, h3, mul_zpow, h5, zpow_add₀ hw, zpow_natCast]
-    ring
+      deltaLTw O Kf m lam (g * lb_D (m + 1) r (algebraMap O Kf w)) :=
+  Formalism.L2.G.Model.dl_P O Kf m r lam hlam w hw g F hF
 
 theorem dl_indep (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf]
     (hinj : Function.Injective (algebraMap O Kf)) (m : ℕ) (lam : Fin (m + 1) → ℤ)

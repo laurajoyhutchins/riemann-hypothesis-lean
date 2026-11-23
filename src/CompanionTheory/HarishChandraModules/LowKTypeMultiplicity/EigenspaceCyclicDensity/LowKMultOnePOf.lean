@@ -1,5 +1,53 @@
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset
 open scoped InnerProductSpace
@@ -28,7 +76,7 @@ theorem evd_eig (F : Fin n → Module.End ℂ V) (τ : Fin n → ℂ) (x : V) (h
     rfl
   · simp only [CompanionTheory.D.LK.evd, FreeAlgebra.lift_ι_apply, h]
   · rw [map_mul, Module.End.mul_apply, hb, map_smul, ha, map_mul, smul_smul, mul_comm]
-  · rw [map_add, LinearMap.add_apply, ha, hb, map_add, add_smul]
+  · rw [map_add (f := _), LinearMap.add_apply, ha, hb, map_add (f := _), add_smul]
 
 theorem mem_cyc {E : Fin n → Fin n → Module.End ℂ V} {v w : V} : w ∈ Cyc E v ↔ ∃ a, ev E a v = w := by
   unfold CompanionTheory.D.LK.Cyc
@@ -227,6 +275,7 @@ theorem lowKMultOneP_of (hM : MultAlg) (hE : KModExists) (hD : CycDense) (hO : O
     · rw [← Module.End.mul_apply, commute_E_cas_of_glRel E hGl a b, Module.End.mul_apply, hv.2 a b hab h, map_zero]
   have hcc : Cas E v ∈ Cyc E v := by
     refine mem_cyc.2 ⟨∑ a, ∑ b, FreeAlgebra.ι ℂ (a, b) * FreeAlgebra.ι ℂ (b, a), ?_⟩
+
     simp only [CompanionTheory.D.LK.ev, map_sum, map_mul, FreeAlgebra.lift_ι_apply, Formalism.REAL.Cas]
   obtain ⟨c, hc⟩ := hmult _ hcv hcc
   have hdense := hD N ε H σ D E hUR hIR hK v c hv0 hc

@@ -1,4 +1,59 @@
-import Formalism.HermitianCurvature.PrimeToDifferent
+module
+
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsNeZeroForallNormLeOfCovolumeLe
+public import Formalism.HermitianCurvature.PrimeToDifferent
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.S6x5
 
@@ -14,30 +69,7 @@ theorem covolume_index (μ : Measure V) [μ.IsAddHaarMeasure] (L₁ L₂ : Submo
     (h : L₁ ≤ L₂) :
     ZLattice.covolume L₁ μ =
       (L₁.toAddSubgroup.relIndex L₂.toAddSubgroup : ℝ) * ZLattice.covolume L₂ μ := by
-  classical
-  have : Module.Free ℤ L₁ := ZLattice.module_free ℝ L₁
-  have : Module.Free ℤ L₂ := ZLattice.module_free ℝ L₂
-  have : Module.Finite ℤ L₁ := ZLattice.module_finite ℝ L₁
-  have : Module.Finite ℤ L₂ := ZLattice.module_finite ℝ L₂
-  let b₂ := Free.chooseBasis ℤ L₂
-  let b₁ := (Free.chooseBasis ℤ L₁).reindex (Fintype.equivOfCardEq
-    (β := Free.ChooseBasisIndex ℤ L₂)
-    (by rw [← finrank_eq_card_chooseBasisIndex, ← finrank_eq_card_chooseBasisIndex,
-      ZLattice.rank ℝ, ZLattice.rank ℝ]))
-  rw [ZLattice.covolume_eq_det_mul_measureReal L₁ μ b₁ (b₂.ofZLatticeBasis ℝ),
-    ZLattice.covolume_eq_det_mul_measureReal L₂ μ b₂ (b₂.ofZLatticeBasis ℝ), ← mul_assoc]
-  congr 1
-  have h2 : (b₂.ofZLatticeBasis ℝ).det ((↑) ∘ b₂) = 1 := by
-    have : ((↑) ∘ b₂ : _ → V) = b₂.ofZLatticeBasis ℝ := by ext; simp
-    rw [this, Basis.det_self]
-  have hrel : L₁.toAddSubgroup.relIndex L₂.toAddSubgroup =
-      (b₂.det (fun i => (⟨b₁ i, h (SetLike.coe_mem _)⟩ : L₂))).natAbs :=
-    AddSubgroup.relIndex_eq_natAbs_det L₁.toAddSubgroup L₂.toAddSubgroup h b₁ b₂
-  rw [h2, abs_one, mul_one, hrel, Nat.cast_natAbs, Int.cast_abs]
-  rw [Basis.det_apply, Basis.det_apply, Int.cast_det]
-  congr; ext i j
-  rw [Matrix.map_apply, Basis.toMatrix_apply, Basis.toMatrix_apply]
-  exact (b₂.ofZLatticeBasis_repr_apply ℝ L₂ ⟨b₁ j, h (SetLike.coe_mem _)⟩ i)
+  apply GlobalTheory.covolume_eq_relIndex_mul_of_haar <;> assumption
 
 noncomputable abbrev scal (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V] (c : ℝ) : V →ₗ[ℤ] V :=
   (c • (LinearMap.id : V →ₗ[ℝ] V)).restrictScalars ℤ
@@ -49,8 +81,6 @@ noncomputable def scalInv (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V]
     (fun x => by simp [smul_smul, hc])
 
 theorem scalInv_apply (c : ℝ) (hc : c ≠ 0) (x : V) : scalInv V c hc x = c⁻¹ • x := rfl
-
-theorem scalInv_symm_apply (c : ℝ) (hc : c ≠ 0) (x : V) : (scalInv V c hc).symm x = c • x := rfl
 
 theorem map_scal_eq_comap (c : ℝ) (hc : c ≠ 0) (L : Submodule ℤ V) :
     L.map (scal V c) = ZLattice.comap ℝ L (scalInv V c hc).toLinearMap := by
@@ -205,8 +235,8 @@ open Formalism.FourierDecayAlt.S6 Formalism.FourierDecayAlt.P.S6x5
 open NumberField NumberField.IsCMField Module MeasureTheory
 open scoped nonZeroDivisors
 
-open scoped Classical in
 
+open scoped Classical in
 theorem covolumeIndex : Formalism.FourierDecayAlt.S6.CovolumeIndex := by
   intro E _ _ _ B L c hB hc hBL hn
   have hinj : Function.Injective (emb E).toAddMonoidHom := (mixedEmbedding E).injective

@@ -1,6 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.PullbackCarrier
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.PurelyInseparable.Exponent
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -8,35 +59,9 @@ open scoped CategoryTheory.Obj
 
 namespace GlobalTheory.GeomSurj
 
-theorem surjective_of_points {k K : Type} [Field k] [Field K] [IsAlgClosed K] (σ : k →+* K)
-    {P A : Scheme.{0}} (a : A ⟶ Sp k) [LocallyOfFiniteType a] (ψ : P ⟶ A)
-    (hψ : IsClosed (Set.range ψ))
-    (h : ∀ x : Sp K ⟶ A, x ≫ a = spMap σ → ∃ p : Sp K ⟶ P, x = p ≫ ψ) : Surjective ψ := by
-  have hs : Surjective (spMap σ) := ⟨fun y ↦ by
-    obtain ⟨z⟩ : Nonempty ↥(Sp K) := inferInstance
-    exact ⟨z, Subsingleton.elim _ _⟩⟩
-  have hJ : JacobsonSpace ↥(pullback a (spMap σ)) :=
-    LocallyOfFiniteType.jacobsonSpace (pullback.snd a (spMap σ))
-  have hZ : IsClosed ((pullback.fst a (spMap σ)) ⁻¹' Set.range ψ) :=
-    hψ.preimage (pullback.fst a (spMap σ)).continuous
-  have hsub : closedPoints ↥(pullback a (spMap σ)) ⊆
-      (pullback.fst a (spMap σ)) ⁻¹' Set.range ψ := by
-    intro z hz
-    replace hz : IsClosed {z} := hz
-    obtain ⟨p, hp⟩ := h (pointOfClosedPoint (pullback.snd a (spMap σ)) z hz ≫ pullback.fst _ _)
-      (by rw [Category.assoc, pullback.condition, pointOfClosedPoint_comp_assoc])
-    obtain ⟨w⟩ : Nonempty ↥(Sp K) := inferInstance
-    refine ⟨p w, ?_⟩
-    rw [← Scheme.Hom.comp_apply, ← hp, Scheme.Hom.comp_apply, pointOfClosedPoint_apply]
-  have hall := closure_minimal hsub hZ
-  rw [closure_closedPoints] at hall
-  refine ⟨fun y ↦ ?_⟩
-  obtain ⟨z, rfl⟩ := (pullback.fst a (spMap σ)).surjective y
-  exact hall (Set.mem_univ z)
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory NumberField in
 open scoped CategoryTheory.Obj in
-
 theorem _root_.GlobalTheory.GeomSurj.exists_lift_of_surjective {Ω : Type} [Field Ω] [IsAlgClosed Ω] {P A : Scheme.{0}}
     (ψ : P ⟶ A) [LocallyOfFiniteType ψ] [Surjective ψ] (x : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Sp Ω ⟶ A) :
     ∃ p : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Sp Ω ⟶ P, x = p ≫ ψ := by
@@ -63,7 +88,11 @@ theorem _root_.GlobalTheory.GeomSurj.exists_lift_of_surjective {Ω : Type} [Fiel
   haveI : Algebra.FiniteType Ω ((pullback ψ x).residueField q) := hft
   haveI : Module.Finite Ω ((pullback ψ x).residueField q) :=
     finite_of_finite_type_of_isJacobsonRing _ _
-  let φ : (pullback ψ x).residueField q →ₐ[Ω] Ω := IsAlgClosed.lift
+  let φ : (pullback ψ x).residueField q →ₐ[Ω] Ω := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have key : Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ g = 𝟙 _ := by
     rw [← Spec.map_preimage g, ← hf, ← Spec.map_comp]
     convert Spec.map_id (CommRingCat.of Ω)

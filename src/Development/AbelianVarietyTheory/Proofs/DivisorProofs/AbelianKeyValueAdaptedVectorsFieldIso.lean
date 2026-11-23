@@ -1,14 +1,56 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.TanRel
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsPolAVSectionInverseImage
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbsoluteSiegel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.StalkOfAppLEEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TanRel
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.StalkOfAppLEEq
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArc
 import Development.AbelianVarietyTheory.Statements.FundamentalDomains.ExistsIsAddFundamentalDomain
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.TorusExt
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.MemSpanOfCardLe
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
-open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.MBModel GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
+open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -33,8 +75,8 @@ include he in
 theorem toF_comp : (e : F →+* F').comp (toF R F) = toF R F' :=
   RingHom.ext fun r => by simp [toF, he]
 
-include he in
 
+include he in
 def rhoE : TE R F' ⟶ TE R F :=
   Over.homMk (spMap (dualMap (e : F →+* F'))) (by
     show spMap (dualMap (e : F →+* F')) ≫ spMap (algebraMap F (DualNumber F)) ≫
@@ -42,12 +84,11 @@ def rhoE : TE R F' ⟶ TE R F :=
       spMap (algebraMap F' (DualNumber F')) ≫ spMap (algebraMap (FractionRing R) F') ≫
         spMap (algebraMap R (FractionRing R))
     simp only [← spMap_comp']
-    congr 1
-    exact RingHom.ext fun r => TrivSqZeroExt.ext (by simp [dualMap, he, TrivSqZeroExt.algebraMap_eq_inl])
-      (by simp [dualMap, TrivSqZeroExt.algebraMap_eq_inl]))
+    apply congrArg spMap
+    ext r <;> simp [dualMap, he, TrivSqZeroExt.algebraMap_eq_inl])
+
 
 include he in
-
 def sigE : TF (R := R) F' ⟶ TF (R := R) F :=
   Over.homMk (spMap (e : F →+* F')) (by
     show spMap (e : F →+* F') ≫ spMap (algebraMap (FractionRing R) F) ≫ spMap (algebraMap R (FractionRing R)) =

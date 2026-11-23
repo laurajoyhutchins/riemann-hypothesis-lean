@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.PAdicHodge.KerFontaineThetaCompFrobeniusEquivSymmPow
+module
+
+public import GroundTheory.PAdicHodge.KerFontaineThetaCompFrobeniusEquivSymmPow
+public import GroundTheory.PAdicHodge.KerTheta
+public import GroundTheory.PAdicHodge.TiltValuation
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Eval
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -12,8 +64,8 @@ section RootsOfUnity
 
 variable {F : Type*} [NormedField F] [IsUltrametricDist F]
 
-omit [IsUltrametricDist F] in
 
+omit [IsUltrametricDist F] in
 theorem norm_le_one_of_pow_eq_one {ζ : F} {n : ℕ} (hn : n ≠ 0) (h : ζ ^ n = 1) : ‖ζ‖ ≤ 1 := by
   by_contra hlt
   have := one_lt_pow₀ (lt_of_not_ge hlt) hn
@@ -59,10 +111,10 @@ namespace AInf
 variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
 variable {p : ℕ} [hp : Fact p.Prime] [IsPerfectoidField K p]
 
-local notation "𝒪" => normInteger K
 local notation "𝒪♭" => PreTilt (normInteger K) p
-local notation "θ" => fontaineTheta (normInteger K) p
-local notation "φ" => WittVector.frobeniusEquiv p (PreTilt (normInteger K) p)
+local notation "𝒪" => normInteger K
+local notation "φ" => WittVector.frobeniusEquiv p 𝒪♭
+local notation "θ" => fontaineTheta 𝒪 p
 
 def mu (ε : 𝒪♭) : AInf K p := teichmuller p ε - 1
 
@@ -81,6 +133,7 @@ theorem mu_eq_xi_mul (ε : 𝒪♭) : mu ε = xi ε * (φ).symm (mu ε) := by
 
 theorem frobeniusEquiv_xi (ε : 𝒪♭) :
     φ (xi ε) = ∑ i ∈ Finset.range p, teichmuller p ε ^ i := by
+
   rw [xi, map_sum]
   simp only [map_pow, WittVector.frobeniusEquiv_teichmuller, frobeniusEquiv_symm_pow_p]
 
@@ -97,30 +150,12 @@ theorem untilt_frobeniusEquiv_symm_pow_p {ε : 𝒪♭} (hε : PreTilt.untilt ε
 
 theorem fontaineTheta_xi {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1)
     (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) : θ (xi ε) = 0 := by
+
   rw [xi, map_sum]
   simp only [map_pow, fontaineTheta_teichmuller]
   have h := mul_geom_sum (PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε)) p
   rw [untilt_frobeniusEquiv_symm_pow_p hε, sub_self] at h
   exact (mul_eq_zero.1 h).resolve_left (sub_ne_zero.2 hζ)
-
-theorem frobeniusEquiv_symm_mu_ne_zero {ε : 𝒪♭} (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) :
-    (φ).symm (mu ε) ≠ 0 := by
-  intro h
-  have := congrArg θ h
-  rw [frobeniusEquiv_symm_mu, map_sub, map_one, fontaineTheta_teichmuller, map_zero,
-    sub_eq_zero] at this
-  exact hζ this
-
-theorem mu_ne_zero {ε : 𝒪♭} (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) : mu ε ≠ 0 := by
-  intro h
-  apply frobeniusEquiv_symm_mu_ne_zero hζ
-  rw [h, map_zero]
-
-theorem eq_xi_of_mul_eq {ε : 𝒪♭} (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) {x : AInf K p}
-    (h : x * (φ).symm (mu ε) = mu ε) : x = xi ε := by
-  have := mul_right_cancel₀ (frobeniusEquiv_symm_mu_ne_zero hζ)
-    (h.trans (mu_eq_xi_mul ε))
-  exact this
 
 theorem norm_sub_one_pow {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1)
     (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) :
@@ -188,6 +223,7 @@ theorem norm_natCast_ne_zero {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1)
 theorem xi_coeff_zero (ε : 𝒪♭) :
     (xi ε).coeff 0 = ∑ i ∈ Finset.range p, (_root_.frobeniusEquiv 𝒪♭ p).symm ε ^ i := by
   change WittVector.constantCoeff (xi ε) = _
+
   rw [xi, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_pow]
@@ -234,33 +270,12 @@ theorem ker_fontaineTheta_eq_span_xi {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1
     RingHom.ker θ = Ideal.span {xi ε} :=
   IsPerfectoidField.ker_fontaineTheta_eq_span (fontaineTheta_xi hε hζ) (isUnit_xi_coeff_one hε hζ)
 
-theorem ker_fontaineTheta_comp_frobeniusEquiv_symm_eq_span {ε : 𝒪♭}
-    (hε : PreTilt.untilt ε = 1)
-    (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) :
-    RingHom.ker ((fontaineTheta (normInteger K) p).comp ((φ).symm : AInf K p ≃+* AInf K p).toRingHom) =
-      Ideal.span {∑ i ∈ Finset.range p, teichmuller p ε ^ i} := by
-  have := ker_fontaineTheta_comp_frobeniusEquiv_symm_pow (ker_fontaineTheta_eq_span_xi hε hζ) 1
-  rwa [pow_one, pow_one, frobeniusEquiv_xi] at this
-
-theorem frobeniusEquiv_mu (ε : 𝒪♭) :
-    φ (mu ε) = mu ε * ∑ i ∈ Finset.range p, teichmuller p ε ^ i := by
-  rw [mu, map_sub, map_one, WittVector.frobeniusEquiv_teichmuller, map_pow, mul_comm,
-    geom_sum_mul]
-
 theorem frobeniusEquiv_symm_ofCompatible (y : ℕ → 𝒪) (hy : ∀ n, y (n + 1) ^ p = y n) :
     (_root_.frobeniusEquiv 𝒪♭ p).symm (IsPerfectoidField.ofCompatible p y hy) =
       IsPerfectoidField.ofCompatible p (fun n => y (n + 1)) (fun n => hy (n + 1)) :=
   IsPerfectoidField.preTilt_ext p fun n => by
     rw [PreTilt.coeff_frobeniusEquiv_symm, IsPerfectoidField.coeff_ofCompatible,
       IsPerfectoidField.coeff_ofCompatible]
-
-theorem ker_fontaineTheta_eq_span_xi_ofCompatible (y : ℕ → 𝒪) (hy : ∀ n, y (n + 1) ^ p = y n)
-    (h0 : y 0 = 1) (h1 : y 1 ≠ 1) :
-    RingHom.ker θ = Ideal.span {xi (IsPerfectoidField.ofCompatible p y hy)} := by
-  refine ker_fontaineTheta_eq_span_xi ?_ ?_
-  · rw [IsPerfectoidField.untilt_ofCompatible, h0]
-  · rw [frobeniusEquiv_symm_ofCompatible, IsPerfectoidField.untilt_ofCompatible]
-    exact h1
 
 theorem isUnit_teichmuller_of_untilt_eq_one {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1) :
     IsUnit (teichmuller p ε : AInf K p) := by

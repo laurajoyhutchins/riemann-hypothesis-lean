@@ -1,30 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.NontrivialTransvection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.TransvectionIdentitiesUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SpecialUnitaryHyperbolicPlaneMemTransvections
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix GlobalTheory.UTrans GlobalTheory.AdLat
 open scoped TensorProduct
 
 namespace GlobalTheory.UTrans.PlaneRefl
 
 variable {R : Type} [CommRing R] {n : ℕ} (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R)
-
-theorem hf_add_left (x y v : Fin n → R) : hf σ G (x + y) v = hf σ G x v + hf σ G y v := by
-  simp only [hf, Pi.add_apply, add_mul, Finset.sum_add_distrib]
-
-theorem hf_add_right (x y v : Fin n → R) : hf σ G v (x + y) = hf σ G v x + hf σ G v y := by
-  simp only [hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
-
-theorem hf_smul_left (a : R) (x v : Fin n → R) : hf σ G (a • x) v = a * hf σ G x v := by
-  simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum, mul_assoc]
-
-theorem hf_smul_right (a : R) (x v : Fin n → R) : hf σ G v (a • x) = σ a * hf σ G v x := by
-  simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum, map_mul]
-  refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
-
-theorem tv_zero (x : Fin n → R) : tv σ G x 0 = 1 := by
-  ext a b; simp [tv]
 
 open NumberField IsDedekindDomain Matrix in
 open scoped TensorProduct in
@@ -75,23 +109,23 @@ private lemma quasiReflection_eq_transvectionGen_mul_shifted {E : Type} [Field E
   have hN0 : N ≠ 0 := by rw [hN]; exact mul_ne_zero hxz hsβ
   have hσD : σ D = D / u := by
     rw [hDdef]
-    simp only [map_add, map_mul, hinv, hsu]
+    simp only [map_add (f := _), map_mul, hinv, hsu]
     field_simp
     ring
   have hσN : σ N = N := by rw [hN]; simp only [map_mul, hinv]; ring
   have trA : A + σ A = 0 := by
     rw [hA]
-    simp only [map_div₀, map_mul, map_neg, map_sub, map_one, map_add, map_pow, hinv, hsu, hαr, hσD, hσN]
+    simp only [map_div₀, map_mul, map_neg, map_sub, map_one, map_add (f := _), map_pow, hinv, hsu, hαr, hσD, hσN]
     field_simp
     ring
   have trB : B + σ B = 0 := by
     rw [hB]
-    simp only [map_div₀, map_mul, map_neg, map_sub, map_one, map_add, map_pow, hinv, hsu, hαr, hσD, hσN]
+    simp only [map_div₀, map_mul, map_neg, map_sub, map_one, map_add (f := _), map_pow, hinv, hsu, hαr, hσD, hσN]
     field_simp
     ring
   have trR : R + σ R = 0 := by
     rw [hR]
-    simp only [map_div₀, map_mul, map_neg, map_sub, map_one, map_add, map_pow, hinv, hsu, hαr, hσD, hσN]
+    simp only [map_div₀, map_mul, map_neg, map_sub, map_one, map_add (f := _), map_pow, hinv, hsu, hαr, hσD, hσN]
     field_simp
     ring
   obtain ⟨w, hw⟩ : ∃ w, w = z + (c * σ β) • x := ⟨_, rfl⟩
@@ -162,10 +196,10 @@ private lemma transvection_mul_isotropic {E : Type} [Field E] {n : ℕ} (σ : E 
   congr 2
   ring
 
+
 open NumberField IsDedekindDomain Matrix in
 open scoped TensorProduct in
 variable {R : Type} [CommRing R] {n : ℕ} (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) in
-
 theorem _root_.GlobalTheory.UTrans.PlaneRefl.quasiRefl_eq_mul_of_plane : ∀ (E : Type) [Field E] [CharZero E]
     (n : ℕ) (σ : E →+* E) (G : Matrix (Fin n) (Fin n) E), _root_.GlobalTheory.UTrans.IsHerm σ G →
     ∀ (x z : Fin n → E) (a u : E), _root_.GlobalTheory.UTrans.hf σ G z z = 0 →
@@ -205,7 +239,7 @@ theorem _root_.GlobalTheory.UTrans.PlaneRefl.quasiRefl_eq_mul_of_plane : ∀ (E 
       _root_.GlobalTheory.UTrans.hf σ G y y := by rw [← hy1, hEiso]
   have hD1 : u * σ (a + ω * β) * β + (a + ω * β) * σ β ≠ 0 := by
     have e1 : u * σ (a + ω * β) * β + (a + ω * β) * σ β = ω * β * σ β * (1 - u) := by
-      rw [map_add, map_mul, hσω]
+      rw [map_add (f := _), map_mul, hσω]
       linear_combination hD
     rw [e1]
     refine mul_ne_zero (mul_ne_zero (mul_ne_zero hω0 hxz) ?_) (sub_ne_zero.2 (Ne.symm hu1))

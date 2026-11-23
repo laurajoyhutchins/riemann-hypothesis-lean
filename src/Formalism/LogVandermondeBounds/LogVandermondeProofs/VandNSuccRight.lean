@@ -1,4 +1,51 @@
-import Formalism.LogVandermondeBounds.VandPlace
+module
+
+public import Formalism.LogVandermondeBounds.VandPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.LogVandermondeBounds.StandardLattice
 
@@ -85,7 +132,7 @@ private lemma vandN_mul_prod_pow_le_vandN_rowPar (k M : ℕ) (v b : ℕ → ℝ)
     have hA : b m ^ (k - 1) ≤ ∏ i ∈ range (k - 1), (rowPar k v b i - rowPar k v b (k - 1 + m)) := by
       calc b m ^ (k - 1) = ∏ _i ∈ range (k - 1), b m := by simp
         _ ≤ _ := by
-          apply prod_le_prod (fun i _ => hbm.le)
+          apply prod_le_prod₀ (fun i _ => hbm.le)
           intro i hi
           rw [mem_range] at hi
           rw [hr i hi, hr2 m]
@@ -93,7 +140,7 @@ private lemma vandN_mul_prod_pow_le_vandN_rowPar (k M : ℕ) (v b : ℕ → ℝ)
     have hB : (1 : ℝ) ≤ ∏ i ∈ range m, (rowPar k v b (k - 1 + i) - rowPar k v b (k - 1 + m)) := by
       calc (1 : ℝ) = ∏ _i ∈ range m, (1 : ℝ) := by simp
         _ ≤ _ := by
-          apply prod_le_prod (fun i _ => zero_le_one)
+          apply prod_le_prod₀ (fun i _ => zero_le_one)
           intro i hi
           rw [mem_range] at hi
           rw [hr2 i, hr2 m]
@@ -128,7 +175,7 @@ private lemma vandN_le_pow_mul_pow_mul_vandN_of_interlace (p : ℕ) (u v : ℕ �
   beta_reduce
   have hP0 : ∏ j ∈ Ico 1 (p + 1 + 1), (u 0 - u j) ≤ D ^ (p + 1) := by
     calc _ ≤ ∏ _j ∈ Ico 1 (p + 1 + 1), D := by
-          apply prod_le_prod
+          apply prod_le_prod₀
           · intro j hj
             rw [mem_Ico] at hj
             linarith [hu 0 j (by omega) (by omega)]
@@ -143,7 +190,7 @@ private lemma vandN_le_pow_mul_pow_mul_vandN_of_interlace (p : ℕ) (u v : ℕ �
     linarith [hu (i + 1) (p + 1) (by omega) (by omega)]
   have hC : ∏ i ∈ range p, (u (i + 1) - u (p + 1)) ≤ D ^ p := by
     calc _ ≤ ∏ _i ∈ range p, D := by
-          apply prod_le_prod
+          apply prod_le_prod₀
           · intro i hi
             rw [mem_range] at hi
             linarith [hu (i + 1) (p + 1) (by omega) (by omega)]
@@ -169,7 +216,7 @@ private lemma vandN_le_pow_mul_pow_mul_vandN_of_interlace (p : ℕ) (u v : ℕ �
     linarith [(hint i (by omega)).2, (hint (j + 1) (by omega)).1, hu (i + 1) (j + 1) (by omega) (by omega)]
   have hVW : ∏ i ∈ range p, ∏ j ∈ Ico (i + 1) p, (u (i + 1) - u (j + 1))
       ≤ ∏ i ∈ range p, ∏ j ∈ Ico (i + 1) p, (v i - v (j + 1)) := by
-    apply prod_le_prod
+    apply prod_le_prod₀
     · intro i hi
       apply prod_nonneg
       intro j hj
@@ -177,7 +224,7 @@ private lemma vandN_le_pow_mul_pow_mul_vandN_of_interlace (p : ℕ) (u v : ℕ �
       rw [mem_Ico] at hj
       linarith [hu (i + 1) (j + 1) (by omega) (by omega)]
     · intro i hi
-      apply prod_le_prod
+      apply prod_le_prod₀
       · intro j hj
         rw [mem_range] at hi
         rw [mem_Ico] at hj
@@ -189,7 +236,7 @@ private lemma vandN_le_pow_mul_pow_mul_vandN_of_interlace (p : ℕ) (u v : ℕ �
   have hAdj : (1 : ℝ) ≤ ∏ i ∈ range p, (v i - v (i + 1)) := by
     calc (1 : ℝ) = ∏ _i ∈ range p, (1 : ℝ) := by simp
       _ ≤ _ := by
-        apply prod_le_prod (fun i _ => zero_le_one)
+        apply prod_le_prod₀ (fun i _ => zero_le_one)
         intro i hi
         rw [mem_range] at hi
         exact hst i (by omega)

@@ -1,16 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsCompactIsOpenUnitsAt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHomSuppSplit
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCompactIsOpenUnitsAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalCharacterNormOneUnit
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalMomentMatrixTransform
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalFieldNormValuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IndicatorIntMMemSB
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsJacMapZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalUnitaryMatrixSurjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SplitPlaceCharacterComponentSmoothUnitaryConduct
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalMomentMatrixTransform
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalCharacterNormOneUnit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHomSuppSplit
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalFieldNormValuation
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +75,9 @@ theorem det_ne_zero_of_hasSig {n r s : ℕ} {M : Matrix (Fin n) (Fin n) ℂ} (h 
   have h3 : LinearMap.range M.mulVecLin = ⊤ := by
     apply Submodule.eq_top_of_finrank_eq
     have := M.rank_le_width
-    simp only [Matrix.rank, Fintype.card_fin] at h2 this
-    rw [Module.finrank_fin_fun]; omega
+    try simp only [Fintype.card_fin] at h2 this
+    rw [Module.finrank_fin_fun]
+    exact (Matrix.finrank_range_mulVecLin M).trans (by omega)
   have hu : IsUnit M := (Matrix.mulVec_surjective_iff_isUnit).mp (LinearMap.range_eq_top.mp h3)
   exact ((Matrix.isUnit_iff_isUnit_det M).mp hu).ne_zero
 
@@ -81,7 +121,7 @@ theorem exists_isQuad (h : IsCMExt F E σ) : ∃ ξ : AE F E, IsQuad (cA σ) ξ 
     intro s u hsu
     simp only [Algebra.smul_def, mul_one] at hsu
     have h2 := congrArg σ hsu
-    simp only [map_add, map_mul, AlgHom.commutes, hξ, map_zero] at h2
+    simp only [map_add (f := _), map_mul, AlgHom.commutes, hξ, map_zero] at h2
     have h3 : algebraMap F E u * ξ = 0 := by linear_combination (hsu - h2) / 2
     have hu : u = 0 := (map_eq_zero (algebraMap F E)).mp ((mul_eq_zero.mp h3).resolve_right hξ0)
     subst hu
@@ -104,7 +144,7 @@ open scoped TensorProduct
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
 
 theorem chrW_comp (h : IsCMExt F E σ) (χ : Chr F E) {m : ℕ}
-    (hχ : ResEtaPow (Units.map (algebraMap F (AF F)).toMonoidHom).range χ m) {v : Pl F} (t : E →ₐ[F] Fv F v) :
+    (hχ : ResEtaPow (Units.map (algebraMap F (AF F)).toMonoidHom).range χ m) {v : Pl (F := F)} (t : E →ₐ[F] Fv F v) :
     chrW χ (t.comp σ) = (chrW χ t)⁻¹ := by
   obtain ⟨ξ, hξ⟩ := exists_isQuad h
   ext x
@@ -112,7 +152,7 @@ theorem chrW_comp (h : IsCMExt F E σ) (χ : Chr F E) {m : ℕ}
   have key : ∀ p q : Fv F v × Fv F v, p + q + p * q = 0 → (1 + L p) * (1 + L q) = 1 := by
     intro p q hpq
     have := congrArg L hpq
-    rw [map_add, map_add, map_mul, map_zero] at this
+    rw [map_add (f := _), map_add (f := _), map_mul, map_zero] at this
     linear_combination this
   have hx1 : ((x : Fv F v) - 1, (0 : Fv F v)) + (((x⁻¹ : (Fv F v)ˣ) : Fv F v) - 1, 0) +
       ((x : Fv F v) - 1, (0 : Fv F v)) * (((x⁻¹ : (Fv F v)ˣ) : Fv F v) - 1, 0) = 0 := by
@@ -185,7 +225,7 @@ section Adelic
 open Matrix GlobalTheory.SplitGLLift GlobalTheory.KSplit
 open GlobalTheory.Div.CoordOpp (piW_cA incM_map_piW unit_map)
 
-variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {v : Pl F}
+variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {v : Pl (F := F)}
 
 theorem eq_zero_of_at (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) {z : AE F E} (hz : At (evFin F v) z) (h1 : piW t z = 0)
     (h2 : piW (t.comp σ) z = 0) : z = 0 := by
@@ -221,11 +261,11 @@ theorem idl_val (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) (x y : (Fv F v)ˣ)
     (idl h t (x, y) : AE F E) = 1 + liftPair h t ((x : Fv F v) - 1, (y : Fv F v) - 1) := rfl
 
 theorem piW_idl (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) (x y : (Fv F v)ˣ) : piW t (idl h t (x, y) : AE F E) = x := by
-  rw [idl_val, map_add, map_one, piW_liftPair, add_sub_cancel]
+  rw [idl_val, map_add (f := _), map_one, piW_liftPair, add_sub_cancel]
 
 theorem piW_comp_idl (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) (x y : (Fv F v)ˣ) :
     piW (t.comp σ) (idl h t (x, y) : AE F E) = y := by
-  rw [idl_val, map_add, map_one, piW_comp_liftPair, add_sub_cancel]
+  rw [idl_val, map_add (f := _), map_one, piW_comp_liftPair, add_sub_cancel]
 
 theorem at_idl (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) (x y : (Fv F v)ˣ) :
     At (evFin F v) ((idl h t (x, y) : AE F E) - 1) := by

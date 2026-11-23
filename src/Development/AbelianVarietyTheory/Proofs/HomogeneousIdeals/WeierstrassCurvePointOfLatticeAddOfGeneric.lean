@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsVariableChangeEqLatticeCurve
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsVariableChangeEqLatticeCurve
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Filter PeriodPair WeierstrassCurve
 open scoped Topology
@@ -21,17 +64,18 @@ theorem _root_.GlobalTheory.latticeCurve_nonsingular {z : ℂ} (hz : z ∉ L.lat
   simp only [_root_.GlobalTheory.latticeCurve]
   linear_combination h / 4
 
-open Classical in
 
-def latticePoint (z : ℂ) : (latticeCurve L).toAffine.Point :=
-  if hz : z ∈ L.lattice then 0 else .some _ _ (latticeCurve_nonsingular L hz)
+open Classical in
+def latticePoint (z : ℂ) : (latticeCurve L).toAffine.Point := by
+  classical
+  exact if hz : z ∈ L.lattice then 0 else .some _ _ (latticeCurve_nonsingular L hz)
 
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
 variable (L : PeriodPair) in
 theorem _root_.GlobalTheory.latticePoint_of_mem {z : ℂ} (hz : z ∈ L.lattice) :
     _root_.GlobalTheory.latticePoint L z = 0 := by
-  rw [_root_.GlobalTheory.latticePoint, dif_pos hz]
+  rw [_root_.GlobalTheory.latticePoint, dite_eq_left hz]
 
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
@@ -39,7 +83,7 @@ variable (L : PeriodPair) in
 theorem _root_.GlobalTheory.latticePoint_of_notMem {z : ℂ} (hz : z ∉ L.lattice) :
     _root_.GlobalTheory.latticePoint L z =
       .some (℘[L] z) (℘'[L] z / 2) (_root_.GlobalTheory.latticeCurve_nonsingular L hz) := by
-  rw [_root_.GlobalTheory.latticePoint, dif_neg hz]
+  rw [_root_.GlobalTheory.latticePoint, dite_eq_right hz]
 
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
@@ -205,10 +249,10 @@ private theorem latticePoint_add_of_not_mem {z w : ℂ} (hz : z ∉ L.lattice)
     field_simp
     ring
 
+
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
 variable (L : PeriodPair) in
-
 theorem _root_.GlobalTheory.latticePoint_add (z w : ℂ) :
     _root_.GlobalTheory.latticePoint L (z + w) =
       _root_.GlobalTheory.latticePoint L z + _root_.GlobalTheory.latticePoint L w := by
@@ -289,10 +333,10 @@ theorem _root_.GlobalTheory.latticePoint_eq_iff {z w : ℂ} :
   rw [← _root_.GlobalTheory.latticePoint_eq_zero_iff, sub_eq_add_neg, _root_.GlobalTheory.latticePoint_add,
     _root_.GlobalTheory.latticePoint_neg, ← sub_eq_add_neg, sub_eq_zero]
 
+
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
 variable (L : PeriodPair) in
-
 theorem _root_.GlobalTheory.weierstrassP_add {z w : ℂ} (hz : z ∉ L.lattice)
     (hw : w ∉ L.lattice) (hne : ℘[L] z ≠ ℘[L] w) :
     ℘[L] (z + w) = ((℘'[L] z - ℘'[L] w) / (℘[L] z - ℘[L] w)) ^ 2 / 4 - ℘[L] z - ℘[L] w ∧
@@ -300,10 +344,10 @@ theorem _root_.GlobalTheory.weierstrassP_add {z w : ℂ} (hz : z ∉ L.lattice)
       ℘'[L] z) :=
   weierstrassP_add_and_deriv_add_of_ne L hz hw hne
 
+
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
 variable (L : PeriodPair) in
-
 theorem _root_.GlobalTheory.weierstrassP_add_add_sub {z w : ℂ} (hz : z ∉ L.lattice)
     (hw : w ∉ L.lattice) (hne : ℘[L] z ≠ ℘[L] w) :
     ℘[L] (z + w) + ℘[L] (z - w) - 2 * ℘[L] w =
@@ -323,10 +367,10 @@ theorem _root_.GlobalTheory.weierstrassP_add_add_sub {z w : ℂ} (hz : z ∉ L.l
   field_simp
   linear_combination 4 * hy
 
+
 open Filter PeriodPair WeierstrassCurve in
 open scoped Topology in
 variable (L : PeriodPair) in
-
 theorem _root_.GlobalTheory.weierstrassP_second_ne_zero {w : ℂ} (hw : w ∉ L.lattice)
     (h : ℘'[L] w = 0) : 6 * ℘[L] w ^ 2 - L.g₂ / 2 ≠ 0 := by
   intro h6

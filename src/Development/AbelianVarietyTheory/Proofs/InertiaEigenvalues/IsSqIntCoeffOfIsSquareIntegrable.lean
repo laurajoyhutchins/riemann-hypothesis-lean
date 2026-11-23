@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.EssSquareIntegrableSegments
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.SquareIntegrableSegment
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.EssSquareIntegrableSegments
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.SquareIntegrableSegment
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,8 +81,8 @@ theorem norm_coeff_out (hs : IsSmooth π) (hi : π.IsIrreducible) (hu : IsUnitar
   obtain ⟨c, h1, hc⟩ := exists_central_scalar hs hi hu z.2
   rw [hz, map_mul, Module.End.mul_apply, hc, map_smul, map_smul, norm_smul, h1, one_mul]
 
-omit [ValuativeRel k] in
 
+omit [ValuativeRel k] in
 theorem isLocallyConstant_orbit [IsTopologicalRing k] (hs : IsSmooth π) (v : V) :
     IsLocallyConstant fun g : GL (Fin N) k => π g v := by
   refine (IsLocallyConstant.iff_eventually_eq _).2 fun g => ?_
@@ -45,7 +91,7 @@ theorem isLocallyConstant_orbit [IsTopologicalRing k] (hs : IsSmooth π) (v : V)
   show π x v = π g v
   conv_rhs => rw [← hx', ← Module.End.mul_apply, ← map_mul, mul_inv_cancel_left]
 
-theorem isSqIntCoeff_of_isSquareIntegrable {δ : IrrGL k} (h : UnitaryDual.IsSquareIntegrable δ) :
+theorem isSqIntCoeff_of_isSquareIntegrable {δ : IrrGL (k := k)} (h : UnitaryDual.IsSquareIntegrable δ) :
     IsSqIntCoeff δ.rep := by
   obtain ⟨-, hu, ν, hν, H⟩ := h
   intro m hm μ hμ v l hl
@@ -55,15 +101,16 @@ theorem isSqIntCoeff_of_isSquareIntegrable {δ : IrrGL k} (h : UnitaryDual.IsSqu
   have hs := δ.2.rep.smooth
   have hF := norm_coeff_out hs δ.2.rep.irr hu v l
   have hl' : l ∈ smoothPart δ.rep.dual := hl.preimage continuous_inv
-  refine ⟨fun q => ‖l (δ.rep q.out v)‖, hF, ?_, ?_⟩
-  · refine Continuous.aestronglyMeasurable ((QuotientGroup.isQuotientMap_mk _).continuous_iff.2 ?_)
+  have hf : AEStronglyMeasurable (fun q : AdGL k δ.1 => ‖l (δ.rep q.out v)‖) μ := by
+    refine Continuous.aestronglyMeasurable ((QuotientGroup.isQuotientMap_mk _).continuous_iff.2 ?_)
     rw [show (fun q : AdGL k δ.1 => ‖l (δ.rep q.out v)‖) ∘ QuotientGroup.mk = fun g => ‖l (δ.rep g v)‖ from funext hF]
     exact ((isLocallyConstant_orbit hs v).comp fun w => ‖l w‖).continuous
-  · rw [show ENNReal.ofReal 2 = 2 by simp, eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top two_ne_zero ENNReal.ofNat_ne_top,
-      Measure.isMulLeftInvariant_eq_smul μ ν, lintegral_smul_measure]
-    have h1 := H v l hl'
-    simp only [enorm_norm, ENNReal.toReal_ofNat, ENNReal.rpow_two]
-    exact ENNReal.mul_lt_top ENNReal.coe_lt_top h1
+  refine ⟨fun q => ‖l (δ.rep q.out v)‖, hF, ?_⟩
+  rw [memLp_iff, show ENNReal.ofReal 2 = 2 by simp, eLpNorm_lt_top_iff_lintegral_rpow_eNorm_lt_top two_ne_zero ENNReal.ofNat_ne_top hf,
+    Measure.isMulLeftInvariant_eq_smul μ ν, lintegral_smul_measure]
+  have h1 := H v l hl'
+  simp only [enorm_norm, ENNReal.toReal_ofNat, ENNReal.rpow_two]
+  exact ENNReal.mul_lt_top ENNReal.coe_lt_top h1
 
 end GlobalTheory.LocGL.SqIntBridge
 

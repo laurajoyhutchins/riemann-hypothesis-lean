@@ -1,8 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.Th0FromPhPrime
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.GoodModelLattice
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementJ
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstIsogeny
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalI
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.BaseChangeCompatible
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.TwoTorsionCurveToSeries
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.AnaSysW
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.ThetaFromPhiDerivative
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.Th0FromPhPrime
 import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.BridgeTwoMore
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalI
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementJ
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -20,7 +69,7 @@ theorem norm_transport (ι : ℂ ≃+* ℂ_[2]) (α : ℂ) (n : ℕ) (h : ((n : 
     ι α * ι (conj α) = (n : ℂ_[2]) + 1 := by
   rw [← map_mul, Complex.mul_conj, ← h]
   push_cast
-  rw [map_add, map_natCast, map_one]
+  rw [map_add (f := _), map_natCast, map_one]
 
 theorem Th0TwoAnalytic_of (hE : HalfFibreExists) (hF : FibreZInstance) (hH : HalfShiftSeries)
     (hM : FibreMap) : ThetaZeroTwoAnalytic := by
@@ -70,7 +119,7 @@ theorem Th0TwoAnalytic_of (hE : HalfFibreExists) (hF : FibreZInstance) (hH : Hal
   have hk : (ι : ℂ →+* ℂ_[2]) (3 * L.weierstrassP (ω₀ / 2) ^ 2 - L.g₂ / 4) =
       3 * ι (L.weierstrassP (ω₀ / 2)) ^ 2 - ι L.g₂ / 4 := by
     simp only [RingEquiv.coe_toRingHom, map_sub, map_mul, map_pow, map_div₀, map_ofNat]
-  rw [map_add, map_mul, PowerSeries.map_C, PowerSeries.map_C, Map.map_wOf, hk, ← hP] at hfib'
+  rw [map_add (f := _), map_mul, PowerSeries.map_C, PowerSeries.map_C, Map.map_wOf, hk, ← hP] at hfib'
   have hZ : IsFibreZ (wpReg W)
       (PowerSeries.C (px W (ptW 2 L ι W (ω₀ / 2)) + W.b₂ / 12) +
         PowerSeries.C (3 * (px W (ptW 2 L ι W (ω₀ / 2)) + W.b₂ / 12) ^ 2 - g₂ W / 4) *

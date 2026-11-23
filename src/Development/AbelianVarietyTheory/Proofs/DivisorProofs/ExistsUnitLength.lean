@@ -1,6 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
+module
+
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinsumNormNeg
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Finite.GaloisField
+
+@[expose] public section
 
 namespace GlobalTheory.InvolutionTraceUnit
 
@@ -8,55 +63,7 @@ open Polynomial IsLocalRing
 
 theorem ff_norm {k : Type} [Field k] [Finite k] (σ : k →+* k) (hσ : ∀ x, σ (σ x) = x)
     (hne : ∃ x, σ x ≠ x) (u : k) (hu : σ u = u) : ∃ w, w * σ w = u := by
-  classical
-  let F : Subfield k := RingHom.eqLocusField σ (RingHom.id k)
-  have hF : ∀ x : k, x ∈ F ↔ σ x = x := fun x => Iff.rfl
-  let σ' : k ≃ₐ[F] k :=
-    { toFun := σ, invFun := σ, left_inv := hσ, right_inv := hσ, map_mul' := σ.map_mul,
-      map_add' := σ.map_add, commutes' := fun r => (hF r).1 r.2 }
-  have hσ' : ∀ x, σ' x = σ x := fun _ => rfl
-  have h1 : ∀ (τ : k ≃ₐ[F] k) (x : k), τ x = x ∨ τ x = σ x := by
-    intro τ x
-    have hs : τ (x + σ x) = x + σ x :=
-      τ.commutes ⟨x + σ x, (hF _).2 (by rw [map_add, hσ, add_comm])⟩
-    have hn : τ (x * σ x) = x * σ x :=
-      τ.commutes ⟨x * σ x, (hF _).2 (by rw [map_mul, hσ, mul_comm])⟩
-    rw [map_add] at hs
-    rw [map_mul] at hn
-    have : (τ x - x) * (τ x - σ x) = 0 := by
-      linear_combination (τ x) * hs - hn
-    rcases mul_eq_zero.1 this with h | h
-    · exact Or.inl (sub_eq_zero.1 h)
-    · exact Or.inr (sub_eq_zero.1 h)
-  have h2 : ∀ τ : k ≃ₐ[F] k, τ = 1 ∨ τ = σ' := by
-    intro τ
-    by_contra hc
-    push Not at hc
-    obtain ⟨a, ha⟩ : ∃ a, τ a ≠ a := by
-      by_contra h; push Not at h
-      exact hc.1 (AlgEquiv.ext h)
-    obtain ⟨b, hb⟩ : ∃ b, τ b ≠ σ b := by
-      by_contra h; push Not at h
-      exact hc.2 (AlgEquiv.ext h)
-    have ha' := (h1 τ a).resolve_left ha
-    have hb' := (h1 τ b).resolve_right hb
-    rcases h1 τ (a + b) with h | h
-    · rw [map_add, hb'] at h
-      exact ha (add_right_cancel h)
-    · rw [map_add, map_add, ha'] at h
-      exact hb (add_left_cancel h)
-  have h3 : (1 : k ≃ₐ[F] k) ≠ σ' := by
-    obtain ⟨x, hx⟩ := hne
-    intro h
-    apply hx
-    rw [← hσ', ← h]; rfl
-  have h4 : (Finset.univ : Finset (k ≃ₐ[F] k)) = {1, σ'} := by
-    ext τ; simpa using h2 τ
-  obtain ⟨w, hw⟩ := FiniteField.norm_surjective F k ⟨u, (hF u).2 hu⟩
-  refine ⟨w, ?_⟩
-  have := Algebra.norm_eq_prod_automorphisms F w
-  rw [hw, h4, Finset.prod_pair h3] at this
-  exact this.symm
+  apply GlobalTheory.NormGauss.exists_norm_eq <;> assumption
 
 section Local
 
@@ -115,7 +122,7 @@ theorem norm_principal [IsAdicComplete (maximalIdeal O) O] (s : O →+* O) (hs :
     linear_combination (t * s t) * e - ((t + s t) * a + (1 - x)) * hM
   have e2 : t * s t * s a ^ 2 + (t + s t) * s a + (1 - x) = 0 := by
     have := congrArg s e1
-    simp only [map_add, map_mul, map_pow, map_sub, map_one, map_zero, hs, hx] at this
+    simp only [map_add (f := _), map_mul, map_pow, map_sub, map_one, map_zero, hs, hx] at this
     linear_combination this
   have e3 : (a - s a) * (t * s t * (a + s a) + (t + s t)) = 0 := by
     linear_combination e1 - e2
@@ -128,7 +135,7 @@ theorem norm_principal [IsAdicComplete (maximalIdeal O) O] (s : O →+* O) (hs :
       rw [this]
       exact neg_mem (Ideal.mul_mem_left _ _ (add_mem ha0 (mem_of_invol s hs ha0)))
   refine ⟨1 + a * t, ?_⟩
-  rw [map_add, map_one, map_mul, e4]
+  rw [map_add (f := _), map_one, map_mul, e4]
   linear_combination e1
 
 theorem norm_unit [IsAdicComplete (maximalIdeal O) O] [Finite (ResidueField O)] (s : O →+* O)
@@ -229,10 +236,10 @@ theorem exists_unit_length (c : E →+* E) (s : O →+* O) (hs : ∀ x, s (s x) 
     obtain ⟨d, hd⟩ := hint z hz z hz
     have hsum : algebraMap O E (b + d + (a + s a)) = h (y + z) (y + z) := by
       have e1 : h y (y + z) = h y y + h y z := by
-        rw [hc (y + z) y, ha, map_add, ← hc, ← hc]
+        rw [hc (y + z) y, ha, map_add (f := _), ← hc, ← hc]
       have e2 : h z (y + z) = h z y + h z z := by
-        rw [hc (y + z) z, ha, map_add, ← hc, ← hc]
-      rw [ha, e1, e2, hc y z, map_add, map_add, map_add, ← hcs, hb, hd, hayz]
+        rw [hc (y + z) z, ha, map_add (f := _), ← hc, ← hc]
+      rw [ha, e1, e2, hc y z, map_add (f := _), map_add (f := _), map_add (f := _), ← hcs, hb, hd, hayz]
       ring
     have := sub_mem (h0 _ (add_mem hy hz) _ hsum) (add_mem (h0 y hy b hb) (h0 z hz d hd))
     simpa using this
@@ -312,11 +319,13 @@ theorem extend_family [IsAdicComplete (maximalIdeal O) O] [Finite (ResidueField 
         · obtain ⟨a, hai⟩ := (hdual z).1 hz (v i) (hv i)
           rw [← hai, algebraMap_smul]
           exact L.smul_mem _ (hv i)
-        · rw [← hB, map_sub, map_sum]
+        · set_option synthInstance.maxHeartbeats 100000 in
+            rw [← hB, map_sub, map_sum]
           simp only [hB, hm, hon]
           simp
       have := hyz _ hz'
       have hvy : ∀ i, h (v i) y = 0 := fun i => by rw [hc, (hφ y).1 hy i, map_zero]
+
       rw [hc, ← hB, map_sub, map_sum] at this
       simp only [hB, hm, hvy, mul_zero, Finset.sum_const_zero, sub_zero] at this
       rw [hc]

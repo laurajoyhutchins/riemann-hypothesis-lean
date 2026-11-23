@@ -1,14 +1,52 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJGlobal
-import GroundTheory.AutomorphicForms.GL2.GJStandardLUnramified
-import GroundTheory.AutomorphicForms.GL2.GJLocalFEGamma
-import GroundTheory.AutomorphicForms.GL2.GJFEInduced
-import GroundTheory.AutomorphicForms.GL2.GJFELevi
-import GroundTheory.AutomorphicForms.GL2.FiniteIdeleDecomp
-import GroundTheory.AutomorphicForms.GL2.GodementSectionFactor
-import GroundTheory.AutomorphicForms.GL2.GJFEInducedLevi
-import GroundTheory.AutomorphicForms.RestrictedHaarProduct
-import GroundTheory.GlobalFields.LocalFieldAtPlace
+module
+
+public import GroundTheory.AutomorphicForms.GL2.FiniteIdeleDecomp
+public import GroundTheory.AutomorphicForms.AdelicGLn
+public import GroundTheory.AutomorphicForms.GL2.GJLocalZeta
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixCoord
+public import GroundTheory.GlobalFields.Adele.IntegersLattice
+public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
+public import GroundTheory.AutomorphicForms.GL2.GJFEInducedLevi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Set Topology IsDedekindDomain NumberField NumberField.mixedEmbedding
 open scoped NumberField.AdeleRing RestrictedProduct SchwartzMap Classical
@@ -27,18 +65,18 @@ instance measurableSpace_infiniteAdelicGL : MeasurableSpace (AdelicGLn.InfiniteA
 
 instance borelSpace_infiniteAdelicGL : BorelSpace (AdelicGLn.InfiniteAdelicGL K n) := ⟨rfl⟩
 
-variable (K n) in
 
+variable (K n) in
 def archComp : AdelicGLn.AdelicGL K n →* AdelicGLn.InfiniteAdelicGL K n :=
   (MonoidHom.fst _ _).comp (AdelicGLn.prodEquiv K n).toMonoidHom
 
-variable (K n) in
 
+variable (K n) in
 def finComp : AdelicGLn.AdelicGL K n →* AdelicGLn.FiniteAdelicGL K n :=
   (MonoidHom.snd _ _).comp (AdelicGLn.prodEquiv K n).toMonoidHom
 
-variable (n) in
 
+variable (n) in
 def localComp (v : HeightOneSpectrum (𝓞 K)) :
     AdelicGLn.AdelicGL K n →* GL (Fin n) (v.adicCompletion K) where
   toFun g := AdelicGLn.finiteRestrictedEquiv K n (finComp K n g) v
@@ -93,8 +131,8 @@ def archZeta (μ : Measure (AdelicGLn.InfiniteAdelicGL K n))
     (s : ℂ) : ℂ :=
   ∫ x, archIntegrand φ f s x ∂μ
 
-variable (n) in
 
+variable (n) in
 def integralGLPositiveCompacts (v : HeightOneSpectrum (𝓞 K)) :
     TopologicalSpace.PositiveCompacts (GL (Fin n) (v.adicCompletion K)) where
   carrier := integralGL (v.adicCompletion K) n
@@ -103,8 +141,8 @@ def integralGLPositiveCompacts (v : HeightOneSpectrum (𝓞 K)) :
     rw [(isOpen_integralGL _ n).interior_eq]
     exact ⟨1, (integralGL _ n).one_mem⟩
 
-variable (n) in
 
+variable (n) in
 def localHaar (v : HeightOneSpectrum (𝓞 K)) : Measure (GL (Fin n) (v.adicCompletion K)) :=
   Measure.haarMeasure (integralGLPositiveCompacts n v)
 

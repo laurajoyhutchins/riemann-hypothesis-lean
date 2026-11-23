@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CompInv
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementF
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CompInv
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -42,7 +84,7 @@ def FlowU : Prop :=
   ∀ (R : Type u) [CommRing R] (W : WeierstrassCurve R),
     IsDer (D W) ∧ ConstCurve (D W) (curveS W) ∧ IsFlowUW (curveS W) (D W) X (wSer W) ∧
     fwAt (curveS W) X (wSer W) = fw W ∧ fuAt (curveS W) X (wSer W) = fu W ∧
-    ∀ f : R⟦X⟧, om W * D W f = derivative R f
+    ∀ f : R⟦X⟧, om W * D W f = derivative f
 
 def DLSpec : Prop :=
   ∀ (R : Type u) [CommRing R] (W : WeierstrassCurve R),
@@ -54,12 +96,6 @@ def FlowL : Prop :=
     IsFlow (curveL W) (DL W) (xL W) (yL W) ∧
     toL X * yL W = -xL W ∧ toL (wSer W) * yL W = -1 ∧ toL (wSer W) * xL W = toL X
 
-def XLSq : Prop :=
-  ∀ (R : Type u) [CommRing R] (W : WeierstrassCurve R),
-    DL W (xL W) ^ 2 = 4 * xL W ^ 3 + HahnSeries.C W.b₂ * xL W ^ 2 + 2 * HahnSeries.C W.b₄ * xL W
-      + HahnSeries.C W.b₆ ∧
-    DL W (DL W (xL W)) = 6 * xL W ^ 2 + HahnSeries.C W.b₂ * xL W + HahnSeries.C W.b₄
-
 def ISerSpec : Prop :=
   ∀ (R : Type u) [CommRing R] (W : WeierstrassCurve R),
     constantCoeff (iSer W) = 0 ∧ coeff 1 (iSer W) = -1 ∧ (iSer W).subst (iSer W) = X ∧
@@ -68,6 +104,6 @@ def ISerSpec : Prop :=
     (yS W).subst (iSer W) = invOfUnit (iDen W) (-1) ^ 3 *
       (-yS W - C W.a₁ * X * xS W - C W.a₃ * X ^ 3) ∧
     D W (iSer W) = -(fw W).subst (iSer W) ∧
-    (om W).subst (iSer W) * derivative R (iSer W) = -om W
+    (om W).subst (iSer W) * derivative (iSer W) = -om W
 
 end Formalism.L2.Th1.A

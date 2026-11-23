@@ -1,5 +1,49 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GramLocTendsto
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TendstoLevelNormOfRegularization
+module
+
+public import Formalism.HermitianCurvature.StatementKB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GramLocTendsto
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TendstoLevelNormOfRegularization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.MetricSpace.Sequences
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt
 
@@ -52,10 +96,10 @@ theorem integral_formula_passes_to_limits : Formalism.FourierDecayAlt.KB.LimitIn
       · rw [hθ' A w' h]
         exact ge_of_tendsto' (hco A ⟨w', h⟩) fun n => (hprob (φ n) A).1 w'
       · show 0 ≤ (if h : w' ∈ B then a A ⟨w', h⟩ else 0)
-        rw [dif_neg h]
+        rw [dite_eq_right h]
     · intro w' h
       show (if h : w' ∈ B then a A ⟨w', h⟩ else 0) = 0
-      rw [dif_neg h]
+      rw [dite_eq_right h]
     · have e1 : ∑ w' ∈ B, θ' A w' = ∑ x : B, a A x := by
         rw [← Finset.sum_coe_sort B]
         exact Finset.sum_congr rfl fun x _ => hθ' A x.1 x.2
@@ -63,7 +107,7 @@ theorem integral_formula_passes_to_limits : Formalism.FourierDecayAlt.KB.LimitIn
         rw [Finset.sum_coe_sort B (θ (φ n) A)]
         exact (hprob (φ n) A).2.2
       rw [e1]
-      refine tendsto_nhds_unique (tendsto_finset_sum _ fun x _ => hco A x) ?_
+      refine tendsto_nhds_unique (tendsto_finsetSum _ fun x _ => hco A x) ?_
       simp_rw [e2]
       exact tendsto_const_nhds
   · intro Y hY κ hκ l hl hl0 A
@@ -75,7 +119,7 @@ theorem integral_formula_passes_to_limits : Formalism.FourierDecayAlt.KB.LimitIn
     have hR : Filter.Tendsto (fun n => (∏ v ∈ A, X i v ^ C.Kst) *
         ∑ w' ∈ B, θ (φ n) A w' * (KB.withRR S (RR (φ n))).base.N0 ε (i - 1) w' Y κ) Filter.atTop
         (nhds ((∏ v ∈ A, X i v ^ C.Kst) * ∑ w' ∈ B, θ' A w' * S.base.N0 ε (i - 1) w' Y κ)) := by
-      refine Filter.Tendsto.const_mul _ (tendsto_finset_sum _ fun w' hw' => ?_)
+      refine Filter.Tendsto.const_mul _ (tendsto_finsetSum _ fun w' hw' => ?_)
       refine Filter.Tendsto.mul ?_ ((PBB.tendsto_base_norm_of_regularization S RR hconv ε hε (i - 1) (by omega) w' Y κ).comp
         hφ.tendsto_atTop)
       rw [hθ' A w' hw']

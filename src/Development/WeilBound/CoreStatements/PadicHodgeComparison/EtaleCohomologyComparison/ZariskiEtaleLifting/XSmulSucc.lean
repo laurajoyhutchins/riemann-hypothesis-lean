@@ -1,5 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.CechAugRow
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.InstAddCommGroup
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.CategoryTheory.SingleObj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -76,7 +120,7 @@ def lin {M : Type w} {N : Type w'} [AddCommGroup M] [AddCommGroup N] [Module ℤ
   map_smul' p x := by
     induction p using Polynomial.induction_on generalizing x with
     | C a => rw [RingHom.id_apply, eq_intCast, Int.cast_smul_eq_zsmul, Int.cast_smul_eq_zsmul, map_zsmul]
-    | add p q hp hq => rw [RingHom.id_apply, add_smul, map_add, add_smul, hp, hq]; rfl
+    | add p q hp hq => rw [RingHom.id_apply, add_smul, map_add (f := _), add_smul, hp, hq]; rfl
     | monomial n a ih =>
       rw [RingHom.id_apply, pow_succ, ← mul_assoc, mul_smul _ X x, mul_smul _ X (f x), ih, h]; rfl
 
@@ -89,8 +133,6 @@ def prMap {T T' : C} (φ : T ⟶ T') : Φ.Pr T →ₗ[ℤ[X]] Φ.Pr T' :=
     cases r
     · exact Subtype.ext (map_zero _)
     · exact Subtype.ext (map_smul _ _ _)
-
-theorem prMap_apply {T T' : C} (φ : T ⟶ T') (x : Φ.Pr T) (r : ℕ) : (Φ.prMap φ x r).1 = (F.map φ).hom (x r).1 := rfl
 
 def rees : C ⥤ ModuleCat.{w} ℤ[X] where
   obj T := ModuleCat.of _ (Φ.Pr T)
@@ -106,10 +148,6 @@ def comap (G : C' ⥤ C) : Flt (G ⋙ F) where
   S r := ⟨fun T => (Φ.S r).S (G.obj T), fun φ _ hx => (Φ.S r).map_mem (G.map φ) hx⟩
   μ := Φ.μ
   mul r T := Φ.mul r (G.obj T)
-
-theorem comap_rees (G : C' ⥤ C) : (Φ.comap G).rees = G ⋙ Φ.rees := rfl
-
-theorem comap_fn (G : C' ⥤ C) (r : ℕ) : ((Φ.comap G).S r).fn = G ⋙ (Φ.S r).fn := rfl
 
 def FAcyc {T T' : C} (i : T ⟶ T') (g : T' ⟶ T') : Prop :=
   Function.Injective (F.map i).hom ∧
@@ -145,14 +183,17 @@ structure Act (j : C₀ ⥤ C) (U : UF C) (d : ℕ) (D : C) where
   trans : ∀ (t : C₀) (c c' : D ⟶ j.obj t), ∃! a, act a c = c'
 
 def Act.γ {j : C₀ ⥤ C} {U : UF C} {d : ℕ} {D : C} (A : Act j U d D) : Gam d →* End D where
-  toFun a := A.act (fun k => U.q D ^ (Multiplicative.toAdd a k)) (𝟙 D)
+  toFun a := End.of (A.act (fun k => U.q D ^ (Multiplicative.toAdd a k)) (𝟙 D))
   map_one' := by
+    apply End.ext
+    change A.act _ (𝟙 D) = 𝟙 D
     have : (fun k => U.q D ^ (Multiplicative.toAdd (1 : Gam d) k)) = 1 := funext fun k => pow_zero _
-    rw [this, A.act_one]; rfl
+    rw [this, A.act_one]
   map_mul' a b := by
-    change _ = A.act _ (𝟙 D) ≫ A.act _ (𝟙 D)
+    apply End.ext
+    change A.act _ (𝟙 D) = A.act _ (𝟙 D) ≫ A.act _ (𝟙 D)
     rw [A.act_comp, Category.id_comp, ← A.act_mul]
-    congr 1
+    apply congrArg (fun c => A.act c (𝟙 D))
     funext k
     rw [Pi.mul_apply, map_pow, U.map_q, ← pow_add, toAdd_mul, Pi.add_apply, add_comm]
 
@@ -181,11 +222,6 @@ structure NI {d : ℕ} (s : R) {M N : SingleObj (Gam d) ⥤ ModuleCat.{w} R} (α
     ∃ y, ((π k).app _).hom y = y ∧ (N.map (X := SingleObj.star _) (Y := SingleObj.star _) (gen k)).hom y - y = s • x
   inj : ∀ k (x : N.obj (SingleObj.star _)), ((π k).app _).hom x = x →
     (N.map (X := SingleObj.star _) (Y := SingleObj.star _) (gen k)).hom x = x → s • x = 0
-
-def eqv {M : Type} [Monoid M] {D D' : C} (γ : M →* End D) (γ' : M →* End D') (θ : D ⟶ D')
-    (h : ∀ a, (γ a : D ⟶ D) ≫ θ = θ ≫ (γ' a : D' ⟶ D')) : SingleObj.functor γ ⟶ SingleObj.functor γ' where
-  app _ := θ
-  naturality _ _ a := h a
 
 structure Onto {C₁ : Type u'} [Category.{v'} C₁] (ι : C₁ ⥤ C) (Q : C → Prop) : Prop where
   full : ι.Full

@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEqAddOfRedVEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonnegSumSmulIntBilinFormToRealMemPsdConeStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SysExOfPol
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonnegSumSmulIntBilinFormToRealMemPsdConeStatement
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.NonemptyFiniteRootsOfBimul
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
+
 open NumberField ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.TorRef GlobalTheory.PolFan
 
 noncomputable section
@@ -20,7 +65,7 @@ theorem isTorsionFree_int (X : Type) [AddCommGroup X] [Module (𝓞 E) X] [Modul
     Module.IsTorsionFree ℤ X := by
   refine ⟨fun r hr x y hxy => ?_⟩
   have h0 : r ≠ 0 := hr.ne_zero
-  have h1 : IsRegular (r : 𝓞 E) := isRegular_of_ne_zero (by exact_mod_cast h0)
+  have h1 : IsRegular (r : 𝓞 E) := IsRegular.of_ne_zero (by exact_mod_cast h0)
   refine Module.IsTorsionFree.isSMulRegular h1 ?_
   have hxy' : r • x = r • y := hxy
   simp only [Int.cast_smul_eq_zsmul]
@@ -54,7 +99,7 @@ theorem tw_symm' (σ : 𝓞 E ≃+* 𝓞 E) (a : Fin n → 𝓞 E) : tw σ.symm 
 
 def conj (σ : 𝓞 E ≃+* 𝓞 E) (r : (Fin n → 𝓞 E) →ₗ[𝓞 E] (Fin m → 𝓞 E)) : (Fin n → 𝓞 E) →ₗ[𝓞 E] (Fin m → 𝓞 E) where
   toFun a := tw σ.symm (r (tw σ a))
-  map_add' a b := by simp only [tw_add, map_add]
+  map_add' a b := by simp only [tw_add, map_add (f := _)]
   map_smul' c a := by
     simp only [tw_smul, map_smul, RingHom.id_apply]
     rw [σ.symm_apply_apply]
@@ -188,10 +233,8 @@ theorem isDomT_zero : IsDomT H q n (fun _ _ => 0) := by
   obtain ⟨i, -⟩ := Function.ne_iff.1 hc
   exact (hx.ne_zero i (Subsingleton.elim _ _)).elim
 
-variable (H q) in
 open Classical in
-
-def extFun (φ : InvFun (𝓞 E)) : InvFun (𝓞 E) where
+def extFun (H : Host E) (q : ℕ) (φ : InvFun (𝓞 E)) : InvFun (𝓞 E) where
   toFun n B := if IsDomT H q n B then φ.toFun n B else (InvFun.minVal (𝓞 E)).toFun n B
   inv n m r hr B := by
     by_cases h : IsDomT H q m B
@@ -252,10 +295,10 @@ theorem extFun_homog (hpol : IsPolFan H.bar q φ) (htw : IsTwInv H φ) (n k : �
   · rw [extFun_of_not (mt (isDomT_smul_iff ht B).1 h), extFun_of_not h]
     exact minVal_smul ht n B
 
-variable (H q φ) in
 
+variable (H q φ) in
 theorem evalR_extFun {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X]
-    (hX : Module.finrank (𝓞 E) X ≤ q) {B : X →ₗ[ℤ] X →ₗ[ℤ] ℝ} (hB : B ∈ psdCone H.bar X) :
+    (hX : Module.finrank (𝓞 E) X ≤ q) {B : X →ₗ[ℤ] X →ₗ[ℤ] ℝ} (hB : B ∈ psdCone (bar := H.bar) (X := X)) :
     evalR (extFun H q φ) B = evalR φ B := by
   obtain ⟨n, r, hr⟩ := Module.Finite.exists_fin' (𝓞 E) X
   unfold evalR
@@ -270,12 +313,12 @@ theorem evalR_extFun {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Module.Fin
   exact ⟨X₁, _, _, inferInstance, s ∘ₗ r, B₁, hs.comp hr, hrk, hB₁, hd, fun a b => he _ _⟩
 
 theorem toReal_mem_psdCone {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X]
-    {β : LinearMap.BilinForm ℤ X} (hβ : β ∈ balForms H.bar X) (hp : ∀ y, 0 ≤ β y y) : toReal β ∈ psdCone H.bar X := by
+    {β : LinearMap.BilinForm ℤ X} (hβ : β ∈ balForms H.bar X) (hp : ∀ y, 0 ≤ β y y) : toReal β ∈ psdCone (bar := H.bar) (X := X) := by
   have := GlobalTheory.T.nonneg_sum_smul_intBilinFormToReal_mem_psdCone (𝓞 E) H.bar X 1 ![β] ![1] (by simp [hβ]) (by simp [hp]) (by simp)
   simpa using this
 
 theorem isCone_of_agree {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X] {φ₁ φ₂ : InvFun (𝓞 E)}
-    (h : ∀ B ∈ psdCone H.bar X, evalR φ₁ B = evalR φ₂ B) {m : ℕ} {γ : Fin m → LinearMap.BilinForm ℤ X}
+    (h : ∀ B ∈ psdCone (bar := H.bar) (X := X), evalR φ₁ B = evalR φ₂ B) {m : ℕ} {γ : Fin m → LinearMap.BilinForm ℤ X}
     (hc : IsCone H.bar φ₁ γ) : IsCone H.bar φ₂ γ := by
   have hz : ∀ β ∈ balForms H.bar X, (∀ y, 0 ≤ β y y) → φ₁.evalZ β = φ₂.evalZ β := fun β hβ hp => by
     rw [← evalR_toReal, ← evalR_toReal]
@@ -296,7 +339,7 @@ theorem isCone_extFun_iff {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Modul
 
 theorem isPolFanOn_extFun {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X]
     (hX : Module.finrank (𝓞 E) X ≤ q) (h : IsPolFanOn H.bar φ X) : IsPolFanOn H.bar (extFun H q φ) X := by
-  have agree := fun B (hB : B ∈ psdCone H.bar X) => evalR_extFun H q φ hX hB
+  have agree := fun B (hB : B ∈ psdCone (bar := H.bar) (X := X)) => evalR_extFun H q φ hX hB
   have hz : ∀ β ∈ balForms H.bar X, (∀ y, 0 ≤ β y y) → (extFun H q φ).evalZ β = φ.evalZ β := fun β hβ hp => by
     rw [← evalR_toReal, ← evalR_toReal]
     exact agree _ (toReal_mem_psdCone hβ hp)
@@ -304,7 +347,7 @@ theorem isPolFanOn_extFun {X : Type} [AddCommGroup X] [Module (𝓞 E) X] [Modul
     fun m m' γ s hγ => ?_, fun B hB => ?_, ?_⟩
   · rw [agree _ (smul_mem_psdCone hB ht), agree _ hB]
     exact h.homog B hB t ht
-  · have hsum : B + B' ∈ psdCone H.bar X := by
+  · have hsum : B + B' ∈ psdCone (bar := H.bar) (X := X) := by
       obtain ⟨m, γ, c, hγ, hc, rfl⟩ := h.cover B hB
       obtain ⟨m', γ', c', hγ', hc', rfl⟩ := h.cover B' hB'
       have := GlobalTheory.T.nonneg_sum_smul_intBilinFormToReal_mem_psdCone (𝓞 E) H.bar X (m + m') (Fin.append γ γ') (Fin.append c c')
@@ -371,7 +414,7 @@ theorem finrank_le_of_isDomT {X : Type} [AddCommGroup X] [Module (𝓞 E) X] {be
   have hadd : ∀ y y', g (y + y') = g y + g y' := fun y y' => by
     obtain ⟨a, rfl⟩ := hs y
     obtain ⟨b, rfl⟩ := hs y'
-    rw [← map_add, hg, hg, hg, tw_add, map_add]
+    rw [← map_add (f := _), hg, hg, hg, tw_add, map_add (f := _)]
   let j : X₁ ≃+ X := AddEquiv.ofBijective (AddMonoidHom.mk' g hadd) ⟨fun y y' e => by
       obtain ⟨a, rfl⟩ := hs y
       obtain ⟨b, rfl⟩ := hs y'

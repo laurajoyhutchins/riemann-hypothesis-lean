@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.QuadraticAlgebra.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 @[reducible] noncomputable def UpperTheory.Reformulated.B.Qh37.Lp :
     (L : Type) → [Field L] → Type :=
@@ -8,8 +54,8 @@ import Mathlib
     (R : Type) → [CommRing R] → R → Type :=
     fun (R : Type) [CommRing R] (Δ : R) ↦ QuadraticAlgebra R Δ (0 : R)
 
-open NumberField NumberField.IsCMField in
 
+open NumberField NumberField.IsCMField in
 private theorem UpperTheory.Reformulated.B.Qh37.exists_anti (L : Type) [Field L] [NumberField L] [IsCMField L] :
     ∃ δ : L, δ ≠ 0 ∧ complexConj L δ = -δ := by
   have h : ∃ x : L, complexConj L x ≠ x := by
@@ -47,18 +93,18 @@ theorem UpperTheory.Reformulated.B.Qh37.globEx :
     exact congrArg Subtype.val this
   have hf : ∀ x y, f ⟨x, y⟩ = algebraMap _ L x + algebraMap _ L y * δ := by
     intro x y
-    rw [QuadraticAlgebra.mk_eq_add_smul_omega, map_add, map_smul, AlgHom.commutes, hω,
+    rw [QuadraticAlgebra.mk_eq_add_smul_omega, map_add (f := _), map_smul, AlgHom.commutes, hω,
       Algebra.smul_def]
   have hstar : ∀ z, f (star z) = NumberField.IsCMField.complexConj L (f z) := by
     rintro ⟨x, y⟩
-    rw [QuadraticAlgebra.star_mk, hf, hf, map_add, map_add, map_mul, map_mul,
+    rw [QuadraticAlgebra.star_mk, hf, hf, map_add (f := _), map_add (f := _), map_mul, map_mul,
       AlgEquiv.commutes, AlgEquiv.commutes, hδ, map_neg, map_zero]
     ring
   have hinj : Function.Injective f := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨x, y⟩ h
     have h' := hstar ⟨x, y⟩
-    rw [h, map_zero, QuadraticAlgebra.star_mk, hf, map_add, map_mul, map_neg, map_zero] at h'
+    rw [h, map_zero, QuadraticAlgebra.star_mk, hf, map_add (f := _), map_mul, map_neg, map_zero] at h'
     rw [hf] at h
     have hx : algebraMap _ L x = 0 := by linear_combination (h + h') / 2
     have hy : algebraMap _ L y * δ = 0 := by linear_combination (h - h') / 2
@@ -70,7 +116,7 @@ theorem UpperTheory.Reformulated.B.Qh37.globEx :
     intro z
     have h1 : (z + NumberField.IsCMField.complexConj L z) / 2 ∈
         NumberField.maximalRealSubfield L := by
-      rw [← NumberField.IsCMField.complexConj_eq_self_iff, map_div₀, map_add, map_ofNat,
+      rw [← NumberField.IsCMField.complexConj_eq_self_iff, map_div₀, map_add (f := _), map_ofNat,
         NumberField.IsCMField.complexConj_apply_apply, add_comm]
     have h2 : (z - NumberField.IsCMField.complexConj L z) / (2 * δ) ∈
         NumberField.maximalRealSubfield L := by

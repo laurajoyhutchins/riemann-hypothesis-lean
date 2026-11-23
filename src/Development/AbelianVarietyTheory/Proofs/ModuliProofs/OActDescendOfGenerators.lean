@@ -1,10 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,10 +117,10 @@ private theorem mul_comp_of_descends_monHom {G H : Over S} [GrpObj G] [GrpObj H]
   change ((up x * up y).left ≫ φ) ≫ f.left = ((up x * up y) ≫ f').left ≫ ψ
   rw [Over.comp_left, Category.assoc, Category.assoc, hf]
 
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField in
 open scoped CategoryTheory.Obj TensorProduct in
 variable {U S : Scheme.{0}} {j : U ⟶ S} [Flat j] [Surjective j] in
-
 theorem _root_.GlobalTheory.ActDescent.isMonHom_descend {G H : Over S} [GrpObj G] [GrpObj H]
     {G' H' : Over U} [GrpObj G'] [GrpObj H'] {φ : G'.left ⟶ G.left} {ψ : H'.left ⟶ H.left}
     (hG : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsGrpPullback G' G j φ) (hH : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsGrpPullback H' H j ψ) (f' : G' ⟶ H') [IsMonHom f'] (f : G ⟶ H)
@@ -94,44 +135,11 @@ theorem _root_.GlobalTheory.ActDescent.isMonHom_descend {G H : Over S} [GrpObj G
   · have h := key _ (fst G G) (snd G G)
     simpa [Hom.mul_def] using h
 
-omit [Flat j] [Surjective j] in
 
-theorem exists_descend {O : Type} [CommRing O] {G : Over S} [GrpObj G] {G' : Over U} [GrpObj G']
-    {φ : G'.left ⟶ G.left} (hG : IsGrpPullback G' G j φ) (i : OAct O G') {s : Set O}
-    (hs : Subring.closure s = ⊤) (hi : ∀ x ∈ s, ∃ f : G ⟶ G, (i.act x).left ≫ φ = φ ≫ f.left) (c : O) :
-    ∃ f : G ⟶ G, (i.act c).left ≫ φ = φ ≫ f.left := by
-  let φ₀ : Over.mk (G'.hom ≫ j) ⟶ G := Over.homMk φ hG.1.w
-  let ρ := pushHom hG G'
-  have key : ∀ (x : G' ⟶ G') (f : G ⟶ G), x.left ≫ φ = φ ≫ f.left ↔ ρ x = φ₀ ≫ f := fun x f =>
-    ⟨fun h => Over.OverMorphism.ext h, fun h => congrArg (fun z => z.left) h⟩
-  have h0 : i.act 0 = 1 := by
-    have := i.add 0 0
-    rw [add_zero] at this
-    exact mul_eq_left.1 this.symm
-  have hneg : ∀ x, i.act (-x) = (i.act x)⁻¹ := fun x =>
-    eq_inv_of_mul_eq_one_left (by rw [← i.add, neg_add_cancel, h0])
-  have hc : c ∈ Subring.closure s := hs ▸ Subring.mem_top c
-  induction hc using Subring.closure_induction with
-  | mem x hx => exact hi x hx
-  | zero => exact ⟨1, (key _ _).2 (by rw [h0, map_one, MonObj.comp_one])⟩
-  | one => exact ⟨𝟙 _, by rw [i.one, Over.id_left, Over.id_left, Category.id_comp, Category.comp_id]⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨f, hf⟩ := hx
-    obtain ⟨g, hg⟩ := hy
-    exact ⟨f * g, (key _ _).2 (by rw [i.add, map_mul, MonObj.comp_mul, (key _ _).1 hf, (key _ _).1 hg])⟩
-  | neg x _ hx =>
-    obtain ⟨f, hf⟩ := hx
-    exact ⟨f⁻¹, (key _ _).2 (by rw [hneg, map_inv, GrpObj.comp_inv, (key _ _).1 hf])⟩
-  | mul x y _ _ hx hy =>
-    obtain ⟨f, hf⟩ := hx
-    obtain ⟨g, hg⟩ := hy
-    exact ⟨f ≫ g, by
-      rw [i.mul, Over.comp_left, Over.comp_left, Category.assoc, hg, ← Category.assoc, hf, Category.assoc]⟩
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField in
 open scoped CategoryTheory.Obj TensorProduct in
 variable {U S : Scheme.{0}} {j : U ⟶ S} [Flat j] [Surjective j] in
-
 theorem _root_.GlobalTheory.ActDescent.exists_oAct {O : Type} [CommRing O] {G : Over S} [GrpObj G]
     {G' : Over U} [GrpObj G'] {φ : G'.left ⟶ G.left} (hG : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsGrpPullback G' G j φ)
     (i : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.OAct O G') (hi : ∀ x, ∃ f : G ⟶ G, (i.act x).left ≫ φ = φ ≫ f.left) :
@@ -161,10 +169,10 @@ end GlobalTheory.ActDescent
 
 namespace GlobalTheory
 
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField in
 open scoped CategoryTheory.Obj TensorProduct in
 variable {U S : Scheme.{0}} {j : U ⟶ S} [Flat j] [Surjective j] in
-
 theorem _root_.GlobalTheory.oAct_descend_of_generators : ∀ (O : Type) [CommRing O] (J : Type) (a : J → O) (K₀ K : Type) [Field K₀] [Field K] (i : K₀ →+* K) (A₀ : Over (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Sp K₀)) (A : Over (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Sp K)) [GrpObj A₀] [GrpObj A] [IsCommMonObj A₀] (φ : A.left ⟶ A₀.left) (act : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.OAct O A) (act₀ : J → (A₀ ⟶ A₀)), Subring.closure (Set.range a) = ⊤ → _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsGrpPullback A A₀ (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap i) φ → (∀ j, (act.act (a j)).left ≫ φ = φ ≫ (act₀ j).left) → ∃ r : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.OAct O A₀, (∀ j, r.act (a j) = act₀ j) ∧ ∀ c, (act.act c).left ≫ φ = φ ≫ (r.act c).left := by
   intro O _ J a K₀ K _ _ i A₀ A _ _ _ φ act act₀ hgen hG hact
   haveI : Flat (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap i) := by unfold _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap; infer_instance

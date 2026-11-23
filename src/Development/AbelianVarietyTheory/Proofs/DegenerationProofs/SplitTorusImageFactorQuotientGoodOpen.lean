@@ -1,16 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRatioOfWeightSumsStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusStableGoodOpenOfWeightUnitsStatement
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.FlatQuotientIsoOfSameKernel
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.FlatQuotientIsoOfSameKernel
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRatioOfWeightSumsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorusStableGoodOpenOfWeightUnitsStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GeometricallyIntegralIffGeometricallyConnectedOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -61,7 +108,7 @@ theorem exists_finset_ext {S : Scheme.{0}} [IsAffine S] (G : Over S) [LocallyOfF
   induction hf using Algebra.adjoin_induction with
   | mem x hx => exact e x hx
   | algebraMap c => exact (key g h c).trans (key g' h' c).symm
-  | add x y _ _ a b => rw [map_add, map_add, a, b]
+  | add x y _ _ a b => rw [map_add (f := _), map_add (f := _), a, b]
   | mul x y _ _ a b => rw [map_mul, map_mul, a, b]
 
 section
@@ -103,8 +150,8 @@ theorem wt_inv {U : G.left.Opens} {u v : Γ(G.left, U)} (e : u * v = 1) {χ : X}
     - (((t ≫ i) * g).left.appLE U ⊤ h₁).hom v * (SplitTorus.val t χ * SplitTorus.val t (-χ)) * c
     - (((t ≫ i) * g).left.appLE U ⊤ h₁).hom v * d
 
-variable (i) in
 
+variable (i) in
 def weights [IrreducibleSpace G.left] : AddSubgroup X where
   carrier := {χ | ∃ (U : G.left.Opens) (u : Γ(G.left, U)), (U : Set G.left).Nonempty ∧ IsUnit u ∧ Wt i U u χ}
   zero_mem' := ⟨⊤, 1, Set.univ_nonempty, isUnit_one, wt_one _⟩
@@ -207,9 +254,11 @@ theorem exists_open (k : Type) [Field k] [IsAlgClosed k] (G : Over (Sp k)) [GrpO
       · rw [map_zero, map_zero]
       · rw [hc Y t g k₁ k₂, appTop_charUnit, ht ψ ⟨U, c, hne, hu, hc⟩, _root_.one_mul]
     have ea : (((t ≫ i) * g).left.appLE U ⊤ k₁).hom (∑ j, a j) = (g.left.appLE U ⊤ k₂).hom (∑ j, a j) := by
+
       rw [map_sum, map_sum]
       exact Finset.sum_congr rfl fun j _ => key _ _ (hw j).1 (hw j).2.2.1
     have eb : (((t ≫ i) * g).left.appLE U ⊤ k₁).hom (∑ j, b j) = (g.left.appLE U ⊤ k₂).hom (∑ j, b j) := by
+
       rw [map_sum, map_sum]
       exact Finset.sum_congr rfl fun j _ => key _ _ (hw j).2.1 (hw j).2.2.2
     rw [← e, map_mul, map_mul, eb, appLE_res _ hU k₁ h₁, appLE_res _ hU k₂ h₂] at ea

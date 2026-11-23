@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountDefs
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.LeAndHalfLeProdOneSubExpNegOfBounds
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountDefs
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.LeAndHalfLeProdOneSubExpNegOfBounds
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.ThresholdLowerBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,8 +149,8 @@ abbrev Tgt (s r : ℕ) := (Fin (2 * s + 1 + 1) → Fin (r + 1) → ℤ) × (Fin 
 def Inter {r : ℕ} (mu : Fin (r + 1) → ℤ) (lam : Fin r → ℤ) : Prop :=
   ∀ i : Fin r, mu i.succ ≤ lam i ∧ lam i ≤ mu i.castSucc
 
-open Classical in
 
+open Classical in
 def Gt {s r : ℕ} (LLk : ChainLetters (2 * s + 1)) (B : ℕ) (t : Tgt s r) : ℚ :=
   if IsChain LLk t.1 ∧ Inter (t.1 (Fin.last _)) t.2.1 ∧ t.2.2 ≤ B then wdim t.2.1 * (sdXi r (B - t.2.2) : ℚ) else 0
 
@@ -232,13 +280,13 @@ theorem prod_kLetters {s : ℕ} (r A0 : ℕ) (A C : Fin s → ℕ) :
     intro i
     have hi := i.isLt
     simp only [hkd]
-    rw [if_neg (by omega), dif_pos (by omega), if_pos (by omega)]
+    rw [if_neg (by omega), dite_eq_left (by omega), if_pos (by omega)]
     simp only [show (2 * i.val + 1 - 1) / 2 = i.val by omega, Fin.eta]
   have k2 : ∀ i : Fin s, kd (2 * i.val + 2) = C i := by
     intro i
     have hi := i.isLt
     simp only [hkd]
-    rw [if_neg (by omega), dif_pos (by omega), if_neg (by omega)]
+    rw [if_neg (by omega), dite_eq_left (by omega), if_neg (by omega)]
     simp only [show (2 * i.val + 2 - 1) / 2 = i.val by omega, Fin.eta]
   simp only [hdeg, hsd]
   refine (Fin.prod_univ_eq_prod_range (fun n => (sd r (kd n) : ℚ)) (2 * s + 1)).trans ?_
@@ -260,8 +308,8 @@ def SrcOK (C0 CE1 CE2 : ℝ) (X : Loc) [NeZero X.m] (j : Fin (numSeg X.TT)) (m :
     IsChain ((BD C0 CE1 CE2 X j m z.1).lettersAt z.2.1.1 z.2.1.2) z.2.2 ∧
     ChainOK (BD C0 CE1 CE2 X j m z.1).T.J (BD C0 CE1 CE2 X j m z.1).T.thr z.2.2
 
-open Classical in
 
+open Classical in
 def Fs (C0 CE1 CE2 : ℝ) (X : Loc) [NeZero X.m] (j : Fin (numSeg X.TT)) (m : ℝ)
     (rz ry : Fin (segS X.TT j) → Fin (X.m + 1) → ℕ) (z : FinalTheorems (segS X.TT j) X.m (X.seg C0 CE1 CE2 j).t) : ℚ :=
   if SrcOK C0 CE1 CE2 X j m rz ry z then
@@ -335,7 +383,7 @@ theorem countUp_of {C0 CYb Cde Ck CD Cb CE1 CE2 Cc H : ℝ} (hCD : ChainDimAt) (
     rw [if_neg hn]
   have hmain := finsum_le_of_inj (Fs C0 CE1 CE2 X j m rz ry)
     (Gt (r := X.m) (mmLetters C0 CE1 CE2 X j rz ry) (X.seg C0 CE1 CE2 j).bPlus) Φ
-    (Gt_nonneg _ _) (Gt_support_finite hCD _ _) (hinj.mono hsupp) (by
+    (Gt_nonneg _ _) (Gt_support_finite hCD _ _) (hinj.mono (fun _ hz => hsupp _ hz)) (by
       intro z hz
       have hz' := hsupp z hz
       obtain ⟨h1, h2, h3, h4⟩ := hΦ z hz'

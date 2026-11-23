@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsHTAtIff
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsDualBC
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsFunctionAtPoint
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.StalkPointFactorization
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.RangeExtension
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.RangeExtension
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsDualBC
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsStalkFractionOfGeneric
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsHTAtIff
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteBaseChangeStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SectionEqZeroOfValuesStatement
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsFunctionAtPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -40,7 +89,7 @@ theorem isFractionRing {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommR
 
 end PositivityTheory.Xgn.SequenceLocalization
 
-set_option maxHeartbeats 1600000 in
+
 open PositivityTheory.Xgn.SequenceLocalization in
 theorem PositivityTheory.Xgn.sequence_localization_exists : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (l : Level H) (Xo : Moduli D l) (c : Coeff l) (O₀ : Type) [CommRing O₀] (β : O₀ →+* c.F) (Y : Model Xo c β) (S : Finset ℕ) (Ω : Type) [Field Ω] (K : Type) [Fintype K] [DecidableEq K] (J : K → Type) [∀ k, Fintype (J k)] (y : (Σ k, J k) → Ω) (𝔐 : HodgeCpt Y S y) (d : ℕ), IsArithVar (mCoordIdeal y) (d + 1) → 0 < D.p + D.q → ∀ (p : ℕ) [Fact p.Prime], p ∈ S → ∀ (A : Type) [CommRing A] [Algebra A Ω] [IsIntegralClosure A ℤ Ω] (m : Ideal A) [m.IsPrime], (p : A) ∈ m → ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Algebra A O] [IsLocalization.AtPrime O m] [Algebra O Ω] [IsScalarTower A O Ω], ∀ (G : GenTors 𝔐 p) (c' : ∀ k, J k), mseg y c' ≠ 0 → ∀ (P : ChartPack G O c'), ∀ q : Cpt 𝔐.ξ, InChart 𝔐.ξ (mseg y) c' q → (∀ o : O, algebraMap O Ω o ∈ regAt 𝔐.ξ q) → HT.omP 𝔐 p q = Submodule.span (regAt 𝔐.ξ q) (P.Dh.om' : Set (Module.Dual Ω 𝔐.Li)) := by
   intro E _ _ _ H D l Xo c O₀ _ β Y S Ω _ K _ _ J _ y 𝔐 d hV _ p hp hpS A _ _ _ m _ hpm O _ _ _ _ _ _ _ G c' hc' P q hq hO
@@ -101,16 +150,16 @@ theorem PositivityTheory.Xgn.sequence_localization_exists : ∀ (E : Type) [Fiel
     intro z w'
     obtain ⟨χ, w₀, hχ, hh, hHT⟩ := P.isHT.2.2 z
     refine GlobalTheory.CompanionTheory.HtLink.isHTAt_iff GlobalTheory.T.lie_model_finite_base_change GlobalTheory.T.section_eq_zero_of_values hξ 𝔐.t.PP.L hn (𝔐.tors p hpS) 𝔐.M P.x κ hx' P.Γ₂
-      P.i₂ P.tors₂ P.M P.toLi (by rw [hκ']; exact P.toLi_pt) _ χ w₀ _ (fun s k _ _ a xk gk u h1 h2 => ?_) hHT
+      P.i₂ P.tors₂ P.M P.toLi (by rw [hκ']; exact P.toLi_pt) _ χ w₀ _ (fun s k _ _ a xk gk u h1 h2 => by
+        obtain ⟨z', rfl⟩ := hsurj s
+        have e1 : χ (qmk (p ^ 𝔐.R p) z') = P.ζ ^ (P.Dh.e z z').val := hχ z'
+        have e2 := G.weil z z' k a xk gk u h1 (by rw [h2, P.pts₂, hκf])
+        have e3 : κ (algebraMap (CR O y c') _ (χ (qmk (p ^ 𝔐.R p) z') : CR O y c')) = G.ζ ^ (G.e z z').val := by
+          rw [e1, hκ, P.Dh_e, Units.val_pow_eq_pow_val, ← P.ζ_eq, map_pow (algebraMap (CR O y c') Ω)]
+          rfl
+        rw [e3, Nat.cast_pow]
+        exact e2) hHT
       (fun b => by rw [hh, P.j_apply, hκ]) q hr (fun a => by rw [hκ]; exact hsub a) w'
-    obtain ⟨z', rfl⟩ := hsurj s
-    have e1 : χ (qmk (p ^ 𝔐.R p) z') = P.ζ ^ (P.Dh.e z z').val := hχ z'
-    have e2 := G.weil z z' k a xk gk u h1 (by rw [h2, P.pts₂, hκf])
-    have e3 : κ (algebraMap (CR O y c') _ (χ (qmk (p ^ 𝔐.R p) z') : CR O y c')) = G.ζ ^ (G.e z z').val := by
-      rw [e1, hκ, P.Dh_e, Units.val_pow_eq_pow_val, ← P.ζ_eq, map_pow (algebraMap (CR O y c') Ω)]
-      rfl
-    rw [e3, Nat.cast_pow]
-    exact e2
   have hpow : ∀ w : Module.Dual Ω 𝔐.Li, ((p : CR O y c') ^ 𝔐.R p) • w = (p ^ 𝔐.R p) • w := fun w => by
     rw [← Nat.cast_pow, Nat.cast_smul_eq_nsmul]
   have hmem : ∀ z, ∀ v ∈ 𝔐.M.omLat q, P.Dh.h z + (p ^ 𝔐.R p) • v ∈ HT.omP 𝔐 p q := fun z v hv =>

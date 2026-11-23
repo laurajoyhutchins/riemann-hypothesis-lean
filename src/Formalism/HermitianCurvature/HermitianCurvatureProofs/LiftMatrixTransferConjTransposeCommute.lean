@@ -1,6 +1,58 @@
-import Formalism.HermitianCurvature.StatementWd
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.EntryCommuteTransposedRMatrix
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ScalarCommuteTransposedRMatrixEntry
+module
+
+public import Formalism.HermitianCurvature.StatementWd
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.EntryCommuteTransposedRMatrix
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ScalarCommuteTransposedRMatrixEntry
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.Wd8
 
@@ -114,8 +166,6 @@ theorem mul_io_apply (x : A) (b : SlopeTestRemainingChoices S A) (z z' : Ix S) :
 theorem io_add (x y : A) : (io (x + y) : SlopeTestRemainingChoices S A) = io x + io y := by simp [io]
 
 theorem io_mul (x y : A) : (io (x * y) : SlopeTestRemainingChoices S A) = io x * io y := by simp [io]
-
-theorem io_neg (x : A) : (io (-x) : SlopeTestRemainingChoices S A) = -io x := by simp [io]
 
 theorem io_zero : (io (0 : A) : SlopeTestRemainingChoices S A) = 0 := by simp [io]
 
@@ -242,9 +292,6 @@ theorem io_comm_bT (σ : Site A) (x : A) (h : ∀ y ∈ ops σ, Commute y x) (w 
     simp only [bT]
     exact (io_comm_vlet σ x h l).mul_right ih
 
-theorem cc_vlet {σ τ : Site A} (h : SitesCommute σ τ) (l : Letter K S) :
-    CC τ (vlet σ l : SlopeTestRemainingChoices S A) := fun x hx => io_comm_vlet σ x (fun y hy => h y hy x hx) l
-
 theorem cc_bT {σ τ : Site A} (h : SitesCommute σ τ) (w : List (Letter K S)) :
     CC τ (bT σ w : SlopeTestRemainingChoices S A) := fun x hx => io_comm_bT σ x (fun y hy => h y hy x hx) w
 
@@ -315,52 +362,12 @@ theorem sum_col_fix (B C : Fin 2 → SlopeTestRemainingChoices S A) (z : Ix S)
     mul_col_fix (B 0) (C 0) z (fun z' => by simp [h]),
     mul_col_zero (B 1) (C 1) z (fun z' => by simp [h]), add_zero]
 
-theorem exchVecA_of (hE1 : ExchangePlusFactor) (hfix : XpFix) : ExchVecA := by
-  intro K A S _ _ _ _ _ _ _ _ QQ sites w Y hOK hw hreg k z
-  have hM := exchA_mat sites w Y (fun σ hσ => hE1 K A S σ w Y (hOK.1 σ hσ).1 hw) hOK.2
-  have hfx := hfix K A S w Y hw.1 hreg
-  have hL : (Xp w Y * lift0 (sites.map fun σ => Ts σ Y).prod * d0 (sites.map fun σ => bT σ w).prod :
-      M2 (SlopeTestRemainingChoices S A)) k 0 z e1 =
-      ∑ l, ∑ z', (Xp w Y k l : SlopeTestRemainingChoices S A) z z' * (v0 sites Y l * uw sites w z') := by
-    rw [mul_diagScalar_apply, Matrix.mul_apply, Matrix.mul_apply]
-    simp only [Matrix.sum_apply, lift0, Matrix.map_apply, mul_io_apply, Finset.sum_mul]
-    rw [Finset.sum_comm]
-    simp only [mul_assoc, v0, uw]
-  have hR : (d0 (sites.map fun σ => bT σ w).prod * lift0 (sites.map fun σ => Ts σ Y).prod * Xp w Y :
-      M2 (SlopeTestRemainingChoices S A)) k 0 z e1 = uw sites w z * v0 sites Y k := by
-    rw [Matrix.mul_apply]
-    simp only [diagScalar_mul_apply, lift0, Matrix.map_apply]
-    rw [sum_col_fix (fun j => (sites.map fun σ => bT σ w).prod * io ((sites.map fun σ => Ts σ Y).prod k j))
-      (fun j => Xp w Y j 0) z hfx]
-    simp only [mul_io_apply, v0, uw]
-  exact hL.symm.trans ((congrArg (fun M : M2 (SlopeTestRemainingChoices S A) => M k 0 z e1) hM).trans hR)
-
 theorem sum_row_fix (U : SlopeTestRemainingChoices S A) (C : Fin 2 → SlopeTestRemainingChoices S A) (x : Fin 2 → A) (z : Ix S)
     (h : ∀ (k : Fin 2) (z' : Ix S), C k z' e1 = if k = 0 ∧ z' = e1 then 1 else 0) :
     (∑ k, U * C k * io (x k) : SlopeTestRemainingChoices S A) z e1 = U z e1 * x 0 := by
   rw [Matrix.sum_apply, Fin.sum_univ_two, mul_io_apply, mul_io_apply,
     mul_col_fix U (C 0) z (fun z' => by simp [h]), mul_col_zero U (C 1) z (fun z' => by simp [h])]
   simp
-
-theorem exchVecB_of (hE2 : ExchangeMinusFactorStar) (hfix : XmFix) : ExchVecB := by
-  intro K A S _ _ _ _ _ _ _ _ QQ sites w Y hOK hw hreg hY l z
-  have hM := exchB_mat sites w Y (fun σ hσ => hE2 K A S σ w Y (hOK.1 σ hσ).1 hw hY) hOK.2
-  have hfx := hfix K A S w Y hw.1 hreg
-  have hL : (lift0 ((sites.map fun σ => Ts σ Y).prod)ᴴ * Xm w Y * d0 (sites.map fun σ => bT σ w).prod :
-      M2 (SlopeTestRemainingChoices S A)) 0 l z e1 =
-      ∑ k, ∑ z', star (v0 sites Y k) * (Xm w Y k l : SlopeTestRemainingChoices S A) z z' * uw sites w z' := by
-    rw [mul_diagScalar_apply, Matrix.mul_apply, Matrix.mul_apply]
-    simp only [Matrix.sum_apply, lift0, Matrix.map_apply, Matrix.conjTranspose_apply, io_mul_apply,
-      Finset.sum_mul]
-    rw [Finset.sum_comm]
-    simp only [v0, uw]
-  have hR : (d0 (sites.map fun σ => bT σ w).prod * Xm w Y * lift0 ((sites.map fun σ => Ts σ Y).prod)ᴴ :
-      M2 (SlopeTestRemainingChoices S A)) 0 l z e1 = uw sites w z * star (v0 sites Y l) := by
-    rw [Matrix.mul_apply]
-    simp only [diagScalar_mul_apply, lift0, Matrix.map_apply, Matrix.conjTranspose_apply]
-    rw [sum_row_fix _ (fun j => Xm w Y 0 j) (fun j => star ((sites.map fun σ => Ts σ Y).prod l j)) z hfx]
-    simp only [v0, uw]
-  exact hL.symm.trans ((congrArg (fun M : M2 (SlopeTestRemainingChoices S A) => M 0 l z e1) hM).trans hR)
 
 theorem QQ_comm (QQ : K → M2 A) (sites : List (Site A)) (w : List (Letter K S)) (Y : K)
     (h : ∀ σ ∈ sites, QQCommutes QQ σ) :
@@ -623,10 +630,6 @@ theorem tTFactor : TTFactor := by
     · simp [TTw, Xm, Xp, h, ih, mul_assoc]
 
 end Formalism.FourierDecayAlt.P.Wd8
-
-theorem Formalism.FourierDecayAlt.P.exchange_vector_positive : Formalism.FourierDecayAlt.Wd.ExchVecA := Formalism.FourierDecayAlt.P.Wd8.exchVecA_of Formalism.FourierDecayAlt.P.exchange_plus_factor Formalism.FourierDecayAlt.P.positive_word_fixed
-
-theorem Formalism.FourierDecayAlt.P.exchange_vector_negative : Formalism.FourierDecayAlt.Wd.ExchVecB := Formalism.FourierDecayAlt.P.Wd8.exchVecB_of Formalism.FourierDecayAlt.P.exchange_second_case Formalism.FourierDecayAlt.P.negative_word_fixed
 
 theorem Formalism.FourierDecayAlt.P.conjugate_word_eigen : Formalism.FourierDecayAlt.Wd.CwEigen := Formalism.FourierDecayAlt.P.Wd8.cwEigen_of Formalism.FourierDecayAlt.P.exchange_plus_factor Formalism.FourierDecayAlt.P.exchange_second_case
   Formalism.FourierDecayAlt.P.positive_word_fixed Formalism.FourierDecayAlt.P.negative_word_fixed Formalism.FourierDecayAlt.P.Wd8.tTFactor

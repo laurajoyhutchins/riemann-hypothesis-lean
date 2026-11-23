@@ -1,39 +1,49 @@
-import Development.WeilBound.CoreStatements.FiniteTypeHarishChandra.SupportExistsAll
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IrreducibleCharacterSeries.ConjugateCharacterFormula
+module
+
+public import Development.WeilBound.CoreStatements.FiniteTypeHarishChandra.FiniteDimensionalHcSpace
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CentralIdempotentPropertiesStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SimpleIffIrreducibleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SeparableIrreducibleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CentralIdempotentPropertiesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntertwinerInnerProductStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrobeniusReciprocityInnerProductStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MackeyInnerProductStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HarishChandraCharacterStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HarishChandraDimensionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CardParabolicSubgroupStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SquarefreeDimensionFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PermutationMatrixPropertiesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BruhatDecompositionTwoBlocksStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BruhatDecompositionUniqueStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalVanishingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SamePartitionStatementStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InnerProductCuspidalIsoStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MackeyFormulaAllStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalIsomorphismPropertiesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConsequenceOfMackeyStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductSimpleAllStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalSupportExistsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MirrorPartitionsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PatternGroupStatementStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WhittakerSymmetryStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RootExchangeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChainIndependenceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GoodWordCount
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HarishChandraWhittaker
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClauseAToL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalOfUnipotentSumsVanishStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsCuspidalWithLabelStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalLabelUniqueStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalParametrization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial CategoryTheory
 open Formalism.IrreducibleCountingLemmas.TYPES hiding zIdem IsCuspidal
@@ -60,32 +70,10 @@ section GeneralLinearIntegers
 
 variable {K : Type} [Field K] [Fintype K] [DecidableEq K]
 
-theorem CuspIso.symm {α β : Type} [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
-    {lam : FDRep ℂ (GL α K)} {mu : FDRep ℂ (GL β K)} (h : CuspIso K lam mu) : CuspIso K mu lam :=
-  (GlobalTheory.T.cuspidal_isomorphism_properties K α β β lam lam mu mu (Equiv.refl α |>.trans (Classical.choose h))).1 h
 
-theorem CuspIso.trans {α β γ : Type} [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β] [Fintype γ]
-    [DecidableEq γ] {lam : FDRep ℂ (GL α K)} {mu : FDRep ℂ (GL β K)} {nu : FDRep ℂ (GL γ K)}
-    (h : CuspIso K lam mu) (h' : CuspIso K mu nu) : CuspIso K lam nu :=
-  (GlobalTheory.T.cuspidal_isomorphism_properties K α β γ lam lam mu nu (Classical.choose h)).2.1 h h'
 
-variable (K) in
-theorem mackey_cuspidal : MackeyCusp K := GlobalTheory.T.mackey_formula_all K
 
-variable (K) in
-theorem supportUnique_of_mackey (h : MackeyCusp K) : SupportUnique K := (GlobalTheory.T.consequence_of_mackey K h).1
 
-variable (K) in
-theorem HC.hcSupportExists_holds : HC.HCSupportExists K := GlobalTheory.T.cuspidal_support_exists K
-
-variable (K) in
-theorem A2.sqfreeCore_of (h : MackeyCusp K) : SqfreeCore K :=
-  ⟨(GlobalTheory.T.consequence_of_mackey K h).2.1, GlobalTheory.T.squarefree_dimension_formula K, (GlobalTheory.T.consequence_of_mackey K h).2.2⟩
-
-variable (K) in
-theorem HCLabelO_mirror (C : LabelConv K) (O : LabelMap K C) : HCLabelO O :=
-  (GlobalTheory.T.mirror_partitions K C O (HC.hcSupportExists_holds K) (supportUnique_of_mackey K (mackey_cuspidal K))
-    (A2.sqfreeCore_of K (mackey_cuspidal K))).1
 
 end GeneralLinearIntegers
 

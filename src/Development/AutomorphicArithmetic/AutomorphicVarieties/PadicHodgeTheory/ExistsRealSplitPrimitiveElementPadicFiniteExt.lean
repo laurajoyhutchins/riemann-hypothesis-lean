@@ -1,5 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsNumberFieldAdjoinEq
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc NumberField
 
@@ -161,8 +211,9 @@ private theorem exists_rat_monic_aeval_close (l : ℕ) [Fact l.Prime] (f : ℚ_[
     have e : aeval α (X ^ n + p) - aeval α f =
         ∑ i : Fin n, algebraMap ℚ_[l] (Om l) ((q i : ℚ_[l]) - f.coeff i) * α ^ (i : ℕ) := by
       conv_lhs => rw [hf', hp]
-      simp only [map_add, map_sum, map_mul, aeval_C, aeval_X_pow, add_sub_add_left_eq_sub,
-        ← Finset.sum_sub_distrib]
+
+      simp only [map_add (f := _), map_sum, map_mul, aeval_C, aeval_X_pow, add_sub_add_left_eq_sub,
+      ← Finset.sum_sub_distrib]
       apply Finset.sum_congr rfl
       intro i _
       rw [map_sub, sub_mul, map_ratCast]
@@ -237,7 +288,7 @@ private theorem exists_rat_monic_close_sign_changing_at_integers (l : ℕ) [Fact
   refine ⟨g₁ + C t * (M - g₁), hmon.add_of_left hCd, ?_, ?_, ?_⟩
   · rw [natDegree_add_eq_left_of_degree_lt hCd, hdeg]
   · have e : aeval α (g₁ + C t * (M - g₁)) - aeval α g₁ = algebraMap ℚ (Om l) t * aeval α (M - g₁) := by
-      rw [map_add, add_sub_cancel_left, map_mul, aeval_C]
+      rw [map_add (f := _), add_sub_cancel_left, map_mul, aeval_C]
     rw [e, norm_mul, IsScalarTower.algebraMap_apply ℚ ℚ_[l] (Om l), norm_algebraMap', ← hA]
     have hnL : ‖((L : ℚ) : ℚ_[l])‖ = (l : ℝ) ^ (-((k + 1 : ℕ) : ℤ)) := by
       rw [hL]; push_cast; exact Padic.norm_p_pow (k + 1)

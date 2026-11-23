@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PtRows
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsScaleWithBoundedGamma
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SzRowElevenLeSplitBound
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CollisionTypingsCompare
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NdBNonneg
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.RankConditionAllMembers
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.PairRowIffQdRows
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.KerInclOn
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.VanishingGramTermsBoundParams
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CollisionTypingsCompare
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ResidEvFree
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.RamificationTwoAndConjugationAtQAndD
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NdBNonneg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SetUnipotentTranslate
+import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions GlobalTheory.EX GlobalTheory.EX.OB GlobalTheory.Mem GlobalTheory.Mem.Top GlobalTheory.Fc GlobalTheory.MiS GlobalTheory.Fam
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -13,8 +58,8 @@ noncomputable section
 
 namespace GlobalTheory.Fam.MemberData
 
-open Formalism.MainNotions.S in
 
+open Formalism.MainNotions.S in
 theorem dataNW_of_val {C : Formalism.MainNotions.Inhab.FC} {cD ch : ℝ} (hC : Std C) {D : D7} (L : SizeData₂ D)
     (hV : Val C cD ch L) (hS : SizesAt L) (hR : ∀ u, GlobalTheory.Core.Rk.RankMu D u) : GlobalTheory.Core.Deg.DataNW D := by
   have hk := D.R.m_add_three_le_k
@@ -98,27 +143,6 @@ theorem val_congr {C C' : Formalism.MainNotions.Inhab.FC} {cD cD' ch ch' : ℝ} 
     (h3 : ch = ch') (h : Val C cD ch L) : Val C' cD' ch' L := by
   subst h1 h2 h3
   exact h
-
-theorem val_sizes_at (hL : GlobalTheory.Published.LocalLanglandsGL) (p : Bl.Prm hL) : GlobalTheory.Fc.RowE (Bl.IsGoodE p.s) (Bl.IsLinked p)
-    (fun κ _ O _ _ => Std κ.C ∧ Val κ.C κ.cD κ.ch O.L ∧ SizesAt O.L) := by
-  refine ⟨1, one_pos, fun eps C8 C5 c6 Cb he _ h52 _ => ⟨⟨0, fun _ => 0, fun _ => 0, fun _ => 0⟩, fun C hC _ _ => ?_⟩⟩
-  obtain ⟨c1, h1⟩ := szRow_sizesAt eps he h52 C hC
-  refine ⟨c1, fun cD hcD => ?_⟩
-  obtain ⟨c2, h2⟩ := h1 cD hcD
-  refine ⟨c2, fun ch hch _ => ?_⟩
-  obtain ⟨x0, h3⟩ := h2 ch hch
-  refine ⟨x0, fun K hK hx β _ c b _ => ?_⟩
-  obtain ⟨e1, e2, e3, e4, -⟩ := hK
-  have hv : Val C cD ch β.O.L := val_congr e1 e2 e3 (β.p.pt_val β.val)
-  have hs : β.O.L.sc = K.s := β.sc
-  refine ⟨hC, hv, h3 β.D β.O.L ?_ ?_ hv⟩
-  · rw [hs]; exact e4
-  · rw [hs]; exact hx
-
-theorem dataNW_at : ∀ (hL : GlobalTheory.Published.LocalLanglandsGL) (p : Bl.Prm hL),
-    GlobalTheory.Fc.RowE (Bl.IsGoodE p.s) (Bl.IsLinked p) (fun _ D _ _ _ => GlobalTheory.Core.Deg.DataNW D) := fun hL p =>
-  ((val_sizes_at hL p).and (GlobalTheory.Fam.MemberCount.member_rankMu hL p)).imp fun _ _ β _ _ _ _ _ H =>
-    dataNW_of_val H.1.1 β.O.L H.1.2.1 H.1.2.2 H.2
 
 end GlobalTheory.Fam.MemberData
 

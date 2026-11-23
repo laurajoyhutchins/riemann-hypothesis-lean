@@ -1,16 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCombAt
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.AllPositions
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalBlockDetBlockTriangular
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PadOneMemSecondBlockTriangular
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdeleCharRestrictLocalUnitsResidueChar
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsLocalModelCreationWeilActionMovedFramesStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsSchwartzBruhatHalfSplitPlaceProductStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsFiniteAdeleProjectionIntegralReductionStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ReducedChainLocalIdentity
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IndexEquivalenceReduction
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsCombAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalBlockDetBlockTriangular
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdeleCharRestrictLocalUnitsResidueChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +70,7 @@ theorem down_add_up (t : WO S T) (x : Matrix Y Y' k) : p.down FS FT (t + p.up FS
   unfold Place.up Place.down
   have : (t + (FT.β * x * FS.γ).map p.ι : Matrix (Fin T.rank) (Fin S.rank) (AE D)).map p.π =
       t.map p.π + FT.β * x * FS.γ := Matrix.ext fun i j => by
-    simp only [Matrix.map_apply, Matrix.add_apply, map_add, p.π_ι]
+    simp only [Matrix.map_apply, Matrix.add_apply, map_add (f := _), p.π_ι]
   rw [this, Matrix.mul_add, Matrix.add_mul]
   congr 1
   simp only [← Matrix.mul_assoc, FT.γβ, Matrix.one_mul]
@@ -289,34 +319,6 @@ theorem isIx_of_isOrd {κ l r t j a : ℕ} (h : κ + l = r) (ha : a = r + j * t)
   · refine (he (.inr (c, s))).trans ?_
     change κ + l + c.val * t + s.val = _
     rw [h, mul_comm]; omega
-
-theorem rank_first {w : Pl D.host.E} (G : GAt d τ w) : D.R.k + (G.s + 1) = D.R.r := by
-  have := G.hs
-  unfold Ranks.r
-  omega
-
-theorem red_iff {w : Pl D.host.E} (G : GAt d τ w) {π' : EAf D →+* G.k} (hπ : ∀ a, π' (toEAf D a) = G.q.pr a)
-    (hred : IsRed (resS D.host.F w) (π'.comp (Formalism.L2.Herm.intAf D.host.F D.host.E).subtype)) (x : G.S.P.J)
-    (g : GL (Fin D.R.r) (kP w)) (M : Matrix (Fin D.R.k ⊕ Fin (G.s + 1)) (Fin D.R.k ⊕ Fin (G.s + 1)) (Formalism.L2.Herm.intAf D.host.F D.host.E))
-    (hM : g.val.submatrix (firstOrd (rank_first G)) (firstOrd (rank_first G)) = M.map (resS D.host.F w)) :
-    G.Red x g ↔ MaxM ((x : GL _ G.k).val - M.map (π'.comp (Formalism.L2.Herm.intAf D.host.F D.host.E).subtype)) := by
-  have key : ∀ a b (z : 𝓞 D.host.E), Ideal.Quotient.mk w.asIdeal z = g.val (firstOrd (rank_first G) a) (firstOrd (rank_first G) b) →
-      valuation G.k ((π'.comp (Formalism.L2.Herm.intAf D.host.F D.host.E).subtype) (M a b) - (ofSplit G.q).pr (z : D.host.E)) < 1 :=
-    fun a b z hz => by
-      have h1 : (π'.comp (Formalism.L2.Herm.intAf D.host.F D.host.E).subtype) (Formalism.L2.DIV.oToS D.host.F D.host.E z) =
-          (ofSplit G.q).pr (z : D.host.E) := hπ (incA D (z : D.host.E))
-      rw [← h1, ← RingHom.map_sub, ← hred.ker, RingHom.map_sub, Formalism.L2.DIV.resS_oToS, sub_eq_zero]
-      exact (hz.trans (congrFun (congrFun hM a) b)).symm
-  constructor
-  · intro h a b
-    obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective (g.val (firstOrd (rank_first G) a) (firstOrd (rank_first G) b))
-    have := Valuation.map_sub_lt _ (h a b _ _ (firstOrd_val _ a) (firstOrd_val _ b) z hz) (key a b z hz)
-    rwa [sub_sub_sub_cancel_right] at this
-  · intro h a b a' b' ha hb z hz
-    obtain rfl : a' = firstOrd (rank_first G) a := Fin.ext (ha.trans (firstOrd_val _ a).symm)
-    obtain rfl : b' = firstOrd (rank_first G) b := Fin.ext (hb.trans (firstOrd_val _ b).symm)
-    have := Valuation.map_add_lt _ (h a b) (key a b z hz)
-    rwa [Matrix.sub_apply, Matrix.map_apply, sub_add_sub_cancel] at this
 
 end Main
 

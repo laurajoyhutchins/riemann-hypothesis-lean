@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.DepthPays
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ProjExists
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.Adapted
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryEmbeddingStabilizer
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IntegralRealUnitaryHaarEqProdUpqHaar
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.Adapted
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IntegralRealUnitaryHaarEqProdUpqHaar
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlacesStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryEmbeddingStabilizer
+import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.Grow
@@ -64,6 +110,7 @@ theorem cmp_mul (θ : InfFam D) {V : HSp D} (τ : D.what₂.Tau) (g h : GA D V) 
   unfold GlobalTheory.SepPer.cmp infMat
   rw [Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.HA_mat_mul, Units.val_mul]
   ext i j
+
   simp only [Matrix.map_apply, Matrix.mul_apply, map_sum, map_mul]
 
 private theorem cmp_eq_map (θ : InfFam D) {V : HSp D} (τ : D.what₂.Tau) (x : GA D V) :
@@ -82,7 +129,7 @@ theorem component_of_auxiliary_embedding {θ : InfFam D} (hθ : IsInfFam θ) {Y 
     ((GlobalTheory.PointAtPlaceHom.atTau_laws D θ hθ Y τ).1 _ hU).exists
   have hk : IsAtTau θ Y τ (GlobalTheory.SepPer.cmp θ τ h) (atTau θ Y τ (GlobalTheory.SepPer.cmp θ τ h)) := by
     unfold atTau
-    rw [dif_pos hex]
+    rw [dite_eq_left hex]
     exact hex.choose_spec
   set k := atTau θ Y τ (GlobalTheory.SepPer.cmp θ τ h) with hkdef
   have h1 : GlobalTheory.SepPer.cmp θ τ (1 : GA D Y) = 1 := hRP.2.2.2.2.1 1 (one_mem _) τ
@@ -218,7 +265,7 @@ theorem pack_of_loc : ∀ {D : D7} (θ : InfFam D), IsInfFam θ → ∀ {Y V : H
           ∂(Formalism.REAL.muG (M₀.ε τ))) *
         eu (B τ *ᵥ (GlobalTheory.SepPer.cmp θ τ g *ᵥ fun i => tauE D τ (zv d i))) ^ (2 * V.rank + 5)) ≤
         ∏ τ, (Real.exp q * ‖c τ‖) :=
-      Finset.prod_le_prod (fun τ _ => mul_nonneg (integral_nonneg fun _ => norm_nonneg _)
+      Finset.prod_le_prod₀ (fun τ _ => mul_nonneg (integral_nonneg fun _ => norm_nonneg _)
         (pow_nonneg (eu_nonneg _) _)) fun τ _ => ((hL τ).far _ (hgU τ)).2
     calc _ ≤ κ * ∏ τ, (Real.exp q * ‖c τ‖) := mul_le_mul_of_nonneg_left hle hκ.le
       _ = _ := by
@@ -281,7 +328,7 @@ theorem pack_of_loc : ∀ {D : D7} (θ : InfFam D), IsInfFam θ → ∀ {Y V : H
               mco M σ (g₀ σ) (v₀ σ) (embAt θ d σ Z)‖
           else ‖mco M σ (g₀ σ) (v₀ σ) (embAt θ d σ Z)‖)).2.trans (smul_eq_mul _ _))
     rw [hI]
-    have hle := Finset.prod_le_prod (s := Finset.univ) (fun σ _ => integral_nonneg fun u => by
+    have hle := Finset.prod_le_prod₀ (s := Finset.univ) (fun σ _ => integral_nonneg fun u => by
       show (0 : ℝ) ≤ (if σ = τ then _ else _)
       split_ifs <;> exact norm_nonneg _) fun σ _ => hb σ
     calc _ ≤ κ * ∏ σ, (Real.exp q * ‖c σ‖ * (if σ = τ then |s| * hsn (A τ * X * (A τ)⁻¹) else 1)) :=

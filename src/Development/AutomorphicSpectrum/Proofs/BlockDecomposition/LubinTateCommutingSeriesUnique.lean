@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EvalMod
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EvalMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
+
 noncomputable section
 open NumberField IsDedekindDomain Neutral.B1 Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.L2.Host Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations
 open GlobalTheory.HeckeGal GlobalTheory.Pst GlobalTheory.TripleGal GlobalTheory.CompanionTheory.LTHodge GlobalTheory.CompanionTheory.LTPer
@@ -15,7 +67,7 @@ theorem map_ltIter {A A' : Type} [CommRing A] [CommRing A'] (g : A →+* A') (a 
     g (ltIter a q n x) = ltIter (g a) q n (g x) := by
   induction n with
   | zero => simp [ltIter]
-  | succ n ih => rw [ltIter_succ, ltIter_succ, map_add, map_mul, map_pow, ih]
+  | succ n ih => rw [ltIter_succ, ltIter_succ, map_add (f := _), map_mul, map_pow, ih]
 
 theorem ltIter_congr {A : Type} [CommRing A] (w s : A) (q : ℕ) (hq : (q : A) = w * s) (a b c : A)
     (h : a - b = w * c) (n : ℕ) : ∃ d, ltIter w q n a - ltIter w q n b = w ^ (n + 1) * d := by
@@ -97,7 +149,7 @@ theorem nev_step {y : C} (hy : IsNilpotent y) (π : R) (q : ℕ) (hq : q ≠ 0) 
   rw [subst_lt hs, subst_lt hΦ] at e1
   have e3 : (PowerSeries.C (algebraMap R C π) * PowerSeries.C y + PowerSeries.C y ^ q : PowerSeries C)
       = PowerSeries.C (algebraMap R C π * y + y ^ q) := by
-    simp only [map_add, map_mul, map_pow]
+    simp only [map_add (f := _), map_mul, map_pow]
   rw [e3] at e1
   have e4 := congrArg (PowerSeries.constantCoeff (R := C)) e1
   simpa [nev] using e4
@@ -223,6 +275,7 @@ theorem finiteRing_sq_sub_mul_sq_eq_of_card {R C : Type} [CommRing R] [CommRing 
       mk (∑ i ∈ Finset.range D, h' (PowerSeries.coeff i φ) * y ^ i) = nev (mk y) φ := by
     intro y N D hN hD
     rw [nev_eq_sum hN hD]
+
     simp [map_sum, hmk]
   obtain ⟨N, hN⟩ := hn m
   obtain ⟨D0, hD0⟩ := hE m k
@@ -257,7 +310,7 @@ theorem finiteRing_sq_sub_mul_sq_eq_of_card {R C : Type} [CommRing R] [CommRing 
       push_cast
       rw [hQ', hv', hϖ', ha']
       linear_combination hQa
-    rw [e, map_add, map_mul, map_pow, hwm1, zero_mul, add_zero, map_ltIter, hw]
+    rw [e, map_add (f := _), map_mul, map_pow, hwm1, zero_mul, add_zero, map_ltIter, hw]
   have e2 : mk R' = ltIter (algebraMap R C π) q m (mk u') := by
     have e : R' = ltIter ϖ' q m u' + ϖ' ^ (m + 1) * b' := by
       apply Subtype.ext
@@ -268,7 +321,7 @@ theorem finiteRing_sq_sub_mul_sq_eq_of_card {R C : Type} [CommRing R] [CommRing 
       have e4 := congrArg σ hQa
       rw [map_sub, map_mul, map_pow, hσϖ, e3] at e4
       linear_combination e4
-    rw [e, map_add, map_mul, map_pow, hwm1, zero_mul, add_zero, map_ltIter, hw]
+    rw [e, map_add (f := _), map_mul, map_pow, hwm1, zero_mul, add_zero, map_ltIter, hw]
   have hfin : nev (mk Q') φ = mk R' := by rw [e1, e2]; exact key
   have hnQ : IsNilpotent (mk Q') := by rw [e1]; exact nil_ltIter _ hq0 (hn m) m
   obtain ⟨N2, hN2⟩ := hnQ

@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LGradedLemmas
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DualWeylEqEvalAtOneSmulExtremalOfRowWeight
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DualWeylEqEvalAtOneSmulExtremalOfRowWeight
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LGradedLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility
 
@@ -13,15 +60,15 @@ namespace GlobalTheory.LeviCut
 namespace NablaStr
 
 theorem coeff_der_diag_row {r n : ℕ} (a : Fin r) (f : MvPolynomial (Fin r × Fin n) ℚ) (m : Fin r × Fin n →₀ ℕ) :
-    coeff m (Formalism.CohomologicalDescent.LR.der r n a a f) = ((Finsupp.weight (rowW r n) m a : ℕ) : ℚ) * coeff m f := by
+    AddMonoidAlgebra.coeff (Formalism.CohomologicalDescent.LR.der r n a a f) m = ((Finsupp.weight (rowW r n) m a : ℕ) : ℚ) * AddMonoidAlgebra.coeff f m := by
   rw [← Formalism.CohomologicalDescent.LR.rowDiv_one, lgraded_coeff_euler, lgraded_weight_rowW]
 
 theorem der_diag_eq_weight_smul_of_isWeightedHomogeneous {r n : ℕ} (f : MvPolynomial (Fin r × Fin n) ℚ) (μ : Fin r → ℕ) :
     IsWeightedHomogeneous (rowW r n) f μ → ∀ a, Formalism.CohomologicalDescent.LR.der r n a a f = (μ a : ℚ) • f := by
   intro h a
   ext m
-  rw [coeff_der_diag_row, coeff_smul, smul_eq_mul]
-  by_cases hm : coeff m f = 0
+  rw [coeff_der_diag_row, MvPolynomial.coeff_smul, smul_eq_mul]
+  by_cases hm : AddMonoidAlgebra.coeff f m = 0
   · rw [hm, mul_zero, mul_zero]
   · rw [h hm]
 
@@ -124,8 +171,8 @@ theorem dom_eV (N : ℕ) (ν : Fin N → ℕ) : Dom N (eV N ν) (wtZ ν) := by
   obtain ⟨m, hm⟩ := ne_zero_iff.mp hx0'
   have hμ : ∀ c (hc : c < N), μ c = (rowDeg m ⟨c, hc⟩ : ℤ) := by
     intro c hc
-    have h1 := congrArg (fun y : dualWeyl ℚ N N ν => coeff m (y : MvPolynomial (Fin N × Fin N) ℚ)) (hx c hc)
-    simp only [eV_val ν c c hc hc, coeff_der_diag_row, Submodule.coe_smul, coeff_smul, smul_eq_mul,
+    have h1 := congrArg (fun y : dualWeyl ℚ N N ν => AddMonoidAlgebra.coeff (y : MvPolynomial (Fin N × Fin N) ℚ) m) (hx c hc)
+    simp only [eV_val ν c c hc hc, coeff_der_diag_row, Submodule.coe_smul, MvPolynomial.coeff_smul, smul_eq_mul,
       weight_rowW_eq] at h1
     have h2 := mul_right_cancel₀ hm h1
     exact_mod_cast h2.symm

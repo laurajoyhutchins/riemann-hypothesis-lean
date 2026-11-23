@@ -1,10 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsUniqueStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.EqSumMultihomogeneousComponents
-import GroundTheory.HeightsAndTheta.Heights.SemipositiveHeights.FibreDimB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.EqSumMultihomogeneousComponents
+public import Mathlib.Data.FunLike.Fintype
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.SemipositiveHeights.FibreDimB
+import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.LengthLocQuotEqZero
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I4 ReciprocityTheory.ChartRestriction.G.ArakelovGeometry
 
@@ -39,15 +89,15 @@ theorem graphMap_eq (P : Ideal (MRing ι)) (g : (Σ k, ι₂ k) → MRing ι) (F
   exact congrArg (fun f => f F) this
 
 theorem mem_graphIdeal_iff (P : Ideal (MRing ι)) (g : (Σ k, ι₂ k) → MRing ι) (F : MRing (Sum.elim ι ι₂)) :
-    F ∈ graphIdeal P g ↔ ∀ b, coeff b (graphLift g F) ∈ P := by
+    F ∈ graphIdeal P g ↔ ∀ b, AddMonoidAlgebra.coeff (graphLift g F) b ∈ P := by
   rw [graphIdeal, RingHom.mem_ker, graphMap_eq]
   constructor
   · intro h b
-    have := congrArg (coeff b) h
-    rwa [coeff_map, coeff_zero, Ideal.Quotient.eq_zero_iff_mem] at this
+    have := congrArg (AddMonoidAlgebra.coeff · b) h
+    rwa [coeff_map, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, Ideal.Quotient.eq_zero_iff_mem] at this
   · intro h
     ext b
-    rw [coeff_map, coeff_zero, Ideal.Quotient.eq_zero_iff_mem]
+    rw [coeff_map, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, Ideal.Quotient.eq_zero_iff_mem]
     exact h b
 
 def baseDeg (δ : K₂ → K → ℕ) (c : K ⊕ K₂ → ℕ) : K → ℕ :=
@@ -197,12 +247,12 @@ theorem exists_graphLift_monomial {g : (Σ k, ι₂ k) → MRing ι} {δ : K₂ 
 theorem coeff_graphLift_i2comp {g : (Σ k, ι₂ k) → MRing ι} {δ : K₂ → K → ℕ}
     (hg : ∀ q, IsMultiHomog (g q) (δ q.1)) (c : K ⊕ K₂ → ℕ) (F : MRing (Sum.elim ι ι₂))
     (b : K₂ →₀ ℕ) :
-    coeff b (graphLift g (i2comp c F)) =
-      if b = expDeg c then i2comp (baseDeg δ c) (coeff b (graphLift g F)) else 0 := by
+    AddMonoidAlgebra.coeff (graphLift g (i2comp c F)) b =
+      if b = expDeg c then i2comp (baseDeg δ c) (AddMonoidAlgebra.coeff (graphLift g F) b) else 0 := by
   classical
   induction F using MvPolynomial.induction_on' with
   | add F F' hF hF' =>
-    rw [i2comp_add, map_add, coeff_add, hF, hF', map_add, coeff_add]
+    rw [i2comp_add, map_add (f := _), MvPolynomial.coeff_add, hF, hF', map_add (f := _), MvPolynomial.coeff_add]
     split_ifs
     · rw [i2comp_add]
     · simp
@@ -222,7 +272,7 @@ theorem coeff_graphLift_i2comp {g : (Σ k, ι₂ k) → MRing ι} {δ : K₂ →
     have hnh : IsMultiHomog (n • h) (baseDeg δ (i2bdeg m)) := by
       rw [isMultiHomog_iff_coeff] at hh ⊢
       intro m' hm'
-      rw [coeff_smul] at hm'
+      rw [MvPolynomial.coeff_smul] at hm'
       exact hh m' fun h0 => hm' (by rw [h0, smul_zero])
     rw [i2comp_of_homog hm, em, coeff_monomial]
     by_cases hd : i2bdeg m = c
@@ -232,7 +282,7 @@ theorem coeff_graphLift_i2comp {g : (Σ k, ι₂ k) → MRing ι} {δ : K₂ →
       · subst hb
         simp only [↓reduceIte, i2comp_self hnh]
       · simp [hb, Ne.symm hb]
-    · rw [if_neg hd, map_zero, coeff_zero]
+    · rw [if_neg hd, map_zero, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
       by_cases hb : b = expDeg c
       · subst hb
         rw [if_pos rfl]
@@ -375,7 +425,7 @@ theorem graphPt_closure (hne : ∀ k₂, ∃ j, g ⟨k₂, j⟩ ∉ P) (z : L) :
         Subfield.closure (Set.range (graphPt P g L)) := fun b => by
     induction b using MvPolynomial.induction_on with
     | C a => exact hC a
-    | add p q hp hq => rw [map_add]; exact add_mem hp hq
+    | add p q hp hq => rw [(algebraMap (MvPolynomial K₂ (MRing ι ⧸ P)) L).map_add]; exact add_mem hp hq
     | mul_X p k hp => rw [map_mul]; exact mul_mem hp (hT k)
   obtain ⟨x, y, _, rfl⟩ := IsFractionRing.div_surjective (A := MvPolynomial K₂ (MRing ι ⧸ P)) z
   exact div_mem (hB x) (hB y)

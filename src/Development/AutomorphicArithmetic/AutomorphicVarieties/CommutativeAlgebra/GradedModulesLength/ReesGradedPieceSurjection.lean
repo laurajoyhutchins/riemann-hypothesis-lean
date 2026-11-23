@@ -1,9 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ChartLeadingWeightTwo
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.Latfil
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.Satfil
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ChartLeadingWeightTwo
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.FgHolds
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.Latfil
 import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.NegWeightLe
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.FgHolds
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.Satfil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib.Algebra.MvPolynomial.CommRing
+
+@[expose] public section
 
 open IsLocalRing Filter Formalism.MainNotions.V.Pf.V2.Calc UpperTheory.V.Alg UpperTheory.V.Alg.M
 
@@ -42,7 +99,7 @@ private theorem length_localization_bound {O B L P I : Type} [CommRing O] [IsDom
         rw [Fintype.linearIndependent_iff]
         intro c hc i
         have h3 := congrArg (fun z : LinearMap.range lc => z.1 i) hc
-        simp only [AddSubmonoidClass.coe_finset_sum, Finset.sum_apply, SetLike.val_smul, Pi.smul_apply,
+        simp only [AddSubmonoidClass.coe_finsetSum, Finset.sum_apply, SetLike.val_smul, Pi.smul_apply,
           LinearMap.codRestrict_apply, LinearMap.rangeRestrict, ZeroMemClass.coe_zero, Pi.zero_apply] at h3
         rw [Finset.sum_eq_single i (fun j _ hj => by rw [hf' j i (Ne.symm hj), smul_zero]) (by simp)] at h3
         exact (smul_eq_zero.1 h3).resolve_right (hf i)
@@ -128,7 +185,7 @@ private noncomputable def monoL {B A : Type} [CommRing B] [CommRing A] [Algebra 
   toFun f := mono N m f.1 f.2
   map_add' f g := Subtype.ext (by
     show MvPolynomial.monomial m (f.1 + g.1) = MvPolynomial.monomial m f.1 + MvPolynomial.monomial m g.1
-    rw [map_add])
+    rw [map_add (f := _)])
   map_smul' c f := Subtype.ext (by
     show MvPolynomial.monomial m (c • f.1) = c • MvPolynomial.monomial m f.1
     rw [MvPolynomial.smul_monomial])
@@ -140,7 +197,7 @@ private theorem gr_eq_range {B A : Type} [CommRing B] [CommRing A] [Algebra B A]
   · intro p hp
     refine ⟨⟨_, p.2 m⟩, Subtype.ext ?_⟩
     ext n
-    show MvPolynomial.coeff n (MvPolynomial.monomial m _) = _
+    show AddMonoidAlgebra.coeff (MvPolynomial.monomial m _) n = _
     rw [MvPolynomial.coeff_monomial]
     split_ifs with h
     · rw [← h]
@@ -176,7 +233,7 @@ private theorem piece_gen {B R L : Type} [CommRing B] [CommRing R] [Algebra B R]
 
 private theorem rees_graded_piece_surjection {B A : Type} [CommRing B] [CommRing A] [Algebra B A] {k : ℕ}
     (N : Fin k → Submodule B A) (μ : Fin k →₀ ℕ) (𝔮 : Ideal (rees N)) (β : B) (T : (Fin k →₀ ℕ) → AddSubgroup A)
-    (hq : ∀ p, p ∈ 𝔮 ↔ ∀ m, MvPolynomial.coeff m p.1 ∈ T m) :
+    (hq : ∀ p, p ∈ 𝔮 ↔ ∀ m, AddMonoidAlgebra.coeff p.1 m ∈ T m) :
     ∃ π : lat N μ →ₗ[B] ((((GMod.self (reesGr N)).quo 𝔮).quot (algebraMap B (rees N) β)).gr (toDeg μ)),
       Function.Surjective π ∧ ∀ f, π f = 0 ↔ ∃ g : lat N μ, (f - β • g).1 ∈ T μ := by
   classical
@@ -184,13 +241,13 @@ private theorem rees_graded_piece_surjection {B A : Type} [CommRing B] [CommRing
   refine ⟨π, hπ, fun f => (hk f).trans ⟨?_, ?_⟩⟩
   · rintro ⟨p, hp⟩
     refine ⟨⟨_, p.2 μ⟩, ?_⟩
-    have h1 : MvPolynomial.coeff μ (MvPolynomial.monomial μ f.1 - β • p.1) ∈ T μ := (hq _).1 hp μ
+    have h1 : AddMonoidAlgebra.coeff (MvPolynomial.monomial μ f.1 - β • p.1) μ ∈ T μ := (hq _).1 hp μ
     rwa [MvPolynomial.coeff_sub, MvPolynomial.coeff_monomial, if_pos rfl, MvPolynomial.coeff_smul] at h1
   · rintro ⟨g, hg⟩
     refine ⟨monoL N μ g, ?_⟩
     rw [← map_smul, ← map_sub, hq]
     intro m
-    show MvPolynomial.coeff m (MvPolynomial.monomial μ (f - β • g).1) ∈ _
+    show AddMonoidAlgebra.coeff (MvPolynomial.monomial μ (f - β • g).1) m ∈ _
     rw [MvPolynomial.coeff_monomial]
     split_ifs with h
     · exact h ▸ hg

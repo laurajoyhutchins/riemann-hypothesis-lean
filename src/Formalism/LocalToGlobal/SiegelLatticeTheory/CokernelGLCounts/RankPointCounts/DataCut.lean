@@ -1,16 +1,62 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
-import Formalism.HermitianCurvature.StatementTC
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TermDefPf
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AddedBlockKernelSupport
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DensitySumsAndDomination
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardFilterResCharLe
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportProposition
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalModelPeriodLattices
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AddedBlockKernelSupport
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DensitySumsAndDomination
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TermDefPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportLoc
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBound
 import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.SmoothBigCellSectionsExist
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
-import Formalism.SharpRestriction.CuspSpanNormBounds.LocalOrbitGerms
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBound
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardFilterResCharLe
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportProposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Log.Summable
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -262,7 +308,7 @@ theorem densInputAt_of (hL : DensLocBound D) (hα : AlpBound D) (hP : PlacesOver
       lt_of_mul_lt_mul_right hxd hαpos.le
     obtain ⟨S, hS⟩ := (hMq.hasProd.eventually (lt_mem_nhds hxq)).exists
     refine ⟨S, le_of_lt (lt_of_lt_of_le hS ?_)⟩
-    exact Finset.prod_le_prod (fun p _ => (div_pos (hb p).1 (hal0 p)).le) (fun p _ => (hb p).2)
+    exact Finset.prod_le_prod₀ (fun p _ => (div_pos (hb p).1 (hal0 p)).le) (fun p _ => (hb p).2)
   · rw [Set.not_nonempty_iff_eq_empty] at hne
     have h0 : supDens L δ ϖ u u' F0 what₂ = 0 := by simp [supDens, hne]
     rw [h0, zero_div] at hx
@@ -292,7 +338,11 @@ theorem countable_LFlag {r : ℕ} {T : D.host.E} : Countable (Lat.LFlag (VS D) r
 theorem countable_Term (u u' : D.what₂.Word) (F0 : FlagG (VS D) D.R.rS ((Lat.Tu D u : ℕ) : D.host.E))
     (what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)) : Countable (TermDef.Term D u u' F0 what₂) := by
   have : ∀ Λ : Submodule (𝓞 D.host.E) (VS D).V, Countable (TermDef.TermsOf D u' F0 Λ) := fun Λ => by
-    have := countable_LFlag (D := D) (r := D.R.rS) (T := ((Lat.Tu D u' : ℕ) : D.host.E))
+    letI : Countable (Lat.LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) :=
+      countable_LFlag (D := D)
+    letI : Countable (TermDef.Carrier (TermDef.PD D Λ (lf D F0) u')) := by
+      unfold TermDef.Carrier
+      exact Subtype.val_injective.countable
     unfold TermDef.TermsOf TermDef.TermQ
     infer_instance
   refine Function.Injective.countable
@@ -524,24 +574,6 @@ def FiberCntC (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model
         (((Formalism.L2.SG.Pf.autR M (th γ₀))⁻¹ : ℝ) : ℂ) * BBG M δ (D.mem u).A.T (D.mem u').A.T w (kind w₀) (th γ₀))
 
 end RD
-
-def RowsDatum (D : Formalism.BasicNotions.D7) : Prop :=
-  (VS D).SigOK →
-  ∀ (δ : ∀ p : PlF D, (D.s.atP p).Fp) (M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep),
-    (∀ p, Agree δ M p) → ∀ (L : CntLocal.LocSp D M) (u u' : D.what₂.Word),
-    (D.mem u).A.T ≡ (D.mem u').A.T [MOD (Formalism.MainNotions.S.Lat.gS D) ^ 2] →
-    ∀ (F0 : FlagG (VS D) D.R.rS (CntLocal.Tn u)) (what₂ : Finset (Submodule (𝓞 D.host.E) (VS D).V)),
-      IsRowReps D F0 what₂ →
-    ∀ ϖ : ∀ p : PlF D, 𝒪[(D.s.atP p).Fp], (∀ p, Irreducible (ϖ p)) →
-    ∀ nc : ℝ, CntLocal.Formula δ L u u' F0 what₂ nc →
-      (∀ d ∈ densSet L δ ϖ u u' F0 what₂, 0 ≤ d) ∧
-      ∃ (th : TermDef.Term D u u' F0 what₂ → ∀ p, Option ((M p).Cls D.R.rS)) (dn : TermDef.Term D u u' F0 what₂ → ℝ),
-        (∀ θ0 : ∀ p, Option ((M p).Cls D.R.rS),
-          (∀ w, ∃ S : Finset (PlF D), Formalism.L2.SG.Pf.UnramOff M δ (D.mem u).A.T (D.mem u').A.T θ0 S w) →
-          ∀ γ w, EligAt γ w → Formalism.L2.SG.Pf.Restricted θ0 (th γ)) ∧
-        (∀ γ w, EligAt γ w → dn γ ∈ densSet L δ ϖ u u' F0 what₂) ∧
-        PartnerSumC δ M (PairVal.vRdef D u u' F0 what₂ δ M) th ∧
-        FiberCntC δ M (PairVal.vRdef D u u' F0 what₂ δ M) nc th dn
 
 section RDProof
 

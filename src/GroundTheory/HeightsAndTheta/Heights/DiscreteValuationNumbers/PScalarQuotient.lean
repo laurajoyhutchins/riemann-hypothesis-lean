@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsBundles
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PDivCycleMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -33,7 +84,7 @@ theorem classNum_add {σ : Type*} (cls : σ → K → ℤ) (H₁ H₂ : MvPolyno
     ext H₁ (H₁.support ∪ H₂.support) Finset.subset_union_left,
     ext H₂ (H₁.support ∪ H₂.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun μ _ => ?_
-  rw [coeff_add, add_mul]
+  rw [MvPolynomial.coeff_add, add_mul]
 
 def classNumHom {σ : Type*} (cls : σ → K → ℤ) (Q : List (K → ℤ)) (W : Ideal (MRing ι O)) :
     MvPolynomial σ ℤ →+ ℤ where
@@ -56,8 +107,8 @@ theorem classNum_monomial {σ : Type*} (cls : σ → K → ℤ) (μ : σ →₀ 
     simp
   · rw [support_monomial, if_neg hc, Finset.sum_singleton, coeff_monomial, if_pos rfl]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem classList_diag {N : ℕ} (x : Fin N → K → ℤ) (i : Fin N) (j l : ℕ) :
     classList (Sum.elim x x) (Finsupp.single (Sum.inl i) j + Finsupp.single (Sum.inr i) l) =
       classList x (Finsupp.single i (j + l)) := by
@@ -114,12 +165,12 @@ theorem divCycle_support_finite (P : Ideal (MRing ι O)) (f : MRing ι O) :
   · exact h.1
   · exact absurd rfl hW
 
-omit [Fintype K] [∀ k, Fintype (ι k)] [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] [IsDomain O] [IsDiscreteValuationRing O] in
 theorem divCycle_unit (P : Ideal (MRing ι O)) (u : Oˣ) : divCycle P (C (u : O)) = 0 := by
   funext W
   unfold divCycle
-  rw [dif_neg]
+  rw [dite_eq_right]
   · rfl
   rintro ⟨h, -⟩
   have hW : W.IsPrime := h.1.1
@@ -153,8 +204,8 @@ theorem ratDiv_const (P : Ideal (MRing ι O)) [P.IsPrime]
 
 variable [DecidableEq K]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] [IsDomain O] [IsDiscreteValuationRing O] in
 theorem isVerticalDivisor_const (P : Ideal (MRing ι O)) [P.IsPrime] (ϖ : O) (u : Oˣ) (n : ℕ)
     (hP : (C ((u : O) * ϖ ^ n) : MRing ι O) ∉ P) :
     IsVerticalDivisor P ϖ 0 (C ((u : O) * ϖ ^ n)) 1 := by

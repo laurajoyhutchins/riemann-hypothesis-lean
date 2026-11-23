@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.PoincareInHH
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.WuDecay
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.WuDecay
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -178,12 +223,12 @@ theorem ph_eq (hK : X.LevelSubgroupCharacter) (hWD : PhWellDef X u hK) (T : Cu X
     (h : Hfin X u) (k : X.B.I.Gf) (hd : IsDec X u y.2 n h k) :
     Ph X u hK T y = phVal X u hK T y.1 n h k := by
   have hex : ∃ n h k, IsDec X u y.2 n h k := ⟨n, h, k, hd⟩
-  rw [Ph, dif_pos hex]
+  rw [Ph, dite_eq_left hex]
   exact hWD T y.1 y.2 _ n _ k _ h hex.choose_spec.choose_spec.choose_spec hd
 
 theorem ph_eq_zero (hK : X.LevelSubgroupCharacter) (T : Cu X u hK) (y : X.B.I.GA)
     (hnd : ¬ ∃ n h k, IsDec X u y.2 n h k) : Ph X u hK T y = 0 := by
-  rw [Ph, dif_neg hnd]
+  rw [Ph, dite_eq_right hnd]
 
 theorem ph_right_K (hK : X.LevelSubgroupCharacter) (hWD : PhWellDef X u hK) (T : Cu X u hK) (y : X.B.I.GA)
     (κ : X.B.I.Gf) (hκ : κ ∈ X.K2) : Ph X u hK T (y * (1, κ)) = X.chi2 κ * Ph X u hK T y := by
@@ -291,7 +336,7 @@ theorem puLinear_holds (hK : X.LevelSubgroupCharacter) (Dt : Set X.B.I.GA) : PuL
   have hmem : ∀ T : Cu X u hK, MemLp (Pser X u hK Dt T) 2 ((X.B.I.muA X.B.μf).restrict X.B.fund) :=
     fun T => (hH T Dt hD).2.2.1
   have hpu : ∀ T : Cu X u hK, PuFun X u hK Dt T = (hmem T).toLp _ := fun T => by
-    rw [PuFun, dif_pos (hmem T)]
+    rw [PuFun, dite_eq_left (hmem T)]
   refine ⟨fun T T' => ?_, fun c T => ?_⟩
   · have he : Pser X u hK Dt (T + T') = Pser X u hK Dt T + Pser X u hK Dt T' := by
       funext x
@@ -424,7 +469,7 @@ theorem inHH_of (hK : X.LevelSubgroupCharacter) (hR : FoldReadyX X)
   have hmem : MemLp (Pser X u hK Dt T) 2 ((X.B.I.muA X.B.μf).restrict X.B.fund) :=
     (hb _ _ hR.2.2.2.2 hle Ω₀ hc h1 a _ hdat Fs hFs hmult Dt hD _ hFB).1
   refine ⟨hsum, fun Dt' hD' => poinc_indep _ _ Dt' Dt hD' hD _ (hPP T).2.1, hmem, ?_⟩
-  have hpu : PuFun X u hK Dt T = hmem.toLp _ := by rw [PuFun, dif_pos hmem]
+  have hpu : PuFun X u hK Dt T = hmem.toLp _ := by rw [PuFun, dite_eq_left hmem]
   have hmeas : Measurable (Pser X u hK Dt T) := hPM (fun T => (hPP T).1) T Dt hD hsum
   have hinv : ∀ γ ∈ X.B.I.GFset, ∀ y, Pser X u hK Dt T (γ * y) = Pser X u hK Dt T y :=
     fun γ hγ y => poinc_left_inv _ _ Dt hD _ (hPP T).2.1 γ hγ y

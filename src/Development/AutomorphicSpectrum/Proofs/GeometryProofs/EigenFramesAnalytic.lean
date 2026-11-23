@@ -1,28 +1,73 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ClopenCondOnto
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.GagaSections
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
+public import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.GagaSections
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenFrameFunctionCompareStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLatticeVectorBundleStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenFrameFunctionCompareStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GagaLineGeneratorEmbeddingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeLineLatticeVectorBundleStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeBasisPullbackDominantStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LineBundleNormalProperPullbackStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsResolutionGenericFibreStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameNearGenericPointStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GagaLineGeneratorEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericOfSmoothSurjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointNormalCoords
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GermStalkClosedPointToBaseChange
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointNormalCoords
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrameNearGenericPointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeLatticeGeneratorStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProperPullbackLineBundleStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericOfSmoothSurjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValueAlongStalkSurjectionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StalkSurjectiveOpenImmersionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsResolutionGenericFibreStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PointFrameSpecializationStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeBasisPullbackDominantStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PointFrameSpecializationStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProperPullbackLineBundleStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StalkSurjectiveOpenImmersionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValueAlongStalkSurjectionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeLatticeGeneratorStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WedgeLineLatticeVectorBundleStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat Filter Topology Metric
 
@@ -48,9 +93,6 @@ theorem isPreimmersion_fst {O K : Type} [CommRing O] [Field K] (β : O →+* K) 
 
 theorem genPt_comp {X X' : Scheme.{0}} {Ω : Type} [Field Ω] (ξ : Sp Ω ⟶ X) (π : X ⟶ X') :
     genPt (ξ ≫ π) = π (genPt ξ) := rfl
-
-theorem centre_comp {X X' : Scheme.{0}} {R : Type} [CommRing R] [IsLocalRing R] (z : Sp R ⟶ X) (π : X ⟶ X') :
-    centre (z ≫ π) = π (centre z) := rfl
 
 end GlobalTheory.CompanionTheory.Ar.Flat.GenOnModel
 

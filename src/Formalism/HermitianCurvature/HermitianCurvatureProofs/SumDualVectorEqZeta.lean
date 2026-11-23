@@ -1,7 +1,63 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.FormalDegreeBessel.FinalWR
-import Formalism.FormalDegreeBessel.FinalG
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCharA
+public import Formalism.HermitianCurvature.StatementQ
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.FormalDegreeBessel.FinalWR
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset Filter Topology
 open scoped ContDiff
@@ -52,45 +108,7 @@ section Lie
 variable {k r : ℕ}
 
 theorem hpk_sq' : Hpk k r * Hpk k r = 1 := by
-  ext a b
-  rw [Matrix.mul_apply, Matrix.one_apply]
-  have ha := a.isLt
-  have hb := b.isLt
-  by_cases hm : r ≤ a.val ∧ a.val ≤ r + k
-  · rw [Finset.sum_eq_single a]
-    · by_cases hab : a = b
-      · subst hab
-        rw [if_pos rfl]
-        simp only [Hpk, eq_self_iff_true, and_true]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-      · rw [if_neg hab]
-        have hab' : a.val ≠ b.val := fun e => hab (Fin.ext e)
-        simp only [Hpk]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro c _ hc
-      have hc' : c.val ≠ a.val := fun e => hc (Fin.ext e)
-      simp only [Hpk]
-      split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro h
-      exact absurd (Finset.mem_univ _) h
-  · obtain ⟨c₀, hc₀⟩ : ∃ c₀ : Fin (2 * r + k + 1), c₀.val = 2 * r + k - a.val :=
-      ⟨⟨2 * r + k - a.val, by omega⟩, rfl⟩
-    rw [Finset.sum_eq_single c₀]
-    · by_cases hab : a = b
-      · subst hab
-        rw [if_pos rfl]
-        simp only [Hpk, eq_self_iff_true, and_true]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-      · rw [if_neg hab]
-        have hab' : a.val ≠ b.val := fun e => hab (Fin.ext e)
-        simp only [Hpk]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro c _ hc
-      have hc' : c.val ≠ c₀.val := fun e => hc (Fin.ext e)
-      simp only [Hpk]
-      split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro h
-      exact absurd (Finset.mem_univ _) h
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.InvChr.Hpk_sq <;> assumption
 
 theorem hpk_h : (Hpk k r)ᴴ = Hpk k r := by
   ext a b
@@ -692,7 +710,7 @@ theorem qminor_poly (hD : IsOpen D) {f : Mx k r → E} (hf : SmoothLev k r i D f
         List.ofFn (opF k r i Y ∘ fun l : Fin t => (s - ((l : ℕ) : ℂ), a (σ l), b l)) := by
       congr 1
       funext l
-      simp only [Function.comp, opF, add_sub_assoc]
+      simp only [Function.comp_apply, opF, add_sub_assoc]
     rw [e]
     rfl
   refine (polyAt_sum Finset.univ _ fun σ _ => (key σ).smul ((Equiv.Perm.sign σ : ℤ) : ℂ)).congr fun Y => ?_
@@ -897,13 +915,13 @@ theorem capelli_two_polynomial (hD : IsOpen D) {f : Mx k r → E} (hf : SmoothLe
   · simp only [if_neg hc]
     exact polyAt_zero _
 
-open Classical in
 
+open Classical in
 def coefOf (N : ℕ) (φ : ℂ → E) : ℕ → E := if h : PolyAt N φ then h.choose else 0
 
 theorem coefOf_spec {N : ℕ} {φ : ℂ → E} (h : PolyAt N φ) (Y : ℂ) :
     φ Y = ∑ j ∈ Finset.range N, Y ^ j • coefOf N φ j := by
-  rw [coefOf, dif_pos h]
+  rw [coefOf, dite_eq_left h]
   exact h.choose_spec Y
 
 def lowC (k r : ℕ) (z z' : Fin (2 * r + k + 1) → ℂ) (i : Fin (r + 1)) :

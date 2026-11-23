@@ -1,6 +1,55 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LatticeBasics.ExistsRealStructure
-import Development.WeilBound.ThetaLifts.SchwartzMoments.SchwartzDqTendsto
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.ExistsRealStructure
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Development.WeilBound.ThetaLifts.LatticeBasics.IsCompactIntV
+public import Development.WeilBound.ThetaLifts.SchwartzMoments.SchwartzDqTendsto
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +79,7 @@ theorem dop_apply (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (x : V) :
 theorem dop_add (a b : V) (L M : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) :
     dop (a + b) (L + M) f = dop a L f + dop b M f := by
   ext x
-  simp only [SchwartzMap.add_apply, dop_apply, map_add, ContinuousLinearMap.add_apply]
+  simp only [SchwartzMap.add_apply, dop_apply, map_add (f := _), ContinuousLinearMap.add_apply]
   push_cast
   ring
 
@@ -63,8 +112,8 @@ theorem hasDerivAt_hl (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (x : V) :
   ring
 end Line
 
-open Complex in
 
+open Complex in
 theorem temperate_exp : Function.HasTemperateGrowth (fun t : ℝ => cexp (I * t)) := by
   have hd : ∀ n : ℕ, iteratedDeriv n (fun t : ℝ => cexp (I * t)) = fun t : ℝ => I ^ n * cexp (I * t) := by
     intro n
@@ -133,7 +182,7 @@ theorem hl_line_deriv (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) :
     (lam.hasTemperateGrowth.mul L.hasTemperateGrowth).add
       ((Function.HasTemperateGrowth.const _).mul (lam.hasTemperateGrowth.mul lam.hasTemperateGrowth))
   have hdiff : ∀ (x : V) (t : ℝ), q (x + t • a) - q x = t * L x + t ^ 2 * (L a / 2) := fun x t => by
-    simp only [hq, map_add, map_smul, hla, smul_eq_mul]
+    simp only [hq, map_add (f := _), map_smul, hla, smul_eq_mul]
     ring
   have t1 := chirp_tg 1 hqt
   have t2 := chirp_tg (-1) hqt
@@ -200,15 +249,15 @@ variable {n d : ℕ} {X : Spc F E n} {W : Spc F E d}
 theorem aOf_add (M : Model σ X W) (u v : Matrix (Fin n) (Fin d) (AE F E)) :
     aOf M (u + v) = aOf M u + aOf M v := by
   funext i
-  simp [aOf, map_add, evI_add]
+  simp [aOf, map_add (f := _), evI_add]
 
 theorem lOf_add (M : Model σ X W) (u v : Matrix (Fin n) (Fin d) (AE F E)) :
     lOf M (u + v) = lOf M u + lOf M v := by
   ext y
-  simp only [lOf, ContinuousLinearMap.add_apply, linForm_apply, ← map_add, ← Finset.sum_add_distrib]
+  simp only [lOf, ContinuousLinearMap.add_apply, linForm_apply, ← map_add (f := _), ← Finset.sum_add_distrib]
   congr 1
   refine Finset.sum_congr rfl fun i _ => ?_
-  simp [map_add, evI_add, mul_add]
+  simp [map_add (f := _), evI_add, mul_add]
 
 theorem evI_half_trace (S : mixedEmbedding.mixedSpace F) :
     Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (evI F ⅟(2 : AF F) * S) =
@@ -219,7 +268,7 @@ theorem evI_half_trace (S : mixedEmbedding.mixedSpace F) :
   have h2 : S = evI F ⅟(2 : AF F) * S + evI F ⅟(2 : AF F) * S := by
     rw [← add_mul, h1, one_mul]
   have h3 := congrArg (Algebra.trace ℝ (mixedEmbedding.mixedSpace F)) h2
-  rw [map_add] at h3
+  rw [map_add (f := _)] at h3
   linarith
 
 open scoped Classical in
@@ -286,8 +335,8 @@ theorem act_add (k : UA σ Y.J × UA σ W.J) (u v : Matrix (Fin n) (Fin d) (AE F
     actAB (cA σ) k (u + v) = actAB (cA σ) k u + actAB (cA σ) k v := by
   rw [actAB, Matrix.mul_add, Matrix.add_mul]; rfl
 
-open scoped Classical in
 
+open scoped Classical in
 def Impl (om : Rep σ Y W) (k : UA σ Y.J × UA σ W.J) (A : SInf F (Fin n × Fin d) →L[ℂ] SInf F (Fin n × Fin d)) : Prop :=
   ∀ f : SInf F (Fin n × Fin d), ∀ g ∈ SB (Fin n × Fin d → Af F), om k (pureA F f g) = pureA F (A f) g
 
@@ -363,7 +412,7 @@ theorem inter (hψ : IsStd ψ) (hs : IsSplitting (adeleClass F) ψ M.co (actAB (
       have huv : At (evI F) (u + v) := fun s hs => by rw [smul_add, hu s hs, hv s hs, add_zero]
       have h1 := inter_of_ne hψ hs hA huv (by rw [aOf_add, ha, zero_add]; exact hξ) f
       have h2 := inter_of_ne hψ hs hA hv hξ f
-      rw [aOf_add, lOf_add, dop_add, map_add, act_add, aOf_add, lOf_add, dop_add, h2] at h1
+      rw [aOf_add, lOf_add, dop_add, map_add (f := _), act_add, aOf_add, lOf_add, dop_add, h2] at h1
       exact add_right_cancel h1
   · exact inter_of_ne hψ hs hA hu ha f
 

@@ -1,18 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordDegreeBoundCharZeroStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordDegreeBoundGenericStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordDegreeBoundOfFlagStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtComplexEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagLabelBasesExistStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GrGenOfIsFlagVBOn
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GradedDegreeFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagLabelBasesExistStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordDegreeBoundGenericStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordDegreeBoundCharZeroStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordDegreeBoundOfFlagStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HermitianLineMetricBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogCardQuotientBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRatioProductFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsAtComplexEmbeddingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtComplexEmbeddingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelValueLiftStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GramDetNeZeroOfIndepStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GradedDegreeFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GramDetNeZeroOfIndepStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HermitianLineMetricBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelValueLiftStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRatioProductFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogCardQuotientBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtComplexEmbeddingStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +73,7 @@ theorem gram_eq {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Sp Ω ⟶ X} {K : 
     (h : LieMetric M y) {L : Type} [Field L] [NumberField L] {z : Sp (𝓞 L) ⟶ X} {B : HermitianBundle.{0} L}
     {MB : LieModel G z B.carrier} (hfib : IsFibre (fun z v w c => c = h.ip z v w) z B MB) (σ : L →+* ℂ) {n : ℕ}
     (g : Fin n → B.carrier) (v : Fin n → (epsAt (spMap (σ.comp (algebraMap (𝓞 L) L)) ≫ z) ⟶ G))
-    (hl : ∀ a, MB.Lifts (σ.comp (algebraMap (𝓞 L) L)) (𝟙 G.left) (g a) (v a)) :
+    (hl : ∀ a, ((v a).left ≫ (𝟙 G.left) = ReciprocityTheory.ChartRestriction.G.Geo.Tor.spMap (GlobalTheory.CompanionTheory.Ar.dualMap (σ.comp (algebraMap (𝓞 L) L))) ≫ (MB.pt (g a)).left)) :
     B.gramDet σ g = (gramAt h _ v).det := by
   unfold HermitianBundle.gramDet gramAt
   congr 1
@@ -230,7 +276,7 @@ theorem isDegOn_inr (Fl : 𝔐.Flag) {a : CMType H × Fin (D.p + D.q) → K → 
   have hi : rootIdx D (τ, Fin.natAdd D.p i) = ⟨.inr τ, i.rev⟩ := by
     have h2 := i.2
     simp only [rootIdx, Fin.val_natAdd]
-    rw [dif_neg (by omega)]
+    rw [dite_eq_right (by omega)]
     congr 1
     apply Fin.ext
     simp [Fin.val_rev]

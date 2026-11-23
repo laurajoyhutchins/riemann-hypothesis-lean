@@ -1,9 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import ReciprocityTheory.ThetaQuasiPeriods.Change
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFormDegreeLeHilbertDegreeEvalNeZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LeadingCoeffNonnegOfEventuallyEvalNat
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFormDegreeLeHilbertDegreeEvalNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -33,7 +87,7 @@ theorem differentiable_eval {φ : ι → E → ℂ} (hφ : ∀ c, Differentiable
     simp only [eval_C]
     exact differentiable_const a
   · intro p q hp hq
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact hp.add hq
   · intro p c hp
     simp only [map_mul, eval_X]
@@ -95,6 +149,7 @@ theorem isHomogeneous {φ : ι → E → ℂ} {I : Ideal (MvPolynomial ι ℂ)}
         = (0 : Polynomial ℂ).eval s := by
     intro s
     have h0 := (hI F).mp hF s z
+
     rw [← hsum, map_sum] at h0
     simp only [Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C,
       Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_zero]
@@ -102,7 +157,7 @@ theorem isHomogeneous {φ : ι → E → ℂ} {I : Ideal (MvPolynomial ι ℂ)}
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [eval_mul_of_isHomogeneous (fun c => φ c z) s (homogeneousComponent_isHomogeneous m F)]
     ring
-  have hc := congrArg (fun p => Polynomial.coeff p i) (Polynomial.funext hP)
+  have hc := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p i) (Polynomial.funext hP)
   simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_zero,
     Finset.sum_ite_eq, Finset.mem_range] at hc
   simpa [show i < F.totalDegree + i + 1 by omega] using hc
@@ -116,7 +171,8 @@ theorem finrank_quotPiece_le [Finite ι] {φ : ι → E → ℂ} {I : Ideal (MvP
   classical
   by_cases hfin : FiniteDimensional ℂ (quotPiece I d)
   swap
-  · rw [Module.finrank_of_not_finite hfin]
+  · set_option synthInstance.maxHeartbeats 100000 in
+    rw [Module.finrank_of_not_finite hfin]
     exact Nat.zero_le _
   let b := Module.finBasis ℂ (quotPiece I d)
 
@@ -139,12 +195,14 @@ theorem finrank_quotPiece_le [Finite ι] {φ : ι → E → ℂ} {I : Ideal (MvP
     rw [eval_mul_of_isHomogeneous (fun c => φ c z) t hhom]
     have hz := congrFun ha z
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at hz
+
     rw [map_sum]
     simp only [smul_eval]
     rw [hz, mul_zero]
   have h0 : ∑ k, a k • b k = 0 := by
     apply Subtype.ext
     simp only [Submodule.coe_sum, Submodule.coe_smul, Submodule.coe_zero]
+
     simp_rw [← hFb, ← map_smul, ← map_sum]
     simp only [AlgHom.toLinearMap_apply, Ideal.Quotient.mkₐ_eq_mk]
     exact Ideal.Quotient.eq_zero_iff_mem.mpr hG

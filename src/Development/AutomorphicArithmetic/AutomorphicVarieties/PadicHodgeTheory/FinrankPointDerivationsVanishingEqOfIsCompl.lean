@@ -1,6 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.KisinCrTrivial
-open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.Published IsLocalRing Polynomial
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.U3 UpperTheory.V.Alg IsLocalRing Polynomial
 
 section SlopeTestRemainingChoices
 open MvPowerSeries
@@ -24,7 +74,7 @@ private theorem low_mem {R σ : Type} [CommRing R] [Finite σ] (m : Ideal (MvPow
       exact Ideal.mul_mem_right _ _ (hIn hp)
     · rw [map_add]; exact add_mem ha hb
   have h := key (e g) (by
-    rw [AdicCompletion.pow_smul_top_eq_ker_eval (MvPolynomial.idealOfVars_fg σ R), LinearMap.mem_ker,
+    rw [AdicCompletion.pow_smul_top_eq_ker_eval (MvPolynomial.fg_idealOfVars σ R), LinearMap.mem_ker,
       AdicCompletion.eval_apply, toAdicCompletionAlgEquiv_apply, toAdicCompletion_apply_eq_mk_truncTotal]
     rw [hg]
     rfl)
@@ -67,7 +117,7 @@ private theorem of_mem_sq {E σ : Type} [Field E] (g : MvPowerSeries σ E)
   rw [pow_two] at h
   refine Submodule.mul_induction_on h (fun a ha b hb => ?_) (fun a b ha hb => ?_)
   · rw [coeff_single_mul, (mem_max _).1 ha, (mem_max _).1 hb]; simp
-  · rw [map_add, ha, hb, add_zero]
+  · rw [map_add (f := _), ha, hb, add_zero]
 
 end SlopeTestRemainingChoices
 
@@ -110,12 +160,12 @@ theorem UpperTheory.finrank_pointDerivations_vanishing_eq_of_isCompl :
     have hz : ∀ s ∈ RingHom.ker x ^ 2 ⊔ P, δ s = 0 := by
       intro s hs
       obtain ⟨u, hu, v, hv, rfl⟩ := Submodule.mem_sup.1 hs
-      rw [map_add, ((hT δ).1 hδ).2 v hv, add_zero]
+      rw [map_add (f := _), ((hT δ).1 hδ).2 v hv, add_zero]
       rw [pow_two] at hu
       refine Submodule.mul_induction_on hu (fun p hp q hq => ?_) (fun p q hp hq => ?_)
       · rw [RingHom.mem_ker] at hp hq
         rw [((hT δ).1 hδ).1, hp, hq]; simp
-      · rw [map_add, hp, hq, add_zero]
+      · rw [map_add (f := _), hp, hq, add_zero]
     have := hz _ hmem
     rw [map_smul, hsub δ hδ, Algebra.smul_def] at this
     exact (mul_eq_zero.1 this).resolve_left (hne k hk)
@@ -130,12 +180,14 @@ theorem UpperTheory.finrank_pointDerivations_vanishing_eq_of_isCompl :
         (fun i => D i r / algebraMap O E (c i))
       choose! b hb using hk
       have hz := hker δ δ.2 ((k : O) • r - ∑ i, b i • a i) (fun j => by
+
         rw [map_sub, map_sum, map_smul]
-        simp only [map_smul, ha, smul_ite, smul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+        simp only [map_smul, ha, smul_ite, smul_zero, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
         rw [Algebra.smul_def, Algebra.smul_def, hb j (Finset.mem_univ _), Algebra.smul_def]
         have := hne _ (hc j)
         field_simp
         ring)
+
       rw [map_sub, map_sum, map_smul] at hz
       simp only [map_smul, ← hev, hδ, Pi.zero_apply, smul_zero, Finset.sum_const_zero, sub_zero] at hz
       rw [Algebra.smul_def] at hz
@@ -143,8 +195,9 @@ theorem UpperTheory.finrank_pointDerivations_vanishing_eq_of_isCompl :
     · intro v
       refine ⟨∑ j, (v j / algebraMap O E (c j)) • ⟨D j, hDT j⟩, ?_⟩
       ext i
+
       rw [map_sum, Finset.sum_apply]
-      simp only [hev, Submodule.coe_smul, LinearMap.smul_apply, ha, smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+      simp only [hev, Submodule.coe_smul, LinearMap.smul_apply, ha, smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
       rw [smul_eq_mul, div_mul_cancel₀ _ (hne _ (hc i))]
   rw [(LinearEquiv.ofBijective ev hbij).finrank_eq]
   simp

@@ -1,7 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfF
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ScalarPairOrthogonal.ExistsNeZeroMem
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaUniqueness.GramNondeg
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -118,8 +157,9 @@ theorem unitri_map (η : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (𝓞 D.ho
 theorem GZ_frameAct (u h : Fin (D.R.rS + 1) → (VS D).V) (η : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (𝓞 D.host.E)) :
     GZ u (frameAct h η) = GZ u h * η.map (fun x => (x : D.host.E)) := by
   ext a b
+
   simp only [GZ, Matrix.of_apply, Matrix.mul_apply, Matrix.map_apply, frameAct, brS, map_sum, map_smul,
-    smul_eq_mul]
+  smul_eq_mul]
   exact Finset.sum_congr rfl fun c _ => mul_comm _ _
 
 theorem GDl_frameAct_top (u h : Fin (D.R.rS + 1) → (VS D).V)
@@ -128,7 +168,7 @@ theorem GDl_frameAct_top (u h : Fin (D.R.rS + 1) → (VS D).V)
     GDl u (frameAct h η) (D.R.rS + 1) = GDl u h (D.R.rS + 1) := by
   have hm := unitri_map η h1 h2
   unfold GDl
-  rw [dif_pos le_rfl, dif_pos le_rfl]
+  rw [dite_eq_left le_rfl, dite_eq_left le_rfl]
   have e : ∀ M : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) D.host.E,
       M.submatrix (Fin.castLE (le_refl _)) (Fin.castLE (le_refl _)) = M := fun M => by ext i j; rfl
   rw [e, e, GZ_frameAct, Matrix.det_mul, det_unitri _ hm.1 hm.2, mul_one]
@@ -139,7 +179,7 @@ theorem GDl_frameAct_r (u h : Fin (D.R.rS + 1) → (VS D).V)
     GDl u (frameAct h η) D.R.rS = GDl u h D.R.rS := by
   have hm := unitri_map η h1 h2
   unfold GDl
-  rw [dif_pos (Nat.le_succ _), dif_pos (Nat.le_succ _), GZ_frameAct]
+  rw [dite_eq_left (Nat.le_succ _), dite_eq_left (Nat.le_succ _), GZ_frameAct]
   have ecs : (Fin.castLE (Nat.le_succ D.R.rS) : Fin D.R.rS → Fin (D.R.rS + 1)) = Fin.castSucc :=
     funext fun i => Fin.ext rfl
   rw [ecs]

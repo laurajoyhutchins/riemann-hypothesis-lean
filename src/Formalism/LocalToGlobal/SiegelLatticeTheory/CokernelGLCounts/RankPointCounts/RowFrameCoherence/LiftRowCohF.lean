@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.LiftRowCohT
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.LiftRowCohT
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelativeEquivalence.DCRelEquivAllHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,6 +89,7 @@ theorem ff_repr {e f : Fin r → S.V} (hfe : ∀ a b, S.hT (f a) (e b) = if a = 
   obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun E).1 hx
   refine Finset.sum_congr rfl fun a _ => ?_
   congr 1
+
   simp [map_sum, hfe]
 
 def ffP (p q : Fin r → S.V) (c d : Fin r → E) : S.V := ∑ a, c a • p a + ∑ a, d a • q a
@@ -60,13 +107,14 @@ theorem ff_hyp {p q : Fin r → S.V} (hp : ∀ a b, S.hT (p a) (p b) = 0) (hq : 
     intro a b
     rw [← ff_herm, hpq]
     by_cases h : a = b <;> simp [h, Ne.symm]
+
   simp [ffP, map_sum, LinearMap.sum_apply, hp, hq, hpq, hqp, mul_ite, Finset.sum_add_distrib]
 
 theorem ff_split_eval {H : Submodule E S.V} {w w' P P' : S.V} (hw : w ∈ orth S H) (hw' : w' ∈ orth S H)
     (hP : P ∈ H) (hP' : P' ∈ H) : S.hT (w + P) (w' + P') = S.hT w w' + S.hT P P' := by
   have h1 : S.hT w P' = 0 := ff_swap (mem_orth_iff.1 hw P' hP')
   have h2 : S.hT P w' = 0 := mem_orth_iff.1 hw' P hP
-  simp only [map_add, LinearMap.add_apply, h1, h2]
+  simp only [map_add (f := _), LinearMap.add_apply, h1, h2]
   ring
 
 def ffC (f : Fin r → S.V) (v : S.V) : Fin r → E := fun a => S.hT (f a) v
@@ -96,6 +144,7 @@ theorem ff_orth_part (hee : ∀ a b, S.hT (e a) (e b) = 0) (hff : ∀ a b, S.hT 
   intro y hy
   have key : ffH e f ≤ LinearMap.ker (S.hT.flip (v - ffP e f (ffC f v) (ffC e v))) := by
     refine Submodule.span_le.2 (Set.union_subset ?_ ?_) <;> rintro _ ⟨b, rfl⟩ <;>
+
       simp [LinearMap.mem_ker, ffP, ffC, map_sum, LinearMap.sum_apply, hee, hef, hfe, hff, mul_ite]
   simpa using LinearMap.mem_ker.1 (key hy)
 
@@ -150,6 +199,7 @@ theorem ff_dual_pair (x : Fin r → S.V) (U : Matrix (Fin r) (Fin r) E)
   simp only [Matrix.mul_apply, Matrix.of_apply, Matrix.one_apply] at h
   have hc : S.hT (x a) (∑ c, starRingEnd E (U b c) • f c) =
       starRingEnd E (∑ c, U b c * S.hT (f c) (x a)) := by
+
     simp [map_sum, ff_herm]
   rw [hc, h]
   by_cases hab : a = b <;> simp [hab, Ne.symm]
@@ -222,7 +272,7 @@ theorem ff_lat_le {Λ' Me L Mf : Submodule (𝓞 E) S.V} {Yf : Submodule E S.V}
     refine (hmem _).2 fun y hy => ?_
     obtain ⟨y12, hy12, y3, hy3, rfl⟩ := Submodule.mem_sup.1 hy
     obtain ⟨y1, hy1, y2, hy2, rfl⟩ := Submodule.mem_sup.1 hy12
-    simp only [map_add, LinearMap.add_apply]
+    simp only [map_add (f := _), LinearMap.add_apply]
     refine Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_) ?_
     · rw [hsymm]
       exact (hmem n).1 hnΛ _ (hMe (h2 y1 hy1))
@@ -236,7 +286,7 @@ theorem ff_lat_le {Λ' Me L Mf : Submodule (𝓞 E) S.V} {Yf : Submodule E S.V}
   obtain ⟨z12, hz12, n, hn', rfl⟩ := Submodule.mem_sup.1 hz
   obtain ⟨m, hm, l, hl, rfl⟩ := Submodule.mem_sup.1 hz12
   show ν (m + l + n) ∈ Me ⊔ L ⊔ Mf
-  rw [map_add, map_add, h3 l hl]
+  rw [map_add (f := _), map_add (f := _), h3 l hl]
   exact Submodule.add_mem _ (Submodule.add_mem _ (hMe (h1 m hm)) (hL hl)) (hn n hn')
 
 end Gen
@@ -271,7 +321,8 @@ theorem frameCorrection_holds : FrameFixNeed X Y u u' := by
   have hA : Xsp (lf D (X.Fu u')) = Submodule.span D.host.E (Set.range e) := rfl
   have hX2 : Xsp y.1 = (Xsp (lf D (X.Fu u'))).map ((β * s.lin : (VS D).V ≃ₗ[D.host.E] (VS D).V) :
       (VS D).V →ₗ[D.host.E] (VS D).V) := by
-    rw [liftT_xsp_eq, ← hP.2.1 D.R.rS, ← liftT_xsp_eq]
+    set_option backward.isDefEq.respectTransparency false in
+      rw [liftT_xsp_eq, ← hP.2.1 D.R.rS, ← liftT_xsp_eq]
     show (Xsp (mapLF s.lin (lf D (X.Fu u')))).map _ = _
     rw [liftT_xsp_mapLF _ hγi, ← liftT_map_mul]
 
@@ -302,6 +353,7 @@ theorem frameCorrection_holds : FrameFixNeed X Y u u' := by
     exact y.1.fl.e_iso a b
   have hgg : ∀ a b, (VS D).hT (g a) (g b) = 0 := by
     intro a b
+
     simp [hg_def, map_sum, hff]
   have hxg : ∀ a b, (VS D).hT (x a) (g b) = if a = b then 1 else 0 := ff_dual_pair x T⁻¹ hUT
   have hxH : ∀ a, x a ∈ ffH e f := fun a => Submodule.span_mono Set.subset_union_left (hxA a)

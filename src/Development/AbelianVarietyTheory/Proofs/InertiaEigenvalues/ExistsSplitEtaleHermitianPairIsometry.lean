@@ -1,4 +1,63 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EtaleHermitianPairStructureFacts
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.TensorProduct.IsBaseChangePi
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Fixed
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
+
 open GlobalTheory.JR Matrix MeasureTheory Filter Topology
 
 noncomputable section
@@ -8,27 +67,7 @@ variable {F E : Type} [NontriviallyNormedField F] [NontriviallyNormedField E] [N
   [Unram F E]
 
 theorem algebraMap_norm_eq_mul_star (z : E) : algebraMap F E (Algebra.norm F z) = z * star z := by
-  have h2 : Module.finrank F E = 2 := Unram.finrank_eq
-  haveI : FiniteDimensional F E := Module.finite_of_finrank_pos (by omega)
-  let σ : E ≃ₐ[F] E := AlgEquiv.ofRingEquiv (f := starRingAut)
-    (fun x => by rw [starRingAut_apply]; exact Unram.star_fix (E := E) x)
-  have hσz : ∀ y, σ y = star y := fun y => rfl
-  have hσ : (1 : E ≃ₐ[F] E) ≠ σ := by
-    obtain ⟨y, hy⟩ := Unram.star_ne (F := F) (E := E)
-    intro h
-    apply hy
-    rw [← hσz, ← h]
-    rfl
-  classical
-  have hle := AlgEquiv.card_le (F := F) (K := E)
-  have hge : ({1, σ} : Finset (E ≃ₐ[F] E)).card ≤ Fintype.card (E ≃ₐ[F] E) := Finset.card_le_univ _
-  rw [Finset.card_pair hσ] at hge
-  have hcard : Fintype.card (E ≃ₐ[F] E) = 2 := by omega
-  haveI : IsGalois F E := IsGalois.of_card_aut_eq_finrank F E (by rw [Nat.card_eq_fintype_card, hcard, h2])
-  have huniv : ({1, σ} : Finset (E ≃ₐ[F] E)) = Finset.univ :=
-    Finset.eq_univ_of_card _ (by rw [Finset.card_pair hσ, hcard])
-  rw [Algebra.norm_eq_prod_automorphisms, ← huniv, Finset.prod_pair hσ, hσz]
-  rfl
+  apply GlobalTheory.JR.EtFacts.normE <;> assumption
 
 def piCoord {ι : Type} [Fintype ι] (b : Module.Basis ι F E) (r : ℕ) :
     (Fin r → E) ≃ₗ[Fin r → F] (ι → (Fin r → F)) where

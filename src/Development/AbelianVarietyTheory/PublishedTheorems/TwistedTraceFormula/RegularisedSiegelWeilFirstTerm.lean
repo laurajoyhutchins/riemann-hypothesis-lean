@@ -1,9 +1,68 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
-import Development.AbelianVarietyTheory.Definitions.Foundations.EisValueAtIffEisPoleLE
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittDecompSymplInclIsotropicInclAnisotropic
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EisValueAtIffEisPoleLE
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsHeightLeTwoMulQuotHeight
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SphericalZero
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittDecompProjAnisotropicAnisotropicEmbedding
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedBessel
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ContinuousResTSymm
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittDecompSymplInclIsotropicInclAnisotropic
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+namespace I195MixedCoordinates_c8055b1c0896c062cd00c0d6
+
+open Formalism.BasicNotions Formalism.BasicNotions.TH
+open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
+open Formalism.L2.Theta Formalism.IndefR.Datum GlobalTheory.MixModel MeasureTheory
+attribute [local instance] Formalism.BasicNotions.Host.cmStar
+
+public noncomputable abbrev target
+    {D : D7} {T T₀ : HSp D} {ρ : ℕ} (d : HypDec T T₀ ρ) (S : HSp D)
+    (ψ : AddChar (AF D.host.F) ℂ) (μ : Measure (Mx D ρ S.rank))
+    (𝓕 : Set (Mx D ρ S.rank)) (f : WO S T → ℂ) (y : Mx D S.rank ρ) : WO S T₀ → ℂ :=
+  fun w₀ => ∫ ξ in 𝓕, heisO ψ S T (d.jX * ξ)
+    (heisO ψ S T (d.jY * (incA D (-D.host.xi0⁻¹) • (adj y * gA S)))
+      (heisO ψ S T (d.j0 * w₀) f)) 0 ∂μ
+
+end I195MixedCoordinates_c8055b1c0896c062cd00c0d6
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,9 +106,6 @@ theorem mul_jX (q : stab d) : mt T q ⬝ d.jX = d.jX ⬝ (onX d q).1 := q.2.choo
 
 theorem levi_mem (α : GL (Fin r) (AE D)) : d.levi α ∈ stab d := ⟨α, d.levi_jX α⟩
 
-theorem onX_levi (α : GL (Fin r) (AE D)) : onX d ⟨_, levi_mem d α⟩ = α :=
-  Units.ext ((eq_of_mul_jX d (mul_jX d _)).trans (eq_of_mul_jX d (d.levi_jX α)).symm)
-
 def absDet : stab d →* ℝ≥0 := (absA D).comp (Matrix.GeneralLinearGroup.det.comp (onX d))
 
 def HasIw (K : Subgroup (GA D T)) : Prop := ∀ h : GA D T, ∃ q : stab d, ∃ k ∈ K, h = q * k
@@ -86,11 +142,6 @@ theorem isClosed_stab : IsClosed (stab d : Set (GA D T)) := by
 
 variable (b : GL (Fin T.rank) (AE D))
 
-theorem HasIw.isIwasawa {d : HypDec T T₀ r} {b : GL (Fin T.rank) (AE D)} (h : HasIw d (Kmax T b)) :
-    IsIwasawa (absDet d) (Kmax T b) :=
-  haveI := isLattice_frameLat_host T
-  isIwasawa_of_isCompact (isClosed_stab d) (continuous_absDet d) (isCompact_levelAll (AdelicU.isCMExt_host D) _ _ _) h
-
 def rhoH (T : HSp D) (r : ℕ) : ℝ := ((T.rank : ℝ) - r) / 2
 
 def sphericalSection (s : ℂ) : GA D T → ℂ := fun h => npow (iwAbs (absDet d) (Kmax T b) h) (s + rhoH T r)
@@ -111,13 +162,6 @@ def EisensteinContinues : Prop :=
     (∀ s₀, ∃ k, EisensteinRegularAt d b s₀ k) ∧ eisensteinResidue d b ≠ 0 ∧
     ∀ h, PoleLE (sphericalEisenstein d b h) (rhoH T r) 1 ∧ ResidueAt (sphericalEisenstein d b h) (rhoH T r) (eisensteinResidue d b)
 
-theorem sphericalSection_levi_mul {d : HypDec T T₀ r} {b : GL (Fin T.rank) (AE D)} (h : HasIw d (Kmax T b)) (s : ℂ)
-    (α : GL (Fin r) (AE D)) {k : GA D T} (hk : k ∈ Kmax T b) :
-    sphericalSection d b s (d.levi α * k) = npow (absA D (Matrix.GeneralLinearGroup.det α)) (s + rhoH T r) := by
-  have := h.isIwasawa.iwAbs_mul ⟨_, levi_mem d α⟩ hk
-  rw [absDet, MonoidHom.comp_apply, MonoidHom.comp_apply, onX_levi] at this
-  exact congrArg (npow · _) this
-
 end SlopeTestRemainingChoices
 
 section Schwartz
@@ -128,7 +172,7 @@ def projK {K : Subgroup (GA D T)} (ν : Measure K) (φ : WO S T → ℂ) : WO S 
   fun w => ∫ k, om (1, (k : GA D T)) φ w ∂ν
 
 def ikeda (ψ : AddChar (AF D.host.F) ℂ) {t : ℕ} (d : HypDec T T' t) (μ : Measure (Mx D t S.rank))
-    (𝓕 : Set (Mx D t S.rank)) (φ : WO S T → ℂ) : WO S T' → ℂ := d.mixT S ψ μ 𝓕 φ 0
+    (𝓕 : Set (Mx D t S.rank)) (φ : WO S T → ℂ) : WO S T' → ℂ := (_root_.I195MixedCoordinates_c8055b1c0896c062cd00c0d6.target d) S ψ μ 𝓕 φ 0
 
 theorem ikeda_apply (ψ : AddChar (AF D.host.F) ℂ) {t : ℕ} (d : HypDec T T' t) (μ : Measure (Mx D t S.rank))
     (𝓕 : Set (Mx D t S.rank)) (φ : WO S T → ℂ) (w : WO S T') :
@@ -146,12 +190,6 @@ def omCentreS (p : MvPolynomial ℕ ℂ) (φ : WO S T → ℂ) : WO S T → ℂ 
 
 def omCentreT (p : MvPolynomial ℕ ℂ) (φ : WO S T → ℂ) : WO S T → ℂ :=
   fun w => centreAct θ τ T p (fun h => om (1, h) φ w) 1
-
-theorem omCentreT_C (c : ℂ) (φ : WO S T → ℂ) : omCentreT om θ τ (MvPolynomial.C c) φ = c • φ := by
-  funext w
-  by_cases hc : c = 0
-  · simp [omCentreT, centreAct, polyAct, hc]
-  · simp [omCentreT, centreAct, polyAct, opPow, MvPolynomial.support_C, hc, show ((1 : GA D S), (1 : GA D T)) = 1 from rfl]
 
 end Schwartz
 
@@ -226,10 +264,6 @@ def RegularisedSiegelWeilFirstTerm : Prop :=
         ∀ φ, IsThetaFunO ψ (dblSp V) T φ → IsKFinVec ω (Khat V a) φ →
           EisCoeffAt V (flat V a (swSec V T ω μ₀ 𝓕₀ φ) (sZero V T)) (sZero V T) (-1)
             (κ • regRes ω' m θ τ d₀ b' zH P (ikeda ψ d μ₁ 𝓕₁ (projK ω ν φ)))
-
-example (D : D7) : ∃ (V T T' : HSp D) (t : ℕ) (_ : HypDec T T' t),
-    T.rank + T'.rank = 2 * V.rank ∧ T'.rank < T.rank ∧ 0 < T'.rank :=
-  ⟨diagSp D 2 ![false, false] 2 0, _, _, 1, hypDecThree D, rfl, (by decide : 1 < 3), Nat.one_pos⟩
 
 end GlobalTheory.Published
 

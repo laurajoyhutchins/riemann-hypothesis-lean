@@ -1,4 +1,68 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FlagGramRestriction
+module
+
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GNonneg
+public import Formalism.HermitianCurvature.FiniteOrderIntersectionInSmooth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FixedFrameProperty
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FixedPointsGramVector
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FlagGramRestriction
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MajorantEstimate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LinearChangeOfVariablesBis
+
+@[expose] public section
 
 open Matrix Formalism.FourierDecayAlt Formalism.QuantumDeterminants
 open scoped ComplexConjugate
@@ -81,7 +145,6 @@ lemma onb {z z' : Fin (2 * r + k + 1) → ℂ} (hstd : C2.Std k r z z') {γ : B.
         funext i
         have hl : 0 < hHerm.eigenvalues i := hPD.eigenvalues_pos i
         have hsq := Real.mul_self_sqrt hl.le
-        have hne : Real.sqrt (hHerm.eigenvalues i) ≠ 0 := (Real.sqrt_pos.mpr hl).ne'
         have hreal : (Real.sqrt (hHerm.eigenvalues i))⁻¹ * hHerm.eigenvalues i *
             (Real.sqrt (hHerm.eigenvalues i))⁻¹ = 1 := by
           rw [mul_right_comm, ← mul_inv, hsq, inv_mul_cancel₀ hl.ne']
@@ -217,7 +280,6 @@ theorem fibre_orbit_description : C2.FibreOrbit := by
   have hfb : ∀ b, s0 *ᵥ (g₁ *ᵥ fvec k r z' b) = g₂ *ᵥ fvec k r z' b := fun b => hcol (Sum.inr b)
   have hu0 := hunit s0 hs0
   have hu1 := hunit g₁ hg₁
-  have hu2 := hunit g₂ hg₂
   refine ⟨s0⁻¹, ?_, g₁⁻¹ * s0⁻¹ * g₂, ?_, ?_⟩
   · rw [← fixed_frame_property k r z hstd.2.1]
     refine ⟨hinv s0 hs0, fun a => ?_⟩

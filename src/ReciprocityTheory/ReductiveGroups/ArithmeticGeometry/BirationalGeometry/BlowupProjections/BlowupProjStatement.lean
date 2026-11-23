@@ -1,5 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.LogResStC
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,15 +71,6 @@ def HasSncCoords {Y : Scheme.{0}} (g : Y ⟶ Sp K) (D : ℕ) (T : Set Y) : Prop 
       ((V j : Y.Opens) : Set Y) ∩ T =
         {y | y ∈ (V j : Y.Opens) ∧ ∃ i : Fin D, (i : ℕ) < k ∧ y ∉ Y.basicOpen (z i)}
 
-def BlowupResStatement : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (X : Scheme.{0}) (g : X ⟶ Sp K) (U : X.Opens),
-    LocallyOfFiniteType g → QuasiCompact g → IsSeparated g → IsReduced X → Dense (U : Set X) →
-    Smooth (U.ι ≫ g) →
-    ∃ (J : X.IdealSheafData) (X' : Scheme.{0}) (f : X' ⟶ X),
-      (J.support : Set X) ⊆ (U : Set X)ᶜ ∧ FinalTheorems.Blowup f J ∧ FinalTheorems.ReesCharts f J ∧
-        Smooth (f ≫ g) ∧ IsProper f ∧ IsIso (f ∣_ U) ∧ Dense ((f ⁻¹ᵁ U : X'.Opens) : Set X') ∧
-        FinalTheorems.Snc (preRed f (U : Set X)ᶜ U.isOpen.isClosed_compl)
-
 def BlowupProjStatement : Prop :=
   ∀ (K : Type) [Field K] (M : ℕ) (X : Scheme.{0}) (i : X ⟶ PSpace K M), IsClosedImmersion i →
     ∀ (J : X.IdealSheafData) (X' : Scheme.{0}) (f : X' ⟶ X), FinalTheorems.Blowup f J →
@@ -56,12 +91,6 @@ def IsResInput {X : Scheme.{0}} (M : ℕ) (i : X ⟶ PSpace K M) (U : X.Opens) (
 def IsResWithCoords {X X' : Scheme.{0}} (g : X ⟶ Sp K) (U : X.Opens) (D : ℕ) (f : X' ⟶ X) : Prop :=
   SmoothOfRelativeDimension D (f ≫ g) ∧ IsIso (f ∣_ U) ∧
     Dense ((f ⁻¹ᵁ U : X'.Opens) : Set X') ∧ HasSncCoords (f ≫ g) D (f.base ⁻¹' (U : Set X)ᶜ)
-
-def ResKPropStatement : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (M D : ℕ) (X : Scheme.{0}) (i : X ⟶ PSpace K M) (U : X.Opens),
-    IsResInput M i U D →
-    ∃ (X' : Scheme.{0}) (f : X' ⟶ X),
-      IsProper f ∧ IsProper (f ≫ i ≫ PSpace.str K M) ∧ IsResWithCoords (i ≫ PSpace.str K M) U D f
 
 def ResKStatement : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (M D : ℕ) (X : Scheme.{0}) (i : X ⟶ PSpace K M) (U : X.Opens),

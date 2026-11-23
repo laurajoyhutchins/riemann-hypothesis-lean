@@ -1,8 +1,56 @@
-import Formalism.LocalToGlobal.NumberFieldFamilies.ThetaCI
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IntegerSubgroupIntersection.IsOpenIntSub
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IntegerSubgroupIntersection.Imports
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.IntegerSubgroupIntersection.IntInterAlt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+module
+
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Mathlib.RingTheory.DedekindDomain.FiniteAdeleRing
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.DataTheta
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,25 +84,7 @@ theorem sc_Fv (v : HeightOneSpectrum (𝓞 F)) : SecondCountableTopology (v.adic
   infer_instance
 
 theorem sc_Af : SecondCountableTopology (FiniteAdeleRing (𝓞 F) F) := by
-  have := countable_primes F
-  have := sc_Fv F
-  have ho : ∀ v : HeightOneSpectrum (𝓞 F), IsOpen (v.adicCompletionIntegers F : Set (v.adicCompletion F)) :=
-    fun v => Valued.isOpen_valuationSubring _
-  have hS : ∀ T : Finset (HeightOneSpectrum (𝓞 F)), Filter.cofinite ≤ Filter.principal ((T : Set (HeightOneSpectrum (𝓞 F)))ᶜ) := fun T =>
-    Filter.le_principal_iff.2 T.finite_toSet.compl_mem_cofinite
-  have he := fun T : Finset (HeightOneSpectrum (𝓞 F)) => RestrictedProduct.isOpenEmbedding_inclusion_principal ho (hS T)
-  have hU : ∀ T : Finset (HeightOneSpectrum (𝓞 F)), SecondCountableTopology (Set.range (RestrictedProduct.inclusion
-      (fun v : HeightOneSpectrum (𝓞 F) => v.adicCompletion F) (fun v => (v.adicCompletionIntegers F : Set _)) (hS T))) :=
-    fun T => by
-      have := (RestrictedProduct.isEmbedding_coe_of_principal (R := fun v : HeightOneSpectrum (𝓞 F) => v.adicCompletion F)
-        (A := fun v => (v.adicCompletionIntegers F : Set _)) (S := (T : Set (HeightOneSpectrum (𝓞 F)))ᶜ)).secondCountableTopology
-      exact (he T).isEmbedding.toHomeomorph.symm.secondCountableTopology
-  refine @TopologicalSpace.secondCountableTopology_of_countable_cover _ _ _ _ _ hU (fun T => (he T).isOpen_range) ?_
-  refine Set.eq_univ_of_forall fun x => Set.mem_iUnion.2 ?_
-  have hx := Filter.eventually_cofinite.1 x.2
-  refine ⟨hx.toFinset, ⟨x.1, Filter.eventually_principal.2 fun v hv => ?_⟩, rfl⟩
-  by_contra h
-  exact hv (by simpa using h)
+  apply GlobalTheory.AdelicUnitaryTop.secondCountable_finiteAdele <;> assumption
 
 variable {F} {E : Type} [Field E] [NumberField E] [Algebra F E]
 

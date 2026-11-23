@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WeakCharInertPartRealAdelicDataTransport
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WeakCharInertPartRealAdelicDataTransport
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FieldValuesMemFixedField
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.OmPinsTr
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.GoodPartEq
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Wp3ApplyEqSqMulSubSqMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Lean.Meta.ExprDefEq
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,21 +67,30 @@ variable {Ks : Type} [Field Ks] [NumberField Ks] [iK : Algebra Ks a.D.what₂.LL
 
 section Three
 
+set_option backward.isDefEq.lazyProjDelta false
+set_option backward.isDefEq.lazyWhnfCore false
+
 variable {A : FamIn3 a.D.what₂.LL G Pl0 I0 (List ℕ) T a.D.R.m} (R : RealDat3 a.D A Ks) {F : Face3 a.D A}
 
 def twice : RealDat3 a.D A Ks := (by with_unfolding_all exact ((real3 (a := b) a (iK := alg b iK) (real3 b R)) :))
 
-def twiceY : type_of% R.ioY := kc% (twice b R).ioY
+def twiceY : type_of% R.ioY := by
+  with_unfolding_all exact ((twice b R).ioY :)
 
-def twiceX : type_of% R.ioX := kc% (twice b R).ioX
+def twiceX : type_of% R.ioX := by
+  with_unfolding_all exact ((twice b R).ioX :)
 
-theorem twiceY_eq : R.ioY = twiceY b R :=
-  eq_of_heq ((by with_unfolding_all exact ((HEq.trans (real_ioY b R.toRealDat) (kc% (real_ioY (a := b) a (iK := alg b iK) (real b R.toRealDat))) :
-    HEq _ (twiceY b R)) :)))
+theorem twiceY_eq : R.ioY = twiceY b R := by
+  apply eq_of_heq
+  with_unfolding_all
+    exact (HEq.trans (real_ioY b R.toRealDat)
+      (real_ioY (a := b) a (iK := alg b iK) (real b R.toRealDat)) :)
 
-theorem twiceX_eq : R.ioX = twiceX b R :=
-  eq_of_heq ((by with_unfolding_all exact ((HEq.trans (real_ioX b R.toRealDat) (kc% (real_ioX (a := b) a (iK := alg b iK) (real b R.toRealDat))) :
-    HEq _ (twiceX b R)) :)))
+theorem twiceX_eq : R.ioX = twiceX b R := by
+  apply eq_of_heq
+  with_unfolding_all
+    exact (HEq.trans (real_ioX b R.toRealDat)
+      (real_ioX (a := b) a (iK := alg b iK) (real b R.toRealDat)) :)
 
 theorem twice_eq : R = twice b R := (by with_unfolding_all exact ((congrArg₂ (setIo R) (twiceY_eq b R) (twiceX_eq b R)) :))
 
@@ -52,7 +101,8 @@ theorem holds_back (h : letI := alg b iK; Holds (real3 b R) (face3 b F)) : Holds
   exact (by with_unfolding_all exact ((cast (congrArg (fun R' : RealDat3 a.D A Ks => Holds R' F) (twice_eq b R).symm) ((h2))) : _))
 
 theorem rowTest_tr (h : Rat.RowTest (R.toCx3 F)) : letI := alg b iK; Rat.RowTest ((real3 b R).toCx3 (face3 b F)) := by
-  tr_via (fun X : Cx.CxData A.fam3.amb3 => Rat.RowTest X) (toCx3_eq b R F) h
+  with_unfolding_all
+    exact ((congrArg (fun X : Cx.CxData A.fam3.amb3 => Rat.RowTest X) (toCx3_eq b R F)).mp h :)
 
 end Three
 
@@ -68,7 +118,7 @@ section Dat
 
 variable {px : PreX B.toPre} {I : ColIn B px} {hX : B.fields.Ok} {Tw : Top.TwDat B} {Wt : Set B.places.Pl}
 
-set_option maxHeartbeats 2000000 in
+
 
 def copy (s : SameGrp a b) (z : Dat a.st I hX Tw Wt) : Dat b.st I hX Tw Wt :=
   @Dat.mk b.st px I hX Tw Wt z.Xg z.tr (coreJ b z.core) ((by with_unfolding_all exact ((alg b z.alg) :))) ((by with_unfolding_all exact (z.alg_eq :))) ((by with_unfolding_all exact ((real3 b (iK := z.alg) z.R) :)))

@@ -1,15 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsMixedSectionStep
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSmallSectionMixed
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsIntegralAgainstPositive
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsZCombExpand
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionMixed
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PShiftNefBig
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PZCombLimit
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotLtLtOfMemMinimalPrimes
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.KleimanSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsMixedSectionStep
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSmallSectionMixed
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsIntegralAgainstPositive
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsZCombExpand
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PShiftNefBig
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionMixed
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PZCombLimit
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotLtLtOfMemMinimalPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -22,8 +70,8 @@ namespace MixedSectionInduction
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-open Classical in
 
+open Classical in
 theorem cycR_eq_finsum (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι) → ℝ) (P : Ideal (MRing ι)) {n : ℕ}
     (L : Fin n → ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι) (s : MRing ι) :
     cycR I P L s = ∑ᶠ W : Ideal (MRing ι), (ReciprocityTheory.ChartRestriction.G.Geo.divCycle P s W : ℝ) *
@@ -39,8 +87,8 @@ theorem cycR_eq_finsum (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → Recipr
 
 end MixedSectionInduction
 
-open MixedSectionInduction in
 
+open MixedSectionInduction in
 theorem MixedSectionStep.proof (hS : SmallSectionMixed.Statement) (hR : GroundTheory.Heights₂.Heights.Inter.RatR.Statement)
     (hI : IntegralAgainstPositive.Statement) (hK : ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH.KleimanNefIntersectionNonneg)
     (hE : ZCombExpand.Statement) : MixedSectionStep.Statement := by
@@ -104,7 +152,7 @@ theorem MixedSectionStep.proof (hS : SmallSectionMixed.Statement) (hR : GroundTh
       else (geoNum n W (fun j => (L j).a) : ℝ) * Real.log (charOf W)) := by
     intro W hW
     obtain ⟨hH, hV⟩ := divSuppArith K ι P n
-      (HermLine.ofMetrics (fun k => fsMetric (ι k)) (fun k => (α k : ℤ))) f W hP ⟨α, fun _ => rfl, hfα, hfP⟩ hW
+      (HermLine.ofMetrics (fun k => fsMetric (ι := ι k)) (fun k => (α k : ℤ))) f W hP ⟨α, fun _ => rfl, hfα, hfP⟩ hW
     have hPW : P ≤ W := le_trans le_sup_left hW.1.1.2
     split_ifs with hWh
     ·

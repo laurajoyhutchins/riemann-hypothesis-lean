@@ -1,4 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullGenPf
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValuationMultiplicationInvariance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GenCalc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -22,17 +69,19 @@ theorem ros_snd_one (hG : GlobalFnsSt) (f g : D.toPre.P.A ⟶ D.toPre.P.A) [IsMo
     (hr0 : LB.Gen.Corr D.toPre.P.L _ _ _ _ (LB.pullGen D.toPre.P.L _ _ r (zero2 D.toPre.P.A)) (LB.oneGen D.toPre.P.L))
     {T : Over (Spec (CommRingCat.of V))} {z : T.left} {J} (hJ : Good D.toPre.P.L z J) (y : T ⟶ D.toPre.P.A) :
     val₂ r z J y 1 = 1 := by
-  have hC := isCub_cubV (c := D.toPre.cub) hJ
-  have h := (ros_add (c := D.toPre.cub) hG D.toPre.P.isAb f g r hr hr0 hJ 1 1 y).2
-  have h11 : (1 : T ⟶ D.toPre.P.A) * 1 = 1 := mul_one _
-  have h1g : (1 : T ⟶ D.toPre.P.A) ≫ g = 1 := by
-    first
-    | exact MonObj.one_comp g
-    | simp [MonObj.Hom.one_def]
-    | simp [Hom.one_def]
-  have c11 : ∀ a : T ⟶ D.toPre.P.A, cubV D.toPre.cub z J a 1 1 = 1 := fun a =>
-    (hC.s01 a 1 1).trans (hC.face a 1)
-  rw [h11, h1g, c11 y, c11 (y ≫ f), _root_.mul_one, _root_.one_mul] at h
+  have face (x y : T ⟶ D.toPre.P.A) : cubV D.toPre.cub z J 1 x y = 1 := by
+    have h := val_corr hJ (D.toPre.cub.face 0) (lift x y).left
+    rw [val_one] at h
+    refine Eq.trans ?_ h
+    refine Eq.trans ?_ (val_cub D.toPre.cub (lift x y) hJ (pzero D.toPre.P.A _) (x2 D.toPre.P.A 0) (x2 D.toPre.P.A 1)).symm
+    congr 1 <;> simp [x2, pzero, Hom.one_def]
+  have c11 (a : T ⟶ D.toPre.P.A) : cubV D.toPre.cub z J a 1 1 = 1 := by
+    have h := (val_corr hJ D.toPre.cub.cubeSymmetric_swap_first (lift a (lift (1 : T ⟶ D.toPre.P.A) 1)).left).trans
+      (val_cub D.toPre.cub (lift a (lift (1 : T ⟶ D.toPre.P.A) 1)) hJ _ _ _)
+    refine h.trans ?_
+    simpa [x3] using face a 1
+  have h := (ros_add D.toPre.cub hG D.toPre.P.isAb f g r hr hr0 hJ 1 1 y).2
+  rw [_root_.mul_one, MonObj.one_comp g, c11 y, c11 (y ≫ f), _root_.mul_one, _root_.one_mul] at h
   have h' : val₂ r z J y 1 * val₂ r z J y 1 = val₂ r z J y 1 * 1 := by
     rw [_root_.mul_one]; exact h.symm
   exact mul_left_cancel h'

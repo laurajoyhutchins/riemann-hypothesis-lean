@@ -1,10 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HTChartExistsHoldsStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyPrimeTorsionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelActionSubalgebraStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualLatticeBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FullTorsionInjectiveSubalgebraStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyPrimeTorsionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualLatticeBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FullTorsionInjectiveSubalgebraStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HTChartExistsHoldsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelActionSubalgebraStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -132,7 +185,7 @@ theorem chartPack_exists : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E
   have hform : ∀ (b : 𝓞 E) (w : Module.Dual (CR O y c') L), j (w ∘ₗ ρ b) = j w ∘ₗ 𝔐.ρ b := by
     intro b w
     ext e
-    refine hbc.inductionOn e (fun e => j (w ∘ₗ ρ b) e = (j w ∘ₗ 𝔐.ρ b) e) (by simp) ?_ ?_ ?_
+    refine hbc.inductionOn e ?_ ?_ ?_
     · intro v
       simp only [LinearMap.comp_apply]
       rw [hj, ← hρ, hj]
@@ -140,17 +193,17 @@ theorem chartPack_exists : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E
     · intro s n hn
       simp only [map_smul, hn]
     · intro n₁ n₂ h₁ h₂
-      simp only [map_add, h₁, h₂]
+      simp only [map_add (f := _), h₁, h₂]
   have hact' : ∀ (a : 𝓞 E) (u : Module.Dual Ω 𝔐.Li), Dh.ρΩ a u = u ∘ₗ 𝔐.ρ (H.bar a) := by
     intro a u
-    refine hjbc.inductionOn u (fun u => Dh.ρΩ a u = u ∘ₗ 𝔐.ρ (H.bar a)) (by simp) ?_ ?_ ?_
+    refine hjbc.inductionOn u ?_ ?_ ?_
     · intro w
       rw [hHT.2.1, hbar, hform]
     · intro s n hn
       rw [map_smul, hn]
       rfl
     · intro n₁ n₂ h₁ h₂
-      rw [map_add, h₁, h₂]
+      rw [map_add (f := _), h₁, h₂]
       rfl
   exact ⟨{ x := x, x_gen := hx, L := L, fin := hfin, proj := hproj, M := M, ρ := ρ, act := hact, toLi := toLi, toLi_bc := hbc,
            toLi_pt := hpt, j := j, j_bc := hjbc, j_apply := hj, Γ₁ := Γ₁, i₁ := i₁, tors₁ := ht₁, pts₁ := hp₁,

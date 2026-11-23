@@ -1,6 +1,59 @@
-import Formalism.HermitianCurvature.StatementTBB
-import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.IntegrableOnIoiTruncatedPowerMoment
-import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.BlockMinorSumCounterexample
+module
+
+public import Formalism.HermitianCurvature.StatementTBB
+public import Formalism.FlagUnipotentLattices.UnipotentStabiliserCharacterisation
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.BlockMinorSumCounterexample
+public import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.IntegrableOnIoiTruncatedPowerMoment
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Data.Set.Finite.List
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.TBBx1
 
@@ -241,7 +294,9 @@ theorem stepUp : StepUp := by
       _ ≤ ENNReal.ofReal Mb *
             ∑' σ : Set.range (fun a : GaussianInt => (Λ : ℂ) * GaussianInt.toComplex a), g σ.1 := by
           gcongr
-          exact ENNReal.tsum_mono_subtype g (fun σ hσ => hdual σ hσ)
+          exact tsum_mono_subtype (s := {σ : ℂ | InDual ω₁ ω₂ σ}) g (by
+            intro σ hσ
+            exact hdual σ hσ)
       _ = ENNReal.ofReal Mb * ∑' a : GaussianInt, g ((Λ : ℂ) * GaussianInt.toComplex a) := by
           rw [tsum_range g hinj]
       _ ≤ ENNReal.ofReal Mb * ENNReal.ofReal 40.5 := by gcongr
@@ -272,7 +327,6 @@ theorem lemmaSOfSteps : LemmaSOfSteps := by
   obtain ⟨Cu, hCu, hup⟩ := hU
   refine ⟨max (3 / π) Cu, lt_max_of_lt_right hCu, ?_⟩
   intro Wp Wq _ _ _ _ _ _ P p nn F Y Λ K N hK hΛ hPos hI2 hI3 hI4 hI5
-  have hC2 : 0 ≤ max (3 / π) Cu := le_max_of_le_right hCu.le
   have hCL : 0 ≤ max (3 / π) Cu * Λ ^ 2 := by positivity
   intro b s hb hs
   induction s, hs using Nat.le_induction with

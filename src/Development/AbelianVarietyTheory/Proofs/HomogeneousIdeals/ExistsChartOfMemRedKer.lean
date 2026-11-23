@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.SpanEqTopOfForallMaximal
+module
+
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.ChartLaw
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.SpanEqTopOfForallMaximal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -144,15 +192,11 @@ theorem mem_redKer_of_section (q : A →ₐ[R] A₀) (s : A₀ →ₐ[R] A) (hs 
     exact Ideal.Quotient.eq.2 (by simp [RingHom.mem_ker, hs])
   rw [mem_redKer, this, ← spMap_comp, Category.assoc, hy, comp_one']
 
-variable (G A) in
 
+variable (G A) in
 def UnitInChart : Prop :=
   ∃ (B : Type) (_ : CommRing B) (_ : Algebra R B) (j : sp B ⟶ G) (u : B →ₐ[R] A),
     IsOpenImmersion j.left ∧ spMap u ≫ j = 1
-
-theorem UnitInChart.map (h : UnitInChart G A) (φ : A →ₐ[R] A') : UnitInChart G A' := by
-  obtain ⟨B, _, _, j, u, hj, hu⟩ := h
-  exact ⟨B, _, _, j, φ.comp u, hj, by rw [← spMap_comp, Category.assoc, hu, comp_one']⟩
 
 variable (G A) in
 theorem span_unitInChart :
@@ -274,7 +318,7 @@ theorem epsTo_add_comp {w : sp (R₀ := R) (DualNumber R) ⟶ G} (hw : IsTan w) 
   have hψ₀ : ψ (e 0) = t₁ := vecTo_single _ _ _ _
   have hψ₁ : ψ (e 1) = t₂ := vecTo_single _ _ _ _
   have := congrArg (spMap ψ ≫ ·) univ
-  simp only [MonObj.comp_mul, ← Category.assoc, spMap_comp, comp_epsTo, map_add, hψ₀, hψ₁] at this
+  simp only [MonObj.comp_mul, ← Category.assoc, spMap_comp, comp_epsTo, map_add (f := _), hψ₀, hψ₁] at this
   exact this
 
 variable [IsCommMonObj G] {n : ℕ}

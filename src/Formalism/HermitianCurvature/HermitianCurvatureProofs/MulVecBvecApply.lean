@@ -1,9 +1,60 @@
-import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeisenbergLeviConjugationMeasure
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+module
+
+public import Formalism.HermitianCurvature.StatementD
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DirectionsInParabolic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeisenbergLeviConjugationMeasure
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwoByOneBlock
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixTranspose
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -233,61 +284,10 @@ section tower
 variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq]
 
-theorem tower_haarW (T : D.LevTower k r Wp Wq) (hT : D.TowerNormalised T) (i : ℕ) (hi : i ≤ r)
-    (h : i + (r - i) = r) : T.base.μW = (T.bs i).μW.map (levMt i (r - i) h) :=
-  haar_lev i (r - i) h (T.bs i).z T.base.z (T.z_lev i hi) T.base.μW (T.bs i).μW T.base.haarW (T.bs i).haarW
-    (hT 0 (Nat.zero_le r)).1 (hT i hi).1
-
 theorem tower_haarW' (T : D.LevTower k r Wp Wq) (hT : D.TowerNormalised T) (i : ℕ) (hi : i ≤ r)
     (h : i + (r - i) = r) : T.base.μW' = (T.bs i).μW'.map (levMt i (r - i) h) :=
   haar_lev i (r - i) h (T.bs i).z' T.base.z' (T.z'_lev i hi) T.base.μW' (T.bs i).μW' T.base.haarW' (T.bs i).haarW'
     (hT 0 (Nat.zero_le r)).2.1 (hT i hi).2.1
-
-theorem tower_intW {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (T : D.LevTower k r Wp Wq)
-    (hT : D.TowerNormalised T) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (f : Mt k r → E) :
-    ∫ x, f x ∂T.base.μW = ∫ y, f (levMt i (r - i) h y) ∂(T.bs i).μW := by
-  rw [tower_haarW T hT i hi h]
-  exact (levMt_emb i (r - i) h).integral_map _
-
-theorem tower_intW' {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (T : D.LevTower k r Wp Wq)
-    (hT : D.TowerNormalised T) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (f : Mt k r → E) :
-    ∫ x, f x ∂T.base.μW' = ∫ y, f (levMt i (r - i) h y) ∂(T.bs i).μW' := by
-  rw [tower_haarW' T hT i hi h]
-  exact (levMt_emb i (r - i) h).integral_map _
-
-theorem tower_haarWW' (T : D.LevTower k r Wp Wq) (hT : D.TowerNormalised T) (i : ℕ) (hi : i ≤ r)
-    (h : i + (r - i) = r) :
-    T.base.μW.prod T.base.μW' =
-      ((T.bs i).μW.prod (T.bs i).μW').map (Prod.map (levMt i (r - i) h) (levMt i (r - i) h)) := by
-  have : IsFiniteMeasure (T.bs i).μW := ⟨by rw [(hT i hi).1]; exact ENNReal.one_lt_top⟩
-  have : IsFiniteMeasure (T.bs i).μW' := ⟨by rw [(hT i hi).2.1]; exact ENNReal.one_lt_top⟩
-  have hm : Measurable (levMt (k := k) i (r - i) h) := (levMt_cont i (r - i) h).measurable
-  rw [tower_haarW T hT i hi h, tower_haarW' T hT i hi h, Measure.map_prod_map _ _ hm hm]
-
-theorem tower_intWW' {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (T : D.LevTower k r Wp Wq)
-    (hT : D.TowerNormalised T) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (f : Mt k r × Mt k r → E) :
-    ∫ p, f p ∂(T.base.μW.prod T.base.μW') =
-      ∫ q, f (levMt i (r - i) h q.1, levMt i (r - i) h q.2) ∂((T.bs i).μW.prod (T.bs i).μW') := by
-  rw [tower_haarWW' T hT i hi h]
-  exact ((levMt_emb i (r - i) h).prodMap (levMt_emb i (r - i) h)).integral_map _
-
-theorem tower_π (T : D.LevTower k r Wp Wq) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (y : Mt k (r - i)) :
-    (T.bs i).π (Matrix.of y) = T.base.π (Matrix.of (levMt i (r - i) h y)) := by
-  rw [T.π_lev i hi]; rfl
-
-theorem tower_π' (T : D.LevTower k r Wp Wq) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (y : Mt k (r - i)) :
-    (T.bs i).π' (Matrix.of y) = T.base.π' (Matrix.of (levMt i (r - i) h y)) := by
-  rw [T.π'_lev i hi]; rfl
-
-theorem tower_mem (T : D.LevTower k r Wp Wq) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (x : Mt k (r - i))
-    (hx : Matrix.of x ∈ UWset k (r - i) (T.bs i).z) : Matrix.of (levMt i (r - i) h x) ∈ UWset k r T.base.z := by
-  have := levMt_mem i (r - i) h (T.bs i).z x hx
-  rwa [T.z_lev i hi] at this
-
-theorem tower_mem' (T : D.LevTower k r Wp Wq) (i : ℕ) (hi : i ≤ r) (h : i + (r - i) = r) (x : Mt k (r - i))
-    (hx : Matrix.of x ∈ UWset k (r - i) (T.bs i).z') : Matrix.of (levMt i (r - i) h x) ∈ UWset k r T.base.z' := by
-  have := levMt_mem i (r - i) h (T.bs i).z' x hx
-  rwa [T.z'_lev i hi] at this
 
 end tower
 
@@ -343,6 +343,7 @@ theorem embG_conj_Rn (y : B.Mat k ρ) (hy : y ∈ B.GV k ρ) (x : U.RC k j ρ) :
   · simp only [Matrix.one_mul, Matrix.mul_one, Matrix.zero_mul, Matrix.mul_zero, add_zero, zero_add]
     exact Matrix.nonsing_inv_mul _ hu
   · simp [rnAct]
+    rfl
   · simp
   · simp
   · simp

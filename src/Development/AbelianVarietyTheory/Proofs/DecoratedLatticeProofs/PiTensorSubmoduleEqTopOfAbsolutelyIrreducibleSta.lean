@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteSupport
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchurAndTensorSubmodule
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ScalarOfComm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteSupport
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchurAndTensorSubmodule
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ScalarOfComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped TensorProduct Classical
 
 noncomputable section
@@ -26,6 +68,7 @@ theorem position_algebraMap (i : ι) (c : ℂ) :
   ext v
   simp only [LinearMap.compMultilinearMap_apply, position_tprod, LinearMap.smul_apply, LinearMap.id_apply]
   rw [Module.algebraMap_end_apply, MultilinearMap.map_update_smul, Function.update_eq_self]
+  rfl
 
 theorem stable_adjoin_position (i : ι) {G : Type} (a : G → Module.End ℂ (K i))
     (N : Submodule ℂ (⨂[ℂ] j, K j)) (hN : ∀ g, ∀ x ∈ N, intersection_update_fsHerm_neg_one i (a g) x ∈ N)
@@ -56,7 +99,7 @@ theorem exists_finset_position (i : ι) (t : ⨂[ℂ] j, K j) :
     obtain ⟨s, hs⟩ := hx
     obtain ⟨s', hs'⟩ := hy
     refine ⟨s ∪ s', fun f g h => ?_⟩
-    rw [map_add, map_add, hs f g fun m hm => h m (Finset.mem_union_left _ hm),
+    rw [map_add (f := _), map_add (f := _), hs f g fun m hm => h m (Finset.mem_union_left _ hm),
       hs' f g fun m hm => h m (Finset.mem_union_right _ hm)]
 
 theorem eq_zero_of_subsingleton (i : ι) [Subsingleton (K i)] (t : ⨂[ℂ] j, K j) : t = 0 := by

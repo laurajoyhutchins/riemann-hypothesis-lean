@@ -1,15 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.WeilRos
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.KerScheme
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFormEqOne
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTateIsoHeckeQuotient
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGenMovePow
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueTangentLift
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsHeckeIsog
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.KerScheme
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsFormEqOne
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGenMovePow
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsHeckeIsog
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTateIsoHeckeQuotient
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueTangentLift
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfProper
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.WeilRos
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueWeilIs
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,8 +119,18 @@ theorem hasQuot_of_isIsogT : ∀ (E : Type) [Field E] [NumberField E] [IsCMField
           (by rw [← c₅, show ψx.ker = C from Subgroup.ext mem])
           (fun n z w c c' _ _ _ h h' => uniq n z w c c' h h')
           (fun n z w c hn hz hw h => by
-            obtain ⟨c', hc⟩ := exists_weil t'.cub hz hw
-            have hc' := (weilIs_iff t'.cub hG hab' hz hw hc c').2 rfl
+            have hlift : ∀ (q : Over.mk x ⟶ t'.G), q ^ n = 1 →
+                ∀ a : (Over.mk x).left, ∃ V : (Over.mk x).left.Opens, a ∈ V ∧
+                  ∃ θ : Out.ThetaGrp t'.G t'.PP.L n (Out.overRes V), θ.pt = Out.overResι V ≫ q := by
+              intro q hq a
+              obtain ⟨V, hV, v, hv⟩ := exists_local_gen t'.PP.isLB (K := Fin 2)
+                ![(1 : Over.mk x ⟶ t'.G).left, q.left] ![(n : ℤ), -(n : ℤ)] a
+              refine ⟨V, hV, ?_⟩
+              apply exists_theta t'.cub (by rw [← MonObj.comp_pow, hq, MonObj.comp_one]) v hv
+              intro U _ f
+              rw [Fin.prod_univ_two, ← MonObj.comp_one (Out.overResι V)]
+              rfl
+            obtain ⟨c', hc'⟩ := CommutatorPairing.exists_weilIs hG hab' t'.PP.isLB (hlift _ hz) (hlift _ hw)
             obtain ⟨c', rfl⟩ := (unitOn_bijective k).2 c'
             have h₂ := (hW n _ z w 1 _ hc').1
             rw [← Nat.cast_mul] at h₂

@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CupProducts.GroupCohomology
-import GroundTheory.ProfiniteCohomology.Colimit
-import GroundTheory.TateCohomology.CupGraded
+module
+
+public import GroundTheory.ProfiniteCohomology.ColimitDefs
+public import GroundTheory.ProfiniteCohomology.CupProducts.Functoriality
+public import GroundTheory.TateCohomology.CupProduct
+public import GroundTheory.ProfiniteCohomology.Colimit
+public import GroundTheory.ProfiniteCohomology.CupProducts.GroupCohomology
+public import GroundTheory.TateCohomology.CupGraded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -22,8 +67,8 @@ def invariantsMap {A A' : Rep.{u} k G} (f : A ⟶ A') :
     A.quotientToInvariants N ⟶ A'.quotientToInvariants N :=
   (Rep.quotientToInvariantsFunctor k N).map f
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem invariantsTensorHom_braiding (A B : Rep.{u} k G) :
     (β_ (A.quotientToInvariants N) (B.quotientToInvariants N)).hom ≫ invariantsTensorHom B A N =
       invariantsTensorHom A B N ≫ invariantsMap N (β_ A B).hom := by
@@ -38,8 +83,8 @@ theorem cohomologyMap_inflation' (U : OpenNormalSubgroup G) {A A' : Rep.{u} k G}
       inflation A' U n (groupCohomology.map (MonoidHom.id _) (invariantsMap (U : Subgroup G) f) n x) :=
   cohomologyMap_inflation U f x
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem map_invariantsMap_braiding_map_invariantsTensorHom_cupH {A B : Rep.{u} k G} {p q n : ℕ}
     (h : p + q = n) (h' : q + p = n) (x : groupCohomology (A.quotientToInvariants N) p)
     (y : groupCohomology (B.quotientToInvariants N) q) :

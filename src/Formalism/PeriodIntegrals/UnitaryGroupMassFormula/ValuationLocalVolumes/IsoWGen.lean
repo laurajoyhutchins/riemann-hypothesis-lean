@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.Root
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.FibPOfDual
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.GramAugT
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.IsoExtOf
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.GramInvOHolds
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.NormOneUnitFixedPoints
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.TrOntoHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.Root
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,7 +127,7 @@ theorem isoW_gen {a : ℕ} (Y : TupV (E := E) v n a) (z : Fin a) (γ : Fv F v)
   have h1 : hR (Fv F v) σ J w0 y = 1 + (-g) * b := by
     rw [hy, hAddR, hSmulR, hw0X, if_pos rfl]
   have h2 : hR (Fv F v) σ J y w0 = 1 + (-g) * b := by
-    rw [← hconj, h1, map_add, map_one, map_mul, map_neg, hg, hsc, hconj]
+    rw [← hconj, h1, map_add (f := _), map_one, map_mul, map_neg, hg, hsc, hconj]
   have h3 : hR (Fv F v) σ J y y = (-g) * (1 + (-g) * b) := by
     rw [hy, hAddR, hSmulR, ← hy, hyX, h2, zero_add]
 
@@ -117,7 +162,7 @@ theorem isoW_gen {a : ℕ} (Y : TupV (E := E) v n a) (z : Fin a) (γ : Fv F v)
   have keyE : sc (E := E) v β + (1 - g * sc (E := E) v β) * sc (E := E) v s -
       g * (1 - g * sc (E := E) v β) * sc (E := E) v ν * sc (E := E) v s ^ 2 = 0 := by
     rw [← key, hg]
-    simp only [PI.OmLocU.NormOneUnitFixedPoints.sc_eq, map_add, map_sub, map_mul, map_one, map_pow]
+    simp only [PI.OmLocU.NormOneUnitFixedPoints.sc_eq, map_add (f := _), map_sub, map_mul, map_one, map_pow]
   have hww : hR (Fv F v) σ J w w = 0 := by
     rw [E0, h1, h2, h3, hσt, hbβ, ht]
     linear_combination keyE + ((1 - g * sc (E := E) v β) * sc (E := E) v s) * hθ -

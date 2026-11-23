@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.RedDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.RedDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SemiChar
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical
@@ -10,7 +56,7 @@ namespace ReciprocityTheory.ChartRestriction.L1
 variable {K : Type} [Field K] (U : PowerSeries K)
 
 theorem homS_add (m : ℕ) (P Q : K[X]) : homS U m (P + Q) = homS U m P + homS U m Q := by
-  simp only [homS, coeff_add, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [homS, coeff_add, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem homS_sub (m : ℕ) (P Q : K[X]) : homS U m (P - Q) = homS U m P - homS U m Q := by
   simp only [homS, coeff_sub, map_sub, sub_mul, Finset.sum_sub_distrib]
@@ -30,7 +76,7 @@ theorem homS_monomial (m i : ℕ) (hi : i ≤ m) (a : K) :
   rw [Finset.sum_eq_single i]
   · simp
   · intro b _ hb
-    rw [coeff_monomial, if_neg (Ne.symm hb)]
+    rw [coeff_monomial_of_ne a hb]
     simp
   · intro h
     exact absurd (Finset.mem_range.2 (Nat.lt_succ_of_le hi)) h
@@ -64,6 +110,7 @@ theorem homS_eq_zero (hU : PowerSeries.constantCoeff U = 1) (m : ℕ) (P : K[X])
     (h : homS U m P = 0) : P = 0 := by
   have h1 : PowerSeries.coeff (2 * (m - P.natDegree)) (homS U m P) = P.leadingCoeff := by
     unfold homS
+
     rw [map_sum, Finset.sum_eq_single P.natDegree]
     · rw [PowerSeries.coeff_mul_X_pow', if_pos le_rfl, Nat.sub_self, PowerSeries.coeff_zero_eq_constantCoeff_apply,
         map_mul, map_pow, hU]

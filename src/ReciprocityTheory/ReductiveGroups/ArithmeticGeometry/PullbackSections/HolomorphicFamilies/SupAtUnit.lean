@@ -1,7 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.SupGenTies
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthonormalFlagTranslateHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.FirstMinimumInvariantContinuousPos
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsotropicCoefficientSplitting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.Divisibility.WeightAlgebra
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,64 +80,6 @@ lemma dmin_ortho {r : ℕ} (X : Data E r) {x : Frame X.Ψ r} (hx : X.IsOrtho x) 
 lemma pnorm_unit {r : ℕ} (X : Data E r) (la : Wt X.Ψ r) (P : Frame X.Ψ r → ℂ) {x : Frame X.Ψ r}
     (hu : ∀ τ i, ‖dmin X.Gm x τ i‖ = 1) : X.pnorm la P x = ‖P x‖ := by
   unfold Data.pnorm
-  simp [norm_div, hu]
-
-theorem supAtUnit (hL1 : Lam1RowSt) : SupAtUnitSt := by
-  intro D T h hGam large₂ j hj w hrows hL hrn hlast σ hσ f hf hpos
-  set X := (T.U j σ).X with hXdef
-  set la := laU (T.U j σ) (wtA w) w.n with hladef
-  set P := rdU (T.U j σ) f with hPdef
-
-  have hE : supE X la P ≠ ⊤ := by
-    intro h0; rw [supN, h0] at hpos; simp at hpos
-  have hE0 : supE X la P ≠ 0 := by
-    intro h0; rw [supN, h0] at hpos; simp at hpos
-  have hhalf := ENNReal.half_lt_self hE0 hE
-  have hhalf' := hhalf
-  unfold supE at hhalf'
-  obtain ⟨p, hp⟩ := lt_iSup_iff.1 hhalf'
-  have hp' : supN X la P / 2 < (X p.1).pnorm (la p.1) (P p.1) p.2 := by
-    have := ENNReal.toReal_lt_of_lt_ofReal hp
-    rw [ENNReal.toReal_div] at this
-    simpa [supN, supE] using this
-  have hle : ∀ q : FPt X, (X q.1).pnorm (la q.1) (P q.1) q.2 ≤ supN X la P := by
-    intro q
-    have h1 : ENNReal.ofReal ((X q.1).pnorm (la q.1) (P q.1) q.2) ≤ supE X la P :=
-      le_iSup (fun q : FPt X => ENNReal.ofReal ((X q.1).pnorm (la q.1) (P q.1) q.2)) q
-    exact (ENNReal.ofReal_le_iff_le_toReal hE).1 h1
-  obtain ⟨k, x, hx⟩ := p
-
-  have hcusp := ((mem_cusp (T.Q.Xo j) T.Q.c (T.U j) (wtA w) w.n f).1 hf).2 σ hσ
-  let S : Submodule ℂ (FDSec X) :=
-    { carrier := {Q | ∀ k, ∀ y ∈ (X k).dom, ∀ b ∈ Bor (X k).Ψ D.R.r, Q k (rmul y b) = bchar (la k) b * Q k y}
-      add_mem' := by
-        intro Q R hQ hR k y hy b hb
-        simp only [Pi.add_apply, hQ k y hy b hb, hR k y hy b hb]; ring
-      zero_mem' := by intro k y _ b _; simp
-      smul_mem' := by
-        intro c Q hQ k y hy b hb
-        simp only [Pi.smul_apply, smul_eq_mul, hQ k y hy b hb]; ring }
-  have hS : holSub X la ≤ S := Submodule.span_le.2 (fun Q hQ k y hy b hb => (hQ k).1.1.2.1 y hy b hb)
-  have hPS : ∀ y ∈ (X k).dom, ∀ b ∈ Bor (X k).Ψ D.R.r, P k (rmul y b) = bchar (la k) b * P k y :=
-    hS hcusp k
-
-  have hb := ReciprocityTheory.ChartRestriction.G.FD.FrameDegreeData.bOf_mem (X k) hx
-  have hx' := ReciprocityTheory.ChartRestriction.G.FD.OrthogonalFrameDomain.rmul_mem_dom (X k) hx hb
-  have hort := ReciprocityTheory.ChartRestriction.G.FD.FrameDegreeData.ortho_bOf (X k) hx
-  have hunit := dmin_ortho (X k) hort
-  have hpn := ReciprocityTheory.ChartRestriction.G.FD.FrameDegreeData.pnorm_rmul (X k) (la k) (P k) hPS x hx _ hb
-  have hla := ReciprocityTheory.ChartRestriction.G.AR.Inst.firstMinimumSq_rightBorel (X k) hx hb
-  have h2 : supN X la P ≤ 2 * (X k).pnorm (la k) (P k) x := by linarith [hp']
-  have hposx : 0 < (X k).pnorm (la k) (P k) x := by linarith
-  obtain ⟨hl1, hl2⟩ := hL1 D T h hGam large₂ j hj w hrows hL hrn hlast σ hσ f hf k x hx
-    (fun y hy => le_trans (hle ⟨k, y, hy⟩) h2) hposx
-  refine ⟨k, ⟨_, hx'⟩, hunit, hort, ?_, by rw [hla]; exact hl1, by rw [hla]; exact hl2⟩
-  have e : (X k).pnorm (la k) (P k) (rmul x (ReciprocityTheory.ChartRestriction.G.FD.FrameDegreeData.bOf (X k) x)) =
-      ‖toC (evR (T.Q.Xo j) T.Q.c f ((T.U j σ).un k ⟨_, hx'⟩))‖ := by
-    rw [pnorm_unit (X k) (la k) (P k) hunit, hPdef]
-    simp [rdU]
-    rw [dif_pos hx']
-  rw [← e, hpn]
-  exact h2
+  simp [hu]
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections.PfSupAtUnit

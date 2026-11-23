@@ -1,32 +1,72 @@
-import Development.EtaleCohomology.EtaleTrace.PNIntegralPf
-import Development.EtaleCohomology.EtaleTrace.PNBasicPf
-import Development.EtaleCohomology.EtaleTrace.GenAwayEvalPf
-import Development.EtaleCohomology.EtaleTrace.GenOfAwayPf
-import Development.EtaleCohomology.EtaleTrace.GenInPf
-import Development.EtaleCohomology.EtaleTrace.ChartOverKPf
-import Development.EtaleCohomology.KummerExtensions.EtaleProjectiveChartGenericValuationIdentity
-import Development.EtaleCohomology.EtaleTrace.ChartGenOnPf
-import Development.EtaleCohomology.EtaleTrace.GenOutChartPfGen
-import Development.EtaleCohomology.EtaleTrace.GenOnAgreePf
-import Development.EtaleCohomology.EtaleTrace.GenOutGluePf
-import Development.EtaleCohomology.EtaleTrace.GenOutPf
-import Development.EtaleCohomology.EtaleTrace.GenUseBackPf
-import Development.EtaleCohomology.EtaleTrace.GenUsePf
-import Development.EtaleCohomology.EtaleTrace.JetSpanPf
-import Development.EtaleCohomology.EtaleTrace.TrdegLePf
-import Development.EtaleCohomology.EtaleTrace.HomRelPf
-import Development.EtaleCohomology.EtaleTrace.StepPf
-import Development.EtaleCohomology.EtaleTrace.ProjectPf
-import Development.EtaleCohomology.EtaleTrace.JetIndepPf
-import Development.EtaleCohomology.EtaleTrace.JetUnramPf
-import Development.EtaleCohomology.EtaleTrace.FieldDimPf
-import Development.EtaleCohomology.EtaleTrace.FinSurjPfAll
-import Development.EtaleCohomology.EtaleTrace.GenEtaleAtBotPf
-import Development.EtaleCohomology.EtaleTrace.GenEtalePfData
-import Development.EtaleCohomology.EtaleTrace.RatPtInPf
-import Development.EtaleCohomology.EtaleTrace.FibreOfEtalePf
-import Development.EtaleCohomology.EtaleTrace.FibrePf
-import Development.EtaleCohomology.EtaleTrace.LCoverCut
+module
+
+public import Development.EtaleCohomology.EtaleTrace.PNBasicPf
+public import Development.EtaleCohomology.EtaleTrace.GenInPf
+public import Development.EtaleCohomology.EtaleTrace.GenOutGluePf
+public import Development.EtaleCohomology.EtaleTrace.GenUsePf
+public import Development.EtaleCohomology.EtaleTrace.ChartGenOnPfCut
+public import Development.EtaleCohomology.EtaleTrace.GenEtalePfCut
+public import Development.EtaleCohomology.EtaleTrace.ChartGenOnPf
+public import Development.EtaleCohomology.EtaleTrace.ChartOverKPf
+public import Development.EtaleCohomology.EtaleTrace.FibreOfEtalePf
+public import Development.EtaleCohomology.EtaleTrace.FieldDimPf
+public import Development.EtaleCohomology.EtaleTrace.FinSurjPfAll
+public import Development.EtaleCohomology.EtaleTrace.GenAwayEvalPf
+public import Development.EtaleCohomology.EtaleTrace.GenEtaleAtBotPf
+public import Development.EtaleCohomology.EtaleTrace.GenEtalePfData
+public import Development.EtaleCohomology.EtaleTrace.GenOfAwayPf
+public import Development.EtaleCohomology.EtaleTrace.GenOnAgreePf
+public import Development.EtaleCohomology.EtaleTrace.GenUseBackPf
+public import Development.EtaleCohomology.EtaleTrace.HomRelPf
+public import Development.EtaleCohomology.EtaleTrace.JetIndepPf
+public import Development.EtaleCohomology.EtaleTrace.JetSpanPf
+public import Development.EtaleCohomology.EtaleTrace.JetUnramPf
+public import Development.EtaleCohomology.EtaleTrace.PNIntegralPf
+public import Development.EtaleCohomology.EtaleTrace.ProjectPf
+public import Development.EtaleCohomology.EtaleTrace.RatPtInPf
+public import Development.EtaleCohomology.EtaleTrace.StepPf
+public import Development.EtaleCohomology.EtaleTrace.TrdegLePf
+public import Development.EtaleCohomology.KummerExtensions.EtaleProjectiveChartGenericValuationIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace LateralTheory.Fin.LCover
 theorem projective_space_over_field_integral : LateralTheory.EtaleTrace.Cov.PNIntegral := by

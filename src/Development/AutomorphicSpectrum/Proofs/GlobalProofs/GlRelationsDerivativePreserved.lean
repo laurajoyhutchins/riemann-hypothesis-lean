@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteSpectrumOfResidual
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliPolynomialCoefficientsIdeal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuantumDeterminantPolynomialCoefficients
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliOperatorsCommute
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliLeviFactorizationSum
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Formalism.RealPlaceAnalysis.StatementE
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CapelliDetBlockLeviCongrModUpperBlockIdeal
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CapelliDetBlockLeviCongrModUpperBlockIdealStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliLeviFactorizationSum
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliOperatorsCommute
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliPolynomialCoefficientsIdeal
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonicFactorCoefficientsIntegralStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.QuantumDeterminantPolynomialCoefficients
+import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousConjFin
+
+@[expose] public section
 
 open Polynomial
 
@@ -28,7 +75,7 @@ theorem isIntegral_coeff_of_shifted_prod {ι : Type} [DecidableEq ι] {A : Type}
       intro t
       rw [hQ, eval_prod]
       refine Finset.prod_congr rfl fun i _ => ?_
-      simp [eval_comp, map_add]
+      simp [eval_comp, map_add (f := _)]
     have key := GlobalTheory.T.monic_factor_coefficients_integral A (P a) Q (c a) 0 (hm a (Finset.mem_insert_self a s)) hQm (fun u => by
       rw [add_zero, hQe]
       have := h u
@@ -55,7 +102,10 @@ theorem monic_of_shifted_prod {V : Type} [AddCommGroup V] [Module ℂ V] {c : �
   have hcs : ∀ x ∈ s, ∀ y ∈ s, x * y = y * x := by
     rintro _ ⟨p, rfl⟩ _ ⟨q, rfl⟩
     exact (hcomm _ _ _ _).eq
-  letI : CommRing (Algebra.adjoin ℂ s) := Algebra.adjoinCommRingOfComm ℂ hcs
+  letI : IsMulCommutative (Algebra.adjoin ℂ s) :=
+    Algebra.isMulCommutative_adjoin ℂ (fun x hx y hy _ => hcs x hx y hy)
+  letI : CommRing (Algebra.adjoin ℂ s) := by
+    open scoped IsMulCommutative in exact inferInstance
   have hpres : Algebra.adjoin ℂ s ≤ preserving I := by
     rw [Algebra.adjoin_le_iff]
     rintro _ ⟨p, rfl⟩
@@ -85,6 +135,7 @@ theorem monic_of_shifted_prod {V : Type} [AddCommGroup V] [Module ℂ V] {c : �
     have : (⟨R i t, hRmem i t⟩ : Algebra.adjoin ℂ s)
         = ∑ k ∈ Finset.range (d i + 1), t ^ k • (⟨a i k, hamem i k⟩ : Algebra.adjoin ℂ s) := by
       apply Subtype.ext; simp [hform i t]
+
     rw [this, map_sum, sumPoly_eval]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, Algebra.smul_def, map_pow, mul_comm]
@@ -223,7 +274,7 @@ theorem monic_relations_along_block : ∀ (W Q : Type) [AddCommGroup W] [Module 
   let I : Submodule ℂ W :=
     { carrier := {F | ∀ x ∈ Sm, L (x F) = 0}
       add_mem' := fun {a b} ha hb x hx => by
-        rw [map_add, map_add, ha x hx, hb x hx, add_zero]
+        rw [map_add (f := _), map_add (f := _), ha x hx, hb x hx, add_zero]
       zero_mem' := fun x _ => by simp
       smul_mem' := fun r a ha x hx => by
         rw [map_smul, map_smul, ha x hx, smul_zero] }

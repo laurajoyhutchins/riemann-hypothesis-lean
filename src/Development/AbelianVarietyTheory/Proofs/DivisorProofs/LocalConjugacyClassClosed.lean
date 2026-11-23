@@ -1,8 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvMemIntV
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MinpolyEqOfAevalOfLinearIndependent
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaDistributionHeisenbergInvariant
+module
+
+public import Mathlib.Algebra.Central.Defs
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.Topology.Algebra.Module.ModuleTopology
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MinpolyEqOfAevalOfLinearIndependent
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TensorRatAlgebraDecompFactorwise
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaDistributionHeisenbergInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Artinian.Instances
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvMemIntV
+
+@[expose] public section
 
 open Polynomial
 open scoped TensorProduct
@@ -30,8 +90,9 @@ theorem eq_zero_of_isNilpotent (n : ℕ) (x₀ : B) (hsep : (minpoly F x₀).Sep
     let e : K ⊗[F] B := (1 : K) ⊗ₜ[F] x₀
     let hp : K[X] := ∑ j : Fin n, C (ψ (c j) i) * X ^ (j : ℕ)
     have hΦw : Φ (∑ j, cen S F B (c j) * ((1 : S) ⊗ₜ[ℚ] x₀) ^ (j : ℕ)) i = aeval e hp := by
+
       simp only [hp, map_sum, map_mul, map_pow, Finset.sum_apply, Pi.mul_apply, Pi.pow_apply, hΦ2, hΦ1,
-        aeval_C, aeval_X, e]
+      aeval_C, aeval_X, e]
       rfl
     obtain ⟨m, hm⟩ := h
     have hnil : aeval e (hp ^ (m + 1)) = 0 := by
@@ -51,7 +112,7 @@ theorem eq_zero_of_isNilpotent (n : ℕ) (x₀ : B) (hsep : (minpoly F x₀).Sep
     have hz : hp = 0 := Polynomial.eq_zero_of_dvd_of_degree_lt hd2 hdeglt
     intro j
     have := congrArg (fun q : K[X] => q.coeff (j : ℕ)) hz
-    simp only [hp, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_zero] at this
+    simp only [hp, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_zero] at this
     rw [Finset.sum_eq_single j] at this
     · simpa using this
     · intro b _ hb
@@ -94,7 +155,7 @@ theorem cen_comm (z : S ⊗[ℚ] F) (y : S ⊗[ℚ] B) : Commute (cen S F B z) y
       rw [Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.tmul_mul_tmul, mul_comm s s',
         Algebra.commutes]
     | add a b ha hb => exact Commute.add_right ha hb
-  | add a b ha hb => rw [map_add]; exact Commute.add_left ha hb
+  | add a b ha hb => rw [map_add (f := _)]; exact Commute.add_left ha hb
 
 theorem exists_conj_of_traces [Algebra.IsCentral F B] [IsSimpleRing B] (n : ℕ) (hn : Module.finrank F B = n ^ 2)
     (x₀ : B) (hsep : (minpoly F x₀).Separable) (hdeg : (minpoly F x₀).natDegree = n) (y : S ⊗[ℚ] B)
@@ -118,11 +179,13 @@ theorem exists_conj_of_traces [Algebra.IsCentral F B] [IsSimpleRing B] (n : ℕ)
     rfl
   have htr : ∀ H : (S ⊗[ℚ] F)[X], trL S B (ev y H) = trL S B (ev e₀ H) := by
     intro H
+
     rw [hev, hev, map_sum, map_sum]
     exact Finset.sum_congr rfl fun k _ => hT _ k
   let R : (S ⊗[ℚ] F)[X] := ∑ j : Fin n, C (c j) * X ^ (j : ℕ)
   have hevR : ∀ u, ev u R = ∑ j : Fin n, cen S F B (c j) * u ^ (j : ℕ) := by
     intro u
+
     simp only [R, map_sum, map_mul, map_pow]
     refine Finset.sum_congr rfl fun j _ => ?_
     show Polynomial.eval₂ _ u (C (c j)) * Polynomial.eval₂ _ u X ^ (j : ℕ) = _
@@ -221,7 +284,7 @@ theorem isClosed_conjClass [TopologicalSpace S] [IsTopologicalRing S] [T2Space S
   refine IsClosed.inter (isClosed_iInter fun i => ?_) (isClosed_iInter fun z => isClosed_iInter fun k => ?_)
   · have hc : Continuous fun y : (S ⊗[ℚ] B)ˣ => b.coord i (Pv (y : S ⊗[ℚ] B)) := by
       refine (IsModuleTopology.continuous_of_linearMap (b.coord i)).comp ?_
-      exact continuous_finset_sum _ fun j _ => continuous_const.mul (Units.continuous_val.pow j)
+      exact continuous_finsetSum _ fun j _ => continuous_const.mul (Units.continuous_val.pow j)
     exact isClosed_eq hc continuous_const
   · have hc : Continuous fun y : (S ⊗[ℚ] B)ˣ => trL S B (cen S F B z * (y : S ⊗[ℚ] B) ^ k) :=
       (IsModuleTopology.continuous_of_linearMap (trL S B)).comp

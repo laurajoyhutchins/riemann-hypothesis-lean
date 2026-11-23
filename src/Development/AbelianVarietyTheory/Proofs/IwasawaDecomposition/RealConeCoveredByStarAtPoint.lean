@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StarDepthToFunNonneg
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MinkowskiWeylOrthantConeIntegralConstraints
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MinkowskiWeylOrthantConeIntegralConstraints
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsStrictIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
+
 open NumberField ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.TorRef GlobalTheory.PolFan GlobalTheory.PolCell
 
 namespace GlobalTheory.StarCover
@@ -150,7 +193,7 @@ theorem star_cover : ∀ (X : Type) [AddCommGroup X] (m : ℕ) (γ : Fin m → L
     apply hv0
     refine LinearMap.ext₂ fun x y => ?_
     have := hvyy (x + y)
-    simp only [map_add, LinearMap.add_apply, hvyy x, hvyy y, hvs y x] at this
+    simp only [map_add (f := _), LinearMap.add_apply, hvyy x, hvyy y, hvs y x] at this
     simp only [LinearMap.zero_apply]; omega
   obtain ⟨a, haF, hamin⟩ := Finset.exists_min_image _ (fun a => dotR a EB / dotR a Ev) hne
   obtain ⟨haA, hapos⟩ := Finset.mem_filter.mp haF
@@ -175,7 +218,7 @@ theorem star_cover : ∀ (X : Type) [AddCommGroup X] (m : ℕ) (γ : Fin m → L
   let h := linW w
   have hh : ∀ β : LinearMap.BilinForm ℤ X, h β = ∑ k, z k * β (p k).1 (p k).2 := fun β => by
     simp only [h, linW_apply, w]
-    rw [← Finsupp.sum_finset_sum_index (fun _ => by simp) (fun _ _ _ => by ring)]
+    rw [← Finsupp.sum_finsetSum_index (fun _ => by simp) (fun _ _ _ => by ring)]
     simp [Finsupp.sum_single_index]
   have hzk : ∀ k, (z k : ℝ) = (N : ℝ) * (a k : ℝ) := fun k => by
     have := congrFun hz k
@@ -232,5 +275,3 @@ theorem star_cover : ∀ (X : Type) [AddCommGroup X] (m : ℕ) (γ : Fin m → L
     linarith
 
 end GlobalTheory.StarCover
-
-example : ∀ (X : Type) [AddCommGroup X] (m : ℕ) (γ : Fin m → LinearMap.BilinForm ℤ X) (v : LinearMap.BilinForm ℤ X) (B : X →ₗ[ℤ] X →ₗ[ℤ] ℝ), (∀ i y z, γ i y z = γ i z y) → (∀ i y, 0 ≤ γ i y y) → v ≠ 0 → InRCone γ v → B ∈ rcone γ → ∃ (m' : ℕ) (s : Fin m' ↪ Fin m) (h : LinearMap.BilinForm ℤ X →ₗ[ℤ] ℤ), IsFaceCut γ s h ∧ 0 < h v ∧ B ∈ rcone (Fin.cons v fun j => γ (s j)) := GlobalTheory.StarCover.star_cover

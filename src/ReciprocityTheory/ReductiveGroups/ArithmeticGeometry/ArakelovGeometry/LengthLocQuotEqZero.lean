@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Length
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+public import Mathlib.Algebra.Module.LocalizedModule.Exact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +76,7 @@ theorem length_loc_step (I q : Ideal R) (f : R) (hq : ∀ g, g ∈ q ↔ g * f �
   let π : (R ⧸ I) →ₗ[R] (R ⧸ (I ⊔ Ideal.span {f})) :=
     Submodule.mapQ I (I ⊔ Ideal.span {f}) LinearMap.id (by intro x hx; exact Ideal.mem_sup_left hx)
   have hg : Function.Injective g := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro z hz
     obtain ⟨x, rfl⟩ := Submodule.Quotient.mk_surjective _ z
     change Submodule.Quotient.mk (p := I) (x * f) = 0 at hz
@@ -64,7 +113,7 @@ theorem length_loc_step (I q : Ideal R) (f : R) (hq : ∀ g, g ∈ q ↔ g * f �
 
 theorem length_loc_quot_eq_zero (q P : Ideal R) [P.IsPrime] (h : ¬ q ≤ P) :
     Module.length (Localization.AtPrime P) (LocalizedModule P.primeCompl (R ⧸ q)) = 0 := by
-  obtain ⟨s, hsq, hsP⟩ := SetLike.not_le_iff_exists.mp h
+  obtain ⟨s, hsq, hsP⟩ := IsConcreteLE.not_le_iff_exists.mp h
   rw [Module.length_eq_zero_iff]
   refine subsingleton_of_forall_eq 0 (fun z => ?_)
   induction z using LocalizedModule.induction_on with
@@ -124,25 +173,27 @@ theorem length_loc_chain (P : Ideal R) [P.IsPrime] : ∀ (N : ℕ) (F : Fin (N +
       ∀ g, g ∈ q j ↔ g * f j ∈ F j.castSucc) →
     (∀ j, q j ≤ P → q j = P) →
     Module.length (Localization.AtPrime P) (LocalizedModule P.primeCompl (R ⧸ F 0)) =
-      ((∑ j : Fin N, if q j = P then 1 else 0 : ℕ) : ℕ∞)
-  | 0, F, f, q, hlast, _, _ => by
+      ((∑ j : Fin N, if q j = P then 1 else 0 : ℕ) : ℕ∞) := by
+  intro N
+  induction N with
+  | zero =>
+    intro F f q hlast _ _
     rw [show F 0 = F (Fin.last 0) from rfl, hlast, length_loc_top]
     simp
-  | N + 1, F, f, q, hlast, hj, hmin => by
-    have ih := length_loc_chain P N (fun j => F j.succ) (fun j => f j.succ) (fun j => q j.succ)
-      (by simpa [Fin.succ_last] using hlast)
-      (fun j => by
-        have h := hj j.succ
-        first | rwa [← Fin.succ_castSucc] at h | rwa [Fin.succ_castSucc] at h)
+  | succ N ih =>
+    intro F f q hlast hj hmin
+    have htail := ih (fun j => F j.succ) (fun j => f j.succ) (fun j => q j.succ)
+      (by simpa only [Fin.succ_last] using hlast)
+      (fun j => by simpa only [Fin.castSucc_succ] using hj j.succ)
       (fun j => hmin j.succ)
     obtain ⟨h1, _, h3⟩ := hj 0
     rw [Fin.castSucc_zero] at h1 h3
-    rw [length_loc_step (F 0) (q 0) (f 0) h3 P, ← h1, ih, Fin.sum_univ_succ]
+    rw [length_loc_step (F 0) (q 0) (f 0) h3 P, ← h1, htail, Fin.sum_univ_succ]
     by_cases hq : q 0 = P
-    · rw [if_pos hq, hq, length_loc_quot_self]
+    · rw [ite_eq_left hq, hq, length_loc_quot_self]
       push_cast
       ring
-    · rw [if_neg hq, length_loc_quot_eq_zero _ _ (fun h => hq (hmin 0 h))]
+    · rw [ite_eq_right hq, length_loc_quot_eq_zero _ _ (fun h => hq (hmin 0 h))]
       simp
 
 end ReciprocityTheory.ChartRestriction.G.ArakelovGeometry

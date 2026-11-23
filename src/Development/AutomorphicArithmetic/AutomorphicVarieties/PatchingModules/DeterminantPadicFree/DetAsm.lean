@@ -1,8 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.FrameWith
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.DetAlg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.MapSpan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.ConstantAndLinearPartsZeroOfMem
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ThetaCoefficientMapEq
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.ConstantAndLinearPartsZeroOfMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.DetAlg
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.MapSpan
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DeterminantPadicFree.W1sMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix IsLocalRing UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Pa
 
@@ -118,7 +171,7 @@ private theorem isKap {l : ℕ} [Fact l.Prime] {F : GFrame l} {n : ℕ} {x : NP 
   · intro j g _ h _
     have e := (hsel j).2.2.1 g h
     simp only [one_smul]
-    rw [hr, hr, e, map_add, map_mul, map_mul]
+    rw [hr, hr, e, map_add (f := _), map_mul, map_mul]
   · intro j g
     rw [ha, mp_od hinj]
     exact (hsel j).1 g
@@ -146,6 +199,7 @@ private theorem isKap {l : ℕ} [Fact l.Prime] {F : GFrame l} {n : ℕ} {x : NP 
       funext g
       apply mp_inj hinj
       rw [Finset.sum_apply]
+
       simp only [Pi.smul_apply, map_sum, mp_smul, hc', mul_smul]
       rw [← Finset.smul_sum, hc g]
       simp only [dTw, dY, one_smul, map_sub, map_mul, hY', hr]
@@ -190,7 +244,7 @@ theorem UpperTheory.V.Pa.Det.detAsm :
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
     · simp only [s, neg_mul_neg, ← map_mul, hee, map_one]
     · intro j g _ h _
-      simp only [la, hzc g h, ep_add, heps, ep_C, (hact (z h) (hzW h) g).2.1 j, map_add, mp_smul,
+      simp only [la, hzc g h, ep_add, heps, ep_C, (hact (z h) (hzW h) g).2.1 j, map_add (f := _), mp_smul,
         map_mul, hr, hχ]
     · intro j g
       rw [hDa, mp_od hinj]
@@ -201,15 +255,17 @@ theorem UpperTheory.V.Pa.Det.detAsm :
       rw [hDa, mp_ev hinj]
       exact (hW.1 _ (hzW g)).1
     · intro g h
+
       simp only [ph, la, hzc g h, eta_add, heps, eta_C, (hact (z h) (hzW h) g).2.2.1, hmapid,
-        map_add, mp_smul, map_sum, map_sub, map_mul, hr, hχ]
+      map_add, mp_smul, map_sum, map_sub, map_mul, hr, hχ]
     · intro g
       simp only [ph, hDσ, hzconj g, eta_neg, heps, eta_C, eta_tr, map_neg, mp_smul, mp_tr, s, neg_smul]
     · intro g hg
       rw [hDG] at hg
       have h0 := hell g hg
       simp only [ell, (hact (z g) (hzW g) g).2.2.2, hmapid] at h0
-      simp only [ph, la, hr, ← map_mul, mp_trace, ← map_sum, ← map_add, h0, map_zero]
+
+      simp only [ph, la, hr, ← map_mul, mp_trace, ← map_sum, ← map_add (f := _), h0, map_zero]
   obtain ⟨Y₀, Y, hY₀ev, hY₀s, hY, hph⟩ := UpperTheory.V.Pa.Det.detAlg D _ la s ph hK hTw
   obtain ⟨m, b, hb⟩ := clr (K := x.K)
     (Sum.elim (fun p : Fin n × Fin n => Y₀ p.1 p.2) (fun q : Fin k.g × Fin n × Fin n => Y q.1 q.2.1 q.2.2))
@@ -253,8 +309,9 @@ theorem UpperTheory.V.Pa.Det.detAsm :
     · apply mp_inj hinj
       have h1 := hph g
       simp only [ph] at h1
+
       simp only [Pi.smul_apply, eta_smul, heps, eta_sub, eta_C, (hact Z hZW g).2.2.1, hmapid,
-        hZeta, hZep, map_sub, map_add, mp_smul, map_sum, map_mul, ← hr, hY₀', hY', h1, dTw, hχ]
+      hZeta, hZep, map_sub, map_add, mp_smul, map_sum, map_mul, ← hr, hY₀', hY', h1, dTw, hχ]
       simp only [smul_add, smul_sub, Finset.smul_sum, Matrix.mul_smul, Matrix.smul_mul, smul_smul,
         mul_comm]
       abel

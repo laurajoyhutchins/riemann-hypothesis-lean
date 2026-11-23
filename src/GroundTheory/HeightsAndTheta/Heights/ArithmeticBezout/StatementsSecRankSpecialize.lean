@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -18,43 +60,6 @@ def SecRankSpecialize.Statement : Prop :=
           (Vertical.SecAlg (Q.map (MvPolynomial.map (algebraMap R K))) (algebraMap R K ∘ y)) ≤
         Module.finrank κ
           (Vertical.SecAlg (Q.map (MvPolynomial.map (algebraMap R κ))) (algebraMap R κ ∘ y))
-
-theorem SecRankSpecialize.hypotheses_inhabited :
-    letI : Algebra (PowerSeries ℚ) ℚ := (PowerSeries.constantCoeff (R := ℚ)).toAlgebra
-    IsDomain (PowerSeries ℚ) ∧ IsLocalRing (PowerSeries ℚ) ∧
-      IsFractionRing (PowerSeries ℚ) (FractionRing (PowerSeries ℚ)) ∧
-      Function.Surjective (algebraMap (PowerSeries ℚ) ℚ) ∧
-      Module.Finite (PowerSeries ℚ)
-        (Vertical.SecAlg (⊥ : Ideal (MvPolynomial (Fin 1) (PowerSeries ℚ)))
-          (fun _ : Vertical.Par 0 1 => (1 : PowerSeries ℚ))) := by
-  letI : Algebra (PowerSeries ℚ) ℚ := (PowerSeries.constantCoeff (R := ℚ)).toAlgebra
-  refine ⟨inferInstance, inferInstance, inferInstance,
-    fun a => ⟨PowerSeries.C a, by simp [RingHom.algebraMap_toAlgebra]⟩, ?_⟩
-  set I := Vertical.secIdeal (⊥ : Ideal (MvPolynomial (Fin 1) (PowerSeries ℚ)))
-    (fun _ : Vertical.Par 0 1 => (1 : PowerSeries ℚ))
-  have hX : ∀ j : Fin 1, Ideal.Quotient.mk I (X j) = 1 := by
-    intro j
-    rw [Fin.fin_one_eq_zero j, ← sub_eq_zero, ← map_one (Ideal.Quotient.mk I), ← map_sub,
-      Ideal.Quotient.eq_zero_iff_mem]
-    refine Ideal.mem_sup_right (Ideal.subset_span ?_)
-    simp [Vertical.chartForm, linForm]
-  have hrange : ∀ p : MvPolynomial (Fin 1) (PowerSeries ℚ),
-      Ideal.Quotient.mk I p ∈ Set.range (algebraMap (PowerSeries ℚ) (Vertical.SecAlg ⊥
-        (fun _ : Vertical.Par 0 1 => (1 : PowerSeries ℚ)))) := by
-    intro p
-    induction p using MvPolynomial.induction_on with
-    | C a => exact ⟨a, rfl⟩
-    | add p q hp hq =>
-      obtain ⟨a, ha⟩ := hp
-      obtain ⟨b, hb⟩ := hq
-      exact ⟨a + b, by rw [map_add, map_add, ha, hb]⟩
-    | mul_X p j hp =>
-      obtain ⟨a, ha⟩ := hp
-      exact ⟨a, by rw [map_mul, hX, mul_one, ha]⟩
-  refine Module.Finite.of_surjective (Algebra.linearMap (PowerSeries ℚ) _) ?_
-  intro x
-  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
-  exact hrange p
 
 end
 

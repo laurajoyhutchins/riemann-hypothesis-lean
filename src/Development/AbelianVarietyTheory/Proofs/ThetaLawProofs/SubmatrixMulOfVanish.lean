@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.DegProd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.DegProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.CStarMatrix
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Block
+public import Mathlib.LinearAlgebra.Matrix.SchurComplement
+
+@[expose] public section
+
 open GlobalTheory.KeyKa
 
 namespace GlobalTheory.TorsionUnique
@@ -9,21 +57,7 @@ variable {R Ix : Type} [CommRing R] [Fintype Ix] [DecidableEq Ix]
 def HasDeg (deg : Ix → ℕ) (k : ℤ) (X : Matrix Ix Ix R) : Prop :=
   ∀ p q, (deg p : ℤ) ≠ deg q + k → X p q = 0
 
-omit [DecidableEq Ix] in
-theorem HasDeg.mul {deg : Ix → ℕ} {k l : ℤ} {X Y : Matrix Ix Ix R}
-    (hX : HasDeg deg k X) (hY : HasDeg deg l Y) : HasDeg deg (k + l) (X * Y) := by
-  intro p q hpq
-  rw [Matrix.mul_apply]
-  refine Finset.sum_eq_zero fun r _ => ?_
-  by_cases h : (deg p : ℤ) = deg r + k
-  · rw [hY r q (by omega), mul_zero]
-  · rw [hX p r h, zero_mul]
 
-omit [Fintype Ix] [DecidableEq Ix] in
-theorem HasDeg.sub {deg : Ix → ℕ} {k : ℤ} {X Y : Matrix Ix Ix R}
-    (hX : HasDeg deg k X) (hY : HasDeg deg k Y) : HasDeg deg k (X - Y) := by
-  intro p q hpq
-  rw [Matrix.sub_apply, hX p q hpq, hY p q hpq, sub_zero]
 
 variable {R Ix : Type} [CommRing R] [Fintype Ix] [DecidableEq Ix] in
 private lemma submatrix_mul_eq_of_vanishing_off {ι κ : Type} (X Y : Matrix Ix Ix R) (Q : Ix → Prop)
@@ -174,8 +208,8 @@ private lemma det_even_submatrix_homotopy_product_eq_one (deg : Ix → ℕ) (D h
       ⟨fun i => hd (by rw [← i.2]; exact i.1.2)⟩
     exact Matrix.det_isEmpty
 
-variable {R Ix : Type} [CommRing R] [Fintype Ix] [DecidableEq Ix] in
 
+variable {R Ix : Type} [CommRing R] [Fintype Ix] [DecidableEq Ix] in
 theorem _root_.GlobalTheory.TorsionUnique.torsSq_unique : ∀ (R Ix : Type) [CommRing R] [Fintype Ix] [DecidableEq Ix]
     (deg : Ix → ℕ) (D : Matrix Ix Ix R) (t t' : R),
     _root_.GlobalTheory.KeyKa.IsCx deg D → _root_.GlobalTheory.KeyKa.TorsSq deg D t →

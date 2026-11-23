@@ -1,5 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.MoveQkCore
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
+module
+
+public import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.MoveQkCore
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ScaleGenIsGen
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 noncomputable section
 
@@ -126,7 +180,7 @@ theorem exists_mult [Module.Free ℤ X] (h : IsCub θ) {c : X → A} (hc : ∀ �
     rw [map_zero]; rfl
   · intro χ χ'
     show (Additive.toMul (s (χ + χ'))).u * θ (c χ) (c χ') b = (Additive.toMul (s χ)).u * (Additive.toMul (s χ')).u
-    rw [map_add, toMul_add, Ex.mul_u, hb, hb, h.s01 b, h.s12 (c χ) b, inv_mul_cancel_right]
+    rw [map_add (f := _), toMul_add, Ex.mul_u, hb, hb, h.s01 b, h.s12 (c χ) b, inv_mul_cancel_right]
 
 theorem exists_root [Module.Free ℤ X] {n : ℕ} (hU : ∀ u : U, ∃ r, r ^ n = u) (l : X → U) (hl : ∀ χ χ', l (χ + χ') = l χ * l χ') :
     ∃ ro : X → U, (∀ χ χ', ro (χ + χ') = ro χ * ro χ') ∧ ∀ χ, ro χ ^ n = l χ := by
@@ -136,7 +190,7 @@ theorem exists_root [Module.Free ℤ X] {n : ℕ} (hU : ∀ u : U, ∃ r, r ^ n 
     (fun a => by obtain ⟨r, hr⟩ := hU (Additive.toMul a); exact ⟨Additive.ofMul r, hr⟩)
   refine ⟨fun χ => Additive.toMul (s χ), fun χ χ' => ?_, fun χ => LinearMap.congr_fun hs χ⟩
   show Additive.toMul (s (χ + χ')) = Additive.toMul (s χ) * Additive.toMul (s χ')
-  rw [map_add, toMul_add]
+  rw [map_add (f := _), toMul_add]
 
 end Ext
 

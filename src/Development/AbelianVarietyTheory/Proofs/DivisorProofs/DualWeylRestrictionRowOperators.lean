@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
-import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightMemWZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightMemWZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility TensorProduct
 
@@ -21,8 +68,8 @@ theorem rTensor_der_mul {A B : Type} [CommRing A] [Algebra ℚ A] [CommRing B] [
       simp only [Algebra.TensorProduct.tmul_mul_tmul, LinearMap.rTensor_tmul, Derivation.coeFn_coe,
         Derivation.leibniz, smul_eq_mul, add_tmul]
       rw [mul_comm b' b]
-    | add y y' hy hy' => simp only [mul_add, map_add, hy, hy', add_mul]; abel
-  | add x x' hx hx' => simp only [add_mul, mul_add, map_add, hx, hx']; abel
+    | add y y' hy hy' => simp only [mul_add, map_add (f := _), hy, hy', add_mul]; abel
+  | add x x' hx hx' => simp only [add_mul, mul_add, map_add (f := _), hx, hx']; abel
 
 theorem lTensor_der_mul {A B : Type} [CommRing A] [Algebra ℚ A] [CommRing B] [Algebra ℚ B]
     (D : Derivation ℚ B B) (x y : A ⊗[ℚ] B) :
@@ -37,8 +84,8 @@ theorem lTensor_der_mul {A B : Type} [CommRing A] [Algebra ℚ A] [CommRing B] [
       simp only [Algebra.TensorProduct.tmul_mul_tmul, LinearMap.lTensor_tmul, Derivation.coeFn_coe,
         Derivation.leibniz, smul_eq_mul, tmul_add]
       rw [mul_comm a' a]
-    | add y y' hy hy' => simp only [mul_add, map_add, hy, hy', add_mul]; abel
-  | add x x' hx hx' => simp only [add_mul, mul_add, map_add, hx, hx']; abel
+    | add y y' hy hy' => simp only [mul_add, map_add (f := _), hy, hy', add_mul]; abel
+  | add x x' hx hx' => simp only [add_mul, mul_add, map_add (f := _), hx, hx']; abel
 
 theorem natAdd_ne_castAdd' {p q : ℕ} (b : Fin q) (d : Fin p) : Fin.natAdd p b ≠ Fin.castAdd q d := by
   rw [Ne, Fin.ext_iff]; simp only [Fin.coe_natAdd, Fin.coe_castAdd]; omega
@@ -118,9 +165,10 @@ theorem resT_wrong_degree (p q : ℕ) (f : MvPolynomial (Fin (p + q) × Fin (p +
     (hf : IsWeightedHomogeneous (colW (p + q) (p + q)) f ν)
     (hsum : ∑ c : Fin p, Formalism.CohomologicalDescent.LR.der (p + q) (p + q) (Fin.castAdd q c) (Fin.castAdd q c) f = t • f)
     (ht : t ≠ ∑ c : Fin p, (ν (Fin.castAdd q c) : ℚ)) : resT ℚ p q f = 0 := by
+
   rw [f.as_sum, map_sum]
   refine Finset.sum_eq_zero fun m hm => ?_
-  have hc : coeff m f ≠ 0 := mem_support_iff.1 hm
+  have hc : AddMonoidAlgebra.coeff f m ≠ 0 := mem_support_iff.1 hm
   by_contra hne
   have h1 : ∀ (a : Fin p) (t' : Fin q), m (Fin.castAdd q a, Fin.natAdd p t') = 0 := by
     intro a t'
@@ -132,8 +180,8 @@ theorem resT_wrong_degree (p q : ℕ) (f : MvPolynomial (Fin (p + q) × Fin (p +
     exact hne (resT_monomial_eq_zero p q m _ _ (resVarT_natAdd_castAdd p q b s) h0)
   have hw : Finsupp.weight (colW (p + q) (p + q)) m = ν := hf hc
   have ht' : t = ∑ c : Fin p, ((Finsupp.weight (rowW (p + q) (p + q)) m (Fin.castAdd q c) : ℕ) : ℚ) := by
-    have h3 := congrArg (coeff m) hsum
-    rw [coeff_sum, coeff_smul, smul_eq_mul] at h3
+    have h3 := congrArg (AddMonoidAlgebra.coeff · m) hsum
+    rw [coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul] at h3
     simp only [Formalism.CohomologicalDescent.LR.coeff_der_diag] at h3
     rw [← Finset.sum_mul] at h3
     exact (mul_right_cancel₀ hc h3).symm
@@ -153,16 +201,16 @@ theorem dualWeyl_resDer : ResDer := by
       rw [← MvPolynomial.algebraMap_eq, Derivation.map_algebraMap, map_zero, AlgHom.commutes,
         Algebra.TensorProduct.algebraMap_apply, LinearMap.rTensor_tmul]
       simp
-    | add g h hg hh => rw [map_add, map_add, map_add, hg, hh, map_add]
+    | add g h hg hh => rw [map_add (f := _), map_add (f := _), map_add (f := _), hg, hh, map_add (f := _)]
     | mul_X g v hg =>
-      rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add, map_mul, map_mul, map_mul, rTensor_der_mul, resT_der_left_X, hg]
+      rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add (f := _), map_mul, map_mul, map_mul, rTensor_der_mul, resT_der_left_X, hg]
   · induction f using MvPolynomial.induction_on with
     | C a =>
       rw [← MvPolynomial.algebraMap_eq, Derivation.map_algebraMap, map_zero, AlgHom.commutes,
         Algebra.TensorProduct.algebraMap_apply, LinearMap.lTensor_tmul]
       simp
-    | add g h hg hh => rw [map_add, map_add, map_add, hg, hh, map_add]
+    | add g h hg hh => rw [map_add (f := _), map_add (f := _), map_add (f := _), hg, hh, map_add (f := _)]
     | mul_X g v hg =>
-      rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add, map_mul, map_mul, map_mul, lTensor_der_mul, resT_der_right_X, hg]
+      rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add (f := _), map_mul, map_mul, map_mul, lTensor_der_mul, resT_der_right_X, hg]
 
 end GlobalTheory.LeviCut

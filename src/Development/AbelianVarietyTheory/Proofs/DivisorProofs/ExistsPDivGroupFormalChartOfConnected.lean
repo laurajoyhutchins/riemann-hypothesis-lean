@@ -1,15 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AssocEvalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantCoeffEqZeroOfEvalEqComulStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalSwapEqStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoordinatesOfIsConnectedStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSeriesOfCompatibleStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalChartGroupLawEvalRightUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicCompleteSpanNatCastStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerTensorStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PadicContinuousEvaluationExistsUniqueSubstNaturaStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoordinatesOfIsConnectedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAdicCompleteSpanNatCastStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerTensorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSeriesOfCompatibleStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveEvalTmulStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantCoeffEqZeroOfEvalEqComulStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalChartGroupLawEvalRightUnitStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvalSwapEqStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AssocEvalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SurjectiveEvalTmulStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 open TensorProduct
 
@@ -106,7 +150,7 @@ theorem chart_exists : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgC
       have h1 := isEval_comp ρ (hE₂ (n + 1))
       convert h1 using 1
       funext j
-      rcases j with j | j <;> simp [ρ, hres]
+      rcases j with j | j <;> simp [ρ, AlgHomClass.toAlgHom, hres]
     rw [← hρ, AlgHom.comp_apply, hf]
     exact (CoalgHomClass.map_comp_comul_apply (G.res n) (x (n + 1) i)).trans (by rw [hres])
   have hμ : ∀ i, ∃ g, ∀ n, E₂ n g = Coalgebra.comul (R := O) (x n i) := by

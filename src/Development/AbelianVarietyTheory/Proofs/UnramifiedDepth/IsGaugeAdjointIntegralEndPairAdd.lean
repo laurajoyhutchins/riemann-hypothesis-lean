@@ -1,11 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.CharacterGerms.NondegenerateCharts
-import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
-import Formalism.LocalToGlobal.CharacterGerms.BlockAdmissibleChart
-import Formalism.LocalToGlobal.CharacterGerms.NegMem
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
-import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntSOfMulEqOne
+module
+
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntSOfMulEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,11 +78,12 @@ theorem h_cc (h : RLaw X V) : constantCoeff X.h = 0 := by
 theorem sum_cc (h : RLaw X V) {τ : Type} {a b : κ → MvPowerSeries τ C}
     (ha : ∀ s, constantCoeff (a s) = 0) (hb : ∀ s, constantCoeff (b s) = 0) (x : κ) :
     constantCoeff (subst a (X.lg x) + subst b (X.lg x)) = 0 := by
-  rw [map_add, cc_subst ha, cc_subst hb, lg_cc h, add_zero]
+  rw [map_add (f := _), cc_subst ha, cc_subst hb, lg_cc h, add_zero]
 
 theorem lin_cc (h : RLaw X V) (M : Matrix κ κ C) {τ : Type} {a : κ → MvPowerSeries τ C}
     (ha : ∀ s, constantCoeff (a s) = 0) (x : κ) :
     constantCoeff (∑ y, M x y • subst a (X.lg y)) = 0 := by
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun y _ => ?_
   rw [smul_eq_C_mul, map_mul, cc_subst ha, lg_cc h, mul_zero]
@@ -95,6 +137,7 @@ theorem subst_endP_X (h : RLaw X V) (M : Matrix κ κ C) {ρ : Type}
     (hasSubst_of_constantCoeff_zero (lin_cc h M (fun s => constantCoeff_X s))) hS]
   congr 1
   funext y
+
   rw [← coe_substAlgHom hS, map_sum]
   refine Finset.sum_congr rfl fun z _ => ?_
   rw [coe_substAlgHom hS, subst_smul hS, subst_self]
@@ -146,13 +189,13 @@ theorem defects [CharZero C] (h : RLaw X V) {τ : Type} {a b c : κ → MvPowerS
   have g := fun j : Fin 3 => gp_cc (C := C) (κ := κ) j
   constructor
   · have h1 := logInt_subst he hei (mem_logInt.2 ⟨by
-      rw [map_sub, map_add, hAt_cc h (g 0) (g 2), hAt_cc h (g 1) (g 2), hAt_cc h (formalAdd_constantCoeff h (g 0) (g 1)) (g 2)]
+      rw [map_sub, map_add (f := _), hAt_cc h (g 0) (g 2), hAt_cc h (g 1) (g 2), hAt_cc h (formalAdd_constantCoeff h (g 0) (g 1)) (g 2)]
       simp, h.ph1⟩)
     rw [subst_sub hS, subst_add hS, subst_hAt (g 0) (g 2) he, subst_hAt (g 1) (g 2) he,
       subst_hAt (formalAdd_constantCoeff h (g 0) (g 1)) (g 2) he, funext (subst_addP h (g 0) (g 1) he), s0, s1, s2] at h1
     exact h1
   · have h1 := logInt_subst he hei (mem_logInt.2 ⟨by
-      rw [map_sub, map_add, hAt_cc h (g 0) (g 1), hAt_cc h (g 0) (g 2), hAt_cc h (g 0) (formalAdd_constantCoeff h (g 1) (g 2))]
+      rw [map_sub, map_add (f := _), hAt_cc h (g 0) (g 1), hAt_cc h (g 0) (g 2), hAt_cc h (g 0) (formalAdd_constantCoeff h (g 1) (g 2))]
       simp, h.ph2⟩)
     rw [subst_sub hS, subst_add hS, subst_hAt (g 0) (g 1) he, subst_hAt (g 0) (g 2) he,
       subst_hAt (g 0) (formalAdd_constantCoeff h (g 1) (g 2)) he, funext (subst_addP h (g 1) (g 2) he), s0, s1, s2] at h1

@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
+module
+
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.NormSqEqAdaptedFrameSum
+public import GroundTheory.AutomorphicForms.HermitianSpaces
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.BlockGLSupportedMemMirabolicSupported
+public import GroundTheory.AutomorphicForms.HermitianOrthogonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.ExistsIntSmulIsAdicIntegralInTensorBasis
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.BlockGLSupportedMemMirabolicSupported
+import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PUnipotentModulusMatrix
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume GroundTheory.Automorphic GlobalTheory.CompanionTheory.Ar.Cusp.Dict
 open scoped ENNReal InnerProductSpace
 open scoped ComplexOrder
@@ -19,27 +67,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 theorem quadConj_eq_complexConj (x : E) :
     conj (maximalRealSubfield E) E x = IsCMField.complexConj E x := by
-  set K := maximalRealSubfield E
-  set t := IsCMField.complexConj E
-  set y := conj K E x with hy
-  have hyy : conj K E y = x := conj_conj x
-  have fix : ∀ a : E, conj K E a = a → t a = a := by
-    intro a ha
-    obtain ⟨b, rfl⟩ := conj_eq_self_iff.1 ha
-    exact (IsCMField.complexConj_eq_self_iff E _).2 b.2
-  have ha : t (x + y) = x + y := fix _ (by rw [map_add, hyy, ← hy, add_comm])
-  have hb : t (x * y) = x * y := fix _ (by rw [map_mul, hyy, ← hy, mul_comm])
-  have hz : (t x - x) * (t x - y) = 0 := by
-    have h0 : x * x - (x + y) * x + x * y = 0 := by ring
-    have h1 := congrArg t h0
-    rw [map_add, map_sub, map_mul, map_mul, ha, hb, map_zero] at h1
-    linear_combination h1
-  rcases mul_eq_zero.1 hz with h | h
-  · have hx : t x = x := sub_eq_zero.1 h
-    have : x ∈ K := (IsCMField.complexConj_eq_self_iff E x).1 hx
-    have h2 : y = x := conj_eq_self_iff.2 ⟨⟨x, this⟩, rfl⟩
-    rw [h2, hx]
-  · exact (sub_eq_zero.1 h).symm
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.Dict.AdaptedLen.conj_eq_complexConj <;> assumption
 
 theorem complexConj_rt (H : Host E) : IsCMField.complexConj E (H.rt : E) = -(H.rt : E) := by
   have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
@@ -82,8 +110,8 @@ theorem sesq_skew {V : Type} [AddCommGroup V] [Module E V] [Module ℚ V]
     ring
   linear_combination this
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem exists_nat_integral {Λ : Type} [AddCommGroup Λ] [Module.Finite ℤ Λ] (F : Λ → Λ → E)
     (h1 : ∀ x x' y, F (x + x') y = F x y + F x' y) (h2 : ∀ x y y', F x (y + y') = F x y + F x y') :
     ∃ m : ℕ, m ≠ 0 ∧ ∀ x y, (m : E) * F x y ∈ integralClosure ℤ E := by
@@ -103,7 +131,7 @@ theorem exists_nat_integral {Λ : Type} [AddCommGroup Λ] [Module.Finite ℤ Λ]
       rw [map_zero]
       exact zero_mem _
     | add x y _ _ hx hy =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hx hy
     | smul a x _ hx =>
       rw [map_zsmul]
@@ -134,7 +162,7 @@ theorem exists_hermitian_of_trace : ∀ (E : Type) [Field E] [NumberField E] [Is
     GlobalTheory.CompanionTheory.Ar.Flat.existsUnique_sesq_of_trace E (Fin N → E) B hadj
   have hsk := sesq_skew B hadj hskew h₁ htr
   obtain ⟨m, hm0, hint⟩ := exists_nat_integral (fun x y : Λ => h₁ (e y) (e x))
-    (fun x x' y => by rw [map_add, hadd2]) (fun x y y' => by rw [map_add, hadd1])
+    (fun x x' y => by rw [map_add (f := _), hadd2]) (fun x y y' => by rw [map_add (f := _), hadd1])
   have hrt0 : (H.rt : E) ≠ 0 := by
     intro h0
     have hsq : (H.rt : E) ^ 2 = -(H.d : E) := by
@@ -187,7 +215,7 @@ theorem exists_hermitian_of_trace : ∀ (E : Type) [Field E] [NumberField E] [Is
     let g : (Fin N → E) →ₗ[ℚ] (Fin N → E) := g0.toRatLinearMap
     have gapp : ∀ u i, g u i = S u (Pi.single i 1) := fun _ _ => rfl
     have ginj : Function.Injective g := by
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro u hu
       have : S u = S 0 := by
         apply (Pi.basisFun E (Fin N)).ext

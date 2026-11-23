@@ -1,18 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
-import Development.AbelianVarietyTheory.Definitions.Degenerations.CompanionTheory
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValuationsTorusPointsFramesFamilyTerms
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFamCoefVal
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ValuationThetaRatioEqBilinear
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBasisOfCoord
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.TwistBaseChangeOfFinrankSectionsOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TWMain
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TestQuadraticFormEqPsiValuationMul
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ValuationsTorusExtensionPoints
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsBasisB
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.AllDV
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TestQuadraticFormEqPsiValuationMul
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ValuationsTorusExtensionPoints
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBasisOfCoord
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.TwistBaseChangeOfFinrankSectionsOne
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ValuationThetaRatioEqBilinear
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueFamOfReps
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFamCoefVal
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFrameRatio
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValuationsTorusPointsFramesFamilyTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.BOfNsmulLeft
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsFamRep
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GsScalJFK
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.SectionScalarValuation
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TWMain
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGenV
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -93,6 +143,7 @@ open ReciprocityTheory.ChartRestriction.G.DVR GlobalTheory.UT GlobalTheory.UT.Co
 
 theorem gs_sum' {Y Z : Scheme.{0}} (f : Z ⟶ Y) (z : Z) (U : Y.Opens) (h : f z ∈ U) {I : Type} (A : Finset I)
     (a : I → Γ(Y, U)) : gs f z U (∑ i ∈ A, a i) = ∑ i ∈ A, gs f z U (a i) := by
+
   simp only [gs_eq f z U h, map_sum]
 
 section
@@ -155,8 +206,8 @@ theorem cst_prB (y : (DegPre.BF D.toPre F).left) (a : V) :
   refine (gs_pull _ _ y ⊤ trivial _).symm.trans (Eq.trans ?_ (gs_pull (𝟙 _) (fst (TF (R := V) F) D.toPre.P.A).left y ⊤ trivial _).symm)
   exact congrArg (gs _ y ⊤) n.symm
 
-include hϖ hv in
 
+include hϖ hv in
 theorem exists_comb {α : D.toPre.X} {I : Type} [Fintype I] {β : I → D.toPre.SecB k α} (hβ : IsBasisB D.toPre β)
     (s : I → Fam D.toPre F k)
     (hs : ∀ i, GeneratorPullback.SecScal D.toPre.P.L (DegPre.famφ D.toPre F α) (DegPre.famε k) ((s i).s α)
@@ -178,8 +229,9 @@ theorem exists_comb {α : D.toPre.X} {I : Type} [Fintype I] {β : I → D.toPre.
       rw [← SectionScalarValuation.secScal_sval (hs i) _ y hJ, ← cst_prB]
       exact (gs_mul _ y _ hm _ _).trans (congrArg₂ (· * ·) (gs_constFn _ _ _ y hm _) rfl)
     rw [sval_sum _ _ _ _ _ _ hJ, SectionScalarValuation.sval_lin (fun i => gF D.toPre F (a i)) σF (fun j => hsum j) _ y hJ]
+
     simp only [e, Finset.mul_sum, gs_eq (𝟙 (DegPre.BF D.toPre F).left) y ⊤ trivial, map_sum, map_mul, Finset.sum_mul,
-      _root_.mul_assoc]
+    _root_.mul_assoc]
     exact Finset.sum_comm
 
 variable {Q : D.toPre.X → ℤ} {g : GtPtF D.toPre F} {w : Frm D.toPre F k g.b} {l : D.toPre.X → ℚ} {ω : ℚ}

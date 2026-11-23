@@ -1,9 +1,67 @@
-import CompanionTheory.AutomorphicTheory.NumberFieldModels.StepCpt
-import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.ModelLoc
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFLeibMain
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopDomEmpty
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJALocOpAdj
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CellSmoothness
+module
+
+public import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.ModelLoc
+public import CompanionTheory.AutomorphicTheory.NumberFieldModels.NFTieProv
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFHatProdKBStmt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopDomPtw
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalMeasurabilityWeakThreshold
+public import CompanionTheory.AutomorphicTheory.NumberFieldModels.HsVecProjLe
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaCutoffLimit
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CellSmoothness
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGRawSmooth
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGTrChain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJALocOpAdj
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDJDJComm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFCoreNExt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFLeibAsm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFLeibExp
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFTopDomEmpty
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopFirstOfParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.P Formalism.FourierDecayAlt.P.CutBP Formalism.FourierDecayAlt.P.CutMP Formalism.FourierDecayAlt.P.CutMP.Gauge Formalism.MainStatements.NFTie
 
@@ -46,8 +104,8 @@ theorem thrW_exists (k r m : ℕ) : ∃ A : ℝ, WeakThresholdClauses.WeakDomina
   have h2 := abs_nonneg ((r : ℝ) * (4 * r + 2 * k - 1) * (6 * r + 1))
   constructor <;> linarith
 
-attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 
+attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 theorem tie_FF (hLL : LocLift) (p : KB.Pl P Wp Wq) {e : M.Ty P → ℂ → (Wq →L[ℂ] Wp)} (he : IsFrameB P p.T.base e)
     (hG : GaugeQQ P p.T.base e) {Lm : R.LevelData (MA.A P (MA.DQ P)) P.r} (hM : MA.IsModelLevel P (MA.DQ P) Lm)
     {w : List C.Letter} (hw : KB.CutWord P p.l0 w) (a : Wd.Ix (Fin w.length))

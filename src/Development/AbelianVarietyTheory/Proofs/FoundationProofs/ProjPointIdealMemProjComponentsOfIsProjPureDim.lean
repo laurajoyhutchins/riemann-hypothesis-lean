@@ -1,6 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MonomialCountAndBinomialEstimates
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RingKrullDimQuotientAddOneOfMemMinimalPrimesSup
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LeadingCoeffNonnegOfEventuallyEvalNat
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.Polynomial.HilbertPoly
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MonomialCountAndBinomialEstimates
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRingKrullDimQuotientMvPolynomialEqNat
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RingKrullDimQuotientAddOneOfMemMinimalPrimesSup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.KrullDimension.Polynomial
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial Filter Module
 
@@ -39,6 +101,7 @@ theorem eval_smul_eq_zero_of_isHomogeneous {I : Ideal (MvPolynomial ι k)}
     (hv : ∀ g ∈ I, MvPolynomial.eval v g = 0) (a : k) :
     ∀ g ∈ I, MvPolynomial.eval (a • v) g = 0 := by
   intro g hg
+
   rw [← sum_homogeneousComponent g, map_sum]
   refine Finset.sum_eq_zero fun i _ => ?_
   rw [eval_smul_of_isHomogeneous (homogeneousComponent_isHomogeneous i g),
@@ -292,8 +355,8 @@ theorem projSetDegree_sup_le_of_isPrime {P : Ideal (MvPolynomial ι k)} [P.IsPri
       linarith
     exact_mod_cast h7
 
-omit [Finite ι] in
 
+omit [Finite ι] in
 theorem exists_mem_projComponents_sup {I J Q : Ideal (MvPolynomial ι k)}
     (hQ : Q ∈ projComponents (I ⊔ J)) :
     ∃ P ∈ projComponents I, Q ∈ projComponents (P ⊔ J) := by
@@ -487,9 +550,9 @@ theorem idealHilbertPoly_bot [Fintype ι] {n : ℕ} (hn : Fintype.card ι = n + 
   have h1 := finrank_quotPiece_add (⊥ : Ideal (MvPolynomial ι k)) m
   have h2 : finrank k (homogeneousSubmodule ι k m) = (m + Fintype.card ι - 1).choose m := by
     rw [← natCard_degree_eq, homogeneousSubmodule_eq_finsupp_supported]
-    exact finrank_eq_nat_card_basis (basisRestrictSupport k _)
+    exact finrank_eq_nat_card_basis (basisRestrictSupport k {d : ι →₀ ℕ | d.degree = m})
   rw [Submodule.restrictScalars_bot, bot_inf_eq, finrank_bot, add_zero, h2, hn] at h1
-  rw [← hm, h1, preHilbertPoly_eq_choose_sub_add ℚ n (Nat.zero_le m), Nat.sub_zero,
+  rw [← hm, h1, preHilbertPoly_eq_choose_sub_add ℚ n (Nat.zero_le (m + n)), Nat.sub_zero,
     ← Nat.choose_symm_add]
   rfl
 
@@ -517,12 +580,6 @@ theorem cutsProperly_bot {f : MvPolynomial ι k} (hf : f ≠ 0) :
   rw [show Set.Iio (0 : Fin 1) = ∅ from Set.Iio_bot, Set.image_empty, Ideal.span_empty,
     sup_bot_eq, Ideal.minimalPrimes_eq_subsingleton_self, Set.mem_singleton_iff] at h
   simpa [h] using hf
-
-example {f : MvPolynomial (Fin 2) k} {d : ℕ} (hf : f.IsHomogeneous d) (h0 : f ≠ 0) :
-    {y : Projectivization k (Fin 2 → k) | MvPolynomial.eval y.rep f = 0}.ncard ≤ d := by
-  have := ((bezout_bound_ideal (Ideal.IsHomogeneous.bot _)).2.1 1 ![d] ![f] (isProjPureDim_bot 1)
-    (by simpa using hf) (cutsProperly_bot h0)).2
-  simpa [projSetDegree_bot, projPoints] using this
 
 end Space
 

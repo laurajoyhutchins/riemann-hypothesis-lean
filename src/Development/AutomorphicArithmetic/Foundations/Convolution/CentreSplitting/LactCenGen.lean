@@ -1,5 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CentralIntegrated
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LactSpec
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocalRepresentationL2
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.CentralIntegrated
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LactSpec
+import GroundTheory.AutomorphicForms.GKModules.KernelCalculus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -10,7 +52,7 @@ open scoped TensorProduct
 
 namespace UpperTheory.ConvolutionTheory.Dp
 
-theorem oinf_toLp {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+theorem oinf_toLp {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
     (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (β : TI K n) (w : CuspL2 μ) :
     Oinf μ ν β (toLp μ w) = toLp μ ((archRepT μ).integrated ν β w) := by
   refine Eq.trans ?_ (toLp_integrated_archRepT μ ν (γ := β) β.continuous β.hasCompactSupport w).symm
@@ -24,9 +66,9 @@ theorem rUC_tmul {K : Type} [Field K] [NumberField K] {n : ℕ} (c : ℂ) (p : U
   rw [h]
   rfl
 
-set_option maxHeartbeats 800000 in
+
 theorem lactCen_of_gen (K : Type) [Field K] [NumberField K] (n : ℕ)
-    (hG : Subgroup.closure (Set.range (isExpLieAlgebra K n).expG) = ⊤) (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+    (hG : Subgroup.closure (Set.range (isExpLieAlgebra K n).expG) = ⊤) (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
     (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (β : TI K n) (hβ : SmoothT β) :
     ∀ p ∈ (isExpLieAlgebra K n).centerU, ∀ q ∈ (isExpLieAlgebra K n).centerU, ∀ φ ∈ centralCuspForms K n,
       Oinf μ ν (lact ((1 : ℂ) ⊗ₜ p + Complex.I ⊗ₜ q) β) (clsL μ φ) =
@@ -50,7 +92,7 @@ theorem lactCen_of_gen (K : Type) [Field K] [NumberField K] (n : ℕ)
     funext g
     have h3 := rUC_tmul 1 p f g⁻¹
     rw [one_mul] at h3
-    rw [hl g, map_add, ← h3, ← rUC_tmul Complex.I q f g⁻¹]
+    rw [hl g, map_add (f := _), ← h3, ← rUC_tmul Complex.I q f g⁻¹]
     rfl
   have h1 := (kernel_uAction _ ν (archRepT μ) p f hf).1
   have h2 := (kernel_uAction _ ν (archRepT μ) q f hf).1

@@ -1,9 +1,61 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfPerpEqBot
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfPerpEqBot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
@@ -34,6 +86,7 @@ theorem hf_smul_r (L : LocE F E) {n : ℕ} (Hm : Matrix (Fin n) (Fin n) E) (c : 
 theorem hf_cj (L : LocE F E) {n : ℕ} {Hm : Matrix (Fin n) (Fin n) E} (h : IsHerm L Hm)
     (x y : Fin n → E) : L.cj (hf L Hm x y) = hf L Hm y x := by
   have h' : ∀ i j, L.cj (Hm i j) = Hm j i := fun i j => congrFun (congrFun h j) i
+
   simp only [hf, map_sum, map_mul, h', L.cj_cj]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -71,11 +124,6 @@ theorem exists_qrefl (L : LocE F E) {n : ℕ} {Hm : Matrix (Fin n) (Fin n) E} (h
   simp only [hf_add_l, hf_add_r, hf_smul_l, hf_smul_r, map_mul, hf_cj L h]
   linear_combination hf L Hm v a * hf L Hm a w * hc
 
-theorem unit_of_fix (L : LocE F E) {z : E} (hz : L.cj z = z) (h0 : z ≠ 0) : IsUnit z := by
-  obtain ⟨a, rfl⟩ := (L.cj_fix z).1 hz
-  have : a ≠ 0 := by rintro rfl; simp at h0
-  exact (IsUnit.mk0 a this).map _
-
 theorem nontriv (L : LocE F E) : Nontrivial E := by
   by_contra h
   rw [not_nontrivial_iff_subsingleton] at h
@@ -107,9 +155,9 @@ theorem quad_finite {K : Type} [Field K] (a b c : K) (h : ¬ (a = 0 ∧ b = 0 �
     intro h0
     apply h
     refine ⟨?_, ?_, ?_⟩
-    · simpa using congrArg (fun p => Polynomial.coeff p 2) h0
-    · simpa using congrArg (fun p => Polynomial.coeff p 1) h0
-    · simpa using congrArg (fun p => Polynomial.coeff p 0) h0
+    · simpa using congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p 2) h0
+    · simpa using congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p 1) h0
+    · simpa using congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p 0) h0
   have := Polynomial.finite_setOf_isRoot hp
   simpa [Polynomial.IsRoot] using this
 
@@ -165,7 +213,7 @@ theorem exists_norm_one [CharZero F] (L : LocE F E) (t s : E) (ht : IsUnit t) (h
     linear_combination (algebraMap F E e * (algebraMap F E r ^ 2 - δ * δ) + 1) * he2
   have hT : L.cj u * s + u * L.cj s = algebraMap F E (e * ((r ^ 2 + D) * A - 2 * r * B)) := by
     rw [hcu, hu]
-    simp only [map_sub, map_add, map_mul, map_pow, map_ofNat, hA, hB, ← hδ2]
+    simp only [map_sub, map_add (f := _), map_mul, map_pow, map_ofNat, hA, hB, ← hδ2]
     ring
   have hcb : L.cj (algebraMap F E τ - L.cj u * s) = algebraMap F E τ - u * L.cj s := by
     simp [L.cj_cj]
@@ -173,7 +221,7 @@ theorem exists_norm_one [CharZero F] (L : LocE F E) (t s : E) (ht : IsUnit t) (h
   refine ⟨u, huu, ?_, ?_⟩
   · have : (algebraMap F E τ - L.cj u * s) * (algebraMap F E τ - u * L.cj s) =
         algebraMap F E (τ ^ 2 + N - τ * (e * ((r ^ 2 + D) * A - 2 * r * B))) := by
-      rw [map_sub, map_add, map_mul (algebraMap F E), ← hT, hN, map_pow]
+      rw [map_sub, map_add (f := _), map_mul (algebraMap F E), ← hT, hN, map_pow]
       linear_combination s * L.cj s * huu
     refine isUnit_of_mul_isUnit_left (y := algebraMap F E τ - u * L.cj s) ?_
     rw [this]

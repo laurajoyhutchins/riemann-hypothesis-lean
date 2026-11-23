@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -132,7 +179,7 @@ theorem rW_u (u : Matrix (Fin r) (Fin r) ℂ) (v : Fin (2 * r + k + 1) → ℂ) 
   funext j
   have := j.2
   have h : ∀ y, uEmb k r u (wI k r j) y = if wI k r j = y then 1 else 0 := fun y => by
-    unfold uEmb; rw [dif_neg (by simp only [wI]; omega), dif_neg (by simp only [wI]; omega)]
+    unfold uEmb; rw [dite_eq_right (by simp only [wI]; omega), dite_eq_right (by simp only [wI]; omega)]
   simp [rW, Matrix.mulVec, dotProduct, h]
 
 theorem rS_u (u : Matrix (Fin r) (Fin r) ℂ) (v : Fin (2 * r + k + 1) → ℂ) :
@@ -143,13 +190,13 @@ theorem rS_u (u : Matrix (Fin r) (Fin r) ℂ) (v : Fin (2 * r + k + 1) → ℂ) 
     Fin.ext (by have := b.2; simp only [esI]; omega)
   have h1 : ∀ b, uEmb k r u (esI k r a) (eI k r b) = 0 := fun b => by
     have := b.2
-    unfold uEmb; rw [dif_neg (by simp only [esI]; omega), dif_neg (by simp only [eI]; omega), if_neg (esI_ne_eI _ _)]
+    unfold uEmb; rw [dite_eq_right (by simp only [esI]; omega), dite_eq_right (by simp only [eI]; omega), if_neg (esI_ne_eI _ _)]
   have h2 : ∀ b, uEmb k r u (esI k r a) (wI k r b) = 0 := fun b => by
     have := b.2
-    unfold uEmb; rw [dif_neg (by simp only [esI]; omega), dif_neg (by simp only [wI]; omega), if_neg (esI_ne_wI _ _)]
+    unfold uEmb; rw [dite_eq_right (by simp only [esI]; omega), dite_eq_right (by simp only [wI]; omega), if_neg (esI_ne_wI _ _)]
   have h3 : ∀ b, uEmb k r u (esI k r a) (esI k r b) = star (u⁻¹ b a) := fun b => by
     have := b.2
-    unfold uEmb; rw [dif_neg (by simp only [esI]; omega), dif_pos (by simp only [esI]; omega)]
+    unfold uEmb; rw [dite_eq_right (by simp only [esI]; omega), dite_eq_left (by simp only [esI]; omega)]
     simp only [hb]
   simp [rS, Matrix.mulVec, dotProduct, sum3, h1, h2, h3]
 
@@ -211,8 +258,9 @@ theorem gramProj_comb {n : ℕ} (P : Submodule ℂ (EuclideanSpace ℂ (Fin n)))
   have : (Matrix.gram ℂ fun c => P.starProjection (WithLp.toLp 2 (∑ b, T b c • w b))) =
       Tᴴ * (Matrix.gram ℂ fun a => P.starProjection (WithLp.toLp 2 (w a))) * T := by
     ext a b
+
     simp only [Matrix.gram_apply, Matrix.mul_apply, Matrix.conjTranspose_apply, WithLp.toLp_sum, WithLp.toLp_smul,
-      map_sum, map_smul, sum_inner, inner_sum, inner_smul_left, inner_smul_right, Finset.sum_mul, Finset.mul_sum]
+    map_sum, map_smul, sum_inner, inner_sum, inner_smul_left, inner_smul_right, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
     simp; ring
   rw [this, Matrix.det_mul, Matrix.det_mul, Matrix.det_conjTranspose, norm_mul, norm_mul, norm_star,

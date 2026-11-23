@@ -1,11 +1,50 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.EmbeddingTypeJumps
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Formalism.SharpRestriction.LevelLetterCocycles.LargeLevelLemmas
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CommutingEndomorphismCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedConclusionOfUsedInputs
-import Formalism.GaloisCohomology.LocalTateDualityK
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.RationalDualityOfAllCoefficients
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.EmbeddingTypeJumps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Formalism.ConjugateSelfDual ReciprocityTheory.Gal NumberField IsDedekindDomain
 
 noncomputable section
@@ -43,12 +82,16 @@ theorem sub_one_le_two_mul_finrank (E : Type) [Field E] [NumberField E] (l : ℕ
     rw [← hprod]
     have := Associated.prod (primitiveRoots l (𝓞 L)) (fun _ => 1 - z) (fun μ => 1 - μ) hassoc
     rwa [Finset.prod_const, hz.card_primitiveRoots, Nat.totient_prime hl] at this
-  set n : 𝓞 E := RingOfIntegers.norm E (1 - z)
+  set n : 𝓞 E := NumberField.RingOfIntegers.norm E (1 - z)
   have hB : Associated (n ^ (l - 1)) ((l : 𝓞 E) ^ k) := by
-    have := hA.map (RingOfIntegers.norm E)
+    have := hA.map (NumberField.RingOfIntegers.norm E)
     rw [map_pow] at this
     have hl' : (l : 𝓞 L) = algebraMap (𝓞 E) (𝓞 L) (l : 𝓞 E) := (map_natCast _ _).symm
-    rwa [hl', RingOfIntegers.norm_algebraMap] at this
+    rw [hl'] at this
+    have hn : NumberField.RingOfIntegers.norm E (algebraMap (𝓞 E) (𝓞 L) (l : 𝓞 E)) = (l : 𝓞 E) ^ k := by
+      simpa only [hk] using (NumberField.RingOfIntegers.norm_algebraMap (L := L) E (l : 𝓞 E))
+    rw [hn] at this
+    exact this
   have hI : (Ideal.span {n}) ^ (l - 1) = (Ideal.span {(l : 𝓞 E)}) ^ k := by
     rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow]
     exact Ideal.span_singleton_eq_span_singleton.2 hB
@@ -63,6 +106,7 @@ theorem sub_one_le_two_mul_finrank (E : Type) [Field E] [NumberField E] (l : ℕ
   have hQ0 : Q ≠ ⊥ := by
     rintro rfl
     have h1 : (l : ℤ) ∈ Ideal.comap (algebraMap ℤ (𝓞 E)) (⊥ : Ideal (𝓞 E)) := by
+      change (l : ℤ) ∈ Ideal.under ℤ _
       rw [hQ]; exact Ideal.mem_span_singleton_self _
     rw [Ideal.mem_comap, Ideal.mem_bot, map_natCast] at h1
     exact hl.ne_zero (by exact_mod_cast h1)
@@ -70,6 +114,7 @@ theorem sub_one_le_two_mul_finrank (E : Type) [Field E] [NumberField E] (l : ℕ
   have hv : v ∈ placesOver E l := by
     show (l : 𝓞 E) ∈ Q
     have h1 : (l : ℤ) ∈ Ideal.comap (algebraMap ℤ (𝓞 E)) Q := by
+      change (l : ℤ) ∈ Ideal.under ℤ _
       rw [hQ]; exact Ideal.mem_span_singleton_self _
     rwa [Ideal.mem_comap, map_natCast] at h1
   have hram2 : Q.ramificationIdx ℤ = 2 := hram v hv
@@ -112,7 +157,5 @@ theorem tr_lt_finrank_cyclotomic : ∀ (D : D7), EmbeddingTypeJumps.Conclusion1 
     (fun v hv => ((h1 _ hmem).2 v hv).1)
   have h4 : 4 * D.R.t * D.R.r = 4 * (D.R.t * D.R.r) := by ring
   omega
-
-example : ∀ (D : D7), EmbeddingTypeJumps.Conclusion1 D → ∀ i : D.nd.Loc, (D.nd.l i = D.host.q ∨ D.nd.l i = D.host.d) → D.R.t * D.R.r < Module.finrank D.host.E (CyclotomicField (D.nd.l i) D.host.E) := tr_lt_finrank_cyclotomic
 
 end GlobalTheory.CycDegRam

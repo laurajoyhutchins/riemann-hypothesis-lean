@@ -1,20 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.CthFac
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CthFac
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Summable
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+
+@[expose] public section
 
 noncomputable section
 
 open scoped UpperHalfPlane
 
 namespace GlobalTheory.Sieg.Model
-
-theorem admissible_example_alt : admitted 5 ![1 / 3, 0] := by
-  refine ⟨by norm_num, by norm_num, ?_⟩
-  rintro ⟨⟨n, hn⟩, -⟩
-  simp at hn
-  have h : (3 * n : ℤ) = 5 := by
-    have : (3 * (n : ℚ)) = 5 := by rw [hn]; norm_num
-    exact_mod_cast this
-  omega
 
 theorem exponent_exact {c : ℕ} (h : Nat.Coprime c 6) :
     12 * ((c ^ 2 - 1) / 12) + 1 = c ^ 2 ∧ 2 * (((c : ℤ) - (c : ℤ) ^ 2) / 2) = (c : ℤ) - (c : ℤ) ^ 2 := by
@@ -136,24 +179,6 @@ theorem multipliable_and_sg_ne_zero {c : ℕ} {x : Fin 2 → ℚ} (h : admitted 
   have e2 : -ee (pt x τ) ≠ 0 := neg_ne_zero.2 (ee_ne_zero _)
   refine mul_ne_zero (div_ne_zero (mul_ne_zero (mul_ne_zero (pow_ne_zero _ e1) (zpow_ne_zero _ e2)) (pow_ne_zero _ h2)) h1) ?_
   exact mul_ne_zero (mul_ne_zero (pow_ne_zero _ hA) (pow_ne_zero _ hB)) (inv_ne_zero (mul_ne_zero hC hD))
-
-theorem sg_translate (c : ℕ) (x : Fin 2 → ℚ) (τ τ' : ℍ) (h : (τ' : ℂ) = τ + 1) :
-    sg c x τ' = sg c ![x 0, x 0 + x 1] τ := by
-  have e1 : ee 1 = 1 := by simp [ee]
-  unfold sg
-  congr 1
-  · rw [h, ee_add, e1, mul_one]
-  · congr 1; simp [pt, h]; ring
-
-theorem f_zero_two_eq (b : ℚ) : f0 2 ![0, b] = -1 / 12 := by
-  simp [f0, Polynomial.bernoulli_eval_zero, bernoulli_eq_bernoulli'_of_ne_one]
-  norm_num
-
-theorem f_zero_one_third (b : ℚ) : f0 1 ![4 / 3, b] = 1 / 6 := by
-  have : Int.fract (4 / 3 : ℚ) = 1 / 3 := by
-    rw [Int.fract_eq_iff]; exact ⟨by norm_num, by norm_num, 1, by norm_num⟩
-  simp [f0, this]
-  norm_num
 
 theorem summable_exp_abs {a : ℝ} (ha : 0 < a) : Summable fun n : ℤ => Real.exp (-(a * |(n : ℝ)|)) := by
   have hs : Summable fun n : ℕ => Real.exp (-(a * n)) := by

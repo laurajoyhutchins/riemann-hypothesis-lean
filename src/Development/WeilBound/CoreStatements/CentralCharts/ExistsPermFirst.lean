@@ -1,8 +1,64 @@
-import Development.WeilBound.CoreStatements.CentralCharts.PshAt0
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsSncAdaptedChartAtPointStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncAdaptedChartSectionFormStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFubiniStudyPositive
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SameOrbitRefl
+module
+
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SatakeMat
+public import Development.WeilBound.CoreStatements.CentralCharts.PshAt0
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsSncAdaptedChartAtPointStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFubiniStudyPositive
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SameOrbitRefl
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SncAdaptedChartSectionFormStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.OpenPartialHomeomorph.Constructions
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PairRelationOfScaledRatio
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,24 +91,7 @@ def NChart (A : FinHolAtlas n X) (U : Set X) (L : LocPot X) (s : X → X → ℂ
 
 theorem exists_perm_first (S : Finset (Fin n)) :
     ∃ σ : Equiv.Perm (Fin n), ∀ i, i ∈ S ↔ ((σ i : Fin n) : ℕ) < S.card := by
-  classical
-  have hle : S.card ≤ n := by simpa using S.card_le_univ
-  have hcard : Fintype.card {i : Fin n // i ∈ S} = Fintype.card {i : Fin n // (i : ℕ) < S.card} := by
-    rw [Fintype.card_coe, ← Fintype.card_congr (Fin.castLEquiv hle), Fintype.card_fin]
-  have hcard' : Fintype.card {i : Fin n // ¬ i ∈ S} = Fintype.card {i : Fin n // ¬ (i : ℕ) < S.card} := by
-    rw [Fintype.card_subtype_compl, Fintype.card_subtype_compl, hcard]
-  let e := Fintype.equivOfCardEq hcard
-  let f := Fintype.equivOfCardEq hcard'
-  refine ⟨Equiv.subtypeCongr e f, fun i => ?_⟩
-  by_cases hi : i ∈ S
-  · have h1 : Equiv.subtypeCongr e f i = e ⟨i, hi⟩ := by
-      simp [Equiv.subtypeCongr, Equiv.sumCompl_symm_apply_of_pos hi]
-    rw [h1]
-    exact ⟨fun _ => (e ⟨i, hi⟩).2, fun _ => hi⟩
-  · have h1 : Equiv.subtypeCongr e f i = f ⟨i, hi⟩ := by
-      simp [Equiv.subtypeCongr, Equiv.sumCompl_symm_apply_of_neg hi]
-    rw [h1]
-    exact ⟨fun h => absurd h hi, fun h => absurd h (f ⟨i, hi⟩).2⟩
+  apply Formalism.UG.P.satake_exists_perm <;> assumption
 
 def scalePerm (δ : ℝ) (hδ : 0 < δ) (σ : Equiv.Perm (Fin n)) : (Fin n → ℂ) ≃L[ℂ] (Fin n → ℂ) :=
   LinearEquiv.toContinuousLinearEquiv

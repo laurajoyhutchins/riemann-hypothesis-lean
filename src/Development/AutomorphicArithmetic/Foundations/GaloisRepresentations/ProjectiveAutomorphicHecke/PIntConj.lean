@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.CentralEig2
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsConjOfNotMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.CentralEig2
+public import Development.AbelianVarietyTheory.Definitions.Foundations.GLintEqKOAndPrincEqKOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductOfLocalLevelsUnitaryIsOpenIsCompactIsLeve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.DefU GlobalTheory.PRep Formalism.L2.Host GlobalTheory.HeckeGal UpperTheory.Gal.CertificateRingHomMap
 open scoped Classical
 
@@ -25,7 +68,20 @@ private theorem val_sim {E : Type} [Field E] [NumberField E] [IsCMField E] {n : 
 theorem UpperTheory.Gal.CertificateRingHomMap.pIntConj_of :
     UpperTheory.Gal.CertificateRingHomMap.IntConj := by
   intro E _ _ _ n k w hs ha
-  rw [← GlobalTheory.CompanionTheory.LFixDPf.mem_KGL_map_conj w]
+  have hmap : ∀ g : Matrix.GeneralLinearGroup (Fin n) ((cj w).adicCompletion E),
+      Matrix.GeneralLinearGroup.map (conjLoc (GlobalTheory.SplitPts.conjE E) w) g ∈ GlobalTheory.LFun.KGL w n ↔
+        g ∈ GlobalTheory.LFun.KGL (cj w) n := by
+    intro g
+    have hv : ∀ x : (cj w).adicCompletion E,
+        conjLoc (GlobalTheory.SplitPts.conjE E) w x ∈ w.adicCompletionIntegers E ↔
+          x ∈ (cj w).adicCompletionIntegers E := fun x => by
+      rw [HeightOneSpectrum.mem_adicCompletionIntegers, HeightOneSpectrum.mem_adicCompletionIntegers,
+        (conjLoc_spec (GlobalTheory.SplitPts.conjE E) w).2.2 x]
+    rw [GlobalTheory.AdelicU.mem_GLint_iff, GlobalTheory.AdelicU.mem_GLint_iff]
+    refine and_congr (forall₂_congr fun a b => hv _) (forall₂_congr fun a b => ?_)
+    rw [← map_inv]
+    exact hv _
+  rw [← hmap]
   set s := pLoc E w (GroundTheory.Global.AdeleBaseChange.finiteAdeleMap ℚ E ((sim k : AfQˣ) : AfQ)) with hsdef
   have hv : Valued.v s = 1 := val_sim k hs w
   have hs0 : s ≠ 0 := by

@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.QuadraticAlgebra.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.QuadraticAlgebra.IsQuadraticExtension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,8 +91,6 @@ variable (m : ℕ) [Fact (∀ r : ℚ, r ^ 2 ≠ -(m : ℚ) + 1 * r)]
 
 instance : NumberField (Kq m) := {}
 
-example : Fintype (ClassGroup (𝓞 (Kq m))) := inferInstance
-
 theorem isIntegral_omega : IsIntegral ℤ (ω : Kq m) := by
   refine ⟨Polynomial.X ^ 2 + (Polynomial.C (m : ℤ) - Polynomial.X), Polynomial.monic_X_pow_add ?_, ?_⟩
   · exact lt_of_le_of_lt (Polynomial.degree_le_of_natDegree_le (by compute_degree!)) (by norm_num)
@@ -61,16 +112,16 @@ theorem repr_int (d : ℕ) (hd : Squarefree d) (hdm : d + 1 = 4 * m) (z : Kq m)
     have e : (⟨a, b⟩ : Kq m) + star ⟨a, b⟩ = algebraMap ℚ (Kq m) (2 * a + b) := by
       ext <;> simp [QuadraticAlgebra.star_mk] <;> ring_nf
     rw [e] at h
-    exact (isIntegral_algebraMap_iff hinj).1 h
+    exact (isIntegral_algebraMap_iff ).1 h
   have hn : IsIntegral ℤ (a ^ 2 + a * b + m * b ^ 2) := by
     have h := hz.mul hstar
     have e : (⟨a, b⟩ : Kq m) * star ⟨a, b⟩ = algebraMap ℚ (Kq m) (a ^ 2 + a * b + m * b ^ 2) := by
       rw [QuadraticAlgebra.mul_star]
-      simp only [← map_mul, ← map_add, ← map_sub]
+      simp only [← map_mul, ← map_add (f := _), ← map_sub]
       congr 1
       ring
     rw [e] at h
-    exact (isIntegral_algebraMap_iff hinj).1 h
+    exact (isIntegral_algebraMap_iff ).1 h
   obtain ⟨T, hT⟩ := rat_int_of_integral _ ht
   obtain ⟨N, hN⟩ := rat_int_of_integral _ hn
   have hd' : (d : ℚ) = 4 * m - 1 := by

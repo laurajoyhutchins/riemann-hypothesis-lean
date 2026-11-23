@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BrgStdR
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReadsDeco
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TrueColumnChoicesHeckeCharReferenceEqOne
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeTie
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LBidetLemmas
+public import Formalism.LocalToGlobal.Columns.CoefficientsModP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+import Formalism.LocalToGlobal.IndefiniteReal.RecTie
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -32,6 +78,7 @@ theorem rowAct_smul_of_weight {R : Type} [CommRing R] {ν : Fin n → ℕ} (c : 
   classical
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [← degree_of_colWeight m (hf (mem_support_iff.mp hm))]
@@ -46,9 +93,9 @@ theorem rowAct_smul_of_weight {R : Type} [CommRing R] {ν : Fin n → ℕ} (c : 
 def totDeg (lam : ι → DomWeight n) : ℕ := ∑ τ, ∑ j, (lam τ).natW j
 
 theorem blockAct_smul_of_mem (lam : ι → DomWeight n) (a : K) (M : ι → Matrix (Fin n) (Fin n) K)
-    {y : Formalism.L2.DIV.Pol K ι n} (hy : y ∈ VV K lam) :
+    {y : Formalism.L2.DIV.Pol K ι n} (hy : y ∈ Formalism.L2.DIV.VV K lam) :
     Formalism.GradedWeylDivisibility.blockAct K (fun τ => a • M τ) y = a ^ totDeg lam • Formalism.GradedWeylDivisibility.blockAct K M y := by
-  unfold VV Formalism.GradedWeylDivisibility.tensorLat at hy
+  unfold Formalism.L2.DIV.VV Formalism.GradedWeylDivisibility.tensorLat at hy
   induction hy using Submodule.span_induction with
   | mem P hP =>
     obtain ⟨F, hF, rfl⟩ := hP
@@ -64,14 +111,14 @@ theorem blockAct_smul_of_mem (lam : ι → DomWeight n) (a : K) (M : ι → Matr
       smul_eq_C_mul]
     rfl
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, map_add, hx, hy, smul_add]
+  | add x y _ _ hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, smul_add]
   | smul c x _ hx => rw [map_smul, map_smul, hx, smul_comm]
 
 variable [StarRing K]
 
 def negSign (lam : ι → DomWeight n) : K := gramTw lam (fun _ => (-1 : Matrix (Fin n) (Fin n) K)) * (-1) ^ totDeg lam
 
-theorem pairK_neg (lam : ι → DomWeight n) (G : ι → Matrix (Fin n) (Fin n) K) (x y : VV K lam) :
+theorem pairK_neg (lam : ι → DomWeight n) (G : ι → Matrix (Fin n) (Fin n) K) (x y : Formalism.L2.DIV.VV K lam) :
     pairK lam (fun τ => -G τ) x y = negSign lam * pairK lam G x y := by
   have hy := blockAct_smul_of_mem lam (-1 : K) (fun τ => (G τ)ᵀ) y.2
   have hT : (fun τ => (-G τ)ᵀ) = fun τ => (-1 : K) • (G τ)ᵀ := by
@@ -114,7 +161,7 @@ open scoped ComplexOrder InnerProductSpace
 
 theorem pairV_neg_one_eq {E K : Type} [Field E] [Field K] [StarRing K] {ι : Type} [Fintype ι] {n : ℕ}
     (emb : ι → E →+* K) (lam : ι → DomWeight n) (φ : K →+* ℂ) {W : Type} [NormedAddCommGroup W]
-    [InnerProductSpace ℂ W] (c0 : VV K lam →ₛₗ[φ] W)
+    [InnerProductSpace ℂ W] (c0 : Formalism.L2.DIV.VV K lam →ₛₗ[φ] W)
     (h : ∀ x y, inner ℂ (c0 x) (c0 y) = φ (pairV emb lam (-1) x y)) :
     ∀ x y, pairV emb lam (-1) x y = pairV emb lam 1 x y := by
   have hG : gramK emb (-1 : Matrix (Fin n) (Fin n) E) = fun τ => -(gramK emb 1 τ) := by
@@ -125,7 +172,7 @@ theorem pairV_neg_one_eq {E K : Type} [Field E] [Field K] [StarRing K] {ι : Typ
     intro x y
     unfold pairV
     rw [hG, pairK_neg]
-  by_cases hnt : Nontrivial (VV K lam)
+  by_cases hnt : Nontrivial (Formalism.L2.DIV.VV K lam)
   · rcases mul_self_eq_one_iff.1 (negSign_mul_self (K := K) lam) with hc | hc
     · intro x y
       rw [hneg, hc, one_mul]
@@ -156,7 +203,7 @@ theorem pairV_neg_one_eq {E K : Type} [Field E] [Field K] [StarRing K] {ι : Typ
 end GlobalTheory.RowsSign
 
 open GlobalTheory.RowsSign in
-theorem GlobalTheory.RowsSign.pairV_gramR_eq : ∀ (X : Stages) (px : PreX X.B.toPre) (I : Col2.ColIn X.B px), I.Ok → ∀ (cX : CoefA X.toD7.sp.X') (gramR : Matrix (Fin X.toD7.sp.X'.rank) (Fin X.toD7.sp.X'.rank) X.toD7.host.E) (c0R : VV X.toD7.what₂.LL (fun τ => Bridge.lamRdef (Ptw X.toD7) τ) →ₛₗ[X.toD7.what₂.embLL] cX.W), cX.Is → (gramR = X.toD7.sp.X'.gram ∨ gramR = -X.toD7.sp.X'.gram) → Bridge.CoefMapTie X.toD7.sp.X' cX.coef c0R (rhoV (labLL X.toD7) _) → (∀ x y, inner ℂ (c0R x) (c0R y) = X.toD7.what₂.embLL (pairV (labLL X.toD7) _ gramR x y)) → ∀ x y, pairV (labLL X.toD7) (fun τ => Bridge.lamRdef (Ptw X.toD7) τ) gramR x y = pairV (labLL X.toD7) (fun τ => Bridge.lamRdef (Ptw X.toD7) τ) X.toD7.sp.X'.gram x y := by
+theorem GlobalTheory.RowsSign.pairV_gramR_eq : ∀ (X : Stages) (px : PreX X.B.toPre) (I : Col2.ColIn X.B px), I.Ok → ∀ (cX : CoefA X.toD7.sp.X') (gramR : Matrix (Fin X.toD7.sp.X'.rank) (Fin X.toD7.sp.X'.rank) X.toD7.host.E) (c0R : Formalism.L2.DIV.VV X.toD7.what₂.LL (fun τ => Bridge.lamRdef (Ptw X.toD7) τ) →ₛₗ[X.toD7.what₂.embLL] cX.W), cX.Is → (gramR = X.toD7.sp.X'.gram ∨ gramR = -X.toD7.sp.X'.gram) → Bridge.CoefMapTie X.toD7.sp.X' cX.coef c0R (rhoV (labLL X.toD7) _) → (∀ x y, inner ℂ (c0R x) (c0R y) = X.toD7.what₂.embLL (pairV (labLL X.toD7) _ gramR x y)) → ∀ x y, pairV (labLL X.toD7) (fun τ => Bridge.lamRdef (Ptw X.toD7) τ) gramR x y = pairV (labLL X.toD7) (fun τ => Bridge.lamRdef (Ptw X.toD7) τ) X.toD7.sp.X'.gram x y := by
   intro X px I hI cX gramR c0R hcX hg htie hinner x y
   have hJ : X.toD7.sp.X'.gram = 1 := by
     obtain ⟨hs, -, h2, -⟩ := hI.spaces

@@ -1,6 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+public import Mathlib.AlgebraicGeometry.Morphisms.Separated
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi
@@ -51,29 +95,6 @@ theorem corr_of_generic_of_isSeparated
 namespace DoubledPoint
 
 variable {X : Scheme.{0}} (U : X.Opens)
-
-instance {i j : WalkingSpan} (f : i ⟶ j) : IsOpenImmersion ((span U.ι U.ι).map f) := by
-  rcases f with _ | (_ | _) <;> (dsimp; infer_instance)
-
-theorem inl_ne_inr (x : X) (hx : x ∉ U) : pushout.inl U.ι U.ι ≠ pushout.inr U.ι U.ι := by
-  intro e
-  have h : colimit.ι (span U.ι U.ι) WalkingSpan.left x = colimit.ι (span U.ι U.ι) WalkingSpan.right x :=
-    congrArg (fun q : X ⟶ pushout U.ι U.ι => q x) e
-  obtain ⟨k, fi, fj, y, h₁, -⟩ := (Scheme.IsLocallyDirected.ι_eq_ι_iff _).1 h
-  rcases fi with _ | _
-  · exact nomatch (show WidePushoutShape.Hom (some WalkingPair.left) (some WalkingPair.right) from fj)
-  · exact hx (by
-      have : U.ι y = x := h₁
-      rw [← this]
-      exact y.2)
-
-abbrev signLB (Y : Scheme.{0}) : LB Y where
-  ι := Bool
-  U := fun _ => ⊤
-  g := fun i j => if i = j then 1 else -1
-
-def signGen {Y T : Scheme.{0}} (f : T ⟶ Y) : LB.Gen ((signLB Y).pull f) where
-  s := fun j => cond (j PUnit.unit) 1 (-1)
 
 end DoubledPoint
 

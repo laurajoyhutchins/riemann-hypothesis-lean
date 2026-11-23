@@ -1,12 +1,65 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.CapOComp
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalisationLadders.CriterionTruncation
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiltrationCriticalComparisonMapStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRespectsFiltrationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedCohomologyOfFrameStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRestrictionCocycleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormCoboundaryRelationStatement
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalisationLadders.CriterionTruncation
+public import Mathlib.Algebra.Exact.Basic
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiltrationCriticalComparisonMapStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormCoboundaryRelationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRespectsFiltrationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRestrictionCocycleStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedCohomologyOfFrameStatement
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.FaceMapCompSuccAboveCastSucc
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TensorProduct CrystallineSemistableComparison CrystallineSemistableComparison.Pb
 
@@ -30,6 +83,7 @@ def fs {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) {d : ℕ} (E : Frame Φ d) (
 theorem fs_val {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) {d : ℕ} (E : Frame Φ d) (σ : ∀ T : C, E.D ⟶ T) {j q : ℕ} {r : ℤ}
     (hr : r = j + q) (x : Idx j d → Φ.A.obj E.D) (hx : ∀ I, x I ∈ (Fil q).S E.D) (s : ComposableArrows C j) :
     (show sqM _ _ _ from fs hF E σ hr x hx s).1 = Ideal.Quotient.mk _ (∑ I : Idx j d, E.form σ I.1 (x I) s) := by
+
   rw [map_sum]
   unfold fs
   rw [Finset.sum_apply]
@@ -52,13 +106,9 @@ variable {d : ℕ} (Q : Poly Φ) (E : Frame Φ (d + 1)) (σ : ∀ T : C, E.D ⟶
 
 abbrev Fil1 : ℤ → IdF (Cut.Φ1 E).A := fun r => (Fil r).res (Cut.U E)
 
-example (r : ℤ) : gr (Fil1 E Fil) r = Cut.U E ⋙ gr Fil r := rfl
-
 abbrev G (r : ℤ) : C ⥤ ModuleCat.{0} R := Cut.Pσ Q σ ⋙ Cut.U E ⋙ gr Fil r
 
 def jW (r : ℤ) : gr Fil r ⟶ G Q E σ Fil r := Functor.whiskerRight (Cut.jσ Q σ) (gr Fil r)
-
-theorem jW_eq (r : ℤ) : CH.Mor.ofNatTrans (jW Q E σ Fil r) = CH.Mor.ofNatTrans (Functor.whiskerRight (Cut.jσ Q σ) (gr Fil r)) := rfl
 
 theorem ses (hF : IsFil Φ Fil) (r : ℤ) (h0 : Q.Crit Fil (r - 1)) (h1 : Q.Crit Fil r) (h2 : Q.Crit Fil (r + 1)) :
     ∃ β : G Q E σ Fil r ⟶ G Q E σ Fil (r - 1),
@@ -100,6 +150,7 @@ theorem pull_cfs (hF : IsFil Φ Fil) (hc : E.GrConst Fil) {j q : ℕ} {r : ℤ} 
     (hx : ∀ I, x I ∈ (Fil q).S E.D) :
     (Pm Q E σ Fil r).pullC j (cfs E hF hr x hx) = (Jm Q E σ Fil r).pullC j (fsS E σ hF hr x hx) := by
   unfold cfs fsS fs
+
   rw [map_sum, map_sum]
   refine Finset.sum_congr rfl fun I _ => ?_
   exact GlobalTheory.T.frame_form_restriction_cocycle Q hF E σ hc j q r hr I.1 (x I) (hx I) _ _ (fun s => rfl) (fun s => rfl)
@@ -305,6 +356,7 @@ theorem d_fs {d : ℕ} (Q : Poly Φ) {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil
     (hc : E.GrConst Fil) (r : ℤ) (hQ : ∀ r' ≤ r + 1, Q.Crit Fil r') {j q : ℕ} (hr : r = j + q) (x : Idx j d → Φ.A.obj E.D)
     (hx : ∀ I, x I ∈ (Fil q).S E.D) : CH.d (gr Fil r) j (fs hF E σ hr x hx) = 0 := by
   unfold fs
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun I _ => cyc d Q hF E σ hc r hQ hr I _ _
 
@@ -318,12 +370,14 @@ theorem d_cfs (hF : IsFil Φ Fil) (hc : E.GrConst Fil) (r : ℤ) (hQ : ∀ r' �
 theorem d_fsS (hF : IsFil Φ Fil) (hc : E.GrConst Fil) (r : ℤ) (hQ : ∀ r' ≤ r + 1, Q.Crit Fil r') {j q : ℕ} (hr : r = j + q)
     (x : Idx j d → Φ.A.obj E.D) (hx : ∀ I, x I ∈ (Fil q).S E.D) : CH.d _ j (fsS E σ hF hr x hx) = 0 := by
   unfold fsS
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun I _ => cyc (d + 1) Q hF E σ hc r hQ hr (idxS I) _ _
 
 theorem d_fsZ (hF : IsFil Φ Fil) (hc : E.GrConst Fil) (r : ℤ) (hQ : ∀ r' ≤ r + 1, Q.Crit Fil r') {j q : ℕ} (hr : r = (j + 1 : ℕ) + q)
     (x : Idx j d → Φ.A.obj E.D) (hx : ∀ I, x I ∈ (Fil q).S E.D) : CH.d _ (j + 1) (fsZ E σ hF hr x hx) = 0 := by
   unfold fsZ
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun I _ => cyc (d + 1) Q hF E σ hc r hQ hr (idxZ I) _ _
 
@@ -345,6 +399,7 @@ theorem d_ys (hF : IsFil Φ Fil) (hc : E.GrConst Fil) {j q : ℕ} {r : ℤ} (hr 
     (hx : ∀ I, x I ∈ (Fil q).S E.D) :
     CH.d _ j (ys Q E σ hF hr x hx) = (Jm Q E σ Fil r).pullC (j + 1) (-fsZ E σ hF hr x hx) := by
   unfold ys fsZ
+
   rw [map_sum, map_neg, map_sum, ← Finset.sum_neg_distrib]
   exact Finset.sum_congr rfl fun I _ => d_yc Q E σ hF hc hr I.1 (x I) (hx I)
 
@@ -357,6 +412,7 @@ theorem beta_ys (hF : IsFil Φ Fil) {r : ℤ} (β : G Q E σ Fil r ⟶ G Q E σ 
     {j q : ℕ} (hr : r = (j + 1 : ℕ) + q) (hr' : r - 1 = j + q) (x : Idx j d → Φ.A.obj E.D) (hx : ∀ I, x I ∈ (Fil q).S E.D) :
     (CH.Mor.ofNatTrans β).pullC j (ys Q E σ hF hr x hx) = (Jm Q E σ Fil (r - 1)).pullC j (fsS E σ hF hr' x hx) := by
   unfold ys fsS
+
   rw [map_sum, map_sum]
   exact Finset.sum_congr rfl fun I _ => beta_yc Q E σ hF β hβ hr hr' _ _ _
 
@@ -508,7 +564,7 @@ theorem step {d : ℕ} (IH : St d) : St (d + 1) := by
       obtain ⟨x', rfl, rfl⟩ := glue xs xz
       have hx' : ∀ I, x' I ∈ (Fil q).S E.D := idx_all (P := fun I => x' I ∈ (Fil q).S E.D) hxs hxz
       refine ⟨x', hx', (rep_iff hF E σ hr x' hx' c).2 ⟨d_fs Q hF E σ hc r hQ hr x' hx', ?_⟩⟩
-      exact hc'.trans ((CrystallineSemistableComparison.CechClassBoundaries.cls_add _ _ _ _ (by rw [map_add, d_fsS Q E σ hF hc r hQ hr _ hxs, d_fsZ Q E σ hF hc r hQ hr _ hxz, add_zero])).symm.trans
+      exact hc'.trans ((CrystallineSemistableComparison.CechClassBoundaries.cls_add _ _ _ _ (by rw [map_add (f := _), d_fsS Q E σ hF hc r hQ hr _ hxs, d_fsZ Q E σ hF hc r hQ hr _ hxz, add_zero])).symm.trans
         (cls_congr (fs_split E σ hF hr x' hx').symm _ _))
   · obtain ⟨h, h0⟩ := (rep_iff hF E σ hr x hx 0).1 hrep
     cases j with
@@ -524,7 +580,7 @@ theorem step {d : ℕ} (IH : St d) : St (d + 1) := by
       have hxz : ∀ I, (x ∘ idxZ) I ∈ (Fil q).S E.D := fun I => hx _
       have e0 : (CH.cx _).cls _ (d_fsS Q E σ hF hc r hQ hr (x ∘ idxS) hxs) +
           (CH.cx _).cls _ (d_fsZ Q E σ hF hc r hQ hr (x ∘ idxZ) hxz) = 0 :=
-        ((CrystallineSemistableComparison.CechClassBoundaries.cls_add _ _ _ _ (by rw [map_add, d_fsS Q E σ hF hc r hQ hr _ hxs, d_fsZ Q E σ hF hc r hQ hr _ hxz, add_zero])).symm.trans
+        ((CrystallineSemistableComparison.CechClassBoundaries.cls_add _ _ _ _ (by rw [map_add (f := _), d_fsS Q E σ hF hc r hQ hr _ hxs, d_fsZ Q E σ hF hc r hQ hr _ hxz, add_zero])).symm.trans
           (cls_congr (fs_split E σ hF hr x hx).symm _ _)).trans h0.symm
       have hd := D hr hn (x ∘ idxZ) hxz
       have e1' : (CH.cx _).cls _ (d_fsS Q E σ hF hc r hQ hr (x ∘ idxS) hxs) =

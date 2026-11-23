@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelIndexNeZeroOfCover
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ClassSumSmallerLevel
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ClassSumSmallerLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RelIndexNeZeroOfCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open GlobalTheory.ClassRefine GlobalTheory.ClassPet
 
 noncomputable section
@@ -63,7 +108,7 @@ theorem Cover.of_relIndex {Γ H H' : Subgroup G} (h : Cover Γ H) (hne : H'.relI
 theorem dsum_eq {Γ H : Subgroup G} {T : Finset G} (hT : Reps Γ H T) {Φ : G → ℂ} (hl : ∀ (γ : Γ) g, Φ ((γ : G) * g) = Φ g)
     (hr : ∀ κ ∈ H, ∀ g, Φ (g * κ) = Φ g) : dsum Γ H Φ = wsum Γ H T Φ := by
   have h : ∃ T, Reps Γ H T := ⟨T, hT⟩
-  rw [dsum, dif_pos h, wsum, sum_classReps_refine le_rfl hT h.choose_spec Φ hl hr (F := {1}) (by simp [H.one_mem])
+  rw [dsum, dite_eq_left h, wsum, sum_classReps_refine le_rfl hT h.choose_spec Φ hl hr (F := {1}) (by simp [H.one_mem])
     (fun κ hκ => ⟨1, by simpa using hκ, fun u hu => by simpa using hu.1⟩)]
   simp [wsum]
 
@@ -72,7 +117,7 @@ theorem dsum_refine {Γ H H' : Subgroup G} (hle : H' ≤ H) (hc : Cover Γ H') {
     (hFu : ∀ κ ∈ H, ∃! u, u ∈ F ∧ u⁻¹ * κ ∈ H') : dsum Γ H' Φ = dsum Γ H fun g => ∑ u ∈ F, Φ (g * u) := by
   have h := (hc.mono hle).reps
   have h' := hc.reps
-  rw [dsum, dif_pos h', dsum, dif_pos h, wsum, wsum, sum_classReps_refine hle h.choose_spec h'.choose_spec Φ hl hr hF hFu]
+  rw [dsum, dite_eq_left h', dsum, dite_eq_left h, wsum, wsum, sum_classReps_refine hle h.choose_spec h'.choose_spec Φ hl hr hF hFu]
 
 theorem dsum_mul (Γ H : Subgroup G) (c : ℂ) (Φ : G → ℂ) : dsum Γ H (fun g => c * Φ g) = c * dsum Γ H Φ := by
   unfold dsum wsum

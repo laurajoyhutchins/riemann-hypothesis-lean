@@ -1,5 +1,57 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.MaIntEmpty
+module
+
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.A
 
@@ -161,7 +213,9 @@ theorem mdisc_cons_eq_sum' {n : ℕ} (A : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ
           Finset.sum_eq_single c (by intro b _ hb; simp [hb]) (by simp)]
         simp
       simp_rw [hL]
+
       rw [hA, map_sum]
+
       simp_rw [map_sum, map_smul, smul_eq_mul, Finset.mul_sum]
       refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => by ring
     · simp [polCoef_eq_zero r hs]
@@ -278,11 +332,6 @@ def PartsStatement : Prop :=
       maInt (Fin.cons w φ) v U = - gradInt φ v w U ∧
       maInt (Fin.cons v φ) w U = maInt (Fin.cons w φ) v U
 
-def MassZeroStatement : Prop :=
-  ∀ (n : ℕ) (φ : Fin n → (Fin (n + 1) → ℂ) → ℝ) (v : (Fin (n + 1) → ℂ) → ℝ)
-    (U : Set (Fin (n + 1) → ℂ)), PartsHyp φ v (fun _ => 1) U →
-      (∫ z in U, maDens (Fin.cons v φ) z) = 0
-
 def GradDensSymmStatement : Prop :=
   ∀ (n : ℕ) (φ : Fin n → (Fin (n + 1) → ℂ) → ℝ) (v w : (Fin (n + 1) → ℂ) → ℝ)
     (U : Set (Fin (n + 1) → ℂ)), IsOpen U → (∀ i, ContDiffOn ℝ 2 (φ i) U) →
@@ -297,13 +346,6 @@ def GradDensNonnegStatement : Prop :=
 def HessCDzStatement : Prop :=
   ∀ (D : ℕ) (v : (Fin D → ℂ) → ℝ) (U : Set (Fin D → ℂ)), IsOpen U → ContDiffOn ℝ 2 v U →
     ∀ z ∈ U, ∀ j k, hessC v z j k = dz j (dzb k (cplx v)) z
-
-def DoubleDivStatement : Prop :=
-  ∀ (n : ℕ) (φ : Fin n → (Fin (n + 1) → ℂ) → ℝ) (v : (Fin (n + 1) → ℂ) → ℝ)
-    (U : Set (Fin (n + 1) → ℂ)), IsOpen U → ContDiffOn ℝ 2 v U →
-      (∀ i, ContDiffOn ℝ 4 (φ i) U) → ∀ z ∈ U,
-        ∑ j, ∑ k, dz j (dzb k (fun y => cplx v y * hessCof φ y j k)) z =
-          ∑ j, ∑ k, hessCof φ z j k * dz j (dzb k (cplx v)) z
 
 def GradDensCauchySchwarzStatement : Prop :=
   ∀ (n : ℕ) (φ : Fin n → (Fin (n + 1) → ℂ) → ℝ) (v w : (Fin (n + 1) → ℂ) → ℝ)
@@ -334,15 +376,6 @@ def GradDensLeibnizStatement : Prop :=
     (z : Fin (n + 1) → ℂ), DifferentiableAt ℝ f z → DifferentiableAt ℝ g z →
       gradDens φ (fun y => f y * g y) w z = f z * gradDens φ g w z + g z * gradDens φ f w z ∧
       gradDens φ g (fun y => g y ^ 2 / 2) z = g z * gradDens φ g g z
-
-def PartsHypInhabitStatement : Prop :=
-  ∀ (n : ℕ) (U : Set (Fin (n + 1) → ℂ)), IsOpen U → ∀ z ∈ U,
-    ∀ φ : Fin n → (Fin (n + 1) → ℂ) → ℝ, (∀ i, ContDiffOn ℝ 3 (φ i) U) →
-      ∃ v : (Fin (n + 1) → ℂ) → ℝ, PartsHyp φ v v U ∧ v z = 1
-
-def PartsInhabitStatement : Prop :=
-  ∃ v : (Fin 1 → ℂ) → ℝ,
-    PartsHyp (n := 0) Fin.elim0 v v Set.univ ∧ 0 < gradInt (n := 0) Fin.elim0 v v Set.univ
 
 end Statements
 

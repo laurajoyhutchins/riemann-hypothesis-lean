@@ -1,13 +1,65 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+public import Mathlib.RingTheory.Norm.Defs
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsPrincipalIdealRingOfHenselian
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OrthonormalBasisAndOneOrbit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelVolMul
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelativeLatticeVolumeOfDetValuationStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OrthonormalBasisAndOneOrbit
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelVolMul
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RelativeLatticeVolumeOfDetValuationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
@@ -28,7 +80,7 @@ theorem exists_int_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F
     intro a b h
     simp only [Algebra.smul_def, mul_one] at h
     have h' := congrArg L.cj h
-    simp only [map_add, map_mul, AlgEquiv.commutes, map_zero] at h'
+    simp only [map_add (f := _), map_mul, AlgEquiv.commutes, map_zero] at h'
     have hb : algebraMap F E b = 0 := hu.mul_left_eq_zero.1 (by linear_combination h - h')
     have ha : algebraMap F E a = 0 := by rw [hb] at h; simpa using h
     exact ⟨hinj (by simpa using ha), hinj (by simpa using hb)⟩
@@ -50,7 +102,7 @@ theorem exists_int_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F
     simp
   refine ⟨c, fun x => ⟨fun h => ?_, fun h => ?_⟩, fun x => ?_⟩
   · have h1 := congrArg L.cj (hx x)
-    simp only [map_add, map_mul, AlgEquiv.commutes] at h1
+    simp only [map_add (f := _), map_mul, AlgEquiv.commutes] at h1
     have hb : algebraMap F E (c.repr x 1) ∈ L.O := by
       have : algebraMap F E (c.repr x 1) = (x - L.cj x) * e := by
         linear_combination (-e) * hx x + e * h1 - algebraMap F E (c.repr x 1) * hωe
@@ -73,10 +125,10 @@ theorem exists_int_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F
     obtain ⟨a, b, rfl⟩ : ∃ a b : F, x = algebraMap F E a + algebraMap F E b * ω := ⟨_, _, hx x⟩
     have h2 : (algebraMap F E a + algebraMap F E b * ω) * ω
         = algebraMap F E (-(b * N)) + algebraMap F E (a + b * t) * ω := by
-      simp only [map_add, map_mul, map_neg, ht, hN]; ring
+      simp only [map_add (f := _), map_mul, map_neg, ht, hN]; ring
     rw [Algebra.norm_eq_matrix_det c, Matrix.det_fin_two]
     simp only [Algebra.leftMulMatrix_eq_repr_mul, hc0, hc1, mul_one, h2, (hr _ _).1, (hr _ _).2]
-    simp only [map_add, map_mul, map_neg, map_sub, ht, hN, AlgEquiv.commutes]
+    simp only [map_add (f := _), map_mul, map_neg, map_sub, ht, hN, AlgEquiv.commutes]
     ring
 
 theorem exists_lat_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F E) {n : ℕ}
@@ -93,6 +145,7 @@ theorem exists_lat_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F
         map_smul' := fun c x => by simp [hf, Finset.mul_sum, mul_assoc] }
     have hfb : ∀ i, f (b i) = if i = j then 1 else 0 := fun i => hb i j
     have := congrArg f hg
+
     simpa [map_sum, hfb] using this
   have hsp : ⊤ ≤ Submodule.span E (Set.range b) := by
     rw [← hΛ.1.2, Submodule.span_span_of_tower]
@@ -181,7 +234,7 @@ theorem det_isom (L : LocE F E) {n : ℕ} (Hm : Matrix (Fin n) (Fin n) E) (hH : 
   rw [mul_one]
   conv_rhs => rw [← h3]
   simp only [RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_ringEquiv,
-    AlgEquiv.toRingEquiv_eq_coe]
+    AlgEquiv.coe_toRingEquiv]
   ring
 
 end GlobalTheory.HL.TupleJac

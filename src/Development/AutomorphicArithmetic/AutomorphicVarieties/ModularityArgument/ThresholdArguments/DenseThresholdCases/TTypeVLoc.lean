@@ -1,9 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.DiscreteSeriesCoefficientsCuspidal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.SubalgebraIntegrality.TypeVLoc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
+module
 
-set_option maxHeartbeats 800000
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ThresholdArguments.DenseThresholdCases.LitAut
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.Distinct
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.AbsCentral
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasSupportOfIsSubquotientProdIrr
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSubquotientUnramPrinSeriesOfHasSupport
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LanglandsClassificationSupercuspidalSupportMulti
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SupercuspidalSupportUniqueGL
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NoMonodromyOfMemWeilDeligneListSum
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotMono0LpCharLpSp
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnlinkedLengthOneSegmentsFirstTermsNotNuTwist
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParIndJacPlacing
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PrincipalSeriesSubquotientOfCharacters
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsGenericIffIsGenericFor
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalDoubleCosets.OfSupportHolds
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalPairIrreducibleUnlinked
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.GenericUnitaryDualGLOfTwo
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NontrivialOfIsSubquotient
+
+@[expose] public section
+
+
+
 
 section
 noncomputable section
@@ -47,7 +104,7 @@ section Loc
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 private theorem prinSeries_irreducible {n : ℕ} (ω : Fin n → kˣ →* ℂˣ) (hω : ∀ i, IsSmoothChar (ω i))
     (h : ∀ i j, ω j ≠ ω i * absPow k 1) : (prinSeries ω).IsIrreducible := by
-  let x : Fin n → IrrGL k := fun i => IrrGL.ofChar (ω i) (hω i)
+  let x : Fin n → IrrGL (k := k) := fun i => IrrGL.ofChar (ω i) (hω i)
   have hx : ∀ i, (x i).IsCusp := fun i => IrrGL.isCusp_ofChar _ _
   have hd : ∑ i, (x i).1 = n := by simp [x, IrrGL.ofChar]
   have hnu : ∀ i j, x j ≠ (x i).nu 1 := fun i j e => by
@@ -65,8 +122,29 @@ private theorem prinSeries_irreducible {n : ℕ} (ω : Fin n → kˣ →* ℂˣ)
       (p.trans (multiProdEquiv (stdBlocks (fun i => (x i).1) hd)
         fun i => equivRep (IrrRep.det (Fin 1) (ω i) (hω i)))).symm hP
   haveI := nontrivial_of_irreducible hM
-  haveI := nontrivial_of_isSubquotient (GlobalTheory.PermPrin.isSubquotient_multiProd_prinSeries e₀ ω)
-  obtain ⟨E⟩ := equiv_of_isSubquotient (GlobalTheory.PrinProd.isSubquotient_prinSeries_multiProd k n ω) hM
+  haveI : Nontrivial (IndSp _ _) := by
+    obtain ⟨S, f, hf⟩ := GlobalTheory.PermPrin.isSubquotient_multiProd_prinSeries e₀ ω
+    have := hf.nontrivial
+    exact Subtype.val_injective.nontrivial (α := S.toSubmodule)
+  have equiv_local {G V W : Type} [Group G] [AddCommGroup V] [Module ℂ V] [AddCommGroup W]
+      [Module ℂ W] {σ : Representation ℂ G W} {ρ : Representation ℂ G V} (h : IsSubquotient σ ρ)
+      [Nontrivial W] (hρ : ρ.IsIrreducible) : Nonempty (ρ.Equiv σ) := by
+    obtain ⟨S, f, hf⟩ := h
+    obtain ⟨y, hy⟩ := exists_ne (0 : W)
+    obtain ⟨v, rfl⟩ := hf y
+    haveI : IsSimpleOrder (Subrepresentation ρ) := hρ
+    rcases eq_bot_or_eq_top S with rfl | rfl
+    · exact absurd (by rw [show v = 0 from Subtype.ext v.2, map_zero]) hy
+    let F : ρ.IntertwiningMap σ := f.comp (topEquiv ρ).symm.toIntertwiningMap
+    have hs : Function.Surjective F := hf.comp (topEquiv ρ).symm.toLinearEquiv.surjective
+    refine ⟨equivOfBijective F ⟨(injective_iff_map_eq_zero _).2 fun x hx => ?_, hs⟩⟩
+    rcases eq_bot_or_eq_top F.ker with h | h
+    · have : x ∈ F.ker := hx
+      rw [h] at this
+      exact this
+    · have : v.1 ∈ F.ker := by rw [h]; trivial
+      exact absurd this hy
+  obtain ⟨E⟩ := equiv_local (GlobalTheory.PrinProd.isSubquotient_prinSeries_multiProd k n ω) hM
   exact GlobalTheory.Parabolic.isIrreducible_of_equiv E hM
 end Loc
 section WD
@@ -140,13 +218,13 @@ private theorem exists_char {z : WD h} (hz : IsIrrWD z) {n : ℕ} (η : Fin n �
     rfl
   · simp [hN]
 variable {a : Weil h →* (w.adicCompletion E)ˣ} {ha : IsLocalArtin h a} {ε : EpsFamily A}
-  {rc : IrrGL (w.adicCompletion E) → WD h}
+  {rc : IrrGL (k := w.adicCompletion E) → WD h}
 private theorem charPol_ofChar (H : UpperTheory.V.Z.Win.LawsV a ha ε rc) (χ : (w.adicCompletion E)ˣ →* ℂˣ) (hχ : IsSmoothChar χ)
     (g : Weil h) : (rc (IrrGL.ofChar χ hχ)).charPol g = X - C (χ (a g) : ℂ) := by
   rw [H.one, WD.lpOfChar, WD.charPol_mk, WDRep.ofChars_ρ, charpoly_diagEnd]
   simp
 private theorem hasSupport_of_charPol (hZ : GlobalTheory.Published.ZelevinskyPolynomialRing) (H : UpperTheory.V.Z.Win.LawsV a ha ε rc)
-    (x : IrrGL (w.adicCompletion E)) {n : ℕ} (ω : Fin n → (w.adicCompletion E)ˣ →* ℂˣ)
+    (x : IrrGL (k := w.adicCompletion E)) {n : ℕ} (ω : Fin n → (w.adicCompletion E)ˣ →* ℂˣ)
     (hω : ∀ i, IsSmoothChar (ω i)) (hp : ∀ g, (rc x).charPol g = ∏ j, (X - C (ω j (a g) : ℂ))) :
     HasSupport x.rep (Finset.univ.val.map fun i => IrrGL.ofChar (ω i) (hω i)) := by
   obtain ⟨s, hs⟩ := SupportRing.exists_hasSupport hZ x
@@ -164,9 +242,9 @@ private theorem hasSupport_of_charPol (hZ : GlobalTheory.Published.ZelevinskyPol
       ⟨{y}, hasSupport_self (hs.isCusp hy), fun u hu => Or.inl (by rwa [Multiset.mem_singleton.1 hu])⟩
     exact ⟨χ, hχ, H.inj _ _ hg e'.symm⟩
   let S := {χ : (w.adicCompletion E)ˣ →* ℂˣ // IsSmoothChar χ}
-  let F : S → IrrGL (w.adicCompletion E) := fun χ => IrrGL.ofChar χ.1 χ.2
+  let F : S → IrrGL (k := w.adicCompletion E) := fun χ => IrrGL.ofChar χ.1 χ.2
   obtain ⟨t, rfl⟩ : ∃ t : Multiset S, t.map F = s :=
-    haveI : CanLift (IrrGL (w.adicCompletion E)) S F fun y => ∃ χ, F χ = y := ⟨fun _ hy => hy⟩
+    haveI : CanLift (IrrGL (k := w.adicCompletion E)) S F fun y => ∃ χ, F χ = y := ⟨fun _ hy => hy⟩
     (Multiset.canLift F (fun y => ∃ χ, F χ = y)).prf s fun y hy => by
       obtain ⟨χ, hχ, e⟩ := hch y hy
       exact ⟨⟨χ, hχ⟩, e⟩
@@ -210,7 +288,7 @@ theorem nonempty_equiv_principal_series_of_char_poly_of_generic (Lc : _root_.Glo
   have hs0 : HasSupport (IrrGL.of σ.ρ σ.smooth σ.irred).rep
       (Finset.univ.val.map fun i => IrrGL.ofChar _ (hμ i)) := by
     have h2 := SupportRing.hasSupport_nu (hasSupport_of_charPol Lc.zel H (algNorm σ) ω hω hp) (((n : ℂ) - 1) / 2)
-    have key : ∀ (x y : IrrGL (w.adicCompletion E)) s, x = y → HasSupport x.rep s → HasSupport y.rep s := by
+    have key : ∀ (x y : IrrGL (k := w.adicCompletion E)) s, x = y → HasSupport x.rep s → HasSupport y.rep s := by
       rintro _ _ _ rfl h; exact h
     have h3 := key _ _ _ e2 h2
     simpa only [Multiset.map_map, Function.comp_def, e1] using h3
@@ -225,7 +303,7 @@ theorem nonempty_equiv_principal_series_of_char_poly_of_generic (Lc : _root_.Glo
   have hlen : ∀ i, (Δ i).len = 1 := fun i => by
     have hirr : IsIrrWD ((rc (Δ i).first).lpTw ((((Δ i).len : ℝ) - 1) / 2)) := by
       rw [← H.nu_eq]; exact (H.cusp _).1 ((Δ i).isCusp_first.nu _)
-    have hmi : (((rc (Δ i).first).lpTw ((((Δ i).len : ℝ) - 1) / 2)).lpChar (WD.lpSp h (Δ i).len)).mono0 :=
+    have hmi : (((rc (Δ i).first).lpTw ((((Δ i).len : ℝ) - 1) / 2)).lpChar (WD.lpSp (h := h) (Δ i).len)).mono0 :=
       GlobalTheory.UnlinkedMono.noMonodromy_of_mem_weilDeligneListSum _ hm0 _ (List.mem_map.2 ⟨Δ i, List.mem_ofFn.2 ⟨i, rfl⟩, rfl⟩)
     have hpos := (Δ i).len_pos
     by_contra hne

@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+module
+
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.Topology.Algebra.Ring.Basic
+public import Mathlib.Topology.Instances.ZMod
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ContinuousCycMod
-import Formalism.GaloisCohomology.Statement
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+import Formalism.ConjugateSelfDual.Statement
+public import Mathlib.Algebra.Module.ZMod
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.Published GlobalTheory.Published.PoitouTate
 
@@ -32,7 +82,8 @@ theorem exists_sum_mul_of_finite_torsion (l : ℕ) [Fact l.Prime] (M M' : Type) 
     conv_lhs => rw [← b.linearCombination_repr m]
     rw [Finsupp.linearCombination_apply, Finsupp.sum]
   conv_lhs => rw [hm']
-  rw [map_sum, AddMonoidHom.finset_sum_apply]
+
+  rw [map_sum, AddMonoidHom.finsetSum_apply]
   simp only [pairing_smul_left', LinearMap.toAddMonoidHom_coe, Module.Basis.coord_apply]
   refine Finset.sum_subset hsub ?_
   intro k _ hk
@@ -58,7 +109,7 @@ theorem inv_cup_pairing_of_inv_cup_characters : ∀ (Γ : Type) [Group Γ] [Topo
     · exact ((continuous_of_discreteTopology.comp hxc).comp continuous_fst).mul
         ((continuous_of_discreteTopology.comp hyc).comp continuous_snd)
     · intro g h k'
-      simp only [hμ, hxa, hya, map_add]
+      simp only [hμ, hxa, hya, map_add (f := _)]
       ring
   let W : ι → Z2 μ := fun k => ⟨_, hmem k⟩
   have hWsum : w = ∑ k ∈ s, W k := by
@@ -70,11 +121,12 @@ theorem inv_cup_pairing_of_inv_cup_characters : ∀ (Γ : Type) [Group Γ] [Topo
   have hW : ∀ k, e (Submodule.Quotient.mk (W k)) = u * (c k (x γ) * d k (y φ)) := fun k =>
     hchar (fun g => c k (x g)) (fun g => d k (y g))
       (continuous_of_discreteTopology.comp hxc) (continuous_of_discreteTopology.comp hyc)
-      (fun g h => by simp only [hxa, map_add]) (fun g h => by simp only [hya, map_add])
+      (fun g h => by simp only [hxa, map_add (f := _)]) (fun g h => by simp only [hya, map_add (f := _)])
       (fun g hg => by simp only [hyI g hg, map_zero]) (W k) (fun g h => rfl)
   have hq : (Submodule.Quotient.mk (∑ k ∈ s, W k) : H2 μ) =
       ∑ k ∈ s, (Submodule.Quotient.mk (W k) : H2 μ) :=
     map_sum (Submodule.mkQ _) W s
+
   rw [hWsum, hq, map_sum]
   simp only [hW]
   rw [← Finset.mul_sum, ← hdec (x γ) ⟨γ, rfl⟩ (y φ)]

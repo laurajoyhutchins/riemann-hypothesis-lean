@@ -1,14 +1,54 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.CellDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InCell
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitOfRetract
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsNMapAdd
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousUnipotentBlockFamily
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBUnique
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StandardSymplecticFormSqNegOne
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LowerDiagonalOfUpperTriangularBlock
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CellConditionsOfSmulEq
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MulNBlockInr
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.CellDefs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InCell
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CellConditionsOfSmulEq
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousUnipotentBlockFamily
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBUnique
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsNMapAdd
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LowerDiagonalOfUpperTriangularBlock
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MulNBlockInr
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StandardSymplecticFormSqNegOne
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitOfRetract
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,12 +82,12 @@ theorem cell_eq {e : AE D} (hee : e * e = e) :
   change IsUnit _ ↔ IsUnit _
   rw [det_mix_one hee]
 
-open Classical in
 
+open Classical in
 def tau (e : AE D) (g : G D p) : hermS D p e := if h : ∃ x, IsB e g x then h.choose else 0
 
 theorem isB_tau {e : AE D} {g : G D p} (h : ∃ x, IsB e g x) : IsB e g (tau e g) := by
-  rw [tau, dif_pos h]
+  rw [tau, dite_eq_left h]
   exact h.choose_spec
 
 theorem tau_eq {e : AE D} {g : G D p} {x : hermS D p e} (h : IsB e g x) : tau e g = x :=

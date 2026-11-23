@@ -1,4 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.PermutationSigns.PadMHerm
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.PermutationSigns.PadMHerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -183,7 +234,7 @@ private theorem isClosed_nonneg_sum_le_one_simplex {q : ℕ} :
   rw [simplex_eq]
   refine (isClosed_iInter fun j => ?_).inter ?_
   · exact isClosed_le continuous_const (continuous_apply j)
-  · exact isClosed_le (continuous_finset_sum _ fun j _ => continuous_apply j) continuous_const
+  · exact isClosed_le (by fun_prop) continuous_const
 
 theorem simplex_meas {q : ℕ} : MeasurableSet {t : Fin q → ℝ | (∀ j, 0 ≤ t j) ∧ ∑ j, t j ≤ 1} := isClosed_nonneg_sum_le_one_simplex.measurableSet
 
@@ -208,10 +259,10 @@ theorem intS_pull {V V' : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [Norm
   unfold intS pullF
   congr 1
   funext t
-  simp only [ContinuousAlternatingMap.compContinuousLinearMap_apply]
+  simp only [map_add (f := _), map_sum, map_sub, map_smul, add_sub_add_right_eq_sub,
+    ContinuousAlternatingMap.compContinuousLinearMap_apply]
   congr 1
-  · simp only [map_add, map_sum, map_sub, map_smul, add_sub_add_right_eq_sub]
-    abel
+  · abel
   · funext j
     simp
 
@@ -242,7 +293,7 @@ theorem intP_sum {q : ℕ} {ι : Type} [Fintype ι] (c : ι → ℝ) (ω : ι �
     intro p v
     simp
   simp only [e]
-  rw [MeasureTheory.integral_finset_sum _ fun x _ => (intP_integrable (hω x) y).const_mul (c x)]
+  rw [MeasureTheory.integral_finsetSum _ fun x _ => (intP_integrable (hω x) y).const_mul (c x)]
   simp only [MeasureTheory.integral_const_mul]
 
 theorem intP_inv {q : ℕ} {ω : Form (HS L N) q} (hω : ∀ g, FInv ω g) (g : Gp L N) (y : Fin (q + 1) → Pos L N) :
@@ -256,8 +307,9 @@ theorem intP_inv {q : ℕ} {ω : Form (HS L N) q} (hω : ∀ g, FInv ω g) (g : 
   unfold FInv at hF
   have h1 := hF _ hmem
   rw [← h1]
-  simp only [ContinuousAlternatingMap.compContinuousLinearMap_apply, map_add, map_sum, map_sub, map_smul,
-    Function.comp_def]
+
+  simp only [ContinuousAlternatingMap.compContinuousLinearMap_apply, map_add (f := _), map_sum, map_sub, map_smul,
+  Function.comp_def]
 
 def evL {G H Y : Type} [Group G] [Group H] [MulAction H Y] (ρ : G →* H) {m : ℕ}
     (F : (Fin (m + 1) → Y) → ℝ) (y : Y) : Chn G m →ₗ[ℝ] ℝ :=

@@ -1,11 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoSqz
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ContSection
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HhGroup
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.KerGen
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.TactVanish
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.TchPoly
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoSqz
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ContSection
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HhGroup
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.KerGen
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.TactVanish
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.TchPoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.MvPowerSeries.Inverse
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -161,6 +216,7 @@ private theorem ker_span (O X R R' : Type) [CommRing O] [IsLocalRing O] [IsNoeth
     obtain ⟨g, hg⟩ := (Ideal.mem_span_range_iff_exists_fun).mp hF
     choose o ho using fun i => IsCO.res_surj (O := O) (W.π (g i))
     refine ⟨o, ?_⟩
+
     rw [← hg, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul]
@@ -262,10 +318,12 @@ private theorem split_data (O X R R' κ : Type) [CommRing O] [IsLocalRing O] [Is
         exact Submodule.smul_mem _ _ (hεp l)
       · exact Submodule.zero_mem _
     have hqz : q (i v + ∑ l, Z l) = v := by
-      rw [map_add, hqi, map_sum]
+
+      rw [map_add (f := _), hqi, map_sum]
       simp [hZ2]
     refine ⟨i v + ∑ l, Z l, ?_, by rw [hqz]; exact hv, ?_⟩
-    · simp only [v, map_add, hφi, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [v, map_add (f := _), hφi, map_sum]
       rw [Finset.mul_sum, ← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [hZ1, hc (cd l) _ (Submodule.smul_mem _ _ (hεp l)), MonoidHom.inv_apply,
@@ -274,6 +332,7 @@ private theorem split_data (O X R R' κ : Type) [CommRing O] [IsLocalRing O] [Is
       · rw [add_zero, h, ← mul_assoc, Units.mul_inv, one_mul]
       · rw [map_zero, zero_add, hTs, mul_assoc]
     · rw [hqz]
+
       simp only [v, map_sum]
       refine Finset.sum_eq_zero fun l _ => ?_
       split_ifs
@@ -323,7 +382,7 @@ private theorem loc_map {O ι X Γ : Type} [CommRing O] [IsLocalRing O] [Fintype
   have hx0 : x = 0 := hφ (by rw [hS x hx, map_zero])
   rw [hx0, map_zero]
 
-set_option maxHeartbeats 800000 in
+
 theorem UpperTheory.V.Alg.loc_graded :
     ∀ (O : Type) [CommRing O] [IsLocalRing O] [IsNoetherianRing O] [IsAdicComplete (maximalIdeal O) O] (ι X : Type) [Fintype ι] [DecidableEq ι] [AddCommGroup X] [Module.Free ℤ X] [Module.Finite ℤ X] (w : ι → X) (Φ : FormData O w), IsUnit (2 : O) → ∀ (Γ : Type) [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] (rbar : Γ →* Matrix ι ι (ResidueField O)) (r0 : Lift O rbar O) (hbar : Φ.Normalises rbar), Φ.Normalises r0.hom → ∀ (N : Subgroup Γ) (L : Cond O rbar), Φ.IsLocCond r0.hom N L →
       ∀ (R : Type) [CommRing R] [Algebra O R] [IsCO O R] (R' : Type) [CommRing R'] [Algebra O R'] [IsCO O R'] (p : R →ₐ[O] R'), Function.Surjective p → maximalIdeal R * RingHom.ker p = ⊥ → ∀ (W : WPres O X R), (∀ s, W.z s ∈ maximalIdeal R) → IsHomog O W.wt (RingHom.ker (p.comp W.π)) →
@@ -354,8 +413,8 @@ theorem UpperTheory.V.Alg.loc_graded :
   have hME : ∀ g, (M g).map φ = E g := by
     intro g
     ext a b
-    simp only [M, E, Matrix.map_apply, Matrix.of_apply, map_add]
-    rw [hφi _ _ (hyp (a, b) g), hZφ, ← mul_add, ← map_add]
+    simp only [M, E, Matrix.map_apply, Matrix.of_apply, map_add (f := _)]
+    rw [hφi _ _ (hyp (a, b) g), hZφ, ← mul_add, ← map_add (f := _)]
     congr 2
     simp [d]
   have hT0 : ∀ a b c' : ι, (T (Multiplicative.ofAdd (w a - w c')) : S) *
@@ -375,6 +434,7 @@ theorem UpperTheory.V.Alg.loc_graded :
     intro g h
     ext a b
     simp only [E, Matrix.of_apply, Matrix.mul_apply]
+
     rw [map_mul, Matrix.mul_apply, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun c' _ => ?_
     rw [map_mul, ← hT0 a b c']
@@ -409,7 +469,7 @@ theorem UpperTheory.V.Alg.loc_graded :
         Ideal.Quotient.mk (maximalIdeal A ^ N') (i (y (a, b) g)) +
           Ideal.Quotient.mk (maximalIdeal A ^ N') (Z (a, b) (d (a, b) g) (hdk (a, b) g)) := by
       funext g
-      rw [← map_add]
+      rw [← map_add (f := _)]
       rfl
     rw [hfun]
     exact h1.comp₂ h2 (· + ·)
@@ -459,10 +519,10 @@ theorem UpperTheory.V.Alg.loc_graded :
   · refine Lift.ext (MonoidHom.ext fun g => Matrix.ext fun a b => ?_)
     rw [Lift.map_hom, Lift.map_hom]
     change p (q (i (y (a, b) g) + Z (a, b) (d (a, b) g) (hdk (a, b) g))) = r'.hom g a b
-    rw [map_add, hqi, map_add, hZp, add_zero, hyl]
+    rw [map_add (f := _), hqi, map_add (f := _), hZp, add_zero, hyl]
   · intro s a b
     rw [Lift.map_hom]
     change q (i (y (a, b) s) + Z (a, b) (d (a, b) s) (hdk (a, b) s)) ∈ W.part (w a - w b)
-    rw [map_add, hqi]
+    rw [map_add (f := _), hqi]
     have hq : q (Z (a, b) (d (a, b) s) (hdk (a, b) s)) ∈ W.part (w a - w b) := hZq (a, b) _ _
     exact (W.part (w a - w b)).add_mem (hyp (a, b) s) hq

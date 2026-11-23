@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers.ContractRelevant
@@ -27,8 +73,9 @@ theorem extend_zero_inj {K K' : Type*} {j : K → K'} (hj : Function.Injective j
 variable {K K' : Type*} [DecidableEq K] [DecidableEq K'] {ι : K → Type*} {ι' : K' → Type*}
   {j : K → K'} {g : (Σ k, ι k) → (Σ k, ι' k)} (hgj : ∀ v, (g v).1 = j v.1)
 
-include hgj in
+include hgj
 
+include hgj in
 theorem weight_mapDomain (hj : Function.Injective j) (d : (Σ k, ι k) →₀ ℕ) :
     Finsupp.weight (blockWeight ι') (Finsupp.mapDomain g d) =
       Function.extend j (Finsupp.weight (blockWeight ι) d) 0 := by
@@ -45,10 +92,10 @@ theorem weight_mapDomain (hj : Function.Injective j) (d : (Σ k, ι k) →₀ �
     simp only [Finsupp.sum, Finset.sum_apply, Pi.smul_apply, blockWeight, hgj, Pi.single_apply,
       Pi.zero_apply]
     refine Finset.sum_eq_zero fun v _ => ?_
-    rw [if_neg fun h => hk ⟨v.1, h.symm⟩, smul_zero]
+    rw [ite_eq_right fun h => hk ⟨v.1, h.symm⟩, smul_zero]
+
 
 include hgj in
-
 theorem rename_weightedHomogeneousComponent (hj : Function.Injective j)
     (hg : Function.Injective g) {R : Type*} [CommSemiring R] (b : K → ℕ)
     (f : MvPolynomial (Σ k, ι k) R) :
@@ -67,19 +114,20 @@ theorem rename_weightedHomogeneousComponent (hj : Function.Injective j)
     · rw [coeff_rename_eq_zero _ _ _ fun u hu => absurd hu (hd u)]
     · rfl
 
-include hgj in
 
+include hgj in
 theorem isMultiProjPrime_comap_rename (hj : Function.Injective j) (hg : Function.Injective g)
     (hsurj : ∀ w : Σ k, ι' k, w.1 ∈ Set.range j → ∃ v, g v = w) {R : Type*} [CommRing R]
     {P : Ideal (MRing ι' R)} (hP : IsMultiProjPrime P) :
-    IsMultiProjPrime (P.comap (rename (R := R) g)) where
-  isPrime := haveI := hP.isPrime; Ideal.comap_isPrime _ _
-  multiHomog f hf b := by
+    IsMultiProjPrime (P.comap (rename (R := R) g)) := by
+  refine ⟨?_, ?_, ?_⟩
+  · have := hP.isPrime
+    exact Ideal.comap_isPrime _ _
+  · intro f hf b
     rw [Ideal.mem_comap] at hf ⊢
     rw [rename_weightedHomogeneousComponent hgj hj hg]
     exact hP.multiHomog _ hf _
-  relevant := by
-    rw [isRelevant_iff]
+  · rw [isRelevant_iff]
     intro k
     obtain ⟨w, hw, hwP⟩ := (isRelevant_iff P).1 hP.relevant (j k)
     obtain ⟨v, rfl⟩ := hsurj w ⟨k, hw.symm⟩

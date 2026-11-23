@@ -1,5 +1,44 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.IsAlgIsoRefl
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualInfinitesimalCharacterRegular
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.IsAlgIsoRefl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.CuspRep GlobalTheory.GKCoh UpperTheory.V.AlgRepEndIrreducible
 open scoped TensorProduct
@@ -28,8 +67,9 @@ private theorem weight_operator_commutator_multiGl {ι V : Type} [Fintype ι] [A
       have h1 := congrArg (fun f : Module.End ℂ V => f x) (hcomm s t hst a a i j)
       simp only [Module.End.mul_apply] at h1
       rw [h1, add_zero]
+
   simp only [LinearMap.sum_apply, LinearMap.smul_apply, key, smul_add, Finset.sum_add_distrib,
-    map_sum, map_smul]
+  map_sum, map_smul]
   congr 1
   simp [smul_ite, smul_sub, Finset.sum_sub_distrib, Finset.sum_ite_eq', Finset.sum_ite_eq,
     Finset.sum_ite_irrel, sub_smul]
@@ -70,7 +110,7 @@ theorem UpperTheory.V.AlgRepEndIrreducible.lowLine :
       ring
     · simp
     · intro x y hx hy
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hx hy
   let P : Submodule ℂ V := (ℂ ∙ v) ⊔ M
   have hvP : v ∈ P := Submodule.mem_sup_left (Submodule.mem_span_singleton_self v)
@@ -78,7 +118,7 @@ theorem UpperTheory.V.AlgRepEndIrreducible.lowLine :
     intro t i j hji x hx
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.mp hx
     obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.mp hy
-    rw [map_add, map_smul]
+    rw [map_add (f := _), map_smul]
     refine Submodule.mem_sup_right (add_mem (Submodule.smul_mem _ _ ?_) (hFM t i j hji z hz))
     obtain ⟨d, hd⟩ := hdist i j hji
     refine (le_iSup (fun k : ℕ => H.eigenspace (l0 + ((k : ℂ) + 1))) d) ?_

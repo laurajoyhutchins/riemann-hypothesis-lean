@@ -1,4 +1,47 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.WField
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.WField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,8 +54,9 @@ theorem hform_sum_left {A : Type} [CommRing A] {n m : ℕ} (σ : A →+* A)
     (J : Matrix (Fin n) (Fin n) A) (α : Fin m → A) (Y : Fin m → Fin n → A) (y : Fin n → A) :
     Formalism.UG.hform σ J (∑ c, α c • Y c) y = ∑ c, σ (α c) * Formalism.UG.hform σ J (Y c) y := by
   unfold Formalism.UG.hform
+
   simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul, Finset.sum_mul,
-    Finset.mul_sum]
+  Finset.mul_sum]
   calc _ = ∑ i, ∑ c, ∑ j, σ (α c) * (σ (Y c i) * J i j * y j) :=
         Finset.sum_congr rfl fun i _ => by
           rw [Finset.sum_comm]
@@ -43,6 +87,7 @@ theorem sigma_invol (hCM : IsCMExt F E σ) (x : E) : σ (σ x) = x := by
 theorem hE_symm (hCM : IsCMExt F E σ) (hJ : IsHermND σ J) (x y : Fin n → E) :
     hE σ J x y = σ (hE σ J y x) := by
   unfold hE Formalism.UG.hform
+
   simp only [map_sum, map_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -77,6 +122,7 @@ theorem hR_ratV (v : HeightOneSpectrum (𝓞 F)) (a b : Fin n → E) :
     hR (Fv F v) σ J (ratV (F := F) (Fv F v) a) (ratV (F := F) (Fv F v) b) =
       inclR (Fv F v) (hE σ J a b) := by
   unfold hR hE Formalism.UG.hform
+
   simp only [map_sum, map_mul, ratV, JR, Matrix.map_apply, sigR_inclR]
   rfl
 

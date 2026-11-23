@@ -1,6 +1,57 @@
-import Formalism.HermitianCurvature.StatementLE
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasIterDeriv
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThetaLimit
+module
+
+public import Formalism.HermitianCurvature.StatementLE
+public import Mathlib.LinearAlgebra.Lagrange
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasIterDeriv
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ThetaLimit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.LEx2
 open Formalism.FourierDecayAlt.LE
@@ -12,7 +63,7 @@ theorem interp1 (s : Finset ℝ) (n k : ℕ) (hs : s.card = n + 1) (hk : k ≤ n
     (Function.injective_id.injOn) (by
       rw [Polynomial.degree_X_pow, hs]; exact_mod_cast Nat.lt_succ_of_le hk)
   have h2 := congrArg (Polynomial.eval y) h
-  simp only [Lagrange.interpolate_apply, Polynomial.eval_finset_sum, Polynomial.eval_mul, Polynomial.eval_C,
+  simp only [Lagrange.interpolate_apply, Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C,
     Polynomial.eval_pow, Polynomial.eval_X, id] at h2
   rw [h2]; apply Finset.sum_congr rfl; intros; ring
 
@@ -45,7 +96,7 @@ theorem gridConvergence : GridConvergence := by
     fun t => interpN N n grid hg (Q t) (hQ t) Y
   rw [interpN N n grid hg Q₀ hQ0 Y]
   simp_rw [h1]
-  apply tendsto_finset_sum
+  apply tendsto_finsetSum
   intro g hgm
   exact (hconv g (fun a => (Fintype.mem_piFinset.1 hgm) a)).const_mul _
 
@@ -119,8 +170,8 @@ theorem coeff_id (s : Finset ℝ) (d k j : ℕ) (hs : s.card = d + 1) (hk : k �
   have h := Lagrange.eq_interpolate (s := s) (v := id) (f := (Polynomial.X : Polynomial ℝ) ^ k)
     (Function.injective_id.injOn) (by
       rw [Polynomial.degree_X_pow, hs]; exact_mod_cast Nat.lt_succ_of_le hk)
-  have h2 := congrArg (fun p => Polynomial.coeff p j) h
-  simp only [Lagrange.interpolate_apply, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul, Polynomial.eval_pow,
+  have h2 := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p j) h
+  simp only [Lagrange.interpolate_apply, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul, Polynomial.eval_pow,
     Polynomial.eval_X, id, Polynomial.coeff_X_pow] at h2
   rw [h2]; apply Finset.sum_congr rfl; intros; ring
 
@@ -239,7 +290,7 @@ theorem coefIntegrable : CoefIntegrable := by
       fun ω => ∑ k, (th ε σ (B.G ω) * S.d Y ω k) * ‖S.ds Y p ω k‖ ^ 2 := by
     funext ω; unfold LE.sq; rw [Finset.mul_sum]; apply Finset.sum_congr rfl; intros; ring
   rw [he]
-  exact integrable_finset_sum _ (fun k _ => (hk k).2)
+  exact MeasureTheory.integrable_finsetSum _ (fun k _ => (hk k).2)
 
 end Formalism.FourierDecayAlt.P.LEx2
 
@@ -291,7 +342,6 @@ theorem csTerm : CSTerm := by
     rwa [hds0] at this
   have hDi := hCI ε hε Y hY p
   have hfac : (0:ℝ) < p.factorial := by exact_mod_cast p.factorial_pos
-  have hσ : 0 < 4 * σ := by linarith
   set K : ℝ := Real.exp 1 * p.factorial * (4 * σ) ^ p with hK
   have hKpos : 0 < K := by positivity
   have hE0 : 0 ≤ S.En ε σ Y := integral_nonneg fun ω => mul_nonneg (hth ω) (sq_nonneg' B _ hd _ ω)
@@ -357,7 +407,6 @@ theorem L1 (hTR : ThetaRange) (hTL : ThetaLimit) (B : Base) (σ : ℝ) (hσ : 0 
 theorem L2 (hTS : ThetaSmooth) (hTR : ThetaRange) (hTL : ThetaLimit) (hTB : ThetaBound) (hC : E.CauchyTheta)
     (B : Base) (σ : ℝ) (h4 : 4 ≤ σ) (p : ℕ) (hp : p ≠ 0) (h : B.Ω → ℂ) (hh : Integrable h B.μ) :
     Tendsto (fun ε : ℝ => ∫ ω, (ld p (th ε σ) (B.G ω) : ℂ) * h ω ∂B.μ) (𝓝[>] 0) (𝓝 0) := by
-  have hσ : 0 < 4 * σ := by linarith
   have key : Tendsto (fun ε : ℝ => ∫ ω, (ld p (th ε σ) (B.G ω) : ℂ) * h ω ∂B.μ) (𝓝[>] 0)
       (𝓝 (∫ _ω, (0:ℂ) ∂B.μ)) := by
     refine tendsto_integral_filter_of_dominated_convergence
@@ -405,7 +454,7 @@ theorem domConv : DomConv := by
     simpa [Step.term] using this
   have lsum : Tendsto (fun ε => ∑ p ∈ range (S.r + 2), S.term ε σ Y p) (𝓝[>] 0)
       (𝓝 (∑ p ∈ range (S.r + 2), if p = 0 then ((∫ ω, LE.sq B (S.d Y) (S.gX Y) ω ∂B.μ : ℝ) : ℂ) else 0)) := by
-    apply tendsto_finset_sum
+    apply tendsto_finsetSum
     intro p _
     by_cases hp : p = 0
     · subst hp
@@ -558,6 +607,7 @@ theorem adj : Adj := by
     intro ε₂ ω
     unfold pr
     simp_rw [hLeib B _ _ (S.g Y) S.X (S.r + 1) (hJet Y hY) (hI4 Y hY) _ (hsm ε₂) ω]
+
     simp only [map_sum, map_div₀, map_mul, Complex.conj_ofReal, map_natCast, Finset.mul_sum, Finset.sum_div]
     rw [Finset.sum_comm]
     apply Finset.sum_congr rfl
@@ -572,7 +622,7 @@ theorem adj : Adj := by
     filter_upwards [self_mem_nhdsWithin] with ε₂ h2
     have h := hAdj Y hY ε ε₂ hε h2
     simp_rw [hleft ε₂, hright ε₂] at h
-    rw [h, integral_finset_sum _ (fun p _ => ((lp p).1 ε₂ h2).div_const _)]
+    rw [h, MeasureTheory.integral_finsetSum _ (fun p _ => ((lp p).1 ε₂ h2).div_const _)]
     apply Finset.sum_congr rfl
     intro p _
     rw [integral_div]
@@ -580,7 +630,7 @@ theorem adj : Adj := by
       (∫ ω, (ld p (fun y => c.sc ε₂ 1 y * th ε σ y) (B.G ω) : ℂ) *
         pr B (S.d Y) (S.gX Y) (S.ds Y p) ω ∂B.μ) / p.factorial) (𝓝[>] 0)
       (𝓝 (∑ p ∈ range (S.r + 2), S.term ε σ Y p)) := by
-    apply tendsto_finset_sum
+    apply tendsto_finsetSum
     intro p _
     exact ((lp p).2).div_const _
   have hfin := tendsto_nhds_unique (l0.2.congr' heq) lsum
@@ -737,7 +787,7 @@ theorem limitA : LimitA := by
         fun ω => ∑ i, F.cw Y i * (F.Wt ω ^ N * ‖dS B (F.gw Y) F.u p ω i‖ ^ 2) := by
       funext ω; unfold LE.sq Fam.dw; apply Finset.sum_congr rfl; intros; ring
     rw [he]
-    exact integrable_finset_sum _ fun i _ => (hdL2 i).2.const_mul _
+    exact MeasureTheory.integrable_finsetSum _ fun i _ => (hdL2 i).2.const_mul _
 
 end Formalism.FourierDecayAlt.P.LEx2
 
@@ -800,7 +850,7 @@ theorem markovTerm : MarkovTerm := by
       apply Finset.sum_congr rfl; intro q _
       apply Finset.sum_congr rfl; intro k _
       ring
-    rw [h1, integral_finset_sum _ (fun q _ => ((hpi q).div_const _).const_mul _)]
+    rw [h1, MeasureTheory.integral_finsetSum _ (fun q _ => ((hpi q).div_const _).const_mul _)]
     apply Finset.sum_congr rfl; intro q _
     rw [integral_const_mul, integral_div]
   have hbound : ∀ s : ℝ, Y + s ∈ S.J →

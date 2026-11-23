@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
-import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.MatchOne
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatchProd
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.HoweSpace
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatchProd
 import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.SplitLoc
-import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.PlaceUp
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.MatchOne
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.Places
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TwistedLocalOrbits.PlaceUp
+import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,11 +106,11 @@ private theorem exists_left_inv [IsTopologicalGroup G] [LocallyCompactSpace G] [
       · exact hC b hb'.2 y hy
     · intro x _
       have hW : IsOpen {z : G | φ (z * x) = φ x} :=
-        (h1.isOpen_fiber (φ x)).preimage (continuous_mul_right x)
+        (h1.isOpen_fiber (φ x)).preimage (continuous_mul_const x)
       have h1W : {z : G | φ (z * x) = φ x} ∈ nhds (1 : G) := hW.mem_nhds (by simp)
       obtain ⟨B, -, hB⟩ := exists_openSubgroup_isCompact_subset h1W
       refine ⟨{y | y * x⁻¹ ∈ B}, mem_nhdsWithin_of_mem_nhds ?_, B, ?_⟩
-      · exact (B.isOpen.preimage (continuous_mul_right x⁻¹)).mem_nhds (by simp [one_mem])
+      · exact (B.isOpen.preimage (continuous_mul_const x⁻¹)).mem_nhds (by simp [one_mem])
       · intro b hb y hy
         have hy' : y * x⁻¹ ∈ B := hy
         have e1 : φ (b * (y * x⁻¹) * x) = φ x := hB (mul_mem hb hy')

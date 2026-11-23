@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RkLe
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EvalStdFramesEqDetPowerMulBlockValue
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.OperatorPolynomialCoeffsWeightExtendedByZeroStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FramePolynomialsWeightRealisedNextLevelStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ModelPartitionSizeExtensionFirstLastRowsStatement
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SecondKernelProjection
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RkLe
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EvalStdFramesEqDetPowerMulBlockValue
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FramePolynomialsWeightRealisedNextLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ModelPartitionSizeExtensionFirstLastRowsStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.OperatorPolynomialCoeffsWeightExtendedByZeroStatement
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SecondKernelProjection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions NumberField IsDedekindDomain Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.L2.G.Pend Formalism.MainNotions Formalism.L2.Ker Formalism.L2.PairingIndexBounds.F Formalism.L2.KerInert Formalism.UG Formalism.L2.G.Cmp Formalism.L2.Forms Formalism.L2.KerInert.SecondKernelProjection Formalism.L2.KerInert.QuadraticBaseChangeGL3 Formalism.L2.KerInert.SecondKernelDifference Formalism.L2.KerInert.SecondKernelHermitian GlobalTheory.TwV.DelA
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -17,14 +60,14 @@ theorem transpC_eval_aeval {σ κ : Type} (x : κ → ℂ) (g : σ → MvPolynom
     eval x (aeval g Q) = eval (fun i => eval x (g i)) Q := by
   induction Q using MvPolynomial.induction_on with
   | C c => simp
-  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _)]
   | mul_X p v hp => rw [map_mul, map_mul, hp, map_mul, aeval_X, eval_X]
 
 theorem transpC_map_eval {σ Kc : Type} [CommRing Kc] (ι : ℂ →+* Kc) (x : σ → ℂ) (R : MvPolynomial σ ℂ) :
     eval (fun i => ι (x i)) (map ι R) = ι (eval x R) := by
   induction R using MvPolynomial.induction_on with
   | C c => simp
-  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _), map_add (f := _)]
   | mul_X p v hp => rw [map_mul, map_mul, hp, map_mul, map_X, eval_X, eval_X, map_mul]
 
 theorem transpC_hom_aeval {σ ι' κ : Type} (φ : MvPolynomial ι' (MvPolynomial κ ℂ) →+* ℂ) (hφ : ∀ c, φ (C (C c)) = c)
@@ -32,7 +75,7 @@ theorem transpC_hom_aeval {σ ι' κ : Type} (φ : MvPolynomial ι' (MvPolynomia
     φ (aeval g Q) = eval (fun i => φ (g i)) Q := by
   induction Q using MvPolynomial.induction_on with
   | C c => simp [MvPolynomial.algebraMap_apply, hφ]
-  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _)]
   | mul_X p v hp => rw [map_mul, map_mul, hp, map_mul, aeval_X, eval_X]
 
 theorem evFr_scalar_of_wtPol (D : D7) {N : ℕ} (ν : D.what₂.Tau → Fin N → ℕ) (Q : MvPolynomial (GL3Theta.FrV D N) ℂ)
@@ -73,31 +116,32 @@ theorem evD_trDY_polDY : ∀ {p : ℕ} [Fact p.Prime] (X : Sys p) (D : D7) (pos 
   have h' := rkT X D hN
   obtain ⟨-, hsz, -, hle, -⟩ := GlobalTheory.T.modelPartition_size_extension_firstLast_rows X D pos j hN ν hν
   have hco := (GlobalTheory.T.operatorPolynomial_coeffs_weight_extended_by_zero D (rk_le X D hN) s ν Q hQ).1
-  have hreal : ∀ α, Realises X D pos (j + 1) h' (wT X D pos j) (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1))))
-      (phiC X D pos (j + 1) h' (wT X D pos j) (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1))))) := by
+  have hreal : ∀ α, Realises X D pos (j + 1) h' (wT X D pos j) (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α)
+      (phiC X D pos (j + 1) h' (wT X D pos j) (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α)) := by
     intro α
     obtain ⟨R, hR⟩ := GlobalTheory.T.frame_polynomials_weight_realised_next_level X D pos j h' (extNu _ ν) hle _ (hco α)
     exact selOf_mem (relPhi X D pos (j + 1) h' (wT X D pos j)) _ (Submodule.mem_map.2 ⟨(_, R), hR, rfl⟩)
   let F : Fr1 D (D.R.N (j + 1)) := ⟨f', fun τ => isUnit_iff_ne_zero.2 (hf τ)⟩
   have hval : ∀ α, (∏ τ, (zT X D pos f' τ).det ^ eT X D pos (j + 1) τ) *
-      valZ X D pos (j + 1) h' (phiC X D pos (j + 1) h' (wT X D pos j) (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1))))) f' =
-      (∏ τ, (f' τ).det ^ (-(wT X D pos j τ))) * GL3Theta.evFr D (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1)))) f' := by
+      valZ X D pos (j + 1) h' (phiC X D pos (j + 1) h' (wT X D pos j) (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α)) f' =
+      (∏ τ, (f' τ).det ^ (-(wT X D pos j τ))) * GL3Theta.evFr D (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α) f' := by
     intro α
     have := hreal α F
     rw [ev1_eq_prod_det_pow_mul_valZ] at this
     exact this
   have hD : evD X D pos ι hN d f' (trDY X Kc j D (eIdx X D pos j hN) (phi0 X D pos ι j) (polDY D s Q (N' := D.R.N (j + 1)))) =
       ι (∑ α ∈ (polDY D s Q (N' := D.R.N (j + 1))).support,
-        valZ X D pos (j + 1) h' (phiC X D pos (j + 1) h' (wT X D pos j) (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1))))) f' *
+        valZ X D pos (j + 1) h' (phiC X D pos (j + 1) h' (wT X D pos j) (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α)) f' *
           ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k) := by
     unfold trDY
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun α _ => ?_
     unfold evD
     rw [MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_monomial,
       Finsupp.prod_mapDomain_index (fun _ => pow_zero _) (fun _ _ _ => pow_add _ _ _)]
     unfold phi0
-    rw [dif_pos h', map_mul, map_prod]
+    rw [dite_eq_left h', map_mul, map_prod]
     congr 1
     · unfold valZ
       exact transpC_map_eval ι _ _
@@ -105,13 +149,13 @@ theorem evD_trDY_polDY : ∀ {p : ℕ} [Fact p.Prime] (X : Sys p) (D : D7) (pos 
       refine Finset.prod_congr rfl fun k _ => ?_
       simp [eIdx, map_pow]
   have hP : ∑ α ∈ (polDY D s Q (N' := D.R.N (j + 1))).support,
-        GL3Theta.evFr D (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1)))) f' * ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k =
+        GL3Theta.evFr D (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α) f' * ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k =
       (∏ τ, s τ ^ szT X D pos j τ) * GL3Theta.evFr D Q (dfr X D hN d f') := by
     let φ : MvPolynomial (GL3Theta.Idx D (D.R.N j) (D.R.N (j + 1))) (MvPolynomial (GL3Theta.FrV D (D.R.N (j + 1))) ℂ) →+* ℂ :=
       MvPolynomial.eval₂Hom (MvPolynomial.eval (fun k : GL3Theta.FrV D (D.R.N (j + 1)) => f' k.1 k.2.1 k.2.2))
         (fun k => d k.1 k.2.2 k.2.1)
     have e1 : φ (polDY D s Q (N' := D.R.N (j + 1))) = ∑ α ∈ (polDY D s Q (N' := D.R.N (j + 1))).support,
-        GL3Theta.evFr D (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1)))) f' * ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k := by
+        GL3Theta.evFr D (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α) f' * ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k := by
       rw [MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_eq]
       rfl
     have e2 : φ (polDY D s Q (N' := D.R.N (j + 1))) = GL3Theta.evFr D Q (fun τ => s τ • dfr X D hN d f' τ) :=
@@ -125,7 +169,7 @@ theorem evD_trDY_polDY : ∀ {p : ℕ} [Fact p.Prime] (X : Sys p) (D : D7) (pos 
   congr 1
   rw [Finset.sum_mul]
   calc _ = ∑ α ∈ (polDY D s Q (N' := D.R.N (j + 1))).support, (∏ τ, (f' τ).det ^ (-(wT X D pos j τ))) *
-        (GL3Theta.evFr D (MvPolynomial.coeff α (polDY D s Q (N' := D.R.N (j + 1)))) f' * ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k) := by
+        (GL3Theta.evFr D (AddMonoidAlgebra.coeff (polDY D s Q (N' := D.R.N (j + 1))) α) f' * ∏ k ∈ α.support, d k.1 k.2.2 k.2.1 ^ α k) := by
         refine Finset.sum_congr rfl fun α _ => ?_
         rw [← mul_assoc, ← hval α]
         ring

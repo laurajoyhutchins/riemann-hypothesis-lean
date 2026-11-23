@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CvecSurjective
+module
+
+public import GroundTheory.AutomorphicForms.AdelicUnitaryGroups
+public import GroundTheory.AutomorphicForms.AnisotropicOrbit
+public import GroundTheory.AutomorphicForms.AnisotropicUnitaryCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyNormFinLeOne
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RatVInjective
+import Development.WeilBound.ThetaLifts.Reductions.SiegelHaar
+public import Formalism.SatakeDualWeyl.Statement
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -15,7 +71,7 @@ namespace GlobalTheory.CompanionTheory.RedCov.MahlerU
 
 theorem exists_isCompact_centralizer_reduction_set {K : Type*} [Field K] [NumberField K] {n : ℕ} {m : Type*}
     [Finite m] (L : m → Matrix (Fin n) (Fin n) K)
-    (G : Set (AdelicGLn.AdelicGL K n)) (hG1 : ∀ g ∈ G, g ∈ Reduction.normOneGL K n)
+    (G : Set (AdelicGLn.AdelicGL K n)) (hG1 : ∀ g ∈ G, g ∈ Reduction.normOneGL (K := K) (n := n))
     (hGL : ∀ g ∈ G, g ∈ adelicCentralizer L) {ε : ℝ} (hε : 0 < ε)
     (hh : ∀ g ∈ G, ∀ x : Fin n → K, x ≠ 0 → ε ≤ Reduction.height g x) :
     ∃ C : Set (AdelicGLn.AdelicGL K n), IsCompact C ∧ ∀ g ∈ G, ∃ γ : GL (Fin n) K,
@@ -87,7 +143,7 @@ theorem exists_isCompact_trHom_set {d : ℕ} (b : Module.Basis (Fin d) K E) (hH 
   classical
   let G : Set (AdelicGLn.AdelicGL K (Fintype.card (ι × Fin d))) :=
     (fun u : unitaryPoints K E H 𝔸[K] => trHom b 𝔸[K] (u : GL ι (𝔸[K] ⊗[K] E))) '' Y
-  have hG1 : ∀ g ∈ G, g ∈ Reduction.normOneGL K (Fintype.card (ι × Fin d)) := by
+  have hG1 : ∀ g ∈ G, g ∈ Reduction.normOneGL (K := K) (n := (Fintype.card (ι × Fin d))) := by
     rintro _ ⟨u, -, rfl⟩
     rw [Reduction.mem_normOneGL]
     set a := AdelicGLn.det K (Fintype.card (ι × Fin d)) (trHom b 𝔸[K] (u : GL ι (𝔸[K] ⊗[K] E)))
@@ -247,14 +303,14 @@ theorem exists_isCompact_unitary_set (hH : IsUnit H.det)
     set D := (unitaryCoords H 𝔸[K] b) ⁻¹' (F '' (Units.val '' C₃)) with hD
     have hDc : IsCompact D := (isClosedEmbedding_unitaryCoords H 𝔸[K] b hH).isCompact_preimage
       ((hC₃.image Units.continuous_val).image hFc)
-    have hsub : Ω ⊆ D⁻¹ := by
+    have hsub : Ω ⊆ Inv.inv '' D := by
       intro v hv
-      show v⁻¹ ∈ D
+      refine ⟨v⁻¹, ?_, inv_inv v⟩
       refine ⟨_, ⟨_, hv, rfl⟩, ?_⟩
       funext p
       simp only [F, trHom_val, readoff_resHom, transpose_transpose]
       rfl
-    exact hDc.inv.of_isClosed_subset hΩcl hsub
+    exact (hDc.image continuous_inv).of_isClosed_subset hΩcl hsub
   · intro u huY
     obtain ⟨M, hM⟩ := hred u huY
     obtain ⟨δ, hδT, hηδ, -⟩ := hT u u.2 (diagGL α M) ⟨M, rfl⟩

@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.Columns.ValuationPosIffMemSeen
-import Formalism.LocalToGlobal.Columns.CoordLatticeSelfDualEqStd
+module
+
+public import Formalism.LocalToGlobal.Columns.ValuationPosIffMemSeen
+public import Formalism.LocalToGlobal.Columns.ExistsPlaceOverFirstPrime
+public import Formalism.LocalToGlobal.Columns.TiedLv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.Columns.LocalLevelIsKOneEverywhere
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 open scoped TensorProduct
@@ -28,41 +69,6 @@ section Asm
 
 variable (hS : SpStd d.toColBase) (hH : HostHyp d) (hP : PtSurj d) (hK : LocalLevelIsKOneEverywhere d) (S : GSplit (Pr := d.Pr) d.sp.cm) (hI : IwAll d S)
   (O : AtTOwed a hS hH)
-
-theorem cofTied : CH.CofTied (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O) := by
-  intro u
-  show (d.piT d.u₀ : d.host.E) / (d.piT u : d.host.E) * (d.piT u : d.host.E) = (d.piT d.u₀ : d.host.E)
-  exact div_mul_cancel₀ _ (basePi_of_ok d.hX d.hPr u).coe_ne_zero
-
-theorem baseTied : CH.BaseTied (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O) := by
-  intro u pb hpb
-  have hpb' : algebraMap (𝓞 d.X.E) d.X.E pb = star (algebraMap (𝓞 d.X.E) d.X.E (d.Pr.piT u)) := by
-    rw [att_star_eq]
-    exact hpb
-  refine ⟨?_, fun i h1 hm => ?_⟩
-  · rw [coordLattice_selfDual_zero hS]
-    exact levPack_base d.sp.cm d.hX d.hPr d.σ₀ u (d.lev 0) _ _ _ _ (hK u 0) (hCrd0 hS u) pb hpb'
-  · rw [coordLattice_selfDual_eq_std hS i hm]
-    exact levPack_base d.sp.cm d.hX d.hPr d.σ₀ u (d.lev i) _ _ _ _ (hK u i) (hCrd hS u i hm) pb hpb'
-
-structure HermOwed where
-  levelZeroCompatibility : CH.Lev0Tied (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O)
-  ad : CH.AdTied (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O)
-  piG : CH.PiGConst (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O) levelZeroCompatibility
-  stabMap : CH.StabMapTied (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O)
-  fvI : CH.FvStepTied (d.colRec a) (hermCols a hS hP hK S hI) (hermAtT a hS hH O)
-
-def colsHerm (W : HermOwed a hS hH hP hK S hI O) : CH.ColsHerm (d.colRec a) where
-  base := hermCols a hS hP hK S hI
-  atT := hermAtT a hS hH O
-  levelZeroCompatibility := W.levelZeroCompatibility
-  ad := W.ad
-  cof := cofTied a hS hH hP hK S hI O
-  piG := W.piG
-  stabMap := W.stabMap
-  fvI := W.fvI
-  std := stdTied a hS
-  baseL := baseTied a hS hH hP hK S hI O
 
 end Asm
 

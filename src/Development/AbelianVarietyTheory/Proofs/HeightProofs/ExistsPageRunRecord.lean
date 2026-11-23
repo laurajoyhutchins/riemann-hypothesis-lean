@@ -1,11 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.ConclOfInputs4
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NoCommonZeroSt
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.N0LeNs
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.NusOffLevel
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DegreeWeightKappaLePageBound
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MulRowsScaledWeightLeKappaRows
+module
+
+public import Development.AbelianVarietyTheory.Definitions.HeightFunctions.ConclOfInputs4
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.NusOffLevel
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.WindowsAllowOffCentre
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.N0LeNs
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.PageOKRun
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CloudSizesBetweenZeroAndTwiceBStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DegreeWeightKappaLePageBound
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MulRowsScaledWeightLeKappaRows
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.PolyConstantLeZBasePowFour
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -150,7 +192,7 @@ theorem sigPar_gap (P : ParameterChoice' D L) (τ : D.what₂.Tau) {G : ℝ} (g1
     push_cast at h3
     linarith
   · by_cases c2 : i < D.R.k - 1
-    · rw [dif_pos c2, dif_neg c1, dif_pos (by omega)]
+    · rw [dif_pos c2, dite_eq_right c1, dif_pos (by omega)]
       have a1 := (L.cloud_v τ ⟨i, c2⟩).1
       have a2 := teta_le_wj P le_rfl (show 1 ≤ D.R.m by omega) τ
       unfold wj at a2
@@ -163,7 +205,7 @@ theorem sigPar_gap (P : ParameterChoice' D L) (τ : D.what₂.Tau) {G : ℝ} (g1
       have a6 := mul_le_mul_of_nonneg_right a4 L.etaSz_pos.le
       push_cast at a3 ⊢
       linarith
-    · rw [dif_neg c2, dif_neg c1, dif_pos (by omega), dif_pos (by omega)]
+    · rw [dite_eq_right c2, dite_eq_right c1, dif_pos (by omega), dif_pos (by omega)]
       have a1 := (P.nodes_gap τ (i - (D.R.k - 1)) (by omega)).1
       have e : (⟨i - (D.R.k - 1) + 1, by omega⟩ : Fin D.R.m) = ⟨i + 1 - (D.R.k - 1), by omega⟩ :=
         Fin.ext (by show i - (D.R.k - 1) + 1 = i + 1 - (D.R.k - 1); omega)
@@ -301,7 +343,7 @@ theorem DF_wF_le {ka wL wF : WeightFamilies.Wt D j} {T nP nW : ℕ} (h1 : 1 ≤ 
       · have := rem_le (gapZ (ka.aP τ) i + 2) T (WeightFamilies.dimY D j)
         linarith
       · have := rem_le ((ka.aP τ i : ℤ) - ((WeightFamilies.dimY D j : ℤ) + 2) * nW - 2 * D.R.r) T (WeightFamilies.dimY D j)
-        have e : gapZ (ka.aP τ) i = ka.aP τ i := by unfold gapZ; rw [dif_neg hi]
+        have e : gapZ (ka.aP τ) i = ka.aP τ i := by unfold gapZ; rw [dite_eq_right hi]
         rw [e]
         linarith) (by positivity) i
     exact_mod_cast this
@@ -314,7 +356,7 @@ theorem DF_wF_le {ka wL wF : WeightFamilies.Wt D j} {T nP nW : ℕ} (h1 : 1 ≤ 
       · have := rem_le (gapZ (ka.aM τ) i + 2) T (WeightFamilies.dimY D j)
         linarith
       · have := rem_le (ka.aM τ i : ℤ) T (WeightFamilies.dimY D j)
-        have e : gapZ (ka.aM τ) i = ka.aM τ i := by unfold gapZ; rw [dif_neg hi]
+        have e : gapZ (ka.aM τ) i = ka.aM τ i := by unfold gapZ; rw [dite_eq_right hi]
         rw [e]
         linarith) (by positivity) i
     exact_mod_cast this

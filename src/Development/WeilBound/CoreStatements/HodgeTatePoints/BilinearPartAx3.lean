@@ -1,5 +1,54 @@
-import Development.WeilBound.CoreStatements.HodgeTatePoints.Comp1IdentityLeft
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CanonA
+module
+
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.Comp1IdentityLeft
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CanonA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +80,7 @@ theorem coeff_ax3_vanish {f : PS R 3 d} (hf : Ax3 f) (D : Fin 3 × Fin d →₀ 
 theorem exists_third (a b : Fin 3) : ∃ k, a ≠ k ∧ b ≠ k := by revert a b; decide
 
 theorem bilinear_part_ax3 {f : PS R 3 d} (hf : Ax3 f) {a : Fin 3 → Pt R 2 d} (ha : ZZ a) : bil (ev a f) 1 1 = 0 := by
-  have h1 : ∀ p : Fin 3 × Fin d, constantCoeff ((pderiv R p) f) = 0 := by
+  have h1 : ∀ p : Fin 3 × Fin d, constantCoeff ((pderiv p) f) = 0 := by
     intro p
     rw [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv, zero_add]
     obtain ⟨k, hk, -⟩ := exists_third p.1 p.1
@@ -40,7 +89,7 @@ theorem bilinear_part_ax3 {f : PS R 3 d} (hf : Ax3 f) {a : Fin 3 → Pt R 2 d} (
     rw [Finsupp.single_apply, if_neg]
     rintro rfl
     exact hk rfl
-  have h2 : ∀ p q : Fin 3 × Fin d, constantCoeff ((pderiv R q) ((pderiv R p) f)) = 0 := by
+  have h2 : ∀ p q : Fin 3 × Fin d, constantCoeff ((pderiv q) ((pderiv p) f)) = 0 := by
     intro p q
     rw [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv, zero_add, coeff_pderiv]
     obtain ⟨k, hk1, hk2⟩ := exists_third p.1 q.1
@@ -230,7 +279,7 @@ theorem iso_rho : ∀ (R : Type) [CommRing R] (d : ℕ) (O : Type) [CommRing O] 
     · rintro ⟨u, v⟩
       simp [transH, Matrix.mulVec_mulVec, Matrix.mulVec_add, i2, ← Matrix.mul_assoc, t2]
     · rintro ⟨u, v⟩
-      simp [transH, Matrix.mulVec_mulVec, Matrix.mulVec_add, i1, t1]
+      simp [transH, Matrix.mulVec_sub, Matrix.mulVec_mulVec, Matrix.mulVec_add, i1, t1]
   · intro a
     have k1 : lin ψ 1 * rho B (star a) = rho B₂ (star a) * lin ψ 1 := by
       calc lin ψ 1 * rho B (star a) = lin ψ 1 * rho B (star a) * (lin φ 1 * lin ψ 1) := by

@@ -1,5 +1,64 @@
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementG
-import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.RaisingKeepsEarlyLetters
+module
+
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.StatementG
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.RemoveS
+public import Mathlib.RingTheory.Binomial
+import Formalism.MahlerMeasure.MahlerMeasureProofs.FreezeInto
+public import Formalism.ThetaLogCoordinates.FockResolutionOnto.FockMonomialProofs.InitPartZeroXMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.MahlerMeasure.MahlerMeasureProofs.TheoremM
+import Formalism.PolynomialDimension.MultinomialDepth.MonoCount
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.L4
 
@@ -9,13 +68,13 @@ section D
 variable {p : ℕ} [Fact p.Prime] {σ : Type}
 
 theorem coeff_pderiv_pow (v : σ) (k : ℕ) (f : MvPolynomial σ ℚ_[p]) (m : σ →₀ ℕ) :
-    coeff m ((((pderiv v).toLinearMap : MvPolynomial σ ℚ_[p] →ₗ[ℚ_[p]] MvPolynomial σ ℚ_[p]) ^ k) f) =
-      (((m v + k).descFactorial k : ℕ) : ℚ_[p]) * coeff (m + Finsupp.single v k) f := by
+    AddMonoidAlgebra.coeff ((((pderiv v).toLinearMap : MvPolynomial σ ℚ_[p] →ₗ[ℚ_[p]] MvPolynomial σ ℚ_[p]) ^ k) f) m =
+      (((m v + k).descFactorial k : ℕ) : ℚ_[p]) * AddMonoidAlgebra.coeff f (m + Finsupp.single v k) := by
   induction k generalizing m with
   | zero => simp
   | succ k ih =>
     rw [pow_succ', Module.End.mul_apply]
-    show coeff m (pderiv v _) = _
+    show AddMonoidAlgebra.coeff (pderiv v _) m = _
     rw [coeff_pderiv, ih, Nat.descFactorial_succ]
     have h1 : (m + Finsupp.single v 1 : σ →₀ ℕ) v = m v + 1 := by simp
     have h2 : m + Finsupp.single v 1 + Finsupp.single v k = m + Finsupp.single v (k + 1) := by
@@ -32,7 +91,7 @@ theorem pderiv_div_int (v : σ) (k : ℕ) (x : MvPolynomial σ ℚ_[p]) (hx : x 
       ((((pderiv v).toLinearMap : MvPolynomial σ ℚ_[p] →ₗ[ℚ_[p]] MvPolynomial σ ℚ_[p]) ^ k) x) ∈ IntPol p σ := by
   rw [intPol_iff_norm] at hx ⊢
   intro m
-  rw [coeff_smul, smul_eq_mul, coeff_pderiv_pow, Nat.descFactorial_eq_factorial_mul_choose, Nat.cast_mul,
+  rw [MvPolynomial.coeff_smul, smul_eq_mul, coeff_pderiv_pow, Nat.descFactorial_eq_factorial_mul_choose, Nat.cast_mul,
     ← mul_assoc, ← mul_assoc, inv_mul_cancel₀ (by exact_mod_cast Nat.factorial_ne_zero k), one_mul, norm_mul]
   exact mul_le_one₀ (norm_natCast_padic_le_one _) (norm_nonneg _) (hx _)
 
@@ -132,7 +191,7 @@ theorem Uop_shift (c n : ℤ) (q : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p])
   rw [Uop_eq, Uop_eq, DDop_mul, hq]
   simp only [MvPolynomial.smul_eq_C_mul]
   push_cast
-  simp only [map_add]
+  simp only [map_add (f := _)]
   ring
 
 theorem Uop_shift_pow (c n : ℤ) (q : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p])
@@ -176,9 +235,9 @@ theorem Uop_step_pow (c : ℤ) (x w : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p
       rw [pow_succ, Module.End.mul_apply]
     have e2 : ((Uop p LL c Cs a) ^ (k + 1)) G = ((Uop p LL c Cs a) ^ k) (Uop p LL c Cs a G) := by
       rw [pow_succ, Module.End.mul_apply]
-    rw [e0, h1, map_add, ih, Uop_comm_pow LL Cs a c w hw (k + 1), ← e1, ← e2]
+    rw [e0, h1, map_add (f := _), ih, Uop_comm_pow LL Cs a c w hw (k + 1), ← e1, ← e2]
     push_cast
-    simp only [MvPolynomial.smul_eq_C_mul, map_add, map_one, map_natCast]
+    simp only [MvPolynomial.smul_eq_C_mul, map_add (f := _), map_one, map_natCast]
     ring
 
 theorem eulL_X (i : Fin (K + 1)) (d : Fin r) :
@@ -234,6 +293,7 @@ theorem DDop_cov (i : Fin (K + 1)) (hi : i ≠ Fin.last K) (hv : LL.vec i = fals
 
 theorem DDop_pair (ha : a ∈ Cs) (i : Fin (K + 1)) (hi : i ≠ Fin.last K) (hv : LL.vec i = false) :
     DDop p LL Cs a (∑ b ∈ Cs, X (Fin.last K, b) * X (i, b)) = 0 := by
+
   rw [map_sum]
   simp only [DDop_mul, DDop_last, DDop_cov LL Cs a i hi hv]
   simp [Finset.sum_add_distrib, mul_ite, Finset.sum_ite_eq, ha]
@@ -260,13 +320,6 @@ theorem Uop_pow_one (c : ℤ) (k : ℕ) :
     push_cast
     simp only [MvPolynomial.smul_eq_C_mul, map_mul]
     ring
-
-theorem one_int : (1 : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p]) ∈ IntPol p (Fin (K + 1) × Fin r) := by
-  classical
-  rw [intPol_iff_norm]
-  intro m
-  rw [coeff_one]
-  split_ifs <;> simp
 
 private theorem Uop_add_one_apply (c : ℤ) (H : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p]) :
     Uop p LL (c + 1) Cs a H = Uop p LL c Cs a H + X (Fin.last K, a) * H := by
@@ -295,9 +348,9 @@ private theorem Uop_pow_succ_apply_eq (c : ℤ) (H : MvPolynomial (Fin (K + 1) �
     have e2 : Uop p LL (c - 1) Cs a (((Uop p LL (c - 1) Cs a) ^ k) H) =
         ((Uop p LL (c - 1) Cs a) ^ (k + 1)) H := by
       rw [pow_succ' _ k, Module.End.mul_apply]
-    rw [pow_succ' (Uop p LL c Cs a) (k + 1), Module.End.mul_apply, ih, map_add, map_smul, hUV, hsh, e1, e2]
+    rw [pow_succ' (Uop p LL c Cs a) (k + 1), Module.End.mul_apply, ih, map_add (f := _), map_smul, hUV, hsh, e1, e2]
     push_cast
-    simp only [MvPolynomial.smul_eq_C_mul, map_add, map_one, map_natCast]
+    simp only [MvPolynomial.smul_eq_C_mul, map_add (f := _), map_one, map_natCast]
     ring
 
 private theorem Uop_pow_succ_mul_apply (c : ℤ) (x w : MvPolynomial (Fin (K + 1) × Fin r) ℚ_[p])
@@ -335,7 +388,7 @@ private theorem Uop_pow_succ_mul_apply (c : ℤ) (x w : MvPolynomial (Fin (K + 1
       rw [pow_succ' _ k, Module.End.mul_apply]
     rw [e0, ih, map_sub, map_smul, h1, hw', hV, e1, e2, Uop_pow_succ_apply_eq LL Cs a c G k]
     push_cast
-    simp only [MvPolynomial.smul_eq_C_mul, map_add, map_one, map_natCast]
+    simp only [MvPolynomial.smul_eq_C_mul, map_add (f := _), map_one, map_natCast]
     ring
 
 private theorem inv_factorial_succ_mul_succ_eq (k : ℕ) :
@@ -371,7 +424,7 @@ theorem udiv_map (ha : a ∈ Cs) (P : MvPolynomial (Fin (K + 1) × Fin r) ℤ_[p
     exact Submodule.smul_mem _ z (zsmul_mem (FrozenVariableLemmas.intPol_pow p (hX _) k) _)
   · intro P Q hP hQ c k
     beta_reduce
-    rw [map_add, map_add, smul_add]
+    rw [map_add (f := _), map_add (f := _), smul_add]
     exact add_mem (hP c k) (hQ c k)
   · intro P n hP c k
     beta_reduce

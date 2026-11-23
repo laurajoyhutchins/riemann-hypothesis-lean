@@ -1,6 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.Statements
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LowerBoundConditional
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -18,39 +60,6 @@ def IncidenceZeroLocus.Statement : Prop :=
 section Inhabitants
 
 attribute [local instance] MvPolynomial.gradedAlgebra
-
-theorem isProjPrime_span_X_zero (F : Type*) [Field F] :
-    IsProjPrime (Ideal.span {(X 0 : MvPolynomial (Fin 2) F)}) where
-  isPrime := (Ideal.span_singleton_prime (X_ne_zero 0)).mpr X_prime
-  isHomog := by
-    rw [isHomogIdeal_iff]
-    refine Ideal.homogeneous_span _ _ fun x hx => ⟨1, ?_⟩
-    rw [Set.mem_singleton_iff] at hx
-    subst hx
-    rw [mem_homogeneousSubmodule]
-    exact isHomogeneous_X _ _
-  isRelevant := ⟨1, by
-    rw [Ideal.mem_span_singleton]
-    intro h
-    have := (X_dvd_X (R := F)).mp h
-    exact absurd this (by decide)⟩
-
-def linearFormX0 (Ω : Type*) [Zero Ω] [One Ω] : Fin 1 × Fin 2 → Ω := fun ij => if ij.2 = 0 then 1 else 0
-
-theorem linearFormX0_mem_incidence :
-    linearFormX0 (AlgebraicClosure ℚ) ∈ incidence (Ideal.span {(X 0 : MvPolynomial (Fin 2) ℚ)}) 1 := by
-  refine ⟨![0, 1], fun h => one_ne_zero (congrFun h 1), fun g hg => ?_, fun i => ?_⟩
-  · obtain ⟨a, rfl⟩ := Ideal.mem_span_singleton'.mp hg
-    simp
-  · simp [linearFormX0]
-
-theorem IncidenceZeroLocus.hypotheses_inhabited :
-    IsHomogIdeal (Ideal.span {(X 0 : MvPolynomial (Fin 2) ℚ)}) ∧
-      ∀ g ∈ incIdeal (Ideal.span {(X 0 : MvPolynomial (Fin 2) ℚ)}) 1,
-        aeval (linearFormX0 (AlgebraicClosure ℚ)) g = 0 := by
-  refine ⟨(isProjPrime_span_X_zero ℚ).isHomog, fun g hg => ?_⟩
-  simp only [incIdeal, Submodule.mem_iInf, RingHom.mem_ker] at hg
-  exact hg _ linearFormX0_mem_incidence
 
 end Inhabitants
 

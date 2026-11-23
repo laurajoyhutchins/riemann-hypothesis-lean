@@ -1,4 +1,43 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.PerDeriv
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.PerDeriv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Sd.Eis
 open MeasureTheory Measure Pointwise
 
@@ -23,7 +62,7 @@ private theorem perMean_key {A : Type} [AddCommGroup A] [TopologicalSpace A] [Is
     (he : μ.map e = c • μ) (σ : Γ → Γ) (hσ : Function.Bijective σ) (hs : ∀ (g : Γ) x, e ((σ g : A) + x) = (g : A) + e x)
     (f : A → ℂ) (hf : ∀ γ ∈ Γ, ∀ x, f (γ + x) = f x) :
     ∫ x in D, f (e x) ∂μ = ∫ x in D, f x ∂μ := by
-  have hq : QuasiMeasurePreserving e μ μ := ⟨e.measurable, by rw [he]; exact Measure.smul_absolutelyContinuous⟩
+  have hq : QuasiMeasurePreserving e μ μ := ⟨e.measurable.aemeasurable, by rw [he]; exact Measure.smul_absolutelyContinuous⟩
   have hD' : IsAddFundamentalDomain Γ (e ⁻¹' D) μ := hD.preimage_of_equiv hq hσ (fun g x => hs g x)
   have hm : μ (e ⁻¹' D) = μ D := by
     have := hD'.measure_set_eq hD MeasurableSet.univ (fun g => by simp)
@@ -67,4 +106,4 @@ theorem UpperTheory.periodic_integral_fundamentalDomain_invariant :
     · exact Subtype.ext (e.symm_apply_apply _)
     · intro g x
       change e (e.symm g + x) = g + e x
-      rw [map_add, e.apply_symm_apply]
+      rw [map_add (f := _), e.apply_symm_apply]

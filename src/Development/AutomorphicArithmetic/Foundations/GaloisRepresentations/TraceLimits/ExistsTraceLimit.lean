@@ -1,7 +1,70 @@
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.Topology.Instances.Matrix
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
 import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ApartAllEmpty
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RegPolOfRepOf
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.Imports
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.ArthurClozelStrongTC
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsWeight
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RestrictsSelf
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import ReciprocityTheory.GaloisValuations.GlobalA
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
@@ -55,7 +118,7 @@ theorem exists_trace_limit : ∀ (l : ℕ) [Fact l.Prime] (Γ : Type) [Group Γ]
       ∀ r > 0, ∀ᶠ j in Filter.comap x (𝓝 g) ⊓ B, ‖θ j - ∑ i ∈ F, c i * trc (ρ i) g‖ ≤ ε + r := by
     intro g F c ε hc r hr
     have hTc : Continuous fun y => ∑ i ∈ F, c i * trc (ρ i) y :=
-      continuous_finset_sum _ fun i _ => continuous_const.mul (hcont i)
+      continuous_finsetSum _ fun i _ => continuous_const.mul (hcont i)
     have hU : {y | ‖(∑ i ∈ F, c i * trc (ρ i) y) - ∑ i ∈ F, c i * trc (ρ i) g‖ < r} ∈ 𝓝 g :=
       (isOpen_lt (continuous_norm.comp (hTc.sub continuous_const)) continuous_const).mem_nhds (by simpa using hr)
     filter_upwards [Filter.mem_inf_of_left (Filter.preimage_mem_comap hU), Filter.mem_inf_of_right (hDF F)] with j hj1 hj2
@@ -102,7 +165,7 @@ theorem exists_trace_limit : ∀ (l : ℕ) [Fact l.Prime] (Γ : Type) [Group Γ]
       MvPolynomial.aeval (fun g => (w g).2) Q - ∑ i ∈ F, c i * MvPolynomial.aeval (fun g => trc (ρ i) (w g).1) Q
     have hΨc : Continuous Ψ :=
       ((hev Q).comp (continuous_pi fun g => continuous_snd.comp (continuous_apply g))).sub
-        (continuous_finset_sum _ fun i _ => continuous_const.mul
+        (continuous_finsetSum _ fun i _ => continuous_const.mul
           ((hev Q).comp (continuous_pi fun g => (hcont i).comp (continuous_fst.comp (continuous_apply g)))))
     let Z : Set (Γ × PadicAlgCl l) := (fun j => (x j, θ j)) '' ⋂ i ∈ F, D i
     have hmem : (fun g => (g, t g)) ∈ closure (Set.univ.pi fun _ : Γ => Z) := by

@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.ConePairing
-import GroundTheory.ProfiniteCohomology.MackeyFormula.ConeHomotopy
+module
+
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.ConePairing
+public import GroundTheory.ProfiniteCohomology.MackeyFormula.ConeHomotopy
+import GroundTheory.ProfiniteCohomology.FilteredHomology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -51,7 +97,6 @@ variable {KA LA KC LC N LN KA' LA' KC' LC' N' LN' : CochainComplex (ModuleCat.{u
   (μL' : LeibnizPairing LA' LN' LC') (μK' : LeibnizPairing KA' N' KC')
 
 include hN in
-
 theorem homotopy_apply_zero_of_d_eq_zero (z : N.X 0) (hz : (N.d 0 1).hom z = 0) :
     (βN.f 0).hom ((ρ.f 0).hom z) = (ρ'.f 0).hom ((αN.f 0).hom z) := by
   have e := congrArg (fun φ => φ.hom z) (hN.comm 0)
@@ -92,7 +137,7 @@ theorem snd_sub_eq_neg_d (hβ : ∀ {r s n : ℕ} (h : r + s = n) (y : LA.X r) (
         μL'.μ (show j + l = j + l from rfl) ((βA.f j).hom b) ((hN.hom (l + 1) l).hom z)) := by
   rw [hβ, homotopy_apply_succ_of_d_eq_zero hN l z hz, hh h a z, map_smul, μL'.leibniz,
     hom_apply_hom_apply_eq_of_comp_eq (βA.comm j (j + 1)) b, ← hab]
-  simp only [map_add, map_sub, LinearMap.sub_apply, smul_add, smul_smul, ← pow_add]
+  simp only [map_add (f := _), map_sub, LinearMap.sub_apply, smul_add, smul_smul, ← pow_add]
   have e : (-1 : k) ^ (j + 1 + j) = -1 := by
     rw [show j + 1 + j = 2 * j + 1 by ring, pow_succ, pow_mul]
     norm_num

@@ -1,5 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelIntegrandAestronglyMeasurable
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftMemMatrixAlgebra
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelIntegrandAestronglyMeasurable
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftMemMatrixAlgebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 open MeasureTheory
 open scoped ComplexConjugate ComplexOrder
@@ -23,11 +76,11 @@ termination_by r - i
 
 theorem level_product_of_lt (L : R.LevelData (Pr (RadSp k r z z' π π')) r) (w : List (Letter ℂ S)) (i : ℕ) (h : i < r) :
     levelProduct L w i = levelProduct L w (i + 1) * bTl L ⟨i, h⟩ w := by
-  rw [levelProduct, dif_pos h]
+  rw [levelProduct, dite_eq_left h]
 
 theorem level_product_of_ge (L : R.LevelData (Pr (RadSp k r z z' π π')) r) (w : List (Letter ℂ S)) (i : ℕ) (h : r ≤ i) :
     levelProduct L w i = 1 := by
-  rw [levelProduct, dif_neg (by omega)]
+  rw [levelProduct, dite_eq_right (by omega)]
 
 theorem level_product_eq_list_prod (L : R.LevelData (Pr (RadSp k r z z' π π')) r) (w : List (Letter ℂ S)) (n : ℕ) :
     ∀ i, r - i = n → i ≤ r →
@@ -172,7 +225,7 @@ theorem complex_norm_eq_re_of_nonneg {z : ℂ} (hz : 0 ≤ z) : ‖z‖ = z.re :
 private lemma act_add_smul_hermitian_curvature (M : SlopeTestRemainingChoices S (Pr (RadSp P.k P.r z z' π π')))
     (x y : Ix S → RadSp P.k P.r z z' π π') (a : ℂ) : act M (x + a • y) = act M x + a • act M y := by
   funext b
-  simp only [act, Pi.add_apply, Pi.smul_apply, map_add, map_smul, Finset.sum_add_distrib, Finset.smul_sum]
+  simp only [act, Pi.add_apply, Pi.smul_apply, map_add (f := _), map_smul, Finset.sum_add_distrib, Finset.smul_sum]
 
 private lemma inK_add_smul_of_inK {Kc : Submodule ℂ (RadSp P.k P.r z z' π π')} {x y : Ix S → RadSp P.k P.r z z' π π'}
     (hx : InK Kc x) (hy : InK Kc y) (a : ℂ) : InK Kc (x + a • y) :=

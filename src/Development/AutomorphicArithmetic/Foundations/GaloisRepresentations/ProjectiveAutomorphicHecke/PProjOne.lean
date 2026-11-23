@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.MapWopWmap
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.MapWopWmap
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Module
 universe u v
@@ -8,18 +58,16 @@ namespace UpperTheory.Gal.CertificateRingHomMap
 
 private theorem monoidAlgebra_lift_freeMonoid_eq_wop {F A J : Type*} [Field F] [Ring A] [Algebra F A] (T : J → A)
     (t : MonoidAlgebra F (FreeMonoid J)) :
-    MonoidAlgebra.lift F A (FreeMonoid J) (FreeMonoid.lift T) t = wop T (t.coeff : List J →₀ F) := by
-  rw [MonoidAlgebra.lift_apply]
-  unfold wop
-  congr 1
-  funext w c
-  rw [FreeMonoid.lift_apply]
+    MonoidAlgebra.lift F A (FreeMonoid J) (FreeMonoid.lift T) t =
+      wop T (t.coeff.equivMapDomain FreeMonoid.toListEquiv) := by
+  simp only [MonoidAlgebra.lift_apply, wop, Finsupp.sum_equivMapDomain, FreeMonoid.lift_apply]
   rfl
 
 private theorem algHom_wop_eq_wop_comp {F A B J : Type*} [Field F] [Ring A] [Algebra F A] [Ring B]
     [Algebra F B] (φ : A →ₐ[F] B) (T : J → A) (t : List J →₀ F) :
     φ (wop T t) = wop (fun j => φ (T j)) t := by
   unfold wop
+
   simp only [Finsupp.sum, map_sum, map_smul, map_list_prod, List.map_map]
   rfl
 
@@ -57,8 +105,10 @@ theorem pProjOne_holds : ProjOne.{u} := by
   have hcomm : ∀ a ∈ Set.range gen, ∀ b ∈ Set.range gen, a * b = b * a := by
     rintro _ ⟨i, rfl⟩ _ ⟨j, rfl⟩
     exact Prod.ext (mul_comm _ _) (hT i j)
-  letI : CommRing D := Algebra.adjoinCommRingOfComm F hcomm
-  haveI : Module.Finite F D := inferInstanceAs (Module.Finite F (Subalgebra.toSubmodule D))
+  have hDcomm : IsMulCommutative D :=
+    Algebra.isMulCommutative_adjoin F fun a ha b hb _ => hcomm a ha b hb
+  let : CommRing D := { D.toRing with mul_comm := hDcomm.is_comm.comm }
+  have : Module.Finite F D := inferInstanceAs (Module.Finite F (Subalgebra.toSubmodule D))
   let χ : D →ₐ[F] F := (AlgHom.fst F F A).comp D.val
   let b := Module.finBasis F D
   choose q hq1 hq2 N hN using fun i => exists_idempotent_aeval_nilpotent_sub_of_isIntegral (b i) (IsIntegral.of_finite F (b i)) (χ (b i))
@@ -100,18 +150,19 @@ theorem pProjOne_holds : ProjOne.{u} := by
   have hD : D ≤ Ψ.range := by
     apply Algebra.adjoin_le
     rintro _ ⟨j, rfl⟩
-    exact ⟨MonoidAlgebra.of F _ (FreeMonoid.of j), by simp [Ψ, MonoidAlgebra.lift_of]⟩
+    exact ⟨MonoidAlgebra.of F _ (FreeMonoid.of j), by simp [Ψ]⟩
   obtain ⟨t, ht⟩ := hD z.2
   have ht' : MonoidAlgebra.lift F (F × A) (FreeMonoid J) (FreeMonoid.lift gen) t = z := ht
-  have hwθ : wop θ t.coeff = (z : F × A).1 := by
-    have h1 := algHom_wop_eq_wop_comp (AlgHom.fst F F A) gen t.coeff
+  let coeff := t.coeff.equivMapDomain FreeMonoid.toListEquiv
+  have hwθ : wop θ coeff = (z : F × A).1 := by
+    have h1 := algHom_wop_eq_wop_comp (AlgHom.fst F F A) gen coeff
     rw [← monoidAlgebra_lift_freeMonoid_eq_wop, ht'] at h1
     exact h1.symm
-  have hwT : wop T t.coeff = (z : F × A).2 := by
-    have h1 := algHom_wop_eq_wop_comp (AlgHom.snd F F A) gen t.coeff
+  have hwT : wop T coeff = (z : F × A).2 := by
+    have h1 := algHom_wop_eq_wop_comp (AlgHom.snd F F A) gen coeff
     rw [← monoidAlgebra_lift_freeMonoid_eq_wop, ht'] at h1
     exact h1.symm
-  refine ⟨t.coeff, ?_, ?_, ?_⟩
+  refine ⟨coeff, ?_, ?_, ?_⟩
   · rw [hwθ]
     exact hzχ
   · rw [hwT]

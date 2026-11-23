@@ -1,5 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
+module
+
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsConjInertiaTameCharOtherPlace
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,21 +56,6 @@ open Formalism.BasicNotions Formalism.ConjugateSelfDual ReciprocityTheory.Gal Po
 open NumberField IsDedekindDomain
 
 open scoped Pointwise
-
-theorem l_not_unit (D : D7) (a : D.nd.Loc) : ¬ IsUnit ((D.nd.l a : ℕ) : D.nd.O a) := by
-  intro hu
-  have hfg : (⊤ : Submodule ℤ_[D.nd.l a] (D.nd.O a)).FG := Module.Finite.fg_top
-  have hle : (⊤ : Submodule ℤ_[D.nd.l a] (D.nd.O a)) ≤
-      (Ideal.span {(D.nd.l a : ℤ_[D.nd.l a])}) • (⊤ : Submodule ℤ_[D.nd.l a] (D.nd.O a)) := by
-    intro y _
-    obtain ⟨u, hu'⟩ := hu
-    have : y = (D.nd.l a : ℤ_[D.nd.l a]) • (((u⁻¹ : (D.nd.O a)ˣ) : D.nd.O a) * y) := by
-      rw [Algebra.smul_def, map_natCast, ← hu', ← mul_assoc, Units.mul_inv, one_mul]
-    rw [this]
-    exact Submodule.smul_mem_smul (Ideal.mem_span_singleton_self _) trivial
-  have hjac : Ideal.span {(D.nd.l a : ℤ_[D.nd.l a])} ≤ Ideal.jacobson ⊥ := by
-    rw [IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top, PadicInt.maximalIdeal_eq_span_p]
-  exact top_ne_bot (Submodule.eq_bot_of_le_smul_of_le_jacobson_bot _ _ hfg hle hjac)
 
 theorem res_T_indep (D : D7) (a : D.nd.Loc) (f : D.nd.T a) (x x' : D.nd.X a) :
     IsLocalRing.residue (D.nd.O a) ((f : D.nd.X a → D.nd.O a) x) =
@@ -40,17 +71,18 @@ theorem res_T_indep (D : D7) (a : D.nd.Loc) (f : D.nd.T a) (x x' : D.nd.X a) :
   have hker : ∀ y, RingHom.ker (ev y) = IsLocalRing.maximalIdeal (D.nd.T a) := fun y =>
     IsLocalRing.eq_maximalIdeal (RingHom.ker_isMaximal_of_surjective (ev y) (hsurj y))
   have h1 : f - algebraMap (D.nd.O a) (D.nd.T a) ((f : D.nd.X a → D.nd.O a) x) ∈ RingHom.ker (ev x) := by
-    rw [RingHom.mem_ker, map_sub]
+    rw [RingHom.mem_ker, (ev x).map_sub]
     exact sub_self _
-  rw [hker x, ← hker x', RingHom.mem_ker, map_sub, sub_eq_zero] at h1
+  rw [hker x, ← hker x', RingHom.mem_ker, (ev x').map_sub, sub_eq_zero] at h1
   exact h1.symm
 
 theorem heckePol_res (D : D7) (a : D.nd.Loc) (x x' : D.nd.X a) (w : PlE D.host) :
     (heckePol D.nd a x w).map (IsLocalRing.residue (D.nd.O a)) =
       (heckePol D.nd a x' w).map (IsLocalRing.residue (D.nd.O a)) := by
   unfold heckePol
-  simp only [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
-    Polynomial.map_mul, Polynomial.map_C, map_mul]
+
+  simp only [Polynomial.map_add (f := _), Polynomial.map_pow, Polynomial.map_X, Polynomial.map_sum,
+  Polynomial.map_mul, Polynomial.map_C, map_mul]
   congr 1
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [res_T_indep D a (D.nd.hT a w k) x x']
@@ -82,29 +114,6 @@ def IsRhoOf (a : N.Loc) (x : N.X a) (ρ : G H.E N.Om →* GL (Fin R.r) (N.O a)) 
       ∏ c ∈ Finset.Icc 1 R.t, (X - C ((N.chi a c σ : (N.O a)ˣ) : N.O a)) = heckePol N a x w
 
 end Defs
-
-def rhoAt (D : D7) (a : D.nd.Loc) {i : D.ntw.Tw} (h : D.ntw.twOf a = i) (s : D.ntw.Sig i) :
-    G D.host.E D.nd.Om →* GL (Fin D.R.r) (D.nd.O a) := by
-  subst h
-  exact mapRep (D.ntw.twist₂ a) (D.ntw.rhoS _ s)
-
-def SideLoc (D : D7) (i : D.ntw.Tw) (b : Bool) : Prop :=
-  ∃ a : D.nd.Loc, D.ntw.twOf a = i ∧ D.ntw.twSide a = b
-
-def SelfPair (D : D7) (i : D.ntw.Tw) : Prop :=
-  ∀ x : NumberField.RingOfIntegers D.LL0,
-    (∃ y ∈ IsLocalRing.maximalIdeal (D.ntw.O0 i),
-      algebraMap (D.ntw.O0 i) (FractionRing (D.ntw.O0 i)) y = D.ntw.emb0 i (x : D.LL0)) ↔
-    (∃ y ∈ IsLocalRing.maximalIdeal (D.ntw.O0 i),
-      algebraMap (D.ntw.O0 i) (FractionRing (D.ntw.O0 i)) y = D.ntw.emb0b i (x : D.LL0))
-
-def NoSelfPair (D : D7) : Prop := ∀ i, D.ntw.NonzeroIndexPlace i → ¬ SelfPair D i
-
-def SigTie (D : D7) : Prop :=
-  ∀ (i : D.ntw.Tw), D.ntw.NonzeroIndexPlace i → ∀ (s : D.ntw.Sig i), SideLoc D i (D.ntw.side i s) →
-    ∃ (a : D.nd.Loc) (h : D.ntw.twOf a = i),
-      D.nd.j a = D.ntw.jS i s ∧ D.ntw.twSide a = D.ntw.side i s ∧ HG D.nd D.naut a ∧
-      ∃ x ∈ D.nd.Z a, IsRhoOf D.nd a x (rhoAt D a h s)
 
 def ResidualIrreducibleRankR (D : D7) : Prop :=
   ∀ a, HG D.nd D.naut a → ∀ rb, IsRhoBar D.nd a rb →
@@ -160,6 +169,7 @@ theorem span_descent {k L : Type} [Field k] [Field L] (φ : k →+* L) {n : ℕ}
   have hfc : ∀ M : Matrix (Fin n) (Fin n) k, f M = ∑ i, ∑ j, M i j * c i j := by
     intro M
     conv_lhs => rw [Matrix.matrix_eq_sum_single M]
+
     simp only [map_sum]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     have : Matrix.single i j (M i j) = M i j • Matrix.single i j (1 : k) := by
@@ -178,6 +188,7 @@ theorem span_descent {k L : Type} [Field k] [Field L] (φ : k →+* L) {n : ℕ}
     show F ((S i).map φ) = 0
     rw [hF]
     have := congrArg φ h0
+
     simp only [map_sum, map_mul, map_zero] at this
     rw [← this]
     refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
@@ -208,31 +219,7 @@ theorem span_descent {k L : Type} [Field k] [Field L] (φ : k →+* L) {n : ℕ}
 theorem conj_mem_Ine_smul {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F Ω]
     (A : ValuationSubring Ω) (τ σ : G F Ω) (hσ : σ ∈ Ine (F := F) A) :
     τ * σ * τ⁻¹ ∈ Ine (F := F) (τ • A) := by
-  have hmem : ∀ x : Ω, x ∈ τ • A ↔ (τ⁻¹ : G F Ω) x ∈ A := by
-    intro x
-    rw [← ValuationSubring.smul_mem_pointwise_smul_iff (g := τ⁻¹), inv_smul_smul]
-    rfl
-  have hlt : ∀ y : Ω, (τ • A).valuation y < 1 ↔ A.valuation ((τ⁻¹ : G F Ω) y) < 1 := by
-    intro y
-    rw [valuation_lt_one_iff', valuation_lt_one_iff', hmem, hmem, map_inv₀,
-      map_eq_zero_iff _ (τ⁻¹ : G F Ω).injective]
-  refine ⟨?_, fun x hx => ?_⟩
-  · show (τ * σ * τ⁻¹) • (τ • A) = τ • A
-    rw [mul_smul, mul_smul, inv_smul_smul]
-    congr 1
-    exact hσ.1
-  · rw [hlt]
-    have hx' : A.valuation ((τ⁻¹ : G F Ω) x) ≤ 1 := by
-      rw [A.valuation_le_one_iff, ← hmem]
-      exact ((τ • A).valuation_le_one_iff x).mp hx
-    have e : (τ⁻¹ : G F Ω) ((τ * σ * τ⁻¹) x - x) = σ ((τ⁻¹ : G F Ω) x) - (τ⁻¹ : G F Ω) x := by
-      rw [map_sub]
-      congr 1
-      show (τ⁻¹ * (τ * σ * τ⁻¹)) x = _
-      rw [← mul_assoc, ← mul_assoc, inv_mul_cancel, one_mul]
-      rfl
-    rw [e]
-    exact hσ.2 _ hx'
+  apply GlobalTheory.TameMove.conj_mem_Ine_smul <;> assumption
 
 theorem placesOver_disj (E : Type) [Field E] [NumberField E] {p q : ℕ} (hp : p.Prime) (hq : q.Prime)
     (hpq : p ≠ q) (v : HeightOneSpectrum (𝓞 E)) (h1 : v ∈ placesOver E p) : v ∉ placesOver E q := by

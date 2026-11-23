@@ -1,20 +1,62 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.FWTie
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FibExtMarked
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FibExtMarked
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CompletedTensorLatticeLatticeVacuumTransport
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.ZeroNotAdmissibleOfRankPos
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicThetaOfTestFunctionExistsLawsFockVectorsStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsConjugateModelSameThetaFunctions
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrthonormalNegFirstFamilyFrameCartanMove
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OmegaFormIntegrality
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OmegaFormSignExists
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitFinitePointMovesVacuumToProjectionStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OmegaFormPeriodRelation
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicThetaOfTestFunctionExistsLawsFockVectorsStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsLatticeVacuumIffSignedRationalFixed
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CompletedTensorLatticeLatticeVacuumTransport
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionFixesLevelVectorUpToUnit
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HostElementIdempotentModTwo
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DualHalfLevelMarkingExistsAndMatch
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RdUEqConstMulClsSum
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletion
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DualHalfLevelMarkingExistsAndMatch
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IsLatticeVacuumIffSignedRationalFixed
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LatticeVacuaTensorCorrespondLine
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RationalSchwartzBruhatAlgebraIntegralLinear
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.RdUEqConstMulClsSum
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SymplecticCharacterRealFinitePointsMatchStatement
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionFixesLevelVectorUpToUnit
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicElementLatticeFullAndCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.FWT Formalism.L2.Pj
 open MeasureTheory IsDedekindDomain NumberField Matrix
@@ -58,7 +100,7 @@ theorem exists_half {R W A : Type} [CommRing R] [AddCommGroup W] [Module R W] [A
     rw [nl k, nl M, smul_comm M k, ← e3, nl, hc, smul_comm (c τ), smul_comm (c τ), smul_smul k, smul_smul]
     congr 2
     ring
-  rw [dec y, map_add, AddMonoidHom.add_apply, eb, e2]
+  rw [dec y, map_add (f := _), AddMonoidHom.add_apply, eb, e2]
   exact add_mem (hH _ (nsmul_mem hb 2) _ hu) (hH _ hM _ (nsmul_mem (sub_mem (nsmul_mem ha' k) hd) 2))
 
 theorem heis_congr {ψ : AddChar (AF D.host.F) ℂ} {H : AddSubgroup (WO S T)}
@@ -109,7 +151,7 @@ theorem smul_mem_of_int {Λ : Lt D.host.E S.rank} (hΛ : Λ ∈ Vset D.host.E S.
       exact ⟨AddSubgroup.subset_closure ⟨α, hα, o, rfl⟩, AddSubgroup.subset_closure
         ⟨α, hα, ⟨cc (o : D.host.E), Base.isIntegral_cc o.isIntegral_coe⟩, rfl⟩⟩
     | zero => rw [map_zero, map_zero]; exact ⟨zero_mem _, zero_mem _⟩
-    | add x y _ _ hx hy => rw [map_add, RingHom.map_add]; exact ⟨add_mem hx.1 hy.1, add_mem hx.2 hy.2⟩
+    | add x y _ _ hx hy => rw [map_add (f := _), RingHom.map_add (f := _)]; exact ⟨add_mem hx.1 hy.1, add_mem hx.2 hy.2⟩
     | neg x _ hx => rw [map_neg, RingHom.map_neg]; exact ⟨neg_mem hx.1, neg_mem hx.2⟩
   have h2 := emb_mul a 1
   rw [mul_one] at h2
@@ -131,6 +173,7 @@ theorem finW_eq_colM (y : Matrix (Fin S.rank) (Fin T.rank) D.host.E) : finW S T 
 
 theorem colM_mem {L : Lt D.host.E T.rank} {u : Fin S.rank → Fin T.rank → AfE D} (hu : ∀ b, u b ∈ hatV L) :
     colM S T u ∈ hatA S T (tens (stdL D.host.E S.rank) L) := by
+
   rw [← Finset.univ_sum_single u, map_sum]
   refine sum_mem fun b _ => ?_
   have h1 : (Pi.single b 1 : Fin S.rank → D.host.E) ∈ stdL D.host.E S.rank := Submodule.subset_span ⟨b, rfl⟩
@@ -150,6 +193,7 @@ theorem actO_colM (g : GA D T) (u : Fin S.rank → Fin T.rank → AfE D) :
   rw [actO, e, Matrix.mul_one]
   ext a k
   change ∑ c, Formalism.L2.Theta.mt T g a c * emb D (u k c) = emb D (∑ c, finPart D (Formalism.L2.Theta.mt T g a c) * u k c)
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun c _ => (emb_mul _ _).symm
 
@@ -299,7 +343,7 @@ theorem char_hatA (C : Ctx S T) {Λ : Lt D.host.E S.rank} (hΛ : Λ ∈ Vset D.h
   push_cast
   ring
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem heis_root (C : Ctx S T) {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E} {Dw : Datum H} {l : Level H}
     {h : GA D S} {g : GA D T} {Λ : Lt D.host.E S.rank} (hΛ : Λ ∈ Vset D.host.E S.rank 1)
@@ -339,6 +383,7 @@ theorem heis_root (C : Ctx S T) {H : ReciprocityTheory.ChartRestriction.G.Geo.To
     have hB1 : (B : D.host.E) ≠ 0 := Nat.cast_ne_zero.2 hB
     have i1 : finPart D (e * incA D (B : D.host.E)⁻¹) ∈ Formalism.L2.Theta.intAE D := by
       obtain ⟨⟨es, hes, rfl⟩, -⟩ := he
+
       rw [Finset.sum_mul, map_sum]
       refine sum_mem fun PP hPP => ?_
       by_contra hn

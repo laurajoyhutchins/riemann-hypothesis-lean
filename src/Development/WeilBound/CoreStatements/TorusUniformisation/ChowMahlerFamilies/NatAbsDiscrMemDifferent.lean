@@ -1,9 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.HtWSpanSingleton
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundle
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateEigenLatticeEq
+module
+
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointNormalCoords
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.HtWSpanSingleton
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateEigenLatticeEq
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieOmegaLatticeVectorBundle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -22,59 +73,11 @@ theorem genMap_germ {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRing
 theorem exists_eq_div_genMap {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRingCat.of Ω) ⟶ X}
     (hξ : IsCptGen ξ) (p : Cpt ξ) (a : Ω) :
     ∃ u v : X.presheaf.stalk p.1, genMap ξ p v ≠ 0 ∧ a = genMap ξ p u / genMap ξ p v := by
-  obtain ⟨W, hW, hpW, -⟩ := exists_isAffineOpen_mem_and_subset (show (p.1 : X) ∈ (⊤ : X.Opens) from trivial)
-  have heW : genPt ξ ∈ W := p.2.mem_open W.isOpen hpW
-  obtain ⟨w, rfl⟩ := hξ.bij.2 a
-  let _ : Algebra Γ(X, W) (X.presheaf.stalk ((⟨genPt ξ, heW⟩ : W) : X)) :=
-    TopCat.Presheaf.algebra_section_stalk X.presheaf ⟨genPt ξ, heW⟩
-  have _ : IsLocalization.AtPrime (X.presheaf.stalk ((⟨genPt ξ, heW⟩ : W) : X))
-      (hW.primeIdealOf ⟨genPt ξ, heW⟩).asIdeal := hW.isLocalization_stalk ⟨genPt ξ, heW⟩
-  obtain ⟨⟨f, g⟩, hfg⟩ := IsLocalization.mk'_surjective (S := X.presheaf.stalk ((⟨genPt ξ, heW⟩ : W) : X))
-    (hW.primeIdealOf ⟨genPt ξ, heW⟩).asIdeal.primeCompl w
-  dsimp only at hfg
-  have h2 := IsLocalization.mk'_eq_iff_eq_mul.1 hfg
-  have h3 : (X.presheaf.germ W (genPt ξ) heW).hom f =
-      (show ↑(X.presheaf.stalk (genPt ξ)) from w) * (X.presheaf.germ W (genPt ξ) heW).hom g := h2
-  have hu := IsLocalization.map_units (M := (hW.primeIdealOf ⟨genPt ξ, heW⟩).asIdeal.primeCompl)
-    (X.presheaf.stalk ((⟨genPt ξ, heW⟩ : W) : X)) g
-  have hu' : IsUnit ((X.presheaf.germ W (genPt ξ) heW).hom g) := hu
-  have hne : (Scheme.stalkClosedPointTo ξ).hom ((X.presheaf.germ W (genPt ξ) heW).hom g) ≠ 0 :=
-    (hu'.map (Scheme.stalkClosedPointTo ξ).hom).ne_zero
-  refine ⟨(X.presheaf.germ W p.1 hpW).hom f, (X.presheaf.germ W p.1 hpW).hom g, ?_, ?_⟩
-  · rw [genMap_germ p hpW heW]
-    exact hne
-  · have h4 : (Scheme.stalkClosedPointTo ξ).hom ((X.presheaf.germ W (genPt ξ) heW).hom f) =
-        (Scheme.stalkClosedPointTo ξ).hom w *
-          (Scheme.stalkClosedPointTo ξ).hom ((X.presheaf.germ W (genPt ξ) heW).hom g) :=
-      (congrArg (Scheme.stalkClosedPointTo ξ).hom h3).trans (map_mul _ _ _)
-    rw [genMap_germ p hpW heW, genMap_germ p hpW heW, h4, mul_div_assoc, div_self hne, _root_.mul_one]
+  apply GlobalTheory.CompanionTheory.Ar.XR.exists_eq_div_genMap <;> assumption
 
 theorem normalCpt_of_isCptGen {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRingCat.of Ω) ⟶ X}
     (hξ : IsCptGen ξ) (hX : IsNormalScheme X) : Flat.NormalCpt ξ := by
-  intro p a ha
-  obtain ⟨_, hic⟩ := hX p.1
-  have e : X.presheaf.stalk p.1 ≃+* regAt ξ p :=
-    RingEquiv.ofBijective (genMap ξ p).rangeRestrict
-      ⟨fun u v h => hξ.inj p (congrArg Subtype.val h), (genMap ξ p).rangeRestrict_surjective⟩
-  have : IsIntegrallyClosed (regAt ξ p) := IsIntegrallyClosed.of_equiv e
-  have hfr : IsFractionRing (regAt ξ p) Ω := by
-    refine ⟨?_, ?_, ?_⟩
-    · rintro ⟨y, hy⟩
-      refine IsUnit.mk0 _ ?_
-      have hy0 : y ≠ 0 := nonZeroDivisors.ne_zero hy
-      intro h
-      exact hy0 (Subtype.ext h)
-    · intro z
-      obtain ⟨u, v, hv, huv⟩ := exists_eq_div_genMap hξ p z
-      have hv' : (⟨genMap ξ p v, v, rfl⟩ : regAt ξ p) ≠ 0 := fun h => hv (congrArg Subtype.val h)
-      refine ⟨⟨⟨genMap ξ p u, u, rfl⟩, ⟨⟨genMap ξ p v, v, rfl⟩, mem_nonZeroDivisors_of_ne_zero hv'⟩⟩, ?_⟩
-      show z * genMap ξ p v = genMap ξ p u
-      rw [huv, div_mul_cancel₀ _ hv]
-    · intro x y h
-      exact ⟨1, by rw [Subtype.ext h]⟩
-  obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.1 ha
-  rw [← hy]
-  exact y.2
+  apply GlobalTheory.CompanionTheory.Ar.XR.normalCpt_of_isCptGen <;> assumption
 
 theorem epiSp {Ω K : Type} [Field Ω] [Field K] (a : Ω →+* K) : Epi (spMap a) := by
   constructor

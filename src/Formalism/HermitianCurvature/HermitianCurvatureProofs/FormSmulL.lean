@@ -1,6 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AeNeZeroComplex
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftDegreeLemmas
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBFVnice
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AeNeZeroComplex
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftDegreeLemmas
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BlockOfChoices
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSettingBis
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBFVnice
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGWave
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBL
 
@@ -111,10 +158,10 @@ theorem gN_uB (hB : KB.IsLeadingFormSetting Cb Cc S p f χ A₀)
     rw [gN_setC_form hB F v ε j hj w h h' hh hh']
     have e1 : uB S p F v ε j hj w h = (((√(nnS S h) / bS S h : ℝ) : ℂ)) •
         KB.slv (p v).T (F v ε) j hj w (stdS S h) ((stdS_size S h).trans hh.2) := by
-      unfold uB; rw [dif_pos hh]
+      unfold uB; rw [dite_eq_left hh]
     have e2 : uB S p F v ε j hj w h' = (((√(nnS S h') / bS S h' : ℝ) : ℂ)) •
         KB.slv (p v).T (F v ε) j hj w (stdS S h') ((stdS_size S h').trans hh'.2) := by
-      unfold uB; rw [dif_pos hh']
+      unfold uB; rw [dite_eq_left hh']
     rw [e1, e2, form_smul_l (p v) j hj w _ _ _ hs (nv_smul _ hs'), form_smul_r (p v) j hj w _ _ _ hs hs',
       Complex.conj_ofReal, dW_split]
     push_cast
@@ -122,8 +169,8 @@ theorem gN_uB (hB : KB.IsLeadingFormSetting Cb Cc S p f χ A₀)
   · rw [gN_setC_zero hB F v ε j w h h' hloc]
     have : uB S p F v ε j hj w h = 0 ∨ uB S p F v ε j hj w h' = 0 := by
       by_cases hh : D.IsLocPt h j
-      · right; unfold uB; rw [dif_neg (fun hh' => hloc ⟨hh, hh'⟩)]
-      · left; unfold uB; rw [dif_neg hh]
+      · right; unfold uB; rw [dite_eq_right (fun hh' => hloc ⟨hh, hh'⟩)]
+      · left; unfold uB; rw [dite_eq_right hh]
     rcases this with h0 | h0
     · rw [h0, form_zero_l (p v) j hj w _ hx', mul_zero]
     · rw [h0, form_zero_r (p v) j hj w _ hx, mul_zero]
@@ -148,10 +195,10 @@ theorem hatB_uB (hA : P5.ThmPActual) (hPS : KB.PStd) (hB : KB.IsLeadingFormSetti
     rw [hatB_setC hA hPS hB F hF v ε hε j hj w hw l h h' hh hh']
     have e1 : uB S p F v ε j hj w h = (((√(nnS S h) / bS S h : ℝ) : ℂ)) •
         KB.slv (p v).T (F v ε) j hj w (stdS S h) ((stdS_size S h).trans hh.2) := by
-      unfold uB; rw [dif_pos hh]
+      unfold uB; rw [dite_eq_left hh]
     have e2 : uB S p F v ε j hj w h' = (((√(nnS S h') / bS S h' : ℝ) : ℂ)) •
         KB.slv (p v).T (F v ε) j hj w (stdS S h') ((stdS_size S h').trans hh'.2) := by
-      unfold uB; rw [dif_pos hh']
+      unfold uB; rw [dite_eq_left hh']
     have hws := PBFV.waveG_nice ((p v).T.bs j) ε2 (sW S j l) w _ hs
     have ew : KB.waveG ((p v).T.bs j) (sW S j l) w ((((√(nnS S h) / bS S h : ℝ) : ℂ)) •
         KB.slv (p v).T (F v ε) j hj w (stdS S h) ((stdS_size S h).trans hh.2)) =
@@ -168,8 +215,8 @@ theorem hatB_uB (hA : P5.ThmPActual) (hPS : KB.PStd) (hB : KB.IsLeadingFormSetti
   · rw [hatB_setC_zero hB F v ε j w l h h' hsz hsz' hloc]
     have : uB S p F v ε j hj w h = 0 ∨ uB S p F v ε j hj w h' = 0 := by
       by_cases hh : D.IsLocPt h j
-      · right; unfold uB; rw [dif_neg (fun hh' => hloc ⟨hh, hh'⟩)]
-      · left; unfold uB; rw [dif_neg hh]
+      · right; unfold uB; rw [dite_eq_right (fun hh' => hloc ⟨hh, hh'⟩)]
+      · left; unfold uB; rw [dite_eq_right hh]
     rcases this with h0 | h0
     · rw [h0, PBG.waveG_zero, form_zero_l (p v) j hj w _ hx', mul_zero]
     · rw [h0, form_zero_r (p v) j hj w _ hwx, mul_zero]

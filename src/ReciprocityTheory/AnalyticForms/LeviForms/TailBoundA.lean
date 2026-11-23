@@ -1,12 +1,60 @@
-import ReciprocityTheory.AnalyticForms.LeviForms.TailCut
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PLLocalStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
-import ReciprocityTheory.AnalyticForms.PotentialTheory.SNCAtlas
-import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
-import ReciprocityTheory.AnalyticForms.PotentialTheory.DegreeInhab
-import ReciprocityTheory.AnalyticForms.LeviForms.PullDominateStatement
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftB
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.P
 
@@ -196,7 +244,7 @@ theorem exists_levi_nonneg_chern_bound [CompactSpace X] (A : FinHolAtlas e X) (�
       Metric.isOpen_ball
   obtain ⟨t, ht⟩ := isCompact_univ.elim_finite_subcover
     (fun p => (A.chart (j p)).source ∩ A.chart (j p) ⁻¹' Metric.ball (A.chart (j p) p) (r p))
-    hVo (fun x _ => Set.mem_iUnion.2 ⟨x, hj x, Metric.mem_ball_self (hr x)⟩)
+    hVo (fun x _ => Set.mem_iUnion.2 ⟨x, hj x, Set.mem_preimage.mpr (Metric.mem_ball_self (hr x))⟩)
   obtain ⟨C, hC0, hCm⟩ : ∃ C : ℝ, 0 ≤ C ∧ ∀ i ∈ t, m i ≤ C :=
     ⟨∑ i ∈ t, |m i|, Finset.sum_nonneg fun i _ => abs_nonneg _, fun i hi =>
       (le_abs_self _).trans (Finset.single_le_sum (f := fun i => |m i|)

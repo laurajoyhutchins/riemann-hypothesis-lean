@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AdelicQuotients.InvariantSesquilinearFormEqSmulOfIrreducible
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsOrthonormalBasisSesquilinear
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Development.AutomorphicArithmetic.AdelicQuotients.InvariantSesquilinearFormEqSmulOfIrreducible
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsOrthonormalBasisSesquilinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
+
 open MeasureTheory
 
 private lemma exists_orthonormal_basis_sesquilinear {V : Type} [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V]
@@ -37,7 +90,7 @@ theorem UpperTheory.irreducible_hermitian_form_unique :
   let S : V → V → ℂ := fun y w => ∫ g, B (ρ g a) y * star (B (ρ g c) w) ∂μ
   have hS1 : ∀ w w' y, S y (w + w') = S y w + S y w' := by
     intro w w' y
-    simp only [S, map_add, star_add, mul_add]
+    simp only [S, map_add (f := _), star_add, mul_add]
     exact integral_add (hint _ _ _ _) (hint _ _ _ _)
   have hS2 : ∀ (r : ℂ) w y, S y (r • w) = r * S y w := by
     intro r w y
@@ -49,7 +102,7 @@ theorem UpperTheory.irreducible_hermitian_form_unique :
     exact integral_const_mul _ _
   have hS3 : ∀ w y y', S (y + y') w = S y w + S y' w := by
     intro w y y'
-    simp only [S, map_add, add_mul]
+    simp only [S, map_add (f := _), add_mul]
     exact integral_add (hint _ _ _ _) (hint _ _ _ _)
   have hS4 : ∀ (r : ℂ) w y, S (r • y) w = star r * S y w := by
     intro r w y
@@ -77,7 +130,7 @@ theorem UpperTheory.irreducible_hermitian_form_unique :
       simp [this, mul_comm]
     have h2 : ∑ i, S (e i) (e i) = ∫ _g : G, B a c ∂μ := by
       simp only [S]
-      rw [← integral_finset_sum _ (fun i _ => hint _ _ _ _)]
+      rw [← integral_finsetSum _ (fun i _ => hint _ _ _ _)]
       congr 1
       funext g
       rw [← hinv g a c, hpar (ρ g a) (ρ g c)]

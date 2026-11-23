@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+module
+
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.Etale.Basic
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsReducedAlgebraOfSmoothOfIsNoetherianRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -12,7 +59,7 @@ theorem mem_minimalPrimes_of_disjoint_nonZeroDivisors {R : Type} [CommRing R] [I
     intro x hx
     have hx' : x ∉ nonZeroDivisors R := Set.disjoint_left.mp hp hx
     rw [mem_nonZeroDivisors_iff_right] at hx'
-    push_neg at hx'
+    push Not at hx'
     obtain ⟨y, hxy, hy⟩ := hx'
     have hrad : (⊥ : Ideal R).radical = ⊥ := by
       exact nilradical_eq_zero R
@@ -42,15 +89,15 @@ theorem total_fractions_isArtinian_isReduced (R : Type) [CommRing R] [IsReduced 
       Q.comap (algebraMap R (FractionRing R)) ∈ minimalPrimes R := by
     intro Q hQ
     have h := (IsLocalization.isPrime_iff_isPrime_disjoint (nonZeroDivisors R) (FractionRing R) Q).1 hQ
-    haveI := h.1
+    have := h.1
     exact mem_minimalPrimes_of_disjoint_nonZeroDivisors _ h.2.symm
   have h1 := key P hP
   have h2 := key M hM.isPrime
   have hle : M.comap (algebraMap R (FractionRing R)) ≤ P.comap (algebraMap R (FractionRing R)) :=
     h2.2 ⟨h1.1.1, bot_le⟩ (Ideal.comap_mono hPM)
   have : P = M := by
-    rw [← IsLocalization.map_comap (nonZeroDivisors R) (FractionRing R) P,
-      ← IsLocalization.map_comap (nonZeroDivisors R) (FractionRing R) M]
+    rw [← IsLocalization.map_under (nonZeroDivisors R) (FractionRing R) P,
+      ← IsLocalization.map_under (nonZeroDivisors R) (FractionRing R) M]
     exact congrArg _ (le_antisymm (Ideal.comap_mono hPM) hle)
   exact this ▸ hM
 

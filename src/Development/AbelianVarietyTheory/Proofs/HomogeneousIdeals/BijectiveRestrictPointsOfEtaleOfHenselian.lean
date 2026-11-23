@@ -1,4 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.Henselian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.CategoryTheory.Limits.Shapes.Connected
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Unramified.LocalStructure
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Etale.StandardEtale
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
 
@@ -42,8 +101,8 @@ theorem isClosedImmersion_equalizer_ι_of_isSeparated {X S T : Scheme.{u}} (f : 
   MorphismProperty.of_isPullback (P := @IsClosedImmersion)
     (isPullback_equalizer_diagonal f hab) inferInstance
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem isOpenImmersion_equalizer_ι_left_of_unramified {S : Scheme.{u}} {T X : Over S}
     [FormallyUnramified X.hom] [LocallyOfFiniteType X.hom] (a b : T ⟶ X) :
     IsOpenImmersion (equalizer.ι a b).left := by
@@ -134,8 +193,8 @@ theorem surjective_of_isNilpotent_ker {T₀ T : Scheme.{u}} (i : T₀ ⟶ T) [Is
     simp
   exact surjective_of_isDominant_of_isClosed_range _ i.isClosedEmbedding.isClosed_range
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_local_lift_of_smooth {X S T₀ T : Scheme.{u}} (f : X ⟶ S) [Smooth f]
     (i : T₀ ⟶ T) [IsClosedImmersion i] (hi : IsNilpotent i.ker)
     (g : T₀ ⟶ X) (h : T ⟶ S) (w : g ≫ f = i ≫ h) (t : T) :
@@ -251,8 +310,8 @@ theorem existsUnique_lift_of_etale_of_surjective {X S : Scheme.{u}} (f : X ⟶ S
   have := IsClosedImmersion.spec_of_surjective π hπ
   existsUnique_lift_of_etale f _ (isNilpotent_ker_specMap π hπ') g h w
 
-open Polynomial in
 
+open Polynomial in
 theorem exists_algHom_lift_of_henselian {B A : Type*} {R K : Type u} [CommRing B] [CommRing A]
     [CommRing R] [Field K] [Algebra B A] [Algebra B R] [Algebra B K] [Algebra.Etale B A]
     [HenselianLocalRing R] (π : R →ₐ[B] K) (hπ : Function.Surjective π) (φ : A →ₐ[B] K) :
@@ -266,16 +325,16 @@ theorem exists_algHom_lift_of_henselian {B A : Type*} {R K : Type u} [CommRing B
     ext a; simp [φ']
   have hx : P.HasMap (φ' P.x) := P.hasMap.map φ'
   have hc : (π : R →+* K).comp (algebraMap B R) = algebraMap B K := π.comp_algebraMap
-  have H := ((HenselianLocalRing.TFAE R).out 0 2).mp ‹HenselianLocalRing R›
+  have H := ((HenselianLocalRing.TFAE R).out 1 3).mp ‹HenselianLocalRing R›
   obtain ⟨a, ha, ha'⟩ := H (π : R →+* K) hπ (P.f.map (algebraMap B R)) (P.monic_f.map _) (φ' P.x)
-    (by rw [eval₂_map, hc]; exact hx.1)
-    (by rw [derivative_map, eval₂_map, hc]; exact hx.isUnit_derivative_f.ne_zero)
+    (by rw [Polynomial.eval₂_map, hc]; exact hx.1)
+    (by rw [Polynomial.derivative_map, Polynomial.eval₂_map, hc]; exact hx.isUnit_derivative_f.ne_zero)
   replace ha' : π a = φ' P.x := ha'
   have hloc : IsLocalHom (π : R →+* K) := .of_surjective _ hπ
   have hA : P.HasMap a := by
-    refine ⟨by rwa [aeval_def, ← Polynomial.eval_map], ?_⟩
+    refine ⟨by rwa [Polynomial.aeval_def, ← Polynomial.eval_map], ?_⟩
     refine IsUnit.of_map (π : R →+* K) _ ?_
-    rw [RingHom.coe_coe, ← aeval_algHom_apply, ha']
+    rw [RingHom.coe_coe, ← Polynomial.aeval_algHom_apply, ha']
     exact hx.2
   refine ⟨((P.lift a hA).comp P.equivRing.toAlgHom).comp (IsScalarTower.toAlgHom B A _), ?_⟩
   rw [← hφ', ← AlgHom.comp_assoc]
@@ -339,10 +398,6 @@ def restrictPoints {X S T₀ T : Scheme.{u}} (f : X ⟶ S) (h : T ⟶ S) (i : T�
     {l : T ⟶ X // l ≫ f = h} → {g : T₀ ⟶ X // g ≫ f = i ≫ h} :=
   fun l ↦ ⟨i ≫ l.1, by rw [Category.assoc, l.2]⟩
 
-@[simp]
-theorem restrictPoints_val {X S T₀ T : Scheme.{u}} (f : X ⟶ S) (h : T ⟶ S) (i : T₀ ⟶ T)
-    (l : {l : T ⟶ X // l ≫ f = h}) : (restrictPoints f h i l).1 = i ≫ l.1 := rfl
-
 theorem bijective_restrictPoints_of_existsUnique {X S T₀ T : Scheme.{u}} (f : X ⟶ S) (h : T ⟶ S)
     (i : T₀ ⟶ T)
     (H : ∀ g : T₀ ⟶ X, g ≫ f = i ≫ h → ∃! l : T ⟶ X, i ≫ l = g ∧ l ≫ f = h) :
@@ -352,38 +407,11 @@ theorem bijective_restrictPoints_of_existsUnique {X S T₀ T : Scheme.{u}} (f : 
   obtain ⟨l, ⟨h₁, h₂⟩, h₃⟩ := H g hg
   exact ⟨⟨l, h₂⟩, Subtype.ext h₁, fun y hy ↦ Subtype.ext (h₃ _ ⟨congr(($hy).1), y.2⟩)⟩
 
-theorem bijective_restrictPoints_of_etale {X S T₀ T : Scheme.{u}} (f : X ⟶ S) [Etale f]
-    (h : T ⟶ S) (i : T₀ ⟶ T) [IsClosedImmersion i] (hi : IsNilpotent i.ker) :
-    Function.Bijective (restrictPoints f h i) :=
-  bijective_restrictPoints_of_existsUnique f h i fun g w ↦ existsUnique_lift_of_etale f i hi g h w
-
 theorem bijective_restrictPoints_of_etale_of_henselian {X S : Scheme.{u}} (f : X ⟶ S) [Etale f]
     (R : Type u) [CommRing R] [HenselianLocalRing R] (h : Spec (.of R) ⟶ S) :
     Function.Bijective (restrictPoints f h
       (Spec.map (CommRingCat.ofHom (IsLocalRing.residue R)))) :=
   bijective_restrictPoints_of_existsUnique f h _ fun g w ↦
     existsUnique_lift_of_etale_of_henselian f _ IsLocalRing.residue_surjective g h w
-
-theorem unramified_etale_sections :
-    (∀ {X S T : Scheme.{u}} (f : X ⟶ S) [FormallyUnramified f] [LocallyOfFiniteType f]
-      [IsSeparated f] (a b : T ⟶ X), a ≫ f = b ≫ f →
-        IsOpenImmersion (equalizer.ι a b) ∧ IsClosedImmersion (equalizer.ι a b)) ∧
-    (∀ {X S T : Scheme.{u}} (f : X ⟶ S) [FormallyUnramified f] [LocallyOfFiniteType f]
-      [IsSeparated f] [ConnectedSpace T] (a b : T ⟶ X), a ≫ f = b ≫ f →
-        ∀ (k : Type u) [Field k] (j : Spec (.of k) ⟶ T), j ≫ a = j ≫ b → a = b) ∧
-    (∀ {X S : Scheme.{u}} (f : X ⟶ S) [Etale f] [IsSeparated f] (s : S ⟶ X), s ≫ f = 𝟙 S →
-        IsOpenImmersion s ∧ IsClosedImmersion s) ∧
-    (∀ {X S T₀ T : Scheme.{u}} (f : X ⟶ S) [Etale f] (i : T₀ ⟶ T) [IsClosedImmersion i],
-      IsNilpotent i.ker → ∀ (g : T₀ ⟶ X) (h : T ⟶ S), g ≫ f = i ≫ h →
-        ∃! l : T ⟶ X, i ≫ l = g ∧ l ≫ f = h) ∧
-    (∀ (R : Type u) [CommRing R] [HenselianLocalRing R] {X : Scheme.{u}} (f : X ⟶ Spec (.of R))
-      [Etale f], Function.Bijective (restrictPoints f (𝟙 _)
-        (Spec.map (CommRingCat.ofHom (IsLocalRing.residue R))))) :=
-  ⟨fun f _ _ _ _ _ hab ↦ ⟨isOpenImmersion_equalizer_ι_of_unramified f hab,
-      isClosedImmersion_equalizer_ι_of_isSeparated f hab⟩,
-    fun f _ _ _ _ _ _ hab _ _ j hj ↦ eq_of_connected_of_unramified_of_point f hab j hj,
-    fun f _ _ s hs ↦ isOpenImmersion_and_isClosedImmersion_of_section_of_etale f s hs,
-    fun f _ i _ hi g h w ↦ existsUnique_lift_of_etale f i hi g h w,
-    fun R _ _ _ f _ ↦ bijective_restrictPoints_of_etale_of_henselian f R _⟩
 
 end GlobalTheory

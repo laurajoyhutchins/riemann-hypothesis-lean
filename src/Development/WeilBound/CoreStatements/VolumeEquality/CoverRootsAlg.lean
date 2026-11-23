@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.Separable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.PrimitiveElement
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,11 +62,12 @@ def low {R : Type} [CommRing R] {d : ℕ} (a : Fin d → R) : R[X] := ∑ j, C (
 
 theorem mon_map {R S : Type} [CommRing R] [CommRing S] {d : ℕ} (a : Fin d → R) (f : R →+* S) :
     (mon a).map f = mon fun j => f (a j) := by
-  simp [mon, Polynomial.map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [mon, Polynomial.map_sum]
 
 theorem eval₂_low {R S : Type} [CommRing R] [CommRing S] {d : ℕ} (a : Fin d → R) (f : R →+* S) (x : S) :
     eval₂ f x (low a) = ∑ j, f (a j) * x ^ (j : ℕ) := by
-  simp [low, eval₂_finset_sum]
+  simp [low, eval₂_finsetSum]
 
 theorem mon_monic {R : Type} [CommRing R] {d : ℕ} (a : Fin d → R) : (mon a).Monic :=
   monic_X_pow_add (degree_sum_fin_lt a)
@@ -69,7 +120,7 @@ theorem exists_prim (Ω₀ Ω : Type) [Field Ω₀] [Field Ω] [CharZero Ω] [Al
     rw [aeval_def, eval₂_map]
   refine ⟨a, cf, G, Q, ⟨u, v, ?_⟩, fun F => ?_, fun s => ?_, ?_, ?_⟩
   · apply map_injective i hi
-    rw [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul, ← derivative_map, hm, hu, hv, huv,
+    rw [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_mul, ← derivative_map, hm, hu, hv, huv,
       Polynomial.map_one]
   · rw [hev, ← map_dvd_map i hi (mon_monic a), hm, minpoly.dvd_iff]
   · rw [eval₂_low, ← hcf s]

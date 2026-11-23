@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.TestFnConstTermVanishX
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicAndConstantTermStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonFieldTypeVanishingStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EllipticPartStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TestFnConstTermVanishX
+import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceAdeleRing
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCyclicOfFiniteQuotient
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMapInfFinEquivEqProd
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasOrbIntTensorOfHasOrbInt
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsMulCommutativeCentRealUJ
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsInertPlOfInertOff
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ClassTermEqVolumeMulOrbitalIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EllipticPart
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonFieldTypeVanishing
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicAndConstantTerm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TypeIdempotentUnipotentIntegralVanishSplitPlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnipotentIntegralsPureTensorVanishOfLocalStatement
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 section
 noncomputable section
@@ -46,7 +94,7 @@ end
 end
 
 section
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.PsCo.Plug.parabolicT : GlobalTheory.IndefiniteRowSideFullHecke.ConstantTermVanishing.ParabolicAndConstTermX := by
   first | exact @GlobalTheory.Proof.parabolic_and_constant_term.parabolicAndConstTermX | exact GlobalTheory.Proof.parabolic_and_constant_term.parabolicAndConstTermX | (intros; apply GlobalTheory.Proof.parabolic_and_constant_term.parabolicAndConstTermX <;> assumption)
 end
@@ -62,7 +110,7 @@ noncomputable section
 namespace GlobalTheory.NonFieldType
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 variable {D : D7} {V : HSp D}
-set_option maxHeartbeats 4000000 in
+
 theorem productClauseX {S : D.what₂.Tau → SPar} {M : DSModel V S} {T : TypeDataG V} {U : AuxiliaryPlaceHermitianSpace V}
     {μa : ∀ w, Measure (GArch D.sp.cm.sig V.gram w)} {μf : ∀ v, Measure (GLoc D.sp.cm.sig V.gram v)}
     {μ : Measure (GA D V)} (hμ : IsRestrictedProd D.sp.cm.sig V.gram (frameLat V) μa μf μ)
@@ -96,7 +144,7 @@ theorem productClauseX {S : D.what₂.Tau → SPar} {M : DSModel V S} {T : TypeD
   have hc := continuous_of_mem_ccAd (tensor_mem_ccAd ha.mem hf.isFinFamily)
   exact @GlobalTheory.T.classTerm_eq_volume_mul_orbitalIntegral (GA D V) _ _ _ _ _ _ _ _ (GQ V) _ (ratEmb D.sp.cm.sig V.gram γ) (ratEmb_mem_GQ γ)
     (isMulCommutative_cent_ratEmb hreg) μ hμ.2.2.1 dt htt 𝓣 h𝓣 hvol _ _ hc.1 hc.2 hO 𝓕 h𝓕
-set_option maxHeartbeats 4000000 in
+
 
 theorem nonFieldTypeVanishingX : NonFieldTypeVanishingX := by
   intro D V _ S M T U hH μa μf μ hμ fa ff ha hf γ hγ
@@ -108,7 +156,7 @@ end
 end
 
 section
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.PsCo.Plug.nonFieldT : GlobalTheory.IndefiniteRowSideFullHecke.NonFieldTypeVanishingAlt.NonFieldTypeVanishingX := by
   first | exact @GlobalTheory.NonFieldType.nonFieldTypeVanishingX | exact GlobalTheory.NonFieldType.nonFieldTypeVanishingX | (intros; apply GlobalTheory.NonFieldType.nonFieldTypeVanishingX <;> assumption)
 end
@@ -137,7 +185,7 @@ open GlobalTheory.AdelicU GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary For
 open GlobalTheory.IndefiniteRowSideFullHecke.PlusPolynomialRoots GlobalTheory.TrEll
 open GlobalTheory.IndefiniteRowSideFullHecke.AdelicUnitaryGroups (mapH diagH)
 open scoped TensorProduct ComplexConjugate Matrix
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.PsCo.Plug.ellipticT : GlobalTheory.IndefiniteRowSideFullHecke.PlusPolynomialRoots.EllipticPartX := by
   first | exact @GlobalTheory.TrEllSum.ellipticPartX | exact GlobalTheory.TrEllSum.ellipticPartX | (intros; apply GlobalTheory.TrEllSum.ellipticPartX <;> assumption)
 end

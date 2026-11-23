@@ -1,6 +1,61 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValAlgebraMapEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValuationResidueLemmas
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HeightIntegralEstimates
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraicIndependentResidueOfIsUnit
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.IsUnitOfValEqZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValAlgebraMapEqZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValuationResidueLemmas
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -29,7 +84,7 @@ theorem uniformizer_of_residue_indep {Ω : Type} [Field Ω] {σ τ : Type}
     | C a =>
       rw [bind₁_C_right, aeval_C, ← MvPolynomial.algebraMap_eq,
         ← IsScalarTower.algebraMap_apply]
-    | add P Q hP hQ => simp only [map_add, hP, hQ]
+    | add P Q hP hQ => simp only [map_add (f := _), hP, hQ]
     | mul_X P x hP => simp only [map_mul, hP, bind₁_X_right, hg]
   have hinj := IsFractionRing.injective (MvPolynomial σ Ω) (FractionRing (MvPolynomial σ Ω))
   have hp0 : p ≠ 0 := by
@@ -69,7 +124,7 @@ namespace Data
 
 variable (d : Data K ι Ω WT A)
 
-set_option maxHeartbeats 800000 in
+
 
 theorem PlaceTrivialOrPositive (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (p : Ideal (KTp K d.D d.N))
     (hp : p ∈ d.HtOne) (w : AddValuation (OmS (Ω c) d.D d.N) (WithTop ℤ)) (hw : w ∈ d.OverP c p) :
@@ -115,6 +170,7 @@ theorem PlaceTrivialOrPositive (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (p : Ideal 
       apply Subtype.ext
       push_cast
       exact d.genericHomAt_relation hd c j0 hw0 hq i hi
+
     rw [hV, map_neg, map_sum]
     congr 1
   obtain ⟨e0, he0⟩ := exists_rename_notMem p hp
@@ -210,6 +266,7 @@ theorem PlaceTrivialOrPositive (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (p : Ideal 
   have hres0 : IsLocalRing.residue (vRing w) ⟨_, hz0mem⟩ =
       ∑ j, algebraMap (IsLocalRing.ResidueField (vRing (d.Wres c w))) _ (ρ j) *
         tb ⟨(0, j), Or.inl rfl⟩ := by
+
     rw [hz0V, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, mul_comm]
@@ -246,8 +303,9 @@ theorem PlaceTrivialOrPositive (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (p : Ideal 
         aeval (fun e : {e : TVar d.D d.N // e.1 = 0 ∨ e.2 ≠ j0} => d.sH c (X e.1)) (G e) := by
       rintro ⟨i, j⟩
       by_cases h : i = 0 ∨ j ≠ j0
-      · simp only [G, dif_pos h, aeval_X]
-      · simp only [G, dif_neg h, map_neg, map_sum, map_mul, aeval_X, aeval_C]
+      · simp only [G, dite_eq_left h, aeval_X]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          simp only [G, dite_eq_right h, map_neg, map_sum, map_mul, aeval_X, aeval_C]
         rw [not_or, not_not] at h
         obtain ⟨hi, hj⟩ := h
         subst j

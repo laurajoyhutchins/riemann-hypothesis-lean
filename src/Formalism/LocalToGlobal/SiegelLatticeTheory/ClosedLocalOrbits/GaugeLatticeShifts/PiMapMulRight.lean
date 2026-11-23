@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LintegralFinProd
+module
+
+public import Mathlib.MeasureTheory.Constructions.Pi
+public import Mathlib.MeasureTheory.Measure.WithDensity
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LintegralFinProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +98,7 @@ theorem pi_map_mul_left (μ : ∀ i, Measure (G i)) [∀ i, SigmaFinite (μ i)] 
   symm
   refine Measure.pi_eq fun s hs => ?_
   have hm : Measurable (fun x : ∀ i, G i => g * x) :=
-    measurable_pi_lambda _ fun i => (measurable_const_mul (g i)).comp (measurable_pi_apply i)
+    Measurable.of_eval fun i => (measurable_const_mul (g i)).comp (measurable_pi_apply i)
   rw [Measure.map_apply hm (MeasurableSet.univ_pi hs)]
   have hpre : (fun x : ∀ i, G i => g * x) ⁻¹' Set.univ.pi s =
       Set.univ.pi fun i => (fun y => g i * y) ⁻¹' s i := by
@@ -65,7 +112,7 @@ theorem pi_map_mul_right (μ : ∀ i, Measure (G i)) [∀ i, SigmaFinite (μ i)]
   symm
   refine Measure.pi_eq fun s hs => ?_
   have hm : Measurable (fun x : ∀ i, G i => x * g) :=
-    measurable_pi_lambda _ fun i => (measurable_mul_const (g i)).comp (measurable_pi_apply i)
+    Measurable.of_eval fun i => (measurable_mul_const (g i)).comp (measurable_pi_apply i)
   rw [Measure.map_apply hm (MeasurableSet.univ_pi hs)]
   have hpre : (fun x : ∀ i, G i => x * g) ⁻¹' Set.univ.pi s =
       Set.univ.pi fun i => (fun y => y * g i) ⁻¹' s i := by
@@ -166,6 +213,7 @@ theorem uniq_on_closed {G : Type*} [Group G] [TopologicalSpace G] [IsTopological
       exact htμi hval
   · conv_lhs => rw [← hback μ hμc, key]
     rw [Measure.map_smul, hback ν hνc]
+    exact he.measurable.aemeasurable
 
 end Uniq
 

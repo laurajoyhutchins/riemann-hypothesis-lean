@@ -1,4 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.Geometry.Manifold.PartitionOfUnity
+import Mathlib.Geometry.Manifold.Sheaf.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.UniformSpace.Matrix
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.Geometry.Manifold.ContMDiff.Basic
+public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+public import Mathlib.Geometry.Manifold.ContMDiffMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +123,6 @@ theorem hpk_mulVec_mulVec (v : Fin (2 * r + k + 1) → ℂ) : Hpk k r *ᵥ (Hpk 
 theorem mat_eq_of_mulVec {A B : Mat k r} (h : ∀ v, A *ᵥ v = B *ᵥ v) : A = B := by
   first
   | exact Matrix.toLin'.injective (LinearMap.ext fun v => by simpa [Matrix.toLin'_apply] using h v)
-  | (ext i j; simpa using congrFun (h (Pi.single j 1)) i)
 
 theorem hpk_sq : Hpk k r * Hpk k r = 1 := mat_eq_of_mulVec fun v => by
   rw [← Matrix.mulVec_mulVec, hpk_mulVec_mulVec, Matrix.one_mulVec]
@@ -97,8 +149,6 @@ theorem gv_inv_mul {g : Mat k r} (hg : g ∈ GV k r) : g⁻¹ * g = 1 := by
 theorem gv_mul_inv {g : Mat k r} (hg : g ∈ GV k r) : g * g⁻¹ = 1 := by
   first
   | exact Matrix.mul_nonsing_inv g (Matrix.isUnit_det_of_left_inverse (gv_left_inv hg))
-  | exact mul_eq_one_comm.mpr (gv_inv_mul hg)
-  | exact (Matrix.mul_eq_one_comm).mpr (gv_inv_mul hg)
 
 theorem gv_one : (1 : Mat k r) ∈ GV k r := by
   show (1 : Mat k r)ᴴ * Hpk k r * 1 = Hpk k r
@@ -132,8 +182,6 @@ theorem gv_closed : IsClosed (GV k r) := by
   first
   | exact isClosed_eq ((continuous_id.matrix_conjTranspose.matrix_mul continuous_const).matrix_mul
       continuous_id) continuous_const
-  | (apply isClosed_eq _ continuous_const; fun_prop)
-  | (apply isClosed_eq _ continuous_const; continuity)
 
 theorem exp_mem {X : Mat k r} (hX : inLie k r X) (t : ℝ) : NormedSpace.exp (t • X) ∈ GV k r := by
   have hX' : Xᴴ * Hpk k r + Hpk k r * X = 0 := hX
@@ -175,8 +223,6 @@ theorem exp_negY_mem {Y : Mat k r} (hY : inLie k r Y) (t : ℝ) : NormedSpace.ex
 theorem cast_smul (t : ℝ) (X : Mat k r) : ((t : ℂ) • X) = t • X := by
   first
   | exact Complex.coe_smul t X
-  | (ext i j; simp [Complex.real_smul])
-  | (ext i j; simp [Matrix.smul_apply, Complex.real_smul])
 
 end hpk
 
@@ -191,8 +237,6 @@ theorem gN_eq_frob (g : Mat k r) :
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   first
   | rw [Complex.normSq_eq_norm_sq, Real.rpow_two]
-  | (rw [Real.rpow_two]; simp [Complex.normSq_eq_norm_sq])
-  | (rw [Real.rpow_two, Complex.norm_eq_abs, Complex.sq_abs])
 
 theorem gN_mul_le (a b : Mat k r) : gN (a * b) ≤ gN a * gN b := by
   rw [gN_eq_frob, gN_eq_frob, gN_eq_frob]
@@ -203,15 +247,12 @@ theorem gN_nonneg (g : Mat k r) : 0 ≤ gN g := Real.sqrt_nonneg _
 theorem gN_continuous : Continuous (fun g : Mat k r => gN g) := by
   show Continuous fun g : Mat k r => Real.sqrt (∑ i, ∑ j, Complex.normSq (g i j))
   first
-  | exact Real.continuous_sqrt.comp (continuous_finset_sum _ fun i _ => continuous_finset_sum _
+  | exact Real.continuous_sqrt.comp (continuous_finsetSum _ fun i _ => continuous_finsetSum _
       fun j _ => Complex.continuous_normSq.comp (continuous_id.matrix_elem i j))
-  | fun_prop
-  | continuity
 
 theorem gN_conjT (g : Mat k r) : gN gᴴ = gN g := by
   first
   | (rw [gN_eq_frob, gN_eq_frob]; exact Matrix.frobenius_norm_conjTranspose g)
-  | (unfold gN; congr 1; rw [Finset.sum_comm]; simp [Matrix.conjTranspose_apply])
 
 theorem gN_inv_le {g : Mat k r} (hg : g ∈ GV k r) : gN g⁻¹ ≤ gN (Hpk k r) ^ 2 * gN g := by
   rw [gv_inv_eq hg]
@@ -262,7 +303,6 @@ theorem aesm_of_contOn {E : Type*} [NormedAddCommGroup E] (hμ : μ (GV k r)ᶜ 
   have h := hf'.aestronglyMeasurable (μ := μ) gv_meas
   first
   | (erw [Measure.restrict_eq_self_of_ae_mem hae] at h; exact h)
-  | exact (Measure.restrict_eq_self_of_ae_mem (s := (GV k r : Set (Mat k r))) hae) ▸ h
 
 theorem ae_mem_gv (hμ : μ (GV k r)ᶜ = 0) : ∀ᵐ x ∂μ, (Matrix.of x : Mat k r) ∈ GV k r := by
   exact ae_iff.mpr hμ
@@ -356,7 +396,6 @@ theorem ext_test {φ : Mat k r → ℂ} (hφ : IsTestG φ) :
   | obtain ⟨Φ, hΦ⟩ := exists_smooth_forall_mem_convex_of_local (I := 𝓘(ℝ, Mt k r)) hc key
   | obtain ⟨Φ, hΦ⟩ := exists_smooth_forall_mem_convex_of_local 𝓘(ℝ, Mt k r) hc key
   | obtain ⟨Φ, hΦ⟩ := exists_contMDiffMap_forall_mem_convex_of_local (I := 𝓘(ℝ, Mt k r)) hc key
-  | obtain ⟨Φ, hΦ⟩ := exists_contMDiffOn_forall_mem_convex_of_local (I := 𝓘(ℝ, Mt k r)) hc key
   have hΦ0 : ∀ y : Mt k r, y ∉ Metric.closedBall (0 : Mt k r) (R + 1) → Φ y = 0 := by
     intro y hy
     rw [Metric.mem_closedBall, dist_zero_right, not_le] at hy

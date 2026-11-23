@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.NormalFrame0
-import Formalism.LocalToGlobal.IndefiniteReal.ZeroPartEigenvalueConvention
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.ZeroPartEigenvalueConvention
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,22 +58,6 @@ def betaY (Rl : RealDat3 D A3 Ks) (j : ℕ) : GL (Fin (D.sp.Y j).rank) (EAf D) :
       rw [Nat.min_eq_left h]) ▸ Rl.βY j
   else 1
 
-def IsDPlaces (Sd : Finset (Pl D.host.E)) : Prop :=
-  (∀ PP ∈ Sd, ¬ Lev.IsConjPl (D := D) PP PP ∧ ((D.host.d : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal) ∧
-  (∀ PP ∈ Sd, ∀ PP' ∈ Sd, Lev.IsConjPl (D := D) PP PP' → PP = PP') ∧
-  ∀ PP : Pl D.host.E, ¬ Lev.IsConjPl (D := D) PP PP → ((D.host.d : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal →
-    PP ∈ Sd ∨ ∃ PP' ∈ Sd, Lev.IsConjPl (D := D) PP PP'
-
-open Classical in
-
-def FramesOK (Rl : RealDat3 D A3 Ks) (Sd : Finset (Pl D.host.E)) : Prop :=
-  ∃ (e ev : ∀ j : ℕ, ℕ → Fin (D.sp.Y j).rank → D.host.E) (z : ∀ j : ℕ, Fin (D.sp.Y j).rank → D.host.E)
-    (κ : ℕ → ℕ → D.host.E) (s : ℕ → D.host.E),
-    (∀ t : T, NormalFrames (betaY Rl) e ev z κ s (Rl.Pg ∪ Rl.Q t ∪ Sd) Rl.Pg ∧
-      NormalFrame0 (betaY Rl 0) (Rl.Pg ∪ Rl.Q t ∪ Sd) Rl.Pg) ∧
-    ∀ i : Fin D.R.m, ∃ (eW : Fin (D.sp.Y 0).rank ≃ Fin (D.sp.W ((i : ℕ) + 1)).rank)
-      (ι : GL (Fin (D.sp.W ((i : ℕ) + 1)).rank) (EAf D)),
-      VertexAt ((i : ℕ) + 1) (betaY Rl 0) (Rl.βW i) eW ι Rl.Pg
 
 end Formalism.IndefR.Mi
 

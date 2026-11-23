@@ -1,5 +1,54 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveIsOrbit
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightObjects
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.HeightsSetAll
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveIsOrbit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +77,7 @@ theorem homog_rename {f : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f a) :
   obtain ⟨m₀, hm₀, rfl⟩ := Finset.mem_image.mp hm
   rw [← hf m₀ hm₀ k]
   refine (Fintype.sum_equiv (e k) _ _ fun i => ?_).symm
-  exact (Finsupp.mapDomain_apply (E e).injective m₀ ⟨k, i⟩).symm
+  exact (Finsupp.mapDomain_apply_of_injective (E e).injective m₀ ⟨k, i⟩).symm
 
 omit [Fintype K] [DecidableEq K] [∀ k, Fintype (ι k)] in
 theorem mem_map_iff (P : Ideal (MRing ι)) (f : MRing ι) : φ e f ∈ P.map (φ e) ↔ f ∈ P :=
@@ -141,7 +190,7 @@ theorem CoverDenseAlt.exists_points_bounded_line_heights : ∀ (K : Type) [Finty
   · exact fun h => hx ((hval f).mp h)
   · rw [height_eq e (A j) (hA j)]
     have h1 := hC j x hxP
-    have h2 : (m j : ℝ) * height (HermLine.standard n) x ≤ m j * C₀ :=
+    have h2 : (m j : ℝ) * height (GroundTheory.Heights₂.Heights.HermLine.standard n) x ≤ m j * C₀ :=
       mul_le_mul_of_nonneg_left (hC₀ x hxS) (Nat.cast_nonneg _)
     have h3 : |m j * C₀ + C j| ≤ ∑ j, |m j * C₀ + C j| :=
       Finset.single_le_sum (f := fun j => |m j * C₀ + C j|) (fun _ _ => abs_nonneg _) (Finset.mem_univ j)

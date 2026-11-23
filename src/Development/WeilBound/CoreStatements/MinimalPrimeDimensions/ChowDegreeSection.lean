@@ -1,5 +1,61 @@
-import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.DimClosureAddOneLe
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartResidueDegreeAlgClosedClosed
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineBundleGlobalSectionsDimCongrPicardClass
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.GenIdeal
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsChowDegreeSection
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ChartResidueDegreeAlgClosedClosed
+import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DvdOfForallEmultiplicityLe
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.DimClosureAddOneLe
+import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.FinrankEqOfDimZero
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PChowDegreeSection
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PFundCycleBaseChange
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PMinimalPrimeComap
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PSectionOrderAlgClosed
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Assembly
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option linter.style.haveILetI false
@@ -32,7 +88,8 @@ theorem algX_strHom {κ : Type} [Field κ] {Z : Scheme.{0}} [Algebra κ Γ(Z, �
     algX (strHom κ Z) ⊤ = algebraMap κ Γ(Z, ⊤) := by
   ext r
   rw [algebraMap_eq_strHom]
-  simp [algX, Scheme.Hom.appLE, Scheme.Hom.appTop]
+  simp only [algX, RingHom.comp_apply, CommRingCat.hom_comp]
+  rw [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
   rfl
 
 section Base
@@ -49,7 +106,8 @@ private theorem eq_of_algX_top_eq {R : Type} [CommRing R] {Z : Scheme.{0}} {f g 
       algX φ ⊤ = ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ φ.appTop).hom := by
     intro φ
     ext r
-    simp [algX, Scheme.Hom.appLE, Scheme.Hom.appTop]
+    simp only [algX, RingHom.comp_apply, CommRingCat.hom_comp]
+    rw [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
     rfl
   rw [hf, hf] at h
   have e : f.appTop = g.appTop := by
@@ -169,7 +227,7 @@ theorem stVert (h1 : StPts) (h2 : StPull) (h3 : StDiv) : StVert := by
   have hsurj : Function.Surjective (algebraMap (𝓞 K) κ) :=
     v.asIdeal.algebraMap_residueField_surjective
   have hEκ : Emb (strHom κ Z) s := V.emb_base hπ hE
-  have hPκ : IsProjOver (strHom κ Z) := isProjOver_of_surjective_base hsurj (V.eq_comp_spMap hπ) hP
+  have hPκ : IsProjOver (strHom κ (X := Z)) := isProjOver_of_surjective_base hsurj (V.eq_comp_spMap hπ) hP
   have hred : reduceMod v (ptIdeal p s (genericPoint Z)) = ptIdeal (strHom κ Z) s (genericPoint Z) := by
     rw [V.ptIdeal_base hπ]
     exact Ideal.map_comap_of_surjective _ (MvPolynomial.map_surjective _ hsurj) _

@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InfPartFPlaceIdem
-import GroundTheory.GlobalFields.TateThesis.NoSmallSubgroups
+module
+
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilRepresentationIntegralAction
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumF
+public import GroundTheory.GlobalFields.TateThesis.NoSmallSubgroups
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -18,11 +63,11 @@ variable {σ : E →ₐ[F] E} {nS nT : ℕ} {JS : Matrix (Fin nS) (Fin nS) E} {J
 
 theorem symplOHF_add_left (x x' y : WOF F E nS nT) :
     symplOHF σ JS JT xi0 (x + x') y = symplOHF σ JS JT xi0 x y + symplOHF σ JS JT xi0 x' y := by
-  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem symplOHF_add_right (x y y' : WOF F E nS nT) :
     symplOHF σ JS JT xi0 x (y + y') = symplOHF σ JS JT xi0 x y + symplOHF σ JS JT xi0 x y' := by
-  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, map_add, mul_add, add_mul, Finset.sum_add_distrib]
+  simp only [symplOHF, symplOF, hOF, Matrix.add_apply, map_add (f := _), mul_add, add_mul, Finset.sum_add_distrib]
 
 theorem cAF_algebraMap (c : AF F) :
     cAF σ (algebraMap (AF F) (AEF F E) c) = algebraMap (AF F) (AEF F E) c := by
@@ -65,7 +110,7 @@ theorem smul_eq_zero_of_infPartF {z : AEF F E} (hz : infPartF F E z = 0) : (pair
       (pairA F 1 0) • z = LinearMap.rTensor E (LinearMap.inl F (Ainf F) (Af F)) (infPartF F E z) := by
     intro z
     induction z using TensorProduct.induction_on with
-    | zero => rw [smul_zero, map_zero, map_zero]; rfl
+    | zero => rw [smul_zero, map_zero, map_zero]
     | tmul a e =>
       have h1 : infPartF F E (a ⊗ₜ[F] e) = fstA F a ⊗ₜ[F] e := Algebra.TensorProduct.map_tmul _ _ _ _
       rw [TensorProduct.smul_tmul', h1, LinearMap.rTensor_tmul]
@@ -75,15 +120,15 @@ theorem smul_eq_zero_of_infPartF {z : AEF F E} (hz : infPartF F E z = 0) : (pair
         rw [one_mul]
       · show 0 * a.2 = 0
         rw [zero_mul]
-    | add x y hx hy => rw [smul_add, hx, hy, map_add, map_add]; rfl
-  rw [key, hz, map_zero]; rfl
+    | add x y hx hy => rw [smul_add, hx, hy, map_add (f := _), map_add (f := _)]
+  rw [key, hz, map_zero]
 
 theorem smul_eq_zero_of_finPartF {z : AEF F E} (hz : finPartF F E z = 0) : (pairA F 0 1) • z = 0 := by
   have key : ∀ z : AEF F E,
       (pairA F 0 1) • z = LinearMap.rTensor E (LinearMap.inr F (Ainf F) (Af F)) (finPartF F E z) := by
     intro z
     induction z using TensorProduct.induction_on with
-    | zero => rw [smul_zero, map_zero, map_zero]; rfl
+    | zero => rw [smul_zero, map_zero, map_zero]
     | tmul a e =>
       have h1 : finPartF F E (a ⊗ₜ[F] e) = sndA F a ⊗ₜ[F] e := Algebra.TensorProduct.map_tmul _ _ _ _
       rw [TensorProduct.smul_tmul', h1, LinearMap.rTensor_tmul]
@@ -93,8 +138,8 @@ theorem smul_eq_zero_of_finPartF {z : AEF F E} (hz : finPartF F E z = 0) : (pair
         rw [zero_mul]
       · show 1 * a.2 = a.2
         rw [one_mul]
-    | add x y hx hy => rw [smul_add, hx, hy, map_add, map_add]; rfl
-  rw [key, hz, map_zero]; rfl
+    | add x y hx hy => rw [smul_add, hx, hy, map_add (f := _), map_add (f := _)]
+  rw [key, hz, map_zero]
 
 end Parts
 
@@ -125,8 +170,8 @@ theorem continuous_symplOHF_left (y : WOF F E nS nT) : Continuous fun x => sympl
   have ht := continuous_trace_AEF (F := F) (E := E)
   unfold symplOHF symplOF hOF
   refine continuous_const.mul (ht.comp (continuous_const.mul ?_))
-  refine continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun b _ =>
-    continuous_finset_sum _ fun c _ => continuous_finset_sum _ fun d _ => ?_
+  refine continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun b _ =>
+    continuous_finsetSum _ fun c _ => continuous_finsetSum _ fun d _ => ?_
   exact continuous_const.mul ((continuous_apply a).comp (continuous_apply d))
 
 theorem continuous_symplOHF_right (x : WOF F E nS nT) : Continuous fun y => symplOHF σ JS JT xi0 x y := by
@@ -135,26 +180,15 @@ theorem continuous_symplOHF_right (x : WOF F E nS nT) : Continuous fun y => symp
   have hc := continuous_cAF (F := F) (E := E) (σ := σ)
   unfold symplOHF symplOF hOF
   refine continuous_const.mul (ht.comp (continuous_const.mul ?_))
-  refine continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun b _ =>
-    continuous_finset_sum _ fun c _ => continuous_finset_sum _ fun d _ => ?_
+  refine continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun b _ =>
+    continuous_finsetSum _ fun c _ => continuous_finsetSum _ fun d _ => ?_
   exact ((continuous_const.mul (hc.comp ((continuous_apply b).comp (continuous_apply c)))).mul
     continuous_const).mul continuous_const
 
-variable (F) in
 
+variable (F) in
 theorem continuous_ringEquiv_mixedSpace : Continuous (InfiniteAdeleRing.ringEquiv_mixedSpace F) := by
-  have : (InfiniteAdeleRing.ringEquiv_mixedSpace F : InfiniteAdeleRing F → mixedEmbedding.mixedSpace F) =
-      fun x => ((fun v : {w : InfinitePlace F // InfinitePlace.IsReal w} =>
-          InfinitePlace.Completion.extensionEmbeddingOfIsReal v.2 (x v)),
-        (fun v : {w : InfinitePlace F // InfinitePlace.IsComplex w} =>
-          InfinitePlace.Completion.extensionEmbedding v.1 (x v))) := by
-    funext x; exact InfiniteAdeleRing.ringEquiv_mixedSpace_apply F x
-  rw [this]
-  refine Continuous.prodMk (continuous_pi fun v => ?_) (continuous_pi fun v => ?_)
-  · exact (InfinitePlace.Completion.isometry_extensionEmbeddingOfIsReal v.2).continuous.comp
-      (continuous_apply _)
-  · exact (InfinitePlace.Completion.isometry_extensionEmbedding v.1).continuous.comp
-      (continuous_apply _)
+  apply _root_.GlobalTheory.ArchIsom.continuous_toMixed <;> assumption
 
 end Top
 
@@ -178,8 +212,8 @@ theorem nonarch_pi {ι : Type} {G : ι → Type} [∀ i, AddGroup (G i)] [∀ i,
     exact ⟨⟨AddSubgroup.pi I fun i => (K i : AddSubgroup (G i)), isOpen_set_pi hI fun i _ => (K i).isOpen⟩,
       fun x hx => hs fun i hi => hK i (hx i hi)⟩
 
-variable (F) in
 
+variable (F) in
 theorem nonarch_Af : NonarchimedeanAddGroup (Af F) := by
   haveI : ∀ v : HeightOneSpectrum (𝓞 F), NonarchimedeanAddGroup (v.adicCompletionIntegers F) := fun v =>
     nonarch_of_isInducing (v.adicCompletionIntegers F).subtype.toAddMonoidHom Topology.IsInducing.subtypeVal

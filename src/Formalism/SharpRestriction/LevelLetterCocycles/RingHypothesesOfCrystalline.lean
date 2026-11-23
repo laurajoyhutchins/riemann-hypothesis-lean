@@ -1,7 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ExpRules
-import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
-import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExpRules
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+public import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,7 +95,7 @@ theorem dl_φpow {i : ZMod n} {x : W.DD T} (h : DL W T i x) (j : ℕ) :
     exact dl_φ W ih
 
 theorem dl_add {i : ZMod n} {x y : W.DD T} (hx : DL W T i x) (hy : DL W T i y) : DL W T i (x + y) :=
-  ⟨by rw [smul_add, hx.1, hy.1], fun δ hδ => by rw [map_add, hx.2 δ hδ, hy.2 δ hδ]⟩
+  ⟨by rw [smul_add, hx.1, hy.1], fun δ hδ => by rw [map_add (f := _), hx.2 δ hδ, hy.2 δ hδ]⟩
 
 theorem dl_zero (i : ZMod n) : DL W T i (0 : W.DD T) :=
   ⟨smul_zero _, fun δ _ => map_zero _⟩
@@ -95,7 +141,7 @@ theorem γD_mem_pullJ {i : ZMod n} {j : ℕ} {δ : W.Gam} (hδ : δ ∈ W.DelF) 
     rw [γD_φpow, hd.2 δ hδ]
     exact φpow_mem_pullJ W hy hd j
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul a x _ hx => rw [Formalism.MainNotions.WachCoordinates.Br.γD_smulA]; exact Submodule.smul_mem _ _ hx
 
 end Letters
@@ -168,12 +214,14 @@ theorem sum_delF_shift {M : Type} [AddCommMonoid M] (f : W.Gam → M) {δ' : W.G
 
 theorem avA_mem (a : LetA O n) : avA W a ∈ W.AΔ := by
   intro δ' hδ'
+
   simp only [avA, map_sum]
   simp_rw [← γA_mul]
   exact sum_delF_shift W (fun δ => W.γA δ a) hδ'
 
 theorem avD_inv (x : W.DD T) : ∀ δ' ∈ W.DelF, W.γD T δ' (avD W x) = avD W x := by
   intro δ' hδ'
+
   simp only [avD, map_sum]
   simp_rw [← W.γD_mul]
   exact sum_delF_shift W (fun δ => W.γD T δ x) hδ'
@@ -185,7 +233,7 @@ theorem avD_smul (a : LetA O n) {x : W.DD T} (hx : ∀ δ ∈ W.DelF, W.γD T δ
   rw [Formalism.MainNotions.WachCoordinates.Br.γD_smulA, hx δ hδ]
 
 theorem avD_add (x y : W.DD T) : avD W (x + y) = avD W x + avD W y := by
-  simp only [avD, map_add, Finset.sum_add_distrib]
+  simp only [avD, map_add (f := _), Finset.sum_add_distrib]
 
 theorem avD_smulΔ {a : LetA O n} (ha : a ∈ W.AΔ) (x : W.DD T) : avD W (a • x) = a • avD W x := by
   simp only [avD, Finset.smul_sum]
@@ -659,6 +707,7 @@ section Avg2
 variable {W} {T : LocLat G Qp LL O}
 
 theorem avD_sum {ι : Type} (s : Finset ι) (f : ι → W.DD T) : avD W (∑ k ∈ s, f k) = ∑ k ∈ s, avD W (f k) := by
+
   simp only [avD, map_sum]
   exact Finset.sum_comm
 

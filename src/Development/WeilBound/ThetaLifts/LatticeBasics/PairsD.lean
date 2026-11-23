@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Dimension.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+public import Mathlib.RingTheory.SimpleModule.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.Analysis.Complex.Cardinality
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+
+@[expose] public section
+
 open scoped TensorProduct
 
 noncomputable section
@@ -82,10 +142,12 @@ theorem exists_smul_of_rank_le_aleph0 (hV : Module.rank ℂ V ≤ ℵ₀) (φ : 
       intro k hk
       rw [← Finset.prod_erase_mul _ _ hk, map_mul, Module.End.mul_apply, hw]
     have h3 := congrArg (aeval φ (∏ j ∈ s, (X - C j))) hg
+
     rw [map_sum, map_zero] at h3
     simp only [LinearMap.map_smul_of_tower] at h3
     rw [Finset.sum_congr rfl (fun k hk => by rw [key k hk])] at h3
     have h4 : aeval φ (∑ k ∈ s, C (g k) * ∏ j ∈ s.erase k, (X - C j)) v = 0 := by
+
       rw [← h3, map_sum, LinearMap.sum_apply]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_mul, aeval_C, Module.End.mul_apply, Module.algebraMap_end_apply]
@@ -262,9 +324,9 @@ private theorem dite_update_eq_update_dite {ι : Type} [DecidableEq ι] {X : ι 
       simp
     · have h1 : (⟨v, hv⟩ : T) ≠ i := fun h => hvi (by rw [← h])
       have h2 : v ≠ ⟨i, hT i.2⟩ := fun h => hvi (by rw [h])
-      rw [dif_pos hv, Function.update_of_ne h1, Function.update_of_ne h2, dif_pos hv]
+      rw [dite_eq_left hv, Function.update_of_ne h1, Function.update_of_ne h2, dite_eq_left hv]
   · have h2 : v ≠ ⟨i, hT i.2⟩ := fun h => hv (by rw [h]; exact i.2)
-    rw [dif_neg hv, Function.update_of_ne h2, dif_neg hv]
+    rw [dite_eq_right hv, Function.update_of_ne h2, dite_eq_right hv]
 
 theorem exists_ext {ι : Type} [DecidableEq ι] {X : ι → Type} [∀ i, AddCommGroup (X i)] [∀ i, Module ℂ (X i)]
     (T T₁ : Finset ι) (hT : T ⊆ T₁) (s : ∀ i, X i) :
@@ -272,7 +334,7 @@ theorem exists_ext {ι : Type} [DecidableEq ι] {X : ι → Type} [∀ i, AddCom
       ∀ u : ∀ i, X i, (∀ i ∉ T, u i = s i) →
         e (PiTensorProduct.tprod ℂ fun v : T => u v) = PiTensorProduct.tprod ℂ fun v : T₁ => u v := by
   classical
-  let f : MultilinearMap ℂ (fun v : T => X v) (PiTensorProduct ℂ fun v : T₁ => X v) :=
+  let f : MultilinearMap (RingHom.id ℂ) (fun v : T => X v) (PiTensorProduct ℂ fun v : T₁ => X v) :=
     { toFun := fun m => PiTensorProduct.tprod ℂ fun v : T₁ => if h : (v : ι) ∈ T then m ⟨v, h⟩ else s v
       map_update_add' := fun m i x y => by
         simp only [dite_update_eq_update_dite T T₁ hT s]
@@ -286,7 +348,7 @@ theorem exists_ext {ι : Type} [DecidableEq ι] {X : ι → Type} [∀ i, AddCom
   congr 1
   funext v
   by_cases hv : (v : ι) ∈ T
-  · rw [dif_pos hv]
-  · rw [dif_neg hv, hu v hv]
+  · rw [dite_eq_left hv]
+  · rw [dite_eq_right hv, hu v hv]
 
 end GlobalTheory.ThK.Dbl.Dens

@@ -1,11 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeviEmbMulSingle
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCompactSubgroup
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwahoriProjSurjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCompactSubgroup
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IwahoriProjSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
-open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.InertSupp GlobalTheory.IndefiniteRowSideFullHecke.TameConstituentPlaces ValuativeRel Matrix MeasureTheory
+open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.InertSupp ValuativeRel Matrix MeasureTheory
 open GlobalTheory.IwahoriInj (Deep)
 
 namespace GlobalTheory.JacquetExact
@@ -74,10 +123,43 @@ theorem jacMap_injective (e : (Σ a, Fin (d a)) ≃ n) {σ : Representation ℂ 
   refine (injective_iff_map_eq_zero _).2 fun x hx => ?_
   obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective _ x
   have h1 : f v ∈ twKer τ (unipRad k e) 1 := (Submodule.Quotient.mk_eq_zero _).1 hx
-  have hN : unipRad k e = unipOf k fun i => ((blk e i).val : ℤ) :=
-    unipRad_eq_unipOf k fun i j => by simp
+  let c : n → ℤ := fun i => (blk e i).val
+  have hN : unipRad k e = unipOf k c := unipRad_eq_unipOf k fun i j => by simp [c]
   obtain ⟨S, hS, h2⟩ := exists_finset_of_mem_twKer h1
-  obtain ⟨H, hle, hH, hSH⟩ := GlobalTheory.UnipCompact.exists_compact_subgroup k n _ S (hN ▸ hS)
+  have hcompact : ∃ H : Subgroup (GL n k), H ≤ unipOf k c ∧
+      IsCompact (H : Set (GL n k)) ∧ ∀ u ∈ S, u ∈ H := by
+    let K (m : ℕ) := GlobalTheory.IwahoriInj.grp k (GlobalTheory.UnipCompact.conc_mul_sub c m)
+    have hentries {u : GL n k} (hu : u ∈ unipOf k c) :
+        ∀ᶠ m : ℕ in Filter.atTop, ∀ i j, Deep ((m : ℤ) * (c i - c j)) (u.val i j) := by
+      simp only [Filter.eventually_all]
+      intro i j
+      by_cases hij : c i < c j
+      · filter_upwards [GlobalTheory.IwahoriInj.eventually_deep (u.val i j)] with m hm
+        exact hm.mono (by nlinarith [Int.natCast_nonneg m])
+      · rw [mem_unipOf.1 hu i j hij]
+        refine Filter.Eventually.of_forall fun m => ?_
+        by_cases heq : i = j
+        · subst j
+          simp [GlobalTheory.IwahoriInj.deep_zero_iff]
+        · simp [one_apply_ne heq, GlobalTheory.IwahoriInj.deep_zero]
+    have hmem : ∀ᶠ m in Filter.atTop, ∀ u ∈ S, u ∈ K m :=
+      (Filter.eventually_all_finset S).2 fun u hu => by
+        have hu' := hN ▸ hS u hu
+        exact (hentries hu').and (hentries (inv_mem hu'))
+    obtain ⟨m, hm⟩ := hmem.exists
+    refine ⟨K m ⊓ unipOf k c, inf_le_right, ?_, fun u hu => ⟨hm u hu, hN ▸ hS u hu⟩⟩
+    obtain ⟨_, _⟩ := Model.secondCountable_and_t2_local_field (k := k)
+    have hclosed : IsClosed (unipOf k c : Set (GL n k)) := by
+      have heq : (unipOf k c : Set (GL n k)) =
+          ⋂ i, ⋂ j, ⋂ (_ : ¬ c i < c j), {g : GL n k | g.val i j = (1 : Matrix n n k) i j} := by
+        ext g
+        simp only [SetLike.mem_coe, mem_unipOf, Set.mem_iInter, Set.mem_ofPred_eq]
+      rw [heq]
+      exact isClosed_iInter fun i => isClosed_iInter fun j => isClosed_iInter fun _ =>
+        isClosed_eq (Units.continuous_val.matrix_elem i j) continuous_const
+    rw [Subgroup.coe_inf]
+    exact (GlobalTheory.IwahoriInj.isCompact_grp _).inter_right hclosed
+  obtain ⟨H, hle, hH, hSH⟩ := hcompact
   refine (Submodule.Quotient.mk_eq_zero _).2 ?_
   exact GlobalTheory.IwahoriInj.twKer_mono (hle.trans hN.ge) (mem_twKer_of_compact hτ f hf hH (h2 H hSH))
 

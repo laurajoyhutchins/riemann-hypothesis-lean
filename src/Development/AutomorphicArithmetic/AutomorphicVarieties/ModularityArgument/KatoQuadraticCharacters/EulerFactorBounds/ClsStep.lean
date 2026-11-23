@@ -1,8 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KatoTwistedClassNormCompatibleCyclotomic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KmapComp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.SCls
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.CdFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.CoeffSlD
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KatoTwistedClassNormCompatibleCyclotomic
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.CdFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.CoeffSlD
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.KmapComp
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.EulerFactorBounds.SCls
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped MatrixGroups Matrix Classical
 open GlobalTheory.KZ GlobalTheory.K4 UpperTheory.V.Z.Kato.Sym UpperTheory.Kd.K4 UpperTheory.V.Z.Kato.Nb
@@ -37,12 +81,12 @@ private theorem cnd_iff (l N M : ℕ) [NeZero M] (hN : N ∣ M) (hl : l ∣ M) (
   have eN : ∀ i, ((m i 0).val : ZMod N) = ((m' i 0).val : ZMod N) := by
     intro i
     have := congrArg (ZMod.castHom hN (ZMod N)) (e i)
-    rw [map_add, map_mul, map_mul, map_mul, map_intCast, map_intCast, hδN, ← vc hN, ← vc hN, ← vc hN, ← vc hN, h1] at this
+    rw [map_add (f := _), map_mul, map_mul, map_mul, map_intCast, map_intCast, hδN, ← vc hN, ← vc hN, ← vc hN, ← vc hN, h1] at this
     linear_combination (en δ 1 1 : ZMod N) * this - (((m i 0).val : ZMod N) - ((m' i 0).val : ZMod N)) * uN
   have el : ∀ i, ((m i 0).val : ZMod l) * (en δ 0 0 : ZMod l) = ((m' i 0).val : ZMod l) := by
     intro i
     have := congrArg (ZMod.castHom hl (ZMod l)) (e i)
-    rw [map_add, map_mul, map_mul, map_mul, map_intCast, map_intCast, hδl, ← vc hl, ← vc hl, ← vc hl, ← vc hl, h2] at this
+    rw [map_add (f := _), map_mul, map_mul, map_mul, map_intCast, map_intCast, hδl, ← vc hl, ← vc hl, ← vc hl, ← vc hl, h2] at this
     linear_combination this
   unfold Cnd
   rw [eN 0, eN 1, ← el 0, ← el 1]
@@ -65,7 +109,7 @@ private theorem wt_dvd (l n M w : ℕ) [Fact l.Prime] [NeZero M] (hl : l ^ n ∣
       have := congrFun (congrFun h 0) j
       simpa [Matrix.mul_apply, Fin.sum_univ_two] using this
     have := congrArg (ZMod.castHom hl (ZMod (l ^ n))) h0
-    rw [map_add, map_mul, map_mul, map_mul, map_intCast, map_intCast, ← vc hl, ← vc hl, ← vc hl, ← vc hl, h2, one_mul] at this
+    rw [map_add (f := _), map_mul, map_mul, map_mul, map_intCast, map_intCast, ← vc hl, ← vc hl, ← vc hl, ← vc hl, h2, one_mul] at this
     exact this
   have ed : (d'.val : ZMod (l ^ n)) = (d.val : ZMod (l ^ n)) := by
     rw [vc hl d', hd, map_mul, map_pow, ← vc hl, ← vc hl, h2, one_pow, one_mul]
@@ -73,7 +117,7 @@ private theorem wt_dvd (l n M w : ℕ) [Fact l.Prime] [NeZero M] (hl : l ^ n ∣
     intro i
     simp [mZl, Matrix.mulVec, dotProduct, Fin.sum_univ_two]
   rw [ev, ev]
-  simp only [map_sub, map_mul, map_pow, map_add, map_natCast, map_intCast]
+  simp only [map_sub, map_mul, map_pow, map_add (f := _), map_natCast, map_intCast]
   rw [ed, ← e 0, ← e 1, sub_eq_zero]
   congr 2
   ring
@@ -172,6 +216,7 @@ theorem UpperTheory.V.Z.Kato.Nb.sXiAct :
   have hcnd := fun m : GL (Fin 2) (ZMod M) => cnd_iff l N M hN (hl1.trans hln) g δ hδN hδl ν h1 h2' _ _ (hrel m)
   show AdicCompletion.eval (idl l) (X.Kl l) n (X.kmap l _ (Xi X l n N M₀ M w g x y P a _) - _) = 0
   unfold Xi
+
   rw [map_sum, map_sub, map_sum, map_sum, sub_eq_zero]
   refine Finset.sum_equiv e (fun m => ?_) (fun m hm => ?_)
   · simp only [Finset.mem_filter, Finset.mem_univ, true_and]

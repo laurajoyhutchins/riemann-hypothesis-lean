@@ -1,7 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.FmTools
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.PFinConv
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LocalOperatorSums.FinsumQuotLe
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryLevelSubgroupProperties
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameReading.ActHecke
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitaryLevelSubgroupProperties
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelicHeckeBlocks.PFinConv
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LocalOperatorSums.FinsumQuotLe
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,22 +88,22 @@ theorem mconv_zero_left {w : Pl E} (f : GLw a w × GLw b w → ℂ) :
     mconv (fun _ => (0 : ℂ)) f = fun _ => 0 := by
   funext m
   unfold mconv
-  simpa using FinConv.hint_zero ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b))
+  simpa using FinConv.hint_zero ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)))
 
 theorem mconv_zero_right {w : Pl E} (f : GLw a w × GLw b w → ℂ) :
     mconv f (fun _ => (0 : ℂ)) = fun _ => 0 := by
   funext m
   unfold mconv
-  simpa using FinConv.hint_zero ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b))
+  simpa using FinConv.hint_zero ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)))
 
 theorem mconv_left {w : Pl E} {f g : GLw a w × GLw b w → ℂ} {v : GLw a w × GLw b w} (hf : ∀ x, f (v * x) = f x)
     (m : GLw a w × GLw b w) : mconv f g (v * m) = mconv f g m := by
   unfold mconv
-  calc hint ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b)) (fun m' => f m' * g (m'⁻¹ * (v * m)))
-      = hint ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b))
+  calc hint ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b))) (fun m' => f m' * g (m'⁻¹ * (v * m)))
+      = hint ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)))
           (fun z => (fun z => f (v * z) * g (z⁻¹ * m)) (v⁻¹ * z)) := by
         congr 1; funext z; simp [mul_assoc]
-    _ = hint ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b)) (fun z => f (v * z) * g (z⁻¹ * m)) :=
+    _ = hint ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b))) (fun z => f (v * z) * g (z⁻¹ * m)) :=
         FinConv.hint_left _ (fun z => f (v * z) * g (z⁻¹ * m)) v⁻¹
     _ = _ := by congr 1; funext z; rw [hf]
 
@@ -94,8 +137,8 @@ theorem mconv_idem_left {w : Pl E} {V : Subgroup (GLw a w × GLw b w)} (hV : IsO
     by_contra hne
     exact hq (hsupp q hne)
   have h := PositivityTheory.Rg.BcN.F2.LocOpPf.hinteq (K2 a b w) V u hle hSu hr hfin
-  change hint ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b)) u = f m
-  rw [show ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b)) = K2 a b w from rfl, h,
+  change hint ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b))) u = f m
+  rw [show ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b))) = K2 a b w from rfl, h,
     finsum_eq_single _ (QuotientGroup.mk 1) hsupp]
   obtain ⟨hh, e⟩ := QuotientGroup.mk_out_eq_mul V (1 : GLw a w × GLw b w)
   simp only [hu]
@@ -130,8 +173,8 @@ theorem mconv_idem_right {w : Pl E} {V : Subgroup (GLw a w × GLw b w)} (hV : Is
     by_contra hne
     exact hq (hsupp q hne)
   have h := PositivityTheory.Rg.BcN.F2.LocOpPf.hinteq (K2 a b w) V u hle hSu hr hfin
-  change hint ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b)) u = f m
-  rw [show ((GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b)) = K2 a b w from rfl, h,
+  change hint ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b))) u = f m
+  rw [show ((GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b))) = K2 a b w from rfl, h,
     finsum_eq_single _ (QuotientGroup.mk m) hsupp]
   obtain ⟨hh, e⟩ := QuotientGroup.mk_out_eq_mul V m
   simp only [hu]

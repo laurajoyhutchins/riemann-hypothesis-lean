@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.KerLat
+module
+
+public import Formalism.PeriodIntegrals.KerLat
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open NumberField ComplexConjugate
@@ -27,13 +76,6 @@ theorem indep_of_im_ne {a b : ℂ} (h : (conj a * b).im ≠ 0) : LinearIndepende
   rw [ht, Complex.ofReal_zero, zero_mul, add_zero] at hst
   exact (mul_eq_zero.1 hst).resolve_right ha |> Complex.ofReal_eq_zero.1
 
-def imMul {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (a : ℂ) : K →ₗ[ℚ] ℝ where
-  toFun k := (conj a * φ k).im
-  map_add' x y := by simp [mul_add]
-  map_smul' q x := by
-    simp only [Rat.smul_def, map_mul, map_ratCast, RingHom.id_apply]
-    rw [mul_left_comm, ← Complex.ofReal_ratCast, Complex.im_ofReal_mul]
-
 theorem im_ne {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (hφ : ∃ k : K, (φ k).im ≠ 0)
     (B : Module.Basis (Fin 2) ℚ K) : (conj (φ (B 0)) * φ (B 1)).im ≠ 0 := by
   intro h0
@@ -48,6 +90,7 @@ theorem im_ne {K : Type} [Field K] [CharZero K] (φ : K →+* ℂ) (hφ : ∃ k 
     rw [mul_comm, Complex.mul_conj, Complex.ofReal_im]
   have key : ∀ x : K, (conj (φ (B 0)) * φ x).im = 0 := by
     intro x
+
     rw [← B.sum_repr x, map_sum, Finset.mul_sum, Complex.im_sum, Fin.sum_univ_two, hs, hs, e0, h0]
     simp
   have h1 := key 1
@@ -108,6 +151,7 @@ theorem perPair : PI.KerLat.PerPair := by
   · rw [AddSubgroup.closure_le]
     rintro w ⟨c, hc, rfl⟩
     have hfc : δ * φ (c : K) = f ⟨c, hc⟩ := rfl
+
     rw [hfc, ← bI.sum_repr ⟨c, hc⟩, map_sum]
     refine AddSubgroup.sum_mem _ fun i _ => ?_
     rw [map_zsmul]

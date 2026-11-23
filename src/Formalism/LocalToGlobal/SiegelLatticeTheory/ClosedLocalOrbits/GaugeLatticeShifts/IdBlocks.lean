@@ -1,6 +1,57 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.KExpCut
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHNeat
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.KExpCut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHNeat
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 noncomputable section
 
@@ -321,7 +372,7 @@ theorem oo_eq (μG μN μH ν : Measure G) [SFinite μN] [IsFiniteMeasure μH]
   set F : G → (V →L[ℂ] V) := fun x => (innerSL ℂ (W x)).smulRight (W x) with hFdef
   have hFc : Continuous F := by
     have h1 : Continuous fun x => innerSL ℂ (W x) := (innerSL ℂ).continuous.comp hWc
-    exact ((ContinuousLinearMap.smulRightL ℂ V V).continuous.comp h1).clm_apply hWc
+    exact ((StrongDual.smulRightL ℂ V V).continuous.comp h1).clm_apply hWc
   set b := stdOrthonormalBasis ℂ V
   have hpar : ∀ w : V, ‖w‖ₑ ^ 2 = ∑ i, ‖⟪w, b i⟫_ℂ‖ₑ ^ 2 := by
     intro w
@@ -659,8 +710,8 @@ theorem piU_aesm (u : D.what₂.Word) (x : X.Vpi u) : AEStronglyMeasurable (fun 
     rw [ae_iff]; exact (X.muH_haar u).2.2.1
   rwa [Measure.restrict_eq_self_of_ae_mem hae] at hm
 
-variable (X) in
 
+variable (X) in
 def PiIrr (u : D.what₂.Word) : Prop := IrrOn ((Hinf X u : Subgroup X.B.I.Ginf) : Set X.B.I.Ginf) (X.piU u)
 
 theorem rk1_smul_right {V V' : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V]
@@ -730,30 +781,30 @@ theorem blk_of (cs : ColSys X u what₂) (cs' : ColSys X u' rows') (FdN FdN' : S
       (X.chi2 (kOf X u u' (cs.h ρ : X.B.I.Gf) (cs'.h ρ' : X.B.I.Gf) t.pt) • OOt t) := by
   unfold blk; exact if_pos h
 
-variable (F0) in
 
+variable (F0) in
 def IdMeetOne (cs : ColSys X u what₂) : Prop :=
   (∀ (ρ ρ' : cs.Cl) (t : GTerm X u u F0 F0 what₂ what₂), t.isId → Meets cs cs t ρ ρ' → ρ = ρ') ∧
     (∀ (ρ : cs.Cl) (t t' : GTerm X u u F0 F0 what₂ what₂), t.isId → t'.isId → Meets cs cs t ρ ρ →
       Meets cs cs t' ρ ρ → t = t') ∧
     ∀ ρ : cs.Cl, ∃ t : GTerm X u u F0 F0 what₂ what₂, t.isId ∧ Meets cs cs t ρ ρ
 
-variable (F0) in
 
+variable (F0) in
 def IdMeetPhase (cs : ColSys X u what₂) : Prop :=
   ∀ (ρ : cs.Cl) (t : GTerm X u u F0 F0 what₂ what₂), t.isId → Meets cs cs t ρ ρ →
     t.pt.1⁻¹ ∈ X.NinfU u ∧
       X.chi2 (kOf X u u (cs.h ρ : X.B.I.Gf) (cs.h ρ : X.B.I.Gf) t.pt) * starRingEnd ℂ (X.psiInfU u t.pt.1⁻¹) = 1
 
-variable (F0) in
 
+variable (F0) in
 def IdMeetRO (cs : ColSys X u what₂) : Prop :=
   ∀ (ρ : cs.Cl) (t : GTerm X u u F0 F0 what₂ what₂), t.isId → Meets cs cs t ρ ρ →
     (ROinf t).Countable ∧ (∀ a ∈ ROinf t, ∀ b ∈ ROinf t, a * b ∈ ROinf t) ∧ (∀ a ∈ ROinf t, a⁻¹ ∈ ROinf t) ∧
       ROinf t ⊆ X.NinfU u
 
-variable (F0) in
 
+variable (F0) in
 def IdMeetVol (cs : ColSys X u what₂) (FdN : Set X.B.I.Ginf) : Prop :=
   ∀ (ρ : cs.Cl) (t : GTerm X u u F0 F0 what₂ what₂), t.isId → Meets cs cs t ρ ρ →
     X.muN u (FundOf t) = X.muN u FdN
@@ -782,7 +833,7 @@ theorem idDiagBlocks_of (cs : ColSys X u what₂) (FdN : Set X.B.I.Ginf) (hK2 : 
       have hΩ : IsSFund X.B.I (ROinf t0) (FundOf t0) := by
         have h := hFE t0
         unfold FundOf
-        rw [dif_pos h]
+        rw [dite_eq_left h]
         exact h.choose_spec
       have hNf : X.muN u FdN ≠ ⊤ := fun h => by rw [h] at hN0; simp at hN0
       have hHf : X.muH u Set.univ ≠ ⊤ := fun h => by rw [h] at hH0; simp at hH0
@@ -848,14 +899,6 @@ theorem idDiagBlocksC (hV : VolPosC) (hI : PiIrrC) (hM : IdMeetC) (D : D7) (X : 
   exact idDiagBlocks_of (Y.cs u) (Y.FN u) hK2 hFE (hI D X u) hH
     (pos_of_mul_pos_right hN ENNReal.toReal_nonneg) h1 h2 h3 h4
 
-def IdCellDiagNeatC : Prop :=
-  ∀ (D : D7) (X : HidaSetting D) (Y : Full X) (u : D.what₂.Word), NeatKu X u Y.hK →
-    FundExists X u u (X.Fu u) (X.Fu u) (Y.what₂ u) (Y.what₂ u) →
-    Formalism.L2.SG.TermOp.IdCellDiag (X.Fu u) (Y.cs u) (Y.FN u)
-
-theorem idCellDiagNeatC_of (hV : VolPosC) (hI : PiIrrC) (hM : IdMeetC) : IdCellDiagNeatC :=
-  fun D X Y u hC hFE => idCellDiag_of (Y.cs u) (Y.FN u) (idDiagBlocksC hV hI hM D X Y u hC hFE)
-
 theorem idCellDiagC_of_steps (hV : VolPosC) (hI : PiIrrC) (hM : IdMeetC) (hN : NeatC) : IdCellDiagC :=
   idCellDiagC_of fun D X Y u _ hFE _ => idDiagBlocksC hV hI hM D X Y u (hN D X Y u) hFE
 
@@ -871,23 +914,23 @@ variable {D : D7} {X : HidaSetting D} {u u' : D.what₂.Word}
   {F0 : FlagG (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)} {F0' : FlagG (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)}
   {what₂ rows' : Finset (Submodule (𝓞 D.host.E) (VS D).V)}
 
-variable (F0 F0' what₂ rows') in
 
+variable (F0 F0' what₂ rows') in
 def IdOffConj : Prop :=
   u ≠ u' → ∀ t : GTerm X u u' F0 F0' what₂ rows', t.isId →
     (∀ s ∈ X.SinfU u, t.pt.1⁻¹ * s * t.pt.1 ∈ X.SinfU u' ∧
       X.psiInfU u' (t.pt.1⁻¹ * s * t.pt.1) = X.psiInfU u s) ∧
     ∀ n ∈ X.NinfU u, t.pt.1⁻¹ * n * t.pt.1 ∈ X.NinfU u'
 
-variable (F0 F0' what₂ rows') in
 
+variable (F0 F0' what₂ rows') in
 def IdOffIneq : Prop :=
   u ≠ u' → ∀ t : GTerm X u u' F0 F0' what₂ rows', t.isId →
     ∀ T : X.Vpi u' →ₗ[ℂ] X.Vpi u, (∀ h ∈ ((Hinf X u : Subgroup X.B.I.Ginf) : Set X.B.I.Ginf), ∀ x,
       T (X.piU u' (t.pt.1⁻¹ * h * t.pt.1) x) = X.piU u h (T x)) → T = 0
 
-variable (F0 F0' what₂ rows') in
 
+variable (F0 F0' what₂ rows') in
 def IdOffRO : Prop :=
   u ≠ u' → ∀ t : GTerm X u u' F0 F0' what₂ rows', t.isId →
     (ROinf t).Countable ∧ (∀ a ∈ ROinf t, ∀ b ∈ ROinf t, a * b ∈ ROinf t) ∧ (∀ a ∈ ROinf t, a⁻¹ ∈ ROinf t) ∧
@@ -956,7 +999,7 @@ theorem idOffBlocks_of (cs : ColSys X u what₂) (cs' : ColSys X u' rows') (FdN 
     have hΩ : IsSFund X.B.I (ROinf t.1) (FundOf t.1) := by
       have h := hFE t.1
       unfold FundOf
-      rw [dif_pos h]
+      rw [dite_eq_left h]
       exact h.choose_spec
     obtain ⟨hS, hN⟩ := hC hu t.1 t.2
     obtain ⟨hRc, hRm, hRi, hRN⟩ := hR hu t.1 t.2

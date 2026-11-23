@@ -1,6 +1,42 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.AuxiliaryPrimeFunction
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.PrimeProj
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.AuxiliaryPrimeFunction
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.PrimeLevelLocalization.PrimeProj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -102,7 +138,7 @@ def TyTop : Prop := ForData fun _ _ _ _ _ n _ _ S _ _ _ w₀ _ _ _ _ N _ Ty =>
 def TyFact : Prop := ForData fun E _ _ _ _ n p _ S _ _ _ _ _ V _ W _ L Ty =>
   (∀ w ∈ W, (L w).Fact Ty.K (Iw n w.1) ∧ Ty.L.Apart (L w) ∧ ∀ w' ∈ W, w ≠ w' → (L w).Apart (L w')) ∧
   (∀ w : Spl E p, w.1 ∉ V.S → cj w.1 ∉ V.S → (∀ u ∈ W, GlobalTheory.Cong.Apart w.1 u.1) →
-    (L w).Fact Ty.K (GlobalTheory.LFun.KGL w.1 n) ∧ Ty.L.Apart (L w)) ∧
+    (L w).Fact Ty.K (GlobalTheory.LFun.KGL w.1 (n := n)) ∧ Ty.L.Apart (L w)) ∧
   ∃ c : ℕ, 0 < c ∧ c.Coprime p ∧ ∀ k ∈ Ty.K, ∀ v ∈ LaHat S.D, c • S.L.actG k v ∈ LaHat S.D
 
 def ExistsIdempotentHeckeOperatorWithRegularSupport : Prop := ForData fun E _ _ _ _ n p _ S _ _ _ _ _ _ _ W _ L Ty =>
@@ -124,7 +160,7 @@ def MemComm : Prop := ForData fun _ _ _ _ _ _ _ _ S F _ _ _ _ V r W N L Ty => �
 
 def PhiEx : Prop := ForData fun E _ _ _ _ n p _ S F _ _ _ _ V r _ N _ Ty =>
   ∃ φ : S.G.GAf → Module.Dual ℂ V.W.Sp, φ ≠ 0 ∧ Ty.IsTy φ ∧
-    (∀ g : GUf E n, (∀ w : Plc E, (p : 𝓞 E) ∈ w.asIdeal → comp w g ∈ GlobalTheory.LFun.KGL w n) → φ (F.j g) = V.Φ (F.th g)) ∧
+    (∀ g : GUf E n, (∀ w : Plc E, (p : 𝓞 E) ∈ w.asIdeal → comp w g ∈ GlobalTheory.LFun.KGL w (n := n)) → φ (F.j g) = V.Φ (F.th g)) ∧
     ∀ (g : Mem S.L N) (θ : ℂ), Seen F V r g θ → Formalism.UG.hAct Ty.K₀ g.fn φ = θ • φ
 
 def EigEx : Prop := ForData fun E _ _ _ _ n _ _ S F _ _ _ _ V r _ N _ Ty =>

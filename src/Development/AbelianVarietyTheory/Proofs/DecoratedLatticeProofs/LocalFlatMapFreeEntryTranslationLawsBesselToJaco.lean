@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.LocMod
@@ -48,6 +92,7 @@ theorem sand (p : Place D k) {S T : HSp D} (FS : Frame k S.rank Y') (FT : Frame 
     · intro b _ hb
       rw [Matrix.mul_single_apply_of_ne _ _ _ _ _ hb, zero_mul]
     · simp
+
   simp only [Matrix.mul_apply, hU, Finset.sum_mul, Finset.mul_sum, map_sum, Matrix.map_apply]
   refine Finset.sum_congr rfl fun u _ => Finset.sum_congr rfl fun t _ => ?_
   rw [mul_comm (N i t), ι_mul, ι_mul]
@@ -72,6 +117,7 @@ theorem col_coord_ne {N : ℕ} (F : Frame k N Y) (j : Y) (c : k) (v : Fin N → 
 theorem row_coord (p : Place D k) {N m m' : ℕ} (F : Frame k N Y) (j : Y) (c : k) (M : Mx D m N) (M' : Mx D N m')
     (i : Fin m') (h : ∀ r, F.β r j = c * p.π (M' r i)) (l : Fin m) :
     (M.map p.π * F.β) l j = c * p.π ((M ⬝ M') l i) := by
+
   simp only [Matrix.mul_apply, map_sum, map_mul, Finset.mul_sum, Matrix.map_apply]
   exact Finset.sum_congr rfl fun t _ => by rw [h]; ring
 
@@ -147,6 +193,7 @@ theorem bes_zero (hC : p.IsCoreFrame B s FA F₀) (hB : p.IsBesFrame B s FA FV) 
       exact Finset.sum_congr rfl fun u _ => by rw [hC.1]
     · refine col_coord_ne FV (Sum.inr ⟨ρ, by omega⟩) 1 _ (fun r => ?_) _ (fun h => ?_)
       · rw [hB.2.2.2.1 _ rfl, one_mul, Matrix.mul_apply]
+
         simp only [hC.2, Place.pr, Matrix.mulVec, dotProduct, map_sum, map_mul, Finset.mul_sum, Matrix.map_apply]
         refine Finset.sum_congr rfl fun u _ => ?_
         rw [show B.d.j0 r u = incA D (B.d.i₀ r u) from rfl]
@@ -330,8 +377,9 @@ theorem splitComponent_wittZero_besselYZeroPoint (t : Fin B.V.rank) (i : Fin ρ)
     intro u
     rw [yZero, Matrix.neg_apply, zEll, Matrix.vecMulVec_apply, map_neg, map_mul, ell, apply_ite p.π, map_one, map_zero]
     rfl
+
   rw [Matrix.mul_apply, map_sum, Place.pr, Matrix.mulVec, dotProduct, map_sum, map_sum, Finset.sum_mul,
-    ← Finset.sum_neg_distrib]
+  ← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun u _ => ?_
   rw [map_mul, h0, map_mul, map_mul, mul_assoc, mul_neg]
   rfl

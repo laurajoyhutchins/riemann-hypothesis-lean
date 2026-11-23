@@ -1,4 +1,56 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePKeyDef
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePKeyDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Finite.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,7 +166,7 @@ theorem fixed_nat (p : ℕ) [hp : Fact p.Prime] [CharP k p] (a : k) (ha : a ^ p 
   let φ : ZMod p →+* k := ZMod.castHom (dvd_refl p) k
   have hφ : Function.Injective φ := φ.injective
   have hp1 : 1 < p := hp.out.one_lt
-  have hP : (X ^ p - X : k[X]) ≠ 0 := FiniteField.X_pow_card_sub_X_ne_zero k hp1
+  have hP : (X ^ p - X : k[X]) ≠ 0 := Polynomial.X_pow_sub_X_ne_zero hp1
   have hroot : ∀ b : k, b ^ p = b → b ∈ (X ^ p - X : k[X]).roots.toFinset := by
     intro b hb
     rw [Multiset.mem_toFinset, Polynomial.mem_roots hP]
@@ -147,7 +199,7 @@ theorem fixed_nat (p : ℕ) [hp : Fact p.Prime] [CharP k p] (a : k) (ha : a ^ p 
     calc (X ^ p - X : k[X]).roots.toFinset.card ≤ Multiset.card (X ^ p - X : k[X]).roots :=
           Multiset.toFinset_card_le _
       _ ≤ (X ^ p - X : k[X]).natDegree := Polynomial.card_roots' _
-      _ = p := FiniteField.X_pow_card_sub_X_natDegree_eq k hp1
+      _ = p := Polynomial.natDegree_X_pow_sub_X (R := k) hp1
   omega
 
 theorem exists_lift (p : ℕ) [Fact p.Prime] [CharP k p] (Q : k[X]) (hQ : ∀ i, Q.coeff i ^ p = Q.coeff i) :
@@ -155,6 +207,7 @@ theorem exists_lift (p : ℕ) [Fact p.Prime] [CharP k p] (Q : k[X]) (hQ : ∀ i,
   classical
   choose f hf using fun i => fixed_nat p (Q.coeff i) (hQ i)
   refine ⟨∑ i ∈ Q.support, Polynomial.monomial i ((f i : ℕ) : ℤ), ?_⟩
+
   rw [Polynomial.map_sum]
   conv_rhs => rw [Q.as_sum_support]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -203,7 +256,7 @@ theorem core (p : ℕ) [hp : Fact p.Prime] [CharP k p] {O : Type} [CommRing O] {
       simp only [Polynomial.map_sub, map_X, map_C, frobenius_def, ← hfr]
       exact Fintype.prod_equiv (Equiv.addRight 1) _ _ fun c => rfl
     have hcoef : ∀ i, Q.coeff i ^ p = Q.coeff i := fun i => by
-      have h1 := congrArg (fun P => Polynomial.coeff P i) hfix
+      have h1 := congrArg (fun P => _root_.AddMonoidAlgebra.coeff (M := ℕ) P i) hfix
       simp only [coeff_map, frobenius_def] at h1
       exact h1
     obtain ⟨μ, hμ⟩ := exists_lift p Q hcoef
@@ -218,7 +271,7 @@ theorem core (p : ℕ) [hp : Fact p.Prime] [CharP k p] {O : Type} [CommRing O] {
     exact ⟨c, hc⟩
 
   have hfin : Finite (Hs (e 0) (p ^ d) hq1 hq) := by
-    have hQ0 : (X ^ (p ^ d) - X : k[X]) ≠ 0 := FiniteField.X_pow_card_sub_X_ne_zero k hq1
+    have hQ0 : (X ^ (p ^ d) - X : k[X]) ≠ 0 := Polynomial.X_pow_sub_X_ne_zero hq1
     have hF : Finite ↥(((X ^ (p ^ d) - X : k[X]).roots.toFinset : Set k)) := (Finset.finite_toSet _).to_subtype
     refine Finite.of_injective (β := ↥(((X ^ (p ^ d) - X : k[X]).roots.toFinset : Set k)))
       (fun u => ⟨((u : kˣ) : k), ?_⟩) ?_

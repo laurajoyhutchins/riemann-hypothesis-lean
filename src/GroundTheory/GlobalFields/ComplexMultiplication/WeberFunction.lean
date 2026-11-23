@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.VariableChangePoints
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.VariableChangePoints
+public import Mathlib.Topology.Compactification.OnePoint.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -28,11 +82,6 @@ theorem IsShortForm.Δ_eq {W : WeierstrassCurve F} (hW : IsShortForm W) :
   simp only [WeierstrassCurve.Δ, b₂, b₄, b₆, b₈, hW.a₁_eq, hW.a₂_eq, hW.a₃_eq]
   ring
 
-theorem IsShortForm.Δ_eq_g {W : WeierstrassCurve F} (hW : IsShortForm W) :
-    W.Δ = g₂ W ^ 3 - 27 * g₃ W ^ 2 := by
-  rw [hW.Δ_eq, g₂, g₃]
-  ring
-
 theorem IsShortForm.a₄_ne_zero_or_a₆_ne_zero {W : WeierstrassCurve F} [W.IsElliptic]
     (hW : IsShortForm W) : W.a₄ ≠ 0 ∨ W.a₆ ≠ 0 := by
   by_contra h
@@ -41,8 +90,9 @@ theorem IsShortForm.a₄_ne_zero_or_a₆_ne_zero {W : WeierstrassCurve F} [W.IsE
   rw [hW.Δ_eq, h.1, h.2] at this
   simp at this
 
-open scoped Classical in
 
+open Classical in
+open scoped Classical in
 noncomputable def weberValue (W : WeierstrassCurve F) (x : F) : F :=
   if W.a₆ = 0 then g₂ W ^ 2 / W.Δ * x ^ 2
   else if W.a₄ = 0 then g₃ W / W.Δ * x ^ 3
@@ -51,9 +101,6 @@ noncomputable def weberValue (W : WeierstrassCurve F) (x : F) : F :=
 noncomputable def weberFunction (W : WeierstrassCurve F) : W.toAffine.Point → OnePoint F
   | .zero => ∞
   | .some x _ _ => OnePoint.some (weberValue W x)
-
-@[simp]
-theorem weberFunction_zero (W : WeierstrassCurve F) : weberFunction W .zero = ∞ := rfl
 
 @[simp]
 theorem weberFunction_some (W : WeierstrassCurve F) {x y : F} (h : W.toAffine.Nonsingular x y) :

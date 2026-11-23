@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GeometricLemmaAverage
+module
+
+import Mathlib.GroupTheory.Index
+public import GroundTheory.AutomorphicForms.GeometricLemmaAverage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -35,18 +84,8 @@ theorem avgOver_eq_of_forall_mul_eq {K : Subgroup G} {f : G → W} (hf : AvgFini
   rw [hcard, inv_mul_cancel₀ (Nat.cast_ne_zero.2 hf), one_smul]
 
 theorem relIndex_ne_zero_trans {H K K' : Subgroup G} (hKK' : K ≤ K') (hH : H.relIndex K ≠ 0)
-    (hK : K.relIndex K' ≠ 0) : H.relIndex K' ≠ 0 := by
-  have h1 : (H ⊓ K).relIndex K' = (H ⊓ K).relIndex K * K.relIndex K' :=
-    (Subgroup.relIndex_mul_relIndex _ _ _ inf_le_right hKK').symm
-  rw [Subgroup.inf_relIndex_right] at h1
-  have h2 : (H ⊓ K).relIndex K' ≠ 0 := by
-    rw [h1]
-    exact mul_ne_zero hH hK
-  intro h0
-  apply h2
-  have := Subgroup.relIndex_dvd_of_le_left K' (inf_le_left : H ⊓ K ≤ H)
-  rw [h0] at this
-  exact Nat.eq_zero_of_zero_dvd this
+    (hK : K.relIndex K' ≠ 0) : H.relIndex K' ≠ 0 :=
+  Subgroup.relIndex_ne_zero_trans hH hK
 
 variable {A : Subgroup G}
 
@@ -276,8 +315,8 @@ theorem avgOver_map_conj (b : G) {K : Subgroup G} {f : G → W} (hf : AvgFinite 
   simp only [MulAut.conj_symm_apply] at this
   exact this
 
-omit [AddCommGroup W] [Module ℂ W] in
 
+omit [AddCommGroup W] [Module ℂ W] in
 theorem avgFinite_map_mulEquiv (φ : G ≃* G) {K : Subgroup G} {f : G → W} (hf : AvgFinite K f) :
     AvgFinite (K.map φ.toMonoidHom) (fun y => f (φ.symm y)) := by
   have hst : rightStab (fun y => f (φ.symm y)) = (rightStab f).map φ.toMonoidHom := by

@@ -1,9 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume GroundTheory.Automorphic GlobalTheory.CompanionTheory.Ar.Cusp.Dict
 open scoped ENNReal InnerProductSpace
 open scoped ComplexOrder
@@ -39,6 +81,7 @@ theorem exists_clear {I : Type} (e : Λ →+ V) (he : Function.Injective e)
     rw [show (a : E) = algebraMap (𝓞 E) E a from rfl, ha, Algebra.smul_def]
   choose! a ha using h2
   refine ⟨d, (b.repr (e x)).support, a, nonZeroDivisors.ne_zero hd, he ?_⟩
+
   rw [hs, map_sum]
   conv_lhs => rw [← b.linearCombination_repr (e x), Finsupp.linearCombination_apply, Finsupp.sum,
     Finset.smul_sum]
@@ -55,6 +98,7 @@ theorem exists_ext (e : Λ →+ V) (he : Function.Injective e)
   have hdE : (d : E) ≠ 0 := by simpa using hd
   have h1 : (d : E) • (b.constr E fun i => e (f (xs i))) (e x) = (d : E) • e (f x) := by
     rw [← map_smul, ← hs, ← hs, ← map_smul, hx]
+
     simp only [map_sum, hs, map_smul, ← hb, Module.Basis.constr_basis]
   exact smul_right_injective _ hdE h1
 
@@ -176,8 +220,8 @@ theorem exists_of_stab (C : LatEmb F) (γ : latticeStab C.h C.e.range) :
   rw [C.form_eq, C.form_eq, hφ, hφ]
   exact congrArg (fun t => Algebra.trace ℚ E (C.xi * t)) hu
 
-open scoped Pointwise in
 
+open scoped Pointwise in
 theorem exists_of_aut (C : LatEmb F) (φ : autGrp (E := E) F.form) :
     ∃ γ : latticeStab C.h C.e.range, ∀ x,
       ((γ : C.h.unitaryGroup) : (Fin (j + j') → E) ≃ₗ[E] (Fin (j + j') → E)) (C.e x) = C.e (φ.1 x) := by

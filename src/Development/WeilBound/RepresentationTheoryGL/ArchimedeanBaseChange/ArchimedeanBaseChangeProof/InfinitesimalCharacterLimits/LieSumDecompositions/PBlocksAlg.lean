@@ -1,4 +1,70 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.Degree.Defs
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
+public import Mathlib.Algebra.Algebra.Subalgebra.Lattice
+public import Mathlib.Algebra.Polynomial.BigOperators
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,9 +153,10 @@ theorem poly_eq (n : ℕ) (a : ℕ → Module.End ℂ M) (ha : a n = 1) (σ : Mu
   set g : ℂ[X] := ∑ i : Fin n, C (f (a i y) - f y * P.coeff i) * X ^ (i : ℕ) with hg
   have hge : ∀ w : ℂ, g.eval w = f ((∑ k ∈ Finset.range (n + 1), w ^ k • a k) y) - f y * P.eval w := by
     intro w
+
     rw [hPsum, hg, eval_finsetSum, Finset.sum_range_succ, Finset.sum_range_succ, hPn, ha,
-      LinearMap.add_apply, map_add, LinearMap.sum_apply, map_sum, ← Fin.sum_univ_eq_sum_range (fun k => f ((w ^ k • a k) y)),
-      ← Fin.sum_univ_eq_sum_range (fun k => P.coeff k * w ^ k)]
+    LinearMap.add_apply, map_add, LinearMap.sum_apply, map_sum, ← Fin.sum_univ_eq_sum_range (fun k => f ((w ^ k • a k) y)),
+    ← Fin.sum_univ_eq_sum_range (fun k => P.coeff k * w ^ k)]
     simp only [eval_mul, eval_C, eval_pow, eval_X, LinearMap.smul_apply, map_smul, smul_eq_mul, Module.End.one_apply,
       mul_add, Finset.mul_sum]
     simp only [sub_mul, Finset.sum_sub_distrib, one_mul]
@@ -256,7 +323,7 @@ theorem piece [Nontrivial M] (r s : ℕ) (a b : ℕ → Module.End ℂ M) (haa :
   have hmστ : m = σ + τ := (add_tsub_cancel_of_le hσm).symm
   have hDr : pD.roots = τ.map Neg.neg := by
     have h1 : pC.roots + pD.roots = pC.roots + τ.map Neg.neg := by
-      rw [hroots, hCr, ← Multiset.map_add, ← hmστ]
+      rw [hroots, hCr, ← Multiset.map_add (f := _), ← hmστ]
     exact add_left_cancel h1
   have hτn : τ.Nodup := Multiset.nodup_of_le tsub_le_self hm
   have hmc : Multiset.card m = r + s := by
@@ -467,11 +534,13 @@ theorem decomp {V : Type} [AddCommGroup V] [Module ℂ V] {ι : Type} [Fintype �
     obtain ⟨χ₀, hχ₀, rfl⟩ := Finset.mem_image.1 hσ
     obtain ⟨h1, h2, -⟩ := hsig χ₀ (Finset.mem_filter.1 hχ₀).2 i
     refine ⟨h1, h2, fun u => ⟨?_, ?_⟩⟩
+
     · rw [map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun χ hχ => ?_
       obtain ⟨hχF, hχe⟩ := Finset.mem_filter.1 hχ
       rw [← hχe]
       exact ((hsig χ (Finset.mem_filter.1 hχF).2 i).2.2 u).1
+
     · rw [map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun χ hχ => ?_
       obtain ⟨hχF, hχe⟩ := Finset.mem_filter.1 hχ

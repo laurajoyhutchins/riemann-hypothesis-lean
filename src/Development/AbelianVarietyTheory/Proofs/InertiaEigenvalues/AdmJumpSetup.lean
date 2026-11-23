@@ -1,13 +1,56 @@
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoAndThreeForFamily
-import Formalism.SharpRestriction.GlobalTheoremInputs
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.JointConditionTameBound
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CrysOnCond
-import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
-import Formalism.SharpRestriction.LevelLetterCocycles.RamifiedCoefficientChains
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BaseSizes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.StatementJAll
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLetterOfLocalEmbedding
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmissibleParameterJ
+public import Formalism.LocalRingCardinality.DataParams
+public import Formalism.SharpRestriction.LevelLetterCocycles.EmbeddingTypeJumps
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsLetterOfLocalEmbedding
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoThreeFamily
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations GlobalTheory.NLink
 
 noncomputable section
@@ -123,16 +166,11 @@ theorem sz_bounds (L : SizeData₂ D) (P : ParameterChoice' D L) (hP : AdmPar L)
     split_ifs <;> simp
   rw [← hw]
   have hx : 1 < L.sc.x := L.sc.one_lt_alt
-  have hx0 : 0 < L.sc.x := by linarith
   have hb' : 0 < L.sc.b' := by
     unfold Scale.b' Scale.a Scale.X' Scale.b
     positivity
-  have hb : 0 < L.sc.b := Real.exp_pos _
   have hn : (1 : ℝ) ≤ (D.R.n : ℝ) := by
     exact_mod_cast D.R.ord_pos
-  have hw''0 : 0 ≤ L.sc.w'' D.R.n := by
-    unfold Scale.w''
-    exact div_nonneg hb'.le (by positivity)
   have hw''b' : L.sc.w'' D.R.n ≤ L.sc.b' := by
     unfold Scale.w''
     exact div_le_self hb'.le (by nlinarith)
@@ -250,9 +288,6 @@ theorem key_sets (L : SizeData₂ D) (hJb : CloudCentreDistance L) (hJc : jcCond
     push_cast
     rfl
   have ht1 : (1 : ℝ) ≤ D.R.t := L.t_win.1
-  have hS0 : 0 < L.Sc := L.Sc_pos
-  have hη : 0 < L.etaSz := L.etaSz_pos
-  have hkc0 : (0 : ℝ) ≤ kc := by rw [hkR]; linarith
   have hc0 := jumpBlockCentreOffset_coe_real (D := D)
   rw [hzR] at hlo hhi
   cases up
@@ -339,30 +374,5 @@ theorem key_sets (L : SizeData₂ D) (hJb : CloudCentreDistance L) (hJc : jcCond
       rw [mem_JJ, mem_intPart, mem_intPart]
       rfl
 
-open Classical in
-
-theorem main : Hypotheses₂ → ∀ (D : D7) (L : SizeData₂ D) (P : ParameterChoice' D L) (nch : NChoice D) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (X : KillingConditions.HubData D) (C₂ : ℝ), Setup L nch HW X C₂ → ∀ ep, AdmissibleParameterJ.hodgeTateJumpsAtModulesForSign D ep → EmbeddingTypeJumps.HodgeJumpWindowsAtDistinguishedPrimes X.r ep L := by
-  intro _ D L P nch HW F Cm X C₂ S ep hJa
-  obtain ⟨-, hJb, hJc, -⟩ := GlobalTheory.JumpStatement.holds_all D L (S.facts.admJ L S.par)
-  intro i _ w hw C τ
-  obtain ⟨g, ρ, hR, hjx, -⟩ := hJa i (X.r i) (S.canon.fam.good i) w hw C τ
-  obtain ⟨hj1, hj2⟩ := D.nd.j_range i
-  obtain ⟨hlo, hhi⟩ := sz_bounds L P S.par (D.nd.j i) hj1 hj2 ρ
-  have hUp : EmbeddingTypeJumps.UpAt ep C τ → AdmissibleParameterJ.TypeU D ep g := fun ⟨τ₀, h0, e0⟩ =>
-    typeU_of_emb i C τ g ρ hR ep τ₀ h0 e0
-  have hDn : EmbeddingTypeJumps.DownAt ep C τ → ¬ AdmissibleParameterJ.TypeU D ep g := fun ⟨τ₀, h0, e0⟩ h => by
-    have h' := typeU_of_emb i C τ g ρ hR (!ep) τ₀ h0 e0
-    unfold AdmissibleParameterJ.TypeU at h h'
-    cases ep <;> simp_all
-  obtain ⟨s, Jc, Jl, h1, h2, h3, h4, h5, hpos, hneg, hJJ⟩ :=
-    key_sets L hJb hJc (D.nd.j i) hj1 hj2 ρ (decide (AdmissibleParameterJ.TypeU D ep g)) hlo hhi
-  refine ⟨s, Jc, Jl, h1, h2, h3, h4, h5, ?_, ?_, ?_, ?_⟩
-  · by_cases ht : AdmissibleParameterJ.TypeU D ep g
-    · left; exact hpos (by simp [ht])
-    · right; exact hneg (by simp [ht])
-  · intro hu; exact hpos (by simp [hUp hu])
-  · intro hd; exact hneg (by simp [hDn hd])
-  · intro x a
-    exact ((hjx x a).1).trans (hJJ a)
 
 end GlobalTheory.HostJumpWin

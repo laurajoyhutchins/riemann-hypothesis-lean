@@ -1,5 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValPlRes
-import ReciprocityTheory.SemistableReduction.AlgAll
+module
+
+public import Mathlib.RingTheory.RamificationInertia.Inertia
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraMapOLInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValPlRes
+public import ReciprocityTheory.SemistableReduction.AlgAll
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Mathlib.RingTheory.Localization.NormTrace
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -12,8 +62,8 @@ variable {O F L : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [F
   [Algebra.IsSeparable F L] [Algebra O L] [IsScalarTower O F L]
   [IsDedekindDomain (integralClosure O L)] [IsFractionRing (integralClosure O L) L]
 
-variable (O F L) in
 
+variable (O F L) in
 noncomputable def hoEquiv : HeightOneSpectrum (integralClosure O L) ≃
     {Q : Ideal (integralClosure O L) // Q.IsMaximal} where
   toFun v := ⟨v.asIdeal, v.isMaximal⟩
@@ -23,8 +73,8 @@ noncomputable def hoEquiv : HeightOneSpectrum (integralClosure O L) ≃
     exact (exists_heightOne O F L v.asIdeal v.isMaximal).choose_spec
   right_inv Q := Subtype.ext (exists_heightOne O F L Q.1 Q.2).choose_spec
 
-include F in
 
+include F in
 theorem norm_integral (b : integralClosure O L) (hb : b ≠ 0) {ϖ : O} (hϖ : Irreducible ϖ) :
     ∃ u : O, IsUnit u ∧
       Algebra.norm F (algebraMap (integralClosure O L) L b) = algebraMap O F
@@ -59,7 +109,7 @@ theorem norm_integral (b : integralClosure O L) (hb : b ≠ 0) {ϖ : O} (hϖ : I
   have hsum : (∑ᶠ v : HeightOneSpectrum (integralClosure O L), v.asIdeal.inertiaDeg O *
       Multiset.count v.asIdeal (UniqueFactorizationMonoid.normalizedFactors (Ideal.span {b}))) = n := by
     rw [hnN]
-    exact finsum_comp_equiv (hoEquiv O F L)
+    exact finsum_comp_equiv (hoEquiv (O := O) (F := F) (L := L))
       (f := fun Q : {Q : Ideal (integralClosure O L) // Q.IsMaximal} => Q.1.inertiaDeg O *
         Multiset.count Q.1 (UniqueFactorizationMonoid.normalizedFactors (Ideal.span {b})))
   haveI : IsLocalization (Algebra.algebraMapSubmonoid (integralClosure O L) (nonZeroDivisors O)) L :=
@@ -180,13 +230,13 @@ theorem norm_eq_places (y : L) (hy : y ≠ 0) {ϖ : O} (hϖ : Irreducible ϖ) :
   intro v
   rw [he v]
   congr 1
-  exact congrArg (fun n : ℕ => (n : ℤ)) (resDeg_addv (F := F) v).symm
+  exact congrArg (fun n : ℕ => (n : ℤ)) (ValPl.resDeg_addv (F := F) v).symm
+
 
 variable (O L) in
 include F in
-
 theorem placesOver_finite : (PlacesOver O L).Finite := by
-  obtain ⟨e, -⟩ := placesOver_bij (O := O) (F := F) (L := L)
+  obtain ⟨e, he⟩ := placesOver_bij (O := O) (F := F) (L := L)
   obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible O
   have hinj : Function.Injective (algebraMap O L) := by
     rw [IsScalarTower.algebraMap_eq O F L]

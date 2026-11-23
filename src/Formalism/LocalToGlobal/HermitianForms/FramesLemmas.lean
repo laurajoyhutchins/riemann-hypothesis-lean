@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.HermitianForms.TiedStep
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,6 +97,7 @@ theorem exists_isON_of_gram (σ : E →+* E) (emb : ι → E →+* ℂ) (hc : �
     intro τ
     rw [← hC]
     ext a b
+
     simp only [gramC, atInf, Matrix.map_apply, Matrix.mul_apply, map_sum, map_mul, conjTranspose_apply, cT, Matrix.transpose_apply, hc]
     rfl
   refine ⟨⟨fun τ => (atInf emb (C : Matrix (Fin n) (Fin n) E) τ)⁻¹, fun τ => ?_⟩, fun τ => Or.inl ?_⟩
@@ -64,11 +107,5 @@ theorem exists_isON_of_gram (σ : E →+* E) (emb : ι → E →+* ℂ) (hc : �
       Matrix.nonsing_inv_mul _ (by rw [det_conjTranspose]; exact (hu τ).star), Matrix.one_mul, Matrix.mul_nonsing_inv _ (hu τ)]
 
 end Gen
-
-theorem ValTied.exists_isON {D : D7} {u : D.what₂.Word} {eV : (D.mem u).A.vT ≃ PlT D u} {i : ℕ} {hi : i ≤ D.R.m}
-    {K : ClsTied u i hi} (W : ValTied u eV i hi K)
-    (hc : ∀ τ x, embT D τ (sigD D x) = starRingEnd ℂ (embT D τ x)) : ∃ o : Fr D i hi, o.IsON := by
-  obtain ⟨C, hC, -, -⟩ := W.de
-  exact exists_isON_of_gram (sigD D : D.host.E →+* D.host.E) (embT D) hc _ C hC
 
 end Formalism.L2.Forms

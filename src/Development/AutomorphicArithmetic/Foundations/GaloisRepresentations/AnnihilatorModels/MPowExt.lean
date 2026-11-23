@@ -1,11 +1,52 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.SameNormBasic
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.PulledRead
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FibrePowerMapOfTotalSpacesIsPullback
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.PulledRead
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FibrePowerMapOfTotalSpacesIsPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Hecke GlobalTheory.UPel.HT.ES
 open GlobalTheory.IwLevel (InSub IsIsogDeg)
-open GlobalTheory.AbDual (evc IsAdditive swap)
+open GlobalTheory.AbDual (IsAdditive swap)
 attribute [local instance] Ideal.Quotient.field
 open UpperTheory.Gal.crystallineComparison UpperTheory.Gal.crystallineComparison.Mod
 
@@ -18,12 +59,12 @@ private noncomputable def powSuccIso {S : Scheme.{0}} (A : Over S) (k : ℕ) :
   have hf : Limits.prod.lift f g ≫ Limits.prod.fst = f := Limits.prod.lift_fst f g
   have hg : Limits.prod.lift f g ≫ Limits.prod.snd = g := Limits.prod.lift_snd f g
   have hgi (i : Fin k) : g ≫ Pi.π (fun _ : Fin k => A) i = Pi.π (fun _ : Fin (k + 1) => A) i.succ :=
-    Pi.lift_π _ _
+    Pi.lift_comp_π _ _
   let b : A ⨯ GlobalTheory.KS.pow A k ⟶ GlobalTheory.KS.pow A (k + 1) :=
     Pi.lift (Fin.cases Limits.prod.fst (fun i => Limits.prod.snd ≫ Pi.π _ i))
-  have hb0 : b ≫ Pi.π (fun _ : Fin (k + 1) => A) 0 = Limits.prod.fst := Pi.lift_π _ _
+  have hb0 : b ≫ Pi.π (fun _ : Fin (k + 1) => A) 0 = Limits.prod.fst := Pi.lift_comp_π _ _
   have hbs (i : Fin k) : b ≫ Pi.π (fun _ : Fin (k + 1) => A) i.succ =
-      Limits.prod.snd ≫ Pi.π (fun _ : Fin k => A) i := Pi.lift_π _ _
+      Limits.prod.snd ≫ Pi.π (fun _ : Fin k => A) i := Pi.lift_comp_π _ _
   { hom := Limits.prod.lift f g
     inv := b
     hom_inv_id := by

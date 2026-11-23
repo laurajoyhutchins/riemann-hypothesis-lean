@@ -1,12 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsFramesEL
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBoxPullGen
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleIdentityIso
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsBoxPullGen
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsFramesEL
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ChartJetTrA
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ChartJetTrD
 import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDPf
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ChartJetTrD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -69,7 +110,27 @@ theorem mapsAt_of_val (hM : M.IsLB) (hM' : M'.IsLB) (w : LB.Iso M' (LB.LinComb M
   have m₄ : (𝟙 Y ≫ p) y ∈ LB.wchart M pr (fun i => J ((𝟙 Y ≫ p) ≫ pr i)) :=
     Set.mem_iInter.2 fun i => hJ ((𝟙 Y ≫ p) ≫ pr i)
   have m₅ : (𝟙 Y ≫ p) y ∈ M'.U jL := hy.2
-  have g := gm_isGen hw (𝟙 Y ≫ p) y jN (fun i => J ((𝟙 Y ≫ p) ≫ pr i)) jL jL m₃ m₄ m₅ m₅
+  have g : bw w (𝟙 Y ≫ p) y jN jL =
+      gm (𝟙 Y ≫ p) y _ ((LB.LinComb M pr (fun _ => 1)).g jN (fun i => J ((𝟙 Y ≫ p) ≫ pr i))) *
+      (gm (𝟙 Y ≫ p) y _ (M'.g jL jL))⁻¹ *
+      bw w (𝟙 Y ≫ p) y (fun i => J ((𝟙 Y ≫ p) ≫ pr i)) jL := by
+    have hm : (𝟙 Y ≫ p) y ∈ ((LB.LinComb M pr (fun _ => 1)).U jN ⊓ M'.U jL) ⊓
+        ((LB.LinComb M pr (fun _ => 1)).U (fun i => J ((𝟙 Y ≫ p) ≫ pr i)) ⊓ M'.U jL) := ⟨⟨m₃, m₅⟩, ⟨m₄, m₅⟩⟩
+    have hw' : res (inf_le_left : _ ≤ (LB.LinComb M pr (fun _ => 1)).U jN ⊓ M'.U jL) (w.s (jN, jL)) =
+        res (le_inf (inf_le_left.trans inf_le_left) (inf_le_right.trans inf_le_left))
+          ((LB.LinComb M pr (fun _ => 1)).g jN (fun i => J ((𝟙 Y ≫ p) ≫ pr i))) *
+        (res (le_inf (inf_le_left.trans inf_le_right) (inf_le_right.trans inf_le_right)) (M'.g jL jL))⁻¹ *
+        res inf_le_right (w.s (fun i => J ((𝟙 Y ≫ p) ≫ pr i), jL)) :=
+      hw (jN, jL) (fun i => J ((𝟙 Y ≫ p) ≫ pr i), jL)
+    have key := congrArg (gm (𝟙 Y ≫ p) y _) hw'
+    set_option backward.isDefEq.respectTransparency false in
+      simp only [map_mul, map_inv, gm_res _ y _ hm, bw] at key ⊢
+    have last := gm_res (𝟙 Y ≫ p) y (inf_le_right :
+      (((LB.LinComb M pr (fun _ => 1)).div M').U (jN, jL) ⊓
+        ((LB.LinComb M pr (fun _ => 1)).div M').U (fun i => J ((𝟙 Y ≫ p) ≫ pr i), jL)) ≤
+        ((LB.LinComb M pr (fun _ => 1)).div M').U (fun i => J ((𝟙 Y ≫ p) ≫ pr i), jL))
+      hm (w.s (fun i => J ((𝟙 Y ≫ p) ≫ pr i), jL))
+    exact key.trans (congrArg (fun t => _ * _ * t) last)
   rw [gm_self hM' _ y m₅, inv_one, _root_.mul_one] at g
   have g' := g.trans (congrArg₂ (· * ·) (gm_linComb M pr (fun _ => 1) (𝟙 Y ≫ p) y _ _ m₃ m₄) rfl)
   refine ((gm_res _ y _ hy _).trans (gen_trans hb _ y m₁ m₂)).trans (Eq.trans ?_ ((map_mul _ _ _).trans
@@ -77,7 +138,6 @@ theorem mapsAt_of_val (hM : M.IsLB) (hM' : M'.IsLB) (w : LB.Iso M' (LB.LinComb M
       (gm_res _ y _ hy _))).symm)
   rw [h, mul_zpow, ← _root_.mul_assoc, ← Finset.prod_zpow]
   simp only [trF, zpow_one, Category.assoc]
-  rfl
 
 theorem clause_iff (hM' : M'.IsLB) (g : Y₁ ⟶ X') (z : Y ⟶ Y₁) (q : ℤ)
     (σ : LB.Sec (LB.LinComb M' (K := Fin 1) (fun _ => g) (fun _ => q))) (a : Γ(Y, ⊤))

@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.SqSubLeNormSub
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.SqSubLeNormSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.QNorm
 open scoped WithZero
 
@@ -42,7 +93,7 @@ theorem isQuad_galois_and_embedding : ∀ (F E : Type) [Field F] [CharZero F] [F
     have h1 : σ (algebraMap F E a + algebraMap F E b * θ)
         = algebraMap F E a + algebraMap F E b * θ :=
       (IntermediateField.mem_fixedField_iff _ _).1 hx σ (Subgroup.mem_top _)
-    rw [map_add, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, h.conj] at h1
+    rw [map_add (f := _), map_mul, AlgEquiv.commutes, AlgEquiv.commutes, h.conj] at h1
     have h2 : algebraMap F E a + algebraMap F E (-b) * θ
         = algebraMap F E a + algebraMap F E b * θ := by
       rw [← h1, map_neg]; ring
@@ -80,18 +131,18 @@ theorem isQuad_galois_and_embedding : ∀ (F E : Type) [Field F] [CharZero F] [F
         have hx := hAB x
         have hy := hAB y
         have hs := h.sq
-        simp only [map_add, map_mul]
+        simp only [map_add (f := _), map_mul]
         linear_combination y * hx + (algebraMap F E (A x) + algebraMap F E (B x) * θ) * hy
           + algebraMap F E (B x) * algebraMap F E (B y) * hs)
-      simp only [h1, h2, map_add, map_mul]
+      simp only [h1, h2, map_add (f := _), map_mul]
       linear_combination (-(φ (B x) * φ (B y))) * hr
     · intro x y
       obtain ⟨h1, h2⟩ := key (x + y) (A x + A y) (B x + B y) (by
         have hx := hAB x
         have hy := hAB y
-        simp only [map_add]
+        simp only [map_add (f := _)]
         linear_combination hx + hy)
-      simp only [h1, h2, map_add]
+      simp only [h1, h2, map_add (f := _)]
       ring
     · obtain ⟨h1, h2⟩ := key θ 0 1 (by simp)
       simp [h1, h2]

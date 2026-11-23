@@ -1,7 +1,59 @@
-import Mathlib
-import GroundTheory.LocalFields.Monogenic
-import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
-import GroundTheory.LocalFields.Unramified
+module
+
+public import GroundTheory.LocalFields.UnitsBasic
+public import GroundTheory.LocalFields.UnramifiedHensel
+public import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+public import Mathlib.RingTheory.DedekindDomain.Different
+public import GroundTheory.LocalFields.Eisenstein
+public import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -150,31 +202,6 @@ theorem differentExponent_eq_addVal {x : 𝒪[L]} (hx : Algebra.adjoin 𝒪[K] {
 
 variable (K L)
 
-instance finite_quotient_maximalIdeal : Finite (𝒪[K] ⧸ 𝓂[K]) :=
-  inferInstanceAs (Finite 𝓀[K])
-
-theorem ramificationIndex_sub_one_le_differentExponent :
-    ramificationIndex K L - 1 ≤ differentExponent K L := by
-  have h := pow_sub_one_dvd_differentIdeal 𝒪[K] (p := 𝓂[K]) (𝓂[L])
-    (ramificationIndex K L) (maximalIdeal_ne_bot K) (by rw [map_maximalIdeal])
-  rwa [differentIdeal_eq_maximalIdeal_pow, maximalIdeal_pow_dvd_pow_iff] at h
-
-theorem differentExponent_eq_zero_iff : differentExponent K L = 0 ↔ IsUnramified K L := by
-  rw [isUnramified_iff]
-  constructor
-  · intro h
-    have h1 := ramificationIndex_sub_one_le_differentExponent K L
-    have h2 := ramificationIndex_pos K L
-    omega
-  · intro he
-    have hmap : 𝓂[L] * 1 = (𝓂[K]).map (algebraMap 𝒪[K] 𝒪[L]) := by
-      rw [map_maximalIdeal, he, pow_one, mul_one]
-    have hnd := not_dvd_differentIdeal_of_isCoprime 𝒪[K] (p := 𝓂[K])
-      (𝓂[L]) 1 isCoprime_one_right hmap
-    rw [differentIdeal_eq_maximalIdeal_pow] at hnd
-    by_contra hd
-    exact hnd (dvd_pow_self _ hd)
-
 end Separable
 
 section Tower
@@ -194,7 +221,7 @@ theorem differentIdeal_tower :
   exact differentIdeal_eq_differentIdeal_mul_differentIdeal 𝒪[K] 𝒪[L] 𝒪[M]
 
 theorem differentExponent_tower :
-    differentExponent K M = ramificationIndex L M * differentExponent K L +
+    differentExponent K M = (_root_.Ideal.ramificationIdx (_root_.IsLocalRing.maximalIdeal (_root_.Valuation.integer (_root_.ValuativeRel.valuation M))) (_root_.Valuation.integer (_root_.ValuativeRel.valuation L))) * differentExponent K L +
       differentExponent L M := by
   have : FiniteDimensional K M := Module.Finite.trans L M
   have : Algebra.IsSeparable K L := Algebra.isSeparable_tower_bot_of_isSeparable K L M
@@ -208,24 +235,6 @@ theorem differentExponent_tower :
 end Tower
 
 section Discriminant
-
-theorem associated_discr {A B : Type*} [CommRing A] [Nontrivial A] [CommRing B] [Algebra A B]
-    {ι ι' : Type*} [Fintype ι] [Fintype ι'] [DecidableEq ι] [DecidableEq ι']
-    (b : Module.Basis ι A B) (b' : Module.Basis ι' A B) :
-    Associated (Algebra.discr A b') (Algebra.discr A b) := by
-  let e : ι ≃ ι' := b.indexEquiv b'
-  let b'' := b'.reindex e.symm
-  have h1 : Algebra.discr A b'' = Algebra.discr A b' := by
-    have := Algebra.discr_reindex A b' e.symm
-    rwa [Module.Basis.coe_reindex]
-  have h2 : Algebra.discr A b = (b''.toMatrix b).det ^ 2 * Algebra.discr A b'' := by
-    convert Algebra.discr_of_matrix_vecMul b'' (b''.toMatrix b)
-    rw [Module.Basis.toMatrix_map_vecMul]
-  have hdet : IsUnit (b''.toMatrix b).det := by
-    rw [← LinearMap.toMatrix_id_eq_basis_toMatrix b b'']
-    exact LinearEquiv.isUnit_det (LinearEquiv.refl A B) b b''
-  refine ⟨(hdet.pow 2).unit, ?_⟩
-  rw [IsUnit.unit_spec, h2, h1, mul_comm]
 
 theorem ord_eq_of_addVal_eq {a : 𝒪[K]} (ha : a ≠ 0) {n : ℕ}
     (hn : IsDiscreteValuationRing.addVal 𝒪[K] a = n) : ord (a : K) = n := by
@@ -247,74 +256,6 @@ theorem ord_eq_of_addVal_eq {a : 𝒪[K]} (ha : a ≠ 0) {n : ℕ}
   simp
 
 variable [Algebra.IsSeparable K L]
-
-theorem addVal_norm_integer (y : 𝒪[L]) :
-    IsDiscreteValuationRing.addVal 𝒪[K] (Algebra.norm 𝒪[K] y) =
-      residueDegree K L • IsDiscreteValuationRing.addVal 𝒪[L] y := by
-  by_cases hy : y = 0
-  · subst hy
-    rw [Algebra.norm_zero, IsDiscreteValuationRing.addVal_zero, IsDiscreteValuationRing.addVal_zero,
-      nsmul_eq_mul]
-    have := residueDegree_pos K L
-    rw [ENat.mul_top (by exact_mod_cast this.ne')]
-  have hN : Algebra.norm 𝒪[K] y ≠ 0 := by
-    intro h
-    have h2 : Algebra.norm K (y : L) = 0 := by rw [← coe_norm_integer, h]; rfl
-    rw [Algebra.norm_eq_zero_iff] at h2
-    exact hy (Subtype.ext h2)
-  obtain ⟨k, hk⟩ := exists_addVal_eq_coe hN
-  obtain ⟨d, hd⟩ := exists_addVal_eq_coe hy
-  have h1 := ord_eq_of_addVal_eq hN hk
-  have h2 := ord_eq_of_addVal_eq hy hd
-  rw [coe_norm_integer, ord_norm, h2] at h1
-  rw [hk, hd, nsmul_eq_mul]
-  have : k = residueDegree K L * d := by exact_mod_cast h1.symm
-  rw [this]
-  push_cast
-  rfl
-
-theorem discr_powerBasis_eq_norm_integer {x : 𝒪[L]} (hint : IsIntegral 𝒪[K] x)
-    (hx : Algebra.adjoin 𝒪[K] {x} = ⊤) :
-    ∃ s : ℕ, Algebra.discr 𝒪[K] (PowerBasis.ofAdjoinEqTop' hint hx).basis =
-      (-1) ^ s * Algebra.norm 𝒪[K] (aeval x (derivative (minpoly 𝒪[K] x))) := by
-  classical
-  set pb := PowerBasis.ofAdjoinEqTop' hint hx
-  have := isLocalization_integer K L
-  let bK : Module.Basis (Fin pb.dim) K L :=
-    pb.basis.localizationLocalization K (nonZeroDivisors 𝒪[K]) L
-  let pb' : PowerBasis K L :=
-    { gen := algebraMap 𝒪[L] L x
-      dim := pb.dim
-      basis := bK
-      basis_eq_pow := fun i ↦ by
-        simp only [bK, Module.Basis.localizationLocalization_apply, PowerBasis.coe_basis, map_pow,
-          pb, PowerBasis.ofAdjoinEqTop'_gen] }
-  have hd := Algebra.discr_localizationLocalization 𝒪[K] (Rₘ := K) (nonZeroDivisors 𝒪[K]) L pb.basis
-  have hn := Algebra.discr_powerBasis_eq_norm (K := K) (L := L) pb'
-  refine ⟨Module.finrank K L * (Module.finrank K L - 1) / 2, ?_⟩
-  apply Subtype.ext
-  change algebraMap 𝒪[K] K _ = _
-  rw [← hd]
-  change Algebra.discr K pb'.basis = _
-  rw [hn, Subring.coe_mul, Subring.coe_pow, coe_norm_integer]
-  congr 2
-  have hm := minpoly.isIntegrallyClosed_eq_field_fractions K L hint
-  simp only [pb']
-  rw [hm, derivative_map, aeval_map_algebraMap, aeval_algebraMap_apply]
-  rfl
-
-theorem addVal_discr {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι 𝒪[K] 𝒪[L]) :
-    IsDiscreteValuationRing.addVal 𝒪[K] (Algebra.discr 𝒪[K] b) =
-      (residueDegree K L * differentExponent K L : ℕ) := by
-  obtain ⟨x, hx⟩ := exists_integer_adjoin_eq_top K L
-  have hint : IsIntegral 𝒪[K] x := Algebra.IsIntegral.isIntegral x
-  rw [(IsDiscreteValuationRing.addVal_eq_iff_associated _ _).mpr
-    (associated_discr (PowerBasis.ofAdjoinEqTop' hint hx).basis b)]
-  obtain ⟨s, hs⟩ := discr_powerBasis_eq_norm_integer hint hx
-  rw [hs, IsDiscreteValuationRing.addVal_mul, IsDiscreteValuationRing.addVal_eq_zero_iff.mpr
-    ((isUnit_neg_one).pow s), zero_add, addVal_norm_integer, ← differentExponent_eq_addVal hx]
-  push_cast
-  rw [nsmul_eq_mul]
 
 variable (K L)
 

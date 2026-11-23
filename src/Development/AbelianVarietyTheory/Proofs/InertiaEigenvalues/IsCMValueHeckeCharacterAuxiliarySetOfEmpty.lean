@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsValueTiedOfIsToricElt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToricSumEqHeckeLValueMulAuxiliaryFactorsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeLNeZeroNat
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsValueTiedOfIsToricElt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsHeckeLOfHasInf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPartEqOneOfFibres
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPartEqOneOfLevel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeckeLNeZeroNat
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValApplySubLtOne
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UniversalAnticyclotomicCharacterLaws
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,7 +125,11 @@ theorem partialSum_mem (hA : GlobalTheory.Published.GlobalArtinReciprocity) (hG 
   obtain ⟨τ₀, -⟩ := hD.1 H.φ₀
   let Ω := AlgebraicClosure H.K
   let _ : Algebra H.K ℂ := ((φ τ₀).comp (algebraMap H.K H.E)).toAlgebra
-  let j : Ω →ₐ[H.K] ℂ := IsAlgClosed.lift
+  let j : Ω →ₐ[H.K] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hj : ∀ x : H.K, j.toRingHom (algebraMap H.K Ω x) = φ τ₀ x := j.commutes
   obtain ⟨art, ha⟩ := hA H.K Ω
   obtain ⟨ρ, hρ, hg⟩ := hG R H I φ s κ 𝔣 χ hD Ω j.toRingHom τ₀ hj art ha T₀ hT₀ h0 Q hQ inferInstance T hT
@@ -118,7 +168,7 @@ theorem isCMValueHeckeCharacter_auxiliarySet_of_empty {E : Type} [Field E] [Numb
     {Q : Finset (HeightOneSpectrum (OF E))} (hQ : IsFinSetSplitPlacesCoprimeConductor 𝔣 Q) (h : IsValChar φ s κ 𝔣 ∅ χ) : IsValChar φ s κ 𝔣 Q χ := by
   refine ⟨h.1, h.2.1, h.2.2.1, fun v P hP => ⟨fun hv => ?_, fun _ => (h.2.2.2 v P hP).2 (Finset.notMem_empty v)⟩⟩
   refine ((h.2.2.2 v P hP).2 (Finset.notMem_empty v) 1).2 ?_
-  rw [expIn, multiplicity_eq_zero.2 (hQ v hv).2]
+  rw [expIn, multiplicity_eq_zero_of_not_dvd (hQ v hv).2]
   exact zero_le_one
 
 theorem exists_classTerms (hL : ToricSumFormula) (hU : UnramFin H.E) (hD : IsHostDatum H φ s κ 𝔣 χ)

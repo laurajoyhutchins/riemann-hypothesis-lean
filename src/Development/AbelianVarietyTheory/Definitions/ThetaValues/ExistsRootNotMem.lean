@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPins
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.RulInst
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -59,8 +103,6 @@ def galRul {ta : c.F ≃+* c.F} (h : Fixes c ta) (f : Rul Xo c) : Rul Xo c :=
 def covAut {n : ℕ} (d : DeltaDat Xo c n) (ta : c.F ≃+* c.F) : d.c₂.F ≃+* d.c₂.F :=
   (d.eF.symm.toRingEquiv.trans ta).trans d.eF.toRingEquiv
 
-theorem fixes_refl : Fixes c (RingEquiv.refl c.F) := ⟨fun _ _ => rfl, fun _ => rfl⟩
-
 theorem Tw.val_algebraMap {K : Type} [Field K] (ta : K ≃+* K) (S : Type) [CommRing S] [Algebra K S] (a : K) :
     (algebraMap K (Tw ta S) a).val = algebraMap K S (ta a) := rfl
 
@@ -95,12 +137,5 @@ theorem fixes_covAut {n : ℕ} (d : DeltaDat Xo c n) (hA : d.l₂.A = 1) {ta : c
     · have : zeta d.l₂.A = 1 := by rw [hA]; simp [zeta]
       rw [this]; exact one_mem _
   exact h.base ⟨a, hle a.2⟩
-
-example {ta : c.F ≃+* c.F} (h : Fixes c ta) {S : Type} [CommRing S] [Algebra c.F S] (y : FrPt Xo c S) :
-    (twPt h y).x = y.x := rfl
-
-example : (algebraMap ℂ (Tw Complex.conjAe.toRingEquiv ℂ) Complex.I).val = -Complex.I := by
-  rw [Tw.val_algebraMap]
-  simp
 
 end GlobalTheory.GalTw

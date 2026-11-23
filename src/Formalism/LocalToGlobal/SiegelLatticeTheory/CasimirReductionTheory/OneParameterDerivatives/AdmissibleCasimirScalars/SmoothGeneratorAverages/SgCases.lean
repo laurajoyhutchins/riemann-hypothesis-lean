@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.CompactDerivativesBounded
+module
+
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.SmoothGeneratorAverages.HasDerivAtDS
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.CompactDerivativesBounded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology
 open scoped InnerProductSpace
@@ -30,48 +76,7 @@ theorem wt_le (p : Fin n × Fin n) : wt p ≤ 1 := by
   split_ifs <;> norm_num
 
 theorem gen_mem (ε : Fin n → Bool) (p : Fin n × Fin n) : inG ε (gen ε p) := by
-  obtain ⟨a, b⟩ := p
-  have key : ∀ X : Matrix (Fin n) (Fin n) ℂ, (∀ i j, star (X j i) * (if ε j = true then 1 else -1) +
-      (if ε i = true then 1 else -1) * X i j = 0) → inG ε X := by
-    intro X hX
-    unfold inG
-    ext i j
-    simpa [Jm, Matrix.mul_diagonal, Matrix.diagonal_mul, Matrix.conjTranspose_apply] using hX i j
-  apply key
-  intro i j
-  unfold gen sg
-  by_cases hab : a = b
-  · subst hab
-    simp only [if_true, Matrix.smul_apply, smul_eq_mul, Matrix.single_apply]
-    by_cases h : a = i ∧ a = j
-    · obtain ⟨rfl, rfl⟩ := h
-      cases ha : ε a <;> simp [ha]
-    · have h' : ¬ (a = j ∧ a = i) := fun h2 => h ⟨h2.2, h2.1⟩
-      simp [h, h']
-  · have hba : ¬ b = a := Ne.symm hab
-    by_cases hlt : a < b
-    · simp only [hab, hlt, if_false, if_true, Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul,
-        Matrix.single_apply]
-      by_cases h1 : a = i ∧ b = j
-      · obtain ⟨rfl, rfl⟩ := h1
-        cases ha : ε a <;> cases hb : ε b <;> simp [ha, hb, hab, hba]
-      · by_cases h2 : b = i ∧ a = j
-        · obtain ⟨rfl, rfl⟩ := h2
-          cases ha : ε a <;> cases hb : ε b <;> simp [ha, hb, hab, hba]
-        · have h1' : ¬ (a = j ∧ b = i) := fun h => h2 ⟨h.2, h.1⟩
-          have h2' : ¬ (b = j ∧ a = i) := fun h => h1 ⟨h.2, h.1⟩
-          simp [h1, h2, h1', h2']
-    · simp only [hab, hlt, if_false, Matrix.add_apply, Matrix.smul_apply, smul_eq_mul,
-        Matrix.single_apply]
-      by_cases h1 : a = i ∧ b = j
-      · obtain ⟨rfl, rfl⟩ := h1
-        cases ha : ε a <;> cases hb : ε b <;> simp [ha, hb, hab, hba] <;> ring1
-      · by_cases h2 : b = i ∧ a = j
-        · obtain ⟨rfl, rfl⟩ := h2
-          cases ha : ε a <;> cases hb : ε b <;> simp [ha, hb, hab, hba] <;> ring1
-        · have h1' : ¬ (a = j ∧ b = i) := fun h => h2 ⟨h.2, h.1⟩
-          have h2' : ¬ (b = j ∧ a = i) := fun h => h1 ⟨h.2, h.1⟩
-          simp [h1, h2, h1', h2']
+  apply Formalism.L2.SG.Pf.admitted.AdmissibleVectors.inG_gen <;> assumption
 
 variable {ε : Fin n → Bool} {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
   {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} {D : Submodule ℂ H}

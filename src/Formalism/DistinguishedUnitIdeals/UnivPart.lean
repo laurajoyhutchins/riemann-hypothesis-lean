@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.Statement
+module
+
+public import Mathlib.Algebra.Field.Defs
+public import Mathlib.Algebra.Module.Submodule.Lattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,21 +71,5 @@ def Rounding : Prop :=
       ∀ i, NbUp b (Fil b) (i - g) ≤ Fil (-i) ∧ Fil (-i) ≤ NbUp b (Fil b) (i + g)) ∧
     ((∀ u, Fil u ≠ Fil (u + 1) → (-b - S ≤ u ∧ u ≤ -b) ∨ (-η ≤ u ∧ u ≤ η)) →
       ∀ i, NbDown b (Fil (-η)) (i - g) ≤ Fil (-i) ∧ Fil (-i) ≤ NbDown b (Fil (-η)) (i + g))
-
-def UnivPart : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (ϖ : O), Irreducible ϖ →
-    ∀ (r m : ℕ) (Up Dn : Finset ℕ) (C F : ℕ → Submodule O (Fin r → O)),
-      (∀ s ∈ Up, ∀ v : Fin r → O, ϖ • v ∈ C s → v ∈ C s) →
-      (∀ s ∈ Dn, ∀ v : Fin r → O, ϖ • v ∈ F s → v ∈ F s) →
-      (∀ s ∈ Up, r ≤ Module.finrank O (C s) + m) → (∀ s ∈ Dn, Module.finrank O (F s) ≤ m) →
-      ∃ L'' Lrest : Submodule O (Fin r → O), IsCompl L'' Lrest ∧ (∀ s ∈ Up, L'' ≤ C s) ∧
-        (∀ s ∈ Dn, F s ≤ Lrest) ∧ Module.finrank O Lrest ≤ m * (Up.card + Dn.card)
-
-def Descent : Prop :=
-  ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (ϖ : O), Irreducible ϖ →
-    ∀ (φ : PowerSeries O →ₐ[O] PowerSeries O) (d : ℕ), 1 ≤ d → UnitDist ϖ d (φ PowerSeries.X) →
-      ∀ (c : O) (f g : PowerSeries O),
-        φ f ∈ Ideal.span {PowerSeries.C c, φ g} → f ∈ Ideal.span {PowerSeries.C c, g}
 
 end Formalism.ExponentWindows

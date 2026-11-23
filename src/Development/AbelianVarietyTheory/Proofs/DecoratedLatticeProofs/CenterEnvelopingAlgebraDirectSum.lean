@@ -1,8 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AutomorphicFormsFiniteIdeal
+module
+
+public import Mathlib.Algebra.Lie.DirectSum
+public import Mathlib.Algebra.Lie.UniversalEnveloping
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CenterTensorProductMemRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WordDerivatives
 import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsSigmaList
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CenterTensorProductMemRange
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AutomorphicFormsFiniteIdeal
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta MeasureTheory GlobalTheory.AutFinLit GlobalTheory.Published.AutFin
 open GlobalTheory.IndefiniteRowSideFullHecke.LieAlgebraExponentialFamilies (LieAt LieInf atPlace IsExpFam IsSmoothInf wordDer)
 open scoped TensorProduct DirectSum Classical
@@ -99,7 +151,7 @@ noncomputable def decomp (j₁ : L₁ →ₗ⁅ℂ⁆ M) (j₂ : L₂ →ₗ⁅�
       ext z
       simp only [LieHom.comp_apply, AlgHom.coe_toLieHom, AlgHom.comp_apply, lift_ι_apply,
         bwdLie_apply, map_add, fwd_tmul, map_one, mul_one, one_mul, AlgHom.id_apply]
-      rw [← map_add, hs])
+      rw [← map_add (f := _), hs])
     (by
       apply Algebra.TensorProduct.ext
       · ext x
@@ -142,11 +194,11 @@ noncomputable def projRestAt (a i : σ) : L i →ₗ⁅ℂ⁆ ⨁ k : {i // i �
   if h : i = a then 0 else lieAlgebraOf ℂ {i // i ≠ a} (fun k => L k.1) ⟨i, h⟩
 
 theorem projRestAt_self (a : σ) (x : L a) : projRestAt L a a x = 0 := by
-  rw [projRestAt, dif_pos rfl]; rfl
+  rw [projRestAt, dite_eq_left rfl]; rfl
 
 theorem projRestAt_ne (a i : σ) (h : i ≠ a) (x : L i) :
     projRestAt L a i x = of (fun k : {i // i ≠ a} => L k.1) ⟨i, h⟩ x := by
-  rw [projRestAt, dif_neg h]; rfl
+  rw [projRestAt, dite_eq_right h]; rfl
 
 noncomputable def projRest (a : σ) : (⨁ i, L i) →ₗ⁅ℂ⁆ ⨁ k : {i // i ≠ a}, L k.1 :=
   toLieAlgebra _ (projRestAt L a) (fun i j hij x y => by
@@ -181,19 +233,19 @@ noncomputable def splitOff (a : σ) :
       induction y using DirectSum.induction_on with
       | zero => rw [map_zero, lie_zero]
       | of k y => rw [inclRest_of]; exact lie_of_of_ne L k.2.symm x y
-      | add y z hy hz => rw [map_add, lie_add, hy, hz, add_zero])
+      | add y z hy hz => rw [map_add (f := _), lie_add, hy, hz, add_zero])
     (fun x => comp_of_same L a x)
     (fun x => (projRest_of L a a x).trans (projRestAt_self L a x))
     (fun y => by
       induction y using DirectSum.induction_on with
       | zero => rw [map_zero, map_zero]
       | of k y => rw [inclRest_of]; exact comp_of_ne L a k.1 k.2 y
-      | add y z hy hz => rw [map_add, map_add, hy, hz, add_zero])
+      | add y z hy hz => rw [map_add (f := _), map_add (f := _), hy, hz, add_zero])
     (fun y => by
       induction y using DirectSum.induction_on with
       | zero => rw [map_zero, map_zero]
       | of k y => rw [inclRest_of, projRest_of, projRestAt_ne L a k.1 k.2]
-      | add y z hy hz => rw [map_add, map_add, hy, hz])
+      | add y z hy hz => rw [map_add (f := _), map_add (f := _), hy, hz])
     (fun z => by
       induction z using DirectSum.induction_on with
       | zero => simp only [map_zero, add_zero]
@@ -204,7 +256,7 @@ noncomputable def splitOff (a : σ) :
         · rw [comp_of_ne L a i h, projRest_of, projRestAt_ne L a i h, map_zero, zero_add]
           exact inclRest_of L a ⟨i, h⟩ y
       | add y z hy hz =>
-        simp only [map_add]
+        simp only [map_add (f := _)]
         rw [add_add_add_comm, hy, hz])
 
 end Sum

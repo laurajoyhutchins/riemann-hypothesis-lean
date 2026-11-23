@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalFormOfThreeInputs
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalFormOfThreeInputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,7 +131,7 @@ theorem isDVR (P : LocPrime l) (LL : FinExt l) : IsDiscreteValuationRing ↥(OL 
   haveI : FiniteDimensional ℚ_[l] ↥LL.1 := LL.2
   haveI : ValuationRing ↥(OL LL) := valuationRing P LL
   haveI : IsNoetherianRing ↥(OL LL) := integralClosure.isNoetherianRing (A := ℤ_[l]) (K := ℚ_[l]) ↥LL.1
-  exact ((IsDiscreteValuationRing.TFAE ↥(OL LL) (not_isField P LL)).out 1 0).mp (valuationRing P LL)
+  exact ((IsDiscreteValuationRing.TFAE ↥(OL LL) (not_isField P LL)).out 2 1).mp (valuationRing P LL)
 
 theorem isFractionRing (LL : FinExt l) : IsFractionRing ↥(OL LL) ↥LL.1 := by
   haveI : FiniteDimensional ℚ_[l] ↥LL.1 := LL.2
@@ -250,6 +295,7 @@ theorem gen_core (LT : LocTheory) (hgen : H1fGeneratorBoundAll LT) (hfon : Fonta
     rw [Finset.sum_const, Finset.card_univ, card_emb K LL hg, nsmul_eq_mul]))
   have hV : (finrank ↥LL.1 T.V : ℤ) = r := by exact_mod_cast hr
   rw [hV] at hcard
+  set_option synthInstance.maxHeartbeats 200000 in
   have h0' : finrank ↥LL.1 ↥(H0V T.ρ) ≤ r := hr ▸ Submodule.finrank_le _
   exact arith ht hcard h0' hS
 

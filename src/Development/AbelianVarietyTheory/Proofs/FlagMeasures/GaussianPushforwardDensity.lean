@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GaugeUnfold
-import Formalism.LocalToGlobal.GlobalTheory.GL5.Statement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianQuadricDensityExistsPosContinuous
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianQuadricDensityExistsPosContinuous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.GaussMean Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open scoped TensorProduct
@@ -17,20 +57,20 @@ theorem integral_lt_eq {n : ℕ} (ε : Fin n → Bool) {a : ℝ} (ha : a ≠ 0) 
   apply le_antisymm
   · exact setIntegral_mono_set (integrable_gauss n).integrableOn
       (Filter.Eventually.of_forall fun y => (gauss_pos y).le)
-      (HasSubset.Subset.eventuallyLE fun y (hy : qEps ε y < a) => hy.le)
+      (Filter.Eventually.of_forall fun y (hy : qEps ε y < a) => hy.le)
   · have hc : Tendsto (cdf ε) (𝓝[<] a) (𝓝 (cdf ε a)) :=
       (differentiableAt_cdf ε ha).continuousAt.tendsto.mono_left nhdsWithin_le_nhds
     refine le_of_tendsto hc ?_
     filter_upwards [self_mem_nhdsWithin] with t (ht : t < a)
     exact setIntegral_mono_set (integrable_gauss n).integrableOn
       (Filter.Eventually.of_forall fun y => (gauss_pos y).le)
-      (HasSubset.Subset.eventuallyLE fun y (hy : qEps ε y ≤ t) => lt_of_le_of_lt hy ht)
+      (Filter.Eventually.of_forall fun y (hy : qEps ε y ≤ t) => lt_of_le_of_lt hy ht)
 
 theorem integral_Icc_eq {n : ℕ} (ε : Fin n → Bool) {a c : ℝ} (ha : a ≠ 0) (hac : a ≤ c) :
     ∫ y in qEps ε ⁻¹' Set.Icc a c, gauss y = cdf ε c - cdf ε a := by
   have hm : MeasurableSet {y : Fin n → ℂ | qEps ε y < a} :=
     measurableSet_lt (continuous_qEps ε).measurable measurable_const
-  have h := integral_diff hm ((integrable_gauss n).integrableOn (s := {y | qEps ε y ≤ c}))
+  have h := setIntegral_sdiff hm ((integrable_gauss n).integrableOn (s := {y | qEps ε y ≤ c}))
     (fun y (hy : qEps ε y < a) => show qEps ε y ≤ c by linarith)
   rw [integral_lt_eq ε ha] at h
   rw [cdf, ← h]
@@ -103,7 +143,7 @@ theorem density_eq_prod (ι : Type) [Fintype ι] (n : ℕ) (ε : ι → Fin n �
     (b : ι → ℝ) (hb : ∀ v, b v ≠ 0) : G b = ((∏ v, gaussDens (ε v) (b v) : ℝ) : ℂ) := by
   have h1 : Tendsto (fun r : ℝ => ∏ v, r⁻¹ • (cdf (ε v) (b v + r) - cdf (ε v) (b v))) (𝓝[>] 0)
       (𝓝 (∏ v, gaussDens (ε v) (b v))) :=
-    tendsto_finset_prod _ fun v _ =>
+    tendsto_finsetProd _ fun v _ =>
       (differentiableAt_cdf (ε v) (hb v)).hasDerivAt.tendsto_slope_zero_right
   have h2 := (Complex.continuous_ofReal.tendsto _).comp h1
   refine tendsto_nhds_unique (tendsto_mean_cube hG b) (h2.congr' ?_)

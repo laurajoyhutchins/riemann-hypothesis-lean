@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.MixedUnlinkedExponents.ValsExtOf
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BijectiveOfSplit
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.WeakStable
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.MixedUnlinkedExponents.ValsExtOf
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.WeakStable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSmoothCharCompNormU
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSubquotientComp
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TraceSplitting.NormCharSplit
+import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.BaseChangeUnits.CycCOfCyclic
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,11 +63,11 @@ def NmEq : Prop :=
 def ChsTr : Prop :=
   ∀ (k k' : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     [Field k'] [ValuativeRel k'] [TopologicalSpace k'] [IsNonarchimedeanLocalField k'] (i : k ≃+* k') (hi' : Continuous i.symm)
-    (s : Multiset (IrrGL k)),
+    (s : Multiset (IrrGL (k := k))),
     chs (s.map (GlobalTheory.SuppIne.trGL i hi')) = (chs s).map fun ξ => ξ.comp (Units.map (i.symm : k' →* k))
 
 def SplitSupp : Prop :=
-  ∀ (K L : Type) [Field K] [NumberField K] [IsTotallyComplex K] [Field L] [NumberField L] [IsTotallyComplex L] [Algebra K L]
+  ∀ (K L : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [Field L] [NumberField L] [_root_.NumberField.IsTotallyComplex L] [Algebra K L]
     [IsGalois K L], (Module.finrank K L).Prime → ∀ n : ℕ, 1 ≤ n → ∀ (π : CuspSub K n) (P : CuspSub L n),
     WeakBC (CG.mk π).HasSat (CG.mk P).HasSat →
     ∀ (v : HeightOneSpectrum (𝓞 K)) (w : PlacesOver L v), (¬ ∀ u : PlacesOver L v, u = w) →
@@ -35,22 +77,17 @@ def SplitSupp : Prop :=
         ∀ s s', SuppAt π v s → SuppAt P w.1 s' → s' = s.map (GlobalTheory.SuppIne.trGL i hi')
 
 def RkSupp : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (π : CuspSub K 1) (ψ : HChar K), CG.mk π = CG.ofChar ψ →
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (π : CuspSub K 1) (ψ : HChar K), CG.mk π = CG.ofChar ψ →
     ∀ v s, SuppAt π v s → chs s = {ψ.loc v}
 
 def RkLift : Prop :=
-  ∀ (K L : Type) [Field K] [NumberField K] [IsTotallyComplex K] [Field L] [NumberField L] [IsTotallyComplex L] [Algebra K L]
+  ∀ (K L : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] [Field L] [NumberField L] [_root_.NumberField.IsTotallyComplex L] [Algebra K L]
     (ψ : HChar K) (ψ' : HChar L), WeakBC (CG.ofChar ψ).HasSat (CG.ofChar ψ').HasSat →
     ∀ (v : HeightOneSpectrum (𝓞 K)) (w : PlacesOver L v), ψ'.loc w.1 = (ψ.loc v).comp (nm w)
 
 def UpThru : Prop :=
   ∀ (K L : Type) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] (v : HeightOneSpectrum (𝓞 K)) (w : PlacesOver L v)
-    (s : Multiset (IrrGL (v.adicCompletion K))), (up w s).filter (Thru w) = up w s
-
-def Spread : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ), 1 ≤ n → ∀ (π : CuspSub K n) v s, SuppAt π v s →
-    GlobalTheory.RoadU.Unlinked s → ∀ ξ ∈ chs s, ∀ ξ' ∈ chs s,
-      ‖((ξ (unif (v.adicCompletion K)) : ℂˣ) : ℂ)‖ < (Ideal.absNorm v.asIdeal : ℝ) * ‖((ξ' (unif (v.adicCompletion K)) : ℂˣ) : ℂ)‖
+    (s : Multiset (IrrGL (k := v.adicCompletion K))), (up w s).filter (Thru w) = up w s
 
 def SplitSuppOf : Prop := NmEq → SuppFacts → UpperTheory.ConvolutionTheory.Sph.WeakStable → UpperTheory.ConvolutionTheory.T.SplitStrong → SplitSupp
 def RkLiftOf : Prop := NormLoc → RkLift

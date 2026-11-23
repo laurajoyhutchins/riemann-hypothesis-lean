@@ -1,6 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.BridgeExpK
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.UniqueA
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Taylor
+module
+
+public import Formalism.RealPlaceAnalysis.StatementKT
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DefsRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ConjTransposeEqOfInG
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.ExistsExpEqOfMemKset
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Taylor
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.BridgeExpK
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.UniqueA
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,11 +149,11 @@ def resE (E : Fin n → Fin n → Module.End ℂ M) (V : Submodule ℂ M) (hst :
 variable {E : Fin n → Fin n → Module.End ℂ M} {V : Submodule ℂ M} {hst : IsKStableSub ε E V}
 
 theorem coe_resE {a b : Fin n} (h : ε a = ε b) (v : V) : ((resE E V hst a b v : V) : M) = E a b v := by
-  rw [resE, dif_pos h]
+  rw [resE, dite_eq_left h]
   rfl
 
 theorem resE_of_ne {a b : Fin n} (h : ¬ ε a = ε b) : resE E V hst a b = 0 := by
-  rw [resE, dif_neg h]
+  rw [resE, dite_eq_right h]
 
 theorem kRel_resE (hE : IsGlRep E) : KRel ε (resE E V hst) := by
   intro a b c d hab hcd
@@ -233,6 +287,7 @@ theorem phi_K (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {V : S
     · simp only [resE_of_ne h, LinearMap.zero_apply, map_zero]
   have hZc : ∀ v, φ (resZ E V hst Z v) = resZ E₂ V₂ hst₂ Z (φ v) := by
     intro v
+
     simp only [resZ, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, hc]
   have hZp : ∀ m v, φ (((resZ E V hst Z) ^ m) v) = ((resZ E₂ V₂ hst₂ Z) ^ m) (φ v) := by
     intro m
@@ -255,8 +310,8 @@ theorem phi_K (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {V : S
   refine h3.unique ?_
   convert h4 using 1
   funext m
-  simp only [LinearMap.coe_toContinuousLinearMap', map_smul, hZp]
-  try rfl
+  rw [map_smul, map_smul, LinearMap.coe_toContinuousLinearMap', hZp]
+  rfl
 
 end Orbit
 

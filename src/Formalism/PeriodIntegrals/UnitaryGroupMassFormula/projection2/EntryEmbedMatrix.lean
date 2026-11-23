@@ -1,4 +1,58 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.projection2.KappaZero
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.projection2.KappaZero
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Block
+
+@[expose] public section
 
 noncomputable section
 
@@ -125,9 +179,9 @@ theorem sum_eq_chArg {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (τ
     split_ifs <;> omega
   rw [e1, e2]
 
-open Classical in
 
-theorem prod_blocks {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (χ : ℕ → kˣ →* ℂˣ)
+open Classical in
+theorem prod_blocks [DecidableEq k] {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (χ : ℕ → kˣ →* ℂˣ)
     (τ : FC n' (c + 1) n c → k) :
     ∏ i ∈ Finset.range (j - 1), chiV (χ i) (Matrix.det (Matrix.of fun s s' : Fin t =>
       ent k₀ (c + 1) n' c n (xx1 (xj0 k₀ n' n) τ) (k₀ + m - 1 + i * t + s.1) (k₀ + m - 1 + i * t + s'.1))) = 1 := by
@@ -153,9 +207,9 @@ theorem prod_blocks {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (χ 
       exact h (Fin.ext (by omega))
   rw [hM, Matrix.det_one, chiV_one]
 
-open Classical in
 
-theorem top_block {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (χ : ℕ → kˣ →* ℂˣ)
+open Classical in
+theorem top_block [DecidableEq k] {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (χ : ℕ → kˣ →* ℂˣ)
     (τ : FC n' (c + 1) n c → k)
     (hC : (∀ p', p' < k₀ + m - 1 → ent k₀ (c + 1) n' c n (xx1 (xj0 k₀ n' n) τ) p' p' = 1) ∧
       (∀ p p', p < n + c → p' < k₀ + m - 1 + (j - 1) * t → p ≠ p' →
@@ -186,9 +240,11 @@ theorem top_block {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (χ : 
         split_ifs at hA <;> omega
   rw [hdet, chiV_one]
 
-open Classical in
 
-theorem term_eq {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (ψ₀ : AddChar k ℂ) (χ : ℕ → kˣ →* ℂˣ)
+local instance (p : Prop) : Decidable p := Classical.propDecidable p
+
+open Classical in
+theorem term_eq [DecidableEq k] {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (ψ₀ : AddChar k ℂ) (χ : ℕ → kˣ →* ℂˣ)
     (τ : FC n' (c + 1) n c → k) :
     PhiS ψ₀ χ k₀ m t j n' c n (xx1 (xj0 k₀ n' n) τ) *
         ψ₀ (-chArg (n' := n') (c' := c + 1) (n := n) (c := c) (xx1 (xj0 k₀ n' n) τ)) =
@@ -199,7 +255,8 @@ theorem term_eq {k₀ m t j n' c n : ℕ} (hN : Nums k₀ m t j n' c n) (ψ₀ :
   unfold PI.OneCosetSharp.PhiS
   dsimp only
   split_ifs with h
-  · rw [prod_blocks hN χ τ, top_block hN χ τ h, sum_eq_chArg hN τ]
+  · letI : DecidableEq k := fun a b => Classical.propDecidable (a = b)
+    rw [prod_blocks hN χ τ, top_block hN χ τ h, sum_eq_chArg hN τ]
     rw [inv_one, mul_one, mul_one, ← AddChar.map_add_eq_mul, add_neg_cancel, AddChar.map_zero_eq_one]
   · rw [zero_mul]
 

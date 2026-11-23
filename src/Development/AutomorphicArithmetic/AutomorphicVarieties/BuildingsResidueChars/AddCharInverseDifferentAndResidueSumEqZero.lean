@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.WeightChange
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.WeightChange
+public import Mathlib.Algebra.AffineMonoid.Basic
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N Polynomial
 open GlobalTheory.CuspRep GlobalTheory.HeckeGal GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Base UpperTheory.V.Sd
@@ -148,7 +193,7 @@ theorem UpperTheory.addChar_inverseDifferent_and_residue_sum_eq_zero :
     have e : ∀ v : InfinitePlace F, (reAt v (η * ((a + b : 𝓞 F) : F)) : ℂ) =
         (reAt v (η * (a : F)) : ℂ) + (reAt v (η * (b : F)) : ℂ) := by
       intro v
-      simp only [reAt, map_add, mul_add, Complex.add_re, Complex.ofReal_add]
+      simp only [reAt, map_add (f := _), mul_add, Complex.add_re, Complex.ofReal_add]
     rw [Finset.sum_congr rfl (fun v _ => e v), Finset.sum_add_distrib]
     ring
   have hker : ∀ c ∈ w.asIdeal, ψ c = 1 := by
@@ -186,7 +231,7 @@ theorem UpperTheory.addChar_inverseDifferent_and_residue_sum_eq_zero :
           rw [← hadd]
           apply hcoset
           rw [← Ideal.Quotient.eq]
-          simp only [map_add, hs]
+          simp only [map_add (f := _), hs]
           ring
       _ = ∑ r, ψ (s r) := Fintype.sum_equiv (Equiv.addRight _) _ _ (fun _ => rfl)
   have h0 : (ψ b0 - 1) * ∑ r, ψ (s r) = 0 := by rw [sub_mul, hsum, one_mul, sub_self]

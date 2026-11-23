@@ -1,12 +1,14 @@
-import Mathlib.AlgebraicGeometry.Group.Abelian
-import Mathlib.AlgebraicGeometry.Group.Affine
-import Mathlib.AlgebraicGeometry.AffineSpace
-import Mathlib.AlgebraicGeometry.Morphisms.Smooth
-import Mathlib.AlgebraicGeometry.Morphisms.Separated
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.Geometrically.Connected
-import Mathlib.RingTheory.HopfAlgebra.MonoidAlgebra
-import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+module
+
+public import Mathlib.AlgebraicGeometry.Group.Affine
+public import Mathlib.RingTheory.HopfAlgebra.MonoidAlgebra
+import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+import Mathlib.Basic.NNReal.Defs
+public import Mathlib.CategoryTheory.Limits.Constructions.Over.Basic
+import Mathlib.Combinatorics.Matroid.Init
+import Mathlib.Data.Nat.Totient
+
+@[expose] public section
 
 universe u
 
@@ -19,10 +21,6 @@ abbrev ZU : CommRingCat.{u} := CommRingCat.of (ULift.{u} ℤ)
 
 noncomputable abbrev torusRing (R : CommRingCat.{u}) (X : Type u) [AddCommGroup X] : CommRingCat.{u} :=
   CommRingCat.of (AddMonoidAlgebra R X)
-
-noncomputable instance (R : CommRingCat.{u}) (X : Type u) [AddCommGroup X] :
-    HopfAlgebra R (torusRing R X) :=
-  inferInstanceAs (HopfAlgebra R (AddMonoidAlgebra R X))
 
 noncomputable abbrev splitTorusAff (R : CommRingCat.{u}) (X : Type u) [AddCommGroup X] :
     Over (Spec R) :=
@@ -43,8 +41,6 @@ noncomputable instance (S : Scheme.{u}) (X : Type u) [AddCommGroup X] :
 noncomputable abbrev Gm (S : Scheme.{u}) : Over S := splitTorus S (ULift.{u} ℤ)
 
 variable {S : Scheme.{u}}
-
-def characters (G : Over S) [GrpObj G] : Type u := {f : G ⟶ Gm S // IsMonHom f}
 
 noncomputable def mulN (G : Over S) [GrpObj G] : ℕ → (G ⟶ G)
   | 0 => toUnit G ≫ η

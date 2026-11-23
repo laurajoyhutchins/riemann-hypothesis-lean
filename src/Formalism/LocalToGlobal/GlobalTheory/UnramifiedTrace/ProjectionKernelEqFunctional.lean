@@ -1,7 +1,57 @@
-import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUPt0FOfVals
-import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.NatSmulInv
-import Formalism.LocalToGlobal.GlobalTheory.UnramifiedDiagonal.DiaFun
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUAllOfParts
+import Formalism.LocalToGlobal.GlobalTheory.GL6.BwAValIntegralNonneg
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PDnDil
+import Formalism.LocalToGlobal.GlobalTheory.GL6.PRLocV
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedDiagonal.DiaFun
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.DUPt0FOfVals
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.NatSmulInv
+import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.TripMem
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CrossDiagonalMatching.Common
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CrossDiagonalMatching.DnkLkLocP
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CrossDiagonalMatching.DualSigmaApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GlobalTheory.UnramifiedTrace.MulLatSupSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +110,7 @@ theorem ld_locP (T : Forms0 D u) (v : (D.mem u).A.vT) (c : (D.mem u).C.cls 0)
   · exact localization_mono₂ _ (sup_le (CrossDiaZero.cls_le_ld T c)
       ((Submodule.span_singleton_le_iff_mem _ _).2 z3.2))
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem ptz_val (T : Forms0 D u) {v : (D.mem u).A.vT} {c : (D.mem u).C.cls 0}
     {g : Module.Dual ((D.mem u).A.Fv v) ((D.fm u).lk 0 v c)}
@@ -90,8 +140,8 @@ def PtLatF (T : Forms0 D u) : Prop :=
       Formalism.HermitianLatticesTheory.localization₂ (T.atT.Pv v) (clsCrd D u 0 (Nat.zero_le _) c ⊔
         Submodule.span (𝓞 D.host.E) {(((D.mem u).A.T : ℕ) : D.host.E)⁻¹ • w3})
 
-set_option maxHeartbeats 16000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 theorem valDia_of_lat (T : Forms0 D u) (hL : PtLatF T) : ValDia T := by
   intro v c
   refine ⟨Equiv.inv _, ?_⟩
@@ -107,7 +157,7 @@ theorem valDia_of_lat (T : Forms0 D u) (hL : PtLatF T) : ValDia T := by
     exact eq_inv_of_mul_eq_one_right hga
 
   have hcl := T.val0.dil v a⁻¹ k hkb c δ hδ
-  obtain ⟨hh, hhH, κ0, hκK, e⟩ := (DoubleCoset.eq _ _ _ _).1 hcl
+  obtain ⟨hh, hhH, κ0, hκK, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 hcl
   have hκ : κ0.1 ∈ T.cls0.lev.U := hκK
   obtain ⟨γd, hγd, hge⟩ := Subgroup.mem_map.1 (Subgroup.mem_subgroupOf.1 hhH)
   have hrel : (T.cls0.y c * δ).1 =

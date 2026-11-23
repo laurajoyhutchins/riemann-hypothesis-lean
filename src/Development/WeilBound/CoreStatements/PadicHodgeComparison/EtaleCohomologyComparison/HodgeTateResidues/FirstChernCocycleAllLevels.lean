@@ -1,7 +1,56 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.EtDefs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.FirstChernUnique
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.Formal
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HodgeTateResidues.EtDefs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VnRed
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.EtaleChernClassEqKummerClass
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PrimResZetaX
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ForE
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.Formal
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.CupLeib
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.FirstChernClassFamily
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.Inputs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.EtProps
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -107,26 +156,12 @@ theorem firstChern_cocycle_all_levels (H : RIn l) (r : Roots l) (M : Model l K) 
   h.elim fun D' h => h.elim fun π h => h.elim fun L h => h.elim fun x h =>
     firstChern_cocycle_untwisted H r M D D' π h.1 L h.2.1 n (x n) (h.2.2.1 n) (v.lev n) (h.2.2.2 n) C G Λ
 
-theorem etP_eFam (H : RIn l) (r : Roots l) (K : IntermediateField ℚ_[l] (PadicAlgCl l)) : EtP (eFam lcNat H r K) where
-  good := good_eFam H r K
-  one M n := eM_one H r M n
-  one_ex M := one_ex r M
-  first_chern_class_exists M D r' := etale_firstChern_exists M D r'
-  c1 M D r' v h C _ G Λ n := firstChern_cocycle_all_levels H r M D v (roots_eq r' r ▸ h) C G Λ n
+theorem etP_eFam (H : RIn l) (r : Roots l) (K : IntermediateField ℚ_[l] (PadicAlgCl l)) : EtP (eFam lcNat H r K) :=
+  ⟨good_eFam H r K, eM_one H r, one_ex r, etale_firstChern_exists,
+    fun M D r' v h C _ G Λ n =>
+      firstChern_cocycle_all_levels H r M D v (roots_eq r' r ▸ h) C G Λ n⟩
 
 theorem etP (l : ℕ) [Fact l.Prime] (K : IntermediateField ℚ_[l] (PadicAlgCl l)) : ∃ e : E.EtFam l K, EtP e :=
   (rootsEx l).elim fun r => ⟨_, etP_eFam (CrystallineSemistableComparison.R.forE l) r K⟩
-
-theorem EtP.isFirstChern_of_etale_class {e : E.EtFam l K} (h : EtP e) (M : Model l K) (D : LineData M.X) (r : Roots l) (v : M.T 2) (hv : IsEtaleFirstChernUntwisted r D v) :
-    E.IsFirstChernClassOfLineBundle M.p (okToOC l K) D (e.tMul M v) :=
-  isFirstChern_of_cocycle fun C _ G Λ n => (h.c1 M D r v hv C G Λ n).elim fun z a => a.elim fun hz b =>
-    Exists.intro (tCo G n 2 z) (And.intro b.1 (tCo_cls M G n e v z hz b.2.symm))
-
-theorem etMapP (K : IntermediateField ℚ_[l] (PadicAlgCl l)) (ζ : E.Roots l) : ∃ e : E.EtFam l K, e.Good ∧
-    (∀ (M : Model l K) n, e M n 0 (GlobalTheory.EtC.one (l ^ n) _) = CH.oneH _) ∧
-    (∀ (M : Model l K) D v, HT.IsEtaleFirstChernUntwisted ζ D v → E.IsFirstChernClassOfLineBundle M.p (okToOC l K) D (e.tMul M v)) ∧
-    (∀ (M : Model l K) (D : LineData M.X), ∃ v, HT.IsEtaleFirstChernUntwisted ζ D v) ∧
-    ∀ M : Model l K, ∃ v : M.T 0, ∀ k, v.lev k = GlobalTheory.EtC.one _ _ :=
-  (etP l K).elim fun e h => ⟨e, h.good, h.one, fun M D v hv => h.isFirstChern_of_etale_class M D ζ v hv, fun M D => h.first_chern_class_exists M D ζ, h.one_ex⟩
 
 end CrystallineSemistableComparison.HT

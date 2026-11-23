@@ -1,12 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspFree
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.AnChartAsm
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsQuotEquiv
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeVacuaExistUnique
+module
+
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsTorusWithSignUniformisationFrame
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsQuotEquiv
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HMatMulVecPerCrd
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeVacuaExistUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr
@@ -118,28 +170,7 @@ theorem datum_move {l : Geo.Tor.Level H} {Xo : Moduli Dw l} {c : Coeff l} (d : D
   ring
 
 theorem cmHostUnit_add_conj_eq_one (H : Host E) : H.w0 + H.bar H.w0 = 1 := by
-  have hsq : (H.bar H.rt) ^ 2 = H.rt ^ 2 := by rw [← map_pow, H.rt_sq]; simp
-  have hne : H.bar H.rt ≠ H.rt := by
-    intro h
-    obtain ⟨φ⟩ : Nonempty (E →+* ℂ) := inferInstance
-    have h1 : IsCMField.complexConj E (H.rt : E) = H.rt := by rw [← H.bar_eq, h]
-    have h2 := IsCMField.complexEmbedding_complexConj E φ (H.rt : E)
-    rw [h1] at h2
-    have h3 : φ (H.rt : E) ^ 2 = -(H.d : ℂ) := by
-      have := congrArg (fun x : 𝓞 E => φ (x : E)) H.rt_sq
-      simpa using this
-    have him : (φ (H.rt : E)).im = 0 := Complex.conj_eq_iff_im.1 h2.symm
-    have h4 := congrArg Complex.re h3
-    simp [sq, him] at h4
-    have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-    nlinarith [mul_self_nonneg (φ (H.rt : E)).re]
-  have hb : H.bar H.rt = -H.rt := (sq_eq_sq_iff_eq_or_eq_neg.1 hsq).resolve_left hne
-  have h2 : 2 * H.bar H.w0 = 1 - H.rt := by
-    have := congrArg H.bar H.two_weight_eq_one_add_root
-    rw [map_mul, map_add, map_one, hb, map_ofNat] at this
-    rw [this]; ring
-  have : (2 : 𝓞 E) * (H.w0 + H.bar H.w0) = 2 * 1 := by rw [mul_add, H.two_weight_eq_one_add_root, h2]; ring
-  exact mul_left_cancel₀ two_ne_zero this
+  apply GlobalTheory.TorusSign.cmHostUnit_add_conj_eq_one <;> assumption
 
 theorem cSep_spec (l : Geo.Tor.Level H) : cSep l ∈ Mfr l ∧ cSep l - 1 ∈ l.Mb := by
   have h : ∃ c, c ∈ Mfr l ∧ c - 1 ∈ l.Mb := by
@@ -150,7 +181,7 @@ theorem cSep_spec (l : Geo.Tor.Level H) : cSep l ∈ Mfr l ∧ cSep l - 1 ∈ l.
     rw [← hab]
     simpa using ha
   unfold cSep
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 theorem level_mem (l : Geo.Tor.Level H) : (l.M : 𝓞 E) ∈ l.Mb ∧ (l.M : 𝓞 E) ∈ Mfr l := by
@@ -308,7 +339,7 @@ theorem EF_int (l : Geo.Tor.Level H) {X : Data E r} {L : Lt E r} (hL : SelfD X L
     rw [← hk]
     change EF X y ((m : E) • x) = EF X (((H.bar m : 𝓞 E) : E) • y) x
     rw [TensLat.EF_smul, H.bar_eq, cc, IsCMField.complexConj_apply_apply]
-  · exact ⟨k + k', by rw [TensLat.EF_eq_bilin, map_add, ← TensLat.EF_eq_bilin, ← TensLat.EF_eq_bilin, hk, hk',
+  · exact ⟨k + k', by rw [TensLat.EF_eq_bilin, map_add (f := _), ← TensLat.EF_eq_bilin, ← TensLat.EF_eq_bilin, hk, hk',
       Int.cast_add]⟩
 
 theorem mem_tens {Λ : Lt E n} {L : Lt E r} {M N : ℕ} (hΛ : Λ ∈ Vset E n M) (hN : NOK Λ N M)
@@ -360,7 +391,7 @@ theorem heis_eq {X : Data E r} {bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] X.Λ
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     change EF X (y b) (u b + u b) = _
-    rw [TensLat.EF_eq_bilin, map_add, ← TensLat.EF_eq_bilin, hk, two_mul]
+    rw [TensLat.EF_eq_bilin, map_add (f := _), ← TensLat.EF_eq_bilin, hk, two_mul]
   have h5 := Complex.exp_int_mul_two_pi_mul_I (-(∑ b, k b))
   rw [h3, h4]
   have h6 : -((Real.pi : ℂ) * I * ((2 * ((∑ b, k b : ℤ) : ℚ) : ℚ) : ℂ)) =
@@ -428,7 +459,7 @@ theorem gphi_move : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : 
       have hdiff : Y q b - Y' (fun b => σ (q b)) b ∈ L := by
         have h3 := add_mem (sub_mem h h') (sub_mem hu (hm₃.mem z))
         convert h3 using 1
-        rw [e2, eq_add_of_sub_eq' hz, map_add, map_nsmul, ← Nat.cast_smul_eq_nsmul E,
+        rw [e2, eq_add_of_sub_eq' hz, map_add (f := _), map_nsmul, ← Nat.cast_smul_eq_nsmul E,
           ← Nat.cast_smul_eq_nsmul E, smul_add, smul_add, smul_smul, smul_smul, inv_mul_cancel₀ hM0,
           one_smul, one_smul]
         abel

@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.LocalLanglandsGL
+module
+
+public import Mathlib.RingTheory.RamificationInertia.Ramification
+public import ReciprocityTheory.GaloisValuations.Global
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GaloisValuations.GlobalB
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +60,6 @@ section Fix
 
 variable {E E' Ω : Type} [Field E] [NumberField E] [Field E'] [NumberField E'] [Field Ω] [Algebra E E'] [Algebra E Ω]
   [Algebra E' Ω] [IsScalarTower E E' Ω] [IsAlgClosure E Ω]
-
-local notation "LL" => IntermediateField.normalClosure E E' Ω
 
 theorem natCast_mem_of_normV {K : Type} [Field K] [NumberField K] (v : HeightOneSpectrum (𝓞 K)) (g n : ℕ)
     (hn : 0 < n) (hN : normV v = g ^ n) : ((g : ℕ) : 𝓞 K) ∈ v.asIdeal := by
@@ -30,6 +76,7 @@ theorem fix_of_ine (A : ValuationSubring Ω) (w : HeightOneSpectrum (𝓞 E)) (h
     (σ : G E Ω) (hσ : σ ∈ Ine (F := E) A) (e : E') : σ (algebraMap E' Ω e) = algebraMap E' Ω e := by
   classical
   have : CharZero Ω := charZero_of_injective_algebraMap (algebraMap E Ω).injective
+  let LL := IntermediateField.normalClosure E E' Ω
   have : NumberField (LL) :=
     { to_charZero := charZero_of_injective_algebraMap (algebraMap E (LL)).injective
       to_finiteDimensional := Module.Finite.trans E (LL) }
@@ -112,7 +159,7 @@ theorem ine_lift {E E' Ω : Type} [Field E] [NumberField E] [Field E'] [NumberFi
       rwa [map_natCast] at this)
     have hlt := Ideal.ramificationIdx'_lt hmap
     rw [Ideal.ramificationIdx'_eq_ramificationIdx w.asIdeal w'.asIdeal w.ne_bot] at hlt
-    have hpos := Ideal.ramificationIdx_pos w'.asIdeal (𝓞 E)
+    have hpos := Ideal.ramificationIdx_pos (R := 𝓞 E) w'.asIdeal
     omega
   have hfix := fix_of_ine A w h w' h' he σ hσ
   let t : G E' Ω := { σ.toRingEquiv with commutes' := hfix }

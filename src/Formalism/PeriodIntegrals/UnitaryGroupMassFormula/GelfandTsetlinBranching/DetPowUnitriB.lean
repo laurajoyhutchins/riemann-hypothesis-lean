@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.RowActDiagMonomial
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.RowActDiagMonomial
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.FockFEqSumOfSubsetB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,7 +76,7 @@ theorem FiltB_mul {σ : Type*} (ψ : σ → ℕ) {d d' : ℕ} {p q : MvPolynomia
   classical
   intro e he
   obtain ⟨a, ha, b, hb, rfl⟩ := Finset.mem_add.mp (support_mul p q he)
-  rw [map_add]
+  rw [map_add (f := _)]
   exact Nat.add_le_add (hp a ha) (hq b hb)
 
 theorem X_mem_FiltB {σ : Type*} (ψ : σ → ℕ) (v : σ) : (X v : MvPolynomial σ ℂ) ∈ FiltB ψ (ψ v) := by
@@ -94,12 +142,13 @@ theorem GoodB_monomial (hX : ∀ v, GoodB R ψ (X v) (ψ v)) (e : σ →₀ ℕ)
 
 theorem GoodB_homog (hX : ∀ v, GoodB R ψ (X v) (ψ v)) (g : MvPolynomial σ ℂ) (d : ℕ)
     (hg : IsWeightedHomogeneous ψ g d) : R g - g ∈ FiltB ψ (d + 1) := by
-  have e0 : R g - g = ∑ e ∈ g.support, (R (monomial e (coeff e g)) - monomial e (coeff e g)) := by
+  have e0 : R g - g = ∑ e ∈ g.support, (R (monomial e (AddMonoidAlgebra.coeff g e)) - monomial e (AddMonoidAlgebra.coeff g e)) := by
     conv_lhs => rw [g.as_sum]
+
     rw [map_sum, ← Finset.sum_sub_distrib]
   rw [e0]
   refine Submodule.sum_mem _ fun e he => ?_
-  have := (GoodB_monomial R ψ hX e (coeff e g)).2
+  have := (GoodB_monomial R ψ hX e (AddMonoidAlgebra.coeff g e)).2
   rwa [hg (mem_support_iff.mp he)] at this
 
 end Good
@@ -176,29 +225,29 @@ theorem embGL_unitri_B {n N : ℕ} (h : n + 1 = N) (u : GL (Fin n) ℂ) (hl : �
   refine ⟨fun a => ?_, fun a b hab hne => ?_, fun a b hab => ?_⟩
   · rw [embGL_apply_B]
     by_cases ha : a.1 < n
-    · rw [dif_pos ha, dif_pos ha]; exact hd _
-    · rw [dif_neg ha, if_neg ha]
+    · rw [dite_eq_left ha, dite_eq_left ha]; exact hd _
+    · rw [dite_eq_right ha, if_neg ha]
   · have ha2 := a.2
     have hb2 := b.2
     rw [embGL_apply_B] at hne
     by_cases hb : b.1 < n <;> by_cases ha : a.1 < n
-    · rw [dif_pos hb, dif_pos ha] at hne
+    · rw [dite_eq_left hb, dite_eq_left ha] at hne
       have hba : ¬ (a.1 < b.1) := fun hlt => hne (hl _ _ (Fin.mk_lt_mk.mpr hlt))
       have hne' : a.1 ≠ b.1 := fun e => hab (Fin.ext e)
       unfold prowB
       rw [if_pos ha, if_pos hb]
       omega
-    · rw [dif_pos hb, dif_neg ha] at hne; exact absurd rfl hne
-    · rw [dif_neg hb, if_pos ha] at hne; exact absurd rfl hne
+    · rw [dite_eq_left hb, dite_eq_right ha] at hne; exact absurd rfl hne
+    · rw [dite_eq_right hb, if_pos ha] at hne; exact absurd rfl hne
     · exact absurd (Fin.ext (by omega)) hab
   · have ha2 := a.2
     have hb2 := b.2
     rw [embGL_apply_B]
     by_cases hb : b.1 < n <;> by_cases ha : a.1 < n
-    · rw [dif_pos hb, dif_pos ha]
+    · rw [dite_eq_left hb, dite_eq_left ha]
       exact hl _ _ (Fin.mk_lt_mk.mpr (Fin.lt_def.mp hab))
     · exact absurd (lt_trans (Fin.lt_def.mp hab) hb) ha
-    · rw [dif_neg hb, if_pos ha]
+    · rw [dite_eq_right hb, if_pos ha]
     · have := Fin.lt_def.mp hab
       omega
 

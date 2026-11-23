@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HighestWeightTensor
+module
+
+public import Formalism.SharpRestriction.Divisibility.SchurIrreducible
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HighestWeightTensor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible GlobalTheory.TensorHW
 
@@ -38,7 +85,7 @@ lemma proj_fin {W : Submodule ℂ V} (hW : KStable act W) {ν : Ix p q → ℚ} 
     have := ih hF.2 ((((ν a : ℚ) : ℂ) - ((μ a : ℚ) : ℂ)) • y) (Submodule.smul_mem _ _ hy)
       (act (Eab a a) z2 - ((μ a : ℚ) : ℂ) • z2) (sub_mem h3 (Submodule.smul_mem _ _ h2)) (by
         convert W.sub_mem (hW _ (isKC_Eab (same_refl a)) _ h) (W.smul_mem ((μ a : ℚ) : ℂ) h) using 1
-        rw [map_add, map_add, mem_wt.1 hy, mem_wt.1 h1]
+        rw [map_add (f := _), map_add (f := _), mem_wt.1 hy, mem_wt.1 h1]
         module)
     exact (W.smul_mem_iff hc).1 this
 
@@ -133,8 +180,8 @@ lemma pair_root (l μ : Ix p q → ℚ) (a b : Ix p q) :
 def Below (ν μ : Ix p q → ℚ) : Prop :=
   ∀ l : Ix p q → ℚ, (∀ a b, posC a b → l b < l a) → pair l ν < pair l μ
 
-open Classical in
 
+open Classical in
 def rho (p q : ℕ) : Ix p q → ℚ :=
   fun x => ∑ c, ((if posC x c then 1 else 0) - (if posC c x then 1 else 0))
 
@@ -147,8 +194,8 @@ lemma rho_lt {a b : Ix p q} (h : posC a b) : rho p q b < rho p q a := by
   · have h1 : ¬ posC a a := fun h => posC_ne h rfl
     simp [h, h1, posC_asymm h]
 
-open Classical in
 
+open Classical in
 def casVal (μ : Ix p q → ℚ) : ℚ :=
   ∑ a, ∑ b, ((if a = b then μ a * μ a else 0) + (if posC a b then μ a - μ b else 0))
 
@@ -361,7 +408,7 @@ lemma stable_sup {A B : Submodule ℂ V} (hA : KStable act A) (hB : KStable act 
     KStable act (A ⊔ B) := by
   intro Z hZ w hw
   obtain ⟨x, hx, y, hy, rfl⟩ := Submodule.mem_sup.1 hw
-  rw [map_add]
+  rw [map_add (f := _)]
   exact Submodule.add_mem_sup (hA Z hZ x hx) (hB Z hZ y hy)
 
 lemma casK_hw (hL : IsKLieAct act) {μ : Ix p q → ℚ} {x : V} (hx : x ∈ hwSub act μ) :

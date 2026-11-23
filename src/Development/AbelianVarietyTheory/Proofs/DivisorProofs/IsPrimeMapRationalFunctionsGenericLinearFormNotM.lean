@@ -1,16 +1,75 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.RingTheory.Ideal.Maps
+public import Mathlib.RingTheory.Localization.FractionRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsAlgebraicIndependentGenericPoint
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ProjPointIdealMemProjComponentsOfIsProjPureDim
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFormDegreeLeHilbertDegreeEvalNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.PointHeight
+public import Mathlib.Algebra.MvPolynomial.Equiv
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.RingTheory.Localization.Ideal
+public import Mathlib.RingTheory.MvPolynomial.Localization
+public import Mathlib.RingTheory.Polynomial.Basic
+
+@[expose] public section
+
 open MvPolynomial GlobalTheory.ChowHt GlobalTheory.CompHt Filter
 open scoped ENNReal
 
 namespace GlobalTheory.ExtPrime
 
+
 open MvPolynomial Filter in
 open scoped ENNReal in
-
 theorem _root_.GlobalTheory.ExtPrime.isPrime_map_and_generic_form_notMem (K L : Type) [Field K] [Field L] (N : ℕ) [Algebra K L]
     [Algebra (MvPolynomial (Fin N) K) L] [IsScalarTower K (MvPolynomial (Fin N) K) L]
     [IsFractionRing (MvPolynomial (Fin N) K) L] (P : Ideal (MvPolynomial (Fin N) K))
@@ -33,7 +92,7 @@ theorem _root_.GlobalTheory.ExtPrime.isPrime_map_and_generic_form_notMem (K L : 
     intro p
     induction p using MvPolynomial.induction_on with
     | C a => simp [e, ι, commAlgEquiv_C]
-    | add p q hp hq => rw [map_add, map_add, hp, hq, map_add]
+    | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _)]
     | mul_X p i hp => rw [map_mul, map_mul, hp, map_X]; simp [e, commAlgEquiv_X]
   have hQ : P.map ι = RingHom.ker π := by
     ext b
@@ -101,23 +160,25 @@ theorem _root_.GlobalTheory.ExtPrime.isPrime_map_and_generic_form_notMem (K L : 
   let G₀ : MvPolynomial (Fin N) (MvPolynomial (Fin N) K) := ∑ i : Fin N, C (X i) * X i
   have hG₀ : algebraMap _ (MvPolynomial (Fin N) L) G₀ =
       ∑ i : Fin N, C (algebraMap (MvPolynomial (Fin N) K) L (X i)) * X i := by
+
     simp [G₀, RingHom.algebraMap_toAlgebra, map_sum]
   rw [← hG₀] at hG
   have hG₀Q : G₀ ∈ P.map ι := by
-    have h := IsLocalization.comap_map_of_isPrime_disjoint _ (MvPolynomial (Fin N) L) hQprime hdisj
+    have h := IsLocalization.under_map_of_isPrime_disjoint _ (MvPolynomial (Fin N) L) hQprime hdisj
     rw [← h]
     exact hG
   rw [hQ, RingHom.mem_ker] at hG₀Q
   have hπG : π G₀ = ∑ i : Fin N, X i * C (Ideal.Quotient.mk P (X i)) := by
+
     simp only [π, G₀, RingHom.coe_comp, Function.comp_apply, map_sum, map_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [show e.toRingHom (C (X i)) = X i from commAlgEquiv_C_X (R := K) (S₁ := Fin N) i,
       show e.toRingHom (X i) = C (X i) from commAlgEquiv_X (R := K) (S₂ := Fin N) i, map_X, map_C]
   rw [hπG] at hG₀Q
-  have hcoeff := congrArg (MvPolynomial.coeff (Finsupp.single j 1)) hG₀Q
-  simp only [coeff_sum, coeff_zero] at hcoeff
-  simp_rw [mul_comm (X _), coeff_C_mul, coeff_X', Finsupp.single_left_inj one_ne_zero] at hcoeff
-  simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true] at hcoeff
+  have hcoeff := congrArg (AddMonoidAlgebra.coeff · (Finsupp.single j 1)) hG₀Q
+  simp only [coeff_sum, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at hcoeff
+  simp_rw [mul_comm (X _), coeff_C_mul, coeff_X, Finsupp.single_left_inj one_ne_zero] at hcoeff
+  simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true] at hcoeff
   exact hj (Ideal.Quotient.eq_zero_iff_mem.mp hcoeff)
 
 end GlobalTheory.ExtPrime

@@ -1,7 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.SecInjG
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.IdealSplit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StalkNormalOfSmooth
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsOpenImmersionOfSurj
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.SecInjG
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsOpenImmersionOfSurj
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.IsEtIdealOfPlace
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen GlobalTheory.UPel.HT.EtLev GlobalTheory.LKTrip GlobalTheory.LKGeo
@@ -88,10 +129,21 @@ theorem UpperTheory.Gal.FiniteEtaleModels.descExt_of :
     refine ⟨v q, ?_⟩
     rw [← Scheme.Hom.comp_apply, hv]⟩
 
+  have stalk_normal (T : Scheme.{0}) (t : T ⟶ Sp O) [Smooth t] (x : T) :
+      IsDomain (T.presheaf.stalk x) ∧ IsIntegrallyClosed (T.presheaf.stalk x) := by
+    refine GlobalTheory.forall_isDomain_and_isIntegrallyClosed_stalk_of_smooth t (fun q => ?_) x
+    haveI : q.asIdeal.IsPrime := PrimeSpectrum.isPrime q
+    let _ : Algebra O ((Sp O).presheaf.stalk q) := StructureSheaf.stalkAlgebra O q
+    have h : IsLocalization.AtPrime ((Sp O).presheaf.stalk q) q.asIdeal :=
+      StructureSheaf.IsLocalization.to_stalk O q
+    have hle : q.asIdeal.primeCompl ≤ nonZeroDivisors O := q.asIdeal.primeCompl_le_nonZeroDivisors
+    have hd : IsDomain ((Sp O).presheaf.stalk q) := IsLocalization.isDomain_of_le_nonZeroDivisors _ hle
+    exact ⟨hd, isIntegrallyClosed_of_isLocalization _ _ hle⟩
   have hsm : Smooth (pullback.fst j' j' ≫ j' ≫ u ≫ s) := inferInstance
   have hred : IsReduced (pullback j' j') := by
     have : ∀ x : (pullback j' j' : Scheme.{0}), _root_.IsReduced ((pullback j' j' : Scheme.{0}).presheaf.stalk x) := fun x => by
-      have := (GlobalTheory.ESOrdM.stalk_normal_of_smooth O _ (pullback.fst j' j' ≫ j' ≫ u ≫ s) x).1
+      letI : IsDomain ((pullback j' j' : Scheme.{0}).presheaf.stalk x) :=
+        (stalk_normal _ (pullback.fst j' j' ≫ j' ≫ u ≫ s) x).1
       infer_instance
     exact isReduced_of_isReduced_stalk _
   have hP : pullback.fst j' j' ≫ y = pullback.snd j' j' ≫ y := by
@@ -110,6 +162,6 @@ theorem UpperTheory.Gal.FiniteEtaleModels.descExt_of :
   have hzg : z ≫ g = u ≫ f := by
     rw [← cancel_epi j', ← Category.assoc, hz, hy, ← hj', Category.assoc]
   obtain ⟨y', h₁, h₂⟩ := hN _ X Y B u f g z inferInstance hdom (LocallyOfFiniteType.isLocallyNoetherian s)
-    (fun x => (GlobalTheory.ESOrdM.stalk_normal_of_smooth O X s x).1)
-    (fun x => (GlobalTheory.ESOrdM.stalk_normal_of_smooth O X s x).2) hg hzg
+    (fun x => (stalk_normal X s x).1)
+    (fun x => (stalk_normal X s x).2) hg hzg
   exact ⟨y', by rw [← hj', Category.assoc, h₁, hz], h₂⟩

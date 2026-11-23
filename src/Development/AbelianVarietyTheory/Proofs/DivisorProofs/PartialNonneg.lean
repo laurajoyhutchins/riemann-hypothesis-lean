@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -140,8 +183,8 @@ theorem core (n q : ℕ) (y : Fin n → ℂ) (hy : star y ⬝ᵥ (sgnM n q).mulV
       (∀ a, ‖b a a‖ ≤ (1 + 2 * ∑ c, ‖y c‖ ^ 2) * (1 + t) ∧ ‖b a a‖⁻¹ ≤ (1 + 2 * ∑ c, ‖y c‖ ^ 2) * (1 + t)) ∧
       ∀ a, ‖(b.mulVec y) a‖ ^ 2 * (1 + t) ≤ ‖y a‖ ^ 2 + 1 := by
   obtain ⟨Y, hYd⟩ : ∃ Y : ℕ → ℂ, ∀ c, Y c = if h : c < n then y ⟨c, h⟩ else 0 := ⟨_, fun _ => rfl⟩
-  have hY : ∀ i : Fin n, Y i = y i := fun i => by rw [hYd, dif_pos i.isLt]
-  have hYz : ∀ c, n ≤ c → Y c = 0 := fun c hc => by rw [hYd, dif_neg (show ¬ c < n by omega)]
+  have hY : ∀ i : Fin n, Y i = y i := fun i => by rw [hYd, dite_eq_left i.isLt]
+  have hYz : ∀ c, n ≤ c → Y c = 0 := fun c hc => by rw [hYd, dite_eq_right (show ¬ c < n by omega)]
   obtain ⟨g, hgd⟩ : ∃ g : ℕ → ℝ, ∀ c, g c = ‖Y c‖ ^ 2 := ⟨_, fun _ => rfl⟩
   have hgnn : ∀ c, 0 ≤ g c := fun c => by rw [hgd]; positivity
   have hgz : ∀ c, n ≤ c → g c = 0 := fun c hc => by rw [hgd, hYz c hc]; simp
@@ -263,7 +306,7 @@ theorem core (n q : ℕ) (y : Fin n → ℂ) (hy : star y ⬝ᵥ (sgnM n q).mulV
 theorem prod_zpow_le {n : ℕ} (v : Fin n → ℂ) (w : Fin n → ℤ) (M : ℝ) (h : ∀ a, ‖v a‖ ≤ M ∧ ‖v a‖⁻¹ ≤ M) :
     ‖∏ a, v a ^ w a‖ ≤ M ^ (∑ a, (w a).natAbs) := by
   rw [norm_prod, ← Finset.prod_pow_eq_pow_sum]
-  apply Finset.prod_le_prod (fun a _ => norm_nonneg _)
+  apply Finset.prod_le_prod₀ (fun a _ => norm_nonneg _)
   intro a _
   obtain ⟨h1, h2⟩ := h a
   rw [norm_zpow]

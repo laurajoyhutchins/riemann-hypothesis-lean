@@ -1,8 +1,60 @@
-import Formalism.HermitianCurvature.StatementFr
-import Formalism.YangianSpanCharacter.YangianRelationFirst
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleGD
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleSS
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.QuasiDeterminantFromEntries
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CommuteLevelZeroElement
+public import Formalism.HermitianCurvature.StatementFr
+public import Mathlib.CategoryTheory.Category.Basic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.QuasiDeterminantFromEntries
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleGD
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleSS
+public import Formalism.YangianSpanCharacter.YangianRTTProofs.DiagonalEntryEqOfModularRelation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Formalism.YangianSpanCharacter.T Formalism.YangianSpanCharacter.Y Formalism.FourierDecayAlt.R Formalism.FourierDecayAlt.Wd Formalism.FourierDecayAlt.Fr
 
@@ -72,36 +124,12 @@ lemma l0_constant_part_commute (Y : ℂ) {g : A} (hg : g ∈ zfns L) :
     Commute (algebraMap ℂ A (Y + 1 / 2) * (L.ζb * L.GGi)) g :=
   (Algebra.commute_algebraMap_left _ g).mul_left ((zc L (mζb L) hg).mul_left (zc L (mGGi L) hg))
 
-lemma zetaInv_mul_l0_mul_zeta (Y : ℂ) : L.ζi * L.l0 Y * L.ζ = L.l0 Y - L.ζi := by
-  have c := l0_constant_part_commute L Y (mζ L)
-  have h1 : L.ζi * (-L.nab) * L.ζ = -L.nab - L.ζi := by
-    rw [mul_neg, neg_mul, mul_assoc, L.nab_ζ, mul_add, ← mul_assoc, L.ζi_ζ, one_mul, mul_one]; abel
-  have h2 : L.ζi * (algebraMap ℂ A (Y + 1 / 2) * (L.ζb * L.GGi)) * L.ζ =
-      algebraMap ℂ A (Y + 1 / 2) * (L.ζb * L.GGi) := by
-    rw [mul_assoc, c.eq, ← mul_assoc, L.ζi_ζ, one_mul]
-  unfold LevelData.l0
-  rw [mul_sub, sub_mul, h1, h2]; abel
-
 lemma l0_mul_gg_eq_gg_mul_sub (Y : ℂ) : L.l0 Y * L.GG = L.GG * (L.l0 Y - L.ζb * L.GGi) := by
   have c := l0_constant_part_commute L Y (mGG L)
   have h : L.GG * (L.ζb * L.GGi) = L.ζb := by
     rw [(zc L (mζb L) (mGGi L)).eq, ← mul_assoc, L.GG_GGi, one_mul]
   unfold LevelData.l0
   rw [sub_mul, c.eq, neg_mul, L.nab_GG, mul_sub, mul_sub, h, mul_neg]; abel
-
-lemma zetaConj2 : L.ζb * L.GGi - L.ζi = L.TT • (L.ζi * L.GGi) := by
-  obtain ⟨p, pb, c, ci, cb, cbi, ζ, ζi, ζb, ζbi, GG, GGi, nab, nabs, TT, h1, h2, h3, h4, h5, h6, h7,
-    h8, h9, h10, h11, h12⟩ := L
-  dsimp only
-  subst h12
-  have e : ζi * (ζ * ζb - algebraMap ℂ A TT) = ζb - TT • ζi := by
-    rw [mul_sub, ← mul_assoc, h7, one_mul, Algebra.smul_def, Algebra.commutes]
-  calc ζb * GGi - ζi = ζb * GGi - ζi * ((ζ * ζb - algebraMap ℂ A TT) * GGi) := by
-        rw [h10, mul_one]
-    _ = ζb * GGi - (ζb - TT • ζi) * GGi := by rw [← mul_assoc, e]
-    _ = TT • (ζi * GGi) := by
-        rw [sub_mul, smul_mul_assoc]
-        abel
 
 end Level
 
@@ -213,22 +241,7 @@ lemma cancel2 {B : Type} [Ring B] {P Pi Q Qi X Y : B} (h1 : Pi * P = 1) (h2 : Q 
 
 lemma hat_herm (hf : IsFrame L f) {Z : ℂ} (hZ : Z ∈ f.reg) (hr : star Z = Z) (i j : Fin 2) :
     star (f.d L * f.hatT Z i j) = f.d L * f.hatT Z j i := by
-  have h0 := hf.module.herm Z hZ hr
-  have hh : ∀ i j, star (f.RR * f.TT Z i j) = f.RR * f.TT Z j i := by
-    intro i j
-    have := congrFun (congrFun h0 j) i
-    simpa [d0, Matrix.conjTranspose_apply, Matrix.diagonal_mul] using this
-  have hF : ∀ i j, f.RR * f.TT Z i j = star f.F * (f.d L * f.hatT Z i j) * f.F := by
-    intro i j
-    rw [hat_apply hZ, hf.form]
-    calc star f.F * f.d L * f.F * f.TT Z i j
-        = star f.F * f.d L * f.F * f.TT Z i j * (f.Fi * f.F) := by rw [hf.Fi_F, mul_one]
-      _ = _ := by simp only [mul_assoc]
-  have sF : star f.Fi * star f.F = 1 := by rw [← star_mul, hf.F_Fi, star_one]
-  refine cancel2 sF hf.F_Fi ?_
-  have := hh i j
-  rw [hF i j, hF j i, star_mul, star_mul, star_star, ← mul_assoc] at this
-  exact this
+  apply Formalism.FourierDecayAlt.P.Fr9.hat_herm <;> assumption
 
 end Frame
 
@@ -237,20 +250,6 @@ end Formalism.FourierDecayAlt.P.Fr3
 namespace Formalism.FourierDecayAlt.P
 
 open Formalism.FourierDecayAlt.P.Fr3
-
-theorem zeta_conj_nabla : Formalism.FourierDecayAlt.Fr.ZetaConj := by
-  intro A S _ _ _ _ _ _ r L f Y hee
-  refine ⟨?_, zetaConj2 L⟩
-  have c : Commute (kapL L * f.ee Y : SlopeTestRemainingChoices S A) (io L.ζ) := by
-    refine Commute.mul_left ?_ (hee _ (mζ L))
-    exact io_comm (((zc L (mζb L) (mζ L)).mul_left (zc L (mζi L) (mζ L))).mul_left (zc L (mGGi L) (mζ L)))
-  have i1 : (io L.ζi : SlopeTestRemainingChoices S A) * io L.ζ = 1 := by rw [← io_mul, L.ζi_ζ, io_one]
-  have h1 : (io L.ζi : SlopeTestRemainingChoices S A) * io (L.l0 Y) * io L.ζ = io (L.l0 Y) - io L.ζi := by
-    rw [← io_mul, ← io_mul, zetaInv_mul_l0_mul_zeta]; simp only [io, map_sub]
-  have h2 : (io L.ζi : SlopeTestRemainingChoices S A) * (kapL L * f.ee Y) * io L.ζ = kapL L * f.ee Y := by
-    rw [mul_assoc, c.eq, ← mul_assoc, i1, one_mul]
-  unfold FrameData.l
-  rw [mul_add, add_mul, h1, h2]; abel
 
 theorem start_ee : Formalism.FourierDecayAlt.Fr.StartEe := by
   intro A _ _ r L SS

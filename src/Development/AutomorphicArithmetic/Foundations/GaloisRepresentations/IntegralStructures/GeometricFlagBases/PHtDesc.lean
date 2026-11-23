@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.FlagBasis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContConeOfQcqsAffineStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TateTwistFinitaryStatement
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.FlagBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContConeOfQcqsAffineStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TateTwistFinitaryStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
 open CategoryTheory Limits AlgebraicGeometry NumberField GlobalTheory.EtC GlobalTheory.Et TensorProduct Polynomial
-open GlobalTheory.GalV (HTower Htot hop galV galTot)
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N
 open UpperTheory.Gal UpperTheory.Gal.Int.Geo
@@ -88,8 +127,8 @@ private theorem pj_tr {L L' : IntermediateField k Ω} (h : L ≤ L') :
       ← CommRingCat.ofHom_comp, pj_snd]
     rfl
 
-variable (k Ω) in
 
+variable (k Ω) in
 private def Gd : (FI k Ω)ᵒᵖ ⥤ Scheme.{0} where
   obj L := geom L.unop.1 p
   map f := tr p (leOfHom f.unop)
@@ -109,8 +148,8 @@ private def Gd : (FI k Ω)ᵒᵖ ⥤ Scheme.{0} where
         ← CommRingCat.ofHom_comp]
       rfl
 
-variable (k Ω) in
 
+variable (k Ω) in
 private def cn : Cone (Gd k Ω p) where
   pt := geom Ω p
   π := { app := fun L => LateralTheory.EWeil.StabPf.proj L.unop.1 p
@@ -222,6 +261,8 @@ private theorem tr_affine {L L' : IntermediateField k Ω} (h : L ≤ L') : IsAff
 end Geo
 
 end UpperTheory.Gal.Int.Geo.HeightDescentDirectedColimits
+
+@[expose] public section
 
 open UpperTheory.Gal.Int.Geo.HeightDescentDirectedColimits in
 theorem UpperTheory.Gal.Int.Geo.htDesc_of :

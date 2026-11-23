@@ -1,6 +1,56 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.ContinuousOfMem
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionNonzeroAdmissible
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowDef
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowLine
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionNonzeroAdmissible
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.ContinuousOfMem
+import Development.WeilBound.ThetaLifts.LeviDeterminants.GrowSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +93,7 @@ theorem exists_dom (hψ : IsStd ψ) {μ : @Measure (κ → AF F) (borel _)} (hμ
     obtain ⟨k, hk⟩ := weight_lt_top (F := F) (κ := κ)
     obtain ⟨K, hK0, hK⟩ := lineD_bound f w.1 0 (linForm w.2) (qc w) k
     have hu : Continuous fun z : V F κ => ((K * ((1 + ‖z‖) ^ k)⁻¹ : ℝ) : ℂ) :=
-      Complex.continuous_ofReal.comp (continuous_const.mul (Continuous.inv₀ (by fun_prop) fun z => by positivity))
+      Complex.continuous_ofReal.comp (continuous_const.mul (Continuous.fun_inv₀ (by fun_prop) fun z => by positivity))
     refine ⟨pureA F (fun z => ((K * ((1 + ‖z‖) ^ k)⁻¹ : ℝ) : ℂ)) g, ?_, nsq_pure_lt_top hμ hu (hk K) hg, fun t ht x => ?_⟩
     · have h := PositivityTheory.ThKF0.Split.continuous_splitE_symm F κ
       exact (hu.comp h.fst).mul (hg.1.continuous.comp h.snd)
@@ -178,6 +228,7 @@ def wordL (hψ : IsStd ψ) (l : List (V F κ × V F κ)) : schA F κ →ₗ[ℂ]
 
 theorem linForm_sum {ι : Type} [Fintype ι] (a : ι → ℝ) (b : ι → V F κ) (p : V F κ) :
     linForm (∑ j, a j • b j) p = ∑ j, a j * linForm (b j) p := by
+
   simp only [linForm_apply, Finset.sum_apply, Pi.smul_apply, Finset.mul_sum, mul_smul_comm, map_sum, map_smul, smul_eq_mul]
   exact Finset.sum_comm
 
@@ -187,9 +238,10 @@ theorem dR_sum (hψ : IsStd ψ) {ι : Type} [Fintype ι] (a : ι → ℝ) (b : �
   | mem x hx =>
     obtain ⟨f, g, hg, rfl⟩ := hx
     funext x
+
     simp only [dR_pure hψ, Finset.sum_apply, Pi.smul_apply, pureA, dS_apply, Prod.fst_sum, Prod.snd_sum, Prod.smul_fst,
-      Prod.smul_snd, linForm_sum, map_sum, map_smul, smul_eq_mul, Complex.real_smul, Complex.ofReal_sum, Complex.ofReal_mul,
-      Finset.sum_mul, Finset.mul_sum, ← Finset.sum_add_distrib]
+    Prod.smul_snd, linForm_sum, map_sum, map_smul, smul_eq_mul, Complex.real_smul, Complex.ofReal_sum, Complex.ofReal_mul,
+    Finset.sum_mul, Finset.mul_sum, ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun j _ => by ring
   | zero =>
     have : ∀ w : V F κ × V F κ, dR ψ w 0 = 0 := fun w => by
@@ -235,6 +287,7 @@ theorem word_bound (hψ : IsStd ψ) {μ : @Measure (κ → AF F) (borel _)} (hμ
         have := dR_sum hψ (b.repr w) b hΦ
         rw [b.sum_repr] at this
         simpa using this
+
       rw [e1, e2, map_sum]
       simp only [map_smul]
       rfl

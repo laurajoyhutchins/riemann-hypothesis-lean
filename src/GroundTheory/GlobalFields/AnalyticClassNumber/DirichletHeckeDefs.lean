@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.NormResidueSymbol.RationalContinuous
-import GroundTheory.GlobalFields.AnalyticClassNumber.HeckeContinued
+module
+
+public import GroundTheory.GlobalFields.NormResidueSymbol.RationalCyclotomic
+public import GroundTheory.GlobalFields.TateThesis.HeckeChar
+public import Mathlib.NumberTheory.DirichletCharacter.Bounds
+public import GroundTheory.GlobalFields.NormResidueSymbol.RationalContinuous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -21,19 +66,11 @@ abbrev modulus (N : ℕ) [NeZero N] : ℕ+ := ⟨N, Nat.pos_of_neZero N⟩
 def unitsMod (N : ℕ) [NeZero N] : ℤ̂ˣ →* (ZMod N)ˣ :=
   Units.map (ProfiniteInteger.proj (modulus N)).toMonoidHom
 
-theorem coe_unitsMod (u : ℤ̂ˣ) :
-    ((unitsMod N u : (ZMod N)ˣ) : ZMod N) = ProfiniteInteger.proj (modulus N) (u : ℤ̂) :=
-  rfl
-
 def toCircle : (ZMod N)ˣ →* Circle where
   toFun a := ⟨χ a, mem_sphere_zero_iff_norm.2 (χ.unit_norm_eq_one a)⟩
   map_one' := Circle.ext (by simp)
   map_mul' a b := Circle.ext (by simp only [Units.val_mul, map_mul]; rfl)
 
-omit [NeZero N] in
-@[simp]
-theorem coe_toCircle (a : (ZMod N)ˣ) : (toCircle χ a : ℂ) = χ a :=
-  rfl
 
 def galoisCharacter : Gal(maxCyclotomic/ℚ) →* Circle :=
   (toCircle χ).comp ((unitsMod N).comp cycCharacter.toMonoidHom)

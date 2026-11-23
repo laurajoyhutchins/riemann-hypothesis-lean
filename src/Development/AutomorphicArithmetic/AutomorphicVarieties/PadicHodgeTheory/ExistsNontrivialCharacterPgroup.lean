@@ -1,5 +1,65 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IqBasic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiniteCohomology
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IqBasic
+import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.IdealValuations.LocRootsY
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Abelianization.Finite
+public import Mathlib.GroupTheory.FiniteAbelian.Duality
+public import Mathlib.GroupTheory.Nilpotent
+import Mathlib.LinearAlgebra.Matrix.CharP
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Ideal.Quotient.Index
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 private theorem exists_eigenvector_tame_inertia {p : ℕ} [Fact p.Prime] {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
@@ -66,6 +126,7 @@ private theorem exists_eigenvector_tame_inertia {p : ℕ} [Fact p.Prime] {G : Ty
     Units.ne_zero _ (hli _ h 1)
   obtain ⟨z, hz⟩ := Function.ne_iff.1 hne
   refine ⟨_, hz, fun τ => ?_⟩
+
   simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul, Finset.mul_sum]
   refine Fintype.sum_equiv (Equiv.mulLeft (c.rangeRestrict τ)) _ _ fun q => ?_
   have e1 : φ τ (((q : (Om p)ˣ)⁻¹ : (Om p)ˣ) : Om p) = (((q : (Om p)ˣ)⁻¹ : (Om p)ˣ) : Om p) := by
@@ -104,7 +165,7 @@ private theorem tame_character_conjugation {p : ℕ} [Fact p.Prime] {G : Type} [
     field_simp
   rw [e2, norm_div, norm_mul, hy, hτ, mul_one, div_one] at h1
   have h2 := KStar.IdealValuations.norm_aut_and_roots.2 m _ _ hm (by rw [← map_pow, hc', map_one]) (hc' τ) h1
-  rw [← h2, ← AlgEquiv.mul_apply, mul_inv_cancel, AlgEquiv.one_apply]
+  simpa using congrArg (φ g) h2
 
 private theorem cyclotomic_congruence_fixed_root {p l : ℕ} [Fact p.Prime] [Fact l.Prime] (σ : GQ p) (x : Om p) (k : ℕ)
     (hx : x ^ l ^ k = 1) (hx1 : x ≠ 1) (h : σ x = x) : (l : ℤ_[l]) ∣ (cyc p l σ : ℤ_[l]) - 1 := by
@@ -145,6 +206,7 @@ private theorem matrix_pow_l_congruence_succ {A : Type} [CommRing A] (I : Ideal 
     exact Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.pow_le_self (Nat.succ_ne_zero k) (h a b))
   have h2 : (Ideal.Quotient.mk I).mapMatrix
       (∑ i ∈ Finset.range l, M ^ i * Matrix.scalar (Fin n) c ^ (l - 1 - i)) = 0 := by
+
     simp only [map_sum, map_mul, map_pow, h1]
     rw [geom_sum₂_self, ← nsmul_eq_mul, ← Nat.cast_smul_eq_nsmul (A ⧸ I), ← map_natCast (Ideal.Quotient.mk I),
       Ideal.Quotient.eq_zero_iff_mem.2 hl, zero_smul]
@@ -183,10 +245,10 @@ private theorem exists_nontrivial_character_pgroup {H : Type} [Group H] [Finite 
   haveI := hH.isNilpotent
   have h1 := IsSolvable.commutator_lt_top_of_nontrivial H
   obtain ⟨a, -, ha⟩ := SetLike.exists_of_lt h1
-  have h2 : Abelianization.of a ≠ 1 := fun h => ha ((QuotientGroup.eq_one_iff a).1 h)
-  haveI : NeZero (Monoid.exponent (Abelianization H)) := ⟨Monoid.exponent_ne_zero_of_finite⟩
-  obtain ⟨ψ, hψ⟩ := CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity (Abelianization H) F h2
-  exact ⟨ψ.comp Abelianization.of, a, hψ⟩
+  have h2 : Group.Abelianization.of a ≠ 1 := fun h => ha ((QuotientGroup.eq_one_iff a).1 h)
+  haveI : NeZero (Monoid.exponent (Group.Abelianization H)) := ⟨Monoid.exponent_ne_zero_of_finite⟩
+  obtain ⟨ψ, hψ⟩ := CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity (Group.Abelianization H) F h2
+  exact ⟨ψ.comp Group.Abelianization.of, a, hψ⟩
 
 private theorem eq_zero_of_twisted_commutation {A : Type} [CommRing A] [IsLocalRing A] [IsHausdorff (IsLocalRing.maximalIdeal A) A] {n : ℕ}
     (M Y : Matrix (Fin n) (Fin n) A) (c x : A) (hc : IsUnit c) (hx : IsUnit (x - 1))

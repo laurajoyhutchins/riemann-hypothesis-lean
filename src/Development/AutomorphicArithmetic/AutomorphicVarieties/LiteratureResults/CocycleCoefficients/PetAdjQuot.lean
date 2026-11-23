@@ -1,9 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.VolMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.StripIm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.TailFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.FdNull
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.FdCount
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.VolumeOpenPosUpperHalfPlane
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Measure
+public import Mathlib.NumberTheory.Modular
+public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
+import Aesop.Main
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.FdCount
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.FdNull
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.StripIm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.TailFin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.VolMap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.AutomorphicRankinSelberg.VolumeOpenPosUpperHalfPlane
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -130,12 +181,16 @@ private theorem intOn {φ : ℍ → ℂ} (hc : Continuous φ) {C : ℝ} (hb : �
 private theorem quotInt_mu (H : Subgroup SL(2, ℤ)) [H.FiniteIndex] {φ : ℍ → ℂ} (hc : Continuous φ) {C : ℝ}
     (hb : ∀ z, ‖φ z‖ ≤ C) : quotInt H φ = ∫ w, w ∂(Measure.map φ (mu H)) := by
   haveI : Fintype (SL(2, ℤ) ⧸ H) := Fintype.ofFinite _
-  rw [integral_map (f := fun w : ℂ => w) hc.aemeasurable aestronglyMeasurable_id, mu, Measure.sum_fintype, integral_finset_sum_measure,
-    quotInt, finsum_eq_sum_of_fintype]
-  · refine Finset.sum_congr rfl fun q _ => ?_
-    rw [integral_map (contSL _).aemeasurable hc.aestronglyMeasurable]
-  · intro q _
-    exact (integrable_map_measure hc.aestronglyMeasurable (contSL _).aemeasurable).2 (intOn hc hb _)
+  rw [integral_map (f := fun w : ℂ => w) hc.aemeasurable aestronglyMeasurable_id, mu]
+  have hi : Integrable φ (Measure.sum fun q : SL(2, ℤ) ⧸ H =>
+      Measure.map (fun z : ℍ => q.out⁻¹ • z) (volume.restrict ModularGroup.fd)) := by
+    apply integrable_sum_measure
+    · intro q
+      exact (integrable_map_measure hc.aestronglyMeasurable (contSL _).aemeasurable).2 (intOn hc hb _)
+    · apply Summable.of_finite
+  rw [integral_sum_measure hi, tsum_fintype, quotInt, finsum_eq_sum_of_fintype]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [integral_map (contSL _).aemeasurable hc.aestronglyMeasurable]
 
 private theorem quotInt_conj0 (H K : Subgroup SL(2, ℤ)) [H.FiniteIndex] [K.FiniteIndex] (α : GL (Fin 2) ℝ) (e : K ≃ H)
     (he : ∀ (h : K) (z : ℍ), α⁻¹ • (h : SL(2, ℤ)) • z = (e h : SL(2, ℤ)) • α⁻¹ • z)
@@ -221,7 +276,7 @@ theorem quotInt_sum (H : Subgroup SL(2, ℤ)) [H.FiniteIndex] {ι : Type} (s : F
   haveI : Fintype (SL(2, ℤ) ⧸ H) := Fintype.ofFinite _
   simp only [quotInt, finsum_eq_sum_of_fintype]
   rw [Finset.sum_comm]
-  exact Finset.sum_congr rfl fun γ _ => integral_finset_sum _ fun i _ => intOn (hc i) (hb i).choose_spec _
+  exact Finset.sum_congr rfl fun γ _ => integral_finsetSum _ fun i _ => intOn (hc i) (hb i).choose_spec _
 
 theorem quotInt_mul (H : Subgroup SL(2, ℤ)) [H.FiniteIndex] (c : ℂ) (φ : ℍ → ℂ) :
     quotInt H (fun z => c * φ z) = c * quotInt H φ := by

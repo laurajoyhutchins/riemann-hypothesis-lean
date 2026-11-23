@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSumUnitarySubstitutionsEqRowLie
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JointHighestProportional
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsJointIntEigenvectorOfStable
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsJointIntEigenvectorOfStable
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsSumUnitarySubstitutionsEqRowLie
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JointHighestProportional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Derivation.Lie
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +80,8 @@ theorem rowLie_X (τ : ι) (k l : Fin m) (v : ι × Fin m × Fin n) :
     rw [pderiv_X_of_ne (by simp [hb.symm]), mul_zero]
   · simp
 
-open Classical in
 
+open Classical in
 theorem rowLie_diag_comm (t t' : ι) (i k l : Fin m) :
     rowLie n t i i * rowLie n t' k l - rowLie n t' k l * rowLie n t i i =
       (if t = t' then ((if i = k then 1 else 0) - (if i = l then 1 else 0) : ℂ) else 0) •
@@ -77,6 +121,7 @@ theorem exists_totalDegree_le_of_finiteDimensional {X : Type} [AddCommGroup X] [
     [FiniteDimensional ℂ X] (Φ : X →ₗ[ℂ] Pol ι m n) : ∃ d, ∀ x, (Φ x).totalDegree ≤ d := by
   let b := Module.finBasis ℂ X
   refine ⟨Finset.univ.sup fun j => (Φ (b j)).totalDegree, fun x => ?_⟩
+
   rw [← b.sum_repr x, map_sum]
   refine totalDegree_finsetSum_le fun j _ => ?_
   rw [map_smul]
@@ -104,8 +149,10 @@ theorem colHighest_intertwiner_proportional :
     intro τ k l x
     obtain ⟨s, c, hc⟩ := GlobalTheory.DefLift.exists_sum_rowSub_eq_rowLie ι m n (max d₁ d₂) τ k l
     refine ⟨∑ u ∈ s, c u • π τ u x, ?_, ?_⟩
+
     · rw [← hc _ ((hd₁ x).trans (le_max_left _ _)), map_sum]
       exact Finset.sum_congr rfl fun u _ => by rw [map_smul, (heq τ u x).1]
+
     · rw [← hc _ ((hd₂ x).trans (le_max_right _ _)), map_sum]
       exact Finset.sum_congr rfl fun u _ => by rw [map_smul, (heq τ u x).2]
   obtain ⟨_, ⟨x, rfl⟩, hx0, hhi, κ, hκ⟩ := GlobalTheory.exists_highest_vector

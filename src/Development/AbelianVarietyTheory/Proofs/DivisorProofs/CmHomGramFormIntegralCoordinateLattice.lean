@@ -1,10 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLinearHomProd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGramMatricesCmUnitaryShimuraObject
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingCompatibleAddFirstSlotComplexStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingCompatibleAddSecondSlotComplexStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingCompatibleScalarSecondSlotConjStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ScalarEqOfWeilPairingEqPrincipalCMTripleStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLinearHomProd
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EigenvectorLieDegree
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGramMatricesCmUnitaryShimuraObject
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ScalarEqOfWeilPairingEqPrincipalCMTripleStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingCompatibleAddFirstSlotComplexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingCompatibleAddSecondSlotComplexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilPairingCompatibleScalarSecondSlotConjStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -117,6 +158,7 @@ theorem integral_of_coords (X : CMObj H K ρ σ₁ p 0) (gP : Matrix (Fin p) (Fi
   have h4 := GlobalTheory.T.scalar_eq_of_weilPairing_eq_principalCMTriple E H K ρ σ₁ (X.A true) X.ρ_sq X.typeP _ _ h3
   refine ⟨r, ?_⟩
   have h5 := congrArg (fun z : 𝓞 E => (z : E)) h4
+
   simp only [map_mul, map_natCast, map_sum] at h5
   have hnm : ((n * m : ℕ) : E) ≠ 0 := Nat.cast_ne_zero.2 (Nat.mul_pos hn hm).ne'
   apply mul_left_cancel₀ hnm
@@ -146,7 +188,7 @@ theorem gram_integral : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (
       obtain ⟨y, hy⟩ := h
       obtain ⟨y', hy'⟩ := h'
       refine ⟨y + y', ?_⟩
-      simp only [map_add, hy, hy', Pi.add_apply, mul_add, Finset.sum_add_distrib]
+      simp only [map_add (f := _), hy, hy', Pi.add_apply, mul_add, Finset.sum_add_distrib]
     | smul s d _ h =>
       obtain ⟨y, hy⟩ := h
       refine ⟨H.bar s * y, ?_⟩
@@ -160,7 +202,7 @@ theorem gram_integral : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (
     obtain ⟨y, hy⟩ := h
     obtain ⟨y', hy'⟩ := h'
     refine ⟨y + y', ?_⟩
-    simp only [map_add, hy, hy', Pi.add_apply, add_mul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), hy, hy', Pi.add_apply, add_mul, Finset.sum_add_distrib]
   | smul s c _ h =>
     obtain ⟨y, hy⟩ := h
     refine ⟨s * y, ?_⟩

@@ -1,7 +1,66 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFormsAlgebraicIndependentSmulSubSumMem
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SubalgebraEqBotOfIsIntegralOfIsIntegrallyClosed
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFormsAlgebraicIndependentSmulSubSumMem
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.AlgebraicGeometry.Normalization
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SubalgebraEqBotOfIsIntegralOfIsIntegrallyClosed
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -30,13 +89,14 @@ theorem finiteDimensional_algebraicClosure_of_essFiniteType (K L : Type*) [Field
     choose q hq using hq
     have h1 : ∑ j ∈ t, MvPolynomial.map (algebraMap K E) (q j) * MvPolynomial.C (b j) = 0 := by
       apply algebraicIndependent_iff.mp hE
+
       rw [map_sum, ← hg]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_mul, MvPolynomial.aeval_map_algebraMap, hq, MvPolynomial.aeval_C]
       rfl
     have h2 : q i = 0 := by
       ext m
-      have h3 := congrArg (MvPolynomial.coeff m) h1
+      have h3 := congrArg (AddMonoidAlgebra.coeff · m) h1
       simp only [MvPolynomial.coeff_sum, mul_comm _ (MvPolynomial.C _), MvPolynomial.coeff_C_mul,
         MvPolynomial.coeff_map, MvPolynomial.coeff_zero, mul_comm (b _), ← Algebra.smul_def] at h3
       exact linearIndependent_iff'.mp b.linearIndependent t (fun j => (q j).coeff m) h3 i hi
@@ -155,6 +215,8 @@ end General
 
 section Local
 
+attribute [local instance] MvPolynomial.gradedAlgebra
+
 theorem finite_localizedModule_integralClosure {R L : Type*} [CommRing R] [CommRing L]
     [Algebra R L] (g : R) [Algebra (Localization.Away g) L]
     [IsScalarTower R (Localization.Away g) L]
@@ -189,6 +251,7 @@ theorem coneHom_of_isHomogeneous (ρ : σ → L) {p : MvPolynomial σ o} {n : �
     (hp : p.IsHomogeneous n) : coneHom o ρ p = C (MvPolynomial.aeval ρ p) * X ^ n := by
   conv_lhs => rw [p.as_sum]
   conv_rhs => rw [p.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hmn : m.degree = n := by
@@ -198,8 +261,8 @@ theorem coneHom_of_isHomogeneous (ρ : σ → L) {p : MvPolynomial σ o} {n : �
   simp only [Finsupp.prod, mul_pow, Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, map_mul,
     map_prod, map_pow, Polynomial.algebraMap_apply, mul_assoc, Finsupp.degree_apply]
 
-attribute [local instance] MvPolynomial.gradedAlgebra in
 
+attribute [local instance] MvPolynomial.gradedAlgebra in
 theorem isHomogeneous_ker_coneHom (ρ : σ → L) :
     (RingHom.ker (coneHom o ρ)).IsHomogeneous (MvPolynomial.homogeneousSubmodule σ o) := by
   intro n p hp
@@ -209,9 +272,10 @@ theorem isHomogeneous_ker_coneHom (ρ : σ → L) :
   rw [h1, RingHom.mem_ker]
   by_cases hn : n < p.totalDegree + 1
   · have h2 := congrArg (fun q => q.coeff n) (RingHom.mem_ker.mp hp)
+
     rw [← MvPolynomial.sum_homogeneousComponent p, map_sum] at h2
     simp only [coneHom_of_isHomogeneous ρ (MvPolynomial.homogeneousComponent_isHomogeneous _ p),
-      finset_sum_coeff, coeff_C_mul_X_pow, Finset.sum_ite_eq, Finset.mem_range, hn, if_true,
+      Polynomial.finsetSum_coeff, coeff_C_mul_X_pow, Finset.sum_ite_eq, Finset.mem_range, hn, if_true,
       coeff_zero] at h2
     rw [coneHom_of_isHomogeneous ρ (MvPolynomial.homogeneousComponent_isHomogeneous _ p), h2,
       map_zero, zero_mul]
@@ -269,7 +333,7 @@ theorem finite_integralClosure_of_coneHom [IsDomain o] [IsNoetherianRing o] [IsI
       obtain ⟨n, p', hp⟩ := hp
       obtain ⟨m, q', hq⟩ := hq
       refine ⟨n + m, p' * MvPolynomial.X s₀ ^ m + q' * MvPolynomial.X s₀ ^ n, ?_⟩
-      simp only [map_add, map_mul, map_pow, hp, hq, hX]
+      simp only [map_add (f := _), map_mul, map_pow, hp, hq, hX]
       ring
     | mul_X p s hp =>
       obtain ⟨n, p', hp⟩ := hp
@@ -405,8 +469,8 @@ theorem finite_integralClosure_of_injective (L : Type*) [Field L] [CharZero o] [
   · rintro ⟨_, a, ha, rfl⟩
     exact ha
 
-include o in
 
+include o in
 theorem finite_integralClosure_of_essFiniteType_field (L : Type*) [Field L] [CharZero L]
     [Algebra R L] [Algebra.EssFiniteType R L] : Module.Finite R (integralClosure R L) := by
   let χ := (algebraMap R L).comp (algebraMap o R)
@@ -447,8 +511,8 @@ theorem finite_of_isIntegralClosure_dedekind [CharZero o] [IsDomain R] [Faithful
   haveI := finite_integralClosure_dedekind o R K L
   .equiv (IsIntegralClosure.equiv R (integralClosure R L) L C).toLinearEquiv
 
-include o in
 
+include o in
 theorem finite_integralClosure_of_essFiniteType_of_isReduced (B : Type*) [CommRing B]
     [IsReduced B] [IsAddTorsionFree B] [Algebra R B] [Algebra.EssFiniteType R B] :
     Module.Finite R (integralClosure R B) := by
@@ -472,12 +536,6 @@ theorem finite_integralClosure_of_essFiniteType_of_isReduced (B : Type*) [CommRi
     Ideal.algebraMap_residueField_eq_zero.mp (hb ⟨p, hp'⟩)
   rw [minimalPrimes, Ideal.sInf_minimalPrimes] at h
   exact IsReduced.eq_zero b (mem_nilradical.mp h)
-
-example : let R := Algebra.adjoin ℤ ({X ^ 2, X ^ 3} : Set ℤ[X])
-    Module.Finite R (integralClosure R (FractionRing R)) := by
-  intro R
-  haveI : Algebra.FiniteType ℤ R := .adjoin_of_finite (Set.toFinite _)
-  exact finite_integralClosure_dedekind ℤ R (FractionRing R) (FractionRing R)
 
 end Main
 
@@ -511,7 +569,7 @@ theorem essFiniteType_stalkMap_SpecMap {A B : CommRingCat.{u}} (φ : A ⟶ B)
     (RingHom.FiniteType.of_surjective _
       (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso B).inv).2).essFiniteType)
 
-include g
+include g in
 
 theorem isFinite_fromNormalization_of_dense [IsReduced X] {D : Set X} (hD : Dense D)
     (hfin : ∀ W : X.Opens, IsCompact (W : Set X) → (D ∩ W).Finite)
@@ -550,8 +608,8 @@ theorem isFinite_fromNormalization_of_dense [IsReduced X] {D : Set X} (hD : Dens
     (.of_surjective _ (ConcreteCategory.bijective_of_isIso (f.normalizationObjIso hU).inv).2)
     (RingHom.finite_algebraMap.mpr this)
 
-omit g in
 
+omit g in
 theorem finite_genericPoints_inter [IsLocallyNoetherian X] (W : X.Opens)
     (hW : IsCompact (W : Set X)) : (genericPoints X ∩ W).Finite := by
   haveI : CompactSpace W.toScheme := isCompact_iff_compactSpace.mp hW
@@ -566,6 +624,8 @@ theorem finite_genericPoints_inter [IsLocallyNoetherian X] (W : X.Opens)
   rw [W.ι.isOpenEmbedding.isInducing.closure_eq_preimage_closure_image]
   convert h using 3
   exact Set.image_singleton
+
+include g
 
 theorem isFinite_fromNormalization_of_genericPoints [IsReduced X] [IsLocallyNoetherian X]
     (hchar : ∀ x ∈ genericPoints X, CharZero (X.residueField x))
@@ -614,8 +674,8 @@ theorem isFinite_fromNormalization_of_genericallyFinite [IsIntegral X] [CharZero
     (hfin : (f.stalkMap (genericPoint X)).hom.Finite) : IsFinite f.fromNormalization :=
   isFinite_fromNormalization_of_isIntegral f g hfin.finiteType.essFiniteType
 
-omit f in
 
+omit f in
 theorem isFinite_fromNormalization_SpecMap_fromSpecStalk (y : Y) {L : Type u} [Field L]
     [CharZero L] (φ : Y.presheaf.stalk y ⟶ .of L) (hφ : φ.hom.EssFiniteType) :
     IsFinite (Spec.map φ ≫ Y.fromSpecStalk y).fromNormalization := by
@@ -627,10 +687,6 @@ theorem isFinite_fromNormalization_SpecMap_fromSpecStalk (y : Y) {L : Type u} [F
       (Scheme.Hom.stalkMap_surjective _ _)).essFiniteType (essFiniteType_stalkMap_SpecMap φ hφ x)
   exact h.residueFieldMap
 
-omit f g in
-
-example : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap ℤ ℚ))).fromNormalization :=
-  isFinite_fromNormalization_of_over_fractionRing (o := .of ℤ) _ (𝟙 _) ℚ (𝟙 _) (by simp)
 
 end Schemes
 

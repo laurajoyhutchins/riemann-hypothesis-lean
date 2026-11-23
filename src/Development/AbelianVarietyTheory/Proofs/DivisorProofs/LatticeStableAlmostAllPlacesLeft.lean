@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
+module
+
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFinsetAdelicUnitaryPreservesLatticeAlmostA
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun
 
 noncomputable section
@@ -10,48 +52,12 @@ open Matrix
 namespace GlobalTheory.AdelMatLat
 
 theorem exists_int_smul_mem {E : Type} [Field E] [NumberField E] {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E))
-    (hL : L.IsLattice E) (v : Fin n → E) : ∃ d : ℤ, d ≠ 0 ∧ d • v ∈ L := by
-  have hv : v ∈ Submodule.span E (L : Set (Fin n → E)) := by rw [hL.span_eq_top]; trivial
-  induction hv using Submodule.span_induction with
-  | mem x hx => exact ⟨1, one_ne_zero, by simpa using hx⟩
-  | zero => exact ⟨1, one_ne_zero, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨d₁, h₁, hx⟩ := hx
-    obtain ⟨d₂, h₂, hy⟩ := hy
-    refine ⟨d₁ * d₂, mul_ne_zero h₁ h₂, ?_⟩
-    have : (d₁ * d₂) • (x + y) = d₂ • (d₁ • x) + d₁ • (d₂ • y) := by
-      rw [smul_add, mul_comm, mul_smul, mul_comm, mul_smul]
-    rw [this]
-    exact add_mem (zsmul_mem hx _) (zsmul_mem hy _)
-  | smul e x _ hx =>
-    obtain ⟨d, hd, hx⟩ := hx
-    obtain ⟨m, hm, hint⟩ := exists_integral_multiples ℤ ℚ (L := E) {e}
-    let o : 𝓞 E := ⟨m • e, (hint e (Finset.mem_singleton_self e) :)⟩
-    refine ⟨m * d, mul_ne_zero hm hd, ?_⟩
-    have : (m * d) • (e • x) = o • (d • x) := by
-      have ho : algebraMap (𝓞 E) E o = m • e := rfl
-      rw [← algebraMap_smul E o (d • x), ho, smul_assoc, smul_comm e d x, mul_smul]
-    rw [this]
-    exact L.smul_mem o hx
+    (hL : L.IsFullLattice E) (v : Fin n → E) : ∃ d : ℤ, d ≠ 0 ∧ d • v ∈ L := by
+  apply GlobalTheory.LatAlmostAll.exists_int_smul_mem <;> assumption
 
 theorem exists_int_mulVec_mem {E : Type} [Field E] [NumberField E] {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E))
-    (hL : L.IsLattice E) (N : Matrix (Fin n) (Fin n) E) : ∃ D : ℤ, D ≠ 0 ∧ ∀ x ∈ L, D • (N *ᵥ x) ∈ L := by
-  obtain ⟨s, hs⟩ := hL.fg
-  choose d hd hdm using fun g : Fin n → E => exists_int_smul_mem L hL (N *ᵥ g)
-  refine ⟨∏ g ∈ s, d g, Finset.prod_ne_zero_iff.2 fun g _ => hd g, ?_⟩
-  let f : (Fin n → E) →ₗ[𝓞 E] (Fin n → E) := ((∏ g ∈ s, d g) • N.mulVecLin).restrictScalars (𝓞 E)
-  have hf : ∀ x, f x = (∏ g ∈ s, d g) • (N *ᵥ x) := fun x => rfl
-  have hle : Submodule.span (𝓞 E) (s : Set (Fin n → E)) ≤ L.comap f := by
-    rw [Submodule.span_le]
-    intro g hg
-    simp only [SetLike.mem_coe, Submodule.mem_comap, hf]
-    classical
-    rw [← Finset.mul_prod_erase s d hg, mul_comm, mul_smul]
-    exact zsmul_mem (hdm g) _
-  intro x hx
-  rw [← hs] at hx
-  have := hle hx
-  rwa [Submodule.mem_comap, hf] at this
+    (hL : L.IsFullLattice E) (N : Matrix (Fin n) (Fin n) E) : ∃ D : ℤ, D ≠ 0 ∧ ∀ x ∈ L, D • (N *ᵥ x) ∈ L := by
+  apply GlobalTheory.LatAlmostAll.exists_int_mulVec_mem <;> assumption
 
 theorem incM_zsmul {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {m k : Type}
     (D : ℤ) (V : Matrix m k E) : incM F (D • V) = (algebraMap F (AF F) (D : F)) • incM F V := by
@@ -60,7 +66,7 @@ theorem incM_zsmul {F E : Type} [Field F] [NumberField F] [Field E] [NumberField
 
 theorem smul_incM_mul_stable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n d : ℕ}
     (X : Spc F E n) (Y : Spc F E d) (c : AF F) (N : Matrix (Fin n) (Fin n) E) (D : ℤ) (hD0 : D ≠ 0)
-    (hD : ∀ x ∈ X.L, D • (N *ᵥ x) ∈ X.L) (w : Pl F)
+    (hD : ∀ x ∈ X.L, D • (N *ᵥ x) ∈ X.L) (w : Pl (F := F))
     (hw : evFin F w (c * algebraMap F (AF F) (D : F)⁻¹) ∈ w.adicCompletionIntegers F) :
     ∀ γ ∈ latAtV X Y w, (c • incM F N) * γ ∈ latAtV X Y w := by
   intro γ hγ
@@ -88,22 +94,22 @@ theorem smul_incM_mul_stable {F E : Type} [Field F] [NumberField F] [Field E] [N
   | neg x _ hx => rw [Matrix.mul_neg]; exact neg_mem hx
 
 theorem finite_not_integral {F : Type} [Field F] [NumberField F] (c : AF F) :
-    {w : Pl F | evFin F w c ∉ w.adicCompletionIntegers F}.Finite :=
+    {w : Pl (F := F) | evFin F w c ∉ w.adicCompletionIntegers F}.Finite :=
   Filter.eventually_cofinite.1 c.2.2
 
 theorem finite_bad_smul_incM {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {n d : ℕ}
-    (X : Spc F E n) (Y : Spc F E d) (hX : X.L.IsLattice E) (c : AF F) (N : Matrix (Fin n) (Fin n) E) :
-    {w : Pl F | ¬ ∀ γ ∈ latAtV X Y w, (c • incM F N) * γ ∈ latAtV X Y w}.Finite := by
+    (X : Spc F E n) (Y : Spc F E d) (hX : X.L.IsFullLattice E) (c : AF F) (N : Matrix (Fin n) (Fin n) E) :
+    {w : Pl (F := F) | ¬ ∀ γ ∈ latAtV X Y w, (c • incM F N) * γ ∈ latAtV X Y w}.Finite := by
   obtain ⟨D, hD0, hD⟩ := exists_int_mulVec_mem X.L hX N
   refine (finite_not_integral (c * algebraMap F (AF F) (D : F)⁻¹)).subset ?_
   intro w hw hint
   exact hw (smul_incM_mul_stable X Y c N D hD0 hD w hint)
 
 theorem almost_all_stable : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (n d : ℕ)
-    (X : Spc F E n) (Y : Spc F E d), X.L.IsLattice E → ∀ M : Matrix (Fin n) (Fin n) (AE F E),
-    Set.Finite {w : Pl F | ¬ ∀ γ ∈ latAtV X Y w, M * γ ∈ latAtV X Y w} := by
+    (X : Spc F E n) (Y : Spc F E d), X.L.IsFullLattice E → ∀ M : Matrix (Fin n) (Fin n) (AE F E),
+    Set.Finite {w : Pl (F := F) | ¬ ∀ γ ∈ latAtV X Y w, M * γ ∈ latAtV X Y w} := by
   intro F E _ _ _ _ _ n d X Y hX M
-  let bad : Matrix (Fin n) (Fin n) (AE F E) → Set (Pl F) :=
+  let bad : Matrix (Fin n) (Fin n) (AE F E) → Set (Pl (F := F)) :=
     fun M => {w | ¬ ∀ γ ∈ latAtV X Y w, M * γ ∈ latAtV X Y w}
   have hadd : ∀ M M', (bad M).Finite → (bad M').Finite → (bad (M + M')).Finite := by
     intro M M' h h'

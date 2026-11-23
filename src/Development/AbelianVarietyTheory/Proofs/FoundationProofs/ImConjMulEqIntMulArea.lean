@@ -1,9 +1,51 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
+import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators
 
@@ -47,62 +89,5 @@ theorem area_closure_pair {w₁ w₂ : ℂ} (h : LinearIndependent ℝ ![w₁, w
   have h1 : (1 : ℝ) ≤ |(k : ℝ)| := by exact_mod_cast Int.one_le_abs hk0
   rw [abs_mul]
   nlinarith [abs_nonneg ((starRingEnd ℂ) w₁ * w₂).im]
-
-theorem im_conj_mul_eq_int_mul_area {Λ : AddSubgroup ℂ}
-    (hΛ : ∃ w₁ w₂ : ℂ, LinearIndependent ℝ ![w₁, w₂] ∧ Λ = AddSubgroup.closure {w₁, w₂}) :
-    0 < area Λ ∧ ∀ u ∈ Λ, ∀ v ∈ Λ, ∃ k : ℤ, ((starRingEnd ℂ) u * v).im = k * area Λ := by
-  obtain ⟨w₁, w₂, h, rfl⟩ := hΛ
-  rw [area_closure_pair h]
-  refine ⟨abs_pos.2 (im_conj_mul_ne_zero h), fun u hu v hv => ?_⟩
-  obtain ⟨k, hk⟩ := im_conj_mul_mem hu hv
-  rcases abs_cases ((starRingEnd ℂ) w₁ * w₂).im with h1 | h1
-  · exact ⟨k, by rw [hk, h1.1]⟩
-  · exact ⟨-k, by rw [hk, h1.1]; push_cast; ring⟩
-
-theorem translate_add_of_fixed {Λ : AddSubgroup ℂ} (hA : area Λ ≠ 0) (G : ℂ → ℂ) (x η : ℂ) (k : ℤ)
-    (hη : ∀ z, U1 Λ η G z = G z) (hk : ((starRingEnd ℂ) η * x).im = 2 * k * area Λ) :
-    U1 Λ (x + η) G = U1 Λ x G := by
-  funext z
-  have h := hη (z + x)
-  have hA' : (area Λ : ℂ) ≠ 0 := by exact_mod_cast hA
-  have hs := Complex.sub_conj ((starRingEnd ℂ) η * x)
-  rw [hk, map_mul, Complex.conj_conj] at hs
-  push_cast at hs
-  unfold U1 at h ⊢
-  rw [← h, mul_assoc (G (z + x + η)), ← Complex.exp_add, ← add_assoc]
-  congr 1
-  rw [Complex.exp_eq_exp_iff_exists_int]
-  refine ⟨k, ?_⟩
-  rw [map_add]
-  field_simp
-  linear_combination hs
-
-theorem translate_sigma_star_period {Λ : AddSubgroup ℂ}
-    (hΛ : ∃ w₁ w₂ : ℂ, LinearIndependent ℝ ![w₁, w₂] ∧ Λ = AddSubgroup.closure {w₁, w₂})
-    (x ω : ℂ) (m : ℕ) (hx : (m : ℂ) * (x / 2) ∈ Λ) (hω : ω ∈ Λ) :
-    U1 Λ (x + 2 * (m : ℂ) * ω) (sgStar Λ) = U1 Λ x (sgStar Λ) := by
-  obtain ⟨hA, hint⟩ := im_conj_mul_eq_int_mul_area hΛ
-  obtain ⟨k, hk⟩ := hint ω hω _ hx
-  have hm : (m : ℂ) * ω ∈ Λ := by simpa using Λ.nsmul_mem hω m
-  have h2 : 2 * (m : ℂ) * ω ∈ Λ := by
-    have := Λ.add_mem hm hm
-    convert this using 1
-    ring
-  have h3 : 2 * (m : ℂ) * ω / 2 ∈ Λ := by
-    convert hm using 1
-    ring
-  refine translate_add_of_fixed hA.ne' _ x _ (2 * k) (fun z => ?_) ?_
-  · rw [(GlobalTheory.OddTheta.sgStar_laws Λ hΛ).1.2.2.2 _ h2 z, if_pos h3, one_mul]
-  · have e : (starRingEnd ℂ) (2 * (m : ℂ) * ω) * x =
-        ((4 : ℝ) : ℂ) * ((starRingEnd ℂ) ω * ((m : ℂ) * (x / 2))) := by
-      simp only [map_mul, map_ofNat, map_natCast]
-      push_cast
-      ring
-    rw [e, Complex.im_ofReal_mul, hk]
-    push_cast
-    ring
-
-theorem transInv_all : ∀ D : D7, transInv D := fun D cc δ hc x ω m _ hx hω =>
-  translate_sigma_star_period (GlobalTheory.CurveLattice.lattice_of_curve D (GlobalTheory.InducedType.induced_type D).1 cc δ hc).1 x ω m hx hω
 
 end GlobalTheory.TransInv

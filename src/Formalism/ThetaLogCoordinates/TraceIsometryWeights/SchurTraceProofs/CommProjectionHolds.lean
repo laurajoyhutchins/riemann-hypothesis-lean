@@ -1,5 +1,49 @@
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.WeightCompApply
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementC
+module
+
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementC
+public import Formalism.MahlerMeasure.MahlerMeasureProofs.WeightSpaceDimensionMonotone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.PW
 
@@ -21,11 +65,12 @@ theorem hwc_le_isoC (LL : Letters N) (j : ℕ) (Cs : Finset (Fin r)) (la : Fin r
 
 theorem coeff_glAct_diag (LL : Letters N) (j : ℕ) (c : Fin r) (x : MvPolynomial (Fin N × Fin r) ℚ_[p])
     (m : Fin N × Fin r →₀ ℕ) :
-    coeff m (glAct p LL j c c x) = ((wt LL j c m : ℤ) : ℚ_[p]) * coeff m x := by
+    AddMonoidAlgebra.coeff (glAct p LL j c c x) m = ((wt LL j c m : ℤ) : ℚ_[p]) * AddMonoidAlgebra.coeff x m := by
   classical
   conv_lhs => rw [x.as_sum]
+
   rw [map_sum, coeff_sum]
-  simp only [glAct_diag_monomial, coeff_smul, coeff_monomial, smul_eq_mul]
+  simp only [glAct_diag_monomial, MvPolynomial.coeff_smul, coeff_monomial, smul_eq_mul]
   rw [Finset.sum_eq_single m]
   · rw [if_pos rfl]
   · intro b _ hb
@@ -40,15 +85,15 @@ theorem wtSpC_iff_eig (LL : Letters N) (j : ℕ) (Cs : Finset (Fin r)) (la : Fin
   constructor
   · intro h c hc
     ext m
-    rw [coeff_glAct_diag, coeff_smul, smul_eq_mul]
-    by_cases hm : coeff m x = 0
+    rw [coeff_glAct_diag, MvPolynomial.coeff_smul, smul_eq_mul]
+    by_cases hm : AddMonoidAlgebra.coeff x m = 0
     · rw [hm, mul_zero, mul_zero]
     · have := h (Finset.mem_coe.mpr (mem_support_iff.mpr hm)) c hc
       rw [this]
   · intro h m hm c hc
-    have hm' : coeff m x ≠ 0 := mem_support_iff.mp (Finset.mem_coe.mp hm)
-    have e := congrArg (coeff m) (h c hc)
-    rw [coeff_glAct_diag, coeff_smul, smul_eq_mul] at e
+    have hm' : AddMonoidAlgebra.coeff x m ≠ 0 := mem_support_iff.mp (Finset.mem_coe.mp hm)
+    have e := congrArg (AddMonoidAlgebra.coeff · m) (h c hc)
+    rw [coeff_glAct_diag, MvPolynomial.coeff_smul, smul_eq_mul] at e
     have := mul_right_cancel₀ hm' e
     exact_mod_cast this
 

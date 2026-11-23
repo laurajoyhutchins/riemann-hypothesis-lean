@@ -1,9 +1,60 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsInt
-import Formalism.LocalToGlobal.InertKernelTheory.DefsIntTens
-import Formalism.LocalToGlobal.GlobalTheory.GL3.ThirdClauseIntegralCombination
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.KerJet
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsInt
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsIntTens
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.ThirdClauseIntegralCombination
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementKer
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.KerJet
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.GlobalTheory.GL3.IntegralityIffAwayAtD
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,8 +95,6 @@ theorem entB_smulE (I : Fin n') (J : Fin n) (x : D.host.E) (A : Matrix (Fin N') 
 theorem sglB_smulE (I : Fin n') (J : Fin n) (x : D.host.E) (A : Matrix (Fin m') (Fin m) D.host.E) :
     sglB (D := D) eR eC I J (x • A) = x • sglB eR eC I J A := by
   ext a c; simp only [sglB_apply, Matrix.smul_apply, smul_eq_mul]; split_ifs <;> simp
-
-theorem one_mem_zero : (0 : D.host.E) ∈ (1 : Submodule (𝓞 D.host.E) D.host.E) := Submodule.zero_mem _
 
 theorem entB_homL (I : Fin n') (J : Fin n) (A : Matrix (Fin N') (Fin N) D.host.E)
     (hA : A ∈ homL D (Formalism.MainNotions.StandardLatticesGL3.stdL D N) (Formalism.MainNotions.StandardLatticesGL3.stdL D N')) :
@@ -249,6 +298,7 @@ theorem linInd_bB {r : ℕ} (b : Fin r → Matrix (Fin m') (Fin m) D.host.E) (hb
   intro g hg q
   obtain ⟨⟨⟨I, J⟩, k⟩, rfl⟩ := (eIdx n' n r).surjective q
   have h1 := congrArg (entB (D := D) eR eC I J) hg
+
   rw [map_sum, map_zero] at h1
   simp_rw [entB_Ksmul] at h1
   have h2 : ∑ k, g (eIdx n' n r ((I, J), k)) • b k =
@@ -414,7 +464,7 @@ variable {p : ℕ} [Fact p.Prime] (lam : Qbar →+* ℂ_[p]) (Λ : AddSubgroup �
 
 theorem lamC_zero : lamC lam 0 = 0 := by
   unfold lamC
-  rw [dif_pos (zero_mem _)]
+  rw [dite_eq_left (zero_mem _)]
   exact map_zero lam
 
 def idxK (r : ℕ) (I : Fin n') (J : Fin n) (k : Fin r) : Fin (n' * n * r) := eIdx n' n r ((I, J), k)
@@ -424,6 +474,7 @@ theorem atLogA_blk {r : ℕ} (b : Fin r → Matrix (Fin m') (Fin m) D.host.E) (I
     atLogA lam Λ C wq (bB (D := D) eR eC b) (blkIdx D eR eC I J k) =
       MvPowerSeries.rename (idxK r I J) (atLogA lam Λ C wq b k) := by
   classical
+
   simp only [atLogA, map_sum, map_mul, AlgHom.commutes]
   rw [← (eIdx n' n r).sum_comp, Fintype.sum_prod_type, Finset.sum_eq_single (I, J)]
   · refine Finset.sum_congr rfl fun k' _ => ?_
@@ -590,7 +641,7 @@ theorem pSer_blk (hTB : TaylorProductOverBlocks) (G : Fin n' → Fin n → VC D 
     intro I J; ext β
     show lamC lam (taylor D (G I J) β) = lam (TQ I J β)
     unfold lamC
-    rw [dif_pos ((hG I J).2 β)]
+    rw [dite_eq_left ((hG I J).2 β)]
   ext α
   change lamC lam (MvPowerSeries.coeff α (taylorSer D (fun z => ∏ I, ∏ J, G I J (blkPt D eR eC I J z)))) = _
   rw [hT]

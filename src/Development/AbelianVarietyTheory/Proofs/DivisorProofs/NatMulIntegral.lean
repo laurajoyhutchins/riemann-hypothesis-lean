@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatSmulMem
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.CoordinateBasisBounds
 
@@ -39,7 +86,7 @@ theorem coord_bound {E : Type} [Field E] [NumberField E] {n : ℕ}
     intro i
     obtain ⟨a, ha⟩ := hx i
     obtain ⟨b, hb⟩ := hy i
-    exact ⟨a + b, by rw [map_add, ← ha, ← hb, Pi.add_apply]; ring⟩
+    exact ⟨a + b, by rw [map_add (f := _), ← ha, ← hb, Pi.add_apply]; ring⟩
   | smul c x _ hx =>
     intro i
     obtain ⟨a, ha⟩ := hx i
@@ -50,27 +97,7 @@ theorem basis_bound {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L : Submodule (𝓞 E) (Fin n → E))
     (hspan : Submodule.span E (L : Set (Fin n → E)) = ⊤) (y : Fin n → E) :
     ∃ d : ℕ, 0 < d ∧ (d : E) • y ∈ L := by
-  have hy : y ∈ Submodule.span E (L : Set (Fin n → E)) := by rw [hspan]; trivial
-  induction hy using Submodule.span_induction with
-  | mem v hv => exact ⟨1, one_pos, by simpa using hv⟩
-  | zero => exact ⟨1, one_pos, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨a, ha, hax⟩ := hx
-    obtain ⟨b, hb, hby⟩ := hy
-    refine ⟨a * b, Nat.mul_pos ha hb, ?_⟩
-    have e : ((a * b : ℕ) : E) • (x + y) = b • ((a : E) • x) + a • ((b : E) • y) := by
-      rw [← Nat.cast_smul_eq_nsmul E, ← Nat.cast_smul_eq_nsmul E, smul_smul, smul_smul, smul_add]
-      push_cast; ring_nf
-    rw [e]
-    exact L.add_mem (nsmul_mem hax b) (nsmul_mem hby a)
-  | smul c x _ hx =>
-    obtain ⟨d, hd, hdx⟩ := hx
-    obtain ⟨m, hm, o, ho⟩ := nat_mul_integral c
-    refine ⟨m * d, Nat.mul_pos hm hd, ?_⟩
-    have e : ((m * d : ℕ) : E) • (c • x) = o • ((d : E) • x) := by
-      rw [← algebraMap_smul E o, ← ho, smul_smul, smul_smul]; push_cast; ring_nf
-    rw [e]
-    exact L.smul_mem o hdx
+  apply GlobalTheory.PrincLat.exists_nat_smul_mem <;> assumption
 
 theorem main : ∀ {E : Type} [inst : Field E] [NumberField E] {n : ℕ} (L : Submodule (NumberField.RingOfIntegers E) (Fin n → E)), Submodule.FG L → Submodule.span E (↑L : Set (Fin n → E)) = ⊤ → ∃ (N : ℕ), (0 : ℕ) < N ∧ (∀ (j : Fin n), (↑N : E) • Pi.single j (1 : E) ∈ L) ∧ ∀ x ∈ L, ∀ (i : Fin n), ∃ (o : NumberField.RingOfIntegers E), (↑N : E) * x i = (Algebra.algebraMap (NumberField.RingOfIntegers E) E : NumberField.RingOfIntegers E → E) o := by
   intro E _ _ n L hL hspan

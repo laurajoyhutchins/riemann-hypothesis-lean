@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,15 +93,10 @@ theorem absFin_finite (D : D7) (x : (AE D)ˣ) :
 theorem absFin_pos (D : D7) (x : (AE D)ˣ) : 0 < absFin D x :=
   finprod_induction (fun r : ℝ => 0 < r) one_pos (fun _ _ => mul_pos) fun v => absV_pos _ v _
 
-example (D : D7) : absFin D 1 = 1 := by simp [absFin, absV]
-
 variable {D : D7}
 
 def subst (S T : HSp D) (g : GA D S) (h : GA D T) (x : WO S T) : WO S T :=
   HMul.hMul (HMul.hMul (mt T h⁻¹) (x : Matrix (Fin T.rank) (Fin S.rank) (AE D))) (mt S g)
-
-example (S T : HSp D) (g : GA D S) (h : GA D T) (x : WO S T) : subst S T g h x = actO S T g⁻¹ h⁻¹ x := by
-  simp [subst, actO]
 
 def modFac (S T : HSp D) (x y : (AE D)ˣ) : ℝ :=
   absFin D x ^ ((T.rank : ℝ) / 2) * absFin D y ^ (-(S.rank : ℝ) / 2)

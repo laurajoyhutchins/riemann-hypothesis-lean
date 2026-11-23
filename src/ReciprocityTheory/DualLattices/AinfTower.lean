@@ -1,5 +1,54 @@
-import ReciprocityTheory.DualLattices.AinfFacts
-import ReciprocityTheory.DualLattices.ThmAFull
+module
+
+public import ReciprocityTheory.DualLattices.AinfFacts
+public import ReciprocityTheory.DualLattices.ATowerInh
+public import ReciprocityTheory.DualLattices.NsetExpInjectiveSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,7 +143,7 @@ lemma ker_pi (n : ℕ) : RingHom.ker (piRing p O hv ε hε n) = span {xiR p O ε
     rw [Ideal.mem_span_singleton']
     refine ⟨Ideal.Quotient.mk _ (Ideal.Quotient.mk _ c), ?_⟩
     rw [ha]
-    simp only [xiR, map_add, map_mul, map_pow, map_natCast, hpR', mul_zero, add_zero]
+    simp only [xiR, map_add (f := _), map_mul, map_pow, map_natCast, hpR', mul_zero, add_zero]
   · rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker, xiR, piRing_mk,
       theta_xi p O hv ε hε, map_zero]
 
@@ -113,7 +162,7 @@ lemma R'n_local (n : ℕ) : IsLocalRing (R'n p O ε n) := by
     obtain ⟨u, hu⟩ := ha.exists_right_inv
     obtain ⟨u', rfl⟩ := piRing_surj p O hv ε hε n u
     have hk : a * u' - 1 ∈ RingHom.ker (piRing p O hv ε hε n) := by
-      rw [RingHom.mem_ker, map_sub, map_mul, hu, map_one, sub_self]
+      rw [RingHom.mem_ker, RingHom.map_sub, map_mul, hu, map_one, sub_self]
     rw [ker_pi, Ideal.mem_span_singleton'] at hk
     obtain ⟨k, hk⟩ := hk
     have h1 : a * u' = 1 + k * xiR p O ε n := by rw [hk]; ring
@@ -122,7 +171,8 @@ lemma R'n_local (n : ℕ) : IsLocalRing (R'n p O ε n) := by
     exact isUnit_of_mul_isUnit_left h2
   refine IsLocalRing.of_isUnit_or_isUnit_one_sub_self (fun a => ?_)
   have h : piRing p O hv ε hε n a + piRing p O hv ε hε n (1 - a) = 1 := by
-    rw [← map_add, add_sub_cancel, map_one]
+    change (piRing p O hv ε hε n) a + (piRing p O hv ε hε n) (1 - a) = 1
+    rw [← (piRing p O hv ε hε n).map_add, add_sub_cancel, (piRing p O hv ε hε n).map_one]
   rcases IsLocalRing.isUnit_or_isUnit_of_add_one h with h | h
   · exact Or.inl (key a h)
   · exact Or.inr (key _ h)
@@ -158,7 +208,7 @@ lemma ann' (n : ℕ) (a : R'n p O ε n) (ha : a * xiR p O ε n = 0) :
   rw [sub_eq_zero] at h5
   rw [h5, Ideal.mem_span_singleton']
   refine ⟨-(Ideal.Quotient.mk _ (Ideal.Quotient.mk _ c)), ?_⟩
-  simp only [xiR, map_sub, map_mul, map_pow, map_natCast, hpR', mul_zero, zero_sub, neg_mul]
+  simp only [xiR, RingHom.map_sub, map_mul, map_pow, map_natCast, hpR', mul_zero, zero_sub, neg_mul]
 
 def zv (n : ℕ) : R'n p O ε n :=
   Ideal.Quotient.mk _ (Ideal.Quotient.mk _ (teichmuller p (root p O ε (n + 1))))
@@ -168,7 +218,7 @@ def nuR (n : ℕ) : R'n p O ε n := Ideal.Quotient.mk _ (Ideal.Quotient.mk _ (nu
 lemma zv_pow (n : ℕ) :
     zv p O ε n ^ p ^ (n + 1) = 1 + nuR p O ε n * xiR p O ε n := by
   unfold zv nuR xiR
-  rw [← map_pow, ← map_pow, ← map_pow, root_pow, teich_eps p O hv ε hε, map_add, map_add, map_one,
+  rw [← map_pow, ← map_pow, ← map_pow, root_pow, teich_eps p O hv ε hε, map_add (f := _), map_add (f := _), map_one,
     map_one, map_mul, map_mul]
 
 lemma zv_unit (n : ℕ) : IsUnit (zv p O ε n) := by
@@ -183,7 +233,7 @@ lemma zeta_unit (n : ℕ) : IsUnit (zetaV p O ε n) := by
   have hne : p ^ (n + 1) ≠ 0 := pow_ne_zero _ hp.out.ne_zero
   have h : zetaV p O ε n ^ p ^ (n + 1) = 1 := by
     unfold zetaV
-    rw [← map_pow, ← map_pow, root_pow, teich_eps p O hv ε hε, map_add, map_one, map_mul,
+    rw [← map_pow, ← map_pow, root_pow, teich_eps p O hv ε hε, map_add (f := _), map_one, map_mul,
       theta_xi p O hv ε hε, mul_zero, add_zero]
   refine IsUnit.of_mul_eq_one (zetaV p O ε n ^ (p ^ (n + 1) - 1)) ?_
   rw [← pow_succ', Nat.sub_add_cancel (Nat.one_le_iff_ne_zero.2 hne), h]
@@ -222,16 +272,9 @@ def ainfTower : ATower (R0 p O ε) p where
   ζ n := (zeta_unit p O hv ε hε n).unit
   ζ_spec n := by rw [IsUnit.unit_spec, IsUnit.unit_spec]; rfl
 
-theorem ainfTower_c_ne_zero : (ainfTower p O hv ε hε).c ≠ 0 := by
-  exact theta_nu p O hv ε hε
-
 theorem ainfTower_isDomain : IsDomain ((ainfTower p O hv ε hε).O : Type) := by
   show IsDomain O
   exact Function.Injective.isDomain (algebraMap O C) hv.hom_inj
-
-theorem thmA_ainf (B : BX (R0 p O ε)) (hB1 : PairingPropertiesStatement B) (hB3 : TangentPairingStatement B) :
-    ThmAFullStatement B (ainfTower p O hv ε hε) := by
-  exact thmAFull B hB1 hB3 _
 
 end Ainf
 

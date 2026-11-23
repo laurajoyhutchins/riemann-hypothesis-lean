@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.ProfiniteInteger
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.ProfiniteInteger
+public import Mathlib.Topology.Algebra.OpenSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.GroupWithZero.Action
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -21,12 +69,6 @@ theorem mem_fixedModule {H : Subgroup G} {a : A} :
 
 theorem fixedModule_anti {H H' : Subgroup G} (h : H ≤ H') : fixedModule A H' ≤ fixedModule A H :=
   fun _ ha g hg => ha g (h hg)
-
-theorem coe_fixedModule (H : Subgroup G) :
-    (fixedModule A H : Set A) = MulAction.fixedPoints H A := by
-  ext a
-  simp only [SetLike.mem_coe, mem_fixedModule, MulAction.mem_fixedPoints, Subtype.forall,
-    Subgroup.mk_smul]
 
 theorem smul_mem_fixedModule {H : Subgroup G} {a : A} (ha : a ∈ fixedModule A H) (g : G) :
     g • a ∈ fixedModule A (H.map (MulAut.conj g).toMonoidHom) := by
@@ -54,10 +96,6 @@ theorem isDiscreteModule_iff [ContinuousMul G] :
     refine ⟨fun a => ?_⟩
     obtain ⟨U, hU⟩ := h a
     exact Subgroup.isOpen_mono (H₁ := (U : Subgroup G)) (fun g hg => hU g hg) U.isOpen
-
-theorem exists_openSubgroup_mem_fixedModule [IsDiscreteModule G A] (a : A) :
-    ∃ U : OpenSubgroup G, a ∈ fixedModule A (U : Subgroup G) :=
-  ⟨⟨MulAction.stabilizer G a, IsDiscreteModule.isOpen_stabilizer a⟩, fun _ hg => hg⟩
 
 end Discrete
 
@@ -166,18 +204,11 @@ abbrev tateNegOne : Type _ :=
 
 variable {A K L}
 
-theorem augmentation_le_map_ker (hLK : L ≤ K) [(L.subgroupOf K).Normal] :
-    augmentation A K L ≤ (norm A K L).ker.map (fixedModule A L).subtype := by
-  rw [augmentation, Subgroup.closure_le]
-  rintro _ ⟨g, hg, a, ha, rfl⟩
-  have hga := smul_mem_fixedModule_of_normal hLK hg ha
-  refine ⟨⟨g • a, hga⟩ / ⟨a, ha⟩, ?_, rfl⟩
-  rw [SetLike.mem_coe, MonoidHom.mem_ker, map_div, div_eq_one]
-  exact norm_smul ⟨g, hg⟩ ⟨a, ha⟩ hga
-
 end Norm
 
 section Data
+
+open scoped GroundTheory.LocalField.Abstract
 
 instance finiteIndex_openSubgroup {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
     [CompactSpace G] (U : OpenSubgroup G) : (U : Subgroup G).FiniteIndex :=

@@ -1,18 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadingsExistRow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormEqMulInner
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HolShapeOfOverK
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPureTensorO
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjFormsRescale
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilDatumUniqueOnThetaFunctions
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralMulConjSelf
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HolomorphicLowestType
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsNormaliseMeanSquareOfCocompact
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.PureTensorLIntertwine
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormEqMulInner
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralMulConjSelf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPureTensorO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilDatumUniqueOnThetaFunctions
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryRealPointsActFockSubstitution
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqTopOfTranslates
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.VacuumUniqueAll
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCharFamIsVacVec
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemClosureUnitary
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsFockVacAtOfIsThetaAt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryRealPointsActFockSubstitution
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.VacuumUniqueAll
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OmPureTensorOOfFinite
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplit
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsNormaliseMeanSquareOfCocompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilGramSignature
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReadingsExistRow
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,16 +82,16 @@ open Matrix Formalism.MainNotions.S
 variable {D : D7} {ψ : AddChar (AF D.host.F) ℂ} {θ : InfFam D} {V W : HSp D} {χV χW : (AE D)ˣ →* Circle}
   {ω : GA D V × GA D W →* Module.End ℂ (WO V W → ℂ)} {S : D.what₂.Tau → SPar} {M : DSModel W S}
 
-variable (ψ V W) in
 
+variable (ψ V W) in
 def thetaSub : Submodule ℂ (WO V W → ℂ) where
   carrier := {g | IsThetaFunO ψ V W g}
   add_mem' := GlobalTheory.OrientedHeis.theta_add
   zero_mem' := GlobalTheory.OrientedHeis.theta_zero
   smul_mem' c _ := GlobalTheory.OrientedHeis.theta_smul c
 
-variable (ω) in
 
+variable (ω) in
 structure IsInvForm (b : thetaSub ψ V W →ₗ⋆[ℂ] thetaSub ψ V W →ₗ[ℂ] ℂ) : Prop where
   symm : ∀ x y, b y x = conj (b x y)
   pos : ∀ x, 0 ≤ (b x x).re
@@ -64,7 +114,7 @@ theorem exists_invForm (hω : IsWeilDatumO ψ V W χV χW ω) :
   refine ⟨LinearMap.mk₂'ₛₗ (starRingEnd ℂ) (RingHom.id ℂ) (fun x y => ∫ w in 𝓕, y.1 w * conj (x.1 w) ∂μ)
     (fun x x' y => ?_) (fun a x y => ?_) (fun x y y' => ?_) (fun a x y => ?_),
     fun x y => ?_, fun x => ?_, fun x h0 => ?_, fun p x y x' y' hx hy => ?_⟩
-  · simp only [Submodule.coe_add, Pi.add_apply, map_add, mul_add]
+  · simp only [Submodule.coe_add, Pi.add_apply, map_add (f := _), mul_add]
     exact integral_add (hI y x) (hI y x')
   · simp only [Submodule.coe_smul, Pi.smul_apply, smul_eq_mul, map_mul, mul_left_comm _ (conj a)]
     exact integral_const_mul _ _
@@ -121,9 +171,9 @@ theorem exists_kop (h1 : LowSm M) (h2 : GlobalTheory.IndefiniteRowSideFullHecke.
   have : u = g ⟨k, hk⟩ v := Subtype.ext (Subtype.ext hu)
   exact this ▸ hU _ v hv
 
+
 open Classical in
 variable (θ ω) in
-
 def Eqv {c : CoefA V} (F : LowT M →ₗ[ℂ] c.W →ₗ[ℂ] thetaSub ψ V W) : Prop :=
   (∀ u ∈ GinfC V, ∀ x w, (F x (c.ρ u w)).1 = ω (u, 1) (F x w).1) ∧
   ∀ τ, ∀ k ∈ Formalism.REAL.Kset (M.ε τ), ∀ (v : ∀ ρ, lowT M ρ) (u : lowT M τ),
@@ -300,8 +350,9 @@ theorem exists_isometry {K X ι : Type} [Field K] [AddCommGroup X] [Module K X] 
   refine ⟨Φ, h1, fun x => ?_, fun h x => ?_⟩
   · have : ⟪Φ x, Φ x⟫_ℂ = ⟪x, x⟫_ℂ := by
       rw [← b1.sum_repr x]
+
       simp only [b1, Module.Basis.mk_apply, map_sum, map_smul, hb, sum_inner, inner_sum, inner_smul_left,
-        inner_smul_right, hp]
+      inner_smul_right, hp]
     rw [@norm_eq_sqrt_re_inner ℂ, this, ← @norm_eq_sqrt_re_inner ℂ]
   · have hrat : ∀ γ ∈ GQ V, Φ (c.ρ γ x) = c'.ρ γ (Φ x) := fun γ hγ => by
       obtain ⟨r, r1, r2⟩ := hr γ hγ

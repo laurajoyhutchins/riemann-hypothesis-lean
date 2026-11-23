@@ -1,9 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.GeoDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HomogeneousIntegralExpression
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EvalZeroOfMemHomogeneousIdeal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HomogeneousIdealComponentMem
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TorusMonomialEvalCompat
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.GeoDefs
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.SeamDefs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EvalZeroOfMemHomogeneousIdeal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HomogeneousIdealComponentMem
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HomogeneousIntegralExpression
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TorusMonomialEvalCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry ReciprocityTheory.ChartRestriction.G.Geo.Tor CrystallineSemistableComparison.Pb
 attribute [local instance] MvPolynomial.gradedAlgebra
@@ -39,7 +85,8 @@ theorem away_relation {K : Type} [Field K] {N : ℕ} {g : MvPolynomial (Fin (N +
   simp only [HomogeneousLocalization.val_add, HomogeneousLocalization.val_pow,
     HomogeneousLocalization.val_mul, val_sum, away_val_mk]
   rw [hFe]
-  simp only [map_add, map_sum, map_mul, map_pow, add_mul, Finset.sum_mul]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [map_add (f := _), map_sum, map_mul, map_pow, add_mul, Finset.sum_mul]
   congr 1
   · rw [mul_pow, ← pow_mul, mul_comm s r]
   · refine Finset.sum_congr rfl fun l hl => ?_
@@ -79,16 +126,16 @@ theorem isIntegral_torusS : ∀ {K : Type} [Field K] {X : Scheme.{0}} {N d e : �
     have hf0 : f.IsHomogeneous 0 := by
       have := (MvPolynomial.mem_homogeneousSubmodule _ _).1 hf
       simpa [hS0] using this
-    have hfC : f = MvPolynomial.C (MvPolynomial.coeff 0 f) :=
+    have hfC : f = MvPolynomial.C (AddMonoidAlgebra.coeff f 0) :=
       MvPolynomial.totalDegree_eq_zero_iff_eq_C.1 (Nat.le_zero.1 hf0.totalDegree_le)
-    have hc : (MvPolynomial.C (MvPolynomial.coeff 0 f) : MvPolynomial (Fin (d + 1)) K).IsHomogeneous (r * S.card) := by
+    have hc : (MvPolynomial.C (AddMonoidAlgebra.coeff f 0) : MvPolynomial (Fin (d + 1)) K).IsHomogeneous (r * S.card) := by
       rw [hS0, Nat.mul_zero]
       exact MvPolynomial.isHomogeneous_C _ _
     have hmem := GlobalTheory.CompanionTheory.GeoTorus.aeval_mem_torusS i y hy hV he q hq S hS ht _ hc
-    have hfe : MvPolynomial.aeval y (MvPolynomial.C (MvPolynomial.coeff 0 f) : MvPolynomial (Fin (d + 1)) K) = f := by
+    have hfe : MvPolynomial.aeval y (MvPolynomial.C (AddMonoidAlgebra.coeff f 0) : MvPolynomial (Fin (d + 1)) K) = f := by
       rw [MvPolynomial.aeval_C]
       exact hfC.symm
-    have heq : HomogeneousLocalization.Away.mk (grK K N) hg r (MvPolynomial.aeval y (MvPolynomial.C (MvPolynomial.coeff 0 f) : MvPolynomial (Fin (d + 1)) K)) (aeval_mem y hy S _ hc) = HomogeneousLocalization.Away.mk (grK K N) hg r f hf := by
+    have heq : HomogeneousLocalization.Away.mk (grK K N) hg r (MvPolynomial.aeval y (MvPolynomial.C (AddMonoidAlgebra.coeff f 0) : MvPolynomial (Fin (d + 1)) K)) (aeval_mem y hy S _ hc) = HomogeneousLocalization.Away.mk (grK K N) hg r f hf := by
       simp only [hfe]
     rw [heq] at hmem
     exact isIntegral_algebraMap (R := torusS K (fun k => (ht k).unit) S) (x := ⟨_, hmem⟩)
@@ -107,7 +154,8 @@ theorem isIntegral_torusS : ∀ {K : Type} [Field K] {X : Scheme.{0}} {N d e : �
     have hid := away_relation hg r s f hf (fun l => MvPolynomial.aeval y (c l)) hcm _ hF rfl
     have hzero := GlobalTheory.CompanionTheory.GeoVanish.homIdeal_vanish i hD hg hF hrel V hS
     rw [← hid] at hzero
-    rw [map_add, map_sum] at hzero
+
+    rw [map_add (f := _), map_sum] at hzero
     simp only [map_mul, map_pow] at hzero
     have hco := fun l => GlobalTheory.CompanionTheory.GeoTorus.aeval_mem_torusS i y hy hV he q hq S hS ht (c l) (hc' l)
     refine ⟨Polynomial.X ^ s + ∑ l ∈ Finset.range s,
@@ -119,7 +167,7 @@ theorem isIntegral_torusS : ∀ {K : Type} [Field K] {X : Scheme.{0}} {N d e : �
       refine (Polynomial.degree_C_mul_X_pow_le l _).trans_lt ?_
       exact_mod_cast Finset.mem_range.1 hl
     · simp only [Polynomial.eval₂_add, Polynomial.eval₂_pow, Polynomial.eval₂_X,
-        Polynomial.eval₂_finset_sum, Polynomial.eval₂_mul, Polynomial.eval₂_C]
+        Polynomial.eval₂_finsetSum, Polynomial.eval₂_mul, Polynomial.eval₂_C]
       exact hzero
 
 end GlobalTheory.CompanionTheory.GeoInteg

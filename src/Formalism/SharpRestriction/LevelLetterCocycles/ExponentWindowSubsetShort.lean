@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
-import Formalism.DistinguishedUnitIdeals.FinalArcProps
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
+public import Formalism.DistinguishedUnitIdeals.FinalArcProps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,11 +96,6 @@ def cutsOf {n j : ℕ} {ty : ZMod n → LT} {cuts : Finset (ZMod n)} {arcLen : Z
     {arcLen : ZMod n → ℕ} (h : CutsOK n j ty cuts arcLen) : (cutsOf h).ell = arcLen := rfl
 
 theorem parM_eq_Mpar (l g h : ℕ) : Formalism.ExponentWindows.E.parM l h g = Mpar l g h := rfl
-
-theorem parA_eq_initialExponentBound (l n : ℕ) [NeZero n] (j g h : ℕ) (H₁ H₂ : ZMod n → ℕ)
-    (cuts : Finset (ZMod n)) (arcLen : ZMod n → ℕ) :
-    Formalism.ExponentWindows.E.parA (sigPar l g h j) (rrPar l n H₁ H₂ cuts) g (ellMax cuts arcLen) =
-      initialExponentBound l n j g h H₁ H₂ cuts arcLen := rfl
 
 theorem parE_eq_ePar (l n : ℕ) [NeZero n] (j g h : ℕ) (H₁ H₂ : ZMod n → ℕ)
     (cuts : Finset (ZMod n)) (arcLen : ZMod n → ℕ) :
@@ -301,23 +339,25 @@ theorem finalNum_of (l : ℕ) (hl : 3 ≤ l) (n : ℕ) [NeZero n] (j Gp S η h :
     (hW : WordOK l (initialExponentBound l n j (gPar Gp S η) h H₁ H₂ cuts arcLen) ty cuts arcLen) :
     Formalism.ExponentWindows.E.FinalNum l (cutsOf hC) (kdOf ty) (bbOf ty) j (gPar Gp S η) Gp S η h
       (sigPar l (gPar Gp S η) h j) (rrPar l n H₁ H₂ cuts)
-      (kapPar l (gPar Gp S η) h (ellMax cuts arcLen)) (ellMax cuts arcLen) where
-  G_le_g := G_le_gPar _ _ _
-  S_le_g := S_le_gPar _ _ _
-  η_le_g := η_le_gPar _ _ _
-  g_le_h := hgh
-  g_lt_b := fun i hi => (size_of_sizesOK hS i hi).1
-  b_le_h := fun i hi => (size_of_sizesOK hS i hi).2
-  one_le_j := hC.2.1
-  thin_after := fun c hc k h1 h2 => kdOf_thin.2 (hC.2.2.2.2 c hc k h1 h2)
-  j_le_ell := fun c hc => hC.2.2.2.1 c hc
-  ell_le := fun c hc => Finset.le_sup (f := arcLen) hc
-  word := fun c hc => textWord_of l _ hT hW c hc
-  sigOK := sigOK_of l _ h j hl
-  kapOK := fun c hc => by
-    obtain ⟨t₀, t₁, ht⟩ := two_thick (hT c hc)
-    exact kapOK_arc l (gPar Gp S η) Gp S η h (arcLen c) (ellMax cuts arcLen) (G_le_gPar _ _ _)
-      (S_le_gPar _ _ _) (η_le_gPar _ _ _) hgh _ _
-      (fun s hs => (size_of_sizesOK hS _ hs).2) (Finset.le_sup (f := arcLen) hc) t₀ t₁ ht
+      (kapPar l (gPar Gp S η) h (ellMax cuts arcLen)) (ellMax cuts arcLen) := by
+  refine
+    { G_le_g := G_le_gPar _ _ _
+      S_le_g := S_le_gPar _ _ _
+      η_le_g := η_le_gPar _ _ _
+      g_le_h := hgh
+      g_lt_b := fun i hi => (size_of_sizesOK hS i hi).1
+      b_le_h := fun i hi => (size_of_sizesOK hS i hi).2
+      one_le_j := hC.2.1
+      thin_after := fun c hc k h1 h2 => kdOf_thin.2 (hC.2.2.2.2 c hc k h1 h2)
+      j_le_ell := fun c hc => hC.2.2.2.1 c hc
+      ell_le := fun c hc => Finset.le_sup (f := arcLen) hc
+      word := fun c hc => textWord_of l _ hT hW c hc
+      sigOK := sigOK_of l _ h j hl
+      kapOK := ?_ }
+  intro c hc
+  obtain ⟨t₀, t₁, ht⟩ := two_thick (hT c hc)
+  exact kapOK_arc l (gPar Gp S η) Gp S η h (arcLen c) (ellMax cuts arcLen) (G_le_gPar _ _ _)
+    (S_le_gPar _ _ _) (η_le_gPar _ _ _) hgh _ _
+    (fun s hs => (size_of_sizesOK hS _ hs).2) (Finset.le_sup (f := arcLen) hc) t₀ t₁ ht
 
 end Formalism.MainNotions.WachCoordinates

@@ -1,13 +1,61 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsIrreducibleOfJhMultEqOne
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LanglandsClassificationCuspidalSupport
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LanglandsDistinctCuspidalPairEmbedding
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsIrreducibleOfClsGLEqSingle
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.TotallyDisjointProductIrreducible
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ZelevinskyGrothendieckPolynomialRingOfSegments
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.TotallyDisjointProductIrreducible
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.GrothendieckRingPolynomial
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.SegmentRepresentation
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ParabolicProductEquivProductOfPartitionStatement
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParIndJacPlacing
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ZelevinskyGrothendieckPolynomialRingOfSegments
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.HasSupportOfIsSubquotientProdIrr
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsIrreducibleOfClsGLEqSingle
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsIrreducibleOfJhMultEqOne
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LanglandsClassificationCuspidalSupport
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LanglandsDistinctCuspidalPairEmbedding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,12 +64,12 @@ namespace GlobalTheory.CompanionTheory.Hypotheses₂.TDZ
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.LocGL GlobalTheory.Published GlobalTheory.LocGL.SupportUnique GlobalTheory.SplitRead GlobalTheory.JHMult
 open GlobalTheory.CompanionTheory.Hypotheses₂.TD
 
-set_option synthInstance.maxHeartbeats 400000
+
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem commute_pair (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
-    (hZ : ZelevinskyPolynomialRing) (g : Fin 2 → IrrGL k) (h0 : (g 0).IsCusp) (h1 : (g 1).IsCusp)
+    (hZ : ZelevinskyPolynomialRing) (g : Fin 2 → IrrGL (k := k)) (h0 : (g 0).IsCusp) (h1 : (g 1).IsCusp)
     (hU : ∀ j : ℤ, |j| ≤ 1 → g 0 ≠ (g 1).nu (j : ℂ)) {n : Type} [Fintype n] [DecidableEq n]
     (f : (Σ i, Fin (g i).1) ≃ n) (f' : (Σ i, Fin (g (Equiv.swap 0 1 i)).1) ≃ n) :
     Nonempty ((multiProd f fun i => (g i).rep).Equiv (multiProd f' fun i => (g (Equiv.swap 0 1 i)).rep)) := by
@@ -49,7 +97,7 @@ theorem commute_pair (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
 
 theorem occurs (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
     (hZ : ZelevinskyPolynomialRing) {d : Fin 2 → ℕ}
-    (p : ∀ i, Irr k (d i)) {A : Fin 2 → Multiset (IrrGL k)} (hA : ∀ i, HasSupport (p i).π (A i))
+    (p : ∀ i, Irr k (d i)) {A : Fin 2 → Multiset (IrrGL (k := k))} (hA : ∀ i, HasSupport (p i).π (A i))
     (hAB : ∀ x ∈ A 0, x ∉ A 1) (hU : ∀ x ∈ A 0, ∀ y ∈ A 1, ∀ j : ℤ, |j| ≤ 1 → x ≠ y.nu (j : ℂ))
     (e : (Σ i, Fin (d i)) ≃ Fin (d 0 + d 1)) (Q : Irr k (d 0 + d 1))
     (hQ : IsSubquotient Q.π (multiProd e fun i => (p i).π)) :
@@ -88,7 +136,7 @@ theorem occurs (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
       rfl
     rw [h, hm, Multiset.filter_add, Multiset.filter_eq_self.2 (fun x hx => hAB x hx),
       Multiset.filter_eq_nil.2 (fun x hx h => h hx), add_zero]
-  have deg : ∀ (T : Finset (Fin s)) (C : Multiset (IrrGL k)), T.val.map u = C →
+  have deg : ∀ (T : Finset (Fin s)) (C : Multiset (IrrGL (k := k))), T.val.map u = C →
       ∑ a : Fin T.card, (u (T.orderEmbOfFin rfl a)).1 = (C.map Sigma.fst).sum := by
     intro T C h
     rw [← h, ← map_orderEmb T u, Multiset.map_map]
@@ -106,7 +154,7 @@ theorem occurs (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
   obtain ⟨Φ⟩ := GlobalTheory.T.parabolicProduct_equiv_product_of_partition k s (fun a => (u a).1) σ S (d 0) (d 1) e₃ e₁ e₂
     (fun a b ha hb n _ _ f f' => commute_pair hG hBZ hZ (fun i => u (![a, b] i)) (hc a) (hc b)
       (hU _ (mem0 a ha) _ (mem1 b hb)) f f')
-  have hsupp : ∀ (T : Finset (Fin s)) (C : Multiset (IrrGL k)), T.val.map u = C → ∀ (n : ℕ)
+  have hsupp : ∀ (T : Finset (Fin s)) (C : Multiset (IrrGL (k := k))), T.val.map u = C → ∀ (n : ℕ)
       (f : (Σ a : Fin T.card, Fin (u (T.orderEmbOfFin rfl a)).1) ≃ Fin n)
       (y : IrrRep (GL (Fin n) k)), IsSubquotient y.ρ (multiProd f fun a => (σ (T.orderEmbOfFin rfl a)).π) →
       HasSupport y.ρ C := by
@@ -121,7 +169,7 @@ theorem occurs (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
 
 theorem isIrreducible_prod₂ (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFiniteness)
     (hZ : ZelevinskyPolynomialRing) {r t : ℕ} (π₁ : Irr k r) (π₂ : Irr k t)
-    {A₀ A₁ : Multiset (IrrGL k)} (H₁ : HasSupport π₁.π A₀) (H₂ : HasSupport π₂.π A₁)
+    {A₀ A₁ : Multiset (IrrGL (k := k))} (H₁ : HasSupport π₁.π A₀) (H₂ : HasSupport π₂.π A₁)
     (hU : ∀ x ∈ A₀, ∀ y ∈ A₁, ∀ j : ℤ, |j| ≤ 1 → x ≠ y.nu (j : ℂ)) :
     (prod₂ π₁.π π₂.π).IsIrreducible := by
   have hAB : ∀ x ∈ A₀, x ∉ A₁ := fun x hx hx' => hU x hx x hx' 0 (by simp) (by simp)
@@ -129,7 +177,7 @@ theorem isIrreducible_prod₂ (hG : GeometricLemma) (hBZ : BernsteinZelevinskyFi
   let p : ∀ i, Irr k (dd i) := fun i =>
     Fin.cases (motive := fun i => Irr k (dd i)) π₁
       (fun j => Fin.cases (motive := fun j : Fin 1 => Irr k (dd j.succ)) π₂ (fun l => l.elim0) j) i
-  let A : Fin 2 → Multiset (IrrGL k) := ![A₀, A₁]
+  let A : Fin 2 → Multiset (IrrGL (k := k)) := ![A₀, A₁]
   have hA : ∀ i, HasSupport (p i).π (A i) := by
     intro i
     fin_cases i

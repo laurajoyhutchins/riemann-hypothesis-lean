@@ -1,4 +1,47 @@
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.SimpleDistinctness.ScalarCharacterOfL2Embedding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +99,7 @@ theorem cj_E {X Y : GMod n} (e : X.V ≃ₗ[ℂ] Y.V) (he : ∀ a b x, e (X.E a 
 theorem cj_Tm {X Y : GMod n} (e : X.V ≃ₗ[ℂ] Y.V) (he : ∀ a b x, e (X.E a b x) = Y.E a b (e x)) (u : ℂ)
     (a b : Fin n) : cj e (Tm X.E u a b) = Tm Y.E u a b := by
   unfold Formalism.REAL.Tm
-  rw [map_add, cj_E e he]
+  rw [map_add (f := _), cj_E e he]
   split_ifs
   · rw [cj_algebraMap]
   · rw [map_zero]
@@ -64,6 +107,7 @@ theorem cj_Tm {X Y : GMod n} (e : X.V ≃ₗ[ℂ] Y.V) (he : ∀ a b x, e (X.E a
 theorem cj_qdet {X Y : GMod n} (e : X.V ≃ₗ[ℂ] Y.V) (he : ∀ a b x, e (X.E a b x) = Y.E a b (e x)) (u : ℂ) :
     cj e (qdet X.E u) = qdet Y.E u := by
   unfold Formalism.REAL.qdet Formalism.REAL.qminor
+
   simp only [map_sum, map_mul, map_intCast, map_list_prod, List.map_ofFn, Function.comp_def, cj_Tm e he]
 
 theorem scalChar_of_iso {X Y : GMod n} (h : Iso X Y) (χ : Fin n → ℂ) (hX : ScalChar X χ) : ScalChar Y χ := by

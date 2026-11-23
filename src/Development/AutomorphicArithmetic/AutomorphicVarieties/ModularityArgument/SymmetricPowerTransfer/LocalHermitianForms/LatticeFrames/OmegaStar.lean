@@ -1,5 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LatticeFrames.LatticeHomothetyOfEqUnimodular
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LatticeFrames.ExistsPsi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Finiteness.Prod
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,8 +63,8 @@ open QuadraticAlgebra
 
 variable {O K : Type} [CommRing O] [Field K] [Algebra O K] {Δ τ : K}
 
-variable (Δ) in
 
+variable (Δ) in
 def mkL (σ : K) : (K × Etau K τ) × (K × Etau K τ) →ₗ[K] Sp Δ τ where
   toFun p := (⟨p.1.1, σ * p.2.1⟩, ⟨⟨p.1.2.re, σ * p.2.2.re⟩, ⟨p.1.2.im, σ * p.2.2.im⟩⟩)
   map_add' a b := by ext <;> simp <;> ring
@@ -41,8 +95,8 @@ theorem mul_mkL (σ : K) (u : Etau K τ) (v w : K × Etau K τ) :
     (((mkL Δ σ (v, w)).1, ofE Δ u * (mkL Δ σ (v, w)).2) : Sp Δ τ) = mkL Δ σ (Mu u v, Mu u w) := by
   ext <;> simp [mkL_apply, Mu, ofE] <;> ring
 
-variable (Δ) in
 
+variable (Δ) in
 def up (σ : K) (S : Set (K × Etau K τ)) : Set (Sp Δ τ) := {x | ∃ v ∈ S, ∃ w ∈ S, x = mkL Δ σ (v, w)}
 
 theorem mem_up {σ : K} (hσ : σ ≠ 0) {S : Set (K × Etau K τ)} {v w : K × Etau K τ} : mkL Δ σ (v, w) ∈ up Δ σ S ↔ v ∈ S ∧ w ∈ S := by
@@ -73,7 +127,7 @@ theorem poly_mem {W : Type} [AddCommGroup W] [Module K W] [Module O W] [IsScalar
   obtain ⟨u2, hu2⟩ := h2
   have e1 : (algebraMap O K ↑u)⁻¹ = algebraMap O K ↑u⁻¹ := (map_units_inv (algebraMap O K) u).symm
   have e2 : (algebraMap O K ↑u * (2 + algebraMap O K ↑u))⁻¹ = algebraMap O K ↑(u * u2)⁻¹ := by
-    rw [map_units_inv, Units.val_mul, map_mul, hu2, map_add, map_ofNat]
+    rw [map_units_inv, Units.val_mul, map_mul, hu2, map_add (f := _), map_ofNat]
   have e3 : algebraMap O K ↑u ^ 2 - 2 = algebraMap O K (↑u ^ 2 - 2) := by
     rw [map_sub, map_pow, map_ofNat]
   rw [e1, e2, e3, algebraMap_smul, algebraMap_smul, algebraMap_smul]
@@ -293,7 +347,7 @@ theorem fix_down (L : IsLoc O Δ) (hσ : Δ * σ ^ 2 = algebraMap O K ε) (h1 : 
           algebraMap O K ↑h2u⁻¹ • ((Mu U a, Mu U b) + (Mu U a, -Mu U b)) := by
         rw [Prod.mk_add_mk, add_neg_cancel, ← two_smul K (Mu U a), Prod.smul_mk, smul_smul, hK, one_smul,
           smul_zero]
-      rw [e, map_smul, map_add, algebraMap_smul]
+      rw [e, map_smul, map_add (f := _), algebraMap_smul]
       exact M.smul_mem _ (M.add_mem hAx hφx)
     · have e : ((0, -Mu U b) : (K × Etau K τ) × (K × Etau K τ)) =
           algebraMap O K ↑h2u⁻¹ • ((Mu U a, -Mu U b) - (Mu U a, Mu U b)) := by
@@ -388,7 +442,7 @@ theorem fix_down (L : IsLoc O Δ) (hσ : Δ * σ ^ 2 = algebraMap O K ε) (h1 : 
       have hv' : mkL Δ σ (v, 0) ∈ M := hv
       have hw' : mkL Δ σ (w, 0) ∈ M := hw
       have key := M.add_mem hv' (hswap2 w hw')
-      rw [← map_add, Prod.mk_add_mk, add_zero, zero_add] at key
+      rw [← map_add (f := _), Prod.mk_add_mk, add_zero, zero_add] at key
       exact key
 
 end UpperTheory.V.Z.Sym.Loc.CP

@@ -1,6 +1,57 @@
-import Formalism.LocalToGlobal.CharacterGerms.ChartHypothesisOfCharacters
-import Formalism.LocalToGlobal.CharacterGerms.UncurryLogConstantCoeff
-import Formalism.LocalToGlobal.CharacterGerms.SelfConjugateRowData
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.MfactMulCoeffMvExpLinF
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieChar
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
+public import Formalism.DropLevelBounds.ConstantCoeffVanishing.UbintConstantCoeffEqZero
+public import Formalism.LocalToGlobal.CharacterGerms.AbstractGermZeroCondition
+public import Formalism.LocalToGlobal.CharacterGerms.ChartHypothesisOfCharacters
+public import Formalism.LocalToGlobal.CharacterGerms.ConstantCoeffPderivUncurry
+import Formalism.LocalToGlobal.CharacterGerms.ConstantCoeffSinglePointZero
+public import Formalism.LocalToGlobal.CharacterGerms.IntSProd
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+import Formalism.LocalToGlobal.CharacterGerms.SubstSubst
+public import Formalism.LocalToGlobal.CharacterGerms.UncurryLogConstantCoeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Formalism.LocalToGlobal.CharacterGerms.GeneralGermZero
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -27,16 +78,6 @@ def CharGermSelfSt : Prop :=
       (∀ g, (S g).IsT (t g)) →
       upG (I := fun _ => I0) g (mvExp (∑ x : I0, p.yOf g χ x • (MvPowerSeries.X x : MvPowerSeries I0 C))) ∈ IntGerm V t
 
-def CHCharSelfSt (Y : FBChart C V O dd) (p : SelfData Y d I0) : Prop :=
-  ∀ g a, p.big g a → ∀ w : Fin p.n → I0 → C, IsSat V w → (∀ c x, (Y.rawSelf p).ty g x ≠ a → w c x = 0) →
-    ∃ χ : Fin p.n → Fin 2 → PS C 1 dd, (∀ ρ col, Y.IsChar (χ ρ col)) ∧
-      ((Y.rawSelf p).AltC →
-        V.v (Matrix.of fun ρ c : Fin p.n => ∑ x, p.yOf g (χ ρ) x * w c x).det ≤
-          (((p.n : ℝ) * gam V.l + ((p.j : ℝ) + p.j') / ((V.l : ℝ) - 1) : ℝ) : WithTop ℝ)) ∧
-      ((∀ a, p.big g a) →
-        V.v (Matrix.of fun ρ c : Fin p.n => ∑ x, p.yOf g (χ ρ) x * w c x).det ≤
-          ((((p.j : ℝ) + p.j') / ((V.l : ℝ) - 1) : ℝ) : WithTop ℝ))
-
 namespace ChG
 
 open VP
@@ -46,9 +87,11 @@ theorem subst_linU_linF {ι : Type} [Fintype ι] (U : ι → Fin dd → C) (y : 
       ∑ x : ι, (∑ i, y i * U x i) • (MvPowerSeries.X x : MvPowerSeries ι C) := by
   have ha : MvPowerSeries.HasSubst (fun i => ∑ c, U c i • (MvPowerSeries.X c : MvPowerSeries ι C)) :=
     VP.hs (fun i => by
+
       rw [map_sum]
       refine Finset.sum_eq_zero fun c _ => ?_
       rw [MvPowerSeries.smul_eq_C_mul, map_mul, MvPowerSeries.constantCoeff_X, mul_zero])
+
   rw [linF, ← MvPowerSeries.coe_substAlgHom ha, map_sum]
   simp only [map_smul, MvPowerSeries.coe_substAlgHom, MvPowerSeries.subst_X ha]
   simp only [Finset.smul_sum, smul_smul, Finset.sum_smul]
@@ -56,6 +99,7 @@ theorem subst_linU_linF {ι : Type} [Fintype ι] (U : ι → Fin dd → C) (y : 
 
 theorem cc_linU {ι κ : Type} [Fintype ι] (U : ι → κ → C) (i : κ) :
     MvPowerSeries.constantCoeff (∑ c, U c i • (MvPowerSeries.X c : MvPowerSeries ι C)) = 0 := by
+
   rw [map_sum]
   refine Finset.sum_eq_zero fun c _ => ?_
   rw [MvPowerSeries.smul_eq_C_mul, map_mul, MvPowerSeries.constantCoeff_X, mul_zero]
@@ -126,14 +170,6 @@ open Formalism.L2.Pj NumberField ReciprocityTheory.ChartRestriction.G Reciprocit
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 variable (Xo : Moduli Dw l) (c : Coeff l) [StarRing (𝓞 E)]
-
-def CharacterHypothesisSelfConjugate : Prop :=
-  (∀ a : 𝓞 E, star a = H.bar a) →
-  ∀ (T : CDVR) (io : c.F →+* T.Fr) (y : IntFr Xo c T io) (C3 : IntChart T io y)
-    (C : Type) [Field C] [CharZero C] (V : VF C) (ι : T.Fr →+* C), EmbOK T V ι →
-    ∀ (k : ℕ) (Y : FBChart C V (𝓞 E) (chD C3.ch)), IsBC C3 ι k Y →
-    ∀ (Orb : Type) (d : ℕ) [NeZero d] (lab : LabS E C Orb d) (ha : LabSArith V io ι lab) (hg : LabSGeo C3 ι Y lab),
-    lab.RankOK Dw → ∀ o, CHCharSelfSt Y (selfOfLab ha hg o)
 
 end Chart
 

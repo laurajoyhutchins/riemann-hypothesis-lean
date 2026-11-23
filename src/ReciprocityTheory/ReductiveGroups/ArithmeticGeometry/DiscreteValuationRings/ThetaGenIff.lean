@@ -1,4 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenFam
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenGeneric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenDiv
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenLevel
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenTerms
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenThick
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.WeightIndep
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option linter.overlappingInstances false
@@ -76,48 +127,6 @@ theorem integral_exp [IsDiscreteValuationRing R] (hI : I = maximalIdeal R) (U : 
     rw [h1, _root_.one_mul]
     exact e2
   exact ⟨F, g', hF0, hexp', hgF⟩
-
-theorem nonzero_of_isTheta [IsDiscreteValuationRing R] (hI : I = maximalIdeal R) (U : Unif I D A G)
-    {ϑ : H0 U.LG.L 1} (hϑ : IsTheta U ϑ) : NonzeroOnSpecial U ϑ := by
-  subst hI
-  classical
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible R
-  have := flat_B (D := D)
-  obtain ⟨f, hexp, hgen⟩ := hϑ 0
-  by_contra hnz
-  have hvan : ∀ j, ((fstG (maximalIdeal R) 0 G).left.app _).hom (ϑ.f j) = 0 := fun j => by
-    by_contra h
-    exact hnz ⟨j, h⟩
-  have hpG := ReciprocityTheory.ChartRestriction.G.Out.WeightPf.weightIndep R (maximalIdeal R) D A G U.toUnifPre 0 1 ϑ f hvan hexp
-  have hB : ∀ j, (pullback.fst D.toPre.P.A.hom (thick R (maximalIdeal R) 0)).app _ ((f 0).f j) = 0 := by
-    intro j
-    have := (U.gt 0).q_flat
-    have := (U.gt 0).q_surj
-    apply app_injective_of_flat_surj (U.gt 0).q.left
-    rw [map_zero]
-    have h := hpG 0 j
-    have e : (U.gt 0).pG.left = (U.gt 0).q.left ≫ pullback.fst D.toPre.P.A.hom (thick R (maximalIdeal R) 0) := rfl
-    rw [e, Scheme.Hom.comp_app] at h
-    exact h
-  obtain ⟨g0, hg0⟩ := sec_div D.toPre.P.A.hom (f 0) hϖ.ne_zero (J := maximalIdeal R ^ (0 + 1))
-    (by rw [zero_add, pow_one, (IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ).1 hϖ]) hB
-  obtain ⟨a, ha, -⟩ := hgen g0
-  have hf0 : ∀ j, (f 0).f j = 0 := by
-    intro j
-    have h1 : toW D.toPre.P.A.hom _ (1 - ϖ * a) * (f 0).f j = 0 := by
-      rw [map_sub, map_one, map_mul, sub_mul, _root_.one_mul, _root_.mul_assoc]
-      have := ha j
-      rw [resTop_scal] at this
-      rw [← this, ← hg0 j, sub_self]
-    refine toW_mul_eq_zero D.toPre.P.A.hom _ ?_ h1
-    intro h
-    apply hϖ.not_isUnit
-    have h' : ϖ * a = 1 := by linear_combination -h
-    exact ⟨⟨ϖ, a, h', by rw [mul_comm]; exact h'⟩, rfl⟩
-  obtain ⟨b, -, hb⟩ := hgen (f 0)
-  have e1 := hb 1 fun j => by rw [hf0 j, mul_zero]
-  have e0 := hb 0 fun j => by rw [hf0 j, mul_zero]
-  exact one_ne_zero (e1.trans e0.symm)
 
 end Integral
 

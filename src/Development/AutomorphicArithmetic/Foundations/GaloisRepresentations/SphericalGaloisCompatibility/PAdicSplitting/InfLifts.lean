@@ -1,6 +1,43 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalGaloisCompatibility.PAdicSplitting.LocalGlobalCompatAtIwahoriFixedPlaces
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.SuppBCOfMix
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CharpolyFromTrace.GoodLiftAlt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalGaloisCompatibility.PAdicSplitting.LocalGlobalCompatAtIwahoriFixedPlaces
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RestrictsSelf
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.NumberField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,17 +52,17 @@ def MixedOf : Prop :=
   ∀ (E Ω : Type) [Field E] [NumberField E] [IsCMField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (n : ℕ) (π : CuspSub E n)
     (w : HeightOneSpectrum (𝓞 E)) (σ : SmIrr (GL (Fin n) (w.adicCompletion E))), π.IsLocComp w σ →
     fixed σ.ρ (KOne (w.adicCompletion E) (Fin n)) ≠ ⊥ → Apart (algNorm σ) →
-    ∀ (A : ValuationSubring Ω) (h : IsPlaceOver A w) (rc : IrrGL (w.adicCompletion E) → WD h), UpperTheory.Zero.LLC.IsRecT h rc →
+    ∀ (A : ValuationSubring Ω) (h : IsPlaceOver A w) (rc : IrrGL (k := w.adicCompletion E) → WD h), UpperTheory.Zero.LLC.IsRecT h rc →
       (rc (algNorm σ)).mono0 → UpperTheory.Gal.InertialTypesAlt.Mixed (IrrGL.of σ.ρ σ.smooth σ.irred)
 
 def InfStep : Prop :=
-  ∀ (K M : Type) [Field K] [NumberField K] [Field M] [NumberField M] [Algebra K M] [IsGalois K M] [IsTotallyComplex K]
-    [IsTotallyComplex M], (Module.finrank K M).Prime → ∀ n : ℕ, 0 < n → ∀ (π : CuspSub K n) (P : CuspSub M n),
+  ∀ (K M : Type) [Field K] [NumberField K] [Field M] [NumberField M] [Algebra K M] [IsGalois K M] [_root_.NumberField.IsTotallyComplex K]
+    [_root_.NumberField.IsTotallyComplex M], (Module.finrank K M).Prime → ∀ n : ℕ, 0 < n → ∀ (π : CuspSub K n) (P : CuspSub M n),
     UpperTheory.V.Published.WeakBC (UpperTheory.CBC.Cusp.cx π).sat (UpperTheory.CBC.Cusp.cx P).sat →
     ∀ τ : M →+* ℂ, (CG.mk P).infChar τ = (CG.mk π).infChar (τ.comp (algebraMap K M))
 
 def InfLifts : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [IsTotallyComplex E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (n : ℕ), 0 < n →
+  ∀ (E Ω : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (n : ℕ), 0 < n →
     ∀ (π : CuspSub E n) (Y : UpperTheory.Gal.InertialTypesAlt.Pt E Ω n), UpperTheory.Gal.InertialTypesAlt.Lifts (UpperTheory.Gal.InertialTypesAlt.Pt.base Ω π) Y →
     ∀ τ : Y.K →+* ℂ, (CG.mk Y.π).infChar τ = (CG.mk π).infChar (τ.comp (algebraMap E Y.K))
 
@@ -34,7 +71,7 @@ def RecChars : Prop :=
     (u : HeightOneSpectrum (𝓞 M)) (h : IsPlaceOver A u) (n : ℕ) (T : SmIrr (GL (Fin n) (u.adicCompletion M)))
     (ξ : Fin n → ((u.adicCompletion M)ˣ →* ℂˣ)) (hξ : ∀ j, IsSmoothChar (ξ j)), HasSupport T.ρ (chars ξ hξ) →
     (GlobalTheory.RoadU.Unlinked (chars ξ hξ) → PlainTor (algNorm T)) ∧
-    ∀ rc : IrrGL (u.adicCompletion M) → WD h, UpperTheory.Zero.LLC.IsRecT h rc → ∀ a, IsLocalArtin h a → ∀ t : Ine (F := M) A,
+    ∀ rc : IrrGL (k := u.adicCompletion M) → WD h, UpperTheory.Zero.LLC.IsRecT h rc → ∀ a, IsLocalArtin h a → ∀ t : Ine (F := M) A,
       (rc (algNorm T)).charPol (ineIncl h t) = ∏ j, (X - C ((ξ j (a (ineIncl h t)) : ℂˣ) : ℂ))
 
 def ToTor : Prop :=
@@ -43,9 +80,9 @@ def ToTor : Prop :=
     InScope .all l π χ → ∀ r : G E Ω →* GL (Fin n) (Qbar l), Weak π ι r →
     ∀ (w : HeightOneSpectrum (𝓞 E)) (σ : SmIrr (GL (Fin n) (w.adicCompletion E))), π.IsLocComp w σ → IsQg w →
       UpperTheory.Gal.InertialTypesAlt.Mixed (IrrGL.of σ.ρ σ.smooth σ.irred) →
-    ∀ (A : ValuationSubring Ω) (h : IsPlaceOver A w) (rc : IrrGL (w.adicCompletion E) → WD h), UpperTheory.Zero.LLC.IsRecT h rc →
+    ∀ (A : ValuationSubring Ω) (h : IsPlaceOver A w) (rc : IrrGL (k := w.adicCompletion E) → WD h), UpperTheory.Zero.LLC.IsRecT h rc →
     ∃ (X : UpperTheory.Gal.UnramifiedFromSplittingCriterion.Fld E Ω) (P : CuspSub X.K n) (χ' : HChar (maximalRealSubfield X.K)) (u : HeightOneSpectrum (𝓞 X.K))
-      (h' : IsPlaceOver A u) (T : SmIrr (GL (Fin n) (u.adicCompletion X.K))) (rc' : IrrGL (u.adicCompletion X.K) → WD h'),
+      (h' : IsPlaceOver A u) (T : SmIrr (GL (Fin n) (u.adicCompletion X.K))) (rc' : IrrGL (k := u.adicCompletion X.K) → WD h'),
       InScope .all l P χ' ∧ Weak P ι (resTo X.K r) ∧
       (∀ τ : X.K →+* ℂ, (CG.mk P).infChar τ = (CG.mk π).infChar (τ.comp (algebraMap E X.K))) ∧
       P.IsLocComp u T ∧ PlainTor (algNorm T) ∧ UpperTheory.Zero.LLC.IsRecT h' rc' ∧

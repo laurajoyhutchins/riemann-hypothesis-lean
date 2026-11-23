@@ -1,4 +1,46 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafTubeCut
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafTubeCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -13,7 +55,7 @@ theorem prd_sub_C_mem {σ R : Type} [CommRing R] (p : MvPolynomial σ R) :
   | add p r hp hr =>
     have e : p + r - MvPolynomial.C (MvPolynomial.constantCoeff (p + r)) =
         (p - MvPolynomial.C (MvPolynomial.constantCoeff p)) + (r - MvPolynomial.C (MvPolynomial.constantCoeff r)) := by
-      simp only [map_add]; ring
+      simp only [map_add (f := _)]; ring
     rw [e]; exact Ideal.add_mem _ hp hr
   | mul_X p i _ =>
     have e : p * MvPolynomial.X i - MvPolynomial.C (MvPolynomial.constantCoeff (p * MvPolynomial.X i)) =
@@ -32,7 +74,8 @@ theorem prd_nbhd_psi {d : ℕ} {A B : Type} [CommRing A] [CommRing B] (I : Ideal
       (Ideal.span (Set.range (MvPolynomial.X : Fin d → MvPolynomial (Fin d) (A ⧸ I)))).map ψ := by
     intro a; rw [hQ, ← neg_sub]; exact (Ideal.neg_mem_iff _).2 (hl a)
   constructor
-  · rw [injective_iff_map_eq_zero]
+  · set_option synthInstance.maxHeartbeats 200000 in
+      rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
     obtain ⟨a, ha⟩ := Ideal.Quotient.mk_surjective (MvPolynomial.constantCoeff p)

@@ -1,7 +1,64 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.AdjointMemSp4
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.NearSplit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisCochains.GLinkQuot
+module
+
+public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.Topology.Instances.ZMod
+public import ReciprocityTheory.Hypotheses.GalCohDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RedIdeal
+import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ZsmulGeneratorEqZeroOfProjection
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws
 
@@ -32,7 +89,7 @@ private theorem sep {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGrou
       (IsLocallyConstant.iff_continuous _).2 QuotientGroup.continuous_mk
     exact this.comp (fun y => c (Additive.ofMul y))
   · intro x y
-    simp only [QuotientGroup.mk_mul, ofMul_mul, map_add]
+    simp only [QuotientGroup.mk_mul, ofMul_mul, map_add (f := _)]
   · intro x hx
     have : (x : G ⧸ N) = 1 := (QuotientGroup.eq_one_iff x).2 (hKN hx)
     simp only [this, ofMul_one, map_zero]
@@ -134,7 +191,8 @@ private theorem core {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGro
   haveI : IsClosed (C : Set G) := hC
   let K : Subgroup G := (Subgroup.zpowers (s : G ⧸ C)).comap (QuotientGroup.mk' C)
   have hKc : IsClosed (K : Set G) := by
-    have : IsClosed (Subgroup.zpowers (s : G ⧸ C) : Set (G ⧸ C)) := (finite_zpowers.2 hfo).isClosed
+    haveI : Finite (Subgroup.zpowers (s : G ⧸ C)) := finite_zpowers.2 hfo
+    have : IsClosed (Subgroup.zpowers (s : G ⧸ C) : Set (G ⧸ C)) := Set.toFinite _ |>.isClosed
     exact this.preimage QuotientGroup.continuous_mk
   have hCK : C ≤ K := fun x hx => by
     show (x : G ⧸ C) ∈ Subgroup.zpowers (s : G ⧸ C)

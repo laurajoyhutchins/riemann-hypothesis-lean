@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteSupport
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryQuotient
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockPolynomialsLocallyFiniteRationalWeights
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockQuadraticActionMapLieBracket
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteSupport
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockPolynomialsLocallyFiniteRationalWeights
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockQuadraticActionMapLieBracket
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH
 open scoped TensorProduct InnerProductSpace Classical Kronecker
@@ -47,7 +85,7 @@ def sumMod (M : GKMod p q) (Y : Type) : GKMod p q where
       obtain ⟨W', hW', hg, hK'⟩ := hg
       refine ⟨W ⊔ W', inferInstance, Submodule.add_mem_sup hf hg, fun X hX w hw => ?_⟩
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hw
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (hK X hX a ha) (hK' X hX b hb)
     | single y x =>
       obtain ⟨W, hW, hx, hK⟩ := M.kfin x
@@ -100,11 +138,11 @@ theorem exists_unitary_image (M : GKMod p q) (Y Z : Type) [AddCommGroup Y] [Modu
     intro X x x'
     induction x using Finsupp.induction_linear with
     | zero => simp
-    | add f g hf hg => simp only [map_add, inner_add_left, hf, hg]
+    | add f g hf hg => simp only [map_add (f := _), inner_add_left, hf, hg]
     | single y P =>
       induction x' using Finsupp.induction_linear with
       | zero => simp
-      | add f g hf hg => simp only [map_add, inner_add_right, hf, hg]
+      | add f g hf hg => simp only [map_add (f := _), inner_add_right, hf, hg]
       | single y' P' => simp only [sumAct_single, hE1, hB]
   obtain ⟨A, f, j, hf, hj, hjf, hact⟩ :=
     GlobalTheory.GKQuot.exists_unitary_quotient p q (sumMod M Y) Z E hE
@@ -112,9 +150,9 @@ theorem exists_unitary_image (M : GKMod p q) (Y Z : Type) [AddCommGroup Y] [Modu
   have hjg : ∀ y P, j (g (Finsupp.single y P)) = B P y := fun y P => (hjf _).trans (hE1 y P)
   let B' : M.V →ₗ[ℂ] Y →ₛₗ[starRingEnd ℂ] A.M.V :=
     LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun P y => g (Finsupp.single y P))
-      (fun P P' y => by rw [Finsupp.single_add, map_add])
+      (fun P P' y => by rw [Finsupp.single_add, map_add (f := _)])
       (fun c P y => by rw [← Finsupp.smul_single, map_smul, RingHom.id_apply])
-      (fun P y y' => hj (by rw [map_add, hjg, hjg, hjg, map_add]))
+      (fun P y y' => hj (by rw [map_add (f := _), hjg, hjg, hjg, map_add (f := _)]))
       (fun c P y => hj (by rw [map_smul, hjg, hjg, map_smulₛₗ]))
   have hB' : ∀ P y, B' P y = g (Finsupp.single y P) := fun _ _ => rfl
   refine ⟨A, j, B', hj, fun P y => hjg y P, ?_, fun X P y => ?_⟩
@@ -123,7 +161,7 @@ theorem exists_unitary_image (M : GKMod p q) (Y Z : Type) [AddCommGroup Y] [Modu
     obtain ⟨v, rfl⟩ : ∃ v, g v = x := hf x
     induction v using Finsupp.induction_linear with
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add a b ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+    | add a b ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
     | single y P => exact Submodule.subset_span ⟨P, y, rfl⟩
   · rw [hB', hB', ← sumAct_single]
     exact hact X _

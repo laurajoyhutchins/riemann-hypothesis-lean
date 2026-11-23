@@ -1,17 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundarySymmCocycleModStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiffCoeffsInIdealSubstOfConstantCoeffZeroStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEqSmulProdChooseStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffEdgesMemOfCoboundaryTwoCoeffsInIdealStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoboundaryDegreePartCocycleModIdealStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffCob1HomogLiftBinomialStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSubstMapToFractionsMemSubmoduleStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSubstEqZeroOfDegreeLtStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundaryTwoCoboundaryOneFractionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SwapVariableGroupsFormalGroupLawCoboundaryOneComStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundarySwapSubRulesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSumElimPowerSeriesSwapVariableGroupsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoboundaryDegreePartCocycleModIdealStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffCob1HomogLiftBinomialStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffEdgesMemOfCoboundaryTwoCoeffsInIdealStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSubstEqZeroOfDegreeLtStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSubstMapToFractionsMemSubmoduleStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffSumElimPowerSeriesSwapVariableGroupsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiffCoeffsInIdealSubstOfConstantCoeffZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEqSmulProdChooseStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundarySwapSubRulesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundarySymmCocycleModStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundaryTwoCoboundaryOneFractionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SwapVariableGroupsFormalGroupLawCoboundaryOneComStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
 set_option autoImplicit false
@@ -29,7 +77,7 @@ def V (p : ℕ) (J : Ideal B) : Submodule B Q where
     rintro q₁ q₂ ⟨k₁, b₁, hb₁, h₁⟩ ⟨k₂, b₂, hb₂, h₂⟩
     refine ⟨k₁ + k₂, (p : B) ^ k₂ * b₁ + (p : B) ^ k₁ * b₂,
       J.add_mem (J.mul_mem_left _ hb₁) (J.mul_mem_left _ hb₂), ?_⟩
-    simp only [map_add, map_mul, map_pow, map_natCast, ← h₁, ← h₂]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast, ← h₁, ← h₂]
     ring
   smul_mem' := by
     rintro b q ⟨k, b₁, hb₁, h₁⟩
@@ -44,14 +92,6 @@ theorem mem_NS {N : Ideal B} {q : Q} : q ∈ (NS N : Submodule B Q) ↔ ∃ b �
   constructor
   · rintro ⟨b, hb, rfl⟩; exact ⟨b, hb, rfl⟩
   · rintro ⟨b, hb, rfl⟩; exact ⟨b, hb, rfl⟩
-
-theorem mem_V {p : ℕ} {J : Ideal B} {q : Q} :
-    q ∈ (V p J : Submodule B Q) ↔ ∃ k : ℕ, ∃ b ∈ J, (p : Q) ^ k * q = algebraMap B Q b := Iff.rfl
-
-theorem NS_le_V (p : ℕ) {N J : Ideal B} (h : N ≤ J) : (NS N : Submodule B Q) ≤ V p J := by
-  intro q hq
-  obtain ⟨b, hb, rfl⟩ := mem_NS.1 hq
-  exact ⟨0, b, h hb, by simp⟩
 
 theorem in_iff {σ : Type} {N : Ideal B} {f : MvPowerSeries σ Q} :
     In N f ↔ ∀ α, coeff α f ∈ (NS N : Submodule B Q) := by
@@ -450,6 +490,7 @@ theorem GlobalTheory.symmetric_cocycle_is_coboundary_mod : ∀ (p : ℕ) [Fact p
     intro k α hk
     rw [hg]
     show _ = coeff α (∑ j ∈ Finset.range k, piece j)
+
     rw [map_sum]
     refine Finset.sum_subset (Finset.range_mono hk) fun j _ hj => hpz j α (Or.inr ?_)
     rw [Finset.mem_range, not_lt] at hj

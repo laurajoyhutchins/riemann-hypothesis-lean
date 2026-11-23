@@ -1,4 +1,49 @@
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OneSubEwMem
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OneSubEwMem
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LevelSubgroupCharacterUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ConcreteLevelAdelicSubset
+import Formalism.LocalToGlobal.IndefiniteReal.AutomorphicEvaluation
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowLevelMatch
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowsJoinPinned
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.IndefR.Mult Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.AutomorphicEvaluation Formalism.L2.DIV Formalism.L2.SG.RowDict Formalism.L2.SG.RowsJoinPinned Formalism.L2.SG.RowLevelMatch Formalism.L2.SG.HidaSetting Formalism.L2.SG.PoincareInHH.PoincareSetting Formalism.L2.SG.ConcreteSettingExists MeasureTheory NumberField IsDedekindDomain GlobalTheory.Mem GlobalTheory.Mem.SRe
 open scoped TensorProduct Matrix
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -17,13 +62,13 @@ theorem hA_bwd_symVec : ∀ (D : D7) (X : HidaSetting D) (w : HeightOneSpectrum 
   unfold GlobalTheory.Mem.SymFrame.symVec GlobalTheory.SeeConjRead.flagV
   rw [he]
   by_cases h1 : j.1 < D.R.rS
-  · rw [dif_pos h1, if_neg (by rw [hp]; omega), sub_zero]
+  · rw [dite_eq_left h1, if_neg (by rw [hp]; omega), sub_zero]
     apply hZ
     rw [Formalism.L2.SG.Pf.unitaryCongruence.hA_symm]
     exact Formalism.L2.SG.Pf.unitaryCongruence.Z_sig X.B.I X.B.g ((X.weightVectorsIntegral i).2.2 _).2.2.1
-  rw [dif_neg h1]
+  rw [dite_eq_right h1]
   by_cases h2 : j.1 < D.R.rS + D.R.k
-  · rw [dif_pos h2]
+  · rw [dite_eq_left h2]
     have hd := X.bw_dual i ⟨j.1 - D.R.rS, by omega⟩
     by_cases hl : j.1 = D.R.rS + i.1
     · rw [if_pos (hp.2 hl)]
@@ -34,19 +79,19 @@ theorem hA_bwd_symVec : ∀ (D : D7) (X : HidaSetting D) (w : HeightOneSpectrum 
     · rw [if_neg (fun h => hl (hp.1 h))]
       rw [if_neg (fun h => hl (by have := congrArg Fin.val h; simp only at this; omega))] at hd
       simpa using hZ hd
-  rw [dif_neg h2]
+  rw [dite_eq_right h2]
   by_cases h4 : j.1 = D.R.rS + D.R.k
-  · rw [dif_pos h4, if_neg (by rw [hp]; omega), sub_zero]
+  · rw [dite_eq_left h4, if_neg (by rw [hp]; omega), sub_zero]
     apply hZ
     rw [Formalism.L2.SG.Pf.unitaryCongruence.hA_symm]
     exact Formalism.L2.SG.Pf.unitaryCongruence.Z_sig X.B.I X.B.g (X.weightVectorsIntegral i).2.1
-  rw [dif_neg h4]
+  rw [dite_eq_right h4]
   by_cases h3 : j.1 < 2 * D.R.rS + D.R.k + 1
-  · rw [dif_pos h3, if_neg (by rw [hp]; omega), sub_zero]
+  · rw [dite_eq_left h3, if_neg (by rw [hp]; omega), sub_zero]
     apply hZ
     rw [Formalism.L2.SG.Pf.unitaryCongruence.hA_symm]
     exact Formalism.L2.SG.Pf.unitaryCongruence.Z_sig X.B.I X.B.g ((X.weightVectorsIntegral i).2.2 _).2.2.2
-  · rw [dif_neg h3, if_neg (by rw [hp]; omega), sub_zero, hA_zero_right']
+  · rw [dite_eq_right h3, if_neg (by rw [hp]; omega), sub_zero, hA_zero_right']
     exact zero_mem _
 
 end GlobalTheory.Mem.SymChar.Resid

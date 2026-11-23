@@ -1,5 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PointHeight
+public import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+public import Mathlib.Algebra.MvPolynomial.Nilpotent
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -9,6 +60,7 @@ private theorem totalDegree_aeval_le_of_totalDegree_le_one {K : Type} [Field K] 
     (hL : ∀ i, (L i).totalDegree ≤ 1) (f : MvPolynomial σ K) :
     (aeval L f).totalDegree ≤ f.totalDegree := by
   conv_lhs => rw [f.as_sum]
+
   rw [map_sum]
   refine (totalDegree_finsetSum _ _).trans (Finset.sup_le fun s hs => ?_)
   rw [aeval_monomial, algebraMap_eq]
@@ -34,11 +86,10 @@ private theorem linSubst_linSubst' {K : Type} [Field K] {B N n m : ℕ} (M : Mat
     linSubst P (linSubst M f) = linSubst (M * P) f := by
   unfold linSubst
   rw [← AlgHom.comp_apply, comp_aeval]
-  congr 1
-  congr 1
+  apply congrArg (fun g : Fin B × Fin N → MvPolynomial (Fin B × Fin m) K => aeval g f)
   funext p
-  simp only [map_sum, map_mul, aeval_C, aeval_X, algebraMap_eq, Matrix.mul_apply, Finset.mul_sum,
-    Finset.sum_mul]
+  simp only [map_sum, map_mul, aeval_C, aeval_X, algebraMap_eq, Matrix.mul_apply, map_sum,
+    Finset.sum_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun l _ => Finset.sum_congr rfl fun k _ => ?_
   ring
@@ -81,7 +132,7 @@ theorem PositivityTheory.UnitarySelfGeneration.UnitProductCombination.irreducibl
   have hunit : ∀ {σ : Type} (q : MvPolynomial σ K), q ≠ 0 → q.totalDegree = 0 → IsUnit q := by
     intro σ q hq hd
     rw [totalDegree_eq_zero_iff_eq_C] at hd
-    refine isUnit_iff_eq_C_of_isReduced.mpr ⟨coeff 0 q, isUnit_iff_ne_zero.mpr ?_, hd⟩
+    refine isUnit_iff_eq_C_of_isReduced.mpr ⟨AddMonoidAlgebra.coeff q 0, isUnit_iff_ne_zero.mpr ?_, hd⟩
     intro h0
     apply hq
     rw [hd, h0, C_0]

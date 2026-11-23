@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -182,7 +227,7 @@ variable {R σ J}
 
 theorem hR_add_left (x x' y : Fin n → R ⊗[F] E) :
     hR R σ J (x + x') y = hR R σ J x y + hR R σ J x' y := by
-  simp only [hR, Formalism.UG.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [hR, Formalism.UG.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hR_smul_left (c : R ⊗[F] E) (x y : Fin n → R ⊗[F] E) :
     hR R σ J (c • x) y = sigR R σ c * hR R σ J x y := by
@@ -205,6 +250,7 @@ theorem hR_lin (g : HA R σ J) (x y : Fin n → R ⊗[F] E) :
   have hσ : (fun i => sigR R σ ((M.mulVec x) i)) =
       (M.map (sigR R σ)).mulVec (fun i => sigR R σ (x i)) := by
     funext i
+
     simp [Matrix.mulVec, dotProduct, map_sum]
   rw [hσ, ← Matrix.vecMul_transpose, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec,
     Matrix.mulVec_mulVec, hg]
@@ -252,8 +298,6 @@ def Nsub {r : ℕ} (P : Frame E n r) : Subgroup (HA R σ J) where
     rw [lin_lin_inv] at this
     simpa using this
 
-def FrameUnipotentSubgroup {r : ℕ} (P : Frame E n r) : Subgroup (HA R σ J) := Nsub R σ J P ⊓ S0 R σ J P
-
 end Frames
 
 section Level
@@ -296,9 +340,6 @@ def KH {r : ℕ} (P : Frame E n r) (Λ : Set (Fin n → E)) : Subgroup (HA (Af F
 
 def NO {r : ℕ} (P : Frame E n r) (Λ : Set (Fin n → E)) : Subgroup (HA (Af F) σ J) :=
   Nsub (Af F) σ J P ⊓ Kf σ J Λ
-
-def levelIntersectParabolic {r : ℕ} (P : Frame E n r) (Λ : Set (Fin n → E)) : Subgroup (HA (Af F) σ J) :=
-  S0 (Af F) σ J P ⊓ Kf σ J Λ
 
 end Level
 

@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DiscEquiv
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DiscriminantNormShapes
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityEighth
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardQuotExtPPow
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.SpanPowMulLe
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.ExistsSubDivMemSP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DiscOnto
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SameGenusFix
+
+@[expose] public section
 
 open NumberField Module Matrix
 
@@ -60,7 +107,7 @@ theorem div_mul_mem_SP_of_mem {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {
   refine Submodule.mul_induction_on hx' (fun y hy y' hy' => ?_) (fun u v hu hv => ?_)
   · rw [map_mul, mul_div_mul_comm]
     exact mul_mem ((div_mem_SP_iff h𝔭 hd _).2 hy) ((div_mem_SP_iff h𝔭 hd' _).2 hy')
-  · rw [map_add, add_div]; exact add_mem hu hv
+  · rw [map_add (f := _), add_div]; exact add_mem hu hv
 
 theorem div_mem_SP_of_sub {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {d : 𝓞 F} (hd : d ≠ 0) {z w : 𝓞 K}
     {k : ℕ} (hk : vF 𝔭 d ≤ k) (h : z - w * ι d ∈ extP K 𝔭 ^ k) :
@@ -70,17 +117,5 @@ theorem div_mem_SP_of_sub {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {d : 
     rw [map_sub, map_mul, sub_div, mul_div_cancel_right₀ _ (jK_ι_ne_zero hd)]; ring
   rw [e]
   exact add_mem (div_mem_SP_of_mem h𝔭 hd hk h) (HU.jK_mem_SP w)
-
-theorem div_mul_mem_SP_of_sub {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {d d' : 𝓞 F} (hd : d ≠ 0)
-    (hd' : d' ≠ 0) {z w : 𝓞 K} {k : ℕ} (hk : vF 𝔭 d + vF 𝔭 d' ≤ k)
-    (h : z - w * (ι d * ι d') ∈ extP K 𝔭 ^ k) :
-    haveI := h𝔭.isPrime; jK z / (jK (ι d) * jK (ι d')) ∈ HU.SP K 𝔭 := by
-  have := h𝔭.isPrime
-  have e : jK z / (jK (ι d) * jK (ι d')) =
-      jK (z - w * (ι d * ι d')) / (jK (ι d) * jK (ι d')) + jK w := by
-    rw [map_sub, map_mul, map_mul, sub_div,
-      mul_div_cancel_right₀ _ (mul_ne_zero (jK_ι_ne_zero hd) (jK_ι_ne_zero hd'))]; ring
-  rw [e]
-  exact add_mem (div_mul_mem_SP_of_mem h𝔭 hd hd' hk h) (HU.jK_mem_SP w)
 
 end Formalism.L2.SG.Pf.fibreCountingData

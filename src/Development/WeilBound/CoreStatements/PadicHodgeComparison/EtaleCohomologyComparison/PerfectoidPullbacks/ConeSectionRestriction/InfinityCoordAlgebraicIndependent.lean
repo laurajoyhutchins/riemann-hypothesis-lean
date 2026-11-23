@@ -1,5 +1,59 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.SeamDefs
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.SeamDefs
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Degrees
+public import Mathlib.LinearAlgebra.Matrix.Block
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -169,7 +223,7 @@ theorem infinityCoord_inv_mem (t : Fin (n + 1) → Rˣ) (j : Fin n) :
 theorem infinityCoord_algebraicIndependent (t : Fin (n + 1) → Rˣ) (ht : AlgebraicIndependent K fun k => (t k : R)) :
     Function.Injective (MvPolynomial.aeval fun k => (u0 t k : R) : MvPolynomial (Fin (n + 1)) K →ₐ[K] R) := by
   classical
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro f hf
   set N := f.totalDegree
   let deg : (Fin (n + 1) →₀ ℕ) → ℕ := fun α => ∑ i, α i
@@ -204,6 +258,7 @@ theorem infinityCoord_algebraicIndependent (t : Fin (n + 1) → Rˣ) (ht : Algeb
     rw [MvPolynomial.aeval_monomial, map_one, one_mul, Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
   have hg : MvPolynomial.aeval (fun k => (t k : R)) g = (t 0 : R) ^ N * MvPolynomial.aeval (fun k => (u0 t k : R)) f := by
     conv_rhs => rw [← MvPolynomial.support_sum_monomial_coeff f]
+
     simp only [g, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun α hα => ?_
     rw [← mul_one (f.coeff α), ← smul_eq_mul, ← MvPolynomial.smul_monomial, ← MvPolynomial.smul_monomial,
@@ -215,7 +270,7 @@ theorem infinityCoord_algebraicIndependent (t : Fin (n + 1) → Rˣ) (ht : Algeb
   rw [MvPolynomial.coeff_zero]
   by_contra hβ
   have hβ' : β ∈ f.support := MvPolynomial.mem_support_iff.2 hβ
-  have := congrArg (MvPolynomial.coeff (h β)) hg0
+  have := congrArg (AddMonoidAlgebra.coeff · (h β)) hg0
   rw [MvPolynomial.coeff_zero, MvPolynomial.coeff_sum, Finset.sum_eq_single β] at this
   · rw [MvPolynomial.coeff_monomial, if_pos rfl] at this
     exact hβ this
@@ -280,7 +335,7 @@ theorem infinityCoord_localization (t : Fin (n + 1) → Rˣ) (ht : AlgebraicInde
       obtain ⟨f2, e2, h2⟩ := hy
       refine ⟨f1 * ∏ j : Fin n, MvPolynomial.X j.succ ^ e2 j + f2 * ∏ j : Fin n, MvPolynomial.X j.succ ^ e1 j,
         e1 + e2, ?_⟩
-      simp only [map_add, map_mul, map_prod, map_pow, MvPolynomial.aeval_X, Pi.add_apply, pow_add,
+      simp only [map_add (f := _), map_mul, map_prod, map_pow, MvPolynomial.aeval_X, Pi.add_apply, pow_add,
         Finset.prod_mul_distrib]
       rw [← h1, ← h2]; ring
     | smul c x _ hx =>

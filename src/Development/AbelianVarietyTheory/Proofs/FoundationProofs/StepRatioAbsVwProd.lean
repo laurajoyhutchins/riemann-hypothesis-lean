@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.TupleConstantsNeZero
-import Formalism.QuotientMetricDivisors.ReductionLemmaZero
-import Formalism.QuotientMetricDivisors.ProdFormula
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.TupleConstantsNeZero
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Finset GlobalTheory.Square
 open Formalism.DivisionValues (vw conjPl)
@@ -63,7 +107,39 @@ theorem stepRatio_vw_bound : ∀ (K : Type) [Field K] [NumberField K] [StarRing 
       |(vw w t : ℝ)| ≤ 2 * ∑ v ∈ S0, (cc v : ℝ) * (vw w (qq v : K) : ℝ) := by
   intro K _ _ _ σ₀ w Qn hQ T S0 cc qq hq u1 u0 h
   obtain ⟨b, g, g', hb, hg, hu⟩ := h
-  obtain ⟨hb0, hbv⟩ := hb.ne_zero_and_vw w hQ
+  have vz : ∀ {a : 𝓞 K}, a ∉ w.asIdeal → vw w (a : K) = 0 := by
+    intro a ha
+    classical
+    have ha0 : (Ideal.span {a} : Ideal (𝓞 K)) ≠ 0 := by
+      rw [ne_eq, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+      rintro rfl
+      exact ha w.asIdeal.zero_mem
+    unfold vw
+    rw [← FractionalIdeal.coeIdeal_span_singleton, FractionalIdeal.count_coe K _ ha0]
+    by_contra h
+    have h' : (Associates.mk w.asIdeal).count (Associates.mk (Ideal.span {a})).factors ≠ 0 := by
+      intro h0
+      exact h (by rw [h0]; rfl)
+    exact ha (Ideal.dvd_span_singleton.1 ((Associates.count_ne_zero_iff_dvd ha0 w.irreducible).1 h'))
+  have ⟨hb0, hbv⟩ : b ≠ 0 ∧ vw w b = 0 := by
+    obtain ⟨a, k, k', ⟨d, hd⟩, he⟩ := hb
+    have hpow : ∀ j : ℕ, (Qn : 𝓞 K) ^ j ∉ w.asIdeal :=
+      fun j hj => hQ (w.isPrime.mem_of_pow_mem j hj)
+    have ha : a ∉ w.asIdeal := fun h => hpow k' (hd ▸ w.asIdeal.mul_mem_right d h)
+    have ha0 : (a : K) ≠ 0 := by
+      intro h
+      have : a = 0 := by exact_mod_cast h
+      exact ha (this ▸ w.asIdeal.zero_mem)
+    have hb0 : b ≠ 0 := by rintro rfl; rw [zero_mul] at he; exact ha0 he.symm
+    have hk0 : (Qn : K) ^ k ≠ 0 := by intro h; rw [h, mul_zero] at he; exact ha0 he.symm
+    refine ⟨hb0, ?_⟩
+    have h1 := Formalism.DivisionValues.ValuationRepresentative.vw_mul w b _ hb0 hk0
+    have h2 := vz ha
+    have h3 := vz (hpow k)
+    have h4 : ((((Qn : 𝓞 K) ^ k : 𝓞 K)) : K) = (Qn : K) ^ k := by simp
+    rw [h4] at h3
+    rw [he, h2, h3] at h1
+    omega
   have key : ∀ v ∈ S0, (g v : K) / (g' v : K) ≠ 0 ∧
       |(vw w ((g v : K) / (g' v : K)) : ℝ)| ≤ 2 * ((cc v : ℝ) * (vw w (qq v : K) : ℝ)) := by
     intro v hv

@@ -1,11 +1,60 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ContinuousResP
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PtLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
 import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PtLt
+import Formalism.LocalRingCardinality.SpanPowerMembership.NZTypeD
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Polynomial ValuativeRel IsLocalRing GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.UnitaryBC UpperTheory.V UpperTheory.V.Hi UpperTheory.V.Hi.CaseU
 open UpperTheory.V.W (Plc Lp HidaSetting Vl Resid LamObj UniversalOrdinaryDeterminantRing Pair)
 open UpperTheory.V.HV (Coef)
 open scoped TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Hi.Up
 
@@ -46,7 +95,7 @@ theorem pt_res (b : R) (a : c.O) (h : Alg.res c.O R b = residue c.O a) : ‖y b 
 theorem pt_le (b : R) : ‖y b‖ ≤ 1 := by
   obtain ⟨a, ha⟩ := Alg.IsCO.res_surj (O := c.O) b
   have h := IsUltrametricDist.norm_add_le_max (y (b - algebraMap c.O R a)) (algebraMap c.O (Qbar l) a)
-  rw [← y.commutes, ← map_add, sub_add_cancel, y.commutes] at h
+  rw [← y.commutes, ← map_add (f := _), sub_add_cancel, y.commutes] at h
   exact h.trans (max_le (pt_lt y _ ha).le (coef_le a))
 
 theorem pt_unit (b : Rˣ) : ‖y b‖ = 1 := by
@@ -60,7 +109,7 @@ theorem pt_small (ε : ℝ) (hε : 0 < ε) : ∃ N : ℕ, ∀ b ∈ maximalIdeal
     induction hb using Submodule.span_induction with
     | mem z hz => exact hS z hz
     | zero => simpa using ht
-    | add a b _ _ ha hb => rw [map_add]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
+    | add a b _ _ ha hb => rw [map_add (f := _)]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
     | smul a b _ hb =>
       rw [smul_eq_mul, map_mul, norm_mul]
       exact (mul_le_of_le_one_left (norm_nonneg _) (pt_le y a)).trans hb
@@ -82,7 +131,7 @@ theorem pt_small (ε : ℝ) (hε : 0 < ε) : ∃ N : ℕ, ∀ b ∈ maximalIdeal
       refine Submodule.mul_induction_on hb (fun a ha b hb => ?_) fun a b ha hb => ?_
       · rw [map_mul, norm_mul, pow_succ]
         exact mul_le_mul (ih a ha) (ht b hb) (norm_nonneg _) (pow_nonneg t0 _)
-      · rw [map_add]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
+      · rw [map_add (f := _)]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ha hb)
   obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one hε t1
   exact ⟨N, fun b hb => (hp N b hb).trans_lt hN⟩
 

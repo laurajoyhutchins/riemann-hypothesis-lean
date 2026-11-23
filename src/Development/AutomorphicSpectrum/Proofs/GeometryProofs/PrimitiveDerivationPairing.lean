@@ -1,10 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.MemPrimitiveTensorsIffIsPrimitiveElem
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrobeniusStableSubspaceElementStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SubspaceContainsUnitStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NilpotentDerivationRankStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MultiplicativeDerivationRankStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimitiveElementPowersIndepStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.MemPrimitiveTensorsIffIsPrimitiveElem
+public import Mathlib.RingTheory.HopfAlgebra.Quotient
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FrobeniusStableSubspaceElementStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MultiplicativeDerivationRankStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NilpotentDerivationRankStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimitiveElementPowersIndepStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SubspaceContainsUnitStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped TensorProduct
 
 namespace GlobalTheory.CompanionTheory.Ar.HopfCount
@@ -29,8 +88,7 @@ noncomputable def dualDer (f : A) (hf : comul (R := k) f = f ⊗ₜ[k] (1 : A) +
         CartierDual.pair k A A (a ⊗ₜ (CartierDual.transpose (LinearMap.mulLeft k f) b)) t := by
       intro t
       induction t with
-      | zero => simp
-      | add x y hx hy => simp only [mul_add, map_add, hx, hy]; ring
+      | add x y hx hy => simp only [mul_add, map_add (f := _), hx, hy]; ring
       | tmul c d => simp [add_mul]
     have h2 := h (comul (R := k) c)
     rw [← hf, ← Bialgebra.comul_mul] at h2
@@ -239,7 +297,7 @@ theorem isHopfIdeal_span {f : A}
       Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.mem_span_singleton_self f)
     have : (Algebra.TensorProduct.map (Ideal.Quotient.mkₐ k (Ideal.span {f}))
         (Ideal.Quotient.mkₐ k (Ideal.span {f}))) (comul (R := k) (a * f)) = 0 := by
-      rw [Bialgebra.comul_mul, map_mul, hf', map_add]
+      rw [Bialgebra.comul_mul, map_mul, hf', map_add (f := _)]
       simp [hz]
     exact this
   · intro x hx
@@ -260,8 +318,7 @@ theorem isCocomm_quot (I : Ideal A) [I.IsHopfIdeal k] [Coalgebra.IsCocomm k A] :
   conv_rhs => rw [← h]
   generalize comul (R := k) a = t
   induction t with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a b => simp
 end
 

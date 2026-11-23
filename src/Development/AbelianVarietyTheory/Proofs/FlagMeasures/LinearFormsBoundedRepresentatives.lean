@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DefiniteLatticeDiscriminantModuleCardDetSq
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsRetractionOfProjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.RowMinor
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DefiniteLatticeDiscriminantModuleCardDetSq
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsRetractionOfProjective
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StandardBaseFlagComplementIntegralLatticeStatement
+import Formalism.SharpRestriction.CuspSpanNormBounds.AbsoluteAmplitudeSecondOfSource
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
+
 open NumberField Module Matrix Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.Cnt GlobalTheory.LoopC
 open scoped ENNReal Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -16,13 +63,7 @@ variable {E : Type} [Field E] [NumberField E] {V : Type} [AddCommGroup V] [Modul
 
 theorem exists_retraction (M0 L : Submodule (𝓞 E) V) (hL : L.FG) (h : IsPrimitiveSub M0 L) :
     ∃ r : L →ₗ[𝓞 E] M0, ∀ x : M0, r ⟨x, h.1 x.2⟩ = x := by
-  first
-  | exact @_root_.GlobalTheory.ProjectiveRetraction.exists_retraction
-  | exact _root_.GlobalTheory.ProjectiveRetraction.exists_retraction
-  | (apply _root_.GlobalTheory.ProjectiveRetraction.exists_retraction <;> assumption)
-  | (intros; apply _root_.GlobalTheory.ProjectiveRetraction.exists_retraction <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.ProjectiveRetraction.exists_retraction <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.ProjectiveRetraction.exists_retraction ..)
+  exact _root_.GlobalTheory.ProjectiveRetraction.exists_retraction M0 L hL h
 
 theorem exists_extend_fun (L : Submodule (𝓞 E) V) (hL : Submodule.span E (L : Set V) = ⊤)
     (ψ : L →ₗ[𝓞 E] 𝓞 E) : ∃ φ : V →ₗ[E] E, ∀ x : L, φ x = (ψ x : E) := by
@@ -73,11 +114,18 @@ theorem exists_vec (S : HSpace E) (φ : S.V →ₗ[E] E) : ∃ w, ∀ x, φ x = 
   have h2 : star (S.hT (S.frame i) w) = S.hT w (S.frame i) := S.herm.eq _ _
   rw [← h2, h1, star_star]
 
-theorem exists_dual_vec (S : HSpace E) (M0 L : Submodule (𝓞 E) S.V) (hL : Submodule.IsLattice E L)
+theorem span_eq_top_of_unimodular {S : HSpace E} (L : Submodule (𝓞 E) S.V)
+    (hL : Submodule.IsLattice E L)
+    (hU : Formalism.HermitianLatticesTheory.IsUnimodular S.hT L) :
+    Submodule.span E (L : Set S.V) = ⊤ := by
+  exact Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top hU S.herm hL.fg
+
+
+theorem exists_dual_vec (S : HSpace E) (M0 L : Submodule (𝓞 E) S.V) (hL : Submodule.IsFullLattice E L)
     (h : IsPrimitiveSub M0 L) (ψ : M0 →ₗ[𝓞 E] 𝓞 E) :
     ∃ w : dualInH S.hT L, ∀ x : M0, (ψ x : E) = S.hT w x := by
   obtain ⟨r, hr⟩ := exists_retraction M0 L hL.fg h
-  obtain ⟨φ, hφ⟩ := exists_extend_fun L hL.span_eq_top (ψ ∘ₗ r)
+  obtain ⟨φ, hφ⟩ := exists_extend_fun L (Submodule.IsFullLattice.span_eq_top (self := hL)) (ψ ∘ₗ r)
   obtain ⟨w, hw⟩ := exists_vec S φ
   refine ⟨⟨w, ?_, ?_⟩, fun x => ?_⟩
   · refine (Submodule.mem_iInf _).2 fun y => (Submodule.mem_iInf _).2 fun hy => ?_
@@ -88,12 +136,12 @@ theorem exists_dual_vec (S : HSpace E) (M0 L : Submodule (𝓞 E) S.V) (hL : Sub
       exact (RingOfIntegers.isIntegral_coe _).map (starRingEnd E).toIntAlgHom
     exact Submodule.mem_one.2 ⟨⟨_, h3⟩, rfl⟩
   · change w ∈ Submodule.span E (L : Set S.V)
-    rw [hL.span_eq_top]; trivial
+    rw [(Submodule.IsFullLattice.span_eq_top (self := hL))]; trivial
   · have := hφ ⟨x, h.1 x.2⟩
     rw [LinearMap.comp_apply, hr] at this
     rw [← this, hw]
 
-theorem exists_reps (S : HSpace E) (M0 L : Submodule (𝓞 E) S.V) (hL : Submodule.IsLattice E L)
+theorem exists_reps (S : HSpace E) (M0 L : Submodule (𝓞 E) S.V) (hL : Submodule.IsFullLattice E L)
     (h : IsPrimitiveSub M0 L)
     (hfin : 1 ≤ Nat.card (dualInH S.hT L ⧸ L.comap (dualInH S.hT L).subtype)) :
     ∃ reps : Finset (M0 →ₗ[𝓞 E] 𝓞 E),
@@ -116,10 +164,45 @@ theorem exists_reps (S : HSpace E) (M0 L : Submodule (𝓞 E) S.V) (hL : Submodu
     rfl
 
 theorem funIdx : ∀ (D : D7) (u u' : D.what₂.Word) (F0 : Fb D u) (Λ : LatV D), Stand D u u' → IsBase D u F0 → IsRowLat D F0 Λ → ∀ M0 : LatW D, IsPrimitiveSub M0 (L0X D Λ (lf D F0)) → ∃ reps : Finset (M0 →ₗ[𝓞 D.host.E] 𝓞 D.host.E), (reps.card : ℝ) ≤ NT D u ^ 2 ∧ ∀ ψ : M0 →ₗ[𝓞 D.host.E] 𝓞 D.host.E, ∃ ψ₀ ∈ reps, ∃ v ∈ L0X D Λ (lf D F0), ∀ x : M0, ((ψ x - ψ₀ x : 𝓞 D.host.E) : D.host.E) = (D.sp.X 0).hT v x := by
-  intro D u u' F0 Λ hS hB hR M0 hM
-  obtain ⟨-, -, hpd, hlat, hint, hdet, -⟩ := GlobalTheory.T.standardBaseFlag_complement_integralLattice D u u' F0 Λ hS hB hR
+  intro D u u' F0 Λ hStand hB hR M0 hM
+  obtain ⟨hWH, -, hpd, hlat, hint, hdet, -⟩ := GlobalTheory.T.standardBaseFlag_complement_integralLattice D u u' F0 Λ hStand hB hR
+  have hfull : Submodule.IsFullLattice D.host.E (L0X D Λ (lf D F0)) := by
+    refine { toIsLattice := hlat, span_eq_top := ?_ }
+    apply eq_top_iff.mpr
+    intro w _
+    have hΛ : Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ :=
+      span_eq_top_of_unimodular Λ hR.2.1.1 hR.2.1.2.1
+    have hw : D.sp.iXY 0 w ∈ orth (hS D) F0.Xplus :=
+      hWH.1.le (Submodule.mem_sup_left ⟨w, rfl⟩)
+    have hwX : D.sp.iXY 0 w ∈ orth (hS D) F0.X :=
+      (Formalism.MainNotions.mem_orth_iff _ _).2 fun x hx =>
+        (Formalism.MainNotions.mem_orth_iff _ _).1 hw x (Submodule.mem_sup_left hx)
+    have hwz : (hS D).hT F0.z (D.sp.iXY 0 w) = 0 :=
+      (Formalism.MainNotions.mem_orth_iff _ _).1 hw _ (Submodule.mem_sup_right (Submodule.mem_span_singleton_self _))
+    obtain ⟨t, ht⟩ := multiple_mem_span_of_mem_localization_span (nonZeroDivisors (𝓞 D.host.E)) D.host.E Λ (D.sp.iXY 0 w) (hΛ ▸ Submodule.mem_top)
+    rw [Submodule.span_eq] at ht
+    have ht0 : (algebraMap (𝓞 D.host.E) D.host.E t) ≠ 0 :=
+      IsFractionRing.to_map_ne_zero_of_mem_nonZeroDivisors t.2
+    have hmem : (t : 𝓞 D.host.E) • w ∈ L0X D Λ (lf D F0) := by
+      change D.sp.iXY 0 ((t : 𝓞 D.host.E) • w) ∈ L0sub Λ (lf D F0)
+      rw [← algebraMap_smul D.host.E, map_smul, algebraMap_smul]
+      have hort : (t : 𝓞 D.host.E) • D.sp.iXY 0 w ∈ toO (hS D) (orth (hS D) F0.X) := by
+        change (t : 𝓞 D.host.E) • D.sp.iXY 0 w ∈ (orth (hS D) F0.X).restrictScalars (𝓞 D.host.E)
+        exact Submodule.smul_mem _ _ hwX
+      refine ⟨⟨Submodule.mem_sup_left ⟨ht, hort⟩, hort⟩, ?_⟩
+      change (hS D).hT F0.z ((t : 𝓞 D.host.E) • D.sp.iXY 0 w) = 0
+      rw [← algebraMap_smul D.host.E, map_smul, hwz, smul_zero]
+    have hspan : (t : 𝓞 D.host.E) • w ∈ Submodule.span D.host.E ((L0X D Λ (lf D F0)) : Set (D.sp.X 0).V) :=
+      Submodule.subset_span hmem
+    have hspan' : (algebraMap (𝓞 D.host.E) D.host.E t) • w ∈
+        Submodule.span D.host.E ((L0X D Λ (lf D F0)) : Set (D.sp.X 0).V) := by
+      rw [algebraMap_smul]
+      exact hspan
+    have := (Submodule.span D.host.E ((L0X D Λ (lf D F0)) : Set (D.sp.X 0).V)).smul_mem (algebraMap (𝓞 D.host.E) D.host.E t)⁻¹ hspan'
+    rw [smul_smul, inv_mul_cancel₀ ht0, one_smul] at this
+    exact this
   obtain ⟨h1, h2, -⟩ := GlobalTheory.LoopC.DetCard.main D _ hlat.fg hpd hint
-  obtain ⟨reps, hc, hr⟩ := exists_reps (D.sp.X 0) M0 _ hlat hM h1
+  obtain ⟨reps, hc, hr⟩ := exists_reps (D.sp.X 0) M0 _ hfull hM h1
   refine ⟨reps, ?_, hr⟩
   rw [← hdet, ← h2]
   exact_mod_cast hc

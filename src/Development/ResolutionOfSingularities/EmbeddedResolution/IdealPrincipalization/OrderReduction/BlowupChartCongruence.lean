@@ -1,11 +1,51 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowup
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowupCartier
-import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowupChartPreimages
-import Development.ResolutionOfSingularities.Foundations.Blowup.ReesGrading
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.Foundations.Blowup.AffineBlowupChartPreimages
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 
 noncomputable section
@@ -20,27 +60,27 @@ variable {B A : Type u} [CommRing B] [CommRing A]
 
 def eqModIdealSet (f g : B →+* A) (J : Ideal A) : Set B := {b | f b - g b ∈ J}
 
-private theorem one_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) :
+theorem one_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) :
     (1 : B) ∈ eqModIdealSet f g J := by
   show f 1 - g 1 ∈ J
   rw [map_one, map_one, sub_self]
   exact J.zero_mem
 
-private theorem zero_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) :
+theorem zero_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) :
     (0 : B) ∈ eqModIdealSet f g J := by
   show f 0 - g 0 ∈ J
   rw [map_zero, map_zero, sub_self]
   exact J.zero_mem
 
-private theorem add_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x y : B}
+theorem add_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x y : B}
     (hx : x ∈ eqModIdealSet f g J) (hy : y ∈ eqModIdealSet f g J) : x + y ∈ eqModIdealSet f g J := by
   show f (x + y) - g (x + y) ∈ J
-  rw [map_add, map_add]
+  rw [map_add (f := _), map_add (f := _)]
   have hrw : f x + f y - (g x + g y) = (f x - g x) + (f y - g y) := by ring
   rw [hrw]
   exact J.add_mem hx hy
 
-private theorem neg_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x : B}
+theorem neg_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x : B}
     (hx : x ∈ eqModIdealSet f g J) : -x ∈ eqModIdealSet f g J := by
   show f (-x) - g (-x) ∈ J
   rw [map_neg, map_neg]
@@ -48,7 +88,7 @@ private theorem neg_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x : B}
   rw [hrw]
   exact J.neg_mem hx
 
-private theorem mul_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x y : B}
+theorem mul_mem_eqModIdealSet (f g : B →+* A) (J : Ideal A) {x y : B}
     (hx : x ∈ eqModIdealSet f g J) (hy : y ∈ eqModIdealSet f g J) : x * y ∈ eqModIdealSet f g J := by
   show f (x * y) - g (x * y) ∈ J
   rw [map_mul, map_mul]
@@ -165,7 +205,7 @@ private theorem exists_mem_closure_chartRingHom_eq_mul_pow (I : Ideal R) (a : I)
       ring
     · rintro x y ⟨wx, hwx, hx⟩ ⟨wy, hwy, hy⟩
       refine ⟨wx + wy, Subring.add_mem _ hwx hwy, ?_⟩
-      rw [map_add, hx, hy]
+      rw [map_add (f := _), hx, hy]
       exact mul_add_mul_eq_add_mul wx wy _
 
 theorem closure_chartRingHom_union_chartFraction_eq_top (I : Ideal R) (a : I) :

@@ -1,4 +1,62 @@
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GermIntegrals.StepSt
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.GermIntegrals.StepSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open ValuativeRel Matrix GlobalTheory.SplitWeil PositivityTheory.Tls2.Ming3
 
@@ -15,7 +73,7 @@ theorem E_apply {R : Type*} [Semiring R] {a b j : ℕ} (i : Fin a) (l : Fin b) :
 theorem E_mul {R : Type*} [Semiring R] {a b c j : ℕ} (hb : j ≤ b) :
     E R a b j * E R b c j = E R a c j := by
   ext i l
-  simp only [mul_apply, E_apply]
+  simp only [Matrix.mul_apply, E_apply]
   by_cases h : (i : ℕ) = l ∧ (l : ℕ) < j
   · rw [if_pos h]
     obtain ⟨h1, h2⟩ := h
@@ -62,7 +120,7 @@ theorem what₂ {k : Type*} [Field k] {n r j : ℕ} (hj : j ≤ n) (y : Matrix (
   have hE : (E k n n j).rank = j := rank_E hj
   have heq : LinearMap.range (E k n n j).mulVecLin = LinearMap.range y.mulVecLin := by
     apply Submodule.eq_of_le_of_finrank_le hc
-    exact (hy.trans hE.ge : y.rank ≤ (E k n n j).rank)
+    simpa only [Matrix.finrank_range_mulVecLin] using (hy.trans hE.ge : y.rank ≤ (E k n n j).rank)
   have hEE : E k n n j * E k n n j = E k n n j := E_mul hj
   ext i l
   have hcol : y.mulVecLin (Pi.single l 1) ∈ LinearMap.range (E k n n j).mulVecLin := by
@@ -119,7 +177,7 @@ theorem ext_basis {k : Type*} [Field k] {a j : ℕ} (hj : j ≤ a) (v : Fin j �
 private theorem E_mul_apply_eq_dite_lt {R : Type*} [Semiring R] {a b c j : ℕ} (hb : j ≤ b)
     (M : Matrix (Fin b) (Fin c) R) (i : Fin a) (m : Fin c) :
     (E R a b j * M) i m = if h : (i : ℕ) < j then M ⟨i, by omega⟩ m else 0 := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   simp only [E_apply]
   split_ifs with h
   · rw [Finset.sum_eq_single (⟨i, by omega⟩ : Fin b)]
@@ -133,14 +191,14 @@ private theorem E_mul_apply_eq_dite_lt {R : Type*} [Semiring R] {a b c j : ℕ} 
     have hne : ¬ ((i : ℕ) = t ∧ (t : ℕ) < j) := fun e => h (by rw [e.1]; exact e.2)
     rw [if_neg hne, zero_mul]
 
-set_option maxHeartbeats 1000000 in
+
 theorem nf1 {k : Type*} [Field k] {n r j : ℕ} (x : Matrix (Fin n) (Fin r) k) (hx : x.rank = j) :
     ∃ (H : GL (Fin n) k) (G : GL (Fin r) k), x = H.val * E k n r j * G.val := by
   classical
   have hn : j ≤ n := hx ▸ (by simpa using x.rank_le_card_height)
   have hr : j ≤ r := hx ▸ (by simpa using x.rank_le_card_width)
   obtain ⟨bb, -⟩ : ∃ bb : Module.Basis (Fin j) k (LinearMap.range x.mulVecLin), True :=
-    ⟨Module.finBasisOfFinrankEq k _ hx, trivial⟩
+    ⟨Module.finBasisOfFinrankEq k _ ((Matrix.finrank_range_mulVecLin x).trans hx), trivial⟩
   obtain ⟨H, hH⟩ := ext_basis hn ((LinearMap.range x.mulVecLin).subtype ∘ bb)
     (bb.linearIndependent.map' _ (Submodule.ker_subtype _))
   have hcol : LinearMap.range (H.val * E k n n j).mulVecLin ≤ LinearMap.range x.mulVecLin := by
@@ -175,7 +233,7 @@ theorem nf1 {k : Type*} [Field k] {n r j : ℕ} (x : Matrix (Fin n) (Fin r) k) (
   have hzero : ∀ i : Fin n, ¬ (i : ℕ) < j → y i = 0 := by
     intro i hi
     ext m
-    rw [← hrows, E_mul_apply_eq_dite_lt hn, dif_neg hi]
+    rw [← hrows, E_mul_apply_eq_dite_lt hn, dite_eq_right hi]
     rfl
   obtain ⟨z, hzd⟩ : ∃ z : Fin j → (Fin r → k), z = fun l => y (Fin.castLE hn l) := ⟨_, rfl⟩
   have hz : LinearIndependent k z := by
@@ -216,7 +274,7 @@ def Bd {a b : ℕ} (γ : ValueGroupWithZero k) (M : Matrix (Fin a) (Fin b) k) : 
 
 theorem bd_mul {a b d : ℕ} {γ δ : ValueGroupWithZero k} {P : Matrix (Fin a) (Fin b) k}
     {Q : Matrix (Fin b) (Fin d) k} (hP : Bd γ P) (hQ : Bd δ Q) : Bd (γ * δ) (P * Q) := fun i m => by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   exact Valuation.map_sum_le _ fun l _ => by rw [map_mul]; exact mul_le_mul' (hP i l) (hQ l m)
 
 theorem bd_sub {a b : ℕ} {γ : ValueGroupWithZero k} {P Q : Matrix (Fin a) (Fin b) k}
@@ -230,7 +288,7 @@ theorem bd_E {a b j : ℕ} : Bd (1 : ValueGroupWithZero k) (E k a b j) := fun i 
 
 theorem bd_one {a : ℕ} : Bd (1 : ValueGroupWithZero k) (1 : Matrix (Fin a) (Fin a) k) := by
   intro i l
-  rw [one_apply]
+  rw [Matrix.one_apply]
   split_ifs <;> simp
 
 theorem bd_KO {a : ℕ} {H : GL (Fin a) k} (hH : H ∈ KO k (Fin a)) : Bd (1 : ValueGroupWithZero k) H.val := by
@@ -247,7 +305,7 @@ theorem mem_KO {a : ℕ} {γ : ValueGroupWithZero k} (hc : γ < 1) (A : Matrix (
     have h1 : A i l = (A - 1) i l + (1 : Matrix (Fin a) (Fin a) k) i l := by simp
     rw [h1]
     refine (Valuation.map_add _ _ _).trans (max_le ((hA i l).trans hc.le) ?_)
-    rw [one_apply]
+    rw [Matrix.one_apply]
     split_ifs <;> simp
   have hI : (valuation k).Integers 𝒪[k] := Valuation.integer.integers (valuation k)
   obtain ⟨B, hB⟩ : ∃ B : Matrix (Fin a) (Fin a) 𝒪[k], B = Matrix.of fun i l => ⟨A i l, hint i l⟩ :=
@@ -267,7 +325,7 @@ theorem mem_KO {a : ℕ} {γ : ValueGroupWithZero k} (hc : γ < 1) (A : Matrix (
       exact lt_of_le_of_lt (hA i l) hc
     have h0 := (IsLocalRing.residue_eq_zero_iff _).2 hm
     rw [map_sub, sub_eq_zero] at h0
-    rw [RingHom.mapMatrix_apply, Matrix.map_apply, h0, one_apply, one_apply]
+    rw [RingHom.mapMatrix_apply, Matrix.map_apply, h0, Matrix.one_apply, Matrix.one_apply]
     split_ifs <;> simp
   have hdet : IsUnit B.det := by
     by_contra hnu

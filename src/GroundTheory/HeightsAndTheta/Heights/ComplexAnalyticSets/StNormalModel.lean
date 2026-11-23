@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -27,67 +73,6 @@ structure NormalModel {n : ℕ} (J : Ideal (MvPolynomial (Fin n) ℂ)) where
       (X (Sum.inr i)) ∈ ideal
   birational : ∀ i : Fin m, ∃ a b : MvPolynomial (Fin n) ℂ, b ∉ J ∧
     rename Sum.inl b * X (Sum.inr i) - rename Sum.inl a ∈ ideal
-
-def lineDiagonalMap : MvPolynomial (Fin 1 ⊕ Fin 1) ℂ →ₐ[ℂ] MvPolynomial (Fin 1) ℂ :=
-  aeval (Sum.elim X fun _ => X 0)
-
-theorem lineDiagonalMap_rename (q : MvPolynomial (Fin 1) ℂ) : lineDiagonalMap (rename Sum.inl q) = q := by
-  rw [lineDiagonalMap, aeval_rename]
-  exact aeval_X_left_apply q
-
-theorem lineDiagonalMap_surjective : Function.Surjective lineDiagonalMap :=
-  fun q => ⟨rename Sum.inl q, lineDiagonalMap_rename q⟩
-
-def lineDiagonalIdeal : Ideal (MvPolynomial (Fin 1 ⊕ Fin 1) ℂ) :=
-  RingHom.ker lineDiagonalMap.toRingHom
-
-theorem lineDiagonalIdeal_isPrime : lineDiagonalIdeal.IsPrime :=
-  RingHom.ker_isPrime _
-
-theorem lineDiagonalIdeal_isIntegrallyClosed :
-    IsIntegrallyClosed (MvPolynomial (Fin 1 ⊕ Fin 1) ℂ ⧸ lineDiagonalIdeal) :=
-  IsIntegrallyClosed.of_equiv (RingHom.quotientKerEquivOfSurjective
-    (f := lineDiagonalMap.toRingHom) lineDiagonalMap_surjective).symm
-
-def lineDiagonalModel : NormalModel (⊥ : Ideal (MvPolynomial (Fin 1) ℂ)) where
-  m := 1
-  ideal := lineDiagonalIdeal
-  isPrime := lineDiagonalIdeal_isPrime
-  isIntegrallyClosed := lineDiagonalIdeal_isIntegrallyClosed
-  comap_eq := by
-    ext q
-    rw [Ideal.mem_comap, Ideal.mem_bot]
-    show lineDiagonalMap (rename Sum.inl q) = 0 ↔ q = 0
-    rw [lineDiagonalMap_rename]
-  integral := fun i => ⟨Polynomial.X - Polynomial.C (X 0), Polynomial.monic_X_sub_C _, by
-    show lineDiagonalMap _ = 0
-    simp [lineDiagonalMap, Polynomial.eval₂_sub]⟩
-  birational := fun i => ⟨X 0, 1, by simp, by
-    show lineDiagonalMap _ = 0
-    simp [lineDiagonalMap]⟩
-
-theorem eval_const_of_lineDiagonalMap_eq_zero (c : ℂ) (q : MvPolynomial (Fin 1 ⊕ Fin 1) ℂ)
-    (hq : lineDiagonalMap q = 0) : eval (fun _ => c) q = 0 := by
-  have h2 : ((aeval (fun _ : Fin 1 => c)).comp lineDiagonalMap) q = 0 := by
-    rw [AlgHom.comp_apply, hq, map_zero]
-  rw [lineDiagonalMap, MvPolynomial.comp_aeval] at h2
-  have hpt : (fun i : Fin 1 ⊕ Fin 1 => (aeval (fun _ : Fin 1 => c) : MvPolynomial (Fin 1) ℂ →ₐ[ℂ] ℂ)
-      (Sum.elim (X : Fin 1 → MvPolynomial (Fin 1) ℂ) (fun _ => X 0) i)) = fun _ => c := by
-    funext s
-    rcases s with i | i <;> simp
-  rw [hpt] at h2
-  rw [← coe_aeval_eq_eval]
-  exact h2
-
-theorem const_mem_zeroSetIn_lineDiagonal (c : ℂ) :
-    (fun _ => c : Fin 1 ⊕ Fin 1 → ℂ) ∈ zeroSetIn lineDiagonalIdeal :=
-  fun q hq => eval_const_of_lineDiagonalMap_eq_zero c q hq
-
-theorem X_inl_not_mem_lineDiagonalIdeal :
-    (X (Sum.inl 0) : MvPolynomial (Fin 1 ⊕ Fin 1) ℂ) ∉ lineDiagonalIdeal := by
-  intro hX
-  have h1 : lineDiagonalMap (X (Sum.inl 0)) = 0 := hX
-  simp [lineDiagonalMap] at h1
 
 end
 

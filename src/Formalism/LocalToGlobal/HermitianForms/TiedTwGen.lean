@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.HermitianForms.RankEqFirstLevel
-import Formalism.LocalToGlobal.HermitianColumns.TiedQC
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.FormsTied
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +63,7 @@ def badQ (D : D7) (Q : Finset (HeightOneSpectrum (𝓞 D.host.F))) : Set (Height
 
 variable {D : D7}
 
-set_option maxHeartbeats 1000000 in
+
 
 structure LevelChart (D : D7) (T : ℕ) (bad : Set (HeightOneSpectrum (𝓞 D.host.F))) (i : ℕ) (hi : i ≤ D.R.m) {cl : Type}
     (stab : cl → Type) [∀ c, Group (stab c)] (lat : cl → Submodule (𝓞 D.host.E) (Fin (D.R.N i) → D.host.E)) where
@@ -65,9 +104,7 @@ variable {u : D.what₂.Word} {C : ColumnChain D.R D.what₂.Tau (D.hcW u)} {A :
 def lamTG (i : ℕ) : D.what₂.Tau → DomWeight (D.R.N i) :=
   fun τ => shW (M.lam i τ) ((i * (D.R.t + 1) / 2 : ℕ) : ℤ)
 
-theorem lamTG_fm (u : D.what₂.Word) (i : ℕ) : lamTG (D.fm u) i = lamT u i := rfl
 
-set_option maxHeartbeats 1000000 in
 
 structure ValuationCompatibleChart {T : ℕ} {bad : Set (HeightOneSpectrum (𝓞 D.host.F))} {i : ℕ} {hi : i ≤ D.R.m} (eY : C.Y i ≃ Fr D i hi)
     (okW : D.what₂.places.Pl → Prop) {Ch : Type} (chOf : C.cls i → Ch) {lat : C.cls i → Submodule (𝓞 D.host.E) (Fin (D.R.N i) → D.host.E)}
@@ -103,7 +140,7 @@ def NormTieG {i : ℕ} {hi : i ≤ D.R.m} (eY : C.Y i ≃ Fr D i hi) : Prop :=
         ∑ c, (C.wt i c).re * (∏ τ, ‖(o.1 τ).det‖ ^ (2 * shiftOf (lamTG M i) τ)) *
           (nfAll (M.lam i) (subP o.1 (MvPolynomial.map s (Pc c))) (subP o.1 (MvPolynomial.map s (Pc c)))).re
 
-set_option maxHeartbeats 1000000 in
+
 
 structure DilationCompatibleChart {T : ℕ} {bad : Set (HeightOneSpectrum (𝓞 D.host.F))} {i : ℕ} {hi : i ≤ D.R.m} (eY : C.Y i ≃ Fr D i hi)
     (eV : A.vT ≃ {v : HeightOneSpectrum (𝓞 D.host.F) // (T : 𝓞 D.host.F) ∈ v.asIdeal})

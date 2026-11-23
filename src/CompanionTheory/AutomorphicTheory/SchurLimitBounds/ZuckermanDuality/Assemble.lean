@@ -1,6 +1,55 @@
-import CompanionTheory.AutomorphicTheory.SchurLimitBounds.ZuckermanDuality.ZuckDualTOfZuckDual
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimBdPf
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimBdPfKFin
+module
+
+public import CompanionTheory.AutomorphicTheory.SchurLimitBounds.ZuckermanDuality.ZuckDualTOfZuckDual
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimBdPf
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimBdPfKFin
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularityAtPlaceOfSubadditive
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BXiAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ComponentFamilySettingOfSetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +64,7 @@ theorem norm_capP_le {n : ℕ} {lam μ : Fin n → ℝ} {c : ℝ} (h : μ ∈ Bo
     ‖Formalism.QuantumDeterminants.capP (fun s => (μ s : ℂ)) (y : ℂ)‖ ≤ PStar lam c y := by
   unfold Formalism.QuantumDeterminants.capP PStar
   rw [norm_prod]
-  refine Finset.prod_le_prod (fun s _ => norm_nonneg _) fun s _ => ?_
+  refine Finset.prod_le_prod₀ (fun s _ => norm_nonneg _) fun s _ => ?_
   have e : (y : ℂ) + (μ s : ℂ) = ((y + μ s : ℝ) : ℂ) := by push_cast; ring
   rw [e, Complex.norm_real, Real.norm_eq_abs]
   obtain ⟨h1, h2⟩ := abs_le.mp (h s)
@@ -162,7 +211,7 @@ theorem smul_mem_iSup {lam : Fin (2 * r + k + 1) → ℝ} {e : ℝ} {ψ : B.Mat 
     exact (le_iSup (fun ν : Box lam e => Wsp k r Wp Wq ε ν) ⟨μ, hμ⟩) (Submodule.subset_span ⟨φ, T, hc, rfl⟩)
   | zero =>
     convert Submodule.zero_mem (⨆ ν : Box lam e, Wsp k r Wp Wq ε ν) using 1
-    funext g
+    ext g
     simp
   | add x y _ _ hx hy =>
     have hxy : (fun g => (x + y) g • T) = (fun g => x g • T) + (fun g => y g • T) := by
@@ -184,6 +233,7 @@ theorem op_expand (S : Wq →L[ℂ] Wp) :
   simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smulRight_apply,
     innerSL_apply_apply]
   conv_lhs => rw [← (stdOrthonormalBasis ℂ Wq).sum_repr' v]
+
   rw [map_sum]
   simp_rw [map_smul]
   conv_lhs => arg 2; ext b; rw [← (stdOrthonormalBasis ℂ Wp).sum_repr' (S (stdOrthonormalBasis ℂ Wq b))]

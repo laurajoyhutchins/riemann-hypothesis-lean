@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockSphereMeanEqOfFrameNormEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockSphereMeanEqOfFrameNormEq
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinSubstLinSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -10,10 +55,10 @@ open MvPolynomial NumberField Module GlobalTheory.ChowHt GlobalTheory.CompHt
 
 namespace GlobalTheory.ImageHeightUnique
 
+
 set_option autoImplicit false in
 open MvPolynomial NumberField Module in
 open scoped Matrix in
-
 theorem _root_.GlobalTheory.ImageHeightUnique.map_linSubst {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S) {B N n : ℕ} (M : Matrix (Fin N) (Fin n) R)
     (f : MvPolynomial (Fin B × Fin N) R) :
     MvPolynomial.map φ (_root_.GlobalTheory.ChowHt.linSubst M f) = _root_.GlobalTheory.ChowHt.linSubst (M.map φ) (MvPolynomial.map φ f) := by
@@ -28,15 +73,6 @@ theorem _root_.GlobalTheory.ImageHeightUnique.map_linSubst {R S : Type} [CommRin
 variable {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V] [Module (𝓞 K) V]
   [IsScalarTower (𝓞 K) K V] {N : ℕ}
 
-omit [NumberField K] in
-
-theorem map_span (b b' : Basis (Fin N) K V) {n : ℕ} (w : Matrix (Fin N) (Fin n) K) :
-    (Submodule.span (𝓞 K) (Set.range fun k => ∑ j, w j k • b' j)).map (b.equivFun.toLinearMap.restrictScalars (𝓞 K)) =
-      Submodule.span (𝓞 K) (Set.range (b.toMatrix b' * w).col) := by
-  rw [Submodule.map_span, ← Set.range_comp]
-  congr 2
-  funext k i
-  simp [Matrix.mul_apply, Basis.toMatrix_apply, mul_comm]
 
 set_option autoImplicit false in
 open MvPolynomial NumberField Module in
@@ -59,13 +95,15 @@ private theorem exists_integral_matrix_toMatrix_mul_eq_of_isFrame {Nm : (K →+*
   refine ⟨Matrix.of fun i k => c k i, ?_⟩
   ext j k
   have hk := congr_arg (fun x => b.repr x j) (hc k)
-  simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul,
-    Pi.smul_apply, smul_eq_mul] at hk
+
+  simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.coe_smul,
+  Pi.smul_apply, smul_eq_mul] at hk
   simp only [Matrix.mul_apply, Matrix.map_apply, Matrix.of_apply, Basis.toMatrix_apply]
   rw [show (∑ x, (b.repr (b' x)) j * w' x k) = ∑ x, w' x k * (b.repr (b' x)) j from
     Finset.sum_congr rfl fun _ _ => mul_comm _ _, ← hk]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [← IsScalarTower.algebraMap_smul K (c k i), map_smul, Finsupp.smul_apply, smul_eq_mul]
+
   simp [map_sum, Finsupp.single_apply, mul_comm]
 
 set_option autoImplicit false in
@@ -73,7 +111,7 @@ open MvPolynomial NumberField Module in
 open scoped Matrix in
 variable {K : Type} [Field K] [NumberField K] in
 private theorem gaussAbs_le_of_forall_coeff_le {ι : Type} {v : FinitePlace K} {p : MvPolynomial ι K}
-    {c : ℝ} (hc : 0 ≤ c) (h : ∀ s, v (coeff s p) ≤ c) : _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v p ≤ c := by
+    {c : ℝ} (hc : 0 ≤ c) (h : ∀ s, v (AddMonoidAlgebra.coeff p s) ≤ c) : _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v p ≤ c := by
   unfold _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs
   rw [← Real.coe_toNNReal c hc, NNReal.coe_le_coe]
   exact Finset.sup_le fun s _ => Real.toNNReal_le_toNNReal (h s)
@@ -106,12 +144,12 @@ open MvPolynomial NumberField Module in
 open scoped Matrix in
 variable {K : Type} [Field K] [NumberField K] in
 private theorem finitePlace_coeff_le_gaussAbs {ι : Type} (v : FinitePlace K) (p : MvPolynomial ι K)
-    (s : ι →₀ ℕ) : v (coeff s p) ≤ _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v p := by
-  by_cases h : coeff s p = 0
+    (s : ι →₀ ℕ) : v (AddMonoidAlgebra.coeff p s) ≤ _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v p := by
+  by_cases h : AddMonoidAlgebra.coeff p s = 0
   · rw [h, map_zero]; exact gaussAbs_nonneg' v p
   unfold _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs
-  have hs := Finset.le_sup (f := fun s => (v (coeff s p)).toNNReal) (mem_support_iff.2 h)
-  calc v (coeff s p) = ((v (coeff s p)).toNNReal : ℝ) :=
+  have hs := Finset.le_sup (f := fun s => (v (AddMonoidAlgebra.coeff p s)).toNNReal) (mem_support_iff.2 h)
+  calc v (AddMonoidAlgebra.coeff p s) = ((v (AddMonoidAlgebra.coeff p s)).toNNReal : ℝ) :=
         (Real.coe_toNNReal _ (apply_nonneg v _)).symm
     _ ≤ _ := NNReal.coe_le_coe.2 hs
 
@@ -196,13 +234,14 @@ private theorem gaussAbs_aeval_le_of_gaussAbs_le_one {ι κ : Type} (v : FiniteP
     (hψ : ∀ i, _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v (ψ i) ≤ 1) (g : MvPolynomial ι K) :
     _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v (aeval ψ g) ≤ _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v g := by
   conv_lhs => rw [g.as_sum]
+
   rw [map_sum]
   refine gaussAbs_finset_sum_le_of_forall_le v _ _ (gaussAbs_nonneg' v g) fun s _ => ?_
   rw [aeval_monomial, algebraMap_eq]
   refine (gaussAbs_C_mul_le' v _ _).trans ?_
   have hprod : _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v (s.prod fun i k => ψ i ^ k) ≤ 1 :=
     gaussAbs_finset_prod_le_one_of_forall_le_one v _ _ fun i _ => gaussAbs_pow_le_one_of_le_one v _ (hψ i) _
-  calc v (coeff s g) * _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v (s.prod fun i k => ψ i ^ k) ≤ v (coeff s g) * 1 :=
+  calc v (AddMonoidAlgebra.coeff g s) * _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v (s.prod fun i k => ψ i ^ k) ≤ v (AddMonoidAlgebra.coeff g s) * 1 :=
         mul_le_mul_of_nonneg_left hprod (apply_nonneg v _)
     _ ≤ _root_.ReciprocityTheory.MultiplicativeHeights.gaussAbs v g := by rw [mul_one]; exact finitePlace_coeff_le_gaussAbs v g s
 
@@ -394,12 +433,12 @@ private theorem frameNorm_toMatrix_map_mul_eq_of_isFrame {Nm : (K →+* ℂ) →
   have n2 : 0 ≤ _root_.GlobalTheory.ChowHt.frameNorm (A σ) z := by unfold _root_.GlobalTheory.ChowHt.frameNorm; positivity
   exact (sq_eq_sq₀ n1 n2).1 hsq'
 
+
 set_option autoImplicit false in
 open MvPolynomial NumberField Module in
 open scoped Matrix in
 variable {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V] [Module (𝓞 K) V]
   [IsScalarTower (𝓞 K) K V] {N : ℕ} in
-
 theorem _root_.GlobalTheory.ImageHeightUnique.formHeight_linSubst {Nm : (K →+* ℂ) → V → ℝ} {L : Submodule (𝓞 K) V} {n n' B : ℕ} {b b' : Basis (Fin N) K V}
     {w : Matrix (Fin N) (Fin n) K} {w' : Matrix (Fin N) (Fin n') K} {A A' : (K →+* ℂ) → Matrix (Fin N) (Fin N) ℂ}
     (h : _root_.GlobalTheory.CompHt.IsFrame Nm L b w A) (h' : _root_.GlobalTheory.CompHt.IsFrame Nm L b' w' A') (δ : ℕ) (f : MvPolynomial (Fin B × Fin N) K) :
@@ -440,12 +479,12 @@ theorem _root_.GlobalTheory.ImageHeightUnique.formHeight_linSubst {Nm : (K →+*
   unfold _root_.GlobalTheory.ChowHt.formHeight
   simp only [hfin, harch]
 
+
 set_option autoImplicit false in
 open MvPolynomial NumberField Module in
 open scoped Matrix in
 variable {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V] [Module (𝓞 K) V]
   [IsScalarTower (𝓞 K) K V] {N : ℕ} in
-
 theorem _root_.GlobalTheory.ImageHeightUnique.isImageHeight_unique {Ω : Type} [Field Ω] [Algebra K Ω] {Nm : (K →+* ℂ) → V → ℝ} {L : Submodule (𝓞 K) V}
     {ev : V →ₗ[K] Ω} {D : ℕ} {x y : ℝ} (hx : _root_.GlobalTheory.CompHt.IsImageHeight Nm L ev D x) (hy : _root_.GlobalTheory.CompHt.IsImageHeight Nm L ev D y) : x = y := by
   obtain ⟨N₁, n₁, b₁, w₁, A₁, δ₁, f₁, hF₁, hC₁, hx₁⟩ := hx
@@ -471,10 +510,10 @@ theorem _root_.GlobalTheory.ImageHeightUnique.isImageHeight_unique {Ω : Type} [
   have : ((D : ℝ) + 1) * δ₁ * x = ((D : ℝ) + 1) * δ₁ * y := by rw [hx₁, hy₂, hH]
   exact mul_left_cancel₀ hδ.ne' this
 
+
 set_option autoImplicit false in
 open MvPolynomial NumberField Module in
 open scoped Matrix in
-
 theorem _root_.GlobalTheory.ImageHeightUnique.imageHeight_eq : ∀ (K V Ω : Type) [Field K] [NumberField K] [AddCommGroup V] [Module K V] [Module (𝓞 K) V]
     [IsScalarTower (𝓞 K) K V] [Field Ω] [Algebra K Ω] (Nm : (K →+* ℂ) → V → ℝ) (L : Submodule (𝓞 K) V)
     (ev : V →ₗ[K] Ω) (D : ℕ) (h : ℝ), _root_.GlobalTheory.CompHt.IsImageHeight Nm L ev D h → _root_.GlobalTheory.CompHt.imageHeight Nm L ev D = h := by

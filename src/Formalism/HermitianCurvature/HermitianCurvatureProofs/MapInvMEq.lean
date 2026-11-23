@@ -1,7 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhiRegOf
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+module
+
+public import Formalism.HermitianCurvature.BesselNonvanishingReduction
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CkOnZeroOfContOn
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LUFactorOrbitBounds
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbConvDDOfDecDD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,10 +94,6 @@ theorem gNpow_inCC (hNI : NormInv) (b : ℝ) (hb : b ≠ 0) :
 
 def invP (p : B.SS k r) : B.SS k r :=
   ((B2.invM p.1.1, B2.invM p.1.2), (B2.invM p.2.1, B2.invM p.2.2))
-
-theorem measurable_componentwiseInv : Measurable (invP (k := k) (r := r)) := by
-  have h := B2x1.invM_meas (k := k) (r := r)
-  exact (h.prodMap h).prodMap (h.prodMap h)
 
 theorem map_invM_eq {U : Set (B.Mat k r)} (hU : B2.IsClosedSubgroup U) {μ : Measure (Formalism.QuantumDeterminants.Mt k r)}
     (hμ : B.IsHaarOn U μ) : μ.map B2.invM = μ := Formalism.FourierDecayAlt.P.haar_measure_inversion k r U μ hU hμ
@@ -128,7 +177,11 @@ theorem la_fin (hNI : NormInv) {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProd
   calc ∫⁻ p, ‖B.gN (Matrix.of p.1.1 * Matrix.of p.1.2 * γ * (Matrix.of p.2.2)⁻¹ * (Matrix.of p.2.1)⁻¹) ^ (-b)‖ₑ
         ∂D.μSS = ∫⁻ p, G (invP p) ∂D.μSS := lintegral_congr_ae (hinv.mono fun p hp => hp.2.symm)
     _ = ∫⁻ p, G (invP p) ∂(D.μSS.map invP) := by rw [map_invP D]
-    _ ≤ ∫⁻ p, G (invP (invP p)) ∂D.μSS := lintegral_map_le (fun p => G (invP p)) invP
+    _ ≤ ∫⁻ p, G (invP (invP p)) ∂D.μSS := by
+      have hm := B2x1.invM_meas (k := k) (r := r)
+      have hinvP : Measurable (invP (k := k) (r := r)) :=
+        (hm.prodMap hm).prodMap (hm.prodMap hm)
+      exact lintegral_map_le (fun p => G (invP p)) hinvP.aemeasurable
     _ = ∫⁻ p, G p ∂D.μSS := lintegral_congr_ae (hinv.mono fun p hp => by show G (invP (invP p)) = G p; rw [hp.1])
     _ < ⊤ := h1
 

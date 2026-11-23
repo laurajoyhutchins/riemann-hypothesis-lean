@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.PAdicHodge.UntiltFrobeniusEquivSymmEpsilonNeOne
+module
+
+public import GroundTheory.PAdicHodge.UntiltFrobeniusEquivSymmEpsilonNeOne
+public import GroundTheory.PAdicHodge.BdRGalois
+public import GroundTheory.PAdicHodge.TateCpTwist
+public import GroundTheory.PAdicHodge.BdRLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -18,6 +68,7 @@ def logPoly (k : ℕ) (z : R) : R := ∑ i ∈ Finset.Ico 1 k, (logPolyCoeff k i
 
 theorem map_logPoly {S : Type*} [CommRing S] (f : R →+* S) (k : ℕ) (z : R) :
     f (logPoly k z) = logPoly k (f z) := by
+
   simp [logPoly, map_sum, map_mul, map_intCast, map_pow]
 
 theorem logPoly_sub_mem (k : ℕ) {z w : R} {J : Ideal R} (h : z - w ∈ J) :
@@ -57,16 +108,16 @@ section Cp
 variable {p : ℕ} [Fact p.Prime]
 
 local notation "𝒪" => normInteger ℂ_[p]
-local notation "𝒪♭" => PreTilt (normInteger ℂ_[p]) p
-local notation "𝕎𝒪♭" => WittVector p (PreTilt (normInteger ℂ_[p]) p)
-local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
-local notation "𝔪" => maximalIdeal (BDeRhamPlus (normInteger ℂ_[p]) p)
-local notation "φi" => RingEquiv.symm (_root_.frobeniusEquiv (PreTilt (normInteger ℂ_[p]) p) p)
+local notation "𝒪♭" => PreTilt 𝒪 p
+local notation "𝕎𝒪♭" => WittVector p 𝒪♭
+local notation "𝔹" => BDeRhamPlus 𝒪 p
+local notation "𝔪" => maximalIdeal 𝔹
+local notation "φi" => RingEquiv.symm (_root_.frobeniusEquiv 𝒪♭ p)
 
 theorem exists_coe_eq_of_pow_eq_one {x : ℂ_[p]} {N : ℕ} (hN : N ≠ 0) (hx : x ^ N = 1) :
     ∃ y : PadicAlgCl p, (y : ℂ_[p]) = x := by
-  haveI : NeZero N := ⟨hN⟩
-  obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot (PadicAlgCl p) N
+  have : NeZero N := ⟨hN⟩
+  obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot (PadicAlgCl p) N
   have hζ' : IsPrimitiveRoot (algebraMap (PadicAlgCl p) ℂ_[p] ζ) N :=
     hζ.map_of_injective (algebraMap (PadicAlgCl p) ℂ_[p]).injective
   obtain ⟨i, -, hi⟩ := hζ'.eq_pow_of_pow_eq_one hx
@@ -117,8 +168,8 @@ theorem gal_smul_muBdR {L : IntermediateField ℚ_[p] (PadicAlgCl p)} (σ : Gal(
     (ε : 𝒪♭) :
     σ • muBdR p ε = wittToBDeRhamPlus 𝒪 p (teichmuller p
       (preTiltMap p (galCp σ : ℂ_[p] →+* ℂ_[p]) (AInf.norm_galCp_toRingHom σ) ε)) - 1 := by
-  rw [muBdR, gal_smul_wittToBDeRhamPlus, AInf.mu, smul_sub, smul_one, AInf.gal_smul_teichmuller,
-    map_sub, map_one]
+  rw [muBdR_eq, gal_smul_bdR_def, map_sub, map_one, ← gal_smul_bdR_def,
+    gal_smul_wittToBDeRhamPlus, AInf.gal_smul_teichmuller]
 
 theorem gal_smul_fontaineT_eq {L : IntermediateField ℚ_[p] (PadicAlgCl p)}
     (σ : Gal(PadicAlgCl p/L)) {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1) :
@@ -179,7 +230,7 @@ theorem gal_smul_fontaineT {L : IntermediateField ℚ_[p] (PadicAlgCl p)} (σ : 
   set ξ := IsPerfectoidField.kerThetaGenerator ℂ_[p] p
   obtain ⟨c, hc⟩ : ξ ∣ teichmuller p ν - 1 := by
     have h : teichmuller p ν - 1 ∈ RingHom.ker (fontaineTheta 𝒪 p) := by
-      rw [RingHom.mem_ker, map_sub, map_one, fontaineTheta_teichmuller, hν, sub_self]
+      rw [RingHom.mem_ker, RingHom.map_sub, map_one, fontaineTheta_teichmuller, hν, sub_self]
     rwa [hξ, mem_span_singleton] at h
   have hT : (teichmuller p ε' : 𝕎𝒪♭) = teichmuller p ε ^ aN * (1 + ξ * c) ^ p ^ (M + k) := by
     rw [hη, ← hνη, map_mul, map_pow, map_pow, ← hc]
@@ -235,7 +286,7 @@ theorem gal_smul_fontaineT {L : IntermediateField ℚ_[p] (PadicAlgCl p)} (σ : 
   have E_Pμ : logPoly k μ = W (logPoly k Zμ) := by rw [hμ, map_logPoly]
   have E_αβ : W (logPoly k Z1) - W (logPoly k Z0) =
       (p : 𝔹) ^ M * W α' + W ξ ^ k * W β' := by
-    rw [← map_sub, ← hαβ, map_add, map_mul, map_mul, map_pow, map_pow, map_natCast]
+    rw [← map_sub, ← hαβ, map_add (f := _), map_mul, map_mul, map_pow, map_pow, map_natCast]
   have E_a : algebraMap ℚ_[p] 𝔹 (a : ℚ_[p]) =
       (aN : 𝔹) - (p : 𝔹) ^ (M + k) * W (IsPerfectoidField.padicIntToWitt (K := ℂ_[p]) p γ) := by
     have h : a = (aN : ℤ_[p]) - (p : ℤ_[p]) ^ (M + k) * γ := by rw [← hγ]; ring
@@ -255,7 +306,7 @@ theorem gal_smul_fontaineT {L : IntermediateField ℚ_[p] (PadicAlgCl p)} (σ : 
         ((k.factorial : 𝔹) * tN - logPoly k ((1 + μ) ^ aN - 1)) + W ξ ^ k * W β' +
         (p : 𝔹) ^ (M + k) * W (IsPerfectoidField.padicIntToWitt (K := ℂ_[p]) p γ) *
           ((k.factorial : 𝔹) * t - logPoly k μ) := by
-    rw [map_add, map_mul, map_mul, map_pow, map_natCast]
+    rw [map_add (f := _), map_mul, map_mul, map_pow, map_natCast]
     linear_combination (k.factorial : 𝔹) * E_σ + (k.factorial : 𝔹) * E_N -
       (k.factorial : 𝔹) * t * E_a + E_P1 - E_P0 + E_αβ +
       (p : 𝔹) ^ (M + k) * W (IsPerfectoidField.padicIntToWitt (K := ℂ_[p]) p γ) * E_Pμ

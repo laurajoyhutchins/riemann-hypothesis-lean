@@ -1,10 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.PoitouTate.RealEvenCoind
-import GroundTheory.ProfiniteCohomology.PoitouTate.RealEvenLevel
-import GroundTheory.ProfiniteCohomology.PoitouTate.RealTraceMap
-import GroundTheory.ProfiniteCohomology.RealPlaces.Vanishing
-import GroundTheory.ProfiniteCohomology.RealPlaces.Devissage
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseMain
+module
+
+public import GroundTheory.ProfiniteCohomology.PoitouTate.RealOdd
+public import GroundTheory.ProfiniteCohomology.RealPlaces.Induced
+public import GroundTheory.ProfiniteCohomology.RealPlaces.LocalDualityPlace
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseFixed
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseInv
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BijectiveGsLocalInvRootsOfPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -13,9 +56,9 @@ namespace GroundTheory.ProfCoh
 
 open IsDedekindDomain NumberField CategoryTheory GroundTheory.Global
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 attribute [local instance 2000] Rep.hV2
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 theorem isTotallyComplex_of_sq_eq_neg_one {F : Type*} [Field F] (x : F) (hx : x ^ 2 = -1) :
     IsTotallyComplex F := by
@@ -137,9 +180,9 @@ section Hypotheses
 variable [Fintype S] {N : ℕ} [NeZero N]
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((N : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S) (hev : Even N)
 
-set_option maxHeartbeats 1000000 in
-include hS in
 
+
+include hS in
 theorem surjective_of_localToCompact_two [hne : Nonempty S]
     (t : tateCompactCohomologyRes (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) 3 →+ ZMod N)
     (ht : ∀ ξ : ptTLocal (gsFinFamily S ιs) (gsRealFamily S ιr) (gsRoots S N) 2,
@@ -152,9 +195,9 @@ theorem surjective_of_localToCompact_two [hne : Nonempty S]
     (gsLocalInvRootsQZ S ιs N) (gsRealInvRootsQZ S ιr N) ht v η
     ((zmodToQZ_gsLocalInvRoots S ιs N v η).symm.trans (congrArg (zmodToQZ N) hη))
 
+
 omit [Fintype S] in
 include hS hev in
-
 theorem isTotallyComplex_of_gsOpenSubgroup_le {L : FiniteSubfield} [Fact (K ≤ L)]
     (hL : ∀ x : L.1, algebraMap L.1 ℚ̄ x ∈ maxUnramifiedOutside K.1 ℚ̄ S)
     (W₀ : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S))
@@ -170,9 +213,9 @@ theorem isTotallyComplex_of_gsOpenSubgroup_le {L : FiniteSubfield} [Fact (K ≤ 
   push_cast
   exact hz2
 
+
 omit [Fintype S] in
 include hS hev in
-
 theorem freeOnCosets_gsRealFamily_of_le (W₀ : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S))
     (hW₀ : ∀ σ ∈ W₀, ∀ ζ : (maxUnramifiedOutside K.1 ℚ̄ S)ˣ, ζ ^ (2 * N) = 1 →
       σ (ζ : maxUnramifiedOutside K.1 ℚ̄ S) = ζ)

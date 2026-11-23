@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -24,7 +63,7 @@ def partLₗ (e : ((κ → A) → ℂ) →ₗ[ℂ] (κ₁ → A) → ℂ) : ((κ
   toFun := partL e
   map_add' Φ Ψ := funext fun y => by
     show e ((fun x => Φ _) + fun x => Ψ _) _ = _
-    rw [map_add]; rfl
+    rw [map_add (f := _)]; rfl
   map_smul' c Φ := funext fun y => by
     show e (c • fun x => Φ _) _ = _
     rw [map_smul]; rfl
@@ -33,7 +72,7 @@ def partRₗ (e : ((κ' → A) → ℂ) →ₗ[ℂ] (κ₁' → A) → ℂ) : ((
   toFun := partR e
   map_add' Φ Ψ := funext fun y => by
     show e ((fun x => Φ _) + fun x => Ψ _) _ = _
-    rw [map_add]; rfl
+    rw [map_add (f := _)]; rfl
   map_smul' c Φ := funext fun y => by
     show e (c • fun x => Φ _) _ = _
     rw [map_smul]; rfl
@@ -52,7 +91,7 @@ def conjLin {X Y : Type} (e : (X → ℂ) →ₗ[ℂ] (Y → ℂ)) : (X → ℂ)
     have h : (fun x => starRingEnd ℂ (φ x + ψ x)) = (fun x => starRingEnd ℂ (φ x)) + fun x => starRingEnd ℂ (ψ x) :=
       funext fun x => map_add _ _ _
     simp only [Pi.add_apply]
-    rw [h, map_add, Pi.add_apply, map_add]
+    rw [h, map_add (f := _), Pi.add_apply, map_add (f := _)]
   map_smul' c φ := funext fun y => by
     have h : (fun x => starRingEnd ℂ (c * φ x)) = starRingEnd ℂ c • fun x => starRingEnd ℂ (φ x) :=
       funext fun x => by simp
@@ -66,15 +105,15 @@ section Loc
 
 variable (F : Type) [Field F] [NumberField F]
 
-def stdInd (κ : Type) (v : Pl F) : (κ → Fv F v) → ℂ := Set.indicator {x | ∀ i, x i ∈ v.adicCompletionIntegers F} 1
+def stdInd (κ : Type) (v : Pl (F := F)) : (κ → Fv F v) → ℂ := Set.indicator {x | ∀ i, x i ∈ v.adicCompletionIntegers F} 1
 
 variable {F}
 
 def IsLocOp {κ κ₁ : Type} [Fintype κ] [Fintype κ₁] (e : ((κ → AF F) → ℂ) →ₗ[ℂ] (κ₁ → AF F) → ℂ) : Prop :=
-  ∃ (ei : SInf F κ →L[ℂ] SInf F κ₁) (ev : ∀ v : Pl F, ((κ → Fv F v) → ℂ) →ₗ[ℂ] (κ₁ → Fv F v) → ℂ),
+  ∃ (ei : SInf F κ →L[ℂ] SInf F κ₁) (ev : ∀ v : Pl (F := F), ((κ → Fv F v) → ℂ) →ₗ[ℂ] (κ₁ → Fv F v) → ℂ),
     (∀ v, ∀ φ ∈ SB (κ → Fv F v), ev v φ ∈ SB (κ₁ → Fv F v)) ∧
     (∀ᶠ v in cofinite, ev v (stdInd F κ v) = stdInd F κ₁ v) ∧
-    ∀ (f : SInf F κ) (φ : ∀ v : Pl F, (κ → Fv F v) → ℂ), (∀ v, φ v ∈ SB _) →
+    ∀ (f : SInf F κ) (φ : ∀ v : Pl (F := F), (κ → Fv F v) → ℂ), (∀ v, φ v ∈ SB _) →
       (∀ᶠ v in cofinite, φ v = stdInd F κ v) → e (pure f φ) = pure (ei f) fun v => ev v (φ v)
 
 end Loc

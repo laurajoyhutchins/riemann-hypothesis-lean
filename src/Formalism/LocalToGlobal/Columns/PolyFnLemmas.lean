@@ -1,6 +1,61 @@
-import Formalism.LocalToGlobal.Columns.PolyFn
+module
+
+public import Formalism.LocalToGlobal.Columns.PolyFn
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FinalB
 import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDlatLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,6 +85,7 @@ theorem map_fockS (s : K →+* ℂ) (f g : MvPolynomial σ K) (hf : ∀ m, s (st
   have hsf : f.support ⊆ f.support ∪ g.support := fun x hx => Finset.mem_union_left _ hx
   have hsg : (MvPolynomial.map s g).support ⊆ f.support ∪ g.support :=
     fun x hx => Finset.mem_union_right _ (MvPolynomial.support_map_subset _ _ hx)
+
   rw [fockF_eq_sum _ _ _ hsg, map_sum, Finset.sum_subset hsf ?_]
   · refine Finset.sum_congr rfl fun m _ => ?_
     simp only [MvPolynomial.coeff_map, map_mul, hf m, map_natCast, mfact, Finsupp.prod]
@@ -44,8 +100,8 @@ section Block
 
 variable {ι : Type} [Fintype ι] {n : ℕ}
 
-open Classical in
 
+open Classical in
 def bigM (g : ι → Matrix (Fin n) (Fin n) ℂ) : Matrix (ι × Fin n × Fin n) (ι × Fin n × Fin n) ℂ :=
   fun x y => if x.1 = y.1 ∧ x.2.2 = y.2.2 then g x.1 x.2.1 y.2.1 else 0
 
@@ -194,10 +250,12 @@ theorem evFr_coord (G : ι → Matrix (Fin n) (Fin n) ℂ) (s : K →+* ℂ) (la
     have key : (blockAct K (n := n) A).comp (blockAct K (n := n) B) = blockAct K (n := n) (fun τ => B τ * A τ) := by
       apply MvPolynomial.algHom_ext
       rintro ⟨a, b, c⟩
+
       simp only [AlgHom.comp_apply, Formalism.GradedWeylDivisibility.blockAct, MvPolynomial.aeval_X, map_sum, map_mul,
-        MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq]
+      MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq]
       simp only [Finset.mul_sum, ← mul_assoc, ← MvPolynomial.C_mul]
       rw [Finset.sum_comm]
+
       simp only [← Finset.sum_mul, ← map_sum, Matrix.mul_apply]
     exact DFunLike.congr_fun key q
   have hid : ∀ q : MvPolynomial (ι × Fin n × Fin n) K,
@@ -323,28 +381,6 @@ theorem pairVr_nfAll (emb : ι → E →+* K) (J : Matrix (Fin n) (Fin n) E) (la
   rw [e0, det_transpose, det_inv_of_frame _ _ (ho τ), shiftOf, _root_.zpow_mul, Complex.ofReal_zpow]
   congr 1
 
-theorem pairV_nfAll (emb : ι → E →+* K) (J : Matrix (Fin n) (Fin n) E) (lam : ι → DomWeight n) (s : K →+* ℂ)
-    (o : Frames (gramC J (embAt s emb))) (ho : ∀ τ, (o.1 τ)ᴴ * gramC J (embAt s emb) τ * o.1 τ = 1)
-    (F F' : VV K lam) (hF : ∀ m, s (star (F.1.coeff m)) = star (s (F.1.coeff m))) :
-    s (pairV emb lam J F F') = ((∏ τ, ‖(o.1 τ).det‖ ^ (-(2 * shiftOf lam τ)) : ℝ) : ℂ) *
-      nfAll lam (blockAct ℂ (fun τ => ((o.1 τ)⁻¹)ᵀ) (MvPolynomial.map s F'.1))
-        (blockAct ℂ (fun τ => ((o.1 τ)⁻¹)ᵀ) (MvPolynomial.map s F.1)) := by
-  have e0 : ∀ τ, (gramK emb J τ).map s = gramC J (embAt s emb) τ := fun τ => by
-    rw [gramK, gramC, embAt, Matrix.map_map]
-    rfl
-  have h := map_pairP s lam (gramK emb J) (fun τ => ((o.1 τ)⁻¹)ᵀ) (fun τ => by
-    rw [e0, eq_of_frame _ _ (ho τ), transpose_mul, ← conjTranspose_nonsing_inv]
-    congr 1) F.1 F'.1 hF
-  have e1 : pairV emb lam J F F' = pairP lam (gramK emb J) F.1 F'.1 := rfl
-  rw [e1, h]
-  congr 1
-  rw [Complex.ofReal_prod]
-  refine Finset.prod_congr rfl fun τ _ => ?_
-  have e2 : (gramC J (embAt s emb) τ).det = (((‖(o.1 τ).det‖ ^ 2 : ℝ) : ℂ))⁻¹ := by
-    rw [← det_inv_of_frame _ _ (ho τ), det_nonsing_inv, Ring.inverse_eq_inv', inv_inv]
-  rw [e0, e2, shiftOf, _root_.zpow_neg, _root_.zpow_mul, Complex.ofReal_inv, Complex.ofReal_zpow, _root_.inv_zpow]
-  congr 2
-
 end EPair
 
 section Pos
@@ -378,19 +414,6 @@ theorem frame_std {E : Type} [Field E] (emb : ι → E →+* ℂ) (y : Frames (g
   simp only [gramC_one]
   exact Matrix.PosSemidef.one
 
-theorem norm_deFr_std {E : Type} [Field E] (emb : ι → E →+* ℂ) (y : Frames (gramC (1 : Matrix (Fin n) (Fin n) E) emb))
-    (hy : y.IsON) (τ : ι) :
-    ‖deFr y τ‖ = 1 := by
-  have h := frame_std emb y hy τ
-  simp only [gramC_one, Matrix.mul_one] at h
-  have hd := congrArg Matrix.det h
-  rw [Matrix.det_mul, Matrix.det_conjTranspose, Matrix.det_one] at hd
-  have h2 : ‖(y.1 τ).det‖ * ‖(y.1 τ).det‖ = 1 := by
-    simpa [norm_mul, norm_star] using congrArg norm hd
-  have h0 : 0 ≤ ‖(y.1 τ).det‖ := norm_nonneg _
-  show ‖(y.1 τ).det‖ = 1
-  nlinarith [h2, h0]
-
 end Pos
 
 section Image
@@ -408,7 +431,7 @@ theorem map_mem_weyl {S : Type} [CommRing S] {r m : ℕ} (hm : m ≤ r) (ν : Fi
     simp only
     rw [← Formalism.GradedWeylDivisibility.lclosedeq_applyWord_map, Formalism.GradedWeylDivisibility.lclosedeq_hw_map]
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx =>
     rw [MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C, ← MvPolynomial.smul_eq_C_mul]
     exact Submodule.smul_mem _ _ hx
@@ -441,8 +464,8 @@ theorem map_ten (s : K →+* ℂ) (f : ι → MvPolynomial (Fin n × Fin n) K) :
   simp only [Formalism.GradedWeylDivisibility.blockEmb]
   rw [MvPolynomial.map_rename]
 
-omit [CharZero K] in
 
+omit [CharZero K] in
 theorem map_mem_CSpan (s : K →+* ℂ) (lam : ι → DomWeight n) (F : MvPolynomial (ι × Fin n × Fin n) K) (hF : F ∈ VV K lam) :
     MvPolynomial.map s F ∈ CSpan lam := by
   unfold VV Formalism.GradedWeylDivisibility.tensorLat at hF
@@ -453,7 +476,7 @@ theorem map_mem_CSpan (s : K →+* ℂ) (lam : ι → DomWeight n) (F : MvPolyno
     rw [← nablaSq_eq_delSq]
     exact Formalism.GradedWeylDivisibility.dualWeylMap K ℂ s n n _ _ (hf τ)
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx =>
     rw [MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.map_C, ← MvPolynomial.smul_eq_C_mul]
     exact Submodule.smul_mem _ _ hx
@@ -520,17 +543,18 @@ theorem linearIndependent_map {σ κ : Type} (s : K →+* ℂ) (v : κ → MvPol
     intro b
     apply hv t (fun j => B.repr (g j) b)
     ext m
-    have hm := congrArg (MvPolynomial.coeff m) hg
+    have hm := congrArg (AddMonoidAlgebra.coeff · m) hg
     simp only [MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, MvPolynomial.coeff_map, smul_eq_mul,
       MvPolynomial.coeff_zero] at hm ⊢
-    have hm' : ∑ j ∈ t, (MvPolynomial.coeff m (v j)) • g j = 0 := by
+    have hm' : ∑ j ∈ t, (AddMonoidAlgebra.coeff (v j) m) • g j = 0 := by
       refine Eq.trans (Finset.sum_congr rfl fun j _ => ?_) hm
       rw [Algebra.smul_def, mul_comm]
       rfl
-    have h2 : ∑ j ∈ t, (MvPolynomial.coeff m (v j)) * B.repr (g j) b = 0 := by
+    have h2 : ∑ j ∈ t, (AddMonoidAlgebra.coeff (v j) m) * B.repr (g j) b = 0 := by
       have h3 := congrArg (fun z => B.repr z b) hm'
-      simpa only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.smul_apply,
-        smul_eq_mul, map_zero, Finsupp.coe_zero, Pi.zero_apply] using h3
+
+      simpa only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
+      smul_eq_mul, map_zero, Finsupp.coe_zero, Pi.zero_apply] using h3
     exact (Finset.sum_congr rfl fun j _ => mul_comm _ _).trans h2
   have h4 : B.repr (g i) = 0 := by
     ext b
@@ -630,10 +654,12 @@ theorem nfAll_blockAct (lam : ι → DomWeight n) (u : ι → Matrix (Fin n) (Fi
   have key : (blockAct ℂ (n := n) (fun τ => (u τ)ᴴ)).comp (blockAct ℂ (n := n) u) = AlgHom.id ℂ _ := by
     apply MvPolynomial.algHom_ext
     rintro ⟨a, b, c⟩
+
     simp only [AlgHom.comp_apply, AlgHom.id_apply, Formalism.GradedWeylDivisibility.blockAct, MvPolynomial.aeval_X, map_sum, map_mul,
-      MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq]
+    MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq]
     simp only [Finset.mul_sum, ← mul_assoc, ← MvPolynomial.C_mul]
     rw [Finset.sum_comm]
+
     simp only [← Finset.sum_mul, ← map_sum]
     have hmul : ∀ d, ∑ x : Fin n, u a b x * (u a)ᴴ x d = (1 : Matrix (Fin n) (Fin n) ℂ) b d := by
       intro d
@@ -696,16 +722,6 @@ theorem ipFr_evV (emb : ι → E →+* K) (J : Matrix (Fin n) (Fin n) E) (lam : 
 end Metric2
 
 section Examples
-
-example (τ : Unit) (s : ℚ →+* ℂ) :
-    evFr (fun _ : Unit => (1 : Matrix (Fin 2) (Fin 2) ℂ)) (fun _ => -3) s (X (τ, 0, 0)) stdFr = 1 := by
-  rw [evFr_apply]
-  simp [stdFr]
-
-example (τ : Unit) (s : ℚ →+* ℂ) :
-    evFr (fun _ : Unit => (1 : Matrix (Fin 2) (Fin 2) ℂ)) (fun _ => -3) s (X (τ, 0, 1)) stdFr = 0 := by
-  rw [evFr_apply]
-  simp [stdFr]
 
 end Examples
 

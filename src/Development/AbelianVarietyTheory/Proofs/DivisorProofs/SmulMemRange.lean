@@ -1,8 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.XiMulNu
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FontaineAinfLocalDomainXiAdicOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.DualLattices.AinfFacts
 import ReciprocityTheory.DualLattices.CotangentSurjective
-import ReciprocityTheory.DualLattices.CyclicRecursionStatement
-import Development.AbelianVarietyTheory.Definitions.Divisors.XiMulNu
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FontaineAinfLocalDomainXiAdicOrderStatement
+
+@[expose] public section
 
 open ReciprocityTheory.PGsh.Up GlobalTheory.Sandwich Matrix
 
@@ -11,69 +59,6 @@ namespace GlobalTheory.Sandwich.HodgeTateBound
 section General
 
 variable {A O : Type} [CommRing A] [CommRing O] {h : ℕ}
-
-theorem right_cancel [IsDomain A] {F G : Matrix (Fin h) (Fin h) A} {μ : A} (hμ : μ ≠ 0)
-    (hGF : G * F = μ • (1 : Matrix (Fin h) (Fin h) A)) {X Y : Matrix (Fin h) (Fin h) A}
-    (hX : X * F = Y * F) : X = Y := by
-  have hdet : F.det ≠ 0 := by
-    intro h0
-    have h1 := congrArg Matrix.det hGF
-    rw [Matrix.det_mul, h0, mul_zero, Matrix.det_smul, Matrix.det_one, mul_one] at h1
-    exact pow_ne_zero _ hμ h1.symm
-  have h2 : X * F * F.adjugate = Y * F * F.adjugate := by rw [hX]
-  rw [Matrix.mul_assoc, Matrix.mul_assoc, Matrix.mul_adjugate, Matrix.mul_smul, Matrix.mul_smul,
-    Matrix.mul_one, Matrix.mul_one] at h2
-  ext i j
-  have h3 := congrFun (congrFun h2 i) j
-  simp only [Matrix.smul_apply, smul_eq_mul] at h3
-  exact mul_left_cancel₀ hdet h3
-
-theorem mul_swap [IsDomain A] {F G : Matrix (Fin h) (Fin h) A} {μ : A} (hμ : μ ≠ 0)
-    (hGF : G * F = μ • (1 : Matrix (Fin h) (Fin h) A)) :
-    F * G = μ • (1 : Matrix (Fin h) (Fin h) A) := by
-  apply right_cancel hμ hGF
-  rw [Matrix.mul_assoc, hGF]
-  simp
-
-theorem range_le_ker (θ : A →+* O) {F G : Matrix (Fin h) (Fin h) A} {μ : A} (hμ : θ μ = 0)
-    (hGF : G * F = μ • (1 : Matrix (Fin h) (Fin h) A)) :
-    LinearMap.range (Matrix.toLin' (F.map θ)) ≤ LinearMap.ker (Matrix.toLin' (G.map θ)) := by
-  rintro _ ⟨x, rfl⟩
-  rw [LinearMap.mem_ker, ← Matrix.toLin'_mul_apply, ← Matrix.map_mul, hGF]
-  have : (μ • (1 : Matrix (Fin h) (Fin h) A)).map θ = 0 := by
-    ext i j
-    simp [hμ]
-  rw [this]
-  simp
-
-theorem smul_mem_range [IsDomain A] (θ : A →+* O) (hs : Function.Surjective θ) {ξ ν μ : A}
-    (hker : RingHom.ker θ = Ideal.span {ξ}) (hξ : ξ ≠ 0) (hμ : ξ * ν = μ)
-    {F G : Matrix (Fin h) (Fin h) A} (hFG : F * G = μ • (1 : Matrix (Fin h) (Fin h) A))
-    (f : Fin h → O) (hf : f ∈ LinearMap.ker (Matrix.toLin' (G.map θ))) :
-    θ ν • f ∈ LinearMap.range (Matrix.toLin' (F.map θ)) := by
-  choose m hm using fun i => hs (f i)
-  have hf' : f = θ ∘ m := by
-    funext i
-    exact (hm i).symm
-  rw [LinearMap.mem_ker, Matrix.toLin'_apply, hf'] at hf
-  have h1 : ∀ i, ∃ x, x * ξ = (G *ᵥ m) i := by
-    intro i
-    rw [← Ideal.mem_span_singleton', ← hker, RingHom.mem_ker, RingHom.map_mulVec, hf]
-    rfl
-  choose x hx using h1
-  have h2 : G *ᵥ m = ξ • x := by
-    funext i
-    rw [← hx i, Pi.smul_apply, smul_eq_mul, mul_comm]
-  have h3 : F *ᵥ (G *ᵥ m) = μ • m := by
-    rw [Matrix.mulVec_mulVec, hFG, Matrix.smul_mulVec, Matrix.one_mulVec]
-  rw [h2, Matrix.mulVec_smul, ← hμ] at h3
-  refine ⟨θ ∘ x, ?_⟩
-  funext i
-  have h4 := congrFun h3 i
-  simp only [Pi.smul_apply, smul_eq_mul, mul_assoc] at h4
-  have h5 := mul_left_cancel₀ hξ h4
-  rw [Matrix.toLin'_apply, ← RingHom.map_mulVec, h5, map_mul, hm]
-  rfl
 
 end General
 
@@ -149,8 +134,8 @@ private lemma map_iInf_eigenspace_le_of_intertwine {ι : Type*} {X Y : ι → Ma
   rw [Module.End.mem_eigenspace_iff, toLin'_apply] at hxa ⊢
   rw [toLin'_apply, mulVec_mulVec, hZ, ← mulVec_mulVec, hxa, mulVec_smul]
 
-open Matrix in
 
+open Matrix in
 theorem _root_.GlobalTheory.Sandwich.HodgeTateBound.bound : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C]
     [CharZero C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C]
     [Fact ¬IsUnit (p : O)] [IsAdicComplete (Ideal.span {(p : O)}) O], v.Integers O →

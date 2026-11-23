@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.EllipticCurveLevels.ClosedAtLConclusionOfMem
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsWeight
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolyApproxZeroPadic
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,9 +62,9 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
 theorem RU_mul (x : UA E n) (a b : UA E n → ℂ) : RU E n x (a * b) = RU E n x a * RU E n x b := rfl
 
-theorem isOpen_fix_of {ψ : UA E n → ℂ} (U : Set (finU E n)) (hU : IsOpen U) (h1 : (1 : finU E n) ∈ U)
-    (hs : ∀ k ∈ U, RU E n k ψ = ψ) : IsOpen {k : finU E n | RU E n k ψ = ψ} := by
-  let St : Subgroup (finU E n) :=
+theorem isOpen_fix_of {ψ : UA E n → ℂ} (U : Set (finU (E := E) (n := n))) (hU : IsOpen U) (h1 : (1 : finU (E := E) (n := n)) ∈ U)
+    (hs : ∀ k ∈ U, RU E n k ψ = ψ) : IsOpen {k : finU (E := E) (n := n) | RU E n k ψ = ψ} := by
+  let St : Subgroup (finU (E := E) (n := n)) :=
     { carrier := {k | RU E n k ψ = ψ}
       mul_mem' := fun {a b} ha hb => by
         change RU E n ((a : UA E n) * b) ψ = ψ
@@ -28,13 +72,13 @@ theorem isOpen_fix_of {ψ : UA E n → ℂ} (U : Set (finU E n)) (hU : IsOpen U)
         change RU E n a (RU E n b ψ) = ψ
         rw [hb]; exact ha
       one_mem' := by
-        change RU E n ((1 : finU E n) : UA E n) ψ = ψ
+        change RU E n ((1 : finU (E := E) (n := n)) : UA E n) ψ = ψ
         simp
       inv_mem' := fun {a} ha => by
         change RU E n ((a : UA E n)⁻¹) ψ = ψ
         conv_lhs => rw [← (show RU E n (a : UA E n) ψ = ψ from ha)]
         rw [RU_RU, inv_mul_cancel, map_one, Module.End.one_apply] }
-  have : (St : Set (finU E n)) ∈ nhds (1 : finU E n) :=
+  have : (St : Set (finU (E := E) (n := n))) ∈ nhds (1 : finU (E := E) (n := n)) :=
     Filter.mem_of_superset (hU.mem_nhds h1) hs
   exact Subgroup.isOpen_of_mem_nhds St this
 

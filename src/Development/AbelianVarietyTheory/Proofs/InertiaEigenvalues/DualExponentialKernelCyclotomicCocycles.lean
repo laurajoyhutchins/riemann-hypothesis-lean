@@ -1,19 +1,66 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardCocyclesCharRepModPowLeOfDuality
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DependentOfCardLe
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DualExponentialExistsUniqueCyclotomicLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DualExponentialImageContainsLattice
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsDegree
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsForallEqPowOfPowEqSelf
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFrobeniusAndExponentModEq
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GalExtCContinuous
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InertiaFix
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCycCycChar
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadicNormZpowSubOnePadicValInt
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PowMulMemLatIff
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DualExponentialExistsUniqueCyclotomicLevel
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DualExponentialImageContainsLattice
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsForallEqPowOfPowEqSelf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InertiaFix
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFrobeniusAndExponentModEq
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsDegree
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardCocyclesCharRepModPowLeOfDuality
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DependentOfCardLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc GlobalTheory.Cyc.TwistLift GlobalTheory.ExpImage
 
@@ -52,6 +99,7 @@ theorem cocycles_dependent (hT : Formalism.GaloisCohomology.LocalTateDualityK) (
     exact (hχ.continuous.comp (continuous_subtype_val.comp hΦ1)).zpow₀ _
       fun g => Or.inl (Units.ne_zero _)
   obtain ⟨g₀, hg₀, hg₁⟩ := (gen_dense l _ χ (GlobalTheory.InertiaEigenvalues.isActC_galActC l) hχ K s hs).1
+  change g₀ ∈ L.fixingSubgroup at hg₀
   have hg : ‖(χZ (Φ ⟨g₀, hg₀⟩) : ℤ_[l]) * (ψ (Φ ⟨g₀, hg₀⟩)⁻¹ : ℤ_[l]) - 1‖ =
       (l : ℝ) ^ (-(N : ℤ)) := by
     have h1 := LiftExp.norm_zpow_sub_one l s hs _ hg₁ ((e + 1 : ℕ) : ℤ) (by omega)
@@ -60,6 +108,8 @@ theorem cocycles_dependent (hT : Formalism.GaloisCohomology.LocalTateDualityK) (
     push_cast
     rw [hχZ, hψ, hN]
     push_cast at h1 ⊢
+    have hcast : (e : ℚ) + 1 = ((e + 1 : ℕ) : ℚ) := by push_cast; rfl
+    rw [hcast, padicValRat.of_nat, ← Nat.padicValNat_def] at h1
     rw [← h1]
     congr 2
     simp only [map_inv, MulEquiv.symm_apply_apply, Subgroup.coe_inv, Units.val_inv_eq_inv_val,
@@ -102,7 +152,7 @@ theorem expStar_add {z z' : GQ l → ℚ_[l]} {α α' : Om l} (h : ExpStar LT G 
   · simp only [h1.2.2 σ hσ τ hτ, h1'.2.2 σ hσ τ hτ]
     ring
   · convert add_mem (h2 σ hσ) (h2' σ hσ) using 1
-    simp only [map_add]
+    simp only [map_add (f := _)]
     ring
 
 theorem expStar_smul {z : GQ l → ℚ_[l]} {α : Om l} (c : ℚ_[l]) (h : ExpStar LT G e z α) :

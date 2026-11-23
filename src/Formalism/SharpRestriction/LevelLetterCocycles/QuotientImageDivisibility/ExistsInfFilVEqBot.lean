@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.WeaklyAdmissibleFiltrations.Statement
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ExistsInfFilVEqBot
+public import Formalism.WeaklyAdmissibleFiltrations.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -29,7 +77,7 @@ private theorem range_tensor_map_subtype_mono {S T : Submodule Qp BdR} (h : S �
   | zero => simp
   | tmul x y => exact LinearMap.mem_range.mpr ⟨x ⊗ₜ[Qp] ⟨(y : BdR), h y.2⟩, by simp⟩
   | add w₁ w₂ h₁ h₂ =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem h₁ h₂
 
 theorem filVB_anti : Antitone (FilV PD (LL := LL) (V := V)) := by
@@ -71,7 +119,7 @@ theorem coord_mem {ι : Type} (b : Basis ι Qp V) (a : ℤ) (z : V ⊗[Qp] BdR)
       TensorProduct.equivFinsuppOfBasisLeft_apply_tmul_apply]
     exact Submodule.smul_of_tower_mem (PD.Fil a) _ y.2
   | add w₁ w₂ h₁ h₂ =>
-    rw [map_add, map_add, Finsupp.add_apply]
+    rw [map_add (f := _), map_add (f := _), Finsupp.add_apply]
     exact add_mem h₁ h₂
 
 theorem filV_sep (z : V ⊗[Qp] BdR) (hz : ∀ a : ℤ, z ∈ FilV PD (LL := LL) (V := V) a) : z = 0 := by
@@ -104,22 +152,7 @@ theorem exists_le_filV (D : Submodule LL (V ⊗[Qp] BdR)) [FiniteDimensional LL 
 
 theorem exists_inf_filV_eq_bot (D : Submodule LL (V ⊗[Qp] BdR)) [FiniteDimensional LL D] :
     ∃ a : ℤ, D ⊓ FilV PD (LL := LL) (V := V) a = ⊥ := by
-  let S : ℤ → Submodule LL D := fun a => (Formalism.WeaklyAdmissibleFiltrations.FilV PD (LL := LL) (V := V) a).comap D.subtype
-  have hex : ∃ n : ℕ, ∃ a : ℤ, finrank LL (S a) = n := ⟨_, 0, rfl⟩
-  obtain ⟨a₀, ha₀⟩ := Nat.find_spec hex
-  refine ⟨a₀, eq_bot_iff.mpr ?_⟩
-  rintro x ⟨hxD, hxF⟩
-  rw [Submodule.mem_bot]
-  refine filV_sep PD (LL := LL) x fun b => ?_
-  rcases le_total b a₀ with hb | hb
-  · exact filVB_anti PD hb hxF
-  · have hle : S b ≤ S a₀ := Submodule.comap_mono (filVB_anti PD hb)
-    have heq : S b = S a₀ :=
-      Submodule.eq_of_le_of_finrank_eq hle
-        (le_antisymm (Submodule.finrank_mono hle) (ha₀ ▸ Nat.find_min' hex ⟨b, rfl⟩))
-    have hx : (⟨x, hxD⟩ : D) ∈ S a₀ := hxF
-    rw [← heq] at hx
-    exact hx
+  apply Formalism.MainNotions.N.Ln34.CrystallineExponents.exists_inf_filV_eq_bot <;> assumption
 
 end Fil
 

@@ -1,5 +1,51 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.JacobiCharacterSums.TailKernel
-import Formalism.LandauZeroFreeBounds.ExceptionalZeroBounds.PerronHorizontalSegmentBound
+module
+
+public import Formalism.LandauZeroFreeBounds.LogDerivRegionChiOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex MeasureTheory
 
@@ -92,7 +138,7 @@ theorem tc_cont {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (hχ : χ �
       (hd.analyticAt _).deriv.continuousAt
     have hcp : ContinuousAt (fun s : ℂ => (y : ℂ) ^ s) ((σ : ℂ) + (u : ℂ) * I) :=
       continuousAt_const_cpow (Complex.ofReal_ne_zero.2 hy.ne')
-    apply ContinuousAt.div
+    apply ContinuousAt.div₀
     · exact ((hdL.div hLc hL).neg).mul hcp
     · fun_prop
     · exact mul_ne_zero hs0 hs1
@@ -195,7 +241,7 @@ theorem tc_left_int {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (hχ : 
     rw [div_le_div_iff₀ (by linarith) hpos]
     linarith
   have hgc : Continuous (fun u : ℝ => 2 / (δ + |u|)) :=
-    continuous_const.div (by fun_prop)
+    continuous_const.div₀ (by fun_prop)
       (fun u => (by have := abs_nonneg u; linarith : (0 : ℝ) < δ + |u|).ne')
   have hg : IntervalIntegrable (fun u : ℝ => M * (4 * η * z ^ σ) * (2 / (δ + |u|)))
       MeasureTheory.volume (-T) T :=

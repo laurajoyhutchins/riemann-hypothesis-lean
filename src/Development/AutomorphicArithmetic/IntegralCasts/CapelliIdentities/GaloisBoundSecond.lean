@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -87,7 +140,7 @@ private lemma key {F : Type} [Field F] [NumberField F] [NumberField.IsTotallyRea
     have h1 := sep N hN I x0 0 (hmem x0 hx0).2.1 ⟨0, I.zero_mem, by simp⟩ (hmem x0 hx0).1
     refine h1.trans ?_
     rw [← hcard, ← Finset.card_univ, ← Finset.prod_const]
-    refine Finset.prod_le_prod (fun w _ => w.1.nonneg _) fun w _ => ?_
+    refine Finset.prod_le_prod₀ (fun w _ => w.1.nonneg _) fun w _ => ?_
     rw [sub_zero, hwN, hC, mul_comm]
     exact mul_le_mul_of_nonneg_right ((hmem x0 hx0).2.2 w) hNr.le
   have hsC : s ≤ C := by
@@ -122,7 +175,7 @@ private lemma key {F : Type} [Field F] [NumberField F] [NumberField.IsTotallyRea
     have h1 := sep N hN I x x' (hmem x hx).2.1 (hmem x' hx').2.1 hne
     have hz : (N : F) * (x - x') ≠ 0 := mul_ne_zero hN'F (sub_ne_zero.2 hne)
     have h2 : ∏ w : InfinitePlace F, w ((N : F) * (x - x')) < ∏ _w : InfinitePlace F, s := by
-      refine Finset.prod_lt_prod_of_nonempty (fun w _ => w.pos_iff.2 hz) (fun w _ => ?_)
+      refine Finset.prod_lt_prod_of_nonempty₀ (fun w _ => w.pos_iff.2 hz) (fun w _ => ?_)
         Finset.univ_nonempty
       have hw := congrFun hff w
       have h3 := Int.abs_sub_lt_one_of_floor_eq_floor hw

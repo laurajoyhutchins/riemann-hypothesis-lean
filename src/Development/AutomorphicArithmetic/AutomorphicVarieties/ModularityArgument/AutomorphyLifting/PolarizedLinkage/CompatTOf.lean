@@ -1,17 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.GalUnitaryT
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.RcUnlinkedChars
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SatWDCharPolChars
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupercuspidalSupportTwistNuCharacters
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalContragredientMonomial
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupercuspidalSupportCharacters
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.WeakRepIso
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FontaineParameterInvariantUnderConjugation
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadicHodgePropertiesConjInvariant
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.RecTExists
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.GalUnitaryT
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BernsteinZelevinskyFinitenessHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatakeOfIsLocComp
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodToralOfIsSubquotientProdIrr
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasSatakeGLOfHasSatakeParametersPrincipalSeriesStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LanglandsClassificationSupercuspidalSupportMulti
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalLanglandsExtensionPreservesCuspidal
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadicHodgePropertiesConjInvariant
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SupercuspidalSupportUniqueGL
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WeilDeligneCharpolyTwistSpecial
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsEquivOfMapEq
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.Mono0OfLpDimEqOne
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.WeilDeligneParamMonodromyEqZeroIff
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FontaineParameterInvariantUnderConjugation
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SatWDCharPolChars
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalContragredientMonomial
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupercuspidalSupportCharacters
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupercuspidalSupportTwistNuCharacters
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LevelIso
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.LocalEmbeddingNorms.SuppFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.NormAbsPowUnif
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.PlainIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.SphUnl
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.RecTExists
 import Development.AutomorphicArithmetic.Foundations.LocalLanglands.Multi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.SphUnl
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.PlainIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LeviSmoothLocalization.PrincipalSeriesMatching.NormAbsPowUnif
+import GroundTheory.ProfiniteCohomology.LocalClassFormation.UnramifiedRes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.RealGaloisRepresentations.IwahoriSphericalTransfer.Imports
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +78,7 @@ variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAl
   {A : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 E)} {h : IsPlaceOver A w}
 
 private theorem charPol_chars {a : Weil h →* (w.adicCompletion E)ˣ} {ha : IsLocalArtin h a}
-    {rc : IrrGL (w.adicCompletion E) → WD h} (H : LawsT a ha rc) (x : IrrGL (w.adicCompletion E)) {n : ℕ}
+    {rc : IrrGL (k := w.adicCompletion E) → WD h} (H : LawsT a ha rc) (x : IrrGL (k := w.adicCompletion E)) {n : ℕ}
     (ξ : Fin n → ((w.adicCompletion E)ˣ →* ℂˣ)) (hξ : ∀ j, IsSmoothChar (ξ j)) (hs : HasSupport x.rep (chars ξ hξ))
     (hu : Unlinked (chars ξ hξ)) (g : Weil h) : (rc x).charPol g = ∏ j, (X - C ((ξ j (a g) : ℂˣ) : ℂ)) := by
   haveI : CharZero (w.adicCompletion E) := charZero_of_injective_algebraMap (algebraMap E _).injective
@@ -89,7 +138,7 @@ variable {E Ω : Type} [Field E] [NumberField E] [IsCMField E] [Field Ω] [Algeb
 
 private theorem rec_eq_sat (hn : 1 ≤ n) (π : CuspSub E n) {w : HeightOneSpectrum (𝓞 E)} {A : ValuationSubring Ω}
     {h : IsPlaceOver A w} {σ : SmIrr (GL (Fin n) (w.adicCompletion E))} (hσ : π.IsLocComp w σ) {B : Multiset ℂˣ}
-    (hB : (CG.mk π).HasSat w B) {rc : IrrGL (w.adicCompletion E) → WD h} (hrc : IsRecT h rc)
+    (hB : (CG.mk π).HasSat w B) {rc : IrrGL (k := w.adicCompletion E) → WD h} (hrc : IsRecT h rc)
     (hP : PlainTor (IrrGL.of σ.ρ σ.smooth σ.irred)) (hm : (rc (algNorm σ)).mono0) : rc (algNorm σ) = satWD h n B := by
   haveI : CharZero (w.adicCompletion E) := charZero_of_injective_algebraMap (algebraMap E _).injective
   obtain ⟨a, ha, hL⟩ := hrc
@@ -150,7 +199,7 @@ private theorem plain_all (hn : 1 ≤ n) {π : CuspSub F n} {w : HeightOneSpectr
   exact ⟨s', hs', h1, hu⟩
 
 private theorem gd_of (H : PlainRec) (hn : 1 ≤ n) {π : CuspSub F n} {w : HeightOneSpectrum (𝓞 F)} {A : ValuationSubring Ω}
-    {h : IsPlaceOver A w} {rc : IrrGL (w.adicCompletion F) → WD h} (hrc : IsRecT h rc)
+    {h : IsPlaceOver A w} {rc : IrrGL (k := w.adicCompletion F) → WD h} (hrc : IsRecT h rc)
     {σ : SmIrr (GL (Fin n) (w.adicCompletion F))} (hσ : π.IsLocComp w σ)
     (hall : ∀ σ', π.IsLocComp w σ' → PlainTor (IrrGL.of σ'.ρ σ'.smooth σ'.irred)) :
     UpperTheory.GalStar.Tor (rc (algNorm σ)) ∧ (rc (algNorm σ)).mono0 := by

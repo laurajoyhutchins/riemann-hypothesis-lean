@@ -1,5 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WaveOperatorLeL2Subspace
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DecayPairEstimate
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DecayPairEstimate
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.FsvMulFsvNeg
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.WaveOperatorLeL2Subspace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped Matrix ComplexConjugate
@@ -75,7 +123,7 @@ include hμ in
 theorem formP_add_right_of_mem_squareIntegrable {u v1 v2 : RadSp k r z z' π π'} (hu : u ∈ squareIntegrableSmoothSubmoduleGL k r z z' π π' μ hμ)
     (h1 : v1 ∈ squareIntegrableSmoothSubmoduleGL k r z z' π π' μ hμ) (h2 : v2 ∈ squareIntegrableSmoothSubmoduleGL k r z z' π π' μ hμ) :
     LocFacts₂ μ 0 u (v1 + v2) c = LocFacts₂ μ 0 u v1 c + LocFacts₂ μ 0 u v2 c := by
-  rw [formP_swap_eq_conj, formP_add_left_of_mem_squareIntegrable μ hμ c h1 h2 hu, map_add, ← formP_swap_eq_conj, ← formP_swap_eq_conj]
+  rw [formP_swap_eq_conj, formP_add_left_of_mem_squareIntegrable μ hμ c h1 h2 hu, map_add (f := _), ← formP_swap_eq_conj, ← formP_swap_eq_conj]
 
 theorem formP_smul_right_eq_conj_mul (u v : RadSp k r z z' π π') (a : ℂ) :
     LocFacts₂ μ 0 u (a • v) c = conj a * LocFacts₂ μ 0 u v c := by
@@ -248,7 +296,7 @@ theorem clsDecayW (hR : RadDecay) (S : Type) [Fintype S] [DecidableEq S] (P : M.
     obtain ⟨C1, hC1⟩ := ihx hx
     obtain ⟨C2, hC2⟩ := ihy hy
     refine ⟨C1 + C2, fun s Wv hWv => ?_⟩
-    rw [map_add, formP_add_left_of_mem_squareIntegrable μ hμ c (hWJ s Wv hWv x hx) (hWJ s Wv hWv y hy) (hL2 hΨ), add_mul]
+    rw [map_add (f := _), formP_add_left_of_mem_squareIntegrable μ hμ c (hWJ s Wv hWv x hx) (hWJ s Wv hWv y hy) (hL2 hΨ), add_mul]
     exact (norm_add_le _ _).trans (add_le_add (hC1 s Wv hWv) (hC2 s Wv hWv))
   | smul a x hx ihx =>
     obtain ⟨C1, hC1⟩ := ihx hx
@@ -273,7 +321,7 @@ theorem form_eq_sum_components {k r : ℕ} {z z' : Fin (2 * r + k + 1) → ℂ} 
     (hv : ∀ a, v a ∈ squareIntegrableSmoothSubmoduleGL k r z z' π π' μ hμ) (c : Fin r → ℂ) :
     form μ 0 u v c = ∑ a, LocFacts₂ μ 0 (u a) (v a) c := by
   unfold form LocFacts₂
-  rw [← integral_finset_sum]
+  rw [← integral_finsetSum]
   · congr 1
     funext c'
     rw [Finset.mul_sum]

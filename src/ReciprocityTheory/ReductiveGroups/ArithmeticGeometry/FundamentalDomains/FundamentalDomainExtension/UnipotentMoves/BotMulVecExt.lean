@@ -1,6 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainExtension.UnipotentMoves.KatoClassHeckeEulerFactorRelation
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LowBlock
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainExtension.UnipotentMoves.KatoClassHeckeEulerFactorRelation
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LowBlock
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.NsqMulVecLeOpN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace UnipMove.GraphH
 
@@ -37,15 +90,11 @@ lemma en_add_le {n : ℕ} (u v : Fin n → ℂ) : en (u + v) ≤ en u + en v := 
   unfold en
   first
     | (rw [WithLp.toLp_add]; exact norm_add_le _ _)
-    | exact norm_add_le _ _
-    | simpa using norm_add_le (WithLp.toLp 2 u : EuclideanSpace ℂ (Fin n)) (WithLp.toLp 2 v)
 
 lemma en_sub_le {n : ℕ} (u v : Fin n → ℂ) : en (u - v) ≤ en u + en v := by
   unfold en
   first
     | (rw [WithLp.toLp_sub]; exact norm_sub_le _ _)
-    | exact norm_sub_le _ _
-    | simpa using norm_sub_le (WithLp.toLp 2 u : EuclideanSpace ℂ (Fin n)) (WithLp.toLp 2 v)
 
 lemma eq_zero_of_en {n : ℕ} (d : Fin n → ℂ) (h : en d = 0) : d = 0 := by
   rw [en_eq_sqrt, Real.sqrt_eq_zero (nsq_nonneg_unipotent_moves d)] at h
@@ -83,8 +132,6 @@ lemma re_conj_mul (w : ℂ) (s : ℝ) : (conj w * (w * (s : ℂ))).re = s * ‖w
     Complex.ofReal_re, Complex.ofReal_im]
   first
     | (rw [Complex.sq_norm, Complex.normSq_apply]; ring)
-    | (rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]; ring)
-    | (simp [Complex.sq_abs, Complex.normSq_apply]; ring)
 
 section Blocks
 
@@ -175,8 +222,6 @@ lemma blkB_low (Z : X.Coord) (τ : X.Ψ) : blkB X (X.lowBlock Z τ) = Matrix.of 
   have hne : X.p0 + (m : ℕ) ≠ (b : ℕ) := by omega
   first
     | simp [blkB, Data.lowBlock, nI, Fin.ext_iff, hne, hb]
-    | (simp only [blkB, Data.lowBlock, Matrix.of_apply, Fin.ext_iff, Fin.coe_castLE, nI]
-       split_ifs <;> first | (simp_all; done) | omega | (congr 1 <;> ext <;> simp))
 
 end Blocks
 
@@ -195,7 +240,6 @@ lemma fin_split (i : Fin r) :
 lemma col_mul (P Q : Matrix (Fin r) (Fin r) ℂ) (j : Fin r) : col (P * Q) j = P *ᵥ col Q j := by
   first
     | rfl
-    | (funext k; simp [col, Matrix.mul_apply, Matrix.mulVec, dotProduct])
 
 lemma span_cols_eq {p : ℕ} (u w : Fin p → Fin r → ℂ) (A : Matrix (Fin p) (Fin p) ℂ)
     (hA : IsUnit A.det) (h : ∀ a, u a = ∑ b, A b a • w b) :
@@ -237,8 +281,9 @@ private lemma hermC_mulVec_mulVec_eq_sum_gram' (τ : E →+* ℂ) (G : Matrix (F
   have e1 : ∀ a b, (M *ᵥ c) a * τ (G a b) * conj ((M *ᵥ d) b) =
       ∑ j, ∑ k, M a j * c j * τ (G a b) * (conj (M b k) * conj (d k)) := by
     intro a b
+
     rw [show (M *ᵥ c) a = ∑ j, M a j * c j from rfl, show (M *ᵥ d) b = ∑ k, M b k * d k from rfl,
-      map_sum, Finset.sum_mul, Finset.sum_mul_sum]
+    map_sum, Finset.sum_mul, Finset.sum_mul_sum]
     simp only [map_mul]
   have e2 : ∀ j k, c j * gram τ G M j k * conj (d k) =
       ∑ a, ∑ b, c j * (M a j * τ (G a b) * conj (M b k)) * conj (d k) := by
@@ -257,8 +302,6 @@ private lemma col_eq_mulVec_single (M : Matrix (Fin r) (Fin r) ℂ) (j : Fin r) 
   funext k
   first
     | simp [col, Matrix.mulVec, dotProduct, Pi.single_apply]
-    | simp [col, Matrix.mulVec_single_one]
-    | (rw [Matrix.mulVec_single_one]; rfl)
 
 private lemma hermC_mat_mulVec_eq_sum_sgn_of_isOrtho {x : Frame X.Ψ r} (ho : X.IsOrtho x) (τ : X.Ψ) (c d : Fin r → ℂ) :
     hermC τ.1 X.Gm (mat x τ *ᵥ c) (mat x τ *ᵥ d) =
@@ -267,7 +310,6 @@ private lemma hermC_mat_mulVec_eq_sum_sgn_of_isOrtho {x : Frame X.Ψ r} (ho : X.
   first
     | simp only [Matrix.diagonal_apply, mul_ite, ite_mul, mul_zero, zero_mul, Finset.sum_ite_eq,
         Finset.mem_univ, if_true]
-    | simp [Matrix.diagonal_apply]
 
 lemma maj_ortho {x : Frame X.Ψ r} (ho : X.IsOrtho x) (τ : X.Ψ) (c : Fin r → ℂ) :
     X.maj x τ (mat x τ *ᵥ c) = nsq c := by

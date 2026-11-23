@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Defs
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.LinearAlgebra.Span.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Span.Basic
+
+@[expose] public section
 
 namespace PI.LevelKSplit.W.Loc
 
@@ -6,22 +55,7 @@ open Submodule
 
 variable {O B : Type} [CommRing O] [CommRing B] [Algebra O B] {n r : ℕ}
 
-def dl (c : Fin n → B) : (Fin n → B) →ₗ[B] B where
-  toFun y := c ⬝ᵥ y
-  map_add' x y := dotProduct_add c x y
-  map_smul' a y := by simp [dotProduct_smul]
 
-theorem dl_apply (c y : Fin n → B) : dl c y = c ⬝ᵥ y := rfl
-
-omit [CommRing O] [Algebra O B] in
-theorem dl_sum_ite (c : Fin n → B) (v : Fin r → Fin n → B) (d : Fin r → B) (b : Fin r)
-    (h : ∀ a, c ⬝ᵥ v a = if a = b then 1 else 0) : dl c (∑ a, d a • v a) = d b := by
-  simp [map_sum, dl_apply, dotProduct_smul, h]
-
-omit [CommRing O] [Algebra O B] in
-theorem dl_sum_zero (c : Fin n → B) (v : Fin r → Fin n → B) (d : Fin r → B)
-    (h : ∀ a, c ⬝ᵥ v a = 0) : dl c (∑ a, d a • v a) = 0 := by
-  simp [map_sum, dl_apply, dotProduct_smul, h]
 
 theorem mulVec_span_stable (A : Matrix (Fin n) (Fin n) B) (G : Set (Fin n → B))
     (hG : ∀ x ∈ G, A.mulVec x ∈ span O G) : ∀ x ∈ span O G, A.mulVec x ∈ span O G := by

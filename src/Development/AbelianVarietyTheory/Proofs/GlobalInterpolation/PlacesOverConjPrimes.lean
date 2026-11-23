@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemUnitOff
-import Formalism.LocalRingCardinality.Lemmas
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemUnitOff
+public import Formalism.LocalRingCardinality.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
+public import Formalism.LocalToGlobal.Columns.DecoFin
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,12 +50,6 @@ open Formalism.BasicNotions Classical NumberField IsDedekindDomain Matrix Global
 open Formalism.MainNotions.product_first_zeroth_parts (Ow ten blk CSpan IntSpan wSh)
 open Formalism.L2.Col (conjPrime₂ PosStar hStd UF Sp)
 
-theorem exists_below {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] (j : K →+* L)
-    (W : HeightOneSpectrum (𝓞 L)) : ∃ Q : HeightOneSpectrum (𝓞 K),
-      ∀ r : 𝓞 K, r ∈ Q.asIdeal ↔ RingOfIntegers.mapRingHom j r ∈ W.asIdeal := by
-  letI : Algebra K L := j.toAlgebra
-  exact ⟨W.under (𝓞 K), fun r => Iff.rfl⟩
-
 theorem mem_valO_of_below {K L : Type} [Field K] [NumberField K] [Field L] [NumberField L] (j : K →+* L)
     (W : HeightOneSpectrum (𝓞 L)) (Q : HeightOneSpectrum (𝓞 K))
     (h : ∀ r : 𝓞 K, r ∈ Q.asIdeal ↔ RingOfIntegers.mapRingHom j r ∈ W.asIdeal) (x : K) :
@@ -24,7 +58,7 @@ theorem mem_valO_of_below {K L : Type} [Field K] [NumberField K] [Field L] [Numb
   haveI : W.asIdeal.LiesOver Q.asIdeal := ⟨Ideal.ext fun r => h r⟩
   rw [mem_valO, mem_valO, show j x = algebraMap K L x from rfl,
     ← HeightOneSpectrum.valuation_liesOver L Q W x]
-  exact pow_le_one_iff (Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver W.asIdeal Q.ne_bot)
+  exact pow_le_one_iff (Ideal.ramificationIdx_pos_of_isDedekindDomain' W.asIdeal Q.ne_bot).ne'
 
 theorem mem_Ow_iff_valO (D : D7) (w : D.what₂.places.Pl) (x : D.what₂.LL) : x ∈ Ow D w ↔ x ∈ valO (D.plEq w) :=
   D.val_nonneg_iff w x

@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CupProducts
-import GroundTheory.ProfiniteCohomology.CupProducts.Functoriality
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Descent
+module
+
+public import GroundTheory.ProfiniteCohomology.CupProducts.Functoriality
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+public import Mathlib.Algebra.Homology.ShortComplex.Linear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -22,8 +65,8 @@ theorem cochainsMap_smul (c : k) (f : A ⟶ B) : cochainsMap (c • f) = c • c
   funext y
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem cohomologyMap_smul (c : k) (f : A ⟶ B) (n : ℕ) :
     cohomologyMap (c • f) n = c • cohomologyMap f n := by
   rw [cohomologyMap, cochainsMap_smul]
@@ -37,32 +80,22 @@ section Morphisms
 
 variable (T : Rep.{u} k G) {M : Rep.{u} k G}
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 noncomputable def tensorRightMor (m : M) (hm : ∀ g : G, M.ρ g m = m) : T ⟶ T ⊗ M :=
   Rep.ofHom ⟨(TensorProduct.mk k T M).flip m, fun g => by
     ext t
     simp [Representation.tprod_apply, hm g]⟩
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
-@[simp]
-theorem tensorRightMor_hom_apply (m : M) (hm : ∀ g : G, M.ρ g m = m) (t : T) :
-    (tensorRightMor T m hm).hom t = t ⊗ₜ[k] m :=
-  rfl
+
 
 omit [TopologicalSpace G] [IsTopologicalGroup G] in
-
 noncomputable def tensorFormMor (f : M →ₗ[k] k) (hf : ∀ (g : G) (m : M), f (M.ρ g m) = f m) :
     T ⊗ M ⟶ T :=
   Rep.ofHom ⟨(TensorProduct.rid k T).toLinearMap ∘ₗ LinearMap.lTensor T f, fun g => by
     ext t m
     simp [Representation.tprod_apply, hf g]⟩
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
-@[simp]
-theorem tensorFormMor_hom_tmul (f : M →ₗ[k] k) (hf : ∀ (g : G) (m : M), f (M.ρ g m) = f m)
-    (t : T) (m : M) : (tensorFormMor T f hf).hom (t ⊗ₜ[k] m) = f m • t := by
-  simp [tensorFormMor]
 
 end Morphisms
 

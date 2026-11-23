@@ -1,10 +1,53 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnramifiedSubfieldLeCyclotomicExt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqStdPowerSeriesAtZeroStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLevelExpansionAtRootOfUnityStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineFrobeniusBijOnLettersDirectSumStatement
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnramifiedSubfieldLeCyclotomicExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineFrobeniusBijOnLettersDirectSumStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqStdPowerSeriesAtZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLevelExpansionAtRootOfUnityStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc TensorProduct GlobalTheory.NL GlobalTheory.NL.Model
 
@@ -74,8 +117,9 @@ theorem tw_conv {c : L} (hc : c ≠ 0) (Φ : M →ₗ[L] M) (a : PowerSeries L) 
     tw c Φ (conv a u) = conv (PowerSeries.rescale c a) (tw c Φ u) := by
   funext k
   set N := (k - m).toNat + 1 with hN
+
   rw [tw_apply, conv_eq_sum _ hm k N (by omega), conv_eq_sum _ (tw_van c Φ hm) k N (by omega),
-    map_sum, Finset.smul_sum]
+  map_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [tw_apply, map_smul, smul_smul, smul_smul, PowerSeries.coeff_rescale, zpow_sub₀ hc, zpow_natCast]
   congr 1
@@ -119,7 +163,7 @@ theorem std_step {A DD : Type} [CommRing A] [AddCommGroup DD] [Module A DD] (N :
       refine ⟨m + m', key ▸ Subtype.mem _, fun k hk => ?_⟩
       have : (⟨Q ^ (m + m') • (z + z'), key ▸ Subtype.mem _⟩ : ↥N) =
           Q ^ m' • (⟨_, hm⟩ : ↥N) + Q ^ m • (⟨_, hm'⟩ : ↥N) := Subtype.ext key
-      rw [this, map_add, hsm, hsm, Pi.add_apply, conv_van _ hz k hk, conv_van _ hz' k hk, add_zero]
+      rw [this, map_add (f := _), hsm, hsm, Pi.add_apply, conv_van _ hz k hk, conv_van _ hz' k hk, add_zero]
     | smul a z _ hz =>
       obtain ⟨m, hm, hz⟩ := hz
       have key : Q ^ m • (a • z) = ((a • (⟨_, hm⟩ : ↥N) : ↥N) : DD) := by
@@ -149,7 +193,7 @@ theorem std_step {A DD : Type} [CommRing A] [AddCommGroup DD] [Module A DD] (N :
       rw [heφ x m hm, ← conv_mul _ _ (tw_van c Φ (hv' x)), mul_assoc, hw, mul_one,
         tw_conv hc Φ a (hv' x)]
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add f g _ _ hf hg => rw [map_add]; exact Submodule.add_mem _ hf hg
+    | add f g _ _ hf hg => rw [map_add (f := _)]; exact Submodule.add_mem _ hf hg
     | smul a f _ hf => rw [map_smul]; exact Submodule.smul_mem _ a hf
   intro f
   constructor
@@ -180,8 +224,8 @@ theorem std_step {A DD : Type} [CommRing A] [AddCommGroup DD] [Module A DD] (N :
 
 end Series
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 2000000 in
+
+
 
 theorem lat_low : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; let E := ((F l).E K s LL h).tie; let C := Cm l; ∀ T : Lt K LL, IsCrys ((D.loc l).PD K) T.ρ → ∀ (i : Let K) (ζ : ↥LL.1), ζ ^ (l ^ (s - 1)) = 1 → Std (Di (HW l) h T i) (Lat C h T i ζ) := by
   intro D HW F Cm l hl K s LL h W E C T hT

@@ -1,6 +1,55 @@
-import Formalism.GaussJetBounds.GenLogInverse
-import Formalism.GaussJetBounds.StatementI
-import Formalism.GaussJetBounds.MonoShapeTop
+module
+
+public import Formalism.GaussJetBounds.StatementI
+public import Formalism.GaussJetBounds.GaussJetProofs.MinorProductSupportTop
+public import Formalism.GaussJetBounds.MonoShapeTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -13,7 +62,7 @@ open Formalism.IncomingBounds MvPolynomial
 
 def opInt (K : Type u) [NormedField K] [IsUltrametricDist K] (σ : Type) :
     Subring (MvPolynomial σ K) where
-  carrier := {P | ∀ κ, ‖coeff κ P‖ ≤ 1}
+  carrier := {P | ∀ κ, ‖AddMonoidAlgebra.coeff P κ‖ ≤ 1}
   mul_mem' := by
     intro P Q hP hQ κ
     classical
@@ -28,14 +77,14 @@ def opInt (K : Type u) [NormedField K] [IsUltrametricDist K] (σ : Type) :
     split_ifs <;> simp
   add_mem' := by
     intro P Q hP hQ κ
-    rw [coeff_add]
+    rw [MvPolynomial.coeff_add]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hP _) (hQ _))
   zero_mem' := by
     intro κ
     simp
   neg_mem' := by
     intro P hP κ
-    rw [coeff_neg, norm_neg]
+    rw [MvPolynomial.coeff_neg, norm_neg]
     exact hP κ
 
 def opA {K : Type u} [Field K] {d N0 : ℕ} (TT : Finset (ZMod d))
@@ -345,7 +394,7 @@ theorem thmAOp : ThmAOp.{u} := by
   have hjet := thmAJetA K l d N0 N1 hl hl3 hd hde hnl h0 K0 hK0 ζ hζ be hbe x hx g hg0 hg U hU ε hε
     TT nu1 nu2 size h21 h1s a ha hsa spec κ ?_ ?_ hspec ?_ hframe
   · rw [mul_assoc, norm_mul]
-    calc ‖coeff κ (∏ s : ZMod d, minorProd (rowOp (N1 := N1) TT T s) (p s) (hp s) (I s))‖ * _
+    calc ‖AddMonoidAlgebra.coeff (∏ s : ZMod d, minorProd (rowOp (N1 := N1) TT T s) (p s) (hp s) (I s)) κ‖ * _
         ≤ 1 * _ := mul_le_mul_of_nonneg_right (hPint κ) (norm_nonneg _)
       _ ≤ _ := by rw [one_mul]; exact hjet
   · intro s hs

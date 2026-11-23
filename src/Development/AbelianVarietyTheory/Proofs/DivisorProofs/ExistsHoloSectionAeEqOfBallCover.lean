@@ -1,7 +1,54 @@
-import ReciprocityTheory.L2DbarEstimates.Imports
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FourSignHolds
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EtaleEmpty
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.L2ExtensionLogCanonical
-import Development.AbelianVarietyTheory.Definitions.Divisors.EtaleEmpty
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+
+@[expose] public section
+
 open MeasureTheory Filter Topology Metric ReciprocityTheory.L2DbarEstimates ReciprocityTheory.L2DbarEstimates.Y GlobalTheory.OTY GlobalTheory.Published.L2Extension
 open scoped ENNReal ContDiff
 
@@ -67,9 +114,10 @@ theorem exists_null (A : WeightedAtlas n Y ι La) (i : ι) (c : V n) (r : ℝ) (
     show (A.chart i).source.piecewise (A.chart i) (fun _ => (0 : V n)) y ∈ T
     rw [Set.piecewise_eq_of_mem _ _ _ hy]
     apply hET
-    simp only [Set.mem_setOf_eq, _root_.not_imp]
-    refine ⟨hb, ?_⟩
-    simpa [Function.comp, (A.chart i).left_inv hy] using hne
+    simp only [Set.mem_setOf_eq]
+    intro heq
+    apply hne
+    simpa [Function.comp, (A.chart i).left_inv hy] using heq hb
 
 theorem continuousOn_g (A : WeightedAtlas n Y ι La) (la : La) (i j : ι) :
     ContinuousOn (A.g la i j) ((A.chart i).source ∩ (A.chart j).source) := by
@@ -124,7 +172,8 @@ theorem main : ∀ (n : ℕ) (Y : Type) [TopologicalSpace Y] [T2Space Y] [Second
         A.g la (C.idx a) (C.idx b) y * u b (A.chart (C.idx b) y)) D :=
       ((hcu a).mono Set.inter_subset_left).sub
         (((continuousOn_g A la (C.idx a) (C.idx b)).mono
-          (fun z hz => ⟨hz.1.1, hz.2.1⟩)).mul ((hcu b).mono Set.inter_subset_right))
+          (show D ⊆ (A.chart (C.idx a)).source ∩ (A.chart (C.idx b)).source from
+            fun z hz => ⟨hz.1.1, hz.2.1⟩)).mul ((hcu b).mono Set.inter_subset_right))
     have hop := hcont.isOpen_inter_preimage ((hBo a).inter (hBo b)) (isOpen_compl_singleton (x := (0 : ℂ)))
     have hsub : D ∩ (fun y => u a (A.chart (C.idx a) y) -
         A.g la (C.idx a) (C.idx b) y * u b (A.chart (C.idx b) y)) ⁻¹' {0}ᶜ ⊆ ⋃ a, M a := by

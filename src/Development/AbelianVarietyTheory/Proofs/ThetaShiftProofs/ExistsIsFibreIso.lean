@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.PullQkSurjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.PullQkSurjective
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -182,9 +228,9 @@ theorem IsFibreIso.zero (hF : Compat φ F) : (DegPre.zF D' F).left ≫ κ = (Deg
       ((congrArg (· ≫ _) z₄).trans ((one_proj hD (T := TF (R := R) F) (T' := TF (R := R') F) (𝟙 _)
         (hF.base.trans (Category.id_comp _).symm)).trans ((Category.id_comp _).trans z₂.symm)))))
 
+
 omit hκ in
 variable (hD κ) in
-
 def SecUp {k : ℕ} {α : D'.X} {β : D.X} (s' : LB.Sec (LB.LinComb D'.P.L (DegPre.famφ D' F α) (DegPre.famε k)))
     (s : LB.Sec (LB.LinComb D.P.L (DegPre.famφ D F β) (DegPre.famε k))) : Prop :=
   ∀ (Z : Scheme.{0}) (r : Z ⟶ (DegPre.BF D' F).left) (z : Z) J J', Good D.P.L z J → Good D'.P.L z J' →
@@ -257,7 +303,7 @@ theorem exists_famUp (hF : Compat φ F) {k : ℕ} (s' : Fam D' F k) :
   refine ⟨⟨s, fun mu β => ?_⟩, hs'⟩
   obtain ⟨mu, rfl⟩ := hD.xe.surjective mu
   obtain ⟨α, rfl⟩ := hD.xe.surjective β
-  have e₁ : hD.xe (α + k • mu) = hD.xe α + k • hD.xe mu := by rw [map_add, map_nsmul]
+  have e₁ : hD.xe (α + k • mu) = hD.xe α + k • hD.xe mu := by rw [map_add (f := _), map_nsmul]
   refine secRel_up hκ hF rfl e₁ ((cPoint_proj hD (T := TF (R := R) F) (T' := TF (R := R') F) (𝟙 _)
     (hF.base.trans (Category.id_comp _).symm) mu).trans (Category.id_comp _)) (trF_eq D' F mu) (trF_eq D F _)
     (hs' _ _ rfl) (hs' _ _ e₁) (fun y J J' hJ hJ' => ?_) (s'.fe mu α)
@@ -312,7 +358,7 @@ theorem phiRel_up (hF : Compat φ F) {k : ℕ} {p : QkPt D F k} {p' : QkPt D' F 
     (ht : ∀ α β, hD.xe α = β → SecUp hD κ (t'.s α) (t.s β)) (H : PhiRel D' F k p' w' s' t') : PhiRel D F k p w s t := by
   intro β
   obtain ⟨α, rfl⟩ := hD.xe.surjective β
-  have e₁ : hD.xe (α + p'.y) = hD.xe α + p.y := by rw [map_add, hy, AddEquiv.apply_symm_apply]
+  have e₁ : hD.xe (α + p'.y) = hD.xe α + p.y := by rw [map_add (f := _), hy, AddEquiv.apply_symm_apply]
   refine secRel_up hκ hF rfl e₁ hg.1 rfl rfl (hs _ _ rfl) (ht _ _ e₁) (fun y J J' hJ hJ' => ?_) (H α)
   have b := pullGt_val hD hg α (𝟙 _) hJ hJ'
   simp only [Category.id_comp] at b
@@ -323,9 +369,9 @@ theorem phiRel_up (hF : Compat φ F) {k : ℕ} {p : QkPt D F k} {p' : QkPt D' F 
   rw [c, c', b, hw y J J' hJ hJ']
   ac_rfl
 
+
 omit hκ in
 variable (hD) in
-
 theorem weilQkIs_pull (hF : Compat φ F) {k : ℕ} {p q : QkPt D F k} {p' q' : QkPt D' F k} (hp : p'.y = hD.xe.symm p.y)
     (hpg : IsPullGtF φ hD F p.g p'.g) (hq : q'.y = hD.xe.symm q.y) (hqg : IsPullGtF φ hD F q.g q'.g) {ζ : F}
     (H : WeilQkIs D F k p q ζ) : WeilQkIs D' F k p' q' ζ := by

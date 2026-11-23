@@ -1,7 +1,55 @@
-import Mathlib
-import Formalism.FlagUnipotentLattices.QDetNegTranspose
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
-open Finset TensorProduct Formalism.HermitianLatticeCounting.S8
+module
+
+public import Formalism.RealPlaceAnalysis.StatementE
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
+
+open Finset TensorProduct
 
 noncomputable section
 
@@ -60,9 +108,9 @@ theorem isPoly_Tm {n : ℕ} (E : Fin n → Fin n → B) (c : ℂ) (a b : Fin n) 
     IsPolyFun (fun u => Tm E (u - c) a b) := by
   unfold Tm
   by_cases h : a = b
-  · simp only [h, if_true, sub_eq_add_neg, map_add]
+  · simp only [h, ite_true, sub_eq_add_neg, map_add (f := _)]
     exact (IsPolyFun.scalar.add (IsPolyFun.const _)).add (IsPolyFun.const _)
-  · simp only [h, if_false]
+  · simp only [h, ite_false]
     exact IsPolyFun.const _
 
 theorem isPoly_qminor {n t : ℕ} (E : Fin n → Fin n → B) (a b : Fin t → Fin n) (c : ℂ) :
@@ -83,13 +131,14 @@ theorem eq_zero_of_eval (P : B[X]) (h : ∀ u : ℂ, P.eval (algebraMap ℂ B u)
     apply Polynomial.funext
     intro u
     have := congrArg ℓ (h u)
+
     rw [eval_eq_sum, Polynomial.sum, map_sum, map_zero] at this
-    rw [eval_zero, ← this, eval_finset_sum]
+    rw [eval_zero, ← this, Polynomial.eval_finsetSum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [← map_pow, ← Algebra.commutes, ← Algebra.smul_def, map_smul, eval_monomial, smul_eq_mul,
       mul_comm]
   have hk := congrArg (fun r => r.coeff k) hq
-  simp only [q, finset_sum_coeff, coeff_monomial, coeff_zero, Finset.sum_ite_eq'] at hk
+  simp only [q, Polynomial.finsetSum_coeff, coeff_monomial_apply, coeff_zero, Finset.sum_ite_eq'] at hk
   by_cases hs : k ∈ P.support
   · simpa [hs] using hk
   · simp [notMem_support_iff.mp hs]
@@ -98,9 +147,6 @@ end
 
 section
 variable {V : Type} [AddCommGroup V] [Module ℂ V] {n : ℕ}
-
-def op (M : Fin n → Fin n → Module.End ℂ V) : Module.End ℂ (V ⊗[ℂ] (Fin n → ℂ)) :=
-  ∑ a, ∑ b, TensorProduct.map (M a b) (stdRep n a b)
 
 end
 

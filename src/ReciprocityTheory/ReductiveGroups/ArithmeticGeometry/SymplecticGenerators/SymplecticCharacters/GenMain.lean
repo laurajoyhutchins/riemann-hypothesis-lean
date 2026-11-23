@@ -1,4 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenFin
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenCol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.GenFin
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 
@@ -180,40 +231,5 @@ theorem spGen : SpGenStatement := by
           rw [← Matrix.mul_assoc, h1, Matrix.one_mul]
   rw [← hOM]
   exact hO
-
-theorem closure_spGens_eq (g : ℕ) :
-    Submonoid.closure (spGens g) = symplecticGroup (Fin g) ℤ := by
-  refine le_antisymm ?_ (fun M hM => spGen g M hM)
-  rw [Submonoid.closure_le]
-  intro M hM'
-  rw [SetLike.mem_coe]
-  rcases hM' with ((⟨S, hS, rfl⟩ | ⟨U, rfl⟩) | hJ)
-  · (first | rw [SymplecticGroup.mem_iff] | rw [Matrix.mem_symplecticGroup_iff])
-    rw [spTransl, Matrix.J, Matrix.fromBlocks_transpose,
-      Matrix.fromBlocks_multiply, Matrix.fromBlocks_multiply]
-    simp [hS.eq]
-  · have hU2 : (U : Matrix (Fin g) (Fin g) ℤ) * (↑U⁻¹ : Matrix (Fin g) (Fin g) ℤ) = 1 := by
-      first
-      | exact Units.mul_inv U
-      | exact Matrix.mul_nonsing_inv _ (Matrix.isUnits_det_units U)
-    have hU : ((↑U⁻¹ : Matrix (Fin g) (Fin g) ℤ)ᵀ) * (U : Matrix (Fin g) (Fin g) ℤ)ᵀ = 1 := by
-      rw [← Matrix.transpose_mul, hU2, Matrix.transpose_one]
-    (first | rw [SymplecticGroup.mem_iff] | rw [Matrix.mem_symplecticGroup_iff])
-    rw [spDiag, Matrix.J, Matrix.fromBlocks_transpose,
-      Matrix.fromBlocks_multiply, Matrix.fromBlocks_multiply]
-    simp [hU, hU2]
-    rw [← Matrix.transpose_mul]
-    first
-    | rw [Matrix.mul_nonsing_inv _ (Matrix.isUnits_det_units U), Matrix.transpose_one]
-    | rw [← Matrix.coe_units_inv, Units.mul_inv, Matrix.transpose_one]
-  · rw [Set.mem_singleton_iff] at hJ
-    rw [hJ]
-    first
-    | exact SymplecticGroup.J_mem
-    | exact Matrix.J_mem
-    | ((first | rw [SymplecticGroup.mem_iff] | rw [Matrix.mem_symplecticGroup_iff])
-       rw [Matrix.J, Matrix.fromBlocks_transpose, Matrix.fromBlocks_multiply,
-         Matrix.fromBlocks_multiply]
-       simp)
 
 end ReciprocityTheory.ChartRestriction.G.Key.Chi

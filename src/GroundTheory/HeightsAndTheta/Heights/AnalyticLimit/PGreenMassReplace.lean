@@ -1,11 +1,65 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.PotentialTheory.ProjectiveLineFubiniStudyFacts
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.GreenMassReplace
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.EnergyStep
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PGreenMassReplaceKappa
+import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PKaehlerBound
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.SystemIndependence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PotentialTheory.AnalyticSubsetChartLocal
+import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
 import ReciprocityTheory.AnalyticForms.PotentialTheory.HessCEqZeroOfEventuallyEqZero
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LogInt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasureA
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PLLocalStatement
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
 import ReciprocityTheory.AnalyticForms.PotentialTheory.SNCAtlas
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.GreenMassReplace
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.EnergyStep
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.SystemIndependence
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PGreenMassReplaceKappa
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.AnalyticLimit
@@ -34,7 +88,15 @@ theorem mInt_nonneg_of_compl {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinH
     (V : Set X) (hAn : A.IsAnalyticSubset Vᶜ) (hint : interior Vᶜ = ∅) (Φ : Fin e → LocPot X)
     (hpot : ∀ i, IsPotential A (Φ i)) (hnn : ∀ i, FormNonneg A V (Φ i)) (f : X → ℝ)
     (hf : ∀ x, 0 ≤ f x) : 0 ≤ mInt A Φ f := by
-  rw [ReciprocityTheory.AnForm.M.mIntCongrNull A Φ Vᶜ hAn hint f (V.indicator f) (fun x hx => by
+  have mIntCongrNull : ∀ (Φ : Fin e → LocPot X) (S : Set X), A.IsAnalyticSubset S →
+      interior S = ∅ → ∀ g g' : X → ℝ, (∀ x ∉ S, g x = g' x) →
+      mInt A Φ g = mInt A Φ g' := by
+    intro Φ S hS hS' g g' hg
+    unfold mInt
+    split_ifs with h
+    · exact ReciprocityTheory.AnForm.M.integralWith_congr_null A h.some Φ hS hS' hg
+    · rfl
+  rw [mIntCongrNull Φ Vᶜ hAn hint f (V.indicator f) (fun x hx => by
     rw [Set.indicator_of_mem (Set.not_notMem.mp hx)])]
   refine SystemIndependence.mInt_nonneg_on A V Φ hpot hnn _ (fun x => ?_)
     (fun x hx => Set.indicator_of_notMem hx _)
@@ -239,6 +301,14 @@ theorem GreenMassReplace.proof : GreenMassReplace.Statement := by
     rw [hsum, levi_add_smul K (contDiffAt_const.mul hu2) hΨ2 w, levi_smul' (-1) hu2 w]
     have hb := abs_le.mp (hK x k y ⟨hyt, trivial, hyΩ⟩ w)
     linarith [hb.2]
+  have mIntCongrNull : ∀ (Φ : Fin (D + 1) → LocPot W) (Z : Set W),
+      S.A.IsAnalyticSubset Z → interior Z = ∅ → ∀ g g' : W → ℝ,
+      (∀ x ∉ Z, g x = g' x) → mInt S.A Φ g = mInt S.A Φ g' := by
+    intro Φ Z hZ hZi g g' hg
+    unfold mInt
+    split_ifs with h
+    · exact ReciprocityTheory.AnForm.M.integralWith_congr_null S.A h.some Φ hZ hZi hg
+    · rfl
   have sE : 0 ≤ -mInt S.A (Fin.cons (LocPot.ofFun ut) Φ') H +
       K * mInt S.A (Fin.cons S.Om.pot Φ') H := by
     have hm1 := ReciprocityTheory.AnForm.M.isPotentialRsmul S.A (-1) _ hutpot
@@ -247,7 +317,7 @@ theorem GreenMassReplace.proof : GreenMassReplace.Statement := by
     have h0 := mInt_nonneg_of_compl S.A S.Yo S.bd_analytic S.bd_interior _ (hcons _ hPpot)
       (hconsnn _ (formNonneg_mono hPnn)) (S.green ε)
       (fun x => GreenMassReplace.greenEp_nonneg S.L S.s hε x)
-    rw [ReciprocityTheory.AnForm.M.mIntCongrNull S.A _ (zeroSet S.s) hZ hZi (S.green ε) H hGH,
+    rw [mIntCongrNull _ (zeroSet S.s) hZ hZi (S.green ε) H hGH,
       ReciprocityTheory.AnForm.M.mIntAdd S.A _ _ Φ' hm1 (hOmK K) hΦpot H (hHint _ hm1) (hHint _ (hOmK K)),
       ReciprocityTheory.AnForm.M.mIntRsmul S.A (-1) _ Φ' hutpot hΦpot H,
       ReciprocityTheory.AnForm.M.mIntRsmul S.A K S.Om.pot Φ' S.Om.isPot hΦpot H] at h0
@@ -258,7 +328,7 @@ theorem GreenMassReplace.proof : GreenMassReplace.Statement := by
     rw [mixedForms_eq_cons S.Om.pot (S.T t) a ha, ReciprocityTheory.AnForm.M.mIntSymm]
     rfl
   have hJ : S.J a ε t = mInt S.A (Fin.cons S.Om.pot Φ') H := by
-    rw [← ReciprocityTheory.AnForm.M.mIntCongrNull S.A _ (zeroSet S.s) hZ hZi (S.green ε) H hGH]
+    rw [← mIntCongrNull _ (zeroSet S.s) hZ hZi (S.green ε) H hGH]
     exact hperm _
   have hW : S.errW a ha t₀ t = mInt S.A (Fin.cons S.Om.pot Φ') g := hperm _
   have hP : S.plTerm a ha ε t = mInt S.A (Fin.cons (kappaEp S.L S.s ε) Φ') u -

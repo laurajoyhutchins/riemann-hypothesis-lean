@@ -1,7 +1,43 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.TrivOfLe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoprimeNatMulFiniteAdeleAwayPIntegralStatement
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.InvMemLatMonoidOfMemAwaySupp
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.TrivOfLe
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.InvMemLatMonoidOfMemAwaySupp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoprimeNatMulFiniteAdeleAwayPIntegralStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKGeo GlobalTheory.LKMid GlobalTheory.LKDef GlobalTheory.CuspRep GlobalTheory.UnitaryBC Formalism.UG
 open UpperTheory.Gal.CertificateRingHomMap (GUf Plc comp lev GLw IsCen mat sim)
@@ -22,7 +58,7 @@ private theorem HasDen.add {D : Datum p} {u w : AfP p ⊗[ℚ] VQ D} (hu : HasDe
     HasDen D (u + w) := by
   obtain ⟨c, hc0, hcp, hc⟩ := hu
   obtain ⟨d, hd0, hdp, hd⟩ := hw
-  refine ⟨c * d, Nat.mul_pos hc0 hd0, Nat.Coprime.mul hcp hdp, ?_⟩
+  refine ⟨c * d, Nat.mul_pos hc0 hd0, Nat.Coprime.mul_left hcp hdp, ?_⟩
   rw [smul_add]
   refine AddSubgroup.add_mem _ ?_ ?_
   · rw [mul_comm, mul_smul]
@@ -82,7 +118,7 @@ theorem UpperTheory.Gal.W2.Seed.pDenom :
       exact AddSubgroup.nsmul_mem _ (hcm y) _
     | zero => simp [AddSubgroup.zero_mem]
     | add y z _ _ hy hz =>
-      rw [map_add, map_add, smul_add]
+      rw [map_add (f := _), map_add (f := _), smul_add]
       exact AddSubgroup.add_mem _ hy hz
     | smul n y _ hy =>
       rw [map_zsmul, map_zsmul, smul_comm]
@@ -98,7 +134,7 @@ theorem UpperTheory.Gal.W2.Seed.pDenom :
     exact GlobalTheory.W2.smul_mem_laHat ha (hgen x)
   | zero => simp [AddSubgroup.zero_mem]
   | add y z _ _ hy hz =>
-    rw [map_add, smul_add]
+    rw [map_add (f := _), smul_add]
     exact AddSubgroup.add_mem _ hy hz
   | neg y _ hy =>
     rw [map_neg, smul_neg]

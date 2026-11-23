@@ -1,10 +1,49 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.NonemptyIsLimitBaseChange
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.NonemptyIsLimitBaseChange
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -21,10 +60,10 @@ variable (D : I ⥤ Scheme.{0}) {X : Scheme.{0}} (π : ∀ i, X ⟶ D.obj i)
   [∀ {i j} (f : i ⟶ j), IsAffineHom (D.map f)]
   [∀ i, CompactSpace (D.obj i)] [∀ i, QuasiSeparatedSpace (D.obj i)]
 
+
 omit [∀ i, CompactSpace (D.obj i)] in
 set_option backward.isDefEq.respectTransparency false in
 include hc in
-
 theorem exists_appLE_eq {i : I} {U : (D.obj i).Opens} (hU : IsCompact (U : Set (D.obj i)))
     (s : Γ(X, π i ⁻¹ᵁ U)) :
     ∃ (j : I) (f : j ⟶ i) (t : Γ(D.obj j, D.map f ⁻¹ᵁ U)),
@@ -45,9 +84,9 @@ theorem exists_appLE_eq {i : I} {U : (D.obj i).Opens} (hU : IsCompact (U : Set (
       Iso.inv_hom_id_apply]
   exact (e _ _ _ _ t).trans h
 
+
 omit [∀ i, CompactSpace (D.obj i)] in
 include hc in
-
 theorem exists_unit_eq {i : I} {U : (D.obj i).Opens} (hU : IsCompact (U : Set (D.obj i)))
     (s : Γ(X, π i ⁻¹ᵁ U)ˣ) :
     ∃ (j : I) (f : j ⟶ i) (t : Γ(D.obj j, D.map f ⁻¹ᵁ U)ˣ), ∀ y : X, y ∈ π i ⁻¹ᵁ U →
@@ -79,7 +118,7 @@ theorem exists_unit_eq {i : I} {U : (D.obj i).Opens} (hU : IsCompact (U : Set (D
 
 theorem pull_isLB_of_germ {Y Z : Scheme.{0}} (M : LB Y) (F : Z ⟶ Y) (hcov : ∀ y : Y, ∃ a, y ∈ M.U a)
     (hco : ∀ (z : Z) a b c, F z ∈ M.U a → F z ∈ M.U b → F z ∈ M.U c →
-      gm F z _ (M.g a b) * gm F z _ (M.g b c) = gm F z _ (M.g a c)) : (M.pull F).IsLB where
+      gm F z _ (M.g a b) * gm F z _ (M.g b c) = gm F z _ (M.g a c)) : (M.pull F).IsLB := {
   cover := top_le_iff.1 fun y _ => by
     obtain ⟨i, hi⟩ := hcov (F y)
     exact TopologicalSpace.Opens.mem_iSup.2 ⟨fun _ => i, mem_pull.2 hi⟩
@@ -90,11 +129,11 @@ theorem pull_isLB_of_germ {Y Z : Scheme.{0}} (M : LB Y) (F : Z ⟶ Y) (hcov : �
     rw [map_mul, gm_res (𝟙 Z) y _ hy, gm_res (𝟙 Z) y _ hy, gm_res (𝟙 Z) y _ hy,
       gm_pull_g M F (𝟙 Z) y I J hy.1.1 hy.1.2,
       gm_pull_g M F (𝟙 Z) y J K hy.1.2 hy.2, gm_pull_g M F (𝟙 Z) y I K hy.1.1 hy.2]
-    exact hco y _ _ _ (mem_pull.1 hy.1.1) (mem_pull.1 hy.1.2) (mem_pull.1 hy.2)
+    exact hco y _ _ _ (mem_pull.1 hy.1.1) (mem_pull.1 hy.1.2) (mem_pull.1 hy.2) }
+
 
 omit [∀ i, CompactSpace (D.obj i)] in
 include hc in
-
 theorem exists_cocycle {j : I} (M : LB (D.obj j)) [Finite M.ι]
     (hM : ∀ a, IsCompact (M.U a : Set (D.obj j)))
     (h : ∀ (y : X) a b c, π j y ∈ M.U a → π j y ∈ M.U b → π j y ∈ M.U c →
@@ -128,8 +167,8 @@ theorem exists_cocycle {j : I} (M : LB (D.obj j)) [Finite M.ι]
       (gm_id_pullU (D.map g) z _ hz _))
   rwa [map_mul, gm_res _ z _ hz, gm_res _ z _ hz, gm_res _ z _ hz] at e
 
-include hc in
 
+include hc in
 theorem exists_lb_of_isLimit (L : LB X) (hL : L.IsLB) :
     ∃ (k : I) (M : LB (D.obj k)), M.IsLB ∧ LBIso L (M.pull (π k)) := by
   have : CompactSpace X := Scheme.compactSpace_of_isLimit D _ hc

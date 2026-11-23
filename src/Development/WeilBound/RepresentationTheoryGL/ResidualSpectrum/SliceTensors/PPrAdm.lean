@@ -1,8 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.IsStableSquareIntegrableForms
-import Development.WeilBound.RepresentationTheoryGL.ConstantTermFiniteness.LieInvariants.InvariantOfLieOneLEqZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.StableLevelDecomposition
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
-import GroundTheory.PAdicHodge.NormalizedTrace
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.StableLevelDecomposition
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsLocCompAndIsLocLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CasimirEigenOrthogonal
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.GenSpace
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsOpenIsCompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemZalgCommuteCompactRep
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemZalgCommuteLieAction
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteLeOfClosureClasses
+public import Development.WeilBound.RepresentationTheoryGL.ConstantTermFiniteness.LieInvariants.InvariantOfLieOneLEqZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +59,7 @@ open NumberField MeasureTheory GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cu
 
 namespace PositivityTheory.Rg.Rs.PrAdm
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {N : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {N : ℕ}
 
 def annZ (ψ : Sm E N) : Set (Module.End ℂ (Sm E N)) := {z | z ∈ Zalg E N ∧ z ψ = 0}
 
@@ -51,7 +99,7 @@ theorem zalg_comm_act {z : Module.End ℂ (Sm E N)} (hz : z ∈ Zalg E N) (o : O
 
 def SupSpansPsiPart (W : Submodule ℂ (Sm E N)) (ψ : Sm E N) : Submodule ℂ (Sm E N) where
   carrier := {φ | φ ∈ W ∧ ∀ z ∈ annZ ψ, z φ = 0}
-  add_mem' := fun {φ φ'} h h' => ⟨W.add_mem h.1 h'.1, fun z hz => by rw [map_add, h.2 z hz, h'.2 z hz, add_zero]⟩
+  add_mem' := fun {φ φ'} h h' => ⟨W.add_mem h.1 h'.1, fun z hz => by rw [map_add (f := _), h.2 z hz, h'.2 z hz, add_zero]⟩
   zero_mem' := ⟨W.zero_mem, fun z _ => map_zero z⟩
   smul_mem' := fun c φ h => ⟨W.smul_mem c h.1, fun z hz => by rw [map_smul, h.2 z hz, smul_zero]⟩
 
@@ -59,7 +107,7 @@ theorem admissible_span_le (W : Submodule ℂ (Sm E N)) (ψ : Sm E N) : SupSpans
 
 theorem mem_admissible_span_self {W : Submodule ℂ (Sm E N)} {ψ : Sm E N} (h : ψ ∈ W) : ψ ∈ SupSpansPsiPart W ψ := ⟨h, fun _ hz => hz.2⟩
 
-theorem isStable_admissible_span {W : Submodule ℂ (Sm E N)} (hW : IsStable W) (ψ : Sm E N) : IsStable (SupSpansPsiPart W ψ) := by
+theorem isStable_admissible_span {W : Submodule ℂ (Sm E N)} (hW : _root_.GlobalTheory.CuspRep.IsStable W) (ψ : Sm E N) : _root_.GlobalTheory.CuspRep.IsStable (SupSpansPsiPart W ψ) := by
   intro o φ hφ
   refine ⟨hW o φ hφ.1, fun z hz => ?_⟩
   rw [← Module.End.mul_apply, zalg_comm_act hz.1 o, Module.End.mul_apply, hφ.2 z hz, map_zero]
@@ -89,8 +137,8 @@ section Proj
 variable {μ : Measure (GA E N)} [μ.IsHaarMeasure] [μ.IsMulRightInvariant] {W : Submodule ℂ (Sm E N)}
   (h : ∀ φ ∈ W, MemL2Quotient (latticeGL E N) μ φ.1)
 
-theorem exists_orth (hW : IsStable W) (hA : ∀ φ ∈ W, IsAutForm φ) (hinj : ∀ x ∈ W, cls h x = 0 → x = 0)
-    {V : Submodule ℂ (Sm E N)} (hV : IsStable V) (hVW : V ≤ W) {χ : Sm E N} (hχ : χ ∈ W)
+theorem exists_orth (hW : _root_.GlobalTheory.CuspRep.IsStable W) (hA : ∀ φ ∈ W, IsAutForm φ) (hinj : ∀ x ∈ W, cls h x = 0 → x = 0)
+    {V : Submodule ℂ (Sm E N)} (hV : _root_.GlobalTheory.CuspRep.IsStable V) (hVW : V ≤ W) {χ : Sm E N} (hχ : χ ∈ W)
     {L : Subgroup (GL (Fin N) (Af E))} (hLo : IsOpen (L : Set (GL (Fin N) (Af E))))
     (hLc : IsCompact (L : Set (GL (Fin N) (Af E)))) {U : Type} [AddCommGroup U] [Module ℂ U] [FiniteDimensional ℂ U]
     (ρ : Representation ℂ (Kinf E N) U) (hρ : GlobalTheory.Published.AutFin.IsContRep ρ) (hχT : χ ∈ typePart L ρ)
@@ -110,8 +158,8 @@ theorem exists_orth (hW : IsStable W) (hA : ∀ φ ∈ W, IsAutForm φ) (hinj : 
   rw [← map_sub, e, map_sub]
   exact hp χW w' ⟨hw'V, hw'L, hw'T⟩
 
-omit [μ.IsHaarMeasure] [μ.IsMulRightInvariant] in
 
+omit [μ.IsHaarMeasure] [μ.IsMulRightInvariant] in
 theorem orth_unique (hinj : ∀ x ∈ W, cls h x = 0 → x = 0) {V : Submodule ℂ (Sm E N)} (hVW : V ≤ W)
     {χ v v' : Sm E N} (hχ : χ ∈ W) (hv : v ∈ V) (hv' : v' ∈ V)
     (h1 : ∀ w ∈ V, inner ℂ (cls h (χ - v)) (cls h w) = 0) (h2 : ∀ w ∈ V, inner ℂ (cls h (χ - v')) (cls h w) = 0) :

@@ -1,21 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ScalesBy
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFrOfIsotropic
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnipotentRadicalCoordinatesGroupLaw
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnipotentFrameCoordsOfMemIsotropicUnipoten
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ScalesBy
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUniqueIsProdMeasureFinAway
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharLeftRightMatrixMulAdeleTensorStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharSkewHermitianNormScaleStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsContinuousChartIsotropicUnipotentRadicalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFrOfIsotropic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLeviSectionIsotropicFrame
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnipotentFrameCoordsOfMemIsotropicUnipoten
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnipotentRadicalPointWithCoords
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLeviSectionIsotropicFrame
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsotropicFrameDecompositionSubgroupProperties
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WittFrameLeviNormalizesRadicalProperties
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemidirectHaarMeasureProduct
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MulVecCEApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemSkewA
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharLeftRightMatrixMulAdeleTensorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharSkewHermitianNormScaleStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsContinuousChartIsotropicUnipotentRadicalStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeviConjScalarIdeleUnipotentCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitSmulOfCentralParabolicLeviStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnitSmulOfCentralParabolicLeviStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsotropicFrameDecompositionSubgroupProperties
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeviConjScalarIdeleUnipotentCoordinatesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemidirectHaarMeasureProduct
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnipotentRadicalCoordinatesGroupLaw
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WittFrameLeviNormalizesRadicalProperties
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLv
+
+@[expose] public section
+
 open scoped TensorProduct NNReal ENNReal Matrix
 open NumberField MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet GlobalTheory.ResLine GlobalTheory.ResidueEisenstein
 open GlobalTheory.Doubling (absE)
@@ -25,7 +72,7 @@ open GlobalTheory.ResidueEisenstein.ModConj
 noncomputable section
 namespace GlobalTheory.ResidueEisenstein.ModConj
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem modulus_conj_flow : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (r : ℕ) (X Y : Matrix (Fin n) (Fin (r + 1)) E), IsCMExt F E σ → IsHermND σ J → IsWittFrame σ J X Y → ∀ b, IsFlowJ σ J X Y b → ∀ ν : Measure (unipRad σ J X), ν.IsHaarMeasure → ∀ (t : ℝ) (f : GAd σ J → ℝ≥0∞), Measurable f → ∫⁻ u : unipRad σ J X, f (b t * u * (b t)⁻¹) ∂ν = ENNReal.ofReal (Real.exp (-(((n : ℝ) - (r + 1)) * t))) * ∫⁻ u : unipRad σ J X, f u ∂ν := by
   intro F E _ _ _ _ _ σ n J r X Y h hJ hW b hb ν hν t f hf
@@ -81,7 +128,7 @@ theorem modulus_conj_flow : ∀ (F E : Type) [Field F] [NumberField F] [Field E]
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul a y => simp [LinearMap.baseChange_tmul, sigR]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hcT : ∀ {p q : ℕ}, Continuous fun M : Matrix (Fin p) (Fin q) (AF F ⊗[F] E) => cT (sigR (AF F) σ) M :=
     fun {p q} => (continuous_id.matrix_map hsc).matrix_transpose
   have hSk : IsClosed (skewA σ (r + 1) : Set (Matrix (Fin (r + 1)) (Fin (r + 1)) (AF F ⊗[F] E))) :=
@@ -110,7 +157,7 @@ theorem modulus_conj_flow : ∀ (F E : Type) [Field F] [NumberField F] [Field E]
       Matrix.mul_assoc]
   set hf2 : AF F ⊗[F] E := inclR (F := F) (AF F) (2⁻¹ : E) with hhf2
   have hh : hf2 + hf2 = 1 := by
-    rw [hhf2, ← map_add, ← map_one (inclR (F := F) (AF F))]; congr 1; norm_num
+    rw [hhf2, ← map_add (f := _), ← map_one (inclR (F := F) (AF F))]; congr 1; norm_num
   have hsh : sigR (AF F) σ hf2 = hf2 := by
     rw [hhf2]; simp [sigR, inclR, map_ofNat]
   have hcond : ∀ (x : Matrix (Fin (r + 1)) (Fin m) (AF F ⊗[F] E)) (s : skewA σ (r + 1)),

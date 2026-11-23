@@ -1,10 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsRatioPoints
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.SplitTorusHomProperTrivialField
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsUniqueFactorCompletedStalkOfMap
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueAlgEquivOfCompatibleQuotient
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsPushoutQuotientMap
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsRatioPoints
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsUniqueFactorCompletedStalkOfMap
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegOUnif
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.SplitTorusHomProperTrivialField
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsPushoutQuotientMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ESecStruct
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.OrbitMapConjSmulZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,8 +111,8 @@ section Level
 variable {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} {D : DegPre R} {e : ℕ}
   {G : Over (Spec (CommRingCat.of R))} [GrpObj G] [IsCommMonObj G]
 
-omit [IsDomain R] [IsCommMonObj G] in
 
+omit [IsDomain R] [IsCommMonObj G] in
 theorem map_mul_fstG {Z : Over (Spec (CommRingCat.of (R ⧸ I ^ (e + 1))))} (a b : Z ⟶ thickObj R I e G) :
     (Over.map (thick R I e)).map (a * b) ≫ fstG I e G =
       ((Over.map (thick R I e)).map a ≫ fstG I e G) * ((Over.map (thick R I e)).map b ≫ fstG I e G) :=
@@ -270,8 +320,8 @@ theorem HasCoords.comp {e : ℕ} {g : GtPt D.toPre T} {Z W : Scheme.{0}} {r : Z 
   (hasCoords_iff U e g _ _).2 ⟨by rw [Category.assoc, h.1, Category.assoc], fun χ _ _ hJ =>
     (val_pull hJ _ _ _).symm.trans ((val_corr hJ (h.2 χ) k).trans (val_pull hJ _ _ _))⟩
 
-variable {U} in
 
+variable {U} in
 theorem HasCoords.unique {e : ℕ} {g : GtPt D.toPre T} {Z : Scheme.{0}} {r : Z ⟶ T.left}
     {y y' : Z ⟶ (thickObj R I e G).left} (h : HasCoords U e g r y) (h' : HasCoords U e g r y') : y = y' := by
   rw [hasCoords_iff] at h h'
@@ -285,8 +335,8 @@ theorem exists_hasCoords (e : ℕ) (g : GtPt D.toPre T) {Z : Scheme.{0}} (r : Z 
   have := h₂ χ _ (𝟙 _) z J hJ
   rwa [Category.id_comp, Category.id_comp] at this
 
-variable {U} in
 
+variable {U} in
 theorem HasCoords.succ {e : ℕ} {g : GtPt D.toPre T} {Z : Scheme.{0}} {r : Z ⟶ T.left}
     {y : Z ⟶ (thickObj R I e G).left} (h : HasCoords U e g r y) :
     HasCoords U (e + 1) g r (y ≫ thickMap R I e G) := by
@@ -347,8 +397,8 @@ theorem IsPointOf.pull {T' : Over (Spec (CommRingCat.of R))} (k : T' ⟶ T) {g :
   exact (hasCoords_iff U e g' _ _).2 ⟨by rw [h₁, h.1, Category.assoc], fun χ z J hJ =>
     (h₂ χ z J hJ).trans ((val_pull hJ _ _ _).symm.trans (val_corr hJ (h.2 χ) r).symm)⟩
 
-variable (U) in
 
+variable (U) in
 theorem isPointOf_one {g : GtPt D.toPre T} (h : g.IsZero) : IsPointOf U g 1 := by
   rw [isPointOf_iff]
   intro e Z r a ha
@@ -509,8 +559,8 @@ theorem existsUnique_isPointOf' [IsAdicComplete (I.map φ) S] {s : Spec (CommRin
   subst hs
   exact existsUnique_isPointOf U g
 
-omit [IsLocalRing S] in
 
+omit [IsLocalRing S] in
 theorem existsUnique_isPointOf_unit [IsLocalRing R] [IsAdicComplete I R]
     (g : GtPt D.toPre (𝟙_ (Over (Spec (CommRingCat.of R))))) :
     ∃! x : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ G, IsPointOf U g x :=

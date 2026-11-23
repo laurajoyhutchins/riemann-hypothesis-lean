@@ -1,6 +1,42 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ArithmeticPointClassicality
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.WeakOfAtt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.WeakOfAtt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.DecompSigmaOrd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,13 +46,13 @@ open UpperTheory.V.W (Plc Lp HidaSetting Vl Resid LamObj UniversalOrdinaryDeterm
 open UpperTheory.V.HV (Coef)
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 namespace UpperTheory.V.Z.Ord
 
 section At
 
-variable {F Ω : Type} [Field F] [NumberField F] [IsTotallyComplex F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] {l : ℕ} [Fact l.Prime]
+variable {F Ω : Type} [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] {l : ℕ} [Fact l.Prime]
   {n : ℕ} (ι : Qbar l ≃+* ℂ) {A : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 F)} (h : IsPlaceOver A w)
 
 def ExpOf (π : CuspSub F n) (ψ : Fin n → Dec (F := F) A →* (Qbar l)ˣ) : Prop :=
@@ -24,15 +60,12 @@ def ExpOf (π : CuspSub F n) (ψ : Fin n → Dec (F := F) A →* (Qbar l)ˣ) : P
     (∀ τ, StrictMono fun j => hh j τ) ∧ (∀ j, OrdChar ι a (ω j) (hh j) (ψ j)) ∧
     ∀ σ, π.IsLocComp w σ → IsSubquotient σ.ρ (PS ω)
 
-def OrdAt (r : G F Ω →* GL (Fin n) (Qbar l)) (π : CuspSub F n) : Prop :=
-  ∃ ψ, W.HasFlag (r.comp (Dec (F := F) A).subtype) ψ ∧ ExpOf ι h π ψ
 
-omit [NumberField F] [IsTotallyComplex F] [IsAlgClosure F Ω] in
-
+omit [NumberField F] [_root_.NumberField.IsTotallyComplex F] [IsAlgClosure F Ω] in
 def Unl (ψ : Fin n → Dec (F := F) A →* (Qbar l)ˣ) : Prop := ∀ i j, ψ i ≠ ψ j * (cycBar F Ω l).comp (Dec (F := F) A).subtype
 
-omit [IsAlgClosure F Ω] in
 
+omit [IsAlgClosure F Ω] in
 def TU (π : CuspSub F n) (w : HeightOneSpectrum (𝓞 F)) : Prop :=
   Gam.TorAt π w ∧ ∀ s, Gam.SuppAt π w s → ImaginaryQuadraticEtaCharacter.Unl (Ideal.absNorm w.asIdeal) s
 
@@ -117,19 +150,8 @@ def AutUO : Prop :=
       Af.IsIrr (Y.r.comp V.pr) → ∃ π : CuspSub L n, (CG.mk π).IsRegAlg ∧ GlobalTheory.ContraPair.DualIsConj π ∧
         Af.AttC ι (Y.r.comp V.pr) π ∧ ∀ v, π.IsLocComp ((hset Q τ₀).Sl v) (Y.σl v)
 
-def EndOrd : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (L Ω : Type) [Field L] [NumberField L] [IsCMField L] [Field Ω] [Algebra L Ω] [IsAlgClosure L Ω]
-    (s : HidaSetting l L Ω) (n : ℕ), 1 ≤ n → ∀ (V : s.Lev) (Q : QData V) (c : Coef l) (r : Resid V.frame c.O n) (ι : Qbar l ≃+* ℂ)
-    (B : UniversalOrdinaryDeterminantRing r) (Λ : LamObj r) (R : HD Q ι Λ) (K : (hset Q R.τ₀).Lev), ∀ J : Ideal B.B, R.IsJ B K J → ENDO B ι J
-
-def FlagPt : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (L Ω : Type) [Field L] [NumberField L] [IsCMField L] [Field Ω] [Algebra L Ω] [IsAlgClosure L Ω]
-    (s : HidaSetting l L Ω) (n : ℕ) (V : s.Lev) (c : Coef l) (r : Resid V.frame c.O n) (B : UniversalOrdinaryDeterminantRing r) (x : B.Pt) (h : s.Wt n)
-    (ρ : G L Ω →* GL (Fin n) (Qbar l)), x.Arith h → x.IsRep ρ → Af.IsIrr ρ →
-    ∀ v : Vl l L, W.HasFlag (ρ.comp (Dec (F := L) (s.A v)).subtype) (x.psi v)
-
 def ExpTor : Prop :=
-  ∀ (F Ω : Type) [Field F] [NumberField F] [IsTotallyComplex F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime]
+  ∀ (F Ω : Type) [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime]
     (n : ℕ), 1 ≤ n → ∀ (ι : Qbar l ≃+* ℂ) (A : ValuationSubring Ω) (w : HeightOneSpectrum (𝓞 F)) (h : IsPlaceOver A w),
     ((l : ℕ) : 𝓞 F) ∈ w.asIdeal → ∀ (π : CuspSub F n) (ψ : Fin n → Dec (F := F) A →* (Qbar l)ˣ), ExpOf ι h π ψ → Gam.TorAt π w ∧
       (Unl ψ → TU π w) ∧ ∀ t : ℝ, ImaginaryQuadraticEtaCharacter.WinAt π t w → ∀ i j (m : ℕ), 1 ≤ m →
@@ -156,13 +178,6 @@ def ExtChar : Prop :=
     ((l : ℕ) : 𝓞 K) ∈ v.asIdeal → ∀ a, IsLocalArtin h a → ∀ (κ : Dec (F := K) A →* (Qbar l)ˣ) (ψ : Dec (F := L) A →* (Qbar l)ˣ),
     Continuous κ → (∀ (g : Dec (F := L) A) (g' : Dec (F := K) A), (g' : G K Ω) = AlgEquiv.restrictScalarsHom K (g : G L Ω) → ψ g = κ g') →
     ∀ ω hh, OrdChar ι a ω hh ψ → ∃ χ : (v.adicCompletion K)ˣ →* ℂˣ, IsSmoothChar χ ∧ IsUnram (ω * χ.comp (Gam.nm w))
-
-def BornL : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (L Ω : Type) [Field L] [NumberField L] [IsCMField L] [Field Ω] [Algebra L Ω] [IsAlgClosure L Ω]
-    (s : HidaSetting l L Ω) (n : ℕ), 1 ≤ n → ∀ (V : s.Lev) (c : Coef l) (r : Resid V.frame c.O n) (ι : Qbar l ≃+* ℂ) (B : UniversalOrdinaryDeterminantRing r)
-    (J : Ideal B.B), ENDO B ι J → ∀ (x : B.Pt) (h : s.Wt n) (ρ : G L Ω →* GL (Fin n) (Qbar l)), J ≤ RingHom.ker x → x.Arith h →
-    x.IsRep ρ → Af.IsIrr ρ → Continuous ρ → ∀ w : Plc L, ((l : ℕ) : 𝓞 L) ∈ w.asIdeal → Win.Unl1 ρ w →
-      Win.PotUnl ρ w ∧ ∀ π : CuspSub L n, Af.AttC ι ρ π → TU π w
 
 end UpperTheory.V.Z.Ord
 

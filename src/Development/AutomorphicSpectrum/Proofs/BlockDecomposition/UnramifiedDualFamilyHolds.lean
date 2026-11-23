@@ -1,5 +1,56 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.Development
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.IntegralUnitBaseChange.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing
 
@@ -40,6 +91,7 @@ theorem exists_isUnit_sum [Nonempty ι] (e : ι → A ≃+* A)
   have h := res_indep e hd (fun _ => 1) (fun x => by
     have : residue A (∑ i, e i x) = 0 := by
       rw [residue_eq_zero_iff]; exact hne x
+
     simpa [map_sum] using this)
   exact one_ne_zero (congrFun h (Classical.arbitrary ι))
 
@@ -59,6 +111,7 @@ theorem isUnit_det [DecidableEq ι] (e : ι → A ≃+* A)
     simpa [Matrix.mulVec, dotProduct, hM] using congrFun hc i
   have : ∀ j, c j * residue A (e j (∑ i, a i * b i)) =
       ∑ i, residue A (a i) * (residue A (e j (b i)) * c j) := fun j => by
+
     rw [map_sum, map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, hS j _ (ha i), map_mul]; ring
@@ -88,7 +141,7 @@ theorem algebraMap_le_one {a : k} (ha : valuation k a ≤ 1) :
   have h1 : (a : k) ≤ᵥ 1 := by
     rw [← map_one (valuation k)] at ha
     exact (Valuation.Compatible.vle_iff_le (v := valuation k) a 1).2 ha
-  have h2 : algebraMap k E a ≤ᵥ algebraMap k E 1 := (ValuativeExtension.vle_iff_vle a 1).2 h1
+  have h2 : algebraMap k E a ≤ᵥ algebraMap k E 1 := ValuativeExtension.vle_iff_vle.2 h1
   have h3 := (Valuation.Compatible.vle_iff_le (v := valuation E) _ _).1 h2
   simpa using h3
 
@@ -195,12 +248,14 @@ theorem dual_of_basis (σ : E ≃ₐ[k] E) (b : Module.Basis (Fin (Module.finran
     have hcv : valuation E c = 1 := by
       have h1 := (ints (E := E)).isUnit_iff_valuation_eq_one.1 hx0
       have h2 : algebraMap (RO E) E (∑ i, e i x0) = c := by
+
         rw [map_sum, hc, ← Fin.sum_univ_eq_sum_range (fun j => (σ ^ j) (x0 : E))]
         rfl
       rwa [h2] at h1
     have hc0 : c ≠ 0 := (Valuation.ne_zero_iff _).1 (by rw [hcv]; exact one_ne_zero)
     have hcσ : σ c = c := by
       have h1 : σ c = ∑ j ∈ Finset.range (Module.finrank k E), (σ ^ (j + 1)) (x0 : E) := by
+
         rw [hc, map_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [pow_succ']; rfl
@@ -232,7 +287,7 @@ theorem dual_of_basis (σ : E ≃ₐ[k] E) (b : Module.Basis (Fin (Module.finran
         apply Subtype.ext
         have h := b.sum_repr (x : E)
         simp only [Algebra.smul_def] at h
-        rw [AddSubmonoidClass.coe_finset_sum]
+        rw [AddSubmonoidClass.coe_finsetSum]
         exact h.symm)
     set M : Matrix (Fin (Module.finrank k E)) (Fin (Module.finrank k E)) (RO E) :=
       Matrix.of fun i j => e j (B i) with hM
@@ -241,7 +296,7 @@ theorem dual_of_basis (σ : E ≃ₐ[k] E) (b : Module.Basis (Fin (Module.finran
     have h1 := congrFun (congrFun (Matrix.nonsing_inv_mul M hdet) ⟨0, hpos⟩) ⟨j, hj⟩
     rw [Matrix.mul_apply] at h1
     have h2 := congrArg (fun z : RO E => (z : E)) h1
-    simp only [AddSubmonoidClass.coe_finset_sum, MulMemClass.coe_mul] at h2
+    simp only [AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul] at h2
     have h3 : ∀ i, ((M i ⟨j, hj⟩ : RO E) : E) = (σ ^ j) (b i) := fun i => rfl
     simp only [h3] at h2
     rw [h2, Matrix.one_apply]

@@ -1,17 +1,49 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.DimensionRecursion
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.CanonicalPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.GeometryHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.MonomialCenterHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.TransformedComponentHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.OrderReductionHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.ControlledTransformOrderBound
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.StrictTransformComponents
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.TransformedBoundaryComponents
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.TransformedComponentHypotheses
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.StrictTransformComponents
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.TransformedBoundaryComponents
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -20,16 +52,21 @@ noncomputable section
 
 namespace FunctorialResolution.EmbeddedResolution
 
-theorem MonomialStrictTransformComponents.transformedComponentHypotheses : MonomialStrictTransformComponents.TransformedComponentHypotheses.{u} where
-  transformed_components := intersectionComponents_transformedBoundary_of_isBlowupAlongIdealSheaf
-  strictTransform_components := exists_eq_closure_of_isIrreducibleComponentOf_strictTransform
+theorem MonomialStrictTransformComponents.transformedComponentHypotheses :
+    MonomialStrictTransformComponents.TransformedComponentHypotheses.{u} := by
+  exact {
+    transformed_components := intersectionComponents_transformedBoundary_of_isBlowupAlongIdealSheaf
+    strictTransform_components := exists_eq_closure_of_isIrreducibleComponentOf_strictTransform }
 
-theorem principalizationGeometryHypotheses : PrincipalizationGeometryHypotheses.{u} :=
-  geometricHypotheses_of_orderReductionHypotheses
-    (OrderReductionHypotheses.of_strictTransformHypotheses
-      (StrictTransformCase.strictTransformHypotheses_of_residualHypotheses
-        (MonomialStrictTransformComponents.strictTransformHypotheses_of_transformedComponents
-          MonomialStrictTransformComponents.transformedComponentHypotheses)))
+theorem principalizationGeometryHypotheses : PrincipalizationGeometryHypotheses.{u} := by
+  have h := StrictTransformCase.strictTransformHypotheses_of_residualHypotheses
+    (MonomialStrictTransformComponents.strictTransformHypotheses_of_transformedComponents
+      MonomialStrictTransformComponents.transformedComponentHypotheses)
+  have hOrder : OrderReductionHypotheses.{u} := {
+    controlledTransform_orderAt_le := orderAt_controlledTransform_le_of_orderAt_eq_on_center
+    strictTransform_components := h.strictTransform_components
+    monomial := h.monomial }
+  exact geometricHypotheses_of_orderReductionHypotheses hOrder
 
 end FunctorialResolution.EmbeddedResolution
 

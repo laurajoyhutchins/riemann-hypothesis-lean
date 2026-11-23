@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+module
+
+public import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -60,17 +98,17 @@ theorem cc_expS {n : ℕ} (g : PS K n d) (hg : constantCoeff g = 0) : constantCo
   have e : PowerSeries.exp K = 1 + (PowerSeries.exp K - 1) := by ring
   have h1 : PowerSeries.constantCoeff (PowerSeries.exp K - 1) = 0 := by
     rw [map_sub, PowerSeries.constantCoeff_exp, map_one, sub_self]
-  rw [FB.expS, e, PowerSeries.subst_add ha, map_add, PowerSeries.constantCoeff_subst_eq_zero hg _ h1, add_zero,
+  rw [FB.expS, e, PowerSeries.subst_add ha, map_add (f := _), PowerSeries.constantCoeff_subst_eq_zero hg _ h1, add_zero,
     ← PowerSeries.coe_substAlgHom ha, map_one, map_one]
 
-variable (V d) in
 
+variable (V d) in
 def intExp (hi : Function.Injective (algebraMap V K)) (n : ℕ) : AddSubgroup (PS K n d) where
   carrier := {g | constantCoeff g = 0 ∧ ∃ u : PS V n d, FB.toK K u = FB.expS K g}
   zero_mem' := ⟨map_zero _, 1, by rw [expS_zero, FB.toK, map_one]⟩
   add_mem' := by
     rintro f g ⟨hf, u, hu⟩ ⟨hg, v, hv⟩
-    refine ⟨by rw [map_add, hf, hg, add_zero], u * v, ?_⟩
+    refine ⟨by rw [map_add (f := _), hf, hg, add_zero], u * v, ?_⟩
     rw [gt_expS_add _ _ hf hg, ← hu, ← hv, FB.toK, map_mul]
   neg_mem' := by
     rintro f ⟨hf, u, hu⟩
@@ -123,7 +161,7 @@ theorem cls_add_left (hi : Function.Injective (algebraMap V K)) (hh : B.IsCanonG
   have hm : (ev ![pt K d 0, pt K d 2] h + ev ![pt K d 1, pt K d 2] h -
       ev ![addOf (B.FK K) (pt K d 0) (pt K d 1), pt K d 2] h) ∈ intExp V d K hi 3 := by
     refine ⟨?_, B.ph1, hh.ph1⟩
-    rw [map_sub, map_add, gt_const_ev _ (pair_points_zero_constant g0 g2) h hc0, gt_const_ev _ (pair_points_zero_constant g1 g2) h hc0,
+    rw [map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant g0 g2) h hc0, gt_const_ev _ (pair_points_zero_constant g1 g2) h hc0,
       gt_const_ev _ (pair_points_zero_constant g01 g2) h hc0, add_zero, sub_zero]
   have hE := ev_mem K hi ![a, b, c] (triple_points_zero_constant ha hb hc) hm
   have hW : (fun j => mp K (![a, b, c] j)) = ![mp K a, mp K b, mp K c] := by
@@ -136,7 +174,7 @@ theorem cls_add_left (hi : Function.Injective (algebraMap V K)) (hh : B.IsCanonG
     Matrix.tail_cons] at hE
   rw [show addOf (B.FK K) (mp K a) (mp K b) = mp K (addOf B.G.F a b) from (mp_addOf K B.G a b ha hb).symm] at hE
   unfold cls
-  rw [← sub_eq_zero, ← map_add, ← map_sub, QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff, ← neg_sub]
+  rw [← sub_eq_zero, ← map_add (f := _), ← map_sub, QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff, ← neg_sub]
   exact neg_mem hE
 
 theorem cls_add_right (hi : Function.Injective (algebraMap V K)) (hh : B.IsCanonGauge K h) {n : ℕ}
@@ -150,7 +188,7 @@ theorem cls_add_right (hi : Function.Injective (algebraMap V K)) (hh : B.IsCanon
   have hm : (ev ![pt K d 0, pt K d 1] h + ev ![pt K d 0, pt K d 2] h -
       ev ![pt K d 0, addOf (B.FK K) (pt K d 1) (pt K d 2)] h) ∈ intExp V d K hi 3 := by
     refine ⟨?_, B.ph2, hh.ph2⟩
-    rw [map_sub, map_add, gt_const_ev _ (pair_points_zero_constant g0 g1) h hc0, gt_const_ev _ (pair_points_zero_constant g0 g2) h hc0,
+    rw [map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant g0 g1) h hc0, gt_const_ev _ (pair_points_zero_constant g0 g2) h hc0,
       gt_const_ev _ (pair_points_zero_constant g0 g12) h hc0, add_zero, sub_zero]
   have hE := ev_mem K hi ![a, b, c] (triple_points_zero_constant ha hb hc) hm
   have hW : (fun j => mp K (![a, b, c] j)) = ![mp K a, mp K b, mp K c] := by
@@ -163,7 +201,7 @@ theorem cls_add_right (hi : Function.Injective (algebraMap V K)) (hh : B.IsCanon
     Matrix.tail_cons] at hE
   rw [show addOf (B.FK K) (mp K b) (mp K c) = mp K (addOf B.G.F b c) from (mp_addOf K B.G b c hb hc).symm] at hE
   unfold cls
-  rw [← sub_eq_zero, ← map_add, ← map_sub, QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff, ← neg_sub]
+  rw [← sub_eq_zero, ← map_add (f := _), ← map_sub, QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff, ← neg_sub]
   exact neg_mem hE
 
 theorem act_addOf (w : O) {n : ℕ} (a b : Pt V n d) (ha : GP a) (hb : GP b) :
@@ -226,7 +264,7 @@ theorem exists_theta (hi : Function.Injective (algebraMap V K)) (hh : B.IsCanonG
       + ev ![mp K (pt V d 0)] (B.hL K h w) + ev ![mp K (pt V d 1)] (B.hL K h w)
       + ev ![mp K (pt V (n := 3) d 2)] (B.hL K h w) ∈ intExp V d K hi 3 := by
     rw [← QuotientAddGroup.eq_zero_iff, ← QuotientAddGroup.mk'_apply]
-    simp only [map_add, map_sub]
+    simp only [map_add (f := _), map_sub]
     rw [hLc _ hxyz, hLc _ hxy, hLc _ hxz, hLc _ hyz, hLc _ hx, hLc _ hy, hLc _ hz,
       PL _ _ _ hxy hz hxyz, PL _ _ _ hx hy hxyz, PR _ _ _ hx hxy hz, PR _ _ _ hy hxy hz, PR _ _ _ hz hxy hz,
       PR _ _ _ hx hx hy, PR _ _ _ hy hx hy, PR _ _ _ hz hx hy,

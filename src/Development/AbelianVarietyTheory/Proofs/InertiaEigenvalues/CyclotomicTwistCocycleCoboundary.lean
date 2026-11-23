@@ -1,14 +1,68 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadicNormZpowSubOnePadicValIntStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTateMaximalIdealKillsFirstCohomologyStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerFixedIffMemCompletedIntegersStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerGeneratorMatrixPerturbationStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorPropertiesStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PadicNormZpowSubOnePadicValIntStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TateDecompositionCompletedCyclotomicIntegersStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerGeneratorMatrixPerturbationStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTateMaximalIdealKillsFirstCohomologyStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerFixedIffMemCompletedIntegersStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.RootsOfUnity.Lemmas
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Nonarchimedean.Completion
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1BallCocycleLogCyclotomic
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +73,7 @@ namespace GlobalTheory.Cyc.TwistKill
 variable {l : ℕ} [Fact l.Prime]
 
 theorem ks_le_kinf (K : FinExt l) (s : ℕ) : Ks K s ≤ Kinf K :=
-  sup_le_sup_left (IntermediateField.adjoin.mono _ _ _ fun (x : Om l) (hx : x ^ (l ^ s) = 1) =>
+  sup_le_sup_left (IntermediateField.adjoin.mono _ {x : Om l | x ^ (l ^ s) = 1} {x : Om l | ∃ j : ℕ, x ^ (l ^ j) = 1} fun x hx =>
     (⟨s, hx⟩ : ∃ j : ℕ, x ^ (l ^ j) = 1)) _
 
 theorem hinf_le_gj (K : FinExt l) (s : ℕ) : Hinf K ≤ Gj K s :=
@@ -63,40 +117,13 @@ theorem norm_l_pow (n : ℕ) : ‖(l : PadicComplex l) ^ n‖ = (l : ℝ) ^ (-(n
 
 theorem ohat_norm (K : FinExt l) {y : PadicComplex l} (hy : y ∈ Ohat K) : ‖y‖ ≤ 1 := by
   have : closure (intC (Kinf K)) ⊆ {y : PadicComplex l | ‖y‖ ≤ 1} :=
-    closure_minimal (fun _ h => h.2) (isClosed_le continuous_norm continuous_const)
+    closure_minimal (by exact fun _ h => h.2) (isClosed_le continuous_norm continuous_const)
   exact this hy
 
 theorem exists_zeta (K : FinExt l) (s : ℕ) (hs : 1 ≤ s) :
     ∃ ζ : PadicComplex l, IsPrimitiveRoot ζ l ∧ ζ ∈ inC (Ks K s) ∧
       ‖(l : PadicComplex l)‖ ≤ ‖ζ - 1‖ := by
-  have hp : l.Prime := Fact.out
-  haveI : NeZero l := ⟨hp.ne_zero⟩
-  obtain ⟨z, hz⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot (Om l) l
-  have hz' : IsPrimitiveRoot (z : PadicComplex l) l :=
-    hz.map_of_injective (f := algebraMap (Om l) (PadicComplex l)) (RingHom.injective _)
-  refine ⟨z, hz', ⟨z, ?_, rfl⟩, ?_⟩
-  · apply (show _ ≤ Ks K s from le_sup_right)
-    apply IntermediateField.subset_adjoin
-    obtain ⟨t, rfl⟩ := Nat.exists_eq_add_of_le hs
-    simp [pow_add, pow_mul, hz.pow_eq_one]
-  · generalize (z : PadicComplex l) = ζ at hz'
-    have hn : ‖ζ‖ = 1 := by
-      have := congrArg norm hz'.pow_eq_one
-      rw [norm_pow, norm_one] at this
-      exact (pow_eq_one_iff_of_nonneg (norm_nonneg _) hp.ne_zero).1 this
-    obtain ⟨m, hm⟩ := Nat.exists_eq_add_of_le hp.two_le
-    have hm' : l = (m + 1) + 1 := by omega
-    have h2 : IsPrimitiveRoot ζ ((m + 1) + 1) := hm' ▸ hz'
-    have h3 := h2.prod_one_sub_pow_eq_order
-    have h4 : (l : PadicComplex l) = ((m + 1 : ℕ) : PadicComplex l) + 1 := by
-      rw [← Nat.cast_succ]; exact congrArg Nat.cast hm'
-    rw [h4, ← h3, Finset.prod_range_succ', norm_mul, norm_prod, norm_sub_rev ζ]
-    simp only [zero_add, pow_one]
-    refine mul_le_of_le_one_left (norm_nonneg _) (Finset.prod_le_one (fun _ _ => norm_nonneg _) ?_)
-    intro i _
-    rw [sub_eq_add_neg]
-    refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
-    simp [hn]
+  apply _root_.GlobalTheory.Cyc.LogClass.exists_zeta <;> assumption
 
 theorem vanish {G M : Type} [Group G] [TopologicalSpace G] [AddCommGroup M] [TopologicalSpace M]
     [T1Space M] (S H : Subgroup G) (hHS : H ≤ S) (A : G → M → M) (hA0 : ∀ g, A g 0 = 0)
@@ -104,20 +131,7 @@ theorem vanish {G M : Type} [Group G] [TopologicalSpace G] [AddCommGroup M] [Top
     (hd : ∀ g ∈ S, ∀ h ∈ S, d (g * h) = d g + A g (d h)) (γ : G) (hγ : γ ∈ S)
     (dense : (S : Set G) ⊆ closure {x | ∃ h ∈ H, ∃ a : ℕ, x = h * γ ^ a})
     (hH : ∀ h ∈ H, d h = 0) (hdγ : d γ = 0) : ∀ σ ∈ S, d σ = 0 := by
-  have hpow : ∀ a : ℕ, d (γ ^ a) = 0 := by
-    intro a
-    induction a with
-    | zero => simpa using hH 1 H.one_mem
-    | succ a ih => rw [pow_succ, hd _ (S.pow_mem hγ a) _ hγ, ih, hdγ, hA0, add_zero]
-  intro σ hσ
-  have hsub : {x | ∃ h ∈ H, ∃ a : ℕ, x = h * γ ^ a} ⊆ (S : Set G) := by
-    rintro _ ⟨h, hh, a, rfl⟩
-    exact S.mul_mem (hHS hh) (S.pow_mem hγ a)
-  have h1 := ((hc σ hσ).mono hsub).mem_closure_image (dense hσ)
-  have h2 : d '' {x | ∃ h ∈ H, ∃ a : ℕ, x = h * γ ^ a} ⊆ {0} := by
-    rintro _ ⟨_, ⟨h, hh, a, rfl⟩, rfl⟩
-    rw [Set.mem_singleton_iff, hd _ (hHS hh) _ (S.pow_mem hγ a), hH h hh, hpow, hA0, add_zero]
-  exact closure_minimal h2 isClosed_singleton h1
+  apply _root_.GlobalTheory.Cyc.LogClass.vanish <;> assumption
 
 theorem norm_chiC {χ : GQ l →* ℚ_[l]ˣ} (hχ : IsCyc χ) (j : ℤ) (g : GQ l) : ‖chiC χ j g‖ = 1 := by
   rw [chiC, norm_algebraMap, Units.val_zpow_eq_zpow_val, norm_zpow, (GlobalTheory.Cyc.cyc_basic l χ hχ).1,
@@ -151,29 +165,7 @@ theorem modify {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)} {χ : GQ 
     (hx : ‖x‖ ≤ 1) :
     CocOn S (fun g y => chiC χ j g * act g y) {y | ‖y‖ ≤ 1}
       (fun g => (l : PadicComplex l) ^ n * c g - (chiC χ j g * act g x - x)) := by
-  refine ⟨?_, ?_, ?_⟩
-  · exact (continuousOn_const.mul hc.1).sub
-      (((continuous_chiC hχ j).mul (GlobalTheory.Cyc.IsActC.continuous_orbit l act ha x)).sub continuous_const).continuousOn
-  · intro g hg
-    have h1 : ‖c g‖ ≤ 1 := hc.2.1 g hg
-    have h2 : ‖(l : PadicComplex l) ^ n * c g‖ ≤ 1 := by
-      rw [norm_mul, norm_pow]
-      exact mul_le_one₀ (pow_le_one₀ (norm_nonneg _) norm_l_lt.le) (norm_nonneg _) h1
-    have h3 : ‖chiC χ j g * act g x‖ ≤ 1 := by
-      rw [norm_mul, norm_chiC hχ, ha.2, one_mul]; exact hx
-    have sub : ∀ a b : PadicComplex l, ‖a‖ ≤ 1 → ‖b‖ ≤ 1 → ‖a - b‖ ≤ 1 := by
-      intro a b h h'
-      rw [sub_eq_add_neg]
-      refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
-      rw [norm_neg]; exact max_le h h'
-    exact sub _ _ h2 (sub _ _ h3 hx)
-  · intro g hg h hh
-    have hfix : act g (chiC χ j h) = chiC χ j h := act_algebraMap ha g _
-    have := hc.2.2 g hg h hh
-    simp only at this ⊢
-    rw [this, chiC_mul]
-    simp only [map_mul, map_sub, map_pow, map_natCast, hfix, RingAut.mul_apply]
-    ring
+  apply _root_.GlobalTheory.Cyc.LogClass.modify <;> assumption
 
 theorem solve {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)} {χ : GQ l →* ℚ_[l]ˣ}
     (ha : IsActC act) (hχ : IsCyc χ) (K : FinExt l) (s : ℕ) (hs : Lev l s) (j : ℤ) (hj : j ≠ 0)
@@ -226,9 +218,9 @@ theorem solve {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)} {χ : GQ l
       have := hs.1
       exact pow_le_of_le_one (norm_nonneg _) norm_l_lt.le (by omega)
   · intro h hh
-    rw [map_add, hfix h (hinf_le_gj K s hh), map_mul (act h) _ (v 0), hfix2 h (hinf_le_gj K s hh),
+    rw [map_add (f := _), hfix h (hinf_le_gj K s hh), map_mul (act h) _ (v 0), hfix2 h (hinf_le_gj K s hh),
       (GlobalTheory.T.cyclotomicTower_fixed_iff_mem_completedIntegers l act ha K _ (ohat_norm K hvO)).2 hvO h hh]
-  · rw [map_add, hfix γ hγ.1, map_mul (act γ) _ (v 0), hfix2 γ hγ.1]
+  · rw [map_add (f := _), hfix γ hγ.1, map_mul (act γ) _ (v 0), hfix2 γ hγ.1]
     have e : chiC χ j γ * act γ (v 0) = v 0 + (ζ - 1) * x := by rw [← hv3]; ring
     have e1 : (l : PadicComplex l) ^ n / (chiC χ j γ - 1) * (chiC χ j γ - 1) = l ^ n :=
       div_mul_cancel₀ _ hu0
@@ -278,7 +270,7 @@ theorem pow_kills_cyclotomic_H1 (l : ℕ) [Fact l.Prime] (act : GQ l →* (Padic
     exact mul_le_one₀ (pow_le_one₀ (norm_nonneg _) norm_l_lt.le) (norm_nonneg _) (hx 0)
   · have := key g hg
     simp only [hc1def] at this
-    simp only [map_add, map_mul, map_pow, map_natCast]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast]
     linear_combination this
 
 end GlobalTheory.Cyc.TwistKill

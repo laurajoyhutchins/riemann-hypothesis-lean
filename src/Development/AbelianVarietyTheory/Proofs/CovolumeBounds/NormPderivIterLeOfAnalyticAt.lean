@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LineDerivListEqIteratedFDeriv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LineDerivListEqIteratedFDeriv
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Pi
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.DiffContOnCl
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.Complex.Liouville
+
+@[expose] public section
 
 open Filter Topology
 
@@ -19,14 +75,12 @@ noncomputable def pderivIter (α : ι →₀ ℕ) (F : (ι → 𝕜) → V) : (�
 noncomputable def polyDeriv (P : MvPolynomial ι 𝕜) (F : (ι → 𝕜) → V) (a : ι → 𝕜) : V :=
   ∑ α ∈ P.support, P.coeff α • pderivIter α F a
 
-@[simp] theorem pderivList_nil (F : (ι → 𝕜) → V) : pderivList [] F = F := rfl
-
 theorem pderivList_append (l₁ l₂ : List ι) (F : (ι → 𝕜) → V) :
     pderivList (l₁ ++ l₂) F = pderivList l₁ (pderivList l₂ F) := by
   simp only [pderivList, List.map_append, lineDerivList_append]
 
 @[simp] theorem pderivIter_zero (F : (ι → 𝕜) → V) : pderivIter 0 F = F := by
-  simp [pderivIter]
+  simp [pderivIter, pderivList, lineDerivList]
 
 theorem update_eq_add_smul_single (z : ι → 𝕜) (k : ι) (t : 𝕜) :
     Function.update z k t = z + (t - z k) • (Pi.single k 1 : ι → 𝕜) := by
@@ -53,35 +107,11 @@ theorem pderivIter_single (k : ι) (n : ℕ) (F : (ι → 𝕜) → V) (z : ι �
   rw [← List.perm_replicate, ← Multiset.coe_eq_coe, Multiset.coe_toList,
     Multiset.nsmul_singleton, Multiset.coe_replicate]
 
-@[simp] theorem pderivIter_zero_fun (α : ι →₀ ℕ) :
-    pderivIter α (fun _ : ι → 𝕜 => (0 : V)) = fun _ => 0 :=
-  lineDerivList_zero _
-
 theorem polyDeriv_eq_sum_of_subset (P : MvPolynomial ι 𝕜) {s : Finset (ι →₀ ℕ)}
     (hs : P.support ⊆ s) (F : (ι → 𝕜) → V) (a : ι → 𝕜) :
     polyDeriv P F a = ∑ α ∈ s, P.coeff α • pderivIter α F a := by
   refine Finset.sum_subset hs fun α _ hα => ?_
   rw [MvPolynomial.notMem_support_iff.1 hα, zero_smul]
-
-noncomputable def polyDerivLinear (F : (ι → 𝕜) → V) (a : ι → 𝕜) : MvPolynomial ι 𝕜 →ₗ[𝕜] V where
-  toFun P := polyDeriv P F a
-  map_add' P Q := by
-    classical
-    rw [polyDeriv_eq_sum_of_subset (P + Q) (s := P.support ∪ Q.support) MvPolynomial.support_add,
-      polyDeriv_eq_sum_of_subset P (s := P.support ∪ Q.support) Finset.subset_union_left,
-      polyDeriv_eq_sum_of_subset Q (s := P.support ∪ Q.support) Finset.subset_union_right,
-      ← Finset.sum_add_distrib]
-    simp only [MvPolynomial.coeff_add, add_smul]
-  map_smul' c P := by
-    rw [polyDeriv_eq_sum_of_subset (c • P) (s := P.support) MvPolynomial.support_smul,
-      polyDeriv, Finset.smul_sum]
-    simp only [MvPolynomial.coeff_smul, smul_eq_mul, mul_smul, RingHom.id_apply]
-
-@[simp] theorem polyDerivLinear_apply (F : (ι → 𝕜) → V) (a : ι → 𝕜) (P : MvPolynomial ι 𝕜) :
-    polyDerivLinear F a P = polyDeriv P F a := rfl
-
-@[simp] theorem polyDeriv_zero (F : (ι → 𝕜) → V) (a : ι → 𝕜) :
-    polyDeriv (0 : MvPolynomial ι 𝕜) F a = 0 := (polyDerivLinear F a).map_zero
 
 @[simp] theorem polyDeriv_monomial (α : ι →₀ ℕ) (c : 𝕜) (F : (ι → 𝕜) → V) (a : ι → 𝕜) :
     polyDeriv (MvPolynomial.monomial α c) F a = c • pderivIter α F a := by
@@ -95,10 +125,6 @@ noncomputable def polyDerivLinear (F : (ι → 𝕜) → V) (a : ι → 𝕜) : 
 @[simp] theorem polyDeriv_one (F : (ι → 𝕜) → V) (a : ι → 𝕜) :
     polyDeriv (1 : MvPolynomial ι 𝕜) F a = F a := by
   rw [← MvPolynomial.C_1, polyDeriv_C, one_smul]
-
-@[simp] theorem polyDeriv_zero_fun (P : MvPolynomial ι 𝕜) (a : ι → 𝕜) :
-    polyDeriv P (fun _ => (0 : V)) a = 0 := by
-  simp [polyDeriv]
 
 end Def
 
@@ -122,7 +148,7 @@ theorem pderivIter_add_index {F : (ι → 𝕜) → V} {a : ι → 𝕜} (h : An
   rw [pderivIter, pderivIter, pderivIter, ← pderivList_append]
   refine pderivList_perm h ?_
   rw [← Multiset.coe_eq_coe, ← Multiset.coe_add]
-  simp only [Multiset.coe_toList, map_add]
+  simp only [Multiset.coe_toList, map_add (f := _)]
 
 end Analytic
 

@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockParOpp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocPartMul
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockParOpp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocPartMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Matrix
 open scoped Classical
 
@@ -13,7 +57,7 @@ variable {H : Type} [Group H]
 
 theorem mk_out_of_le {T P L : Subgroup H} (hTP : T ≤ P) (x : H) :
     DoubleCoset.mk P L (Quotient.out (DoubleCoset.mk T L x)) = DoubleCoset.mk P L x := by
-  obtain ⟨t, l, ht, hl, h⟩ := DoubleCoset.mk_out_eq_mul T L x
+  obtain ⟨t, ht, l, hl, h⟩ := DoubleCoset.mk_out_eq_mul T L x
   rw [h, DoubleCoset.eq]
   exact ⟨t⁻¹, P.inv_mem (hTP ht), l⁻¹, L.inv_mem hl, by group⟩
 
@@ -48,7 +92,7 @@ theorem dsum_eq_zero_of_par (H : Type) [Group H] (T P L U : Subgroup H) (Ψ : H 
   rw [finsum_eq_sum F hfin, ← Finset.sum_fiberwise_of_maps_to (g := π)
     (t := hfin.toFinset.image π) (fun _ h => Finset.mem_image_of_mem _ h)]
   refine Finset.sum_eq_zero fun r _ => ?_
-  obtain ⟨y, rfl⟩ : ∃ y, DoubleCoset.mk P L y = r := ⟨Quotient.out r, DoubleCoset.out_eq' _ _ _⟩
+  obtain ⟨y, rfl⟩ : ∃ y, DoubleCoset.mk P L y = r := ⟨Quotient.out r, DoubleCoset.out_eq' _⟩
   set Ly := P ⊓ L.map (MulAut.conj y).toMonoidHom with hLy
   have hLyP : ∀ k ∈ Ly, k ∈ P := fun k hk => (Subgroup.mem_inf.1 hk).1
   set G : DoubleCoset.Quotient (T : Set H) (Ly : Set H) → ℂ :=
@@ -73,8 +117,8 @@ theorem dsum_eq_zero_of_par (H : Type) [Group H] (T P L U : Subgroup H) (Ψ : H 
     simp only [wt, if_pos hq', hLy, locPart_inf_conj hTP hq' y]
   have hinj : Set.InjOn φ A := by
     intro q₁ h₁ q₂ h₂ h
-    obtain ⟨t, ht, l, hl, e⟩ := (DoubleCoset.eq T L _ _).1 h
-    rw [← DoubleCoset.out_eq' T Ly q₁, ← DoubleCoset.out_eq' T Ly q₂, DoubleCoset.eq]
+    obtain ⟨t, ht, l, hl, e⟩ := (@DoubleCoset.eq _ _ T L _ _).1 h
+    rw [← DoubleCoset.out_eq' q₁, ← DoubleCoset.out_eq' q₂, DoubleCoset.eq]
     refine ⟨t, ht, y * l * y⁻¹, Subgroup.mem_inf.2 ⟨?_, l, hl, rfl⟩, ?_⟩
     · have e' : y * l * y⁻¹ = (t * Quotient.out q₁)⁻¹ * Quotient.out q₂ := by
         rw [show Quotient.out q₂ = t * (Quotient.out q₁ * y) * l * y⁻¹ by rw [← e]; group]
@@ -91,15 +135,15 @@ theorem dsum_eq_zero_of_par (H : Type) [Group H] (T P L U : Subgroup H) (Ψ : H 
       simp only [hπ, hφ, mk_out_of_le hTP, DoubleCoset.eq]
       exact ⟨(Quotient.out q')⁻¹, P.inv_mem hq', 1, L.one_mem, by group⟩
     · intro hq
-      obtain ⟨p, hp, l, hl, e⟩ := (DoubleCoset.eq P L _ _).1 hq
-      obtain ⟨t, k, ht, hk, ek⟩ := DoubleCoset.mk_out_eq_mul T Ly p⁻¹
+      obtain ⟨p, hp, l, hl, e⟩ := (@DoubleCoset.eq _ _ P L _ _).1 hq
+      obtain ⟨t, ht, k, hk, ek⟩ := DoubleCoset.mk_out_eq_mul T Ly p⁻¹
       refine ⟨DoubleCoset.mk T Ly p⁻¹, ?_, ?_⟩
       · show Quotient.out (DoubleCoset.mk T Ly p⁻¹) ∈ P
         rw [ek]
         exact P.mul_mem (P.mul_mem (hTP ht) (P.inv_mem hp)) (hLyP k hk)
       · obtain ⟨_, l', hl', rfl⟩ := Subgroup.mem_inf.1 hk
         simp only [hφ]
-        rw [ek, ← DoubleCoset.out_eq' T L q, DoubleCoset.eq]
+        rw [ek, ← DoubleCoset.out_eq' q, DoubleCoset.eq]
         refine ⟨t⁻¹, T.inv_mem ht, l'⁻¹ * l⁻¹, L.mul_mem (L.inv_mem hl') (L.inv_mem hl), ?_⟩
         simp only [MulEquiv.coe_toMonoidHom, MulAut.conj_apply]
         rw [e]

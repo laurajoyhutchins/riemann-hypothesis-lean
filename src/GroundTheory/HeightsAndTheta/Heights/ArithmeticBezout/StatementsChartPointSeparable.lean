@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.OfFreeParAlgIndep
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LineInhabitant
+module
+
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.FieldTheory.Perfect
+public import Mathlib.RingTheory.AlgebraicIndependent.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -45,42 +89,6 @@ def ChartPointSeparable.Statement : Prop :=
 section Inhabitants
 
 namespace ChartPointLine
-
-abbrev KL : Type := FractionRing (MvPolynomial (Fin 1 × Fin 2) ℚ)
-
-def uL : Fin 1 × Fin 2 → KL := fun q => algebraMap (MvPolynomial (Fin 1 × Fin 2) ℚ) KL (X q)
-
-def tL : Fin 2 → ℚ := ![0, 1]
-
-def ηL : Fin 2 → KL := ![-(uL (0, 1)) / uL (0, 0), 1]
-
-theorem uL_ne_zero (q : Fin 1 × Fin 2) : uL q ≠ 0 := by
-  intro h
-  have hinj := IsFractionRing.injective (MvPolynomial (Fin 1 × Fin 2) ℚ) KL
-  exact X_ne_zero (R := ℚ) q (hinj (by rw [map_zero]; exact h))
-
-theorem adjoin_ηL : IntermediateField.adjoin KL (Set.range ηL) = ⊤ := by
-  refine eq_top_iff.2 fun x _ => ?_
-  simpa using IntermediateField.algebraMap_mem (IntermediateField.adjoin KL (Set.range ηL)) x
-
-theorem rel_ηL : ∀ i : Fin 1, ∑ m, algebraMap KL KL (uL (i, m)) * ηL m = 0 := by
-  intro i
-  fin_cases i
-  simp only [Fin.sum_univ_two, Algebra.algebraMap_self, RingHom.id_apply, ηL]
-  simp only [Fin.zero_eta, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one,
-    mul_one]
-  field_simp [uL_ne_zero (0, 0)]
-  ring
-
-theorem chart_ηL : ∑ m, algebraMap ℚ KL (tL m) * ηL m = 1 := by
-  simp [Fin.sum_univ_two, tL, ηL]
-
-theorem ηL_one_ne_zero : ηL 1 ≠ 0 := by simp [ηL]
-
-theorem trdeg_ηL (j₀ : Fin 2) (hj₀ : ηL j₀ ≠ 0) :
-    Algebra.trdeg ℚ (Algebra.adjoin ℚ (Set.range fun m => ηL m * (ηL j₀)⁻¹)) ≤ ((1 : ℕ) : Cardinal) :=
-  Vertical.ChartPointTrdeg.full ℚ KL 2 1 ⊥ LineChowForm.D2 LineChowForm.isProjPrime_line
-    LineChowForm.isChowForm_line ηL j₀ (fun f hf => by rw [Ideal.mem_bot.1 hf, map_zero]) hj₀
 
 end ChartPointLine
 

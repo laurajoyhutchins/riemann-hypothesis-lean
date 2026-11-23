@@ -1,4 +1,59 @@
-import Formalism.LocalToGlobal.IndefiniteReal.DKerHasCompactSupport
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.DKerHasCompactSupport
+import Formalism.LocalToGlobal.IndefiniteReal.SchurOrthogonality
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChainRuleSmooth.ExpIntertwine
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.KFiniteSmoothVectors.DenseWeakVectors
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.KFiniteSmoothVectors.Garding
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,7 +136,7 @@ theorem gp_deriv_add {τ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} (hτ 
     intro Ψ hΨ hΨc x
     have e : dKer (-(Z₁ + Z₂)) Ψ = fun m => dKer (-Z₁) Ψ m + dKer (-Z₂) Ψ m := by
       funext m
-      simp only [dKer, neg_neg, Matrix.add_mul, map_add]
+      simp only [dKer, neg_neg, Matrix.add_mul, map_add (f := _)]
     have hc1 := dKer_contDiff (Z := -Z₁) hΨ
     have hc2 := dKer_contDiff (Z := -Z₂) hΨ
     rw [inner_sub_right, inner_add_right, gp_pair_deriv hτ hΨ hΨc h12 x v d hd,
@@ -136,7 +191,8 @@ theorem gp_sv_contDiff1 {M : DSModel V S} {τ : D.what₂.Tau} {v : M.H τ}
     (contDiff_pi.2 fun _ : Fin 1 => contDiff_id : ContDiff ℝ ∞ fun s : ℝ => fun _ : Fin 1 => s)
   convert h using 1
   funext s
-  simp
+  simp only [Function.comp_apply, List.ofFn_succ, List.ofFn_zero, Matrix.cons_val_zero,
+    List.prod_cons, List.prod_nil, mul_one]
 
 private theorem rep_mul_of_mem_UH (M : DSModel V S) (τ : D.what₂.Tau) {a b : Matrix (Fin V.rank) (Fin V.rank) ℂ}
     (ha : a ∈ Formalism.QuantumDeterminants.UH (gramAt D V τ)) (hb : b ∈ Formalism.QuantumDeterminants.UH (gramAt D V τ)) (x : M.H τ) :
@@ -174,7 +230,7 @@ theorem gp_sv_add {M : DSModel V S} {τ : D.what₂.Tau} {v w : M.H τ}
     (hv : SmoothVec (lieAt V τ) (M.rep τ) v) (hw : SmoothVec (lieAt V τ) (M.rep τ) w) :
     SmoothVec (lieAt V τ) (M.rep τ) (v + w) := by
   intro k Xs hXs
-  simpa only [map_add] using (hv k Xs hXs).add (hw k Xs hXs)
+  simpa only [map_add (f := _)] using (hv k Xs hXs).add (hw k Xs hXs)
 
 theorem gp_sv_smul {M : DSModel V S} {τ : D.what₂.Tau} (c : ℂ) {v : M.H τ}
     (hv : SmoothVec (lieAt V τ) (M.rep τ) v) : SmoothVec (lieAt V τ) (M.rep τ) (c • v) := by
@@ -311,7 +367,7 @@ theorem gp_dRep_add {M : DSModel V S} {τ : D.what₂.Tau} {v w : M.H τ}
     {X : Matrix (Fin V.rank) (Fin V.rank) ℂ} (hX : X ∈ lieAt V τ) :
     dRep (M.rep τ) X (v + w) = dRep (M.rep τ) X v + dRep (M.rep τ) X w := by
   show deriv (fun t : ℝ => M.rep τ (NormedSpace.exp (t • X)) (v + w)) 0 = _
-  simp only [map_add]
+  simp only [map_add (f := _)]
   exact deriv_add (gp_sv_diffAt hv hX) (gp_sv_diffAt hw hX)
 
 theorem gp_dRep_smul {M : DSModel V S} {τ : D.what₂.Tau} (c : ℂ) {v : M.H τ}
@@ -572,6 +628,7 @@ theorem gp_dRep_expand {M : DSModel V S} {τ : D.what₂.Tau} {u : M.H τ}
   have h1 : dRep (M.rep τ) Y u = gpA M τ u hu ⟨Y, hY⟩ := rfl
   rw [h1]
   conv_lhs => rw [← (Module.finBasis ℝ (gpTan V τ)).sum_repr ⟨Y, hY⟩]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, Complex.coe_smul]
@@ -689,8 +746,8 @@ theorem gp_foldr_conj (M : DSModel V S) (τ : D.what₂.Tau) {g g' : Matrix (Fin
   | X :: l, hl, x, hx => by
     have hl' : ∀ Y ∈ l, Y ∈ lieAt V τ := fun Y hY => hl Y (List.mem_cons_of_mem _ hY)
     have hlm : ∀ Y ∈ l.map (fun X => g' * X * g), Y ∈ lieAt V τ := by
-      intro Y hY
-      obtain ⟨Z, hZ, rfl⟩ := List.mem_map.1 hY
+      rw [List.forall_mem_map]
+      intro Z hZ
       exact gp_lie_conj hg hgg' (hl' Z hZ)
     rw [List.foldr_cons, List.map_cons, List.foldr_cons, gp_foldr_conj M τ hg hgg' l hl' hx]
     exact gp_dRep_conj M τ hg hgg' (hl X (by simp)) (gp_sv_foldr _ hlm hx)

@@ -1,17 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsSmoothVector
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundedAutomorphicHasRepresentative
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSumIntegralCubeDerivativesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanLiftUnitaryGroupProduct
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsContinuousRepresentativeAverageStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEvaluationExtensionClosureRepresentativesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFixedAverageApproxOfSubgroupFixedStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FundamentalDomainL2BoundStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeMulSetIntegralImage2OfForallLeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalSobolevInequalityAdelicUnitary
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocallyIntegrableRep
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundedAutomorphicHasRepresentative
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalSobolevInequalityAdelicUnitary
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NcardRationalPointsTranslatedCompactLePowStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NcardRationalPointsTranslatedCompactLePowStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepresentativeParametricIntegralContinuousFamilyStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SetIntegralLeOfExpandingStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothAlongCurveProductsStableStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SobolevIteratedOneParameterSubgroups
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepresentativeParametricIntegralContinuousFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsContinuousRepresentativeAverageStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFixedAverageApproxOfSubgroupFixedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEvaluationExtensionClosureRepresentativesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSumIntegralCubeDerivativesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothAlongCurveProductsStableStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FundamentalDomainL2BoundStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +91,7 @@ theorem hasDerivAt_rep [μ.IsMulRightInvariant]
       have h2 : HasDerivAt (fun t : ℝ => ρ (c t) v) v' (t - t) := by rwa [sub_self]
       exact h2.comp_sub_const t t
     have h2 := ((ρ (c t)).restrictScalars ℝ).hasFDerivAt.comp_hasDerivAt t h1
-    convert h2 using 1
+    convert (preTransparency := .reducible) h2 using 1
     · funext r
       show _ = (ρ (c t) * ρ (c (r - t))) v
       rw [← map_mul, ← hadd, add_sub_cancel]
@@ -90,7 +137,7 @@ theorem exists_eval [μ.IsMulRightInvariant]
   let A₀ : K →ₗ[ℂ] K :=
     { toFun := fun v => ∫ t in Q, κ t • ρ (Θ t) v
       map_add' := fun v w => by
-        simp only [map_add, smul_add]
+        simp only [map_add (f := _), smul_add]
         exact integral_add (hi v) (hi w)
       map_smul' := fun a v => by
         simp only [map_smul, RingHom.id_apply, ← integral_smul]
@@ -101,7 +148,7 @@ theorem exists_eval [μ.IsMulRightInvariant]
   let E : Submodule ℂ K :=
     { carrier := {v | (∀ k ∈ H, ρ k v = v) ∧ ∃ φ : G → ℂ, Continuous φ ∧ ι v =ᵐ[μ] φ}
       zero_mem' := ⟨fun k _ => map_zero _, fun _ => 0, continuous_const, rep_zero hlin⟩
-      add_mem' := fun {v w} ⟨a1, φ, a2, a3⟩ ⟨b1, ψ, b2, b3⟩ => ⟨fun k hk => by rw [map_add, a1 k hk, b1 k hk],
+      add_mem' := fun {v w} ⟨a1, φ, a2, a3⟩ ⟨b1, ψ, b2, b3⟩ => ⟨fun k hk => by rw [map_add (f := _), a1 k hk, b1 k hk],
         fun x => φ x + ψ x, a2.add b2, by
           filter_upwards [rep_add hlin v w, a3, b3] with x e1 e2 e3
           rw [e1, e2, e3]⟩
@@ -134,7 +181,7 @@ theorem exists_eval [μ.IsMulRightInvariant]
         (fun y => ‖φ y‖) Ω
       rw [h3, ← h4]
       refine setIntegral_mono_set (a2.norm.continuousOn.integrableOn_compact (hB.mul hΩ))
-        (Filter.Eventually.of_forall fun y => norm_nonneg _) (LE.le.eventuallyLE ?_)
+        (Filter.Eventually.of_forall fun y => norm_nonneg _) (Filter.Eventually.of_forall ?_)
       rintro _ ⟨y, hy, rfl⟩
       exact Set.mul_mem_mul hx hy
     rw [e]
@@ -192,7 +239,7 @@ theorem exists_smooth_rep [μ.IsMulRightInvariant]
     have h1 := hv.1.hasDerivAt hp
     have h2 := ((ρ k).restrictScalars ℝ).hasFDerivAt.comp_hasDerivAt 0 h1
     refine HasDerivAt.unique (f := fun r : ℝ => ρ (e p r) v) (x := 0) ?_ h1
-    convert h2 using 1
+    convert (preTransparency := .reducible) h2 using 1
     · funext r
       show _ = (ρ k * ρ (e p r)) v
       rw [← map_mul, ← hcomm p r k hk, map_mul, mul_apply_eq_comp, hv.2 k hk]
@@ -250,7 +297,7 @@ open NumberField IsDedekindDomain MeasureTheory Matrix Formalism.BasicNotions Fo
 open scoped TensorProduct InnerProductSpace ContDiff
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_smooth_repr : ∀ (D : D7) (θ : InfFam D) (V : HSp D), IsInfFam θ → ∀ (μ : Measure (GA D V)) (𝓕 : Set (GA D V)) (ρ : GA D V →* (Lp ℂ 2 (nuQ V μ 𝓕) →L[ℂ] Lp ℂ 2 (nuQ V μ 𝓕))), FinPair V μ 𝓕 → IsReg V μ 𝓕 ρ → ∀ U : Subgroup (GA D V), IsOpen (U : Set (GA D V)) → ∀ F, IsSmoothVector' θ V ρ F → (∀ k ∈ U, k ∈ GfC V → ρ k F = F) → ∃ ψ, Repr V μ 𝓕 F ψ ∧ IsAutFun V ψ ∧ (∀ (k : ℕ) (τs : Fin k → D.what₂.Tau) (Xs : Fin k → Mt V.rank), (∀ i, Xs i ∈ lieAt V (τs i)) → ∀ g, ContDiff ℝ ∞ fun t : Fin k → ℝ => ψ (g * (List.ofFn fun i => oneP θ V (τs i) (Xs i) (t i)).prod)) ∧ ∀ l : List (D.what₂.Tau × Mt V.rank), (∀ p ∈ l, p.2 ∈ lieAt V p.1) → Continuous (l.foldr (fun p f => Rder θ V p.1 p.2 f) ψ) ∧ Repr V μ 𝓕 (l.foldr (dL2 θ V ρ) F) (l.foldr (fun p f => Rder θ V p.1 p.2 f) ψ) := by
   intro D θ V hθ μ 𝓕 ρ hp hr U hU F hF hFU

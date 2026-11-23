@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LaurentCechNerveLevelSpecTensorPower
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace GlobalTheory.CompanionTheory.Ar
 
@@ -56,8 +96,6 @@ def Flag.shrink {𝔐 : HodgeCpt Y S y} (Fl : 𝔐.Flag) (S₀ : Finset ℕ) (h 
   @Flag.mk _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (𝔐.shrink S₀ h hvb) Fl.b hsub Fl.Li₀ Fl.acg Fl.mod Fl.M₀ Fl.j
     Fl.j_pt Fl.V₀ Fl.V₀_mem Fl.deg Fl.generic
 
-abbrev constAlg (𝔐 : HodgeCpt Y S y) : Algebra (𝓞 c.F) Ω := (𝔐.cst.comp (algebraMap (𝓞 c.F) c.F)).toAlgebra
-
 def Flag.TwoLevels [DecidableEq K] {𝔐 : HodgeCpt Y S y} (Fl : 𝔐.Flag) (S₀ : Finset ℕ)
     (T : LocPair J ℤ (CMType H × Fin (D.p + D.q))) : Prop :=
   ∃ (h : S₀ ⊆ S) (hvb : ∀ s, (𝔐.VAt S₀ s).IsVB (labelRk D s) (𝔐.Vgen s))
@@ -65,9 +103,6 @@ def Flag.TwoLevels [DecidableEq K] {𝔐 : HodgeCpt Y S y} (Fl : 𝔐.Flag) (S�
     (Fl.shrink S₀ h hvb hsub).RootLines T.x e₀ ∧ Fl.RootLines T.x' e ∧
     (∀ r, aeval y (T.f r) = e r / e₀ r * aeval y (T.g r)) ∧
     T.IsVertOff (mCoordIdeal y) ((S \ S₀).preimage (fun p : Nat.Primes => (p : ℕ)) Subtype.val_injective.injOn)
-
-def wholeW (𝔐 : HodgeCpt Y S y) (n : ℕ) : Lat 𝔐.ξ 𝔐.Li := fun q =>
-  Submodule.span (regAt 𝔐.ξ q) {e | ∀ w ∈ 𝔐.M.htOm 𝔐.t.PP.L n q, w e ∈ regAt 𝔐.ξ q}
 
 end HodgeCpt
 

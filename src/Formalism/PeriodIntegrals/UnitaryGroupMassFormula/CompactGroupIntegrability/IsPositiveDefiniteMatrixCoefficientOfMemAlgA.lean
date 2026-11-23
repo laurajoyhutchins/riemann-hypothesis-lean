@@ -1,6 +1,63 @@
-import Mathlib
-import Formalism.PeriodIntegrals.WeylForU
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompactGroupIntegrability.InstCompactUG
+module
+
+public import Mathlib
+public import Formalism.PeriodIntegrals.WeylForU
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CompactGroupIntegrability.InstCompactUG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Matrix
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,7 +130,7 @@ lemma isPositiveDefinite_matrix_coefficient_of_mem_algA [FiniteDimensional ℂ S
     simp only [inv_mul_cancel_left] at hsh
     rw [hsh]
     simp_rw [hab h, Finset.sum_mul]
-    rw [integral_finset_sum]
+    rw [MeasureTheory.integral_finsetSum]
     · refine Finset.sum_congr rfl fun i _ => ?_
       simp_rw [mul_assoc]
       rw [integral_const_mul]
@@ -84,13 +141,13 @@ lemma isPositiveDefinite_matrix_coefficient_of_mem_algA [FiniteDimensional ℂ S
   rw [e]
   exact IsPD.sum _ fun i _ => (ha i).mul (IsPD.const _)
 
-variable (σ S) in
 
+variable (σ S) in
 def Ugood : Submodule ℂ S where
   carrier := {u | ∀ w : H, IsPD (fun h : UG N => ⟪w, σ h (u : H)⟫_ℂ)}
   add_mem' := by
     intro u v hu hv w
-    simpa [map_add, inner_add_right] using (hu w).add (hv w)
+    simpa [map_add (f := _), inner_add_right] using (hu w).add (hv w)
   zero_mem' := by
     intro w
     simpa using IsPD.const (N := N) 0
@@ -99,7 +156,7 @@ def Ugood : Submodule ℂ S where
     simpa [map_smul, inner_smul_right] using (IsPD.const c).mul (hu w)
 
 theorem Ugood_eq_top (hrep : IsURepOn (Kset (allPos N)) σ) (hfin : FiniteDimensional ℂ S)
-    (hst : IsKStableOn (allPos N) σ S) : Ugood σ S = ⊤ := by
+    (hst : IsKStableOn (allPos N) σ S) : Ugood (σ := σ) (S := S) = ⊤ := by
   haveI := hfin
   by_contra hne
   obtain ⟨φ, hφ0, hle⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.mpr hne)
@@ -110,7 +167,8 @@ theorem Ugood_eq_top (hrep : IsURepOn (Kset (allPos N)) σ) (hfin : FiniteDimens
   have hg : Continuous g := φC.continuous.comp (orb_cont hrep hst u)
   have hA : ∀ f ∈ algA N, ∫ x, f x * g x ∂(muU N) = 0 := by
     intro f hf
-    have hmem : T hst f u ∈ Ugood σ S := fun w => isPositiveDefinite_matrix_coefficient_of_mem_algA hrep hst hf u w
+    have hmem : T hst f u ∈ Ugood (σ := σ) (S := S) :=
+      fun w => isPositiveDefinite_matrix_coefficient_of_mem_algA hrep hst hf u w
     have h0 : φ (T hst f u) = 0 := LinearMap.mem_ker.mp (hle hmem)
     have hint : Integrable (fun x => f x • orb hst u x) (muU N) :=
       integrable_cont (f.continuous.smul (orb_cont hrep hst u))
@@ -179,7 +237,7 @@ end
 
 theorem polyCoef : PI.PolyCoef := by
   intro N H _ _ σ S hrep hfin hst v hv w
-  have hgood : (⟨v, hv⟩ : S) ∈ Ugood σ S := by
+  have hgood : (⟨v, hv⟩ : S) ∈ Ugood (σ := σ) (S := S) := by
     rw [Ugood_eq_top hrep hfin hst]
     trivial
   obtain ⟨k, P, hP⟩ := hgood w

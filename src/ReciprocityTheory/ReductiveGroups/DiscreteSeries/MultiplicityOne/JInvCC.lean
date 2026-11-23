@@ -1,4 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCCB
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCCB
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDiagExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCCA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,24 +83,6 @@ lemma CkOn_Rw (q : List (Mat k r)) (hq : ∀ X ∈ q, inLie k r X) (m : ℕ) {f 
       have e : m + 1 + q.length = m + (X :: q).length := by simp only [List.length_cons]; omega
       rw [e]; exact hf
     exact CkOn_RdV (ih hq' (m + 1) h1) (hq X (by simp))
-
-lemma Lw_congr (q : List (Mat k r)) (hq : ∀ X ∈ q, inLie k r X) {f₁ f₂ : Mat k r → ℂ}
-    (h : ∀ g ∈ GV k r, f₁ g = f₂ g) : ∀ g ∈ GV k r, q.foldr LdV f₁ g = q.foldr LdV f₂ g := by
-  induction q with
-  | nil => simpa using h
-  | cons X q ih =>
-    intro g hg
-    rw [List.foldr_cons, List.foldr_cons]
-    exact LdV_congr (ih (fun Y hY => hq Y (List.mem_cons_of_mem X hY))) (hq X (by simp)) hg
-
-lemma Rw_congr (q : List (Mat k r)) (hq : ∀ X ∈ q, inLie k r X) {f₁ f₂ : Mat k r → ℂ}
-    (h : ∀ g ∈ GV k r, f₁ g = f₂ g) : ∀ g ∈ GV k r, q.foldr RdV f₁ g = q.foldr RdV f₂ g := by
-  induction q with
-  | nil => simpa using h
-  | cons X q ih =>
-    intro g hg
-    rw [List.foldr_cons, List.foldr_cons]
-    exact RdV_congr (ih (fun Y hY => hq Y (List.mem_cons_of_mem X hY))) (hq X (by simp)) hg
 
 lemma comm1 (Y : Mat k r) (hY : inLie k r Y) (q : List (Mat k r)) (hq : ∀ X ∈ q, inLie k r X)
     (f : Mat k r → ℂ) (hf : CkOn ((q.length + 1 : ℕ) : ℕ∞) (GV k r) f) :
@@ -117,11 +146,6 @@ lemma RdV_fsmul (a : ℝ) (X : Mat k r) (f : Mat k r → ℂ) : RdV X (a • f) 
   funext g
   simp only [RdV, Pi.smul_apply]
   exact deriv_const_smul_field (f := fun t : ℝ => f (g * NormedSpace.exp ((t : ℂ) • X))) a
-
-lemma Lw_fsmul (a : ℝ) (q : List (Mat k r)) (f : Mat k r → ℂ) : q.foldr LdV (a • f) = a • q.foldr LdV f := by
-  induction q with
-  | nil => rfl
-  | cons X q ih => simp only [List.foldr_cons, ih, LdV_fsmul]
 
 lemma Rw_fsmul (a : ℝ) (q : List (Mat k r)) (f : Mat k r → ℂ) : q.foldr RdV (a • f) = a • q.foldr RdV f := by
   induction q with

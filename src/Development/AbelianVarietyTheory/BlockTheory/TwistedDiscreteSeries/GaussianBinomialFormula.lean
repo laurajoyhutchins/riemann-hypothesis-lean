@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module
 
@@ -36,28 +81,5 @@ def SubspaceCount : Prop :=
   ∀ (k : Type) [Field k] [Finite k] (V : Type) [AddCommGroup V] [Module k V]
     [FiniteDimensional k V] (j : ℕ),
     Nat.card {L : Submodule k V // finrank k L = j} = gaussBinom (Nat.card k) (finrank k V) j
-
-def OverspaceCount : Prop :=
-  ∀ (k : Type) [Field k] [Finite k] (r : ℕ) (U : Submodule k (Fin r → k)) (j : ℕ),
-    Nat.card {L : Submodule k (Fin r → k) // U ≤ L ∧ finrank k ((Fin r → k) ⧸ L) = j} =
-      gaussBinom (Nat.card k) (r - finrank k U) j
-
-def GaussFormula : Prop :=
-  ∀ (k : Type) [Field k] [Finite k] (R : Type) [CommRing R] (Y : R) (m : ℕ),
-    ∑ j ∈ Finset.range (m + 1),
-        (-1 : R) ^ j * (Nat.card k : R) ^ (j * (j - 1) / 2) *
-          (gaussBinom (Nat.card k) m j : R) * Y ^ j =
-      ∏ i ∈ Finset.range m, (1 - (Nat.card k : R) ^ i * Y)
-
-def Statement : Prop := SubspaceCount ∧ OverspaceCount ∧ GaussFormula
-
-example : gaussBinom 2 2 1 = 3 ∧ gaussBinom 2 3 1 = 7 ∧ gaussBinom 2 3 2 = 7 ∧
-    gaussBinom 2 4 2 = 35 ∧ gaussBinom 3 4 2 = 130 := by decide
-
-example (Y : ℤ) : ∑ j ∈ Finset.range (3 + 1),
-    (-1 : ℤ) ^ j * ((3 : ℕ) : ℤ) ^ (j * (j - 1) / 2) * (gaussBinom 3 3 j : ℤ) * Y ^ j =
-      ∏ i ∈ Finset.range 3, (1 - ((3 : ℕ) : ℤ) ^ i * Y) := by
-  simp [Finset.sum_range_succ, Finset.prod_range_succ, gaussBinom_succ_succ]
-  ring
 
 end GlobalTheory.IndefiniteRowSideFullHecke.GaussianBinomialFormula

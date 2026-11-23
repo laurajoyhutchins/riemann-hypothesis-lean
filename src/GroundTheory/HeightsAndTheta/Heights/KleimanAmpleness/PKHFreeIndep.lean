@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeIndepSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeIndepSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -12,8 +57,8 @@ namespace KHFreeIndep
 
 variable {S : Type} [CommRing S] {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem cellMon_monomial {I : ∀ k, Finset (ι k)} {t : MRingOver S ι} (ht : t ∈ KH.cellMon S I) :
     ∃ e, t = monomial e 1 := by
   unfold KH.cellMon at ht
@@ -27,17 +72,17 @@ theorem cellMon_monomial {I : ∀ k, Finset (ι k)} {t : MRingOver S ι} (ht : t
     obtain ⟨e', rfl⟩ := hy
     exact ⟨e + e', by rw [monomial_mul, mul_one]⟩
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem eq_zero_of_monomial_mul (e : (Σ k, ι k) →₀ ℕ) {p : MRingOver S ι}
     (h : monomial e (1 : S) * p = 0) : p = 0 := by
   ext d
-  have := congrArg (coeff (e + d)) h
-  rw [coeff_monomial_mul, one_mul, coeff_zero] at this
-  rw [this, coeff_zero]
+  have := congrArg (AddMonoidAlgebra.coeff · (e + d)) h
+  rw [coeff_monomial_mul, one_mul] at this
+  simpa using this
+
 
 omit [Fintype K] [∀ k, Fintype (ι k)] in
-
 theorem eq_zero_of_mk_eq_zero {I : ∀ k, Finset (ι k)} {p : MRingOver S ι}
     (h : LocalizedModule.mk (Ideal.Quotient.mk (⊥ : Ideal (MRingOver S ι)) p) (1 : KH.cellMon S I) = 0) :
     p = 0 := by
@@ -95,19 +140,21 @@ theorem eq_zero_of_sum_smul_monoFrac (I : ∀ k, Finset (ι k)) (A : Finset ((Σ
         (∑ b ∈ A, monomial (c b) (g b))) (1 : KH.cellMon S I) =
         ∑ b ∈ A, LocalizedModule.mk (Ideal.Quotient.mk (⊥ : Ideal (MRingOver S ι))
           (monomial (c b) (g b))) (1 : KH.cellMon S I) := by
+
       rw [map_sum]
       exact map_sum (LocalizedModule.mkLinearMap (KH.cellMon S I) _) _ _
     rw [e1, ← Finset.sum_congr rfl hterm, ← Finset.smul_sum, h, smul_zero]
   intro a ha
   by_cases hI : ∀ k, negSet a k ⊆ I k
-  · have hk := congrArg (coeff (c a)) key
-    rw [coeff_sum, Finset.sum_eq_single a, coeff_monomial, if_pos rfl, coeff_zero] at hk
+  · have hk := congrArg (AddMonoidAlgebra.coeff · (c a)) key
+    rw [coeff_sum, Finset.sum_eq_single a, coeff_monomial, if_pos rfl,
+      AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at hk
     · exact hk
     · intro b hb hba
       by_cases hbI : ∀ k, negSet b k ⊆ I k
       · rw [coeff_monomial, if_neg]
         exact fun hcb => hba (shift_injective u (hle b hb hbI) (hle a ha hI) hcb)
-      · rw [hg b hb hbI, monomial_zero, coeff_zero]
+      · simp [hg b hb hbI]
     · exact fun hna => absurd ha hna
   · exact hg a ha hI
 

@@ -1,4 +1,43 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.ThresholdStandardLarge
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.ThresholdStandardLarge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,13 +86,13 @@ theorem nk_core {s : ℕ} (r : ℕ) (hr : 1 ≤ r) (L A : ℕ) (R n Ai Ci : Fin 
       (((L : ℝ) + r) ^ (r - 1) * f) * (∏ i, (((R i : ℝ) + r) ^ (r - 1) * f)) *
         (∏ i, (((n i : ℝ) + r) ^ (r - 1) * f)) := by
     apply mul_le_mul (mul_le_mul (nk_b_up r L)
-      (Finset.prod_le_prod (fun _ _ => by positivity) (fun i _ => nk_b_up r (R i))) (by positivity) (by positivity))
-      (Finset.prod_le_prod (fun _ _ => by positivity) (fun i _ => nk_b_up r (n i))) (by positivity) (by positivity)
+      (Finset.prod_le_prod₀ (fun _ _ => by positivity) (fun i _ => nk_b_up r (R i))) (by positivity) (by positivity))
+      (Finset.prod_le_prod₀ (fun _ _ => by positivity) (fun i _ => nk_b_up r (n i))) (by positivity) (by positivity)
   have low : (((A : ℝ)) ^ (r - 1) * f) * (∏ i, ((Ai i : ℝ) ^ (r - 1) * f)) * (∏ i, ((Ci i : ℝ) ^ (r - 1) * f)) ≤
       (sdXi r A : ℝ) * (∏ i, (sdXi r (Ai i) : ℝ)) * ∏ i, (sdXi r (Ci i) : ℝ) := by
     apply mul_le_mul (mul_le_mul (nk_b_low r A hr)
-      (Finset.prod_le_prod (fun _ _ => by positivity) (fun i _ => nk_b_low r (Ai i) hr)) (by positivity) (by positivity))
-      (Finset.prod_le_prod (fun _ _ => by positivity) (fun i _ => nk_b_low r (Ci i) hr)) (by positivity) (by positivity)
+      (Finset.prod_le_prod₀ (fun _ _ => by positivity) (fun i _ => nk_b_low r (Ai i) hr)) (by positivity) (by positivity))
+      (Finset.prod_le_prod₀ (fun _ _ => by positivity) (fun i _ => nk_b_low r (Ci i) hr)) (by positivity) (by positivity)
   have e1 : (((L : ℝ) + r) ^ (r - 1) * f) * (∏ i, (((R i : ℝ) + r) ^ (r - 1) * f)) *
         (∏ i, (((n i : ℝ) + r) ^ (r - 1) * f)) =
       (((L : ℝ) + r) * (∏ i, ((R i : ℝ) + r)) * (∏ i, ((n i : ℝ) + r))) ^ (r - 1) *
@@ -104,8 +143,8 @@ theorem nk_prod_le_dimMM {s : ℕ} (m : ℕ) (hm : 1 ≤ m) (A : ℕ) (Ai Ci : F
   push_cast
   rw [Finset.prod_mul_distrib, ← mul_assoc]
   have h : ∀ y : ℕ, (sdXi m y : ℝ) ≤ (sd m y : ℝ) := fun y => by exact_mod_cast nk_sdXi_le_sd m y hm
-  apply mul_le_mul (mul_le_mul (h A) (Finset.prod_le_prod (fun _ _ => by positivity) (fun i _ => h (Ai i)))
-    (by positivity) (by positivity)) (Finset.prod_le_prod (fun _ _ => by positivity) (fun i _ => h (Ci i)))
+  apply mul_le_mul (mul_le_mul (h A) (Finset.prod_le_prod₀ (fun _ _ => by positivity) (fun i _ => h (Ai i)))
+    (by positivity) (by positivity)) (Finset.prod_le_prod₀ (fun _ _ => by positivity) (fun i _ => h (Ci i)))
     (by positivity) (by positivity)
 
 theorem notKeptWt_of {C0 CYb Cde Ck CD Cb CE1 CE2 Cc : ℝ} (hW : WtBoundAt)

@@ -1,10 +1,60 @@
-import Mathlib
-import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactCasimirHighestWeight
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantCompactSpan
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.PRVComponents.HighestWeightDifferencesNat
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.InnerEqZeroOfWeight
+module
+
+public import CompanionTheory.HarishChandraModules.LowKTypeMultiplicity.EigenspaceCyclicDensity.LowKMultOneP
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.InnerEqZeroOfWeight
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantCompactSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.PRVComponents.HighestWeightDifferencesNat
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped InnerProductSpace
 open Formalism.REAL (KHighest IsWeight CasK kSpan)
@@ -93,7 +143,6 @@ lemma string_bound (hF : KRel ε E) (hU : KUnit ε E) {a b : Fin n} (hab : a ≠
       exact h2
     have hn0 := norm_nonneg ((E a b ^ k) z)
     have hn1 := norm_nonneg ((E a b ^ (k + 1)) z)
-    have hnA := norm_nonneg (E b a ((E a b ^ (k + 1)) z))
     have key : ((k : ℝ) + 1) * (μ b - μ a - k) * ‖(E a b ^ (k + 1)) z‖ ^ 2 ≤
         ‖E b a ((E a b ^ (k + 1)) z)‖ ^ 2 := by
       rcases le_or_gt (((k : ℝ) + 1) * (μ b - μ a - k)) 0 with hc | hc
@@ -447,7 +496,7 @@ theorem wtMajor_of (hlow : CompanionTheory.D.DSIC.LowSpan) : CompanionTheory.D.L
       intro A c hAL hAp hAx
       have h1 : A xL - c • xL ∈ L := L.sub_mem (hAL _ hxL) (L.smul_mem _ hxL)
       have h0 : A xL + A xp = c • xL + c • xp := by
-        rw [← map_add, ← smul_add, ← hxsplit, hAx]
+        rw [← map_add (f := _), ← smul_add, ← hxsplit, hAx]
       have h2 : A xL - c • xL = -(A xp - c • xp) := by
         rw [neg_sub, sub_eq_sub_iff_add_eq_add, add_comm (c • xp)]
         exact h0

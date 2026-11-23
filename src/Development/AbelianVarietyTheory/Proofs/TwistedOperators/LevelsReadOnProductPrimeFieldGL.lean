@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FactTypePrime
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelGroupActionEqZeroOfNoLift
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FactTypePrime
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelGroupActionEqZeroOfNoLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Matrix.PEquiv
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
+public import Mathlib.Basic.PEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,8 +88,8 @@ def EdK (b : Bool) (s k : ℕ) (a c : Fin r) : Prop :=
     ((c : ℕ) = a + 1 ∧ (a : ℕ) + 1 ≠ s ∧ ¬ (0 < k ∧ (a : ℕ) + 1 = s + k)) ∨ ((a : ℕ) + 1 = s ∧ (c : ℕ) = s + k)
   else (c : ℕ) = a + 1
 
-open Classical in
 
+open Classical in
 def sumK (b : Bool) (s k : ℕ) (u : Fin r → Fin r → κ) : κ := ∑ a, ∑ c, if EdK b s k a c then u a c else 0
 
 theorem memK_map (e : κ ≃+* κ') (b : Bool) (s k : ℕ) (u : Fin r → Fin r → κ) :
@@ -53,8 +99,10 @@ theorem memK_map (e : κ ≃+* κ') (b : Bool) (s k : ℕ) (u : Fin r → Fin r 
 theorem sumK_map (e : κ ≃+* κ') (b : Bool) (s k : ℕ) (u : Fin r → Fin r → κ) :
     sumK b s k (fun a c => e (u a c)) = e (sumK b s k u) := by
   unfold sumK
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
   split_ifs <;> simp
@@ -99,10 +147,8 @@ theorem ofLocal_chi {E : Type} [Field E] [NumberField E] {Pg : Finset (Pl E)} {r
     (Hl : ∀ PP : ↥Pg, Subgroup (GL (Fin r) (kP PP.1))) (cl : ∀ PP : ↥Pg, Hl PP →* ℂˣ)
     (x : (Subgroup.pi Set.univ Hl : Subgroup (G0 Pg r))) :
     (((LevelP.ofLocal Hl cl).chi x : ℂˣ) : ℂ) = ∏ PP : Pg, ((cl PP (LevelP.prj Hl PP x) : ℂˣ) : ℂ) := by
-  unfold LevelP.ofLocal
-  simp only [MonoidHom.finset_prod_apply, MonoidHom.comp_apply]
-  push_cast
-  rfl
+  change (((∏ PP, (cl PP).comp (LevelP.prj Hl PP)) x : ℂˣ) : ℂ) = _
+  simp only [MonoidHom.finsetProd_apply, MonoidHom.comp_apply, Units.coe_prod]
 
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m}
   {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat D A Ks} {F : Face D A}

@@ -1,5 +1,61 @@
-import Formalism.LocalToGlobal.Columns.ChainTopLaw
-import Formalism.LocalToGlobal.Columns.ReferenceKernelEquivOfLastComponent
+module
+
+public import Formalism.LocalToGlobal.Columns.ReferenceKernelEquivOfLastComponent
+public import Formalism.LocalToGlobal.Columns.RecLevelSym
+public import Formalism.LocalToGlobal.Columns.SmulMemTrpSet
+public import Formalism.LocalToGlobal.Columns.TiedGlMat
+public import Formalism.LocalToGlobal.Columns.XtSumSingle
+import Formalism.LocalToGlobal.Columns.ChainInst
+public import Formalism.LocalToGlobal.Columns.ChainTopLaw
+import Formalism.LocalToGlobal.Columns.ColumnsProofs.ChainCounts
+import Formalism.LocalToGlobal.Columns.FirstUnfoldingEqZeroOfNotIntegral
+import Formalism.LocalToGlobal.Columns.RecLevelSymF
+import Formalism.LocalToGlobal.Columns.XiTopTilRefHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 
@@ -30,14 +86,14 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] {P : HeightOneSpectru
 
 theorem ctl_unitV_ne {K : Type} [Field K] (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) {a : E} (hU : IsUnit (redP P a)) : LocE.unitV χ a ≠ 0 := by
   unfold LocE.unitV
-  rw [dif_pos hU]
+  rw [dite_eq_left hU]
   exact Units.ne_zero _
 
 theorem ctl_unitV_inv_mul {K : Type} [Field K] (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) {a b : E} (hab : redP P a = redP P b)
     (hU : IsUnit (redP P a)) : LocE.unitV χ⁻¹ a * LocE.unitV χ b = 1 := by
   have hU' : IsUnit (redP P b) := hab ▸ hU
   unfold LocE.unitV
-  rw [dif_pos hU, dif_pos hU', MonoidHom.inv_apply, Units.val_inv_eq_inv_val]
+  rw [dite_eq_left hU, dite_eq_left hU', MonoidHom.inv_apply, Units.val_inv_eq_inv_val]
   have : hU.unit = hU'.unit := Units.ext (by rw [IsUnit.unit_spec, IsUnit.unit_spec, hab])
   rw [this, inv_mul_cancel₀ (Units.ne_zero _)]
 
@@ -232,10 +288,10 @@ theorem topLawG_sym (hlaw : CtlPhiLaw) (hX : X.Ok) (hPr : Pr.Ok) {m2 : ℕ} (hm 
   simp only [if_pos hw, hsharp, if_true]
   have e1 : psi0P Ch w.1 = Ch.psi0 ⟨w.1, hw⟩ := by
     unfold psi0P
-    rw [dif_pos hw]
+    rw [dite_eq_left hw]
   have e2 : chiP Ch w.1 = extChi fun s => Ch.chi s ⟨w.1, hw⟩ := by
     unfold chiP
-    rw [dif_pos hw]
+    rw [dite_eq_left hw]
     rfl
   rw [Units.val_inv_eq_inv_val, hlamS, hlamT, e1, e2]
   have hn' : R.N (m2 + 1) = R.r + (m2 + 1 + 1 - 1) * R.t := by

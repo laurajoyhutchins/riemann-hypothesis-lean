@@ -1,12 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.BlockTheory.CMModuli.ThetaTowerRecognition
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsFib
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SemiAbelianHomExtensionDvr
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.LineBundleIsoDescendsFieldToDedekindDomain
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomIffOfIsGrpPullback
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsPicardGroup
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.LineBundleIsoDescendsFieldToDedekindDomain
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomIffOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SemiAbelianHomExtensionDvr
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.PUnit
+import Mathlib.Algebra.Ring.BooleanRing
+import Mathlib.AlgebraicGeometry.Morphisms.FlatDescent
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Development.AbelianVarietyTheory.Definitions.Degenerations.SepticCharacterInjective
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj BigOperators
@@ -130,8 +181,25 @@ theorem exists_iso_over_dvr : Laws → Laws2 → ∀ (V : Type) [CommRing V] [Is
   have hm : IsMonHom f.hom := hl.rigidity _ _ _ (isAbelianScheme_pullback _ _ P.isAb)
     (isAbelianScheme_pullback _ _ P'.isAb) f.hom hf₁
   have hm' : IsMonHom f.inv := inferInstance
-  have hs := isSemiAbelian_of_isAbelianScheme P.A P.isAb
-  have hs' := isSemiAbelian_of_isAbelianScheme P'.A P'.isAb
+  have semi_of_ab {S : Scheme.{0}} (B : Over S) [GrpObj B] (h : IsAbelianScheme B) : IsSemiAbelian B := by
+    have := h.proper
+    refine ⟨h.comm, h.smooth, inferInstance, inferInstance, h.geomConnected, ?_⟩
+    intro Ω _ _ p
+    have hab := isAbelianScheme_pullback p B h
+    refine ⟨{ X := PUnit, B := _, isAbelian := hab, q := 𝟙 _, q_hom := inferInstance
+              q_flat := ?_, q_surjective := ?_, q_quasiCompact := ?_
+              i := toUnit _ ≫ η, i_hom := ?_, isKernel := ?_ }⟩
+    · rw [Over.id_left]; infer_instance
+    · rw [Over.id_left]; infer_instance
+    · rw [Over.id_left]; infer_instance
+    · have := hab.comm; infer_instance
+    · have hident : 𝟙 (splitTorus (Spec (CommRingCat.of Ω)) PUnit) = 1 := by
+        rw [← Diag.diagMap_id, ← Diag.diagMap_zero]
+        congr 1
+      have : IsIso (toUnit (splitTorus (Spec (CommRingCat.of Ω)) PUnit)) := ⟨η, hident.symm, toUnit_unique _ _⟩
+      exact IsPullback.of_vert_isIso ⟨Category.comp_id _⟩
+  have hs := semi_of_ab P.A P.isAb
+  have hs' := semi_of_ab P'.A P'.isAb
   obtain ⟨F, ⟨hF, eF⟩, -⟩ := homExtension_semiAbelian_dvr_unconditional V (FractionRing V) P.A P'.A hs hs' f.hom hm
   obtain ⟨G, ⟨-, eG⟩, -⟩ := homExtension_semiAbelian_dvr_unconditional V (FractionRing V) P'.A P.A hs' hs f.inv hm'
   obtain ⟨_, _⟩ := ExtUnique.spec_fractionRing V (FractionRing V)
@@ -145,6 +213,8 @@ theorem exists_iso_over_dvr : Laws → Laws2 → ∀ (V : Type) [CommRing V] [Is
     rw [← hf, ← eF, Over.comp_left, ← toBase_fst (jFK (R := V) C) (jK V) P.A, Category.assoc]
     exact congrArg (_ ≫ ·) (ExtUnique.pullback_map_left_fst (jK V) F)
   refine ⟨asIso F, hF, e, ?_⟩
+  have pull_isLB {X Y : Scheme.{0}} {L : LB X} (hL : L.IsLB) (F : Y ⟶ X) : (L.pull F).IsLB :=
+    ReciprocityTheory.ChartRestriction.G.Geo.Tor.pull_isLB hL F
   have hN := pull_isLB P'.isLB F.left
   have hβ : jFK (R := V) C ≫ jK V =
       spMap ((algebraMap (FractionRing V) C).comp (algebraMap V (FractionRing V))) := (Spec.map_comp _ _).symm
@@ -152,12 +222,21 @@ theorem exists_iso_over_dvr : Laws → Laws2 → ∀ (V : Type) [CommRing V] [Is
     ((algebraMap (FractionRing V) C).injective.comp (IsFractionRing.injective V (FractionRing V))) P.A P.isAb _
     (snd (TF (R := V) C) P.A).left (fst (TF (R := V) C) P.A).left (hβ ▸ isPullback_snd (TF (R := V) C) P.A)
     P.L (P'.L.pull F.left) P.isLB hN ?_ ?_
+  all_goals
+    obtain ⟨Pic, groups, cl, pl, iso_iff, gen_iff, -, comp, linComb, -⟩ := CechPicMul.exists_picardGroup
+    let _ := groups
+    have pull_class {S T : Scheme.{0}} (f : T ⟶ S) {L : LB S} (hL : L.IsLB) :
+        (L.pull f).IsLB ∧ cl (L.pull f) = pl f (cl L) := by
+      simpa only [Fintype.prod_unique, zpow_one] using
+        linComb S T L hL PUnit (fun _ => f) (fun _ => 1)
   · have eF' : eSec P.A ≫ F.left = eSec P'.A := congrArg (·.left) (IsMonHom.one_hom F)
-    rw [← CechPic.cls_eq_iff (pull_isLB P.isLB _) (pull_isLB hN _),
-      (CechPic.cls_eq_zero_iff _).2 P.rigid, CechPic.cls_pull hN, CechPic.cls_pull P'.isLB, ← CechPic.pull_comp, eF',
-      ← CechPic.cls_pull P'.isLB _ (pull_isLB P'.isLB _), (CechPic.cls_eq_zero_iff _).2 P'.rigid]
-  · rw [← CechPic.cls_eq_iff (pull_isLB P.isLB _) (pull_isLB P'.isLB _), CechPic.cls_pull P'.isLB, e] at hL
-    rw [← CechPic.cls_eq_iff (pull_isLB P.isLB _) (pull_isLB hN _), hL, CechPic.cls_pull hN,
-      CechPic.cls_pull P'.isLB, ← CechPic.pull_comp, Over.comp_left]
+    apply (iso_iff _ _ _ (pull_isLB P.isLB _) (pull_isLB hN _)).1
+    rw [(gen_iff _ _ (pull_isLB P.isLB _)).2 P.rigid,
+      (pull_class _ hN).2, (pull_class _ P'.isLB).2, ← comp, eF',
+      ← (pull_class _ P'.isLB).2, (gen_iff _ _ (pull_isLB P'.isLB _)).2 P'.rigid]
+  · apply (iso_iff _ _ _ (pull_isLB P.isLB _) (pull_isLB hN _)).1
+    have hL' := (iso_iff _ _ _ (pull_isLB P.isLB _) (pull_isLB P'.isLB _)).2 hL
+    rw [(pull_class _ P'.isLB).2, e] at hL'
+    rw [hL', (pull_class _ hN).2, (pull_class _ P'.isLB).2, ← comp, Over.comp_left]
 
 end GlobalTheory.IsoOverField

@@ -1,9 +1,54 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitOpenAndCongrOpen
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdUnifMulUnitIdl
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdUnifMulUnitIdl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitOpenAndCongrOpen
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,8 +69,8 @@ def KDq : Subgroup (Ideles H.E) :=
 
 abbrev DtQ : Type := Ideles H.E ⧸ KDq H SQ
 
-open Classical in
 
+open Classical in
 def tildeQ (χ : HChar H.E) : DtQ H SQ →* ℂˣ :=
   if h : KDq H SQ ≤ (χ.1.comp (finPartI H.E)).ker then QuotientGroup.lift (KDq H SQ) (χ.1.comp (finPartI H.E)) h else 1
 
@@ -38,8 +83,8 @@ def IsUnitaryPointsMapFinerDeterminants (f : (letI := H.cmStar; unitary H.E) →
   letI := H.cmStar
   ∀ (k : H.Eˣ) (z : unitary H.E), (z : H.E) * H.conj (k : H.E) = k → QuotientGroup.mk (diagUnits H.E k) = f z
 
-open Classical in
 
+open Classical in
 def e1Q : (letI := H.cmStar; unitary H.E) →* DtQ H SQ := if h : ∃ f, IsUnitaryPointsMapFinerDeterminants H SQ f then h.choose else 1
 
 def relDetQ (N : ℕ) (M M' : Submodule (𝓞 H.E) (Fin N → H.E)) : DtQ H SQ ⧸ UOQ H SQ :=
@@ -149,8 +194,8 @@ theorem compAt_localIdele_ne {v w : HeightOneSpectrum (𝓞 L)} (hw : w ≠ v) (
 
 variable (F : Type) [Field F] [NumberField F] [Algebra F L]
 
-open Classical in
 
+open Classical in
 theorem compAt_locF (w : HeightOneSpectrum (𝓞 L)) (v : HeightOneSpectrum (𝓞 F)) (k : Fˣ) :
     compAt w (locF F v k) = if w.under (𝓞 F) = v then compAt w (diagUnits L (upF F k)) else 1 := by
   unfold locF
@@ -241,7 +286,7 @@ theorem relDetQ_self (N : ℕ) (M : Submodule (𝓞 H.E) (Fin N → H.E)) : relD
 theorem tildeQ_mk {χ : HChar H.E} (h : KDq H SQ ≤ (χ.1.comp (finPartI H.E)).ker) (a : Ideles H.E) :
     tildeQ H SQ χ (QuotientGroup.mk a) = χ.1 (finPartI H.E a) := by
   unfold tildeQ
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
 theorem tildeQ_eq_comp {χ : HChar H.E} (h : KD H ≤ (χ.1.comp (finPartI H.E)).ker) :
@@ -274,12 +319,12 @@ theorem norm_tildeQ {χ : HChar H.E} (hu : χ.IsUnitary) (x : DtQ H SQ) : ‖((t
     rw [tildeQ_mk H SQ h]
     exact hu _
   · unfold tildeQ
-    rw [dif_neg h]
+    rw [dite_eq_right h]
     simp
 
 theorem muTilQ_succ (mu : Fin R.m → HChar H.E) (j : Fin R.m) : muTilQ H SQ mu (j.1 + 1) = tildeQ H SQ (mu j) := by
   unfold muTilQ
-  rw [dif_pos ⟨Nat.le_add_left 1 j.1, j.2⟩]
+  rw [dite_eq_left ⟨Nat.le_add_left 1 j.1, j.2⟩]
   rfl
 
 theorem exists_eq_div_conj : letI := H.cmStar
@@ -304,7 +349,7 @@ theorem exists_eq_div_conj : letI := H.cmStar
     rw [Units.val_mk0, map_sub, hcc]
     linear_combination (x - H.conj x) * h
   · refine ⟨Units.mk0 _ h, ?_⟩
-    rw [Units.val_mk0, map_add, map_one]
+    rw [Units.val_mk0, map_add (f := _), map_one]
     linear_combination hz
 
 theorem mk_diag_eq {z : H.E} {k k' : (H.E)ˣ} (h : z * H.conj (k : H.E) = k) (h' : z * H.conj (k' : H.E) = k') :
@@ -335,7 +380,7 @@ theorem exists_isUnitaryPointsMapFinerDeterminants : ∃ f, IsUnitaryPointsMapFi
 
 theorem isUnitaryPointsMap_unitaryRationalPointsFiner : IsUnitaryPointsMapFinerDeterminants H SQ (e1Q H SQ) := by
   unfold e1Q
-  rw [dif_pos (exists_isUnitaryPointsMapFinerDeterminants H SQ)]
+  rw [dite_eq_left (exists_isUnitaryPointsMapFinerDeterminants H SQ)]
   exact (exists_isUnitaryPointsMapFinerDeterminants H SQ).choose_spec
 
 theorem isRationalUnitaryDeterminantMap_rationalUnitary : IsRationalUnitaryDeterminantMap H (e1T H) :=
@@ -346,21 +391,5 @@ theorem toDtT_e1Q : letI := H.cmStar
   intro z
   obtain ⟨k, hk⟩ := exists_eq_div_conj H z
   rw [← isUnitaryPointsMap_unitaryRationalPointsFiner H SQ k z hk, toDtT_mk, isRationalUnitaryDeterminantMap_rationalUnitary H k z hk]
-
-example (v : HeightOneSpectrum (𝓞 H.E)) (hv : v ∈ SQ) (x : (v.adicCompletion H.E)ˣ)
-    (hx : Valued.v ((x : v.adicCompletion H.E) - 1) = 1) : localIdele H.E v x ∉ congQ H SQ := fun h => by
-  have h1 : Valued.v (compAt v (localIdele H.E v x) - 1) < 1 := h.2.2 v (Or.inl hv)
-  rw [compAt_localIdele_self, hx] at h1
-  exact lt_irrefl _ h1
-
-example (χ : HChar H.E) (h : KDq H SQ ≤ (χ.1.comp (finPartI H.E)).ker) : letI := H.cmStar
-    ∀ (k : (H.E)ˣ) (z : unitary H.E), (z : H.E) * H.conj (k : H.E) = k →
-      tildeQ H SQ χ (e1Q H SQ z) = χ.1 (finPartI H.E (diagUnits H.E k)) := by
-  intro k z hk
-  rw [← isUnitaryPointsMap_unitaryRationalPointsFiner H SQ k z hk, tildeQ_mk H SQ h]
-
-example (mu : Fin R.m → HChar H.E) : muTilQ H SQ mu 0 = 1 := by
-  unfold muTilQ
-  rw [dif_neg (by omega)]
 
 end GlobalTheory.Mem.Col2

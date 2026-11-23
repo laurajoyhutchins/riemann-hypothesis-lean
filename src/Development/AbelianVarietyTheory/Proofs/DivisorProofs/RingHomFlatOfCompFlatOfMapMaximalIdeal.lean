@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealEqBotOfFlatQuotientOfMapMaximalIdeal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealEqBotOfFlatQuotientOfMapMaximalIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 open TensorProduct LinearMap IsLocalRing
 
@@ -84,7 +138,7 @@ theorem relationsLift_of_lTensor_injective (K : Ideal A)
   let g : F × K →ₗ[A] A := f.coprod (-K.subtype)
   let z : M ⊗[A] (F × K) := (inl A F K).lTensor M x + (inr A F K).lTensor M y
   have hgz : g.lTensor M z = 0 := by
-    simp only [z, g, map_add, ← lTensor_comp_apply, coprod_inl, coprod_inr, lTensor_neg,
+    simp only [z, g, map_add (f := _), ← lTensor_comp_apply, coprod_inl, coprod_inr, lTensor_neg,
       LinearMap.neg_apply, hy, add_neg_cancel]
   have hL : K ≤ range g := fun a ha => ⟨(0, ⟨-a, neg_mem ha⟩), by simp [g]⟩
   have hz : g.rangeRestrict.lTensor M z = 0 := by
@@ -100,7 +154,7 @@ theorem relationsLift_of_lTensor_injective (K : Ideal A)
     rw [add_neg_eq_zero.mp this]
     exact k.2
   · rw [lTensor_comp_apply, hw]
-    simp only [z, map_add, ← lTensor_comp_apply, fst_comp_inl, fst_comp_inr, lTensor_id,
+    simp only [z, map_add (f := _), ← lTensor_comp_apply, fst_comp_inl, fst_comp_inr, lTensor_id,
       lTensor_zero, LinearMap.zero_apply, add_zero, id_apply]
 
 theorem flat_of_lTensor_injective [IsNoetherianRing A] (B : Type*) [CommRing B] [Algebra A B]
@@ -123,7 +177,6 @@ theorem lTensor_map_injective {O : Type*} [CommRing O] [Algebra O A] [Module O M
   have ht : ∀ x, ∃ y, t y = x := by
     intro x
     induction x with
-    | zero => exact ⟨0, map_zero _⟩
     | add a b ha hb =>
       obtain ⟨a, rfl⟩ := ha
       obtain ⟨b, rfl⟩ := hb
@@ -138,7 +191,7 @@ theorem lTensor_map_injective {O : Type*} [CommRing O] [Algebra O A] [Module O M
       | add a b ha hb iha ihb =>
         obtain ⟨a', ha'⟩ := iha m
         obtain ⟨b', hb'⟩ := ihb m
-        exact ⟨a' + b', by rw [map_add, ha', hb', ← tmul_add]; rfl⟩
+        exact ⟨a' + b', by rw [map_add (f := _), ha', hb', ← tmul_add]; rfl⟩
       | smul c a ha iha =>
         obtain ⟨a', ha'⟩ := iha (c • m)
         exact ⟨a', by rw [ha', smul_tmul]; rfl⟩
@@ -146,10 +199,9 @@ theorem lTensor_map_injective {O : Type*} [CommRing O] [Algebra O A] [Module O M
       TensorProduct.rid O M (J.subtype.lTensor M y) := by
     intro y
     induction y with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul m a => simp [t, j]
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨y, rfl⟩ := ht x
   have h0 := hc y
@@ -169,7 +221,7 @@ theorem ringHom_flat_of_comp_flat_of_map_maximalIdeal :
   intro O R' E _ _ _ _ _ _ _ _ _ φ' b _ hm hb hc
   algebraize [φ', b, b.comp φ']
   refine LocalFlatMax.flat_of_lTensor_injective E (maximalIdeal R') ?_ ?_
-  · have h : (maximalIdeal R').map b ≤ maximalIdeal E := ((local_hom_TFAE b).out 0 2).mp hb
+  · have h : (maximalIdeal R').map b ≤ maximalIdeal E := ((local_hom_tfae b).out 1 3).mp hb
     exact h.trans (maximalIdeal_le_jacobson _)
   · rw [← hm]
     exact LocalFlatMax.lTensor_map_injective (maximalIdeal O)

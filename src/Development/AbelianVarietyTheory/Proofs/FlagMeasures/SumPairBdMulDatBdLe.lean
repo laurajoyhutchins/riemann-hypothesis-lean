@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AdaptSelf
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PairBdNonneg
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AdaptSelf
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PairBdNonneg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt GlobalTheory.DegAsm
 open scoped Pointwise ENNReal Classical
@@ -15,7 +58,6 @@ theorem parith_small (k f g : ℕ) (b e : ℝ) (hb : 2 ≤ b) (hk : 9 ≤ k) (hf
     (32 / (g : ℝ)) ^ (k * f) * ((4 * k * f : ℕ) : ℝ) ^ (4 * f) * (b ^ (e * f)) ^ 42 ≤ 1 / 2 := by
   have hb0 : 0 < b := by linarith
   have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast (by omega : 1 ≤ k)
-  have hk0 : (0 : ℝ) < k := by linarith
   have hfk' : (f : ℝ) ≤ k := by exact_mod_cast hfk
   have h1 : (b ^ (e * f)) ^ 42 = (Real.exp (42 * (e * Real.log b))) ^ f := by
     rw [Real.rpow_def_of_pos hb0, ← Real.exp_nat_mul, ← Real.exp_nat_mul]
@@ -156,7 +198,6 @@ theorem parith_pair (K : Type) [Field K] [NumberField K] (k g r T x x' : ℕ) (h
   have hD1 : (1 : ℝ) ≤ (T : ℝ) ^ (2 * f) := one_le_pow₀ hT1
   have hDA : (T : ℝ) ^ (2 * f) ≤ A ^ 2 := by rw [mul_comm, pow_mul]; gcongr
   generalize (T : ℝ) ^ (2 * f) = D at *
-  have hD0 : 0 ≤ D := by linarith
   have hxx : (1 : ℝ) ≤ (x : ℝ) * x' := one_le_mul_of_one_le_of_one_le hx1 hx1'
   have hY1 : (1 : ℝ) ≤ (x : ℝ) * x' * D ^ 2 := one_le_mul_of_one_le_of_one_le hxx (one_le_pow₀ hD1)
   have hYA : (x : ℝ) * x' * D ^ 2 ≤ A ^ 6 * (S * S') ^ 2 := by
@@ -168,11 +209,7 @@ theorem parith_pair (K : Type) [Field K] [NumberField K] (k g r T x x' : ℕ) (h
     calc D * x * x' = x * x' * D := by ring
       _ ≤ _ := by gcongr
   generalize (x : ℝ) * x' * D ^ 2 = Y at *
-  have hY0 : 0 ≤ Y := by linarith
-  have hv0 : 0 ≤ Formalism.HermitianLatticesTheory.vInv K := by linarith
   have hSS : 1 ≤ S * S' := one_le_mul_of_one_le_of_one_le hS hS'
-  have hS2 : 1 ≤ S ^ 2 := one_le_pow₀ hS
-  have hS2' : 1 ≤ S' ^ 2 := one_le_pow₀ hS'
   have hZ : 1 ≤ (S * S') ^ 14 := one_le_pow₀ hSS
   set V := (A * S ^ 2) * (A * S' ^ 2) with hV
   have hVe : V = A ^ 2 * (S * S') ^ 2 := by rw [hV]; ring
@@ -208,7 +245,6 @@ theorem parith_pair (K : Type) [Field K] [NumberField K] (k g r T x x' : ℕ) (h
         _ ≤ _ := by gcongr)
   have hB' := le_trans hB (mul_le_mul_of_nonneg_right (le_trans hco (pow_le_pow_left₀ (by linarith) hAV 183))
     (by positivity))
-  have hV0 : 0 ≤ V := by linarith
   rw [mul_assoc]
   refine mul_le_mul_of_nonneg_left ?_ (by positivity)
   calc _ ≤ V ^ (96 * r) * (V ^ 183 * ((S * S') ^ 14) ^ k) := mul_le_mul h1 hB' (by positivity) (by positivity)
@@ -251,7 +287,6 @@ theorem parith_sum (K : Type) [Field K] [NumberField K] [StarRing K] (k g r T : 
   have hD0' : 0 ≤ Del' := by linarith
   set C := (Del ^ ((k : ℝ) / 2) * Del' ^ ((k : ℝ) / 2)) *
     ((U * U') ^ (96 * r + 183) * (S * S') ^ (14 * k) * (U ^ (250000 * r ^ 4) * U' ^ (250000 * r ^ 4))) with hC
-  have hC0 : 0 ≤ C := by positivity
   have hterm : ∀ x ∈ Finset.Icc 1 ⌊Del⌋₊, ∀ x' ∈ Finset.Icc 1 ⌊Del'⌋₊, pairBd K k g r T x x' *
       (datBd K k r Del Db ((T : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K) x * datBd K k r Del' Db' ((T : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K) x') ≤ C := by
     intro x hx x' hx'
@@ -302,7 +337,7 @@ theorem parith_abs (k r : ℕ) (A B S Ch : ℝ) (hA : 1 ≤ A) (hAB : A ≤ B) (
   rw [mul_pow, mul_assoc, mul_assoc, mul_assoc]
   gcongr
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem sum_pairBd_mul_datBd_le : ∀ Ca : ℝ, 1 ≤ Ca → ∃ Ch Cl : ℝ, 0 ≤ Ch ∧ ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (k r m g T : ℕ) (b Del Del' Db Db' S S' : ℝ), Module.finrank ℚ K = 2 * Formalism.HermitianLatticesTheory.fDeg K → m = 2 * r + 2 → Cl ≤ m → m ^ 4 ≤ Formalism.HermitianLatticesTheory.fDeg K → m ^ 5 * Formalism.HermitianLatticesTheory.fDeg K ≤ k → Cl * ((m : ℝ) ^ 2 * Real.log b) ≤ k → Real.log (Formalism.HermitianLatticesTheory.fDeg K) ≤ Real.sqrt r → 2 ≤ b → 1 ≤ Formalism.HermitianLatticesTheory.vInv K → 2 * Formalism.HermitianLatticesTheory.vInv K ≤ b → ((k : ℝ) * b) ^ 8 ≤ g → 1 ≤ T → (T : ℝ) ≤ b ^ (Ca * m) → 1 ≤ S → 1 ≤ S' → 1 ≤ Del → 1 ≤ Del' → 1 ≤ Db → 1 ≤ Db' → Del ≤ b ^ (Ca * (m : ℝ) ^ 2 * Formalism.HermitianLatticesTheory.fDeg K) * S ^ 2 → Del' ≤ b ^ (Ca * (m : ℝ) ^ 2 * Formalism.HermitianLatticesTheory.fDeg K) * S' ^ 2 → Db ≤ (b ^ (Ca * (m : ℝ) ^ 2 * Formalism.HermitianLatticesTheory.fDeg K) * S ^ 2) ^ r → Db' ≤ (b ^ (Ca * (m : ℝ) ^ 2 * Formalism.HermitianLatticesTheory.fDeg K) * S' ^ 2) ^ r → ∑ x ∈ Finset.Icc 1 ⌊Del⌋₊, ∑ x' ∈ Finset.Icc 1 ⌊Del'⌋₊, pairBd K k g r T x x' * (datBd K k r Del Db ((T : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K) x * datBd K k r Del' Db' ((T : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K) x') ≤ (Del ^ ((k : ℝ) / 2) * (b ^ (Ch * (m : ℝ) ^ 2 * Formalism.HermitianLatticesTheory.fDeg K)) ^ (Ch * (r : ℝ) ^ 4) * S ^ (16 * (k : ℝ))) * (Del' ^ ((k : ℝ) / 2) * (b ^ (Ch * (m : ℝ) ^ 2 * Formalism.HermitianLatticesTheory.fDeg K)) ^ (Ch * (r : ℝ) ^ 4) * S' ^ (16 * (k : ℝ))) := by
   intro Ca hCa
@@ -384,8 +419,6 @@ theorem sum_pairBd_mul_datBd_le : ∀ Ca : ℝ, 1 ≤ Ca → ∃ Ch Cl : ℝ, 0 
     gcongr
     linarith
   have hkr : 300000 * r ^ 4 ≤ k := by omega
-  have hD0 : 0 ≤ Del := by linarith
-  have hD0' : 0 ≤ Del' := by linarith
   exact mul_le_mul
     (parith_abs k r _ _ S _ hA hAB hS (by linarith) hkr _ (by positivity))
     (parith_abs k r _ _ S' _ hA hAB hS' (by linarith) hkr _ (by positivity)) (by positivity) (by positivity)

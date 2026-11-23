@@ -1,11 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.HodgeTateFromSandwich
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.HasSupportOfIsSubquotientProdIrr
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetModuleLeviTransport
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityPos
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEquivDetCharacterOfIrreducibleRankLeOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.FixedNeBotOfIsSubquotientOfIsCompact
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.HodgeTateFromSandwich
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SupercuspidalSupportUniqueGL
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCovBySubmodule
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEquivDetCharacterOfIrreducibleRankLeOne
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InSupportOfIsSubquotient
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SubsingletonJacquetOfPerm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.FixedNeBotOfIsSubquotientOfIsCompact
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetModuleLeviTransport
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityPos
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.BernsteinZelevinskyFiniteness
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GeometricLemma
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.HasSupportOfIsSubquotientProdIrr
+import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -146,7 +197,7 @@ private theorem cusp_block {n r : ℕ} {d : Fin r → ℕ} (e : (Σ j, Fin (d j)
 private theorem cnt_eq {n r : ℕ} {d : Fin r → ℕ} (hd : ∀ j, 0 < d j) (e : (Σ j, Fin (d j)) ≃ Fin n) {β : Fin n → ℕ}
     (hβ : ∀ x y, β x < β y ↔ blk e x < blk e y) (φ : Levi k (fun j => Fin (d j)) ≃* levi k n β)
     (hφ : ∀ g, ((φ g : levi k n β) : GL (Fin n) k) = leviEmb k e g) {V : Type} [AddCommGroup V] [Module ℂ V]
-    {π : Representation ℂ (GL (Fin n) k) V} {s : Multiset (IrrGL k)} (hs : HasSupport π s)
+    {π : Representation ℂ (GL (Fin n) k) V} {s : Multiset (IrrGL (k := k))} (hs : HasSupport π s)
     {W : Type} [AddCommGroup W] [Module ℂ W] (σ : Representation ℂ (levi k n β) W) (hi : σ.IsIrreducible)
     (hc : GroundTheory.Automorphic.Parabolic.IsCuspidal σ) (ι : Representation.IntertwiningMap π (parabolicInd k n β σ))
     (hι : Function.Injective ι) :
@@ -171,7 +222,9 @@ private theorem cnt_eq {n r : ℕ} {d : Fin r → ℕ} (hd : ∀ j, 0 < d j) (e 
   obtain ⟨v, hv⟩ := exists_ne (0 : V)
   let f := E.symm.toIntertwiningMap.comp ι
   have hf : f v ≠ 0 := fun h => hv (hι (E.symm.toLinearEquiv.injective (by
-    rw [map_zero, map_zero]; exact h)))
+    have hz : ι 0 = 0 := map_zero ι
+    rw [hz, E.symm.toLinearEquiv.map_zero]
+    exact h)))
   have hτs : IsSubquotient τ (jac e π) := .of_surjective (GlobalTheory.CompanionTheory.FrobJm.frobMap e f)
     (GlobalTheory.CompanionTheory.FrobJm.surjective_of_ne_zero hτ _ (GlobalTheory.CompanionTheory.FrobJm.frobMap_ne_zero e f ⟨v, hf⟩))
   have hτsm : IsSmooth τ := hτs.isSmooth (isSmooth_jac e hs.isSmooth)

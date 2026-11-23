@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.GenericPointSectionHypotheses
+module
+
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PAmpleTwistLocal
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -28,25 +79,7 @@ theorem res_mem_twistMod_zero_of_mem_chartRing {I : Chart x} {a : Ω} (ha : a �
 theorem SubSystem.res_mul_mem_pow (H : SubSystem S x Ω) (I : Chart x) {m : ℕ} {a : Ω}
     (ha : a ∈ (H.pow m).sub I) (n : ℕ) {b : Ω} (hb : b ∈ (H.pow n).sub I) :
     a * b ∈ (H.pow (m + n)).sub I := by
-  induction n generalizing b with
-  | zero =>
-    have hb' : b ∈ chartRing S x I := res_mem_chartRing_of_mem_twistMod_zero hb
-    have := ((H.pow m).sub I).smul_mem ⟨b, hb'⟩ ha
-    rw [chartRing_smul_def] at this
-    rw [mul_comm]; exact this
-  | succ n ih =>
-    change b ∈ ((H.pow n).twist H).sub I at hb
-    change a * b ∈ ((H.pow (m + n)).twist H).sub I
-    refine Submodule.span_induction (p := fun z _ => a * z ∈ ((H.pow (m + n)).twist H).sub I)
-      ?_ ?_ ?_ ?_ hb
-    · rintro _ ⟨q, hq, z, hz, rfl⟩
-      refine Submodule.subset_span ⟨q, hq, a * z, ih hz, ?_⟩
-      simp only [smul_eq_mul]; ring
-    · rw [mul_zero]; exact Submodule.zero_mem _
-    · intro u v _ _ hu hv; rw [mul_add]; exact Submodule.add_mem _ hu hv
-    · intro c u _ hu
-      rw [chartRing_smul_def, mul_left_comm, ← chartRing_smul_def]
-      exact Submodule.smul_mem _ c hu
+  apply GroundTheory.Heights₂.Heights.Kleiman.AmpleTwistLocal.mul_mem_pow <;> assumption
 
 theorem LineBundle.res_exists_mul_mem_pow (H : LineBundle S x) {I J : Chart x} (hIJ : I.1 ⊆ J.1)
     (n : ℕ) {z : Ω} (hz : z ∈ (H.pow n).sub J) :
@@ -107,8 +140,8 @@ theorem res_ampleChart_pow {a : Ω} (ha : a ∈ ampleChart H 1 σ I) (n : ℕ) :
 
 end AmpleChart
 
-variable (x) in
 
+variable (x) in
 def resUnionChart (I J : Chart x) : Chart x :=
   ⟨I.1 ∪ J.1, I.2.1.mono Finset.subset_union_left, Finset.union_subset I.2.2 J.2.2⟩
 

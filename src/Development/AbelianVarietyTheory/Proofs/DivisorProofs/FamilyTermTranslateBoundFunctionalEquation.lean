@@ -1,16 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.TanRel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TrVal
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsPolAVSectionInverseImage
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbsoluteSiegel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TanRel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TrVal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ToStkAInjective
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ProdNeg
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.DegenerationValuesIntOfAdmissibleBase
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.DualNumber
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsValGenHasVal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GenCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GsScalJFK
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Development.AbelianVarietyTheory.Definitions.Divisors.TorusExt
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.DegenerationValuesIntOfAdmissibleBase
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.GermEqZeroOfThickenings
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GsScalJFK
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.MemSpanOfCardLe
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
-open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.MBModel GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
+open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -78,7 +133,39 @@ theorem exists_fe_val (hϖ : Irreducible ϖ) {Q : D.toPre.X → ℤ} (hQ : IsQ D
   have z₂ : DegPre.zF D.toPre F ≫ DegPre.prB D.toPre F = 1 := lift_snd _ _
   have hcorr : LB.Gen.Corr D.toPre.P.L _ _ _ _ (LB.pullGen D.toPre.P.L _ _ u (DegPre.zF D.toPre F).left)
       (DegPre.famMult D.toPre F k mu α) := corr_of_val hL fun y J hJ => Units.ext (by
-    have C : IsCub (cubV D.toPre.cub (T := TF (R := V) F) y J) := isCub_cubV D.toPre.cub hJ
+    have C : IsCub (cubV D.toPre.cub (T := TF (R := V) F) y J) := by
+      constructor
+      case face =>
+        intro x y
+        have := val_corr hJ (D.toPre.cub.face 0) (lift x y).left
+        rw [val_one] at this
+        refine Eq.trans ?_ this
+        refine Eq.trans ?_ (val_cub D.toPre.cub (lift x y) hJ (pzero D.toPre.P.A _) (x2 D.toPre.P.A 0) (x2 D.toPre.P.A 1)).symm
+        congr 1 <;> simp [x2, pzero, Hom.one_def]
+      case s01 =>
+        intro x y w
+        have := (val_corr hJ D.toPre.cub.cubeSymmetric_swap_first (lift x (lift y w)).left).trans (val_cub D.toPre.cub (lift x (lift y w)) hJ _ _ _)
+        refine Eq.trans this ?_
+        congr 1 <;> simp [x3]
+      case s12 =>
+        intro x y w
+        have := (val_corr hJ D.toPre.cub.cubeSymmetric_swap_last (lift x (lift y w)).left).trans (val_cub D.toPre.cub (lift x (lift y w)) hJ _ _ _)
+        refine Eq.trans this ?_
+        congr 1 <;> simp [x3]
+      case coc =>
+        intro x x' x'' y
+        have := val_corr hJ D.toPre.cub.cocycle (lift x (lift x' (lift x'' y))).left
+        have e := ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) (val_cub D.toPre.cub _ hJ _ _ _) (val_cub D.toPre.cub _ hJ _ _ _))).symm.trans
+          (this.trans ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) (val_cub D.toPre.cub _ hJ _ _ _) (val_cub D.toPre.cub _ hJ _ _ _))))
+        have a₀ : lift x (lift x' (lift x'' y)) ≫ x4 D.toPre.P.A 0 = x := by simp [x4]
+        have a₁ : lift x (lift x' (lift x'' y)) ≫ x4 D.toPre.P.A 1 = x' := by simp [x4]
+        have a₂ : lift x (lift x' (lift x'' y)) ≫ x4 D.toPre.P.A 2 = x'' := by simp [x4]
+        have a₃ : lift x (lift x' (lift x'' y)) ≫ x4 D.toPre.P.A 3 = y := by simp [x4]
+        have b₀ : lift x (lift x' (lift x'' y)) ≫ padd D.toPre.P.A (x4 D.toPre.P.A 0) (x4 D.toPre.P.A 1) = x * x' :=
+          (MonObj.comp_mul _ _ _).trans (by rw [a₀, a₁])
+        have b₁ : lift x (lift x' (lift x'' y)) ≫ padd D.toPre.P.A (x4 D.toPre.P.A 1) (x4 D.toPre.P.A 2) = x' * x'' :=
+          (MonObj.comp_mul _ _ _).trans (by rw [a₁, a₂])
+        rwa [b₀, b₁, a₀, a₁, a₂, a₃] at e
     have E2 : val eB ((DegPre.zF D.toPre F).left ≫ (DegPre.prB D.toPre F).left) y J =
         val e' (DegPre.jFR (R := V) F) y J := by
       have E1 := veB (TF (R := V) F) (DegPre.zF D.toPre F ≫ DegPre.prB D.toPre F) y J hJ
@@ -260,7 +347,7 @@ theorem main : ∀ (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing
     exact hϖ.ne_zero (IsFractionRing.injective V (FractionRing V)
       ((algebraMap (FractionRing V) C).injective (by simpa [toF] using h)))
   have hκ : ‖algebraMap (FractionRing V) C c₀‖ = Real.exp (-((k : ℝ) * q mu + QuadraticMap.polar q mu α)) := by
-    rw [norm_hasVal hC.1 hc₀, bOf, ← map_add, zpow_add₀ ht, zpow_sub₀ ht, zpow_sub₀ ht, mul_comm (k : ℤ), zpow_mul,
+    rw [norm_hasVal hC.1 hc₀, bOf, ← map_add (f := _), zpow_add₀ ht, zpow_sub₀ ht, zpow_sub₀ ht, mul_comm (k : ℤ), zpow_mul,
       ← hψ, ← hψ, ← hψ, zpow_natCast, ← Real.exp_nat_mul, ← Real.exp_sub, ← Real.exp_sub, ← Real.exp_add,
       QuadraticMap.polar]
     congr 1; ring
@@ -303,7 +390,7 @@ theorem main : ∀ (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing
     rw [r₂, e₂] at e₁
     apply toStkA_injective
     unfold jc trVal
-    rw [map_add, map_nsmul, map_mul, map_mul, map_mul, map_mul, toStk_sE ν.good, toStk_sE ν.good, toStk_vE ν.good,
+    rw [map_add (f := _), map_nsmul, map_mul, map_mul, map_mul, map_mul, toStk_sE ν.good, toStk_sE ν.good, toStk_vE ν.good,
       toStk_vE ν.good, toStk_vE ν.good]
     refine (congrArg₂ (· * ·) e₁ (congrArg Units.val e₃)).trans ?_
     ring

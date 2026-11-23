@@ -1,4 +1,51 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.IsCompl
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.WittExactSequences.IsCompl
+public import Mathlib.Algebra.Colimit.Ring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open TensorProduct CrystallineSemistableComparison.D
 open scoped LaurentPolynomial
 
@@ -12,14 +59,15 @@ variable {A : Type} [CommRing A] {G : ℕ → Type} [∀ n, CommRing (G n)] [∀
   (f : ∀ n, G n →ₐ[A] G (n + 1))
 
 def trA (i j : ℕ) (h : i ≤ j) : G i →ₐ[A] G j :=
-  Nat.leRecOn (C := fun k => G i →ₐ[A] G k) h (fun {k} g => (f k).comp g) (AlgHom.id A (G i))
+  Nat.leRecOn (motive := fun k => G i →ₐ[A] G k) h (fun {k} g => (f k).comp g)
+    (AlgHom.id A (G i))
 
 theorem trA_self (i : ℕ) (h : i ≤ i) : trA f i i h = AlgHom.id A (G i) :=
-  Nat.leRecOn_self (C := fun k => G i →ₐ[A] G k) _
+  Nat.leRecOn_self (motive := fun k => G i →ₐ[A] G k) _
 
 theorem trA_succ (i k : ℕ) (h : i ≤ k) (h2 : i ≤ k + 1) :
     trA f i (k + 1) h2 = (f k).comp (trA f i k h) :=
-  Nat.leRecOn_succ (C := fun k => G i →ₐ[A] G k) h _
+  Nat.leRecOn_succ (motive := fun k => G i →ₐ[A] G k) h _
 
 theorem trA_trans (i j k : ℕ) (hij : i ≤ j) (hjk : j ≤ k) (x : G i) :
     trA f j k hjk (trA f i j hij x) = trA f i k (hij.trans hjk) x := by
@@ -69,16 +117,17 @@ theorem ι_trA (i j : ℕ) (h : i ≤ j) (x : G i) : ι f j (trA f i j h x) = ι
 theorem ι_tr (n k : ℕ) (x : G n) : ι f (n + k) (tr f n k x) = ι f n x := by
   rw [tr_eq_trA, ι_trA]
 
-theorem isColim : IsColim f (ι f) where
-  comm n x := by
+theorem isColim : IsColim f (ι f) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n x
     have := ι_tr f n 1 x
     simpa [tr] using this
-  surj m x := by
+  · intro m x
     choose n y hy using fun i => Ring.DirectLimit.exists_of (x i)
     refine ⟨Finset.univ.sup n, fun i => trA f (n i) _ (Finset.le_sup (Finset.mem_univ i)) (y i),
       fun i => ?_⟩
     rw [ι_trA, ι_apply, hy]
-  ker n m y hy := by
+  · intro n m y hy
     have h0 : ∀ i, ∃ j, ∃ hij : n ≤ j, trR f n j hij (y i) = 0 := fun i =>
       Ring.DirectLimit.of.zero_exact (f' := fun i j h => trR f i j h) (hy i)
     choose j hj hz using h0

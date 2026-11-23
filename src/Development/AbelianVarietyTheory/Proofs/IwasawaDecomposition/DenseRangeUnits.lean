@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsForallAbvSubLt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdUnifMulUnitIdl
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdeleCharacterTrivialOnLocalUnits
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsForallAbvSubLt
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdeleCharacterTrivialOnLocalUnits
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdUnifMulUnitIdl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,10 +102,13 @@ def proj (S : Finset (HeightOneSpectrum (𝓞 E))) : AdeleRing (𝓞 E) E →* L
 theorem denseRange_inf (w : InfinitePlace E) : DenseRange (algebraMap E w.Completion) := by
   refine Dense.mono ?_ (InfinitePlace.Completion.denseRange_coe w)
   rintro _ ⟨a, rfl⟩
-  exact ⟨WithAbs.equiv w.1 a, rfl⟩
+  refine ⟨WithAbs.equiv w.1 a, ?_⟩
+  rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
+  simp
 
-theorem norm_inf (w : InfinitePlace E) (x : E) : ‖algebraMap E w.Completion x‖ = w x :=
-  InfinitePlace.Completion.norm_coe w ((WithAbs.equiv w.1).symm x)
+theorem norm_inf (w : InfinitePlace E) (x : E) : ‖algebraMap E w.Completion x‖ = w x := by
+  rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
+  simpa using InfinitePlace.Completion.norm_coe w ((WithAbs.equiv w.1).symm x)
 
 theorem denseRange_proj (S : Finset (HeightOneSpectrum (𝓞 E))) :
     DenseRange fun x : E => proj S (algebraMap E (AdeleRing (𝓞 E) E) x) := by
@@ -132,8 +180,8 @@ theorem proj_incl (S : Finset (HeightOneSpectrum (𝓞 E))) (y : Loc S) : proj S
 
 variable {B : Type} [CommGroup B] [TopologicalSpace B] [T2Space B]
 
-open GlobalTheory.Mem.LocTriv GlobalTheory.Mem.Chr GlobalTheory.Mem.Chr.IdlFact in
 
+open GlobalTheory.Mem.LocTriv GlobalTheory.Mem.Chr GlobalTheory.Mem.Chr.IdlFact in
 theorem eq_one_of_local (ψ : Ideles E →* B) (hψ : Continuous ψ) (a : Ideles E)
     (h1 : (a : AdeleRing (𝓞 E) E).1 = 1) (hl : ∀ v, ψ (localIdele E v (Units.map (ev v) a)) = 1) : ψ a = 1 := by
   have hp : ∀ (c : Ideles E) T, (∀ v, ψ (localIdele E v (Units.map (ev v) c)) = 1) → ψ (part c T) = 1 :=
@@ -168,8 +216,8 @@ theorem eq_one_of_local (ψ : Ideles E →* B) (hψ : Continuous ψ) (a : Ideles
   simp only [b] at hb
   rwa [← part_inv, map_mul, map_inv, hp a T hl, inv_one, one_mul] at hb
 
-open GlobalTheory.Mem.LocTriv in
 
+open GlobalTheory.Mem.LocTriv in
 theorem eq_one_of_away (ψ : Ideles E →* B) (hψ : Continuous ψ) (hd : ∀ k, ψ (diagUnits E k) = 1)
     (S : Finset (HeightOneSpectrum (𝓞 E))) (hS : ∀ v ∉ S, ∀ x, ψ (localIdele E v x) = 1) : ψ = 1 := by
   have h0 : ∀ a : Ideles E, Units.map (proj S) a = 1 → ψ a = 1 := fun a ha => by
@@ -189,8 +237,8 @@ theorem eq_one_of_away (ψ : Ideles E →* B) (hψ : Continuous ψ) (hd : ∀ k,
   ext a
   rw [← h1, h2, MonoidHom.one_apply]
 
-omit [TopologicalSpace B] [T2Space B] in
 
+omit [TopologicalSpace B] [T2Space B] in
 theorem eq_one_of_unif {v : HeightOneSpectrum (𝓞 E)} (θ : (v.adicCompletion E)ˣ →* B)
     (h : ∀ x, IsUnifAt v x → θ x = 1) (x : (v.adicCompletion E)ˣ) : θ x = 1 := by
   obtain ⟨k, hk⟩ := exists_unif v

@@ -1,4 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open UpperTheory.V.GradeZeroInterpolatingElement
 
 section SlopeTestRemainingChoices
@@ -59,7 +110,7 @@ theorem UpperTheory.lift_symplectic_similitude_nilpotent :
     subst hc
     rfl
   have hu0 : IsUnit ((π' : B' →+* E).mapMatrix (1 + g)) := by
-    rw [map_add, map_one, hr']
+    rw [map_add (f := _), map_one, hr']
     have := (IsUnit.mk0 (2 : E) two_ne_zero).map (algebraMap E (M4 E))
     rwa [map_ofNat, ← one_add_one_eq_two] at this
   obtain ⟨U, hU⟩ := isUnit_of_res π' hπ' _ hu0
@@ -106,14 +157,14 @@ theorem UpperTheory.lift_symplectic_similitude_nilpotent :
     · rw [adj_smul', adj_sub', adj_adj', ← smul_neg, neg_sub]
   have hY0 : (π : B →+* E).mapMatrix Y = 0 := by rw [hcomp, hY, hY'0]
   obtain ⟨V, hV⟩ := isUnit_of_res π hπ (1 - Y) (by rw [map_sub, map_one, hY0, sub_zero]; exact isUnit_one)
-  obtain ⟨V', hV'⟩ := isUnit_of_res π hπ (1 + Y) (by rw [map_add, map_one, hY0, add_zero]; exact isUnit_one)
+  obtain ⟨V', hV'⟩ := isUnit_of_res π hπ (1 + Y) (by rw [map_add (f := _), map_one, hY0, add_zero]; exact isUnit_one)
   have e4 : ((V' * V⁻¹ : (M4 B)ˣ) : M4 B) * (1 - Y) = 1 + Y := by
     rw [← hV, ← hV', Units.val_mul, Units.inv_mul_cancel_right]
   refine ⟨V' * V⁻¹, ?_⟩
   generalize ((V' * V⁻¹ : (M4 B)ˣ) : M4 B) = h at e4 ⊢
   have hph : (p : B →+* B').mapMatrix h = g := by
     have h1 := congrArg (p : B →+* B').mapMatrix e4
-    rw [map_mul, map_sub, map_add, map_one, hY, ← hk] at h1
+    rw [map_mul, map_sub, map_add (f := _), map_one, hY, ← hk] at h1
     have h2 : IsUnit (1 - Y') := by
       have := V.isUnit.map (p : B →+* B').mapMatrix
       rwa [hV, map_sub, map_one, hY] at this

@@ -1,6 +1,62 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.CoprimeProd
-import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.GroundTheory
+module
+
+public import Formalism.DistinguishedUnitIdeals.Statement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 noncomputable section
 
@@ -229,10 +285,12 @@ theorem linExt_apply (g : (Fin r → O) →ₗ[O] O) (u : Fin r → PowerSeries 
 
 theorem linExt_cst (g : (Fin r → O) →ₗ[O] O) (v : Fin r → O) : linExt g (cst v) = C (g v) := by
   rw [linExt_apply]
+
   simp_rw [cst, ← map_mul, ← map_sum]
   congr 1
   have key : ∀ i, v i * g (Pi.single i 1) = g (v i • Pi.single i 1) := fun i => by
     rw [LinearMap.map_smul, smul_eq_mul]
+
   simp_rw [key, ← map_sum]
   congr 1
   ext j
@@ -264,7 +322,7 @@ theorem linExt_mem_of_mem_ext (g : (Fin r → O) →ₗ[O] O) (V : Submodule O (
     exact Ideal.mul_mem_left _ _ (Ideal.mem_span_singleton_self _)
   | zero => simp
   | add x y _ _ hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
   | smul c x _ hx =>
     rw [map_smul, smul_eq_mul]
@@ -353,8 +411,9 @@ theorem exists_const_decomp (ϖ : O) (hϖ : Irreducible ϖ) (F C : Submodule O (
       exact h1.symm
     refine ⟨t, ?_⟩
     rw [e]
+
     simp only [map_sum, map_smul, Module.Basis.equivFun_self, Finset.sum_apply, Pi.smul_apply, smul_eq_mul,
-      Pi.single_apply]
+    Pi.single_apply]
   let Φ : _ → (Fin r → O) →ₗ[O] O := fun j =>
     LinearMap.proj j ∘ₗ snf.bM.equivFun.toLinearMap ∘ₗ F.mkQ
   have hΦ : ∀ j v, Φ j v = snf.bM.equivFun (F.mkQ v) j := fun j v => rfl
@@ -498,7 +557,7 @@ end Main
 
 section Proof
 
-set_option maxHeartbeats 4000000 in
+
 theorem descent_estimate_up_down : MUD := by
   intro O _ _ _ ϖ hϖ ℓ ell r p H b kind V hℓ hPS hsat hub s₀ s₁ h01 h1ell hk1 hk0 hthin c α β
     hαβ hnot y
@@ -604,7 +663,7 @@ theorem descent_estimate_up_down : MUD := by
       rw [hk1] at h
       obtain ⟨N, c', z, hc', heq⟩ := h
       have hj := congrArg (linExt (LinearMap.proj j ∘ₗ f)) heq
-      rw [linExt_levelRel, map_add, map_smul, map_smul,
+      rw [linExt_levelRel, map_add (f := _), map_smul, map_smul,
         linExt_eq_zero_of_mem_ext _ (V s₁) (fun v hv => by simp [hfC v hv]) c' hc', hyW,
         map_smul, hLam, hLL] at hj
       have hj' : p s₁ ^ (H s₁ - b s₁) * (Q1 * (C (ϖ ^ (N + kk s₁)) * vecExt f W j)) =
@@ -638,7 +697,7 @@ theorem descent_estimate_up_down : MUD := by
         ϖ ^ (kk s₀ + min n c) ∣ ϖ ^ c * φ (dd s₀) := by
       intro φ n hφF hφC
       have hj := congrArg (linExt φ) heq₀
-      rw [linExt_levelRel, map_add, map_smul, map_smul,
+      rw [linExt_levelRel, map_add (f := _), map_smul, map_smul,
         linExt_eq_zero_of_mem_ext _ (V s₀) hφF c₀ hc₀, hyW, map_smul, hWu, map_add, map_smul]
         at hj
       obtain ⟨g, hg⟩ := Ideal.mem_span_singleton'.mp (linExt_mem_of_mem_ext φ (V s₁) _ hφC u huC)
@@ -735,7 +794,7 @@ theorem descent_estimate_up_down : MUD := by
           Submodule.smul_mem _ _ hc', ?_⟩
         funext i
         have hi := congrFun heq i
-        simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul, cst, map_add, map_mul]
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul, cst, map_add (f := _), map_mul]
           at hi ⊢
         rw [hLamE, hLL0]
         rw [pow_add] at hi ⊢

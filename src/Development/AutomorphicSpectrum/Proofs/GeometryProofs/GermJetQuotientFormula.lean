@@ -1,7 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TranslDiffEq
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.JetSubstPSEqJetMap
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TranslDiffEq
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDJet
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.JetSubstPSEqJetMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1 GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Coc
 open scoped CategoryTheory.Obj
@@ -27,7 +78,7 @@ theorem aeval_firstOrder {B A : Type} [CommRing B] [Algebra k B] [CommRing A] [A
   induction P using MvPolynomial.induction_on with
   | C a => simp
   | add P Q hP hQ =>
-    simp only [map_add, hP, hQ, mul_add, Finset.sum_add_distrib]
+    simp only [map_add (f := _), hP, hQ, mul_add, Finset.sum_add_distrib]
     ring
   | mul_X P q hP =>
     obtain ⟨a, j⟩ := q
@@ -38,7 +89,7 @@ theorem aeval_firstOrder {B A : Type} [CommRing B] [Algebra k B] [CommRing A] [A
           if j = i then τ (θ P) else 0 := by
         intro i
         have hX : θ (MvPolynomial.X ((0 : Fin 2), j)) = 0 := by simp [hθ]
-        rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add, map_mul, map_mul, hX, zero_mul, add_zero,
+        rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, map_add (f := _), map_mul, map_mul, hX, zero_mul, add_zero,
           MvPolynomial.pderiv_X]
         by_cases hij : j = i
         · subst hij; simp
@@ -74,7 +125,7 @@ theorem mk_psTrunc_of_le {κ : Type} [Fintype κ] [DecidableEq κ] {m N : ℕ} (
 theorem mk_pderiv_psTrunc {κ : Type} [Fintype κ] [DecidableEq κ] {m N : ℕ} (hN : m + 1 ≤ N)
     (f : MvPowerSeries κ k) (q : κ) :
     Ideal.Quotient.mk (orig k κ ^ (m + 1)) (MvPolynomial.pderiv q (psTrunc N f)) =
-      psJet m (MvPowerSeries.pderiv k q f) := by
+      psJet m (MvPowerSeries.pderiv (R := k) q f) := by
   rw [psJet, Ideal.Quotient.eq]
   refine GermD.mem_orig_pow_of fun e he => ?_
   by_contra hlt
@@ -173,7 +224,8 @@ theorem jq_psJet_ptPow (k : Type) [Field k] (p : ℕ) [Fact p.Prime] [CharP k p]
     (fun j => Ideal.Quotient.mk _ (MvPolynomial.X ((0 : Fin 1), j))) (psTrunc (p + m + 1) g)]
   rw [aeval_axis_eq_psJet m _ g (mk_psTrunc_of_le (by omega) g), hg.1, FBIdJet.psJet_one, map_one]
   congr 2
-  rw [dSer, psJet_sum_C_mul, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [dSer, psJet_sum_C_mul, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [aeval_axis_eq_psJet m _ _ (mk_pderiv_psTrunc (by omega) g _), map_mul]
   rw [← IsScalarTower.algebraMap_apply]

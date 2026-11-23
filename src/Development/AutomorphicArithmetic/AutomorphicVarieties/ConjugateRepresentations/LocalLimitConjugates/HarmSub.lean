@@ -1,8 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.LocalLimitConjugates.CasimirResolventProjection
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.LocalLimitConjugates.PetInv
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CobordismLinearRelations.LevSub
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.CapAct
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CmBridge
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.LocalLimitConjugates.CasimirResolventProjection
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CobordismLinearRelations.LevSub
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.CapAct
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.LocalLimitConjugates.PetInv
+import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.PerNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.ArchimedeanCompact.AutomorphicFormsLeSm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CmBridge
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CobordismLinearRelations.ClozelConjCOfSteps
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory Filter Topology Formalism.L2.Host GlobalTheory.CuspRep GlobalTheory.GKCoh GlobalTheory.UnitaryBC UpperTheory.V.Af UpperTheory.V.AlgRepEndIrreducible
 open UpperTheory.V.Lit UpperTheory.V.Lit.Geo UpperTheory.V.Lit.Bor UpperTheory.V.Lit.Dr
 open scoped TensorProduct GlobalTheory.CuspRep.CuspidalL2GL
@@ -12,7 +55,7 @@ section SlopeTestRemainingChoices
 
 open UpperTheory.V
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 private theorem aut_fin (g : GL (Fin a) (Af E)) {φ : Sm E a} (h : GlobalTheory.CuspRep.IsAutForm φ) :
     GlobalTheory.CuspRep.IsAutForm (finRep E a g φ) := by
@@ -43,13 +86,13 @@ theorem UpperTheory.V.Cj.H.harmSub :
   have comb : ∀ (s : ℂ) (α β : Geo.Co Ξ q), IsH r m α → IsH r m β → IsH r m (s • α + β) := by
     intro s α β hα hβ
     have ap : ∀ X i, cmp i ((s • α + β) X) = s • cmp i (α X) + cmp i (β X) := fun X i => by
-      rw [show (s • α + β) X = s • α X + β X from rfl, map_add, map_smul]
+      rw [show (s • α + β) X = s • α X + β X from rfl, map_add (f := _), map_smul]
     refine ⟨(L1 _).1 (L.add_mem (L.smul_mem s ((L1 _).2 hα.lev)) ((L1 _).2 hβ.lev)),
       by rw [dCo_comb, hα.closed, hβ.closed, smul_zero, add_zero], fun X i => ⟨?_, fun t u => ?_⟩, fun X i => ?_⟩
     · rw [ap]
       exact Cm.mem_range_ofAut.1 (Submodule.add_mem _ (Submodule.smul_mem _ s (Cm.mem_range_ofAut.2 (hα.aut X i).1))
         (Cm.mem_range_ofAut.2 (hβ.aut X i).1))
-    · rw [ap, map_add, map_smul, (hα.aut X i).2 t u, (hβ.aut X i).2 t u, smul_add, smul_comm]
+    · rw [ap, map_add (f := _), map_smul, (hα.aut X i).2 t u, (hβ.aut X i).2 t u, smul_add, smul_comm]
     · rw [ap]
       exact Submodule.add_mem _ (Submodule.smul_mem _ s (hα.sq X i)) (hβ.sq X i)
   have zero : IsH r m (0 : Geo.Co Ξ q) := by

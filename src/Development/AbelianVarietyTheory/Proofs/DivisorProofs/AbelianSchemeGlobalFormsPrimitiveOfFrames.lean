@@ -1,9 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveStructureSheafDegTwoVanish
-import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianUnobstructed
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveStructureSheafDegTwoVanish
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -46,7 +86,7 @@ theorem coef_eq (i : Fin n) (ω : GlobForm s) (r : R)
 def coefL : GlobForm s →ₗ[R] (Fin n → R) where
   toFun ω i := coef fr hc i ω
   map_add' ω ω' := funext fun i ↦ coef_eq fr hc i _ _ fun T ↦ by
-    simp only [Submodule.coe_add, Pi.add_apply, map_add]
+    simp only [Submodule.coe_add, Pi.add_apply, map_add (f := _)]
     rw [coef_spec fr hc i ω T, coef_spec fr hc i ω' T]
   map_smul' r ω := funext fun i ↦ coef_eq fr hc i _ _ fun T ↦ by
     simp only [Submodule.coe_smul, Pi.smul_apply, LinearMap.map_smul_of_tower, RingHom.id_apply,
@@ -67,8 +107,8 @@ theorem sumL_coefL (ω : GlobForm s) : sumL fr (coefL fr hc ω) = ω := by
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [coef_spec, algebraMap_smul]
 
-include fr hc in
 
+include fr hc in
 theorem projective : Module.Projective R (GlobForm s) :=
   Module.Projective.of_split (coefL fr hc) (sumL fr) (LinearMap.ext (sumL_coefL fr hc))
 
@@ -76,10 +116,10 @@ def back (U : AffOp X) (x : Ω[Sec s U.unop.1⁄R]) : Sec s U.unop.1 ⊗[R] Glob
   ∑ i, (fr.δ i U x : Sec s U.unop.1) ⊗ₜ[R] fr.w i
 
 theorem back_add (U : AffOp X) (x y : Ω[Sec s U.unop.1⁄R]) : back fr U (x + y) = back fr U x + back fr U y := by
-  simp only [back, map_add, TensorProduct.add_tmul, Finset.sum_add_distrib]
+  simp only [back, map_add (f := _), TensorProduct.add_tmul, Finset.sum_add_distrib]
+
 
 include fr hc in
-
 theorem par (U : AffOp X) : IsBaseChange (Sec s U.unop.1) (evForm s U) := by
   change Function.Bijective (TensorProduct.lift _)
   rw [Function.bijective_iff_has_inverse]
@@ -97,10 +137,11 @@ theorem par (U : AffOp X) : IsBaseChange (Sec s U.unop.1) (evForm s U) := by
       change fr.δ i U (a • ω.1 U) = coef fr hc i ω • a
       rw [(fr.δ i U).map_smul a (ω.1 U), coef_spec fr hc i ω U, Algebra.smul_def, mul_comm]
       rfl
-    | add t t' ht ht' => rw [map_add, back_add, ht, ht']
+    | add t t' ht ht' => rw [map_add (f := _), back_add, ht, ht']
   · conv_rhs => rw [fr.sum U x]
+
     simp only [back, map_sum, TensorProduct.lift.tmul, LinearMap.restrictScalars_apply, LinearMap.flip_apply,
-        Algebra.linearMap_apply, Module.algebraMap_end_apply, LinearMap.smul_apply]
+      Algebra.linearMap_apply, Module.algebraMap_end_apply, LinearMap.smul_apply]
     rfl
 
 end GlobalTheory.FormsOnAb

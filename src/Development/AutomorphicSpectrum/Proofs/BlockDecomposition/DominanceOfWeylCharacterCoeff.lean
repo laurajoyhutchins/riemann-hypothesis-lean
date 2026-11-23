@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CPoly
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CPoly
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Monoid.Prod
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib.Algebra.Order.Rearrangement
+
+@[expose] public section
+
 open Matrix Finset
 open scoped InnerProductSpace
 open PositivityTheory.RgBcC PositivityTheory.RgBcC.Real PositivityTheory.RgBcC.RealD GlobalTheory.CompanionTheory.RealCount GlobalTheory.CompanionTheory.RealCount.Tope
@@ -30,7 +81,7 @@ theorem exists_top_add (φ : (Fin n → ℤ) →+ ℤ) (f g : LP n) (hf : f ≠ 
   have hadd : ∀ x y, D (x + y) = D x + D y := by
     intro x y
     show toLex (φ (x + y), toLex (x + y)) = toLex (φ x, toLex x) + toLex (φ y, toLex y)
-    rw [map_add]; rfl
+    rw [map_add (f := _)]; rfl
   have hmono : ∀ x y, D x ≤ D y → φ x ≤ φ y := by
     intro x y h
     rcases Prod.Lex.toLex_le_toLex.1 h with h | h
@@ -85,7 +136,7 @@ theorem Bd.mul {φ : (Fin n → ℤ) →+ ℤ} {f g : LP n} {B C : ℤ} (hf : Bd
   rw [Finsupp.sum] at hx'
   obtain ⟨y, hy, hy'⟩ := Finset.exists_ne_zero_of_sum_ne_zero hx'
   by_cases he : x + y = ν
-  · rw [← he, map_add]
+  · rw [← he, map_add (f := _)]
     exact add_le_add (hf x (Finsupp.mem_support_iff.1 hx)) (hg y (Finsupp.mem_support_iff.1 hy))
   · exact absurd (if_neg he) hy'
 
@@ -114,7 +165,7 @@ theorem bd_single (φ : (Fin n → ℤ) →+ ℤ) (m : Fin n → ℤ) (r : ℂ) 
 theorem Bd.sum {ι : Type*} {φ : (Fin n → ℤ) →+ ℤ} (s : Finset ι) (F : ι → LP n) {B : ℤ}
     (h : ∀ i ∈ s, Bd φ (F i) B) : Bd φ (∑ i ∈ s, F i) B := by
   intro ν hν
-  rw [AddMonoidAlgebra.coeff_sum, Finsupp.finset_sum_apply] at hν
+  rw [AddMonoidAlgebra.coeff_sum, Finsupp.finsetSum_apply] at hν
   obtain ⟨i, hi, hi'⟩ := Finset.exists_ne_zero_of_sum_ne_zero hν
   exact h i hi ν hi'
 
@@ -173,7 +224,7 @@ theorem delZ_injective : Function.Injective (delZ n) := by
 theorem coeff_altL_delZ : (altL (delZ n)).coeff (delZ n) = 1 := by
   classical
   unfold altL
-  rw [AddMonoidAlgebra.coeff_sum, Finsupp.finset_sum_apply, Finset.sum_eq_single (1 : Equiv.Perm (Fin n))]
+  rw [AddMonoidAlgebra.coeff_sum, Finsupp.finsetSum_apply, Finset.sum_eq_single (1 : Equiv.Perm (Fin n))]
   · simp
   · intro σ _ hσ
     rw [AddMonoidAlgebra.coeff_smul, Finsupp.smul_apply, AddMonoidAlgebra.coeff_single, Finsupp.single_apply,
@@ -210,8 +261,8 @@ theorem phw_le (w : Fin n → ℤ) (hw : Antitone w) (lam : Fin n → ℤ) (hlam
   have e3 := hcmax _ hab
   have e4 := hbmax _ hA1
   have e5 := hdmax _ hA1
-  rw [map_add] at e1 e3
-  rw [map_add] at e1
+  rw [map_add (f := _)] at e1 e3
+  rw [map_add (f := _)] at e1
   linarith
 
 end GlobalTheory.CompanionTheory.RealCountG.DomA

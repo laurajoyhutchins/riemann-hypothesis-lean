@@ -1,6 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeReferenceFrame.IdemLiftOfSteps
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeReferenceFrame.IdemLiftOfSteps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -100,7 +143,7 @@ theorem tenStep : TenStep := by
   have hi' := congrArg (iA I) hi
   have hii' := congrArg (iA I) hii
   have hiii' := congrArg (iA I) hiii
-  simp only [map_mul, map_add, map_sub, map_pow, map_neg, map_ofNat, map_zero] at hi' hii' hiii'
+  simp only [map_mul, map_add (f := _), map_sub, map_pow, map_neg, map_ofNat, map_zero] at hi' hii' hiii'
   have hA : iA I A0 = iE I (θ : I.E) + iE I (star (θ : I.E)) := by
     have e1 : A0 = algebraMap I.F (Af I.F) (1 - (g : I.F) * (a3 : I.F)) := by
       rw [hA0d, map_sub, map_one, map_mul, map_natCast]
@@ -108,7 +151,7 @@ theorem tenStep : TenStep := by
     have e2 : algebraMap I.F I.E (1 - (g : I.F) * (a3 : I.F)) = (θ : I.E) + star (θ : I.E) := by
       rw [map_sub, map_one, map_mul, map_natCast, ha3]
       linear_combination ht3
-    rw [e1, ← iE_alg, e2, map_add]
+    rw [e1, ← iE_alg, e2, map_add (f := _)]
   have hB : iA I B0 = iE I (θ : I.E) * iE I (star (θ : I.E)) := by
     have e1 : B0 = algebraMap I.F (Af I.F) ((g : I.F) * (a2 : I.F)) := by
       rw [hB0d, map_mul, map_natCast]
@@ -131,7 +174,7 @@ theorem tenStep : TenStep := by
   · refine ⟨iE I (θ : I.E) * iA I C₁ - iA I C₂,
       sub_mem (mul_mem (iE_mem I θ) (iA_mem I hC₁)) (iA_mem I hC₂), ?_⟩
     have hW' : iA I W = 1 + (g : I.E ⊗[I.F] Af I.F) * iA I C₁ := by
-      rw [hWd, map_add, map_one, map_mul, map_natCast]
+      rw [hWd, map_add (f := _), map_one, map_mul, map_natCast]
     have hQ' : iA I Q = (g : I.E ⊗[I.F] Af I.F) * iA I C₂ := by
       rw [hQd, map_mul, map_natCast]
     show iE I (θ : I.E) * iA I W - iA I Q - iE I (θ : I.E) = _

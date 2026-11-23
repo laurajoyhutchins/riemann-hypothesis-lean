@@ -1,6 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemOfExp
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.PchainDN
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.NDlCoords
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSAddLeft
+public import Formalism.SharpRestriction.LevelLetterCocycles.WachCoordinates
+public import Formalism.JumpKernelCokernel.JumpShiftProofs.InvConst
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExpPowSubOne
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.GammaLevelsExpansion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -68,7 +112,7 @@ theorem fam_exp [IsDomain O] {A : Type} [AddCommGroup A] [Module O A] (hs : W.s 
     have e1 : (⟨W.Q ^ K • w (f + g), hK (f + g)⟩ : ↥(W.N T)) =
         ⟨W.Q ^ K • w f, hK f⟩ + ⟨W.Q ^ K • w g, hK g⟩ := Subtype.ext (by simp [smul_add])
     have e2 := hde (f + g)
-    rw [e1, map_add, hde f, hde g, ← smulS_add (LB_mono h2 (min_le_left m2 m3))
+    rw [e1, map_add (f := _), hde f, hde g, ← smulS_add (LB_mono h2 (min_le_left m2 m3))
       (LB_mono h3 (min_le_right m2 m3))] at e2
     exact div_unique (m := min m1 (min m2 m3)) (LB_mono h1 (min_le_left _ _))
       (LB_mono (LB_add (LB_mono h2 (min_le_left m2 m3)) (LB_mono h3 (min_le_right m2 m3)))

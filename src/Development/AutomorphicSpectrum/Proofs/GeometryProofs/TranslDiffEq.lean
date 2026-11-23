@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ToFirst
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ToFirst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1 GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj
 open scoped CategoryTheory.Obj
@@ -93,7 +139,7 @@ section Ser
 variable {k : Type} [CommRing k] {d : ℕ}
 
 def dSer (g : Germ.PS k 2 d) (u : Fin d → k) : MvPowerSeries (Fin 1 × Fin d) k :=
-  ∑ i, MvPowerSeries.C (u i) * Germ.ev (n := 1) ![0, Germ.pt k d 0] (MvPowerSeries.pderiv k ((0 : Fin 2), i) g)
+  ∑ i, MvPowerSeries.C (u i) * Germ.ev (n := 1) ![0, Germ.pt k d 0] (MvPowerSeries.pderiv (R := k) ((0 : Fin 2), i) g)
 
 end Ser
 
@@ -104,10 +150,8 @@ namespace GlobalTheory.CompanionTheory.Ar.Coc
 section
 variable {X0 : Scheme.{0}} (G : Over X0) {k : Type} [Field k] (x : Sp k ⟶ X0)
 
-@[reassoc (attr := simp)]
 theorem prZ_fst (m : ℕ) : prZ G x m ≫ pullback.fst G.hom x = pb G x m := pullback.lift_fst _ _ _
 
-@[reassoc (attr := simp)]
 theorem prZ_snd (m : ℕ) : prZ G x m ≫ pullback.snd G.hom x =
     (fst (Tm x m) G).left ≫ spMap (algebraMap k (Jet k Unit m)) := pullback.lift_snd _ _ _
 
@@ -238,11 +282,9 @@ theorem jet_pt {k : Type} [Field k] {κ : Type} (m : ℕ) (q : Sp (Jet k κ m)) 
 section
 variable {X0 : Scheme.{0}} (G : Over X0) [GrpObj G] {k : Type} [Field k] (x : Sp k ⟶ X0)
 
-@[reassoc (attr := simp)]
 theorem xkZ_fst {B : Type} [CommRing B] [Algebra k B] (z : overAt x B ⟶ G) :
     xkZ G x z ≫ pullback.fst G.hom x = z.left := pullback.lift_fst _ _ _
 
-@[reassoc (attr := simp)]
 theorem xkZ_snd {B : Type} [CommRing B] [Algebra k B] (z : overAt x B ⟶ G) :
     xkZ G x z ≫ pullback.snd G.hom x = spMap (algebraMap k B) := pullback.lift_snd _ _ _
 

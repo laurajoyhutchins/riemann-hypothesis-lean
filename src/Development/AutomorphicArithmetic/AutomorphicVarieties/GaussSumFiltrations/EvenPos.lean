@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.Hilbert
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.KLevTop
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.IsCondAt
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,16 +155,16 @@ def BF (G : Matrix κ κ ℤ) (x y : κ → F) : F := x ⬝ᵥ (G.map (Int.cast 
 
 def QF (G : Matrix κ κ ℤ) (x : κ → F) : F := BF G x x / 2
 
-variable (F κ) in
 
+variable (F κ) in
 def LL : AddSubgroup (κ → F) := AddSubgroup.pi Set.univ fun _ => (integralClosure ℤ F).toSubring.toAddSubgroup
 
-variable (κ) in
 
-def aL (a : F) : AddSubgroup (κ → F) := (LL F κ).map (DistribMulAction.toAddMonoidHom (κ → F) a)
+variable (κ) in
+def aL (a : F) : AddSubgroup (κ → F) := (LL F κ).map (DistribSMul.toAddMonoidHom (κ → F) a)
+
 
 variable (F) in
-
 def dualL (G : Matrix κ κ ℤ) : AddSubgroup (κ → F) where
   carrier := {y | ∀ l ∈ LL F κ, ∃ n : ℤ, Algebra.trace ℚ F (BF G y l) = n}
   zero_mem' := fun l _ => ⟨0, by simp [BF]⟩
@@ -132,7 +173,7 @@ def dualL (G : Matrix κ κ ℤ) : AddSubgroup (κ → F) where
     obtain ⟨n, hn⟩ := hy l hl
     refine ⟨m + n, ?_⟩
     simp only [BF] at hm hn ⊢
-    rw [add_dotProduct, map_add, hm, hn, Int.cast_add]
+    rw [add_dotProduct, map_add (f := _), hm, hn, Int.cast_add]
   neg_mem' {x} hx := fun l hl => by
     obtain ⟨m, hm⟩ := hx l hl
     refine ⟨-m, ?_⟩
@@ -163,13 +204,13 @@ def wC (k t : ℕ) (a c : F) : ℂ :=
   (-Complex.I) ^ (k * Module.finrank ℚ F) * ((Algebra.norm ℚ c : ℚ) : ℂ) ^ k /
     (((Algebra.norm ℚ a : ℚ) : ℂ) ^ (2 * k) * ((discr F).natAbs : ℂ) ^ k * (t : ℂ) ^ Module.finrank ℚ F)
 
-open Classical in
 
+open Classical in
 def wT (G : Matrix κ κ ℤ) (k t : ℕ) (a c : F) (T : Finset (κ → F)) (Φ : (κ → F) → ℂ) (y : κ → F) : ℂ :=
   if (a / c) • y ∈ dualL F G then wC k t a c * ∑ x ∈ T, Φ x * et (BF G y x / c) else 0
 
-open Classical in
 
+open Classical in
 def oneL (x : κ → F) : ℂ := if x ∈ LL F κ then 1 else 0
 
 variable [IsTotallyReal F]

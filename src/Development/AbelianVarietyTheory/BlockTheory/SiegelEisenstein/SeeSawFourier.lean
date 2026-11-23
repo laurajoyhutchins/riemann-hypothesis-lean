@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsQuasiFam
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,8 +55,8 @@ def nrm (L : HSp D) (ζ : Fin L.rank → D.host.E) : D.host.E := star ζ ⬝ᵥ 
 def colQ {m : ℕ} (ζ : Fin m → D.host.E) : Matrix (Fin m) (Fin 1) D.host.E := replicateCol (Fin 1) ζ
 
 def beta (S : HSp D) {L L'' : HSp D} (ζ₁ : Fin L.rank → D.host.E) (ζ : Fin L''.rank → D.host.E) (x : WO L S) : WO S L'' :=
-  (rat (colQ ζ) : Mx D L''.rank 1) ⬝
-    (adj (incA D (nrm L'' ζ)⁻¹ • (x ⬝ (rat (colQ ζ₁) : Mx D L.rank 1) : Mx D S.rank 1)) ⬝ gA S : Mx D 1 S.rank)
+  (rat (colQ ζ) : Mx D L''.rank 1) *
+    (adj (incA D (nrm L'' ζ)⁻¹ • (x * (rat (colQ ζ₁) : Mx D L.rank 1) : Mx D S.rank 1)) * gA S : Mx D 1 S.rank)
 
 def OppLines (L L'' : HSp D) (ζ₁ : Fin L.rank → D.host.E) (ζ : Fin L''.rank → D.host.E) : Prop :=
   IsLineVec L ζ₁ ∧ IsLineVec L'' ζ ∧ nrm L ζ₁ = -nrm L'' ζ
@@ -33,7 +70,7 @@ def weilChar (p : SplitPt D k) (ψ : AddChar (AF D.host.F) ℂ) (a : k) : ℂ :=
 variable {p : SplitPt D k} {S T : HSp D} {n n' : Type} [Fintype n] [DecidableEq n] [Fintype n'] [DecidableEq n']
 
 def atW (α : Frame p S n') (β : Frame p T n) (x : Matrix n n' k) : WO S T :=
-  Matrix.map (β.b ⬝ (x ⬝ α.b') : Matrix (Fin T.rank) (Fin S.rank) k) p.sec
+  Matrix.map (β.b * (x * α.b') : Matrix (Fin T.rank) (Fin S.rank) k) p.sec
 
 def IsModel (ψ : AddChar (AF D.host.F) ℂ) (α : Frame p S n') (β : Frame p T n)
     (M : (Matrix n n' k → ℂ) →ₗ[ℂ] (WO S T → ℂ)) : Prop :=

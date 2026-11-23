@@ -1,5 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ValTransOfEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ValTransOfEq
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Wp3ApplyEqSqMulSubSqMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,7 +117,7 @@ theorem isomFin_tr (i : Fin a.D.R.m) : @principalLevelFrame.IsIsomFin c.to.D (Yc
   case conj => exact (by with_unfolding_all exact ((Y.isomFin i).conj :))
   case lat => exact (by with_unfolding_all exact ((Y.isomFin i).lat :))
 
-set_option maxHeartbeats 800000 in
+
 
 def read : @Read c.to.D G _ _ Pl0 I0 T (famInThreeCoefficientChange c.to A) Ks _ _ (alg c.to iK) ((by with_unfolding_all exact ((real c.to R) :))) ((by with_unfolding_all exact ((face c.to F) :))) (baseLevelRowSideTransport c X0) :=
   @Read.mk c.to.D G _ _ Pl0 I0 T (famInThreeCoefficientChange c.to A) Ks _ _ (alg c.to iK) ((by with_unfolding_all exact ((real c.to R) :))) ((by with_unfolding_all exact ((face c.to F) :))) (baseLevelRowSideTransport c X0)
@@ -104,7 +141,7 @@ def read : @Read c.to.D G _ _ Pl0 I0 T (famInThreeCoefficientChange c.to A) Ks _
     (tied := (by with_unfolding_all exact ((recTied_tr c Y.tied) :)))
     (prtE := (by with_unfolding_all exact ((prtE_tr c Y) :)))
     (prtE0 := (by with_unfolding_all exact ((replacementValues_baseLevelTypeParts_eq c Y) :)))
-    (prtWE := kc% (prtWE_tr c Y))
+    (prtWE := by with_unfolding_all exact (prtWE_tr c Y :))
     (xi := (by with_unfolding_all exact (Y.xi :)))
     (isomFin := (by with_unfolding_all exact ((isomFin_tr c Y) :)))
     (frameMatch := (by with_unfolding_all exact (Y.frameMatch :)))
@@ -148,8 +185,8 @@ section Three
 
 variable {R : RealDat3 a.D A Ks} {F : Face3 a.D A} {X0 : BaseLevelRowSide a.D} {Y : Read (A3 := A) R.toRealDat F.lv2 X0}
 
-variable (R) in
 
+variable (R) in
 def partsB : Parts R :=
   ((by with_unfolding_all exact ((letI := alg c.to iK; (real3 c.to R).EEp3) :)), (by with_unfolding_all exact ((letI := alg c.to iK; (real c.to R.toRealDat).EEat) :)),
     (by with_unfolding_all exact ((letI := alg c.to iK; (real3 c.to R).Wp3) :)))
@@ -177,9 +214,9 @@ theorem metu : ∀ v, v ≠ A.A.v0 → ∀ x y, Formalism.HermitianLatticesTheor
 theorem met0u : ∀ v, v ≠ A.A.v0 → ∀ x y, Formalism.HermitianLatticesTheory.majAt X0.s.RR.b X0.s.RR.X v (riemannRochSpaceCoordinateEquiv Z u x) (riemannRochSpaceCoordinateEquiv Z u y) =
     Formalism.HermitianLatticesTheory.majAt (Pi.basisFun a.D.what₂.LL _) ((cxW R F u).data F.cr false).XE v x y := (by with_unfolding_all exact (Z.met0 :))
 
-include Z in
-open Classical in
 
+open Classical in
+include Z in
 theorem etaJu : ∀ (i : Fin a.D.R.m) w, a.D.what₂.etaJ ((i : ℕ) + 1) w =
     if a.D.plEq w ∈ R.twPl then A.A.fam.etaJ F.P0 F.ψ0 (A.fam3.toSub2 (cxW R F u).zs) i (R.mu (a.D.plEq w)) (a.D.plEq w) else 0 :=
   (by with_unfolding_all exact (Z.etaJ :))
@@ -195,8 +232,12 @@ def readL : @ReadL c.to.D G _ _ Pl0 I0 T (famInThreeCoefficientChange c.to A) Ks
       (jEE0u Z (partsB c R) y)) :)))
     (met := (by with_unfolding_all exact ((metu Z (partsB c R)) :)))
     (met0 := (by with_unfolding_all exact ((met0u Z (partsB c R)) :)))
-    (rr := kc% Z.rr)
-    (rr0 := kc% Z.rr0)
+    (rr := by
+      set_option smartUnfolding false in
+        with_unfolding_all exact (Z.rr :))
+    (rr0 := by
+      set_option smartUnfolding false in
+        with_unfolding_all exact (Z.rr0 :))
     (jW := (by with_unfolding_all exact ((jWu Z (partsB c R)) :)))
     (jW_read := (by with_unfolding_all exact (Z.jW_read :)))
     (etaJ := (by with_unfolding_all exact ((etaJu Z (partsB c R)) :)))

@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeVecMemFixed
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsIdempotentElemCharIdem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatVecUOfIsSphericalU
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FiniteCosetsInDoset
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HeckeVecMemFixed
+import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.UG GlobalTheory.PRep GlobalTheory.LFun
 
@@ -21,8 +69,9 @@ theorem heckeVec_dosetInd {σ : Representation ℂ G V} (hσ : IsSmooth σ) (hc 
     exact ⟨fun ⟨a, ha, b, hb, e⟩ => ⟨⟨a, ha⟩, ⟨b, hb⟩, e⟩, fun ⟨a, b, e⟩ => ⟨a, a.2, b, b.2, e⟩⟩
   rw [← idem_of_mem hσ hc (SatCompare.heckeVec_mem_fixed hK (Final.DosetIndMem G K ℂ g) hz)]
   unfold heckeVec
+
   rw [finsum_eq_sum_of_support_subset (s := (P.finite_cosets_in_doset hK g).toFinset), map_sum,
-    Nat.cast_smul_eq_nsmul, ← Finset.sum_const]
+  Nat.cast_smul_eq_nsmul, ← Finset.sum_const]
   · refine Finset.sum_congr rfl fun c hc' => ?_
     have h1 := (hmem c).2 hc'
     obtain ⟨a, b, e⟩ := (Set.Finite.mem_toFinset _).1 hc'
@@ -34,8 +83,8 @@ theorem heckeVec_dosetInd {σ : Representation ℂ G V} (hσ : IsSmooth σ) (hc 
       show dosetInd ℂ K g c.out • _ = 0
       rw [dosetInd, Set.indicator_of_notMem (fun h' => h ((hmem c).1 h')), zero_smul])
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem card_ne_zero (hK : IsCommensurated K) (g : G) :
     ((P.finite_cosets_in_doset hK g).toFinset.card : ℂ) ≠ 0 := by
   refine Nat.cast_ne_zero.2 (Finset.card_ne_zero.2 ⟨(g : G ⧸ K), (Set.Finite.mem_toFinset _).2 ?_⟩)
@@ -57,7 +106,7 @@ theorem idem_orbitMap {π : Representation ℂ G V} {ρ : Representation ℂ G W
   | add a b ha hb =>
     obtain ⟨c, h1, h2⟩ := ha
     obtain ⟨d, h3, h4⟩ := hb
-    exact ⟨c + d, by rw [map_add, map_add, h1, h3, add_smul], by rw [map_add, map_add, h2, h4, add_smul]⟩
+    exact ⟨c + d, by rw [map_add (f := _), map_add (f := _), h1, h3, add_smul], by rw [map_add (f := _), map_add (f := _), h2, h4, add_smul]⟩
   | smul r a ha =>
     obtain ⟨c, h1, h2⟩ := ha
     exact ⟨r * c, by rw [map_smul, map_smul, h1, mul_smul], by rw [map_smul, map_smul, h2, mul_smul]⟩

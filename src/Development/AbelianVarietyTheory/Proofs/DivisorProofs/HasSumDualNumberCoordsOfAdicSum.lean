@@ -1,12 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.TanRel
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsPolAVSectionInverseImage
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbsoluteSiegel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TanRel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.TorusExt
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigValD
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.MemSpanOfCardLe
+public import Mathlib.Analysis.Normed.Group.Ultra
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
-open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.MBModel GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
+open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -24,7 +67,7 @@ theorem hasSum_of_sumI {R : Type} [CommRing R] [IsNoetherianRing R] {I : Ideal R
     induction hy using Submodule.span_induction with
     | mem y hy => exact hc y hy
     | zero => simpa using h0
-    | add y z _ _ k1 k2 => rw [map_add]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le k1 k2)
+    | add y z _ _ k1 k2 => rw [map_add (f := _)]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le k1 k2)
     | smul a y _ k1 => rw [hf, norm_mul]; exact (mul_le_of_le_one_left (norm_nonneg _) (h1 a)).trans k1
   obtain ⟨N, ⟨t, rfl⟩, -, -, h⟩ := h
   obtain ⟨u, rfl⟩ := IsNoetherian.noetherian I
@@ -45,7 +88,7 @@ theorem hasSum_of_sumI {R : Type} [CommRing R] [IsNoetherianRing R] {I : Ideal R
       intro y hy
       rw [pow_succ', Submodule.mul_smul] at hy
       refine Submodule.smul_induction_on hy (fun a ha z hz => ?_)
-        (fun y z k1 k2 => by rw [map_add]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le k1 k2))
+        (fun y z k1 k2 => by rw [map_add (f := _)]; exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le k1 k2))
       rw [hg, norm_mul, pow_succ', _root_.mul_assoc]
       exact mul_le_mul (hI a ha) (ih z hz) (norm_nonneg _) hr0
   refine Metric.tendsto_nhds.2 fun e he => ?_
@@ -55,6 +98,7 @@ theorem hasSum_of_sumI {R : Type} [CommRing R] [IsNoetherianRing R] {I : Ideal R
   obtain ⟨S, hS⟩ := h n
   refine Filter.mem_of_superset (Filter.mem_atTop S) fun T hT => ?_
   show dist _ _ < e
+
   rw [dist_comm, dist_eq_norm, ← map_sum, ← map_sub]
   exact (hP n _ (hS T hT)).trans_lt hn
 

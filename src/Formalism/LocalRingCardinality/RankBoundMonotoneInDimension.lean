@@ -1,14 +1,74 @@
-import Formalism.LocalRingCardinality.DataParams₂
-import Formalism.ThetaLiftIndependence.FinalThetaLiftAMFKIndep
-import Formalism.FrobeniusOrbits.HostCorollaries
-import Formalism.LocalRingCardinality.HostCls
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameCyclicGenerator
-import Formalism.HarderNarasimhan.ShiftInvariance
+module
+
+import Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe
+public import Formalism.LocalRingCardinality.DataParams₂
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameCyclicGenerator
+public import Formalism.GradedWeylDivisibility.StatementE
+public import Formalism.FrobeniusOrbits.HostCorollaries
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
 import Formalism.GradedWeylDivisibility.FinalB
-import Formalism.GradedWeylDivisibility.FinalD
-import Formalism.GradedWeylDivisibility.StatementE
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+public import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.HarderNarasimhan.ShiftInvariance
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stdform
+public import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+public import Formalism.ThetaLiftIndependence.FinalThetaLiftAMFKIndep
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,8 +79,6 @@ open NumberField IsDedekindDomain
 section ranks
 
 variable (R : Ranks)
-
-theorem Ranks.two_le_m' : 2 ≤ R.m := R.two_le_m
 
 theorem Ranks.k_ge : 5 ≤ R.k := by
   have h1 := R.two_le_m
@@ -500,8 +558,6 @@ theorem bridge_iota_holds : bridge_iota := by
   rw [h2, map_pow, h1]
   rfl
 
-theorem iotaHInv_iotaH (e : ℕ) (i : ZMod (2 ^ e)) : iotaHInv e (iotaH e i) = i := Function.leftInverse_invFun (iotaH_bijective e).injective i
-
 theorem iotaH_iotaHInv (e : ℕ) (h : HGrp e) : iotaH e (iotaHInv e h) = h := Function.rightInverse_invFun (iotaH_bijective e).surjective h
 
 theorem bridge_star_holds : bridge_star := by
@@ -602,11 +658,13 @@ theorem hT_expand (S : HSpace E) (x y : S.V) :
   have key : ∀ u : S.V, S.hT u y = ∑ b, S.hT u (S.frame b) * S.frame.repr y b := by
     intro u
     conv_lhs => rw [← S.frame.sum_repr y]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun b _ => by rw [LinearMap.map_smul, smul_eq_mul, mul_comm]
   have key2 : ∀ b, S.hT x (S.frame b) = ∑ a, star (S.frame.repr x a) * S.hT (S.frame a) (S.frame b) := by
     intro b
     conv_lhs => rw [← S.frame.sum_repr x]
+
     rw [map_sum, LinearMap.sum_apply]
     exact Finset.sum_congr rfl fun a _ => by rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply]
   rw [key x]
@@ -947,7 +1005,7 @@ theorem factNormFockUnitary : FactNormFockUnitary := by
     rw [← AlgHom.comp_apply, ← h1.1, inv_mul_cancel, h1.2, AlgHom.id_apply]
   simpa [Formalism.UG.dwAct] using congrArg (Formalism.REAL.fockF f) key
 
-theorem nPl_two_mul (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] :
+theorem nPl_two_mul (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] :
     (Formalism.HN.nPl K : ℝ) * 2 = Module.finrank ℚ K := by
   simp only [Formalism.HN.nPl]
   have h1 := NumberField.InfinitePlace.card_add_two_mul_card_eq_rank K
@@ -1074,37 +1132,12 @@ theorem bridge_unit_rule_holds : bridge_unit_rule := by
 theorem sum_e_f (p : ℕ) (hp : p.Prime) (S : Finset (HeightOneSpectrum (𝓞 K)))
     (hS : ∀ w, w ∈ S ↔ (p : 𝓞 K) ∈ w.asIdeal) :
     ∑ w ∈ S, eWL K w * w.asIdeal.inertiaDeg ℤ = Module.finrank ℚ K := by
-  have := span_prime_isMaximal p hp
-  have hP0 : Ideal.span {(p : ℤ)} ≠ ⊥ := by simp [hp.ne_zero]
-  have h := Ideal.sum_ramification_inertia_eq_finrank (Ideal.span {(p : ℤ)}) (𝓞 K)
-  rw [NumberField.RingOfIntegers.rank] at h
-  rw [← h]
-  refine Finset.sum_bij' (fun w hw => ⟨w.asIdeal, w.isPrime, liesOver_of_mem p hp w ((hS w).mp hw)⟩)
-    (fun q _ => ⟨q.1, q.2.1, Ideal.ne_bot_of_liesOver_of_ne_bot hP0 q.1⟩)
-    (fun _ _ => Finset.mem_univ _) (fun q _ => ?_) (fun _ _ => rfl) (fun _ _ => rfl)
-    (fun _ _ => rfl)
-  rw [hS]
-  have := q.2.2
-  exact mem_of_liesOver p q.1
+  apply Formalism.MainNotions.J.sum_e_f <;> assumption
 
 theorem sum_lw_e (p : ℕ) (hp : p.Prime) (S : Finset (HeightOneSpectrum (𝓞 K)))
     (hS : ∀ w, w ∈ S ↔ (p : 𝓞 K) ∈ w.asIdeal) :
     ∑ w ∈ S, lw K w * (eWL K w : ℝ) = Real.log p := by
-  have hn : (0 : ℝ) < Module.finrank ℚ K := by exact_mod_cast Module.finrank_pos
-  have hterm : ∀ w ∈ S, lw K w * (eWL K w : ℝ) =
-      Real.log p / Module.finrank ℚ K * ((eWL K w * w.asIdeal.inertiaDeg ℤ : ℕ) : ℝ) := by
-    intro w hw
-    have := liesOver_of_mem p hp w ((hS w).mp hw)
-    have hN := Ideal.pow_inertiaDeg p w.asIdeal
-    unfold lw
-    rw [← hN]
-    push_cast
-    rw [Real.log_pow]
-    ring
-  rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum]
-  have := sum_e_f p hp S hS
-  rw [← Nat.cast_sum, this]
-  field_simp
+  apply Formalism.MainNotions.J.sum_lw_e <;> assumption
 
 theorem finite_places_over (p : ℕ) (hp : p.Prime) :
     ∃ S : Finset (HeightOneSpectrum (𝓞 K)), ∀ w, w ∈ S ↔ (p : 𝓞 K) ∈ w.asIdeal := by
@@ -1133,26 +1166,7 @@ theorem factUnitNormalisation : FactUnitNormalisation := by
 
 theorem resChar_mem (D : D7) (w : D.what₂.places.Pl) :
     ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL) ∈ (D.plEq w).asIdeal := by
-  have hv := D.what₂.places.val_resChar w
-  have hne : ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) ≠ 0 := by
-    exact_mod_cast (D.what₂.places.resChar_prime w).ne_zero
-  rw [D.val_eq w _ hne] at hv
-  have hv' : vAdd (D.plEq w) ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) =
-      ((D.what₂.places.ramIdx w : ℕ) : ℤ) := by exact_mod_cast hv
-  have hpos := D.what₂.places.ramIdx_pos w
-  have h1 : (D.plEq w).valuation D.what₂.LL (algebraMap (𝓞 D.what₂.LL) D.what₂.LL
-      ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL)) < 1 := by
-    have hx : ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) = algebraMap (𝓞 D.what₂.LL) D.what₂.LL
-        ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL) := by simp
-    rw [← hx]
-    have hv0 : (D.plEq w).valuation D.what₂.LL ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) ≠ 0 :=
-      (Valuation.ne_zero_iff _).mpr hne
-    unfold vAdd at hv'
-    rw [← WithZero.exp_log hv0, show WithZero.log ((D.plEq w).valuation D.what₂.LL
-      ((D.what₂.places.resChar w : ℕ) : D.what₂.LL)) = -((D.what₂.places.ramIdx w : ℕ) : ℤ) by omega]
-    rw [← WithZero.exp_zero, WithZero.exp_lt_exp]
-    omega
-  exact ((D.plEq w).valuation_lt_one_iff_mem _).mp h1
+  apply Formalism.MainNotions.J.resChar_mem <;> assumption
 
 theorem factEtaMean : FactEtaMean := by
   intro D _ l hl S hS

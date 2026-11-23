@@ -1,12 +1,72 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitianStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsMaximalIntegralHermitianLatticeOrthonormalStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MaximalHermitianLatticeBadPrimesIffGramDetStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemHcompl
-import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.ExistsOrthogonalBasisDotProductApplyEq
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MaximalHermitianLatticeBadPrimesIffGramDet
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
+public import Formalism.HermitianLattices.StatementMass
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsMaximalIntegralHermitianLatticeOrthonormalStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MaximalHermitianLatticeBadPrimesIffGramDetStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemHcompl
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitianStatement
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.ExistsOrthogonalBasisDotProductApplyEq
 import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
@@ -54,48 +114,7 @@ theorem star_mem_locR {P : Ideal (𝓞 K)} (hP : P.IsMaximal) (hc : conjIdeal (K
 theorem valuation_star (v : IsDedekindDomain.HeightOneSpectrum (𝓞 K))
     (hc : conjIdeal (K := K) v.asIdeal = v.asIdeal) (a : K) :
     v.valuation K (star a) = v.valuation K a := by
-  have le1 : ∀ a : K, v.valuation K a ≤ 1 → v.valuation K (star a) ≤ 1 := fun a ha =>
-    (mem_locR_iff v hc _).1 (star_mem_locR v.isMaximal hc ((mem_locR_iff v hc _).2 ha))
-  have mono : ∀ a b : K, b ≠ 0 → v.valuation K a ≤ v.valuation K b →
-      v.valuation K (star a) ≤ v.valuation K (star b) := by
-    intro a b hb hab
-    have hb' : v.valuation K b ≠ 0 := by simpa using hb
-    have hb'' : v.valuation K (star b) ≠ 0 := by simpa using hb
-    have := le1 (a / b) (by rw [map_div₀]; exact div_le_one_of_le₀ hab zero_le')
-    rw [star_div₀, map_div₀] at this
-    exact (div_le_one₀ (zero_lt_iff.2 hb'')).1 this
-  obtain ⟨π, hπ⟩ := v.valuation_exists_uniformizer K
-  have π0 : π ≠ 0 := by
-    rintro rfl
-    rw [map_zero] at hπ
-    exact WithZero.exp_ne_zero hπ.symm
-  have s0 : v.valuation K (star π) ≠ 0 := by simpa using π0
-  obtain ⟨n, hn⟩ : ∃ n : ℤ, v.valuation K (star π) = WithZero.exp n :=
-    ⟨_, (WithZero.exp_log s0).symm⟩
-  have gen : ∀ (a : K) (m : ℤ), v.valuation K a = WithZero.exp m →
-      v.valuation K (star a) = WithZero.exp (-m * n) := by
-    intro a m hm
-    have a0 : a ≠ 0 := by
-      rintro rfl
-      rw [map_zero] at hm
-      exact WithZero.exp_ne_zero hm.symm
-    have e1 : v.valuation K (π ^ (-m)) = v.valuation K a := by
-      rw [map_zpow₀, hπ, ← WithZero.exp_zsmul, hm]; simp
-    have e2 : v.valuation K (star (π ^ (-m))) = WithZero.exp (-m * n) := by
-      rw [star_zpow₀, map_zpow₀, hn, ← WithZero.exp_zsmul]; simp
-    rw [← e2]
-    exact le_antisymm (mono _ _ (zpow_ne_zero _ π0) e1.ge) (mono _ _ a0 e1.le)
-  have h1 := gen _ _ hn
-  rw [star_star, hπ, WithZero.exp_inj] at h1
-  have h2 : n ≤ 0 := by
-    have := le1 π (by rw [hπ, ← WithZero.exp_zero, WithZero.exp_le_exp]; norm_num)
-    rwa [hn, ← WithZero.exp_zero, WithZero.exp_le_exp] at this
-  have h3 : n = -1 := by nlinarith
-  rcases eq_or_ne a 0 with rfl | a0
-  · simp
-  · have : v.valuation K a ≠ 0 := by simpa using a0
-    have h4 := gen a _ (WithZero.exp_log this).symm
-    rw [h4, h3]; simp [WithZero.exp_log this]
+  apply GlobalTheory.MaxLatDet.val_star <;> assumption
 
 theorem normUnit_iff (v : IsDedekindDomain.HeightOneSpectrum (𝓞 K))
     (hc : conjIdeal (K := K) v.asIdeal = v.asIdeal) {x : K} {m : ℤ}
@@ -160,11 +179,11 @@ theorem nondeg_of_PD (h : V →ₗ⋆[K] V →ₗ[K] K) (hp : PD h) : h.Nondegen
 
 def ext (h : V →ₗ⋆[K] V →ₗ[K] K) (β : K) : (V × K) →ₗ⋆[K] (V × K) →ₗ[K] K :=
   LinearMap.mk₂'ₛₗ (starRingEnd K) (RingHom.id K) (fun x y => h x.1 y.1 + β * (star x.2 * y.2))
-    (fun x x' y => by simp only [Prod.fst_add, Prod.snd_add, map_add, LinearMap.add_apply, star_add]; ring)
+    (fun x x' y => by simp only [Prod.fst_add, Prod.snd_add, map_add (f := _), LinearMap.add_apply, star_add]; ring)
     (fun c x y => by
       simp only [Prod.smul_fst, Prod.smul_snd, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, star_mul',
         starRingEnd_apply]; ring)
-    (fun x y y' => by simp only [Prod.fst_add, Prod.snd_add, map_add]; ring)
+    (fun x y y' => by simp only [Prod.fst_add, Prod.snd_add, map_add (f := _)]; ring)
     (fun c x y => by
       simp only [Prod.smul_fst, Prod.smul_snd, map_smul, smul_eq_mul, RingHom.id_apply]; ring)
 
@@ -185,7 +204,7 @@ theorem ext_PD (hK : IsCMUnram K) {h : V →ₗ⋆[K] V →ₗ[K] K} (hp : PD h)
   intro τ x hx
   have e : (τ (β * (star x.2 * x.2))).re = (τ β).re * Complex.normSq (τ x.2) := by
     rw [map_mul, map_mul, hK.2.1, ← Complex.normSq_eq_conj_mul_self, Complex.re_mul_ofReal]
-  rw [ext_apply, map_add, Complex.add_re, e]
+  rw [ext_apply, map_add (f := _), Complex.add_re, e]
   have n1 := Complex.normSq_nonneg (τ x.2)
   have b := hβ τ
   by_cases h1 : x.1 = 0
@@ -229,12 +248,15 @@ theorem exists_intLat [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower
   let b' := b.unitsSMul fun _ => Units.mk0 _ N0
   have hb' : ∀ i, b' i = algebraMap (𝓞 K) K N • b i := fun i => by
     simp [b', Module.Basis.unitsSMul_apply, Units.smul_def]
-  refine ⟨Submodule.span (𝓞 K) (Set.range b'), ⟨Submodule.fg_span (Set.finite_range _), ?_⟩, ?_⟩
+  letI : Submodule.IsLattice K (Submodule.span (𝓞 K) (Set.range b')) :=
+    ⟨Submodule.fg_span (Set.finite_range _), fun _ _ hs =>
+      (LinearIndependent.iff_fractionRing (𝓞 K) K).mp hs⟩
+  refine ⟨Submodule.span (𝓞 K) (Set.range b'), ⟨?_⟩, ?_⟩
   · rw [Submodule.span_span_of_tower, b'.span_eq]
   · intro x hx y hy
     induction hx using Submodule.span_induction with
     | zero => simp
-    | add x x' _ _ h1 h2 => rw [map_add, LinearMap.add_apply]; exact Submodule.add_mem _ h1 h2
+    | add x x' _ _ h1 h2 => rw [map_add (f := _), LinearMap.add_apply]; exact Submodule.add_mem _ h1 h2
     | smul a x _ h1 =>
       obtain ⟨t, ht⟩ := LocWitt.star_int a
       rw [← algebraMap_smul K a x, map_smulₛₗ, LinearMap.smul_apply, starRingEnd_apply, ← ht,
@@ -244,7 +266,7 @@ theorem exists_intLat [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower
       obtain ⟨i, rfl⟩ := hx
       induction hy using Submodule.span_induction with
       | zero => simp
-      | add y y' _ _ h1 h2 => rw [map_add]; exact Submodule.add_mem _ h1 h2
+      | add y y' _ _ h1 h2 => rw [map_add (f := _)]; exact Submodule.add_mem _ h1 h2
       | smul a y _ h1 =>
         rw [← algebraMap_smul K a y, map_smul, algebraMap_smul]
         exact Submodule.smul_mem _ _ h1
@@ -257,8 +279,8 @@ theorem exists_intLat [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower
         refine Submodule.smul_mem _ _ ?_
         exact Submodule.mem_one.2 ⟨r, hr⟩
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem exists_basis_ext {n : ℕ} (h : V →ₗ⋆[K] V →ₗ[K] K) (β : K) (b : Module.Basis (Fin n) K V) :
     ∃ (j : ℕ) (c : Module.Basis (Fin j) K (V × K)), (Matrix.of fun i l => ext h β (c i) (c l)).det =
       (Matrix.of fun i l => h (b i) (b l)).det * β := by
@@ -287,7 +309,7 @@ theorem exists_unimodular [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarT
   obtain ⟨M, hM⟩ := exists_intLat (ext h β)
   obtain ⟨L, hL, -⟩ := (GlobalTheory.T.exists_maximal_integralHermitianLattice_orthonormal_maximal K (V × K) (ext h β) hK hs nd).1 M hM
   obtain ⟨j, c, hc⟩ := exists_basis_ext h β b
-  refine ⟨L, hL.1.1, (locDual (𝓞 K) K (V × K) (ext h β) hs
+  refine ⟨L, hL.1.1.toIsLattice, (locDual (𝓞 K) K (V × K) (ext h β) hs
     (fun r => LocWitt.star_int r) L hL.1.1.fg).2.2 fun P hm => ?_⟩
   by_contra hu
   have := (GlobalTheory.T.maximalHermitianLattice_badPrimes_iff_gramDet K (V × K) (ext h β) hK hs nd L hL j c P hm).1 ⟨hm, hu⟩
@@ -306,6 +328,7 @@ theorem iso_of_ortho {W : Type} [AddCommGroup W] [Module K W] [Module (𝓞 K) V
   have he : ∀ i, e (A i) = B i := fun i => by simp [e]
   refine ⟨e, fun x y => ?_⟩
   rw [← A.sum_repr x, ← A.sum_repr y]
+
   simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, he]
   simp [A, B, a3, b3]
 
@@ -341,7 +364,7 @@ theorem cancel {W : Type} [AddCommGroup W] [Module K W] [FiniteDimensional K V] 
     rw [ext_apply, ext_apply, z y] at this
     simpa [f] using this
   have inj : Function.Injective f := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     refine (nondeg_of_PD h hh).1 x fun y => ?_
     rw [← hf, hx]; simp

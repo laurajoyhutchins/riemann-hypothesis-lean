@@ -1,4 +1,57 @@
-import Formalism.HermitianCurvature.StatementWd
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ScalarCommuteTransposedRMatrixEntry
+public import Formalism.HermitianCurvature.StatementWd
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.Wd1
 
@@ -18,37 +71,15 @@ theorem cond_iff (a : S) (i j : Fin 2) (x y : Ix S) :
   · rintro ⟨h1, rfl⟩
     exact ⟨h1, by simp, fun b hb => by simp [Function.update_apply, hb]⟩
 
-theorem cond_iff' (a : S) (i j : Fin 2) (x y : Ix S) :
-    (x a = i ∧ y a = j ∧ ∀ b, b ≠ a → x b = y b) ↔ (y a = j ∧ x = Function.update y a i) := by
-  constructor
-  · rintro ⟨h1, h2, h3⟩
-    refine ⟨h2, ?_⟩
-    funext b
-    by_cases hb : b = a
-    · subst hb; simp [h1]
-    · simp [Function.update_apply, hb, h3 b hb]
-  · rintro ⟨h2, rfl⟩
-    exact ⟨by simp, h2, fun b hb => by simp [Function.update_apply, hb]⟩
-
 theorem eU_apply (a : S) (i j : Fin 2) (x y : Ix S) :
     (eU a i j : SlopeTestRemainingChoices S A) x y = if x a = i ∧ y = Function.update x a j then 1 else 0 := by
   simp only [eU, Matrix.of_apply]
   exact if_congr (cond_iff a i j x y) rfl rfl
 
-theorem eU_apply' (a : S) (i j : Fin 2) (x y : Ix S) :
-    (eU a i j : SlopeTestRemainingChoices S A) x y = if y a = j ∧ x = Function.update y a i then 1 else 0 := by
-  simp only [eU, Matrix.of_apply]
-  exact if_congr (cond_iff' a i j x y) rfl rfl
-
 theorem eU_mul_apply (a : S) (i j : Fin 2) (B : SlopeTestRemainingChoices S A) (x y : Ix S) :
     ((eU a i j : SlopeTestRemainingChoices S A) * B) x y = if x a = i then B (Function.update x a j) y else 0 := by
   simp only [Matrix.mul_apply, eU_apply, ite_mul, one_mul, zero_mul]
   by_cases hx : x a = i <;> simp [hx]
-
-theorem mul_eU_apply (a : S) (i j : Fin 2) (B : SlopeTestRemainingChoices S A) (x y : Ix S) :
-    (B * (eU a i j : SlopeTestRemainingChoices S A)) x y = if y a = j then B x (Function.update y a i) else 0 := by
-  simp only [Matrix.mul_apply, eU_apply', mul_ite, mul_one, mul_zero]
-  by_cases hy : y a = j <;> simp [hy]
 
 theorem eU_mul_eU (a : S) (i j k l : Fin 2) :
     (eU a i j : SlopeTestRemainingChoices S A) * eU a k l = if j = k then eU a i l else 0 := by
@@ -94,21 +125,7 @@ theorem star_eU [StarRing A] (a : S) (i j : Fin 2) :
 
 theorem ins_mul (a : S) (M N : M2 (SlopeTestRemainingChoices S A)) (hM : FreeOf2 a M) :
     ins a (M * N) = ins a M * ins a N := by
-  have key : ∀ i j k l : Fin 2, (eU a i j : SlopeTestRemainingChoices S A) * M i j * (eU a k l * N k l) =
-      if j = k then eU a i l * (M i j * N k l) else 0 := by
-    intro i j k l
-    have e1 : (eU a i j : SlopeTestRemainingChoices S A) * M i j * (eU a k l * N k l) =
-        eU a i j * (M i j * eU a k l) * N k l := by
-      simp only [mul_assoc]
-    rw [e1, ← (hM i j k l).eq]
-    have e2 : (eU a i j : SlopeTestRemainingChoices S A) * (eU a k l * M i j) * N k l =
-        (eU a i j * eU a k l) * (M i j * N k l) := by
-      simp only [mul_assoc]
-    rw [e2, eU_mul_eU]
-    split_ifs <;> simp
-  simp only [ins, Fin.sum_univ_two, Matrix.mul_apply, add_mul, mul_add, key]
-  simp
-  abel
+  apply Formalism.FourierDecayAlt.P.Wd7.ins_mul <;> assumption
 
 theorem ins_star [StarRing A] (a : S) (M : M2 (SlopeTestRemainingChoices S A)) (hM : FreeOf2 a M) :
     star (ins a M) = ins a Mᴴ := by

@@ -1,14 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLsB
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteWeilRepEqLatticeIntertwinerMulCharacter
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdealExtendConjMulEqAbsNorm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLsB
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardLatticeDoubleCosetClassesStabilisers
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdealExtendConjMulEqAbsNorm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActAApply
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField MeasureTheory IsDedekindDomain
 open scoped Classical
@@ -28,7 +71,7 @@ namespace GlobalTheory.SplitLatDict
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 160000
+
 
 section SlopeTestRemainingChoices
 
@@ -90,7 +133,7 @@ theorem inc_mem_IhE {cc : Ideal (𝓞 D.host.K)} {α : D.host.E} (hα : α ∈ G
     intro x hx
     exact AddSubgroup.subset_closure ⟨c, hc, x, hx, 1, Subring.one_mem _, by rw [mul_one]⟩
   | zero => intro x _; rw [zero_mul, map_zero]; exact zero_mem _
-  | add a b _ _ ha hb => intro x hx; rw [add_mul, map_add]; exact add_mem (ha x hx) (hb x hx)
+  | add a b _ _ ha hb => intro x hx; rw [add_mul, map_add (f := _)]; exact add_mem (ha x hx) (hb x hx)
   | smul o a _ ha =>
     intro x hx
     have e : (o • a) * x = a * (o • x) := by rw [Algebra.smul_def, Algebra.smul_def]; ring
@@ -119,7 +162,7 @@ theorem inc_r_mem_IhE {cc : Ideal (𝓞 D.host.K)} {r : D.host.E} (hc : cc ≠ �
     exact inc_mem_IhE hα _ (mul_conj_div_absNorm_mem_auxiliaryOrder ha hγ)
   | zero => intro a _; rw [star_zero, mul_zero, mul_zero, map_zero]; exact zero_mem _
   | add x y _ _ hx hy =>
-    intro a ha; rw [star_add, mul_add, mul_add, map_add]; exact add_mem (hx a ha) (hy a ha)
+    intro a ha; rw [star_add, mul_add, mul_add, map_add (f := _)]; exact add_mem (hx a ha) (hy a ha)
   | smul o y _ hy =>
     intro a ha
     have hco : algebraMap (𝓞 D.host.E) D.host.E (GlobalTheory.InertSign.sgO D o) =
@@ -152,13 +195,13 @@ theorem infPart_liftFin (z : Af D.host.F ⊗[D.host.F] D.host.E) : infPart D (Gl
     show (Algebra.TensorProduct.map _ _) _ = 0
     rw [Algebra.TensorProduct.map_tmul]
     exact TensorProduct.zero_tmul _ _
-  | add x y hx hy => rw [(GlobalTheory.LatticeStable.liftFin D).map_add, (infPart D).map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
 
 theorem finPart_liftFin (z : Af D.host.F ⊗[D.host.F] D.host.E) : finPart D (GlobalTheory.LatticeStable.liftFin D z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul α e => rw [GlobalTheory.LatticeStable.liftFin_tmul]; rfl
-  | add x y hx hy => rw [(GlobalTheory.LatticeStable.liftFin D).map_add, (finPart D).map_add, hx, hy]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
 
 theorem toAfE_inc (e : D.host.E) :
     GlobalTheory.BotFormula.toAfE D (Formalism.MainNotions.StandardLatticesGL3.inc D e) = (1 : Af D.host.F) ⊗ₜ[D.host.F] e := by
@@ -257,7 +300,7 @@ theorem fwd {cc : Ideal (𝓞 D.host.K)} {r : D.host.E} (hc : cc ≠ ⊥) (hr : 
         (stdL D T.rank : Set (Fin T.rank → D.host.E)) (fun _ => True)) (i : Fin T.rank) (j : Fin S.rank) :
     Formalism.MainNotions.StandardLatticesGL3.inc D r * finQ D (u i j) ∈ Formalism.MainNotions.StandardLatticesGL3.IhE D cc := by
   let Ψ : WO S T →+ Formalism.MainNotions.StandardLatticesGL3.AE D := AddMonoidHom.mk' (fun u => Formalism.MainNotions.StandardLatticesGL3.inc D r * finQ D (u i j))
-    (fun x y => by rw [Matrix.add_apply, (finQ D).map_add, mul_add])
+    (fun x y => by rw [Matrix.add_apply, map_add, mul_add])
   have hle : latO S T (GlobalTheory.VacRead.lsB D cc r S.rank : Set (Fin S.rank → D.host.E))
       (stdL D T.rank : Set (Fin T.rank → D.host.E)) (fun _ => True) ≤ (Formalism.MainNotions.StandardLatticesGL3.IhE D cc).comap Ψ := by
     refine (AddSubgroup.closure_le _).2 ?_
@@ -278,7 +321,7 @@ theorem fwd {cc : Ideal (𝓞 D.host.K)} {r : D.host.E} (hc : cc ≠ ⊥) (hr : 
     exact inc_r_mem_IhE hc hr hsj _ hat
   exact hle hu
 
-set_option maxHeartbeats 400000 in
+
 theorem bwd {cc : Ideal (𝓞 D.host.K)} {r : D.host.E} (hc : cc ≠ ⊥) (hr : IsScale D cc r)
     (S T : HSp D) (hG : S.gram = 1) (u : WO S T) (hinf : u.map (infPart D) = 0)
     (h : ∀ i j, Formalism.MainNotions.StandardLatticesGL3.inc D r * finQ D (u i j) ∈ Formalism.MainNotions.StandardLatticesGL3.IhE D cc) :
@@ -289,7 +332,7 @@ theorem bwd {cc : Ideal (𝓞 D.host.K)} {r : D.host.E} (hc : cc ≠ ⊥) (hr : 
   refine sum_mem fun i _ => sum_mem fun j _ => ?_
   let Φ : Formalism.MainNotions.StandardLatticesGL3.AE D →+ WO S T := AddMonoidHom.mk'
     (fun x => Matrix.single i j (GlobalTheory.LatticeStable.liftFin D (GlobalTheory.BotFormula.toAfE D (Formalism.MainNotions.StandardLatticesGL3.inc D r⁻¹ * x))))
-    (fun x y => by rw [mul_add, (GlobalTheory.BotFormula.toAfE D).map_add, (GlobalTheory.LatticeStable.liftFin D).map_add, Matrix.single_add])
+    (fun x y => by rw [mul_add, map_add, map_add, Matrix.single_add])
   have hle : Formalism.MainNotions.StandardLatticesGL3.IhE D cc ≤ (latO S T (GlobalTheory.VacRead.lsB D cc r S.rank : Set (Fin S.rank → D.host.E))
       (stdL D T.rank : Set (Fin T.rank → D.host.E)) (fun _ => True)).comap Φ := by
     refine (AddSubgroup.closure_le _).2 ?_

@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NondegenerateOnOrthCompl
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SameGenusFix
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NondegenerateOnOrthCompl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -23,8 +73,6 @@ theorem formOn_isSymm {h : V →ₗ⋆[K] V →ₗ[K] K} (hs : h.IsSymm) (X : Su
 
 def incl (X : Submodule K V) : ↥X →ₗ[𝓞 K] V := X.subtype.restrictScalars (𝓞 K)
 
-theorem incl_apply (X : Submodule K V) (x : ↥X) : incl X x = x := rfl
-
 theorem incl_injective (X : Submodule K V) : Function.Injective (incl X) := Subtype.val_injective
 
 def push (X : Submodule K V) (L : Submodule (𝓞 K) ↥X) : Submodule (𝓞 K) V := L.map (incl X)
@@ -46,9 +94,6 @@ theorem coe_mem_push {X : Submodule K V} {L : Submodule (𝓞 K) ↥X} {x : ↥X
 theorem push_le (X : Submodule K V) (L : Submodule (𝓞 K) ↥X) : ∀ v ∈ push X L, v ∈ X := by
   rintro v ⟨x, -, rfl⟩
   exact x.2
-
-theorem pull_push (X : Submodule K V) (L : Submodule (𝓞 K) ↥X) : pull X (push X L) = L :=
-  Submodule.comap_map_eq_of_injective (incl_injective X) L
 
 theorem push_pull {X : Submodule K V} {L : Submodule (𝓞 K) V} (hL : ∀ v ∈ L, v ∈ X) :
     push X (pull X L) = L := by
@@ -97,19 +142,22 @@ theorem push_span (X : Submodule K V) (s : Set ↥X) :
   Submodule.map_span (incl X) s
 
 theorem isLatIn_push_iff_isLattice {X : Submodule K V} (L : Submodule (𝓞 K) ↥X) :
-    IsLatIn X (push X L) ↔ Submodule.IsLattice K L := by
+    IsLatIn X (push X L) ↔ Submodule.IsFullLattice K L := by
   have hspan : Submodule.span K ((push X L : Submodule (𝓞 K) V) : Set V) =
       (Submodule.span K (L : Set ↥X)).map X.subtype := by
     rw [Submodule.map_span]
     congr 1
   constructor
   · rintro ⟨hfg, hsp⟩
-    refine ⟨Submodule.fg_of_fg_map_injective _ (incl_injective X) hfg, ?_⟩
+    refine
+      { toIsLattice := Submodule.IsLattice.of_fg K
+          (Submodule.fg_of_fg_map_injective _ (incl_injective X) hfg)
+        span_eq_top := ?_ }
     apply Submodule.map_injective_of_injective X.injective_subtype
     rw [← hspan, hsp, Submodule.map_subtype_top]
-  · rintro ⟨hfg, hsp⟩
-    refine ⟨hfg.map _, ?_⟩
-    rw [hspan, hsp, Submodule.map_subtype_top]
+  · intro hL
+    refine ⟨hL.toIsLattice.fg.map _, ?_⟩
+    rw [hspan, hL.span_eq_top, Submodule.map_subtype_top]
 
 theorem isIntegralLat_push {h : V →ₗ⋆[K] V →ₗ[K] K} {X : Submodule K V} (L : Submodule (𝓞 K) ↥X) :
     Formalism.HermitianLatticesTheory.IsIntegralLat h (push X L) ↔ Formalism.HermitianLatticesTheory.IsIntegralLat (formOn h X) L := by
@@ -183,7 +231,7 @@ theorem extId_mem (hs : h.IsSymm) (hc : IsCompl U (orthK h U)) {g : ↥(orthK h 
   have o1 : ∀ {x y : V}, x ∈ U → y ∈ orthK h U → h x y = 0 := fun hx hy => mem_orthK.mp hy _ hx
   have o2 : ∀ {x y : V}, x ∈ U → y ∈ orthK h U → h y x = 0 := fun {x y} hx hy => by
     rw [← hs.eq x y, o1 hx hy, map_zero]
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
   rw [hg', o1 hu (g ⟨w', hw'⟩).2, o2 hu' (g ⟨w, hw⟩).2, o1 hu hw', o2 hu' hw]
 
 theorem map_orthK {g : V ≃ₗ[K] V} (hg : g ∈ isomFix h U) :
@@ -213,7 +261,7 @@ theorem extId_restr (hc : IsCompl U (orthK h U)) {g : V ≃ₗ[K] V} (hg : g ∈
   apply LinearEquiv.ext
   intro v
   obtain ⟨u, hu, w, hw, rfl⟩ := exists_add hc v
-  rw [extId_add hc _ hu hw, restr_apply, map_add, hg.2 u hu]
+  rw [extId_add hc _ hu hw, restr_apply, map_add (f := _), hg.2 u hu]
 
 theorem restr_extId (hs : h.IsSymm) (hc : IsCompl U (orthK h U))
     {g : ↥(orthK h U) ≃ₗ[K] ↥(orthK h U)} (hg : g ∈ Formalism.HermitianLatticesTheory.isom (formOn h (orthK h U))) :

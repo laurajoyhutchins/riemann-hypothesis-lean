@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ReductionRespectsAdd
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionRespectsAdd
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionEval
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -44,7 +88,7 @@ theorem liftPt₁₂_eq : ∃ (x y : gaussRing (gaussCurve W W)) (h : _),
       (algebraMap _ (liftField K W) y) h := by
   have hsum : pushPt W W (redU K W W (liftPt₁ K W + liftPt₂ K W)) =
       univPt₁ (W.map (residue 𝒪)) + univPt₂ (W.map (residue 𝒪)) := by
-    rw [map_add, map_add, pushPt_redU_liftPt₁, pushPt_redU_liftPt₂]
+    rw [map_add (f := _), map_add (f := _), pushPt_redU_liftPt₁, pushPt_redU_liftPt₂]
   have hne : redU K W W (liftPt₁ K W + liftPt₂ K W) ≠ 0 := fun h0 =>
     isGenPt_ne_zero _ (isGenPt_univPt₁₂ (W.map (residue 𝒪))) (by rw [← hsum, h0, map_zero])
   rw [redU_apply] at hne
@@ -81,7 +125,7 @@ theorem pushField_comp_fieldEvalRed {x y : gaussRing (gaussCurve W W)}
   · rw [RingHom.comp_apply, fieldEvalRed_genY, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
       genEval_genY, hRy]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem pushPt_redU_genEval {x y : gaussRing (gaussCurve W W)}
     (h : ((W.baseChange K).baseChange (liftField K W)).toAffine.Nonsingular
@@ -104,7 +148,7 @@ theorem pushPt_redU_genEval {x y : gaussRing (gaussCurve W W)}
     exact (WeierstrassCurve.Affine.map_equation (W.map (liftJ W)).toAffine
       (IsFractionRing.injective _ (liftField K W)) x y).mp h₁
   have hx : Function.Injective (eval₂RingHom (ResidueField.map (liftJ W)) (residue _ x)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro p hp
     by_contra hp0
     have hT : Transcendental (ResidueField 𝒪) (pushField W (residue _ x)) := hR
@@ -121,7 +165,7 @@ theorem pushPt_redU_genEval {x y : gaussRing (gaussCurve W W)}
     pointMapRing_pointMapRing, pointMapRing_congr hring, map_eq_pointCongr_pointMapRing]
   exact pointCongr_pointCongr_eq _ _ _ _
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem univAdd_reduceFF
     (Q : ((W'.baseChange K).baseChange (W.baseChange K).toAffine.FunctionField).toAffine.Point)
@@ -138,7 +182,7 @@ theorem univAdd_reduceFF
     rw [← e₃]; exact isGenPt_liftPt₁₂ K W
   have hsum : pushPt W W (redU K W W (liftPt₁ K W + liftPt₂ K W)) =
       univPt₁ (W.map (residue 𝒪)) + univPt₂ (W.map (residue 𝒪)) := by
-    rw [map_add, map_add, pushPt_redU_liftPt₁, pushPt_redU_liftPt₂]
+    rw [map_add (f := _), map_add (f := _), pushPt_redU_liftPt₁, pushPt_redU_liftPt₂]
   have k₁ := pushPt_redU_genEval K W W' h₁ g₁ (isGenPt_univPt₁ _)
     (by rw [← e₁]; exact pushPt_redU_liftPt₁ K W) Q
   have k₂ := pushPt_redU_genEval K W W' h₂ g₂ (isGenPt_univPt₂ _)
@@ -150,7 +194,7 @@ theorem univAdd_reduceFF
   have hadd := (respectsAdd_iff Q).mp hQ (liftField K W) _ _ g₁ g₂ (hs ▸ g₃)
   rw [genEval_congr _ hs _ g₃] at hadd
   have := congrArg (fun P => pushPt W W' (redU K W W' P)) hadd
-  simp only [map_add] at this
+  simp only [map_add (f := _)] at this
   rw [k₁, k₂, k₃] at this
   exact this
 
@@ -159,17 +203,6 @@ theorem respectsAdd_reduceFF
     (hQ : RespectsAdd (W.baseChange K) (W'.baseChange K) Q) :
     RespectsAdd (W.map (residue 𝒪)) (W'.map (residue 𝒪)) (reduceFF K W W' Q) :=
   respectsAdd_of_univAdd _ (univAdd_reduceFF K W W' Q hQ)
-
-def reduceHom :
-    isogHom (W.baseChange K) (W'.baseChange K) →+ isogHom (W.map (residue 𝒪)) (W'.map (residue 𝒪))
-    where
-  toFun Q := ⟨reduceFF K W W' Q.1, respectsAdd_reduceFF K W W' Q.1 Q.2⟩
-  map_zero' := Subtype.ext (map_zero (reduceFF K W W'))
-  map_add' Q R := Subtype.ext (map_add (reduceFF K W W') Q.1 R.1)
-
-theorem reduceHom_val (Q : isogHom (W.baseChange K) (W'.baseChange K)) :
-    (reduceHom K W W' Q).1 = reduceFF K W W' Q.1 :=
-  rfl
 
 end Main
 

@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfSpan
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.ResAlgOfSpan
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.MemUniformizerHermitianIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +84,7 @@ theorem thetaSpan_holds : ThetaSpan σ J ψ v := by
     induction hy using Submodule.span_induction with
     | mem z hz => exact Submodule.subset_span ⟨z, hz, rfl⟩
     | zero => rw [map_zero]; exact Nt.zero_mem
-    | add a b _ _ ha hb => rw [map_add]; exact Nt.add_mem ha hb
+    | add a b _ _ ha hb => rw [map_add (f := _)]; exact Nt.add_mem ha hb
     | smul n a _ ha => rw [map_zsmul]; exact zsmul_mem ha n
   have hI : ∀ w ∈ IE (E := E) v, ∀ c : 𝓞 E,
       ι (c * w) ∈ IsLocalRing.maximalIdeal (v.adicCompletionIntegers F) • Nt := by
@@ -57,7 +98,7 @@ theorem thetaSpan_holds : ThetaSpan σ J ψ v := by
       rw [hs]
       exact Submodule.smul_mem_smul (iO_max v p hp) (hN c)
     | zero => intro c; rw [mul_zero, map_zero]; exact Submodule.zero_mem _
-    | add a b _ _ ha hb => intro c; rw [mul_add, map_add]; exact Submodule.add_mem _ (ha c) (hb c)
+    | add a b _ _ ha hb => intro c; rw [mul_add, map_add (f := _)]; exact Submodule.add_mem _ (ha c) (hb c)
     | smul d a _ ha =>
       intro c
       rw [smul_eq_mul, ← mul_assoc]
@@ -80,7 +121,7 @@ theorem thetaSpan_holds : ThetaSpan σ J ψ v := by
         ι (1 * (y - algebraMap (𝓞 F) (𝓞 E) b0 - algebraMap (𝓞 F) (𝓞 E) b1 * θ)) := by
       rw [ov_smul, ov_smul, mul_one]
       show _ = sc (E := E) v (iO v b0) + sc (E := E) v (iO v b1) * ι θ + _
-      rw [← halg, ← halg, ← map_mul, ← map_add, ← map_add]
+      rw [← halg, ← halg, ← map_mul, ← map_add (f := _), ← map_add (f := _)]
       congr 1
       ring
     rw [hy]

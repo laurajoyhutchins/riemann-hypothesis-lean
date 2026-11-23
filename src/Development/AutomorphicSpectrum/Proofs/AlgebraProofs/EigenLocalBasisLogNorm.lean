@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ProjSumSumEmbeddingsEqTrace
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualBasisTraceLogNormStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
+public import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualBasisTraceLogNormStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ProjSumSumEmbeddingsEqTrace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,6 +70,7 @@ variable {E K U : Type} [Field E] [NumberField E] [Field K] [AddCommGroup U] [Mo
 theorem eigProj_rho (ρ : 𝓞 E →+* Module.End K U) (σ : E →+* K) (a : 𝓞 E) (u : U) :
     HT.eigProj ρ σ (ρ a u) = σ (a : E) • HT.eigProj ρ σ u := by
   have h1 : HT.eigProj ρ σ (ρ a u) = ρ a (HT.eigProj ρ σ u) := by
+
     simp only [HT.eigProj, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [← Module.End.mul_apply, ← Module.End.mul_apply, ← map_mul, ← map_mul, mul_comm]
@@ -65,6 +114,7 @@ theorem eigProj_eq_sum [CharZero K] (hcard : Nat.card (E →+* K) = Module.finra
       · rw [(hb τ hr).2 (Ne.symm h), zero_smul]
       · rw [eigProj_eq_zero ρ τ r (σ (r : E)) hr hu, smul_zero]
   conv_rhs => rw [hexp]
+
   simp only [map_sum, Finset.smul_sum]
   rw [Finset.sum_comm]
   simp only [hterm]
@@ -123,7 +173,8 @@ theorem core (V : Subring K) (ρ : 𝓞 E →+* Module.End K U) (σ : E →+* K)
     set x : I → K := fun a => ∑ k, (c (Sum.inl (a, k)) : K) * σ (b k : E) with hx
     have hez : z = ∑ a, x a • HT.eigProj ρ σ (u a) := by
       conv_lhs => rw [← heig, ← hc]
-      rw [map_add, map_sum, map_sum]
+
+      rw [map_add (f := _), map_sum, map_sum]
       have h0 : ∑ q : J × Fin f, HT.eigProj ρ σ ((c (Sum.inr q) : K) • ρ (b q.2) (u' q.1)) = 0 :=
         Finset.sum_eq_zero fun q _ => by rw [map_smul, hker, smul_zero]
       rw [h0, add_zero, Fintype.sum_prod_type]

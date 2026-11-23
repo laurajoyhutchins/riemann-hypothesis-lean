@@ -1,5 +1,59 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PositiveDefiniteness.Development
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PositiveDefiniteness.Development
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Complex.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,9 +67,9 @@ theorem re_nonneg_of_rat {k : ℕ} (M : Matrix (Fin k) (Fin k) ℂ) (z : ℂ) (h
     (v : Fin k → ℂ) : 0 ≤ (star v ⬝ᵥ (M *ᵥ v)).re := by
   have hQc : Continuous fun w : Fin k → ℂ => (star w ⬝ᵥ (M *ᵥ w)).re := by
     show Continuous fun w : Fin k → ℂ => (∑ i, star (w i) * ∑ j, M i j * w j).re
-    exact Complex.continuous_re.comp (continuous_finset_sum _ fun i _ =>
+    exact Complex.continuous_re.comp (continuous_finsetSum _ fun i _ =>
       (continuous_star.comp (continuous_apply i)).mul
-        (continuous_finset_sum _ fun j _ => continuous_const.mul (continuous_apply j)))
+        (continuous_finsetSum _ fun j _ => continuous_const.mul (continuous_apply j)))
   let ψ : (Fin k → ℝ) × (Fin k → ℝ) → (Fin k → ℂ) := fun p i => (p.1 i : ℂ) + (p.2 i : ℂ) * z
   have hψ : Continuous ψ := by fun_prop
   let d : (Fin k → ℚ) × (Fin k → ℚ) → (Fin k → ℝ) × (Fin k → ℝ) :=
@@ -56,9 +110,9 @@ theorem posDef_of_points {E : Type} [Field E] (φ : E →+* ℂ) {k : ℕ} (N : 
       have hQc : Continuous fun a : Fin k → ℝ =>
           (star (fun i => (a i : ℂ)) ⬝ᵥ (N *ᵥ fun i => (a i : ℂ))).re := by
         show Continuous fun a : Fin k → ℝ => (∑ i, star ((a i : ℂ)) * ∑ j, N i j * (a j : ℂ)).re
-        exact Complex.continuous_re.comp (continuous_finset_sum _ fun i _ =>
+        exact Complex.continuous_re.comp (continuous_finsetSum _ fun i _ =>
           (continuous_star.comp (Complex.continuous_ofReal.comp (continuous_apply i))).mul
-            (continuous_finset_sum _ fun j _ =>
+            (continuous_finsetSum _ fun j _ =>
               continuous_const.mul (Complex.continuous_ofReal.comp (continuous_apply j))))
       have hd : DenseRange (fun α : Fin k → ℚ => fun i => (α i : ℝ)) :=
         DenseRange.piMap fun _ => Rat.denseRange_cast
@@ -77,7 +131,7 @@ theorem posDef_of_points {E : Type} [Field E] (φ : E →+* ℂ) {k : ℕ} (N : 
       obtain ⟨t, ht⟩ := hreal
       refine re_nonneg_of_rat N (φ t) ht (fun α β => ?_)
       have h1 := hpt (fun i => (α i : E) + (β i : E) * t)
-      simpa [map_add, map_mul, map_ratCast] using h1
+      simpa [map_add (f := _), map_mul, map_ratCast] using h1
   have hpsd : N.PosSemidef := by
     rw [Matrix.posSemidef_iff_dotProduct_mulVec]
     refine ⟨hN, fun v => ?_⟩
@@ -97,8 +151,9 @@ theorem positive_definite_second : Step2 := by
   have hQ : ∀ x : Fin k → E, star (fun i => φ (x i)) ⬝ᵥ (J.map φ *ᵥ (fun i => φ (x i)))
       = φ (hform (σ : E →+* E) J x x) := by
     intro x
+
     simp only [dotProduct, mulVec, hform, Pi.star_apply, hst, Matrix.map_apply, map_sum, map_mul,
-      Finset.mul_sum, mul_assoc]
+    Finset.mul_sum, mul_assoc]
     rfl
   have hdet : J.det ≠ 0 := by
     intro h0

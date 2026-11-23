@@ -1,9 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.DetJacMatCoordsEqTransitionJacobianDet
-import Development.AbelianVarietyTheory.Definitions.Divisors.AltPullApply
-import Development.AbelianVarietyTheory.Definitions.Divisors.CircleAsphGNontrivial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,78 +85,10 @@ def op {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B'
     (n : ℤ) : Module.End E (HE l E (ksBC A m p b) n) :=
   ε.sum fun M c => c • pullE l E (matBC act p b M) n
 
-def Hxi {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B) (ε : Matrix (Fin m) (Fin m) O →₀ E)
-    (k : ℕ) (i : ℤ) : Submodule E (HE l E (ksBC A m p b) (i + k)) :=
-  LinearMap.range (op l act p b ε (i + k))
-
-def galE (E : Type) [CommRing E] [Algebra ℚ_[l] E] {k : Type} [Field k] (Ω : Type) [Field Ω] [Algebra k Ω] {Y : Scheme.{0}}
-    (q : Y ⟶ Spec (CommRingCat.of k)) (n : ℤ) (σ : Ω ≃ₐ[k] Ω) : Module.End E (HE l E (GlobalTheory.Et.geom Ω q) n) :=
-  pullE l E (GlobalTheory.Et.galMap Ω q σ) n
 
 variable (E) in
-
 abbrev HEt (Y : Scheme.{0}) (n t : ℤ) : Type 1 := E ⊗[ℚ_[l]] HQ l (sch.obj Y) n t
 
-variable (E) in
 
-def pullEt {Y Y' : Scheme.{0}} (u : Y ⟶ Y') (n t : ℤ) : HEt l E Y' n t →ₗ[E] HEt l E Y n t :=
-  (pullHQ l (sch.map u) n t).baseChange E
-
-def opT {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B) (ε : Matrix (Fin m) (Fin m) O →₀ E)
-    (n t : ℤ) : Module.End E (HEt l E (ksBC A m p b) n t) :=
-  ε.sum fun M c => c • pullEt l E (matBC act p b M) n t
-
-def HxiT {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B) (ε : Matrix (Fin m) (Fin m) O →₀ E)
-    (k : ℕ) (t i : ℤ) : Submodule E (HEt l E (ksBC A m p b) (i + k) t) :=
-  LinearMap.range (opT l act p b ε (i + k) t)
-
-def galEt (E : Type) [CommRing E] [Algebra ℚ_[l] E] {k : Type} [Field k] (Ω : Type) [Field Ω] [Algebra k Ω] {Y : Scheme.{0}}
-    (q : Y ⟶ Spec (CommRingCat.of k)) (n t : ℤ) (σ : Ω ≃ₐ[k] Ω) : Module.End E (HEt l E (GlobalTheory.Et.geom Ω q) n t) :=
-  pullEt l E (GlobalTheory.Et.galMap Ω q σ) n t
-
-variable (E) in
-theorem pullEt_zero {Y Y' : Scheme.{0}} (u : Y ⟶ Y') (n : ℤ) : pullEt l E u n 0 = pullE l E u n := rfl
-
-theorem opT_zero {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B)
-    (ε : Matrix (Fin m) (Fin m) O →₀ E) (n : ℤ) : opT l act p b ε n 0 = op l act p b ε n := rfl
-
-theorem HxiT_zero {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B)
-    (ε : Matrix (Fin m) (Fin m) O →₀ E) (k : ℕ) (i : ℤ) : HxiT l act p b ε k 0 i = Hxi l act p b ε k i := rfl
-
-theorem galEt_zero (E : Type) [CommRing E] [Algebra ℚ_[l] E] {k : Type} [Field k] (Ω : Type) [Field Ω] [Algebra k Ω]
-    {Y : Scheme.{0}} (q : Y ⟶ Spec (CommRingCat.of k)) (n : ℤ) (σ : Ω ≃ₐ[k] Ω) :
-    galEt l E Ω q n 0 σ = galE l E Ω q n σ := rfl
-
-example (Y : Scheme.{0}) (n : ℤ) : HEt l E Y n 0 = HE l E Y n := rfl
-
-@[simp] theorem opT_zero_comb {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B) (n t : ℤ) :
-    opT l act p b (0 : Matrix (Fin m) (Fin m) O →₀ E) n t = 0 := by
-  simp [opT]
-
-theorem HxiT_zero_comb {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B) (k : ℕ) (t i : ℤ) :
-    HxiT l act p b (0 : Matrix (Fin m) (Fin m) O →₀ E) k t i = ⊥ := by
-  rw [HxiT, opT_zero_comb, LinearMap.range_zero]
-
-theorem opT_add {A : Over S} [GrpObj A] (act : OActN O A) {m : ℕ} (p : S ⟶ B) (b : B' ⟶ B)
-    (ε ε' : Matrix (Fin m) (Fin m) O →₀ E) (n t : ℤ) : opT l act p b (ε + ε') n t = opT l act p b ε n t + opT l act p b ε' n t := by
-  unfold opT
-  exact Finsupp.sum_add_index' (fun _ => zero_smul _ _) (fun _ _ _ => add_smul _ _ _)
-
-abbrev latRep {p : ℕ} [Fact p.Prime] (D : Datum p) : D.O →+* Module.End ℤ D.La := Module.toModuleEnd ℤ D.La
-
-example {k Ω : Type} [Field k] [Field Ω] [Algebra k Ω] (A : Over S) (m : ℕ) (p : S ⟶ Spec (CommRingCat.of k)) :
-    ksBC A m p (Spec.map (CommRingCat.ofHom (algebraMap k Ω))) = GlobalTheory.Et.geom Ω ((pow A m).hom ≫ p) := rfl
-
-def ArtinQE (E : Type) [Field E] [Algebra ℚ_[l] E] : Prop :=
-  ∃ e : ∀ (X : Scheme.{0}) (p : X ⟶ Spec (CommRingCat.of ℂ)) [LocallyOfFiniteType p] [QuasiCompact p] [IsSeparated p] (n : ℕ),
-      HE l E X n ≃ₗ[E] SH E (GlobalTheory.CxPts p (RingHom.id ℂ)) n,
-    ∀ (X Y : Scheme.{0}) (p : X ⟶ Spec (CommRingCat.of ℂ)) [LocallyOfFiniteType p] [QuasiCompact p] [IsSeparated p]
-      (q : Y ⟶ Spec (CommRingCat.of ℂ)) [LocallyOfFiniteType q] [QuasiCompact q] [IsSeparated q]
-      (u : X ⟶ Y) (g : C(GlobalTheory.CxPts p (RingHom.id ℂ), GlobalTheory.CxPts q (RingHom.id ℂ))), u ≫ q = p → (∀ x, (g x).1 = x.1 ≫ u) →
-      ∀ (n : ℕ) (y : HE l E Y n), e X p n (pullE l E u n y) = shMap E g n (e Y q n y)
-
-def trivMap (E : Type) [Field E] {G G' : Type} [Group G] [Group G'] (α : G' →* G) :
-    Rep.res α (Rep.trivial E G E) ⟶ Rep.trivial E G' E :=
-  Rep.ofHom { toLinearMap := LinearMap.id, isIntertwining' := fun _ => rfl }
 
 end GlobalTheory.KS

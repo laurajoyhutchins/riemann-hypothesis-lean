@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Retie
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EisGEqZeroOfInfinite
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ExistsPowPrincipalFractionalIdeal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Retie
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ExistsPowPrincipalFractionalIdeal
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EisGEqZeroOfInfinite
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeInvariantsPeriodPairDictionary
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaNormUnimodularLattice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemInvMulDifferent
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPeriodPairBaseLat
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsPeriodPairBaseLat
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemInvMulDifferent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -210,7 +253,7 @@ theorem span_gen [NumberField M] (hF : FieldOK D.host D.what₂.embLL D.embE) (h
     induction hy using Submodule.span_induction with
     | mem y hy => exact hS y hy
     | zero => rw [map_zero]; exact N.zero_mem
-    | add x y _ _ hx hy => rw [map_add]; exact N.add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact N.add_mem hx hy
     | smul r y _ hy =>
       have := N.smul_mem (RingOfIntegers.mapRingHom (into D M hL) r) hy
       rw [Algebra.smul_def, map_mul]
@@ -279,40 +322,5 @@ theorem perTie_retie (hF : FieldOK D.host D.what₂.embLL D.embE) (h : IsDiscrim
   exact ⟨⟨isCurveIdeal_ccK D, h⟩, hM,
     fun τ => ⟨_, span_gen hF hL τ, fun s => om_eq hF h hL hM _ s (hs s) τ⟩,
     fun s t ht => thOne_sq hF h hL hM _ s (hs s) t ht⟩
-
-theorem exists_field (hF : FieldOK D.host D.what₂.embLL D.embE) (h : IsDiscriminantTwelfthRootOfIdealLattice D D.host.ccK δ) :
-    ∃ (M : IntermediateField ℚ ℂ) (_ : NumberField M), (∀ x, D.what₂.embLL x ∈ M) ∧
-      DataIn D (tor0 D D.host.ccK δ) M := by
-  have hL : ∀ x, D.what₂.embLL x ∈ coefM D := fun x => ⟨x, rfl⟩
-  obtain ⟨-, h2, h3⟩ := data_of_fieldOK hF h hL
-  have hi : ∀ x ∈ coefM D, IsIntegral ℚ x := fun x hx =>
-    (IsIntegral.of_finite ℚ (⟨x, hx⟩ : coefM D)).map (coefM D).val
-  let S : Set ℂ := {g2 (lamOf D D.host.ccK δ), g3 (lamOf D D.host.ccK δ)}
-  have hS : FiniteDimensional ℚ (IntermediateField.adjoin ℚ S) := by
-    refine IntermediateField.finiteDimensional_adjoin ?_
-    rintro _ (rfl | rfl)
-    · exact (hi _ h2).of_pow (by norm_num)
-    · exact (hi _ h3).of_pow (by norm_num)
-  have hL' : ∀ x, D.what₂.embLL x ∈ coefM D ⊔ IntermediateField.adjoin ℚ S := fun x => le_sup_left (a := coefM D) (hL x)
-  refine ⟨coefM D ⊔ IntermediateField.adjoin ℚ S, ⟨⟩, hL', (data_of_fieldOK hF h hL').1, ?_, ?_⟩
-  · exact le_sup_right (a := coefM D) (IntermediateField.subset_adjoin ℚ S (by simp [S, tor0]))
-  · exact le_sup_right (a := coefM D) (IntermediateField.subset_adjoin ℚ S (by simp [S, tor0]))
-
-theorem retie_periods : ∀ D : D7, FieldOK D.host D.what₂.embLL D.embE →
-    (∃ δ, IsDiscriminantTwelfthRootOfIdealLattice D D.host.ccK δ) ∧ ∀ δ, IsDiscriminantTwelfthRootOfIdealLattice D D.host.ccK δ →
-      (∃ (M : IntermediateField ℚ ℂ) (_ : NumberField M), (∀ x, D.what₂.embLL x ∈ M) ∧
-        DataIn D (tor0 D D.host.ccK δ) M) ∧
-      ∀ (M : IntermediateField ℚ ℂ) [NumberField M] (hL : ∀ x, D.what₂.embLL x ∈ M),
-        DataIn D (tor0 D D.host.ccK δ) M →
-        ∃ c : D.what₂.Tau → D.what₂.LL, (∀ τ, Submodule.span (𝓞 M) {into D M hL (c τ)} = ellT D M τ) ∧
-          ∀ ρ : M →ₐ[ℚ] ℂ,
-            (∀ τ, (retie D).gx.Om τ ((ρ : M →+* ℂ).comp (into D M hL)) =
-              Real.exp (-logMet M (lamOf D D.host.ccK δ) ρ (into D M hL (c τ)))) ∧
-            ∀ t, GL3Theta.IsTwoTorsionPointUnkilled D (lamConj M ρ (lamOf D D.host.ccK δ)) t →
-              (retie D).gx.thOne ((ρ : M →+* ℂ).comp (into D M hL)) ^ 2 =
-                GL3Theta.normSq1 (lamConj M ρ (lamOf D D.host.ccK δ))
-                  (GL3Theta.th0 (lamConj M ρ (lamOf D D.host.ccK δ)) t) :=
-  fun D hF => ⟨exists_discriminantTwelfthRoot_of_ideal D, fun _ h => ⟨exists_field hF h, fun _ _ hL hM =>
-    ⟨_, span_gen hF hL, fun ρ => ⟨om_eq hF h hL hM ρ _ fun _ => rfl, thOne_sq hF h hL hM ρ _ fun _ => rfl⟩⟩⟩⟩
 
 end GlobalTheory.Mem.TruePeriods

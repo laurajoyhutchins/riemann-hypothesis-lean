@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.Columns.TiedGlSplit
-import Formalism.LocalToGlobal.Columns.TwQDefs
+module
+
+public import Formalism.LocalToGlobal.Columns.DecoFin
+public import Formalism.LocalToGlobal.Columns.RecLevel
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LevGapFacts
+public import Formalism.LocalToGlobal.Columns.TiedGlSplit
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LevGapLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -18,15 +66,15 @@ theorem qsp_exists_pi (P : Pl E) (hP : conjPrime₂ P ≠ P) : ∃ ϖ : 𝓞 E, 
   obtain ⟨s, hs, hns⟩ := exists_mem_notMem (Ne.symm hP)
   exact ⟨s, hs, fun h => hns ((mem_conjP P s).2 h)⟩
 
-include hc in
 
+include hc in
 theorem qsp_norm_mem (a : 𝓞 E) : ∃ b : 𝓞 F, algebraMap (𝓞 F) (𝓞 E) b = a * cO E a := by
   have h1 : star (algebraMap (𝓞 E) E (a * cO E a)) = algebraMap (𝓞 E) E (a * cO E a) := by
     rw [map_mul, algebraMap_cO, star_mul', star_star, mul_comm]
   obtain ⟨x, hx⟩ := (hc.fixed _).1 h1
   have hi : IsIntegral ℤ x := by
     have h2 : IsIntegral ℤ (algebraMap F E x) := by rw [hx]; exact RingOfIntegers.isIntegral_coe _
-    exact (isIntegral_algebraMap_iff (algebraMap F E).injective).1 h2
+    exact (isIntegral_algebraMap_iff ).1 h2
   obtain ⟨b, hb⟩ : ∃ b : 𝓞 F, algebraMap (𝓞 F) F b = x := ⟨⟨x, hi⟩, rfl⟩
   refine ⟨b, ?_⟩
   apply RingOfIntegers.ext
@@ -35,8 +83,8 @@ theorem qsp_norm_mem (a : 𝓞 E) : ∃ b : 𝓞 F, algebraMap (𝓞 F) (𝓞 E)
 
 theorem qsp_isOver (P : Pl E) : IsOver (underPl F P) P := rfl
 
-include hc in
 
+include hc in
 theorem qsp_exists (P : Pl E) (hP : conjPrime₂ P ≠ P) :
     ∃ ϖ : 𝓞 E, ϖ ∈ P.asIdeal ∧ cO E ϖ ∉ P.asIdeal ∧ Nonempty (Formalism.MainNotions.Gaps.LG.SplitAt hc.sig (underPl F P) (ϖ : E)) := by
   obtain ⟨ϖ, hϖ, hcϖ⟩ := qsp_exists_pi P hP
@@ -50,7 +98,7 @@ theorem qsp_exists (P : Pl E) (hP : conjPrime₂ P ≠ P) :
     rw [hsig0]; exact this
   have ht' : algebraMap F E (t : F) = (ϖ : E) + hc.sig (ϖ : E) := by
     have := congrArg (algebraMap (𝓞 E) E) ht
-    rw [map_add, ← IsScalarTower.algebraMap_apply, IsScalarTower.algebraMap_apply (𝓞 F) F E] at this
+    rw [map_add (f := _), ← IsScalarTower.algebraMap_apply, IsScalarTower.algebraMap_apply (𝓞 F) F E] at this
     rw [hsig0]; exact this
   have hNv : N ∈ (underPl F P).asIdeal := by
     show algebraMap (𝓞 F) (𝓞 E) N ∈ P.asIdeal

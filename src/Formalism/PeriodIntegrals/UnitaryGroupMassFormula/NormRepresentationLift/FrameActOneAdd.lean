@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermDef
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ActsByFrameAct
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelativeEquivalence.DCRelEquivAllHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ActsByFrameAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,10 +59,6 @@ theorem Xflag_mono (F : LFlag S r T) (j : ℕ) : Xflag F j ≤ Xflag F (j + 1) :
     simp only [Set.mem_setOf_eq] at hi ⊢
     omega)
 
-theorem Xflag_le (F : LFlag S r T) (j : ℕ) : Xflag F j ≤ Xsp F := by
-  show Submodule.span E (F.fl.e '' {i | i.1 < j}) ≤ Submodule.span E (Set.range F.fl.e)
-  exact Submodule.span_mono (Set.image_subset_range _ _)
-
 theorem X_le_orth (F : LFlag S r T) : Xsp F ≤ orth S (Xsp F) := by
   intro x hx
   simp only [orth, Submodule.mem_iInf, LinearMap.mem_ker]
@@ -35,33 +71,7 @@ theorem X_le_orth (F : LFlag S r T) : Xsp F ≤ orth S (Xsp F) := by
 
 theorem NLam_mul (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T) {n₁ n₂ : S.V ≃ₗ[E] S.V}
     (h₁ : n₁ ∈ NLam Λ F) (h₂ : n₂ ∈ NLam Λ F) : n₁ * n₂ ∈ NLam Λ F := by
-  simp only [NLam, IsAutLam, Set.mem_setOf_eq] at h₁ h₂ ⊢
-  obtain ⟨⟨hi₁, hg₁⟩, hf₁, ho₁⟩ := h₁
-  obtain ⟨⟨hi₂, hg₂⟩, hf₂, ho₂⟩ := h₂
-  refine ⟨⟨Subgroup.mul_mem _ hi₁ hi₂, ?_⟩, ?_, ?_⟩
-  · rw [gmap_eq_iff] at hg₁ hg₂ ⊢
-    refine ⟨fun y hy => hg₁.1 _ (hg₂.1 y hy), fun y hy => ?_⟩
-    obtain ⟨w₁, hw₁, rfl⟩ := hg₁.2 y hy
-    obtain ⟨w₂, hw₂, rfl⟩ := hg₂.2 w₁ hw₁
-    exact ⟨w₂, hw₂, rfl⟩
-  · intro j x hx
-    have h2 := hf₂ j x hx
-    have hmem : n₂ x ∈ Xflag F (j + 1) := by
-      have h3 := Submodule.add_mem _ (Xflag_mono F j h2) hx
-      rwa [sub_add_cancel] at h3
-    have h1 := hf₁ j (n₂ x) hmem
-    have h4 := Submodule.add_mem _ h1 h2
-    rw [sub_add_sub_cancel] at h4
-    exact h4
-  · intro x hx
-    have h2 := ho₂ x hx
-    have hmem : n₂ x ∈ orth S (Xsp F) := by
-      have h3 := Submodule.add_mem _ (X_le_orth F h2) hx
-      rwa [sub_add_cancel] at h3
-    have h1 := ho₁ (n₂ x) hmem
-    have h4 := Submodule.add_mem _ h1 h2
-    rw [sub_add_sub_cancel] at h4
-    exact h4
+  apply PI.DCRelEquiv.UnitaryGroupMassFormula.nlam_mul <;> assumption
 
 theorem modG_of_mem (Λ : Submodule (𝓞 E) S.V) (g : ℕ) {x : S.V}
     (hx : x ∈ Ideal.span {(g : 𝓞 E)} • Λ) : ModG S Λ g x := by

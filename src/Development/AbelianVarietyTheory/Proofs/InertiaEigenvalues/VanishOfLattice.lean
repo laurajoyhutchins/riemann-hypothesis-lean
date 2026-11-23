@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HomToCharacterLineEqZeroStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsOpenOfFgOfSpanEqTop
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
+public import Formalism.GaloisCohomology.LocalTateDualityK
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousFixingSubgroupEquiv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FiniteQuotientPow
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HomToCharacterLineEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegersCompleteDVR
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCycCycChar
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsOpenOfFgOfSpanEqTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+
+@[expose] public section
 
 open GlobalTheory.PhiGam GlobalTheory.AdmLoc GlobalTheory.Models GlobalTheory.TopSteps Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc
 open scoped LaurentSeries PowerSeries TensorProduct
@@ -27,7 +73,7 @@ theorem subsingleton_H2 {N : ℕ} {G G' : Type} [Group G] [TopologicalSpace G] [
       rw [hrho, map_inv, Φ.symm_apply_apply, ← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one,
         Module.End.one_apply] at h3
       exact h3.symm
-    exact Subtype.ext (ReciprocityTheory.Gal.TDual.ext fun m => DFunLike.congr_fun h m)
+    exact Subtype.ext (LinearMap.ext fun m => DFunLike.congr_fun h m)
   refine subsingleton_of_forall_eq 0 fun y => ?_
   obtain ⟨⟨z, hz⟩, rfl⟩ := Submodule.Quotient.mk_surjective _ y
   have hz' : (fun p : G × G => z (Φ.symm p.1, Φ.symm p.2)) ∈ ReciprocityTheory.Gal.Z2 (rho.comp (MonoidHom.id G)) := by
@@ -56,7 +102,7 @@ theorem addHom_eq_zero {k G V A : Type} [Field k] [Group G] [AddCommGroup V] [Mo
   let N : Submodule k V :=
     { carrier := {x | ∀ a : k, φ (a • x) = 0}
       zero_mem' := fun a => by simp
-      add_mem' := fun {x y} hx hy a => by rw [smul_add, map_add, hx, hy, add_zero]
+      add_mem' := fun {x y} hx hy a => by rw [smul_add, map_add (f := _), hx, hy, add_zero]
       smul_mem' := fun b x hx a => by rw [smul_smul]; exact hx _ }
   by_contra hne
   have hN : N < ⊤ := lt_top_iff_ne_top.2 fun hN => hne (AddMonoidHom.ext fun x => by

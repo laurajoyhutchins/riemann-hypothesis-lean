@@ -1,11 +1,57 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.PtOfSInst
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveLoc
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveInj
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveUnit
-import Formalism.LocalToGlobal.ProjectiveLattices.PtOfSPfBC
+module
+
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointBaseChangeLaws
+public import Formalism.LocalToGlobal.ProjectiveLattices.PtOfSInst
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveLoc
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveOpen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveInj
+public import Formalism.LocalToGlobal.ProjectiveLattices.CurveUnit
+public import Formalism.LocalToGlobal.ProjectiveLattices.PtOfSPfBC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
-set_option synthInstance.maxHeartbeats 400000
+
 
 noncomputable section
 
@@ -41,8 +87,8 @@ theorem pos_factor {K' Fr R L : Type} [Field K'] [CommRing Fr] [CommRing R] [Fie
     simp
   · intro r s
     rw [hχ (r + s) (a r * p s + a s * p r) (p r * p s) (by rw [map_mul]; exact mul_ne_zero (hp r) (hp s))
-      (by simp only [map_add, map_mul]; rw [← hr r, ← hr s]; ring)]
-    simp only [χf, map_add, map_mul]
+      (by simp only [map_add (f := _), map_mul]; rw [← hr r, ← hr s]; ring)]
+    simp only [χf, map_add (f := _), map_mul]
     rw [div_add_div _ _ (hp r) (hp s)]
     ring
   · intro k
@@ -66,26 +112,7 @@ theorem pos_dualMap_comp {R S T : Type} [CommRing R] [CommRing S] [CommRing T] (
 theorem pos_frMap_trans {S T U : Type} [CommRing S] [Algebra c.F S] [CommRing T] [Algebra c.F T] [CommRing U]
     [Algebra c.F U] {φ : S →ₐ[c.F] T} {ψ : T →ₐ[c.F] U} {y : FrPt Xo c S} {z : FrPt Xo c T} {w : FrPt Xo c U}
     (h₁ : FrMap φ y z) (h₂ : FrMap ψ z w) : FrMap (ψ.comp φ) y w := by
-  obtain ⟨hx1, hu1, pm1, hs1, hf1, ha1⟩ := h₁
-  obtain ⟨hx2, hu2, pm2, hs2, hf2, ha2⟩ := h₂
-  have esp : spMap (ψ.comp φ).toRingHom = spMap ψ.toRingHom ≫ spMap φ.toRingHom := by
-    show Spec.map (CommRingCat.ofHom (ψ.toRingHom.comp φ.toRingHom)) = _
-    rw [CommRingCat.ofHom_comp, Spec.map_comp]
-  refine ⟨?_, ?_, pm2 ≫ pm1, ?_, ?_, ?_⟩
-  · rw [hx2, hx1, esp, CategoryTheory.Category.assoc]
-  · intro τ i
-    rw [hu2 τ i, hu1 τ i, ← CategoryTheory.Category.assoc]
-    congr 1
-    show _ = Spec.map (CommRingCat.ofHom (dualMap (ψ.toRingHom.comp φ.toRingHom)))
-    rw [pos_dualMap_comp, CommRingCat.ofHom_comp, Spec.map_comp]
-  · rw [CategoryTheory.Category.assoc, hs1, hs2]
-  · rw [CategoryTheory.Category.assoc, hf1, ← CategoryTheory.Category.assoc, hf2, esp, CategoryTheory.Category.assoc]
-  · intro i h
-    have h1' := pos_ppx_le pm1 hs1 i
-    have h2' := pos_ppx_le pm2 hs2 i
-    have e : (pm2 ≫ pm1).appLE _ _ h = pm1.appLE _ _ h1' ≫ pm2.appLE _ _ h2' :=
-      (AlgebraicGeometry.Scheme.Hom.appLE_comp_appLE pm2 pm1 _ _ _ h1' h2').symm
-    rw [e, CommRingCat.hom_comp, RingHom.comp_apply, ha1 i h1', ha2 i h2']
+  apply GlobalTheory.FramedBaseChange.trans <;> assumption
 
 theorem pos_evR (hWD : EvalWD (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z)) (f : Rul Xo c)
     (hf : IsNatural (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) f)
@@ -96,7 +123,7 @@ theorem pos_evR (hWD : EvalWD (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z 
     obtain ⟨p, ψ, y', hy'⟩ := hT1
     exact ⟨p, φ.comp ψ, y', pos_frMap_trans hy' hm⟩
   unfold evR evalAt
-  rw [dif_pos hT2, dif_pos hT1]
+  rw [dite_eq_left hT2, dite_eq_left hT1]
   exact hWD f hf K₂ _ _ _ _ _ _ y₂ hT2.choose_spec.choose_spec.choose_spec
     (pos_frMap_trans hT1.choose_spec.choose_spec.choose_spec hm)
 
@@ -134,14 +161,16 @@ theorem pos_sec_ne :
 
 theorem pos_sec_eval :
     χ (algebraMap (RZ X la N Ω) (RZs X la N Ω gF w) (rzMap X la N Ω gF (Formalism.MainNotions.Gaps.EtaleWeightGaps.sec X la w 0))) =
-      ∑ k, algebraMap (Kp X la N) L (algebraMap (Op X la N) (Kp X la N) (Tv X la N (0, k))) *
+      ∑ k, algebraMap (Kp X la N) L (@algebraMap (Op X la N) (Kp X la N) _ _ _ (Tv X la N (0, k))) *
         χ (CurveLoc.psiZ X la N w gF (gF (X.inc wL (w k)))) := by
   have e : rzMap X la N Ω gF (Formalism.MainNotions.Gaps.EtaleWeightGaps.sec X la w 0) =
-      ∑ k, (algebraMap (Op X la N) (Kp X la N) (Tv X la N (0, k))) • rzMap X la N Ω gF (emb X la N (X.inc wL (w k))) := by
+      ∑ k, (@algebraMap (Op X la N) (Kp X la N) _ _ _ (Tv X la N (0, k))) • rzMap X la N Ω gF (emb X la N (X.inc wL (w k))) := by
     unfold Formalism.MainNotions.Gaps.EtaleWeightGaps.sec
+
     rw [map_sum]
     simp only [map_smul]
   refine (congrArg (fun v => χ (algebraMap (RZ X la N Ω) (RZs X la N Ω gF w) v)) e).trans ?_
+
   simp only [map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [Algebra.smul_def, map_mul, map_mul, ← IsScalarTower.algebraMap_apply, AlgHom.commutes,
@@ -187,17 +216,17 @@ def PtOfSBody (h : LawsP T) (j : ℕ) (hj : InR D j) (hG : GenFrEx (T.Q.Xo j) T.
           (algebraMap T.Q.c.F ((recPlus h j hj).Kl la) a))) ∧
       letI := alg.toAlgebra
       (∑ k, algebraMap (Kp (recPlus h j hj) la G.N) L
-          (algebraMap (Op (recPlus h j hj) la G.N) (Kp (recPlus h j hj) la G.N) (Tv (recPlus h j hj) la G.N (0, k))) *
+          (@algebraMap (Op (recPlus h j hj) la G.N) (Kp (recPlus h j hj) la G.N) _ _ _ (Tv (recPlus h j hj) la G.N (0, k))) *
           evR (T.Q.Xo j) T.Q.c ((G.w k : T.R j)) y) ≠ 0 ∧
       ∀ (k : ℕ) (g : (recB h.toLawsCore).Cusp j (addL (wt0 D j) wL k)),
         φ (toOsK (recPlus h j hj) la G.w (fr0 (recPlus h j hj) la G.w k
           ⟨emb (recPlus h j hj) la G.N ((recPlus h j hj).inc _ g), emb_mem_Vw (recPlus h j hj) la G.N _ g⟩)) =
         evR (T.Q.Xo j) T.Q.c ((g : T.R j)) y /
           (∑ k', algebraMap (Kp (recPlus h j hj) la G.N) L
-            (algebraMap (Op (recPlus h j hj) la G.N) (Kp (recPlus h j hj) la G.N) (Tv (recPlus h j hj) la G.N (0, k'))) *
+            (@algebraMap (Op (recPlus h j hj) la G.N) (Kp (recPlus h j hj) la G.N) _ _ _ (Tv (recPlus h j hj) la G.N (0, k'))) *
             evR (T.Q.Xo j) T.Q.c ((G.w k' : T.R j)) y) ^ k
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem ptOfS_all [Finite (Comp (T.Q.Xo j) T.Q.c)] (hS : ReciprocityTheory.ChartRestriction.G.Out.SecBaseChangeAnySt)
     (hTw : ReciprocityTheory.ChartRestriction.G.Out.SecTwistSt) (hFT : GenFromTest (T.Q.Xo j) T.Q.c hG) (hV : GenValInjSt h j hG)
@@ -250,7 +279,7 @@ theorem ptOfS_all [Finite (Comp (T.Q.Xo j) T.Q.c)] (hS : ReciprocityTheory.Chart
   have hs : χ (algebraMap (RZ (recPlus h j hj) la G.N (Om Z)) (RZs (recPlus h j hj) la G.N (Om Z) (formsEvR j hG hFT Z) G.w)
       (rzMap (recPlus h j hj) la G.N (Om Z) (formsEvR j hG hFT Z) (Formalism.MainNotions.Gaps.EtaleWeightGaps.sec (recPlus h j hj) la G.w 0))) =
       ∑ k, algebraMap (Kp (recPlus h j hj) la G.N) L
-        (algebraMap (Op (recPlus h j hj) la G.N) (Kp (recPlus h j hj) la G.N) (Tv (recPlus h j hj) la G.N (0, k))) *
+        (@algebraMap (Op (recPlus h j hj) la G.N) (Kp (recPlus h j hj) la G.N) _ _ _ (Tv (recPlus h j hj) la G.N (0, k))) *
         evR (T.Q.Xo j) T.Q.c ((G.w k : (recB h.toLawsCore).Cusp j wL) : T.R j) y :=
     (pos_sec_eval (recPlus h j hj) la G.N G.w (formsEvR j hG hFT Z) χ).trans
       (Finset.sum_congr rfl fun k _ => congrArg _ (hF (G.w k)))

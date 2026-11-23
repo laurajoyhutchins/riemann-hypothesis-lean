@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.SegStartSpec
+module
+
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.SegmentStatementHolds
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.InitialLevelFormula
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.SegStartSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,55 +96,7 @@ theorem next_min (TT : Finset (Fin n')) (j : Fin (numSeg TT)) (e : Fin n') (he :
     (hev : Even e.val) (hne : e ≠ segStart TT j) :
     0 < cdist (segStart TT j) (segNext TT j) ∧
       cdist (segStart TT j) (segNext TT j) ≤ cdist (segStart TT j) e := by
-  obtain ⟨k, hk⟩ := List.mem_iff_get.mp ((mem_evenTops TT e).mpr ⟨he, hev⟩)
-  have hm := evenTops_mono TT
-  have hkj : k ≠ j := by
-    rintro rfl
-    exact hne hk.symm
-  have hc : ∀ a b : Fin n', cdist a b = (b.val + n' - a.val) % n' := fun _ _ => rfl
-  have hx : segStart TT j = (evenTops TT).get j := rfl
-  have hkl : k.val < numSeg TT := k.isLt
-  by_cases hj : j.val + 1 < numSeg TT
-  · have hnext : segNext TT j = (evenTops TT).get ⟨j.val + 1, hj⟩ := by
-      unfold segNext
-      congr 1
-      exact Fin.ext (Nat.mod_eq_of_lt hj)
-    have h1 : (evenTops TT).get j < (evenTops TT).get ⟨j.val + 1, hj⟩ := hm (Fin.mk_lt_mk.mpr (Nat.lt_succ_self _))
-    rw [hc, hc, hnext, hx, ← hk]
-    have h1' : ((evenTops TT).get j).val < ((evenTops TT).get ⟨j.val + 1, hj⟩).val := h1
-    have b1 := ((evenTops TT).get j).isLt
-    have b2 := ((evenTops TT).get ⟨j.val + 1, hj⟩).isLt
-    have b3 := ((evenTops TT).get k).isLt
-    rw [cd_le b2 h1'.le]
-    rcases lt_or_gt_of_ne hkj with hlt | hgt
-    · have h3 : ((evenTops TT).get k).val < ((evenTops TT).get j).val := hm hlt
-      rw [cd_gt b1 h3]
-      omega
-    · have h3 : ((evenTops TT).get ⟨j.val + 1, hj⟩).val ≤ ((evenTops TT).get k).val :=
-        hm.monotone (Fin.mk_le_of_le_val (Nat.succ_le_of_lt hgt))
-      rw [cd_le b3 (by omega)]
-      omega
-  · have hjl : j.val < numSeg TT := j.isLt
-    have hje : j.val + 1 = numSeg TT := by omega
-    have h0 : 0 < numSeg TT := by omega
-    have hnext : segNext TT j = (evenTops TT).get ⟨0, h0⟩ := by
-      unfold segNext
-      congr 1
-      apply Fin.ext
-      show (j.val + 1) % numSeg TT = 0
-      rw [hje, Nat.mod_self]
-    have hklt : k < j := by
-      apply Fin.lt_def.mpr
-      have : k.val ≠ j.val := fun h => hkj (Fin.ext h)
-      omega
-    have h1 : ((evenTops TT).get ⟨0, h0⟩).val < ((evenTops TT).get j).val :=
-      hm (Fin.lt_def.mpr (by show 0 < j.val; omega))
-    have h3 : ((evenTops TT).get k).val < ((evenTops TT).get j).val := hm hklt
-    have h4 : ((evenTops TT).get ⟨0, h0⟩).val ≤ ((evenTops TT).get k).val :=
-      hm.monotone (Fin.le_def.mpr (Nat.zero_le _))
-    have b1 := ((evenTops TT).get j).isLt
-    rw [hc, hc, hnext, hx, ← hk, cd_gt b1 h1, cd_gt b1 h3]
-    omega
+  apply Formalism.MainNotions.ColumnSystems.Pf.next_min <;> assumption
 
 theorem segNext_spec (TT : Finset (Fin n')) (j : Fin (numSeg TT)) :
     segNext TT j ∈ TT ∧ Even (segNext TT j).val :=

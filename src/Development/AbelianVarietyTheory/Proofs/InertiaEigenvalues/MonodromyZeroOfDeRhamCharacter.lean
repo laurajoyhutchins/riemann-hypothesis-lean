@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.StepJumpDirect
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConjPlMemPlacesOver
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrysLatOfTrivial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.StepJumpDirect
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConjPlMemPlacesOver
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrysLatOfTrivial
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Card
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism Formalism.MainNotions Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module GlobalTheory.Pass
 open Formalism.MainNotions.PairedCharacterCondition Polynomial
 open Classical
@@ -247,12 +292,12 @@ theorem inertial_chars : ∀ (D : D7) (P : Pend D), TypeLGC P → SumRepresentat
       obtain ⟨hm, hd, hc⟩ := (P.lz k).lab_spec τ
       rw [hl] at hm hd hc
       exact ⟨s v, hm.ne_zero, hc, hd.le, fun _ _ => rfl⟩
-    · exact ⟨1, one_ne_zero, by rw [coeff_one_zero]; exact one_ne_zero,
+    · exact ⟨1, one_ne_zero, by rw [AddMonoidAlgebra.coeff_one_zero]; exact one_ne_zero,
         by rw [natDegree_one]; exact Nat.zero_le _, fun x hx => absurd ⟨x, hx⟩ hne⟩
   have hr1 : 1 ≤ D.R.r := by have := D.R.two_le_m; unfold Ranks.r; omega
   have hN : Nat.card (GL (Fin D.R.r) (ZMod (D.host.g k))) ∣ D.what₂.restRowsFiniteGroupCard := by
     rw [D.nd.restN_card_levelGroup_eq]
-    exact (dvd_pow_self _ (by unfold Ranks.f Ranks.n; positivity)).trans
+    exact (dvd_pow_self _ (by have := D.R.two_le_m; have := D.R.m_le_f; unfold Ranks.f Ranks.n; omega)).trans
       (Finset.dvd_prod_of_mem _ (Finset.mem_univ k))
   have hcard : D.R.r + 2 ≤ D.R.nV + 1 := by
     have := D.R.rank_add_five_le; unfold Ranks.nV; unfold Ranks.r at *; omega

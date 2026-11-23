@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsWeakOfDatum
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SymplecticAdelicFormBiadditiveAlternatingRationa
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharacterHalfSymplecticFormRealPoint
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HomSymplecticHalfFormAlgebraicLawsContinuous
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsWeakOfDatum
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmAtSmulRight
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HomSymplecticHalfFormAlgebraicLawsContinuous
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharacterHalfSymplecticFormRealPoint
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SymplecticAdelicFormBiadditiveAlternatingRationa
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.L2.Pj MeasureTheory IsDedekindDomain NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Ker
@@ -93,9 +135,10 @@ theorem sum_EF (C : Ctx S T) (y y' : Matrix (Fin S.rank) (Fin T.rank) D.host.E) 
     ∑ k, EF C.X (y k) (y' k) = -Algebra.trace ℚ D.host.F
       (Algebra.trace D.host.F D.host.E (D.host.xi0 * GlobalTheory.LatVac.hRat S T yᵀ y'ᵀ)) := by
   simp only [GlobalTheory.ThFr.EF_def]
+
   rw [← map_sum, ← Finset.mul_sum, ← hRat_eq C, C.m.ka, Algebra.trace_trace,
-    show -(2 * D.host.xi0 / 2) * GlobalTheory.LatVac.hRat S T yᵀ y'ᵀ = -(D.host.xi0 * GlobalTheory.LatVac.hRat S T yᵀ y'ᵀ) by ring,
-    map_neg]
+  show -(2 * D.host.xi0 / 2) * GlobalTheory.LatVac.hRat S T yᵀ y'ᵀ = -(D.host.xi0 * GlobalTheory.LatVac.hRat S T yᵀ y'ᵀ) by ring,
+  map_neg]
 
 theorem symplO_rat (M N : Matrix (Fin T.rank) (Fin S.rank) D.host.E) :
     symplO S T (ratW T S M) (ratW T S N) = algebraMap D.host.F (AF D.host.F)
@@ -104,7 +147,7 @@ theorem symplO_rat (M N : Matrix (Fin T.rank) (Fin S.rank) D.host.E) :
   have h2 : symplOH S T (ratW T S M) (ratW T S N) = algebraMap D.host.F (AF D.host.F)
       (1 / 2 * Algebra.trace D.host.F D.host.E (D.host.xi0 * GlobalTheory.LatVac.hRat S T M N)) :=
     GlobalTheory.OrientedFormLaws.symplOH_rat M N
-  rw [h2, ← map_add]
+  rw [h2, ← map_add (f := _)]
   congr 1
   ring
 
@@ -114,6 +157,7 @@ theorem re_match {m n : ℕ} (ξ : ℂ) (Q : Fin m → Fin m → ℂ) (x y : Fin
   have key : ∀ k, conj (-ξ) * ∑ a, ∑ b, conj (x a k) * conj (Q b a) * conj (conj (y b k)) =
       conj (-ξ * ∑ a, ∑ b, x a k * Q b a * conj (y b k)) := by
     intro k
+
     simp only [map_mul, map_sum, map_neg]
   simp only [key, Complex.conj_re, neg_mul, Complex.neg_re, mul_neg, Finset.sum_neg_distrib, neg_inj]
   rw [← Finset.mul_sum, ← Complex.re_sum, ← Finset.mul_sum]
@@ -145,8 +189,6 @@ theorem EFR_realPt (C : Ctx S T) (w w' : WO S T) :
     hx, map_neg]
   rfl
 
-theorem symplO_eq_add (x y : WO S T) : symplO S T x y = symplOH S T x y + symplOH S T x y := ((GlobalTheory.OrientedFormLaws.symplOH_laws D S T).2.2.2.1 x y).symm
-
 theorem symplOH_finW (y y' : Matrix (Fin S.rank) (Fin T.rank) D.host.E) :
     symplOH S T (finW S T y) (finW S T y') = pairA D.host.F 0 (algebraMap D.host.F (Af D.host.F)
       (1 / 2 * Algebra.trace D.host.F D.host.E (D.host.xi0 * GlobalTheory.LatVac.hRat S T yᵀ y'ᵀ))) := by
@@ -166,7 +208,7 @@ theorem symplOH_finW (y y' : Matrix (Fin S.rank) (Fin T.rank) D.host.E) :
     unfold pairA
     exact Prod.ext (add_zero _) rfl
   apply key
-  rw [h, hp, ← map_add]
+  rw [h, hp, ← map_add (f := _)]
   congr 2
   ring
 

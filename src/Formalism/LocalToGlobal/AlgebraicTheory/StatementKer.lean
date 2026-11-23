@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.AlgebraicTheory.StatementD
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementB
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -66,12 +107,5 @@ def JetAtSplit : Prop :=
   ∀ (c' : ℕ) (x : HomE X.E a b), 0 < c' → ¬ p ∣ c' → x ∈ divLat c' (homAt S N N') →
   ∀ m : DVar X.Tau a b →₀ ℕ,
     ‖ι (A.σ₀ (A.jetK S N N' (p * c') x m))‖ * ‖ι (conj π)‖ ^ m.degree * ‖(p : ℂ_[p])‖ ^ (Fintype.card X.Tau * b * a) ≤ 1
-
-def JetAtPlace : Prop :=
-  ∀ (X : Fields) (σ₀ : X.K →+* ℂ) (p : ℕ) [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) (w : HeightOneSpectrum (𝓞 X.K)),
-    0 < Formalism.DivisionValues.vw w (p : X.K) →
-    (∀ y : X.K, y ≠ 0 → ‖ι (σ₀ y)‖ = (p : ℝ) ^ (-(Formalism.DivisionValues.vw w y : ℝ) / (Formalism.DivisionValues.vw w (p : X.K) : ℝ))) →
-  ∀ (y pb : X.K) (D R : ℕ), pb ≠ 0 → ‖ι (σ₀ y)‖ * ‖ι (σ₀ pb)‖ ^ D * ‖(p : ℂ_[p])‖ ^ R ≤ 1 →
-    y = 0 ∨ -((D : ℤ) * Formalism.DivisionValues.vw w pb) - (R : ℤ) * Formalism.DivisionValues.vw w (p : X.K) ≤ Formalism.DivisionValues.vw w y
 
 end Formalism.L2.AlgTh

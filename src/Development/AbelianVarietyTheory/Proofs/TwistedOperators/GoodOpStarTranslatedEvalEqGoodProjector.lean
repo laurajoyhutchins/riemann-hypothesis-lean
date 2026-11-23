@@ -1,10 +1,53 @@
-import Formalism.LocalToGlobal.IndefiniteReal.ZeroPartEigenvalueConvention
-import Formalism.LocalToGlobal.IndefiniteReal.EvalTieTOne
-import Formalism.LocalToGlobal.IndefiniteReal.RationalEmbedding
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowLevelMatch
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.DiscreteSeriesClassificationIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EvalActIntertwines
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ConcreteLevelAdelicSubset
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EvalActIntertwines
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.LevelSubgroupProperties
 import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.RowDictPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.S Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.AutomorphicEvaluation Formalism.L2.SG.RowDict Formalism.L2.SG.RowsJoinPinned Formalism.L2.SG.RowLevelMatch Formalism.L2.SG.PoincareInHH.PoincareSetting MeasureTheory NumberField IsDedekindDomain
 open scoped InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -119,7 +162,7 @@ theorem goodOp_star_ev : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : 
       · have hgk := hgood k hk
         have heg : eg X k = D.ntypes.e0.coeff (red k) / (vol : ℂ) := by
           unfold eg
-          rw [dif_pos ⟨hk, ⟨red k, hgk⟩⟩]
+          rw [dite_eq_left ⟨hk, ⟨red k, hgk⟩⟩]
           congr 1
           exact Formalism.L2.SG.Pf.rowDictEgWellDef_holds X k _ _ (Classical.choose_spec _) hgk
         rw [Finset.sum_eq_single (red k)]
@@ -130,12 +173,12 @@ theorem goodOp_star_ev : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : 
           exact absurd (Finset.mem_univ _) hn
       · have heg : eg X k = 0 := by
           unfold eg
-          rw [dif_neg (fun h' => hk h'.1)]
+          rw [dite_eq_right (fun h' => hk h'.1)]
         rw [heg, zero_mul]
         symm
         refine Finset.sum_eq_zero fun γ _ => Set.indicator_of_notMem (fun hm => hk ((hCmem γ k).1 hm).1) _
     rw [integral_congr_ae (Filter.Eventually.of_forall hpt)]
-    rw [integral_finset_sum _ (fun γ _ => (integrable_indicator_iff (hCmeas γ)).2
+    rw [integral_finsetSum _ (fun γ _ => (integrable_indicator_iff (hCmeas γ)).2
       (integrableOn_const (by rw [hCvol]; exact hvol_fin.ne)))]
     refine Finset.sum_congr rfl fun γ _ => ?_
     rw [integral_indicator_const _ (hCmeas γ), Measure.real, hCvol, ← hvol, Complex.real_smul]
@@ -143,6 +186,7 @@ theorem goodOp_star_ev : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : 
 
   have hstar : (star (Gd.Rg (star φ)) : L2X X) =
       ∑ γ, star (D.ntypes.e0.coeff γ) • star (X.B.R (1, s γ) (star φ)) := by
+
     rw [← conjL_apply (muX X), hRg, map_sum]
     refine Finset.sum_congr rfl fun γ _ => ?_
     rw [LinearIsometryEquiv.map_smulₛₗ, conjL_apply]

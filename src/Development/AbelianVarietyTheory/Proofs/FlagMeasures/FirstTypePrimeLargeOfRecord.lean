@@ -1,7 +1,44 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.PExtra
-import Formalism.SharpRestriction.GlobalSchurBounds.ThickPlacesCorollaryOfAnyTranslate
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExactRanksOfRecord
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions
 
 namespace GlobalTheory
@@ -26,17 +63,5 @@ theorem first_type_prime_large_of_record (D : D7) : StandardLattice.GBig D := by
       _ ≤ _ := Nat.mul_le_mul (Nat.mul_le_mul_right _ hQ) (by omega)
   rw [mul_assoc] at hq ⊢
   omega
-
-theorem exact_ranks_along_family : ∀ (eps : ℝ) (Fm : FamP eps), (∀ x (hx : Fm.x1 < x) (i : Fm.Ix x), StandardLattice.Conclusion4f (Fm.D x i) (Fm.ex x hx i).lev) → (∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, (∀ j, StandardLattice.SplitsF (Fm.D x i) ((Fm.D x i).host.g j)) ∧ ∀ u : (Fm.D x i).what₂.Word, StandardLattice.SplitsF (Fm.D x i) ((Fm.D x i).mem u).A.T ∧ StandardLattice.Mu0Tie (Fm.D x i) u) → (∃ x0 : ℝ, ∀ x ≥ x0, ∀ i : Fm.Ix x, StandardLattice.volY0 (Fm.D x i) = StandardLattice.massI (Fm.D x i) (Fm.D x i).R.r) → ∀ C0 Cg cb Cu cT CT : ℝ, PX.RanksF Fm C0 Cg cb Cu cT CT := by
-  intro eps Fm h4 ⟨a, ha⟩ ⟨b, hb⟩ C0 Cg cb Cu cT CT
-  have key : ∀ x ≥ max (max a b) (Fm.x1 + 1), ∀ i : Fm.Ix x, LocalBesselAndTopKernel.FamilyMidVolume (Fm.D x i) := by
-    intro x hx i
-    have hxa : a ≤ x := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hx
-    have hxb : b ≤ x := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hx
-    have hx1 : Fm.x1 < x := lt_of_lt_of_le (lt_add_one _) (le_trans (le_max_right _ _) hx)
-    obtain ⟨hS, hu⟩ := ha x hxa i
-    exact exact_ranks_of_record (Fm.D x i) hS (hb x hxb i) (StandardLattice.factDstar_fam Fm x hx1 i)
-      (fun u => h4 x hx1 i (first_type_prime_large_of_record _) hS u (hu u).1 (hu u).2)
-  exact ⟨max (max a b) (Fm.x1 + 1), fun x hx i _ => key x hx i⟩
 
 end GlobalTheory

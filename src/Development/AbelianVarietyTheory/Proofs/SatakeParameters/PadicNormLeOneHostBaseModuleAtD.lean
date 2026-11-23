@@ -1,14 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.CyclotomicBounds.RamifiedDiscriminants.OffSmall
-import Formalism.SharpRestriction.Divisibility.OrbitPlaces
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementJ
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.StdBases
-import Formalism.LocalToGlobal.KernelLattices.KerStd
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaZJetsThree
-import Formalism.LocalToGlobal.InertKernelTheory.StatementIota
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ColR
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocPAAAndPrimesNe
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntegralEigenCombination
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocPAAAndPrimesNe
+import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.GaussJetBounds.StatementH
+public import Formalism.GaussJetBounds.StatementN
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.IsPairFrame
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementC
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementG
+import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.IsTransSys
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementW
+public import Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero
+
+@[expose] public section
+
 open NumberField Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Ker Formalism.L2.Col Classical
 open Formalism.L2.Th1.H (cmL CmOK matH IsIsom taylorMv)
 open Formalism.L2.Th1.GD (LocNorm InMul frameM thetaLin)
@@ -39,7 +82,7 @@ theorem norm_le_one : ∀ (D : D7) (p : ℕ) [Fact p.Prime], p = D.host.d → �
   let Q : Ideal (𝓞 D.host.E) :=
     { carrier := {y | ‖φ (y : D.host.E)‖ < 1}
       add_mem' := fun {x y} hx hy => by
-        simp only [Set.mem_setOf_eq, map_add] at *
+        simp only [Set.mem_setOf_eq, map_add (f := _)] at *
         exact lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt hx hy)
       zero_mem' := by simp
       smul_mem' := fun c x hx => by

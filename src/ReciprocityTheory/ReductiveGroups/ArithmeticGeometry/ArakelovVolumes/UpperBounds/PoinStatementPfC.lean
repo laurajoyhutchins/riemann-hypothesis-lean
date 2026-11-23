@@ -1,4 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPfB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPfB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPfA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ProdCastLESucc
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.PoinPf
 
@@ -40,8 +94,6 @@ theorem cont_cpt' (X : Data E r) (x0 : Frame X.Ψ r) : Continuous (cpt X x0) := 
     split_ifs
     · first
         | fun_prop
-        | exact (EuclideanSpace.proj _).continuous
-        | exact PiLp.continuous_apply _ _ _
         | continuity
     · exact continuous_const
     · exact continuous_const
@@ -53,11 +105,10 @@ private theorem gram_continuous_comp {α : Type*} [TopologicalSpace α] (τ : E 
   refine continuous_pi fun a => continuous_pi fun b => ?_
   simp only [ReciprocityTheory.ChartRestriction.G.FD.gram, ReciprocityTheory.ChartRestriction.G.FD.hermC, ReciprocityTheory.ChartRestriction.G.FD.col,
     Matrix.of_apply]
-  refine continuous_finset_sum _ fun k _ => continuous_finset_sum _ fun l _ => ?_
+  refine continuous_finsetSum _ fun k _ => continuous_finsetSum _ fun l _ => ?_
   refine ((hf.matrix_elem k a).mul continuous_const).mul ?_
   first
     | exact Complex.continuous_conj.comp (hf.matrix_elem l b)
-    | exact (hf.matrix_elem l b).star
     | fun_prop
 
 theorem isOpen_Bset (X : Data E r) (x : Frame X.Ψ r) (ρ : ℝ) : IsOpen (Bset X x ρ) := by
@@ -134,8 +185,6 @@ private theorem apply_cc_eq_starRingEnd_apply (τ : E →+* ℂ) (z : E) : τ (c
   first
     | exact NumberField.IsCMField.complexEmbedding_complexConj τ z
     | exact NumberField.IsCMField.complexEmbedding_complexConj E τ z
-    | exact NumberField.IsCMField.complexEmbedding_complexConj (K := E) τ z
-    | simp
 
 private theorem gram_eq_transpose_mul_mul_map_conj (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E) (M : Matrix (Fin r) (Fin r) ℂ) :
     ReciprocityTheory.ChartRestriction.G.FD.gram τ G M = M.transpose * G.map τ * M.map (starRingEnd ℂ) := by
@@ -270,7 +319,6 @@ theorem key_int (X : Data E r) (la : Wt X.Ψ r) (W : Frame X.Ψ r → ℝ≥0∞
         _ ≤ supR X la W ρ x ^ 2 := by
           first
             | exact pow_le_pow_left' h1 2
-            | exact pow_le_pow_left₀ (zero_le _) h1 2
             | gcongr
     have he : e ≤ supR X la W ρ x ^ 2 * W (cpt X x w) := by
       calc e = e / W (cpt X x w) * W (cpt X x w) := (ENNReal.div_mul_cancel hW0 hWT).symm
@@ -348,8 +396,6 @@ theorem ball_of (hA : SubMeanStatement (E := E)) (hS : SumBallStatement (E := E)
       ≤ ∑' γ : X.Γ, CA ^ (1 / 2 : ℝ) * supR X la W ρ x * (∫⁻ w in Bset X x ρ0, ‖P (lact γ.1 (cpt X x w))‖ₑ ^ 2 * W (lact γ.1 (cpt X x w))) ^ (1 / 2 : ℝ) := by
         first
           | exact ENNReal.tsum_le_tsum hpt
-          | exact ENNReal.tsum_mono hpt
-          | exact tsum_mono ENNReal.summable ENNReal.summable hpt
     _ = CA ^ (1 / 2 : ℝ) * supR X la W ρ x * ∑' γ : X.Γ, (∫⁻ w in Bset X x ρ0, ‖P (lact γ.1 (cpt X x w))‖ₑ ^ 2 * W (lact γ.1 (cpt X x w))) ^ (1 / 2 : ℝ) :=
         ENNReal.tsum_mul_left
     _ ≤ CA ^ (1 / 2 : ℝ) * supR X la W ρ x * CS := by
@@ -450,7 +496,8 @@ theorem loc_of (hA : SubMeanLocStatement (E := E)) (hS : SumBallStatement (E := 
     rw [lact_rmul', hP.2 _ (lactDom X γ.2 hyd) b0 hb0]
   have hbn : 0 < ‖bchar la b0‖ := norm_pos_iff.2 (bchar_ne X la hb0)
   rw [le_div_iff₀ hbn, mul_comm, ← norm_mul, ← heq]
-  have hfin : K * I γ ^ (1 / 2 : ℝ) ≠ ⊤ := ne_top_of_le_ne_top hsumfin (ENNReal.le_tsum γ)
+  have hfin : K * I γ ^ (1 / 2 : ℝ) ≠ ⊤ :=
+    ne_top_of_le_ne_top hsumfin (le_tsum (fun δ => K * I δ ^ (1 / 2 : ℝ)) γ)
   exact (ENNReal.ofReal_le_iff_le_toReal hfin).1 (by rw [ofReal_norm]; exact hB)
 
 end

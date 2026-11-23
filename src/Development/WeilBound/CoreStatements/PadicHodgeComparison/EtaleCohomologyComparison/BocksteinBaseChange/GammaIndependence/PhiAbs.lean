@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -42,11 +89,7 @@ def hom (hlin : ∀ (c : A) (x : H) (φ : Q), κ (c • x) φ = i c * κ x φ) (
       calc F i t κ n x (y + y') φ = Ring.inverse (i t ^ n) * (i (t ^ n) * F i t κ n x (y + y') φ) := by
             rw [← mul_assoc, map_pow, Ring.inverse_mul_cancel _ (ht.pow n), one_mul]
         _ = F i t κ n x y φ + F i t κ n x y' φ := by
-            rw [← e, map_add, AddMonoidHom.add_apply, F, F, mul_add])
-
-theorem hom_apply (hlin : ∀ (c : A) (x : H) (φ : Q), κ (c • x) φ = i c * κ x φ) (ht : IsUnit (i t))
-    (hinj : ∃ n₀ : ℕ, ∀ x, β x = 0 → t ^ n₀ • x = 0) (n : ℕ) (x : N → H) (hx : ∀ y, β (x y) = t ^ n • y) (y : N) (φ : Q) :
-    hom hlin ht hinj n x hx y φ = F i t κ n x y φ := rfl
+            rw [← e, map_add (f := _), AddMonoidHom.add_apply, F, F, mul_add])
 
 theorem hom_key (hlin : ∀ (c : A) (x : H) (φ : Q), κ (c • x) φ = i c * κ x φ) (ht : IsUnit (i t))
     (hinj : ∃ n₀ : ℕ, ∀ x, β x = 0 → t ^ n₀ • x = 0) (n : ℕ) (x : N → H) (hx : ∀ y, β (x y) = t ^ n • y)
@@ -77,12 +120,5 @@ variable {ρ g}
 theorem ext_tmul (hg : ∀ (r : ℤ_[p]) (v : T) (f : Q), g (r • v) f = ρ (algebraMap ℤ_[p] ℚ_[p] r) * g v f)
     (z : ℚ_[p]) (v : T) (f : Q) : ext ρ g hg (z ⊗ₜ v) f = ρ z * g v f := by
   simp [ext]
-
-theorem ext_smul (hg : ∀ (r : ℤ_[p]) (v : T) (f : Q), g (r • v) f = ρ (algebraMap ℤ_[p] ℚ_[p] r) * g v f)
-    (z : ℚ_[p]) (w : ℚ_[p] ⊗[ℤ_[p]] T) (f : Q) : ext ρ g hg (z • w) f = ρ z * ext ρ g hg w f := by
-  induction w using TensorProduct.induction_on with
-  | zero => simp
-  | tmul a v => rw [TensorProduct.smul_tmul', ext_tmul, ext_tmul, smul_eq_mul, map_mul, mul_assoc]
-  | add u w hu hw => rw [smul_add, map_add, AddMonoidHom.add_apply, hu, hw, map_add, AddMonoidHom.add_apply, mul_add]
 
 end CrystallineSemistableComparison.ExtV

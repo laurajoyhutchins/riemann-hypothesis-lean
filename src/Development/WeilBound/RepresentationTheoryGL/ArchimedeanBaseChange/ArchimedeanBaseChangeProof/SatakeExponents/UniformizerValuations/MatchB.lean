@@ -1,5 +1,43 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameL
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchT
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.FrameL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.MatchT
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,12 +56,12 @@ open PositivityTheory.Rg.BcB.F.MT (MatchLin)
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 def congK (m : ℕ) (w : Pl E) (k : ℕ) : Set (GLw m w) :=
-  {g | g ∈ GlobalTheory.LFun.KGL w m ∧ ∀ i j, Valued.v (g.val i j - (1 : Matrix (Fin m) (Fin m) (w.adicCompletion E)) i j) ≤
+  {g | g ∈ GlobalTheory.LFun.KGL w (n := m) ∧ ∀ i j, Valued.v (g.val i j - (1 : Matrix (Fin m) (Fin m) (w.adicCompletion E)) i j) ≤
     WithZero.exp (-(k : ℤ))}
 
 def pairIndicatorMatch (_n a b : ℕ) (w : Pl E) (k : ℕ) (y : GLw a w × GLw b w) : ℂ :=
   ((-((Real.sqrt (qV E w : ℝ) : ℝ) : ℂ)) ^ (k * a * b))⁻¹ *
-    (if y.1 ∈ GlobalTheory.LFun.KGL w a ∧ nrmL a w y.1 ∈ congK a w k ∧ y.2 ∈ GlobalTheory.LFun.KGL w b ∧ nrmL b w y.2 ∈ congK b w k then 1
+    (if y.1 ∈ GlobalTheory.LFun.KGL w (n := a) ∧ nrmL a w y.1 ∈ congK a w k ∧ y.2 ∈ GlobalTheory.LFun.KGL w (n := b) ∧ nrmL b w y.2 ∈ congK b w k then 1
       else 0)
 
 def LponeIdem : Prop :=
@@ -32,7 +70,7 @@ def LponeIdem : Prop :=
 
 def FixIdem : Prop :=
   ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) (w : Pl E) (L : Subgroup (GLw a w × GLw b w)),
-    IsOpen (L : Set (GLw a w × GLw b w)) → L ≤ (GlobalTheory.LFun.KGL w a).prod (GlobalTheory.LFun.KGL w b) →
+    IsOpen (L : Set (GLw a w × GLw b w)) → L ≤ (GlobalTheory.LFun.KGL w (n := a)).prod (GlobalTheory.LFun.KGL w (n := b)) →
     ∀ φ : GLw a w × GLw b w → ℂ, IsHecke L φ → mconv φ (idem L) = φ ∧ mconv (idem L) φ = φ
 
 def MatchBadS : Prop :=
@@ -50,7 +88,6 @@ def MatchUnitI : Prop :=
     Match n a (n - a) w 1 ((KL n w : Set (UL n w)).indicator 1) (idem (K2 a (n - a) w))
 
 def MatchBadSOf : Prop := M3 → LponeIdem → MatchBadS
-def MatchBadIOf : Prop := M2 → LponeIdem → MatchLin → MatchBadI
 def MatchUnitIOf : Prop := M1 → MatchUnitI
 
 end PositivityTheory.Rg.BcB.F.MB

@@ -1,11 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.BetaAddRight
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.BetaAddRight
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.BetaAtAddLeftAndDiagEqTwoOrder
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsGoodIntegral
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsProperOfSubsingleton
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.PsiCoordExistsUniqueUpToUnitLocal
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.BetaAtAddLeftAndDiagEqTwoOrder
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsGoodIntegral
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsProperOfSubsingleton
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,17 +99,6 @@ theorem vPsiAt_eq (A : DatAt Y P) (χ : A.Ylat) : (∃ r, PsiCoord A.U.D.toPre �
   have h4 : ‖fC A u‖ = 1 := by nlinarith [norm_nonneg (fC A u), norm_nonneg (fC A (↑u⁻¹ : A.R))]
   simp only [vPsiAt, dif_pos hex]
   rw [hu, map_mul, norm_mul, h4, one_mul]
-
-theorem natCast_mem (hp : 1 < p) (A : DatAt Y P) : (p : A.R) ∈ maximalIdeal A.R := by
-  rw [mem_maximalIdeal, mem_nonunits_iff]
-  intro hu
-  obtain ⟨u, hu'⟩ := hu.exists_right_inv
-  have h := congrArg (fun x => ‖fC A x‖) hu'
-  simp only [map_mul, map_natCast, map_one, norm_mul, norm_one, C.norm_p] at h
-  have hp' : (1 : ℝ) < p := by exact_mod_cast hp
-  have h4 : (p : ℝ)⁻¹ < 1 := inv_lt_one_of_one_lt₀ hp'
-  have h5 : (0 : ℝ) < (p : ℝ)⁻¹ := by positivity
-  nlinarith [norm_le A u]
 
 theorem betaAdd (Y : Model Xo c β) (p : ℕ) : BetaAdd Y p := fun _ _ A =>
   (BetaAdd.main A.R A.U.D _ _ p A.normal (norm_le A) (coord_ne_zero A)).1

@@ -1,5 +1,70 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.RegularUFDLocalization
+module
+
+public import Mathlib.Algebra.Module.StablyFree.Basic
+public import Mathlib.CategoryTheory.Abelian.Projective.Dimension
+public import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.LinearAlgebra.ExteriorPower.Basic
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.RegularLocalDomain
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.RegularUFDLocalization
+import GroundTheory.ArithmeticGeometry.SchemeCohomology.RegularUFDSerre
+import Mathlib.Algebra.Category.ModuleCat.Projective
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+public import Mathlib.Algebra.Module.LocalizedModule.Exact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.ExteriorPower.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.UFD
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -36,7 +101,7 @@ theorem isPrincipal_of_isStablyFree {D : Type u} [CommRing D] [IsDomain D] [IsNo
   obtain ⟨N, _, _, _, _, hfree⟩ := IsStablyFree.exist_free_prod D P
   let n := Module.finrank D N
 
-  let 𝔭 : PrimeSpectrum D := ⟨⊥, Ideal.bot_prime⟩
+  let 𝔭 : PrimeSpectrum D := ⟨⊥, Ideal.isPrime_bot⟩
   have h1 : rankAtStalk P 𝔭 = 1 := by
     let Dp := Localization.AtPrime 𝔭.asIdeal
     let pc := 𝔭.asIdeal.primeCompl
@@ -74,8 +139,8 @@ theorem isPrincipal_of_isStablyFree {D : Type u} [CommRing D] [IsDomain D] [IsNo
   · rw [Submodule.span_le, Set.singleton_subset_iff]
     exact (f 1).2
 
-open CategoryTheory in
 
+open CategoryTheory in
 theorem isStablyFree_localizedModule {R : Type u} [CommRing R] [IsLocalRing R] [IsNoetherianRing R]
     (T : Submonoid R) (k : ℕ) (M : Type u) [AddCommGroup M] [Module R M] [Module.Finite R M]
     (hM : HasProjectiveDimensionLT (ModuleCat.of R M) (k + 1))
@@ -251,7 +316,7 @@ theorem IsRegularLocalRing.uniqueFactorizationMonoid (R : Type u) [CommRing R]
   let f := Algebra.linearMap S A
   let gQ := Q.toLocalized' A T f
   have hloc : Q.localized' A T f = P := by
-    rw [Ideal.localized'_eq_map]; exact IsLocalization.map_comap T A P
+    rw [Ideal.localized'_eq_map]; exact IsLocalization.map_under T A P
   let eQ : LocalizedModule T Q ≃ₗ[A] P :=
     ((IsLocalizedModule.linearEquiv T (LocalizedModule.mkLinearMap T Q) gQ
       ).extendScalarsOfIsLocalization T A).trans (LinearEquiv.ofEq _ _ hloc)

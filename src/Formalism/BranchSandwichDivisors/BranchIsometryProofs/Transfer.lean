@@ -1,8 +1,65 @@
-import Mathlib
-import Formalism.BranchSandwichDivisors.StatementL
-import Formalism.BranchSandwichDivisors.BranchIsometryProofs.TransferMean
-import Formalism.MeanHeightDescent.AverageDegreeBounds.GoodBadCut
-import Formalism.HarderNarasimhan.ShiftInvariance
+module
+
+public import Formalism.BranchSandwichDivisors.StatementL
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Formalism.BranchSandwichDivisors.BranchIsometryProofs.TransferMean
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.MuChar
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SatBasic
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SlopeIneqMean
+public import Formalism.MeanHeightDescent.AverageDegreeBounds.GoodBadCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Chebyshev
+
+@[expose] public section
 
 open Module NumberField
 open scoped Matrix
@@ -121,7 +178,7 @@ theorem row_norm_le {n : ℕ} (M : Fin n → Matrix ι ι ℂ) (c : ℝ) (hc : 0
   have hdec : LinearMap.toContinuousLinearMap (Matrix.toEuclideanLin R) z =
       ∑ i, (c : ℂ) • Matrix.toEuclideanLin (M i) (zs i) := by
     ext k
-    simp [zs, Matrix.toEuclideanLin_apply, Matrix.mulVec, dotProduct, Fintype.sum_sigma, hR,
+    simp [zs, Matrix.toLpLin_apply, Matrix.mulVec, dotProduct, Fintype.sum_sigma, hR,
       Finset.mul_sum, mul_assoc, Finset.sum_apply]
   have hnorm : ∑ i, ‖zs i‖ ^ 2 = ‖z‖ ^ 2 := (sigma_norm_sq z).symm
   have hzs : ∑ i, ‖zs i‖ ≤ Real.sqrt n * ‖z‖ := by
@@ -155,7 +212,7 @@ theorem col_norm_le {n : ℕ} (M : Fin n → Matrix ι ι ℂ) (c : ℝ) (hc : 0
       (c : ℂ) • Matrix.toEuclideanLin (M i) z := by
     intro i
     ext j
-    simp [Matrix.toEuclideanLin_apply, Matrix.mulVec, dotProduct, hC, Finset.mul_sum, mul_assoc]
+    simp [Matrix.toLpLin_apply, Matrix.mulVec, dotProduct, hC, Finset.mul_sum, mul_assoc]
   have hsq2 : ‖LinearMap.toContinuousLinearMap (Matrix.toEuclideanLin C) z‖ ^ 2 ≤
       (c * Real.sqrt n * ‖z‖) ^ 2 := by
     rw [sigma_norm_sq]

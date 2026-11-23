@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveInvariants
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveDefs
+public import Mathlib.Algebra.Field.ZMod
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -22,11 +69,6 @@ def funRep (Y : Type*) [MulAction Γ Y] (σ : Representation k Γ N) : Represent
     ext F y
     simp [mul_smul]
 
-@[simp]
-theorem funRep_apply (Y : Type*) [MulAction Γ Y] (σ : Representation k Γ N) (γ : Γ) (F : Y → N)
-    (y : Y) : funRep Y σ γ F y = σ γ (F (γ⁻¹ • y)) :=
-  rfl
-
 end Fun
 
 section Pi
@@ -42,12 +84,6 @@ def piFamilyRep {ι : Type*} (V : ι → Type*) [∀ i, AddCommMonoid (V i)] [�
   map_mul' γ δ := by
     ext
     simp
-
-@[simp]
-theorem piFamilyRep_apply {ι : Type*} (V : ι → Type*) [∀ i, AddCommMonoid (V i)]
-    [∀ i, Module k (V i)] (ρ : ∀ i, Representation k Γ (V i)) (γ : Γ) (x : ∀ i, V i) (i : ι) :
-    piFamilyRep V ρ γ x i = ρ i γ (x i) :=
-  rfl
 
 end Pi
 

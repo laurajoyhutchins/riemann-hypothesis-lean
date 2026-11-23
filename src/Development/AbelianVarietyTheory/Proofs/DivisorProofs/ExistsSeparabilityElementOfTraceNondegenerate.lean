@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Trace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
+
+@[expose] public section
+
 open NumberField
 open scoped TensorProduct
 
@@ -28,6 +80,7 @@ noncomputable def dualD (l : Fin n) : A := ∑ m, (gram b).adjugate m l • b m
 
 lemma trL_mul_dualD (u : A) (l : Fin n) :
     trL (u * dualD b l) = ∑ m, (gram b).adjugate m l * trL (u * b m) := by
+
   simp only [dualD, Finset.mul_sum, mul_smul_comm, map_sum, map_zsmul, smul_eq_mul]
 
 lemma trL_basis_mul_dualD (k l : Fin n) :
@@ -42,6 +95,7 @@ lemma trL_basis_mul_dualD (k l : Fin n) :
 lemma det_mul_repr (u : A) (k : Fin n) :
     (gram b).det * b.repr u k = trL (u * dualD b k) := by
   conv_rhs => rw [← b.sum_repr u]
+
   simp only [Finset.sum_mul, smul_mul_assoc, map_sum, map_zsmul, trL_basis_mul_dualD, smul_eq_mul]
   simp [mul_comm]
 
@@ -61,8 +115,9 @@ lemma eq_zero_of_trL_mul_basis (v : A) (hv : ∀ k, trL (v * b k) = 0) : v = 0 :
   intro y
   rw [← trL_apply]
   conv_lhs => rw [← b.sum_repr y]
+
   simp only [Finset.mul_sum, mul_smul_comm, map_sum, map_zsmul, hv, smul_zero,
-    Finset.sum_const_zero]
+  Finset.sum_const_zero]
 
 lemma eq_zero_of_trL_basis_mul (v : A) (hv : ∀ k, trL (b k * v) = 0) : v = 0 :=
   eq_zero_of_trL_mul_basis b hnd v fun k => by rw [trL_comm]; exact hv k
@@ -71,8 +126,9 @@ lemma det_smul_eq' (u : A) : (gram b).det • u = ∑ l, trL (b l * u) • dualD
   rw [← sub_eq_zero]
   apply eq_zero_of_trL_basis_mul b hnd
   intro k
+
   simp only [mul_sub, Finset.mul_sum, mul_smul_comm, map_sub, map_sum, map_zsmul, smul_eq_mul,
-    trL_basis_mul_dualD, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  trL_basis_mul_dualD, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
   ring
 
 lemma det_ne_zero : (gram b).det ≠ 0 := by
@@ -84,6 +140,7 @@ lemma det_ne_zero : (gram b).det ≠ 0 := by
     intro l
     have := congrFun hv l
     simp only [Matrix.vecMul, dotProduct, gram, Matrix.of_apply, Pi.zero_apply] at this
+
     simp only [Finset.sum_mul, smul_mul_assoc, map_sum, map_zsmul, smul_eq_mul]
     exact this
   funext k
@@ -93,6 +150,7 @@ lemma sum_mul_dualD : ∑ k, b k * dualD b k = ((gram b).det : A) := by
   rw [← sub_eq_zero]
   apply eq_zero_of_trL_mul_basis b hnd
   intro j
+
   rw [sub_mul, map_sub, Finset.sum_mul, map_sum]
   have h1 : ∀ k, trL (b k * dualD b k * b j) = (gram b).det * b.repr (b j * b k) k := by
     intro k
@@ -126,8 +184,8 @@ end Nondeg
 
 end GlobalTheory.TraceCasimir
 
-open GlobalTheory.TraceCasimir in
 
+open GlobalTheory.TraceCasimir in
 theorem GlobalTheory.exists_separability_element_of_trace_nondegenerate :
     ∀ (A : Type) [Ring A] [Module.Free ℤ A] [Module.Finite ℤ A],
       (∀ x : A, (∀ y : A, LinearMap.trace ℤ A (LinearMap.mulLeft ℤ (x * y)) = 0) → x = 0) →

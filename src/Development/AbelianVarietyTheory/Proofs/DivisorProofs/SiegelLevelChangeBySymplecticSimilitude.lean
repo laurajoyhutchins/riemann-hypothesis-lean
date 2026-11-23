@@ -1,12 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SRelOneOneIff
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothCommGroupSchemeEqOfPowEqOfClosedPoint
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSiegelObjectOfDescendedData
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemeGlueAffineCover
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsSiegelObjectOfDescendedData
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothCommGroupSchemeEqOfPowEqOfClosedPoint
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnitOnInjectiveOfCommRing
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemeGlueAffineCover
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnitOnInjectiveOfCommRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import Development.AbelianVarietyTheory.Definitions.Divisors.SRelOneOneIff
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.ZM GlobalTheory.SiegLev GlobalTheory.SiegelTor
@@ -65,6 +116,7 @@ theorem similitude_bij_mod (h N m : ℕ) (T : (Fin h ⊕ Fin h → ℤ) →ₗ[�
   have hT_sum : ∀ a : Fin h ⊕ Fin h → ℤ, T a = ∑ j, a j • T (Pi.single j 1) := by
     intro a
     conv_lhs => rw [← Finset.univ_sum_single a]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [show Pi.single j (a j) = a j • (Pi.single j 1 : Fin h ⊕ Fin h → ℤ) by
@@ -138,7 +190,7 @@ theorem part_one (h N : ℕ) (B : Type) [CommRing B] (b : TBase B N) (hN : Odd N
   have lev_mod : ∀ a c, C.lev (a + N • c) = C.lev a := by
     intro a c; rw [C.lev_add, lev_nsmul, C.lev_tors, _root_.mul_one]
   refine ⟨{ C with
-      lev := fun a => C.lev (T a), lev_add := fun a c => (by rw [map_add]; exact C.lev_add _ _),
+      lev := fun a => C.lev (T a), lev_add := fun a c => (by rw [map_add (f := _)]; exact C.lev_add _ _),
       lev_tors := fun a => C.lev_tors _, geom := ?_ }, 𝟙 _, 𝟙 _, ?_, ⟨by simp, by simp⟩,
       GlobalTheory.ThetaAffineGlue.lbIso_pull_id C.isLB, fun x => Category.comp_id _⟩
   · intro k _ _ x β z hx hz
@@ -190,7 +242,7 @@ theorem part_two (h N : ℕ) (B : Type) [CommRing B] (b : TBase B N) (hN : Odd N
       AddMonoidHom.mk' (fun a => Additive.ofMul (ψ (p a))) (fun a c => by rw [p_add, map_mul]; rfl)
     let f₂ : (Fin h ⊕ Fin h → ℤ) →+ Additive (Tx ⟶ C.A) :=
       AddMonoidHom.mk' (fun a => Additive.ofMul (toUnit Tx ≫ C.lev (T a)))
-        (fun a c => by rw [map_add, C.lev_add, MonObj.comp_mul]; rfl)
+        (fun a c => by rw [map_add (f := _), C.lev_add, MonObj.comp_mul]; rfl)
     have hext : f₁ = f₂ := by
       refine AddMonoidHom.functions_ext _ _ _ fun i k => ?_
       rw [show (Pi.single i k : Fin h ⊕ Fin h → ℤ) = k • Pi.single i 1 by

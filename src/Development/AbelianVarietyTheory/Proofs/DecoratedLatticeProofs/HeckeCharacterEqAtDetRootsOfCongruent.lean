@@ -1,14 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevChiEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftsInvOne
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemIffOfCarries
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.TupleCharacterAtBasePointDetRootRootOfUnity
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsDetRoot
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.DetNormOneGen
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ReferenceCharactersFactorTame
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MidChart
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.DetNormOneGen
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ContinuousCharacterFiniteOrderIntegralUnits
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.TupleCharacterAtBasePointDetRootRootOfUnity
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TrueColumnChoicesHeckeCharReferenceEqOne
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteDimensionalMram
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Forms Formalism.UG
 open NumberField IsDedekindDomain Matrix MeasureTheory GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.MixPer GlobalTheory.Core.Rk GlobalTheory.AdForm
 open scoped TensorProduct Classical
@@ -127,7 +165,7 @@ theorem natCast_le_one {K Γ : Type} [Field K] [LinearOrderedCommGroupWithZero �
     rw [Nat.cast_succ]
     exact (v.map_add _ _).trans (max_le ih (le_of_eq v.map_one))
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_root_same_value : ∀ (D : D7) (c : (AE D)ˣ →* Circle), IsHeckeChar D c → ∃ N₀ : ℕ, ∀ (V : HSp D) {n : ℕ} (hn : V.rank = n) (g w : GA D V), w ∈ GfC V → (∀ (P : HeightOneSpectrum (𝓞 D.host.E)) (r s : Fin n), Valued.v (adAt D.host.F P (finM V hn w r s - (1 : Matrix (Fin n) (Fin n) (EF D)) r s)) ≤ WithZero.exp (-(N₀ : ℤ))) → ∀ x, IsDetRoot V g x → ∃ x₁, IsDetRoot V (g * w) x₁ ∧ c x₁ = c x := by
   intro D c hc
@@ -190,7 +228,7 @@ theorem exists_root_same_value : ∀ (D : D7) (c : (AE D)ˣ →* Circle), IsHeck
   have hrt : (1 + d) * h2 = 1 + (N : AE D) * ((d - 1) * hK) := by
     linear_combination (-(d - 1)) * hNK + h2m
   have hroot : (1 + d) * h2 = d * sigR (AF D.host.F) D.sp.cm.sig ((1 + d) * h2) := by
-    rw [map_mul, map_add, map_one, hσ2]
+    rw [map_mul, map_add (f := _), map_one, hσ2]
     linear_combination (-h2) * hnorm
 
   have hv : ∀ P : HeightOneSpectrum (𝓞 D.host.E),
@@ -217,7 +255,7 @@ theorem exists_root_same_value : ∀ (D : D7) (c : (AE D)ˣ →* Circle), IsHeck
         _ = 1 := by rw [mul_comm, hvK]
     refine ⟨ht1, ?_⟩
     change Valued.v (φ ((1 + d) * h2)) = 1
-    rw [hrt, map_add, map_one, map_mul, map_natCast]
+    rw [hrt, map_add (f := _), map_one, map_mul, map_natCast]
     apply Valuation.map_one_add_of_lt
     rw [map_mul]
     calc Valued.v ((N : P.adicCompletion D.host.E)) * Valued.v (φ ((d - 1) * hK))
@@ -226,7 +264,7 @@ theorem exists_root_same_value : ∀ (D : D7) (c : (AE D)ˣ →* Circle), IsHeck
   have hinfr : infPart D ((1 + d) * h2) = 1 := by
     have := congrArg (infPart D) h2m
     rw [map_mul, map_ofNat, map_one] at this
-    rw [map_mul, map_add, map_one, hinf]
+    rw [map_mul, map_add (f := _), map_one, hinf]
     linear_combination this
   have hru : IsUnit ((1 + d) * h2) := isUnit_of_parts D _ hinfr (fun P => (hv P).2)
   have hcr : c hru.unit = 1 := by
@@ -243,7 +281,7 @@ theorem exists_root_same_value : ∀ (D : D7) (c : (AE D)ˣ →* Circle), IsHeck
       rw [map_mul, map_mul] at h3
       rw [h3, mul_one] at e2
       exact e2.le
-    · rw [IsUnit.unit_spec, hrt, map_add, map_one, add_sub_cancel_left, map_mul, map_natCast, nsmul_eq_mul]
+    · rw [IsUnit.unit_spec, hrt, map_add (f := _), map_one, add_sub_cancel_left, map_mul, map_natCast, nsmul_eq_mul]
   refine ⟨x * hru.unit, ?_, ?_⟩
   · unfold IsDetRoot at hx ⊢
     have hmt : (matHom V (g * w)).1.det =

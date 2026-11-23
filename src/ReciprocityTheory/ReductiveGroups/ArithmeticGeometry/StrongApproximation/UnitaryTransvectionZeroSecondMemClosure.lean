@@ -1,5 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.StrongApproximation.EichAlongSub
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.StrongApproximation.EichAlongSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.StrongApproximation.EichPreserves
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.SA
 
@@ -8,9 +57,10 @@ open Matrix
 variable {ι : Type*} [Fintype ι] [DecidableEq ι] {K : Type*} [CommRing K] {σ : K →+* K}
   {J : Matrix ι ι K}
 
-variable (σ J) in
 
-def hm (e f : ι → K) (M : Matrix (Fin 2) (Fin 2) K) : Matrix ι ι K :=
+variable (σ J) in
+def hm (σ : K →+* K) (J : Matrix ι ι K) (e f : ι → K)
+    (M : Matrix (Fin 2) (Fin 2) K) : Matrix ι ι K :=
   1 + (M 0 0 - 1) • vecMulVec e (J *ᵥ (σ ∘ f)) + M 0 1 • vecMulVec e (J *ᵥ (σ ∘ e))
     + M 1 0 • vecMulVec f (J *ᵥ (σ ∘ f)) + (M 1 1 - 1) • vecMulVec f (J *ᵥ (σ ∘ e))
 
@@ -95,20 +145,17 @@ theorem unitaryTransvection_zero_second (e f : ι → K) (c : K) : eich σ J f 0
   try ring
 
 variable (σ J) in
-theorem tor_hm (e f : ι → K) (l m : K) : tor σ J e f l m = hm σ J e f !![l, 0; 0, m] := by
+theorem tor_hm (e f : ι → K) (l m : K) :
+    tor (σ := σ) (J := J) e f l m = hm σ J e f !![l, 0; 0, m] := by
   ext i j
   simp [tor, hm, vecMulVec_apply]
   try ring
 
 variable (σ J) in
-theorem tor_swap (e f : ι → K) (l m : K) : tor σ J e f l m = tor σ J f e m l := by
-  have matrix_eq_of_mulVec_eq_lemma_2 {ι : Type _} [Fintype ι] [DecidableEq ι] {K : Type _} [CommRing K] {A B : Matrix ι ι K} (h : ∀ x, A *ᵥ x = B *ᵥ x) : A = B := by
-    first
-      | exact Matrix.ext_of_mulVec_single fun i => h _
-      | exact Matrix.toLin'.injective (LinearMap.ext fun x => by simpa using h x)
-  refine matrix_eq_of_mulVec_eq_lemma_2 fun x => ?_
-  rw [tor_mulVec, tor_mulVec]
-  abel
+theorem tor_swap (e f : ι → K) (l m : K) :
+    tor (σ := σ) (J := J) e f l m = tor (σ := σ) (J := J) f e m l := by
+  unfold tor
+  exact add_right_comm _ _ _
 
 private theorem matrix_fin_two_eq_of_entries_eq {α : Type*} {p q r s p' q' r' s' : α} (h1 : p = p') (h2 : q = q')
     (h3 : r = r') (h4 : s = s') : !![p, q; r, s] = !![p', q'; r', s'] := by
@@ -136,7 +183,8 @@ theorem unitaryTransvection_zero_second_mem_closure {c : K} (hc : σ c = -c) : e
   ring
 
 theorem tor_mem_closure {δ di l li : K} (hσδ : σ δ = -δ) (hδ : δ * di = 1) (hl : σ l = l)
-    (hli : l * li = 1) : tor σ J e f l li ∈ Submonoid.closure (eichSet σ J e f) := by
+    (hli : l * li = 1) :
+    tor (σ := σ) (J := J) e f l li ∈ Submonoid.closure (eichSet σ J e f) := by
   have hmul : ∀ A B : Matrix (Fin 2) (Fin 2) K,
       hm σ J e f A ∈ Submonoid.closure (eichSet σ J e f) →
       hm σ J e f B ∈ Submonoid.closure (eichSet σ J e f) →
@@ -175,7 +223,7 @@ theorem tor_mem_closure {δ di l li : K} (hσδ : σ δ = -δ) (hδ : δ * di = 
   · rw [map_neg, hσδ]
   · linear_combination hδ
 
-theorem tor_det (l m : K) : (tor σ J e f l m).det = l * m := by
+theorem tor_det (l m : K) : (tor (σ := σ) (J := J) e f l m).det = l * m := by
   rw [tor_hm, hm_det hσ hJ he hff hef, Matrix.det_fin_two_of]
   ring
 

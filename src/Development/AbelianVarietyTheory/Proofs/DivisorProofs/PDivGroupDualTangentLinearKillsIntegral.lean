@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantCoeffNmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartEvNmulPowSelf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ChartEvNmulPowSelf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantCoeffNmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
 set_option autoImplicit false
@@ -22,7 +67,7 @@ theorem eq_zero_of_forall_dvd [IsHausdorff (Ideal.span {(p : O)}) O] (x : O)
 variable {G : PDivGroup p O}
 
 theorem exists_form (n : ℕ) (w : G.dual.omega) :
-    ∃ φ : CartierDual O (G.A n), PDiv.dUnit O φ = w.1 n ∧ φ 1 = 0 := by
+    ∃ φ : CartierDual O (G.A n), PDiv.dUnit (R := O) φ = w.1 n ∧ φ 1 = 0 := by
   obtain ⟨φ, hφ⟩ := AugCot.d_surjective _ (w.1 n)
   refine ⟨φ - algebraMap O _ (φ 1), ?_, ?_⟩
   · change AugCot.d _ (φ - algebraMap O _ (φ 1)) = _
@@ -36,7 +81,7 @@ theorem exists_form (n : ℕ) (w : G.dual.omega) :
     rw [h1, sub_self]
 
 theorem lie_eq_zero [IsHausdorff (Ideal.span {(p : O)}) O] (l : G.dual.Lie)
-    (h : ∀ (n : ℕ) (w : G.dual.omega) (φ : CartierDual O (G.A n)), PDiv.dUnit O φ = w.1 n →
+    (h : ∀ (n : ℕ) (w : G.dual.omega) (φ : CartierDual O (G.A n)), PDiv.dUnit (R := O) φ = w.1 n →
       φ 1 = 0 → (p : O) ^ n ∣ l w) : l = 0 :=
   LinearMap.ext fun w => eq_zero_of_forall_dvd _ fun n => by
     obtain ⟨φ, hφ, h1⟩ := exists_form n w
@@ -55,7 +100,7 @@ theorem constantCoeff_subst_of {a : σ → MvPowerSeries τ R} (ha0 : ∀ i, con
       have hC : (C (constantCoeff f) : MvPowerSeries σ R) =
           algebraMap R (MvPowerSeries σ R) (constantCoeff f) := by
         rw [MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self, RingHom.id_apply]
-      rw [subst_add hs, map_add, constantCoeff_subst_eq_zero hs ha0 hg, add_zero,
+      rw [subst_add hs, map_add (f := _), constantCoeff_subst_eq_zero hs ha0 hg, add_zero,
         ← coe_substAlgHom hs, hC, AlgHom.commutes, MvPowerSeries.algebraMap_apply]
       simp
 
@@ -97,7 +142,7 @@ theorem ev_subst_eq (n : ℕ) (a : Fin d → MvPowerSeries (Fin d) O)
       subst a (s - (P : MvPowerSeries (Fin d) O)) := by
     rw [← subst_add hs, add_sub_cancel]
   have hz' : (fun i => c.ev n (a i)) = 0 := funext hz
-  rw [e, map_add, subst_coe, ← AlgHom.comp_apply, MvPolynomial.comp_aeval, hy, hz',
+  rw [e, map_add (f := _), subst_coe, ← AlgHom.comp_apply, MvPolynomial.comp_aeval, hy, hz',
     MvPolynomial.aeval_zero, Algebra.smul_def, map_pow, map_natCast, MvPolynomial.constantCoeff_eq,
     hP, coeff_trunc', if_pos (by simp), coeff_zero_eq_constantCoeff_apply]
 
@@ -127,7 +172,7 @@ theorem lie_eq_zero_of_integral [IsHausdorff (Ideal.span {(p : O)}) O]
     rw [Algebra.algebraMap_eq_smul_one, map_smul, h1, smul_zero]
   have e : φ (c.ev n (((p ^ n : ℕ) : O) • s0 - subst (nmul c.μ (p ^ n)) s0)) =
       (p : O) ^ n * (φ (c.ev n s0) - φ y) := by
-    rw [map_sub, map_smul, hy, map_sub, map_smul, map_add, map_smul, hφa, smul_eq_mul, smul_eq_mul]
+    rw [map_sub, map_smul, hy, map_sub, map_smul, map_add (f := _), map_smul, hφa, smul_eq_mul, smul_eq_mul]
     push_cast
     ring
   rw [e] at h2
@@ -203,7 +248,7 @@ theorem isLie_add_smul (hinj : Function.Injective (algebraMap O E))
   refine ⟨sf + a • sg, by rw [hmap, defect_add_smul, hsf, hsg], fun w φ hφ => ?_⟩
   have h1 := hf.2 n w φ sf hφ hsf
   have h2 := hg.2 n w φ sg hφ hsg
-  rw [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, map_add,
+  rw [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, map_add (f := _),
     map_smul, smul_eq_mul]
   have h3 := dvd_add h1 (dvd_mul_of_dvd_right h2 a)
   convert h3 using 1

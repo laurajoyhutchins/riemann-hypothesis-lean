@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PhiCSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValuationMultiplicationInvariance
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.WchartLePreimage
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,22 +58,5 @@ def ETSpanStatement : Prop :=
     (∀ a : Y, ∃ u ∈ Submodule.span (𝓞 E) (Set.range y), ∃ t : Y, a = u + R' • t) →
     ∀ a : Y, ∃ n : ℕ, 0 < n ∧
       n • a ∈ Submodule.span (𝓞 E) (Set.range fun b => y b + R' • z b)
-
-def ETPointStatement : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] (cj : E → E),
-    (∀ c : 𝓞 E, ∃ c' : 𝓞 E, (c' : E) = cj c) →
-    ∀ w₀ : 𝓞 E, (w₀ : E) + cj w₀ = 1 →
-    ∀ (V : Type) [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] (ϖ : V), Irreducible ϖ →
-    ∀ (D : DegData V (maximalIdeal V)) [Module (𝓞 E) D.toPre.X] (Q : D.toPre.X → ℤ), QForm.IsQ D.toPre ϖ Q →
-    ∀ β : SymB cj D.toPre.X, (∀ a b, (β : D.toPre.X →ₗ[ℤ] D.toPre.X →ₗ[ℤ] ℝ) a b = QForm.bOf D.toPre Q a b) →
-    (∀ a, (β : D.toPre.X →ₗ[ℤ] D.toPre.X →ₗ[ℤ] ℝ) a a = 2 * (Q a : ℝ)) →
-    (∀ a, 0 ≤ (β : D.toPre.X →ₗ[ℤ] D.toPre.X →ₗ[ℤ] ℝ) a a) →
-    ∀ (F : Type) [Field F] [Algebra (FractionRing V) F] (v : AddValuation F (WithTop ℚ)), ValOver ϖ F v →
-    ∀ (R' R₀ : ℕ), 2 ≤ R' → 2 ≤ R₀ → R₀ ∣ R' → ∀ (r : ℕ) (y : Fin r → D.toPre.X),
-      (∀ a : D.toPre.X, ∃ u ∈ Submodule.span (𝓞 E) (Set.range y), ∃ t : D.toPre.X, a = u + R₀ • t) →
-    ∀ (s : Fin r → Fam D.toPre F (R' ^ 2)) (w : Fin r → F),
-      (∀ b (α : D.toPre.X), (∀ z : D.toPre.X, α ≠ y b + R' • z) → ∀ j, ((s b).s α).f j = 0) →
-      (∀ b, NuGe D Q F v (R' ^ 2) (s b) 0) → (∀ b, ValAt0 D F v (R' ^ 2) (s b) (w b)) →
-      ∀ q : ℚ, (q : ℝ) ≤ phiC cj β / (R' ^ 2 : ℝ) → ((q : ℚ) : WithTop ℚ) ≤ ∑ b, v (w b)
 
 end Formalism.MainNotions.ModuliIntegralCharts.H1

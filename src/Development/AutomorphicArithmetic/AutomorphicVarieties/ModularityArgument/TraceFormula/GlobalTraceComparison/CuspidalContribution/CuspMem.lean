@@ -1,6 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.CuspidalContribution.LevShrink
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.CuspSupportOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.StrongMultiplicityOne.Strong
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.CuspidalContribution.LevShrink
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.CuspidalTwists.Reduce
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.StrongMultiplicityOne.Strong
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.CapAct
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.CiBasic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.CiCompl
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalSatakeAlmostAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.BindPow
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix Filter Topology
 open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.LFun UpperTheory.V.Z.Tf.GlobalTraceComparison UpperTheory.V.Z.Tf.GlobalTraceComparison.Cusp
@@ -68,7 +112,7 @@ private theorem exists_proj {M : Type*} [AddCommGroup M] [Module ℂ M] {C V D :
     have e1 : Submodule.projectionOnto _ _ hc v = ⟨v, hv⟩ := Submodule.projectionOnto_apply_left hc ⟨v, hv⟩
     have e2 : Submodule.projectionOnto _ _ hc d = 0 := Submodule.projectionOnto_apply_right hc ⟨d, hd⟩
     have : (p (v + d)).1 = v.1 := by
-      simp only [p, LinearMap.comp_apply, map_add, e1, e2, map_zero, add_zero]
+      simp only [p, LinearMap.comp_apply, map_add (f := _), e1, e2, map_zero, add_zero]
       rfl
     rw [this]
     simpa using hd
@@ -78,12 +122,12 @@ private theorem exists_proj {M : Type*} [AddCommGroup M] [Module ℂ M] {C V D :
 
 section Forms
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
-private noncomputable def stRep (C : Submodule ℂ (Sm E a)) (hC : IsStable C) : Representation ℂ (GL (Fin a) (Af E)) C :=
+private noncomputable def stRep (C : Submodule ℂ (Sm E a)) (hC : _root_.GlobalTheory.CuspRep.IsStable C) : Representation ℂ (GL (Fin a) (Af E)) C :=
   GlobalTheory.PRep.sub (finRep E a) C fun k => hC (.fin k)
 
-private theorem proj_rep {C V D : Submodule ℂ (Sm E a)} (hC : IsStable C) (hV : IsStable V) (hD : IsStable D)
+private theorem proj_rep {C V D : Submodule ℂ (Sm E a)} (hC : _root_.GlobalTheory.CuspRep.IsStable C) (hV : _root_.GlobalTheory.CuspRep.IsStable V) (hD : _root_.GlobalTheory.CuspRep.IsStable D)
     (p : C →ₗ[ℂ] V) (p1 : ∀ x : C, x.1 - (p x).1 ∈ D) (p2 : ∀ (x : C) (v : V), x.1 - v.1 ∈ D → p x = v)
     (g : GL (Fin a) (Af E)) (y : C) : p (stRep C hC g y) = stRep V hV g (p y) := by
   refine p2 _ _ ?_
@@ -91,7 +135,7 @@ private theorem proj_rep {C V D : Submodule ℂ (Sm E a)} (hC : IsStable C) (hV 
   rw [map_sub] at this
   exact this
 
-private theorem hasSat_of_map {C : Submodule ℂ (Sm E a)} (hC : IsStable C) (π : CuspSub E a) (f : C →ₗ[ℂ] π.V)
+private theorem hasSat_of_map {C : Submodule ℂ (Sm E a)} (hC : _root_.GlobalTheory.CuspRep.IsStable C) (π : CuspSub E a) (f : C →ₗ[ℂ] π.V)
     (hf : ∀ g (y : C), f (stRep C hC g y) = π.finPart g (f y)) (w : Pl E) (B : Multiset ℂˣ) {x : C}
     (hx : IsSatVecGL w (fL a w) x.1 B) (h0 : f x ≠ 0) : HasSatGL w (π.locRep w) B := by
   have h1 : IsSatVecGL w (locOf (stRep C hC) w) x B :=

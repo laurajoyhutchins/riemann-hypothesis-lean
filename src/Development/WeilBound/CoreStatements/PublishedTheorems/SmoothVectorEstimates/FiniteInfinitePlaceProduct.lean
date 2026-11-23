@@ -1,10 +1,53 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.WhittakerVanishingImpliesZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.WhittakerVanishingImpliesZero
+public import Development.AbelianVarietyTheory.Definitions.Foundations.AbsCharNotUnitary
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousInfIdele
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalIdeleSndSelf
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousInfIdele
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
-import GroundTheory.GlobalFields.Adele.WeakApproxUnits
+public import GroundTheory.GlobalFields.Adele.WeakApproxUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,9 +81,18 @@ theorem loc_eq_one_of_val {ν : HChar L} {v : HeightOneSpectrum (𝓞 L)} (hu : 
 
 theorem inf_eq_prod (ν : HChar L) (k : Lˣ) :
     ν.inf k = ∏ w ∈ (Finset.univ : Finset (InfinitePlace L)), ν.locInf w (atInf w k) := by
-  simp only [HChar.inf, HChar.locInf, infDiag, MonoidHom.comp_apply, MonoidHom.finset_prod_apply, map_prod]
+  classical
+  simp only [HChar.inf, HChar.locInf, infDiag, MonoidHom.comp_apply]
+  have hp : ∀ (s : Finset (InfinitePlace L)) (f : InfinitePlace L → Lˣ →* Ideles L),
+      (∏ w ∈ s, f w) k = ∏ w ∈ s, f w k := by
+    intro s f
+    induction s using Finset.induction_on with
+    | empty => simp
+    | insert a s ha ih => simp [ha, ih, MonoidHom.mul_apply]
+  rw [hp, map_prod]
+  rfl
 
-set_option maxHeartbeats 400000 in
+
 
 theorem eq_one (ν : HChar L) (h : ∀ᶠ w in cofinite, ν.val w = 1) : ν = 1 := by
   classical
@@ -75,11 +127,11 @@ theorem eq_one (ν : HChar L) (h : ∀ᶠ w in cofinite, ν.val w = 1) : ν = 1 
         (∏ v : S, ν.loc v.1 (p.1 v)) *
           ∏ w : (Finset.univ : Finset (InfinitePlace L)), ν.locInf w.1 (p.2 w) := by
       apply Continuous.mul
-      · apply continuous_finset_prod
+      · apply continuous_finsetProd
         intro v _
         exact (hνc.comp (GlobalTheory.Mem.Chr.Determ.continuous_localIdele v.1)).comp
           ((continuous_apply v).comp continuous_fst)
-      · apply continuous_finset_prod
+      · apply continuous_finsetProd
         intro w _
         exact (hνc.comp (GlobalTheory.InfTypeLocal.continuous_infIdele L w.1)).comp
           ((continuous_apply w).comp continuous_snd)

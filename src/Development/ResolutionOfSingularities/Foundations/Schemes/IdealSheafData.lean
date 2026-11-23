@@ -1,5 +1,54 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Schemes.AffineOpens
+module
+
+public import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Order.CompletePartialOrder
+public import Development.ResolutionOfSingularities.Foundations.Schemes.AffineOpens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.Proper
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 universe u
 
@@ -315,41 +364,6 @@ theorem notMem_support_of_comap_ι_eq_top (I : Y.IdealSheafData) {U : Y.Opens}
   have h2 : (⟨x, hxU⟩ : ↥U) ∈ ((⊥ : TopologicalSpace.Closeds ↥U) : Set ↥U) := h1
   simp at h2
 
-private theorem mem_basicOpen_iff_notMem_primeIdealOf {X : Scheme.{u}} {U : X.Opens}
-    (hU : IsAffineOpen U) {x : X} (hx : x ∈ U) (g : Γ(X, U)) :
-    x ∈ X.basicOpen g ↔ g ∉ (hU.primeIdealOf ⟨x, hx⟩).asIdeal := by
-  have h1 : hU.fromSpec.base (hU.primeIdealOf ⟨x, hx⟩) = x := hU.fromSpec_primeIdealOf ⟨x, hx⟩
-  have h2 : hU.fromSpec ⁻¹ᵁ (X.basicOpen g) = PrimeSpectrum.basicOpen g :=
-    hU.fromSpec_preimage_basicOpen g
-  constructor
-  · intro h
-    rw [← h1] at h
-    have h3 : hU.primeIdealOf ⟨x, hx⟩ ∈ hU.fromSpec ⁻¹ᵁ (X.basicOpen g) := h
-    rw [h2] at h3
-    exact (PrimeSpectrum.mem_basicOpen g _).mp h3
-  · intro h
-    have h3 : hU.primeIdealOf ⟨x, hx⟩ ∈ PrimeSpectrum.basicOpen g :=
-      (PrimeSpectrum.mem_basicOpen g _).mpr h
-    rw [← h2] at h3
-    have h4 : hU.fromSpec.base (hU.primeIdealOf ⟨x, hx⟩) ∈ X.basicOpen g := h3
-    rwa [h1] at h4
-
-theorem mem_support_iff_ideal_le_primeIdealOf {X : Scheme.{u}} (I : X.IdealSheafData)
-    {U : X.Opens} (hU : IsAffineOpen U) {x : X} (hx : x ∈ U) :
-    x ∈ I.support ↔ I.ideal ⟨U, hU⟩ ≤ (hU.primeIdealOf ⟨x, hx⟩).asIdeal := by
-  rw [Scheme.IdealSheafData.mem_support_iff_of_mem (I := I) (U := ⟨U, hU⟩) hx,
-    Scheme.mem_zeroLocus_iff]
-  constructor
-  · intro h
-    rw [SetLike.le_def]
-    intro f hf
-    have hb := h f hf
-    rw [mem_basicOpen_iff_notMem_primeIdealOf hU hx f] at hb
-    exact not_not.mp hb
-  · intro h f hf
-    rw [mem_basicOpen_iff_notMem_primeIdealOf hU hx f]
-    exact not_not.mpr (h hf)
-
 theorem comap_ι_comp_eq_of_comap_ι_eq (f : X ⟶ Y) (V : Y.Opens) (U : X.Opens)
     (hle : U ≤ f ⁻¹ᵁ V) (I J : Y.IdealSheafData)
     (h : I.comap V.ι = J.comap V.ι) : I.comap (U.ι ≫ f) = J.comap (U.ι ≫ f) := by
@@ -370,16 +384,6 @@ theorem comap_listProd {X Y : Scheme.{u}} (f : X ⟶ Y) (L : List Y.IdealSheafDa
     simp only [List.map_nil, List.prod_nil]
     exact comap_top f
   | cons D E ih => simp only [List.map_cons, List.prod_cons, comap_mul, ih]
-
-theorem comap_finset_prod {X Y : Scheme.{u}} (f : X ⟶ Y) {ι : Type*} (s : Finset ι)
-    (F : ι → Y.IdealSheafData) :
-    (∏ i ∈ s, F i).comap f = ∏ i ∈ s, (F i).comap f := by
-  classical
-  refine Finset.induction_on s ?_ ?_
-  · simp only [Finset.prod_empty]
-    exact comap_top f
-  · intro a t ha ih
-    simp only [Finset.prod_insert ha, comap_mul, ih]
 
 private theorem isReduced_of_ringEquiv {A B : Type u} [CommRing A] [CommRing B]
     (e : A ≃+* B) (h : _root_.IsReduced B) : _root_.IsReduced A := by
@@ -423,12 +427,6 @@ theorem isReduced_subscheme_vanishingIdeal
     rw [Scheme.IdealSheafData.vanishingIdeal_ideal]
     exact PrimeSpectrum.isRadical_vanishingIdeal _
   exact isReduced_of_isReduced_stalk _
-
-theorem comap_subschemeι_self {X : Scheme.{u}} (I : X.IdealSheafData) :
-    I.comap I.subschemeι = ⊥ := by
-  refine le_antisymm ?_ bot_le
-  have h := comap_map_le (⊥ : I.subscheme.IdealSheafData) I.subschemeι
-  rwa [map_bot, ker_subschemeι] at h
 
 end AlgebraicGeometry.Scheme.IdealSheafData
 

@@ -1,14 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BialgHomFactorThroughSplitInjectionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsQuotPDivGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsQuotientFiniteCommGroupSchemeClosedSubgrouStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivSubgroupQuotientTowerRSEqSRes
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuotientTransitionSurjectiveSameSubgroupStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRetractionMulP
 import Development.AbelianVarietyTheory.Definitions.Divisors.RedSurjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KerEqRangeOfRangeEqKer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobKerIdealLeAugIdeal
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRetractionMulP
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvEqOneOfForallPairing
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsQuotientFiniteCommGroupSchemeClosedSubgrouStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsQuotPDivGroup
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivSubgroupQuotientTowerRSEqSRes
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BialgHomFactorThroughSplitInjectionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuotientTransitionSurjectiveSameSubgroupStatement
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,18 +82,18 @@ theorem ker_succ {C : Type} [CommRing C] [Bialgebra O C] (π : G.A 1 →ₐc[O] 
   Ideal.ext fun _ => Iff.rfl
 
 theorem torsion_le {C : Type} [CommRing C] [Bialgebra O C] (π : G.A 1 →ₐc[O] C) (m : ℕ) :
-    torsionIdeal O (G.A (m + 1)) p ≤ RingHom.ker (π.comp (levelRes G m)) := by
+    torsionIdeal (R := O) (A := G.A (m + 1)) p ≤ RingHom.ker (π.comp (levelRes G m)) := by
   refine (kerIdeal_le_ker_iff _
     ((π.comp (levelRes G m) : G.A (m + 1) →ₐc[O] C) : G.A (m + 1) →ₐ[O] C)).2 fun c => ?_
-  change π (levelRes G m (mulBy O _ p c)) = _
+  change π (levelRes G m (mulBy (R := O) (A := G.A (m + 1)) p c)) = _
   have h := G.mulBy_pow_self 1 (levelRes G m c)
   rw [pow_one] at h
   rw [map_mulBy, h, AlgHomClass.commutes, CoalgHomClass.counit_comp_apply]
 
 end GlobalTheory.QuotField
 
-open GlobalTheory.QuotField GlobalTheory.HTPair.QuotIsog in
 
+open GlobalTheory.QuotField GlobalTheory.HTPair.QuotIsog in
 theorem GlobalTheory.HTPair.exists_quot_field : ∀ (p : ℕ) [Fact p.Prime] (k : Type) [Field k] [CharP k p]
     (G : PDivGroup p k) (C : Type) [CommRing C] [HopfAlgebra k C] [IsCocomm k C]
     [Module.Finite k C] (π : G.A 1 →ₐc[k] C), Function.Surjective π →
@@ -106,12 +148,12 @@ theorem GlobalTheory.HTPair.exists_quot_field : ∀ (p : ℕ) [Fact p.Prime] (k 
       tors_le := fun m => (hker m).symm ▸ torsion_le G π m }
   obtain ⟨H, q, hqs, hqk, hqc⟩ := GlobalTheory.HTPair.exists_quotPDivGroup p k G τ
   refine ⟨H, toQuot τ q hqs hqk hqc, fromQuot τ q hqc, ?_, ?_, ?_⟩
-  · refine hom_ext fun n => ?_
+  · refine PDivGroup.Hom.ext (funext fun n => ?_)
     rw [natCast_smul_id_app, comp_app]
     refine BialgHom.ext fun a => ?_
     change (toQuot τ q hqs hqk hqc).app n (q n (τ.s n a)) = _
     rw [toQuot_app_q, τ.j_s, G.res_mulP]
-  · refine hom_ext fun n => ?_
+  · refine PDivGroup.Hom.ext (funext fun n => ?_)
     rw [natCast_smul_id_app, comp_app]
     refine BialgHom.ext fun c => ?_
     obtain ⟨b, rfl⟩ := hqs n c

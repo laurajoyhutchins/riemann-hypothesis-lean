@@ -1,7 +1,47 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataParams
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Formalism.SharpRestriction.ParamsHeightRankConstant
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +52,6 @@ open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.WeaklyAdmissi
 section At
 
 variable (D : D7) (i : D.nd.Loc)
-
-def NoLevelPrime : Prop := ∀ k : Fin 2, D.nd.l i ≠ D.host.g k
 
 def chiRatio (c : ℕ) : GE D.nd →* (D.nd.O i)ˣ := chiU D.nd i c * (chiU D.nd i 1)⁻¹
 
@@ -30,38 +68,11 @@ def CharCrysAt (χ : GE D.nd →* (D.nd.O i)ˣ) : Prop :=
 def MatCrysAt {n : ℕ} (M : GE D.nd →* Matrix (Fin n) (Fin n) (D.nd.O i)) : Prop :=
   IsCrys (Br.PD D.loc D.nbr i w hw) (matRep (Br.loc D.nbr i w hw M))
 
-def ChiOneInvCrysAt : Prop := CharCrysAt D i w hw (chiU D.nd i 1)⁻¹
-
 def ChiRatioCrysAt : Prop :=
   ∀ c : ℕ, 1 ≤ c → c ≤ D.R.t →
     chiRatio D i c = (epsU D.nd i) ^ (-((c : ℤ) - 1)) ∧ CharCrysAt D i w hw (chiRatio D i c)
 
-def BlockCrysAt : Prop := ChiOneInvCrysAt D i w hw ∧ ChiRatioCrysAt D i w hw
-
 end At
-
-def BlockCrys_at (D : D7) : Prop :=
-  ∀ i : D.nd.Loc, NoLevelPrime D i → (D.nd.Z i).Nonempty →
-    ∀ (w : HeightOneSpectrum (𝓞 D.host.E)) (hw : w ∈ placesOver D.host.E (D.nd.l i)), BlockCrysAt D i w hw
-
-def BlockCrysF {eps : ℝ} (Fm : FamP eps) : Prop :=
-  ∃ x0 : ℝ, ∀ x ≥ x0, ∀ a : Fm.Ix x, BlockCrys_at (Fm.D x a)
-
-def BlockCrysClosed (𝒞 : FamClass) : Prop := Closed 𝒞 (fun Fm _ => BlockCrysF Fm)
-
-def BlockCharactersCrystalline : Prop :=
-  ∀ (D : D7) (i : D.nd.Loc) (r : D.nd.X i → (GE D.nd →* GL (Fin D.R.nV) (D.nd.O i))),
-    GoodR D.nd i r → NoLevelPrime D i →
-    ∀ π ∈ D.nd.Z i, IsConstituent D i (chiU D.nd i 1) (rO D.nd i r π) →
-    ∀ (w : HeightOneSpectrum (𝓞 D.host.E)) (hw : w ∈ placesOver D.host.E (D.nd.l i)),
-      (∀ x, MatCrysAt D i w hw (rO D.nd i r x)) → BlockCrysAt D i w hw
-
-def Inputs_at (D : D7) : Prop :=
-  ∀ i : D.nd.Loc, NoLevelPrime D i →
-    ∃ r : D.nd.X i → (GE D.nd →* GL (Fin D.R.nV) (D.nd.O i)), GoodR D.nd i r ∧
-      (∀ (w : HeightOneSpectrum (𝓞 D.host.E)) (hw : w ∈ placesOver D.host.E (D.nd.l i)) (x : D.nd.X i),
-        MatCrysAt D i w hw (rO D.nd i r x)) ∧
-      ∀ π ∈ D.nd.Z i, IsConstituent D i (chiU D.nd i 1) (rO D.nd i r π)
 
 theorem chiRatio_eq (D : D7) (i : D.nd.Loc) (c : ℕ) (h1 : 1 ≤ c) (h2 : c ≤ D.R.t) :
     chiRatio D i c = (epsU D.nd i) ^ (-((c : ℤ) - 1)) := by

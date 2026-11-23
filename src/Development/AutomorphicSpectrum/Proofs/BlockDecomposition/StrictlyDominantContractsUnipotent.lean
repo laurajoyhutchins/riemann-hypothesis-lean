@@ -1,6 +1,58 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.StrictDominanceCasselman.IsStrictlyDominant
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.StrictDominanceCasselman.IsStrictlyDominant
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SmGL ValuativeRel PositivityTheory.Lbc Topology Filter Matrix
 
@@ -105,12 +157,29 @@ theorem exists_pow_conj_mem_KN : ∀ (k : Type) [Field k] [ValuativeRel k] [Topo
     simpa using h1O
   obtain ⟨j, hj⟩ := ht.2 U hU h1U
   refine ⟨j, ?_⟩
+  have hconjAll : ∀ r : ℕ, leviEmb k (stdBlocks d hd) t ^ r * v *
+      (leviEmb k (stdBlocks d hd) t ^ r)⁻¹ ∈ KN k N J d hd := by
+    intro r
+    induction r with
+    | zero => simpa only [pow_zero, one_mul, inv_one, mul_one] using
+        (show v ∈ KN k N J d hd from Subgroup.mem_inf.2 ⟨hvJ, hvN⟩)
+    | succ r ih =>
+      simpa only [pow_succ', _root_.mul_inv_rev, mul_assoc] using ht.1.1 _ ih
   set G := leviEmb k (stdBlocks d hd) t ^ j with hG
-  have hGn : G ∈ Subgroup.normalizer (unipRad k (stdBlocks d hd) : Set (GL (Fin N) k)) :=
-    pow_mem (leviEmb_mem_normalizer k (stdBlocks d hd) t) j
+  have hconj : G * v * G⁻¹ ∈ KN k N J d hd := hconjAll j
   have hmem := hj v (Subgroup.mem_inf.2 ⟨hvJ, hvN⟩)
   have hval := val_conj_one_add_smul G n v c hv
-  refine Subgroup.mem_inf.2 ⟨(memJ _).2 ?_, (Subgroup.mem_normalizer_iff.1 hGn n).1 hn⟩
+  have hscaled : (1 : Matrix (Fin N) (Fin N) k) +
+      c⁻¹ • (((G * v * G⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) - 1) =
+      ((G * n * G⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) := by
+    rw [hval]
+    simp [smul_smul, inv_mul_cancel₀ hc0']
+  obtain ⟨w, hw, hwN⟩ := exists_one_add_smul_mem_unipRad (stdBlocks d hd)
+    (Subgroup.mem_inf.1 hconj).2 c⁻¹
+  have hw_eq : w = G * n * G⁻¹ := by
+    apply Units.ext
+    exact hw.trans hscaled
+  refine Subgroup.mem_inf.2 ⟨(memJ _).2 ?_, hw_eq ▸ hwN⟩
   have hmem' : (1 : Matrix (Fin N) (Fin N) k) +
       c⁻¹ • (((G * v * G⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) - 1) ∈ O := hmem
   rw [hval] at hmem'

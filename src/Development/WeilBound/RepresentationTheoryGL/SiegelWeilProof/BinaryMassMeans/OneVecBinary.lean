@@ -1,18 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BinaryMassMeans.MeanVal
-import Development.WeilBound.CoreStatements.AutomorphicKernels.UnitarySchrodingerModel.UnitarySchrodingerLemmas.LowRankSiegelDensities.SiegelDensitiesLowAOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EquidistributionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NormThetaMulStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MeanValueFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CocompactnessStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalMassFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VectorLengthFormulaOfPartsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SimilitudeInvarianceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HassePrincipleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TestFunctionExistsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftSideFormulaStatement
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BinaryMassMeans.SingleRowSide.Srside
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CountingFormulaStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneVectorFormulaOfPartsStatement
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BinaryMassMeans.MeanVal
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.UnitarySchrodingerModel.UnitarySchrodingerLemmas.LowRankSiegelDensities.SiegelDensitiesLowAOf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CocompactnessStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CountingFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EquidistributionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HassePrincipleStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftSideFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalMassFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MeanValueFormulaStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NormThetaMulStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneVectorFormulaOfPartsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SimilitudeInvarianceStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TestFunctionExistsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.VectorLengthFormulaOfPartsStatement
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BinaryMassMeans.SingleRowSide.Srside
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace PositivityTheory.Rg.Mass
 

@@ -1,9 +1,56 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.FriedrichsKernels.Friedrichs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContDiffOnUncurryOfFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WordSmooth
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousOnFderivApply
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DerivativeAsRightWords
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.FriedrichsKernels.Friedrichs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContDiffOnUncurryOfFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousOnFderivApply
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DerivativeAsRightWords
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LengthFunctionFactsHold
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WordSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
+import Mathlib.Analysis.Calculus.FDeriv.Partial
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,6 +80,7 @@ theorem fderiv_frame (f : Mat n → V) {x : Mat n} (hx : x ∈ GLs n) (ξ : Mat 
       rw [← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hu, Matrix.one_mul]
     conv_lhs => rw [← this, ← sum_eps (x⁻¹ * ξ), Finset.mul_sum]
     exact Finset.sum_congr rfl fun p _ => mul_smul_comm _ _ _
+
   conv_lhs => rw [e, map_sum]
   exact Finset.sum_congr rfl fun p _ => map_smul _ _ _
 
@@ -69,7 +117,7 @@ theorem hasFDerivAt_uncurry {h h₀ : ℝ → Mat n → V} {hp : (Bool × Fin n 
     refine continuousOn_clm_apply.2 fun ξ => ?_
     have h1 : ContinuousOn (fun z : ℝ × Mat n => ∑ p, eps p (z.2⁻¹ * ξ) • hp p z.1 z.2)
         (Set.univ ×ˢ GLs n) :=
-      continuousOn_finset_sum _ fun p _ => (contDiffOn_coeff' p ξ).continuousOn.smul (cp p)
+      continuousOn_finsetSum _ fun p _ => (contDiffOn_coeff' p ξ).continuousOn.smul (cp p)
     refine h1.congr ?_
     rintro ⟨s, y⟩ ⟨-, hy⟩
     have hy' : y ∈ GLs n := hy
@@ -219,7 +267,7 @@ theorem sup_bound (hS : SobG) (n : ℕ) [MeasurableSpace (G n)] [BorelSpace (G n
     set K := Rw w f with hK
     have hm : MemLp (fun y : G n => K y.val) 2 μ := hf.2 w
     have hφ : Integrable (fun y : G n => ‖K y.val‖ ^ 2) μ :=
-      (memLp_two_iff_integrable_sq_norm hm.1).1 hm
+      (memLp_two_iff_integrable_sq_norm hm.aestronglyMeasurable).1 hm
     have hψ : Integrable (fun y : G n => ‖K (x * y.val)‖ ^ 2) μ :=
       hφ.comp_mul_left (GlobalTheory.CompanionTheory.RCalc.ByParts.toG hx)
     have e1 : ∫ y : G n, ‖K (x * y.val)‖ ^ 2 ∂μ = ∫ y : G n, ‖K y.val‖ ^ 2 ∂μ :=
@@ -269,7 +317,7 @@ theorem curveJoint : CurveJoint := by
     have hE0 : Tendsto E (𝓝 t) (𝓝 0) := by
       have e0 : (C * ∑ w' ∈ S, (0 : ℝ)) = 0 := by simp
       rw [← e0]
-      refine Tendsto.const_mul C (tendsto_finset_sum _ fun w' _ => ?_)
+      refine Tendsto.const_mul C (tendsto_finsetSum _ fun w' _ => ?_)
       have h1 := (hD j (w' ++ w) t).continuousAt.tendsto
       have h2 := tendsto_iff_norm_sub_tendsto_zero.1 h1
       simpa only [zero_smul, sub_zero, Rw_append] using h2

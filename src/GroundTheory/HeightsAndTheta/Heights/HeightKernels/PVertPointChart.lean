@@ -1,9 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsVertPointLengthSteps
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionsNonzero
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.CharacterNondegenerate
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveDivVertical
-import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsVertPointLengthSteps
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveDivVertical
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.CharacterNondegenerate
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSmallSectionsNonzero
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -72,8 +122,8 @@ theorem mem_of_aeval_eq (y : (Σ _ : Unit, T) → K') {W : Ideal (MRing (fun _ :
   have h1 := W.sub_mem hfW (hPW h0)
   rwa [sub_sub_cancel] at h1
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem mem_of_X_pow_mul {W : Ideal (MRing (fun _ : Unit => T))} (hWp : W.IsPrime) {t : T}
     (ht : (X ⟨(), t⟩ : MRing (fun _ : Unit => T)) ∉ W) {n : ℕ} {f : MRing (fun _ : Unit => T)}
     (h : X ⟨(), t⟩ ^ n * f ∈ W) : f ∈ W :=
@@ -90,8 +140,8 @@ theorem exists_rep (y : (Σ _ : Unit, T) → K') {t : T} (hyt : y ⟨(), t⟩ �
   refine ⟨δ (), k, hk, ?_⟩
   rw [he, Fintype.prod_unique]
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem mem_chart (y : (Σ _ : Unit, T) → K') {t : T} (hyt : y ⟨(), t⟩ ≠ 0) (b : curveRing y) :
     (b : K') ∈ chartRingZ y (fun _ => t) :=
   mem_curveRing.mp b.2 (fun _ => t) (fun _ => hyt)
@@ -125,7 +175,7 @@ theorem chartPrime_add (y : (Σ _ : Unit, T) → K') {t : T} {W : Ideal (MRing (
   have h3 : X ⟨(), t⟩ ^ e * g + X ⟨(), t⟩ ^ d * g' ∈ W :=
     W.add_mem (W.mul_mem_left _ hgW) (W.mul_mem_left _ hg'W)
   have h4 : (r + r') * y ⟨(), t⟩ ^ (d + e) = aeval y (X ⟨(), t⟩ ^ e * g + X ⟨(), t⟩ ^ d * g') := by
-    simp only [map_add, map_mul, map_pow, aeval_X]
+    simp only [map_add (f := _), map_mul, map_pow, aeval_X]
     linear_combination (y ⟨(), t⟩ ^ e) * hd + (y ⟨(), t⟩ ^ d) * he
   exact ⟨d + e, _, h2, h3, h4⟩
 
@@ -236,14 +286,14 @@ def locSub (y : (Σ _ : Unit, T) → K') (m : Ideal (curveRing y)) (hm : m.IsPri
     rw [Subring.coe_neg]
     linear_combination -h
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem mem_locSub {y : (Σ _ : Unit, T) → K'} {m : Ideal (curveRing y)} {hm : m.IsPrime} {r : K'} :
     r ∈ locSub y m hm ↔ ∃ a b : curveRing y, b ∉ m ∧ (b : K') * r = a :=
   Iff.rfl
 
-omit [Fintype T] in
 
+omit [Fintype T] in
 theorem chart_le_locSub (y : (Σ _ : Unit, T) → K') (m : Ideal (curveRing y)) (hm : m.IsPrime) (t : T)
     (h : ∀ u : T, y ⟨(), u⟩ / y ⟨(), t⟩ ∈ locSub y m hm) {r : K'} (hr : r ∈ chartRingZ y (fun _ => t)) :
     r ∈ locSub y m hm := by
@@ -260,8 +310,8 @@ theorem chart_le_locSub (y : (Σ _ : Unit, T) → K') (m : Ideal (curveRing y)) 
 
 end VerticalPointChart
 
-open VerticalPointChart in
 
+open VerticalPointChart in
 theorem VertPointChart.proof (hC : CurveCharts.Statement) : VertPointChart.Statement := by
   intro T _ K' _ _ y s hy hs hsP W hW t ht
   have hWp : W.IsPrime := hW.1.1.1

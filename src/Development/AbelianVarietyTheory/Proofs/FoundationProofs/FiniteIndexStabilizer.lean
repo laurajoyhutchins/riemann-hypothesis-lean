@@ -1,24 +1,53 @@
-import Mathlib
-import ReciprocityTheory.GaloisValuations.Global
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharInertiaSurjective
+module
+
+public import ReciprocityTheory.GaloisValuations.Global
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharInertiaSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal
 
 namespace GlobalTheory.InertiaPowers
-
-theorem finiteIndex_stabilizer (Ω : Type) [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω] (x : Ω) :
-    (MulAction.stabilizer (G ℚ Ω) x).FiniteIndex := by
-  have hint : IsIntegral ℚ x := Algebra.IsIntegral.isIntegral x
-  have hsub : MulAction.orbit (G ℚ Ω) x ⊆ (minpoly ℚ x).rootSet Ω := by
-    rintro _ ⟨σ, rfl⟩
-    rw [Polynomial.mem_rootSet]
-    refine ⟨minpoly.ne_zero hint, ?_⟩
-    have e := Polynomial.aeval_algHom_apply (σ : Ω →ₐ[ℚ] Ω) x (minpoly ℚ x)
-    rw [minpoly.aeval, map_zero] at e
-    exact e
-  have hfin : (MulAction.orbit (G ℚ Ω) x).Finite := ((minpoly ℚ x).rootSet_finite Ω).subset hsub
-  refine ⟨?_⟩
-  rw [MulAction.index_stabilizer]
-  exact ((Set.ncard_pos hfin).mpr ⟨x, MulAction.mem_orbit_self x⟩).ne'
 
 theorem cycMod_Ine_surjective (l : ℕ) [Fact l.Prime] (Ω : Type) [Field Ω] [Algebra ℚ Ω]
     [IsAlgClosure ℚ Ω] (A : ValuationSubring Ω) (hA : A.valuation (l : Ω) < 1) (n : ℕ) :
@@ -37,30 +66,5 @@ theorem cycMod_Ine_surjective (l : ℕ) [Fact l.Prime] (Ω : Type) [Field Ω] [A
   simp only [MonoidHom.comp_apply, Subgroup.coe_subtype]
   rw [cycMod, MonoidHom.comp_apply, hσv]
   exact hv
-
-theorem main : ∀ (l : ℕ) [Fact l.Prime] (Ω : Type) [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω]
-    (A : ValuationSubring Ω), A.valuation (l : Ω) < 1 →
-    ∀ F : Finset Ω, ∃ D : ℕ, 1 ≤ D ∧ ∀ (n : ℕ) (u : (ZMod (l ^ n))ˣ),
-      ∃ s ∈ Ine (F := ℚ) A, (∀ x ∈ F, s x = x) ∧ cycMod ℚ Ω l n s = u ^ D := by
-  intro l _ Ω _ _ _ A hA F
-  let Fix : Subgroup (G ℚ Ω) := ⨅ x : F, MulAction.stabilizer (G ℚ Ω) (x : Ω)
-  haveI : Fix.FiniteIndex :=
-    Subgroup.finiteIndex_iInf fun x => finiteIndex_stabilizer Ω (x : Ω)
-  let H : Subgroup (Ine (F := ℚ) A) := Fix.subgroupOf (Ine (F := ℚ) A)
-  have hH0 : H.index ≠ 0 := Subgroup.FiniteIndex.index_ne_zero
-  refine ⟨H.index, Nat.one_le_iff_ne_zero.mpr hH0, fun n u => ?_⟩
-  set f := (cycMod ℚ Ω l n).comp (Ine (F := ℚ) A).subtype with hf
-  have hsurj := cycMod_Ine_surjective l Ω A hA n
-  have hdvd : (H.map f).index ∣ H.index := Subgroup.index_map_dvd H hsurj
-  haveI : (H.map f).Normal := Subgroup.normal_of_comm _
-  have hmem : u ^ H.index ∈ H.map f := by
-    obtain ⟨c, hc⟩ := hdvd
-    rw [hc, pow_mul]
-    exact Subgroup.pow_mem _ (Subgroup.pow_index_mem _ u) _
-  obtain ⟨h, hh, hfh⟩ := hmem
-  refine ⟨h, h.2, fun x hx => ?_, hfh⟩
-  have hfix : (h : G ℚ Ω) ∈ Fix := hh
-  have := (Subgroup.mem_iInf.mp hfix) ⟨x, hx⟩
-  exact this
 
 end GlobalTheory.InertiaPowers

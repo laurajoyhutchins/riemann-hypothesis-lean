@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PointMatrixPhases
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.FormRegularity
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PointMatrixPhases
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.FormRegularity
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.HermitianBlockSpans
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.HermitianSumFrames
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.InfCut
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.TraceEqSumPlaces
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellBru
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -109,17 +157,17 @@ variable {r : ℕ}
 theorem sgLoF_eq {K : Type} [Field K] (M : Matrix (Fin (r + 1)) (Fin (r + 1)) K) :
     sgLoF M = ∑ a : Fin r, M a.succ a.castSucc := by
   unfold sgLoF
-  rw [Fin.sum_univ_castSucc, dif_neg (by simp), add_zero]
+  rw [Fin.sum_univ_castSucc, dite_eq_right (by simp), add_zero]
   refine Finset.sum_congr rfl fun a _ => ?_
-  rw [dif_pos (by simp)]
+  rw [dite_eq_left (by simp)]
   rfl
 
 theorem sgUpF_eq {K : Type} [Field K] (M : Matrix (Fin (r + 1)) (Fin (r + 1)) K) :
     sgUpF M = ∑ a : Fin r, M a.castSucc a.succ := by
   unfold sgUpF
-  rw [Fin.sum_univ_castSucc, dif_neg (by simp), add_zero]
+  rw [Fin.sum_univ_castSucc, dite_eq_right (by simp), add_zero]
   refine Finset.sum_congr rfl fun a _ => ?_
-  rw [dif_pos (by simp)]
+  rw [dite_eq_left (by simp)]
   rfl
 
 theorem sgLoF_one {K : Type} [Field K] {N : ℕ} : sgLoF (1 : Matrix (Fin N) (Fin N) K) = 0 := by
@@ -162,11 +210,13 @@ variable {D : D7} (X : Formalism.L2.SG.HidaSetting.HidaSetting D)
 
 theorem sgLoF_map (L : Formalism.L2.SG.PairVal.MatR D) (ψ : D.host.E →+* ℂ) :
     sgLoF (L.map ψ) = ψ (Formalism.L2.SG.PairVal.sgLo L) := by
+
   rw [sgLoF_eq, FormRegularity.sgLo_eq, map_sum]
   rfl
 
 theorem sgUpF_map (U : Formalism.L2.SG.PairVal.MatR D) (ψ : D.host.E →+* ℂ) :
     sgUpF (U.map ψ) = ψ (Formalism.L2.SG.PairVal.sgUp U) := by
+
   rw [sgUpF_eq, FormRegularity.sgUp_eq, map_sum]
   rfl
 
@@ -242,7 +292,7 @@ theorem place_id (u u' : D.what₂.Word) {γ γw g g' : X.B.I.Ginf} (hg : g ∈ 
   rw [e1, e2] at hds
   have hψy : ψ (Formalism.L2.SG.PairVal.sgLo L) + ψ (Formalism.L2.SG.PairVal.sgUp U) =
       X.B.I.φ v (X.ιE.symm (Formalism.L2.SG.PairVal.sgLo L + Formalism.L2.SG.PairVal.sgUp U)) := by
-    rw [← map_add]; rfl
+    rw [← map_add (f := _)]; rfl
   linear_combination hds - hψy
 
 end Main
@@ -289,7 +339,7 @@ theorem realPhase (u u' : D.what₂.Word) {γ γw g g' : X.B.I.Ginf} (hg : g ∈
   rw [e1, e2]
   simp only [map_neg]
   rw [← hY]
-  simp only [map_mul, map_div₀, map_add, map_ofNat, Complex.conj_ofReal, Complex.conj_I, map_natCast,
+  simp only [map_mul, map_div₀, map_add (f := _), map_ofNat, Complex.conj_ofReal, Complex.conj_I, map_natCast,
     Complex.star_def, Complex.conj_conj, map_neg]
   rw [Complex.star_def] at hp
   simp only [div_eq_mul_inv]

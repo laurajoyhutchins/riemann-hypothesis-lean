@@ -1,12 +1,62 @@
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GlobSet
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FiniteIsometriesFixingBothFramesStabilizingLatti
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TotallyPositiveOrthogonalOfTwoFlagExtendedSpaces
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TraceFormPosOnOrthLiftedFlag
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocFacts
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DetNeOfTotPos
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.LocGlobInt
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.IsUnitaryAndFixesFramesOfMemComplementUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.NGAnalytic
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.InVolumesAtOfSWS
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GlobSet
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FiniteIsometriesFixingBothFramesStabilizingLatti
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TotallyPositiveOrthogonalOfTwoFlagExtendedSpaces
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DensFrame
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.IsUnitaryAndFixesFramesOfMemComplementUnitary
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DetNeOfTotPos
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StepHeightOfNormOne
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
+
 open NumberField MeasureTheory Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.HidaSetting Formalism.L2.SG.Full Formalism.L2.SG.TermLoc Formalism.L2.SG.RowsConc Formalism.L2.SG.NGCut Formalism.L2.SG.NGAnalytic Formalism.FourierDecayAlt GlobalTheory.Unfold GlobalTheory.LocOver GlobalTheory.GenMass
 open scoped Classical ENNReal
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -15,8 +65,8 @@ namespace GlobalTheory.StabYFin
 
 open Formalism.L2.SG.Pf Formalism.L2.SG.Pf.Cnt
 
-theorem pos_compl (D : D7) (u u' : D.what₂.Word) (F : LFlag (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E))
-    (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (hTP : TotPos (Gval F F')) :
+theorem pos_compl (D : D7) (u u' : D.what₂.Word) (F : LFlag (D.sp.Y 0) D.R.rS (((D.mem u).A.T : ℕ) : D.host.E))
+    (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (hTP : TotPos (Gval F F')) :
     ∀ x ∈ orth (VS D) (Xplus F ⊔ Xplus F'), x ≠ 0 → 0 < Algebra.trace ℚ D.host.E ((VS D).hT x x) := by
   intro x hx hx0
   have hdet0 : (ZhatL F F').det ≠ 0 := Formalism.L2.SG.Pf.Cnt.R1.det_ne_of_totPos D (ZhatL F F') hTP
@@ -33,7 +83,7 @@ theorem pos_compl (D : D7) (u u' : D.what₂.Word) (F : LFlag (VS D) D.R.rS ((Tu
     exact GlobalTheory.LoopC.PerpPos.trace_pos_perp D (Tu D u) F hT x (GlobalTheory.ComplPos.mem_orth_left hx) hxX
 
 theorem baseChange_mem_perp_sup (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FPair (locH Z p) D.R.rS) (Tn T'n : ℕ)
-    (F : LFlag (VS D) D.R.rS (Tn : D.host.E)) (F' : LFlag (VS D) D.R.rS (T'n : D.host.E))
+    (F : LFlag (D.sp.Y 0) D.R.rS (Tn : D.host.E)) (F' : LFlag (D.sp.Y 0) D.R.rS (T'n : D.host.E))
     (hB : Based Z FP Tn T'n F F') (p : PlF D) (w : (VS D).V) (hw : w ∈ orth (VS D) (Xplus F ⊔ Xplus F')) :
     baseChange₂ D p w ∈ (locH Z p).perp ((locH Z p).X (FP p).A.f) := by
   intro x hx
@@ -98,7 +148,7 @@ theorem fg_of_int {E V : Type} [Field E] [NumberField E] [StarRing E] [AddCommGr
       exact congrFun hy ⟨l, hl⟩
     · simp
     · intro a c _ _ ha hc
-      rw [map_add, LinearMap.add_apply, ha, hc, add_zero]
+      rw [map_add (f := _), LinearMap.add_apply, ha, hc, add_zero]
     · intro e a _ ha
       rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, ha, smul_zero]
   apply Submodule.fg_of_fg_map_injective Φ hΦ
@@ -111,9 +161,9 @@ theorem fg_of_int {E V : Type} [Field E] [NumberField E] [StarRing E] [AddCommGr
   choose o ho using h1
   exact ⟨o, funext fun l => ho l⟩
 
-set_option maxHeartbeats 1000000 in
 
-theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FPair (locH Z p) D.R.rS) (u u' : D.what₂.Word) (F G : LFlag (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)) (F' G' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (P : Finset (PlF D)) (d0 : Dat Z FP), 4 * D.R.rS + 7 ≤ D.R.k → BaseOK (Tu D u) (Tu D u') F F' P d0 → StdOff Z P F G F' G' → TotPos (Gval F F') → ∀ (Λ : LV D) (y : Dat Z FP), Λ ∈ Formalism.L2.SG.Pf.Cnt.GlueSet (VS D).hT (Formalism.L2.SG.Pf.Cnt.UPair D G.fl G') (Formalism.L2.SG.Pf.Cnt.MMof D G.fl G') → Λ ∈ globSet G G' y → (stabY F F' y).Finite := by
+
+theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FPair (locH Z p) D.R.rS) (u u' : D.what₂.Word) (F G : LFlag (D.sp.Y 0) D.R.rS (((D.mem u).A.T : ℕ) : D.host.E)) (F' G' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (P : Finset (PlF D)) (d0 : Dat Z FP), 4 * D.R.rS + 7 ≤ D.R.k → BaseOK (Tu D u) (Tu D u') F F' P d0 → StdOff Z P F G F' G' → TotPos (Gval F F') → ∀ (Λ : LV D) (y : Dat Z FP), Λ ∈ Formalism.L2.SG.Pf.Cnt.GlueSet (VS D).hT (Formalism.L2.SG.Pf.Cnt.UPair D G.fl G') (Formalism.L2.SG.Pf.Cnt.MMof D G.fl G') → Λ ∈ globSet G G' y → (stabY F F' y).Finite := by
   intro D Z FP u u' F G F' G' P d0 _hk hB _hS hTP Λ y _hGl hΛ
   have hBased : Based Z FP (Tu D u) (Tu D u') F F' := hB.1
   set U : Submodule D.host.E (VS D).V := Xplus F ⊔ Xplus F' with hUdef
@@ -143,6 +193,7 @@ theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FP
         rw [Submodule.coe_sum] at this
         simp only [Submodule.coe_smul] at this
         exact this.symm
+
       rw [hx', map_sum, LinearMap.sum_apply]
       refine Finset.sum_eq_zero fun i _ => ?_
       rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hy' i, smul_zero]
@@ -157,8 +208,10 @@ theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FP
     have h5 := Submodule.finrank_le (U ⊔ W)
     omega
   have hΛlat : Submodule.IsLattice D.host.E Λ := hΛ.1
+  have hspan : Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ :=
+    Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top _hGl.2.1 (VS D).herm hΛlat.fg
   have hmul : ∀ v : (VS D).V, ∃ d : 𝓞 D.host.E, d ≠ 0 ∧ d • v ∈ Λ := fun v => by
-    have hv : v ∈ Submodule.span D.host.E (Λ : Set (VS D).V) := by rw [hΛlat.span_eq_top]; trivial
+    have hv : v ∈ Submodule.span D.host.E (Λ : Set (VS D).V) := by rw [hspan]; trivial
     obtain ⟨t, ht⟩ := multiple_mem_span_of_mem_localization_span (nonZeroDivisors (𝓞 D.host.E)) D.host.E _ v hv
     rw [Submodule.span_eq] at ht
     exact ⟨t, nonZeroDivisors.ne_zero t.2, ht⟩
@@ -208,7 +261,7 @@ theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FP
     induction hwΘ using Submodule.span_induction with
     | mem w hw =>
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hl1
-      rw [map_add, LinearMap.add_apply]
+      rw [map_add (f := _), LinearMap.add_apply]
       refine add_mem (hint w hw a ha.1 ha.2) ?_
       rw [(memW w).1 hw.1 b hb.2]
       exact zero_mem _
@@ -219,17 +272,20 @@ theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FP
       exact Submodule.mul_mem_mul (Submodule.mem_one.2 ⟨o, rfl⟩) ha |> fun h => by simpa using h
 
   let Λ₀ : LV D := Θ ⊔ ΛU
-  have hΛ₀ : Submodule.IsLattice D.host.E Λ₀ := by
-    refine ⟨hΘfg.sup (hΛlat.fg.of_le inf_le_left), span_top_of_mul _ fun v => ?_⟩
-    obtain ⟨d, hd0, hd⟩ := hmul2 v
-    have hle : ΛW ⊔ ΛU ≤ Λ₀ :=
-      sup_le (fun x hx => Submodule.mem_sup_left (Submodule.subset_span (hΛW x hx.1 hx.2))) le_sup_right
-    exact ⟨d, hd0, hle hd⟩
+  have hΛ₀ : Submodule.IsFullLattice D.host.E Λ₀ := by
+    refine { toIsLattice := Submodule.IsLattice.of_fg D.host.E (hΘfg.sup (hΛlat.fg.of_le inf_le_left)), span_eq_top := ?_ }
+    apply span_top_of_mul
+    intro v
+    obtain ⟨d, hd, hv⟩ := hmul2 v
+    refine ⟨d, hd, ?_⟩
+    apply (show ΛW ⊔ ΛU ≤ Λ₀ from sup_le ?_ le_sup_right) hv
+    intro w hw
+    exact Submodule.mem_sup_left (Submodule.subset_span (hΛW w hw.1 hw.2))
   refine (GlobalTheory.StabFin.finite_of_fix (VS D).hT U hpos Λ₀ hΛ₀).subset ?_
   rintro h ⟨hh, hm⟩
 
   have hfixU : ∀ x ∈ U, h x = x := by
-    have key : ∀ {T0 : D.host.E} (G0 : LFlag (VS D) D.R.rS T0), (∀ a, h (frame G0 a) = frame G0 a) →
+    have key : ∀ {T0 : D.host.E} (G0 : LFlag (D.sp.Y 0) D.R.rS T0), (∀ a, h (frame G0 a) = frame G0 a) →
         Xplus G0 ≤ LinearMap.ker ((h : (VS D).V →ₗ[D.host.E] (VS D).V) - LinearMap.id) := by
       intro T0 G0 hG
       have he : ∀ i, h (G0.fl.e i) = G0.fl.e i := fun i => by

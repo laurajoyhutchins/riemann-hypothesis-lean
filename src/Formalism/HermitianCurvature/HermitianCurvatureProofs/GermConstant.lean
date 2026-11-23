@@ -1,4 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PtSizeToStd
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PtSizeToStd
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermLocalOfFibres
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.FormNormSumIdentities
 
@@ -71,7 +120,6 @@ theorem rd_pos' : 0 < S6.rd E := GermRealisation.rd_pos E
 theorem gamLev_nonneg (S : C.HidaSetting E Wp Wq) (i : ℕ) :
     0 ≤ D.GamLev S.G.k S.G.r (D.kapG (S.g : ℝ) (S6.rd E)) (D.deG (S.g : ℝ) (S6.rd E)) i := by
   have hrd := (rd_pos' (E := E)).le
-  have hg : (0 : ℝ) ≤ (S.g : ℝ) := Nat.cast_nonneg _
   unfold D.GamLev
   refine Finset.prod_nonneg fun l _ => div_nonneg (zpow_nonneg ?_ _) ?_
   · unfold D.kapG; positivity
@@ -117,7 +165,7 @@ theorem gNSetC_main (S : C.HidaSetting E Wp Wq) [∀ x, FiniteDimensional ℂ (W
   · have hP' := isLocPt_toStd S.G.r (S.g : ℝ) hg P i hP
     have hQ' := isLocPt_toStd S.G.r (S.g : ℝ) hg Q i hQ
     unfold D.RRplace
-    rw [dif_pos ⟨hP', hQ'⟩, dif_pos hi, hcoef]
+    rw [dite_eq_left ⟨hP', hQ'⟩, dite_eq_left hi, hcoef]
     unfold KB.slv
     push_cast
     ring
@@ -310,10 +358,7 @@ theorem germConst : GermConst := by
   set e2 : ℤ := (S.G.k : ℤ) + 2 * ρ + 1 with he2
   refine ⟨Hf * (R ^ (-ν2 - ν1 * e1 - ν2 * e2) * √δ * Real.pi ^ ((m + 1) * (m + 4) / 2) / B1 /
     q ^ (ν1 * ((m + 1 : ℕ) : ℤ) * ((S.G.k : ℤ) + 2 * ρ + m + 2) + ν2 * e2)), fun x D z hx hD hz => ?_⟩
-  have hX : 0 < ‖x‖ := norm_pos_iff.mpr hx
-  have hDn : 0 < ‖D‖ := norm_pos_iff.mpr hD
   have hz0 : z ≠ 0 := by rintro rfl; apply hD; rw [← hz]; simp
-  have hZ : 0 < ‖z‖ := norm_pos_iff.mpr hz0
   have hZl : ((m : ℝ) + 2) * Real.log ‖z‖ = Real.log ‖D‖ := by
     rw [← hz, norm_pow, Real.log_pow]; push_cast; ring
   rcases hHf0.eq_or_lt with h0 | hHp

@@ -1,6 +1,66 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenRank
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GsScalJFK
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.Tactic.ENatToNat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenFlat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtPtBridgeSt
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GenCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GsScalJFK
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenDiv
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenGeneric
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaGenThick
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.WeightIndep
+public import Mathlib.RingTheory.Valuation.ExtendToLocalization
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option linter.overlappingInstances false
@@ -107,7 +167,7 @@ lemma constBF_alg (a : R) (W : (DegPre.BF D.toPre (FractionRing R)).left.Opens) 
   erw [Scheme.Hom.appLE_eq_app, ← this]
   rfl
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem terms_vanish [IsDiscreteValuationRing R] {ϖ : R} (hϖ : Irreducible ϖ) (hI : I = maximalIdeal R)
     (F : Fam D.toPre (FractionRing R) 1) (g : ∀ α, D.toPre.SecB 1 α)
@@ -116,11 +176,43 @@ theorem terms_vanish [IsDiscreteValuationRing R] {ϖ : R} (hϖ : Irreducible ϖ)
     ∀ mu, mu ≠ 0 → ∀ j, (pullback.fst D.toPre.P.A.hom (thick R I 0)).app _ ((g mu).f j) = 0 := by
   subst hI
   classical
-  choose Q hQ using fun χ => QForm.exists_QVal hϖ D χ
+  choose Q hQ using QForm.exists_QVal hϖ D
   have hQ' : QForm.IsQ D.toPre ϖ Q := hQ
-  have hv := valOver_vK hϖ
+  let castVal : ℕ∞ →+o WithTop ℚ :=
+    { toFun := WithTop.map (Nat.cast : ℕ → ℚ)
+      map_zero' := rfl
+      map_add' := WithTop.map_add (Nat.castAddMonoidHom ℚ)
+      monotone' := ENat.map_natCast_strictMono.monotone }
+  let vR := (IsDiscreteValuationRing.addVal R).map castVal rfl
+  have hvR : nonZeroDivisors R ≤ vR.toValuation.supp.primeCompl := by
+    intro r hr
+    change WithTop.map (Nat.cast : ℕ → ℚ) (IsDiscreteValuationRing.addVal R r) ≠ ⊤
+    have h := IsDiscreteValuationRing.addVal_eq_top_iff.not.mpr (nonZeroDivisors.ne_zero hr)
+    obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp h
+    rw [← hn]
+    exact WithTop.coe_ne_top
+  let w := vR.toValuation.extendToLocalization hvR (FractionRing R)
+  let v := AddValuation.ofValuation w
+  have hv : ValOver ϖ (FractionRing R) v := by
+    rintro c n ⟨u, rfl⟩
+    rw [Algebra.algebraMap_self, RingHom.id_apply]
+    change OrderDual.ofDual (Multiplicative.toAdd (w (_ ^ n * _))) = _
+    rw [map_mul, map_zpow₀, Valuation.extendToLocalization_apply_map_apply,
+      Valuation.extendToLocalization_apply_map_apply]
+    change n • WithTop.map (Nat.cast : ℕ → ℚ) (IsDiscreteValuationRing.addVal R ϖ) +
+      WithTop.map (Nat.cast : ℕ → ℚ) (IsDiscreteValuationRing.addVal R (u : R)) = _
+    rw [IsDiscreteValuationRing.addVal_uniformizer hϖ, IsDiscreteValuationRing.addVal_eq_zero_of_unit]
+    change n • ((1 : ℚ) : WithTop ℚ) + 0 = _
+    rw [add_zero, ← zsmul_one (R := ℚ) n]
+    cases n with
+    | ofNat k =>
+      change (k : ℤ) • ((1 : ℚ) : WithTop ℚ) = ↑((k : ℤ) • (1 : ℚ))
+      rw [natCast_zsmul, natCast_zsmul, WithTop.coe_nsmul]
+    | negSucc k =>
+      rw [negSucc_zsmul, negSucc_zsmul, WithTop.LinearOrderedAddCommGroup.coe_neg,
+        WithTop.coe_nsmul]
   obtain ⟨hstd, hqc⟩ := prB_std D
-  have hs0 : VGe D (FractionRing R) (vK hϖ) 1 0 (F.s 0) 0 := by
+  have hs0 : VGe D (FractionRing R) v 1 0 (F.s 0) 0 := by
     refine ⟨1, fun _ => 1, fun _ => g 0, fun _ => F.s 0, fun _ => hgF 0, fun _ => by simp, fun j => ?_⟩
     rw [Fin.sum_univ_one, ← map_one (algebraMap R (FractionRing R)), constBF_alg, map_one, _root_.one_mul]
   intro mu hmu
@@ -182,6 +274,7 @@ theorem terms_vanish [IsDiscreteValuationRing R] {ϖ : R} (hϖ : Irreducible ϖ)
     have hw : (DegPre.prB D.toPre (FractionRing R)).left ≫ D.toPre.P.A.hom = (DegPre.BF D.toPre (FractionRing R)).hom :=
       Over.w _
     rw [show resTop _ (1 : Γ((DegPre.BF D.toPre (FractionRing R)).left, ⊤)) = 1 from map_one _, _root_.one_mul, E2]
+
     simp only [map_sum, map_mul, app_toW, toW_congr hw]
     erw [map_sum, map_mul, map_sum]
     rw [Finset.mul_sum]

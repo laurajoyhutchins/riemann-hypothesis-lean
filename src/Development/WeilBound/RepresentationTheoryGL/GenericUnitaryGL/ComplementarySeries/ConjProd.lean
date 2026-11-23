@@ -1,4 +1,48 @@
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
+module
+
+import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.ConjProd
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +60,7 @@ instance (Y : Type) [AddCommGroup Y] [Module ℂ Y] : Module ℂ (Cj Y) := Modul
 def semiInv {X Y : Type} [AddCommGroup X] [Module ℂ X] [AddCommGroup Y] [Module ℂ Y]
     (φ : X →ₛₗ[starRingEnd ℂ] Y) (hφ : Function.Bijective φ) : Y →ₛₗ[starRingEnd ℂ] X where
   toFun := Function.surjInv hφ.2
-  map_add' a b := hφ.1 (by rw [map_add, Function.surjInv_eq hφ.2, Function.surjInv_eq hφ.2,
+  map_add' a b := hφ.1 (by rw [map_add (f := _), Function.surjInv_eq hφ.2, Function.surjInv_eq hφ.2,
     Function.surjInv_eq hφ.2])
   map_smul' c y := hφ.1 (by
     rw [Function.surjInv_eq hφ.2, map_smulₛₗ, Function.surjInv_eq hφ.2]
@@ -41,23 +85,23 @@ theorem update_comp (φ : ∀ a, X a →ₛₗ[starRingEnd ℂ] Y a) [DecidableE
   funext a
   exact Function.apply_update (fun a => φ a) x i w a
 
-def mlin (φ : ∀ a, X a →ₛₗ[starRingEnd ℂ] Y a) : MultilinearMap ℂ X (Cj (⨂[ℂ] a, Y a)) where
+def mlin (φ : ∀ a, X a →ₛₗ[starRingEnd ℂ] Y a) : MultilinearMap (RingHom.id ℂ) X (Cj (⨂[ℂ] a, Y a)) where
   toFun x := (PiTensorProduct.tprod ℂ (fun a => φ a (x a)) : ⨂[ℂ] a, Y a)
   map_update_add' x i u v := by
     show (PiTensorProduct.tprod ℂ (fun a => φ a (Function.update x i (u + v) a)) : ⨂[ℂ] a, Y a) =
       PiTensorProduct.tprod ℂ (fun a => φ a (Function.update x i u a)) +
         PiTensorProduct.tprod ℂ (fun a => φ a (Function.update x i v a))
-    rw [update_comp, update_comp, update_comp, map_add, MultilinearMap.map_update_add]
+    rw [update_comp, update_comp, update_comp, map_add (f := _), MultilinearMap.map_update_add]
   map_update_smul' x i c u := by
     show (PiTensorProduct.tprod ℂ (fun a => φ a (Function.update x i (c • u) a)) : ⨂[ℂ] a, Y a) =
       starRingEnd ℂ c • PiTensorProduct.tprod ℂ (fun a => φ a (Function.update x i u a))
-    rw [update_comp, update_comp, map_smulₛₗ, MultilinearMap.map_update_smul]
+    rw [update_comp, update_comp, map_smulₛₗ, MultilinearMap.map_update_smul, RingHom.id_apply]
 
 def tmap (φ : ∀ a, X a →ₛₗ[starRingEnd ℂ] Y a) : (⨂[ℂ] a, X a) →ₛₗ[starRingEnd ℂ] (⨂[ℂ] a, Y a) where
   toFun t := (PiTensorProduct.lift (mlin φ) t : Cj (⨂[ℂ] a, Y a))
   map_add' s t := by
     show (PiTensorProduct.lift (mlin φ) (s + t) : Cj (⨂[ℂ] a, Y a)) = _
-    rw [map_add]
+    rw [map_add (f := _)]
     rfl
   map_smul' c t := by
     show (PiTensorProduct.lift (mlin φ) (c • t) : Cj (⨂[ℂ] a, Y a)) = _
@@ -76,7 +120,7 @@ theorem tmap_comp (φ : ∀ a, X a →ₛₗ[starRingEnd ℂ] Y a) (ψ : ∀ a, 
   | smul_tprod r x =>
     rw [map_smulₛₗ, map_smulₛₗ, tmap_tprod, tmap_tprod]
     simp [h]
-  | add s t hs ht => rw [map_add, map_add, hs, ht]
+  | add s t hs ht => rw [map_add (f := _), map_add (f := _), hs, ht]
 
 end Tensor
 
@@ -84,19 +128,7 @@ theorem conjEquiv_piTensor {α : Type} [Fintype α] {Γ X Y : α → Type} [∀ 
     [∀ a, AddCommGroup (X a)] [∀ a, Module ℂ (X a)] [∀ a, AddCommGroup (Y a)] [∀ a, Module ℂ (Y a)]
     (π : ∀ a, Representation ℂ (Γ a) (X a)) (σ : ∀ a, Representation ℂ (Γ a) (Y a))
     (h : ∀ a, ConjEquiv (π a) (σ a)) : ConjEquiv (piTensor π) (piTensor σ) := by
-  choose φ hφ heq using h
-  refine ⟨tmap φ, ⟨fun s t hst => ?_, fun t => ⟨tmap (fun a => semiInv (φ a) (hφ a)) t, ?_⟩⟩, fun g t => ?_⟩
-  · have := congrArg (tmap (fun a => semiInv (φ a) (hφ a))) hst
-    rwa [tmap_comp _ _ (fun a x => semiInv_apply' (φ a) (hφ a) x),
-      tmap_comp _ _ (fun a x => semiInv_apply' (φ a) (hφ a) x)] at this
-  · exact tmap_comp (fun a => semiInv (φ a) (hφ a)) φ (fun a y => semiInv_apply (φ a) (hφ a) y) t
-  · induction t using PiTensorProduct.induction_on with
-    | smul_tprod r x =>
-      rw [map_smul, map_smulₛₗ, map_smulₛₗ, map_smul, piTensor_tprod, tmap_tprod, tmap_tprod, piTensor_tprod]
-      congr 2
-      funext a
-      exact heq a (g a) (x a)
-    | add s t hs ht => rw [map_add, map_add, hs, ht, map_add, map_add]
+  apply CompanionTheory.RgGu.NR.ConjProd.conjEquiv_piTensor <;> assumption
 
 section Ind
 
@@ -138,20 +170,7 @@ theorem indMap_apply (e : (Σ a, m a) ≃ n) {ρ : Representation ℂ (Levi k m)
 
 theorem conjEquiv_parInd (e : (Σ a, m a) ≃ n) (ρ : Representation ℂ (Levi k m) V)
     (τ : Representation ℂ (Levi k m) W) (h : ConjEquiv ρ τ) : ConjEquiv (parInd e ρ) (parInd e τ) := by
-  obtain ⟨φ, hφ, heq⟩ := h
-  have hinv : ∀ g w, semiInv φ hφ (τ g w) = ρ g (semiInv φ hφ w) := fun g w => by
-    apply hφ.1
-    rw [semiInv_apply, heq, semiInv_apply]
-  refine ⟨indMap e φ heq, ⟨fun f f' hff => ?_, fun f => ⟨indMap e (semiInv φ hφ) hinv f, ?_⟩⟩, fun g f => ?_⟩
-  · apply Subtype.ext; apply Subtype.ext; funext x
-    apply hφ.1
-    have := congrArg (fun F : IndSp e τ => F.1.1 x) hff
-    simpa only [indMap_apply] using this
-  · apply Subtype.ext; apply Subtype.ext; funext x
-    show φ (semiInv φ hφ (f.1.1 x)) = f.1.1 x
-    exact semiInv_apply φ hφ _
-  · apply Subtype.ext; apply Subtype.ext; funext x
-    rfl
+  apply CompanionTheory.RgGu.NR.ConjProd.conjEquiv_parInd <;> assumption
 
 end Ind
 

@@ -1,13 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntegrationByPartsRightDerivativeAdelicQuotient
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryUnimodularExistsFundamentalDomain
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsQuasiFam
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselToFourierJacobiHandedFamilyContinuousAutomStatement
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousIntegralCompactAutomorphicQuotientParaStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilRepresentationRationalTranslateSubstitutionStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselToFourierJacobiHandedFamilyContinuousAutomStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiHandOffAutomorphicStatement
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PairedThetaKernelContinuousAndRationallyInvarianStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiHandOffAutomorphicStatement
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilRepresentationRationalTranslateSubstitutionStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryUnimodularExistsFundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntegrationByPartsRightDerivativeAdelicQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,7 +101,7 @@ theorem handBF_right {φ : GA D B.A → ℂ} {Ξ Ξ' : WO B.V₀ J.W₀ → ℂ}
     (hΞ : IsThetaFunO ψ B.V₀ J.W₀ Ξ) (hΞ' : IsThetaFunO ψ B.V₀ J.W₀ Ξ') (c : ℂ) :
     handBF s l φ (c • Ξ + Ξ') = star c • handBF s l φ Ξ + handBF s l φ Ξ' := by
   funext h w
-  simp only [handBF, map_add, map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul, mul_add, mul_left_comm _ c]
+  simp only [handBF, map_add (f := _), map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul, mul_add, mul_left_comm _ c]
   rw [integral_add ((IsContAut.integrableOn B.cpt B.vA (contAut_kerBF s hφ hΞ h _)).const_mul c)
     (IsContAut.integrableOn B.cpt B.vA (contAut_kerBF s hφ hΞ' h _)), integral_const_mul, star_add, star_mul']
 
@@ -93,7 +133,7 @@ theorem integrableOn_pair {Y : GA D J.W₀ → WO J.W₀ B.L → ℂ} {F : WO J.
       (B.o.mem_ratL_resT _ _).2 (by rw [AddEquiv.apply_symm_apply]; exact ⟨zero_mem _, γ, rfl⟩)
     replace hδ : ratW B.V₀ J.W₀ δ = (B.o.resT J.W₀).symm (0, ratW B.L J.W₀ γ) := hδ
     have e1 := hF.quasi δ ((B.o.resT J.W₀).symm (0, v))
-    rw [hδ, ← map_add, Prod.mk_add_mk, add_zero, B.o.symplOH_resT, AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply,
+    rw [hδ, ← map_add (f := _), Prod.mk_add_mk, add_zero, B.o.symplOH_resT, AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply,
       symplOH_zero_left, zero_add] at e1
     have e2 := hY.quasi h γ v
     change F ((B.o.resT J.W₀).symm (0, ratW B.L J.W₀ γ + v)) * star (Y h (ratW B.L J.W₀ γ + v)) = _
@@ -127,7 +167,7 @@ theorem handFB_right {Y : GA D J.W₀ → WO J.W₀ B.L → ℂ} {Ξ Ξ' : WO J.
   funext h₁
   have e : ∀ h₀, pairKer s vL Y (c • Ξ + Ξ') h₀ h₁ = c * pairKer s vL Y Ξ h₀ h₁ + pairKer s vL Y Ξ' h₀ h₁ := by
     intro h₀
-    simp only [pairKer, contractT, thPair, map_add, map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul, add_mul,
+    simp only [pairKer, contractT, thPair, map_add (f := _), map_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul, add_mul,
       mul_assoc]
     rw [integral_add ((integrableOn_pair s vL hY (s.weil₀.om_pres _ _ hΞ) h₀).const_mul c)
       (integrableOn_pair s vL hY (s.weil₀.om_pres _ _ hΞ') h₀), integral_const_mul]
@@ -142,7 +182,7 @@ theorem handFB_equiv {Y : GA D J.W₀ → WO J.W₀ B.L → ℂ} {Ξ : WO J.W₀
   simp only [handFB]
   refine Eq.trans ?_ (integral_right J.v0 (contAut_pairKer s vL hY hΞ (h₁ * h)).1 g)
   congr 1
-  funext x
+  funext h₀
   simp only [pairKer]
   rw [← Module.End.mul_apply, ← map_mul, Prod.mk_mul_mk, ← map_mul, Prod.mk_mul_mk, one_mul]
 

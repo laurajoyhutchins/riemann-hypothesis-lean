@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.Point
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.UpUMul
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.UpUMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.L2.SG.PtCell
 
@@ -31,7 +75,7 @@ theorem loU_mul {A B : Matrix (Fin N) (Fin N) K} (hA : LoU A) (hB : LoU B) : LoU
   intro i j
   refine ⟨fun hij => (BlockTriangular.mul (loU_bt hA) (loU_bt hB)) hij, fun hij => ?_⟩
   subst hij
-  rw [mul_apply, Finset.sum_eq_single i]
+  rw [Matrix.mul_apply, Finset.sum_eq_single i]
   · rw [(hA i i).2 rfl, (hB i i).2 rfl, one_mul]
   · intro k _ hk
     rcases lt_or_gt_of_ne hk with h | h
@@ -50,7 +94,7 @@ theorem loU_inv {L : Matrix (Fin N) (Fin N) K} (h : LoU L) : LoU L⁻¹ := by
   refine ⟨fun hij => hbt hij, fun hij => ?_⟩
   subst hij
   have e := congrFun (congrFun (mul_nonsing_inv L hu) i) i
-  rw [mul_apply, Finset.sum_eq_single i, (h i i).2 rfl, one_mul] at e
+  rw [Matrix.mul_apply, Finset.sum_eq_single i, (h i i).2 rfl, one_mul] at e
   · simpa using e
   · intro k _ hk
     rcases lt_or_gt_of_ne hk with h' | h'
@@ -66,7 +110,7 @@ theorem upU_inv {U : Matrix (Fin N) (Fin N) K} (h : UpU U) : UpU U⁻¹ := by
   refine ⟨fun hij => hbt hij, fun hij => ?_⟩
   subst hij
   have e := congrFun (congrFun (mul_nonsing_inv U hu) i) i
-  rw [mul_apply, Finset.sum_eq_single i, (h i i).2 rfl, one_mul] at e
+  rw [Matrix.mul_apply, Finset.sum_eq_single i, (h i i).2 rfl, one_mul] at e
   · simpa using e
   · intro k _ hk
     rcases lt_or_gt_of_ne hk with h' | h'
@@ -90,7 +134,7 @@ def mono (π : Fin N → Fin N) (c : Fin N → K) : Matrix (Fin N) (Fin N) K := 
 
 theorem mul_mono_apply (A : Matrix (Fin N) (Fin N) K) {π : Fin N → Fin N} (hπ : ∀ a, π (π a) = a) (c : Fin N → K)
     (a b : Fin N) : (A * mono π c) a b = A a (π b) * c (π b) := by
-  rw [mul_apply, Finset.sum_eq_single (π b)]
+  rw [Matrix.mul_apply, Finset.sum_eq_single (π b)]
   · simp [mono, hπ]
   · intro k _ hk
     have : b ≠ π k := fun hb => hk (by rw [hb, hπ])
@@ -99,7 +143,7 @@ theorem mul_mono_apply (A : Matrix (Fin N) (Fin N) K) {π : Fin N → Fin N} (h�
 
 theorem mono_mul_apply (A : Matrix (Fin N) (Fin N) K) (π : Fin N → Fin N) (c : Fin N → K) (a b : Fin N) :
     (mono π c * A) a b = c a * A (π a) b := by
-  rw [mul_apply, Finset.sum_eq_single (π a)]
+  rw [Matrix.mul_apply, Finset.sum_eq_single (π a)]
   · simp [mono]
   · intro k _ hk
     simp [mono, hk]

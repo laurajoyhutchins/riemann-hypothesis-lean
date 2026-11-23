@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ModuleFlatOfFlatAndFibreFlatStatement
+module
+
+public import Mathlib.RingTheory.RingHom.Flat
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ModuleFlatOfFlatAndFibreFlatStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open TensorProduct
 
 namespace GlobalTheory.CompanionTheory.FinAlgFlat
@@ -71,8 +117,7 @@ theorem fibreMap_flat_localize (R k P Q Bp An : Type*) [CommRing R] [CommRing k]
       (fibreMap R k Q An).comp (fibreMap R k P Q) := by
     refine RingHom.ext fun x => ?_
     induction x with
-    | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul a b =>
       simp [← IsScalarTower.algebraMap_apply]
   have hPA : ((fibreMap R k Bp An).comp (fibreMap R k P Bp)).Flat := by
@@ -96,9 +141,9 @@ theorem flat_localization_of_fibre (R P Q : Type) [CommRing R] [IsLocalRing R] [
   haveI : IsNoetherianRing P := IsNoetherianRing.of_finite R P
   haveI : IsNoetherianRing Q := IsNoetherianRing.of_finite R Q
   let p : Ideal P := n.comap (algebraMap P Q)
-  haveI hp : p.IsMaximal := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal n
+  haveI hp : p.IsMaximal := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := P) n
   have hmR : p.comap (algebraMap R P) = IsLocalRing.maximalIdeal R :=
-    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal p)
+    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := R) p)
   letI : Algebra (Localization.AtPrime p) (Localization.AtPrime n) :=
     (Localization.localRingHom p n (algebraMap P Q) rfl).toAlgebra
   haveI tP : IsScalarTower P (Localization.AtPrime p) (Localization.AtPrime n) :=

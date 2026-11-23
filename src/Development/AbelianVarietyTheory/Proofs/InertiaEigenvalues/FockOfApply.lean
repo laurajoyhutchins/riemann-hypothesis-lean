@@ -1,10 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CenUsedOfCenReal
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChoiceSideWithE
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.OfFirstStepLoc
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ToUnitsCompToCircle
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TupPrimeEmpty
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAlgebraicOfRoot
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChoiceSideWithE
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ToUnitsCompToCircle
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +49,8 @@ open Formalism.L2.Host (embLL0)
 open Formalism.IndefR.RecTie (Used0)
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1600000
+
+
 
 namespace GlobalTheory.PlaceRead
 
@@ -64,18 +99,17 @@ def rdE (T : CellTie hρ D.nexp rd) {ε : KE c w →+* ℂ} (hε : Extends ρ ε
   { toFun := φ
     map_add' := φ.map_add
     map_smul' := fun s x => by
-      induction x using TensorProduct.induction_on with
-      | zero => rw [smul_zero, map_zero, smul_zero]
-      | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add]
+      induction x using TensorProduct.inductionOn with
       | tmul a f =>
         change ε (s • a) • T.rdV _ _ _ f = ε s • ε a • T.rdV _ _ _ f
-        rw [smul_eq_mul, map_mul, mul_smul] }
+        rw [smul_eq_mul, map_mul, mul_smul]
+      | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), hx, hy, smul_add] }
 
 theorem rdE_tmul (T : CellTie hρ D.nexp rd) {ε : KE c w →+* ℂ} (hε : Extends ρ ε) (a : KE c w) (f) :
     rdE T hε (a ⊗ₜ f) = ε a • T.rdV (c.k' w) (c.Q w) (chr c w) f := rfl
 
-variable (rd) in
 
+variable (rd) in
 def rdF (hρ : ρ.Good) {ε : KE c w →+* ℂ} (hε : Extends ρ ε) :
     KE c w ⊗[D.ntw.O (c.twI w)] D.nexp.Fm (c.twI w) (j.1 + 1) (c.sd w) →ₛₗ[ε] (GA D (Wc D j) → ℂ) :=
   let φ : KE c w ⊗[D.ntw.O (c.twI w)] D.nexp.Fm (c.twI w) (j.1 + 1) (c.sd w) →+ (GA D (Wc D j) → ℂ) := TensorProduct.liftAddHom
@@ -89,12 +123,11 @@ def rdF (hρ : ρ.Good) {ε : KE c w →+* ℂ} (hε : Extends ρ ε) :
   { toFun := φ
     map_add' := φ.map_add
     map_smul' := fun s x => by
-      induction x using TensorProduct.induction_on with
-      | zero => rw [smul_zero, map_zero, smul_zero]
-      | add x y hx hy => rw [smul_add, map_add, map_add, hx, hy, smul_add]
+      induction x using TensorProduct.inductionOn with
       | tmul a f =>
         change ε (s • a) • rd f = ε s • ε a • rd f
-        rw [smul_eq_mul, map_mul, mul_smul] }
+        rw [smul_eq_mul, map_mul, mul_smul]
+      | add x y hx hy => rw [smul_add, map_add (f := _), map_add (f := _), hx, hy, smul_add] }
 
 theorem rdF_tmul (hρ : ρ.Good) {ε : KE c w →+* ℂ} (hε : Extends ρ ε) (a : KE c w) (f) :
     rdF rd hρ hε (a ⊗ₜ f) = ε a • rd f := rfl
@@ -128,8 +161,8 @@ def fockOf {μ : D.what₂.Tup} (hμ : Used0 D μ) (j : Fin D.R.m) (u : ∀ τ, 
 theorem fockOf_apply {μ : D.what₂.Tup} (hμ : Used0 D μ) (j : Fin D.R.m) (u : ∀ τ, lowT (X.R.MW j (sg0 D X.A3.A)) τ) (x h) :
     fockOf Y hμ j u x h = X.R.ioP j (PiTensorProduct.tprod ℂ u) ((X.R.HV j (Y.tupT μ)).e (formOf Y hμ j x) h) := rfl
 
-variable (X) in
 
+variable (X) in
 def IsLow (j : Fin D.R.m) (u : ∀ τ, lowT (X.R.MW j (sg0 D X.A3.A)) τ) : Prop :=
   ∀ τ, (u τ : (X.R.MW j (sg0 D X.A3.A)).sm τ) = X.geo.v₀ j (sg0 D X.A3.A) τ
 

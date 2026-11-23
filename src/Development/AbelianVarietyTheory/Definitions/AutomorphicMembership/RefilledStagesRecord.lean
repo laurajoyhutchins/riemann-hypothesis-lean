@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +75,6 @@ def reS (D : D7) (Z : SNew D) : D7 :=
 
 def SNew.self (D : D7) : SNew D := ⟨D.s, D.s_HH, D.s_Cu, D.s_PlF, D.s_Cu_isom, D.sEE⟩
 
-theorem reS_self (D : D7) : reS D (SNew.self D) = D := rfl
-
 def reStage (X : Stages) (Z : SNew X.toD7) : SStage X.B X.C X.W where
   dsig := X.S.dsig
   dsig_pos := X.S.dsig_pos
@@ -49,20 +86,8 @@ def reStage (X : Stages) (Z : SNew X.toD7) : SStage X.B X.C X.W where
   s_Cu_isom := Z.s_Cu_isom
   sEE := Z.sEE
 
-def reStages (X : Stages) (Z : SNew X.toD7) : Stages := { X with S := reStage X Z }
-
-theorem refilledStages_record (X : Stages) (Z : SNew X.toD7) : (reStages X Z).toD7 = reS X.toD7 Z := rfl
-
 section
 variable (D : D7) (Z : SNew D)
-
-theorem reS_atP : (reS D Z).s.atP = D.s.atP := rfl
-theorem reS_Del : (reS D Z).s.Del = D.s.Del := rfl
-theorem reS_letter : (reS D Z).s.letter = D.s.letter := rfl
-theorem reS_cdScale : (reS D Z).s.cdScale = D.s.cdScale := rfl
-theorem reS_dsig : (reS D Z).dsig = D.dsig := rfl
-theorem reS_rows : (reS D Z).what₂ = D.what₂ := rfl
-theorem reS_HH : (reS D Z).s.HH = Z.s.HH := rfl
 
 end
 

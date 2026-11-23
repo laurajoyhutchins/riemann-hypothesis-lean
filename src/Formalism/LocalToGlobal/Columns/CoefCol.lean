@@ -1,7 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
-import Formalism.LocalToGlobal.Columns.StdLatUnimodular
-import Formalism.LocalToGlobal.Divisibility.CoefMod
+module
+
+public import Formalism.LocalToGlobal.Columns.StdLatUnimodular
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 
@@ -87,28 +126,20 @@ section Vals
 variable {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Word R)
 
 def colVal (u : Pr.Word) (j : ℕ) (ST SG : Finset (HeightOneSpectrum (𝓞 X.E))) :
-    CoefPk X (R.N j) (DecoSet X.E (R.N j) ST SG) :=
+    CoefPk X (R.N j) (DecoSet (E := X.E) (n := R.N j) (ST := ST) (SG := SG)) :=
   roundPk X (W.lamTrue u j) fun d => d.1.Lsh
 
-def colNabL (u : Pr.Word) (j : ℕ) {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (d : DecoSet X.E (R.N j) ST SG) : Submodule (𝓞 X.K) (VV X.K (W.lamTrue u j)) :=
-  nabAtr X.emb (W.lamTrue u j) d.1.L
-
 def rowVal (SG : Finset (HeightOneSpectrum (𝓞 X.E))) :
-    CoefPk X (R.N R.m - 1) (DecoSet X.E (R.N R.m - 1) ∅ SG) :=
+    CoefPk X (R.N R.m - 1) (DecoSet (E := X.E) (n := R.N R.m - 1) (ST := ∅) (SG := SG)) :=
   squarePk X W.sgTrue fun d => d.1.N
 
 def mtVal (j : ℕ) (SG : Finset (HeightOneSpectrum (𝓞 X.E))) :
-    CoefPk X R.nV (DecoSet X.E R.nV ∅ SG) :=
+    CoefPk X R.nV (DecoSet (E := X.E) (n := R.nV) (ST := ∅) (SG := SG)) :=
   roundPk X (W.lamV j) fun d => d.1.N
 
 def BvLat (u : Pr.Word) (j : ℕ) {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (P : ST) (d : DecoSet X.E (R.N j) ST SG) : Submodule (𝓞 X.K) (VV X.K (W.lamTrue u j)) :=
+    (P : ST) (d : DecoSet (E := X.E) (n := R.N j) (ST := ST) (SG := SG)) : Submodule (𝓞 X.K) (VV X.K (W.lamTrue u j)) :=
   delAtr X.emb (W.lamTrue u j) (d.1.LshKer P)
-
-def BvLatF (u : Pr.Word) (j : ℕ) {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
-    (τ₀ : X.Tau) (P : ST) (d : DecoSet X.E (R.N j) ST SG) : Submodule (𝓞 X.K) (VV X.K (W.lamTrue u j)) :=
-  delK (W.lamTrue u j) fun τ => dualFr (tauLat X.emb τ (if τ = τ₀ then d.1.LshKer P else d.1.Lsh))
 
 end Vals
 

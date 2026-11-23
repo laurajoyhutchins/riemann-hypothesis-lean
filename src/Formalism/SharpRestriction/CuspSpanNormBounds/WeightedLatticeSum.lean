@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -230,7 +279,7 @@ theorem latSum (ι : Type) [Fintype ι] (P : Finset (ι → ℂ)) (R : ℝ) (hR 
   have hpt : ∀ p : ι → ℂ, ∏ i, (max 1 (‖p i‖ / R)) ^ (-(3 : ℝ)) ≤
       ∏ i, wt R (cell p i).1.natAbs * wt R (cell p i).2.natAbs := by
     intro p
-    apply Finset.prod_le_prod
+    apply Finset.prod_le_prod₀
     · intro i _
       exact Real.rpow_nonneg (le_trans zero_le_one (le_max_left _ _)) _
     · intro i _
@@ -252,7 +301,7 @@ theorem latSum (ι : Type) [Fintype ι] (P : Finset (ι → ℂ)) (R : ℝ) (hR 
     · exact hne (funext fun i => hι.elim i)
     · obtain ⟨i0⟩ := hι
       have hE : ∏ i ∈ Finset.univ.erase i0, ‖p i - q i‖ ≤ 1 :=
-        Finset.prod_le_one (fun i _ => norm_nonneg _) (fun i _ => (hlt i).le)
+        Finset.prod_le_one₀ (fun i _ => norm_nonneg _) (fun i _ => (hlt i).le)
       have hE0 : 0 ≤ ∏ i ∈ Finset.univ.erase i0, ‖p i - q i‖ :=
         Finset.prod_nonneg (fun i _ => norm_nonneg _)
       have hsplit : ‖p i0 - q i0‖ * ∏ i ∈ Finset.univ.erase i0, ‖p i - q i‖ = ∏ i, ‖p i - q i‖ :=
@@ -289,7 +338,7 @@ theorem latSum (ι : Type) [Fintype ι] (P : Finset (ι → ℂ)) (R : ℝ) (hR 
         (Finset.prod_univ_sum (fun _ : ι => S)
           (fun _ x => wt R x.1.natAbs * wt R x.2.natAbs)).symm
     _ ≤ ∏ _i : ι, ((18 * R) * (18 * R)) := by
-        apply Finset.prod_le_prod
+        apply Finset.prod_le_prod₀
         · intro i _
           exact Finset.sum_nonneg (fun x _ => hf0 x)
         · intro i _

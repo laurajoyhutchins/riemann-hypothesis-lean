@@ -1,4 +1,43 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.EquivariantFiniteGroup
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsProbabilityMeasureAutQuotientNormalized
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,16 +60,6 @@ theorem volPair_isVolPair (V : HSp D) (h : VolPairEx V) : IsVolPair D V (volPair
   rw [volPair_eq_choose V h]
   exact h.choose_spec
 
-theorem isVolPair_of_volTie (h : VolTieG D) (V : HSp D) (hs : V.SigOK) : VolPairEx V := by
-  obtain ⟨⟨μ, hμ⟩, hall⟩ := h V hs
-  obtain ⟨⟨𝓕, h𝓕⟩, _⟩ := hall μ hμ
-  exact ⟨(μ, 𝓕), hμ, h𝓕⟩
-
-theorem mass_eq_of_isVolPair (h : VolTieG D) (V : HSp D) (hs : V.SigOK) {μ : Measure (GA D V)}
-    {𝓕 : Set (GA D V)} (hp : IsVolPair D V μ 𝓕) : μ 𝓕 = ENNReal.ofReal (D.vol V) := by
-  obtain ⟨hμ, h𝓕⟩ := hp
-  exact ((h V hs).2 μ hμ).2 𝓕 h𝓕
-
 theorem autMk_measurable (V : HSp D) : Measurable (autMk V) := by
   first
   | exact measurable_quotient_mk'
@@ -40,32 +69,5 @@ theorem muQ_univ (V : HSp D) : muQ V Set.univ = (volPair V).1 (volPair V).2 := b
   unfold muQ
   rw [Measure.map_apply (autMk_measurable V) MeasurableSet.univ, Set.preimage_univ,
     Measure.restrict_apply_univ]
-
-theorem muQ_univ_eq_vol (h : VolTieG D) (V : HSp D) (hs : V.SigOK) :
-    muQ V Set.univ = ENNReal.ofReal (D.vol V) := by
-  rw [muQ_univ]
-  exact mass_eq_of_isVolPair h V hs (volPair_isVolPair V (isVolPair_of_volTie h V hs))
-
-theorem finVol_of_volTie (h : VolTieG D) (V : HSp D) (hs : V.SigOK) : FinVol V := by
-  show muQ V Set.univ ≠ 0 ∧ muQ V Set.univ ≠ ⊤
-  rw [muQ_univ_eq_vol h V hs]
-  exact ⟨(ENNReal.ofReal_pos.mpr (D.vol_pos V)).ne', ENNReal.ofReal_ne_top⟩
-
-theorem finVol_alt (h : VolTieG D) (j : ℕ) : FinVol (D.sp.W j) := finVol_of_volTie h _ (D.sp.W_sig j)
-
-theorem finVol_of_eqW (h : VolTieG D) {V : HSp D} {j : ℕ} (hV : V = D.sp.W j) : FinVol V := by
-  subst hV
-  exact finVol_alt h j
-
-theorem normalized_quotient_measure_eq (h : VolTieG D) (V : HSp D) (hs : V.SigOK) :
-    muQ1 V = (ENNReal.ofReal (D.vol V))⁻¹ • muQ V := by
-  have hf : muQ V Set.univ ≠ 0 ∧ muQ V Set.univ ≠ ⊤ := finVol_of_volTie h V hs
-  unfold muQ1
-  rw [if_pos hf, muQ_univ_eq_vol h V hs]
-
-theorem probability_measure_eq_pair (h : VolTieG D) (V : HSp D) (hs : V.SigOK) :
-    muQ1 V = (ENNReal.ofReal (D.vol V))⁻¹ • (((volPair V).1.restrict (volPair V).2).map (autMk V)) := by
-  rw [normalized_quotient_measure_eq h V hs]
-  rfl
 
 end Formalism.L2.Pj

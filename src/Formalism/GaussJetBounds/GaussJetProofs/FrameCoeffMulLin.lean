@@ -1,5 +1,57 @@
-import Formalism.GaussJetBounds.StatementC
-import Formalism.GaussJetBounds.GaussJetProofs.AsmRDotAddRight
+module
+
+public import Formalism.GaussJetBounds.StatementC
+public import Formalism.GaussJetBounds.GaussJetProofs.AsmRDotAddRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Ring.Ultra
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.RingTheory.MvPolynomial.WeightedHomogeneous
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -51,16 +103,16 @@ private theorem frame_frob_norm {K : Type*} [NormedField K] [IsUltrametricDist K
 
 private theorem frame_coeff_mul_lin {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι]
     (Q : MvPolynomial ι R) (c : ι → R) (m : ι →₀ ℕ) :
-    MvPolynomial.coeff m (Q * ∑ y, MvPolynomial.C (c y) * MvPolynomial.X y) =
-      ∑ y, c y * (if y ∈ m.support then MvPolynomial.coeff (m - Finsupp.single y 1) Q else 0) := by
+    AddMonoidAlgebra.coeff (Q * ∑ y, MvPolynomial.C (c y) * MvPolynomial.X y) m =
+      ∑ y, c y * (if y ∈ m.support then AddMonoidAlgebra.coeff Q (m - Finsupp.single y 1) else 0) := by
   rw [Finset.mul_sum, MvPolynomial.coeff_sum]
   refine Finset.sum_congr rfl fun y _ => ?_
   rw [mul_left_comm, MvPolynomial.coeff_C_mul, MvPolynomial.coeff_mul_X']
 
 private theorem frame_coeff_pow_lin {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι]
     (c : ι → R) (j : ι) (B : ℕ) :
-    MvPolynomial.coeff (Finsupp.single j B)
-      ((∑ y, MvPolynomial.C (c y) * MvPolynomial.X y) ^ B) = c j ^ B := by
+    AddMonoidAlgebra.coeff ((∑ y, MvPolynomial.C (c y) * MvPolynomial.X y) ^ B)
+      (Finsupp.single j B) = c j ^ B := by
   induction B with
   | zero => simp
   | succ B ih =>
@@ -72,9 +124,9 @@ private theorem frame_coeff_pow_lin {R ι : Type*} [CommSemiring R] [Fintype ι]
 
 private theorem frame_coeff_two {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι]
     (c c' : ι → R) (i j : ι) (hij : i ≠ j) (hc : ∀ y, c y ≠ 0 → y ≠ j) (A B : ℕ) :
-    MvPolynomial.coeff (Finsupp.single i A + Finsupp.single j B)
-      ((∑ y, MvPolynomial.C (c' y) * MvPolynomial.X y) ^ B *
-        (∑ y, MvPolynomial.C (c y) * MvPolynomial.X y) ^ A) = c i ^ A * c' j ^ B := by
+    AddMonoidAlgebra.coeff ((∑ y, MvPolynomial.C (c' y) * MvPolynomial.X y) ^ B *
+        (∑ y, MvPolynomial.C (c y) * MvPolynomial.X y) ^ A)
+      (Finsupp.single i A + Finsupp.single j B) = c i ^ A * c' j ^ B := by
   induction A with
   | zero => simp [frame_coeff_pow_lin]
   | succ A ih =>
@@ -133,6 +185,7 @@ private theorem frame_pure_formula {K : Type u} [Field K] {d N0 N1 : ℕ} [NeZer
         ∑ ab : Fin N0 × Fin N1, M (lt i, ab.1, ab.2) i ^ A * M (lt j, ab.1, ab.2) j ^ B := by
   classical
   unfold bSum
+
   rw [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun ab _ => ?_
   set φ : MvPolynomial ι K →+* MvPowerSeries ι K := MvPolynomial.coeToMvPowerSeries.ringHom
@@ -141,8 +194,9 @@ private theorem frame_pure_formula {K : Type u} [Field K] {d N0 N1 : ℕ} [NeZer
     fun t => ∑ y, MvPolynomial.C (M (t, ab.1, ab.2) y) * MvPolynomial.X y with hPdef
   have hL : ∀ t, linSub M (t, ab.1, ab.2) = φ (P t) := by
     intro t
+
     simp only [linSub, hPdef, hφ, map_sum, map_mul, MvPolynomial.coeToMvPowerSeries.ringHom_apply,
-      MvPolynomial.coe_C, MvPolynomial.coe_X]
+    MvPolynomial.coe_C, MvPolynomial.coe_X]
   have hsub : MvPowerSeries.HasSubst (fun t => linSub (K := K) M (t, ab.1, ab.2)) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero
     intro t; simp [linSub]
@@ -152,7 +206,7 @@ private theorem frame_pure_formula {K : Type u} [Field K] {d N0 N1 : ℕ} [NeZer
   have hwt : Finsupp.weight (fun y => Finsupp.single (lt y) 1)
       (Finsupp.single i A + Finsupp.single j B) =
       Finsupp.single (lt i) A + Finsupp.single (lt j) B := by
-    simp only [map_add, Finsupp.weight_single, Finsupp.smul_single_one]
+    simp only [map_add (f := _), Finsupp.weight_single, Finsupp.smul_single_one]
   have hij' : i ≠ j := fun h => hij (congrArg lt h)
   have hterm : ∀ e : ZMod d →₀ ℕ, MvPowerSeries.coeff (Finsupp.single i A + Finsupp.single j B)
       (e.prod fun t k => linSub M (t, ab.1, ab.2) ^ k) =

@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.PeterssonNormOfUpLift
+module
+
+import Formalism.LocalToGlobal.IndefiniteReal.SchurOrthogonality
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.PeterssonNormOfUpLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,36 +65,7 @@ theorem sobCont_zero : Sobolev₂ Lie σ 0 :=
 
 theorem sobCont_add {ℓ₁ ℓ₂ : H →ₗ[ℂ] ℂ} (h₁ : Sobolev₂ Lie σ ℓ₁) (h₂ : Sobolev₂ Lie σ ℓ₂) :
     Sobolev₂ Lie σ (ℓ₁ + ℓ₂) := by
-  obtain ⟨S₁, C₁, hS₁, hb₁⟩ := h₁
-  obtain ⟨S₂, C₂, hS₂, hb₂⟩ := h₂
-  refine ⟨S₁ ++ S₂, max C₁ 0 + max C₂ 0, fun l hl X hX => ?_, fun w hw => ?_⟩
-  · rcases List.mem_append.1 hl with hl | hl
-    · exact hS₁ l hl X hX
-    · exact hS₂ l hl X hX
-  · have n₁ : 0 ≤ (S₁.map fun l => ‖l.foldr (dRep σ) w‖).sum :=
-      List.sum_nonneg fun x hx => by
-        obtain ⟨l, -, rfl⟩ := List.mem_map.1 hx
-        exact norm_nonneg _
-    have n₂ : 0 ≤ (S₂.map fun l => ‖l.foldr (dRep σ) w‖).sum :=
-      List.sum_nonneg fun x hx => by
-        obtain ⟨l, -, rfl⟩ := List.mem_map.1 hx
-        exact norm_nonneg _
-    have e₁ : C₁ * (S₁.map fun l => ‖l.foldr (dRep σ) w‖).sum ≤
-        max C₁ 0 * (S₁.map fun l => ‖l.foldr (dRep σ) w‖).sum :=
-      mul_le_mul_of_nonneg_right (le_max_left _ _) n₁
-    have e₂ : C₂ * (S₂.map fun l => ‖l.foldr (dRep σ) w‖).sum ≤
-        max C₂ 0 * (S₂.map fun l => ‖l.foldr (dRep σ) w‖).sum :=
-      mul_le_mul_of_nonneg_right (le_max_left _ _) n₂
-    have m₁ : 0 ≤ max C₁ 0 := le_max_right _ _
-    have m₂ : 0 ≤ max C₂ 0 := le_max_right _ _
-    rw [List.map_append, List.sum_append, LinearMap.add_apply]
-    calc ‖ℓ₁ w + ℓ₂ w‖ ≤ ‖ℓ₁ w‖ + ‖ℓ₂ w‖ := norm_add_le _ _
-      _ ≤ C₁ * (S₁.map fun l => ‖l.foldr (dRep σ) w‖).sum + C₂ * (S₂.map fun l => ‖l.foldr (dRep σ) w‖).sum :=
-        add_le_add (hb₁ w hw) (hb₂ w hw)
-      _ ≤ max C₁ 0 * (S₁.map fun l => ‖l.foldr (dRep σ) w‖).sum +
-          max C₂ 0 * (S₂.map fun l => ‖l.foldr (dRep σ) w‖).sum := add_le_add e₁ e₂
-      _ ≤ (max C₁ 0 + max C₂ 0) * ((S₁.map fun l => ‖l.foldr (dRep σ) w‖).sum +
-          (S₂.map fun l => ‖l.foldr (dRep σ) w‖).sum) := by nlinarith
+  apply Formalism.IndefR.SchurOrthogonalityAlt.sobCont_add <;> assumption
 
 theorem sobCont_smul {ℓ : H →ₗ[ℂ] ℂ} (c : ℂ) (h : Sobolev₂ Lie σ ℓ) : Sobolev₂ Lie σ (c • ℓ) := by
   obtain ⟨S, C, hS, hb⟩ := h
@@ -62,8 +77,8 @@ end Sobolev₂
 
 variable {D : D7}
 
-open Classical in
 
+open Classical in
 def ContAt {V : HSp D} {S : D.what₂.Tau → SPar} (M : Mult.DSModel V S) (T : Mult.MMap M) : Prop :=
   ∀ τ (v : M.Vec) (x : GA D V), ∃ ℓ : M.H τ →ₗ[ℂ] ℂ, Sobolev₂ (lieAt V τ) (M.rep τ) ℓ ∧
     ∀ w : M.sm τ, ℓ w = T (Function.update v τ w) x

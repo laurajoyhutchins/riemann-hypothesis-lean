@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WdOfMono0L
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.WdOfMono0L
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,7 +114,7 @@ structure RowWD (D : D7) where
   dim : ∀ σ w, (par σ w).lpDim = D.R.r
   tame : ∀ σ k v, (par σ (D.naut.plGw k v)).tame
 
-set_option maxHeartbeats 2000000 in
+
 
 def setAut (D : D7) (hE : IsEmpty D.nd.Loc) (lab : ∀ k, D.what₂.FT → D.nd.PlG k → Polynomial (ZMod (D.host.g k)))
     (h : ∀ k σ v, (lab k σ v).Monic ∧ (lab k σ v).natDegree = D.R.r) (A : NAut (ndLab D.nd lab h)) (C : NBC A)
@@ -98,7 +137,7 @@ def setAut (D : D7) (hE : IsEmpty D.nd.Loc) (lab : ∀ k, D.what₂.FT → D.nd.
     mtpar_tie := fun i => hE.elim i, Z_tie := fun i => hE.elim i, Zgood_tie := fun i => hE.elim i
     etaJ_tie := D.etaJ_tie }
 
-set_option maxHeartbeats 2000000 in
+
 
 def setCG (D : D7) (hE : IsEmpty D.nd.Loc) (K : CGK D.naut) : D7 :=
   { D with

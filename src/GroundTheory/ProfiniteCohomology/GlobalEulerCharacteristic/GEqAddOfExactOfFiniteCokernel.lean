@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.UnitsDefs
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ModNEquivOfSurjectiveApplyModNRep
-import GroundTheory.GlobalFields.HerbrandQuotients.SUnits
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.UnitsDefs
+public import GroundTheory.GlobalFields.HerbrandQuotients.UnitsHerbrand
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveDefs
+import GroundTheory.GlobalFields.HerbrandQuotients.Lattice
+public import GroundTheory.GlobalFields.HerbrandQuotients.SUnits
+import GroundTheory.GlobalFields.HerbrandQuotients.UnitsHerbrandValue
+import GroundTheory.GlobalFields.SUnits
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.Additive
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ModNEquivOfSurjectiveApplyModNRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -177,7 +231,7 @@ theorem exists_logLatticeProd_real_equiv :
     | tmul r x =>
       rw [LinearMap.baseChange_tmul, LinearMap.liftBaseChange_tmul, LinearMap.liftBaseChange_tmul,
         map_smul, logLatticeProdMap_comm]
-    | add y z hy hz => rw [map_add, map_add, hy, hz, map_add, map_add]
+    | add y z hy hz => rw [map_add (f := _), map_add (f := _), hy, hz, map_add (f := _), map_add (f := _)]
   refine ⟨e, fun g y ↦ ?_⟩
   apply P.injective
   simp only [e, LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply]
@@ -217,7 +271,7 @@ theorem g_logLattice_add_one :
     intro x y h
     rw [hψ, hψ] at h
     have h' := hφi h
-    exact _root_.Prod.ext (Prod.mk.inj h').1 (ULift.ext _ _ (Prod.mk.inj h').2)
+    exact _root_.Prod.ext (Prod.mk.inj h').1 (ULift.ext (Prod.mk.inj h').2)
   have hψγ : ∀ (γ : L ≃ₐ[K] L) x, ψ (γ • x) = γ • ψ x := by
     intro γ x
     change φ (logLatticeRep K L γ x.1, x.2.down) =

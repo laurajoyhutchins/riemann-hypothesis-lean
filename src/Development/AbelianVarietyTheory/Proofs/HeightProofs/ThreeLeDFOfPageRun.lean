@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.ConclOfInputs4
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NoCommonZeroSt
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
+module
+
+public import Development.AbelianVarietyTheory.Definitions.HeightFunctions.ConclOfInputs4
 import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.ModulusPosOfThirdHypothesis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,8 +60,10 @@ theorem three_le_DF_of_SetC {D : D7} {B : WeightFamilies.Prov D} {P : ModuliInte
     omega
   have hτ : Nonempty D.what₂.Tau := by
     rw [← Fintype.card_pos_iff, D.what₂.card_Tau]
+    have hm := D.R.two_le_m
+    have hf := D.R.m_le_f
     unfold Ranks.f Ranks.n
-    positivity
+    omega
   obtain ⟨τ⟩ := hτ
   set i : Fin (D.R.sigW j).1 := ⟨(D.R.sigW j).1 - 1, by omega⟩ with hi
   have hi1 : i.1 + 1 = (D.R.sigW j).1 := by simp only [hi]; omega
@@ -33,7 +72,7 @@ theorem three_le_DF_of_SetC {D : D7} {B : WeightFamilies.Prov D} {P : ModuliInte
   have hn : ¬ i.1 + 1 < (D.R.sigW j).1 := by omega
   rw [if_neg hn] at h3
   unfold gapZ at h3
-  rw [dif_neg hn] at h3
+  rw [dite_eq_right hn] at h3
   have hTp : (0 : ℤ) < (Tp D j T : ℤ) := by unfold Tp; positivity
   rw [Int.fdiv_eq_ediv_of_nonneg _ hTp.le] at h3
   have h4 : (3 : ℤ) ≤ ((ka.aP τ i : ℤ) - ((WeightFamilies.dimY D j : ℤ) + 2) * nW - 2 * D.R.r) / (Tp D j T : ℤ) := by

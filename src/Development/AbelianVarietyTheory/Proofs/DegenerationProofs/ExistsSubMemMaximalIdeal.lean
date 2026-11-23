@@ -1,4 +1,66 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Invariant.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Invariant.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.IsSepClosed
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+
+@[expose] public section
+
 universe u_1
 open Polynomial IsLocalRing
 open scoped Pointwise
@@ -13,7 +75,9 @@ theorem isLocalRing_of_isInvariant {A B G : Type*} [CommRing A] [CommRing B] [Is
   haveI : Algebra.IsIntegral A B := Algebra.IsInvariant.isIntegral A B G
   obtain ⟨Q, hQ⟩ := Ideal.exists_maximal B
   have hunder : ∀ P : Ideal B, P.IsMaximal → P.under A = maximalIdeal A := fun P hP =>
-    IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P)
+    IsLocalRing.eq_maximalIdeal
+      (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap A B)
+        (fun x => Algebra.IsIntegral.isIntegral x) P)
   suffices hs : ∀ σ : G, σ • Q = Q by
     refine IsLocalRing.of_unique_max_ideal ⟨Q, hQ, fun P hP => ?_⟩
     haveI := hP.isPrime
@@ -86,7 +150,8 @@ theorem isLocalRing_of_isInvariant {A B G : Type*} [CommRing A] [CommRing B] [Is
     · intro δ _; rfl
   have hlift : f ∈ Polynomial.lifts (algebraMap A B) :=
     f.lifts_iff_coeff_lifts.mpr fun n =>
-      Algebra.IsInvariant.isInvariant (G := G) _ fun σ => by rw [← coeff_smul, hfinv]
+      Algebra.IsInvariant.isInvariant (G := G) _ fun σ => by
+        rw [← AddMonoidAlgebra.coeff_smul_apply, hfinv]
   obtain ⟨p, hp1, -, hp2⟩ := Polynomial.lifts_and_natDegree_eq_and_monic hlift hfm
   have hfφ : f.map φ = (X - 1) * X ^ (O.erase γ).card := by
     rw [hf, ← Finset.mul_prod_erase O _ hγO, Polynomial.map_mul, Polynomial.map_prod,
@@ -157,7 +222,7 @@ theorem exists_unit_mul_pow {R : Type*} (K L : Type*) [CommRing R] [IsDomain R]
   have hnf : ¬ IsField S := fun h => IsDiscreteValuationRing.not_isField R
     ((Algebra.IsIntegral.isField_iff_isField (FaithfulSMul.algebraMap_injective R S)).mpr h)
   haveI : IsDiscreteValuationRing S :=
-    ((IsDiscreteValuationRing.TFAE S hnf).out 0 2).mpr (inferInstance : IsDedekindDomain S)
+    ((IsDiscreteValuationRing.TFAE S hnf).out 1 3).mpr (inferInstance : IsDedekindDomain S)
   obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible S
   have hπ0 : algebraMap R S π ≠ 0 := by simpa using hπ.ne_zero
   obtain ⟨e, u, hu⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hπ0 hϖ
@@ -201,13 +266,16 @@ theorem exists_pow_eq_of_isGalois {R : Type*} (K L M : Type*) [CommRing R] [IsDo
   set T := integralClosure R M
   set S := integralClosure R L
   haveI : FaithfulSMul R M := FaithfulSMul.trans R K M
+  haveI : FaithfulSMul K M :=
+    (faithfulSMul_iff_algebraMap_injective K M).mpr (RingHom.injective (algebraMap K M))
   haveI : FaithfulSMul R T := FaithfulSMul.tower_bot R T M
   haveI : Algebra.IsInvariant R T (M ≃ₐ[K] M) := ⟨fun x hx => by
     have h1 : (x : M) ∈ (⊥ : IntermediateField K M) :=
       (IsGalois.mem_bot_iff_fixed _).mpr fun σ => congrArg Subtype.val (hx σ)
     obtain ⟨z, hz⟩ := IntermediateField.mem_bot.mp h1
     have h2 : IsIntegral R z := by
-      rw [← isIntegral_algebraMap_iff (algebraMap K M).injective, hz]; exact x.2
+      rw [← (isIntegral_algebraMap_iff (R := R) (A := K) (B := M)), hz]
+      exact x.2
     obtain ⟨r, hr⟩ := IsIntegrallyClosed.isIntegral_iff.mp h2
     refine ⟨r, Subtype.ext ?_⟩
     rw [← hz, ← hr]; rfl⟩
@@ -217,13 +285,16 @@ theorem exists_pow_eq_of_isGalois {R : Type*} (K L M : Type*) [CommRing R] [IsDo
   have hι : ∀ x : S, ((ι x : T) : M) = algebraMap L M x := fun _ => rfl
   have hunit : ∀ x : S, IsUnit (ι x) → IsUnit x := by
     intro x hx
+    haveI : FaithfulSMul L M :=
+      (faithfulSMul_iff_algebraMap_injective L M).mpr (RingHom.injective (algebraMap L M))
     obtain ⟨z, hz⟩ := hx.exists_right_inv
     have hz' : algebraMap L M x * (z : M) = 1 := congrArg Subtype.val hz
     have hx0 : (x : L) ≠ 0 := fun h => by simp [h] at hz'
     have h3 : algebraMap L M (x : L)⁻¹ = z := by
       rw [map_inv₀]; exact inv_eq_of_mul_eq_one_right hz'
     have h4 : IsIntegral R (x : L)⁻¹ := by
-      rw [← isIntegral_algebraMap_iff (algebraMap L M).injective, h3]; exact z.2
+      rw [← (isIntegral_algebraMap_iff (R := R) (A := L) (B := M)), h3]
+      exact z.2
     exact IsUnit.of_mul_eq_one (⟨_, h4⟩ : S) (Subtype.ext (mul_inv_cancel₀ hx0))
   haveI : IsLocalRing S := IsLocalRing.of_isUnit_or_isUnit_one_sub_self fun x => by
     rcases IsLocalRing.isUnit_or_isUnit_one_sub_self (ι x) with h | h
@@ -266,6 +337,7 @@ theorem exists_pow_eq_of_isGalois {R : Type*} (K L M : Type*) [CommRing R] [IsDo
     rcases h5 with h5 | h5
     · exfalso
       have h6 := congrArg (residue T) h5
+
       simp only [map_sum, map_mul, map_pow, hres, map_zero] at h6
       rw [geom_sum₂_self] at h6
       have h7 : IsUnit ((n : ResidueField T) * residue T y ^ (n - 1)) := by

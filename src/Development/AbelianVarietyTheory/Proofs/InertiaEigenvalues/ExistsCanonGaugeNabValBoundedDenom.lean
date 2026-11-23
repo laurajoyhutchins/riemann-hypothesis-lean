@@ -1,11 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SigCancel
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CanonGaugeDmonOfHLIntegral
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BilinPartCanonGaugeCongr
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsSymmBalancedCongrOfSeparability
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsSepDiscr
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BilinearLogFormEvalZeroRightEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CanonGaugeDmonOfHLIntegral
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BilinPartCanonGaugeCongr
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BilinearLogFormEvalZeroRightEqZero
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsSepDiscr
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsSymmBalancedCongrOfSeparability
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofDApply
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeBilinearTermEqNegDoubleSum
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SigCancel
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -30,13 +78,14 @@ theorem exists_symm_balanced {k : Type} [CommRing k] [Algebra ℚ k] (S : Subrin
     exact_mod_cast mul_ne_zero two_ne_zero (discr_ne_zero E)
   obtain ⟨g, hg⟩ := GlobalTheory.exists_addHom_tensor_int_of_biadditive
     (fun a b : 𝓞 E => (A a)ᵀ * β * A (star b))
-    (fun m m' n => by simp only [map_add, transpose_add, Matrix.add_mul])
-    (fun m n n' => by simp only [star_add, map_add, Matrix.mul_add])
+    (fun m m' n => by simp only [map_add (f := _), transpose_add, Matrix.add_mul])
+    (fun m n n' => by simp only [star_add, map_add (f := _), Matrix.mul_add])
   have hT : ∀ a b : 𝓞 E, (A (a * b))ᵀ = (A a)ᵀ * (A b)ᵀ := fun a b => by
     rw [mul_comm a b, map_mul, transpose_mul]
   set γ : Matrix (Fin d) (Fin d) k := ∑ i, (A (x i))ᵀ * β * A (star (y i)) with hγ
   have hγbal : ∀ a, (A a)ᵀ * γ = γ * A (star a) := fun a => by
     have := congrArg g (hc a)
+
     simp only [map_sum, hg] at this
     rw [hγ, Finset.mul_sum, Finset.sum_mul]
     convert this using 2 with i _ i _
@@ -44,8 +93,9 @@ theorem exists_symm_balanced {k : Type} [CommRing k] [Algebra ℚ k] (S : Subrin
     · rw [star_mul, map_mul]; simp only [Matrix.mul_assoc]
   have hβ : ((discr E : ℤ) : k) • β = ∑ i, (A (x i))ᵀ * ((A (y i))ᵀ * β) := by
     have := congrArg (fun a => (A a)ᵀ * β) h1
+
     simp only [map_sum, transpose_sum, Finset.sum_mul, hT, Matrix.mul_assoc, map_intCast,
-      transpose_intCast] at this
+    transpose_intCast] at this
     rw [this, Int.cast_smul_eq_zsmul, zsmul_eq_mul]
   have hdiff : ∀ i j, (((discr E : ℤ) : k) • β - γ) i j ∈ S := fun i j => by
     have e : ((discr E : ℤ) : k) • β - γ =
@@ -188,21 +238,21 @@ theorem pow_mul_nabVal_mem {R : Type} [CommRing R] {d : ℕ} {O : Type} [CommRin
   have c0 : constantCoeff g = 0 := by
     rw [← coeff_zero_eq_constantCoeff_apply]
     exact coeff_eq_zero_of_axes g hg.ax0 hg.ax1 0 (by simp)
-  have c1 : ∀ s, constantCoeff (pderiv k s g) = 0 := fun s => by
+  have c1 : ∀ s, constantCoeff (pderiv (R := k) s g) = 0 := fun s => by
     rw [const_pderiv]
     exact coeff_eq_zero_of_axes g hg.ax0 hg.ax1 _ (by simp)
   have hp : ∀ j : Fin 3, GP (pt k d j) := gp_pt
   have hl : DI (algebraMap R k) (defL (B.FK k) g) := by
     refine di_of_exp B.ph1 ?_ _ ?_ hg.ph1
     · rw [← gt_const_ev_eq _ (triple_points_zero_constant (n := 2) gp_zero₂ (gp_pt 0) (gp_pt 1)), B.cocycleLeft_zero_fst, map_one]
-    · rw [defL, map_sub, map_add, gt_const_ev _ (pair_points_zero_constant (hp _) (hp _)) _ c0,
+    · rw [defL, map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant (hp _) (hp _)) _ c0,
         gt_const_ev _ (pair_points_zero_constant (hp _) (hp _)) _ c0,
         gt_const_ev _ (pair_points_zero_constant (gp_addOf _ hF _ _ (hp _) (hp _)) (hp _)) _ c0]
       simp
   have hr : DI (algebraMap R k) (defR (B.FK k) g) := by
     refine di_of_exp B.ph2 ?_ _ ?_ hg.ph2
     · rw [← gt_const_ev_eq _ (triple_points_zero_constant (n := 2) gp_zero₂ (gp_pt 0) (gp_pt 1)), B.cocycleRight_zero_fst, map_one]
-    · rw [defR, map_sub, map_add, gt_const_ev _ (pair_points_zero_constant (hp _) (hp _)) _ c0,
+    · rw [defR, map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant (hp _) (hp _)) _ c0,
         gt_const_ev _ (pair_points_zero_constant (hp _) (hp _)) _ c0,
         gt_const_ev _ (pair_points_zero_constant (hp _) (gp_addOf _ hF _ _ (hp _) (hp _))) _ c0]
       simp
@@ -215,8 +265,9 @@ theorem pow_mul_nabVal_mem {R : Type} [CommRing R] {d : ℕ} {O : Type} [CommRin
   refine pow_mul_const_dmonOf_mem iF _ hu δ hδ _ (gt_const_ev _ (pair_points_zero_constant (gp_pt 0) hw) _ c0)
     (fun l => ?_) (fun l l' => ?_) m _ ⟨f, rfl⟩ α
   · rw [Dof]
+
     simp only [map_sum, map_mul, constantCoeff_pderiv_formalSubst_two _ _ (gp_pt 0) hw, c1, zero_mul,
-      Finset.sum_const_zero, add_zero, mul_zero]
+    Finset.sum_const_zero, add_zero, mul_zero]
   · have h := mul_mem (int_C (n := 1) (d := d) hδ) (quad_int iF hU iw hom g c1 hl hr (hu l) (hu l'))
     rw [mul_sub, ← map_mul] at h
     have h' := add_mem h (int_C (n := 1) (d := d) (add_mem

@@ -1,9 +1,54 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.CorA3primeB
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LemmaA2indepOf
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.JacobiMinorProof
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.GenSpace
-import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.LeIffLtColHeight
+module
+
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.IndexWeightsDominance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Monad
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +71,7 @@ theorem vars_of_polB {R : Type*} [CommRing R] {n N : ℕ} {B : ℕ → ℕ} {G :
   push_neg at hlt
   have hGi := (Submodule.mem_iInf _).mp hG x.1
   rw [if_neg (not_lt.mpr hlt), mem_weightedHomogeneousSubmodule] at hGi
-  obtain ⟨e, he, hex⟩ := (MvPolynomial.mem_vars x).mp hx
+  obtain ⟨e, he, hex⟩ := (MvPolynomial.mem_vars_iff_mem_support x).mp hx
   have h0 := hGi (mem_support_iff.mp he)
   have hpos : 0 < e x := Nat.pos_of_ne_zero (Finsupp.mem_support_iff.mp hex)
   rw [Finsupp.weight_apply, Finsupp.sum] at h0
@@ -65,33 +110,6 @@ theorem vars_act {L : Type*} [CommRing L] [Nontrivial L] {n N : ℕ} (isVec : �
   obtain ⟨x, hx, hyx⟩ := Finset.mem_biUnion.mp (MvPolynomial.vars_bind₁ _ _ hy)
   rw [vars_actX isVec g gi x y hyx]
   exact hv x hx
-
-private lemma rename_actAll_eq_sharpHom {L : Type*} [CommRing L] {n N : ℕ} (isVec : ℕ → Bool)
-    (g gi : Matrix (Fin n) (Fin n) L) (P : MvPolynomial (ℕ × Fin n) L) (hv : ∀ x ∈ P.vars, x.1 < N) :
-    rename (Sum.inl : ℕ × Fin n → ℕ × Fin n ⊕ Empty) (actAll isVec g gi P) =
-      sharpHom (ζ := Empty) isVec {j : ℕ | j < N} g gi (rename Sum.inl P) := by
-  have h := MvPolynomial.hom_congr_vars
-    (f₁ := ((rename (Sum.inl : ℕ × Fin n → ℕ × Fin n ⊕ Empty)).comp (actAll isVec g gi)).toRingHom)
-    (f₂ := ((sharpHom (ζ := Empty) isVec {j : ℕ | j < N} g gi).comp
-      (rename (Sum.inl : ℕ × Fin n → ℕ × Fin n ⊕ Empty))).toRingHom) (p₁ := P) (p₂ := P) ?_ ?_ rfl
-  · simpa using h
-  · exact RingHom.ext fun a => by simp
-  · rintro ⟨i, a⟩ hi _
-    have hiN : i < N := hv _ hi
-    simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgHom.comp_apply, rename_X, actAll_X]
-    simp only [sharpHom, aeval_X, Set.mem_setOf_eq, hiN, if_true]
-    split_ifs <;> simp [Matrix.vecMul, dotProduct]
-
-theorem bridge (k : Type) [Field k] {n N : ℕ} (isVec : ℕ → Bool) {G : MvPolynomial (ℕ × Fin n) k}
-    (hv : ∀ x ∈ G.vars, x.1 < N) :
-    rename Sum.inl (actAll isVec (genMat k n) (genMat k n)⁻¹ (map (algebraMap k (GenField k n)) G)) =
-      genPoint (ζ := Empty) isVec {j : ℕ | j < N} (rename Sum.inl G) := by
-  rw [GS.genPoint_eq]
-  have ha := GS.act_eq (ζ := Empty) (isVec := isVec) (S := {j : ℕ | j < N}) (genMat k n)
-    GS.genMat_isUnit (rename Sum.inl G)
-  refine Eq.trans ?_ ha
-  rw [map_rename]
-  exact rename_actAll_eq_sharpHom isVec _ _ _ (fun x hx => hv x (vars_map _ _ hx))
 
 end DominanceOrderLemmas
 

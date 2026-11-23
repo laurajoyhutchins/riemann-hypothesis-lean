@@ -1,8 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ExistsSecNotMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.NsPoint
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.FtHolds
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.OzTwoMulEqPow
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ToDegInjective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.ExistsSecNotMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.FtHolds
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.NsPoint
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.GradedModulesLength.OzTwoMulEqPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing Filter Formalism.MainNotions.V.Pf.V2.Calc UpperTheory.V.Alg UpperTheory.V.Alg.M
 
@@ -14,7 +66,7 @@ variable {O A R : Type} [CommRing O] [CommRing A] [Algebra O A] [CommRing R]
 
 private def zmJ (ι : ℕ → A →+ R) (p : Ideal R) : Ideal A where
   carrier := {a | ∀ h n, ι n (h * a) ∈ p}
-  add_mem' {a b} ha hb h n := by rw [mul_add, map_add]; exact add_mem (ha h n) (hb h n)
+  add_mem' {a b} ha hb h n := by rw [mul_add, map_add (f := _)]; exact add_mem (ha h n) (hb h n)
   zero_mem' h n := by simp
   smul_mem' c a ha h n := by rw [smul_eq_mul, ← mul_assoc]; exact ha _ n
 
@@ -25,6 +77,7 @@ private theorem zm_of_hom (h0 : ∀ (n : ℕ) j a, a ∈ 𝒜 j → j ≠ -(2 * 
   classical
   show ∀ h n, ι n (h * g) ∈ p
   intro h n
+
   rw [← DirectSum.sum_support_decompose 𝒜 h, Finset.sum_mul, map_sum]
   refine Ideal.sum_mem _ fun i _ => ?_
   by_cases hi : i = -(2 * (n : ℤ)) - j
@@ -112,7 +165,7 @@ private theorem zm_iota {O A : Type} [CommRing O] [CommRing A] [Algebra O A] (�
       map_add' := fun a b => by
         apply Subtype.ext
         show MvPolynomial.monomial _ _ = MvPolynomial.monomial _ _ + MvPolynomial.monomial _ _
-        simp [map_add] }
+        simp [map_add (f := _)] }
   refine ⟨ι, ?_, ?_⟩
   · intro n j a ha hj
     apply Subtype.ext
@@ -140,8 +193,8 @@ private theorem zm_f {B A : Type} [CommRing B] [CommRing A] [Algebra B A] {k : �
   apply hp
   refine hle.trans (Ideal.span_le.mpr ?_)
   intro s hs
-  have hs' : ∀ m : Fin k →₀ ℕ, toDeg m ≠ e i → MvPolynomial.coeff m s.1 = 0 := hs
-  have hc : MvPolynomial.coeff (Finsupp.single i 1) s.1 ∈ N i := by
+  have hs' : ∀ m : Fin k →₀ ℕ, toDeg m ≠ e i → AddMonoidAlgebra.coeff s.1 m = 0 := hs
+  have hc : AddMonoidAlgebra.coeff s.1 (Finsupp.single i 1) ∈ N i := by
     rw [← lat_single N i]
     exact s.2 _
   have hval : s = sec N i _ hc := by
@@ -222,9 +275,6 @@ theorem UpperTheory.V.Alg.M.zm_holds :
       rw [← (hpow (n + 1)).2, mem_oz]
       have := SetLike.pow_mem_graded 2 hg
       convert this using 2
-      rw [nsmul_eq_mul]
-      push_cast
-      ring
     have hle : oz 𝒜 2 ^ (n + 1) ≤ (zmJ ι p).restrictScalars (𝒜 0) := by
       rw [pow_succ, Submodule.mul_le]
       intro a _ b hb

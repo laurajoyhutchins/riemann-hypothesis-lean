@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
+public import Mathlib.RingTheory.AlgebraicIndependent.AlgebraicClosure
+
+@[expose] public section
 
 open Matrix
 
@@ -13,17 +70,18 @@ theorem affine_form_ne_zero {K L : Type} [Field K] [Field L] [Algebra K L] {n : 
   let P : MvPolynomial (Fin n) K :=
     MvPolynomial.C a + ∑ j, MvPolynomial.C (b j) * MvPolynomial.X j
   have hP : MvPolynomial.aeval x P = 0 := by
-    simpa [P, map_add, map_sum, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_X] using h
+
+    simpa [P, map_add (f := _), map_sum, map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_X] using h
   have hP0 : P = 0 := by
     have := (injective_iff_map_eq_zero (MvPolynomial.aeval x : MvPolynomial (Fin n) K →ₐ[K] L)).mp hx
     exact this P hP
   rcases hab with ha | ⟨j, hj⟩
   · apply ha
-    have := congrArg (MvPolynomial.coeff 0) hP0
+    have := congrArg (AddMonoidAlgebra.coeff · 0) hP0
     simpa [P, MvPolynomial.coeff_add, MvPolynomial.coeff_sum, MvPolynomial.coeff_C_mul,
       MvPolynomial.coeff_C, MvPolynomial.coeff_X'] using this
   · apply hj
-    have := congrArg (MvPolynomial.coeff (Finsupp.single j 1)) hP0
+    have := congrArg (AddMonoidAlgebra.coeff · (Finsupp.single j 1)) hP0
     have hne : (0 : Fin n →₀ ℕ) ≠ Finsupp.single j 1 :=
       (Finsupp.single_ne_zero.mpr one_ne_zero).symm
     simpa [P, hne, MvPolynomial.coeff_add, MvPolynomial.coeff_sum, MvPolynomial.coeff_C_mul,
@@ -180,8 +238,9 @@ theorem generic_lu_decomposition_exists (n : ℕ) : ∀ (K L : Type) [Field K] [
     have hxs : ∀ k, algebraMap K₁ L (xs k) = x k := fun _ => rfl
     have hM0 : ∀ i, M i 0 = algebraMap K₁ L (q i) := by
       intro i
-      simp only [M, q, Matrix.mul_apply, Fin.sum_univ_succ, Matrix.map_apply, hdiag, map_add,
-        map_sum, map_mul, hcoe, hxs, mul_one]
+
+      simp only [M, q, Matrix.mul_apply, Fin.sum_univ_succ, Matrix.map_apply, hdiag, map_add (f := _),
+      map_sum, map_mul, hcoe, hxs, mul_one]
       rfl
     have hMs : ∀ i j, M i j.succ = ∑ k, algebraMap K L (A i k.succ) * u' k j := by
       intro i j

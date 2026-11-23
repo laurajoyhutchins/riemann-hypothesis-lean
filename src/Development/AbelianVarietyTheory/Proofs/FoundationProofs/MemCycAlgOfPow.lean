@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTLawAt
-import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
-import Development.AbelianVarietyTheory.Definitions.Foundations.CosetTrace
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsTrDataGaussianIntOne
+module
+
+public import Mathlib.RingTheory.Kaehler.Basic
+public import ReciprocityTheory.GaloisValuations.Global
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +62,7 @@ def fixA (A : ValuationSubring Ω) : Subring A where
   zero_mem' := fun s _ => by simp
   add_mem' := fun {a b} ha hb s hs => by
     show s ((a : Ω) + (b : Ω)) = (a : Ω) + (b : Ω)
-    rw [map_add, ha s hs, hb s hs]
+    rw [map_add (f := _), ha s hs, hb s hs]
   neg_mem' := fun {a} ha s hs => by
     show s (-(a : Ω)) = -(a : Ω)
     rw [map_neg, ha s hs]
@@ -45,8 +86,8 @@ theorem mem_ineCyc {l : ℕ} [Fact l.Prime] {A : ValuationSubring Ω} {s : G ℚ
 
 abbrev FracA (A : ValuationSubring Ω) : Type := Ω ⧸ LinearMap.range (Algebra.linearMap A Ω)
 
-omit [Algebra ℚ Ω] in
 
+omit [Algebra ℚ Ω] in
 theorem mem_of_pow_mem (A : ValuationSubring Ω) {x : Ω} {n : ℕ} (hn : n ≠ 0)
     (h : x ^ n ∈ A) : x ∈ A := by
   rw [← A.valuation_le_one_iff] at h ⊢

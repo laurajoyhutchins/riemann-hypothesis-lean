@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.VanishTranslates
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.ApproxId
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.VanishTranslates
+public import Formalism.LocalToGlobal.IndefiniteReal.SchurOrthogonality
+public import Formalism.PeriodIntegrals.UpqRep
+public import Formalism.LocalToGlobal.IndefiniteReal.GvPairOfOrbitDerivCont
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.ApproxId
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.LocalToGlobal.IndefiniteReal.DKerHasCompactSupport
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,7 +118,7 @@ theorem ksub_rep {g : Matrix (Fin V.rank) (Fin V.rank) ℂ} (hg : g ∈ Formalis
     refine Submodule.subset_span ⟨g * g', uh_mul τ hg hg', w0, ?_⟩
     rw [rep_mul M τ hg hg', ContinuousLinearMap.comp_apply]
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ c hx
 
 theorem ksub_closure_top (hlow : ∃ w0 : lowT M τ, ((w0 : M.sm τ) : M.H τ) ≠ 0) :
@@ -117,7 +165,7 @@ theorem cont_orbit {ℓ : M.H τ →ₗ[ℂ] ℂ} (hℓ : Sobolev₂ (lieAt V τ
     have hs := gp_sv_add (hsv h) (gp_sv_smul (-1) (hsv h0))
     have e1 : ℓ (M.σ τ (PI.UpqRep.umat h) w) - ℓ (M.σ τ (PI.UpqRep.umat h0) w) =
         ℓ (M.σ τ (PI.UpqRep.umat h) w + (-1 : ℂ) • M.σ τ (PI.UpqRep.umat h0) w) := by
-      rw [map_add, map_smul]; simp [sub_eq_add_neg]
+      rw [map_add (f := _), map_smul]; simp [sub_eq_add_neg]
     rw [e1]
     refine (hC _ hs).trans ?_
     have e2 : (L.map fun l => ‖l.foldr (dRep (M.rep τ)) (M.σ τ (PI.UpqRep.umat h) w +

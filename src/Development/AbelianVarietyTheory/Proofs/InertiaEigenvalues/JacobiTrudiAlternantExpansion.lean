@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SchurEqJtDet
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AddLeOfStrictAnti
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SchurEqJtDet
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AddLeOfStrictAnti
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,6 +123,7 @@ theorem antisym_lhs_eq {A : Type*} [CommRing A] (m d : ℕ) (h : ℕ → A) :
     exact Finset.sum_congr rfl fun ν _ => by ring
   rw [Finset.sum_congr rfl fun σ _ => hσ σ, Finset.sum_comm]
   refine Finset.sum_congr rfl fun ν _ => ?_
+
   rw [← Finset.sum_mul, Matrix.det_apply', map_sum]
   congr 1
   refine Finset.sum_congr rfl fun σ _ => ?_
@@ -125,8 +168,8 @@ theorem antisym_gap {m : ℕ} {s : Fin m → ℕ} (hs : StrictAnti s) :
   | (intros; apply @_root_.GlobalTheory.StrictAntiAddLe.add_le_of_strictAnti <;> first | assumption | infer_instance)
   | (intros; exact _root_.GlobalTheory.StrictAntiAddLe.add_le_of_strictAnti ..)
 
-open Classical in
 
+open Classical in
 theorem antisym_sum_sort {M : Type*} [AddCommMonoid M] (m d : ℕ) (g : (Fin m → ℕ) → M) :
     ∑ l ∈ antiParts m d, ∑ τ : Perm (Fin m), g (fun i => l (τ i) + staircase m (τ i)) =
       ∑ ν ∈ (Finset.Nat.antidiagonalTuple m (d + ∑ i, staircase m i)).filter Function.Injective, g ν := by
@@ -230,11 +273,5 @@ theorem alternant_staircase_mul_antidiagonal {A : Type} [CommRing A] (m d : ℕ)
     obtain ⟨a, b, hab, hne⟩ := hni
     exact ⟨a, b, hab, hne⟩
   rw [Matrix.det_zero_of_column_eq hne' (fun k => by simp [antisymMat, hab]), map_zero, zero_mul]
-
-example : alternant ℤ 2 (staircase 2) *
-    ∑ k ∈ Finset.Nat.antidiagonalTuple 2 1, ∏ j, MvPolynomial.C ((k j : ℤ) + 1) * MvPolynomial.X j ^ (k j) =
-      ∑ l ∈ antiParts 2 1, MvPolynomial.C (jtDet 2 (fun k => (k : ℤ) + 1) l) *
-        alternant ℤ 2 (fun i => l i + staircase 2 i) :=
-  alternant_staircase_mul_antidiagonal 2 1 (fun k => (k : ℤ) + 1)
 
 end GlobalTheory.JSW

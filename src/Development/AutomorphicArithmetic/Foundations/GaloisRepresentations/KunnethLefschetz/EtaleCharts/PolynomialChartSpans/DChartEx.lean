@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtaleCharts.FinCover
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtaleCharts.FinCover
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,10 +103,9 @@ private theorem alg_core {D : ℕ} (u : Fin D → B)
     exact this ha)
   have hm : ∀ y : B ⊗[P] B, mulQ (ρ y) = Algebra.TensorProduct.lmul' P y := by
     intro y
-    induction y using TensorProduct.induction_on with
-    | zero => simp
+    induction y using TensorProduct.inductionOn with
     | tmul x y => rw [hρ]; simp [mulQ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   obtain ⟨t', ht0, ht1⟩ := (Algebra.FormallyUnramified.iff_exists_tensorProduct (R := P) (S := B)).1 inferInstance
   obtain ⟨t, ht⟩ := Ideal.Quotient.mk_surjective (ρ t')
   refine ⟨t, ?_, fun x hx => ?_⟩
@@ -86,10 +134,9 @@ private theorem alg2 {T : Type} [CommRing T] [Algebra R T] (a b : B →ₐ[R] T)
   obtain ⟨t, ht1, ht2⟩ := alg_core (R := R) u h
   have hm : ∀ y : B ⊗[R] B, m (Algebra.TensorProduct.productMap a b y) = Algebra.TensorProduct.lmul' R y := by
     intro y
-    induction y using TensorProduct.induction_on with
-    | zero => simp
+    induction y using TensorProduct.inductionOn with
     | tmul x y => simp [ma, mb]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   refine ⟨Algebra.TensorProduct.productMap a b t, by rw [hm, ht1], fun x hx => ?_⟩
   obtain ⟨y, rfl⟩ := hφ.2 x
   rw [hm] at hx
@@ -201,7 +248,7 @@ private theorem sq_main (Z : Sch R) (U : Z.left.Opens) (hU : IsAffineOpen U) :
     exact this
   let ψ₀ := pullback.map (Spec.map (CommRingCat.ofHom (algebraMap R B))) (Spec.map (CommRingCat.ofHom (algebraMap R B)))
     Z.hom Z.hom j j (𝟙 _) (by rw [Category.comp_id, hj]) (by rw [Category.comp_id, hj])
-  haveI : IsOpenImmersion ψ₀ := MorphismProperty.pullback_map (P := IsOpenImmersion) inferInstance inferInstance hj hj
+  haveI : IsOpenImmersion ψ₀ := MorphismProperty.pullbackMap (P := IsOpenImmersion) inferInstance inferInstance hj hj
   let ψ : Spec (CommRingCat.of (B ⊗[R] B)) ⟶ (XX Z).left := (pullbackSpecIso R B B).inv ≫ ψ₀
   haveI : IsOpenImmersion ψ := inferInstanceAs (IsOpenImmersion ((pullbackSpecIso R B B).inv ≫ ψ₀))
   have hr : Set.range ψ = (W : Set (XX Z).left) := by

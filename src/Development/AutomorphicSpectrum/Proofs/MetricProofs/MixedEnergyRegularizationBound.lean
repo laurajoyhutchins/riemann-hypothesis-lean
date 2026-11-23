@@ -1,9 +1,60 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.LeviForms.ConvExpandStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MaMeasureEqOfConst
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsCompactRWSublevel
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CompactPartIntegralsTendsto
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocDensAddOfFunContinuousOn
+module
+
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.CompactPartIntegralsTendsto
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsCompactRWSublevel
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocDensAddOfFunContinuousOn
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MaMeasureEqOfConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.LeviForms.ConvExpandStatement
+public import ReciprocityTheory.AnalyticForms.LeviForms.TailBoundB
+import ReciprocityTheory.AnalyticForms.LeviForms.TailCut
+import ReciprocityTheory.AnalyticForms.LeviForms.TailCutA
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.AnalyticSubsetChartLocal
+
+@[expose] public section
+
 open MeasureTheory Metric Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.AnForm.M.FinHolAtlas
 open scoped ContDiff
 
@@ -88,7 +139,8 @@ theorem tail_lintegral_le_of_eventually {e : ℕ} {X : Type} [TopologicalSpace X
     rw [integral_eq_lintegral_of_nonneg_ae (hnn _) hgm.aestronglyMeasurable,
       ← ENNReal.toReal_ofReal']
     exact ENNReal.toReal_mono ENNReal.ofReal_ne_top
-      ((lintegral_mono_set (fun y hy => hy.1)).trans ht)
+      ((lintegral_mono_set (show Es N ⊆ (bdry s)ᶜ ∩ {y | R ≤ rW L s y} from
+        fun _ hy => hy.1)).trans ht)
   rw [← ofReal_integral_eq_lintegral_ofReal (hint.mono_set hEK) (hnn _)]
   refine (ENNReal.ofReal_le_ofReal hle).trans (le_of_eq ?_)
   rcases le_total B 0 with h | h
@@ -126,7 +178,8 @@ theorem limit_measure_tail : TailBoundStatement → ∀ {e : ℕ} {X : Type} [To
         have h1 := ((hT (fun _ => t) fun _ => ht).2 R hRe).1
         simp only [ENNReal.ofReal_one, lintegral_const, one_mul, Measure.restrict_apply,
           MeasurableSet.univ, Set.univ_inter]
-        exact (measure_mono fun y hy => Or.inr hy.2).trans h1)
+        exact (measure_mono (show (bdry s)ᶜ ∩ {y | R ≤ rW L s y} ⊆
+          bdry s ∪ {y | R ≤ rW L s y} from fun _ hy => Or.inr hy.2)).trans h1)
     simpa using h
   have tail : ∀ R : ℝ, Real.exp 1 ≤ R →
       maMeasure A (fun i => th i + LocPot.ofFun (ph i) + Θ) (bdry s ∪ {y | R ≤ rW L s y}) ≤

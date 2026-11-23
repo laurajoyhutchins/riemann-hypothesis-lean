@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OpenCellParabolicNearIdentity
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,22 +104,7 @@ theorem dEmb_add (i t : ℕ) (a b : Fin (t + 1) → k) : dEmb k i t (a + b) = dE
   simp only [dEmb, Subgroup.coe_mul, this, ofAdd_add, map_mul]
 
 theorem continuous_dEmb (i t : ℕ) : Continuous (dEmb k i t) := by
-  refine Continuous.subtype_mk ?_ _
-  rw [Units.continuous_iff]
-  have hcol : Continuous fun d : Fin (t + 1) → k => colMat k ((i + 1) + (t + 1)) (Fin.append (0 : Fin (i + 1) → k) d) := by
-    refine continuous_matrix fun r c => ?_
-    by_cases hc : c = Fin.last _
-    · subst hc
-      refine Fin.lastCases ?_ (fun r' => ?_) r
-      · simpa [colMat] using continuous_const
-      · simp only [colMat, if_true, Fin.lastCases_castSucc]
-        refine Fin.addCases (fun a => ?_) (fun a => ?_) r'
-        · simpa using continuous_const
-        · simpa using continuous_apply a
-    · simpa [colMat, hc] using continuous_const
-  constructor
-  · exact continuous_const.add hcol
-  · exact continuous_const.sub hcol
+  apply GlobalTheory.CompanionTheory.BZPhiPG.OntoO.Small.continuous_dEmb <;> assumption
 
 theorem dEmb_mul_entry (i t : ℕ) (d : Fin (t + 1) → k) (g : Mir k ((i + 1) + t + 1)) (b : Fin (t + 1)) :
     (((dEmb k i t d * g : Mir k ((i + 1) + t + 1)) : GL (Fin ((i + 1) + t + 2)) k) :
@@ -88,7 +121,7 @@ theorem dEmb_mul_entry (i t : ℕ) (d : Fin (t + 1) → k) (g : Mir k ((i + 1) +
   have hc : colMat k ((i + 1) + (t + 1)) (Fin.append (0 : Fin (i + 1) → k) d)
       (Fin.castSucc (Fin.natAdd (i + 1) b)) (Fin.last _) = d b := by
     simp only [colMat, if_true, Fin.lastCases_castSucc, Fin.append_right]
-  rw [Subgroup.coe_mul, Units.val_mul, hv, add_mul, one_mul, Matrix.add_apply, mul_apply,
+  rw [Subgroup.coe_mul, Units.val_mul, hv, add_mul, one_mul, Matrix.add_apply, Matrix.mul_apply,
     Finset.sum_eq_single (Fin.last _)]
   · rw [hc]
     exact congrArg (_ + ·) ((congrArg (d b * ·) hg).trans (mul_one _))

@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.SharpRestriction.LevelLetterCocycles.EqZeroOfPowDvd
+public import Mathlib.RingTheory.PowerSeries.Inverse
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,31 +77,29 @@ theorem lev_eq_levC (i : ZMod n) (ζ : LL) (a : LetA O n) : W.lev i ζ a = levC 
   exact h
 
 theorem levC_X (i : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) :
-    ∃ E : PowerSeries LL, PowerSeries.constantCoeff E = 1 ∧ PowerSeries.derivative LL E = E ∧
+    ∃ E : PowerSeries LL, PowerSeries.constantCoeff E = 1 ∧ PowerSeries.derivative (R := LL) E = E ∧
       levC W i ζ PowerSeries.X = PowerSeries.C ζ * E - 1 := by
   obtain ⟨E, h0, h1, h2⟩ := W.lev_π i ζ ⟨1, by rwa [pow_one]⟩
   refine ⟨E, h0, h1, ?_⟩
   have h3 : levC W i ζ PowerSeries.X = W.lev i ζ letπ := by
     first
     | rfl
-    | exact (lev_eq_levC W i ζ letπ).symm
   rw [h3]
   linear_combination h2
 
 private theorem coeff_zero_derivative_eq_coeff_one {R : Type} [CommRing R] (f : PowerSeries R) :
-    PowerSeries.coeff 0 (PowerSeries.derivative R f) = PowerSeries.coeff 1 f := by
+    PowerSeries.coeff 0 (PowerSeries.derivative (R := R) f) = PowerSeries.coeff 1 f := by
   first
-  | (rw [show PowerSeries.derivative R f = f.derivativeFun from rfl, PowerSeries.coeff_derivativeFun]; simp)
+  | (rw [show PowerSeries.derivative (R := R) f = f.derivativeFun from rfl, PowerSeries.coeff_derivativeFun]; simp)
   | simp [PowerSeries.coeff_derivativeFun]
-  | simp [PowerSeries.derivative, PowerSeries.coeff_derivativeFun]
 
 theorem X_dvd_levC_q (i : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) (hp : 2 ≤ PD.p) :
     PowerSeries.X ∣ levC W i ζ W.q₀ := by
   obtain ⟨E, hE0, _, hX⟩ := levC_X W i ζ hζ
   have h := congrArg (levC W i ζ) W.q₀_def
-  simp only [map_mul, map_sub, map_pow, map_add, map_one, hX] at h
+  simp only [map_mul, map_sub, map_pow, map_add (f := _), map_one, hX] at h
   have h2 := congrArg PowerSeries.constantCoeff h
-  simp only [map_mul, map_sub, map_pow, map_add, map_one, PowerSeries.constantCoeff_C, hE0] at h2
+  simp only [map_mul, map_sub, map_pow, map_add (f := _), map_one, PowerSeries.constantCoeff_C, hE0] at h2
   rw [PowerSeries.X_dvd_iff]
   have h3 : (ζ - 1) * PowerSeries.constantCoeff (levC W i ζ W.q₀) = 0 := by
     linear_combination h2 + hζ.pow_eq_one
@@ -83,9 +130,8 @@ theorem residue_q₀ [IsLocalRing O] (hp : PD.p.Prime) (hpm : ((PD.p : ℕ) : O)
   haveI : CharP (PowerSeries (IsLocalRing.ResidueField O)) PD.p := by
     first
     | exact (CharP.charP_iff_prime_eq_zero hp).mpr hK
-    | exact (charP_iff_prime_eq_zero hp).mpr hK
   have h := congrArg (PowerSeries.map (IsLocalRing.residue O)) W.q₀_def
-  simp only [map_mul, map_sub, map_pow, map_add, map_one, PowerSeries.map_X] at h
+  simp only [map_mul, map_sub, map_pow, map_add (f := _), map_one, PowerSeries.map_X] at h
   rw [add_pow_char, one_pow, add_sub_cancel_left] at h
   have h2 : PowerSeries.X * PowerSeries.map (IsLocalRing.residue O) W.q₀ =
       PowerSeries.X * PowerSeries.X ^ (PD.p - 1) := by
@@ -98,11 +144,10 @@ private theorem eq_of_mul_mul_eq_of_det_ne_zero (i : ZMod n) (ζ : LL) (hζ : Is
   obtain ⟨E, hE0, hE1, hX⟩ := levC_X W i ζ hζ
   obtain ⟨w, hw⟩ := X_dvd_levC_q W i ζ hζ hp
   have h1 := congrArg (levC W i ζ) W.q₀_def
-  simp only [map_mul, map_sub, map_pow, map_add, map_one, hX, hw] at h1
+  simp only [map_mul, map_sub, map_pow, map_add (f := _), map_one, hX, hw] at h1
   have e : (PowerSeries.C ζ * E) ^ PD.p = E ^ PD.p := by
     first
     | rw [mul_pow, ← map_pow, hζ.pow_eq_one, map_one, one_mul]
-    | simp [mul_pow, ← map_pow, hζ.pow_eq_one]
   have h1' : (PowerSeries.C ζ * E - 1) * w * PowerSeries.X = E ^ PD.p - 1 := by
     rw [← e]
     linear_combination h1
@@ -118,7 +163,6 @@ private theorem eq_of_mul_mul_eq_of_det_ne_zero (i : ZMod n) (ζ : LL) (hζ : Is
     have e2 : PowerSeries.coeff 1 (E ^ PD.p - 1) = PowerSeries.coeff 1 (E ^ PD.p) := by
       first
       | simp
-      | simp [PowerSeries.coeff_one]
     rw [← hD, ← e2, ← hc, PowerSeries.coeff_zero_eq_constantCoeff_apply, map_mul, h0, mul_zero]
   have hwU : IsUnit w := by
     rw [PowerSeries.isUnit_iff_constantCoeff]
@@ -127,8 +171,6 @@ private theorem eq_of_mul_mul_eq_of_det_ne_zero (i : ZMod n) (ζ : LL) (hζ : Is
   have h2 := (mul_dvd_mul_iff_left PowerSeries.X_ne_zero).mp h
   first
   | exact hwU.dvd_mul_left.mp h2
-  | exact (IsUnit.dvd_mul_left hwU).mp h2
-  | exact (Units.dvd_mul_left (u := hwU.unit)).mp h2
 
 private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) O]
     (hp : PD.p.Prime) (hpm : ((PD.p : ℕ) : O) ∈ IsLocalRing.maximalIdeal O)
@@ -154,8 +196,6 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
   have hdeg : r.degree < ((PD.p - 1 : ℕ) : WithBot ℕ) := by
     first
     | (rw [ENat.toNat_coe] at hdeg0; exact hdeg0)
-    | exact hdeg0
-    | simpa only [ENat.toNat_coe] using hdeg0
   have hroots : ∀ ζ ∈ primitiveRoots PD.p LL, (r.map (algebraMap O LL)).eval (ζ - 1) = 0 := by
     intro ζ hζm
     have hζ : IsPrimitiveRoot ζ PD.p := (mem_primitiveRoots hp.pos).mp hζm
@@ -165,7 +205,6 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
       have hc := (levC W i ζ).commutes c
       first
       | simpa [PowerSeries.algebraMap_apply] using hc
-      | simpa [PowerSeries.algebraMap_apply'] using hc
     have key : ∀ s : Polynomial O, PowerSeries.constantCoeff (levC W i ζ (s : PowerSeries O)) =
         (s.map (algebraMap O LL)).eval (ζ - 1) := by
       intro s
@@ -177,7 +216,7 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
       · intro k c _
         simp [hC, hX, hE0]
     have h1 := hv ζ hζ
-    rw [heq, map_add, map_mul] at h1
+    rw [heq, map_add (f := _), map_mul] at h1
     have h3 := dvd_mul_of_dvd_left (X_dvd_levC_q W i ζ hζ hp.two_le) (levC W i ζ q)
     have h2 := (dvd_add_right h3).mp h1
     rw [PowerSeries.X_dvd_iff, key] at h2
@@ -187,7 +226,6 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
     have hRdeg : (r.map (algebraMap O LL)).degree < ((PD.p - 1 : ℕ) : WithBot ℕ) := by
       first
       | exact lt_of_le_of_lt Polynomial.degree_map_le hdeg
-      | exact lt_of_le_of_lt (Polynomial.degree_map_le _ _) hdeg
     have hnd : (r.map (algebraMap O LL)).natDegree < PD.p - 1 :=
       (Polynomial.natDegree_lt_iff_degree_lt hR).mpr hRdeg
     apply hR
@@ -217,8 +255,6 @@ theorem q_pow_dvd [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) O
     rw [h0, AddValuation.map_zero] at h1
     first
     | exact WithTop.top_ne_one h1
-    | exact absurd h1 (by simp)
-    | simp at h1
   induction b generalizing a with
   | zero => exact ⟨a, by simp⟩
   | succ b ih =>

@@ -1,5 +1,63 @@
-import Mathlib
-import Formalism.GaloisCohomology.LocalTateDualityK
+module
+
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.Instances.ZMod
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.GaloisCohomology.StatementLoc
+public import Mathlib.Analysis.Normed.Group.FunctionSeries
+public import Mathlib.Analysis.SpecificLimits.Basic
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology
 
 namespace GlobalTheory.PadicCocycleLift
@@ -81,8 +139,8 @@ theorem continuous_dTwo {χ : Γ → ℤ_[l]} (hχ : Continuous χ) {u : Γ × �
   unfold dTwo
   fun_prop
 
-omit [ContinuousMul Γ] in
 
+omit [ContinuousMul Γ] in
 theorem exists_dTwo_eq (χ : Γ → ℤ_[l])
     (step : ∀ c : Γ × Γ × Γ → ℤ_[l], Continuous c → IsCocycleThree χ c →
       ∃ u c', Continuous u ∧ Continuous c' ∧ IsCocycleThree χ c' ∧
@@ -162,13 +220,13 @@ theorem twoCocycle_lift : ∀ (l : ℕ) [Fact l.Prime] (Γ : Type) [Group Γ] [T
         intro g h k m
         have := congrArg (PadicInt.toZModPow 1) (hz g h k m)
         rw [← hρχ] at this
-        simpa only [map_add, map_sub, h1, map_zero] using this)
+        simpa only [map_add (f := _), map_sub, h1, map_zero] using this)
     obtain ⟨u, hu, huv⟩ := exists_continuous_lift 1 v hv
     obtain ⟨c', hc', e⟩ := exists_continuous_div (fun p => c p - dTwo χ u p)
       (hc.sub (continuous_dTwo hχc hu)) l hl0 (by
         rintro ⟨g, h, k⟩
         rw [← pow_one (l : ℤ_[l]), ← toZModPow_eq_zero_iff]
-        simp only [dTwo, ← hρχ, map_add, map_sub, h1, huv, hvc, sub_self])
+        simp only [dTwo, ← hρχ, map_add (f := _), map_sub, h1, huv, hvc, sub_self])
     exact ⟨u, c', hu, hc', (hz.sub (isCocycleThree_dTwo χ hχm u)).cancel hl0 e,
       fun p => by linear_combination e p⟩
   obtain ⟨Y, hY, hYy⟩ := exists_continuous_lift r y hy.1
@@ -176,7 +234,7 @@ theorem twoCocycle_lift : ∀ (l : ℕ) [Fact l.Prime] (Γ : Type) [Group Γ] [T
     ((l : ℤ_[l]) ^ r) (pow_ne_zero _ hl0) (by
       rintro ⟨g, h, k⟩
       rw [← toZModPow_eq_zero_iff]
-      simp only [dTwo, ← hρχ, map_add, map_sub, hr, hYy]
+      simp only [dTwo, ← hρχ, map_add (f := _), map_sub, hr, hYy]
       exact hy.2 g h k)
   obtain ⟨u, hu, hcu⟩ := exists_dTwo_eq χ step c hc
     ((isCocycleThree_dTwo χ hχm Y).cancel (pow_ne_zero _ hl0) e)

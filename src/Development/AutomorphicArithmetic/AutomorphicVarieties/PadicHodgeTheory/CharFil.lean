@@ -1,12 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmRes
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CycFacts
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAdaptedOfSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAddValuationFinExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsBasisOfSubmodule
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaloisRepresentationHomFiniteDimensional
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDataComparison
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedCharIsCrystallineHodgeTateZero
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedIsCrysAndJumpEqZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmRes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CycFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.MemIK
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedCharIsCrystallineHodgeTateZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaloisRepresentationHomFiniteDimensional
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDataComparison
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.DualExactSequence
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 namespace UpperTheory.V.Loc.CharFil
@@ -61,7 +111,11 @@ variable {l : ℕ} [Fact l.Prime] {E : Type} [Field E] [Algebra ℚ_[l] E] [Fini
 
 private theorem val_integral {G : Type} [Group G] [TopologicalSpace G] [CompactSpace G] (μ : G →* Eˣ)
     (hμ : Continuous fun g => (μ g : E)) (g : G) : IsIntegral ℤ_[l] (μ g : E) := by
-  let j : E →ₐ[ℚ_[l]] Om l := IsAlgClosed.lift
+  let j : E →ₐ[ℚ_[l]] Om l := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hj : Continuous j := IsModuleTopology.continuous_of_linearMap j.toLinearMap
   let d : G →* Om l := (j : E →* Om l).comp ((Units.coeHom E).comp μ)
   have hd : ‖d g‖ = 1 := GlobalTheory.UnramifiedChar.norm_eq_one_of_compact d (hj.comp hμ) g
@@ -70,8 +124,8 @@ private theorem val_integral {G : Type} [Group G] [TopologicalSpace G] [CompactS
   have h2 : IsIntegral ℤ_[l] (j (μ g)) := IsIntegral.map (LL.1.val.restrictScalars ℤ_[l]) h1
   exact (isIntegral_algHom_iff (j.restrictScalars ℤ_[l]) j.injective).1 h2
 
-omit [TopologicalSpace E] [IsModuleTopology ℚ_[l] E] in
 
+omit [TopologicalSpace E] [IsModuleTopology ℚ_[l] E] in
 private theorem exists_int_basis : ∃ (n : ℕ) (e : Basis (Fin n) ℚ_[l] E),
     ∀ x : E, IsIntegral ℤ_[l] x ↔ ∀ i, ‖e.repr x i‖ ≤ 1 := by
   have : CharZero E := charZero_of_injective_algebraMap (algebraMap ℚ_[l] E).injective
@@ -86,8 +140,8 @@ private theorem exists_int_basis : ∃ (n : ℕ) (e : Basis (Fin n) ℚ_[l] E),
   have hx : IsAlgebraic ℤ_[l] x := (IsFractionRing.isAlgebraic_iff ℤ_[l] ℚ_[l] E).2 (Algebra.IsAlgebraic.isAlgebraic x)
   exact hx.exists_integral_multiple
 
-open GlobalTheory.UnramifiedCrys GlobalTheory.UnramifiedRep in
 
+open GlobalTheory.UnramifiedCrys GlobalTheory.UnramifiedRep in
 private theorem exists_split [IsTopologicalRing E] (K : FinExt l) (μ : ↥(GK K) →* Eˣ)
     (hμ : Continuous fun g => (μ g : E)) (hI : ∀ g ∈ IK K, μ g = 1) :
     ∃ (n : ℕ) (e : Basis (Fin n) ℚ_[l] E) (W W' : Matrix (Fin n) (Fin n) (Bdr l)), W * W' = 1 ∧
@@ -116,7 +170,6 @@ private theorem exists_split [IsTopologicalRing E] (K : FinExt l) (μ : ↥(GK K
         norm_sub_lt_one_of_fix AI g (fun m hm y hy => hg m hm y hy) x hx)
       rw [← map_one M]
       ext i j
-      apply PadicInt.ext
       rw [hM, hM, hρ, hρ, h, map_one])
   have hB : ∀ g, (Matrix.of fun i j => algebraMap ℚ_[l] P.R.B (e.repr (chRep μ g (e j)) i)) *
       (AI.ιA.mapMatrix W).map ((P.PD K).actB g) = AI.ιA.mapMatrix W := fun g => by

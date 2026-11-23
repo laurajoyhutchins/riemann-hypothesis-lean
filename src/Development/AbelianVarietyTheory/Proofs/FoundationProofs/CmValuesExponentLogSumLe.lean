@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.PairingDivisors.StatementN
+module
+
+public import Formalism.PairingDivisors.StatementN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.Primorial
+
+@[expose] public section
 
 open Finset
 
@@ -10,7 +57,7 @@ theorem ceSum_val_le (S : Finset ℕ) (hS : ∀ l ∈ S, l.Prime) (X : ℕ) :
   have h1 : ∑ l ∈ S, (padicValNat l X : ℝ) * Real.log l
       = ∑ l ∈ S, (X.factorization l : ℝ) * Real.log l := by
     refine Finset.sum_congr rfl fun l hl => ?_
-    rw [Nat.factorization_def X (hS l hl)]
+    rw [Nat.factorization_def X (hS l hl), Nat.padicValNat_def]
   rw [h1, Real.log_nat_eq_sum_factorization, Finsupp.sum]
   have hsub : S ⊆ S ∪ X.factorization.support := Finset.subset_union_left
   calc ∑ l ∈ S, (X.factorization l : ℝ) * Real.log l
@@ -49,8 +96,8 @@ end GlobalTheory
 
 namespace GlobalTheory
 
-open Formalism.PairingDivisionLocalBalance in
 
+open Formalism.PairingDivisionLocalBalance in
 theorem ceSum_term_le (f X l : ℕ) (hX : X ≠ 0) (hp : l.Prime) :
     ((f * padicValNat l 2 + mE l X : ℕ) : ℝ) * Real.log l ≤
       (padicValNat l X : ℝ) * Real.log l + (if l = 2 then ((f : ℝ) + 2) * Real.log 2 else 0)
@@ -71,7 +118,8 @@ theorem ceSum_term_le (f X l : ℕ) (hX : X ≠ 0) (hp : l.Prime) :
   · subst h2
     have hlog2 : 0 ≤ Real.log (2 : ℝ) := Real.log_nonneg (by norm_num)
     have hm : mE 2 X = 2 + padicValNat 2 X := by simp [mE]
-    have h22 : padicValNat 2 2 = 1 := by simp
+    have h22 : padicValNat 2 2 = 1 := by
+      rw [Nat.padicValNat_def, Nat.multiplicity_self (by norm_num : 1 < 2)]
     have e : ((f * padicValNat 2 2 + mE 2 X : ℕ) : ℝ) * Real.log ((2 : ℕ) : ℝ)
         = (padicValNat 2 X : ℝ) * Real.log ((2 : ℕ) : ℝ) + ((f : ℝ) + 2) * Real.log 2 := by
       rw [hm, h22]; push_cast; ring
@@ -79,7 +127,8 @@ theorem ceSum_term_le (f X l : ℕ) (hX : X ≠ 0) (hp : l.Prime) :
     linarith
   · have hA : (if l = 2 then ((f : ℝ) + 2) * Real.log 2 else 0) = 0 := if_neg h2
     have hv2 : padicValNat l 2 = 0 := by
-      apply padicValNat.eq_zero_of_not_dvd
+      rw [Nat.padicValNat_def]
+      apply multiplicity_eq_zero_of_not_dvd
       intro h
       exact h2 ((Nat.prime_dvd_prime_iff_eq hp Nat.prime_two).1 h)
     rw [hA, hv2]

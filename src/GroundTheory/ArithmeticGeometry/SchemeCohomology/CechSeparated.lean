@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechLeray
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.AffineVanishing
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechLeray
+public import Mathlib.Algebra.Category.ModuleCat.Sheaf.Quasicoherent
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.AffineVanishing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -31,6 +77,7 @@ lemma cechAcyclic_of_transport (φ : Opens Y → Opens X) (hφ : Monotone φ)
   have hE'0 : ∀ n, E' n 0 = 0 := fun n => funext fun i => by
     simp only [E', Pi.zero_apply, map_zero]
   have hEd : ∀ n σ, E (n + 1) (d P' U n σ) = d P (φ ∘ U) n (E n σ) := fun n σ => funext fun i => by
+
     simp only [E, d_apply, map_sum, map_zsmul, he, res_res]
   intro n σ hσ
   have hσ' : d P' U (n + 1) (E' (n + 1) σ) = 0 := by
@@ -67,15 +114,17 @@ lemma inter_basicOpen {V : X.Opens} {κ : Type u} (h : κ → Γ(X, V)) :
     rfl
 
 lemma isCoverSystem_isBasicCover :
-    IsCoverSystem (X := X.toTopCat) IsAffineOpen (fun {κ} V U => IsBasicCover (κ := κ) V U) where
-  iSup_eq V κ U hU := hU.2.choose_spec.2
-  inter_mem V κ U hU n i := by
+    IsCoverSystem (X := X.toTopCat) IsAffineOpen (fun {κ} V U => IsBasicCover (κ := κ) V U) := by
+  constructor
+  · intro V κ U hU
+    exact hU.2.choose_spec.2
+  · intro V κ U hU n i
     obtain ⟨hV, h, hUh, -⟩ := hU
     have : U = fun a => X.basicOpen (h a) := funext hUh
     subst this
     rw [inter_basicOpen h i]
     exact hV.basicOpen _
-  exists_refinement V hV O hO := by
+  · intro V hV O hO
     choose f hfO hxf using fun x : V => hV.exists_basicOpen_le (V := O x) ⟨x.1, hO x⟩ x.2
     obtain ⟨fs, hfs⟩ := hV.isCompact.elim_finite_subcover
       (fun x : V => (X.basicOpen (f x) : Set X)) (fun x => (X.basicOpen (f x)).isOpen)
@@ -130,7 +179,8 @@ theorem cechAcyclic_of_isBasicCover (F : X.Modules) [F.IsQuasicoherent] {V : X.O
   let e : tildeAb M ≅ modulesAb F' :=
     (SheafOfModules.toSheaf _).mapIso (@asIso _ _ _ _ F'.fromTildeΓ hiso)
   have hF' : CechAcyclic (modulesAb F').obj U' :=
-    CechAcyclic.of_retract U' e.inv.hom e.hom.hom (congrArg (fun f => f.hom) e.inv_hom_id) hM
+    CechAcyclic.of_retract U' e.inv.hom e.hom.hom
+      (congrArg (fun f => f.hom) e.inv_hom_id) hM
   have key := cechAcyclic_of_transport (P := (modulesAb F).obj) (P' := (modulesAb F').obj)
     (fun W => hV.fromSpec ''ᵁ W) (fun _ _ hle => hV.fromSpec.image_mono hle)
     (fun W => AddEquiv.refl _) (fun _ _ => rfl) U' (fun i => image_inter hV.fromSpec U' i) hF'

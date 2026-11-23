@@ -1,5 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.IsAlgIsoRefl
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DualInfinitesimalCharacterRegular
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.WignerHighestWeights.IsAlgIsoRefl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.CuspRep GlobalTheory.GKCoh UpperTheory.V.AlgRepEndIrreducible
 open scoped TensorProduct
@@ -78,7 +122,7 @@ private theorem single_mul_eq_sum_smul_single {n : ℕ} (y : Matrix (Fin n) (Fin
   simp [Matrix.mul_apply, Matrix.single_apply, Matrix.sum_apply, ite_and]
 
 private theorem sum_sign_left_mul_update_eq_trace_smul {M : Type} [AddCommGroup M] [Module ℂ M] {n : ℕ}
-    (μ : MultilinearMap ℂ (fun _ : Fin n => Matrix (Fin n) (Fin n) ℂ) M)
+    (μ : (Fin n → Matrix (Fin n) (Fin n) ℂ) →ₘₗ[ℂ] M)
     (y : Matrix (Fin n) (Fin n) ℂ) (τ : Equiv.Perm (Fin n)) :
     ∑ σ : Equiv.Perm (Fin n), (Equiv.Perm.sign σ : ℤ) •
         ∑ k, μ (Function.update (units σ τ) k (y * units σ τ k))
@@ -107,7 +151,7 @@ private theorem sum_sign_left_mul_update_eq_trace_smul {M : Type} [AddCommGroup 
   rfl
 
 private theorem sum_sign_right_mul_update_eq_trace_smul {M : Type} [AddCommGroup M] [Module ℂ M] {n : ℕ}
-    (μ : MultilinearMap ℂ (fun _ : Fin n => Matrix (Fin n) (Fin n) ℂ) M)
+    (μ : (Fin n → Matrix (Fin n) (Fin n) ℂ) →ₘₗ[ℂ] M)
     (y : Matrix (Fin n) (Fin n) ℂ) (σ : Equiv.Perm (Fin n)) :
     ∑ τ : Equiv.Perm (Fin n), (Equiv.Perm.sign τ : ℤ) •
         ∑ k, μ (Function.update (units σ τ) k (units σ τ k * y))
@@ -136,7 +180,8 @@ private theorem sum_sign_right_mul_update_eq_trace_smul {M : Type} [AddCommGroup
   rfl
 
 theorem UpperTheory.V.AlgRepEndIrreducible.epsDer :
-    ∀ (M : Type) [AddCommGroup M] [Module ℂ M] (n : ℕ) (μ : MultilinearMap ℂ (fun _ : Fin n => Matrix (Fin n) (Fin n) ℂ) M) (y : Matrix (Fin n) (Fin n) ℂ),
+    ∀ (M : Type) [AddCommGroup M] [Module ℂ M] (n : ℕ)
+      (μ : (Fin n → Matrix (Fin n) (Fin n) ℂ) →ₘₗ[ℂ] M) (y : Matrix (Fin n) (Fin n) ℂ),
       eps (fun x => ∑ k, μ (Function.update x k (y * x k - x k * y))) = 0 := by
   intro M _ _ n μ y
   show ∑ τ : Equiv.Perm (Fin n), ∑ σ : Equiv.Perm (Fin n),

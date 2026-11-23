@@ -1,9 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.AnalyticClassNumber.HeckeContinued
-import GroundTheory.GlobalFields.TateThesis.RootNumberLocalFinite
-import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
-import GroundTheory.GlobalFields.IdeleGroups.LocalConditionIndex
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.PartialZetaFunctionalEquation
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConductorEqTopOfStandardOpen
+public import GroundTheory.GlobalFields.TateThesis.HeckeTheoremFE
+public import GroundTheory.GlobalFields.IdeleGroups.LocalConditionIndex
+import GroundTheory.GlobalFields.TateThesis.EulerFactorsInverse
+public import GroundTheory.GlobalFields.TateThesis.RootNumberLocalFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -17,22 +61,7 @@ noncomputable section
 variable {F : Type} [Field F] [NumberField F] {χ : HeckeCharacter F}
 
 theorem conductor_eq_top (h : standardOpenSubgroup F ≤ χ.toIdele.ker) : χ.conductor = ⊤ := by
-  have hd : χ.conductor ∣ ⊤ := by
-    refine (χ.map_idealLevel_le_ker_iff (𝔪 := ⊤) top_ne_bot).1 ?_
-    rintro _ ⟨x, hx, rfl⟩
-    refine h ((mem_standardOpenSubgroup_iff_toFinite_mem _).2 ?_)
-    rw [toFinite_ofFinite]
-    have hx' : x ∈ idealLevel (⊤ : Ideal (𝓞 F)) := hx
-    rw [idealLevel, mem_finiteLevel] at hx'
-    rw [mem_finiteLevel]
-    intro v
-    have hv := hx' v
-    have h0 : multiplicity v.asIdeal (⊤ : Ideal (𝓞 F)) = 0 :=
-      multiplicity_eq_zero.2 fun hdv ↦ v.isPrime.ne_top (by
-        rwa [Ideal.dvd_iff_le, top_le_iff] at hdv)
-    rw [h0] at hv
-    exact hv
-  rwa [Ideal.dvd_iff_le, top_le_iff] at hd
+  apply GlobalTheory.CompanionTheory.PartialZeta.conductor_eq_top_of_standardOpen <;> assumption
 
 theorem infiniteWeight_eq_zero (h : standardOpenSubgroup F ≤ χ.toIdele.ker)
     (w : InfinitePlace F) : χ.infiniteWeight w = 0 := by

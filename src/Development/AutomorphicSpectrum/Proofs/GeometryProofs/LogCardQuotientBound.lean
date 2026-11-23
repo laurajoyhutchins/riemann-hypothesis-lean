@@ -1,8 +1,68 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseHeight
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.FieldChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GrGenOfIsFlagVBOn
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.FieldChange
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.DenseHeight
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField TensorProduct Filter Topology Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
@@ -42,7 +102,7 @@ theorem place_le_iSup {M : Type} [AddCommGroup M] [Module (𝓞 L) M] (φ : M �
     exact le_ciSup (f := fun i ↦ v (φ (g i))) (Set.finite_range _).bddAbove i
   | zero => simpa using h0
   | add a b _ _ ha hb =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (FinitePlace.add_le v _ _).trans (max_le ha hb)
   | smul r a _ ha =>
     rw [map_smul, Algebra.smul_def, map_mul]
@@ -90,7 +150,7 @@ theorem log_card_eq {M : Type} [AddCommGroup M] [Module (𝓞 L) M] (φ : M →�
     | add p q _ _ hp hq =>
       obtain ⟨r₁, h₁⟩ := hp
       obtain ⟨r₂, h₂⟩ := hq
-      exact ⟨r₁ + r₂, by rw [map_add, mul_add, ← h₁, ← h₂]; rfl⟩
+      exact ⟨r₁ + r₂, by rw [map_add (f := _), mul_add, ← h₁, ← h₂]; rfl⟩
     | smul c p _ hp =>
       obtain ⟨r, h⟩ := hp
       refine ⟨c * r, ?_⟩
@@ -102,7 +162,7 @@ theorem log_card_eq {M : Type} [AddCommGroup M] [Module (𝓞 L) M] (φ : M →�
     { toFun := ψ₀
       map_add' := fun p q ↦ RingOfIntegers.ext (by
         change (ψ₀ (p + q) : L) = (ψ₀ p : L) + (ψ₀ q : L)
-        rw [hψ₀, hψ₀, hψ₀, map_add, mul_add])
+        rw [hψ₀, hψ₀, hψ₀, map_add (f := _), mul_add])
       map_smul' := fun c p ↦ RingOfIntegers.ext (by
         change (ψ₀ (c • p) : L) = (c : L) * (ψ₀ p : L)
         rw [hψ₀, hψ₀, map_smul, Algebra.smul_def]

@@ -1,5 +1,49 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PhiCMinA
-import Formalism.SharpRestriction.Divisibility.ModuliIntegralCharts
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PhiCMinA
+public import Formalism.SharpRestriction.Divisibility.ModuliIntegralCharts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -16,7 +60,7 @@ def comp (η : Y →ₗ[ℤ] ℝ) (σ : E →+* ℂ) (a : Y) : ℂ :=
 
 theorem comp_add (η : Y →ₗ[ℤ] ℝ) (σ : E →+* ℂ) (a b : Y) :
     comp η σ (a + b) = comp η σ a + comp η σ b := by
-  simp only [comp, smul_add, map_add, Complex.ofReal_add, add_mul, Finset.sum_add_distrib]
+  simp only [comp, smul_add, map_add (f := _), Complex.ofReal_add, add_mul, Finset.sum_add_distrib]
 
 theorem comp_fadd (η ζ : Y →ₗ[ℤ] ℝ) (σ : E →+* ℂ) (a : Y) :
     comp (η + ζ) σ a = comp η σ a + comp ζ σ a := by
@@ -31,8 +75,6 @@ def compL (σ : E →+* ℂ) (a : Y) : (Y →ₗ[ℤ] ℝ) →ₗ[ℝ] ℂ where
   toFun η := comp η σ a
   map_add' η ζ := comp_fadd η ζ σ a
   map_smul' r η := by rw [comp_fsmul, RingHom.id_apply, Complex.real_smul]
-
-theorem compL_apply (σ : E →+* ℂ) (a : Y) (η : Y →ₗ[ℤ] ℝ) : compL σ a η = comp η σ a := rfl
 
 theorem key_exp (u : 𝓞 E) (j : Free.ChooseBasisIndex ℤ (𝓞 E)) :
     ∑ i, (((RingOfIntegers.basis E).repr (RingOfIntegers.basis E i * u) j : ℤ) : E) * ed E i =
@@ -62,8 +104,10 @@ theorem comp_smul (η : Y →ₗ[ℤ] ℝ) (σ : E →+* ℂ) (u : 𝓞 E) (a : 
   have hk : ∀ j, ∑ i, (((RingOfIntegers.basis E).repr (RingOfIntegers.basis E i * u) j : ℤ) : ℂ)
       * σ (ed E i) = σ (ed E j) * σ (u : E) := fun j => by
     have := congrArg σ (key_exp u j)
+
     simpa [map_sum, map_mul, map_intCast] using this
   unfold comp
+
   simp_rw [smul_expand u _ a, map_sum, map_zsmul, zsmul_eq_mul]
   push_cast
   simp_rw [Finset.sum_mul]
@@ -85,8 +129,9 @@ theorem sum_comp (η : Y →ₗ[ℤ] ℝ) (a : Y) : ∑ σ : E →+* ℂ, comp �
   rw [Finset.sum_comm]
   simp_rw [← Finset.mul_sum, htr, htr1]
   conv_rhs => rw [← h1]
+
   simp only [map_sum, map_zsmul, zsmul_eq_mul, Complex.ofReal_sum, Complex.ofReal_mul,
-    Complex.ofReal_intCast, Rat.cast_intCast]
+  Complex.ofReal_intCast, Rat.cast_intCast]
   exact Finset.sum_congr rfl fun i _ => by ring
 
 def smulZ (u : 𝓞 E) : Y →ₗ[ℤ] Y where
@@ -102,8 +147,8 @@ theorem comp_pre (η : Y →ₗ[ℤ] ℝ) (σ : E →+* ℂ) (u : 𝓞 E) (a : Y
   simp only [LinearMap.comp_apply, smulZ, LinearMap.coe_mk, AddHom.coe_mk]
   rw [smul_comm]
 
-variable (E) in
 
+variable (E) in
 def Pf (η ζ : Y →ₗ[ℤ] ℝ) (a c : Y) : ℝ :=
   (∑ σ : E →+* ℂ, (comp η σ a * conj (comp ζ σ c) + comp ζ σ a * conj (comp η σ c))).re
 
@@ -114,7 +159,7 @@ theorem Pf_add_left (η ζ : Y →ₗ[ℤ] ℝ) (a b c : Y) :
 
 theorem Pf_add_right (η ζ : Y →ₗ[ℤ] ℝ) (a b c : Y) :
     Pf E η ζ a (b + c) = Pf E η ζ a b + Pf E η ζ a c := by
-  simp only [Pf, comp_add, map_add, Complex.re_sum, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.conj_re, Complex.conj_im, ← Finset.sum_add_distrib]
+  simp only [Pf, comp_add, map_add (f := _), Complex.re_sum, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.conj_re, Complex.conj_im, ← Finset.sum_add_distrib]
   exact Finset.sum_congr rfl fun σ _ => by ring
 
 theorem Pf_symm (η ζ : Y →ₗ[ℤ] ℝ) (a c : Y) : Pf E η ζ a c = Pf E η ζ c a := by
@@ -127,7 +172,7 @@ theorem Pf_comm (η ζ : Y →ₗ[ℤ] ℝ) (a c : Y) : Pf E η ζ a c = Pf E ζ
 
 theorem Pf_fadd (η η' ζ : Y →ₗ[ℤ] ℝ) (a c : Y) :
     Pf E (η + η') ζ a c = Pf E η ζ a c + Pf E η' ζ a c := by
-  simp only [Pf, comp_fadd, map_add, Complex.re_sum, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.conj_re, Complex.conj_im, ← Finset.sum_add_distrib]
+  simp only [Pf, comp_fadd, map_add (f := _), Complex.re_sum, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.conj_re, Complex.conj_im, ← Finset.sum_add_distrib]
   exact Finset.sum_congr rfl fun σ _ => by ring
 
 theorem Pf_fsmul (r : ℝ) (η ζ : Y →ₗ[ℤ] ℝ) (a c : Y) :
@@ -158,9 +203,9 @@ theorem Pf_bal (η ζ : Y →ₗ[ℤ] ℝ) (c c' : 𝓞 E) (h : (c' : E) = cj (c
   congr 1
   exact Finset.sum_congr rfl fun σ _ => by ring
 
+
 omit hcj in
 variable (E) in
-
 def PfB (η ζ : Y →ₗ[ℤ] ℝ) : Y →ₗ[ℤ] Y →ₗ[ℤ] ℝ :=
   (AddMonoidHom.mk' (fun a => (AddMonoidHom.mk' (fun c => Pf E η ζ a c)
       (Pf_add_right η ζ a)).toIntLinearMap)
@@ -204,8 +249,8 @@ theorem Pm_ne_zero {η : Y →ₗ[ℤ] ℝ} (hη : η ≠ 0) : Pm hcj η η ≠ 
   simp only [LinearMap.zero_apply]
   exact_mod_cast this.symm
 
-omit hcj in
 
+omit hcj in
 theorem Pf_skew (θ : 𝓞 E) (hθ : ∀ σ : E →+* ℂ, star (σ (θ : E)) = -σ (θ : E))
     (η ζ : Y →ₗ[ℤ] ℝ) (a c : Y) :
     Pf E (η ∘ₗ smulZ θ) ζ a c = -Pf E η (ζ ∘ₗ smulZ θ) a c := by

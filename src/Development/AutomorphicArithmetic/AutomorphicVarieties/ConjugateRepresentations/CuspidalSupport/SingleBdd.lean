@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.LFun Formalism.UG Formalism.UG.P Formalism.L2.Host UpperTheory.V.Cj.S
 open GroundTheory.Automorphic.AutomorphicForm (UPos unipGL constantTerm archCompact infEmb isExpLieAlgebra)
@@ -20,8 +63,7 @@ private theorem exists_types {G H : Type} [Group G] [Group H] (i : H →* G) (W 
       (fun _ _ _ => by funext k; simp) (fun _ _ _ => by funext k; simp)
   refine ⟨LinearMap.range (TensorProduct.lift m), inferInstance, ?_, fun f hf g => ?_⟩
   · rintro _ ⟨t, rfl⟩ k'
-    induction t using TensorProduct.induction_on with
-    | zero => rw [map_zero]; exact zero_mem _
+    induction t using TensorProduct.inductionOn with
     | tmul l w => exact ⟨l ⊗ₜ ρ k' w, funext fun k => congrArg l (hρ k k' w).symm⟩
     | add s t hs ht => rw [map_add]; exact add_mem hs ht
   · exact ⟨((LinearMap.proj g).comp W.subtype) ⊗ₜ ⟨f, hf⟩, rfl⟩
@@ -48,9 +90,9 @@ private theorem exists_monic {M : Type} [AddCommGroup M] [Module ℂ M] (T : Mod
   have key : ∀ q : Polynomial ℂ, Polynomial.aeval T q x = (Polynomial.aeval (T.restrict hW) q ⟨x, hx⟩ : W) := by
     intro q
     induction q using Polynomial.induction_on' with
-    | add q r hq hr => simp only [map_add, LinearMap.add_apply, hq, hr, Submodule.coe_add]
+    | add q r hq hr => simp only [map_add (f := _), LinearMap.add_apply, hq, hr, Submodule.coe_add]
     | monomial n c =>
-      simp only [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply, Submodule.coe_smul,
+      simp only [Polynomial.aeval_monomial, mul_apply_eq_comp, Module.algebraMap_end_apply, Submodule.coe_smul,
         Module.End.pow_restrict n hW, LinearMap.restrict_apply]
   rw [key, h]
   rfl
@@ -82,7 +124,7 @@ private theorem bdd_span {K : Type} [Field K] [NumberField K] {n : ℕ} (f : arc
     · induction hψ using Submodule.span_induction with
       | mem ψ hψ =>
         obtain ⟨y, hy, rfl⟩ := hψ
-        exact Submodule.subset_span ⟨z * y, mul_mem hz hy, by simp only [map_mul, Module.End.mul_apply]⟩
+        exact Submodule.subset_span ⟨z * y, mul_mem hz hy, by simp only [map_mul, mul_apply_eq_comp]⟩
       | zero => rw [map_zero]; exact zero_mem _
       | add _ _ _ _ a b => rw [map_add]; exact add_mem a b
       | smul c _ _ a => rw [map_smul]; exact Submodule.smul_mem _ c a

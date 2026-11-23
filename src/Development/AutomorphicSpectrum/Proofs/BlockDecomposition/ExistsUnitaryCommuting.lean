@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.RealGroupsIwasawa
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierEnergyPfLoc
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierEnergyPfLoc
+public import GroundTheory.AutomorphicForms.RealGroupsIwasawa
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix
 open scoped ComplexOrder InnerProductSpace
@@ -20,7 +69,7 @@ theorem halfProj_apply (T : V →ₗ[ℂ] V) (s : ℂ) (x : V) :
 theorem map_halfProj {T : V →ₗ[ℂ] V} (hT2 : ∀ x, T (T x) = x) {s : ℂ} (hs2 : s * s = 1) (x : V) :
     T (halfProj T s x) = s • halfProj T s x := by
   have e : (s * s) • T x = T x := by rw [hs2, one_smul]
-  simp only [halfProj_apply, map_smul, map_add, hT2]
+  simp only [halfProj_apply, map_smul, map_add (f := _), hT2]
   linear_combination (norm := module) (-1 / 2 : ℂ) • e
 
 theorem halfProj_map {T : V →ₗ[ℂ] V} (hT2 : ∀ x, T (T x) = x) {s : ℂ} (hs2 : s * s = 1) (x : V) :
@@ -90,7 +139,7 @@ theorem exists_commuting_of_gram {α : Type*} (T : V →ₗ[ℂ] V)
   · simp only [LinearMap.add_apply, inner_add_left, inner_add_right, cross, cross', hv1, hw1]
     rw [inner_halfProj hT hT2 (by simp) (by simp), inner_halfProj hT hT2 (by simp) (by simp)]
     ring
-  · simp only [LinearMap.add_apply, map_add, hv2, hv3, hw2, hw3]
+  · simp only [LinearMap.add_apply, map_add (f := _), hv2, hv3, hw2, hw3]
   · simp only [LinearMap.add_apply, hv4, hw4, halfProj_apply]
     module
 
@@ -110,7 +159,7 @@ theorem gram_col {κ' : Type*} (A : Matrix (Fin n) κ ℂ) (B : Matrix (Fin n) �
 theorem toEuclideanLin_col (M : Matrix (Fin n) (Fin n) ℂ) (A : Matrix (Fin n) κ ℂ) (a : κ) :
     Matrix.toEuclideanLin M (col A a) = col (M * A) a := by
   ext i
-  simp [col, Matrix.toEuclideanLin_apply, Matrix.mul_apply, Matrix.mulVec, dotProduct]
+  simp [col, Matrix.toLpLin_apply, Matrix.mul_apply, Matrix.mulVec, dotProduct]
 
 theorem col_injective {A B : Matrix (Fin n) κ ℂ} (h : ∀ a, col A a = col B a) : A = B := by
   ext i a
@@ -127,7 +176,7 @@ theorem exists_unitary_commuting {n r : ℕ} (T : Matrix (Fin n) (Fin n) ℂ) (h
       fun y => by ext i; simp [col]
     rw [e x, toEuclideanLin_col, toEuclideanLin_col, ← Matrix.mul_assoc, hT2, Matrix.one_mul]
   obtain ⟨u, hu1, hu2, hu3⟩ := exists_commuting_of_gram (Matrix.toEuclideanLin T)
-    (fun x y => (Matrix.isHermitian_iff_isSymmetric.1 hT) x y) hinv (col A) (col A')
+    (fun x y => (Matrix.isSymmetric_toEuclideanLin_iff.mpr hT) x y) hinv (col A) (col A')
     (fun a b => by rw [← gram_col, ← gram_col, h1])
     (fun a b => by rw [toEuclideanLin_col, toEuclideanLin_col, ← gram_col, ← gram_col, h2])
   set U : Matrix (Fin n) (Fin n) ℂ := Matrix.toEuclideanLin.symm u with hUdef

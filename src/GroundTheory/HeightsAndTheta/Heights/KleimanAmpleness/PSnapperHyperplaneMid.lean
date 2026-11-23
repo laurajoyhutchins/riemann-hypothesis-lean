@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSnapperHyperplane
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSnapperDevissage
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperHyperplaneMidSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PIdealTwistFamily
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSnapperDevissage
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSnapperHyperplane
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -84,7 +130,7 @@ theorem exists_eq_of_mem_idealMod {pp : Ideal (Poly k N)} {I : Chart x} {z : Ω}
     refine ⟨g * s' + s * g', s * s', e + e', pp.add_mem (pp.mul_mem_right _ hg) (pp.mul_mem_left _ hg'),
       mul_mem hs hs', (hge.mul hse').add (hse.mul hge'), hse.mul hse', ?_⟩
     rw [div_add_div _ _ (eval_ne_zero_of_mem_monos I hs) (eval_ne_zero_of_mem_monos I hs')]
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
   | smul a b _ hb =>
     obtain ⟨f, s₀, e₀, hs₀, hf, hse₀, ha⟩ := a.2
     obtain ⟨g, s, e, hg, hs, hge, hse, rfl⟩ := hb
@@ -137,7 +183,7 @@ theorem idealMod_sup_le {pp : Ideal (Poly k N)} (hh : ∀ f ∈ pp, ∀ d : ℕ,
   rintro _ ⟨f, s, e, hf, hs, hfe, hse, rfl⟩
   obtain ⟨g, hg, y, hy, rfl⟩ := Submodule.mem_sup.mp hf
   obtain ⟨h, rfl⟩ := Ideal.mem_span_singleton'.mp hy
-  rw [SetLike.mem_coe, ← homogeneousComponent_eq_self hfe, map_add, map_add, add_div]
+  rw [SetLike.mem_coe, ← homogeneousComponent_eq_self hfe, map_add (f := _), map_add (f := _), add_div]
   refine Submodule.add_mem _ (Submodule.mem_sup_left (Submodule.subset_span
     ⟨homogeneousComponent e g, s, e, hh g hg e, hs, homogeneousComponent_isHomogeneous e g, hse, rfl⟩))
     (Submodule.mem_sup_right ?_)
@@ -153,7 +199,7 @@ theorem idealMod_sup_le {pp : Ideal (Poly k N)} (hh : ∀ f ∈ pp, ∀ d : ℕ,
     simp only [map_mul, aeval_X]
     field_simp
   | zero => simp
-  | add v w _ _ hv hw => rw [map_add, add_div]; exact Submodule.add_mem _ hv hw
+  | add v w _ _ hv hw => rw [map_add (f := _), add_div]; exact Submodule.add_mem _ hv hw
   | smul c v _ hv =>
     rw [map_smul, smul_div_assoc]
     exact Submodule.smul_of_tower_mem _ c hv

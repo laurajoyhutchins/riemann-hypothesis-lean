@@ -1,8 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemRange
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EqIffConjNe
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EqIffConjNe
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Matrix
 open scoped nonZeroDivisors ComplexOrder ComplexConjugate
@@ -82,7 +131,7 @@ theorem exists_frame {r q : ℕ} (G M Mi : Matrix (Fin r) (Fin r) ℂ) (hM : M *
         by_cases hq : (a : ℕ) < q
         · have : (A *ᵥ u) a = 0 := by simpa [N, mulVec, dotProduct, hq] using ha
           simp [sgnMat, mulVec_diagonal, this]
-        · have : u a = 0 := by simpa [N, mulVec, dotProduct, hq, one_apply] using ha
+        · have : u a = 0 := by simpa [N, mulVec, dotProduct, hq, Matrix.one_apply] using ha
           simp [this]
       exact h1.ne' h2
     intro u u' huu
@@ -131,7 +180,7 @@ theorem exists_frame {r q : ℕ} (G M Mi : Matrix (Fin r) (Fin r) ℂ) (hM : M *
         rw [(comm_sgnMat_iff _).mp hAY c a (by simp [hcq, ha])]
         simp [this]
     rw [h1, ← vecMul_vecMul, vecMul_transpose]
-    simp [vecMul, dotProduct, h2, one_apply]
+    simp [vecMul, dotProduct, h2, Matrix.one_apply]
   · rw [inv_eq_left_inv hinv, ← mulVec_mulVec]
     have h3 : ∀ c, (N.map conj) a c = if a = c then 1 else 0 := by
       intro c
@@ -160,8 +209,8 @@ def blockOf (t : ι) : (Fin g → ℂ) →ₗ[ℝ] (Fin r → ℂ) :=
 theorem blockOf_apply (t : ι) (z : Fin g → ℂ) (a : Fin r) :
     blockOf idx q t z a = kap q a (z (idx.symm (t, a))) := rfl
 
-open Classical in
 
+open Classical in
 def ofBlock (t : ι) (w : Fin r → ℂ) : Fin g → ℂ :=
   fun k => if (idx k).1 = t then kap q (idx k).2 (w (idx k).2) else 0
 
@@ -221,7 +270,7 @@ theorem im_form_eq (A : ι → Matrix (Fin r) (Fin r) ℂ) (s : ι → ℝ) (Hm 
       exact h x y
     | zero => simp
     | add _ _ _ _ h1 h2 =>
-      simp only [star_add, mulVec_add, dotProduct_add, Complex.add_im, map_add, h1, h2, mul_add,
+      simp only [star_add, mulVec_add, dotProduct_add, Complex.add_im, map_add (f := _), h1, h2, mul_add,
         Finset.sum_add_distrib]
     | smul c _ _ h1 =>
       simp only [star_smul, star_trivial, mulVec_smul, dotProduct_smul, Complex.smul_im, map_smul, h1,
@@ -229,7 +278,7 @@ theorem im_form_eq (A : ι → Matrix (Fin r) (Fin r) ℂ) (s : ι → ℝ) (Hm 
       exact Finset.sum_congr rfl fun _ _ => by ring
   | zero => simp
   | add _ _ _ _ h1 h2 =>
-    simp only [add_dotProduct, Complex.add_im, map_add, h1, h2, mul_add, Finset.sum_add_distrib]
+    simp only [add_dotProduct, Complex.add_im, map_add (f := _), h1, h2, mul_add, Finset.sum_add_distrib]
   | smul c _ _ h1 =>
     simp only [smul_dotProduct, Complex.smul_im, map_smul, h1, smul_eq_mul, Finset.mul_sum]
     exact Finset.sum_congr rfl fun _ _ => by ring
@@ -430,8 +479,9 @@ theorem hermC_col {r : ℕ} (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E)
   have hcc : ∀ a b, conj (τ (G a b)) = τ (G b a) := fun a b => by
     rw [← hG a b]
     exact (IsCMField.complexEmbedding_complexConj E τ _).symm
+
   simp only [FD.hermC, FD.col, vecMul, dotProduct, Matrix.mul_apply, map_apply,
-    map_sum, map_mul, Complex.conj_conj, Finset.mul_sum, hcc]
+  map_sum, map_mul, Complex.conj_conj, Finset.mul_sum, hcc]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 

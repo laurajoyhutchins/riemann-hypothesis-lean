@@ -1,12 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.PseudoCoefficientSeparation
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Formalism.RealPlaceAnalysis.StatementE
-import Formalism.RealPlaceAnalysis.StatementB
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.KStableSubspaceHasWeightVectorStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteTorusWeightsFiniteDimensionalSubspaceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MaxCompactSpanHighestWeightLineStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsKEquivariantGraphGoursatStatement
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsKEquivariantGraphGoursatStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteTorusWeightsFiniteDimensionalSubspaceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.KStableSubspaceHasWeightVectorStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MaxCompactSpanHighestWeightLineStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ContinuousOfMemCcSmooth
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsAuxiliaryPlaceNotMemFinset
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermitianFormUnitaryOneOne
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsStandardIndModule
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsAdmissibleSubOfFiniteDimensional
+
+@[expose] public section
 
 open MeasureTheory Matrix Formalism.REAL Formalism.MainNotions.S Formalism.L2.Theta GlobalTheory.FlagMeas GlobalTheory.GKModule GlobalTheory.RealInd GlobalTheory.OpTrace
 open GlobalTheory.SmoothGlob (lieSet)
@@ -109,7 +156,7 @@ theorem orbSpan_kstable (hrep : Formalism.QuantumDeterminants.IsCRepOn (Formalis
 theorem isWtOn_add {μ : Fin n → ℝ} {x y : H} (hx : Formalism.MainNotions.S.IsWtOn (Formalism.REAL.Kset ε) ρ μ x)
     (hy : Formalism.MainNotions.S.IsWtOn (Formalism.REAL.Kset ε) ρ μ y) : Formalism.MainNotions.S.IsWtOn (Formalism.REAL.Kset ε) ρ μ (x + y) := by
   intro θ hθ
-  rw [map_add, hx θ hθ, hy θ hθ, smul_add]
+  rw [map_add (f := _), hx θ hθ, hy θ hθ, smul_add]
 
 theorem isWtOn_comp {S S' : Submodule ℂ H} (hKS : Formalism.MainNotions.S.IsKStableOn ε ρ S)
     (hKS' : Formalism.MainNotions.S.IsKStableOn ε ρ S') (hbot : S ⊓ S' = ⊥) {μ : Fin n → ℝ} {s s' : H} (hs : s ∈ S)
@@ -124,7 +171,7 @@ theorem isWtOn_comp {S S' : Submodule ℂ H} (hKS : Formalism.MainNotions.S.IsKS
     set D := Matrix.diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I))
     set c := Complex.exp (((∑ a, μ a * θ a : ℝ) : ℂ) * Complex.I)
     have h := hw θ hθ
-    rw [map_add, smul_add] at h
+    rw [map_add (f := _), smul_add] at h
     have e1 : ρ D s - c • s = c • s' - ρ D s' := by
       rw [sub_eq_sub_iff_add_eq_add, h, add_comm]
     have hm1 : ρ D s - c • s ∈ S := S.sub_mem (hKS D hθ s hs) (S.smul_mem c hs)
@@ -221,7 +268,7 @@ theorem ktype_highest_weight : ∀ (n : ℕ) (ε : Fin n → Bool) (H : Type) [N
     have hKT : IsKStableOn ε ρ (S ⊔ S') := by
       intro k hk v hv
       obtain ⟨s, hs, s', hs', rfl⟩ := Submodule.mem_sup.1 hv
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (hKS k hk s hs) (hKS' k hk s' hs')
     have hsum0 : w + w' ≠ 0 := by
       intro h
@@ -295,7 +342,7 @@ theorem ktype_highest_weight : ∀ (n : ℕ) (ε : Fin n → Bool) (H : Type) [N
       intro k hk u
       have hsplit : u = (S.orthogonalProjection u : H) + (u - S.orthogonalProjection u) := by abel
       have hperpm : u - (S.orthogonalProjection u : H) ∈ Sᗮ := Submodule.sub_starProjection_mem_orthogonal (K := S) u
-      conv_lhs => rw [hsplit, map_add, map_add]
+      conv_lhs => rw [hsplit, map_add (f := _), map_add (f := _)]
       rw [Submodule.orthogonalProjection_mem_subspace_orthogonalComplement_eq_zero (hperp k hk _ hperpm),
         add_zero, hPself _ (hKS k hk _ (S.orthogonalProjection u).2)]
     refine ⟨B, fun k hk u => ?_, ?_⟩

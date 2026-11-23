@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.EulerIdentity
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -13,7 +60,7 @@ def Ed (K : Type) [Field K] (k d : ℕ) (a b : Fin k) :
     rw [mem_homogeneousSubmodule]
     rcases Nat.eq_zero_or_pos d with h0 | h0
     · subst h0
-      have : (F : MvPolynomial (Fin k) K) = C (coeff 0 (F : MvPolynomial (Fin k) K)) :=
+      have : (F : MvPolynomial (Fin k) K) = C (AddMonoidAlgebra.coeff (F : MvPolynomial (Fin k) K) 0) :=
         (totalDegree_eq_zero_iff_eq_C).1 (Nat.le_zero.1 hF.totalDegree_le)
       rw [this, pderiv_C, mul_zero]
       exact isHomogeneous_zero _ _ _
@@ -41,12 +88,5 @@ def OpBound : Prop :=
     WW = Submodule.span K Sg →
     (∀ A ∈ Sg, ∃ ω : Fin k → ℤ, (∀ a, Ed K k d a a * A - A * Ed K k d a a = (ω a : K) • A) ∧ ∀ a, ω a ≤ c) →
     ∀ A ∈ WW, A ∈ Submodule.span K {B | ∃ l : List (Fin k × Fin k), l.length ≤ c ∧ B = EdWord K k d l}
-
-def JacobiMinor : Prop :=
-  ∀ (n s t : ℕ), 1 ≤ s → s + t = n → ∀ (I J : Fin s → Fin n) (Ic Jc : Fin t → Fin n),
-    StrictMono I → StrictMono J → StrictMono Ic → StrictMono Jc →
-    (∀ x, (x ∈ Set.range I) ↔ x ∉ Set.range Ic) → (∀ x, (x ∈ Set.range J) ↔ x ∉ Set.range Jc) →
-    ∃ e : ℕ, ∀ (R : Type) [CommRing R] (A : Matrix (Fin n) (Fin n) R),
-      (A.adjugate.submatrix I J).det = (-1) ^ e * A.det ^ (s - 1) * (A.submatrix Jc Ic).det
 
 end Formalism.MainNotions.TestSideCounting

@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OmegaFactorization
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OmegaFactorization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,8 +74,8 @@ def hTrans (σ : ℂ) (ν y : ℝ) : ℂ :=
 
 def cConst (σ : ℂ) : ℂ := hTrans σ 0 1
 
-variable (F) in
 
+variable (F) in
 def kFac (σ : ℂ) : ℂ :=
   ∏ _τ : Emb F, ((2 * (Real.pi : ℂ) * I)⁻¹ ^ 2 * ((2 * Real.pi : ℝ) : ℂ) ^ (-2 * σ))
 
@@ -46,17 +92,17 @@ def bOne (𝔞 𝔟 : Frac F) (σ : ℂ) (z : Emb F → ℂ) : ℂ :=
 
 def bZero (Zb : ℂ → ℂ) (𝔞 𝔟 : Frac F) (σ : ℂ) (z : Emb F → ℂ) : ℂ :=
   if σ = 0 then 0 else
-    kFac F σ * (omegaFactor 𝔞 : ℂ) * ((nrm 𝔟 : ℝ) : ℂ) ^ (-1 - 2 * σ) * Zb (1 + 2 * σ) *
+    kFac (F := F) σ * ((omegaFactor (F := F) 𝔞) : ℂ) * (((nrm (F := F) 𝔟) : ℝ) : ℂ) ^ (-1 - 2 * σ) * Zb (1 + 2 * σ) *
       ∏ τ : Emb F, (cConst σ * (((z τ).im : ℝ) : ℂ) ^ (-1 - 2 * σ))
 
 def gFun (Zb : ℂ → ℂ) (𝔞 𝔟 : Frac F) (σ : ℂ) (z : Emb F → ℂ) : ℂ :=
-  aPart 𝔞 σ + bZero Zb 𝔞 𝔟 σ z + kFac F σ * (omegaFactor 𝔞 : ℂ) * bOne 𝔞 𝔟 σ z
+  aPart 𝔞 σ + bZero Zb 𝔞 𝔟 σ z + kFac (F := F) σ * ((omegaFactor (F := F) 𝔞) : ℂ) * bOne 𝔞 𝔟 σ z
 
 def IsGood (P : ℂ → (Emb F → ℂ) → ℂ) : Prop :=
   (∀ σ ∈ halfPlane, ContDiffOn ℝ ∞ (P σ) (upperHalf F)) ∧
   (∀ w : List (Emb F × Bool), ∀ z ∈ upperHalf F, DifferentiableOn ℂ (fun σ => wirtWord w (P σ) z) halfPlane)
 
-theorem kFac_differentiable : Differentiable ℂ (kFac F) := by
+theorem kFac_differentiable : Differentiable ℂ (kFac (F := F)) := by
   intro σ
   unfold kFac
   rw [show (fun σ : ℂ => ∏ _τ : Emb F, ((2 * (Real.pi : ℂ) * I)⁻¹ ^ 2 * ((2 * Real.pi : ℝ) : ℂ) ^ (-2 * σ))) =
@@ -65,8 +111,5 @@ theorem kFac_differentiable : Differentiable ℂ (kFac F) := by
   refine DifferentiableAt.pow (DifferentiableAt.const_mul ?_ _) _
   refine DifferentiableAt.const_cpow (differentiableAt_id.const_mul _) (Or.inl ?_)
   exact_mod_cast (mul_pos two_pos Real.pi_pos).ne'
-
-example (𝔞 : Frac F) (σ : ℂ) (z : Emb F → ℂ) (a : F) : eisTerm 2 σ z (a, 0) = eisTerm 2 σ 0 (a, 0) := by
-  simp [eisTerm, latPt]
 
 end GlobalTheory.HeckeTwo

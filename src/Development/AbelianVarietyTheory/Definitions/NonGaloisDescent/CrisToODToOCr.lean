@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsSumMonomialAdd
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRPlusFiltrationEqFontaineXiPow
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCanonicalAcrisToBdRPlus
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CanonicalAcrisToBdRPlusUniqueEquivariantApprox
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsSumMonomialAdd
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCanonicalAcrisToBdRPlus
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
-import Development.AbelianVarietyTheory.CrystallinePeriods.AdicMaps
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TiltWittEqZeroOfPrimeMulEqZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BdRPlusFiltrationEqFontaineXiPow
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CanonicalAcrisToBdRPlusUniqueEquivariantApprox
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCompatibleRootsOfUnityAndTiltPadic
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FontaineThetaEqZeroIffFontaineXiElementDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,18 +61,18 @@ variable {l : ℕ} [hl : Fact l.Prime]
 scoped instance algZlBdRp : Algebra ℤ_[l] (Per.BdRp l) :=
   ((GlobalTheory.MemLoc.aDp l).comp (algebraMap ℤ_[l] (Ainf l))).toAlgebra
 
-variable (l) in
 
+variable (l) in
 def ainfToBdRp : Ainf l →ₐ[ℤ_[l]] Per.BdRp l where
   toRingHom := GlobalTheory.MemLoc.aDp l
   commutes' _ := rfl
 
-variable (l) in
 
+variable (l) in
 def crisP : Per.Acris l →+* Per.BdRp l := (GlobalTheory.MemLoc.exists_isCrisP l).choose
 
-variable (l) in
 
+variable (l) in
 theorem isCrisP_crisP : GlobalTheory.MemLoc.IsCrisP (crisP l) := (GlobalTheory.MemLoc.exists_isCrisP l).choose_spec
 
 theorem eq_crisP {j : Per.Acris l →+* Per.BdRp l} (h : GlobalTheory.MemLoc.IsCrisP j) : j = crisP l :=
@@ -39,8 +82,8 @@ theorem crisP_ainf (x : Ainf l) : crisP l (ainfToAcris l x) = ainfToBdRp l x :=
   (congrArg (crisP l) (GlobalTheory.RingIface.tower l x)).trans
     ((isCrisP_crisP l).on0 (algebraMap (Per.Ainf l) (Per.Acris0 l) x))
 
-variable (l) in
 
+variable (l) in
 def acrisToBdRp : Per.Acris l →ₐ[ℤ_[l]] Per.BdRp l where
   toRingHom := crisP l
   commutes' _ := crisP_ainf _
@@ -64,23 +107,23 @@ theorem complete_BdRp {d : Ainf l} (hd : Ideal.span {d} = RingHom.ker (Per.θ l)
 
 variable {a : ℕ} [NeZero a] {O : Type} [CommRing O] [Algebra ℤ_[l] O] (t : Wq l a →ₐ[ℤ_[l]] O)
 
-variable (l O) in
 
+variable (l O) in
 abbrev OD : Type := O ⊗[ℤ_[l]] Per.BdRp l
 
-variable (l O) in
 
+variable (l O) in
 def toOD : OA l O →ₐ[O] OD l O := Algebra.TensorProduct.map (AlgHom.id _ _) (ainfToBdRp l)
 
-variable (l O) in
 
+variable (l O) in
 def crisToOD : OCr l O →ₐ[O] OD l O := Algebra.TensorProduct.map (AlgHom.id _ _) (acrisToBdRp l)
 
 theorem crisToOD_toOCr (x : OA l O) : crisToOD l O (toOCr l O x) = toOD l O x := by
   induction x using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul o w => exact congrArg (fun y : Per.BdRp l => o ⊗ₜ[ℤ_[l]] y) (crisP_ainf w)
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem isUnit_l_OD : IsUnit (l : OD l O) := by
   simpa only [map_natCast] using (GlobalTheory.MemLoc.isUnit_l_BdRp l).map
@@ -93,14 +136,14 @@ namespace PiSys
 variable [Module.Free ℤ_[l] O] [Module.Finite ℤ_[l] O] {e : ℕ} [NeZero e] (O) (K : Type) [NormedField K]
   [IsUltrametricDist K] [Algebra O K] [IsUnitBall O K] [NormedAlgebra ℚ_[l] K] (ϖ : PiSys l e)
 
-omit [NeZero e] in
 
+omit [NeZero e] in
 def iAl : invL l (A O K) →+* OD l O :=
   IsLocalization.Away.lift (l : A O K) (g := ((toOD l O).comp (ϖ.iA O K)).toRingHom)
     (by rw [map_natCast]; exact isUnit_l_OD)
 
-omit [NeZero e] in
 
+omit [NeZero e] in
 theorem iAl_of_mem {f : K⟦X⟧} (h : f ∈ A O K) (h' : f ∈ invL l (A O K)) :
     ϖ.iAl O K ⟨f, h'⟩ = toOD l O (ϖ.iA O K ⟨f, h⟩) :=
   IsLocalization.Away.lift_eq (S := invL l (A O K)) (l : A O K)

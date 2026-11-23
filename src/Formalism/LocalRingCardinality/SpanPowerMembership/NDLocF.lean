@@ -1,4 +1,50 @@
-import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocE
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocE
+public import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +62,7 @@ theorem residue_algebraMap (c : ℤ_[l]) :
   have hc : c = (((PadicInt.toZMod c).val : ℕ) : ℤ_[l]) + (l : ℤ_[l]) * d := by
     rw [← hd, ZMod.natCast_val]; ring
   conv_lhs => rw [hc]
-  rw [map_add, map_add, map_mul, map_mul, map_natCast, map_natCast, map_natCast, map_natCast]
+  rw [map_add (f := _), map_add (f := _), map_mul, map_mul, map_natCast, map_natCast, map_natCast, map_natCast]
   have h0 : (((l : ℕ) : ResidueField ↥(OL LL))) = 0 := by
     rw [← map_natCast (residue ↥(OL LL))]
     exact (residue_eq_zero_iff _).mpr (l_mem_max LL)
@@ -32,13 +78,12 @@ theorem OL_resFinite : Finite (ResidueField ↥(OL LL)) := by
   have hx : x ∈ Submodule.span ℤ_[l] (Set.range s) := hs ▸ Submodule.mem_top
   obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun ℤ_[l]).mp hx
   refine ⟨fun i => PadicInt.toZMod (c i), ?_⟩
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Algebra.smul_def, map_mul, residue_algebraMap]
 
 def toOm : ↥(OL LL) →+* PadicAlgCl l := LL.1.val.toRingHom.comp (OL LL).val.toRingHom
-
-theorem toOm_apply (a : ↥(OL LL)) : toOm LL a = ((a : ↥LL.1) : PadicAlgCl l) := rfl
 
 theorem toOm_injective : Function.Injective (toOm LL) := fun a b h => Subtype.ext (Subtype.ext h)
 
@@ -73,13 +118,6 @@ theorem OL_adic : IsAdic (maximalIdeal ↥(OL LL)) := by
     exact ⟨n, by
       rw [key]
       exact (Set.preimage_mono ((Metric.closedBall_subset_ball hn).trans h)).trans hts⟩
-
-def toC : ↥(OL LL) →+* ℂ_[l] := (algebraMap (PadicAlgCl l) ℂ_[l]).comp (toOm LL)
-
-theorem toC_injective : Function.Injective (toC LL) := fun a b h =>
-  toOm_injective LL ((algebraMap (PadicAlgCl l) ℂ_[l]).injective h)
-
-theorem norm_toC (a : ↥(OL LL)) : ‖toC LL a‖ = nrm LL a := PadicComplex.norm_extends l _
 
 def toFrac : ↥LL.1 →+* FractionRing ↥(OL LL) := (FractionRing.algEquiv ↥(OL LL) ↥LL.1).symm.toRingEquiv.toRingHom
 

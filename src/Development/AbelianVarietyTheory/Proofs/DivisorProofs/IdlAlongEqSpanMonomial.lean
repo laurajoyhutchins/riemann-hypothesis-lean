@@ -1,14 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsMumfordFamOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsThetaCompact
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RefinePolarisedMonomialPeriodsMonomialData
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTauLattice
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntegralOfMemAdjoinInv
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationEndomorphismsToCompleteDvr
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsMumfordFamOfSubsingleton
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsThetaCompact
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissiblePadicIntMaximalIdeal
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TraceFormTwistIsoOfPullback
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUniformisationCompleteLocalDomainPrime
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTauLattice
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntegralOfMemAdjoinInv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RefinePolarisedMonomialPeriodsMonomialData
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsSquareUnique
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolarizationTransferModels
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsSemiAbelianOfGenericAbelianOfClosedIsGt
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsPelUnifPsiCoord
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.QkToAkBaseChange
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsPelUnifPsiCoord
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleIdentityIso
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.GeneratorPullback.PullAlong
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +95,7 @@ theorem eq_span_of_forall_cdvr {R R' : Type} [CommRing R] [IsDomain R] [IsLocalR
       IsLocalHom ψ → (I.map ρ).map ψ = Ideal.span {ψ (ρ f)}) : I = Ideal.span {f} := by
   obtain ⟨_, _, -, _⟩ := hR'
   have loc : ∀ (V : Type) [CommRing V] [IsLocalRing V] (ψ : R' →+* V), (maximalIdeal V).comap ψ = maximalIdeal R' →
-      IsLocalHom ψ := fun V _ _ ψ h => ((IsLocalRing.local_hom_TFAE ψ).out 0 4).2 h
+      IsLocalHom ψ := fun V _ _ ψ h => ((IsLocalRing.local_hom_tfae ψ).out 1 5).2 h
   have hdvd : ∀ x ∈ I, f ∣ x := fun x hx => by
     refine dvd_of_map_dvd ρ hρ hi hf (GlobalTheory.ValCrit.dvd_of_forall_cdvr R' _ _ ((map_ne_zero_iff _ hρ).2 hf)
       fun V _ _ _ ψ hV hψ hc => ?_)
@@ -272,7 +319,27 @@ theorem idlAlong_eq_span_monomial : ∀ (g : ℕ) (n : ℕ) (F : SFam g n (zetaA
     push_cast
     exact Finset.sum_congr rfl fun k _ => by rw [he]; ring
   have hI' : idlAlong J (spMap ψ ≫ spMap ρ ≫ a) = Ideal.span {ϖ ^ c} := hI
-  rw [GlobalTheory.TraitOrder.idlAlong_comp, GlobalTheory.TraitOrder.idlAlong_comp] at hI'
+  have idlAlong_comp_local {X : Scheme.{0}} (J : X.IdealSheafData) {R S : Type} [CommRing R] [IsLocalRing R] [CommRing S]
+      [IsLocalRing S] (χ : Sp R ⟶ X) (f : R →+* S) : idlAlong J (spMap f ≫ χ) = (idlAlong J χ).map f := by
+    have eq_map {A : Type} [CommRing A] [IsLocalRing A] (ψ : Sp A ⟶ X)
+        (U : X.affineOpens) (hle : ⊤ ≤ ψ ⁻¹ᵁ U.1) :
+        idlAlong J ψ = (J.ideal U).map (ψ.appLE U.1 ⊤ hle ≫ (Scheme.ΓSpecIso (.of A)).hom).hom := by
+      have hx : ψ (closedPoint A) ∈ U.1 := hle trivial
+      unfold idlAlong
+      rw [ds_stalkId_eq_map J U _ hx, Ideal.map_map, ← CommRingCat.hom_comp, Scheme.germ_stalkClosedPointTo]
+      congr 2
+    obtain ⟨U, hU, hx, -⟩ := TopologicalSpace.Opens.isBasis_iff_nbhd.1 X.isBasis_affineOpens
+      (show χ (closedPoint R) ∈ (⊤ : X.Opens) from trivial)
+    have hle : ⊤ ≤ χ ⁻¹ᵁ U := (Scheme.preimage_eq_top_of_closedPoint_mem χ hx).ge
+    have hle' : ⊤ ≤ (spMap f ≫ χ) ⁻¹ᵁ U := fun x _ => hle (show spMap f x ∈ (⊤ : (Sp R).Opens) from trivial)
+    rw [eq_map χ ⟨U, hU⟩ hle, eq_map _ ⟨U, hU⟩ hle', Ideal.map_map]
+    congr 1
+    have e : (spMap f ≫ χ).appLE U ⊤ hle' = χ.appLE U ⊤ hle ≫ (spMap f).appTop := by
+      rw [Scheme.Hom.appTop, Scheme.Hom.app_eq_appLE]
+      exact (Scheme.Hom.appLE_comp_appLE _ _ _ _ _ _ _).symm
+    rw [e, Category.assoc, Scheme.ΓSpecIso_naturality, ← Category.assoc, CommRingCat.hom_comp]
+    rfl
+  rw [idlAlong_comp_local, idlAlong_comp_local] at hI'
   rw [hI', map_prod, map_prod]
   simp_rw [map_pow, ← hr, map_pow, ← pow_mul]
   rw [hprod, hce]

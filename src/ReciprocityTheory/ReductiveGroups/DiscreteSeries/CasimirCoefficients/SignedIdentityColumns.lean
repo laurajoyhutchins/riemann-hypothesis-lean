@@ -1,4 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedEmbeddingToM
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedEmbeddingToM
+public import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +71,7 @@ abbrev SgIxV (ε : Fin n → Bool) (s : Bool) : Type := {a : Fin n // ε a = s}
 
 lemma hs_contVG : Continuous (hs : Matrix (Fin n) (Fin n) ℂ → ℝ) := by
   unfold hs
-  exact continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
     (continuous_id.matrix_elem i j).norm.pow 2
 
 lemma hs_nonnegVG (A : Matrix (Fin n) (Fin n) ℂ) : 0 ≤ hs A := by
@@ -87,7 +143,9 @@ lemma ballFiniteVG (ε : Fin n → Bool) (ν : Measure (UJ ε)) [ν.IsHaarMeasur
   let K : Set (Matrix (Fin n) (Fin n) ℂ) := {M | inUJ ε M ∧ hs M ≤ R}
   have hKc : IsCompact K := by
     apply Metric.isCompact_of_isClosed_isBounded
-    · apply IsClosed.inter
+    · change IsClosed ({M : Matrix (Fin n) (Fin n) ℂ | Mᴴ * Jm ε * M = Jm ε} ∩
+        {M : Matrix (Fin n) (Fin n) ℂ | hs M ≤ R})
+      apply IsClosed.inter
       · exact isClosed_eq ((continuous_id.matrix_conjTranspose.matrix_mul continuous_const).matrix_mul
           continuous_id) continuous_const
       · exact isClosed_le hs_contVG continuous_const
@@ -145,7 +203,7 @@ def signedIdentityColumns (ε : Fin n → Bool) (s : Bool) : Matrix (Fin n) (SgI
 
 lemma hsRV_cont {Q : Type} [Fintype Q] : Continuous (hsRV : Matrix (Fin n) Q ℂ → ℝ) := by
   unfold hsRV
-  exact continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
     (continuous_id.matrix_elem i j).norm.pow 2
 
 lemma hsRV_entry_le {Q : Type} [Fintype Q] (g : Matrix (Fin n) Q ℂ) (i : Fin n) (j : Q) : ‖g i j‖ ^ 2 ≤ hsRV g := by
@@ -184,8 +242,7 @@ lemma hs_le_colsV {ε : Fin n → Bool} (s : Bool) {g : Matrix (Fin n) (Fin n) �
     unfold Jm
     congr 1
     funext a
-    simp only [σ]
-    split_ifs <;> simp
+    by_cases ha : ε a = true <;> simp [σ, ha]
   have hterm : ∀ i j, g i j * ((σ j : ℝ) : ℂ) * star (g i j) = ((σ j * ‖g i j‖ ^ 2 : ℝ) : ℂ) := by
     intro i j
     rw [mul_comm (g i j), mul_assoc, Complex.star_def, Complex.mul_conj']

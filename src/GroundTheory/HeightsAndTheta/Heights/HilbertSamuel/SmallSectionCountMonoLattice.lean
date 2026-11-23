@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -30,33 +73,6 @@ theorem smallSectionCount_mono_lattice {Ω : Type*} [CommRing Ω] (P : ℕ → �
   · rw [h0, Nat.cast_zero, Real.log_zero]
     exact Real.log_natCast_nonneg _
   · exact Real.log_le_log (by exact_mod_cast hpos) (by exact_mod_cast hc)
-
-theorem ArithmeticVolumeBigRefined.proof (hG6p : ArithmeticVolumeBig.Statement) (hPk : PackingStatement) :
-    ArithmeticVolumeBigRefined.Statement := by
-  intro K _ ι _ Ω _ y D A P0 II hD hII har hb hP0 hs hnef hc
-  refine (hG6p K ι Ω y D A P0 II hD hII har hb hP0 hs hnef hc).trans ?_
-  obtain ⟨hfin, C, hC⟩ := hPk K ι Ω y D A (chartLatNm y A.a) har hb hs.1 (fun _ => le_rfl)
-  unfold arVolP
-  simp only [one_mul]
-  have hden : ∀ k : ℕ, 0 ≤ ((k : ℝ) ^ (D + 1) / ((D + 1).factorial : ℝ)) := fun k => by positivity
-  refine limsup_le_limsup (Eventually.of_forall fun k => div_le_div_of_nonneg_right
-      (smallSectionCount_mono_lattice _ k (chartLat_le_chartLatNm y A.a k) (hfin k)) (hden k)) ?_ ?_
-  · exact isCoboundedUnder_le_of_le atTop (fun k => div_nonneg (Real.log_natCast_nonneg _) (hden k))
-  · refine isBoundedUnder_of_eventually_le (a := |C| * 2 ^ (D + 1) * ((D + 1).factorial : ℝ))
-      (eventually_atTop.2 ⟨1, fun k hk => ?_⟩)
-    have hk' : (1 : ℝ) ≤ k := by exact_mod_cast hk
-    have hF : (0 : ℝ) < (D + 1).factorial := by positivity
-    have hkp : (0 : ℝ) < (k : ℝ) ^ (D + 1) := by positivity
-    rw [div_le_iff₀ (by positivity)]
-    have h2 : C * ((k : ℝ) + 1) ^ (D + 1) ≤ |C| * (2 * (k : ℝ)) ^ (D + 1) :=
-      calc C * ((k : ℝ) + 1) ^ (D + 1) ≤ |C| * ((k : ℝ) + 1) ^ (D + 1) :=
-            mul_le_mul_of_nonneg_right (le_abs_self C) (by positivity)
-        _ ≤ |C| * (2 * (k : ℝ)) ^ (D + 1) :=
-            mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) (by linarith) _) (abs_nonneg C)
-    calc smallSectionCount (IsSmallH (mCoordIdeal y) y A) (chartLatNm y A.a) k
-        ≤ |C| * (2 * (k : ℝ)) ^ (D + 1) := (hC k).trans h2
-      _ = |C| * 2 ^ (D + 1) * ((D + 1).factorial : ℝ) * ((k : ℝ) ^ (D + 1) / ((D + 1).factorial : ℝ)) := by
-          rw [mul_pow]; field_simp
 
 end
 

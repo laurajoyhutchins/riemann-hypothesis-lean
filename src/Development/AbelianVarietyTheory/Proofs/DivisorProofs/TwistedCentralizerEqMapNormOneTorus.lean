@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulHomInjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SesqAsym
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MulHomInjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EqZeroOfTraceMulOfSeparableGeneratedStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAevalEqOfCharpolySeparableInvolutionStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SesqAsym
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -30,6 +75,7 @@ theorem invT_injective : Function.Injective (invT a R) := fun x y h => by
 theorem comp_mulVec (c : R →+* R) (M : Matrix (Fin a) (Fin a) R) (v : Fin a → R) :
     c ∘ (M *ᵥ v) = c.mapMatrix M *ᵥ (c ∘ v) := by
   funext i
+
   simp [Matrix.mulVec, dotProduct, map_sum, map_mul, RingHom.mapMatrix_apply]
 
 theorem sf_mulVec (c : R →+* R) (G T : Matrix (Fin a) (Fin a) R) (u v : Fin a → R) :
@@ -139,7 +185,7 @@ theorem isometry_eq_mul (hP : B.P.Separable) (β : B.Aˣ) (ε : B.A) (hε : ε =
       rw [aeval_C, ← Algebra.smul_def, ← Algebra.smul_def, hsm]
     | add p q hp hq =>
       intro y
-      rw [map_add, add_mul, map_add, hp, hq, add_mul]
+      rw [map_add (f := _), add_mul, map_add (f := _), hp, hq, add_mul]
     | monomial n e ih =>
       intro y
       rw [pow_succ, ← mul_assoc, map_mul (aeval B.g), aeval_X, mul_assoc (aeval B.g (C e * X ^ n)) B.g y, ih, hg,
@@ -170,10 +216,12 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {w : Pl E} {K : UQ}
 
 theorem herm_sum_left (x z : B.A) (s : Finset (Fin a)) (f : Fin a → B.A) :
     B.herm x (∑ i ∈ s, f i) z = ∑ i ∈ s, B.herm x (f i) z := by
+
   simp only [InvAlg.herm, Finset.mul_sum, Finset.sum_mul, map_sum]
 
 theorem herm_sum_right (x y : B.A) (s : Finset (Fin a)) (f : Fin a → B.A) :
     B.herm x y (∑ i ∈ s, f i) = ∑ i ∈ s, B.herm x y (f i) := by
+
   simp only [InvAlg.herm, map_sum B.σ, Finset.mul_sum, map_sum]
 
 theorem herm_smul_left (x y z : B.A) (c : K.E) : B.herm x (c • y) z = c * B.herm x y z := by
@@ -197,7 +245,9 @@ theorem herm_basis (x y z : B.A) :
 theorem sf_crd (c : w.adicCompletion E →+* w.adicCompletion E) (he : ∀ x, e (K.c x) = c (e x))
     (G : Matrix (Fin a) (Fin a) (w.adicCompletion E)) (β : B.A) (hG : ∀ i j, G i j = e (B.herm β (b i) (b j)))
     (y z : B.A) : sf c G (crd e b y) (crd e b z) = e (B.herm β y z) := by
+
   rw [herm_basis b, map_sum]
+
   simp only [sf, dotProduct, Matrix.mulVec, Function.comp_apply, crd, hG, ← he, Finset.mul_sum, map_sum, map_mul]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -211,8 +261,8 @@ theorem ofCrd_add (u v : Fin a → w.adicCompletion E) : ofCrd e b (u + v) = ofC
 
 end Crd
 
-open GlobalTheory.UnitLemma GlobalTheory.TwOrbLat in
 
+open GlobalTheory.UnitLemma GlobalTheory.TwOrbLat in
 theorem twCent_eq_map : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (w : Pl E), ¬ IsSplitAt w → ∀ (K : GlobalTheory.UnitLemma.UQ) (e : K.E ≃+* w.adicCompletion E), (∀ x, e (K.c x) = cj w (e x)) → ∀ (a : ℕ) (B : GlobalTheory.UnitLemma.InvAlg K), B.P.Separable → ∀ (β : B.Aˣ) (ε : B.A), (ε = 1 ∨ ε = -1) → B.σ (β : B.A) = β * (ε * B.g) → ∀ (b : Module.Basis (Fin a) K.E B.A) (δ : GLw a w), (∀ i j, ((δ.val * GlobalTheory.Tw.Phi a (w.adicCompletion E))⁻¹)ᵀ i j = e (B.herm β (b i) (b j))) → twCent (thL a w) δ = B.T.map (GlobalTheory.TwOrbLat.mulGL e b) := by
   intro E _ _ _ w hw K e he a B hP β ε hε hβ b δ hG
   have hth : thL a w = thetaGL a (cj w) := by

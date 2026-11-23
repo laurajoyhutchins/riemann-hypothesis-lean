@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnramifiedWhittaker.QuadAtOf
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnramifiedWhittaker.QuadAtOf
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +63,7 @@ theorem decomp {S : Type*} [CommRing S] (σS : S →+* S) (hinv : ∀ a, σS (σ
   refine ⟨isUnit_iff_exists_inv.2 ⟨t * w, ?_⟩, fun a => ⟨(a + σS a) * t, (a - σS a) * t * w, ?_, ?_, ?_⟩⟩
   · rw [hu]
     linear_combination (w * u) * h2 + hw
-  · rw [map_mul, map_add, hinv, ht]
+  · rw [map_mul, map_add (f := _), hinv, ht]
     ring
   · rw [map_mul, map_mul, map_sub, hinv, ht, hσw]
     ring
@@ -53,18 +98,18 @@ theorem exists_of_conj_eq (h : IsCMExt F E σ) (e : E) (he : σ e = e) :
 theorem trace_field (h : IsCMExt F E σ) (e : E) :
     algebraMap F E (Algebra.trace F E e) = e + σ e := by
   have hσ := conj_conj h
-  obtain ⟨a, ha⟩ := exists_of_conj_eq h (e + σ e) (by rw [map_add, hσ, add_comm])
+  obtain ⟨a, ha⟩ := exists_of_conj_eq h (e + σ e) (by rw [map_add (f := _), hσ, add_comm])
   have h1 : Algebra.trace F E (σ e) = Algebra.trace F E e :=
     Algebra.trace_eq_of_algEquiv (AlgEquiv.ofAlgHom σ σ (AlgHom.ext hσ) (AlgHom.ext hσ)) e
   have h3 := congrArg (Algebra.trace F E) ha
-  rw [Algebra.trace_algebraMap, h.2.2.1, map_add, h1, two_smul, ← two_mul, ← two_mul] at h3
+  rw [Algebra.trace_algebraMap, h.2.2.1, map_add (f := _), h1, two_smul, ← two_mul, ← two_mul] at h3
   rw [← ha, mul_left_cancel₀ two_ne_zero h3]
 
 theorem trace_tensor (R : Type) [CommRing R] [Algebra F R] (h : IsCMExt F E σ) (z : R ⊗[F] E) :
     algebraMap R (R ⊗[F] E) (Algebra.trace R (R ⊗[F] E) z) = z + sigR R σ z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]; ring
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]; ring
   | tmul a e =>
     have h1 : a ⊗ₜ[F] e = a • ((1 : R) ⊗ₜ[F] e) := by
       rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
@@ -81,7 +126,7 @@ theorem sigR_sigR (R : Type) [CommRing R] [Algebra F R] (h : IsCMExt F E σ) (z 
     sigR R σ (sigR R σ z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul a e =>
     show a ⊗ₜ[F] σ (σ e) = _
     rw [conj_conj h]

@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.LocalLengthAdditivityTorsionFree
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.LocalLengthAdditivityTorsionFree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AI
 
@@ -32,11 +82,9 @@ theorem ord_ringEquiv (e : R ≃+* S) (x : R) : Ring.ord R x = Ring.ord S (e x) 
     first
       | exact le_antisymm (Order.krullDim_le_of_strictMono iso iso.strictMono)
           (Order.krullDim_le_of_strictMono iso.symm iso.symm.strictMono)
-      | exact Order.krullDim_eq_of_orderIso iso
   unfold Module.length
   first
     | simp only [h]
-    | congr 1
 
 theorem length_self_ringEquiv (e : R ≃+* S) : Module.length R R = Module.length S S := by
   haveI : RingHomInvPair (e : R →+* S) (e.symm : S →+* R) := RingHomInvPair.of_ringEquiv e
@@ -46,12 +94,9 @@ theorem length_self_ringEquiv (e : R ≃+* S) : Module.length R R = Module.lengt
     first
       | exact le_antisymm (Order.krullDim_le_of_strictMono iso iso.strictMono)
           (Order.krullDim_le_of_strictMono iso.symm iso.symm.strictMono)
-      | exact Order.krullDim_eq_of_orderIso iso
-      | exact iso.krullDim_eq
   unfold Module.length
   first
     | simp only [h]
-    | congr 1
 
 end general
 
@@ -78,8 +123,6 @@ theorem quotQuotComapEquiv_mk (a b : A) (P : PrimeSpectrum (A ⧸ Ideal.span {a}
       Ideal.Quotient.mk _ b := by
   first
     | rfl
-    | simp [quotQuotComapEquiv]
-    | fail
 
 end quot
 
@@ -138,8 +181,6 @@ theorem dim_quot_comap (a : A) (P : PrimeSpectrum (A ⧸ Ideal.span {a})) :
       ringKrullDim (A ⧸ (PrimeSpectrum.comap (Ideal.Quotient.mk (Ideal.span {a})) P).asIdeal) := by
   first
     | exact ringKrullDim_eq_of_ringEquiv (quotQuotComapEquiv a P)
-    | exact (quotQuotComapEquiv a P).ringKrullDim
-    | exact RingEquiv.ringKrullDim (quotQuotComapEquiv a P)
 
 theorem length_loc_quot (a : A) (P : PrimeSpectrum (A ⧸ Ideal.span {a})) :
     length (Localization.AtPrime P.asIdeal)
@@ -205,6 +246,5 @@ theorem length_quot_restrict (a : A) (N : Type v) [AddCommGroup N] [Module (A �
   unfold Module.length
   first
     | simp only [h]
-    | congr 1
 
 end ReciprocityTheory.ChartRestriction.G.AI

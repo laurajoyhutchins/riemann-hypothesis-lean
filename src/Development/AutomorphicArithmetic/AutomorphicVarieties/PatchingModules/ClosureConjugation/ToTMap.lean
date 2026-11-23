@@ -1,6 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ClosureConjugation.GrAlg
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DToDetMap
-import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DToDetMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TwoSidedIdeal.Instances
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.InvAlg
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.IsLocalHom
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PairedDualFirstOrderDualMatrixSpace
+public import Mathlib.LinearAlgebra.TensorProduct.RightExactness
+
+@[expose] public section
+
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.AlgebraTools UpperTheory.V.CA UpperTheory.V.Pa Polynomial
 open scoped TensorProduct
 
@@ -15,8 +64,7 @@ theorem UpperTheory.V.Pa.tens :
   let m : C ⊗[B] MonoidAlgebra B G →ₐ[C] C ⊗[B] E := Algebra.TensorProduct.map (AlgHom.id C C) π
   have hm : ∀ x, m x = π.toLinearMap.lTensor C x := fun x => by
     induction x with
-    | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | tmul s y => rfl
   have h2 : ∀ y, m (toT B G C (MonoidAlgebra.mapRingHom G (algebraMap B C) y)) = 1 ⊗ₜ π y := fun y => by
     rw [toT_map]; rfl
@@ -28,8 +76,7 @@ theorem UpperTheory.V.Pa.tens :
     rw [← ofT_toT (A := B) y, ← hx]
     clear hx
     induction x with
-    | zero => simp
-    | add a b ha hb => rw [map_add, map_add]; exact add_mem ha hb
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _)]; exact add_mem ha hb
     | tmul s z =>
       rw [LinearMap.lTensor_tmul, ofT_tmul, Algebra.smul_def]
       exact TwoSidedIdeal.mul_mem_left _ _ _ (TwoSidedIdeal.subset_span ⟨z, z.2, rfl⟩)
@@ -48,13 +95,11 @@ theorem UpperTheory.V.Pa.tens :
         Algebra.TensorProduct.map (AlgHom.id S S) π (Det.cancel B (MonoidAlgebra B G) C S
           (Algebra.TensorProduct.map (AlgHom.id S S) (toT B G C) x)) := by
       induction x with
-      | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | tmul s y =>
         rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul, AlgHom.comp_apply]
         generalize toT B G C y = w
         induction w with
-        | zero => simp
-        | add a b ha hb => simp only [TensorProduct.tmul_add, map_add, ha, hb]
+        | add a b ha hb => simp only [TensorProduct.tmul_add, map_add (f := _), ha, hb]
         | tmul c z => simp [m, Det.cancel_tmul]
     exact congrArg (DE.D S) h

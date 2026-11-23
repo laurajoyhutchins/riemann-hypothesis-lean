@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.CMTypeGalois.StatementField
+module
+
+public import Formalism.CMTypeGalois.StatementField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial
 
@@ -93,58 +143,10 @@ section Exists
 
 variable {k : ℕ} (a : Fin k → ℤ)
 
-lemma exists_square_roots_closure : ∃ β : Fin k → AlgebraicClosure ℚ, ∀ i, β i ^ 2 = (a i : AlgebraicClosure ℚ) := by
-  choose β hβ using fun i => IsAlgClosed.exists_pow_nat_eq ((a i : AlgebraicClosure ℚ)) two_pos
-  exact ⟨β, hβ⟩
-
 end Exists
-
-private lemma adjoin_range_subtype_eq_whole_field {L : Type} [Field L] [Algebra ℚ L] (K : IntermediateField ℚ L)
-    {k : ℕ} (β : Fin k → L) (hK : K = IntermediateField.adjoin ℚ (Set.range β)) (α' : Fin k → K)
-    (hα : ∀ i, (α' i : L) = β i) :
-    @IntermediateField.adjoin ℚ _ K _ K.algebra' (Set.range α') = ⊤ := by
-  letI : Algebra ℚ K := K.algebra'
-  have himg : K.val '' Set.range α' = Set.range β := by
-    rw [← Set.range_comp]
-    congr 1
-    funext i
-    exact hα i
-  have hmap := IntermediateField.adjoin_map ℚ (Set.range α') K.val
-  rw [himg, ← hK] at hmap
-  rw [eq_top_iff]
-  intro x _
-  have hx : (x : L) ∈ (IntermediateField.adjoin ℚ (Set.range α')).map K.val := by
-    rw [hmap]; exact x.2
-  obtain ⟨y, hy, hyx⟩ := (IntermediateField.mem_map _).1 hx
-  have hyx' : y = x := Subtype.ext hyx
-  exact hyx' ▸ hy
-
-lemma adjoin_subtype_top {L : Type} [Field L] [Algebra ℚ L] (K : IntermediateField ℚ L)
-    {k : ℕ} (β : Fin k → L) (hK : K = IntermediateField.adjoin ℚ (Set.range β)) (α' : Fin k → K)
-    (hα : ∀ i, (α' i : L) = β i) [inst : Algebra ℚ K] :
-    IntermediateField.adjoin ℚ (Set.range α') = ⊤ := by
-  obtain rfl : inst = K.algebra' := Subsingleton.elim _ _
-  exact adjoin_range_subtype_eq_whole_field K β hK α' hα
 
 theorem mqGalois : MQGalois := by
   intro k E _ _ a α h ha
   exact ⟨mq_isGalois h, mq_sigma h, mq_galSign_mul h ha, mq_injective h⟩
-
-theorem mqExists : MQExists := by
-  intro k a
-  obtain ⟨β, hβ⟩ := exists_square_roots_closure a
-  set K := IntermediateField.adjoin ℚ (Set.range β) with hK
-  have hint : ∀ x ∈ Set.range β, IsIntegral ℚ x := by
-    rintro _ ⟨i, rfl⟩
-    refine ⟨X ^ 2 - C ((a i : ℚ)), monic_X_pow_sub_C _ two_ne_zero, ?_⟩
-    rw [eval₂_sub, eval₂_X_pow, eval₂_C, hβ i, map_intCast, sub_self]
-  haveI : FiniteDimensional ℚ K := IntermediateField.finiteDimensional_adjoin hint
-  haveI : NumberField K := ⟨⟩
-  let α' : Fin k → K := fun i => ⟨β i, IntermediateField.subset_adjoin ℚ _ ⟨i, rfl⟩⟩
-  refine ⟨K, inferInstance, inferInstance, α', ?_, ?_⟩
-  · intro i
-    apply Subtype.ext
-    simp [α', hβ i]
-  · exact adjoin_subtype_top K β hK α' (fun i => rfl)
 
 end Formalism.Q3

@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,8 +56,8 @@ open MvPolynomial
 
 variable {K : Type*} [Fintype K] [DecidableEq K] {ι : K → Type*} [∀ k, Fintype (ι k)]
 
-variable (ι) in
 
+variable (ι) in
 def blkW : (Σ k, ι k) → (K → ℕ) := fun p => Pi.single p.1 1
 
 theorem weight_blkW (β : (Σ k, ι k) →₀ ℕ) (k : K) :
@@ -106,8 +154,8 @@ theorem diag_of_homog (d : ℕ) {f : MvPolynomial (Σ k, ι k) ℂ}
       exact ⟨G, fun _ => ⟨h1, h2⟩⟩
     · exact ⟨0, fun h => absurd h hm⟩
   choose Gf hGf using hG
-  refine ⟨∑ m ∈ f.support, C (coeff m f) * Gf m, ?_, fun z => ?_⟩
-  · refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun m hm => ?_)
+  refine ⟨∑ m ∈ f.support, C (AddMonoidAlgebra.coeff f m) * Gf m, ?_, fun z => ?_⟩
+  · refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun m hm => ?_)
     refine (totalDegree_mul _ _).trans ?_
     rw [totalDegree_C, zero_add]
     exact (hGf m hm).1
@@ -126,12 +174,12 @@ theorem comp_mul_homog {σ : Type*} {M : Type*} [AddCancelCommMonoid M] [Decidab
   split_ifs with hx
   · refine Finset.sum_congr rfl fun ab hab => ?_
     rw [coeff_weightedHomogeneousComponent]
-    by_cases hb : coeff ab.2 ψ = 0
+    by_cases hb : AddMonoidAlgebra.coeff ψ ab.2 = 0
     · simp [hb]
     · have hwb := hψ hb
       have hsum : Finsupp.weight w ab.1 + Finsupp.weight w ab.2 = Finsupp.weight w x := by
         have hab' : ab.1 + ab.2 = x := by simpa using hab
-        rw [← map_add, hab']
+        rw [← map_add (f := _), hab']
       have ha : Finsupp.weight w ab.1 = n := by
         rw [hwb, hx] at hsum
         exact add_right_cancel hsum
@@ -140,13 +188,13 @@ theorem comp_mul_homog {σ : Type*} {M : Type*} [AddCancelCommMonoid M] [Decidab
     refine Finset.sum_eq_zero fun ab hab => ?_
     rw [coeff_weightedHomogeneousComponent]
     split_ifs with ha
-    · by_cases hb : coeff ab.2 ψ = 0
+    · by_cases hb : AddMonoidAlgebra.coeff ψ ab.2 = 0
       · simp [hb]
       · exfalso
         apply hx
         have hwb := hψ hb
         have hab' : ab.1 + ab.2 = x := by simpa using hab
-        rw [← hab', map_add, ha, hwb]
+        rw [← hab', map_add (f := _), ha, hwb]
     · simp
 
 end ReciprocityTheory.ChartRestriction.G.Geo

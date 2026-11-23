@@ -1,8 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.UaFacts
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.SignatureIntegrality.SignatureTorusFixedPoints.FactJ
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.SignatureIntegrality.LevelTorusLeTorus
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeDEqSumOfAgree
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.CharacterShapes.HodgeTateFromSandwich
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeDEqSumOfAgree
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GeneralizedEigenspaces.GlobalRationalGL.IntegralConjugation.UaFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.SignatureIntegrality.LevelTorusLeTorus
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.SignatureIntegrality.SignatureTorusFixedPoints.FactJ
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -126,7 +170,7 @@ theorem UpperTheory.V.Z.Sym.So.torUA :
   have huJ : ∀ w ∈ S, cLoc w u ∈ (VL w).J 2 := fun w hw =>
     Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (Subgroup.mem_inf.1 hu).2 w) hw
   have huK : u ∈ Kall L 2 := hF.1 huU
-  have hKfin : ∀ {y : UA L 2}, y ∈ U₀ → y ∈ finU L 2 := fun hy => (Subgroup.mem_inf.1 (hF.1 hy)).1
+  have hKfin : ∀ {y : UA L 2}, y ∈ U₀ → y ∈ finU (E := L) (n := 2) := fun hy => (Subgroup.mem_inf.1 (hF.1 hy)).1
   let δ : ∀ w : Plc L, (Kw w)ˣ := fun w => Matrix.GeneralLinearGroup.det (cLoc w u)
   let e : ∀ w : Plc L, GL (Fin 2) (Kw w) := fun w => Sig.dg ![δ w, 1]
   let g : ∀ w : Plc L, GL (Fin 2) (Kw w) := fun w => (cLoc w u)⁻¹ * e w
@@ -134,7 +178,7 @@ theorem UpperTheory.V.Z.Sym.So.torUA :
   have hg1 : ∀ w, Matrix.GeneralLinearGroup.det (g w) = 1 := fun w => by
     simp only [g, e, map_mul, map_inv, det_diagonal_two]
     simp [δ]
-  have hgK : ∀ w ∈ S, g w ∈ GlobalTheory.LFun.KGL w 2 := fun w hw => by
+  have hgK : ∀ w ∈ S, g w ∈ GlobalTheory.LFun.KGL w (n := 2) := fun w hw => by
     refine mul_mem (inv_mem ?_) ?_
     · exact Subgroup.mem_iInf.1 (Subgroup.mem_inf.1 huK).2 w
     · rw [← GlobalTheory.HeckeEigConj.KO_eq_KGL]
@@ -142,7 +186,7 @@ theorem UpperTheory.V.Z.Sym.So.torUA :
       fin_cases i
       · exact (VL w).H_le (hδ w hw)
       · exact one_mem _
-  have piece : ∀ w ∈ S, secW 2 w (g w) ∈ U₀ ∧ secW 2 w (g w) ∈ finU L 2 ⊓ SUA L ∧ cLoc w (secW 2 w (g w)) = g w ∧
+  have piece : ∀ w ∈ S, secW 2 w (g w) ∈ U₀ ∧ secW 2 w (g w) ∈ finU (E := L) (n := 2) ⊓ SUA L ∧ cLoc w (secW 2 w (g w)) = g w ∧
       ∀ w' ∈ S, w' ≠ w → cLoc w' (secW 2 w (g w)) = 1 := fun w hw => by
     have hs := hP.split w hw
     obtain ⟨a1, a2, -, -⟩ := fA w hs
@@ -159,7 +203,7 @@ theorem UpperTheory.V.Z.Sym.So.torUA :
         exact one_mem _
     · refine Subgroup.mem_inf.2 ⟨hfin, ?_⟩
       exact hom_trivial_on_det_one ((Matrix.GeneralLinearGroup.det.comp (UA L 2).subtype).comp (secW 2 w)) (two_ne w) _ (hg1 w)
-  have prod : ∀ T : Finset (Plc L), T ⊆ S → ∃ p : UA L 2, p ∈ U₀ ∧ p ∈ finU L 2 ⊓ SUA L ∧
+  have prod : ∀ T : Finset (Plc L), T ⊆ S → ∃ p : UA L 2, p ∈ U₀ ∧ p ∈ finU (E := L) (n := 2) ⊓ SUA L ∧
       (∀ w ∈ T, cLoc w p = g w) ∧ ∀ w ∈ S, w ∉ T → cLoc w p = 1 := fun T => by
     induction T using Finset.induction_on with
     | empty => exact fun _ => ⟨1, one_mem _, one_mem _, by simp, by simp⟩
@@ -189,8 +233,8 @@ theorem UpperTheory.V.Z.Sym.So.torUA :
   refine ⟨u * p, hc, ?_, ?_, fun x d hx hd => ?_⟩
   · have : u * (u * p)⁻¹ = u * p⁻¹ * u⁻¹ := by group
     rw [this]
-    have hn : (finU L 2 ⊓ SUA L).Normal := by
-      have h1 : (finU L 2).Normal := MonoidHom.normal_ker _
+    have hn : (finU (E := L) (n := 2) ⊓ SUA L).Normal := by
+      have h1 : (finU (E := L) (n := 2)).Normal := MonoidHom.normal_ker _
       have h2 : (SUA L).Normal := MonoidHom.normal_ker _
       exact Subgroup.normal_inf_normal _ _
     exact hn.conj_mem _ (inv_mem p2) u
@@ -198,9 +242,9 @@ theorem UpperTheory.V.Z.Sym.So.torUA :
     rw [this]
     exact inv_mem p2
   · set c := u * p with hcdef
-    have hcfin : c ∈ finU L 2 := hKfin (mul_mem huU p1)
+    have hcfin : c ∈ finU (E := L) (n := 2) := hKfin (mul_mem huU p1)
     set z := c * x * c⁻¹ * x⁻¹ with hz
-    have hzfin : z ∈ finU L 2 := mul_mem (mul_mem (mul_mem hcfin hx.1) (inv_mem hcfin)) (inv_mem hx.1)
+    have hzfin : z ∈ finU (E := L) (n := 2) := mul_mem (mul_mem (mul_mem hcfin hx.1) (inv_mem hcfin)) (inv_mem hx.1)
     have hz1 : ∀ w ∈ S, cLoc w z = 1 := fun w hw => by
       simp only [hz, map_mul, map_inv]
       rw [hcw w hw, hd w hw]

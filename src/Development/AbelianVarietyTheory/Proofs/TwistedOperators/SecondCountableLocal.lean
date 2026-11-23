@@ -1,7 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.SimpleSum
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnipotentRadicalBasic
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LinearChangeOfVariablesLocalFieldMatrix
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SimpleSum
+public import Mathlib.CategoryTheory.Category.Basic
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LinearChangeOfVariablesLocalFieldMatrix
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnipotentRadicalBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx
 
@@ -117,16 +170,16 @@ theorem affPt_mul {g : GL (n' ⊕ Fin (c + 1)) k} (hg : InN p g) (x₀ : Matrix 
             (if h : Free p b then e ⟨b, h⟩ else 0) := by
         rw [← Fintype.sum_subtype_add_sum_subtype (fun b => Free p b)]
         rw [Finset.sum_eq_zero (s := Finset.univ) (f := fun b : {b // ¬ Free p b} => _)
-          (fun b _ => by rw [dif_neg b.2, mul_zero]), add_zero]
+          (fun b _ => by rw [dite_eq_right b.2, mul_zero]), add_zero]
         simp only [Matrix.mulVec, dotProduct, linPart, of_apply]
-        refine Finset.sum_congr rfl fun b _ => by rw [dif_pos b.2]
+        refine Finset.sum_congr rfl fun b _ => by rw [dite_eq_left b.2]
       rw [h1, Fintype.sum_prod_type, Finset.sum_eq_single r]
       · simp [mul_comm]
       · intro r' _ hr
         simp [hr]
       · simp
     unfold affPt
-    rw [Matrix.add_mul, Matrix.add_apply, Matrix.add_apply, of_apply, dif_pos h, Pi.add_apply, key]
+    rw [Matrix.add_mul, Matrix.add_apply, Matrix.add_apply, of_apply, dite_eq_left h, Pi.add_apply, key]
     simp only [Matrix.mul_apply, Matrix.sub_apply, of_apply]
     ring
   · rw [affPt_mul_nonfree hg _ _ _ _ h, affPt_nonfree _ _ _ _ h]

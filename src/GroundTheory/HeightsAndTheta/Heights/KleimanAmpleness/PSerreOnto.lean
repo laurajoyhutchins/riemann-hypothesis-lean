@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -50,8 +99,8 @@ variable {M : Type v} [AddCommGroup M] [Module (Poly S N) M] [Module S M] [IsSca
 variable {M' : Type w} [AddCommGroup M'] [Module (Poly S N) M'] [Module S M']
   [IsScalarTower S (Poly S N) M']
 
-omit [IsScalarTower S (Poly S N) M] in
 
+omit [IsScalarTower S (Poly S N) M] in
 theorem GradedPMod.smul_mem_int (𝓜 : GradedPMod S N M) {p : Poly S N} {e a : ℤ} {m : M}
     (hp : p ∈ (polyGraded S N).piece e) (hm : m ∈ 𝓜.piece a) : p • m ∈ 𝓜.piece (a + e) := by
   rcases eq_zero_or_isHomogeneous_of_mem_piece hp with rfl | ⟨n, rfl, hn⟩
@@ -88,8 +137,8 @@ section Free
 
 variable {S : Type u} [CommRing S] {N : ℕ}
 
-variable (S N) in
 
+variable (S N) in
 def freeGraded {r : ℕ} (deg : Fin r → ℤ) : GradedPMod S N (Fin r → Poly S N) where
   piece c := Submodule.pi Set.univ fun j => (polyGraded S N).piece (c - deg j)
   isInternal := by
@@ -159,18 +208,18 @@ theorem single_one_mem_freeGraded {r : ℕ} (deg : Fin r → ℤ) (j : Fin r) :
 
 variable {M : Type v} [AddCommGroup M] [Module (Poly S N) M] [Module S M] [IsScalarTower S (Poly S N) M]
 
-variable (S N) in
 
+variable (S N) in
 def freeMap {r : ℕ} (g : Fin r → M) : (Fin r → Poly S N) →ₗ[Poly S N] M :=
   ∑ j, (LinearMap.proj j).smulRight (g j)
 
 omit [Module S M] [IsScalarTower S (Poly S N) M] in
 theorem freeMap_apply {r : ℕ} (g : Fin r → M) (f : Fin r → Poly S N) :
-    freeMap S N g f = ∑ j, f j • g j := by
+    freeMap (S := S) (N := N) g f = ∑ j, f j • g j := by
   simp [freeMap]
 
-omit [IsScalarTower S (Poly S N) M] in
 
+omit [IsScalarTower S (Poly S N) M] in
 theorem GradedPMod.exists_gens (𝓜 : GradedPMod S N M) (hM : Module.Finite (Poly S N) M) :
     ∃ (r : ℕ) (g : Fin r → M) (deg : Fin r → ℤ), (∀ j, g j ∈ 𝓜.piece (deg j)) ∧
       Submodule.span (Poly S N) (Set.range g) = ⊤ := by
@@ -191,7 +240,7 @@ theorem GradedPMod.exists_gens (𝓜 : GradedPMod S N M) (hM : Module.Finite (Po
 omit [IsScalarTower S (Poly S N) M] in
 theorem freeMap_mem {r : ℕ} (𝓜 : GradedPMod S N M) {g : Fin r → M} {deg : Fin r → ℤ}
     (hg : ∀ j, g j ∈ 𝓜.piece (deg j)) (c : ℤ) {f : Fin r → Poly S N}
-    (hf : f ∈ (freeGraded S N deg).piece c) : freeMap S N g f ∈ 𝓜.piece c := by
+    (hf : f ∈ (freeGraded S N deg).piece c) : freeMap (S := S) (N := N) g f ∈ 𝓜.piece c := by
   rw [freeMap_apply]
   refine Submodule.sum_mem _ fun j _ => ?_
   have hj : f j ∈ (polyGraded S N).piece (c - deg j) := (Submodule.mem_pi.mp hf) j (Set.mem_univ _)
@@ -200,7 +249,7 @@ theorem freeMap_mem {r : ℕ} (𝓜 : GradedPMod S N M) {g : Fin r → M} {deg :
 
 omit [Module S M] [IsScalarTower S (Poly S N) M] in
 theorem freeMap_surjective {r : ℕ} {g : Fin r → M} (hg : Submodule.span (Poly S N) (Set.range g) = ⊤) :
-    Function.Surjective (freeMap S N g) := by
+    Function.Surjective (freeMap (S := S) (N := N) g) := by
   classical
   rw [← LinearMap.range_eq_top, eq_top_iff, ← hg, Submodule.span_le]
   rintro _ ⟨j, rfl⟩
@@ -218,8 +267,8 @@ variable {M' : Type w} [AddCommGroup M'] [Module (Poly S N) M'] [Module S M']
   [IsScalarTower S (Poly S N) M']
 variable {𝓕 : GradedPMod S N M} {𝓜 : GradedPMod S N M'}
 
-omit [IsScalarTower S (Poly S N) M] [IsScalarTower S (Poly S N) M'] in
 
+omit [IsScalarTower S (Poly S N) M] [IsScalarTower S (Poly S N) M'] in
 theorem GradedHom.map_decompose (φ : GradedHom 𝓕 𝓜) [DirectSum.Decomposition 𝓕.piece]
     [DirectSum.Decomposition 𝓜.piece] (c : ℤ) (m : M) :
     φ.toLin (DirectSum.decompose 𝓕.piece m c : M) = (DirectSum.decompose 𝓜.piece (φ.toLin m) c : M') := by
@@ -233,7 +282,7 @@ theorem GradedHom.map_decompose (φ : GradedHom 𝓕 𝓜) [DirectSum.Decomposit
     · rw [DirectSum.decompose_of_mem_ne _ m.2 h, DirectSum.decompose_of_mem_ne _ (φ.map_piece _ _ m.2) h,
         map_zero]
   | add m m' hm hm' =>
-    simp only [map_add, DirectSum.decompose_add, DirectSum.add_apply, Submodule.coe_add, hm, hm']
+    simp only [map_add (f := _), DirectSum.decompose_add, DirectSum.add_apply, Submodule.coe_add, hm, hm']
 
 def GradedHom.kerGraded (φ : GradedHom 𝓕 𝓜) : GradedPMod S N (LinearMap.ker φ.toLin) where
   piece c := (𝓕.piece c).comap ((LinearMap.ker φ.toLin).subtype.restrictScalars S)
@@ -338,12 +387,12 @@ theorem SerreOnto.proof (hC : CechExact.Statement.{u, max u v})
   let 𝓜L := 𝓜.transport eM
   let 𝓕 := (freeGraded S N deg).transport eF
   let φ : GradedHom 𝓕 𝓜L :=
-    { toLin := eM.toLinearMap ∘ₗ freeMap S N g ∘ₗ eF.symm.toLinearMap
+    { toLin := eM.toLinearMap ∘ₗ freeMap (S := S) (N := N) g ∘ₗ eF.symm.toLinearMap
       map_piece := by
         rintro c _ ⟨f, hf, rfl⟩
-        exact ⟨freeMap S N g f, freeMap_mem 𝓜 hg c hf, by simp [eF]⟩ }
+        exact ⟨freeMap (S := S) (N := N) g f, freeMap_mem 𝓜 hg c hf, by simp [eF]⟩ }
   have hφ : Function.Surjective φ.toLin := by
-    change Function.Surjective (⇑eM.toLinearMap ∘ ⇑(freeMap S N g) ∘ ⇑eF.symm.toLinearMap)
+    change Function.Surjective (⇑eM.toLinearMap ∘ ⇑(freeMap (S := S) (N := N) g) ∘ ⇑eF.symm.toLinearMap)
     exact eM.surjective.comp ((freeMap_surjective hspan).comp eF.symm.surjective)
 
   have hKfin : Module.Finite (Poly S N) (LinearMap.ker φ.toLin) := by

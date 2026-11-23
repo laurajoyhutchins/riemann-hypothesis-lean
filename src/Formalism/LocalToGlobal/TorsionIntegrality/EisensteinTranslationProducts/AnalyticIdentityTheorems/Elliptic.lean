@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaLine
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.ThetaLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Meromorphic.NormalForm
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Complex.Liouville
+
+@[expose] public section
 
 noncomputable section
 open Filter Topology
@@ -48,7 +94,7 @@ lemma eq_of_eventuallyEq_nhdsNE {g₁ g₂ : ℂ → ℂ} {z : ℂ} (h₁ : Cont
 
 lemma tendsto_add_nhdsNE (z ω : ℂ) : Tendsto (fun w : ℂ => w + ω) (𝓝[≠] z) (𝓝[≠] (z + ω)) := by
   rw [tendsto_nhdsWithin_iff]
-  refine ⟨((continuous_add_right ω).tendsto z).mono_left nhdsWithin_le_nhds, ?_⟩
+  refine ⟨((continuous_add_const ω).tendsto z).mono_left nhdsWithin_le_nhds, ?_⟩
   filter_upwards [self_mem_nhdsWithin] with w hw
   exact fun h => hw (add_right_cancel h)
 
@@ -70,7 +116,7 @@ theorem elliptic_no_pole_const : EllipticNoPole := by
     intro ω hω z
     have hc1 : ContinuousAt (fun w => g (w + ω)) z :=
       show ContinuousAt (g ∘ fun w => w + ω) z from
-        (hcont (z + ω)).comp_of_eq (continuous_add_right ω).continuousAt rfl
+        (hcont (z + ω)).comp_of_eq (continuous_add_const ω).continuousAt rfl
     have h1 : ∀ᶠ w in 𝓝[≠] z, g (w + ω) = f (w + ω) :=
       (Elliptic.tendsto_add_nhdsNE z ω).eventually (heq (z + ω))
     have h2 : (fun w => g (w + ω)) =ᶠ[𝓝[≠] z] g := by

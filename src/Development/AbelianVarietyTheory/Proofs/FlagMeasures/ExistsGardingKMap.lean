@@ -1,21 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ActSingleNeZero
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.EigenfunctionFiniteCoefficients
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.FirstSlotSliceSlotMixedCasimirZero
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantOrthogonalInf
-import Formalism.RealPlaceAnalysis.FinalF
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ActSingleNeZero
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ContDiffFderivMul
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsDer
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsDerLowKSub
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsSmoothCompactSupportFixLowestKType
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsDer
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsDerLowKSub
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ContDiffFderivMul
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.EigenfunctionFiniteCoefficients
+
+@[expose] public section
+
 open MeasureTheory Matrix Finset Formalism.MainNotions.S Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.Count GlobalTheory.Dec GlobalTheory.DSId GlobalTheory.Jet
 open scoped InnerProductSpace ComplexOrder
 
 namespace GlobalTheory.SmoothKType
 
-attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 
+attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 theorem exists_garding_kMap (n : ℕ) (ε : Fin n → Bool) (μ : Fin n → ℝ) (H : Type) [NormedAddCommGroup H]
     [InnerProductSpace ℂ H] [CompleteSpace H] (σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)) (S : Submodule ℂ H)
     (hσ : IsURepOn (UJset ε) σ) (hK : IsKTypeOf ε σ μ S) :
@@ -47,7 +91,7 @@ theorem exists_garding_kMap (n : ℕ) (ε : Fin n → Bool) (μ : Fin n → ℝ)
       map_add' := by
         intro s t
         rw [← integral_add (hint s) (hint t)]
-        simp only [Submodule.coe_add, map_add, smul_add]
+        simp only [Submodule.coe_add, map_add (f := _), smul_add]
       map_smul' := by
         intro c s
         rw [RingHom.id_apply, ← integral_smul]
@@ -133,7 +177,7 @@ theorem exists_isDer_kType : ∀ (n : ℕ) (ε : Fin n → Bool) (μ : Fin n →
       obtain ⟨a', ha', hda⟩ := ha
       obtain ⟨b', hb', hdb⟩ := hb
       refine ⟨a' + b', add_mem ha' hb', ?_⟩
-      simp only [map_add]
+      simp only [map_add (f := _)]
       exact hda.add hdb
     | smul c a _ ha =>
       obtain ⟨a', ha', hda⟩ := ha

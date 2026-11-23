@@ -1,6 +1,44 @@
-import Formalism.LocalRingCardinality.DataParams₂
-import Formalism.LocalRingCardinality.DataGatTies
-import Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,7 +117,7 @@ def imgL {i j : ℕ} (w : D.what₂.places.Pl) (f : Fn D u i →ₗ[ℂ] Fn D u 
   carrier := {y | ∃ x ∈ A, (D.fm u).emb j y = f ((D.fm u).emb i x)}
   add_mem' := by
     rintro a b ⟨x, hx, h1⟩ ⟨y, hy, h2⟩
-    exact ⟨x + y, A.add_mem hx hy, by rw [map_add, map_add, map_add, h1, h2]⟩
+    exact ⟨x + y, A.add_mem hx hy, by rw [map_add (f := _), map_add (f := _), map_add (f := _), h1, h2]⟩
   zero_mem' := ⟨0, A.zero_mem, by simp⟩
   smul_mem' := by
     rintro r a ⟨x, hx, h1⟩
@@ -95,16 +133,6 @@ def expT (w : D.what₂.places.Pl) : ℤ :=
 
 def Nlam (w : D.what₂.places.Pl) : Submodule (Ow D w) (Vl D u 0) :=
   imgL D u w ((((D.mem u).A.T : ℂ) ^ expT D u w) • (Uprod D u 0 w) ^ D.R.m) (Sram D u w)
-
-def URat (i : ℕ) (v : (D.mem u).A.vT) : Prop :=
-  ∀ x, ∃ y, (D.fm u).emb i y = Uop D u i v ((D.fm u).emb i x)
-
-def UL (i : ℕ) (v : (D.mem u).A.vT) (h : URat D u i v) : Vl D u i →ₗ[D.what₂.LL] Vl D u i :=
-  descend ((D.fm u).emb i) ((D.fm u).emb i) ((D.fm u).emb_inj i) (Uop D u i v) h
-
-theorem UL_spec (i : ℕ) (v : (D.mem u).A.vT) (h : URat D u i v) (x : Vl D u i) :
-    (D.fm u).emb i (UL D u i v h x) = Uop D u i v ((D.fm u).emb i x) :=
-  descend_spec ((D.fm u).emb i) ((D.fm u).emb i) ((D.fm u).emb_inj i) (Uop D u i v) h x
 
 end LT
 

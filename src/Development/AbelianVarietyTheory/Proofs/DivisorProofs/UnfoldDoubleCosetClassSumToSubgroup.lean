@@ -1,5 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Data.Set.Card
+public import Mathlib.GroupTheory.DoubleCoset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
+public import Mathlib.Algebra.Group.Subgroup.Finite
+public import Mathlib.GroupTheory.Index
+
+@[expose] public section
+
 open GlobalTheory.BCT
 
 noncomputable section
@@ -103,7 +162,7 @@ theorem fiber_count (ι : H →* G) (hι : Injective ι) (Γ : Subgroup G) (hΓ 
     simp only [Set.mem_preimage, Set.mem_singleton_iff, MulAction.mem_orbit_iff]
     constructor
     · intro he
-      obtain ⟨g', hg', k, hk, e⟩ := (DoubleCoset.eq Γ' K _ _).1 he
+      obtain ⟨g', hg', k, hk, e⟩ := (@DoubleCoset.eq _ _ Γ' K _ _).1 he
       obtain ⟨t, ht, rfl⟩ := (hΓ' g').1 hg'
       have e' : (ι h₀)⁻¹ = ι t * ((ι (Quotient.out δ))⁻¹ * x) * k * x⁻¹ := by
         rw [← e]; group
@@ -123,7 +182,7 @@ theorem fiber_count (ι : H →* G) (hι : Injective ι) (Γ : Subgroup G) (hΓ 
       refine ⟨ι t, (hT t).1 t.2, x⁻¹ * ι s * x, (hS s).1 s.2, ?_⟩
       simp only [map_mul, map_inv]
       group
-  obtain ⟨g', k, hg', hk, hy⟩ := DoubleCoset.mk_out_eq_mul Γ' K ((ι h₀)⁻¹ * x)
+  obtain ⟨g', hg', k, hk, hy⟩ := DoubleCoset.mk_out_eq_mul Γ' K ((ι h₀)⁻¹ * x)
   set y := Quotient.out (DoubleCoset.mk Γ' K ((ι h₀)⁻¹ * x)) with hydef
   set a := g' * (ι h₀)⁻¹ with hadef
   let φ : S →* G := (MulAut.conj a).toMonoidHom.comp (ι.comp S.subtype)
@@ -208,11 +267,11 @@ theorem unfold_classSum : ∀ {G H : Type} [Group G] [Group H] (ι : H →* G), 
     exact right_ne_zero_of_mul hp
   have hπ : ∀ q q' δ δ', Φ (q', δ) = Φ (q, δ') → q' = q := by
     intro q q' δ δ' h
-    obtain ⟨g', hg', k, hk, e⟩ := (DoubleCoset.eq Γ' K _ _).1 h
+    obtain ⟨g', hg', k, hk, e⟩ := (@DoubleCoset.eq _ _ Γ' K _ _).1 h
     have hΓ'Γ : g' ∈ Γ := by
       obtain ⟨t, -, rfl⟩ := (hΓ' g').1 hg'
       exact hιΓ t
-    rw [← DoubleCoset.out_eq' Γ K q, ← DoubleCoset.out_eq' Γ K q', DoubleCoset.eq]
+    rw [← DoubleCoset.out_eq' q, ← DoubleCoset.out_eq' q', DoubleCoset.eq]
     refine ⟨ι (Quotient.out δ') * g' * (ι (Quotient.out δ))⁻¹,
       Γ.mul_mem (Γ.mul_mem (hιΓ _) hΓ'Γ) (Γ.inv_mem (hιΓ _)), k, hk, ?_⟩
     have e' : Quotient.out q = ι (Quotient.out δ') * (g' * ((ι (Quotient.out δ))⁻¹ * Quotient.out q') * k) := by
@@ -220,13 +279,13 @@ theorem unfold_classSum : ∀ {G H : Type} [Group G] [Group H] (ι : H →* G), 
     rw [e']; group
   have hsurj : Surjective Φ := by
     intro b
-    obtain ⟨γ, k, hγ, hk, e⟩ := DoubleCoset.mk_out_eq_mul Γ K (Quotient.out b)
+    obtain ⟨γ, hγ, k, hk, e⟩ := DoubleCoset.mk_out_eq_mul Γ K (Quotient.out b)
     obtain ⟨h, rfl⟩ := (hΓ γ).1 hγ
     obtain ⟨t, ht⟩ := QuotientGroup.mk_out_eq_mul T h
     refine ⟨(DoubleCoset.mk Γ K (Quotient.out b), (h : H ⧸ T)), ?_⟩
     show DoubleCoset.mk Γ' K ((ι (Quotient.out (h : H ⧸ T)))⁻¹ * Quotient.out (DoubleCoset.mk Γ K (Quotient.out b))) = b
     rw [ht, e]
-    conv_rhs => rw [← DoubleCoset.out_eq' Γ' K b]
+    conv_rhs => rw [← DoubleCoset.out_eq' b]
     rw [DoubleCoset.eq]
     refine ⟨ι t, (hΓ' _).2 ⟨t, t.2, rfl⟩, k⁻¹, K.inv_mem hk, ?_⟩
     simp only [map_mul]
@@ -264,7 +323,7 @@ theorem unfold_classSum : ∀ {G H : Type} [Group G] [Group H] (ι : H →* G), 
         have hS0 : Nat.card ↥(Γ ⊓ K.map (MulAut.conj (Quotient.out q)).toMonoidHom) ≠ 0 := Nat.card_pos.ne'
         rw [← hc] at hS0
         obtain ⟨hn0, hc0⟩ := mul_ne_zero_iff.1 hS0
-        obtain ⟨g', k, hg', hk, e⟩ := DoubleCoset.mk_out_eq_mul Γ' K ((ι (Quotient.out δ₀))⁻¹ * Quotient.out q)
+        obtain ⟨g', hg', k, hk, e⟩ := DoubleCoset.mk_out_eq_mul Γ' K ((ι (Quotient.out δ₀))⁻¹ * Quotient.out q)
         have hue : u (Quotient.out (DoubleCoset.mk Γ' K ((ι (Quotient.out δ₀))⁻¹ * Quotient.out q))) =
             u ((ι (Quotient.out δ₀))⁻¹ * Quotient.out q) := by rw [e, hu' g' hg' k hk]
         simp only [w, Φ]

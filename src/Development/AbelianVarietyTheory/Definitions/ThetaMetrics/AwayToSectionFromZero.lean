@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,10 +66,10 @@ def ev (U : (Proj 𝒜).Opens) (x : Proj 𝒜) (hx : x ∈ U) :
 
 variable {𝒜}
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
-
 theorem _root_.GlobalTheory.ProjFrac.ext {U : (Proj 𝒜).Opens} {s t : Γ(Proj 𝒜, U)}
     (h : ∀ x hx, _root_.GlobalTheory.ProjFrac.ev 𝒜 U x hx s =
       _root_.GlobalTheory.ProjFrac.ev 𝒜 U x hx t) : s = t := by
@@ -33,16 +79,8 @@ theorem _root_.GlobalTheory.ProjFrac.ext {U : (Proj 𝒜).Opens} {s t : Γ(Proj 
 theorem ev_resG {U V : (Proj 𝒜).Opens} (h : V ≤ U) (x : Proj 𝒜) (hx : x ∈ V) (s : Γ(Proj 𝒜, U)) :
     ev 𝒜 V x hx (resG (Proj 𝒜) h s) = ev 𝒜 U x (h hx) s := rfl
 
-theorem mem_basicOpen_iff {U : (Proj 𝒜).Opens} (s : Γ(Proj 𝒜, U)) (x : Proj 𝒜) (hx : x ∈ U) :
-    x ∈ (Proj 𝒜).basicOpen s ↔ IsUnit (ev 𝒜 U x hx s) := by
-  rw [Scheme.mem_basicOpen _ _ _ hx]
-  refine Iff.trans ?_ (HomogeneousLocalization.isUnit_iff_isUnit_val 𝒜 x.asHomogeneousIdeal.toIdeal
-    (s.1 ⟨x, hx⟩)).symm
-  rw [← Proj.stalkIso'_germ 𝒜 U x hx s]
-  exact (isUnit_map_iff (Proj.stalkIso' 𝒜 x) _).symm
 
 variable (𝒜) in
-
 def frac (U : (Proj 𝒜).Opens) {d : ℕ} (a b : A) (ha : a ∈ 𝒜 d) (hb : b ∈ 𝒜 d)
     (hU : U ≤ Proj.basicOpen 𝒜 b) : Γ(Proj 𝒜, U) :=
   ⟨fun y => HomogeneousLocalization.mk ⟨d, ⟨a, ha⟩, ⟨b, hb⟩, hU y.2⟩, fun y =>
@@ -56,13 +94,9 @@ variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜
 theorem ev_frac (x : Proj 𝒜) (hx : x ∈ U) :
     ev 𝒜 U x hx (frac 𝒜 U a b ha hb hU) = Localization.mk a ⟨b, hU hx⟩ := rfl
 
-theorem ev_frac_mul_den (x : Proj 𝒜) (hx : x ∈ U) :
-    ev 𝒜 U x hx (frac 𝒜 U a b ha hb hU) * algebraMap A _ b = algebraMap A _ a := by
-  rw [ev_frac, Localization.mk_eq_mk']
-  exact IsLocalization.mk'_spec _ a (⟨b, hU hx⟩ : x.asHomogeneousIdeal.toIdeal.primeCompl)
-
 theorem resG_frac (h : V ≤ U) :
     resG (Proj 𝒜) h (frac 𝒜 U a b ha hb hU) = frac 𝒜 V a b ha hb (h.trans hU) := rfl
+
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
@@ -70,7 +104,6 @@ variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_eq (h : a * b' = a' * b) :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U a b ha hb hU =
       _root_.GlobalTheory.ProjFrac.frac 𝒜 U a' b' ha' hb' hU' := by
@@ -79,13 +112,13 @@ theorem _root_.GlobalTheory.ProjFrac.frac_eq (h : a * b' = a' * b) :
     Localization.mk_eq_mk_iff, Localization.r_iff_exists]
   exact ⟨1, by simp only [OneMemClass.coe_one, one_mul]; linear_combination h⟩
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_mul :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U a b ha hb hU *
         _root_.GlobalTheory.ProjFrac.frac 𝒜 U a' b' ha' hb' hU' =
@@ -96,13 +129,13 @@ theorem _root_.GlobalTheory.ProjFrac.frac_mul :
     _root_.GlobalTheory.ProjFrac.ev_frac, Localization.mk_mul]
   rfl
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_mul_eq {d'' : ℕ} {a'' b'' : A} {ha'' : a'' ∈ 𝒜 d''}
     {hb'' : b'' ∈ 𝒜 d''} {hU'' : U ≤ Proj.basicOpen 𝒜 b''} (h : a * a' * b'' = a'' * (b * b')) :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U a b ha hb hU *
@@ -110,20 +143,21 @@ theorem _root_.GlobalTheory.ProjFrac.frac_mul_eq {d'' : ℕ} {a'' b'' : A} {ha''
       _root_.GlobalTheory.ProjFrac.frac 𝒜 U a'' b'' ha'' hb'' hU'' :=
   _root_.GlobalTheory.ProjFrac.frac_mul.trans (_root_.GlobalTheory.ProjFrac.frac_eq h)
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_add {a₂ : A} {ha₂ : a₂ ∈ 𝒜 d} :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U (a + a₂) b (add_mem ha ha₂) hb hU =
       _root_.GlobalTheory.ProjFrac.frac 𝒜 U a b ha hb hU +
         _root_.GlobalTheory.ProjFrac.frac 𝒜 U a₂ b ha₂ hb hU := by
   refine _root_.GlobalTheory.ProjFrac.ext fun x hx => ?_
-  rw [map_add, _root_.GlobalTheory.ProjFrac.ev_frac, _root_.GlobalTheory.ProjFrac.ev_frac,
+  rw [map_add (f := _), _root_.GlobalTheory.ProjFrac.ev_frac, _root_.GlobalTheory.ProjFrac.ev_frac,
     _root_.GlobalTheory.ProjFrac.ev_frac, Localization.add_mk_self]
+
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
@@ -131,32 +165,31 @@ variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_self :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U b b hb hb hU = 1 := by
   refine _root_.GlobalTheory.ProjFrac.ext fun x hx => ?_
   rw [map_one, _root_.GlobalTheory.ProjFrac.ev_frac]
   exact Localization.mk_self (⟨b, hU hx⟩ : x.asHomogeneousIdeal.toIdeal.primeCompl)
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_zero :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U 0 b (zero_mem _) hb hU = 0 := by
   refine _root_.GlobalTheory.ProjFrac.ext fun x hx => ?_
   rw [map_zero, _root_.GlobalTheory.ProjFrac.ev_frac, Localization.mk_zero]
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.frac_pow (n : ℕ) :
     _root_.GlobalTheory.ProjFrac.frac 𝒜 U a b ha hb hU ^ n =
       _root_.GlobalTheory.ProjFrac.frac 𝒜 U (a ^ n) (b ^ n) (SetLike.pow_mem_graded n ha)
@@ -167,13 +200,13 @@ theorem _root_.GlobalTheory.ProjFrac.frac_pow (n : ℕ) :
     (ha := SetLike.pow_mem_graded n ha) (hb := SetLike.pow_mem_graded n hb)
     (hU := fun x hx h => hU hx (x.isPrime.mem_of_pow_mem n h)) x hx).symm
 
+
 open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite in
 variable {A σ : Type} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A] (𝒜 : ℕ → σ) [GradedRing 𝒜] in
 variable {𝒜} in
 variable {U V : (Proj 𝒜).Opens} {d d' : ℕ} {a b a' b' : A} {ha : a ∈ 𝒜 d} {hb : b ∈ 𝒜 d}
   {ha' : a' ∈ 𝒜 d'} {hb' : b' ∈ 𝒜 d'} {hU : U ≤ Proj.basicOpen 𝒜 b}
   {hU' : U ≤ Proj.basicOpen 𝒜 b'} in
-
 theorem _root_.GlobalTheory.ProjFrac.basicOpen_frac :
     (Proj 𝒜).basicOpen (_root_.GlobalTheory.ProjFrac.frac 𝒜 U a b ha hb hU) =
       U ⊓ Proj.basicOpen 𝒜 a := by
@@ -212,8 +245,8 @@ theorem _root_.GlobalTheory.ProjFrac.basicOpen_frac :
 
 end
 
-variable (𝒜) in
 
+variable (𝒜) in
 def fracUnit (U : (Proj 𝒜).Opens) {d : ℕ} (a b : A) (ha : a ∈ 𝒜 d) (hb : b ∈ 𝒜 d)
     (hUa : U ≤ Proj.basicOpen 𝒜 a) (hUb : U ≤ Proj.basicOpen 𝒜 b) : Γ(Proj 𝒜, U)ˣ where
   val := frac 𝒜 U a b ha hb hUb

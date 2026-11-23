@@ -1,10 +1,57 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicFrobeniusSystemContinuationOpenDisc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvariantBasisConvergingOpenDisc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RingsCyclotomic
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicFrobeniusSystemContinuationOpenDisc
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLaws
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvariantBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvariantBasisConvergingOpenDisc
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GeomSumOneAddPrime
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RingsCyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -170,7 +217,8 @@ theorem tau_eq (s : ℕ) (hs : 1 ≤ s) (τ : (↥LL.1)⟦X⟧) (hτ : XX l ↥L
   have hX : XX l ↥LL.1 s ≠ 0 := fun h => by
     have h1 := logS_deriv (LL := LL)
     rw [h, zero_mul] at hτ
-    simp [← hτ] at h1
+    rw [← hτ, map_zero, mul_zero] at h1
+    exact zero_ne_one h1
   have hl0 : (l : ↥LL.1) ≠ 0 := by exact_mod_cast hl.out.ne_zero
   have hinv : C ((l : ↥LL.1)⁻¹) * (l : (↥LL.1)⟦X⟧) = 1 := by
     rw [← map_natCast (C (R := ↥LL.1)), ← map_mul, inv_mul_cancel₀ hl0, map_one]
@@ -233,7 +281,7 @@ theorem bded_blk {κ : Type} (A : Matrix κ κ (↥LL.1)⟦X⟧) (u : κ → (�
   · exact (show C 0 = blk A u (Sum.inr a) (Sum.inl c) by simp [blk]) ▸ bded_C 0
   · exact (show C 1 = blk A u (Sum.inr a) (Sum.inr c) by simp [blk]) ▸ bded_C 1
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem letterwise (s r n m k : ℕ) [NeZero n] (hs : 1 ≤ s) (h2 : l = 2 → 2 ≤ s) (u : ℤ_[l]ˣ)
     (hu : ‖(u : ℤ_[l]) - 1‖ = (l : ℝ) ^ (-(s : ℤ))) (J : Multiset ℕ) (Λ : (↥(OL LL))⟦X⟧)
@@ -285,13 +333,15 @@ theorem letterwise (s r n m k : ℕ) [NeZero n] (hs : 1 ≤ s) (h2 : l = 2 → 2
     (by
       ext1 a c
       have h := congrArg ι (congrFun (congrFun (hGP i) a) c)
+
       simpa only [Matrix.smul_apply, smul_eq_mul, Matrix.mul_apply, Matrix.map_apply, map_mul, map_pow, map_sum,
-        hact, hphi, hQ] using h)
+      hact, hphi, hQ] using h)
     (by
       funext a
       have h := congrArg ι (congrFun (hy i) a)
+
       simpa only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul, Matrix.mulVec, dotProduct, Matrix.map_apply, map_mul,
-        map_pow, map_sum, map_sub, hact, hphi, hQ] using h)
+      map_pow, map_sum, map_sub, hact, hphi, hQ] using h)
     (by rw [← mul_assoc, ← pow_add, map_pow, ← mul_pow, ← mul_pow, tau_eq s hs τ hτ])
     (by rw [← mul_assoc, hbΛ, ← pow_add, add_comm])
   have hrow : ∀ i a c, (blk ((τ ^ (m + J.card)) • (1 : Matrix (Fin r) (Fin r) (↥LL.1)⟦X⟧)) 0 * U i) (Sum.inl a) c =
@@ -337,7 +387,7 @@ theorem const_of_mem {O : Type} [CommRing O] {n : ℕ} {a : LetA O n} (h : a ∈
   obtain ⟨b, rfl⟩ := Ideal.mem_span_singleton.1 h
   simp [letπ]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem over_letters (s r n m k : ℕ) [NeZero n] (hs : 1 ≤ s) (h2 : l = 2 → 2 ≤ s) (u : ℤ_[l]ˣ)
     (hu : ‖(u : ℤ_[l]) - 1‖ = (l : ℝ) ^ (-(s : ℤ))) (J : Multiset ℕ) (Q Λ : LetA ↥(OL LL) n)
@@ -400,7 +450,7 @@ namespace GlobalTheory.NL
 
 open WCont GlobalTheory.HWL.InvCont
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_cocycle_solution_conv : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let W := (HW l).W K s LL h; ∀ (r m k : ℕ) (J : Multiset ℕ) (G Pm Pm' : Matrix (Fin r) (Fin r) (AA K LL)) (y z : Fin r → AA K LL), let Λ : AA K LL := (J.map fun j => (W.φA ^ j) W.Q).prod; let γL : LetA ↥LL.1 (Module.finrank ℚ_[l] ↥(K0 K)) → LetA ↥LL.1 (Module.finrank ℚ_[l] ↥(K0 K)) := fun a i => PowerSeries.subst (PowerSeries.map (algebraMap ↥(OL LL) ↥LL.1) (W.γ₀ W.gam PowerSeries.X)) (a i); (∀ i j, (G - 1) i j ∈ Ideal.span {(letπ : AA K LL)}) → Pm * Pm' = (W.Q ^ k) • (1 : Matrix (Fin r) (Fin r) (AA K LL)) → (W.γA W.gam W.Q ^ m) • (Pm * G.map W.φA) = (W.Q ^ m) • (G * Pm.map (W.γA W.gam)) → (∀ j, z j ∈ Ideal.span {(letπ : AA K LL)}) → (W.Q ^ m * Λ) • G.mulVec (fun j => W.γA W.gam (y j)) - (W.Q ^ m * W.γA W.gam Λ) • y = (Λ * W.γA W.gam Λ) • (Pm.mulVec (fun j => W.φA (z j)) - (W.Q ^ m) • z) → ∃ (w : Fin r → LetA ↥LL.1 (Module.finrank ℚ_[l] ↥(K0 K))) (p : ℕ), (∀ j i, PowerSeries.constantCoeff (w j i) = 0) ∧ (∀ j i, GlobalTheory.HWL.Conv (GlobalTheory.HWL.logS LL ^ p * w j i)) ∧ (G.map GlobalTheory.HWL.toLL).mulVec (fun j => γL (w j)) - w = fun j => GlobalTheory.HWL.toLL (z j) := by
   intro D HW l _ K s LL h W r m k J G Pm Pm' y z Λ γL hG hP hGP hz hy

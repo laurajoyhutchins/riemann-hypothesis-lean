@@ -1,24 +1,68 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.HasDataCondition
-import Formalism.LocalToGlobal.ProjectiveLattices.FamilyUniformisationBasePointOrthogonalBis
-import Formalism.LocalToGlobal.ProjectiveLattices.RecCond
-import Formalism.LocalToGlobal.ProjectiveLattices.ParCanon
-import Formalism.LocalToGlobal.ProjectiveLattices.ExistsParameterConditions
-import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.ContDiffOfDifferentiableFd
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.L2NormFundamentalDomain
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.Taylor
-import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.Taylor
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DifferentiableOnDetHMat
+public import Formalism.LocalToGlobal.ProjectiveLattices.CuspidalL2Subspace
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsAnalyticDataUnitFrameFramedPointStatement
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsIntegralHarmonicNeZeroAndIsHomogeneous
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsTorusOfSelfD
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaRuleExistsAndEval
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FockHxDifferentiable
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianFormAtFrameLaws
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.FockHxDifferentiable
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaValueStandardLatticeEqClassicalThetaStatement
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsTorusOfSelfD
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsIntegralHarmonicNeZeroAndIsHomogeneous
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaRuleExistsAndEval
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsAnalyticDataUnitFrameFramedPointStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ThetaFunctionIsogenyRestrictionStatement
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ThetaValueStandardLatticeEqClassicalThetaStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ThetaFunctionIsogenyRestrictionStatement
+public import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.AnalyticForms.AnalyticCharts.Osgood
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.ContDiffOfDifferentiableFd
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
+
+@[expose] public section
 
 section Analytic
 
@@ -251,8 +295,8 @@ theorem mem_smul_iff {L : Lt E r} (hL : SelfD X L) {M : ℕ} (hM : M ≠ 0) {P Q
       push_cast
       ring
 
-open scoped ComplexOrder in
 
+open scoped ComplexOrder in
 theorem exists_jet_ne_zero (hs : IsSympl X bas) (hd : x ∈ X.dom) {L : Lt E r} (hL : SelfD X L) {M : ℕ}
     (hM : M ≠ 0) {P Q : Ideal (𝓞 E)} (cj : 𝓞 E → 𝓞 E) (hcj : ∀ a, ((cj a : 𝓞 E) : E) = cc (a : E))
     (hPQ : Q * P = Ideal.span {(M : 𝓞 E)}) (h1 : ∀ a ∈ P, cj a ∈ Q) (h2 : ∀ b ∈ Q, cj b ∈ P) {w : E}
@@ -359,7 +403,14 @@ theorem exists_jet_ne_zero (hs : IsSympl X bas) (hd : x ∈ X.dom) {L : Lt E r} 
     have hb : ∀ b, Differentiable ℂ fun z : Fin n → Fin g → ℂ =>
         fock X bas idx x 1 (pv X idx x (Y b)) θ (z b) := fun b =>
       (hdiff hθ.1 (pv X idx x (Y b))).comp (f := fun z : Fin n → Fin g → ℂ => z b) (differentiable_apply b)
-    exact fun z => (HasFDerivAt.finset_prod (u := Finset.univ) fun b _ => (hb b z).hasFDerivAt).differentiableAt
+    have hprod : ∀ s : Finset (Fin n), Differentiable ℂ (fun z : Fin n → Fin g → ℂ =>
+        ∏ b ∈ s, fock X bas idx x 1 (pv X idx x (Y b)) θ (z b)) := by
+      intro s
+      induction s using Finset.induction_on with
+      | empty => simpa using (differentiable_const (c := (1 : ℂ)))
+      | @insert b s hbs ih =>
+        convert (hb b).mul ih using 1 <;> funext z <;> simp [Finset.prod_insert, hbs]
+    simpa using hprod Finset.univ
   simp only [hc, Finset.prod_mul_distrib] at hne
   rw [polyDeriv_const_mul _ _ _ hent] at hne
   exact right_ne_zero_of_mul hne
@@ -472,7 +523,14 @@ theorem exists_thGen_ne_zero (hC : Formalism.MainNotions.ModuliIntegralCharts.H1
     have hb : ∀ b, Differentiable ℂ fun z : Fin n → Fin W.g → ℂ =>
         fock (U.X k) Dc.bas Dc.idx x.1 1 (pv (U.X k) Dc.idx x.1 (Y b)) θ (z b) := fun b =>
       (hdiff hθ.1 _).comp (f := fun z : Fin n → Fin W.g → ℂ => z b) (differentiable_apply b)
-    exact fun z => (HasFDerivAt.finset_prod (u := Finset.univ) fun b _ => (hb b z).hasFDerivAt).differentiableAt
+    have hprod : ∀ s : Finset (Fin n), Differentiable ℂ (fun z : Fin n → Fin W.g → ℂ =>
+        ∏ b ∈ s, fock (U.X k) Dc.bas Dc.idx x.1 1 (pv (U.X k) Dc.idx x.1 (Y b)) θ (z b)) := by
+      intro s
+      induction s using Finset.induction_on with
+      | empty => simpa using (differentiable_const (c := (1 : ℂ)))
+      | @insert b s hbs ih =>
+        convert (hb b).mul ih using 1 <;> funext z <;> simp [Finset.prod_insert, hbs]
+    simpa using hprod Finset.univ
   refine hjet Y hYu ?_
   rw [thP, ← polyDeriv_const_mul' _ _ _ (hfun ▸ hent), ← hfun] at hval
   have e1 := polyDeriv_rename hent 0 Dc.eL Dc.eL.injective (MvPolynomial.map σ P) (letterDir (U.X k) Dc.hr Dc.idx)

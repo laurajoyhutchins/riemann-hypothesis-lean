@@ -1,10 +1,57 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPinsRec
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.CoefficientSpaceWeights
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaLetterEquivConjugate
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.GeneralLinearGroupCharEqOneOfDetEqOne
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteNotIsUnitOneAddSmul
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EqZeroOfMul
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPinsRec
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.CoefficientSpaceWeights
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaLetterEquivConjugate
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.EqZeroOfMul
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FinalD
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -127,8 +174,8 @@ variable {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {l : Level H}
 theorem embF_conjugate (τ : E →+* ℂ) (x : E) : embF c (ComplexEmbedding.conjugate τ) x = embF c τ (star x) :=
   Subtype.ext (IsCMField.complexEmbedding_complexConj E τ x).symm
 
-variable (n) in
 
+variable (n) in
 def letRep : GL (Fin n) E →* Module.End c.F (MvPolynomial (LtN Dw n) c.F) :=
   ((renameEquiv c.F (Harm.thetaLetterEquiv Dw n)).toLinearEquiv.symm.conjRingEquiv : _ →* _).comp
     ((Harm.colRep c.F (Psi H) Dw.p Dw.q (Fin n)).comp (embGL (embPsi c)))
@@ -191,8 +238,8 @@ theorem mult_le (σ : E →+* ℂ) : Dw.mult σ ≤ Dw.p + Dw.q := by
   unfold Datum.mult
   split_ifs <;> omega
 
-open Classical in
 
+open Classical in
 theorem gaStar_pG {a : (E →+* ℂ) × ℕ → ℕ} (ha : IsPartFam Dw a) (hn : Dw.p + Dw.q ≤ n) (u : Fin n → E) :
     gaStar c (Matrix.diagonal u) (pG (Dw := Dw) c a n) =
       (∏ σ : E →+* ℂ, ∏ b : Fin n, embF c σ (u (if InPsi H σ then b else b.rev)) ^ part Dw a σ b) •
@@ -463,6 +510,7 @@ theorem isPartFam_of_tie {emb : Ix → E →+* c.F} (hok : hwOK c lam hw)
   · replace hj : j < Dw.q := Harm.mult_conjEmb_of_mem Dw hτ ▸ hj
     exact key ⟨τ, hτ⟩ (Sum.inr ⟨i, hlt.trans hj⟩) (Sum.inr ⟨j, hj⟩) hlt
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem exists_lift {emb : Ix → E →+* c.F}
     (h : IoLF (Dw := Dw) c a io (rhoM c emb lam) cga nab0 hw (pG (Dw := Dw) c a n)) :
     ∃ φ : GL (Fin n) E →* Module.End c.F (VVc c lam), (∀ g v, io (φ g v) = letRep n Dw c g (io v)) ∧
@@ -475,6 +523,7 @@ theorem exists_lift {emb : Ix → E →+* c.F}
   rw [map_smul io, hφ, letRep_unitary, ← heq γ hγ v]
   exact congrArg (fun f => io (f v)) (rhoM_coe emb lam (uGL γ hγ)).symm
 
+set_option synthInstance.maxHeartbeats 100000 in
 theorem scalar_diag (e : Ix ≃ Psi H) (ha : IsPartFam Dw a) (d : Psi H → ℤ) (hok : hwOK c lam hw)
     (h : IoLF (Dw := Dw) c a io (rhoM c (fun x => embF c (e x).1) lam) cga nab0 hw (pG (Dw := Dw) c a n))
     {t : Fin n → E} (ht : ∀ i, star (t i) * t i = 1) :
@@ -576,8 +625,6 @@ section Compare
 
 variable {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {l : Level H} (Dw : Datum H) (c : Coeff l) (n : ℕ)
   {a : (E →+* ℂ) × ℕ → ℕ}
-
-theorem space_eq (ha : IsPartFam Dw a) (d : Psi H → ℤ) : VVc c (lamP Dw n ha d) = CoefSp Dw c n ha d := rfl
 
 theorem pins_of_ioLF {Ix : Type} [Fintype Ix] (e : Ix ≃ Psi H) (a : (E →+* ℂ) × ℕ → ℕ) (lam : Ix → DomWeight n)
     (io : VVc c lam →ₗ[c.F] MvPolynomial (LtN Dw n) c.F) (hw : VVc c lam) (cga : Matrix (Fin n) (Fin n) E → c.F)

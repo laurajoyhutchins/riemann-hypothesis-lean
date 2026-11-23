@@ -1,8 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.AdelicScalarSectionLift
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TwistedLevelValues
-import Development.AbelianVarietyTheory.Counterexamples.RotationExamples.LevelVectorSizeBounds
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TwistedLevelValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,18 +59,6 @@ theorem Q_base (h : R.toLevCh.Is A.μ0) : R.Q A.μ0 = ∅ := by
   intro x _
   rfl
 
-theorem typePart_base (h : R.toLevCh.Is A.μ0) (i : Fin D.R.m) (c : HeightOneSpectrum (𝓞 D.host.E) → List ℤ → ℂ) :
-    GlobalTheory.IndefiniteRowSideFullHecke.TwistedLevelValues.typePart R i (sg0 D A) A.μ0 R.triv c =
-      (GlobalTheory.IndefiniteRowSideFullHecke.AdelicScalarSectionLift.cuspPart R i c).comap (R.HW i (sg0 D A)).e := by
-  classical
-  have e : GlobalTheory.IndefiniteRowSideFullHecke.TwistedLevelValues.finS R A.μ0 = GlobalTheory.IndefiniteRowSideFullHecke.AdelicScalarSectionLift.finS R := by
-    unfold GlobalTheory.IndefiniteRowSideFullHecke.TwistedLevelValues.finS GlobalTheory.IndefiniteRowSideFullHecke.AdelicScalarSectionLift.finS
-    rw [Q_base R h]
-    congr 1
-    ext; simp
-  unfold GlobalTheory.IndefiniteRowSideFullHecke.TwistedLevelValues.typePart GlobalTheory.IndefiniteRowSideFullHecke.AdelicScalarSectionLift.cuspPart
-  rw [e]
-
 theorem exists_factor {X Y Z : Type} [AddCommGroup X] [Module ℂ X] [AddCommGroup Y] [Module ℂ Y] [AddCommGroup Z] [Module ℂ Z]
     (e : Y →ₗ[ℂ] Z) (f : X →ₗ[ℂ] Z) (V : Submodule ℂ Z) (hinj : Function.Injective e) (hr : LinearMap.range e = V)
     (hm : ∀ x, f x ∈ V) : ∃ th : X →ₗ[ℂ] Y, ∀ x, e (th x) = f x := by
@@ -42,11 +66,6 @@ theorem exists_factor {X Y Z : Type} [AddCommGroup X] [Module ℂ X] [AddCommGro
   refine ⟨(LinearEquiv.ofInjective _ hinj).symm.toLinearMap ∘ₗ f.codRestrict _ hm, fun x => ?_⟩
   have := congrArg Subtype.val ((LinearEquiv.ofInjective _ hinj).apply_symm_apply ⟨f x, hm x⟩)
   rwa [LinearEquiv.ofInjective_apply] at this
-
-theorem exists_lift {F : Face D A} (h : R.Char F) (i : Fin D.R.m) (t : T0) :
-    ∃ th : (R.HV i t).H →ₗ[ℂ] (R.HW i (sg0 D A)).H, ∀ x, (R.HW i (sg0 D A)).e (th x) = R.thF i t x :=
-  exists_factor (R.HW i (sg0 D A)).e (R.thF i t) (R.Wall i (sg0 D A)) (h.models.HW i (sg0 D A)).1
-    (h.models.HW i (sg0 D A)).2.1 (h.thP.thF_mem i t)
 
 theorem integrableOn_of_isThetaLift {G' H' S' Sinf TK Tau X : Type} [MeasurableSpace H'] [AddCommGroup Sinf] [Module ℂ Sinf] [AddCommGroup TK]
     [Module ℂ TK] [AddCommGroup Tau] [Module ℂ Tau] [AddCommGroup X] [Module ℂ X] {ν : Measure H'} {𝓕 : Set H'}

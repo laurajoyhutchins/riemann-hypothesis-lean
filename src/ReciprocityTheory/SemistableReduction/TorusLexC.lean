@@ -1,4 +1,54 @@
-import ReciprocityTheory.SemistableReduction.TorusLexB
+module
+
+public import ReciprocityTheory.SemistableReduction.TorusLexB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights.TorusLexOrder
 
@@ -15,7 +65,7 @@ private theorem continuous_torusMono' {ι : Type} [Fintype ι] (s : ι →₀ �
   have h : ∀ i, Continuous fun θ : ι → ℝ => torusPoint θ i :=
     fun i => (continuous_apply i).comp continuous_torusPoint
   unfold torusMono
-  exact continuous_finset_prod _ (fun i _ => (h i).pow _)
+  exact continuous_finsetProd _ (fun i _ => (h i).pow _)
 
 theorem integrable_torus_term {ι : Type} [Fintype ι] (f : MvPolynomial ι ℂ) (s : ι →₀ ℕ) :
     Integrable (fun θ => MvPolynomial.eval (torusPoint θ) f * conj (torusMono θ s))
@@ -36,7 +86,7 @@ theorem torus_coeff_integral {ι : Type} [Fintype ι] (f : MvPolynomial ι ℂ) 
     ∫ θ, MvPolynomial.eval (torusPoint θ) f * conj (torusMono θ s) ∂(torusProb ι) =
       f.coeff s := by
   simp_rw [eval_torus, Finset.sum_mul]
-  rw [integral_finset_sum _ (fun t _ => by
+  rw [MeasureTheory.integral_finsetSum _ (fun t _ => by
     simpa [mul_assoc] using (integrable_mono_term t s).const_mul (f.coeff t))]
   simp_rw [mul_assoc, integral_const_mul, torus_orth, mul_ite, mul_one, mul_zero]
   rw [Finset.sum_ite_eq']
@@ -54,6 +104,7 @@ theorem torus_parseval {ι : Type} [Fintype ι] (f : MvPolynomial ι ℂ) :
     have hc : conj (MvPolynomial.eval (torusPoint θ) f) =
         ∑ s ∈ f.support, conj (f.coeff s) * conj (torusMono θ s) := by
       conv_lhs => rw [eval_torus]
+
       simp [map_sum, map_mul]
     push_cast
     rw [show ((‖MvPolynomial.eval (torusPoint θ) f‖ : ℂ)) ^ 2 =
@@ -65,7 +116,7 @@ theorem torus_parseval {ι : Type} [Fintype ι] (f : MvPolynomial ι ℂ) :
   apply Complex.ofReal_injective
   rw [← integral_complex_ofReal]
   simp_rw [key]
-  rw [integral_finset_sum _ (fun s _ => (integrable_torus_term f s).const_mul _)]
+  rw [MeasureTheory.integral_finsetSum _ (fun s _ => (integrable_torus_term f s).const_mul _)]
   simp_rw [integral_const_mul, torus_coeff_integral]
   push_cast
   refine Finset.sum_congr rfl (fun s _ => ?_)

@@ -1,8 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.IsOpenOfMemIrreducibleComponentsOfFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FamIdeal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CharpolyDvdPowFinrankOfAevalEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormIdeal
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.TensorProduct.Free
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CharpolyDvdPowFinrankOfAevalEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PicardGroup
+public import Mathlib.RingTheory.Polynomial.IsIntegral
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits
 
 noncomputable section
@@ -18,6 +74,7 @@ theorem leftMulMatrix_sum_tmul (K L : Type) [Field K] [Field L] [Algebra K L] [F
       (∑ i, (X i : MvPolynomial (Fin m) K) ⊗ₜ[K] x i) =
     ∑ i, (X i : MvPolynomial (Fin m) K) •
       (Algebra.leftMulMatrix (Module.finBasis K L) (x i)).map (C : K →+* MvPolynomial (Fin m) K) := by
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   ext a c
@@ -43,8 +100,8 @@ open scoped TensorProduct
 theorem isIntegral_normForm (A K L : Type) [CommRing A] [Field K] [Field L] [Algebra A K]
     [Algebra K L] [FiniteDimensional K L] [Algebra A L] [IsScalarTower A K L] {m : ℕ}
     (x : Fin m → L) (hx : ∀ i, IsIntegral A (x i)) :
-    letI : Algebra (MvPolynomial (Fin m) A) (MvPolynomial (Fin m) K) := MvPolynomial.algebraMvPolynomial
-    IsIntegral (MvPolynomial (Fin m) A) (GlobalTheory.NormSheaf.normForm K L x) := by
+    @IsIntegral (MvPolynomial (Fin m) A) (MvPolynomial (Fin m) K) _ _
+      MvPolynomial.algebraMvPolynomial (GlobalTheory.NormSheaf.normForm K L x) := by
   classical
   letI : Algebra (MvPolynomial (Fin m) A) (MvPolynomial (Fin m) K) := MvPolynomial.algebraMvPolynomial
   set R := MvPolynomial (Fin m) K
@@ -95,7 +152,7 @@ theorem isIntegral_normForm (A K L : Type) [CommRing A] [Field K] [Field L] [Alg
     exact h2.symm
   have hdet := isIntegral_det_of_aeval _ g hgm h0
   rw [hM, ← RingHom.map_det] at hdet
-  exact (isIntegral_algebraMap_iff (IsFractionRing.injective R F)).mp hdet
+  exact (isIntegral_algebraMap_iff ).mp hdet
 
 end GlobalTheory.NormSheaf.IntegralCoeff
 

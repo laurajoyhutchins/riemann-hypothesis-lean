@@ -1,8 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
-import Formalism.SharpRestriction.LevelLetterCocycles.ExponentWindowSubsetShort
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
-import Lemmata.FirstBlockLemmaI.Imports
-import Lemmata.GeneralBFactRightForm.Imports
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoordHomMapTrace
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExponentWindowSubsetShort
+public import Lemmata.FirstBlockLemmaI.Imports
+public import Lemmata.GeneralBFactRightForm.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -172,6 +217,7 @@ theorem mem_DelF_mul {δ' : W.Gam} (hδ' : δ' ∈ W.DelF) (δ : W.Gam) :
 
 theorem sum_γA_mem (c : LetA O n) : ∑ δ ∈ W.DelF, W.γA δ c ∈ W.AΔ := by
   intro δ' hδ'
+
   rw [map_sum]
   refine Finset.sum_equiv (Equiv.mulLeft δ') (fun δ => ?_) (fun δ _ => ?_)
   · exact mem_DelF_mul hδ' δ
@@ -187,6 +233,7 @@ theorem average (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) {r : ℕ} (c : Fin r �
     fun j => W.AΔ.smul_mem (sum_γA_mem (c j)) _, ?_⟩
   have h1 : ∀ δ ∈ W.DelF, z = ∑ j, W.γA δ (c j) • w j := by
     intro δ hδ
+
     rw [← hz δ hδ, h, map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [γD_smulA, hw j δ hδ]
   have h2 : ((W.DelF.card : ℕ) : O) • z = ∑ j, (∑ δ ∈ W.DelF, W.γA δ (c j)) • w j := by
@@ -206,6 +253,7 @@ theorem φspan_le {r : ℕ} (b : Fin r → W.DD T)
   obtain ⟨a, ha⟩ := hb x hx
   have e : W.φD T (((letE (i - 1) : LetA O n) • (LinearMap.id : W.DD T →ₗ[LetA O n] W.DD T)) x) =
       ∑ j, W.φA (a j) • W.φD T ((letE (i - 1) : LetA O n) • b j) := by
+
     rw [LinearMap.smul_apply, LinearMap.id_apply, ha, Finset.smul_sum, map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [smul_comm, φD_smulA]
   rw [SetLike.mem_coe, e]
@@ -430,6 +478,7 @@ theorem pull_mutual (L : Formalism.ExponentWindows.E.Lat B' n' V) (m h : ZMod n'
         rintro _ ⟨y, hy, rfl⟩
         rw [SetLike.mem_coe, hi] at hy
         obtain ⟨cf, hcf⟩ := (Submodule.mem_span_range_iff_exists_fun (PowerSeries O')).1 (h2 y hy)
+
         rw [SetLike.mem_coe, Submodule.mem_comap, LinearMap.lsmul_apply, ← L.φ_semi, ← hcf, map_sum]
         refine Submodule.sum_mem _ fun a _ => ?_
         rw [L.φ_semi]

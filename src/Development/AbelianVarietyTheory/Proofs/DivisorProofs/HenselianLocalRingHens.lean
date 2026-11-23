@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InstPreorder
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HensIsLocalRingAndIsLocalHomOfStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleNbhdLocalRingToHenselisationInjectiveOfNbhdStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLeIsRootOfSimpleRootPointedEtaleNbhdStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InstPreorder
+public import Mathlib.RingTheory.Henselian
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleNbhdLocalRingToHenselisationAlgebraMapStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleNbhdLocalRingToHenselisationInjectiveOfNbhdStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLeIsRootOfSimpleRootPointedEtaleNbhdStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSubMemMaximalIdealPointedEtaleNeighbourhooStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HensIsLocalRingAndIsLocalHomOfStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PointedEtaleNeighbourhoodLocalRingIsDirectedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleNbhdLocalRingToHenselisationAlgebraMapStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSubMemMaximalIdealPointedEtaleNeighbourhooStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing GlobalTheory.Henselisation Polynomial
 
@@ -51,7 +97,7 @@ theorem henselianLocalRing_hens : ∀ (R : Type) [CommRing R] [IsLocalRing R],
   set ρ := algebraMap R (Hens R) r with hρdef
   have hρ : a₀ - ρ ∈ maximalIdeal (Hens R) := by
     haveI := hofloc i'
-    rw [← hb₀, hρdef, ← GlobalTheory.T.etaleNbhdLocalRingToHenselisation_algebraMap R i' r, ← map_sub]; exact map_nonunit _ _ hr
+    rw [← hb₀, hρdef, ← GlobalTheory.T.etaleNbhdLocalRingToHenselisation_algebraMap R i' r, ← (Hens.of i').map_sub b₀ ((algebraMap R i'.B) r)]; exact map_nonunit _ _ hr
   have hfρ : f.eval ρ ∈ maximalIdeal (Hens R) := by
     have hd := sub_dvd_eval_sub ρ a₀ f
     have : f.eval ρ - f.eval a₀ ∈ maximalIdeal (Hens R) := by
@@ -120,7 +166,7 @@ theorem henselianLocalRing_hens : ∀ (R : Type) [CommRing R] [IsLocalRing R],
     rw [← hhΦ, ← hΦj, ← Polynomial.map_map, eval_map, eval₂_at_apply, hc.eq_zero, map_zero]
   have hcm' : c' - u * ρ ∈ maximalIdeal (Hens R) := by
     have := map_nonunit (Hens.of j) _ hcm
-    rwa [map_sub, ← RingHom.comp_apply (Hens.of j) (EtNbhd.trans hij),
+    rwa [(Hens.of j).map_sub c ((EtNbhd.trans hij) (ψ a₀')), ← RingHom.comp_apply (Hens.of j) (EtNbhd.trans hij),
       ← RingHom.comp_apply ((Hens.of j).comp (EtNbhd.trans hij)) ψ, hofj,
       show (Hens.of i).comp ψ = Φ from rfl, hΦa₀'] at this
   refine ⟨↑hu.unit⁻¹ * c', ?_, ?_⟩

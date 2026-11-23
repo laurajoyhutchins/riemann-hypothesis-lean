@@ -1,10 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsQuadOfPlane
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOscillatorActionUnitaryGroupHermitian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergSmoothOfWeakDerivativeClosedSet
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.PolarConjTranspose
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.CommuteGelfandInvariantMatrixUnitsOfGlRel
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeisenbergSmoothVectorDerivativeCalculus
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsQuadOfPlane
+public import Mathlib.CategoryTheory.Category.Basic
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeisenbergSmoothVectorDerivativeCalculus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Complex Matrix GlobalTheory.RealWeil GlobalTheory.Mem.Lift
 open scoped RealInnerProductSpace ContDiff Real ComplexOrder Topology
@@ -22,14 +64,14 @@ theorem real_lin_smul (l : (ι → ℂ) →ₗ[ℝ] ℂ) (c : ℂ) (z : ι → �
     simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, Complex.real_smul]
     conv_lhs => rw [← Complex.re_add_im c]
     ring
-  rw [hc, map_add, map_smul, map_smul, Complex.real_smul, Complex.real_smul]
+  rw [hc, map_add (f := _), map_smul, map_smul, Complex.real_smul, Complex.real_smul]
 
 theorem real_lin_I_I (l : (ι → ℂ) →ₗ[ℝ] ℂ) (z : ι → ℂ) : l (I • I • z) = - l z := by
   rw [smul_smul, I_mul_I, neg_one_smul, map_neg]
 
 def linPart (l : (ι → ℂ) →ₗ[ℝ] ℂ) : (ι → ℂ) →ₗ[ℂ] ℂ where
   toFun z := l z - I * l (I • z)
-  map_add' x y := by simp only [smul_add, map_add]; ring
+  map_add' x y := by simp only [smul_add, map_add (f := _)]; ring
   map_smul' c z := by
     rw [smul_comm I c z, real_lin_smul l c z, real_lin_smul l c (I • z), real_lin_I_I, RingHom.id_apply, smul_eq_mul]
     conv_rhs => rw [← Complex.re_add_im c]
@@ -37,7 +79,7 @@ def linPart (l : (ι → ℂ) →ₗ[ℝ] ℂ) : (ι → ℂ) →ₗ[ℂ] ℂ wh
 
 def antiPart (l : (ι → ℂ) →ₗ[ℝ] ℂ) : (ι → ℂ) →ₗ⋆[ℂ] ℂ where
   toFun z := l z + I * l (I • z)
-  map_add' x y := by simp only [smul_add, map_add]; ring
+  map_add' x y := by simp only [smul_add, map_add (f := _)]; ring
   map_smul' c z := by
     rw [smul_comm I c z, real_lin_smul l c z, real_lin_smul l c (I • z), real_lin_I_I, smul_eq_mul]
     have : (starRingEnd ℂ) c = c.re - c.im * I := by
@@ -67,6 +109,7 @@ theorem sum_lin (X : Matrix ι ι ℂ) (A : (ι → ℂ) →ₗ[ℂ] ℂ) (v : �
   have hx : X *ᵥ v = ∑ k, (∑ j, X k j * v j) • (Pi.single k (1 : ℂ) : ι → ℂ) := by
     ext i
     simp [Matrix.mulVec, dotProduct, Finset.sum_apply, Pi.single_apply]
+
   rw [hx, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, smul_eq_mul, Finset.sum_mul]
@@ -90,6 +133,7 @@ theorem sum_anti {H X : Matrix ι ι ℂ} (hH : Hᴴ = H) (hd : H.det ≠ 0) (hX
         simp only [Matrix.mulVec_smul]
   have hA : A w = ∑ j, (starRingEnd ℂ) ((H *ᵥ w) j) * A (H⁻¹ *ᵥ Pi.single j 1) := by
     conv_lhs => rw [hexp]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [LinearMap.map_smulₛₗ, smul_eq_mul]
@@ -168,7 +212,7 @@ theorem isQuadOf_normal {H X : Matrix ι ι ℂ} (hH : Hᴴ = H) (hd : H.det ≠
 private theorem sm_add' {B : Type} [NormedAddCommGroup B] [NormedSpace ℂ B]
     {ρ : (ι → ℂ) → B →L[ℂ] B} {f g : B} (hf : Sm ρ f) (hg : Sm ρ g) : Sm ρ (f + g) := by
   unfold Sm at *
-  simp only [map_add]
+  simp only [map_add (f := _)]
   exact hf.add hg
 
 private theorem sm_smul' {B : Type} [NormedAddCommGroup B] [NormedSpace ℂ B]

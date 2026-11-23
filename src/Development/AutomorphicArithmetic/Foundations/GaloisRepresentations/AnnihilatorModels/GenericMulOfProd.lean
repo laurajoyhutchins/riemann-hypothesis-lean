@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,20 +166,6 @@ structure Corr (l : ℕ) (Y : Scheme.{0}) : Type 1 where
   et : Etale (p ∣_ Y.basicOpen (l : Γ(Y, ⊤)))
   deg : ∀ (K : Type) [Field K] [IsAlgClosed K], (l : K) ≠ 0 → ∀ y : Spec (CommRingCat.of K) ⟶ Y,
     Nat.card {z : Spec (CommRingCat.of K) ⟶ Z // z ≫ p = y} = d
-
-def Corr.graph (l : ℕ) {Y : Scheme.{0}} (z : Y ⟶ Y) : Corr l Y where
-  Z := Y
-  p := 𝟙 Y
-  r := z
-  d := 1
-  fin := inferInstance
-  et := inferInstance
-  deg K _ _ _ y := by
-    have : Unique {z : Spec (CommRingCat.of K) ⟶ Y // z ≫ 𝟙 Y = y} :=
-      ⟨⟨⟨y, Category.comp_id y⟩⟩, fun a => Subtype.ext ((Category.comp_id a.1).symm.trans a.2)⟩
-    exact Nat.card_unique
-
-instance (l : ℕ) (Y : Scheme.{0}) : Inhabited (Corr l Y) := ⟨Corr.graph l (𝟙 Y)⟩
 
 def Corr.Sec {l : ℕ} {Y : Scheme.{0}} (T : Corr l Y) {X : Scheme.{0}} (y : X ⟶ Y) : Type := {z : X ⟶ T.Z // z ≫ T.p = y}
 

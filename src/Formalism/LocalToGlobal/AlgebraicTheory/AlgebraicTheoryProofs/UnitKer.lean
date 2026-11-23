@@ -1,14 +1,71 @@
-import Formalism.LocalToGlobal.AlgebraicTheory.StatementB
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.NeZeroOfNorm
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.SecondCoeffConsistency
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.FirstLevelFromUniversalLaw
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveSecondLogDerivative
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveJetsUnitBall
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.FacShapeZero
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.AnalyticTransOfAdd
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.HasCMByStable
+module
+
+public import Formalism.LocalToGlobal.AlgebraicTheory.StatementB
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.NeZeroOfNorm
 import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinRecursion
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.HasCMByStable
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SecondLogDerivativeUnique
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SqrtInUnramifiedCompletion
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.Points
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.UnitBall
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveJetsUnitBall
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveSecondLogDerivative
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.FirstLevelFromUniversalLaw
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.SecondCoeffConsistency
+import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.AnalyticTransOfAdd
+import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.FacShapeZero
+import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.CmIntegralityOfTorsionPoints
+import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OrthogonalGaussModels.NormLeOneOfQuad
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -194,7 +251,7 @@ theorem gauss_roots {ι : Type} [Fintype ι] (A : PowerSeries K) (hA0 : constant
   have hrest : (1 : ℝ) ≤ ∏ Q ∈ Finset.univ.erase P, ‖d Q‖ := by
     calc (1 : ℝ) = ∏ Q ∈ Finset.univ.erase P, (1 : ℝ) := by rw [Finset.prod_const_one]
       _ ≤ ∏ Q ∈ Finset.univ.erase P, ‖d Q‖ :=
-        Finset.prod_le_prod (fun _ _ => zero_le_one) (fun Q _ => hd1 Q)
+        Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun Q _ => hd1 Q)
   rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ P), hdP] at hc
   have : ‖c P‖ * 1 ≤ ‖c P‖ * ∏ Q ∈ Finset.univ.erase P, ‖d Q‖ :=
     mul_le_mul_of_nonneg_left hrest (norm_nonneg _)
@@ -226,12 +283,12 @@ theorem pick3 (hp : p = 3) {x : ℂ_[p]} (hx : ‖x‖ ≤ 1) :
 
 theorem em_fst (a : ℤ × ℤ) : (em dK ι a).1 = (a.1 : ℂ_[p]) + (a.2 : ℂ_[p]) * ι (omegaK dK) := by
   show ι _ = _
-  simp [map_add, map_mul, map_intCast]
+  simp [map_add (f := _), map_mul, map_intCast]
 
 theorem em_snd (a : ℤ × ℤ) :
     (em dK ι a).2 = (a.1 : ℂ_[p]) + (a.2 : ℂ_[p]) * (1 - ι (omegaK dK)) := by
   show ι _ = _
-  simp [map_add, map_mul, map_intCast, map_sub, map_one]
+  simp [map_add (f := _), map_mul, map_intCast, map_sub, map_one]
 
 theorem cand3 (hw : ‖ι (omegaK dK)‖ < 1 ∨ ‖ι (omegaK dK) - 1‖ < 1) (r s : ℤ) (hr : r = 1 ∨ r = 2)
     (hs : s = 1 ∨ s = 2) :
@@ -361,7 +418,7 @@ theorem split_w {p : ℕ} [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) {dK : ℕ} (hm
     have e : ι (((3 * a : ℤ) : ℂ) + ((3 * b : ℤ) : ℂ) * omegaK dK) =
         ((3 : ℤ) : ℂ_[p]) * (em dK ι (a, b)).1 := by
       rw [em_fst]
-      simp only [map_add, map_mul, map_intCast]
+      simp only [map_add (f := _), map_mul, map_intCast]
       push_cast
       ring
     rw [e, norm_mul] at hα1
@@ -467,6 +524,7 @@ theorem main_case {p : ℕ} [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) {dK : ℕ} (
       ι (Formalism.L2.Th1.F.s2 L) = ∑ P : S, (ι (L.weierstrassP (P : ℂ)) + (curveL p L ι).b₂ / 12) := by
     rw [hb2]
     have := congrArg ι hs2C
+
     simpa [map_mul, map_sub, map_sum] using this
   have hIsoP := (Formalism.L2.Th1.C.isogenyIffBar ℂ_[p] (wpReg (curveL p L ι)) (ι (Formalism.L2.Th1.F.s2 L)) S neg
     (fun P : S => ι (L.weierstrassP (P : ℂ))) ((curveL p L ι).b₂ / 12) _ _ _ hα0p hNp hEp').2 hs2p
@@ -516,10 +574,10 @@ theorem main_case {p : ℕ} [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) {dK : ℕ} (
 
 end UnitKernelIntegral
 
+
 open UnitKernelIntegral Formalism.L2.Th1.Top.CalcPAux in
 open Formalism.L2.Th1.CM (omegaK) in
 open Formalism.L2.Th1.D (normInt) in
-
 theorem unit_kernel_integral_coords : UnitKerInt := by
   intro dK L _hsq hmod hcm p _ ι hp2 hpd hW α t hαQ hα1 hαt ht
   obtain ⟨m, n, rfl⟩ := hαQ

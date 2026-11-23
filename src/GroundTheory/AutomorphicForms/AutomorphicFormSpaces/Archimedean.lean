@@ -1,9 +1,55 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GKModules.GKModule
-import GroundTheory.AutomorphicForms.GKModules.Garding
-import GroundTheory.AutomorphicForms.GKModules.Casimir
-import GroundTheory.AutomorphicForms.Reduction
+module
+
+public import GroundTheory.AutomorphicForms.RealGroupsLie
+public import GroundTheory.AutomorphicForms.ReductionIwasawa
 import GroundTheory.GlobalFields.Adele.IntegersLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField NumberField.mixedEmbedding IsDedekindDomain Topology Filter Set
 open scoped NumberField.AdeleRing
@@ -27,7 +73,7 @@ instance : NormedAlgebra ℝ (ArchMatrix K n) := Matrix.linftyOpNormedAlgebra
 instance : FiniteDimensional ℝ (ArchMatrix K n) := by
   change FiniteDimensional ℝ (Matrix (Fin n) (Fin n) (mixedSpace K)); infer_instance
 
-instance : CompleteSpace (ArchMatrix K n) := FiniteDimensional.complete ℝ _
+instance : CompleteSpace (ArchMatrix K n) := FiniteDimensional.completeSpace ℝ _
 
 abbrev archGroup : Subgroup (ArchMatrix K n)ˣ := ⊤
 
@@ -37,11 +83,11 @@ instance : NormedAddCommGroup (archLie K n) := Submodule.normedAddCommGroup _
 
 instance : NormedSpace ℝ (archLie K n) := Submodule.normedSpace _
 
-theorem isExpLieAlgebra : IsExpLieAlgebra (archGroup K n) (archLie K n) where
-  expUnit_mem _ _ := Subgroup.mem_top _
-  exists_nhds := ⟨(expPartialHomeomorph ℝ (ArchMatrix K n)).source,
+theorem isExpLieAlgebra : IsExpLieAlgebra (archGroup K n) (archLie K n) := by
+  refine ⟨fun _ _ => Subgroup.mem_top _, ?_⟩
+  exact ⟨(expPartialHomeomorph ℝ (ArchMatrix K n)).source,
     (expPartialHomeomorph ℝ (ArchMatrix K n)).open_source,
-    zero_mem_expPartialHomeomorph_source ℝ _, subset_rfl, fun _ _ _ => Submodule.mem_top⟩
+    zero_mem_expPartialHomeomorph_source ℝ _, Set.Subset.rfl, fun _ _ _ => Submodule.mem_top⟩
 
 def archMatrixEquiv : Matrix (Fin n) (Fin n) (InfiniteAdeleRing K) ≃+* ArchMatrix K n :=
   RingEquiv.mapMatrix (m := Fin n) (InfiniteAdeleRing.ringEquiv_mixedSpace K)

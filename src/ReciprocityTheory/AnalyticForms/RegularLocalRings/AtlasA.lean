@@ -1,6 +1,53 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.IsOpenAlt
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.AnChart
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.IsOpenAlt
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.AnChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Topology.OpenPartialHomeomorph.IsImage
 import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -17,19 +64,19 @@ theorem analyticAt_eval_of_pi {E : Type*} [NormedAddCommGroup E] [NormedSpace �
     simp only [eval_C]
     exact analyticAt_const
   | add p q hp hq =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact hp.add hq
   | mul_X p l hp =>
     simp only [map_mul, eval_X]
     exact hp.mul (hf l)
 
-def AlgRes.GoodChart (R : AlgRes ι P D e) (ψ : OpenPartialHomeomorph R.M (Fin e → ℂ)) : Prop :=
+def AlgRes.GoodChart (R : AlgRes (ι := ι) P D e) (ψ : OpenPartialHomeomorph R.M (Fin e → ℂ)) : Prop :=
   ∃ i, ψ.source ⊆ R.src i ∧
     (∃ r : Fin e → MvPolynomial (Fin (R.amb i)) ℂ, ∀ y ∈ ψ.source, ψ y = evalFam r (R.coord i y)) ∧
     ∃ g : (Fin e → ℂ) → Fin (R.amb i) → ℂ, AnalyticOnNhd ℂ g ψ.target ∧
       ∀ w ∈ ψ.target, R.coord i (ψ.symm w) = g w
 
-theorem AlgRes.analyticAt_coord_symm (R : AlgRes ι P D e)
+theorem AlgRes.analyticAt_coord_symm (R : AlgRes (ι := ι) P D e)
     {ψ : OpenPartialHomeomorph R.M (Fin e → ℂ)} {i : Fin R.n} (hs : ψ.source ⊆ R.src i)
     {g : (Fin e → ℂ) → Fin (R.amb i) → ℂ} (hg : AnalyticOnNhd ℂ g ψ.target)
     (hgc : ∀ w ∈ ψ.target, R.coord i (ψ.symm w) = g w)
@@ -67,7 +114,7 @@ theorem AlgRes.analyticAt_coord_symm (R : AlgRes ι P D e)
     exact hl.symm
   exact congrArg (fun v => eval v h) hfun
 
-theorem AlgRes.analyticOnNhd_comp_symm (R : AlgRes ι P D e)
+theorem AlgRes.analyticOnNhd_comp_symm (R : AlgRes (ι := ι) P D e)
     {ψ : OpenPartialHomeomorph R.M (Fin e → ℂ)} (hψ : R.GoodChart ψ) {m : ℕ}
     (f : R.M → Fin m → ℂ) (S : Set R.M) (hS : IsOpen S) (j : Fin R.n) (hSj : S ⊆ R.src j)
     (r : Fin m → MvPolynomial (Fin (R.amb j)) ℂ) (hf : ∀ y ∈ S, f y = evalFam r (R.coord j y)) :
@@ -85,7 +132,7 @@ theorem AlgRes.analyticOnNhd_comp_symm (R : AlgRes ι P D e)
   intro l
   exact R.analyticAt_coord_symm hsi hg hgc j (r l) hw (hSj hwS')
 
-theorem AlgRes.exists_goodChart (R : AlgRes ι P D e) (i : Fin R.n) (x : R.M) (hx : x ∈ R.src i)
+theorem AlgRes.exists_goodChart (R : AlgRes (ι := ι) P D e) (i : Fin R.n) (x : R.M) (hx : x ∈ R.src i)
     (r : Fin e → MvPolynomial (Fin (R.amb i)) ℂ)
     (hr : Ideal.span (Set.range fun l => algebraMap _ (locRing (R.ideal i) (R.coord i x)) (r l)) =
       Ideal.map (algebraMap _ (locRing (R.ideal i) (R.coord i x))) (ptIdeal (R.coord i x)))

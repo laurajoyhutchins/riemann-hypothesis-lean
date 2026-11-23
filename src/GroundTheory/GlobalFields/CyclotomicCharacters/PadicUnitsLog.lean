@@ -1,5 +1,61 @@
-import Mathlib
-import GroundTheory.GlobalFields.CyclotomicCharacters.ProfinitePadic
+module
+
+public import Mathlib.Data.ZMod.Units
+public import Mathlib.GroupTheory.Torsion
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.Instances.ZMod
+public import GroundTheory.GlobalFields.CyclotomicCharacters.ProfinitePadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.CyclotomicCharacters.Character
+
+@[expose] public section
 
 open scoped GroundTheory.LocalField.Abstract
 
@@ -89,7 +145,7 @@ def genUnit (n : ℕ) : (ZMod (ℓ ^ (n + unitsLevel ℓ)))ˣ :=
 
 theorem orderOf_genUnit (n : ℕ) : orderOf (genUnit ℓ n) = ℓ ^ n := by
   rw [← orderOf_units, coe_genUnit]
-  have := ZMod.orderOf_one_add_mul_prime_pow hℓ.out (unitsLevel ℓ) (unitsLevel_ne_zero ℓ)
+  have := ZMod.orderOf_one_add_mul_prime_pow hℓ.out (unitsLevel ℓ)
     (unitsLevel_add_two_le ℓ) 1 (by norm_cast; exact hℓ.out.not_dvd_one) n
   simpa using this
 
@@ -100,7 +156,7 @@ theorem genUnit_pow_eq_one (n : ℕ) : genUnit ℓ n ^ (ℓ ^ n) = 1 := by
 theorem genUnit_mem_unitsKer (n : ℕ) : genUnit ℓ n ∈ unitsKer ℓ n := by
   rw [unitsKer, MonoidHom.mem_ker]
   refine Units.ext ?_
-  simp only [ZMod.unitsMap_def, Units.coe_map, MonoidHom.coe_coe, coe_genUnit, map_add, map_one,
+  simp only [ZMod.unitsMap_def, Units.coe_map, MonoidHom.coe_coe, coe_genUnit, map_add (f := _), map_one,
     map_pow, map_natCast, Units.val_one]
   rw [← Nat.cast_pow, ZMod.natCast_self, add_zero]
 
@@ -174,7 +230,7 @@ theorem unitsMap_genUnit {m n : ℕ} (h : m ≤ n) :
     ZMod.unitsMap (pow_dvd_pow ℓ (by omega : m + unitsLevel ℓ ≤ n + unitsLevel ℓ)) (genUnit ℓ n) =
       genUnit ℓ m := by
   refine Units.ext ?_
-  simp only [ZMod.unitsMap_def, Units.coe_map, MonoidHom.coe_coe, coe_genUnit, map_add, map_one,
+  simp only [ZMod.unitsMap_def, Units.coe_map, MonoidHom.coe_coe, coe_genUnit, map_add (f := _), map_one,
     map_pow, map_natCast]
 
 theorem castHom_logMod {m n : ℕ} (h : m ≤ n) (x : (ZMod (ℓ ^ (n + unitsLevel ℓ)))ˣ) :
@@ -251,7 +307,7 @@ noncomputable def padicUnitsLog : ℤ_[ℓ]ˣ →* Multiplicative ℤ_[ℓ] wher
   map_mul' u v := by
     rw [← ofAdd_add]
     refine congrArg Multiplicative.ofAdd (PadicInt.ext_of_toZModPow.mp fun n => ?_)
-    rw [map_add, toZModPow_limFamilies, toZModPow_limFamilies, toZModPow_limFamilies]
+    rw [map_add (f := _), toZModPow_limFamilies, toZModPow_limFamilies, toZModPow_limFamilies]
     simp
 
 theorem toZModPow_padicUnitsLog (u : ℤ_[ℓ]ˣ) (n : ℕ) :
@@ -394,11 +450,6 @@ theorem mem_torsion_two_iff (u : ℤ_[2]ˣ) :
     · exact Or.inl (Units.ext h1)
     · exact Or.inr (Units.ext (by rw [h1, Units.val_neg, Units.val_one]))
   · rintro (rfl | rfl) <;> simp
-
-noncomputable def unitsModTorsionEquiv :
-    ℤ_[ℓ]ˣ ⧸ CommGroup.torsion ℤ_[ℓ]ˣ ≃* Multiplicative ℤ_[ℓ] :=
-  (QuotientGroup.quotientMulEquivOfEq (ker_padicUnitsLog ℓ).symm).trans
-    (QuotientGroup.quotientKerEquivOfSurjective _ (padicUnitsLog_surjective ℓ))
 
 end Limit
 

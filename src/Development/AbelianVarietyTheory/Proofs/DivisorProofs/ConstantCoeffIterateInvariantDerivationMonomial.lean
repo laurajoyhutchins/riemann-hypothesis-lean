@@ -1,9 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvDer
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantDerivationCoeffEqZeroOfDegreeLtStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantDerivationFormalGroupLawIsLinearStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantDerivationFormalGroupLawLeibnizStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
 import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvDer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantDerivationCoeffEqZeroOfDegreeLtStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantDerivationFormalGroupLawIsLinearStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InvariantDerivationFormalGroupLawLeibnizStatement
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat GlobalTheory.LawDer
 
 set_option autoImplicit false
@@ -53,7 +100,7 @@ theorem prod_X_pow (n : Fin d → ℕ) :
       rw [Finset.prod_insert ha, Finset.sum_insert ha, ih, X_pow_eq, monomial_mul_monomial, mul_one]
   have hsum : (∑ j, Finsupp.single j (n j)) = Finsupp.equivFunOnFinite.symm n := by
     ext j
-    rw [Finsupp.finset_sum_apply, Finset.sum_eq_single j]
+    rw [Finsupp.finsetSum_apply, Finset.sum_eq_single j]
     · simp
     · intro b _ hb
       simp [Finsupp.single_apply, hb]
@@ -76,7 +123,7 @@ theorem coeff_subst_zero_X (H : MvPowerSeries (Fin d ⊕ Fin d) R) (e : Fin d �
   have h1 : ∀ j : Fin d, (e.mapDomain (Sum.inr : Fin d → Fin d ⊕ Fin d)) (Sum.inl j) = 0 := fun j =>
     Finsupp.mapDomain_notin_range _ _ (by simp)
   have h2 : ∀ j : Fin d, (e.mapDomain (Sum.inr : Fin d → Fin d ⊕ Fin d)) (Sum.inr j) = e j := fun j =>
-    Finsupp.mapDomain_apply Sum.inr_injective _ _
+    Finsupp.mapDomain_apply_of_injective Sum.inr_injective _ _
   rw [coeff_subst ha, finsum_eq_single _ (e.mapDomain Sum.inr)]
   · rw [key]
     have h3 : (Finsupp.equivFunOnFinite.symm fun j : Fin d => (e.mapDomain (Sum.inr : Fin d → Fin d ⊕ Fin d)) (Sum.inr j)) = e := by
@@ -131,12 +178,13 @@ theorem constantCoeff_invDer_X (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) R
     (hswap : ∀ i, swap (μ i) = μ i) (u : Fin d → R) (i : Fin d) :
     constantCoeff (invDer μ u (X i)) = u i := by
   have hμ : HasSubst μ := hasSubst_of_constantCoeff_zero hc
-  have hp : ∀ k, constantCoeff (pderiv R (Sum.inr k) (μ i)) = if k = i then 1 else 0 := by
+  have hp : ∀ k, constantCoeff (pderiv (Sum.inr k) (μ i)) = if k = i then 1 else 0 := by
     intro k
     rw [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv, zero_add, coeff_inr_of_unit μ hunit hswap]
     simp
+
   simp only [invDer, subst_X hμ, map_sum, smul_eq_C_mul, map_mul, constantCoeff_C,
-    constantCoeff_atZero, hp]
+  constantCoeff_atZero, hp]
   simp
 
 end GlobalTheory.LawDer.MonoIter
@@ -223,7 +271,7 @@ theorem invDer_monomial (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) R)
         · simp
     refine ⟨G * X i + monomial α' 1 * Ri, ?_, ?_⟩
     · intro β hβ
-      rw [map_add, X_def, coeff_mul_monomial, coeff_monomial_mul]
+      rw [map_add (f := _), X_def, coeff_mul_monomial, coeff_monomial_mul]
       have h1 : (if Finsupp.single i 1 ≤ β then coeff (β - Finsupp.single i 1) G * 1 else 0) = 0 := by
         split_ifs with h
         · have := degree_add' (β - Finsupp.single i 1) (Finsupp.single i 1)
@@ -315,7 +363,8 @@ theorem constantCoeff_iterate_invDer_monomial : ∀ (R : Type) [CommRing R] (d :
           · simp
         rw [hp]
         ring
-    rw [Function.iterate_succ_apply, hD, hL, map_add, map_sum, ← hL, map_add, map_sum]
+
+    rw [Function.iterate_succ_apply, hD, hL, map_add (f := _), map_sum, ← hL, map_add (f := _), map_sum]
     simp only [← hL]
     rw [hG0, add_zero, Finset.sum_congr rfl (fun j _ => hterm j), ← Finset.sum_mul]
     have hs : (∑ j, (α j : R)) = ((n + 1 : ℕ) : R) := by

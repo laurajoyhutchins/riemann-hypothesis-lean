@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +55,8 @@ section Space
 
 variable {d d₁ : ℕ}
 
-variable (σ) in
 
+variable (σ) in
 structure IsPlane (H : Plane E d d₁) (Y : Spc F E d) (Y₁ : Spc F E d₁) : Prop where
   rank : d = d₁ + 2
   xx : form σ Y.J H.x H.x = 0
@@ -27,14 +66,14 @@ structure IsPlane (H : Plane E d d₁) (Y : Spc F E d) (Y₁ : Spc F E d₁) : P
   gram : H.ιᵀ * Y.J * H.ι.map σ = Y₁.J
   nondeg : Y₁.J.det ≠ 0
 
-variable (σ) in
 
+variable (σ) in
 def FinK (B : Base F E) (W : Spc F E d) : Set (UA σ W.J) := {k | ∀ w, Commute ((mat k).map (piInf (B.emb w))) (W.θ w)}
 
 def IsAut {W : Spc F E d} (f : UA σ W.J → ℂ) : Prop := Continuous f ∧ ∀ γ ∈ ratU σ W.J, ∀ h, f (γ * h) = f h
 
-variable (σ) in
 
+variable (σ) in
 def unipU (W : Spc F E d) (U : Submodule E (Fin d → E)) : Subgroup (UA σ W.J) :=
   Subgroup.closure {m | (∀ u ∈ U, mat m *ᵥ incV F u = incV F u) ∧ ∀ z : Fin d → E, (∀ u ∈ U, form σ W.J z u = 0) →
     mat m *ᵥ incV F z - incV F z ∈ Submodule.span (AE F E) (incV F '' (U : Set (Fin d → E)))}

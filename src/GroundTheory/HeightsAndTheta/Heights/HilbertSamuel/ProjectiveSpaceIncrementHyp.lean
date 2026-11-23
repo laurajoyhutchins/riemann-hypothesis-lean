@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.HilbertSamuel
@@ -16,26 +60,14 @@ variable {K : Type*} [DecidableEq K] (ι : K → Type*) {F : Type*} [Field F]
 variable {M : Type*} [AddCommGroup M] [Module (MRing ι F) M] [Module F M]
   [IsScalarTower F (MRing ι F) M]
 
-open Classical in
-
-structure IsMultigraded (ℳ : (K → ℤ) → Submodule F M) : Prop where
-  internal : DirectSum.IsInternal ℳ
-  var_mul : ∀ (v : Σ k, ι k) (m : K → ℤ), ∀ x ∈ ℳ m,
-    (X v : MRing ι F) • x ∈ ℳ (m + Pi.single v.1 1)
 
 variable {ι}
-
-def modHilb (ℳ : (K → ℤ) → Submodule F M) (m : K → ℤ) : ℤ :=
-  (Module.finrank F (ℳ m) : ℤ)
 
 end Objects
 
 section Support
 
 variable {S : Type*} [CommRing S] (M : Type*) [AddCommGroup M] [Module S M]
-
-def modMultAt (p : PrimeSpectrum S) : ℕ∞ :=
-  Module.length (Localization.AtPrime p.asIdeal) (LocalizedModule p.asIdeal.primeCompl M)
 
 end Support
 
@@ -44,57 +76,9 @@ section Cycle
 variable {K : Type*} [Fintype K] [DecidableEq K] (ι : K → Type*) (F : Type*) [Field F]
 variable (M : Type*) [AddCommGroup M] [Module (MRing ι F) M]
 
-def topSupport (d : ℕ) : Set (PrimeSpectrum (MRing ι F)) :=
-  {p | p ∈ Module.support (MRing ι F) M ∧ IsMultiProjPrime p.asIdeal ∧
-    ringKrullDim (MRing ι F ⧸ p.asIdeal) = ((d + Fintype.card K : ℕ) : WithBot ℕ∞)}
-
-def modIntNum (d : ℕ) (a : K → ℤ) : ℤ :=
-  ∑ᶠ (p : PrimeSpectrum (MRing ι F)) (_ : p ∈ topSupport ι F M d),
-    ((modMultAt M p).toNat : ℤ) * intNum F p.asIdeal (fun _ : Fin d => a)
-
 end Cycle
 
-def degSize {K : Type*} [Fintype K] (a : K → ℤ) : ℝ := ∑ k, (a k : ℝ)
-
 section Statements
-
-def MultigradedFiltration.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (M : Type u) [AddCommGroup M] [Module (MRing ι F) M] [Module F M]
-    [IsScalarTower F (MRing ι F) M] (ℳ : (K → ℤ) → Submodule F M),
-    IsMultigraded ι ℳ → Module.Finite (MRing ι F) M →
-    ∃ (n : ℕ) (x : Fin n → M) (c : Fin n → K → ℤ) (q : Fin n → Ideal (MRing ι F)),
-      (∀ j, x j ∈ ℳ (c j)) ∧
-      (∀ j, (q j).IsPrime ∧ IsMultiHomogIdeal (q j)) ∧
-      Submodule.span (MRing ι F) (Set.range x) = ⊤ ∧
-      ∀ j (f : MRing ι F),
-        f • x j ∈ Submodule.span (MRing ι F) (x '' {i | i < j}) ↔ f ∈ q j
-
-def HilbertDimZero.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (q : Ideal (MRing ι F)),
-    IsMultiProjPrime q → ringKrullDim (MRing ι F ⧸ q) = ((Fintype.card K : ℕ) : WithBot ℕ∞) →
-    ∃ a₀ : ℕ, ∀ a : K → ℤ, (∀ k, (a₀ : ℤ) ≤ a k) →
-      hilbFn q a = intNum F q (Fin.elim0 : Fin 0 → K → ℤ)
-
-def HilbertPrime.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (d : ℕ) (q : Ideal (MRing ι F)),
-    IsMultiProjPrime q → ringKrullDim (MRing ι F ⧸ q) = ((d + Fintype.card K : ℕ) : WithBot ℕ∞) →
-    ∃ (a₀ : ℕ) (C : ℝ), ∀ a : K → ℤ, (∀ k, (a₀ : ℤ) ≤ a k) →
-      |(hilbFn q a : ℝ) - (intNum F q (fun _ : Fin d => a) : ℝ) / (d.factorial : ℝ)| ≤
-        C * (degSize a + 1) ^ ((d : ℤ) - 1)
-
-def HilbertModule.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (M : Type u) [AddCommGroup M] [Module (MRing ι F) M] [Module F M]
-    [IsScalarTower F (MRing ι F) M] (ℳ : (K → ℤ) → Submodule F M) (d : ℕ),
-    IsMultigraded ι ℳ → Module.Finite (MRing ι F) M →
-    (∀ p ∈ Module.support (MRing ι F) M, IsMultiProjPrime p.asIdeal →
-      ringKrullDim (MRing ι F ⧸ p.asIdeal) ≤ ((d + Fintype.card K : ℕ) : WithBot ℕ∞)) →
-    ∃ (a₀ : ℕ) (C : ℝ), ∀ a : K → ℤ, (∀ k, (a₀ : ℤ) ≤ a k) →
-      |(modHilb ℳ a : ℝ) - (modIntNum ι F M d a : ℝ) / (d.factorial : ℝ)| ≤
-        C * (degSize a + 1) ^ ((d : ℤ) - 1)
 
 def HilbertIncrement.Statement : Prop :=
   ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
@@ -106,29 +90,11 @@ def HilbertIncrement.Statement : Prop :=
     ∀ W : Ideal (MRing ι F), IsMultiProjPrime W → q ⊔ Ideal.span {(X ⟨b, i⟩ : MRing ι F)} ≤ W →
       ringKrullDim (MRing ι F ⧸ W) ≤ ((d - 1 + Fintype.card K : ℕ) : WithBot ℕ∞)
 
-def RankOfSections.Statement : Prop :=
-  ∀ (ι : Unit → Type) [∀ k, Fintype (ι k)] (D : ℕ) (q : Ideal (MRing ι ℚ)),
-    IsMultiProjPrime q → ringKrullDim (MRing ι ℚ ⧸ q) = ((D + 1 : ℕ) : WithBot ℕ∞) →
-    (fun n : ℕ => (hilbFn q (fun _ => (n : ℤ)) : ℝ) -
-        (intNum ℚ q (fun _ : Fin D => fun _ => (1 : ℤ)) : ℝ) * (n : ℝ) ^ D / (D.factorial : ℝ))
-      =O[Filter.atTop] fun n : ℕ => (n : ℝ) ^ ((D : ℤ) - 1)
-
-def MixedNumberPolynomial.Statement : Prop :=
-  ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
-    [∀ k, Fintype (ι k)] (d : ℕ) (q : Ideal (MRing ι F)),
-    IsMultiProjPrime q → ringKrullDim (MRing ι F ⧸ q) = ((d + Fintype.card K : ℕ) : WithBot ℕ∞) →
-    (∀ (σ : Equiv.Perm (Fin d)) (bs : Fin d → K → ℤ), intNum F q (bs ∘ σ) = intNum F q bs) ∧
-    ∀ (bs : Fin d → K → ℤ) (j : Fin d) (b b' : K → ℤ),
-      intNum F q (Function.update bs j (b + b')) =
-        intNum F q (Function.update bs j b) + intNum F q (Function.update bs j b')
-
 end Statements
 
 section Examples
 
 variable {K : Type*} [DecidableEq K] (ι : K → Type*) (F : Type*) [Field F]
-
-def blockWeightInt : (Σ k, ι k) → K → ℤ := fun v => Pi.single v.1 1
 
 end Examples
 

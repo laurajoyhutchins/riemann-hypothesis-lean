@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.AdelicPair
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix GlobalTheory.ClassFin
 open scoped Kronecker ComplexOrder TensorProduct
 
@@ -14,7 +59,7 @@ def vanC (S : Set (Matrix ι ι ℂ)) : Ideal (MvPolynomial (ι × ι) ℂ) wher
     have h1 := ha g hg
     have h2 := hb g hg
     simp only [evC] at h1 h2 ⊢
-    rw [map_add, h1, h2, add_zero]
+    rw [map_add (f := _), h1, h2, add_zero]
   zero_mem' := by
     intro g _
     simp [evC]
@@ -24,9 +69,6 @@ def vanC (S : Set (Matrix ι ι ℂ)) : Ideal (MvPolynomial (ι × ι) ℂ) wher
     simp only [evC] at h1 ⊢
     rw [smul_eq_mul, map_mul, h1, mul_zero]
 
-omit [Fintype ι] [DecidableEq ι] in
-lemma mem_vanC {S : Set (Matrix ι ι ℂ)} {f : MvPolynomial (ι × ι) ℂ} :
-    f ∈ vanC S ↔ ∀ g ∈ S, evC f g = 0 := Iff.rfl
 
 omit [DecidableEq ι] in
 lemma evC_ltr (g y : Matrix ι ι ℂ) (f : MvPolynomial (ι × ι) ℂ) : evC (ltr g f) y = evC f (g * y) := by
@@ -34,7 +76,7 @@ lemma evC_ltr (g y : Matrix ι ι ℂ) (f : MvPolynomial (ι × ι) ℂ) : evC (
   | C a => simp [evC, ltr]
   | add p q hp hq =>
     simp only [evC] at hp hq ⊢
-    rw [map_add, map_add, map_add, hp, hq]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
   | mul_X p ij hp =>
     simp only [evC] at hp ⊢
     rw [map_mul, map_mul, map_mul, hp]
@@ -53,7 +95,7 @@ lemma exists_rtr (h : Matrix ι ι ℂ) (f : MvPolynomial (ι × ι) ℂ) :
     have h1 := hp z
     have h2 := hq z
     simp only [evC] at h1 h2 ⊢
-    rw [map_add, map_add, h1, h2]
+    rw [map_add (f := _), map_add (f := _), h1, h2]
   | mul_X p ij hp =>
     obtain ⟨p', hp⟩ := hp
     refine ⟨p' * ∑ k, MvPolynomial.X (ij.1, k) * MvPolynomial.C (h k ij.2), fun z => ?_⟩
@@ -114,8 +156,8 @@ end GlobalTheory.ClassFin.CosetSep
 
 namespace GlobalTheory.ClassFin
 
-open CosetSep in
 
+open CosetSep in
 theorem exists_isInv_evC_one_ne : ∀ (ι : Type) [Fintype ι] [DecidableEq ι] (Γ : Set (Matrix ι ι ℂ)) (Rey : MvPolynomial (ι × ι) ℂ →ₗ[ℂ] MvPolynomial (ι × ι) ℂ), IsQGroup Γ → IsReynolds Γ Rey → ∀ y : Matrix ι ι ℂ, y.det = 1 → y ∉ Γ → ∃ f, IsInv Γ f ∧ evC f 1 ≠ evC f y := by
   intro ι _ _ Γ Rey hΓ hR y hy hyΓ
   have htop := vanC_sup_eq_top hΓ hy hyΓ
@@ -133,14 +175,14 @@ theorem exists_isInv_evC_one_ne : ∀ (ι : Type) [Fintype ι] [DecidableEq ι] 
     rw [evC_ltr, ← mul_assoc]
     exact hf _ ⟨g * h, hΓ.mul_mem _ hg _ hh, rfl⟩
   have hR1 : Rey 1 = 1 := hR.fix 1 (fun g _ z => by simp [evC])
-  have hsum : Rey a + Rey b = 1 := by rw [← map_add, hab, hR1]
+  have hsum : Rey a + Rey b = 1 := by rw [← map_add (f := _), hab, hR1]
   refine ⟨Rey a, hR.inv a, ?_⟩
   have e1 : evC (Rey a) 1 = 0 := hRa 1 hΓ.one_mem
   have e2 : evC (Rey b) y = 0 := hRb y ⟨1, hΓ.one_mem, one_mul y⟩
   have e3 : evC (Rey a) y = 1 := by
     have h := congrArg (fun f => evC f y) hsum
     simp only [evC] at h e2 ⊢
-    rw [map_add, e2, add_zero, map_one] at h
+    rw [map_add (f := _), e2, add_zero, map_one] at h
     exact h
   rw [e1, e3]
   exact zero_ne_one

@@ -1,9 +1,53 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGenerator
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsOpenOfFgOfSpanEqTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsOpenOfFgOfSpanEqTop
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGenerator
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc TensorProduct
 
@@ -94,8 +138,8 @@ theorem HfD_eq_unramified : ∀ {G : Type} [Group G] [TopologicalSpace G] {Qp K�
       induction y using TensorProduct.induction_on with
       | zero => simp
       | tmul v b => simp [m, actVB, hρ]
-      | add a b ha hb => simp only [map_add, ha, hb]
-    refine ⟨⟨hc₀c, fun g h => by simp only [hδadd, map_add, hρ]⟩, m x₀, fun g => ?_⟩
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
+    refine ⟨⟨hc₀c, fun g h => by simp only [hδadd, map_add (f := _), hρ]⟩, m x₀, fun g => ?_⟩
     have := congrArg m (hx₀ g)
     simp only [m, AlgebraTensorModule.map_tmul, LinearMap.id_apply, map_sub] at this
     rw [← hm]
@@ -138,7 +182,7 @@ theorem HfD_eq_unramified : ∀ {G : Type} [Group G] [TopologicalSpace G] {Qp K�
     rw [this]
     exact hc₀c.const_smul a
   have hradd : ∀ a g h, r a (g * h) = r a g + r a h := fun a g h => by
-    simp only [r, hδadd, mul_add, map_add]
+    simp only [r, hδadd, mul_add, map_add (f := _)]
   have hrI : ∀ a, ∀ g ∈ I, r a g = 0 := fun a g hg => by
     simp only [r, hδI g hg, mul_zero, map_zero]
   have hr₀ : r (y₀ / δ g₀) g₀ ≠ 0 := by

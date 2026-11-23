@@ -1,4 +1,44 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 private theorem UpperTheory.Gal.W2.mul_inv_star_of_triv {S A : Type*} [Ring S] [CommRing A] [Algebra A S]
     (σ : S →+* Sᵐᵒᵖ) (b : S) (x x' : Sˣ) (t t' : Aˣ)
@@ -30,21 +70,25 @@ open UpperTheory.Gal.W2
 
 theorem UpperTheory.Gal.W2.adOfWit_of :
     UpperTheory.Gal.W2.AdCore → UpperTheory.Gal.W2.AdOfWit := by
-  intro hcore p _ D G L B D' j hpl f nu hw
+  intro hcore
+  unfold AdCore at hcore
+  unfold AdOfWit
+  intro p _ D G L B D' j hpl f nu hw
   obtain ⟨x, c, hxc, hread⟩ := hcore p D G L B.β D' j hpl f nu hw
   obtain ⟨t0, ht0⟩ := B.trivAf.choose_spec
   have hmem : ((trivX B * x⁻¹, t0 * c⁻¹) : (AfP p ⊗[ℚ] G.C)ˣ × (AfP p)ˣ) ∈ UPts G.star (AfP p) := by
     rw [UPts, mem_uGroup]
     exact mul_inv_star_of_triv _ _ _ _ _ _ ht0 hxc
-  refine ⟨⟨_, hmem⟩, ?_⟩
-  have hrd : ∀ w, rd L (trivX B) ⟨_, hmem⟩ w = rd L x 1 w := by
+  let h : G.GAf := ⟨(trivX B * x⁻¹, t0 * c⁻¹), hmem⟩
+  refine ⟨h, ?_⟩
+  have hrd : ∀ w, rd L (trivX B) h w = rd L x 1 w := by
     intro w
     have hy : (((trivX B * x⁻¹)⁻¹ : (AfP p ⊗[ℚ] G.C)ˣ) : AfP p ⊗[ℚ] G.C) * (trivX B : AfP p ⊗[ℚ] G.C) = x := by
       rw [← Units.val_mul]
       congr 1
       group
-    simp only [rd, inv_one, map_one, Module.End.one_apply]
-    rw [← hy, map_mul, Module.End.mul_apply]
+    simp only [rd, inv_one, map_one, one_apply_eq_self]
+    rw [← hy, map_mul, mul_apply_eq_comp]
     rfl
   intro n hn hcop
   obtain ⟨h1, h2⟩ := hread n hn hcop

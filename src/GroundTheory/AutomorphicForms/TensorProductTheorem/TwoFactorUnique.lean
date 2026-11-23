@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.TensorProductTheorem.TwoFactor
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Dual.Defs
+public import Mathlib.LinearAlgebra.TensorProduct.Associator
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Finsupp.Basic
+public import Mathlib.LinearAlgebra.Basis.Defs
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.RepresentationTheory.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,24 +118,8 @@ theorem exists_contractLeft_ne_zero {z : V₁ ⊗[ℂ] V₂} (hz : z ≠ 0) :
     induction z' using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp [contractLeft_tmul, contractRight_tmul]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   rwa [key]
-
-theorem contractRight_outerTensor (π₁ : Representation ℂ M₁ V₁) (π₂ : Representation ℂ M₂ V₂)
-    (l : Dual ℂ V₂) (a : M₁) (z : V₁ ⊗[ℂ] V₂) :
-    contractRight l (outerTensor π₁ π₂ (a, 1) z) = π₁ a (contractRight l z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
-  | tmul x y => simp [outerTensor_tmul, contractRight_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
-
-theorem contractLeft_outerTensor (π₁ : Representation ℂ M₁ V₁) (π₂ : Representation ℂ M₂ V₂)
-    (l : Dual ℂ V₁) (b : M₂) (z : V₁ ⊗[ℂ] V₂) :
-    contractLeft l (outerTensor π₁ π₂ (1, b) z) = π₂ b (contractLeft l z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
-  | tmul x y => simp [outerTensor_tmul, contractLeft_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
 
 theorem tmul_ne_zero_of {x : V₁} {y : V₂} (hx : x ≠ 0) (hy : y ≠ 0) : x ⊗ₜ[ℂ] y ≠ 0 := by
   obtain ⟨l, hl⟩ : ∃ l : Dual ℂ V₂, l y ≠ 0 := by
@@ -94,64 +133,6 @@ theorem tmul_ne_zero_of {x : V₁} {y : V₂} (hx : x ≠ 0) (hy : y ≠ 0) : x 
 
 variable {π₁ : Representation ℂ M₁ V₁} {π₂ : Representation ℂ M₂ V₂}
   {π₁' : Representation ℂ M₁ V₁'} {π₂' : Representation ℂ M₂ V₂'}
-
-theorem nonempty_equiv_fst_of_equiv (h₁ : π₁.IsIrreducible) (h₂ : π₂.IsIrreducible)
-    (h₁' : π₁'.IsIrreducible) (Φ : (outerTensor π₁ π₂).Equiv (outerTensor π₁' π₂')) :
-    Nonempty (π₁.Equiv π₁') := by
-  haveI := h₁
-  haveI := h₁'
-  have := nontrivial_of_irreducible h₁
-  have := nontrivial_of_irreducible h₂
-  obtain ⟨u, hu⟩ := exists_ne (0 : V₁)
-  obtain ⟨v, hv⟩ := exists_ne (0 : V₂)
-  have hΦ : ∀ p z, Φ (outerTensor π₁ π₂ p z) = outerTensor π₁' π₂' p (Φ z) :=
-    fun p z => Representation.IntertwiningMap.isIntertwining _ _ Φ.toIntertwiningMap p z
-  have hy : Φ (u ⊗ₜ v) ≠ 0 := fun h =>
-    tmul_ne_zero_of hu hv (Φ.toLinearEquiv.injective (h.trans (map_zero _).symm))
-  obtain ⟨l₂, hl₂⟩ := exists_contractRight_ne_zero hy
-  obtain ⟨l₁, hl₁⟩ : ∃ l : Dual ℂ V₁', l (contractRight l₂ (Φ (u ⊗ₜ v))) ≠ 0 := by
-    by_contra hcon
-    push Not at hcon
-    exact hl₂ ((Module.forall_dual_apply_eq_zero_iff ℂ _).1 hcon)
-  let μ : Dual ℂ V₁ := l₁ ∘ₗ contractRight l₂ ∘ₗ Φ.toLinearEquiv.toLinearMap ∘ₗ
-    (TensorProduct.mk ℂ V₁ V₂).flip v
-  refine nonempty_equiv_of_matrixCoeff_eq' (v := u) (l := μ)
-    (w := contractRight l₂ (Φ (u ⊗ₜ v))) (m := l₁) (fun a => ?_) ⟨1, ?_⟩
-  · have : π₁ a u ⊗ₜ[ℂ] v = outerTensor π₁ π₂ (a, 1) (u ⊗ₜ v) := by
-      rw [outerTensor_tmul, map_one, Module.End.one_apply]
-    show l₁ (contractRight l₂ (Φ (π₁ a u ⊗ₜ v))) = _
-    rw [this, hΦ, contractRight_outerTensor]
-  · show l₁ (contractRight l₂ (Φ (π₁ 1 u ⊗ₜ v))) ≠ 0
-    rwa [map_one, Module.End.one_apply]
-
-theorem nonempty_equiv_snd_of_equiv (h₁ : π₁.IsIrreducible) (h₂ : π₂.IsIrreducible)
-    (h₂' : π₂'.IsIrreducible) (Φ : (outerTensor π₁ π₂).Equiv (outerTensor π₁' π₂')) :
-    Nonempty (π₂.Equiv π₂') := by
-  haveI := h₂
-  haveI := h₂'
-  have := nontrivial_of_irreducible h₁
-  have := nontrivial_of_irreducible h₂
-  obtain ⟨u, hu⟩ := exists_ne (0 : V₁)
-  obtain ⟨v, hv⟩ := exists_ne (0 : V₂)
-  have hΦ : ∀ p z, Φ (outerTensor π₁ π₂ p z) = outerTensor π₁' π₂' p (Φ z) :=
-    fun p z => Representation.IntertwiningMap.isIntertwining _ _ Φ.toIntertwiningMap p z
-  have hy : Φ (u ⊗ₜ v) ≠ 0 := fun h =>
-    tmul_ne_zero_of hu hv (Φ.toLinearEquiv.injective (h.trans (map_zero _).symm))
-  obtain ⟨l₁, hl₁⟩ := exists_contractLeft_ne_zero hy
-  obtain ⟨l₂, hl₂⟩ : ∃ l : Dual ℂ V₂', l (contractLeft l₁ (Φ (u ⊗ₜ v))) ≠ 0 := by
-    by_contra hcon
-    push Not at hcon
-    exact hl₁ ((Module.forall_dual_apply_eq_zero_iff ℂ _).1 hcon)
-  let μ : Dual ℂ V₂ := l₂ ∘ₗ contractLeft l₁ ∘ₗ Φ.toLinearEquiv.toLinearMap ∘ₗ
-    TensorProduct.mk ℂ V₁ V₂ u
-  refine nonempty_equiv_of_matrixCoeff_eq' (v := v) (l := μ)
-    (w := contractLeft l₁ (Φ (u ⊗ₜ v))) (m := l₂) (fun b => ?_) ⟨1, ?_⟩
-  · have : u ⊗ₜ[ℂ] π₂ b v = outerTensor π₁ π₂ (1, b) (u ⊗ₜ v) := by
-      rw [outerTensor_tmul, map_one, Module.End.one_apply]
-    show l₂ (contractLeft l₁ (Φ (u ⊗ₜ π₂ b v))) = _
-    rw [this, hΦ, contractLeft_outerTensor]
-  · show l₂ (contractLeft l₁ (Φ (u ⊗ₜ π₂ 1 v))) ≠ 0
-    rwa [map_one, Module.End.one_apply]
 
 end RestrictedTensor
 

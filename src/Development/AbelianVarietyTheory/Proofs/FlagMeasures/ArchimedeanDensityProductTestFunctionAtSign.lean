@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SiegelMeanCc
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SelfDualMeasureGaussian
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.SiegelMeanCc
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ComplexCoordinatesMeasurePreserving
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianQuadricDensityExistsPosContinuous
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SelfDualMeasureGaussian
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SelfDualMeasureRealDiagonal
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ComplexCoordinatesMeasurePreserving
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianQuadricDensityExistsPosContinuous
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.GaussMean Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open scoped TensorProduct
@@ -29,6 +72,7 @@ theorem selfDual_complex_eq {ι : Type} [Fintype ι] {n : ℕ} (d : ι → Fin n
   rw [h1, Measure.map_smul, hT.map_eq]
   congr 2
   simp only [Fintype.prod_prod_type, Fintype.prod_bool, Real.mul_self_sqrt (abs_nonneg _)]
+  exact hT.measurable.aemeasurable
 
 theorem eq_zero_of_cubes {ι : Type} [Fintype ι] {K : (ι → ℝ) → ℂ} {U : Set (ι → ℝ)} (hK : ContinuousOn K U)
     {b : ι → ℝ} (hU : U ∈ 𝓝 b)
@@ -73,7 +117,7 @@ theorem setIntegral_box {ι : Type} [Fintype ι] {X : Type} [MeasureSpace X] [Si
       ∏ v, ∫ y in q v ⁻¹' Set.Icc (a v) (c v), φ v y := by
   have hm : MeasurableSet ((fun (y : ι → X) (v : ι) => q v (y v)) ⁻¹' Set.Icc a c) :=
     measurableSet_Icc.preimage
-      (measurable_pi_lambda _ fun v => (hq v).comp (measurable_pi_apply v))
+      (Measurable.of_eval fun v => (hq v).comp (measurable_pi_apply v))
   rw [← integral_indicator hm,
     ← Finset.prod_congr rfl fun v _ => integral_indicator (measurableSet_Icc.preimage (hq v)),
     ← integral_fintype_prod_volume_eq_prod]
@@ -97,7 +141,7 @@ theorem density_eq_prod_of_isDens (ι : Type) [Fintype ι] (n : ℕ) (ε : ι �
         ∫ b in S, G b)
     (b : ι → ℝ) (hb : ∀ v, b v ≠ 0) : G b = ((∏ v, D v (b v) : ℝ) : ℂ) := by
   have hH : ContinuousOn (fun x : ι → ℝ => ((∏ v, D v (x v) : ℝ) : ℂ)) {b | ∀ v, b v ≠ 0} :=
-    Complex.continuous_ofReal.comp_continuousOn (continuousOn_finset_prod _ fun v _ =>
+    Complex.continuous_ofReal.comp_continuousOn (continuousOn_finsetProd _ fun v _ =>
       (hD v).1.comp (continuous_apply v).continuousOn fun x hx => hx v)
   have hU : {b : ι → ℝ | ∀ v, b v ≠ 0} ∈ 𝓝 b :=
     Filter.eventually_all.2 fun v => (continuous_apply v).continuousAt.eventually_ne (hb v)
@@ -146,9 +190,9 @@ theorem density_at_sign : ∀ (I : AutInst) (θ : InfinitePlace I.F → (Ainf I.
     cases s <;> simp [sgn, hone]
   have hhalf : ∀ v, a (algebraMap I.F (Ainf I.F) (1 / 2)) v = 1 / 2 := fun v => by
     have h1 : algebraMap I.F (Ainf I.F) (1 / 2) + algebraMap I.F (Ainf I.F) (1 / 2) = 1 := by
-      rw [← map_add, add_halves, map_one]
+      rw [← map_add (f := _), add_halves, map_one]
     have := hone v
-    rw [← h1, map_add, Pi.add_apply] at this
+    rw [← h1, map_add (f := _), Pi.add_apply] at this
     linarith
   have htr : ∀ (X Y : Fin 1 → Fin I.n → Ainf I.F ⊗[I.F] I.E) v,
       a (Algebra.trace (Ainf I.F) (Ainf I.F ⊗[I.F] I.E) (hR (Ainf I.F) I.cm.sig I.J (X 0) (Y 0))) v =

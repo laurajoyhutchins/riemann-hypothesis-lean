@@ -1,6 +1,53 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjDehom
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.LogResStC
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinTypeQE
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinTypeQE
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.SegreIdealIsHomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjDehom
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -35,7 +82,7 @@ theorem isReduced_gammaChart {P : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (hP : I
     (hrad : P.IsRadical) (p : (k : K) → ι k) :
     _root_.IsReduced Γ(projX P hP, (chartOpen hP p).1) := by
   letI := segreGraded hP
-  have := isReduced_away hP hrad p
+  letI := isReduced_away hP hrad p
   exact isReduced_of_injective _ ((gammaChart hP p).trans (awayEquiv hP p)).injective
 
 theorem qeRing_gammaChart {P : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (hP : IsMultiHomogIdeal P)
@@ -43,7 +90,7 @@ theorem qeRing_gammaChart {P : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (hP : IsMu
   letI : Algebra ℂ Γ(projX P hP, (chartOpen hP p).1) :=
     ((gammaChart hP p).symm.toRingHom.comp (algebraMap ℂ (chartRing P p))).toAlgebra
   let e : chartRing P p ≃ₐ[ℂ] Γ(projX P hP, (chartOpen hP p).1) :=
-    { (gammaChart hP p).symm with commutes' := fun c => rfl }
+    AlgEquiv.ofRingEquiv (f := (gammaChart hP p).symm) (fun c => rfl)
   haveI : Algebra.FiniteType ℂ Γ(projX P hP, (chartOpen hP p).1) :=
     Algebra.FiniteType.equiv inferInstance e
   exact hQE Γ(projX P hP, (chartOpen hP p).1)
@@ -96,21 +143,6 @@ theorem eval₂_smul_of_isMultiHomog' {R : Type} [CommRing R] (g : ℂ →+* R)
     intro k
     rw [Finset.prod_pow_eq_pow_sum, hf mo hmo k]
   simp only [hk]
-  ring
-
-theorem eval₂_smul_of_isHomogeneous' {σ R : Type} [Fintype σ] [CommRing R] (g : ℂ →+* R)
-    {f : MvPolynomial σ ℂ} {d : ℕ} (hf : f.IsHomogeneous d) (t : R) (y : σ → R) :
-    eval₂ g (fun i => t * y i) f = t ^ d * eval₂ g y f := by
-  classical
-  rw [f.as_sum, MvPolynomial.eval₂_sum, MvPolynomial.eval₂_sum, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun mo hmo => ?_
-  have hd : ∑ i, mo i = d := by
-    have := hf (MvPolynomial.mem_support_iff.1 hmo)
-    simpa [Finsupp.weight_apply, Finsupp.sum_fintype] using this
-  rw [MvPolynomial.eval₂_monomial, MvPolynomial.eval₂_monomial,
-    Finsupp.prod_fintype _ _ (fun _ => pow_zero _), Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
-  simp_rw [mul_pow, Finset.prod_mul_distrib]
-  rw [Finset.prod_pow_eq_pow_sum, hd]
   ring
 
 theorem isUnit_mapId_mk_iff {A : Type} [CommRing A] [Algebra ℂ A]

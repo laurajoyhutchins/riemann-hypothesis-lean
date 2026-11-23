@@ -1,9 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolRepOfIsTau
 import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHolRepOfIsTau
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,8 +71,9 @@ theorem lsub_one [DecidableEq σ] : lsub (1 : Matrix σ σ ℂ) = AlgHom.id ℂ 
 
 theorem lsub_mul (M N : Matrix σ σ ℂ) : lsub (M * N) = (lsub M).comp (lsub N) := by
   refine algHom_ext fun v => ?_
+
   simp only [AlgHom.comp_apply, lsub_X, map_sum, map_mul, algHom_C, algebraMap_eq, Matrix.mul_apply,
-    Finset.sum_mul, Finset.mul_sum]
+  Finset.sum_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun w _ => Finset.sum_congr rfl fun x _ => ?_
   ring
@@ -48,9 +90,10 @@ theorem pderiv_lsub [DecidableEq σ] (M : Matrix σ σ ℂ) (s : σ) (g : MvPoly
     pderiv s (lsub M g) = ∑ w, C (M s w) * lsub M (pderiv w g) := by
   induction g using MvPolynomial.induction_on with
   | C c => simp
-  | add p q hp hq => simp only [map_add, hp, hq, mul_add, Finset.sum_add_distrib]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq, mul_add, Finset.sum_add_distrib]
   | mul_X p k hp =>
     have hX : pderiv s (lsub M (X k)) = C (M s k) := by
+
       rw [lsub_X, map_sum, Finset.sum_eq_single s]
       · simp [pderiv_X]
       · intro b _ hb
@@ -58,7 +101,7 @@ theorem pderiv_lsub [DecidableEq σ] (M : Matrix σ σ ℂ) (s : σ) (g : MvPoly
         simp
       · simp
     rw [map_mul, Derivation.leibniz, hX, hp, smul_eq_mul, smul_eq_mul]
-    simp_rw [Derivation.leibniz, smul_eq_mul, map_add, map_mul, mul_add, Finset.sum_add_distrib]
+    simp_rw [Derivation.leibniz, smul_eq_mul, map_add (f := _), map_mul, mul_add, Finset.sum_add_distrib]
     congr 1
     · rw [Finset.sum_eq_single k]
       · rw [pderiv_X_self, map_one]; ring
@@ -75,14 +118,16 @@ theorem fockL_lsub_adj (M : Matrix σ σ ℂ) (F F' : MvPolynomial σ ℂ) :
   classical
   induction F using MvPolynomial.induction_on generalizing F' with
   | C a => rw [algHom_C, algebraMap_eq, fockL_C_left, fockL_C_left, constantCoeff_lsub]
-  | add p q hp hq => rw [map_add, map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, hp, hq]
   | mul_X p v hp =>
     have e1 : lsub M (p * X v) = ∑ w, M w v • (X w * lsub M p) := by
       rw [map_mul, lsub_X, Finset.mul_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [smul_eq_C_mul]; ring
+
     rw [e1, map_sum, LinearMap.sum_apply]
     simp_rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, fockL_X_pderiv, hp]
+
     rw [mul_comm p, fockL_X_pderiv, pderiv_lsub, map_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     rw [← smul_eq_C_mul, map_smul, Matrix.conjTranspose_apply, starRingEnd_apply]

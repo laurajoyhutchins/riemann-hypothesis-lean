@@ -1,10 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.PerpVecPerpSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.FormPartialDerivatives
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfEvalGridEqZeroOfTotalDegreeLe
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsWeightedHomogeneousOfMemOrbitSpan
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsMinorProdEqSmulColActBasePoly
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.PerpVecPerpSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsWeightedHomogeneousOfMemOrbitSpan
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfEvalGridEqZeroOfTotalDegreeLe
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsMinorProdEqSmulColActBasePoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantTheorems.FormPartialDerivatives
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Matrix NumberField
 open ReciprocityTheory.ChartRestriction.G.TB (perpVec hMat)
@@ -16,9 +65,9 @@ section Perp
 
 variable {R S : Type} [CommRing R] [CommRing S] {p n : ℕ}
 
-variable (R n) in
 
-def dotPairing : (Fin n → R) →ₗ[R] ((Fin n → R) → R) where
+variable (R n) in
+def dotPairing (R : Type) [CommRing R] (n : ℕ) : (Fin n → R) →ₗ[R] ((Fin n → R) → R) where
   toFun x y := x ⬝ᵥ y
   map_add' x x' := funext fun y => add_dotProduct x x' y
   map_smul' r x := funext fun y => smul_dotProduct r x y
@@ -35,8 +84,9 @@ theorem map_perpVec_apply (f : R →+* S) (h : (Fin n → R) →ₗ[R] ((Fin n �
     ext a' a; exact hM a' a
   have hadj (a a') : f ((hMat h e e').adjugate a a') = (hMat h' ε ε').adjugate a a' := by
     rw [← hm, ← RingHom.map_adjugate]; rfl
+
   simp only [perpVec, Pi.sub_apply, Pi.smul_apply, Finset.sum_apply, smul_eq_mul, map_sub, map_mul,
-    map_sum, RingHom.map_det, hm, hadj, hg, hge, he']
+  map_sum, RingHom.map_det, hm, hadj, hg, hge, he']
 
 theorem map_perpVec_dotPairing (f : R →+* S) (ε ε' : Fin p → Fin n → R) (γ : Fin n → R) :
     f ∘ perpVec (dotPairing R n) ε ε' γ =
@@ -104,6 +154,7 @@ variable [Fintype κ]
 
 theorem swapVars_rowForm_isHomogeneous (t : T) (r : Fin p ⊕ Fin q) (u : κ → MvPolynomial σ K)
     {d : ℕ} (hu : ∀ k, (u k).IsHomogeneous d) : (swapVars (rowForm t r u)).IsHomogeneous d := by
+
   rw [rowForm_apply, map_sum]
   refine IsHomogeneous.sum _ _ _ fun k _ => ?_
   simp only [swapVars, map_mul, eval₂Hom_C, eval₂Hom_X']
@@ -154,6 +205,7 @@ theorem map_coordProd (f : R →+* S) (c : T → Fin p → ℕ) (c' : T → Fin 
     MvPolynomial.map f (coordProd c c' w w' x) =
       coordProd c c' (fun t i k => f (w t i k)) (fun t i k => f (w' t i k)) fun j => f (x j) := by
   simp only [coordProd, map_minorProd, map_perpVec_dotPairing]
+
   simp only [Function.comp_def, map_sum, map_mul]
 
 variable {K : Type} [Field K]
@@ -258,8 +310,10 @@ theorem exists_sum_mul_embedding_eq {E K J κ ι : Type*} [Field E] [CharZero E]
       have h2 : u (Pi.single k a) = ∑ j, σ j a • Pi.single (j, k) 1 := by
         ext ⟨j', k'⟩
         by_cases hk : k' = k <;> simp [u, Finset.sum_apply, Pi.single_apply, hk]
+
       rw [h2, map_sum] at h1
       simpa [mul_comm] using h1
+
     rw [← Finset.univ_sum_single (fun s : J × κ => y s.1 s.2), map_sum]
     refine Finset.sum_eq_zero fun s _ => ?_
     rw [← mul_one (y s.1 s.2), ← smul_eq_mul, Pi.single_smul', map_smul, h0, smul_zero]

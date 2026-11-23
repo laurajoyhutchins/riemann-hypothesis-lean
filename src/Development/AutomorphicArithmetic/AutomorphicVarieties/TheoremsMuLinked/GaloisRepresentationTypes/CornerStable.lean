@@ -1,10 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.ContinuousSubActions.ContActionSub
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.DualInclUnit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.SnocZeroLastCoordinateLast
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.ExistsNeOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.ExistsIntBasis
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.FreeFlag
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineFormalismOfRegular
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmHom
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.ExistsIntBasis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.ExistsNeOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.SnocZeroLastCoordinateLast
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.Z1fCoef
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.Z1fMap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.ContinuousSubActions.ContActionSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Separation.Connected
+
+@[expose] public section
 
 namespace UpperTheory.V.Th.OrdinaryBlock
 
@@ -166,7 +214,7 @@ private theorem fin (P : LocalPublishedTheorems) (hφ : IsOpenEmbedding φ)
       refine ⟨X + Matrix.single i j m, fun g q hq => ?_⟩
       have e : (y g - (adGL r g (X + Matrix.single i j m) - (X + Matrix.single i j m))) q.1 q.2 =
           (y g - (adGL r g X - X)) q.1 q.2 - (adGL r g (Matrix.single i j m) q.1 q.2 - Matrix.single i j m q.1 q.2) := by
-        simp only [map_add, Matrix.sub_apply, Matrix.add_apply]
+        simp only [map_add (f := _), Matrix.sub_apply, Matrix.add_apply]
         ring
       rw [e]
       rcases Finset.mem_insert.1 hq with rfl | hq
@@ -255,8 +303,10 @@ private theorem desc [T2Space G] (r : G →* GL (Fin n) (PadicAlgCl l))
   have hf : ∀ g X, f (adGL r g X) = adGL s g (f X) := fun g X => by
     ext1 a b
     change π (adGL r g X a b) = _
+
     rw [ad_apply, ad_apply, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun d _ => ?_
     rw [hs', hs', mul_comm, hπ2, hπ2, mul_comm]
@@ -264,8 +314,10 @@ private theorem desc [T2Space G] (r : G →* GL (Fin n) (PadicAlgCl l))
   have hi : ∀ g X, i (adGL s g X) = adGL r g (i X) := fun g X => by
     ext1 a b
     change E.val (adGL s g X a b) = _
+
     rw [ad_apply, ad_apply, map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun d _ => ?_
     rw [map_mul, map_mul]
@@ -276,16 +328,17 @@ private theorem desc [T2Space G] (r : G →* GL (Fin n) (PadicAlgCl l))
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [actC, hf]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have key' : ∀ g (y : Matrix (Fin n) (Fin n) E ⊗[ℚ_[l]] Bcr l),
       LinearMap.rTensor (Bcr l) i (actC φ (adGL s) g y) = actC φ (adGL r) g (LinearMap.rTensor (Bcr l) i y) := by
     intro g y
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [actC, hi]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   set x := ∑ p ∈ S, p.1 ⊗ₜ[ℚ_[l]] p.2 with hxd
   have hix : LinearMap.rTensor (Bcr l) i (LinearMap.rTensor (Bcr l) f x) = x := by
+
     rw [hxd, map_sum, map_sum]
     refine Finset.sum_congr rfl fun p hp => ?_
     rw [LinearMap.rTensor_tmul, LinearMap.rTensor_tmul]
@@ -302,7 +355,7 @@ private theorem desc [T2Space G] (r : G →* GL (Fin n) (PadicAlgCl l))
   refine ⟨E, inferInstance, s, fun g => f (y g), hs, hi, hcE, ⟨?_, fun g h => ?_⟩, _, hx'⟩
   · refine continuous_matrix fun a b => continuous_induced_rng.2 ((hcc.matrix_elem a b).congr fun g => ?_)
     exact (congrFun (congrFun (hcE g) a) b).symm
-  · exact (congrArg f (hcoc g h)).trans (by rw [map_add, hf])
+  · exact (congrArg f (hcoc g h)).trans (by rw [map_add (f := _), hf])
 
 private theorem bar (P : LocalPublishedTheorems) (hφ : IsOpenEmbedding φ) {r : G →* GL (Fin n) (PadicAlgCl l)}
     {κ : Fin n → G →* (PadicAlgCl l)ˣ}

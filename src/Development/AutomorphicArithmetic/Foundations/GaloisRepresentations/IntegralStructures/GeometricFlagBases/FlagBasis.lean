@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.HodgeTrAt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicWittLattices.SplitsBasic
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.ProjectiveBaseChange.AdicTopOf
-import Development.EtaleCohomology.WeilConjectures.StabPf
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.SplitsSelfOfIso
+module
+
+public import Development.EtaleCohomology.WeilConjectures.StabPf
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IsGrRefl
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.EtSide
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,15 +102,6 @@ theorem grEx_of (h1 : FlagEx) (h2 : FlagBasis) (h3 : FlagMove) (h4 : GrHom) (h5 
 def ContGL : Prop := ∀ (Γ k : Type) [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] [Field k] [TopologicalSpace k]
   [IsTopologicalRing k] (d : ℕ) (ρ : Γ →* GL (Fin d) k),
   Continuous ρ ↔ ∀ i j, Continuous fun g => (ρ g : Matrix (Fin d) (Fin d) k) i j
-
-def GrKill : Prop := ∀ (Γ k : Type) [Group Γ] [Field k] (d : ℕ) (ρ₀ ρ : Γ →* GL (Fin d) k), IsGr ρ₀ ρ → ∀ g,
-  (ρ₀ g = 1 → ρ g = 1) ∧ (∀ Q : k[X], aeval (ρ₀ g : Matrix (Fin d) (Fin d) k) Q = 0 → aeval (ρ g : Matrix (Fin d) (Fin d) k) Q = 0) ∧
-    (ρ g : Matrix (Fin d) (Fin d) k).charpoly = (ρ₀ g : Matrix (Fin d) (Fin d) k).charpoly
-
-theorem IsGr.comp {Γ Γ' k : Type} [Group Γ] [Group Γ'] [Field k] {d : ℕ} {ρ₀ ρ : Γ →* GL (Fin d) k} (h : IsGr ρ₀ ρ) (f : Γ' →* Γ) :
-    IsGr (ρ₀.comp f) (ρ.comp f) := by
-  obtain ⟨c, hc⟩ := h
-  exact ⟨c, fun g => hc (f g)⟩
 
 def MatEx : Prop := ∀ (Γ L : Type) [Group Γ] [Field L] (M : Type 1) [AddCommGroup M] [Module L M] (a : Γ → M →ₗ[L] M),
   a 1 = LinearMap.id → (∀ g h, a (g * h) = a g ∘ₗ a h) → ∀ U : Submodule L M, (∀ g, ∀ x ∈ U, a g x ∈ U) →

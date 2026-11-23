@@ -1,5 +1,50 @@
-import Development.AutomorphicArithmetic.DedekindLFunctions.RunBaseDimensionLeRankAddGenusTerm
-import Formalism.SizeWindowBrackets.ChainSlopeWindows.PChain
+module
+
+public import Formalism.RankGapBounds.MeanBoundSecondForm
+public import Formalism.SizeWindowBrackets.FirstPrimeNeSecondPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SizeWindowBrackets.ErrorFormsWeakWindowsFalse
+import Formalism.SizeWindowBrackets.GrowthBoundGivesRiemannHypothesis
+import Formalism.SizeWindowBrackets.QuotientSlopeBoundsWith
+import Formalism.SizeWindowBrackets.SChain
+
+@[expose] public section
 
 open Finset
 
@@ -21,21 +66,21 @@ structure HostFactsS (D : ArithData H) (S : Finset ℕ) : Prop where
   split_frob : ∀ p ∈ S, InPhi (D.frob p)
   inertia_d : ∀ x, x ∈ D.inertia D.d ↔ x = 0 ∨ x = sgc0
 
-open Classical in
 
+open Classical in
 def PsiA (A0 : AddSubgroup H) : Finset (AddChar (E0 × H) ℂ) := univ.filter fun ψ => ∀ s ∈ A0, ψ (0, s) = 1
 
-open Classical in
 
+open Classical in
 def wtA (c : ℝ) (ψ : AddChar (E0 × H) ℂ) : ℝ := if ∀ h : H, ψ (0, h) = 1 then 1 else c
 
-open Classical in
 
+open Classical in
 def GmA (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ) (Kp : Finset (AddChar (E0 × H) ℂ)) (c y : ℝ) : ℝ :=
   ∑ ψ ∈ Kp, wtA c ψ * (GPsi D ell ψ y).re
 
-open Classical in
 
+open Classical in
 def SigA (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ) (A0 : AddSubgroup H) (Kp : Finset (AddChar (E0 × H) ℂ)) (y : ℝ) : ℝ :=
   ∑ ψ ∈ PsiA A0 \ Kp, ‖GPsi D ell ψ y‖
 
@@ -51,8 +96,8 @@ def gapA (D : ArithData H) (N : ℕ) (ell : AddChar (E0 × H) ℂ → ℂ) {m : 
     (w : H → Fin m → E0 × H → ℝ) (u0 : H) : ℝ :=
   ∑ t ∈ TT, ∑ j : Fin m, (ASK D N (a t) t (w u0 j) - (MAIN ell (a t) (w u0 j)).re)
 
-open Classical in
 
+open Classical in
 def CharsA (ell : AddChar (E0 × H) ℂ → ℂ) (A0 : AddSubgroup H) (Kp : Finset (AddChar (E0 × H) ℂ)) (TT : Finset H)
     (c M Ko CE ε x : ℝ) : Prop :=
   0 ∈ Kp ∧ (∀ ψ ∈ Kp, ψ ∈ PsiA A0 ∧ ψ sgc0 = 1) ∧ ((PsiA A0).card : ℝ) ≤ M ∧
@@ -76,28 +121,6 @@ def BNBoundsU (Dd : Data U0 W Top m f) (T2 : Finset H) : Prop :=
   Dd.Nc ≤ (T2.card : ℝ) * Dd.k * Dd.b * Dd.x ^ Dd.ε
     / ((Fintype.card H : ℝ) * ((Fintype.card H : ℝ) * Dd.x ^ (-Dd.ε)))
 
-open Classical in
-
-def ReadsKept (T : DType) (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ) (Kp : Finset (AddChar (E0 × H) ℂ)) : Prop :=
-  ∃ rd : PC → AddChar (E0 × H) ℂ, Set.InjOn rd T.KEPT ∧ Kp = T.KEPT.image rd ∧
-    ∀ ξ ∈ T.KEPT, (∀ n : ℕ, n ≠ 0 → ξ.χ (n : ZMod ξ.N) = primVal D (rd ξ) n) ∧ (rd ξ = 0 ↔ ξ = PC.one) ∧
-      (ξ ≠ PC.one → ell (rd ξ) = ξ.kappa) ∧ (T.psK = some ξ ∨ ξ = PC.one ↔ rd ξ = psC ∨ rd ξ = 0)
-
-def ChainCoreH (T : DType) (eD eL K cHH eK M CE x : ℝ) : Prop :=
-  ∃ (H : Type) (_ : AddCommGroup H) (_ : Fintype H) (_ : DecidableEq H) (U0 : Type) (_ : Fintype U0) (tr : U0 → H)
-    (W : U0 → Type) (_ : ∀ u0, Fintype (W u0)) (_ : ∀ u0, Nonempty (W u0)) (Top : Type) (_ : Fintype Top)
-    (m f : ℕ) (Dd : Data U0 W Top m f) (C : Consts) (Xpp : ℝ)
-    (D : ArithData H) (S : Finset ℕ) (ell : AddChar (E0 × H) ℂ → ℂ) (N : ℕ) (TT T2 : Finset H) (a : H → ℝ)
-    (w : H → Fin m → E0 × H → ℝ) (eT : Top ≃ TT) (eP : Fin f ≃ PhiSet (H := H)) (η X' θ Ko : ℝ)
-    (A0 : AddSubgroup H) (Kp : Finset (AddChar (E0 × H) ℂ)),
-    Dd.x = x ∧ Dd.ε = T.eps ∧ C.eDiv ≤ eD ∧ C.eLoss ≤ eL ∧ C.cHH ≤ cHH ∧
-    HostFactsS D S ∧ (∀ s ∈ A0, ∃ u, tr u = s) ∧ IdentU Dd tr D N ell TT a w eT eP ∧
-    SizeData₂ Dd C Xpp ∧ ErrWindows Dd C Xpp eK K ∧ BNBoundsU Dd T2 ∧
-    SizesA A0 TT T2 a w N x Dd.b Dd.b' η X' θ ∧ ThinScales D ell X' θ ∧
-    CostWindows x (fPl H) Dd.b η θ ∧
-    RestSize T.eps x (Fintype.card H) TT.card T2.card m Dd.b Dd.k Dd.a ∧
-    (∀ s ∈ T2, s ∈ A0) ∧ CharsA ell A0 Kp TT T.aStar M Ko CE T.eps x ∧ ReadsKept T D ell Kp ∧
-    ∀ ψ ∈ PsiA A0, ψ ∉ Kp → ‖GPsi D ell ψ x‖ ≤ x ^ ((1 : ℝ) / 2 + T.eps)
 
 end Deduction.CH
 

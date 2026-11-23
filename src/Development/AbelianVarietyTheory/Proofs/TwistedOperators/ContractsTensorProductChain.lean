@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,7 +101,7 @@ theorem exists_piTensor_succ_equiv_map (m : ℕ) (F : Fin (m + 1) → Type) [∀
     simp only [Fin.cons_succ, Fin.cons_zero] at h1 h2
     simp only [← TensorProduct.smul_tmul', map_smul, PiTensorProduct.map_tprod, h1, h2]
   | add x y hx hy =>
-    simp only [TensorProduct.add_tmul, map_add, hx, hy]
+    simp only [TensorProduct.add_tmul, map_add (f := _), hx, hy]
 
 private theorem factor_dual_lemma {X Y : Type} [AddCommGroup X] [Module ℂ X] [AddCommGroup Y] [Module ℂ Y]
     (p : X →ₗ[ℂ] Y) (hp : Function.Surjective p) (l : Module.Dual ℂ X) (hl : ∀ x, p x = 0 → l x = 0) :
@@ -81,7 +127,7 @@ private theorem lTensor_ker_lemma_2 {Q N P : Type} [AddCommGroup Q] [Module ℂ 
   | tmul q k =>
     rw [LinearMap.lTensor_tmul]
     exact hl q k.1 (LinearMap.mem_ker.mp k.2)
-  | add a b ha hb => rw [map_add, map_add, ha, hb, add_zero]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb, add_zero]
 
 theorem contracts_chain : ∀ (m : ℕ) (G : Fin (m + 1) → Type) [∀ j, Monoid (G j)] (F : Fin m → Type) [∀ j, AddCommGroup (F j)] [∀ j, Module ℂ (F j)] (V : Fin (m + 1) → Type) [∀ j, AddCommGroup (V j)] [∀ j, Module ℂ (V j)] (φ : ∀ j : Fin m, Representation ℂ (G j.castSucc × G j.succ) (F j)) (σ : ∀ j, Representation ℂ (G j) (V j)), (∀ j : Fin m, Contracts (φ j) (σ j.castSucc) (σ j.succ)) → ∃ π : ((⨂[ℂ] j, F j) ⊗[ℂ] V 0) →ₗ[ℂ] V (Fin.last m), Function.Surjective π ∧ (∀ (g : ∀ j, G j) (f : ⨂[ℂ] j, F j) (v : V 0), π (PiTensorProduct.map (fun j => φ j (g j.castSucc, g j.succ)) f ⊗ₜ[ℂ] σ 0 (g 0) v) = σ (Fin.last m) (g (Fin.last m)) (π (f ⊗ₜ[ℂ] v))) ∧ ∀ l : Module.Dual ℂ ((⨂[ℂ] j, F j) ⊗[ℂ] V 0), (∀ g : ∀ j, G j, g (Fin.last m) = 1 → ∀ (f : ⨂[ℂ] j, F j) (v : V 0), l (PiTensorProduct.map (fun j => φ j (g j.castSucc, g j.succ)) f ⊗ₜ[ℂ] σ 0 (g 0) v) = l (f ⊗ₜ[ℂ] v)) → ∀ x, π x = 0 → l x = 0 := by
   intro m
@@ -98,7 +144,7 @@ theorem contracts_chain : ∀ (m : ℕ) (G : Fin (m + 1) → Type) [∀ j, Monoi
       intro A f
       induction f using PiTensorProduct.induction_on with
       | smul_tprod r x => simp [PiTensorProduct.map_tprod]
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
     refine ⟨ψ.toLinearMap, ψ.surjective, ?_, ?_⟩
     · intro g f v
       simp only [LinearEquiv.coe_coe]
@@ -137,7 +183,7 @@ theorem contracts_chain : ∀ (m : ℕ) (G : Fin (m + 1) → Type) [∀ j, Monoi
         rw [h0]
         exact he' (fun j => g j.succ) t (π₀ (a ⊗ₜ v))
       | add y₁ y₂ h₁ h₂ =>
-        simp only [map_add, TensorProduct.add_tmul] at h₁ h₂ ⊢
+        simp only [map_add (f := _), TensorProduct.add_tmul] at h₁ h₂ ⊢
         rw [h₁, h₂]
     · intro l hl x hx
       obtain ⟨L, hL⟩ : ∃ L : Module.Dual ℂ ((⨂[ℂ] j : Fin m, F j.succ) ⊗[ℂ] (F 0 ⊗[ℂ] V 0)),
@@ -182,7 +228,7 @@ theorem contracts_chain : ∀ (m : ℕ) (G : Fin (m + 1) → Type) [∀ j, Monoi
             (by rw [← Fin.succ_last, Fin.cons_succ]; exact hg') (e (t ⊗ₜ a)) v
           rw [he] at hinv
           exact k1.symm.trans (hinv.trans k2)
-        | add u₁ u₂ h₁ h₂ => simp only [map_add, TensorProduct.tmul_add, h₁, h₂]
+        | add u₁ u₂ h₁ h₂ => simp only [map_add (f := _), TensorProduct.tmul_add, h₁, h₂]
       have hx' : π' (LinearMap.lTensor _ π₀ (ψ x)) = 0 := hx
       have h1 := hk' L' hD _ hx'
       rw [← hL', hL, LinearEquiv.symm_apply_apply] at h1

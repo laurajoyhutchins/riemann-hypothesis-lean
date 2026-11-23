@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SerreHolomorphicSectionsHolds
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CompactSpacePts
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.GagaSections
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAffineOpenAndIsPushout
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DetJacMatCoordsEqTransitionJacobianDet
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsAffineOpenAndIsPushout
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Set
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.CxPts
@@ -28,12 +69,11 @@ theorem mem_closure_of_isPushout {R A B C : CommRingCat.{0}} {f : R ⟶ A} {g : 
   haveI : Algebra.IsPushout R B A C := CommRingCat.isPushout_iff_isPushout.mp h.flip
   obtain ⟨t, rfl⟩ := (Algebra.IsPushout.equiv R B A C).surjective c
   induction t with
-  | zero => simp
   | tmul b a =>
     rw [Algebra.IsPushout.equiv_tmul]
     exact AddSubmonoid.subset_closure ⟨a, b, mul_comm _ _⟩
   | add x y hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
 
 theorem appLE_surjective {X Z : Scheme.{0}} (d : X ⟶ Z) [IsClosedImmersion d] {O : Z.Opens}
@@ -70,7 +110,7 @@ theorem mem_closure_inf {S Y : Scheme.{0}} [IsAffine S] (p : Y ⟶ S) [IsSeparat
     rw [e₁, e₂]
     exact congrArg₂ (· * ·) (Conormal.id_appLE _ a) (Conormal.id_appLE _ b)
   | add x y _ _ hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem hx hy
 
 variable {Y : Scheme.{0}} {p : Y ⟶ Sp ℂ}
@@ -113,7 +153,7 @@ theorem gensBdd_eval₂ (f : MvPolynomial (Fin n) ℂ) (b : Γ(Y, W)) :
     have hy' := mem_ptsIn_inf.1 hy
     simp [ev_mul, ev_algX hy'.1, ev_algX hy'.2]
   | add f g hf hg =>
-    simpa only [map_add, ev_add, add_mul] using (hf b).add (hg b)
+    simpa only [map_add (f := _), ev_add, add_mul] using (hf b).add (hg b)
   | mul_X f l hf =>
     obtain ⟨r, m, w, h⟩ := hf b
     refine ⟨r, m + 1, w, fun y hy => ?_⟩

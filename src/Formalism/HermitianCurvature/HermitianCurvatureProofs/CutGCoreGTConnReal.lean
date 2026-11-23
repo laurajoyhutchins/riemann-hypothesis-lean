@@ -1,6 +1,63 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSAdjH
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSConst
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTRadAdj
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormalFormOrderZeroOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.cut_GCore_GTConnCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateCommuteRaisingConstant
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTConnGaugeB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTRadAdj
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSAdjH
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSConst
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGTSSTr
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCoreGenTransferFn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt MeasureTheory
 
@@ -261,7 +318,7 @@ theorem dZb_cont {F : ℂ → ℂ} (hF : ContDiff ℝ 1 F) : Continuous (NF.dZb 
   exact continuous_const.mul ((c.clm_apply continuous_const).add
     (continuous_const.mul (c.clm_apply continuous_const)))
 
-set_option maxHeartbeats 4000000 in
+
 theorem gauge_reality_holds : GTCReal := by
   intro Wp Wq _ _ _ _ _ _ P Bs X d hH e he hk A Bf hAB hC ρ ζ0 hζ0
   classical
@@ -398,7 +455,7 @@ theorem gauge_reality_holds : GTCReal := by
       hGc hGs (fun ζ h => by simp only [Kf]; rw [h, mul_zero])
     have hpt : ∀ ζ, Lf ζ - Rf ζ = x * (-(Ja ζ + Jb ζ) + Kf ζ) := by
       intro ζ
-      simp only [Lf, Rf, Ja, Jb, Kf, gg, Complex.star_def, map_mul, map_sub, map_neg, map_add, Complex.conj_ofReal,
+      simp only [Lf, Rf, Ja, Jb, Kf, gg, Complex.star_def, map_mul, map_sub, map_neg, map_add (f := _), Complex.conj_ofReal,
         Complex.conj_conj, map_div₀, map_one, map_ofNat, hxr]
       ring
     have hibp := ibp_dZb (fun w => G w * gg w) (fun w => star (F w)) (hG1.mul (gg_sm.of_le (by exact_mod_cast le_top)))
@@ -439,7 +496,7 @@ theorem gauge_reality_holds : GTCReal := by
       rw [← this]
       congr 1
       funext ζ
-      simp only [kk, Complex.real_smul, Complex.star_def, Complex.conj_ofReal]
+      simp only [kk, Complex.star_def, Complex.conj_ofReal, Complex.real_smul]
       ring)
     ζ0 (Metric.mem_ball_self (by positivity))
   have h1 : χ ζ0 = 1 := χ.one_of_mem_closedBall (Metric.mem_closedBall_self (by positivity))

@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.MeasLev
-import Formalism.LocalRingCardinality.DataTies
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.UnimodInst
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HaarScaling.MapEqSelfOfIterate
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.MeasBrg
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.MeasFr
+import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.MeasUpq
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.UnimodGA
+import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RightRegularIsometricMultiplicative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,9 +73,6 @@ theorem det_ne_of_inUJ {C : Matrix (Fin n) (Fin n) ℂ} (h : Cᴴ * Formalism.RE
 
 def ofInUJ {C : Matrix (Fin n) (Fin n) ℂ} (h : Cᴴ * Formalism.REAL.Jm ε * C = Formalism.REAL.Jm ε) : Formalism.REAL.UJ ε :=
   ⟨Matrix.nonsingInvUnit C (Ne.isUnit (det_ne_of_inUJ ε h)), h⟩
-
-theorem umat_ofInUJ {C : Matrix (Fin n) (Fin n) ℂ} (h : Cᴴ * Formalism.REAL.Jm ε * C = Formalism.REAL.Jm ε) :
-    PI.CdHaarScale.umat (ofInUJ ε h) = C := rfl
 
 theorem umat_mul (g h : Formalism.REAL.UJ ε) :
     PI.CdHaarScale.umat (g * h) = PI.CdHaarScale.umat g * PI.CdHaarScale.umat h := rfl
@@ -59,8 +102,8 @@ theorem signs_eq : (fun i => (e.symm i).isLeft) = ε := by
   · simp [h1]
   · simp [h2]
 
-include h1 h2 in
 
+include h1 h2 in
 theorem sq_inUJ {C : Matrix (Fin P ⊕ Fin Q) (Fin n) ℂ} (hC : Cᴴ * Formalism.UG.Jpq P Q * C = Formalism.REAL.Jm ε) :
     (C.submatrix e.symm id)ᴴ * Formalism.REAL.Jm ε * C.submatrix e.symm id = Formalism.REAL.Jm ε := by
   have := Formalism.IndefR.Eqv.MF.sq_gram e.symm C

@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GramSchmidtFrames.LocBCore
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GramSchmidtFrames.SMulVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.BigCellVanishingOfCommute
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DensityLemma.PFdGramCut
+
+@[expose] public section
 
 open MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.C6
 open Matrix
@@ -16,9 +64,6 @@ variable {k r : ℕ}
 
 lemma aps {V : Type*} [AddCommGroup V] (a b : V) : a + (b - a) = b := by
   exact add_sub_cancel a b
-
-lemma spa {V : Type*} [AddCommGroup V] (a b : V) : b - a + a = b := by
-  exact sub_add_cancel b a
 
 def Rk (k r : ℕ) (p q : Fin (2 * r + k + 1) → ℂ) : B.Mat k r := vecMulVec p (star q ᵥ* Hpk k r)
 
@@ -75,49 +120,9 @@ lemma Phi_mulVec (z z' : Fin (2 * r + k + 1) → ℂ) (M : B.Mat k r) (u : Fin (
   unfold Phi
   rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, Pm_mulVec]
 
-def ev (k r : ℕ) (z z' : Fin (2 * r + k + 1) → ℂ) (M : B.Mat k r) : Fin (2 * r + k + 1) → ℂ :=
-  nz k r (omW k r z z' M)
-
-def Am (k r : ℕ) (z z' nu : Fin (2 * r + k + 1) → ℂ) (M : B.Mat k r) : B.Mat k r :=
-  (1 - Pm k r z) + Phi k r z z' M * (Pm k r z - Rk k r nu nu * Pm k r z) + Rk k r (ev k r z z' M) nu * Pm k r z
-
-lemma Am_mulVec (z z' nu : Fin (2 * r + k + 1) → ℂ) (M : B.Mat k r) (v : Fin (2 * r + k + 1) → ℂ) :
-    Am k r z z' nu M *ᵥ v = (v - prW k r z v) +
-      Phi k r z z' M *ᵥ (prW k r z v - herm (Hpk k r) (prW k r z v) nu • nu) +
-      herm (Hpk k r) (prW k r z v) nu • ev k r z z' M := by
-  unfold Am
-  simp only [Matrix.add_mulVec, Matrix.sub_mulVec, Matrix.one_mulVec, ← Matrix.mulVec_mulVec, Pm_mulVec,
-    Rk_mulVec]
-
 lemma s_msmul {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {s : Set E} {m : ℕ} {c : E → ℂ}
     {M : E → Matrix (Fin m) (Fin m) ℂ} (hc : Sm c s) (hM : Sm M s) : Sm (fun x => c x • M x) s :=
   sm_iff.2 fun i j => by simp only [Matrix.smul_apply, smul_eq_mul]; exact hc.mul (sm_iff.1 hM i j)
-
-lemma s_Rk {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {s : Set E} {p : E → Fin (2 * r + k + 1) → ℂ}
-    (hp : Sm p s) (q : Fin (2 * r + k + 1) → ℂ) : Sm (fun x => Rk k r (p x) q) s :=
-  sm_iff.2 fun i j => by simp only [Rk, vecMulVec_apply]; exact (sv_iff.1 hp i).mul contDiffOn_const
-
-lemma s_Am {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {s : Set E} (z z' nu : Fin (2 * r + k + 1) → ℂ)
-    {Y : E → B.Mat k r} (hY : Sm Y s) (hd : ∀ x ∈ s, (Zhat k r z z' (Y x)).det ≠ 0)
-    (hn : ∀ x ∈ s, 0 < (herm (Hpk k r) (omW k r z z' (Y x)) (omW k r z z' (Y x))).re) :
-    Sm (fun x => Am k r z z' nu (Y x)) s := by
-  have hdi : Sm (fun x => -((Zhat k r z z' (Y x)).det)⁻¹) s := ((s_det (s_Zhat z z' hY)).inv hd).neg
-  have hL : Sm (fun x => Lm k r z z' (Y x)) s := by
-    unfold Lm
-    exact contDiffOn_const.add (ContDiffOn.sum fun c _ => ContDiffOn.sum fun a _ =>
-      s_msmul (hdi.mul (s_adj (s_Zhat z z' hY) c a)) (s_mmul contDiffOn_const hY))
-  have hP : Sm (fun x => Phi k r z z' (Y x)) s := by
-    unfold Phi
-    exact s_mmul (s_mmul contDiffOn_const hY) hL
-  have hf : Sm (fun x => (herm (Hpk k r) (omW k r z z' (Y x)) (omW k r z z' (Y x))).re) s :=
-    s_re (s_herm _ (s_omW z z' hY) (s_omW z z' hY))
-  have hN : Sm (fun x => ((Real.sqrt (herm (Hpk k r) (omW k r z z' (Y x)) (omW k r z z' (Y x))).re)⁻¹ : ℝ)) s :=
-    (hf.sqrt fun x hx => (hn x hx).ne').inv fun x hx => (Real.sqrt_pos.2 (hn x hx)).ne'
-  have he : Sm (fun x => ev k r z z' (Y x)) s := by
-    unfold ev nz
-    exact s_smul (s_ofReal hN) (s_omW z z' hY)
-  unfold Am
-  exact (contDiffOn_const.add (s_mmul hP contDiffOn_const)).add (s_mmul (s_Rk he nu) contDiffOn_const)
 
 end loca
 

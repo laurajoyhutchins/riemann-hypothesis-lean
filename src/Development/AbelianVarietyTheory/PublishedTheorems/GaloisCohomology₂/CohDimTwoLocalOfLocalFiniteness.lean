@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.Hypotheses.GalCoh
+module
+
+public import ReciprocityTheory.Hypotheses.GalCoh
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,7 +54,7 @@ open NumberField IsDedekindDomain Representation ReciprocityTheory.Gal Formalism
 namespace GlobalTheory.Published
 
 def CohDimTwoGlobal : Prop :=
-  ∀ (F Ω : Type) [Field F] [NumberField F] [IsTotallyComplex F] [Field Ω] [Algebra F Ω]
+  ∀ (F Ω : Type) [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] [Field Ω] [Algebra F Ω]
     [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (r : ℕ) (M : Type) [AddCommGroup M]
     [Module (ZMod (l ^ r)) M] [Finite M] [TopologicalSpace M] [DiscreteTopology M]
     (S : Finset (HeightOneSpectrum (𝓞 F)))
@@ -42,8 +88,8 @@ theorem subsingleton_Hn_succ_iff {R : Type*} [CommRing R] [Module R M] [Continuo
   · intro h f _
     exact h f.1 f.2.1 f.2.2
 
-omit [TopologicalSpace Γ] [TopologicalSpace M] [IsTopologicalAddGroup M] in
 
+omit [TopologicalSpace Γ] [TopologicalSpace M] [IsTopologicalAddGroup M] in
 theorem dn_eq_of_action_eq {R R' : Type*} [CommRing R] [CommRing R'] [Module R M] [Module R' M]
     (rho : Representation R Γ M) (rho' : Representation R' Γ M)
     (h : ∀ g m, rho g m = rho' g m) (n : ℕ) (f : (Fin n → Γ) → M) :
@@ -69,8 +115,8 @@ theorem subsingleton_Hn_of_action_eq {R R' : Type*} [CommRing R] [CommRing R'] [
   obtain ⟨c, hc, e⟩ := hs f hf (by rw [← dn_eq_of_action_eq rho rho' h]; exact hd)
   exact ⟨c, hc, by rw [dn_eq_of_action_eq rho rho' h]; exact e⟩
 
-omit [TopologicalSpace Γ] [TopologicalSpace M] [IsTopologicalAddGroup M] in
 
+omit [TopologicalSpace Γ] [TopologicalSpace M] [IsTopologicalAddGroup M] in
 def zmodRep {R : Type*} [CommRing R] [Module R M] (N : ℕ) [Module (ZMod N) M]
     (rho : Representation R Γ M) : Representation (ZMod N) Γ M where
   toFun g := (rho g).toAddMonoidHom.toZModLinearMap N
@@ -84,15 +130,6 @@ section Consequences
 variable {F Ω : Type} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω]
   (l : ℕ) [Fact l.Prime] {R : Type*} [CommRing R] {M : Type} [AddCommGroup M] [Module R M]
   [Finite M] [TopologicalSpace M] [DiscreteTopology M]
-
-theorem CohDimTwoGlobal.of_nsmul (h : CohDimTwoGlobal) [IsTotallyComplex F] (r : ℕ)
-    (hM : ∀ m : M, (l ^ r) • m = 0) {S : Finset (HeightOneSpectrum (𝓞 F))}
-    (rhoS : Representation R (GS Ω (S : Set (HeightOneSpectrum (𝓞 F)))) M)
-    (hS : ContainsAbove S l) (hc : ContAction rhoS) (n : ℕ) (hn : 3 ≤ n) :
-    Subsingleton (Hn rhoS n) := by
-  letI : Module (ZMod (l ^ r)) M := AddCommGroup.zmodModule hM
-  exact subsingleton_Hn_of_action_eq rhoS (zmodRep (l ^ r) rhoS) (fun _ _ => rfl) n (by omega)
-    (h F Ω l r M S (zmodRep (l ^ r) rhoS) hS hc n hn)
 
 theorem CohDimTwoLocal.of_nsmul (h : CohDimTwoLocal) (r : ℕ)
     (hM : ∀ m : M, (l ^ r) • m = 0) {v : HeightOneSpectrum (𝓞 F)} {A : ValuationSubring Ω}

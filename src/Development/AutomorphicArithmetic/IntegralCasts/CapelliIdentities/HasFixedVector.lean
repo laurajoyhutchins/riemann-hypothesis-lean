@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.BlochKatoSelmerVanishes
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LocIsotypic
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsIdempotentElemCharIdem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LocIsotypic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 private lemma sum_shift {H M : Type} [Group H] [AddCommMonoid M] (K : Subgroup H)
     [Fintype (H ⧸ K)] (φ : H → M) (hφ : ∀ g, ∀ k ∈ K, φ (g * k) = φ g) (h : H) :
@@ -68,12 +106,14 @@ private lemma core {G W V : Type} [Group G] [TopologicalSpace G] [IsTopologicalG
         intro g k hk
         simp only [Subgroup.coe_mul, map_mul, Module.End.mul_apply]
         rw [hK i hi k hk]) ⟨u, hu⟩
+
     simp only [A, map_sum]
     simpa [Subgroup.coe_mul, map_mul, Module.End.mul_apply] using this
   have hsum : ∑ i ∈ c.support, (i : {f : W →ₗ[ℂ] V // ∀ (g : G) (x : W), f (σ g x) = τ g (f x)}).1 (A (x i))
       = (Fintype.card (U ⧸ (K : Subgroup U)) : ℂ) • v := by
     have h1 : ∀ i ∈ c.support, i.1 (A (x i)) = ∑ q : U ⧸ (K : Subgroup U), τ (((q.out : U)) : G) (c i) := by
       intro i _
+
       simp only [A, map_sum]
       refine Finset.sum_congr rfl fun q _ => ?_
       rw [i.2, hx i]
@@ -81,6 +121,7 @@ private lemma core {G W V : Type} [Group G] [TopologicalSpace G] [IsTopologicalG
     have h2 : ∀ q : U ⧸ (K : Subgroup U), ∑ i ∈ c.support, τ (((q.out : U)) : G) (c i) = v := by
       intro q
       have hcs' : ∑ i ∈ c.support, c i = v := hcs
+
       rw [← map_sum, hcs']
       exact hfix _ (q.out : U).2
     simp only [h2, Finset.sum_const, Finset.card_univ]

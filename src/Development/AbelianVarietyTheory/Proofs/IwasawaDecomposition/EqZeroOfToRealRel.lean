@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsBaryStageStart
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.TorRef GlobalTheory.PolFan
 
@@ -61,6 +101,7 @@ theorem eq_zero_of_toReal_rel {a b : ℕ} {u : Fin a → LinearMap.BilinForm ℤ
   have hq : ∀ x y : X, ∑ j, ((u j x y : ℤ) : ℚ) * f (r j) = ∑ k, ((v k x y : ℤ) : ℚ) * f (s k) := by
     intro x y
     have hxy := congrArg f (hpt x y)
+
     rw [map_sum, map_sum] at hxy
     simpa only [e] using hxy
 
@@ -127,12 +168,5 @@ theorem IsCell.reindex {m m' : ℕ} {γ : Fin m → LinearMap.BilinForm ℤ X} (
     exact (Fintype.sum_equiv e _ _ (fun _ => rfl)).symm
 
 end CellFacts
-
-example : InRCone (fun i : Fin 2 => (![mulForm, mulForm] : Fin 2 → LinearMap.BilinForm ℤ ℤ) (Equiv.swap 0 1 i))
-    ((2 : ℤ) • mulForm) :=
-  inRCone_trans (δ := ![mulForm]) (fun j => by
-    fin_cases j
-    exact ⟨![1, 0], fun i => by fin_cases i <;> norm_num, LinearMap.ext₂ fun a b => by simp [Fin.sum_univ_two]⟩)
-    ⟨![2], fun i => by fin_cases i; norm_num, LinearMap.ext₂ fun a b => by simp⟩
 
 end GlobalTheory.PolFan

@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.HasSecondLogDeriv
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.HasSecondLogDeriv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -8,23 +50,6 @@ namespace Formalism.L2.Th1.C
 def veluXs {K : Type} [Field K] {ι : Type} [Fintype ι] (A : PowerSeries K) (xs : ι → PowerSeries K)
     (xP : ι → K) (r : K) : PowerSeries K :=
   A + PowerSeries.X ^ 2 * (∑ P, (xs P - PowerSeries.C (xP P)) - PowerSeries.C r)
-
-def veluYs {K : Type} [Field K] {ι : Type} [Fintype ι] (A : PowerSeries K)
-    (xs ys : ι → PowerSeries K) (xP yP : ι → K) (r s t : K) : PowerSeries K :=
-  A - PowerSeries.X ^ 3 * ∑ P, (ys P - PowerSeries.C (yP P))
-    + PowerSeries.C s * PowerSeries.X * veluXs A xs xP r + PowerSeries.C t * PowerSeries.X ^ 3
-
-def VeluIntegral : Prop :=
-  ∀ (K : Type) [Field K] (R : Subring K) (A v : PowerSeries K) (ι : Type) [Fintype ι]
-    (xs ys : ι → PowerSeries K) (xP yP : ι → K) (al r s t : K),
-    IsOneUnit R A → (∀ P, IntPS R (xs P)) → (∀ P, IntPS R (ys P)) →
-    (∀ P, xP P ∈ R) → (∀ P, yP P ∈ R) → r ∈ R → s ∈ R → t ∈ R →
-    PowerSeries.constantCoeff v = 0 → v ≠ 0 →
-    PowerSeries.C (al ^ 2) * PowerSeries.subst v A * PowerSeries.X ^ 2 = v ^ 2 * veluXs A xs xP r →
-    PowerSeries.C (al ^ 3) * PowerSeries.subst v A * PowerSeries.X ^ 3 =
-      v ^ 3 * veluYs A xs ys xP yP r s t →
-    ∃ g : PowerSeries K, IsOneUnit R g ∧ v = PowerSeries.C al * PowerSeries.X * g ∧
-      g * veluYs A xs ys xP yP r s t = veluXs A xs xP r
 
 def VeluXFromZ : Prop :=
   ∀ (K : Type) [Field K] [CharZero K] (e l linv A : PowerSeries K) (c0 : K) (ι : Type) [Fintype ι]

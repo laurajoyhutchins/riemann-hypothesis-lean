@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivPowerCompatTwoFormDerivativeCompOneForm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsUniqueIsConnOfLift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DivPowerCompatTwoFormDerivativeCompOneForm
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsUniqueIsConnOfLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -173,7 +215,7 @@ def oneFormRetractionToK1 (hadd : ∀ x y, ρ (x + y) - ρ x - ρ y ∈ rel R δ
     rw [← Submodule.Quotient.mk_add]
     refine oneForm_quotient_class_eq_of_rel_differences δ ρ (hone (x + y)).choose_spec ?_
     have := add_mem (add_mem (hadd (ι1 x) (ι1 y)) (hone x).choose_spec) (hone y).choose_spec
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     convert this using 1
     abel
 
@@ -249,7 +291,7 @@ theorem algebraMapInv_eq_zero {M : Type} [AddCommGroup M] [Module B M] {j : ℕ}
     (hx : x ∈ ⋀[B]^j M) : ExteriorAlgebra.algebraMapInv x = 0 := by
   induction hx using Submodule.pow_induction_on_left' with
   | algebraMap b => exact absurd rfl hj
-  | add x y i _ _ hx hy => rw [map_add, hx hj, hy hj, add_zero]
+  | add x y i _ _ hx hy => rw [map_add (f := _), hx hj, hy hj, add_zero]
   | mem_mul m hm i x hx ih =>
     obtain ⟨ω, rfl⟩ := hm
     have : ExteriorAlgebra.algebraMapInv (ExteriorAlgebra.ι B ω) = 0 := by
@@ -292,8 +334,8 @@ section Agree
 
 variable (hr : ∀ T : Thick κ t, ∀ x ∈ rel R T.δ, ∀ y, x * y ∈ rel R T.δ)
 
-include hr in
 
+include hr in
 theorem natAgree {T T' : Thick κ t} (φ : T ⟶ T') (ρ : DR R (ER T) → DR R T.B) (ρ' : DR R (ER T') → DR R T'.B)
     (ha : ∀ x y, ρ (x + y) - ρ x - ρ y ∈ rel R T.δ) (hm : ∀ x y, ρ (x * y) - ρ x * ρ y ∈ rel R T.δ)
     (h0 : ∀ c, ρ (algebraMap (ER T) (DR R (ER T)) c) - algebraMap T.B (DR R T.B) (fstA T c) ∈ rel R T.δ)
@@ -307,7 +349,7 @@ theorem natAgree {T T' : Thick κ t} (φ : T ⟶ T') (ρ : DR R (ER T) → DR R 
   set he := SemiHom.of_algHom (nbAlg φ)
   have mr : ∀ z ∈ rel R T.δ, h.mDR z ∈ rel R T'.δ := fun z hz ↦ mDR_mem_rel h φ.dp hz
   refine agree (C := ER T) (hr T') (fun x ↦ ρ' (he.mDR x)) (fun x ↦ h.mDR (ρ x))
-    (fun x y ↦ by rw [map_add]; exact ha' _ _) (fun x y ↦ by rw [map_mul]; exact hm' _ _)
+    (fun x y ↦ by rw [map_add (f := _)]; exact ha' _ _) (fun x y ↦ by rw [map_mul]; exact hm' _ _)
     (fun x y ↦ by have := mr _ (ha x y); rwa [map_sub, map_sub] at this)
     (fun x y ↦ by have := mr _ (hm x y); rwa [map_sub, map_mul] at this) (fun c ↦ ?_) (fun c ↦ ?_) x
   · have e1 := h0' (nbAlg φ c)
@@ -334,8 +376,8 @@ theorem natAgree {T T' : Thick κ t} (φ : T ⟶ T') (ρ : DR R (ER T) → DR R 
     rw [sub_sub_sub_cancel_right] at e4
     exact e4
 
-include hr in
 
+include hr in
 theorem uAgree (T : Thick κ t) (ρ : DR R (ER T) → DR R T.B)
     (ha : ∀ x y, ρ (x + y) - ρ x - ρ y ∈ rel R T.δ) (hm : ∀ x y, ρ (x * y) - ρ x * ρ y ∈ rel R T.δ)
     (h0 : ∀ c, ρ (algebraMap (ER T) (DR R (ER T)) c) - algebraMap T.B (DR R T.B) (fstA T c) ∈ rel R T.δ)
@@ -345,7 +387,7 @@ theorem uAgree (T : Thick κ t) (ρ : DR R (ER T) → DR R T.B)
       ∈ rel R T.δ := by
   set h := SemiHom.of_algHom (inlMap T).φ
   refine agree (C := T.B) (hr T) (fun x ↦ ρ (h.mDR x)) (fun x ↦ algebraMap T.B (DR R T.B) (ExteriorAlgebra.algebraMapInv x))
-    (fun x y ↦ by rw [map_add]; exact ha _ _) (fun x y ↦ by rw [map_mul]; exact hm _ _) (fun x y ↦ by simp)
+    (fun x y ↦ by rw [map_add (f := _)]; exact ha _ _) (fun x y ↦ by rw [map_mul]; exact hm _ _) (fun x y ↦ by simp)
     (fun x y ↦ by simp) (fun b ↦ ?_) (fun b ↦ ?_) x
   · have e := h0 ((inlMap T).φ b)
     simp only [SemiHom.mDR_algebraMap, AlgHom.commutes]
@@ -355,8 +397,8 @@ theorem uAgree (T : Thick κ t) (ρ : DR R (ER T) → DR R T.B)
     simp only [SemiHom.mDR_ι, SemiHom.m1_D, z, map_zero, sub_zero] at e ⊢
     exact e
 
-include hr in
 
+include hr in
 theorem vAgree (T : Thick κ t) (ρ : DR R (ER T) → DR R T.B)
     (ha : ∀ x y, ρ (x + y) - ρ x - ρ y ∈ rel R T.δ) (hm : ∀ x y, ρ (x * y) - ρ x * ρ y ∈ rel R T.δ)
     (h0 : ∀ c, ρ (algebraMap (ER T) (DR R (ER T)) c) - algebraMap T.B (DR R T.B) (fstA T c) ∈ rel R T.δ)
@@ -364,7 +406,7 @@ theorem vAgree (T : Thick κ t) (ρ : DR R (ER T) → DR R T.B)
     (x : DR R T.B) : ρ ((SemiHom.of_algHom (difMap T).φ).mDR x) - x ∈ rel R T.δ := by
   set h := SemiHom.of_algHom (difMap T).φ
   refine agree (C := T.B) (hr T) (fun x ↦ ρ (h.mDR x)) id
-    (fun x y ↦ by rw [map_add]; exact ha _ _) (fun x y ↦ by rw [map_mul]; exact hm _ _) (fun x y ↦ by simp)
+    (fun x y ↦ by rw [map_add (f := _)]; exact ha _ _) (fun x y ↦ by rw [map_mul]; exact hm _ _) (fun x y ↦ by simp)
     (fun x y ↦ by simp) (fun b ↦ ?_) (fun b ↦ ?_) x
   · have e := h0 ((difMap T).φ b)
     have hf : fstA T ((difMap T).φ b) = b := fst_derSec _ b

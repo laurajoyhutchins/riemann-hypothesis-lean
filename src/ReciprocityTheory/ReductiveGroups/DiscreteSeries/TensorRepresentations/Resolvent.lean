@@ -1,5 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PartialTrace
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.GelfandHW
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PartialTrace
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.GelfandSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,22 +115,6 @@ theorem dualPole_eq_neg_shift (μ : Fin n → ℝ) : poleVd μ = -icShift μ := 
   simp only [poleVd, icShift, Pi.neg_apply]
   push_cast
   ring
-
-theorem infinitesimalShift_reversed (ν : Fin n → ℝ) :
-    icShift ((fun r => -ν (Fin.rev r)) + rho n) = icShift (-(ν + rho n)) ∘ Fin.revPerm := by
-  funext r
-  have hr : (r : ℕ) + 1 ≤ n := r.2
-  simp only [icShift, Function.comp_apply, Pi.add_apply, Pi.neg_apply, rho, Fin.revPerm_apply, Fin.val_rev]
-  push_cast [Nat.cast_sub hr]
-  ring
-
-theorem hasGelfandChar_span_hw {E : Fin n → Fin n → Module.End ℂ M} (hE : IsGlRep E) {ν : Fin n → ℝ} {v : M}
-    (hv : IsHWVec E ν v) : HasGelfandChar E (ν + rho n) (Submodule.span ℂ {v}) := by
-  intro k x hx
-  obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.mp hx
-  refine ⟨?_, ?_⟩
-  · rw [map_smul, gelfand_hw hE hv k, smul_comm]
-  · rw [map_smul, gelfand_hw (antiE_isGlRep hE) (antiE_hw hv) k, infinitesimalShift_reversed, gval_perm, smul_comm]
 
 theorem ptr_eeV_pow_char {E : Fin n → Fin n → Module.End ℂ M} {μ : Fin n → ℝ} {S : Submodule ℂ M}
     (hS : HasGelfandChar E μ S) (k : ℕ) (x : M) (hx : x ∈ S) :

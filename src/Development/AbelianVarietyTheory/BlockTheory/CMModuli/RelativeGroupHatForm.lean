@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +59,7 @@ def zhatSubring : Subring (∀ n : ℕ+, ZMod n) where
   carrier := {f | ∀ (m n : ℕ+) (h : (m : ℕ) ∣ n), ZMod.castHom h (ZMod m) (f n) = f m}
   mul_mem' {a b} ha hb m n h := by rw [Pi.mul_apply, map_mul, ha m n h, hb m n h, Pi.mul_apply]
   one_mem' m n h := by rw [Pi.one_apply, map_one, Pi.one_apply]
-  add_mem' {a b} ha hb m n h := by rw [Pi.add_apply, map_add, ha m n h, hb m n h, Pi.add_apply]
+  add_mem' {a b} ha hb m n h := by rw [Pi.add_apply, map_add (f := _), ha m n h, hb m n h, Pi.add_apply]
   zero_mem' m n h := by rw [Pi.zero_apply, map_zero, Pi.zero_apply]
   neg_mem' {a} ha m n h := by rw [Pi.neg_apply, map_neg, ha m n h, Pi.neg_apply]
 
@@ -26,7 +72,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 abbrev Lhat (D : Datum H) : Type := Zhat ⊗[ℤ] D.La
 
 def hatMul (D : Datum H) (c : 𝓞 E) : Lhat D →ₗ[Zhat] Lhat D :=
-  (DistribMulAction.toLinearMap ℤ D.La c).baseChange Zhat
+  (DistribSMul.toLinearMap ℤ D.La c).baseChange Zhat
 
 def hatForm (D : Datum H) : LinearMap.BilinForm Zhat (Lhat D) := D.EF.baseChange Zhat
 
@@ -71,9 +117,6 @@ def trivAt (D : Datum H) (l : Level H) : Subgroup (Lhat D ≃ₗ[Zhat] Lhat D) :
   congSub D l.Mb ⊓ congSub D (Ideal.span {(l.A : 𝓞 E)})
 
 def relGroup (D : Datum H) (l l₂ : Level H) : Subgroup (Lhat D ≃ₗ[Zhat] Lhat D) := simGroup D l₂ ⊓ trivAt D l
-
-example (D : Datum H) (l : Level H) : LinearEquiv.neg Zhat ∈ simGroup D l :=
-  ⟨fun c x => by simp, 1, map_one _, fun x y => by simp⟩
 
 theorem zeta_pow_div {m n : ℕ} (hn : 0 < n) (h : m ∣ n) : zeta n ^ (n / m) = zeta m := by
   obtain ⟨k, rfl⟩ := h
@@ -154,25 +197,5 @@ def IsLevelCovering (h : l.Dvd l₂) {Xo : Moduli D l} {Xo₂ : Moduli D l₂} {
         (∀ y : Sp k ⟶ Xo₂.XF c, y ≫ levelMapF h hπ c = x ≫ levelMapF h hπ c →
           ∃ g, x ≫ endF (ρ g).hom (hρ g) c = y) ∧
         ∀ g, x ≫ endF (ρ g).hom (hρ g) c = x ↔ g.1 ∈ trivAt D l₂
-
-def ModuliExists : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H), 1 ≤ D.p + D.q →
-    ∀ l : Level H, Nonempty (Moduli D l)
-
-def LevelMapsAndAction : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H), 1 ≤ D.p + D.q →
-    ∀ (l l₂ : Level H) (h : l.Dvd l₂) (Xo : Moduli D l) (Xo₂ : Moduli D l₂),
-      ∃ (π : Xo₂.X ⟶ Xo.X) (hπ : IsOver h Xo Xo₂ π), PullsBack Xo Xo₂ π ∧
-        (∀ π' : Xo₂.X ⟶ Xo.X, IsOver h Xo Xo₂ π' → PullsBack Xo Xo₂ π' → π' = π) ∧
-        IsLevelCovering h hπ
-
-def ModuliAndLevels : Prop := ModuliExists ∧ LevelMapsAndAction
-
-def WholeGroupActs : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H), 1 ≤ D.p + D.q →
-    ∀ (l : Level H) (Xo : Moduli D l),
-      ∃ ρ : simGroup D l → (Xo.X ≅ Xo.X), (∀ g, (ρ g).hom ≫ Xo.s = Xo.s) ∧
-        ρ 1 = Iso.refl _ ∧ (∀ g g', ρ (g * g') = ρ g ≪≫ ρ g') ∧
-        (∀ g, ChangesLevelBy Xo g.1 (ρ g).hom) ∧ ∀ g, g.1 ∈ trivAt D l → ρ g = Iso.refl _
 
 end GlobalTheory.IndefiniteRowSideFullHecke.RelativeGroupHatForm

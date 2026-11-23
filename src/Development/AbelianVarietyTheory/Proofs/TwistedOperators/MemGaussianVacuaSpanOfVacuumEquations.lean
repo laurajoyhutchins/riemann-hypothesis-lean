@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaEqB
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsGaussEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsGaussEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open scoped TensorProduct GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels Matrix
@@ -22,7 +66,7 @@ theorem evIHom_apply (a : AF F) : evIHom a = evI F a := rfl
 theorem evI_realAd_mul (t : ℝ) (c : AF F) : evI F (realAd F t * c) = t • evI F c := by
   rw [← evIHom_apply, map_mul, evIHom_apply, evIHom_apply, Algebra.smul_def]
   congr 1
-  simp [evI, realAd]
+  exact (InfiniteAdeleRing.ringEquiv_mixedSpace F).apply_symm_apply _
 
 theorem realAd_mul_snd (t : ℝ) (c : AF F) : (realAd F t * c).2 = 0 := by
   show (realAd F t).2 * c.2 = 0
@@ -58,7 +102,7 @@ theorem schr_pureA (ψ : AddChar (AF F) ℂ) (hψ : IsStd ψ) (w : (κ → AF F)
       t • ((fun i => evI F (x i)) ⬝ᵥ (fun i => evI F (w.2 i)) + t • evI F (⅟(2 : AF F) * (w.1 ⬝ᵥ w.2))) := by
     rw [evI_realAd_mul]
     congr 1
-    rw [← evIHom_apply, map_add, evIHom_apply, evIHom_apply, evI_realAd_mul, ← evIHom_apply (x ⬝ᵥ w.2),
+    rw [← evIHom_apply, map_add (f := _), evIHom_apply, evIHom_apply, evI_realAd_mul, ← evIHom_apply (x ⬝ᵥ w.2),
       RingHom.map_dotProduct]
     rfl
   unfold schr pureA gam
@@ -67,13 +111,13 @@ theorem schr_pureA (ψ : AddChar (AF F) ℂ) (hψ : IsStd ψ) (w : (κ → AF F)
       (fun i => evI F (x i)) + t • fun i => evI F (w.1 i) := by
     funext i
     show evIHom (x i + realAd F t * w.1 i) = evI F (x i) + t • evI F (w.1 i)
-    rw [map_add, evIHom_apply, evIHom_apply, evI_realAd_mul]
+    rw [map_add (f := _), evIHom_apply, evIHom_apply, evI_realAd_mul]
   have hg : (fun i => ((x + (realAd F t • w).1) i).2) = fun i => (x i).2 := by
     funext i
     show (x i).2 + (realAd F t * w.1 i).2 = (x i).2
     rw [realAd_mul_snd, add_zero]
   rw [hf, hg]
-  simp only [map_smul, map_add, smul_eq_mul]
+  simp only [map_smul, map_add (f := _), smul_eq_mul]
   ring_nf
 
 end GlobalTheory.VacFactor
@@ -148,8 +192,8 @@ theorem hasDerivAt_heisLine_sum (M : Model σ X W) (ψ : AddChar (AF F) ℂ) (h�
 
 end GlobalTheory.VacFactor
 
-open GlobalTheory.VacFactor in
 
+open GlobalTheory.VacFactor in
 theorem GlobalTheory.VacFactor.mem_span_of_isGaussEq : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n d : ℕ}
     {X : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Spc F E n} {W : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Spc F E d} (M : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Model σ X W) (ψ : AddChar (AF F) ℂ)
     (τ : ∀ w : InfinitePlace F, GlobalTheory.AdelicU.EmbOver E w), GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.IsStd ψ →
@@ -164,7 +208,7 @@ theorem GlobalTheory.VacFactor.mem_span_of_isGaussEq : ∀ {F E : Type} [Field F
     fun y z i => ((InfiniteAdeleRing.ringEquiv_mixedSpace F).symm (y i), z i)
   have hmk1 : ∀ y z, (fun i => evI F (mk y z i)) = y := fun y z => by
     funext i
-    simp [mk, evI]
+    exact (InfiniteAdeleRing.ringEquiv_mixedSpace F).apply_symm_apply _
   have hmk2 : ∀ y z, (fun i => (mk y z i).2) = z := fun y z => rfl
   have key : ∀ u u' : Matrix (Fin n) (Fin d) (AE F E), At (evI F) u → At (evI F) u' →
       (∀ w, u'.map (piInf (τ w)) = (((ε w : ℤ) : ℂ) * Complex.I) • (X.θ w * u.map (piInf (τ w)) * (W.θ w)ᵀ)) →

@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosureOperatorFacts
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.FriedrichsKernels.Friedrichs
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ClosureOperatorFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,7 +126,7 @@ theorem inverse_of_dense [CompleteSpace H] (M : Submodule ℂ H) (Ω : M →ₗ[
     exact sub_eq_zero.1 hw1
   refine ⟨fun x => ?_, key⟩
   obtain ⟨v, hv, hv2⟩ := twice M Ω T hTM x
-  exact ⟨v, hv, by rw [hv, hv2, ← map_add]; exact key x⟩
+  exact ⟨v, hv, by rw [hv, hv2, ← map_add (f := _)]; exact key x⟩
 
 end Abstract
 
@@ -146,7 +190,7 @@ theorem cls_sum' {ι : Type} (s : Finset ι) (F : ι → Mat n → V)
     have h2 : ∀ i ∈ s, MemLp (fun y : G n => F i y.val) 2 μ :=
       fun i hi => h i (Finset.mem_insert_of_mem hi)
     have hs : MemLp (fun y : G n => (fun g => ∑ i ∈ s, F i g) y.val) 2 μ :=
-      memLp_finset_sum s h2
+      MeasureTheory.memLp_finsetSum s h2
     have e : (fun g => ∑ i ∈ insert a s, F i g) = (1 : ℂ) • F a + fun g => ∑ i ∈ s, F i g := by
       ext g; simp [Finset.sum_insert ha]
     rw [e, cls_add_smul μ 1 h1 hs, ih h2, Finset.sum_insert ha, one_smul]
@@ -161,7 +205,7 @@ theorem cls_om (hOm : OmFormula) {f : Mat n → V} (hf : Sob μ f) :
   have hs : ∀ a c, MemLp (fun y : G n => Rw (pw true a c) f y.val - Rw (pw false a c) f y.val) 2 μ :=
     fun a c => (hf.2 _).sub (hf.2 _)
   rw [e, cls_sum' Finset.univ (fun a g => ∑ c, (Rw (pw true a c) f g - Rw (pw false a c) f g))
-    (fun a _ => memLp_finset_sum _ fun c _ => hs a c)]
+    (fun a _ => MeasureTheory.memLp_finsetSum _ fun c _ => hs a c)]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [cls_sum' Finset.univ (fun c g => Rw (pw true a c) f g - Rw (pw false a c) f g)
     (fun c _ => hs a c)]
@@ -316,7 +360,7 @@ theorem rR_norm (hU : Unimod) (h : G n) (x : Lp V 2 μ) : ‖rR μ V h x‖ = �
     haveI := (hU n μ).1
     exact measurePreserving_mul_right μ h
   unfold rR
-  rw [dif_pos hmp]
+  rw [dite_eq_left hmp]
   exact (Lp.compMeasurePreservingₗᵢ ℂ (fun y : G n => y * h) hmp).norm_map x
 
 end Conc
@@ -402,7 +446,7 @@ theorem concT : ConcT := by
     obtain ⟨v, hv, hv2⟩ := twice (Msob μ V) Ω (rR μ V h) (hRΩ h) ⟨x, hDM x.2⟩
     refine ⟨⟨rR μ V h x, hy⟩, rfl, ?_⟩
     have hvv : (⟨rR μ V h x, hDM hy⟩ : Msob μ V) = v := Subtype.ext hv.symm
-    rw [hA, hA, map_add, ← hv2]
+    rw [hA, hA, map_add (f := _), ← hv2]
     change rR μ V h x + (Ω (Ω ⟨rR μ V h x, hDM hy⟩) : Lp V 2 μ) = _
     rw [hvv]
   have hcomm : ∀ h : G n, T * rR μ V h = rR μ V h * T := by
@@ -432,8 +476,10 @@ theorem concT : ConcT := by
     obtain ⟨f, hf, hm, rfl⟩ := rep x
     obtain ⟨f', hf', e, ew⟩ := hPS n μ V T hLg hU hR hS hcomm f hf
     refine ⟨⟨cls μ f', inM f' hf'⟩, e, ?_⟩
+
     rw [hΩ f' _ hf', hΩ f hm hf, cls_om hOm hf', cls_om hOm hf, map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
     rw [map_sub, ew, ew]

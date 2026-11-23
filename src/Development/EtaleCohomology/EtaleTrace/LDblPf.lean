@@ -1,29 +1,55 @@
-import Development.EtaleCohomology.EtaleTrace.LCycleCut
-import Development.EtaleCohomology.TateTwists.MayerVietorisExactSequence
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC
 
 namespace LateralTheory.EtaleTrace.LDblPf
 
-def LMvWeak : Prop := ∀ (R : Type) [CommRing R] (F : Shv R) {U V E : Spc} (f : U ⟶ E) (g : V ⟶ E), Cover2 R f g →
-  (∀ (n : ℤ) (a : H R U F n) (b : H R V F n), pull R (pullback.fst f g) F n a = pull R (pullback.snd f g) F n b →
-    ∃ x : H R E F n, pull R f F n x = a ∧ pull R g F n x = b) ∧
-  ∀ m : ℤ, (∀ c : H R (pullback f g) F m, ∃ a b, c = pull R (pullback.fst f g) F m a - pull R (pullback.snd f g) F m b) →
-    ∀ x : H R E F (m + 1), pull R f F _ x = 0 → pull R g F _ x = 0 → x = 0
-
 instance monoSch {X : Scheme.{0}} (U : X.Opens) : Mono (sch.map U.ι) := by
   have hy : Mono (yoneda.map U.ι) := NatTrans.mono_of_mono_app _
   have : ∀ n, Mono ((sch.map U.ι).app n) := fun _ => hy
   exact NatTrans.mono_of_mono_app _
-
-instance freePres (R : Type) [CommRing R] : PreservesColimitsOfShape WalkingSpan (free R) := by
-  have : PreservesColimitsOfSize.{0, 0} (ModuleCat.free (ULift.{1} R)) := (ModuleCat.adj _).leftAdjoint_preservesColimits
-  unfold free freeP
-  infer_instance
-
-def LDblCover : Prop := ∀ (R : Type) [CommRing R] {X : Scheme.{0}} (U : X.Opens),
-  Cover2 R (LCycleCut.i1 U) (LCycleCut.i2 U) ∧
-    IsPullback (sch.map U.ι) (sch.map U.ι) (LCycleCut.i1 U) (LCycleCut.i2 U)
 
 end LateralTheory.EtaleTrace.LDblPf

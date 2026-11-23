@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodCoefficientRingPadicIntegersFinExt
-import BuildAid.D3
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ResBound
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GoodCoefficientRingPadicIntegersFinExt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.BasicDefinitions.ExistsUnique
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.AdmFinite
@@ -68,14 +110,16 @@ theorem indep_cons [IsLocalRing O] {lam : O} (hl : Ideal.span {lam} = IsLocalRin
     rw [this]; simp
   refine Fin.cases ?_ (fun a => ?_)
   · have h1 := congrArg ((C.projectionOnto F h.symm).rTensor _) hx
-    simp only [map_add, map_smul, map_sum, hC, LinearMap.rTensor_tmul, map_zero] at h1
+
+    simp only [map_add (f := _), map_smul, map_sum, hC, LinearMap.rTensor_tmul, map_zero] at h1
     simp only [Submodule.projectionOnto_apply_right, zero_tmul, smul_zero, Finset.sum_const_zero, add_zero] at h1
     rw [← Ideal.mem_span_singleton, hl]
     by_contra hu
     have hu' : IsUnit (x 0) := by simpa using hu
     exact hc (hu'.smul_eq_zero.mp h1)
   · have h1 := congrArg (fun y => TensorProduct.lid O _ ((b.coord a).rTensor _ ((F.projectionOnto C h).rTensor _ y))) hx
-    simp only [map_add, map_smul, map_sum, hF, LinearMap.rTensor_tmul, map_zero] at h1
+
+    simp only [map_add (f := _), map_smul, map_sum, hF, LinearMap.rTensor_tmul, map_zero] at h1
     simp only [Submodule.projectionOnto_apply_left, lid_tmul, smul_zero, zero_add, Module.Basis.coord_apply,
       Module.Basis.repr_self, Finsupp.single_apply, ite_smul, one_smul, zero_smul, smul_ite, Finset.sum_ite_eq',
       Finset.mem_univ, if_true] at h1
@@ -147,7 +191,7 @@ def coefAmb {M : Type} [AddCommGroup M] [Module O M] (W : Representation O G M) 
     induction b using TensorProduct.induction_on with
     | zero => simp
     | tmul a x => simp [coefRep_tmul]
-    | add a b ha hb => simp only [map_add, ha, hb])
+    | add a b ha hb => simp only [map_add (f := _), ha, hb])
 
 theorem toAmb_coefH1_eq_coefAmb_toAmb {M : Type} [AddCommGroup M] [Module O M] (W : Representation O G M) {X X' : Type}
     [AddCommGroup X] [Module O X] [AddCommGroup X'] [Module O X'] (f : X →ₗ[O] X') (c : H1 (twCoef W χ X) ⊤) :
@@ -160,7 +204,7 @@ theorem tensAmb_lTensor {X X' : Type} [AddCommGroup X] [Module O X] [AddCommGrou
     tensAmb L χ X' (f.lTensor _ y) = coefAmb χ (latRep L) f (tensAmb L χ X y) := by
   induction y using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul c x =>
     obtain ⟨z, rfl⟩ := Submodule.Quotient.mk_surjective _ c
     rfl
@@ -211,7 +255,9 @@ theorem subset_of_bound [IsDomain O] [IsDiscreteValuationRing O] {lam : O} (hl :
       choose c hc e using hy
       refine hk s c hc fun x hx => hind x ((hT _).1 ?_)
       have h2 := congrArg (toAmb (twCoef (latRep L) χ (O ⧸ Ideal.span {lam}))) hx
+
       simp only [map_sum, map_smul, e, map_zero] at h2
+
       simp only [map_sum, map_smul, map_zero, h2])
     X y ⟨c, hc, hy.symm⟩
   exact ⟨y', by rw [LinearMap.comp_apply, hy', hy]⟩
@@ -229,8 +275,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     [CommRing O] [Algebra O LL] [TopologicalSpace LL] {n : ℕ} (emb : ZMod n → (K₀ →ₐ[Qp] LL))
     (Γ : GalData G Qp LL O) (t d : ℕ) (Ut : ZMod n → Multiset ℤ)
 
-open GlobalTheory.IndefiniteRowSideFullHecke.InvariantsVanishing in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.InvariantsVanishing in
 theorem adm_eq_H1fX (hO : IsDomain O) (hdvr : IsDiscreteValuationRing O) (hl : Irreducible Γ.lam)
     (hf1 : Module.Free O (HH Γ)) (hf2 : Module.Finite O (HH Γ))
     (hC : ∃ C : Submodule O (HH Γ), IsCompl (Hf PD Γ) C) (hd : Module.finrank O ↥(Hf PD Γ) = d)

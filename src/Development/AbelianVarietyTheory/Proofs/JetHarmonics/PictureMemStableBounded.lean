@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FormZeroEqSlotPairingOfLe
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MemLevelZeroOfMemGroup
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsNormBoundThreeFamilies
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RadialModuleFormOfXiExists
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MemLevelZeroOfMemGroup
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBFCstmt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PictureMemLevelZeroClass
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SesquilinearLevelZeroPairing
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsNormBoundThreeFamilies
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FormZeroEqSlotPairingOfLe
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.InvariantOperatorUnderJacquet
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelsOfBuiltSetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.PairOperatorCommute
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.QNFAsm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory.ListDuality
 
@@ -200,6 +251,17 @@ theorem listDuality_cpt (hRMF : Formalism.FourierDecayAlt.JC.RadialModuleForm) :
     rw [Lw_dual]
     exact cast_map_pred (len_pm ys w) (fun k u => WordOK (JC.parLev P jF) (p.T.bs jF).z (p.T.bs jF).z'
       (p.T.bs jF).π (p.T.bs jF).π' st p.l0 u) _ hW2
+  have Lw_plus : ∀ (ys : List ℝ) (w : List C.Letter), ∀ l ∈ Lw ys w, l.plus = true := by
+    intro ys w
+    induction ys with
+    | nil => simp [Lw_nil]
+    | cons y ys ih =>
+      intro l hl
+      rw [Lw_cons] at hl
+      rcases List.mem_cons.1 hl with rfl | hl
+      · rfl
+      · obtain ⟨l', hl', rfl⟩ := List.mem_map.1 hl
+        exact ih l' hl'
   have hDK : FormPairingAction.DKHyp (M.qC (JC.parLev P jF)) (Ww ys w) (Lw ys w) := by
     refine ⟨Lw_plus ys w, good_of_adm st _ hOK1.1, good_of_adm st _ hOK2.1, Lw_pairwise w ys hys, ?_⟩
     intro l hl
@@ -223,6 +285,24 @@ theorem listDuality_cpt (hRMF : Formalism.FourierDecayAlt.JC.RadialModuleForm) :
   have hmn : w.length ≤ (KB.plusW ys w).length := by rw [len_plusW]; omega
   have ePlus := hform (KB.plusW ys w) x x Φ Φ ε hε hx hx hΦ hΦ
   have eMinus := hform (KB.minusW ys w) x' x' Φ' Φ' ε hε hx' hx' hΦ' hΦ'
+  have pairJ_rel {X Y : Type} {w : List C.Letter} (R : X → Y → Prop) (c : ℂ)
+      (Ξ1 : (Ix (Fin w.length) → X) → (Ix (Fin w.length) → X) → ℂ)
+      (Ξ2 : (Ix (Fin w.length) → Y) → (Ix (Fin w.length) → Y) → ℂ)
+      (h : ∀ x x' y y', (∀ e, R (x e) (y e)) → (∀ e, R (x' e) (y' e)) → Ξ1 x x' = c * Ξ2 y y') :
+      ∀ (ys : List ℝ) (x : Ix (Fin (KB.plusW ys w).length) → X) (x' : Ix (Fin (KB.minusW ys w).length) → X)
+        (y : Ix (Fin (KB.plusW ys w).length) → Y) (y' : Ix (Fin (KB.minusW ys w).length) → Y),
+        (∀ e, R (x e) (y e)) → (∀ e, R (x' e) (y' e)) → KB.pairJ Ξ1 ys x x' = c * KB.pairJ Ξ2 ys y y' := by
+    intro ys
+    induction ys with
+    | nil => exact h
+    | cons a ys ih =>
+      intro x x' y y' hx hx'
+      show KB.pairJ Ξ1 ys _ _ - KB.pairJ Ξ1 ys _ _ = c * (KB.pairJ Ξ2 ys _ _ - KB.pairJ Ξ2 ys _ _)
+      have a1 := ih (fun e => x (Fin.cons 1 e)) (fun e => x' (Fin.cons 0 e))
+        (fun e => y (Fin.cons 1 e)) (fun e => y' (Fin.cons 0 e)) (fun e => hx _) (fun e => hx' _)
+      have a2 := ih (fun e => x (Fin.cons 0 e)) (fun e => x' (Fin.cons 1 e))
+        (fun e => y (Fin.cons 0 e)) (fun e => y' (Fin.cons 1 e)) (fun e => hx _) (fun e => hx' _)
+      exact (congrArg₂ (· - ·) a1 a2).trans (mul_sub _ _ _).symm
   have ePJ := pairJ_rel (w := w) (fun F Ψ => JC.NiceCoef (p.T.bs jF) ε F ∧ IsPic p.T jF Ψ F) (Cst : ℂ)
     (p.form j hj w) (fun u u' => form μ 0 (P5.act (RRi L st 0 (D.positionted w)) u) u' 0)
     (fun u u' v v' hu hu' => hform w u u' v v' ε hε (fun e => (hu e).1) (fun e => (hu' e).1) (fun e => (hu e).2)
@@ -239,8 +319,41 @@ theorem listDuality_cpt (hRMF : Formalism.FourierDecayAlt.JC.RadialModuleForm) :
         blockMulVec_apply_mem (fun a b x hx => (hRRw a b).1 x hx) (fun e => (hu e).2)
       exact form_zero_eq_position_pairing_of_le hThm hmn _ _ (fun a => hle (hin a)) (fun a => hle (hu' a).2))
     ys Φ Φ' Φ Φ' (fun e => ⟨rfl, hΦU e⟩) (fun e => ⟨rfl, hΦ'U e⟩)
-  have ePosition := position_pair (V := RadSp (JC.parLev P jF).k (JC.parLev P jF).r (p.T.bs jF).z (p.T.bs jF).z'
-    (p.T.bs jF).π (p.T.bs jF).π') (bet μ) hodd (QQi L st 0) w ys Φ Φ'
+  have ePosition : pairS (bet μ) (actP (JL (Lw ys w) * RRw (QQi L st 0) (Ww ys w)) Φ)
+      (fun z => Φ' (z ∘ Fin.cast (len_pm ys w))) =
+      KB.pairJ (fun x x' => ∑ e, bet μ (actP (RRw (QQi L st 0) (D.positionted w)) x e) (x' e)) ys Φ Φ' := by
+    have aux {V : Type} [AddCommGroup V] [Module ℂ V] (β : V → V → ℂ)
+        (hβ : ∀ v v', β (-v) v' = -β v v') (QQ : ℂ → M2 (Q.Pr V))
+        (w : List C.Letter) : ∀ (ys : List ℝ) (X : Ix (Fin (KB.plusW ys w).length) → V)
+        (X' : Ix (Fin (KB.minusW ys w).length) → V),
+        ∑ z, β (actP (JL (Lw ys w) * RRw QQ (Ww ys w)) X z) (X' (z ∘ Fin.cast (len_pm ys w))) =
+          KB.pairJ (fun x x' => ∑ e, β (actP (RRw QQ (D.positionted w)) x e) (x' e)) ys X X' := by
+      intro ys
+      induction ys with
+      | nil =>
+        intro X X'
+        have hc : ∀ z : Ix (Fin w.length), z ∘ Fin.cast (len_pm [] w) = z :=
+          fun z => funext fun t => congrArg z (Fin.ext rfl)
+        rw [Lw_nil, Ww_nil, JL, one_mul, KB.pairJ]
+        refine Finset.sum_congr rfl fun z _ => ?_
+        exact congrArg (fun t => β (actP (RRw QQ (D.positionted w)) X z) (X' t)) (hc z)
+      | cons y ys ih =>
+        intro X X'
+        have h' : (KB.minusW ys w).length + 1 = (KB.plusW ys w).length + 1 := by rw [len_pm]
+        have e1 : (JL (Lw (y :: ys) w) * RRw QQ (Ww (y :: ys) w) : SlopeTestRemainingChoices (Fin ((KB.plusW ys w).length + 1)) (Q.Pr V)) =
+            ins (0 : Fin ((KB.plusW ys w).length + 1)) (Formalism.YangianSpanCharacter.T.J (SlopeTestRemainingChoices (Fin ((KB.plusW ys w).length + 1)) (Q.Pr V))) *
+              Formalism.FourierDecayAlt.P.PBF.liftM (JL (Lw ys w) * RRw QQ (Ww ys w)) := by
+          rw [Lw_cons, Ww_cons]; exact mat_cons QQ (y : ℂ) _ _
+        have step := pair_step (n := (KB.plusW ys w).length) β hβ h' (JL (Lw ys w) * RRw QQ (Ww ys w)) X X'
+        rw [← e1] at step
+        refine step.trans ?_
+        show _ - _ = KB.pairJ _ ys (fun e => X (Fin.cons 1 e)) (fun e => X' (Fin.cons 0 e)) -
+          KB.pairJ _ ys (fun e => X (Fin.cons 0 e)) (fun e => X' (Fin.cons 1 e))
+        congr 1
+        · exact ih (fun e' => X (Fin.cons 1 e')) (fun e' => X' (Fin.cons 0 e'))
+        · exact ih (fun e' => X (Fin.cons 0 e')) (fun e' => X' (Fin.cons 1 e'))
+    exact aux (V := RadSp (JC.parLev P jF).k (JC.parLev P jF).r (p.T.bs jF).z (p.T.bs jF).z'
+      (p.T.bs jF).π (p.T.bs jF).π') (bet μ) hodd (QQi L st 0) w ys Φ Φ'
   have eA : form μ 0 (P5.act (RRi L st 0 (Lw ys w ++ Ww ys w)) Φ) Φ 0 =
       form μ 0 (P5.act (RRi L st 0 (D.positionted (KB.plusW ys w))) Φ) Φ 0 := by rw [Lw_append_Ww]
   have eB : form μ 0 (P5.act (RRi L st 0 ((Lw ys w).map dl ++ Ww ys w)) (fun z => Φ' (z ∘ Fin.cast (len_pm ys w))))
@@ -271,9 +384,6 @@ theorem listDuality_cpt (hRMF : Formalism.FourierDecayAlt.JC.RadialModuleForm) :
   refine final_ineq Cst _ _ _ _ _ hQ (fun z hz => ?_) hAi hBi hdk
   obtain ⟨y, hy, rfl⟩ := List.mem_map.1 hz
   exact hqpos y hy
-
-theorem listDuality_cpt_of_bessel (h : GlobalTheory.HCXi.BesselXiIntegrable) : Formalism.FourierDecayAlt.KB.SizeStdCpt :=
-  listDuality_cpt (GlobalTheory.RadialModule.radialModuleForm_of_bessel h)
 
 end
 

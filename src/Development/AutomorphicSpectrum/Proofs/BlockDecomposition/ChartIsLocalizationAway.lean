@@ -1,10 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.NLeA
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ChartGrConst
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapConeRing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InterEqBasicOpen
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InterEqBasicOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CrystallineSemistableComparison CrystallineSemistableComparison.Onto
 
 set_option autoImplicit false
@@ -36,6 +75,7 @@ theorem one_bij (hL : OneLow) (hR : OneRes) {R : Type} [CommRing R] {ι : Type} 
     intro m x
     rw [Cos.d_apply, Cos.d_apply]
     funext i
+
     simp only [hδ, Finset.sum_apply, Pi.smul_apply, φ, map_sum, map_zsmul]
   have hφ1 : ∀ m x y, φ m (x - y) = φ m x - φ m y := fun m x y => funext fun i => map_sub _ _ _
   obtain ⟨-, hinj, hex, hup⟩ := hP
@@ -172,7 +212,8 @@ theorem chart_alt_alt (c : BChart q i π d V) (S : Finset (Fin d)) (k : Fin d) (
     rw [c.rel k]
     exact Ideal.subset_span (Set.mem_insert_of_mem _ ⟨j, rfl⟩)
   rw [RingHom.mem_ker] at hm
-  simp only [map_sub, map_mul, MvPolynomial.coe_eval₂Hom, MvPolynomial.eval₂_C, MvPolynomial.eval₂_X] at hm
+  change MvPolynomial.eval₂ (π.appLE V (c.C k) (c.C_le k)).hom (c.u k) _ = 0 at hm
+  simp only [MvPolynomial.eval₂_sub, MvPolynomial.eval₂_mul, MvPolynomial.eval₂_C, MvPolynomial.eval₂_X] at hm
   have hrs : ∀ x, rs (inf_le_C c hk) ((π.appLE V (c.C k) (c.C_le k)).hom x) = (π.appLE V (S.inf c.C) (inf_le_pre c ⟨k, hk⟩)).hom x := by
     intro x
     change (Y.presheaf.map (homOfLE _).op).hom ((π.appLE V _ _).hom x) = (π.appLE V _ _).hom x
@@ -266,7 +307,10 @@ theorem pres_transport {A R B ι : Type} [CommRing A] [CommRing R] [CommRing B] 
     (p : MvPolynomial ι A) : β (MvPolynomial.aeval v p) = MvPolynomial.eval₂Hom g w p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp [hg]
-  | add p p' hp hp' => simp only [map_add, hp, hp']
+  | add p p' hp hp' =>
+    change β (MvPolynomial.aeval v (p + p')) = MvPolynomial.eval₂ g w (p + p')
+    rw [map_add (MvPolynomial.aeval v), map_add β, MvPolynomial.eval₂_add, hp, hp']
+    rfl
   | mul_X p j hp => simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.eval₂Hom_X', hw]
 
 theorem chart_exists (K : Type) [Field K] (W Z Y : Scheme.{0}) (q : Z ⟶ Spec (CommRingCat.of K)) (i : W ⟶ Z)
@@ -341,7 +385,7 @@ theorem chart_exists (K : Type) [Field K] (W Z Y : Scheme.{0}) (q : Z ⟶ Spec (
     exact he ▸ chart_loc c S k hk
 
 section Main
-set_option maxHeartbeats 4000000 in
+
 
 theorem chartBij_of : ChartFormsCechExact → SiteLaws → OneLow → OneRes → CovDesc → ZarRel → AffOm → OmNat → OmRes → AffRel → FormLaws →
     ChartLaws → ChartBij := by

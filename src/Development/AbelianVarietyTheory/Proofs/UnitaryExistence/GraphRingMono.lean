@@ -1,4 +1,70 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Field.Subfield.Defs
+public import Mathlib.Algebra.Ring.Subring.Basic
+public import Mathlib.Data.Nat.Prime.Defs
+public import Mathlib.Order.Preorder.Chain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Basic
+public import Mathlib.Algebra.CharP.Frobenius
+public import Mathlib.Algebra.CharP.Reduced
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Algebra.Polynomial.Degree.Lemmas
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.FieldTheory.KummerPolynomial
+
+@[expose] public section
+
 open IsLocalRing Polynomial
 
 namespace GlobalTheory.PBasis
@@ -90,7 +156,7 @@ lemma indep_insert {p : ℕ} (hp : p.Prime) (h0 : (p : k) = 0) {B : Set k} (hB :
     exact ⟨s, s.2, rfl⟩
   let ψ : S →+* K := ((RingHom.fst k Q).comp S.subtype).codRestrict K hK
   have hψ : Function.Injective ψ := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro s hs
     have h1 : (s : k × Q).1 = 0 := congrArg Subtype.val hs
     exact Subtype.ext (Prod.ext h1 (hI s s.2 h1))
@@ -108,7 +174,7 @@ lemma indep_insert {p : ℕ} (hp : p.Prime) (h0 : (p : k) = 0) {B : Set k} (hB :
     simp [ev, c, hga]
   have hR : ev (P %ₘ (X ^ p - C c)) = ev P := by
     conv_rhs => rw [← modByMonic_add_div P (X ^ p - C c)]
-    rw [map_add, map_mul, hevq, zero_mul, add_zero]
+    rw [map_add (f := _), map_mul, hevq, zero_mul, add_zero]
   have hirr : Irreducible (X ^ p - C (ψ c) : K[X]) := by
     apply X_pow_sub_C_irreducible_of_prime hp
     intro b hb
@@ -154,7 +220,7 @@ theorem exists_pBasis : ∀ (k : Type) [Field k] (p : ℕ), p.Prime → (p : k) 
   let φ : S →+* k := (RingHom.fst k Q).comp S.subtype
   have hφ : Function.Bijective φ := by
     constructor
-    · rw [injective_iff_map_eq_zero]
+    · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro s hs
       exact Subtype.ext (Prod.ext hs (hI s s.2 hs))
     · intro x

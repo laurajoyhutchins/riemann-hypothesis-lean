@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraicIsogeny
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenySeparable
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticAlgebraicIsogeny
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DualWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology Set Polynomial WeierstrassCurve.Affine GroundTheory.Arith.Abelian KaehlerDifferential
 open scoped PeriodPair
@@ -27,7 +71,7 @@ theorem homConst_ne_zero {Q : isogHom (weierstrassCurve L₁) (weierstrassCurve 
 
 theorem homConst_injective :
     Function.Injective (homConst (weierstrassCurve L₁) (weierstrassCurve L₂)) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro Q h
   by_contra hQ
   exact homConst_ne_zero hQ h
@@ -121,14 +165,14 @@ theorem latticeToHom_homConst (Q : isogHom (weierstrassCurve L₁) (weierstrassC
 theorem latticeToHom_add (α β : latticeHom L₁ L₂) :
     latticeToHom (α + β) = latticeToHom α + latticeToHom β :=
   homConst_injective (by
-    rw [map_add, homConst_latticeToHom, homConst_latticeToHom, homConst_latticeToHom]
+    rw [map_add (f := _), homConst_latticeToHom, homConst_latticeToHom, homConst_latticeToHom]
     rfl)
 
 theorem ellEval_comp_translate (L : PeriodPair) (z : ℂ) :
     (ellEval L).comp (translate (weierstrassCurve L) (toPoint L z)) =
       (affineComp 1 z one_ne_zero).comp (ellEval L) := by
   apply algHom_eq_of_map_genericPoint' (E := weierstrassCurve L)
-  rw [← Point.map_map, map_translate_genericPoint, map_add, map_ellEval_genericPoint,
+  rw [← Point.map_map, map_translate_genericPoint, map_add (f := _), map_ellEval_genericPoint,
     show constPoint (weierstrassCurve L) (toPoint L z) =
       constMap (weierstrassCurve L) _ (toPoint L z) from rfl, map_constMap, basePoint_eq,
     affinePoint_add_constMap, ← Point.map_map, map_ellEval_genericPoint, basePoint_eq,

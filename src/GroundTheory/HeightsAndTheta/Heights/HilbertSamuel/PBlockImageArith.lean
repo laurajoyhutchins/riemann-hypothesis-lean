@@ -1,7 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageArith
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageArith
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PConeTrdeg
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -29,10 +82,10 @@ theorem ringKrullDim_eq (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (hc : ∀ k,
   rw [CoordinateConeArithVar.mCoordIdeal_ratioPtL y c hc] at htr
   rw [IntDomainDim.proof (MRing ι ⧸ mCoordIdeal y)
     (CoordinateConeArithVar.algebraMap_injective _ hhor), htr]
-  simp only [map_add, map_natCast]
+  simp only [map_add (f := _), map_natCast]
+
 
 omit [Fintype K] [∀ k, Fintype (ι k)] in
-
 theorem div_mem_of_sum (F : IntermediateField ℚ Ω) {A B : Type} [Fintype B] (u : A → Ω) (v : B → Ω)
     (L : Matrix A B ℤ) (hu : ∀ a, u a = ∑ b, (L a b : Ω) * v b) (b₀ : B)
     (hF : ∀ b, v b / v b₀ ∈ F) (a : A) : u a / v b₀ ∈ F := by
@@ -41,16 +94,16 @@ theorem div_mem_of_sum (F : IntermediateField ℚ Ω) {A B : Type} [Fintype B] (
   rw [mul_div_assoc]
   exact mul_mem (intCast_mem F _) (hF b)
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem ratio_mem_of_sum (F : IntermediateField ℚ Ω) {A B : Type} [Fintype B] (u : A → Ω) (v : B → Ω)
     (L : Matrix A B ℤ) (hu : ∀ a, u a = ∑ b, (L a b : Ω) * v b) (b₀ : B) (hv : v b₀ ≠ 0)
     (hF : ∀ b, v b / v b₀ ∈ F) (a a' : A) : u a / u a' ∈ F := by
   rw [← div_div_div_cancel_right₀ hv (u a) (u a')]
   exact div_mem (div_mem_of_sum F u v L hu b₀ hF a) (div_mem_of_sum F u v L hu b₀ hF a')
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem aeval_mem (F : IntermediateField ℚ Ω) (w : (Σ k, ι k) → Ω) (hw : ∀ p, w p ∈ F) (f : MRing ι) :
     aeval w f ∈ F := by
   induction f using MvPolynomial.induction_on with
@@ -58,8 +111,8 @@ theorem aeval_mem (F : IntermediateField ℚ Ω) (w : (Σ k, ι k) → Ω) (hw :
   | add p q hp hq => rw [map_add]; exact add_mem hp hq
   | mul_X p q hp => rw [map_mul, aeval_X]; exact mul_mem hp (hw q)
 
-omit [Fintype K] [CharZero Ω] in
 
+omit [Fintype K] [CharZero Ω] in
 theorem isMultiHomog_X_single [DecidableEq K] (p : Σ k, ι k) :
     IsMultiHomog (X p : MRing ι) (fun k ↦ if k = p.1 then 1 else 0) := by
   intro m hm k
@@ -76,14 +129,15 @@ theorem isMultiHomog_X_single [DecidableEq K] (p : Σ k, ι k) :
       exact absurd (Finset.mem_univ _) h
   · simp [h]
 
-omit [CharZero Ω] in
 
+omit [CharZero Ω] in
 theorem aeval_mul_pow_of_block (y w : (Σ k, ι k) → Ω) (k₀ : K) (z : Ω)
     (hw : ∀ i, w ⟨k₀, i⟩ * z = y ⟨k₀, i⟩) {f : MRing ι} {d : K → ℕ} (hf : IsMultiHomog f d)
     (hd : ∀ k, k ≠ k₀ → d k = 0) : aeval w f * z ^ d k₀ = aeval y f := by
   classical
   conv_rhs => rw [f.as_sum]
   conv_lhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm ↦ ?_
   rw [aeval_monomial, aeval_monomial, mul_assoc]
@@ -113,8 +167,8 @@ theorem aeval_mul_pow_of_block (y w : (Σ k, ι k) → Ω) (k₀ : K) (z : Ω)
 
 end BlockImageArithmetic
 
-open BlockImageArithmetic in
 
+open BlockImageArithmetic in
 theorem BlockImageArith.proof : BlockImageArith.Statement := by
   intro D K _ _ ι _ Ω _ _ y k₀ r M N x hY hbir hB _
   classical
@@ -153,12 +207,12 @@ theorem BlockImageArith.proof : BlockImageArith.Statement := by
       rintro ⟨k', i'⟩
       by_cases h : k' = k₀
       · subst h
-        simp only [w, if_true]
+        simp only [w, ite_true]
         exact hyF i'
-      · simp only [w, h, if_false]
+      · simp only [w, h, ite_false]
         exact zero_mem _
     have hw : ∀ i, w ⟨k₀, i⟩ * x j₀ = y ⟨k₀, i⟩ := fun i ↦ by
-      simp only [w, if_true]
+      simp only [w, ite_true]
       exact div_mul_cancel₀ _ hj₀
     obtain ⟨n, g', h', hg', hh', hh0, heq⟩ := hbir _ (X ⟨k, i⟩) (X ⟨k, c k⟩)
       (isMultiHomog_X_single ⟨k, i⟩) (isMultiHomog_X_single ⟨k, c k⟩)

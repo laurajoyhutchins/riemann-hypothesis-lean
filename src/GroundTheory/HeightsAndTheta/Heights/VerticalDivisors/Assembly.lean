@@ -1,48 +1,93 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.AssemblyPartial
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecAlgFinite
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChartDomain
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGenSecDomain
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowSecDvd
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormIrreducible
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormDvd
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecAlgFieldChange
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGenChowIrreducible
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecBTorsionFree
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGaussDVR
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PVertSpec
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PResidueAlgIndep
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecAlgField
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PCodimOnePrimeAvoid
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PFibreCut
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGenericFibreDrop
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PFibreCompDim
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecCompDim
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecIdealOfPrime
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecFirstNeField
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecLength
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowNormFormGeneric
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowNormForm
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowSecDegree
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecLinNZD
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecBLinInj
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecMax
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecResidue
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormIdentity
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.POrdEq
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGaussEq
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.IsChowFormCMul
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsGenSecKer
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsChart
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsOrd
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsFibreCut
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PIncIdealBelow
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PAffineChartTrdeg
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PIncIdealDim
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PConeDimOfChowForm
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsGenSecKer
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsChart
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsOrd
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsFibreCut
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.ComapMaximalIdealParDVR
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.StatementsSpecFirst
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PIncidenceZeroLocus
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PAffineChartTrdeg
 import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChowFormExists
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PIncidenceZeroLocus
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.PConeDimOfChowForm
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.PIncIdealBelow
+import GroundTheory.HeightsAndTheta.Heights.ChowForms.PIncIdealDim
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.AssemblyPartial
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.IsChowFormCMul
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChartDomain
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowNormForm
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowNormFormGeneric
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowSecDegree
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowSecDvd
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PCodimOnePrimeAvoid
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PFibreCompDim
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PFibreCut
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGaussDVR
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGaussEq
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGenChowIrreducible
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGenSecDomain
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PGenericFibreDrop
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormDvd
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormIrreducible
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormIdentity
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.POrdEq
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PResidueAlgIndep
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecAlgField
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecAlgFieldChange
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecAlgFinite
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecBLinInj
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecBTorsionFree
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecIdealOfPrime
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSecLinNZD
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecCompDim
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecFirstNeField
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecLength
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecMax
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PSpecResidue
+import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PVertSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Vertical

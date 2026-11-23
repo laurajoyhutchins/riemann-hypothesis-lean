@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SuccMulSuccSubOneDivSucc
-import Formalism.LocalToGlobal.InertKernelTheory.SubBSplit
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.SubBSplit
+public import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.LtCNeZero
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.InertKernelTheory.K2OfAgreements
+import Formalism.LocalToGlobal.InertKernelTheory.KernelDifferenceOfFrame
+import Formalism.LocalToGlobal.InertKernelTheory.SecondKernelEntrywiseLastLevel
+import Formalism.LocalToGlobal.InertKernelTheory.TieSerPin
+import Formalism.LocalToGlobal.InertKernelTheory.DelPolOfTies
+
+@[expose] public section
 
 open Formalism.MainNotions.G Formalism.MainNotions.FormalGroupSystem Formalism.L2.G.Pend Finset
 
@@ -41,6 +86,7 @@ theorem mapT_yMat (v : X.Pl) (s : Fin (X.G.P.n' v)) :
   simp only [Matrix.map_apply, Matrix.mul_apply, yMat, mapT, MvPolynomial.map_C]
   rw [show (tau0 X Kc j W : XspC (X.Pj (j + 1)) Kc →+* XspC (X.Pj (j + 1)) Kc) (MvPolynomial.X (idxS X j ⟨v, (s, (b, t))⟩)) =
     frF X Kc j W (idxS X j ⟨v, (s, (b, t))⟩) from MvPolynomial.aeval_X _ _]
+
   simp only [frF, idxS, map_sum, map_mul, cD, RingHom.comp_apply, Fin.cast_cast, Fin.cast_eq_self]
   rfl
 
@@ -161,7 +207,7 @@ def sS (X : Sys p) (Kc : Type) [Field Kc] (j : ℕ) (κ : ∀ v : X.Pl, Fin (X.G
     if IsOddPos b.2 then (κ b.1 b.2 ^ (NN X.G.P.m X.t j - 1)) ^
       ((NN X.G.P.m X.t j : ℤ) * cMu X j b.1 b.2 - szMu X j b.1 b.2).toNat else 1
 
-set_option maxHeartbeats 1000000 in
+
 theorem thU_subD (h : FrRel X Kc j U W κ) (G : (X.Pj j).Xsp) (hO : OddDeg X j G) :
     thU X Kc j U (subD X Kc j G) = cD X Kc j (sS X Kc j κ) * mapT X Kc j W (subD X Kc j G) := by
   have hC : ∀ a : X.G.Kf, thU X Kc j U (subD X Kc j (MvPolynomial.C a)) = mapT X Kc j W (subD X Kc j (MvPolynomial.C a)) := by
@@ -235,13 +281,13 @@ theorem thU_det_Yt (h : FrRel X Kc j U W κ) (v : X.Pl) (s : Fin (X.G.P.n' v)) (
   rw [odd_YtMat X Kc j U W v s (κ v s) ((h v s).2 ho), Matrix.det_smul, Fintype.card_fin, map_pow]
   rfl
 
-variable (X Kc j W κ) in
 
+variable (X Kc j W κ) in
 def kN : Kc := ∏ v : X.Pl, ∏ s : Fin (X.G.P.n' v),
   if IsOddPos s then ((W v s).det⁻¹) ^ (exY X j v s).toNat * (κ v s ^ NN X.G.P.m X.t j) ^ (exT X j v s).toNat else 1
 
-variable (X Kc j W κ) in
 
+variable (X Kc j W κ) in
 def kD : Kc := ∏ v : X.Pl, ∏ s : Fin (X.G.P.n' v),
   if IsOddPos s then ((W v s).det⁻¹) ^ (-exY X j v s).toNat * (κ v s ^ NN X.G.P.m X.t j) ^ (-exT X j v s).toNat else 1
 
@@ -333,8 +379,8 @@ variable {p : ℕ} [Fact p.Prime] {X : Sys p} {Kc : Type} [Field Kc] [Algebra (F
 
 theorem coeff_cD_mapT (W : ∀ v : X.Pl, Fin (X.G.P.n' v) → Matrix (Fin (NN X.G.P.m X.t (j + 1))) (Fin (NN X.G.P.m X.t (j + 1))) Kc)
     (k : Kc) (P : DA X Kc j) (n : X.ZA j →₀ ℕ) :
-    MvPolynomial.coeff n (cD X Kc j k * mapT X Kc j W P) = (k • (tau0 X Kc j W).toLinearMap) (MvPolynomial.coeff n P) := by
-  show MvPolynomial.coeff n (MvPolynomial.C _ * MvPolynomial.map _ P) = _
+    AddMonoidAlgebra.coeff (cD X Kc j k * mapT X Kc j W P) n = (k • (tau0 X Kc j W).toLinearMap) (AddMonoidAlgebra.coeff P n) := by
+  show AddMonoidAlgebra.coeff (MvPolynomial.C _ * MvPolynomial.map _ P) n = _
   rw [MvPolynomial.coeff_C_mul, MvPolynomial.coeff_map, LinearMap.smul_apply, Algebra.smul_def]
   rfl
 

@@ -1,5 +1,61 @@
-import Mathlib
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Matrix.Normed
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+
+@[expose] public section
 
 open Matrix Filter Topology Set
 open scoped ContDiff
@@ -187,7 +243,7 @@ theorem IsSm.sub {v v' : H} (hv : IsSm G σ v) (hv' : IsSm G σ v') : IsSm G σ 
 
 theorem IsSm.smOn_mul (h : RepOn G σ) {w : H} (hw : IsSm G σ w) :
     SmOn (G ×ˢ G) (fun q : Mat n × Mat n => σ q.1 (σ q.2 w)) :=
-  (SmOn.comp hw contDiff_mul fun _ hq => h.mul_mem _ hq.1 _ hq.2).congr
+  (SmOn.comp hw (B := G ×ˢ G) contDiff_mul fun _ hq => h.mul_mem _ hq.1 _ hq.2).congr
     fun _ hq => (h.apply_mul hq.1 hq.2 w).symm
 
 theorem IsSm.apply (h : RepOn G σ) {w : H} (hw : IsSm G σ w) {x : Mat n} (hx : x ∈ G) :
@@ -198,7 +254,7 @@ theorem IsSm.apply (h : RepOn G σ) {w : H} (hw : IsSm G σ w) {x : Mat n} (hx :
 theorem ds_add (h : RepOn G σ) {X : Mat n} (hX : ∀ t, ex X t ∈ G) {v v' : H} (hv : IsSm G σ v)
     (hv' : IsSm G σ v') : ds σ X (v + v') = ds σ X v + ds σ X v' := by
   unfold ds
-  simp only [map_add]
+  simp only [map_add (f := _)]
   exact deriv_fun_add (hv.differentiableAt h hX) (hv'.differentiableAt h hX)
 
 theorem ds_smul (h : RepOn G σ) {X : Mat n} (hX : ∀ t, ex X t ∈ G) {v : H} (hv : IsSm G σ v)
@@ -213,7 +269,8 @@ theorem dsW_add (h : RepOn G σ) {v v' : H} (hv : IsSm G σ v) (hv' : IsSm G σ 
   | X :: W, hW => by
     have hW' : LieW G W := fun Y hY => hW Y (List.mem_cons_of_mem _ hY)
     simp only [dsW_cons]
-    rw [dsW_add h hv hv' hW', ds_add h (hW X List.mem_cons_self) (hv.dsW h hW') (hv'.dsW h hW')]
+    rw [dsW_add h hv hv' (W := W) hW']
+    exact ds_add h (hW X List.mem_cons_self) (hv.dsW h hW') (hv'.dsW h hW')
 
 theorem dsW_smul (h : RepOn G σ) {v : H} (hv : IsSm G σ v) (c : ℂ) :
     ∀ {W : List (Mat n)}, LieW G W → dsW σ W (c • v) = c • dsW σ W v
@@ -221,7 +278,8 @@ theorem dsW_smul (h : RepOn G σ) {v : H} (hv : IsSm G σ v) (c : ℂ) :
   | X :: W, hW => by
     have hW' : LieW G W := fun Y hY => hW Y (List.mem_cons_of_mem _ hY)
     simp only [dsW_cons]
-    rw [dsW_smul h hv c hW', ds_smul h (hW X List.mem_cons_self) (hv.dsW h hW')]
+    rw [dsW_smul h hv c (W := W) hW']
+    exact ds_smul h (hW X List.mem_cons_self) (hv.dsW h hW') c
 
 theorem dsW_sub (h : RepOn G σ) {v v' : H} (hv : IsSm G σ v) (hv' : IsSm G σ v')
     {W : List (Mat n)} (hW : LieW G W) : dsW σ W (v - v') = dsW σ W v - dsW σ W v' := by

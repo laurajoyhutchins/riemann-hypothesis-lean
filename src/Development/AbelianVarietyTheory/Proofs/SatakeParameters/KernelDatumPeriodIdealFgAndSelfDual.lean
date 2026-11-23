@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.FirstKernelLawReading
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.FirstKernelLawReading
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Ker Formalism.L2.Col Formalism.HermitianLatticesTheory Formalism.L2.DIV Classical
 
@@ -88,29 +129,12 @@ theorem isSdLat_of_transport (i : E ≃+* E') (hst : ∀ x, i (star x) = star (i
       have := key _ hy
       rwa [cwInv_cw] at this
   ·
-    rw [eq_top_iff]
-    intro x _
-    have hy : cw i x ∈ Submodule.span E' (L : Set (Fin n → E')) := hspan ▸ Submodule.mem_top
-    have key : ∀ y ∈ Submodule.span E' (L : Set (Fin n → E')),
-        cwInv i y ∈ Submodule.span E (N : Set (Sp E n)) := by
-      intro y hy
-      induction hy using Submodule.span_induction with
-      | mem y hy => exact Submodule.subset_span ((hmem y).1 hy)
-      | zero =>
-        have : cwInv i (0 : Fin n → E') = 0 := by funext k; simp [cwInv]
-        rw [this]; exact Submodule.zero_mem _
-      | add a b _ _ ha hb =>
-        have : cwInv i (a + b) = cwInv i a + cwInv i b := by funext k; simp [cwInv]
-        rw [this]; exact Submodule.add_mem _ ha hb
-      | smul r a _ ha =>
-        have : cwInv i (r • a) = i.symm r • cwInv i a := by
-          funext k; simp [cwInv]
-        rw [this]; exact Submodule.smul_mem _ _ ha
-    have := key _ hy
-    rwa [cwInv_cw] at this
+    intro s hs hli
+    exact (LinearIndependent.iff_fractionRing (𝓞 E) E).mp hli
   ·
     have hform : ∀ x y : Sp E n, stdH E' n (cw i x) (cw i y) = i (hStd E n x y) := by
       intro x y
+
       simp only [stdH, cw, hStd, LinearMap.mk₂'ₛₗ_apply, map_sum, map_mul, hst]
     have hrange : ∀ w : E, i w ∈ (algebraMap (𝓞 E') E').range ↔ w ∈ (1 : Submodule (𝓞 E) E) := by
       intro w

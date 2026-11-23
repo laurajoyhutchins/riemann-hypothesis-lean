@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.FieldTheory.PrimitiveElement
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.ComplexSets
@@ -37,11 +95,12 @@ theorem exists_linear_primitive {K L : Type*} [Field K] [Field L] [Algebra K L] 
     apply hne
     apply hx
     intro j
-    have hc := congrArg (fun q => Polynomial.coeff q (j : ℕ)) h
+    have hc := congrArg (fun q => _root_.AddMonoidAlgebra.coeff (M := ℕ) q (j : ℕ)) h
     simp only [p, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial, Polynomial.coeff_zero] at hc
     rw [Finset.sum_eq_single j] at hc
     · simpa [sub_eq_zero] using hc
-    · intro b _ hb; rw [if_neg]; exact fun h => hb (Fin.ext h)
+    · intro b _ hb
+      simp [Finsupp.single_apply, show (b : ℕ) ≠ (j : ℕ) from fun h => hb (Fin.ext h)]
     · simp
   have hev : ∀ φψ : (L →ₐ[K] A) × (L →ₐ[K] A), ∀ t : A,
       (p φψ).eval t = ∑ j : Fin n, (φψ.1 (x j) - φψ.2 (x j)) * t ^ (j : ℕ) := by
@@ -64,6 +123,7 @@ theorem exists_linear_primitive {K L : Type*} [Field K] [Field L] [Algebra K L] 
   have h1 : ∀ χ : L →ₐ[K] A, χ (∑ j : Fin n, algebraMap K L (ι (t ^ (j : ℕ))) * x j) =
       ∑ j : Fin n, ι' t ^ (j : ℕ) * χ (x j) := by
     intro χ
+
     simp [map_sum, map_mul, AlgHom.commutes, ι', map_pow]
   have h2 := congrArg id hφψ
   simp only [id] at h2
@@ -115,6 +175,7 @@ theorem exists_primitive_data {R B : Type*} [CommRing R] [IsDomain R] [IsIntegra
   refine ⟨c, ?_⟩
   set ℓ : B := ∑ j, algebraMap R B (ι (c j)) * x j with hℓ
   have hℓL : algebraMap B L ℓ = ∑ j, algebraMap K L (ιK (c j)) * algebraMap B L (x j) := by
+
     rw [hℓ, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_mul, ← IsScalarTower.algebraMap_apply R B L, IsScalarTower.algebraMap_apply R K L]
@@ -145,7 +206,7 @@ theorem exists_primitive_data {R B : Type*} [CommRing R] [IsDomain R] [IsIntegra
       C α * IsLocalization.integerNormalization (nonZeroDivisors R) b * derivative (minpoly R ℓ) =
       C (α * β) := by
     apply hinjK
-    simp only [Polynomial.map_add, Polynomial.map_mul, Polynomial.map_C, hαa, hβb,
+    simp only [Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_C, hαa, hβb,
       Algebra.smul_def, Polynomial.algebraMap_apply, map_mul]
     linear_combination (C (algebraMap R K α) * C (algebraMap R K β)) * hab
 

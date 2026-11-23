@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.CMModuli.ProjectiveSpaceOverSpec
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.CMModuli.ProjectiveSpaceOverSpec
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Tactic.Linter.HaveILetI
+public import Mathlib.Algebra.Category.Ring.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open CategoryTheory Limits
 
@@ -19,8 +69,6 @@ structure Idx where
 
 variable {D s M}
 
-def Idx.unit (j : J) : Idx D s M := ⟨j, 1, by simpa using M.one_mem⟩
-
 theorem app_map_apply {j k : J} (φ : j ⟶ k) (x : D.obj j) :
     (s.app k).hom ((D.map φ).hom x) = (s.app j).hom x := by
   have h := congr(($(s.naturality φ)).hom x)
@@ -38,11 +86,6 @@ instance : SmallCategory (Idx D s M) where
   id_comp _ := Subtype.ext (Category.id_comp _)
   comp_id _ := Subtype.ext (Category.comp_id _)
   assoc _ _ _ := Subtype.ext (Category.assoc _ _ _)
-
-@[simp] theorem comp_val {a b c : Idx D s M} (φ : a ⟶ b) (ψ : b ⟶ c) :
-    (φ ≫ ψ).1 = φ.1 ≫ ψ.1 := rfl
-
-@[simp] theorem id_val (a : Idx D s M) : (𝟙 a : a ⟶ a).1 = 𝟙 a.j := rfl
 
 theorem isUnit_map {a b : Idx D s M} (φ : a ⟶ b) :
     IsUnit (algebraMap (D.obj b.j) (Localization.Away b.e) ((D.map φ.1).hom a.e)) := by
@@ -67,11 +110,11 @@ def diag : Idx D s M ⥤ CommRingCat.{0} where
   map_id a := by
     ext : 1
     refine IsLocalization.ringHom_ext (Submonoid.powers a.e) (RingHom.ext fun x => ?_)
-    simp
+    simp [show (𝟙 a : a ⟶ a).1 = 𝟙 a.j from rfl]
   map_comp {a b c} φ ψ := by
     ext : 1
     refine IsLocalization.ringHom_ext (Submonoid.powers a.e) (RingHom.ext fun x => ?_)
-    simp
+    simp [show (φ ≫ ψ).1 = φ.1 ≫ ψ.1 from rfl]
 
 end GlobalTheory.IndEtaleLoc
 
@@ -94,7 +137,8 @@ instance [IsFiltered J] : IsFiltered (Idx D s M) := by
   · let h := IsFiltered.coeqHom φ.1 ψ.1
     refine ⟨⟨IsFiltered.coeq φ.1 ψ.1, (D.map h).hom b.e, by rw [app_map_apply]; exact b.mem⟩,
       ⟨h, 1, mul_one _⟩, Subtype.ext ?_⟩
-    simpa using IsFiltered.coeq_condition φ.1 ψ.1
+    change φ.1 ≫ h = ψ.1 ≫ h
+    exact IsFiltered.coeq_condition φ.1 ψ.1
 
 end GlobalTheory.IndEtaleLoc
 

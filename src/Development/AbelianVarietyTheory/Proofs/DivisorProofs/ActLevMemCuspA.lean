@@ -1,10 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.FWExist
-import Formalism.LocalToGlobal.IndefiniteReal.RhoGeo
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralFramedPointOfLevelMove
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevelActionMemCuspForms
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevActMemMlat
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetReducedBlockEqResidueDet
+module
+
+public import Mathlib
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+public import Formalism.LocalToGlobal.IndefiniteReal.OneMapEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetReducedBlockEqResidueDet
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralFramedPointOfLevelMove
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevActMemMlat
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevelActionMemCuspForms
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteDimensionalOfLeHolSub
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Formalism.LocalToGlobal.ProjectiveLattices.SpMapAlgHomId
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +127,7 @@ theorem eval_injective (M : DSModel V S) {H : Type} [NormedAddCommGroup H] [Inne
       rw [hx, h2, mul_one] at h1
       rw [← h1]
       simp
-    · rw [ipM, dif_neg hc, mul_zero]
+    · rw [ipM, dite_eq_right hc, mul_zero]
   intro x y hxy
   refine sub_eq_zero.1 (key _ ?_)
   rw [map_sub]
@@ -154,7 +197,7 @@ theorem carried_of_eval (hW : R.models_HW) (hg : R.models_gW) {i : Fin D.R.m} {�
   rw [map_smul, ← h1]
   exact (h u).trans (congrArg (c * ·) (actW_apply R i g hk σ _ v u).symm)
 
-set_option maxHeartbeats 800000 in
+
 
 theorem isGeoAct_levRep (ht : TieIn T R κ v₀) (hW : R.models_HW) (hg : R.models_gW) (i : Fin D.R.m) {Tp : Type} {tup : Tp → T0}
     (O : OMDat T.toCore R i Tp tup) (hL : ActLev (Xo := T.Q.Xo ((i : ℕ) + 1)) T.Q.c O.lev2)
@@ -240,8 +283,8 @@ theorem mu_lift (hR : R.toLevCh.Is A.μ0) (ht : TieIn T R κ v₀) (hpb : T.pb =
   rw [castDict_mu (ht.laws.muVal _ (inR i) σ hσ) hV hroot, map_inv₀, ← hy]
   exact inv_mul_cancel₀ (Circle.coe_ne_zero _)
 
-variable (T) in
 
+variable (T) in
 def frameRead (i : Fin D.R.m) (σ : T.Q.c.F →+* ℂ) (hV : T.V ((i : ℕ) + 1) σ = Wc D i) (c : (T.U ((i : ℕ) + 1) σ).Comp → ℂ)
     (f : T.R ((i : ℕ) + 1)) (h : GA D (Wc D i)) : ℂ :=
   c (castDict hV (T.dict ((i : ℕ) + 1) σ) h).1 * rdU (T.U ((i : ℕ) + 1) σ) f (castDict hV (T.dict ((i : ℕ) + 1) σ) h).1

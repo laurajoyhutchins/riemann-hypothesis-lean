@@ -1,4 +1,47 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapCompStalkAlg
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapCompStalkAlg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TopPairDForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.BasicNotions
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -33,14 +76,14 @@ theorem exists_restrict_der {k A K R : Type} [CommRing k] [CommRing A] [CommRing
   choose δ0 hδ0 using hmem
   let δ : Derivation k A A :=
     { toFun := δ0
-      map_add' := fun a b => hφ (by simp only [hδ0, map_add])
+      map_add' := fun a b => hφ (by simp only [hδ0, map_add (f := _)])
       map_smul' := fun c a => hφ (by
         simp only [RingHom.id_apply, Algebra.smul_def, map_mul, hk, hδ0]
         rw [← Algebra.smul_def, D.map_smul, Algebra.smul_def])
       map_one_eq_zero' := hφ (by show φ (δ0 1) = φ 0; rw [hδ0, map_one, Derivation.map_one_eq_zero, map_zero])
       leibniz' := fun a b => hφ (by
         show φ (δ0 (a * b)) = φ (a • δ0 b + b • δ0 a)
-        simp only [hδ0, map_mul, map_add, smul_eq_mul, Derivation.leibniz]) }
+        simp only [hδ0, map_mul, map_add (f := _), smul_eq_mul, Derivation.leibniz]) }
   refine ⟨δ, fun a => (hδ0 a).symm, fun r => hφ ?_⟩
   show φ (δ0 (h r)) = _
   rw [hδ0, hD]

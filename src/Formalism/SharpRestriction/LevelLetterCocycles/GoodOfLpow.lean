@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsSmulPowEqSumOfInFNc
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExistsSmulPowEqSumOfInFNc
+import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+import Formalism.SharpRestriction.LevelLetterCocycles.CoprimeFrobeniusUniformizerPowers
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvOZeroHigh
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrameInvPoly
+import Formalism.SharpRestriction.LevelLetterCocycles.HorTrUnique
+import Formalism.SharpRestriction.LevelLetterCocycles.SecInTransport
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecOfP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,10 +111,10 @@ theorem good_of_sec (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c'
   have hS := secIn_add W (Formalism.MainNotions.UnusedSlot80.ArcF.secIn_lE W hD κ₀) (Formalism.MainNotions.UnusedSlot80.ArcF.secIn_lE W hS₀ (t + k))
   refine ⟨κ₀ + (t + k₀), ?_⟩
   convert hS using 1
-  funext m
-  simp only [Pi.add_apply, lE_mul, mul_sub]
   rw [show κ₀ + (t + k₀) = κ₀ + (t + k₀) from rfl]
   unfold lE
+  funext m
+  simp only [Pi.add_apply]
   ring
 
 theorem good_of_lpow (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c' ∈ A.cuts)
@@ -80,22 +127,6 @@ theorem good_of_lpow (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c
   obtain ⟨κ', hS⟩ := h.2 κ f hrep hfr
   rw [lA_smul_smul] at hrep
   exact good_of_sec C A hA c' hc' T hT b sol hb e z hz _ f hrep hfr κ' hS
-
-theorem good_smul (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c' ∈ A.cuts)
-    (T : LocLat G Qp LL O) (hT : Win W A T) {d : ℕ} (b : Fin d → W.DD T) (sol : Fin d → ℕ → Fin d → LL)
-    (hb : IsHor W T c' b sol) (e : ℕ) (z : W.DD T) {c : LetA O n} (hc : c ∈ W.AΔ)
-    (h : Good A c' e T b sol z) : Good A c' e T b sol (c • z) := by
-  have hz : InFP W T c' e 1 (abelian₂ W A (c' + (e : ZMod n)) e • (c • z)) := by
-    rw [smul_comm]; exact Formalism.MainNotions.UnusedSlot80.Relay2.inMultiple_smul W T c' e _ hc h.1
-  obtain ⟨κ, f, hrep, hfr⟩ := secOfP' W C.hinj C.hO2 C.hR C.hTr C.hH C.hCA C.h5p A hA c' e T hT.1 b sol hb _
-    h.1
-  obtain ⟨κ', hS⟩ := h.2 κ f hrep hfr
-  have hrep' := repVV_smul W T c' e _ _ b sol _ f hc hrep
-  rw [smul_comm] at hrep'
-  refine good_of_sec C A hA c' hc' T hT b sol hb e _ hz κ _ hrep' (fun m => inFr_mulA W (hfr m) hc) κ' ?_
-  have := secIn_mulA W hS hc
-  convert this using 1
-  funext m; ring
 
 theorem good_add (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c' ∈ A.cuts)
     (T : LocLat G Qp LL O) (hT : Win W A T) {d : ℕ} (b : Fin d → W.DD T) (sol : Fin d → ℕ → Fin d → LL)
@@ -120,9 +151,9 @@ theorem good_add (C : Ctx W) (A : ArcP n) (hA : A.OK) (c' : ZMod n) (hc' : c' �
   have hS := secIn_add W (Formalism.MainNotions.UnusedSlot80.ArcF.secIn_lE W hS₁ (κ'₂ + κ₂))
     (Formalism.MainNotions.UnusedSlot80.ArcF.secIn_lE W hS₂ (κ'₁ + κ₁))
   convert hS using 1
+  unfold lE
   funext m
   simp only [Pi.add_apply]
-  unfold lE
   ring
 
 end Formalism.MainNotions.UnusedSlot80.LevC

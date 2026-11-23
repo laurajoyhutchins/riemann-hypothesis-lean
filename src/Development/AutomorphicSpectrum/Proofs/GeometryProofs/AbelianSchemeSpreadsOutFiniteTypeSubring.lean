@@ -1,12 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CubeTheorem
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SmoothGrpSchemeDescendsToFgSubring
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeometricallyConnectedDescendsToFinitelyGenerateStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SeparatedPropernessFgSubalgebraStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianSchemeModelBaseChangeSubalgebraStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SmoothGrpSchemeDescendsToFgSubring
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianSchemeModelBaseChangeSubalgebraStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeDescendsFiniteType
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -42,40 +83,7 @@ theorem isCommMonObj_of_isGrpPullback {S S' : Scheme.{0}} {G' : Over S'} {G : Ov
   rw [mul_eq_mul, comp_mul, key]
   simp
 
-theorem abelianScheme_descends_to_fg_subring : ∀ (R : Type) [CommRing R] (A : Over (Sp R)) [GrpObj A] (F : Finset R), IsAbelianScheme A → ∃ (S : Subring R) (B : Over (Sp S)) (_ : GrpObj B) (φ : A.left ⟶ B.left), (F : Set R) ⊆ S ∧ Algebra.FiniteType ℤ S ∧ IsAbelianScheme B ∧ IsGrpPullback A B (spMap S.subtype) φ := by
-  intro R _ A _ F hA
-  haveI : IsCommMonObj A := hA.comm
-  haveI : IsProper A.hom := hA.proper
-  obtain ⟨k, A₀, i₀, c₀, φ, hFk, hk, s₀, sep₀, qc₀, hφ⟩ :=
-    GlobalTheory.smooth_grpScheme_descends_to_fg_subring R A F hA.smooth inferInstance inferInstance
-  haveI : IsNoetherianRing k := Algebra.FiniteType.isNoetherianRing ℤ k
-  have hφ' : IsGrpPullback A A₀ (spMap (algebraMap k R)) φ := hφ
-  obtain ⟨R₁, hR₁, pr₁⟩ := GlobalTheory.T.separated_properness_fg_subalgebra k R A₀.left A₀.hom sep₀ inferInstance qc₀
-    (prop_snd_of_isPullback @IsProper hφ.1 hA.proper)
-  obtain ⟨i₁, φ₁, h₁₀, h₁, -⟩ := GlobalTheory.T.abelianScheme_model_baseChange_subalgebra k R A A₀ φ hφ' R₁
-  haveI : Algebra.FiniteType k R₁ := (Subalgebra.fg_iff_finiteType R₁).1 hR₁
-  haveI : IsNoetherianRing R₁ := Algebra.FiniteType.isNoetherianRing k R₁
-  haveI : IsCommMonObj (Over.mk (pullback.snd A₀.hom (spMap (algebraMap k R₁)))) :=
-    isCommMonObj_of_isGrpPullback h₁₀
-  have hk₁ : Algebra.FiniteType ℤ R₁ := Algebra.FiniteType.trans hk inferInstance
-  have h₁' : IsGrpPullback A (Over.mk (pullback.snd A₀.hom (spMap (algebraMap k R₁))))
-      (spMap (algebraMap R₁ R)) φ₁ := h₁
-  have sm₁ : Smooth (pullback.snd A₀.hom (spMap (algebraMap k R₁))) :=
-    by haveI := s₀; infer_instance
-  obtain ⟨R₂, hR₂, gc₂⟩ := GlobalTheory.T.geometricallyConnected_descends_to_finitelyGenerated R₁ R (Over.mk (pullback.snd A₀.hom (spMap (algebraMap k R₁))))
-    sm₁ pr₁ (prop_snd_of_isPullback @GeometricallyConnected h₁.1 hA.geomConnected)
-  obtain ⟨i₂, φ₂, h₂₁, h₂, -⟩ := @GlobalTheory.T.abelianScheme_model_baseChange_subalgebra R₁ R _ _ _ A _
-    (Over.mk (pullback.snd A₀.hom (spMap (algebraMap k R₁)))) i₁ φ₁ h₁' R₂
-  haveI : Algebra.FiniteType R₁ R₂ := (Subalgebra.fg_iff_finiteType R₂).1 hR₂
-  have hk₂ : Algebra.FiniteType ℤ R₂ := Algebra.FiniteType.trans hk₁ inferInstance
-  refine ⟨R₂.toSubring, Over.mk (pullback.snd (Over.mk (pullback.snd A₀.hom (spMap (algebraMap k R₁)))).hom
-    (spMap (algebraMap R₁ R₂))), i₂, φ₂, ?_, hk₂, ?_, h₂⟩
-  · intro x hx
-    have hx₁ : x ∈ R₁ := R₁.algebraMap_mem (⟨x, hFk hx⟩ : k)
-    exact R₂.algebraMap_mem (⟨x, hx₁⟩ : R₁)
-  · haveI := sm₁
-    haveI := pr₁
-    exact ⟨isCommMonObj_of_isGrpPullback h₂₁, by dsimp only [Over.mk_hom]; infer_instance,
-      by dsimp only [Over.mk_hom]; infer_instance, gc₂⟩
+theorem abelianScheme_descends_to_fg_subring : ∀ (R : Type) [CommRing R] (A : Over (Sp R)) [GrpObj A] (F : Finset R), IsAbelianScheme A → ∃ (S : Subring R) (B : Over (Sp S)) (_ : GrpObj B) (φ : A.left ⟶ B.left), (F : Set R) ⊆ S ∧ Algebra.FiniteType ℤ S ∧ IsAbelianScheme B ∧ IsGrpPullback A B (spMap S.subtype) φ :=
+  GlobalTheory.AbelianLimit.abelianScheme_descends_to_fg_subring_anyDim
 
 end GlobalTheory.CompanionTheory.Ar.Approx

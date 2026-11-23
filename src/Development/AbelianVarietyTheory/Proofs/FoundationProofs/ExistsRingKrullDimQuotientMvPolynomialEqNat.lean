@@ -1,5 +1,63 @@
-import Mathlib
-import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.Integral
+module
+
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+public import Mathlib.RingTheory.KrullDimension.Basic
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.SaturatedChains.Integral
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+public import Mathlib.RingTheory.Finiteness.Ideal
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -231,7 +289,8 @@ theorem exists_forms_sub_sum_mem {I : Ideal (MvPolynomial σ R)}
     exact (decomposition.decompose'_apply _ _).symm.trans
       (this.trans (congrArg _ (decomposition.decompose'_apply _ _)))
   have h2 := congrArg (homogeneousComponent d) hab
-  rw [map_add, map_sum, homogeneousComponent_eq_self hp] at h2
+
+  rw [map_add (f := _), map_sum, homogeneousComponent_eq_self hp] at h2
   simp only [h1] at h2
   rw [← h2, add_sub_cancel_right]
   exact homogeneousComponent_mem_of_mem hI ha d
@@ -273,6 +332,7 @@ theorem finite_aeval_of_forms_eq_sum [Finite σ] (π : MvPolynomial σ R →ₐ[
   rw [Finset.coe_image, eq_top_iff]
   intro y _
   obtain ⟨p, rfl⟩ := hπ y
+
   rw [← sum_homogeneousComponent p, map_sum]
   exact M.sum_mem fun i _ => hall i _ (homogeneousComponent_isHomogeneous _ _)
 
@@ -281,7 +341,7 @@ end AnyBase
 theorem injective_of_finite_of_ringKrullDim_eq {k S : Type*} [Field k] [CommRing S] {δ : ℕ}
     (φ : MvPolynomial (Fin δ) k →+* S) (hφ : φ.Finite) (hdim : ringKrullDim S = δ) :
     Function.Injective φ := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro r hr
   by_contra hne
   letI := φ.toAlgebra
@@ -293,7 +353,7 @@ theorem injective_of_finite_of_ringKrullDim_eq {k S : Type*} [Field k] [CommRing
     (Ideal.Quotient.mk ((⊥ : Ideal S).comap (algebraMap (MvPolynomial (Fin δ) k) S)))
     Ideal.Quotient.mk_surjective (mem_nonZeroDivisors_of_ne_zero hne)
     (Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_comap.mpr (Ideal.mem_bot.mpr hr)))
-  rw [← h1, MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field,
+  rw [← h1, MvPolynomial.ringKrullDim_of_isNoetherianRing_of_finite, ringKrullDim_eq_zero_of_field,
     zero_add, Nat.card_eq_fintype_card, Fintype.card_fin] at h2
   have h3 : δ + 1 ≤ δ := by exact_mod_cast h2
   omega
@@ -314,7 +374,7 @@ theorem exists_ringKrullDim_quotient_mvPolynomial_eq_nat {I : Ideal (MvPolynomia
   | bot => simp at h0
   | coe x =>
     induction x with
-    | top => exact absurd h1 (not_le.mpr (by exact_mod_cast ENat.coe_lt_top _))
+    | top => exact absurd h1 (not_le.mpr (by exact_mod_cast ENat.card_lt_top_of_finite (α := σ)))
     | coe n => exact ⟨n, rfl⟩
 
 theorem exists_forms_algebraicIndependent_finite {I : Ideal (MvPolynomial σ k)}
@@ -348,16 +408,6 @@ theorem exists_forms_algebraicIndependent_finite {I : Ideal (MvPolynomial σ k)}
     simpa using this
   exact ⟨e, max N e, F, he, le_max_right N e, hF,
     injective_of_finite_of_ringKrullDim_eq _ hfin hdim, hgen, hfin⟩
-
-example : (Ideal.span {(X 0 * X 1 : MvPolynomial (Fin 2) (ZMod 2))}).IsHomogeneous
-      (homogeneousSubmodule (Fin 2) (ZMod 2)) ∧
-    Ideal.span {(X 0 * X 1 : MvPolynomial (Fin 2) (ZMod 2))} ≠ ⊤ := by
-  have h : (X 0 * X 1 : MvPolynomial (Fin 2) (ZMod 2)).IsHomogeneous (1 + 1) :=
-    (isHomogeneous_X _ 0).mul (isHomogeneous_X _ 1)
-  refine ⟨Ideal.homogeneous_span _ _ (by rintro x rfl; exact ⟨_, h⟩),
-    ne_top_of_le_ne_top idealOfVars_ne_top ?_⟩
-  rw [Ideal.span_singleton_le_iff_mem, ← pow_one (idealOfVars _ _)]
-  exact mem_idealOfVars_pow_of_isHomogeneous h (by norm_num)
 
 end Main
 

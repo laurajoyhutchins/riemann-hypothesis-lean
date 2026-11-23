@@ -1,5 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.LinearIndependentC
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.LinearIndependentC
+public import Mathlib.RingTheory.Algebraic.Basic
+public import Mathlib.RingTheory.Algebraic.Integral
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0.VariableBasisExtension
 
@@ -40,6 +94,7 @@ theorem basis_extend [FiniteDimensional L E] {n : Type} [Fintype n] [DecidableEq
     intro q P; rw [hsmul, map_mul, hlift]
   have hmem : ∀ P : MvPolynomial σ E, algebraMap (MvPolynomial σ E) (FractionRing (MvPolynomial σ E)) P ∈ Submodule.span (FractionRing (MvPolynomial σ L)) (Set.range (fun i => algebraMap (MvPolynomial σ E) (FractionRing (MvPolynomial σ E)) (MvPolynomial.C (b i)))) := by
     intro P
+
     rw [PolynomialCoordinateBasis.eq_sum_crd b P, map_sum]
     refine Submodule.sum_mem _ fun i _ => ?_
     rw [himg, ← Algebra.smul_def]
@@ -53,6 +108,7 @@ theorem basis_extend [FiniteDimensional L E] {n : Type} [Fintype n] [DecidableEq
       fun j => hd j (Finset.mem_univ j)
     choose a ha using hd'
     have h0 : algebraMap (MvPolynomial σ E) (FractionRing (MvPolynomial σ E)) (∑ j, a j • (MvPolynomial.C (b j) : MvPolynomial σ E)) = 0 := by
+
       rw [map_sum]
       simp only [himg, ha]
       have e1 : ∑ j, algebraMap (FractionRing (MvPolynomial σ L)) (FractionRing (MvPolynomial σ E)) ((d : MvPolynomial σ L) • g j) * algebraMap (MvPolynomial σ E) (FractionRing (MvPolynomial σ E)) (MvPolynomial.C (b j)) =
@@ -97,6 +153,7 @@ theorem basis_extend [FiniteDimensional L E] {n : Type} [Fintype n] [DecidableEq
       ∑ k, algebraMap L (FractionRing (MvPolynomial σ L)) (b.repr (e * b j) k) • (Module.Basis.mk hli htop) k := by
     rw [← map_mul, ← MvPolynomial.C_mul]
     conv_lhs => rw [← b.sum_repr (e * b j)]
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Module.Basis.mk_apply, Algebra.smul_def (algebraMap L (FractionRing (MvPolynomial σ L)) _),

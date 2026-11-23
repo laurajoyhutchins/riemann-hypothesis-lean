@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.SumMemLaSet
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.FamilyDegreesAdmissible
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.FactorialMulChooseEqProdRange
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.SumMemLaSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -158,7 +199,7 @@ theorem restSum_of (hF : ∀ (p n' r K : ℕ) [NeZero n'] [NeZero r] [NeZero K] 
       unfold Dat.EE Dat.sumTset
       congr
     rw [e3, ← e2]
-    refine Finset.prod_le_prod (fun j _ => hseg0 _ _) fun j _ => ?_
+    refine Finset.prod_le_prod₀ (fun j _ => hseg0 _ _) fun j _ => ?_
     exact hGsum (j.val : ℤ) _ (family_degrees_admissible hr hp (fun j x hx => (F.LLsub j x hx).1) la hla _)
       (fun i => X.nz p K la (j.val : ℤ) (X.F.fr (j.val : ℤ) i.val))
   refine le_trans ?_ (mul_le_mul_of_nonneg_left (Finset.sum_le_sum step1) hq0.le)
@@ -181,15 +222,15 @@ theorem restSum_of (hF : ∀ (p n' r K : ℕ) [NeZero n'] [NeZero r] [NeZero K] 
     have hm : ∏ j ∈ Finset.range X.F.J, ((∏ x ∈ X.F.LLset (j : ℤ), sumBin r K (X.a' p K (posOf n' x))) *
         ∏ i : Fin r, ((X.Pz p K (j : ℤ) (X.F.fr (j : ℤ) i.val) : ℕ) : ℝ) ^ (r + K - 1)) ≤
         ∏ j ∈ Finset.range X.F.J, ∏ x ∈ X.toLate (j : ℤ), X.sumSt p K (posOf n' x) := by
-      refine Finset.prod_le_prod (fun j _ => mul_nonneg
+      refine Finset.prod_le_prod₀ (fun j _ => mul_nonneg
         (Finset.prod_nonneg fun x _ => zero_le_one.trans (sum_one_le_bin _ _ _))
         (Finset.prod_nonneg fun i _ => by positivity)) fun j hj => ?_
       rw [F.split (j : ℤ) (fun x => X.sumSt p K (posOf n' x))]
       refine mul_le_mul ?_ ?_ (Finset.prod_nonneg fun i _ => by positivity)
         (Finset.prod_nonneg fun x _ => sum_St_nonneg _)
-      · exact Finset.prod_le_prod (fun x _ => zero_le_one.trans (sum_one_le_bin _ _ _)) fun x hx =>
+      · exact Finset.prod_le_prod₀ (fun x _ => zero_le_one.trans (sum_one_le_bin _ _ _)) fun x hx =>
           sum_St_LL F hr hp ⟨j, Finset.mem_range.mp hj⟩ hx
-      · exact Finset.prod_le_prod (fun i _ => by positivity) fun i _ => sum_St_fr F hr hp (j : ℤ) i
+      · exact Finset.prod_le_prod₀ (fun i _ => by positivity) fun i _ => sum_St_fr F hr hp (j : ℤ) i
     have hnn : 0 ≤ ∏ j ∈ Finset.range X.F.J, ∏ x ∈ X.toLate (j : ℤ), X.sumSt p K (posOf n' x) :=
       Finset.prod_nonneg fun j _ => Finset.prod_nonneg fun x _ => sum_St_nonneg _
     nlinarith
@@ -227,13 +268,13 @@ theorem restSum_of (hF : ∀ (p n' r K : ℕ) [NeZero n'] [NeZero r] [NeZero K] 
     ring
   rw [hfin]
   have heta0 : 0 ≤ sumEta r X.Y := mul_nonneg (mul_nonneg h5 h1) hr0
-  refine Finset.prod_le_prod (fun j _ => mul_nonneg hA00 (Finset.prod_nonneg fun x _ =>
+  refine Finset.prod_le_prod₀ (fun j _ => mul_nonneg hA00 (Finset.prod_nonneg fun x _ =>
     mul_nonneg heta0 (zero_le_one.trans (sum_one_le_bin _ _ _)))) fun j _ => ?_
   refine mul_le_mul_of_nonneg_left ?_ hA00
   rw [F.split (j : ℤ) (fun x => sumEta r X.Y * sumBin r K (X.deg (posOf n' x)))]
   refine mul_le_mul ?_ ?_ (Finset.prod_nonneg fun i _ => mul_nonneg heta0 (zero_le_one.trans (sum_one_le_bin _ _ _)))
     (Finset.prod_nonneg fun x _ => zero_le_one.trans (sum_one_le_bin _ _ _))
-  · exact Finset.prod_le_prod (fun x _ => mul_nonneg heta0 (zero_le_one.trans (sum_one_le_bin _ _ _))) fun x hx =>
+  · exact Finset.prod_le_prod₀ (fun x _ => mul_nonneg heta0 (zero_le_one.trans (sum_one_le_bin _ _ _))) fun x hx =>
       sum_fac_LL F h5 h1 h1' hr0 hr1 _ (sum_late_mem (F.LLsub _ _ hx).1).2.2.2
   · have e : X.sumWf p K ((j : ℤ) + 1) * X.sumTf p K (j : ℤ) *
         (∏ i : Fin r, ((X.Pz p K (j : ℤ) (X.F.fr (j : ℤ) i.val) : ℕ) : ℝ) ^ (r + K - 1)) *
@@ -245,7 +286,7 @@ theorem restSum_of (hF : ∀ (p n' r K : ℕ) [NeZero n'] [NeZero r] [NeZero K] 
       unfold Dat.sumWf Dat.sumTf
       simp only [add_sub_cancel_right, mul_pow]
     rw [e]
-    exact Finset.prod_le_prod (fun i _ => mul_nonneg heta0 (zero_le_one.trans (sum_one_le_bin _ _ _))) fun i _ =>
+    exact Finset.prod_le_prod₀ (fun i _ => mul_nonneg heta0 (zero_le_one.trans (sum_one_le_bin _ _ _))) fun i _ =>
       sum_fac_fr F hr h5 h1 hr0 (j : ℤ) i
 
 end Main

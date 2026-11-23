@@ -1,8 +1,54 @@
-import Formalism.LocalToGlobal.GlobalTheory.CoordinateLengths.IntSpanLeRat
-import Formalism.LocalToGlobal.GlobalTheory.GL6.BwAValIntegralNonneg
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.CoordinateLengths.IntSpanLeRat
+import Formalism.GradedWeylDivisibility.FinalD
 import Formalism.LocalToGlobal.GlobalTheory.GL6.WeylLengthDiagonalUnitUniformiser
-import Formalism.LocalToGlobal.GroupLattices.FockModels.SwRowGenMonomial
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.RankConditionsOfLayerTwo
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.SwRowGenMonomial
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.DualWeylModuleStable
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.RankConditionsOfLayerTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -159,7 +205,7 @@ theorem rat_ten (D : D7) {N : ℕ} (lam : D.what₂.Tau → DomWeight N) (s : Fi
       | add x y _ _ hx hy =>
         intro r
         have e : Formalism.L2.Forms.ten (Function.update g τv (x + y)) = Formalism.L2.Forms.ten (Function.update g τv x) + Formalism.L2.Forms.ten (Function.update g τv y) := by
-          rw [bwA_ten_update, bwA_ten_update, bwA_ten_update, map_add, add_mul]
+          rw [bwA_ten_update, bwA_ten_update, bwA_ten_update, map_add (f := _), add_mul]
         rw [e, smul_add]
         exact add_mem (hx r) (hy r)
       | smul o x _ hx =>
@@ -210,7 +256,7 @@ theorem ratGL_holds (D : D7) (u : D.what₂.Word) : RatGL D u := by
     · intro τ hτ
       exact absurd (Finset.mem_univ τ) hτ
   | zero => rw [map_zero, smul_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [map_add, smul_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _), smul_add]; exact add_mem hx hy
   | neg x _ hx => rw [map_neg, smul_neg]; exact neg_mem hx
 
 end Formalism.L2.GlobalTheoryTheory.LemB

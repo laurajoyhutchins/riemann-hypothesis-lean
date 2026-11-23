@@ -1,12 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.PrF
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.MatrixExtendByZeroApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmBilin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmRes
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmSub
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsContinuousLadicGalRepModelFiniteExtHost
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CompactGroupRepDefinedOverFiniteExtension
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsContinuousLadicGalRepModelFiniteExtHost
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmBilin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmRes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmSub
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.MatrixExtendByZeroApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.PrF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 namespace UpperTheory.V.Z.Keep.PotentialOfUnlocked
@@ -43,7 +92,7 @@ private theorem cont_mrep [TopologicalSpace Γ] [TopologicalSpace E] [IsTopologi
     (M : Γ →* Matrix (Fin n) (Fin n) E) (h : ∀ i j, Continuous fun g => M g i j) : ContAction (mrep M) := by
   refine continuous_pi fun i => ?_
   simp only [mrep_apply]
-  exact continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun j _ =>
     ((h i j).comp continuous_fst).mul ((continuous_apply j).comp continuous_snd)
 
 private theorem tri_apply {n : ℕ} (M : Γ →* Matrix (Fin n) (Fin n) E) (h : ∀ g i j, j < i → M g i j = 0)
@@ -264,8 +313,8 @@ private theorem key (hP : LocalPublishedTheorems) {l : ℕ} [Fact l.Prime] {Γ :
 
 end UpperTheory.V.Z.Keep.PotentialOfUnlocked
 
-open UpperTheory.V.Z.Keep.PotentialOfUnlocked in
 
+open UpperTheory.V.Z.Keep.PotentialOfUnlocked in
 theorem UpperTheory.V.Z.Keep.crOnTri (hP : LocalPublishedTheorems) {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalSpace Γ]
     [IsTopologicalGroup Γ] (φ : Γ →* GQ l) (hφ : IsOpenEmbedding φ) {E : Type} [Field E] [Algebra ℚ_[l] E]
     [FiniteDimensional ℚ_[l] E] [Algebra ℤ_[l] E] [IsScalarTower ℤ_[l] ℚ_[l] E] [TopologicalSpace E]
@@ -368,8 +417,8 @@ private theorem cr_descend (hP : LocalPublishedTheorems) {l : ℕ} [Fact l.Prime
 
 end UpperTheory.V.Z.Keep.PotentialOfUnlocked
 
-open UpperTheory.V.Z.Keep.PotentialOfUnlocked in
 
+open UpperTheory.V.Z.Keep.PotentialOfUnlocked in
 theorem UpperTheory.V.Z.Keep.crDescend (hP : LocalPublishedTheorems) {l : ℕ} [Fact l.Prime] {Γ : Type} [Group Γ] [TopologicalSpace Γ]
     [IsTopologicalGroup Γ] [CompactSpace Γ] [T2Space Γ] (φ : Γ →* GQ l) (hφ : IsOpenEmbedding φ)
     (H : Subgroup Γ) [H.Normal] (hH : IsOpen (H : Set Γ)) {n : ℕ} (r₀ : Γ →* GL (Fin n) (Om l))

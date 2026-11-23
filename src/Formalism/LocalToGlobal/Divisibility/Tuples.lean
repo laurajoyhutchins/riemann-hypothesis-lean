@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.StatementC
-import Formalism.QuotientMetricDivisors.RatHermLcvTwist
-import Formalism.MirabolicMackeyTheory.StatementT
+module
+
+public import Formalism.SatakeDualWeyl.StatementC
+public import Formalism.MirabolicMackeyTheory.StatementT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,8 +100,8 @@ def SplitAt (v : HeightOneSpectrum (𝓞 F)) : Prop :=
   ∃ P P' : HeightOneSpectrum (𝓞 E), P ≠ P' ∧
     Ideal.map (algebraMap (𝓞 F) (𝓞 E)) v.asIdeal = P.asIdeal * P'.asIdeal
 
-variable {E} in
 
+variable {E} in
 def DegOne (v : HeightOneSpectrum (𝓞 F)) : Prop :=
   (Ideal.absNorm v.asIdeal).Prime ∧ ((Ideal.absNorm v.asIdeal : ℕ) : 𝓞 F) ∉ v.asIdeal ^ 2
 
@@ -107,8 +148,6 @@ def openChr : Subgroup (Chr F E L) where
 def finChar : Subgroup (Chr F E L) :=
   kills Lˣ (ratId F E).range ⊓ openChr F E L ⊓ CommGroup.torsion (Chr F E L)
 
-abbrev FinChar : Type := ↥(finChar F E L)
-
 def tupGrp (S : Set ℕ) : Subgroup (Chr F E L) :=
   finChar F E L ⊓ kills Lˣ (idF F E).range ⊓ (⨅ v : HeightOneSpectrum (𝓞 F), kills Lˣ (wildAt E v)) ⊓
     ⨅ (v : HeightOneSpectrum (𝓞 F)) (_ : ¬ GoodPl E S v), kills Lˣ (inertAt E v)
@@ -137,11 +176,8 @@ def TrivAt (ξ : Chr F E L) (v : HeightOneSpectrum (𝓞 F)) : Prop := suppAt E 
 def IsBaseChar (p : ℕ) (δ : Chr F E L) : Prop :=
   p.Prime ∧ ∀ v : HeightOneSpectrum (𝓞 F), (plc v = p → InertOrd δ v 15) ∧ (plc v ≠ p → v ∉ Qprime δ)
 
-def IsTwistChar (l : ℕ) (ψ : Chr F E L) : Prop :=
-  (∃ k : ℕ, ψ ^ l ^ k = 1) ∧ ∀ v : HeightOneSpectrum (𝓞 F), plc v = l → TrivAt ψ v
 
 variable (F E) in
-
 def toRInt : 𝓞 E →+* RInt F E :=
   ((inclE (F := F) (E := E) (FiniteAdeleRing (𝓞 F) F)).comp (algebraMap (𝓞 E) E)).codRestrict (RInt F E)
     fun b => Subring.subset_closure (Or.inl ⟨⟨algebraMap (𝓞 E) E b, b, rfl⟩, rfl⟩)
@@ -154,13 +190,11 @@ def IsResChar (ξ : Chr F E L) (P : HeightOneSpectrum (𝓞 E)) (χ : (𝓞 E �
     (∀ P' : HeightOneSpectrum (𝓞 E), P' ≠ P → (u : RInt F E) - 1 ∈ P'.asIdeal.map (toRInt F E)) →
     ξ (Units.map (RInt F E).subtype.toMonoidHom u) = χ a
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def resChar (ξ : Chr F E L) (P : HeightOneSpectrum (𝓞 E)) : (𝓞 E ⧸ P.asIdeal)ˣ →* Lˣ :=
   if h : ∃ χ, IsResChar ξ P χ then h.choose else 1
-
-def resDet (ξ : Chr F E L) (P : HeightOneSpectrum (𝓞 E)) (n : ℕ) : GL (Fin n) (𝓞 E ⧸ P.asIdeal) →* Lˣ :=
-  (resChar ξ P).comp Matrix.GeneralLinearGroup.det
 
 end Ram
 
@@ -175,16 +209,18 @@ def h90 (σ : E →ₐ[F] E) : (AfE F E)ˣ →* (AfE F E)ˣ := MonoidHom.id _ / 
 
 def U1 (σ : E →ₐ[F] E) : Subgroup (AfE F E)ˣ := (MonoidHom.id _ * conjId σ).ker
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def tilde (σ : E →ₐ[F] E) (ξ : Chr F E L) : (h90 σ).range →* Lˣ :=
   if h : (h90 σ).ker ≤ ξ.ker then
     (h90 σ).rangeRestrict.liftOfSurjective (h90 σ).rangeRestrict_surjective
       ⟨ξ, by rw [MonoidHom.ker_rangeRestrict]; exact h⟩
   else 1
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def detTw (σ : E →ₐ[F] E) (ξ : Chr F E L) {n : ℕ} (g : GL (Fin n) (AfE F E)) : Lˣ :=
   if h : Matrix.GeneralLinearGroup.det g ∈ (h90 σ).range then tilde σ ξ ⟨_, h⟩ else 1
 
@@ -195,33 +231,11 @@ section Maps
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
   {K : Type} [Field K] [NumberField K] [StarRing K] {S : Set ℕ}
 
-def IsTupleMap (muAt : HeightOneSpectrum (𝓞 K) → Tup F E K S) : Prop :=
-  (∀ w, muAt (conjPl w) = muAt w) ∧ {w | muAt w ≠ mu0 F E K S}.Finite ∧
-    ∀ w, plc w ∉ QprimeN (muAt w : Chr F E K)
-
 def deAt (p : ℕ) (δ0 δ0' : Tup F E K S) (w : HeightOneSpectrum (𝓞 K)) : Tup F E K S :=
   if plc w = p then δ0' else δ0
 
 def muTw (p : ℕ) (δ0 δ0' : Tup F E K S) (ψ : HeightOneSpectrum (𝓞 K) → Tup F E K S)
     (w : HeightOneSpectrum (𝓞 K)) : Tup F E K S := deAt p δ0 δ0' w * ψ w
-
-structure IsTupleMapTW (p p' : ℕ) (δ0 δ0' : Tup F E K S) (ψ : HeightOneSpectrum (𝓞 K) → Tup F E K S)
-    (avoid : HeightOneSpectrum (𝓞 K) → Set (HeightOneSpectrum (𝓞 F)))
-    (muAt : HeightOneSpectrum (𝓞 K) → Tup F E K S) : Prop where
-  ne : p ≠ p'
-  base : IsBaseChar p (δ0 : Chr F E K)
-  base' : IsBaseChar p' (δ0' : Chr F E K)
-  psi_conj : ∀ w, ψ (conjPl w) = ψ w
-  psi_tw : ∀ w, IsTwistChar (plc w) (ψ w : Chr F E K)
-  psi_Q : ∀ w, ∀ v ∈ Qprime (ψ w : Chr F E K), plc v ≠ plc w ∧ plc v ≠ p ∧ plc v ≠ p' ∧ v ∉ avoid w
-  conj : ∀ w, muAt (conjPl w) = muAt w
-  fin : {w | muAt w ≠ mu0 F E K S}.Finite
-  ref_or_tw : ∀ w, (muAt w = mu0 F E K S ∧ ψ w = 1) ∨ muAt w = muTw p δ0 δ0' ψ w
-
-def PsiFromBelow {K0 : Type} [Field K0] [NumberField K0] [Algebra K0 K]
-    (ψ0 : HeightOneSpectrum (𝓞 K0) → Tup F E K S) (ψ : HeightOneSpectrum (𝓞 K) → Tup F E K S) : Prop :=
-  ∀ (w' : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (𝓞 K0)), w'.asIdeal.under (𝓞 K0) = w.asIdeal →
-    ∃ a : ℕ, a.Coprime (plc w') ∧ ψ w' = ψ0 w ^ a
 
 end Maps
 
@@ -237,16 +251,6 @@ structure IsMu0 (σ : E →ₐ[F] E) (Ψ : Finset (E →+* L)) (e : (E →+* L) 
   ram : ∀ v : HeightOneSpectrum (𝓞 F), v ∈ Qprime μ ↔ plc v ∈ G
 
 def chiOf (μ : Chr F E L) (P : HeightOneSpectrum (𝓞 E)) : (𝓞 E ⧸ P.asIdeal)ˣ →* Lˣ := (resChar μ P)⁻¹
-
-def TameAtG {m : ℕ} (g : ℕ) (om : (ZMod g)ˣ →* Lˣ) (rd : Set (HeightOneSpectrum (𝓞 E)))
-    (μ : Fin m → Chr F E L) : Prop :=
-  Function.Injective om ∧ ∀ P ∈ rd, plc P = g →
-    ∀ (j : Fin m) (a : (𝓞 E ⧸ P.asIdeal)ˣ) (u : (ZMod g)ˣ) (n : ℤ),
-      (a : 𝓞 E ⧸ P.asIdeal) = (n : 𝓞 E ⧸ P.asIdeal) → (u : ZMod g) = (n : ZMod g) →
-      chiOf (μ j) P a = om u ^ (2 * (j.val + 1))
-
-def tupleOf {m : ℕ} {S : Set ℕ} (μ : Fin m → Chr F E L) (ξ : Tup F E L S) : Fin m → Chr F E L :=
-  fun j => μ j * (ξ : Chr F E L)
 
 end Ref
 

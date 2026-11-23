@@ -1,5 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.LowestKTypeModels.ApplyNeZero
-import Development.WeilBound.CoreStatements.OrbitDecayEstimates.CurveDerivativeDecay.KFiniteWordBoundIndefUnitary
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.WeightOccurrence.OccSome
+public import Development.WeilBound.CoreStatements.BranchingTraces.ContinuousEmb
+import Development.WeilBound.CoreStatements.BranchingTraces.FormTSingle
+public import Development.WeilBound.CoreStatements.OrbitDecayEstimates.CurveDerivativeDecay.KFiniteWordBoundIndefUnitary
+public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.LowestKTypeModels.ApplyNeZero
+public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.LowestKTypeModels.OfIntegralHolds
+import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothVec
+public import Development.WeilBound.CoreStatements.BranchingTraces.ExistsIntertwiner
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +86,7 @@ theorem lowestKTypeModel : Seed := by
     { toFun := fun a => ∫ h, φ h * ⟪b0, ρ h a⟫_ℂ ∂ν
       map_add' := fun a a' => by
         rw [← integral_add (hint _ a) (hint _ a')]
-        simp only [map_add, inner_add_right, mul_add]
+        simp only [map_add (f := _), inner_add_right, mul_add]
       map_smul' := fun c a => by
         rw [RingHom.id_apply, smul_eq_mul, ← integral_const_mul]
         simp only [map_smul, inner_smul_right]
@@ -75,7 +127,7 @@ theorem lowestKTypeModel : Seed := by
       · rintro _ ⟨g', rfl⟩
         exact Submodule.subset_span ⟨g * g', u_mul hπ.2.2.1 g g' v0⟩
       · simp
-      · intro x y _ _ hx hy; rw [map_add]; exact D.add_mem hx hy
+      · intro x y _ _ hx hy; rw [map_add (f := _)]; exact D.add_mem hx hy
       · intro c x _ hx; rw [map_smul]; exact D.smul_mem c hx
     have hv0D : v0 ∈ D := Submodule.subset_span ⟨1, by
       show π (um (1 : UJ ε)) v0 = v0

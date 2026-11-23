@@ -1,18 +1,54 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.AffineSpaceCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCoordinateCodimension
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineResolutionRule
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceProduct
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceLinearEmbeddings
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.PullbackBlowupSequenceComposition
-import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.KernelFlatBaseChange
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrongResolution.SequenceIsomorphism
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCoordinateCodimension
+public import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceProduct
+public import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineSpaceLinearEmbeddings
+public import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.KernelFlatBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -31,12 +67,6 @@ theorem affineSpaceOrigin_comp_toSpec (k : Type u) [Field k] (m : ℕ) :
       𝟙 (Spec (CommRingCat.of k)) := by
   unfold affineSpaceOrigin
   simp
-
-@[simp]
-theorem affineSpaceOrigin_comp_toSpec_assoc (k : Type u) [Field k] (m : ℕ) {Z : Scheme.{u}}
-    (g : Spec (CommRingCat.of k) ⟶ Z) :
-    affineSpaceOrigin k m ≫ affineSpaceIndexedByToSpec k (ULift.{u, 0} (Fin m)) ≫ g = g := by
-  rw [← Category.assoc, affineSpaceOrigin_comp_toSpec, Category.id_comp]
 
 theorem pullbackCoord_affineSpaceOrigin (k : Type u) [Field k] (m : ℕ)
     (i : ULift.{u, 0} (Fin m)) :
@@ -170,7 +200,7 @@ private theorem sub_C_constantCoeff_mem_span_X {σ : Type u} {A : Type u} [CommR
     have hadd : q + r - MvPolynomial.C (MvPolynomial.constantCoeff (q + r)) =
         (q - MvPolynomial.C (MvPolynomial.constantCoeff q)) +
           (r - MvPolynomial.C (MvPolynomial.constantCoeff r)) := by
-      simp only [map_add]
+      simp only [map_add (f := _)]
       ring
     rw [hadd]
     exact Ideal.add_mem _ hq hr
@@ -298,12 +328,6 @@ theorem affineSpaceInrEmbedding_comp_projRight (k : Type u) [Field k] (n m : ℕ
         projRight_appTop_coord, ← pullbackCoord_def, pullbackCoord_affineSpaceInrEmbedding_inr]
     rw [← pullbackCoord_def, h]
     simp
-
-@[simp]
-theorem affineSpaceInrEmbedding_comp_projRight_assoc (k : Type u) [Field k] (n m : ℕ) {Z : Scheme.{u}}
-    (g : affineSpaceIndexedBy k (ULift.{u, 0} (Fin m)) ⟶ Z) :
-    affineSpaceInrEmbedding k n m ≫ projRight k n m ≫ g = g := by
-  rw [← Category.assoc, affineSpaceInrEmbedding_comp_projRight, Category.id_comp]
 
 theorem affineSpaceInl_comp_projRight (k : Type u) [Field k] (n m : ℕ) :
     affineSpaceInl k n m ≫ projRight k n m =

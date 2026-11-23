@@ -1,9 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.ThDistC
-import Formalism.LocalToGlobal.KernelLattices.BaseEx
-import Formalism.LocalToGlobal.Columns.WordFin
-import Formalism.LocalToGlobal.GlobalTheory.JetPositivity.DeltaPowTwelveEqDiscr
-import Formalism.LocalToGlobal.GlobalTheory.GL3.Statement
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Formalism.LocalToGlobal.Columns.WordFin
+public import Formalism.LocalToGlobal.GlobalTheory.JetPositivity.DeltaPowTwelveEqDiscr
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.Statement
+public import Formalism.PeriodIntegrals.KerIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -632,13 +670,6 @@ def KapChoice.yP {γ₀ : IsoK D} (k : KapChoice γ₀) (p : ℕ) : ℤ := ordK 
 def KapChoice.kappa {γ₀ : IsoK D} (k : KapChoice γ₀) : ℂ :=
   ∏ᶠ p : {p : ℕ // p.Prime ∧ SplitK D p}, k.rt p ^ (-(k.yP p))
 
-def KapChoice.YFinite {γ₀ : IsoK D} (k : KapChoice γ₀) : Prop :=
-  {p : ℕ | p.Prime ∧ SplitK D p ∧ k.yP p ≠ 0}.Finite
-
-def YIndep (γ₀ : IsoK D) : Prop :=
-  ∀ (p : ℕ) (𝔭 : IsDedekindDomain.HeightOneSpectrum (𝓞 D.host.K)) (γ γ' : IsoK D), p.Prime → SplitK D p →
-    ((p : ℕ) : 𝓞 D.host.K) ∈ 𝔭.asIdeal → γ.AtP p → γ'.AtP p → ordK 𝔭 (γ.detRel γ₀) = ordK 𝔭 (γ'.detRel γ₀)
-
 def lamMM (D : Car) (Λ : AddSubgroup ℂ) : AddSubgroup (D.what₂.Tau → ℂ) :=
   AddSubgroup.closure {z | ∃ w ∈ Λ, ∃ a ∈ D.host.AA0, z = fun τ => w * TaylorLogMetric.embT D τ a}
 
@@ -667,8 +698,6 @@ def cq (_B : Base D cc δ) : ℝ := Real.sqrt D.host.d / 2
 
 def lamM (_B : Base D cc δ) : AddSubgroup (D.what₂.Tau → ℂ) := lamMM D (TaylorLogMetric.lamOf D cc δ)
 
-def th0 : ℂ → ℂ := Formalism.L2.Th1.F.th0 B.L (B.ω₀ / 2)
-
 def kappa : ℂ := B.kc.kappa
 
 def StdOK : Prop := Ker.StdOK B.L B.ω₀ B.cq B.lamM B.gC
@@ -680,10 +709,6 @@ def thMM : (D.what₂.Tau → ℂ) → ℂ := thM B.L B.ω₀ B.cq B.lamM B.gC B
 def thZero (N N' : ℕ) : TaylorLogMetric.VC D N N' → ℂ := tensPow B.thMM N N'
 
 abbrev tor (_B : Base D cc δ) : TaylorLogMetric.Tor D := TaylorLogMetric.tor0 D cc δ
-
-def eY (N N' : ℕ) (L : Submodule (𝓞 D.host.E) (Fin N → D.host.E))
-    (L' : Submodule (𝓞 D.host.E) (Fin N' → D.host.E)) : TaylorLogMetric.VC D N N' → ℂ :=
-  TaylorLogMetric.Iop D B.tor (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N')) (TaylorLogMetric.La D B.tor L L') (B.thZero N N')
 
 def thHalf (N N' : ℕ) (L : Submodule (𝓞 D.host.E) (Fin N → D.host.E)) : TaylorLogMetric.VC D N N' → ℂ :=
   TaylorLogMetric.Iop D B.tor (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N')) (TaylorLogMetric.La D B.tor L (StandardLatticesGL3.stdL D N'))
@@ -732,40 +757,9 @@ def LatAll : Prop :=
   ∀ N N' L₁ L₁' L₂ L₂', TaylorLogMetric.admitted D N N' L₁ L₁' → TaylorLogMetric.admitted D N N' L₂ L₂' →
     Comm (TaylorLogMetric.La D B.tor L₁ L₁') (TaylorLogMetric.La D B.tor L₂ L₂')
 
-def VecP (χ : TaylorLogMetric.IdE D → ℂ) : Prop := TaylorLogMetric.vec22 D B.tor (B.eNat χ)
-
-def ThP (C : ℝ) (χ : TaylorLogMetric.IdE D → ℂ) : Prop := TaylorLogMetric.th22 D B.tor C (B.eNat χ)
-
 def EqP (χ : TaylorLogMetric.IdE D → ℂ) : Prop := TaylorLogMetric.eq22 D B.tor χ (B.eNat χ)
 
-def IntP (χ : TaylorLogMetric.IdE D → ℂ) : Prop := TaylorLogMetric.int22 D B.tor (B.eNat χ)
-
-def MomP (χ : TaylorLogMetric.IdE D → ℂ) : Prop := TaylorLogMetric.mom22 D cc δ (B.eNat χ) ∧ TaylorLogMetric.LargerSupportMomentCondition D cc δ (B.eNat χ)
-
-def StrP (χ : TaylorLogMetric.IdE D → ℂ) : Prop := TaylorLogMetric.str22 D B.tor (B.eNat χ)
-
-def LateralTheory (C : ℝ) (χ : TaylorLogMetric.IdE D → ℂ) : Prop :=
-  B.VecP χ ∧ B.ThP C χ ∧ B.EqP χ ∧ B.IntP χ ∧ B.MomP χ ∧ B.StrP χ
-
-def SignP : Prop :=
-  ∀ N N' L L', TaylorLogMetric.admitted D N N' L L' → B.thMoved N N' L L' = B.eY N N' L L' ∨ B.thMoved N N' L L' = -B.eY N N' L L'
-
-def OrderP : Prop :=
-  ∀ N N' L L', TaylorLogMetric.admitted D N N' L L' → B.thMoved N N' L L' =
-    TaylorLogMetric.Iop D B.tor (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) L') (TaylorLogMetric.La D B.tor L L')
-      (TaylorLogMetric.Iop D B.tor (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N')) (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) L')
-        (B.thZero N N'))
-
 end Base
-
-def BaseExists (D : Car) : Prop :=
-  ∀ cc : Ideal (𝓞 D.host.K), TaylorLogMetric.IsCurveIdeal D cc → ∀ δ : ℂ, δ ≠ 0 → Nonempty (Base D cc δ)
-
-def GCUnique (D : Car) : Prop :=
-  ∀ (γ₀ : IsoK D) (g g' : (Fin 4 × D.what₂.Tau → ℂ) ≃ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ)),
-    (∀ x : Fin 4 → D.host.E, g (fun w => TaylorLogMetric.embT D w.2 (x w.1)) = fun w => D.host.φ₀ ((γ₀.g x w : D.host.K) : D.host.E)) →
-    (∀ x : Fin 4 → D.host.E, g' (fun w => TaylorLogMetric.embT D w.2 (x w.1)) = fun w => D.host.φ₀ ((γ₀.g x w : D.host.K) : D.host.E)) →
-    g = g'
 
 end Fam
 
@@ -809,19 +803,8 @@ def HostFacts : Prop :=
 
 def MMSelfDual : Prop := PI.KerIso.SelfDualI D.host.K D.host.conj D.host.AA0
 
-def SplitKSplits : Prop := ∀ p : ℕ, p.Prime → SplitK D p → PI.KerIso.SplitsAt D.host.K D.host.conj p
-
-def GammaZeroExists : Prop :=
-  ∃ (γ₀ : IsoK D) (gC : (Fin 4 × D.what₂.Tau → ℂ) ≃ₗ[ℂ] (Fin 4 × D.what₂.Tau → ℂ)),
-    ∀ x : Fin 4 → D.host.E, gC (fun w => TaylorLogMetric.embT D w.2 (x w.1)) = fun w => D.host.φ₀ ((γ₀.g x w : D.host.K) : D.host.E)
-
-def GammaPExists : Prop := ∀ p : ℕ, p.Prime → SplitK D p → ∃ γ : IsoK D, γ.AtP p
-
 def PeriodExists : Prop :=
   ∀ (cc : Ideal (𝓞 D.host.K)) (δ : ℂ), cc ≠ ⊥ → δ ≠ 0 → ∃ L : PeriodPair, L.lattice.toAddSubgroup = TaylorLogMetric.lamOf D cc δ
-
-def TZeroExists : Prop :=
-  ∀ (cc : Ideal (𝓞 D.host.K)) (δ : ℂ), cc ≠ ⊥ → δ ≠ 0 → ∃ t : ℂ, GL3Theta.IsTwoTorsionPointUnkilled D (TaylorLogMetric.lamOf D cc δ) t
 
 end HostFacts
 
@@ -843,10 +826,6 @@ def Seam.Ok : Prop :=
 
 def Seam.lat {n : ℕ} (N : Submodule (𝓞 X.E) (Sp X.E n)) : Submodule (𝓞 D.host.E) (Fin n → D.host.E) :=
   Submodule.span (𝓞 D.host.E) ((fun (x : Sp X.E n) (i : Fin n) => s.iE (x i)) '' (N : Set (Sp X.E n)))
-
-def IsDgen (D : Car) (cD : D.what₂.Tau → ℂ) : Prop :=
-  ∃ (M : IntermediateField ℚ ℂ) (_ : NumberField M), (∀ τ x, TaylorLogMetric.embT D τ x ∈ M) ∧ ∀ τ, ∃ s : M, (s : ℂ) = cD τ ∧
-    TaylorLogMetric.ellT D M τ = Submodule.span (𝓞 M) {s}
 
 def ambOf {cc : Ideal (𝓞 D.host.K)} {δ : ℂ} (B : Base D cc δ) (χ : TaylorLogMetric.IdE D → ℂ) (cD : D.what₂.Tau → ℂ) : Amb X where
   σ₀ := s.σ₀

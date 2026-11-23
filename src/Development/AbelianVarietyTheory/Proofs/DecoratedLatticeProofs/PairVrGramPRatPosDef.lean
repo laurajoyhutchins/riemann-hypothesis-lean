@@ -1,36 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.CoefficientsModP
-import Formalism.LocalToGlobal.HermitianForms.FormsTied
-import Formalism.LocalToGlobal.Columns.TiedValLatG
-import Formalism.LocalToGlobal.Columns.TiedValNorm
-import Formalism.LocalToGlobal.Columns.TiedValRat
-import Formalism.LocalToGlobal.Columns.CoefModAt
-import Formalism.LocalRingCardinality.PosOfIsomEmb
-import Formalism.QuotientMetricDivisors.ReductionLemmaZero
-import Formalism.QuotientMetricDivisors.FinalW
-import Formalism.LocalToGlobal.Divisibility.FramesLemmas
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SlopeStepG
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HtPsiLeIffExists
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.WeTransposeWordTransposeWord
+import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open Module NumberField IsDedekindDomain Formalism.BasicNotions Formalism.L2.DIV Formalism.L2.Forms
 open scoped Matrix ComplexOrder
 
 namespace GlobalTheory.Core.CoefGram
-
-theorem map_inv_entry_mem {E K : Type} [Field E] [Field K] {n : ℕ} (f : E →+* K) (K0 : Subfield K) (hf : ∀ x, f x ∈ K0)
-    (J : Matrix (Fin n) (Fin n) E) (a b : Fin n) : (J.map f)⁻¹ a b ∈ K0 := by
-  rw [Matrix.inv_def, Ring.inverse_eq_inv', Matrix.smul_apply, smul_eq_mul]
-  have h1 : (J.map f).det = f J.det := (RingHom.map_det f J).symm
-  have h2 : (J.map f).adjugate = J.adjugate.map f := (RingHom.map_adjugate f J).symm
-  rw [h1, h2, Matrix.map_apply]
-  exact mul_mem (inv_mem (hf _)) (hf _)
-
-theorem map_inv_eq {K L : Type} [Field K] [Field L] {n : ℕ} (f : K →+* L) (A : Matrix (Fin n) (Fin n) K) :
-    A⁻¹.map f = (A.map f)⁻¹ := by
-  have h1 : (A.map f).det = f A.det := (RingHom.map_det f A).symm
-  have h2 : (A.map f).adjugate = A.adjugate.map f := (RingHom.map_adjugate f A).symm
-  ext a b
-  rw [Matrix.map_apply, Matrix.inv_def, Matrix.inv_def, Ring.inverse_eq_inv', Ring.inverse_eq_inv', h1, h2,
-    Matrix.smul_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul, map_mul, map_inv₀, Matrix.map_apply]
 
 theorem posDef_of_hasSignature {n : ℕ} (G : Matrix (Fin n) (Fin n) ℂ) (h : Formalism.UG.HasSignature G n 0) : G.PosDef := by
   obtain ⟨e, P, hP⟩ := h
@@ -49,28 +68,5 @@ theorem posDef_of_hasSignature {n : ℕ} (G : Matrix (Fin n) (Fin n) ℂ) (h : F
   have h3 : G = (G.reindex e e).submatrix e e := by ext i j; simp
   rw [h3]
   exact h2.submatrix e.injective
-
-theorem gramP_posDef (D : D7) (σ : D.host.E →+* ℂ) : ((gramP D).map σ).PosDef := by
-  letI := D.host.cmStar
-  have hsig := D.sp.X'_sig σ
-  have h0 : D.sp.X'.sig σ = (D.sp.X'.rank, 0) := D.X'_posDef σ
-  rw [h0] at hsig
-  have h1 : (D.sp.X'.gram.map σ).PosDef := posDef_of_hasSignature _ hsig
-  exact h1.submatrix (finCongr (rankP D)).symm.injective
-
-theorem embE_mem (D : D7) (x : D.host.E) : D.embE x ∈ Formalism.DivisionValues.cmMax D.what₂.LL := by
-  intro σ
-  rw [← D.embE_conj]
-  exact D.host.conjE_apply (σ.comp D.embE) x
-
-theorem pairVr_gramP_rat_posDef : ∀ (D : D7) (u : D.what₂.Word), (∀ i j, (Matrix.of fun i j => pairVr (fun τ : D.what₂.Tau => D.embE.comp (D.host.sigmaOf (D.eTau τ : D.R.GG) : D.host.E →+* D.host.E)) (sgT u) (gramP D) (bVV D.what₂.LL (sgT u) i) (bVV D.what₂.LL (sgT u) j)) i j ∈ Formalism.DivisionValues.cmMax D.what₂.LL) ∧ ∀ v : InfinitePlace D.what₂.LL, ((Matrix.of fun i j => pairVr (fun τ : D.what₂.Tau => D.embE.comp (D.host.sigmaOf (D.eTau τ : D.R.GG) : D.host.E →+* D.host.E)) (sgT u) (gramP D) (bVV D.what₂.LL (sgT u) i) (bVV D.what₂.LL (sgT u) j)).map v.embedding).PosDef := by
-  intro D u
-  refine ⟨fun i j => ?_, fun v => ?_⟩
-  · exact pairRat _ _ _ _ (Formalism.DivisionValues.cmMax D.what₂.LL) _
-      (fun τ a b => map_inv_entry_mem _ _ (fun x => embE_mem D _) _ b a) i j
-  · refine pairPos _ _ _ (sgT u) _ v.embedding fun τ => ?_
-    unfold gramKd
-    rw [Matrix.transpose_map, map_inv_eq, Matrix.map_map, ← RingHom.coe_comp]
-    exact (gramP_posDef D _).inv.transpose
 
 end GlobalTheory.Core.CoefGram

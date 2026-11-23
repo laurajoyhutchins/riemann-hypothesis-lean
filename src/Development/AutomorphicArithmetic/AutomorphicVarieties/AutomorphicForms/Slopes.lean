@@ -1,11 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Hypotheses2
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LocIsotypic
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.SatFrob
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.CrysSlopes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RecOfRecLiteral
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalAdjoinRange
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.IntCrit
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Hypotheses2
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.IsoOfFrob
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RecOfRecLiteral
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalAdjoinRange
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.CrysSlopes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.SatFrob
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.IntCrit
+import Formalism.LocalToGlobal.Columns.StdLatUnimodular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,7 +105,7 @@ theorem slopesOf (hP : Hypotheses₂) {F : Type} [Field F] [NumberField F] {n : 
     (σ : SmIrr (GL (Fin n) (w.adicCompletion F))) (B : Multiset ℂˣ) (hB : GlobalTheory.LFun.HasSatGL w σ.ρ B)
     (H : ∀ (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ), ∃ r : G F (AlgebraicClosure F) →* GL (Fin n) (Qbar l), Continuous r ∧
       ((l : 𝓞 F) ∉ w.asIdeal → ∀ (A : ValuationSubring (AlgebraicClosure F)) (h : IsPlaceOver A w)
-        (rc : IrrGL (w.adicCompletion F) → WD h), IsRec h rc → IsWDOf ι r (rc (algNorm σ))) ∧
+        (rc : IrrGL (k := w.adicCompletion F) → WD h), IsRec h rc → IsWDOf ι r (rc (algNorm σ))) ∧
       ∀ (A : ValuationSubring (AlgebraicClosure F)) (h : IsPlaceOver A w)
         (O : Type) [CommRing O] [Algebra ℤ_[l] O] [TopologicalSpace O]
         (Bw : LocBridge l F (AlgebraicClosure F) (Dec (F := F) A) O) (hj : Induces Bw),
@@ -77,7 +117,7 @@ theorem slopesOf (hP : Hypotheses₂) {F : Type} [Field F] [NumberField F] {n : 
     SlopesIn (normV w) m (algSat n (normV w) B) := by
   have hK := GlobalTheory.SmGL.SphCompletion.KO_completion w n
   obtain ⟨x, hx0, hx, -⟩ := hB.exists_vec
-  have hfix : ∀ U, U ≤ GlobalTheory.LFun.KGL w n → GlobalTheory.PRep.fixed σ.ρ U ≠ ⊥ := fun U hU =>
+  have hfix : ∀ U, U ≤ GlobalTheory.LFun.KGL w (n := n) → GlobalTheory.PRep.fixed σ.ρ U ≠ ⊥ := fun U hU =>
     (Submodule.ne_bot_iff _).2 ⟨x, GlobalTheory.LGrp.mem_fixed.2 fun k hk => GlobalTheory.LGrp.mem_fixed.1 hx k (hU hk), hx0⟩
   have hsph : GlobalTheory.SmGL.IsSpherical σ.ρ := hfix _ hK.le
   have hiw := hfix _ ((GlobalTheory.SmGL.iwahori_le_KO _ _).trans hK.le)

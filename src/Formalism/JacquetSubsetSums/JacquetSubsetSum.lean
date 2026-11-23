@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module
 
@@ -11,27 +57,6 @@ def NoFixedSum : Prop :=
     (τ : Representation ℂ G V) (N : Subgroup G) [Fintype N],
     (∀ v : V, (∀ n ∈ N, τ n v = v) → v = 0) →
     ∀ x y : G, ∑ n : N, LinearMap.trace ℂ V (τ (x * (n : G) * y)) = 0
-
-def GoodImpliesH : Prop :=
-  ∀ (r : ℕ) (S : Type) (c : S → Type) [∀ v, Fintype (c v)] (d : ∀ v, c v → ℕ),
-    (∀ v, ∑ i, d v i = r) →
-    (∀ a : ℕ, 1 ≤ a → 2 * a ≤ r → ∃ v, ∀ J : Finset (c v), ∑ i ∈ J, d v i ≠ a) →
-    ∀ a : ℕ, 0 < a → a < r → ∃ v, ∀ J : Finset (c v), ∑ i ∈ J, d v i ≠ a
-
-def JacquetSubsetSum : Prop :=
-  ∀ (k : Type) [Field k] (r s : ℕ) (b : Fin r → Fin s), Monotone b →
-    ∀ (Y : Type) [AddCommGroup Y] [Module ℂ Y] (ρ : GL (Fin r) k → Y →ₗ[ℂ] Y),
-    (∀ S : Finset (Fin r), (∃ i j, b i = b j ∧ i ∈ S ∧ j ∉ S) →
-      ∀ y : Y, (∀ u : GL (Fin r) k,
-        (∀ i j, (u : Matrix (Fin r) (Fin r) k) i j ≠ (1 : Matrix (Fin r) (Fin r) k) i j →
-          b i = b j ∧ i ∈ S ∧ j ∉ S) → ρ u y = y) → y = 0) →
-    ∀ (a : ℕ), a ≤ r → ∀ (φ : GL (Fin r) k → Y),
-    (∀ q x : GL (Fin r) k, (∀ i j, b j < b i → (q : Matrix (Fin r) (Fin r) k) i j = 0) →
-      φ (q * x) = ρ q (φ x)) →
-    (∀ x n : GL (Fin r) k,
-      (∀ i j, (n : Matrix (Fin r) (Fin r) k) i j ≠ (1 : Matrix (Fin r) (Fin r) k) i j →
-        (i : ℕ) < a ∧ a ≤ (j : ℕ)) → φ (x * n) = φ x) →
-    φ ≠ 0 → ∃ J : Finset (Fin s), a = ∑ c ∈ J, (Finset.univ.filter fun i => b i = c).card
 
 def IwahoriNewton : Prop :=
   ∀ (O : Type) [CommRing O] [IsLocalRing O] (ϖ : O), ϖ ∈ IsLocalRing.maximalIdeal O →
@@ -60,18 +85,5 @@ def PacketSum : Prop :=
 
 def SignEven : Prop :=
   ∀ p q : ℕ, Odd (p + q) → (-1 : ℤ) ^ (p * q) = 1
-
-def ConeCharIndep : Prop :=
-  ∀ (r : ℕ) (c : (Multiplicative (Fin r → ℤ) →* ℂ) →₀ ℂ),
-    (∀ a : Fin r → ℤ, StrictAnti a →
-      (c.sum fun χ z => z * χ (Multiplicative.ofAdd a)) = 0) → c = 0
-
-def SimpleCharIndep : Prop :=
-  ∀ (A : Type) [Ring A] [Algebra ℂ A] (ι : Type) [Finite ι] (W : ι → Type)
-    [∀ i, AddCommGroup (W i)] [∀ i, Module ℂ (W i)] [∀ i, Module A (W i)]
-    [∀ i, IsScalarTower ℂ A (W i)] [∀ i, FiniteDimensional ℂ (W i)],
-    (∀ i, IsSimpleModule A (W i)) → (∀ i j, Nonempty (W i ≃ₗ[A] W j) → i = j) →
-    LinearIndependent ℂ
-      (fun i => fun h : A => LinearMap.trace ℂ (W i) (Algebra.lsmul ℂ ℂ (W i) h))
 
 end Formalism.PacketSums

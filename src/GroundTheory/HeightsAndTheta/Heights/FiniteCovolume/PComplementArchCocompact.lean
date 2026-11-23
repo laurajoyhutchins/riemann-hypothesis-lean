@@ -1,10 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StComplementArchCocompact
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StArchCovolumeBound
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PComplementExtension
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PHermAtPlace
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PCoordEmbedBasis
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsZsmulMem
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StComplementArchCocompact
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StArchCovolumeBound
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PComplementExtension
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsZsmulMem
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PCoordEmbedBasis
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.PHermAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -27,7 +75,7 @@ end Lattice
 end ComplementArchCocompact
 
 variable {F E : Type*} [Field F] [Field E] [NumberField F] [NumberField E] [Algebra F E]
-  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [IsTotallyComplex E]
+  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E]
 variable {W : Type*} [AddCommGroup W] [Module E W] {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 namespace ComplementArchCocompact
@@ -43,13 +91,13 @@ def projAt (h : HermitianForm F E W) (v : Basis ι E W) (x₀ w₀ : W) :
   LinearMap.pi fun w => (LinearMap.id - (formAt h v w (vecAt v w₀ w)).smulRight (vecAt v x₀ w) -
     (formAt h v w (vecAt v x₀ w)).smulRight (vecAt v w₀ w)) ∘ₗ LinearMap.proj w
 
-omit [NumberField F] [NumberField E] [IsTotallyReal F] [IsTotallyComplex E] [DecidableEq ι] in
+omit [NumberField F] [NumberField E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] [DecidableEq ι] in
 theorem projAt_apply (h : HermitianForm F E W) (v : Basis ι E W) (x₀ w₀ : W)
     (Y : InfinitePlace E → ι → ℂ) (w : InfinitePlace E) :
     projAt h v x₀ w₀ Y w = Y w - (star (vecAt v w₀ w) ⬝ᵥ (gramAt h v w *ᵥ Y w)) • vecAt v x₀ w -
       (star (vecAt v x₀ w) ⬝ᵥ (gramAt h v w *ᵥ Y w)) • vecAt v w₀ w := rfl
 
-omit [NumberField E] [IsTotallyComplex E] [Fintype ι] [DecidableEq ι] in
+omit [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Fintype ι] [DecidableEq ι] in
 theorem vecAt_smul_apply (v : Basis ι E W) (a : E) (x : W) (w : InfinitePlace E) :
     vecAt v (a • x) w = w.embedding a • vecAt v x w := by
   funext i; simp [vecAt]
@@ -65,8 +113,8 @@ theorem projAt_vecAt (h : HermitianForm F E W) (v : Basis ι E W) {x₀ w₀ : W
 
 end ComplementArchCocompact
 
-open ComplementArchCocompact in
 
+open ComplementArchCocompact in
 theorem ComplementArchCocompact.proof (h : HermitianForm F E W) (v : Basis ι E W) :
     ComplementArchCocompact.Statement h v := by
   classical
@@ -102,6 +150,7 @@ theorem ComplementArchCocompact.proof (h : HermitianForm F E W) (v : Basis ι E 
     calc Y = (projAt h v x₀ w₀).restrictScalars ℝ (∑ k, Bs.repr Y k • Bs k) := by
           rw [Bs.sum_repr]; exact hPY.symm
       _ = ∑ k, Bs.repr Y k • vecAt v (p k) := by
+
           simp only [map_sum, map_smul, LinearMap.restrictScalars_apply, hBe]
           exact Finset.sum_congr rfl fun k _ => by rw [projAt_vecAt]
       _ = _ := Finset.sum_congr rfl fun k _ => by
@@ -115,6 +164,7 @@ theorem ComplementArchCocompact.proof (h : HermitianForm F E W) (v : Basis ι E 
     exact Finset.sum_congr rfl fun k _ => smul_comm _ _ _
   · show ∑ k, Int.fract (s k) • vecAt v (f k) = Y - vecAt v (∑ k, ⌊s k⌋ • f k)
     conv_rhs => rw [hYs]
+
     rw [← vecAtHom_apply, map_sum, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_zsmul, vecAtHom_apply, ← Int.cast_smul_eq_zsmul ℝ, ← sub_smul, Int.self_sub_floor]

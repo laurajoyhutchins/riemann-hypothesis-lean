@@ -1,17 +1,71 @@
-import Formalism.HermitianCurvature.StatementJF
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Block3MulBlocks
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSizesOfHypotheses
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SeminormCompletion
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SandwichRhoAction
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SmoothnessOnGoodSet
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.JDomBoundOfNnMaj
+import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaSesquilinearity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Block3MulBlocks
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSizesOfHypotheses
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeisenbergLeviConjugationMeasure
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.JfJqSmoothOfNnMaj
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.JfJqSmoothOfNnMaj
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -109,10 +163,6 @@ lemma n_colE {n : Mat k r} (hn : n ∈ Nset k r) (a : Fin r) (i : Fin (2 * r + k
 
 lemma n_colM {n : Mat k r} (hn : n ∈ Nset k r) (i j : Fin (2 * r + k + 1)) (hj1 : r ≤ j.val)
     (hj2 : j.val ≤ r + k) (hi : r ≤ i.val) : n i j = if i = j then 1 else 0 := hn.2.2 i j hj1 hj2 hi
-
-lemma eI_val (a : Fin r) : (eI k r a).val = a.val := rfl
-
-lemma esI_val (a : Fin r) : (esI k r a).val = 2 * r + k - a.val := rfl
 
 lemma n_rowEs {n : Mat k r} (hn : n ∈ Nset k r) (i l : Fin (2 * r + k + 1)) (hi : r + k < i.val)
     (hl : l.val ≤ r + k) : n i l = 0 := by
@@ -903,7 +953,6 @@ lemma ninv_bd (hΓ : 1 ≤ Γ) (hδ : 0 < δ) (hg : g ∈ GV k r) (hgΓ : gN g �
     have : 0 ≤ ((2 * r + k + 1 : ℕ) : ℝ) * (c11 r Γ δ * cPg r Γ δ) := by positivity
     nlinarith
   · obtain ⟨a, rfl⟩ := Es_of_gt l (by omega)
-    have hx : IsUnit (Zm (n⁻¹ * g * n')).det := by rw [det_Zx hn hn']; exact unit_of_det hδ hdet
     have hk := congrFun (congrFun (key hδ hdet hn hn') i) a
     rw [Matrix.mul_apply, sum_split_Es] at hk
     simp only [Pm_Es g (unit_of_det hδ hdet), mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
@@ -1227,7 +1276,6 @@ instance haar_hpar (k r' : ℕ) : (volume : Measure (HPar k r')).IsAddHaarMeasur
 
 lemma lint_heis_fin (k r' : ℕ) {c : ℝ} (hc : ((2 * (2 * r' + k + 1) + 1 : ℕ) : ℝ) < c) :
     ∫⁻ x : HPar k r', ENNReal.ofReal (((1 + ‖x‖) / 2) ^ (-c)) < ⊤ := by
-  have hc0 : 0 < c := lt_of_le_of_lt (Nat.cast_nonneg _) hc
   have e : ∀ x : HPar k r', ((1 + ‖x‖) / 2) ^ (-c) = (2 : ℝ) ^ c * (1 + ‖x‖) ^ (-c) := by
     intro x
     have hu : 0 ≤ 1 + ‖x‖ := by positivity
@@ -1304,8 +1352,6 @@ theorem lint_gN_fin (k r : ℕ) (μ : Measure (Mt k r)) (hμ : IsHaarOn (Nset k 
       · omega
       · exact h
     push_cast at ha'
-    have hr0 : (0 : ℝ) ≤ r' := Nat.cast_nonneg _
-    have hk0 : (0 : ℝ) ≤ k := Nat.cast_nonneg _
     have ha0 : 0 < a := by nlinarith
     obtain ⟨μ', hμ'⟩ := unipotent_haar_exists k r'
     have := sigmaFinite_haar hμ'
@@ -1459,10 +1505,6 @@ lemma real_step (X G1 G2 C4 Λ1 A A1 β P : ℝ) (m r : ℕ) (hX : 1 ≤ X) (hC4
   have hXA : 0 ≤ X ^ (-A) := Real.rpow_nonneg hXpos.le _
   have hb1 := rp_bd X C4 G1 β (3 * r) (by linarith) (by linarith) h1 hβ
   have hb2 := rp_bd X C4 G2 β (3 * r) (by linarith) (by linarith) h2 hβ
-  have hn1 : 0 ≤ (X ^ (3 * r)) ^ (-β) := Real.rpow_nonneg (by positivity) _
-  have hn2 : 0 ≤ C4 ^ β * G1 ^ (-β) := by
-    have := Real.rpow_nonneg (show (0:ℝ) ≤ C4 by linarith) β
-    have := Real.rpow_nonneg (show (0:ℝ) ≤ G1 by linarith) (-β); positivity
   have hΛm : 0 ≤ Λ1 ^ m := by positivity
   calc P * X ^ (-A) ≤ (Λ1 * X ^ (6 * r)) ^ m * X ^ (-A) := mul_le_mul_of_nonneg_right hP hXA
     _ = Λ1 ^ m * X ^ (-A1) := by
@@ -1502,12 +1544,10 @@ theorem nnMaj : Formalism.FourierDecayAlt.P.JFxDs2.NNMaj := by
   obtain ⟨cW, hcW, hW⟩ := uw_bound D.z D.z_mem D.T_pos
   obtain ⟨cW', hcW', hW'⟩ := uw_bound D.z' D.z'_mem D.T'_pos
 
-  have hc : 1 ≤ max cW cW' := le_trans hcW (le_max_left _ _)
   have hC4 : 1 ≤ max 1 (C3 * max cW cW' ^ (6 * r)) := le_max_left _ _
   set c := max cW cW' with hc_def
   set C4 := max 1 (C3 * c ^ (6 * r)) with hC4_def
   set NN : ℝ := ((2 * r + k + 1 : ℕ) : ℝ) with hNN
-  have hNN1 : 1 ≤ NN := by rw [hNN]; exact_mod_cast (by omega : 1 ≤ 2 * r + k + 1)
   set Λ1 := max 1 (NN * c ^ 2 * C4 ^ 2) with hΛ1_def
   have hΛ1 : 1 ≤ Λ1 := le_max_left _ _
   set A1 := A - 6 * (r : ℝ) * (m : ℝ) with hA1_def
@@ -1629,8 +1669,6 @@ theorem nnMaj : Formalism.FourierDecayAlt.P.JFxDs2.NNMaj := by
         exact ⟨norm_nonneg _, hlet _ (Matrix.of p.2.1) (Or.inr rfl) (Formalism.FourierDecayAlt.P.JFxDs2.sR_mem hp) Y (hv Y hYv)⟩)
       simpa using this
     have hP : (u.map fun Y => ‖AdL p Y‖).prod * (v.map fun Y => ‖AdR p Y‖).prod ≤ (Λ1 * X ^ (6 * r)) ^ m := by
-      have hu0 : 0 ≤ (u.map fun Y => ‖AdL p Y‖).prod := List.prod_nonneg fun y hy => by
-        obtain ⟨Y, _, rfl⟩ := List.mem_map.1 hy; exact norm_nonneg _
       calc _ ≤ (Λ1 * X ^ (6 * r)) ^ u.length * (Λ1 * X ^ (6 * r)) ^ v.length :=
             mul_le_mul hPu hPv (List.prod_nonneg fun y hy => by
               obtain ⟨Y, _, rfl⟩ := List.mem_map.1 hy; exact norm_nonneg _) (by positivity)
@@ -1641,8 +1679,6 @@ theorem nnMaj : Formalism.FourierDecayAlt.P.JFxDs2.NNMaj := by
       hA1_def hΛ1 hP
 
 end Formalism.FourierDecayAlt.P.WeakDominationMajorants.Asm
-
-theorem Formalism.FourierDecayAlt.P.WeakDominationMajorants.unipotent_majorant : Formalism.FourierDecayAlt.P.JFxDs2.NNMaj := Formalism.FourierDecayAlt.P.WeakDominationMajorants.Asm.nnMaj
 
 theorem Formalism.FourierDecayAlt.P.bessel_integral_domain : Formalism.FourierDecayAlt.JF.JDom :=
   Formalism.FourierDecayAlt.P.jf_jDom_of_nnMaj Formalism.FourierDecayAlt.P.WeakDominationMajorants.Asm.nnMaj

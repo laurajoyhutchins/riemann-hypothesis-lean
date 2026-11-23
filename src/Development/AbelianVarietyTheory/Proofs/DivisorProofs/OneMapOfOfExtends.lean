@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinsMerge
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsOmegaField
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinsMerge
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.IoOverLeftUnique
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ActLevAndActBC
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.EqOfForallAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsEmbExt
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsIntegralCoeffCof
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.RuleBaseChangeSectionValuesSemilinear
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.SecBCAndCuspBC
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartIndependenceUnconditional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option synthInstance.maxHeartbeats 200000
@@ -47,7 +96,7 @@ variable {Tp : Type} {tup : Tp → T0}
 
 theorem geo_add (O : OMDat C R i Tp tup) (cc z f g q) : geo O cc z (f + g) q = geo O cc z f q + geo O cc z g q := by
   unfold geo
-  rw [map_add, map_add, Pi.add_apply, mul_add]
+  rw [map_add (f := _), map_add (f := _), Pi.add_apply, mul_add]
 
 theorem geo_smul (O : OMDat C R i Tp tup) (cc z) (a : O.c'.F) (f q) : geo O cc z (a • f) q = (a : ℂ) * geo O cc z f q := by
   unfold geo
@@ -148,7 +197,7 @@ theorem geo_agree {t₀ : T0} (O : OMDat C R i Unit (fun _ => t₀)) (M : OMDat 
   simp only [Fin.sum_univ_one, Matrix.cons_val_zero, map_one, OneMemClass.coe_one, one_mul] at e
   rw [mul_left_comm, e, mul_left_comm]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem oneMapOf_of_extends (O : OMDat C R i Unit (fun _ => A.μ0)) (M : OMDat C R i Tp tup) (t₀ : Tp) (hle : O.c'.F ≤ M.c'.F)
     (hlev : M.lev = O.lev) {κ : WeightFamilies.Wt D ((i : ℕ) + 1)} {v₀ ι x₀} (hM : M.Pins κ v₀ ι x₀)
@@ -229,74 +278,6 @@ def PinnedDataExist (i : Fin D.R.m) : Prop :=
 
 variable {T R κ v₀}
 
-set_option maxHeartbeats 1600000 in
-
-theorem exists_extension {F : Face D A} (hR : R.Char F) {i : Fin D.R.m} {ι x₀}
-    (O : OMDat T.toCore R i Unit (fun _ => A.μ0)) (O' : OMDat T.toCore R i T0 id) (hle : O.c'.F ≤ O'.c'.F)
-    (hO : O.Pins (κ i) (v₀ i (sg0 D A)) ι x₀) (hO' : O'.Pins (κ i) (v₀ i (sg0 D A)) ι x₀) :
-    ∃ (M : OMDat T.toCore R i (Option T0) (fun o => o.getD A.μ0)) (h₁ : O.c'.F ≤ M.c'.F), M.lev = O.lev ∧
-      M.Pins (κ i) (v₀ i (sg0 D A)) ι x₀ ∧
-      ∀ x, O.Plc () x → ∃ x', M.Plc none x' ∧ M.thAd none x' = O.thAd () x ∧
-        ∀ f ∈ sec _ O.c' (wtA (κ i)) (Vc D i).rank, IsSum O () x f → IsSum M none x' (rulBC h₁ f) := by
-  obtain ⟨a, ha, hca⟩ := (cXiVal_iff _ _ _ _ _ _ _ _ _).1 hO.cxi
-  obtain ⟨b, hb, hcb⟩ := (cXiVal_iff _ _ _ _ _ _ _ _ _).1 hO'.cxi
-  obtain ⟨c₃, h', haF, hbF⟩ := exists_coeff_roots O'.c' ha hb
-  have hb0 : b ≠ 0 := fun h0 => by
-    obtain ⟨m, hm, e⟩ := hb
-    simp [h0, hm.ne'] at e
-  have h₁ : O.c'.F ≤ c₃.F := hle.trans h'
-  have h₃ : T.Q.c.F ≤ c₃.F := O.hle.trans h₁
-  have hV₃ : T.V ((i : ℕ) + 1) (sOv T.toCore c₃ h₃) = Wc D i := by
-    rw [sOv_eq, ← sOv_eq T.toCore O.c' O.hle]; exact O.hV
-  obtain ⟨c0₃, hc0⟩ := exists_coef_ext (incF O.c' c₃ h₁) (σ := inC O.c') (inC c₃) (fun _ => rfl) (lamV D i) O.c0'
-  obtain ⟨io₃, hw₃, hio, hover⟩ := GlobalTheory.T.vector_valued_lift_field_change _ _ _ _ O.c' c₃ h₁ _ _ (tauE D) (lamV D i) (wtA (κ i)) O.io O.hw hO.io
-  have hlift : ThPinsR R i ((incF O.c' c₃ h₁).comp O.jL) (inC c₃) (v₀ i (sg0 D A)) c0₃ ι T.Q.l.M (Mfr T.Q.l) O.lev := by
-    refine ⟨(RingHom.ext fun _ => rfl : _ = (inC O.c').comp O.jL).trans hO.lift.field, hO.lift.std, hO.lift.v0, ?_,
-      hO.lift.lev⟩
-    obtain ⟨g, r, c0L, hT, hc⟩ := hO.lift.c0
-    refine ⟨g, r, c0L, hT, fun v => ?_⟩
-    obtain ⟨v', hv', e⟩ := hc v
-    obtain ⟨v'', hv''⟩ := GlobalTheory.FieldBCModel.exists_over h₁ (lamV D i) v'
-    exact ⟨v'', by rw [hv'', hv', MvPolynomial.map_map], (hc0 v' v'' hv'').trans e⟩
-  obtain ⟨h₀, J₀, hr₀, -, hth₀, hpl₀⟩ := (hO.tuple ()).reps
-  choose hh Jt hrt _ using fun t => (hO'.tuple t).reps
-  let src : ∀ o : Option T0, OMDat T.toCore R i Unit (fun _ => o.getD A.μ0) := fun o =>
-    match o with
-    | none => O
-    | some t => comap O' (fun _ => t)
-  have hs : ∀ o, (src o).c'.F ≤ c₃.F := fun o =>
-    match o with
-    | none => h₁
-    | some _ => h'
-  let u : Option T0 → c₃.F := fun o =>
-    match o with
-    | none => 1
-    | some _ => ⟨a, haF⟩ / ⟨b, hbF⟩
-  let h : ∀ o, (src o).Cl' () → GA D (Vc D i) := fun o =>
-    match o with
-    | none => h₀
-    | some t => hh t
-  have hP := pins_merge src c₃ h₃ hs _ hV₃ c0₃ O.lev io₃ hw₃ u h (v₀ i (sg0 D A)) hR
-    (fun o => match o with
-      | none => hO
-      | some t => pins_comap (fun _ => t) hO') hlift hO.act.1 hio
-    (fun o => match o with
-      | none => ⟨J₀, hr₀⟩
-      | some t => ⟨Jt t, hrt t⟩) a ha (fun o => o.elim a fun _ => b)
-    (fun o => match o with
-      | none => one_mul a
-      | some _ => div_mul_cancel₀ a hb0)
-    (fun o => match o with
-      | none => hca ()
-      | some t => hcb t)
-  refine ⟨_, h₁, rfl, hP, fun x hx => ?_⟩
-  obtain ⟨y, hy⟩ := (hpl₀ x).1 hx
-  choose x' hx' using fun k => GlobalTheory.FieldBCModel.exists_over h₁ (lamV D i) (x k)
-  have hy' : Place R i A.μ0 h₀ c0₃ (jVx R i A.μ0 y) x' := fun k => (hy k).trans (hc0 _ _ (hx' k)).symm
-  refine ⟨x', ⟨y, hy'⟩, (thAdIs_thAdOf R i A.μ0 h₀ c0₃ hR.models.HV hr₀.2.2.1 hr₀.2.2.2.2.2.1 _ _ _ hy').trans
-    (hth₀ _ _ hy).symm, fun f hf hfx => ?_⟩
-  exact isThClsD_covBC_one h₁ (O.dδ ()) rfl _ _ _ _ _ _ O.io io₃ x x' (fun k => hover _ _ (hx' k))
-    (hO.cov ()).1.2.2.2.2.2.2.2.1 hf hfx
 
 variable (T R κ v₀)
 

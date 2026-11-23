@@ -1,28 +1,64 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.TypeSlice
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.OrbZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeCentralizerComm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgebraMapQrOneBijective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPowMemConj
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RatIntOfIsIntegral
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralityFromPadicNormBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SiegelWeilOrbitalMeasure
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenvalueNormBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianOneByOneIsScalar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SiegelWeilMeasureOfCongruentForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BetaTwistedInvolutionEqComplexConjOfMarked
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BetaTwistedInvolutionEqComplexConjOfMarkedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundedPowersPadicIntegral
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.BoundQ
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentralizerElementPadicBounded
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentralizerScalarPadicBounded
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjugatePlaceLiesOver
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KottwitzPointCountOneClassCommensurableStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitarySimilitudeIntegralSubgroupCommensuratedFrStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompactOpenLevelConjCommensurableStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SimilitudePairAdelicProdUnramifiedEmbeddingInjecStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapCentralizerRegularTwistedCentraliserStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SimilitudePairRegularImageAtPStatement
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.TypeSlice
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeCentralizerComm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BetaTwistedInvolutionEqComplexConjOfMarkedStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BoundedPowersPadicIntegral
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentralSimpleAlgebraEmbeddingsConjugate
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentralizerElementPadicBounded
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CentralizerScalarPadicBounded
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharpolyAlgHomEqMapMinpoly
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompactOpenLevelConjCommensurableStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjugatePlaceLiesOver
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralityFromPadicNormBound
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KottwitzPointCountOneClassCommensurableStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapCentralizerRegularTwistedCentraliserStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RatIntOfIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SimilitudePairAdelicProdUnramifiedEmbeddingInjecStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SimilitudePairRegularImageAtPStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitarySimilitudeIntegralSubgroupCommensuratedFrStatement
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.BoundQ
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.OrbZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Artinian.Instances
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NormSub
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,7 +80,11 @@ private theorem units_field {M L : Type} [CommRing M] [Algebra ℚ M] [Module.Fi
   haveI : CharZero L := (RingHom.charZero_iff (π.comp (algebraMap ℚ M)).injective).1 inferInstance
   haveI : Module.Finite ℚ L := Module.Finite.of_surjective π.toRatAlgHom.toLinearMap hπ
   haveI : NumberField L := ⟨⟩
-  let τ₀ : L →ₐ[ℚ] ℂ := IsAlgClosed.lift
+  let τ₀ : L →ₐ[ℚ] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   have hker : ∀ a, π a = 0 → π (c a) = 0 := by
     intro a ha
     apply (τ₀ : L →+* ℂ).injective
@@ -74,7 +114,7 @@ private theorem units_field {M L : Type} [CommRing M] [Algebra ℚ M] [Module.Fi
       map_add' := fun y y' => by
         obtain ⟨a, rfl⟩ := hπ y
         obtain ⟨b, rfl⟩ := hπ y'
-        rw [← map_add, hcomp, hcomp, hcomp, map_add, map_add]
+        rw [← map_add (f := _), hcomp, hcomp, hcomp, map_add (f := _), map_add (f := _)]
       commutes' := fun r => by
         have := hcomp (algebraMap ℚ M r)
         simpa using this }

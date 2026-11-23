@@ -1,5 +1,58 @@
-import Formalism.CharacterColumnKernels.StatementN
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.LenCokerOfDetNeZero
+module
+
+public import Formalism.CharacterColumnKernels.StatementN
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.LinearAlgebra.Quotient.Pi
+
+@[expose] public section
 
 open Module IsDiscreteValuationRing
 
@@ -18,7 +71,6 @@ lemma mem_smulRange {M : Type*} [AddCommGroup M] [Module O M] (l : O) (x : M) :
     x ∈ smulRange M l ↔ ∃ y, l • y = x := by
   first
     | exact Iff.rfl
-    | simp [smulRange, LinearMap.mem_range]
 
 lemma quot_mono {M : Type*} [AddCommGroup M] [Module O M] {A B : Submodule O M} (h : A ≤ B) :
     Module.length O (M ⧸ B) ≤ Module.length O (M ⧸ A) := by
@@ -77,11 +129,9 @@ private theorem length_quot_span_pow_irreducible {ϖ : O} (hϖ : Irreducible ϖ)
       rw [Module.length_eq_one_iff, isSimpleModule_iff_isCoatom]
       first
         | exact (PrincipalIdealRing.isMaximal_of_irreducible hϖ).out
-        | exact Ideal.isMaximal_def.mp (PrincipalIdealRing.isMaximal_of_irreducible hϖ)
     rw [hlen, h1, ih]
     first
       | (push_cast; ring)
-      | simp [add_comm]
 
 private theorem length_quot_smulRange_eq_addVal (l : O) :
     Module.length O (O ⧸ smulRange O l) = addVal O l := by
@@ -97,7 +147,6 @@ private theorem length_quot_smulRange_eq_addVal (l : O) :
   have hirr : ∃ ϖ : O, Irreducible ϖ := by
     first
       | exact IsDiscreteValuationRing.exists_irreducible O
-      | exact IsDiscreteValuationRing.exists_irreducible
   obtain ⟨ϖ, hϖ⟩ := hirr
   by_cases hl : l = 0
   · subst hl
@@ -141,7 +190,6 @@ lemma length_quot_smulRange_pi (n : ℕ) (l : O) :
   rw [hlen, Module.length_pi_of_fintype, length_quot_smulRange_eq_addVal l]
   first
     | simp
-    | simp [Finset.sum_const, nsmul_eq_mul]
 
 lemma length_quot_smulRange_free (Q : Type*) [AddCommGroup Q] [Module O Q] [Module.Finite O Q]
     [IsTorsionFree O Q] (l : O) :
@@ -151,7 +199,7 @@ lemma length_quot_smulRange_free (Q : Type*) [AddCommGroup Q] [Module O Q] [Modu
     by_cases hc : c = 0
     · exact Or.inl hc
     · right
-      have hreg : IsRegular c := isRegular_of_ne_zero hc
+      have hreg : IsRegular c := IsRegular.of_ne_zero hc
       apply (‹IsTorsionFree O Q›).1 hreg
       show c • x = c • 0
       rw [h, smul_zero]
@@ -244,7 +292,7 @@ lemma step1 (N : Submodule O V) (hN : N.FG) (W U : Submodule (FractionRing O) V)
       by_cases hc : c = 0
       · exact Or.inl hc
       · right
-        have hreg : IsRegular c := isRegular_of_ne_zero hc
+        have hreg : IsRegular c := IsRegular.of_ne_zero hc
         apply hQtf.1 hreg
         show c • x = c • 0
         rw [h, smul_zero]
@@ -264,7 +312,7 @@ lemma step1 (N : Submodule O V) (hN : N.FG) (W U : Submodule (FractionRing O) V)
         rw [Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
         exact hc
       show U.mkQ a = U.mkQ (n : V)
-      rw [← hac, map_add, hc0, add_zero]
+      rw [← hac, map_add (f := _), hc0, add_zero]
     have hli : LinearIndependent O (fun i => ((b i : LinearMap.range g) : V ⧸ U)) :=
       b.linearIndependent.map' (LinearMap.range g).subtype (Submodule.ker_subtype _)
     have hliK := (LinearIndependent.iff_fractionRing O (FractionRing O)).mp hli
@@ -274,8 +322,6 @@ lemma step1 (N : Submodule O V) (hN : N.FG) (W U : Submodule (FractionRing O) V)
         = Fintype.card (Module.Free.ChooseBasisIndex O (LinearMap.range g)) := by
           first
             | exact Module.finrank_eq_card_chooseBasisIndex O _
-            | exact Module.finrank_eq_card_chooseBasisIndex
-            | simp [Module.finrank_eq_card_chooseBasisIndex]
       _ ≤ finrank (FractionRing O) (W.map U.mkQ) := hliW.fintype_card_le_finrank
       _ ≤ finrank (FractionRing O) W := Submodule.finrank_map_le _ _
   calc Module.length O (N ⧸ (smulRange N l ⊔ LinearMap.ker g))
@@ -284,7 +330,6 @@ lemma step1 (N : Submodule O V) (hN : N.FG) (W U : Submodule (FractionRing O) V)
     _ ≤ (finrank (FractionRing O) W : ℕ∞) * addVal O l := by
         first
           | gcongr
-          | exact mul_le_mul_of_nonneg_right (Nat.cast_le.mpr he) (zero_le _)
 
 lemma split {M P : Type*} [AddCommGroup M] [Module O M] [AddCommGroup P] [Module O P]
     (A B : Submodule O M) (hAB : A ≤ B) (i : P →ₗ[O] M) (C : Submodule O P)
@@ -317,7 +362,6 @@ lemma split {M P : Type*} [AddCommGroup M] [Module O M] [AddCommGroup P] [Module
   have hex : Function.Exact (LinearMap.ker q).subtype q := by
     first
       | exact LinearMap.exact_subtype_ker_map q
-      | exact fun y => ⟨fun hy => ⟨⟨y, hy⟩, rfl⟩, by rintro ⟨⟨z, hz⟩, rfl⟩; exact hz⟩
   have hlen := Module.length_eq_add_of_exact (LinearMap.ker q).subtype q
     (LinearMap.ker q).injective_subtype hqs hex
   have h1 : Module.length O (LinearMap.ker q) ≤ Module.length O (LinearMap.range φ) :=
@@ -371,8 +415,6 @@ theorem core {X : Type*} (E : Set (Module.End (FractionRing O) V))
     rw [htop, Finset.sum_empty]
     first
       | simp
-      | exact (Module.length_eq_zero_iff.mpr inferInstance).le
-      | exact le_of_eq (Module.length_eq_zero_iff.mpr ((Submodule.Quotient.subsingleton_iff _).mpr rfl))
   | @insert x S hxS ih =>
     intro h1 h2 U hU N hN hNE hNS
     obtain ⟨f, hfE, l, hfl, hlw⟩ := h2 x (Finset.mem_insert_self x S)
@@ -443,7 +485,7 @@ theorem core {X : Type*} (E : Set (Module.End (FractionRing O) V))
           have hnWU : (n : V) ∈ W x ⊔ U₁ := hNWU n.2
           obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.mp hnWU
           have key : f (n : V) - l • (n : V) = f b - l • b := by
-            rw [← hab, map_add, hfl a ha, smul_add]
+            rw [← hab, map_add (f := _), hfl a ha, smul_add]
             abel
           show f (n : V) - l • (n : V) ∈ U₁
           rw [key]
@@ -479,7 +521,6 @@ theorem core {X : Type*} (E : Set (Module.End (FractionRing O) V))
           first
             | (gcongr; exact hlw)
             | gcongr
-            | exact add_le_add_right (mul_le_mul_of_nonneg_left hlw (zero_le _)) _
 
 section Eig
 
@@ -544,7 +585,7 @@ lemma cc_mem_VS (hsum : (⨆ x, Vx T act x) = ⊤) {Z : Set X} {c : T} (hc : c �
     exact Submodule.mem_top
   obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hv
   have hpres := VS_pres (act c) (fun y => vx_pres (act c) (fun f => cc_comm c f) y) Z
-  rw [map_add, LinearMap.mem_ker.mp (cc_kill hc hb), add_zero]
+  rw [map_add (f := _), LinearMap.mem_ker.mp (cc_kill hc hb), add_zero]
   exact hpres ha
 
 lemma vcc_attain (Z : Set X) (x : X) :
@@ -587,73 +628,9 @@ end QuotientPowerLengths
 
 open QuotientPowerLengths
 
-theorem congBound : StatCongBound := by
-  unfold StatCongBound
-  intro O _ _ _ X _ T _ _ V _ _ _ _ _ act hsum L hL _ hLT Z
-  refine congMod_le hsum L hL Z ((fun c : T => act c) '' (ccIdeal T (Z : Set X) : Set T))
-    (vcc T (Z : Set X)) ?_ ?_ ?_ ?_
-  · rintro g ⟨c, -, rfl⟩ f
-    exact cc_comm c f
-  · rintro g ⟨c, -, rfl⟩ v hv
-    exact hLT c v hv
-  · rintro g ⟨c, hc, rfl⟩ v -
-    exact cc_mem_VS hsum hc v
-  · intro x _
-    obtain ⟨c, hc, hcx⟩ := vcc_attain (T := T) (Z : Set X) x
-    exact ⟨act c, ⟨c, hc, rfl⟩, (c : X → O) x, fun v hv => (mem_Vx.mp hv) c, hcx.le⟩
-
 theorem congBoundGood : StatCongBoundGood := by
   unfold StatCongBoundGood
   intro O _ _ _ X _ T _ _ V _ _ _ _ _ act hsum L hL _ hLT Z Zg _ a A haL hacomm hZgA hZ0
-  have hVa : VS T act (Z : Set X) ≤ (VS T act (Zg : Set X)).comap a := by
-    unfold VS
-    refine iSup₂_le fun y hy => ?_
-    intro v hv
-    rw [Submodule.mem_comap]
-    by_cases hyg : y ∈ Zg
-    · rw [hZgA y hyg v hv]
-      exact Submodule.smul_mem _ _
-        ((le_iSup₂_of_le y (Finset.mem_coe.mpr hyg) le_rfl :
-          Vx T act y ≤ ⨆ x ∈ (Zg : Set X), Vx T act x) hv)
-    · rw [hZ0 y (Finset.mem_coe.mp hy) hyg v hv]
-      exact Submodule.zero_mem _
-  refine congMod_le hsum L hL Zg ((fun c : T => a * act c) '' (ccIdeal T (Z : Set X) : Set T))
-    (fun x => vcc T (Z : Set X) x + addVal O (A : O)) ?_ ?_ ?_ ?_
-  · rintro g ⟨c, -, rfl⟩ f
-    show a * act c * act f = act f * (a * act c)
-    rw [mul_assoc, cc_comm c f, ← mul_assoc, hacomm f, mul_assoc]
-  · rintro g ⟨c, -, rfl⟩ v hv
-    exact haL (act c v) (hLT c v hv)
-  · rintro g ⟨c, hc, rfl⟩ v -
-    exact hVa (cc_mem_VS hsum hc v)
-  · intro x hx
-    obtain ⟨c, hc, hcx⟩ := vcc_attain (T := T) (Z : Set X) x
-    refine ⟨a * act c, ⟨c, hc, rfl⟩, (A : O) * (c : X → O) x, fun v hv => ?_, ?_⟩
-    · show a (act c v) = _
-      rw [(mem_Vx.mp hv) c, ← algebraMap_smul (FractionRing O) ((c : X → O) x) v, map_smul,
-        hZgA x hx v hv, smul_smul,
-        ← algebraMap_smul (FractionRing O) ((A : O) * (c : X → O) x) v, map_mul, map_intCast,
-        mul_comm]
-    · exact le_of_eq (by rw [addVal_mul, hcx, add_comm])
-
-theorem congBoundLarge : StatCongBoundLarge := by
-  unfold StatCongBoundLarge
-  intro O _ _ _ X _ T _ _ V _ _ _ _ _ act hsum L hL _ hLT Z _
-  refine congMod_le hsum L hL Z ((fun c : T => act c) '' (ccIdeal T (Z : Set X) : Set T))
-    (vcc T (Z : Set X)) ?_ ?_ ?_ ?_
-  · rintro g ⟨c, -, rfl⟩ f
-    exact cc_comm c f
-  · rintro g ⟨c, -, rfl⟩ v hv
-    exact hLT c v hv
-  · rintro g ⟨c, hc, rfl⟩ v -
-    exact cc_mem_VS hsum hc v
-  · intro x _
-    obtain ⟨c, hc, hcx⟩ := vcc_attain (T := T) (Z : Set X) x
-    exact ⟨act c, ⟨c, hc, rfl⟩, (c : X → O) x, fun v hv => (mem_Vx.mp hv) c, hcx.le⟩
-
-theorem congBoundGoodLarge : StatCongBoundGoodLarge := by
-  unfold StatCongBoundGoodLarge
-  intro O _ _ _ X _ T _ _ V _ _ _ _ _ act hsum L hL _ hLT Z Zg _ _ a A haL hacomm hZgA hZ0
   have hVa : VS T act (Z : Set X) ≤ (VS T act (Zg : Set X)).comap a := by
     unfold VS
     refine iSup₂_le fun y hy => ?_

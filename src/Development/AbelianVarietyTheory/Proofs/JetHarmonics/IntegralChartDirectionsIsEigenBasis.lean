@@ -1,8 +1,53 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ChartDirectionsIntegral
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartF
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralChartDirectionsAreEigenvectors
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.SaturationChartsHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import Development.AbelianVarietyTheory.Definitions.Jets.TwoPlaces
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ConnectionKillsSeries
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralChartDirectionsAreEigenvectors
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.SaturationChartsHolds
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -42,6 +87,7 @@ theorem eigBasis_of_generic {V K : Type} [CommRing V] [IsDomain V] [Field K] [Al
   · funext k
     apply hinj
     have := heig a ⟨τ, i⟩ k
+
     simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Pi.smul_apply, smul_eq_mul, ht]
     exact this
   obtain ⟨b, hb, -⟩ := hbas fun k => algebraMap V K (v k)
@@ -51,6 +97,7 @@ theorem eigBasis_of_generic {V K : Type} [CommRing V] [IsDomain V] [Field K] [Al
     have h1 : ∀ k, ∑ ℓ', (b ℓ' * χ ℓ'.1 a) * algebraMap V K (u ℓ' k) = χ τ a * algebraMap V K (v k) := by
       intro k
       have h2 := congrArg (algebraMap V K) (congrFun (hv a) k)
+
       simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Pi.smul_apply, smul_eq_mul, ht] at h2
       rw [← h2]
       simp only [← hb, Finset.mul_sum]
@@ -78,6 +125,7 @@ theorem eigBasis_of_generic {V K : Type} [CommRing V] [IsDomain V] [Field K] [Al
   have hmem : (s : V) • v ∈ Submodule.span V (Set.range fun i : Fin (m τ) => u ⟨τ, i⟩) := by
     rw [Submodule.mem_span_range_iff_exists_fun]
     refine ⟨g, funext fun k => hinj ?_⟩
+
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul, hg, ← hb1, Finset.mul_sum]
     simp only [Algebra.smul_def, mul_assoc]
   obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun V).1 (hsat v s (nonZeroDivisors.ne_zero s.2) hmem)
@@ -87,6 +135,7 @@ theorem eigBasis_of_generic {V K : Type} [CommRing V] [IsDomain V] [Field K] [Al
         algebraMap V K (v k) := by
     intro c hc k
     rw [hext (fun i => algebraMap V K (c i)) k, ← hc]
+
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul]
   have h5 := (hbas fun k => algebraMap V K (v k)).unique (hK c' hc') (hK c hc)
   funext i

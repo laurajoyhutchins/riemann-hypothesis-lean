@@ -1,14 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EqMulProdOfPartial
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LowestKTypesJointShapeBlockUnitaryStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GluingLawHoldsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFockPolynomialIsoUnitaryPairStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DiscreteSeriesPureInnerProductsTensorProduct
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRealIntertwinerContractionOnePlaceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealIntertwinerContractionValuesKFiniteStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCoverKFinitePairingOfRealIntertwinerStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CovariantPairingUniqueUpToScalarStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EqMulProdOfPartial
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.BarMatrix
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LowestKTypesJointShapeBlockUnitaryStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CovariantPairingUniqueUpToScalarStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DiscreteSeriesPureInnerProductsTensorProduct
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCoverKFinitePairingOfRealIntertwinerStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFockPolynomialIsoUnitaryPairStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRealIntertwinerContractionOnePlaceStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GluingLawHoldsStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealIntertwinerContractionValuesKFiniteStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Matrix GlobalTheory.Chain GlobalTheory.Chain.RealIt GlobalTheory.Chain.RealLine
 open scoped TensorProduct InnerProductSpace
@@ -22,8 +63,8 @@ open GlobalTheory.IndefiniteRowSideFullHecke.RaisingLoweringOperators GlobalTheo
 
 variable {D : D7} {V W : HSp D} {S S' : D.what₂.Tau → SPar}
 
-open Classical in
 
+open Classical in
 theorem exists_ins {a b : ℕ} (P : D.what₂.Tau → LPol b a) (τ : D.what₂.Tau) :
     ∃ j : LPol b a →ₗ[ℂ] PolF D b a, ∀ Q, j Q = glue (Function.update P τ Q) := by
   refine ⟨LinearMap.mulLeft ℂ
@@ -39,8 +80,8 @@ theorem exists_ins {a b : ℕ} (P : D.what₂.Tau → LPol b a) (τ : D.what₂.
   refine Finset.prod_congr rfl fun σ hσ => ?_
   rw [if_neg (Finset.ne_of_mem_erase hσ)]
 
-open Classical in
 
+open Classical in
 theorem locW_of_semiW {M : DSModel V S} {M' : DSModel W S'} {τ : D.what₂.Tau} {aS aT : ℚ}
     {A : PolF D W.rank V.rank →ₗ[ℂ] M'.sm τ →ₗ[ℂ] M.H τ} (h : SemiW M M' τ aS aT A)
     {P : D.what₂.Tau → LPol W.rank V.rank} {j : LPol W.rank V.rank →ₗ[ℂ] PolF D W.rank V.rank}
@@ -70,7 +111,7 @@ theorem locW_of_semiW {M : DSModel V S} {M' : DSModel W S'} {τ : D.what₂.Tau}
   · intro Y hY Q y y' hy
     have e : tgtOp M M' τ aS Y (j Q) =
         j (locT (M.ε τ) (M'.ε τ) (M'.fr τ * Y * (M'.fr τ)⁻¹) Q + ((aS : ℂ) * Y.trace) • Q) := by
-      rw [map_add, map_smul, ← hT]
+      rw [map_add (f := _), map_smul, ← hT]
       simp [tgtOp]
     simp only [LinearMap.comp_apply]
     rw [← e]

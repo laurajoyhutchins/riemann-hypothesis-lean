@@ -1,9 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartCut
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartKer
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartGr
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HomogSpan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartCut
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartGr
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ChartKer
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.HomogSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
@@ -38,7 +90,7 @@ private theorem der_sq {O A : Type} [CommRing O] [CommRing A] [Algebra O A] (x :
   · rw [RingHom.mem_ker] at ha hb
     rw [hD a b, ha, hb, zero_smul, zero_smul, add_zero]
   · intro a b ha hb
-    rw [map_add, ha, hb, add_zero]
+    rw [map_add (f := _), ha, hb, add_zero]
 
 private theorem indep {O A κ : Type} [CommRing O] [IsDomain O] [CommRing A] [Algebra O A] [Fintype κ] (x : A →ₐ[O] O)
     (g : κ → A) (hd : ∀ k, ∃ δ ∈ PtDer x O, δ (g k) ≠ 0 ∧ ∀ k', k' ≠ k → δ (g k') = 0) :
@@ -47,12 +99,14 @@ private theorem indep {O A κ : Type} [CommRing O] [IsDomain O] [CommRing A] [Al
   rw [Fintype.linearIndependent_iff]
   intro c hc k
   have hs : (satSq x).mkQ (∑ i, c i • g i) = 0 := by
+
     rw [map_sum]
     simpa only [map_smul] using hc
   rw [Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero] at hs
   obtain ⟨a, ha0, ha⟩ := hs
   obtain ⟨δ, hδ, hk, hk'⟩ := hd k
   have hz := der_sq x δ hδ _ ha
+
   rw [map_smul, map_sum] at hz
   simp only [map_smul, smul_eq_mul] at hz
   rw [Finset.sum_eq_single k (fun j _ hj => by rw [hk' j hj, mul_zero]) (by simp)] at hz

@@ -1,12 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GlobSet
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PlacesOf
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PatternUnitriangularStrongApproximation
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitriangularChangeRationalFlagIffRationalUnipot
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocFacts
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.NGAnalytic
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.DataInst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.InVolumesAtOfSWS
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GlobSet
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PlacesOf
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalUnitriangularFrameChangeLocalScalings
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitriangularChangeRationalFlagIffRationalUnipotStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PatternUnitriangularStrongApproximationStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -121,12 +161,12 @@ private theorem algebraMap_δ_mul_uP_mem_O (Z : LocDat D) (p : PlF D) :
     exact FractionalIdeal.coeIdeal_le_one
   have h1 : (1 : D.host.E) ∈ (ddS D)⁻¹ ^ 1 := by
     rw [pow_one]
-    have hle := FractionalIdeal.inv_anti_mono h0 one_ne_zero hle0
+    have hle := FractionalIdeal.inv_anti_mono h0 hle0
     rw [inv_one] at hle
     exact FractionalIdeal.one_le.mp hle
   obtain ⟨-, -, -, hO, -⟩ := Z.agree p
-  have h2 := LocFacts.lf_mem_pow p dualLoc_holds Z 1 1 h1
-  simp only [map_one, one_mul, pow_one] at h2
+  have h2 := LocFacts.lf_mem_inv p dualLoc_holds Z 1 (by simpa using h1)
+  simp only [map_one, one_mul] at h2
   rw [hO]
   exact h2
 
@@ -145,8 +185,9 @@ theorem chg_scaled (Z : LocDat D) (p : PlF D) {f g : Fin (D.R.rS + 1) → (VS D)
     Chg (scaled Z p f) (Matrix.diagonal (fun a => Ring.inverse (frFac Z.δ p a)) * t.map (D.s.atP p).ιE *
       Matrix.diagonal (frFac Z.δ p)) (scaled Z p g) := by
   intro b
+
   simp only [scaled, h b, map_sum, baseChange_smul₂, Finset.smul_sum, smul_smul, Matrix.mul_diagonal,
-    Matrix.diagonal_mul, Matrix.map_apply]
+  Matrix.diagonal_mul, Matrix.map_apply]
   refine Finset.sum_congr rfl fun a _ => ?_
   congr 1
   have hu := Ring.inverse_mul_cancel _ (isUnit_frFac' Z p a)
@@ -158,10 +199,10 @@ section Glob
 
 variable {D : D7}
 
-theorem one_flag (Z : LocDat D) {T : D.host.E} (hT : T ≠ 0) (F : LFlag (VS D) D.R.rS T)
+theorem one_flag (Z : LocDat D) {T : D.host.E} (hT : T ≠ 0) (F : LFlag (D.sp.Y 0) D.R.rS T)
     (P : Finset (PlF D)) (f : ∀ p : PlF D, Fin (D.R.rS + 1) → Vp D p)
     (hf : ∀ p ∈ P, Tri (D.s.atP p).Ep (scaled Z p (frame F)) (f p)) :
-    ∃ G : LFlag (VS D) D.R.rS T, Tri D.host.E (frame F) (frame G) ∧ G.zt = G.fl.z ∧
+    ∃ G : LFlag (D.sp.Y 0) D.R.rS T, Tri D.host.E (frame F) (frame G) ∧ G.zt = G.fl.z ∧
       (∀ p, p ∉ P → ∃ A : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (D.s.atP p).Ep, Uni A ∧
         (∀ a b, A a b ∈ (Z.M p).L.O) ∧ Chg (scaled Z p (frame F)) A (scaled Z p (frame G))) ∧
       ∀ p ∈ P, ∃ A : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (D.s.atP p).Ep, Uni A ∧
@@ -285,11 +326,11 @@ theorem one_flag (Z : LocDat D) {T : D.host.E} (hT : T ≠ 0) (F : LFlag (VS D) 
       rw [← mul_assoc, Matrix.mul_nonsing_inv _ (hdet p), one_mul]
       exact hsc p
 
-theorem choose_frames : ∀ (D : D7) (Z : LocDat D) (u u' : D.what₂.Word) (F : LFlag (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E))
-    (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)) (P : Finset (PlF D))
+theorem choose_frames : ∀ (D : D7) (Z : LocDat D) (u u' : D.what₂.Word) (F : LFlag (D.sp.Y 0) D.R.rS (((D.mem u).A.T : ℕ) : D.host.E))
+    (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)) (P : Finset (PlF D))
     (f f' : ∀ p : PlF D, Fin (D.R.rS + 1) → Vp D p),
     (∀ p ∈ P, Tri (D.s.atP p).Ep (scaled Z p (frame F)) (f p) ∧ Tri (D.s.atP p).Ep (scaled Z p (frame F')) (f' p)) →
-    ∃ (G : LFlag (VS D) D.R.rS ((Tu D u : ℕ) : D.host.E)) (G' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E)),
+    ∃ (G : LFlag (D.sp.Y 0) D.R.rS (((D.mem u).A.T : ℕ) : D.host.E)) (G' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E)),
       StdOff Z P F G F' G' ∧ ∀ p ∈ P, ∃ A A' : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (D.s.atP p).Ep,
         Uni A ∧ Uni A' ∧ (∀ a b, A a b ∈ (Z.M p).L.O ∧ A' a b ∈ (Z.M p).L.O ∧
           A a b - A' a b ∈ Submodule.span (Z.M p).L.O

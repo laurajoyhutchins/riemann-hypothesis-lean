@@ -1,29 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.BoundedStatements
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Statements.TowerExistence.GoodTowerExists
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.HodgeLatticeFlagStatement
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.TrivFlagHodgeStatement
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.PadicIntegersHenselianFiniteResidue
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.HodgeComparisonCompatibility
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.CmpSt
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NumberField
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenOfUnit
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DetLatticeFlagTensor
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NefDegreeScaleInvariant
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsReindexDegreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCompCoverPrimesStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NefOnFibresBlockXdegSumsOfRootLinesStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CoordsReindexDegreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DetLatticeFlagTensor
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenOfUnit
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCompCoverPrimesStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LatticeTensorPowerDegree
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NefDegreeScaleInvariant
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.NefOnFibresBlockXdegSumsOfRootLinesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
 open GroundTheory.Heights₂.Heights.LowerBoundFree GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp
 open ReciprocityTheory.AnForm (levi)
 
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.CompanionTheory.Relay.hodge_comp_cover_cm_signs : Top.Given → Out.WeilSt → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (Xo : ∀ l : Tor.Level H, Moduli D l) (l : Tor.Level H) (c : Coeff l) (Y : Model (Xo l) c (algebraMap (𝓞 c.F) c.F)) (S : Finset ℕ) (Ω : Type) [Field Ω] [CharZero Ω] (K : Type) [Fintype K] (J : K → Type) [∀ k, Fintype (J k)] (y : (Σ k, J k) → Ω) (𝔐 : HodgeCpt Y S y) (dg : ℕ) (sm : CMType H → CMType H ⊕ CMType H) (m : ℕ) (s : CMType H → Fin m → 𝔐.Li) (a : K → ℤ) (e₀ : Ω), Top.IsGlobal Xo l c Y → 1 ≤ D.p → 1 ≤ D.q → 𝔐.IsCover dg → (∀ p ∈ S, HT.HTFree 𝔐 p) → (∀ p : ℕ, p.Prime → p ∉ S → ¬ (p : ℤ) ∣ discr E ∧ 4 * Fintype.card (CMType H) + 2 ≤ p ∧ 2 < p) → (sm = Sum.inl ∨ sm = Sum.inr) → (∀ τ, LinearIndependent Ω (s τ) ∧ Submodule.span Ω (Set.range (s τ)) = 𝔐.Vgen (sm τ)) → (Lat.tens (fun τ => detLat (𝔐.V (sm τ)) (s τ)) (fun _ => -1)).IsDegOn Set.univ y a e₀ → NefOnFibres (mCoordIdeal y) a := by
   intro hG hW E _ _ _ H D Xo l c Y S Ω _ _ K _ J _ y 𝔐 dg sm m s a e₀ hY hp hq hcov hS hS' hsm hs hdeg
   have hI : PB.Inputs := hG.2.2.2.2.2.2.2.2.2.1
@@ -31,7 +65,10 @@ theorem _root_.GlobalTheory.CompanionTheory.Relay.hodge_comp_cover_cm_signs : To
     GlobalTheory.T.hodge_comp_cover_primes hW E H D Xo l c Y S Ω K J y 𝔐 dg hcov
       (fun p hp hdv => by by_contra h; exact (hS' p hp h).1 hdv) hS
   haveI : CharZero M.Ω := charZero_of_injective_ringHom i.injective
-  obtain ⟨n1, n2⟩ := GlobalTheory.T.nefOnFibres_block_xdeg_sums_of_rootLines hG E H D Xo l c Y S M 𝔐' Fl e hY hp hq hS2 hS' hR
+  have hNef : _ ∧ _ :=
+    GlobalTheory.T.nefOnFibres_block_xdeg_sums_of_rootLines hG E H D Xo l c Y S M 𝔐' Fl e
+      hY hp hq hS2 hS' hR
+  obtain ⟨n1, n2⟩ := hNef
   have hb₀ : ∀ σ, LinearIndependent M.Ω (Fl.b σ) := by
     obtain ⟨_, _, -, -, -, h, -⟩ := Fl.generic
     exact h
@@ -58,7 +95,7 @@ theorem _root_.GlobalTheory.CompanionTheory.Relay.hodge_comp_cover_cm_signs : To
     rcases hsm with rfl | rfl
     · have h1 : ∀ τ (k : Fin D.p), HodgeCpt.rootIdx D (τ, Fin.castAdd D.q k) = ⟨.inl τ, k⟩ := fun τ k => by
         unfold HodgeCpt.rootIdx
-        rw [dif_pos (show ((Fin.castAdd D.q k : Fin _) : ℕ) < D.p from k.2)]
+        rw [dite_eq_left (show ((Fin.castAdd D.q k : Fin _) : ℕ) < D.p from k.2)]
         rfl
       refine ⟨_, _, Lat.tens_isDegOn _ _ _ _ _ _ _ _ _ _ _ (fun τ => Lat.tens_isDegOn _ _ _ _ _ _ _ _ _ _ _
         (fun k => hgr _ _ (h1 τ k)) _) _, ?_⟩
@@ -69,7 +106,7 @@ theorem _root_.GlobalTheory.CompanionTheory.Relay.hodge_comp_cover_cm_signs : To
       simp [HodgeCpt.rootSgn]
     · have h1 : ∀ τ (k : Fin D.q), HodgeCpt.rootIdx D (τ, Fin.natAdd D.p k.rev) = ⟨.inr τ, k⟩ := fun τ k => by
         unfold HodgeCpt.rootIdx
-        rw [dif_neg (by simp)]
+        rw [dite_eq_right (by simp)]
         congr 1
         apply Fin.ext
         have := k.2

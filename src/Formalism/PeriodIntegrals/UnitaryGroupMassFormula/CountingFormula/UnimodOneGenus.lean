@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.ZMemPerp
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.ZMemPerp
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
 
 open NumberField Module Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.BasicNotions Formalism.L2.SG.CntLocal
 open Classical
@@ -33,7 +79,7 @@ def vPr (f : Fin D.R.rS → (VS D).V) (v : (VS D).V) : (VS D).V :=
 
 theorem vPr_add (f : Fin D.R.rS → (VS D).V) (v w : (VS D).V) :
     vPr D F0 f (v + w) = vPr D F0 f v + vPr D F0 f w := by
-  simp only [vPr, map_add, add_smul, Finset.sum_add_distrib]
+  simp only [vPr, map_add (f := _), add_smul, Finset.sum_add_distrib]
   abel
 
 theorem vPr_smul (f : Fin D.R.rS → (VS D).V) (c : D.host.E) (v : (VS D).V) :
@@ -69,10 +115,10 @@ def lamC (f : Fin D.R.rS → (VS D).V) (M : Submodule (𝓞 D.host.E) (WbQ D F0)
   add_mem' := by
     rintro v v' ⟨h1, ⟨w, hw, hwM⟩, h3⟩ ⟨h1', ⟨w', hw', hwM'⟩, h3'⟩
     refine ⟨fun a => ?_, ⟨w + w', ?_, ?_⟩, fun a => ?_⟩
-    · rw [map_add, star_add]; exact fi_add D (h1 a) (h1' a)
+    · rw [map_add (f := _), star_add]; exact fi_add D (h1 a) (h1' a)
     · rw [Submodule.coe_add, hw, hw', vPr_add]
     · rw [Submodule.Quotient.mk_add]; exact M.add_mem hwM hwM'
-    · rw [vPr_add, map_add]; exact fi_add D (h3 a) (h3' a)
+    · rw [vPr_add, map_add (f := _)]; exact fi_add D (h3 a) (h3' a)
   zero_mem' := by
     refine ⟨fun a => ?_, ⟨0, ?_, ?_⟩, fun a => ?_⟩
     · simp only [map_zero, star_zero]; exact fi_zero D _
@@ -121,6 +167,12 @@ def LocGenXS : Prop :=
       (haveI := P.isPrime; Formalism.HermitianLatticesTheory.localization₂ P.asIdeal (XS D F0) =
         Formalism.HermitianLatticesTheory.localization₂ P.asIdeal (Submodule.span (𝓞 D.host.E) (Set.range fun a => c a • F0.e a)))
 
+private theorem row_span_eq_top_of_unimodular (D : Formalism.BasicNotions.D7) {Λ : Submodule (𝓞 D.host.E) (VS D).V}
+    (hL : Λ.FG) (hU : Formalism.HermitianLatticesTheory.IsUnimodular (VS D).hT Λ) :
+    Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ := by
+  exact Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top hU (VS D).herm hL
+
+
 theorem rowSurj_of (hJ : UnimodOneGenus) (hP : PartnerEx) (hL : LamLattice) (hU : LamUnimod)
     (hF : LamFlag) (hG : LocGenXS) : RowSurj := by
   intro D u F0 M hM
@@ -128,10 +180,12 @@ theorem rowSurj_of (hJ : UnimodOneGenus) (hP : PartnerEx) (hL : LamLattice) (hU 
   obtain ⟨hz, hX, hprim, hMof⟩ := hF D u F0 f M hf hM
   have hLat := hL D u F0 f M hf hM
   have hUn := hU D u F0 f M hf hM
+  have hFull : Submodule.IsFullLattice D.host.E (lamC D F0 f M) :=
+    { toIsLattice := hLat, span_eq_top := row_span_eq_top_of_unimodular D hLat.fg hUn }
   refine ⟨lamC D F0 f M, ?_, hMof⟩
   refine ⟨?_, ⟨hLat, hUn, ⟨hz, rfl⟩, ?_, hprim⟩, hX⟩
   ·
-    exact ⟨hLat, hJ D.host.E (VS D).V (VS D).hT D.sp.cm.cmUnram (VS D).herm (VS D).nondeg
+    exact ⟨hFull, hJ D.host.E (VS D).V (VS D).hT D.sp.cm.cmUnram (VS D).herm (VS D).nondeg
       (VS D).L0 (lamC D F0 f M) (VS D).standardTuple_isLattice hLat (VS D).baseLattice_isUnimodular hUn⟩
   · intro P
     rw [hX]

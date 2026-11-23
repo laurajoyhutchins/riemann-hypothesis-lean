@@ -1,6 +1,52 @@
-import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.HlamStable
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarMirror
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.LholClmEventually
+module
+
+public import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.HlamStable
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.ExplicitFunctionSquareIntegrable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.LholClmEventually
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarMirror
+public import Mathlib.Algebra.Order.Chebyshev
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,6 +65,7 @@ theorem pl_opNorm_le {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V
   have h1 : ‖A‖ ≤ ∑ i, ‖A (b i)‖ := by
     refine A.opNorm_le_bound (Finset.sum_nonneg fun _ _ => norm_nonneg _) fun v => ?_
     conv_lhs => rw [← b.sum_repr' v]
+
     rw [map_sum, Finset.sum_mul]
     refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
     rw [map_smul, norm_smul, mul_comm]
@@ -33,8 +80,7 @@ theorem pl_opNorm_le {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V
 theorem square_integrable_of_norm : PsiNorm → CompanionTheory.RgDs.ExplicitFunctionSquareIntegrable := by
   intro hN n ε lam T μ hl hμ ν hν
   have hfin := hN n ε lam hl T μ hμ
-  have := muCD_isHaar ε
-  set f : UJ ε → (T.V →L[ℂ] T.V) := fun g => PsiM T μ (toM g) with hf
+  let f : UJ ε → (T.V →L[ℂ] T.V) := fun g => PsiM T μ (toM g)
   have hcont : Continuous f :=
     (psiM_continuousOn T μ hμ).comp_continuous (continuous_toM ε) (fun g => g.2)
   have hmCD : MemLp f 2 (muCD ε) := by
@@ -43,7 +89,7 @@ theorem square_integrable_of_norm : PsiNorm → CompanionTheory.RgDs.ExplicitFun
     have hle : ∀ g : Formalism.REAL.UJ ε, ‖‖f g‖ ^ 2‖ₑ ≤
         ENNReal.ofReal (Module.finrank ℂ T.V : ℝ) * ENNReal.ofReal (hsOp (PsiM T μ (Formalism.MainNotions.S.umat g))) := by
       intro g
-      rw [← ENNReal.ofReal_mul (Nat.cast_nonneg _), Real.enorm_eq_ofReal (by positivity)]
+      rw [← ENNReal.ofReal_mul (Nat.cast_nonneg _), Real.eNorm_eq_ofReal (by positivity)]
       exact ENNReal.ofReal_le_ofReal (pl_opNorm_le _)
     calc ∫⁻ g, ‖‖f g‖ ^ 2‖ₑ ∂(muCD ε) ≤ ∫⁻ g : Formalism.REAL.UJ ε, ENNReal.ofReal (Module.finrank ℂ T.V : ℝ) *
           ENNReal.ofReal (hsOp (PsiM T μ (Formalism.MainNotions.S.umat g))) ∂(muCD ε) := lintegral_mono hle

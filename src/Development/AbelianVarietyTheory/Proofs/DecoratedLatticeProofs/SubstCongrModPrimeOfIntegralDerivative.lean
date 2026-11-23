@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
-import Formalism.TorsionNormIteration.InverseIntegralClasses.SigmaNormLeOne
-import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
+public import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.SigmaNormLeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -11,7 +54,7 @@ namespace GlobalTheory.Honda
 
 theorem subst_congr_of_derivative_integral :
     ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (l : ℕ), l.Prime → ‖(l : K)‖ < 1 →
-    ∀ (f : K⟦X⟧), CoefLe 1 (derivative K f) → ∀ (s : Type) (A B : MvPowerSeries s K),
+    ∀ (f : K⟦X⟧), CoefLe 1 (PowerSeries.derivative f) → ∀ (s : Type) (A B : MvPowerSeries s K),
     MvPowerSeries.constantCoeff A = 0 → MvPowerSeries.constantCoeff B = 0 →
     (∀ m, ‖MvPowerSeries.coeff m A‖ ≤ 1) → (∀ m, ‖MvPowerSeries.coeff m B‖ ≤ 1) →
     (∀ m, ‖MvPowerSeries.coeff m (A - B)‖ ≤ ‖(l : K)‖) →
@@ -27,7 +70,7 @@ theorem subst_congr_of_derivative_integral :
     have hcong := Formalism.LT.PowCongr_valid K s l hl A B hA hB 1 le_rfl
       (by intro e; simpa using hAB e) (padicValNat l d) (d / l ^ padicValNat l d) m
     have hdecomp : l ^ padicValNat l d * (d / l ^ padicValNat l d) = d :=
-      Nat.mul_div_cancel' pow_padicValNat_dvd
+      Nat.mul_div_cancel' (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))
     rw [hdecomp, norm_pow, pow_add, pow_one] at hcong
     have hnd : ‖(d : K)‖ = ‖(l : K)‖ ^ padicValNat l d :=
       Formalism.DworkPowerSeriesWeights.norm_natCast_eq_pow_padicValNat hl hlt hd.ne'

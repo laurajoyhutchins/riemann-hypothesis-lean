@@ -1,5 +1,68 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.KatoUse
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BoxDefs
+module
+
+public import ReciprocityTheory.GaloisValuations.ContinuousConstSMulQuotient
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.UnitaryThreeReflectionRight
+import Formalism.ConjugateSelfDual.Statement
+public import Mathlib.Topology.Algebra.Group.ClosedSubgroup
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import Mathlib.Topology.LocallyConstant.Basic
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Matrix IsLocalRing
 open UpperTheory.V UpperTheory.V.Base UpperTheory.V.HV UpperTheory.V.Alg UpperTheory.V.U3
 
@@ -34,6 +97,7 @@ private theorem cocycle_coboundary_averaging {k G M : Type} [Field k] [Group G] 
       have : (QuotientGroup.mk (t * x.out) : G ⧸ N) = t • x := MulAction.Quotient.mk_smul_out N t x
       simp only [this, MulAction.toPerm_apply]
     conv_lhs => rw [e1]
+
     simp only [hf, A, map_sum]
     rw [Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, Subgroup.index, Nat.card_eq_fintype_card,
       Nat.cast_smul_eq_nsmul]
@@ -54,7 +118,7 @@ private theorem unipotent_cochain_add {k Γ M : Type} [Field k] [Group Γ] [AddC
   | zero => simp [powerCocycleSum]
   | succ i ih =>
     rw [show i + 1 + j = (i + j) + 1 by ring]
-    simp only [powerCocycleSum, ih, map_add, pow_succ', map_mul, Module.End.mul_apply, pow_add]
+    simp only [powerCocycleSum, ih, map_add (f := _), pow_succ', map_mul, Module.End.mul_apply, pow_add]
     abel
 
 private theorem unipotent_cochain_periodic {l : ℕ} {k Γ M : Type} [Field k] [CharP k l] [Group Γ] [AddCommGroup M] [Module k M]
@@ -117,7 +181,7 @@ private theorem unipotent_restriction_surjective (l : ℕ) [hl : Fact l.Prime] {
     intro n
     induction n with
     | zero => intro i _; simp [powerCocycleSum]
-    | succ n ih => intro i hi; simp only [powerCocycleSum, map_add, hm i hi, invariants_of_normal_stable ρ I _ ih fr i hi]
+    | succ n ih => intro i hi; simp only [powerCocycleSum, map_add (f := _), hm i hi, invariants_of_normal_stable ρ I _ ih fr i hi]
   let V1 : Subgroup Γ := I ⊔ ρ.ker
   have hV1 : IsOpen (V1 : Set Γ) := Subgroup.isOpen_mono le_sup_right hker
   have hV1b : ∀ v ∈ V1, ∀ n, ρ v (powerCocycleSum ρ fr m n) = powerCocycleSum ρ fr m n := by
@@ -192,7 +256,7 @@ theorem UpperTheory.cohomology_of_finite_representation :
       simp only [ReciprocityTheory.Gal.amitsur_d0_apply, map_mul, map_sub, Module.End.mul_apply]; abel⟩
   let P : Submodule k M :=
     { carrier := {m | ∀ i ∈ I, ρ i m = m}
-      add_mem' := fun {a b} ha hb i hi => by rw [map_add, ha i hi, hb i hi]
+      add_mem' := fun {a b} ha hb i hi => by rw [map_add (f := _), ha i hi, hb i hi]
       zero_mem' := fun i _ => map_zero _
       smul_mem' := fun c a ha i hi => by rw [map_smul, ha i hi] }
   let Z : Submodule k (ReciprocityTheory.Gal.Z1 ρ) :=

@@ -1,10 +1,48 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousCharpolyCoeffOfMatrix
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIntSubMem
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SemisimpleOfInjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PolarizedGaloisRep
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsRhoPtOfSplitting
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,16 +54,6 @@ open GlobalTheory.BlockComplement GlobalTheory.IndefiniteRowSideFullHecke.BlockR
 section Twist
 
 variable {Γ O : Type} [Group Γ] [CommRing O] {n : ℕ}
-
-def twistRep (ψ : Γ →* Oˣ) (ρ : Γ →* GL (Fin n) O) : Γ →* GL (Fin n) O :=
-  MonoidHom.toHomUnits
-    { toFun := fun g => ((ψ g : Oˣ) : O) • ((ρ g : GL (Fin n) O) : Matrix (Fin n) (Fin n) O)
-      map_one' := by simp
-      map_mul' := fun g h => by simp [smul_smul, mul_comm] }
-
-theorem coe_twistRep (ψ : Γ →* Oˣ) (ρ : Γ →* GL (Fin n) O) (g : Γ) :
-    ((twistRep ψ ρ g : GL (Fin n) O) : Matrix (Fin n) (Fin n) O) =
-      ((ψ g : Oˣ) : O) • ((ρ g : GL (Fin n) O) : Matrix (Fin n) (Fin n) O) := rfl
 
 end Twist
 
@@ -56,27 +84,6 @@ theorem frobEig_block (θ : A.CG 1) (t : ℕ) (w : PlE H) (b : ℂ) (hu : A.unr 
     simp
 
 end Eig
-
-def RowLift (D : D7) : Prop :=
-  ∀ (i : D.nd.Loc) (σ : D.what₂.FT), D.what₂.isot (D.nd.j i) σ ≠ ⊥ → D.nd.goodRow σ →
-    ∃ (P : D.naut.AV i) (π : D.naut.CG D.R.r), thetaOf D.nd D.naut i σ P ∧ D.naut.csd π ∧ D.naut.ralg π ∧
-      HasParamW D.nd D.naut i σ [⟨D.R.r, π, 1⟩] ∧
-      IsBCV D.nd D.naut i P (twistIso D.nd D.naut ([⟨D.R.r, π, 1⟩] ++ [muPart D.nd D.naut i]) D.naut.etaTinv)
-
-def AllMaximal (D : D7) : Prop :=
-  ∀ (i : D.nd.Loc) (P : D.naut.AV i), ∃ (i' : D.nd.Loc) (P' : D.naut.AV i') (x : D.nd.X i'),
-    D.nd.w i' = D.nd.w i ∧
-    (⟨D.nd.j i', D.nbc.embAV i' P'⟩ : Σ j, D.nbc.AU j) = ⟨D.nd.j i, D.nbc.embAV i P⟩ ∧ D.naut.ptV i' P' = some x
-
-def LocFree (D : D7) : Prop :=
-  ∀ i i' : D.nd.Loc, D.nd.j i' = D.nd.j i → D.nd.w i' = D.nd.w i →
-    D.naut.muC i' = D.naut.muC i ∧ ∀ σ w, IsSplitPl D.host w → D.naut.locW i' σ w = D.naut.locW i σ w
-
-def EtaValues (D : D7) : Prop :=
-  ∀ w : PlE D.host, ∀ a ∈ D.naut.frobEig (D.naut.lpTw (D.naut.locG D.naut.etaT w) (1 / 2)),
-    ∃ y : D.what₂.LL, D.what₂.embLL y = a
-
-def PointModels (D : D7) : Prop := ∀ (i : D.nd.Loc) (x : D.nd.X i), ∃ r, IsHeckeGalois D.nd i x r
 
 variable {D : D7}
 

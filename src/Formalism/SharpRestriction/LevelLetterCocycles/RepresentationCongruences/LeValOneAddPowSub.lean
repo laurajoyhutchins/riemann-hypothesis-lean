@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+public import Mathlib.RingTheory.Valuation.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -154,8 +206,8 @@ theorem chi_pow_nat_val (l : ℕ) (hl : l.Prime) (hl2 : l ≠ 2) (hvl : v (l : L
   have hcop : Nat.Coprime r l := ((Nat.Prime.coprime_iff_not_dvd hl).mpr hr).symm
   have : Fact l.Prime := ⟨hl⟩
   have hpv : padicValNat l (l ^ k * r) = k := by
-    rw [padicValNat.mul (pow_ne_zero k hl.ne_zero) hr0, padicValNat.prime_pow,
-      padicValNat.eq_zero_of_not_dvd hr, add_zero]
+    rw [Nat.padicValNat_def, Nat.multiplicity_mul (pow_ne_zero k hl.ne_zero) hr0,
+      Nat.multiplicity_prime_pow, multiplicity_eq_zero_of_not_dvd hr, add_zero]
   have hk0 : (0 : WithTop ℚ) ≤ k := by exact_mod_cast (Nat.cast_nonneg k : (0 : ℚ) ≤ k)
   have hlk := pow_lk_val v l hl hl2 hvl (le_refl 1) hχ k
   rw [hpv, pow_mul, pow_coprime_val v l hvl
@@ -187,11 +239,11 @@ theorem chi_pow_val {LL : Type*} [Field LL] (v : AddValuation LL (WithTop ℚ)) 
   have hne : χ ≠ 0 := LemGA.ne_zero_of_val_zero v hχ0
   obtain ⟨n, rfl | rfl⟩ := Int.eq_nat_or_neg m
   · have hn : n ≠ 0 := by rintro rfl; exact hm rfl
-    rw [zpow_natCast, padicValInt.of_nat]
+    rw [zpow_natCast, padicValInt.of_nat, ← Nat.padicValNat_def]
     exact LemGA.chi_pow_nat_val v l hl hl2 hvl χ hχ n hn
   · have hn : n ≠ 0 := by rintro rfl; exact hm (by simp)
     have hpv : padicValInt l (-(n : ℤ)) = padicValNat l n := by
-      unfold padicValInt; rw [Int.natAbs_neg]; simp
+      rw [padicValInt, Int.natAbs_neg, Int.natAbs_natCast, Nat.padicValNat_def]
     rw [hpv, zpow_neg, zpow_natCast]
     have hxn : v (χ ^ n) = 0 := by
       rw [AddValuation.map_pow, hχ0, smul_zero]

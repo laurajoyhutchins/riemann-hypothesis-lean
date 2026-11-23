@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HbApply
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsBisBis
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HbApply
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsBisBis
+import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped Classical ENNReal Pointwise
 open MeasureTheory Matrix NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.L2.SG.HidaSetting Formalism.L2.SG.TermOp Formalism.L2.SG.Full
   Formalism.L2.SG.LocWSOf Formalism.MainNotions.S.Cnt Formalism.L2.SG.KappaOffDiagonal Formalism.MainNotions.LatticeGluingRadicals
@@ -15,15 +61,9 @@ section Gen
 variable {E V : Type*} [Field E] [NumberField E] [AddCommGroup V] [Module E V] [Module (𝓞 E) V]
   [IsScalarTower (𝓞 E) E V]
 
-theorem exists_smul_mem_lat (Λ : Submodule (𝓞 E) V) (hL : Submodule.IsLattice E Λ) (v : V) :
+theorem exists_smul_mem_lat (Λ : Submodule (𝓞 E) V) (hL : Submodule.IsFullLattice E Λ) (v : V) :
     ∃ o : 𝓞 E, o ≠ 0 ∧ o • v ∈ Λ := by
-  first
-  | exact @_root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem
-  | exact _root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem
-  | (apply _root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem <;> assumption)
-  | (intros; apply _root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem ..)
+  exact _root_.GlobalTheory.NonzeroSmulMemSpanLattice.exists_ne_zero_smul_mem Λ hL v
 
 end Gen
 
@@ -82,11 +122,13 @@ theorem pr_mem (v : (VS D).V) : pr X v ∈ Wb X := by
   intro b
   constructor
   · rw [pr_apply]
+
     simp only [map_sub, map_sum, map_smul, X.ee, X.ef, smul_eq_mul, mul_zero, Finset.sum_const_zero, sub_zero,
-      mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true, sub_self]
+    mul_ite, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true, sub_self]
   · rw [pr_apply]
+
     simp only [map_sub, map_sum, map_smul, X.ff, hT_fe, smul_eq_mul, mul_zero, Finset.sum_const_zero, sub_zero,
-      mul_ite, mul_one, Finset.sum_ite_eq', Finset.mem_univ, if_true, sub_self]
+    mul_ite, mul_one, Finset.sum_ite_eq', Finset.mem_univ, if_true, sub_self]
 
 theorem pr_eX (c : Fin D.R.rS) : pr X (X.eX c) = 0 := by
   rw [pr_apply]
@@ -134,23 +176,11 @@ theorem lmap_isLattice (u : D.what₂.Word) (Λ : Submodule (𝓞 D.host.E) (VS 
     apply Subtype.ext
     change pr X l = (w : (VS D).V)
     have hx0 : pr X x = 0 := pr_X X ((mem_XO X u x).1 hx)
-    calc pr X l = pr X (l + x) := by rw [map_add, hx0, add_zero]
+    calc pr X l = pr X (l + x) := by rw [map_add (f := _), hx0, add_zero]
       _ = pr X w := by rw [hlx]
       _ = w := pr_Wb X w.2
-  · rw [eq_top_iff]
-    intro w _
-    obtain ⟨o, ho, hmem⟩ := exists_smul_mem_lat Λ hΛ (w : (VS D).V)
-    have h1 : o • w ∈ Lmap X u Λ := by
-      rw [mem_Lmap]
-      exact Submodule.mem_sup_left hmem
-    have ho' : ((o : D.host.E)) ≠ 0 := by simpa using ho
-    have e : w = ((o : D.host.E)⁻¹) • (o • w) := by
-      rw [← algebraMap_smul D.host.E o w, smul_smul]
-      have : (o : D.host.E)⁻¹ * algebraMap (𝓞 D.host.E) D.host.E o = 1 := inv_mul_cancel₀ ho'
-      rw [this, one_smul]
-    rw [e]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span h1)
-
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
 end GlobalTheory.RowsOrb.Basic
 
 namespace GlobalTheory.RowsOrb.Basic
@@ -236,13 +266,15 @@ theorem lmap_unimod (Y : Full X) (u : D.what₂.Word) (Λ : Submodule (𝓞 D.ho
     have hw'f : ∀ b, (VS D).hT (f b) w' = 0 := by
       intro b
       rw [hw']
+
       simp only [map_sub, map_sum, map_smul, hfe, smul_eq_mul, mul_ite, mul_one, mul_zero,
-        Finset.sum_ite_eq', Finset.mem_univ, if_true, sub_self]
+      Finset.sum_ite_eq', Finset.mem_univ, if_true, sub_self]
     have hw'e : ∀ b, (VS D).hT (X.eX b) w' = 0 := by
       intro b
       rw [hw']
+
       simp only [map_sub, map_sum, map_smul, X.ee, (hwW b).1, smul_eq_mul, mul_zero, Finset.sum_const_zero,
-        sub_zero]
+      sub_zero]
     have hw'Λ : w' ∈ Λ := by
       rw [memΛ]
       intro y hy
@@ -251,11 +283,12 @@ theorem lmap_unimod (Y : Full X) (u : D.what₂.Word) (Λ : Submodule (𝓞 D.ho
       obtain ⟨y0, hy0, l, hl, rfl⟩ := Submodule.mem_sup.1 hy1
       have h0 : (VS D).hT y0 w' = 0 := hT_span_left X.eX w' hw'e (latSpan_le (Formalism.L2.SG.Saturated.aaS D) X.eX hy0)
       have h3 : (VS D).hT y3 w' = 0 := hT_span_left f w' hw'f (latSpan_le (fun a => (Formalism.L2.SG.Saturated.aaS D a)⁻¹) f hy3)
-      rw [map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, h0, h3, zero_add, add_zero]
+      rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, h0, h3, zero_add, add_zero]
       have hle : ∀ a, (VS D).hT l (X.eX a) = 0 := by
         intro a; rw [a_herm, (hL l hl a).1, star_zero]
       have e1 : (VS D).hT l w' = (VS D).hT l w := by
         rw [hw']
+
         simp only [map_sub, map_sum, map_smul, hle, smul_zero, Finset.sum_const_zero, sub_zero]
       have hpl : pW X l ∈ Lmap X u Λ := by
         rw [mem_Lmap, pW_coe, pr_apply]
@@ -271,9 +304,10 @@ theorem lmap_unimod (Y : Full X) (u : D.what₂.Word) (Λ : Submodule (𝓞 D.ho
       rw [hb_apply, pW_coe, pr_apply] at h2
       have e2 : (VS D).hT (l - ∑ a, (VS D).hT (X.fY a) l • X.eX a - ∑ a, (VS D).hT (X.eX a) l • X.fY a) w =
           (VS D).hT l w := by
+
         simp only [map_sub, map_sum, LinearMap.sub_apply, LinearMap.sum_apply,
-          LinearMap.map_smulₛₗ, LinearMap.smul_apply, (hwW _).1, (hwW _).2, smul_zero, Finset.sum_const_zero,
-          sub_zero]
+        LinearMap.map_smulₛₗ, LinearMap.smul_apply, (hwW _).1, (hwW _).2, smul_zero, Finset.sum_const_zero,
+        sub_zero]
       rw [e1, ← e2]
       exact h2
     show (w : (VS D).V) ∈ Λ ⊔ GlobalTheory.HermLat.rs (𝓞 D.host.E) (GlobalTheory.TypeAsm.F0 X u).X
@@ -301,9 +335,9 @@ theorem lmap_unimod (Y : Full X) (u : D.what₂.Word) (Λ : Submodule (𝓞 D.ho
     have ec : (VS D).hT x1 x2 = 0 :=
       hT_span_left X.eX x2 (fun a => hT_span_right X.eX (X.eX a) (fun b => X.ee a b) hx2') hx1'
     have ed : (VS D).hT l1 x2 = 0 := by
-      have := eb; rw [← h1, map_add, LinearMap.add_apply, ec, add_zero] at this; exact this
+      have := eb; rw [← h1, map_add (f := _), LinearMap.add_apply, ec, add_zero] at this; exact this
     have key : (VS D).hT (y : (VS D).V) w = (VS D).hT l1 l2 := by
-      rw [← h1, map_add, LinearMap.add_apply, ea, add_zero, ← h2, map_add, ed, add_zero]
+      rw [← h1, map_add (f := _), LinearMap.add_apply, ea, add_zero, ← h2, map_add (f := _), ed, add_zero]
     rw [key]
     exact (memΛ l2).1 hl2 l1 hl1
 

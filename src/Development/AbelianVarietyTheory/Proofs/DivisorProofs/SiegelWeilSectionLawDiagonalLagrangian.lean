@@ -1,13 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReindexDblIncM
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrInt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReindexDblIncM
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrInt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTransportF
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicGLCircleCharacterTrivialOnDetOne
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SpecialLinearGeneratedByTransvectionsStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilRepresentationValueAtOriginLeviFactor
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalLagrangianIntegralSiegelParabolicTransfo
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExtensionAdelesStableRangeOneStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SplitPlaceSiegelLawDiagonalLagrangianCharacter
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransportedWeilDatumCMPreservesSchwartzHeisenber
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilRepresentationValueAtOriginLeviFactor
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicGLCircleCharacterTrivialOnDetOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalLagrangianIntegralSiegelParabolicTransfo
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SplitPlaceSiegelLawDiagonalLagrangianCharacter
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryHeckeCharEqOneOfTrivialOverSplitPlacesCmStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExtensionAdelesStableRangeOneStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryHeckeCharEqOneOfTrivialOverSplitPlacesCmStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes MeasureTheory
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -141,11 +185,12 @@ theorem main_law : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberF
       | (simp [mtF, matHomF]; rfl)
   obtain ⟨hmem, heq⟩ := htr p 1 1 h hh hg Φ hΦ
   refine ⟨hmem, ?_⟩
-  rw [heq]
   have hth := GlobalTheory.TransportHeisF.isThetaFunOF_thetaTr F E σ B hB nS (nT + nT) JS
     (GlobalTheory.WeilSchrodinger.DblTargetF.dblG JT) hS (GlobalTheory.WeilSchrodinger.DblTargetF.isHermND_dblG hT) ξ₀ hξ₀ hσ hωd.std _ JB ξ
     rfl hξ κ co hco Φ hΦ
-  exact lagr_law F E σ B hB nS nT JS JT hS hT ξ₀ hξ₀ hσ ν 𝓕 hν h𝓕 χS ωd hωd h t (by rw [hh]; exact hpt) _ hth
+  exact (congrArg (GlobalTheory.LagrTheta.lagrInt ν 𝓕
+    ((diagCols (Fin nT)).submatrix finSumFinEquiv.symm id)) heq).trans
+    (lagr_law F E σ B hB nS nT JS JT hS hT ξ₀ hξ₀ hσ ν 𝓕 hν h𝓕 χS ωd hωd h t (by rw [hh]; exact hpt) _ hth)
 
 end GlobalTheory.SiegelLawDblTargetF
 

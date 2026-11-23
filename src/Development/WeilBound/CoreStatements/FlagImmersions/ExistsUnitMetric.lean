@@ -1,6 +1,60 @@
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemOfAevalEqZero
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsPlaceWeightConjInvariantStatement
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.HodgeIPIffHodgeFormConj
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemOfAevalEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -22,6 +76,7 @@ theorem evC_conj (w : (Σ k, J k) → ℂ) (f : MRing J) :
     evC (fun p => (starRingEnd ℂ) (w p)) f = (starRingEnd ℂ) (evC w f) := by
   simp only [evC, MvPolynomial.eval_map]
   rw [MvPolynomial.eval₂_eq', MvPolynomial.eval₂_eq']
+
   simp [map_sum, map_prod, map_pow, map_mul]
 
 theorem contDiff_evC (f : MRing J) : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) fun w : (Σ k, J k) → ℂ => evC w f := by
@@ -29,7 +84,7 @@ theorem contDiff_evC (f : MRing J) : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ�
   induction f using MvPolynomial.induction_on with
   | C a => simpa using contDiff_const
   | add p q hp hq => simpa using hp.add hq
-  | mul_X p i hp => simpa using hp.mul (contDiff_apply ℝ ℂ i)
+  | mul_X p i hp => simpa using hp.mul (contDiff_apply ℝ (fun _ => ℂ) i)
 
 def blk (k : K) (w : (Σ k, J k) → ℂ) : ℝ := ∑ i, ‖w ⟨k, i⟩‖ ^ 2
 
@@ -46,7 +101,7 @@ theorem blk_conj (w : (Σ k, J k) → ℂ) (k : K) : blk k (fun p => (starRingEn
 
 theorem contDiff_blk (k : K) : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (blk (J := J) k) := by
   unfold blk
-  exact ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ (⟨k, i⟩ : Σ k, J k))
+  exact ContDiff.sum fun i _ => (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) (⟨k, i⟩ : Σ k, J k))
 
 def nu (f : MRing J) (d : K → ℕ) (w : (Σ k, J k) → ℂ) : ℝ := ‖evC w f‖ ^ 2 / ∏ k, blk k w ^ d k
 
@@ -104,7 +159,7 @@ theorem exists_finset {T : Type} (z : T → (Σ k, J k) → ℂ) (f : T → MRin
   classical
   have hc : IsCompactElement (⨆ t, Ideal.span {f t}) :=
     (Submodule.fg_iff_compact _).1 (IsNoetherian.noetherian _)
-  obtain ⟨s, hs⟩ := CompleteLattice.IsCompactElement.exists_finset_of_le_iSup _ hc
+  obtain ⟨s, hs⟩ := IsCompactElement.exists_finset_of_le_iSup hc
     (fun t => Ideal.span {f t}) le_rfl
   refine ⟨s, fun t => ?_⟩
   by_contra hno

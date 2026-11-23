@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Meromorphic.Order
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+
+@[expose] public section
 
 open Complex Filter Topology Set
 
@@ -84,10 +137,11 @@ lemma dslopeIter_congr {p : ℂ} {g₁ g₂ : ℂ → ℂ} (h : g₁ =ᶠ[𝓝 p
     · rw [dslope_same, dslope_same, ih.deriv_eq]
     · rw [dslope_of_ne _ hzp, dslope_of_ne _ hzp, slope_def_field, slope_def_field, hz, hp]
 
-open Classical in
 
-def meromorphicShift (f : ℂ → ℂ) (p : ℂ) : ℕ :=
-  if h : MeromorphicAt f p then Nat.find h else 0
+open Classical in
+def meromorphicShift (f : ℂ → ℂ) (p : ℂ) : ℕ := by
+  classical
+  exact if h : MeromorphicAt f p then Nat.find h else 0
 
 lemma analyticAt_pow_meromorphicShift_mul {f : ℂ → ℂ} {p : ℂ} (hf : MeromorphicAt f p) :
     AnalyticAt ℂ (fun z ↦ (z - p) ^ meromorphicShift f p * f z) p := by
@@ -95,7 +149,7 @@ lemma analyticAt_pow_meromorphicShift_mul {f : ℂ → ℂ} {p : ℂ} (hf : Mero
   have := Nat.find_spec hf
   simp only [smul_eq_mul] at this
   unfold meromorphicShift
-  rw [dif_pos hf]
+  rw [dite_eq_left hf]
   convert this
 
 lemma meromorphicShift_le {f : ℂ → ℂ} {p : ℂ} {n : ℕ}
@@ -103,7 +157,7 @@ lemma meromorphicShift_le {f : ℂ → ℂ} {p : ℂ} {n : ℕ}
   classical
   have hf : MeromorphicAt f p := ⟨n, by simpa [smul_eq_mul] using h⟩
   unfold meromorphicShift
-  rw [dif_pos hf]
+  rw [dite_eq_left hf]
   convert Nat.find_min' hf (by simpa [smul_eq_mul] using h)
 
 lemma analyticAt_pow_mul_of_meromorphicShift_le {f : ℂ → ℂ} {p : ℂ} (hf : MeromorphicAt f p)

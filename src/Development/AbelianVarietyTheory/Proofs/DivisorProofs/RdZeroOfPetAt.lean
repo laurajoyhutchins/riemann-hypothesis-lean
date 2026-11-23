@@ -1,19 +1,57 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ReadLeaves
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.LocClauseOfUnifPlaces
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsCoreGoodMatch
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalLevelMulArchimedeanMemNhdsStatement
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.VolPairExAndFinVol
+public import Formalism.LocalToGlobal.ProjectiveLattices.ReadQuot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.CommGroupMulMulEqMulInvMulMulMul
 import Development.AbelianVarietyTheory.Definitions.Divisors.CuspIso
-import Development.AbelianVarietyTheory.Definitions.Divisors.WellChosen
-import Development.AbelianVarietyTheory.Definitions.Divisors.P22
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsLogCanonicalMultipleCanonical
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
-import Formalism.LocalToGlobal.ProjectiveLattices.ReadQuot
-import Formalism.LocalToGlobal.ProjectiveLattices.ReadLeaves
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.VolPairExAndFinVol
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsCoreGoodMatch
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.LocClauseOfUnifPlaces
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrincipalLevelMulArchimedeanMemNhdsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfRestrictionsVanishStatement
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUniqueIsTanFrameOfIsEmpty
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsoOverOfIsOpenImmersion
+import Development.AbelianVarietyTheory.Definitions.Divisors.LinearIndependentBasisCoords
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnitaryWeightExponentVectorSignatureWeightMuZero
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Limits NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory Formalism.L2.Pj Formalism.BasicNotions
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -22,7 +60,7 @@ open GlobalTheory.AllWt (Psi wtOf cuspOn latOn normOn petOn GoodOn GoodW bergOn 
 open GlobalTheory.FlagMod (FlagCover)
 open GlobalTheory.FlagTan (dimFlag)
 open GlobalTheory.HSApp
-set_option synthInstance.maxHeartbeats 400000
+
 
 noncomputable section
 
@@ -97,41 +135,6 @@ theorem aeDom_good (Y : Deep T j) {e : ℕ} {o : ℝ} (h : Y.Good e o) (σ : Y.d
   obtain ⟨hP, hV⟩ := GlobalTheory.FinalJoin2.volPairEx_and_finVol D (D.sp.W j) (D.sp.W_sig j)
   exact aeDom_of_aut Y.d.Xo₂ Y.d.c₂ (adelAut_good Y h σ hσ) (quotSupp_of _ hV hP) (muUnit_one Y h σ hσ) hd
 
-theorem rd_zero_of_petAt (Y : Deep T j) {e : ℕ} {o : ℝ} (h : Y.Good e o) (σ : Y.d.c₂.F →+* ℂ)
-    (hσ : GoodEmb Y.d.c₂ σ) (G : WTZ D.host.E) (f : Rul Y.d.Xo₂ Y.d.c₂) (hf : f ∈ GlobalTheory.AllWt.cuspW Y.d.Xo₂ Y.d.c₂ Y.U G)
-    (h0 : GlobalTheory.AllWt.petAt (Y.U σ) (xiR D) (D.sp.W j) (Y.dict σ) (muQ1 (D.sp.W j)) G f = 0) :
-    ∀ k, ∀ z ∈ ((Y.U σ).X k).dom, rdU (Y.U σ) f k z = 0 := by
-  have hP : rdU (Y.U σ) f ∈ holSub (Y.U σ).X (GlobalTheory.AllWt.modelWt (Y.U σ) G) := (GlobalTheory.AllWt.mem_cuspW.1 hf).2 σ hσ
-  obtain ⟨th, hr, hd, -⟩ := dictLoc_of_good Y h σ hσ
-  have hfin := GlobalTheory.AllWt.petE_ne_top (D.sp.W j) (Y.dict σ) (muQ1 (D.sp.W j)) prob_le_one hd.2.2.2.1 hP
-  have hE : GlobalTheory.AllWt.petE (D.sp.W j) (Y.dict σ) (muQ1 (D.sp.W j)) (GlobalTheory.AllWt.modelWt (Y.U σ) G) (rdU (Y.U σ) f) = 0 := by
-    unfold GlobalTheory.AllWt.petAt at h0
-    rcases mul_eq_zero.1 h0 with h1 | h1
-    · exact absurd h1 (GlobalTheory.AllWt.lieFacZ_pos _ _).ne'
-    · exact ((ENNReal.toReal_eq_zero_iff _).1 h1).resolve_right hfin
-  have hmeas := aesm_of_holSub (adelMeas_of_aut Y.d.Xo₂ Y.d.c₂ (U := Y.U) (σ := σ) (adelAut_good Y h σ hσ)) _ hP
-  have heqn : (fun q : AutQ (D.sp.W j) => GlobalTheory.AllWt.ptN (GlobalTheory.AllWt.modelWt (Y.U σ) G) (rdU (Y.U σ) f) (Y.dict σ q.out)) =
-      fun q => ‖onQ (D.sp.W j) (adel (D.sp.W j) (Y.dict σ) (fun _ => (1 : ℂ)) (rdU (Y.U σ) f)) q‖ := by
-    funext q
-    show ((Y.U σ).X _).pnorm _ _ _ = ‖(1 : ℂ) * rdU (Y.U σ) f _ _‖
-    rw [pnorm_eq_of_unit _ _ _ _ (h.unit σ hσ q.out), one_mul]
-  have hz : onQ (D.sp.W j) (adel (D.sp.W j) (Y.dict σ) (fun _ => (1 : ℂ)) (rdU (Y.U σ) f)) =ᵐ[muQ1 (D.sp.W j)] 0 := by
-    have h2 : eLpNorm (onQ (D.sp.W j) (adel (D.sp.W j) (Y.dict σ) (fun _ => (1 : ℂ)) (rdU (Y.U σ) f))) 2
-        (muQ1 (D.sp.W j)) = 0 := by
-      rw [← eLpNorm_norm]
-      unfold GlobalTheory.AllWt.petE at hE
-      rw [heqn] at hE
-      exact hE
-    exact (eLpNorm_eq_zero_iff hmeas two_ne_zero).1 h2
-  exact aeDom_good Y h σ hσ _ _ hP hz
-
 end Cover
-
-theorem nrm_eq_zero : ∀ (D : D7) (T : Core D) (j : ℕ) (Y : Deep T j) (e : ℕ) (o : ℝ), Y.Good e o →
-    2 < Module.finrank ℚ D.host.E / 2 → ∀ (G : WTZ D.host.E) (v : InfinitePlace Y.d.c₂.F) (x : Y.V G),
-    Y.nrm G v.embedding x = 0 → x = 0 := by
-  intro D T j Y e o h _ G v x h0
-  have hσ := goodEmb_goodOf Y.d.c₂ v.embedding
-  exact GlobalTheory.T.eq_zero_of_restrictions_vanish D T j Y e o h _ hσ G x (rd_zero_of_petAt Y h _ hσ G x x.2 h0)
 
 end GlobalTheory.PetDef

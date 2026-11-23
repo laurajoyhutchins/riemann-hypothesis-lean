@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOneOfConjMemOfPow
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
+import Development.AbelianVarietyTheory.Counterexamples.RotationExamples.OneLeAPlLast
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsTestLatUnique
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOneOfConjMemOfPow
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryExistsWithPrescribedParts
 import Formalism.LocalToGlobal.Columns.CoefColLemmas
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 namespace TestFunctionNorms
 section
@@ -253,16 +292,6 @@ theorem inf_aux {W : G.Weil} (S : GridChoice W Set.univ) (rp : ClassReps G) (σ 
   · rw [e, show rhoW G γ u = rhoVr (labLL D) (LaP G) γ.1 u from rfl, castVV_rhoVr_mul, nrm_castVV,
       nrm_transport (Xp G) _ σ _ (orth_inv S γ)]
 
-theorem finPsi_infPsi : GlobalTheory.FunPr.Hypotheses₂ → FinPsiK ∧ InfPsiK := by
-  intro _
-  constructor
-  · refine ⟨0, fun CF _ => ⟨0, fun ε C _ => ⟨0, ?_⟩⟩⟩
-    intro D large₂ _ _ Γ _ _ Pl0 T A Ks _ _ _ R F s ch _ _ _ w c u hu x
-    exact pullback_fin_relation _ _ w c u hu x
-  · refine ⟨0, fun CF _ => ⟨0, fun ε C _ => ⟨0, ?_⟩⟩⟩
-    intro D large₂ _ _ Γ _ _ Pl0 T A Ks _ _ _ R F s ch _ _ _ σ c u x
-    exact inf_aux _ _ σ c u x
-
 end GlobalTheory.CompanionTheory.TestVal
 
 end
@@ -272,7 +301,5 @@ end
 end TestFunctionNorms
 section
 open GlobalTheory.SumSize GlobalTheory.RowClaim
-theorem _root_.GlobalTheory.Adopt.finite_infinite_psi_bounds : GlobalTheory.FunPr.Hypotheses₂ → FinPsiK ∧ InfPsiK := by
-  first | exact @TestFunctionNorms.GlobalTheory.CompanionTheory.TestVal.finPsi_infPsi | exact TestFunctionNorms.GlobalTheory.CompanionTheory.TestVal.finPsi_infPsi | (intros; apply TestFunctionNorms.GlobalTheory.CompanionTheory.TestVal.finPsi_infPsi <;> assumption)
 
 end

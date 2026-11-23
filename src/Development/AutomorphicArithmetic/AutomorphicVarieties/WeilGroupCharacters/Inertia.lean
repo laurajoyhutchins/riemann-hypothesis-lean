@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,8 +81,6 @@ attribute [instance] DetObj.ring DetObj.alg DetObj.co
 variable {l : ℕ} [Fact l.Prime] {F : GFrame l} {O : Type} [CommRing O] [IsLocalRing O] [Algebra ℤ_[l] O] {n : ℕ}
   (r : Resid F O n)
 
-theorem GFrame.mu_eq (v : F.Vl) : F.mu v = muG l (F.Gv v) := rfl
-
 structure LamTObj : Type 1 where
   Λ : Type
   [ring : CommRing Λ]
@@ -55,17 +96,6 @@ attribute [instance] LamTObj.ring LamTObj.alg LamTObj.co
 def Resid.Ok : Prop :=
   (∀ v (g : Fin n → F.Gv v) (h : F.G₀), r.Dbar.tr (MonoidAlgebra.single h 1 * F.oEl v (r.psib v) g) = 0) ∧
     ∀ v i (g : F.mu v), r.psib v i g = Units.map (residue O : O →* ResidueField O) (r.th v i g)
-
-structure IsGPair {A : Type} [CommRing A] [Algebra O A] [IsLocalRing A] [IsLocalHom (algebraMap O A)]
-    (D : GDet n A F.G₀) (ψ : ∀ v, Fin n → F.Gv v →* Aˣ) : Prop where
-  cont : D.IsCont (maximalIdeal A)
-  red : D.map (residue A) = r.Dbar.map (ResidueField.map (algebraMap O A))
-  ψ_cont : ∀ v i, AdicCont (maximalIdeal A) fun g => ((ψ v i g : Aˣ) : A)
-  ψ_red : ∀ v i g, residue A (ψ v i g) = ResidueField.map (algebraMap O A) (r.psib v i g)
-  ψ_mu : ∀ v i (g : F.mu v), ((ψ v i g : Aˣ) : A) = algebraMap O A (r.th v i g)
-  P : ∀ i g, D.lam i (F.star O A n (MonoidAlgebra.single g 1)) = D.lam i (MonoidAlgebra.single g 1)
-  Ord : ∀ v (g : Fin n → F.Gv v) (h : F.G₀), D.tr (MonoidAlgebra.single h 1 * F.oEl v (ψ v) g) = 0
-  I : ∀ u, ∀ g ∈ r.Ip u, ∀ h : F.G₀, D.tr (MonoidAlgebra.single h 1 * (MonoidAlgebra.single g 1 - 1)) = 0
 
 structure FHom (F' F : GFrame l) where
   π : F'.Γ →* F.Γ

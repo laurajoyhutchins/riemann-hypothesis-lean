@@ -1,4 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.IsFieldIntersection
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.IsFieldIntersection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,12 +108,6 @@ section BaseField
 variable {K : Type*} [Fintype K] (F F' : Type*) [Field F] [Field F'] [Algebra F F'] (ι : K → Type*)
   [∀ k, Fintype (ι k)]
 
-def BaseChangeStatement : Prop :=
-  ∀ (I : IFamily F ι) (I' : IFamily F' ι), IsFieldIntersection I → IsFieldIntersection I' →
-    ∀ (V : Ideal (MRingOver F ι)) (n : ℕ) (L : Fin n → K → ℤ), IsProjVarF V n →
-      I V n L = ∑ᶠ W ∈ (V.map (MvPolynomial.map (algebraMap F F'))).minimalPrimes,
-        (multAt (V.map (MvPolynomial.map (algebraMap F F'))) W : ℤ) * I' W n L
-
 end BaseField
 
 section Positivity
@@ -87,29 +124,6 @@ end Positivity
 section Inhabit
 
 variable (F : Type*) [Field F]
-
-def PointIsVarStatement : Prop :=
-  IsProjVarF (⊥ : Ideal (MRingOver F fun _ : Unit => Fin 1)) 0
-
-def LineIsVarStatement : Prop :=
-  IsProjVarF (⊥ : Ideal (MRingOver F fun _ : Unit => Fin 2)) 1
-
-def LineSectionStatement : Prop :=
-  IsRatSection (⊥ : Ideal (MRingOver F fun _ : Unit => Fin 2)) (fun _ => 1) (X ⟨(), 0⟩) 1 ∧
-    ratDiv (⊥ : Ideal (MRingOver F fun _ : Unit => Fin 2)) (X ⟨(), 0⟩) 1 =
-      Finsupp.single (Ideal.span {X ⟨(), 0⟩}) 1
-
-def PointDegStatement : Prop :=
-  ∀ I : IFamily F (fun _ : Unit => Fin 1), IsFieldIntersection I →
-    I ⊥ 0 Fin.elim0 = 1
-
-def LineDegStatement : Prop :=
-  ∀ I : IFamily F (fun _ : Unit => Fin 2), IsFieldIntersection I →
-    ∀ d : ℤ, I ⊥ 1 ![fun _ => d] = d
-
-def QuadricStatement : Prop :=
-  ∀ I : IFamily F (fun _ : Fin 2 => Fin 2), IsFieldIntersection I →
-    I ⊥ 2 ![Pi.single 0 1, Pi.single 1 1] = 1 ∧ I ⊥ 2 ![Pi.single 0 1, Pi.single 0 1] = 0
 
 end Inhabit
 

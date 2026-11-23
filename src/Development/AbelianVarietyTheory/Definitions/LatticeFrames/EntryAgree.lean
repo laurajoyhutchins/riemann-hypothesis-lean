@@ -1,6 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PhiTopAgree
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ToOneSucc
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PhiTopAgree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory ValuativeRel Matrix
 open Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col
@@ -118,9 +156,6 @@ def LastAgree : Prop :=
         (W.T s R).xiTop (box _ (W.ϖ ^ cst.M)) W.ψ ν (-1) (Submodule.Quotient.mk fun a => ι (y' (e' a))) (toLoc ι e e' y) =
           σ₀ (PhiTop Ch mu cst.sharp s P.1 (prXp X.E R ∘ₗ y ∘ₗ LinearMap.funLeft X.E X.E (Fin.castAdd (cOf R (s + 1)))) *
             ftY sel mu cst P (atNL X.E (R.N R.m) (R.N R.m - 1) ∘ₗ y) y')
-
-def RepsAgree : Prop :=
-  (∀ j, j ≤ s → Nonempty (L.β j)) → (W.T s R).IsRepSystem (fun j _ _ => {g | ∃ b : L.β j, IsGL ι (L.h j b P) g}) W.ψ ν
 
 def IdxIsProd : Prop :=
   ∀ j, j ≤ s → ∀ hh : rowSG Pr sel mu → AutY X R j, (∀ P, ∃ b : L.β j, L.h j b P = hh P) → ∃! b : L.β j, ∀ P, L.h j b P = hh P

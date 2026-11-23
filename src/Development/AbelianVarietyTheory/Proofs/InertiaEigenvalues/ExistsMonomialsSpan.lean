@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.Lifts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+public import Mathlib.LinearAlgebra.Lagrange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.Subalgebra.Tower
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.Algebra.Polynomial.BigOperators
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.Data.Fintype.Perm
+public import Mathlib.RingTheory.Adjoin.Polynomial.Basic
+public import Mathlib.RingTheory.IntegralClosure.IsIntegral.Basic
+
+@[expose] public section
 
 open scoped BigOperators
 open Polynomial
@@ -112,7 +169,17 @@ theorem coeff_prod_apply {O I : Type} [CommRing O] {t : ℕ} (y : Fin t → I �
   rw [Polynomial.map_prod] at this
   simpa using this.symm
 
-theorem main : ∀ {O X : Type} [CommRing O] [IsDomain O] [Finite X] (T : Subalgebra O (X → O)) (t : ℕ) (α : X → Fin t → O), (∀ x, Function.Injective (α x)) → (∀ x y, x ≠ y → ∃ f ∈ T, f x ≠ f y) → (∀ j, (fun x => (∏ c, (Polynomial.X - Polynomial.C (α x c))).coeff j) ∈ T) → let T' : Subalgebra O (X × Equiv.Perm (Fin t) → O) := Algebra.adjoin O ((fun f : X → O => fun x' => f x'.1) '' (T : Set (X → O)) ∪ Set.range fun c : Fin t => fun x' => α x'.1 (x'.2 c)); ∃ b : Fin t.factorial → X × Equiv.Perm (Fin t) → O, (∀ k, b k ∈ T') ∧ ∀ f ∈ T', ∃! cf : Fin t.factorial → T, f = ∑ k, (fun x' => (cf k : X → O) x'.1) * b k := by
+theorem main : ∀ {O X : Type} [CommRing O] [IsDomain O] [Finite X]
+    (T : Subalgebra O (X → O)) (t : ℕ) (α : X → Fin t → O),
+    (∀ x, Function.Injective (α x)) →
+    (∀ x y, x ≠ y → ∃ f ∈ T, f x ≠ f y) →
+    (∀ j, (fun x => (∏ c, (Polynomial.X - Polynomial.C (α x c))).coeff j) ∈ T) →
+    (let T' : Subalgebra O (X × Equiv.Perm (Fin t) → O) :=
+        Algebra.adjoin O ((fun f : X → O => fun x' => f x'.1) '' (T : Set (X → O)) ∪
+          Set.range (fun c : Fin t => fun x' => α x'.1 (x'.2 c)))
+      ∃ b : Fin t.factorial → X × Equiv.Perm (Fin t) → O,
+        (∀ k, b k ∈ T') ∧ ∀ f ∈ T', ∃! cf : Fin t.factorial → T,
+          f = ∑ k, (fun x' => (cf k : X → O) x'.1) * b k) := by
   intro O Y _ _ _ T t α hα _ hT T'
   obtain ⟨e, he⟩ := exists_monomials_span t
   let y : Fin t → Y × Equiv.Perm (Fin t) → O := fun c x' => α x'.1 (x'.2 c)

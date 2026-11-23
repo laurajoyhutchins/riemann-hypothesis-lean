@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementC
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -10,18 +52,18 @@ namespace Formalism.L2.Th1.A
 
 def LogSpec : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K),
-    constantCoeff (logSer W) = 0 ∧ coeff 1 (logSer W) = 1 ∧ derivative K (logSer W) = om W ∧
+    constantCoeff (logSer W) = 0 ∧ coeff 1 (logSer W) = 1 ∧ derivative (logSer W) = om W ∧
     D W (logSer W) = 1
 
 def ExpSpec : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K),
     constantCoeff (expSer W) = 0 ∧ coeff 1 (expSer W) = 1 ∧
     (logSer W).subst (expSer W) = X ∧ (expSer W).subst (logSer W) = X ∧
-    derivative K (expSer W) = (fw W).subst (expSer W)
+    derivative (expSer W) = (fw W).subst (expSer W)
 
 def ChainZ : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K) (f : K⟦X⟧),
-    derivative K (f.subst (expSer W)) = (D W f).subst (expSer W)
+    derivative (f.subst (expSer W)) = (D W f).subst (expSer W)
 
 def LogNeg : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K),
@@ -43,14 +85,6 @@ def WpShape : Prop :=
     wpL W = uPow (-2) + toL (wpReg W) ∧ coeff 0 (wpReg W) = 0 ∧
     (∀ n : ℕ, Odd n → coeff n (wpReg W) = 0) ∧
     coeff 2 (wpReg W) = g₂ W / 20 ∧ coeff 4 (wpReg W) = g₃ W / 28
-
-def WpUnique : Prop :=
-  ∀ (K : Type u) [Field K] [CharZero K] (g2 g3 : K) (r r' : K⟦X⟧),
-    dL (uPow (-2) + toL r) ^ 2 = 4 * (uPow (-2) + toL r) ^ 3
-      - HahnSeries.C g2 * (uPow (-2) + toL r) - HahnSeries.C g3 →
-    dL (uPow (-2) + toL r') ^ 2 = 4 * (uPow (-2) + toL r') ^ 3
-      - HahnSeries.C g2 * (uPow (-2) + toL r') - HahnSeries.C g3 →
-    r = r'
 
 def WpRecursion : Prop :=
   ∀ (K : Type u) [Field K] [CharZero K] (W : WeierstrassCurve K) (k : ℕ), 3 ≤ k →

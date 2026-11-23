@@ -1,5 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.ExDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.KerPow
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.KerPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.Order
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+import Formalism.ConjugateSelfDual.Statement
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
 private lemma order_pow {O A K τ : Type} [CommRing O] [CommRing A] [Algebra O A] [CommRing K] [Algebra O K]
@@ -19,7 +72,7 @@ private lemma order_pow {O A K τ : Type} [CommRing O] [CommRing A] [Algebra O A
       refine add_le_add (ih a ha) (MvPowerSeries.one_le_order_iff_constCoeff_eq_zero.2 ?_)
       rw [hc, hb, map_zero]
     · intro a b ha hb
-      rw [map_add]
+      rw [map_add (f := _)]
       exact le_trans (le_min ha hb) MvPowerSeries.min_order_le_add
 
 private lemma extend {O R K τ : Type} [CommRing O] [CommRing R] [Algebra O R] [CommRing K] [Algebra O K]
@@ -50,7 +103,7 @@ private lemma extend {O R K τ : Type} [CommRing O] [CommRing R] [Algebra O R] [
   have hadd : ∀ x x', ψ (x + x') = ψ x + ψ x' := fun x x' => by
     ext m
     have hm := Nat.lt_succ_self m.degree
-    rw [map_add, spec _ x _ (ha _ x) m hm, spec _ x' _ (ha _ x') m hm, ← map_add, ← map_add]
+    rw [map_add (f := _), spec _ x _ (ha _ x) m hm, spec _ x' _ (ha _ x') m hm, ← map_add (f := _), ← map_add (f := _)]
     refine spec _ _ _ ?_ m hm
     have := Ideal.add_mem _ (ha (m.degree + 1) x) (ha (m.degree + 1) x')
     rw [sub_add_sub_comm] at this
@@ -67,7 +120,7 @@ private lemma extend {O R K τ : Type} [CommRing O] [CommRing R] [Algebra O R] [
     rw [spec _ _ _ h1 m hm, map_mul, MvPowerSeries.coeff_mul, MvPowerSeries.coeff_mul]
     refine Finset.sum_congr rfl fun p hp => ?_
     have h2 : p.1.degree + p.2.degree = m.degree := by
-      rw [← Finset.HasAntidiagonal.mem_antidiagonal.1 hp, map_add]
+      rw [← Finset.HasAntidiagonal.mem_antidiagonal.1 hp, map_add (f := _)]
     rw [spec _ x _ (ha (m.degree + 1) x) p.1 (by omega), spec _ x' _ (ha (m.degree + 1) x') p.2 (by omega)]
   refine ⟨{ toFun := ψ
             map_one' := (onA 1).trans (map_one φ)

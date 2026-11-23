@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ReLatSelf
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ReLatSelf
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+public import Formalism.LocalRingCardinality.DataTheta
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.LocalToGlobal.ProjectiveLattices.UnramBridgeHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.BesselHermitianTheta.IsAutFunDef
-import Formalism.LocalToGlobal.ProjectiveLattices.UnramBridgeHolds
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta
 open scoped TensorProduct Matrix
@@ -19,11 +65,19 @@ attribute [local instance] IsCMField.starRing
 noncomputable def coordLat (V : Formalism.BasicNotions.HSpace E) (L : Submodule (𝓞 E) V.V) : Submodule (𝓞 E) (Fin V.rank → E) :=
   L.map (V.frame.equivFun.restrictScalars (𝓞 E)).toLinearMap
 
-theorem isLattice_coordLat (V : Formalism.BasicNotions.HSpace E) (L : Submodule (𝓞 E) V.V) (h : Submodule.IsLattice E L) :
+theorem span_eq_top_of_unimodular (V : Formalism.BasicNotions.HSpace E)
+    (L : Submodule (𝓞 E) V.V) (h : Submodule.IsLattice E L)
+    (hu : Formalism.HermitianLatticesTheory.IsUnimodular V.hT L) :
+    Submodule.span E (L : Set V.V) = ⊤ := by
+  exact Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top hu V.herm h.fg
+
+theorem isLattice_coordLat (V : Formalism.BasicNotions.HSpace E) (L : Submodule (𝓞 E) V.V)
+    (h : Submodule.IsLattice E L)
+    (hu : Formalism.HermitianLatticesTheory.IsUnimodular V.hT L := by exact V.baseLattice_isUnimodular) :
     ReciprocityTheory.MultiplicativeHeights.IsLattice (coordLat V L) := by
   refine ⟨h.fg.map _, ?_⟩
   have : (coordLat V L : Set (Fin V.rank → E)) = V.frame.equivFun.toLinearMap '' (L : Set V.V) := rfl
-  rw [this, ← Submodule.map_span, h.span_eq_top, Submodule.map_top, LinearEquiv.range]
+  rw [this, ← Submodule.map_span, span_eq_top_of_unimodular V L h hu, Submodule.map_top, LinearEquiv.range]
 
 theorem herm_coord (V : Formalism.BasicNotions.HSpace E) (x y : V.V) :
     herm V.gramᵀ (V.frame.equivFun x) (V.frame.equivFun y) = V.hT y x := by
@@ -108,8 +162,8 @@ theorem exists_conj (hc : CMData (maximalRealSubfield E) E) (V : Formalism.Basic
   have hG : ∀ a b, cc (V.gramᵀ a b) = V.gramᵀ b a := fun a b => V.herm.eq (V.frame b) (V.frame a)
   have hd : V.gramᵀ.det ≠ 0 := by
     rw [Matrix.det_transpose]; exact (GlobalTheory.IndefiniteRowSideFullHecke.AdelicUnitaryGroups.gram_det_isUnit V).ne_zero
-  obtain ⟨γ, hγ, hfin⟩ := (GlobalTheory.selfDual_lattices_one_genus hG hG hd hd (isLattice_coordLat V L h1)
-    (isLattice_coordLat V V.L0 V.standardTuple_isLattice)
+  obtain ⟨γ, hγ, hfin⟩ := (GlobalTheory.selfDual_lattices_one_genus hG hG hd hd (isLattice_coordLat V L h1 h2)
+    (isLattice_coordLat V V.L0 V.standardTuple_isLattice V.baseLattice_isUnimodular)
     (Or.inl ⟨selfDual_coordLat V L h2, selfDual_coordLat V V.L0 V.baseLattice_isUnimodular⟩)).2.1 rfl
   have hmem : ∀ v, γ v ∈ HR (Fv (maximalRealSubfield E) v) hc.sig V.gram := fun v => by
     have h := congrArg Matrix.transpose (hγ v).1

@@ -1,4 +1,53 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.SWFull
+module
+
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Mathlib.Topology.ContinuousMap.Bounded.Normed
+public import Development.WeilBound.ThetaLifts.LatticeBasics.SWFull
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.Schwarz
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,15 +116,15 @@ theorem unif_bound (h1 : ∀ x, 1 ≤ h x) {V : Submodule ℂ (X → ℂ)} (hV :
 
 variable [TopologicalSpace X] {g g' : ℂ → X → ℂ} {S S' : Set ℂ} {s₀ : ℂ}
 
-variable (h g S) in
 
+variable (h g S) in
 structure RegOn : Prop where
   hol : ∀ x, DifferentiableOn ℂ (g · x) S
   cont : ContinuousOn (fun y : ℂ × X => g y.1 y.2) (S ×ˢ Set.univ)
   grow : ∃ (C : ℝ) (N : ℕ), ∀ s ∈ S, ∀ x, ‖g s x‖ ≤ C * h x ^ N
 
-variable (h g s₀) in
 
+variable (h g s₀) in
 def Reg : Prop := ∃ S ∈ 𝓝 s₀, RegOn h g S
 
 theorem RegOn.mono (a : RegOn h g S) (e : S' ⊆ S) : RegOn h g S' :=

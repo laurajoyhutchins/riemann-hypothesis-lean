@@ -1,9 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.RhoEqOfSmulEq
-import Formalism.LocalToGlobal.Columns.GenericUnipotentCharacter
-import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
-import Formalism.LocalToGlobal.Columns.StdLatUnimodular
-import Formalism.LocalToGlobal.Columns.CoefCol
+module
+
+public import Formalism.LocalToGlobal.Columns.RhoEqOfSmulEq
+public import Formalism.LocalToGlobal.Columns.GenericUnipotentCharacter
+public import Formalism.LocalToGlobal.Columns.CoefCol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 
@@ -30,7 +68,7 @@ namespace LevFam
 variable {E K : Type} [Field E] [NumberField E] [Field K] {n : ℕ} {SG : Finset (HeightOneSpectrum (𝓞 E))}
   (Λ : LevFam E K n SG)
 
-def grp : Subgroup (GLG E n SG) := Subgroup.pi Set.univ fun w => (Λ w).H
+def grp : Subgroup (GLG (E := E) (n := n) (SG := SG)) := Subgroup.pi Set.univ fun w => (Λ w).H
 
 def chr : ↥Λ.grp →* Kˣ := piChar (fun w => (Λ w).H) fun w => (Λ w).lam
 
@@ -44,13 +82,13 @@ variable {X : Fields} {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 X.E))}
 
 abbrev FormG (Λ : LevFam X.E X.K n SG) : Type := UF X.E n × ↥Λ.grp
 
-@[reducible] def FormG.incl (Λ : LevFam X.E X.K n SG) : FormG Λ →* UF X.E n × GLG X.E n SG :=
+@[reducible] def FormG.incl (Λ : LevFam X.E X.K n SG) : FormG Λ →* UF X.E n × GLG (E := X.E) (n := n) (SG := SG) :=
   MonoidHom.prodMap (MonoidHom.id _) Λ.grp.subtype
 
-instance formAct (Λ : LevFam X.E X.K n SG) : MulAction (FormG Λ) (DecoSet X.E n ST SG) :=
+instance formAct (Λ : LevFam X.E X.K n SG) : MulAction (FormG Λ) (DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG)) :=
   MulAction.compHom _ (FormG.incl Λ)
 
-def formRho (C : CoefPk X n (DecoSet X.E n ST SG)) (Λ : LevFam X.E X.K n SG) :
+def formRho (C : CoefPk X n (DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG))) (Λ : LevFam X.E X.K n SG) :
     FormG Λ →* Module.End X.K C.V where
   toFun a := ((Λ.chr a.2 : X.Kˣ) : X.K) • C.rho a.1
   map_one' := by simp
@@ -58,11 +96,11 @@ def formRho (C : CoefPk X n (DecoSet X.E n ST SG)) (Λ : LevFam X.E X.K n SG) :
     simp only [Prod.fst_mul, Prod.snd_mul, map_mul, Units.val_mul]
     rw [smul_mul_smul_comm]
 
-open Classical in
 
-@[reducible] def formGSD (C : CoefPk X n (DecoSet X.E n ST SG)) (Λ : LevFam X.E X.K n SG) : GSD X.K where
+open Classical in
+@[reducible] def formGSD (C : CoefPk X n (DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG))) (Λ : LevFam X.E X.K n SG) : GSD X.K where
   G := FormG Λ
-  D := DecoSet X.E n ST SG
+  D := DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG)
   actD := formAct Λ
   V := C.V
   ιV := VVIdx C.lam
@@ -72,14 +110,14 @@ open Classical in
   Nab := C.Nab
   Del := C.Del
 
-structure CoefPk.Eqv (C : CoefPk X n (DecoSet X.E n ST SG)) : Prop where
-  nab_smul : ∀ (a : UF X.E n × GLG X.E n SG) (d : DecoSet X.E n ST SG),
+structure CoefPk.Eqv (C : CoefPk X n (DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG))) : Prop where
+  nab_smul : ∀ (a : UF X.E n × GLG (E := X.E) (n := n) (SG := SG)) (d : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG)),
     C.Nab (a • d) = (C.Nab d).map ((C.rho a.1).restrictScalars (𝓞 X.K))
-  del_smul : ∀ (a : UF X.E n × GLG X.E n SG) (d : DecoSet X.E n ST SG),
+  del_smul : ∀ (a : UF X.E n × GLG (E := X.E) (n := n) (SG := SG)) (d : DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG)),
     C.Del (a • d) = (C.Del d).map ((C.rho a.1).restrictScalars (𝓞 X.K))
   inv : ∀ (γ : UF X.E n) (x y : C.V), C.pair (C.rho γ x) (C.rho γ y) = C.pair x y
 
-instance formModO (C : CoefPk X n (DecoSet X.E n ST SG)) (Λ : LevFam X.E X.K n SG) :
+instance formModO (C : CoefPk X n (DecoSet (E := X.E) (n := n) (ST := ST) (SG := SG))) (Λ : LevFam X.E X.K n SG) :
     Module (𝓞 X.K) (formGSD C Λ).EqFun :=
   (fun S : GSD X.K => (inferInstance : Module (𝓞 X.K) S.EqFun)) (formGSD C Λ)
 
@@ -106,10 +144,6 @@ abbrev ColV (u : Pr.Word) (j : ℕ) : Submodule X.K ((colGSD W Ch u j).D → (co
   (colGSD W Ch u j).EqFun
 
 def ColL (u : Pr.Word) (j : ℕ) : Submodule (𝓞 X.K) (ColV W Ch u j) := (colGSD W Ch u j).intDel
-
-def ColLnab (u : Pr.Word) (j : ℕ) : Submodule (𝓞 X.K) (ColV W Ch u j) := (colGSD W Ch u j).intNab
-
-@[reducible] def ColCSD (u : Pr.Word) (j : ℕ) (h : (colGSD W Ch u j).Ok) : CSD X.K := (colGSD W Ch u j).toCSD h
 
 abbrev MfV (u : Pr.Word) : Submodule X.K ((colGSD W Ch u 0).D → (colGSD W Ch u 0).V) := ColV W Ch u 0
 

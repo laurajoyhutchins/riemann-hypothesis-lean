@@ -1,6 +1,72 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SummableCell
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.LeftInvOfIsSection
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ValueFormula
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWeilDatumOOneOfRankZero
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.DoubledFlatSectionEqTranslateStandardSection
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsStandardUnitaryChartDoubledSpace
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsWeilDatumTransportSchwartzBruhatStandard
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ImportsBis
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchrodingerThetaEqSchwartzBruhat
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SiegelParabolicUnnMatrixBlockUpperTriangular
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SiegelWeilFockDoubledPairOfWeilAndIchino
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.TransportedSchrodingerSiegelUnipotentAction
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.TransportedSchrodingerStandardLeviAction
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeylFormulaStandardUnitaryGroupWeilDatum
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDetSmulSubOne
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasDerivAtAndIsTheta
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AdelicConjTransposeBlockMatrixTwoByTwoFin
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.EisPoleLEZeroOfLt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousSymmUnitaryChart
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaSectionContinuous
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WeilSchwartzParabolicEquivariant
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SummableCell
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +100,7 @@ theorem norm_le_of_law {n : ℕ} {χ : (AE D)ˣ →* Circle} {t : ℂ} {f : G D 
   refine ⟨max C 0, le_max_right _ _, fun g => ?_⟩
   have hlaw : GlobalTheory.Doubling.IndLaw GlobalTheory.StdUnn.PolesModel.modP (χ.comp GlobalTheory.StdUnn.PolesModel.detP) t f := by
     intro p g
-    exact hl p.1 p.2 (GlobalTheory.StdUnn.HeightExists.leviBlock p) rfl g
+    exact hl p.1 p.2 ((GlobalTheory.StdUnn.HeightExists.leviBlock (D := D) (n := n)) p) rfl g
   exact (GlobalTheory.StdUnn.PolesModel.isIwasawa (D := D) (n := n)).norm_le hlaw
     (fun k hk => (hC k hk).trans (le_max_left _ _)) g
 
@@ -96,9 +162,9 @@ theorem exists_hermQ {n : ℕ} (c : ratHerm D n) : ∃ b : HermQ D n, b.1.map (i
 
 private theorem leftInv_ht {n : ℕ} : GlobalTheory.AutomorphicL2Unitary.LeftInv (P D n ⊓ GF D n) (ht D n) := by
   intro γ hγ g
-  obtain ⟨u, hu⟩ := GlobalTheory.StdUnn.LeftInvSect.det_rat hγ.2 (GlobalTheory.StdUnn.HeightExists.leviBlock ⟨γ, hγ.1⟩) rfl
+  obtain ⟨u, hu⟩ := GlobalTheory.StdUnn.LeftInvSect.det_rat hγ.2 ((GlobalTheory.StdUnn.HeightExists.leviBlock (D := D) (n := n)) ⟨γ, hγ.1⟩) rfl
   have h1 : GlobalTheory.StdUnn.PolesModel.modP (⟨γ, hγ.1⟩ : P D n) = 1 := by
-    show GlobalTheory.Doubling.absA D (Matrix.GeneralLinearGroup.det (GlobalTheory.StdUnn.HeightExists.leviBlock ⟨γ, hγ.1⟩)) = 1
+    show GlobalTheory.Doubling.absA D (Matrix.GeneralLinearGroup.det ((GlobalTheory.StdUnn.HeightExists.leviBlock (D := D) (n := n)) ⟨γ, hγ.1⟩)) = 1
     rw [hu]
     exact GlobalTheory.Doubling.absE_inclR u
   have h := (GlobalTheory.StdUnn.PolesModel.isIwasawa (D := D) (n := n)).iwAbs_left ⟨γ, hγ.1⟩ g

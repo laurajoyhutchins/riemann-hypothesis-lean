@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.StabilizersFinite
+module
+
+public import GroundTheory.GlobalFields.HerbrandQuotients.SUnitsPerm
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.StabilizersDefs
+public import GroundTheory.ProfiniteCohomology.GlobalEulerCharacteristic.OrbitInvariants
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -7,9 +52,9 @@ namespace GroundTheory.ProfCoh
 open NumberField IsDedekindDomain GroundTheory.Global MulAction NumberField.InfinitePlace.Completion
 open scoped NumberField.LiesOver
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 section Complex
 
@@ -56,7 +101,7 @@ theorem infPlaceOfEmbedding_eq_inv_smul (ι ι' : ℚ̄ →ₐ[K.1] AlgebraicClo
     change infCompletionEmbedding ι L (AdeleBaseChange.infiniteCompletionMap
       (τ : L.1 ≃+* L.1) w₀ (algebraMap L.1 _ x)) = ι' x
     rw [AdeleBaseChange.infiniteCompletionMap_algebraMap, infCompletionEmbedding_algebraMap,
-      AlgEquiv.coe_ringEquiv, h x]
+      AlgEquiv.coe_toRingEquiv, h x]
   have e := congrArg Subtype.val (eq_infPlaceOfEmbedding ι' L j hj)
   rw [← e]
   exact hcomap
@@ -126,8 +171,8 @@ theorem stabilizer_infPlaceOfEmbedding (v : {v : NumberField.InfinitePlace K.1 /
 variable {k N : Type*} [Field k] [AddCommGroup N] [Module k N] [FiniteDimensional k N]
   (σN : Representation k (L.1 ≃ₐ[K.1] L.1) N)
 
-omit [FiniteDimensional k N] [IsGalois K.1 L.1] in
 
+omit [FiniteDimensional k N] [IsGalois K.1 L.1] in
 theorem finrank_invariants_comp_bot :
     Module.finrank k (Representation.invariants (σN.comp (⊥ : Subgroup (L.1 ≃ₐ[K.1] L.1)).subtype)) =
       Module.finrank k N := by
@@ -139,8 +184,8 @@ theorem finrank_invariants_comp_bot :
     simp
   rw [htop, finrank_top]
 
-open Classical in
 
+open Classical in
 theorem finrank_invariants_funPermRep_infinitePlace :
     Module.finrank k ((funPermRep k (L.1 ≃ₐ[K.1] L.1)
         (NumberField.InfinitePlace L.1)).tprod σN).invariants =

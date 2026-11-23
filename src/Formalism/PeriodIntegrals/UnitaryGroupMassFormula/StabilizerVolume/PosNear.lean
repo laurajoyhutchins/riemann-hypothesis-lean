@@ -1,8 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.VolStabFromSWS
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensInfAll
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.PosNear
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.VolStabFromSWS
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
-import ReciprocityTheory.GeneralLinearIntegers.AlgebraMapIntMemOint
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensInfAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GeneralLinearIntegers.AlgebraMapIntMemOint
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +79,7 @@ theorem crd_map {R S : Type} [CommRing R] [Algebra F R] [CommRing S] [Algebra F 
     simp [crd, Algebra.TensorProduct.basis_repr_tmul, Algebra.TensorProduct.map_tmul]
   | add x y hx hy =>
     simp only [crd] at hx hy ⊢
-    rw [map_add, map_add, Finsupp.add_apply, hx, hy, map_add, Finsupp.add_apply, map_add]
+    rw [map_add (f := _), map_add (f := _), Finsupp.add_apply, hx, hy, map_add (f := _), Finsupp.add_apply, map_add (f := _)]
 
 theorem crd_incl (R : Type) [CommRing R] [Algebra F R] (x : E) (k : Fin d) :
     crd b R (inclR R x) k = algebraMap F R (b.repr x k) := by
@@ -72,41 +122,10 @@ theorem isClosed_int : IsClosed (v.adicCompletionIntegers F : Set (v.adicComplet
   (ReciprocityTheory.GeneralLinearIntegers.GeneralLinearIntegersOpenCompact.isCompact_integers v).isClosed
 
 theorem isClopen_latV (a M : ℕ) : IsClopen (latV (M := M) (n := a) b v) := by
-  have hc : ∀ (x : Fin a) (i : Fin M) (k : Fin d),
-      Continuous (fun Y : Fin a → Fin M → Fv F v ⊗[F] E => crd b (Fv F v) (Y x i) k) :=
-    fun x i k => (continuous_crd b (Fv F v) k).comp ((continuous_apply i).comp (continuous_apply x))
-  have e : latV (M := M) (n := a) b v = ⋂ x, ⋂ i, ⋂ k,
-      (fun Y : Fin a → Fin M → Fv F v ⊗[F] E => crd b (Fv F v) (Y x i) k) ⁻¹'
-        (v.adicCompletionIntegers F : Set (v.adicCompletion F)) := by
-    ext Y
-    simp [latV, crd]
-  rw [e]
-  refine ⟨isClosed_iInter fun x => isClosed_iInter fun i => isClosed_iInter fun k =>
-    (isClosed_int v).preimage (hc x i k), isOpen_iInter_of_finite fun x =>
-    isOpen_iInter_of_finite fun i => isOpen_iInter_of_finite fun k =>
-    (ReciprocityTheory.GeneralLinearIntegers.GeneralLinearIntegersOpenCompact.isOpen_integers v).preimage (hc x i k)⟩
+  apply PI.VolStabSW.PositiveNearLattice.isClopen_latV <;> assumption
 
 theorem isCompact_latV (a M : ℕ) : IsCompact (latV (M := M) (n := a) b v) := by
-  let L : (Fin a → Fin M → Fin d → Fv F v) → (Fin a → Fin M → Fv F v ⊗[F] E) :=
-    fun c x i => ∑ k, c x i k • ((1 : Fv F v) ⊗ₜ[F] b k)
-  have hL : Continuous L := by
-    refine continuous_pi fun x => continuous_pi fun i => continuous_finsetSum _ fun k _ => ?_
-    exact continuous_smul.comp
-      (((continuous_apply k).comp ((continuous_apply i).comp (continuous_apply x))).prodMk
-        continuous_const)
-  let K : Set (Fin a → Fin M → Fin d → Fv F v) :=
-    Set.pi Set.univ fun _ => Set.pi Set.univ fun _ => Set.pi Set.univ fun _ =>
-      (v.adicCompletionIntegers F : Set (v.adicCompletion F))
-  have hK : IsCompact K := isCompact_univ_pi fun _ => isCompact_univ_pi fun _ =>
-    isCompact_univ_pi fun _ => ReciprocityTheory.GeneralLinearIntegers.GeneralLinearIntegersOpenCompact.isCompact_integers v
-  refine (hK.image hL).of_isClosed_subset (isClopen_latV b v a M).isClosed ?_
-  intro Y hY
-  refine ⟨fun x i k => crd b (Fv F v) (Y x i) k, ?_, ?_⟩
-  · simp only [K, Set.mem_pi, Set.mem_univ, true_implies]
-    intro x i k
-    exact hY x i k
-  · funext x i
-    exact (eq_sum_crd b (Fv F v) (Y x i)).symm
+  apply PI.VolStabSW.PositiveNearLattice.isCompact_latV <;> assumption
 
 theorem isSB_latV (a M : ℕ) :
     IsSB ((latV (M := M) (n := a) b v).indicator (fun _ => (1 : ℂ))) := by

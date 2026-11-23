@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.BilinearSmul.BSmulRight
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.EvenVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.BilinearSmul.BSmulRight
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.Descent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open QuadraticAlgebra Matrix UpperTheory.V.Z.Sym UpperTheory.V.Z.Sym.Loc
 
@@ -102,6 +152,7 @@ theorem UpperTheory.V.Z.Sym.Loc.One.fixg :
       have hx' : ∀ i, IsInt O (Q x i) := hx
       have hxe : x = ∑ i, R i (Q x i) := by
         show x = ∑ i, P.symm (G *ᵥ Pi.single i (Q x i))
+
         rw [← map_sum, ← Matrix.mulVec_sum, Finset.univ_sum_single, hPQ, P.symm_apply_apply]
       rw [hxe]
       refine Submodule.sum_mem _ fun i _ => ?_
@@ -121,7 +172,7 @@ theorem UpperTheory.V.Z.Sym.Loc.One.fixg :
         · simp [hij]
       have hR : R i (Q x i) = a • R i 1 + b • R i w := by
         show P.symm (G *ᵥ Pi.single i (Q x i)) = a • R i 1 + b • R i w
-        rw [hsp, Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul, map_add, map_smul, map_smul,
+        rw [hsp, Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul, map_add (f := _), map_smul, map_smul,
           ← algebra_compatible_smul, ← algebra_compatible_smul]
       rw [hR]
       exact add_mem (Submodule.smul_mem _ _ (Submodule.subset_span h1S))
@@ -146,7 +197,7 @@ theorem UpperTheory.V.Z.Sym.Loc.One.fixg :
       | add z v _ _ hz hv =>
         intro i
         show IsInt O ((M *ᵥ P (z + v)) i)
-        rw [map_add, Matrix.mulVec_add]
+        rw [map_add (f := _), Matrix.mulVec_add]
         exact (hz i).add (hv i)
       | smul a z _ hz =>
         intro i

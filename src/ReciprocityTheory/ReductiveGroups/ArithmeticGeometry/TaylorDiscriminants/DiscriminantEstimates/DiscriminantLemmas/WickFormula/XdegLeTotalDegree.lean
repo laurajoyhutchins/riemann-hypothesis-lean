@@ -1,4 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantLemmas.WickFormula.DeltaEqGdelta
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantLemmas.WickFormula.DeltaEqGdelta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -40,7 +87,7 @@ variable {k AA M : Type} [CommRing k] [Algebra ℚ k] [Ring AA] [Algebra k AA] [
 theorem ordEval_add (h1 : OrdLin) (a : Fin r → AA) (a' : Fin s → AA) (P Q : MvPolynomial (Fin r ⊕ Fin s) k) :
     ordEval a a' (P + Q) = ordEval a a' P + ordEval a a' Q := by
   obtain ⟨f, hf⟩ := h1 k AA r s a a'
-  rw [← hf, ← hf, ← hf, map_add]
+  rw [← hf, ← hf, ← hf, map_add (f := _)]
 
 theorem ordEval_zero (h1 : OrdLin) (a : Fin r → AA) (a' : Fin s → AA) :
     ordEval a a' (0 : MvPolynomial (Fin r ⊕ Fin s) k) = 0 := by
@@ -58,7 +105,7 @@ theorem phiH_apply (h1 : OrdLin) (a b : Fin r → AA) (a' b' : Fin s → AA) (σ
 noncomputable def tH (h1 : OrdLin) (a : Fin r → AA) (a' : Fin s → AA) (κ : Fin r → Fin s → k) (σ₀ : M)
     (n : ℕ) : MvPolynomial (Fin r ⊕ Fin s) k →+ M :=
   AddMonoidHom.mk' (fun R => ordEval a a' ((n.factorial : ℚ)⁻¹ • (delta κ ^ n) R) • σ₀)
-    (fun P Q => by rw [map_add, smul_add, ordEval_add h1, add_smul])
+    (fun P Q => by rw [map_add (f := _), smul_add, ordEval_add h1, add_smul])
 
 theorem tH_apply (h1 : OrdLin) (a : Fin r → AA) (a' : Fin s → AA) (κ : Fin r → Fin s → k) (σ₀ : M)
     (n : ℕ) (R : MvPolynomial (Fin r ⊕ Fin s) k) :
@@ -72,6 +119,7 @@ theorem psi_sum (h1 : OrdLin) (a : Fin r → AA) (a' : Fin s → AA) (κ : Fin r
     (N : ℕ) {α : Type} (t : Finset α) (g : α → MvPolynomial (Fin r ⊕ Fin s) k) :
     psi h1 a a' κ σ₀ N (∑ x ∈ t, g x) = ∑ x ∈ t, psi h1 a a' κ σ₀ N (g x) := by
   unfold psi
+
   simp only [map_sum]
   exact Finset.sum_comm
 
@@ -157,6 +205,7 @@ theorem claim (h1 : OrdLin) (h2 : OrdX) (h3 : Base) (h4 : BComm) (g1 : Gen.PowXL
   | succ d ih =>
     intro R hR N hN
     obtain ⟨N', rfl⟩ : ∃ N', N = N' + 1 := ⟨N - 1, by omega⟩
+
     rw [R.as_sum, map_sum, psi_sum]
     refine Finset.sum_congr rfl fun m hm => ?_
     have hmd := hR m hm
@@ -180,15 +229,15 @@ theorem claim (h1 : OrdLin) (h2 : OrdX) (h3 : Base) (h4 : BComm) (g1 : Gen.PowXL
         have := xdeg_add (Finsupp.single (Sum.inl i : Fin r ⊕ Fin s) 1) m'
         rw [← hm', xdeg_single] at this
         omega
-      have hmon : monomial m (coeff m R) = X (Sum.inl i) * monomial m' (coeff m R) := by
+      have hmon : monomial m (AddMonoidAlgebra.coeff R m) = X (Sum.inl i) * monomial m' (AddMonoidAlgebra.coeff R m) := by
         rw [X, monomial_mul, one_mul, ← hm']
       rw [hmon, phi_X h1 h2 h4 H, psi_X h1 h2 g1 g2 H]
-      have e1 := ih (monomial m' (coeff m R)) (fun u hu => by
+      have e1 := ih (monomial m' (AddMonoidAlgebra.coeff R m)) (fun u hu => by
         have hu' := MvPolynomial.support_monomial_subset hu
         rw [Finset.mem_singleton] at hu'
         rw [hu']
         exact hxm') (N' + 1) (by omega)
-      have e2 := ih (Gen.dL κ i (monomial m' (coeff m R)))
+      have e2 := ih (Gen.dL κ i (monomial m' (AddMonoidAlgebra.coeff R m)))
         (fun u hu => (dL_monomial_support κ i m' _ u hu).trans hxm') N' (by omega)
       rw [e1, e2]
 

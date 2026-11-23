@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
-import GroundTheory.GlobalFields.GlobalReciprocity.General
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import GroundTheory.GlobalFields.IdeleGroups.ClassGroup
+public import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.BaseChange
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,16 +52,16 @@ namespace UpperTheory.Gal.TP.Skew
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-variable (F E) in
 
+variable (F E) in
 def stdSpc (n : ℕ) : Spc F E n where
   J := 1
   L := Submodule.pi Set.univ fun _ => (1 : Submodule (𝓞 E) E)
   θ := fun _ => 1
   bas := fun _ => 1
 
-variable (F) in
 
+variable (F) in
 def skewSpc (δ : E) (𝔞 : Submodule (𝓞 E) E) (d : ℕ) : Spc F E d where
   J := δ • 1
   L := Submodule.pi Set.univ fun _ => 𝔞
@@ -38,7 +78,7 @@ def IsPos (δ : E) (emb : ∀ w : InfinitePlace F, EmbOver E w) : Prop :=
   ∀ w, ∃ c : ℝ, 0 < c ∧ Complex.I * (emb w).1 δ = c
 
 def GoodField (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] : Prop :=
-  IsGalois ℚ E ∧ ∀ (v : Pl F) w, Formalism.UG.IsInertAt F E v w →
+  IsGalois ℚ E ∧ ∀ (v : Pl (F := F)) w, Formalism.UG.IsInertAt F E v w →
     (2 : 𝓞 F) ∉ v.asIdeal ∧ 3 < Ideal.absNorm v.asIdeal ∧ ¬ differentIdeal ℤ (𝓞 F) ≤ v.asIdeal
 
 def SpacesEx : Prop :=

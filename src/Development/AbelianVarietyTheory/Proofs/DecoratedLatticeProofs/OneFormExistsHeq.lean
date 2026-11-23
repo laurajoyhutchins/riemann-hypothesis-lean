@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PeriodSingle
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MovedReadingSameMapsBaseReadingAgrees
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PeriodSingle
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MovedReadingSameMapsBaseReadingAgrees
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TwArgs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ValidForConstructedPointClassesEventuallyWorking
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MiStarOfMid
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.UnitRatio
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions GlobalTheory.EX GlobalTheory.EX.OB GlobalTheory.Mem GlobalTheory.Mem.Top GlobalTheory.Fc GlobalTheory.MiS GlobalTheory.Fam
 open Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -14,37 +54,6 @@ section Generic
 
 variable {D : D7} {O : Obj D} {c : ℝ}
 
-set_option maxHeartbeats 800000 in
-
-theorem row_of_btw (b : Bundle D O c) (x : R3.TwIn O.ex) (y : Bl.BTw b x) (t : (packB b).P.T)
-    (F : Fin (((packB b).P.A3.side3 (packB b).P.Ps (packB b).P.ψs (packB b).P.Zs).nV t) → D.what₂.LL)
-    (F' : Fin (((packB b).Q.F.fc (cxW (packB b)).zs).Df1.nV t) → D.what₂.LL) (hF : HEq F F') :
-    ∃ (s : x.T) (v : Fin (rDim D x.A3.A x.F.P1 x.F.ψ1 s) → D.what₂.LL), (packB b).P.I.tup t = x.Y.tup s ∧
-      HEq ((packB b).Q.F.eV (cxW (packB b)).zs t F') (R3.rowForm x.A3.A x.F.P1 x.F.ψ1 s v) ∧
-      HEq ((packB b).P.I.jA t ((rV0 D (packB b).P.A3.A (packB b).P.Ps (packB b).P.ψs t).mulVec F)) (x.Y.jA s v) := by
-  have key : ∀ k : Bl.RPk b.R b.S, k = Bl.rpkX y.y → ∀ (t : k.P.T)
-      (F : Fin ((k.P.A3.side3 k.P.Ps k.P.ψs k.P.Zs).nV t) → D.what₂.LL)
-      (F' : Fin ((k.B.Q.F.fc (k.B.Q.Rl.toCx3 k.B.Q.F).zs).Df1.nV t) → D.what₂.LL), HEq F F' →
-      ∃ (s : x.T) (v : Fin (rDim D x.A3.A x.F.P1 x.F.ψ1 s) → D.what₂.LL), k.P.I.tup t = x.Y.tup s ∧
-        HEq (k.B.Q.F.eV (k.B.Q.Rl.toCx3 k.B.Q.F).zs t F') (R3.rowForm x.A3.A x.F.P1 x.F.ψ1 s v) ∧
-        HEq (k.P.I.jA t ((rV0 D k.P.A3.A k.P.Ps k.P.ψs t).mulVec F)) (x.Y.jA s v) := by
-    intro k hk
-    subst hk
-    intro t F F' hF
-    have e : F = F' := eq_of_heq hF
-    subst e
-    refine ⟨t, (rV0 D x.A3.A x.F.P1 x.F.ψ1 t).mulVec F, rfl, heq_of_eq ?_, HEq.rfl⟩
-    have hOk := y.intersectionNumber_baseChange.ok
-    have hb : BlockHyp (x.A3.A.fam.R t) (x.A3.A.fam.lvl x.F.P1 x.F.ψ1) x.A3.A.fam.v0 1 :=
-      ⟨hOk.ok2.conj, hOk.ok2.irr, hOk.ok2.what₂ t⟩
-    have key := BlockDat.lf_lvl_vE hb
-    unfold R3.rowForm rV0
-    show (x.A3.A.fam.R t).S.basis.equivFun.symm (((x.A3.A.fam.R t).vE (x.A3.A.fam.lvl x.F.P1 x.F.ψ1)) *ᵥ F) = _
-    congr 1
-    conv_lhs => rw [← key]
-    rw [Matrix.mul_assoc]
-    exact (Matrix.mulVec_mulVec _ _ _).symm
-  exact key (Bl.rpkB b) y.eq t F F' hF
 
 end Generic
 
@@ -52,7 +61,7 @@ section Rows
 
 open GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top.Bl
 
-set_option maxHeartbeats 800000 in
+
 
 theorem row_of_pack {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotions.G.Inst D L} {Gl : Formalism.MainNotions.G.LatInst D}
     {Kc : Formalism.MainNotions.G.Consts} {Yd : DivX D} {cX : ExtraC} {ex : Extra D L hT Gi Gl Kc Yd cX} (x : R3.TwIn ex)
@@ -78,7 +87,7 @@ theorem row_of_pack {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalis
   cases hj
   exact ⟨s, v, rfl, HEq.rfl, HEq.rfl⟩
 
-set_option maxHeartbeats 800000 in
+
 
 theorem row_of_args {K : Ctx} {B : GlobalTheory.Mem.Base} {f : GlobalTheory.Mem.Top.Fr B.toPre} {T : TwDat B} {w : ColW B f T} {Z : w.Lt} {Wt : Set B.places.Pl}
     {L : SizeData₂ (w.st Z).toD7} {hT : GatTies (w.st Z).toD7} {Gi : Formalism.MainNotions.G.Inst (w.st Z).toD7 L} {Gl : Formalism.MainNotions.G.LatInst (w.st Z).toD7}
@@ -92,7 +101,7 @@ theorem row_of_args {K : Ctx} {B : GlobalTheory.Mem.Base} {f : GlobalTheory.Mem.
       HEq (a.x.Y.jA s v) (t.r.Y.jA s' v') :=
   row_of_pack a.x (R3.famT t) a.pack (R3.lev1 w.I) (R3.chr1 w.I) rfl HEq.rfl t.r.Y.tup t.r.Y.jA a.tup a.jA s v
 
-set_option maxHeartbeats 800000 in
+
 
 theorem rowForm_all (X : Stages) {px : PreX X.B.toPre} (I : ColIn X.B px) (hX : X.B.fields.Ok) (U : Set I.ι)
     (Xg : Finset (R3.Gc X.B px → X.B.LL)) (tr : R3.TrI X.B px) (s : R3.TupU I U) (a : I.ι) (h : s.1 = I.tup a)
@@ -106,7 +115,7 @@ theorem rowForm_all (X : Stages) {px : PreX X.B.toPre} (I : ColIn X.B px) (hX : 
   subst h
   exact ⟨v, fun i i' e => congrArg v (Fin.ext e), HEq.rfl⟩
 
-set_option maxHeartbeats 800000 in
+
 
 theorem one_form_rows {K : Ctx} {B : GlobalTheory.Mem.Base} {f : GlobalTheory.Mem.Top.Fr B.toPre} {T : TwDat B} {w : ColW B f T} {Z : w.Lt} {Wt : Set B.places.Pl}
     {p0 : BaseLevelRowSide (w.D Z)} {t : RowsT K w Z Wt p0} (rx : RXs t) (s : R3.TupU w.I (R3.usedOf w.I T Wt))
@@ -141,25 +150,7 @@ theorem one_form_congr {B : GlobalTheory.Mem.Base} {X : PreX B.toPre} {I : Col2.
   cases hG
   exact h
 
-set_option maxHeartbeats 800000 in
 
-theorem one_form {hL : GlobalTheory.Published.LocalLanglandsGL} {p : Bl.Prm hL} {K : Ctx} (q : Bl.WPt p.s K) (x : R3.TwIn q.O.ex)
-    (a : R3.TwArgs q.O.ex q.x.what₂) (ax : HEq a.x x) (rx : Bl.RXs q.x.what₂) (s : x.T)
-    (v : Fin (rDim (q.w.D q.Z) x.A3.A x.F.P1 x.F.ψ1 s) → (q.w.D q.Z).what₂.LL) :
-    ∃ φ : Frm q.w.I (x.Y.tup s), IsRes φ (R3.rowForm x.A3.A x.F.P1 x.F.ψ1 s v) ∧
-      ∀ u, RecVal (I := q.w.I) (l := q.w.l) (Z := q.Z) u (x.Y.tup s) φ (x.Y.jA s v) := by
-  have e : a.x = x := eq_of_heq ax
-  subst e
-  obtain ⟨s', v', k1, k2, k3⟩ := row_of_args (w := q.w) (Z := q.Z) (ex := q.O.ex) (t := q.x.what₂) a s v
-  exact one_form_congr (I := q.w.I) (l := q.w.l) (Z := q.Z) k1 k2 k3 (one_form_rows rx s' v')
-
-set_option maxHeartbeats 800000 in
-
-theorem recVal_packB : ∀ {hL : GlobalTheory.Published.LocalLanglandsGL} {p : Bl.Prm hL} {K : Ctx} (q : Bl.WPt p.s K) {c : ℝ} (b : Bundle (q.w.D q.Z) q.O c), Bl.BWit q b → Nonempty (Bl.RXs q.x.what₂) → ∀ (t : (packB b).P.T) (F : Fin (((packB b).P.A3.side3 (packB b).P.Ps (packB b).P.ψs (packB b).P.Zs).nV t) → (q.w.D q.Z).what₂.LL) (F' : Fin (((packB b).Q.F.fc (cxW (packB b)).zs).Df1.nV t) → (q.w.D q.Z).what₂.LL), HEq F F' → ∃ φ : GlobalTheory.TopVal.Frm q.w.I ((packB b).P.I.tup t), GlobalTheory.TopVal.IsRes φ ((packB b).Q.F.eV (cxW (packB b)).zs t F') ∧ ∀ u, GlobalTheory.TopVal.RecVal (I := q.w.I) (l := q.w.l) (Z := q.Z) u ((packB b).P.I.tup t) φ ((packB b).P.I.jA t ((rV0 (q.w.D q.Z) (packB b).P.A3.A (packB b).P.Ps (packB b).P.ψs t).mulVec F)) := by
-  intro hL p K q c b hb hR t F F' hF
-  obtain ⟨rx⟩ := hR
-  obtain ⟨s, v, h1, h2, h3⟩ := row_of_btw b hb.x hb.y t F F' hF
-  exact one_form_congr (I := q.w.I) (l := q.w.l) (Z := q.Z) h1 h2 h3 (one_form q hb.x hb.a hb.ax rx s v)
 
 end GlobalTheory.TopVal.OneForm
 

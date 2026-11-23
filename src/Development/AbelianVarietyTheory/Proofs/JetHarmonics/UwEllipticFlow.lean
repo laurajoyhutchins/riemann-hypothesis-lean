@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries GlobalTheory.MomOne Filter PeriodPair
 open scoped ComplexConjugate BigOperators Topology
@@ -33,7 +82,7 @@ lemma g₃_eq (h : M.Ok) : M.L.g₃ = M.c ^ 6 * ((-(M.ι.symm M.W.a₁ ^ 2 + 4 *
 
 lemma x_eq (z : ℂ) : M.x z =
     ℘[M.L] z / M.c ^ 2 - (M.ι.symm M.W.a₁ ^ 2 + 4 * M.ι.symm M.W.a₂) / 12 := by
-  simp only [Mdl.x, WeierstrassCurve.b₂, map_div₀, map_add, map_mul, map_pow, map_ofNat]
+  simp only [Mdl.x, WeierstrassCurve.b₂, map_div₀, map_add (f := _), map_mul, map_pow, map_ofNat]
 
 lemma charpoly_eq_of_isIso (h : M.Ok) (z : ℂ) : ℘[M.L] z =
     M.c ^ 2 * (M.x z + (M.ι.symm M.W.a₁ ^ 2 + 4 * M.ι.symm M.W.a₂) / 12) := by
@@ -265,7 +314,7 @@ private lemma exists_analytic_u_w_factor_near_lattice (h : M.Ok) {l : ℂ} (hl :
 lemma norm_x_lt (h : M.Ok) {z : ℂ} (hz : z ∉ M.L.lattice) (hx : 1 < ‖M.ι (M.x z)‖) :
     ‖M.ι (M.x z)‖ < ‖M.ι (M.y z)‖ := by
   have heq := congrArg M.ι (equation M h hz)
-  simp only [map_add, map_mul, map_pow, RingEquiv.apply_symm_apply] at heq
+  simp only [map_add (f := _), map_mul, map_pow, RingEquiv.apply_symm_apply] at heq
   obtain ⟨-, h1, h2, h3, h4, h6, -, -, -⟩ := h
   by_contra hY'
   have hY := not_lt.mp hY'

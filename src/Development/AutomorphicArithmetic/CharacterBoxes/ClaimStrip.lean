@@ -1,24 +1,54 @@
-import Development.AutomorphicArithmetic.CharacterBoxes.HalfPlane
+module
+
+public import Development.AutomorphicArithmetic.CharacterBoxes.HalfPlane
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+public import Mathlib.NumberTheory.LSeries.Nonvanishing
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex
 
 namespace Claim
-
-theorem factor_ne_zero {M : ℕ} (ψ : DirichletCharacter ℂ M) {s : ℂ} (hs : 0 < s.re) (p : ℕ)
-    (hp : p.Prime) : (1 : ℂ) - ψ p * (p : ℂ) ^ (-s) ≠ 0 := by
-  intro h
-  have h1 : ψ p * (p : ℂ) ^ (-s) = 1 := by linear_combination -h
-  have hp1 : (1 : ℝ) < p := by exact_mod_cast hp.one_lt
-  have hpow : ‖(p : ℂ) ^ (-s)‖ < 1 := by
-    rw [Complex.norm_natCast_cpow_of_pos hp.pos, Complex.neg_re]
-    exact Real.rpow_lt_one_of_one_lt_of_neg hp1 (by linarith)
-  have hn : ‖ψ p * (p : ℂ) ^ (-s)‖ < 1 := by
-    rw [norm_mul]
-    calc ‖ψ p‖ * ‖(p : ℂ) ^ (-s)‖ ≤ 1 * ‖(p : ℂ) ^ (-s)‖ := by
-          gcongr; exact ψ.norm_le_one _
-      _ < 1 := by rw [one_mul]; exact hpow
-  rw [h1, norm_one] at hn
-  exact lt_irrefl _ hn
 
 theorem prim_zero {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) [NeZero χ.conductor] {s : ℂ}
     (hs0 : 0 < s.re) (hs1 : s.re < 1) (h : DirichletCharacter.LFunction χ s = 0) :
@@ -63,7 +93,7 @@ theorem strip (h : HalfPlane) : Strip := by
   have hs0' : s ≠ 0 := fun e => by rw [e, Complex.zero_re] at hs0; exact lt_irrefl _ hs0
   rcases lt_trichotomy s.re (1 / 2) with hlt | heq | hgt
   · exfalso
-    haveI : NeZero χ.conductor := ⟨χ.conductor_ne_zero⟩
+    have : NeZero χ.conductor := ⟨χ.conductor_ne_zero⟩
     have hp := prim_zero χ hs0 hs1 hz
     have hr := prim_reflect χ.primitiveCharacter χ.primitiveCharacter_isPrimitive hs0 hs1 hp
     have ht : (1 : ℂ) - s ≠ 1 := fun e => hs0' (sub_eq_self.mp e)
@@ -98,7 +128,5 @@ theorem zeta (h : HalfPlane) : Zeta := by
     have hz' : riemannZeta (1 - s) = 0 := by
       rw [riemannZeta_def_of_ne_zero h1s, completedRiemannZeta_one_sub, hc, zero_div]
     exact riemannZeta_ne_zero_of_one_le_re (by rw [Complex.sub_re, Complex.one_re]; linarith) hz'
-
-theorem zeta_iff : Zeta ↔ RiemannHypothesis := Iff.rfl
 
 end Claim

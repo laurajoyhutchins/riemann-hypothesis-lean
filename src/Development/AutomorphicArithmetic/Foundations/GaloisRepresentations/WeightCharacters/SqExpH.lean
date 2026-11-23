@@ -1,4 +1,45 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.WeightCharacters.DeltaNear
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.WeightCharacters.DeltaNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
@@ -7,9 +48,9 @@ open UpperTheory.Gal.Gen (IsLevel fixedBy)
 open UpperTheory.Gal.Wt
 open MvPolynomial
 
-set_option maxHeartbeats 400000 in
+
 private theorem coeff_diag {a : ℕ} (t : Fin a → ℂ) (f : MvPolynomial (Fin a × Fin a) ℂ) (m : Fin a × Fin a →₀ ℕ) :
-    MvPolynomial.coeff m (Formalism.GradedWeylDivisibility.rowAct ℂ (n := a) (Matrix.diagonal t) f) = (∏ v : Fin a × Fin a, t v.1 ^ m v) * MvPolynomial.coeff m f := by
+    AddMonoidAlgebra.coeff (Formalism.GradedWeylDivisibility.rowAct ℂ (n := a) (Matrix.diagonal t) f) m = (∏ v : Fin a × Fin a, t v.1 ^ m v) * AddMonoidAlgebra.coeff f m := by
   have hg : (fun v : Fin a × Fin a => ∑ b, MvPolynomial.C (Matrix.diagonal t v.1 b) * MvPolynomial.X (b, v.2))
       = fun v => MvPolynomial.C (t v.1) * MvPolynomial.X v := by
     funext v
@@ -19,8 +60,8 @@ private theorem coeff_diag {a : ℕ} (t : Fin a → ℂ) (f : MvPolynomial (Fin 
       rw [Matrix.diagonal_apply_ne t (Ne.symm hb), map_zero, zero_mul]
     · intro h
       exact absurd (Finset.mem_univ _) h
-  show MvPolynomial.coeff m (MvPolynomial.aeval
-      (fun v : Fin a × Fin a => ∑ b, MvPolynomial.C (Matrix.diagonal t v.1 b) * MvPolynomial.X (b, v.2)) f) = _
+  show AddMonoidAlgebra.coeff (MvPolynomial.aeval
+      (fun v : Fin a × Fin a => ∑ b, MvPolynomial.C (Matrix.diagonal t v.1 b) * MvPolynomial.X (b, v.2)) f) m = _
   rw [hg]
   induction f using MvPolynomial.induction_on' with
   | monomial n c =>
@@ -38,7 +79,7 @@ private theorem coeff_diag {a : ℕ} (t : Fin a → ℂ) (f : MvPolynomial (Fin 
       rw [hv, pow_zero]
     · simp
   | add p q hp hq =>
-    rw [map_add, MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, mul_add]
+    rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, mul_add]
 
 theorem UpperTheory.Gal.Wt.sqExp_h : ExpBasic → EvLem → Dom → SqExp := by
   intro hE hEv hDom a k κ w L
@@ -66,11 +107,11 @@ theorem UpperTheory.Gal.Wt.sqExp_h : ExpBasic → EvLem → Dom → SqExp := by
     simp only [hin]
     rw [← Finset.prod_filter, Finset.prod_pow_eq_pow_sum, he]
   have hcoeff : ∀ (z : Circle) (m : Fin a × Fin a →₀ ℕ),
-      MvPolynomial.coeff m ((sqRep ℂ a κ (tor a k z) w : nablaSq ℂ a κ) : MvPolynomial (Fin a × Fin a) ℂ)
-        = MvPolynomial.coeff m (w : MvPolynomial (Fin a × Fin a) ℂ)
+      AddMonoidAlgebra.coeff ((sqRep ℂ a κ (tor a k z) w : nablaSq ℂ a κ) : MvPolynomial (Fin a × Fin a) ℂ) m
+        = AddMonoidAlgebra.coeff (w : MvPolynomial (Fin a × Fin a) ℂ) m
           * (z : ℂ) ^ ((D : ℤ) * κ.detShift + (e m : ℤ)) := by
     intro z m
-    show MvPolynomial.coeff m (sqAct ℂ a κ (tor a k z) (w : MvPolynomial (Fin a × Fin a) ℂ)) = _
+    show AddMonoidAlgebra.coeff (sqAct ℂ a κ (tor a k z) (w : MvPolynomial (Fin a × Fin a) ℂ)) m = _
     rw [sqAct, MvPolynomial.coeff_smul, hdet, tor_coe, Matrix.diagonal_transpose, coeff_diag]
     beta_reduce
     rw [hprod, smul_eq_mul, zpow_add₀ (Circle.coe_ne_zero z), zpow_natCast]
@@ -83,19 +124,19 @@ theorem UpperTheory.Gal.Wt.sqExp_h : ExpBasic → EvLem → Dom → SqExp := by
     ext x
     simpa [ev] using hp x
   have hterm : ∀ T : Submodule ℂ (Circle → ℂ),
-      (∀ x, MvPolynomial.coeff x (w : MvPolynomial (Fin a × Fin a) ℂ) ≠ 0 →
-        (fun z : Circle => MvPolynomial.coeff x (w : MvPolynomial (Fin a × Fin a) ℂ)
+      (∀ x, AddMonoidAlgebra.coeff (w : MvPolynomial (Fin a × Fin a) ℂ) x ≠ 0 →
+        (fun z : Circle => AddMonoidAlgebra.coeff (w : MvPolynomial (Fin a × Fin a) ℂ) x
           * (z : ℂ) ^ ((D : ℤ) * κ.detShift + (e x : ℤ))) ∈ T) →
       (fun z => L (sqRep ℂ a κ (tor a k z) w)) ∈ T := by
     intro T hT
     refine hEv (nablaSq ℂ a κ) (Fin a × Fin a →₀ ℕ) Circle ev hsep T (fun z => sqRep ℂ a κ (tor a k z) w) ?_ L
     intro x
     have hfun : (fun z => ev x (sqRep ℂ a κ (tor a k z) w))
-        = fun z : Circle => MvPolynomial.coeff x (w : MvPolynomial (Fin a × Fin a) ℂ)
+        = fun z : Circle => AddMonoidAlgebra.coeff (w : MvPolynomial (Fin a × Fin a) ℂ) x
           * (z : ℂ) ^ ((D : ℤ) * κ.detShift + (e x : ℤ)) := funext fun z => hcoeff z x
     rw [hfun]
-    by_cases hx : MvPolynomial.coeff x (w : MvPolynomial (Fin a × Fin a) ℂ) = 0
-    · have h0 : (fun z : Circle => MvPolynomial.coeff x (w : MvPolynomial (Fin a × Fin a) ℂ)
+    by_cases hx : AddMonoidAlgebra.coeff (w : MvPolynomial (Fin a × Fin a) ℂ) x = 0
+    · have h0 : (fun z : Circle => AddMonoidAlgebra.coeff (w : MvPolynomial (Fin a × Fin a) ℂ) x
           * (z : ℂ) ^ ((D : ℤ) * κ.detShift + (e x : ℤ))) = 0 := by
         funext z
         simp [hx]

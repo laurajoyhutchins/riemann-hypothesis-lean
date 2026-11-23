@@ -1,8 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.ExistsDpPow
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.CrSEqOne
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapAcrFromBase
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FrobeniusElement
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.ZariskiEtaleLifting.MapAcrFromBase
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.FrobeniusElement
+public import Mathlib.RingTheory.WittVector.Isocrystal
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.ValuationSquareOfValuationMod
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.CrSEqOne
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.ExistsDpPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -183,12 +225,12 @@ def pullS (u : B.Fn.Map F F') (j : ℕ) : Sys.Hom (HS l F' ρ j) (HS l F ρ j) (
   f m := (pullMor l ρ u m).pull j
   comm m x := red_pull l ρ u m j x
 
-variable (k) in
 
+variable (k) in
 abbrev K₀ : Type := FractionRing (WittVector l k)
 
-variable (k) in
 
+variable (k) in
 def frob₀ : K₀ l k →ₛₗ[(WittVector.frobenius : WittVector l k →+* WittVector l k)] K₀ l k where
   toFun := WittVector.FractionRing.frobeniusRingHom l k
   map_add' := map_add _
@@ -197,16 +239,16 @@ def frob₀ : K₀ l k →ₛₗ[(WittVector.frobenius : WittVector l k →+* Wi
     congr 1
     exact IsFractionRing.ringEquivOfRingEquiv_algebraMap _ a
 
-variable (F) in
 
+variable (F) in
 def D (j : ℕ) : Type 1 := K₀ l k ⊗[WittVector l k] (HS l F ρ j).lim
 
 instance (j : ℕ) : AddCommGroup (D l F ρ j) := inferInstanceAs (AddCommGroup (K₀ l k ⊗[WittVector l k] (HS l F ρ j).lim))
 
 instance (j : ℕ) : Module (K₀ l k) (D l F ρ j) := inferInstanceAs (Module (K₀ l k) (K₀ l k ⊗[WittVector l k] (HS l F ρ j).lim))
 
-variable (F) in
 
+variable (F) in
 def phiD (j : ℕ) : D l F ρ j →+ D l F ρ j := (TensorProduct.map (frob₀ l k) (phiS l F ρ j).lim).toAddMonoidHom
 
 def pullD (u : B.Fn.Map F F') (j : ℕ) : D l F' ρ j →ₗ[K₀ l k] D l F ρ j := ((pullS l ρ u j).lim).baseChange (K₀ l k)

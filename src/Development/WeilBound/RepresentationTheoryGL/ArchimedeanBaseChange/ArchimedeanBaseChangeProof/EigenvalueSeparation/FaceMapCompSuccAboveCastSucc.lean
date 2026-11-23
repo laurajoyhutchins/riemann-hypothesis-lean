@@ -1,5 +1,43 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +52,6 @@ attribute [local instance] borelH
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {a b : ℕ}
 
-def thetaH (x : H E a b) : H E a b := (thetaA E a x.1, thetaA E b x.2)
-
 def chiH (τ : ℝ) (x : H E a b) : ℝ := (cutSet E a τ ×ˢ cutSet E b τ).indicator 1 x
 
 def hs2 (D : Dom E a b) (τ : ℝ) (φ : H E a b → ℂ) : ENNReal :=
@@ -23,20 +59,11 @@ def hs2 (D : Dom E a b) (τ : ℝ) (φ : H E a b → ℂ) : ENNReal :=
 
 def mulS (μ : Measure (H E a b)) (φ₁ φ₂ : H E a b → ℂ) : H E a b → ℂ := fun y => ∫ z, φ₁ z * φ₂ (z⁻¹ * y) ∂μ
 
-abbrev kerTwH (φ : H E a b → ℂ) (x y : H E a b) : ℂ := kerTw2 φ x y
-
 def SmoothSeminormGrowth : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) (D : Dom E a b) (ι : Type) [Fintype ι]
   (Φ : Matrix ι ι (H E a b → ℂ)), IsTestM Φ →
     ∃ T : Hs (ι := ι) D →L[ℂ] Hs (ι := ι) D, IsROp D Φ T ∧ IsROp D (adjM Φ) (ContinuousLinearMap.adjoint T) ∧
       ∀ (Φ' : Matrix ι ι (H E a b → ℂ)) (T' : Hs (ι := ι) D →L[ℂ] Hs (ι := ι) D), IsTestM Φ' → IsROp D Φ' T' →
         IsROp D (mulM D.μ Φ Φ') (T.comp T')
-
-def faceMap_comp_succAbove_castSucc : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) (D : Dom E a b) (φ : H E a b → ℂ),
-  IsTestH φ → ∃ (C : ℝ) (N : ℕ), ∀ τ : ℝ, 0 ≤ τ → hs2 D τ φ ≤ ENNReal.ofReal (C * (1 + τ) ^ N)
-
-def KernelDiagonalIntegrable : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) (D : Dom E a b) (ι : Type) [Fintype ι]
-  (Φ : Matrix ι ι (H E a b → ℂ)), IsTestM Φ → ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
-    ∫⁻ x, ENNReal.ofReal (wt x ^ (-(2 * M : ℤ))) * ‖∑ i, kerH (mulM D.μ Φ (adjM Φ) i i) x x‖ₑ ∂D.ν < ⊤
 
 def E2 : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) (D : Dom E a b) (ι : Type) [Fintype ι]
   (K : Type) [NormedAddCommGroup K] [InnerProductSpace ℂ K] [CompleteSpace K] (J : K →L[ℂ] Hs (ι := ι) D),
@@ -68,7 +95,7 @@ def OrthogonalKeepingOperator : Prop := ∀ (E : Type) [Field E] [NumberField E]
         (∀ x ∈ C, conv D.μ (Φ x) (f k) = s k (x * a₀) • f k) ∧
         ∀ j, ∑ i, ∫ x, starRingEnd ℂ ((g j i : H E a b → ℂ) x) * f k i x ∂D.ν = 0
 
-def hull {N : ℕ} (S : Set (Sm E N)) : Submodule ℂ (Sm E N) := sInf {U | S ⊆ U ∧ IsStable U}
+def hull {N : ℕ} (S : Set (Sm E N)) : Submodule ℂ (Sm E N) := sInf {U | S ⊆ U ∧ _root_.GlobalTheory.CuspRep.IsStable U}
 
 def slices₁ {ι : Type} (f : ι → H E a b → ℂ) : Set (Sm E a) := {φ | ∃ i m₂, φ.1 = fun x => f i (x, m₂)}
 
@@ -84,7 +111,7 @@ def E3 : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : �
   (∀ φ ∈ slices₁ f, IsAutForm φ) → (∀ φ ∈ slices₂ f, IsAutForm φ) →
   (∀ τ, HasInfCharGL (Submodule.span ℂ (slices₁ f)) τ (m₁ τ)) →
   (∀ τ, HasInfCharGL (Submodule.span ℂ (slices₂ f)) τ (m₂ τ)) →
-  IsStable (hull (slices₁ f)) ∧ IsStable (hull (slices₂ f)) ∧
+  _root_.GlobalTheory.CuspRep.IsStable (hull (slices₁ f)) ∧ _root_.GlobalTheory.CuspRep.IsStable (hull (slices₂ f)) ∧
   (∀ φ ∈ hull (slices₁ f), IsAutForm φ) ∧ (∀ φ ∈ hull (slices₂ f), IsAutForm φ) ∧
     SpectralAccumulation.NonPos (hull (slices₁ f)) ∧ SpectralAccumulation.NonPos (hull (slices₂ f)) ∧
     SpectralAccumulation.CentIm (hull (slices₁ f)) ∧ SpectralAccumulation.CentIm (hull (slices₂ f)) ∧

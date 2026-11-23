@@ -1,9 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperDiffPolySt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperDevissageSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperHyperplaneSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperSectionSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperDiffPolySt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperDevissageSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperHyperplaneSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperSectionSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -100,8 +149,8 @@ theorem one_le_ringKrullDim_of_relevant (pp : Ideal (Poly k N)) [pp.IsPrime]
     by_contra h0
     have h1 := hh f hf 0
     rw [homogeneousComponent_zero] at h1
-    have h0' : coeff 0 f ≠ 0 := by rwa [← constantCoeff_eq]
-    have hu : IsUnit (C (coeff 0 f) : Poly k N) := (isUnit_iff_ne_zero.mpr h0').map C
+    have h0' : AddMonoidAlgebra.coeff f 0 ≠ 0 := by rwa [← constantCoeff_eq]
+    have hu : IsUnit (C (AddMonoidAlgebra.coeff f 0) : Poly k N) := (isUnit_iff_ne_zero.mpr h0').map C
     exact Ideal.IsPrime.ne_top ‹_› (Ideal.eq_top_of_isUnit_mem _ h1 hu)
   have hlt : pp < RingHom.ker (constantCoeff : Poly k N →+* k) :=
     lt_of_le_of_ne hle fun h => hi (h ▸ by simp [RingHom.mem_ker])

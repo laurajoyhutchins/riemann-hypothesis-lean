@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.Primorial
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -48,22 +96,6 @@ theorem RestConstants.intersectionNumber_baseChange : RestConstants.Statement :=
     field_simp
   rw [this]
   norm_num
-
-theorem SmallRankBound.intersectionNumber_baseChange : SmallRankBound.Statement := by
-  intro k m j' N hm hk hj hN
-  have h3 : 8 ≤ m ^ 3 := by
-    calc 8 = 2 ^ 3 := by norm_num
-      _ ≤ m ^ 3 := Nat.pow_le_pow_left hm 3
-  have h4 : 8 * m ≤ m ^ 4 := by
-    calc 8 * m ≤ m ^ 3 * m := Nat.mul_le_mul_right m h3
-      _ = m ^ 4 := by ring
-  have hk' : 2 * m + 2 ≤ k := by omega
-  exact ⟨hk', by omega⟩
-
-theorem SmallRankWeakHypothesis.intersectionNumber_baseChange : SmallRankWeakHypothesis.Statement := by
-  intro h
-  have := h 5 2 2 6 le_rfl (by norm_num) le_rfl (by norm_num)
-  omega
 
 theorem GeometricTail.intersectionNumber_baseChange : GeometricTail.Statement := by
   intro p k hp hk

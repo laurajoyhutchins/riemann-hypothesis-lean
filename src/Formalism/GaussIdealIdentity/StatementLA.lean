@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.RingTheory.Ideal.Maps
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped InnerProductSpace Pointwise
 
@@ -6,85 +51,7 @@ noncomputable section
 
 namespace Formalism.DV
 
-def dualIn {𝕜 V : Type} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
-    (S : Set 𝕜) (W M : Set V) : Set V :=
-  {x | x ∈ W ∧ ∀ m ∈ M, ⟪x, m⟫_𝕜 ∈ S}
-
-def ProjDual : Prop :=
-  ∀ (𝕜 V : Type) [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
-    (Z : Submodule 𝕜 V) [Z.HasOrthogonalProjection] (S : Set 𝕜) (M : Set V),
-    let pr : V → V := fun v => Z.starProjection v
-    dualIn S (Z : Set V) (pr '' M) = dualIn S Set.univ M ∩ (Z : Set V) ∧
-    (dualIn S Set.univ M ⊆ M →
-      dualIn S (Z : Set V) (pr '' M) ⊆ M ∩ (Z : Set V) ∧ M ∩ (Z : Set V) ⊆ pr '' M)
-
-def GramDetIndex : Prop :=
-  ∀ (V ι : Type) [NormedAddCommGroup V] [InnerProductSpace ℝ V] [Fintype ι] [DecidableEq ι]
-    (b : Module.Basis ι ℝ V) (Ld : Submodule ℤ V),
-    let L : Submodule ℤ V := Submodule.span ℤ (Set.range b)
-    (∀ x, x ∈ Ld ↔ ∀ y ∈ L, ∃ z : ℤ, ⟪x, y⟫_ℝ = z) → Ld ≤ L →
-      (Matrix.of fun i j => ⟪b i, b j⟫_ℝ).det *
-        ((Ld.toAddSubgroup.relIndex L.toAddSubgroup : ℕ) : ℝ) = 1
-
-def GramDet : Prop :=
-  ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (d : ℕ) (e F : Fin d → V),
-    Pairwise (fun σ τ => ⟪e σ, e τ⟫_ℂ = 0) → (∀ σ, e σ ≠ 0) →
-    let Z : Submodule ℂ V := Submodule.span ℂ (Set.range e)
-    letI : FiniteDimensional ℂ Z := FiniteDimensional.span_of_finite ℂ (Set.finite_range e)
-    let pr : V → V := fun v => Z.starProjection v
-    let G : Matrix (Fin d) (Fin d) ℂ := Matrix.of fun a b => ⟪pr (F a), pr (F b)⟫_ℂ
-    let C : Matrix (Fin d) (Fin d) ℂ := Matrix.of fun σ a => ⟪e σ, F a⟫_ℂ
-    G.det = ((‖C.det‖ ^ 2 / ∏ σ, ‖e σ‖ ^ 2 : ℝ) : ℂ)
-
-def MasterIdentity : Prop :=
-  ∀ (V : Type) [NormedAddCommGroup V] [InnerProductSpace ℂ V] (d : ℕ) (e F : Fin d → V),
-    Pairwise (fun σ τ => ⟪e σ, e τ⟫_ℂ = 0) → (∀ σ, e σ ≠ 0) →
-    let Z : Submodule ℂ V := Submodule.span ℂ (Set.range e)
-    letI : FiniteDimensional ℂ Z := FiniteDimensional.span_of_finite ℂ (Set.finite_range e)
-    let pr : V → V := fun v => Z.starProjection v
-    let G : Matrix (Fin d) (Fin d) ℂ := Matrix.of fun a b => ⟪pr (F a), pr (F b)⟫_ℂ
-    let C : Matrix (Fin d) (Fin d) ℂ := Matrix.of fun σ a => ⟪e σ, F a⟫_ℂ
-    LinearIndependent ℂ (fun a => pr (F a)) →
-    ∀ (A : ℂ) (B₀ : Matrix (Fin d) (Fin d) ℂ),
-      let P : Matrix (Fin d) (Fin d) ℂ := Matrix.of fun i a => A⁻¹ * (B₀ * C.map (starRingEnd ℂ)) i a
-      ‖P.det‖ ^ 2 / G.det.re = ‖A‖ ^ (-(2 * (d : ℤ))) * ‖B₀.det‖ ^ 2 * ∏ σ, ‖e σ‖ ^ 2
-
-def ExponentForm : Prop :=
-  ∀ (O K X : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field K] [Algebra O K]
-    [IsFractionRing O K] [AddCommGroup X] [Module K X] [Module O X] [IsScalarTower O K X]
-    [FiniteDimensional K X] (ϖ : O), Irreducible ϖ →
-    ∀ (e : ℕ) (M Θ : Submodule O X), M.FG → Θ ≤ M → ∀ Vc : Submodule K X,
-      let M₁ : Submodule O X := (ϖ ^ e) • M ⊔ Θ
-      let MV : Submodule O X := M ⊓ Vc.restrictScalars O
-      let ΘV : Submodule O X := Θ ⊓ Vc.restrictScalars O
-      Module.length O (MV ⧸ ΘV.comap MV.subtype) ≤
-        (e * Module.finrank K Vc : ℕ) + Module.length O (M₁ ⧸ Θ.comap M₁.subtype)
-
 def gaussIdeal (σ O : Type) [CommRing O] [IsLocalRing O] : Ideal (MvPolynomial σ O) :=
   Ideal.map MvPolynomial.C (IsLocalRing.maximalIdeal O)
-
-def GaussDVR : Prop :=
-  ∀ (σ O : Type) [Fintype σ] [CommRing O] [IsDomain O] [IsDiscreteValuationRing O],
-    (gaussIdeal σ O).IsPrime ∧
-    ∀ [(gaussIdeal σ O).IsPrime],
-      IsDiscreteValuationRing (Localization.AtPrime (gaussIdeal σ O)) ∧
-      IsLocalRing.maximalIdeal (Localization.AtPrime (gaussIdeal σ O)) =
-        Ideal.map (algebraMap O (Localization.AtPrime (gaussIdeal σ O))) (IsLocalRing.maximalIdeal O)
-
-def GaussLength : Prop :=
-  ∀ (σ O : Type) [Fintype σ] [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [(gaussIdeal σ O).IsPrime] (N : Type) [AddCommGroup N] [Module O N],
-    Module.length (Localization.AtPrime (gaussIdeal σ O))
-        (TensorProduct O (Localization.AtPrime (gaussIdeal σ O)) N) = Module.length O N
-
-def GramDetLength : Prop :=
-  ∀ (O K X ι : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field K] [Algebra O K]
-    [IsFractionRing O K] [AddCommGroup X] [Module K X] [Module O X] [IsScalarTower O K X]
-    [Fintype ι] [DecidableEq ι] (b : Module.Basis ι K X) (B : LinearMap.BilinForm K X)
-    (Ld : Submodule O X),
-    let L : Submodule O X := Submodule.span O (Set.range b)
-    (∀ x, x ∈ Ld ↔ ∀ y ∈ L, ∃ c : O, B x y = algebraMap O K c) → Ld ≤ L →
-      ∃ g : O, algebraMap O K g * (Matrix.of fun i j => B (b i) (b j)).det = 1 ∧
-        Module.length O (L ⧸ Ld.comap L.subtype) = IsDiscreteValuationRing.addVal O g
 
 end Formalism.DV

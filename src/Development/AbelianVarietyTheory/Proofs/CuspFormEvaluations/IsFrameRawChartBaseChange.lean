@@ -1,11 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBC
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermCut
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.JetSubstPCompJetBC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+module
+
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsRawChartBaseChangeJetPoints
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.JetSubstPCompJetBC
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -54,6 +93,7 @@ theorem psIn_map {d n n' : ℕ} (m : ℕ) (r : Fin n → Fin n') (f : MvPowerSer
   rw [MvPolynomial.map_rename]
   congr 1
   unfold psTrunc
+
   rw [map_sum]
   simp only [MvPolynomial.map_monomial, MvPowerSeries.coeff_map]
 
@@ -77,25 +117,7 @@ theorem copy_square (d m n : ℕ) (i : Fin n) :
     homAt (spMap ψ ≫ x0) (jetCopy d m i : Jet S' (Fin 1 × Fin d) m →ₐ[S'] Jet S' (Fin n × Fin d) m) ≫
         rjBC ψ x0 d m 1 =
       rjBC ψ x0 d m n ≫ homAt x0 (jetCopy d m i : Jet S (Fin 1 × Fin d) m →ₐ[S] Jet S (Fin n × Fin d) m) := by
-  unfold rjBC Formalism.L2.Pj.homAt jetCopy
-  apply Over.OverMorphism.ext
-  simp only [Over.comp_left, Over.homMk_left]
-  rw [spec_comp, spec_comp]
-  congr 1
-  have hS : ∀ p : Fin 1 × Fin d, (X (i, p.2) : MvPolynomial (Fin n × Fin d) S) ∈ orig S (Fin n × Fin d) := by
-    intro p
-    simp only [orig]
-    exact Ideal.subset_span ⟨_, rfl⟩
-  have hS' : ∀ p : Fin 1 × Fin d,
-      MvPolynomial.map ψ (X (i, p.2) : MvPolynomial (Fin n × Fin d) S) ∈ orig S' (Fin n × Fin d) := by
-    intro p
-    rw [MvPolynomial.map_X]
-    simp only [orig]
-    exact Ideal.subset_span ⟨_, rfl⟩
-  have h := ReciprocityTheory.ChartRestriction.G.PullbackSections.jetMap_comp_jetBC ψ m (fun p : Fin 1 × Fin d => (X (i, p.2) : MvPolynomial (Fin n × Fin d) S)) hS hS'
-  rw [jetMap_congr (g := fun p : Fin 1 × Fin d => MvPolynomial.map ψ (X (i, p.2) : MvPolynomial (Fin n × Fin d) S))
-    (funext fun p => (MvPolynomial.map_X ψ (i, p.2)).symm) _ hS']
-  exact h
+  apply GlobalTheory.RawChartBC.sq_copy <;> assumption
 
 variable {ψ x0} {d : ℕ} {x : ∀ m, rjO x0 d m 1 ⟶ Xo.univ.t.G} {x' : ∀ m, rjO (spMap ψ ≫ x0) d m 1 ⟶ Xo.univ.t.G}
 

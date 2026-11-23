@@ -1,6 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimeGermProjectionStep
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StGermGeneralCoordinates
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StPrimeGermProjectionStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -42,7 +89,8 @@ theorem affineGerm_eq_eval₂ {σ : Type} [Fintype σ] {d : ℕ} (w : σ → ℂ
   change ∑ i, Germ.coeRingHom _ ((fun _ : Fin d → ℂ => L (fun j => if i = j then 1 else 0)) ∘ A) *
       Germ.coeRingHom _ (fun z : σ → ℂ => z i) + Germ.coeRingHom _ ((fun _ : Fin d → ℂ => c) ∘ A) =
     Germ.coeRingHom _ (fun z : σ → ℂ => L z + c)
-  simp only [← map_mul, ← map_sum, ← map_add]
+
+  simp only [← map_mul, ← map_sum, ← map_add (f := _)]
   congr 1
   funext z
   have hL := (L : (σ → ℂ) →ₗ[ℂ] ℂ).pi_apply_eq_sum_univ z
@@ -117,7 +165,8 @@ theorem germ_division_after_coordinates (hD : WeierstrassDivision.Statement)
   change (↑h : Germ (𝓝 w) ℂ) = Germ.coeRingHom _ (fun z => q (M (z - w))) * Germ.coeRingHom _ f +
     ∑ j : Fin n, Germ.coeRingHom _ ((fun u => a j (u - π w)) ∘ π) *
       Germ.coeRingHom _ (fun z : σ → ℂ => T z + -T w) ^ (j : ℕ)
-  simp only [← map_mul, ← map_pow, ← map_sum, ← map_add]
+
+  simp only [← map_mul, ← map_pow, ← map_sum, ← map_add (f := _)]
   refine Germ.coe_eq.2 ?_
   filter_upwards [hev'] with z hz
   simp [hz, Finset.sum_apply]
@@ -217,7 +266,8 @@ theorem isFiniteGermProjection_comp {σ τ : Type} [Fintype σ] [Fintype τ] (w 
         rw [e]
         exact hb
       have h0 := Ideal.Quotient.eq_zero_iff_mem.2 hS
-      rw [map_add, map_sum, map_pow] at h0
+
+      rw [map_add (f := _), map_sum, map_pow] at h0
       simp only [map_mul, map_pow] at h0
       rw [Polynomial.eval₂_add, Polynomial.eval₂_X_pow, Polynomial.eval₂_finsetSum]
       simp only [Polynomial.eval₂_mul, Polynomial.eval₂_C, Polynomial.eval₂_X_pow]
@@ -228,6 +278,7 @@ theorem isFiniteGermProjection_comp {σ τ : Type} [Fintype σ] [Fintype τ] (w 
     intro ψ
     obtain ⟨a, ha⟩ := hdiv ψ
     have hψ : Ideal.Quotient.mk P ψ = ∑ j : Fin n, Ideal.Quotient.mk P (ι (a j)) * Ideal.Quotient.mk P (affineGerm w T c) ^ (j : ℕ) := by
+
       rw [Ideal.Quotient.eq.2 ha, map_sum]
       simp only [map_mul, map_pow]
     rw [hψ]

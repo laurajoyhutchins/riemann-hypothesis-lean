@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry KaehlerDifferential MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.CechDR GlobalTheory.AbCoh
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -19,6 +61,7 @@ theorem hasFrame_of_isBaseChange : ∀ (R : Type) [CommRing R] (C : Type) [Categ
     conv_lhs => rw [← this]
     conv_lhs => rw [show σ x = ∑ i, σ x i • Pi.single i (1 : R) from by
       ext k; simp [Finset.sum_apply, Pi.single_apply]]
+
     simp [map_sum, map_smul]
   choose e he hb using h
   let l : Fin n → W →ₗ[R] R := fun i ↦ LinearMap.proj i ∘ₗ σ
@@ -29,8 +72,7 @@ theorem hasFrame_of_isBaseChange : ∀ (R : Type) [CommRing R] (C : Type) [Categ
     exact (hb T).lift_eq _ x
   refine ⟨n, ⟨⟨fun i ↦ j (v (Pi.single i 1)), δ, ?_, ?_⟩⟩⟩
   · intro i T T' φ ω
-    refine (hb T).inductionOn ω (fun ω ↦ δ i T' (p1 F φ ω) = mp F φ (δ i T ω)) ?_ ?_ ?_ ?_
-    · simp
+    refine (hb T).inductionOn ω ?_ ?_ ?_
     · intro x
       have h1 : p1 F φ (e T x) = e T' x := by
         rw [he T x, he T' x]; exact ((j x).2 φ).symm
@@ -39,19 +81,19 @@ theorem hasFrame_of_isBaseChange : ∀ (R : Type) [CommRing R] (C : Type) [Categ
     · intro s ω hω
       rw [oneFormsMapOfFunctorMorphism_smul, LinearMap.map_smul, LinearMap.map_smul, hω, smul_eq_mul, smul_eq_mul, map_mul]
     · intro a b ha hb'
-      rw [map_add, map_add, map_add, ha, hb', map_add]
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), ha, hb', map_add (f := _)]
   · intro T ω
-    refine (hb T).inductionOn ω (fun ω ↦ ω = ∑ i, δ i T ω • (j (v (Pi.single i 1))).1 T) ?_ ?_ ?_ ?_
-    · simp
+    refine (hb T).inductionOn ω ?_ ?_ ?_
     · intro x
       simp_rw [hδ, ← he T, algebraMap_smul]
       conv_lhs => rw [hw x]
+
       rw [map_sum]; simp_rw [map_smul]
     · intro s ω hω
       conv_lhs => rw [hω]
       simp_rw [LinearMap.map_smul, Finset.smul_sum, smul_eq_mul, mul_smul]
     · intro a b ha hb'
       conv_lhs => rw [ha, hb']
-      simp_rw [map_add, add_smul, Finset.sum_add_distrib]
+      simp_rw [map_add (f := _), add_smul, Finset.sum_add_distrib]
 
 end GlobalTheory.AbCoh

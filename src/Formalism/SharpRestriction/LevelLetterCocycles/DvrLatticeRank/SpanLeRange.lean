@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.LVSmulA
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.LVSmulA
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.Imports
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ModelFPfA
+import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +89,7 @@ theorem LV_sum {ι : Type} (K : ℕ) (s : Finset ι) (f : ι → W.DD T)
     rw [Finset.sum_empty, Finset.sum_empty, LV_zero]
   | insert a s ha ih =>
     rw [Finset.sum_insert ha, Finset.sum_insert ha]
-    refine ⟨by rw [map_add, smul_add]; exact Submodule.add_mem _ (hf a) ih.1, ?_⟩
+    refine ⟨by rw [map_add (f := _), smul_add]; exact Submodule.add_mem _ (hf a) ih.1, ?_⟩
     rw [LV_add W T c ζ K _ _ (hf a) ih.1, ih.2]
 
 theorem letE_idem (d : ZMod n) : (letE d : LetA O n) * letE d = letE d := by
@@ -86,6 +132,7 @@ theorem span_le_range (hp4 : Formalism.MainNotions.DeltaInvariantLattices.p4 W P
     set p := (PiNS W T π' 1).comap (NcS W T (c - 1)).subtype
     set o := bL.repr (mkL W T π' c y hy)
     have h2 : (∑ k, o k • bL k) = p.mkQ (∑ k, o k • (⟨rep k, hrep k⟩ : ↥(NcS W T (c - 1)))) := by
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_smul, hbrep]

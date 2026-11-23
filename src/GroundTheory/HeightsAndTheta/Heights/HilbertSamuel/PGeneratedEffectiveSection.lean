@@ -1,9 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGeneratedEffectiveSection
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVocabDivCycle
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.DivCycleEqZeroOfFormNotMem
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGeneratedEffectiveSection
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.DivCycleEqZeroOfFormNotMem
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVocabDivCycle
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -231,8 +280,8 @@ theorem res_eq_of_pair {M : Type*} [AddCommGroup M] [Module (MRingOver F ι) M] 
       rfl
   change (∑ l : K, ∑ i ∈ I.1 l, _ :
     KH.CechC F ι M 0 →ₗ[MRingOver F ι] LocalizedModule (KH.cellMon F I.1) M) f = 0 at h
-  rw [Finset.sum_eq_single k, Finset.sum_eq_add_of_mem (c k) j hx hy hxy, dif_pos (hface (c k) hx),
-    dif_pos (hface j hy)] at h
+  rw [Finset.sum_eq_single k, Finset.sum_eq_add_of_mem (c k) j hx hy hxy, dite_eq_left (hface (c k) hx),
+    dite_eq_left (hface j hy)] at h
   · rw [hsign, LinearMap.add_apply] at h
     change KH.faceSign I.1 k (c k) • (KH.cellRes F M _ I.1 (f _)) +
       (-KH.faceSign I.1 k (c k)) • (KH.cellRes F M _ I.1 (f _)) = 0 at h

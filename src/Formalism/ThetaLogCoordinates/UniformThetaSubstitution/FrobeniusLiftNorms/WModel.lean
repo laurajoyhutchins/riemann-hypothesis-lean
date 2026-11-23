@@ -1,6 +1,61 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementW
-import Formalism.FormalGroupWitt.FormalGroupWittProofs.WittTeichmullerRoot
+module
+
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.WittVector.Complete
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Continuity
+public import Mathlib.Analysis.SpecificLimits.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,8 +91,8 @@ theorem toNNReal_exp {e : ℝ≥0} (he : e ≠ 0) (n : ℤ) :
     WithZeroMulInt.toNNReal he (WithZero.exp n) = e ^ n := by
   have h : WithZero.exp n = ((Multiplicative.ofAdd n : Multiplicative ℤ) :
       WithZero (Multiplicative ℤ)) := rfl
-  rw [h, WithZeroMulInt.toNNReal_neg_apply he WithZero.coe_ne_zero, WithZero.unzero_coe]
-  rfl
+  rw [h, WithZeroMulInt.toNNReal_neg_apply he (by simp)]
+  rw [← h, WithZero.log_exp]
 
 theorem abv_p : abv p (p : KK p) = (p : ℝ)⁻¹ := by
   have h : (p : KK p) = algebraMap (WW p) (KK p) (p : WW p) := by simp
@@ -153,9 +208,6 @@ attribute [local instance] nf
 
 theorem norm_def (x : KK p) : ‖x‖ = abv p x := rfl
 
-theorem ultra : IsUltrametricDist (KK p) :=
-  IsUltrametricDist.isUltrametricDist_of_forall_norm_add_le_max_norm fun x y => abv_nonarch p x y
-
 theorem complete : CompleteSpace (KK p) := by
   have hpos : (0 : ℝ) < (p : ℝ)⁻¹ := by
     have := hp.out.pos
@@ -198,26 +250,6 @@ theorem complete : CompleteSpace (KK p) := by
 
 end WModel
 
-open WModel in
-theorem modelExists_statement : ModelExists := by
-  intro p _ hp2
-  have hW : CharZero (WW p) := Formalism.FG.witt_char_zero p
-  obtain ⟨ζ, hζ⟩ := Formalism.FG.witt_teichmuller_root p 2 (by norm_num)
-  refine ⟨KK p, nf p, ?_, ?_, complete p, sig p, ⟨Fact.out, hp2, abv_p p, abv_value p, abv_sig p⟩,
-    algebraMap (WW p) (KK p) ζ, hζ.map_of_injective (IsFractionRing.injective (WW p) (KK p))⟩
-  · exact ultra p
-  · exact charZero_of_injective_algebraMap (IsFractionRing.injective (WW p) (KK p))
-
-theorem BetaNonVacuous_of (hM : ModelExists) (hL : LawExists) (hG : GcIsBeta) (hU : GcUnique) :
-    BetaNonVacuous := by
-  intro p _ hp2
-  obtain ⟨K, i1, h1, h2, h3, σ, hσ, ζ, hζ⟩ := hM p hp2
-  obtain ⟨⟨F, hF⟩, -⟩ := hL K p hσ.1 hσ.2.2.1
-  refine ⟨K, i1, h1, h2, h3, σ, F, Gser p 1 (σ 1), hσ, ⟨ζ, hζ⟩, hF, ?_, ?_⟩
-  · exact hG K p σ hσ F hF 1 (by simp) (by simp)
-  · intro h
-    have h0 : (0 : MvPowerSeries (Fin 2) K) = Gser p 0 (σ 0) := by simp [Gser]
-    rw [h0] at h
-    exact one_ne_zero (hU K p σ hσ 1 0 (by simp) (by simp) h)
+open WModel
 
 end Formalism.InvariantFactorPaths.G7

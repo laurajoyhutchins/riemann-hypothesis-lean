@@ -1,6 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.FnOfComp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.CanonGenIsGen
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegUnif
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -72,7 +115,7 @@ lemma hOv_pG (hO : ∀ a : O, (Over.pullback (thick R I e)).map (ιG.act a) ≫ 
   congr 1
   ext
   simp only [DegPre.prBe, Over.comp_left, Over.homMk_left, Over.map_map_left]
-  first
+  all_goals first
   | exact pullback.lift_fst _ _ _
   | simp
 
@@ -89,12 +132,6 @@ abbrev OφX {T : Over (Spec (CommRingCat.of R))} (P x : T ⟶ D.toPre.P.A) :
     Fin 4 → (T.left ⟶ D.toPre.P.A.left) :=
   ![(padd D.toPre.P.A P x).left, x.left, P.left, (toUnit T ≫ η[D.toPre.P.A]).left]
 
-omit [Module O D.toPre.X] in
-lemma OφX_0 {T : Over (Spec (CommRingCat.of R))} (P x : T ⟶ D.toPre.P.A) :
-    OφX (D := D) P x 0 = (padd D.toPre.P.A P x).left := rfl
-omit [Module O D.toPre.X] in
-lemma OφX_1 {T : Over (Spec (CommRingCat.of R))} (P x : T ⟶ D.toPre.P.A) :
-    OφX (D := D) P x 1 = x.left := rfl
 
 lemma eAk (k : Fin 4) : D.toPre.Oφ (U.gt e).pG (star a • χ) k =
     OφX (D := D) (U.gt e).pG (xc e χ (G := G) ≫ ιD.onB.act (star a)) k := by
@@ -191,14 +228,7 @@ lemma hsub : ∀ k : Fin 4, ∃ k', φA U ιD e a χ k' = φB U ιG e a χ k := 
   · exact ⟨Sum.inr 5, h5⟩
   · exact ⟨Sum.inl 3, (selfLieBasisVector U e a χ).trans rfl⟩
 
-omit [IsDomain R] in
-lemma v4 {α : Type} (w x y z : α) : ![w, x, y, z] 0 = w ∧ ![w, x, y, z] 1 = x ∧
-    ![w, x, y, z] 2 = y ∧ ![w, x, y, z] 3 = z := ⟨rfl, rfl, rfl, rfl⟩
 
-omit [IsDomain R] in
-lemma v6 {α : Type} (a b c d f g : α) : ![a, b, c, d, f, g] 0 = a ∧ ![a, b, c, d, f, g] 1 = b ∧
-    ![a, b, c, d, f, g] 2 = c ∧ ![a, b, c, d, f, g] 3 = d ∧ ![a, b, c, d, f, g] 4 = f ∧
-    ![a, b, c, d, f, g] 5 = g := ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 private lemma ss_lemma {Y X : Scheme.{0}} (pB x Pa u0 pA xs P : Y ⟶ X) :
     LB.SameSum ![pB, x, Pa, u0] Oinvε (Sum.elim ![pA, xs, P, u0] ![pA, xs, P, pB, x, Pa])
@@ -247,8 +277,8 @@ lemma hA : φA U ιD e a χ = Sum.elim
     · exact h4
     · exact h5
 
-include hO in
 
+include hO in
 lemma hBv : φB U ιG e a χ =
     ![(padd D.toPre.P.A ((U.gt e).pG ≫ ιD.onB.act a) (xc e χ (G := G))).left,
       (xc e χ (G := G)).left, ((U.gt e).pG ≫ ιD.onB.act a).left,

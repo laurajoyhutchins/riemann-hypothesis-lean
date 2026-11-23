@@ -1,6 +1,46 @@
-import Formalism.LocalRingCardinality.DataAmbForm
-import Formalism.LocalRingCardinality.DataDIV
-import Formalism.LocalRingCardinality.DataParams₂
+module
+
+public import Formalism.LocalRingCardinality.DataAmbForm
+public import Formalism.LocalRingCardinality.DataDIV
+public import Formalism.LocalRingCardinality.DataParams₂
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,16 +70,11 @@ structure EigIdx (D : D7) (X : DivX D) where
 
 attribute [instance] EigIdx.fin EigIdx.dec
 
-def DV.ftP {D : D7} {X : DivX D} (E : EigIdx D X) (σ : Fin D.what₂.Drows) : E.Pi := E.cOf (D.what₂.ft σ)
-
-def DV.sum₃ {D : D7} {X : DivX D} (E : EigIdx D X) (j : ℕ) (c : E.Pi) : Submodule ℂ (D.what₂.Mj j) :=
-  ⨆ π, ⨆ (_ : E.cOf π = c), D.what₂.isot j π
-
 def DV.EEcpart (D : D7) {X : DivX D} (E : EigIdx D X) (c : E.Pi) : Submodule ℂ D.what₂.EE :=
   Submodule.span ℂ (D.what₂.onb '' {σ | E.cOf (D.what₂.ft σ) = c})
 
-open Classical in
 
+open Classical in
 def DV.logLamC {D : D7} {X : DivX D} (E : EigIdx D X) (j : ℕ) (c : E.Pi) (e : D.what₂.LL →+* ℂ) : ℝ :=
   if h : ∃ π, E.cOf π = c ∧ D.what₂.isot j π ≠ ⊥ then X.logLam j h.choose e else 0
 
@@ -52,14 +87,6 @@ def RRMetricDef (D : D7) (X : DivX D) (A : AmbForm D (RowSide.sharp D)) (E : Eig
         Formalism.HermitianLatticesTheory.normAt D.div.RR.b D.div.RR.X v (∑ c, x c) ^ 2 =
           ∑ c, X.kapR v.embedding * Real.exp (∑ j ∈ SizeData₂.lifts D, DV.logLamC E j c v.embedding) *
             DV.quotNorm A v (q c) ^ 2
-
-def DV.RowsRational (D : D7) {X : DivX D} (A : AmbForm D (RowSide.sharp D)) (E : EigIdx D X) : Prop :=
-  Submodule.span ℂ (A.jAmb D.what₂.mu0 '' {x | A.jAmb D.what₂.mu0 x ∈ (RowSide.sharp D).V0 D.what₂.mu0}) =
-    (RowSide.sharp D).V0 D.what₂.mu0 ∧
-  Submodule.span ℂ (A.jAmb D.what₂.mu0 '' DV.UL A) = (RowSide.sharp D).Usp D.what₂.mu0 ∧
-  (∀ x : (A.MtH D.what₂.mu0).V, A.jAmb D.what₂.mu0 x ∈ (RowSide.sharp D).V0 D.what₂.mu0 →
-    ∃ y : D.div.RR.V, D.jEE y = (RowSide.sharp D).iota D.what₂.mu0 (A.jAmb D.what₂.mu0 x)) ∧
-  ∀ c : E.Pi, Submodule.span ℂ (D.jEE '' {y | D.jEE y ∈ DV.EEcpart D E c}) = DV.EEcpart D E c
 
 end Formalism.BasicNotions
 

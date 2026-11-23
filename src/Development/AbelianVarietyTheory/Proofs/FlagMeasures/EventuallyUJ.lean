@@ -1,24 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ActSingleNeZero
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.EigenfunctionFiniteCoefficients
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.FirstSlotSliceSlotMixedCasimirZero
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantOrthogonalInf
-import Formalism.RealPlaceAnalysis.FinalF
+module
+
+public import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.EigenfunctionFiniteCoefficients
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiEntriesCentreEigenfunctionsDiscreteSeries
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivedModuleCoefficientsAndStableFlows
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsDerLowKSub
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HighestWeightDerivativeSumZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HighestWeightEventuallyZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HighestWeightGapBoundStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.InnerRepK
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PhiPositiveDefiniteCholeskyFormula
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.KTypeExtendsHolomorphicComplexifiedK
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiPolarDecompositionEquivariance
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiRestrictionHolomorphicNearOne
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiEntriesRealAnalytic
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiEntriesCentreEigenfunctionsDiscreteSeries
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivedModuleCoefficientsAndStableFlows
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsDerLowKSub
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IteratedDerivLine
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IteratedDerivLine
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.KTypeExtendsHolomorphicComplexifiedK
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LowestKTypeAnalyticStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NotCdomAdd
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HighestWeightDerivativeSumZeroStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HighestWeightGapBoundStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HighestWeightEventuallyZeroStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LowestKTypeAnalyticStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PhiPositiveDefiniteCholeskyFormula
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiEntriesRealAnalytic
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiPolarDecompositionEquivariance
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PsiRestrictionHolomorphicNearOne
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ScalarOfMultOne
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ActSingleNeZero
+
+@[expose] public section
+
 open MeasureTheory Matrix Finset Formalism.MainNotions.S Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.Count GlobalTheory.Dec GlobalTheory.DSId GlobalTheory.Jet
 open scoped InnerProductSpace ComplexOrder
 
@@ -244,6 +288,7 @@ theorem formulaGap : StrictLow → FormulaGap := by
       rfl
     have h4 := congrArg (fun x : V => ⟪S.starProjection y, σ (umat g) x⟫_ℂ)
       (GlobalTheory.T.highest_weight_derivative_sum_zero n ε H σ V E lam _ hlam hσ hD hK hfd G hG)
+
     simp only [Submodule.coe_sum, map_sum, inner_sum, Submodule.coe_zero, map_zero, inner_zero_right] at h4
     simp only [ContinuousLinearMap.coe_coe, h3, Finset.sum_add_distrib, ← Finset.mul_sum, h2, h4]
     simp

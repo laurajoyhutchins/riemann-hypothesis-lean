@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBoundOfNorms
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilySeparationBoundOfNorms
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,17 +58,6 @@ theorem szf_finrankE (D : D7) : Module.finrank ℚ D.host.E = 2 * D.R.f := by
 theorem szf_finrankF (D : D7) : Module.finrank ℚ D.host.F = D.R.f := by
   rw [D.host.der.finrank_F]
   simp only [Formalism.BasicNotions.Ranks.f, Formalism.BasicNotions.Ranks.n]
-
-theorem szf_normG (D : D7) : SzfNormG D := by
-  unfold SzfNormG
-  rw [FractionalIdeal.absNorm_span_singleton]
-  have hE := szf_finrankE D
-  have hg : Formalism.MainNotions.S.gE D = algebraMap ℚ D.host.E ((D.host.g 0 * D.host.g 1 : ℕ) : ℚ) := by
-    simp [Formalism.MainNotions.S.gE]
-  rw [hg, Algebra.norm_algebraMap, hE]
-  simp only [Formalism.MainNotions.S.gg]
-  push_cast
-  rw [abs_of_nonneg (by positivity), ← pow_mul, mul_comm D.R.f 2]
 
 theorem szf_finrankFE (D : D7) : Module.finrank D.host.F D.host.E = 2 := by
   have h1 := D.host.der.finrank_E
@@ -91,40 +123,6 @@ theorem szf_normDD (D : D7) (hd : NumberField.discr D.host.E = NumberField.discr
   first
   | simp [abs_pow, Nat.cast_natAbs]
   | rw [Nat.cast_natAbs, Int.cast_abs, abs_pow]
-
-theorem separation_bound (CA c5 C4 C0 cT : ℝ) (hCA : 1 ≤ CA) (hcT : 0 < cT) :
-    ∃ K0 Cl0 : ℝ, ∀ (D : D7) (large₂ : SizeData₂ D) (C' Cl Cg cb Cu CT : ℝ),
-      K0 ≤ D.R.k → Cl0 ≤ Cl → LocalBesselAndTopKernel.MassRatioTheoremTwo D large₂ C0 C' Cl Cg cb Cu cT CT C4 c5 CA := by
-  obtain ⟨K0, Cl0, h⟩ := separation_bound_of_norms CA c5 C4 C0 cT hCA hcT
-  refine ⟨K0, Cl0, fun D large₂ C' Cl Cg cb Cu CT hK hCl => ?_⟩
-  intro hh
-  have hd : NumberField.discr D.host.E = NumberField.discr D.host.F ^ 2 := by
-    obtain ⟨-, -, -, -, -, -, -, -, -, -, -, -, hd, -⟩ := hh.1
-    exact hd
-  exact h D large₂ C' Cl Cg cb Cu CT (szf_normDD D hd) (szf_normG D) hK hCl hh
-
-theorem family_separation_bound (CA c5 C4 C0 cT : ℝ) (hCA : 1 ≤ CA) (hcT : 0 < cT) :
-    ∃ Cl0 : ℝ, ∀ {eps : ℝ} (Fm : FamP eps) (Cg cb Cu CT : ℝ), Cl0 ≤ sCl Fm →
-      LocalBesselAndTopKernel.FamilyBesselBoundFirstPart Fm C0 Cg cb Cu cT CT → LocalBesselAndTopKernel.SchurOrthogonalityRealPlace Fm C0 Cg cb Cu cT CT C4 →
-      LocalBesselAndTopKernel.FamilyLocalBesselBoundWithCharacter Fm C0 Cg cb Cu cT CT c5 CA := by
-  obtain ⟨K0, Cl0, h⟩ := separation_bound CA c5 C4 C0 cT hCA hcT
-  refine ⟨max Cl0 (max 1 K0), fun {eps} Fm Cg cb Cu CT hCl hA hE => ?_⟩
-  simp only [LocalBesselAndTopKernel.FamilyLocalBesselBoundWithCharacter, LocalBesselAndTopKernel.FamilyBesselBoundFirstPart, LocalBesselAndTopKernel.SchurOrthogonalityRealPlace, LocalBesselAndTopKernel.UnderF, OwnEv] at hA hE ⊢
-  obtain ⟨xa, hxa⟩ := hA
-  obtain ⟨xe, hxe⟩ := hE
-  refine ⟨max xa xe, fun x hx i hh => ?_⟩
-  have hCl0 : Cl0 ≤ sCl Fm := le_trans (le_max_left _ _) hCl
-  have h1 : (1 : ℝ) ≤ sCl Fm := le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hCl
-  have hK0 : K0 ≤ sCl Fm := le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hCl
-  have hK : K0 ≤ ((Fm.D x i).R.k : ℝ) := by
-    obtain ⟨-, hS, -⟩ := hh
-    obtain ⟨-, -, h3, h4, -, -, -, -, -, -, -, -, -, -, -, -, -, -, -, -, -, -, -, hClm, -⟩ := hS
-    have hk4 : ((Fm.D x i).R.m : ℝ) ^ 4 ≤ ((Fm.D x i).R.k : ℝ) := by exact_mod_cast h3.trans h4
-    have hm1 : (1 : ℝ) ≤ (Fm.D x i).R.m := le_trans h1 hClm
-    have hm4 : ((Fm.D x i).R.m : ℝ) ≤ ((Fm.D x i).R.m : ℝ) ^ 4 := le_self_pow₀ hm1 (by norm_num)
-    linarith
-  exact h (Fm.D x i) (Fm.L x i) (sC' Fm) (sCl Fm) Cg cb Cu CT hK hCl0 hh
-    (hxa x (le_trans (le_max_left _ _) hx) i hh) (hxe x (le_trans (le_max_right _ _) hx) i hh)
 
 end Formalism.MainNotions.BridgeLemma
 

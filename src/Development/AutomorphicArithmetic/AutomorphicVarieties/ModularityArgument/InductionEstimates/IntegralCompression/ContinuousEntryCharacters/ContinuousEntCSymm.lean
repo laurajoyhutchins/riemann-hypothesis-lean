@@ -1,6 +1,44 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.IntegralCompression.LAbove
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
+import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+import GroundTheory.AutomorphicForms.L2LocalComponents.ArchPolar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open MeasureTheory NumberField Filter Topology Matrix
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
@@ -32,6 +70,7 @@ private def entM (c : mixedSpace K ≃+* (ι → ℂ)) (n : ℕ) :
   map_mul' X Y := by
     funext i
     ext a b
+
     simp [Matrix.mul_apply, map_sum, Finset.sum_apply]
   map_add' X Y := by
     funext i
@@ -114,7 +153,7 @@ end mk
 
 section co
 
-private def cF (F : Type) [Field F] [NumberField F] [IsTotallyComplex F] : mixedSpace F ≃+* (InfinitePlace F → ℂ) where
+private def cF (F : Type) [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F] : mixedSpace F ≃+* (InfinitePlace F → ℂ) where
   toFun a w := a.2 ⟨w, IsTotallyComplex.isComplex w⟩
   invFun z := (fun v => absurd v.2 (InfinitePlace.not_isReal_iff_isComplex.2 (IsTotallyComplex.isComplex v.1)), fun v => z v.1)
   left_inv a := Prod.ext (funext fun v => absurd v.2 (InfinitePlace.not_isReal_iff_isComplex.2 (IsTotallyComplex.isComplex v.1))) rfl
@@ -122,7 +161,7 @@ private def cF (F : Type) [Field F] [NumberField F] [IsTotallyComplex F] : mixed
   map_mul' _ _ := rfl
   map_add' _ _ := rfl
 
-variable (F : Type) [Field F] [NumberField F] [IsTotallyComplex F]
+variable (F : Type) [Field F] [NumberField F] [_root_.NumberField.IsTotallyComplex F]
 
 private theorem continuous_cF : Continuous (cF F) := by
   refine continuous_pi fun w => ?_
@@ -203,7 +242,7 @@ end co
 end UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA
 
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.EA.coEx :
-    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsTotallyComplex F] [IsTotallyComplex E] (σ : E ≃ₐ[F] E) (D : InfD σ 1), ∃ (CF : Co F (InfinitePlace F)) (CE : Co E (Fin 2 × InfinitePlace F)),
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [_root_.NumberField.IsTotallyComplex F] [_root_.NumberField.IsTotallyComplex E] (σ : E ≃ₐ[F] E) (D : InfD σ 1), ∃ (CF : Co F (InfinitePlace F)) (CE : Co E (Fin 2 × InfinitePlace F)),
       ∀ n (g : archGroup E n) s u, CE.Ψ n g (s, u) = CF.Ψ n (compA D n s g) u := by
   intro F E _ _ _ _ _ _ _ σ D
   refine ⟨mkCo (cF F) (continuous_cF F) (continuous_cF_symm F) (unitary_cF F),

@@ -1,5 +1,57 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Finsupp
 
@@ -13,8 +65,8 @@ lemma mapDomain_inl_add_inr (u g : Fin k →₀ ℕ) :
     u.mapDomain Sum.inl + g.mapDomain Sum.inr = Finsupp.sumElim u g := by
   ext v
   rcases v with i | i
-  · simp [Finsupp.mapDomain_apply Sum.inl_injective, Finsupp.mapDomain_notin_range]
-  · simp [Finsupp.mapDomain_apply Sum.inr_injective, Finsupp.mapDomain_notin_range]
+  · simp [Finsupp.mapDomain_apply_of_injective Sum.inl_injective, Finsupp.mapDomain_notin_range]
+  · simp [Finsupp.mapDomain_apply_of_injective Sum.inr_injective, Finsupp.mapDomain_notin_range]
 
 lemma sumElim_inj {u g u' g' : Fin k →₀ ℕ} :
     Finsupp.sumElim u g = Finsupp.sumElim u' g' ↔ u = u' ∧ g = g' := by
@@ -37,7 +89,7 @@ lemma exists_sumElim (n : Fin k ⊕ Fin k →₀ ℕ) : ∃ m g : Fin k →₀ �
   rcases v with i | i <;> simp [Finsupp.comapDomain_apply]
 
 lemma pol_ext {P Q : Pol K k}
-    (h : ∀ m g : Fin k →₀ ℕ, coeff (Finsupp.sumElim m g) P = coeff (Finsupp.sumElim m g) Q) : P = Q := by
+    (h : ∀ m g : Fin k →₀ ℕ, AddMonoidAlgebra.coeff P (Finsupp.sumElim m g) = AddMonoidAlgebra.coeff Q (Finsupp.sumElim m g)) : P = Q := by
   ext n
   obtain ⟨m, g, rfl⟩ := exists_sumElim n
   exact h m g
@@ -53,8 +105,8 @@ lemma sumElim_add_single_inr (m g : Fin k →₀ ℕ) (b : Fin k) :
   rcases v with i | i <;> simp [Finsupp.single_apply]
 
 lemma coeff_term (P : MvPolynomial (Fin k) K) (m g g' : Fin k →₀ ℕ) :
-    coeff (Finsupp.sumElim m g) (rename Sum.inl P * monomial (g'.mapDomain Sum.inr) (1 : K)) =
-      if g' = g then coeff m P else 0 := by
+    AddMonoidAlgebra.coeff (rename Sum.inl P * monomial (g'.mapDomain Sum.inr) (1 : K)) (Finsupp.sumElim m g) =
+      if g' = g then AddMonoidAlgebra.coeff P m else 0 := by
   classical
   induction P using MvPolynomial.induction_on'
   next u c =>
@@ -62,8 +114,8 @@ lemma coeff_term (P : MvPolynomial (Fin k) K) (m g g' : Fin k →₀ ℕ) :
     simp only [coeff_monomial, sumElim_inj, mul_one]
     by_cases h1 : u = m <;> by_cases h2 : g' = g <;> simp [h1, h2]
   next p q hp hq =>
-    rw [map_add, add_mul, coeff_add, hp, hq]
-    split_ifs <;> simp [coeff_add]
+    rw [map_add (f := _), add_mul, MvPolynomial.coeff_add, hp, hq]
+    split_ifs <;> simp [MvPolynomial.coeff_add]
 
 lemma mono_val (g : Fin k →₀ ℕ) :
     (mono K k d g : MvPolynomial (Fin k) K) = if g.degree = d then monomial g 1 else 0 := by
@@ -82,29 +134,29 @@ lemma kappa_apply (A : Module.End K ↥(homogeneousSubmodule (Fin k) K d)) :
   simp [kappa]
 
 lemma coeff_kappa (A : Module.End K ↥(homogeneousSubmodule (Fin k) K d)) (m g : Fin k →₀ ℕ) :
-    coeff (Finsupp.sumElim m g) (kappa K k d A) =
-      invFact K g * coeff m (A (mono K k d g) : MvPolynomial (Fin k) K) := by
+    AddMonoidAlgebra.coeff (kappa K k d A) (Finsupp.sumElim m g) =
+      invFact K g * AddMonoidAlgebra.coeff (A (mono K k d g) : MvPolynomial (Fin k) K) m := by
   classical
   rw [kappa_apply, coeff_sum]
-  simp only [coeff_smul, coeff_term, smul_eq_mul, mul_ite, mul_zero, Finset.sum_ite_eq']
+  simp only [MvPolynomial.coeff_smul, coeff_term, smul_eq_mul, mul_ite, mul_zero, Finset.sum_ite_eq']
   split_ifs with h
   · rfl
   · rw [mem_antidiag_iff] at h
     have h0 : mono K k d g = 0 := by
       unfold mono
-      rw [dif_neg h]
+      rw [dite_eq_right h]
     rw [h0, map_zero]
     simp
 
 lemma degree_of_coeff_ne (F : ↥(homogeneousSubmodule (Fin k) K d)) {m : Fin k →₀ ℕ}
-    (h : coeff m (F : MvPolynomial (Fin k) K) ≠ 0) : m.degree = d := by
+    (h : AddMonoidAlgebra.coeff (F : MvPolynomial (Fin k) K) m ≠ 0) : m.degree = d := by
   have hF := (mem_homogeneousSubmodule d _).1 F.2
   rw [Finsupp.degree_eq_weight_one]
   exact hF h
 
 lemma eq_sum_mono (F : ↥(homogeneousSubmodule (Fin k) K d)) :
     F = ∑ g ∈ (F : MvPolynomial (Fin k) K).support,
-      coeff g (F : MvPolynomial (Fin k) K) • mono K k d g := by
+      AddMonoidAlgebra.coeff (F : MvPolynomial (Fin k) K) g • mono K k d g := by
   apply Subtype.ext
   rw [Submodule.coe_sum]
   conv_lhs => rw [(F : MvPolynomial (Fin k) K).as_sum]
@@ -154,7 +206,7 @@ lemma degree_sub_add (g : Fin k →₀ ℕ) (a b : Fin k) (hb : g b ≠ 0) :
     rw [Finsupp.degree_eq_sum]
     simp [Finsupp.single_apply]
   conv_rhs => rw [← tsub_add_cancel_of_le hle]
-  rw [map_add, map_add, hs, hs]
+  rw [map_add (f := _), map_add (f := _), hs, hs]
 
 lemma Ed_val (a b : Fin k) (F : ↥(homogeneousSubmodule (Fin k) K d)) :
     (Formalism.MainNotions.TestSideCounting.Ed K k d a b F : MvPolynomial (Fin k) K) = X a * pderiv b (F : MvPolynomial (Fin k) K) :=

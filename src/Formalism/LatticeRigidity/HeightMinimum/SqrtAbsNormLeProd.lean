@@ -1,4 +1,51 @@
-import Formalism.LatticeRigidity.StatementC
+module
+
+public import Formalism.LatticeRigidity.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.SA.P
 
@@ -122,7 +169,7 @@ theorem card_box_le (b : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (hb : b �
       apply hX
       have h1 := absNorm_le_prod_infinitePlace_sq b hb l hlb hl0
       have h2 : ∏ w : InfinitePlace E, w l ^ 2 ≤ ∏ w, ρ w ^ 2 :=
-        Finset.prod_le_prod (fun w _ => by positivity)
+        Finset.prod_le_prod₀ (fun w _ => by positivity)
           (fun w _ => pow_le_pow_left₀ (NumberField.InfinitePlace.pos_iff.mpr hl0).le (hlt w).le 2)
       have h3 : (1 : ℝ) ≤ 2 ^ d := one_le_pow₀ (by norm_num)
       nlinarith
@@ -197,7 +244,7 @@ theorem card_box_le (b : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (hb : b �
       rw [e1, hsX, hXdef]
       field_simp
     have hlt : ∏ w : InfinitePlace E, w (l - l') ^ 2 < ∏ w : InfinitePlace E, (2 * (ρ w / s) ^ 2) :=
-      Finset.prod_lt_prod_of_nonempty
+      Finset.prod_lt_prod_of_nonempty₀
         (fun w _ => by have := (NumberField.InfinitePlace.pos_iff (w := w)).mpr hsub0; positivity)
         (fun w _ => hsmall w) Finset.univ_nonempty
     rw [hprod] at hlt
@@ -264,7 +311,7 @@ theorem geom_prod_sum {ι : Type} [Fintype ι] (T : Finset (ι → ℕ)) :
           (fun _ _ _ => Finset.prod_nonneg fun _ _ => by positivity)
     _ = ∏ _i : ι, ∑ n ∈ Finset.range N, (1 / 2 : ℝ) ^ n := by rw [Finset.prod_univ_sum]
     _ ≤ ∏ _i : ι, (2 : ℝ) :=
-        Finset.prod_le_prod (fun _ _ => Finset.sum_nonneg fun _ _ => by positivity)
+        Finset.prod_le_prod₀ (fun _ _ => Finset.sum_nonneg fun _ _ => by positivity)
           (fun _ _ => sum_geometric_two_le N)
     _ = 2 ^ Fintype.card ι := by simp
 
@@ -304,7 +351,7 @@ theorem cube_sum_le (b : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (hb : b �
       fun w => NumberField.InfinitePlace.pos_iff.mpr (hS l hl).2
     apply pow_le_pow_left₀
       (Finset.prod_nonneg fun w _ => le_min zero_le_one (div_pos (hx w) (hwl w)).le)
-    exact Finset.prod_le_prod (fun w _ => le_min zero_le_one (div_pos (hx w) (hwl w)).le)
+    exact Finset.prod_le_prod₀ (fun w _ => le_min zero_le_one (div_pos (hx w) (hwl w)).le)
       (fun w _ => hmin l hl w)
   have hfiber : ∀ k ∈ S.image kf,
       ∑ l ∈ S with kf l = k, (∏ w, min 1 (x w / w l)) ^ 3 ≤ 4 ^ d * 100 ^ d * Q * G k := by
@@ -383,12 +430,12 @@ theorem smoothedSumBound : Formalism.SA.C.BoxSum := by
     have hp0 : 0 < ∏ w, min 1 (x w / w l) :=
       Finset.prod_pos fun w _ => lt_min one_pos (div_pos (hx w) (hwl w))
     have e1 : ∏ w, min 1 ((x w / w l) ^ Kx) = (∏ w, min 1 (x w / w l)) ^ Kx := by
-      rw [← Real.finset_prod_rpow _ _ (fun w _ => hm0 w)]
+      rw [← Real.finsetProd_rpow _ _ (fun w _ => hm0 w)]
       refine Finset.prod_congr rfl fun w _ => ?_
       exact min_one_rpow _ _ (div_pos (hx w) (hwl w)) (by linarith)
     have hpA : ∏ w, min 1 (x w / w l) ≤ 1 / A := by
       have h1 : ∏ w, min 1 (x w / w l) ≤ ∏ w, (x w / w l) :=
-        Finset.prod_le_prod (fun w _ => hm0 w) (fun w _ => min_le_right _ _)
+        Finset.prod_le_prod₀ (fun w _ => hm0 w) (fun w _ => min_le_right _ _)
       rw [Finset.prod_div_distrib] at h1
       have h3 := sqrt_absNorm_le_prod b hb l (hS l hl).1 (hS l hl).2
       rw [hinvA]

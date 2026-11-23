@@ -1,8 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.SplitInv
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PChordA
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpTw
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.InfInd2Holds
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.SplitInv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InfinitesimalCharacterInduced
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PChordA
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpTw
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PExpTwA
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,9 +88,40 @@ theorem hyp_tw {N : ℕ} {τ : E →+* ℂ} {U : Submodule ℂ (Sm E N)} (hU : H
     Hyp τ (tw U w) := by
   obtain ⟨⟨hst, haut⟩, ⟨S, hSU, hS⟩, hnp, ⟨z, hz, hzU⟩, ⟨m, hm, hnd⟩, hreg⟩ := hU
   classical
+  have aut_tw {a : ℕ} {ψ : Sm E a} (h : IsAutForm ψ) (χ : Formalism.L2.Host.HChar E) :
+      IsAutForm (mulChi a χ ψ) := by
+    exact {
+      left γ g := by simp [h.left, chiDet_ratGL]
+      level := isOpen_stab_of_mem_nhds _ _ <| Filter.mem_of_superset
+        ((h.level.inter (isOpen_ker_chiDet χ)).mem_nhds ⟨by simp, by simp⟩) fun k hk => by
+          have h1 : rt E a (finGL E a k) ψ = ψ := hk.1
+          have h2 : chiDet a χ (finGL E a k) = 1 := hk.2
+          change rt E a (finGL E a k) _ = _
+          rw [rt_mulChi, h1, h2, Units.val_one, one_smul]
+      kfin := by
+        have := h.kfin
+        refine Submodule.finiteDimensional_of_le (S₂ := (Submodule.span ℂ (Set.range fun k => cptRep E a k ψ)).map
+          (GlobalTheory.CuspRep.mulChi a χ).toLinearMap) (Submodule.span_le.2 ?_)
+        rintro _ ⟨k, rfl⟩
+        exact ⟨_, Submodule.smul_mem _ _ (Submodule.subset_span ⟨k, rfl⟩), (rt_mulChi χ _ ψ).symm⟩
+      zfin := by
+        have := h.zfin
+        refine Submodule.finiteDimensional_of_le (S₂ := (Submodule.span ℂ ((fun z : Module.End ℂ (Sm E a) => z ψ) ''
+          Zalg E a)).map (GlobalTheory.CuspRep.mulChi a χ).toLinearMap) (Submodule.span_le.2 ?_)
+        rintro _ ⟨z, hz, rfl⟩
+        obtain ⟨z', h1, h2⟩ := Zalg_mulChi χ hz
+        exact ⟨_, Submodule.subset_span ⟨z', h1, rfl⟩, (h2 ψ).symm⟩
+      growth g := by
+        obtain ⟨C, N, h1⟩ := h.growth g
+        obtain ⟨C', N', h2⟩ := chiDet_growth (a := a) χ
+        refine ⟨C * (‖((chiDet a χ g : ℂˣ) : ℂ)‖ * C'), N + N', fun y => ?_⟩
+        rw [mulChi_apply, map_mul, Units.val_mul, norm_mul, norm_mul]
+        refine (mul_le_mul (h1 y) (mul_le_mul_of_nonneg_left (h2 y) (norm_nonneg _)) (by positivity)
+          ((norm_nonneg _).trans (h1 y))).trans_eq ?_
+        ring }
   refine ⟨⟨ParabolicProjection.isStable_tw hst w, ?_⟩, ⟨S.image (mulChi N (Model.absC E w)), ?_, ?_⟩, ?_, ?_, ?_, ?_⟩
   · rintro _ ⟨φ, hφ, rfl⟩
-    exact (haut φ hφ).mulChi _
+    exact aut_tw (haut φ hφ) _
   · intro x hx
     rw [Finset.coe_image] at hx
     obtain ⟨φ, hφ, rfl⟩ := hx
@@ -106,7 +183,7 @@ theorem core (h1 : SliceU) (h2 : Blocks) (h3 : Leaf) (h4 : Node) (h6 : TwConc) (
   have hφ' : mulChi (r + s) (Model.absC E w) φ ∈ tw U w := ⟨φ, hφ, rfl⟩
   have hne' : mulChi (r + s) (Model.absC E w) φ ≠ 0 := (LinearEquiv.map_ne_zero_iff _).2 hne
   have hc' : c - -w * r * (Module.finrank ℚ E : ℂ) ∈ Exp r (mulChi (r + s) (Model.absC E w) φ).1 := by
-    refine expTw_holds E (r + s) (mulChi (r + s) (Model.absC E w) φ) (-w) ((hU.1.2 φ hφ).mulChi _) r hr hrN c ?_
+    refine expTw_holds E (r + s) (mulChi (r + s) (Model.absC E w) φ) (-w) (hU'.1.2 _ hφ') r hr hrN c ?_
     rw [ParabolicProjection.mulChi_absC_neg]
     exact hc
   have hpc' : pE E (r + s) r (c - -w * r * (Module.finrank ℚ E : ℂ)) = 0 := by
@@ -198,7 +275,7 @@ theorem separation_of_six_inputs (h1 : SliceU) (h2 : Blocks) (h3 : Leaf) (h4 : N
   obtain ⟨φ, hφS, hne⟩ : ∃ φ ∈ S, φ ≠ 0 := by
     by_contra hcon
     push_neg at hcon
-    have hbot : IsStable (⊥ : Submodule ℂ (Sm E N)) := by
+    have hbot : _root_.GlobalTheory.CuspRep.IsStable (⊥ : Submodule ℂ (Sm E N)) := by
       intro o ψ hψ
       rw [Submodule.mem_bot] at hψ ⊢
       rw [hψ, map_zero]

@@ -1,7 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.CxCutE
-import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
+module
+
+public import Formalism.LocalToGlobal.Divisibility.LiftLat
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Formalism.LocalToGlobal.Divisibility.ClassSumLemmas
+public import Formalism.LocalToGlobal.Divisibility.LiftLatLemmas
+import Formalism.LocalToGlobal.Divisibility.ProjLemmas
 import Formalism.LocalToGlobal.Divisibility.RowLatLemmas
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.CommutingTwist
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ConjugateWeightLatticeOfGeneral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.IndefiniteReal.PartsOrth
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Polynomial
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -105,9 +157,6 @@ variable {K : Type} [Field K] [NumberField K] [StarRing K] {G : Type} [Group G] 
 section Proj
 
 variable (hc : Col.PairComm B.op) (hs : Col.SplitOver B.op) (C : (B.Pl × ℕ → K) → Prop)
-
-def pMat : Matrix (Fin B.S.dim) (Fin B.S.dim) K :=
-  LinearMap.toMatrix B.S.basis B.S.basis (Col.eigProj hc hs C)
 
 private theorem hform_eq_lemma {L : Type} [Field L] [StarRing L] {n : ℕ} (H : Matrix (Fin n) (Fin n) L)
     (x y : Fin n → L) : hform H x y = star x ⬝ᵥ H *ᵥ y := by
@@ -573,6 +622,7 @@ theorem HZ_unit (h : BlockHyp B ℓ v0 s) : IsUnit ((B.zE ℓ Z)ᴴ * B.HV ℓ *
     intro c h0
     have h1 : star (fun i => v0.embedding (c i)) ⬝ᵥ (B.S.H.map v0.embedding) *ᵥ (fun i => v0.embedding (c i)) =
         v0.embedding (star c ⬝ᵥ B.S.H *ᵥ c) := by
+
       simp only [dotProduct, Matrix.mulVec, map_sum, map_mul, Pi.star_apply, hv0', Matrix.map_apply]
     rw [h0, map_zero] at h1
     by_contra hc0
@@ -660,34 +710,6 @@ variable (A : FamIn K G Pl0 T m) (X : CxData A.fam.amb)
 variable (P0 : Subgroup G) (ψ0 : P0 →* Kˣ) (P1 : Subgroup G) (ψ1 : P1 →* Kˣ)
   (Dc : ∀ Zs : DefSub A.fam.amb, DefCols (A.side P1 ψ1 Zs)) (Sp : ∀ Zs : DefSub A.fam.amb, SPer (Dc Zs))
   (Zsc : DefSub A.fam.amb → IndefScale A.fam.base)
-
-theorem proviso_at {s : ℕ} (hOk : A.fam.Ok s) (hH : HeckeRatL A) (P : Subgroup G) (ψ : P →* Kˣ)
-    {C : ∀ j : Fin m, ((A.fam.L j A.fam.μ0).Pl × ℕ → K) → Prop} (hC : LiftsEig A X P ψ C) :
-    (A.fam.side P ψ X.zs).Proviso :=
-  A.fam.side_Proviso hOk P ψ X.zs fun j => by
-    show SubHasRatBasis ((A.fam.L j A.fam.μ0).Z0 (A.fam.lvlA P ψ) (X.Zl j A.fam.μ0))
-    rw [hC j]
-    exact EigenprojectionMatrices.eig_rat (A.fam.blockHyp_lift hOk P ψ j A.fam.μ0) (hH j) (C j)
-
-theorem types_at {s : ℕ} (hOk : A.fam.Ok s) (hsep : A.fam.TypesSep) (hst : X.zs.Stable) (P : Subgroup G)
-    (ψ : P →* Kˣ) {C : ∀ j : Fin m, ((A.fam.L j A.fam.μ0).Pl × ℕ → K) → Prop} (hC : LiftsEig A X P ψ C)
-    (hT : LiftsTyp A C) : (A.fam.side P ψ X.zs).Types :=
-  A.fam.side_Types hOk P ψ X.zs hst hsep fun j => by
-    show (A.fam.L j A.fam.μ0).Z0 (A.fam.lvlA P ψ) (X.Zl j A.fam.μ0) ≤ _
-    rw [hC j]
-    exact (A.fam.L j A.fam.μ0).good_part_coordinates_mono _ (Col.eigSum_mono fun x hx => hT j x hx)
-
-theorem cutProviso : CutProviso A X P0 ψ0 P1 ψ1 Dc Sp Zsc := by
-  intro s C0 C1 hOk hH h0 h1 b
-  cases b
-  · exact proviso_at A X hOk hH P0 ψ0 h0
-  · exact proviso_at A X hOk hH P1 ψ1 h1
-
-theorem cutTypes : CutTypes A X P0 ψ0 P1 ψ1 Dc Sp Zsc := by
-  intro s C0 C1 hOk hsep hst h0 h1 t0 t1 b
-  cases b
-  · exact types_at A X hOk hsep hst P0 ψ0 h0 t0
-  · exact types_at A X hOk hsep hst P1 ψ1 h1 t1
 
 end Main
 

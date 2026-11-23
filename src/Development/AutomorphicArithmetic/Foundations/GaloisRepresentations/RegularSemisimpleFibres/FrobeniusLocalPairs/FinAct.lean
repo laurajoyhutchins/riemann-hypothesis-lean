@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.FrobeniusLocalPairs.FrobFactsAlt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.FrobeniusLocalPairs.InflFacts
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.FrobeniusLocalPairs.FrobFactsAlt
+import GroundTheory.LocalFields.UnramifiedHensel
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -143,7 +186,7 @@ private theorem tr_eq [Finite Γ] (ρ : Representation ℂ G V) (ι : H →* G) 
     refine Submodule.smul_mem _ _ (Submodule.sum_mem _ fun g _ => Submodule.smul_mem _ _ ?_)
     exact fx_stable ρ ι p _ (hA v hv)
   unfold GlobalTheory.BCT.twTr
-  rw [dif_pos hL, finsum_eq_sum_of_fintype, ← smul_eq_mul, ← map_smul]
+  rw [dite_eq_left hL, finsum_eq_sum_of_fintype, ← smul_eq_mul, ← map_smul]
   congr 1
   ext ⟨v, hv⟩
   simp only [LinearMap.restrict_apply, LinearMap.smul_apply, LinearMap.sum_apply, LinearMap.comp_apply,
@@ -196,12 +239,12 @@ private theorem infl_on (rd : 𝒪[k] →+* F₀) {n : ℕ} (fb : GL (Fin n) F�
   have h : ∃ y', GeneralLinearGroup.map (algebraMap 𝒪[k] k) y' = GeneralLinearGroup.map (algebraMap 𝒪[k] k) y :=
     ⟨y, rfl⟩
   unfold infl
-  rw [dif_pos h, iota_inj (k := k) n h.choose_spec]
+  rw [dite_eq_left h, iota_inj (k := k) n h.choose_spec]
 
 private theorem infl_off (rd : 𝒪[k] →+* F₀) {n : ℕ} (fb : GL (Fin n) F₀ → ℂ) (x : GL (Fin n) k)
     (hx : x ∉ (GeneralLinearGroup.map (n := Fin n) (algebraMap 𝒪[k] k)).range) : infl rd fb x = 0 := by
   unfold infl
-  rw [dif_neg (fun h => hx (MonoidHom.mem_range.2 h))]
+  rw [dite_eq_right (fun h => hx (MonoidHom.mem_range.2 h))]
 
 end Loc
 

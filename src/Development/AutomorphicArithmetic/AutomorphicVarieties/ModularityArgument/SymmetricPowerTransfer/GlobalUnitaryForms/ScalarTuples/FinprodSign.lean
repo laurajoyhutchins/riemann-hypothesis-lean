@@ -1,13 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.FormsFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.LcountNorm
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.HsCast
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.HsHasse
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.IndexVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.ModelMap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.QuoMulInv
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.SymbolEx
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.DatSmul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.ModelMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.QuoMulInv
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.HsCast
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.SymbolEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.IndexVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.ScalarTuples.HsHasse
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.LcountNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace UpperTheory.V.Z.Sym.Glob
 
@@ -291,7 +341,7 @@ private theorem loc_two {K : Type} [Field K] [CharZero K] (τ : K)
     · have e := hf t ((hN t).mpr ht) 1
       rwa [mul_one] at e
     · have hex : ∃ y : Kˣ, hs D (y : K) ≠ 1 := ⟨t, ht⟩
-      rw [hb, dif_pos hex]
+      rw [hb, dite_eq_left hex]
       have hc : hs D ((hex.choose : Kˣ) : K) ≠ 1 := hex.choose_spec
       have hmem : t * hex.choose⁻¹ ∈ NE τ := by
         rw [hN, hm, (hv t).resolve_left ht, hinv _ hc]
@@ -307,7 +357,7 @@ private theorem loc_two {K : Type} [Field K] [CharZero K] (τ : K)
     rw [finsum_congr e, T1]
     split_ifs with hex
     · rfl
-    · rw [hb, dif_neg hex, add_zero]
+    · rw [hb, dite_eq_right hex, add_zero]
   · have e : ∀ q : Kˣ ⧸ NE τ, hs D ((q.out : Kˣ) : K) * f q.out =
         if hs D ((q.out : Kˣ) : K) = 1 then f 1 else -b := by
       intro q
@@ -319,7 +369,7 @@ private theorem loc_two {K : Type} [Field K] [CharZero K] (τ : K)
     rw [finsum_congr e, T2]
     split_ifs with hex
     · ring
-    · rw [hb, dif_neg hex]
+    · rw [hb, dite_eq_right hex]
       ring
 
 open Classical in
@@ -455,11 +505,11 @@ theorem sumT : SumT := by
       refine ⟨fun v => if h : v ∈ s then (hE v h).choose else 1, fun v => ?_⟩
       beta_reduce
       by_cases hv : v ∈ s
-      · rw [if_pos hv, dif_pos hv]
+      · rw [if_pos hv, dite_eq_left hv]
         have hc := (hE v hv).choose_spec
         rw [hDv]
         exact (hs_cases _ _).resolve_left hc
-      · rw [if_neg hv, dif_neg hv, Units.val_one, hs_iff]
+      · rw [if_neg hv, dite_eq_right hv, Units.val_one, hs_iff]
         exact ⟨1, 0, by ring⟩
     have hfin : {v | hs (cv v (τ ^ 2 - 4)) ((y v : (Kv v)ˣ) : Kv v) ≠ 1}.Finite := by
       apply s.finite_toSet.subset
@@ -488,7 +538,7 @@ theorem sumT : SumT := by
       · rw [if_neg hv]
         exact ⟨fun h => absurd rfl h, fun h => absurd h hv⟩
   have hb0 : ∀ v, ¬ (∃ y : (Kv v)ˣ, hs (cv v τ ^ 2 - 4) (y : Kv v) ≠ 1) → b v = 0 :=
-    fun v h => by rw [hbdef, dif_neg h]
+    fun v h => by rw [hbdef, dite_eq_right h]
   have hSg : ∀ g, ∀ v ∈ S g, v ∉ D.Sg := fun g v hv hvs => (hS g v).mp hv (hsplit v hvs _)
   obtain ⟨A1, A2⟩ := abs_sum D.Sg (fun g : Fˣ ⧸ NE τ => TPos ((g.out : Fˣ) : F)) S
     (fun v => ∃ y : (Kv v)ˣ, hs (cv v τ ^ 2 - 4) (y : Kv v) ≠ 1) (fun v => f v 1) b hab hb0 inj hSg ev surj

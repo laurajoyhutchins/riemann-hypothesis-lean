@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmoothFormsCalculusHolomorphicAtlasStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralEqEuclideanIntegralOfSupportInChartStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralReTopDegreeDensityDbarEqZeroStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsTypeIsRealConst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HolAtlasIsFormDelDbarSmoothStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralEqEuclideanIntegralOfSupportInChartStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralReTopDegreeDensityDbarEqZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFormOneAddMulSmulStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -52,9 +94,10 @@ theorem integral_dbar_fn_mul_eq_zero : ∀ {M : Type} [TopologicalSpace M] [Comp
   intro M _ _ _ _ _ _ n A γ χ i hγ hχ hK
   set K := tsupport χ with hKdef
   have hKc : IsCompact K := (isClosed_tsupport χ).isCompact
-  have calc0 := (GlobalTheory.T.smoothForms_calculus_holomorphicAtlas M n A).2.1 0
-  have hP : A.IsForm (A.fn χ * γ) := (calc0 _ _ (A.isForm_fn hχ) hγ).2.1
-  have hω : A.IsForm (A.dbar (A.fn χ * γ)) := (calc0 _ _ hP hγ).2.2.2.2.1
+  have hP : A.IsForm (A.fn χ * γ) :=
+    ((GlobalTheory.T.isForm_one_add_mul_smul M n A).2 0 _ _ (A.isForm_fn hχ) hγ).2.1
+  have hω : A.IsForm (A.dbar (A.fn χ * γ)) :=
+    (GlobalTheory.T.holAtlas_isForm_del_dbar_smooth M n A _ hP).2
 
   have hnear : ∀ (j : A.ι) (w : V n), w ∈ (A.e j).target → (A.e j).symm w ∉ K →
       A.loc (A.fn χ * γ) j =ᶠ[𝓝 w] fun _ => 0 := by
@@ -91,10 +134,10 @@ theorem integral_dbar_fn_mul_eq_zero : ∀ {M : Type} [TopologicalSpace M] [Comp
   have hloc : A.loc (A.dbar (A.fn χ * γ)) i = dbarAt F := by
     funext v
     by_cases ht : v ∈ (A.e i).target
-    · rw [HolAtlas.loc, dif_pos ht]
+    · rw [HolAtlas.loc, dite_eq_left ht]
       simp only [HolAtlas.dbar, Pt.crd, Pt.ch, (A.e i).right_inv ht]
       rfl
-    · rw [HolAtlas.loc, dif_neg ht, dbarAt_eq_zero_of_eventually (hF0 v fun h => ht (hBt h))]
+    · rw [HolAtlas.loc, dite_eq_right ht, dbarAt_eq_zero_of_eventually (hF0 v fun h => ht (hBt h))]
   rw [hloc]
   exact GlobalTheory.T.integral_re_topDegreeDensity_dbar_eq_zero F hFC hFs
 

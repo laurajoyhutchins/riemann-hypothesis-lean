@@ -1,36 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.SqSubLeNormSub
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.SqSubLeNormSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.QNorm
 open scoped WithZero
 
 namespace GlobalTheory.QNorm
-
-theorem withZero_eq_of_le_exp_iff {a b : ℤᵐ⁰} (ha : a ≤ 1) (hb : b ≤ 1)
-    (h : ∀ n : ℕ, a ≤ WithZero.exp (-(n : ℤ)) ↔ b ≤ WithZero.exp (-(n : ℤ))) : a = b := by
-  have key : ∀ a b : ℤᵐ⁰, b ≠ 0 → b ≤ 1 →
-      (∀ n : ℕ, b ≤ WithZero.exp (-(n : ℤ)) → a ≤ WithZero.exp (-(n : ℤ))) → a ≤ b := by
-    intro a b hb0 hb h
-    have e : b = WithZero.exp (WithZero.log b) := (WithZero.exp_log hb0).symm
-    have hl : WithZero.log b ≤ 0 := by
-      rw [e, ← WithZero.exp_zero, WithZero.exp_le_exp] at hb; exact hb
-    have e2 : WithZero.log b = -(((-WithZero.log b).toNat : ℕ) : ℤ) := by omega
-    rw [e2] at e
-    rw [e]
-    exact h _ e.le
-  have key0 : ∀ a : ℤᵐ⁰, (∀ n : ℕ, a ≤ WithZero.exp (-(n : ℤ))) → a = 0 := by
-    intro a h
-    by_contra ha0
-    have e : a = WithZero.exp (WithZero.log a) := (WithZero.exp_log ha0).symm
-    have := h ((-WithZero.log a).toNat + 1)
-    rw [e, WithZero.exp_le_exp, WithZero.log_exp] at this
-    omega
-  by_cases hb0 : b = 0
-  · subst hb0
-    exact key0 a fun n => (h n).2 (by simp)
-  by_cases ha0 : a = 0
-  · subst ha0
-    exact (key0 b fun n => (h n).1 (by simp)).symm
-  exact le_antisymm (key a b hb0 hb fun n => (h n).2) (key b a ha0 ha fun n => (h n).1)
 
 open NumberField IsDedekindDomain in
 open scoped WithZero in
@@ -90,7 +110,7 @@ private lemma exists_algebraMap_eq_mul_conj_of_isQuad {F E : Type} [Field F] [Nu
   obtain ⟨a, b, hab⟩ := hq.span (x : E)
   have hprod : (x : E) * σ (x : E) = algebraMap F E (a ^ 2 - b ^ 2 * δ) := by
     rw [hab]
-    simp only [map_add, map_mul, AlgEquiv.commutes, hq.conj]
+    simp only [map_add (f := _), map_mul, AlgEquiv.commutes, hq.conj]
     rw [map_sub, map_mul, map_pow, map_pow, ← hq.sq]
     ring
   have hint : IsIntegral ℤ (algebraMap F E (a ^ 2 - b ^ 2 * δ)) := by

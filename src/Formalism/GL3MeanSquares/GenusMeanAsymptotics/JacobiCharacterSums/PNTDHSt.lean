@@ -1,4 +1,47 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.JacobiCharacterSums.DeuringHeilbronnM
+module
+
+public import Formalism.LandauZeroFreeBounds.NoZeroComplexOf
+public import Mathlib.Data.FunLike.Fintype
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.JacobiCharacterSums.MeanSquareHypWIff
+
+@[expose] public section
 
 open Finset Complex Classical
 
@@ -44,34 +87,6 @@ def DHLocal : Prop :=
             - (if ψ = 1 then 1 / (s - 1) ^ (k + 1) else 0)
             + ∑ ρ ∈ Z, (m ρ : ℂ) / (s - ρ) ^ (k + 1)‖ ≤ C * Real.log ((M : ℝ) * (|t| + 2)) * 25 ^ k
 
-def DHCount : Prop :=
-  ∀ C : ℝ, 0 ≤ C → ∃ C' : ℝ, 0 < C' ∧ ∀ (M : ℕ) [NeZero M] (ψ : DirichletCharacter ℂ M) (t : ℝ)
-    (Z : Finset ℂ) (m : ℂ → ℕ), 3 ≤ M → (∀ ρ ∈ Z, ρ.re < 1) →
-    (∀ s : ℂ, 1 < s.re → ‖s - ((26 / 25 : ℂ) + t * I)‖ ≤ 1 / 25 →
-      ‖negLD ψ s - (if ψ = 1 then 1 / (s - 1) else 0) + ∑ ρ ∈ Z, (m ρ : ℂ) / (s - ρ)‖ ≤
-        C * Real.log ((M : ℝ) * (|t| + 2))) →
-    ∀ σ R : ℝ, 0 < R → R ≤ 1 / 50 → 1 < σ → σ ≤ 1 + R →
-      (∑ ρ ∈ Z.filter (fun ρ => ‖(σ : ℂ) + t * I - ρ‖ ≤ R), (m ρ : ℝ)) ≤
-        C' * (R * Real.log ((M : ℝ) * (|t| + 2)) + 1)
-
-def DHIneq : Prop :=
-  ∃ C : ℝ, 0 < C ∧ ∀ (M : ℕ) [NeZero M] (χ₁ χ : DirichletCharacter ℂ M) (β₁ T η : ℝ) (ρ : ℂ),
-    3 ≤ M → 2 ≤ T → χ₁ ^ 2 = 1 → χ₁ ≠ 1 → DirichletCharacter.LFunction χ₁ (β₁ : ℂ) = 0 →
-    19 / 20 ≤ β₁ → β₁ < 1 → IsLZero χ ρ → 22 / 25 ≤ ρ.re → |ρ.im| ≤ T → (χ, ρ) ≠ (χ₁, (β₁ : ℂ)) →
-    0 < η → η ≤ 2 / 25 →
-    ∃ (N : ℕ) (w : Fin N → ℂ),
-      (∀ i, η ≤ (w i).re) ∧
-      (∃ i, w i = ((η + (1 - ρ.re) : ℝ) : ℂ)) ∧
-      ((N : ℝ) ≤ C * Real.log ((M : ℝ) * T)) ∧
-      (∀ R : ℝ, η ≤ R → R ≤ 1 / 50 →
-        ((Finset.univ.filter (fun i => ‖w i‖ ≤ R)).card : ℝ) ≤ C * (R * Real.log ((M : ℝ) * T) + 1)) ∧
-      ∀ j : ℕ, 1 ≤ j →
-        (∑ i, 1 / (w i) ^ j).re ≤ 2 * j * (1 - β₁) / η ^ (j + 1) + C * Real.log ((M : ℝ) * T) * 25 ^ j
-
 def DHLocalOf : Prop := DHCauchy → DHLocal
-
-def DHIneqOf : Prop := DHPos → DHLocal → DHCount → DHIneq
-
-def DHFinishOf : Prop := DHTuran → DHIneq → DeuringHeilbronnM
 
 end Formalism.HermitianLattices.Ext.PrimesInProgressions

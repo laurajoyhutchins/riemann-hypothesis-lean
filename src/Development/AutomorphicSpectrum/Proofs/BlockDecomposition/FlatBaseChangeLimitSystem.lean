@@ -1,6 +1,52 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.TwistedRepresentations.Tens
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdicCompleteTensorFiniteStatement
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.TwistedRepresentations.Tens
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Flat.Basic
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdicCompleteTensorFiniteStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open TensorProduct CrystallineSemistableComparison CrystallineSemistableComparison.Tw
 
@@ -30,7 +76,7 @@ theorem lTensor_pow_smul (n : ℕ) (v : A ⊗[W] M) :
   | tmul a x =>
     rw [pow_smul_tmul, LinearMap.lTensor_tmul]
     rfl
-  | add x y hx hy => rw [map_add, hx, hy, smul_add]
+  | add x y hx hy => rw [map_add (f := _), hx, hy, smul_add]
 
 theorem mem_pow_smul_top {N : Type*} [AddCommGroup N] [Module A N] (n : ℕ) (v : N) :
     v ∈ ((Ideal.span {(l : A)}) ^ n • ⊤ : Submodule A N) ↔ ∃ u : N, v = ((l : A) ^ n) • u := by
@@ -55,7 +101,7 @@ theorem r_baseChange_pr (n : ℕ) (w : A ⊗[W] S.lim) :
     simp only [LinearMap.baseChange_tmul]
     change a ⊗ₜ[W] S.r n (x.1 (n + 1)) = a ⊗ₜ[W] x.1 n
     rw [hx]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem exists_eq_pow_smul [Module.Flat W A] (n : ℕ)
     (hkill : ∀ (x : S.M n), ((l : W) ^ n) • x = 0)
@@ -96,7 +142,7 @@ theorem exists_baseChange_pr_eq (n c : ℕ)
   | add x y hx hy =>
     obtain ⟨w₁, h₁⟩ := hx
     obtain ⟨w₂, h₂⟩ := hy
-    exact ⟨w₁ + w₂, by rw [map_add, h₁, h₂, smul_add]⟩
+    exact ⟨w₁ + w₂, by rw [map_add (f := _), h₁, h₂, smul_add]⟩
 
 theorem eq_zero_of_baseChange_pr [Module.Flat W A]
     [IsHausdorff (Ideal.span {(l : A)}) (A ⊗[W] S.lim)]
@@ -155,7 +201,7 @@ theorem limit_extension_upTo : ∀ (W : Type) [CommRing W] [IsDomain W] [IsDiscr
   refine ⟨{ toFun := g, map_add' := fun x y => ?_, map_smul' := fun a x => ?_ }, hg⟩
   · rw [← sub_eq_zero]
     refine hinj _ fun n => ?_
-    rw [map_sub, map_add, hg, hg, hg]
+    rw [map_sub, map_add (f := _), hg, hg, hg]
     exact sub_eq_zero.2 (smul_add ((l : A) ^ c) (x.1 n : A ⊗[W] S.M n) (y.1 n : A ⊗[W] S.M n))
   · rw [← sub_eq_zero]
     refine hinj _ fun n => ?_

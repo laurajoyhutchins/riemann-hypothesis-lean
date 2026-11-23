@@ -1,7 +1,45 @@
-import Formalism.LocalToGlobal.Columns.TiedRec
-import Formalism.LocalToGlobal.Columns.Record
-import Formalism.LocalToGlobal.Columns.RecLevelStep
-import Formalism.LocalToGlobal.Columns.RowFormsLemmas
+module
+
+public import Formalism.LocalToGlobal.Columns.TiedRec
+public import Formalism.LocalToGlobal.Columns.Record
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 open scoped TensorProduct
@@ -127,11 +165,11 @@ theorem f_eq : d.X.f = d.R.f := d.what₂.card_Tau
 def crd (i : ℕ) (hi : i ≤ d.R.m) : (d.sp.X i).V ≃ₗ[d.host.E] (Fin (d.R.N i) → d.host.E) :=
   (d.sp.X i).frame.equivFun.trans (LinearEquiv.funCongrLeft d.host.E d.host.E (finCongr (d.sp.X_rank i hi)).symm)
 
-def repr (u : d.what₂.Word) (i : ℕ) (c : StCl (Pr := d.Pr) d.W d.lev u i) : DecoSet d.X.E (d.R.N i) (d.Pr.vT u) d.Pr.vGs :=
+def repr (u : d.what₂.Word) (i : ℕ) (c : StCl (Pr := d.Pr) d.W d.lev u i) : DecoSet (E := d.X.E) (n := d.R.N i) (ST := d.Pr.vT u) (SG := d.Pr.vGs) :=
   (stepGSD (Pr := d.Pr) d.W d.lev u i).outSec.rep c
 
-open Classical in
 
+open Classical in
 def clsLat (u : d.what₂.Word) (i : ℕ) (c : StCl (Pr := d.Pr) d.W d.lev u i) : Submodule (𝓞 d.host.E) (d.sp.X i).V :=
   if hi : i ≤ d.R.m then
     (d.repr u i c).1.L.map (((d.crd i hi).symm : (Fin (d.R.N i) → d.host.E) →ₗ[d.host.E] (d.sp.X i).V).restrictScalars (𝓞 d.host.E))

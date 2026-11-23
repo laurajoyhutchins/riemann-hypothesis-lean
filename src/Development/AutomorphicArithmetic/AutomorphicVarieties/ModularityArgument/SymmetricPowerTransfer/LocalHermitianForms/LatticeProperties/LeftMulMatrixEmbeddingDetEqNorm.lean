@@ -1,4 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.NormOneIsCoboundaryUnramifiedQuadratic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.NormOneIsCoboundaryUnramifiedQuadratic
+public import Mathlib.Algebra.Module.Lattice.Full
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Basis
+
+@[expose] public section
 
 open QuadraticAlgebra UpperTheory.V.Z.Sym UpperTheory.V.Z.Sym.Loc Matrix
 
@@ -171,7 +225,7 @@ theorem lat_le {g g' : GL (Fin 2) K} : LL O τ g ⊆ LL O τ g' ↔ Ent O (g'⁻
     choose a ha using h
     choose v hv using hx
     refine ⟨a i 0 * v 0 + a i 1 * v 1, ?_⟩
-    rw [map_add, map_mul, map_mul, ha, ha, hv, hv]
+    rw [map_add (f := _), map_mul, map_mul, ha, ha, hv, hv]
     generalize ((g⁻¹ : GL (Fin 2) K) : Matrix (Fin 2) (Fin 2) K) *ᵥ (b0 τ).repr x = w
     simp [mulVec, dotProduct]
 
@@ -194,12 +248,13 @@ theorem isLat_lat [IsDomain O] [IsDiscreteValuationRing O] [IsFractionRing O K] 
     (hS : IsLat O τ S) : ∃ g, S = LL O τ g := by
   obtain ⟨⟨s, rfl⟩, hsp⟩ := hS
   set M : Submodule O (Etau K τ) := Submodule.span O (s : Set (Etau K τ)) with hM
-  haveI : Submodule.IsLattice K M := ⟨⟨s, rfl⟩, hsp⟩
+  haveI : Submodule.IsLattice K M := Submodule.IsLattice.of_fg K ⟨s, rfl⟩
+  haveI : Submodule.IsFullLattice K M := ⟨hsp⟩
   have hr : Module.finrank O M = 2 := by
     apply Module.finrank_eq_of_rank_eq
-    rw [Submodule.IsLattice.rank' K M, ← Module.finrank_eq_rank, QuadraticAlgebra.finrank_eq_two]
+    rw [Submodule.IsFullLattice.rank_eq K M, ← Module.finrank_eq_rank, QuadraticAlgebra.finrank_eq_two]
   let b := Module.finBasisOfFinrankEq O M hr
-  let B := b.extendOfIsLattice K
+  let B := b.extendOfIsFullLattice K
   refine ⟨⟨(b0 τ).toMatrix B, B.toMatrix (b0 τ), by simp, by simp⟩, ?_⟩
   rw [lat_basis B _ fun x => (b0 τ).toMatrix_mulVec_repr B x]
   have : Set.range B = M.subtype '' Set.range b := by
@@ -218,15 +273,6 @@ theorem cls_smul (s : Kˣ) (S : Set (Etau K τ)) : cls τ (((s : K) • ·) '' S
     exact ⟨r * s, by simp [← Set.image_comp, Function.comp_def, mul_smul]⟩
   · rintro ⟨r, rfl⟩
     exact ⟨r * s⁻¹, by simp [← Set.image_comp, Function.comp_def, smul_smul]⟩
-
-theorem cls_mul (t : Etau K τ) (S : Set (Etau K τ)) :
-    cls τ ((t * ·) '' S) = (fun S => (t * ·) '' S) '' cls τ S := by
-  ext T
-  constructor
-  · rintro ⟨r, rfl⟩
-    exact ⟨_, ⟨r, rfl⟩, by simp [← Set.image_comp, Function.comp_def]⟩
-  · rintro ⟨_, ⟨r, rfl⟩, rfl⟩
-    exact ⟨r, by simp [← Set.image_comp, Function.comp_def]⟩
 
 theorem cls_lat [IsFractionRing O K] {g g' : GL (Fin 2) K} :
     cls τ (LL O τ g) = cls τ (LL O τ g') ↔ g⁻¹ * g' ∈ ZK O K := by

@@ -1,7 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.LocDefs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DFormMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 open CategoryTheory AlgebraicGeometry GlobalTheory.LogCris CrystallineSemistableComparison CrystallineSemistableComparison.Pb GlobalTheory.CompanionTheory.ConeLocal
@@ -10,8 +53,8 @@ open GlobalTheory.CatH (face toLast)
 noncomputable section
 namespace GlobalTheory.CompanionTheory.ConeLocal
 
-open GlobalTheory.CompanionTheory.CocProd in
 
+open GlobalTheory.CompanionTheory.CocProd in
 theorem d_eq_of_rep {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {A : C ⥤ CommAlgCat.{0} R} {a b : IdF A} {n : ℕ}
     (f g : CH.Cn (CH.modF A) n) {c : CH.H (sq a b) n}
     (hf : CrystallineSemistableComparison.Pb.Rep a b (fun u => f u) c) (hg : CrystallineSemistableComparison.Pb.Rep a b (fun u => g u) c) :
@@ -55,9 +98,6 @@ section Form
 open GlobalTheory.CompanionTheory.CocProd
 variable {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {Φ : PDF R C} {d : ℕ}
   (E : Frame Φ d) (σ : ∀ T : C, E.D ⟶ T)
-
-local macro "fa" : tactic =>
-  `(tactic| (simp only [sa_val, Fin.val_castSucc, Fin.val_succ, Fin.val_last]; split_ifs <;> omega))
 
 def headP {j : ℕ} (I : Fin j → Fin d) (s : ComposableArrows C (j + 1)) : Φ.A.obj (s.obj (Fin.last (j + 1))) :=
   ∏ k : Fin j, ga E σ (I k) s k.castSucc.castSucc k.succ.castSucc (by rw [Fin.le_def]; simp)
@@ -104,12 +144,12 @@ theorem alt_sum_form {j : ℕ} (I : Fin j → Fin d) (x : Φ.A.obj E.D) (s : Com
       · rw [hu, hv]
         dsimp only
         rw [← ga_add]
-        refine ga_congr E σ _ s _ _ ?_ ?_ <;> fa
+        refine ga_congr E σ _ s _ _ ?_ ?_ <;> simp [sa_val] <;> (try split_ifs) <;> simp_all <;> omega
       · refine Finset.prod_congr rfl fun k hk => ?_
         have hki : (k : ℕ) ≠ i := fun h => Finset.ne_of_mem_erase hk (Fin.ext h)
         split_ifs with h
-        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> fa
-        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> fa
+        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> simp [sa_val] <;> (try split_ifs) <;> simp_all <;> omega
+        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> simp [sa_val] <;> (try split_ifs) <;> simp_all <;> omega
     have hE : ∏ k ∈ Finset.univ.erase i, (if (k : ℕ) < i + 1 then u k else v k) =
         ∏ k ∈ Finset.univ.erase i, (if (k : ℕ) < i then u k else v k) := by
       refine Finset.prod_congr rfl fun k hk => ?_
@@ -263,6 +303,7 @@ theorem connecting_form {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {�
     change ∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (Φ.A.map (toLast i s)).hom (∑ I : Idx n d, E.form σ I.1 (y I) (face i s)) = _
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => ?_
+
     rw [map_sum, Finset.smul_sum]
   · rw [Fintype.sum_prod_type, ← Finset.sum_sub_distrib]
     refine Ideal.sum_mem _ fun I _ => ?_

@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.EtaSixProductDifferentiable
+module
+
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsSturmBoundIsModularFormCoeffSeq
+public import Mathlib.NumberTheory.ModularForms.NormTrace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.ModularForms.LevelOne.DimensionFormula
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsDCReps
+public import Mathlib.NumberTheory.ModularForms.CuspFormSubmodule
+
+@[expose] public section
+
 open GlobalTheory.HeckeFamilyMatrices UpperHalfPlane ModularForm
 open scoped MatrixGroups ModularForm Manifold
 
@@ -79,31 +132,7 @@ theorem qParam_pow_bigO {h : ℝ} (hh : 0 < h) {m M : ℕ} (hm : (M : ℝ) * h �
 
 theorem norm_bigO {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ} [ModularFormClass F Γ k]
     [Γ.IsArithmetic] (f : F) : (ModularForm.norm 𝒮ℒ f : ℍ → ℂ) =O[atImInfty] (f : ℍ → ℂ) := by
-  classical
-  let := Fintype.ofFinite (𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ))
-  have hb : ∀ q : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ),
-      SlashInvariantForm.quotientFunc (k := k) f q =O[atImInfty] fun _ => (1 : ℂ) := by
-    refine Quotient.forall.mpr fun ⟨r, hr⟩ => ?_
-    have hc : IsCusp OnePoint.infty 𝒮ℒ := Fact.out
-    have := (ModularForm.translate f r⁻¹).bdd_at_cusps' (c := OnePoint.infty)
-      (by simpa using hc.of_isFiniteRelIndex_conj hr)
-    rw [OnePoint.isBoundedAt_infty_iff] at this
-    have h2 : (ModularForm.translate f r⁻¹ : ℍ → ℂ) =O[atImInfty] (1 : ℍ → ℝ) := this
-    refine IsBigO.trans h2 ?_
-    exact IsBigO.of_bound 1 (by simp)
-  have h1 : (∏ q ∈ Finset.univ.erase (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ)),
-      SlashInvariantForm.quotientFunc (k := k) f q) =O[atImInfty] fun _ => (1 : ℂ) := by
-    have := IsBigO.finsetProd (s := Finset.univ.erase (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ))) (fun q _ => hb q)
-    simpa [Finset.prod_fn] using this
-  have h2 := (isBigO_refl (f : ℍ → ℂ) atImInfty).mul h1
-  simp only [mul_one] at h2
-  refine h2.congr_left fun τ => ?_
-  have h3 := congr_fun (Finset.mul_prod_erase Finset.univ (fun q => SlashInvariantForm.quotientFunc (k := k) f q)
-    (Finset.mem_univ (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ)))) τ
-  rw [ModularForm.coe_norm]
-  have h4 : SlashInvariantForm.quotientFunc (k := k) f (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ)) = f := by simp
-  rw [h4, Pi.mul_apply] at h3
-  convert h3
+  apply GlobalTheory.EisM.modularFormNorm_isBigO_self_atImInfty <;> assumption
 
 theorem sturm {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.IsArithmetic] {h : ℝ} (hh : 0 < h)
     (hΓ : h ∈ Γ.strictPeriods) (k : ℤ) :
@@ -126,7 +155,7 @@ def coeffMap {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.HasDetOne] {h : ℝ} (hh : 0 <
   map_add' f g := by
     funext n
     simp only [Pi.add_apply]
-    rw [ModularForm.coe_add, ModularForm.qExpansion_add hh hΓ f g, map_add]
+    rw [ModularForm.coe_add, ModularForm.qExpansion_add hh hΓ f g, map_add (f := _)]
   map_smul' c f := by
     funext n
     simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
@@ -143,8 +172,8 @@ theorem finiteDimensional_of_isArithmetic (Γ : Subgroup (GL (Fin 2) ℝ)) [Γ.I
 
 end GlobalTheory.HeckeFamilyMatrices.FinDim
 
-open GlobalTheory.HeckeFamilyMatrices.FinDim in
 
+open GlobalTheory.HeckeFamilyMatrices.FinDim in
 theorem GlobalTheory.HeckeFamilyMatrices.finiteDimensional_modularForm_cuspForm :
     ∀ (Γ : Subgroup SL(2, ℤ)) (k : ℤ), Γ.FiniteIndex →
       FiniteDimensional ℂ (ModularForm Γ k) ∧ FiniteDimensional ℂ (CuspForm Γ k) := by

@@ -1,7 +1,56 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankWsp
-import ReciprocityTheory.ReductiveGroups.SymplecticTraces.WeylCharacters.SqChar
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RowActCoefPolyAndUnitaryDense
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCommonEigenvectorCommuting
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
+public import Mathlib.Data.Matrix.PEquiv
+public import ReciprocityTheory.ReductiveGroups.SymplecticTraces.WeylCharacters.AltBranchStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RowActCoefPolyAndUnitaryDense
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCommonEigenvectorCommuting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+public import ReciprocityTheory.ReductiveGroups.SymplecticTraces.WeylCharacters.SqChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -16,6 +65,7 @@ theorem map_gtChar (σ : ℂ →+* ℂ) : ∀ (n : ℕ) (l : Fin n → ℤ) (t :
     σ (gtChar n l t) = gtChar n l (fun i => σ (t i))
   | 0, l, t => by simp [gtChar]
   | n + 1, l, t => by
+
     simp only [gtChar, map_sum, map_mul, map_zpow₀]
     refine Finset.sum_congr rfl fun mu _ => ?_
     rw [map_gtChar σ n mu]
@@ -50,6 +100,7 @@ theorem exists_poly_trace {n : ℕ} (lam : DomWeight n) :
     fun i => GlobalTheory.Branching.exists_poly_rowAct_coef n n _ (L i)
   choose P hP using hP
   refine ⟨∑ i, P i, fun g => ?_⟩
+
   rw [LinearMap.trace_eq_matrix_trace ℂ B, Matrix.trace, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Matrix.diag_apply, LinearMap.toMatrix_apply]
@@ -241,7 +292,7 @@ theorem trace_sqRep_inv_eq_conj_chAt : ∀ (E : Type) [Field E] [NumberField E] 
   have hex : ∃ h : GL (Fin n) ℂ, (h : Matrix (Fin n) (Fin n) ℂ).charpoly = (g : Matrix (Fin n) (Fin n) ℂ).charpoly :=
     ⟨g, rfl⟩
   unfold chAt
-  rw [dif_pos hex, trace_sqRep_eq_of_charpoly_eq lam _ D (hex.choose_spec.trans cpD.symm),
+  rw [dite_eq_left hex, trace_sqRep_eq_of_charpoly_eq lam _ D (hex.choose_spec.trans cpD.symm),
     trace_sqRep_diag lam D _ hD, map_gtChar]
 
 end GlobalTheory.ContraChar

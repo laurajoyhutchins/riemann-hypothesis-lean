@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.PaddedLastEntry
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.TopPlaceLogTheta
 import Formalism.LocalToGlobal.Columns.BaseLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.ColNorms.StepRows
 
@@ -14,19 +54,19 @@ theorem nuW_eq_nu (N : NumDatum) {X : Fields} {Pr : Primes X} (W : Wts X Pr.Word
   have he : (W.hc u (pl z)).e = (N.hc z).e := congrArg RowPar.e h1
   have hq : N.eQ (i + 1) z = (N.hc z).e ⟨i, hi⟩ := by
     unfold NumDatum.eQ
-    rw [dif_pos ⟨by omega, by omega⟩]
+    rw [dite_eq_left ⟨by omega, by omega⟩]
     rfl
   rw [W.nuW_eq u hi, W.lamN_eq u hi.le, he]
   unfold NumDatum.nu NumDatum.srcPar
   rw [hq]
   by_cases hl : l.1 < N.R.k
-  · rw [dif_pos hl, dif_pos hl]
+  · rw [dite_eq_left hl, dite_eq_left hl]
     unfold hcToWeightQ rhoVec wG Ranks.N
     rw [h2, Nat.add_sub_cancel]
     push_cast
     ring
   · have hb := N.R.blk_lt hi.le l hl
-    rw [dif_neg hl, dif_neg hl, dif_pos hb]
+    rw [dite_eq_right hl, dite_eq_right hl, dite_eq_left hb]
     have hdm := Nat.div_add_mod (l.1 - N.R.k) (N.R.t + 1)
     have hl2 : l.1 = N.R.k + ((N.R.t + 1) * ((l.1 - N.R.k) / (N.R.t + 1)) + (l.1 - N.R.k) % (N.R.t + 1)) := by omega
     have hl3 : ((l.1 : ℕ) : ℚ) = N.R.k + (((N.R.t : ℚ) + 1) * (((l.1 - N.R.k) / (N.R.t + 1) : ℕ) : ℚ) +
@@ -59,7 +99,7 @@ theorem stepWeights {X : Fields} {Word : Type} {R : Ranks} (W : Wts X Word R) (u
     exact_mod_cast h
   · unfold GlobalTheory.IndefiniteRowSideFullHecke.PaddedLastEntry.padZero
     by_cases hl : l.1 < R.N i
-    · rw [dif_pos hl]
+    · rw [dite_eq_left hl]
       have h := W.nuW_eq_true u hi τ ⟨l.1, hl⟩
       have h' := W.lamTrue_old u hi τ l hl
       rw [hz, hy'] at h
@@ -69,7 +109,7 @@ theorem stepWeights {X : Fields} {Word : Type} {R : Ranks} (W : Wts X Word R) (u
         rw [h']
         ring
       exact_mod_cast h2
-    · rw [dif_neg hl]
+    · rw [dite_eq_right hl]
       have h' := W.lamTrue_new u hi τ l hl
       rw [hz, hy] at h'
       have h2 : (((W.lamTrue u (i + 1) τ).w l + y : ℤ) : ℚ) = 0 := by
@@ -77,15 +117,5 @@ theorem stepWeights {X : Fields} {Word : Type} {R : Ranks} (W : Wts X Word R) (u
         rw [h']
         ring
       exact_mod_cast h2
-
-theorem weights_rows : ∀ (D : D7) (N : NumDatum) (X : Fields) (s : Seam D X) (Pr : Primes X) (W : Wts X Pr.Word N.R) (Ch : Chars X Pr N.R.m) (G : ChGlob X N.R.m) (sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)) (Sg : Set ℕ) (mu : Tup X.F X.E X.K Sg) (cst : LocCst X (rowSG Pr sel mu)) (I : ChIdx X Pr N.R (QE sel (mu : Chr X.F X.E X.K))) (dl : ℂ) (χ : TaylorLogMetric.IdE D → ℂ) (cD : D.what₂.Tau → ℂ) (pl : RPl N.R ≃ X.Tau) (u : Pr.Word) (δ : Code N), Hyp N s W Ch G sel mu cst I dl χ cD pl u δ → ∀ i, i < N.R.m → (∀ τ, GlobalTheory.IndefiniteRowSideFullHecke.PaddedLastEntry.StepWeights (W.lamTrue u i τ) (W.nuW u (i + 1) τ) (W.lamTrue u (i + 1) τ)) ∧ ∀ (z : RPl N.R) (l : Fin (N.R.N i)), (((W.nuW u (i + 1) (pl z)).w l : ℤ) : ℚ) = N.nu δ (i + 1) z l := by
-  intro D N X s Pr W Ch G sel Sg mu cst I dl χ cD pl u δ hyp i hi
-  obtain ⟨-, hW, -, -, -, -, -, -, hS⟩ := hyp
-  refine ⟨fun τ => stepWeights W u hi τ fun l => ?_, fun z l => nuW_eq_nu N W pl u δ hW hi z l⟩
-  obtain ⟨z, rfl⟩ := pl.surjective τ
-  have h1 := nuW_eq_nu N W pl u δ hW hi z l
-  have h2 := (hS.2.2.2.2.1 (i + 1) (Finset.mem_Icc.2 ⟨by omega, by omega⟩) z l.1 l.2).1
-  rw [← h1] at h2
-  exact_mod_cast h2
 
 end GlobalTheory.ColNorms.StepRows

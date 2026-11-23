@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithRes
-import GroundTheory.HeightsAndTheta.Heights.FubiniStudy
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.FubiniStudy
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -52,22 +96,22 @@ theorem scale_ne_zero {D : ℕ} {z : Ix (Idx D) → ℂ} (hz : z ≠ 0) : scale 
   simpa [scale, h2] using h1
 
 def metric (D : ℕ) : ConeMetric ℂ (Ix (Idx D)) where
-  ρ z := (fsMetric (Ix (Idx D))).ρ (scale D z)
-  pos z hz := (fsMetric (Ix (Idx D))).pos _ (scale_ne_zero hz)
+  ρ z := (fsMetric (ι := Ix (Idx D))).ρ (scale D z)
+  pos z hz := (fsMetric (ι := Ix (Idx D))).pos _ (scale_ne_zero hz)
   smul c z := by
     have : scale D (c • z) = c • scale D z := by
       funext q
       simp only [scale, Pi.smul_apply, smul_eq_mul]
       ring
-    rw [this, (fsMetric (Ix (Idx D))).smul]
+    rw [this, (fsMetric (ι := Ix (Idx D))).smul]
 
 def gram (D n : ℕ) {r : ℕ} (b : Fin r → MvPolynomial (Ix (Idx D)) ℚ) : Matrix (Fin r) (Fin r) ℝ :=
   fun k l => (1 / 2) *
     ((∫ p : CP D, pairVal (metric D) n (b k) (b l) (map D p.rep) ∂CP.fsMeasure D).re +
       (∫ p : CP D, pairVal (metric D) n (b k) (b l) (conjPt (map D p.rep)) ∂CP.fsMeasure D).re)
 
-open Classical in
 
+open Classical in
 def chi (D n : ℕ) : ℝ :=
   if h : ∃ p : (Σ r : ℕ, Fin r → MvPolynomial (Ix (Idx D)) ℚ), IsSecBasis (x D) n p.2 then
     -(1 / 2) * Real.log (gram D n h.choose.2).det
@@ -101,10 +145,6 @@ def VeroneseTop.Statement : Prop :=
 
 def VeroneseGenDeg.Statement : Prop :=
   ∀ D : ℕ, 1 ≤ D → genDeg (ι := GlobalTheory (Idx D)) (coordIdeal ℤ (Veronese.x D)) D 1 = 2 ^ D
-
-example : (1 : ℕ) ≤ 1 := le_rfl
-
-example (D : ℕ) : CharZero (Veronese.Fld D) := inferInstance
 
 end
 

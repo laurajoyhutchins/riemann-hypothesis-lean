@@ -1,5 +1,63 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RealCusp
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.CoveringMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Homotopy.Lifting
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,22 +75,22 @@ def expU (z : ι → ℝ) : (ι → ℝ)ˣ :=
 omit [Fintype ι] in
 @[simp] theorem expU_val (z : ι → ℝ) (i : ι) : (expU z).val i = Real.exp (z i) := rfl
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem expU_add (z z' : ι → ℝ) : expU (z + z') = expU z * expU z' :=
   Units.ext (funext fun i => Real.exp_add (z i) (z' i))
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem expU_zero : expU (0 : ι → ℝ) = 1 := Units.ext (funext fun _ => Real.exp_zero)
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem unit_ne_zero (u : (ι → ℝ)ˣ) (i : ι) : (u : ι → ℝ) i ≠ 0 :=
   left_ne_zero_of_mul_eq_one (congrFun u.mul_inv i)
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem exists_sign_mul_expU (u : (ι → ℝ)ˣ) :
     ∃ s : (ι → ℝ)ˣ, s * s = 1 ∧ u = s * expU fun i => Real.log ((u : ι → ℝ) i) := by
   refine ⟨u * (expU fun i => Real.log ((u : ι → ℝ) i))⁻¹, Units.ext (funext fun i => ?_), by simp⟩
@@ -44,8 +102,8 @@ theorem exists_sign_mul_expU (u : (ι → ℝ)ˣ) :
   field_simp
   rw [sq_abs]
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem continuous_expU : Continuous (expU : (ι → ℝ) → (ι → ℝ)ˣ) :=
   Units.continuous_iff.2 ⟨continuous_pi fun i => Real.continuous_exp.comp (continuous_apply i),
     continuous_pi fun i => Real.continuous_exp.comp (continuous_apply i).neg⟩
@@ -67,12 +125,12 @@ theorem exists_lin (ψ : (ι → ℝ)ˣ →* ℂˣ) (hψ : Continuous ψ) :
     rw [← this]; ring
   exact ⟨(AddMonoidHom.mk' F hadd).toRealLinearMap F.continuous, fun z => (hF' z).symm⟩
 
-open Classical in
 
+open Classical in
 def extZero (ψ : (ι → ℝ)ˣ →* ℂˣ) (x : ι → ℝ) : ℂ := if h : IsUnit x then (ψ h.unit : ℂˣ) else 0
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem extZero_unit (ψ : (ι → ℝ)ˣ →* ℂˣ) (u : (ι → ℝ)ˣ) : extZero ψ u = (ψ u : ℂˣ) := by
   simp [extZero]
 
@@ -94,7 +152,7 @@ theorem contDiffAt_extZero (ψ : (ι → ℝ)ˣ →* ℂˣ) (hψ : Continuous ψ
   obtain ⟨L, hL⟩ := exists_lin ψ hψ
   refine ContDiffAt.congr_of_eventuallyEq ?_ (extZero_eventually hL u)
   refine contDiffAt_const.mul (ContDiffAt.cexp (L.contDiff.contDiffAt.comp _ (contDiffAt_pi.2 fun i => ?_)))
-  exact ((contDiffAt_apply ℝ ℝ i _).div_const _).log (by rw [div_self (unit_ne_zero u i)]; exact one_ne_zero)
+  exact ((contDiffAt_apply ℝ (fun _ : ι => ℝ) i _).div_const _).log (by rw [div_self (unit_ne_zero u i)]; exact one_ne_zero)
 
 theorem fderiv_extZero {ψ : (ι → ℝ)ˣ →* ℂˣ} {L : (ι → ℝ) →L[ℝ] ℂ} (hψ : Continuous ψ)
     (hL : ∀ z, ((ψ (expU z) : ℂˣ) : ℂ) = Complex.exp (L z)) : fderiv ℝ (extZero ψ) 1 = L := by

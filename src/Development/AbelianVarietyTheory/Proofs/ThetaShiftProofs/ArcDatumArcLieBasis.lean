@@ -1,15 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.FinLocalCutAt
-import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LiePush
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomLieEquivScalarTmul
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsIntegralElemOfIsAlgebraicInt
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CommonEigenvectorsFlatBaseChange
+module
+
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsArcFr
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomLieEquivScalarTmul
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CommonEigenvectorsFlatBaseChange
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsConstantLieBasisArcGroup
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormalFormArcDatumFramedPointRootOfUnityStatement
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsUniqueConstantTangentVectorsAlongArc
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsIntegralElemOfIsAlgebraicInt
 import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LieImgIffIsLieComb
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsConstantLieBasisArcGroup
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormalFormArcDatumFramedPointRootOfUnityStatement
+public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.ArcLineFunctions.ArcSPin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasisBaseChange
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LiePush
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,19 +78,20 @@ theorem comb_iff_symm (z : Fin g → R) (w : epsR R ⟶ G) :
   have e : B = fun i => (Lie.basis a hB i).hom := funext fun i => (Lie.hom_basis hB i).symm
   rw [Module.Basis.equivFun_symm_apply, ← Lie.isLieComb_iff, ← e]
 
-include a in
 
+include a in
 theorem exists_comb (z : Fin g → R) : ∃ w, IsTangent w ∧ IsLieComb z B w :=
   ⟨_, Lie.isTangent _, (comb_iff_symm a hB z _).2 rfl⟩
 
-include a in
 
+include a in
 theorem comb_coord {m : ℕ} {U : Fin m → Fin g → R} {u : Fin m → (epsR R ⟶ G)} (hU : ∀ k, IsLieComb (U k) B (u k))
     {z : Fin g → R} {w : epsR R ⟶ G} (hz : IsLieComb z B w) (cf : Fin m → R) :
     IsLieComb cf u w ↔ z = ∑ k, cf k • U k := by
   obtain rfl : u = fun k => ((Lie.basis a hB).equivFun.symm (U k)).hom :=
     funext fun k => (comb_iff_symm a hB _ _).1 (hU k)
   obtain rfl := (comb_iff_symm a hB _ _).1 hz
+
   rw [Lie.isLieComb_iff, ← (Lie.basis a hB).equivFun.symm.injective.eq_iff, map_sum]
   simp only [map_smul]
   exact ⟨fun h => Lie.ext h, fun h => congrArg Lie.hom h⟩
@@ -57,6 +103,7 @@ theorem eig_coord {x : O} {M : Matrix (Fin g) (Fin g) R} (hM : ∀ i, IsLieComb 
   have h1 : ∀ i, x • Lie.basis a hB i = (Lie.basis a hB).equivFun.symm (M i) := fun i => Lie.ext (by
     rw [Lie.hom_act_smul, Lie.hom_basis]; exact (comb_iff_symm a hB _ _).1 (hM i))
   have h2 : x • (Lie.basis a hB).equivFun.symm z = (Lie.basis a hB).equivFun.symm (z ᵥ* M) := by
+
     rw [Matrix.vecMul_eq_sum, map_sum, Module.Basis.equivFun_symm_apply, Finset.smul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [smul_comm x, h1, map_smul]
@@ -178,21 +225,7 @@ theorem tan_iff (w : epsR S ⟶ t'.G) : IsTanAt x (w.left ≫ m.φ) ↔ IsTangen
 theorem eig_iff (w : epsR S ⟶ t'.G) (a : 𝓞 E) (s : S) :
     (w.left ≫ m.φ) ≫ (Xo.univ.t.act.act a).left = spMap (epsMul s) ≫ w.left ≫ m.φ ↔
       (w ≫ t'.act.act a).left = spMap (epsScaleR s) ≫ w.left := by
-  have hw : w.left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w w
-  have e : (w.left ≫ m.φ) ≫ (Xo.univ.t.act.act a).left = (w ≫ t'.act.act a).left ≫ m.φ := by
-    rw [Over.comp_left, Category.assoc, Category.assoc, m.act]
-  have sc : spMap (epsScaleR s) ≫ spMap (algebraMap S (DualNumber S)) = spMap (algebraMap S (DualNumber S)) := by
-    rw [← spMap_comp]
-    congr 1
-    ext r <;> simp [epsScaleR, TrivSqZeroExt.algebraMap_eq_inl]
-  rw [e]
-  constructor
-  · intro h
-    apply m.cart.1.hom_ext
-    · rw [Category.assoc]; exact h
-    · rw [Over.w, Category.assoc, hw, sc]; rfl
-  · intro h
-    rw [h, Category.assoc]; rfl
+  apply GlobalTheory.ArcQ.ExFr.eig_iff <;> assumption
 
 theorem comb_iff {n : ℕ} (v : Fin n → (epsR S ⟶ t'.G)) (cf : Fin n → S) (w : epsR S ⟶ t'.G) :
     IsCombAt x (fun i => (v i).left ≫ m.φ) cf (w.left ≫ m.φ) ↔ IsLieComb cf v w :=
@@ -202,11 +235,13 @@ end Push
 
 end GlobalTheory.ArcQ.DatumBasis
 
-open GlobalTheory.ArcQ.DatumBasis in
 
+open GlobalTheory.ArcQ.DatumBasis in
 theorem GlobalTheory.ArcQ.arcDatum_arcLieBasis : Out.Laws → Out.Laws2 → ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (K₁ : Type) [Field K₁] [Algebra c.F K₁] (d : ArcDatum Xo c K₁), (∀ τ k, GtTanR (d.e τ k)) → ArcLieBasis d.W d.e := by
   intro hL hL2 E _ _ _ H Dw l Xo c K₁ _ _ d htan
-  obtain ⟨ζ, -, -, -, hN, -⟩ := GlobalTheory.T.exists_normalForm_arcDatum_framedPoint_rootOfUnity hL hL2 E H Dw l Xo c K₁ d
+  have hNormal := @GlobalTheory.T.exists_normalForm_arcDatum_framedPoint_rootOfUnity
+    hL hL2 E _ _ _ H Dw l Xo c K₁ _ _ _ d
+  obtain ⟨ζ, -, -, -, hN, -⟩ := hNormal
   obtain ⟨y, hy, -⟩ := hN htan
   obtain ⟨-, G, m1, m2, -, -, -, -, -, -, h, -⟩ := hy
   choose v p hv hp1 hp2 hp3 using h

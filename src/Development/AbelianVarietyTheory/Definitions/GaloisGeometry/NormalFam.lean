@@ -1,6 +1,44 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ConcretePkgSpec
-import Formalism.LocalToGlobal.Columns.HeckeSp
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+public import Formalism.SatakeDualWeyl.StatementF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,8 +68,8 @@ def SphOp (V : HSp D) (P : Pl D.host.E) (d : List ℤ) (R : Finset (GA D V)) : P
 
 def IsLab (V : HSp D) (P : Pl D.host.E) (d : List ℤ) : Prop := ∃ R, SphOp V P d R
 
-open Classical in
 
+open Classical in
 def rep (V : HSp D) (P : Pl D.host.E) (d : List ℤ) : Finset (GA D V) :=
   if h : IsLab V P d then h.choose else ∅
 
@@ -51,8 +89,8 @@ def hkF (V : HSp D) {W : Type} [AddCommGroup W] [Module ℂ W] (P : Pl D.host.E)
 
 def dualC (c : List ℤ →₀ ℂ) : List ℤ →₀ ℂ := Finsupp.mapDomain dualLab c
 
-open Classical in
 
+open Classical in
 def evC (V : HSp D) (P : Pl D.host.E) (a : List ℤ → ℂ) (c : List ℤ →₀ ℂ) : ℂ :=
   c.sum fun d z => if IsLab V P d then z * a d else 0
 
@@ -100,9 +138,6 @@ def Good (t : T) (P : Pl D.host.E) : Prop := ∀ PP, PP ∈ R.Pg ∨ PP ∈ R.Q 
 
 def IsSF (SF : Finset (HeightOneSpectrum (𝓞 D.host.F))) : Prop :=
   ∀ v, v ∈ SF ↔ ∃ PP ∈ R.Pg, PP.asIdeal.comap (algebraMap (𝓞 D.host.F) (𝓞 D.host.E)) = v.asIdeal
-
-def CorrAll (t : T) (P : Pl D.host.E) : Prop :=
-  (∀ k, k + 1 < D.R.m → SphCorr R.ψ (R.ωY t k) P) ∧ SphCorr R.ψ (R.ωX t) P ∧ ∀ i, SphCorr R.ψ (R.ωP i t) P
 
 def FixAll (t : T) (P : Pl D.host.E) : Prop :=
   (∀ k, k + 1 < D.R.m → VacFix R.ψ (R.ωY t k) P) ∧ VacFix R.ψ (R.ωX t) P ∧ ∀ i, VacFix R.ψ (R.ωP i t) P

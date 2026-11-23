@@ -1,4 +1,59 @@
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Measure.CharacteristicFunction.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Fourier.Inversion
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.CharacteristicFunction.TaylorExpansion
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.CountData
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology GlobalTheory.CompanionTheory.SW.Core
 open scoped ENNReal NNReal MatrixGroups
 
@@ -43,7 +98,6 @@ lemma continuous_ker (b : ℝ) : Continuous (ker b : V → ℝ) := by
 lemma ker_le {b : ℝ} (hb : 0 < b) (w : V) :
     ker b w ≤ (Real.pi / b) ^ ((Module.finrank ℝ V : ℝ) / 2) := by
   unfold ker
-  have hp := Real.pi_pos
   refine mul_le_of_le_one_right (by positivity) ?_
   rw [Real.exp_le_one_iff]
   have : 0 ≤ Real.pi ^ 2 / b * ‖w‖ ^ 2 := by positivity
@@ -58,11 +112,9 @@ lemma integrable_gauss {b : ℝ} (hb : 0 < b) :
   simp [Complex.norm_exp, ← Complex.ofReal_pow]
 
 lemma integrable_ker {b : ℝ} (hb : 0 < b) : Integrable (ker b : V → ℝ) volume := by
-  have hp := Real.pi_pos
   exact (integrable_gauss (V := V) (b := Real.pi ^ 2 / b) (by positivity)).const_mul _
 
 lemma integral_ker {b : ℝ} (hb : 0 < b) : ∫ w : V, ker b w = 1 := by
-  have hp := Real.pi_pos
   unfold ker
   rw [integral_const_mul, GaussianFourier.integral_rexp_neg_mul_sq_norm (by positivity),
     ← Real.mul_rpow (by positivity) (by positivity)]
@@ -73,7 +125,6 @@ lemma integral_ker {b : ℝ} (hb : 0 < b) : ∫ w : V, ker b w = 1 := by
 lemma gauss_inner {b : ℝ} (hb : 0 < b) (u : V) :
     ∫ x : V, Complex.exp (-(b : ℂ) * (‖x‖ : ℂ) ^ 2 +
       (2 * (Real.pi : ℂ) * Complex.I) * ((inner ℝ u x : ℝ) : ℂ)) = (ker b u : ℂ) := by
-  have hp := Real.pi_pos
   rw [GaussianFourier.integral_cexp_neg_mul_sq_norm_add (by simpa using hb)]
   unfold ker
   push_cast

@@ -1,4 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.BiextCoeffSecondLinear
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.BiextCoeffSecondLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -31,19 +75,6 @@ private theorem smul_mulVec_lemma {S : Type} [CommRing S] {m : ℕ} (e : S)
   show e * A i j * v j = e * (A i j * v j)
   ring
 
-theorem actD_mulVec_eig (M : O →+* Matrix (Fin d) (Fin d) k) (χ : O →+* k) {n : ℕ} (b : Fin n → O) (c : Fin n → k)
-    (v : Fin d → k) (hv : ∀ a, (M a).mulVec v = χ a • v) : (actD M b c).mulVec v = evD χ b c • v := by
-  have key : ∀ s : Finset (Fin n),
-      (∑ i ∈ s, c i • M (b i)).mulVec v = ∑ i ∈ s, (c i * χ (b i)) • v := by
-    intro s
-    refine Finset.induction_on s ?_ ?_
-    · simp
-    · intro j s hj ih
-      rw [Finset.sum_insert hj, Finset.sum_insert hj, Matrix.add_mulVec, ih,
-        smul_mulVec_lemma, hv, smul_smul]
-  unfold actD evD
-  rw [key, Finset.sum_smul]
-
 theorem eig_actD (M : O →+* Matrix (Fin d) (Fin d) k) (χ : O →+* k) {n : ℕ} (b : Fin n → O) (c : Fin n → k)
     (h : IsEqv χ b c) (a : O) : M a * actD M b c = χ a • actD M b c := by
   obtain ⟨m, hm1, hm2⟩ := h a
@@ -54,6 +85,7 @@ theorem eig_actD (M : O →+* Matrix (Fin d) (Fin d) k) (χ : O →+* k) {n : �
         rw [map_mul, Matrix.mul_smul]
     _ = ∑ i, c i • ∑ j, ((m i j : ℤ) : k) • M (b j) := by
         refine Finset.sum_congr rfl fun i _ => ?_
+
         rw [hm1 i, map_sum]
         congr 1
         refine Finset.sum_congr rfl fun j _ => ?_
@@ -78,6 +110,7 @@ theorem evD_eqv (χ χ' : O →+* k) {n : ℕ} (b : Fin n → O) (c : Fin n → 
         ring
     _ = ∑ i, c i * ∑ j, ((m i j : ℤ) : k) * χ' (b j) := by
         refine Finset.sum_congr rfl fun i _ => ?_
+
         rw [hm1 i, map_sum]
         congr 1
         refine Finset.sum_congr rfl fun j _ => ?_

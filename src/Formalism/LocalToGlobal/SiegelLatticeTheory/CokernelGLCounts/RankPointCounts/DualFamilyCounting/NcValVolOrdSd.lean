@@ -1,7 +1,64 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.SdNormHolds
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.KitScale
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcValVolOrdA
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcValVolOrdA
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.ChiZeroRight
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.JacobianTransvectionSplitting.DiagonalOneJacobian
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.JacobianTransvectionSplitting.GoodTransvection
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.JacobianTransvectionSplitting.Transport
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.BoxMul
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.BoxMulA
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.ComponentsOfD1EqZero
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.IsCompactDbox
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalJacobianType.KitAbs
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DetAdmA
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +80,11 @@ theorem boxScaleL_holds : BoxScaleL := by
   have hrank : Module.finrank (Fv F v) (Fv F v ⊗[F] E) = 2 := by
     rw [Module.finrank_baseChange]; exact hE
   have hdet : LinearMap.det f = ∏ i, x i ^ 2 := by
-    rw [PI.UnitaryGroupMassFormula.LocJacTyp.BM.det_mulL]
+    have hdet_norm : LinearMap.det f = ∏ i, Algebra.norm (Fv F v) (z i) := by
+      unfold f PI.UnitaryGroupMassFormula.LocJacTyp.BM.mulL
+      rw [LinearMap.det_pi]
+      simp only [Algebra.norm_apply]
+    rw [hdet_norm]
     refine Finset.prod_congr rfl fun i _ => ?_
     change Algebra.norm (Fv F v) (algebraMap (Fv F v) (Fv F v ⊗[F] E) (x i)) = _
     rw [Algebra.norm_algebraMap, hrank]
@@ -104,7 +165,7 @@ theorem sdFromAnn_holds : SdFromAnn := by
   obtain hex := PI.UnitaryGroupMassFormula.LocJacTyp.Sd.exists_sd (E := E) v ψ hker hnt ι
   have hμ : LocVol.sdE ψ v ι = hex.choose := by
     change PI.LocJacTyp.sdE ψ v ι = _
-    rw [PI.UnitaryGroupMassFormula.LocJacTyp.Sd.sdE_eq, dif_pos hex]
+    rw [PI.UnitaryGroupMassFormula.LocJacTyp.Sd.sdE_eq, dite_eq_left hex]
   have hsd := hex.choose_spec
   rw [hμ]
   haveI : hex.choose.IsAddHaarMeasure := hsd.1
@@ -137,6 +198,6 @@ theorem sdFromAnn_holds : SdFromAnn := by
     rw [inv_pow, ← pow_mul] at this
     field_simp at this
     rw [this]; ring
-  exact (pow_left_inj₀ ha (by positivity) two_ne_zero).mp hsq
+  exact (pow_left_inj₀ ha (pow_nonneg hpos.le _) two_ne_zero).mp hsq
 
 end Formalism.L2.SG.Pf.NcVal.SdW

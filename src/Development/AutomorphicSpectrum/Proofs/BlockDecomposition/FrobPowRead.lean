@@ -1,20 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EvalMod
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ValuationLtOneOfEq
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalEmbeddingRangeEqField
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUniformizerGaloisAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NormSubLeOfNear
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformizerPropertiesResidue
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformizerResidueFieldFinitePowerStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LubinTateSequenceNormBoundsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerCompatibleSequenceApproximationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerFixedPointApproximationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformizerDividesFrobeniusDifferenceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerCharacterEqResidueLiftStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerResidueCongruenceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteFieldEmbeddingsDifferFrobeniusStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsGaloisExtensionOfEmbeddingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LubinTateTeichmullerSequenceCompatibilityStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.NormSubLeOfNear
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsGaloisExtensionOfEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteFieldEmbeddingsDifferFrobeniusStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LubinTateSequenceNormBoundsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LubinTateTeichmullerSequenceCompatibilityStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerCharacterEqResidueLiftStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerCompatibleSequenceApproximationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerFixedPointApproximationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TeichmullerResidueCongruenceStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformizerDividesFrobeniusDifferenceStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformizerPropertiesResidue
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UniformizerResidueFieldFinitePowerStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
+
 noncomputable section
 open NumberField IsDedekindDomain Neutral.B1 Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.L2.Host Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations
 open GlobalTheory.HeckeGal GlobalTheory.Pst GlobalTheory.TripleGal GlobalTheory.CompanionTheory.LTHodge GlobalTheory.CompanionTheory.LTPer
@@ -68,7 +113,7 @@ theorem fix_ringHom {l : ℕ} [Fact l.Prime] (K : FinExt l) (π : ↥(OL K)) (f 
       (by rw [map_zero, sh_zero, sub_self, norm_zero]; exact norm_nonneg _)
   · intro a b
     refine huniq _ _ (by rw [add_pow_char_pow, hF1, hF1]) ?_
-    rw [map_add]
+    rw [map_add (f := _)]
     exact near_add hl (hF2 a) (hF2 b)
 
 theorem tch_eq {l : ℕ} [Fact l.Prime] (f : ℕ) (hf : 0 < f) (x : Tl l) (hx : x ^ l ^ f = x) (y : Om l)
@@ -134,8 +179,8 @@ theorem gal_clause {l : ℕ} [Fact l.Prime] {R : Type} [CommRing R] (g : GQ l) (
 
 end GlobalTheory.CompanionTheory.LTPer.Tilt
 
-open GlobalTheory.CompanionTheory.LTPer.Tilt in
 
+open GlobalTheory.CompanionTheory.LTPer.Tilt in
 theorem GlobalTheory.CompanionTheory.LTPer.Tilt.tilt_period : ∀ {l : ℕ} [Fact l.Prime] (K : FinExt l) (χ : ↥(GK K) →* (↥K.1)ˣ) (π : ↥(OL K)) (z : ℕ → Om l),
     LTData K χ π z → ∀ μ : ↥K.1 →ₐ[ℚ_[l]] Om l,
     ∃ (r : ↥(OL K) →+* Tl l) (v : ℕ → Tl l),
@@ -165,7 +210,7 @@ theorem GlobalTheory.CompanionTheory.LTPer.Tilt.tilt_period : ∀ {l : ℕ} [Fac
   have hZ : ∀ n, ‖omC (z (n + 1)) ^ l ^ f - omC (z n)‖ ≤ ‖oc K π‖ := by
     intro n
     have e : omC (z (n + 1)) ^ l ^ f - omC (z n) = -(oc K π * omC (z (n + 1))) := by
-      rw [← hrec' n, map_add, map_mul, map_pow, oc_eq]
+      rw [← hrec' n, map_add (f := _), map_mul, map_pow, oc_eq]
       ring
     rw [e, norm_neg, norm_mul]
     exact mul_le_of_le_one_right (norm_nonneg _) (hzlt _).le

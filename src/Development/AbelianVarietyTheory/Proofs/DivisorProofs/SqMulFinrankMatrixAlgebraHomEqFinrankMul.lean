@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QActMSubAlgebraMap
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QActMSubAlgebraMap
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.Constructions
+public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
+
+@[expose] public section
+
 open scoped TensorProduct
 
 noncomputable section
@@ -23,6 +78,7 @@ theorem unit_mul (i j l p : Fin (n+1)) (x : X) :
 
 theorem recon (x : X) : ∑ i, ρ (single i 0 1) (ρ (single 0 i 1) x) = x := by
   simp only [unit_mul, if_true]
+
   rw [← LinearMap.sum_apply, ← map_sum, sum_single_one, map_one, Module.End.one_apply]
 
 abbrev corner : Submodule k X := LinearMap.range (ρ (single 0 0 1))
@@ -56,9 +112,10 @@ def piEquiv : X ≃ₗ[k] (Fin (n+1) → corner ρ) :=
     (∑ i, ρ (single i 0 1) ∘ₗ (corner ρ).subtype ∘ₗ LinearMap.proj i)
     (by
       refine LinearMap.ext fun v => funext fun j => ?_
+
       simp only [LinearMap.comp_apply, LinearMap.pi_apply, LinearMap.sum_apply, map_sum,
-        Submodule.subtype_apply, LinearMap.proj_apply, cut_unit, Finset.sum_ite_eq, Finset.mem_univ,
-        if_true, cut_corner, LinearMap.id_apply])
+      Submodule.subtype_apply, LinearMap.proj_apply, cut_unit, Finset.sum_ite_eq, Finset.mem_univ,
+      if_true, cut_corner, LinearMap.id_apply])
     (by
       refine LinearMap.ext fun x => ?_
       simp only [LinearMap.comp_apply, LinearMap.pi_apply, LinearMap.sum_apply,
@@ -101,6 +158,7 @@ theorem ext_apply (S : corner ρX →ₗ[k] corner ρY) (x : X) :
 
 theorem ext_unit (S : corner ρX →ₗ[k] corner ρY) (l p : Fin (n+1)) (x : X) :
     ext ρX ρY S (ρX (single l p 1) x) = ρY (single l p 1) (ext ρX ρY S x) := by
+
   rw [ext_apply, ext_apply, map_sum]
   simp only [cut_unit, unit_mul]
   rw [Finset.sum_ite_eq]
@@ -118,6 +176,7 @@ theorem ext_mem (S : corner ρX →ₗ[k] corner ρY) :
     conv_lhs => rw [matrix_eq_sum_single a]
     simp only [smul_single, smul_eq_mul, mul_one]
   rw [ha]
+
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, ext_unit]
 
 theorem restr_bij : Function.Bijective (restr ρX ρY) := by
@@ -128,6 +187,7 @@ theorem restr_bij : Function.Bijective (restr ρX ρY) := by
     have h0 : ∀ i, (T : X →ₗ[k] Y) (ρX (single 0 i 1) x) = 0 := fun i => by
       exact (congrArg Subtype.val (LinearMap.congr_fun hT ⟨_, unit_mem_corner ρX i x⟩) :)
     change (T : X →ₗ[k] Y) x = 0
+
     rw [← recon ρX x, map_sum]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [comm ρX ρY T.2, h0, map_zero]

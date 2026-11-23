@@ -1,5 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ArchimedeanH0Cards.ObstructionBoundFromDuality
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DegreeCountCohomology.SolCnt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DegreeCountCohomology.SolCnt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ArchimedeanH0Cards.PushforwardPreservesSelmerCocycles
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PairedDualFirstOrderDualMatrixSpace
+import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
+
 open Matrix Filter ReciprocityTheory.Gal UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Pa UpperTheory.V.Pa.B2
 
 section aux
@@ -76,7 +133,7 @@ variable (K n) in
 private def fcC : Submodule K⟦X⟧ (Y → Matrix (Fin n) (Fin n) K⟦X⟧) where
   carrier := {f | ∀ i j k, IsLocallyConstant fun g => coeff k (f (φ g) i j)}
   add_mem' ha hb i j k := by
-    simp only [Pi.add_apply, Matrix.add_apply, map_add]
+    simp only [Pi.add_apply, Matrix.add_apply, map_add (f := _)]
     exact (ha i j k).add (hb i j k)
   zero_mem' i j k := by
     simp only [Pi.zero_apply, Matrix.zero_apply, map_zero]
@@ -106,13 +163,14 @@ private theorem fc_memC (m : ℕ) (x : fcC K n φ) :
       · simp [Nat.sub_add_cancel hk]
       · exact (h y i j k (not_le.1 hk)).symm
 
-private theorem fc_complete : IsAdicComplete (Ideal.span {(X : K⟦X⟧)}) (fcC K n φ) where
-  haus' x hx := by
+private theorem fc_complete : IsAdicComplete (Ideal.span {(X : K⟦X⟧)}) (fcC K n φ) := by
+  refine { toIsHausdorff := ⟨?_⟩, toIsPrecomplete := ⟨?_⟩ }
+  · intro x hx
     ext y i j k
     have := hx (k + 1)
     rw [SModEq.sub_mem, Ideal.span_singleton_pow, sub_zero, fc_memC] at this
     simpa using this y i j k (Nat.lt_succ_self k)
-  prec' f hf := by
+  · intro f hf
     refine ⟨⟨fun y i j => mk fun k => coeff k ((f (k + 1)).1 y i j), fun i j k => ?_⟩, fun m => ?_⟩
     · simpa using (f (k + 1)).2 i j k
     · rw [SModEq.sub_mem, Ideal.span_singleton_pow, fc_memC]
@@ -188,7 +246,7 @@ private theorem fc_sol {J : Type} (Φ : (Y → Matrix (Fin n) (Fin n) K⟦X⟧) 
         funext y i j
         exact sub_eq_iff_eq_add'.1 (hc y i j)
       change Φ f' ∈ (Ideal.span {(X : K⟦X⟧) ^ m} • ⊤ : Submodule K⟦X⟧ (J → K⟦X⟧))
-      rw [e2, map_add, map_smul]
+      rw [e2, map_add (f := _), map_smul]
       exact add_mem ((fc_memJ _ _).2 h3) ((fc_mem _ _).2 ⟨_, rfl⟩)
     · ext y i j
       exact (fc_mk m _ _).2 (e y i j)

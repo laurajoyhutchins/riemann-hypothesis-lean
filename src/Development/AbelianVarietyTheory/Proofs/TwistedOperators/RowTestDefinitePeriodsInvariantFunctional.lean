@@ -1,14 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DefPerEqGenPer
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DefPerEqGenPer
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingMulRight
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PeriodsOnLineOfInvLine
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AdaptedFrameOrthonormal
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CastRealAll
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EqZeroOfFockSSelf
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CastRealAll
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GenPerMove
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GenPerMultilinear
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InvContCast
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeftCast
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OmLiftOfMultilinearTprod
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PairwiseFlatMapBand
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OmLiftOfMultilinearTprod
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeftCast
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GenPerMultilinear
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GenPerMove
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AdaptedFrameOrthonormal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InvContCast
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +95,7 @@ theorem invLine_of_iso [DecidableEq D.what₂.Tau] (ch : Choice R) {μ0 : T} (hL
   intro t a hS β hβ M hM τ hτ d hd y
   obtain ⟨Φ0, hΦ0⟩ := GlobalTheory.RowReal.genPer_multilinear ch t a M d y (hc t a hS β hβ M hM τ hτ d hd y)
   let Irow := (LinearMap.compMultilinearMapₗ ℂ (pullBil Aψ.toLinearMap Bf.toLinearMap)) ∘ₗ
-    (MultilinearMap.compLinearMapₗ (fun i : Fin D.R.m => (tr i).symm.toLinearMap))
+    (MultilinearMap.compLinearMapₗ (σ₂₃ := RingHom.id ℂ) (σ₁₃ := RingHom.id ℂ) (fun i : Fin D.R.m => (tr i).symm.toLinearMap))
   let Φ := (Irow.compMultilinearMap Φ0).compLinearMap (fun j : Fin D.R.m => (tc j).symm.toLinearMap)
   have hΦ : ∀ x₁ y₁ v₁ φ₁, Φ x₁ y₁ v₁ φ₁ =
       genPer ch t a M d y (fun j => (tc j).symm (x₁ j), fun i => (tr i).symm (y₁ i)) (Aψ v₁) (Bf φ₁) :=

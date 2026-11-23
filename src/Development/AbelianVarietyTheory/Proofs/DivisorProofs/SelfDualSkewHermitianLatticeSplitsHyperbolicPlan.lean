@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemLowLat
+
+@[expose] public section
+
 open scoped TensorProduct Matrix nonZeroDivisors
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.PlaneSkew
@@ -24,7 +71,7 @@ theorem form_smul_left (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n
 
 theorem form_add_right (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (x y y' : Fin n → E) :
     form σ J x (y + y') = form σ J x y + form σ J x y' := by
-  simp only [form, Pi.add_apply, map_add]
+  simp only [form, Pi.add_apply, map_add (f := _)]
   rw [show (fun i => σ (y i) + σ (y' i)) = (fun i => σ (y i)) + (fun i => σ (y' i)) from rfl,
     Matrix.mulVec_add, dotProduct_add]
 
@@ -36,6 +83,7 @@ theorem form_smul_right (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin 
 
 theorem form_skew [NumberField F] [NumberField E] {σ : E →ₐ[F] E} (h : IsCMExt F E σ) {n : ℕ} {J : Matrix (Fin n) (Fin n) E}
     (hJ : ∀ i j, σ (J j i) = -J i j) (x y : Fin n → E) : σ (form σ J x y) = -form σ J y x := by
+
   simp only [form, dotProduct, Matrix.mulVec, map_sum, map_mul, sig_sig h, Finset.mul_sum]
   rw [Finset.sum_comm, ← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -183,23 +231,14 @@ theorem split_global : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Num
   have hnd : ∃ z ∈ L, φ z ≠ 0 := by
     by_contra hcon
     push_neg at hcon
-    have hall : ∀ z, form σ J z x = 0 := by
-      intro z
-      have hz : z ∈ Submodule.span E (L : Set (Fin (n₁ + 2) → E)) := by
-        rw [hL.span_eq_top]; trivial
-      induction hz using Submodule.span_induction with
-      | mem w hw => exact hcon w hw
-      | zero => simp [form]
-      | add a b _ _ ha hb => rw [form_add_left, ha, hb, add_zero]
-      | smul c a _ ha => rw [form_smul_left, ha, mul_zero]
     obtain ⟨s, hs⟩ := fg_no_line E _ L hL.fg x hx
     apply hs
     rw [hSD]
-    intro w _ o
+    intro w hw o
     have h0 : form σ J (s • x) w = 0 := by
       rw [form_smul_left]
       have h1 := hsk w x
-      rw [hall w, map_zero] at h1
+      rw [← hφ, hcon w hw, map_zero] at h1
       rw [neg_eq_zero.mp h1.symm, mul_zero]
     rw [h0, mul_zero, map_zero]
     exact isIntegral_zero

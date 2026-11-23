@@ -1,9 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsTerRest
-import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ArithVarZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CurvePt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ImportsTerRest
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ArithVarZero
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CurvePt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -152,7 +204,7 @@ theorem exists_rep {W : Ideal (MRing ι)} (hW : W.IsPrime) {x : FractionRing (MR
     refine ⟨u * v' + u' * v, v * v', a + a',
       isMultiHomog_add' (AvoidRing.isMultiHomog_mul hu hv') (by rw [add_comm]; exact AvoidRing.isMultiHomog_mul hu' hv),
       AvoidRing.isMultiHomog_mul hv hv', fun h => (hW.mem_or_mem h).elim hvW hvW', ?_⟩
-    rw [map_mul, map_add, map_mul, map_mul, ← e, ← e']
+    rw [map_mul, map_add (f := _), map_mul, map_mul, ← e, ← e']
     ring
   | neg x _ hx =>
     obtain ⟨u, v, a, hu, hv, hvW, e⟩ := hx
@@ -230,8 +282,8 @@ end Loc
 
 end regularityLocalResidue_holds
 
-open regularityLocalResidue_holds in
 
+open regularityLocalResidue_holds in
 theorem regularityLocalResidue_holds.proof : regularityLocalResidue_holds.Statement := by
   intro K _ ι _ P s a W b hP hs hsP hW _
   classical
@@ -260,7 +312,7 @@ theorem regularityLocalResidue_holds.proof : regularityLocalResidue_holds.Statem
   have hT : ∀ k, (X ⟨k, T k⟩ : MRing ι) ∉ W := fun k => (hWrel k).choose_spec
   set J := W ⊔ Ideal.span (Set.range fun k => (X ⟨k, T k⟩ : MRing ι) - 1) with hJ
   have hgeo : geoNum 0 W b = ((Module.length ℤ (MRing ι ⧸ J)).toNat : ℤ) := by
-    rw [geoNum, dif_pos hWrel]
+    rw [geoNum, dite_eq_left hWrel]
   obtain ⟨hCf, hCfin, hCcard⟩ := chart_field_card hWmh hT hdim (charOf W) hp
   letI : Field (MRing ι ⧸ J) := hCf.toField
   let g := chartMap hPW T hT

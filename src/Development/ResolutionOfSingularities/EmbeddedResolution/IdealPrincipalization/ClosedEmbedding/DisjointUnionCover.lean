@@ -1,23 +1,59 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceRelations
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.MaxContactReduction
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.StrictTransform
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.DisjointUnionOfOpens
+import Development.ResolutionOfSingularities.Foundations.Schemes.SchemeCoproduct
 import Development.ResolutionOfSingularities.Foundations.Schemes.SchemeMorphismProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.TunedSheaf
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.MaxContactReduction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.DescentHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
@@ -45,15 +81,6 @@ theorem isOpenImmersion_summandι (D : FiniteOpenCoverWithIdeals T) (i : D.idx) 
 instance instIsOpenImmersionSummandι (D : FiniteOpenCoverWithIdeals T) (i : D.idx) :
     IsOpenImmersion (D.summandι i) :=
   isOpenImmersion_summandι D i
-
-theorem isClosedImmersion_summandι (D : FiniteOpenCoverWithIdeals T) (i : D.idx) :
-    IsClosedImmersion (D.summandι i) := by
-  show IsClosedImmersion (Sigma.ι (fun j : D.idx => (D.opens j).toScheme) i)
-  infer_instance
-
-instance instIsClosedImmersionSummandι (D : FiniteOpenCoverWithIdeals T) (i : D.idx) :
-    IsClosedImmersion (D.summandι i) :=
-  isClosedImmersion_summandι D i
 
 theorem quasiCompact_summandι (D : FiniteOpenCoverWithIdeals T) (i : D.idx) :
     QuasiCompact (D.summandι i) := by
@@ -204,10 +231,6 @@ theorem restrictIdeal_iInfImageIdeal_summandOpen (D : FiniteOpenCoverWithIdeals 
       (D.localIdeal i).comap (D.summandIso i).inv := by
   rw [restrictIdeal_summandOpen D i D.iInfImageIdeal, comap_iInfImageIdeal_summandι D i]
 
-theorem iInfImageIdeal_eq_iInf (D : FiniteOpenCoverWithIdeals T) :
-    D.iInfImageIdeal = ⨅ i : D.idx, imageIdealSheaf (D.summandι i) (D.localIdeal i) :=
-  rfl
-
 theorem restrictIdeal_comap_disjointUnionMap_summandOpen (D : FiniteOpenCoverWithIdeals T) (i : D.idx)
     (J : T.scheme.IdealSheafData) :
     restrictIdeal (J.comap D.disjointUnionMap) (D.summandOpen i) =
@@ -215,14 +238,14 @@ theorem restrictIdeal_comap_disjointUnionMap_summandOpen (D : FiniteOpenCoverWit
   rw [restrictIdeal_eq_comap_ι, restrictIdeal_eq_comap_ι, ← Scheme.IdealSheafData.comap_comp,
     ← Scheme.IdealSheafData.comap_comp, summandOpen_ι_comp_disjointUnionMap]
 
-private theorem summandIso_inv_comp_map_comp_affineSpaceFinToSpec (D : FiniteOpenCoverWithIdeals T) (i : D.idx) {n : ℕ}
+theorem summandIso_inv_comp_map_comp_affineSpaceFinToSpec (D : FiniteOpenCoverWithIdeals T) (i : D.idx) {n : ℕ}
     (c : EtaleChart T.structMap (D.opens i) n) :
     ((D.summandIso i).inv ≫ c.map) ≫ affineSpaceFinToSpec T.base n =
       (D.summandOpen i).ι ≫ (D.disjointUnionMap ≫ T.structMap) := by
   rw [Category.assoc, c.comp_struct, ← Category.assoc, ← summandOpen_ι_comp_disjointUnionMap,
     Category.assoc]
 
-private theorem etale_summandIso_inv_comp_map (D : FiniteOpenCoverWithIdeals T) (i : D.idx) {n : ℕ}
+theorem etale_summandIso_inv_comp_map (D : FiniteOpenCoverWithIdeals T) (i : D.idx) {n : ℕ}
     (c : EtaleChart T.structMap (D.opens i) n) :
     Etale ((D.summandIso i).inv ≫ c.map) := by
   have h1 : Etale c.map := c.isEtale

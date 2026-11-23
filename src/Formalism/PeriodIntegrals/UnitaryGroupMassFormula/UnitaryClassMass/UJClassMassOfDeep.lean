@@ -1,4 +1,53 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.CardStepOf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryClassMass.CardStepOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField PI.UJClassFin PI.UJClassMass
 
@@ -29,7 +78,7 @@ theorem crd_upper {M : ℕ} (b : Module.Basis (Fin M) E V) (L0 : Submodule (𝓞
       intro i
       exact hint _ (Finset.mem_image.mpr ⟨(v, i), Finset.mem_product.mpr ⟨hv, Finset.mem_univ _⟩, rfl⟩)
     | zero => intro i; simp [isIntegral_zero]
-    | add v w _ _ hv hw => intro i; rw [map_add, Pi.add_apply, smul_add]; exact (hv i).add (hw i)
+    | add v w _ _ hv hw => intro i; rw [map_add (f := _), Pi.add_apply, smul_add]; exact (hv i).add (hw i)
     | smul a v _ hv =>
       intro i
       rw [← algebraMap_smul E a v, map_smul, Pi.smul_apply, smul_eq_mul, ← mul_smul_comm]
@@ -68,8 +117,9 @@ end
 
 theorem crdBounds : CrdBounds := by
   intro F E _ _ _ _ _ V _ _ _ _ _ M b L0 hL
-  obtain ⟨y1, hy1, h1⟩ := crd_upper b L0 hL.fg
-  obtain ⟨y2, hy2, h2⟩ := crd_lower b L0 hL.span_eq_top
+  let hFull : Submodule.IsFullLattice E L0 := hL
+  obtain ⟨y1, hy1, h1⟩ := crd_upper b L0 hFull.toIsLattice.fg
+  obtain ⟨y2, hy2, h2⟩ := crd_lower b L0 (Submodule.IsFullLattice.span_eq_top (A := E) (M := L0))
   refine ⟨⟨(y1 : 𝓞 F), intCast_ne_zero_OF y1 hy1, fun x hx i => ?_⟩,
     ⟨(y2 : 𝓞 F), intCast_ne_zero_OF y2 hy2, fun i e he => ?_⟩⟩
   · rw [intF_smul]

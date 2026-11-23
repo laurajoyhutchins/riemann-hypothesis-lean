@@ -1,14 +1,73 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OnePlaceKF
-import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CellDataSupport
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HaarEqSmul
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DiscreteSeriesUnitarySmoothBasic
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CellDataSupport
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NormalizedLocalScale
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HaarLieNilpotentEqLebesgue
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SumNormSqEqTrace
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentRadicalInterConjugateClosedUnimodular
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselCharacterUnipotentRadicalProperties
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.DiscreteSeriesUnitarySmoothBasic
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.GrowthUnitaryGroupRpowNegIntegrable
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.HaarEqSmul
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsHaarOnIffGroupsUnitaryUnipotent
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.GrowthUnitaryGroupRpowNegIntegrable
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselCharacterUnipotentRadicalProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentRadicalInterConjugateClosedUnimodular
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SumNormSqEqTrace
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SigmaContOn
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UhMeasurableSet
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LowerSmoothStability.ExistsFinStableOfMemSSup
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.ZhatNormLinearBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.MeasurableSpace
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open BranchingSupport GlobalTheory.CellAmp Formalism.BasicNotions Formalism.MainNotions.S Formalism.QuantumDeterminants Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
@@ -154,20 +213,24 @@ theorem mp_inv_haarLie (S : Set (MatKR k r)) (κ : ℝ≥0∞) :
   have hm : Measurable (Formalism.FourierDecayAlt.B2.invM (k := k) (r := r)) := Formalism.FourierDecayAlt.P.B7.measurable_invM
   refine ⟨hm, ?_⟩
   unfold haarLie
-  rw [Measure.map_smul]
+  rw [Measure.map_smul _ hm.aemeasurable]
   congr 1
   set e : lieE S → Mt k r := fun x i j => NormedSpace.exp (unrealify (x : EuclideanSpace ℝ _)) i j with he
-  by_cases h : AEMeasurable e volume
-  · rw [AEMeasurable.map_map_of_aemeasurable hm.aemeasurable h]
-    have : Formalism.FourierDecayAlt.B2.invM ∘ e = e ∘ Neg.neg := by
-      funext x
-      show (NormedSpace.exp (unrealify (x : EuclideanSpace ℝ _)))⁻¹ =
-        NormedSpace.exp (unrealify (-x.1))
-      rw [← Matrix.exp_neg]
-      exact congrArg NormedSpace.exp (by ext i j; simp [unrealify, Complex.ext_iff])
-    rw [this, ← AEMeasurable.map_map_of_aemeasurable (by rwa [Measure.map_neg_eq_self]) measurable_neg.aemeasurable,
-      Measure.map_neg_eq_self]
-  · simp [Measure.map_of_not_aemeasurable h]
+  have hu : Continuous fun x : lieE S => unrealify (m := 2 * r + k + 1) x.1 := by
+    refine continuous_pi fun i => continuous_pi fun j => ?_
+    simp only [unrealify, Complex.mk_eq_add_mul_I]
+    fun_prop
+  have h : AEMeasurable e volume :=
+    (GlobalTheory.Amp.NLie.cont_exp.comp hu).measurable.aemeasurable
+  rw [AEMeasurable.map_map_of_aemeasurable hm.aemeasurable h]
+  have : Formalism.FourierDecayAlt.B2.invM ∘ e = e ∘ Neg.neg := by
+    funext x
+    show (NormedSpace.exp (unrealify (x : EuclideanSpace ℝ _)))⁻¹ =
+      NormedSpace.exp (unrealify (-x.1))
+    rw [← Matrix.exp_neg]
+    exact congrArg NormedSpace.exp (by ext i j; simp [unrealify, Complex.ext_iff])
+  rw [this, ← AEMeasurable.map_map_of_aemeasurable (by rwa [Measure.map_neg_eq_self]) measurable_neg.aemeasurable,
+    Measure.map_neg_eq_self]
 
 def side {H W : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [NormedAddCommGroup W] [InnerProductSpace ℂ W]
     (z : Fin (2 * r + k + 1) → ℂ) (c : ℂ) (π : MatKR k r → (W →L[ℂ] W)) (σ : MatKR k r → (H →L[ℂ] H)) (u v : H)

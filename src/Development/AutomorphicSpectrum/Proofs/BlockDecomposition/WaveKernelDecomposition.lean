@@ -1,19 +1,65 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.WaveSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMultOfFintype
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveKernelExistence
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.WaveSt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ActEqSumOfKernel
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CenterOperatorCommutesIntegralStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CenterOperatorPreservesWaveStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EventuallyEqOfAgreeGLs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ActEqSumOfKernel
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InnerIntegralLeft
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SectionOrthCptZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveCptBoundedTime
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GelfandOperatorPairingAdjointStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WavePairingTimeSymmetryStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CenterOperatorPreservesWaveStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CenterOperatorCommutesIntegralStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelActionEquivariantStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelAdjointRegularStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveTimeAverageIsWaveStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GelfandOperatorPairingAdjointStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InnerIntegralLeft
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelActionEquivariantStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.KernelAdjointRegularStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SectionOrthCptZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveCptBoundedTime
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveKernelExistence
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WavePairingTimeSymmetryStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WaveTimeAverageIsWaveStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 noncomputable section
 
@@ -213,6 +259,7 @@ theorem chain (hL : LgFacts) (hU : Unimod) (hR : RCalc) (hS : WaveSpeed) (hE : W
       = conj (∫ y : G n, ⟪zOp w (fun x => ∫ t, (g t : ℂ) • v t x) y.val, f y.val⟫_ℂ ∂μ) := by
     rw [← integral_conj]
     simp only [inner_conj_symm]
+
   rw [e1, e2, e3, hw _ f hHs hf.1 cH cf, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_mul, ← term_eq μ hL hR hS hb (hK i) hu hv hu0 hv0 cf ch, ← integral_conj]
@@ -249,7 +296,7 @@ theorem kernel_adjoint : LgFacts → Unimod → RCalc → WaveSpeed → WaveEx �
     refine hQ n μ E (fun y => ContinuousLinearMap.adjoint (k y⁻¹) - ∑ i, c i • K i y) (GLs n)
       (GlobalTheory.CompanionTheory.WaveKer.isOpen_GLs n) subset_rfl
       (fun y hy k₂ => GlobalTheory.CompanionTheory.WaveKer.mul_mem_GLs hy (GlobalTheory.CompanionTheory.WaveKer.unitary_mem_GLs k₂)) ?_ ?_ ?_
-    · exact regp.1.sub (continuousOn_finset_sum _ fun i _ => (regK i).1.const_smul (c i))
+    · exact regp.1.sub (continuousOn_finsetSum _ fun i _ => (regK i).1.const_smul (c i))
     · intro y hy k₂
       simp only [rp y hy k₂, rK _ y hy k₂, sub_mul, Finset.sum_mul, smul_mul_assoc]
     · intro f hf cf _
@@ -258,9 +305,10 @@ theorem kernel_adjoint : LgFacts → Unimod → RCalc → WaveSpeed → WaveEx �
       have aK := fun i => GlobalTheory.T.kernel_action_equivariant hL n μ E (K i) f (regK i) hfc (lK i)
       have hA0 := section_orth_cpt_zero hQ n μ E
         (fun x => act μ E (fun y => ContinuousLinearMap.adjoint (k y⁻¹)) f x - ∑ i, c i • act μ E (K i) f x)
-        (ap.1.sub (continuousOn_finset_sum _ fun i _ => (aK i).1.const_smul (c i)))
+        (ap.1.sub (continuousOn_finsetSum _ fun i _ => (aK i).1.const_smul (c i)))
         (by
           intro y hy k₂
+
           simp only [ap.2 y hy k₂, (aK _).2 y hy k₂, map_sub, map_sum, map_smul])
         (by
           intro h hh ch
@@ -272,8 +320,8 @@ theorem kernel_adjoint : LgFacts → Unimod → RCalc → WaveSpeed → WaveEx �
             intro y
             simp only [inner_sub_left, sum_inner, inner_smul_left]
           simp only [hpt]
-          rw [integral_sub int1 (integrable_finset_sum _ fun i _ => int2 i),
-            integral_finset_sum _ fun i _ => int2 i]
+          rw [integral_sub int1 (integrable_finsetSum _ fun i _ => int2 i),
+            integral_finsetSum _ fun i _ => int2 i]
           simp only [integral_const_mul]
           rw [chain μ hL hU hR hS hE hb hk hw hK hf cf hh ch, sub_self])
       have h1 := hA0 1 (GlobalTheory.CompanionTheory.WaveKer.one_mem_GLs n)

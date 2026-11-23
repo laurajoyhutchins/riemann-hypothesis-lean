@@ -1,22 +1,63 @@
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SiegelOneDescent.SgOneOfParts
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistOfSectionLaw
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JMapVal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Jtop
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Jcpt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemStabLine
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MapMemKGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MapScalarVal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TriangularLowerRightDiag
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JCh
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsHtHalfSub
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsParComap
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapHalfTr
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Brat
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdeleMapMemIntAdIff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExtensionEmbeddingAlgebraMapOfTotallyReal
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SchwartzBruhatMajorants.BlgOfDict
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFinIdele
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BaseCM
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.Descend
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.DictInf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AdeleMapMemIntAdIff
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AlgebraMapHalfTr
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BaseCM
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Brat
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFinIdele
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExtensionEmbeddingAlgebraMapOfTotallyReal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsHtHalfSub
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsParComap
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JCh
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JMapVal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Jcpt
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.Jtop
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MapMemKGL
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MapScalarVal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MemStabLine
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TriangularLowerRightDiag
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwistOfSectionLaw
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SchwartzBruhatMajorants.BlgOfDict
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SiegelOneDescent.SgOneOfParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace PositivityTheory.RgEis.So
 

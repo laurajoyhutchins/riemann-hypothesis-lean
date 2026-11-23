@@ -1,12 +1,54 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.DifferentialFormsCech.AffineHodgeIsomorphisms.IsFormT
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.CosieveBot
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.RelativeLiftCosieves.TopRes
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.RelativeLiftCosieves.ZarAbs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GrCechFin
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitLogRepresentativeCompat
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitOfBasicOpenTop
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.DifferentialFormsCech.AffineHodgeIsomorphisms.IsFormT
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CupListRepresentativeOfForms
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitOfBasicOpenTop
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationProperty
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnitLogRepresentativeCompat
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.TotPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CoeEqAlgebraMapZeroEquiv
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 set_option linter.unusedVariables false
@@ -151,6 +193,33 @@ theorem cup_h0_normal_coboundary (hF : IsFil Φ Fil) {m : ℕ} {g : CH.Cn (CH.mo
       (CH.mulP Φ.A).cupC (add_zero n) H (h0 y), cup_mem hF (add_zero n) (r := n + 1) (r' := 0) hH (h0_mem_filtration_zero hF y), ?_⟩
     rw [CrystallineSemistableComparison.P.leibniz, sub_neg_eq_add]
 
+theorem cupList_diff_local (hF : IsFil Φ Fil) : ∀ {m : ℕ} (ℓ : Fin m → CH.Cn (CH.modF Φ.A) 1)
+    (α : Fin m → CH.Cn (CH.modF Φ.A) 0), (∀ k, ℓ k ∈ FC (Fil ((1 : ℕ) : ℤ)) 1) → (∀ k, CH.d _ 1 (ℓ k) = 0) →
+    (∀ k, α k ∈ FC (Fil ((1 : ℕ) : ℤ)) 0) →
+    IsBd Fil m (cupListC Φ.A (fun k => ℓ k + CH.d _ 0 (α k)) - cupListC Φ.A ℓ)
+  | 0, _, _, _, _, _ => sub_self _
+  | m + 1, ℓ, α, hℓ, hd, hα => by
+    have ih := cupList_diff_local hF (fun i : Fin m => ℓ i.castSucc) (fun i => α i.castSucc) (fun i => hℓ _)
+      (fun i => hd _) (fun i => hα _)
+    have hl' : ℓ (Fin.last m) + CH.d _ 0 (α (Fin.last m)) ∈ FC (Fil ((1 : ℕ) : ℤ)) 1 :=
+      add_mem (hℓ _) (d_mem (hα _))
+    have hdl' : CH.d (CH.modF Φ.A) 1
+        (ℓ (Fin.last m) + CH.d (CH.modF Φ.A) 0 (α (Fin.last m))) = 0 := by
+      rw [map_add (f := _), hd, CH.d_d, add_zero]
+    have h₁ := bd_cup (m := m) (Fil := Fil) hF ih hl' hdl'
+    rcases h₁ with ⟨H₁, hH₁, e₁⟩
+    let ℓ' : Fin m → CH.Cn (CH.modF Φ.A) 1 := fun i => ℓ i.castSucc
+    have h₂ := cup_d (Φ := Φ) (Fil := Fil) (m := m) (B := cupListC Φ.A ℓ')
+      (a := α (Fin.last m)) hF (cupList_mem hF ℓ' fun i => hℓ i.castSucc)
+      (d_cupList Φ.A ℓ' fun i => hd i.castSucc) (hα (Fin.last m))
+    rcases h₂ with ⟨H₂, hH₂, e₂⟩
+    refine ⟨H₁ + H₂, add_mem hH₁ hH₂, ?_⟩
+    rw [map_add (f := _), ← e₁, ← e₂]
+    change (CH.mulP Φ.A).cupC rfl _ (ℓ (Fin.last m) + CH.d _ 0 (α (Fin.last m))) - (CH.mulP Φ.A).cupC rfl _ (ℓ (Fin.last m)) = _
+    simp only [map_sub, map_add (f := _), LinearMap.sub_apply]
+    abel
+
+
 theorem fm_change (hF : IsFil Φ Fil) {a : ℕ} {u₀ u₀' : ∀ T : C, Φ.A.obj T} {u u' : Fin a → ∀ T : C, Φ.A.obj T}
     (h₀' : Nr Fil u₀') (hu : ∀ k, Nr Fil (u k))
     (hz₀ : ∀ T, u₀' T - u₀ T ∈ (Fil ((1 : ℕ) : ℤ)).S T) (hz : ∀ k T, u' k T - u k T ∈ (Fil ((1 : ℕ) : ℤ)).S T)
@@ -161,7 +230,7 @@ theorem fm_change (hF : IsFil Φ Fil) {a : ℕ} {u₀ u₀' : ∀ T : C, Φ.A.ob
   set P' := cupListC Φ.A fun k => CH.d (CH.modF Φ.A) 0 (h0 (u' k)) with hP'
   have hα : ∀ k, h0 (u' k) - h0 (u k) ∈ FC (Fil ((1 : ℕ) : ℤ)) 0 := fun k => mem_FC.2 fun t => hz k _
   have hbd : IsBd Fil a (P' - P) := by
-    have := cupList_diff hF (fun k => CH.d (CH.modF Φ.A) 0 (h0 (u k))) (fun k => h0 (u' k) - h0 (u k))
+    have := cupList_diff_local hF (fun k => CH.d (CH.modF Φ.A) 0 (h0 (u k))) (fun k => h0 (u' k) - h0 (u k))
       (fun k => d_h0_mem_filtration_one (hu k)) (fun k => CH.d_d _ 0 _) hα
     have e : (fun k => CH.d (CH.modF Φ.A) 0 (h0 (u k)) + CH.d (CH.modF Φ.A) 0 (h0 (u' k) - h0 (u k))) =
         fun k => CH.d (CH.modF Φ.A) 0 (h0 (u' k)) := by
@@ -254,8 +323,8 @@ theorem lifts_sub (Λ Λ' : LiftsT q) (x : Γ(X, ⊤)) (T : Thick (smFun X q)) :
   rw [fil_one]
   exact Ideal.Quotient.eq.1 ((Λ'.hv T x).trans (Λ.hv T x).symm)
 
-variable (q) in
 
+variable (q) in
 def liftsTopBot : LiftsT q where
   v T g := Function.surjInv Ideal.Quotient.mk_surjective
     (ev (γ := dividedPowersBot K) (p := 0) (q := q) (κ := Ideal.Quotient.mk ⊥) T (inTop q T) g)
@@ -269,8 +338,8 @@ theorem form_eq (Λ : LiftsT q) {a : ℕ} (g₀ : Γ(X, ⊤)) (g : Fin a → Γ(
 
 end Conc
 
-open CrystallineSemistableComparison.HT CrystallineSemistableComparison.Om.L2 in
 
+open CrystallineSemistableComparison.HT CrystallineSemistableComparison.Om.L2 in
 theorem main : ∀ {K : Type} [CommRing K] {X : Scheme.{0}} (q : X ⟶ Spec (CommRingCat.of K)) {a : ℕ} (g₀ : Γ(X, ⊤)) (g : Fin a → Γ(X, ⊤)),
     ∃ c : CrystallineSemistableComparison.HT.Hdg q a a, CrystallineSemistableComparison.Om.L2.IsFormT q g₀ g c := by
   intro K _ X q a g₀ g

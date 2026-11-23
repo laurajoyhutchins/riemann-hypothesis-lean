@@ -1,19 +1,59 @@
-import Formalism.HermitianCurvature.StatementU
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactlySupportedBanachModel
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixTranspose
+module
+
+public import Formalism.HermitianCurvature.StatementU
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdditiveCharacterPsi
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Block3MulBlocks
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BudgetTopConvergence
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChangeOfVariablesXy
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSizesOfHypotheses
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CorollaryU1Plain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CorollaryU1Truncated
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhiBoundPartsOfRadicalParametrisation
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SeminormCompletion
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DirectionsInParabolic
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Block3MulBlocks
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSizesOfHypotheses
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BudgetTopConvergence
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SeminormCompletion
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CorollaryU1Truncated
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhiBoundPartsOfRadicalParametrisation
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeakToStrongSmoothnessReal
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopCellsOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CorollaryU1Plain
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdditiveCharacterPsi
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChangeOfVariablesXy
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixTranspose
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TopCellsOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeakToStrongSmoothnessReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P
 
@@ -36,21 +76,11 @@ theorem corollary_u2_germ_hypothesis : Formalism.FourierDecayAlt.U.GermExpansion
   corollary_u2_of_parts theorem_u corollary_u1_truncated_alt star_projection budget_second_corollary
     thresholds_second_corollary phi_support_level_function
 
-theorem derivative_bound_in_banach_space : Formalism.FourierDecayAlt.U.UseDerivBound :=
-  derivative_bound_use_of_parts corollary_u2_germ_hypothesis compactly_supported_banach_model compactly_supported_monotone seminorm_of_form
-    seminorm_completion derivative_bound_of_decay derivative_bound_composition
-
 theorem germ_expansion_applies : Formalism.FourierDecayAlt.U.UseGerm :=
   germ_expansion_of_parts germ_rate det_weyl_matrix corollary_u2_germ_hypothesis derivative_bound_of_decay
     power_matching scale_matching
 
 theorem germ_expansion_top_level : Formalism.FourierDecayAlt.U.UseGermTop :=
   germ_top_level_of_parts germ_rate det_weyl_matrix top_cells derivative_bound_of_decay
-
-theorem germ_expansion_top_count : Formalism.FourierDecayAlt.U.UseGermTopCount :=
-  germ_top_count_of_parts germ_expansion_top_level budget_top_convergence
-
-theorem germ_expansion_in_form_space : Formalism.FourierDecayAlt.U.GermInForm :=
-  germ_in_form_of_parts germ_rate det_weyl_matrix derivative_bound_in_banach_space scale_matching
 
 end Formalism.FourierDecayAlt.P

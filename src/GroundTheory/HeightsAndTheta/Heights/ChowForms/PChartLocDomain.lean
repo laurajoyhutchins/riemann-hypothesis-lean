@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.ImportsBis
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.ImportsBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -17,6 +66,7 @@ theorem aeval_mul_of_isHomogeneous {A : Type*} [CommRing A] [Algebra F A]
     aeval (fun m => c * x m) g = c ^ d * aeval x g := by
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s hs => ?_
   have hd := hg (mem_support_iff.mp hs)
@@ -39,13 +89,14 @@ theorem linForm_not_mem_sup {I : Ideal (MvPolynomial (Fin n) F)} (hI : IsProjPri
   let φ : MvPolynomial (Fin n) F →ₐ[F] A :=
     (IsScalarTower.toAlgHom F (MvPolynomial (Fin n) F ⧸ I) A).comp (Ideal.Quotient.mkₐ F I)
   have hφ : ∀ g, aeval (fun m => φ (X m)) g = φ g := fun g => by
-    rw [← comp_aeval_apply]; simp
+    exact (DFunLike.congr_fun (MvPolynomial.aeval_unique φ) g).symm
   let ψ : MvPolynomial (Fin n) F →ₐ[F] A := aeval fun m => v * φ (X m)
   have hhom : ∀ {g : MvPolynomial (Fin n) F} {d : ℕ}, g.IsHomogeneous d → ψ g = v ^ d * φ g :=
     fun hg => by rw [← hφ]; exact aeval_mul_of_isHomogeneous hg _ _
   have hle : I ⊔ Ideal.span {linForm t - 1} ≤ RingHom.ker ψ := by
     refine sup_le (fun g hg => ?_) ?_
-    · rw [RingHom.mem_ker, ← sum_homogeneousComponent g, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [RingHom.mem_ker, ← sum_homogeneousComponent g, map_sum]
       refine Finset.sum_eq_zero fun d _ => ?_
       rw [hhom (homogeneousComponent_isHomogeneous d g)]
       have : φ (homogeneousComponent d g) = 0 := by

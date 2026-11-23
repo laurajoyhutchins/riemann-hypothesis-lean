@@ -1,10 +1,58 @@
-import Mathlib
-import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+module
+
+public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MaMeasureEqOfConst
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.TailBoundStatementHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Log.Monotone
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.AnalyticForms.LeviForms.TailCut
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
+import ReciprocityTheory.AnalyticForms.PotentialTheory.ContDiffAtOfIsPotential
 import ReciprocityTheory.AnalyticForms.PotentialTheory.MaMeasure
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MaMeasureEqOfConst
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.TailBoundStatementHolds
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Stokes
+
+@[expose] public section
+
 open MeasureTheory Metric Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.AnForm.M.FinHolAtlas
 open scoped ContDiff
 
@@ -27,7 +75,7 @@ theorem maMeasure_univ_eq {e : ℕ} {X : Type} [TopologicalSpace X] [CompactSpac
     (hPsh : ∀ i, IsPsh A (th i + LocPot.ofFun (u i) + Θ)) :
     maMeasure A (fun i => th i + LocPot.ofFun (u i) + Θ) Set.univ =
       ENNReal.ofReal (mInt A (fun i => th i + Θ) (fun _ => 1)) := by
-  obtain ⟨hfin, hg⟩ := maMeasure_thm A _ hP hPsh
+  obtain ⟨hfin, hg⟩ := maMeasure_thm A (fun i => th i + LocPot.ofFun (u i) + Θ) hP hPsh
   have hI : Integrable (fun _ : X => (1 : ℝ)) (maMeasure A (fun i => th i + LocPot.ofFun (u i) + Θ)) :=
     integrable_const 1
   have hM := (hg _ measurable_const).1.2 hI
@@ -45,8 +93,8 @@ end GlobalTheory.CompanionTheory.Ar.Giv.Rate
 
 namespace GlobalTheory.CompanionTheory.Ar.Giv
 
-open GlobalTheory.CompanionTheory.Ar.Giv.Rate in
 
+open GlobalTheory.CompanionTheory.Ar.Giv.Rate in
 theorem convergenceRate_holds : ConvergenceRateStatement := by
   intro e X _ _ _ _ _ A Θ L s n m W hΘ hpos hL hS hSNC hnorm th ph phT th₀ ph₀ phT₀ C₅ C t₀
     hW hR hW₀ hR₀
@@ -168,7 +216,7 @@ theorem convergenceRate_holds : ConvergenceRateStatement := by
     · rw [Set.indicator_of_mem (show y ∈ (bdry s)ᶜ ∩ {y | ℓ ≤ rW L s y} from ⟨hy, hry⟩),
         ← ENNReal.ofReal_mul hk]
       exact (ENNReal.ofReal_le_ofReal (hout y hy hry)).trans le_add_self
-    · rw [Set.indicator_of_notMem (fun h => hry h.2), add_zero]
+    · rw [Set.indicator_of_notMem (by exact fun h => hry h.2), add_zero]
       exact ENNReal.ofReal_le_ofReal (hin y hy (not_le.1 hry))
   have hsec : ∫⁻ y, ((bdry s)ᶜ ∩ {y | ℓ ≤ rW L s y}).indicator
         (fun y => ENNReal.ofReal k * ENNReal.ofReal (Real.log (rW L s y))) y ∂μ ≤

@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
-import Formalism.LocalRingCardinality.DataSpaces
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +61,9 @@ theorem hT_expand' (S : Formalism.BasicNotions.HSpace E) (x y : S.V) :
   have hx := S.frame.sum_repr x
   have hy := S.frame.sum_repr y
   conv_lhs => rw [← hx, ← hy]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, LinearMap.sum_apply,
-    LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, Finset.mul_sum, Formalism.BasicNotions.HSpace.gram]
+  LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, Finset.mul_sum, Formalism.BasicNotions.HSpace.gram]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
   rw [RingHom.id_apply]
@@ -25,8 +72,10 @@ theorem hT_expand' (S : Formalism.BasicNotions.HSpace E) (x y : S.V) :
 theorem hT_map (S : Formalism.BasicNotions.HSpace E) (τ : E →+* ℂ) (hτ : ∀ a, τ (star a) = starRingEnd ℂ (τ a))
     (x y : S.V) :
     τ (S.hT x y) = ∑ a, ∑ b, star (τ (S.frame.repr x a)) * (S.gram.map τ) a b * τ (S.frame.repr y b) := by
+
   rw [hT_expand', map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [map_mul, map_mul, hτ, Matrix.map_apply, starRingEnd_apply]

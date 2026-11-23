@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.SkewSolve
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.SkewSolve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +63,7 @@ theorem rowsDep_holds : RowsDep := by
   have hcast1 : ∀ (h : r + 1 ≤ r + 1) (c : Fin (r + 1)), Fin.castLE h c = c := fun h c => Fin.ext rfl
   constructor
   · unfold leadMinorE
-    rw [dif_pos le_rfl, ← Matrix.exists_vecMul_eq_zero_iff]
+    rw [dite_eq_left le_rfl, ← Matrix.exists_vecMul_eq_zero_iff]
     refine ⟨Fin.snoc (α := fun _ => E) u 0, ?_, ?_⟩
     · intro h0
       apply hu
@@ -28,7 +76,7 @@ theorem rowsDep_holds : RowsDep := by
       simp only [Fin.snoc_castSucc, Fin.snoc_last, zero_mul, add_zero]
       exact hdep b
   · unfold leadMinorE
-    rw [dif_pos (Nat.le_succ r), ← Matrix.exists_vecMul_eq_zero_iff]
+    rw [dite_eq_left (Nat.le_succ r), ← Matrix.exists_vecMul_eq_zero_iff]
     refine ⟨u, hu, ?_⟩
     funext b
     simp only [Matrix.vecMul, dotProduct, Matrix.submatrix_apply, hcast, Pi.zero_apply]
@@ -45,11 +93,12 @@ theorem rightInv_holds : RightInv := by
     rw [Matrix.mulVecLin_apply, Matrix.mulVec_transpose] at h1
     exact h1
   have hrank : β.rank = r := by
-    rw [← Matrix.rank_transpose, Matrix.rank, LinearMap.finrank_range_of_inj hinjT]
+    rw [← Matrix.rank_transpose, ← Matrix.finrank_range_mulVecLin, LinearMap.finrank_range_of_inj hinjT]
     simp
   have hsurj : Function.Surjective (Matrix.mulVecLin β) := by
     rw [← LinearMap.range_eq_top]
     apply Submodule.eq_top_of_finrank_eq
+    rw [Matrix.finrank_range_mulVecLin]
     show β.rank = _
     rw [hrank]
     simp

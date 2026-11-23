@@ -1,22 +1,76 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.UnifOfSpaceEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSelfDualDataTransvectionPrincipalLevel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedFrameSumPositive
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MaxBoundPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FinrankRieszBounds
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnifOfSpaceEq
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.UnitaryDatumNumbersForSupBounds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSelfDualDataTransvectionPrincipalLevel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedFrameSumPositive
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Formalism.LocalToGlobal.ProjectiveLattices.RosatiLatticeNorms.LinkFD
+import Formalism.MeanHeightDescent.AverageDegreeBounds.GlobalBoundRefinements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.FirstMinimumInvariantContinuousPos
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FinrankRieszBounds
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajorantConjugateTransfer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.FirstMinimumInvariantContinuousPos
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupAtUnit
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.UnitaryDatumNumbersForSupBounds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MaxBoundPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthonormalFlagTranslateHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ProdCastLESucc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.SiegelSpaceAlgebraHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ModelLatB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupAtUnit
+
+@[expose] public section
 
 open NumberField MeasureTheory Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.L2.Theta Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.LevGeo
 open scoped nonZeroDivisors
 
 namespace GlobalTheory.RawThetaSup
 
-set_option maxHeartbeats 800000 in
 
-theorem exists_small_inv (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (ξ : K) (x : ℝ) (hx : 0 < x)
+
+theorem exists_small_inv (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (ξ : K) (x : ℝ) (hx : 0 < x)
     (hξ : ∀ τ : K →+* ℂ, ‖τ ξ‖ = x) (A B : FractionalIdeal (𝓞 K)⁰ K)
     (h : FractionalIdeal.spanSingleton (𝓞 K)⁰ ξ * A * B * (differentIdeal ℤ (𝓞 K) : FractionalIdeal (𝓞 K)⁰ K) = 1)
     (hAB : FractionalIdeal.absNorm B ≤ FractionalIdeal.absNorm A) :
@@ -94,13 +148,6 @@ theorem exists_small_inv_AA (D : D7) : ∃ b : D.host.E, b ≠ 0 ∧ (∀ a ∈ 
     · have := (hb _ (conj_mem_AAbar D ha)).map (D.host.conj : D.host.E →+* D.host.E).toIntAlgHom
       simpa [conj_conj] using this
     · exact hτ (τ.comp (D.host.conj : D.host.E →+* D.host.E))
-
-theorem epsLev_pos (E : Type) [Field E] [NumberField E] {d M : ℕ} (hd : 0 < d) (hM : 0 < M) {w : ℝ} (hw : 0 < w) :
-    0 < epsLev E d M w := by
-  unfold epsLev epStar
-  have h2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
-  have hd' : (0 : ℝ) < d := by exact_mod_cast hd
-  exact lt_min one_pos (div_pos Real.pi_pos (by positivity))
 
 section Level
 

@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.ExistsIdempotentHeckeOperatorWithRegularSupportAlt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PIdemP
-import GroundTheory.AutomorphicForms.StableConjTorus
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ScalarCommutation.ExistsIdempotentHeckeOperatorWithRegularSupportAlt
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.PIdemP
+public import GroundTheory.AutomorphicForms.StableConjTorus
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -45,13 +86,13 @@ private theorem tensor_comm {R Q C : Type} [CommRing R] [Algebra ℚ R] [CommRin
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [σ, hEV, hs1]
-    | add a b ha hb => simp [map_add, ha, hb]
+    | add a b ha hb => simp [map_add (f := _), ha, hb]
   have h2 : ∀ z, σ (EV z) = (r ⊗ₜ[ℚ] (1 : C)) * z := by
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [σ, hEV, hs2]
-    | add a b ha hb => simp only [map_add, ha, hb, mul_add]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb, mul_add]
   have h3 : EV (r ⊗ₜ[ℚ] (1 : C)) = 1 := by simp [hEV, hr, Algebra.TensorProduct.one_def]
   have key : ∀ z, Commute z (EV M) → (r ⊗ₜ[ℚ] (1 : C)) * (σ z * M - M * σ z) = 0 := by
     intro z hz
@@ -200,8 +241,8 @@ private theorem rho_idem {p q : ℕ} [Fact p.Prime] (hq : q.Prime) (hqp : q ≠ 
   rw [(he u).1 hu] at this
   exact one_ne_zero this
 
-open Classical in
 
+open Classical in
 private def secAdd {p : ℕ} (v₀ : AwayP p) : v₀.1.adicCompletion ℚ →+ AfP p where
   toFun x := ⟨Pi.single v₀ x, by
     have : ({v₀}ᶜ : Set (AwayP p)) ∈ Filter.cofinite := by simp

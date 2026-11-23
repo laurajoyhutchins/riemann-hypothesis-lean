@@ -1,9 +1,63 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefBTensSubKStable
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.OccDAdjA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
+public import Mathlib.Analysis.InnerProductSpace.Subspace
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HidaSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Closure
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.CasimirGapAtNoncompactWeight
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.KUnitB
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefBTensSubKStable
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,49 +71,12 @@ theorem adjA_high {D : Type*} [AddCommGroup D] [Module ℂ D] {W : Type*} [AddCo
     [FiniteDimensional ℂ W] (M : Submodule ℂ D) (T : Module.End ℂ D) (hT : ∀ y ∈ M, T y ∈ M)
     (Φ : D →ₗ[ℂ] W) (hΦ : ∀ y ∈ M, Φ y = 0 → Φ (T y) = 0) :
     ∃ C : ℝ, ∀ y ∈ M, ∀ θ : ℝ, C < θ → T y = (θ : ℂ) • y → Φ y = 0 := by
-  classical
-  set TM : Module.End ℂ M := T.restrict hT
-  set Φ' : M →ₗ[ℂ] W := Φ.comp M.subtype
-  set p : Submodule ℂ M := LinearMap.ker Φ'
-  have hp : p ≤ p.comap TM := by
-    intro y hy
-    simp only [Submodule.mem_comap, p, LinearMap.mem_ker, Φ', LinearMap.comp_apply,
-      Submodule.subtype_apply] at hy ⊢
-    exact hΦ y y.2 hy
-  set Tb : Module.End ℂ (M ⧸ p) := p.mapQ p TM hp
-  have : FiniteDimensional ℂ (LinearMap.range Φ') := inferInstance
-  have : FiniteDimensional ℂ (M ⧸ p) := LinearEquiv.finiteDimensional Φ'.quotKerEquivRange.symm
-  have hfin := Module.End.finite_hasEigenvalue Tb
-  refine ⟨∑ μ ∈ hfin.toFinset, ‖μ‖, fun y hy θ hθ hTy => ?_⟩
-  by_contra hne
-  have hq : Submodule.Quotient.mk (p := p) (⟨y, hy⟩ : M) ≠ 0 := by
-    rw [Ne, Submodule.Quotient.mk_eq_zero]
-    exact hne
-  have hTb : Tb (Submodule.Quotient.mk (⟨y, hy⟩ : M)) = (θ : ℂ) • Submodule.Quotient.mk (⟨y, hy⟩ : M) := by
-    rw [Submodule.mapQ_apply, ← Submodule.Quotient.mk_smul]
-    congr 1
-    exact Subtype.ext hTy
-  have hev : Tb.HasEigenvalue (θ : ℂ) :=
-    Module.End.hasEigenvalue_of_hasEigenvector ⟨Module.End.mem_eigenspace_iff.2 hTb, hq⟩
-  have hmem : (θ : ℂ) ∈ hfin.toFinset := hfin.mem_toFinset.2 hev
-  have hle : ‖(θ : ℂ)‖ ≤ ∑ μ ∈ hfin.toFinset, ‖μ‖ :=
-    Finset.single_le_sum (f := fun μ : ℂ => ‖μ‖) (fun _ _ => norm_nonneg _) hmem
-  rw [Complex.norm_real, Real.norm_eq_abs] at hle
-  linarith [le_abs_self θ]
+  apply ReciprocityTheory.ChartRestriction.DS.adjA_high <;> assumption
 
 theorem adjA_tensF_single {M : Type*} [AddCommGroup M] [Module ℂ M] (dual : Bool)
     (E : Fin n → Fin n → Module.End ℂ M) (a b c : Fin n) (y : M) :
     ∃ c' : Fin n, ∃ r : ℂ, tensF dual E a b (Pi.single c y) = Pi.single c (E a b y) + r • (Pi.single c' y : Fin n → M) := by
-  classical
-  cases dual
-  · refine ⟨a, if b = c then 1 else 0, ?_⟩
-    funext x
-    simp only [tensF, cond_false, tensV_coord, Pi.add_apply, Pi.smul_apply, Pi.single_apply]
-    split_ifs <;> simp_all
-  · refine ⟨b, if a = c then -1 else 0, ?_⟩
-    funext x
-    simp only [tensF, cond_true, tensVd_coord, Pi.add_apply, Pi.smul_apply, Pi.single_apply]
-    split_ifs <;> simp_all [sub_eq_add_neg]
+  apply ReciprocityTheory.ChartRestriction.DS.adjA_tensF_single <;> assumption
 
 theorem adjA_single_mem {M : Type*} [AddCommGroup M] [Module ℂ M] {S : Submodule ℂ M} (c : Fin n) {y : M}
     (hy : y ∈ S) : (Pi.single c y : Fin n → M) ∈ tensSub S := by
@@ -117,7 +134,7 @@ theorem adjA_rep (dual : Bool) (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn 
     intro y hy hPy a b hab v hv c
     obtain ⟨c', r, hcr⟩ := adjA_tensF_single dual E a b c y
     have h1 : ps (Pi.single c (E a b y)) = E a b (ps (Pi.single c y)) - r • ps (Pi.single c' y) := by
-      rw [← hps a b _ (adjA_single_mem c hy), hcr, map_add, map_smul]
+      rw [← hps a b _ (adjA_single_mem c hy), hcr, map_add (f := _), map_smul]
       abel
     rw [h1, inner_sub_right, inner_smul_right, hPy v hv c', mul_zero, sub_zero, ← hUk b a hab.symm]
     exact hPy _ (hL'k b a hab.symm v hv) c
@@ -127,6 +144,7 @@ theorem adjA_rep (dual : Bool) (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn 
       funext x
       simp only [Pi.single_apply, Finset.sum_apply]
       split_ifs <;> simp
+
     rw [this, map_sum, inner_sum]
     exact Finset.sum_eq_zero fun q hq => hg q hq v hv c
   have hcasP : ∀ y ∈ genSub E V, P y → P (casimirK ε E y) := by

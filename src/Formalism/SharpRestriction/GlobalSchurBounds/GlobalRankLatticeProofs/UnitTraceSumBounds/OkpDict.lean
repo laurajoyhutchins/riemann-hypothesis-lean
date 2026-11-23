@@ -1,6 +1,47 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.LemmaTwoThreeOfSiegelBound
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.EqOfLeOfAbsNormEq
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.MainNotions.Ext
 
@@ -25,41 +66,5 @@ theorem tauKp_apply (x : D.host.K) : tauKp D lam x = lamC lam (D.host.φ₀ (x :
   | rfl
   | (simp [test_vector_mem_schwartz_bruhat]; done)
   | (rw [dif_pos (test_vector_mem_schwartz_bruhat D _)]; rfl)
-
-theorem conjK_ne : ∃ x, conjK D x ≠ x := by
-  have hd : 0 < D.host.d := by
-    have := D.host.qd_big.2
-    omega
-  refine ⟨⟨D.host.sqd, IntermediateField.mem_adjoin_simple_self ℚ D.host.sqd⟩, ?_⟩
-  intro h
-  have h1 := congrArg (fun y : D.host.K => (y : D.host.E)) h
-  simp only at h1
-  rw [conjK_coe] at h1
-  change D.host.conj D.host.sqd = D.host.sqd at h1
-  rw [Formalism.HC.HostRaw.conj_sqd] at h1
-  have h2 : (2 : D.host.E) * D.host.sqd = 0 := by linear_combination -h1
-  have hs : D.host.sqd = 0 := (mul_eq_zero.mp h2).resolve_left two_ne_zero
-  have h3 := D.host.sqd_sq
-  rw [hs] at h3
-  have h4 : (D.host.d : D.host.E) = 0 := by linear_combination h3
-  have h5 : D.host.d = 0 := by exact_mod_cast h4
-  omega
-
-theorem okp_eq : OKp D lam = closure (Set.range fun a : 𝓞 D.host.K => (tauKp D lam (a : D.host.K), tauKp D lam (conjK D (a : D.host.K)))) := by
-  unfold OKp
-  congr 2
-  funext a
-  simp only [tauKp_apply, conjK_coe]
-  first
-  | rfl
-  | (unfold tauK tauKc; rfl)
-  | (simp only [tauK, tauKc]; done)
-  | (simp [tauK, tauKc]; done)
-
-theorem exists_sqrt_K : ∃ b : D.host.K, b ^ 2 = -(D.host.d : D.host.K) := by
-  refine ⟨⟨D.host.sqd, IntermediateField.mem_adjoin_simple_self ℚ D.host.sqd⟩, ?_⟩
-  apply (algebraMap D.host.K D.host.E).injective
-  rw [map_pow, map_neg, map_natCast]
-  exact D.host.sqd_sq
 
 end Formalism.MainNotions.Ext

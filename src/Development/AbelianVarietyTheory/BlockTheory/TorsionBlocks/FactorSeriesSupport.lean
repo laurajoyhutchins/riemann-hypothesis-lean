@@ -1,8 +1,52 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Formalism.SharpRestriction.LevelLetterCocycles.DataN
-import Formalism.CyclotomicNorms.StatementI
+module
+
+public import Formalism.CyclotomicNorms.StatementT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,85 +64,8 @@ def rootExp (N g : ℕ) : ℕ := (Finset.Icc 1 N).lcm fun d => g ^ d - 1
 def IsPowLabel {g : ℕ} [Fact g.Prime] (a : ℤ) (f f' : (ZMod g)[X]) : Prop :=
   Formalism.CyclotomicNorms.rootsBar f' = (Formalism.CyclotomicNorms.rootsBar f).map fun x => x ^ a
 
-def atFactor {ι : Type} {G : ι → Type} [∀ i, Group (G i)] (i : ι) :
-    MonoidAlgebra ℂ (G i) →ₐ[ℂ] MonoidAlgebra ℂ (∀ i, G i) :=
-  open Classical in MonoidAlgebra.mapDomainAlgHom ℂ ℂ (MonoidHom.mulSingle G i)
-
-open Classical in
-theorem atFactor_single {ι : Type} {G : ι → Type} [∀ i, Group (G i)] (i : ι) (γ : G i) (c : ℂ) :
-    atFactor i (MonoidAlgebra.single γ c) = MonoidAlgebra.single (Pi.mulSingle i γ) c := by
-  simp [atFactor]
-
-theorem atFactor_central {ι : Type} {G : ι → Type} [∀ i, Group (G i)] (i : ι)
-    (z : MonoidAlgebra ℂ (G i)) (hz : ∀ b, z * b = b * z) :
-    atFactor i z ∈ Subalgebra.center ℂ (MonoidAlgebra ℂ (∀ i, G i)) := by
-  classical
-  rw [Subalgebra.mem_center_iff]
-  have key : ∀ (δ : ∀ i, G i), δ i = 1 → ∀ y : MonoidAlgebra ℂ (G i),
-      MonoidAlgebra.single δ (1 : ℂ) * atFactor i y = atFactor i y * MonoidAlgebra.single δ 1 := by
-    intro δ hδ y
-    induction y using MonoidAlgebra.induction_linear with
-    | zero => simp
-    | add a b ha hb => rw [map_add, mul_add, add_mul, ha, hb]
-    | single γ c =>
-      rw [atFactor_single, MonoidAlgebra.single_mul_single, MonoidAlgebra.single_mul_single,
-        one_mul, mul_one]
-      congr 1
-      funext j
-      by_cases hj : j = i
-      · subst hj; simp [hδ]
-      · simp [Pi.mulSingle_eq_of_ne hj]
-  intro b
-  induction b using MonoidAlgebra.induction_linear with
-  | zero => simp
-  | add a b ha hb => rw [mul_add, add_mul, ha, hb]
-  | single γ c =>
-    have h1 : MonoidAlgebra.single γ c =
-        MonoidAlgebra.single (Function.update γ i 1) (1 : ℂ) *
-          atFactor i (MonoidAlgebra.single (γ i) c) := by
-      rw [atFactor_single, MonoidAlgebra.single_mul_single, one_mul]
-      congr 1
-      funext j
-      by_cases hj : j = i
-      · subst hj; simp
-      · simp [Pi.mulSingle_eq_of_ne hj, Function.update_of_ne hj]
-    rw [h1, mul_assoc, ← map_mul, ← hz, map_mul, ← mul_assoc,
-      key _ (Function.update_self _ _ _), mul_assoc]
 
 variable (D : D7)
-
-def serAt (k : Fin 2) (v : D.nd.PlG k) (f : (ZMod (D.host.g k))[X]) :
-    Subalgebra.center ℂ (MonoidAlgebra ℂ (G0g D.nd)) :=
-  ⟨atFactor (G := fun kv : (Σ k : Fin 2, D.nd.PlG k) => GL (Fin D.R.r) (ZMod (D.host.g kv.1)))
-      ⟨k, v⟩ (D.ntypes.eSer k f),
-    atFactor_central _ _ (D.ntypes.eSer_central k f)⟩
-
-def GaloisAction : Prop :=
-  ∀ (k : Fin 2) (α : ℂ ≃+* ℂ) (a : ℤ),
-    (∀ ζ : ℂ, ζ ^ rootExp D.R.r (D.host.g k) = 1 → α ζ = ζ ^ a) →
-    ∀ f : (ZMod (D.host.g k))[X], IsLabel D.R.r f →
-      haveI : Fact (D.host.g k).Prime := ⟨D.host.g_prime k⟩
-      ∃ f' : (ZMod (D.host.g k))[X], IsLabel D.R.r f' ∧ IsPowLabel a f f' ∧
-        ∀ γ : GL (Fin D.R.r) (ZMod (D.host.g k)),
-          α ((D.ntypes.eSer k f).coeff γ) = (D.ntypes.eSer k f').coeff γ
-
-def SupportOneBlock : Prop :=
-  ∀ (μ : D.what₂.Tup) (j : ℕ), 1 ≤ j → j ≤ D.R.m →
-    ∀ (σ' : D.ntypes.Par) (k : Fin 2) (v : D.nd.PlG k) (f : (ZMod (D.host.g k))[X]),
-      IsLabel D.R.r f → f ≠ D.ntypes.labPar k σ' v →
-      ∀ x ∈ D.ntypes.MtPar μ j σ', D.ntypes.cenMt μ j (serAt D k v f) x = 0
-
-def SupportAllBlocks : Prop :=
-  ∀ (μ : D.what₂.Tup) (σ' : D.ntypes.Par) (k : Fin 2) (v : D.nd.PlG k)
-    (f : (ZMod (D.host.g k))[X]), IsLabel D.R.r f →
-      (haveI : Fact (D.host.g k).Prime := ⟨D.host.g_prime k⟩
-       ¬ IsPowLabel (-1) (D.ntypes.labPar k σ' v) f) →
-      ∀ x ∈ D.ntypes.AmbPar μ σ', D.ntypes.cenAmb μ (serAt D k v f) x = 0
-
-def SeriesLocal : Prop := GaloisAction D ∧ SupportOneBlock D ∧ SupportAllBlocks D
-
-example {g : ℕ} [Fact g.Prime] (f : (ZMod g)[X]) : IsPowLabel 1 f f := by
-  simp [IsPowLabel]
 
 theorem IsPowLabel.unique {g : ℕ} [Fact g.Prime] {a : ℤ} {f f₁ f₂ : (ZMod g)[X]}
     (h₁ : IsPowLabel a f f₁) (h₂ : IsPowLabel a f f₂) (m₁ : f₁.Monic) (m₂ : f₂.Monic) : f₁ = f₂ := by

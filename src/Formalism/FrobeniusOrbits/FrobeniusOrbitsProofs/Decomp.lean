@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.Statement
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
-import Formalism.TameInertiaTowers.TowerFieldFoundations
+module
+
+public import Formalism.FrobeniusOrbits.Statement
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+public import Formalism.TameInertiaTowers.CentralOrderTwo.OddEqOneOfSubOneMem
+public import Formalism.TameInertiaTowers.TowerFieldFoundations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 open scoped Pointwise
@@ -117,7 +168,6 @@ theorem restrict_smul (σ : hostE ζ a b ≃ₐ[ℚ] hostE ζ a b) (τ : Gal(L/�
   ext
   first
     | exact hστ x
-    | simpa using hστ x
 
 theorem mem_P_iff (P : Ideal (𝓞 (hostE ζ a b))) (Q : Ideal (𝓞 L)) [Q.LiesOver P]
     (x : 𝓞 (hostE ζ a b)) : x ∈ P ↔ algebraMap (𝓞 (hostE ζ a b)) (𝓞 L) x ∈ Q := by
@@ -180,7 +230,7 @@ theorem hPart_inertia (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b) (p : �
     rw [hinv]
     exact hζint.pow _
   have hθint : IsIntegral ℤ (thE ζ a b) :=
-    (isIntegral_algebraMap_iff (algebraMap (hostE ζ a b) L).injective).mp (hζint.add hζiint)
+    (isIntegral_algebraMap_iff ).mp (hζint.add hζiint)
   obtain ⟨zz, hzz⟩ : ∃ z : 𝓞 L, (z : L) = ζ := ⟨⟨ζ, hζint⟩, rfl⟩
   obtain ⟨tt, htt⟩ : ∃ t : 𝓞 (hostE ζ a b), (t : hostE ζ a b) = thE ζ a b := ⟨⟨_, hθint⟩, rfl⟩
   have hth : ((thE ζ a b : hostE ζ a b) : L) = ζ + ζ⁻¹ := rfl
@@ -192,26 +242,23 @@ theorem hPart_inertia (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b) (p : �
         ((ρ (tt : hostE ζ a b) : hostE ζ a b) : L) - ((tt : hostE ζ a b) : L) := by
       first
         | rfl
-        | simp
     have e2 : ((zz ^ n + zz ^ ((2 ^ (e + 2) - 1) * n) - zz - zz ^ (2 ^ (e + 2) - 1) : 𝓞 L) : L) =
         (zz : L) ^ n + (zz : L) ^ ((2 ^ (e + 2) - 1) * n) - (zz : L) - (zz : L) ^ (2 ^ (e + 2) - 1) := by
       first
         | rfl
-        | simp
     rw [e1, e2, htt, hth, hu, hzz, pow_mul, ← hinv]
     ring
   obtain ⟨zq, hzq⟩ : ∃ w, Ideal.Quotient.mk Q zz = w := ⟨_, rfl⟩
   have hrel : zq ^ n + zq ^ ((2 ^ (e + 2) - 1) * n) = zq + zq ^ (2 ^ (e + 2) - 1) := by
     have h0 := Ideal.Quotient.eq_zero_iff_mem.mpr hmemQ
     rw [heq] at h0
-    simp only [map_sub, map_add, map_pow, hzq] at h0
+    simp only [map_sub, map_add (f := _), map_pow, hzq] at h0
     linear_combination h0
   have hzzN : zz ^ (2 ^ (e + 2)) = 1 := by
     ext1
     have e3 : ((zz ^ (2 ^ (e + 2)) : 𝓞 L) : L) = (zz : L) ^ (2 ^ (e + 2)) := by
       first
         | rfl
-        | simp
     rw [e3, hzz, hζN]
     all_goals first | rfl | simp
   have hneg : ζ ^ (2 ^ (e + 1)) = -1 := by
@@ -231,7 +278,6 @@ theorem hPart_inertia (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b) (p : �
     have e4 : ((zz ^ (2 ^ (e + 1)) : 𝓞 L) : L) = (zz : L) ^ (2 ^ (e + 1)) := by
       first
         | rfl
-        | simp
     rw [e4, hzz, hneg]
     all_goals first | rfl | simp
   have h2notQ : (2 : 𝓞 L) ∉ Q := by
@@ -346,13 +392,11 @@ theorem stab_two_sgn (hqd : HypOdd q d) (hd16 : d % 16 = 7) (h : IsLayer (e + 2)
         first
           | rfl
           | push_cast; rfl
-          | simp
       have e4 : ((2 * (m2 : 𝓞 (hostE ζ a b)) : 𝓞 (hostE ζ a b)) : hostE ζ a b) =
           2 * (m2 : hostE ζ a b) := by
         first
           | rfl
           | push_cast; rfl
-          | simp
       rw [e3, e4, hωv]
       have hb2 : bE ζ a b ^ 2 = 1 - 8 * (m2 : hostE ζ a b) := by
         rw [hbsq, ← hm]
@@ -363,13 +407,11 @@ theorem stab_two_sgn (hqd : HypOdd q d) (hd16 : d % 16 = 7) (h : IsLayer (e + 2)
       have e1 : ((σ • ω : 𝓞 (hostE ζ a b)) : hostE ζ a b) = σ (ω : hostE ζ a b) := by
         first
           | rfl
-          | simp
       have e2 : ((1 - ω : 𝓞 (hostE ζ a b)) : hostE ζ a b) = 1 - (ω : hostE ζ a b) := by
         first
           | rfl
           | push_cast; rfl
-          | simp
-      rw [e1, e2, hωv, map_div₀, map_add, map_one, hσb, map_ofNat]
+      rw [e1, e2, hωv, map_div₀, map_add (f := _), map_one, hσb, map_ofNat]
       ring
     have hsmul : ∀ z, σ • z ∈ P ↔ z ∈ P := smul_mem_iff_of_stab σ P hσ
     have hprodP : ω * (1 - ω) ∈ P := by
@@ -564,7 +606,6 @@ theorem hostDecompConj : HostDecompConj := by
     have h3 : chD e (cc e) = -1 := by
       first
         | rfl
-        | simp [chD, cc, c0]
     exact hm1 (h3.symm.trans (MonoidHom.mem_ker.mp hmem))
   rcases hp with rfl | rfl | ⟨rfl, he2⟩
   · haveI : P.LiesOver (span {(2 : ℤ)}) := by
@@ -613,7 +654,5 @@ theorem hostDecompConj : HostDecompConj := by
       exact absurd hval (by decide)
     · rw [h1, Units.val_neg, Units.val_one, map_neg, map_one] at hval
       exact absurd hval (by decide)
-
-theorem hostDecompBoth : HostDecomp ∧ HostDecompConj := ⟨hostDecomp, hostDecompConj⟩
 
 end Formalism.FrobeniusOrbits

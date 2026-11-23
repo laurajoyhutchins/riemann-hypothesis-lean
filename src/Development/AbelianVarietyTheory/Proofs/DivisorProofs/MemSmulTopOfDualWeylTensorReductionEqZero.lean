@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockSub
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueDualWeylWeightProjector
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TotalDegreeLeOfColW
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockSub
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TotalDegreeLeOfColW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.SumExpSt
+import Development.AbelianVarietyTheory.Definitions.Divisors.TupleReadBaseTupleEqFamily
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Pj GlobalTheory.BigTop GlobalTheory.BigOn GlobalTheory.ExpTie GlobalTheory.ExpFrame Formalism.CohomologicalDescent.DepthNonnegative Formalism.CohomologicalDescent.LogSmallConstantBounds Formalism.CohomologicalDescent.ShortWeightBounds Formalism.CohomologicalDescent.LD Formalism.RankGapBounds.FormsTensorLocalization
 open MvPolynomial Formalism.GradedWeylDivisibility GlobalTheory.HighWtEmb
 
@@ -25,6 +74,7 @@ theorem exists_basis_reduction_linearIndependent : ∀ (O : Type) [CommRing O] [
   let g : dualWeyl O N N ν := ∑ j, c j • b j
   have hg : MvPolynomial.map (Ideal.Quotient.mk (Ideal.span {ϖ})) (g : MvPolynomial (Fin N × Fin N) O) = 0 := by
     rw [← ha]
+
     simp only [g, Submodule.coe_sum, Submodule.coe_smul, map_sum, MvPolynomial.smul_eq_C_mul, map_mul, map_C, hc]
   obtain ⟨h, hh, hgh⟩ := (hBC O ϖ hϖ N ν hν).2 g g.2 hg
   have hgh' : g = ϖ • (⟨h, hh⟩ : dualWeyl O N N ν) := Subtype.ext (by simpa using hgh)
@@ -32,6 +82,7 @@ theorem exists_basis_reduction_linearIndependent : ∀ (O : Type) [CommRing O] [
     have h2 := congrArg (fun x => b.repr x i) hgh'
     simp only [LinearEquiv.map_smul, Finsupp.smul_apply, smul_eq_mul] at h2
     rw [← h2]
+
     simp [g, map_sum, Finsupp.single_apply]
   rw [← hc i, hci, map_mul, Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self ϖ), zero_mul]
 
@@ -50,8 +101,8 @@ theorem curry_sum_mapDomain {ι σ : Type} [Fintype ι] [DecidableEq ι] (F : ι
     (∑ ρ, Finsupp.mapDomain (fun s : σ => ((ρ, s) : ι × σ)) (F ρ)).curry τ = F τ := by
   classical
   ext s
-  rw [Finsupp.curry_apply, Finsupp.coe_finset_sum, Finset.sum_apply, Finset.sum_eq_single τ]
-  · exact Finsupp.mapDomain_apply (fun _ _ h => congrArg Prod.snd h) _ _
+  rw [Finsupp.curry_apply, Finsupp.coe_finsetSum, Finset.sum_apply, Finset.sum_eq_single τ]
+  · exact Finsupp.mapDomain_apply_of_injective (fun _ _ h => congrArg Prod.snd h) _ _
   · intro ρ _ hρ
     apply Finsupp.mapDomain_notin_range
     rintro ⟨t, ht⟩
@@ -75,17 +126,20 @@ theorem exists_prod_functional : ∀ (k : Type) [CommRing k] (ι : Type) [Fintyp
     rw [← smul_eq_mul, ← map_smul, smul_monomial, smul_eq_mul, mul_one]
   refine ⟨Φ, fun f => ?_⟩
   have h1 : ∀ τ, rename (fun s : σ => ((τ, s) : ι × σ)) (f τ) =
-      ∑ m ∈ (f τ).support, monomial (Finsupp.mapDomain (fun s : σ => ((τ, s) : ι × σ)) m) (coeff m (f τ)) := by
+      ∑ m ∈ (f τ).support, monomial (Finsupp.mapDomain (fun s : σ => ((τ, s) : ι × σ)) m) (AddMonoidAlgebra.coeff (f τ) m) := by
     intro τ
     conv_lhs => rw [as_sum (f τ)]
+
     simp only [map_sum, rename_monomial]
-  have h2 : ∀ τ, φ τ (f τ) = ∑ m ∈ (f τ).support, coeff m (f τ) * φ τ (monomial m 1) := by
+  have h2 : ∀ τ, φ τ (f τ) = ∑ m ∈ (f τ).support, AddMonoidAlgebra.coeff (f τ) m * φ τ (monomial m 1) := by
     intro τ
     conv_lhs => rw [as_sum (f τ)]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun m _ => hφ τ m _
+
   rw [Finset.prod_congr rfl (fun τ _ => h1 τ), Finset.prod_congr rfl (fun τ _ => h2 τ), Finset.prod_univ_sum,
-    Finset.prod_univ_sum, map_sum]
+  Finset.prod_univ_sum, map_sum]
   refine Finset.sum_congr rfl fun F _ => ?_
   rw [← monomial_sum_prod, hmono]
   simp only [w, curry_sum_mapDomain, Finset.prod_mul_distrib]
@@ -100,6 +154,7 @@ theorem linearIndependent_prod_rename : ∀ (k : Type) [Field k] (ι : Type) [Fi
   intro a ha l
   obtain ⟨Φ, hΦ⟩ := exists_prod_functional k ι σ (fun τ => ψ τ (l τ))
   have h := congrArg Φ ha
+
   rw [map_sum, map_zero] at h
   simp only [map_smul, hΦ, hψ, smul_eq_mul] at h
   rw [Finset.sum_eq_single l] at h
@@ -141,6 +196,7 @@ theorem mem_smul_top_of_redT_eq_zero : ∀ (O : Type) [CommRing O] [IsDomain O] 
       (MvPolynomial.map (Ideal.Quotient.mk (Ideal.span {ϖ})) (b τ (p τ) : MvPolynomial (Fin N × Fin N) O)) = 0 := by
     rw [← hy]
     conv_rhs => rw [← B.sum_repr y]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun p _ => ?_
     rw [LinearMap.map_smul, hred]

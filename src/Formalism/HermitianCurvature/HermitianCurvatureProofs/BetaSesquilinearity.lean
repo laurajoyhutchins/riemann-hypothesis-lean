@@ -1,7 +1,69 @@
-import Formalism.HermitianCurvature.StatementB
-import Formalism.FormalDegreeBessel.FinalG
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCCB
+public import Formalism.HermitianCurvature.StatementB
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ComplexifiedDerivativeCommutator
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.PolarCoord
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.CompMul
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal
@@ -64,23 +126,7 @@ lemma gv_closed : IsClosed (GV k r) := by
     continuous_id) continuous_const
 
 lemma exp_mem {X : Mat k r} (hX : inLie k r X) : NormedSpace.exp X ∈ GV k r := by
-  have hX' : Xᴴ * Hpk k r + Hpk k r * X = 0 := hX
-  have hH : Hpk k r * Hpk k r = 1 := Hsq k r
-  have hHu : IsUnit (Hpk k r) := (Matrix.isUnit_iff_isUnit_det _).mpr (Hdet k r)
-  have hinv : (Hpk k r)⁻¹ = Hpk k r := Matrix.inv_eq_left_inv hH
-  have hXH : Xᴴ = Hpk k r * (-X) * (Hpk k r)⁻¹ := by
-    rw [hinv]
-    have h1 : Xᴴ * Hpk k r = -(Hpk k r * X) := eq_neg_of_add_eq_zero_left hX'
-    calc Xᴴ = Xᴴ * Hpk k r * Hpk k r := by rw [Matrix.mul_assoc, hH, Matrix.mul_one]
-      _ = Hpk k r * (-X) * Hpk k r := by rw [h1, Matrix.mul_neg, Matrix.neg_mul]
-  show (NormedSpace.exp X)ᴴ * Hpk k r * NormedSpace.exp X = Hpk k r
-  rw [← Matrix.exp_conjTranspose, hXH, Matrix.exp_conj _ _ hHu, hinv, Matrix.exp_neg]
-  have hu : IsUnit (NormedSpace.exp X).det :=
-    (Matrix.isUnit_iff_isUnit_det _).mp (Matrix.isUnit_exp X)
-  calc Hpk k r * (NormedSpace.exp X)⁻¹ * Hpk k r * Hpk k r * NormedSpace.exp X
-      = Hpk k r * ((NormedSpace.exp X)⁻¹ * NormedSpace.exp X) := by
-        rw [Matrix.mul_assoc (Hpk k r * _) (Hpk k r) (Hpk k r), hH, Matrix.mul_one, Matrix.mul_assoc]
-    _ = Hpk k r := by rw [Matrix.nonsing_inv_mul _ hu, Matrix.mul_one]
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.InvCC.exp_mem <;> assumption
 
 lemma lie_rsmul {X : Mat k r} (hX : inLie k r X) (t : ℝ) : inLie k r ((t : ℂ) • X) := by
   have hX' : Xᴴ * Hpk k r + Hpk k r * X = 0 := hX
@@ -562,7 +608,7 @@ lemma Dx_scale (s : ℝ) (b : Bool) (X : Mat k r) (f : Mat k r → E) :
     rw [← h]
     congr 1
     funext t
-    simp only [smul_smul, Complex.ofReal_mul, mul_comm (t : ℂ)]
+    rw [smul_smul, ← Complex.ofReal_mul, mul_comm t s]
   · show deriv (fun t : ℝ => f (NormedSpace.exp (-((t : ℂ) • (s : ℂ) • X)) * g)) 0 =
       (s : ℂ) • deriv (fun t : ℝ => f (NormedSpace.exp (-((t : ℂ) • X)) * g)) 0
     have h := deriv_comp_mul_left s (fun u : ℝ => f (NormedSpace.exp (-((u : ℂ) • X)) * g)) 0
@@ -571,7 +617,7 @@ lemma Dx_scale (s : ℝ) (b : Bool) (X : Mat k r) (f : Mat k r → E) :
     rw [← h]
     congr 1
     funext t
-    simp only [smul_smul, Complex.ofReal_mul, mul_comm (t : ℂ)]
+    rw [smul_smul, ← Complex.ofReal_mul, mul_comm t s]
 
 lemma Rw_scale (v : List (Mat k r)) (f : Mat k r → E) :
     Rw v f = fun g => (((v.map nz).prod : ℝ) : ℂ) • Rw (v.map nrm) f g := by
@@ -1106,7 +1152,7 @@ lemma wt_measurable (D : RealPlaceData k r Wp Wq) : Measurable (wt D) := by
   unfold wt bcWeight
   refine Measurable.ite ?_ ?_ measurable_const
   · exact measurableSet_le measurable_const (Complex.continuous_normSq.measurable.comp measurable_snd)
-  · exact Continuous.measurable ((continuous_finset_prod _ fun a _ =>
+  · exact Continuous.measurable ((continuous_finsetProd _ fun a _ =>
       ((continuous_apply a).comp continuous_fst).norm.pow _).mul
       (((Complex.continuous_normSq.comp continuous_snd).sub continuous_const).pow _))
 
@@ -1386,7 +1432,7 @@ lemma aDil_one : aDil k r 1 = 1 := by
   rw [← Matrix.diagonal_one]
   congr 1
   funext i
-  simp
+  split_ifs <;> simp
 
 lemma dilF_one (F : Mat k r → (Wq →L[ℂ] Wp)) : dilF (1, 1) F = F := by
   funext g
@@ -1474,7 +1520,8 @@ lemma core (hC : FormCoreC) (hAe : AeFromTests) (hFa : FatouParam) (hL : CCLin) 
         prod_mem_nhds (Ioo_mem_nhds (by norm_num) (by norm_num)) (Ioo_mem_nhds (by norm_num) (by norm_num)), ?_⟩
       have h1 := ae_eq hAe hRB hRA hU x.2
       rw [ae_restrict_iff' isOpen_Quad.measurableSet] at h1
-      have h2 := (scale_qmp (ne_of_gt hτ₀.1) (ne_of_gt hτ₀.2)).ae h1
+      have h2 := MeasureTheory.QuasiMeasurePreserving.ae
+        (scale_qmp (ne_of_gt hτ₀.1) (ne_of_gt hτ₀.2)) h1
       rw [ae_restrict_iff' (measurableSet_Ioo.prod measurableSet_Ioo)]
       filter_upwards [h2] with t ht htU
       have t1 : 0 < t.1 := lt_trans (by norm_num) htU.1.1
@@ -1496,16 +1543,6 @@ end Formalism.FourierDecayAlt.P.BetaSesquilinearity
 namespace Formalism.FourierDecayAlt.P
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.P.BetaSesquilinearity
-
-theorem assemble_diagonal_identity : Formalism.FourierDecayAlt.B.AssembleDiag := by
-  intro hC hAe hFa hL hDC k r Wp Wq _ _ _ _ _ _ D A hA hRB hRA hU hJ hDB
-  have hDD : DiagDom D A := diagDom hAe hFa hRB hRA hU hJ
-  refine ⟨hDD, ?_⟩
-  intro F hF τ hτ
-  have hF4 : InCC A 4 F := InCC_mono (by norm_num) hF
-  refine ⟨ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hDD F hF4 τ hτ).2, ?_⟩
-  rw [← betaTau_self hJ hF4 hτ]
-  exact core hC hAe hFa hL hDC hA hRB hRA hU hJ hDB hτ F F hF hF
 
 theorem assemble_equality_identity : Formalism.FourierDecayAlt.B.AssembleEq := by
   intro hC hAe hFa hL hDC hJ1 k r Wp Wq _ _ _ _ _ _ D A hA hRB hRA hU hJ hDB

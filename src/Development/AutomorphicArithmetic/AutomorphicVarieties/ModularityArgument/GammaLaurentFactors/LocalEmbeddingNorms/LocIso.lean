@@ -1,9 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.MatchIndOf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationDetEqOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatakeOfIsLocComp
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.GammaLaurentFactors.MatchIndOf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatakeOfIsLocComp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFixedIff
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.StrongMultiplicityOne.EigOfSat
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.SmoothRepresentationsGL.SphDict
+import Formalism.DoubleCosetMeasures.Statement
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLCuspidalGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 attribute [-instance] Formalism.DoubleCosetMeasures.instMeasGL
@@ -55,7 +93,7 @@ theorem UpperTheory.V.Z.Gam.locIso :
     exact h2.of_equiv e
   · obtain ⟨α, -, h'⟩ := GlobalTheory.LFun.SphComp.hasSatake_of_isLocComp σ ((CG.hasSat_mk σ v B).1 hB) hτ
     have h1 : GlobalTheory.LGrp.IsSpherical τ.ρ (GlobalTheory.SplitWeil.KO (v.adicCompletion K) (Fin n)) := h'.2.1
-    have hsph : GlobalTheory.LGrp.IsSpherical τ.ρ (GlobalTheory.LFun.KGL v n) := by
+    have hsph : GlobalTheory.LGrp.IsSpherical τ.ρ (GlobalTheory.LFun.KGL v (n := n)) := by
       rwa [GlobalTheory.SmGL.SphCompletion.KO_completion v n] at h1
     obtain ⟨x, hx, hx0⟩ := (Submodule.ne_bot_iff _).1 hsph
     rw [(Af.Smo.sphDict K n v).1]

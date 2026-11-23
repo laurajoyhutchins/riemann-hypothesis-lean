@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeAt
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsSplitGaussChars
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
 open scoped CategoryTheory.Obj
@@ -27,6 +74,7 @@ theorem trace_eigProj_eq_sum {K V : Type} [Field K] [AddCommGroup V] [Module K V
     (ρ : 𝓞 E →+* Module.End K V) (σ : E →+* K) :
     LinearMap.trace K V (HT.eigProj ρ σ) =
       ∑ k, σ (HT.dualInt E k) * LinearMap.trace K V (ρ (RingOfIntegers.basis E k)) := by
+
   simp [HT.eigProj, map_sum, map_smul]
 
 variable {Ω Vs C : Type} [Field Ω] [AddCommGroup Vs] [Module Ω Vs] [Field C]
@@ -54,6 +102,7 @@ theorem trace_of_comb {R : Subring Ω} {g : ℕ} {ℓ : Fin g → Vs} (hl : Line
   push_cast
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [Matrix.diag_apply, LinearMap.toMatrix_apply, hbj, hx j, comb]
+
   simp only [← hbj, map_sum, map_smul, Module.Basis.repr_self]
   simp [Finsupp.single_apply]
 
@@ -91,6 +140,7 @@ theorem finrank_eigSp_eval : ∀ (E : Type) [Field E] [NumberField E] (Ω Vs C :
     fun a => trace_of_comb hl hs (ρ a) (M a) (hM a)
   have tC : ∀ a, LinearMap.trace C (Fin g → C) (ρC a) = ψ (∑ j, M a j j) := by
     intro a
+
     rw [trace_of_cols (ρC a) (fun j i => ψ (M a j i)) (hC a), map_sum]
   set T : R' := ∑ k, ⟨σ (HT.dualInt E k), (hσ _).1⟩ * ∑ j, M (RingOfIntegers.basis E k) j j with hTdef
   have h1 : (Module.finrank Ω (HT.eigSp ρ σ) : Ω) = (T : Ω) := by
@@ -105,6 +155,7 @@ theorem finrank_eigSp_eval : ∀ (E : Type) [Field E] [NumberField E] (Ω Vs C :
     rw [← h1]
     simp
   have h3 : (Module.finrank C (HT.eigSp ρC σC) : C) = ψ T := by
+
     rw [← trace_eigProj, trace_eigProj_eq_sum, hTdef, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [tC, map_mul]

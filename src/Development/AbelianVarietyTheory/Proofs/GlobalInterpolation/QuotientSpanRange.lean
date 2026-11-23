@@ -1,11 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix
 
 namespace GlobalTheory.RegularQuotient
 
-open IsLocalRing Matrix in
 
+open IsLocalRing Matrix in
 theorem _root_.GlobalTheory.RegularQuotient.quot_regular (Λ : Type) [CommRing Λ]
     [IsRegularLocalRing Λ] {ι κ : Type} [Fintype ι]
     [Fintype κ] (t : ι → Λ) (z : κ → Λ)
@@ -67,8 +116,8 @@ theorem _root_.GlobalTheory.RegularQuotient.quot_regular (Λ : Type) [CommRing �
   exact ⟨IsRegularLocalRing.of_spanFinrank_maximalIdeal_le _ (hgen.trans hdim.ge), hmap, hspan,
     hdim⟩
 
-open IsLocalRing Matrix in
 
+open IsLocalRing Matrix in
 theorem _root_.GlobalTheory.RegularQuotient.exists_extend (Λ : Type) [CommRing Λ]
     [IsRegularLocalRing Λ] {ι : Type} [Fintype ι]
     (τ : ι → maximalIdeal Λ)
@@ -124,14 +173,15 @@ private theorem linearIndependent_toCotangent_of_sum_mem_maximalIdeal_sq (A : Ty
     have he : (⟨∑ j, a j * x j, hmem⟩ : maximalIdeal A) =
         ∑ j, a j • (⟨x j, hx j⟩ : maximalIdeal A) := by
       ext; simp [Submodule.coe_sum, smul_eq_mul]
+
     rw [he, map_sum, ← hg]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_smul, ← ha j, ← IsLocalRing.ResidueField.algebraMap_eq, algebraMap_smul]
   rw [← ha i, IsLocalRing.residue_eq_zero_iff]
   exact hind a hsum i
 
-open IsLocalRing Matrix in
 
+open IsLocalRing Matrix in
 theorem _root_.GlobalTheory.RegularQuotient.quotient_span_range : ∀ (A : Type) [CommRing A] [IsRegularLocalRing A] (d k : ℕ)
     (x : Fin k → A),
     ringKrullDim A = ((d + k : ℕ) : WithBot ℕ∞) → (∀ i, x i ∈ maximalIdeal A) →

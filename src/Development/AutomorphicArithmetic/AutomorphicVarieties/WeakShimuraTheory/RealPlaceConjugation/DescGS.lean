@@ -1,5 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RbUVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.FerreroWashington
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RbUVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.QuadraticExtensions.ModulusAdjoinISqrtNegPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC ReciprocityTheory.Gal IsLocalRing UpperTheory.V.Base UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws UpperTheory.V.Two
 open scoped Classical
@@ -9,7 +51,7 @@ private theorem continuous_of_right_invariant_open_subgroup {Γ X : Type*} [Grou
     (hf : ∀ g, ∀ h ∈ H, f (g * h) = f g) : Continuous f := by
   refine continuous_iff_continuousAt.2 fun g => ?_
   have ht : Filter.Tendsto (fun x => g⁻¹ * x) (nhds g) (nhds 1) := by
-    have := (continuous_mul_left g⁻¹).tendsto g
+    have := (continuous_const_mul g⁻¹).tendsto g
     simpa using this
   have hev : ∀ᶠ x in nhds g, f x = f g := by
     filter_upwards [ht (hH.mem_nhds H.one_mem)] with x hx
@@ -83,7 +125,7 @@ theorem UpperTheory.V.Ws.exists_descent_to_galoisGroupUnramifiedOutside :
           intro g h
           funext m
           show ρ (g * h) m + z (g * h) = ρ g (ρ h m + z h) + z g
-          rw [hzc, map_mul, Module.End.mul_apply, map_add]
+          rw [hzc, map_mul, Module.End.mul_apply, map_add (f := _)]
           abel }
     have hkerφ : ∀ g, g ∈ φ.ker ↔ z g = 0 ∧ ∀ m, ρ g m = m := by
       intro g

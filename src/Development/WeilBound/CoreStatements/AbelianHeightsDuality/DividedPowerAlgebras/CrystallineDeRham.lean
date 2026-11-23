@@ -1,8 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.IsNilpotentOfIsNilDP
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.TagIso
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.IsDPMorphismId
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
+module
+
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.IsDPMorphismId
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.AcycOfCoprod
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.IsNilpotentOfIsNilDP
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.TagIso
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -41,10 +82,10 @@ theorem acyc_NT (T : Tag (dp0 R) s (chartOpen s)) :
   have hu : ∀ {a b : D} (f : a ⟶ b), u f ≫ c b = c a := fun f ↦
     congrArg Tag.Hom.f (CostructuredArrow.w f)
   have ext : ∀ {a b : D} (f g : a ⟶ b), u f = u g → f = g := fun f g h ↦
-    CostructuredArrow.hom_ext _ _ (ObjectProperty.hom_ext _ (Tag.hom_ext h))
+    CostructuredArrow.hom_ext _ _ (ObjectProperty.hom_ext _ (Tag.Hom.ext h))
   let hom : ∀ (a b : D) (φ : a.left.obj.T ⟶ b.left.obj.T) (_ : chartOpen s a.left.obj.k ≤ chartOpen s b.left.obj.k)
       (_ : φ ≫ c b = c a), a ⟶ b := fun a b φ h e ↦
-    CostructuredArrow.homMk (ObjectProperty.homMk (⟨φ, h⟩ : Tag.Hom _ _)) (Tag.hom_ext e)
+    CostructuredArrow.homMk (ObjectProperty.homMk (⟨φ, h⟩ : Tag.Hom _ _)) (Tag.Hom.ext e)
   choose P i j hP hl hun using fun a : D ↦ exists_coprod T.k a.left.obj.T a.left.property (hle a) n hn
   choose q hq using fun a : D ↦ (hun a T.T hT (c a) a₀).exists
   let d : D := mk _ (bas_inN T.k) (bas_le T.k.1) a₀

@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
-import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightMemWZero
-import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DualWeylEqEvalAtOneSmulExtremalOfRowWeight
 import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDrowLemmas
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DualWeylEqEvalAtOneSmulExtremalOfRowWeight
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.HighestWeightMemWZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility
 
@@ -38,7 +82,7 @@ theorem nablaBdd_rowDeg_bounds {M : ℕ} (ν : Fin (M + 1) → ℕ) (f : MvPolyn
       exact mem_support_iff.mp hm
     · unfold rowDeg
       refine Finset.sum_congr rfl fun s _ => ?_
-      exact Finsupp.mapDomain_apply hinj m (c, s)
+      exact Finsupp.mapDomain_apply_of_injective hinj m (c, s)
   constructor
   · obtain ⟨h1, h2, h3⟩ := key (Equiv.swap c 0)
     have dom := (GlobalTheory.DualWeyl.rowDeg_dominated_of_mem_nabla ν _ h1 _ h2).1 1
@@ -77,12 +121,12 @@ theorem nablaBdd : NablaBdd := by
         Formalism.CohomologicalDescent.LR.der (M + 1) (M + 1) ⟨c, hc⟩ ⟨c, hc⟩ (y : MvPolynomial (Fin (M + 1) × Fin (M + 1)) ℚ) := by
     intro c hc y
     unfold eV
-    rw [dif_pos ⟨hc, hc⟩]
+    rw [dite_eq_left ⟨hc, hc⟩]
     rfl
-  have hc := congrArg (fun y : dualWeyl ℚ (M + 1) (M + 1) ν => coeff m (y : MvPolynomial (Fin (M + 1) × Fin (M + 1)) ℚ)) hx
-  simp only [Submodule.coe_sub, Submodule.coe_smul, hea a ha, hea b hb, coeff_sub,
-    Formalism.CohomologicalDescent.LR.coeff_der_diag, coeff_smul, smul_eq_mul, Formalism.GradedWeylDivisibility.ldrow_weight_rowW] at hc
-  have hne : coeff m (x : MvPolynomial (Fin (M + 1) × Fin (M + 1)) ℚ) ≠ 0 := mem_support_iff.mp hm
+  have hc := congrArg (fun y : dualWeyl ℚ (M + 1) (M + 1) ν => AddMonoidAlgebra.coeff (y : MvPolynomial (Fin (M + 1) × Fin (M + 1)) ℚ) m) hx
+  simp only [Submodule.coe_sub, Submodule.coe_smul, hea a ha, hea b hb, MvPolynomial.coeff_sub,
+    Formalism.CohomologicalDescent.LR.coeff_der_diag, MvPolynomial.coeff_smul, smul_eq_mul, Formalism.GradedWeylDivisibility.ldrow_weight_rowW] at hc
+  have hne : AddMonoidAlgebra.coeff (x : MvPolynomial (Fin (M + 1) × Fin (M + 1)) ℚ) m ≠ 0 := mem_support_iff.mp hm
   have key : (((rowDeg m ⟨a, ha⟩ : ℕ) : ℚ) - ((rowDeg m ⟨b, hb⟩ : ℕ) : ℚ)) = (n : ℚ) := by
     apply mul_right_cancel₀ hne
     rw [sub_mul]

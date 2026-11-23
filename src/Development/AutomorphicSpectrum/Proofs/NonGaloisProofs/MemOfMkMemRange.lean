@@ -1,9 +1,59 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Formalism.SharpRestriction.LevelLetterCocycles.ChainRows
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Definitions.NonGaloisLines.TopLine
-import Development.AutomorphicSpectrum.Proofs.NonGaloisProofs.CupFlipContinuousCocycleStatement
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism Formalism.ConjugateSelfDual Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Module GlobalTheory.CompanionTheory.LocDual
 
 namespace GlobalTheory.CompanionTheory.LocDual.ExactAnn
@@ -198,7 +248,7 @@ theorem exists_pairing (Z : Submodule k E) (Z' : Submodule k E') (M C : Submodul
         rw [Submodule.coe_smul, smul_sub, mul_smul] }
   refine ⟨LinearMap.mk₂ k (fun a b => f ⟨cup a b, hM a a.2 b b.2⟩) ?_ ?_ ?_ ?_, ?_⟩
   · intro a a' b
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     ext
     simp
@@ -208,7 +258,7 @@ theorem exists_pairing (Z : Submodule k E) (Z' : Submodule k E') (M C : Submodul
     ext
     simp
   · intro a b b'
-    rw [← map_add]
+    rw [← map_add (f := _)]
     congr 1
     ext
     simp
@@ -242,7 +292,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
 def cocSub : Submodule LL (G × G → LL) where
   carrier := {z | Continuous z ∧ ReciprocityTheory.Def.d2 (charRep (cycLL PD LL)) z = 0}
   zero_mem' := ⟨continuous_const, map_zero _⟩
-  add_mem' := fun ha hb => ⟨ha.1.add hb.1, by rw [map_add, ha.2, hb.2, add_zero]⟩
+  add_mem' := fun ha hb => ⟨ha.1.add hb.1, by rw [map_add (f := _), ha.2, hb.2, add_zero]⟩
   smul_mem' := fun c _ ha => ⟨ha.1.const_smul c, by rw [map_smul, ha.2, smul_zero]⟩
 
 def cobSub : Submodule LL (G × G → LL) where
@@ -264,9 +314,6 @@ def cupBil (ρ' : Representation LL G V') (P : V →ₗ[LL] V' →ₗ[LL] LL) :
     (fun r a b => by ext x; simp [cupL])
     (fun a b b' => by ext x; simp [cupL])
     (fun r a b => by ext x; simp [cupL])
-
-theorem cupBil_apply (ρ' : Representation LL G V') (P : V →ₗ[LL] V' →ₗ[LL] LL) (a : G → V)
-    (b : G → V') : cupBil ρ' P a b = cupL ρ' P a b := rfl
 
 end Cup
 

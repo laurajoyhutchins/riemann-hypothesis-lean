@@ -1,10 +1,58 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsNumberFieldPointOfCmPeriodLattice
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CountablePointsOfOnto
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsNumberFieldPointOfCmPeriodLattice
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsNumberFieldPointOfCountable
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CmPointClosed
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsCmEllipticCurveWithPeriod
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsCmEllipticCurveWithPeriod
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CmPointClosed
-import Development.WeilBound.CoreStatements.SesquilinearFractions.GPureSpan
+public import Development.WeilBound.CoreStatements.SesquilinearFractions.GPureSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open Matrix GlobalTheory GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl
@@ -20,7 +68,7 @@ theorem sgnRt_eq_sign_mul {E : Type} [Field E] [NumberField E] [IsCMField E] (H 
   cases b <;> simp [sgnRt, pureTypeSign]
 
 open GlobalTheory.CM GlobalTheory.PointAlg ReciprocityTheory.GeometryOfNumbersTheory IsDedekindDomain in
-set_option maxHeartbeats 1000000 in
+
 theorem family_pure_periods_span : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (l : Level H) (Xo : Moduli D l) (c : Coeff l) (g : ℕ) (ty : Fin g → (E →+* ℂ)) (FU : FamilyUnif Xo (algebraMap (KA l) ℂ) ty) (i : Fin FU.n) (P : (FU.Di i).La →+ (Fin g → ℂ)) (hP : IsPeriod (FU.Di i) ty P) (n : ℕ), 0 < n → (∀ y : (FU.Di i).La, ∃ a ∈ PureType.lat hP (sgnRt H true), ∃ b ∈ PureType.lat hP (sgnRt H false), n • y = a + b) → ∃ (K₁ : IntermediateField ℚ ℂ) (hk : KA l ≤ K₁) (y : Sp K₁ ⟶ Xo.X), FiniteDimensional ℚ K₁ ∧ y ≫ Xo.s = spMap (IntermediateField.inclusion hk).toRingHom ∧ spMap (algebraMap K₁ ℂ) ≫ y = FU.u i P := by
   intro E _ _ _ H D l Xo cc g ty FU i Pe hP nn hnn hfi
   have hC := GlobalTheory.cmCurve_closed
@@ -40,7 +88,7 @@ theorem family_pure_periods_span : ∀ (E : Type) [Field E] [NumberField E] [IsC
   obtain ⟨v₀, hv₀, -⟩ := PureType.exists_tangent_over f hπ (hv.1 0)
   obtain ⟨u₀, hu⟩ := PureType.exists_isThetaUnif hT PC
   have hLL : LBIso PC.L (P.L.pull (ψ ≫ π)) :=
-    LBIso.trans PC.isLB (pull_isLB P₀.isLB ψ) (pull_isLB P.isLB _) hLC
+    LBIso.trans PC.isLB (LB.isLB_pull P₀.isLB ψ) (LB.isLB_pull P.isLB _) hLC
       (LBIso.chartPull (chartPullPull P₀.L ψ ψ rfl) (chartPullSame P.L _ _ _ ψ fun _ => rfl) hL₀)
   obtain ⟨c, hc0, hc⟩ := hcm PC (ψ ≫ π) ⟨hgC.trans hg₀, (hψ.comp hπ).congr (spMap_comp_spMap _ _) rfl, hLL.symm⟩ u₀
   rw [hw] at hc
@@ -84,8 +132,47 @@ theorem family_pure_periods_span : ∀ (E : Type) [Field E] [NumberField E] [IsC
       · rw [Category.assoc, hy, spMap_comp_spMap]
         exact congrArg spMap (RingHom.ext fun x => ρ.commutes _)
       obtain ⟨t', ⟨m'⟩⟩ : ∃ t' : SAB H (Sp ℂ), Nonempty (SABMap t' Xo.univ.t (spMap ρ.toRingHom ≫ y)) := by
-        obtain ⟨_, _, _, _, _, m', -⟩ := sabPull Out.CubePf.cubePull (spMap ρ.toRingHom ≫ y) Xo.univ.t
-        exact ⟨_, ⟨m'⟩⟩
+        let f := spMap ρ.toRingHom ≫ y
+        let t := Xo.univ.t
+        have h := isGrpPullback_pullback t.G f
+        obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := Out.CubePf.cubePull _ _ t.G _ (cubeMapOf h) t.PP t.cub
+        have hact : ∀ a, ((OAct.pullback f t.G t.act).act a).left ≫ pullback.fst t.G.hom f =
+            pullback.fst t.G.hom f ≫ (t.act.act a).left := fun a => pullback.lift_fst _ _ _
+        have pa : ∀ {T : Over (Sp ℂ)} (x : T ⟶ (Over.pullback f).obj t.G) a,
+            pushPt h.1.w (x ≫ (OAct.pullback f t.G t.act).act a) = pushPt h.1.w x ≫ t.act.act a := fun x a =>
+          Over.OverMorphism.ext (by
+            show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+            rw [Category.assoc, hact, Category.assoc])
+        have hsemi : IsSemiAbelian ((Over.pullback f).obj t.G) := by
+          refine { comm := ?_, smooth := ?_, separated := ?_, quasiCompact := ?_, geomConnected := ?_, fibres := ?_ }
+          · have := t.semi.comm; infer_instance
+          · have := t.semi.smooth; change Smooth (pullback.snd t.G.hom f); infer_instance
+          · have := t.semi.separated; change IsSeparated (pullback.snd t.G.hom f); infer_instance
+          · have := t.semi.quasiCompact; change QuasiCompact (pullback.snd t.G.hom f); infer_instance
+          · have := t.semi.geomConnected; change GeometricallyConnected (pullback.snd t.G.hom f); infer_instance
+          · intro Ω _ _ q
+            obtain ⟨E⟩ := t.semi.fibres Ω (q ≫ f)
+            exact ⟨torusExtOfIso (pullCompIso q f t.G) E⟩
+        refine ⟨⟨(Over.pullback f).obj t.G, hsemi,
+          OAct.pullback f t.G t.act, (cubeMapOf h).rigLB t.PP hL hr, c', hs t.sym, ?_, ?_⟩,
+          ⟨⟨cubeMapOf h, h, rfl, hact, hc'⟩⟩⟩
+        · intro a
+          let U := lift (pushPt h.1.w (fst ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+            (pushPt h.1.w (snd ((Over.pullback f).obj t.G) ((Over.pullback f).obj t.G)))
+          refine LBIso.chartPull (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+            (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (t.adj a)
+          · fin_cases i
+            · exact (pa _ a).trans (by simp [U])
+            · simp [U]
+          · fin_cases i
+            · simp [U]
+            · exact (pa _ _).trans (by simp [U])
+        · let U := pushPt h.1.w (𝟙 ((Over.pullback f).obj t.G))
+          refine LBIso.chartPull (chartPullPull t.PP.L _ U.left (Category.id_comp _))
+            (chartPullLinComb t.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) t.prim
+          fin_cases i
+          · simp [U]
+          · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
       let κ := m.cart.1.lift m'.φ (t'.G.hom ≫ spMap ρ.toRingHom) (by rw [m'.cart.1.w, Category.assoc])
       have hγ : IsGrpPullback t'.G t.G (spMap ρ.toRingHom) κ :=
         m.cart.cancel (m'.cart.congr rfl (m.cart.1.lift_fst _ _ _).symm) (m.cart.1.lift_snd _ _ _)

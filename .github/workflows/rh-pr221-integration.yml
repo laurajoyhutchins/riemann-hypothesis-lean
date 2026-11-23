@@ -1,0 +1,168 @@
+name: Stage community RH PR 221 compression
+
+# One-time, pinned and fail-closed integration on a research branch.
+# This job measures source only. It does not claim a trusted kernel rebuild.
+on:
+  push:
+    branches: [research/upstream-pr221-integration-20261123]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rh-pr221-integration
+  cancel-in-progress: true
+
+jobs:
+  integrate:
+    if: "!contains(github.event.head_commit.message, '[integrated-pr221]')"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact fork research branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: research/upstream-pr221-integration-20261123
+          fetch-depth: 1
+          persist-credentials: true
+          submodules: false
+      - name: Detect already-integrated upstream source
+        id: source-state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test "$(git rev-parse HEAD:src)" = 84e5e9889142f86f47b3156b54009f65fc274f82; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "Full PR 221 source already integrated; not replaying patch." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Test census before touching proof source
+        run: python3 tools/rh_pr221_census.py --test
+      - name: Reproduce the complete two-tree patch, stage and measure
+        if: steps.source-state.outputs.already != 'true'
+        shell: bash
+        env:
+          UPSTREAM_MERGE: 98cc3736f046abae883d8cda839c84f3004257a7
+          UPSTREAM_FIRST_PARENT: 97ed34c57bc0d159b51c77a9e7e2ba59932b1256
+          UPSTREAM_SECOND_PARENT: af9ae2a2f8f14d910823f837d4771792dc60cbb8
+          INTEGRATION_BRANCH: research/upstream-pr221-integration-20261123
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config commit.gpgsign false
+          git remote add community https://github.com/leanprover-community/riemann-hypothesis.git
+          echo 'Fetching immutable upstream merge and its parents'
+          git fetch --no-tags --depth=2 community "$UPSTREAM_MERGE"
+          parents="$(git show -s --format='%P' "$UPSTREAM_MERGE")"
+          test "$parents" = "$UPSTREAM_FIRST_PARENT $UPSTREAM_SECOND_PARENT"
+          mkdir -p reports
+          python3 tools/rh_pr221_census.py --output "$RUNNER_TEMP/fork-original.json"
+          base="$(git rev-parse HEAD)"
+          printf 'Fork original source branch base: %s\n' "$base" >> "$GITHUB_STEP_SUMMARY"
+          # Fail closed: our fork's main source must be untouched since its
+          # original archive import. All local Lean proof work lives on
+          # separate branches and must never be silently overwritten.
+          src_tree="$(git rev-parse HEAD:src)"
+          if test "$src_tree" != b41b516b1f7baee4d83ced235ecc71fd43c97695; then
+            echo "Unexpected fork source tree: $src_tree" >&2
+            exit 1
+          fi
+          if test -n "$(git ls-files -- scripts)"; then
+            echo "Fork has independent scripts; refusing to overwrite" >&2
+            exit 1
+          fi
+          # Keep the fork's docs, tools, CI, and existing PRs. Import only
+          # community source + the source's matching build inputs. This
+          # first commit is NOT counted as savings from PR #221.
+          git restore --source="$UPSTREAM_FIRST_PARENT" --staged --worktree --             src lakefile.toml lake-manifest.json lean-toolchain scripts
+          python3 tools/rh_pr221_census.py --before "$RUNNER_TEMP/fork-original.json"             --output "$RUNNER_TEMP/pre221-upstream-sync.json"
+          git commit -m "sync: import community pre-221 Lean source and build inputs"             -m "Source: leanprover-community/riemann-hypothesis@97ed34c57bc0d159b51c77a9e7e2ba59932b1256"             -m "Fork source tree equals original archive import b41b516b1f7baee4d83ced235ecc71fd43c97695."
+          python3 tools/rh_pr221_census.py --output "$RUNNER_TEMP/pr221-before.json"
+          git diff --no-ext-diff --binary "$UPSTREAM_FIRST_PARENT" "$UPSTREAM_MERGE" -- > "$RUNNER_TEMP/pr221-full.patch"
+          git diff --numstat "$UPSTREAM_FIRST_PARENT" "$UPSTREAM_MERGE" -- > "$RUNNER_TEMP/upstream-numstat.txt"
+          wc -l "$RUNNER_TEMP/upstream-numstat.txt" >> "$GITHUB_STEP_SUMMARY"
+          if ! git apply --3way --index "$RUNNER_TEMP/pr221-full.patch" > "$RUNNER_TEMP/apply.log" 2>&1; then
+            {
+              echo '## Upstream integration blocked by conflicts'
+              echo 'No proof changes were committed.'
+              echo 'Unmerged files:'
+              git diff --name-only --diff-filter=U || true
+              echo 'Apply diagnostics:'
+              cat "$RUNNER_TEMP/apply.log"
+            } | tee "$RUNNER_TEMP/pr221-conflict.txt" >> "$GITHUB_STEP_SUMMARY"
+            cp "$RUNNER_TEMP/pr221-conflict.txt" reports/pr221-conflict.txt
+            cp "$RUNNER_TEMP/pr221-before.json" reports/pr221-before.json
+            exit 1
+          fi
+          python3 - <<'PY'
+          import re, subprocess, sys
+          diff = subprocess.check_output(
+              ['git', 'diff', '--cached', '--no-ext-diff', '--unified=0', '--', 'src'],
+              text=True, errors='replace')
+          introduced = [(i, line[:220]) for i, line in enumerate(diff.splitlines(), 1)
+                        if line.startswith('+') and not line.startswith('+++')
+                        and re.search(r'\b(?:sorry|admit|axiom)\b', line)]
+          if introduced:
+              print('Potential proof holes in newly added source lines:', introduced[:30])
+              sys.exit(1)
+          print('No newly added lines containing sorry/admit/axiom (textual screen only).')
+          PY
+          python3 tools/rh_pr221_census.py --before "$RUNNER_TEMP/pr221-before.json" \
+            --output reports/rh-pr221-integration.json
+          git diff --cached --numstat > "$RUNNER_TEMP/fork-applied-numstat.txt"
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          p = pathlib.Path('reports/rh-pr221-integration.json')
+          d = json.loads(p.read_text())
+          d['upstream_pr'] = 221
+          d['fork_original_census'] = json.loads(pathlib.Path(
+              os.environ['RUNNER_TEMP'], 'fork-original.json').read_text())
+          d['upstream_pre221_sync'] = json.loads(pathlib.Path(
+              os.environ['RUNNER_TEMP'], 'pre221-upstream-sync.json').read_text())
+          d['upstream_merge'] = os.environ['UPSTREAM_MERGE']
+          d['upstream_first_parent'] = os.environ['UPSTREAM_FIRST_PARENT']
+          d['upstream_second_parent'] = os.environ['UPSTREAM_SECOND_PARENT']
+          d['fork_base'] = subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          d['method'] = 'complete parent1..merge git binary patch, git apply --3way --index'
+          d['changed_paths_in_upstream_diff'] = len(pathlib.Path(
+              os.environ['RUNNER_TEMP'], 'upstream-numstat.txt').read_text().splitlines())
+          d['changed_paths_applied_in_fork'] = len(pathlib.Path(
+              os.environ['RUNNER_TEMP'], 'fork-applied-numstat.txt').read_text().splitlines())
+          d['verification'] = {
+            'census_self_test': 'passed',
+            'source_patch': 'applied with zero conflicts',
+            'new_proof_gap_token_screen': 'passed',
+            'elaborated_theorem_type_equality': 'not checked',
+            'axiom_equivalence': 'not checked',
+            'independent_clean_kernel_rebuild': 'not checked',
+          }
+          p.write_text(json.dumps(d,indent=2,sort_keys=True)+'\n')
+          print(p.read_text())
+          PY
+          git add reports/rh-pr221-integration.json
+          if git diff --cached --quiet; then
+            echo 'Patch was already present: no additional source commit.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "proof: integrate entire community PR #221 patch [integrated-pr221]" \
+              -m "Source: leanprover-community/riemann-hypothesis@98cc3736f046abae883d8cda839c84f3004257a7" \
+              -m "Base: 97ed34c57bc0d159b51c77a9e7e2ba59932b1256"
+          fi
+          git push origin "HEAD:refs/heads/$INTEGRATION_BRANCH"
+          {
+            echo '## PR #221 source integration'
+            echo "Applied SHA: $UPSTREAM_MERGE"
+            echo "Integration branch head: $(git rev-parse HEAD)"
+            echo 'Census and textual checks passed; no Lean build or axiom comparison was performed.'
+            cat reports/rh-pr221-integration.json
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload conflict diagnosis if integration did not finish
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pr221-conflict-and-baseline
+          path: reports/pr221-conflict.txt
+          if-no-files-found: ignore
+          retention-days: 7

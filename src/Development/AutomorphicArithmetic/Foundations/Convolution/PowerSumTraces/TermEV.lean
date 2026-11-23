@@ -1,26 +1,70 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TvDefs
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TwistFactorAlt
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.LocGalEx
-import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OlocEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TwistFactor
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CommPrj
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.InnerOps
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.NormIntLe
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.EigBasic
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TwistY
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.LocGalEx
 import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OccursBasics
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TwistY
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.EigBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CommPrj
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.LocEmb
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.NormIntLe
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.InnerOps
-import Development.AutomorphicArithmetic.TwistedTraces.ExistsBoundDimSimultaneousLocalEigenspaceOfOpenC
-import Development.AutomorphicArithmetic.TwistedTraces.ExistsPosConstEigenspaceBoundOfSplitCMDatum
-import Development.AutomorphicArithmetic.TwistedTraces.EigenspaceFactorizationOverNonsplitPlacesCMDatum
-import Development.AutomorphicArithmetic.TwistedTraces.TraceEigenspaceOfSelfAdjointInvariantSubspaces
-import Development.AutomorphicArithmetic.TwistedTraces.HeckeOperatorSummandWeightCMDatum
-import Development.AutomorphicArithmetic.TwistedTraces.ProdLocalOperatorsMemFixedAndOffNCMDatum
-import Development.AutomorphicArithmetic.TwistedTraces.FiniteDimensionalEigenspaceInfFixedOffNCMDatum
-import Development.AutomorphicArithmetic.TwistedTraces.GaloisTwistCommuteArchOperatorAndOffProjection
-import Development.AutomorphicArithmetic.TwistedTraces.ExistsUniqueEigenlineOfRankOneOccurs
-import Development.AutomorphicArithmetic.TwistedTraces.IntegralOpEigenlineScalarOfTwist
-import Development.AutomorphicArithmetic.TwistedTraces.TrOnProdEigenProjectionsEqTrOnJointEigenspace
-import Development.AutomorphicArithmetic.TwistedTraces.ArchimedeanBaseChangeTraceComparison
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.OlocEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TwistFactorAlt
+public import Development.AutomorphicArithmetic.TwistedTraces.ArchimedeanBaseChangeTraceComparison
+public import Development.AutomorphicArithmetic.TwistedTraces.EigenspaceFactorizationOverNonsplitPlacesCMDatum
+public import Development.AutomorphicArithmetic.TwistedTraces.ExistsPosConstEigenspaceBoundOfSplitCMDatum
+public import Development.AutomorphicArithmetic.TwistedTraces.ExistsUniqueEigenlineOfRankOneOccurs
+public import Development.AutomorphicArithmetic.TwistedTraces.FiniteDimensionalEigenspaceInfFixedOffNCMDatum
+public import Development.AutomorphicArithmetic.TwistedTraces.GaloisTwistCommuteArchOperatorAndOffProjection
+public import Development.AutomorphicArithmetic.TwistedTraces.HeckeOperatorSummandWeightCMDatum
+public import Development.AutomorphicArithmetic.TwistedTraces.IntegralOpEigenlineScalarOfTwist
+public import Development.AutomorphicArithmetic.TwistedTraces.ProdLocalOperatorsMemFixedAndOffNCMDatum
+public import Development.AutomorphicArithmetic.TwistedTraces.TrOnProdEigenProjectionsEqTrOnJointEigenspace
+public import Development.AutomorphicArithmetic.TwistedTraces.TraceEigenspaceOfSelfAdjointInvariantSubspaces
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.PSConjSpaceR
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicArithmetic.Foundations.Convolution.PowerSumTraces.TvDefs
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain Filter GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Automorphic.AutomorphicForm
 open GroundTheory.Automorphic.CuspidalSpectrum GlobalTheory.IndefiniteRowSideFullHecke.IwahoriDoubleCosets GlobalTheory.PRep Formalism.BasicNotions GlobalTheory.CuspRep GlobalTheory.SmGL PositivityTheory.Rg.Tf.Core PositivityTheory.Rg.Tf.Geo GroundTheory.Global GroundTheory.Global.SemiLocal UpperTheory.ConvolutionTheory UpperTheory.ConvolutionTheory.L1 UpperTheory.ConvolutionTheory.C
@@ -104,8 +148,8 @@ private theorem prj_self' {V : Submodule ℂ H} {v : H} (hv : v ∈ V) : prj V v
   Submodule.starProjection_eq_self_iff.2 (Submodule.le_topologicalClosure V hv)
 
 private theorem mem_eigIn' {W : Submodule ℂ H} {A : H →L[ℂ] H} {x : ℝ} {v : H} :
-    v ∈ eigIn W A x ↔ v ∈ W ∧ A v = (x : ℂ) • v := by
-  simp [eigIn, Module.End.mem_eigenspace_iff]
+    v ∈ eigIn W A x ↔ v ∈ W ∧ A v = (x : ℂ) • v :=
+  Submodule.mem_inf.trans (and_congr_right fun _ => Module.End.mem_eigenspace_iff)
 
 private theorem trOn_congr {Y : Submodule ℂ H} (hY : IsClosed (Y : Set H)) {A B : H →L[ℂ] H} (h : ∀ v ∈ Y, A v = B v) :
     trOn Y A = trOn Y B := by
@@ -118,7 +162,7 @@ private theorem trOn_congr {Y : Submodule ℂ H} (hY : IsClosed (Y : Set H)) {A 
 end Hil
 
 section Ops
-variable {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+variable {K : Type} [Field K] [NumberField K] {n : ℕ} (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 private theorem oloc_comm {w : Pl K} [MeasurableSpace (Gw n w)] {m : Measure (Gw n w)} {ψ : Gw n w → ℂ}
     {Bo : LL μ →L[ℂ] LL μ} (h : IsOloc μ w m ψ Bo) (R : LL μ →L[ℂ] LL μ) (hR : ∀ g, Commute R (rhoL μ w g)) :
@@ -164,7 +208,7 @@ private theorem fixL_comm {w : Pl K} {J : Subgroup (Gw n w)} (O : LL μ →L[ℂ
   rw [← this, hv x hx]
 
 private theorem oinf_comm (ν : Measure (archGroup K n)) [ν.IsHaarMeasure] (a : TI K n) (C : LL μ →L[ℂ] LL μ)
-    (h : ∀ g, Commute C (rightRegularRep (rationalGLOne K n) μ (archP K n g))) : Commute C (Oinf μ ν a) := by
+    (h : ∀ g, Commute C (rightRegularRep (rationalGLOne (K := K) (n := n)) μ (archP K n g))) : Commute C (Oinf μ ν a) := by
   have key : C ∘L Oinf μ ν a = Oinf μ ν a ∘L C := by
     refine UnitaryRep.comp_integrated_of_mem_intertwiners _ _ ?_ _
     intro x u
@@ -228,7 +272,7 @@ end Loc
 end UpperTheory.ConvolutionTheory.C.TraceVanishing
 
 open UpperTheory.ConvolutionTheory.C.TraceVanishing in
-set_option maxHeartbeats 3200000 in
+
 theorem UpperTheory.ConvolutionTheory.C.termEV :
     UpperTheory.ConvolutionTheory.C.TermEV := by
   classical
@@ -261,9 +305,7 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
     show ((m u (T.J u))⁻¹ • m u) (T.J u) = 1
     rw [Measure.smul_apply, smul_eq_mul, ENNReal.inv_mul_cancel (h0 u) (ht u)]
   have hbb : ∀ u, bb u ≠ 0 := fun u => Complex.ofReal_ne_zero.2 (ENNReal.toReal_ne_zero.2 ⟨hd0 u, hdt u⟩)
-  set x : ℝ := y ^ (k + 1) with hxd
-  set Oa := Oinf μ νE aE with hOa
-  set O : Fin (k + 1) → LL μ →L[ℂ] LL μ := fun i => OComponent μ (s i) (hs i) νF a with hO
+  let x : ℝ := y ^ (k + 1)
 
   obtain ⟨κ, hκ, hK⟩ := UpperTheory.exists_pos_const_eigenspace_bound_of_split_CMDatum F E σ n hn μ νE aE q w₀ hq T hU
   obtain ⟨c₀, hc₀, hTY⟩ := (UpperTheory.ConvolutionTheory.L1.twistY F E σ hgen k n hk hn μ θ hθ D s hs hposition νE νF b a aE aF harch q w₀ hq T V hV hVθ
@@ -284,7 +326,7 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
         rw [← under_over' (T.mk' (p₂ i)), show (T.mk' (p₂ i)).1 = (T.mk' v).1 from h, under_over']
       exact (hns _ (hm₂ i)).2 (h1 ▸ (Finset.mem_filter.1 hv).2)
   obtain ⟨hZc, hZs, hZa⟩ := UpperTheory.finiteDimensional_eigenspace_inf_fixed_offN_CMDatum F E σ n hn μ νE aE q w₀ T V hV hU x hx.ne'
-  set Z := eigIn (V ⊓ offN μ T) (Oinf μ νE aE) x with hZd
+  let Z := eigIn (V ⊓ offN μ T) (Oinf μ νE aE) x
   have hZV : Z ≤ V := fun f hf => (mem_eigIn'.1 hf).1.1
   have hZo : Z ≤ offN μ T := fun f hf => (mem_eigIn'.1 hf).1.2
   have hoffc : IsClosed (offN μ T : Set (LL μ)) := by
@@ -327,7 +369,7 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
   have hP0 : ∏ i, t0 i ≠ 0 := Finset.prod_ne_zero_iff.2 fun i _ => ht0n i
   have hZ0 : Z ⊓ ⨅ i, eigL μ (w i) (T.J (w i)) (T.χ (w i)) = eigIn (V ⊓ T.typed μ) (Oinf μ νE aE) x := by
     ext f
-    simp only [Submodule.mem_inf, Submodule.mem_iInf, hZd, mem_eigIn', offN, Ty.typed]
+    simp only [Z, Submodule.mem_inf, Submodule.mem_iInf, mem_eigIn', offN, Ty.typed]
     constructor
     · rintro ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩
       refine ⟨⟨h1, fun u => ?_⟩, h3⟩
@@ -344,8 +386,8 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
     · rintro ⟨⟨h1, h2⟩, h3⟩
       exact ⟨⟨⟨h1, fun u _ => h2 u⟩, h3⟩, fun i => h2 _⟩
   refine ⟨(κ : ℂ) * x * c₀ * c₁ * (∏ i, bb (w i)) * (∏ i, t0 i)⁻¹, fun hz => ?_, ?_⟩
-  · have h1 : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ.ne'
-    have h2 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
+  · have h1 : (κ : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hκ.ne'
+    have h2 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hx.ne'
     exact mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero (mul_ne_zero h1 h2) hc₀) (hc₁ hz))
       (Finset.prod_ne_zero_iff.2 fun i _ => hbb _)) (inv_ne_zero hP0)
   intro L ψ hfit e l 𝔢 he hsd j sq t hsq htS htN
@@ -360,14 +402,20 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
     exact (UpperTheory.ConvolutionTheory.C.olocEx E n μ _ (mm _) (ψ (p₂ i)) (hfit.test _ (hns _ (hm₂ i)).1)).exists
   choose B₁ hB₁ using hB₁
   choose B₂ hB₂ using hB₂
+  let P₁ : LL μ →L[ℂ] LL μ := (List.ofFn B₁).prod
+  let P₂ : LL μ →L[ℂ] LL μ := (List.ofFn B₂).prod
+  let S : LL μ →L[ℂ] LL μ := P₁ ∘L P₂ ∘L prj (offN μ T)
   have hmmA : ∀ u, (mm u).IsHaarMeasure ∧ mm u (T.J u) = 1 := fun u => ⟨hmmH u, hmm1 u⟩
   obtain ⟨hCa, hCr, hCo, hCV⟩ := UpperTheory.heckeOperator_summand_weight_CMDatum F E σ n μ q w₀ hq T V hV e j r₁ p₁ hm₁ mm hmmA ψ (fun i => hψ₁ _ (hm₁ i)) B₁ hB₁
-  obtain ⟨-, hDr, hDo, -⟩ := UpperTheory.heckeOperator_summand_weight_CMDatum F E σ n μ q w₀ hq T V hV e 0 r₁ p₁ hm₁ mm hmmA ψ (fun i => hψ₁ _ (hm₁ i)) B₁ hB₁
-  have hD1 : (Uiw μ w₀.1 e ^ 0) ∘L (List.ofFn B₁).prod = (List.ofFn B₁).prod := by
-    ext1 f
-    simp
-  rw [hD1] at hDr hDo
-  set C := (Uiw μ w₀.1 e ^ j) ∘L (List.ofFn B₁).prod with hCd
+  obtain ⟨-, hDr₀, hDo₀, -⟩ := UpperTheory.heckeOperator_summand_weight_CMDatum F E σ n μ q w₀ hq T V hV e 0 r₁ p₁ hm₁ mm hmmA ψ (fun i => hψ₁ _ (hm₁ i)) B₁ hB₁
+  have hD1 : (Uiw μ w₀.1 e ^ 0) ∘L P₁ = P₁ :=
+    (congrArg (fun A : LL μ →L[ℂ] LL μ => A ∘L P₁) (pow_zero (Uiw μ w₀.1 e))).trans
+      (ContinuousLinearMap.id_comp P₁)
+  have hDr : ∀ u ∉ T.marked, ∀ g, Commute P₁ (rhoL μ u g) :=
+    fun u hu g => hD1 ▸ hDr₀ u hu g
+  have hDo : ∀ f ∈ offN μ T, P₁ f ∈ offN μ T :=
+    fun f hf => hD1 ▸ hDo₀ f hf
+  let C : LL μ →L[ℂ] LL μ := (Uiw μ w₀.1 e ^ j) ∘L P₁
   have hCO : Commute C (Oinf μ νE aE) := oinf_comm μ νE aE C hCa
   have hRZ : ∀ f ∈ Z, (C ∘L θ.U) f ∈ Z := fun f hf => by
     obtain ⟨⟨h1, h2⟩, h3⟩ := mem_eigIn'.1 (hθZ f hf)
@@ -397,14 +445,15 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
       (hZa r₂ p₂ hp₂ hpr₂ _ fun i => ker_co (T.co _) (T.chr _))
     have e3 := hTY C hCa hCr
     have e4 := hval ψ hψ₁ e he j sq t hsq htS B₁ hB₁
-    rw [← e1, e2, hZ0, e3, e4]
+    exact e1.symm.trans (e2.trans
+      ((congrArg (fun W : Submodule ℂ (LL μ) => trOn W (C ∘L θ.U)) hZ0).trans
+        (e3.trans (congrArg (c₀ * ·) e4))))
 
-  have hAeq : 𝔢.toAmp.A = Oinf μ νE aE ∘L prj (fixF μ (GM.levE L.UE)) := by
-    show Oinf μ 𝔢.ν 𝔢.a₀ ∘L prj (fixF μ 𝔢.U) = _
-    rw [ha, hUl, oinf_congr μ hν]
-  have hpos : 0 ≤ Oinf μ νE aE := by
-    have := 𝔢.pos
-    rwa [ha, oinf_congr μ hν] at this
+  have hArch : Oinf μ 𝔢.ν 𝔢.a₀ = Oinf μ νE aE :=
+    (congrArg (Oinf μ 𝔢.ν) ha).trans (oinf_congr μ hν aE)
+  have hAeq : 𝔢.toAmp.A = Oinf μ νE aE ∘L prj (fixF μ (GM.levE L.UE)) :=
+    congrArg₂ (fun A U => A ∘L prj (fixF μ U)) hArch hUl
+  have hpos : 0 ≤ Oinf μ νE aE := hArch ▸ 𝔢.pos
   have hOsa : ContinuousLinearMap.adjoint (Oinf μ νE aE) = Oinf μ νE aE :=
     (IsSelfAdjoint.of_nonneg hpos).adjoint_eq
   have hOF : ∀ h, Commute (Oinf μ νE aE) (rhoF μ h) := fun h =>
@@ -418,63 +467,56 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
     exact this.symm
   obtain ⟨hlc, hlψ, hle⟩ := UpperTheory.eigenspace_factorization_over_nonsplit_places_CMDatum F E σ n q w₀ hq μ T L ψ hfit hU r₂ p₂ hpr₂
   obtain ⟨hNf, hNo⟩ := UpperTheory.prod_localOperators_mem_fixed_and_offN_CMDatum F E σ n μ q w₀ T r₂ p₂ hp₂ hm₂ mm hmmH ψ (fun i => lvN T L (p₂ i)) hlψ B₂ hB₂
-  set FN : Submodule ℂ (LL μ) := ⨅ i, fixL μ (T.mk' (p₂ i)).1 (lvN T L (p₂ i)) with hFN
+  let N := fun i => fixL μ (T.mk' (p₂ i)).1 (lvN T L (p₂ i))
+  let FN : Submodule ℂ (LL μ) := ⨅ i, N i
   have hFNc : IsClosed (FN : Set (LL μ)) := by
-    rw [hFN, Submodule.coe_iInf]
+    change IsClosed ((⨅ i, N i : Submodule ℂ (LL μ)) : Set (LL μ))
+    rw [Submodule.coe_iInf]
     exact isClosed_iInter fun i => isClosed_fixL μ _ _
-  have hTc : IsClosed ((offN μ T ⊓ FN : Submodule ℂ (LL μ)) : Set (LL μ)) := by
-    rw [Submodule.coe_inf]
-    exact hoffc.inter hFNc
+  have hTc : IsClosed ((offN μ T ⊓ FN : Submodule ℂ (LL μ)) : Set (LL μ)) := hoffc.inter hFNc
   have hcomm : ∀ O' : LL μ →L[ℂ] LL μ, (∀ u g, Commute O' (rhoL μ u g)) → ∀ f ∈ offN μ T ⊓ FN, O' f ∈ offN μ T ⊓ FN := by
     intro O' hO' f hf
     obtain ⟨a1, a2⟩ := Submodule.mem_inf.1 hf
     refine Submodule.mem_inf.2 ⟨?_, ?_⟩
     · simp only [offN, Submodule.mem_iInf] at a1 ⊢
       exact fun u hu => eigL_comm μ O' (hO' u) (a1 u hu)
-    · rw [hFN, Submodule.mem_iInf] at a2 ⊢
-      exact fun i => fixL_comm μ O' (hO' _) (a2 i)
+    · exact (Submodule.mem_iInf N).2 fun i =>
+        fixL_comm μ O' (hO' _) ((Submodule.mem_iInf N).1 a2 i)
   have hmk : ∀ (P : LL μ →L[ℂ] LL μ), (∀ f ∈ offN μ T, P f ∈ offN μ T) → (∀ u ∉ T.marked, ∀ g, Commute P (rhoL μ u g)) →
       ∀ f ∈ offN μ T ⊓ FN, P f ∈ offN μ T ⊓ FN := by
     intro P h1 h2 f hf
     obtain ⟨a1, a2⟩ := Submodule.mem_inf.1 hf
-    refine Submodule.mem_inf.2 ⟨h1 f a1, ?_⟩
-    rw [hFN, Submodule.mem_iInf] at a2 ⊢
-    exact fun i => fixL_comm μ P (h2 _ (hwm i)) (a2 i)
+    exact Submodule.mem_inf.2 ⟨h1 f a1, (Submodule.mem_iInf N).2 fun i =>
+      fixL_comm μ P (h2 _ (hwm i)) ((Submodule.mem_iInf N).1 a2 i)⟩
   have hVc : IsClosed (V : Set (LL μ)) := IsSummandOf.closed hV
-  have hS : ∀ f, ((List.ofFn B₁).prod ∘L (List.ofFn B₂).prod ∘L prj (offN μ T)) f ∈ offN μ T ⊓ FN := fun f =>
+  have hS : ∀ f, S f ∈ offN μ T ⊓ FN := fun f =>
     hmk _ hDo hDr _ ⟨hNo _ (prj_mem' hoffc f), hNf _⟩
-  have hUS : ∀ f, (𝔢.Uq 0 ^ j) (((List.ofFn B₁).prod ∘L (List.ofFn B₂).prod ∘L prj (offN μ T)) f) ∈ offN μ T ⊓ FN := fun f => by
-    rw [hUq]
-    exact hmk C hCo hCr _ ⟨hNo _ (prj_mem' hoffc f), hNf _⟩
+  have hUS_eq (f : LL μ) : (𝔢.Uq 0 ^ j) (S f) = C (P₂ (prj (offN μ T) f)) :=
+    congrArg (fun U : LL μ →L[ℂ] LL μ => (U ^ j) (S f)) hUq
+  have hUS : ∀ f, (𝔢.Uq 0 ^ j) (S f) ∈ offN μ T ⊓ FN := fun f =>
+    (hUS_eq f).symm ▸ hmk C hCo hCr _ ⟨hNo _ (prj_mem' hoffc f), hNf _⟩
   have hY : eigIn (V ⊓ (offN μ T ⊓ FN)) (Oinf μ νE aE) x = Z ⊓ FN := by
     ext f
-    simp only [Submodule.mem_inf, hZd, mem_eigIn']
-    tauto
-  haveI hfd : FiniteDimensional ℂ ↥(eigIn (V ⊓ (offN μ T ⊓ FN)) (Oinf μ νE aE) x) := by
-    rw [hY]
-    exact hZa r₂ p₂ hp₂ hpr₂ _ hlc
+    simp only [Z, Submodule.mem_inf, mem_eigIn']
+    exact ⟨fun h => ⟨⟨⟨h.1.1, h.1.2.1⟩, h.2⟩, h.1.2.2⟩,
+      fun h => ⟨⟨h.1.1.1, h.1.1.2, h.2⟩, h.1.2⟩⟩
+  have hfd : FiniteDimensional ℂ ↥(eigIn (V ⊓ (offN μ T ⊓ FN)) (Oinf μ νE aE) x) :=
+    hY.symm ▸ hZa r₂ p₂ hp₂ hpr₂ _ hlc
   have hred := UpperTheory.trace_eigenspace_of_selfAdjoint_invariant_subspaces (LL μ) (offN μ T ⊓ FN) (fixF μ (GM.levE L.UE)) V hTc hcp.1 hVc hle (Oinf μ νE aE) hOsa
     (hcomm _ fun u g => hOF _) hOFx
     (hcomm _ fun u g => ((UpperTheory.ConvolutionTheory.Tf.innerOps E n μ).2.2.2.1 _ V hVc (IsSummandOf.inv hV)).symm) x (κ : ℂ)
-    (𝔢.Uq 0 ^ j) ((List.ofFn B₁).prod ∘L (List.ofFn B₂).prod ∘L prj (offN μ T)) θ.U hfd
-    (by
-      have := (𝔢.Uq_amp 0).pow_left j
-      rwa [hAeq] at this) hS hUS
+    (𝔢.Uq 0 ^ j) S θ.U hfd
+    (hAeq ▸ (𝔢.Uq_amp 0).pow_left j) hS hUS
   have hRop := hK L ψ hfit r₁ p₁ hp₁ hpr₁ r₂ p₂ hp₂ hpr₂ mm hmmA B₁ B₂ hB₁ hB₂ 𝔢.g hg
-  have hCB : Commute C (List.ofFn B₂).prod := Commute.list_prod_right _ _ fun Bx hBx => by
+  have hCB : Commute C P₂ := Commute.list_prod_right _ _ fun Bx hBx => by
     obtain ⟨i, rfl⟩ := (List.mem_ofFn' _ _).1 hBx
     exact oloc_comm μ (hB₂ i) C (fun g => hCr _ (hwm i) g)
-  have hZFc : IsClosed ((Z ⊓ FN : Submodule ℂ (LL μ)) : Set (LL μ)) := by
-    rw [Submodule.coe_inf]
-    exact hZc.inter hFNc
-  have hsw : trOn (Z ⊓ FN) ((𝔢.Uq 0 ^ j) ∘L ((List.ofFn B₁).prod ∘L (List.ofFn B₂).prod ∘L prj (offN μ T)) ∘L θ.U) =
-      trOn (Z ⊓ FN) ((List.ofFn B₂).prod ∘L (C ∘L θ.U)) := by
+  have hZFc : IsClosed ((Z ⊓ FN : Submodule ℂ (LL μ)) : Set (LL μ)) := hZc.inter hFNc
+  have hsw : trOn (Z ⊓ FN) ((𝔢.Uq 0 ^ j) ∘L S ∘L θ.U) = trOn (Z ⊓ FN) (P₂ ∘L C ∘L θ.U) := by
     refine trOn_congr hZFc fun f hf => ?_
-    have := congrArg (fun S : LL μ →L[ℂ] LL μ => S (θ.U f)) hCB.eq
-    simp only [ContinuousLinearMap.mul_apply] at this
-    simp only [ContinuousLinearMap.comp_apply]
-    rw [prj_self' (hZo (hθZ f hf.1)), hUq]
-    exact this
+    exact (hUS_eq (θ.U f)).trans
+      ((congrArg (fun v : LL μ => C (P₂ v)) (prj_self' (hZo (hθZ f hf.1)))).trans
+        (DFunLike.congr_fun hCB.eq (θ.U f)))
   have hTw : ∀ i, HasTwTrace (mm (w i)) (τ (p₂ i)) (I (p₂ i)) (ψ (p₂ i)) (bb (w i) * t (p₂ i)) := fun i =>
     hasTw_smul _ (hd0 _) (hdt _) (htN _ (hns _ (hm₂ i)).1 (hns _ (hm₂ i)).2)
   have hfac := hTF (fun i => lvN T L (p₂ i)) (fun i => mm (w i)) (fun i => ψ (p₂ i)) B₂ (fun i => bb (w i) * t (p₂ i)) hlc
@@ -488,5 +530,9 @@ theorem UpperTheory.ConvolutionTheory.C.termEV :
     rw [← e3]
     exact (Finset.prod_filter_mul_prod_filter_not T.S _ t).symm
   have hcR : cR = c₀ * (c₁ * sq * ∏ v ∈ T.sp, t v) * (∏ i, t0 i)⁻¹ := (eq_mul_inv_iff_mul_eq₀ hP0).2 hcr
-  rw [hAeq, hRop, hred, hY, hsw, hfac, hprod, hcR, Finset.prod_mul_distrib]
+  refine (congrArg₂ (fun A R => trOn (eigIn V A x) ((𝔢.Uq 0 ^ j) ∘L R ∘L θ.U)) hAeq hRop).trans (hred.trans ?_)
+  refine (congrArg (fun W : Submodule ℂ (LL μ) => (κ : ℂ) * x *
+    trOn W ((𝔢.Uq 0 ^ j) ∘L S ∘L θ.U)) hY).trans ?_
+  refine (congrArg (((κ : ℂ) * x) * ·) (hsw.trans hfac)).trans ?_
+  rw [hprod, hcR, Finset.prod_mul_distrib]
   ring

@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.Prod
+
+@[expose] public section
 
 noncomputable section
 
@@ -196,12 +249,12 @@ theorem pi_iterated_integral_continuous (μ : Measure X) [SigmaFinite μ] [IsFin
           ∑ J' : (∀ v : {v // v ≠ w}, Idx v), (∏ v : {v // v ≠ w}, e v (z v) (I v) (J' v)) * u' J' z := by
       intro z
       simp only [splitM_symm, hsplit]
-      rw [integral_finset_sum _ fun j _ => integrable_finset_sum _ fun J' _ => (hint z j J').const_mul _]
+      rw [MeasureTheory.integral_finsetSum _ fun j _ => MeasureTheory.integrable_finsetSum _ fun J' _ => (hint z j J').const_mul _]
       have hj : ∀ j : Idx w, ∫ t, ∑ J' : (∀ v : {v // v ≠ w}, Idx v), (∏ v : {v // v ≠ w}, e v (z v) (I v) (J' v)) *
             (e w t (I w) j * u ((Equiv.piSplitAt w Idx).symm (j, J')) (splitY w t z)) ∂μ =
           ∑ J' : (∀ v : {v // v ≠ w}, Idx v), (∏ v : {v // v ≠ w}, e v (z v) (I v) (J' v)) *
             ∫ t, e w t (I w) j * u ((Equiv.piSplitAt w Idx).symm (j, J')) (splitY w t z) ∂μ := fun j => by
-        rw [integral_finset_sum _ fun J' _ => (hint z j J').const_mul _]
+        rw [MeasureTheory.integral_finsetSum _ fun J' _ => (hint z j J').const_mul _]
         simp only [integral_const_mul]
       rw [Finset.sum_congr rfl fun j _ => hj j]
       rw [Finset.sum_comm]

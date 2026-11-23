@@ -1,6 +1,55 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.StarOfInv
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.ProductDecompositionHolds
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.DDMulApply
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.StarOfInv
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.DDMulApply
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.InstLocallyCompactSpace
+public import Mathlib.MeasureTheory.Group.ModularCharacter
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NotMidCases
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.ProductDecompositionHolds
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.SubgroupHypothesisHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,8 +130,9 @@ lemma mod_auto (e : GN k r ≃* GN k r) (he : Continuous e) (hs : Continuous e.s
       Measure.map_map he.measurable (measurable_mul_const _)]
     congr 1
     funext x
-    simp only [Function.comp_apply, map_mul]
-  rw [hE, Measure.map_smul, map_rmul, map_rmul, Measure.map_smul, hE, smul_smul, smul_smul] at key
+    exact (map_mul e x g).symm
+  rw [hE, Measure.map_smul s (measurable_mul_const (e g)).aemeasurable,
+    map_rmul, map_rmul, Measure.map_smul _ he.measurable.aemeasurable, hE, smul_smul, smul_smul] at key
   have := smul_cancel key
   rw [mul_comm] at this
   exact mul_right_cancel₀ hs0 this
@@ -362,7 +412,8 @@ theorem nUnimod_core (hB : NWtUpper) (k r : ℕ) (z : Fin (2 * r + k + 1) → �
     he.measurable.mul_const _
   have hsplit : (fun g : GN k r => conjW z hz hT h hh g * Grp.mk m₀ hm₀) =
       (· * Grp.mk m₀ hm₀) ∘ conjW z hz hT h hh := rfl
-  rw [hμ, haarNm_eq, Measure.map_smul, Measure.map_map hΦ Grp.embt.continuous.measurable, hcomp,
+  rw [hμ, haarNm_eq, Measure.map_smul c hΦ.aemeasurable,
+    Measure.map_map hΦ Grp.embt.continuous.measurable, hcomp,
     ← Measure.map_map Grp.embt.continuous.measurable hψ, hsplit,
     ← Measure.map_map (measurable_mul_const _) he.measurable, haar_conj z hz hT h hh, haar_right hB]
 

@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsMahler
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -10,7 +55,7 @@ theorem localMult_ne_zero_of_mem_minimalPrimes {A : Type*} [CommRing A] [IsNoeth
     {J P : Ideal A} (hP : P ∈ J.minimalPrimes) : localMult J P ≠ 0 := by
   have hPp : P.IsPrime := hP.1.1
   unfold localMult
-  rw [dif_pos hPp]
+  rw [dite_eq_left hPp]
   let R := Localization.AtPrime P
   let I : Ideal R := J.map (algebraMap A R)
   have hmin : IsLocalRing.maximalIdeal R ∈ I.minimalPrimes := by
@@ -25,63 +70,5 @@ theorem localMult_ne_zero_of_mem_minimalPrimes {A : Type*} [CommRing A] [IsNoeth
   have : Nontrivial (R ⧸ I) := Ideal.Quotient.nontrivial_iff.mpr hI
   rw [Ne, ENat.toNat_eq_zero, not_or]
   exact ⟨(Module.length_pos (R := R) (M := R ⧸ I)).ne', Module.length_ne_top⟩
-
-theorem ProperSymm.proof : ProperSymm.Statement := by
-  intro n W u u' hW hu hu' hadm W'' hW'' hlu
-  classical
-  have hval := Finsupp.mem_support_iff.mp hW''
-  simp only [divCycle, fundCycle, Finsupp.onFinset_apply] at hval
-  have hrel : W'' ∈ relComps (W ⊔ span {linForm u'}) := by
-    by_contra h
-    exact hval (if_neg h)
-  obtain ⟨hmin'', hrel''⟩ := hrel
-  have : W''.IsPrime := hmin''.1.1
-  have hle : W ⊔ span {linForm u} ≤ W'' :=
-    sup_le (le_sup_left.trans hmin''.1.2) ((span_singleton_le_iff_mem _).mpr hlu)
-  obtain ⟨W', hW', hW'le⟩ := Ideal.exists_minimalPrimes_le hle
-  have hrel' : IsRelevant W' := by
-    obtain ⟨j, hj⟩ := hrel''
-    exact ⟨j, fun h => hj (hW'le h)⟩
-  have hsupp : W' ∈ (divCycle W u).support := by
-    rw [Finsupp.mem_support_iff]
-    simp only [divCycle, fundCycle, Finsupp.onFinset_apply]
-    rw [if_pos ⟨hW', hrel'⟩]
-    exact localMult_ne_zero_of_mem_minimalPrimes hW'
-  have hu'W' : linForm u' ∉ W' := hadm W' hsupp
-  have : W'.IsPrime := hW'.1.1
-  have : W.IsPrime := hW.isPrime
-  have hWW' : W ≤ W' := le_sup_left.trans hW'.1.2
-  have huW' : linForm u ∈ W' := hW'.1.2 (Ideal.mem_sup_right (Ideal.mem_span_singleton_self _))
-  have hu'W'' : linForm u' ∈ W'' :=
-    hmin''.1.2 (Ideal.mem_sup_right (Ideal.mem_span_singleton_self _))
-  let f := Ideal.Quotient.mk W
-  have hf : Function.Surjective f := Ideal.Quotient.mk_surjective
-  have hker : RingHom.ker f = W := Ideal.mk_ker
-  have : (W'.map f).IsPrime := Ideal.map_isPrime_of_surjective hf (by rw [hker]; exact hWW')
-  have : (W''.map f).IsPrime :=
-    Ideal.map_isPrime_of_surjective hf (by rw [hker]; exact hWW'.trans hW'le)
-  have : IsDomain (MvPolynomial (Fin n) ℂ ⧸ W) := Ideal.Quotient.isDomain W
-  have : (⊥ : Ideal (MvPolynomial (Fin n) ℂ ⧸ W)).IsPrime := Ideal.isPrime_bot
-  have h0 : (⊥ : Ideal (MvPolynomial (Fin n) ℂ ⧸ W)) < W'.map f := by
-    refine bot_lt_iff_ne_bot.mpr fun h => hu ?_
-    have hm := Ideal.mem_map_of_mem f huW'
-    rw [h, Ideal.mem_bot] at hm
-    exact Ideal.Quotient.eq_zero_iff_mem.mp hm
-  have h1 : W'.map f < W''.map f := by
-    refine lt_of_le_of_ne (Ideal.map_mono hW'le) fun h => hu'W' ?_
-    have hm := Ideal.mem_map_of_mem f hu'W''
-    rw [← h, ← Ideal.mem_comap, Ideal.comap_map_of_surjective' f hf, hker,
-      sup_eq_left.mpr hWW'] at hm
-    exact hm
-  have e1 := Ideal.height_add_one_le_of_lt_of_isPrime h0
-  have e2 := Ideal.height_add_one_le_of_lt_of_isPrime h1
-  have e3 : (W''.map f).height ≤ 1 := Ideal.map_height_le_one_of_mem_minimalPrimes hmin''
-  rw [Ideal.height_bot, zero_add] at e1
-  have h2 : (2 : ℕ∞) ≤ 1 :=
-    calc (2 : ℕ∞) = 1 + 1 := by norm_num
-      _ ≤ (W'.map f).height + 1 := by gcongr
-      _ ≤ (W''.map f).height := e2
-      _ ≤ 1 := e3
-  exact absurd h2 (by norm_num)
 
 end GroundTheory.Heights₂.Heights

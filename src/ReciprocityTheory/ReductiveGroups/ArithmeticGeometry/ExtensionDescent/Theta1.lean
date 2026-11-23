@@ -1,5 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaPt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -22,21 +64,6 @@ def one1 (x : T ⟶ (zeroPolAV S).A) (k : ℤ) :
     LB.Gen (LB.LinComb (zeroPolAV S).L (Y := T.left) (K := Fin 1) (fun _ => x.left) (fun _ => k)) :=
   ⟨fun _ => 1⟩
 
-macro "ones" : tactic => `(tactic| (repeat (first | erw [map_one] | erw [one_zpow] | erw [one_pow] | erw [inv_one] | erw [_root_.mul_one] | erw [_root_.one_mul])))
-
-example : IsTorsFrame (zeroPolAV S) (rig1 S) 3 (1 : T ⟶ (zeroPolAV S).A) (one1 S T 1 1) := by
-  refine ⟨one_pow _, ?_, ⟨fun _ => 1⟩, ?_, ?_, ?_⟩
-  · intro i j
-    erw [linComb_triv_g, _root_.one_mul]; dsimp only [one1]; repeat erw [map_one]
-  · intro i j
-    erw [linComb_triv_g, _root_.one_mul]; repeat erw [map_one]
-  · intro j j' _ _ _
-    dsimp only [LB.pullGen, LB.mulGen, LB.invGen, rigPow, rig1]
-    ones
-  · intro j j' _ _ _
-    dsimp only [LB.pullGen, LB.mulGen, rigT, powFrame, rig1, one1]
-    ones
-
 def theta1 (k : ℤ) : ThetaGrp (zeroPolAV S).A (zeroPolAV S).L k T where
   pt := 1
   φ := ⟨fun _ => 1⟩
@@ -44,44 +71,11 @@ def theta1 (k : ℤ) : ThetaGrp (zeroPolAV S).A (zeroPolAV S).L k T where
     intro i j
     erw [linComb_triv_g, _root_.one_mul]; repeat erw [map_one]
 
-example (k : ℤ) : IsThetaFrame (zeroPolAV S) (rig1 S) k (theta1 S T k) ⟨fun _ => 1⟩ := by
-  refine ⟨?_, ?_⟩
-  · intro i j
-    erw [linComb_triv_g, _root_.one_mul]; repeat erw [map_one]
-  · intro j j' _ _ _
-    dsimp only [LB.pullGen, LB.mulGen, rigT, rig1]
-    erw [show (theta1 S T k).φ.s = fun _ => 1 from rfl]
-    ones
-
-example (a : ℤ) : (fun _ => 1) ∈ SecM (zeroPolAV S).A (zeroPolAV S).L a T := by
-  intro i j
-  erw [linComb_triv_g]; simp only [Units.val_one]; ones; rfl
-
 def oneSec (a : ℤ) (T : Over S) : LB.Sec (LPow (zeroPolAV S).A (zeroPolAV S).L a T) :=
-  ⟨fun _ => 1, by intro i j; erw [linComb_triv_g]; simp only [Units.val_one]; ones; rfl⟩
-
-example (N m : ℕ) : (oneSec S (N : ℤ) T).f ∈ VVsub (zeroPolAV S) N m T := by
-  refine Submodule.subset_span ⟨(oneSec S N T).compat, ?_⟩
-  intro p
-  refine ⟨⊤, trivial, oneSec S N _, ?_, ?_⟩
-  · intro j
-    simp only [SecM.toSec, oneSec]
-    (repeat erw [map_one])
-  · refine ⟨1, fun _ => 1, fun _ => oneSec S N _, fun _ => ?_, ?_⟩
-    · refine ⟨oneSec S 1 _, oneSec S N _, ⟨fun _ => 1⟩, theta1 S _ N, ?_, ?_, ?_⟩
-      · intro i j
-        erw [linComb_triv_g, _root_.one_mul]; repeat erw [map_one]
-      · intro j
-        simp only [oneSec, Units.val_one]
-        (repeat erw [map_one]); (try erw [_root_.one_mul])
-      · intro j
-        simp only [oneSec, Units.val_one]
-        (repeat erw [map_one]); (try erw [_root_.one_mul])
-    · intro j
-      dsimp only [oneSec]
-      simp only [liftFun, map_one, Finset.sum_const, Finset.card_univ, Fintype.card_fin, one_smul,
-        _root_.mul_one]
-
-example : de (zeroPolAV S) T := 0
+  ⟨fun _ => 1, by
+    intro i j
+    erw [linComb_triv_g]
+    simp only [Units.val_one, map_one]
+    exact (_root_.one_mul _).symm⟩
 
 end ReciprocityTheory.ChartRestriction.G.Out.InhVV

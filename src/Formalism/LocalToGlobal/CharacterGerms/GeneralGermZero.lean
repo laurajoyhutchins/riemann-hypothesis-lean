@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.CharacterGerms.CoeffSingleSubstOfLowDegree
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.IntSubst
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieDefs
+public import Formalism.LocalToGlobal.CharacterGerms.AbstractGermZeroCondition
+public import Formalism.LocalToGlobal.CharacterGerms.CoeffSingleSubstOfLowDegree
+public import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,21 +70,6 @@ def gsumK {σ ι : Type} (F : κ → MvPowerSeries (Fin 2 × κ) C) (Γ : ι →
     List ι → κ → MvPowerSeries σ C
   | [] => 0
   | c :: l => addK F (Γ c) (gsumK F Γ l)
-
-private theorem cc_subst_lemma {σ τ A : Type} [Finite σ] [CommRing A] (a : σ → MvPowerSeries τ A)
-    (ha : ∀ s, MvPowerSeries.constantCoeff (a s) = 0) (f : MvPowerSeries σ A) :
-    MvPowerSeries.constantCoeff (MvPowerSeries.subst a f) = MvPowerSeries.constantCoeff f := by
-  rw [MvPowerSeries.constantCoeff_subst (MvPowerSeries.hasSubst_of_constantCoeff_zero ha)]
-  rw [finsum_eq_single _ 0]
-  · simp
-  · intro e he
-    obtain ⟨s, hs⟩ : ∃ s, e s ≠ 0 := by
-      by_contra h
-      push_neg at h
-      exact he (Finsupp.ext h)
-    rw [map_finsuppProd]
-    simp only [map_pow, ha, Finsupp.prod]
-    rw [Finset.prod_eq_zero (Finsupp.mem_support_iff.mpr hs) (zero_pow hs), smul_zero]
 
 theorem pairK_const {σ : Type} {a b : κ → MvPowerSeries σ C} (ha : ∀ j, MvPowerSeries.constantCoeff (a j) = 0)
     (hb : ∀ j, MvPowerSeries.constantCoeff (b j) = 0) :
@@ -152,8 +188,9 @@ theorem sysK_P {g : Fin 2} (hg : X.CartHyp V g) (S : Sys (RawChart.cart hg)) :
       show _ = MvPowerSeries.subst (fun _ : Unit => (MvPowerSeries.X c : MvPowerSeries (I g) C)) _
       rw [MvPowerSeries.subst_comp_subst_apply (MvPowerSeries.hasSubst_of_constantCoeff_zero (hγ0 c)) (hXc c)]
       rfl
+
     rw [e1, hlog c i, ← PowerSeries.coe_substAlgHom
-      (PowerSeries.HasSubst.of_constantCoeff_zero (MvPowerSeries.constantCoeff_X c)), map_sum]
+    (PowerSeries.HasSubst.of_constantCoeff_zero (MvPowerSeries.constantCoeff_X c)), map_sum]
     simp only [map_smul]
   set P : κ → MvPowerSeries (I g) C := gsumK F Γ Finset.univ.toList with hPdef
   have hP0 : ∀ j, MvPowerSeries.constantCoeff (P j) = 0 := gsumK_const hF0 Γ hΓ0 _
@@ -166,7 +203,9 @@ theorem sysK_P {g : Fin 2} (hg : X.CartHyp V g) (S : Sys (RawChart.cart hg)) :
   refine ⟨P, hP0, gsumK_int hF0 hFI Γ hΓ0 hΓI _, ?_, ?_⟩
   · intro j c
     have hl1 := coeff_single_subst_lin P hP0 (X.lg j) j (hlin j) c
+
     rw [← hl1, hPlg j, map_sum]
+
     simp only [map_sum, MvPowerSeries.coeff_smul, coeff_single_substX_tyS hl, mul_ite, mul_zero]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun c' _ => ?_
@@ -194,7 +233,9 @@ theorem sysK_P {g : Fin 2} (hg : X.CartHyp V g) (S : Sys (RawChart.cart hg)) :
         congr 1
         funext u
         rw [MvPowerSeries.subst_X hts]
+
       rw [e1, hPlg i, ← MvPowerSeries.coe_substAlgHom hts, map_sum]
+
       simp only [map_sum, map_smul, MvPowerSeries.coe_substAlgHom hts, e2]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun c' _ => ?_
@@ -228,10 +269,12 @@ theorem general_germ_zero
   refine AbstractGermZero.abstract_germ_zero V I t t₂ (fun g k => ∑ x, w g x k • P g x) (fun g k => ∑ x, w g x k • P₂ g x)
     (fun g c => (hT g).1 c) (fun g c => (hT₂ g).1 c) ?_ ?_ ?_ ?_ ?_ ?_ ?_
   · intro g k
+
     rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, map_sum]
     simp [MvPowerSeries.coeff_smul, hP0]
   · intro g k μ
     show (0 : WithTop ℝ) ≤ V.v (MvPowerSeries.coeff μ (∑ x, w g x k • P g x))
+
     rw [map_sum]
     refine v_sum_lemma X F hF0 hFI hadd hlin hexlg V.v _ _ (fun x _ => ?_)
     have h1 : (0 : WithTop ℝ) ≤ V.v (w g x k) := hw0 g x k
@@ -242,6 +285,7 @@ theorem general_germ_zero
     have hm : (Matrix.of fun k c : I g => MvPowerSeries.coeff (Finsupp.single c 1) (∑ x, w g x k • P g x)) =
         (Matrix.of (S g).tan).transpose := by
       ext k c
+
       simp only [Matrix.of_apply, Matrix.transpose_apply, map_sum, MvPowerSeries.coeff_smul, hPlin, Finset.mul_sum]
       rw [Finset.sum_comm]
       have hr : ∀ c' : I g, ∑ x, w g x k * (X.u g c' x * (S g).tan c c') =
@@ -253,10 +297,12 @@ theorem general_germ_zero
     rw [hm, Matrix.det_transpose]
     exact (S g).unimod
   · intro g k
+
     rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, map_sum]
     simp [MvPowerSeries.coeff_smul, hP0₂]
   · intro g k μ
     show (0 : WithTop ℝ) ≤ V.v (MvPowerSeries.coeff μ (∑ x, w g x k • P₂ g x))
+
     rw [map_sum]
     refine v_sum_lemma X F hF0 hFI hadd hlin hexlg V.v _ _ (fun x _ => ?_)
     have h1 : (0 : WithTop ℝ) ≤ V.v (w g x k) := hw0 g x k
@@ -267,6 +313,7 @@ theorem general_germ_zero
     have hm : (Matrix.of fun k c : I g => MvPowerSeries.coeff (Finsupp.single c 1) (∑ x, w g x k • P₂ g x)) =
         (Matrix.of (S₂ g).tan).transpose := by
       ext k c
+
       simp only [Matrix.of_apply, Matrix.transpose_apply, map_sum, MvPowerSeries.coeff_smul, hPlin₂, Finset.mul_sum]
       rw [Finset.sum_comm]
       have hr : ∀ c' : I g, ∑ x, w g x k * (X.u g c' x * (S₂ g).tan c c') =
@@ -281,6 +328,7 @@ theorem general_germ_zero
     have ht : MvPowerSeries.HasSubst (t g) := MvPowerSeries.hasSubst_of_constantCoeff_zero (hT g).1
     have ht₂ : MvPowerSeries.HasSubst (t₂ g) := MvPowerSeries.hasSubst_of_constantCoeff_zero (hT₂ g).1
     rw [← MvPowerSeries.coe_substAlgHom ht, ← MvPowerSeries.coe_substAlgHom ht₂]
+
     simp only [map_sum, map_smul]
     simp only [MvPowerSeries.coe_substAlgHom, hPeq g (t g) (hT g), hPeq₂ g (t₂ g) (hT₂ g)]
 

@@ -1,5 +1,52 @@
-import Formalism.AdmissibleDesigns.GlobalIndexTheoremPlacesOfRNAdm
-import Formalism.AdmissibleDesigns.DesignOfAdmittedObjects
+module
+
+public import Formalism.AdmissibleDesigns.GlobalIndexTheoremPlacesOfRNAdm
+public import Formalism.SharpRestriction.LevelLetterCocycles.DistinctEigenvalueCornerPerturbationOfBlocks
+public import Formalism.SharpRestriction.LevelLetterCocycles.LargeLevelLemmas
+public import Formalism.AdmissibleDesigns.DesignOfAdmittedObjects
+import Formalism.SharpRestriction.LevelLetterCocycles.SecondPropositionEveryLocalisation
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RamifiedBlockProofs.FinrankRangeEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +100,7 @@ theorem cInt_spec {P Q : Matrix (Fin D.R.nV) (Fin D.R.nV) (KK D.nd i)} {A : MatN
     (h : ∃ M : MatN D.nd i, M.map (toK D.nd i) = P * A.map (toK D.nd i) * Q) :
     (cInt i P Q A).map (toK D.nd i) = P * A.map (toK D.nd i) * Q := by
   unfold cInt
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   exact h.choose_spec
 
 def phiC (P Q : Matrix (Fin D.R.nV) (Fin D.R.nV) (KK D.nd i)) (a : D.nd.X i → MatN D.nd i) :
@@ -84,6 +131,7 @@ theorem inR_phiC {P Q : Matrix (Fin D.R.nV) (Fin D.R.nV) (KK D.nd i)}
     simp only [Finset.sum_apply]
     change (toK D.nd i).mapMatrix (∑ k, f k π • rO D.nd i (rN i r ρ π) π (g k)) =
       P * (toK D.nd i).mapMatrix (∑ k, f k π • rO D.nd i r π (g k)) * Q
+
     rw [map_sum, map_sum, Finset.mul_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [RingHom.mapMatrix_apply, RingHom.mapMatrix_apply, map_smul_toK, map_smul_toK, hconj, Matrix.mul_smul,
@@ -329,19 +377,10 @@ theorem design_normalized (S : IdempotentChoiceData D.nd i) (hG : GoodCongruence
   rw [← blockPoly_map, blockPoly_eq, ← hroots x', prod_Icc_fin D.nd D.R.t, Polynomial.map_prod]
   refine Finset.prod_congr rfl (fun c _ => ?_)
   simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C]
-  try rfl
 
 theorem design_normalized_of_admitted (hA : LargeLevelLemmas.adm51 i r ρ π) (hZ : π ∈ D.nd.Z i) : InertiaElementIdempotentChoice D.nd (rN i r ρ π) π := by
   obtain ⟨S, hG⟩ := hA hZ
   exact design_normalized i r ρ π S hG
-
-theorem inputs_normalized (hA : LargeLevelLemmas.admitted i r ρ π) (hZ : π ∈ D.nd.Z i) :
-    NormAt D.nd (rN i r ρ π) ρ π ∧
-      (∀ (γ : GE D.nd) (k : ℕ), (fun x : D.nd.X i => ((rO D.nd i (rN i r ρ π) x γ).charpolyRev).coeff k) ∈ D.nd.T i) ∧
-      Submodule.span (kk D.nd i) (Set.range (mapM (IsLocalRing.residue (D.nd.O i)) (rhoO D.nd i ρ π))) = ⊤ ∧
-      InertiaElementIdempotentChoice D.nd (rN i r ρ π) π := by
-  obtain ⟨a51, -, -, -, g1, -, g3, -, -, -, -, -, -, -, -, -, dcm, -⟩ := hA
-  exact ⟨normAt_rN i r ρ π, admG1_rN i r ρ π dcm g1, g3.2.2, design_normalized_of_admitted i r ρ π a51 hZ⟩
 
 end D51b
 

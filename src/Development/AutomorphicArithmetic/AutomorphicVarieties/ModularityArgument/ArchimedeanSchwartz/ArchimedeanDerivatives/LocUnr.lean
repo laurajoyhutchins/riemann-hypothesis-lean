@@ -1,6 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.HodgeTateFromSandwich
-import GroundTheory.AutomorphicForms.GL2.GJStandardLDual
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ArchimedeanSchwartz.HodgeTateFromSandwich
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Formalism.DoubleCosetMeasures.Statement
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLDual
 import GroundTheory.GlobalFields.TateThesis.RootNumberLocalPlace
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 attribute [-instance] Formalism.DoubleCosetMeasures.instMeasGL
 open scoped Classical
@@ -39,8 +85,8 @@ private theorem anti_sq :
   ext i j
   simp [Matrix.one_apply]
 
-variable (F n) in
 
+variable (F n) in
 private def wl : GL (Fin n) F :=
   ⟨(1 : Matrix (Fin n) (Fin n) F).submatrix Fin.rev id, (1 : Matrix (Fin n) (Fin n) F).submatrix Fin.rev id, anti_sq, anti_sq⟩
 
@@ -145,7 +191,7 @@ private theorem evalAt_flip (z : Fin n → ℂˣ) (h : SphericalHecke μ (F := F
   rw [← integral_mul_left_eq_self φ (wl F n), ← integral_comp_transposeInv μ fun g => φ (wl F n * g)]
   congr 1
   funext g
-  simp only [hφ]
+  dsimp only [φ]
   rw [exponent_conj, monomial_conj, flip_apply, (HeckeAlgebraLevel.val_mem _ _ h _ wl_mem _).1]
 
 private theorem exists_pair {V : Type} [AddCommGroup V] [Module ℂ V] {π : Representation ℂ (GL (Fin n) F) V}

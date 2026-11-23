@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsLocallyPrincipalCoprime
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsLocallyPrincipalCoprime
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -76,7 +130,7 @@ theorem exists_local_mult {B : Subring L} {M : AddSubgroup L} {ι : Type} [Finty
     have e : b • a j = c • a i := by rw [Subring.smul_def, Subring.smul_def, smul_eq_mul, smul_eq_mul, hbc]
     rw [Submodule.mem_colon_singleton, e]
     exact Submodule.mem_span_singleton.mpr ⟨c, rfl⟩
-  obtain ⟨t, htK, htm⟩ := SetLike.not_le_iff_exists.mp hK
+  obtain ⟨t, htK, htm⟩ := IsConcreteLE.not_le_iff_exists.mp hK
   refine ⟨t / a i, i, ?_, t, by field_simp, htm⟩
   intro z hz
   have hzN := mem_span_of_local hloc hz
@@ -95,8 +149,9 @@ theorem exists_local_mult {B : Subring L} {M : AddSubgroup L} {ι : Type} [Finty
   rw [this]
   exact c.2
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 noncomputable def toB (B : Subring L) (x : L) : B := if h : x ∈ B then ⟨x, h⟩ else 0
 
 theorem coe_toB {B : Subring L} {x : L} (h : x ∈ B) : (toB B x : L) = x := by
@@ -104,9 +159,10 @@ theorem coe_toB {B : Subring L} {x : L} (h : x ∈ B) : (toB B x : L) = x := by
 
 end LocallyPrincipalCoprimeAlt
 
-open LocallyPrincipalCoprimeAlt in
 
+open LocallyPrincipalCoprimeAlt in
 theorem LocallyPrincipalCoprime.proof : LocallyPrincipalCoprime.Statement := by
+  classical
   intro L _ _ B M ι _ a hfin hBM haM hden hloc hM s hs
   obtain ⟨m₀, hm₀⟩ := Ideal.exists_maximal B
   have : Nonempty ι := ⟨(hloc m₀ hm₀).choose⟩
@@ -123,7 +179,7 @@ theorem LocallyPrincipalCoprime.proof : LocallyPrincipalCoprime.Statement := by
       rintro ⟨m', hm'S, hm'm⟩
       have h' := (memS m').mp (Finset.mem_of_mem_erase hm'S)
       exact Finset.ne_of_mem_erase hm'S (h'.1.eq_of_le hmS'.1.ne_top hm'm)
-    obtain ⟨e, he, hem⟩ := SetLike.not_le_iff_exists.mp hnle
+    obtain ⟨e, he, hem⟩ := IsConcreteLE.not_le_iff_exists.mp hnle
     exact ⟨e, fun m' hm' => Finset.inf_le (f := id) hm' he, hem⟩
   choose! e he hem using havoid
   set γ : L := (s : L) * g m₀ + ∑ m ∈ S, (e m : L) * g m with hγdef

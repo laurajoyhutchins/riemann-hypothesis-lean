@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ReductionEval
-import GroundTheory.GlobalFields.ComplexMultiplication.RespectsAddUniversal
-import GroundTheory.GlobalFields.ComplexMultiplication.BaseChange
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.RespectsAddUniversal
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChange
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionMap
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionEval
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -107,7 +151,9 @@ theorem pushPt_redU_some (V : WeierstrassCurve 𝒪) [V.IsElliptic]
     show ((V.map (liftJ W)).map (algebraMap _ (liftField K W))).toAffine.Nonsingular _ _
     rw [← map_baseChange_eq_map_of K V (liftJ W) (liftField K W) (liftJ_algebraMap K W)]
     exact h
-  have n := nonsingular_residue_of_isElliptic (liftField K W) (V.map (liftJ W)) h₁.1
+  have n : (curveRed (V.map (liftJ W))).Nonsingular (residue _ x) (residue _ y) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (equation_residue (V.map (liftJ W)) (equation_of_map (liftField K W) _ h₁.1))
   obtain ⟨h', e⟩ := pointMapRing_some (pushField W) ((V.map (liftJ W)).map (residue _)) n
   refine ⟨by rw [← pushCurve_eq W V]; exact h', ?_⟩
   have e₁ : pointCongr (map_baseChange_eq_map_of K V (liftJ W) (liftField K W)

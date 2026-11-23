@@ -1,6 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SInternal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SpanMono
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EntryMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SInternal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SpanMono
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
@@ -86,13 +129,13 @@ private theorem limit_graded {O S X K : Type} [CommRing O] [CommRing S] [Algebra
         simp
       | add a b ha hb iha ihb =>
         change L ((⟨f, _⟩ : B) * (⟨a, ha⟩ + ⟨b, hb⟩)) = L ⟨f, _⟩ * L (⟨a, ha⟩ + ⟨b, hb⟩)
-        rw [mul_add, map_add, map_add, mul_add, iha, ihb]
+        rw [mul_add, map_add (f := _), map_add (f := _), mul_add, iha, ihb]
     | zero =>
       change L ((0 : B) * ⟨y, hy⟩) = L 0 * L ⟨y, hy⟩
       simp
     | add a b ha hb iha ihb =>
       change L (((⟨a, ha⟩ : B) + ⟨b, hb⟩) * ⟨y, hy⟩) = L (⟨a, ha⟩ + ⟨b, hb⟩) * L ⟨y, hy⟩
-      rw [add_mul, map_add, map_add, add_mul, iha, ihb]
+      rw [add_mul, map_add (f := _), map_add (f := _), add_mul, iha, ihb]
   have hone : L 1 = 1 := by
     have h1 : (1 : S) ∈ 𝒜 0 := SetLike.GradedOne.one_mem
     have e : (1 : B) = ⟨1, mem_gradedSub 𝒜 h1⟩ := rfl
@@ -158,7 +201,7 @@ private theorem vanish_mono {O S K H : Type} [CommRing O] [CommRing S] [Algebra 
   | add x y hx hy ihx ihy =>
     intro hA
     have e : (⟨x + y, hA⟩ : A) = ⟨x, hspan hx⟩ + ⟨y, hspan hy⟩ := rfl
-    rw [e, map_add, ihx, ihy, add_zero]
+    rw [e, map_add (f := _), ihx, ihy, add_zero]
   | smul a x hx ih =>
     intro hA
     have e : (⟨a • x, hA⟩ : A) = a • (⟨x, hspan hx⟩ : A) := rfl

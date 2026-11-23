@@ -1,9 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerLast
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsMoreTail
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.InterNumRestrictSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraLast
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ExistsSumEqOneOfMulEqOne
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerLast
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsMoreTail
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.InterNumRestrictSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsExtraLast
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ExistsSumEqOneOfMulEqOne
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeMIdealOverGraph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -17,8 +62,8 @@ section Generic
 
 variable {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} [∀ a, Fintype (ι a)] {k : Type} [Field k]
 
-omit [Fintype K] [DecidableEq K] [∀ a, Fintype (ι a)] in
 
+omit [Fintype K] [DecidableEq K] [∀ a, Fintype (ι a)] in
 theorem X_mem_mIdealOver_iff {Ω : Type} [Field Ω] [Algebra k Ω] (y : (Σ a, ι a) → Ω) (p : Σ a, ι a) :
     (X p : NumbersDVR.MRing ι k) ∈ mIdealOver k y ↔ y p = 0 := by
   change mConeMapOver k y (X p) = 0 ↔ _
@@ -28,8 +73,8 @@ def genPtOf (W : Ideal (NumbersDVR.MRing ι k)) [W.IsPrime] :
     (Σ a, ι a) → FractionRing (NumbersDVR.MRing ι k ⧸ W) :=
   fun p => algebraMap _ _ (Ideal.Quotient.mk W (X p))
 
-omit [Fintype K] [DecidableEq K] [∀ a, Fintype (ι a)] in
 
+omit [Fintype K] [DecidableEq K] [∀ a, Fintype (ι a)] in
 theorem aeval_genPtOf (W : Ideal (NumbersDVR.MRing ι k)) [W.IsPrime] (g : NumbersDVR.MRing ι k) :
     aeval (genPtOf W) g = algebraMap _ (FractionRing (NumbersDVR.MRing ι k ⧸ W)) (Ideal.Quotient.mk W g) := by
   have h : (aeval (genPtOf W) : NumbersDVR.MRing ι k →ₐ[k] FractionRing (NumbersDVR.MRing ι k ⧸ W)) =
@@ -53,10 +98,11 @@ theorem mIdealOver_genPtOf (W : Ideal (NumbersDVR.MRing ι k)) [W.IsPrime] (hh :
     rw [← sum_weightedHomogeneousComponent (NumbersDVR.blockWeight ι) f,
       finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f)]
     refine Ideal.sum_mem _ fun b _ => (hz _).mp ?_
-    rw [← coeff_mConeMapOver, h, coeff_zero]
+    rw [← coeff_mConeMapOver, h, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
   · intro hf
     ext e
-    rw [coeff_zero, ← Finsupp.equivFunOnFinite_symm_coe e, coeff_mConeMapOver]
+    rw [AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply,
+      ← Finsupp.equivFunOnFinite_symm_coe e, coeff_mConeMapOver]
     exact (hz _).mpr (hh f hf _)
 
 end Generic

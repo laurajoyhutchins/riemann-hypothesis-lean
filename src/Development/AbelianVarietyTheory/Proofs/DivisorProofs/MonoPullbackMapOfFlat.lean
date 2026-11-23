@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsLocalizedModuleGermLinearPointOfPrime
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.IsLocalizedModuleGermLinearPointOfPrime
+public import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry TopologicalSpace Opposite
 
@@ -38,10 +81,10 @@ def skyPresheaf : (X.Opens)ᵒᵖ ⥤ Ab.{u} where
   map f := AddCommGrpCat.ofHom
     { toFun := fun m h ↦ m ⟨leOfHom f.unop h.down⟩, map_zero' := rfl, map_add' := fun _ _ ↦ rfl }
 
-instance (U : (X.Opens)ᵒᵖ) : Module (X.ringCatSheaf.val.obj U) ((skyPresheaf x M).obj U) :=
+instance (U : (X.Opens)ᵒᵖ) : Module (X.ringCatSheaf.obj.obj U) ((skyPresheaf x M).obj U) :=
   inferInstanceAs (Module Γ(X, U.unop) (Obj x U.unop M))
 
-def skyPresheafOfModules : PresheafOfModules.{u} X.ringCatSheaf.val :=
+def skyPresheafOfModules : PresheafOfModules.{u} X.ringCatSheaf.obj :=
   PresheafOfModules.ofPresheaf (skyPresheaf x M) fun U V f r m ↦ funext fun h ↦ by
     have e := X.presheaf.germ_res_apply f.unop x h.down (r : Γ(X, U.unop))
     exact congrArg (· • m ⟨leOfHom f.unop h.down⟩) e.symm
@@ -59,8 +102,8 @@ def sky : X.Modules where
   val := skyPresheafOfModules x M
   isSheaf := skyPresheaf_isSheaf x M
 
-variable {x} in
 
+variable {x} in
 def skyPresheafMap {M N : ModuleCat.{u} (X.presheaf.stalk x)} (g : M ⟶ N) :
     skyPresheaf x M ⟶ skyPresheaf x N where
   app U := AddCommGrpCat.ofHom
@@ -73,24 +116,11 @@ def skyFunctor : ModuleCat.{u} (X.presheaf.stalk x) ⥤ X.Modules where
     (M₂ := skyPresheafOfModules x N) (skyPresheafMap g)
     fun U r m ↦ funext fun h ↦ g.hom.map_smul _ (m h)⟩
 
-@[simp]
-theorem skyFunctor_map_app {M N : ModuleCat.{u} (X.presheaf.stalk x)} (g : M ⟶ N) (U : X.Opens)
-    (m : Γ(sky x M, U)) (h : PLift (x ∈ U)) :
-    ((skyFunctor x).map g).app U m h = g (m h) := rfl
-
-@[simp]
-theorem sky_map_apply {U V : X.Opens} (i : V ⟶ U) (m : Γ(sky x M, U)) (h : PLift (x ∈ V)) :
-    (sky x M).presheaf.map i.op m h = m ⟨leOfHom i h.down⟩ := rfl
-
 def stalkFunctor : X.Modules ⥤ ModuleCat.{u} (X.presheaf.stalk x) where
   obj F := ModuleCat.of _ (F.presheaf.stalk x)
   map φ := ModuleCat.ofHom (GlobalTheory.QCoh.stalkLinear φ x)
   map_id F := by ext1; exact GlobalTheory.QCoh.stalkLinear_id F x
   map_comp φ ψ := by ext1; exact GlobalTheory.QCoh.stalkLinear_comp φ ψ x
-
-@[simp]
-theorem stalkFunctor_map {F G : X.Modules} (φ : F ⟶ G) :
-    (stalkFunctor x).map φ = ModuleCat.ofHom (GlobalTheory.QCoh.stalkLinear φ x) := rfl
 
 end GlobalTheory.SkyMod
 
@@ -110,10 +140,6 @@ def unitApp (F : X.Modules) : F ⟶ sky x (ModuleCat.of _ (F.presheaf.stalk x)) 
         funext h
         exact F.presheaf.germ_res_apply i.unop x h.down s }
     (fun U r s ↦ funext fun h ↦ GlobalTheory.QCoh.germ_smul F x h.down r s)⟩
-
-@[simp]
-theorem unitApp_app (F : X.Modules) (U : X.Opens) (s : Γ(F, U)) (h : PLift (x ∈ U)) :
-    (unitApp x F).app U s h = F.presheaf.germ U x h.down s := rfl
 
 def counitAb (M : ModuleCat.{u} (X.presheaf.stalk x)) :
     (sky x M).presheaf.stalk x ⟶ AddCommGrpCat.of M :=
@@ -187,8 +213,8 @@ end GlobalTheory.SkyMod
 
 theorem GlobalTheory.SkyMod.nonempty_adjunction : ∀ (X : Scheme.{0}) (x : X), Nonempty (GlobalTheory.SkyMod.stalkFunctor x ⊣ GlobalTheory.SkyMod.skyFunctor x) := fun _ x ↦ ⟨GlobalTheory.SkyMod.adjunction x⟩
 
-open GlobalTheory.SkyMod in
 
+open GlobalTheory.SkyMod in
 theorem GlobalTheory.SkyMod.nonempty_sky_pushforward_iso : ∀ (X Y : Scheme.{0}) (f : X ⟶ Y) (x : X), Nonempty (GlobalTheory.SkyMod.skyFunctor x ⋙ Scheme.Modules.pushforward f ≅ ModuleCat.restrictScalars (f.stalkMap x).hom ⋙ GlobalTheory.SkyMod.skyFunctor (f x)) := by
   intro X Y f x
   have key : ∀ (M : ModuleCat.{0} (X.presheaf.stalk x)) (U : Y.Opens) (r : Γ(Y, U))
@@ -201,8 +227,8 @@ theorem GlobalTheory.SkyMod.nonempty_sky_pushforward_iso : ∀ (X Y : Scheme.{0}
     ⟨PresheafOfModules.homMk (𝟙 _) (fun U r m ↦ funext fun h ↦ (key M U.unop r m h).symm)⟩,
     rfl, rfl⟩) (fun g ↦ rfl)⟩
 
-open GlobalTheory.SkyMod in
 
+open GlobalTheory.SkyMod in
 theorem GlobalTheory.mono_pullback_map_of_flat : ∀ (X Y : Scheme.{0}) (f : X ⟶ Y) [Flat f] (G G' : Y.Modules)
     (φ : G ⟶ G') [Mono φ], Mono ((Scheme.Modules.pullback f).map φ) := by
   intro X Y f _ G G' φ _

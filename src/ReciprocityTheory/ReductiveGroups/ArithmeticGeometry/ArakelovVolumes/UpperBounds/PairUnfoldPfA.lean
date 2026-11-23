@@ -1,4 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExtFStatementPfB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExtFStatementPfA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExtFStatementPfB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HermitianTraceFormVanishing
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsIntegralCc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.PairUnfoldPf
 
@@ -100,27 +154,16 @@ theorem isOrth_lact {γ : GL (Fin r) E} (hγ : γ ∈ X.Γ) {x0 : Frame X.Ψ r} 
   rw [gram_lact X hγ]
   exact h τ
 
-theorem OmF_lact {γ : GL (Fin r) E} (hγ : γ ∈ X.Γ) (x0 : Frame X.Ψ r) : OmF X (lact γ x0) = OmF X x0 := by
-  ext z
-  simp only [OmF, Set.mem_setOf_eq, cpt_lact, lact_mem_dom_iff X hγ]
-
-theorem densF_lact {γ : GL (Fin r) E} (hγ : γ ∈ X.Γ) (x0 : Frame X.Ψ r) (z : V (nd X)) :
-    densF X (lact γ x0) z = densF X x0 z := by
-  simp only [densF, cpt_lact, dmin_lact X hγ]
-
-theorem muF_lact {γ : GL (Fin r) E} (hγ : γ ∈ X.Γ) (x0 : Frame X.Ψ r) : muF X (lact γ x0) = muF X x0 := by
-  simp only [muF, OmF_lact X hγ, densF_lact X hγ]
-
 theorem lact_cont (γ : GL (Fin r) E) : Continuous (lact (Ψ := X.Ψ) (r := r) γ) := by
   refine continuous_pi fun τ => continuous_pi fun a => continuous_pi fun b => ?_
   simp only [lact, mat, Matrix.mul_apply, Matrix.of_apply, Matrix.map_apply]
-  exact continuous_finset_sum _ fun k _ =>
+  exact continuous_finsetSum _ fun k _ =>
     continuous_const.mul ((continuous_apply b).comp ((continuous_apply k).comp (continuous_apply τ)))
 
 theorem cpt_cont (x0 : Frame X.Ψ r) : Continuous (cpt X x0) := by
   refine continuous_pi fun τ => continuous_pi fun a => continuous_pi fun b => ?_
   simp only [cpt, rmul, mat, Matrix.mul_apply, Matrix.of_apply]
-  refine continuous_finset_sum _ fun k _ => continuous_const.mul ?_
+  refine continuous_finsetSum _ fun k _ => continuous_const.mul ?_
   simp only [nmat]
   split_ifs
   · exact PiLp.continuous_apply 2 _ _

@@ -1,9 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.SInvariantToInvariantsEqZeroIff
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerDefs
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Devissage
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerSplit
 import GroundTheory.ProfiniteCohomology.RestrictedRamification.SPicFinite
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
-import GroundTheory.GlobalFields.SUnits
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Devissage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.EqZeroOfBrauerLocalApplyEqZero
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -19,8 +65,8 @@ variable {F Ω : Type u} [Field F] [NumberField F] [Field Ω] [Algebra F Ω] [Is
 variable (S : Set (HeightOneSpectrum (𝓞 F))) (n : ℕ) [NeZero n]
   (hnS : ∀ v ∉ S, ((n : ℕ) : 𝓞 F) ∉ v.asIdeal)
 
-include hnS in
 
+include hnS in
 theorem finite_cohomology_one_rootsOfUnity [Finite S] :
     Finite (cohomology (galRootsOfUnity.{u} F (maxUnramifiedOutside F Ω S) n) 1) := by
   refine (AddMonoidHom.finite_iff_finite_ker_range (kummerPicHom (Ω := Ω) S n)).2 ⟨?_, inferInstance⟩
@@ -42,8 +88,8 @@ theorem finite_cohomology_one_rootsOfUnity [Finite S] :
     simp only at h
     exact Subtype.ext (Subtype.mk.inj h)
 
-include hnS in
 
+include hnS in
 theorem finite_cohomology_two_rootsOfUnity_of_finite
     (hfin : {y : cohomology (galSUnits S (maxUnramifiedOutside F Ω S)) 2 | n • y = 0}.Finite) :
     Finite (cohomology (galRootsOfUnity.{u} F (maxUnramifiedOutside F Ω S) n) 2) := by
@@ -96,7 +142,7 @@ theorem eq_zero_of_nsmul_eq_zero_of_sUnitsBrauer_eq_zero (n : ℕ) (hn0 : n ≠ 
   | _ n ih =>
   by_cases h1 : n = 1
   · subst h1
-    simpa using hy
+    exact (one_nsmul y).symm.trans hy
   have hℓ : n.minFac.Prime := Nat.minFac_prime h1
   obtain ⟨a, m, hm, hn⟩ := Nat.exists_eq_pow_mul_and_not_dvd hn0 n.minFac hℓ.ne_one
   have hm0 : m ≠ 0 := by
@@ -107,10 +153,10 @@ theorem eq_zero_of_nsmul_eq_zero_of_sUnitsBrauer_eq_zero (n : ℕ) (hn0 : n ≠ 
     rw [pow_zero, one_mul] at hn
     exact hm (hn ▸ Nat.minFac_dvd n)
   have hmy : m • y = 0 := by
-    refine eq_zero_of_sUnitsBrauer_eq_zero K S _ hℓ
-      (mem_of_dvd_of_mem K S (Nat.minFac_dvd _) hS) (m • y) a ?_ ?_
-    · rw [smul_smul, ← hn, hy]
-    · rw [map_nsmul, hy', nsmul_zero]
+    have ht : n.minFac ^ a • (m • y) = 0 := by rw [smul_smul, ← hn, hy]
+    have hb : sUnitsBrauer K S (m • y) = 0 := by rw [map_nsmul, hy', nsmul_zero]
+    exact eq_zero_of_sUnitsBrauer_eq_zero K S n.minFac hℓ
+      (mem_of_dvd_of_mem K S (Nat.minFac_dvd n) hS) (m • y) a ht hb
   have hlt : m < n := by
     have h2 : 1 < n.minFac ^ a := Nat.one_lt_pow ha hℓ.one_lt
     rw [hn]
@@ -124,24 +170,28 @@ theorem finite_nsmul_eq_zero_sUnits_two [Finite S] (n : ℕ) (hn0 : n ≠ 0)
   let T : Set QZ := {u | n • u = 0}
   have : Finite T := (AddCircle.finite_torsion (1 : ℚ) (Nat.pos_of_ne_zero hn0)).to_subtype
   let t := (brauerLocal ιs).comp (sUnitsBrauer K S)
-  have ht : ∀ y : {y : cohomology (galSUnitsMax K.1 ℚ̄ S) 2 | n • y = 0}, ∀ v : Place K.1,
-      placeInv v (t y.1 v) ∈ T := by
-    intro y v
-    change n • placeInv v (t y.1 v) = 0
-    have e : (n • t y.1) v = n • (t y.1 v) := map_nsmul (DFinsupp.evalAddMonoidHom v) n (t y.1)
-    rw [← map_nsmul, ← e, ← map_nsmul t, y.2, map_zero, DFinsupp.zero_apply, map_zero]
+  let inv (v : Place K.1) := (placeInv (K := K) v).comp
+    ((DFinsupp.evalAddMonoidHom (β := localGaloisCohomology K 2) v).comp t)
+  have ht (y : {y : cohomology (galSUnitsMax K.1 ℚ̄ S) 2 | n • y = 0}) (v : Place K.1) :
+      inv v y.1 ∈ T :=
+    (map_nsmul (inv v) n y.1).symm.trans ((congrArg (inv v) y.2).trans (inv v).map_zero)
   let Φ : {y : cohomology (galSUnitsMax K.1 ℚ̄ S) 2 | n • y = 0} →
       (InfinitePlace K.1 → T) × (S → T) := fun y =>
-    (fun w => ⟨placeInv (.inl w) (t y.1 (.inl w)), ht y _⟩,
-      fun w => ⟨placeInv (.inr w.1) (t y.1 (.inr w.1)), ht y _⟩)
+    (fun w => ⟨inv (.inl w) y.1, ht y _⟩, fun w => ⟨inv (.inr w.1) y.1, ht y _⟩)
   refine Set.finite_coe_iff.1 (Finite.of_injective Φ fun y z h => ?_)
+  have hinv (v : Place K.1) (hv : inv v y.1 = inv v z.1) : t y.1 v = t z.1 v :=
+    placeInv_injective (K := K) v hv
   have htyz : t y.1 = t z.1 := by
-    ext v
+    apply DFinsupp.ext
+    intro v
     rcases v with w | w
-    · exact placeInv_injective (.inl w) (congrArg Subtype.val (congrFun (congrArg Prod.fst h) w))
+    · have hw := congrArg (fun a : (InfinitePlace K.1 → T) × (S → T) => (a.1 w).1) h
+      dsimp only [Φ] at hw
+      exact hinv (.inl w) hw
     · by_cases hw : w ∈ S
-      · exact placeInv_injective (.inr w)
-          (congrArg Subtype.val (congrFun (congrArg Prod.snd h) ⟨w, hw⟩))
+      · have hw' := congrArg (fun a : (InfinitePlace K.1 → T) × (S → T) => (a.2 ⟨w, hw⟩).1) h
+        dsimp only [Φ] at hw'
+        exact hinv (.inr w) hw'
       · exact (brauerLocal_sUnitsBrauer_inr K S ιs y.1 w hw).trans
           (brauerLocal_sUnitsBrauer_inr K S ιs z.1 w hw).symm
   have hyz : sUnitsBrauer K S (y.1 - z.1) = 0 := by

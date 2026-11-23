@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DatumEquiv
-import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.VdmSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GapConditionsOfLargeGaps
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,14 +65,15 @@ theorem cpt_const {ε : Fin n → Bool} (h : pOf ε = 0 ∨ qOf ε = 0) (a b : F
 theorem cpt_Jm_comm {ε : Fin n → Bool} (hc : ∀ a b, ε a = ε b) (M : Matrix (Fin n) (Fin n) ℂ) :
     Formalism.REAL.Jm ε * M = M * Formalism.REAL.Jm ε := by
   ext i j
-  simp only [Formalism.REAL.Jm, Matrix.diagonal_mul, Matrix.mul_diagonal, hc i j]
+  delta Formalism.REAL.Jm
+  simp only [Matrix.diagonal_mul, Matrix.mul_diagonal, hc i j]
   ring
 
 theorem cpt_Kset_eq {ε : Fin n → Bool} (hc : ∀ a b, ε a = ε b) :
     Formalism.REAL.Kset ε = Formalism.MainNotions.S.UJset ε := by
   ext g
-  simp only [Formalism.REAL.Kset, Formalism.MainNotions.S.UJset, Formalism.REAL.inUJ, Set.mem_ofPred_eq, Matrix.mem_unitaryGroup_iff',
-    Matrix.star_eq_conjTranspose]
+  delta Formalism.REAL.Kset Formalism.MainNotions.S.UJset Formalism.REAL.inUJ
+  simp only [Set.mem_ofPred_eq, Matrix.mem_unitaryGroup_iff', Matrix.star_eq_conjTranspose]
   constructor
   · rintro ⟨hu, -⟩
     rw [Matrix.mul_assoc, cpt_Jm_comm hc g, ← Matrix.mul_assoc, hu, Matrix.one_mul]
@@ -70,7 +110,7 @@ theorem compactDiscreteSeries_ownType : CptCase := by
     have := hcs
     have hKU := cpt_Kset_eq hc
     have : FiniteDimensional ℂ S := hS.1
-    have hclosed : IsClosed (S : Set X) := Submodule.closed_of_finiteDimensional S
+    have hclosed : IsClosed (S : Set X) := S.isClosed_of_finiteDimensional
     have hstab : ∀ g ∈ Formalism.MainNotions.S.UJset ε, ∀ v ∈ S, D g v ∈ S := fun g hg v hv =>
       hS.2.1 g (hKU ▸ hg) v hv
     have htop : S = ⊤ := by
@@ -102,7 +142,8 @@ theorem compactDiscreteSeries_ownType : CptCase := by
             have := Finset.filter_eq_empty_iff.1 (Finset.card_eq_zero.1 hq) (Finset.mem_univ a)
             simpa using this
           simp [ha, hq]
-      simp only [gaW, Formalism.QuantumDeterminants.lowK, Pi.add_apply, Pi.sub_apply, hN, hH, add_zero]
+      delta gaW Formalism.QuantumDeterminants.lowK
+      simp only [Pi.add_apply, Pi.sub_apply, hN, hH, add_zero]
       rfl
     refine ⟨LinearEquiv.finiteDimensional Submodule.topEquiv, hnt, hKU ▸ hU, ?_⟩
     rw [hga]

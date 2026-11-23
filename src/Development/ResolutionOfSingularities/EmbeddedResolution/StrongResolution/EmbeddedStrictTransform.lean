@@ -1,17 +1,53 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.RemoveIsoBlowups
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.AffineSpaceCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineResolutionRule
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.RemoveIsoBlowups
+public import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionDescent.AffineResolutionRule
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.FunctorialPrincipalization
+public import Mathlib.CategoryTheory.Functor.OfSequence
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.FunctorialPrincipalization
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
@@ -168,11 +204,6 @@ def discardedUnion (i : ℕ) : Scheme.{u} :=
   Nat.rec (motive := fun _ => Scheme.{u}) (⊥_ Scheme.{u})
     (fun j ih => ih ⨿ S.discardedSubscheme j) i
 
-@[simp] theorem discardedUnion_zero : S.discardedUnion 0 = ⊥_ Scheme.{u} := rfl
-
-@[simp] theorem discardedUnion_succ (i : ℕ) :
-    S.discardedUnion (i + 1) = (S.discardedUnion i ⨿ S.discardedSubscheme i) := rfl
-
 abbrev totalSpace (i : ℕ) : Scheme.{u} := S.strictTransform i ⨿ S.discardedUnion i
 
 def transitionMap (i : ℕ) : S.totalSpace (i + 1) ⟶ S.totalSpace i :=
@@ -251,8 +282,6 @@ theorem totalSpaceZeroIso_spec :
 def tower : ℕᵒᵖ ⥤ Scheme.{u} :=
   (Functor.ofSequence (fun i => (S.transitionMap i).op)).leftOp
 
-theorem tower_obj (i : ℕ) : S.tower.obj (Opposite.op i) = S.totalSpace i := rfl
-
 theorem tower_map_succ (i : ℕ) :
     S.tower.map (homOfLE (Nat.le_succ i)).op = S.transitionMap i := by
   show ((Functor.ofSequence fun j => (S.transitionMap j).op).map (homOfLE (Nat.le_succ i))).unop
@@ -269,15 +298,6 @@ def blowupSequence (h : S.TransitionsAreBlowups) : SequenceOfBlowups Y where
   isoZero := S.totalSpaceZeroIso
   center := S.centerOnTotalSpace
   isBlowup := h
-
-@[simp] theorem blowupSequence_length (h : S.TransitionsAreBlowups) : (S.blowupSequence h).length = S.ambientLength := rfl
-
-@[simp] theorem blowupSequence_tower (h : S.TransitionsAreBlowups) : (S.blowupSequence h).tower = S.tower := rfl
-
-theorem blowupSequence_isoObjZero (h : S.TransitionsAreBlowups) : (S.blowupSequence h).isoZero = S.totalSpaceZeroIso := rfl
-
-@[simp] theorem blowupSequence_center (h : S.TransitionsAreBlowups) (i : ℕ) :
-    (S.blowupSequence h).center i = S.centerOnTotalSpace i := rfl
 
 def blowupSequenceWithoutIsos (h : S.TransitionsAreBlowups) : SequenceOfBlowups Y := (S.blowupSequence h).withoutIsoBlowups
 

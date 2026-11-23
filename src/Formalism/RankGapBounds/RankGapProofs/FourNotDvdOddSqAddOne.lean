@@ -1,4 +1,50 @@
-import Formalism.RankGapBounds.RandomSubsetCounterexample
+module
+
+public import Formalism.RankGapBounds.RandomSubsetCounterexample
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.RankGapBounds.LocalQuadraticParts
 
@@ -136,49 +182,5 @@ theorem powTwoPowEqOneIff_holds : OrdersIff := by
   push_cast
   rw [show (4 : ℤ) * 2 ^ e = 2 ^ (e + 2) by ring]
   exact pm_iff e j hj l (odd_of_coprime e l hl)
-
-theorem leOfOrderOfLe_holds : OrdersBound := by
-  intro e J l hl hJ hl1 hord
-  have hodd := odd_of_coprime e l hl
-  have hE : (hOf e l hl) ^ (2 ^ e) = 1 := by
-    rw [powTwoPowEqOneIff_holds e e l hl le_rfl, show e + 2 - e = 2 by omega, zmod_nat_eq_one_iff,
-      zmod_nat_eq_neg_one_iff]
-    obtain ⟨k, hk⟩ := hodd
-    push_cast
-    rcases Int.even_or_odd k with ⟨b, hb⟩ | ⟨b, hb⟩
-    · left
-      rw [hk, hb]
-      exact ⟨b, by ring⟩
-    · right
-      rw [hk, hb]
-      exact ⟨b + 1, by ring⟩
-  obtain ⟨k, hk, hko⟩ := (Nat.dvd_prime_pow Nat.prime_two).mp (orderOf_dvd_of_pow_eq_one hE)
-  have hk1 : (hOf e l hl) ^ (2 ^ k) = 1 := by
-    rw [← hko]
-    exact pow_orderOf_eq_one _
-  have hres := (powTwoPowEqOneIff_holds e k l hl hk).mp hk1
-  rw [zmod_nat_eq_one_iff, zmod_nat_eq_neg_one_iff] at hres
-  have hM : ((2 : ℤ) ^ (e + 2 - k)) ≤ (l : ℤ) + 1 := by
-    rcases hres with h | h
-    · push_cast at h
-      have hpos : (0 : ℤ) < l - 1 := by omega
-      have := Int.le_of_dvd hpos h
-      linarith
-    · push_cast at h
-      have hpos : (0 : ℤ) < l + 1 := by omega
-      have := Int.le_of_dvd hpos h
-      linarith
-  have hJn : 2 ^ k ≤ J := hko ▸ hord
-  have hJ' : (2 : ℝ) ^ k ≤ J := by exact_mod_cast hJn
-  have key : (4 * 2 ^ e : ℝ) = 2 ^ (e + 2 - k) * 2 ^ k := by
-    rw [← pow_add, show e + 2 - k + k = e + 2 by omega]
-    ring
-  have h1 : (4 * 2 ^ e : ℝ) / J ≤ 4 * 2 ^ e / 2 ^ k :=
-    div_le_div_of_nonneg_left (by positivity) (by positivity) hJ'
-  have h2 : (4 * 2 ^ e : ℝ) / 2 ^ k = 2 ^ (e + 2 - k) := by
-    rw [key]
-    field_simp
-  have h3 : (2 : ℝ) ^ (e + 2 - k) ≤ l + 1 := by exact_mod_cast hM
-  linarith
 
 end Formalism.RankGapBounds.LocalQuadraticParts

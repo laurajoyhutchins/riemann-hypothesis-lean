@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
-import Lemmata.GeneralBFactLeftFurther.Imports
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.StatementOfDegreeAndBound
+public import Lemmata.GeneralBFactLeftFurther.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -89,7 +137,7 @@ section Orders
 
 variable {σ : Type*} {R : Type*} [CommRing R] (wv : σ → ℕ)
 
-def Ord (b : ℕ) (f : MvPolynomial σ R) : Prop := ∀ m, Finsupp.weight wv m < b → coeff m f = 0
+def Ord (b : ℕ) (f : MvPolynomial σ R) : Prop := ∀ m, Finsupp.weight wv m < b → AddMonoidAlgebra.coeff f m = 0
 
 def IsW (y : MvPolynomial σ R) (a : ℕ) : Prop := y = 0 ∨ ∃ v, y = X v ∧ wv v = a
 
@@ -112,7 +160,7 @@ lemma Ord.add {b : ℕ} {f g : MvPolynomial σ R} (h : Ord wv b f) (h' : Ord wv 
 
 lemma weight_single_add (v : σ) (m : σ →₀ ℕ) :
     Finsupp.weight wv (Finsupp.single v 1 + m) = wv v + Finsupp.weight wv m := by
-  rw [map_add, Finsupp.weight_single]; simp
+  rw [map_add (f := _), Finsupp.weight_single]; simp
 
 lemma Ord.X_mul {b : ℕ} {f : MvPolynomial σ R} (h : Ord wv b f) (v : σ) : Ord wv (wv v + b) (X v * f) := by
   classical
@@ -215,23 +263,27 @@ lemma extOne_ne {J : Finset (Fin n)} (h : (extOne J : P) ≠ 0) : J = ∅ := by
 
 lemma KG_card_pos (hc : 1 ≤ c) (x : ℕ → Fin n → P) (h0 : hs 0 = 0)
     (hst : ∀ j, hs (j + 1) ≤ hs j + 1 ∧ hs j ≤ hs (j + 1) + 1) :
-    ∀ (j : ℕ) (J : Finset (Fin n)), KG c hs x j J ≠ 0 → J.card = hs j
-  | 0, J, h => by rw [extOne_ne h, h0]; rfl
-  | j + 1, J, h => by
-    have ih := KG_card_pos hc x h0 hst j
-    have hj := hst j
+    ∀ (j : ℕ) (J : Finset (Fin n)), KG c hs x j J ≠ 0 → J.card = hs j := by
+  intro j
+  induction j with
+  | zero =>
+    intro J h
+    rw [extOne_ne h, h0]
+    rfl
+  | succ j ih =>
+    intro J h
+    obtain ⟨hrise, hfall⟩ := hst j
     rcases lt_trichotomy (hs j) (hs (j + 1)) with h1 | h1 | h1
-    · rw [KG_rise_pos hc h1] at h
-      obtain ⟨m, hm, hK⟩ := wedgeR_ne h
-      have h2 := ih _ hK
-      rw [Finset.card_erase_of_mem hm] at h2
-      have h3 := Finset.card_pos.mpr ⟨m, hm⟩
+    · rw [KG_rise_pos (x := x) hc h1] at h
+      obtain ⟨m, hm, hK⟩ : ∃ m ∈ J, KG c hs x j (J.erase m) ≠ 0 := wedgeR_ne h
+      have h2 := ih (J.erase m) hK
+      have h3 := Finset.card_erase_add_one hm
       omega
-    · rw [KG_eq h1] at h
-      rw [ih _ h, h1]
-    · rw [KG_fall_pos hc h1] at h
-      obtain ⟨m, hm, hK⟩ := contrR_ne h
-      have h2 := ih _ hK
+    · rw [KG_eq (c := c) (x := x) h1] at h
+      exact (ih J h).trans h1
+    · rw [KG_fall_pos (x := x) hc h1] at h
+      obtain ⟨m, hm, hK⟩ : ∃ m, m ∉ J ∧ KG c hs x j (insert m J) ≠ 0 := contrR_ne h
+      have h2 := ih (insert m J) hK
       rw [Finset.card_insert_of_notMem hm] at h2
       omega
 
@@ -267,8 +319,9 @@ lemma wedge_tan {o cost : ℕ} {Kj : Finset (Fin (r + K)) → MvPolynomial σ R}
     weightedHomogeneousComponent wv (cost + o) (wedgeR y Kj J) =
       pl (Jp J) * wedgeR (fun b => y (Fin.natAdd r b)) tn (Jt J) := by
   unfold wedgeR
-  rw [sum_split, map_add, map_sum, map_sum,
-    Finset.sum_eq_zero (fun a ha => cmp_of_Ord (hoff J a ha _) (Nat.lt_succ_self _)), zero_add, Finset.mul_sum]
+
+  rw [sum_split, map_add (f := _), map_sum, map_sum,
+  Finset.sum_eq_zero (fun a ha => cmp_of_Ord (hoff J a ha _) (Nat.lt_succ_self _)), zero_add, Finset.mul_sum]
   refine Finset.sum_congr rfl fun b hb => ?_
   rw [cmp_term o _ (hyt b), hD, Jp_erase_na, Jt_erase_na, card_filter_na]
   ring
@@ -283,9 +336,10 @@ lemma contr_tan {o cost : ℕ} {Kj : Finset (Fin (r + K)) → MvPolynomial σ R}
     weightedHomogeneousComponent wv (cost + o) (contrR y Kj J) =
       pl (Jp J) * contrR (fun b => y (Fin.natAdd r b)) tn (Jt J) := by
   unfold contrR
-  rw [sum_split, Jp_compl, Jt_compl, map_add, map_sum, map_sum,
-    Finset.sum_eq_zero (fun a ha => cmp_of_Ord (hoff J a (by simpa using ha) _) (Nat.lt_succ_self _)), zero_add,
-    Finset.mul_sum]
+
+  rw [sum_split, Jp_compl, Jt_compl, map_add (f := _), map_sum, map_sum,
+  Finset.sum_eq_zero (fun a ha => cmp_of_Ord (hoff J a (by simpa using ha) _) (Nat.lt_succ_self _)), zero_add,
+  Finset.mul_sum]
   refine Finset.sum_congr rfl fun b hb => ?_
   rw [cmp_term o _ (hyt b), hD, Jp_insert_na, Jt_insert_na, card_filter_na]
   ring
@@ -301,9 +355,10 @@ lemma wedge_pl {o cost : ℕ} {Kj : Finset (Fin (r + K)) → MvPolynomial σ R} 
     weightedHomogeneousComponent wv (cost + o) (wedgeR y Kj J) =
       wedgeR (fun a => y (Fin.castAdd K a)) pl (Jp J) * tn (Jt J) := by
   unfold wedgeR
-  rw [sum_split, map_add, map_sum, map_sum,
-    Finset.sum_eq_zero (s := Jt J) (fun a ha => cmp_of_Ord (hoff J a ha _) (Nat.lt_succ_self _)), add_zero,
-    Finset.sum_mul]
+
+  rw [sum_split, map_add (f := _), map_sum, map_sum,
+  Finset.sum_eq_zero (s := Jt J) (fun a ha => cmp_of_Ord (hoff J a ha _) (Nat.lt_succ_self _)), add_zero,
+  Finset.sum_mul]
   refine Finset.sum_congr rfl fun a ha => ?_
   rw [cmp_term o _ (hyp a), hD, Jp_erase_ca, Jt_erase_ca, card_filter_ca]
   by_cases hJ : Jt J = ∅
@@ -321,10 +376,11 @@ lemma contr_pl {o cost : ℕ} {Kj : Finset (Fin (r + K)) → MvPolynomial σ R} 
     weightedHomogeneousComponent wv (cost + o) (contrR y Kj J) =
       contrR (fun a => y (Fin.castAdd K a)) pl (Jp J) * tn (Jt J) := by
   unfold contrR
-  rw [sum_split, Jp_compl, Jt_compl, map_add, map_sum, map_sum,
-    Finset.sum_eq_zero (s := univ \ Jt J)
-      (fun a ha => cmp_of_Ord (hoff J a (by simpa using ha) _) (Nat.lt_succ_self _)), add_zero,
-    Finset.sum_mul]
+
+  rw [sum_split, Jp_compl, Jt_compl, map_add (f := _), map_sum, map_sum,
+  Finset.sum_eq_zero (s := univ \ Jt J)
+    (fun a ha => cmp_of_Ord (hoff J a (by simpa using ha) _) (Nat.lt_succ_self _)), add_zero,
+  Finset.sum_mul]
   refine Finset.sum_congr rfl fun a ha => ?_
   rw [cmp_term o _ (hyp a), hD, Jp_insert_ca, Jt_insert_ca, card_filter_ca]
   by_cases hJ : Jt J = ∅

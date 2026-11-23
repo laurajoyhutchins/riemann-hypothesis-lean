@@ -1,9 +1,70 @@
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.EndInt
-import Formalism.LocalToGlobal.InertKernelTheory.DefsBeW
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalC
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsBeW
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.VarChange
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementW
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.EpsteinZeta.LatITopBasis
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.PeriodRelations.ConjCls
+import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.PeriodRelations.LeadingConstantNeZero
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.WeierstrassUniqueness.ExistsPeriodPairOfIsLat
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.EndInt
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PadicNormTwoHundredSixteenEqOneOfFiveLe
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PowerSeriesEmbedding
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SigmaAlg
+import Formalism.LocalToGlobal.TorsionIntegrality.ComplexLatticeClosure.LamConjTheta0
 import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.HasCMByStable
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalA
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalC
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.UnitaryInverseIdentity
 import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.SecondCoeffConsistency
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OneLetterGaussSharpTranslateHolds
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.OneLetterGaussSharpTranslateHolds
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.SubstPairSubst
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.CoeffOneSubstOfConstantCoeffEqZero
+
+@[expose] public section
 
 open PowerSeries
 
@@ -339,7 +400,7 @@ theorem phNormAt_varChange (W : WeierstrassCurve K) (hW : CoeffIn R' W) (C : Wei
   have hadd : ∀ (a f g : K⟦X⟧), PowerSeries.HasSubst a →
       PowerSeries.subst a (f + g) = PowerSeries.subst a f + PowerSeries.subst a g := by
     intro a f g ha
-    rw [← PowerSeries.coe_substAlgHom ha, map_add]
+    rw [← PowerSeries.coe_substAlgHom ha, map_add (f := _)]
   have hL1 := Formalism.L2.Th1.C.lGSubst K R' _ h Unit _ hψpt
   have hL2 := Formalism.L2.Th1.C.lGSubst K R' _ hDLG Unit _ hmψpt
   have hL3 := lg_intsmul N (Formalism.L2.Th1.C.lGSubst K R' _ hDLG Unit _ hψpt)
@@ -458,32 +519,32 @@ theorem phNormOKInert_of : Formalism.L2.KerInert.PhNormOKInert := by
     linear_combination (-1 : ℂ) * hsq + (((Real.sqrt D.host.d : ℝ) : ℂ) ^ 2) * Complex.I_sq
   have hconjω : starRingEnd ℂ ω = 1 - ω := by
     rw [hωdef]; unfold Formalism.L2.Th1.CM.omegaK
-    simp only [map_div₀, map_add, map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
+    simp only [map_div₀, map_add (f := _), map_one, map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
     ring
   have h2E : ((2 : D.host.K) : D.host.E) = 2 := by
     rw [show (2 : D.host.K) = 1 + 1 by norm_num]; push_cast; norm_num
   have hωφ : D.host.φ₀ ((ωK : D.host.K) : D.host.E) = (1 + D.host.φ₀ (xs : D.host.E)) / 2 := by
-    rw [hω]; push_cast; simp only [map_div₀, map_add, map_one]; rw [h2E, map_ofNat]
+    rw [hω]; push_cast; simp only [map_div₀, map_add (f := _), map_one]; rw [h2E, map_ofNat]
   have hc : ∀ k : ℤ, ((k : 𝓞 D.host.K) : D.host.K) = (k : D.host.K) := fun k => by
     rw [NumberField.RingOfIntegers.coe_eq_algebraMap, map_intCast]
   obtain ⟨m, n, rfl⟩ := hspan a
   have ea : (((m : 𝓞 D.host.K) + (n : 𝓞 D.host.K) * ωK : 𝓞 D.host.K) : D.host.K) =
       (m : D.host.K) + (n : D.host.K) * (ωK : D.host.K) := by
-    rw [NumberField.RingOfIntegers.coe_eq_algebraMap, map_add, map_mul, map_intCast, map_intCast,
+    rw [NumberField.RingOfIntegers.coe_eq_algebraMap, map_add (f := _), map_mul, map_intCast, map_intCast,
       ← NumberField.RingOfIntegers.coe_eq_algebraMap]
   set z : ℂ := D.host.φ₀ ((((m : 𝓞 D.host.K) + (n : 𝓞 D.host.K) * ωK : 𝓞 D.host.K) : D.host.K) : D.host.E) with hz
   have hzv : z = (m : ℂ) + (n : ℂ) * D.host.φ₀ ((ωK : D.host.K) : D.host.E) := by
-    rw [hz, ea]; push_cast; simp only [map_add, map_mul, map_intCast]
+    rw [hz, ea]; push_cast; simp only [map_add (f := _), map_mul, map_intCast]
   have hzb : D.host.φ₀ (D.host.conj ((((m : 𝓞 D.host.K) + (n : 𝓞 D.host.K) * ωK : 𝓞 D.host.K) : D.host.K) : D.host.E)) =
       starRingEnd ℂ z := Formalism.BasicNotions.Examples₂.emb_conj D.host D.host.φ₀ _
   have hpair : ∃ m' n' : ℤ, z = (m' : ℂ) + (n' : ℂ) * ω ∧ starRingEnd ℂ z = (m' : ℂ) + (n' : ℂ) * (1 - ω) := by
     rcases sq_eq_sq_iff_eq_or_eq_neg.1 (hx2.trans hom.symm) with h | h
     · have e : D.host.φ₀ ((ωK : D.host.K) : D.host.E) = ω := by rw [hωφ, h]; ring
       refine ⟨m, n, by rw [hzv, e], ?_⟩
-      rw [hzv, e, map_add, map_mul, map_intCast, map_intCast, hconjω]
+      rw [hzv, e, map_add (f := _), map_mul, map_intCast, map_intCast, hconjω]
     · have e : D.host.φ₀ ((ωK : D.host.K) : D.host.E) = 1 - ω := by rw [hωφ, h]; ring
       refine ⟨m + n, -n, by rw [hzv, e]; push_cast; ring, ?_⟩
-      rw [hzv, e, map_add, map_mul, map_intCast, map_intCast, map_sub, map_one, hconjω]; push_cast; ring
+      rw [hzv, e, map_add (f := _), map_mul, map_intCast, map_intCast, map_sub, map_one, hconjω]; push_cast; ring
   obtain ⟨m', n', hz1, hz2⟩ := hpair
   have hcτ : tauK D g.lam ((((m : 𝓞 D.host.K) + (n : 𝓞 D.host.K) * ωK : 𝓞 D.host.K) : D.host.K)) = ι z :=
     (Formalism.L2.KerInert.lamCIota p g.lam ι hι).1 _ (Formalism.MainNotions.Ext.test_vector_mem_schwartz_bruhat D _)

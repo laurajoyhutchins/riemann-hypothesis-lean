@@ -1,5 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.CharacterNorms.FacDefs
-import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ReductionDomains.KkCpt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.CharacterNorms.FacDefs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.ReductionDomains.KkCpt
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
 open UpperTheory.ConvolutionTheory.R2 UpperTheory.ConvolutionTheory.RankTwoDescent
@@ -57,7 +103,7 @@ private theorem Rr_mem (t : ℝ) : Rr t ∈ KK ℚ := by
   refine ⟨?_, ?_⟩
   · intro i j
     apply inf_ext
-    simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.transpose_apply, map_add, map_mul, Rr_inf]
+    simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.transpose_apply, map_add (f := _), map_mul, Rr_inf]
     fin_cases i <;> fin_cases j <;> funext w <;> simp [Mr] <;> nlinarith [Real.sin_sq_add_cos_sq t]
   · intro v i j
     have h : ((Rr t) i j).2 = ((1 : Matrix (Fin 2) (Fin 2) (Af ℚ)) i j) := Rr_fin t i j
@@ -86,7 +132,7 @@ private theorem Rr_cp (t : ℝ) (v : H.P ℚ) (i j : Fin 2) :
 private theorem mul_mem_SS (N : ℕ) (u : ℝ) (k : G1 ℚ) : Rr u * k ∈ SS N ↔ k ∈ SS N := by
   have h : ∀ v, H.cp v ((Rr u * k) 1 0) = H.cp v (k 1 0) := by
     intro v
-    simp [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two, map_add, map_mul, Rr_cp]
+    simp [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two, map_add (f := _), map_mul, Rr_cp]
   simp only [SS, Dv, Set.mem_setOf_eq, h]
 
 private theorem Rr_SS (N : ℕ) (t : ℝ) : Rr t ∈ SS N := by
@@ -123,7 +169,7 @@ private theorem kk_rel {k : G1 ℚ} (hk : k ∈ KK ℚ) :
   have h11 := key 1 1
   have hd : reH (k.1 0 0 * k.1 1 1 - k.1 0 1 * k.1 1 0) = 1 := by
     rw [← Matrix.det_fin_two, k.det_coe, map_one]
-  simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.transpose_apply, map_add, map_mul, Matrix.one_apply_eq,
+  simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.transpose_apply, map_add (f := _), map_mul, Matrix.one_apply_eq,
     Matrix.one_apply_ne (show (0 : Fin 2) ≠ 1 by decide), map_one, map_zero] at h00 h01 h11
   simp only [map_sub, map_mul] at hd
   simp only [re_eq]
@@ -177,10 +223,10 @@ private theorem mul_re {u : ℝ} {k : G1 ℚ} (hk : k ∈ KK ℚ) :
   obtain ⟨hs, hc⟩ := th_sin_cos hk
   have e0 : UpperTheory.ConvolutionTheory.RankTwoDescent.re ((Rr u * k) 1 0) = UpperTheory.ConvolutionTheory.RankTwoDescent.re ((Rr u) 1 0) * UpperTheory.ConvolutionTheory.RankTwoDescent.re (k 0 0) +
       UpperTheory.ConvolutionTheory.RankTwoDescent.re ((Rr u) 1 1) * UpperTheory.ConvolutionTheory.RankTwoDescent.re (k 1 0) := by
-    simp only [re_eq, Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two, map_add, map_mul]
+    simp only [re_eq, Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two, map_add (f := _), map_mul]
   have e1 : UpperTheory.ConvolutionTheory.RankTwoDescent.re ((Rr u * k) 1 1) = UpperTheory.ConvolutionTheory.RankTwoDescent.re ((Rr u) 1 0) * UpperTheory.ConvolutionTheory.RankTwoDescent.re (k 0 1) +
       UpperTheory.ConvolutionTheory.RankTwoDescent.re ((Rr u) 1 1) * UpperTheory.ConvolutionTheory.RankTwoDescent.re (k 1 1) := by
-    simp only [re_eq, Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two, map_add, map_mul]
+    simp only [re_eq, Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two, map_add (f := _), map_mul]
   rw [e0, e1, rotation_entry_sin, rotation_entry_cos, h0, h1, hs, hc, Real.sin_add, Real.cos_add]
   constructor <;> ring
 

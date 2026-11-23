@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.OtherEFree
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.BFDefs
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.ChainEmbInj
+import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.DivDerZero
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.OtherEFree
+import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.TopOddNeEnd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,9 +89,9 @@ theorem op_SSt (D7 : Formalism.BasicNotions.D7) {D : BlockData N} (hT : TieOK D)
     have hsum : ((Finsupp.single a b + f).sum fun _ n => n) = b + f.sum fun _ n => n := by
       rw [Finsupp.sum_add_index' (fun _ => rfl) (fun _ _ _ => rfl), Finsupp.sum_single_index rfl]
     have hsupp : (Finsupp.single a b + f).support = insert a f.support := by
-      rw [Finsupp.support_add_eq, Finsupp.support_single_ne_zero _ hb]
+      rw [Finsupp.support_add_eq, Finsupp.support_single _ hb]
       · rfl
-      · rw [Finsupp.support_single_ne_zero _ hb, Finset.disjoint_singleton_left]
+      · rw [Finsupp.support_single _ hb, Finset.disjoint_singleton_left]
         exact ha
     have h1 := ih (fun v hvf => hv v (by rw [hsupp]; exact Finset.mem_insert_of_mem hvf)) thr
       (fun k => thr k + (((f.sum fun _ n => n : ℕ) : ℤ) : WithTop ℤ)) (fun _ => le_rfl) u hu
@@ -57,31 +104,27 @@ theorem op_SSt (D7 : Formalism.BasicNotions.D7) {D : BlockData N} (hT : TieOK D)
 end GlobalTheory
 
 theorem tieOK_blockBase (p : ℕ) {r s : ℕ} (S : SegData s) (aTop : Fin s → ℕ) (aPlus : ℕ) (b : SegBlock s r) :
-    TieOK (blockBase p S aTop aPlus b) where
-  lt := by
-    intro i
+    TieOK (blockBase p S aTop aPlus b) := by
+  refine { lt := ?_, inj := ?_, sep := ?_, uW := ?_, vecE := ?_ }
+  · intro i
     have := (uTop S i).2
     show 2 * ((uTop S i : Fin s) : ℕ) + 1 < 2 * s + 1
     omega
-  inj := by
-    intro i i' h
+  · intro i i' h
     have h' : 2 * ((uTop S i : Fin s) : ℕ) = 2 * ((uTop S i' : Fin s) : ℕ) := h
     simp only [uTop] at h'
     exact Fin.ext (by omega)
-  sep := by
-    intro i i' h
+  · intro i i' h
     have h' : 2 * ((uTop S i : Fin s) : ℕ) + 1 = 2 * ((uTop S i' : Fin s) : ℕ) := h
     omega
-  uW := by
-    intro i
+  · intro i
     have := (uTop S i).2
     constructor
     · show 2 * ((uTop S i : Fin s) : ℕ) ≠ 2 * s
       omega
     · show 2 * ((uTop S i : Fin s) : ℕ) + 1 ≠ 2 * s
       omega
-  vecE := by
-    intro i h
+  · intro i h
     show decide ((2 * ((uTop S i : Fin s) : ℕ) + 1) % 2 = 0) = false
     simp
 

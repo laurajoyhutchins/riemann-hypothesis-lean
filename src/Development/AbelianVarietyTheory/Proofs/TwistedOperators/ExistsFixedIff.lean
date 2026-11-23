@@ -1,9 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
-import Formalism.SatakeDualWeyl.StatementE
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeltaHalfMulUnrTorus
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Formalism.SatakeDualWeyl.StatementE
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DeltaHalfMulUnrTorus
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Cartan
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineOppositeParabolicUnitaryLeviSectionEq
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL ValuativeRel MeasureTheory NumberField IsDedekindDomain
 
@@ -46,9 +97,9 @@ private theorem residueFieldCard_adicCompletion_lemma :
   rw [← _root_.Formalism.UG.P.tjcosets_card_residue v]
   exact Nat.card_congr (IsLocalRing.ResidueField.mapEquiv e).toEquiv
 
+
 open ValuativeRel MeasureTheory NumberField IsDedekindDomain in
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)) in
-
 theorem _root_.GlobalTheory.SmGL.SphCompletion.ord_completion (x : (v.adicCompletion F)ˣ) :
     letI := _root_.GlobalTheory.LocalData.complRel v
     haveI := _root_.GlobalTheory.LocalData.isLocalField v
@@ -64,9 +115,9 @@ theorem _root_.GlobalTheory.SmGL.SphCompletion.ord_completion (x : (v.adicComple
   have := zpow_right_injective₀ (by linarith) hq.ne' h
   omega
 
+
 open ValuativeRel MeasureTheory NumberField IsDedekindDomain in
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)) in
-
 theorem _root_.GlobalTheory.SmGL.SphCompletion.KO_completion (n : ℕ) :
     letI := _root_.GlobalTheory.LocalData.complRel v
     haveI := _root_.GlobalTheory.LocalData.isLocalField v
@@ -95,9 +146,9 @@ private theorem natCast_zpow_neg_cpow_eq_cpow_mul (q : ℕ) (m : ℤ) (n : ℕ) 
   push_cast
   rfl
 
+
 open ValuativeRel MeasureTheory NumberField IsDedekindDomain in
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)) in
-
 theorem _root_.GlobalTheory.SmGL.SphCompletion.law_completion (n : ℕ) (α : Fin n → ℂˣ)
     (b : _root_.GlobalTheory.SmGL.borel (v.adicCompletion F) (Fin n)) (c : ℂ) :
     letI := _root_.GlobalTheory.LocalData.complRel v
@@ -134,9 +185,9 @@ theorem _root_.GlobalTheory.SmGL.SphCompletion.law_completion (n : ℕ) (α : Fi
     _root_.GlobalTheory.LGrp.nabs_eq_zpow, hord, residueFieldCard_adicCompletion_lemma, mul_comm]
   rw [Units.val_zpow_eq_zpow_val, natCast_zpow_neg_cpow_eq_cpow_mul]
 
+
 open ValuativeRel MeasureTheory NumberField IsDedekindDomain in
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)) in
-
 theorem _root_.GlobalTheory.SmGL.SphCompletion.exists_fixed_iff {k : Type} [Field k] [ValuativeRel k]
     [TopologicalSpace k] [IsNonarchimedeanLocalField k] {n : ℕ} (χ : Fin n → kˣ →* ℂˣ)
     (φ : GL (Fin n) k → ℂ) :
@@ -178,9 +229,9 @@ theorem _root_.GlobalTheory.SmGL.SphCompletion.exists_fixed_iff {k : Type} [Fiel
     ext x
     exact (_root_.GlobalTheory.SmGL.parInd_apply _ _ g x _).trans (hinv g hg x)
 
+
 open ValuativeRel MeasureTheory NumberField IsDedekindDomain in
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)) in
-
 theorem _root_.GlobalTheory.SmGL.SphCompletion.isSpherical_iff : ∀ (F : Type) [Field F] [NumberField F]
     (v : HeightOneSpectrum (𝓞 F)) (n : ℕ) (α : Fin n → ℂˣ)
     (φ : GL (Fin n) (v.adicCompletion F) → ℂ),

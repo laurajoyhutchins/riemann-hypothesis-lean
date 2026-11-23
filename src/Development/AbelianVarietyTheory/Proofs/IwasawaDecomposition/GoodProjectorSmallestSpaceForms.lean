@@ -1,5 +1,47 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.IsMultMapUnivZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Formalism.LocalToGlobal.HilbertRowConditions.CenterIdempotentAction
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -49,7 +91,7 @@ theorem mem_CCP_cast (C : ChainReal D) (b : Bool) (μ : D.what₂.Tup) :
   subst h
   exact hw
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem iota_eq_gen (X : RowSide D EE) (C : ChainReal D) (b : Bool) (I : RowIds X C b) {n : ℕ}
     {bs : OrthonormalBasis (Fin n) ℂ EE} {ty : Fin n → D.what₂.FT} (hR : RowSideReal X C b I bs ty)
@@ -182,12 +224,13 @@ theorem isIo_transfer {G H S Sinf Ds Dt : Type*} [MeasurableSpace H] [AddCommGro
     {th : G → H → S → ℂ} {pt : Sinf → S} {T : Sinf →ₗ[ℂ] Ds →ₗ[ℂ] Dt} {CCs CCs' : Submodule ℂ (Ds →ₗ[ℂ] (H → ℂ))}
     {CCt CCt' : Submodule ℂ (Dt →ₗ[ℂ] (G → ℂ))} {io : CCs →ₗ[ℂ] CCt} {io' : CCs' →ₗ[ℂ] CCt'}
     (h : Lift.IsIo ν 𝓕 th pt T CCs CCt io) (hc : ∀ F : CCs', ∃ F' : CCs, F.1 = F'.1 ∧ (io' F).1 = (io F').1) :
-    Lift.IsIo ν 𝓕 th pt T CCs' CCt' io' where
-  integ F φ v g := by
+    Lift.IsIo ν 𝓕 th pt T CCs' CCt' io' := by
+  constructor
+  · intro F φ v g
     obtain ⟨F', h1, -⟩ := hc F
     rw [h1]
     exact h.integ F' φ v g
-  eq F φ v g := by
+  · intro F φ v g
     obtain ⟨F', h1, h2⟩ := hc F
     rw [h1, h2]
     exact h.eq F' φ v g
@@ -314,7 +357,7 @@ section Spec4
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m}
   {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL]
 
-set_option maxHeartbeats 1000000 in
+
 theorem thDn_eq_dnFrom (R : RealDat D A Ks) (F : Face D A) (tupT : D.what₂.Tup → T) (hm : 0 < D.R.m)
     (hTop : TopMultH R) (b : Bool) (μ : D.what₂.Tup) (u : (toChainReal R F tupT hm hTop).CCX b μ)
     (y' : (R.HX (tupT μ)).H) (hu : u.1 = R.cX.toMap R.prX ((R.HX (tupT μ)).e y')) :
@@ -331,7 +374,7 @@ theorem thDn_eq_dnFrom (R : RealDat D A Ks) (F : Face D A) (tupT : D.what₂.Tup
     (R.ioX (tupT μ) ((R.cX.toMap R.prX ∘ₗ (R.HX (tupT μ)).e).rangeRestrict y'))
     ((ioX_val R F tupT hm hTop b μ u hu').trans (congrArg (fun z => (R.ioX (tupT μ) z).1) e2))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem iota_eq_real (R : RealDat D A Ks) (F : Face D A) (tupT : D.what₂.Tup → T) (hm : 0 < D.R.m)
     (hTop : TopMultH R) (hch : R.IsChain) (hS : StepLev R F) (hT : TopLev R F) (hP : RowProj R F)

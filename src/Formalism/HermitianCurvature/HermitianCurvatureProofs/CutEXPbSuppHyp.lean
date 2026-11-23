@@ -1,4 +1,59 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEX2
+module
+
+public import Mathlib.Analysis.Complex.Norm
+public import Mathlib.LinearAlgebra.Matrix.ConjTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.FormalDegreeBessel.StatementWR
+import Formalism.HermitianCurvature.StatementI
+import Formalism.RealPlaceAnalysis.StatementA
+public import Mathlib.Algebra.BigOperators.Fin
+public import Mathlib.Analysis.CStarAlgebra.Basic
+public import Mathlib.Analysis.Complex.Basic
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -18,17 +73,13 @@ theorem rev_cs (a b : Fin (m + 1) → ℂ) (c : ℂ) (t : ℝ) (ht : 0 < t)
   set A := ‖a (Fin.last m)‖ with hA
   set Bn := ‖b (Fin.last m)‖ with hBn
   set P := ∑ i : Fin m, ‖a i.castSucc‖ * ‖b i.castSucc‖ with hPdef
-  have hP0 : 0 ≤ P := Finset.sum_nonneg fun i _ => mul_nonneg (norm_nonneg _) (norm_nonneg _)
   have hCS : P ^ 2 ≤ (∑ i : Fin m, ‖a i.castSucc‖ ^ 2) * (∑ i : Fin m, ‖b i.castSucc‖ ^ 2) :=
     Finset.sum_mul_sq_le_sq_mul_sq _ _ _
   have hsb : 0 ≤ ∑ i : Fin m, ‖b i.castSucc‖ ^ 2 := Finset.sum_nonneg fun i _ => by positivity
   have hA0 : 0 ≤ A := norm_nonneg _
-  have hB0 : 0 ≤ Bn := norm_nonneg _
-  have hBt : t ≤ Bn ^ 2 := by linarith
   have hP2 : P ^ 2 ≤ A ^ 2 * (Bn ^ 2 - t) := hCS.trans (mul_le_mul ha hb hsb (sq_nonneg _))
   have key : 2 * Bn * P ≤ A * (2 * Bn ^ 2 - t) := by
     have hR : 0 ≤ A * (2 * Bn ^ 2 - t) := mul_nonneg hA0 (by linarith)
-    have hL : 0 ≤ 2 * Bn * P := by positivity
     have hsq : (2 * Bn * P) ^ 2 ≤ (A * (2 * Bn ^ 2 - t)) ^ 2 := by
       have e1 : (2 * Bn * P) ^ 2 = 4 * Bn ^ 2 * P ^ 2 := by ring
       have e2 : (A * (2 * Bn ^ 2 - t)) ^ 2 = 4 * Bn ^ 2 * (A ^ 2 * (Bn ^ 2 - t)) + A ^ 2 * t ^ 2 := by ring
@@ -188,8 +239,6 @@ theorem entry_bound (μ : Matrix (Fin (m + 1)) (Fin (m + 1)) ℂ)
       rw [hy, Matrix.mulVec, dotProduct, Fin.sum_univ_castSucc]; ring
     rw [hyL]; exact this
   have h3 := entry_le_last μ hμ i j
-  have hzL : 0 ≤ ‖z (Fin.last m)‖ := norm_nonneg _
-  have hz'L : 0 ≤ ‖z' (Fin.last m)‖ := norm_nonneg _
   calc ‖μ i j‖ * (T * T') ≤ ‖μ (Fin.last m) (Fin.last m)‖ * T' * T := by
         rw [mul_comm T T', ← mul_assoc]; exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right h3 hT'.le) hT.le
     _ ≤ 2 * ‖z' (Fin.last m)‖ * ‖y (Fin.last m)‖ * T := mul_le_mul_of_nonneg_right h2 hT.le

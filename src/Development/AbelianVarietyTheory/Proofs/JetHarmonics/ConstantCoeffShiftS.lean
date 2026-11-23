@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries GlobalTheory.MomOne
 open scoped ComplexConjugate BigOperators Topology
@@ -21,6 +72,7 @@ lemma coeff_sS_pow (ζ : ℂ_[q]) (m n : ℕ) :
     intro k _
     simp only [mul_pow, map_mul, map_pow, map_natCast]
     ring
+
   rw [hs, add_pow, Finset.sum_congr rfl hterm, map_sum]
   simp only [PowerSeries.coeff_C_mul_X_pow]
   rw [Finset.sum_ite_eq]
@@ -81,8 +133,8 @@ lemma shiftS_add {ζ : ℂ_[q]} (h : ‖ζ - 1‖ < 1) {f g : ℂ_[q]⟦X⟧} (h
   obtain ⟨B, hB⟩ := hf
   obtain ⟨B', hB'⟩ := hg
   ext n
-  rw [map_add, coeff_shiftS, coeff_shiftS, coeff_shiftS]
-  simp only [map_add, add_mul]
+  rw [map_add (f := _), coeff_shiftS, coeff_shiftS, coeff_shiftS]
+  simp only [map_add (f := _), add_mul]
   exact (summable_term (a := fun m => coeff m f) h hB n).tsum_add
     (summable_term (a := fun m => coeff m g) h hB' n)
 
@@ -139,7 +191,7 @@ lemma shiftS_one (f : ℂ_[q]⟦X⟧) : shiftS 1 f = f := by
 lemma coeff_DT (f : ℂ_[q]⟦X⟧) (n : ℕ) :
     coeff n (DT f) = coeff (n + 1) f * ((n : ℂ_[q]) + 1) + coeff n f * n := by
   rcases n with _ | n
-  · rw [DT, add_mul, one_mul, map_add, PowerSeries.coeff_zero_X_mul, PowerSeries.coeff_derivative]
+  · rw [DT, add_mul, one_mul, map_add (f := _), PowerSeries.coeff_zero_X_mul, PowerSeries.coeff_derivative]
     simp
   · simp [DT, add_mul, PowerSeries.coeff_derivative, PowerSeries.coeff_succ_X_mul]
 
@@ -147,7 +199,7 @@ lemma DT_sS_pow (ζ : ℂ_[q]) (m : ℕ) :
     DT (sS ζ ^ m) = C (m : ℂ_[q]) * (sS ζ ^ (m - 1) + sS ζ ^ m) := by
   unfold DT
   rw [Derivation.leibniz_pow]
-  have hd : derivative ℂ_[q] (sS ζ) = C ζ := by simp [sS]
+  have hd : PowerSeries.derivative (sS ζ) = C ζ := by simp [sS]
   have h1 : (1 + X) * C ζ = sS ζ + 1 := by
     unfold sS
     ring
@@ -174,7 +226,7 @@ lemma DT_shiftS {ζ : ℂ_[q]} (h : ‖ζ - 1‖ < 1) {f : ℂ_[q]⟦X⟧} (hf :
   have hk : ∀ m : ℕ, coeff (n + 1) (sS ζ ^ m) * ((n : ℂ_[q]) + 1) + coeff n (sS ζ ^ m) * n =
       (m : ℂ_[q]) * coeff n (sS ζ ^ (m - 1)) + (m : ℂ_[q]) * coeff n (sS ζ ^ m) := by
     intro m
-    rw [← coeff_DT, DT_sS_pow, PowerSeries.coeff_C_mul, map_add, mul_add]
+    rw [← coeff_DT, DT_sS_pow, PowerSeries.coeff_C_mul, map_add (f := _), mul_add]
   have s0 := summable_term (a := fun m => coeff m f) h hB n
   have s1 := summable_term (a := fun m => coeff m f) h hB (n + 1)
   have s2 := summable_term (a := fun m => coeff m f * (m : ℂ_[q])) h hB1 n

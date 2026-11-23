@@ -1,4 +1,65 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianPerturbedVectorOrthogonal
+module
+
+public import Formalism.HermitianCurvature.OperatorsCommuteTranslations
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianInsertionVectorOrthogonal
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianPerturbedVectorOrthogonal
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OneAddProjectionMemIsotropicSet
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RightDerivativeRulePsi
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.StrictMonoSnoc
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TriangularFactorMiddleRow
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormFormOneUnitary.HermitianOrthogonalProjectionVector
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -23,7 +84,6 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
   have hVs : ∀ (b : Fin m) (q : Fin (2 * (m + 1) + k + 1)), m + 1 + k < q.val →
       Vc b q = if (NFOne.sg k (m + 1) q).val = (i.succAbove b).val then 1 else 0 := by
     intro b q hq
-    have hqv := q.isLt
     simp only [Vc, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
     by_cases hqi : (NFOne.sg k (m + 1) q).val = i.val
     · have hq' : q = esI k (m + 1) i := by ext; rw [sg_val'] at hqi; simp [esI]; omega
@@ -52,7 +112,7 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
   have hV1c : ∀ b : Fin m, V1 (i.succAbove b).val = Vc b := by
     intro b
     simp only [V1]
-    rw [dif_pos ⟨(i.succAbove b).isLt, hsne b⟩, pidx_succAbove]
+    rw [dite_eq_left ⟨(i.succAbove b).isLt, hsne b⟩, pidx_succAbove]
   have hV1i : V1 i.val = ViF m i Vc := by
     simp [V1]
   have hyy' : ∀ a a' : Fin m, herm (Hpk k (m + 1)) (y (i.succAbove a)) (y (i.succAbove a')) = 0 :=
@@ -61,7 +121,7 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
     fun b c => NFOne.herm_comb k (m + 1) m (fun a => y (i.succAbove a)) hyy' _ _
 
   have V1_0 : ∀ c, m + 1 ≤ c → V1 c = 0 := by
-    intro c hc; simp only [V1]; rw [dif_neg (by omega), if_neg (by omega)]
+    intro c hc; simp only [V1]; rw [dite_eq_right (by omega), if_neg (by omega)]
   have V1_cases : ∀ c, c < m + 1 → (c = i.val ∧ V1 c = ViF m i Vc) ∨
       (∃ b : Fin m, (i.succAbove b).val = c ∧ V1 c = Vc b) := by
     intro c hc
@@ -69,7 +129,7 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
     · left; exact ⟨hci, by rw [hci, hV1i]⟩
     · right
       refine ⟨pidx m i c ⟨hc, hci⟩, succAbove_pidx m i c ⟨hc, hci⟩, ?_⟩
-      simp only [V1]; rw [dif_pos ⟨hc, hci⟩]
+      simp only [V1]; rw [dite_eq_left ⟨hc, hci⟩]
   have V1_s : ∀ b, b < m + 1 → ∀ q : Fin (2 * (m + 1) + k + 1), m + 1 + k < q.val →
       V1 b q = if (NFOne.sg k (m + 1) q).val = b then 1 else 0 := by
     intro b hb q hq
@@ -101,7 +161,6 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
   have hpres := herm_unitary n1 hn1.1
   have u_star : ∀ p : Fin (2 * (m + 1) + k + 1), m + 1 + k < p.val → u p = 0 := by
     intro p hp
-    have hpv := p.isLt
     have hpe : p = esI k (m + 1) ⟨2 * (m + 1) + k - p.val, by omega⟩ := by ext; simp [esI]; omega
     have e := herm_bvec_eI (k := k) u (⟨2 * (m + 1) + k - p.val, by omega⟩ : Fin (m + 1))
     rw [hpe, ← e, ← hpres, hnu, hn1.2.1, herm_bvec_eI]
@@ -181,9 +240,9 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
       (c ≠ i.val ∧ V2 c = bvec (esI k (m + 1) ⟨c, hc⟩)) := by
     intro c hc
     by_cases hci : c = i.val
-    · left; refine ⟨hci, ?_⟩; simp only [V2]; rw [dif_pos hc, if_pos hci]
-    · right; refine ⟨hci, ?_⟩; simp only [V2]; rw [dif_pos hc, if_neg hci]
-  have V2_0 : ∀ c, m + 1 ≤ c → V2 c = 0 := by intro c hc; simp only [V2]; rw [dif_neg (by omega)]
+    · left; refine ⟨hci, ?_⟩; simp only [V2]; rw [dite_eq_left hc, if_pos hci]
+    · right; refine ⟨hci, ?_⟩; simp only [V2]; rw [dite_eq_left hc, if_neg hci]
+  have V2_0 : ∀ c, m + 1 ≤ c → V2 c = 0 := by intro c hc; simp only [V2]; rw [dite_eq_right (by omega)]
   have V2_s : ∀ b, b < m + 1 → ∀ q : Fin (2 * (m + 1) + k + 1), m + 1 + k < q.val →
       V2 b q = if (NFOne.sg k (m + 1) q).val = b then 1 else 0 := by
     intro b hb q hq
@@ -261,7 +320,6 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
     simp only [ystar, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, bvec, Pi.single_apply]
     by_cases hp : m + 1 + k < p.val
     · rw [if_pos hp]
-      have hpv := p.isLt
       by_cases hpi : (NFOne.sg k (m + 1) p).val = i.val
       · have hpe : p = esI k (m + 1) i := by ext; rw [sg_val'] at hpi; simp [esI]; omega
         rw [hpe, hyi _ (Fin.succAbove_ne i a'')]

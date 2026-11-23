@@ -1,8 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
-import Development.WeilBound.CoreStatements.HodgeTatePoints.FormMemLin
-import ReciprocityTheory.DualLattices.PrimeHopfOrderOfAddEquiv
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
+module
+
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsTight
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.RelatedPairsOrbitalTermEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Up GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.GR GlobalTheory.CompanionTheory.Ar.Num.FamEx
 open PositivityTheory.Xgn.TestGroupPoint
@@ -40,6 +83,7 @@ theorem sum_cz (x : Fin n → 𝓞 E) : ∑ m, cz x m • dl m = x := by
 theorem hom_eq {A : Type} [AddCommGroup A] (f : (Fin n → 𝓞 E) →+ A) (x : Fin n → 𝓞 E) :
     f x = ∑ m, cz x m • f (dl m) := by
   conv_lhs => rw [← sum_cz x]
+
   rw [map_sum]
   simp only [map_zsmul]
 
@@ -152,13 +196,17 @@ theorem exists_dualOf {C : Type} [Field C] [Algebra R C] (hi : Function.Injectiv
   unfold IsDualOf
   refine ⟨?_, ?_⟩
   · apply hi
+
     rw [map_sum, map_one]
     simp only [map_mul, hs, hσ']
+
     rw [← map_one σ, ← GlobalTheory.CompanionTheory.Ar.HT.ProjEig.sum_dualInt_mul, map_sum]
     simp [map_mul]
   · intro a l
     apply hi
+
     simp only [map_mul, map_sum, hs, hσ', map_intCast]
+
     rw [← map_mul, GlobalTheory.CompanionTheory.Ar.HT.ProjEig.mul_dualInt_eq, map_sum]
     simp [map_mul, map_intCast]
 
@@ -180,6 +228,7 @@ theorem Pm_cz (k : Fin n) (x : Fin n → 𝓞 E) : ∑ m, Pm n σ k m * (cz x m 
   rw [Fintype.sum_prod_type, Finset.sum_eq_single k]
   · simp only [Pm, if_true, cz_apply]
     conv_rhs => rw [← (RingOfIntegers.basis E).sum_repr (x k)]
+
     rw [map_sum]
     refine Finset.sum_congr rfl (fun k' _ => ?_)
     rw [map_zsmul, zsmul_eq_mul, mul_comm]
@@ -222,8 +271,8 @@ theorem vecMul_Ma (l : Ix E n → R) (a : 𝓞 E) (x : Fin n → 𝓞 E) :
     ∑ m, (l ᵥ* Ma R n a) m * (cz x m : R) = ∑ m, l m * (cz (a • x) m : R) := by
   have key : ∀ m', (cz (a • x) m' : R) = ∑ m, (cz x m : R) * (cz (a • dl m) m' : R) := by
     intro m'
-    have := hom_eq ((cz (E := E) (n := n)).comp (DistribMulAction.toAddMonoidHom (Fin n → 𝓞 E) a)) x
-    simp only [AddMonoidHom.comp_apply, DistribMulAction.toAddMonoidHom_apply] at this
+    have := hom_eq ((cz (E := E) (n := n)).comp (DistribSMul.toAddMonoidHom (Fin n → 𝓞 E) a)) x
+    simp only [AddMonoidHom.comp_apply, DistribSMul.toAddMonoidHom_apply] at this
     rw [this]
     simp [Finset.sum_apply]
   simp only [key, Matrix.vecMul, dotProduct, Ma, Finset.sum_mul, Finset.mul_sum]

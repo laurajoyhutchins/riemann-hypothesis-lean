@@ -1,25 +1,70 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CentreSetDominatingPointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DominatesRegAtLocalStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntegralClosureFiniteStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntegralClosureChartSpanStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueDominatingMapStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.JoinCoordsChartIntegralStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CentreSetDominatingPointStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartPrimeExistsUniquePointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProjectiveModelNonemptyStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DominatesRegAtLocalStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DominatingModelChartCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueDominatingMapStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntegralClosureChartSpanStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntegralOverLocalizationScaledStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalSubringIntegralClosureMaxStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MaximalIdealMembershipOfLocalStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimeMemIffNotUnitLocalizationStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProjectiveModelNonemptyStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtChartLocalizationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IntegralOverLocalizationScaledStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalSubringIntegralClosureMaxStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MaximalIdealMembershipOfLocalStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PrimeMemIffNotUnitLocalizationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularFunctionsTwoComponentsStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartRingIntegralFractionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartRingIntegralClosureFiniteStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DominatingModelChartCompatStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularFunctionsTwoComponentsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.WeilBound.CoreStatements.HodgeTatePoints.MbLNormExists
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory GlobalTheory.CompanionTheory.Ar NumberField
 
 noncomputable section
@@ -35,7 +80,7 @@ theorem int_trans {o K : Type} [CommRing o] [Field K] [Algebra o K] (A B : Subal
   haveI : IsScalarTower A B K := IsScalarTower.of_algebraMap_eq fun _ => rfl
   haveI : Algebra.IsIntegral A B := ⟨fun b => by
     have := hB b b.2
-    exact (isIntegral_algebraMap_iff (A := B) (B := K) (x := b) Subtype.val_injective).1 this⟩
+    exact (isIntegral_algebraMap_iff (A := B) (B := K) (x := b) ).1 this⟩
   exact isIntegral_trans a ha
 
 theorem mem_of_isIntegral_loc {o K : Type} [CommRing o] [Field K] [Algebra o K] (A : Subalgebra o K) (D : Subring K)
@@ -154,8 +199,8 @@ variable {o : Type} [CommRing o] {Ω : Type} [Field Ω] [Algebra o Ω] {κ : Typ
   (M : PModel o x) (Ω' : Type) [Field Ω'] [Algebra Ω Ω'] [Algebra o Ω'] [IsScalarTower o Ω Ω']
   {κ' : Type} [Finite κ'] {y : κ' → Ω'} (M' : PModel o y) (f : M'.X ⟶ M.X) (e : κ → κ')
 
-variable {M Ω' M' f} in
 
+variable {M Ω' M' f} in
 theorem dom_of_eq (hD : Dominates M'.ξ M.ξ f (algebraMap Ω Ω')) {p : Cpt M.ξ} {p' : Cpt M'.ξ} (h : f p'.1 = p.1) :
     (∀ a ∈ regAt M.ξ p, algebraMap Ω Ω' a ∈ regAt M'.ξ p') ∧
       ∀ a ∈ regAt M.ξ p, unitAt M'.ξ p' (algebraMap Ω Ω' a) → unitAt M.ξ p a := by
@@ -238,9 +283,6 @@ variable {o : Type} [CommRing o] {Ω : Type} [Field Ω] [Algebra o Ω] {κ : Typ
   (M : PModel o x) (Ω' : Type) [Field Ω'] [Algebra Ω Ω'] [Algebra o Ω'] [IsScalarTower o Ω Ω']
   {κ' : Type} [Finite κ'] {y : κ' → Ω'} (M' : PModel o y) (f : M'.X ⟶ M.X) (e : κ → κ')
 
-local notation "i₀" => algebraMap Ω Ω'
-local notation "A₀" => chRing o (fun k => algebraMap Ω Ω' (x k))
-
 theorem normAt_of_charts (hD : Dominates M'.ξ M.ξ f (algebraMap Ω Ω'))
     (hy : ∀ c, x c ≠ 0 → y (e c) ≠ 0)
     (hB : ∀ c, x c ≠ 0 → ∀ a : Ω', a ∈ chRing o y (e c) ↔ IsIntegral (chRing o (fun k => algebraMap Ω Ω' (x k)) c) a)
@@ -250,6 +292,8 @@ theorem normAt_of_charts (hD : Dominates M'.ξ M.ξ f (algebraMap Ω Ω'))
   obtain ⟨c, hp⟩ := M.tie.cover p
   have hc := hp.1
   have hr := GlobalTheory.T.regAt_chart_localization o Ω κ x M c p hp
+  let i₀ := algebraMap Ω Ω'
+  let A₀ := fun c => chRing o (fun k => algebraMap Ω Ω' (x k)) c
   have hB1 : ∀ c, x c ≠ 0 → ∀ a : Ω', IsIntegral (A₀ c) a → a ∈ chRing o y (e c) := fun c hc a => (hB c hc a).2
   have hAR : ∀ a ∈ A₀ c, a ∈ (regAt M.ξ p).map i₀ := fun a ha => by
     obtain ⟨b, hb, rfl⟩ := exists_of_mem_chRing x Ω' c a ha
@@ -328,61 +372,7 @@ theorem normAt_of_charts (hD : Dominates M'.ξ M.ξ f (algebraMap Ω Ω'))
 
 end Sit
 
-theorem exists_normalisation : ∀ (o : Type) [CommRing o] [Algebra.EssFiniteType ℤ o] (Ω : Type) [Field Ω] [Algebra o Ω] (κ : Type) [Finite κ] (x : κ → Ω) (M : PModel o x) (Ω' : Type) [Field Ω'] [Algebra Ω Ω'] [FiniteDimensional Ω Ω'] [Algebra o Ω'] [IsScalarTower o Ω Ω'], ∃ (κ' : Type) (_ : Finite κ') (y : κ' → Ω') (M' : PModel o y) (f : M'.X ⟶ M.X), Dominates M'.ξ M.ξ f (algebraMap Ω Ω') ∧ Flat.NormalCpt M'.ξ ∧ IsFinite f ∧ ∀ p : Cpt M.ξ, NormAt M'.ξ f (algebraMap Ω Ω') p := by
-  intro o _ _ Ω _ _ κ _ x M Ω' _ _ _ _ _
-  have hinj : ∀ c, x c ≠ 0 → algebraMap Ω Ω' (x c) ≠ 0 := fun c hc => by
-    simpa using hc
-  have hinj' : ∀ c, algebraMap Ω Ω' (x c) ≠ 0 → x c ≠ 0 := fun c hc h => hc (by simp [h])
-  obtain ⟨d, n, z, hz1, hz2⟩ := GlobalTheory.T.integral_closure_chart_span o Ω' κ (fun k => algebraMap Ω Ω' (x k))
-    (fun c hc => GlobalTheory.T.chart_ring_integral_closure_finite M Ω' c (hinj' c hc))
-  set x' : κ → Ω' := fun k => algebraMap Ω Ω' (x k) with hx'
-  set y := joinCo (RingHom.id Ω') x' z with hy
-  obtain ⟨c₀, hc₀⟩ := exists_ne M
-  have hyne : ∀ c, x c ≠ 0 → y (c, Sum.inl c) ≠ 0 := fun c hc => by
-    simp only [hy, joinCo, RingHom.id_apply, hz1]
-    exact mul_ne_zero (hinj c hc) (pow_ne_zero _ (hinj c hc))
-  have hJ := fun c (hc : x c ≠ 0) a (ha : IsIntegral (chRing o x' c) a) =>
-    join_chart (o := o) x' d n z hz1 hz2 c (hinj c hc) a ha
-  obtain ⟨M'⟩ : Nonempty (PModel o y) := GlobalTheory.T.projective_model_nonempty o Ω' (κ × (κ ⊕ Fin n)) y
-    ⟨(c₀, Sum.inl c₀), hyne c₀ hc₀, fun a => by
-      obtain ⟨b, v, hb, hv, hv0, rfl⟩ := GlobalTheory.T.chart_ring_integral_fraction M Ω' c₀ hc₀ a
-      exact ⟨b, hJ c₀ hc₀ b hb, v, hJ c₀ hc₀ v (isIntegral_algebraMap (x := (⟨v, hv⟩ : chRing o x' c₀))), rfl⟩⟩
-  have hT := GlobalTheory.T.join_coords_chart_integral o Ω' κ x' d n z M' hz1 hz2
-  have hB : ∀ c, x c ≠ 0 → ∀ a : Ω', a ∈ chRing o y (c, Sum.inl c) ↔ IsIntegral (chRing o x' c) a :=
-    fun c hc => (hT c (hinj c hc)).1
-  have hC : ∀ c, x c ≠ 0 → ∀ p' : Cpt M'.ξ, (∀ j, x' j / x' c ∈ regAt M'.ξ p') → InChart M'.ξ y (c, Sum.inl c) p' :=
-    fun c hc => (hT c (hinj c hc)).2
-  have hcov : ∀ p' : Cpt M'.ξ, ∃ c, x c ≠ 0 ∧ InChart M'.ξ y (c, Sum.inl c) p' := by
-    intro p'
-    obtain ⟨⟨c, k⟩, h0, h1⟩ := M'.tie.cover p'
-    have hc' : x' c ≠ 0 := left_ne_zero_of_mul h0
-    have hk : z k ≠ 0 := right_ne_zero_of_mul h0
-    refine ⟨c, hinj' c hc', hC c (hinj' c hc') p' fun j => ?_⟩
-    have := h1 (j, k)
-    simp only [hy, joinCo, RingHom.id_apply] at this
-    rwa [mul_div_mul_right _ _ hk] at this
-  have hreg : ∀ (c : κ) (p' : Cpt M'.ξ), InChart M'.ξ y (c, Sum.inl c) p' → ∀ a ∈ chRing o x c, algebraMap Ω Ω' a ∈ regAt M'.ξ p' := by
-    intro c p' hp a ha
-    have hc : x c ≠ 0 := hinj' c (left_ne_zero_of_mul hp.1)
-    exact (GlobalTheory.T.regAt_chart_localization o Ω' _ y M' _ p' hp).1 _ ((hB c hc _).2
-      (isIntegral_algebraMap (x := (⟨_, map_chRing x Ω' c a ha⟩ : chRing o x' c))))
-  obtain ⟨f, hf, -⟩ := GlobalTheory.T.existsUnique_dominating_map o Ω κ x M o Ω' _ y M' (algebraMap Ω Ω') fun p' => by
-    obtain ⟨c, hc, hp⟩ := hcov p'
-    exact ⟨c, hc, hreg c p' hp⟩
-  have hN : Flat.NormalCpt M'.ξ := by
-    refine normal_of_charts M' {q | ∃ c, x c ≠ 0 ∧ q = (c, Sum.inl c)} (fun p' => ?_) ?_
-    · obtain ⟨c, hc, hp⟩ := hcov p'
-      exact ⟨_, ⟨c, hc, rfl⟩, hp⟩
-    · rintro _ ⟨c, hc, rfl⟩ a ha
-      rw [hB c hc]
-      refine int_trans (chRing o x' c) (chRing o y (c, Sum.inl c)) (fun b hb => (hB c hc b).2
-        (isIntegral_algebraMap (x := (⟨b, hb⟩ : chRing o x' c)))) (fun b hb => (hB c hc b).1 hb) a ha
-  refine ⟨_, inferInstance, y, M', f, hf, hN, ?_, fun p => ?_⟩
-  · refine GlobalTheory.T.dominating_model_chart_compat M Ω' M' f (fun c => (c, Sum.inl c)) hf hyne
-      (fun c hc p' => chart_over M Ω' M' f _ hf (fun c hc a ha => (hB c hc a).2 ha) hC c hc p') fun c hc => ?_
-    refine ⟨(Set.finite_range fun k => z k / x' c ^ d).toFinset, fun a => ?_⟩
-    rw [Set.Finite.coe_toFinset]
-    exact (hB c hc a).trans (hz2 c (hinj c hc) a)
-  · exact normAt_of_charts M Ω' M' f (fun c => (c, Sum.inl c)) hf hyne hB hC hN p
+theorem exists_normalisation : ∀ (o : Type) [CommRing o] [Algebra.EssFiniteType ℤ o] (Ω : Type) [Field Ω] [Algebra o Ω] (κ : Type) [Finite κ] (x : κ → Ω) (M : PModel o x) (Ω' : Type) [Field Ω'] [Algebra Ω Ω'] [FiniteDimensional Ω Ω'] [Algebra o Ω'] [IsScalarTower o Ω Ω'], ∃ (κ' : Type) (_ : Finite κ') (y : κ' → Ω') (M' : PModel o y) (f : M'.X ⟶ M.X), Dominates M'.ξ M.ξ f (algebraMap Ω Ω') ∧ Flat.NormalCpt M'.ξ ∧ IsFinite f ∧ ∀ p : Cpt M.ξ, NormAt M'.ξ f (algebraMap Ω Ω') p :=
+  PositivityTheory.HtPt.Mb.LNormExists.NormEx.exists_normalisation
 
 end GlobalTheory.CompanionTheory.Ar.NormEx

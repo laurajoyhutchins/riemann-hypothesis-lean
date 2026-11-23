@@ -1,6 +1,52 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Cut_BPEq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BetaCongrRight
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Cut_BPEq
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SliceLastLevel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBPEq
 
@@ -98,16 +144,21 @@ theorem inCC_zero_fnE (A : ℝ) (m : ℕ) : B.InCC A m (0 : B.Mat k r → (Wq �
   simp
 
 theorem inCC_finsum {A : ℝ} {m : ℕ} : ∀ {n : ℕ} (F : Fin n → Mat k r → (Wq →L[ℂ] Wp)),
-    (∀ i, InCC A m (F i)) → InCC A m (fun g => ∑ i, F i g)
-  | 0, F, _ => by
-    have e : (fun g => ∑ i : Fin 0, F i g) = (0 : Mat k r → (Wq →L[ℂ] Wp)) := by funext g; simp
-    rw [e]; exact inCC_zero_fnE A m
-  | n + 1, F, h => by
-    have e : (fun g => ∑ i : Fin (n + 1), F i g) = fun g => F 0 g + ∑ i : Fin n, F i.succ g := by
-      funext g; exact Fin.sum_univ_succ _
+    (∀ i, InCC A m (F i)) → InCC A m (fun g => ∑ i, F i g) := by
+  intro n
+  induction n with
+  | zero =>
+    intro F _
+    have e : (fun g => ∑ i : Fin 0, F i g) = (0 : Mat k r → (Wq →L[ℂ] Wp)) := by
+      funext g
+      exact Fin.sum_univ_zero _
     rw [e]
+    exact inCC_zero_fnE A m
+  | succ n ih =>
+    intro F h
+    simp only [Fin.sum_univ_succ]
     obtain ⟨c₁, h₁⟩ := h 0
-    obtain ⟨c₂, h₂⟩ := inCC_finsum (fun i : Fin n => F i.succ) (fun i => h i.succ)
+    obtain ⟨c₂, h₂⟩ := ih (fun i : Fin n => F i.succ) (fun i => h i.succ)
     exact ⟨c₁ + c₂, Formalism.FourierDecayAlt.P.BetaSesquilinearity.CCle_add h₁ h₂⟩
 
 end sum
@@ -119,6 +170,7 @@ theorem shifted_decay : FpmShDecay := by
   have e : fpmSh q f A p₀ = fun g => ∑ i, (Gp g * c i g) • (f g).comp (L i) := by
     funext g
     ext v
+
     simp [fpmSh, hAe g, map_sum, map_smul, Finset.smul_sum, smul_smul, hGp]
   rw [e]
   refine inCC_finsum _ fun i => ?_

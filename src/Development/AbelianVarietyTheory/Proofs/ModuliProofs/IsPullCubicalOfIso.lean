@@ -1,12 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PulledComparisonEven
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubicalOfNormalised
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubicalOfNormalised
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.NonemptyCubicalPull
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PulledComparisonEven
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,8 +118,24 @@ theorem isPullCubical_of_iso (hG : Out.GlobalFnsSt) {S : Scheme.{0}} {G' G : Ove
     have a₁ : e.left ≫ (CubeMap.ofHom α).F3 = (lift (1 : 𝟙_ (Over S) ⟶ G) (lift 1 1)).left := by
       show (e ≫ (α ⊗ₘ α ⊗ₘ α)).left = _
       simp only [e, lift_map, MonObj.one_comp]
-    have b₁ := (isCub_cubV c (T := 𝟙_ (Over S)) hJ).face 1 1
-    have b₂ := (isCub_cubV c' (T := 𝟙_ (Over S)) hJ').face 1 1
+    have b₁ : val c.t (lift (1 : 𝟙_ (Over S) ⟶ G) (lift 1 1)).left y J = 1 := by
+      have v := val_corr hJ (c.face 0) (lift (1 : 𝟙_ (Over S) ⟶ G) 1).left
+      rw [val_one] at v
+      have vp := val_pull (φ := thφ G (x3 G)) (ε := thε) hJ c.t (faceMap G 0).left (lift (1 : 𝟙_ (Over S) ⟶ G) 1).left
+      rw [vp] at v
+      have eq : (lift (1 : 𝟙_ (Over S) ⟶ G) 1) ≫ faceMap G 0 = lift 1 (lift 1 1) := by
+        simp [faceMap, x2, pzero, comp_lift, Hom.one_def]
+      rw [← Over.comp_left, eq] at v
+      exact v
+    have b₂ : val c'.t (lift (1 : 𝟙_ (Over S) ⟶ G') (lift 1 1)).left y J' = 1 := by
+      have v := val_corr hJ' (c'.face 0) (lift (1 : 𝟙_ (Over S) ⟶ G') 1).left
+      rw [val_one] at v
+      have vp := val_pull (φ := thφ G' (x3 G')) (ε := thε) hJ' c'.t (faceMap G' 0).left (lift (1 : 𝟙_ (Over S) ⟶ G') 1).left
+      rw [vp] at v
+      have eq : (lift (1 : 𝟙_ (Over S) ⟶ G') 1) ≫ faceMap G' 0 = lift 1 (lift 1 1) := by
+        simp [faceMap, x2, pzero, comp_lift, Hom.one_def]
+      rw [← Over.comp_left, eq] at v
+      exact v
     have b₃ := prod_cub (1 : 𝟙_ (Over S) ⟶ G') 1 1 (fun ψ => gw w₁ ψ y (J (ψ ≫ α.left)) (J' ψ))
     refine Eq.trans ((congrArg (fun q => val (L := L.L) (φ := thφ G (x3 G)) (ε := thε) c.t q y J) a₁).trans b₁)
       (Eq.symm ?_)
@@ -131,8 +193,8 @@ theorem iso_of_lam {S : Scheme.{0}} (t' t : SAB H S) (α : t'.G ⟶ t.G) [IsMonH
   have h₃ : LBIso (t.PP.L.pull α.left) (cubeLB t'.G ![𝟙 _, t'.act.act H.w0] (t.PP.L.pull α.left)) :=
     LBIso.chartPull (chartPullPull _ _ _ rfl) (chartPullLinComb _ _ _ _ _ α.left fun I =>
       congrArg (fun q => q.left) (pa I.down)) t.prim
-  have i₁ := pull_isLB t'.PP.isLB (𝟙 _)
-  have i₂ := pull_isLB t.PP.isLB α.left
+  have i₁ : (t'.PP.L.pull (𝟙 _)).IsLB := DVR.linComb_isLB _ t'.PP.isLB _ _
+  have i₂ : (t.PP.L.pull α.left).IsLB := DVR.linComb_isLB _ t.PP.isLB _ _
   have h₄ := LBIso.trans i₁ (DVR.linComb_isLB _ i₂ _ _) i₂
     (LBIso.trans i₁ (DVR.linComb_isLB _ i₁ _ _) (DVR.linComb_isLB _ i₂ _ _) h₂ h₁) h₃.symm
   exact LBIso.chartPull (chartPullUnpull _ _ rfl) (chartPullId _) h₄

@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementE
-import Formalism.GaussJetBounds.StatementP
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Data.ZMod.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.GaussJetBounds.Statement
+import Formalism.GaussJetBounds.StatementH
+public import Formalism.GaussJetBounds.StatementP
+public import Formalism.GrowthSums.StatementA
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,43 +75,5 @@ def lsG (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ) (hts : ∀ 
   ∑ c, hts s c - alG TT colN hts s
 
 end Shape
-
-def FrameJetExcessBound : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (ν r0 r1 : ℕ) [NeZero ν] (u : ZMod (2 * ν) → ℂ_[p])
-    (F : MvPowerSeries (ZV ν r0 r1) ℂ_[p]) (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ)
-    (hts : ∀ s, Fin (colN s) → ℕ) (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1),
-    2 < p → (∀ s, ‖u s‖ ≤ 1) → InClass (p : ℂ_[p]) (hhS p u) F →
-    ∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
-      (p : ℝ) ^ (-(excessGain (p : ℝ) TT (dSet TT) (fun s => (alG TT colN hts s : ℝ))
-          (fun s => (capG TT colN hts s : ℝ))
-          (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) +
-        rhoP p * ∑ s, ((alG TT colN hts s : ℝ) + lsG TT colN hts s)))
-
-def FrameJetCappedBound : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (ν r0 r1 : ℕ) [NeZero ν] (u : ZMod (2 * ν) → ℂ_[p])
-    (F : MvPowerSeries (ZV ν r0 r1) ℂ_[p]) (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ)
-    (hts : ∀ s, Fin (colN s) → ℕ) (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1),
-    2 < p → (∀ s, ‖u s‖ ≤ 1) → InClass (p : ℂ_[p]) (hhS p u) F →
-    ∀ n, ‖MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
-      (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
-          (fun s => (capG TT colN hts s : ℝ))
-          (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) -
-        ∑ s ∈ TT \ oddT TT, (alG TT colN hts s : ℝ) +
-        rhoP p * ∑ s, ((alG TT colN hts s : ℝ) + lsG TT colN hts s)))
-
-def GaussB : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (ν r0 r1 i : ℕ) [NeZero ν] (u : ZMod (2 * ν) → ℂ_[p])
-    (F : MvPowerSeries (ZV ν r0 r1) ℂ_[p]) (TT : Finset (ZMod (2 * ν))) (colN : ZMod (2 * ν) → ℕ)
-    (hts : ∀ s, Fin (colN s) → ℕ) (hp : ∀ s c, hts s c ≤ r0) (I : ∀ s c, Fin (hts s c) → Fin r1),
-    2 < p → 1 ≤ i → (∀ s, ‖u s‖ ≤ 1) → InClass (p : ℂ_[p]) (hhS p u) F →
-    ∀ n, ‖(p : ℂ_[p]) ^ (∑ s : ZMod (2 * ν), ∑ c : Fin (colN s),
-          (if s.val % 2 = 0 then
-            min (hts s c) i - ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card
-          else ((univ.image (I s c)) ∩ univ.filter (fun b : Fin r1 => b.val < i)).card)) *
-        MvPolynomial.coeff n (frameJet colN hts hp I F)‖ ≤
-      (p : ℝ) ^ (-(gainG (p : ℝ) TT (oddT TT) (fun s => (alG TT colN hts s : ℝ))
-          (fun s => (capG TT colN hts s : ℝ))
-          (deLoss p r0 r1 TT (alG TT colN hts) (lsG TT colN hts)) +
-        rhoP p * ∑ s, ((alG TT colN hts s : ℝ) + lsG TT colN hts s)))
 
 end Formalism.InvariantFactorPaths.G7

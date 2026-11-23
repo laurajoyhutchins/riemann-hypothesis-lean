@@ -1,6 +1,46 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftUnit
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.Bezout
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftOfEq
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.BaseOnto
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.Bezout
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.LiftOfEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -29,7 +69,7 @@ private theorem cg_trans {n : ℕ} {x y w : M} (h : Cg n x y) (k : Cg n y w) : C
 
 private theorem cg_hom {n : ℕ} (f : M →+ M) {x y : M} (h : Cg n x y) : Cg n (f x) (f y) := by
   obtain ⟨z, hz⟩ := h
-  exact ⟨f z, by rw [hz, map_add, map_nsmul]⟩
+  exact ⟨f z, by rw [hz, map_add (f := _), map_nsmul]⟩
 
 private theorem cg_smul {O : Type} [Ring O] [Module O M] {n : ℕ} (c : O) {x y : M} (h : Cg n x y) :
     Cg n (c • x) (c • y) := by
@@ -81,7 +121,7 @@ private theorem exists_mix {a b : ℕ} (hc : a.Coprime b) (f : M →+ M) :
       map_zero' := by simp
       map_add' := by
         intro x y
-        simp only [map_add, smul_add]
+        simp only [map_add (f := _), smul_add]
         abel }
   exact ⟨k, fun x => crt_elt hc (f x) x⟩
 
@@ -251,4 +291,4 @@ theorem UpperTheory.Gal.FiniteEtaleModels.O.liftSys :
       · rw [pow_one]
         exact_mod_cast hqa
       · rw [map_natCast]
-    rw [hz, map_add, hzero, add_zero]
+    rw [hz, map_add (f := _), hzero, add_zero]

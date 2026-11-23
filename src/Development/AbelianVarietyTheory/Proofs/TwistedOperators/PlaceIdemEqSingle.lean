@@ -1,8 +1,48 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OneEqSumPlaceIdempotentsOverTwoAddTwoMul
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SubMemOfMkEq
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.IsSelfDualCLatFrame
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OneEqSumPlaceIdempotentsOverTwoAddTwoMul
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum NumberField GlobalTheory.FinDecomp IsDedekindDomain
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -55,7 +95,7 @@ theorem finPart_algebraMap (x : AF D.host.F) :
   rw [Algebra.TensorProduct.algebraMap_apply, Algebra.TensorProduct.map_tmul]
   rfl
 
-set_option maxHeartbeats 1000000 in
+
 theorem exists_idem_half : ∀ (D : D7), ∃ e : AE D, e * e = e ∧ e * cA D e = 0 ∧ finPart D e ∈ intAE D ∧
     finPart D (cA D e) ∈ intAE D ∧ ∃ h : AE D, finPart D h ∈ intAE D ∧ 2 * h = 1 - e - cA D e := by
   intro D
@@ -86,6 +126,7 @@ theorem exists_idem_half : ∀ (D : D7), ∃ e : AE D, e * e = e ∧ e * cA D e 
     rw [Finset.sum_eq_single v (fun w hw hwv => cross _ _ v w (Ne.symm hwv) (absE v hv) (absE w hw))
       (fun h => absurd hv h), hEE v hv]
   have hec : (∑ v ∈ P, E v) * cA D (∑ v ∈ P, E v) = 0 := by
+
     rw [map_sum, Finset.sum_mul_sum]
     refine Finset.sum_eq_zero fun v hv => ?_
     rw [Finset.sum_eq_single v (fun w hw hwv => cross _ _ v w (Ne.symm hwv) (absE v hv) (absC w hw))
@@ -110,11 +151,13 @@ theorem exists_idem_half : ∀ (D : D7), ∃ e : AE D, e * e = e ∧ e * cA D e 
   · have key : 2 * pairA D.host.F (algebraMap D.host.F _ (1 / 2)) β =
         1 - ∑ v ∈ P, pairA D.host.F 0 (singleV D.host.F v 1) := by
       refine AF_ext ?_ ?_
-      · rw [map_mul, map_sub, map_sum, map_one, map_ofNat, fstA_pairA]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_mul, map_sub, map_sum, map_one, map_ofNat, fstA_pairA]
         simp only [fstA_pairA, Finset.sum_const_zero, sub_zero]
         rw [← map_ofNat (algebraMap D.host.F (Ainf D.host.F)) 2, ← map_mul]
         norm_num
-      · rw [map_mul, map_sub, map_sum, map_one, map_ofNat, sndA_pairA]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_mul, map_sub, map_sum, map_one, map_ofNat, sndA_pairA]
         simp only [sndA_pairA]
         linear_combination -h1
     calc (2 : AE D) * algebraMap (AF D.host.F) (AE D) (pairA D.host.F (algebraMap D.host.F _ (1 / 2)) β)

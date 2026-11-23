@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodModModT
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeisenbergVacuumCommutantPreservesLatticeVacua
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergFinitePointReadsClassicalTranslation
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatAnn
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodModModT
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeCompletionSelfAnnihilatorAtPlaces
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ActOMemFinSub
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergFinitePointReadsClassicalTranslation
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeisenbergVacuumCommutantPreservesLatticeVacua
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatAnn
 import Formalism.SharpRestriction.GlobalSchurBounds.StandardIntegralLatticeExists
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeCompletionSelfAnnihilatorAtPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField MeasureTheory IsDedekindDomain UniqueFactorizationMonoid
 open scoped Classical Pointwise
@@ -25,7 +71,7 @@ namespace GlobalTheory.NormRatio.SphCoset
 
 theorem isSelfDualC_of_gram_one {D : D7} {V : HSp D} (hV : V.gram = 1) {L : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)}
     (hL : IsSDLat D.host.E V.rank L) : IsSelfDualC V L := by
-  refine ⟨⟨hL.1, hL.2.1⟩, fun y => ?_⟩
+  refine ⟨Submodule.IsLattice.of_fg D.host.E hL.1, fun y => ?_⟩
   rw [hL.2.2 y]
   refine forall₂_congr fun x _ => ?_
   have e : ∑ i, ∑ j, star (x i) * V.gram i j * y j = stdH D.host.E V.rank x y := by
@@ -87,7 +133,7 @@ theorem isLatVac_span {D : D7} {ψ : AddChar (AF D.host.F) ℂ} {S T : HSp D} {�
       funext w; have e1 := congrFun h1 w
       simp only [heisO, Pi.smul_apply, smul_eq_mul] at e1 ⊢; rw [mul_left_comm, e1]
 
-set_option synthInstance.maxHeartbeats 200000 in
+
 
 theorem exists_sum_eq {D : D7} (𝔫 : Ideal (𝓞 D.host.F)) {α : Af D.host.F} (hα : α ∈ Formalism.MainNotions.StandardLattice.intAf D.host.F)
     (h0 : ∀ v : FinPl D, 𝔫 ≤ v.asIdeal → evalV D.host.F v α = 0) :
@@ -113,6 +159,7 @@ theorem exists_sum_eq {D : D7} (𝔫 : Ideal (𝓞 D.host.F)) {α : Af D.host.F}
     · rw [zero_mul, smul_zero]; exact zero_mem _
   · refine FiniteAdeleRing.ext (R := 𝓞 D.host.F) D.host.F fun v => ?_
     show evalV D.host.F v α = evalV D.host.F v _
+
     rw [map_sum]
     simp only [Algebra.smul_def, map_mul, AlgHom.commutes, GlobalTheory.SelfDualAt.evalV_indP]
     by_cases h : 𝔫 ≤ v.asIdeal
@@ -196,7 +243,7 @@ theorem heisO_sum {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (S T : HSp D) (x : W
   simp only [heisO, Finset.sum_apply, Finset.mul_sum, Pi.smul_apply, smul_eq_mul]
   exact Finset.sum_congr rfl fun q _ => mul_left_comm _ _ _
 
-set_option maxHeartbeats 800000 in
+
 
 theorem mem_span : ∀ {D : D7} {δ t0 : ℂ} {Q : ℕ} (P : Pair D ⊤ δ t0 Q) (X : Data P) (r : D.host.E), IsExact P X r →
   ∀ (𝔪 : Ideal (𝓞 D.host.E)) (o : ℕ) (f₀ φ : WO X.A X.B → ℂ), Reads X.ψ X.θ X.rkA X.rkB ⊤ δ r P.e0 f₀ →
@@ -234,8 +281,8 @@ theorem mem_span : ∀ {D : D7} {δ t0 : ℂ} {Q : ℕ} (P : Pair D ⊤ δ t0 Q)
   rw [heisO_sum]
   exact sum_mem fun q _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨z q, hz q, rfl⟩)
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 800000 in
+
+
 
 theorem smul_finPt {D : D7} {S T : HSp D} {a d : ℕ} (hS : S.rank = a) (hT : T.rank = d) (r : D.host.E) (n : 𝓞 D.host.F)
     (z : Matrix (Fin d) (Fin a) D.host.E) : algebraMap D.host.F (AF D.host.F) n • finPt hS hT r z =
@@ -248,7 +295,7 @@ theorem smul_finPt {D : D7} {S T : HSp D} {a d : ℕ} (hS : S.rank = a) (hT : T.
   show ((n : D.host.F) : D.host.E) * _ = _
   ring
 
-set_option maxHeartbeats 800000 in
+
 
 theorem psi_symplO_skew : ∀ {D : D7} {δ t0 : ℂ} {Q : ℕ} (P : Pair D ⊤ δ t0 Q) (X : Data P) (r : D.host.E), IsExact P X r →
   ∀ (𝔪 : Ideal (𝓞 D.host.E)) (Sf : Finset (FinPl D)), GoodMod D 𝔪 Sf →

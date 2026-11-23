@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.NaturalLeray
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.ImmersionPush
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.CechFunctor
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheaf
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.ImmersionPush
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -35,8 +79,9 @@ include he in
 lemma transE_d (n : ℕ) (σ : Cochain P' U n) :
     transE φ e U hinter (n + 1) (d P' U n σ) = d P (φ ∘ U) n (transE φ e U hinter n σ) :=
   funext fun i => by
+
     simp only [transE, AddMonoidHom.coe_mk, ZeroHom.coe_mk, d_apply, map_sum, map_zsmul, he,
-      res_res]
+    res_res]
 
 lemma transE_transE' (n : ℕ) (σ : Cochain P (φ ∘ U) n) :
     transE φ e U hinter n (transE' φ e U hinter n σ) = σ :=
@@ -162,8 +207,8 @@ variable (A : Type u) [CommRing A] [X.Over (Spec (.of A))] [Y.Over (Spec (.of A)
 
 attribute [local instance] algebraOfOver
 
-include i in
 
+include i in
 lemma algebraMap_eq_appTop (a : A) :
     algebraMap A Γ(X, ⊤) a = i.appTop (algebraMap A Γ(Y, ⊤) a) := by
   change (X ↘ Spec (.of A)).appTop _ = i.appTop ((Y ↘ Spec (.of A)).appTop _)
@@ -172,8 +217,8 @@ lemma algebraMap_eq_appTop (a : A) :
 
 lemma smulHom_pushforward_app (F : X.Modules) (a : A) (W : Y.Opens)
     (x : (modulesAb ((Scheme.Modules.pushforward i).obj F)).obj.obj (op W)) :
-    (smulAbRingHom ((Scheme.Modules.pushforward i).obj F) (algebraMap A Γ(Y, ⊤) a)).hom.app (op W)
-      x = (smulAbRingHom F (algebraMap A Γ(X, ⊤) a)).hom.app (op (i ⁻¹ᵁ W)) x := by
+    (smulAbRingHom ((Scheme.Modules.pushforward i).obj F) (algebraMap A Γ(Y, ⊤) a)).asHom.hom.app
+      (op W) x = (smulAbRingHom F (algebraMap A Γ(X, ⊤) a)).asHom.hom.app (op (i ⁻¹ᵁ W)) x := by
   change i.app W (restrictTop W (algebraMap A Γ(Y, ⊤) a)) • (show Γ(F, i ⁻¹ᵁ W) from x) =
     restrictTop (i ⁻¹ᵁ W) (algebraMap A Γ(X, ⊤) a) • (show Γ(F, i ⁻¹ᵁ W) from x)
   rw [algebraMap_eq_appTop i A a, restrictTop, restrictTop, app_resO]

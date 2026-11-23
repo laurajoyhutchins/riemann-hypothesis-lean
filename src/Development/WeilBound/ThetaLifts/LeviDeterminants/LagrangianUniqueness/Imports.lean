@@ -1,4 +1,54 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.WeilM Filter Topology
 open scoped Classical
@@ -19,7 +69,7 @@ theorem ind_mem {U₀ U : OpenAddSubgroup G} (h₀ : IsCompact (U₀ : Set G)) (
       exact (if_pos hz).trans (if_pos hx).symm
     · filter_upwards [hc.isClosed.isOpen_compl.mem_nhds hx] with z hz
       exact (if_neg hz).trans (if_neg hx).symm
-  · refine HasCompactSupport.intro (h₀.image (continuous_add_right a)) fun y hy => if_neg fun h => hy ?_
+  · refine HasCompactSupport.intro (h₀.image (continuous_add_const a)) fun y hy => if_neg fun h => hy ?_
     exact ⟨y - a, hU h, sub_add_cancel y a⟩
 
 theorem uniform {φ : G → ℂ} (hφ : φ ∈ SB G) : ∃ U : OpenAddSubgroup G, ∀ u ∈ U, ∀ x, φ (x + u) = φ x := by
@@ -75,7 +125,7 @@ theorem off (h2 : ∀ a ∉ P, ∃ χ : G → ℂ, IsLocallyConstant χ ∧ χ a
     by_cases ha : a ∈ P
     · exact ⟨⊤, fun h => absurd ha h⟩
     have : ∀ᶠ u in 𝓝 (0 : G), χ a (a + u) = χ a a := by
-      simpa using (((hχ a ha).comp_continuous (continuous_add_left a)).eventually_eq 0)
+      simpa using (((hχ a ha).comp_continuous (continuous_const_add a)).eventually_eq 0)
     obtain ⟨V, hV⟩ := NonarchimedeanAddGroup.is_nonarchimedean _ this
     exact ⟨V, fun _ u hu => hV hu⟩
   choose V hV using hV
@@ -88,6 +138,7 @@ theorem off (h2 : ∀ a ∉ P, ∃ χ : G → ℂ, IsLocallyConstant χ ∧ χ a
   obtain ⟨U, hU⟩ := NonarchimedeanAddGroup.is_nonarchimedean ((U₀ : Set G) ∩ U₁ ∩ ⋂ a ∈ s, (V a : Set G))
     (inter_mem (inter_mem U₀.mem_nhds_zero U₁.mem_nhds_zero) ((biInter_finset_mem s).2 fun a _ => (V a).mem_nhds_zero))
   obtain ⟨t, ht, e⟩ := decomp hφ U fun u hu => hU₁ u (hU hu).1.2
+
   rw [e, map_sum]
   refine Finset.sum_eq_zero fun q hq => ?_
   obtain ⟨a, ha, hqa⟩ := Set.mem_iUnion₂.mp (hcov ((ht q).1 hq))
@@ -103,8 +154,8 @@ theorem off (h2 : ∀ a ∉ P, ∃ χ : G → ℂ, IsLocallyConstant χ ∧ χ a
   rw [h4, map_smul, smul_eq_mul] at h3
   rw [map_smul, (mul_left_eq_self₀.1 h3).resolve_left (hne a haP), smul_zero]
 
-include h₀ in
 
+include h₀ in
 theorem test (hP0 : (0 : G) ∈ P) (h1 : ∀ p ∈ P, ∀ φ ∈ SB G, l (fun x => φ (x + p)) = l φ)
     (h2 : ∀ a ∉ P, ∃ χ : G → ℂ, IsLocallyConstant χ ∧ χ a ≠ 1 ∧ ∀ φ ∈ SB G, l (fun x => χ x * φ x) = l φ)
     (h0 : l (ind U₀ 0) = 0) {φ : G → ℂ} (hφ : φ ∈ SB G) : l φ = 0 := by
@@ -115,7 +166,8 @@ theorem test (hP0 : (0 : G) ∈ P) (h1 : ∀ p ∈ P, ∀ φ ∈ SB G, l (fun x 
       rw [← h1 p hp _ (ind_mem h₀ hU a)]
       congr 1
       funext x
-      simp only [ind, sub_zero, add_sub_assoc]
+      simp only [ind, sub_zero]
+      rw [show x + p - a = x + (p - a) by abel]
       exact if_congr (U.toAddSubgroup.add_mem_cancel_right hpa) rfl rfl
     · refine off h₀ h2 (ind_mem h₀ hU a) fun b hb hbP => h ⟨b, hbP, ?_⟩
       by_contra hc
@@ -131,15 +183,17 @@ theorem test (hP0 : (0 : G) ∈ P) (h1 : ∀ p ∈ P, ∀ φ ∈ SB G, l (fun x 
       split_ifs at this ⊢ with h
       · rfl
       · exact absurd rfl this
+
     rw [e, map_sum, Finset.sum_congr rfl fun q hq => by rw [h3 q hq, one_smul, key U hU], ← Finset.sum_filter,
-      Finset.sum_const, nsmul_eq_mul] at h0
+    Finset.sum_const, nsmul_eq_mul] at h0
     refine (mul_eq_zero.1 h0).resolve_left (Nat.cast_ne_zero.2 (Finset.card_ne_zero.2 ⟨0, ?_⟩))
     have h4 : (0 : G ⧸ U.toAddSubgroup).out ∈ U :=
       (QuotientAddGroup.eq_zero_iff _).1 (QuotientAddGroup.out_eq' (0 : G ⧸ U.toAddSubgroup))
-    refine Finset.mem_filter.2 ⟨(ht _).2 ?_, 0, hP0, by simpa using U.neg_mem h4⟩
+    refine Finset.mem_filter.2 ⟨(ht _).2 ?_, 0, hP0, by first | (rw [zero_sub]; exact U.neg_mem h4) | exact U.sub_mem U.zero_mem h4⟩
     simp [ind, hU h4]
   obtain ⟨U₁, hU₁⟩ := uniform hφ
   obtain ⟨t, -, e⟩ := decomp hφ (U₀ ⊓ U₁) fun u hu => hU₁ u hu.2
+
   rw [e, map_sum]
   refine Finset.sum_eq_zero fun q _ => ?_
   rw [map_smul, key _ inf_le_left, zero _ inf_le_left, ite_self, smul_zero]

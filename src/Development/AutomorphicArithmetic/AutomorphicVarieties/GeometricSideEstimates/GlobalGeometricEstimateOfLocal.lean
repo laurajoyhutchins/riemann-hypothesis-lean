@@ -1,6 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.ThStmt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GeometricSideEstimates.GeometricSideQuadraticFormIdentity
-import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.ThStmt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GeometricSideEstimates.GeometricSideQuadraticFormIdentity
+public import GroundTheory.GlobalFields.TateThesis.AdelePoissonUniform
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Lit.Geo
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.GKCoh UpperTheory.V.Af
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.AutomorphicForm
@@ -16,15 +55,19 @@ private theorem key {E : Type} [Field E] [NumberField E] {a : ℕ} (g : GA E a) 
   rw [← prod_norm_mul_finprod_norm hcx, AutomorphicForm.height, ← mul_assoc, ← Finset.prod_mul_distrib]
   refine mul_le_mul ?_ ?_ (finprod_nonneg fun _ => norm_nonneg _)
     (Finset.prod_nonneg fun w _ => by have := locHeight_pos (infAt w g); positivity)
-  · refine Finset.prod_le_prod (fun _ _ => pow_nonneg (norm_nonneg _) _) fun w _ => ?_
+  · refine Finset.prod_le_prod₀ (fun _ _ => pow_nonneg (norm_nonneg _) _) fun w _ => ?_
     rw [← mul_pow]
     refine pow_le_pow_left₀ (norm_nonneg _) ?_ _
     have h1 : ((c * x : E) : w.Completion) = ∑ j, ((c : w.Completion) * (y j).1 w) * ((infAt w g)⁻¹).val j i := by
       have := congrArg (infEval w) e
+
       rw [map_sum] at this
+      conv at this =>
+        lhs
+        rw [infEval_apply, AdeleRing.algebraMap_fst_apply]
       refine Eq.trans this (Finset.sum_congr rfl fun j _ => ?_)
       rw [map_mul, map_mul, ← infAt_inv]
-      rfl
+      simp only [infEval_apply, AdeleRing.algebraMap_fst_apply, infAt_apply]
     rw [h1]
     calc _ ≤ ∑ _j : Fin a, ‖(c : w.Completion)‖ * r * locHeight (infAt w g) := by
           refine norm_sum_le_of_le _ fun j _ => ?_
@@ -32,11 +75,12 @@ private theorem key {E : Type} [Field E] [NumberField E] {a : ℕ} (g : GA E a) 
           exact mul_le_mul (mul_le_mul_of_nonneg_left (hr j w) (norm_nonneg _))
             (norm_inv_apply_le_locHeight _ j i) (norm_nonneg _) (by positivity)
       _ = _ := by simp; ring
-  · refine finprod_le_finprod (Filter.eventually_cofinite.1 (eventually_norm_eq_one hcx)) (fun _ => norm_nonneg _)
+  · refine finprod_le_finprod₀ (Filter.eventually_cofinite.1 (eventually_norm_eq_one hcx)) (fun _ => norm_nonneg _)
       (finite_mulSupport_locHeight_finAt g) fun p => ?_
     have h1 : ((c * x : E) : p.adicCompletion E) =
         ∑ j, (algebraMap E (Ad E) c * y j).2 p * ((finAt p g)⁻¹).val j i := by
       have := congrArg (finEval p) e
+
       rw [map_sum] at this
       refine Eq.trans this (Finset.sum_congr rfl fun j _ => ?_)
       rw [map_mul, ← finAt_inv]
@@ -71,10 +115,12 @@ theorem UpperTheory.global_geometric_estimate_of_local :
     exact (congrFun this i).symm
   have hF : ∀ j, (y j).2 = ptF g v j := fun j => by
     change pFin E (∑ k, ratVec v k * g.val k j) = ∑ k, vFin v k * pFin E (g.val k j)
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun k _ => by rw [map_mul]; rfl
   have hI : ∀ j, pInf E (y j) = pt g v j := fun j => by
     change pInf E (∑ k, ratVec v k * g.val k j) = ∑ k, vInf v k * pInf E (g.val k j)
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun k _ => by rw [map_mul]; rfl
   have hn : ∀ (x : Ad E) (w : InfinitePlace E), ‖pInf E x w‖ = ‖x.1 w‖ := fun x w =>

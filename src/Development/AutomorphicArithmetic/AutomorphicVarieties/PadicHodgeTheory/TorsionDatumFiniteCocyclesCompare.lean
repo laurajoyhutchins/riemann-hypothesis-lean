@@ -1,9 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.TriDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.PosExact
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.TriDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmRes
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiltByRestrictScalarsOfResidualCharacters
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.PosExact
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.Z1fMap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmRes
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiltByRestrictScalarsOfResidualCharacters
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal Module Topology UpperTheory.V.Loc UpperTheory.V.U3
 
 theorem UpperTheory.torsionDatum_finiteCocycles_compare :
@@ -21,8 +66,13 @@ theorem UpperTheory.torsionDatum_finiteCocycles_compare :
   have hI : ∀ g ∈ H, g ∈ Iq l →
       T.χ2 g = Units.map (algebraMap E B : E →* B) (cycA l l E g ^ ((2 * e : ℕ) : ℤ)) := by
     intro g hg hgI
-    have h := (hT.chars hD).ine ⟨g, hg⟩ hgI
-    simp only [Tor.ch_apply, Subgroup.coe_subtype] at h
+    have h : ∀ i, T.t g i = cycA l l B g ^ ((e : ℤ) * wt1 i) := by
+      intro i
+      apply Units.ext
+      rw [hT.ine g hgI, hD.ΨH g hg hgI, ← algebraMap_cycA (E := E) (B := B),
+        zpow_mul, zpow_natCast, ← map_pow (Units.map _),
+        ← map_zpow (Units.map (algebraMap E B : E →* B))]
+      rfl
     change Units.map _ (η g) * (T.t g 0 / T.t g 2) = _
     rw [hD.ηH g hg, map_one, one_mul, h 0, h 2, map_zpow, algebraMap_cycA, div_eq_mul_inv, ← zpow_sub]
     congr 1

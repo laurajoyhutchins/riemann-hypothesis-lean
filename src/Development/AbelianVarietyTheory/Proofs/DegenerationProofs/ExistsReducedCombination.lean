@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.QuadraticForm.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module
 
@@ -83,8 +131,8 @@ theorem exists_reduced_combination {I : Type} [Fintype I] (N : ℕ) (hN : 1 ≤ 
 
 end LatticeIneq
 
-open LatticeIneq in
 
+open LatticeIneq in
 theorem lattice_inequality :
     ∀ (X : Type) [AddCommGroup X] (q : QuadraticMap ℤ X ℝ), (∀ x, 0 ≤ q x) → ∀ (I : Type) [Fintype I] (N N' j : ℕ), 1 ≤ N → N ∣ N' → 1 ≤ j → ∀ (yy w : I → X) (vth : I → ℝ) (αs c : X) (vf' : ℝ), (∀ x, ∃ μ, w x = yy x + N' • μ) → (∀ x, q (w x) ≤ (N' : ℝ) ^ 2 * vth x) → q αs ≤ N * vf' → c - αs ∈ AddSubgroup.closure (Set.range yy ∪ Set.range fun μ : X => N • μ) → ∃ μ : X, j * (q (c + N • μ) / N) ≤ (j + 1) * vf' + (j * (j + 1) * Fintype.card I * N * N' ^ 2 : ℕ) * ∑ x, vth x := by
   intro X _ q hq I _ N N' j hN hNN' _ yy w vth αs c vf' hw hwq hα hc
@@ -92,12 +140,12 @@ theorem lattice_inequality :
   have hw' : ∀ x, ∃ μ, w x = yy x + N • μ := fun x => by
     obtain ⟨μ, hμ⟩ := hw x
     exact ⟨m • μ, by rw [hμ, mul_smul]⟩
-  obtain ⟨k, μ, hk, h⟩ := exists_reduced_combination N hN yy w hw' _ hc
+  obtain ⟨k, μ, hk, h⟩ := LatticeIneq.exists_reduced_combination N hN yy w hw' _ hc
   refine ⟨μ, ?_⟩
   have hc' : c + N • μ = αs + ∑ x, k x • w x := by rw [← h]; abel
   have hNpos : (0 : ℝ) < N := by exact_mod_cast hN
-  have h1 := weighted_add_le q hq j αs (∑ x, k x • w x)
-  have h2 := map_sum_le q hq Finset.univ (fun x => k x • w x)
+  have h1 := LatticeIneq.weighted_add_le q hq j αs (∑ x, k x • w x)
+  have h2 := LatticeIneq.map_sum_le q hq Finset.univ (fun x => k x • w x)
   have h3 : ∑ x, q (k x • w x) ≤ (N : ℝ) ^ 2 * ((N * m : ℕ) : ℝ) ^ 2 * ∑ x, vth x := by
     rw [Finset.mul_sum]
     refine Finset.sum_le_sum fun x _ => ?_

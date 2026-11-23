@@ -1,11 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.TraceFormulaC
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefEmbed
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.TraceFormulaG
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.TraceFormulaC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Closure
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RightDerivativeToL2
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,59 +62,12 @@ variable {n : ℕ}
 theorem tfg_gen {M : Type*} [AddCommGroup M] [Module ℂ M] (dual : Bool)
     (E : Fin n → Fin n → Module.End ℂ M) (V : Submodule ℂ M) (S : Submodule ℂ (Fin n → M))
     (hV : tensSub V ≤ S) (hS : ∀ a b, ∀ f ∈ S, tensF dual E a b f ∈ S) : tensSub (genSub E V) ≤ S := by
-  let T : Submodule ℂ M := ⨅ c, S.comap (LinearMap.single ℂ (fun _ : Fin n => M) c)
-  have hT : ∀ m, m ∈ T ↔ ∀ c, (Pi.single c m : Fin n → M) ∈ S := fun m => by simp [T, Submodule.mem_iInf]
-  have hle : genSub E V ≤ T := sInf_le ⟨fun v hv => (hT v).2 fun c => hV (tset_mem.mpr fun d => by
-      by_cases h : d = c
-      · subst h; simpa using hv
-      · simp [h]),
-    fun a b m hm => (hT _).2 fun c => by
-      have hm' := (hT m).1 hm
-      cases dual
-      · have e : (Pi.single c (E a b m) : Fin n → M) =
-            tensF false E a b (Pi.single c m) - if b = c then Pi.single a m else 0 := by
-          funext d
-          simp only [tensF, cond_false, Pi.sub_apply, tensV_coord]
-          by_cases h1 : d = c <;> by_cases h2 : d = a <;> by_cases h3 : b = c <;>
-            simp_all
-        rw [e]
-        refine S.sub_mem (hS a b _ (hm' c)) ?_
-        split_ifs
-        · exact hm' a
-        · exact S.zero_mem
-      · have e : (Pi.single c (E a b m) : Fin n → M) =
-            tensF true E a b (Pi.single c m) + if a = c then Pi.single b m else 0 := by
-          funext d
-          simp only [tensF, cond_true, Pi.add_apply, tensVd_coord]
-          by_cases h1 : d = c <;> by_cases h2 : d = b <;> by_cases h3 : a = c <;>
-            simp_all
-        rw [e]
-        refine S.add_mem (hS a b _ (hm' c)) ?_
-        split_ifs
-        · exact hm' b
-        · exact S.zero_mem⟩
-  intro f hf
-  rw [← Finset.univ_sum_single f]
-  exact S.sum_mem fun c _ => (hT _).1 (hle (tset_mem.mp hf c)) c
+  apply ReciprocityTheory.ChartRestriction.DS.tfg_gen <;> assumption
 
 theorem tfg_real {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℂ X] {ε : Fin n → Bool}
     {E : Fin n → Fin n → Module.End ℂ X} (hU : IsInfUnitary ε E) {c : ℂ} {v : X}
     (h : casimir E v = c • v) : casimir E v = ((c.re : ℝ) : ℂ) • v := by
-  by_cases hv : v = 0
-  · simp [hv]
-  have h1 : inner ℂ (casimir E v) v = inner ℂ v (casimir E v) := by
-    simp only [casimir, LinearMap.sum_apply, Module.End.mul_apply, sum_inner, inner_sum]
-    refine sum_congr rfl fun a _ => sum_congr rfl fun b _ => ?_
-    have e1 := hU b a v (E b a v)
-    have e2 := hU a b (E b a v) v
-    have e3 : inner ℂ v (E a b (E b a v)) = starRingEnd ℂ (inner ℂ (E a b (E b a v)) v) :=
-      (inner_conj_symm _ _).symm
-    rw [e3, e2, map_mul, inner_conj_symm]
-    congr 1
-    unfold adjSign; split_ifs <;> simp
-  rw [h, inner_smul_left, inner_smul_right] at h1
-  have h2 := mul_right_cancel₀ (inner_self_ne_zero.mpr hv) h1
-  rw [h, Complex.conj_eq_iff_re.mp h2]
+  apply ReciprocityTheory.ChartRestriction.DS.tfg_real <;> assumption
 
 theorem tf_closure_stable (dual : Bool) {lam : Fin n → ℝ} {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     [CompleteSpace H] {ε : Fin n → Bool} {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} {D : Submodule ℂ H}
@@ -113,7 +110,8 @@ theorem tf_closure_stable (dual : Bool) {lam : Fin n → ℝ} {H : Type*} [Norme
       map_smul' := fun a f => Subtype.ext (vectorL2_ext fun c => by
         refine Eq.trans ?_ (toL2_smul_smooth ε a _)
         refine toL2_congr_of_eq_on_UJset fun g _ => ?_
-        simp [coefMap, tensGrp, mul_sum, mul_left_comm]) }
+        cases dual <;> simp [coefMap, tensGrp, inner_sum, inner_smul_right, mul_sum,
+          mul_assoc, mul_left_comm, mul_comm]) }
   have hΦE : ∀ a b (f : tensSub (n := n) (genSub E V)), smE ε (tfRdiag ε) a b (Φ f) =
       Φ ⟨tensF dual E a b f.1, tensSub_stable dual a b f.1 f.2⟩ := fun a b f =>
     Subtype.ext (vectorL2_ext fun c => by
@@ -159,6 +157,7 @@ theorem tf_closure_stable (dual : Bool) {lam : Fin n → ℝ} {H : Type*} [Norme
       · exact LinearMap.congr_fun (casimir_tensVd hD.glRep) _
     show casimir _ (Φ (P' f)) = _ • Φ (P' f)
     rw [← map_smul]
+
     simp only [casimir, LinearMap.sum_apply, Module.End.mul_apply, hΦE, ← map_sum]
     refine congrArg Φ (Subtype.ext ?_)
     simp only [Submodule.coe_sum, Submodule.coe_smul]

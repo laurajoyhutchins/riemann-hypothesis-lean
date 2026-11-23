@@ -1,4 +1,56 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LagrangianDecomposition.SbSlice
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LagrangianDecomposition.FinPart
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LagrangianDecomposition.PartCharInv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CharacterInvariantAdelicFormEqMulEvalZero
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactOpenSeparating
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEqMulApplyZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProductFunctionOnSumCoordsMemAdelicSchwartzSpace
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TraceFormMapSurjective
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LagrangianDecomposition.KillsLinearMul
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LagrangianDecomposition.SbSlice
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,9 +106,7 @@ theorem partCharInv_of (hfin : FinPart) : PartCharInv := by
           (pureA F f₂ g) (GlobalTheory.CharInvForm.mem_schA f₂ hg)]
         congr 1
         funext x
-        simp only [pureA, h23, GlobalTheory.CharInvForm.psi_dot_inf hψ, hY]
-        simp only [Function.comp_apply]
-        ring) (f - f₁) (fun v hv => by
+        simp only [pureA, h23, GlobalTheory.CharInvForm.psi_dot_inf hψ, hY, Function.comp_def, mul_assoc]) (f - f₁) (fun v hv => by
           have hv' : v = Sum.elim (v ∘ Sum.inl) 0 := by
             funext j; rcases j with j | j
             · rfl
@@ -68,26 +118,22 @@ theorem partCharInv_of (hfin : FinPart) : PartCharInv := by
     let a : ((κ' ⊕ κ'' → Af F) → ℂ) →ₗ[ℂ] ℂ :=
       { toFun := fun h => l (pureA F f₁ h)
         map_add' := fun h h' => by
-          rw [← map_add]
+          rw [← map_add (f := _)]
           congr 1
           funext x
-          simp only [pureA, Pi.add_apply]
-          ring
+          simp [pureA, add_mul, mul_assoc, mul_comm, mul_left_comm]
         map_smul' := fun s h => by
           rw [RingHom.id_apply, ← map_smul]
           congr 1
           funext x
-          simp only [pureA, Pi.smul_apply, smul_eq_mul]
-          ring }
+          simp [pureA, add_mul, mul_assoc, mul_comm, mul_left_comm] }
     have hB : a g = a g₁ := by
       have h := hfin F ψ hψ κ' κ'' a (fun y h hh => by
         show l (pureA F f₁ _) = l (pureA F f₁ h)
         rw [← hinv (fun i => pairA F 0 (y i)) (pureA F f₁ h) (GlobalTheory.CharInvForm.mem_schA f₁ hh)]
         congr 1
         funext x
-        simp only [pureA, GlobalTheory.CharInvForm.dot_pairA_fin]
-        simp only [Function.comp_def]
-        ring) (g - g₁) (sub_mem hg hg₁) (fun z' => by
+        simp [pureA, GlobalTheory.CharInvForm.dot_pairA_fin, Function.comp_def, mul_left_comm]) (g - g₁) (sub_mem hg hg₁) (fun z' => by
           simp only [Pi.sub_apply, hg₁def, Sum.elim_comp_inl, Sum.elim_comp_inr, hθf0, mul_one, sub_self])
       rw [map_sub, sub_eq_zero] at h
       exact h
@@ -104,7 +150,7 @@ theorem partCharInv_of (hfin : FinPart) : PartCharInv := by
       obtain ⟨f, g, hg, rfl⟩ := hmem
       exact gen f g hg
     | zero => simp
-    | add _ _ _ _ h h' => rw [map_add, map_add, map_add, h, h']
+    | add _ _ _ _ h h' => rw [map_add (f := _), map_add (f := _), map_add (f := _), h, h']
     | smul c _ _ h => rw [map_smul, map_smul, map_smul, h]
   have h0 : P Ψ = 0 := by
     funext x

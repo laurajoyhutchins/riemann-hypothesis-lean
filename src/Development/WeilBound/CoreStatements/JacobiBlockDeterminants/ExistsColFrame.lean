@@ -1,7 +1,55 @@
-import Development.WeilBound.CoreStatements.MultihomogeneousSquares.SingSt
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptFiniteExtension
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GramMatrixTwoFrames
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemAbLocusIff
+module
+
+public import Development.WeilBound.CoreStatements.MultihomogeneousSquares.SingSt
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GramMatrixTwoFrames
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptFiniteExtension
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptInteriorFlag
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeInnerProductPullbackUniqueStatement
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.MemAbLocusIff
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StalkSpecializesBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -129,6 +177,7 @@ theorem map_colFrame {Ω' V' : Type} [Field Ω'] [AddCommGroup V'] [Module Ω' V
     (hj : ∀ (a : Ω) (e : V), j (a • e) = i a • j e) (c : Fin r → V) (T : Matrix (Fin r) (Fin r) Ω) :
     (fun k => j (colFrame c T k)) = colFrame (fun k => j (c k)) (T.map i) := by
   funext k
+
   simp [colFrame, map_sum, hj]
 
 end Lin
@@ -195,8 +244,8 @@ theorem gram_pull {A : HodgeCpt Y S x} {A' : HodgeCpt Y S x'} {pr : A'.X ⟶ A.X
     (ho : HodgeOver A' A pr i j) {z : Spec (CommRingCat.of ℂ) ⟶ A'.X} {r : ℕ} {b : Fin r → A.Li}
     {Γ : Matrix (Fin r) (Fin r) ℂ} (hG : A.M.GramAt A.t.PP.L (z ≫ pr) b Γ) :
     A'.M.GramAt A'.t.PP.L z (fun k => j (b k)) Γ := by
-  obtain ⟨m, hm⟩ := Chg.exists_sabMap A A' pr ho.2.1
-  have hpt : ∀ e, (A'.M.pt (j e)).left ≫ m.φ = Spec.map (CommRingCat.ofHom (dualMap i)) ≫ (A.M.pt e).left := by
+  obtain ⟨m, hm⟩ := GlobalTheory.CompanionTheory.Ar.Chg.exists_sabMap A A' pr ho.2.1
+  have hpt : ∀ e, (A'.M.pt (j e)).left ≫ m.φ = Spec.map (CommRingCat.ofHom (GlobalTheory.CompanionTheory.Ar.dualMap i)) ≫ (A.M.pt e).left := by
     intro e
     have h1 := ho.2.2.2.2 e
     rw [hm] at h1

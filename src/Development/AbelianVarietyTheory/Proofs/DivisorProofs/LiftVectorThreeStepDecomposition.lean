@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SuppAtMul
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ThetaLiftVectorIsThetaFunctionTwoStepModel
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdjointFrameIntegralIffPartsConjHalf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionAdjointFrameConjHalfTwoParts
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIdempotentSumSubsetAndConjugateFlip
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SuppAtMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NabBaseChange
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LiftWeightComplexPointEqTwist
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPairCharactersAtLevel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdjointFrameIntegralIffPartsConjHalf
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIdempotentSumSubsetAndConjugateFlip
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsPlaceModelCompRestrictToHalfLatticeIndicator
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ReductionAdjointFrameConjHalfTwoParts
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ThetaLiftVectorIsThetaFunctionTwoStepModel
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNsmulIntMemLatO
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GramMapMulInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.TupleReadBaseTupleEqFamily
+
+@[expose] public section
+
 set_option autoImplicit false
 noncomputable section
 open NumberField IsDedekindDomain
@@ -13,8 +58,8 @@ open Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.BasicNot
 open GlobalTheory.ConjTwist (BaseOf UnitOff)
 open GlobalTheory.FlatVecSum (princ)
 open scoped TensorProduct
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1600000
+
+
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open Classical
 open GlobalTheory.BigOn.Exp.TupLe.Swap
@@ -30,16 +75,16 @@ theorem omegaQ_union {D : D7} {a b : ℕ} {Sa St : Finset (Pl D.host.E)} (hd : D
     intro Q
     unfold omegaQ
     by_cases h : ∀ PP ∈ Q, LowZero r (y PP) ∧ IsUnit (topL r (y PP)).det
-    · rw [dif_pos h, ← Finset.prod_attach Q g]
+    · rw [dite_eq_left h, ← Finset.prod_attach Q g]
       refine Finset.prod_congr rfl fun PP _ => ?_
       simp only [g]
-      rw [dif_pos (h PP.1 PP.2)]
-    · rw [dif_neg h]
+      rw [dite_eq_left (h PP.1 PP.2)]
+    · rw [dite_eq_right h]
       obtain ⟨PP, hPP⟩ := not_forall.1 h
       obtain ⟨hQ, hn⟩ := Classical.not_imp.1 hPP
       refine (Finset.prod_eq_zero hQ ?_).symm
       simp only [g]
-      rw [dif_neg hn]
+      rw [dite_eq_right hn]
   rw [key, key, key, Finset.prod_union hd]
 
 section
@@ -61,7 +106,7 @@ theorem adjDat_union {Sa St : Finset (Pl D.host.E)} {ea et : AE D} (hg : IsIdemS
   funext x
   rw [GlobalTheory.TwoStepModel.tensorHalf_apply]
   unfold adjDat
-  have hc : cA D (ea + et) = cA D et + cA D ea := by rw [map_add, add_comm]
+  have hc : cA D (ea + et) = cA D et + cA D ea := by rw [map_add (f := _), add_comm]
   by_cases hx : IsHalf (cA D (ea + et)) x
   · have hx' : IsHalf (cA D et + cA D ea) x := hc ▸ hx
     rw [if_pos hx', mul_one]
@@ -119,11 +164,11 @@ theorem thetaVector_three_step_decomposition : ∀ (D : D7) (G : Type) [Group G]
   have hinft : infPart D (cA D et) = 0 := GlobalTheory.PlaceVec.infPart_cA (GlobalTheory.PlaceVec.idemSum_infPart ht)
   have hSB : ∀ (Q : Finset (Pl D.host.E)) (a : AE D), infPart D a = 0 →
       IsSBHalf a (latO (Vc D i) (Wc D i) (R.ΛV i) (R.ΛW i) fun _ => True) (adjDat R i Q (R.xiR t) a) :=
-    fun Q a hinf => GlobalTheory.PlaceVec.isSBHalf_of_red hSV.1 hSW.1 hinf (frMapAdj (Vc D i) (Wc D i) (R.βV i) (R.βW i))
+    fun Q a hinf => GlobalTheory.PlaceVec.isSBHalf_of_red (GlobalTheory.PlaceVec.selfDual_isFullLattice _ _ hSV) (GlobalTheory.PlaceVec.selfDual_isFullLattice _ _ hSW) hinf (frMapAdj (Vc D i) (Wc D i) (R.βV i) (R.βW i))
       (GlobalTheory.PlaceVec.frMapAdj_add _ _ _ _) (GlobalTheory.PlaceVec.frMapAdj_up _ _ _ _) (GlobalTheory.PlaceVec.frMapAdj_down _ _ _ _)
       Q (fun y => omegaQ Q (Wc D i).rank (R.xiR t) (-1) y) fun y y' h => GlobalTheory.PlaceVec.omegaQ_congr _ _ _ _ h
   obtain ⟨⟨Te, hTe1⟩, hTe2⟩ := h2
-  have hc : cA D (ea + et) = cA D et + cA D ea := by rw [map_add, add_comm]
+  have hc : cA D (ea + et) = cA D et + cA D ea := by rw [map_add (f := _), add_comm]
   have hc' : cA D (ea + et) = cA D ea + cA D et := map_add _ _ _
   have hm1 := GlobalTheory.TwoStepModel.isPlaceModel_comp_tensorHalf hct hca hta hΛ (hSB Sa _ hinfa) (hc ▸ hTe1)
   have hm2 := GlobalTheory.ExportSeries.isPlaceModel_comp_restrictHalf hca hct hat' hΛ (hc' ▸ hTe1)

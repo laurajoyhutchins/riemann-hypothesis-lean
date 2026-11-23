@@ -1,19 +1,73 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.KeyBadSt
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.KeyBadSt
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalisedModelUniformisationBaseChange
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoDefs
+import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsOfCmTriplePullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLieCoordinatesLieMultIff
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModuliSchemePolarizedAbelianLevel
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PelStructureDescendsFieldExtension
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsIsKeyPow
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsKeyPBRing
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.RulePow
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelGoodAtAllPrimesAndIdx
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LevelOfSplitAndLevelCoeffExist
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoDatum
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoExt
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoFrame
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoHost
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoModel
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoPoint
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoSquare
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.UnifAt
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
 import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ZhangDimensionPushDownGrassmannianHeightBounds
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsBundles
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.RulePow
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelGoodAtAllPrimesAndIdx
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLieCoordinatesLieMultIff
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoHost
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoSquare
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoDatum
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoPoint
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoExt
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoFrame
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KftwoModel
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+
+@[expose] public section
 
 noncomputable section
 

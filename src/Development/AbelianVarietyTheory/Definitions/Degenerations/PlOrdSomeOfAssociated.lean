@@ -1,6 +1,62 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+public import Mathlib.FieldTheory.RatFunc.Valuation
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Artinian.Instances
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
@@ -10,8 +66,8 @@ namespace GlobalTheory.SS
 open ReciprocityTheory.ChartRestriction.G.Out GlobalTheory.AbLaw
 
 def FrobG {k : Type} [Field k] (G : Over (Sp k)) [GrpObj G] (F : End G) (q : ℕ) : Prop :=
-  IsMonHom (show G ⟶ G from F) ∧ ∀ U : G.left.Opens, IsAffineOpen U → ∀ f : Γ(G.left, U), ∃ m : ℕ, 1 ≤ m ∧
-    ∃ h : U = (show G ⟶ G from F ^ m).left ⁻¹ᵁ U, ((show G ⟶ G from F ^ m).left.appLE U U h.le).hom f = f ^ (q ^ m)
+  IsMonHom F.asHom ∧ ∀ U : G.left.Opens, IsAffineOpen U → ∀ f : Γ(G.left, U), ∃ m : ℕ, 1 ≤ m ∧
+    ∃ h : U = (F ^ m).asHom.left ⁻¹ᵁ U, ((F ^ m).asHom.left.appLE U U h.le).hom f = f ^ (q ^ m)
 
 def AmpleCub {S : Scheme.{0}} (G : Over S) [GrpObj G] (L : LB G.left) : Prop :=
   L.IsLB ∧ (∃ t : LB.Gen (Theta G L), t.IsGen) ∧
@@ -42,8 +98,8 @@ def MonIrr.prime {k : Type} [Field k] (p : MonIrr k) : HeightOneSpectrum k[X] wh
   isPrime := (Ideal.span_singleton_prime p.2.2.ne_zero).2 p.2.2.prime
   ne_bot := by simpa using p.2.2.ne_zero
 
-open scoped Classical in
 
+open scoped Classical in
 def plVal : Option (MonIrr k) → Valuation (RatFunc k) (WithZero (Multiplicative ℤ))
   | none => RatFunc.inftyValuation k
   | some p => p.prime.valuation (RatFunc k)
@@ -222,51 +278,7 @@ def projLinePlaces : Places k (RatFunc k) where
   fin := fun x => (pf_all x.1 x.ne_zero).1
   sum := fun x => (pf_all x.1 x.ne_zero).2
 
-theorem projLinePlaces_X : (projLinePlaces k).v none (Units.mk0 RatFunc.X RatFunc.X_ne_zero) = -1 := by
-  show plOrd k none RatFunc.X = -1
-  rw [← RatFunc.algebraMap_X, plOrd_none Polynomial.X_ne_zero, Polynomial.natDegree_X]
-  rfl
-
-private theorem appLE_apply_of_eq_id' {Y : Scheme.{0}} (φ : Y ⟶ Y) (hφ : φ = 𝟙 Y) {U : Y.Opens}
-    (e : U ≤ φ ⁻¹ᵁ U) (f : Γ(Y, U)) : (φ.appLE U U e).hom f = f := by
-  subst hφ
-  show (Y.presheaf.map (𝟙 (Opposite.op U))).hom f = f
-  rw [CategoryTheory.Functor.map_id]
-  rfl
-
 end ProjLine
-
-theorem frobG_one {k : Type} [Field k] (G : Over (Sp k)) [GrpObj G] : FrobG G 1 1 := by
-  unfold FrobG
-  refine ⟨inferInstanceAs (IsMonHom (𝟙 G)), fun U _ f => ⟨1, le_rfl, ?_⟩⟩
-  have hh : Over.Hom.left (show G ⟶ G from (1 : End G) ^ 1) = 𝟙 G.left := by
-    exact congrArg (fun φ => Over.Hom.left φ) (pow_one (1 : End G))
-  refine ⟨by rw [hh]; rfl, ?_⟩
-  rw [appLE_apply_of_eq_id' _ hh]
-  simp
-
-theorem linComb_triv_gen {X Y : Scheme.{0}} {K : Type} [Fintype K] (φ : K → (Y ⟶ X)) (ε : K → ℤ) :
-    ∃ t : LB.Gen (LB.LinComb (Inh.trivLB X) φ ε), t.IsGen := by
-  refine ⟨⟨fun _ => 1⟩, ?_⟩
-  unfold LB.Gen.IsGen
-  intro i j
-  rw [Inh.linComb_triv_g]
-  simp
-
-theorem pullPow_triv {X : Scheme.{0}} (F : X ⟶ X) (q : ℤ) : PullPow F (Inh.trivLB X) q := by
-  unfold PullPow
-  exact linComb_triv_gen _ _
-
-theorem ampleCub_triv {S : Scheme.{0}} (G : Over S) [GrpObj G] [IsAffine G.left] :
-    AmpleCub G (Inh.trivLB G.left) := by
-  unfold AmpleCub
-  refine ⟨Inh.trivLB_isLB _, linComb_triv_gen _ _, linComb_triv_gen _ _, 1, le_rfl, fun x => ?_⟩
-  rw [Nat.cast_one, pw_one]
-  refine ⟨oneSec _, ?_, ?_⟩
-  · rw [nonzeroLocus_oneSec]
-    trivial
-  · rw [nonzeroLocus_oneSec]
-    exact isAffineOpen_top _
 
 end GlobalTheory.SS
 end

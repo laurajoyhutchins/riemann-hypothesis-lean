@@ -1,7 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ValuationEqOneOfNormOneOfNotMoved
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsDenominatorPrimesPrescribed
+module
+
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsTraceZeroAdjustmentOfHermitianLattice
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsDenominatorPrimesPrescribed
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ValuationEqOneOfNormOneOfNotMoved
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.AdLat GlobalTheory.UnRep
 open scoped TensorProduct Matrix
@@ -9,26 +65,7 @@ open scoped TensorProduct Matrix
 namespace GlobalTheory.UnRep.NormOne
 
 lemma exists_split (N : ℕ) : ∀ M : ℕ, 0 < M → ∃ D₁ D₂ k : ℕ, M = D₁ * D₂ ∧ D₁ ∣ N ^ k ∧ D₂.Coprime N := by
-  intro M
-  induction M using Nat.strong_induction_on with
-  | _ M ih =>
-    intro hM
-    by_cases h : M.Coprime N
-    · exact ⟨1, M, 0, by simp, by simp, h⟩
-    · obtain ⟨M', hM'⟩ := Nat.gcd_dvd_left M N
-      have hg : 0 < Nat.gcd M N := Nat.gcd_pos_of_pos_left N hM
-      have hg1 : Nat.gcd M N ≠ 1 := h
-      have hpos : 0 < M' := by
-        rcases Nat.eq_zero_or_pos M' with h0 | h0
-        · rw [h0, mul_zero] at hM'; omega
-        · exact h0
-      have hlt : M' < M := by
-        have h2 : 2 ≤ Nat.gcd M N := by omega
-        nlinarith
-      obtain ⟨D₁, D₂, k, h1, h2, h3⟩ := ih M' hlt hpos
-      refine ⟨Nat.gcd M N * D₁, D₂, k + 1, by rw [mul_assoc, ← h1]; exact hM', ?_, h3⟩
-      rw [pow_succ']
-      exact Nat.mul_dvd_mul (Nat.gcd_dvd_right M N) h2
+  apply GlobalTheory.TvAdjust.exists_split <;> assumption
 
 variable {E : Type} [Field E] [NumberField E]
 
@@ -55,7 +92,7 @@ lemma exists_coprime_multiple (N : ℕ) (hN : 0 < N) (z : 𝓞 E) (hw : 1 + (N :
     Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _)
   have hu : IsUnit (Ideal.Quotient.mk I (N : 𝓞 E)) :=
     IsUnit.of_mul_eq_one (Ideal.Quotient.mk I (-z)) (by
-      rw [map_add, map_one, map_mul] at h0
+      rw [map_add (f := _), map_one, map_mul] at h0
       rw [map_neg]; linear_combination -h0)
   obtain ⟨v, hv⟩ := hu
   obtain ⟨k, hk, hvk⟩ := isOfFinOrder_iff_pow_eq_one.mp (isOfFinOrder_of_finite v)
@@ -124,7 +161,7 @@ lemma val_le_of_cong (P : HeightOneSpectrum (𝓞 E)) (N D D₁ D₂ k n : ℕ) 
   refine val_le_of_mul P _ ((n * p * (α - β) : 𝓞 E) : E) (D₁ * (p * D₂ * β + b))
     (fun h => (hP.mem_or_mem h).elim hD₁ hβ) ?_ (P.valuation_le_one _)
   rw [RingOfIntegers.coe_eq_algebraMap] at hβ0
-  simp only [RingOfIntegers.coe_eq_algebraMap, map_mul, map_add, map_sub, map_natCast] at hβ0 ⊢
+  simp only [RingOfIntegers.coe_eq_algebraMap, map_mul, map_add (f := _), map_sub, map_natCast] at hβ0 ⊢
   field_simp
   linear_combination (-(algebraMap (𝓞 E) E p) * (algebraMap (𝓞 E) E α - algebraMap (𝓞 E) E β)) * hME
 
@@ -139,7 +176,7 @@ lemma hilbert90_matrix_subalgebra_norm_one (c : E ≃ₐ[F] E) (hc : ∀ x, c (c
   have h0 : ∃ x : E, x ≠ 0 ∧ u * c x = x := by
     have key : ∀ θ : E, u * c (θ + u * c θ) = θ + u * c θ := by
       intro θ
-      rw [map_add, map_mul, hc]
+      rw [map_add (f := _), map_mul, hc]
       linear_combination θ * hu
     by_cases h : 1 + u * c 1 = 0
     · have : ∃ θ, c θ ≠ θ := by
@@ -173,8 +210,8 @@ lemma hilbert90_matrix_subalgebra_norm_one (c : E ≃ₐ[F] E) (hc : ∀ x, c (c
 
 end GlobalTheory.UnRep.NormOne
 
-open GlobalTheory.UnRep.NormOne in
 
+open GlobalTheory.UnRep.NormOne in
 theorem GlobalTheory.UnRep.normOne_approx : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (c : E ≃ₐ[F] E), (∀ x, c (c x) = x) → c ≠ 1 → ∀ (u : E) (N D : ℕ), u * c u = 1 → 0 < N → 0 < D → ∃ u' : E, u' * c u' = 1 ∧ (∃ t : ℕ, t.Coprime N ∧ ∃ b : 𝓞 E, (t : E) * (u' / u - 1) = (D : E) * (b : E)) ∧ ∃ s : 𝓞 E, SplitOr c N s ∧ (∃ b : 𝓞 E, (s : E) * (u' - 1) = (D : E) * (b : E)) ∧ ∃ b : 𝓞 E, (s : E) * (u'⁻¹ - 1) = (D : E) * (b : E) := by
   intro F E _ _ _ _ _ c hc hc1 u N D hu hN hD
   by_cases hN1 : N = 1
@@ -199,7 +236,7 @@ theorem GlobalTheory.UnRep.normOne_approx : ∀ (F E : Type) [Field F] [NumberFi
   set α' : 𝓞 E := p * D₂ * α + b with hα'
   set β' : 𝓞 E := p * D₂ * β + b with hβ'
   have hcα' : c α' = β' := by
-    simp only [hα', hβ', hb, RingOfIntegers.coe_eq_algebraMap, map_mul, map_add, map_natCast, map_intCast] at hβc ⊢
+    simp only [hα', hβ', hb, RingOfIntegers.coe_eq_algebraMap, map_mul, map_add (f := _), map_natCast, map_intCast] at hβc ⊢
     rw [hβc]
   have hcβ' : c β' = α' := by rw [← hcα', hc]
   set z : 𝓞 E := -2 * q * D₁ + q * D₁ * b + p * q * (D * α * γ₁ * γ₂) with hz

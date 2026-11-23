@@ -1,15 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.ConvMeas
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.ConvPi
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.HaarCompactGrowth.ExpUpper
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselIntegrability.LieNUpper
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+module
+
+public import Formalism.PeriodIntegrals.BesselPeriodGGP
+public import Formalism.PeriodIntegrals.IsLowUnitH
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselIntegrability.Growth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.OpNormLeOneOfIso
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselIntegrability.LieNUpper
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.ConvMeas
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.ConvPi
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.HaarCompactGrowth.ExpUpper
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLemma3
-import Formalism.PeriodIntegrals.BesselPeriodGGP
-import Formalism.PeriodIntegrals.IsLowUnitH
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLemma3
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+
+@[expose] public section
 
 open MeasureTheory Matrix
 open scoped ENNReal NNReal
@@ -30,35 +73,20 @@ theorem conj_meas (a : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ) :
     Measurable (conjM (k := k) (r := r) a) := by
   refine Continuous.measurable (continuous_pi fun i => continuous_pi fun j => ?_)
   simp only [Formalism.QuantumDeterminants.conjM, Matrix.mul_apply, Matrix.of_apply]
-  exact continuous_finset_sum _ fun l _ =>
-    (continuous_finset_sum _ fun n _ => by fun_prop).mul continuous_const
+  exact continuous_finsetSum _ fun l _ =>
+    (continuous_finsetSum _ fun n _ => by fun_prop).mul continuous_const
 
 theorem rmul_meas (a : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ) :
     Measurable (Formalism.FourierDecayAlt.B.rmulF a : Mt k r → Mt k r) := by
   refine Continuous.measurable (continuous_pi fun i => continuous_pi fun j => ?_)
   simp only [Formalism.FourierDecayAlt.B.rmulF, Matrix.mul_apply, Matrix.of_apply]
-  exact continuous_finset_sum _ fun l _ => by fun_prop
-
-theorem isHaarOn_UWset_of_isHaarOn_of_univ_eq_one {z : Fin (2 * r + k + 1) → ℂ} {μW : Measure (Mt k r)} (hz : inWb k r z) (hT : 0 < Tz k r z)
-    (hμ : Formalism.MainNotions.S.IsHaarOn (UWset k r z) μW) (h1 : μW Set.univ = 1) :
-    Formalism.FourierDecayAlt.B.IsHaarOn (UWset k r z) μW := by
-  have : IsFiniteMeasure μW := ⟨by rw [h1]; exact ENNReal.one_lt_top⟩
-  obtain ⟨μ0, h0⟩ := Formalism.FourierDecayAlt.P.weyl_haar_exists k r z hz hT
-  obtain ⟨c, hc⟩ := Formalism.FourierDecayAlt.P.haar_measure_unique_up_to_scalar k r (UWset k r z) μ0 μW
-    (Formalism.FourierDecayAlt.P.weyl_subgroup_closed k r z) h0 hμ.2.2.1 hμ.2.2.2 (fun K _ => measure_lt_top _ _)
-  refine ⟨hμ.2.2.1, hμ.2.2.2, fun a ha => ?_, fun K _ => measure_lt_top _ _, hμ.2.1⟩
-  rw [hc, Measure.map_smul, h0.right a ha]
-
-theorem measPresW_right {z : Fin (2 * r + k + 1) → ℂ} {μW : Measure (Mt k r)} (hz : inWb k r z)
-    (hT : 0 < Tz k r z) (hμ : Formalism.MainNotions.S.IsHaarOn (UWset k r z) μW) (h1 : μW Set.univ = 1) :
-    ∀ h ∈ UWset k r z, MeasurePreserving (fun x : Mt k r => fun i j => (Matrix.of x * h) i j) μW μW :=
-  fun h hh => ⟨rmul_meas h, (isHaarOn_UWset_of_isHaarOn_of_univ_eq_one hz hT hμ h1).right h hh⟩
+  exact continuous_finsetSum _ fun l _ => by fun_prop
 
 theorem hsN_cont : Continuous (fun y : Mt k r => Formalism.MainNotions.GrowthW.hsN (Matrix.of y)) := by
   unfold Formalism.MainNotions.GrowthW.hsN
   simp only [Matrix.of_apply]
   refine Real.continuous_sqrt.comp ?_
-  refine continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ => ?_
+  refine continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ => ?_
   exact Complex.continuous_normSq.comp ((continuous_apply j).comp (continuous_apply i))
 
 theorem haarLie_finite_compact (κ : ℝ≥0∞) (hκ : κ ≠ ⊤) (K : Set (Mt k r)) (hK : IsCompact K) :
@@ -84,7 +112,6 @@ theorem haarLie_finite_compact (κ : ℝ≥0∞) (hκ : κ ≠ ⊤) (K : Set (Mt
         rw [Real.norm_eq_abs]; exact le_abs_self _
       exact e1.trans hb0
     have he0 : 0 ≤ Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) := Formalism.MainNotions.GrowthW.hsN_nonneg _
-    have hX0 : 0 ≤ Formalism.MainNotions.GrowthW.hsN X := Formalism.MainNotions.GrowthW.hsN_nonneg _
     have hp : Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D ≤ R ^ D := Real.rpow_le_rpow he0 he hD.le
     have hp0 : 0 ≤ Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D := Real.rpow_nonneg he0 D
     have hc1 : C * Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D ≤ |C| * Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D :=
@@ -118,6 +145,7 @@ theorem haar_lie_measure_on_nilpotent (hL : NLeft) (κ : ℝ≥0∞) (h0 : κ �
     hconc hleft hfin
   refine ⟨hconc, hleft, fun a ha => ?_, hfin, haarLie_ne_zero κ h0⟩
   rw [hc, Measure.map_smul, hμ0.right a ha]
+  exact (rmul_meas a).aemeasurable
 
 theorem measPresN_conj_of {z : Fin (2 * r + k + 1) → ℂ} {μN : Measure (Mt k r)}
     (hN : Formalism.FourierDecayAlt.B.IsHaarOn (Nset k r) μN) (hz : inWb k r z) (hT : 0 < Tz k r z) :

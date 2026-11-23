@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.FormalGroupInverse
+module
+
+public import GroundTheory.LocalFields.FormalGroups.Inverse
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
+public import GroundTheory.LocalFields.FormalGroups.Basics
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.Topology
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.BigOperators
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Basic
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -50,10 +100,6 @@ theorem hasEval_adicRing {σ : Type*} [Finite σ] {a : σ → 𝒪}
 
 theorem psEvalAt_X {σ : Type*} (a : σ → 𝒪) (i : σ) : psEvalAt (MvPowerSeries.X i) a = a i := by
   simp [psEvalAt, MvPowerSeries.eval₂_X]
-
-theorem psEvalAt_C {σ : Type*} (a : σ → 𝒪) (r : 𝒪) : psEvalAt (MvPowerSeries.C r) a = r := by
-  simp [psEvalAt, MvPowerSeries.eval₂_C]
-  rfl
 
 variable [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪) 𝒪]
 
@@ -151,11 +197,7 @@ omit [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪) 𝒪] in
 @[simp] theorem val_mk (x : 𝒪) (hx : x ∈ IsLocalRing.maximalIdeal 𝒪) :
     (mk x hx : MaxIdealPoint F).val = x := rfl
 
-omit [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪) 𝒪] in
-@[ext] theorem ext {x y : MaxIdealPoint F} (h : x.val = y.val) : x = y := Subtype.ext h
 
-omit [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪) 𝒪] in
-theorem val_injective : Function.Injective (val : MaxIdealPoint F → 𝒪) := fun _ _ => ext
 
 instance : Zero (MaxIdealPoint F) := ⟨mk 0 (zero_mem _)⟩
 
@@ -195,27 +237,28 @@ def pointVar {σ : Type*} (i : σ) : F.Point σ :=
 
 theorem evalPoint_pointVar {σ : Type*} [Finite σ] (x : σ → MaxIdealPoint F) (i : σ) :
     evalPoint x (pointVar i) = x i :=
-  ext (psEvalAt_X _ i)
+  Subtype.ext (psEvalAt_X _ i)
 
 theorem evalPoint_zero {σ : Type*} [Finite σ] (x : σ → MaxIdealPoint F) :
     evalPoint x (0 : F.Point σ) = 0 := by
-  apply ext
+  apply Subtype.ext
   change psEvalAt 0 _ = 0
   rw [← evAlgHom_apply _ (fun i => (x i).val_mem), map_zero]
 
 theorem evalPoint_add {σ : Type*} [Finite σ] (x : σ → MaxIdealPoint F) (p q : F.Point σ) :
     evalPoint x (p + q) = evalPoint x p + evalPoint x q := by
-  apply ext
-  change psEvalAt (p + q).val _ = _
+  apply Subtype.ext
+  change psEvalAt (p + q).val _ = psEvalAt F.toPowerSeries
+    ![(evalPoint x p).val, (evalPoint x q).val]
   rw [FormalGroup.add_apply, psEvalAt_subst (GroundTheory.LocalField.FormalGroup.point_hasSubst_pair p q)
-    _ fun i => (x i).val_mem, val_add]
+    _ fun i => (x i).val_mem]
   congr 1
   funext i
   fin_cases i <;> rfl
 
 theorem evalPoint_neg {σ : Type*} [Finite σ] (x : σ → MaxIdealPoint F) (p : F.Point σ) :
     evalPoint x (-p) = -evalPoint x p := by
-  apply ext
+  apply Subtype.ext
   change psEvalAt (-p).val _ = _
   rw [GroundTheory.LocalField.FormalGroup.neg_point_val,
     psEvalAt_powerSeries_subst p.prop _ fun i => (x i).val_mem]

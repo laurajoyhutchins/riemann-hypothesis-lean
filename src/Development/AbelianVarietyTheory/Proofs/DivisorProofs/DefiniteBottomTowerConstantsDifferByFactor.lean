@@ -1,19 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RatInOfUnit
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegIdxOfIsStd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPureTensorO
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilDatumUniqueOnThetaFunctions
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ApplyAddInfRat
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockVectorNegSpaceFrameChangeConjSubst
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SignedUnitaryGroupCompat
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialVectorBasisChangeEqSubstitution
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NegIdxOfIsStd
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ApplyAddInfRat
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LawsRescaleWithS
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaPureTensorO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilDatumUniqueOnThetaFunctions
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenusMassSignature
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SupportedSubgroupSplitCommutePrimeIdempotents
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenusMassSignature
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LawsRescaleWithS
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialVectorBasisChangeEqSubstitution
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FockVectorNegSpaceFrameChangeConjSubst
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SignedUnitaryGroupCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField Finset
 open Formalism.DivisionValues (vw)
@@ -133,7 +169,7 @@ theorem ker'_left (hX : X.Is ψ θ α β νH S) (t : T) (P h) : ∀ γ ∈ GQ A'
   fun γ hγ g => thetaKO_left (hX.weil' t) (GlobalTheory.GalLift.Vec.theta_pureTensorO hX.isVac.1 hX.isVac.2.inf _ _ _ _
     (GlobalTheory.GalLift.Vec.theta_of_thetaAt hX.isVac.1 hX.isVac.2.inf (hX.snd t) hX.isVac'.2.theta) P) hγ g h
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem ker_eq (hX : X.Is ψ θ α β νH S) (hY : Y.Is ψ θ α β νH S) (sA : X.rA.IsStd) (sW : X.rW.IsStd)
     (l1 : Y.rA.Λ = X.rA.Λ) (l3 : Y.rW.Λ = X.rW.Λ) (b1 : Y.rA.β = X.rA.β) (b3 : Y.rW.β = X.rW.β) :
@@ -170,7 +206,7 @@ theorem ker_eq (hX : X.Is ψ θ α β νH S) (hY : Y.Is ψ θ α β νH S) (sA :
   exact congrFun (GlobalTheory.WeilUniq.weilDatum_unique D ψ hψ (neg A) WW _ _ _ _ (hY.weil t) (hX.weil t)
     ((ofSgn true A).symm g, h) _ (GlobalTheory.GalLift.Vec.theta_pureTensorO (S := neg A) hψ hθ _ _ _ _ tX _)) 0
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem ker'_eq (hX : X.Is ψ θ α β νH S) (hY : Y.Is ψ θ α β νH S) (sA : X.rA'.IsStd) (sW : X.rW.IsStd)
     (l1 : Y.rA'.Λ = X.rA'.Λ) (l3 : Y.rW.Λ = X.rW.Λ) (b1 : Y.rA'.β = X.rA'.β) (b3 : Y.rW.β = X.rW.β) :

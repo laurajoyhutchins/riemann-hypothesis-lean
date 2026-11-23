@@ -1,4 +1,46 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.CharacterNorms.ThInf
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.CharacterNorms.ThInf
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.Entire
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.IsotypicQuotients.NormWfLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
@@ -6,7 +48,7 @@ open UpperTheory.ConvolutionTheory.R2 UpperTheory.ConvolutionTheory.RankTwoDesce
 open UpperTheory.ConvolutionTheory.R2.G (FS2 nE)
 open scoped Classical
 
-private theorem inf_const (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (c : ℝ) :
+private theorem inf_const (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (c : ℝ) :
     GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap (K := ℚ) (L := E) (TR.infEq ℚ fun _ => c) =
       infEq E fun _ => (c : ℂ) := by
   funext w
@@ -28,7 +70,7 @@ private theorem re_const (x : A ℚ) : TR.pInf ℚ x = fun _ => re x := by
   rw [Subsingleton.elim v Rat.infinitePlace]
   rfl
 
-private theorem pInf_adeleMap (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (x : A ℚ) :
+private theorem pInf_adeleMap (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (x : A ℚ) :
     pInf E (AdeleBaseChange.adeleMap ℚ E x) = fun _ => (re x : ℂ) := by
   have h : x.1 = TR.infEq ℚ fun _ => re x := by
     rw [← re_const]
@@ -36,10 +78,10 @@ private theorem pInf_adeleMap (E : Type) [Field E] [NumberField E] [IsTotallyCom
   change (infEq E).symm (GroundTheory.Global.InfinitePlace.infiniteAdeleRingMap x.1) = _
   rw [h, inf_const, RingEquiv.symm_apply_apply]
 
-private theorem pInf_s {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (x : Cinf E) :
+private theorem pInf_s {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (x : Cinf E) :
     pInf E (GlobalTheory.CuspRep.sInf E x) = x := (infEq E).symm_apply_apply x
 
-private theorem pFin_s {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (x : Cinf E) :
+private theorem pFin_s {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (x : Cinf E) :
     pFin E (GlobalTheory.CuspRep.sInf E x) = 0 := rfl
 
 private theorem re_s (c : ℝ) : re (TR.sInf ℚ fun _ => c) = c :=
@@ -55,7 +97,7 @@ private theorem map_n {R S : Type} [CommRing R] [CommRing S] (f : R →+* S) (g 
   rw [hg]
   fin_cases i <;> fin_cases j <;> simp
 
-private theorem step1 {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (D : Dat ℚ E) (k : GL (Fin 2) (A E)) (t : ℝ) :
+private theorem step1 {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (D : Dat ℚ E) (k : GL (Fin 2) (A E)) (t : ℝ) :
     k * infGL E 2 (cv D k t) = gl (nU (GlobalTheory.CuspRep.sInf E (t • thInf D))) * k := by
   refine ga_ext ?_ ?_
   · rw [map_mul, map_mul, pInf_infGL]
@@ -79,7 +121,7 @@ private theorem em_aE {E : Type} [Field E] [NumberField E] (y : (A ℚ)ˣ) :
   change AdeleBaseChange.adeleMap ℚ E ((aE y).val i j) = _
   fin_cases i <;> fin_cases j <;> simp [aE]
 
-private theorem step3 {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (D : Dat ℚ E) (y : (A ℚ)ˣ) (t : ℝ) :
+private theorem step3 {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (D : Dat ℚ E) (y : (A ℚ)ˣ) (t : ℝ) :
     AdeleBaseChange.adeleMap ℚ E (y : A ℚ) * GlobalTheory.CuspRep.sInf E (t • thInf D) =
       D.mkE 0 (TR.sInf ℚ fun _ => t * re (y : A ℚ)) := by
   refine ad_ext ?_ ?_
@@ -94,7 +136,7 @@ private theorem step3 {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] 
     rw [this, zero_mul]
 
 theorem UpperTheory.diagonal_mul_archimedeanCurve_eq_unipotent_mul :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (D : Dat ℚ E) (y : (A ℚ)ˣ) (k : GL (Fin 2) (A E)) (t : ℝ),
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (D : Dat ℚ E) (y : (A ℚ)ˣ) (k : GL (Fin 2) (A E)) (t : ℝ),
         em E (aE y) * k * infGL E 2 (cv D k t) = nE D ![0, TR.sInf ℚ fun _ => t * re (y : A ℚ)] * (em E (aE y) * k) := by
   intro E _ _ _ D y k t
   have h3 := step3 D y t

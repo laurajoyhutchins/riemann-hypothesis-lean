@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.Columns.TwQSplit
-import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
+module
+
+import Development.AutomorphicSpectrum.Proofs.AdelicProofs.LocalValuationLogNormsExistence
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -20,43 +66,10 @@ theorem qsp_val_one (t : 𝓞 E) (ht : t ∉ P.asIdeal) : Valued.v (φ (algebraM
 
 theorem qsp_frac (x : E) (hx : P.valuation E x ≤ 1) :
     ∃ (a : 𝓞 E) (t : 𝓞 E), t ∉ P.asIdeal ∧ x * algebraMap (𝓞 E) E t = algebraMap (𝓞 E) E a := by
-  obtain ⟨⟨n, d⟩, hnd⟩ := IsLocalization.surj (nonZeroDivisors (𝓞 E)) x
-  simp only at hnd
-  have hd0 : (d : 𝓞 E) ≠ 0 := nonZeroDivisors.ne_zero d.2
-  have hspan : Ideal.span {(d : 𝓞 E)} ≠ 0 := by
-    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact hd0
-  have hPu : ¬ IsUnit P.asIdeal := by
-    rw [Ideal.isUnit_iff]
-    exact P.isPrime.ne_top
-  obtain ⟨e, J, hPJ, hJ⟩ := WfDvdMonoid.max_power_factor' hspan hPu
-  have hJP : ¬ J ≤ P.asIdeal := fun h => hPJ (Ideal.dvd_iff_le.2 h)
-  obtain ⟨t, htJ, htP⟩ := SetLike.not_le_iff_exists.1 hJP
-  have hvd : P.intValuation (d : 𝓞 E) ≤ WithZero.exp (-(e : ℤ)) := by
-    rw [P.intValuation_le_pow_iff_dvd, hJ]
-    exact dvd_mul_right _ _
-  have hvn : P.intValuation n ≤ WithZero.exp (-(e : ℤ)) := by
-    refine le_trans ?_ hvd
-    rw [← HeightOneSpectrum.valuation_of_algebraMap (K := E),
-      ← HeightOneSpectrum.valuation_of_algebraMap (K := E)]
-    change P.valuation E (algebraMap (𝓞 E) E n) ≤ P.valuation E (algebraMap (𝓞 E) E (d : 𝓞 E))
-    rw [← hnd, map_mul]
-    exact mul_le_of_le_one_left' hx
-  have hnt : n * t ∈ Ideal.span {(d : 𝓞 E)} := by
-    rw [hJ]
-    exact Ideal.mul_mem_mul ((P.intValuation_le_pow_iff_mem n e).1 hvn) htJ
-  obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.1 hnt
-  refine ⟨a, t, htP, ?_⟩
-  have hD : algebraMap (𝓞 E) E d ≠ 0 :=
-    (map_ne_zero_iff _ (IsFractionRing.injective (𝓞 E) E)).2 hd0
-  have hat : algebraMap (𝓞 E) E a * algebraMap (𝓞 E) E d =
-      algebraMap (𝓞 E) E n * algebraMap (𝓞 E) E t := by
-    rw [← map_mul, ← map_mul, ha]
-  apply mul_right_cancel₀ hD
-  linear_combination (algebraMap (𝓞 E) E t) * hnd - hat
+  apply GlobalTheory.CompanionTheory.Ar.Br.Dd.exists_frac <;> assumption
+
 
 include hint hPv in
-
 theorem qsp_le_of_val (x : E) (hx : P.valuation E x ≤ 1) : Valued.v (φ x) ≤ 1 := by
   obtain ⟨a, t, ht, hxt⟩ := qsp_frac P x hx
   have h1 := qsp_val_one P φ hint hPv t ht
@@ -64,8 +77,8 @@ theorem qsp_le_of_val (x : E) (hx : P.valuation E x ≤ 1) : Valued.v (φ x) ≤
   rw [← hxt, map_mul, Valuation.map_mul, h1, mul_one] at h2
   exact h2
 
-include hint hPv in
 
+include hint hPv in
 theorem qsp_lt_of_val (x : E) (hx : P.valuation E x < 1) : Valued.v (φ x) < 1 := by
   obtain ⟨a, t, ht, hxt⟩ := qsp_frac P x hx.le
   have h1 := qsp_val_one P φ hint hPv t ht
@@ -78,8 +91,8 @@ theorem qsp_lt_of_val (x : E) (hx : P.valuation E x < 1) : Valued.v (φ x) < 1 :
   rw [← hxt, map_mul, Valuation.map_mul, h1, mul_one] at h2
   exact h2
 
-include hint hPv in
 
+include hint hPv in
 theorem qsp_val_iff (x : E) : Valued.v (φ x) ≤ 1 ↔ P.valuation E x ≤ 1 := by
   refine ⟨fun h => ?_, qsp_le_of_val P φ hint hPv x⟩
   by_contra hc
@@ -93,8 +106,8 @@ theorem qsp_val_iff (x : E) : Valued.v (φ x) ≤ 1 ↔ P.valuation E x ≤ 1 :=
   have hφ : φ x ≠ 0 := (map_ne_zero φ).2 hx0
   exact absurd h (not_le.2 ((Valuation.one_lt_val_iff _ hφ).2 hlt))
 
-include hint hPv in
 
+include hint hPv in
 theorem qsp_mod (x d : E) (hd : d ≠ 0) (z : v.adicCompletion F) (hz : Valued.v z ≤ 1) (hxz : φ x = φ d * z) :
     P.valuation E x ≤ P.valuation E d := by
   have hφd : φ d ≠ 0 := (map_ne_zero φ).2 hd

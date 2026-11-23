@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SharpDualSpans.GlueConvA
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumAGlueCut
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LsDatumAGram
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SharpDualSpans.GlueConvA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SharpDualSpans.GlueEtaPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,13 +123,13 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
       add_mem' := by
         rintro _ _ ⟨m, w, h, rfl⟩ ⟨m', w', h', rfl⟩
         refine ⟨m + m', w + w', ?_, ?_⟩
-        · rw [ddMk_add, map_add, h, h', dwMk_add]
+        · rw [ddMk_add, η.map_add, h, h', dwMk_add]
         · simp only [Submodule.coe_add]; abel
-      zero_mem' := ⟨0, 0, by rw [ddMk_zero, map_zero, dwMk_zero], by simp⟩
+      zero_mem' := ⟨0, 0, by rw [ddMk_zero, η.map_zero, dwMk_zero], by simp⟩
       smul_mem' := by
         rintro c _ ⟨m, w, h, rfl⟩
         refine ⟨c • m, c • w, ?_, ?_⟩
-        · rw [ddMk_smul, map_smul, h, dwMk_smul]
+        · rw [ddMk_smul, η.map_smul, h, dwMk_smul]
         · simp only [Submodule.coe_smul]; rw [smul_add] }
   have GI : ∀ (m : ↥(MMsharp H t)) (w : ↥(ThSharp H t N)),
       η (ddMk H t m) = dwMk H t N w ↔ (m : V) + w ∈ Λ := by
@@ -101,13 +145,13 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
   have hNΛ : N ≤ Λ := by
     intro n hn
     refine ⟨0, ⟨n, hNs n hn⟩, ?_, by simp⟩
-    rw [ddMk_zero, map_zero, eq_comm, dwMk_eq_zero]
+    rw [ddMk_zero, η.map_zero, eq_comm, dwMk_eq_zero]
     exact hn
   have hgΛ : ∀ a, H.MMfam t a ∈ Λ := by
     intro a
     have ha : H.MMfam t a ∈ MMo H t := Submodule.subset_span ⟨a, rfl⟩
     refine ⟨⟨_, hMMs _ ha⟩, 0, ?_, by simp⟩
-    rw [dwMk_zero, (ddMk_eq_zero H t _).2 ha, map_zero]
+    rw [dwMk_zero, (ddMk_eq_zero H t _).2 ha, η.map_zero]
   have hMMΛ : MMo H t ≤ Λ := Submodule.span_le.2 (by rintro _ ⟨a, rfl⟩; exact hgΛ a)
 
   have hInf : Λ ⊓ (H.W0 t.f t.f').restrictScalars M.L.O = N := by
@@ -119,7 +163,7 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
         rwa [add_sub_cancel_right] at this)
       have hm : m = 0 := Subtype.ext hm0
       subst hm
-      rw [ddMk_zero, map_zero, eq_comm, dwMk_eq_zero] at h
+      rw [ddMk_zero, η.map_zero, eq_comm, dwMk_eq_zero] at h
       simpa using h
     · intro n hn
       exact ⟨hNΛ hn, hNW hn⟩
@@ -132,7 +176,7 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
       rwa [add_sub_cancel_left] at this) w.2.1
     have hw : w = 0 := Subtype.ext hw0
     subst hw
-    rw [dwMk_zero, ← map_zero η, η.injective.eq_iff, ddMk_eq_zero] at h
+    rw [dwMk_zero, ← η.map_zero, η.injective.eq_iff, ddMk_eq_zero] at h
     simpa [MMo] using h
 
   have hfwd : ∀ x ∈ Λ, ∀ y ∈ Λ, H.h x y ∈ M.L.O := by
@@ -173,7 +217,7 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
       rwa [add_sub_cancel_right] at this
     have hmvM : (mv : V) ∈ MMo H t := mem_MMo_of_dual H t hG mv.2.1 hint
     have hvN : (v : V) ∈ N := by
-      rw [← dwMk_eq_zero, ← hmv', (ddMk_eq_zero H t mv).2 hmvM, map_zero]
+      rw [← dwMk_eq_zero, ← hmv', (ddMk_eq_zero H t mv).2 hmvM, η.map_zero]
     have e : m + w = (m + (w₀ : V)) + (v : V) := by rw [hvV]; abel
     rw [e]
     exact Λ.add_mem hin₀ (hNΛ hvN)
@@ -210,7 +254,7 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
     | zero =>
       intro hy w hw
       have e0 : (⟨0, hy⟩ : ↥(MMsharp H t)) = 0 := rfl
-      rw [e0, ddMk_zero, map_zero, eq_comm, dwMk_eq_zero] at hw
+      rw [e0, ddMk_zero, η.map_zero, eq_comm, dwMk_eq_zero] at hw
       rw [zero_add]; exact Submodule.mem_sup_left hw
     | add a b ha hb iha ihb =>
       intro hy w hw
@@ -221,7 +265,7 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
       have hA := iha has wa hwa.symm
       have hB := ihb hbs wb hwb.symm
       have e0 : (⟨a + b, hy⟩ : ↥(MMsharp H t)) = ⟨a, has⟩ + ⟨b, hbs⟩ := rfl
-      rw [e0, ddMk_add, map_add, ← hwa, ← hwb, ← dwMk_add, dwMk_eq_iff] at hw
+      rw [e0, ddMk_add, η.map_add, ← hwa, ← hwb, ← dwMk_add, dwMk_eq_iff] at hw
       have e : a + b + (w : V) = (a + wa) + (b + wb) + ((w : V) - ↑(wa + wb)) := by
         simp only [Submodule.coe_add]; abel
       rw [e]
@@ -234,7 +278,7 @@ theorem glueConv_holds (M : Model F E) (r : ℕ) : GlueConv M r := by
       obtain ⟨wa, hwa⟩ := exists_rep H t N (η (ddMk H t ⟨a, has⟩))
       have hA := iha has wa hwa.symm
       have e0 : (⟨c • a, hy⟩ : ↥(MMsharp H t)) = c • ⟨a, has⟩ := rfl
-      rw [e0, ddMk_smul, map_smul, ← hwa, ← dwMk_smul, dwMk_eq_iff] at hw
+      rw [e0, ddMk_smul, η.map_smul, ← hwa, ← dwMk_smul, dwMk_eq_iff] at hw
       have e : c • a + (w : V) = c • (a + wa) + ((w : V) - ↑(c • wa)) := by
         simp only [Submodule.coe_smul, smul_add]; abel
       rw [e]

@@ -1,6 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
-import Formalism.LocalToGlobal.UnitaryNorms.MemFIffReal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CmQuadraticFormEqAlternatingForm
+public import Formalism.LocalToGlobal.UnitaryNorms.RealCyclotomicTwoPower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +49,6 @@ def LevEx (D : D7) : Prop :=
     (∃ i, p = D.host.g i) ∨ p = D.host.pde ∨ p = D.host.pde' ∨ (∃ u, p = (D.mem u).A.T) ∨ p = q0Av D
 
 def ExFld (B : Pre) (f : Fr B) (δ : FieldDat B) (F : IntermediateField ℚ ℂ) : Prop := F = listField δ f
-
-def EvLgEx (p : Ctx → ∀ B : Base, Fr B.toPre → FieldDat B.toPre → TwDat B → Prop) : Prop := EvLgOn ExFld p
 
 def qb (ι : Qb →+* ℂ) (M : IntermediateField ℚ ℂ) : Fld := M.comap ι.toRatAlgHom
 
@@ -34,14 +68,6 @@ structure TupPins {D : D7} {C : CharFrame D} {nch : NChoice D} (Tp : TupTied D C
   ram : ∀ μ v, ¬ (Tp.xi μ).UnrAt v → IsSplitPl D.host v ∧ (Ideal.absNorm v.asIdeal).Prime ∧
     ((Ideal.absNorm v.asIdeal : ℕ) : 𝓞 D.host.E) ∉ v.asIdeal ^ 2 ∧ ∀ k, ¬ OverP D.host (D.host.g k) v
   atl : ∀ w v, OverP D.host (D.what₂.places.resChar w) v → (Tp.xi (D.what₂.muAt w)).UnrAt v
-
-theorem ExFld.recFld {B : Pre} {f : Fr B} {δ : FieldDat B} {F : IntermediateField ℚ ℂ} (h : ExFld B f δ F)
-    (hO : listField δ f ≤ δ.Om) : RecFld B f δ F := by
-  unfold ExFld at h
-  subst h
-  exact ⟨le_rfl, hO⟩
-
-example (B : Base) (f : Fr B.toPre) (δ : FieldDat B.toPre) : ExFld B.toPre f δ B.KsC ↔ B.KsExact δ f := Iff.rfl
 
 end GlobalTheory.Mem.HD
 

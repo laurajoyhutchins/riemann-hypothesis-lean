@@ -1,11 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.HTChartExists
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFunctionalMulStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HodgeTateLatticeBaseChangePairingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsHodgeTateFunctionalStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFunctionalEndomorphismStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFunctionalUniqueStatement
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.HTChartExists
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HodgeTateLatticeBaseChangePairingStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsHodgeTateFunctionalStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFunctionalEndomorphismStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFunctionalMulStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateFunctionalUniqueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteBaseChangeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,7 +138,7 @@ theorem charOf_neg (y : Fin N → 𝓞 E) :
       ← powChar_apply m ζ hζ, map_neg, AddMonoidHom.neg_apply, ofAdd_neg, map_inv]
 
 def mulMap (b : 𝓞 E) : T →* T :=
-  liftSurj π hπ (π.comp (DistribMulAction.toAddMonoidHom (Fin N → 𝓞 E) b).toMultiplicative) (fun z hz => by
+  liftSurj π hπ (π.comp (DistribSMul.toAddMonoidHom (Fin N → 𝓞 E) b).toMultiplicative) (fun z hz => by
     obtain ⟨z', hz'⟩ := (hker (Multiplicative.toAdd z)).1 hz
     show π (Multiplicative.ofAdd (b • Multiplicative.toAdd z)) = 1
     rw [hker, hz', smul_comm]
@@ -179,7 +222,7 @@ theorem htChartExists : HTChartExists := by
       rw [this]; exact hwb k
     | zero => rw [map_zero, show χ 0 = 1 from charOf_zero _ _ _ _ _ _ _]; exact hzero
     | add y y' _ _ h1 h2 =>
-      rw [map_add, show χ (y + y') = χ y * χ y' from charOf_add _ _ _ _ _ _ _ y y']; exact hadd _ _ _ _ h1 h2
+      rw [map_add (f := _), show χ (y + y') = χ y * χ y' from charOf_add _ _ _ _ _ _ _ y y']; exact hadd _ _ _ _ h1 h2
     | neg y _ h1 => rw [map_neg, show χ (-y) = (χ y)⁻¹ from charOf_neg _ _ _ _ _ _ _ y]; exact hneg _ _ h1
 
   have hlin : ∀ (a : 𝓞 E) y, ∃ u, h (a • y) = dualAct ρ (RingOfIntegers.mapRingEquiv c) a (h y) + (p ^ n) • u := by

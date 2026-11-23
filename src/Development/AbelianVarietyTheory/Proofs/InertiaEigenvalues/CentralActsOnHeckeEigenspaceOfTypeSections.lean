@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CoeffRingsHaveRootsOfUnity
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TypeSpaceProjectionEigenOfLocalisedFormsSection
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CoeffRingsHaveRootsOfUnity
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.StepJumpDirect
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TypeSpaceProjectionEigenOfLocalisedFormsSection
+import Formalism.SharpRestriction.LevelLetterCocycles.EndomorphismIndexBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism Formalism.MainNotions Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Formalism.L2 NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module Polynomial GlobalTheory.Pass GlobalTheory.PendOf
 
 noncomputable section
@@ -48,6 +94,7 @@ theorem conjSum_of_central (z : MonoidAlgebra R G) (hz : ∀ a, z * a = a * z) :
 theorem mapCoef_conjSum {S : Type} [CommRing S] (f : R →+* S) (w : MonoidAlgebra R G) :
     PairedCharacterCondition.mapCoef f (conjSum w) = conjSum (PairedCharacterCondition.mapCoef f w) := by
   show MonoidAlgebra.mapRingHom G f (conjSum w) = conjSum (MonoidAlgebra.mapRingHom G f w)
+
   simp only [conjSum, map_sum, map_mul, MonoidAlgebra.of_apply, MonoidAlgebra.mapRingHom_single, map_one]
 
 theorem mapCoef_of {S : Type} [CommRing S] (f : R →+* S) (m : G) :
@@ -90,14 +137,14 @@ theorem onMt_add (i : D.nd.Loc) {a b : MonoidAlgebra ℂ (G0g D.nd)}
     D.ntypes.onMt (D.nd.mu i) (D.nd.j i) (a + b) =
       D.ntypes.onMt (D.nd.mu i) (D.nd.j i) a + D.ntypes.onMt (D.nd.mu i) (D.nd.j i) b := by
   unfold NTypes.onMt
-  rw [dif_pos ha, dif_pos hb, dif_pos (add_mem ha hb), ← map_add]
+  rw [dite_eq_left ha, dite_eq_left hb, dite_eq_left (add_mem ha hb), ← map_add (f := _)]
   rfl
 
 theorem onMt_smul (i : D.nd.Loc) (c : ℂ) {a : MonoidAlgebra ℂ (G0g D.nd)}
     (ha : a ∈ Subalgebra.center ℂ (MonoidAlgebra ℂ (G0g D.nd))) :
     D.ntypes.onMt (D.nd.mu i) (D.nd.j i) (c • a) = c • D.ntypes.onMt (D.nd.mu i) (D.nd.j i) a := by
   unfold NTypes.onMt
-  rw [dif_pos ha, dif_pos (Subalgebra.smul_mem _ ha c), ← map_smul]
+  rw [dite_eq_left ha, dite_eq_left (Subalgebra.smul_mem _ ha c), ← map_smul]
   rfl
 
 theorem onMt_typeSum (hC : OnMtPreservesTypeV D) (i : D.nd.Loc) (z : MonoidAlgebra ℂ (G0g D.nd))
@@ -120,7 +167,7 @@ theorem Phi_mem {i : D.nd.Loc} (s : Sec D i) (w : TensorProduct (D.nd.O i) (KK D
     rw [Formalism.MainNotions.TruncatedSeriesCountingIdentities.Br.EigSpan_holds D.nd i]; exact Submodule.mem_top
   refine Submodule.iSup_induction _ (motive := fun w => s.Φ w ∈ ptPart D i) hw
     (fun x v hv => ?_) (by rw [map_zero]; exact Submodule.zero_mem _)
-    (fun v v' h h' => by rw [map_add]; exact Submodule.add_mem _ h h')
+    (fun v v' h h' => by rw [map_add (f := _)]; exact Submodule.add_mem _ h h')
   exact Submodule.mem_iSup_of_mem (some x)
     (Submodule.mem_iSup_of_mem (Option.some_ne_none x) (s.eig x v hv))
 
@@ -155,7 +202,7 @@ theorem class_step (P : PairedCharacterCondition.Pend D) (hC : OnMtPreservesType
       Submodule.sub_mem _ (Phi_mem s _) (onMt_ptPart hC i _ (Phi_mem s _))
     exact sub_eq_zero.1 ((Submodule.disjoint_def.1 hind) _ m1 m2)
   | zero => simp only [map_zero]
-  | add v v' _ _ h h' => simp only [map_add, h, h']
+  | add v v' _ _ h h' => simp only [map_add (f := _), h, h']
   | smul a v _ h => rw [LinearMap.map_smul, s.semi, h, s.semi, LinearMap.map_smul]
 
 end Forms
@@ -195,7 +242,7 @@ theorem all_central (P : PairedCharacterCondition.Pend D) (hC : OnMtPreservesTyp
           ↥(Subalgebra.center (D.nd.O i) (MonoidAlgebra (D.nd.O i) (G0g D.nd)))) =
           ⟨conjSum x, conjSum_mem_center _⟩ + ⟨conjSum y, conjSum_mem_center _⟩ :=
         Subtype.ext (conjSum_add x y)
-      rw [e, map_add, LinearMap.baseChange_add, LinearMap.add_apply, map_add, hx, hy, conjSum_add,
+      rw [e, map_add (f := _), LinearMap.baseChange_add, LinearMap.add_apply, map_add (f := _), hx, hy, conjSum_add,
         mapCoef_add, onMt_add i (mapCoef_central _ _ (conjSum_mem_center _))
           (mapCoef_central _ _ (conjSum_mem_center _)), LinearMap.add_apply]
     | smul r x hx =>

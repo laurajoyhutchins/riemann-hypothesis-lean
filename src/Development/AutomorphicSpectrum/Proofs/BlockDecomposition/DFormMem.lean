@@ -1,5 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory CrystallineSemistableComparison CrystallineSemistableComparison.Pb
 open GlobalTheory.CatH (face toLast)
@@ -16,7 +64,7 @@ theorem tele {B : Type*} [CommRing B] (P : ℕ → B) (m : ℕ) :
     ring
 
 variable {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {Φ : PDF R C} {d : ℕ}
-  (E : Frame Φ d) (σ : ∀ T : C, E.D ⟶ T)
+  (E : Frame (Φ := Φ) d) (σ : ∀ T : C, E.D ⟶ T)
 
 theorem a_comp (i : Fin d) {T T' T'' : C} (φ : T ⟶ T') (ψ : T' ⟶ T'') :
     E.a σ i (φ ≫ ψ) = (Φ.A.map ψ).hom (E.a σ i φ) + E.a σ i ψ := by
@@ -34,7 +82,7 @@ theorem ga_add (i : Fin d) {n : ℕ} (s : ComposableArrows C n) (p q r : Fin (n 
     rw [← s.map_comp]; rfl
   have e2 : s.map (homOfLE (Fin.le_last q)) = s.map (homOfLE h') ≫ s.map (homOfLE (Fin.le_last r)) := by
     rw [← s.map_comp]; rfl
-  rw [e, a_comp, map_add, e2, Functor.map_comp]
+  rw [e, a_comp, map_add (f := _), e2, Functor.map_comp]
   rfl
 
 theorem ga_mem {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) (i : Fin d) {n : ℕ} (s : ComposableArrows C n)
@@ -81,9 +129,6 @@ theorem sa_val {n : ℕ} (i : Fin (n + 1)) (m : Fin n) :
     ((i.succAbove m : Fin (n + 1)) : ℕ) = if (m : ℕ) < i then (m : ℕ) else m + 1 := by
   unfold Fin.succAbove
   split_ifs <;> simp_all [Fin.lt_def]
-
-local macro "fa" : tactic =>
-  `(tactic| (simp only [sa_val, Fin.val_castSucc, Fin.val_succ, Fin.val_last]; split_ifs <;> omega))
 
 theorem ga_congr (i : Fin d) {n : ℕ} (s : ComposableArrows C n) {p q p' q' : Fin (n + 1)} (h : p ≤ q) (h' : p' ≤ q')
     (hp : (p : ℕ) = p') (hq : (q : ℕ) = q') : ga E σ i s p q h = ga E σ i s p' q' h' := by
@@ -139,12 +184,12 @@ theorem d_form_mem {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) (hc : E.GrConst 
       · rw [hu, hv]
         dsimp only
         rw [← ga_add]
-        refine ga_congr E σ _ s _ _ ?_ ?_ <;> fa
+        refine ga_congr E σ _ s _ _ ?_ ?_ <;> simp only [sa_val, Fin.val_castSucc, Fin.val_succ] <;> split_ifs <;> omega
       · refine Finset.prod_congr rfl fun k hk => ?_
         have hki : (k : ℕ) ≠ i := fun h => Finset.ne_of_mem_erase hk (Fin.ext h)
         split_ifs with h
-        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> fa
-        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> fa
+        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> simp only [sa_val, Fin.val_castSucc, Fin.val_succ] <;> split_ifs <;> omega
+        · refine ga_congr E σ _ s _ _ ?_ ?_ <;> simp only [sa_val, Fin.val_castSucc, Fin.val_succ] <;> split_ifs <;> omega
     have hE : ∏ k ∈ Finset.univ.erase i, (if (k : ℕ) < i + 1 then u k else v k) =
         ∏ k ∈ Finset.univ.erase i, (if (k : ℕ) < i then u k else v k) := by
       refine Finset.prod_congr rfl fun k hk => ?_
@@ -200,7 +245,7 @@ theorem d_form_mem {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) (hc : E.GrConst 
   rwa [e] at h
 
 theorem rep_form {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {Φ : PDF R C} {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil)
-    {d : ℕ} (E : Frame Φ d) (σ : ∀ T : C, E.D ⟶ T) (hc : E.GrConst Fil) (j q : ℕ) (r : ℤ) (hr : r = j + q)
+    {d : ℕ} (E : Frame (Φ := Φ) d) (σ : ∀ T : C, E.D ⟶ T) (hc : E.GrConst Fil) (j q : ℕ) (r : ℤ) (hr : r = j + q)
     (I : Fin j → Fin d) (x : Φ.A.obj E.D) (hx : x ∈ (Fil q).S E.D) :
     ∃ c, Rep (Fil r) (Fil (r + 1)) (E.form σ I x) c := by
   subst hr
@@ -215,6 +260,7 @@ theorem rep_form {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {Φ : PDF
     funext s
     apply Subtype.ext
     have h := Ideal.Quotient.eq_zero_iff_mem.2 (d_form_mem E σ hF hc j q I x hx s)
+
     rw [map_sum] at h
     refine Eq.trans ?_ h
     change Subtype.val (∑ i : Fin (j + 2), (-1 : ℤ) ^ (i : ℕ) • ((sq (Fil ((j : ℤ) + q)) (Fil ((j : ℤ) + q + 1))).map (toLast i s)).hom (f (face i s)) :

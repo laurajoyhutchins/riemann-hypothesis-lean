@@ -1,7 +1,57 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.SupportG
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportLoc
-import Formalism.LocalToGlobal.UnitaryNorms.CharRat
-import Formalism.SharpRestriction.CuspSpanNormBounds.LocalModelPeriodLattices
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.SupportG
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SupportLoc
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.SmoothBigCellSectionsExist
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalModelPeriodLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +75,7 @@ theorem posSemidef_of_hasSum {ι J : Type*} [Fintype ι] (f : J → ι → ℂ) 
     refine h1.unique ?_
     convert h2 using 1
     funext j
-    simp only [star_mul', star_star, Complex.star_def, Complex.conj_ofReal, Complex.conj_conj]
+    simp only [star_mul, Complex.star_def, Complex.conj_ofReal, Complex.conj_conj]
     ring
   refine ⟨hherm, fun v => ?_⟩
   simp only [Finsupp.sum]
@@ -45,7 +95,7 @@ variable {P : Type*} {C : P → Type*}
 
 def OffS (θ0 : ∀ p, C p) (S : Finset P) : Type _ := {θ : ∀ p, C p // ∀ p ∉ S, θ p = θ0 p}
 
-set_option maxHeartbeats 800000 in
+
 
 theorem hasSum_prod_offS [DecidableEq P] (θ0 : ∀ p, C p) (f : ∀ p, C p → ℂ) (a : P → ℂ) (S : Finset P)
     (hf : ∀ p ∈ S, HasSum (f p) (a p)) (hn : ∀ p ∈ S, Summable fun c => ‖f p c‖) :
@@ -297,7 +347,7 @@ theorem ktopG_hasSum {θ0 : ∀ p, Option ((M p).Cls D.R.rS)} {S : Finset (PlF D
   rw [← hg.hasSum_iff hz]
   convert hsum using 1
   funext θ
-  simp only [Function.comp_apply, g]
+  simp only [Function.comp_apply]
   rw [bbG_eq_prod hu θ.2 rfl, bbG_eq_prod hu' θ.2 hk.symm, autG_eq_prodS hu θ.2, map_prod,
     ← Finset.prod_mul_distrib, ← Finset.prod_div_distrib]
   rfl
@@ -507,15 +557,6 @@ end Vec
 section PropSix
 
 variable {D : Formalism.BasicNotions.D7}
-
-def TopLocal {Y : TermTie D} {δ : ∀ p : PlF D, (D.s.atP p).Fp}
-    {M : ∀ p : PlF D, Loc.Model (D.s.atP p).Fp (D.s.atP p).Ep} {u u' : D.what₂.Word} (X : TermLoc D Y δ M u u') : Prop :=
-  ∃ θ0 : ∀ p, Option ((M p).Cls D.R.rS),
-    (∀ w : Point D.host.E (D.R.rS + 1), Gpt (D.mem u).A.T (D.mem u').A.T w ≠ 0 →
-      (∃ S : Finset (PlF D), UnramOff M δ (D.mem u).A.T (D.mem u').A.T θ0 S w) ∧
-        ∀ p, BBsq M δ (D.mem u).A.T (D.mem u').A.T p w) ∧
-    ∀ γ : D.s.Term u u', D.s.generic γ → Gpt (D.mem u).A.T (D.mem u').A.T (D.s.ptOf γ) ≠ 0 →
-      Restricted θ0 (thCls X γ)
 
 theorem n0_pos {c : ℝ} (hc : 0 < c) {T T' : ℕ} {w : Point D.host.E (D.R.rS + 1)} (hG : Gpt T T' w ≠ 0) :
     0 < n0 c T T' w := by

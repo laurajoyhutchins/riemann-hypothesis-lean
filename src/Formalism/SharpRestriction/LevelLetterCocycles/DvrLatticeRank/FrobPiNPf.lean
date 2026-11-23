@@ -1,6 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
-import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.FramePfHyp
+public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantUniformizer
 import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+import Formalism.SharpRestriction.LevelLetterCocycles.MapCompZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,6 +94,7 @@ theorem frobpin_geom (I : Ideal A) [IsAdicComplete I M] (f : M →+ M)
   have hS : ∀ k, f (S k) - S k = (⇑f)^[k] b - b := by
     intro k
     have e1 : f (S k) = ∑ i ∈ Finset.range k, (⇑f)^[i + 1] b := by
+
       simp only [S, map_sum]
       exact Finset.sum_congr rfl (fun i _ => (Function.iterate_succ_apply' _ _ _).symm)
     rw [e1]
@@ -149,12 +195,12 @@ theorem frobpin_local (I : Ideal (LetA O n)) (hI : IsAdicComplete I ↥(W.N T))
     refine Submodule.smul_induction_on hy (fun a ha z hz => ?_) (fun x y hx hy => ?_)
     · rw [frobpin_φD_smul, smul_comm c (W.φA a), pow_succ, Submodule.mul_smul]
       exact Submodule.smul_mem_smul (frobpin_φA_pow W I hφI k a ha) (hcI z hz)
-    · rw [map_add, smul_add]
+    · rw [map_add (f := _), smul_add]
       exact Submodule.add_mem _ hx hy
   let f : ↥(W.N T) →+ ↥(W.N T) :=
     { toFun := fun y => ⟨c • W.φD T y, hcN y y.2⟩
       map_zero' := by ext; simp
-      map_add' := fun x y => by ext; simp [map_add, smul_add] }
+      map_add' := fun x y => by ext; simp [map_add (f := _), smul_add] }
   have hf : ∀ k : ℕ, ∀ y ∈ (I ^ k • ⊤ : Submodule (LetA O n) ↥(W.N T)),
       f y ∈ (I ^ (k + 1) • ⊤ : Submodule (LetA O n) ↥(W.N T)) := by
     intro k y hy
@@ -236,7 +282,7 @@ theorem frobenius_uniformiser_wach {G : Type} [Group G] [TopologicalSpace G] {Qp
     · rw [map_zero, smul_zero]
       exact Submodule.zero_mem _
     · intro x y hx hy
-      rw [map_add, smul_add]
+      rw [map_add (f := _), smul_add]
       exact Submodule.add_mem _ hx hy
   have hN : ∀ y ∈ W.N T, Formalism.MainNotions.DeltaInvariantLattices.Eat E π' ^ h' • W.φD T y ∈ W.N T := by
     intro y hy
@@ -259,77 +305,12 @@ theorem frobpin_finrank_sup {l : ℕ} [Fact l.Prime] (F : IntermediateField ℚ_
     (hint : IsIntegral F y) :
     finrank ℚ_[l] ↥(F ⊔ IntermediateField.adjoin ℚ_[l] {y}) = finrank ℚ_[l] ↥F * (minpoly F y).natDegree := by
   rw [← IntermediateField.restrictScalars_adjoin_eq_sup, ← IntermediateField.adjoin.finrank hint]
-  exact (Module.finrank_mul_finrank ℚ_[l] ↥F ↥(IntermediateField.adjoin F {y})).symm
+  set_option synthInstance.maxHeartbeats 200000 in
+    exact (Module.finrank_mul_finrank ℚ_[l] ↥F ↥(IntermediateField.adjoin F {y})).symm
 
 theorem frobpin_sK_pos {l : ℕ} [Fact l.Prime] (hl : l ≠ 2) (K LL : FinExt l) (hG : Good K 1 LL) :
     1 ≤ sK l K := by
-  have hlp : l.Prime := Fact.out
-  have hl3 : 2 ≤ l - 1 := by
-    have := hlp.two_le
-    omega
-  have hl0 : (l : Om l) ≠ 0 := by
-    have h : (l : Om l) = algebraMap ℚ_[l] (Om l) (l : ℚ_[l]) := (map_natCast _ _).symm
-    rw [h]
-    exact (map_ne_zero _).2 (Nat.cast_ne_zero.2 hlp.ne_zero)
-  have : NeZero (l : Om l) := ⟨hl0⟩
-  have hdeg : (Polynomial.cyclotomic l (Om l)).degree ≠ 0 := by
-    rw [Polynomial.degree_cyclotomic, Nat.totient_prime hlp]
-    exact_mod_cast (by omega : l - 1 ≠ 0)
-  obtain ⟨z, hz0⟩ := IsAlgClosed.exists_root _ hdeg
-  have hz : IsPrimitiveRoot z l := Polynomial.isRoot_cyclotomic_iff.1 hz0
-  have hKs : Ks K 1 = K0 K ⊔ IntermediateField.adjoin ℚ_[l] {z} := by
-    unfold Ks
-    congr 1
-    apply le_antisymm
-    · refine IntermediateField.adjoin_le_iff.2 fun x hx => ?_
-      have hx' : x ^ l = 1 := by simpa using hx
-      obtain ⟨i, -, rfl⟩ := hz.eq_pow_of_pow_eq_one hx'
-      exact pow_mem (IntermediateField.mem_adjoin_simple_self _ _) _
-    · refine IntermediateField.adjoin.mono _ _ _ ?_
-      intro x hx
-      rw [Set.mem_singleton_iff.1 hx]
-      show z ^ l ^ 1 = 1
-      rw [pow_one]
-      exact hz.pow_eq_one
-  have hint : IsIntegral (K0 K) z := by
-    have h1 : IsIntegral ℚ_[l] z :=
-      ⟨Polynomial.X ^ l - Polynomial.C 1, Polynomial.monic_X_pow_sub_C 1 hlp.ne_zero,
-        by simp [hz.pow_eq_one]⟩
-    exact h1.tower_top
-  have hfin : finrank ℚ_[l] ↥(Ks K 1) = finrank ℚ_[l] ↥(K0 K) * (minpoly (K0 K) z).natDegree := by
-    rw [hKs]
-    exact frobpin_finrank_sup (K0 K) z hint
-  have hmin : (minpoly (K0 K) z).natDegree ≤ l - 1 := by
-    have hroot : Polynomial.aeval z (Polynomial.cyclotomic l (K0 K)) = 0 := by
-      rw [Polynomial.aeval_def, Polynomial.eval₂_eq_eval_map, Polynomial.map_cyclotomic]
-      exact hz0
-    have hdvd := minpoly.dvd (K0 K) z hroot
-    rw [← Nat.totient_prime hlp, ← Polynomial.natDegree_cyclotomic l (K0 K)]
-    exact Polynomial.natDegree_le_of_dvd hdvd (Polynomial.cyclotomic_ne_zero _ _)
-  have hf := max_unramified_finrank_pos K
-  have ht := Module.finrank_mul_finrank ℚ_[l] ↥(K0 K) ↥K.1
-  have hKle : K.1 ≤ Ks K 1 := hG.2.2.1
-  have hpos : 0 < finrank ℚ_[l] ↥(Ks K 1) := by
-    rw [hfin]
-    exact Nat.mul_pos hf (minpoly.natDegree_pos hint)
-  have hfd : FiniteDimensional ℚ_[l] ↥(Ks K 1) := Module.finite_of_finrank_pos hpos
-  have hle : finrank ℚ_[l] ↥K.1 ≤ finrank ℚ_[l] ↥(Ks K 1) :=
-    LinearMap.finrank_le_finrank_of_injective (f := (IntermediateField.inclusion hKle).toLinearMap)
-      (IntermediateField.inclusion hKle).injective
-  have he : eK K ≤ l - 1 := by
-    have h2 : finrank ℚ_[l] ↥(K0 K) * eK K ≤ finrank ℚ_[l] ↥(K0 K) * (l - 1) := by
-      rw [ht]
-      exact hle.trans (hfin ▸ Nat.mul_le_mul_left _ hmin)
-    exact Nat.le_of_mul_le_mul_left h2 hf
-  have hepos : 0 < eK K := by
-    have hK : 0 < finrank ℚ_[l] ↥K.1 := by
-      have := K.2
-      exact Module.finrank_pos
-    rw [← ht] at hK
-    have h3 : 0 < finrank ↥(K0 K) ↥K.1 :=
-      Nat.pos_of_ne_zero (fun h0 => by rw [h0, mul_zero] at hK; exact lt_irrefl 0 hK)
-    exact h3
-  exact Nat.div_pos he hepos
+  apply Formalism.MainNotions.N.Ln34.ramification_quotient_pos <;> assumption
 
 theorem frobpin_sM {l : ℕ} [Fact l.Prime] (K : FinExt l) (h' : ℕ) (hh' : 1 ≤ h')
     (hs : 1 ≤ sK l K) : h' + 1 ≤ sK l K * MK l K h' := by

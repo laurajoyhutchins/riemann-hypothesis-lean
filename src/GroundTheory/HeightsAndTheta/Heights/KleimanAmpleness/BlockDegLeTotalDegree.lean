@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerFurther
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTerFurther
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -21,8 +71,8 @@ theorem prod_block_pow {R : Type} [CommMonoid R] (e : (Σ k, ι k) →₀ ℕ) (
     (fun _ => pow_zero _) (fun _ _ _ => pow_add _ _ _)
   exact h.symm.trans (Finsupp.prod_fintype _ _ (fun _ => pow_zero _))
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem blockDeg_le_totalDegree (g : MvPolynomial (Σ k, ι k) S) :
     ∀ e ∈ g.support, ∀ k, blockDeg e k ≤ g.totalDegree := by
   intro e he k
@@ -33,7 +83,7 @@ theorem blockDeg_le_totalDegree (g : MvPolynomial (Σ k, ι k) S) :
   · rw [Finsupp.notMem_support_iff.mp hk]; exact Nat.zero_le _
 
 def homog (c : ∀ k, ι k) (D : ℕ) (g : MvPolynomial (Σ k, ι k) S) : MvPolynomial (Σ k, ι k) S :=
-  ∑ e ∈ g.support, monomial e (coeff e g) * ∏ k, X ⟨k, c k⟩ ^ (D - blockDeg e k)
+  ∑ e ∈ g.support, monomial e (AddMonoidAlgebra.coeff g e) * ∏ k, X ⟨k, c k⟩ ^ (D - blockDeg e k)
 
 variable {Ω : Type} [Field Ω] [Algebra S Ω]
 
@@ -47,6 +97,7 @@ theorem mConeMapOver_monomial (y : (Σ k, ι k) → Ω) (e : (Σ k, ι k) →₀
 theorem mConeMapOver_homog (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) {D : ℕ} {g : MvPolynomial (Σ k, ι k) S}
     (hD : ∀ e ∈ g.support, ∀ k, blockDeg e k ≤ D) :
     mConeMapOver S y (homog c D g) = C (aeval y (homog c D g)) * ∏ k, X k ^ D := by
+
   simp only [homog, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun e he => ?_
   have hX : ∏ k, (X k : MvPolynomial K Ω) ^ D =
@@ -61,6 +112,7 @@ theorem aeval_homog (w : (Σ k, ι k) → Ω) {c : ∀ k, ι k} (hw : ∀ k, w �
     {g : MvPolynomial (Σ k, ι k) S} (hD : ∀ e ∈ g.support, ∀ k, blockDeg e k ≤ D) :
     aeval w (homog c D g) = (∏ k, w ⟨k, c k⟩ ^ D) * aeval (fun p => w p / w ⟨p.1, c p.1⟩) g := by
   conv_rhs => rw [g.as_sum]
+
   simp only [homog, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun e he => ?_
   have hP : ∏ k, w ⟨k, c k⟩ ^ D =

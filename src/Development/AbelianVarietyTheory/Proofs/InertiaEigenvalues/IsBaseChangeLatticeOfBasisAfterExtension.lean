@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.IsTensorProduct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.BigOperators
+public import Mathlib.Data.Matrix.Diagonal
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+
+@[expose] public section
 
 open TensorProduct
 
@@ -20,6 +69,7 @@ theorem isBaseChange_subtype_of_basis_after_extension : ∀ (S A EE O W RW D Y :
   have hjsum : ∀ e : Fin (d * r) → EE, ∀ v : Fin (d * r) → D,
       jD (∑ i, e i • v i) = ∑ i, ι (e i) • jD (v i) := by
     intro e v
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ => hjD _ _
 
@@ -49,6 +99,7 @@ theorem isBaseChange_subtype_of_basis_after_extension : ∀ (S A EE O W RW D Y :
       ext i m
       have h1 : jD (x i) = ∑ m, c ((C * Matrix.of B) i m) • jD (x m) := by
         conv_lhs => rw [hx i, hjsum]
+
         simp only [Matrix.mul_apply, map_sum, map_mul, Finset.sum_smul, Matrix.of_apply]
         rw [Finset.sum_comm]
         refine Finset.sum_congr rfl fun l _ => ?_
@@ -112,7 +163,7 @@ theorem isBaseChange_subtype_of_basis_after_extension : ∀ (S A EE O W RW D Y :
         add_mem' := by
           rintro _ _ ⟨e₁, h₁, rfl⟩ ⟨e₂, h₂, rfl⟩
           refine ⟨e₁ + e₂, fun i => ?_, ?_⟩
-          · rw [Pi.add_apply, map_add]
+          · rw [Pi.add_apply, map_add (f := _)]
             exact add_mem (h₁ i) (h₂ i)
           · simp [TensorProduct.add_tmul, Finset.sum_add_distrib] }
     have hP : ∀ (e : EE) (n : N), ι e ∈ c.range → e ⊗ₜ[A] n ∈ P := by
@@ -147,6 +198,7 @@ theorem isBaseChange_subtype_of_basis_after_extension : ∀ (S A EE O W RW D Y :
       obtain ⟨e, he, rfl⟩ := hnf t
       choose w hw using he
       have h1 : ∑ i, e i • x i = 0 := by
+
         simpa [map_sum, LinearMap.liftBaseChange_tmul] using ht
       have h2 : (0 : Y) = ∑ i, c (w i) • jD (x i) := by
         simp only [hw]

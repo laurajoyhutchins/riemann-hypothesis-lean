@@ -1,6 +1,59 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.Cross
-import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedMultiplicityOneProportional
-import Development.WeilBound.ThetaLifts.LocalTheory.SplitInv2
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.Cross
+public import Development.WeilBound.ThetaLifts.LocalTheory.SplitInv2
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsPureML
+public import Development.WeilBound.ThetaLifts.ConeHypotheses.PolDense
+public import Development.WeilBound.ThetaLifts.LocalTheory.SplitInv
+public import Development.WeilBound.ThetaLifts.LocalTheory.UnramifiedDeterminedBySpherical
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFactorPureTensorComponentAtPlace
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+import Development.WeilBound.ThetaLifts.CartanFactorisation.TensOfEval
+import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+import Development.WeilBound.ThetaLifts.LocalTheory.UatClosure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,8 +124,8 @@ theorem vac_ne (h : M.IsGood B.ψ) (v) : M.vac v ≠ 0 := (h.vac v).2.1
 
 theorem vac_sb (h : M.IsGood B.ψ) (v) : M.vac v ∈ SB _ := (h.vac v).1
 
-variable (B M) in
 
+variable (B M) in
 def SS : ∀ v : Pl F, Submodule ℂ (Fl F v n d) := Function.update (fun _ => SB _) B.v₁ (Submodule.span ℂ (M.SoLoc B.ψ B.τ₁))
 
 theorem SS_self : SS B M B.v₁ = Submodule.span ℂ (M.SoLoc B.ψ B.τ₁) := Function.update_self ..
@@ -138,7 +191,7 @@ theorem so_slice (h : M.IsGood B.ψ) {f : SInf F _} (hf : f ≠ 0) {x} (hx : pur
 theorem I_add₂ {o : Rep σ Y W} {χ χ' : Chr F E} (hw : M.IsWeil B.ψ χ χ' o) {Φ Ψ : Fn F n d} (hΦ : Φ ∈ schA F _) (hΨ : Ψ ∈ schA F _)
     (c : M.Conv o Φ) (c' : M.Conv o Ψ) (h : UA σ W.J) : M.I o (Φ + Ψ) h = M.I o Φ h + M.I o Ψ h := by
   have e : ∀ g, theta o (Φ + Ψ) g h = theta o Φ g h + theta o Ψ g h := fun g => by
-    simp only [theta, map_add]
+    simp only [theta, map_add (f := _)]
     exact thetaSum_add F (hw.isUSplitting.pres _ _ hΦ) (hw.isUSplitting.pres _ _ hΨ)
   simp only [Model.I, e]
   exact integral_add (c h) (c' h)

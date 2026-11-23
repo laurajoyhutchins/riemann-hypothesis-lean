@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.WittUnram
+module
+
+public import Mathlib.RingTheory.WittVector.Frobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +72,7 @@ def sigW (hinj : Function.Injective (algebraMap W Qq)) (σ : Qq ≃+* Qq)
   map_one' := hinj (by rw [sigF_spec]; simp)
   map_mul' x y := hinj (by simp only [sigF_spec, map_mul])
   map_zero' := hinj (by rw [sigF_spec]; simp)
-  map_add' x y := hinj (by simp only [sigF_spec, map_add])
+  map_add' x y := hinj (by simp only [sigF_spec, map_add (f := _)])
 
 theorem sigW_spec (hinj : Function.Injective (algebraMap W Qq)) (σ : Qq ≃+* Qq)
     (hσ : ∀ x : W, ∃ y : W, σ (algebraMap W Qq x) = algebraMap W Qq (x ^ p + (p : W) * y)) (x : W) :
@@ -53,6 +100,7 @@ theorem ghostComponent_G (x : W) (n : ℕ) :
 theorem ghost_sum_G (x : W) (k : ℕ) :
     ∑ i ∈ range (k + 1), (p : Qq) ^ i * (G p Qq F x).coeff i ^ p ^ (k - i) = algebraMap W Qq ((F^[k]) x) := by
   rw [← ghostComponent_G p Qq F x k, WittVector.ghostComponent_apply, wittPolynomial_eq_sum_C_mul_X_pow]
+
   simp [map_sum, MvPolynomial.aeval_X]
 
 theorem G_coeff_zero (x : W) : (G p Qq F x).coeff 0 = algebraMap W Qq x := by
@@ -62,10 +110,10 @@ theorem G_coeff_zero (x : W) : (G p Qq F x).coeff 0 = algebraMap W Qq x := by
 theorem G_add (x y : W) : G p Qq F (x + y) = G p Qq F x + G p Qq F y := by
   have hit : ∀ n, (F^[n]) = ⇑(F ^ n) := fun n => (RingHom.coe_pow F n).symm
   simp only [G]
-  rw [← map_add]
+  rw [← map_add (f := _)]
   congr 1
   funext n
-  simp only [Pi.add_apply, hit, map_add]
+  simp only [Pi.add_apply, hit, RingHom.map_add]
 
 theorem G_mul (x y : W) : G p Qq F (x * y) = G p Qq F x * G p Qq F y := by
   have hit : ∀ n, (F^[n]) = ⇑(F ^ n) := fun n => (RingHom.coe_pow F n).symm
@@ -73,7 +121,7 @@ theorem G_mul (x y : W) : G p Qq F (x * y) = G p Qq F x * G p Qq F y := by
   rw [← map_mul]
   congr 1
   funext n
-  simp only [Pi.mul_apply, hit, map_mul]
+  simp only [Pi.mul_apply, hit, RingHom.map_mul]
 
 theorem G_one : G p Qq F (1 : W) = 1 := by
   have hit : ∀ n, (F^[n]) = ⇑(F ^ n) := fun n => (RingHom.coe_pow F n).symm
@@ -81,7 +129,7 @@ theorem G_one : G p Qq F (1 : W) = 1 := by
   rw [← map_one (ghostEquiv p Qq).symm]
   congr 1
   funext n
-  simp only [Pi.one_apply, hit, map_one]
+  simp only [Pi.one_apply, hit, RingHom.map_one]
 
 theorem G_zero : G p Qq F (0 : W) = 0 := by
   have hit : ∀ n, (F^[n]) = ⇑(F ^ n) := fun n => (RingHom.coe_pow F n).symm
@@ -89,7 +137,7 @@ theorem G_zero : G p Qq F (0 : W) = 0 := by
   rw [← map_zero (ghostEquiv p Qq).symm]
   congr 1
   funext n
-  simp only [Pi.zero_apply, hit, map_zero]
+  simp only [Pi.zero_apply, hit, RingHom.map_zero]
 
 theorem G_frob (x : W) : G p Qq F (F x) = frobenius (G p Qq F x) := by
   apply (ghostEquiv p Qq).injective
@@ -118,10 +166,12 @@ theorem G_coeff_integral (hinj : Function.Injective (algebraMap W Qq)) (x : W) (
   have hk : (F^[k]) x = ∑ i ∈ range (k + 1), (p : W) ^ i * b i ^ p ^ (k - i) := by
     apply hinj
     rw [← ghost_sum_G p Qq F x k]
+
     simp only [map_sum, map_mul, map_pow, map_natCast]
     exact Finset.sum_congr rfl fun i hi => by rw [hbk i hi]
   have hk1 : (F^[k + 1]) x = ∑ i ∈ range (k + 1), (p : W) ^ i * F (b i) ^ p ^ (k - i) := by
     rw [Function.iterate_succ_apply', hk]
+
     simp only [map_sum, map_mul, map_pow, map_natCast]
   have hdvd : (p : W) ^ (k + 1) ∣
       (F^[k + 1]) x - ∑ i ∈ range (k + 1), (p : W) ^ i * b i ^ p ^ (k + 1 - i) := by
@@ -142,6 +192,7 @@ theorem G_coeff_integral (hinj : Function.Injective (algebraMap W Qq)) (x : W) (
   rw [Finset.sum_range_succ, Nat.sub_self, pow_zero, pow_one] at hs
   have hsum : ∑ i ∈ range (k + 1), (p : Qq) ^ i * (G p Qq F x).coeff i ^ p ^ (k + 1 - i) =
       algebraMap W Qq (∑ i ∈ range (k + 1), (p : W) ^ i * b i ^ p ^ (k + 1 - i)) := by
+
     simp only [map_sum, map_mul, map_pow, map_natCast]
     exact Finset.sum_congr rfl fun i hi => by rw [hbk i hi]
   rw [hsum] at hs
@@ -170,7 +221,7 @@ def sHom (hinj : Function.Injective (algebraMap W Qq)) : W →+* WittVector p W 
   map_one' := map_injective _ hinj (by rw [map_sFun, map_one, G_one])
   map_mul' x y := map_injective _ hinj (by rw [map_mul, map_sFun, map_sFun, map_sFun, G_mul])
   map_zero' := map_injective _ hinj (by rw [map_sFun, map_zero, G_zero])
-  map_add' x y := map_injective _ hinj (by rw [map_add, map_sFun, map_sFun, map_sFun, G_add])
+  map_add' x y := map_injective _ hinj (by rw [map_add (f := _), map_sFun, map_sFun, map_sFun, G_add])
 
 theorem sHom_apply (hinj : Function.Injective (algebraMap W Qq)) (x : W) :
     sHom p Qq F hF hinj x = sFun p Qq F hF hinj x := rfl
@@ -185,7 +236,7 @@ private theorem map_frobenius' (f : W →+* Qq) (w : WittVector p W) :
       | exact DFunLike.congr_fun (MvPolynomial.comp_aeval w.coeff f.toIntAlgHom) P
       | (induction P using MvPolynomial.induction_on with
           | C a => simp [MvPolynomial.aeval_C, algebraMap_int_eq, eq_intCast, map_intCast]
-          | add P Q hP hQ => simp only [map_add, hP, hQ]
+          | add P Q hP hQ => simp only [map_add (f := _), hP, hQ]
           | mul_X P i hP => simp only [map_mul, hP, MvPolynomial.aeval_X])
   ext n
   rw [WittVector.map_coeff, WittVector.coeff_frobenius, WittVector.coeff_frobenius, key]

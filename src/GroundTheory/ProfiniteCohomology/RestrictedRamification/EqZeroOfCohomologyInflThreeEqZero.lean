@@ -1,8 +1,63 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.InflationRestriction
-import GroundTheory.ProfiniteCohomology.Factor
-import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
-import GroundTheory.ProfiniteCohomology.ClassFormations.IsIsoCohomologyMapAlongResSubgroupOfHom
+module
+
+public import GroundTheory.ProfiniteCohomology.ClassFormationDefs
+public import GroundTheory.ProfiniteCohomology.CoinducedModules.Acyclic
+import GroundTheory.ProfiniteCohomology.CoinducedModules.CohomologyCoindCokernelIsoHom
+public import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
+public import GroundTheory.ProfiniteCohomology.Factor
+public import GroundTheory.ProfiniteCohomology.InflationRestriction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.QuotientToInvariantsFunctorPreservesZeroMorphism
+public import GroundTheory.ProfiniteCohomology.CoinducedModules
+public import GroundTheory.ProfiniteCohomology.CupProducts
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -73,8 +128,8 @@ section Extension
 variable {k G : Type u} [CommRing k] [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   (A : Rep.{u} k G) [IsDiscreteRep A]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem inv_mul_contractNth_mem {n : ℕ} (V : Subgroup G) [V.Normal] (g g' : Fin (n + 1) → G)
     (h : ∀ i, (g i)⁻¹ * g' i ∈ V) (j : Fin (n + 1)) (i : Fin n) :
     (Fin.contractNth j (· * ·) g i)⁻¹ * Fin.contractNth j (· * ·) g' i ∈ V := by
@@ -116,7 +171,7 @@ theorem exists_isOpen_cohomologyResLE_eq (N : Subgroup G) (hN : IsClosed (N : Se
   classical
   have : CompactSpace N := isCompact_iff_compactSpace.mp hN.isCompact
   obtain ⟨z, rfl⟩ := cohomologyπ_surjective _ n y
-  set c : (Fin n → N) → A := cochainOf _ (cocycleι _ n z) with hc_def
+  set c : (Fin n → N) → A := cochainOf _ (cocycleι (A := Rep.res N.subtype A) (p := n) z) with hc_def
   have hc : IsLocallyConstant c := isLocallyConstant_cochainOf _
   obtain ⟨U, hU⟩ := exists_openNormalSubgroup_fin_of_isLocallyConstant hc
   obtain ⟨O, hO, hOU⟩ := isOpen_induced_iff.1 U.isOpen'
@@ -197,7 +252,7 @@ theorem exists_isOpen_cohomologyResLE_eq (N : Subgroup G) (hN : IsClosed (N : Se
     (cochainsComplex (Rep.res H.subtype A)).cyclesMk (mkCochain _ c' hc') (n + 1) (by simp) (by
       apply cochainOf_injective (A := Rep.res H.subtype A)
       exact (cochainOf_d _).trans hdc)
-  have hz' : cochainOf _ (cocycleι _ n z') = c' :=
+  have hz' : cochainOf _ (cocycleι (A := Rep.res H.subtype A) (p := n) z') = c' :=
     congrArg (cochainOf (Rep.res H.subtype A)) ((cochainsComplex (Rep.res H.subtype A)).i_cyclesMk _ _ _ _)
   refine ⟨H, hHo, le_sup_left, cohomologyπ _ n z', ?_⟩
   rw [cohomologyResLE_eq, cohomologyMapAlong_cohomologyπ]

@@ -1,8 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalToGlobal.UnitaryNorms.CharTied
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+module
+
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EqZeroOfForallLeExp
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.FrobeniusOrbits Neutral.B1 ReciprocityTheory.Neutral.Bridge.HCFR Formalism.L2.Host GlobalTheory.Mem.Chr
 
@@ -13,22 +55,12 @@ section General
 theorem continuous_of_valued_eq {A B Γ : Type*} [Ring A] [Ring B] [LinearOrderedCommGroupWithZero Γ]
     [Valued A Γ] [Valued B Γ] (hs : Function.Surjective (Valued.v : A → Γ)) (f : A →+* B)
     (hf : ∀ x, Valued.v (f x) = Valued.v x) : Continuous f := by
-  refine continuous_of_continuousAt_zero f ?_
-  rw [ContinuousAt, map_zero, (Valued.hasBasis_nhds_zero A _).tendsto_iff (Valued.hasBasis_nhds_zero B _)]
-  intro γ _
-  obtain ⟨a, ha⟩ := hs (MonoidWithZeroHom.ValueGroup₀.embedding γ.1)
-  have ha0 : (Valued.v : Valuation A Γ).restrict a ≠ 0 := by
-    simp [ha]
-  refine ⟨Units.mk0 _ ha0, trivial, fun x hx => ?_⟩
-  simp only [Set.mem_setOf_eq, Units.val_mk0, Valuation.restrict_lt_iff] at hx
-  simp only [Set.mem_setOf_eq, Valuation.restrict_lt_iff_lt_embedding]
-  rw [hf, ← ha]
-  exact hx
+  apply _root_.GlobalTheory.DenseCompl.continuous_of_valued_eq <;> assumption
 
 variable {L : Type} [Field L] [NumberField L]
 
-open scoped WithZeroTopology in
 
+open scoped WithZeroTopology in
 theorem exists_finCompl_map (c : L ≃+* L) {v v' : HeightOneSpectrum (𝓞 L)} (h : ConjPl c v v') :
     ∃ φ : v.adicCompletion L →+* v'.adicCompletion L, Continuous φ ∧
       (∀ k : L, φ (algebraMap L _ k) = algebraMap L _ (c k)) ∧ ∀ x, Valued.v (φ x) = Valued.v x := by
@@ -53,19 +85,25 @@ theorem exists_finCompl_map (c : L ≃+* L) {v v' : HeightOneSpectrum (𝓞 L)} 
   exact (HeightOneSpectrum.valuedAdicCompletion_eq_valuation' v' _).trans
     ((h k).trans (HeightOneSpectrum.valuedAdicCompletion_eq_valuation' v _).symm)
 
-omit [NumberField L] in
 
+omit [NumberField L] in
 theorem exists_infCompl_map (c : L ≃+* L) (w : InfinitePlace L) :
     ∃ φ : (w.comap (c : L →+* L)).Completion →+* w.Completion, Continuous φ ∧
       ∀ k : L, φ (algebraMap L _ k) = algebraMap L _ (c k) := by
   have hc : Continuous (WithAbs.map (w.comap (c : L →+* L)).1 w.1 (c : L →+* L)) :=
     (AddMonoidHomClass.isometry_of_norm _ fun x => rfl).continuous
-  refine ⟨((InfinitePlace.Completion.equiv w).symm.toRingHom.comp
-      (UniformSpace.Completion.mapRingHom _ hc)).comp (InfinitePlace.Completion.equiv _).toRingHom,
-    (InfinitePlace.Completion.continuous_ofCompletion w).comp
-      (UniformSpace.Completion.continuous_map.comp (InfinitePlace.Completion.continuous_toCompletion _)), fun k => ?_⟩
-  apply InfinitePlace.Completion.ext
-  exact UniformSpace.Completion.mapRingHom_coe hc (WithAbs.toAbs _ k)
+  let φ : (w.comap (c : L →+* L)).Completion →+* w.Completion :=
+    ((AbsoluteValue.Completion.ofCompletion (v := w.1)).comp
+      (UniformSpace.Completion.mapRingHom _ hc)).comp
+        (AbsoluteValue.Completion.toCompletion (v := (w.comap (c : L →+* L)).1))
+  have hφ : Continuous φ :=
+    (AbsoluteValue.Completion.continuous_ofCompletion w.1).comp
+      (UniformSpace.Completion.continuous_map.comp
+        (AbsoluteValue.Completion.continuous_toCompletion _))
+  refine ⟨φ, hφ, fun k => ?_⟩
+  apply AbsoluteValue.Completion.toCompletion_injective w.1
+  simpa [φ, AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply] using
+    (UniformSpace.Completion.mapRingHom_coe hc (WithAbs.toAbs _ k))
 
 theorem conjPl_symm_iff (c : L ≃+* L) (v v' : HeightOneSpectrum (𝓞 L)) : ConjPl c.symm v' v ↔ ConjPl c v v' :=
   ⟨fun h x => by simpa using (h (c x)).symm, fun h x => by simpa using (h (c.symm x)).symm⟩
@@ -82,8 +120,8 @@ theorem map_update_one {ι : Type} [DecidableEq ι] {M : ι → Type} [∀ i, Ri
 
 end General
 
-open Classical in
 
+open Classical in
 theorem exists_isConjI : ∀ (L : Type) [Field L] [NumberField L] (c : L ≃+* L), ∃ C : Ideles L →* Ideles L, IsConjI c C := by
   intro L _ _ c
   choose f hf hfu using fun v => existsUnique_conjPl c.symm v

@@ -1,12 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowsAre
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalizationFreeStageTrueGroupColumnChoiceStep
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsIsBIffCoreB
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowsAre
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalizationFreeStageTrueGroupColumnChoiceStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Cx Formalism.IndefR.RecTie
 open scoped TensorProduct InnerProductSpace ComplexOrder
@@ -60,7 +90,7 @@ theorem stdIso_dat {X : Stages} {px : PreX X.B.toPre} {I : ColIn X.B px} {hX : X
 
 variable {B : Base} {f : Fr B.toPre} {T : TwDat B} {w : ColW B f T}
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem mLU_eq (Z Z' : w.Lt) (hX : B.fields.Ok) {Xg Xg' : Finset (Gc B w.px → B.LL)} {tr tr' : TrI B w.px} (h1 : Xg' = Xg)
     (h2 : tr' = tr) (a : w.I.ι) (i : Fin (w.st Z').toD7.R.m) :
@@ -71,11 +101,11 @@ theorem mLU_eq (Z Z' : w.Lt) (hX : B.fields.Ok) {Xg Xg' : Finset (Gc B w.px → 
       lMat (D := (w.st Z').toD7) (famR (w.st Z') w.I hX Set.univ Xg' tr').A (lev0 w.I) (chr0 w.I) i (tAll w.I a) := by
     have hi : 1 ≤ (i : ℕ) + 1 ∧ (i : ℕ) + 1 ≤ (w.st Z').toD7.R.m := ⟨by omega, i.2⟩
     unfold mLU
-    rw [dif_pos hi]
+    rw [dite_eq_left hi]
     exact (by with_unfolding_all exact ((Eq.refl (lMat (D := (w.st Z').toD7) (famR (w.st Z') w.I hX Set.univ Xg' tr').A (lev0 w.I) (chr0 w.I) i (tAll w.I a))) :))
   exact (by with_unfolding_all exact ((heq_of_eq e) :))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem crd_eq (Z : w.Lt) (hX : B.fields.Ok) {Xg Xg' : Finset (Gc B w.px → B.LL)} {tr tr' : TrI B w.px} (h1 : Xg' = Xg)
     (h2 : tr' = tr) (a : w.I.ι) (M : Hs) (e : Df.MtCx w.I a ≃ₗ[ℂ] M.T)
@@ -93,7 +123,7 @@ theorem algebra_eq {k L : Type} [Field k] [Field L] (σ : L →+* ℂ) (v : k �
     (hi : ∀ y, σ (@algebraMap k L _ _ i y) = v y) (hi' : ∀ y, σ (@algebraMap k L _ _ i' y) = v y) : i = i' :=
   Algebra.algebra_ext _ _ fun y => σ.injective ((hi y).trans (hi' y).symm)
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem brgStd_copy0 (Z Z' : w.Lt) (hX : B.fields.Ok) (U : Set w.I.ι) (Xg : Finset (Gc B w.px → B.LL)) (tr : TrI B w.px)
     (k : Type) [Field k] [NumberField k] (v : k → ℂ)
@@ -111,7 +141,7 @@ theorem brgStd_copy0 (Z Z' : w.Lt) (hX : B.fields.Ok) (U : Set w.I.ι) (Xg : Fin
   subst eR
   exact (by with_unfolding_all exact (h :))
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem brgStd_copy (Z Z' : w.Lt) (hX : B.fields.Ok) (U : Set w.I.ι) {Xg Xg' : Finset (Gc B w.px → B.LL)} {tr tr' : TrI B w.px}
     (h1 : Xg' = Xg) (h2 : tr' = tr) (c : Formalism.L2.Pj.CoreJ (w.st Z).toD7) (c' : Formalism.L2.Pj.CoreJ (w.st Z').toD7)
@@ -130,7 +160,7 @@ theorem brgStd_copy (Z Z' : w.Lt) (hX : B.fields.Ok) (U : Set w.I.ι) {Xg Xg' : 
 
 variable {Z₀ : w.Lt} {hX : B.fields.Ok} {Wt : Set B.places.Pl} {z₀ : Dat (w.st Z₀) w.I hX T Wt} {q : RowPk w z₀} {o : q.Over}
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem mL_all (m : Moved o) (i : Fin (w.st o.Z).toD7.R.m) (a : w.I.ι) :
     q.p.mL a ((i : ℕ) + 1) =
@@ -139,7 +169,7 @@ theorem mL_all (m : Moved o) (i : Fin (w.st o.Z).toD7.R.m) (a : w.I.ι) :
   have h' := q.mL a ((i : ℕ) + 1)
   exact (by with_unfolding_all exact ((eq_of_heq ((heq_of_eq h').trans h)) :))
 
-set_option maxHeartbeats 4000000 in
+
 
 def allT (h : o.Fits) (m : Moved o) (s : Side0 o) :
     AllT (w.st o.Z).toD7 (famR (w.st o.Z) w.I hX Set.univ m.z.Xg m.z.tr).A (lev0 w.I) (chr0 w.I) (lev1 w.I) (chr1 w.I) s.p0
@@ -171,25 +201,25 @@ def allT (h : o.Fits) (m : Moved o) (s : Side0 o) :
       have h2 := cen_cast (mL_all m i μ) (q.p.tL μ ((i : ℕ) + 1)) z' ((by with_unfolding_all exact (a :))) ((by with_unfolding_all exact (ha' :))) ((by with_unfolding_all exact (x :)))
       exact (by with_unfolding_all exact ((h1.trans h2) :))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem jA_same (h : o.Fits) {m : Moved o} {s : Side0 o} (r : ReadPk m s) (t) :
     SameOn ((allT h m s).jA (r.Y.tup t)) (r.Y.jA t) := (by with_unfolding_all exact ((sameOn_tie (mAU (w.st o.Z) w.I hX m.z.Xg m.z.tr true) (q.p.sA true) (m.t.tA true) (congrFun r.tup t) (m.t.hA true t)
     (((r.Y.jA t))) (((r.jA t)))) : _))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem rowReading_baseLevel_sameOn_allTuples (h : o.Fits) {m : Moved o} {s : Side0 o} (r : ReadPk m s) (t) :
     SameOn ((allT h m s).jA0 (r.Y.tup t)) (r.Y.jA0 t) := (by with_unfolding_all exact ((sameOn_tie (mAU (w.st o.Z) w.I hX m.z.Xg m.z.tr false) (q.p.sA false) (m.t.tA false) (congrFun r.tup t) (m.t.hA false t)
     (((r.Y.jA0 t))) (((r.jA0 t)))) : _))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem eMt_same (h : o.Fits) {m : Moved o} {s : Side0 o} (r : ReadPk m s) (i : Fin (w.st o.Z).toD7.R.m) (t) :
     SameOn ((allT h m s).eMt i (r.Y.tup t)) (r.Y.eMt i t) := (by with_unfolding_all exact ((sameOn_cast (fun a => q.p.mL a ((i : ℕ) + 1)) (congrFun r.tup t) (mL_all m i (r.Y.tup t)) (m.t.hL i t)
     (fun x => (by with_unfolding_all exact ((r.Y.eMt i t ((x))) : _))) ((by with_unfolding_all exact ((r.eMt i t) :)))) :))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem crd_moved (h : o.Fits) (m : Moved o) (s : Side0 o) (a : w.C.Tup) (y) :
     IsCrd w.I hX a (q.per.e a)
@@ -197,7 +227,7 @@ theorem crd_moved (h : o.Fits) (m : Moved o) (s : Side0 o) (a : w.C.Tup) (y) :
       ((allT h m s).jA a y) := (by with_unfolding_all exact ((crd_eq Z₀ hX m.Xg m.tr a (q.p.sA true a).A (q.per.e a) (q.t.tA true a).j (((m.t.tA true a).j)) (((m.tA true a)))
     (q.per.crd a) ((y))) : _))
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem io_junk {m : Moved o} {s : Side0 o} (r : ReadPk m s) (μ : (w.D o.Z).what₂.Tup) (h : ¬ Used0 (w.D o.Z) μ) (b : Bool) (j : ℕ) :
     (q.p.ch b).io μ j = 0 := by
@@ -206,12 +236,12 @@ theorem io_junk {m : Moved o} {s : Side0 o} (r : ReadPk m s) (μ : (w.D o.Z).wha
   · exact Or.inl hu
   · exact Or.inr ⟨v, hu.trans ((congrFun r.tup _).symm.trans (r.Y.muAt v).symm)⟩
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem std_moved {m : Moved o} (c : m.Copy) (h : z₀.Std) : m.z.Std :=
   brgStd_copy Z₀ o.Z hX _ m.Xg m.tr z₀.core m.z.core z₀.alg m.z.alg z₀.alg_eq m.z.alg_eq z₀.R m.z.R ((by with_unfolding_all exact (c.core :))) ((by with_unfolding_all exact (c.R :))) h
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem rxs_of_state : ∀ (K : Ctx) (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T), K.Over B.toPre → Forced K B T →
     pinAnd HasPk K B f T w → ∀ (P : Pre2 K w) (x : St P) (hη : ∀ j v, 1 ≤ j → j ≤ B.R.m → x.o.η j v = P.q.eta j v), ∀ t : RowsT K w x.o.Z P.Wt x.s.p0, t.r = x.rowsAre hη → Nonempty (RXs t) := by

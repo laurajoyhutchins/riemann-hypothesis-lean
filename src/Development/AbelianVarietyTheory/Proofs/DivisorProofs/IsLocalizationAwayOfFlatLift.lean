@@ -1,8 +1,65 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Localization.Away.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CommAlgFunctorCoboundaryZeroMemCocyclesOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+import Development.AbelianVarietyTheory.Definitions.Divisors.PrimitiveCrystalHodgeLiftClasses
+import Development.AbelianVarietyTheory.Definitions.Divisors.Pullback1MemHodgeFiltration
 import Development.AbelianVarietyTheory.Definitions.Divisors.SurjectiveOfIsPullbackSqZero
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsNoetherianRingDualNumber
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
+import Mathlib.RingTheory.DividedPowers.Basic
+public import Mathlib.RingTheory.Flat.EquationalCriterion
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry KaehlerDifferential DividedPowers ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.CechDR GlobalTheory.DeRham GlobalTheory.SqLift GlobalTheory.LiftSys GlobalTheory.Published
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -22,7 +79,7 @@ theorem frac_add {B B' : Type} [CommRing B] [CommRing B'] [Algebra B B'] {a : B}
   obtain ⟨n, b, hb⟩ := hy
   obtain ⟨m, c, hc⟩ := hz
   refine ⟨n + m, b * a ^ m + c * a ^ n, ?_⟩
-  rw [map_add, map_mul, map_mul, map_pow, map_pow, ← hb, ← hc]
+  rw [map_add (f := _), map_mul, map_mul, map_pow, map_pow, ← hb, ← hc]
   ring
 
 theorem isLocalization_away_of_flat_lift (R B B' B₀ B₀' : Type) [CommRing R] [CommRing B]
@@ -84,7 +141,7 @@ theorem isLocalization_away_of_flat_lift (R B B' B₀ B₀' : Type) [CommRing R]
     obtain ⟨n, b, hb⟩ := lift0 y
     obtain ⟨m, c, hc⟩ := fracMem _ hb
     refine ⟨n + m, c + b * a ^ m, ?_⟩
-    rw [map_add, map_mul, map_pow, ← hc]
+    rw [map_add (f := _), map_mul, map_pow, ← hc]
     ring
 
   have kerI : ∀ x : B, φ x = 0 → ∃ n : ℕ, a ^ n * x ∈ I.map (algebraMap R B) := by
@@ -102,6 +159,7 @@ theorem isLocalization_away_of_flat_lift (R B B' B₀ B₀' : Type) [CommRing R]
     obtain ⟨k, c, g, rfl⟩ := Submodule.mem_span_set'.mp hxI
     choose i hi hgi using fun j => (g j).2
     have hrel : ∑ j, i j • φ (c j) = 0 := by
+
       rw [← hx, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [smul_eq_mul, map_mul, Algebra.smul_def, ← hgi j, hφ,
@@ -119,6 +177,7 @@ theorem isLocalization_away_of_flat_lift (R B B' B₀ B₀' : Type) [CommRing R]
       ring
     have he : ∀ q, φ (c q * a ^ M - ∑ j, A q j • (d j * a ^ (M - m j))) = 0 := by
       intro q
+
       rw [map_sub, map_mul, map_pow, map_sum]
       simp_rw [hφs, ← hM]
       rw [show φ (c q) = ∑ j, A q j • y j from hy q, Finset.sum_mul]
@@ -147,6 +206,7 @@ theorem isLocalization_away_of_flat_lift (R B B' B₀ B₀' : Type) [CommRing R]
         _ = _ := Finset.sum_congr rfl fun j _ => by ring
     rw [Finset.mul_sum, Finset.sum_congr rfl fun q _ => step q, Finset.sum_comm]
     refine Finset.sum_eq_zero fun j _ => ?_
+
     rw [← Finset.sum_mul, ← map_sum, hA j, map_zero, zero_mul]
   have kerAll : ∀ x : B, φ x = 0 → ∃ N : ℕ, a ^ N * x = 0 := by
     intro x hx

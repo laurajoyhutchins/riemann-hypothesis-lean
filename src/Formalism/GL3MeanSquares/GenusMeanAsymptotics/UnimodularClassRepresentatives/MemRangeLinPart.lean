@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardFiberMulCardRange
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CardFiberMulCardRange
+public import Mathlib.RingTheory.Ideal.Maps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 namespace Formalism.HermitianLattices.Ext.L3.SecondPropositionFree
 
@@ -28,7 +79,7 @@ theorem card_lift_pred [Finite A] (hπ : Function.Surjective π) (hστ : ∀ a,
       obtain ⟨a0, ha0⟩ := hπ b
       exact Nat.card_congr
         { toFun := fun a => ⟨a.1 - a0, by rw [RingHom.mem_ker, map_sub, a.2, ha0, sub_self]⟩
-          invFun := fun k => ⟨k.1 + a0, by rw [map_add, RingHom.mem_ker.mp k.2, ha0, zero_add]⟩
+          invFun := fun k => ⟨k.1 + a0, by rw [map_add (f := _), RingHom.mem_ker.mp k.2, ha0, zero_add]⟩
           left_inv := fun a => Subtype.ext (sub_add_cancel a.1 a0)
           right_inv := fun k => Subtype.ext (add_sub_cancel_right k.1 a0) }
     have hB : 0 < Nat.card B := Nat.card_pos
@@ -59,9 +110,10 @@ theorem card_lift_pred [Finite A] (hπ : Function.Surjective π) (hστ : ∀ a,
           refine Ideal.sum_mem _ fun i _ => Ideal.add_mem _ ?_ ?_
           · exact Ideal.mul_mem_left _ _ (δ i).2
           · exact Ideal.mul_mem_right _ _ (hIσ _ (δ i).2)
-        · rw [linPart_apply, map_sum]
+        · set_option synthInstance.maxHeartbeats 100000 in
+            rw [linPart_apply, map_sum]
           refine Finset.sum_congr rfl fun i _ => ?_
-          simp only [map_add, map_mul, hσ]
+          simp only [map_add (f := _), map_mul, hσ]
           ring
       · intro hw
         exact AddMonoidHom.mem_range.mp (hsurj x0 hp w hw)
@@ -69,6 +121,7 @@ theorem card_lift_pred [Finite A] (hπ : Function.Surjective π) (hστ : ∀ a,
 
   have hnorm : ∀ x : Fin M → A, ∑ i, σ (x i) * x i = n → ∑ i, τ (π (x i)) * π (x i) = π n := by
     intro x hx
+
     rw [← hx, map_sum]
     simp only [map_mul, hστ]
   refine card_eq_mul_of_fibers
@@ -82,6 +135,7 @@ theorem card_lift_pred [Finite A] (hπ : Function.Surjective π) (hστ : ∀ a,
     rw [h]
     exact y.2.1
   have hNx0 : π (∑ i, σ (x0 i) * x0 i) = π n := by
+
     rw [map_sum]
     simp only [map_mul, hστ, hx0]
     exact y.2.2
@@ -90,7 +144,8 @@ theorem card_lift_pred [Finite A] (hπ : Function.Surjective π) (hστ : ∀ a,
       σ (n - ∑ i, σ (x0 i) * x0 i) = n - ∑ i, σ (x0 i) * x0 i
     refine ⟨?_, ?_⟩
     · rw [RingHom.mem_ker, map_sub, hNx0, sub_self]
-    · rw [map_sub, hn, map_sum]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sub, hn, map_sum]
       congr 1
       refine Finset.sum_congr rfl fun i _ => ?_
       simp only [map_mul, hσ]
@@ -136,7 +191,7 @@ theorem card_lift_pred [Finite A] (hπ : Function.Surjective π) (hστ : ∀ a,
     exact (δ i).2
   have hbinv : ∀ (δ : Fin M → RingHom.ker π) i, π (x0 i + δ i) = y.1 i := by
     intro δ i
-    rw [map_add, RingHom.mem_ker.mp (δ i).2, add_zero, hx0]
+    rw [map_add (f := _), RingHom.mem_ker.mp (δ i).2, add_zero, hx0]
   have hpinv : ∀ δ : Fin M → RingHom.ker π, p (fun i => π (x0 i + δ i)) := by
     intro δ
     have h : (fun i => π (x0 i + δ i)) = y.1 := funext (hbinv δ)

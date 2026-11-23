@@ -1,10 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsMultiDegreePositive
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSegrePrime
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSegreHilb
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSegreDimGe
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PDegreePositive
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsMultiDegreePositive
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSegrePrime
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSegreHilb
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSegreDimGe
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
+import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDivPrincipalDegree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PDegreePositive
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -45,7 +98,8 @@ theorem pos_of_isEmpty {F : Type} [Field F] {K : Type} [Fintype K] [DecidableEq 
     0 < intNum F q (fun _ : Fin e => fun _ : K => (1 : ℤ)) := by
   have hle := (ringKrullDim_quotient_le q).trans_eq
     (MvPolynomial.ringKrullDim_of_isNoetherianRing (R := F) (ι := Σ k, ι k))
-  rw [hd, ringKrullDim_eq_zero_of_field, zero_add, Nat.card_of_isEmpty, Fintype.card_eq_zero,
+  rw [hd, ringKrullDim_eq_zero_of_field, zero_add, ENat.card_eq_coe_natCard,
+    Nat.card_of_isEmpty, Fintype.card_eq_zero,
     add_zero] at hle
   have he : e = 0 := by exact_mod_cast (nonpos_iff_eq_zero.mp (by exact_mod_cast hle) : (e : ℕ∞) = 0)
   subst he
@@ -84,7 +138,7 @@ theorem MultiDegreePositive.proof (hPrime : SegrePrime.Statement) (hHilb : Segre
   have hle := (ringKrullDim_quotient_le (segrePrime F q)).trans_eq
     (MvPolynomial.ringKrullDim_of_isNoetherianRing (R := F)
       (ι := Σ _ : Unit, ∀ k, ι k))
-  rw [ringKrullDim_eq_zero_of_field, zero_add] at hle
+  rw [ringKrullDim_eq_zero_of_field, zero_add, ENat.card_eq_coe_natCard] at hle
 
   obtain ⟨D, hD, heD⟩ : ∃ D : ℕ, ringKrullDim (MRing (fun _ : Unit => ∀ k, ι k) F ⧸
       segrePrime F q) = ((D + 1 : ℕ) : WithBot ℕ∞) ∧ e ≤ D := by

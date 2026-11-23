@@ -1,13 +1,60 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.LocDefs
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalisationLadders.CriterionTruncation
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiltrationCriticalComparisonMap
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedCohomologyOfFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRestrictionCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormCoboundaryRelation
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalisationLadders.CriterionTruncation
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiltrationCriticalComparisonMap
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormCoboundaryRelation
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRespectsFiltration
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FrameFormRestrictionCocycle
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedCohomologyOfFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RepUnique
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.FaceMapCompSuccAboveCastSucc
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MapHComp
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.MemBoundariesZeroIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DFormMem
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
 set_option linter.unusedVariables false
@@ -53,8 +100,6 @@ def alpha (Q : Poly Φ) (Fil : ℤ → IdF Φ.A) {E : Frame Φ (d + 1)} (σ : �
     gr Fil r ⟶ Cut.Pσ Q σ ⋙ Cut.U E ⋙ gr Fil r :=
   Functor.whiskerRight (Cut.jσ Q σ) (gr Fil r)
 
-example (Fil : ℤ → IdF Φ.A) (E : Frame Φ (d + 1)) (r : ℤ) : gr (Fl Fil E) r = Cut.U E ⋙ gr Fil r := rfl
-
 universe w in
 theorem cls_congr {K : Cx.{w} R} {n : ℕ} {x y : K.X n} (h : x = y) (hx : K.d n x = 0)
     (hy : K.d n y = 0) : K.cls x hx = K.cls y hy := by
@@ -79,7 +124,7 @@ theorem coef {M : Type} [AddCommMonoid M] (u v : M) (n : ℕ) :
 theorem val_ev (Q : Poly Φ) (T : C) (u f : Φ.A.obj T) :
     (Q.X T + (Φ.A.map (Q.j T)).hom u) * (Φ.A.map (Q.j T)).hom f =
       GlobalTheory.CompanionTheory.PolySes.ev Q T (Finsupp.single 0 (u * f) + Finsupp.single 1 f) := by
-  rw [map_add, GlobalTheory.CompanionTheory.PolySes.ev_single, GlobalTheory.CompanionTheory.PolySes.ev_single, Φ.dp_zero (Q.X_mem T), Φ.dp_one (Q.X_mem T), map_mul]
+  rw [map_add (f := _), GlobalTheory.CompanionTheory.PolySes.ev_single, GlobalTheory.CompanionTheory.PolySes.ev_single, Φ.dp_zero (Q.X_mem T), Φ.dp_one (Q.X_mem T), map_mul]
   ring
 
 theorem lift_form (Q : Poly Φ) {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) (E : Frame Φ (d + 1)) (σ : ∀ T : C, E.D ⟶ T)
@@ -201,7 +246,8 @@ theorem pack (Q : Poly Φ) {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) (E : Fra
       rw [LinearEquiv.apply_symm_apply]
     · rintro ⟨a, rfl⟩
       change (e r (n + 1)).symm (fH (n + 1) (δ n (e (r - 1) n a))) = 0
-      rw [(e3 n _).2 ⟨_, rfl⟩, map_zero]
+      rw [(e3 n _).2 ⟨_, rfl⟩]
+      exact (e r (n + 1)).symm.toLinearMap.map_zero
   · intro n a
     constructor
     · intro h
@@ -216,7 +262,8 @@ theorem pack (Q : Poly Φ) {Fil : ℤ → IdF Φ.A} (hF : IsFil Φ Fil) (E : Fra
       exact (e2 n _).2 ⟨_, rfl⟩
   · intro n b
     change (e (r - 1) n).symm (gH n (e r n ((e r n).symm (fH n b)))) = 0
-    rw [LinearEquiv.apply_symm_apply, (e1 n _).2 ⟨b, rfl⟩, map_zero]
+    rw [LinearEquiv.apply_symm_apply, (e1 n _).2 ⟨b, rfl⟩]
+    exact (e (r - 1) n).symm.toLinearMap.map_zero
   · intro j q hr I x hx a b ha hb
     change (e r j).symm (fH j b) = a
     exact (LinearEquiv.symm_apply_eq _).2 (pull_form Q hF E σ hc j q r hr I x hx a b ha hb)
@@ -247,6 +294,7 @@ theorem sum_pull (hF : IsFil Φ Fil) (hc : E.GrConst Fil) (P : Pack Fil E σ r �
   choose b' hb' using fun I : Idx j d => GlobalTheory.CompanionTheory.CocProd.rep_form hF E σ hc j q r hr (Fin.succ ∘ I.1) (x I) (hx I)
   have e1 : a = ∑ I, a' I := rep_unique ha (rep_sum Finset.univ _ a' fun I _ => ha' I)
   have e2 : b = ∑ I, b' I := rep_unique hb (rep_sum Finset.univ _ b' fun I _ => hb' I)
+
   rw [e1, e2, map_sum]
   exact Finset.sum_congr rfl fun I _ => P.pull j q hr I.1 (x I) (hx I) _ _ (ha' I) (hb' I)
 
@@ -266,6 +314,7 @@ theorem sum_delta (hF : IsFil Φ Fil) (hc : E.GrConst Fil) (P : Pack Fil E σ r 
     GlobalTheory.CompanionTheory.CocProd.rep_form hF E σ hc (k + 1) q r hr'' (Fin.cons 0 (Fin.succ ∘ I.1)) (x I) (hx I)
   have e1 : a = ∑ I, a' I := rep_unique ha (rep_sum Finset.univ _ a' fun I _ => ha' I)
   have e2 : w = ∑ I, w' I := rep_unique hw (rep_sum Finset.univ _ w' fun I _ => hw' I)
+
   rw [e1, e2, map_sum, ← Finset.sum_neg_distrib]
   exact Finset.sum_congr rfl fun I _ => P.delta k q hr I.1 (x I) (hx I) _ _ (ha' I) (hw' I)
 

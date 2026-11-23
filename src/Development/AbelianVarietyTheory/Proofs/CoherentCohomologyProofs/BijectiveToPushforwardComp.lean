@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -123,7 +164,7 @@ def homOfFrames (hL : L.IsLB) {F : X.Modules} {σ : ∀ i, Γ(F, L.U i)}
     { toFun := frameFun hL hσ
       map_add' := fun s t => modSec_ext_of_cover (fun i => V ⊓ L.U i) (fun _ => inf_le_left)
         (le_iSup_inf hL.cover V) fun i => by
-          rw [map_add, modRes_frameFun hL hσ _ i _ inf_le_right,
+          rw [map_add (f := _), modRes_frameFun hL hσ _ i _ inf_le_right,
             modRes_frameFun hL hσ _ i _ inf_le_right, modRes_frameFun hL hσ _ i _ inf_le_right,
             coord_add, map_add, add_smul]
       map_smul' := fun a s => modSec_ext_of_cover (fun i => V ⊓ L.U i) (fun _ => inf_le_left)
@@ -144,14 +185,6 @@ theorem homOfFrames_app_chartSec (hL : L.IsLB) {F : X.Modules} {σ : ∀ i, Γ(F
   have := modRes_frameFun hL hσ (chartSec hL i) i le_rfl le_rfl
   rw [modRes_self, modRes_self, coord_chartSec, resG_resG, resG_g_self hL, one_smul] at this
   exact this
-
-def homEquivFrames (hL : L.IsLB) (F : X.Modules) :
-    (toMod L ⟶ F) ≃ {σ : ∀ i, Γ(F, L.U i) // IsFrameFamily L σ} where
-  toFun φ := ⟨fun i => φ.app (L.U i) (chartSec hL i), (isFrameFamily_chartSec hL).map φ⟩
-  invFun σ := homOfFrames hL σ.2
-  left_inv φ := hom_ext_chartSec hL fun i =>
-    homOfFrames_app_chartSec hL ((isFrameFamily_chartSec hL).map φ) i
-  right_inv σ := Subtype.ext (funext fun i => homOfFrames_app_chartSec hL σ.2 i)
 
 theorem bijective_toPushforward_comp (hL : L.IsLB) (f : Y ⟶ X) (G : Y.Modules) :
     Function.Bijective fun ψ : toMod (L.pull f) ⟶ G =>

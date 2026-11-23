@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +91,7 @@ theorem regroup (vec : ι → E) (hv : Summable fun t => ‖vec t‖) (P : ι �
   have hG : Summable G := (normSq_tsum_eq vec hv).1
   have hF : Summable (S.indicator G) := hG.indicator S
   have hfib := hF.hasSum.tsum_fiberwise (fun p : ι × ι => q p.1)
-  have hA1 : ∀ c, Summable fun s : A c => ‖vec s‖ := fun c => hv.subtype (A c)
+  have hA1 : ∀ c, Summable fun s : A c => ‖vec s‖ := fun c => hv.subtype (fun s => s ∈ A c)
   have key : ∀ c, ∑' p : (fun p : ι × ι => q p.1) ⁻¹' {c}, S.indicator G p = ‖∑' s : A c, vec s‖ ^ 2 := by
     intro c
     rw [(normSq_tsum_eq (fun s : A c => vec s) (hA1 c)).2]
@@ -95,8 +139,8 @@ open Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Loca
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option linter.deprecated false in
 
+set_option linter.deprecated false in
 theorem rowRegroupC_of {D : D7} (X : HidaSetting D) (Y : Formalism.L2.SG.Full.Full X) (u u' : D.what₂.Word)
     (κ : Term D u u' (X.Fu u) (Y.what₂ u) → ℕ)
     (hAbs : Formalism.L2.SG.TermOp.AbsConvT (X.Fu u) (X.Fu u') Y.TR (Y.cs u) (Y.cs u') (Y.FN u) (Y.FN u'))
@@ -115,7 +159,7 @@ theorem rowRegroupC_of {D : D7} (X : HidaSetting D) (Y : Formalism.L2.SG.Full.Fu
     · simp [h]
   have hnorm : ∀ s, ‖(Y.tO u u').vec s‖ = ‖liftVec X Y u u' s‖ := by
     intro s
-    rw [hvec s, PiLp.norm_toLp_single]
+    rw [hvec s, PiLp.toLp_single, PiLp.norm_single]
   have hv : Summable fun s => ‖liftVec X Y u u' s‖ := hAbs.2.1.congr hnorm
   obtain ⟨h1, h2, h3⟩ := Formalism.L2.SG.Pf.RowRegroup.regroup (liftVec X Y u u') hv
     (fun s => (Y.tO u u').G s ≠ 0 ∧ (Y.tO u u').gener s)

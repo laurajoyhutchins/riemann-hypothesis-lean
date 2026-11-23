@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.ObjPol
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -123,15 +166,6 @@ def V2 [CharZero K] : Prop :=
       ∀ F ∈ PolK K r d, valS sg S F + ((-(∑ i ∈ S \ S', d i : ℕ) : ℤ) : WithTop ℤ) ≤ valS sg S' F)
 
 def initSet (N : ℕ) (i : ℕ) : Finset (Fin N) := univ.filter fun k => k.val < i
-
-def IsPieriStep {r : ℕ} (vec : Bool) (deg : ℕ) (μ ν : Fin r → ℤ) : Prop :=
-  if vec then (∀ a, μ a ≤ ν a) ∧ (∀ a b : Fin r, b.val + 1 = a.val → ν a ≤ μ b) ∧
-      ∑ a, ν a = ∑ a, μ a + deg
-  else (∀ a, ν a ≤ μ a) ∧ (∀ a b : Fin r, b.val + 1 = a.val → μ a ≤ ν b) ∧
-      ∑ a, μ a = ∑ a, ν a + deg
-
-def IsPieriPath {N r : ℕ} (sg : Fin N → Bool) (d : Fin N → ℕ) (path : Fin (N + 1) → Fin r → ℤ) : Prop :=
-  path 0 = 0 ∧ ∀ k : Fin N, IsPieriStep (sg k) (d k) (path k.castSucc) (path k.succ)
 
 variable (v : AddValuation K (WithTop ℚ)) (p : ℕ)
 
@@ -356,8 +390,8 @@ section Thm
 
 variable (K : Type) [Field K] (v : AddValuation K (WithTop ℚ)) (p : ℕ)
 
-open TwistData in
 
+open TwistData in
 def LiftBoundWith [CharZero K] (C0 kH k6 k18 kE : ℝ) : Prop :=
   DVRHyp v p → ∀ D : TwistData K, D.Valid v p → D.HypH p kH → D.Hc p C0 →
     ∀ F : MvPolynomial (D.OL × Fin D.r) K, D.InXX p F → vBB v F = 0 →
@@ -370,9 +404,6 @@ def LiftBoundWith [CharZero K] (C0 kH k6 k18 kE : ℝ) : Prop :=
           ((D.E p C0 kE + 2 * D.kapD p : ℝ) : WithTop ℝ)
 
 def LiftBoundUniform [CharZero K] (C0 : ℝ) : Prop := LiftBoundWith K v p C0 13 12 30 2
-
-def LiftBoundOfHypotheses [CharZero K] (C0 : ℝ) : Prop :=
-  1 ≤ C0 → V2 K → SPAN K v p → PROJ K v p C0 → DIG K v p → DER K v p → LiftBoundUniform K v p C0
 
 end Thm
 

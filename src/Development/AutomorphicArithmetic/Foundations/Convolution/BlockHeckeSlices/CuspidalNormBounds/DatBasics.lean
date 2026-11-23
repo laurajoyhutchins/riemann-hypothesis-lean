@@ -1,13 +1,61 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CapPoly
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.SliceShift
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CapPoly
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.CuspRep GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Global.IdeleGroup
 open UpperTheory.V.Cm
 
 namespace UpperTheory.ConvolutionTheory.BW
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {n : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {n : ℕ}
 
 private theorem posIdele_inf (s : ℝ) (hs : 0 < s) (w : InfinitePlace E) :
     ((posIdele s hs : GroundTheory.Global.IdeleGroup E) : AdeleRing (𝓞 E) E).1 w =
@@ -16,7 +64,7 @@ private theorem posIdele_inf (s : ℝ) (hs : 0 < s) (w : InfinitePlace E) :
   rw [← coe_infiniteProj, infiniteProj_posIdele]
   change GroundTheory.Global.posRealElem w _ = _
   unfold GroundTheory.Global.posRealElem
-  rw [dif_neg hw]
+  rw [dite_eq_right hw]
   simp [InfinitePlace.mult, hw, Real.sqrt_sq hs.le]
 
 private noncomputable def eU (E : Type) [Field E] (x : ℝ) : (Cinf E)ˣ where
@@ -200,7 +248,7 @@ private theorem comb {S : Set (Pl E)} (d : Dat S n) : Function.Surjective d.idx 
 end UpperTheory.ConvolutionTheory.BW
 
 theorem UpperTheory.ConvolutionTheory.BW.datBasics :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.DatBasics E := by
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E], UpperTheory.ConvolutionTheory.BW.DatBasics E := by
   intro E _ _ _
   refine ⟨fun S r b => blo_sum b, fun S n d => ?_⟩
   obtain ⟨h1, h2, h3, h4⟩ := comb d
@@ -226,6 +274,7 @@ theorem UpperTheory.ConvolutionTheory.BW.datBasics :
   · obtain ⟨c, hc⟩ := J_eq d j
     obtain ⟨c', hc'⟩ := J_eq d l
     rw [hc, hc']
+    set_option synthInstance.maxHeartbeats 400000 in
     exact ((Commute.sum_left _ _ _ fun i _ => Commute.sum_right _ _ _ fun k _ => comm_lie i k).smul_left c).smul_right c'
   · obtain ⟨c, hc⟩ := J_eq d j
     obtain ⟨a, ha⟩ : ∃ a : Fin n → (Cinf E)ˣ, d.tr v = infGL E n (diagUnits n a) := ⟨_, diag_eq _⟩
@@ -233,5 +282,6 @@ theorem UpperTheory.ConvolutionTheory.BW.datBasics :
     exact (Commute.sum_left _ _ _ fun i _ => comm_rt i a).smul_left c
   · obtain ⟨c, hc⟩ := J_eq d j
     exact ⟨c • ∑ i ∈ Finset.univ.filter fun i => d.idx i = j, ιC E n (toL (Matrix.single i i 1)), by
-      rw [map_smul, map_sum, Finset.sum_congr rfl fun i _ => uC_ιC _]
+      set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_smul, map_sum, Finset.sum_congr rfl fun i _ => uC_ιC _]
       exact hc⟩

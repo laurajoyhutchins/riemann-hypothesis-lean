@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemRangeOfFrobeniusEquationCyclotomicFixed
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemRangeOfFrobeniusEquationCyclotomicFixed
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct GlobalTheory.HWL GlobalTheory.Decompl GlobalTheory.FrobDescent
 
@@ -102,6 +149,7 @@ theorem contract {τ : A} (hτ : ι τ = t) {S : Subring R}
   have h3 : ∀ k, ∑ i ∈ Finset.range (k + 1), T^[i] y =
       y + T (∑ i ∈ Finset.range k, T^[i] y) := by
     intro k
+
     rw [Finset.sum_range_succ', map_sum, add_comm]
     simp only [Function.iterate_succ_apply', Function.iterate_zero_apply]
   choose r hr using fun i j => meet ((Matrix.of z - y - T (Matrix.of z)) i j) fun k => by
@@ -116,7 +164,7 @@ theorem contract {τ : A} (hτ : ι τ = t) {S : Subring R}
   abel
 
 def opT (φ : R →+* R) (X Y : Matrix n n R) : Matrix n n R →+ Matrix n n R :=
-  AddMonoidHom.mk' (fun Z => X * φ.mapMatrix Z * Y) fun _ _ => by rw [map_add, mul_add, add_mul]
+  AddMonoidHom.mk' (fun Z => X * φ.mapMatrix Z * Y) fun _ _ => by rw [map_add (f := _), mul_add, add_mul]
 
 theorem opT_apply (φ : R →+* R) (X Y Z : Matrix n n R) :
     opT φ X Y Z = X * φ.mapMatrix Z * Y := rfl
@@ -257,8 +305,8 @@ theorem padic_conj {φ : R →+* R} {io : E →+* R} {S : Subring R} (hφS : ∀
       have h3 : V * io.mapMatrix d' = io.mapMatrix d' + (p : R) • (v * io.mapMatrix d') := by
         rw [hv, add_mul, smul_mul_assoc, one_mul]
       have h4 : z * io.mapMatrix D = z * io.mapMatrix e + (p : R) • (z * io.mapMatrix d) := by
-        rw [hd, map_add, map_natCast_smul, mul_add, mul_smul_comm]
-      simp only [map_add, map_pow_smul, mul_add, add_mul, mul_smul_comm, smul_mul_assoc]
+        rw [hd, map_add (f := _), map_natCast_smul, mul_add, mul_smul_comm]
+      simp only [map_add (f := _), map_pow_smul, mul_add, add_mul, mul_smul_comm, smul_mul_assoc]
       linear_combination (norm := module) hρ + (p : R) ^ (k + 1) • hr + (p : R) ^ (k + 1) • h2 -
         (p : R) ^ (k + 1) • h3 - (p : R) ^ (k + 1) • h4
   choose z d hstep using step
@@ -309,7 +357,7 @@ theorem padic_conj {φ : R →+* R} {io : E →+* R} {S : Subring R} (hφS : ∀
       io.mapMatrix ((q k).2 + (p : E) ^ (k + 1) • b') = (p : R) ^ k • (p : R) •
         (ρ + F * φ.mapMatrix a' - (q k).1 * io.mapMatrix b' - a' * io.mapMatrix (q k).2 -
           (p : R) ^ (k + 1) • (a' * io.mapMatrix b')) := by
-    simp only [map_add, map_pow_smul, mul_add, add_mul, mul_smul_comm, smul_mul_assoc]
+    simp only [map_add (f := _), map_pow_smul, mul_add, add_mul, mul_smul_comm, smul_mul_assoc]
     linear_combination (norm := module) hρ
   rw [this]
   exact ⟨_, rfl⟩
@@ -332,8 +380,8 @@ theorem exists_pole₂ (F G : Matrix n n R) :
   obtain ⟨K₂, h₂⟩ := exists_pole hτ G fun i j => hpole _
   exact ⟨max K₁ K₂, h₁ _ (le_max_left _ _), h₂ _ (le_max_right _ _)⟩
 
-include hτ ht hp h3 meet comp hφS hioS hpole h2 in
 
+include hτ ht hp h3 meet comp hφS hioS hpole h2 in
 theorem onto_mod (a b : Matrix n n E) (y : Matrix n n R) (hy : y ∈ matS S) :
     ∃ z ∈ matS S, y - (z - opT φ (io.mapMatrix a) (io.mapMatrix b) z) ∈ matS (modSub io p) := by
   obtain ⟨K, ha, hb⟩ := exists_pole₂ hτ hpole (io.mapMatrix a) (io.mapMatrix b)
@@ -367,12 +415,12 @@ theorem onto_mod (a b : Matrix n n E) (y : Matrix n n R) (hy : y ∈ matS S) :
       rw [← map_sub]
       exact (hT 0 _ (by rw [zero_add]; exact hu)).mono hτ (by omega))
     refine ⟨y + z, add_mem hy hz, ?_⟩
-    rw [map_add]
+    rw [map_add (f := _)]
     convert h' using 1
     abel
 
-include hτ ht hp h3 meet comp hφS hioS hpole h2 in
 
+include hτ ht hp h3 meet comp hφS hioS hpole h2 in
 theorem conj_mod (hφt : (p : R) ∣ t ^ p - φ t) (hJ : ∀ x : R, IsUnit (1 + (p : R) * x))
     (hinv : ∀ X Y : Matrix n n R, X ∈ matS S → X * Y = 1 → Y ∈ matS S)
     (F : Matrix n n R) (hF : F ∈ matS S) (hu : IsUnit F) :
@@ -430,7 +478,7 @@ theorem conj_mod (hφt : (p : R) ∣ t ^ p - φ t) (hJ : ∀ x : R, IsUnit (1 + 
   have key : (1 + z) * F₁ = io.mapMatrix e * φ.mapMatrix (1 + z) + (p : R) • (r₁ * F₁) := by
     have := congrArg (· * F₁) hr₁
     simp only [add_mul, neg_mul, opT_apply, mul_assoc, hGF, mul_one, smul_mul_assoc] at this
-    rw [map_add, map_one, mul_add, mul_one, add_mul, one_mul, this]
+    rw [map_add (f := _), map_one, mul_add, mul_one, add_mul, one_mul, this]
     abel
   refine ⟨(1 + z) * F₁ * φ.mapMatrix V, mul_mem (mul_mem hUS hF1S)
     (show φ.mapMatrix V ∈ matS S from fun i j => hφS _ (hVS i j)),
@@ -438,8 +486,8 @@ theorem conj_mod (hφt : (p : R) ∣ t ^ p - φ t) (hJ : ∀ x : R, IsUnit (1 + 
   · rw [← mul_assoc, ← mul_assoc, hVU, one_mul]
   · rw [key, add_mul, mul_assoc (io.mapMatrix e), ← map_mul, hV, map_one, mul_one, smul_mul_assoc]
 
-include hτ ht hp h3 meet comp hφS hioS hpole h2 in
 
+include hτ ht hp h3 meet comp hφS hioS hpole h2 in
 theorem conj_io (hφt : (p : R) ∣ t ^ p - φ t) (hJ : ∀ x : R, IsUnit (1 + (p : R) * x))
     (hinv : ∀ X Y : Matrix n n R, X ∈ matS S → X * Y = 1 → Y ∈ matS S)
     (hsat : ∀ x, (p : R) * x ∈ S → x ∈ S)
@@ -535,7 +583,7 @@ theorem frob_pi {p : ℕ} (hp : PD.p = p) : φR (inclR πA) = (inclR πA + 1) ^ 
     change R.φ₀ PowerSeries.X = (PowerSeries.X + 1) ^ PD.p - 1
     rw [R.φ₀_X, R.q₀_def, add_comm]
   rw [← io_pi I, ← I.ioE_φ, R.φE_ext, h, hp]
-  simp only [map_sub, map_pow, map_add, map_one]
+  simp only [map_sub, map_pow, map_add (f := _), map_one]
 
 theorem series_EE (R : WSer Γ) {p : ℕ} (hp : PD.p = p) (x : ℕ → R.EE) :
     ∃ y, ∀ k : ℕ, ∃ r, y - ∑ i ∈ Finset.range k, (p : R.EE) ^ i * x i = (p : R.EE) ^ k * r := by

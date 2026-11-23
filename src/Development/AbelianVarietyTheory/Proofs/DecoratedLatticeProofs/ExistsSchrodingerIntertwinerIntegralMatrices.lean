@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.LinearIndependentWave
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MatrixIntegersModNatFinite
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsNeZeroOfEventually
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.LinearIndependentWave
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsNeZeroOfEventually
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MatrixIntegersModNatFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open ValuativeRel GlobalTheory.SplitWeil Matrix
 
 noncomputable section
@@ -77,13 +126,15 @@ theorem exists_intertwiner_span {G V : Type} [AddCommGroup G] [AddCommGroup V] [
           simp
         rw [e, map_zero, map_zero]
     | add Ψ₁ Ψ₂ _ _ ih₁ ih₂ =>
-      refine ⟨fun x hx => ?_, fun y hy => ?_, by rw [map_add]; exact add_mem ih₁.2.2 ih₂.2.2⟩
+      refine ⟨fun x hx => ?_, fun y hy => ?_, ?_⟩
       · have e : (fun t => (Ψ₁ + Ψ₂) (t + x)) = (fun t => Ψ₁ (t + x)) + fun t => Ψ₂ (t + x) := rfl
-        rw [e, map_add, map_add, map_add, ih₁.1 x hx, ih₂.1 x hx]
+        rw [e, map_add (f := _), map_add (f := _), map_add (f := _), ih₁.1 x hx, ih₂.1 x hx]
       · have e : (fun t => χ t y * (Ψ₁ + Ψ₂) t) = (fun t => χ t y * Ψ₁ t) + fun t => χ t y * Ψ₂ t := by
           funext t
           simp [mul_add]
-        rw [e, map_add, map_add, map_add, ih₁.2.1 y hy, ih₂.2.1 y hy]
+        rw [e, map_add (f := _), map_add (f := _), map_add (f := _), ih₁.2.1 y hy, ih₂.2.1 y hy]
+      · rw [T.map_add]
+        exact add_mem ih₁.2.2 ih₂.2.2
     | smul c Ψ _ ih =>
       refine ⟨fun x hx => ?_, fun y hy => ?_, by rw [map_smul]; exact Submodule.smul_mem _ c ih.2.2⟩
       · have e : (fun t => (c • Ψ) (t + x)) = c • fun t => Ψ (t + x) := rfl
@@ -135,8 +186,9 @@ theorem inv_nsmul_nsmul {k : Type} [Field k] [CharZero k] {Y Y' : Type} (n : ℕ
     (m : Matrix Y Y' k) : (n : k)⁻¹ • (n • m) = m := by
   rw [← Nat.cast_smul_eq_nsmul k n m, smul_smul, inv_mul_cancel₀ (Nat.cast_ne_zero.2 hn.ne'), one_smul]
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def liftZ {A Z : Type} [AddCommGroup Z] [TopologicalSpace A] : SB A →ₗ[ℂ] (A × Z → ℂ) where
   toFun := fun Φ g => if g.2 = 0 then Φ.1 g.1 else 0
   map_add' := by

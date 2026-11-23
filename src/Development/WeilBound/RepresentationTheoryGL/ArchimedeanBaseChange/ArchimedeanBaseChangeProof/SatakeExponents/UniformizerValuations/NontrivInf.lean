@@ -1,7 +1,46 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.LeviMatchingWords.MatchLM
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.TwistedConjugationNorms.HilbertNinetyNorms.InertDeltaFirstCaseEqPower
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.SetupEig
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.AdelRep
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.BaseChangeIsobaricOf
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.OnlyIsotropic
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.ExistsEigv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaNormCommutation.IsTransl
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,17 +50,6 @@ open scoped Classical
 
 namespace PositivityTheory.Rg.BcB.F.FBL
 
-def CtStar : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n a b : ℕ) (h : a + b = n) (w : Pl E),
-  IsSplitAt w → ∀ (μ : (w.adicCompletion E)ˣ →* ℂˣ), (∀ x, ‖(μ x : ℂ)‖ = 1) → ∀ (f : UL n w → ℂ),
-    ctMu h w μ (PositivityTheory.Rg.BcB.F.Eig.lstar f) = PositivityTheory.Rg.BcB.F.lfStar (ctMu h w μ f)
-
-def MuInert : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n a b : ℕ) (w : Pl E), ¬ IsSplitAt w →
-  ∀ (μ : (w.adicCompletion E)ˣ →* ℂˣ) (f : UL n w → ℂ) (φ : GLw a w × GLw b w → ℂ), Match n a b w 1 f φ → Match n a b w μ f φ
-
-theorem muInert : MuInert := by
-  intro E _ _ _ n a b w hw μ f φ h Q₁ Q₂ h1 h2 h3 h4 h5 h6 h7
-  rw [h Q₁ Q₂ h1 h2 h3 h4 h5 h6 h7, PositivityTheory.Rg.Bc.ArchbcB.B.M4.V1.delta_inert w hw μ, PositivityTheory.Rg.Bc.ArchbcB.B.M4.V1.delta_inert w hw 1]
-
 def LpowMul : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (w : Pl E) (K' : Subgroup (UL n w))
   (g : UL n w → ℂ), IsOpen (K' : Set (UL n w)) → K' ≤ KL n w → IsHecke K' g → ∀ m k : ℕ, U.lpow K' (U.lpow K' g m) k = U.lpow K' g (m * k)
 
@@ -30,11 +58,6 @@ def EllHom : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (a b
     ellSum2 μ₁ μ₂ (c • φ) = c * ellSum2 μ₁ μ₂ φ
 
 def NontrivInf : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Unr E → Nontrivial (InfinitePlace E)
-
-def TraceComb : Prop := ∀ (A : Type) [Ring A] [StarRing A] [Algebra ℂ A] [StarModule ℂ A] (Γ : Type) (gen : Γ → A) (a : A),
-  a ∈ StarAlgebra.adjoin ℂ (Set.range gen) →
-    ∃ (J : Type) (_ : Fintype J) (c : J → ℂ) (wd : J → List (Γ × Bool)),
-      a = ∑ j, c j • ((wd j).map fun x => if x.2 then star (gen x.1) else gen x.1).prod
 
 end PositivityTheory.Rg.BcB.F.FBL
 

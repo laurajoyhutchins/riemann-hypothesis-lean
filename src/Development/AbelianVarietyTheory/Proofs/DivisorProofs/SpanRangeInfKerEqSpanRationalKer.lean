@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.LinearAlgebra.LinearIndependent.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Algebra.Defs
+public import Mathlib.Algebra.Module.BigOperators
+public import Mathlib.LinearAlgebra.Basis.Defs
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+
+@[expose] public section
 
 open Module
 
@@ -11,6 +66,7 @@ theorem semilinear_pi_eq_sum_single {K : Type} [Field K] (σ : K →+* ℂ) {W :
     ext l
     simp [Finset.sum_apply, Pi.single_apply]
   conv_lhs => rw [hx]
+
   rw [map_sum]
   simp only [LinearMap.map_smulₛₗ]
 
@@ -35,6 +91,7 @@ theorem span_range_inf_ker_eq_span_rational_ker {K : Type} [Field K] (σ : K →
     obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).1 (hle hw)
     have h0 : f (∑ k, c k • j (Pi.single k 1)) = 0 := hw0
     have h1 : ∑ l, (∑ k, σ (M l k) * c k) • j' (Pi.single l 1) = 0 := by
+
       rw [← h0, map_sum]
       simp only [map_smul, hf, Finset.sum_smul]
       rw [Finset.sum_comm]
@@ -70,7 +127,8 @@ theorem span_range_inf_ker_eq_span_rational_ker {K : Type} [Field K] (σ : K →
     have h4 : b.repr (∑ k, M l k • c k) i = 0 := by
       have : ∑ k, M l k • c k = 0 := h2 l
       rw [this]; simp
-    rw [map_sum, Finsupp.finset_sum_apply] at h4
+
+    rw [map_sum, Finsupp.finsetSum_apply] at h4
     simp only [map_smul, Finsupp.smul_apply, smul_eq_mul] at h4
     exact h4
   · rw [Submodule.span_le]

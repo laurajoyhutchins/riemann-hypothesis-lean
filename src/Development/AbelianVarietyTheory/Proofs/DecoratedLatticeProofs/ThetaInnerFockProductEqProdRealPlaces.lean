@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CartFrSgn
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChainParSucc
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockOperatorsDistinctRealPlacesCommuteThetaStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockCoefficientRealPlaceTwoVacuaStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ThetaFunctionEqZeroOfMeanSquareZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ThetaSourceAction
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChosenSeries
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasDerivAtZeroAndIsTheta
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockCoefficientRealPlaceTwoVacuaStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FockOperatorsDistinctRealPlacesCommuteThetaStatement
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.AtPlaceIffEqAtTau
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ThetaFunctionEqZeroOfMeanSquareZero
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsCharFamIsVacVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CartFrSgn
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.S Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum MeasureTheory NumberField Matrix
 open GlobalTheory.Chain GlobalTheory.ChainFr GlobalTheory.PairLift GlobalTheory.Chain.RealIt
 open scoped TensorProduct InnerProductSpace ComplexConjugate
@@ -94,7 +137,7 @@ theorem pure_comm {g : X → ℂ} (hg : P g) (v : ι) (Q : MvPolynomial ι ℂ) 
     rw [e, ← List.foldr_append]
     exact GlobalTheory.FockIndep.foldr_perm hA hc hg (List.perm_append_singleton _ _)
   | add p q hp hq =>
-    rw [map_add, map_add, hp, hq, Aadd _ _ _ (GlobalTheory.FockIndep.pure_mem hadd hsm hA hg _)
+    rw [map_add (f := _), map_add (f := _), hp, hq, Aadd _ _ _ (GlobalTheory.FockIndep.pure_mem hadd hsm hA hg _)
       (GlobalTheory.FockIndep.pure_mem hadd hsm hA hg _)]
 
 theorem pure_mul {f : X → ℂ} (hf : P f) (Q R : MvPolynomial ι ℂ) :
@@ -103,14 +146,14 @@ theorem pure_mul {f : X → ℂ} (hf : P f) (Q R : MvPolynomial ι ℂ) :
   | C a =>
     rw [MvPolynomial.C_mul', map_smul, ← MvPolynomial.monomial_zero', GlobalTheory.FockIndep.pure_monomial]
     simp [opPow]
-  | add p q hp hq => rw [add_mul, map_add, hp, hq, map_add]
+  | add p q hp hq => rw [add_mul, map_add (f := _), hp, hq, map_add (f := _)]
   | mul_X p v hp =>
     have hR := GlobalTheory.FockIndep.pure_mem hadd hsm hA hf R
     rw [mul_assoc, hp, GlobalTheory.FockIndep.pure_X_mul hadd hsm hA hc Aadd Asm hf,
       pure_comm hadd hsm hA hc Aadd Asm hR, mul_comm p, GlobalTheory.FockIndep.pure_X_mul hadd hsm hA hc Aadd Asm hR]
 
-omit hadd hsm Aadd Asm in
 
+omit hadd hsm Aadd Asm in
 theorem pure_rename {κ : Type} {f : X → ℂ} (hf : P f) (e : κ → ι) (Q : MvPolynomial κ ℂ) :
     pureTensorL A f (MvPolynomial.rename e Q) = pureTensorL (fun i => A (e i)) f Q := by
   induction Q using MvPolynomial.induction_on' with
@@ -122,7 +165,7 @@ theorem pure_rename {κ : Type} {f : X → ℂ} (hf : P f) (e : κ → ι) (Q : 
     refine (GlobalTheory.FockIndep.foldr_perm hA hc hf ?_).symm
     rw [← Multiset.coe_eq_coe, ← Multiset.map_coe, Multiset.coe_toList, Multiset.coe_toList,
       Finsupp.toMultiset_map]
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
 
 end Poly
 

@@ -1,7 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeIntegral
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinFlatRadiusIdealFacts
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinFlatRadiusIdealFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BKReal GlobalTheory.Per GlobalTheory.BSP
 open scoped Formalism.Per NNReal
 open Matrix
@@ -50,7 +95,7 @@ theorem dec {a : ℕ} [NeZero a] (s : (Wq l a)⟦X⟧) :
     · rw [isUnit_iff_constantCoeff, ← coeff_zero_eq_constantCoeff_apply, coeff_mk, zero_add]
       exact WittVector.isUnit_of_coeff_zero_ne_zero _ (fun h0 => hj ((dvd_iff_coeff _).2 h0))
     · refine PowerSeries.ext fun k => ?_
-      rw [map_add, coeff_X_pow_mul', hl', coeff_C_mul]
+      rw [map_add (f := _), coeff_X_pow_mul', hl', coeff_C_mul]
       simp only [coeff_mk]
       by_cases hk : j ≤ k
       · rw [if_pos hk, if_neg (not_lt.2 hk), mul_zero, add_zero, Nat.sub_add_cancel hk]
@@ -75,7 +120,7 @@ theorem reduction_decomposition (s : bk.S) : (∃ s', s = (l : bk.S) * s') ∨ �
   rcases dec s with h | ⟨j, t, s', ht, h⟩
   · exact Or.inl h
   · refine Or.inr ⟨j, t, ht.map _, s', h, ?_⟩
-    rw [h, map_add, reduction_l_mul_eq_zero, add_zero, map_mul, map_pow, reduction_X_eq_flat]
+    rw [h, map_add (f := _), reduction_l_mul_eq_zero, add_zero, map_mul, map_pow, reduction_X_eq_flat]
 
 theorem dvd_of_reduction_eq_zero {s : bk.S} (h : e0 bk s = 0) : ∃ s', s = (l : bk.S) * s' := by
   rcases reduction_decomposition bk s with h' | ⟨j, t, ht, s', -, he⟩
@@ -123,7 +168,7 @@ theorem mem_of_l_mul_mem {v : WCb l} (h : (l : WCb l) * v ∈ bk.OE) : v ∈ bk.
   obtain ⟨m, s, y, hs⟩ := h (n + 1)
   have h0 : e0 bk s = 0 := by
     have := congrArg WittVector.constantCoeff hs
-    rw [map_add, pow_succ', mul_assoc, cc_l_mul, add_zero, cc_evW, mul_left_comm, cc_l_mul] at this
+    rw [map_add (f := _), pow_succ', mul_assoc, cc_l_mul, add_zero, cc_evW, mul_left_comm, cc_l_mul] at this
     exact (IsFractionRing.injective (OCb l) (Cb l)) (by rw [← this, map_zero])
   obtain ⟨s', rfl⟩ := dvd_of_reduction_eq_zero bk h0
   refine ⟨m, s', y, l_mul_cancel ?_⟩
@@ -135,7 +180,7 @@ theorem step {a : Ainf l} (h : inclW l a ∈ bk.OE) :
   obtain ⟨m, s, y, hs⟩ := h 1
   have h1 : bk.flat ^ m * a.coeff 0 = e0 bk s := by
     have := congrArg WittVector.constantCoeff hs
-    rw [map_add, pow_one, cc_l_mul, add_zero, cc_evW, map_mul, map_pow, cc_evW, cc_inclW, reduction_X_eq_flat, ← map_pow,
+    rw [map_add (f := _), pow_one, cc_l_mul, add_zero, cc_evW, map_mul, map_pow, cc_evW, cc_inclW, reduction_X_eq_flat, ← map_pow,
       ← map_mul] at this
     exact IsFractionRing.injective (OCb l) (Cb l) this
   obtain ⟨s₀, hs₀⟩ := exists_reduction_of_flat_pow bk h1
@@ -199,7 +244,7 @@ theorem main (w : WCb l) (hw : w ∈ bk.OE) (a : Ainf l) (ha : w = inclW l a) : 
     | zero => simp [T, A]
     | succ n ih =>
       rw [ih, hσ (A n), ← hA n]
-      simp only [T, Finset.sum_range_succ, map_add, map_mul, map_pow, map_natCast]
+      simp only [T, Finset.sum_range_succ, map_add (f := _), map_mul, map_pow, map_natCast]
       ring
   obtain ⟨s, hs⟩ := exists_lim T (fun n => ⟨σ (A n), by simp [T, Finset.sum_range_succ]⟩)
   refine ⟨s, ?_⟩
@@ -210,7 +255,7 @@ theorem main (w : WCb l) (hw : w ∈ bk.OE) (a : Ainf l) (ha : w = inclW l a) : 
   refine ⟨bk.ev q + (A n).1, ?_⟩
   rw [sub_zero]
   conv_lhs => rw [hTa n]
-  rw [this, map_add, map_mul, map_pow, map_natCast]
+  rw [this, map_add (f := _), map_mul, map_pow, map_natCast]
   ring
 
 end GlobalTheory.BSP.HeightSInt

@@ -1,5 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
-import CompanionTheory.AutomorphicTheory.HeckeStandardModules.ExistsCen
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
+public import CompanionTheory.AutomorphicTheory.HeckeStandardModules.ExistsCen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Ramification
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.LDataCardLeFinrank UpperTheory.V.Base UpperTheory.V.Kum
 
@@ -38,8 +84,7 @@ private theorem dvd_of_ram {K L : Type} [Field K] [NumberField K] [Field L] [Num
   let w : HeightOneSpectrum (𝓞 L) := ⟨Q, inferInstance, Ideal.ne_bot_of_liesOver_of_ne_bot v.ne_bot Q⟩
   have : w.asIdeal.LiesOver v.asIdeal := (inferInstance : Q.LiesOver v.asIdeal)
   have h1 := HeightOneSpectrum.valuation_liesOver L v w (a : K)
-  rw [show v.asIdeal.ramificationIdx' w.asIdeal = 1 from
-    (Ideal.ramificationIdx'_eq_ramificationIdx v.asIdeal Q v.ne_bot).trans h, pow_one, ← hb, map_pow,
+  rw [h, pow_one, ← hb, map_pow,
     ← HeightOneSpectrum.valuationOfNeZero_eq] at h1
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · rw [pow_zero, ← WithZero.coe_one, WithZero.coe_inj] at h1
@@ -72,7 +117,8 @@ theorem UpperTheory.V.Kum.dvdOfIne :
   have hv : (CompanionTheory.PlaceDict.cen A).under (𝓞 K) = v.asIdeal := Ideal.ext fun x => hA x
   have : Algebra.IsIntegral (𝓞 K) (𝓞 Ω) := ⟨fun b => (RingOfIntegers.isIntegral b).tower_top⟩
   have hm : (CompanionTheory.PlaceDict.cen A).IsMaximal :=
-    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (R := 𝓞 K) _ (by
+    Ideal.isMaximal_of_isIntegral_of_isMaximal_comap (algebraMap (𝓞 K) (𝓞 Ω))
+      (algebraMap_isIntegral_iff.mpr this) _ (by
       have := v.isMaximal
       rwa [← hv] at this)
   let P : Ideal (𝓞 L) := (CompanionTheory.PlaceDict.cen A).under (𝓞 L)

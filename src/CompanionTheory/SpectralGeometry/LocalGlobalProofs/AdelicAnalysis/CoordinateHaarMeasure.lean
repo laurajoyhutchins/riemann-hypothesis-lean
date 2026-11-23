@@ -1,6 +1,62 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRingStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -56,9 +112,8 @@ theorem sigR_tmul (σ : E →ₐ[F] E) (r : R) (e : E) :
 theorem sigR_sigR {σ : E →ₐ[F] E} (hinv : ∀ x, σ (σ x) = x) (y : R ⊗[F] E) :
     sigR R σ (sigR R σ y) = y := by
   induction y with
-  | zero => simp
   | tmul r e => rw [sigR_tmul, sigR_tmul, hinv]
-  | add a b ha hb => rw [map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
 
 theorem half_add_self [CharZero F] (r : R) : algebraMap F R (1 / 2) * (r + r) = r := by
   have h2 : algebraMap F R (1 / 2) * 2 = 1 := by
@@ -73,7 +128,7 @@ theorem fixed_eq_tmul [CharZero F] {σ : E →ₐ[F] E} (hinv : ∀ x, σ (σ x)
     rw [LinearIndependent.pair_iff]
     intro s t hst
     have h' := congrArg σ hst
-    simp only [map_add, map_smul, map_one, hσδ, map_zero, smul_neg] at h'
+    simp only [map_add (f := _), map_smul, map_one, hσδ, map_zero, smul_neg] at h'
     have ht2 : (t + t) • δ = 0 := by
       rw [add_smul]
       have := sub_eq_zero.mpr (hst.trans h'.symm)
@@ -100,7 +155,7 @@ theorem fixed_eq_tmul [CharZero F] {σ : E →ₐ[F] E} (hinv : ∀ x, σ (σ x)
       exact this.symm⟩
   have hs : sigR R σ y = r0 • C 0 + (-r1) • C 1 := by
     rw [hy', hC0, hC1]
-    simp only [TensorProduct.smul_tmul', smul_eq_mul, mul_one, map_add, sigR_tmul, map_one, hσδ,
+    simp only [TensorProduct.smul_tmul', smul_eq_mul, mul_one, map_add (f := _), sigR_tmul, map_one, hσδ,
       TensorProduct.tmul_neg, TensorProduct.neg_tmul]
   rw [hy] at hs
   have h1 : r1 = -r1 := by
@@ -160,7 +215,7 @@ theorem hermCoord_add (σ : E →ₐ[F] E) (n : ℕ) (S T : HermR R σ n) :
     hermCoord R σ n (S + T) = hermCoord R σ n S + hermCoord R σ n T := by
   refine Prod.ext ?_ ?_
   · funext i
-    simp [hermCoord, map_add, mul_add]
+    simp [hermCoord, map_add (f := _), mul_add]
   · funext p
     simp [hermCoord]
 

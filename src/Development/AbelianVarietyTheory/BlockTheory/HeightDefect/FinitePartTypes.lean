@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedSmooth
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,10 +78,6 @@ def HasTypeAt (S : SPar) (φ : GA D V → ℂ) : Prop :=
   ∀ C : Set (GA D V), IsCompact C → ∀ δ : ℝ, 0 < δ →
     ∃ ψ ∈ finPartOfType θ V τ S, ∀ x ∈ C, ‖φ x - ψ x‖ < δ
 
-def IsCompatibleThetaType {X : ThetaX D} (T : ThetaTied D X) : Prop :=
-  AllSome (IsInfFam (D := D)) fun θ => ∀ V : HSp D, V.SigOK → ∀ (S : D.what₂.Tau → SPar) (F : X.AF V),
-    F ∈ X.typ V S ↔ ∀ τ, HasTypeAt θ V τ (S τ) (T.ev V F)
-
 theorem HasTypeAt.of_mem {S : SPar} {φ : GA D V → ℂ} (h : φ ∈ finPartOfType θ V τ S) : HasTypeAt θ V τ S φ :=
   fun _ _ δ hδ => ⟨φ, h, fun x _ => by simpa using hδ⟩
 
@@ -70,19 +104,6 @@ def typeSub (S : SPar) : Submodule ℂ (GA D V → ℂ) where
     rw [e, norm_mul]
     have h2 := (lt_div_iff₀ hc).1 (h1 x hx)
     nlinarith [norm_nonneg c, norm_nonneg (a x - ψ x)]
-
-theorem HasTypeAt.eq_zero_of_not_good {S : SPar} (hS : ∀ p q, ¬ GoodPar V.rank p q S) {φ : GA D V → ℂ}
-    (h : HasTypeAt θ V τ S φ) : φ = 0 := by
-  have hb : finPartOfType θ V τ S = ⊥ := by
-    rw [finPartOfType, sSup_eq_bot]
-    rintro W ⟨H, _, _, σ, lam, ε, P, T, h1, h2, -⟩
-    exact (hS _ _ ⟨lam, ε, h1, h2, rfl, rfl⟩).elim
-  funext x
-  by_contra hx
-  obtain ⟨ψ, hψ, h1⟩ := h {x} isCompact_singleton ‖φ x‖ (norm_pos_iff.2 hx)
-  rw [hb, Submodule.mem_bot] at hψ
-  have := h1 x rfl
-  simp [hψ] at this
 
 end GlobalTheory.IndefiniteRowSideFullHecke.FinitePartTypes
 

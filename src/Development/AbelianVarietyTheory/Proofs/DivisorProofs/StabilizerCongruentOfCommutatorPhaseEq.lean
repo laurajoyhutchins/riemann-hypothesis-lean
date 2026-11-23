@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecEq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLine
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairModulusOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SelfDualSkewIdealLatticeIsSelfDualStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IdealPeriodLatticeOfCurveDatum
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PtHomInjective
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaSpaceSelfDualPairAtMostLineStatement
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryHeckeCharacterValues
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PtHomInjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SelfDualSkewIdealLatticeIsSelfDualStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.VacuumUnderAdelicPairModulusOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecEq
+
+@[expose] public section
+
 open scoped Pointwise nonZeroDivisors
 open Formalism.BasicNotions Formalism.IndefR.Links IsDedekindDomain NumberField
 open Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3
@@ -26,7 +70,7 @@ def skewCoef (D : D7) (𝔪 : Ideal (𝓞 D.host.E)) : Submodule (𝓞 D.host.E)
     rintro e f he hf b hb c hc
     obtain ⟨m, hm, h1⟩ := he b hb c hc
     obtain ⟨n, hn, h2⟩ := hf b hb c hc
-    exact ⟨m + n, add_mem hm hn, by rw [map_add, h1, h2]; ring⟩
+    exact ⟨m + n, add_mem hm hn, by rw [map_add (f := _), h1, h2]; ring⟩
   smul_mem' := by
     rintro s e he b hb c hc
     obtain ⟨m, hm, h1⟩ := he b hb c hc
@@ -118,10 +162,10 @@ theorem mem_of_int {𝔪 : Ideal (𝓞 D.host.E)} (h1 : IsCoprime 𝔪 (D.host.c
   have ho : algebraMap (𝓞 D.host.E) D.host.E o = e := rfl
   refine ⟨o * μ + o * β * μ' + m, add_mem (add_mem (Ideal.mul_mem_left _ _ hμ) (Ideal.mul_mem_left _ _ hμ')) hm, ?_⟩
   have ea : algebraMap (𝓞 D.host.E) D.host.E μ + algebraMap (𝓞 D.host.E) D.host.E β = 1 := by
-    rw [← map_add, hμβ, map_one]
+    rw [← map_add (f := _), hμβ, map_one]
   have eb : algebraMap (𝓞 D.host.E) D.host.E μ' + algebraMap (𝓞 D.host.E) D.host.E ν = 1 := by
-    rw [← map_add, hμν, map_one]
-  rw [map_add, map_add, hme, map_mul, map_mul, map_mul, ho]
+    rw [← map_add (f := _), hμν, map_one]
+  rw [map_add (f := _), map_add (f := _), hme, map_mul, map_mul, map_mul, ho]
   linear_combination e * ea + e * algebraMap (𝓞 D.host.E) D.host.E β * eb
 
 theorem im_int_of_kap_eq (T : Tor D) {N N' : ℕ} (u u' y : VC D N N')
@@ -167,7 +211,7 @@ theorem hatId_mul {𝔪 : Ideal (𝓞 D.host.E)} {x y : AE D} (hx : x ∈ OhE D)
   | add y z _ _ h1 h2 => rw [mul_add]; exact add_mem h1 h2
   | neg y _ h => rw [mul_neg]; exact neg_mem h
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem cong_of_kap_eq : ∀ (D : D7) (δ : ℂ), Crv D ⊤ δ → ∀ (𝔪 : Ideal (𝓞 D.host.E)), 𝔪 ≠ ⊥ → IsCoprime 𝔪 (D.host.conj • 𝔪) → IsCoprime 𝔪 D.host.𝔟 → ∀ {a d : ℕ}, a ≤ d → ∀ (r r' : GA D a), r ∈ intG D a → r' ∈ intG D a → ∀ x x' : Matrix (Fin d) (Fin a) D.host.E, pt D (tor0 D ⊤ δ) δ x ∈ (La0 D (tor0 D ⊤ δ) a d) → pt D (tor0 D ⊤ δ) δ x' ∈ (La0 D (tor0 D ⊤ δ) a d) → (∀ i j, (x.map (inc D) - (unitBlock D 0 a d).map (inc D) * (((r⁻¹ : GA D a) : GL (Fin a) (AE D)) : Matrix (Fin a) (Fin a) (AE D))) i j ∈ hatId D 𝔪) → (∀ i j, (x'.map (inc D) - (unitBlock D 0 a d).map (inc D) * (((r'⁻¹ : GA D a) : GL (Fin a) (AE D)) : Matrix (Fin a) (Fin a) (AE D))) i j ∈ hatId D 𝔪) → (∀ y ∈ (La D (tor0 D ⊤ δ) (stdL D a) (skewLat D 𝔪 d)), Formalism.MainNotions.TaylorLogMetric.kap D (tor0 D ⊤ δ) (pt D (tor0 D ⊤ δ) δ x) y = Formalism.MainNotions.TaylorLogMetric.kap D (tor0 D ⊤ δ) (pt D (tor0 D ⊤ δ) δ x') y) → CongOne D 𝔪 (r⁻¹ * r') := by
   intro D δ hc 𝔪 h𝔪 hcop hb a d had r r' hr hr' x x' _ _ hx hx' hk

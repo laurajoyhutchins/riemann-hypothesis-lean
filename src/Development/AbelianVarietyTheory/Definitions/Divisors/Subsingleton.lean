@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,50 +65,7 @@ def htAct {s : S ⟶ Sp R} (o : Obj b N s) : Out.RingAct o.A D.O :=
 abbrev HTIw {s : S ⟶ Sp R} (o : Obj b N s) (w : Ideal (𝓞 D.F)) : Type 1 :=
   Chain (htAct o) (w.map (algebraMap (𝓞 D.F) D.O)) (Ideal.absNorm w ^ D.m) D.n
 
-def HTIwMap {s' : S' ⟶ Sp R} {s : S ⟶ Sp R} {o' : Obj b N s'} {o : Obj b N s} {w : Ideal (𝓞 D.F)}
-    (C' : HTIw o' w) (C : HTIw o w) (f : S' ⟶ S) : Prop :=
-  ∃ m : ObjMap o' o f, Nonempty (ChainMap C' C f m.φ)
-
-theorem HTIw.exists_pull {s' : S' ⟶ Sp R} {s : S ⟶ Sp R} {o' : Obj b N s'} {o : Obj b N s}
-    {w : Ideal (𝓞 D.F)} (C : HTIw o w) {f : S' ⟶ S} (m : ObjMap o' o f) :
-    ∃ C' : HTIw o' w, HTIwMap C' C f := by
-  obtain ⟨C', ⟨e⟩⟩ := Chain.exists_pull (ρ' := htAct o') C m.cart m.act
-  exact ⟨C', m, ⟨e⟩⟩
-
-theorem HTIwMap.subsingleton {s' : S' ⟶ Sp R} {s : S ⟶ Sp R} {o' : Obj b N s'} {o : Obj b N s}
-    {w : Ideal (𝓞 D.F)} (C' : HTIw o' w) (C : HTIw o w) (f : S' ⟶ S) (m : ObjMap o' o f) :
-    Subsingleton (ChainMap C' C f m.φ) := inferInstance
-
-def IsPlaceOf (b : Base D R) (i : Fin D.a) (w : Ideal (𝓞 D.F)) : Prop :=
-  w.IsMaximal ∧ ((p : 𝓞 D.F) ∈ w) ∧
-    ∀ (k : Type) [Field k] [CharP k p] (β : R →+* k), RingHom.ker (β.comp (b.t i)) = w
-
-structure HTIwRep (b : Base D R) (N : ℕ) (w : Ideal (𝓞 D.F)) where
-
-  X : Scheme.{0}
-
-  s : X ⟶ Sp R
-
-  univ : Obj b N s
-
-  univC : HTIw univ w
-
-  rep : ∀ (S : Scheme.{0}) (s' : S ⟶ Sp R) (o : Obj b N s') (C : HTIw o w),
-    ∃! f : S ⟶ X, f ≫ s = s' ∧ HTIwMap C univC f
-
 section Basic₂
-
-example {s : S ⟶ Sp R} {o : Obj b N s} {w : Ideal (𝓞 D.F)} (C : HTIw o w) :
-    IsIsogDeg (C.π (Fin.last D.n)) (Ideal.absNorm w ^ (D.m * D.n)) := by
-  rw [pow_mul]; simpa using C.π_deg (Fin.last D.n)
-
-example {s : S ⟶ Sp R} {o : Obj b N s} {w : Ideal (𝓞 D.F)} (C : HTIw o w) {T : Over S} (x : T ⟶ o.A)
-    (h : x ≫ C.π (Fin.last D.n) = 1) (c : 𝓞 D.F) (hc : c ∈ w) : x ≫ o.act.act (algebraMap _ _ c) = 1 :=
-  (C.ker_last T x).1 h _ (Ideal.mem_map_of_mem _ hc)
-
-example {s : S ⟶ Sp R} {o : Obj b N s} {w : Ideal (𝓞 D.F)} (C : HTIw o w) (i : Fin (D.n + 1)) (c : 𝓞 D.F)
-    (hc : c ∈ w) : ∃ g : C.B i ⟶ o.A, C.π i ≫ g = o.act.act (algebraMap _ _ c) :=
-  (C.existsUnique_close i (Ideal.mem_map_of_mem _ hc)).exists
 
 end Basic₂
 

@@ -1,10 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CommutingLevelOperators
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InnerProductFormula
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
-import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.LabelSettingScalars
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CommutingLevelOperators
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InnerProductFormula
+public import Formalism.LocalToGlobal.IndefiniteReal.OneMapT
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.LabelSettingScalars
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -100,8 +136,8 @@ def SourceLevelLawC (F : Face D A) : Prop :=
     ∀ κ ∈ Lev.levA (Vc D i) (levV R i t P m), ∀ Q : PolF D (Wc D i).rank (Vc D i).rank,
       ω (κ, 1) (ptAt R i σ BW f Q) = (Lev.levChi (Vc D i) (R.βV i) (datV i R.Pg (R.Q t) P m) κ)⁻¹ • ptAt R i σ BW f Q
 
-open Datum in
 
+open Datum in
 def InnerProductFormulaC (F : Face D A) : Prop :=
   ForLiftDataC R F fun i t σ P m ω BW f _ _ =>
     ∀ (ν : Measure (GA D (Vc D i))) (𝓕 : Set (GA D (Vc D i))), IsMeasDef (Vc D i) (levV R i t P m) ν 𝓕 →
@@ -120,8 +156,8 @@ def InnerProductFormulaC (F : Face D A) : Prop :=
       ∫⁻ b, ∑' x, ‖Z (pt x b)‖ₑ ∂(Measure.pi mR) < ⊤ ∧
       l2 ν 𝓕 (upLift R i ω φ₁ F₁) (upLift R i ω φ₂ F₂) = ((ν 𝓕).toReal : ℂ) * ∫ b, ∑' x, Z (pt x b) ∂(Measure.pi mR)
 
-open Datum in
 
+open Datum in
 def FockCoefficientC (F : Face D A) : Prop :=
   ForLiftDataC R F fun i _ σ _ _ ω BW f c io =>
     ∀ (μ : Measure (WO (Vc D i) (Wc D i))) (𝓧 : Set (WO (Vc D i) (Wc D i))), IsCovolOne (ratL (Wc D i) (Vc D i)) μ 𝓧 →
@@ -133,8 +169,8 @@ def FockCoefficientC (F : Face D A) : Prop :=
           (∏ ρ, ⟪((e' ρ : (R.MW i σ).sm ρ) : (R.MW i σ).H ρ), (R.MW i σ).rep ρ (g ρ) ((e ρ : (R.MW i σ).sm ρ) : (R.MW i σ).H ρ)⟫_ℂ) *
           ⟪w', w⟫_ℂ * l2 μ 𝓧 (ω (1, x) f) f
 
-open Datum in
 
+open Datum in
 def FiniteZetaL (F : Face D A) : Prop :=
   ∀ i t σ s P cμ cη m ω BW f₀ f c io, IsLiftDataC R F i t σ s P cμ cη m ω BW f₀ f c io →
     ∀ (μ : Measure (WO (Vc D i) (Wc D i))) (𝓧 : Set (WO (Vc D i) (Wc D i))), IsCovolOne (ratL (Wc D i) (Vc D i)) μ 𝓧 →
@@ -150,8 +186,8 @@ def FiniteZetaL (F : Face D A) : Prop :=
             ((Nat.card P.H : ℂ) * (nrm2 μ 𝓧 f : ℂ) * (GlobalTheory.LFun.LSD D (finS R t) B cμ ((1 + (D.R.t : ℂ)) / 2) / (dOff D (finS R t) : ℂ)) *
               starRingEnd ℂ (petW R i (U₁ v₁) (U₂ v₂)))
 
-open Datum in
 
+open Datum in
 def LevelIndexNormC (F : Face D A) : Prop :=
   ForLiftDataC R F fun i t _ P m _ _ f _ _ =>
     levV R i t P m ≤ GlobalTheory.Mass.Levels.latLev (Vc D i) ∧

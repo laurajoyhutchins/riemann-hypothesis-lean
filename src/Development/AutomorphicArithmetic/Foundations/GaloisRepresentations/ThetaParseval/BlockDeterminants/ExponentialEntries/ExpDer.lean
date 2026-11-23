@@ -1,4 +1,49 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+module
+
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.BlockDeterminants.ExponentialEntries.LinDer
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.RealLift
 
@@ -36,9 +81,10 @@ theorem der_pow_mul (D : Derivation ℂ R R) (k : ℕ) (P Q : R) :
   induction k with
   | zero => simp
   | succ k ih =>
+
     rw [pow_succ', Module.End.mul_apply, ih,
-      Finset.sum_antidiagonal_choose_succ_mul (fun i j => (D.toLinearMap ^ i) P * (D.toLinearMap ^ j) Q) k,
-      map_sum, ← Finset.sum_add_distrib]
+    Finset.sum_antidiagonal_choose_succ_mul (fun i j => (D.toLinearMap ^ i) P * (D.toLinearMap ^ j) Q) k,
+    map_sum, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun p hp => ?_
     have hc : k.choose p.2 = k.choose p.1 :=
       (Nat.choose_symm_of_eq_add (Finset.HasAntidiagonal.mem_antidiagonal.1 hp).symm).symm
@@ -75,7 +121,7 @@ theorem Good.add {D : Derivation ℂ R R} {P Q u v : R} (hP : Good D P u) (hQ : 
   refine ⟨⟨N₁ ⊔ N₂, inferInstance, add_mem (Submodule.mem_sup_left m₁) (Submodule.mem_sup_right m₂), ?_⟩, fun l => ?_⟩
   · intro y hy
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem (Submodule.mem_sup_left (s₁ a ha)) (Submodule.mem_sup_right (s₂ b hb))
   · simpa [mul_add] using (h₁ l).add (h₂ l)
 
@@ -103,7 +149,7 @@ theorem Good.mul {D : Derivation ℂ R R} {P Q u v : R} (hP : Good D P u) (hQ : 
     | mem_mul_mem a ha b hb =>
       rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, mul_comm b]
       exact add_mem (Submodule.mul_mem_mul ha (s₂ b hb)) (Submodule.mul_mem_mul (s₁ a ha) hb)
-    | add x _ y _ hx hy => rw [map_add]; exact add_mem hx hy
+    | add x _ y _ hx hy => rw [map_add (f := D)]; exact add_mem hx hy
   · have hv : v ∈ N₂ := mem_of_sum h₂ m₂ s₂
     obtain ⟨π, hπ⟩ := LinearMap.exists_leftInverse_of_injective N₂.subtype (Submodule.ker_subtype N₂)
     let b := Module.finBasis ℂ N₂
@@ -117,6 +163,7 @@ theorem Good.mul {D : Derivation ℂ R R} {P Q u v : R} (hP : Good D P u) (hQ : 
           exact Finset.sum_congr rfl fun i _ => by simp [Module.Basis.coord_apply]
     have key : ∀ (a y : R), y ∈ N₂ → l (a * y) = ∑ i, l (a * b i) * b.coord i (π y) := fun a y hy => by
       conv_lhs => rw [dec y hy]
+
       rw [Finset.mul_sum, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [mul_smul_comm, map_smul, smul_eq_mul, mul_comm]
@@ -125,6 +172,7 @@ theorem Good.mul {D : Derivation ℂ R R} {P Q u v : R} (hP : Good D P u) (hQ : 
     simp only [LinearMap.comp_apply, LinearMap.mulRight_apply] at T
     rw [key u v hv]
     convert T using 2 with k
+
     rw [der_pow_mul, map_sum, Finset.mul_sum, Finset.sum_comm]
     refine Finset.sum_congr rfl fun p hp => ?_
     obtain rfl : p.1 + p.2 = k := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
@@ -141,31 +189,13 @@ theorem isExp_of_gens {σ : Type} (D : Derivation ℂ (MvPolynomial σ ℂ) (MvP
       have := Good.const D a
       rwa [show algebraMap ℂ (MvPolynomial σ ℂ) a = MvPolynomial.C a from rfl, ← MvPolynomial.algebraMap_eq,
         AlgHom.commutes] at *
-    | add p q hp hq => rw [map_add]; exact hp.add hq
+    | add p q hp hq => rw [map_add (f := _)]; exact hp.add hq
     | mul_X p i hp => rw [map_mul]; exact hp.mul (h i)
   exact fun v l => (g v).2 l
 
 theorem isExp_shift {V : Type} [AddCommGroup V] [Module ℂ V] {L U : Module.End ℂ V} (h : IsExp L U) (s : ℂ) :
     IsExp (L + s • 1) (Complex.exp s • U) := by
-  intro v l
-  have hc : Commute L (s • (1 : Module.End ℂ V)) := (Commute.one_right L).smul_right s
-  have b : HasSum (fun n : ℕ => ((n.factorial : ℂ))⁻¹ * s ^ n) (Complex.exp s) := by
-    have := NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) s
-    rw [← Complex.exp_eq_exp_ℂ] at this
-    simpa [smul_eq_mul] using this
-  have T := hasSum_cauchy (h v l) b
-  have e : l ((Complex.exp s • U) v) = l (U v) * Complex.exp s := by
-    simp [mul_comm]
-  rw [e]
-  convert T using 2 with k
-  rw [hc.add_pow', LinearMap.sum_apply, map_sum, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun p hp => ?_
-  obtain rfl : p.1 + p.2 = k := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
-  have : (s • (1 : Module.End ℂ V)) ^ p.2 = s ^ p.2 • 1 := by rw [smul_pow, one_pow]
-  rw [this, LinearMap.smul_apply, Module.End.mul_apply]
-  simp only [mul_smul_comm, mul_one, LinearMap.smul_apply, Module.End.one_apply, map_nsmul, map_smul, smul_eq_mul, nsmul_eq_mul]
-  rw [← mul_assoc, fact_choose]
-  ring
+  apply UpperTheory.TP.RP.isExp_add_smul <;> assumption
 
 section Mat
 
@@ -187,6 +217,7 @@ theorem good_lin (D : Derivation ℂ R R) {τ : Type} [Fintype τ] [DecidableEq 
     | zero => intro c; simp [Matrix.one_apply, ite_smul]
     | succ k ih =>
       intro c
+
       rw [pow_succ, Module.End.mul_apply, show D.toLinearMap (v c) = _ from hD c, map_sum]
       simp only [map_smul, ih, pow_succ, Matrix.mul_apply, Finset.smul_sum, Finset.sum_smul, smul_smul]
       rw [Finset.sum_comm]
@@ -204,10 +235,12 @@ theorem good_lin (D : Derivation ℂ R R) {τ : Type} [Fintype τ] [DecidableEq 
     have e1 : (fun n : ℕ => ((n.factorial : ℂ))⁻¹ * l ((D.toLinearMap ^ n) (v c))) =
         fun n : ℕ => ∑ a, ((n.factorial : ℂ))⁻¹ * (Y ^ n) a c * l (v a) := by
       funext n
+
       rw [hp, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun a _ => ?_
       rw [map_smul, smul_eq_mul, mul_assoc]
     have e2 : l (∑ a, NormedSpace.exp Y a c • v a) = ∑ a, NormedSpace.exp Y a c * l (v a) := by
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun a _ => by rw [map_smul, smul_eq_mul]
     rw [e1, e2]

@@ -1,7 +1,60 @@
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.ExistsOpenNormalOrderOf
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ConjEMemHostFIff
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Orbits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 open scoped Pointwise
@@ -67,9 +120,9 @@ theorem coprime_QS_q : Nat.Coprime H.QS H.q :=
 theorem coprime_QS_d : Nat.Coprime H.QS H.d :=
   Nat.Coprime.coprime_dvd_right (dvd_mul_left H.d H.q) H.QS_coprime
 theorem coprime_QSq_d : Nat.Coprime (H.QS * H.q) H.d :=
-  Nat.Coprime.mul H.coprime_QS_d H.coprime_q_d
+  Nat.Coprime.mul_left H.coprime_QS_d H.coprime_q_d
 theorem coprime_QSd_q : Nat.Coprime (H.QS * H.d) H.q :=
-  Nat.Coprime.mul H.coprime_QS_q H.coprime_q_d.symm
+  Nat.Coprime.mul_left H.coprime_QS_q H.coprime_q_d.symm
 theorem QS_ne_zero : H.QS ≠ 0 := H.QS_pos.ne'
 theorem condN_ne_zero : H.condN ≠ 0 :=
   Nat.mul_ne_zero (Nat.mul_ne_zero H.QS_ne_zero H.q_prime.ne_zero) H.d_prime.ne_zero
@@ -85,7 +138,6 @@ theorem sixteen_dvd_QS : 16 ∣ H.QS :=
   (show 2 ^ 4 ∣ 2 ^ (φ.e + 2) from Nat.pow_dvd_pow 2 (by have := H.two_le_e; omega)).trans H.tower_dvd
 theorem two_dvd_condN : 2 ∣ H.condN := H.two_dvd_QS.trans H.QS_dvd_condN
 theorem sixteen_dvd_condN : 16 ∣ H.condN := H.sixteen_dvd_QS.trans H.QS_dvd_condN
-theorem tower_le_QS : 2 ^ (φ.e + 2) ≤ H.QS := Nat.le_of_dvd H.QS_pos H.tower_dvd
 
 theorem q_not_dvd_QS : ¬ H.q ∣ H.QS := (Nat.Prime.coprime_iff_not_dvd H.q_prime).1 H.coprime_QS_q.symm
 theorem d_not_dvd_QS : ¬ H.d ∣ H.QS := (Nat.Prime.coprime_iff_not_dvd H.d_prime).1 H.coprime_QS_d.symm
@@ -149,34 +201,14 @@ theorem not_dvd_condN_of_inert {p : ℕ} (hp : p.Prime) (h2 : p ≠ 2) (hj : jac
       jacobiSym.zero_left H.d_prime.one_lt] at hj
     norm_num at hj
 
-variable {H} in
-theorem CoprimeFifteen.three_not_dvd_QS (h : H.CoprimeFifteen) : ¬ 3 ∣ H.QS :=
-  (Nat.Prime.coprime_iff_not_dvd Nat.prime_three).1
-    ((show Nat.Coprime H.QS 15 from h).coprime_dvd_right (by norm_num : 3 ∣ 15)).symm
 
-variable {H} in
-theorem CoprimeFifteen.five_not_dvd_QS (h : H.CoprimeFifteen) : ¬ 5 ∣ H.QS :=
-  (Nat.Prime.coprime_iff_not_dvd Nat.prime_five).1
-    ((show Nat.Coprime H.QS 15 from h).coprime_dvd_right (by norm_num : 5 ∣ 15)).symm
 
-variable {H} in
-theorem CoprimeFifteen.five_not_dvd_condN (h : H.CoprimeFifteen) : ¬ 5 ∣ H.condN := by
-  exact (H.not_dvd_condN_iff Nat.prime_five).2 ⟨h.five_not_dvd_QS,
-    fun e => by have := H.q_mod_eight; omega, fun e => by have := H.d_mod_sixteen; omega⟩
 
-variable {H} in
-theorem CoprimeFifteen.three_not_dvd_condN (h : H.CoprimeFifteen) (hq : H.q ≠ 3) : ¬ 3 ∣ H.condN := by
-  exact (H.not_dvd_condN_iff Nat.prime_three).2 ⟨h.three_not_dvd_QS,
-    fun e => hq e.symm, fun e => by have := H.d_mod_sixteen; omega⟩
 
 theorem psAt_of_coprime {p : ℕ} (h : Nat.Coprime p H.condN) :
     H.psAt p = (((H.art (ZMod.unitOfCoprime p h)).1.1 : ℤˣ) : ℤ) := by
   unfold HostRaw.psAt
-  rw [dif_pos h]
-
-theorem psAt_of_not_coprime {p : ℕ} (h : ¬ Nat.Coprime p H.condN) : H.psAt p = 0 := by
-  unfold HostRaw.psAt
-  rw [dif_neg h]
+  rw [dite_eq_left h]
 
 theorem psAt_eq_one_or {p : ℕ} (h : Nat.Coprime p H.condN) : H.psAt p = 1 ∨ H.psAt p = -1 := by
   rw [H.psAt_of_coprime h]
@@ -192,16 +224,12 @@ theorem odd_of_coprime {p : ℕ} (h : Nat.Coprime p H.condN) : p % 2 = 1 := by
   have h2p : 2 ∣ p := by omega
   exact (Nat.Prime.coprime_iff_not_dvd Nat.prime_two).1 (Nat.Coprime.coprime_dvd_left h2p h) H.two_dvd_condN
 
-variable {H} in
 
+variable {H} in
 theorem PsQ.psAt_eq (hP : H.PsQ) {p : ℕ} (h : Nat.Coprime p H.condN) : H.psAt p = jacobiSym (-(H.q : ℤ)) p := by
   rw [H.psAt_of_coprime h, hP, jacobi_neg_recip H.q_mod_four (H.odd_of_coprime h)]
   exact jacobi_congr ((H.val_unitOfCoprime h).of_dvd H.q_dvd_condN)
 
-variable {H} in
-theorem PsQ.psAt_prime (hP : H.PsQ) {p : ℕ} (hp : p.Prime) (h : ¬ p ∣ H.condN) :
-    H.psAt p = jacobiSym (-(H.q : ℤ)) p :=
-  hP.psAt_eq ((Nat.Prime.coprime_iff_not_dvd hp).2 h)
 
 theorem sqd_mem_K : H.sqd ∈ H.K := IntermediateField.mem_adjoin_simple_self ℚ H.sqd
 
@@ -231,9 +259,6 @@ theorem finrank_K : Module.finrank ℚ H.K = 2 := by
     linarith
   omega
 
-theorem ncard_primesOver_d : (primesOver (span {(H.d : ℤ)}) (𝓞 H.K)).ncard = 1 :=
-  SplitK.ram_ncard H.d_prime H.sqd_sq
-
 theorem gal_comm (σ τ : H.E ≃ₐ[ℚ] H.E) : σ * τ = τ * σ :=
   H.gal.injective (by rw [map_mul, map_mul, mul_comm])
 
@@ -244,12 +269,6 @@ theorem conj_mul_conj : H.conj * H.conj = 1 :=
 
 theorem conj_conj (x : H.E) : H.conj (H.conj x) = x := by
   rw [← AlgEquiv.mul_apply, H.conj_mul_conj, AlgEquiv.one_apply]
-
-theorem conj_ne_one : H.conj ≠ 1 := by
-  intro h
-  have e := H.gal_conj
-  rw [h, map_one] at e
-  simp [Frame.cc, c0, Prod.ext_iff] at e
 
 theorem conj_sqd : H.conj H.sqd = -H.sqd := by
   rw [H.gal_sqd, H.gal_conj]
@@ -286,26 +305,10 @@ theorem hostClasses (p : ℕ) [Fact p.Prime] (hp : ¬ p ∣ H.condN)
     rcases Int.units_eq_one_or (H.galE σ).1.2 with h2 | h2 <;>
     simp [Prod.ext_iff, c0, h1, h2, ← ha, ← hb]
 
-theorem hostClassesQ (hP : H.PsQ) (p : ℕ) [Fact p.Prime] (hp : ¬ p ∣ H.condN)
-    (P : Ideal (𝓞 H.E)) [P.IsPrime] [P.LiesOver (span {(p : ℤ)})] (σ : H.E ≃ₐ[ℚ] H.E) (hσ : IsArithFrobAt ℤ σ P) :
-    (((H.galE σ).1 = 1 ∨ (H.galE σ).1 = (-1, 1)) ↔ jacobiSym (-(H.d : ℤ)) p = 1) ∧
-    ((H.galE σ).1 = (1, -1) ↔ (jacobiSym (-(H.d : ℤ)) p = -1 ∧ jacobiSym (-(H.q : ℤ)) p = 1)) ∧
-    ((H.galE σ).1 = c0 ↔ (jacobiSym (-(H.d : ℤ)) p = -1 ∧ jacobiSym (-(H.q : ℤ)) p = -1)) := by
-  have h := H.hostClasses p hp P σ hσ
-  rw [hP.psAt_prime Fact.out hp] at h
-  exact h
-
 theorem frob_iff (p : ℕ) [Fact p.Prime] (hp : Nat.Coprime p H.condN)
     (P : Ideal (𝓞 H.E)) [P.IsPrime] [P.LiesOver (span {(p : ℤ)})] (σ : H.E ≃ₐ[ℚ] H.E) :
     IsArithFrobAt ℤ σ P ↔ H.galE σ = H.art (ZMod.unitOfCoprime p hp) :=
   (H.der.frob p ((Nat.Prime.coprime_iff_not_dvd Fact.out).1 hp) P).2.1 σ _ (ZMod.coe_unitOfCoprime p hp)
-
-theorem frob_mem_Psi_iff (p : ℕ) [Fact p.Prime] (hp : ¬ p ∣ H.condN)
-    (P : Ideal (𝓞 H.E)) [P.IsPrime] [P.LiesOver (span {(p : ℤ)})] (σ : H.E ≃ₐ[ℚ] H.E) (hσ : IsArithFrobAt ℤ σ P) :
-    H.galE σ ∈ φ.Psi ↔ jacobiSym (-(H.d : ℤ)) p = 1 := by
-  have h3 := ((H.der.frob p hp P).2.2.1 σ hσ).2.1
-  rw [Frame.Psi, MonoidHom.mem_ker, ← h3]
-  simp [Frame.chD, Units.val_eq_one]
 
 theorem splitK_of_dvd {l : ℕ} (hl : l.Prime) (h : l ∣ H.QS * H.q) :
     (primesOver (span {(l : ℤ)}) (𝓞 H.K)).ncard = 2 := by
@@ -318,24 +321,6 @@ theorem splitK_of_dvd {l : ℕ} (hl : l.Prime) (h : l ∣ H.QS * H.q) :
   · exact H.QS_split l hl h2 h'
   · subst h'
     exact H.hyp.2.2.2.2
-
-theorem hostSplitK :
-    (∀ p : ℕ, p.Prime →
-      ((primesOver (span {(p : ℤ)}) (𝓞 H.K)).ncard = 2 ↔ (p = 2 ∨ (p ≠ 2 ∧ jacobiSym (-(H.d : ℤ)) p = 1)))) ∧
-    (primesOver (span {(H.d : ℤ)}) (𝓞 H.K)).ncard = 1 ∧
-    (primesOver (span {(H.q : ℤ)}) (𝓞 H.K)).ncard = 2 ∧
-    ∀ (p : ℕ) [Fact p.Prime], ¬ p ∣ H.condN →
-    ∀ (P : Ideal (𝓞 H.E)) [P.IsPrime] [P.LiesOver (span {(p : ℤ)})] (σ : H.E ≃ₐ[ℚ] H.E), IsArithFrobAt ℤ σ P →
-      (H.galE σ ∈ φ.Psi ↔ (primesOver (span {(p : ℤ)}) (𝓞 H.K)).ncard = 2) := by
-  refine ⟨H.der.splitK, H.ncard_primesOver_d, H.splitK_of_dvd H.q_prime (dvd_mul_left _ _), ?_⟩
-  intro p _ hp P _ _ σ hσ
-  rw [H.frob_mem_Psi_iff p hp P σ hσ, H.der.splitK p Fact.out]
-  simp [H.ne_two_of_not_dvd hp]
-
-theorem eta_eq_neg_one_iff (h2 : φ.TwoGroup) (p : ℕ) [Fact p.Prime] (hp : ¬ p ∣ H.condN)
-    (P : Ideal (𝓞 H.E)) [P.IsPrime] [P.LiesOver (span {(p : ℤ)})] (σ : H.E ≃ₐ[ℚ] H.E) (hσ : IsArithFrobAt ℤ σ P) :
-    H.etaF (P.comap (algebraMap (𝓞 H.F) (𝓞 H.E))) = -1 ↔ H.galE σ = φ.cc := by
-  exact (H.der.eta.2.1 p hp P σ hσ).trans (h2.cc_mem_zpowers_iff _)
 
 theorem hostFiniteOrder (k g : ℕ) (hg : g.Prime) (M : Matrix (Fin k) (Fin k) H.E) (hM : M ^ g = 1) (hne : M ≠ 1) :
     g - 1 ≤ 4 * φ.ord * k := by

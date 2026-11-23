@@ -1,5 +1,54 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+module
+
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 open CompanionTheory.Rg.FlB
 
@@ -54,6 +103,7 @@ theorem lat_bdd {V' : Type} [AddCommGroup V'] [Module L V'] {Λ : AddSubgroup V}
   have hx' := (hb x).1 hx
   have key : c • P x = ∑ i, b.repr x i • (c • P (b i)) := by
     conv_lhs => rw [← b.sum_repr x]
+
     simp only [map_sum, map_smul, Finset.smul_sum]
     exact Finset.sum_congr rfl fun i _ => smul_comm _ _ _
   rw [key]
@@ -64,7 +114,7 @@ variable [IsUltrametricDist L]
 def latOf {m : ℕ} (b : Module.Basis (Fin m) L V) : AddSubgroup V where
   carrier := {x | ∀ i, ‖b.repr x i‖ ≤ 1}
   add_mem' := fun {x y} hx hy i => by
-    simp only [map_add, Finsupp.add_apply]
+    simp only [map_add (f := _), Finsupp.add_apply]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hx i) (hy i))
   zero_mem' := fun i => by simp
   neg_mem' := fun {x} hx i => by simpa using hx i
@@ -77,11 +127,11 @@ def bigLat {V' : Type} [AddCommGroup V'] [Module L V'] (p q : V →ₗ[L] L) (P 
   carrier := {x | ‖p x‖ ≤ 1 ∧ ‖q x‖ ≤ 1 ∧ P x ∈ N}
   add_mem' := fun {x y} hx hy => by
     refine ⟨?_, ?_, ?_⟩
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hx.1 hy.1)
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le hx.2.1 hy.2.1)
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact N.add_mem hx.2.2 hy.2.2
   zero_mem' := by simp [N.zero_mem]
   neg_mem' := fun {x} hx => by
@@ -99,7 +149,7 @@ variable {L : Type} [NontriviallyNormedField L] {V : Type} [AddCommGroup V] [Mod
   {s : L →+* L} {h : V → V → L}
 
 theorem herm_add_left (hh : IsHerm s h) (x y z : V) : h (x + y) z = h x z + h y z := by
-  rw [hh.2.2.1 z (x + y), hh.1, map_add, ← hh.2.2.1, ← hh.2.2.1]
+  rw [hh.2.2.1 z (x + y), hh.1, map_add (f := _), ← hh.2.2.1, ← hh.2.2.1]
 
 theorem herm_smul_left (hh : IsHerm s h) (a : L) (x y : V) : h (a • x) y = s a * h x y := by
   rw [hh.2.2.1 y (a • x), hh.2.1, map_mul, ← hh.2.2.1]
@@ -246,7 +296,6 @@ theorem restrict_isMax (hS : StSandwich) [ProperSpace L] [FiniteDimensional L V]
   have hlatU := restrict_isLat hS hh hδ0 he hf hef hU hΛ.1
   refine ⟨hlatU, fun x hx => hΛ.2.1 _ hx, fun N hN hNint hle => ?_⟩
   set P := prU hh hδ0 he hf hef hU with hP
-  have hPv : ∀ x, ((P x : U) : V) = pr hh δ e f x := fun _ => rfl
   set M := bigLat (ca hh δ f) (cb hh δ e) P N with hM
   have hΛM : Λ ≤ M := fun x hx => by
     obtain ⟨h1, h2, h3⟩ := coef_int hs hδ0 hh hΛ.1 hpair heΛ hfΛ hx

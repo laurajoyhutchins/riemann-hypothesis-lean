@@ -1,20 +1,63 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ContinuousOrbitPadicComplex
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTwistCocycleCoboundaryStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamFilQuotientXiPowerAinfStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFontaineThetaOnAinfStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1BallCocycleLogCyclotomicStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodDataStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormUnitPowSubOne
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFontaineThetaOnAinfStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamFilQuotientXiPowerAinfStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TateInvariantsCyclotomicTwistStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTwistCocycleCoboundaryStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.H1BallCocycleLogCyclotomicStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodDataStatement
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TateInvariantsCyclotomicTwistStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.SModEq.Pow
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -190,7 +233,7 @@ theorem Small.add {n k : ℕ} {x y : P.R.BdR} (hx : Small AI n k x) (hy : Small 
   obtain ⟨b, hb⟩ := hy
   refine ⟨a + b, ?_⟩
   convert add_mem ha hb using 1
-  rw [map_add, map_add]; ring
+  rw [map_add (f := _), map_add (f := _)]; ring
 
 theorem Small.sub {n k : ℕ} {x y : P.R.BdR} (hx : Small AI n k x) (hy : Small AI n k y) :
     Small AI n k (x - y) := by
@@ -257,7 +300,7 @@ theorem small_cob (u : GQ l → ℚ_[l]) (hu : Tendsto u (𝓝 1) (𝓝 1)) (hu1
   have h5 : Small AI n (m + k) (P.actQdR g (P.ιB (AI.ιA a)) - P.ιB (AI.ιA a)) := by
     refine ⟨x, ?_⟩
     have h6 := congrArg (fun w => P.ιB (AI.ιA w)) h4
-    simp only [map_sub, map_add, map_mul, map_pow, map_natCast] at h6
+    simp only [map_sub, map_add (f := _), map_mul, map_pow, map_natCast] at h6
     rw [act_ι, ← AI.ιA_act]
     have h7 := (h2 (AI.ξ ^ n * y)).2 (dvd_mul_right _ _)
     simp only [map_mul, map_pow] at h7
@@ -385,8 +428,8 @@ theorem th_tw (j : ℤ) (σ : GQ l) {y : P.R.BdR} (hy : y ∈ Fl P 0) :
   rw [th_q J _ (act_mem σ hy), J.θ_act σ y hy]
   rfl
 
-include T in
 
+include T in
 theorem graded {e : ℕ} {z : GQ l → ℚ_[l]}
     (hz : CocOn (Gj K s) (fun σ y => ((P.χQ σ ^ (-(e : ℤ)) : ℚ_[l]ˣ) : ℚ_[l]) * y) Set.univ z)
     (i : ℕ) {b : P.R.BdR} (hb : b ∈ Fl P 0)
@@ -404,7 +447,7 @@ theorem graded {e : ℕ} {z : GQ l → ℚ_[l]}
     congr 1
     refine (t_unit.pow i).mul_left_cancel ?_
     rw [mul_add, ← tw_act, ← hy' _ hg, ← hy' _ hh, ← hy' _ (mul_mem hg hh), hz.2.2 g hg h hh]
-    simp only [cB, map_mul, map_add, map_sub, mul_zpow, Units.val_mul, AlgEquiv.commutes,
+    simp only [cB, map_mul, map_add (f := _), map_sub, mul_zpow, Units.val_mul, AlgEquiv.commutes,
       AlgEquiv.mul_apply]
     ring
   refine ⟨y, fun σ hσ => ⟨hy σ hσ, hy' σ hσ⟩, cont_of_one
@@ -447,7 +490,7 @@ theorem descend {e : ℕ} {z : GQ l → ℚ_[l]}
       exact hβ σ hσ)
     rw [Nat.cast_succ]
     convert h2 using 1
-    rw [map_add, mul_add, tw_act, mul_sub, ← (hy σ hσ).2]
+    rw [map_add (f := _), mul_add, tw_act, mul_sub, ← (hy σ hσ).2]
     ring
 
 include T J hs in
@@ -469,7 +512,7 @@ theorem exists_exp {e : ℕ} {z : GQ l → ℚ_[l]}
       th_q J _ (om_mem α), J.θ_Om, J.θ_act σ x hx, hβ σ hσ]
     ring)
   convert h2 using 1
-  rw [map_add, mul_add, tw_act, mul_sub, mul_sub, ← (hy σ hσ).2, sub_self]
+  rw [map_add (f := _), mul_add, tw_act, mul_sub, mul_sub, ← (hy σ hσ).2, sub_self]
   simp only [cB, zpow_zero, Units.val_one, map_one]
   ring
 

@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedExcChartParts
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcChart
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcGeoFirst
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcChart
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStackedExcGeoFirst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GlobalTheory.CompanionTheory.Ar.Giv
@@ -32,8 +83,8 @@ theorem exists_forms_of_linear {k R A : Type*} [Field k] [CommRing R] [AddCommGr
   let L : V →ₗ[k] R :=
     { toFun := fun w => Λ (pre w)
       map_add' := fun w w' => by
-        rw [← map_add]
-        exact hwd _ _ (by rw [map_add, hpre, hpre, hpre]; rfl)
+        rw [← map_add (f := _)]
+        exact hwd _ _ (by rw [map_add (f := _), hpre, hpre, hpre]; rfl)
       map_smul' := fun c w => by
         obtain ⟨x', h, h'⟩ := hact c (pre w)
         rw [RingHom.id_apply, hsm, ← h']
@@ -49,6 +100,7 @@ theorem exists_forms_of_linear {k R A : Type*} [Field k] [CommRing R] [AddCommGr
     rw [h3]
     exact hwd _ _ (hpre _)
   rw [← h2]
+
   conv_rhs => rw [h1, map_sum]
   exact Finset.sum_congr rfl fun j _ => by rw [map_smul, hsm]
 
@@ -63,6 +115,7 @@ theorem formCoord_mul_of_quadIdentity {φ₁ φ₂ φ₃ φ₄ : Fin i → K} (h
       (∑ j, C (φ₃ j) * X j) * (∑ j, C (φ₄ j) * X j) := by
     refine MvPolynomial.funext fun x => ?_
     have := h x
+
     simpa [dotProduct, map_sum] using this
   simp only [formCoord, AddMonoidHom.mk'_apply, ← map_mul, hp]
 
@@ -76,7 +129,8 @@ theorem graphMap_secondForm {F' : HermLattice K i} (b' : Module.Basis T ℤ (dua
       C (Ideal.Quotient.mk (dualIdeal b') (C (a t) * X ⟨(), t⟩)) * X () := by
     intro t
     simp only [graphMap, graphSecond, coe_eval₂Hom, eval₂_X, h]
-  simp only [graphSecondForm, linD, map_sum, Finset.sum_mul]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [graphSecondForm, linD, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun t _ => ?_
   have h3 : Ideal.Quotient.mk (dualIdeal b') (C (d t * a t) * X ⟨(), t⟩) =
       ((d t : ℤ) : MRing (dualBlocks T) ⧸ dualIdeal b') * Ideal.Quotient.mk (dualIdeal b') (C (a t) * X ⟨(), t⟩) := by
@@ -181,8 +235,8 @@ def chartScale : 𝓞 K →+* excChartRing b' a v u where
     simp [graphFirstForm]
   map_add' ω₁ ω₂ := by
     have h : scaleCoord b' v (ω₁ + ω₂) = scaleCoord b' v ω₁ + scaleCoord b' v ω₂ := latCombo_injective b' (by
-      rw [latCombo_add, latCombo_scaleCoord, latCombo_scaleCoord, latCombo_scaleCoord, map_add, add_smul])
-    rw [h, graphFirstForm_add, map_add, add_mul]
+      rw [latCombo_add, latCombo_scaleCoord, latCombo_scaleCoord, latCombo_scaleCoord, map_add (f := _), add_smul])
+    rw [h, graphFirstForm_add, map_add (f := _), add_mul]
 
 theorem chartScale_mul_first (ω : 𝓞 K) {c : T → ℤ}
     (hc : latCombo b' c = algebraMap (𝓞 K) K ω • (b' v : Fin i → K)) :
@@ -193,6 +247,7 @@ theorem chartScale_mul_first (ω : 𝓞 K) {c : T → ℤ}
 
 theorem chartMap_firstForm_mul (e : T → ℤ) :
     excChartMap b' a v u (graphFirstForm fun s => e s * a s) = 0 := by
+
   rw [graphFirstForm, map_sum]
   refine Finset.sum_eq_zero fun s _ => ?_
   rw [C_mul, mul_assoc, map_mul (excChartMap b' a v u), first_eq_zero, mul_zero]
@@ -220,10 +275,10 @@ def evalVec {k : Type} [Field k] (ρ : 𝓞 K →+* k) {n : ℕ} (Y : Fin n → 
   AddMonoidHom.mk' (fun φ j => ρ (evalInt (hY j) φ)) (by
     intro φ ψ
     funext j
-    rw [Pi.add_apply, ← map_add]
+    rw [Pi.add_apply, ← map_add (f := _)]
     congr 1
     refine (eq_evalInt (hY j) _ ?_).symm
-    rw [map_add, algebraMap_evalInt, algebraMap_evalInt, Submodule.coe_add, add_dotProduct])
+    rw [map_add (f := _), algebraMap_evalInt, algebraMap_evalInt, Submodule.coe_add, add_dotProduct])
 
 omit [DecidableEq T] in
 theorem graphSecondForm_add (d d' : T → ℤ) :
@@ -238,10 +293,10 @@ def chartSecond (b : Module.Basis T ℤ (dualLattice F)) (b' : Module.Basis T �
     (v u : T) : dualLattice F →+ excChartRing b' a v u :=
   AddMonoidHom.mk' (fun φ => excChartMap b' a v u (graphSecondForm (b.equivFun φ))) (by
     intro φ ψ
-    rw [map_add, graphSecondForm_add, map_add])
+    rw [map_add (f := _), graphSecondForm_add, map_add (f := _)])
+
 
 omit [DecidableEq T] in
-
 theorem latCombo_equivFun (b : Module.Basis T ℤ (dualLattice F)) (b' : Module.Basis T ℤ (dualLattice F'))
     {a : T → ℤ} (hab : ∀ t, (b t : Fin i → K) = a t • (b' t : Fin i → K)) (φ : dualLattice F) :
     latCombo b' (fun s => b.equivFun φ s * a s) = (φ : Fin i → K) := by

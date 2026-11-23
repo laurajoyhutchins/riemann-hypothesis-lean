@@ -1,11 +1,60 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SupportPhiZeroSubset
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MajorantEstimate
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FixedPointsGramVector
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.IsoRightInv
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.HermProjRight
+public import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FixedPointsGramVector
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormFlagVector
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DensityLemma.PointwiseBoundHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.IsoRightInv
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.NsqMulVecLe
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.ZhatNormLinearBound
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.NsqMulVecLe
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnitaryWeylCompact
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DensityLemma.PointwiseBoundHolds
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnitaryWeylCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.SmoothExtensionClosedSet
 
@@ -98,7 +147,7 @@ theorem isoExpl (H : Matrix (Fin n) (Fin n) ℂ) (m : ι → Fin n → ℂ) (hH 
 
 theorem nsq_cont : Continuous fun x : Fin n → ℂ => nsq x := by
   show Continuous fun x : Fin n → ℂ => ∑ i, Complex.normSq (x i)
-  exact continuous_finset_sum _ fun i _ => Complex.continuous_normSq.comp (continuous_apply i)
+  exact continuous_finsetSum _ fun i _ => Complex.continuous_normSq.comp (continuous_apply i)
 
 theorem eN_eq_sqrt (x : Fin n → ℂ) : eN x = Real.sqrt (nsq x) := by
   rw [eN, EuclideanSpace.norm_eq]
@@ -115,9 +164,9 @@ theorem gramOf_cont {X : Type*} [TopologicalSpace X] (H : Matrix (Fin n) (Fin n)
     continuousOn_pi.1 (continuousOn_pi.1 hm i) l
   refine continuousOn_pi.2 fun i => continuousOn_pi.2 fun j => ?_
   simp only [gramOf, Matrix.of_apply, herm, dotProduct, Matrix.mulVec, Pi.star_apply]
-  refine continuousOn_finset_sum _ fun l _ => ?_
+  refine continuousOn_finsetSum _ fun l _ => ?_
   refine ((hmi i l).star).mul ?_
-  exact continuousOn_finset_sum _ fun q _ => continuousOn_const.mul (hmi j q)
+  exact continuousOn_finsetSum _ fun q _ => continuousOn_const.mul (hmi j q)
 
 theorem isoUnif {X : Type*} [TopologicalSpace X] (H : Matrix (Fin n) (Fin n) ℂ) (hH : Hᴴ = H)
     (hHH : H * H = 1) (m : X → ι → Fin n → ℂ) (Kx : Set X) (hK : IsCompact Kx) (hm : ContinuousOn m Kx)
@@ -137,10 +186,10 @@ theorem isoUnif {X : Type*} [TopologicalSpace X] (H : Matrix (Fin n) (Fin n) ℂ
     have h3 : ContinuousOn (fun x => ((gramOf H (m x)).det)⁻¹ • (gramOf H (m x)).adjugate) Kx := h1.smul h2
     exact h3.congr fun x _ => e x
   have hA : ContinuousOn (fun x => ∑ j, ∑ k, ‖(gramOf H (m x))⁻¹ j k‖) Kx :=
-    continuousOn_finset_sum _ fun j _ => continuousOn_finset_sum _ fun k _ =>
+    continuousOn_finsetSum _ fun j _ => continuousOn_finsetSum _ fun k _ =>
       continuous_norm.comp_continuousOn (continuousOn_pi.1 (continuousOn_pi.1 hinv j) k)
   have hR : ContinuousOn (fun x => ∑ i, eN (m x i)) Kx :=
-    continuousOn_finset_sum _ fun i _ => eN_cont.comp_continuousOn (continuousOn_pi.1 hm i)
+    continuousOn_finsetSum _ fun i _ => eN_cont.comp_continuousOn (continuousOn_pi.1 hm i)
   have hc : ContinuousOn (fun x => cIso (Fintype.card ι) (∑ j, ∑ k, ‖(gramOf H (m x))⁻¹ j k‖)
       (∑ i, eN (m x i))) Kx := by
     simp only [cIso]
@@ -271,7 +320,6 @@ theorem fibreProper (z z' : Fin (2 * r + k + 1) → ℂ) (hstd : C2.Std k r z z'
   obtain ⟨K, hKdef⟩ : ∃ K : ℝ, K = Kf + R ^ 2 * Kf := ⟨_, rfl⟩
   have hK0 : 0 ≤ K := hKdef ▸ add_nonneg hKf0 (mul_nonneg (sq_nonneg _) hKf0)
   obtain ⟨Bv, hBv⟩ : ∃ Bv : ℝ, Bv = ∑ j, nsq (bvec j : Fin (2 * r + k + 1) → ℂ) := ⟨_, rfl⟩
-  have hBv0 : 0 ≤ Bv := hBv ▸ Finset.sum_nonneg fun a _ => by rw [← eN_sq]; positivity
 
   have hcols : ∀ (C : ℝ) (t : B.Mat k r), (∀ v, nsq (t *ᵥ v) ≤ C * (1 + K) ^ 2 * nsq v) →
       B.gN t ≤ Real.sqrt (C * (1 + K) ^ 2 * Bv) := fun C t ht => by

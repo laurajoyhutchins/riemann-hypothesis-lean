@@ -1,7 +1,51 @@
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.EllipticityFromProductFormula
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Places
-import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.IsNormAlong
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+public import GroundTheory.GlobalFields.IdeleGroups.SIdeleGroups.Galois
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles
+public import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
+public import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Places
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Polynomial
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Global GroundTheory.Global.SemiLocal GroundTheory.Global.AdeleBaseChange
 open PositivityTheory.Rg.Tf.Core PositivityTheory.Rg.Tf.Loc PositivityTheory.Rg.Tf.Geo
@@ -29,8 +73,11 @@ private theorem galAd_apply (σ : E ≃ₐ[F] E) (y : 𝔸[E]) : galAd σ y = σ
 private theorem continuous_infMap {M M' : Type} [Field M] [NumberField M] [Field M']
     [NumberField M'] (τ : M ≃+* M') (w' : InfinitePlace M') :
     Continuous (infiniteCompletionMap τ w') := by
+  open scoped NumberField.LiesOver in
   let _ : Algebra M M' := (τ : M →+* M').toAlgebra
-  exact NumberField.LiesOver.continuous_completionMap
+  change Continuous (algebraMap (w'.comap (algebraMap M M')).Completion w'.Completion)
+  rw [AbsoluteValue.Completion.algebraMap_eq_of_liesOver]
+  exact AbsoluteValue.Completion.continuous_map _ _
 
 private theorem norm_algebraMap_of_smul_eq (σ : E ≃ₐ[F] E) (u w : HeightOneSpectrum (𝓞 E))
     (h : σ • u = w) (l : E) :
@@ -50,13 +97,18 @@ private theorem norm_finMap (σ : E ≃ₐ[F] E) (w : HeightOneSpectrum (𝓞 E)
 
 private theorem norm_algebraMap_completion (w : InfinitePlace E) (x : E) :
     ‖algebraMap E w.Completion x‖ = w x :=
-  InfinitePlace.Completion.norm_coe w (WithAbs.toAbs _ x)
+  by
+    rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
+    simpa using InfinitePlace.Completion.norm_coe w (WithAbs.toAbs _ x)
 
 private theorem norm_infMap (σ : E ≃ₐ[F] E) (w : InfinitePlace E)
     (y : (w.comap ((σ : E ≃+* E) : E →+* E)).Completion) :
     ‖infiniteCompletionMap (σ : E ≃+* E) w y‖ = ‖y‖ := by
   refine InfinitePlace.Completion.induction_on _ y
     (isClosed_eq (continuous_norm.comp (continuous_infMap _ w)) continuous_norm) fun a => ?_
+  have ha : algebraMap E (w.comap ((σ : E ≃+* E) : E →+* E)).Completion a.ofAbs = (a : (w.comap ((σ : E ≃+* E) : E →+* E)).Completion) := by
+    rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply, Algebra.algebraMap_self_apply]
+  rw [← ha]
   change ‖infiniteCompletionMap (σ : E ≃+* E) w (algebraMap E _ a.ofAbs)‖ =
     ‖algebraMap E (w.comap ((σ : E ≃+* E) : E →+* E)).Completion a.ofAbs‖
   rw [infiniteCompletionMap_algebraMap, norm_algebraMap_completion, norm_algebraMap_completion,

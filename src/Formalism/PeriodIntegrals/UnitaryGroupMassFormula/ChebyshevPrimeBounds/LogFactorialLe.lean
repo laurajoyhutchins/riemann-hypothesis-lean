@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChebyshevPrimeBounds.PrimeCountBoundOf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChebyshevPrimeBounds.PrimeCountBoundOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Stirling
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -162,24 +209,6 @@ theorem main_term {x : ℝ} (hx : 0 < x) :
 theorem stir_log_thirty : log 30 = log 2 + log 3 + log 5 := by
   rw [show (30 : ℝ) = 2 * 3 * 5 by norm_num, Real.log_mul (by norm_num) (by norm_num),
     Real.log_mul (by norm_num) (by norm_num)]
-
-theorem dLower : DLower := by
-  intro x hx
-  simp only [chD]
-  have hx0 : (0 : ℝ) < x := by linarith
-  have l1 := lfLower x (by linarith)
-  have l30 := lfLower (x / 30) (by rw [le_div_iff₀ (by norm_num)]; linarith)
-  have u2 := lfUpper (x / 2) (by rw [le_div_iff₀ (by norm_num)]; linarith)
-  have u3 := lfUpper (x / 3) (by rw [le_div_iff₀ (by norm_num)]; linarith)
-  have u5 := lfUpper (x / 5) (by rw [le_div_iff₀ (by norm_num)]; linarith)
-  have hm := main_term hx0
-  have h2 : log (x / 2) = log x - log 2 := Real.log_div hx0.ne' (by norm_num)
-  have h3 : log (x / 3) = log x - log 3 := Real.log_div hx0.ne' (by norm_num)
-  have h5 : log (x / 5) = log x - log 5 := Real.log_div hx0.ne' (by norm_num)
-  have h30 : log (x / 30) = log x - log 30 := Real.log_div hx0.ne' (by norm_num)
-  have hl30 := log_thirty_ge
-  have hs := stir_log_thirty
-  linarith
 
 theorem dUpper : DUpper := by
   intro x hx

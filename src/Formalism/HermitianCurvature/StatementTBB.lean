@@ -1,4 +1,45 @@
-import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+module
+
+public import Formalism.HermitianCurvature.RealInputsClosedAdmissibleSettings
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.TBB
 
@@ -173,11 +214,6 @@ def PtBoundOfCorS : Prop :=
       CorS p nn (D.cutF p.T.base χ F ε) Y Λ K N C₂) →
     VecCutAt p χ F → LimZeroAt p nn χ F Y N κ₀ → PtBound p F (κ₀ * (C₂ * Λ ^ 2) ^ (P.r + 1))
 
-def VecCutAll : Prop :=
-  ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
-    [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (P : M.Par) (p : KB.Pl P Wp Wq)
-    (χ : ℝ → ℝ) (F : B.Mat P.k P.r → (Wq →L[ℂ] Wp)), C6.IsCut0 χ → VecCutAt p χ F
-
 def ThmBpOfParts : Prop :=
   ∀ C₃ CΛ C₀ C₂ Cκ : ℝ, 0 ≤ C₃ → 0 ≤ CΛ → 1 / 2 ≤ C₀ → 0 < C₂ → ∃ C₄ : ℝ, ∀ (Wp Wq : Type)
     [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq]
@@ -188,17 +224,6 @@ def ThmBpOfParts : Prop :=
     n₀ ≤ 30 * (P.r + 1) ^ 2 + 6 → (p₀ : ℝ) ≤ C₀ * (3 * ((P.r : ℝ) + 1)) + 1 →
     NormAt p f Fp Fm b n₀ p₀ → PtBound p Fp (κ₀ * (C₂ * Λ ^ 2) ^ (P.r + 1)) →
     PtBound p Fm (κ₀ * (C₂ * Λ ^ 2) ^ (P.r + 1)) → RegularityBoundBigCell p f b C₃ (2 * p₀ + n₀) → ThmBpAt p f b C₄ n₀ p₀
-
-def TriAt : Prop :=
-  ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
-    [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (P : M.Par) (p : KB.Pl P Wp Wq)
-    (f : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) (n : ℕ) (fi : Fin n → B.Mat P.k P.r → (Wq →L[ℂ] Wp)) (a : Fin n → ℂ)
-    (b C₁ C₄ : ℝ) (n₀ p₀ : ℕ) (γ : C.LPt) (Qγ : ℝ),
-    1 ≤ b → ∑ i, ‖a i‖ ≤ b ^ (C₁ * ((2 * P.r + 2 : ℕ) : ℝ) ^ 4) → (∀ i, jN2 p (fi i) ≤ jN2 p f) →
-    (∀ i, ThmBpAt p (fi i) b C₄ n₀ p₀) → D.IsLocPt γ (P.r + 1) → 0 < Gp p γ →
-    (Qγ : ℂ) • p.V f γ = ∑ i, a i • p.V (fi i) γ →
-    ENNReal.ofReal (Qγ ^ 2 * Ew p (fun _ => 1) f (P.r + 1) [] γ) ≤
-      ENNReal.ofReal (b ^ ((2 * C₁ + C₄) * ((2 * P.r + 2 : ℕ) : ℝ) ^ 4) * (Gp p γ)⁻¹ ^ (2 * p₀ + n₀)) * jN2 p f
 
 end
 

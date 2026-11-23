@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.BridgeNC
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.BridgePlace
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StepPtRepPfA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.BridgeNC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.CarrierBase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +83,7 @@ theorem rootCoord_Q (hT : TrHyp F Qm Qim c) {κ : ℂ} (hc : ∀ a : Fin r, c a 
         else (ρ *ᵥ (Qim *ᵥ F.z)) (Formalism.QuantumDeterminants.eI k r a)) := by
   unfold rootCoord nxt
   by_cases h : a.val + 1 < r
-  · rw [dif_pos h, dif_pos h, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, Qi_e hT, Matrix.mulVec_smul,
+  · rw [dite_eq_left h, dite_eq_left h, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, Qi_e hT, Matrix.mulVec_smul,
       Matrix.mulVec_smul, PtRepPf.hJ_smul_right, hJ_fd_Q hT, hc, hc]
     unfold Formalism.QuantumDeterminants.bvec
     rw [mulVec_single_apply]
@@ -45,7 +91,7 @@ theorem rootCoord_Q (hT : TrHyp F Qm Qim c) {κ : ℂ} (hc : ∀ a : Fin r, c a 
     simp only
     rw [he, pow_succ]
     field_simp
-  · rw [dif_neg h, dif_neg h, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, hJ_fd_Q hT, hc]
+  · rw [dite_eq_right h, dite_eq_right h, ← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, hJ_fd_Q hT, hc]
     have he : r - a.val = 1 := by have := a.2; omega
     rw [he, pow_one]
 

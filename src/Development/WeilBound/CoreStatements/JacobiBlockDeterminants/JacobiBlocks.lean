@@ -1,5 +1,53 @@
-import Development.WeilBound.CoreStatements.MultihomogeneousSquares.SingSt
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.MinorIJConjTranspose
+module
+
+public import Development.WeilBound.CoreStatements.MultihomogeneousSquares.SingSt
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishing
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPoints
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.MinorIJConjTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +92,7 @@ theorem jacobi_lead {q : ℕ} (O : Matrix (Fin q) (Fin q) ℂ) (hO : O.PosDef) {
     O.det.re * leadMinor (revDual O) l = leadMinor O k := by
   subst e
   unfold leadMinor
-  rw [dif_pos (Nat.le_add_left l k), dif_pos (Nat.le_add_right k l), ← jacobi O hO.det_pos.ne',
+  rw [dite_eq_left (Nat.le_add_left l k), dite_eq_left (Nat.le_add_right k l), ← jacobi O hO.det_pos.ne',
     re_mul_pos hO.det_pos]
 
 theorem grN_rev {q : ℕ} (O : Matrix (Fin q) (Fin q) ℂ) (hO : O.PosDef) {k l : ℕ} (e : k + l + 1 = q) :
@@ -82,7 +130,7 @@ theorem minor_w (Γ : Matrix (Fin (p + q)) (Fin (p + q)) ℂ) (i : Fin (p + q)) 
     (minorIJ Γ (stepCols (p + q) p i) (stepCols (p + q) p i)).re = leadMinor (wBlock Γ) (i + 1) := by
   rw [minor_emb Γ _ (fun s => wEmb p q (Fin.castLE hi s)) (fun a b h => wEmb_strictMono p q h) fun a => ?_]
   · unfold leadMinor
-    rw [dif_pos hi]
+    rw [dite_eq_left hi]
     rfl
   · simp only [stepCols, Finset.mem_filter, Finset.mem_univ, true_and, if_pos hi]
     constructor
@@ -98,7 +146,7 @@ theorem minor_om (Γ : Matrix (Fin (p + q)) (Fin (p + q)) ℂ) (i : Fin (p + q))
   have hq : (i : ℕ) + 1 - p ≤ q := by have := i.2; omega
   rw [minor_emb Γ _ (fun s => omEmb p q (Fin.castLE hq s)) (fun a b h => omEmb_strictMono p q h) fun a => ?_]
   · unfold leadMinor
-    rw [dif_pos hq]
+    rw [dite_eq_left hq]
     rfl
   · simp only [stepCols, Finset.mem_filter, Finset.mem_univ, true_and, if_neg hi]
     constructor

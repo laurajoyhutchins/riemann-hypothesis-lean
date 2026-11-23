@@ -1,6 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.BcrisRegularPeriodRing
-import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.FixedBaseSurjectivity.Imports
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.BcrisRegularPeriodRing
+public import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.PeriodRingUnits.DieudonneManinBasisModification
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.FockModels.TiltedDrinfeld.Base
+import GroundTheory.PAdicHodge.ACrisBdRGalois
+import GroundTheory.PAdicHodge.ACrisPhi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -11,8 +56,6 @@ open Formalism.Per6 GroundTheory.PAdicHodge DeRhamPotentiallySemistable.DRPst
 namespace CrystallineSemistableComparison
 
 variable {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl l)}
-
-theorem σ_per (g : K.fixingSubgroup) (x : BdR l) : (per l K).σ g x = σD g.1 x := rfl
 
 theorem isU_of_isUnit {A B : Type*} [CommRing A] [CommRing B] (f : A →+* B) {a : A} (ha : IsUnit a) :
     f a ∈ f.range ∧ ∃ y ∈ f.range, f a * y = 1 :=
@@ -29,7 +72,7 @@ theorem loc_abs {A B : Type*} [CommRing A] [IsLocalRing A] [CommRing B] (f : A �
     (x ∈ f.range ∧ ∃ z ∈ f.range, x * z = 1) ∨ (y ∈ f.range ∧ ∃ z ∈ f.range, y * z = 1) := by
   obtain ⟨a, rfl⟩ := hx
   obtain ⟨b, rfl⟩ := hy
-  rw [← map_add] at h
+  rw [← map_add (f := _)] at h
   rcases IsLocalRing.isUnit_or_isUnit_of_isUnit_add (isUnit_of_isU f hf h.2) with ha | hb
   · exact Or.inl (isU_of_isUnit f ha)
   · exact Or.inr (isU_of_isUnit f hb)
@@ -53,7 +96,7 @@ theorem facts : PeriodRingFacts := fun l _ K =>
     thetaSetup_structureMap_comp := fun z => by
       show algebraMap (BdRp l) (BdR l) (ACris.iota ℂ_[l] l (algebraMap (AInf ℂ_[l] l) (ACris.ACris ℂ_[l] l)
         (IsPerfectoidField.padicIntToWitt l z))) = algebraMap (BdRp l) (BdR l) (algebraMap ℚ_[l] (BdRp l) (z : ℚ_[l]))
-      rw [ACris.iota_padicInt]
+      exact congrArg _ (ACris.iota_padicInt z)
     frobenius_period := ACris.phi_periodT_eq_mul (untilt_epsilon (p := l))
     t_ne := DeRhamTwist.Twist.tQ_ne
     t_mem := ⟨ACris.iota ℂ_[l] l (tA l), rfl⟩

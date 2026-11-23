@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JpUnif
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LowerLeftBlock
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+
+@[expose] public section
+
 open Matrix GlobalTheory.CompanionTheory.Jp
 
 noncomputable section
@@ -52,7 +107,7 @@ theorem rank_add_rank_eq {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuati
       simp [Matrix.mulVec_mulVec, hzero]
   have hrn := LinearMap.finrank_range_add_finrank_ker (d.map (IsLocalRing.residue O)).mulVecLin
   rw [hker] at hrn
-  simpa [Matrix.rank] using hrn
+  simpa [← Matrix.finrank_range_mulVecLin] using hrn
 
 theorem low_rows {R : Type} [CommRing R] {n : ℕ} (g : GL (Ix n) R) :
     lowerLeftBlock g * (g⁻¹).1.toBlocks₁₂ + dBlk g * (g⁻¹).1.toBlocks₂₂ = 1 := by
@@ -94,18 +149,18 @@ theorem exists_integral {O L : Type} [CommRing O] [Field L] (ι : O →+* L) (h�
   have hC' : ι.mapMatrix C = dL * ι.mapMatrix C' := hC
   have hD' : ι ϖ • ι.mapMatrix D = dL * ι.mapMatrix D' := hD
   have h1' : ι.mapMatrix C * ι.mapMatrix Bi + ι.mapMatrix D * ι.mapMatrix Di = 1 := by
-    rw [← map_mul, ← map_mul, ← map_add, h1, map_one]
+    rw [← map_mul, ← map_mul, ← map_add (f := _), h1, map_one]
   have h2' : ι.mapMatrix C' * ι.mapMatrix Bi' + ι.mapMatrix D' * ι.mapMatrix Di' = 1 := by
-    rw [← map_mul, ← map_mul, ← map_add, h2, map_one]
+    rw [← map_mul, ← map_mul, ← map_add (f := _), h2, map_one]
   have hCi : ι.mapMatrix C' = dLi * ι.mapMatrix C := by
     rw [hC', ← Matrix.mul_assoc, hd', Matrix.one_mul]
   have hDi : ι.mapMatrix D' = ι ϖ • (dLi * ι.mapMatrix D) := by
     rw [← Matrix.mul_smul, hD', ← Matrix.mul_assoc, hd', Matrix.one_mul]
   have hF : ι.mapMatrix (C * Bi' + ϖ • (D * Di')) = dL := by
-    rw [map_add, hs, map_mul, map_mul, hC', ← Matrix.smul_mul, hD', Matrix.mul_assoc, Matrix.mul_assoc, ← Matrix.mul_add,
+    rw [map_add (f := _), hs, map_mul, map_mul, hC', ← Matrix.smul_mul, hD', Matrix.mul_assoc, Matrix.mul_assoc, ← Matrix.mul_add,
       h2', Matrix.mul_one]
   have hG : ι.mapMatrix (ϖ • (C' * Bi) + D' * Di) = ι ϖ • dLi := by
-    rw [map_add, hs, map_mul, map_mul, hCi, hDi, Matrix.smul_mul, Matrix.mul_assoc, Matrix.mul_assoc, ← smul_add,
+    rw [map_add (f := _), hs, map_mul, map_mul, hCi, hDi, Matrix.smul_mul, Matrix.mul_assoc, Matrix.mul_assoc, ← smul_add,
       ← Matrix.mul_add, h1', Matrix.mul_one]
   refine ⟨hinj ?_, hinj ?_, hinj ?_, hinj ?_⟩
   · rw [map_mul, hF, hG, hs, map_one, Matrix.mul_smul, hd]
@@ -139,11 +194,11 @@ theorem iD_eq_rank : ∀ (O L : Type) [CommRing O] [IsDomain O] [IsDiscreteValua
   have hd0 : (lowerLeftBlock κ * (κ'⁻¹).1.toBlocks₁₂ + ϖ • (dBlk κ * (κ'⁻¹).1.toBlocks₂₂)).map (IsLocalRing.residue O) =
       R (lowerLeftBlock κ) * R (κ'⁻¹).1.toBlocks₁₂ := by
     change R _ = _
-    rw [map_add, hsz, add_zero, map_mul]
+    rw [map_add (f := _), hsz, add_zero, map_mul]
   have hE0 : (ϖ • (lowerLeftBlock κ' * (κ⁻¹).1.toBlocks₁₂) + dBlk κ' * (κ⁻¹).1.toBlocks₂₂).map (IsLocalRing.residue O) =
       R (dBlk κ') * R (κ⁻¹).1.toBlocks₂₂ := by
     change R _ = _
-    rw [map_add, hsz, zero_add, map_mul]
+    rw [map_add (f := _), hsz, zero_add, map_mul]
   have r1 : ((lowerLeftBlock κ * (κ'⁻¹).1.toBlocks₁₂ + ϖ • (dBlk κ * (κ'⁻¹).1.toBlocks₂₂)).map (IsLocalRing.residue O)).rank
       = (R (lowerLeftBlock κ)).rank := by
     apply le_antisymm

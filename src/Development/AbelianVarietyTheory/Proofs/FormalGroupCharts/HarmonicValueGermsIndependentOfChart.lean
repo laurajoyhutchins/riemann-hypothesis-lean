@@ -1,21 +1,68 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpUniqChart
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpChartOf
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpActOf
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralChartDirectionsAreEigenvectors
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PrimUniqPf
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndRelPf
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndEnc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsTorusAndQuotientHom
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.JetsOnCopiesCompatibleFrames
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FrameBiextDictionarySecondPartialLaw
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndSt
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpTie
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.BiextensionDepthLeOfRelated
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartLawActionEqTransportedOfCoordRel
 import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalCompApplyEqMvPowerSeriesSubst
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.BiextensionDepthLeOfRelated
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ChartLawActionEqTransportedOfCoordRel
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FrameRatioAdjointnessSeries
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.NabValNTransport
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.SvalValueAt
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsTorusAndQuotientHom
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IntegralChartDirectionsAreEigenvectors
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SumSupportRename
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.SvalValueAt
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.NabValNTransport
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndEnc
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndRelPf
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpActOf
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpChartOf
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpUniqChart
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PrimUniqPf
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThetaSwapFirstTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ExpLaw
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -51,10 +98,10 @@ theorem chartVal_eq {y : FrPt Xo c S} (C : ChartAt Xo c y) (k : ℕ) {n : ℕ} (
   congr 1
   refine Finset.prod_congr rfl fun b _ => ?_
   refine congrArg (fun z => C.B.nabVal S C.h H.w0 k (f b) C.uvec (MvPolynomial.monomial z 1)) (Finsupp.ext fun ℓ => ?_)
-  exact (Finsupp.mapDomain_apply (ltEquiv Dw n).injective m ⟨ℓ.1, ℓ.2, b⟩).symm
+  exact (Finsupp.mapDomain_apply_of_injective (ltEquiv Dw n).injective m ⟨ℓ.1, ℓ.2, b⟩).symm
+
 
 omit [StarRing (𝓞 E)] [Algebra ℚ S] in
-
 theorem exp_facts (G : FGLaw S (dL Dw)) (uvec : Lt1 Dw → Fin (dL Dw) → S)
     (hb : ∀ v : Fin (dL Dw) → S, ∃! a : Lt1 Dw → S, ∀ j, ∑ ℓ, a ℓ * uvec ℓ j = v j) (φ : Pt S 1 (dL Dw))
     (h : IsExpOf G.F uvec φ) :
@@ -86,9 +133,9 @@ theorem exp_facts (G : FGLaw S (dL Dw)) (uvec : Lt1 Dw → Fin (dL Dw) → S)
 
 end
 
+
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ GlobalTheory.FrameBiextId GlobalTheory.ChartCmp ReciprocityTheory.ChartRestriction.G.TB.WickVanishing Formalism.MainNotions.ModuliIntegralCharts.H1.FBIdPh in
 open ReciprocityTheory.ChartRestriction.G.TB (dLin transF IsInvPair dAct) in
-
 theorem chartVal_indep : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) [StarRing (𝓞 E)], (∀ a : 𝓞 E, star a = H.bar a) → ∀ (S : Type) [Field S] [Algebra c.F S] [Algebra ℚ S] (y : FrPt Xo c S) (C C' : ChartAt Xo c y) (k n : ℕ) (F : Fin n → LB.Sec (LPow Xo.univ.t.G Xo.univ.t.PP.L k (ptO Xo y.x))) (f : Fin n → MvPowerSeries (Fin 1 × Fin C.d) S) (f' : Fin n → MvPowerSeries (Fin 1 × Fin C'.d) S), (∀ b, IsGerm y C.d C.x C.B.A.act C.e C.wP k (F b) (f b)) → (∀ b, IsGerm y C'.d C'.x C'.B.A.act C'.e C'.wP k (F b) (f' b)) → ∀ (a : (E →+* ℂ) × ℕ → ℕ) (P : MvPolynomial (LtN Dw n) c.F), P ∈ harmA c a n → chartVal C k f P = chartVal C' k f' P := by
   intro E _ _ _ H Dw l Xo c _ hs S _ _ _ y C C' k n F f f' hf hf' a P hP
   have hAct := expActOf_of GlobalTheory.EigDir.linEig_holds

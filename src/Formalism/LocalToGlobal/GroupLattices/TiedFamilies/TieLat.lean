@@ -1,10 +1,55 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpCMemMIff
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ExistsPrimeToLe
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.MRatSpanOfRatInv
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.MRatSpanOfWeak
-import Formalism.LocalToGlobal.GroupLattices.StdSubAtOfRing
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IsUnitDetBlockPreimage
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtRec
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpCMemMIff
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.MRatSpanOfWeak
+public import Formalism.LocalToGlobal.GroupLattices.StdSubAtOfRing
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TiePtRec
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CastGLSymmBc
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.MRatSpanRec
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ClsGat
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ExistsPrimeToLe
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.MRatSpanOfRatInv
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.SpanImageOfSurj
+import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.GramDetIsUnit
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.IsUnitDetBlockPreimage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +80,7 @@ structure CmpCore (T : ∀ u : D.what₂.Word, Forms0 D u) (Gt : GatTies D) (I :
 
 variable {T : ∀ u : D.what₂.Word, Forms0 D u} {Gt : GatTies D} {I : CmpIn D X}
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem cmpRec_lat_pf (H : CmpCore T Gt I) (hloc : ValIntRec T Gt I)
     (u : D.what₂.Word) (w : D.what₂.places.Pl) (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w))
@@ -50,7 +95,7 @@ theorem cmpRec_lat_pf (H : CmpCore T Gt I) (hloc : ValIntRec T Gt I)
 def SurjRat (T : ∀ u : D.what₂.Word, Forms0 D u) (Gt : GatTies D) (I : CmpIn D X) : Prop :=
   ∀ u w hg, ∀ F ∈ (D.gat u w hg).M, RatFn (D.gat u w hg) (I.embW u w hg) F → ∃ x, cmpRec T Gt I u w hg x = F
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem latM_pf (H : CmpCore T Gt I) (hloc : ValIntRec T Gt I) (hsurj : SurjRat T Gt I)
     (hd : ∀ u w hg, MRatSpan (D.gat u w hg).P (D.gat u w hg).comp (I.embW u w hg) (D.gat u w hg).M)

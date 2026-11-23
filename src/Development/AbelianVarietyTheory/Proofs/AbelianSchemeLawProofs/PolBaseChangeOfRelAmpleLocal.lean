@@ -1,7 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.TangentLinearity.ConstPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,8 +103,8 @@ theorem sym_pull (h : IsGrpPullback A' A f φ) (hs : Sym A L) : Sym A' (L.pull �
     rw [Category.assoc, inv_comm h, ← Category.assoc, ← hψ, Category.assoc]
   · exact hψ.symm
 
-omit [GrpObj A] [GrpObj A'] in
 
+omit [GrpObj A] [GrpObj A'] in
 theorem relAmple_restrict (h : IsPullback φ A'.hom A.hom f) (hL : L.IsLB) (hA : RelAmple A L)
     (V : S.Opens) (hV : IsAffineOpen V) :
     RelAmple (Over.mk (A'.hom ∣_ (f ⁻¹ᵁ V))) ((L.pull φ).pull (A'.hom ⁻¹ᵁ (f ⁻¹ᵁ V)).ι) := by
@@ -70,8 +113,8 @@ theorem relAmple_restrict (h : IsPullback φ A'.hom A.hom f) (hL : L.IsLB) (hA :
   obtain ⟨w, hw⟩ : LBIso ((L.pull φ).pull (A'.hom ⁻¹ᵁ (f ⁻¹ᵁ V)).ι) (L.pull ((A'.hom ⁻¹ᵁ (f ⁻¹ᵁ V)).ι ≫ φ)) :=
     LBIso.chartPull (chartPullLinComb L φ (fun _ : PUnit => (A'.hom ⁻¹ᵁ (f ⁻¹ᵁ V)).ι)
       (fun _ => (A'.hom ⁻¹ᵁ (f ⁻¹ᵁ V)).ι ≫ φ) (fun _ => 1) (𝟙 _) fun _ => (Category.id_comp _).symm)
-      (chartPullId _) (lbIso_refl (pull_isLB hL _))
-  exact relAmple_pull (A' := Over.mk (A'.hom ∣_ (f ⁻¹ᵁ V))) H hL (pull_isLB (pull_isLB hL _) _)
+      (chartPullId _) (lbIso_refl (LB.isLB_pull hL _))
+  exact relAmple_pull (A' := Over.mk (A'.hom ∣_ (f ⁻¹ᵁ V))) H hL (LB.isLB_pull (LB.isLB_pull hL _) _)
     ((isGen_iff w).1 hw) V hV (fun y => y.2) hA
 
 end GlobalTheory.PolBaseChange
@@ -87,7 +130,7 @@ theorem polBaseChange_of_relAmple_local :
   intro hloc S S' f P
   have h := isGrpPullback_pullback P.A f
   have hab := TLinPf.isAb_pullback f P.A P.isAb
-  have hL' := pull_isLB P.isLB (pullback.fst P.A.hom f)
+  have hL' := LB.isLB_pull P.isLB (pullback.fst P.A.hom f)
   obtain ⟨w, hw⟩ := lbIso_refl hL'
   have := hab.proper
   have hamp : RelAmple ((Over.pullback f).obj P.A) (P.L.pull (pullback.fst P.A.hom f)) := by

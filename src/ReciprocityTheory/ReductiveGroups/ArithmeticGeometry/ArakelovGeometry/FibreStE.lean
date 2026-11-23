@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreStD
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreStD
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreStC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +61,7 @@ theorem fnTrace_coe (x : ι → Ω) (e : Fin (D + 1) → ι) (s : Lx x e) :
       ((Algebra.trace (fnField (x ∘ e)) (Lx x e) s : fnField (x ∘ e)) : Ω) := by
   have hs : (s : Ω) ∈ fnField x := (IntermediateField.mem_extendScalars _).mp s.2
   unfold fnTrace
-  rw [dif_pos hs]
+  rw [dite_eq_left hs]
 
 theorem exists_gen (x : ι → Ω) (e : Fin (D + 1) → ι) (h : IsProjFrame x e) :
     ∃ G : Gen x e, G.P.natDegree = projDeg x e ∧
@@ -136,11 +184,11 @@ theorem exists_gen (x : ι → Ω) (e : Fin (D + 1) → ι) (h : IsProjFrame x e
       hUV := by
         have e1 : (UV 0).map r * Pa.map r + (UV 1).map r * derivative (Pa.map r) - C (r b') =
             (UV 0 * Pa + UV 1 * derivative Pa - C b').map r := by
-          rw [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul,
+          rw [Polynomial.map_sub, Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_mul,
             Polynomial.derivative_map, Polynomial.map_C]
         have e2 : (UV 0 * Pa + UV 1 * derivative Pa - C b').map
             (algebraMap (chartRing y) (fnField y)) = 0 := by
-          rw [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul,
+          rw [Polynomial.map_sub, Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_mul,
             ← Polynomial.derivative_map, Polynomial.map_C, hUV 0, hUV 1, ← hPK]
           simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
           linear_combination (C (algebraMap (chartRing y) (fnField y) b')) * huv
@@ -160,8 +208,10 @@ theorem exists_gen (x : ι → Ω) (e : Fin (D + 1) → ι) (h : IsProjFrame x e
       show _ = H.eval₂ (deh y 0) (deh x (e 0) Θ)
       rw [eval₂_eq_sum_range, hθ, hsdef]
       simp [Algebra.smul_def]
+
     rw [← hs, fnTrace_coe, map_sum]
     simp only [LinearMap.map_smul, smul_eq_mul, trace_pow_eq_psumC hc]
+
     rw [Gen.TrP, map_sum]
     push_cast
     refine Finset.sum_congr rfl fun j _ => ?_

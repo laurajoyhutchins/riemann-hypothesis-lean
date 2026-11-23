@@ -1,15 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatLineGenerator
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.CardComapMulFinsumEqFinsumFibres
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsRingHomComplexCompEqOfCountable
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointComponentLocalRing
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRingPointsExistsUnique
+public import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsPoint
+public import Development.WeilBound.CoreStatements.VolumeEquality.CoverRootsSch
+public import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PFibreNormDehomRoots
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+import Mathlib.Algebra.MvPolynomial.Cardinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GapN
-import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsPoint
-import Development.WeilBound.CoreStatements.VolumeEquality.CoverRootsSch
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsRingHomComplexCompEqOfCountable
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointComponentLocalRing
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PFibreNormDehomRoots
+public import Mathlib.Algebra.MvPolynomial.Funext
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.ExRefEff
 
@@ -25,19 +74,19 @@ variable {K : Type} [Fintype K] {J : K → Type} [∀ k, Fintype (J k)]
 
 def bdeg (m : (Σ k, J k) →₀ ℕ) : K → ℕ := fun k => ∑ i, m ⟨k, i⟩
 
-open Classical in
 
+open Classical in
 def bcomp (g : MRing J) (d : K → ℕ) : MRing J :=
-  ∑ m ∈ g.support.filter (fun m => bdeg m = d), monomial m (coeff m g)
+  ∑ m ∈ g.support.filter (fun m => bdeg m = d), monomial m (AddMonoidAlgebra.coeff g m)
 
 open Classical in
 theorem coeff_bcomp (g : MRing J) (d : K → ℕ) (m : (Σ k, J k) →₀ ℕ) :
-    coeff m (bcomp g d) = if bdeg m = d then coeff m g else 0 := by
+    AddMonoidAlgebra.coeff (bcomp g d) m = if bdeg m = d then AddMonoidAlgebra.coeff g m else 0 := by
   rw [bcomp, coeff_sum]
   simp only [coeff_monomial]
   rw [Finset.sum_ite_eq']
   simp only [Finset.mem_filter, mem_support_iff]
-  by_cases h : bdeg m = d <;> by_cases h' : coeff m g = 0 <;> simp [h, h']
+  by_cases h : bdeg m = d <;> by_cases h' : AddMonoidAlgebra.coeff g m = 0 <;> simp [h, h']
 
 theorem bcomp_homog (g : MRing J) (d : K → ℕ) : IsMultiHomog (bcomp g d) d := by
   classical
@@ -52,7 +101,7 @@ theorem sum_bcomp [DecidableEq (K → ℕ)] (g : MRing J) : ∑ d ∈ g.support.
   classical
   ext m
   rw [coeff_sum]
-  by_cases h : coeff m g = 0
+  by_cases h : AddMonoidAlgebra.coeff g m = 0
   · rw [h]
     refine Finset.sum_eq_zero fun d _ => ?_
     rw [coeff_bcomp]
@@ -69,7 +118,7 @@ theorem sum_bcomp [DecidableEq (K → ℕ)] (g : MRing J) : ∑ d ∈ g.support.
 theorem bcomp_eq_zero [DecidableEq (K → ℕ)] (g : MRing J) {d : K → ℕ} (h : d ∉ g.support.image bdeg) : bcomp g d = 0 := by
   classical
   ext m
-  rw [coeff_bcomp, coeff_zero]
+  rw [coeff_bcomp, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
   split_ifs with e
   · by_contra h0
     exact h (e ▸ Finset.mem_image_of_mem _ (mem_support_iff.2 h0))
@@ -78,6 +127,7 @@ theorem bcomp_eq_zero [DecidableEq (K → ℕ)] (g : MRing J) {d : K → ℕ} (h
 theorem exists_aeval_bcomp_ne {Ω : Type} [Field Ω] (t : (Σ k, J k) → Ω) (g : MRing J) (h : aeval t g ≠ 0) :
     ∃ d : K → ℕ, aeval t (bcomp g d) ≠ 0 := by
   classical
+
   rw [← sum_bcomp g, map_sum] at h
   obtain ⟨d, -, hd⟩ := Finset.exists_ne_zero_of_sum_ne_zero h
   exact ⟨d, hd⟩
@@ -91,6 +141,7 @@ theorem aeval_bcomp_eq_zero (w : (Σ k, J k) → ℂ) (g : MRing J)
     rw [map_zero, GroundTheory.Heights₂.Heights.HilbertSamuel.FibreNormDehomRoots.eval_mConeMap]
     exact h c fun k => hc k (Set.mem_univ k)
   have h1 : mConeMap w g = ∑ d' ∈ g.support.image bdeg, C (aeval w (bcomp g d')) * ∏ k, X k ^ d' k := by
+
     conv_lhs => rw [← sum_bcomp g, map_sum]
     exact Finset.sum_congr rfl fun d' _ =>
       GroundTheory.Heights₂.Heights.HilbertSamuel.ProjLine.mConeMap_eq_of_isMultiHomog w (bcomp_homog g d')
@@ -99,8 +150,8 @@ theorem aeval_bcomp_eq_zero (w : (Σ k, J k) → ℂ) (g : MRing J)
     rw [monomial_eq, C_1, _root_.one_mul, Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
     rfl
   by_cases hd : d ∈ g.support.image bdeg
-  · have h2 := congrArg (coeff (Finsupp.equivFunOnFinite.symm d)) (h1.symm.trans h0)
-    rw [coeff_sum, coeff_zero] at h2
+  · have h2 := congrArg (AddMonoidAlgebra.coeff · (Finsupp.equivFunOnFinite.symm d)) (h1.symm.trans h0)
+    rw [coeff_sum, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at h2
     simp only [hm, coeff_C_mul, coeff_monomial, mul_ite, _root_.mul_one, mul_zero, EmbeddingLike.apply_eq_iff_eq] at h2
     rwa [Finset.sum_ite_eq', if_pos hd] at h2
   · rw [bcomp_eq_zero g hd, map_zero]

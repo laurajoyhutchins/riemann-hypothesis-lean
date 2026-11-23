@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocFreeMapMkQIff
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LatticeGoodBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeBaseChangeQuotientStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SmulMemSpanOver
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.Imports
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.Imports
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LatticeGoodBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocFreeMapMkQIff
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeBaseChangeQuotientStatement
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SmulMemSpanOver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,8 +99,8 @@ theorem swp_stable {Γ : AddSubgroup (V × Z)} (hs : ∀ a ∈ R, ∀ v ∈ Γ, 
   have := hs a ha _ (mem_swp.1 h)
   exact mem_swp.2 this
 
-include hR in
 
+include hR in
 theorem comap_inl (hb : IsBaseChange C b) (hb' : IsBaseChange C b')
     (Γ : AddSubgroup (V × Z)) (N : ℕ) (hs : ∀ a ∈ R, ∀ v ∈ Γ, a • v ∈ Γ)
     (hf : LocFree R N (Γ.map (AddMonoidHom.snd V Z))) :
@@ -75,8 +122,8 @@ theorem comap_inl (hb : IsBaseChange C b) (hb' : IsBaseChange C b')
   simp only [AddSubgroup.mem_comap, AddMonoidHom.inr_apply, AddMonoidHom.inl_apply]
   exact (mem_swp (Γ := spanOver RC (Prod.map b b' '' Γ))).symm
 
-include hR in
 
+include hR in
 theorem inf_top_prod (hb : IsBaseChange C b) (hb' : IsBaseChange C b')
     (Γ : AddSubgroup (V × Z)) (H : AddSubgroup Z) (N : ℕ) (hs : ∀ a ∈ R, ∀ v ∈ Γ, a • v ∈ Γ)
     (hf : LocFree R N (Γ.map (AddMonoidHom.snd V Z))) (hle : H ≤ Γ.map (AddMonoidHom.snd V Z))
@@ -114,8 +161,8 @@ variable {o Ω C : Type} [CommRing o] [Field Ω] [Field C] [Algebra o Ω] [Algeb
   [IsScalarTower Ω C Sc]
   (a : A →ₗ[Ω] Ac) (b : B →ₗ[Ω] Bc) (c : S →ₗ[Ω] Sc)
 
-include hR in
 
+include hR in
 theorem core (ha : IsBaseChange C a) (hb : IsBaseChange C b) (hc : IsBaseChange C c)
     (Gam : AddSubgroup (A × B)) (Del : AddSubgroup (B × S)) (hh : AddSubgroup B) (n₁ n₂ n₃ : ℕ)
     (hGs : ∀ x ∈ R, ∀ v ∈ Gam, x • v ∈ Gam) (hDs : ∀ x ∈ R, ∀ v ∈ Del, x • v ∈ Del)

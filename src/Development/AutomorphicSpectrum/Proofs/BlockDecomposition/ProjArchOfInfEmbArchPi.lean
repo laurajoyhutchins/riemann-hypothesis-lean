@@ -1,8 +1,49 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.Reductions.SiegelCore
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsAdaptedMajorant
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUnitaryCommuting
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqDiagonalOfUpperTriangularOfUnitary
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.SiegelCore
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqDiagonalOfUpperTriangularOfUnitary
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsAdaptedMajorant
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUnitaryCommuting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -113,8 +154,8 @@ theorem exists_lift (hcm : IsCMExt F E σ) (hdet : J.det ≠ 0) (τ : EmbOver E 
 theorem archMat_injective (hcm : IsCMExt F E σ) (τ : EmbOver E w) : Function.Injective (archMat σ J τ) :=
   fun a b e => (GlobalTheory.Orb.isEmbedding_archMat J hcm τ).injective (congrArg (fun m i j => m i j) e)
 
-variable (σ) in
 
+variable (σ) in
 def stabAt (τ : EmbOver E w) (P : Matrix (Fin n) (Fin n) ℂ) : Subgroup (GArch σ J w) where
   carrier := {y | (archMat σ J τ y)ᴴ * P * archMat σ J τ y = P}
   one_mem' := by simp
@@ -157,8 +198,8 @@ theorem isCompact_stabAt (hcm : IsCMExt F E σ) (hdet : J.det ≠ 0) (τ : EmbOv
 
 def evC (τ : EmbOver E w) : AF F ⊗[F] E →+* ℂ := (infEmb τ).comp (compInf F E w)
 
-variable (F E) in
 
+variable (F E) in
 def finPart : AF F ⊗[F] E →+* Af F ⊗[F] E := (Algebra.TensorProduct.map (sndA F) (AlgHom.id F E)).toRingHom
 
 theorem map_evW_fst (w : InfinitePlace F) (z : AF F ⊗[F] E) :
@@ -166,7 +207,7 @@ theorem map_evW_fst (w : InfinitePlace F) (z : AF F ⊗[F] E) :
       (Algebra.TensorProduct.map (fstA F) (AlgHom.id F E) z) = compInf F E w z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e => rfl
 
 theorem tens_prod_ext {F E A B : Type} [Field F] [Field E] [Algebra F E] [CommRing A] [CommRing B] [Algebra F A]
@@ -181,10 +222,9 @@ theorem tens_prod_ext {F E A B : Type} [Field F] [Field E] [Algebra F E] [CommRi
         (Algebra.TensorProduct.map (AlgHom.snd F A B) (AlgHom.id F E) z) := by
     intro z
     induction z with
-    | zero => simp
     | tmul x y => simp [← TensorProduct.add_tmul]
     | add x y hx hy =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [add_add_add_comm, ← hx, ← hy]
   rw [hz z, hz z', a, b]
 
@@ -279,8 +319,8 @@ theorem exists_diag (hcm : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOve
         rw [this, map_zero, Matrix.one_apply_ne e]
   exact ⟨fun i => B i i, by rw [← hB]; exact h1⟩
 
-variable (σ) in
 
+variable (σ) in
 def kInf (τ : ∀ w : InfinitePlace F, EmbOver E w) (P : InfinitePlace F → Matrix (Fin n) (Fin n) ℂ) :
     Subgroup (GAd σ J) :=
   (Subgroup.pi Set.univ fun w => stabAt σ J (τ w) (P w)).map ((ofInf σ J).comp (embArchPi σ J))

@@ -1,4 +1,49 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +112,7 @@ theorem inverse_lm {M : LieI ι a} (hM : IsUnit (Matrix.of M)) : Ring.inverse (l
 omit [Fintype ι] in
 theorem orb_unit (ρ : GL (Fin a) (ι → ℂ) →* (X →L[ℂ] X)) (v : X) {M : LieI ι a} (hM : IsUnit (Matrix.of M)) :
     orb ρ v M = ρ hM.unit v := by
-  unfold orb; rw [dif_pos hM]
+  unfold orb; rw [dite_eq_left hM]
 
 omit [Fintype ι] in
 theorem orb_mul (ρ : GL (Fin a) (ι → ℂ) →* (X →L[ℂ] X)) (v : X) (g : GL (Fin a) (ι → ℂ)) (M : LieI ι a) :
@@ -84,7 +129,7 @@ theorem orb_mul (ρ : GL (Fin a) (ι → ℂ) →* (X →L[ℂ] X)) (v : X) (g :
       have e : Matrix.of M = (g⁻¹).val * (g.val * Matrix.of M) := by
         rw [← mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, one_mul]
       rw [e]; exact (g⁻¹).isUnit.mul h
-    unfold orb; rw [dif_neg hM, dif_neg h', map_zero]
+    unfold orb; rw [dite_eq_right hM, dite_eq_right h', map_zero]
 
 theorem hasFDerivAt_orb (ρ : GL (Fin a) (ι → ℂ) →* (X →L[ℂ] X)) {v : X} {D : LieI ι a →L[ℝ] X}
     (hD : HasFDerivAt (orb ρ v) D (oneI ι a)) {M : LieI ι a} (hM : IsUnit (Matrix.of M)) :
@@ -111,6 +156,7 @@ theorem fderiv_orb (ρ : GL (Fin a) (ι → ℂ) →* (X →L[ℂ] X)) {v : X} {
   ext1 Z
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   conv_lhs => rw [← b.sum_repr (Ring.inverse (lm M) Z)]
+
   rw [map_sum, map_sum, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, map_smul, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.comp_apply,

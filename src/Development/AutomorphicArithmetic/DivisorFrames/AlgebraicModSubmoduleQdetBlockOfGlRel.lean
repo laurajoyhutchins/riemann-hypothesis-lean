@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AutomorphicArithmetic.LocalEmbeddings.ULieDefs
-import Development.AutomorphicArithmetic.DivisorFrames.ExistsQdetEqPowAddSumCoeffMemSpan
-import Development.AutomorphicArithmetic.DivisorFrames.IsIntegralEvalOfMonicMulIsIntegral
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CapelliDetBlockLeviCongrModUpperBlockIdeal
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorCommutatorQuantumDet
-open NumberField Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet GlobalTheory.UAut GlobalTheory.ULie
+module
+
+public import Formalism.RealPlaceAnalysis.StatementE
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CapelliDetBlockLeviCongrModUpperBlockIdeal
+public import Development.AutomorphicArithmetic.DivisorFrames.ExistsQdetEqPowAddSumCoeffMemSpan
+public import Development.AutomorphicArithmetic.DivisorFrames.IsIntegralEvalOfMonicMulIsIntegral
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorCommutatorQuantumDet
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.QuantumDetHighestWeightHolds
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ShiftedGeneratorEqIteSmulAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.LocallyCompactUnipFlag
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyNormFinLeOne
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
+
+open NumberField Matrix Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.AdelicU GlobalTheory.SiegelSet GlobalTheory.UAut
 open scoped TensorProduct
 
 namespace UpperTheory.QuantumDeterminantBlockAnnihilators
@@ -25,12 +77,13 @@ private theorem map_qdet {A B : Type} [Ring A] [Algebra ℂ A] [Ring B] [Algebra
     (φ : A →ₐ[ℂ] B) (E : Fin n → Fin n → A) (u : ℂ) :
     φ (qdet E u) = qdet (fun a b => φ (E a b)) u := by
   unfold qdet qminor
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [map_mul, map_intCast, map_list_prod, List.map_ofFn]
   congr 3
   funext k
-  simp only [Function.comp, Tm]
+  simp only [Function.comp_apply, Tm, map_add]
   split_ifs <;> simp
 
 private theorem qdet_self_comm {A : Type} [Ring A] [Algebra ℂ A] {n : ℕ}
@@ -59,7 +112,8 @@ private theorem exists_poly {A : Type} [Ring A] [Algebra ℂ A] {R : Type} [Comm
   choose d hd using hc'
   refine ⟨X ^ n + ∑ k : Fin n, C (d k) * X ^ (k : ℕ), monic_X_pow_add (degree_sum_fin_lt _), fun u => ?_⟩
   rw [hq u, ← Fin.sum_univ_eq_sum_range (fun k => u ^ k • c k)]
-  simp only [eval_add, eval_pow, eval_X, eval_finset_sum, eval_mul, eval_C, map_add, map_sum]
+
+  simp only [eval_add, eval_pow, eval_X, eval_finsetSum, eval_mul, eval_C, map_add (f := _), map_sum]
   congr 1
   · rw [← map_pow, AlgHom.commutes]
   · refine Finset.sum_congr rfl fun k _ => ?_
@@ -74,7 +128,7 @@ private theorem factor_alg {V : Type} [AddCommGroup V] [Module ℂ V] {R : Type}
     { carrier := {a | φ a v ∈ M}
       add_mem' := fun {a b} ha hb => by
         show φ (a + b) v ∈ M
-        rw [map_add]; exact M.add_mem ha hb
+        rw [map_add (f := _)]; exact M.add_mem ha hb
       zero_mem' := by
         show φ 0 v ∈ M
         rw [map_zero]; exact M.zero_mem
@@ -118,7 +172,7 @@ private theorem aeval_congr {V : Type} [AddCommGroup V] [Module ℂ V] (W M : Su
   | add p q hp hq =>
     have e : aeval c (p + q) v - aeval D (p + q) v =
         (aeval c p v - aeval D p v) + (aeval c q v - aeval D q v) := by
-      simp only [map_add, LinearMap.add_apply]; abel
+      simp only [map_add (f := _), LinearMap.add_apply]; abel
     rw [e]; exact M.add_mem hp hq
   | monomial n a =>
     simp only [aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply]
@@ -134,8 +188,8 @@ private theorem two_factor {V : Type} [AddCommGroup V] [Module ℂ V] {r m : ℕ
     (∀ u : ℂ, ∃ P : ℂ[X], P ≠ 0 ∧ aeval (qdet A u) P v ∈ M) ∧
       (∀ u : ℂ, ∃ P : ℂ[X], P ≠ 0 ∧ aeval (qdet B u) P v ∈ M) := by
   let s : Set (Module.End ℂ V) := Set.range (qdet A) ∪ Set.range (qdet B)
-  have hs : ∀ x ∈ s, ∀ y ∈ s, x * y = y * x := by
-    rintro _ (⟨u, rfl⟩ | ⟨u, rfl⟩) _ (⟨w, rfl⟩ | ⟨w, rfl⟩)
+  have hs : s.Pairwise Commute := by
+    rintro _ (⟨u, rfl⟩ | ⟨u, rfl⟩) _ (⟨w, rfl⟩ | ⟨w, rfl⟩) _
     · exact qdet_self_comm A hA u w
     · exact (hAB w u).symm
     · exact hAB u w
@@ -193,7 +247,7 @@ private theorem block_congr {V : Type} [AddCommGroup V] [Module ℂ V] {r m : �
       obtain ⟨p, q, w, rfl⟩ := hy
       exact Submodule.subset_span ⟨p, q, w.1 x, w.2 x hx, rfl⟩
     | zero => simp
-    | add a b _ _ ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+    | add a b _ _ ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
     | smul c a _ ha => rw [map_smul]; exact Submodule.smul_mem _ c ha
   have h3 := h2 _ h1
   rw [map_sub, map_mul, map_qdet, map_qdet, map_qdet] at h3
@@ -230,7 +284,7 @@ private theorem span_stable {V : Type} [AddCommGroup V] [Module ℂ V] {r m : �
         · exact Submodule.subset_span ⟨p, t, x, hx, rfl⟩
       · exact Submodule.zero_mem _
   | zero => simp
-  | add a b _ _ ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+  | add a b _ _ ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
   | smul c a _ ha => rw [map_smul]; exact Submodule.smul_mem _ c ha
 
 end UpperTheory.QuantumDeterminantBlockAnnihilators
@@ -250,7 +304,7 @@ theorem UpperTheory.algebraicModSubmodule_qdet_block_of_glRel :
     intro a b hab x hx
     rw [hN'] at hx ⊢
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.1 hx
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (hN _ _ _ hy) (span_stable X hX W hW a b hab z hz)
   have hAM : ∀ p q : Fin r, ∀ x ∈ N', X (Fin.castAdd m p) (Fin.castAdd m q) x ∈ N' :=
     fun p q => hst _ _ (Or.inl ⟨p, q, rfl, rfl⟩)

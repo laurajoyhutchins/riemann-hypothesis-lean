@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+module
+
+public import GroundTheory.ProfiniteCohomology.DiscreteModules
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Basic
+public import Mathlib.Topology.Algebra.Group.Defs
+public import Mathlib.Topology.LocallyConstant.Basic
+public import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -98,10 +146,6 @@ noncomputable def cochainsComplex (A : Rep.{u} k G) [IsDiscreteRep A] :
   CochainComplex.of (fun n => ModuleCat.of k (locallyConstantCochains A n))
     (fun n => dLocallyConstant A n) fun n => dLocallyConstant_comp A n
 
-theorem cochainsComplex_X (A : Rep.{u} k G) [IsDiscreteRep A] (n : ℕ) :
-    (cochainsComplex A).X n = ModuleCat.of k (locallyConstantCochains A n) :=
-  rfl
-
 theorem cochainsComplex_d (A : Rep.{u} k G) [IsDiscreteRep A] (n : ℕ) :
     (cochainsComplex A).d n (n + 1) = dLocallyConstant A n := by
   simp [cochainsComplex]
@@ -112,11 +156,6 @@ noncomputable def cochainsComplexι (A : Rep.{u} k G) [IsDiscreteRep A] :
     rw [cochainsComplex_d, inhomogeneousCochains.d_def]
     ext f : 2
     rfl
-
-theorem cochainsComplexι_f_hom_apply (A : Rep.{u} k G) [IsDiscreteRep A] (n : ℕ)
-    (f : locallyConstantCochains A n) :
-    ((cochainsComplexι A).f n).hom f = (f : (Fin n → G) → A) :=
-  rfl
 
 instance (A : Rep.{u} k G) [IsDiscreteRep A] (n : ℕ) : Mono ((cochainsComplexι A).f n) :=
   (ModuleCat.mono_iff_injective _).2 Subtype.val_injective

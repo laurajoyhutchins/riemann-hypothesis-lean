@@ -1,5 +1,47 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+module
+
+public import Formalism.HermitianCurvature.StatementQ
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Finset MeasureTheory
 open scoped ContDiff InnerProductSpace
@@ -141,56 +183,6 @@ namespace PreLevel
 
 variable {A : Type} [Ring A] [Algebra ℂ A] {r : ℕ}
 
-def ofLevel (L : R.LevelData A r) : PreLevel A r where
-  p := L.p
-  pb := L.pb
-  c := L.c
-  ci := L.ci
-  cb := L.cb
-  cbi := L.cbi
-  ζ := L.ζ
-  ζi := L.ζi
-  ζb := L.ζb
-  ζbi := L.ζbi
-  GG := L.GG
-  GGi := L.GGi
-  TT := L.TT
-  fns_comm := L.fns_comm
-  c_ci := L.c_ci
-  ci_c := L.ci_c
-  cb_cbi := L.cb_cbi
-  cbi_cb := L.cbi_cb
-  ζ_ζi := L.ζ_ζi
-  ζi_ζ := L.ζi_ζ
-  ζb_ζbi := L.ζb_ζbi
-  ζbi_ζb := L.ζbi_ζb
-  GG_GGi := L.GG_GGi
-  GGi_GG := L.GGi_GG
-  GG_def := L.GG_def
-  p_c := L.p_c
-  p_ci := L.p_ci
-  p_cb := L.p_cb
-  p_cbi := L.p_cbi
-  p_ζ := L.p_ζ
-  p_ζi := L.p_ζi
-  p_ζb := L.p_ζb
-  p_ζbi := L.p_ζbi
-  p_GG := L.p_GG
-  p_GGi := L.p_GGi
-  pb_cb := L.pb_cb
-  pb_cbi := L.pb_cbi
-  pb_c := L.pb_c
-  pb_ci := L.pb_ci
-  pb_ζ := L.pb_ζ
-  pb_ζi := L.pb_ζi
-  pb_ζb := L.pb_ζb
-  pb_ζbi := L.pb_ζbi
-  pb_GG := L.pb_GG
-  pb_GGi := L.pb_GGi
-  p_p := L.p_p
-  p_pb := L.p_pb
-  pb_pb := L.pb_pb
-
 variable (L0 : PreLevel A r)
 
 def fns : Set A :=
@@ -265,10 +257,6 @@ def SHyp (P : M.Par) {A : Type} [Ring A] [StarRing A] [Algebra ℂ A] (L0 : PreL
     QQ Y 0 1 * L0.ζ = L0.ζ * QQ Y 0 1 ∧ QQ Y 0 1 * L0.ζb = L0.ζb * QQ Y 0 1 + QQ Y 1 1 ∧
     QQ Y 1 0 * L0.ζb = L0.ζb * QQ Y 1 0 ∧ QQ Y 1 1 * L0.ζb = L0.ζb * QQ Y 1 1) ∧
   (∀ Y (a b : Fin 2), ∀ g ∈ L0.crdOps, Commute (QQ Y a b) g)
-
-def ModelSHyp : Prop :=
-  ∀ (P : M.Par) (L : R.LevelData (M.A P) P.r), P.OK → M.IsModelLevel P L →
-    SHyp P (PreLevel.ofLevel L) (M.QQr P) (M.kap P)
 
 def SForm (P : M.Par) {A : Type} [Ring A] [StarRing A] [Algebra ℂ A] (L0 : PreLevel A P.r)
     (QQ : ℂ → Matrix (Fin 2) (Fin 2) A) (κ : (M.Ty P → ℂ) →ₐ[ℂ] A) (b : M.Ty P → A) (SS : ℕ → A) : Prop :=

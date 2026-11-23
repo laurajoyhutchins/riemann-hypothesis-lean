@@ -1,4 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.CoreSt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.CoreSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Interval
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +119,7 @@ theorem list_pderiv (γ : σ → ℕ) (l : List σ) (hl : l.Nodup) (s : σ →�
     ring
 
 theorem opMono_add (t : σ ⊕ σ →₀ ℕ) (f g : PX m n) : opMono t (f + g) = opMono t f + opMono t g := by
-  unfold opMono; rw [map_add, mul_add]
+  unfold opMono; rw [map_add (f := _), mul_add]
 
 theorem opMono_smul (t : σ ⊕ σ →₀ ℕ) (c : ℂ) (f : PX m n) : opMono t (c • f) = c • opMono t f := by
   unfold opMono; rw [map_smul, mul_smul_comm]
@@ -85,13 +138,13 @@ theorem op_add (s₁ s₂ : Sym m n) (f : PX m n) : op (s₁ + s₂) f = op s₁
   rw [op_eq_sum (s₁ + s₂) _ MvPolynomial.support_add, op_eq_sum s₁ (s₁.support ∪ s₂.support) Finset.subset_union_left,
     op_eq_sum s₂ (s₁.support ∪ s₂.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun t _ => ?_
-  rw [coeff_add, add_smul]
+  rw [MvPolynomial.coeff_add, add_smul]
 
 theorem op_smul (c : ℂ) (s : Sym m n) (f : PX m n) : op (c • s) f = c • op s f := by
   rw [op_eq_sum (c • s) s.support MvPolynomial.support_smul, op]
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl fun t _ => ?_
-  rw [coeff_smul, smul_eq_mul, mul_smul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul, mul_smul]
 
 theorem op_zero (f : PX m n) : op (0 : Sym m n) f = 0 := by
   simp [op]
@@ -122,7 +175,7 @@ theorem comap_inl_add (t : σ ⊕ σ →₀ ℕ) (μ : σ →₀ ℕ) :
     (t + Finsupp.mapDomain Sum.inl μ).comapDomain Sum.inl Sum.inl_injective.injOn =
       t.comapDomain Sum.inl Sum.inl_injective.injOn + μ := by
   ext k
-  simp [Finsupp.comapDomain_apply, Finsupp.mapDomain_apply Sum.inl_injective]
+  simp [Finsupp.comapDomain_apply, Finsupp.mapDomain_apply_of_injective Sum.inl_injective]
 
 theorem inr_add (t : σ ⊕ σ →₀ ℕ) (μ : σ →₀ ℕ) (k : σ) :
     ((t + Finsupp.mapDomain Sum.inl μ : σ ⊕ σ →₀ ℕ)) (Sum.inr k) = t (Sum.inr k) := by
@@ -145,13 +198,14 @@ theorem op_mulL (μ : σ →₀ ℕ) (s : Sym m n) (f : PX m n) :
   rw [monomial_mul, one_mul, op_monomial, add_comm, opMono_shiftL, mul_smul_comm]
 
 theorem op_renameL (p : PX m n) (s : Sym m n) (f : PX m n) : op (rename Sum.inl p * s) f = p * op s f := by
+
   conv_lhs => rw [p.as_sum, map_sum, Finset.sum_mul]
   conv_rhs => rw [p.as_sum, Finset.sum_mul]
   rw [op_sum]
   refine Finset.sum_congr rfl fun μ _ => ?_
-  have h1 : (monomial (Finsupp.mapDomain Sum.inl μ) (coeff μ p) : Sym m n) =
-      coeff μ p • monomial (Finsupp.mapDomain Sum.inl μ) 1 := by rw [smul_monomial, smul_eq_mul, mul_one]
-  have h2 : (monomial μ (coeff μ p) : PX m n) = coeff μ p • monomial μ 1 := by rw [smul_monomial, smul_eq_mul, mul_one]
+  have h1 : (monomial (Finsupp.mapDomain Sum.inl μ) (AddMonoidAlgebra.coeff p μ) : Sym m n) =
+      AddMonoidAlgebra.coeff p μ • monomial (Finsupp.mapDomain Sum.inl μ) 1 := by rw [smul_monomial, smul_eq_mul, mul_one]
+  have h2 : (monomial μ (AddMonoidAlgebra.coeff p μ) : PX m n) = AddMonoidAlgebra.coeff p μ • monomial μ 1 := by rw [smul_monomial, smul_eq_mul, mul_one]
   rw [rename_monomial, h1, h2, smul_mul_assoc, op_smul, op_mulL, smul_mul_assoc]
 
 theorem opMono_inr (γ δ : σ →₀ ℕ) :
@@ -165,7 +219,7 @@ theorem opMono_inr (γ δ : σ →₀ ℕ) :
     · rfl
     · rintro ⟨x, hx⟩; exact Sum.inr_ne_inl hx
   rw [h0]
-  simp only [Finsupp.mapDomain_apply Sum.inr_injective]
+  simp only [Finsupp.mapDomain_apply_of_injective Sum.inr_injective]
   rw [list_pderiv γ _ (Finset.nodup_toList _), Finset.prod_map_toList, Finset.sum_map_toList,
     Finsupp.univ_sum_single]
   rw [← C_apply, C_1, one_mul, one_mul]
@@ -206,7 +260,7 @@ theorem sf_sum {ι : Type*} (S : Finset ι) (g : ι → Sym m n) (h : ∀ i ∈ 
 theorem goodT_add_inl (t : σ ⊕ σ →₀ ℕ) (μ : σ →₀ ℕ) (ht : GoodT ε t) (hμ : ∀ k ∈ μ.support, inF1 ε k) :
     GoodT ε (Finsupp.mapDomain Sum.inl μ + t) := by
   intro k hk
-  simp only [Finsupp.add_apply, Finsupp.mapDomain_apply Sum.inl_injective] at hk
+  simp only [Finsupp.add_apply, Finsupp.mapDomain_apply_of_injective Sum.inl_injective] at hk
   have h2 : (Finsupp.mapDomain Sum.inl μ : σ ⊕ σ →₀ ℕ) (Sum.inr k) = 0 := by
     rw [Finsupp.mapDomain_of_notMem_range]; rintro ⟨x, hx⟩; exact Sum.inl_ne_inr hx
   rw [h2, zero_add] at hk
@@ -222,11 +276,12 @@ theorem sf_mulL (μ : σ →₀ ℕ) (hμ : ∀ k ∈ μ.support, inF1 ε k) {s 
   exact sf_monomial ε _ _ (goodT_add_inl ε t μ (h t ht) hμ)
 
 theorem sf_renameL (p : PX m n) (hp : p ∈ F1 ε) {s : Sym m n} (h : SymbolInFirstFamily ε s) : SymbolInFirstFamily ε (rename Sum.inl p * s) := by
+
   rw [p.as_sum, map_sum, Finset.sum_mul]
   refine sf_sum ε _ _ fun μ hμ => ?_
   rw [rename_monomial]
   refine sf_mulL ε μ (fun k hk => ?_) h _
-  have hv : k ∈ p.vars := (MvPolynomial.mem_vars k).mpr ⟨μ, hμ, hk⟩
+  have hv : k ∈ p.vars := (MvPolynomial.mem_vars_iff_mem_support k).mpr ⟨μ, hμ, hk⟩
   exact (MvPolynomial.mem_supported.mp hp) hv
 
 theorem sf_inr (γ : σ →₀ ℕ) (hγ : ∀ k ∈ γ.support, inF1 ε k) (c : ℂ) :
@@ -234,7 +289,7 @@ theorem sf_inr (γ : σ →₀ ℕ) (hγ : ∀ k ∈ γ.support, inF1 ε k) (c :
   refine sf_monomial ε _ _ fun k hk => ?_
   have h1 : (Finsupp.mapDomain Sum.inr γ : σ ⊕ σ →₀ ℕ) (Sum.inl k) = 0 := by
     rw [Finsupp.mapDomain_of_notMem_range]; rintro ⟨x, hx⟩; exact Sum.inr_ne_inl hx
-  rw [h1, Finsupp.mapDomain_apply Sum.inr_injective] at hk
+  rw [h1, Finsupp.mapDomain_apply_of_injective Sum.inr_injective] at hk
   exact hγ k (Finsupp.mem_support_iff.mpr (hk.resolve_left (by simp)))
 
 theorem indicator (Γ : Finset (σ →₀ ℕ)) (hΓ : ∀ γ ∈ Γ, ∀ k ∈ γ.support, inF1 ε k) :
@@ -343,7 +398,7 @@ theorem dens : Dens := by
       omega
   have mono_mem : ∀ γ ∈ Γ, (monomial γ 1 : PX m n) ∈ box ε (R : Set (Fin m → ℕ)) := fun γ hγ =>
     Submodule.subset_span ⟨γ, hΓ γ hγ, (Finset.mem_filter.mp hγ).2.2, rfl⟩
-  have hind := indicator ε Γ hΓ Γ.card
+  have hind := B1.indicator ε Γ hΓ Γ.card
   choose! P hP using fun γ (hγ : γ ∈ Γ) => hind γ hγ (Finset.card_filter_le _ _)
   refine ⟨∑ γ ∈ Γ, rename Sum.inl (T (monomial γ 1)) * P γ,
     sf_sum ε _ _ fun γ hγ => sf_renameL ε _ (hT _ (mono_mem γ hγ)) (hP γ hγ).1, ?_⟩
@@ -358,7 +413,7 @@ theorem dens : Dens := by
     simp only [mul_ite, mul_one, mul_zero]
     rw [Finset.sum_ite_eq, if_pos hδ]
   | zero => rw [op_f_zero, map_zero]
-  | add x y _ _ hx hy => rw [op_f_add, map_add, hx, hy]
+  | add x y _ _ hx hy => rw [op_f_add, map_add (f := _), hx, hy]
   | smul a x _ hx => rw [op_f_smul, map_smul, hx]
 
 end PositivityTheory.Rg.Sw.LC

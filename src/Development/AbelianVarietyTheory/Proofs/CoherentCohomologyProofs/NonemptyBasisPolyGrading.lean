@@ -1,10 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.HomologyRestrictScalarsBijective
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexExactAtOfMonomialBasis
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.TopClassSurjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.HomologyRestrictScalarsBijective
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.TopClassSurjective
+public import Mathlib.RingTheory.Binomial
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexExactAtOfMonomialBasis
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexPolyGradingFiniteExact
 import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsMonomialBasisCechCubePolynomialGrading
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CubeComplexPolyGradingFiniteExact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Data.Sym.Card
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -75,6 +126,7 @@ theorem exists_basis_top {κ : Type} (T : κ → Finset ι) (A : Cube.{0} ι R)
     by_contra ha
     obtain ⟨a, rfl⟩ := hz (Finsupp.mem_support_iff.2 ha)
     refine ha ?_
+
     rw [← Module.Basis.coord_apply, ← e, map_sum]
     exact Finset.sum_eq_zero fun i _ => by rw [map_zsmul, h0, smul_zero]
   refine ⟨Module.Basis.mk hli ?_, fun a => Module.Basis.mk_apply _ _ a⟩
@@ -164,7 +216,7 @@ theorem nonempty_basis_polyGrading :
   obtain ⟨b, -⟩ := exists_basis_grCube_polyGrading (Fin (N + 1)) R n
   have h : ∀ a : Fin (N + 1) → ℤ, Finset.univ.filter (fun i => a i < 0) ⊆ ∅ ↔ ∀ i, 0 ≤ a i :=
     fun a => by simp [Finset.filter_eq_empty_iff]
-  exact ⟨((b ∅).map (homLocEmptyEquiv (Fin (N + 1)) _ n).symm).reindex
+  exact ⟨((b ∅).map (homLocEmptyEquiv (ι := Fin (N + 1)) _ n).symm).reindex
     { toFun := fun a => ⟨fun i => (a.1.1 i).toNat, by
         rw [Finset.sum_congr rfl fun i _ => Int.toNat_of_nonneg ((h _).1 a.2 i), a.1.2]⟩
       invFun := fun a => ⟨⟨fun i => a.1 i, a.2⟩, (h _).2 fun i => Int.natCast_nonneg _⟩
@@ -182,8 +234,12 @@ theorem cube_exactAt {p : ℕ} (hp : p ≠ N + 1) :
   exact cubeComplex_exactAt_of_monomialBasis _ R _ _ _ b hb p (by simpa using hp)
 
 theorem grAug_bijective (hN : 1 ≤ N) :
-    Function.Bijective (grAug (Fin (N + 1)) (polyGrading (Fin (N + 1)) R) n) :=
-  (grAug_bijective_iff _ n).2 ⟨cube_exactAt R N n (by omega), cube_exactAt R N n (by omega)⟩
+    Function.Bijective (grAug (ι := Fin (N + 1)) (ℳ := polyGrading (Fin (N + 1)) R) n) := by
+  let A := grCube (Fin (N + 1)) (polyGrading (Fin (N + 1)) R) n
+  have hA : IsIso (cechAugHomology A) := (isIso_cechAugHomology_iff A).2
+    ⟨cube_exactAt R N n (by omega), cube_exactAt R N n (by omega)⟩
+  have hLoc := (homLocEmptyEquiv (ι := Fin (N + 1)) (polyGrading (Fin (N + 1)) R) n).bijective
+  exact ((ConcreteCategory.isIso_iff_bijective _).1 hA).comp hLoc
 
 theorem isZero_grH_poly {p : ℕ} (h0 : p ≠ 0) (hp : p ≠ N) :
     IsZero (grH (Fin (N + 1)) (polyGrading (Fin (N + 1)) R) n p) := by

@@ -1,6 +1,58 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Imports
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RightSingleRule.PatEntryZero
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LeadingTermVectorIdentity
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Imports
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RightSingleRule.PatEntryZero
+public import Formalism.HermitianCurvature.OperatorsCommuteTranslations
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LeadingTermVectorIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGLet
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RightSingleRule.EllSingleZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory
 
@@ -116,8 +168,8 @@ section rule
 variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq]
 
-open Formalism.FourierDecayAlt.Q.QRR in
 
+open Formalism.FourierDecayAlt.Q.QRR in
 theorem rdV_kr (Bs : B.RealPlaceData k r Wp Wq) (F : B.Mat k r → (Wq →L[ℂ] Wp)) (x : B.Mat k r) (l : Fin r)
     (X : B.Mat k r) (hX : Pat k r l X) (hS : dag k r X = -X) :
     RdV X (Kr Bs F) x = (ell k r Bs.z' X - star (ell k r Bs.z' X)) • Kr Bs F x := by
@@ -136,7 +188,7 @@ theorem dEll_eq_ell (z' : Fin (2 * r + k + 1) → ℂ) (X : B.Mat k r) (hr : 1 �
   unfold C3.dEll ell
   rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (⟨r - 1, by omega⟩ : Fin r)),
     ← Finset.sum_erase_add _ _ (Finset.mem_univ (⟨r - 1, by omega⟩ : Fin r))]
-  rw [dif_neg (by simp; omega), dif_neg (by simp; omega), add_zero]
+  rw [dite_eq_right (by simp; omega), dite_eq_right (by simp; omega), add_zero]
   congr 1
   apply Finset.sum_congr rfl
   intro a ha
@@ -145,7 +197,7 @@ theorem dEll_eq_ell (z' : Fin (2 * r + k + 1) → ℂ) (X : B.Mat k r) (hr : 1 �
     have := a.isLt
     have : a.val ≠ r - 1 := fun e => ha' (Fin.ext e)
     omega
-  rw [dif_pos this, dif_pos this]
+  rw [dite_eq_left this, dite_eq_left this]
 
 open Formalism.FourierDecayAlt.Q.QRR in
 theorem pat_inNp {l : Fin r} {X : B.Mat k r} (hX : Pat k r l X) : ∀ a b, ¬ C3.InNp k r a b → X a b = 0 := by
@@ -161,7 +213,6 @@ open Formalism.FourierDecayAlt.Q.QRR in
 theorem exists_pat (p q : Fin (2 * r + k + 1)) (h : C3.InNp k r p q) :
     ∃ l : Fin r, Pat k r l (Matrix.single p q (1 : ℂ)) := by
   obtain ⟨hpq, hW⟩ := h
-  have hq := q.isLt
   by_cases hp : p.val < r
   · by_cases hq2 : q.val ≤ 2 * r + k - p.val
     · exact ⟨⟨p.val, hp⟩, pat_single _ p q 1 (Or.inl ⟨rfl, hpq, hq2⟩)⟩
@@ -222,18 +273,6 @@ open Classical Formalism.FourierDecayAlt.P.CapelliWordSumExpansion
 
 variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq]
   [InnerProductSpace ℂ Wq]
-
-def KrW (Bs : B.RealPlaceData k r Wp Wq) (F : B.Mat k r → (Wq →L[ℂ] Wp)) (U₀ : Set (B.Mat k r)) (hU₀ : IsOpen U₀)
-    (hK : ∀ g ∈ U₀, g ∈ B.GV k r → Loc (⊤ : ℕ∞) (Kr Bs F) g) : Wsm (E := Wq →L[ℂ] Wp) U₀ :=
-  ⟨fun g => if g ∈ U₀ ∧ g ∈ B.GV k r then Kr Bs F g else 0, fun g hg hgG =>
-    loc_of_eq (hK g hg hgG) hU₀ hg (fun x hx hxG => by simp [hx, hxG])⟩
-
-def LaK (Bs : B.RealPlaceData k r Wp Wq) (F : B.Mat k r → (Wq →L[ℂ] Wp)) (U₀ : Set (B.Mat k r)) (hU₀ : IsOpen U₀)
-    (hK : ∀ g ∈ U₀, g ∈ B.GV k r → Loc (⊤ : ℕ∞) (Kr Bs F) g) (x₀ : B.Mat k r) :
-    Module.End ℂ (Wsm (E := Wq →L[ℂ] Wp) U₀) →ₗ[ℂ] (Wq →L[ℂ] Wp) where
-  toFun X := (X (KrW Bs F U₀ hU₀ hK)).1 x₀
-  map_add' X Y := rfl
-  map_smul' c X := rfl
 
 end ring
 

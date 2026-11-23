@@ -1,8 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.Transference
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.EmbeddingHermSelf
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocalizedModuleSubtype
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DifferentSmulMemOfTraceIntegral
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.EmbeddingHermSelf
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsLocalizedModuleSubtype
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Dual
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.Transference
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD Module Submodule
 
@@ -34,8 +89,9 @@ theorem exists_euclidean {M : ℕ} [FiniteDimensional ℚ V] (hM : finrank ℚ V
   refine ⟨φ, fun x y => ?_⟩
   have hB : B x y = ∑ j, v.repr x j * v.repr y j * B (v j) (v j) := by
     conv_lhs => rw [← v.sum_repr x, ← v.sum_repr y]
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-      Finset.mul_sum]
+    Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Finset.sum_eq_single j]
     · ring
@@ -95,7 +151,7 @@ theorem transference_rat {M : ℕ} (b : Basis (Fin M) ℚ V)
     | add x y _ _ hx hy =>
       obtain ⟨k1, h1⟩ := hx
       obtain ⟨k2, h2⟩ := hy
-      exact ⟨k1 + k2, by rw [map_add, LinearMap.add_apply, h1, h2]; push_cast; ring⟩
+      exact ⟨k1 + k2, by rw [map_add (f := _), LinearMap.add_apply, h1, h2]; push_cast; ring⟩
     | smul a x _ hx =>
       obtain ⟨k, h⟩ := hx
       exact ⟨a * k, by rw [map_zsmul, LinearMap.smul_apply, h, zsmul_eq_mul]; push_cast; ring⟩
@@ -121,6 +177,7 @@ theorem transference_rat {M : ℕ} (b : Basis (Fin M) ℚ V)
   have hyv : ∀ i, φ (∑ j, (m i j : ℚ) • b j) = y i := by
     intro i
     refine InnerProductSpace.ext_inner_right_basis b' fun k => ?_
+
     rw [hm, hb', map_sum, sum_inner]
     simp only [map_smul, ← Rat.cast_smul_eq_qsmul ℝ, real_inner_smul_left, hd3, mul_ite, mul_one,
       mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true, Rat.cast_intCast]
@@ -131,6 +188,7 @@ theorem transference_rat {M : ℕ} (b : Basis (Fin M) ℚ V)
   · rw [Fintype.linearIndependent_iff]
     intro g hg i
     have h := congrArg φ hg
+
     rw [map_sum, map_zero] at h
     simp only [map_smul, hyv, ← Rat.cast_smul_eq_qsmul ℝ] at h
     have := (Fintype.linearIndependent_iff.mp hyli) (fun i => (g i : ℝ)) h i
@@ -214,38 +272,7 @@ theorem traceHerm_nondegenerate (n : ℕ) : (traceHerm (E := E) n).Nondegenerate
 omit [IsCMField E] in
 theorem span_rat_eq_top {n : ℕ} (Λ : Submodule (𝓞 E) (Fin n → E))
     (h : span E (Λ : Set (Fin n → E)) = ⊤) : span ℚ (Λ : Set (Fin n → E)) = ⊤ := by
-  have key : ∀ (a : E) (v : Fin n → E), v ∈ Λ → a • v ∈ span ℚ (Λ : Set (Fin n → E)) := by
-    intro a v hv
-    obtain ⟨m, s, hm, hs⟩ :=
-      ((IsFractionRing.isAlgebraic_iff ℤ ℚ E).mpr (Algebra.IsAlgebraic.isAlgebraic a)).exists_nsmul_eq
-        (𝓞 E)
-    have hinv : ((m : ℚ)⁻¹) • (m • a) = a := by
-      rw [← Nat.cast_smul_eq_nsmul ℚ, smul_smul, inv_mul_cancel₀ (Nat.cast_ne_zero.mpr hm), one_smul]
-    have ha : a = ((m : ℚ)⁻¹) • (algebraMap (𝓞 E) E s) := by
-      rw [← hs, hinv]
-    have hsv : (algebraMap (𝓞 E) E s) • v = s • v := algebraMap_smul E s v
-    rw [ha, smul_assoc, hsv]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span (Λ.smul_mem s hv))
-  have closed : ∀ (a : E) (x : Fin n → E), x ∈ span ℚ (Λ : Set (Fin n → E)) →
-      a • x ∈ span ℚ (Λ : Set (Fin n → E)) := by
-    intro a x hx
-    induction hx using Submodule.span_induction with
-    | mem v hv => exact key a v hv
-    | zero => simp
-    | add x y _ _ hx hy =>
-      rw [smul_add]
-      exact add_mem hx hy
-    | smul q x _ hx =>
-      rw [smul_comm]
-      exact Submodule.smul_mem _ q hx
-  rw [eq_top_iff]
-  rintro w -
-  have hw : w ∈ span E (Λ : Set (Fin n → E)) := h ▸ Submodule.mem_top
-  induction hw using Submodule.span_induction with
-  | mem v hv => exact Submodule.subset_span hv
-  | zero => exact zero_mem _
-  | add x y _ _ hx hy => exact add_mem hx hy
-  | smul a x _ hx => exact closed a x hx
+  apply GlobalTheory.TraceDualHom.rat_span_eq_top <;> assumption
 
 theorem finrank_eq : finrank ℚ E = 2 * fdeg E := by
   rw [fdeg, NumberField.IsTotallyComplex.finrank]
@@ -294,12 +321,12 @@ end ShortVectors
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
-open ShortVectors in
 
+open ShortVectors in
 theorem exists_short_vectors {n : ℕ} (Λ : Submodule (𝓞 E) (Fin n → E)) (hfg : Λ.FG)
     (hint : ∀ x ∈ Λ, ∀ y ∈ Λ, IsIntegral ℤ (herm 1 x y)) (hdual : ∀ x, (∀ y ∈ Λ, IsIntegral ℤ (herm 1 x y)) → x ∈ Λ) :
     ∃ v : Fin (2 * fdeg E * n) → Fin n → E, (∀ i, v i ∈ Λ) ∧ LinearIndependent ℚ v ∧ Submodule.span ℚ (Set.range v) = ⊤ ∧
-      ∀ i (τ : E →+* ℂ), ∑ k, ‖τ (v i k)‖ ^ 2 ≤ (2 * (fdeg E : ℝ) ^ ((3 : ℝ) / 2) * n ^ 2 * rdE E) ^ 2 := by
+      ∀ i (τ : E →+* ℂ), ∑ k, ‖τ (v i k)‖ ^ 2 ≤ (2 * (fdeg E : ℝ) ^ ((3 : ℝ) / 2) * n ^ 2 * rdE E) ^ 2 := open ShortVectors in by
   classical
   have hspan := DualFamily.span_eq_top Λ hfg hdual
   obtain ⟨b, hb⟩ := exists_basis Λ hfg hspan
@@ -331,7 +358,7 @@ theorem exists_short_vectors {n : ℕ} (Λ : Submodule (𝓞 E) (Fin n → E)) (
       | add x z _ _ hx hz =>
         obtain ⟨k1, h1⟩ := hx
         obtain ⟨k2, h2⟩ := hz
-        exact ⟨k1 + k2, by rw [map_add, h1, h2]; push_cast; ring⟩
+        exact ⟨k1 + k2, by rw [map_add (f := _), h1, h2]; push_cast; ring⟩
       | smul a x _ hx =>
         obtain ⟨k, h⟩ := hx
         exact ⟨a * k, by rw [map_zsmul, h, zsmul_eq_mul]; push_cast; ring⟩

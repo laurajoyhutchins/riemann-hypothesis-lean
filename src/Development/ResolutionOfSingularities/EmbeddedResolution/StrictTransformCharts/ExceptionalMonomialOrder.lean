@@ -1,19 +1,62 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupChart
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupChartComputations
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.CoordinateBlowupChart
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.ExceptionalDivisorChart
+module
+
+public import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.PowerContainmentAndOrderLocus
 import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCenterChart
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.PowerContainmentAndOrderLocus
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.SmoothCenterChart
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupChartComputations
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.ExceptionalDivisorChart
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.BlowupChart
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry TopologicalSpace
@@ -271,7 +314,7 @@ private theorem C_coeff_mem_of_minimal_prime {R : Type*} [CommRing R] {σ : Type
     (Pp : Ideal (MvPolynomial σ R)) [Pp.IsPrime]
     (hmin : ∀ K : Ideal (MvPolynomial σ R), K.IsPrime → K ≤ Pp → Pp ≤ K)
     {p : MvPolynomial σ R} (hp : p ∈ Pp) (d : σ →₀ ℕ) :
-    MvPolynomial.C (MvPolynomial.coeff d p) ∈ Pp := by
+    MvPolynomial.C (AddMonoidAlgebra.coeff p d) ∈ Pp := by
   have hq : (Ideal.comap (MvPolynomial.C : R →+* MvPolynomial σ R) Pp).IsPrime :=
     Ideal.comap_isPrime (MvPolynomial.C : R →+* MvPolynomial σ R) Pp
   have hle : Ideal.map (MvPolynomial.C : R →+* MvPolynomial σ R)
@@ -429,6 +472,7 @@ theorem ideal_le_comap_pow_succ_of_map_le_span_pow_mul {A B : Type*} [CommRing A
     rw [← hfeq i hi]
   have hφa : φ a = y s ^ c *
       ∑ i ∈ cf.support, φ (cf i) * powProd (fun t : ↥(S.erase s) => y t.1) (fsel i) := by
+
     rw [ha', map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl ?_
     intro i hi
@@ -449,20 +493,21 @@ theorem ideal_le_comap_pow_succ_of_map_le_span_pow_mul {A B : Type*} [CommRing A
         powProd (fun t : ↥(S.erase s) => y t.1) (fsel i))
       = ∑ i ∈ cf.support, MvPolynomial.monomial (fsel i)
           (Ideal.Quotient.mk (Ideal.span (x '' (S : Set (Fin m)))) (cf i)) := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [map_mul, hΨC, map_powProd, hfun]
     exact C_mul_powProd_X_eq_monomial (fsel i) _
   have hcoeff : ∀ g₀ ∈ cf.support,
-      MvPolynomial.coeff (fsel g₀)
-          (∑ i ∈ cf.support, MvPolynomial.monomial (fsel i)
+      AddMonoidAlgebra.coeff (∑ i ∈ cf.support, MvPolynomial.monomial (fsel i)
             (Ideal.Quotient.mk (Ideal.span (x '' (S : Set (Fin m)))) (cf i)))
+          (fsel g₀)
         = Ideal.Quotient.mk (Ideal.span (x '' (S : Set (Fin m)))) (cf g₀) := by
     intro g₀ hg₀
     have hstep : ∀ g ∈ cf.support, g ≠ g₀ →
-        MvPolynomial.coeff (fsel g₀) (MvPolynomial.monomial (fsel g)
-          (Ideal.Quotient.mk (Ideal.span (x '' (S : Set (Fin m)))) (cf g))) = 0 := by
+        AddMonoidAlgebra.coeff (MvPolynomial.monomial (fsel g)
+          (Ideal.Quotient.mk (Ideal.span (x '' (S : Set (Fin m)))) (cf g))) (fsel g₀) = 0 := by
       intro g hg hne
       have hne' : fsel g ≠ fsel g₀ := fun hh => hne (hinj g hg g₀ hg₀ hh)
       rw [MvPolynomial.coeff_monomial, if_neg hne']

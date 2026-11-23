@@ -1,28 +1,68 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RankPosOfLeaves
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairSlicesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairRestrictionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairFiniteDimensionalStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SliceTypeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairFirstStepStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairSecondStepStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairEmbeddingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HullGenerationStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapacityEquivalenceStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DiscreteInfimumStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TopologicalInfimumStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InfimumOfEqualityStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeafBoundStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceStripStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceShiftStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceCompositionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceInfimumStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FactorInductionStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SingleGluingStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LimitListsStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LimitTreesStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdCloseStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FactorLimitStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RankPosOfLeaves
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapacityEquivalenceStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceCompositionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceInfimumStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceShiftStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConvergenceStripStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DiscreteInfimumStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FactorInductionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FactorLimitStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HullGenerationStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InfimumOfEqualityStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeafBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LimitListsStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LimitTreesStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairEmbeddingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairFiniteDimensionalStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairFirstStepStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairRestrictionStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairSecondStepStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairSlicesStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdCloseStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SingleGluingStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SliceTypeStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TopologicalInfimumStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 

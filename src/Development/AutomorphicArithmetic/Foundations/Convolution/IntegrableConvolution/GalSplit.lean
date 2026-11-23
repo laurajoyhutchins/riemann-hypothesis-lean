@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DeterminantNonzero
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ClosedProperAlt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DeterminantNonzero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped TensorProduct
 open PositivityTheory.Rg.Tf.Loc PositivityTheory.Rg.Tf.Geo
@@ -14,15 +61,6 @@ variable {F E : Type} [Field F] [Field E] [Algebra F E] [FiniteDimensional F E] 
 private theorem orderOf_gen (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ ∈ Subgroup.zpowers σ) {m : ℕ}
     (hm : Module.finrank F E = m + 1) : orderOf σ = m + 1 := by
   rw [orderOf_eq_card_of_forall_mem_zpowers hσ, IsGalois.card_aut_eq_finrank, hm]
-
-private theorem pow_inj (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ ∈ Subgroup.zpowers σ) {m : ℕ}
-    (hm : Module.finrank F E = m + 1) :
-    Function.Injective (fun i : Fin (m + 1) => σ ^ (i : ℕ)) := by
-  have ho := orderOf_gen σ hσ hm
-  intro i j hij
-  have := pow_injOn_Iio_orderOf (x := σ) (by simp only [ho, Set.mem_Iio]; exact i.2)
-    (by simp only [ho, Set.mem_Iio]; exact j.2) hij
-  exact Fin.ext this
 
 private theorem det_ne (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ ∈ Subgroup.zpowers σ) {m : ℕ}
     (hm : Module.finrank F E = m + 1) (b : Module.Basis (Fin (m + 1)) F E) :
@@ -52,9 +90,11 @@ private theorem phi_bij (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ �
   have hr : Function.RightInverse Ψ (phi σ p m) := by
     intro f
     funext k
+
     simp only [Ψ, map_sum, Finset.sum_apply, phi_tmul]
     have h1 : ∀ i, ∑ j, p ((σ ^ (k : ℕ)) (b j)) * p (N j i) = if k = i then 1 else 0 := fun i => by
       have h2 := congrArg p (congrFun (congrFun hMN k) i)
+
       simp only [Matrix.mul_apply, Matrix.one_apply, M, Matrix.of_apply, map_sum, map_mul] at h2
       rw [h2]
       split_ifs <;> simp
@@ -70,12 +110,13 @@ private theorem phi_bij (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ �
     intro t
     induction t using TensorProduct.induction_on with
     | zero => simp [Ψ]
-    | add s t hs ht => rw [map_add, hadd, hs, ht]
+    | add s t hs ht => rw [map_add (f := _), hadd, hs, ht]
     | tmul x a =>
       let c : Fin (m + 1) → E := fun l => algebraMap F E (b.repr x l)
       have hx : (fun i : Fin (m + 1) => (σ ^ (i : ℕ)) x) = M.mulVec c := by
         funext i
         conv_lhs => rw [← b.sum_repr x]
+
         rw [map_sum]
         simp only [Matrix.mulVec, dotProduct, M, Matrix.of_apply, c]
         refine Finset.sum_congr rfl fun j _ => ?_
@@ -86,6 +127,7 @@ private theorem phi_bij (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ �
         exact congrFun this j
       have h3 : ∀ j, ∑ i, p (N j i) * (p ((σ ^ (i : ℕ)) x) * a) = b.repr x j • a := fun j => by
         calc _ = p (∑ i, N j i * (σ ^ (i : ℕ)) x) * a := by
+
               simp only [map_sum, map_mul, Finset.sum_mul, mul_assoc]
           _ = _ := by rw [hc]; simp only [c, p.commutes, Algebra.smul_def]
       simp only [Ψ, phi_tmul, h3, TensorProduct.tmul_smul, TensorProduct.smul_tmul']
@@ -99,7 +141,7 @@ private theorem phi_shift (σ : E ≃ₐ[F] E) (hσ : ∀ τ : E ≃ₐ[F] E, τ
   have hv : ((i + 1 : Fin (m + 1)) : ℕ) = ((i : ℕ) + 1) % (m + 1) := by simp [Fin.val_add]
   induction t using TensorProduct.induction_on with
   | zero => simp
-  | add s t hs ht => simp only [map_add, Pi.add_apply, hs, ht]
+  | add s t hs ht => simp only [map_add (f := _), Pi.add_apply, hs, ht]
   | tmul x a =>
     rw [Algebra.TensorProduct.map_tmul, phi_tmul, phi_tmul, hv, ← pow_eq_pow_mod _ h1, pow_succ]
     rfl

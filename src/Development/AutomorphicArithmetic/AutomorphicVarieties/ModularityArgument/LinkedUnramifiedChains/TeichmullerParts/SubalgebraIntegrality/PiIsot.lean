@@ -1,4 +1,43 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.TeichmullerParts.UnramifiedTrivialInertialType
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open UpperTheory.V.Z.J.D
 open scoped TensorProduct
 
@@ -106,7 +145,7 @@ private def split (Wi : I → Type) [∀ i, AddCommGroup (Wi i)] [∀ i, Module 
         intro _ m i c x
         by_cases h : i = i₀
         · subst h
-          simp only [Function.update_self, res_update_self, TensorProduct.smul_tmul']
+          simp only [Function.update_self, res_update_self, TensorProduct.smul_tmul', RingHom.id_apply]
         · classical
           simp only [Function.update_of_ne (Ne.symm h), res_update i₀ i h,
             MultilinearMap.map_update_smul, TensorProduct.tmul_smul] }
@@ -137,7 +176,7 @@ private lemma split_range (Wi : I → Type) [∀ i, AddCommGroup (Wi i)] [∀ i,
     | add a b ha hb =>
       obtain ⟨x, hx⟩ := ha
       obtain ⟨y, hy⟩ := hb
-      exact ⟨x + y, by rw [map_add, hx, hy, TensorProduct.tmul_add]⟩
+      exact ⟨x + y, by rw [map_add (f := _), hx, hy, TensorProduct.tmul_add]⟩
 
 private lemma piRep_tprod {Gi Wi : I → Type} [∀ i, Group (Gi i)] [∀ i, AddCommGroup (Wi i)]
     [∀ i, Module ℂ (Wi i)] (τ : ∀ i, Representation ℂ (Gi i) (Wi i)) (g : ∀ i, Gi i) (m : ∀ i, Wi i) :
@@ -155,7 +194,7 @@ private lemma split_intw [Fintype I] {Gi Wi : I → Type} [∀ i, Group (Gi i)] 
     rw [map_smul, map_smul, map_smul, map_smul, piRep_tprod, split_tprod, split_tprod]
     simp only [box, Representation.tprod_apply, TensorProduct.map_tmul, MonoidHom.comp_apply,
       MonoidHom.coe_fst, MonoidHom.coe_snd, piRep_tprod]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 end Ins
 

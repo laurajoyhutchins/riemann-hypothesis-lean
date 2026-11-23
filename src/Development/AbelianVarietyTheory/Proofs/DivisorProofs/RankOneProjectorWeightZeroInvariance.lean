@@ -1,4 +1,53 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.LeviCut
 
@@ -14,7 +63,7 @@ theorem rankOne_H_X_pow (X H : Module.End ℚ W) (hHX : ∀ w, H (X w) = X (H w)
   | zero => simp
   | succ k ih =>
     simp only [pow_succ, Module.End.mul_apply]
-    rw [ih, hHX, map_add, map_smul]
+    rw [ih, hHX, map_add (f := _), map_smul]
     push_cast
     module
 
@@ -38,7 +87,7 @@ theorem rankOne_X_Y_pow (X Y H : Module.End ℚ W) (hXY : ∀ w, X (Y w) = Y (X 
     have h1 : (Y ^ (k + 1 + 1)) w = (Y ^ (k + 1)) (Y w) := by
       rw [pow_succ Y (k + 1), Module.End.mul_apply]
     rw [h1, ih, hXY, hHY]
-    simp only [map_add, map_sub, map_smul, pow_succ, Module.End.mul_apply]
+    simp only [map_add (f := _), map_sub, map_smul, pow_succ, Module.End.mul_apply]
     push_cast
     module
 
@@ -56,8 +105,8 @@ end GlobalTheory.LeviCut
 
 namespace GlobalTheory.LeviCut
 
-open RankOnePf in
 
+open RankOnePf in
 theorem rankOne : RankOne := by
   intro W _ _ N K D hG hB o q ho hq hoq T hoT hqT
   have hqo : q ≠ o := Ne.symm hoq
@@ -108,7 +157,7 @@ theorem rankOne : RankOne := by
       induction n with
       | zero => simp
       | succ n ih =>
-        rw [Finset.sum_range_succ, map_add, ih, map_smul, hterm n]
+        rw [Finset.sum_range_succ, map_add (f := _), ih, map_smul, hterm n]
         have hc := rankOne_coef_succ n
         rw [show coef 0 n = -(coef 0 (n + 1) * (((n + 1) * (n + 1 + 1) : ℕ) : ℚ)) by rw [hc, neg_neg]]
         module

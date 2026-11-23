@@ -1,7 +1,51 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalEnd
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SurjectiveCubeBaseChange
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -143,10 +187,16 @@ section Alg
 variable {A U : Type} [CommGroup A] [CommGroup U]
 
 theorem isCub_transl {C : A → A → A → U} (hC : IsCub C) (α : A) :
-    IsCub (fun x y u => C x y (α * u) * (C x y α)⁻¹) where
-  face x y := by simp only [hC.face, mul_inv_cancel]
-  s01 x y u := by rw [hC.s01 x y, hC.s01 x y]
-  s12 x y u := by
+    IsCub (fun x y u => C x y (α * u) * (C x y α)⁻¹) := by
+  constructor
+  case face =>
+    intro x y
+    simp only [hC.face, mul_inv_cancel]
+  case s01 =>
+    intro x y u
+    rw [hC.s01 x y, hC.s01 x y]
+  case s12 =>
+    intro x y u
     have t : ∀ p q, C x p q = C p q x := fun p q => (hC.s01 x p q).trans (hC.s12 p x q)
     have e := hC.coc u α y x
     rw [← t, ← t, ← t, ← t, hC.s12 x (u * α) y, mul_comm u α, hC.s12 x α y] at e
@@ -154,7 +204,8 @@ theorem isCub_transl {C : A → A → A → U} (hC : IsCub C) (α : A) :
     have e' := congrArg Additive.ofMul e
     simp only [ofMul_mul, ofMul_inv] at e' ⊢
     linear_combination (norm := abel) e'
-  coc x x' x'' y := by
+  case coc =>
+    intro x x' x'' y
     have e₁ := hC.coc x x' x'' (α * y)
     have e₂ := hC.coc x x' x'' α
     apply Additive.ofMul.injective

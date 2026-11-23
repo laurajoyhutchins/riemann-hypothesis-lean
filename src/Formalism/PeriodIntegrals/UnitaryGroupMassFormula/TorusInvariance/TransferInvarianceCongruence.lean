@@ -1,7 +1,61 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusInvariance.TransferInvarianceRestriction
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.CapelliHighestWeightConjugated
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DerivativePreservation.HasDerivAtExt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusInvariance.Development
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusInvariance.TransferInvarianceRestriction
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset Filter Topology
 open scoped ContDiff
@@ -145,25 +199,7 @@ lemma hpart_cols (i : Fin (r + 1)) (p q : Fin (mdim k r i)) :
     (∀ a : Fin r, a.val < i.val → ∀ x,
       hpart2 (Hpk k r) (Matrix.single (posL k r i p) (posL k r i q) 1) x (eI k r a) = 0 ∧
       hpart2 (Hpk k r) (Matrix.single (posL k r i p) (posL k r i q) 1) x (esI k r a) = 0) := by
-  have key : ∀ a : Fin r, a.val < i.val → ∀ x c, (c = eI k r a ∨ c = esI k r a) →
-      (Matrix.single (posL k r i p) (posL k r i q) (1 : ℂ)) x c = 0 ∧
-      (Hpk k r * (Matrix.single (posL k r i p) (posL k r i q) (1 : ℂ))ᴴ * Hpk k r) x c = 0 := by
-    intro a ha x c hc
-    obtain ⟨n1, n2⟩ := posL_ne i q a ha
-    obtain ⟨z1, z2⟩ := hpk_zero i p a ha
-    rcases hc with rfl | rfl
-    · exact unit_col i p q _ n1 z1 x
-    · exact unit_col i p q _ n2 z2 x
-  refine ⟨fun a ha x => ?_, fun a ha x => ?_⟩ <;>
-  · obtain ⟨e1, e2⟩ := key a ha x _ (Or.inl rfl)
-    obtain ⟨e3, e4⟩ := key a ha x _ (Or.inr rfl)
-    simp only [hpart1, hpart2]
-    rw [hpk_inv]
-    refine ⟨?_, ?_⟩ <;>
-    · first
-      | rw [Matrix.smul_apply, Matrix.sub_apply]
-      | rw [Matrix.smul_apply, Matrix.add_apply]
-      simp only [e1, e2, e3, e4, sub_zero, add_zero, smul_zero]
+  apply Formalism.FourierDecayAlt.Q.EabLie.hpart_cols <;> assumption
 
 theorem exp_hpart1_mem (i : Fin (r + 1)) (p q : Fin (mdim k r i)) (t : ℝ) :
     NormedSpace.exp ((t : ℂ) • hpart1 (Hpk k r) (Matrix.single (posL k r i p) (posL k r i q) 1))
@@ -320,7 +356,7 @@ lemma real_smul_mx (a : ℝ) (N : Mx k r) : (a : ℂ) • N = a • N := by
 
 lemma lam_add (Φ : Mx k r →L[ℝ] E) (g Z W : Mx k r) : lam Φ g (Z + W) = lam Φ g Z + lam Φ g W := by
   unfold lam
-  rw [hpart1_add, hpart2_add, mul_add, mul_add, map_add, map_add, smul_add]
+  rw [hpart1_add, hpart2_add, mul_add, mul_add, map_add (f := _), map_add (f := _), smul_add]
   abel
 
 lemma lam_real (Φ : Mx k r →L[ℝ] E) (g Z : Mx k r) (a : ℝ) :
@@ -398,6 +434,7 @@ theorem transfer_invariance_right : StepRight := by
         rw [hconj]
         change lamL (fderiv ℝ F (g * s')) (g * s')
           (∑ c, ∑ d, (blk i s'⁻¹ c a * blk i s' b d) • Matrix.single (posL k r i c) (posL k r i d) (1 : ℂ)) = _
+
         simp only [map_sum, map_smul]
         rfl
     _ = _ := by

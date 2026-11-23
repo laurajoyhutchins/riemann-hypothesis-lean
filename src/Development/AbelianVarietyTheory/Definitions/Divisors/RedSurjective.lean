@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigExtMapRelFrobCompRigOfOmega
-import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsPull
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsPull
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobTwistBaseChangeHomApp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -45,7 +85,7 @@ structure Base (p : ℕ) [Fact p.Prime] (P : ∀ (k : Type) [CommRing k], PDivGr
     SemiHom σ G' G → (M G h →+ M G' h')
 
   red : ∀ {k : Type} [Field k] [CharP k p] [PerfectRing k p] (G : PDivGroup p k) (h : P k G),
-    M G h →ₛₗ[(WittVector.constantCoeff : WittVector p k →+* k)] G.RigExt
+    M G h →ₛₗ[(WittVector.constantCoeff : WittVector p k →+* k)] PDivGroup.RigExt G
   free : ∀ {k : Type} [Field k] [CharP k p] [PerfectRing k p] (G : PDivGroup p k) (h : P k G),
     Module.Free (WittVector p k) (M G h)
   finite : ∀ {k : Type} [Field k] [CharP k p] [PerfectRing k p] (G : PDivGroup p k) (h : P k G),
@@ -69,7 +109,7 @@ structure Base (p : ℕ) [Fact p.Prime] (P : ∀ (k : Type) [CommRing k], PDivGr
     (∀ n a, u.app n a = t.app n (s.app n a)) → ∀ m : M G h, smap h'' h u m = smap h'' h' t (smap h' h s m)
   red_smap : ∀ {k k' : Type} [Field k] [CharP k p] [PerfectRing k p] [Field k'] [CharP k' p] [PerfectRing k' p]
     {σ : k →+* k'} {G' : PDivGroup p k'} {G : PDivGroup p k} (h' : P k' G') (h : P k G) (s : SemiHom σ G' G)
-    (m : M G h), red G' h' (smap h' h s m) = s.rig (red G h m)
+    (m : M G h), red G' h' (smap h' h s m) = SemiHom.rig s (red G h m)
 
 namespace Base
 
@@ -144,41 +184,12 @@ abbrev F (G : PDivGroup p k) :
     T.M G →ₛₗ[(WittVector.frobenius : WittVector p k →+* WittVector p k)] T.M G := T.base.F G trivial
 
 abbrev red (G : PDivGroup p k) :
-    T.M G →ₛₗ[(WittVector.constantCoeff : WittVector p k →+* k)] G.RigExt := T.base.red G trivial
-
-def IsLat {G : PDivGroup p k} (L : Submodule (WittVector p k) (T.M G)) : Prop :=
-  (∃ n : ℕ, ∀ m, p ^ n • m ∈ L) ∧ (∀ m ∈ L, T.F G m ∈ L) ∧ ∀ m ∈ L, T.V G m ∈ L
-
-def Duality : Prop :=
-  ∃ e : ∀ {k : Type} [Field k] [CharP k p] [PerfectRing k p] (G : PDivGroup p k),
-      T.M G ≃ₗ[WittVector p k] Module.Dual (WittVector p k) (T.M G.dual),
-    ∀ {k : Type} [Field k] [CharP k p] [PerfectRing k p] (G : PDivGroup p k),
-      (∀ x y, e G (T.F G x) (T.F G.dual y) = p * WittVector.frobenius (e G x y)) ∧
-      ∀ (H : PDivGroup p k) (f : G ⟶ H) x y, e G (T.map f x) y = e H x (T.map (dualHom G H f) y)
+    T.M G →ₛₗ[(WittVector.constantCoeff : WittVector p k →+* k)] PDivGroup.RigExt G :=
+  T.base.red G trivial
 
 end Theory
 
 section Examples
-
-example {p : ℕ} [Fact p.Prime] {k : Type} [Field k] (G : PDivGroup p k) : IsIsog (𝟙 G) :=
-  ⟨0, 𝟙 G, by simp, by simp⟩
-
-example (p : ℕ) [Fact p.Prime] (k : Type) [Field k] [CharP k p] [PerfectRing k p] :
-    IsDM ((WittVector.frobenius : WittVector p k →+* WittVector p k).toSemilinearMap)
-      ((p : ℕ) • ((WittVector.frobeniusEquiv p k).symm : WittVector p k →+* WittVector p k).toSemilinearMap) where
-  free := inferInstance
-  finite := inferInstance
-  F_V x := by
-    change WittVector.frobenius ((p : ℕ) • (WittVector.frobeniusEquiv p k).symm x) = p • x
-    rw [nsmul_eq_mul, nsmul_eq_mul, map_mul, map_natCast]
-    congr 1
-    exact (WittVector.frobeniusEquiv p k).apply_symm_apply x
-  V_F x := by
-    change (p : ℕ) • (WittVector.frobeniusEquiv p k).symm (WittVector.frobenius x) = p • x
-    congr 1
-    exact (WittVector.frobeniusEquiv p k).symm_apply_apply x
-
-example : ((2 : ℕ) : ZMod 2) = 0 := p_eq_zero 2 (ZMod 2)
 
 end Examples
 

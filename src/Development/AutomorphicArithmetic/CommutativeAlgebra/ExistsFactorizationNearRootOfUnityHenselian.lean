@@ -1,8 +1,58 @@
-import Mathlib
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.GoodRoot
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsZeroOfLinearFormJacobianHenselian
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsPowerDecompositionOfRootOfUnity
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsTwoChartQuotientOfFiniteCoord
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.GoodRoot
+public import Mathlib.RingTheory.Henselian
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsPowerDecompositionOfRootOfUnity
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsTwoChartQuotientOfFiniteCoord
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsZeroOfLinearFormJacobianHenselian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open IsLocalRing UpperTheory.Et
@@ -102,7 +152,7 @@ private lemma L_mem {n : ℕ} (I : Ideal A) (L : D →ₗ[A] (Fin n → A)) (x :
     | zero => intro d i; simp
     | add y z _ _ hy hz =>
       intro d i
-      rw [mul_add, map_add]
+      rw [mul_add, map_add (f := _)]
       exact I.add_mem (hy d i) (hz d i)
     | smul e y _ hy =>
       intro d i
@@ -124,6 +174,7 @@ private lemma eval_lin (c : D) (a y : Fin n → D) :
 
 private lemma pderiv_lin (c : D) (a : Fin n → D) (j : Fin n) :
     MvPolynomial.pderiv j (lin c a) = MvPolynomial.C (a j) := by
+
   simp [lin, MvPolynomial.pderiv_X, Pi.single_apply, map_sum, Derivation.leibniz]
 
 end
@@ -181,7 +232,7 @@ theorem UpperTheory.exists_factorization_near_root_of_unity_henselian :
     refine ⟨a, ha, b, hb, c, hc, ?_⟩
     rw [← Ideal.Quotient.eq_zero_iff_mem]
     rw [hT't] at hk
-    simp only [map_sub, map_add, map_mul, map_pow, map_natCast]
+    simp only [map_sub, map_add (f := _), map_mul, map_pow, map_natCast]
     rw [hk]
     ring
   choose a ha b hb c hc hkey using hdec

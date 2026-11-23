@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StAdjoinIndepRelfinrank
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StAdjoinIndepRelfinrank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.LinearDisjoint
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -30,18 +77,20 @@ theorem AdjoinIndepRelfinrank.proof : AdjoinIndepRelfinrank.Statement := by
       ∑ j ∈ s, MvPolynomial.C (b j) * MvPolynomial.map (algebraMap L₀ L') (p j) with hq
     have hq0 : q = 0 := by
       apply ht'.eq_zero_of_aeval_eq_zero
+
       rw [hq, map_sum]
       rw [← hg]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_mul, MvPolynomial.aeval_C, MvPolynomial.aeval_map_algebraMap, hp, Subalgebra.smul_def,
         Function.comp_apply, mul_comm]
       rfl
-    have hcoef : ∀ m, ∀ j ∈ s, MvPolynomial.coeff m (p j) = 0 := by
+    have hcoef : ∀ m, ∀ j ∈ s, AddMonoidAlgebra.coeff (p j) m = 0 := by
       intro m
-      have h := congrArg (MvPolynomial.coeff m) hq0
-      rw [hq, MvPolynomial.coeff_sum, MvPolynomial.coeff_zero] at h
-      simp only [MvPolynomial.coeff_C_mul, MvPolynomial.coeff_map] at h
-      have hb := (linearIndependent_iff'.mp b.linearIndependent) s (fun j => MvPolynomial.coeff m (p j))
+      have h := congrArg (AddMonoidAlgebra.coeff · m) hq0
+      rw [hq, MvPolynomial.coeff_sum] at h
+      simp only [MvPolynomial.coeff_C_mul, MvPolynomial.coeff_map, AddMonoidAlgebra.coeff_zero,
+        Finsupp.zero_apply] at h
+      have hb := (linearIndependent_iff'.mp b.linearIndependent) s (fun j => AddMonoidAlgebra.coeff (p j) m)
       apply hb
       rw [← h]
       refine Finset.sum_congr rfl fun j _ => ?_
@@ -73,7 +122,10 @@ theorem AdjoinIndepRelfinrank.proof : AdjoinIndepRelfinrank.Statement := by
   · have : Algebra.IsAlgebraic L₀ L' := Algebra.IsAlgebraic.of_finite L₀ L'
     have := hdisj.adjoin_rank_eq_rank_right_of_isAlgebraic_right
     exact congrArg Cardinal.toNat this
-  · rw [finrank_of_not_finite hfin, finrank_of_not_finite]
+  · rw [finrank_of_not_finite hfin]
+    have : Module.Free A (extendScalars hle') :=
+      Module.Free.of_divisionRing (K := A) (V := extendScalars hle')
+    apply finrank_of_not_finite
     intro hfin'
     apply hfin
     let v : _ → extendScalars hle' := fun j => ⟨algebraMap L' Ω (b j), by

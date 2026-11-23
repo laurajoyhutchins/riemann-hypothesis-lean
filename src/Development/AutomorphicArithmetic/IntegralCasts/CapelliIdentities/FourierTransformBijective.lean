@@ -1,4 +1,69 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Normed.Group.Defs
+public import Mathlib.Basic.Complex.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.MetricSpace.Ultra.Pi
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.Algebra.Group.AddChar
+public import Mathlib.Analysis.Normed.Field.Basic
+public import Mathlib.Analysis.Normed.Group.Continuity
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Metric
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+public import Mathlib.MeasureTheory.Integral.Prod
+public import Mathlib.Topology.LocallyConstant.Basic
+
+@[expose] public section
 
 open MeasureTheory Metric
 
@@ -183,13 +248,6 @@ private lemma four_inv {f : (κ → K) → ℂ} {c : K} (hc : c ≠ 0)
   · rw [(cond_pi ψ hd hc u).2 hu x hx, one_mul]
   · rw [h2 x hx, mul_zero]
 
-omit [IsUltrametricDist K] in
-private lemma four_sb (hd0 : d ≠ 0) {f : (κ → K) → ℂ} (h1 : IsLocallyConstant f)
-    (h2 : HasCompactSupport f) :
-    IsLocallyConstant (four μ ψ f) ∧ HasCompactSupport (four μ ψ f) := by
-  obtain ⟨e, he, h1⟩ := unif h1 h2
-  obtain ⟨c, hc, h2⟩ := bdd h2
-  exact sb_of (div_ne_zero hd0 hc) (four_inv μ ψ hd hc h2) (four_supp μ ψ hd he h1)
 
 omit hd [ProperSpace K] [MeasurableSpace (κ → K)] [BorelSpace (κ → K)] in
 private lemma ind_inv (r : ℝ) (u : κ → K) (hu : ‖u‖ ≤ r) (x : κ → K) :
@@ -293,73 +351,3 @@ private lemma four_four (hψ : IsLocallyConstant ψ) (hd0 : d ≠ 0) {f : (κ �
     · simp [Function.uncurry, image_eq_zero_of_notMem_tsupport h]
 
 end
-
-theorem UpperTheory.fourier_transform_bijective :
-    ∀ (K : Type) [NontriviallyNormedField K] [IsUltrametricDist K] [ProperSpace K] (ψ : AddChar K ℂ),
-        IsLocallyConstant ψ → (∃ t, ψ t ≠ 1) → ∀ (κ : Type) [Fintype κ],
-        ∃ T : ((κ → K) → ℂ) →ₗ[ℂ] ((κ → K) → ℂ),
-          Set.BijOn T {f | IsLocallyConstant f ∧ HasCompactSupport f} {f | IsLocallyConstant f ∧ HasCompactSupport f} ∧
-          (∀ f : (κ → K) → ℂ, IsLocallyConstant f → HasCompactSupport f → ∀ a y : κ → K,
-            T (fun x => f (x + a)) y = ψ (-(dotProduct a y)) * T f y) ∧
-          (∀ f : (κ → K) → ℂ, IsLocallyConstant f → HasCompactSupport f → ∀ b y : κ → K,
-            T (fun x => ψ (dotProduct x b) * f x) y = T f (y + b)) := by
-  intro K _ _ _ ψ hψ hne κ _
-  obtain ⟨d, hd0, hd⟩ := cond_one ψ hψ hne
-  letI : MeasurableSpace (κ → K) := borel _
-  haveI : BorelSpace (κ → K) := ⟨rfl⟩
-  let μ : Measure (κ → K) := Measure.addHaar
-  let S : Submodule ℂ ((κ → K) → ℂ) :=
-    { carrier := {f | IsLocallyConstant f ∧ HasCompactSupport f}
-      add_mem' := fun ha hb => ⟨ha.1.add hb.1, ha.2.add hb.2⟩
-      zero_mem' := ⟨IsLocallyConstant.const 0, HasCompactSupport.zero⟩
-      smul_mem' := fun c f hf => ⟨hf.1.comp (fun t => c • t), hf.2.comp_left (g := fun t => c • t) (by simp)⟩ }
-  have hlc : ∀ y : κ → K, IsLocallyConstant (fun x : κ → K => ψ (dotProduct x y)) := by
-    intro y
-    have hdot : Continuous fun x : κ → K => dotProduct x y := by
-      unfold dotProduct
-      fun_prop
-    exact hψ.comp_continuous hdot
-  have hint : ∀ f ∈ S, ∀ y, Integrable (fun x => ψ (dotProduct x y) * f x) μ := by
-    intro f hf y
-    exact ((hlc y).continuous.mul hf.1.continuous).integrable_of_hasCompactSupport hf.2.mul_left
-  let T0 : S →ₗ[ℂ] ((κ → K) → ℂ) :=
-    { toFun := fun f => four μ ψ f
-      map_add' := fun f g => by
-        ext y
-        simp only [four, Submodule.coe_add, Pi.add_apply, mul_add]
-        exact integral_add (hint f f.2 y) (hint g g.2 y)
-      map_smul' := fun c f => by
-        ext y
-        simp only [four, Submodule.coe_smul, Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
-        rw [← integral_const_mul]
-        congr 1
-        ext x
-        ring }
-  obtain ⟨T, hT⟩ := LinearMap.exists_extend T0
-  have hT' : ∀ f ∈ S, T f = four μ ψ f := fun f hf => LinearMap.congr_fun hT ⟨f, hf⟩
-  have hmap : ∀ f ∈ S, T f ∈ S := fun f hf => by
-    rw [hT' f hf]; exact four_sb μ ψ hd hd0 hf.1 hf.2
-  have hTT : ∀ f ∈ S, ∃ C : ℂ, C ≠ 0 ∧ ∀ z, T (T f) z = C * f (-z) := fun f hf => by
-    rw [hT' _ (hmap f hf), hT' f hf]; exact four_four μ ψ hd hψ hd0 hf.1 hf.2
-  refine ⟨T, ⟨hmap, ?_, ?_⟩, ?_, ?_⟩
-  · intro f hf g hg h
-    obtain ⟨C, hC, h1⟩ := hTT (f - g) (S.sub_mem hf hg)
-    ext z
-    have := h1 (-z)
-    rw [map_sub, h, sub_self, map_zero, neg_neg] at this
-    have := (mul_eq_zero.1 this.symm).resolve_left hC
-    exact sub_eq_zero.1 this
-  · intro g hg
-    have hg' : (fun x => g (-x)) ∈ S :=
-      ⟨hg.1.comp_continuous continuous_neg, hg.2.comp_homeomorph (Homeomorph.neg _)⟩
-    obtain ⟨C, hC, h1⟩ := hTT _ hg'
-    refine ⟨C⁻¹ • T (fun x => g (-x)), S.smul_mem _ (hmap _ hg'), ?_⟩
-    ext z
-    rw [map_smul, Pi.smul_apply, h1, neg_neg, smul_eq_mul, inv_mul_cancel_left₀ hC]
-  · intro f h1 h2 a y
-    have : (fun x => f (x + a)) ∈ S :=
-      ⟨h1.comp_continuous (continuous_add_const a), h2.comp_homeomorph (Homeomorph.addRight a)⟩
-    rw [hT' _ this, hT' f ⟨h1, h2⟩, four_transl]
-  · intro f h1 h2 b y
-    have : (fun x => ψ (dotProduct x b) * f x) ∈ S := ⟨(hlc b).mul h1, h2.mul_left⟩
-    rw [hT' _ this, hT' f ⟨h1, h2⟩, four_mod]

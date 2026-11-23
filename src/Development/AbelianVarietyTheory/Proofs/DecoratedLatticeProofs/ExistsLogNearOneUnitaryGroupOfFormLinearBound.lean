@@ -1,45 +1,65 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Basic
+public import Mathlib.Analysis.SpecialFunctions.Exponential
+
+@[expose] public section
+
 open Matrix Filter Topology
 
 namespace GlobalTheory.UnitaryLog
 
 attribute [local instance] Matrix.linftyOpNormedRing Matrix.linftyOpNormedAlgebra
-
-theorem entry_le_linfty {n : ℕ} (X : Matrix (Fin n) (Fin n) ℂ) (i j : Fin n) : ‖X i j‖ ≤ ‖X‖ := by
-  have h : ‖X i j‖₊ ≤ ‖X‖₊ := by
-    rw [Matrix.linfty_opNNNorm_def]
-    exact (Finset.single_le_sum (f := fun j => ‖X i j‖₊) (fun _ _ => bot_le) (Finset.mem_univ j)).trans
-      (Finset.le_sup (f := fun i => ∑ j, ‖X i j‖₊) (Finset.mem_univ i))
-  exact_mod_cast h
-
-theorem linfty_le_of_entries {n : ℕ} (M : Matrix (Fin n) (Fin n) ℂ) {δ : ℝ} (hδ : 0 ≤ δ)
-    (h : ∀ i j, ‖M i j‖ ≤ δ) : ‖M‖ ≤ n * δ := by
-  have h' : ‖M‖₊ ≤ (n : NNReal) * δ.toNNReal := by
-    rw [Matrix.linfty_opNNNorm_def]
-    refine Finset.sup_le fun i _ => ?_
-    calc ∑ j, ‖M i j‖₊ ≤ ∑ _j : Fin n, δ.toNNReal :=
-          Finset.sum_le_sum fun j _ => by
-            rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal _ hδ]; exact h i j
-      _ = (n : NNReal) * δ.toNNReal := by simp
-  have := NNReal.coe_le_coe.2 h'
-  simpa [Real.coe_toNNReal _ hδ] using this
-
-theorem exp_conj_neg_eq {n : ℕ} (U : (Matrix (Fin n) (Fin n) ℂ)ˣ) (X u : Matrix (Fin n) (Fin n) ℂ)
-    (hX : NormedSpace.exp X = u) (hu : uᴴ * (U : Matrix (Fin n) (Fin n) ℂ) * u = U) :
-    NormedSpace.exp (-(((U⁻¹ : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ) * Xᴴ *
-      (U : Matrix (Fin n) (Fin n) ℂ))) = u := by
-  rw [Matrix.exp_neg, Matrix.exp_units_conj', Matrix.exp_conjTranspose, hX]
-  apply Matrix.inv_eq_right_inv
-  rw [mul_assoc, mul_assoc, ← mul_assoc uᴴ, hu, Units.inv_mul]
-
-theorem lie_of_fixed {n : ℕ} (U : (Matrix (Fin n) (Fin n) ℂ)ˣ) (X : Matrix (Fin n) (Fin n) ℂ)
-    (h : X = -(((U⁻¹ : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ) * Xᴴ *
-      (U : Matrix (Fin n) (Fin n) ℂ))) : Xᴴ * (U : Matrix (Fin n) (Fin n) ℂ) + (U : Matrix (Fin n) (Fin n) ℂ) * X = 0 := by
-  have e : (U : Matrix (Fin n) (Fin n) ℂ) * X = -(Xᴴ * (U : Matrix (Fin n) (Fin n) ℂ)) := by
-    conv_lhs => rw [h]
-    rw [mul_neg, mul_assoc (((U⁻¹ : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ)),
-      Units.mul_inv_cancel_left]
-  rw [e, add_neg_cancel]
 
 open Matrix Filter Topology in
 attribute [local instance] Matrix.linftyOpNormedRing Matrix.linftyOpNormedAlgebra in
@@ -71,9 +91,9 @@ private lemma norm_entry_le_linftyOp_norm {n : ℕ} (A : Matrix (Fin n) (Fin n) 
     _ ≤ _ := by
       exact_mod_cast Finset.le_sup (f := fun i => ∑ k, ‖A i k‖₊) (Finset.mem_univ i)
 
+
 open Matrix Filter Topology in
 attribute [local instance] Matrix.linftyOpNormedRing Matrix.linftyOpNormedAlgebra in
-
 theorem _root_.GlobalTheory.UnitaryLog.exists_log_unitary (n : ℕ)
     (G : Matrix (Fin n) (Fin n) ℂ) (hG : IsUnit G.det) :
     ∃ δ₁ C : ℝ, 0 < δ₁ ∧ ∀ (u : Matrix (Fin n) (Fin n) ℂ) (δ : ℝ), uᴴ * G * u = G → δ ≤ δ₁ →

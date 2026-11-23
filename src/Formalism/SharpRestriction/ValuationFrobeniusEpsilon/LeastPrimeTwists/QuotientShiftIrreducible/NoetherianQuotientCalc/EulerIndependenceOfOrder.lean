@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+module
+
+public import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Finiteness.Prod
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,7 +128,7 @@ theorem gK_mk (z : Z1 (M := M) s t) :
     gK s t (Submodule.Quotient.mk z) = cK s t z := rfl
 
 theorem fK_inj : Function.Injective (fK (M := M) s t) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨a, rfl⟩ := Submodule.Quotient.mk_surjective _ x
   rw [fK_mk, Submodule.Quotient.mk_eq_zero] at hx
@@ -158,9 +207,6 @@ def swH : (Z1 (M := M) s t ⧸ B1 (M := M) s t) ≃ₗ[R] (Z1 (M := M) t s ⧸ B
       rw [swZ_coe, bd_coe, bd_coe]
       simp)
 
-theorem swH_mk (z : Z1 (M := M) s t) :
-    swH s t (Submodule.Quotient.mk z) = Submodule.Quotient.mk (swZ s t z) := rfl
-
 def qqHom : ((M ⧸ LinearMap.range (lsmul R M s)) ⧸
       LinearMap.range (lsmul R (M ⧸ LinearMap.range (lsmul R M s)) t)) →ₗ[R]
     ((M ⧸ LinearMap.range (lsmul R M t)) ⧸
@@ -179,10 +225,6 @@ def qqHom : ((M ⧸ LinearMap.range (lsmul R M s)) ⧸
       rw [Submodule.Quotient.mk_eq_zero]; exact ⟨x, rfl⟩
     rw [this]; rfl)
 
-theorem qqHom_mk (x : M) :
-    qqHom s t (Submodule.Quotient.mk (Submodule.Quotient.mk x)) =
-      Submodule.Quotient.mk (Submodule.Quotient.mk x) := rfl
-
 def qqEquiv : ((M ⧸ LinearMap.range (lsmul R M s)) ⧸
       LinearMap.range (lsmul R (M ⧸ LinearMap.range (lsmul R M s)) t)) ≃ₗ[R]
     ((M ⧸ LinearMap.range (lsmul R M t)) ⧸
@@ -199,9 +241,6 @@ def aaHom : LinearMap.ker (lsmul R (LinearMap.ker (lsmul R M s)) t) →ₗ[R]
       exact congrArg Subtype.val (LinearMap.mem_ker.1 x.2))) (fun x => by
     rw [LinearMap.mem_ker]
     exact Subtype.ext (LinearMap.mem_ker.1 x.1.2))
-
-theorem aaHom_coe (x : LinearMap.ker (lsmul R (LinearMap.ker (lsmul R M s)) t)) :
-    ((aaHom s t x).1.1 : M) = x.1.1 := rfl
 
 def aaEquiv : LinearMap.ker (lsmul R (LinearMap.ker (lsmul R M s)) t) ≃ₗ[R]
     LinearMap.ker (lsmul R (LinearMap.ker (lsmul R M t)) s) :=
@@ -257,7 +296,7 @@ theorem cmp_map (hG : DirectSum.IsInternal G.gr) (φ : F.M →ₗ[R] G.M) (hφ :
     · rw [cmp_ne h hx hi, cmp_ne hG (hφ _ _ hx) hi, map_zero]
   · rw [map_zero, cmp_zero, cmp_zero, map_zero]
   · intro x y hx hy
-    rw [map_add, cmp_add, cmp_add, map_add, hx, hy]
+    rw [map_add (f := _), cmp_add, cmp_add, map_add (f := _), hx, hy]
 
 theorem comap_of_inj (hG : DirectSum.IsInternal G.gr) (φ : F.M →ₗ[R] G.M) (hφ : IsGrMap φ)
     (inj : Function.Injective φ) (m : Deg k) :
@@ -369,13 +408,9 @@ theorem internal_prod {F G : GMod B R k} (hF : DirectSum.IsInternal F.gr)
   internal_prod' F.gr G.gr hF hG
 
 theorem isGr_prod (𝒜 : Deg k → Submodule B R) {F G : GMod B R k} (hF : F.IsGr 𝒜) (hG : G.IsGr 𝒜) :
-    (gprod F G).IsGr 𝒜 where
-  smul_mem := fun ha hx => ⟨hF.smul_mem ha hx.1, hG.smul_mem ha hx.2⟩
-  internal := internal_prod hF.internal hG.internal
-  fin := by
-    have := hF.fin
-    have := hG.fin
-    exact Module.Finite.prod
+    (gprod F G).IsGr 𝒜 := by
+  exact ⟨fun ha hx => ⟨hF.smul_mem ha hx.1, hG.smul_mem ha hx.2⟩,
+    internal_prod hF.internal hG.internal, Module.Finite.prod (hM := hF.fin) (hN := hG.fin)⟩
 
 theorem secs_perm {ts ts' : List (Deg k × R)} (hp : ts.Perm ts') : secs ts = secs ts' := by
   unfold secs
@@ -430,10 +465,6 @@ def H1 (F : GMod B R k) (s t : R) (d d' : Deg k) : GMod B R k where
   gr m := (((F.gr (m - d)).prod (F.gr (m - d'))).comap
     ((Z1 (M := F.M) s t).subtype.restrictScalars B)).map
       ((B1 (M := F.M) s t).mkQ.restrictScalars B)
-
-theorem koszul_homology_eq (F : GMod B R k) (s t : R) (d d' : Deg k) :
-    H1 F s t d d' = ((gprod (F.shift d) (F.shift d')).sub (Z1 (M := F.M) s t)).quo
-      (B1 (M := F.M) s t) := rfl
 
 theorem ann_le_koszul_ann (F : GMod B R k) (s t : R) (d d' : Deg k) : F.Ann ≤ (H1 F s t d d').Ann := by
   intro r hr

@@ -1,8 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ContinuousUpperOff
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupJacobian.SUpPowEqZero
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ContinuousUpperOff
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GNonneg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ShearMeasurability
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Complex.Determinant
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,21 +86,7 @@ theorem mulVec_mp {ι : Type*} [Fintype ι] [DecidableEq ι] {g : Matrix ι ι �
   simp
 
 theorem mul_star_mp {a : ℂ} (ha : ‖a‖ = 1) : MeasurePreserving (fun z : ℂ => a * star z) volume volume := by
-  set f : ℂ →ₗ[ℝ] ℂ := (LinearMap.mulLeft ℝ a).comp Complex.conjAe.toLinearEquiv.toLinearMap with hf
-  have hn : Complex.normSq a = 1 := by
-    rw [Complex.normSq_eq_norm_sq, ha]; norm_num
-  have hm : LinearMap.det (LinearMap.mulLeft ℝ a) = Complex.normSq a := by
-    rw [← Algebra.norm_complex_apply, Algebra.norm_apply]
-    rfl
-  have hdet : LinearMap.det f = -1 := by
-    rw [hf, LinearMap.det_comp, hm, Complex.det_conjAe, hn]; norm_num
-  have hfun : (⇑f) = fun z : ℂ => a * star z := by
-    funext z
-    simp [hf]
-  rw [← hfun]
-  refine ⟨f.continuous_of_finiteDimensional.measurable, ?_⟩
-  rw [Measure.map_linearMap_addHaar_eq_smul_addHaar _ (by rw [hdet]; norm_num), hdet]
-  simp
+  apply PI.AmpRootJacW.mp_unitConj1 <;> assumption
 
 theorem normSq_det_of_mem {M : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ} (hM : M ∈ UH (Hb k)) :
     Complex.normSq M.det = 1 := by

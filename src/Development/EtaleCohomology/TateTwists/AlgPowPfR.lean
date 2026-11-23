@@ -1,4 +1,49 @@
-import Development.EtaleCohomology.TateTwists.TwSecLocPfZarR
+module
+
+import Development.EtaleCohomology.EtaleSheaves.KummerSequence.TwLocGenPfSec
+public import Development.EtaleCohomology.TateTwists.TwSecLocPfZarR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+
+@[expose] public section
 
 noncomputable section
 open Polynomial GlobalTheory.EtC
@@ -48,6 +93,7 @@ theorem self_sq {A : Type} [CommRing A] (q : ℕ) [NeZero q] (hq : IsUnit (q : A
     rw [← Ideal.Quotient.eq_zero_iff_mem]
     have hxy : Ideal.Quotient.mk (Ideal.span {d}) x = Ideal.Quotient.mk (Ideal.span {d}) y := by
       rw [Ideal.Quotient.eq]; exact Ideal.subset_span rfl
+
     simp only [u, c, map_sub, map_sum, map_mul, map_pow, map_natCast, hxy]
     rw [geom_sum₂_self, sub_self]
   obtain ⟨w0, hw0⟩ := Ideal.mem_span_singleton'.1 hmem
@@ -68,57 +114,6 @@ theorem self_pow {A : Type} [CommRing A] (d w : A) (h : d = d ^ 2 * w) (k : ℕ)
       _ = _ := by ring
 
 theorem AlgPow_of : LateralTheory.EtaleFoundations.TwSecLocPf.AlgPow := by
-  classical
-  intro q _ A _ ζ ξ
-  obtain ⟨hqA, hζ⟩ := ζ.2
-  obtain ⟨-, hξ⟩ := ξ.2
-  let f : (ZMod q)ˣ → A := fun a => ∏ b ∈ Finset.univ.erase a, (ξ.1 - ζ.1 ^ (b : ZMod q).val)
-
-  have hdom : ∀ p : Ideal A, p.IsPrime → IsPrimitiveRoot (Ideal.Quotient.mk p ζ.1) q ∧
-      IsPrimitiveRoot (Ideal.Quotient.mk p ξ.1) q := by
-    intro p hp
-    have hq : ((q : ℕ) : A ⧸ p) ≠ 0 := by
-      have := hqA.map (Ideal.Quotient.mk p)
-      rw [map_natCast] at this
-      exact this.ne_zero
-    have hm : ∀ z : A, aeval z (cyclotomic q ℤ) = 0 → aeval (Ideal.Quotient.mk p z) (cyclotomic q ℤ) = 0 := by
-      intro z hz
-      have := Polynomial.aeval_algHom_apply (Ideal.Quotient.mkₐ ℤ p) z (cyclotomic q ℤ)
-      rw [hz, map_zero] at this
-      simpa using this
-    exact ⟨root_dom q hq _ (hm _ hζ), root_dom q hq _ (hm _ hξ)⟩
-  refine ⟨Set.range f, ?_, ?_⟩
-  · by_contra hne
-    obtain ⟨m, hm, hsm⟩ := Ideal.exists_le_maximal _ hne
-    obtain ⟨h1, h2⟩ := hdom m hm.isPrime
-    obtain ⟨b0, hb0⟩ := eq_pow_dom q _ _ h1 h2
-    have hin : f b0 ∈ m := hsm (Ideal.subset_span ⟨b0, rfl⟩)
-    rw [← Ideal.Quotient.eq_zero_iff_mem] at hin
-    simp only [f, map_prod, map_sub, map_pow, hb0] at hin
-    rw [Finset.prod_eq_zero_iff] at hin
-    obtain ⟨b, hb, e⟩ := hin
-    exact pow_ne_dom q _ h1 b0 b (Finset.ne_of_mem_erase hb).symm (sub_eq_zero.1 e)
-  · rintro _ ⟨a, rfl⟩
-    refine ⟨a, ?_⟩
-    have hnil : IsNilpotent (f a * (ξ.1 - ζ.1 ^ (a : ZMod q).val)) := by
-      rw [← mem_nilradical, nilradical_eq_sInf, Ideal.mem_sInf]
-      intro p hp
-      have hp : p.IsPrime := hp
-      obtain ⟨h1, h2⟩ := hdom p hp
-      obtain ⟨b0, hb0⟩ := eq_pow_dom q _ _ h1 h2
-      rw [← Ideal.Quotient.eq_zero_iff_mem]
-      simp only [f, map_mul, map_prod, map_sub, map_pow, hb0]
-      by_cases hab : b0 = a
-      · subst hab; simp
-      · apply mul_eq_zero_of_left
-        exact Finset.prod_eq_zero (Finset.mem_erase.2 ⟨hab, Finset.mem_univ _⟩) (sub_self _)
-    obtain ⟨n, hn⟩ := hnil
-    obtain ⟨w, hw⟩ := self_sq q hqA ξ.1 (ζ.1 ^ (a : ZMod q).val) (pow_q q _ hξ)
-      (by rw [← pow_mul, mul_comm, pow_mul, pow_q q _ hζ, one_pow])
-    refine ⟨n, ?_⟩
-    rw [self_pow _ w hw n, pow_succ, mul_pow] at *
-    calc f a ^ n * ((ξ.1 - ζ.1 ^ (a : ZMod q).val) ^ n * (ξ.1 - ζ.1 ^ (a : ZMod q).val) * w ^ n)
-        = (f a ^ n * (ξ.1 - ζ.1 ^ (a : ZMod q).val) ^ n) * ((ξ.1 - ζ.1 ^ (a : ZMod q).val) * w ^ n) := by ring
-      _ = 0 := by rw [hn, zero_mul]
+  apply LateralTheory.E.H2CurveOrder.TwLocGenPfSec.AlgPow_of <;> assumption
 
 end LateralTheory.EtaleFoundations.AlgPowPf

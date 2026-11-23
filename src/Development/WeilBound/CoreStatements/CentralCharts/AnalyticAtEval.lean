@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSegreChartFrames
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValAtIffValueAtStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ConstantsInCoordRatioFieldStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsSegreChartFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +90,7 @@ theorem analyticAt_eval {A : Type} {n : ℕ} {q : (Fin n → ℂ) → A → ℂ}
     simp only [MvPolynomial.map_C, MvPolynomial.eval_C]
     exact analyticAt_const
   | add p r hp hr =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact hp.add hr
   | mul_X p i hp =>
     simp only [map_mul, MvPolynomial.map_X, MvPolynomial.eval_X]
@@ -74,7 +122,7 @@ private theorem valAt_add_lemma_12 {z : Spec (CommRingCat.of ℂ) ⟶ X} {a b : 
     (h : ValAt ξ z a r) (h' : ValAt ξ z b s) : ValAt ξ z (a + b) (r + s) := by
   obtain ⟨hz, s1, hs, hs'⟩ := h
   obtain ⟨hz', s2, ht, ht'⟩ := h'
-  refine ⟨hz, s1 + s2, by rw [map_add, hs, ht], ?_⟩
+  refine ⟨hz, s1 + s2, by rw [map_add (f := _), hs, ht], ?_⟩
   rw [← hs', ← ht']
   exact map_add _ s1 s2
 
@@ -127,7 +175,7 @@ private theorem valAt_pow_lemma_8 {z : Spec (CommRingCat.of ℂ) ⟶ X} (hz : ge
 private theorem eval₂_div_lemma_9 {L : Type*} [Field L] {d : K → ℕ} {p : MRing J} (hp : IsMultiHomog p d)
     (u : (Σ k, J k) → L) (c : (k : K) → J k) :
     MvPolynomial.eval₂ (Int.castRingHom L) u p / ∏ k, u ⟨k, c k⟩ ^ d k =
-      ∑ m ∈ p.support, ((MvPolynomial.coeff m p : ℤ) : L) * ∏ k, ∏ i, (u ⟨k, i⟩ / u ⟨k, c k⟩) ^ m ⟨k, i⟩ := by
+      ∑ m ∈ p.support, ((AddMonoidAlgebra.coeff p m : ℤ) : L) * ∏ k, ∏ i, (u ⟨k, i⟩ / u ⟨k, c k⟩) ^ m ⟨k, i⟩ := by
   rw [MvPolynomial.eval₂_eq', Finset.sum_div]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [eq_intCast, mul_div_assoc, Fintype.prod_sigma, ← Finset.prod_div_distrib]
@@ -285,7 +333,7 @@ theorem exists_emb (𝔐 : HodgeCpt Y S y) {z : Spec (CommRingCat.of ℂ) ⟶ �
       map_one' := hu _ _ (by rw [map_one]; simpa using valAt_intCast_lemma_13 (ξ := 𝔐.ξ) h0 1)
       map_mul' := fun a b => hu _ _ (by rw [map_mul]; exact valAt_mul_lemma_2 (hsv a) (hsv b))
       map_zero' := hu _ _ (by rw [map_zero]; simpa using valAt_intCast_lemma_13 (ξ := 𝔐.ξ) h0 0)
-      map_add' := fun a b => hu _ _ (by rw [map_add]; exact valAt_add_lemma_12 (hsv a) (hsv b)) }
+      map_add' := fun a b => hu _ _ (by rw [map_add (f := _)]; exact valAt_add_lemma_12 (hsv a) (hsv b)) }
   exact ⟨s, hsv⟩
 
 theorem exists_emb_fam (𝔐 : HodgeCpt Y S y) {n : ℕ} {gm : (Fin n → ℂ) → (Σ k, J k) → ℂ}

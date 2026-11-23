@@ -1,6 +1,46 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ChartTransportSt
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.IntChartSt
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.SaturationChartsHolds
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.SaturationChartsHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LieEig
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -22,23 +62,19 @@ theorem isChartG_reindex (t : SAB H X0) {S : Type} [CommRing S] (x0 : Sp S ⟶ X
     [Fintype κ] [Fintype κ'] (F : Fin d → MvPowerSeries (Fin 2 × Fin d) S)
     (act : 𝓞 E → Fin d → MvPowerSeries (Fin 1 × Fin d) S) (tg : κ → (Sp (DualNumber S) ⟶ t.G.left))
     (uvec : κ → Fin d → S) (x : ∀ m, jOG x0 d m 1 ⟶ t.G) (h : IsChartG t x0 d F act tg uvec x) (e : κ' ≃ κ) :
-    IsChartG t x0 d F act (fun ℓ => tg (e ℓ)) (fun ℓ => uvec (e ℓ)) x where
-  zero := h.zero
-  trunc := h.trunc
-  law := h.law
-  act := h.act
-  tan := fun ℓ => h.tan (e ℓ)
-  basis := fun v => by
-    obtain ⟨b, hb, hbu⟩ := h.basis v
-    refine ⟨fun ℓ => b (e ℓ), fun j => ?_, fun a ha => ?_⟩
-    · rw [← hb j]
-      exact Equiv.sum_comp e (fun ℓ => b ℓ * uvec ℓ j)
-    · have h1 : (fun ℓ => a (e.symm ℓ)) = b := hbu _ fun j => by
-        rw [← ha j, ← Equiv.sum_comp e (fun ℓ => a (e.symm ℓ) * uvec ℓ j)]
-        simp only [Equiv.symm_apply_apply]
-      funext ℓ
-      rw [← h1]
+    IsChartG t x0 d F act (fun ℓ => tg (e ℓ)) (fun ℓ => uvec (e ℓ)) x := by
+  refine ⟨h.zero, h.trunc, h.law, h.act, fun ℓ => h.tan (e ℓ), ?_⟩
+  intro v
+  obtain ⟨b, hb, hbu⟩ := h.basis v
+  refine ⟨fun ℓ => b (e ℓ), fun j => ?_, fun a ha => ?_⟩
+  · rw [← hb j]
+    exact Equiv.sum_comp e (fun ℓ => b ℓ * uvec ℓ j)
+  · have h1 : (fun ℓ => a (e.symm ℓ)) = b := hbu _ fun j => by
+      rw [← ha j, ← Equiv.sum_comp e (fun ℓ => a (e.symm ℓ) * uvec ℓ j)]
       simp only [Equiv.symm_apply_apply]
+    funext ℓ
+    rw [← h1]
+    simp only [Equiv.symm_apply_apply]
 
 variable {V : Type} [CommRing V] (t : SAB H (Sp V))
 

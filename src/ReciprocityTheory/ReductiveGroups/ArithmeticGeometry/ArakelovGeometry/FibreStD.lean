@@ -1,5 +1,61 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreStC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.EqZeroOfSecTraceMulEqZero
+module
+
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.BasisOfLinearIndependentOfCardEqFinrank
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.EqZeroOfSecTraceMulEqZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreStA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreStC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.LemCone
+public import Mathlib.Algebra.MvPolynomial.Funext
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +104,7 @@ theorem aeval_chartGen (y : Fin (D + 1) → Ω) (g : MvPolynomial {k : Fin (D + 
       deh y 0 (MvPolynomial.rename Subtype.val g) := by
   induction g using MvPolynomial.induction_on with
   | C a => simp [deh_apply]
-  | add p q hp hq => simp only [map_add, AddMemClass.coe_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), AddMemClass.coe_add, hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.rename_X, MulMemClass.coe_mul, hp]
     congr 1
@@ -142,44 +198,7 @@ variable {Ω : Type*} [Field Ω] [CharZero Ω] {ι : Type} [Fintype ι] {D : ℕ
 
 theorem coord_div_isIntegral (x : ι → Ω) (e : Fin (D + 1) → ι) (h : IsProjFrame x e) (i : ι) :
     IsIntegral (chartRing (x ∘ e)) (x i / x (e 0)) := by
-  set y := x ∘ e with hy
-  change IsIntegral _ (x i / y 0)
-  have hl : y 0 ≠ 0 := coord_ne_zero y h.free 0
-  have hinj : Function.Injective (coneMap ℤ y) := by
-    rw [injective_iff_map_eq_zero]
-    intro f hf
-    have : f ∈ coordIdeal ℤ y := by rw [coordIdeal, RingHom.mem_ker]; exact hf
-    rwa [h.free, Ideal.mem_bot] at this
-  let eqv : MvPolynomial (Fin (D + 1)) ℤ ≃ₐ[ℤ] coneRing ℤ y := AlgEquiv.ofInjective (coneMap ℤ y) hinj
-  let w : Fin (D + 1) → chartRing y := fun k =>
-    if hk : k = 0 then 1 else ⟨chartGen y ⟨k, hk⟩, Algebra.subset_adjoin ⟨_, rfl⟩⟩
-  have hw : ∀ k, algebraMap (chartRing y) Ω (w k) = y k * (y 0)⁻¹ := by
-    intro k
-    by_cases hk : k = 0
-    · subst hk; simp [w, mul_inv_cancel₀ hl]
-    · simp only [w, dif_neg hk]
-      change y k / y 0 = _
-      exact div_eq_mul_inv _ _
-  let ψ : Polynomial Ω →+* Ω := Polynomial.evalRingHom (y 0)⁻¹
-  have hev : ∀ f : MvPolynomial (Fin (D + 1)) ℤ,
-      ψ (coneMap ℤ y f) = MvPolynomial.aeval (fun k => y k * (y 0)⁻¹) f := by
-    intro f
-    induction f using MvPolynomial.induction_on with
-    | C a => simp [coneMap, ψ]
-    | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
-    | mul_X p k hp => rw [map_mul, map_mul, map_mul, hp]; simp [coneMap, ψ]
-  let φ : coneRing ℤ y →+* chartRing y :=
-    (MvPolynomial.aeval w).toRingHom.comp eqv.symm.toAlgHom.toRingHom
-  have hrel : (algebraMap (chartRing y) Ω).comp φ = ψ.comp (algebraMap (coneRing ℤ y) _) := by
-    ext r
-    obtain ⟨f, rfl⟩ := eqv.surjective r
-    have h1 : ((eqv f : coneRing ℤ y) : Polynomial Ω) = coneMap ℤ y f := rfl
-    change algebraMap _ Ω (MvPolynomial.aeval w (eqv.symm (eqv f))) =
-      ψ ((eqv f : coneRing ℤ y) : Polynomial Ω)
-    rw [eqv.symm_apply_apply, h1, hev, ← MvPolynomial.aeval_algebraMap_apply,
-      show (⇑(algebraMap (chartRing y) Ω) ∘ w) = fun k => y k * (y 0)⁻¹ from funext hw]
-  have := IsIntegral.map_of_comp_eq φ ψ hrel (h.integral i)
-  simpa [ψ, div_eq_mul_inv] using this
+  apply ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.TraceNormBounds.coord_div_isIntegral <;> assumption
 
 abbrev Lx (x : ι → Ω) (e : Fin (D + 1) → ι) : IntermediateField (fnField (x ∘ e)) Ω :=
   extendScalars (fnField_comp_le x e)

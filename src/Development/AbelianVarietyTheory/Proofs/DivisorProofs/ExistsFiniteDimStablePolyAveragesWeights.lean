@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.RangeShape
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.MeasurePreservingMulRight
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.Smooth
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PropsKfin
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TCoefMInMMul
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DefsRep
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.PropsKfin
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,6 +64,7 @@ variable {n : ℕ}
 theorem totalDegree_bind_le {α β : Type} (g : α → MvPolynomial β ℂ) (hg : ∀ i, (g i).totalDegree ≤ 1)
     (Q : MvPolynomial α ℂ) : (bind₁ g Q).totalDegree ≤ Q.totalDegree := by
   classical
+
   conv_lhs => rw [Q.as_sum, map_sum]
   refine totalDegree_finsetSum_le fun s hs => ?_
   rw [bind₁_monomial]
@@ -40,7 +87,7 @@ theorem exists_translate (a : Mat n) (P : Poly n) :
   · have h : ev (a * g) = (ev g).comp (bind₁ f : Poly n →ₐ[ℂ] Poly n).toRingHom := by
       refine MvPolynomial.ringHom_ext (fun r => ?_) ?_
       · simp [ev]
-      · rintro (x | x) <;> simp [ev, f, Matrix.mul_apply]
+      · rintro (x | x) <;> simp [ev, f, Matrix.mul_apply, bind₁_X_right]
     rw [h]; rfl
 
 def varWt : (Fin n × Fin n) ⊕ (Fin n × Fin n) → Fin n → ℝ :=
@@ -93,7 +140,7 @@ def avg (hσ : IsURepOn (UJset ε) σ) (u : H) : Poly n →ₗ[ℂ] H where
   toFun P := ∫ k : KG ε, ev (toMK k) P • σ (toMK k) u ∂(muK ε)
   map_add' P Q := by
     rw [← integral_add (integrable_avg hσ u P) (integrable_avg hσ u Q)]
-    simp only [map_add, add_smul]
+    simp only [map_add (f := _), add_smul]
   map_smul' c P := by
     rw [RingHom.id_apply, ← integral_smul]
     simp [ev, smul_eq_C_mul, mul_smul]
@@ -148,12 +195,13 @@ theorem polyAvg : ∀ (n : ℕ) (ε : Fin n → Bool) (d : ℕ), ∃ A : Set (Fi
     apply hv
     have hP' : P.totalDegree ≤ d := (mem_restrictTotalDegree _ _ _).1 hP
     rw [← inner_self_eq_zero (𝕜 := ℂ)]
-    have e : avg hσ u P = ∑ s ∈ P.support, coeff s P • avg hσ u (monomial s 1) := by
+    have e : avg hσ u P = ∑ s ∈ P.support, AddMonoidAlgebra.coeff P s • avg hσ u (monomial s 1) := by
+
       conv_lhs => rw [P.as_sum, map_sum]
       refine Finset.sum_congr rfl fun s _ => ?_
       rw [← map_smul, smul_monomial, smul_eq_mul, mul_one]
     generalize avg hσ u P = v at e hw
-    have : inner ℂ v (∑ s ∈ P.support, coeff s P • avg hσ u (monomial s 1)) = 0 := by
+    have : inner ℂ v (∑ s ∈ P.support, AddMonoidAlgebra.coeff P s • avg hσ u (monomial s 1)) = 0 := by
       rw [inner_sum]
       refine Finset.sum_eq_zero fun s hs => ?_
       rw [inner_smul_right, ReciprocityTheory.ChartRestriction.DS.kfin_wt_orth hσ hw (isWtOn_avg hσ u s), mul_zero]

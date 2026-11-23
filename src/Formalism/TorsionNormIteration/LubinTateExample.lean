@@ -1,14 +1,52 @@
-import Formalism.TorsionNormIteration.InverseIntegralClasses.SolveExistsProof
-import Formalism.TorsionNormIteration.InverseIntegralClasses.InvInt
-import Formalism.TorsionNormIteration.InverseIntegralClasses.SigmaNormLeOne
-import Formalism.TorsionNormIteration.InverseIntegralClasses.MemSpanOfNormLe
-import Formalism.TorsionNormIteration.InverseIntegralClasses.NormSigmaLeOne
-import Formalism.TorsionNormIteration.InverseIntegralClasses.MapSubtypeInjective
-import Formalism.TorsionNormIteration.InverseIntegralClasses.CoeffSubstAddCMulXPow
-import Formalism.TorsionNormIteration.InverseIntegralClasses.IsHomOfSubstEqSmul
-import Formalism.TorsionNormIteration.InverseIntegralClasses.TorsionNormIterProof
-import Formalism.TorsionNormIteration.InverseIntegralClasses.NormNatCastOfNotDvd
-import Formalism.TorsionNormIteration.InverseIntegralClasses.LTLemma
+module
+
+public import Formalism.FormalGroupLog.Statement
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.InvInt
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.MapSubtypeInjective
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.MemSpanOfNormLe
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.NormSigmaLeOne
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.SigmaNormLeOne
+public import Formalism.TorsionNormIteration.InverseIntegralClasses.SolveExistsProof
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.LT
 
@@ -20,28 +58,7 @@ theorem funEqSubst : Formalism.G.FunEqSubst.{u, v} :=
 theorem funEqGroup : Formalism.G.FunEqGroup.{u} :=
   FunEqGroup_of SolveExists_proof InvIntegralOfClass_proof FunEqLowCoeff_proof funEqSubst
 
-theorem funEqFormalGroup : Formalism.G.FunEqFormalGroup.{u} := FunEqFormalGroup_of funEqGroup
-
 theorem funEqHom : Formalism.G.FunEqHom.{u} :=
   FunEqHom_of SolveExists_proof InvIntegralOfClass_proof FunEqLowCoeff_proof funEqSubst
-
-theorem funEqCongr : Formalism.G.FunEqCongr.{u} := FunEqCongr_of CoeffBound_valid PowCongr_valid
-
-theorem lubinTateExample : Formalism.G.LubinTateExample :=
-  LubinTateExample_of funEqFormalGroup funEqHom funEqCongr
-
-theorem torsionExample : TorsionExample := by
-  unfold TorsionExample IsLTPoly
-  refine ⟨⟨?_, ?_, ?_, ?_⟩, ?_, ?_, ?_⟩
-  · simp
-  · simp [Polynomial.coeff_X]
-  · simp [Polynomial.coeff_X]
-  · intro i h1 h2
-    simp [Polynomial.coeff_X, Polynomial.coeff_X_pow, h2, Ne.symm h1]
-  · norm_num
-  · have h : ‖((2 : ℕ) : ℚ_[2])‖ < 1 := Padic.norm_p_lt_one
-    simpa using h
-  · norm_num
-theorem expIntegral : ExpIntegral.{u} := exp_integral
 
 end Formalism.LT

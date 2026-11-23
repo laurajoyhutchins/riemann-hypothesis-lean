@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CPoly
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonomialCoefficientComparison
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCliff
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CPoly
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TZero
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.IsCoreMod
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonomialCoefficientComparison
+public import Mathlib.Algebra.DirectSum.LinearMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix Finset
 open scoped InnerProductSpace ComplexConjugate
 open PositivityTheory.RgBcC PositivityTheory.RgBcC.Real PositivityTheory.RgBcC.RealD GlobalTheory.CompanionTheory.RealCount GlobalTheory.CompanionTheory.RealCount.Tope
@@ -30,12 +77,14 @@ theorem lp_eq_sum (f : LP n) :
 theorem evL_eq_sum (z : Fin n → ℂˣ) (f : LP n) :
     evL z f = ∑ m ∈ f.coeff.support, f.coeff m * GlobalTheory.CompanionTheory.CoefId.mon m (fun a => (z a : ℂ)) := by
   conv_lhs => rw [lp_eq_sum f]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [evL_single]; rfl
 
 theorem evL_cPoly (z : Fin n → ℂˣ) (s : Finset (Fin n → ℤ)) (c : (Fin n → ℤ) → ℂ) :
     evL z (cPoly s c) = ∑ μ ∈ s, (∏ a, ((z a : ℂ) ^ μ a)) * c μ := by
+
   rw [cPoly, map_sum]
   exact Finset.sum_congr rfl fun μ _ => by rw [evL_single, mul_comm]
 
@@ -65,7 +114,7 @@ theorem evL_frL (z : Fin n → ℂˣ) (f : LP n) : evL z (frL n f) = evL (fun a 
   exact congrArg (fun φ : LP n →ₐ[ℂ] ℂ => φ f) this
 
 theorem evL_pPL (z : Fin n → ℂˣ) : evL z (pPL n) = ∏ a, ∏ b, (1 + (z a : ℂ) / z b) := by
-  simp only [pPL, map_prod, map_add, map_one, evL_single, one_mul]
+  simp only [pPL, map_prod, map_add (f := _), map_one, evL_single, one_mul]
   refine Finset.prod_congr rfl fun a _ => Finset.prod_congr rfl fun b _ => ?_
   congr 1
   have key : ∀ a : Fin n, ∏ c, (z c : ℂ) ^ ((Pi.single a (1 : ℤ) : Fin n → ℤ) c) = z a := fun a => by
@@ -81,6 +130,7 @@ variable {n : ℕ}
 
 theorem evL_altL (z : Fin n → ℂˣ) (m : Fin n → ℤ) :
     evL z (altL m) = (Matrix.of fun i j : Fin n => (z i : ℂ) ^ m j).det := by
+
   rw [← Matrix.det_transpose, Matrix.det_apply', altL, map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [map_smul, evL_single, one_mul, smul_eq_mul]
@@ -161,7 +211,7 @@ theorem trace_restrict_eq (E : KMod n) (T' : E.V →L[ℂ] E.V) (hT : ∀ k, T' 
     obtain ⟨ξ, hξ⟩ := x
     simp only [LinearMap.restrict_apply, LinearMap.smul_apply, SetLike.val_smul]
     exact dualT_wt E T' μ k z hk ξ hξ
-  rw [trOn, dif_pos hg, e, map_smul, smul_eq_mul]
+  rw [trOn, dite_eq_left hg, e, map_smul, smul_eq_mul]
 
 theorem trace_decomp (E : KMod n) (T' : E.V →L[ℂ] E.V) (hT : ∀ k, T' * E.ρ k = E.ρ k * T')
     (htop : (⨆ μ, wtDual E μ) = ⊤) (hind : iSupIndep (wtDual E)) (s : Finset (Fin n → ℤ))

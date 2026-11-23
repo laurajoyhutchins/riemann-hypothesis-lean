@@ -1,11 +1,57 @@
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.Multi
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassCuspidalStatement
+module
+
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SmoothContragredientIrreducibleAndReflexive
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExhUnipRadOne
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.Multi
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassCuspidalStatement
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassInvolutive
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DualClassTwistNeg
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApplyMemTwKerOfNormalizer
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.ExhUnipRadOne
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,11 +62,11 @@ namespace UpperTheory.Zero.LLC
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-private theorem dualCl_fst' (x : IrrGL k) : (Zc.dualCl x).1 = x.1 := by
+private theorem dualCl_fst' (x : IrrGL (k := k)) : (Zc.dualCl x).1 = x.1 := by
   rw [GlobalTheory.CompanionTheory.ZcDual.dualCl_eq Pr.adm x]
   rfl
 
-private theorem dualCl_iff (x y : IrrGL k) : DualCl x y ↔ y = Zc.dualCl x := by
+private theorem dualCl_iff (x y : IrrGL (k := k)) : DualCl x y ↔ y = Zc.dualCl x := by
   constructor
   · rintro ⟨n, π, π', rfl, rfl, ⟨e⟩⟩
     have ψ := GlobalTheory.ContraRefl.contraEquiv (equivRep π)
@@ -31,7 +77,7 @@ private theorem dualCl_iff (x y : IrrGL k) : DualCl x y ↔ y = Zc.dualCl x := b
       GlobalTheory.CompanionTheory.ZcDual.isIrreducible_contra Pr.adm _ x.2.rep.smooth x.2.rep.irr⟩,
       congrArg (Sigma.mk x.1) x.2.cl_rep.symm, GlobalTheory.CompanionTheory.ZcDual.dualCl_eq Pr.adm x, ⟨.refl _⟩⟩
 
-private theorem dualCl_tw (x : IrrGL k) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (hχ' : IsSmoothChar χ⁻¹) :
+private theorem dualCl_tw (x : IrrGL (k := k)) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (hχ' : IsSmoothChar χ⁻¹) :
     Zc.dualCl (x.tw χ hχ) = (Zc.dualCl x).tw χ⁻¹ hχ' := by
   obtain ⟨e⟩ := GlobalTheory.CompanionTheory.ZcDual.nonempty_equiv_contra_twist Pr.adm x.rep x.2.rep.smooth x.2.rep.irr hχ hχ'
     (mul_inv_cancel χ)
@@ -68,12 +114,12 @@ private theorem fixed_contra_ne {n : ℕ} {V : Type} [AddCommGroup V] [Module �
   rw [hl0] at this
   exact hm (by simpa using this.symm)
 
-private theorem dz_dualCl {x : IrrGL k} (h : DZ x) : DZ (Zc.dualCl x) := by
+private theorem dz_dualCl {x : IrrGL (k := k)} (h : DZ x) : DZ (Zc.dualCl x) := by
   unfold DZ
   rw [GlobalTheory.CompanionTheory.ZcDual.dualCl_eq Pr.adm x]
   exact fixed_ne_of_equiv (IrrGL.equivOf _ _ _) (fixed_contra_ne x.rep x.2.rep.smooth h)
 
-private theorem central_dualCl {x : IrrGL k} {ω : kˣ →* ℂˣ} (h : HasCentralChar x.rep ω) :
+private theorem central_dualCl {x : IrrGL (k := k)} {ω : kˣ →* ℂˣ} (h : HasCentralChar x.rep ω) :
     HasCentralChar (Zc.dualCl x).rep ω⁻¹ := by
   rw [GlobalTheory.CompanionTheory.ZcDual.dualCl_eq Pr.adm x]
   refine hasCentralChar_of_equiv (IrrGL.equivOf _ _ _) fun z l => Subtype.ext (LinearMap.ext fun v => ?_)
@@ -81,23 +127,23 @@ private theorem central_dualCl {x : IrrGL k} {ω : kˣ →* ℂˣ} (h : HasCentr
     (map_inv _ z).symm
   rw [contra_apply, h1, h z⁻¹ v, map_smul, Submodule.coe_smul, LinearMap.smul_apply, MonoidHom.inv_apply, map_inv]
 
-private theorem tw_tw_inv (y : IrrGL k) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (hχ' : IsSmoothChar χ⁻¹) :
+private theorem tw_tw_inv (y : IrrGL (k := k)) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) (hχ' : IsSmoothChar χ⁻¹) :
     (y.tw χ hχ).tw χ⁻¹ hχ' = y := by
   simp only [IrrGL.tw_tw, mul_inv_cancel, IrrGL.tw_one]
 
-private theorem goodCusp_tw {y : IrrGL k} (h : GoodCusp y) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) :
+private theorem goodCusp_tw {y : IrrGL (k := k)} (h : GoodCusp y) (χ : kˣ →* ℂˣ) (hχ : IsSmoothChar χ) :
     GoodCusp (y.tw χ hχ) := by
   rcases h with h | ⟨hg, y₀, χ₀, h₀, hd, rfl⟩
   · exact .inl h
   · exact .inr ⟨hg, y₀, χ₀ * χ, h₀.mul hχ, hd, IrrGL.tw_tw _ _ _ _ _⟩
 
-private theorem goodCusp_dualCl {y : IrrGL k} (h : GoodCusp y) : GoodCusp (Zc.dualCl y) := by
+private theorem goodCusp_dualCl {y : IrrGL (k := k)} (h : GoodCusp y) : GoodCusp (Zc.dualCl y) := by
   rcases h with h | ⟨hg, y₀, χ₀, h₀, hd, rfl⟩
   · exact .inl ((dualCl_fst' y).trans h)
   · exact .inr ⟨hg, Zc.dualCl y₀, χ₀⁻¹, h₀.inv, dz_dualCl hd, dualCl_tw _ _ _ _⟩
 
 private theorem deg_one (c : IrrCl (GL (Fin 1) k)) :
-    IrrGL.IsCusp (⟨1, c⟩ : IrrGL k) ∧ ∃ χ hχ, (⟨1, c⟩ : IrrGL k) = IrrGL.ofChar χ hχ := by
+    IrrGL.IsCusp (⟨1, c⟩ : IrrGL (k := k)) ∧ ∃ χ hχ, (⟨1, c⟩ : IrrGL (k := k)) = IrrGL.ofChar χ hχ := by
   refine ⟨⟨one_pos, c.rep.smooth, fun s d e he => absurd (exh_unipRad_one e) he⟩, ?_⟩
   obtain ⟨ω, hω, hc⟩ := exists_smooth_hasCentralChar c.rep.smooth c.rep.irr
   refine ⟨ω, hω, ?_⟩

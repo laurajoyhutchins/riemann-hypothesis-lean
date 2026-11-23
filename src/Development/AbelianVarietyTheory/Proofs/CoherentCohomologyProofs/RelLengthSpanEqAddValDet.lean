@@ -1,4 +1,55 @@
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.LengthCommensurableMapIffOfInjective
+module
+
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.OrderOfVanishing.Noetherian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.Finite.Quotient
+
+@[expose] public section
 
 namespace GlobalTheory.RelativeLengthSpanDet
 
@@ -7,8 +58,8 @@ open IsDiscreteValuationRing
 variable {R : Type*} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
   {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem addVal_prod (s : Finset ι) (c : ι → R) :
     addVal R (∏ i ∈ s, c i) = ∑ i ∈ s, addVal R (c i) := by
   induction s using Finset.induction_on with
@@ -29,7 +80,7 @@ theorem length_coker_of_det_eq_zero (P : Matrix ι ι R) (h : P.det = 0) :
   let g : R →ₗ[R] (ι → R) ⧸ LinearMap.range P.mulVecLin :=
     (LinearMap.range P.mulVecLin).mkQ ∘ₗ LinearMap.single R (fun _ : ι => R) k
   have hg : Function.Injective g := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro r hr
     have hr' : (Pi.single k r : ι → R) ∈ LinearMap.range P.mulVecLin :=
       (Submodule.Quotient.mk_eq_zero _).mp hr
@@ -79,41 +130,11 @@ theorem length_coker (P : Matrix ι ι R) :
   by_cases h : P.det = 0
   · rw [length_coker_of_det_eq_zero P h, h, addVal_zero]
   · have hinj : Function.Injective P.mulVecLin := by
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro x hx
       by_contra hx0
       exact h (Matrix.exists_mulVec_eq_zero_iff.mp ⟨x, hx0, hx⟩)
     rw [length_coker_of_injective (Pi.basisFun R ι) _ hinj, ← Matrix.toLin'_apply',
       LinearMap.det_toLin']
-
-theorem relLength_span_eq_addVal_det {V : Type*} [AddCommGroup V] [Module R V] {a v : ι → V}
-    (ha : LinearIndependent R a) (P : Matrix ι ι R) (hv : ∀ j, v j = ∑ i, P i j • a i) :
-    relLength (Submodule.span R (Set.range a)) (Submodule.span R (Set.range v)) =
-      addVal R P.det := by
-  have hinj : Function.Injective (Fintype.linearCombination R a) := by
-    rw [injective_iff_map_eq_zero]
-    intro x hx
-    funext i
-    exact Fintype.linearIndependent_iff.mp ha x (by rwa [Fintype.linearCombination_apply] at hx) i
-  have hA : Submodule.span R (Set.range a) =
-      (⊤ : Submodule R (ι → R)).map (Fintype.linearCombination R a) := by
-    rw [Submodule.map_top, Fintype.range_linearCombination]
-  have hcomp : Fintype.linearCombination R a ∘ₗ P.mulVecLin = Fintype.linearCombination R v := by
-    refine LinearMap.pi_ext' fun j => LinearMap.ext_ring ?_
-    simp [Fintype.linearCombination_apply, hv, Pi.single_apply]
-  have hB : Submodule.span R (Set.range v) =
-      (LinearMap.range P.mulVecLin).map (Fintype.linearCombination R a) := by
-    rw [← LinearMap.range_comp, hcomp, Fintype.range_linearCombination]
-  rw [hA, hB, relLength_map_of_injective _ hinj, relLength_top_left, length_coker]
-
-universe u_1 u_2 u_3 in
-
-theorem relLength_span_eq {R : Type u_1} [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
-    {V : Type u_2} [AddCommGroup V] [Module R V] {ι : Type u_3} [Fintype ι] [DecidableEq ι]
-    {a v : ι → V} (ha : LinearIndependent R a) (P : Matrix ι ι R)
-    (hv : ∀ j, v j = ∑ i, P i j • a i) :
-    relLength (Submodule.span R (Set.range a)) (Submodule.span R (Set.range v)) =
-      (addVal R : R → ℕ∞) P.det :=
-  relLength_span_eq_addVal_det ha P hv
 
 end GlobalTheory.RelativeLengthSpanDet

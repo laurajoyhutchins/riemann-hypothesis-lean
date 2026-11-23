@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.HerbrandQuotients.Permutation
-import GroundTheory.GlobalFields.HerbrandQuotients.LatticeBridge
-import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+module
+
+public import GroundTheory.GlobalFields.HerbrandQuotients.Permutation
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Galois
+public import GroundTheory.GlobalFields.HerbrandQuotients.CycTate
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Ramification
+public import Mathlib.NumberTheory.RamificationInertia.Galois
+public import GroundTheory.GlobalFields.HerbrandQuotients.LatticeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -63,9 +109,7 @@ variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Alge
 
 section Infinite
 
-omit [NumberField L] in
 open scoped Classical in
-
 theorem prod_card_stabilizer_infinitePlace
     [Fintype (orbitRel.Quotient (L ≃ₐ[K] L) (InfinitePlace L))] :
     ∏ ω : orbitRel.Quotient (L ≃ₐ[K] L) (InfinitePlace L),
@@ -90,8 +134,8 @@ instance (w : HeightOneSpectrum (𝓞 L)) :
     w.asIdeal.LiesOver (placeBelow (K := K) w).asIdeal :=
   ⟨rfl⟩
 
-omit [NumberField K] [NumberField L] [IsGalois K L] in
 
+omit [NumberField K] [NumberField L] [IsGalois K L] in
 theorem eq_placeBelow_of_liesOver {w : HeightOneSpectrum (𝓞 L)} {v : HeightOneSpectrum (𝓞 K)}
     (h : w.asIdeal.LiesOver v.asIdeal) : v = placeBelow w :=
   HeightOneSpectrum.ext h.over
@@ -99,10 +143,8 @@ theorem eq_placeBelow_of_liesOver {w : HeightOneSpectrum (𝓞 L)} {v : HeightOn
 omit [NumberField K] [NumberField L] [IsGalois K L] in
 theorem placeBelow_smul (g : L ≃ₐ[K] L) (w : HeightOneSpectrum (𝓞 L)) :
     placeBelow (K := K) (g • w) = placeBelow w := by
-  symm
-  apply eq_placeBelow_of_liesOver
-  change ((g • w.asIdeal : Ideal (𝓞 L))).LiesOver _
-  infer_instance
+  have h : (g • w.asIdeal).LiesOver (placeBelow (K := K) w).asIdeal := inferInstance
+  exact HeightOneSpectrum.ext h.over.symm
 
 variable (S : Set (HeightOneSpectrum (𝓞 L)))
 
@@ -112,13 +154,13 @@ variable (S : Set (HeightOneSpectrum (𝓞 L)))
   mul_smul g h w := Subtype.ext (mul_smul g h w.1)
 
 theorem prod_card_stabilizer_finitePlace (hS : ∀ (g : L ≃ₐ[K] L), ∀ w ∈ S, g • w ∈ S) :
-    letI := stableMulAction S hS
+    letI _ := stableMulAction S hS
     ∀ [Fintype (orbitRel.Quotient (L ≃ₐ[K] L) S)],
     ∏ ω : orbitRel.Quotient (L ≃ₐ[K] L) S,
         (Nat.card (stabilizer (L ≃ₐ[K] L) (Quotient.out ω)) : ℚ) =
       ∏ᶠ (v : HeightOneSpectrum (𝓞 K)) (_ : ∃ w ∈ S, w.asIdeal.LiesOver v.asIdeal),
         ((v.asIdeal.ramificationIdxIn (𝓞 L) * v.asIdeal.inertiaDegIn (𝓞 L) : ℕ) : ℚ) := by
-  let := stableMulAction S hS
+  let _ := stableMulAction S hS
   intro _
   have hstab : ∀ x : S, Nat.card (stabilizer (L ≃ₐ[K] L) x) =
       (placeBelow (K := K) x.1).asIdeal.ramificationIdxIn (𝓞 L) *
@@ -131,20 +173,23 @@ theorem prod_card_stabilizer_finitePlace (hS : ∀ (g : L ≃ₐ[K] L), ∀ w �
     rw [h1]
     exact Ideal.card_stabilizer_eq (placeBelow (K := K) x.1).asIdeal x.1.asIdeal
   rw [← finprod_eq_prod_of_fintype, ← finprod_mem_univ]
-  refine finprod_mem_eq_of_bijOn (fun ω => placeBelow (K := K) (Quotient.out ω).1) ⟨?_, ?_, ?_⟩
-    fun ω _ => by rw [hstab]
+  refine finprod_mem_eq_of_bijOn (M := ℚ)
+    (t := {v : HeightOneSpectrum (𝓞 K) | ∃ w ∈ S, w.asIdeal.LiesOver v.asIdeal})
+    (fun ω : orbitRel.Quotient (L ≃ₐ[K] L) S => placeBelow (K := K) (Quotient.out ω).1)
+    ⟨?_, ?_, ?_⟩ ?_
   · intro ω _
     exact ⟨(Quotient.out ω).1, (Quotient.out ω).2, inferInstance⟩
   · intro ω₁ _ ω₂ _ h
     simp only at h
     set x₁ := Quotient.out ω₁
     set x₂ := Quotient.out ω₂
-    obtain ⟨g, hg⟩ := MulAction.exists_smul_eq (L ≃ₐ[K] L)
-      (⟨x₂.1, inferInstance⟩ : SemiLocal.PlacesOver L (placeBelow (K := K) x₂.1))
-      ⟨x₁.1, by rw [← h]; infer_instance⟩
+    let _ : x₁.1.asIdeal.LiesOver (placeBelow (K := K) x₂.1).asIdeal := by
+      rw [← h]
+      infer_instance
+    obtain ⟨g, hg⟩ := Ideal.exists_smul_eq_of_isGaloisGroup
+      (placeBelow (K := K) x₂.1).asIdeal x₂.1.asIdeal x₁.1.asIdeal (L ≃ₐ[K] L)
     rw [← Quotient.out_eq ω₁, ← Quotient.out_eq ω₂]
-    have hg' : g • x₂.1 = x₁.1 := congrArg Subtype.val hg
-    exact Quotient.sound ⟨g, Subtype.ext hg'⟩
+    exact Quotient.sound ⟨g, Subtype.ext (HeightOneSpectrum.ext hg)⟩
   · rintro v ⟨w, hw, hlies⟩
     refine ⟨Quotient.mk _ ⟨w, hw⟩, Set.mem_univ _, ?_⟩
     obtain ⟨g, hg⟩ : Quotient.out (Quotient.mk (orbitRel (L ≃ₐ[K] L) S) ⟨w, hw⟩) ∈
@@ -154,6 +199,8 @@ theorem prod_card_stabilizer_finitePlace (hS : ∀ (g : L ≃ₐ[K] L), ∀ w �
     rw [← hg]
     change placeBelow (g • w) = v
     rw [placeBelow_smul, ← eq_placeBelow_of_liesOver hlies]
+  · intro ω _
+    rw [hstab]
 
 end Finite
 

@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,28 +53,6 @@ def IsQuotMeasure {G G' : Type} [Group G] [Group G'] [MeasurableSpace G] [Measur
     (j : G' →* G) (μ : Measure G) (μ' : Measure G') (ν : Measure (RCosets j)) : Prop :=
   ∀ f : G → ℝ≥0∞, Measurable f →
     ∫⁻ g, f g ∂μ = ∫⁻ c : RCosets j, ∫⁻ h, f (j h * c.out) ∂μ' ∂ν
-
-example {G : Type} [Group G] [MeasurableSpace G] (μ : Measure G) :
-    IsQuotMeasure (1 : PUnit →* G) μ (Measure.dirac PUnit.unit)
-      (μ.map (Quotient.mk (QuotientGroup.rightRel (1 : PUnit →* G).range))) := by
-  intro f hf
-  have hout : ∀ g : G,
-      (Quotient.mk (QuotientGroup.rightRel (1 : PUnit →* G).range) g).out = g := by
-    intro g
-    have h := Quotient.mk_out (s := QuotientGroup.rightRel (1 : PUnit →* G).range) g
-    rw [QuotientGroup.rightRel_apply] at h
-    obtain ⟨u, hu⟩ := h
-    have h1 : (1 : G) = g * (Quotient.mk (QuotientGroup.rightRel (1 : PUnit →* G).range) g).out⁻¹ := by
-      simpa using hu
-    exact (mul_inv_eq_one.1 h1.symm).symm
-  have hm : Measurable fun c : RCosets (1 : PUnit →* G) => f c.out := by
-    rw [measurable_from_quotient]
-    have : ((fun c : RCosets (1 : PUnit →* G) => f c.out) ∘ Quotient.mk'') = f := by
-      funext g; exact congrArg f (hout g)
-    rw [this]; exact hf
-  simp only [MonoidHom.one_apply, one_mul, lintegral_const, measure_univ, mul_one]
-  rw [lintegral_map hm measurable_quotient_mk'']
-  exact lintegral_congr fun g => (congrArg f (hout g)).symm
 
 section Coord
 
@@ -110,10 +126,5 @@ def Unfolding (D : D7) : Prop :=
   ∀ (W W' : HSpace D.host.E) (P Q P' Q' : ℕ) (s : Bool) (x : W.V) (ι : W'.V →ₗ[D.host.E] W.V),
     HidaSetting W W' P Q P' Q' s x ι → (∀ y : W'.V, y ∈ W'.L0 ↔ ι y ∈ W.L0) →
     UnfoldAt D W W' P Q P' Q' s x
-
-def UnfoldingAnyLattice (D : D7) : Prop :=
-  letI := D.host.cmStar
-  ∀ (W W' : HSpace D.host.E) (P Q P' Q' : ℕ) (s : Bool) (x : W.V) (ι : W'.V →ₗ[D.host.E] W.V),
-    HidaSetting W W' P Q P' Q' s x ι → UnfoldAt D W W' P Q P' Q' s x
 
 end GlobalTheory.IndefiniteRowSideFullHecke.LatticeTensorUnfolding

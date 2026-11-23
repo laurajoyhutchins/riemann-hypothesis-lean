@@ -1,4 +1,45 @@
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.CauchyLoc
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,40 +49,11 @@ namespace PositivityTheory.Rg.Tf.ChR
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-def Over (w : HeightOneSpectrum (𝓞 E)) (v : HeightOneSpectrum (𝓞 F)) : Prop :=
-  w.asIdeal.comap (algebraMap (𝓞 F) (𝓞 E)) = v.asIdeal
-
-def HasDeg (w : HeightOneSpectrum (𝓞 E)) (v : HeightOneSpectrum (𝓞 F)) (f : ℕ) : Prop :=
-  Over w v ∧ Ideal.absNorm w.asIdeal = Ideal.absNorm v.asIdeal ^ f
-
-def Above (S : Finset (HeightOneSpectrum (𝓞 F))) (T : Finset (HeightOneSpectrum (𝓞 E))) : Prop :=
-  ∀ w v, Over w v → (w ∈ T ↔ v ∈ S)
-
-def BCFam {S : Finset (HeightOneSpectrum (𝓞 F))} {T : Finset (HeightOneSpectrum (𝓞 E))} {n : ℕ}
-    (α : Off F S → Fin n → ℂˣ) (A : Off E T → Fin n → ℂˣ) : Prop :=
-  ∀ (w : Off E T) (v : Off F S) (f : ℕ), HasDeg w.1 v.1 f →
-    Finset.univ.val.map (A w) = Finset.univ.val.map fun a => α v a ^ f
-
-def IsGalGen (E : Type) [Field E] [NumberField E] [Algebra F E] (l : ℕ) (η : HChar F) : Prop :=
-  η ≠ 1 ∧ η ^ l = 1 ∧ ∀ᶠ v : HeightOneSpectrum (𝓞 F) in Filter.cofinite, η.UnrAt v ∧
-    ∀ w : HeightOneSpectrum (𝓞 E), Over w v → (HasDeg w v 1 ↔ η.val v = 1)
-
-variable [IsTotallyComplex F] [IsTotallyComplex E]
-
-def BCSat {n : ℕ} (π : CG F n) (w : HeightOneSpectrum (𝓞 E)) (C : Multiset ℂˣ) : Prop :=
-  ∃ (v : HeightOneSpectrum (𝓞 F)) (f : ℕ) (B : Multiset ℂˣ), HasDeg w v f ∧ π.HasSat v B ∧ C = B.map (· ^ f)
-
-def IsWL {n : ℕ} (π : CG F n) {ι : Type} [Fintype ι] {m : ι → ℕ} (Ps : ∀ i, CG E (m i)) : Prop :=
-  ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite, ∃ (C : Multiset ℂˣ) (B : ι → Multiset ℂˣ),
-    BCSat π w C ∧ (∀ i, (Ps i).HasSat w (B i)) ∧ ∑ i, B i = C
+variable [_root_.NumberField.IsTotallyComplex F] [_root_.NumberField.IsTotallyComplex E]
 
 def IsIso {n : ℕ} (P : CG E n) {ι : Type} [Fintype ι] {m : ι → ℕ} (Ps : ∀ i, CG E (m i)) : Prop :=
   ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite, ∃ (C : Multiset ℂˣ) (B : ι → Multiset ℂˣ),
     P.HasSat w C ∧ (∀ i, (Ps i).HasSat w (B i)) ∧ ∑ i, B i = C
 
-variable (E) in
-
-def SameBC {n : ℕ} (π π' : CG F n) : Prop :=
-  ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite, ∃ C : Multiset ℂˣ, BCSat π w C ∧ BCSat π' w C
 
 end PositivityTheory.Rg.Tf.ChR

@@ -1,9 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.FibOfTens
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.PosNear
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensFibV
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.PosNear
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.PeriodIntegrals.VolFromSW
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,8 +121,9 @@ theorem wMat_mulVec (R : Type) [CommRing R] [Algebra F R] {a M : ℕ}
     (X : Fin a → Fin M → R ⊗[F] E) (c : Fin a × Fin d → R) (j : Fin M) (l : Fin d) :
     (wMat b R X *ᵥ c) (j, l) =
       crd b R (∑ i, (∑ k, c (i, k) • ((1 : R) ⊗ₜ[F] b k)) * X i j) l := by
+
   simp only [Matrix.mulVec, dotProduct, wMat, crd, Finset.sum_mul, smul_mul_assoc, map_sum, map_smul,
-    Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.smul_apply, smul_eq_mul, Fintype.sum_prod_type]
+  Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply, smul_eq_mul, Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => ?_
   ring
 
@@ -106,9 +154,10 @@ theorem linIndep_iff (R : Type) [CommRing R] [Algebra F R] {a M : ℕ}
     intro g l
     have hb : ∀ k, ((1 : R) ⊗ₜ[F] b k) = Algebra.TensorProduct.basis R b k := fun k =>
       (Algebra.TensorProduct.basis_apply b k).symm
-    simp only [crd, hb, map_sum, map_smul, Module.Basis.repr_self, Finsupp.coe_finset_sum,
-      Finset.sum_apply, Finsupp.smul_apply, Finsupp.single_apply, smul_eq_mul, mul_ite, mul_one,
-      mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+
+    simp only [crd, hb, map_sum, map_smul, Module.Basis.repr_self, Finsupp.coe_finsetSum,
+    Finset.sum_apply, Finsupp.smul_apply, Finsupp.single_apply, smul_eq_mul, mul_ite, mul_one,
+    mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
   rw [Fintype.linearIndependent_iff]
   constructor
   · intro h c hc
@@ -177,45 +226,8 @@ open scoped TensorProduct
 open NumberField IsDedekindDomain MeasureTheory Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes PI.AdicCompletionValuation
   PI.VolFromSW TensAllW
 
-theorem tensFacts_of {F E : Type} [Field F] [Field E] [Algebra F E] [FiniteDimensional F E]
-    (σ : E →ₐ[F] E) (hσ : ∀ x, σ (σ x) = x) {M : ℕ} (J : Matrix (Fin M) (Fin M) E)
-    (hJ : ∀ i j, σ (J j i) = J i j) (a : ℕ) (R : Type) [CommRing R] [Algebra F R]
-    [TopologicalSpace R] [IsTopologicalRing R] [LocallyCompactSpace R] [T2Space R]
-    [SecondCountableTopology R] (hU : IsOpen {r : R | IsUnit r}) (hL : LIP R) :
-    TensFacts F E σ M J a R := by
-  refine ⟨inferInstance, inferInstance, inferInstance, ?_, ?_, ?_,
-    isOpen_linIndep (Module.finBasis F E) R hU hL⟩
-  · exact isClosed_HermR (R := R) σ a
-  · exact continuous_gramR (R := R) σ J
-  · exact fun X => gramR_mem (R := R) σ hσ J hJ X
-
 theorem lip_ainf (F : Type) [Field F] [NumberField F] : LIP (InfiniteAdeleRing F) := by
   classical
   exact lip_pi (fun v : InfinitePlace F => v.Completion) (fun v => lip_field _)
-
-theorem tensAll_holds : TensAll := by
-  unfold TensAll
-  intro F E _ _ _ _ _ σ hCM M J hJ _ _ a _ _ X0 hT _
-  show TensFacts F E σ M J a (Ainf F) ∧ ∀ v : HeightOneSpectrum (𝓞 F), TensFacts F E σ M J a (Fv F v)
-  have hσ : ∀ x, σ (σ x) = x := by
-    intro x
-    let τ : E →+* ℂ := (IsAlgClosed.lift : E →ₐ[ℚ] ℂ).toRingHom
-    apply τ.injective
-    rw [hCM.2.2.2 τ, hCM.2.2.2 τ, star_star]
-  have hUinf : IsOpen {r : Ainf F | IsUnit r} := by
-    show IsOpen {r : (∀ w : InfinitePlace F, w.Completion) | IsUnit r}
-    have hset : {r : (∀ w : InfinitePlace F, w.Completion) | IsUnit r} =
-        ⋂ w : InfinitePlace F, (fun r : (∀ w : InfinitePlace F, w.Completion) => r w) ⁻¹' {x | x ≠ 0} := by
-      ext r
-      simp only [Set.mem_setOf_eq, Set.mem_iInter, Set.mem_preimage, Pi.isUnit_iff, isUnit_iff_ne_zero]
-    rw [hset]
-    exact isOpen_iInter_of_finite fun w => isOpen_ne.preimage (continuous_apply w)
-  refine ⟨tensFacts_of σ hσ J hJ.1 a (Ainf F) hUinf (lip_ainf F), fun v => ?_⟩
-  have hUv : IsOpen {r : Fv F v | IsUnit r} := by
-    simp only [isUnit_iff_ne_zero]
-    exact isOpen_ne
-  haveI : LocallyCompactSpace (Fv F v) := locallyCompact_Fv (F := F) (v := v)
-  haveI : SecondCountableTopology (Fv F v) := secondCountable_Fv (F := F) (v := v)
-  exact tensFacts_of σ hσ J hJ.1 a (Fv F v) hUv (lip_field _)
 
 end PI.VolStabSW

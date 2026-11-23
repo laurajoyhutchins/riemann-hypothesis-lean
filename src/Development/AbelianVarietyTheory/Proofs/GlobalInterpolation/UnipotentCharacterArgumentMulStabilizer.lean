@@ -1,9 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SandwichNormalForm
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SourceLatticeInvariance
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.LatticeNormalFormUnipotent
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormalFormAtPrime
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SourceLatticeInvariance
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -73,6 +114,7 @@ theorem intHom_iff {P : HeightOneSpectrum (𝓞 E)} {a b : ℕ} (y : (Fin a → 
     conv_lhs => rw [show v = ∑ s, v s • (Pi.single s (1 : E) : Fin a → E) from by
       funext k
       simp [Finset.sum_apply, Pi.single_apply]]
+
     simp only [map_sum, map_smul]
   rw [e, Finset.sum_apply]
   exact intAt_sum _ _ fun s _ => (hv s).mul (h s l)
@@ -80,19 +122,6 @@ theorem intHom_iff {P : HeightOneSpectrum (𝓞 E)} {a b : ℕ} (y : (Fin a → 
 theorem mem_stdAt_iff [StarRing E] {P : HeightOneSpectrum (𝓞 E)} {N : ℕ} (v : Fin N → E) : v ∈ stdAt E N P ↔ IntV P v :=
   mem_localization_standardLattice P v
 
-open Classical in
-
-example (P : HeightOneSpectrum (𝓞 E)) (a b : ℕ) :
-    HomBdd P 0 (fun x : (Fin a → E) →ₗ[E] (Fin b → E) => if IntHom P x then (1 : K) else 0) := by
-  refine ⟨fun x hx => ?_, fun x y hy => ?_⟩
-  · by_contra h
-    rw [pow_zero, one_smul] at h
-    simp [h] at hx
-  · have : IntHom P (x + y) ↔ IntHom P x := by
-      refine ⟨fun h v hv => ?_, fun h v hv => (h v hv).add (hy v hv)⟩
-      have := (h v hv).add (hy v hv).neg
-      simpa using this
-    simp [this]
 
 section Flags
 
@@ -106,7 +135,7 @@ theorem inX_apply (x : Fin n → F) (l : Fin (n + c)) : Loc.inX F n c x l = if h
 theorem mem_Ufl {i : ℕ} {v : Fin (n + c) → F} : v ∈ Loc.Ufl F n c i ↔ ∀ l : Fin (n + c), ¬ l.1 < n + i → v l = 0 := Iff.rfl
 
 theorem inX_mem_Ufl (i : ℕ) (x : Fin n → F) : Loc.inX F n c x ∈ Loc.Ufl F n c i :=
-  mem_Ufl.2 fun l hl => by rw [inX_apply, dif_neg (by omega)]
+  mem_Ufl.2 fun l hl => by rw [inX_apply, dite_eq_right (by omega)]
 
 theorem Ufl_mono {i j : ℕ} (h : i ≤ j) : Loc.Ufl F n c i ≤ Loc.Ufl F n c j :=
   fun _ hv => mem_Ufl.2 fun l hl => mem_Ufl.1 hv l (by omega)
@@ -117,7 +146,7 @@ theorem eN_mem_Ufl {i s : ℕ} (h : s < n + i) : Loc.eN F (n + c) s ∈ Loc.Ufl 
     rw [if_neg (by omega)]
 
 theorem inX_castAdd (x : Fin n → F) (a : Fin n) : Loc.inX F n c x (Fin.castAdd c a) = x a := by
-  rw [inX_apply, dif_pos (by simp)]
+  rw [inX_apply, dite_eq_left (by simp)]
   rfl
 
 theorem inX_of_mem_Ufl {v : Fin (n + c) → F} (hv : v ∈ Loc.Ufl F n c 0) :
@@ -170,7 +199,7 @@ theorem atN_of_R1cond {r : (Fin (n + c) → F) ≃ₗ[F] (Fin (n + c) → F)} (h
     simp only [Pi.sub_apply, Pi.smul_apply, Loc.eN, smul_eq_mul]
     split_ifs with h
     · unfold Loc.atN
-      rw [dif_pos (h ▸ l.2), mul_one, sub_eq_zero]
+      rw [dite_eq_left (h ▸ l.2), mul_one, sub_eq_zero]
       congr 1
       exact Fin.ext h
     · rw [mem_Ufl.1 hv l (by omega)]
@@ -227,7 +256,7 @@ theorem unfoldingAffinePointMap_apply_inclusion {n' c' : ℕ} (xj : (Fin n' → 
       · rfl
     funext l
     change Loc.xx1 xj t (Loc.inX F n' c' (Pi.single a 1)) l = Loc.inX F n c (xj (Pi.single a 1)) l
-    rw [e, linearMap_unfolding_apply_single, dif_neg (fun h => by have := h.1; have := a.2; simp at *; omega), dif_pos (by simp), inX_apply]
+    rw [e, linearMap_unfolding_apply_single, dite_eq_right (fun h => by have := h.1; have := a.2; simp at *; omega), dite_eq_left (by simp), inX_apply]
     rfl
   exact LinearMap.congr_fun this v
 

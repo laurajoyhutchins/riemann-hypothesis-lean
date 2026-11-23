@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.SzHypFam
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RowsConc
+module
+
+public import Formalism.HermitianCurvature.StatementSz
+public import Formalism.SharpRestriction.CuspSpanNormBounds.CntPartners
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CriticalThresholdLowerBound
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumInvSqLeSub
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CfgTopFalseIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.S
 
 namespace GlobalTheory.RowVand
@@ -9,12 +55,12 @@ open Formalism.FourierDecayAlt Finset
 
 lemma prod_le_pow_of_le {s : Finset ℕ} {f : ℕ → ℝ} {B : ℝ} (h0 : ∀ i ∈ s, 0 ≤ f i)
     (h : ∀ i ∈ s, f i ≤ B) : ∏ i ∈ s, f i ≤ B ^ s.card := by
-  calc ∏ i ∈ s, f i ≤ ∏ _i ∈ s, B := Finset.prod_le_prod h0 h
+  calc ∏ i ∈ s, f i ≤ ∏ _i ∈ s, B := Finset.prod_le_prod₀ h0 h
     _ = B ^ s.card := Finset.prod_const B
 
 lemma one_le_prod_of_le {s : Finset ℕ} {f : ℕ → ℝ} (h : ∀ i ∈ s, 1 ≤ f i) : 1 ≤ ∏ i ∈ s, f i := by
   calc (1 : ℝ) = ∏ _i ∈ s, (1 : ℝ) := (Finset.prod_const_one).symm
-    _ ≤ ∏ i ∈ s, f i := Finset.prod_le_prod (fun _ _ => zero_le_one) h
+    _ ≤ ∏ i ∈ s, f i := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) h
 
 lemma b_le (c : Sz.Cfg) (hc : c.Ok) : ∀ i j, 1 ≤ i → i ≤ j → j ≤ c.m → c.b i ≤ c.b j := by
   intro i j hi hij hj

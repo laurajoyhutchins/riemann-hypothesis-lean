@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LatticeBasics.BoxFinA
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.RealInvL
+public import Development.WeilBound.ThetaLifts.LatticeBasics.RealInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,17 +77,17 @@ def D (w : (κ → AF F) × (κ → AF F)) : ((κ → AF F) → ℂ) → (κ →
 
 theorem linForm_add (b b' : κ → mixedEmbedding.mixedSpace F) : linForm (b + b') = linForm b + linForm b' := by
   ext y
-  simp only [ContinuousLinearMap.add_apply, linForm_apply, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+  simp only [add_apply, linForm_apply, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
 
 theorem DP_add_left (a a' L L') (Φ : (κ → AF F) → ℂ) : DP (a + a') (L + L') Φ = DP a L Φ + DP a' L' Φ := by
   funext z
-  simp only [DP, map_add, ContinuousLinearMap.add_apply, Pi.add_apply]
+  simp only [DP, map_add (f := _), add_apply, Pi.add_apply]
   push_cast
   ring
 
 theorem DP_smul_left (t : ℝ) (a L) (Φ : (κ → AF F) → ℂ) : DP (t • a) (t • L) Φ = (t : ℂ) • DP a L Φ := by
   funext z
-  simp only [DP, map_smul, ContinuousLinearMap.smul_apply, Pi.smul_apply, smul_eq_mul, Complex.real_smul]
+  simp only [DP, map_smul, smul_apply, Pi.smul_apply, smul_eq_mul, Complex.real_smul]
   push_cast
   ring
 
@@ -147,7 +192,7 @@ theorem Imp.of_ne (hψ : IsStd ψ) (h : Imp ψ T g) {w} (hw : At (evI F) w) (ha 
     rw [D, DP_pure]
     exact h1.unique (hasD hψ (h.at hw) (h.pres _ hs) z)
   | zero => simp only [D, DP_zero, map_zero]
-  | add _ _ h1 h2 i1 i2 => simp only [D] at *; rw [DP_add h1 h2, map_add, map_add, DP_add (h.pres _ h1) (h.pres _ h2), i1, i2]
+  | add _ _ h1 h2 i1 i2 => simp only [D] at *; rw [DP_add h1 h2, map_add (f := _), map_add (f := _), DP_add (h.pres _ h1) (h.pres _ h2), i1, i2]
   | smul c _ h1 i1 => simp only [D] at *; rw [DP_smul h1, map_smul, map_smul, DP_smul (h.pres _ h1), i1]
 
 theorem at_pt (x : κ → mixedEmbedding.mixedSpace F) : At (evI F) (pt x (0 : κ → Af F)) := fun s hs => by
@@ -170,7 +215,7 @@ theorem Imp.inter (hψ : IsStd ψ) (h : Imp ψ T g) {w} (hw : At (evI F) w) {Φ}
       have h1 := h.of_ne hψ (w := w + (pt ξ 0, 0)) (fun s hs => by rw [smul_add, hw s hs, hv s hs, add_zero])
         (by rwa [Prod.fst_add, nf_add, ha, zero_add, nf_pt]) hΦ
       have h2 := h.of_ne hψ hv (by rwa [nf_pt]) hΦ
-      rw [D_add_left, map_add, h.add, D_add_left, h2] at h1
+      rw [D_add_left, map_add (f := _), h.add, D_add_left, h2] at h1
       exact add_right_cancel h1
   · exact h.of_ne hψ hw ha hΦ
 

@@ -1,4 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.TraceAlgebra.IsoOfTrace
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.TraceAlgebra.IsoOfTrace
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,12 +173,14 @@ private theorem mul_eq_mul_of_ratio_eq_one {n : ℕ} {R : Type} [CommRing R] [Al
         apply Subtype.ext
         have := proj_of_mem ρ' e he i j _ (φ i ((ρ (e i)).rangeRestrict v)).2
         simpa [h] using this
-      rw [h1, map_zero, if_neg h]
+      rw [h1, (φ j).symm.map_zero, if_neg h]
       rfl
+
   simp only [LinearMap.sum_apply, LinearMap.comp_apply, map_sum, Submodule.coe_subtype,
-    LinearEquiv.coe_coe]
+  LinearEquiv.coe_coe]
   simp only [Submodule.coe_sum, inner]
   simp
+
   rw [← LinearMap.sum_apply, ← map_sum, hs, map_one]
   rfl
 
@@ -154,6 +209,7 @@ theorem isoOfTrace : IsoOfTrace k := by
       · rw [Pi.single_eq_of_ne hx, zero_mul]
   have hs : ∑ m, e m = 1 := by
     apply E.injective
+
     rw [map_sum, map_one]
     funext x
     simp [hE, Finset.sum_apply, Pi.single_apply]
@@ -182,8 +238,9 @@ theorem isoOfTrace : IsoOfTrace k := by
     LinearMap.ext fun v => mul_eq_mul_of_ratio_eq_one ρ' ρ e he hs (fun i => (φ i).symm) v
   refine ⟨LinearEquiv.ofLinear Φ Ψ h2 h1, fun r v => ?_⟩
   show Φ (ρ r v) = ρ' r (Φ v)
+
   simp only [Φ, LinearMap.sum_apply, LinearMap.comp_apply, map_sum, Submodule.coe_subtype,
-    LinearEquiv.coe_coe]
+  LinearEquiv.coe_coe]
   refine Finset.sum_congr rfl fun i _ => ?_
   have h3 : (ρ (e i)).rangeRestrict (ρ r v) = resHom ρ (e i) r ((ρ (e i)).rangeRestrict v) := by
     apply Subtype.ext

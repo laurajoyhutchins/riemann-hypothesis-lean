@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Length
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.LocalRing.Length
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +116,7 @@ variable {R G M : Type} [CommRing R] [Group G] [TopologicalSpace G] [AddCommGrou
 def continuousCocycleMap : Z1U ρ U →ₗ[R] Z1U ρ' U where
   toFun z := ⟨fun u => j (z.1 u), (continuous_of_discreteTopology (f := j)).comp z.2.1, fun g h => by
     show j _ = j _ + ρ' g (j _)
-    rw [z.2.2, map_add, ← hj]
+    rw [z.2.2, map_add (f := _), ← hj]
     rfl⟩
   map_add' _ _ := Subtype.ext (funext fun _ => map_add j _ _)
   map_smul' _ _ := Subtype.ext (funext fun _ => map_smul j _ _)
@@ -106,6 +156,7 @@ theorem coordSum_z1Map (z : ι → Z1U ρ U) (u : U) :
 theorem coordSum_h1Map (z : ι → Z1U ρ U) :
     coordSum b (h1Map ρ ρ' j hj U) (fun i => Submodule.Quotient.mk (z i)) =
       Submodule.Quotient.mk (coordSum b (continuousCocycleMap ρ ρ' j hj U) z) := by
+
   simp only [coordSum_apply, h1Map_mk, ← Submodule.mkQ_apply, map_sum, map_smul]
   rfl
 
@@ -136,7 +187,7 @@ theorem coordSum_z1Map_surjective [DiscreteTopology M'] (hb : IsBaseChange O j) 
     (continuous_of_discreteTopology (f := fun m => e.symm m i)).comp y.2.1, fun g h => ?_⟩, ?_⟩
   · have : e.symm (y.1 (g * h)) = e.symm (y.1 g) + fun i => ρ g (e.symm (y.1 h) i) := by
       apply hb.1
-      rw [map_add, ← map_coordSum b j (ρ g) (ρ' g) (hj g), he, he, he]
+      rw [map_add (f := _), ← map_coordSum b j (ρ g) (ρ' g) (hj g), he, he, he]
       exact y.2.2 g h
     exact congrFun this i
   · exact Subtype.ext (funext fun u => (coordSum_z1Map ρ ρ' j hj U b _ u).trans (he _))
@@ -172,14 +223,14 @@ theorem coordSum_mem_locSel (hb : IsBaseChange O j) (𝒟 : Set (Subgroup G)) (x
   rw [forall_comm]
   exact imp_congr_right fun _ => exists_cob_iff ρ ρ' j hj U b hb (fun u => u.1 ∈ D) fun i => (z i).1
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem isBaseChange_h1Map [Module.Free R O] [Module.Finite R O] [DiscreteTopology M'] (hb : IsBaseChange O j) :
     IsBaseChange O (h1Map ρ ρ' j hj U) :=
   isBaseChange_h1Map' ρ ρ' j hj U (Module.Free.chooseBasis R O) hb
 
-omit [Fintype ι] in
 
+omit [Fintype ι] in
 theorem isBaseChange_selMap [Module.Free R O] [Module.Finite R O] [DiscreteTopology M'] (hb : IsBaseChange O j)
     (𝒟 : Set (Subgroup G)) : IsBaseChange O (selMap ρ ρ' j hj U 𝒟) :=
   isBaseChange_restrict (Module.Free.chooseBasis R O) (isBaseChange_h1Map ρ ρ' j hj U hb) _ _

@@ -1,5 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.FgDefs
+module
+
+public import Formalism.TorsionNormIteration.InvIntegralOfClass
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.KurDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +100,7 @@ theorem divByMv_zero (x : K) : DivByMv x (0 : MvPowerSeries ι K) := by
 theorem divByMv_add {x : K} {F G : MvPowerSeries ι K} (hF : DivByMv x F) (hG : DivByMv x G) :
     DivByMv x (F + G) := by
   intro d
-  rw [map_add]
+  rw [map_add (f := _)]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hF d) (hG d))
 theorem divByMv_sub {x : K} {F G : MvPowerSeries ι K} (hF : DivByMv x F) (hG : DivByMv x G) :
     DivByMv x (F - G) := by
@@ -155,7 +204,7 @@ private theorem norm_natCast_le_one_unramified_integrals (n : ℕ) : ‖(n : K)�
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ih (by simp))
 
 theorem divBy_derivative {x : K} {f : PowerSeries K} (hf : DivBy x f) :
-    DivBy x (derivative K f) := by
+    DivBy x (derivative f) := by
   unfold DivBy at hf ⊢
   intro n
   rw [PowerSeries.coeff_derivative, norm_mul]
@@ -167,7 +216,7 @@ theorem divBy_derivative {x : K} {f : PowerSeries K} (hf : DivBy x f) :
         mul_le_mul (hf _) h1 (norm_nonneg _) (norm_nonneg _)
     _ = ‖x‖ := mul_one _
 theorem integralPS_derivative {f : PowerSeries K} (hf : IntegralPS f) :
-    IntegralPS (derivative K f) := by
+    IntegralPS (derivative f) := by
   rw [integralPS_iff_divBy_one] at *
   exact divBy_derivative hf
 

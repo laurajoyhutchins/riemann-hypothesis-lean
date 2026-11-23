@@ -1,4 +1,50 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LineBasis
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LineBasis
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LevelChange
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.PELU GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen
@@ -56,7 +102,7 @@ private noncomputable def cxEquiv {g : ℕ} (f : (Fin g → ℂ) ≃ₗ[ℝ] (Fi
   map_add' := f.map_add
   map_smul' c x := by
     show f (c • x) = c • f x
-    rw [smul_decomp c x, map_add, map_smul, map_smul, hf, ← smul_decomp]
+    rw [smul_decomp c x, map_add (f := _), map_smul, map_smul, hf, ← smul_decomp]
 
 private abbrev relQ (A : ArchFrame L) (v : InfinitePlace G.F) (Q : VQ D →+ (Fin D.g → ℂ)) (z : Fin G.n → ℂ) : Prop :=
   ∃ R : Arch G →ₗ[ℝ] (Fin D.g → ℂ), (∀ w, Q w = R (A.th w)) ∧
@@ -159,7 +205,7 @@ private theorem intertw (A : ArchFrame L) {Q : VQ D →+ (Fin D.g → ℂ)} (R :
 private theorem period_smul_eq_conj_or_self_smul {g : ℕ} (R : Arch G →ₗ[ℝ] (Fin g → ℂ)) (v : InfinitePlace G.F) (z : Fin G.n → ℂ)
     (hrel : R (Pi.single v (Complex.I • z)) = (sgnV L v * Complex.I) • R (Pi.single v z)) (m : ℂ) :
     R (Pi.single v (m • z)) = (if sgnV L v = 1 then m else starRingEnd ℂ m) • R (Pi.single v z) := by
-  rw [smul_decomp m z, Pi.single_add, map_add, Pi.single_smul, Pi.single_smul, map_smul, map_smul, hrel]
+  rw [smul_decomp m z, Pi.single_add, map_add (f := _), Pi.single_smul, Pi.single_smul, map_smul, map_smul, hrel]
   rcases sgn_pm L v with hs | hs
   · rw [if_pos hs, hs, _root_.one_mul, smul_decomp m (R (Pi.single v z))]
   · rw [if_neg (by rw [hs]; norm_num), hs, smul_decomp ((starRingEnd ℂ) m) (R (Pi.single v z))]

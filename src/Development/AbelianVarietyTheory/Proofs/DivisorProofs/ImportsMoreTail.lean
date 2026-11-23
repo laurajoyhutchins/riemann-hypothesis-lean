@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+public import Mathlib.RingTheory.Localization.Submodule
+
+@[expose] public section
 
 namespace GlobalTheory.AuxiliaryLemmaSecond
 
@@ -20,7 +73,7 @@ theorem main : ∀ {κ : Type} [inst : Field κ] (R : Subring κ) [IsNoetherianR
   haveI : IsNoetherianRing A := IsLocalization.isNoetherianRing Q.primeCompl A inferInstance
   haveI : IsIntegrallyClosed A := isIntegrallyClosed_of_isLocalization A Q.primeCompl hS
   have hcm : (maximalIdeal A).comap (algebraMap R A) = Q :=
-    IsLocalization.AtPrime.comap_maximalIdeal A Q
+    IsLocalization.AtPrime.under_maximalIdeal A Q
   have hmap : ∀ r : R, algebraMap R κ r = (r : κ) := fun r => rfl
   simp only [hmap] at memA
   have hinj : Function.Injective (algebraMap R A) := IsLocalization.injective A hS
@@ -31,13 +84,13 @@ theorem main : ∀ {κ : Type} [inst : Field κ] (R : Subring κ) [IsNoetherianR
     exact Ideal.comap_bot_of_injective _ hinj
   have hnf : ¬ IsField A := isField_iff_maximalIdeal_eq.not.mpr hm0
   have hDVR : IsDiscreteValuationRing A := by
-    have h03 := (IsDiscreteValuationRing.TFAE A hnf).out 0 3
+    have h03 := (IsDiscreteValuationRing.TFAE A hnf).out 1 4
     refine h03.mpr ⟨inferInstance, ExistsUnique.intro (maximalIdeal A) ⟨hm0, inferInstance⟩ ?_⟩
     rintro P ⟨hP0, hPp⟩
     have eP : Ideal.map (algebraMap R A) (P.comap (algebraMap R A)) = P :=
-      IsLocalization.map_comap Q.primeCompl A P
+      IsLocalization.map_under Q.primeCompl A P
     have eM : Ideal.map (algebraMap R A) ((maximalIdeal A).comap (algebraMap R A)) = maximalIdeal A :=
-      IsLocalization.map_comap Q.primeCompl A (maximalIdeal A)
+      IsLocalization.map_under Q.primeCompl A (maximalIdeal A)
     have hc : P.comap (algebraMap R A) = Q := by
       apply hmin
       · exact Ideal.comap_isPrime _ _

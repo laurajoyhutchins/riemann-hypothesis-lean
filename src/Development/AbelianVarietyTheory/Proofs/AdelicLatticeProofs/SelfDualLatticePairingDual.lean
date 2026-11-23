@@ -1,14 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMulStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsDualFamilySelfDualHermitianSpaceStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwoStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OneEqSumPlaceIdempotentsOverTwoAddTwoMulStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ProdLeftEqMaps
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RationalHermitianRankOneLatticeSelfDualStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ScaledMatrixMemRationalLatticeStatement
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTraceStatement
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTraceStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMulStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsDualFamilySelfDualHermitianSpaceStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RationalHermitianRankOneLatticeSelfDualStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ScaledMatrixMemRationalLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwoStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OneEqSumPlaceIdempotentsOverTwoAddTwoMulStatement
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ProdLeftEqMaps
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Formalism.LocalToGlobal.IndefiniteReal.SelfDualFullLattice
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix GlobalTheory.LatVac
 open scoped TensorProduct
@@ -24,13 +69,7 @@ theorem tensor_prod_eq_zero {F A B E : Type} [Field F] [CommRing A] [CommRing B]
     [Algebra F B] [Algebra F E] (z : (A × B) ⊗[F] E)
     (h1 : Algebra.TensorProduct.map (AlgHom.fst F A B) (AlgHom.id F E) z = 0)
     (h2 : Algebra.TensorProduct.map (AlgHom.snd F A B) (AlgHom.id F E) z = 0) : z = 0 := by
-  first
-  | exact @_root_.GlobalTheory.ProductLeftMaps.main
-  | exact _root_.GlobalTheory.ProductLeftMaps.main
-  | (apply _root_.GlobalTheory.ProductLeftMaps.main <;> assumption)
-  | (intros; apply _root_.GlobalTheory.ProductLeftMaps.main <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.ProductLeftMaps.main <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.ProductLeftMaps.main ..)
+  exact _root_.GlobalTheory.ProductLeftMaps.main z h1 h2
 
 theorem approx_tmul {F A E : Type} [Field F] [CommRing A] [CommRing E] [Algebra F A] [Algebra F E]
     (a : F) (N : ℕ) (β : A) (x : E) :
@@ -67,17 +106,17 @@ theorem infPart_of_mem {LS : Set (Fin S.rank → D.host.E)} {LT : Set (Fin T.ran
   refine latO_induction (p := fun u => infPart D (u i j) = 0) ?_ ?_ ?_ ?_ hu
   · intro α _ M _; exact infPart_pair _ _
   · exact RingHom.map_zero _
-  · intro x y hx hy; rw [Matrix.add_apply, RingHom.map_add, hx, hy, add_zero]
+  · intro x y hx hy; rw [Matrix.add_apply, RingHom.map_add (f := _), hx, hy, add_zero]
   · intro x hx; rw [Matrix.neg_apply, RingHom.map_neg, hx, neg_zero]
 
 def kerChar {A : Type} [AddCommGroup A] (ψ : AddChar A ℂ) : AddSubgroup A where
   carrier := {a | ψ a = 1}
   zero_mem' := ψ.map_zero_eq_one
   add_mem' := fun {a b} ha hb => by
-    simp only [Set.mem_setOf_eq] at *
+    simp only [Set.mem_ofPred_eq] at *
     rw [ψ.map_add_eq_mul, ha, hb, one_mul]
   neg_mem' := fun {a} ha => by
-    simp only [Set.mem_setOf_eq] at *
+    simp only [Set.mem_ofPred_eq] at *
     rw [ψ.map_neg_eq_inv, ha, inv_one]
 
 theorem hRat_smul (c : D.host.E) (M N : Matrix (Fin T.rank) (Fin S.rank) D.host.E) :
@@ -115,11 +154,23 @@ theorem char_sympl_eq_one {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ
       rw [← h1, ← smul_eq_mul, ← map_smul, Algebra.smul_def, mul_left_comm]
       rfl
     · rw [map_zero]; exact zero_mem _
-    · intro x y hx hy; rw [map_add]; exact add_mem hx hy
+    · intro x y hx hy
+      change symplO S T (finTens α M) (x + y) ∈ kerChar ψ
+      rw [symplO_add_right]
+      exact add_mem hx hy
     · intro x hx; rw [map_neg]; exact neg_mem hx
   · rw [map_zero]; exact zero_mem _
-  · intro x y hx hy; rw [map_add]; exact add_mem hx hy
+  · intro x y hx hy
+    change symplO S T (x + y) u' ∈ kerChar ψ
+    rw [symplO_add_left]
+    exact add_mem hx hy
   · intro x hx; rw [map_neg]; exact neg_mem hx
+
+private theorem selfDual_isFullLattice {D : D7} : ∀ (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)),
+    IsSelfDualC V Λ → Submodule.IsFullLattice D.host.E Λ := by
+  intro V Λ hΛ
+  exact Formalism.IndefR.Datum.IsSelfDualC.isFullLattice V Λ hΛ
+
 
 theorem approx (hS : IsSelfDualC S ΛS) (hT : IsSelfDualC T ΛT) (γ : WO S T) :
     ∃ M : Matrix (Fin T.rank) (Fin S.rank) D.host.E,
@@ -137,7 +188,7 @@ theorem approx (hS : IsSelfDualC S ΛS) (hT : IsSelfDualC T ΛT) (γ : WO S T) :
         ∀ i j, finPart D ((γ + γ') i j) = (1 : Af D.host.F) ⊗ₜ[D.host.F] M i j + finPart D (u i j) := by
     rintro γ γ' ⟨M, u, hu, h⟩ ⟨M', u', hu', h'⟩
     refine ⟨M + M', u + u', add_mem hu hu', fun i j => ?_⟩
-    simp only [Matrix.add_apply, RingHom.map_add, h, h', TensorProduct.tmul_add]
+    simp only [Matrix.add_apply, RingHom.map_add (f := _), h, h', TensorProduct.tmul_add]
     exact add_add_add_comm _ _ _ _
   induction γ using Matrix.induction_on' with
   | h_zero => exact ⟨0, 0, zero_mem _, fun i j => by simp⟩
@@ -147,7 +198,7 @@ theorem approx (hS : IsSelfDualC S ΛS) (hT : IsSelfDualC T ΛT) (γ : WO S T) :
     | zero => exact ⟨0, 0, zero_mem _, fun i j => by simp⟩
     | add x y hx hy => rw [Matrix.single_add]; exact hadd _ _ hx hy
     | tmul a x =>
-      obtain ⟨N, hN, hM⟩ := GlobalTheory.T.scaled_matrix_mem_rational_lattice D S T ΛS ΛT hS.1 hT.1 (Matrix.single i j x)
+      obtain ⟨N, hN, hM⟩ := GlobalTheory.T.scaled_matrix_mem_rational_lattice D S T ΛS ΛT (selfDual_isFullLattice S ΛS hS) (selfDual_isFullLattice T ΛT hT) (Matrix.single i j x)
       obtain ⟨a0, β, hβ, hab⟩ := (GlobalTheory.AdLat.strong_approximation_mod_nat D.host.F N hN).1 (sndA D.host.F a)
       refine ⟨Matrix.single i j (a0 • x), _, finTens_mem_latO (α := β) hβ hM, fun i' j' => ?_⟩
       have e : finPart D (finTens β (N • Matrix.single i j x) i' j') =
@@ -173,8 +224,8 @@ theorem mem_of_char {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1))
     apply eq_zero_of_parts
     · have h1 : infPart D (u i j) = 0 := congrFun (congrFun hu i) j
       have h2 : infPart D (finTens 1 M i j) = 0 := infPart_pair _ _
-      rw [Matrix.add_apply, RingHom.map_sub, RingHom.map_add, h1, h2, infPart_of_mem hu₀, add_zero, sub_zero]
-    · rw [Matrix.add_apply, RingHom.map_sub, RingHom.map_add, hM, sub_eq_zero]
+      rw [Matrix.add_apply, RingHom.map_sub, RingHom.map_add (f := _), h1, h2, infPart_of_mem hu₀, add_zero, sub_zero]
+    · rw [Matrix.add_apply, RingHom.map_sub, RingHom.map_add (f := _), hM, sub_eq_zero]
       rfl
   rw [e]
   refine add_mem (finTens_mem_latO (one_mem_intAf _) ?_) hu₀
@@ -213,7 +264,7 @@ theorem tmul_smul_finTens {m n : ℕ} (α β : Af D.host.F) (x : D.host.E) (M : 
 theorem cA_cA (z : Formalism.L2.Theta.AE D) : cA D (cA D z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => rw [RingHom.map_zero, RingHom.map_zero]
-  | add x y hx hy => rw [RingHom.map_add, RingHom.map_add, hx, hy]
+  | add x y hx hy => rw [RingHom.map_add (f := _), RingHom.map_add (f := _), hx, hy]
   | tmul a x =>
     change a ⊗ₜ[D.host.F] star (star x) = _
     rw [star_star]
@@ -277,7 +328,7 @@ theorem heisO_zero (ψ : AddChar (AF D.host.F) ℂ) (f : WO S T → ℂ) : heisO
 
 theorem char_half {ψ : AddChar (AF D.host.F) ℂ} {u u' : WO S T} (h : ψ (symplO S T u u') = 1) :
     ψ (symplOH S T u u') * ψ (symplOH S T u u') = 1 := by
-  rw [← ψ.map_add_eq_mul, symplOH, ← add_mul, ← RingHom.map_add, add_halves, RingHom.map_one, one_mul, h]
+  rw [← ψ.map_add_eq_mul, symplOH, ← add_mul, ← RingHom.map_add (f := _), add_halves, RingHom.map_one, one_mul, h]
 
 def signGroup (ψ : AddChar (AF D.host.F) ℂ) (Λ : AddSubgroup (WO S T))
     (hΛ : ∀ u ∈ Λ, ∀ u' ∈ Λ, ψ (symplO S T u u') = 1) (p : (WO S T → ℂ) → Prop) : AddSubgroup (WO S T) where

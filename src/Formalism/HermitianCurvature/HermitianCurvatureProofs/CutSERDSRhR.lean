@@ -1,8 +1,50 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSOpR
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialSideRaising
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialRaisingTopOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSOpR
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAlgebraFacts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialRaisingTopOfParts
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialSideRaising
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 
@@ -19,11 +61,6 @@ section pair
 variable {V : Type} [AddCommGroup V] [Module ℂ V]
 
 theorem fst_mul_apply (p q : Pr V) (v : V) : (p * q).1 v = p.1 (q.1 v) := rfl
-theorem fst_add_apply (p q : Pr V) (v : V) : (p + q).1 v = p.1 v + q.1 v := rfl
-theorem fst_sub_apply (p q : Pr V) (v : V) : (p - q).1 v = p.1 v - q.1 v := rfl
-theorem fst_neg_apply (p : Pr V) (v : V) : (-p).1 v = -(p.1 v) := rfl
-theorem fst_zero_apply (v : V) : (0 : Pr V).1 v = 0 := rfl
-theorem fst_algebraMap_apply (w : ℂ) (v : V) : (algebraMap ℂ (Pr V) w).1 v = w • v := rfl
 theorem fst_mkP (a a' : Module.End ℂ V) : (mkP a a').1 = a := rfl
 
 end pair

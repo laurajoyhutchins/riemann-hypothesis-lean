@@ -1,5 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXKS
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXCC
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXLeb
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXPS
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NShear
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.BigCellMulVecWb
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ProductExactness
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcRealXKS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -245,7 +296,8 @@ theorem skew_conj (F Δ : Matrix (Fin r) (Fin r) ℂ) (hΔ : ∀ i j, star (Δ j
     star ((Fᴴ * Δ * F) a b) = -(Fᴴ * Δ * F) b a := by
   have hD : Δᴴ = -Δ := by
     ext i j
-    rw [conjTranspose_apply, hΔ, neg_apply]
+    rw [conjTranspose_apply, hΔ]
+    rfl
   have hM : (Fᴴ * Δ * F)ᴴ = -(Fᴴ * Δ * F) := by
     rw [conjTranspose_mul, conjTranspose_mul, conjTranspose_conjTranspose, hD]
     simp only [Matrix.mul_assoc, Matrix.neg_mul, Matrix.mul_neg]
@@ -581,13 +633,13 @@ theorem cont_shG (i : WlocSk.NB.CI k r) :
   rcases i with p | q | p
   · show Continuous fun mc : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ × (WlocSk.NB.CI k r → ℂ) =>
       ∑ c, if p.1.1 < c then WlocSk.NB.bA mc.1 p.1.1 c * WlocSk.NB.cA mc.2 c p.1.2 else 0
-    refine continuous_finset_sum _ fun c _ => ?_
+    refine continuous_finsetSum _ fun c _ => ?_
     by_cases h : p.1.1 < c
     · simp only [if_pos h]; exact (hent _ _).mul (hcA _ _)
     · simp only [if_neg h]; exact continuous_const
   · show Continuous fun mc : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ × (WlocSk.NB.CI k r → ℂ) =>
       (∑ c, if q.1 < c then WlocSk.NB.bA mc.1 q.1 c * WlocSk.NB.cB mc.2 c q.2 else 0) + WlocSk.NB.bB mc.1 q.1 q.2
-    refine (continuous_finset_sum _ fun c _ => ?_).add (hent _ _)
+    refine (continuous_finsetSum _ fun c _ => ?_).add (hent _ _)
     by_cases h : q.1 < c
     · simp only [if_pos h]; exact (hent _ _).mul (hcB _ _)
     · simp only [if_neg h]; exact continuous_const
@@ -598,15 +650,10 @@ theorem cont_shG (i : WlocSk.NB.CI k r) :
       (continuous_apply b).comp ((continuous_apply a).comp cont_dlt)
     exact ((h1 _ _).sub (h1 _ _).star).div_const 2
 
-theorem cont_shH (a : Fin r) :
-    Continuous fun mc : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ × (WlocSk.NB.CI k r → ℂ) =>
-      WlocSk.NB.shH mc.1 mc.2 a :=
-  Complex.continuous_im.comp ((continuous_apply a).comp ((continuous_apply a).comp cont_dlt))
-
 variable {ι : Type}
 
 theorem meas_chAt (T : ℝ) (v : ι) : Measurable (fun x : (∀ q : CBlk r, CSpc ι k q) => chAt T x v) := by
-  refine Measurable.prodMk (measurable_pi_lambda _ fun c => ?_) (measurable_pi_lambda _ fun a => ?_)
+  refine Measurable.prodMk (Measurable.of_eval fun c => ?_) (Measurable.of_eval fun a => ?_)
   · rcases c with p | ⟨b, j⟩ | p
     · exact (measurable_pi_apply v).comp (measurable_pi_apply (Sum.inl (Sum.inl p) : CBlk r))
     · exact ((measurable_pi_apply j).comp ((measurable_pi_apply v).comp
@@ -614,7 +661,7 @@ theorem meas_chAt (T : ℝ) (v : ι) : Measurable (fun x : (∀ q : CBlk r, CSpc
     · exact (measurable_pi_apply v).comp (measurable_pi_apply (Sum.inr (Sum.inl p) : CBlk r))
   · exact (measurable_pi_apply v).comp (measurable_pi_apply (Sum.inr (Sum.inr a) : CBlk r))
 
-set_option maxHeartbeats 800000 in
+
 theorem meas_Bk (T : ℝ) (p : CBlk r) :
     Measurable (fun z : (∀ q : CBlk r, CSpc ι k q) × (∀ q : CBlk r, CSpc ι k q) => Bk T p z.1 z.2) := by
   haveI : SecondCountableTopology ((WlocSk.NB.CI k r → ℂ) × (Fin r → ℝ)) := inferInstance
@@ -666,23 +713,23 @@ theorem meas_Bk (T : ℝ) (p : CBlk r) :
         WlocSk.NB.shH (ph0 cc.1) cc.2.1 a) (f := fun z : (∀ q : CBlk r, CSpc ι k q) × (∀ q : CBlk r, CSpc ι k q) =>
         (chAt T z.1 v, chAt T z.2 v)) hc.measurable (hmc v)
   rcases p with ((p | b) | (p | a))
-  · refine measurable_pi_lambda _ fun v => ?_
+  · refine Measurable.of_eval fun v => ?_
     have h2 : Measurable fun z : (∀ q : CBlk r, CSpc ι k q) × (∀ q : CBlk r, CSpc ι k q) =>
         (z.1 (Sum.inl (Sum.inl p)) : ι → ℂ) v :=
       (measurable_pi_apply v).comp ((measurable_pi_apply (Sum.inl (Sum.inl p) : CBlk r)).comp measurable_fst)
     exact (hG _ v).sub h2
-  · refine measurable_pi_lambda _ fun v => measurable_pi_lambda _ fun j => ?_
+  · refine Measurable.of_eval fun v => Measurable.of_eval fun j => ?_
     have h2 : Measurable fun z : (∀ q : CBlk r, CSpc ι k q) × (∀ q : CBlk r, CSpc ι k q) =>
         (z.1 (Sum.inl (Sum.inr b)) : ι → Fin (k + 1) → ℂ) v j :=
       (measurable_pi_apply j).comp ((measurable_pi_apply v).comp
         ((measurable_pi_apply (Sum.inl (Sum.inr b) : CBlk r)).comp measurable_fst))
     exact (measurable_const.mul (hG _ v)).sub h2
-  · refine measurable_pi_lambda _ fun v => ?_
+  · refine Measurable.of_eval fun v => ?_
     have h2 : Measurable fun z : (∀ q : CBlk r, CSpc ι k q) × (∀ q : CBlk r, CSpc ι k q) =>
         (z.1 (Sum.inr (Sum.inl p)) : ι → ℂ) v :=
       (measurable_pi_apply v).comp ((measurable_pi_apply (Sum.inr (Sum.inl p) : CBlk r)).comp measurable_fst)
     exact (hG _ v).sub h2
-  · refine measurable_pi_lambda _ fun v => ?_
+  · refine Measurable.of_eval fun v => ?_
     have h2 : Measurable fun z : (∀ q : CBlk r, CSpc ι k q) × (∀ q : CBlk r, CSpc ι k q) =>
         (z.1 (Sum.inr (Sum.inr a)) : ι → ℝ) v :=
       (measurable_pi_apply v).comp ((measurable_pi_apply (Sum.inr (Sum.inr a) : CBlk r)).comp measurable_fst)

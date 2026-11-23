@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.Galois.Infinite
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,13 +58,14 @@ variable {l : ℕ} [Fact l.Prime]
 
 theorem Ks_le_Kinf (K : FinExt l) (i : ℕ) : Ks K i ≤ Kinf K := by
   unfold Ks Kinf
-  exact sup_le_sup_left (IntermediateField.adjoin.mono _ _ _
-    fun (x : Om l) (hx : x ^ l ^ i = 1) => (⟨i, hx⟩ : ∃ j : ℕ, x ^ l ^ j = 1)) _
+  exact sup_le_sup_left (IntermediateField.adjoin.mono ℚ_[l] {x : Om l | x ^ l ^ i = 1}
+    {x : Om l | ∃ j : ℕ, x ^ l ^ j = 1} fun x hx => (⟨i, hx⟩ : ∃ j : ℕ, x ^ l ^ j = 1)) _
 
 theorem Ks_mono (K : FinExt l) : Monotone (Ks K) := by
   intro i j hij
   unfold Ks
-  refine sup_le_sup_left (IntermediateField.adjoin.mono _ _ _ fun x hx => ?_) _
+  refine sup_le_sup_left (IntermediateField.adjoin.mono ℚ_[l] {x : Om l | x ^ l ^ i = 1}
+    {x : Om l | x ^ l ^ j = 1} fun x hx => ?_) _
   obtain ⟨c, hc⟩ := pow_dvd_pow l hij
   have hx' : x ^ l ^ i = 1 := hx
   show x ^ l ^ j = 1
@@ -67,12 +114,11 @@ theorem exists_Gj_subset (K : FinExt l) {U : Set (GQ l)} (hU : IsOpen U)
     obtain ⟨i, hi⟩ := exists_mem_Ks K hx
     exact (IntermediateField.mem_fixingSubgroup_iff _ _).1 (Set.mem_iInter.1 hσ i) x hi
   obtain ⟨i₀, hi₀⟩ := hU.isClosed_compl.isCompact.elim_directed_family_closed
-    (fun i => (Gj K i : Set (GQ l))) hcl hinter hanti.directed_ge
+    (fun i => (Gj K i : Set (GQ l))) hcl (Set.disjoint_iff_inter_eq_empty.mpr hinter) hanti.directed_ge
   refine ⟨i₀, fun i hi σ hσ => ?_⟩
   by_contra hσU
   have hmem : σ ∈ Uᶜ ∩ (Gj K i₀ : Set (GQ l)) := ⟨hσU, hanti hi hσ⟩
-  rw [hi₀] at hmem
-  exact hmem
+  exact Set.disjoint_left.1 hi₀ hmem.1 hmem.2
 
 theorem sum_mem_Kinf (K : FinExt l) (L : IntermediateField ℚ_[l] (Om l)) (S : Finset (GQ l))
     (hS : ∀ s ∈ S, s ∈ Hinf K)
@@ -84,6 +130,7 @@ theorem sum_mem_Kinf (K : FinExt l) (L : IntermediateField ℚ_[l] (Om l)) (S : 
   have hex : ∀ s ∈ S, ∃ t, t ∈ S ∧ t⁻¹ * (h * s) ∈ L.fixingSubgroup := fun s hs =>
     (hrep (h * s) (mul_mem hh (hS s hs))).exists
   choose! φ hφS hφF using hex
+
   rw [map_sum]
   refine Finset.sum_nbij φ hφS ?_ ?_ ?_
   · intro s₁ hs₁ s₂ hs₂ he

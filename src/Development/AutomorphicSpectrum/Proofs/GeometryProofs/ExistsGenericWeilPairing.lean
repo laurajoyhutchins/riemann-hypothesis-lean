@@ -1,12 +1,61 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenWeil
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHTFormOver
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.ThetaMove
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WeilPairingBaseChangeUnitStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsCommonAlgClosedExtension
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GenWeil
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.MemEigSpOfMemHtDual
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.WeilIsGrpPullbackOfCommute
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.WeilPairingBaseChangeUnitStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Duality
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar
 
@@ -32,22 +81,7 @@ theorem epi_spMap_field : ∀ (K L : Type) [Field K] [Field L] (i : K →+* L), 
 
 theorem exists_common_closed : ∀ (Ω k K : Type) [Field Ω] [Field k] [Field K] (i : Ω →+* k) (i' : Ω →+* K),
     ∃ (M : Type) (_ : Field M) (_ : IsAlgClosed M) (j : k →+* M) (j' : K →+* M), j.comp i = j'.comp i' := by
-  intro Ω k K _ _ _ i i'
-  letI := i.toAlgebra
-  letI := i'.toAlgebra
-  haveI : Nontrivial (TensorProduct Ω k K) := inferInstance
-  obtain ⟨m, hm⟩ := Ideal.exists_maximal (TensorProduct Ω k K)
-  letI : Field (TensorProduct Ω k K ⧸ m) := Ideal.Quotient.field m
-  let q : TensorProduct Ω k K →+* AlgebraicClosure (TensorProduct Ω k K ⧸ m) :=
-    (algebraMap _ _).comp (Ideal.Quotient.mk m)
-  refine ⟨AlgebraicClosure (TensorProduct Ω k K ⧸ m), inferInstance, inferInstance,
-    q.comp Algebra.TensorProduct.includeLeftRingHom, q.comp (Algebra.TensorProduct.includeRight.toRingHom), ?_⟩
-  ext a
-  simp only [RingHom.comp_apply]
-  congr 1
-  show (i a) ⊗ₜ[Ω] (1 : K) = (1 : k) ⊗ₜ[Ω] (i' a)
-  rw [show i a = a • (1 : k) from (Algebra.algebraMap_eq_smul_one a),
-    show i' a = a • (1 : K) from (Algebra.algebraMap_eq_smul_one a), TensorProduct.smul_tmul]
+  apply GlobalTheory.CommonAlgClosedExtension.exists_common_algClosed_extension <;> assumption
 
 theorem ef_dvd : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (n : ℕ),
     (∀ a : D.La, (∀ c, (n : ℤ) ∣ D.EF a c) → ∃ a', a = n • a') ∧
@@ -58,7 +92,7 @@ theorem ef_dvd : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Hos
     let ψ : D.La →ₗ[ℤ] ℤ :=
       { toFun := fun c => D.EF a c / n
         map_add' := fun c c' => by
-          rw [map_add]; exact Int.add_ediv_of_dvd_left (h c)
+          rw [map_add (f := _)]; exact Int.add_ediv_of_dvd_left (h c)
         map_smul' := fun z c => by
           rw [map_smul, smul_eq_mul, smul_eq_mul, RingHom.id_apply]
           exact Int.mul_ediv_assoc z (h c) }
@@ -71,7 +105,7 @@ theorem ef_dvd : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Hos
   refine ⟨first, fun c h => first c fun a => ?_⟩
   have hs : D.EF c a = - D.EF a c := by
     have h0 := D.alt (a + c)
-    simp only [map_add, LinearMap.add_apply, D.alt a, D.alt c, zero_add, add_zero] at h0
+    simp only [map_add (f := _), LinearMap.add_apply, D.alt a, D.alt c, zero_add, add_zero] at h0
     linarith
   rw [hs]; exact (h a).neg_right
 
@@ -271,7 +305,7 @@ theorem genWeil_of_obj : Out.WeilSt → ∀ (E : Type) [Field E] [NumberField E]
     have h2 := val _ _ hx hg a c ha hc
     have h3 := val _ _ hx' hg a' c ha' hc
     apply Units.map_injective (f := iK.toMonoidHom) iK.injective
-    rw [map_mul, ← h1, ← h2, ← h3, map_add, LinearMap.add_apply, zpow_add]
+    rw [map_mul, ← h1, ← h2, ← h3, map_add (f := _), LinearMap.add_apply, zpow_add]
   have hr : ∀ x g g', x ^ n = 1 → g ^ n = 1 → g' ^ n = 1 → e x (g * g') = e x g * e x g' := by
     intro x g g' hx hg hg'
     obtain ⟨a, ha⟩ := coord x hx
@@ -282,7 +316,7 @@ theorem genWeil_of_obj : Out.WeilSt → ∀ (E : Type) [Field E] [NumberField E]
     have h2 := val _ _ hx hg a c ha hc
     have h3 := val _ _ hx hg' a c' ha hc'
     apply Units.map_injective (f := iK.toMonoidHom) iK.injective
-    rw [map_mul, ← h1, ← h2, ← h3, map_add, zpow_add]
+    rw [map_mul, ← h1, ← h2, ← h3, map_add (f := _), zpow_add]
   have hL4 := ef_dvd E H D n
   have zeroOf : ∀ a c, ζK ^ D.EF a c = 1 → (n : ℤ) ∣ D.EF a c := fun a c h => (hpK.zpow_eq_one_iff_dvd _).1 h
   have nondegR : ∀ g, g ^ n = 1 → (∀ x, x ^ n = 1 → e x g = 1) → g = 1 := by

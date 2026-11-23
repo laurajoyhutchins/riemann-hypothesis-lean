@@ -1,13 +1,63 @@
-import Mathlib
-import Development.AutomorphicArithmetic.ThetaCorrespondence.LocalComparison.CoeTo1
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.HeckeLAdicCharacterDeRham
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.DeRhamJacobian.IsdRJ
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasPeriods
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitDetEmbMat
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinrankDdRFinsum
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsDeRhamFilGradedSymbolToTateTwist
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConcretePeriodDeRhamModuleFinrankLe
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.TiedAInvOfTheta
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HasPeriods
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitDetEmbMat
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.LocTied6
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinrankDdRFinsum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsDeRhamFilGradedSymbolToTateTwist
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LinearIndepOnOfInvariant
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.NonemptyThetaLOfTied
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.TiedAInvOfTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LocalPrimeGaloisActionPeriodT
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TripleAtt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
+
 noncomputable section
 open NumberField IsDedekindDomain Neutral.B1 Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.L2.Host Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations
 open GlobalTheory.HeckeGal GlobalTheory.Pst GlobalTheory.TripleGal GlobalTheory.CompanionTheory.LTHodge
@@ -90,7 +140,7 @@ theorem mem_filV_iff (a : ℤ) (z : (Fin 1 → ↥LL.1) ⊗[ℚ_[l]] P.R.BdR) :
       simp only [LinearMap.id_apply, ev_tmul]
       exact om_mul_mem P K a _ b.2
     | add x y hx hy =>
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       exact (P.PD K).Fil a |>.add_mem hx hy
   · intro h
     rw [← coordInv_ev (Om := Om l) z]
@@ -108,7 +158,7 @@ theorem ev_mulVdR (c : ↥K.1) (σ : ↥LL.1 →ₐ[ℚ_[l]] Om l) (z : (Fin 1 �
     simp only [ev_tmul]
     change _ * (algebraMap (Om l) P.R.BdR (c : Om l) * b) = _
     ring
-  | add x y hx hy => simp only [map_add, hx, hy, mul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, mul_add]
 
 variable {K LL}
 
@@ -139,7 +189,7 @@ theorem ev_act (ψ : ↥(GK K) →* (↥LL.1)ˣ) (g : ↥(GK K)) (σ : ↥LL.1 �
       simp [actVdR]
     rw [h1, ev_tmul, ev_tmul, lineRep_apply, P.PD_actdR, map_mul, P.actQdR_Om]
     simp only [Pi.smul_apply, smul_eq_mul, map_mul, gc_apply, mul_assoc]
-  | add x y hx hy => simp only [map_add, hx, hy, mul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, mul_add]
 
 end Coord
 
@@ -176,7 +226,7 @@ theorem genCoord_orbit (ψ : ↥(GK K) →* (↥LL.1)ˣ) {σ₀ : ↥LL.1 →ₐ
     genCoord P ψ σ₀ u (gc g σ₀) =
       algebraMap (Om l) P.R.BdR (gc g σ₀ ((ψ g : (↥LL.1)ˣ) : ↥LL.1)) * P.actQdR (g : GQ l) u := by
   have h : ∃ g' : ↥(GK K), gc g' σ₀ = gc g σ₀ := ⟨g, rfl⟩
-  rw [genCoord, dif_pos h]
+  rw [genCoord, dite_eq_left h]
   have hs := h.choose_spec
   obtain ⟨k, hk⟩ : ∃ k, h.choose = g * k := ⟨g⁻¹ * h.choose, by group⟩
   rw [hk] at hs ⊢
@@ -207,7 +257,7 @@ theorem genCoord_law (ψ : ↥(GK K) →* (↥LL.1)ˣ) {σ₀ : ↥LL.1 →ₐ[�
       rw [gc_mul, h, ← gc_mul, inv_mul_cancel, gc_one]
     rw [genCoord, dif_neg h2, genCoord, dif_neg hσ, map_zero, mul_zero]
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem component_line {AI : LocAinf l P} (T : LocTied6 l P AI) (ψ : ↥(GK K) →* (↥LL.1)ˣ)
     (τ' : ↥K.1 →ₐ[ℚ_[l]] ↥LL.1) (σ₀ : ↥LL.1 →ₐ[ℚ_[l]] Om l) (h₀ : ∀ c : ↥K.1, σ₀ (τ' c) = c)
@@ -321,8 +371,9 @@ theorem component_line {AI : LocAinf l P} (T : LocTied6 l P AI) (ψ : ↥(GK K) 
 
 end Line
 
-set_option maxHeartbeats 1600000 in
 
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 200000 in
 theorem jumps_of_periods : ∀ {l : ℕ} [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P), Nonempty (LocTied6 l P AI) →
     ∀ (K LL : FinExt l), (∀ (μ : ↥K.1 →ₐ[ℚ_[l]] Om l) (x : ↥K.1), μ x ∈ LL.1) →
     ∀ (χ : ↥(GK K) →* (↥K.1)ˣ), HasPeriods P K χ → ∀ τ : ↥K.1 →ₐ[ℚ_[l]] ↥LL.1,

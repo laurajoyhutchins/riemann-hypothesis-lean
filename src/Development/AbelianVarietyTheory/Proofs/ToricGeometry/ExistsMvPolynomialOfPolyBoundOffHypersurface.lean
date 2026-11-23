@@ -1,9 +1,66 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import ReciprocityTheory.ThetaQuasiPeriods.Change
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PolyGrowthStatementPf
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Lagrange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PolyGrowthStatementPfB
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+
+@[expose] public section
 
 open Filter Topology Asymptotics
 
@@ -150,8 +207,8 @@ private theorem polynomial_eventually_ne_zero_lemma_3 {ρ : Polynomial ℂ} (hρ
     Polynomial.mem_roots hρ, Polynomial.IsRoot.def, h0, Set.mem_singleton_iff, true_and]
   exact ht
 
-open Filter Topology Asymptotics in
 
+open Filter Topology Asymptotics in
 theorem _root_.GlobalTheory.exists_mvPolynomial_of_poly_bound_off_hypersurface :
     ∀ (d m : ℕ) (q : MvPolynomial (Fin d) ℂ) (f : (Fin d → ℂ) → ℂ) (C : ℝ), q ≠ 0 →
       DifferentiableOn ℂ f {x | MvPolynomial.eval x q ≠ 0} →
@@ -217,8 +274,9 @@ theorem _root_.GlobalTheory.exists_mvPolynomial_of_poly_bound_off_hypersurface :
           MvPolynomial.eval x (Polynomial.aeval (MvPolynomial.X 0) φ) = φ.eval (x 0) := by
         intro φ
         induction φ using Polynomial.induction_on' with
-        | add p₁ p₂ h₁ h₂ => simp only [map_add, Polynomial.eval_add, h₁, h₂]
+        | add p₁ p₂ h₁ h₂ => simp only [map_add (f := _), Polynomial.eval_add, h₁, h₂]
         | monomial n a => simp [Polynomial.aeval_monomial, Polynomial.eval_monomial]
+
       rw [hPmdef, map_sum]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [map_mul, MvPolynomial.eval_rename, hA]
@@ -255,7 +313,7 @@ theorem _root_.GlobalTheory.exists_mvPolynomial_of_poly_bound_off_hypersurface :
       have hx0 : f x = φ.eval (x 0) := by
         have := hφ (x 0) (by rw [hr, hxc]; exact hx)
         rw [← this, hxc]
-      rw [hx0, hinterp, Lagrange.interpolate_apply, Polynomial.eval_finset_sum, hPm]
+      rw [hx0, hinterp, Lagrange.interpolate_apply, Polynomial.eval_finsetSum, hPm]
       refine Finset.sum_congr rfl fun k hk => ?_
       rw [Polynomial.eval_mul, Polynomial.eval_C, mul_comm]
       congr 1

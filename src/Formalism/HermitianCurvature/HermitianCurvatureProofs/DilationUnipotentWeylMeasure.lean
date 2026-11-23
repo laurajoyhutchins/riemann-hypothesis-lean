@@ -1,6 +1,67 @@
-import Formalism.HermitianCurvature.StatementB
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCCB
+public import Formalism.HermitianCurvature.StatementB
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.Deriv.CompMul
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+
+@[expose] public section
 
 open Matrix Filter Topology
 
@@ -99,10 +160,6 @@ lemma dg_last (k r : ℕ) (t : ℝ) (a : Fin r) (h : ¬ a.val + 1 < r) :
 
 variable {k r : ℕ} {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
-lemma inLie_zero : inLie k r (0 : Mat k r) := by
-  unfold inLie
-  simp
-
 lemma inLie_add {X Y : Mat k r} (hX : inLie k r X) (hY : inLie k r Y) : inLie k r (X + Y) := by
   unfold inLie at *
   rw [Matrix.conjTranspose_add, add_mul, mul_add]
@@ -151,26 +208,7 @@ lemma hpk_isUnit : IsUnit (Hpk k r) := by
   exact ⟨⟨Hpk k r, Hpk k r, hpk_sq_lemma, hpk_sq_lemma⟩, rfl⟩
 
 lemma exp_mem {Y : Mat k r} (hY : inLie k r Y) : NormedSpace.exp Y ∈ GV k r := by
-  have hU : IsUnit (Hpk k r) := hpk_isUnit
-  have hHH : Hpk k r * Hpk k r = 1 := by
-    calc Hpk k r * Hpk k r = Hpk k r * (Hpk k r)⁻¹ := by rw [hpk_inv]
-      _ = 1 := Matrix.mul_nonsing_inv _ ((Matrix.isUnit_iff_isUnit_det _).mp hU)
-  have hY' : Yᴴ = Hpk k r * (-Y) * (Hpk k r)⁻¹ := by
-    have h1 : Yᴴ * Hpk k r = -(Hpk k r * Y) := eq_neg_of_add_eq_zero_left hY
-    rw [hpk_inv]
-    calc Yᴴ = Yᴴ * (Hpk k r * Hpk k r) := by rw [hHH, Matrix.mul_one]
-      _ = Yᴴ * Hpk k r * Hpk k r := by rw [Matrix.mul_assoc]
-      _ = Hpk k r * (-Y) * Hpk k r := by rw [h1, _root_.neg_mul, _root_.mul_neg, _root_.neg_mul]
-  show (NormedSpace.exp Y)ᴴ * Hpk k r * NormedSpace.exp Y = Hpk k r
-  rw [← Matrix.exp_conjTranspose, hY', Matrix.exp_conj _ _ hU, hpk_inv]
-  have hE : NormedSpace.exp (-Y) * NormedSpace.exp Y = 1 := by
-    rw [← Matrix.exp_add_of_commute _ _ (Commute.neg_left (Commute.refl Y)),
-      show -Y + Y = (0 : Mat k r) by abel, NormedSpace.exp_zero]
-  calc Hpk k r * NormedSpace.exp (-Y) * Hpk k r * Hpk k r * NormedSpace.exp Y
-      = Hpk k r * (NormedSpace.exp (-Y) * (Hpk k r * Hpk k r) * NormedSpace.exp Y) := by
-        simp only [Matrix.mul_assoc]
-    _ = Hpk k r := by
-        rw [hHH, Matrix.mul_one, hE, Matrix.mul_one]
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.InvCC.exp_mem <;> assumption
 
 def cv (b : Bool) (X : Mat k r) (t : ℝ) (g : Mat k r) : Mat k r :=
   match b with
@@ -191,8 +229,6 @@ def mulR (X : Mat k r) : Mat k r →L[ℝ] Mat k r :=
   LinearMap.toContinuousLinearMap (LinearMap.mulRight ℝ X)
 
 lemma mulL_apply (X g : Mat k r) : mulL X g = X * g := rfl
-
-lemma mulR_apply (X g : Mat k r) : mulR X g = g * X := rfl
 
 def vf (b : Bool) (X : Mat k r) : Mat k r →L[ℝ] Mat k r :=
   match b with
@@ -273,11 +309,6 @@ lemma natCast_succ_le (m : ℕ) :
   first
     | exact le_of_eq (by norm_cast)
     | exact le_of_eq (by simp)
-    | simp
-
-lemma one_le_cast (m : ℕ) : (1 : WithTop ℕ∞) ≤ (((m + 1 : ℕ) : ℕ∞) : WithTop ℕ∞) := by
-  first
-    | exact_mod_cast Nat.succ_le_succ (Nat.zero_le m)
     | simp
 
 lemma cast_ne_zero (m : ℕ) : (((m + 1 : ℕ) : ℕ∞) : WithTop ℕ∞) ≠ 0 := by
@@ -384,14 +415,14 @@ lemma op_smul (b : Bool) (X : Mat k r) (a : ℂ) (f : Mat k r → E) : op b X (a
   funext g
   simp only [op, Pi.smul_apply]
   first
-    | exact deriv_const_smul' (f := fun t : ℝ => f (cv b X t g)) (x := 0) a
+    | exact deriv_const_smul_field (f := fun t : ℝ => f (cv b X t g)) (x := 0) a
     | exact deriv_const_smul_field (f := fun t : ℝ => f (cv b X t g)) (x := 0) a
 
 lemma op_rsmul (b : Bool) (X : Mat k r) (a : ℝ) (f : Mat k r → E) : op b X (a • f) = a • op b X f := by
   funext g
   simp only [op, Pi.smul_apply]
   first
-    | exact deriv_const_smul' (f := fun t : ℝ => f (cv b X t g)) (x := 0) a
+    | exact deriv_const_smul_field (f := fun t : ℝ => f (cv b X t g)) (x := 0) a
     | exact deriv_const_smul_field (f := fun t : ℝ => f (cv b X t g)) (x := 0) a
 
 lemma cv_rsmul (b : Bool) (X g : Mat k r) (c t : ℝ) : cv b ((c : ℂ) • X) t g = cv b X (c * t) g := by
@@ -417,7 +448,7 @@ lemma op_letter_add {f : Mat k r → E} {X Y g : Mat k r} (b : Bool) (hX : inLie
     cases b
     · rw [vf_false, vf_false, vf_false, Matrix.mul_add]
     · rw [vf_true, vf_true, vf_true, Matrix.add_mul, neg_add]
-  rw [hv, map_add]
+  rw [hv, map_add (f := _)]
 
 def W (w : List (Bool × Mat k r)) (f : Mat k r → E) : Mat k r → E :=
   w.foldr (fun x h => op x.1 x.2 h) f
@@ -508,11 +539,6 @@ lemma W_smul (w : List (Bool × Mat k r)) (a : ℂ) (f : Mat k r → E) : W w (a
   induction w with
   | nil => rfl
   | cons x w ih => rw [W_cons, W_cons, ih, op_smul]
-
-lemma W_rsmul (w : List (Bool × Mat k r)) (a : ℝ) (f : Mat k r → E) : W w (a • f) = a • W w f := by
-  induction w with
-  | nil => rfl
-  | cons x w ih => rw [W_cons, W_cons, ih, op_rsmul]
 
 lemma W_sub {f f₂ : Mat k r → E} (w : List (Bool × Mat k r)) (hw : AllLie w)
     (hf : CkOn ((w.length : ℕ) : ℕ∞) (GV k r) f) (hf₂ : CkOn ((w.length : ℕ) : ℕ∞) (GV k r) f₂) :

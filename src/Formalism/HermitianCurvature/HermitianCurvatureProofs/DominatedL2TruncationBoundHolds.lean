@@ -1,6 +1,69 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFApxDom
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFApxDomThQ
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DominatedL2OperatorBoundHolds
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFApxDom
+public import Formalism.HermitianCurvature.StatementJF
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BXiAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CccoefMono
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutDomCutInt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEnTrSmooth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutFpmDecay
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDCCLower
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLemB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutNFApxDomThQ
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DominatedL2OperatorBoundHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LUFactorOrbitBounds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplySub
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TriangleInequalityAtPlace
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.cut_PtwCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBP
 
@@ -25,7 +88,7 @@ theorem jf_sub_thr (D : B.RealPlaceData k r Wp Wq) {A : ℝ} (hT : JF.Transporte
   rw [hJ, hJ, hJ, ← integral_sub (hFi h hh) (hGi h hh)]
   congr 1
   funext q
-  simp only [JF.integrand, B.rho, ContinuousLinearMap.sub_comp, ContinuousLinearMap.comp_sub, smul_sub]
+  simp [JF.integrand, B.rho, smul_sub]
 
 theorem hsVec_sub'' (A C : Wq →L[ℂ] Wp) : B.hsVec (A - C) = B.hsVec A - B.hsVec C := by
   unfold B.hsVec
@@ -182,7 +245,7 @@ theorem ew_lint_le (p : KB.Pl P Wp Wq) {A : ℝ} (hAB : B.AB P.k P.r ≤ A) (hT 
 
 end place
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem dominated_L2_truncation_bound_holds : DominatedL2TruncationBound := by
   intro Cb C₁
@@ -371,8 +434,6 @@ theorem dominated_L2_truncation_bound_holds : DominatedL2TruncationBound := by
         2 * (‖TBB.Gp p (TBB.bigPt P.r c)‖ ^ (2 * p₀ - N) *
           TBB.Ew p (fun _ => 1) (B.opApply Th (ψ n)) (P.r + 1) [] (TBB.bigPt P.r c)) := by ring
     _ ≤ 2 * (Hn c).toReal := by linarith
-
-theorem nfApxDomAll_of_ptw (hP : NFDomPtw) : NFApxDomAll := nfApxDomAll_of_cut domination_at_zero_holds hP dominated_L2_truncation_bound_holds
 
 end
 

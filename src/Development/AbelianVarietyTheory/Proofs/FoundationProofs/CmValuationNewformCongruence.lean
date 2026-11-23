@@ -1,25 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaTW
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsZetaSystemFixedExponent
-import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsEqSubOfMemCob
-import Development.AbelianVarietyTheory.Definitions.Foundations.EigenfunctionalZeroProjection
-import Development.AbelianVarietyTheory.Definitions.Foundations.PieceEqPieceT
-import Development.AbelianVarietyTheory.Definitions.Foundations.HtCoLOfEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleHodgeTateZetaClassParams
-import Development.AbelianVarietyTheory.Definitions.Foundations.AdmissibleNewformZetaData
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFROfIsLamF
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamOfLSmulIff
-import Development.AbelianVarietyTheory.Definitions.Foundations.ActWBOfInvariant
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GalBMemKummerInvariantSet
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPrimitiveRootEOmLevel
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCuspFunctionalOddWeightOddPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCuspFunctionalValueModPrimePowDiamondIndepende
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsThBActSgDDiamIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaBasisLinearCombination
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeDiamondAction
-import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.Thdiam
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFR2
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HtCoLOfEq
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsLamFROfIsLamF
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.Foundations.IwahoriReduction.SiegelFixedPoints.IsThBIff
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ActWBOfInvariant
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCuspFunctionalValueModPrimePowDiamondIndepende
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsPrimitiveRootEOmLevel
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsThBActSgDDiamIff
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SlMulToRingEquiv
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaBasisLinearCombination
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ThetaLatticeDiamondAction
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerUnitClassModPrimePowProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
+
+@[expose] public section
 
 noncomputable section
 
@@ -80,7 +111,7 @@ theorem exists_isLamG [IsAlgClosure ℚ Ω] (ε : Ω →+* ℂ) (hl : l ≠ 2) {
   · have := congrArg (algebraMap ℤ_[l] (Qbar l)) (eq_add_of_sub_eq hu)
     rw [map_natCast] at this
     rw [this, hlam, hT]
-    simp only [map_add, map_mul, map_pow, map_natCast, map_one]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast, map_one]
     ring
 
 abbrev pushB {ε : Ω →+* ℂ} (X : Tower Ω ε) (l : ℕ) [Fact l.Prime] (n m N : ℕ) [NeZero N] (bB : (Ω ≃ₐ[ℚ] Ω) → X.Fn l)
@@ -108,7 +139,7 @@ theorem cycMod_one_of {m : ℕ} (hm : 1 ≤ m) {s : G ℚ Ω} (hs : cycMod ℚ �
   ext
   change PadicInt.toZModPow 1 ((cycZ ℚ Ω l s : ℤ_[l]ˣ) : ℤ_[l]) = 1
   have e : (l : ℤ_[l]) ^ (1 + k) * a = ((l ^ 1 : ℕ) : ℤ_[l]) * ((l : ℤ_[l]) ^ k * a) := by push_cast; ring
-  rw [ha, e, map_add, map_one, map_mul, map_natCast, ZMod.natCast_self, zero_mul, add_zero]
+  rw [ha, e, map_add (f := _), map_one, map_mul, map_natCast, ZMod.natCast_self, zero_mul, add_zero]
 
 theorem cg_per {per : ℕ → Qbar l} (h : ∀ n, Cg n (per (n + 1)) (per n)) {m n : ℕ} (hmn : m ≤ n) : Cg m (per n) (per m) := by
   induction n, hmn using Nat.le_induction with
@@ -164,8 +195,9 @@ theorem inChi_avg {ε : Ω →+* ℂ} (X : Tower Ω ε) {N : ℕ} [NeZero N] (hN
     GlobalTheory.KummerEisensteinGalois.InChi X N w χ (∑ δ : (ZMod N)ˣ, u δ • X.diam N l (δ : ZMod N).val f) := by
   refine ⟨Submodule.sum_mem _ fun δ _ => Submodule.smul_mem _ _
     (GlobalTheory.CyclotomicQExpansion.ThnEx.diam_B X N l w _ (NeZero.pos N) hNl (ZMod.val_coe_unit_coprime δ) f hf), fun d hd => ?_⟩
+
   rw [map_sum, Finset.smul_sum, ← Equiv.sum_comp (Equiv.mulRight (ZMod.unitOfCoprime d hd))
-    (fun δ => χ d • u δ • X.diam N l (δ : ZMod N).val f)]
+  (fun δ => χ d • u δ • X.diam N l (δ : ZMod N).val f)]
   refine Finset.sum_congr rfl fun δ _ => ?_
   have hk : ((δ * ZMod.unitOfCoprime d hd : (ZMod N)ˣ) : ZMod N).val ≡ (δ : ZMod N).val * d [MOD N] := by
     rw [← ZMod.natCast_eq_natCast_iff]; simp
@@ -188,7 +220,7 @@ theorem exists_isThB_sum [IsAlgClosed Ω] {ε : Ω →+* ℂ} (X : Tower Ω ε) 
       ‖((a.appr n : ℕ) : Qbar l) * z - algebraMap ℤ_[l] (Qbar l) a * z‖ ≤ ‖(l : Qbar l) ^ n‖ := fun a z hz => by
     obtain ⟨q, hq⟩ := Ideal.mem_span_singleton.1 (PadicInt.appr_spec n a)
     have h := congrArg (algebraMap ℤ_[l] (Qbar l)) hq
-    rw [map_sub, map_natCast, map_mul, map_pow, map_natCast] at h
+    rw [RingHom.map_sub, map_natCast, map_mul, map_pow, map_natCast] at h
     rw [← sub_mul, norm_mul, norm_sub_rev, h]
     refine (mul_le_of_le_one_right (norm_nonneg _) hz).trans ?_
     rw [norm_mul]
@@ -199,7 +231,7 @@ theorem exists_isThB_sum [IsAlgClosed Ω] {ε : Ω →+* ℂ} (X : Tower Ω ε) 
         (algebraMap ℤ_[l] (Qbar l) a * j (Φ.coeff r) + algebraMap ℤ_[l] (Qbar l) a' * j (Φ'.coeff r))‖ ≤ ‖(l : Qbar l) ^ n‖ := by
     intro a a' b b' Φ Φ' hb hb' h h'
     refine ⟨_, GlobalTheory.ThAdd.isThB_add Ω ε X A N l n w b b' hnon hb hb' a a' Φ Φ' h h', fun r => ?_⟩
-    simp only [HahnSeries.coeff_add, HahnSeries.coeff_smul, smul_eq_mul, map_add, map_mul, map_natCast]
+    simp only [HahnSeries.coeff_add, HahnSeries.coeff_smul, smul_eq_mul, map_add (f := _), map_mul, map_natCast]
     rw [add_sub_add_comm]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (happ _ _ (hint h r)) (happ _ _ (hint h' r)))
   induction hT using Finset.Nonempty.cons_induction with

@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
-import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.ColTwoStep
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.RamificationTwoAndConjugationAtQAndD
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+public import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.ColTwoStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,40 +62,11 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {LL O : Type} [Field LL] [Algebra Qp LL] [TopologicalSpace LL] [CommRing O] [Algebra O LL]
     {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
 
-omit [Algebra O LL] in
 
+omit [Algebra O LL] in
 theorem len_quot_span_ne_top_dvr [IsDomain O] [IsDiscreteValuationRing O] (t : O) (ht : t ≠ 0) :
     Module.length O (O ⧸ Ideal.span {t}) ≠ ⊤ := by
-  have hI : Ideal.span {t} ≠ ⊥ := by rwa [Ne, Ideal.span_singleton_eq_bot]
-  have hA : IsArtinianRing (O ⧸ Ideal.span {t}) := by
-    rw [isArtinianRing_iff_isNoetherianRing_krullDimLE_zero]
-    refine ⟨inferInstance, ?_⟩
-    rw [Ring.krullDimLE_zero_iff]
-    intro J hJ
-    have hsurj : Function.Surjective (Ideal.Quotient.mk (Ideal.span {t})) :=
-      Ideal.Quotient.mk_surjective
-    have hJ' : (J.comap (Ideal.Quotient.mk (Ideal.span {t}))).IsPrime := Ideal.comap_isPrime _ _
-    have hne : J.comap (Ideal.Quotient.mk (Ideal.span {t})) ≠ ⊥ := by
-      intro h
-      apply hI
-      rw [eq_bot_iff, ← h]
-      intro x hx
-      rw [Ideal.mem_comap, Ideal.Quotient.eq_zero_iff_mem.2 hx]
-      exact J.zero_mem
-    have hmax := hJ'.isMaximal hne
-    refine ⟨⟨hJ.ne_top, fun K hK => ?_⟩⟩
-    by_contra hKtop
-    have hK' : K.comap (Ideal.Quotient.mk (Ideal.span {t})) ≠ ⊤ := fun h => hKtop (by
-      rw [← Ideal.map_comap_of_surjective _ hsurj K, h, Ideal.map_top])
-    have hle : J.comap (Ideal.Quotient.mk (Ideal.span {t})) ≤
-        K.comap (Ideal.Quotient.mk (Ideal.span {t})) := Ideal.comap_mono hK.le
-    have heq := hmax.eq_of_le hK' hle
-    apply hK.ne
-    rw [← Ideal.map_comap_of_surjective _ hsurj K, ← heq, Ideal.map_comap_of_surjective _ hsurj J]
-  rw [Module.length_ne_top_iff, isFiniteLength_iff_isNoetherian_isArtinian]
-  haveI := hA
-  exact ⟨inferInstance, isArtinian_of_surjective_algebraMap (R := O ⧸ Ideal.span {t})
-    Ideal.Quotient.mk_surjective⟩
+  apply Formalism.MainNotions.BlochKatoDuality.Br.length_quot_ne_top <;> assumption
 
 theorem colLeR_of_exponent [IsDomain O] [IsDiscreteValuationRing O] (PD : PeriodData G Qp K₀ K B BdR)
     (hp0 : ((PD.p : ℕ) : O) ≠ 0) {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (g₁ e e' : ℕ)

@@ -1,5 +1,57 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -45,7 +97,7 @@ theorem exists_basis {σ : E →ₐ[F] E} (hσ : IsCMExt F E σ) :
     have hσs : ∀ (c : F) (z : E), σ (c • z) = c • σ z := fun c z => by
       rw [Algebra.smul_def, Algebra.smul_def, map_mul, AlgHom.commutes]
     have h' := congrArg σ hst
-    simp only [map_add, hσs, map_one, hσδ, map_zero, smul_neg] at h'
+    simp only [map_add (f := _), hσs, map_one, hσδ, map_zero, smul_neg] at h'
     have hs2 : (s + s) • (1 : E) = 0 := by
       rw [add_smul]
       linear_combination hst + h'
@@ -91,7 +143,7 @@ theorem fixed_eq {σ : E →ₐ[F] E} (hσ : IsCMExt F E σ) {y : R ⊗[F] E} (h
     simp [hB, Algebra.TensorProduct.basis_repr_tmul]
   have hc : c1 = 0 := by
     have := congrArg (fun z => B.repr z 1) hz
-    simp only [map_add, Finsupp.add_apply, hr, map_zero, Finsupp.zero_apply] at this
+    simp only [map_add (f := _), Finsupp.add_apply, hr, map_zero, Finsupp.zero_apply] at this
     rw [← half_add (F := F) R c1, this, mul_zero]
   exact ⟨c0, by rw [hy', hc]; simp⟩
 
@@ -194,7 +246,7 @@ theorem map_hermScal {σ : E →ₐ[F] E} (hσ : IsCMExt F E σ) {d : ℕ} (b : 
     rfl
   have hemb : MeasurableEmbedding e := by
     refine MeasurableEmbedding.of_measurable_inverse (g := fun y => y.1 0) ?_ ?_ ?_ ?_
-    · exact (measurable_pi_lambda _ fun _ => measurable_id).prodMk measurable_const
+    · exact (Measurable.of_eval fun _ => measurable_id).prodMk measurable_const
     · have : Set.range e = Set.univ := by
         refine Set.eq_univ_of_forall fun y => ⟨y.1 0, ?_⟩
         refine Prod.ext ?_ (Subsingleton.elim _ _)
@@ -216,7 +268,7 @@ theorem map_hermScal {σ : E →ₐ[F] E} (hσ : IsCMExt F E σ) {d : ℕ} (b : 
     rw [Measure.pi_of_empty _ x₀, Measure.prod_dirac]
     have h1 : (Measure.pi fun _ : Fin 1 => lam) = lam.map (fun s _ => s) :=
       ((measurePreserving_funUnique lam (Fin 1)).symm (MeasurableEquiv.funUnique (Fin 1) R)).map_eq.symm
-    have hm1 : Measurable fun (s : R) (_ : Fin 1) => s := measurable_pi_lambda _ fun _ => measurable_id
+    have hm1 : Measurable fun (s : R) (_ : Fin 1) => s := Measurable.of_eval fun _ => measurable_id
     have hm2 : Measurable fun y : Fin 1 → R => (y, x₀) := measurable_id.prodMk measurable_const
     rw [h1, Measure.map_map hm2 hm1]
     rfl

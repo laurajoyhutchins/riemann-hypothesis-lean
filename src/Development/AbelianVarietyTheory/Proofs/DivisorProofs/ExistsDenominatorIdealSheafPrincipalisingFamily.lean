@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JGenSpecializes
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsModelRefinementGenerating
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIdealSheafAwayFromP
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.JGenSpecializes
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIdealSheafAwayFromP
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsModelRefinementGenerating
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -77,8 +117,8 @@ theorem mem_map_of_mem_gens_basicOpen [Fintype ι] {U : X.Opens} (hU : IsAffineO
   rw [hb]
   exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (Ideal.subset_span hgen))
 
-variable (w) in
 
+variable (w) in
 def idealSheaf [Fintype ι] : X.IdealSheafData where
   ideal U := idealOn w U.1
   map_ideal_basicOpen U f := by
@@ -88,8 +128,6 @@ def idealSheaf [Fintype ι] : X.IdealSheafData where
       refine Ideal.span_le.2 fun b hb => ?_
       exact Ideal.subset_span (res_mem_gens (X.basicOpen_le f) hb)
     · exact Ideal.span_le.2 fun b hb => mem_map_of_mem_gens_basicOpen U.2 f hb
-
-theorem idealSheaf_ideal [Fintype ι] (U : X.affineOpens) : (idealSheaf w).ideal U = idealOn w U.1 := rfl
 
 theorem idealSheaf_ne_bot [Fintype ι] (i₀ : ι) (h1 : w i₀ = 1) : idealSheaf w ≠ ⊥ := by
   classical
@@ -191,11 +229,11 @@ theorem exists_dvd_of_effCartier [Fintype ι] {Y' : Scheme.{0}} [IsIntegral Y'] 
     | add x y _ _ hx hy =>
       obtain ⟨C, hC, hC'⟩ := hx
       obtain ⟨D, hD, hD'⟩ := hy
-      refine ⟨C + D, by rw [map_add, hC, hD, ← Finset.sum_add_distrib]; simp only [Pi.add_apply, mul_add],
+      refine ⟨C + D, by rw [map_add (f := _), hC, hD, ← Finset.sum_add_distrib]; simp only [Pi.add_apply, mul_add],
         fun i j => ?_⟩
       obtain ⟨r, hr⟩ := hC' i j
       obtain ⟨r', hr'⟩ := hD' i j
-      exact ⟨r + r', by simp only [Pi.add_apply, mul_add, hr, hr', map_add]⟩
+      exact ⟨r + r', by simp only [Pi.add_apply, mul_add, hr, hr', map_add (f := _)]⟩
     | smul c x _ hx =>
       obtain ⟨C, hC, hC'⟩ := hx
       refine ⟨fun j => φ c * C j, ?_, fun i j => ?_⟩

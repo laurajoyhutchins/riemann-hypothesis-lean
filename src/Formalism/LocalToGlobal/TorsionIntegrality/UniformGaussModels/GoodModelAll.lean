@@ -1,7 +1,49 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.IsHypPair
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.HomotheticLatticeIntegralS2
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementK
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementV
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.HomotheticLatticeIntegralS2
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementR
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementA
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -48,15 +90,5 @@ def JetsCM : Prop :=
   ∀ (dK : ℕ) (L : PeriodPair), dK % 4 = 3 → HasCMBy dK L →
   ∀ (p : ℕ) [Fact p.Prime], p ≠ 2 → ¬ p ∣ dK → ∀ ι : ℂ ≃+* ℂ_[p], IntCurve (curveL p L ι) →
     ∀ i : ℕ, 1 ≤ i → ‖Formalism.L2.Th1.C.jet (logSer (curveL p L ι)) (phC p L ι) i‖ ≤ 1
-
-def KernelJoint : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (L : PeriodPair) (ι : ℂ ≃+* ℂ_[p]), p ≠ 2 → IntCurve (curveL p L ι) →
-  ∀ (n : Type) [Fintype n],
-  ∀ ω₀ : ℂ, ω₀ ∈ L.lattice → ω₀ / 2 ∉ L.lattice →
-  ∀ (κ : Type) [Fintype κ] (r : κ → ℂ_[p]) (s : κ → n → ℂ) (N : ℕ), (∀ k, ‖r k‖ ≤ 1) → 0 < N →
-    ¬ p ∣ N → (∀ k i, (N : ℂ) * s k i ∈ L.lattice) →
-    ∃ G : MvPowerSeries n ℂ_[p], Formalism.L2.Th1.C.IntMv (unitBall ℂ_[p]) G ∧
-      thetaZ p L ι ω₀ r s = Formalism.L2.Th1.G.toZ (expSer (curveL p L ι))
-        (Formalism.L2.Th1.C.mvExp (-(Formalism.L2.Th1.G.phSum (fun _ => (1 : ℂ_[p])) (phC p L ι))) * G)
 
 end Formalism.L2.Th1.Top

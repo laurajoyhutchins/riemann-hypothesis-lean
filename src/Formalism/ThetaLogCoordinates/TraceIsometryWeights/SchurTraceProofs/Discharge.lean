@@ -1,4 +1,52 @@
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementF
+module
+
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementF
+public import Formalism.MahlerMeasure.QuotientUpperBoundsOfPowerBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.PW
 
@@ -43,11 +91,6 @@ theorem dischargeE_of (h : ExtP) : DischargeE := by
   obtain ⟨P, h1, h2, h3, h4, h5⟩ := h0 j hj la
   have hk : kapC p (r - 1) LL.total ≤ e1 := (kapC_mono (Nat.sub_le r 1) le_rfl).trans he
   exact ⟨P, h1, h2, h3, h4, fun F hF hW => pow_smul_mem_of_le _ hk (h5 F hF hW)⟩
-
-theorem total_le {N : ℕ} (LL : Letters N) (b : ℕ) (h : ∀ x, LL.deg x ≤ b) : LL.total ≤ b * N := by
-  unfold Letters.total
-  calc ∑ i, LL.deg i ≤ ∑ _i : Fin N, b := Finset.sum_le_sum (fun i _ => h i)
-    _ = b * N := by simp [mul_comm]
 
 theorem kapC_le_real (p : ℕ) [Fact p.Prime] (r d a : ℕ) (h : d + r ≤ p ^ 2 * (8 * a + r) ^ 2) :
     (kapC p r d : ℝ) ≤ (r : ℝ) ^ 2 * lgV2 p a r := by
@@ -95,23 +138,5 @@ theorem kapC_le_real (p : ℕ) [Fact p.Prime] (r d a : ℕ) (h : d + r ≤ p ^ 2
       ≤ ((r.choose 2 : ℕ) : ℝ) * (2 * lgV2 p a r) := mul_le_mul_of_nonneg_left hL (Nat.cast_nonneg _)
     _ = (((r.choose 2 : ℕ) : ℝ) * 2) * lgV2 p a r := by ring
     _ ≤ (r : ℝ) ^ 2 * lgV2 p a r := mul_le_mul_of_nonneg_right hc hlg
-
-theorem kappa_le_height_bound : ∀ (p : ℕ) [Fact p.Prime] (N r : ℕ) (LL : Letters N) (a : ℕ) (κ : ℝ),
-    (∀ x, LL.deg x ≤ 2 * a) → 2 * a * N + r ≤ p ^ 2 * (8 * a + r) ^ 2 →
-    ((N + 2) * r ^ 2 : ℝ) * lgV2 p a r ≤ κ → kapC p r LL.total ≤ ⌈κ / (N + 2)⌉₊ := by
-  intro p _ N r LL a κ hdeg hpa hκ
-  have htot := total_le LL (2 * a) hdeg
-  have hk := kapC_le_real p r LL.total a (le_trans (Nat.add_le_add_right htot r) hpa)
-  have hpos : (0 : ℝ) < (N : ℝ) + 2 := by positivity
-  have hb : (r : ℝ) ^ 2 * lgV2 p a r ≤ κ / ((N : ℝ) + 2) := by
-    rw [le_div_iff₀ hpos]
-    calc (r : ℝ) ^ 2 * lgV2 p a r * ((N : ℝ) + 2) = ((N + 2) * r ^ 2 : ℝ) * lgV2 p a r := by ring
-      _ ≤ κ := hκ
-  exact Nat.cast_le.1 ((hk.trans hb).trans (Nat.le_ceil _))
-
-theorem discharge_of_pwe (hP : DischargeP) (hW : DischargeW) (hE : DischargeE) : HeightBoundImplication := by
-  intro p _ N r LL ρ a κ hdeg hpa hκ
-  have hk := kappa_le_height_bound p N r LL a κ hdeg hpa hκ
-  exact ⟨hP p N r LL ρ _ hk, hW p N r LL _ hk, hE p N r LL ρ _ hk⟩
 
 end Formalism.InvariantFactorPaths.PW

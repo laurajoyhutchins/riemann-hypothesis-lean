@@ -1,5 +1,59 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.HasFDerivAtEvX
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SquareNormBound
+module
+
+import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.ContinuousEvX
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.NullSec
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SquareNormBound
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.HasFDerivAtEvX
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,8 +70,9 @@ def Sg (c : ℝ) : PX m n := C (-(c : ℂ)) * ∑ a, ∑ i, X (a, i, true) * X (
 theorem gs_eq (c : ℝ) (x : Fin m → Fin n → ℂ) : gs c x = Complex.exp (evX (Sg c) x) := by
   unfold gs
   congr 1
+
   simp only [Sg, evX_eq, map_mul, map_sum, eval_C, eval_X, crd_apply, if_true, Bool.false_eq_true, if_false,
-    Complex.star_def, Complex.conj_mul']
+  Complex.star_def, Complex.conj_mul']
   push_cast
   ring
 
@@ -25,27 +80,7 @@ theorem continuous_evX (P : PX m n) : Continuous fun x : Fin m → Fin n → ℂ
   continuous_iff_continuousAt.2 fun x => (hasFDerivAt_evX P x).continuousAt
 
 theorem evX_bound (P : PX m n) : ∃ K : ℝ, ∃ d : ℕ, 0 ≤ K ∧ ∀ x, ‖evX P x‖ ≤ K * (1 + ‖x‖) ^ d := by
-  induction P using MvPolynomial.induction_on with
-  | C a => exact ⟨‖a‖, 0, norm_nonneg _, fun x => by simp [evX_eq]⟩
-  | add p q hp hq =>
-    obtain ⟨K1, d1, h1, b1⟩ := hp
-    obtain ⟨K2, d2, h2, b2⟩ := hq
-    refine ⟨K1 + K2, max d1 d2, by positivity, fun x => ?_⟩
-    have hx : 1 ≤ 1 + ‖x‖ := by linarith [norm_nonneg x]
-    have e1 : (1 + ‖x‖) ^ d1 ≤ (1 + ‖x‖) ^ max d1 d2 := pow_le_pow_right₀ hx (le_max_left _ _)
-    have e2 : (1 + ‖x‖) ^ d2 ≤ (1 + ‖x‖) ^ max d1 d2 := pow_le_pow_right₀ hx (le_max_right _ _)
-    calc ‖evX (p + q) x‖ ≤ ‖evX p x‖ + ‖evX q x‖ := by simpa [evX_eq] using norm_add_le _ _
-      _ ≤ K1 * (1 + ‖x‖) ^ d1 + K2 * (1 + ‖x‖) ^ d2 := add_le_add (b1 x) (b2 x)
-      _ ≤ K1 * (1 + ‖x‖) ^ max d1 d2 + K2 * (1 + ‖x‖) ^ max d1 d2 :=
-        add_le_add (mul_le_mul_of_nonneg_left e1 h1) (mul_le_mul_of_nonneg_left e2 h2)
-      _ = (K1 + K2) * (1 + ‖x‖) ^ max d1 d2 := by ring
-  | mul_X p k hp =>
-    obtain ⟨K, d, hK, b⟩ := hp
-    refine ⟨K, d + 1, hK, fun x => ?_⟩
-    have hc : ‖crd k x‖ ≤ 1 + ‖x‖ := (norm_crd_le k x).trans (by linarith)
-    calc ‖evX (p * X k) x‖ = ‖evX p x‖ * ‖crd k x‖ := by simp [evX_eq]
-      _ ≤ (K * (1 + ‖x‖) ^ d) * (1 + ‖x‖) := mul_le_mul (b x) hc (norm_nonneg _) (by positivity)
-      _ = K * (1 + ‖x‖) ^ (d + 1) := by ring
+  apply PositivityTheory.Rg.Sw.AbsSt.DF.poly_bound <;> assumption
 
 theorem sq_norm_le (x : Fin m → Fin n → ℂ) : ‖x‖ ^ 2 ≤ ∑ a, ∑ i, ‖x a i‖ ^ 2 :=
   _root_.UpperTheory.Reformulated.B.SquareNormBound.sq_norm_le x

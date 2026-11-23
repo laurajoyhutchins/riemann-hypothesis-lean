@@ -1,10 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsDegreeFibre
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Assembly
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.WeightedHomogeneousComponentMap
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsDegreeFibre
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyCN
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PConservationOfNumberLE
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PIntNumBaseChange
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
 import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Assembly
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.WeightedHomogeneousComponentMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Targets
@@ -65,7 +113,7 @@ theorem FibreDegreeSum.intNum_eq_cycEval (K : Type) [Fintype K] [DecidableEq K] 
     IsLocalization.under_map_of_isPrime_disjoint M (MRing ι O) hPprime hPdisj
   have hmp : IsMultiProjPrime P' :=
     { isPrime := hP'prime
-      multiHomog := WeightedDegree.isMultiHomogIdeal_map 𝔭.primeCompl
+      multiHomog := WeightedDegree.isMultiHomogIdeal_map (M₀ := 𝔭.primeCompl)
         ((Bridge.isMultiHomogIdeal_iff P).mpr hP.2.1.2.1)
       relevant := fun k ↦ by
         obtain ⟨i, hi⟩ := hP.2.1.2.2 k
@@ -92,7 +140,7 @@ theorem FibreDegreeSum.intNum_eq_cycEval (K : Type) [Fintype K] [DecidableEq K] 
     rw [hm0, map_zero] at hms
     exact ((IsLocalization.map_units O s).mul_left_eq_zero).mp hms
   have hdimle : ringKrullDim (MRing ι O ⧸ P') ≤ ((e + 1 + Fintype.card K : ℕ) : WithBot ℕ∞) :=
-    (WeightedDegree.ringKrullDim_quotient_map_le 𝔭.primeCompl P).trans_eq hP.2.2.2
+    (WeightedDegree.ringKrullDim_quotient_map_le (M₀ := 𝔭.primeCompl) P).trans_eq hP.2.2.2
 
   have key := ConservationOfNumberLE.proof.{0} IntNumAssoc.full SpecialCycleEval.full
     SpecialPieceRank.full GenericPieceRank.full SpecialIdealMultiHomog.full O ϖ hϖ K ι P' e hmp hnt
@@ -199,9 +247,9 @@ theorem FibreDegreeSum.proof : FibreDegreeSum.Statement := by
     have hm : Geo.multAt (P ⊔ Ideal.span {C (p : ℤ)}) W =
         (NumbersDVR.multAt (P ⊔ Ideal.span {C (p : ℤ)}) W).toNat :=
       Bridge.multAt_eq_toNat _ _
-    rw [NumbersDVR.divCycle, dif_pos hW', hm, Bridge.intNum_map_eq_geoNum p e W hMP hpW hdimW a]
+    rw [NumbersDVR.divCycle, dite_eq_left hW', hm, Bridge.intNum_map_eq_geoNum p e W hMP hpW hdimW a]
   · have hW' : ¬(W ∈ (P ⊔ Ideal.span {C (p : ℤ)}).minimalPrimes ∧ NumbersDVR.IsRelevant W) := hW
-    rw [Set.indicator_of_notMem hW, NumbersDVR.divCycle, dif_neg hW', zero_mul]
+    rw [Set.indicator_of_notMem hW, NumbersDVR.divCycle, dite_eq_right hW', zero_mul]
 
 end
 

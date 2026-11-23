@@ -1,4 +1,53 @@
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.AApproxC
+module
+
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FamilyLeCoords
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.WithLp
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.HoloSmooth
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.Y
 
@@ -64,43 +113,6 @@ theorem chiC_smooth {i : ι} {β : V n → ℝ} (hβ : ContDiff ℝ ∞ β) {K0 
     refine (contDiffOn_const (c := (0 : ℝ))).congr fun v' hv' => ?_
     simp only [Function.comp]
     exact A.chiC_eq_zero hβs hv'.2.2
-
-def F0 (la' : La) (Sf : Finset Y) (idx : Y → ι) (χ : Y → Y → ℝ) (c : Y → ℂ) (j : ι) (y : Y) : ℂ :=
-  ∑ P ∈ Sf, c P * (χ P y : ℂ) * A.g la' j (idx P) y
-
-theorem isSmoothSection_localizedSection (la' : La) (Sf : Finset Y) (idx : Y → ι) (χ : Y → Y → ℝ) (c : Y → ℂ)
-    (K : Y → Set Y) (hχ : ∀ P ∈ Sf, A.SmoothFn (χ P)) (hχs : ∀ P ∈ Sf, ∀ y, χ P y ≠ 0 → y ∈ K P)
-    (hKc : ∀ P ∈ Sf, IsCompact (K P)) (hKs : ∀ P ∈ Sf, K P ⊆ (A.chart (idx P)).source) :
-    A.IsSSec la' (A.F0 la' Sf idx χ c) := by
-  refine ⟨fun j => ?_, fun i j y hi hj => ?_⟩
-  · have : (A.F0 la' Sf idx χ c j ∘ (A.chart j).symm) = fun v => ∑ P ∈ Sf,
-        c P * (χ P ((A.chart j).symm v) : ℂ) * A.g la' j (idx P) ((A.chart j).symm v) := by
-      funext v; rfl
-    rw [this]
-    refine ContDiffOn.sum fun P hP => contDiffOn_of_locally_contDiffOn fun v hv => ?_
-    by_cases hx : (A.chart j).symm v ∈ (A.chart (idx P)).source
-    · refine ⟨ovl A.chart j (idx P), A.isOpen_ovl j _, ⟨hv, hx⟩, ?_⟩
-      have hg : ContDiffOn ℝ ∞ (A.g la' j (idx P) ∘ (A.chart j).symm) (ovl A.chart j (idx P)) :=
-        contDiffOn_of_holo (A.isOpen_ovl j _) (A.holo_g la' j (idx P))
-      have hc : ContDiffOn ℝ ∞ (fun v => (χ P ((A.chart j).symm v) : ℂ)) (A.chart j).target :=
-        Complex.ofRealCLM.contDiff.comp_contDiffOn (hχ P hP j)
-      exact ((contDiffOn_const.mul hc).mono Set.inter_subset_left).mul
-        (hg.mono Set.inter_subset_right)
-    · have hKc' := (hKc P hP).isClosed
-      have hxK : (A.chart j).symm v ∉ K P := fun h => hx (hKs P hP h)
-      refine ⟨(A.chart j).target ∩ (A.chart j).symm ⁻¹' (K P)ᶜ,
-        (A.chart j).isOpen_inter_preimage_symm hKc'.isOpen_compl, ⟨hv, hxK⟩, ?_⟩
-      refine (contDiffOn_const (c := (0 : ℂ))).congr fun v' hv' => ?_
-      have h0 : χ P ((A.chart j).symm v') = 0 := by
-        by_contra h; exact hv'.2.2 (hχs P hP _ h)
-      simp [h0]
-  · unfold F0
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl fun P hP => ?_
-    by_cases hy : y ∈ (A.chart (idx P)).source
-    · rw [A.g_cocycle la' i j (idx P) y hi hj hy]; ring
-    · have h0 : χ P y = 0 := by by_contra h; exact hy (hKs P hP (hχs P hP y h))
-      simp [h0]
 
 end WeightedAtlas
 

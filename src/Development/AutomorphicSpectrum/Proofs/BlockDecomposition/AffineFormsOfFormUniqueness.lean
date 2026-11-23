@@ -1,16 +1,64 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.NLeA
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ChartGrConst
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DFormMem
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormAlternating
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAdd
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormVanishOfFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGradedVanishing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PolynomialTransfer
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.HodgeSurjectivity.FormUniq
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DFormMem
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormAlternating
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAdd
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormVanishOfFrame
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGradedVanishing
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PolynomialTransfer
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationProperty
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ChartGrConst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.ExteriorPower.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb CrystallineSemistableComparison.Onto
 noncomputable section
@@ -47,7 +95,7 @@ theorem ring_diff {K A B : Type} [CommRing K] [CommRing A] [CommRing B] [Algebra
   let dl : A →ₗ[K] B ⧸ J' := (Ideal.Quotient.mkₐ K J').toLinearMap ∘ₗ (f'.toLinearMap - f.toLinearMap)
   have hdl : ∀ x, dl x = Ideal.Quotient.mk J' (f' x - f x) := fun x => rfl
   let δ : Derivation K A (B ⧸ J') := Derivation.mk' dl fun x y => by
-    rw [hdl, hdl, hdl, hsm, hsm, ← map_add]
+    rw [hdl, hdl, hdl, hsm, hsm, ← map_add (f := _)]
     refine Ideal.Quotient.eq.2 (?_ : _ ∈ J')
     have := hJ (Ideal.mul_mem_mul (hf x) (hf y))
     convert this using 1
@@ -55,8 +103,10 @@ theorem ring_diff {K A B : Type} [CommRing K] [CommRing A] [CommRing B] [Algebra
     ring
   have hδ : ∀ x, δ x = Ideal.Quotient.mk J' (f' x - f x) := fun x => rfl
   have h := congrArg δ.liftKaehlerDifferential hp
+
   rw [map_sum] at h
   simp only [map_smul, Derivation.liftKaehlerDifferential_comp_D, hδ, hsm] at h
+
   rw [← map_sum] at h
   exact Ideal.Quotient.eq.1 h
 
@@ -187,7 +237,7 @@ variable {R : Type} [CommRing R] {C : Type 1} [Category.{0} C] {Φ : PDF R C} {F
 
 theorem form_add (E : Frame Φ d) (σ : ∀ T : C, E.D ⟶ T) {j : ℕ} (I : Fin j → Fin d) (x y : Φ.A.obj E.D)
     (s : ComposableArrows C j) : E.form σ I (x + y) s = E.form σ I x s + E.form σ I y s := by
-  simp only [Frame.form, map_add, mul_add]
+  simp only [Frame.form, map_add (f := _), mul_add]
 
 theorem form_smul (E : Frame Φ d) (σ : ∀ T : C, E.D ⟶ T) {j : ℕ} (I : Fin j → Fin d) (r : R) (x : Φ.A.obj E.D)
     (s : ComposableArrows C j) : E.form σ I (r • x) s = r • E.form σ I x s := by
@@ -409,7 +459,8 @@ theorem frame_main (Q : Poly Φ) (hF : IsFil Φ Fil) (E : Frame Φ d) (σ : ∀ 
     (b.sum_repr _).symm
   have hrule := frame_rule hF E σ hc θ.toAlgHom τ ht g₀ g (fun k i => b.repr (KaehlerDifferential.D R A (g k)) i)
     (fun k => by simpa only [hb] using hp k)
-  rw [form_expand b g₀ g _ hp, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [form_expand b g₀ g _ hp, map_sum]
   simp only [he]
   have hsum := rep_sum (a := Fil (a : ℤ)) (b := Fil ((a : ℤ) + 1)) Finset.univ
     (fun I : Fin a → Fin d => E.form σ I (θ (g₀ * ∏ k, b.repr (KaehlerDifferential.D R A (g k)) (I k))))
@@ -513,7 +564,7 @@ theorem exists_lifts {V : Z.Opens} {s d : ℕ} (hle : SS q 1 s V ≤ inU q V) (E
     rw [e1, e2]
     rfl
 
-set_option maxHeartbeats 3000000 in
+
 
 theorem affOm : FormUniq → AffOm := by
   intro hU K _ _ Z q V d ⟨c⟩ a

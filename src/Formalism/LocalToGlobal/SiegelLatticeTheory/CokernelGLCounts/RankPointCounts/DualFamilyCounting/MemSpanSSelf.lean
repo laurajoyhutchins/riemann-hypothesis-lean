@@ -1,4 +1,52 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.MemSpanIffSpanS
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SplitAtOf
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsIsomScale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module
 
@@ -67,6 +115,7 @@ private theorem span_ne_eq_cutW_of_orthogonal {ι : Type} [Fintype ι] [Decidabl
     obtain ⟨hv1, hv2⟩ := Submodule.mem_inf.1 hv'
     obtain ⟨a, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hv1
     have ha0 : a i₀ = 0 := by
+
       rw [LinearMap.mem_ker, map_sum, Finset.sum_eq_single i₀] at hv2
       · rw [map_smul, smul_eq_mul] at hv2
         exact (mul_eq_zero.1 hv2).resolve_right hf0
@@ -96,10 +145,10 @@ private theorem mem_spanS_iff_smul_add_mem_spanS_ne {ι : Type} [Fintype ι] [De
       · exact hd _
     · rw [Fintype.sum_eq_add_sum_subtype_ne _ i₀]
       dsimp only
-      rw [dif_pos rfl]
+      rw [dite_eq_left rfl]
       congr 1
       refine Finset.sum_congr rfl fun i _ => ?_
-      rw [dif_neg i.2]
+      rw [dite_eq_right i.2]
 
 theorem core_of_split (hs : h.IsSymm) (hd : ∀ x, h x x = 0 → x = 0) (hsp : SplitAt S π h) :
     ∀ (n : ℕ) (ι : Type) [Fintype ι] [DecidableEq ι], Fintype.card ι ≤ n →
@@ -151,6 +200,7 @@ theorem core_of_split (hs : h.IsSymm) (hd : ∀ x, h x x = 0 → x = 0) (hsp : S
         h w (b i₀) = 0 := by
       intro w hw
       obtain ⟨a, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hw
+
       rw [map_sum, LinearMap.sum_apply]
       exact Finset.sum_eq_zero fun i _ => by
         rw [map_smulₛₗ, LinearMap.smul_apply, ho i i₀ i.2, smul_zero]
@@ -163,11 +213,11 @@ theorem core_of_split (hs : h.IsSymm) (hd : ∀ x, h x x = 0 → x = 0) (hsp : S
       constructor
       · rintro ⟨a, ha, w, hw, rfl⟩
         refine ⟨a, ha, g w, (hgiff w).1 hw, ?_⟩
-        rw [map_add, map_smul, hg0]
+        rw [map_add (f := _), map_smul, hg0]
       · rintro ⟨a, ha, u, hu2, huv⟩
         refine ⟨a, ha, g.symm u, (hgiff _).2 (by rw [LinearEquiv.apply_symm_apply]; exact hu2), ?_⟩
         apply g.injective
-        rw [huv, map_add, map_smul, hg0, LinearEquiv.apply_symm_apply]
+        rw [huv, map_add (f := _), map_smul, hg0, LinearEquiv.apply_symm_apply]
 
 end
 

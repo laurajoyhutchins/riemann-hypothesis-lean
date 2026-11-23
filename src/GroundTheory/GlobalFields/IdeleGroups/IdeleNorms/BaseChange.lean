@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.GlobalFields.Adele.BaseChange
-import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
+module
+
+public import GroundTheory.GlobalFields.Adele.BaseChange
+public import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -32,8 +78,8 @@ namespace AdeleBaseChange
 
 variable {K L : Type*} [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L]
 
-variable (K L) in
 
+variable (K L) in
 def adeleTensorAlgEquivLeft : 𝔸[K] ⊗[K] L ≃ₐ[𝔸[K]] 𝔸[L] :=
   AlgEquiv.ofRingEquiv
     (f := (Algebra.TensorProduct.comm K 𝔸[K] L).toRingEquiv.trans
@@ -60,38 +106,38 @@ theorem adeleBasis_apply (i : ι) : adeleBasis b i = algebraMap L 𝔸[L] (b i) 
 theorem adeleBasis_repr (y : 𝔸[L]) (i : ι) : (adeleBasis b).repr y i = coord b i y := by
   have hy : ∑ j, coord b j y • adeleBasis b j = y := by
     conv_rhs => rw [← adeleTensorEquiv_sum_coord b y]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [adeleTensorEquiv_tmul, adeleBasis_apply, Algebra.smul_def, algebraMap_adeleRing, mul_comm]
   conv_lhs => rw [← hy]
   rw [Basis.repr_sum_self]
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem adeleBasis_repr_algebraMap (l : L) (i : ι) :
     (adeleBasis b).repr (algebraMap L 𝔸[L] l) i = algebraMap K 𝔸[K] (b.repr l i) := by
   classical
   have hl : algebraMap L 𝔸[L] l = ∑ j, algebraMap K 𝔸[K] (b.repr l j) • adeleBasis b j := by
     conv_lhs => rw [← b.sum_repr l]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [adeleBasis_apply, Algebra.smul_def, map_mul, Algebra.smul_def, algebraMap_adeleRing,
       adeleMap_algebraMap]
   rw [hl, Basis.repr_sum_self]
 
-variable (K) in
 
+variable (K) in
 scoped instance nontrivial_adeleRing : Nontrivial 𝔸[K] :=
   (AdeleRing.algebraMap_injective (𝓞 K) K).nontrivial
 
 variable (K L) in
 scoped instance : Module.Free 𝔸[K] 𝔸[L] := .of_basis (adeleBasis (Module.finBasis K L))
 
-variable (K L) in
-scoped instance : Module.Finite 𝔸[K] 𝔸[L] := .of_basis (adeleBasis (Module.finBasis K L))
+
 
 variable (K L) in
-
 theorem finrank_adeleRing : Module.finrank 𝔸[K] 𝔸[L] = Module.finrank K L := by
   rw [Module.finrank_eq_card_basis (adeleBasis (Module.finBasis K L)), Fintype.card_fin]
 
@@ -144,29 +190,13 @@ theorem coe_ideleEmbedding (x : IdeleGroup K) :
 theorem ideleEmbedding_injective : Function.Injective (ideleEmbedding K L) := fun _ _ h ↦
   Units.ext (adeleMap_injective (congrArg Units.val h))
 
-theorem continuous_ideleEmbedding : Continuous (ideleEmbedding K L) :=
-  Continuous.units_map (adeleMap K L).toMonoidHom continuous_adeleMap
-
-theorem isClosedEmbedding_ideleEmbedding : IsClosedEmbedding (ideleEmbedding K L) :=
-  haveI : T2Space (FiniteAdeleRing (𝓞 L) L) := inferInstanceAs (T2Space
-    (Πʳ w : HeightOneSpectrum (𝓞 L), [w.adicCompletion L, w.adicCompletionIntegers L]))
-  haveI : T2Space (InfiniteAdeleRing L) :=
-    inferInstanceAs (T2Space ((w : NumberField.InfinitePlace L) → w.Completion))
-  haveI : T2Space 𝔸[L] := inferInstanceAs (T2Space (InfiniteAdeleRing L × FiniteAdeleRing (𝓞 L) L))
-  haveI : T2Space (FiniteAdeleRing (𝓞 K) K) := inferInstanceAs (T2Space
-    (Πʳ v : HeightOneSpectrum (𝓞 K), [v.adicCompletion K, v.adicCompletionIntegers K]))
-  haveI : T2Space (InfiniteAdeleRing K) :=
-    inferInstanceAs (T2Space ((v : NumberField.InfinitePlace K) → v.Completion))
-  haveI : T2Space 𝔸[K] := inferInstanceAs (T2Space (InfiniteAdeleRing K × FiniteAdeleRing (𝓞 K) K))
-  Topology.IsClosedEmbedding.units_map (f := (adeleMap K L).toMonoidHom) isClosedEmbedding_adeleMap
-
 theorem ideleEmbedding_diagonal (k : Kˣ) :
     ideleEmbedding K L (IdeleGroup.diagonal K k) =
       IdeleGroup.diagonal L (Units.map (algebraMap K L).toMonoidHom k) :=
   Units.ext (adeleMap_algebraMap (k : K))
 
-variable (K L) in
 
+variable (K L) in
 def ideleNorm : IdeleGroup L →* IdeleGroup K :=
   Units.map (Algebra.norm 𝔸[K] : 𝔸[L] →* 𝔸[K])
 
@@ -197,13 +227,13 @@ theorem diagonal_range_le_comap_ideleNorm :
   rintro _ ⟨l, rfl⟩
   exact ⟨Units.map (Algebra.norm K : L →* K) l, (ideleNorm_diagonal l).symm⟩
 
-variable (K L) in
 
+variable (K L) in
 def ideleClassMap : IdeleClassGroup K →* IdeleClassGroup L :=
   QuotientGroup.map _ _ (ideleEmbedding K L) diagonal_range_le_comap_ideleEmbedding
 
-variable (K L) in
 
+variable (K L) in
 def ideleClassNorm : IdeleClassGroup L →* IdeleClassGroup K :=
   QuotientGroup.map _ _ (ideleNorm K L) diagonal_range_le_comap_ideleNorm
 
@@ -216,10 +246,6 @@ theorem ideleClassMap_mk (x : IdeleGroup K) :
 theorem ideleClassNorm_mk (x : IdeleGroup L) :
     ideleClassNorm K L (IdeleClassGroup.mk L x) = IdeleClassGroup.mk K (ideleNorm K L x) :=
   rfl
-
-theorem continuous_ideleClassMap : Continuous (ideleClassMap K L) :=
-  (QuotientGroup.isQuotientMap_mk _).continuous_iff.2
-    ((IdeleClassGroup.continuous_mk L).comp continuous_ideleEmbedding)
 
 theorem continuous_ideleClassNorm : Continuous (ideleClassNorm K L) :=
   (QuotientGroup.isQuotientMap_mk _).continuous_iff.2

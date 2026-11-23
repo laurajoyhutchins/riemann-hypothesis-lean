@@ -1,4 +1,59 @@
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.PairFormula
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.OneSidedLemma4Realisable
+import Formalism.LocalToGlobal.GroupLattices.FockModels.ElementaryDivisorBasis
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.ProdBlockEmbMonomial
+import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.FockRLinDual
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.FockSumRight
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.LaTwInvT
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.PairFormula
+import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.EdgePlane
+import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ScaleNegMono
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TestSideEdge
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockR
+public import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.TransposeWordsProofs.FockPairingRowAction
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.FockRAddRight
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +82,7 @@ variable {p n' : ℕ} [Fact p.Prime] [NeZero n'] {W Qq O Kf : Type} [CommRing W]
   [Field Qq] [Algebra W Qq] [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Field Kf] [Algebra O Kf]
   {ι : Qq →+* Kf} {σ : Qq ≃+* Qq} {j : W →+* O} {w : O} {m : ℕ}
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem realAt_gen (hS : HidaSetting p n' W Qq O Kf ι σ j w) (φ : WF p n' ≃+* W) (hφ : IsWittIdent σ φ)
     (hm1 : 1 ≤ m) (r : ℕ) (hr1 : 1 ≤ r) (hr2 : r < m + 1) (d : Fin n' → ℕ) (cP κ : ℕ)
@@ -91,13 +146,13 @@ theorem realAt_gen (hS : HidaSetting p n' W Qq O Kf ι σ j w) (φ : WF p n' ≃
       obtain ⟨c1, hc1⟩ := hsym mm
       obtain ⟨c2, hc2⟩ := hint mm
       refine ⟨c2 + w ^ cP * c1, ?_⟩
-      have e1 : coeff mm (subst p n' O w n' r gv Ff) =
-          coeff mm (subst p n' O w n' r gv Ff - C (algebraMap O (KK O) (w ^ o)) * sig) +
-            algebraMap O (KK O) (w ^ o) * coeff mm sig := by
-        rw [coeff_sub, coeff_C_mul]
+      have e1 : AddMonoidAlgebra.coeff (subst p n' O w n' r gv Ff) mm =
+          AddMonoidAlgebra.coeff (subst p n' O w n' r gv Ff - C (algebraMap O (KK O) (w ^ o)) * sig) mm +
+            algebraMap O (KK O) (w ^ o) * AddMonoidAlgebra.coeff sig mm := by
+        rw [MvPolynomial.coeff_sub, coeff_C_mul]
         ring
-      show coeff mm (subst p n' O w n' r gv Ff) = _
-      rw [e1, hc1, hc2, ← map_mul, ← map_add]
+      show AddMonoidAlgebra.coeff (subst p n' O w n' r gv Ff) mm = _
+      rw [e1, hc1, hc2, ← map_mul, ← map_add (f := _)]
       congr 1
       ring
     have h2 := (hv2 gv hgv e.dual hbv F' (o + 0)).1 h1
@@ -159,7 +214,7 @@ theorem realAt_gen (hS : HidaSetting p n' W Qq O Kf ι σ j w) (φ : WF p n' ≃
         algebraMap O Kf w ^ o * kapR hS ((p : KK O) ^ κ * fock SF sig / (((∏ s, (d s).factorial : ℕ) : ℕ) : KK O)) +
           algebraMap O Kf w ^ (o + cP) * algebraMap O Kf z := by
       rw [← hz]
-      simp only [map_div₀, map_mul, map_add, map_pow, map_natCast, kapR_alg, e3]
+      simp only [map_div₀, map_mul, map_add (f := _), map_pow, map_natCast, kapR_alg, e3]
       ring
     rw [e4, zpow_neg, zpow_natCast, map_mul, map_pow, pow_add]
     field_simp

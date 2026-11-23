@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.StdChar
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.StdChar
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.FundamentalContinuity.AdelicIsomorphismStatement
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,8 +96,8 @@ theorem dense_F : DenseRange (algebraMap F (Af F)) := by
 
 variable [IsTotallyReal F]
 
-open Formalism.L2.SG.Pf.StdChar in
 
+open Formalism.L2.SG.Pf.StdChar in
 theorem eq_psiStd (ψ : AddChar (AF F) ℂ) (h1 : IsCharAF F ψ) (h2 : Formalism.L2.SG.LocVol.IsStdChar ψ) (x : AF F) :
     ψ x = psiStd F x := by
   obtain ⟨hcont, -, htriv, -⟩ := h1
@@ -68,11 +111,10 @@ theorem eq_psiStd (ψ : AddChar (AF F) ℂ) (h1 : IsCharAF F ψ) (h2 : Formalism
       first
         | exact InfinitePlace.Completion.extensionEmbedding_coe w a
         | exact InfinitePlace.Completion.extensionEmbedding_coe a
-        | simp [InfiniteAdeleRing]
+        | simp [InfiniteAdeleRing, AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply]
     simp only [psiA, hw]
     first
       | rfl
-      | simp [trR]
   have hsplit : ∀ z : AF F, z = pairA F z.1 0 + pairA F 0 z.2 := by
     intro z
     first
@@ -86,7 +128,6 @@ theorem eq_psiStd (ψ : AddChar (AF F) ℂ) (h1 : IsCharAF F ψ) (h2 : Formalism
       first
         | exact hsplit _
         | (rw [hsplit (algebraMap F (AF F) a)]; rfl)
-        | simp [pairA]
     have h3 : psiA F (algebraMap F (Ainf F) a) * ψ (pairA F 0 (algebraMap F (Af F) a)) = 1 := by
       rw [← hinf, ← AddChar.map_add_eq_mul, ← e2]
       exact htriv a
@@ -95,14 +136,11 @@ theorem eq_psiStd (ψ : AddChar (AF F) ℂ) (h1 : IsCharAF F ψ) (h2 : Formalism
   have hp : Continuous (fun z : Af F => pairA F 0 z) := by
     first
       | exact continuous_const.prodMk continuous_id
-      | exact continuous_const.prod_mk continuous_id
       | (unfold pairA; fun_prop)
   have hc : Continuous (fun z : Af F => ψ (pairA F 0 z)) := hcont.comp hp
   have hcf : Continuous (psiFin F) := by
     first
       | exact continuous_psiFin F
-      | exact continuous_psiFin
-      | exact continuous_psiFin (F := F)
   have hfin : (fun z : Af F => ψ (pairA F 0 z)) = psiFin F :=
     (dense_F (F := F)).equalizer hc hcf (funext fun a => hF a)
   calc ψ x = ψ (pairA F x.1 0 + pairA F 0 x.2) := by rw [← hsplit x]
@@ -120,8 +158,8 @@ def LocTrDual : Prop :=
         singleV F v (x * y) - algebraMap F (Af F) q ∈ Formalism.UG.intAd F → ∃ n : ℤ, Algebra.trace ℚ F q = n) ↔
       Formalism.L2.SG.LocVol.dV v * x ∈ v.adicCompletionIntegers F
 
-open Formalism.L2.SG.Pf.StdChar in
 
+open Formalism.L2.SG.Pf.StdChar in
 theorem condAllTR_of (hL : LocTrDual) (F : Type) [Field F] [NumberField F] [IsTotallyReal F]
     (ψ : AddChar (AF F) ℂ) (h1 : IsCharAF F ψ) (h2 : Formalism.L2.SG.LocVol.IsStdChar ψ)
     (v : HeightOneSpectrum (𝓞 F)) (x : Fv F v) :
@@ -134,14 +172,10 @@ theorem condAllTR_of (hL : LocTrDual) (F : Type) [Field F] [NumberField F] [IsTo
       have h : algebraMap ℚ ℂ (Algebra.trace ℚ F q) = ∑ σ : F →ₐ[ℚ] ℂ, σ q := by
         first
           | exact trace_eq_sum_embeddings ℂ (x := q)
-          | exact trace_eq_sum_embeddings (E := ℂ) (x := q)
-          | exact trace_eq_sum_embeddings ℂ q
-          | exact trace_eq_sum_embeddings (L := F) ℂ
       rw [← h]
       first
         | rfl
         | (simp; done)
-        | exact (eq_ratCast _ _).symm
     have hbij : Function.Bijective (fun w : InfinitePlace F => w.embedding.toRatAlgHom) := by
       constructor
       · intro w w' h
@@ -180,7 +214,6 @@ theorem condAllTR_of (hL : LocTrDual) (F : Type) [Field F] [NumberField F] [IsTo
     rw [hre, hs, ← hsum]
     first
       | simp
-      | exact Complex.ratCast_re _
   have hψ : ∀ z, ψ z = psiStd F z := fun z => eq_psiStd ψ h1 h2 z
   have hV : ∀ y : Fv F v, psiV F ψ v y = psiFin F (singleV F v y) := by
     intro y
@@ -194,7 +227,6 @@ theorem condAllTR_of (hL : LocTrDual) (F : Type) [Field F] [NumberField F] [IsTo
     rw [(exists_psiF F).choose_spec.1 c hc, neg_zero]
     first
       | simp
-      | rw [AddCircle.toCircle_zero, Circle.coe_one]
   have hshift : ∀ (s : Af F) (q : F), s - algebraMap F (Af F) q ∈ Formalism.UG.intAd F →
       psiFin F s = Complex.exp (-(2 * Real.pi * Complex.I * ((trR F q : ℝ) : ℂ))) := by
     intro s q hq
@@ -208,7 +240,6 @@ theorem condAllTR_of (hL : LocTrDual) (F : Type) [Field F] [NumberField F] [IsTo
       have h2pi : (2 * Real.pi * Complex.I : ℂ) ≠ 0 := by
         first
           | exact Complex.two_pi_I_ne_zero
-          | simp [Real.pi_ne_zero]
       have ht : (t : ℂ) = ((-n : ℤ) : ℂ) := by
         apply mul_left_cancel₀ h2pi
         push_cast

@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsLocFac
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdemAtUniqueOrth
+module
+
+public import Formalism.LocalToGlobal.Divisibility.DefGroup
+public import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdemAtUniqueOrth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsDiscriminantTwelfthRootOfIdealLatticeIffDelta1
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.JointSmooth
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MidChart
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.WittSmallGroupEmbeddingMemPointwiseStabilizerIso
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.SeeSaw GlobalTheory.AdForm GlobalTheory.LocMod GlobalTheory.Mem GlobalTheory.Mem.Col2 Formalism.L2.Col Formalism.L2.Forms
 open scoped Classical
 
@@ -28,64 +76,5 @@ theorem sum_mul_sum_of_subset {D : D7} (S S' : Finset (Formalism.L2.DIV.Pl D.hos
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun P hP => ?_
   rw [mul_sum_of_isIdemAt (hf P hP) S' g hg, if_pos (hS hP)]
-
-theorem sum_mul_of_not_mem {D : D7} (S : Finset (Formalism.L2.DIV.Pl D.host.E)) (f : Formalism.L2.DIV.Pl D.host.E → AE D)
-    (hf : ∀ P ∈ S, Formalism.L2.NTheta.IsIdemAt (f P) P) {x : AE D} {R : Formalism.L2.DIV.Pl D.host.E}
-    (hx : Formalism.L2.NTheta.IsIdemAt x R) (hR : R ∉ S) : (∑ P ∈ S, f P) * x = 0 := by
-  rw [mul_comm, mul_sum_of_isIdemAt hx S f hf, if_neg hR]
-
-theorem partial_sums : ∀ (D : D7) (P₀ ι : Finset (Formalism.L2.DIV.Pl D.host.E)) (e e' : AE D) (es : ι → AE D),
-    Disjoint P₀ ι → (∀ PP, Formalism.L2.NTheta.IsIdemAt (es PP) PP.1) → IsIdemSum e P₀ → IsIdemSum e' (P₀ ∪ ι) →
-    e' * e' = e' ∧ ∀ Q : Finset ι, IsIdemSum (e + ∑ PP ∈ Q, es PP) (P₀ ∪ Q.map (Function.Embedding.subtype (· ∈ ι))) ∧
-      (e + ∑ PP ∈ Q, es PP) * (e + ∑ PP ∈ Q, es PP) = e + ∑ PP ∈ Q, es PP ∧
-      (e + ∑ PP ∈ Q, es PP) * e' = e + ∑ PP ∈ Q, es PP ∧
-      ∀ R, R ∉ Q → (e + ∑ PP ∈ Q, es PP) * es R = 0 := by
-  intro D P₀ ι e e' es hdisj hes he he'
-  obtain ⟨⟨es₀, hes₀, rfl⟩, -⟩ := he
-  obtain ⟨⟨es'', hes'', rfl⟩, hce'⟩ := he'
-  set g : Formalism.L2.DIV.Pl D.host.E → AE D :=
-    fun P => if P ∈ P₀ then es₀ P else if h : P ∈ ι then es ⟨P, h⟩ else 0 with hgdef
-  have hg : ∀ P ∈ P₀ ∪ ι, Formalism.L2.NTheta.IsIdemAt (g P) P := by
-    intro P hP
-    by_cases h0 : P ∈ P₀
-    · simp only [hgdef, if_pos h0]; exact hes₀ P h0
-    · have hι : P ∈ ι := by
-        rcases Finset.mem_union.mp hP with h | h
-        · exact absurd h h0
-        · exact h
-      simp only [hgdef, if_neg h0, dif_pos hι]; exact hes ⟨P, hι⟩
-  refine ⟨sum_mul_sum_of_subset _ _ es'' es'' hes'' hes'' subset_rfl, fun Q => ?_⟩
-  have hmapι : Q.map (Function.Embedding.subtype (· ∈ ι)) ⊆ ι := by
-    intro P hP
-    obtain ⟨PP, -, rfl⟩ := Finset.mem_map.mp hP
-    exact PP.2
-  have hS : P₀ ∪ Q.map (Function.Embedding.subtype (· ∈ ι)) ⊆ P₀ ∪ ι :=
-    Finset.union_subset_union subset_rfl hmapι
-  have hgS : ∀ P ∈ P₀ ∪ Q.map (Function.Embedding.subtype (· ∈ ι)), Formalism.L2.NTheta.IsIdemAt (g P) P :=
-    fun P hP => hg P (hS hP)
-  have hsum : ∑ P ∈ P₀, es₀ P + ∑ PP ∈ Q, es PP =
-      ∑ P ∈ P₀ ∪ Q.map (Function.Embedding.subtype (· ∈ ι)), g P := by
-    rw [Finset.sum_union (Finset.disjoint_of_subset_right hmapι hdisj), Finset.sum_map]
-    congr 1
-    · refine Finset.sum_congr rfl fun P hP => ?_
-      simp only [hgdef, if_pos hP]
-    · refine Finset.sum_congr rfl fun PP _ => ?_
-      have hn : (PP : Formalism.L2.DIV.Pl D.host.E) ∉ P₀ := Finset.disjoint_right.mp hdisj PP.2
-      simp only [hgdef, Function.Embedding.coe_subtype, if_neg hn, dif_pos PP.2]
-  rw [hsum]
-  have hxy := sum_mul_sum_of_subset _ _ g es'' hgS hes'' hS
-  refine ⟨⟨⟨g, hgS, rfl⟩, ?_⟩, sum_mul_sum_of_subset _ _ g g hgS hgS subset_rfl, hxy, fun R hR => ?_⟩
-  · set x := ∑ P ∈ P₀ ∪ Q.map (Function.Embedding.subtype (· ∈ ι)), g P
-    set y := ∑ P ∈ P₀ ∪ ι, es'' P
-    calc x * cA D x = (x * y) * cA D (x * y) := by rw [hxy]
-      _ = (x * cA D x) * (y * cA D y) := by rw [map_mul]; ring
-      _ = 0 := by rw [hce', mul_zero]
-  · refine sum_mul_of_not_mem _ g hgS (hes R) ?_
-    intro hmem
-    rcases Finset.mem_union.mp hmem with h | h
-    · exact Finset.disjoint_left.mp hdisj h R.2
-    · obtain ⟨PP, hPP, hPR⟩ := Finset.mem_map.mp h
-      have : PP = R := Subtype.ext hPR
-      exact hR (this ▸ hPP)
 
 end GlobalTheory.PartialIdemSum

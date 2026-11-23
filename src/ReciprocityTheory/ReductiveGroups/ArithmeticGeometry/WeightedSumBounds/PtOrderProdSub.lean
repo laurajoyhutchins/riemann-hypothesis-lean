@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.MvPowerSeries.Substitution
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.Sh
 
@@ -13,18 +61,6 @@ variable {R : Type*} [CommRing R] {τ : Type*} {ι : Type*}
 def PTAgree (k : ℕ) (A A' : ι → MvPowerSeries τ R) : Prop :=
   ∀ i (e : τ →₀ ℕ), e.degree < k → coeff e (A i) = coeff e (A' i)
 
-theorem PTAgree.mono {k l : ℕ} {A A' : ι → MvPowerSeries τ R} (h : PTAgree k A A') (hl : l ≤ k) :
-    PTAgree l A A' := fun i e he => h i e (lt_of_lt_of_le he hl)
-
-theorem PTAgree.trans {k : ℕ} {A B D : ι → MvPowerSeries τ R} (h : PTAgree k A B)
-    (h' : PTAgree k B D) : PTAgree k A D := fun i e he => (h i e he).trans (h' i e he)
-
-theorem PTAgree.symm {k : ℕ} {A B : ι → MvPowerSeries τ R} (h : PTAgree k A B) :
-    PTAgree k B A := fun i e he => (h i e he).symm
-
-theorem ptAgree_zero (A A' : ι → MvPowerSeries τ R) : PTAgree 0 A A' :=
-  fun _ _ he => absurd he (Nat.not_lt_zero _)
-
 theorem PTAgree.eq {A A' : ι → MvPowerSeries τ R} (h : ∀ k, PTAgree k A A') : A = A' :=
   funext fun i => MvPowerSeries.ext fun e => h (e.degree + 1) i e (Nat.lt_succ_self _)
 
@@ -32,17 +68,6 @@ section Fixed
 
 variable (T : (ι → MvPowerSeries τ R) → (ι → MvPowerSeries τ R))
   (P : (ι → MvPowerSeries τ R) → Prop)
-
-theorem pt_unique
-    (hT : ∀ k x y, P x → P y → PTAgree k x y → PTAgree (k + 1) (T x) (T y))
-    {x y : ι → MvPowerSeries τ R} (hx : P x) (hy : P y) (hTx : T x = x) (hTy : T y = y) :
-    x = y := by
-  refine ReciprocityTheory.ChartRestriction.G.Sh.PTAgree.eq fun k => ?_
-  induction k with
-  | zero => exact ptAgree_zero _ _
-  | succ k ih =>
-    have h := hT k x y hx hy ih
-    rwa [hTx, hTy] at h
 
 end Fixed
 
@@ -55,7 +80,7 @@ private theorem natCast_le_order_iff_coeff_eq_zero {f : MvPowerSeries τ R} {n :
 private theorem natCast_le_order_add {f g : MvPowerSeries τ R} {n : ℕ}
     (hf : (n : ℕ∞) ≤ f.order) (hg : (n : ℕ∞) ≤ g.order) : (n : ℕ∞) ≤ (f + g).order :=
   natCast_le_order_iff_coeff_eq_zero.2 fun d hd => by
-    rw [map_add, natCast_le_order_iff_coeff_eq_zero.1 hf d hd, natCast_le_order_iff_coeff_eq_zero.1 hg d hd, add_zero]
+    rw [map_add (f := _), natCast_le_order_iff_coeff_eq_zero.1 hf d hd, natCast_le_order_iff_coeff_eq_zero.1 hg d hd, add_zero]
 
 private theorem natCast_add_le_order_mul {f g : MvPowerSeries τ R} {a b : ℕ}
     (hf : (a : ℕ∞) ≤ f.order) (hg : (b : ℕ∞) ≤ g.order) : ((a + b : ℕ) : ℕ∞) ≤ (f * g).order :=

@@ -1,5 +1,43 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.WordFrameBounds.WordIdAt
-import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.FrameMatching.HeckeWordBounds.ChainSc
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.UniformizerValuations.WordFrameBounds.WordIdAt
+public import Aesop.BuiltinRules
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +48,7 @@ open PositivityTheory.RgTw (Mat G)
 open PositivityTheory.Rg.BcB.SpectralAccumulation (Hf)
 open scoped Classical
 
-set_option synthInstance.maxHeartbeats 200000
+
 
 open PositivityTheory.Rg.BcB.F PositivityTheory.Rg.BcB.F.B3 PositivityTheory.Rg.BcB.F.Eig PositivityTheory.Rg.BcN.F2
 
@@ -22,16 +60,6 @@ def heckeLevelWordBase : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMF
   (locL d a ha p).Ok d.P ∧ ((d.eL a).mul (locL d a ha p)).Eqv d.P (locL d a ha p) ∧ d.IsLetter a ha (locL d a ha p)
 
 def ProdOk : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (d : LocData E n), d.Ok → ∀ (ls : List (LL d)), ∀ a ≤ n, (prodL d ls a).Ok d.P
-
-def MatchOn : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], GlobalTheory.BCT.Unr E → ∀ (n : ℕ) (d : LocData E n), d.Ok → MLM.MOk d →
-  (∀ w, IsLevel (MonoidHom.id _) (KL n w) (d.KU w)) → ∀ (ls : List (LL d)) (m k : ℕ), 1 ≤ m → 1 ≤ k →
-  ls.countP Sum.isLeft = m * k → ∀ a ≤ n, ∀ w ∈ d.B,
-    Match n a (n - a) w (d.μ w) (U.lpow (d.KU w) (d.gU m w) k) (seen ((prodL d ls a).tr d.P d.one) (prodL d ls a).t w)
-
-def MatchOff : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], GlobalTheory.BCT.Unr E → ∀ (n : ℕ) (d : LocData E n), d.Ok →
-  (∀ w u, ‖((d.μ w u : ℂˣ) : ℂ)‖ = 1) → ∀ (ls : List (LL d)) (N : ℕ), ls.countP Sum.isLeft = N + 1 →
-    ∀ a ≤ n, ∀ w ∉ d.B, (IsSplitAt w → d.Good w) →
-    Match n a (n - a) w (d.μ w) (MLM.wordUS d w (atPlace d w ls)) (seen ((prodL d ls a).tr d.P d.one) (prodL d ls a).t w)
 
 section Frame
 

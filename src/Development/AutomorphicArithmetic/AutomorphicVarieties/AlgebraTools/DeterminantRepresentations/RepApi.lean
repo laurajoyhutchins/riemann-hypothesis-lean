@@ -1,4 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+
+@[expose] public section
 
 open Polynomial UpperTheory.V.W
 
@@ -20,7 +73,7 @@ private theorem repAlg_map (ρ : G →* Matrix (Fin n) (Fin n) A) (B : Type) [Co
   | of g =>
     simp [MonoidAlgebra.of_apply, repAlg_single]
   | add x y hx hy =>
-    rw [map_add, map_add, hx, hy, map_add]
+    rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)]
     ext i j
     simp
   | smul r x hx =>
@@ -79,7 +132,7 @@ theorem UpperTheory.V.AlgebraTools.Det.repApi :
   · intro y hy
     unfold GDet.Kills
     intro B _ _ h
-    rw [ofRep_D, map_add, map_mul, repAlg_map, hy, Matrix.map_zero _ (map_zero _), mul_zero, add_zero, map_one,
+    rw [ofRep_D, map_add (f := _), map_mul, repAlg_map, hy, Matrix.map_zero _ (map_zero _), mul_zero, add_zero, map_one,
       Matrix.det_one]
   · intro A' _ f
     refine GDet.ext fun B _ _ x => ?_
@@ -98,7 +151,7 @@ theorem UpperTheory.V.AlgebraTools.Det.repApi :
     | of h =>
       simp [MonoidAlgebra.of_apply, repAlg_single, MonoidAlgebra.mapDomainRingHom]
     | add x y hx hy =>
-      rw [map_add, map_add, map_add, hx, hy]
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
     | smul r x hx =>
       have hr : r • x = MonoidAlgebra.single 1 r * x := by
         rw [Algebra.smul_def]
@@ -117,7 +170,7 @@ theorem UpperTheory.V.AlgebraTools.Det.repApi :
         rw [MonoidAlgebra.of_apply, repAlg_single, repAlg_single, one_smul, one_smul,
           ← Matrix.map_mul, ← Matrix.map_mul, hP]
       | add y z hy hz =>
-        rw [map_add, map_add, Matrix.mul_add, Matrix.add_mul, hy, hz]
+        rw [map_add (f := _), map_add (f := _), Matrix.mul_add, Matrix.add_mul, hy, hz]
       | smul r y hy =>
         rw [map_smul, map_smul, Matrix.mul_smul, Matrix.smul_mul, hy]
     have hd := congrArg Matrix.det (key x)

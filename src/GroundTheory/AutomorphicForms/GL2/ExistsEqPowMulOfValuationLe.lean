@@ -1,6 +1,61 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJZetaDefs
-import GroundTheory.AutomorphicForms.MeasuresGL
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJZetaDefs
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+import GroundTheory.AutomorphicForms.Cartan
+import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
+import GroundTheory.LocalFields.SeparableClosureValuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -54,8 +109,8 @@ theorem detPow_of_mem_integralGL {k : GL (Fin n) F} (hk : k ∈ integralGL F n) 
     detPow k s = 1 := by
   rw [detPow_eq_qs_zpow, ordDet_of_mem_integralGL hk, zpow_zero]
 
-variable (F n) in
 
+variable (F n) in
 theorem isClopen_shell (k : ℤ) : IsClopen {g : GL (Fin n) F | ordDet g = k} := by
   have hcont : Continuous fun g : GL (Fin n) F => (g : Matrix (Fin n) (Fin n) F).det :=
     Units.continuous_val.matrix_det
@@ -73,8 +128,8 @@ theorem isClopen_shell (k : ℤ) : IsClopen {g : GL (Fin n) F | ordDet g = k} :=
     ⟨LocalField.isClosed_valBall (k + 1), LocalField.isOpen_valBall (k + 1)⟩
   exact (c1.diff c2).preimage hcont
 
-variable (F n) in
 
+variable (F n) in
 theorem isCompact_shell (A : ℕ) (k : ℤ) :
     IsCompact {g : GL (Fin n) F | (∀ i j, (uniformizer F : F) ^ A * g i j ∈ 𝒪[F]) ∧ ordDet g = k} := by
   classical

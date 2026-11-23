@@ -1,7 +1,45 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Formalism.SharpRestriction.ParamsHeightRankConstant
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +96,7 @@ def TypesPair : Prop :=
       (PlIn nbr i false w hw ∧ PlIn nbr i true w' hw')) ∧
   ∀ s : Bool,
     (∀ w ∈ placesOver H.E (N.l i), ∀ w', IsConjPl H w w' →
-      Xor' (w ∈ columns nbr i s) (w' ∈ columns nbr i s)) ∧
+      Xor (w ∈ columns nbr i s) (w' ∈ columns nbr i s)) ∧
     (columns nbr i s).Finite ∧
     ∀ w ∈ placesOver H.E (N.l i), locDeg H.E w * (columns nbr i s).ncard = R.f
 
@@ -67,40 +105,6 @@ end Loc
 def SplitRow_at (D : D7) : Prop :=
   (∀ l : ℕ, SplitRowPrime D.host l → PlacesSplit D.host l) ∧
   ∀ i : D.nd.Loc, SplitRowPrime D.host (D.nd.l i) → TypesPair (N := D.nd) D.nbr i
-
-def SplitRowF {eps : ℝ} (Fm : FamP eps) : Prop :=
-  ∀ x, Fm.x1 < x → ∀ i : Fm.Ix x, SplitRow_at (Fm.D x i)
-
-def SplitRowClosed (C : FamClass) : Prop := Closed C (fun Fm _ => SplitRowF Fm)
-
-example {R : Ranks} (H : Host R) : ∃ l, SplitRowPrime H l := by
-  have hd : H.d ≠ 0 := H.hyp.2.1.ne_zero
-  obtain ⟨l, hl, hgt, hmod⟩ := Nat.exists_prime_gt_modEq_one
-    (5 + H.q + H.d + H.g 0 + H.g 1 + H.small.sup id) (k := 4 * H.d) (by omega)
-  have hs : l ∉ H.small := fun h => by
-    have : l ≤ H.small.sup id := Finset.le_sup (f := id) h
-    omega
-  have hq : l ≠ H.q := by omega
-  have hd' : l ≠ H.d := by omega
-  have hodd : Odd l := hl.odd_of_ne_two (by omega)
-  have hj : jacobiSym (-(H.d : ℤ)) l = 1 := by
-    rw [jacobiSym.mod_right _ hodd]
-    have h1 : l % (4 * (-(H.d : ℤ)).natAbs) = 1 := by
-      rw [Int.natAbs_neg, Int.natAbs_natCast]
-      have h := hmod
-      unfold Nat.ModEq at h
-      rw [h]
-      exact Nat.mod_eq_of_lt (by omega)
-    rw [h1, jacobiSym.one_right]
-  refine ⟨l, hl, by omega, hq, hd', ?_, ?_⟩
-  · intro k
-    fin_cases k
-    · show l ≠ H.g 0
-      omega
-    · show l ≠ H.g 1
-      omega
-  · unfold Host.cls primeClass
-    rw [if_neg hs, if_neg hq, if_neg hd', if_pos hj]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.SplitPlaceTypes
 

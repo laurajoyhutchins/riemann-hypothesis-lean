@@ -1,4 +1,45 @@
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeTie
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,15 +58,15 @@ open Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism
 
 variable {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m}
 
-open Classical in
 
+open Classical in
 def IsDualPair {V : HSp D} {S : D.what₂.Tau → SPar} (θ : InfFam D) (M : DSModel V S) (c : CoefA V)
     (pr : c.W →ₗ[ℂ] SmT M →ₗ[ℂ] ℂ) : Prop :=
   pr ≠ 0 ∧ ∀ τ, ∀ g ∈ Formalism.QuantumDeterminants.UH (gramAt D V τ), ∀ (w : c.W) (v : M.Vec) (u : M.sm τ), (u : M.H τ) = M.rep τ g (v τ) →
     pr (c.ρ (atTau θ V τ g) w) (PiTensorProduct.tprod ℂ (Function.update v τ u)) = pr w (PiTensorProduct.tprod ℂ v)
 
-open Classical in
 
+open Classical in
 def IsIoW {V W : HSp D} {S' : D.what₂.Tau → SPar} (θ : InfFam D) (M' : DSModel W S') (c : CoefA V)
     (ω : GA D V × GA D W →* Module.End ℂ (WO V W → ℂ)) (pt : PolF D W.rank V.rank → (WO V W → ℂ))
     (Δ : PolF D W.rank V.rank) (io : LowT M' →ₗ[ℂ] c.W →ₗ[ℂ] PolF D W.rank V.rank) : Prop :=
@@ -42,8 +83,8 @@ variable {V : HSp D} {S : D.what₂.Tau → SPar} (M : DSModel V S)
 
 def inclT : SmT M →ₗ[ℂ] ⨂[ℂ] τ, M.H τ := PiTensorProduct.map fun τ => (M.sm τ).subtype
 
-open Classical in
 
+open Classical in
 def actT (τ : D.what₂.Tau) (g : Matrix (Fin V.rank) (Fin V.rank) ℂ) : (⨂[ℂ] ρ, M.H ρ) →ₗ[ℂ] ⨂[ℂ] ρ, M.H ρ :=
   PiTensorProduct.map (Function.update (fun ρ => (LinearMap.id : M.H ρ →ₗ[ℂ] M.H ρ)) τ (M.rep τ g : M.H τ →ₗ[ℂ] M.H τ))
 
@@ -419,20 +460,7 @@ structure Char : Prop where
   scal : R.IsScal F
   tup : R.IsTup F
 
-structure RealCol where
-
-  ζ : (F.Dc (R.toCx F).zs).Mem → T → D.what₂.LL
-
-  sEE : (R.toCx F).EE →ₗ⋆[ℂ] (F.Sp (R.toCx F).zs).HH
-
 variable {R F}
-
-def RealCol.toCol (Y : RealCol R F) : CxData.CxCol (fc := F.fc) (R.toCx F) := (R.toCx F).colDef (fun u t => (Y.ζ u t)⁻¹) Y.sEE
-
-structure RealCol.Char (Y : RealCol R F) : Prop where
-  zeta : ∀ u t, ∃ n : ℕ, 0 < n ∧ Y.ζ u t ^ n = 1
-  zeta0 : ∀ u, Y.ζ u A.μ0 = 1
-  sE : ∀ x ∈ (R.toCx F).EEl true, ‖Y.sEE x‖ ^ 2 = (nP F true)⁻¹ * ‖x‖ ^ 2 ∧ Y.sEE x ∈ (F.Sp (R.toCx F).zs).Rw
 
 end RealDat
 

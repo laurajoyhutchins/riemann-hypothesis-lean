@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ApplyEqOfMemAdjoin
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsTopWTopWOfExists
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsGaloisInvariantValuationIntegersEqIntegral
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.Integral
+
+@[expose] public section
+
 open scoped MatrixGroups NNReal
 open GlobalTheory.KZ GlobalTheory.Glue GlobalTheory.K5 GlobalTheory.KummerEisensteinGalois
 
@@ -50,7 +102,7 @@ theorem exists_eq_sum (φ : ℤ_[p] →+* L) (hφ : ∀ z, v (φ z) ≤ 1) (h1 :
       obtain ⟨l, y, hy, rfl⟩ := ih
       obtain ⟨l', y', hy', rfl⟩ := h y hy
       refine ⟨fun i => l i + p ^ k * l' i, y', hy', ?_⟩
-      simp only [map_add, map_mul, map_pow, map_natCast, mul_add, Finset.sum_add_distrib, Finset.mul_sum]
+      simp only [map_add (f := _), map_mul, map_pow, map_natCast, mul_add, Finset.sum_add_distrib, Finset.mul_sum]
       rw [add_assoc, pow_succ, mul_assoc]
       congr 2
       exact Finset.sum_congr rfl fun i _ => by ring
@@ -110,8 +162,8 @@ theorem exists_expansion (φ : ℤ_[p] →+* L) {F : ℕ} (κ : Fin F → L) {π
 
 variable [Algebra ℚ_[p] L]
 
-variable (p L) in
 
+variable (p L) in
 noncomputable def fromInt : ℤ_[p] →+* L := (algebraMap ℚ_[p] L).comp PadicInt.Coe.ringHom
 
 theorem fromInt_apply (z : ℤ_[p]) : fromInt p L z = algebraMap ℚ_[p] L z := rfl
@@ -238,7 +290,8 @@ theorem exists_residue_basis (hφ : ∀ z, v (fromInt p L z) ≤ 1) (h1 : v (p :
     have hj0 : 0 < ‖g j‖ := (norm_pos_iff.2 hgi).trans_le (hmax i (Finset.mem_univ i))
     have hgj : g j ≠ 0 := norm_pos_iff.1 hj0
     let μ : Fin _ → ℤ_[p] := fun k => ⟨g k / g j, by
-      rw [norm_div]; exact (div_le_one hj0).2 (hmax k (Finset.mem_univ k))⟩
+      rw [PadicInt.mem_subring_iff, norm_div]
+      exact (div_le_one hj0).2 (hmax k (Finset.mem_univ k))⟩
     have h2 := hu μ ⟨j, by
       have : μ j = 1 := Subtype.ext (div_self hgj)
       rw [this, ← isUnit_iff_dvd_one]
@@ -272,7 +325,7 @@ theorem exists_basis (hφ : ∀ z, v (fromInt p L z) ≤ 1) (h0 : 0 < v (p : L))
 
 end Abstract
 
-theorem okbasis : ∀ (p : ℕ) [Fact p.Prime] (Ω : Type) [Field Ω] [Algebra (O0 p) Ω], IsClo p Ω → ∀ (v : Valuation Ω ℝ≥0), (∀ x : Ω, v x ≤ 1 ↔ IsInt p x) → 0 < v (p : Ω) → v (p : Ω) < 1 → ∀ (d : ℕ) (e : Fin d → Ω), (∀ t, IsInt p (e t) ∧ IsAlgZp p (e t)) → ∃ (E F : ℕ) (π : Ω) (κ : Fin F → Ω) (lam : Fin d → Fin F → Fin E → ℤ_[p]), 1 ≤ E ∧ IsAlgZp p π ∧ v π ^ E = v (p : Ω) ∧ (∀ j, IsInt p (κ j) ∧ IsAlgZp p (κ j)) ∧ (∀ μ : Fin F → ℤ_[p], (∃ j, ¬ (p : ℤ_[p]) ∣ μ j) → v (∑ j, κ j * zp Ω (μ j)) = 1) ∧ ∀ t, e t = ∑ j, ∑ s : Fin E, κ j * π ^ (s : ℕ) * zp Ω (lam t j s) := by
+theorem okbasis : ∀ (p : ℕ) [Fact p.Prime] (Ω : Type) [Field Ω] [Algebra (O0 p) Ω], IsClo p Ω → ∀ (v : Valuation Ω ℝ≥0), (∀ x : Ω, v x ≤ 1 ↔ IsInt (p := p) x) → 0 < v (p : Ω) → v (p : Ω) < 1 → ∀ (d : ℕ) (e : Fin d → Ω), (∀ t, IsInt (p := p) (e t) ∧ IsAlgZp p (e t)) → ∃ (E F : ℕ) (π : Ω) (κ : Fin F → Ω) (lam : Fin d → Fin F → Fin E → ℤ_[p]), 1 ≤ E ∧ IsAlgZp p π ∧ v π ^ E = v (p : Ω) ∧ (∀ j, IsInt (p := p) (κ j) ∧ IsAlgZp p (κ j)) ∧ (∀ μ : Fin F → ℤ_[p], (∃ j, ¬ (p : ℤ_[p]) ∣ μ j) → v (∑ j, κ j * zp Ω (μ j)) = 1) ∧ ∀ t, e t = ∑ j, ∑ s : Fin E, κ j * π ^ (s : ℕ) * zp Ω (lam t j s) := by
   intro p hp Ω _ _ hc v hv h0 h1 d e he
   letI : Algebra ℤ_[p] Ω := ((algebraMap (O0 p) Ω).comp (algebraMap ℤ_[p] (O0 p))).toAlgebra
   haveI : IsScalarTower ℤ_[p] (O0 p) Ω := IsScalarTower.of_algebraMap_eq fun _ => rfl
@@ -287,7 +340,7 @@ theorem okbasis : ∀ (p : ℕ) [Fact p.Prime] (Ω : Type) [Field Ω] [Algebra (
   have hle : ∀ z, v (algebraMap ℤ_[p] Ω z) ≤ 1 := fun z =>
     (hv _).2 (isIntegral_algebraMap (x := algebraMap ℤ_[p] (O0 p) z))
   have hinj : Function.Injective (algebraMap ℤ_[p] Ω) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro z hz
     by_contra hz0
     obtain ⟨n, hn⟩ := val_int v _ hle hz0

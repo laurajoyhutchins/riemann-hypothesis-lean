@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LowersMulZero
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnitaryLayerCoordsToBlocks
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LowersMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas GlobalTheory.FlagBase GlobalTheory.RadCov
 
 namespace GlobalTheory.RadCov.LowDim
@@ -19,29 +65,7 @@ theorem block_eq_zero (hB : Biorth r m U (fun b => (U b)ᴴ)) {s : ℕ} (hs : m 
 theorem mem_lowers_iff_blocks (hB : Biorth r m U (fun b => (U b)ᴴ))
     (hW : ∀ k y, y ∈ W k ↔ ∀ b, k ≤ b → (U b)ᴴ *ᵥ y = 0) (c : ℕ) (Y : Matrix (Fin n) (Fin n) ℂ) :
     Y ∈ lowers W c ↔ ∀ s t, t ≤ s + c → (U s)ᴴ * Y * U t = 0 := by
-  obtain ⟨-, h2, h3⟩ := hB
-  rw [mem_lowers]
-  constructor
-  · intro h s t hst
-    refine Matrix.ext_of_mulVec_single fun j => ?_
-    have hy : U t *ᵥ Pi.single j 1 ∈ W (s + c + 1) := by
-      rw [hW]
-      intro b hb
-      rw [Matrix.mulVec_mulVec, h2 b t (by omega), Matrix.zero_mulVec]
-    have := (hW _ _).1 (h s _ hy) s le_rfl
-    rw [Matrix.mulVec_mulVec, Matrix.mulVec_mulVec] at this
-    rw [this, Matrix.zero_mulVec]
-  · intro h b y hy
-    rw [hW]
-    intro s hs
-    have e : (U s)ᴴ *ᵥ Y *ᵥ y = ((U s)ᴴ * Y * ∑ t ∈ range m, U t * (U t)ᴴ) *ᵥ y := by
-      rw [h3, Matrix.mul_one, Matrix.mulVec_mulVec]
-    rw [e, Matrix.mul_sum, Matrix.sum_mulVec]
-    refine Finset.sum_eq_zero fun t _ => ?_
-    rw [← Matrix.mul_assoc, ← Matrix.mulVec_mulVec]
-    by_cases hst : t ≤ s + c
-    · rw [h s t hst, Matrix.zero_mulVec]
-    · rw [(hW _ _).1 hy t (by omega), Matrix.mulVec_zero]
+  apply GlobalTheory.LayerIso.mem_lowers_iff <;> assumption
 
 noncomputable def layer (m : ℕ) (U : ∀ b, Matrix (Fin n) (Fin (r b)) ℂ) (c : ℕ) :
     Matrix (Fin n) (Fin n) ℂ →ₗ[ℂ] ∀ b : Fin m, Matrix (Fin (r b)) (Fin (r (b + c + 1))) ℂ where
@@ -57,8 +81,8 @@ end GlobalTheory.RadCov.LowDim
 
 namespace GlobalTheory.RadCov
 
-open LowDim in
 
+open LowDim in
 theorem finrank_lowers_eq_succ_add (n m : ℕ) (W : ℕ → Submodule ℂ (Fin n → ℂ)) (r : ℕ → ℕ)
     (U : ∀ b, Matrix (Fin n) (Fin (r b)) ℂ) (hB : Biorth r m U (fun b => (U b)ᴴ))
     (hW : ∀ k y, y ∈ W k ↔ ∀ b, k ≤ b → (U b)ᴴ *ᵥ y = 0) (c : ℕ) :

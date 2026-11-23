@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.ESSymmApply
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.ESSymmApply
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +72,7 @@ lemma Qm_integral [DecidableEq ι] (hfin : ∀ i, m i (L i) ≠ ⊤) (hT : TailH
       fun i => Pn_prob m L (h i.1 i.2)
     have hQ : Qm m L S = tl m L S • Measure.infinitePi (fun i : {i // i ∉ S} => Pn m L i.1) := by
       unfold Qm
-      rw [dif_pos h]
+      rw [dite_eq_left h]
     set J := T.subtype (fun i => i ∉ S) with hJ
     have hgP : ∀ j : J, Integrable (g j.1.1) (Pn m L j.1.1) := by
       intro j
@@ -74,7 +122,7 @@ lemma Qm_integral [DecidableEq ι] (hfin : ∀ i, m i (L i) ≠ ⊤) (hT : TailH
     ring
   · have hQ : Qm m L S = 0 := by
       unfold Qm
-      rw [dif_neg h]
+      rw [dite_eq_right h]
     rw [hQ]
     refine ⟨integrable_zero_measure, ?_⟩
     rw [integral_zero_measure]
@@ -114,10 +162,10 @@ lemma kap_integral [DecidableEq ι] (hfin : ∀ i, m i (L i) ≠ ⊤) (hT : Tail
     refine (mul_comm _ _).trans (congrArg₂ (· * ·) ?_ ?_)
     · rw [← Finset.prod_coe_sort S]
       refine Finset.prod_congr rfl (fun j _ => ?_)
-      rw [eS_symm_apply, dif_pos j.2]
+      rw [eS_symm_apply, dite_eq_left j.2]
     · rw [Finset.sdiff_eq_filter, ← Finset.subtype_map]
       refine Finset.prod_subtype_map_embedding (fun j _ => ?_)
-      rw [eS_symm_apply, dif_neg j.2]
+      rw [eS_symm_apply, dite_eq_right j.2]
   have hprod := hRi.mul_prod hQi
   refine ⟨?_, ?_⟩
   · unfold kap

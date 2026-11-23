@@ -1,12 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmBilin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmSub
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntegralOfNormLeOne
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrystallineIffMemH1f
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmBilin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmHom
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.AdmSub
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.Z1fDescAvg
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrystallineIffMemH1f
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.Z1fDescAvg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.CrystallineExtensions
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 namespace UpperTheory.V.Loc.CrExt
@@ -55,7 +106,7 @@ private theorem line {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [TopologicalS
     | tmul v b =>
       change σ (e g) v ⊗ₜ[ℚ_[l]] ((PP l).PD K).actB (e g) b = σ (e g) v ⊗ₜ[ℚ_[l]] (PP l).actQ (e g : GQ l) b
       rw [(PP l).PD_actB]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   rw [this, e.symm_apply_apply]
 
 private theorem isCr_trivial {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [TopologicalSpace G]
@@ -109,7 +160,7 @@ private theorem triv {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [TopologicalS
   have hj : ∀ x, j x = f x.1 + x.2 • s := fun _ => rfl
   have hjρ : ∀ g x, j (σ g x) = ρ' g (j x) := by
     intro g x
-    simp only [hj, hσ, map_add, LinearMap.map_smul_of_tower, hc, hfρ, smul_add]
+    simp only [hj, hσ, map_add (f := _), LinearMap.map_smul_of_tower, hc, hfρ, smul_add]
     abel
   constructor
   · intro h
@@ -118,10 +169,10 @@ private theorem triv {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [TopologicalS
       rw [Subsingleton.elim c 0]
       exact zero_mem _
     · refine key.1 (((isCrys_isDR_sub_quot φ hφ σ ρ' hcont hρ' j hjρ).1 ?_).1 h)
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       rintro ⟨v, t⟩ hx
       have h1 := congrArg p hx
-      rw [hj, map_add, hex.apply_apply_eq_zero, LinearMap.map_smul_of_tower, hs, zero_add, map_zero,
+      rw [hj, map_add (f := _), hex.apply_apply_eq_zero, LinearMap.map_smul_of_tower, hs, zero_add, map_zero,
         smul_eq_zero] at h1
       obtain rfl : t = 0 := h1.resolve_right one_ne_zero
       rw [hj, zero_smul, add_zero, map_eq_zero_iff f hf] at hx
@@ -206,7 +257,7 @@ theorem UpperTheory.V.Loc.crExt :
   have hκ : Continuous fun g => (κ g : A) := by
     have : (fun g => (κ g : A)) = fun g => p (ρ' g s) := by
       funext g
-      rw [hc, map_smul, map_add, hex.apply_apply_eq_zero, hs, add_zero, smul_eq_mul, mul_one]
+      rw [hc, map_smul, map_add (f := _), hex.apply_apply_eq_zero, hs, add_zero, smul_eq_mul, mul_one]
     rw [this]
     exact hp.comp (hρ'.comp (continuous_id.prodMk continuous_const))
   have hκ' := cont_inv κ hκ
@@ -231,8 +282,8 @@ theorem UpperTheory.V.Loc.crExt :
       exact (IsModuleTopology.continuous_of_linearMap r).comp
         ((hτ'.comp (continuous_id.prodMk continuous_const)).sub continuous_const)
     · have h1 := hcτ (g * h)
-      rw [map_mul, Module.End.mul_apply, hcτ, map_add, hcτ, ← hfτ, add_assoc, add_right_inj] at h1
-      rw [map_add, h1]
+      rw [map_mul, Module.End.mul_apply, hcτ, map_add (f := _), hcτ, ← hfτ, add_assoc, add_right_inj] at h1
+      rw [map_add (f := _), h1]
   haveI : H.FiniteIndex := by
     obtain ⟨K, e, -, he, -⟩ := openField φ hφ
     haveI := GlobalTheory.BlochKatoIntegralScalars.compactSpace_GK K

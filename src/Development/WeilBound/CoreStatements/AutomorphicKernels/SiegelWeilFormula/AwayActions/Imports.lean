@@ -1,4 +1,50 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AwayActions.AlgebraMapAEInjective
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOrthogonalIdempotentsAdeleUnitCombination
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AwayActions.AlgebraMapAEInjective
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.AwayActions.DecAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.ThetaLifts.LatticeBasics.Hypotheses2
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,6 +120,7 @@ theorem free_etale_sheaf_zmod_exists_hom_sending_generator (hcm : IsCMExt F E σ
       rw [sub_smul, one_smul]
       abel
     have hdet := det_idem_sum (fun o => ae (fo o)) (fun o => by rw [← map_mul, hfi]) (fun o o' h => by
+
       rw [← map_mul, hfo o o' h, map_zero]) (by rw [← map_sum, hf1, map_one]) Mo
     rw [← hsum, Fintype.sum_option] at hdet
     have hAeq : A = ∑ b : Bool, (ae (if b then e else 1 - e)) • (if b then (1 : Matrix (Fin n) (Fin n) (AE F E)) else A) := by
@@ -96,12 +143,14 @@ theorem free_etale_sheaf_zmod_exists_hom_sending_generator (hcm : IsCMExt F E σ
         _ = ae e := by rw [he, hee, map_zero, zero_mul, add_zero]
     set zs := ∑ i, ae (η i) * (A - incM F (g i) * C).det with hzs
     have hcz : cA σ zs = ∑ i, ae (η i) * cA σ (A - incM F (g i) * C).det := by
+
       rw [hzs, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_mul, hae, AlgHom.commutes]
     have hzz : zs * cA σ zs = ae (∑ i, η i * i.1) := by
+
       rw [hcz, hzs, sum_idem_mul (fun i => ae (η i)) (fun i => by rw [← map_mul, hηi]) (fun i j h => by
-        rw [← map_mul, hηo i j h, map_zero]), map_sum]
+      rw [← map_mul, hηo i j h, map_zero]), map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_mul, hgN i]
     have hzu : IsUnit zs := isUnit_of_mul_isUnit_left (hzz ▸ hηu.map ae)

@@ -1,5 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+public import Mathlib.RingTheory.Polynomial.RationalRoot
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -166,21 +216,6 @@ def Core.zero (U : (Sp ℤ).Opens) (hU : (U : Set (Sp ℤ)).Nonempty) : Core whe
   e_zero := by
     change _ = 𝟙 U.toScheme ≫ U.ι ≫ (Sp ℤ).topIso.inv
     simp
-
-instance : Inhabited Core := ⟨Core.zero ⊤ ⟨(⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum ℤ), trivial⟩⟩
-
-example (h : ((⊤ : (Sp ℤ).Opens) : Set (Sp ℤ)).Nonempty) (p : ℕ) [Fact p.Prime] (y : Sp (OO p) ⟶ Sp ℤ) :
-    (Core.zero ⊤ h).Cl y := fun _ _ => trivial
-
-example (U : (Sp ℤ).Opens) (hU : (U : Set (Sp ℤ)).Nonempty) : (Core.zero U hU).Indep := by
-  intro p _ y y' _ _ h b hb
-  have hι : (Core.zero U hU).GG.hom = (⊤ : (Sp ℤ).Opens).ι := Category.comp_id _
-  have : IsIso (Core.zero U hU).GG.hom := by
-    rw [hι]
-    exact inferInstanceAs (IsIso (Sp ℤ).topIso.hom)
-  refine ⟨y' ≫ inv (Core.zero U hU).GG.hom, by simp, ?_⟩
-  rw [← cancel_mono (Core.zero U hU).GG.hom]
-  simp only [Category.assoc, IsIso.inv_hom_id, Category.comp_id, hb, h]
 
 end GlobalTheory.ZJ
 end

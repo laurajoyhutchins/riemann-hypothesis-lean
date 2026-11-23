@@ -1,17 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConvZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachInclusionInjectiveSaturatedInterStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWittTiltLatticeTensorCancelStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WittTwistInvariantBasisChangeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWachPrismOverIntegersStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCrysLatOfTrivial
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PrismaticFCrystalValueLocalPrismAinfWittTensorStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAdicCoordinatesOfBasisModPStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsBaseChangeLatticeOfBasisAfterExtensionStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsUnitMatrixOfPowSmulSpanInvertStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ProjectiveOfFreeLatticeOverFiniteFreeRingStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsOfLayers
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAdicCoordinatesOfBasisModPStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsBaseChangeLatticeOfBasisAfterExtensionStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ProjectiveOfFreeLatticeOverFiniteFreeRingStatement
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +89,7 @@ theorem isUnit_Q (R : WSer Γ) : IsUnit (algebraMap (LetA O n) R.EE R.Q) := by
     rw [pow_succ', AlgHom.mul_apply, ← R.φE_ext]
     exact ih.map R.φE
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem build (E : WEt I) [Nontrivial R.EE] {Zl S W : Type} [CommRing Zl] [CommRing S] [CommRing W]
     (a : S →+* LetA O n) (z : PowerSeries Zl →+* S) (c : W →+* RW) (ψ : S →+* W) (π Q : S)
@@ -81,6 +119,7 @@ theorem build (E : WEt I) [Nontrivial R.EE] {Zl S W : Type} [CommRing Zl] [CommR
   choose q x hq hbas hL using hB
   have hsum : ∀ T hT (t : Fin (q T hT) → S),
       E.jD T (∑ i, a (t i) • x T hT i) = ∑ i, c (ψ (t i)) • E.jD T (x T hT i) := fun T hT t => by
+
     rw [map_sum]; exact Finset.sum_congr rfl fun i _ => hj _ _ _
   have hD : ∀ T hT (y : E.DD T), E.jD T y ∈ L T ↔ ∃ t : Fin (q T hT) → S, y = ∑ i, a (t i) • x T hT i :=
     fun T hT y => by
@@ -95,7 +134,7 @@ theorem build (E : WEt I) [Nontrivial R.EE] {Zl S W : Type} [CommRing Zl] [CommR
     obtain ⟨t, rfl⟩ := (hD T hT y).1 hy
     obtain ⟨t', rfl⟩ := (hD T hT y').1 hy'
     refine (hD T hT _).2 ⟨t + t', ?_⟩
-    simp only [Pi.add_apply, map_add, add_smul, Finset.sum_add_distrib]
+    simp only [Pi.add_apply, map_add (f := _), add_smul, Finset.sum_add_distrib]
   have hzero : ∀ T, IsCrys PD T.ρ → E.jD T 0 ∈ L T := fun T hT => (hD T hT _).2 ⟨0, by simp⟩
   have hS : ∀ T, IsCrys PD T.ρ → ∀ (t : S) (y : E.DD T), E.jD T y ∈ L T → E.jD T (a t • y) ∈ L T :=
     fun T hT t y hy => by
@@ -166,6 +205,7 @@ theorem build (E : WEt I) [Nontrivial R.EE] {Zl S W : Type} [CommRing Zl] [CommR
     · obtain ⟨k, m, t, u, hu, hk⟩ := hφi T hT _ ((hN T hT y).1 hy)
       choose u' hu' using fun i => hlift T hT _ (hu i)
       have e : R.Q ^ k • y = ∑ i, a (t i) • E.φD T (u' i) := E.jD_inj T (by
+
         rw [hQk, hk, map_sum]
         exact Finset.sum_congr rfl fun i _ => by rw [hj, E.jD_φ, hu'])
       refine ⟨k, ?_⟩
@@ -254,12 +294,11 @@ theorem range_trivial (BS : GlobalTheory.Published.BhattScholzeCrystallineLattic
     have key : ∀ y : WCb l ⊗[ℤ_[l]] T, y = ∑ i,
         (LinearMap.toSpanSingleton ℤ_[l] T (b i)).lTensor (WCb l) ((b.coord i).lTensor (WCb l) y) := fun y => by
       induction y with
-      | zero => simp
       | tmul w t =>
         simp only [LinearMap.lTensor_tmul, LinearMap.toSpanSingleton_apply, Module.Basis.coord_apply]
         rw [← TensorProduct.tmul_sum, b.sum_repr]
       | add y y' h h' =>
-        simp only [map_add, Finset.sum_add_distrib]
+        simp only [map_add (f := _), Finset.sum_add_distrib]
         rw [← h, ← h']
     rw [key (j (E.tr ioH x))]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -269,6 +308,7 @@ theorem range_trivial (BS : GlobalTheory.Published.BhattScholzeCrystallineLattic
     choose x hx using fun i => full ioH BS U H (LinearMap.toSpanSingleton ℤ_[l] T (b i))
       (fun g x => by rw [hρ]; rfl) (t i)
     refine ⟨∑ i, x i, ?_⟩
+
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [hx, h2, h1]
@@ -283,9 +323,8 @@ variable {Z O W RW T T' : Type} [CommRing Z] [CommRing O] [CommRing W] [CommRing
 theorem kappa_smul (κ : W ⊗[Z] T ≃+ RW ⊗[O] T) (hκ : ∀ w t, κ (w ⊗ₜ t) = c w ⊗ₜ t) (w : W) (y : W ⊗[Z] T) :
     κ (w • y) = c w • κ y := by
   induction y with
-  | zero => simp
   | tmul w' t => rw [TensorProduct.smul_tmul', hκ, hκ, TensorProduct.smul_tmul', smul_eq_mul, smul_eq_mul, map_mul]
-  | add y y' h h' => rw [smul_add, map_add, map_add, smul_add, h, h']
+  | add y y' h h' => rw [smul_add, map_add (f := _), map_add (f := _), smul_add, h, h']
 
 theorem kappa_map (κ : W ⊗[Z] T ≃+ RW ⊗[O] T) (hκ : ∀ w t, κ (w ⊗ₜ t) = c w ⊗ₜ t)
     (κ' : W ⊗[Z] T' ≃+ RW ⊗[O] T') (hκ' : ∀ w t, κ' (w ⊗ₜ t) = c w ⊗ₜ t)
@@ -293,27 +332,26 @@ theorem kappa_map (κ : W ⊗[Z] T ≃+ RW ⊗[O] T) (hκ : ∀ w t, κ (w ⊗�
     (f : T →ₗ[Z] T') (f' : T →ₗ[O] T') (hf : ∀ t, f' t = f t) (y : W ⊗[Z] T) :
     κ' (TensorProduct.map σ f y) = TensorProduct.map σ' f' (κ y) := by
   induction y with
-  | zero => simp
   | tmul w' t => rw [TensorProduct.map_tmul, hκ, hκ', TensorProduct.map_tmul, hσ, hf]
-  | add y y' h h' => simp only [map_add, h, h']
+  | add y y' h h' => simp only [map_add (f := _), h, h']
 
 theorem kappa_basis (κ : W ⊗[Z] T ≃+ RW ⊗[O] T) (hκ : ∀ w t, κ (w ⊗ₜ t) = c w ⊗ₜ t) {q : ℕ}
     (b : Module.Basis (Fin q) W (W ⊗[Z] T)) (y : RW ⊗[O] T) :
     ∃! w : Fin q → W, y = ∑ i, c (w i) • κ (b i) := by
   have key : ∀ w : Fin q → W, ∑ i, c (w i) • κ (b i) = κ (b.equivFun.symm w) := fun w => by
+
     rw [b.equivFun_symm_apply, map_sum]
     exact Finset.sum_congr rfl fun i _ => (kappa_smul c κ hκ _ _).symm
   refine ⟨b.equivFun (κ.symm y), by simp only [key]; simp, fun w hw => ?_⟩
   rw [hw, key, AddEquiv.symm_apply_apply, LinearEquiv.apply_symm_apply]
 
-omit [Module Z T] in
 
+omit [Module Z T] in
 theorem map_mulLeft (r : RW) (y : RW ⊗[O] T) :
     TensorProduct.map (LinearMap.mulLeft O r) (LinearMap.id : T →ₗ[O] T) y = r • y := by
   induction y with
-  | zero => simp
   | tmul w' t => rw [TensorProduct.map_tmul, TensorProduct.smul_tmul']; rfl
-  | add y y' h h' => rw [map_add, smul_add, h, h']
+  | add y y' h h' => rw [map_add (f := _), smul_add, h, h']
 
 end Kappa
 
@@ -327,6 +365,7 @@ theorem coord_tensor {d : ℕ} (o : Module.Basis (Fin d) Z O) (r : O ⊗[Z] W) :
   have key : ∀ w : Fin d → W,
       ∑ j, o j • (Algebra.TensorProduct.includeRight : W →ₐ[Z] O ⊗[Z] W).toRingHom (w j) =
         TensorProduct.comm Z W O (b.equivFun.symm w) := fun w => by
+
     rw [b.equivFun_symm_apply, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     simp [b, TensorProduct.smul_tmul']
@@ -376,6 +415,7 @@ theorem coord_EE (I : WIo R RA RW inclR φR gR πA) {S W : Type} [CommRing S] [C
     fun j => ⟨((w⁻¹ : Wˣ) : W) ^ m * ψ (t j), by simp only [map_mul, map_pow, h2, hψ]⟩, ?_⟩
   rw [pow_one, map_pow, ← hu] at h
   convert Ideal.mul_mem_left _ (((u⁻¹ : R.EEˣ) : R.EE) ^ m) h using 1
+
   rw [mul_sub, mul_left_comm, ← mul_pow, Units.inv_mul, one_pow, mul_one, map_sum, Finset.mul_sum]
   congr 1
   refine Finset.sum_congr rfl fun j _ => ?_

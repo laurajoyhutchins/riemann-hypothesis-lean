@@ -1,5 +1,10 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFiniteMeasureQuotMeasure
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnConjugationMeasure
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFiniteMeasureQuotMeasure
+public import GroundTheory.AutomorphicForms.Reduction
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,12 +22,12 @@ namespace FundamentalDomainCentre
 
 set_option synthInstance.maxHeartbeats 400000
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {k : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {k : ℕ}
 
-abbrev fdL (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (k : ℕ) : Set (GA E k) :=
+abbrev fdL (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (k : ℕ) : Set (GA E k) :=
   GlobalTheory.AutomorphicL2Unitary.stdDom (latticeGL E k)
 
-abbrev rhoZ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (k : ℕ) : Measure (GA E k) :=
+abbrev rhoZ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (k : ℕ) : Measure (GA E k) :=
   Measure.sum fun n : ℤ => Measure.dirac (splitCentre E k 1 ^ (-n))
 
 instance rhoZ_sFinite : SFinite (rhoZ E k) := by
@@ -32,7 +37,6 @@ instance rhoZ_sFinite : SFinite (rhoZ E k) := by
 theorem lint_rhoZ (F : GA E k → ℝ≥0∞) : ∫⁻ r, F r ∂rhoZ E k = ∑' n : ℤ, F (splitCentre E k 1 ^ (-n)) := by
   first
   | (rw [rhoZ, lintegral_sum_measure]; simp only [lintegral_dirac])
-  | simp only [rhoZ, lintegral_sum_measure, lintegral_dirac]
 
 theorem degree_rank_pos (hk : 1 ≤ k) : (0 : ℝ) < (k : ℝ) * (Module.finrank ℚ E : ℝ) := by
   have h1 : (0 : ℝ) < k := by exact_mod_cast (show 0 < k by omega)
@@ -40,8 +44,6 @@ theorem degree_rank_pos (hk : 1 ≤ k) : (0 : ℝ) < (k : ℝ) * (Module.finrank
     have : 0 < Module.finrank ℚ E := by
       first
       | exact Module.finrank_pos
-      | exact Module.finrank_pos (R := ℚ) (M := E)
-      | exact FiniteDimensional.finrank_pos
     exact_mod_cast this
   exact mul_pos h1 h2
 
@@ -68,7 +70,6 @@ theorem adeles_nontrivial (hD : D0) (hk : 1 ≤ k) : Nontrivial (Ad E) := by
   have h1 : splitCentre E k 1 = 1 := by
     first
     | exact Units.ext (Matrix.ext fun i j => Subsingleton.elim _ _)
-    | exact Subsingleton.elim _ _
   have h2 : Dt (splitCentre E k 1) = Real.exp ((k : ℝ) * (Module.finrank ℚ E : ℝ) * 1) :=
     (hD E k).2.2.2.2.2.2.1 1
   rw [h1, dt_one (E := E) (k := k) hD] at h2
@@ -85,7 +86,6 @@ theorem rational_GL_injective (hD : D0) (hk : 1 ≤ k) : Function.Injective (rat
       (ratGL E k γ' : Matrix (Fin k) (Fin k) (Ad E)) i j := by rw [h]
   first
   | exact (algebraMap E (Ad E)).injective h1
-  | exact RingHom.injective _ h1
   | (simp [ratGL] at h1; exact h1)
 
 theorem rational_centre_injective (hD : D0) (hk : 1 ≤ k) {γ γ' : GL (Fin k) E} {n n' : ℤ}
@@ -117,7 +117,6 @@ theorem fundamental_domain_tsum (hD : D0) (hk : 1 ≤ k) (g : GA E k) :
       exact hne (by rw [e1, e2])
     first
     | exact Set.indicator_of_notMem hnm _
-    | exact Set.indicator_of_not_mem hnm _
 
 theorem exp_band_iff_floor {c L : ℝ} (hc : 0 < c) (n : ℤ) :
     (1 ≤ Real.exp (c * ((-n : ℤ) : ℝ)) * Real.exp L ∧
@@ -164,10 +163,10 @@ theorem fundamental_domain_of : Q1 → D0 → N3 → W0 := by
   have hβ₁ : Measurable ((FundamentalDomainCentre.fdL E k).indicator (1 : GA E k → ℝ≥0∞)) := by
     first | exact measurable_one.indicator hF | exact measurable_const.indicator hF
   refine ⟨⟨fun g => ∑' n : ℤ, (FundamentalDomainCentre.fdL E k).indicator (1 : GA E k → ℝ≥0∞) (splitCentre E k 1 ^ n * g),
-    Measurable.ennreal_tsum fun n => hβ₁.comp (measurable_const_mul _), fun g => ?_⟩, fun β hβ => ?_⟩
+    Measurable.tsum fun n => hβ₁.comp (measurable_const_mul _), fun g => ?_⟩, fun β hβ => ?_⟩
   · have hm : Measurable fun h : GA E k =>
         ∑' n : ℤ, (FundamentalDomainCentre.fdL E k).indicator (1 : GA E k → ℝ≥0∞) (splitCentre E k 1 ^ n * (h * g)) :=
-      Measurable.ennreal_tsum fun n => hβ₁.comp ((measurable_const_mul _).comp (measurable_mul_const g))
+      Measurable.tsum fun n => hβ₁.comp ((measurable_const_mul _).comp (measurable_mul_const g))
     refine (hlint _ hm).trans ?_
     refine Eq.trans ?_ (FundamentalDomainCentre.fundamental_domain_tsum hD hk g)
     rw [ENNReal.tsum_prod']
@@ -221,8 +220,6 @@ theorem fundamental_domain_of : Q1 → D0 → N3 → W0 := by
     have hfin : IsFiniteMeasure (GlobalTheory.AutomorphicL2Unitary.quotMeasure (latticeGL E k) μ) := by
       first
       | exact GlobalTheory.CovolGL.isFiniteMeasure_quotMeasure E k μ
-      | exact @GlobalTheory.CovolGL.isFiniteMeasure_quotMeasure E _ _ k _ μ ‹_›
-      | exact (GlobalTheory.CovolGL.finvol E k μ).1
     have hfinF : μ (FundamentalDomainCentre.fdL E k) < ∞ :=
       lt_of_eq_of_lt (GlobalTheory.AutomorphicL2Unitary.quotMeasure_univ (GlobalTheory.AutomorphicL2Unitary.isFundamentalDomain_stdDom (latticeGL E k) μ)).symm
         hfin.measure_univ_lt_top

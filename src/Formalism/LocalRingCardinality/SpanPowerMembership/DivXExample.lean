@@ -1,6 +1,44 @@
-import Formalism.LocalRingCardinality.DataDIV
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleClassGroupCardPos
-import Formalism.LocalRingCardinality.SpanPowerMembership.PlOver
+module
+
+public import Formalism.LocalRingCardinality.DataDIV
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,77 +112,5 @@ def geoExample (F : Type) [Field F] [NumberField F] [StarRing F] : DV.Geo F wher
   regOn := fun Y => Empty.elim Y
 
 variable (D : D7)
-
-def divXExample (_h0 : D.what₂.Drows = 0) (hM : ∀ j, Subsingleton (D.what₂.Mj j)) : DivX D where
-  geo := geoExample _
-  Lev := Empty
-  levPr := fun κ => κ.elim
-  shv := fun _ κ => κ.elim
-  shv_N := fun _ κ => κ.elim
-  shv_lev := fun _ κ => κ.elim
-  PlP := fun p _ => {w : D.what₂.places.Pl // D.what₂.places.resChar w = p}
-  plpFin := fun p _ => PlOver.plFin D p
-  plpNe := fun p _ => PlOver.plNe D p
-  wtP := fun p _ la => PlOver.wt D p la.1
-  divisorWeight_nonneg := fun p _ la => PlOver.wt_nonneg D p la.1
-  divisorWeight_sum := fun p _ => PlOver.wt_sum D p
-  plP := fun _ _ => Equiv.refl _
-  divisorWeight_def := fun _ _ _ => rfl
-  jC := fun p _ _ => (teich_Om_equiv p).some.toRingHom.comp (algebraMap (DV.KW p) (TeichOm p))
-  Mp := fun _ κ => κ.elim
-  md := fun _ κ => κ.elim
-  vdd := fun _ _ => 0
-  vdd_unram := fun _ _ _ => rfl
-  vdd_nonneg := fun _ _ => le_rfl
-  CurveM := fun _ κ => κ.elim
-  degM := fun _ κ => κ.elim
-  htMdl := fun _ κ => κ.elim
-  htCurve := fun _ κ => κ.elim
-  htCurve_deg := fun _ κ => κ.elim
-  MjH := fun _ => zeroHLat _
-  MjH_good := fun _ => zeroHLat_good _
-  jM := fun _ => 0
-  jM_basis := fun j => by
-    have := hM j
-    exact ⟨linearIndependent_empty_type (ι := Fin 0), Subsingleton.elim _ _⟩
-  jM_lat := fun j _ _ _ => by
-    have := hM j
-    exact ⟨fun _ => ⟨0, Subsingleton.elim _ _⟩, fun _ => Submodule.mem_top⟩
-  jM_metric := fun _ _ _ _ => (normAt_empty (ι := Fin 0) _ _ _ _).trans norm_zero.symm
-  Qp := fun _ => ∅
-  degreeZero_partial_set_empty := rfl
-  Qp_muAt := fun _ => Finset.notMem_empty _
-  Qp_g := fun _ _ _ => Finset.notMem_empty _
-  QPl := fun _ => Empty
-  qv := fun _ v => v.elim
-  qv_gt := fun _ v => v.elim
-  qv_char := fun _ _ v => v.elim
-  nu := fun _ v => v.elim
-  nu_ne := fun _ v => v.elim
-  nu_abs := fun _ v => v.elim
-  ZQ := fun _ v => v.elim
-  quotientLocalValueFirst := fun _ v => v.elim
-  typeDim := fun _ v => v.elim
-  Comp := fun _ => Empty
-  degHH := fun _ c => c.elim
-  Yv := fun _ c => c.elim
-  Ybd := fun _ c => c.elim
-  Lw := fun _ c => c.elim
-  iMj := fun _ c => c.elim
-  iMj_mem := fun _ c => c.elim
-  logLam := fun j σ _ => Real.log (D.what₂.lamP D.what₂.mu0 j σ)
-  logLam_base := fun _ _ => rfl
-  kapR := fun _ => 1
-  kapR_pos := fun _ => one_pos
-  kapR_conj := fun _ => rfl
-  MjLat_sub := fun j _ _ _ _ => by
-    have := hM j
-    exact ⟨0, Subsingleton.elim _ _⟩
-  phiFr_unram := fun _ κ => κ.elim
-  Surf := Empty
-  surfCh2 := fun _ => 0
-  surfDegOm := fun _ => 0
-  SurfFp := Empty
-  surfFpCh2 := fun _ => 0
 
 end Formalism.BasicNotions.Examples₂

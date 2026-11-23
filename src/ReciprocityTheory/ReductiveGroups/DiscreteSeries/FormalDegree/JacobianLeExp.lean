@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PSpecB
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,12 +133,12 @@ theorem jacobian_le_exp {ε : Fin n → Bool} (z : PCoord ε → ℂ) (f : ℝ �
       f (pev z a - pev z b)) := by
   unfold Jac
   rw [Real.exp_sum]
-  apply Finset.prod_le_prod
+  apply Finset.prod_le_prod₀
   · intro a _
     exact Finset.prod_nonneg (fun b _ => le_trans zero_le_one (shc_bounds _).1)
   · intro a _
     rw [Real.exp_sum]
-    apply Finset.prod_le_prod
+    apply Finset.prod_le_prod₀
     · intro b _
       exact le_trans zero_le_one (shc_bounds _).1
     · intro b _
@@ -101,11 +151,11 @@ theorem jac_ge_one {ε : Fin n → Bool} (z : PCoord ε → ℂ) : 1 ≤ Jac z :
     intro a
     have h1 : ∏ _b ∈ univ.filter (fun b : Fin n => a < b), (1 : ℝ)
         ≤ ∏ b ∈ univ.filter (fun b : Fin n => a < b), shc (pev z a - pev z b) :=
-      Finset.prod_le_prod (fun _ _ => zero_le_one) (fun b _ => (shc_bounds _).1)
+      Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun b _ => (shc_bounds _).1)
     simpa using h1
   have h2 : ∏ _a : Fin n, (1 : ℝ)
       ≤ ∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b), shc (pev z a - pev z b) :=
-    Finset.prod_le_prod (fun _ _ => zero_le_one) (fun a _ => h a)
+    Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun a _ => h a)
   simpa using h2
 
 private theorem sum_pev_sq_le_hs_pmat {ε : Fin n → Bool} (z : PCoord ε → ℂ) :
@@ -138,6 +188,7 @@ private theorem sum_pev_sq_le_hs_pmat {ε : Fin n → Bool} (z : PCoord ε → �
       = ∑ i : Fin n, ∑ j : Fin n, A i j * star (A i j) := by
     rw [← hAA, hAA2, hD]
   have hre := congrArg (fun w : ℂ => RCLike.re w) hmain
+
   simp only [map_sum, RCLike.star_def, RCLike.mul_conj] at hre
   simp only [← RCLike.ofReal_pow, RCLike.ofReal_re] at hre
   simp only [hpev]
@@ -193,7 +244,7 @@ private theorem pmat_eq_zero_of_sign_eq {ε : Fin n → Bool} (z : PCoord ε →
 
 private theorem matrix_rank_add_le' (P Q : Matrix (Fin n) (Fin n) ℂ) :
     (P + Q).rank ≤ P.rank + Q.rank := by
-  unfold Matrix.rank
+  simp only [← Matrix.finrank_range_mulVecLin]
   have hle : LinearMap.range (P + Q).mulVecLin
       ≤ LinearMap.range P.mulVecLin ⊔ LinearMap.range Q.mulVecLin := by
     rintro _ ⟨v, rfl⟩

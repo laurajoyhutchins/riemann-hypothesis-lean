@@ -1,13 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.OfFactorE
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProjOverWeierstrass
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.W8AddTransposeEqE8
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgIdemBinv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RosVec
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStronglyTrivialCubicalThetaFinsuppTensor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransportedGeneratorUniqueGlobalFunctionsBase
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AlgIdemBinv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RosVec
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStronglyTrivialCubicalThetaFinsuppTensor
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MumfordTensorDataMatrixActionRingHomProperties
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TransportedGeneratorUniqueGlobalFunctionsBase
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsTorusAndQuotientHom
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.TauBalPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -42,6 +84,7 @@ theorem flat_single (u v : Vec r) : flat (Finsupp.single (u, v) 1) = lam u v := 
   simp [flat]
 
 theorem flat_sigP (W A A' : Matrix (Fin r) (Fin r) ℤ) : flat (sigP W A A') = sig W A A' := by
+
   simp only [sigP, sig, map_sum, map_zsmul, flat_single]
 
 end Formal
@@ -262,7 +305,7 @@ theorem triv_span {n : PVec r →₀ ℤ} (hn : n ∈ Submodule.span ℤ (rels r
     rw [map_zero]
     exact triv_congr (triv_zero Q D' pr) fun z J _ y y' => (tv_zero Q xe z J y y').symm
   | add x y _ _ hx hy =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact triv_congr (triv_add hx hy) fun z J _ a b => (tv_add Q xe x y z J a b).symm
   | smul k x _ hx =>
     have hneg : ∀ m, Triv Q D' pr (flat m) (tv Q xe m) → Triv Q D' pr (flat (-m)) (tv Q xe (-m)) := fun m hm => by
@@ -270,7 +313,7 @@ theorem triv_span {n : PVec r →₀ ℤ} (hn : n ∈ Submodule.span ℤ (rels r
       exact triv_congr (triv_neg hm) fun z J _ a b => (tv_neg Q xe m z J a b).symm
     have hadd : ∀ m m', Triv Q D' pr (flat m) (tv Q xe m) → Triv Q D' pr (flat m') (tv Q xe m') →
         Triv Q D' pr (flat (m + m')) (tv Q xe (m + m')) := fun m m' hm hm' => by
-      rw [map_add]
+      rw [map_add (f := _)]
       exact triv_congr (triv_add hm hm') fun z J _ a b => (tv_add Q xe m m' z J a b).symm
     have h0 : Triv Q D' pr (flat 0) (tv Q xe 0) := by
       rw [map_zero]
@@ -378,7 +421,7 @@ theorem formEq_sig (hpr : ∀ i, IsMonHom (pr i)) (W A A' : Matrix (Fin r) (Fin 
   have hF1 : ∀ x, F (Finsupp.single x 1) = H x := fun x => by
     simp only [F, Finsupp.liftAddHom_apply_single, zmultiplesHom_apply, one_zsmul]
   have hlam : ∀ u v, F (lam u v) = ∑ s : Fin 4, Oε s • H (lamV u v s) := fun u v => by
-    simp only [lam, map_add, map_sub, hF1, Fin.sum_univ_four]
+    simp only [lam, map_add (f := _), map_sub, hF1, Fin.sum_univ_four]
     simp [Oε, lamV]
     abel
   have hR : Additive.ofMul (∏ v : (sig W A A').support, h (vecHom pr v.1).left ^ sig W A A' v.1) =
@@ -390,6 +433,7 @@ theorem formEq_sig (hpr : ∀ i, IsMonHom (pr i)) (W A A' : Matrix (Fin r) (Fin 
     rfl
   apply Additive.ofMul.injective
   rw [hR]
+
   simp only [ofMul_prod, ofMul_zpow, sig, map_sum, map_zsmul, hlam]
   rw [Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun a _ => ?_
@@ -466,6 +510,7 @@ theorem tv_sigP (Q : Data R) {X' : Type} [AddCommGroup X'] (xe : X' ≃+ (Fin r 
     fin_cases a <;> simp [rosVec, vecLat_add, vecLat_xv, vecLat_zv, vecLat_axv, vecLat_azv, hA, hA']
   apply Additive.ofMul.injective
   change T (sigP W A A') = _
+
   simp only [sigP, map_sum, map_zsmul, ofMul_prod, ofMul_zpow]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [Finset.smul_sum]
@@ -534,6 +579,7 @@ theorem span_sigP {r : ℕ} (W A A' : Matrix (Fin r) (Fin r) ℤ)
     rw [hc]
     abel
   have hπ : N.mkQ (sigP W A A') = ∑ a : Fin 6, rosatiε a • X (rosVec A A' a) (rosVec A A' a) := by
+
     simp only [sigP, map_sum, map_zsmul, X, Finset.smul_sum, mul_smul]
     rfl
   have e0 : rosVec A A' 0 = fun i => axv A i + zv i := rfl

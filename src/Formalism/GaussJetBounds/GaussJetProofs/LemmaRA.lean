@@ -1,5 +1,57 @@
-import Formalism.GaussJetBounds.OneLetterRadius
-import Formalism.GaussJetBounds.StatementG
+module
+
+public import Formalism.GaussJetBounds.StatementG
+public import Formalism.GaussJetBounds.GenLogInverse
+public import Formalism.GaussJetBounds.GaussJetProofs.AsmRDotAddRight
+public import Formalism.GaussJetBounds.GaussJetProofs.LogarithmWeightComparison
+public import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+public import Formalism.GaussJetBounds.GaussJetProofs.PureCrossTermWeight
+import Formalism.GaussJetBounds.GaussJetProofs.SubstitutionWeightBound
+public import Formalism.GaussJetBounds.OneLetterRadius
+import Formalism.IncomingBounds.FlowDegreeBounds.ProdRangeEqFactorialMulProdIco
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -36,7 +88,7 @@ theorem factValA {K : Type u} [NormedField K] [IsUltrametricDist K] [CharZero K]
   rw [hmf, norm_prod]
   calc ∏ i ∈ κ.support, ‖(((κ i).factorial : ℕ) : K)‖
       ≤ ∏ i ∈ κ.support, ‖(l : K)‖ ^ ((κ i : ℝ) / ((l : ℝ) - 1) - L) :=
-        Finset.prod_le_prod (fun i _ => norm_nonneg _) hcoord
+        Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) hcoord
     _ = ‖(l : K)‖ ^ (∑ i ∈ κ.support, ((κ i : ℝ) / ((l : ℝ) - 1) - L)) :=
         (Real.rpow_sum_of_pos hpi0 _ _).symm
     _ ≤ ‖(l : K)‖ ^ ((∑ i, (κ i : ℝ) / ((l : ℝ) - 1)) - (Fintype.card ι : ℝ) * L) := by
@@ -84,6 +136,7 @@ theorem lemmaRA_of (hS : LemmaS.{u}) (hG : GenLogWeight.{u, 0}) (hB : LogBridges
     simp [linSub]
   have hbS0 : MvPowerSeries.constantCoeff (bSum M be) = 0 := by
     unfold bSum
+
     rw [map_sum]
     refine Finset.sum_eq_zero fun ab _ => ?_
     exact MvPowerSeries.constantCoeff_subst_eq_zero
@@ -133,6 +186,7 @@ theorem lemmaRA_of (hS : LemmaS.{u}) (hG : GenLogWeight.{u, 0}) (hB : LogBridges
   have hlinw : ∀ x, WtGe ‖(l : K)‖ (fun _ : ι => rho l) (rho l) (linSub M x) := by
     intro x n
     rw [monoWtGe_iff]
+
     simp only [linSub, map_sum, MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_X]
     refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (Real.rpow_nonneg h0.le _)
       fun i _ => ?_

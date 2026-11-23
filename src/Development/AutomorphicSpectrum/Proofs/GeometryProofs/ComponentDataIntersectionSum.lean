@@ -1,14 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPeriodAtRestrict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SegreChartBundleStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsChartBundle
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueLatOfChartBundle
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.AlternatingMapSumSmulEqDetSmul
+module
+
+import Development.WeilBound.CoreStatements.PlurisubharmonicCones.DeterminantLatticeGenerator
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.AlternatingMapSumSmulEqDetSmul
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsChartBundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueLatOfChartBundle
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SegreChartBundleStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GroundTheory.Heights₂.Heights.LowerBoundFree
 open GroundTheory.Heights₂.Heights.LowerBoundFree
@@ -99,45 +142,7 @@ theorem tens_isGenAt : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Spec (C
     exact Submodule.subset_span ⟨t, ht, rfl⟩
 
 theorem detLat_isGenAt : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Spec (CommRingCat.of Ω) ⟶ X) (P : Type) [AddCommGroup P] [Module Ω P] (L : Lat ξ P) (r : ℕ) (s b : Fin r → P) (T : Matrix (Fin r) (Fin r) Ω) (p : Cpt ξ), LinearIndependent Ω s → L.IsFrameAt b p → (∀ k, b k = ∑ k', T k' k • s k') → (Cusp.detLat L s).IsGenAt p T.det := by
-  intro X Ω _ ξ P _ _ L r s b T p hs hb hT
-  have hdet : T.det ≠ 0 := by
-    intro h0
-    obtain ⟨v, hv, hTv⟩ := Matrix.exists_mulVec_eq_zero_iff.2 h0
-    refine hv (funext fun k => Fintype.linearIndependent_iff.1 hb.1 v ?_ k)
-    have h1 : ∑ k, v k • b k = ∑ a, (T.mulVec v a) • s a := by
-      simp_rw [hT, Finset.smul_sum, smul_smul, Matrix.mulVec, dotProduct, Finset.sum_smul]
-      rw [Finset.sum_comm]
-      exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun k _ => by rw [mul_comm]
-    rw [h1, hTv]
-    simp
-  refine ⟨hdet, le_antisymm (Submodule.span_le.2 ?_) (Submodule.span_le.2 ?_)⟩
-  · rintro t ⟨b', T', hb', hT', rfl⟩
-    have hex : ∀ k, ∃ A : Fin r → regAt ξ p, ∑ k', A k' • b k' = b' k := fun k => by
-      have h := ChartTie.frame_mem hb' k
-      rw [hb.2] at h
-      exact (Submodule.mem_span_range_iff_exists_fun _).1 h
-    choose A hA using hex
-    have hcoef : ∀ k a, T' a k = ∑ m, T a m * (A k m : Ω) := by
-      intro k
-      have h := Fintype.linearIndependent_iff.1 hs (fun a => T' a k - ∑ m, T a m * (A k m : Ω)) (by
-        simp only [sub_smul, Finset.sum_sub_distrib]
-        rw [← hT' k, ← hA k, sub_eq_zero]
-        have e : ∀ m, A k m • b m = (A k m : Ω) • b m := fun _ => rfl
-        simp_rw [e, hT, Finset.smul_sum, smul_smul, Finset.sum_smul]
-        rw [Finset.sum_comm]
-        exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun m _ => by rw [mul_comm])
-      exact fun a => sub_eq_zero.1 (h a)
-    let M : Matrix (Fin r) (Fin r) (regAt ξ p) := Matrix.of fun m k => A k m
-    have hTT : T' = T * (regAt ξ p).subtype.mapMatrix M := by
-      ext a k
-      rw [hcoef, Matrix.mul_apply]
-      rfl
-    refine Submodule.mem_span_singleton.2 ⟨M.det, ?_⟩
-    show ((M.det : regAt ξ p) : Ω) * T.det = T'.det
-    rw [hTT, Matrix.det_mul, ← RingHom.map_det, mul_comm]
-    rfl
-  · rintro _ rfl
-    exact Submodule.subset_span ⟨b, T, hb, hT, rfl⟩
+  apply LevelTowerAlt.determinant_lattice_generator <;> assumption
 
 theorem exists_block_frame : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Spec (CommRingCat.of Ω) ⟶ X) (P Wv : Type) [AddCommGroup P] [Module Ω P] [AddCommGroup Wv] [Module Ω Wv] (i : Wv →ₗ[Ω] P) (A B : Lat ξ P) (Va Vb : Submodule Ω P) (N j : ℕ) (hj : j ≤ N), Function.Injective i → LinearMap.range i = Va ⊔ Vb → A.IsVB j Va → B.IsVB (N - j) Vb → (Lat.comap (fun p => A p ⊔ B p) i).IsVB N ⊤ → ∀ p : Cpt ξ, ∃ U : X.Opens, p.1 ∈ U ∧ ∃ b : Fin N → Wv, Submodule.span Ω (Set.range b) = ⊤ ∧ Submodule.span Ω (Set.range (b ∘ headIdx hj)) = Va.comap i ∧ (∀ a, i (b (tailIdx hj a)) ∈ Vb) ∧ ∀ q : Cpt ξ, q.1 ∈ U → (Lat.comap (fun p => A p ⊔ B p) i).IsFrameAt b q ∧ B.IsFrameAt (fun a => i (b (tailIdx hj a))) q := by
   intro X Ω _ ξ P Wv _ _ _ _ i A B Va Vb N j hj hinj hrange hA hB hL p
@@ -238,8 +243,8 @@ end GlobalTheory.CompanionTheory.Ar.BigBlock
 noncomputable section
 namespace GlobalTheory.CompanionTheory.Ar.BigBlock
 
-open GlobalTheory.CompanionTheory.Ar.ChartTie in
 
+open GlobalTheory.CompanionTheory.Ar.ChartTie in
 theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (D : Datum H) (l : Tor.Level H) (Xo : Moduli D l) (c : Coeff l) (Y : Model Xo c (algebraMap (𝓞 c.F) c.F)) (II : IntersectionSystem) (K : Type) [Fintype K] (J : K → Type) [∀ k, Fintype (J k)] (Ω : Type) [Field Ω] [Algebra ℚ Ω] (W : CMType H → Type) [∀ τ, AddCommGroup (W τ)] [∀ τ, Module Ω (W τ)] (Dc : ComponentData II (CMType H) K J Ω W) (S₀ : Finset ℕ) (𝔐 : HodgeCpt Y S₀ Dc.y) (bg sm : CMType H → CMType H ⊕ CMType H) (i : ∀ τ, W τ →ₗ[Ω] 𝔐.Li) (s : CMType H → Fin (Dc.N - Dc.j) → 𝔐.Li) (aMu : K → ℤ) (e₀ : Ω), (∀ τ, Function.Injective (i τ)) → (∀ τ, LinearMap.range (i τ) = 𝔐.Vgen (bg τ) ⊔ 𝔐.Vgen (sm τ)) → (∀ τ, bg τ ≠ sm τ) → (∀ τ, labelRk D (bg τ) = Dc.j) → (∀ τ, labelRk D (sm τ) = Dc.N - Dc.j) → (∀ τ, (Lat.comap (fun p => 𝔐.V (bg τ) p ⊔ 𝔐.V (sm τ) p) (i τ)).IsVB Dc.N ⊤) → (∀ τ, (Lat.comap (fun p => 𝔐.V (bg τ) p ⊔ 𝔐.V (sm τ) p) (i τ)).IsChartOf (segreCoord Dc.y) (Dc.W τ).lat) → (∀ τ, LinearIndependent Ω (s τ)) → (∀ τ, Submodule.span Ω (Set.range (s τ)) = 𝔐.Vgen (sm τ)) → (Lat.tens (fun τ => Cusp.detLat (𝔐.V (sm τ)) (s τ)) (fun _ => -1)).IsDegOn Set.univ Dc.y aMu e₀ → ∃ Hd : HodgeData Dc, ∀ τ, Hd.F τ = (𝔐.Vgen (bg τ)).comap (i τ) := by
   intro E _ _ _ H D l Xo c Y II K _ J _ Ω _ _ W _ _ Dc S₀ 𝔐 bg sm i s aMu e₀ hinj hrange hne hbg hsm hvb hch hsli hsspan hdeg
   classical
@@ -292,6 +297,7 @@ theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host 
       exact ⟨Matrix.of fun a' a => v a a', fun a => (hv a).symm⟩
     choose T hTs using hex
     have hbw : ∀ τ a, b τ (tailIdx hj a) = ∑ a', T τ a' a • w τ a' := fun τ a => hinj τ (by
+
       rw [hTs, map_sum]
       exact Finset.sum_congr rfl fun a' _ => by rw [map_smul, hw])
     have hq : ∀ τ, quotWedge (F τ) hj (b τ) =
@@ -300,6 +306,7 @@ theorem main : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host 
       unfold quotWedge
       congr 1
       funext a
+
       rw [hbw, map_sum]
       exact Finset.sum_congr rfl fun a' _ => by rw [map_smul]
     have htp : (PiTensorProduct.tprod Ω fun τ => quotWedge (F τ) hj (b τ)) = (∏ τ, (T τ).det) • Pw := by

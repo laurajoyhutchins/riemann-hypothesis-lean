@@ -1,9 +1,61 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsLatticeFrameIsMajorantFrame
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsNormEqXModMonicOfAdicCompleteInvolution
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.InvMemDoubleCosetAndComm
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnitaryMemIntegralUnitaryDoubleCosetOfGLnDoubleC
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Cartan
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
 import Formalism.SatakeDualWeyl.KpqSubgroupCompact
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsLatticeFrameIsMajorantFrame
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsNormEqXModMonicOfAdicCompleteInvolution
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.UnitaryMemIntegralUnitaryDoubleCosetOfGLnDoubleC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -162,6 +214,7 @@ theorem mem_intLoc_iff (hw : IsInertAt F E v w) (h : w.under (𝓞 F) = v) (y : 
     · rw [h3 u e]; exact zero_mem _
   obtain ⟨m, g, hg⟩ := Module.Finite.exists_fin (R := ℤ) (M := 𝓞 E)
   obtain ⟨r, hr, e⟩ := P.levelaf_decomp g hg h4
+
   rw [← h1, ← c.apply_symm_apply Y, e, map_sum, map_sum]
   exact sum_mem fun j _ => tmul_mem_intLoc (hr j v) (g j)
 
@@ -234,7 +287,7 @@ theorem exists_isUnramInv (hσ : IsCMExt F E σ) (hw : IsInertAt F E v w) (hc : 
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul a x => exact congrArg (a ⊗ₜ[F] ·) (conj_conj hσ x)
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   · by_cases h0 : x = 0
     · simp [h0]
     have h0' : Valued.v x ≠ 0 := by simpa using h0
@@ -252,7 +305,7 @@ theorem exists_isUnramInv (hσ : IsCMExt F E σ) (hw : IsInertAt F E v w) (hc : 
 variable {n : ℕ}
 
 theorem exists_norm {ϖ : w.adicCompletion E} {q : ℕ} (hU : IsUnramInv ϖ c q) {B : GL (Fin n) (w.adicCompletion E)}
-    (hB : B ∈ KGL w n) (hB' : cT c B.1 = B.1) : ∃ k ∈ KGL w n, cT c k.1 * k.1 = B.1 := by
+    (hB : B ∈ KGL w (n := n)) (hB' : cT c B.1 = B.1) : ∃ k ∈ KGL w (n := n), cT c k.1 * k.1 = B.1 := by
   obtain ⟨hcc, hv, -, -, ⟨x, hx1, hx2⟩, -⟩ := hU
   obtain ⟨B, rfl⟩ := hB
   have := GlobalTheory.SelfDualGenus.isAdicComplete_adicCompletionIntegers w
@@ -278,8 +331,8 @@ theorem exists_norm {ϖ : w.adicCompletion E} {q : ℕ} (hU : IsUnramInv ϖ c q)
   rw [GlobalTheory.UnitaryDoubleCoset.cT_map ι (c := d) (fun _ => rfl), ← Matrix.map_mul, hp]
 
 theorem exists_congr_antiJ {ϖ : w.adicCompletion E} {q : ℕ} (hU : IsUnramInv ϖ c q)
-    {B : GL (Fin n) (w.adicCompletion E)} (hB : B ∈ KGL w n) (hB' : cT c B.1 = B.1) :
-    ∃ k ∈ KGL w n, cT c k.1 * B.1 * k.1 = antiJ _ n := by
+    {B : GL (Fin n) (w.adicCompletion E)} (hB : B ∈ KGL w (n := n)) (hB' : cT c B.1 = B.1) :
+    ∃ k ∈ KGL w (n := n), cT c k.1 * B.1 * k.1 = antiJ _ n := by
   have hint : ∀ i j, antiJ (w.adicCompletion E) n i j ∈ Ov E w := fun i j => by
     unfold antiJ; split_ifs
     exacts [one_mem _, zero_mem _]
@@ -336,7 +389,9 @@ theorem exists_comp (h : w.under (𝓞 F) = v) (z : Fin n → w.adicCompletion E
 
 theorem exists_isFrameAt (hw : IsInertAt F E v w) (hL : L.FG) (hL' : Submodule.span E (L : Set (Fin n → E)) = ⊤) :
     ∃ a, IsFrameAt w L a := by
-  have : Submodule.IsLattice E L := ⟨hL, hL'⟩
+  have : Submodule.IsFullLattice E L :=
+    { toIsLattice := Submodule.IsLattice.of_fg E hL
+      span_eq_top := hL' }
   have h := (under_eq_iff hw w).2 rfl
   obtain ⟨b, h1, h2⟩ := Frames.exists_rational_frame L v
   refine ⟨bc (toCompl h) (bc (inclR (Fv F v)) b), fun z => ?_⟩
@@ -344,9 +399,9 @@ theorem exists_isFrameAt (hw : IsInertAt F E v w) (hL : L.FG) (hL' : Submodule.s
   rw [← comp_mulVec, ← mem_latLoc_iff hw, ← Frames.frame_of_rational b h1 h2]
   exact forall_congr' fun i => (mem_intLoc_iff hw h _).symm
 
-theorem isFrameAt_mul {a k : GL (Fin n) (w.adicCompletion E)} (ha : IsFrameAt w L a) (hk : k ∈ KGL w n) :
+theorem isFrameAt_mul {a k : GL (Fin n) (w.adicCompletion E)} (ha : IsFrameAt w L a) (hk : k ∈ KGL w (n := n)) :
     IsFrameAt w L (a * k) ∧ ∀ g : GL (Fin n) (w.adicCompletion E),
-      (∀ z, z ∈ latAt w L ↔ g.1 *ᵥ z ∈ latAt w L) ↔ a⁻¹ * g * a ∈ KGL w n := by
+      (∀ z, z ∈ latAt w L ↔ g.1 *ᵥ z ∈ latAt w L) ↔ a⁻¹ * g * a ∈ KGL w (n := n) := by
   have e := Final.StabStd (w.adicCompletion E) (Ov E w) (Fin n) Subtype.val_injective
   have hm : ∀ y : Fin n → w.adicCompletion E, y ∈ stdLat (n := Fin n) (Ov E w) ↔ ∀ i, y i ∈ Ov E w := fun y =>
     ⟨fun h i => by obtain ⟨r, hr⟩ := h i trivial; exact hr ▸ r.2, fun h i _ => ⟨⟨_, h i⟩, rfl⟩⟩
@@ -378,6 +433,7 @@ theorem mem_latAt_iff (hw : IsInertAt F E v w) (hc : IsConjAt σ h c) (hL : IsSe
   have e : ∀ x y, toCompl h (hLin σ J (Fv F v) y x) =
       hform c (J.map (algebraMap E _)) (toCompl h ∘ x) (toCompl h ∘ y) := fun x y => by
     rw [← JR_map h]
+
     simp only [hLin, hR, hform, map_sum, map_mul, ← hc _, Function.comp_apply, Matrix.map_apply]
   obtain ⟨y, rfl⟩ := exists_comp h z
   rw [← mem_latLoc_iff hw, hL]
@@ -390,7 +446,7 @@ theorem mem_latAt_iff (hw : IsInertAt F E v w) (hc : IsConjAt σ h c) (hL : IsSe
 
 theorem exists_gram (hw : IsInertAt F E v w) (hc : IsConjAt σ h c) (hJ : J.det ≠ 0) (hL : IsSelfDualAt σ J L v)
     {a : GL (Fin n) (w.adicCompletion E)} (ha : IsFrameAt w L a) :
-    ∃ B ∈ KGL w n, B.1 = cT c a.1 * J.map (algebraMap E _) * a.1 := by
+    ∃ B ∈ KGL w (n := n), B.1 = cT c a.1 * J.map (algebraMap E _) * a.1 := by
   set B := cT c a.1 * J.map (algebraMap E (w.adicCompletion E)) * a.1 with hB
   have hu : IsUnit B := by
     refine (IsUnit.mul (IsUnit.of_mul_eq_one (cT c (a⁻¹).1) ?_) ?_).mul a.isUnit
@@ -490,8 +546,8 @@ theorem isInertChart_chart (hw : IsInertAt F E v w) (hc : IsConjAt σ h c) {a : 
 
 end InertChart
 
-open InertChart in
 
+open InertChart in
 theorem exists_isInertChart (σ : E →ₐ[F] E) (hσ : IsCMExt F E σ) (v : HeightOneSpectrum (𝓞 F)) :
     (IsUnram (E := E) v → IsSplit (E := E) v ∨ ∃ w, IsInertAt F E v w) ∧
     ∀ (w : HeightOneSpectrum (𝓞 E)) (h : w.under (𝓞 F) = v), IsInertAt F E v w →

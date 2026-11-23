@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsMChart
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsMChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -12,8 +64,8 @@ universe u
 
 variable {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} {F : Type*} [Field F]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem chartMonomial_add (u : ∀ k, ι k) (a c : K → ℕ) :
     (chartMonomial u (a + c) : MRing ι F) = chartMonomial u a * chartMonomial u c := by
   simp only [chartMonomial, Pi.add_apply, pow_add, Finset.prod_mul_distrib]
@@ -34,7 +86,7 @@ theorem finsuppProd_chartVar (u : ∀ k, ι k) (e : (Σ k, ι k) →₀ ℕ) :
   induction e using Finsupp.induction_linear with
   | zero => simp [chartMonomial]
   | add f g hf hg =>
-    rw [Finsupp.prod_add_index' (fun _ => pow_zero _) (fun _ _ _ => pow_add _ _ _), hf, hg, map_add,
+    rw [Finsupp.prod_add_index' (fun _ => pow_zero _) (fun _ _ _ => pow_add _ _ _), hf, hg, map_add (f := _),
       chartMonomial_add]
   | single v n =>
     rw [Finsupp.prod_single_index (by simp), Finsupp.weight_single]
@@ -69,9 +121,9 @@ theorem MChartHomog.proof : MChartHomog.Statement.{u} := by
     ⟨fun k => p.support.sup fun e => Finsupp.weight (blockWeight ι) e k, fun e he k =>
       Finset.le_sup (f := fun e => Finsupp.weight (blockWeight ι) e k) he⟩
   refine ⟨b, ∑ e ∈ p.support,
-    monomial e (coeff e p) * chartMonomial u (b - Finsupp.weight (blockWeight ι) e), ?_, ?_⟩
+    monomial e (AddMonoidAlgebra.coeff p e) * chartMonomial u (b - Finsupp.weight (blockWeight ι) e), ?_, ?_⟩
   · refine IsWeightedHomogeneous.sum _ _ _ fun e he => ?_
-    have := (isWeightedHomogeneous_monomial (blockWeight ι) e (coeff e p) rfl).mul
+    have := (isWeightedHomogeneous_monomial (blockWeight ι) e (AddMonoidAlgebra.coeff p e) rfl).mul
       (chartMonomial_isMultiHomog (F := F) u (b - Finsupp.weight (blockWeight ι) e))
     rwa [add_tsub_cancel_of_le (hle e he)] at this
   · intro P _ hu
@@ -83,7 +135,8 @@ theorem MChartHomog.proof : MChartHomog.Statement.{u} := by
       exact hu k
     rw [eq_div_iff (hY b)]
     conv_lhs => rw [p.as_sum]
-    rw [map_sum, Finset.sum_mul, map_sum, map_sum]
+    set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum, Finset.sum_mul, map_sum, map_sum]
     refine Finset.sum_congr rfl fun e he => ?_
     have key : (chartMonomial u b : MRing ι F) = chartMonomial u (Finsupp.weight (blockWeight ι) e) *
         chartMonomial u (b - Finsupp.weight (blockWeight ι) e) := by

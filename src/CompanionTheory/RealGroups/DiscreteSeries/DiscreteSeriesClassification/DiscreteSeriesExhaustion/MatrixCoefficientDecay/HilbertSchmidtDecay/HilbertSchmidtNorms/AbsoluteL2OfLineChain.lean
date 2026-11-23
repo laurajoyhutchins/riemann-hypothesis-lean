@@ -1,4 +1,55 @@
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HilbertSchmidtNorms.LineCurve
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HaarExists
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HilbertSchmidtNorms.ContinuousHs
+import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HilbertSchmidtNorms.HsConjTranspose
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HilbertSchmidtNorms.LineCurve
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,7 +126,7 @@ theorem far_est (hLC : LineChain) (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn
     intro g
     by_cases hg : g ∈ V
     · rw [Set.indicator_of_mem hg, hFdef, Set.indicator_of_mem (Set.mem_image_of_mem _ hg)]
-    · rw [Set.indicator_apply, if_neg hg, hFdef, Set.indicator_apply, if_neg]
+    · rw [Set.indicator_of_notMem hg, hFdef, Set.indicator_of_notMem]
       rintro ⟨g', hg', he⟩
       exact hg (hinj he ▸ hg')
   have hFm : Measurable fun g : S7.UJ ε => F (S7.toM g) := by
@@ -104,7 +155,7 @@ theorem far_est (hLC : LineChain) (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn
     by_cases hg : g ∈ V
     · rw [Set.indicator_of_mem hg, Set.indicator_of_mem (hmem.2 hg)]
       exact psiK_inv f w g k
-    · rw [Set.indicator_apply, if_neg (fun h => hg (hmem.1 h)), Set.indicator_apply, if_neg hg]
+    · rw [Set.indicator_of_notMem (fun h => hg (hmem.1 h)), Set.indicator_of_notMem hg]
   obtain ⟨T, Cf, hTS, hd⟩ := H.dom f hf
   have hle := fun h (hh : h ∈ T) => line_est hLC H hn s hs hL c'' hc0 hc1 j hz h (hTS h hh)
   choose! Ψ K hKT hΨm hΨK hΨi hΨae using hle
@@ -179,13 +230,13 @@ theorem far_est (hLC : LineChain) (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn
               refine Finset.sum_congr rfl fun h _ => ?_
               rw [ENNReal.ofReal_mul' (Real.exp_pos _).le, ENNReal.ofReal_mul' (by positivity)]
               ring
-      · rw [Set.indicator_apply, if_neg hyV, zero_mul]
+      · rw [Set.indicator_of_notMem hyV, zero_mul]
         exact bot_le
     have hmeas : ∀ h ∈ T, Measurable fun t : ℝ => ENNReal.ofReal (Formalism.REAL.hs (S7.toM (x : S7.UJ ε)) ^ s) *
         (‖h (S7.toM (x : S7.UJ ε) * aT (A j) t)‖ₑ ^ 2 * ENNReal.ofReal (Real.exp (2 * (r j + s + c'') * t))) := by
       intro h hh
       have hc := line_cont H j x h (H.cont h (hTS h hh))
-      exact measurable_const.mul ((hc.enorm.measurable.pow_const 2).mul
+      exact measurable_const.mul ((hc.eNorm.measurable.pow_const 2).mul
         (ENNReal.measurable_ofReal.comp (Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable))
     calc ∫⁻ t : ℝ, F (S7.toM (x : S7.UJ ε) * aT (A j) t) * ENNReal.ofReal (Real.exp (2 * r j * t))
         ≤ ∫⁻ t : ℝ, (Set.Ioi (0 : ℝ)).indicator (fun t => ENNReal.ofReal Cf * ENNReal.ofReal Kr * ∑ h ∈ T,
@@ -287,7 +338,7 @@ theorem step (hLC : LineChain) (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn : 
       (fun g => PsiK ε f w (S7.toM g)) with hfar
   have hmball : Measurable ball := by
     refine Measurable.indicator ?_ (measurableSet_le hmhs measurable_const)
-    exact (hcont.enorm.measurable.pow_const 2).mul ((hmhs.pow_const w).ennreal_ofReal)
+    exact (hcont.eNorm.measurable.pow_const 2).mul ((hmhs.pow_const w).ennreal_ofReal)
   have hmfar : ∀ j ∈ (Finset.univ : Finset (Fin m)), Measurable (far j) := fun j _ =>
     (psiK_meas f w hcont).indicator ((hUm j).inter (measurableSet_lt measurable_const hmhs))
   have hpt : ∀ g, ‖f (S7.toM g)‖ₑ ^ 2 * ENNReal.ofReal (Formalism.REAL.hs (S7.toM g) ^ w) ≤ ball g + ∑ j, far j g := by
@@ -296,17 +347,17 @@ theorem step (hLC : LineChain) (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn : 
     · have e : ball g = ‖f (S7.toM g)‖ₑ ^ 2 * ENNReal.ofReal (Formalism.REAL.hs (S7.toM g) ^ w) :=
         Set.indicator_of_mem (show g ∈ {g | Formalism.REAL.hs (S7.toM g) ≤ R₂} from hg) _
       rw [e]; exact le_self_add
-    · push_neg at hg
-      obtain ⟨j, hj⟩ := hUcov g (lt_of_le_of_lt hR₂0 hg)
+    · have hg' := lt_of_not_ge hg
+      obtain ⟨j, hj⟩ := hUcov g (lt_of_le_of_lt hR₂0 hg')
       have hfj : far j g = PsiK ε f w (S7.toM g) :=
-        Set.indicator_of_mem (show g ∈ U j ∩ {g | R₂ < Formalism.REAL.hs (S7.toM g)} from ⟨hj, hg⟩) _
+        Set.indicator_of_mem (show g ∈ U j ∩ {g | R₂ < Formalism.REAL.hs (S7.toM g)} from ⟨hj, hg'⟩) _
       calc _ ≤ PsiK ε f w (S7.toM g) := psiK_ge f w g
         _ = far j g := hfj.symm
         _ ≤ ∑ j, far j g := Finset.single_le_sum (f := fun j => far j g) (fun _ _ => bot_le) (Finset.mem_univ j)
         _ ≤ _ := le_add_self
   unfold LevelF
   refine lt_of_le_of_lt (lintegral_mono hpt) ?_
-  rw [lintegral_add_left hmball, lintegral_finset_sum _ hmfar]
+  rw [lintegral_add_left hmball, lintegral_finsetSum _ hmfar]
   refine ENNReal.add_lt_top.2 ⟨ball_est hn f s w R₂ hw1 hR₂1 (hL f hf), ?_⟩
   exact ENNReal.sum_lt_top.2 fun j _ => far_est hLC H hn s hs hL c'' hc0 hc1 j (hz j) (U j) (hUm j)
     (fun g k hg => hUK j g k hg) (hUτ j) R₂ hR₂1 hR₂' w hw1 hw2 f hf

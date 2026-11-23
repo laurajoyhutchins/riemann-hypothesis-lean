@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFinsetOfEventually
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -40,20 +83,8 @@ def prjM (T : Finset (Pl E)) :
 def prjG (T : Finset (Pl E)) : GL (Fin n) (FiniteAdeleRing (𝓞 E) E) →* GL (Fin n) (FiniteAdeleRing (𝓞 E) E) :=
   Units.map (prjM E n T)
 
-def Gam (w : Pl E) : Subgroup (GL (Fin n) (FiniteAdeleRing (𝓞 E) E)) := (prjG E n (orb E w)).range
-
-def pfU (w : Pl E) : GL (Fin n) (FiniteAdeleRing (𝓞 E) E) →* Gam E n w := (prjG E n (orb E w)).rangeRestrict
-
-def thU (w : Pl E) : Gam E n w →* Gam E n w := (pfU E n w).comp ((thF E n).comp (Gam E n w).subtype)
-
 def Kglob : Subgroup (GL (Fin n) (FiniteAdeleRing (𝓞 E) E)) :=
-  ⨅ w : Pl E, (GlobalTheory.LFun.KGL w n).comap (GeneralLinearGroup.map (pLoc E w))
-
-def KU (w : Pl E) : Subgroup (Gam E n w) := (Kglob E n).subgroupOf (Gam E n w)
-
-def FU (S : Set (Pl E)) (φ : ∀ w : Pl E, GLw n w → ℂ) (w : Pl E) (y : Gam E n w) : ℂ :=
-  (∏ᶠ u ∈ S ∩ ↑(orb E w), φ u (GeneralLinearGroup.map (pLoc E u) y.1)) *
-    ∏ᶠ u ∈ Sᶜ ∩ ↑(orb E w), (GlobalTheory.LFun.KGL u n : Set (GLw n u)).indicator 1 (GeneralLinearGroup.map (pLoc E u) y.1)
+  ⨅ w : Pl E, (GlobalTheory.LFun.KGL w (n := n)).comap (GeneralLinearGroup.map (pLoc E w))
 
 instance t2Space_finiteAdeleRing : T2Space (FiniteAdeleRing (𝓞 E) E) :=
   T2Space.of_injective_continuous (f := fun x : FiniteAdeleRing (𝓞 E) E => (x : ∀ v : Pl E, v.adicCompletion E))

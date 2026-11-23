@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped BigOperators
 
@@ -155,8 +205,8 @@ theorem coeff_det_generic_sum_mem_of_charpoly_coeff_mem :
       (r : X → G →* Matrix (Fin n) (Fin n) O),
       (∀ g j, (fun x => (r x g).charpoly.coeff j) ∈ T) →
       ∀ (m : ℕ) (g : Fin m → G) (d : Fin m →₀ ℕ),
-        (fun x => MvPolynomial.coeff d (Matrix.det (∑ k,
-          (MvPolynomial.X k : MvPolynomial (Fin m) O) • (r x (g k)).map MvPolynomial.C))) ∈ T := by
+        (fun x => AddMonoidAlgebra.coeff (Matrix.det (∑ k,
+          (MvPolynomial.X k : MvPolynomial (Fin m) O) • (r x (g k)).map MvPolynomial.C)) d) ∈ T := by
   intro O X G _ _ T n r h m g d
   let ρ : G → Matrix (Fin n) (Fin n) (X → O) := fun a => Matrix.of fun i j x => r x a i j
   have hρx : ∀ a x, (ρ a).map (Pi.evalRingHom (fun _ : X => O) x) = r x a := by
@@ -183,16 +233,19 @@ theorem coeff_det_generic_sum_mem_of_charpoly_coeff_mem :
     Finset.univ (fun k => MvPolynomial.X k) (fun k => (ρ (g k)).map MvPolynomial.C)
     (fun k => ⟨MvPolynomial.X k, by simp⟩) (fun k => ⟨g k, rfl⟩)
   obtain ⟨p, hp⟩ := main
-  have h1 : MvPolynomial.coeff d (MvPolynomial.map T.toSubring.subtype p) ∈ T := by
+  have h1 : AddMonoidAlgebra.coeff (MvPolynomial.map T.toSubring.subtype p) d ∈ T := by
     rw [MvPolynomial.coeff_map]
-    exact (MvPolynomial.coeff d p).2
+    exact (AddMonoidAlgebra.coeff p d).2
   rw [hp] at h1
   convert h1 using 1
   funext x
-  change _ = Pi.evalRingHom (fun _ : X => O) x (MvPolynomial.coeff d _)
+  change _ = Pi.evalRingHom (fun _ : X => O) x (AddMonoidAlgebra.coeff _ d)
   rw [← MvPolynomial.coeff_map, RingHom.map_det]
-  congr 2
-  ext1 i j
-  simp [Matrix.sum_apply, ρ]
+  have heq : (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) O) • (r x (g k)).map (MvPolynomial.C (σ := Fin m))) =
+      (MvPolynomial.map (Pi.evalRingHom (fun _ : X => O) x)).mapMatrix
+        (∑ k, (MvPolynomial.X k : MvPolynomial (Fin m) (X → O)) • (ρ (g k)).map (MvPolynomial.C (σ := Fin m))) := by
+    ext i j
+    simp [Matrix.sum_apply, ρ]
+  rw [heq]
 
 end GlobalTheory

@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianFormAtFrameLaws
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspFree
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ThExprUniqOfChartIndep2
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.AnChartAsm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianFormAtFrameLaws
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr
@@ -28,12 +69,6 @@ theorem epi_spMap {K k : Type} [Field K] [Field k] (β : K →+* k) : Epi (spMap
     infer_instance
   obtain ⟨h1, h2⟩ := (AlgebraicGeometry.flat_and_surjective_SpecMap_iff (CommRingCat.ofHom β)).2 hff
   exact AlgebraicGeometry.Flat.epi_of_flat_of_surjective _
-
-noncomputable def ptHom : (Fin r → E) →+ Additive (ptO Xo y.x ⟶ Xo.univ.t.G) :=
-  AddMonoidHom.mk' (fun v => Additive.ofMul (A.ex (pv X idx x v))) fun u v => by
-    rw [← ofMul_mul, ← A.ex_add, pv, per_add]; rfl
-
-theorem ex_eq (v : Fin r → E) : A.ex (pv X idx x v) = (ptHom A v).toMul := rfl
 
 theorem ex_add (u v : Fin r → E) : A.ex (pv X idx x (u + v)) = A.ex (pv X idx x u) * A.ex (pv X idx x v) := by
   have h : pv X idx x (u + v) = pv X idx x u + pv X idx x v := by
@@ -84,8 +119,8 @@ theorem sub_mem_of_ex_eq (hinj : Function.Injective (pv X idx x)) {u v : Fin r �
   rw [hinj hpw]
   exact hw
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem sum_mem_of_tens {n : ℕ} {Λ : Lt E n} {mu : Matrix (Fin n) (Fin n) E}
     (hmu : ∀ v ∈ Λ, mu.mulVec v ∈ stdLat E n) {u : Matrix (Fin n) (Fin r) E} (hu : u ∈ tens Λ L) (i : Fin n) :
     ∑ j, mu i j • u j ∈ L := by
@@ -170,8 +205,8 @@ theorem geoInj (hinj : Function.Injective (pv X idx x)) {n N : ℕ} (hN : 0 < N)
   refine ⟨(N : E)⁻¹ • u i b - (N : E)⁻¹ • u i' b, sub_mem_of_ex_eq A hinj he, ?_⟩
   rw [← smul_sub, nsmul_inv_smul hN]
 
-omit [Algebra c.F ℂ] in
 
+omit [Algebra c.F ℂ] in
 theorem levPt_levRep {S : Type} [CommRing S] (x0 : Sp S ⟶ Xo.X) (a : Dw.La) :
     levPt Xo x0 (levRep (l := l) (Submodule.Quotient.mk a)) = levPt Xo x0 a := by
   have hs : (Submodule.Quotient.mk (levRep (l := l) (Submodule.Quotient.mk a : LevQ Dw l)) : LevQ Dw l) =
@@ -183,7 +218,7 @@ theorem levPt_levRep {S : Type} [CommRing S] (x0 : Sp S ⟶ Xo.X) (a : Dw.La) :
       Xo.univ.eta_ker _ hq, _root_.one_mul]
   unfold levPt
   rw [he]
-set_option maxHeartbeats 1000000 in
+
 
 theorem roots {N : ℕ} (hN : 0 < N) {mk : Dw.La →ₗ[𝓞 E] (Fin r → E)} (hm : IsMark l L mk) (hA : A.Marked mk)
     (hM : l.M ∣ N) {Y : Fin r → E} {q : LevQ Dw l}

@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SpecialLinearGeneratedByTransvections
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsSelfDualLatticeAtPlaceLatticeCompletion
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SpecialLinearGeneratedByTransvections
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittCoreEmbeddingPreservesSupportedUnitarySubgro
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsSelfDualLatticeAtPlaceLatticeCompletion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
@@ -32,11 +70,13 @@ theorem hermAt_colMul_jY (d : HypDec S S₀ ρ) (l : Fin ρ) (b : AE D) (x : Fin
     hermAt S (colMul d.jY l b) x = b * cA D ((d.pX *ᵥ x) l) := by
   have hg : ∀ k m, cA D (gA S k m) = gA S m k := fun k m => congrFun (congrFun (adj_gA S) m) k
   have hp : ∀ m, cA D (d.pX l m) = ∑ k, gA S m k * d.jY k l := fun m => by
+
     rw [d.pX_eq, Matrix.mul_apply, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [RingHom.map_mul, hg, mul_comm]
     exact congrArg _ (congrFun (congrFun (adj_adj d.jY) k) l)
   unfold hermAt colMul
+
   rw [Matrix.mulVec, dotProduct, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [RingHom.map_mul, hp, Finset.sum_mul, Finset.mul_sum]
@@ -44,7 +84,7 @@ theorem hermAt_colMul_jY (d : HypDec S S₀ ρ) (l : Fin ρ) (b : AE D) (x : Fin
   ring
 
 theorem pX_colMul_jX (d : HypDec S S₀ ρ) (l : Fin ρ) (a : AE D) : (d.pX *ᵥ colMul d.jX l a) l = a := by
-  have h : (d.pX ⬝ d.jX) l l = 1 := by rw [d.pX_jX, Matrix.one_apply_eq]
+  have h : (d.pX * d.jX) l l = 1 := by rw [d.pX_jX, Matrix.one_apply_eq]
   rw [Matrix.mul_apply] at h
   refine Eq.trans ?_ (mul_one a)
   rw [Matrix.mulVec, dotProduct, ← h, Finset.mul_sum]
@@ -106,14 +146,14 @@ theorem levi_mem_grpAt (d : HypDec S S₀ ρ) {v : Pl D} {i j : Fin ρ} (hij : i
     (hr : r ∈ idAt D (· = v)) : d.levi (GlobalTheory.GLGen.transvGL hij r) ∈ grpAt S (· = v) := by
   refine (mem_congGrp_iff S _ _).2 fun a b => ?_
   have e : mt S (d.levi (GlobalTheory.GLGen.transvGL hij r)) - 1 =
-      d.jX ⬝ (Matrix.single i j r : Mx D ρ ρ) ⬝ d.pX + d.jY ⬝ (Matrix.single j i (cA D (-r)) : Mx D ρ ρ) ⬝ d.pY := by
+      d.jX * (Matrix.single i j r : Mx D ρ ρ) * d.pX + d.jY * (Matrix.single j i (cA D (-r)) : Mx D ρ ρ) * d.pY := by
     rw [d.mt_levi, ← d.sum_eq_one]
-    change d.jX ⬝ (transvection i j r : Mx D ρ ρ) ⬝ d.pX + _ + d.jY ⬝ adj (transvection i j (-r) : Mx D ρ ρ) ⬝ d.pY - _ = _
+    change d.jX * (transvection i j r : Mx D ρ ρ) * d.pX + _ + d.jY * adj (transvection i j (-r) : Mx D ρ ρ) * d.pY - _ = _
     rw [adj_transv, transvection, transvection]
     simp only [Matrix.mul_add, Matrix.add_mul, Matrix.mul_one]
     abel
   have k : ∀ (A : Mx D S.rank ρ) (B : Mx D ρ S.rank) (p q : Fin ρ) (s : AE D), s ∈ idAt D (· = v) →
-      (A ⬝ (Matrix.single p q s : Mx D ρ ρ) ⬝ B) a b ∈ idAt D (· = v) := fun A B p q s hs => by
+      (A * (Matrix.single p q s : Mx D ρ ρ) * B) a b ∈ idAt D (· = v) := fun A B p q s hs => by
     rw [Matrix.mul_apply]
     refine Ideal.sum_mem _ fun k _ => Ideal.mul_mem_right _ _ ?_
     rw [Matrix.mul_apply]

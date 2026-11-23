@@ -1,5 +1,58 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.CovolumeIntegerLatticeEq
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsSqAbsNormOfInert
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassSt
+public import Mathlib.RingTheory.DedekindDomain.Different
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+
+@[expose] public section
 
 open NumberField Module Polynomial
 
@@ -90,7 +143,7 @@ theorem exists_int_of_star_eq (hF : ∀ a : K, star a = a ↔ a ∈ Set.range (a
   have hint : IsIntegral ℤ u := by
     have h1 : IsIntegral ℤ (algebraMap F K u) := by
       rw [hu]; exact RingOfIntegers.isIntegral_coe y
-    exact (isIntegral_algebraMap_iff (algebraMap F K).injective).mp h1
+    exact (isIntegral_algebraMap_iff ).mp h1
   refine ⟨⟨u, hint⟩, ?_⟩
   apply RingOfIntegers.ext
   exact (coe_algebraMap (F := F) (K := K) ⟨u, hint⟩).trans hu
@@ -113,20 +166,18 @@ theorem minpoly_eq (hF : ∀ a : K, star a = a ↔ a ∈ Set.range (algebraMap F
     (ht : algebraMap (𝓞 K) K t = star (algebraMap (𝓞 K) K θ)) (hne : θ ≠ t) :
     aeval θ (derivative (minpoly (𝓞 F) θ)) = θ - t := by
   have ht' : star (algebraMap (𝓞 K) K t) = algebraMap (𝓞 K) K θ := by rw [ht, star_star]
-  obtain ⟨s, hs⟩ := exists_int_of_star_eq hF (θ + t) (by rw [map_add, star_add, ht', ← ht, add_comm])
+  obtain ⟨s, hs⟩ := exists_int_of_star_eq hF (θ + t) (by rw [map_add (f := _), star_add, ht', ← ht, add_comm])
   obtain ⟨p, hp⟩ := exists_int_of_star_eq hF (θ * t) (by rw [map_mul, star_mul', ht', ← ht, mul_comm])
   obtain ⟨q, hq⟩ : ∃ q : Polynomial (𝓞 F), q = X ^ 2 - C s * X + C p := ⟨_, rfl⟩
   have hqdeg : q.natDegree = 2 := by rw [hq]; compute_degree!
   have hqm : q.Monic := by rw [hq]; monicity!
   have hroot : aeval θ q = 0 := by
     rw [hq]
-    simp only [map_add, map_sub, map_mul, map_pow, aeval_X, aeval_C, hs, hp]
+    simp only [map_add (f := _), map_sub, map_mul, map_pow, aeval_X, aeval_C, hs, hp]
     ring
   have hint : IsIntegral (𝓞 F) θ := by
     first
       | exact Algebra.IsIntegral.isIntegral θ
-      | exact IsIntegral.tower_top (A := 𝓞 F) (RingOfIntegers.isIntegral θ)
-      | exact (Algebra.IsIntegral.isIntegral (R := ℤ) θ).tower_top
   have hdvd : minpoly (𝓞 F) θ ∣ q := minpoly.isIntegrallyClosed_dvd hint hroot
   have hdeg2 : 2 ≤ (minpoly (𝓞 F) θ).natDegree := by
     by_contra hlt
@@ -140,8 +191,6 @@ theorem minpoly_eq (hF : ∀ a : K, star a = a ↔ a ∈ Set.range (algebraMap F
     have hr : θ ∈ (algebraMap (𝓞 F) (𝓞 K)).range := by
       first
         | exact minpoly.mem_range_of_degree_eq_one (𝓞 F) θ hd1
-        | exact minpoly.mem_range_of_degree_eq_one hd1
-        | exact minpoly.mem_range_of_degree_eq_one (𝓞 F) hd1
     obtain ⟨z, hz⟩ := hr
     apply hne
     apply RingOfIntegers.ext
@@ -157,9 +206,6 @@ theorem minpoly_eq (hF : ∀ a : K, star a = a ↔ a ∈ Set.range (algebraMap F
     aeval_X, aeval_C, map_natCast, hs]
   first
     | ring
-    | (norm_num; ring)
-    | norm_num
-    | (push_cast; ring)
 
 theorem differentIdeal_eq_top (hK : Formalism.HermitianLatticesTheory.IsCMUnram K)
     (hF : ∀ a : K, star a = a ↔ a ∈ Set.range (algebraMap F K)) :
@@ -216,12 +262,6 @@ theorem discrTower : DiscrTower := by
         | exact IsTotallyComplex.nrRealPlaces_eq_zero
         | exact NumberField.InfinitePlace.nrRealPlaces_eq_zero_iff.mpr hTC
         | exact NumberField.nrRealPlaces_eq_zero_iff.mpr hTC
-        | (haveI : IsEmpty {w : NumberField.InfinitePlace K // w.IsReal} :=
-             ⟨fun w => (NumberField.InfinitePlace.not_isReal_iff_isComplex.mpr (hTC.isComplex w.1)) w.2⟩
-           simp [NumberField.InfinitePlace.nrRealPlaces])
-        | (unfold NumberField.InfinitePlace.nrRealPlaces
-           rw [Fintype.card_eq_zero_iff]
-           exact ⟨fun w => (NumberField.InfinitePlace.not_isReal_iff_isComplex.mpr (hTC.isComplex w.1)) w.2⟩)
     rw [QuadraticExtensionConjugation.finrank_eq_two hK hF] at e2
     unfold Formalism.HermitianLatticesTheory.fDeg
     omega
@@ -238,8 +278,5 @@ theorem discrTower : DiscrTower := by
   congr 1
   first
     | (push_cast; field_simp)
-    | (push_cast; field_simp; ring)
-    | field_simp
-    | (field_simp; ring)
 
 end Formalism.HermitianLattices.Ext.L3

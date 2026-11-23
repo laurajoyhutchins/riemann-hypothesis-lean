@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperDiffPolySt
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PPolyOfDiffs
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.SnapperDiffPolySt
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PPolyOfDiffs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -18,7 +66,7 @@ theorem eval_aeval_eq {K : Type} (x : K → ℚ) (σ : K → MvPolynomial K ℚ)
     eval x (aeval σ P) = eval (fun k => eval x (σ k)) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simp
-  | add p r hp hr => rw [map_add, map_add, hp, hr, map_add]
+  | add p r hp hr => rw [map_add (f := _), map_add (f := _), hp, hr, map_add (f := _)]
   | mul_X p j hp => simp only [map_mul, hp, aeval_X, eval_X]
 
 theorem numPt_succ {t : ℕ} (n : Fin t → ℕ) (c : ℤ) :
@@ -147,7 +195,7 @@ theorem unit_steps {t D : ℕ} (g : (Fin t → ℕ) → ℤ → ℚ)
       · refine (totalDegree_add _ _).trans (max_le ?_ (by rw [totalDegree_C]; exact Nat.zero_le _))
         exact (FieldNumbers.PolyOfDiffs.totalDegree_aeval_le _ (hσd ∅) _).trans hPcd
       · have h0 : tr ∅ n = 0 := by funext i; simp [tr]
-        rw [map_add, eval_C, eval_aeval_eq, hσe, h0]
+        rw [map_add (f := _), eval_C, eval_aeval_eq, hσe, h0]
         linarith [hcol c]
     | insert i s hi ih =>
       obtain ⟨Γ, hΓd, hΓ⟩ := ih
@@ -167,7 +215,7 @@ theorem unit_steps {t D : ℕ} (g : (Fin t → ℕ) → ℤ → ℚ)
           · simp [hk]
         have h := hrow i (tr s n) c (n i)
         rw [← e1, ← e2] at h
-        rw [map_add, map_sub, eval_aeval_eq, eval_aeval_eq, hσe, hσe, ← hΓ n c]
+        rw [map_add (f := _), map_sub, eval_aeval_eq, eval_aeval_eq, hσe, hσe, ← hΓ n c]
         linarith
   obtain ⟨Γ, hΓd, hΓ⟩ := key Finset.univ
   refine ⟨Γ, Or.inr (by omega), fun n c => ?_⟩

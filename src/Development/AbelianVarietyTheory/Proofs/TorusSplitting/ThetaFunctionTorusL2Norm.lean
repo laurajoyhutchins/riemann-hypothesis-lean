@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
-import Formalism.LocalToGlobal.ProjectiveLattices.AllTest
-import Formalism.LocalToGlobal.ProjectiveLattices.NormsFree
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.IsOrth
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TorusSections.IsTorusOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj Formalism.L2.PjFree GlobalTheory.EtaForm GlobalTheory.EtaAn GlobalTheory.ArcQ
@@ -12,10 +60,10 @@ namespace GlobalTheory.EtaAn.ThetaTorus
 
 open MeasureTheory
 
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField in
 attribute [local instance] Over.cartesianMonoidalCategory in
 open MeasureTheory in
-
 theorem _root_.GlobalTheory.EtaAn.ThetaTorus.setAverage_equiv {V W : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
     [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
     [NormedAddCommGroup W] [NormedSpace ℝ W] [FiniteDimensional ℝ W] [MeasurableSpace W]
@@ -37,14 +85,14 @@ theorem _root_.GlobalTheory.EtaAn.ThetaTorus.setAverage_equiv {V W : Type} [Norm
     measureReal_nnreal_smul_apply, hmeas, NNReal.smul_def, smul_eq_mul, smul_eq_mul, smul_eq_mul,
     mul_inv, _root_.mul_mul_mul_comm, inv_mul_cancel₀ hpos.ne', _root_.one_mul]
 
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField in
 attribute [local instance] Over.cartesianMonoidalCategory in
 open MeasureTheory in
-
 theorem _root_.GlobalTheory.EtaAn.ThetaTorus.Hf_add_re {κ : Type} [Fintype κ] (v w : EuclideanSpace ℂ κ) :
     (_root_.ReciprocityTheory.ChartRestriction.G.I2.Hf (v + w) (v + w)).re = (_root_.ReciprocityTheory.ChartRestriction.G.I2.Hf v v).re + 2 * (_root_.ReciprocityTheory.ChartRestriction.G.I2.Hf v w).re + (_root_.ReciprocityTheory.ChartRestriction.G.I2.Hf w w).re := by
   unfold _root_.ReciprocityTheory.ChartRestriction.G.I2.Hf
-  simp only [PiLp.add_apply, map_add, mul_add, add_mul, Finset.sum_add_distrib, Complex.add_re,
+  simp only [PiLp.add_apply, map_add (f := _), mul_add, add_mul, Finset.sum_add_distrib, Complex.add_re,
     Complex.re_sum]
   have hsym : ∀ i, (w.ofLp i * (starRingEnd ℂ) (v.ofLp i)).re
       = (v.ofLp i * (starRingEnd ℂ) (w.ofLp i)).re := by
@@ -54,10 +102,10 @@ theorem _root_.GlobalTheory.EtaAn.ThetaTorus.Hf_add_re {κ : Type} [Fintype κ] 
   simp only [hsym]
   ring
 
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField in
 attribute [local instance] Over.cartesianMonoidalCategory in
 open MeasureTheory in
-
 theorem _root_.GlobalTheory.EtaAn.ThetaTorus.theta_section_l2_torus :
     ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (D : _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.Datum H) (g : ℕ) (ty : Fin g → (E →+* ℂ)) (Pm : D.La →+ (Fin g → ℂ)) (Hm : Matrix (Fin g) (Fin g) ℂ) (T : _root_.ReciprocityTheory.ChartRestriction.G.I2.PT E) (ψ : (Fin g → ℂ) ≃ₗ[ℂ] _root_.ReciprocityTheory.ChartRestriction.G.I2.Vsp T.dim) (θ : (Fin g → ℂ) → ℂ) (Fd : Set (Fin g → ℂ)), _root_.GlobalTheory.EtaAn.IsTorusOf D ty Pm Hm T ψ → Differentiable ℂ θ → (∀ a z, θ (z + Pm a) = (((Int.negOnePow (D.EF a (H.w0 • a)) : ℤˣ) : ℤ) : ℂ) * Complex.exp (Real.pi * _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm z (Pm a) + Real.pi / 2 * _root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm (Pm a) (Pm a)) * θ z) → MeasureTheory.IsAddFundamentalDomain Pm.range Fd MeasureTheory.volume → (fun v : Fin 1 → _root_.ReciprocityTheory.ChartRestriction.G.I2.Vsp T.dim => θ (ψ.symm (v 0))) ∈ T.Sec 1 1 ∧ T.l2 1 (fun v : Fin 1 → _root_.ReciprocityTheory.ChartRestriction.G.I2.Vsp T.dim => θ (ψ.symm (v 0))) = (∫ z in Fd, ‖θ z‖ ^ 2 * Real.exp (-Real.pi * (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm z z).re)) / (MeasureTheory.volume Fd).toReal ∧ ∀ z, Real.sqrt (T.ptN2 1 (fun v : Fin 1 → _root_.ReciprocityTheory.ChartRestriction.G.I2.Vsp T.dim => θ (ψ.symm (v 0))) (fun _ => ψ z)) = ‖θ z‖ * Real.exp (-(Real.pi / 2) * (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm z z).re) := by
   intro E _ _ _ H D g ty Pm Hm T ψ θ Fd hT hθ hper hFd
@@ -84,7 +132,7 @@ theorem _root_.GlobalTheory.EtaAn.ThetaTorus.theta_section_l2_torus :
     · intro p hp v
       obtain ⟨a, ha⟩ := (hL (p 0)).1 (hp 0)
       have h1 : ψ.symm ((v + p) 0) = ψ.symm (v 0) + Pm a := by
-        rw [Pi.add_apply, map_add, ← ha, ψ.symm_apply_apply]
+        rw [Pi.add_apply, map_add (f := _), ← ha, ψ.symm_apply_apply]
       simp only [h1, hper, hIJ, Fin.prod_univ_one, ← ha, heps, ψ.symm_apply_apply, Nat.cast_one,
         _root_.one_mul, pow_one]
       ring_nf
@@ -128,7 +176,7 @@ theorem _root_.GlobalTheory.EtaAn.ThetaTorus.theta_section_l2_torus :
       show ‖θ (Pm a + z)‖ ^ 2 * Real.exp (-Real.pi * (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm (Pm a + z) (Pm a + z)).re)
         = ‖θ z‖ ^ 2 * Real.exp (-Real.pi * (_root_.ReciprocityTheory.ChartRestriction.G.Geo.Tor.hermForm Hm z z).re)
       have hexp := _root_.GlobalTheory.EtaAn.ThetaTorus.Hf_add_re (ψ z) (ψ (Pm a))
-      rw [← map_add] at hexp
+      rw [← map_add (f := _)] at hexp
       simp only [hψ] at hexp
       have hs : ‖((((Int.negOnePow (D.EF a (H.w0 • a)) : ℤˣ) : ℤ) : ℂ))‖ = 1 := by
         rcases Int.units_eq_one_or (Int.negOnePow (D.EF a (H.w0 • a))) with h | h <;> simp [h]

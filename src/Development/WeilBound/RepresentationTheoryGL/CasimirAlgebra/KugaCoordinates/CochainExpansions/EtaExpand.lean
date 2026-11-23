@@ -1,7 +1,47 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.IsStarRep
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CompactUnitaryGroups.IsCompactUnitaryGroup
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CochainExpansions.SumSumProd
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.ClozelCohomologicalOf
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CochainExpansions.SumSumProd
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.KugaCoordinates.CompactUnitaryGroups.IsCompactUnitaryGroup
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +67,7 @@ def vec (η : TV a M (Fin q ⊕ (Fin N ⊕ Fin N))) (I' I'' : Fin N → Fin a) :
   fun I => η (Sum.elim I (Sum.elim I' I''))
 
 def mm (tl : Fin N → (E →+* ℂ)) (η : TV a M (Fin q ⊕ (Fin N ⊕ Fin N))) :
-    MultilinearMap ℝ (fun _ : Fin N => Herm E a) (TV a M (Fin q)) :=
+    (Fin N → Herm E a) →ₘₗ[ℝ] TV a M (Fin q) :=
   ∑ I' : Fin N → Fin a, ∑ I'' : Fin N → Fin a,
     ((LinearMap.toSpanSingleton ℂ _ (vec η I' I'')).restrictScalars ℝ).compMultilinearMap
       ((MultilinearMap.mkPiAlgebra ℝ (Fin N) ℂ).compLinearMap fun k => ent (tl k) (I'' k) (I' k))
@@ -97,12 +137,12 @@ theorem intersection_update_fsHerm_neg_one (τ : E →+* ℂ) (k : Kinf E a) (X 
   refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
   ring
 
-theorem kap_bar [IsTotallyComplex E] (τ : E →+* ℂ) (k : Kinf E a) (x y : Fin a) :
+theorem kap_bar [_root_.NumberField.IsTotallyComplex E] (τ : E →+* ℂ) (k : Kinf E a) (x y : Fin a) :
     kap E a (barE E τ) k x y = star (kap E a τ k x y) := by
   simp only [kap, Matrix.map_apply]
   exact J.coord_conjugate τ _
 
-theorem eta_expand [IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin N → (E →+* ℂ)) (ρ : Kinf E a → Module.End ℂ M)
+theorem eta_expand [_root_.NumberField.IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin N → (E →+* ℂ)) (ρ : Kinf E a → Module.End ℂ M)
     (η : TV a M (Fin q ⊕ (Fin N ⊕ Fin N)))
     (h2 : ∀ γ, actT (lab3 (barE E) lab tl) (kap E a) ρ γ η = η) (k : Kinf E a) (I : Fin q → Fin a) (I' I'' : Fin N → Fin a) :
     η (Sum.elim I (Sum.elim I' I'')) = ∑ w : (Fin q → Fin a) × ((Fin N → Fin a) × (Fin N → Fin a)),
@@ -136,7 +176,7 @@ theorem coef_id (tl : Fin N → (E →+* ℂ)) (k : Kinf E a) (Y : Fin N → Her
     star (kap E a (tl j) k y (A' j)))]
   exact Finset.prod_congr rfl fun j _ => intersection_update_fsHerm_neg_one (tl j) k (Y j).1 (A' j) (B' j)
 
-theorem mm_equiv [IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin N → (E →+* ℂ)) (ρ : Kinf E a → Module.End ℂ M)
+theorem mm_equiv [_root_.NumberField.IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin N → (E →+* ℂ)) (ρ : Kinf E a → Module.End ℂ M)
     (η : TV a M (Fin q ⊕ (Fin N ⊕ Fin N)))
     (h2 : ∀ γ, actT (lab3 (barE E) lab tl) (kap E a) ρ γ η = η) (k : Kinf E a) (Y : Fin N → Herm E a) :
     mm tl η (fun i => adHerm k (Y i)) = actT lab (kap E a) ρ k (mm tl η Y) := by
@@ -165,17 +205,20 @@ theorem mm_equiv [IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin 
     _ = _ := by
         rw [Fintype.sum_prod_type]
         refine Finset.sum_congr rfl fun J1 _ => ?_
+
         rw [mm_apply, map_sum, Finset.smul_sum, Fintype.sum_prod_type]
         refine Finset.sum_congr rfl fun B' _ => ?_
+
         rw [map_sum, Finset.smul_sum]
         refine Finset.sum_congr rfl fun A' _ => ?_
         rw [map_smul, smul_smul]
 
-theorem om_cochain [IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin N → (E →+* ℂ))
+theorem om_cochain [_root_.NumberField.IsTotallyComplex E] (lab : Fin q → (E →+* ℂ)) (tl : Fin N → (E →+* ℂ))
     (ρ : Kinf E a → Module.End ℂ M) (η : TV a M (Fin q ⊕ (Fin N ⊕ Fin N)))
     (h2 : ∀ γ, actT (lab3 (barE E) lab tl) (kap E a) ρ γ η = η) :
     IsCochain (actT lab (kap E a) ρ) (om tl η) := by
   intro k X
+
   rw [om, MultilinearMap.alternatization_apply, MultilinearMap.alternatization_apply, map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [Units.smul_def, Units.smul_def, map_zsmul, MultilinearMap.domDomCongr_apply, MultilinearMap.domDomCongr_apply]

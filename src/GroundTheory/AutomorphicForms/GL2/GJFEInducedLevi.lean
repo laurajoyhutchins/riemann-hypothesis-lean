@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJFEInducedParabolic
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJFEInducedParabolic
+import GroundTheory.AutomorphicForms.MeasuresGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,8 +66,8 @@ theorem cosetFamily_mem (p : ℤ × (Fin n × Fin n → F)) (ij : Fin n × Fin n
     cosetFamily p ij ∈ LocalField.schwartzBruhat F :=
   cosetInd_valBall_mem p.1 (p.2 ij)
 
-omit [MeasurableSpace F] [BorelSpace F] in
 
+omit [MeasurableSpace F] [BorelSpace F] in
 theorem isSchwartzBruhat_matrixTensor {g : Fin n × Fin n → F → ℂ}
     (hg : ∀ ij, g ij ∈ LocalField.schwartzBruhat F) : IsSchwartzBruhat (matrixTensor g) := by
   rw [isSchwartzBruhat_iff_comp_symm]
@@ -33,8 +77,8 @@ theorem isSchwartzBruhat_matrixTensor {g : Fin n × Fin n → F → ℂ}
   rw [this]
   exact localTensor_mem hg
 
-omit [MeasurableSpace F] [BorelSpace F] in
 
+omit [MeasurableSpace F] [BorelSpace F] in
 theorem exists_matrixTensor_decomp {Φ : Matrix (Fin n) (Fin n) F → ℂ} (hΦ : IsSchwartzBruhat Φ) :
     ∃ (S : Finset (ℤ × (Fin n × Fin n → F))) (c : ℤ × (Fin n × Fin n → F) → ℂ),
       ∀ X, Φ X = ∑ p ∈ S, c p * matrixTensor (cosetFamily p) X := by
@@ -106,8 +150,8 @@ theorem norm_leviIntegrandB (κ : levi F n β →* ℝ≥0) (Ψ : Matrix (Fin n)
   simp only [leviIntegrandB, norm_mul]
   ring
 
-omit [IsNonarchimedeanLocalField F] in
 
+omit [IsNonarchimedeanLocalField F] in
 instance borelSpace_GL : BorelSpace (GL (Fin n) F) := by
   refine ⟨?_⟩
   have hM : (measurableSpace_matrix : MeasurableSpace (Matrix (Fin n) (Fin n) F)) =

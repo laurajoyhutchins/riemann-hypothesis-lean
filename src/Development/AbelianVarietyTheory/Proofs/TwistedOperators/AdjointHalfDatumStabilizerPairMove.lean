@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDetInt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsDetInt
+import Formalism.LocalToGlobal.Columns.LevGCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +59,7 @@ variable {κ : Type} [CommRing κ] {n r : ℕ}
 theorem topL_eq (hr : r ≤ n) (u : Matrix (Fin n) (Fin r) κ) : topL r u = u.submatrix (Fin.castLE hr) id := by
   ext i j
   simp only [topL, Matrix.submatrix_apply, id]
-  rw [dif_pos ⟨lt_of_lt_of_le i.2 hr, j.2⟩]
+  rw [dite_eq_left ⟨lt_of_lt_of_le i.2 hr, j.2⟩]
   rfl
 
 theorem lowZero_mul {G : GL (Fin n) κ} (hG : G ∈ blockTri (blk2 r)) (K : Matrix (Fin r) (Fin r) κ)
@@ -115,12 +159,12 @@ theorem red_mul {A : Type} [CommRing A] (R : Subring A) {a b : ℕ} (y : Matrix 
   refine ⟨mem, fun {κ} _ φ => ?_⟩
   have L1 : (Matrix.of fun i j => if h : N' i j ∈ R then φ ⟨N' i j, h⟩ else 0) = (y * N₀ * z).map φ := by
     ext i j
-    rw [Matrix.of_apply, dif_pos (mem i j), Matrix.map_apply]
+    rw [Matrix.of_apply, dite_eq_left (mem i j), Matrix.map_apply]
     congr 1
     exact Subtype.ext (by show N' i j = _; rw [hN']; rfl)
   have L2 : (Matrix.of fun i j => if h : N i j ∈ R then φ ⟨N i j, h⟩ else 0) = N₀.map φ := by
     ext i j
-    rw [Matrix.of_apply, dif_pos (hN i j), Matrix.map_apply]
+    rw [Matrix.of_apply, dite_eq_left (hN i j), Matrix.map_apply]
     rfl
   rw [L1, L2, Matrix.map_mul, Matrix.map_mul]
 

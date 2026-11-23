@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.FdomExistsAll
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteCovolumeUnimodular
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EqZeroOfAeFundamentalDomainOfLeftInvariant
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteCovolumeUnimodular
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EqZeroOfAeFundamentalDomainOfLeftInvariant
+public import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.FdomExistsAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory in
 theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotient :
@@ -29,15 +80,17 @@ theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotien
       refine h𝓕.image_of_equiv (Equiv.mulRight y) ?_ (Equiv.refl _) ?_
       · exact (measurePreserving_mul_right μ y⁻¹).quasiMeasurePreserving
       · intro γ h
-        simp [Subgroup.smul_def, mul_assoc]
+        exact mul_assoc (γ : G) h y
     rw [h𝓕.setIntegral_eq h' (f := u) (fun γ h => hu γ γ.2 h)]
     exact ((measurePreserving_mul_right μ y).setIntegral_image_emb
       (measurableEmbedding_mulRight y) u 𝓕).symm
   let N : Submodule ℂ (G → ℂ) :=
     { carrier := {φ | Continuous φ ∧ ∀ γ ∈ Γ, ∀ g, φ (γ * g) = φ g}
-      add_mem' := fun {a b} ha hb => ⟨ha.1.add hb.1, fun γ hγ g => by simp [ha.2 γ hγ g, hb.2 γ hγ g]⟩
+      add_mem' := fun {a b} ha hb => ⟨ha.1.add hb.1, fun γ hγ g =>
+        congrArg₂ (· + ·) (ha.2 γ hγ g) (hb.2 γ hγ g)⟩
       zero_mem' := ⟨continuous_const, fun _ _ _ => rfl⟩
-      smul_mem' := fun c a ha => ⟨ha.1.const_smul c, fun γ hγ g => by simp [ha.2 γ hγ g]⟩ }
+      smul_mem' := fun c a ha => ⟨ha.1.const_smul c, fun γ hγ g =>
+        congrArg (c • ·) (ha.2 γ hγ g)⟩ }
   have hRN : ∀ k : G, ∀ φ ∈ N, (fun g => φ (g * k)) ∈ N := by
     intro k φ h
     refine ⟨h.1.comp (continuous_mul_const k), fun γ hγ g => ?_⟩
@@ -60,7 +113,7 @@ theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotien
   let B : (G → ℂ) →ₗ⋆[ℂ] (G → ℂ) →ₗ[ℂ] ℂ :=
     LinearMap.mk₂'ₛₗ (starRingEnd ℂ) (RingHom.id ℂ) F
     (fun x x' y => by
-      simp only [F, map_add, Submodule.coe_add]
+      simp only [F, map_add (f := _), Submodule.coe_add]
       rw [← integral_add (hI _ (hPN x) _ (hPN y)) (hI _ (hPN x') _ (hPN y))]
       congr 1
       funext g
@@ -70,10 +123,9 @@ theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotien
       rw [smul_eq_mul, ← integral_const_mul]
       congr 1
       funext g
-      simp only [Pi.smul_apply, smul_eq_mul, star_mul', starRingEnd_apply]
-      ring)
+      simp only [Pi.smul_apply, smul_eq_mul, star_mul', starRingEnd_apply, mul_assoc])
     (fun x y y' => by
-      simp only [F, map_add, Submodule.coe_add]
+      simp only [F, map_add (f := _), Submodule.coe_add]
       rw [← integral_add (hI _ (hPN x) _ (hPN y)) (hI _ (hPN x) _ (hPN y'))]
       congr 1
       funext g
@@ -83,12 +135,11 @@ theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotien
       rw [smul_eq_mul, ← integral_const_mul]
       congr 1
       funext g
-      simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
-      ring)
+      exact mul_left_comm (star ((P x).1 g)) c ((P y).1 g))
   have hB : ∀ x ∈ N, ∀ y ∈ N, B x y = ∫ g in 𝓕, star (x g) * y g ∂μ := by
     intro x hx y hy
-    show F x y = _
-    simp only [F, hPid x hx, hPid y hy]
+    change (∫ g in 𝓕, star ((P x).1 g) * (P y).1 g ∂μ) = _
+    rw [hPid x hx, hPid y hy]
   refine ⟨B, ?_, ?_⟩
   · intro T hT1 hT2 h0
     have hT : T ∈ N := ⟨hT1, hT2⟩
@@ -97,9 +148,7 @@ theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotien
       rw [← integral_complex_ofReal]
       congr 1
       funext g
-      rw [Complex.star_def, Complex.conj_mul']
-      push_cast
-      rfl
+      rw [Complex.star_def, Complex.conj_mul', Complex.ofReal_pow]
     rw [hre, Complex.ofReal_eq_zero] at h0
     have hi : IntegrableOn (fun g => ‖T g‖ ^ 2) 𝓕 μ := by
       have := (hI T hT T hT).norm
@@ -108,11 +157,9 @@ theorem UpperTheory.exists_nondegenerate_right_invariant_form_of_compact_quotien
         rw [norm_mul, norm_star, sq]
       rw [e2] at this
       exact this
-    have hae := (integral_eq_zero_iff_of_nonneg (fun g => by positivity) hi).1 h0
-    have := GlobalTheory.eq_zero_of_ae_fundamentalDomain_of_leftInvariant Γ μ 𝓕 h𝓕 T hT1 hT2 (by
-      filter_upwards [hae] with g hg
-      simpa using hg)
-    first | exact this | exact funext this
+    have hae := (integral_eq_zero_iff_of_nonneg (fun g => sq_nonneg ‖T g‖) hi).1 h0
+    exact funext (GlobalTheory.eq_zero_of_ae_fundamentalDomain_of_leftInvariant Γ μ 𝓕 h𝓕
+      T hT1 hT2 (hae.mono fun g hg => norm_eq_zero.mp (sq_eq_zero_iff.mp hg)))
   · intro k T T' h1 h2 h3 h4
     have hT : T ∈ N := ⟨h1, h2⟩
     have hT' : T' ∈ N := ⟨h3, h4⟩

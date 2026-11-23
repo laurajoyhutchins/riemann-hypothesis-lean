@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotIsPrimZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotIsPrimZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SimpLabMinValOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsStrictFaceOfSmoothConePolyhedralFanStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonnegSumSmulIntBilinFormToRealMemPsdCone
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SumMulEqOfSumToRealEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsStrictFaceOfSmoothConePolyhedralFanStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,16 +59,16 @@ section Gen
 variable {O : Type} [CommRing O] {bar : O → O} {φ : InvFun O} {X : Type} [AddCommGroup X] [Module O X]
   [Module.Finite O X] {m : ℕ}
 
-omit [Module.Finite O X] in
 
+omit [Module.Finite O X] in
 theorem smul_cancel {β β' : LinearMap.BilinForm ℤ X} {k : ℤ} (hk : k ≠ 0) (h : k • β = k • β') : β = β' := by
   ext x y
   have h1 := LinearMap.congr_fun₂ h x y
   simp only [LinearMap.smul_apply, smul_eq_mul] at h1
   exact mul_left_cancel₀ hk h1
 
-omit [Module.Finite O X] in
 
+omit [Module.Finite O X] in
 theorem isPrim_of_isPartOfBasis {v : Fin m → balForms bar X} (h : IsPartOfBasis v) (i : Fin m) : IsPrim bar (v i) := by
   intro k β' hk
   have h1 : (k : ℤ) • β' = v i := by rw [natCast_zsmul]; exact hk.symm
@@ -32,8 +76,8 @@ theorem isPrim_of_isPartOfBasis {v : Fin m → balForms bar X} (h : IsPartOfBasi
   · exact_mod_cast h2
   · omega
 
-omit [Module.Finite O X] in
 
+omit [Module.Finite O X] in
 theorem eq_of_isPrim {x y : LinearMap.BilinForm ℤ X} (hx : x ∈ balForms bar X) (hy : y ∈ balForms bar X)
     (px : IsPrim bar ⟨x, hx⟩) (py : IsPrim bar ⟨y, hy⟩) {k n : ℕ} (hk : 0 < k) (hn : 0 < n)
     (h : (k : ℤ) • x = (n : ℤ) • y) : x = y := by
@@ -266,6 +310,7 @@ theorem isPartOfBasis_of_card_torsion_le_one : ∀ (L : Type) [AddCommGroup L] [
       have e : (Submodule.Quotient.mk (∑ k, bQ.repr (Submodule.Quotient.mk x) k • s k) :
           L ⧸ Submodule.span ℤ (Set.range v)) = ∑ k, bQ.repr (Submodule.Quotient.mk x) k • bQ k := by
         change (Submodule.span ℤ (Set.range v)).mkQ (∑ k, bQ.repr (Submodule.Quotient.mk x) k • s k) = _
+
         rw [map_sum]
         simp only [map_smul, Submodule.mkQ_apply, hs]
       rw [e, hx, sub_self]
@@ -334,6 +379,7 @@ theorem ray_of_mem_cone : ∀ (O : Type) [CommRing O] (bar : O → O) (φ : InvF
       apply Subtype.ext
       simpa using hkc
     have := congrArg (ψ l) hsub
+
     rw [map_nsmul, map_sum] at this
     simp only [map_nsmul, hψ', nsmul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ,
       if_true] at this
@@ -489,7 +535,7 @@ theorem onModule (hD : ∀ (X : Type) [AddCommGroup X] [Module O X] [Module.Fini
       · rintro β ⟨hβ, pβ, β₀, hβ₀, k, n, hk, hn, h⟩
         exact Set.mem_biUnion hβ₀ ⟨hβ, pβ, k, n, hk, hn, h⟩
     · intro m γ hγ
-      have hB : ∑ j, toReal (γ j) ∈ psdCone bar X := by
+      have hB : ∑ j, toReal (γ j) ∈ psdCone (bar := bar) (X := X) := by
         have := ConeSub.sum_smul_toReal_mem_psdCone O bar X m γ (fun _ => 1) hγ.mem hγ.nonneg (fun _ => zero_le_one)
         simpa using this
       obtain ⟨e, m', δ, c, hδ, hδS, hc, hBe⟩ := hS0 _ hB
@@ -544,8 +590,8 @@ theorem isPolFan_of_maxMult_le_one (hD : ∀ (X : Type) [AddCommGroup X] [Module
 
 end GlobalTheory.PolFan.SmoothEnd
 
-open GlobalTheory.PolFan.SmoothEnd in
 
+open GlobalTheory.PolFan.SmoothEnd in
 theorem GlobalTheory.PolFan.smoothEnd : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (q : ℕ) (φ lab : InvFun (𝓞 E)), (∀ (X : Type) [AddCommGroup X] [Module (𝓞 E) X] [Module.Finite (𝓞 E) X] [Module.Projective (𝓞 E) X], Dominates H.bar X) → IsPolyFan H.bar q φ → SimpLab H.bar q φ lab → maxMult H.bar q φ ≤ 1 → IsPolFan H.bar q φ ∧ NoSelfInt H.bar q φ := by
   intro E _ _ _ H q φ lab hD hPF hSL hM
   exact isPolFan_of_maxMult_le_one hD hPF hSL hM

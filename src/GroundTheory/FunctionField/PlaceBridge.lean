@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.FunctionField.PlaceSum
+module
+
+public import GroundTheory.FunctionField.PlaceDefs
+public import Mathlib.FieldTheory.Separable
+public import GroundTheory.FunctionField.PlaceBasic
+public import GroundTheory.FunctionField.PlaceSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.RatFunc.Defs
+public import Mathlib.NumberTheory.FunctionField
+
+@[expose] public section
 
 namespace GroundTheory.FunctionField
 
@@ -111,13 +164,6 @@ theorem center_ofHeightOneSpectrum (P : HeightOneSpectrum B) :
     rw [map_inv₀, inv_le_one₀ (zero_lt_iff.2 ((Valuation.ne_zero_iff _).2 hb0))] at h1
     exact absurd h2 (not_lt.2 h1)
 
-noncomputable def equivHeightOneSpectrum :
-    {v : Place k K // ∀ b : B, algebraMap B K b ∈ v.ring} ≃ HeightOneSpectrum B where
-  toFun v := center B v.1 v.2
-  invFun P := ⟨ofHeightOneSpectrum B hk P, algebraMap_mem_ofHeightOneSpectrum B hk P⟩
-  left_inv v := Subtype.ext (ofHeightOneSpectrum_center B hk v.1 v.2)
-  right_inv P := center_ofHeightOneSpectrum B hk P
-
 theorem valuation_ofHeightOneSpectrum (P : HeightOneSpectrum B) :
     (ofHeightOneSpectrum B hk P).valuation = P.valuation K := by
   refine valuation_eq_of_isEquiv ?_ (ofHeightOneSpectrum B hk P).valuation_surjective
@@ -150,51 +196,9 @@ section RatFunc
 
 open scoped Polynomial
 
-omit [Algebra k K] in
 
-theorem _root_.GroundTheory.FunctionField.IsFunctionField.of_trdeg_eq_one [Algebra k K]
-    [Algebra.EssFiniteType k K] (h : Algebra.trdeg k K = 1) : IsFunctionField k K := by
-  have : Algebra.Transcendental k K :=
-    (trdeg_ne_zero_iff (R := k) (A := K)).1 (by rw [h]; exact one_ne_zero)
-  obtain ⟨x, hx⟩ := Algebra.Transcendental.transcendental (R := k) (A := K)
-  have hbx : IsTranscendenceBasis k ((↑) : ({x} : Set K) → K) :=
-    AlgebraicIndependent.isTranscendenceBasis_of_trdeg_le_of_finite
-      ((algebraicIndependent_singleton_iff (⟨x, rfl⟩ : ({x} : Set K))).2 hx)
-      (by rw [h, Cardinal.mk_singleton])
-  have halg := hbx.isAlgebraic_field
-  rw [Subtype.range_coe] at halg
-  have : Algebra.EssFiniteType (IntermediateField.adjoin k {x}) K :=
-    Algebra.EssFiniteType.of_comp k _ K
-  exact ⟨⟨x, hx, Algebra.finite_of_essFiniteType_of_isAlgebraic⟩⟩
 
-omit [Algebra k K] in
-theorem _root_.GroundTheory.FunctionField.essFiniteType_ratFunc : Algebra.EssFiniteType k (RatFunc k) := by
-  have : Algebra.EssFiniteType k[X] (RatFunc k) :=
-    .of_isLocalization _ (nonZeroDivisors k[X])
-  exact .comp k k[X] (RatFunc k)
 
-omit [Algebra k K] in
-
-instance _root_.GroundTheory.FunctionField.isFunctionField_ratFunc : IsFunctionField k (RatFunc k) := by
-  have := essFiniteType_ratFunc (k := k)
-  apply IsFunctionField.of_trdeg_eq_one
-  have : Algebra.IsAlgebraic k[X] (RatFunc k) := IsLocalization.isAlgebraic _ (nonZeroDivisors k[X])
-  have h := trdeg_add_eq k k[X] (A := RatFunc k)
-  rw [Polynomial.trdeg_of_isDomain, trdeg_eq_zero, add_zero] at h
-  exact h.symm
-
-omit [Algebra k K] in
-
-theorem _root_.GroundTheory.FunctionField.IsFunctionField.of_functionField [Algebra k K]
-    [Algebra (RatFunc k) K] [IsScalarTower k (RatFunc k) K] [FunctionField k K] :
-    IsFunctionField k K := by
-  have := essFiniteType_ratFunc (k := k)
-  have : Algebra.EssFiniteType k K := .comp k (RatFunc k) K
-  apply IsFunctionField.of_trdeg_eq_one
-  have h := lift_trdeg_add_eq k (RatFunc k) K
-  rw [trdeg_eq_one (k := k) (K := RatFunc k), trdeg_eq_zero, Cardinal.lift_zero, add_zero,
-    Cardinal.lift_one] at h
-  exact (Cardinal.lift_eq_one.1 h.symm)
 
 end RatFunc
 
@@ -205,51 +209,8 @@ open scoped Polynomial
 variable [IsFunctionField k K] [Algebra k[X] K] [Algebra (RatFunc k) K]
   [IsScalarTower k[X] (RatFunc k) K] [IsScalarTower k k[X] K] [FunctionField k K]
 
-omit [IsFunctionField k K] [Algebra (RatFunc k) K] [IsScalarTower k[X] (RatFunc k) K]
-  [FunctionField k K] in
-theorem algebraMap_polynomial_mem (v : Place k K) (hv : algebraMap k[X] K Polynomial.X ∈ v.ring)
-    (p : k[X]) : algebraMap k[X] K p ∈ v.ring := by
-  have h : algebraMap k[X] K p = Polynomial.aeval (algebraMap k[X] K Polynomial.X) p := by
-    rw [Polynomial.aeval_algebraMap_apply, Polynomial.aeval_X_left_apply]
-  rw [h, ← v.ring.valuation_le_one_iff]
-  exact v.valuation_aeval_le_one hv p
 
-omit [IsFunctionField k K] [Algebra (RatFunc k) K] [IsScalarTower k[X] (RatFunc k) K]
-  [FunctionField k K] in
 
-theorem forall_mem_ringOfIntegers_iff (v : Place k K) :
-    (∀ b : FunctionField.ringOfIntegers k K, algebraMap _ K b ∈ v.ring) ↔
-      algebraMap k[X] K Polynomial.X ∈ v.ring := by
-  constructor
-  · intro h
-    have hX : IsIntegral k[X] (algebraMap k[X] K Polynomial.X) := isIntegral_algebraMap
-    have := h (IsIntegralClosure.mk' (FunctionField.ringOfIntegers k K) _ hX)
-    rwa [IsIntegralClosure.algebraMap_mk'] at this
-  · intro hv b
-    let : Algebra k[X] v.ring :=
-      (RingHom.codRestrict (algebraMap k[X] K) v.ring (v.algebraMap_polynomial_mem hv)).toAlgebra
-    have : IsScalarTower k[X] v.ring K := IsScalarTower.of_algebraMap_eq fun _ => rfl
-    have hb : IsIntegral k[X] (algebraMap (FunctionField.ringOfIntegers k K) K b) :=
-      (IsIntegralClosure.isIntegral k[X] K b).map
-        (IsScalarTower.toAlgHom k[X] (FunctionField.ringOfIntegers k K) K)
-    obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.1 (hb.tower_top (A := v.ring))
-    rw [← hy]
-    exact y.2
-
-omit [IsFunctionField k K] [Algebra (RatFunc k) K] [IsScalarTower k[X] (RatFunc k) K]
-  [FunctionField k K] in
-theorem algebraMap_mem_range_ringOfIntegers (c : k) :
-    algebraMap k K c ∈ (algebraMap (FunctionField.ringOfIntegers k K) K).range := by
-  have hc : IsIntegral k[X] (algebraMap k[X] K (Polynomial.C c)) := isIntegral_algebraMap
-  refine ⟨IsIntegralClosure.mk' (FunctionField.ringOfIntegers k K) _ hc, ?_⟩
-  rw [IsIntegralClosure.algebraMap_mk', ← Polynomial.algebraMap_eq,
-    ← IsScalarTower.algebraMap_apply]
-
-noncomputable def equivHeightOneSpectrumRingOfIntegers [Algebra.IsSeparable (RatFunc k) K] :
-    {v : Place k K // algebraMap k[X] K Polynomial.X ∈ v.ring} ≃
-      HeightOneSpectrum (FunctionField.ringOfIntegers k K) :=
-  (Equiv.subtypeEquivRight fun v => (forall_mem_ringOfIntegers_iff v).symm).trans
-    (equivHeightOneSpectrum _ algebraMap_mem_range_ringOfIntegers)
 
 end RingOfIntegers
 
@@ -257,8 +218,8 @@ section Separating
 
 open scoped IntermediateField.algebraAdjoinAdjoin
 
-omit [Algebra k K] in
 
+omit [Algebra k K] in
 theorem isPrincipalIdealRing_adjoin [Algebra k K] (t : K) :
     IsPrincipalIdealRing (Algebra.adjoin k {t}) := by
   refine IsPrincipalIdealRing.of_surjective
@@ -284,7 +245,8 @@ theorem isDedekindDomain_closure_adjoin :
     IsDedekindDomain (integralClosure (Algebra.adjoin k {t}) K) := by
   have := isPrincipalIdealRing_adjoin (k := k) t
   have := finiteDimensional_adjoin (transcendental_of_isSeparable (k := k) t)
-  exact IsIntegralClosure.isDedekindDomain (Algebra.adjoin k {t}) (IntermediateField.adjoin k {t}) K _
+  set_option synthInstance.maxHeartbeats 200000 in
+    exact IsIntegralClosure.isDedekindDomain (Algebra.adjoin k {t}) (IntermediateField.adjoin k {t}) K _
 
 theorem isFractionRing_closure_adjoin :
     IsFractionRing (integralClosure (Algebra.adjoin k {t}) K) K := by
@@ -294,76 +256,9 @@ theorem isFractionRing_closure_adjoin :
 
 attribute [local instance] isDedekindDomain_closure_adjoin isFractionRing_closure_adjoin
 
-omit [IsFunctionField k K] [Algebra.IsSeparable (IntermediateField.adjoin k {t}) K] in
 
-theorem forall_mem_closure_adjoin_iff (v : Place k K) :
-    (∀ b : integralClosure (Algebra.adjoin k {t}) K, algebraMap _ K b ∈ v.ring) ↔ t ∈ v.ring := by
-  constructor
-  · intro h
-    have hint : IsIntegral (Algebra.adjoin k {t}) t :=
-      isIntegral_algebraMap (R := Algebra.adjoin k {t}) (A := K)
-        (x := ⟨t, Algebra.self_mem_adjoin_singleton k t⟩)
-    exact h ⟨t, hint⟩
-  · intro hv b
-    have hA : ∀ a : Algebra.adjoin k {t}, (a : K) ∈ v.ring := by
-      rintro ⟨y, hy⟩
-      rw [Algebra.adjoin_singleton_eq_range_aeval] at hy
-      obtain ⟨p, rfl⟩ := (AlgHom.mem_range _).1 hy
-      rw [← v.ring.valuation_le_one_iff]
-      exact v.valuation_aeval_le_one hv p
-    let : Algebra (Algebra.adjoin k {t}) v.ring :=
-      (RingHom.codRestrict (algebraMap (Algebra.adjoin k {t}) K) v.ring hA).toAlgebra
-    have : IsScalarTower (Algebra.adjoin k {t}) v.ring K := IsScalarTower.of_algebraMap_eq fun _ => rfl
-    have hb : IsIntegral (Algebra.adjoin k {t}) (b : K) := b.2
-    obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.1 (hb.tower_top (A := v.ring))
-    show (b : K) ∈ v.ring
-    rw [← hy]
-    exact y.2
 
-omit [IsFunctionField k K] [Algebra.IsSeparable (IntermediateField.adjoin k {t}) K] in
-theorem algebraMap_mem_range_closure_adjoin (c : k) :
-    algebraMap k K c ∈ (algebraMap (integralClosure (Algebra.adjoin k {t}) K) K).range := by
-  have hc : IsIntegral (Algebra.adjoin k {t}) (algebraMap k K c) :=
-    isIntegral_algebraMap (R := Algebra.adjoin k {t}) (A := K)
-      (x := ⟨algebraMap k K c, Subalgebra.algebraMap_mem _ c⟩)
-  exact ⟨⟨algebraMap k K c, hc⟩, rfl⟩
 
-noncomputable def equivOfSeparating :
-    {v : Place k K // t ∈ v.ring} ≃ HeightOneSpectrum (integralClosure (Algebra.adjoin k {t}) K) :=
-  (Equiv.subtypeEquivRight fun v => (forall_mem_closure_adjoin_iff t v).symm).trans
-    (equivHeightOneSpectrum _ (algebraMap_mem_range_closure_adjoin t))
-
-omit [IsFunctionField k K] [Algebra.IsSeparable (IntermediateField.adjoin k {t}) K] in
-theorem adjoin_inv_eq : IntermediateField.adjoin k {t⁻¹} = IntermediateField.adjoin k {t} := by
-  apply le_antisymm
-  · rw [IntermediateField.adjoin_simple_le_iff]
-    exact inv_mem (IntermediateField.mem_adjoin_simple_self k t)
-  · rw [IntermediateField.adjoin_simple_le_iff]
-    have := inv_mem (IntermediateField.mem_adjoin_simple_self k t⁻¹)
-    rwa [inv_inv] at this
-
-omit [IsFunctionField k K] in
-
-theorem isSeparable_adjoin_inv : Algebra.IsSeparable (IntermediateField.adjoin k {t⁻¹}) K := by
-  rw [adjoin_inv_eq]
-  infer_instance
-
-noncomputable def equivZerosOfSeparating :
-    {v : Place k K // v.ring.valuation t < 1} ≃
-      {P : HeightOneSpectrum (integralClosure (Algebra.adjoin k {t}) K) //
-        (⟨t, isIntegral_algebraMap (R := Algebra.adjoin k {t}) (A := K)
-          (x := ⟨t, Algebra.self_mem_adjoin_singleton k t⟩)⟩ :
-            integralClosure (Algebra.adjoin k {t}) K) ∈ P.asIdeal} :=
-  let e₁ : {v : Place k K // v.ring.valuation t < 1} ≃
-      {w : {v : Place k K // t ∈ v.ring} // w.1.ring.valuation t < 1} :=
-    { toFun v := ⟨⟨v.1, (v.1.ring.valuation_le_one_iff t).1 v.2.le⟩, v.2⟩
-      invFun w := ⟨w.1.1, w.2⟩
-      left_inv _ := rfl
-      right_inv _ := rfl }
-  e₁.trans (Equiv.subtypeEquiv (equivOfSeparating t) fun w => by
-    change _ ↔ centerHom _ w.1 _ _ ∈ maximalIdeal w.1.ring
-    rw [ValuationSubring.valuation_lt_one_iff]
-    rfl)
 
 end Separating
 

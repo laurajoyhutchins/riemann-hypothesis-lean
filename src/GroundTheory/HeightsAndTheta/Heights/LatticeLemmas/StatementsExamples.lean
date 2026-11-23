@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsLocal
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -12,7 +55,7 @@ variable {K : Type*} [Field K] [NumberField K]
 
 def embLinear (σ : K →+* ℂ) : K →ₗ[𝓞 K] ComplexAt σ where
   toFun x := ofComplex σ (σ x)
-  map_add' x y := by simp only [map_add]
+  map_add' x y := by simp only [map_add (f := _)]
   map_smul' a x := by
     rw [RingHom.id_apply, smul_def, Algebra.smul_def, map_mul, map_mul]
 
@@ -54,20 +97,11 @@ theorem eq_fieldCoord_tmul_one (σ : K →+* ℂ) (t : Fibre σ K) :
         rw [div_eq_mul_inv]
         ring
   | add s t hs ht =>
-    rw [map_add, map_add, add_tmul, ← hs, ← ht]
+    rw [map_add (f := _), map_add (f := _), add_tmul, ← hs, ← ht]
 
 theorem fieldCoord_injective (σ : K →+* ℂ) : Function.Injective (fieldCoord σ) := by
   intro s t h
   rw [eq_fieldCoord_tmul_one σ s, eq_fieldCoord_tmul_one σ t, h]
-
-theorem fieldCoord_conjMap (σ : K →+* ℂ) (t : Fibre σ K) :
-    fieldCoord (conjugate σ) (conjMap σ K t) = starRingEnd ℂ (fieldCoord σ t) := by
-  induction t using TensorProduct.induction_on with
-  | zero => simp only [map_zero]
-  | tmul z x =>
-    rw [conjMap_tmul, fieldCoord_tmul, fieldCoord_tmul, map_mul]
-    rfl
-  | add s t hs ht => rw [map_add, map_add, hs, ht, map_add, map_add]
 
 def fieldStdCoord (σ : K →+* ℂ) (n : ℕ) : Fibre σ (Fin n → K) →ₗ[ℂ] EuclideanSpace ℂ (Fin n) :=
   (WithLp.linearEquiv 2 ℂ (Fin n → ℂ)).symm.toLinearMap ∘ₗ
@@ -94,18 +128,19 @@ theorem fieldStdCoord_conjMap (σ : K →+* ℂ) (n : ℕ) (x : Fibre σ (Fin n 
     rw [conjMap_tmul, fieldStdCoord_apply, fieldStdCoord_apply, piRight_apply, piRight_apply,
       piRightHom_tmul, piRightHom_tmul, fieldCoord_tmul, fieldCoord_tmul, map_mul]
     rfl
-  | add x y hx hy => rw [map_add, map_add, PiLp.add_apply, hx, hy, map_add, PiLp.add_apply, map_add]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), PiLp.add_apply, hx, hy, map_add (f := _), PiLp.add_apply, map_add (f := _)]
+
 
 variable (K) in
-
 def HermitianNorms.standard (n : ℕ) : HermitianNorms K (Fin n → K) where
   form σ := coreOfInjective (fieldStdCoord σ n) (fieldStdCoord_injective σ n)
   form_conj σ x y := by
+
     simp only [coreOfInjective_inner, PiLp.inner_apply, RCLike.inner_apply, fieldStdCoord_conjMap,
-      map_sum, map_mul, Complex.conj_conj]
+    map_sum, map_mul, Complex.conj_conj]
+
 
 variable (K) in
-
 def FullLattice.standard (n : ℕ) : FullLattice K (Fin n → K) where
   carrier := Submodule.span (𝓞 K) (Set.range fun i : Fin n ↦ (Pi.single i 1 : Fin n → K))
   fg := Submodule.fg_span (Set.finite_range _)
@@ -114,8 +149,6 @@ def FullLattice.standard (n : ℕ) : FullLattice K (Fin n → K) where
         Set.range (Pi.basisFun K (Fin n)) :=
       congrArg Set.range (funext fun i ↦ (Pi.basisFun_apply K (Fin n) i).symm)
     rw [Submodule.span_span_of_tower, e, (Pi.basisFun K (Fin n)).span_eq]
-
-example : HermitianBundle K := (HermitianNorms.standard K 2).bundle (FullLattice.standard K 2)
 
 section Local
 
@@ -130,7 +163,7 @@ theorem localLattice_span (S : Set V) :
     induction hx using Submodule.span_induction with
     | mem y hy => exact Submodule.subset_span ⟨y, hy, rfl⟩
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
     | smul a y _ hy => rw [toLocal_smul]; exact Submodule.smul_mem _ _ hy
   · exact Submodule.span_mono (Set.image_mono Submodule.subset_span)
 
@@ -151,7 +184,7 @@ theorem localLattice_isLocalLattice (L : FullLattice K V) :
       induction hx using Submodule.span_induction with
       | mem y hy => exact h1 y hy
       | zero => rw [map_zero]; exact W.zero_mem
-      | add y z _ _ hy hz => rw [map_add]; exact W.add_mem hy hz
+      | add y z _ _ hy hz => rw [map_add (f := _)]; exact W.add_mem hy hz
       | smul c y _ hy =>
         rw [map_smul, ← algebraMap_smul (v.adicCompletion K) c]
         exact W.smul_mem _ hy

@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.SchurInvariantProjectionTrace
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.LatticeTheoremOfTraceFormula
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.OperatorsKillInvariantProjection
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.BinomialPreservesDiagonalStable
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.EquivariantInjectiveOfCyclic
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.InvariantProjectionRangeTrivial
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.SchurInvariantProjectionTrace
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightProjectionDiagonalApplyEqSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.EquivariantKillsCyclicOfZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,6 +109,7 @@ theorem isotypic_projector_trace_formula (D : Formalism.BasicNotions.D7) (h2 : a
         simp [Module.Basis.coord_apply]
       rw [Finset.sum_congr rfl fun i _ => hterm i]
       conv_rhs => rw [← b.sum_repr l]
+
       rw [map_sum]
       exact Finset.sum_congr rfl fun i _ => (map_smul _ _ _).symm
     · intro y hy
@@ -98,8 +146,5 @@ theorem isotypic_projector_trace_formula (D : Formalism.BasicNotions.D7) (h2 : a
   change ((Fintype.card ι : K) • Θ) m = e m at this
   rw [LinearMap.smul_apply, hΘ] at this
   exact this
-
-theorem isotypicProjectorTheoremField_of_sharp_bound (D : Formalism.BasicNotions.D7) (h2 : adm2 D) (h : InvariantDenominatorEllPBound) : IsotypicProjectorTheoremField D :=
-  lattice_theorem_of_trace_formula D h2 h (isotypic_projector_trace_formula D h2)
 
 end Formalism.MainNotions.G.GLWeightTheory

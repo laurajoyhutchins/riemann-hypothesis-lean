@@ -1,6 +1,52 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.SkewTwo
-import Development.WeilBound.ThetaLifts.LatticeBasics.HgtFin
-import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.MemIntLocOfIdem
+module
+
+public import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.MemIntLocOfIdem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntAddConjEqOneOfBaseGood
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PlaceSplitOrInert
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsLatticeFrameIsMajorantFrame
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.VaceigenDual
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HgtFin
+public import Development.WeilBound.ThetaLifts.LatticeBasics.SkewTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +59,8 @@ open Formalism.UG (bc)
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n : ℕ} {v : Pl F}
 
-variable (σ v) in
 
+variable (σ v) in
 def cInt : intLoc F E v →+* intLoc F E v :=
   ((sigR (Fv F v) σ).comp (intLoc F E v).subtype).codRestrict _ fun z => sigR_mem_intLoc σ z.2
 
@@ -97,7 +143,7 @@ theorem comp_cA (z : AE F E) : compFin F E v (cA σ z) = sigR (Fv F v) σ (compF
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul a x => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem gram_fr (a : GL (Fin n) (Fv F v ⊗[F] E)) (J M m : Matrix (Fin n) (Fin n) (AE F E)) :
     a.1ᵀ * (Mᵀ * J * m.map (cA σ)).map (compFin F E v) * a.1.map (sigR _ σ) =
@@ -161,9 +207,10 @@ theorem exists_beta {B : Base F E} (hB : B.IsGood σ) {X : Spc F E n} {r s : ℕ
       induction z.1 using TensorProduct.induction_on with
       | zero => simp only [map_zero]
       | tmul a x => exact congrArg (a ⊗ₜ[F] ·) (hσ x)
-      | add x y hx hy => simp only [map_add, hx, hy])) r1
+      | add x y hx hy => simp only [map_add (f := _), hx, hy])) r1
     (fun i k => Subtype.ext (congrArg ι (by
       change σ (G₀ k i) = G₀ i k
+
       simp only [hG₀, Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, map_sum, map_mul, hσ, hX.herm, Finset.sum_mul]
       rw [Finset.sum_comm]
       exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring)))
@@ -172,10 +219,10 @@ theorem exists_beta {B : Base F E} (hB : B.IsGood σ) {X : Spc F E n} {r s : ℕ
       change G₀.map ι * G'.map ι = 1
       rw [← Matrix.map_mul, mul_eq_one_comm.1 hG', Matrix.map_one _ (map_zero _) (map_one _)])) r2 r3
     (inj (by
-      rw [map_add, jj, jj, hNm, hNM, ← eG, ← gram_fr, ← gram_fr, ← Matrix.add_mul, ← Matrix.mul_add,
+      rw [map_add (f := _), jj, jj, hNm, hNM, ← eG, ← gram_fr, ← gram_fr, ← Matrix.add_mul, ← Matrix.mul_add,
         ← Matrix.map_add _ (map_add _), lag, Matrix.map_zero _ (map_zero _), Matrix.mul_zero, Matrix.zero_mul, map_zero]))
     (inj (by
-      rw [map_add, map_mul, map_mul, hNm, hNM, hNP, hNQ, ← map_mul, ← map_mul, ← map_add, map_one, ← map_one (fr v a), ← h]
+      rw [map_add (f := _), map_mul, map_mul, hNm, hNM, hNP, hNQ, ← map_mul, ← map_mul, ← map_add (f := _), map_one, ← map_one (fr v a), ← h]
       congr 1
       noncomm_ring))
   let SA : Matrix (Fin n) (Fin n) (AE F E) := (a.1 * j S * (a⁻¹).1).map (sgE E v)
@@ -191,7 +238,7 @@ theorem exists_beta {B : Base F E} (hB : B.IsGood σ) {X : Spc F E n} {r s : ℕ
     have k5 := jj 1 S
     simp only [Matrix.transpose_one, Matrix.one_mul, Matrix.mul_one, map_one, mapc_one, fS, eG,
       Matrix.map_one _ (map_zero (sigR (Fv F v) σ)) (map_one _), Matrix.map_one _ (map_zero (cInt σ v)) (map_one _)] at k1 k2 k4 k5
-    rw [map_add, k4, k5, ← k1, ← k2, ← Matrix.add_mul, ← Matrix.mul_add, ← Matrix.map_add _ (map_add _), map_zero] at k3
+    rw [map_add (f := _), k4, k5, ← k1, ← k2, ← Matrix.add_mul, ← Matrix.mul_add, ← Matrix.map_add _ (map_add _), map_zero] at k3
     have u1 : IsUnit a.1ᵀ := (Matrix.isUnit_transpose _).2 a.isUnit
     have u2 : IsUnit (a.1.map (sigR (Fv F v) σ)) := a.isUnit.map (sigR (Fv F v) σ).mapMatrix
     rw [u2.mul_left_eq_zero, u1.mul_right_eq_zero] at k3
@@ -202,7 +249,7 @@ theorem exists_beta {B : Base F E} (hB : B.IsGood σ) {X : Spc F E n} {r s : ℕ
   have am : At (evFin F v) (y - x) := by simpa using at_sub ay ax
   obtain ⟨t', pt, ht⟩ := exists_inv ha (f := y + (b₀ + SA) * (y - x)) (N := NM + S * Nm)
     (by rw [add_sub_right_comm]; exact at_add ay (at_mul_right _ am))
-    (by rw [map_add, map_mul, hNm, hNM, ← fS, ← map_mul, ← map_add, add_mul, add_assoc]) s2
+    (by rw [map_add (f := _), map_mul, hNm, hNM, ← fS, ← map_mul, ← map_add (f := _), add_mul, add_assoc]) s2
   exact ⟨b₀ + SA, _ + -SA, t', b0.add (by rw [Adj, mapc_neg, Matrix.mul_neg]; exact eq_neg_of_add_eq_zero_left sk),
     by rw [add_add_add_comm, add_neg_cancel, add_zero, hb0], add_mem pb0 ((ha _).2 ⟨S, fS.symm⟩), pt, ht⟩
 

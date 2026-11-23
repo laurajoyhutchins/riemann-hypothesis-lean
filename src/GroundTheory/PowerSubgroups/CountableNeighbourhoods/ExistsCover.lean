@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
+module
+
+import ReciprocityTheory.SemistableReduction.SemiContractC
+public import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Variant₂.N1
 
@@ -9,33 +54,7 @@ theorem exists_ne_zero_smul_mem {K : Type} [Field K] [NumberField K] {i : ℕ}
     (L : Submodule (RingOfIntegers K) (Fin i → K))
     (hL : Submodule.span K (L : Set (Fin i → K)) = ⊤) (v : Fin i → K) :
     ∃ d : RingOfIntegers K, d ≠ 0 ∧ d • v ∈ L := by
-  let T : Submodule K (Fin i → K) :=
-    { carrier := {v | ∃ d : RingOfIntegers K, d ≠ 0 ∧ d • v ∈ L}
-      zero_mem' := ⟨1, one_ne_zero, by simp⟩
-      add_mem' := by
-        rintro a b ⟨d₁, h₁, ha⟩ ⟨d₂, h₂, hb⟩
-        refine ⟨d₁ * d₂, mul_ne_zero h₁ h₂, ?_⟩
-        rw [smul_add]
-        refine L.add_mem ?_ ?_
-        · rw [mul_comm, mul_smul]; exact L.smul_mem _ ha
-        · rw [mul_smul]; exact L.smul_mem _ hb
-      smul_mem' := by
-        rintro c v ⟨d, hd, hv⟩
-        obtain ⟨⟨a, b⟩, hab⟩ := IsLocalization.surj (nonZeroDivisors (RingOfIntegers K)) c
-        refine ⟨(b : RingOfIntegers K) * d, mul_ne_zero (nonZeroDivisors.coe_ne_zero b) hd, ?_⟩
-        have key : ((b : RingOfIntegers K) * d) • (c • v) = a • (d • v) := by
-          rw [← algebraMap_smul K ((b : RingOfIntegers K) * d) (c • v), ← algebraMap_smul K a (d • v),
-            ← algebraMap_smul K d v, smul_smul, smul_smul]
-          congr 1
-          simp only [map_mul] at hab ⊢
-          rw [← hab]
-          ring
-        rw [key]
-        exact L.smul_mem _ hv }
-  have hT : Submodule.span K (L : Set (Fin i → K)) ≤ T :=
-    Submodule.span_le.2 fun x hx => ⟨1, one_ne_zero, by simpa using hx⟩
-  rw [hL] at hT
-  exact hT Submodule.mem_top
+  apply ReciprocityTheory.MultiplicativeHeights.sc_scale <;> assumption
 
 theorem exists_cover {K : Type} [Field K] [NumberField K] {i : ℕ}
     {F X : GroundTheory.Heights₂.Heights.HermLattice K i} :

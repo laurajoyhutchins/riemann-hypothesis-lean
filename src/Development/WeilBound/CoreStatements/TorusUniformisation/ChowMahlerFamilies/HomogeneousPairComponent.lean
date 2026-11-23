@@ -1,8 +1,48 @@
-import Mathlib
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLatFlagPair
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HeckeSectionsIsotropicCommutatorPairingPower
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -14,9 +54,10 @@ theorem comp_mul {σ M R : Type*} [CommRing R] [AddCancelCommMonoid M] (w : σ �
     weightedHomogeneousComponent w (b + bg) (s * g) = weightedHomogeneousComponent w b s * g := by
   conv_lhs => rw [s.as_sum, Finset.sum_mul]
   conv_rhs => rw [s.as_sum]
+
   rw [map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl (fun d _ => ?_)
-  have hm : IsWeightedHomogeneous w (monomial d (coeff d s)) (Finsupp.weight w d) :=
+  have hm : IsWeightedHomogeneous w (monomial d (AddMonoidAlgebra.coeff s d)) (Finsupp.weight w d) :=
     isWeightedHomogeneous_monomial _ _ _ rfl
   by_cases h : Finsupp.weight w d = b
   · subst h
@@ -28,6 +69,7 @@ theorem comp_mul_zero {σ M R : Type*} [CommRing R] [AddCommMonoid M] (w : σ �
     (g : MvPolynomial σ R) (bg : M) (hg : IsWeightedHomogeneous w g bg) (c : M)
     (hc : ∀ b, c ≠ b + bg) (s : MvPolynomial σ R) :
     weightedHomogeneousComponent w c (s * g) = 0 := by
+
   rw [s.as_sum, Finset.sum_mul, map_sum]
   refine Finset.sum_eq_zero (fun d _ => ?_)
   exact ((isWeightedHomogeneous_monomial _ _ _ rfl).mul hg).weightedHomogeneousComponent_ne _ (hc _)

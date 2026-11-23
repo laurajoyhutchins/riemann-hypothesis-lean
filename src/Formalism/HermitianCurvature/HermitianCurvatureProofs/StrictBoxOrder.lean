@@ -1,4 +1,55 @@
-import Formalism.HermitianCurvature.CapelliDeterminantAndBranching
+module
+
+public import Formalism.HermitianCurvature.CapelliDeterminantAndBranching
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset
 
@@ -103,7 +154,7 @@ theorem core (hESM : ExistsSingMax) (hCS : CapSing) (hSR : SubRel) (hTW : TopWei
   have hTstab : Stab (subA E) (S' ⊔ O) := by
     intro a b v hv
     obtain ⟨s', hs', t, ht, rfl⟩ := Submodule.mem_sup.1 hv
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (hS' a b _ hs') (hO a b _ ht)
 
   have hAnn : (S' ⊔ O).dualAnnihilator ≠ ⊥ := by
@@ -133,7 +184,7 @@ theorem core (hESM : ExistsSingMax) (hCS : CapSing) (hSR : SubRel) (hTW : TopWei
     ext v
     have hv : v ∈ CapSp (subA E) m ⊔ O := by rw [htop]; trivial
     obtain ⟨s, hs, t, ht, rfl⟩ := Submodule.mem_sup.1 hv
-    simp only [LinearMap.dualMap_apply, LinearMap.smul_apply, map_add]
+    simp only [LinearMap.dualMap_apply, LinearMap.smul_apply, map_add (f := _)]
     rw [mem_CapSp.1 hs w, hξA _ (Submodule.mem_sup_right (hOq w t ht)), hξA t (Submodule.mem_sup_right ht)]
     simp
   have hμ : ∀ j, μd j = m j + ((j : ℕ) : ℂ) :=
@@ -160,12 +211,12 @@ theorem core (hESM : ExistsSingMax) (hCS : CapSing) (hSR : SubRel) (hTW : TopWei
 
   obtain ⟨s, hs, t, ht, hst⟩ := Submodule.mem_sup.1 (show x ∈ CapSp (subA E) m ⊔ O by rw [htop]; trivial)
   have hξs : ξ s ≠ 0 := by
-    rw [← hst, map_add, hξA t (Submodule.mem_sup_right ht), add_zero] at ha
+    rw [← hst, map_add (f := _), hξA t (Submodule.mem_sup_right ht), add_zero] at ha
     exact ha
   have hsμ : ∀ c, subA E c c s = (m c + ((c : ℕ) : ℂ)) • s := by
     intro c
     have h1 := hxμ c
-    rw [← hst, map_add, smul_add] at h1
+    rw [← hst, map_add (f := _), smul_add] at h1
     have h2 : subA E c c s - (m c + ((c : ℕ) : ℂ)) • s = -(subA E c c t - (m c + ((c : ℕ) : ℂ)) • t) := by
       rw [eq_neg_iff_add_eq_zero, ← sub_eq_zero.2 h1]
       abel

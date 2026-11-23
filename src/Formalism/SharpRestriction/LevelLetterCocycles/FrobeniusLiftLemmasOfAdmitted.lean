@@ -1,31 +1,78 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RhoLiftOf
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusSqBoundOfLocal
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsXPowMul
-import Formalism.SharpRestriction.LevelLetterCocycles.HermFlagUnipotentAnisotropicVectorSubMem
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LetterConditionGlobal
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingBounds
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmaGsOfLemGAB
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ContentBoundLevel
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.H2Bound
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IsExpSmulA
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LemmaDN0
+import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorGeneralOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.CancelUnitMulUniformizerPow
+public import Formalism.SharpRestriction.LevelLetterCocycles.CompleteMax
+public import Formalism.SharpRestriction.LevelLetterCocycles.DerivativeProdSubEval
+public import Formalism.SharpRestriction.LevelLetterCocycles.EqUniformizerMulOfConstantCoeffZero
+public import Formalism.SharpRestriction.LevelLetterCocycles.EvaluationAtUniformizerPower
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowerCongruenceOfAdmitted
+public import Formalism.SharpRestriction.LevelLetterCocycles.IdempotentMemInvariantsLetter
+public import Formalism.SharpRestriction.LevelLetterCocycles.IsFracOL
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemGA0ConvVanish
+public import Formalism.SharpRestriction.LevelLetterCocycles.LiftRingOfUniformizerClause
 import Formalism.SharpRestriction.LevelLetterCocycles.LocalClauseOfFrobeniusHyps
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LengthBoundOfHypotheses
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSeriesDeltaZero
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalClauseOfGammaLemmas
+public import Formalism.SharpRestriction.LevelLetterCocycles.QPowSmulFrobeniusMem
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.FrobeniusSqBoundOfLocal
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IsAdicCompleteOfLe
 import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.JumpsLetExists
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LengthBoundOfHypotheses
 import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.PtTransRec
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSZeroSplit
-import Formalism.SharpRestriction.LevelLetterCocycles.IdempotentMemInvariantsLetter
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowerCongruenceOfAdmitted
-import Formalism.SharpRestriction.LevelLetterCocycles.CompleteMax
-import Formalism.SharpRestriction.LevelLetterCocycles.UniformizerClauseOfAdmitted
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
-import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelClauseOfOpenTool
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalClauseOfGammaLemmas
-import Formalism.SharpRestriction.LevelLetterCocycles.LiftRingOfUniformizerClause
-import Formalism.SharpRestriction.LevelLetterCocycles.QPowSmulFrobeniusMem
-import Formalism.SharpRestriction.LevelLetterCocycles.LemGA0ConvVanish
-import Formalism.SharpRestriction.LevelLetterCocycles.EqUniformizerMulOfConstantCoeffZero
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IsAdicCompleteOfLe
-import Formalism.SharpRestriction.LevelLetterCocycles.EvaluationAtUniformizerPower
-import Formalism.SharpRestriction.LevelLetterCocycles.IsFracOL
-import Formalism.SharpRestriction.LevelLetterCocycles.LetterConditionGlobal
-import Formalism.SharpRestriction.LevelLetterCocycles.UniformizerClauseOfAdmittedAlt
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RhoLiftOf
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSDivMem
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSZeroSplit
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.SmulSeriesDeltaZero
+public import Formalism.SharpRestriction.LevelLetterCocycles.UniformizerClauseOfAdmitted
+public import Formalism.SharpRestriction.LevelLetterCocycles.UniformizerClauseOfAdmittedAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocE
+
+@[expose] public section
 
 noncomputable section
 
@@ -136,8 +183,8 @@ theorem rhoLift_of_Adm (hA : admitted D HW F Cm CR CA CB CK) : rhoLift D HW F :=
   Formalism.MainNotions.N.Pv.LocalLengthBound.rhoLift_D D HW F Cm CR CA CB CK hA fun l _ K LL hg _ =>
     ⟨((truncation_clause_of_admitted D HW F Cm hA).2 l K LL hg).2, Formalism.MainNotions.CrystallineLiftingInputs.Tools.local_clause_of_admitted_statements D HW F Cm hA l K LL hg⟩
 
-set_option maxHeartbeats 1600000 in
 
+set_option maxHeartbeats 1600000 in
 theorem h2_bound_of_admitted (hA : admitted D HW F Cm CR CA CB CK) (l : ℕ) [Fact l.Prime] (K LL : Loc.FinExt l)
     (hg : Loc.Good K 1 LL) [NeZero (Module.finrank ℚ_[l] ↥(Loc.K0 K))] :
     Formalism.MainNotions.N.Pv.LocalLengthBound.H2Bound ((HW l).W K 1 LL hg) := by
@@ -173,8 +220,8 @@ theorem h2_bound_of_admitted (hA : admitted D HW F Cm CR CA CB CK) (l : ℕ) [Fa
     (Formalism.MainNotions.N.Pv.LocalLengthBound.chi_zpow_ne_one _ hCA)
     (fun T hT c ζ hζ x hx hγx k => hG.1 T hT c ζ hζ ⟨x, hx⟩ hγx k) hG.2 d T₁ T₂ F' b S η m hset
 
-set_option maxHeartbeats 1600000 in
 
+set_option maxHeartbeats 1600000 in
 theorem lemGA_rec (hA : admitted D HW F Cm CR CA CB CK) (l : ℕ) [Fact l.Prime] (K LL : Loc.FinExt l)
     (hg : Loc.Good K 1 LL) [NeZero (Module.finrank ℚ_[l] ↥(Loc.K0 K))] :
     LemGA ((HW l).W K 1 LL hg) := by
@@ -199,7 +246,11 @@ theorem lemGA_rec (hA : admitted D HW F Cm CR CA CB CK) (l : ℕ) [Fact l.Prime]
   have hrec : Loc.CaseA K LL := caseA_loc D HW hg hCA
   have hR : Formalism.MainNotions.UnusedSlot80.ToolsR.RingP ((HW l).W K 1 LL hg) :=
     Formalism.MainNotions.UnusedSlot80.ring_condition_uniformizer_polynomial D HW F hP9 l K LL hrec
-  obtain ⟨hGN, hGA⟩ := Formalism.MainNotions.N.Pv.LocalLengthBound.gam_of_tie ((HW l).W K 1 LL hg) hCA.2.1 hCT
+  have hG : Formalism.MainNotions.N.Pv.LocalLengthBound.GamN ((HW l).W K 1 LL hg) ∧
+      Formalism.MainNotions.N.Pv.LocalLengthBound.GamA ((HW l).W K 1 LL hg) := by
+    set_option synthInstance.maxHeartbeats 400000 in
+      exact Formalism.MainNotions.N.Pv.LocalLengthBound.gam_of_tie ((HW l).W K 1 LL hg) hCA.2.1 hCT
+  obtain ⟨hGN, hGA⟩ := hG
   have hER : Formalism.MainNotions.RamifiedCoefficientChains.Sh.ExpRing ((HW l).W K 1 LL hg) :=
     Formalism.MainNotions.N.Pv.LocalLengthBound.expRing_of ((HW l).W K 1 LL hg) hR
   have h4L : Formalism.MainNotions.WachCoordinates.LevelMapHodgeFiltration ((HW l).W K 1 LL hg) := hLev l K LL hrec (by omega)

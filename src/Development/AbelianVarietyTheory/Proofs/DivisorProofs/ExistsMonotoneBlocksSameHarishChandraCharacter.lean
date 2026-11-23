@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.PadicSubsetSums.CentralIdempotents.GaloisConjCentralIdempotent
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.CuspidalProductMultiplicity
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoeffZeroNeOfMonicIrr
+module
+
+public import Formalism.PadicSubsetSums.CentralIdempotents.GaloisConjCentralIdempotent
+public import Mathlib.Tactic.Continuity
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoeffZeroNeOfMonicIrr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+public import Mathlib.Data.Matrix.PEquiv
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasLabelTransportEquiv
+public import Mathlib.Basic.PEquiv
+
+@[expose] public section
+
 open CategoryTheory Polynomial Formalism.IrreducibleCountingLemmas.TYPES
 
 noncomputable section
@@ -15,7 +61,7 @@ variable {K : Type} [Field K] [Fintype K] [DecidableEq K]
 
 theorem trace_conj_rep {G V : Type} [Group G] [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ G V)
     (P g : G) : LinearMap.trace ℂ V (ρ (P * g * P⁻¹)) = LinearMap.trace ℂ V (ρ g) := by
-  let E : V ≃ₗ[ℂ] V := LinearEquiv.ofLinear (ρ P) (ρ P⁻¹)
+  let E : V ≃ₗ[ℂ] V := LinearEquiv.ofLinearMap (ρ P) (ρ P⁻¹)
     (LinearMap.ext fun v => by
       show (ρ P * ρ P⁻¹) v = v
       rw [← map_mul, mul_inv_cancel, map_one]; rfl)
@@ -36,7 +82,7 @@ def blockEquiv (e : ι ≃ κ) (b : ι → Fin s) (c : Fin s) : {i // b i = c} �
 
 def lamT (e : ι ≃ κ) (b : ι → Fin s) (lam : ∀ c : Fin s, FDRep ℂ (GL {i // b i = c} K)) (c : Fin s) :
     FDRep ℂ (GL {k // (b ∘ e.symm) k = c} K) :=
-  transp (blockEquiv e b c) (lam c)
+  Formalism.IrreducibleCountingLemmas.TYPES.transp (blockEquiv e b c) (lam c)
 
 theorem mem_parab_symm (e : ι ≃ κ) (b : ι → Fin s) (p : parab K (b ∘ e.symm)) :
     (glEquiv K e).symm p.1 ∈ parab K b := by
@@ -122,9 +168,17 @@ theorem exists_monotone_same_trace : ∀ (K : Type) [Field K] [Fintype K] [Decid
     rw [Equiv.symm_symm]
     exact Tuple.monotone_sort b
   · rw [trace_hcRep_lamT]
-    have h : (glEquiv K e).symm x = glEquiv K e.symm x := by
+    let P : GL (Fin r) K := ⟨e.toPEquiv.toMatrix, e.symm.toPEquiv.toMatrix,
+      by rw [← PEquiv.toMatrix_trans, ← Equiv.toPEquiv_trans, Equiv.self_trans_symm,
+        Equiv.toPEquiv_refl, PEquiv.toMatrix_refl],
+      by rw [← PEquiv.toMatrix_trans, ← Equiv.toPEquiv_trans, Equiv.symm_trans_self,
+        Equiv.toPEquiv_refl, PEquiv.toMatrix_refl]⟩
+    have h : (glEquiv K e).symm x = P * x * P⁻¹ := by
       apply Units.ext
+      change Matrix.reindex e.symm e.symm (x : Matrix (Fin r) (Fin r) K) =
+        e.toPEquiv.toMatrix * (x : Matrix (Fin r) (Fin r) K) * e.symm.toPEquiv.toMatrix
+      rw [PEquiv.toMatrix_toPEquiv_mul, PEquiv.mul_toMatrix_toPEquiv]
       rfl
-    rw [h, GlobalTheory.SerOSys.TranspLabel.glEquiv_perm, trace_conj_rep]
+    rw [h, trace_conj_rep]
 
 end GlobalTheory.HCSort

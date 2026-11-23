@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.CyclicSubmoduleIsSubrepresentation
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,8 +68,8 @@ theorem linearMap_ext_on_weightSpaces {V' : Type} [AddCommGroup V'] [Module K V'
   have : x ∈ (⨆ mu, weightSp E mu) := by rw [hE.2.2]; trivial
   exact hle this
 
-open Classical in
 
+open Classical in
 def lagrangeWeightFactor (E : GLOps n K V) (mu nu : Fin n → ℤ) : Module.End K V :=
   if h : ∃ a, nu a ≠ mu a then
     (((mu h.choose : K) - (nu h.choose : K))⁻¹) • (E h.choose h.choose - (nu h.choose : K) • (1 : Module.End K V))
@@ -56,7 +102,7 @@ theorem lagrangeFactor_kills_other_weight (E : GLOps n K V) (mu nu : Fin n → �
   have h : ∃ a, nu a ≠ mu a := by
     by_contra hc; exact hne (funext fun a => by_contra fun h => hc ⟨a, h⟩)
   unfold lagrangeWeightFactor
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   simp [(mem_weightSp_iff_diagonal_apply E nu x).1 hx]
 
 theorem lagrangeFactor_preserves_stable (E : GLOps n K V) (mu nu : Fin n → ℤ) (W : Submodule K V)
@@ -103,7 +149,7 @@ theorem finitely_many_weights_span [FiniteDimensional K V] (E : GLOps n K V) (hE
     ∃ s : Finset (Fin n → ℤ), (⨆ mu ∈ s, weightSp E mu) = ⊤ := by
   have hc : IsCompactElement (⊤ : Submodule K V) :=
     (Submodule.fg_iff_compact _).1 (Module.finite_def.1 inferInstance)
-  obtain ⟨s, hs⟩ := CompleteLattice.IsCompactElement.exists_finset_of_le_iSup _ hc (weightSp E) (by rw [hE.2.2])
+  obtain ⟨s, hs⟩ := IsCompactElement.exists_finset_of_le_iSup hc (weightSp E) (by rw [hE.2.2])
   exact ⟨s, top_le_iff.1 hs⟩
 
 theorem weightSpace_eq_bot_outside_support [CharZero K] (E : GLOps n K V) (s : Finset (Fin n → ℤ))

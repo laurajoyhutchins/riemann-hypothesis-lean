@@ -1,6 +1,60 @@
-import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
-import Formalism.LocalToGlobal.Divisibility.CoefMod
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
 import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LFocksLemmas
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ProdFactorialSupportSubSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.Algebra.Star.UnitaryStarAlgAut
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,23 +81,6 @@ def evFr (G : ι → Matrix (Fin n) (Fin n) ℂ) (sh : ι → ℤ) (s : K →+* 
 def deFr {G : ι → Matrix (Fin n) (Fin n) ℂ} (y : Frames G) (τ : ι) : ℂ := (y.1 τ).det
 
 def stdFr : Frames (fun _ : ι => (1 : Matrix (Fin n) (Fin n) ℂ)) := ⟨fun _ => 1, fun _ => by simp⟩
-
-theorem stdFr_isON : (stdFr (ι := ι) (n := n)).IsON := fun τ => Or.inl (by simp [stdFr])
-
-def mulU {G : ι → Matrix (Fin n) (Fin n) ℂ} (o : Frames G) (u : ι → Matrix (Fin n) (Fin n) ℂ)
-    (hu : ∀ τ, (u τ)ᴴ * u τ = 1) : Frames G :=
-  ⟨fun τ => o.1 τ * u τ, fun τ => by
-    rw [det_mul]; exact (o.2 τ).mul (Matrix.isUnit_det_of_left_inverse (hu τ))⟩
-
-theorem mulU_isON {G : ι → Matrix (Fin n) (Fin n) ℂ} (o : Frames G) (ho : o.IsON) (u : ι → Matrix (Fin n) (Fin n) ℂ)
-    (hu : ∀ τ, (u τ)ᴴ * u τ = 1) : (mulU o u hu).IsON := by
-  intro τ
-  have e : (o.1 τ * u τ)ᴴ * G τ * (o.1 τ * u τ) = (u τ)ᴴ * ((o.1 τ)ᴴ * G τ * o.1 τ) * u τ := by
-    simp only [conjTranspose_mul, Matrix.mul_assoc]
-  show (o.1 τ * u τ)ᴴ * G τ * (o.1 τ * u τ) = 1 ∨ (o.1 τ * u τ)ᴴ * G τ * (o.1 τ * u τ) = -1
-  rcases ho τ with h | h
-  · left; rw [e, h, Matrix.mul_one, hu τ]
-  · right; rw [e, h, Matrix.mul_neg, Matrix.mul_one, Matrix.neg_mul, hu τ]
 
 theorem mapS_apply {σ : Type} (s : K →+* ℂ) (P : MvPolynomial σ K) : mapS s P = MvPolynomial.map s P := rfl
 
@@ -140,7 +177,7 @@ theorem eval_aeval_poly {σ ρ : Type} (f : σ → MvPolynomial ρ ℂ) (d : ρ 
     eval d (aeval f P) = eval (fun x => eval d (f x)) P := by
   induction P using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.eval_X]
 
 theorem circle_infinite : {z : ℂ | star z * z = 1}.Infinite := by
@@ -286,9 +323,6 @@ theorem evFr_injective (G : ι → Matrix (Fin n) (Fin n) ℂ) (sh : ι → ℤ)
   intro P Q h
   exact mapS_injective s (fnOf_injective G sh 1 (fun τ => by simp) o h)
 
-theorem evFr_injective_std (sh : ι → ℤ) (s : K →+* ℂ) :
-    Function.Injective (evFr (K := K) (fun _ : ι => (1 : Matrix (Fin n) (Fin n) ℂ)) sh s) := evFr_injective _ sh s stdFr
-
 end Inj
 
 section ESide
@@ -310,8 +344,6 @@ theorem evV_injective (emb : ι → E →+* K) (J : Matrix (Fin n) (Fin n) E) (l
 
 def stdFrC (emb : ι → E →+* ℂ) : Frames (gramC (1 : Matrix (Fin n) (Fin n) E) emb) :=
   ⟨fun _ => 1, fun τ => by simp⟩
-
-theorem stdFrC_isON (emb : ι → E →+* ℂ) : (stdFrC (n := n) emb).IsON := fun τ => Or.inl (by simp [stdFrC, gramC])
 
 theorem natW_anti (lam : DomWeight n) : Antitone lam.natW := by
   intro i j hij

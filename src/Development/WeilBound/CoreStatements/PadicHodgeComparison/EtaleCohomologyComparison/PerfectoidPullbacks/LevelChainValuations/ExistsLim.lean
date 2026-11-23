@@ -1,5 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.FinDefs
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.FinDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -10,7 +51,7 @@ open CategoryTheory AlgebraicGeometry TensorProduct GlobalTheory.LogCris Divided
 
 namespace CrystallineSemistableComparison.Pb.Kap
 
-set_option maxHeartbeats 1000000
+
 
 variable {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl l)} {R : Per l K} {S : LevSys R} {G : Model l K → Prop}
   {D : Dat R} {c1K : ∀ {M : Model l K}, D.Ch M → HdR M.q 2 → Prop}
@@ -37,12 +78,12 @@ theorem exists_lim (hS : S.Good) (P : RhoSys S G D c1K) {M : Model l K} (a : D.C
     intro x φ ψ
     apply ext_P hS
     intro m
-    rw [map_add, hk0, hk0, hk0, map_add]
+    rw [map_add (f := _), hk0, hk0, hk0, map_add (f := _)]
   have haddx : ∀ x y φ, k0 (x + y) φ = k0 x φ + k0 y φ := by
     intro x y φ
     apply ext_P hS
     intro m
-    rw [map_add, hk0, hk0, hk0]
+    rw [map_add (f := _), hk0, hk0, hk0]
     have e := P.uniq a hM j m (x + y) _ _ (hf m (x + y)) (P.add a hM j m x y _ _ (hf m x) (hf m y))
     rw [e]
     rfl
@@ -132,8 +173,10 @@ theorem kap_abs (hR : R.Facts) (hi : ∀ c, R.i c ∈ R.P) (hS : S.Good) (P : Rh
     obtain ⟨f, hf⟩ := P.ex a hM i m x
     obtain ⟨g, hg⟩ := P.ex a hM j m y
     obtain ⟨hh, hhh⟩ := P.ex a hM (i + j) m z
+
     rw [hkP a hM (i + j) m z hh hhh, P.cup a hM m x y z f g hh hf hg hhh hc b b' φ, map_sum]
     refine Finset.sum_congr rfl fun s _ => ?_
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun s' _ => ?_
     rw [map_mul, map_mul, hkP a hM i m x f hf, hkP a hM j m y g hg,

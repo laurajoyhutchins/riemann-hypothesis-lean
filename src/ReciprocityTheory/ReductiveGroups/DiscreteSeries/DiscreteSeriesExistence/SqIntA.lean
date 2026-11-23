@@ -1,4 +1,56 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.Analysis.InnerProductSpace.ProdL2
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousFunctionalCalculus.Basic
+public import Mathlib.Analysis.CStarAlgebra.ContinuousFunctionalCalculus.Commute
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped InnerProductSpace ENNReal
@@ -16,7 +68,7 @@ def graph (μ : Measure G) (ρ : G → (H →L[ℂ] H)) (w₀ : H) : Submodule �
     intro p q hp hq
     simp only [Set.mem_ofPred_eq, WithLp.add_fst, WithLp.add_snd] at *
     filter_upwards [Lp.coeFn_add p.snd q.snd, hp, hq] with g h1 h2 h3
-    rw [h1, Pi.add_apply, h2, h3, map_add, inner_add_right]
+    rw [h1, Pi.add_apply, h2, h3, map_add (f := _), inner_add_right]
   zero_mem' := by
     simp only [Set.mem_ofPred_eq, WithLp.zero_fst, WithLp.zero_snd, map_zero, inner_zero_right]
     exact Lp.coeFn_zero _ _ _
@@ -111,7 +163,6 @@ theorem proj_act (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp (ρ
     intro z
     first
     | exact Submodule.sub_starProjection_mem_orthogonal z
-    | exact (graph μ ρ w₀).sub_starProjection_mem_orthogonal z
     | (rw [Submodule.starProjection_apply]; exact Submodule.sub_orthogonalProjection_mem_orthogonal z)
   apply Submodule.eq_starProjection_of_mem_of_inner_eq_zero (act_mem hR hmul w₀ h (hmemP y))
   intro z hz
@@ -141,8 +192,8 @@ theorem star_eq (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp (ρ 
     ({ toLinearMap := (ρ h : H →ₗ[ℂ] H), norm_map' := hiso h } : H →ₗᵢ[ℂ] H).inner_map_map _ _
   rw [← hI, hinv]
 
-include hR in
 
+include hR in
 theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp (ρ b)) (hiso : ∀ g v, ‖ρ g v‖ = ‖v‖)
     (hirr : ∀ S : Submodule ℂ H, IsClosed (S : Set H) → (∀ g, ∀ v ∈ S, ρ g v ∈ S) → S = ⊥ ∨ S = ⊤)
     (w₀ x₀ : H) (hx₀ : x₀ ≠ 0) (h0 : MemLp (fun g => ⟪w₀, ρ g x₀⟫_ℂ) 2 μ) (x : H) :
@@ -173,9 +224,6 @@ theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp 
       intro f g
       first
       | exact (hc g).cfc_real f
-      | exact hB.commute_cfc (hc g) f
-      | exact Commute.cfc_real (hc g) f
-      | exact (hc g).cfc (by rw [hB.star_eq]; exact hc g) f
     have hsub : ∀ a ∈ spectrum ℝ B, ∀ b ∈ spectrum ℝ B, a = b := by
       intro a ha b hb
       by_contra hab
@@ -189,9 +237,6 @@ theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp 
         have h1 : max (b - m) 0 = 0 := by
           first
           | exact (eqOn_of_cfc_eq_cfc (h0.trans (cfc_zero ℝ B).symm) (hf := hf.continuousOn) (hg := continuousOn_const) (ha := hB)) hb
-          | exact (eqOn_of_cfc_eq_cfc (h0.trans (cfc_const_zero ℝ B).symm) (hf := hf.continuousOn) (hg := continuousOn_const) (ha := hB)) hb
-          | exact eqOn_of_cfc_eq_cfc (h0.trans (cfc_zero (R := ℝ) B).symm) (hf := hf.continuousOn) (ha := hB) hb
-          | exact eqOn_of_cfc_eq_cfc (h0.trans (cfc_const_zero (R := ℝ) B).symm) (hf := hf.continuousOn) (ha := hB) hb
         have h2 : b - m ≤ 0 := by rw [← h1]; exact le_max_left _ _
         linarith
       have hgne : cfc (fun x : ℝ => max (m - x) 0) B ≠ 0 := by
@@ -199,9 +244,6 @@ theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp 
         have h1 : max (m - a) 0 = 0 := by
           first
           | exact (eqOn_of_cfc_eq_cfc (h0.trans (cfc_zero ℝ B).symm) (hf := hg.continuousOn) (hg := continuousOn_const) (ha := hB)) ha
-          | exact (eqOn_of_cfc_eq_cfc (h0.trans (cfc_const_zero ℝ B).symm) (hf := hg.continuousOn) (hg := continuousOn_const) (ha := hB)) ha
-          | exact eqOn_of_cfc_eq_cfc (h0.trans (cfc_zero (R := ℝ) B).symm) (hf := hg.continuousOn) (ha := hB) ha
-          | exact eqOn_of_cfc_eq_cfc (h0.trans (cfc_const_zero (R := ℝ) B).symm) (hf := hg.continuousOn) (ha := hB) ha
         have h2 : m - a ≤ 0 := by rw [← h1]; exact le_max_left _ _
         linarith
       have hfg : cfc (fun x : ℝ => max (x - m) 0) B * cfc (fun x : ℝ => max (m - x) 0) B = 0 := by
@@ -215,8 +257,6 @@ theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp 
         rw [h3]
         first
         | exact cfc_const_zero ℝ B
-        | exact cfc_zero ℝ B
-        | simp
       rcases hker _ (hcf (fun x : ℝ => max (x - m) 0)) with h1 | h1
       · exact hfne h1
       · apply hgne
@@ -245,7 +285,6 @@ theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp 
     intro u v
     first
     | exact Submodule.inner_starProjection_left_eq_right _ u v
-    | exact Submodule.inner_starProjection_left_eq_right u v
     | (simp only [Submodule.starProjection_apply]; exact inner_orthogonalProjection_left_eq_right _ u v)
   have hsym : ∀ x y : H, ⟪bop (graph μ ρ w₀) x, y⟫_ℂ = ⟪x, bop (graph μ ρ w₀) y⟫_ℂ := by
     intro x y
@@ -302,7 +341,6 @@ theorem memLp_of_ne (hone : ρ 1 = 1) (hmul : ∀ a b, ρ (a * b) = (ρ a).comp 
         = WithLp.toLp 2 (x₀, MemLp.toLp _ h0) := by
       first
       | exact Submodule.starProjection_eq_self_iff.mpr hz
-      | exact (Submodule.starProjection_eq_self_iff _).mpr hz
       | (rw [Submodule.starProjection_apply, Submodule.orthogonalProjection_mem_subspace_eq_self ⟨_, hz⟩])
     have e0 := hsa (WithLp.toLp 2 (x₀, (0 : Lp ℂ 2 μ))) (WithLp.toLp 2 (x₀, MemLp.toLp _ h0))
     rw [hPz, WithLp.prod_inner_apply, WithLp.prod_inner_apply] at e0

@@ -1,5 +1,49 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfLevelZeroParts
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfLevelZeroParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,13 +93,13 @@ theorem lev_q_X (a : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) :
       LocWach.q, W.q₀_def]
   set F : PowerSeries LL := C ζ * E with hF
   have hL := congrArg (W.lev a ζ) hq
-  simp only [map_mul, map_sub, map_pow, map_add, map_one] at hL
+  simp only [map_mul, map_sub, map_pow, map_add (f := _), map_one] at hL
   rw [hE] at hL
   set P := W.lev a ζ letπ with hP
   set Lq := W.lev a ζ W.q with hLq
   have hP0 : constantCoeff P = ζ - 1 := by
     have := congrArg constantCoeff hE
-    rw [map_add, map_one, map_mul, constantCoeff_C, hE0, mul_one] at this
+    rw [map_add (f := _), map_one, map_mul, constantCoeff_C, hE0, mul_one] at this
     linear_combination this
   have hζne : ζ ≠ 1 := hζ.ne_one PD.hp.one_lt
   have hζp : ζ ^ PD.p = 1 := hζ.pow_eq_one
@@ -72,15 +116,15 @@ theorem lev_q_X (a : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) :
   refine ⟨R, ?_, hR⟩
   intro hR0
 
-  have hD : derivative LL F = F := by
+  have hD : derivative (R := LL) F = F := by
     rw [hF, Derivation.leibniz, hED]
     simp
-  have hd := congrArg (fun f => constantCoeff (derivative LL f)) hL
+  have hd := congrArg (fun f => constantCoeff (derivative (R := LL) f)) hL
   rw [map_sub, Derivation.leibniz_pow, hD, Derivation.map_one_eq_zero, sub_zero] at hd
   obtain ⟨R', hR'⟩ := X_dvd_iff.mpr hR0
   have hLq2 : Lq = X ^ 2 * R' := by rw [hR, hR']; ring
   rw [hLq2, Derivation.leibniz, Derivation.leibniz, Derivation.leibniz_pow] at hd
-  simp only [smul_eq_mul, map_add, map_mul, map_pow, map_nsmul, constantCoeff_X] at hd
+  simp only [smul_eq_mul, map_add (f := _), map_mul, map_pow, map_nsmul, constantCoeff_X] at hd
   have hF0 : constantCoeff F = ζ := by rw [hF, map_mul, constantCoeff_C, hE0, mul_one]
   rw [hF0] at hd
   have hpζ : (PD.p : LL) * ζ ^ PD.p = 0 := by
@@ -135,11 +179,11 @@ theorem step (hR : ToolsR.RingP W) (hpu : ¬ IsUnit ((PD.p : ℕ) : O))
     Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _)
   set D : PowerSeries O := X + C ((PD.p : ℕ) : O) with hD
   have hmap : D.map (Ideal.Quotient.mk I) = X := by
-    rw [hD, map_add, map_X, map_C, hpI, map_zero, add_zero]
+    rw [hD, map_add (f := _), map_X, map_C, hpI, map_zero, add_zero]
   have hord : (D.map (Ideal.Quotient.mk I)).order.toNat = 1 := by rw [hmap, order_X]; rfl
   have hdiv : D.IsWeierstrassDivisorAt I := by
     unfold IsWeierstrassDivisorAt
-    rw [hord, hD, map_add, coeff_C, if_neg one_ne_zero, add_zero]
+    rw [hord, hD, map_add (f := _), coeff_C, if_neg one_ne_zero, add_zero]
     simp [coeff_X]
   have HD := hdiv.isWeierstrassDivisionAt_div_mod (f := f a)
   set H := hdiv.div (f a)
@@ -161,7 +205,7 @@ theorem step (hR : ToolsR.RingP W) (hpu : ¬ IsUnit ((PD.p : ℕ) : O))
       r.coeff 0 • (1 : PowerSeries O) := by
     rw [hf a]
     change subst W.π₀₁ (f a) = _
-    rw [heq, hr, hDn, ← coe_substAlgHom hs0, map_add, map_mul, map_add, substAlgHom_X, map_natCast,
+    rw [heq, hr, hDn, ← coe_substAlgHom hs0, map_add (f := _), map_mul, map_add (f := _), substAlgHom_X, map_natCast,
       map_smul, map_one]
   set h : LetA O n := Pi.single a (subst W.π₀₁ H) with hh
   have key : (letE a : LetA O n) * g = qP W * h + r.coeff 0 • (letE a : LetA O n) := by
@@ -173,7 +217,7 @@ theorem step (hR : ToolsR.RingP W) (hpu : ¬ IsUnit ((PD.p : ℕ) : O))
     · simp [Pi.mul_apply, Pi.add_apply, Pi.smul_apply, hh, letE, Pi.single_eq_of_ne hi]
   obtain ⟨S, -, hS⟩ := lev_qP_X hR a ζ hζ
   have hL := congrArg (fun x => coeff 0 (W.lev a ζ x)) key
-  simp only [map_add, map_mul, map_smul, lev_letE', hS, one_mul] at hL
+  simp only [map_add (f := _), map_mul, map_smul, lev_letE', hS, one_mul] at hL
   rw [h0, mul_assoc, coeff_zero_X_mul, zero_add, coeff_smul, coeff_zero_eq_constantCoeff,
     map_one, Algebra.smul_def, mul_one] at hL
   have hc : r.coeff 0 = 0 := hinj (by rw [← hL, map_zero])
@@ -181,7 +225,7 @@ theorem step (hR : ToolsR.RingP W) (hpu : ¬ IsUnit ((PD.p : ℕ) : O))
   refine ⟨h, ?_, key⟩
   refine ToolsR.cancel_AΔ (ToolsR.qP_AΔ hR) (fun i hq => by
     have := congrArg constantCoeff hq
-    simp only [qP, Pi.add_apply, LocWach.π₀, Pi.natCast_apply, map_add, ToolsR.π₀₁_cc hR, map_natCast,
+    simp only [qP, Pi.add_apply, LocWach.π₀, Pi.natCast_apply, map_add (f := _), ToolsR.π₀₁_cc hR, map_natCast,
       zero_add, map_zero] at this
     have h1 : ((PD.p : ℕ) : LL) = 0 := by
       rw [← map_natCast (algebraMap O LL), this, map_zero]

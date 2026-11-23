@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.LocalFields.FormalGroups.Basics
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+public import Mathlib.RingTheory.MvPowerSeries.Inverse
+public import Mathlib.RingTheory.PowerSeries.Substitution
+public import GroundTheory.LocalFields.FormalGroups.Inverse
+import GroundTheory.LocalFields.FormalGroups.Truncation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -189,7 +241,7 @@ theorem zwPoly_wAt {τ : Type*} {u : MvPowerSeries τ R} (hu : MvPowerSeries.con
   have := congrArg (PowerSeries.substAlgHom (R := R) hs) (zwPoly_formalW W)
   rw [map_zero] at this
   rw [← this]
-  simp only [zwPoly, map_add, map_sub, map_mul, map_pow]
+  simp only [zwPoly, map_add (f := _), map_sub, map_mul, map_pow]
   simp [PowerSeries.coe_substAlgHom, PowerSeries.subst_X hs, wAt]
 
 theorem constantCoeff_wAt {τ : Type*} {u : MvPowerSeries τ R}
@@ -275,7 +327,7 @@ theorem map_thirdZ : MvPowerSeries.map f (thirdZ W) = thirdZ (W.map f) := by
     map_addSlope, map_addIntercept, thirdZ]
 
 theorem map_thirdW : MvPowerSeries.map f (thirdW W) = thirdW (W.map f) := by
-  rw [thirdW, map_add, map_mul, map_addSlope, map_thirdZ, map_addIntercept, thirdW]
+  rw [thirdW, map_add (f := _), map_mul, map_addSlope, map_thirdZ, map_addIntercept, thirdW]
 
 theorem map_negDen : MvPowerSeries.map f (negDen W) = negDen (W.map f) := by
   simp [negDen, map_thirdZ, map_thirdW, MvPowerSeries.map_C]
@@ -387,7 +439,7 @@ theorem coeff_single_subst_pair [DecidableEq τ] {G : MvPowerSeries (Fin 2) R} {
       (fun j => by fin_cases j <;> simp [ha, hb]) (by simpa using hG)
     rwa [← MvPowerSeries.subst_sub hab, sub_zero] at this
   rw [hGH, ← MvPowerSeries.coe_substAlgHom hab]
-  simp only [map_add, map_mul, MvPowerSeries.coe_substAlgHom hab, MvPowerSeries.subst_X hab,
+  simp only [map_add (f := _), map_mul, MvPowerSeries.coe_substAlgHom hab, MvPowerSeries.subst_X hab,
     MvPowerSeries.subst_C]
   rw [MvPowerSeries.coeff_of_lt_order (lt_of_lt_of_le (by simp) h2), add_zero,
     MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_C_mul]

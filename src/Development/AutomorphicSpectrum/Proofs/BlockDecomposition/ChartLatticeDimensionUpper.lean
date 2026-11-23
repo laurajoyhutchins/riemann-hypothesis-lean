@@ -1,23 +1,79 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNefSectionsAsymptotic
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsShiftSectionBound
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsFujitaOne
-import GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.Imports
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AmpleSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.NefRR
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDimensionalChartLattice
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinrankChartLatQMono
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KleimanInputUniverseZero
-import Development.WeilBound.CoreStatements.HodgeTatePoints.KTwins
-import Development.WeilBound.CoreStatements.HodgeTatePoints.A36
-import Development.WeilBound.CoreStatements.HodgeTatePoints.SiuaNum
-import Development.WeilBound.CoreStatements.HodgeTatePoints.SiubOf
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ExistsNeZeroOfIsSubvar
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLiftBirationalNef
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNefPlusAmpleDegree
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ExistsLinearIndependentOfGenerates
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsKodairaGeneric
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsFieldSubalgebraSelf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDimensionalChartLattice
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FinrankChartLatQMono
+import Development.WeilBound.CoreStatements.HodgeTatePoints.A12
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.A28
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.A36
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KTwins
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.KleimanInputUniverseZero
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.SiuaNum
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.SiubOf
+import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Assembly
 import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PCutRegular
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ExistsLinearIndependentOfGenerates
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLiftBirationalNef
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PNefPlusAmpleDegree
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.BlockVecSegreJoin
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockBase
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ExistsNeZeroOfWeight
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsTer
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeMIdealOverGraph
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeSegreLift
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.RelDimMIdealOverEqTrdeg
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ZpowMemSubalgebraOfInvMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.ArakelovGeometry GroundTheory.Heights₂.Heights.HilbertSamuel Filter Topology
 
 namespace GlobalTheory.CompanionTheory.NefSections
@@ -88,7 +144,7 @@ namespace GlobalTheory.CompanionTheory.NefSections
 open GroundTheory.Heights₂.Heights ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.KH GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.Kleiman2
 
 theorem exists_rat_multilinear_le {M : Type} [AddCommGroup M] {n : ℕ}
-    (f : MultilinearMap ℤ (fun _ : Fin n => M) ℤ) (μ e : M) (ε : ℚ) (hε : 0 < ε) :
+    (f : (Π _ : Fin n, M) →ₘₗ[ℤ] ℤ) (μ e : M) (ε : ℚ) (hε : 0 < ε) :
     ∃ t : ℚ, 0 < t ∧ ∀ (a : ℕ) (m : ℤ), 1 ≤ a → (m : ℚ) = a * t →
       ((f (fun _ => a • μ + m • e) : ℤ) : ℚ) ≤ (a : ℚ) ^ n * (((f fun _ => μ : ℤ) : ℚ) + ε) := by
   let g : ℚ → ℚ := fun t => PositivityTheory.HtPt.Siua.form f μ e (fun _ => 1) (fun _ => 1 * t)

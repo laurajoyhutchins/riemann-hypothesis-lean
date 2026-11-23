@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.BlockSplitAll
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsobaricDiscreteSelfDualStrongMultiplicityOne
-import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
-import Formalism.LocalToGlobal.UnitaryNorms.CharTied
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BlockCharIntegral
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowLeSpan
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.SumRepresentations
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTied
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowLeSpan
+import Formalism.LocalToGlobal.UnitaryNorms.CharUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +114,7 @@ theorem isClosed_range_iota : IsClosed (Set.range (iotaOQ N A i)) := by
   let f : (s → ℤ_[N.l i]) → Qbar (N.l i) := fun c =>
     ∑ y : s, algebraMap ℚ_[N.l i] (Qbar (N.l i)) (c y : ℚ_[N.l i]) * iotaOQ N A i y
   have hf : Continuous f := by
-    refine continuous_finset_sum _ fun y _ => ?_
+    refine continuous_finsetSum _ fun y _ => ?_
     exact ((continuous_algebraMap ℚ_[N.l i] (Qbar (N.l i))).comp
       ((continuous_subtype_val : Continuous fun x : ℤ_[N.l i] => (x : ℚ_[N.l i])).comp
         (continuous_apply y))).mul continuous_const
@@ -77,11 +125,13 @@ theorem isClosed_range_iota : IsClosed (Set.range (iotaOQ N A i)) := by
       have hb : b ∈ Submodule.span ℤ_[N.l i] (s : Set (N.O i)) := hs ▸ Submodule.mem_top
       obtain ⟨c, -, rfl⟩ := Submodule.mem_span_finset.1 hb
       refine ⟨fun y => c y, ?_⟩
+
       rw [map_sum]
       simp only [f, iota_smul]
       exact Finset.sum_coe_sort s (fun y => algebraMap ℚ_[N.l i] (Qbar (N.l i)) (c y : ℚ_[N.l i]) * iotaOQ N A i y)
     · rintro ⟨c, rfl⟩
       refine ⟨∑ y : s, c y • (y : N.O i), ?_⟩
+
       rw [map_sum]
       simp only [f, iota_smul]
   rw [hr]
@@ -220,7 +270,8 @@ theorem frob_value (D : D7) (C : CharFrame D) (nch : NChoice D) (Tp : TupTied D 
   have hq : ((normV w : ℕ) : ℂ) ≠ 0 := by
     have := w.asIdeal.finiteQuotientOfFreeOfNeBot w.ne_bot
     exact Nat.cast_ne_zero.2 Nat.card_pos.ne'
-  have hn : (Ideal.absNorm w.asIdeal : ℕ) = normV w := rfl
+  have hn : (Ideal.absNorm w.asIdeal : ℕ) = normV w := by
+    simp [normV, Ideal.absNorm_apply, Submodule.cardQuot_apply]
   have hy' : D.what₂.embLL (y : D.what₂.LL) =
       ((C.eta.val w : ℂˣ) : ℂ) * ((normV w : ℕ) : ℂ) ^ (-(((1 / 2 : ℝ)) : ℂ)) := by
     have e : D.what₂.embLL (y : D.what₂.LL) = C.eta.valTw (1 / 2) w := hy
@@ -237,53 +288,5 @@ theorem frob_value (D : D7) (C : CharFrame D) (nch : NChoice D) (Tp : TupTied D 
   rw [e1, Complex.cpow_add _ _ hq, Complex.cpow_neg _ (v : ℂ), Complex.cpow_natCast, inv_pow]
 
 end Main
-
-theorem main : ∀ (D : D7) (C : Formalism.L2.Host.CharFrame D) (nch : NChoice D) (Tp : Formalism.L2.Host.TupTied D C nch), Formalism.L2.Host.NCharTied D C nch Tp → Formalism.L2.Host.ValLL0 D C → Formalism.MainNotions.SumRepresentations.tie0 D → Formalism.MainNotions.SumRepresentations.adm2 D → Formalism.MainNotions.SumRepresentations.adm5 D → XiOverO D.nd D.naut := by
-  intro D C nch Tp T V ht h2 h5 i
-  have hA : Formalism.MainNotions.SumRepresentations.At.TieAut D.nd D.naut := ht.2.1
-  obtain ⟨ρ, hρ, hwd, -⟩ := (h2 i).2.2 D.naut.etaTinv (-(D.R.t : ℝ) / 2) (inf_int D hA)
-  have hun : ∀ w, w ∉ placesOver D.host.E (D.nd.l i) → D.naut.unr (D.naut.wdOf i ρ w) := fun w hw => by
-    rw [hwd w hw]
-    exact (D.naut.unr_tw _ _).2 (D.naut.etaTinv_def w).1
-  have hfrob : ∀ w, w ∉ placesOver D.host.E (D.nd.l i) → ∀ (B : ValuationSubring D.nd.Om) (σ : G D.host.E D.nd.Om),
-      IsPlaceOver (F := D.host.E) B w → IsFrob (F := D.host.E) B (normV w) σ →
-      D.naut.frobEig (D.naut.lpTw (D.naut.locG D.naut.etaTinv w) (-(D.R.t : ℝ) / 2)) =
-        {D.naut.iotaQC i (((ρ σ : GL (Fin 1) (Qbar (D.nd.l i))) : Matrix (Fin 1) (Fin 1) (Qbar (D.nd.l i))) 0 0)} := by
-    intro w hw B σ hB hσ
-    have e := D.naut.wdOf_frob i ρ w hw hρ (hun w hw) B σ hB hσ
-    obtain ⟨a, ha⟩ := Multiset.card_eq_one.1
-      ((D.naut.frobEig_card _ (hun w hw)).trans (D.naut.wdOf_dim i ρ w))
-    rw [ha, charpoly_fin_one] at e
-    simp only [Multiset.map_singleton, Multiset.prod_singleton, Polynomial.map_sub, Polynomial.map_X,
-      Polynomial.map_C] at e
-    have e2 := C_injective (sub_right_injective e)
-    rw [← hwd w hw, ha]
-    exact congrArg _ e2.symm
-  let d : G D.host.E D.nd.Om →* Qbar (D.nd.l i) :=
-    (Units.coeHom _).comp (Matrix.GeneralLinearGroup.det.comp ρ)
-  have hde : ∀ g, d g = ((ρ g : GL (Fin 1) (Qbar (D.nd.l i))) : Matrix (Fin 1) (Fin 1) (Qbar (D.nd.l i))) 0 0 :=
-    fun g => Matrix.det_fin_one _
-  have hd : Continuous d := by
-    have : (d : G D.host.E D.nd.Om → Qbar (D.nd.l i)) = fun g =>
-        ((ρ g : GL (Fin 1) (Qbar (D.nd.l i))) : Matrix (Fin 1) (Fin 1) (Qbar (D.nd.l i))) 0 0 := funext hde
-    rw [this]
-    exact (continuous_apply_apply 0 0).comp hρ
-  have hfin : (placesOver D.host.E (D.nd.l i)).Finite :=
-    GlobalTheory.SplitRead.finite_placesOver _ (Fact.out : (D.nd.l i).Prime).ne_zero
-  have hS := h5.2.2.1 _ hfin
-  obtain ⟨ξ, hξc, hξ⟩ := exists_integral_char D.nd D.naut i d hd _ hS (by
-    rintro σ ⟨w, hw, -, B, hB, hσ⟩
-    obtain ⟨x, hx⟩ := frob_value D C nch Tp T V w
-    have e := hfrob w hw B σ hB hσ
-    rw [hx, Multiset.singleton_inj, ← D.naut.iota_LL i x, ← hde] at e
-    exact ⟨_, (D.naut.iotaQC i).injective e⟩)
-  refine ⟨ξ, hξc, fun w hw => ⟨fun σ hσ => ?_, fun B σ hB hσ => ?_⟩⟩
-  · have h1 := (D.naut.wdOf_unr i ρ w hw hρ).1 (hun w hw) σ hσ
-    apply Units.ext
-    apply iota_inj D.nd D.naut i
-    rw [hξ, hde, h1]
-    simp
-  · rw [hfrob w hw B σ hB hσ, ← hde, ← hξ]
-    rfl
 
 end GlobalTheory.XiOver

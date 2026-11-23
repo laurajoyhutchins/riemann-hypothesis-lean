@@ -1,11 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.MemHomogeneousExponentsOneBlock
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.ThFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.MemHomogeneousExponentsOneBlock
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.WeightTraceProducts.WeightDeterminantTwists.CoeffScale
+import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+
+@[expose] public section
 
 open Polynomial UpperTheory.V.Z.Sym.Wt
 
 open MvPolynomial in
 private theorem homogeneous_trace_mul {d : ℕ} (n : ℕ) (g h : GL (Fin d) ℂ) :
-    tr1 d n (g * h) = ∑ p ∈ deg1 d n ×ˢ deg1 d n, coeff p.1 (sbs (fun _ : Unit => g) (monomial p.2 1)) *
-      coeff p.2 (sbs (fun _ : Unit => h) (monomial p.1 1)) := by
+    tr1 d n (g * h) = ∑ p ∈ deg1 d n ×ˢ deg1 d n,
+      (sbs (fun _ : Unit => g) (monomial p.2 1)).coeff p.1 *
+        (sbs (fun _ : Unit => h) (monomial p.1 1)).coeff p.2 := by
   classical
   have hcomp : ∀ P, sbs (fun _ : Unit => g * h) P = sbs (fun _ : Unit => g) (sbs (fun _ : Unit => h) P) := by
     intro P
@@ -23,7 +73,7 @@ private theorem homogeneous_trace_mul {d : ℕ} (n : ℕ) (g h : GL (Fin d) ℂ)
     exact mem_homogeneousExponentsOneBlock.1 hm
   have hQ := sbs_mem (fun _ : Unit => h) hmono
   have hQsum : sbs (fun _ : Unit => h) (monomial m 1) =
-      ∑ m' ∈ deg1 d n, monomial m' (coeff m' (sbs (fun _ : Unit => h) (monomial m 1))) := by
+      ∑ m' ∈ deg1 d n, monomial m' ((sbs (fun _ : Unit => h) (monomial m 1)).coeff m') := by
     conv_lhs => rw [(sbs (fun _ : Unit => h) (monomial m 1)).as_sum]
     apply Finset.sum_subset
     · intro m' hm'
@@ -33,11 +83,12 @@ private theorem homogeneous_trace_mul {d : ℕ} (n : ℕ) (g h : GL (Fin d) ℂ)
       rw [MvPolynomial.notMem_support_iff.1 hm', monomial_zero]
   rw [hcomp]
   conv_lhs => rw [hQsum]
+
   rw [map_sum, MvPolynomial.coeff_sum]
   apply Finset.sum_congr rfl
   intro m' _
-  rw [show monomial m' (coeff m' (sbs (fun _ : Unit => h) (monomial m 1))) =
-      coeff m' (sbs (fun _ : Unit => h) (monomial m 1)) • monomial m' (1 : ℂ) by
+  rw [show monomial m' ((sbs (fun _ : Unit => h) (monomial m 1)).coeff m') =
+      (sbs (fun _ : Unit => h) (monomial m 1)).coeff m' • monomial m' (1 : ℂ) by
     rw [MvPolynomial.smul_monomial, smul_eq_mul, mul_one]]
   rw [map_smul, MvPolynomial.coeff_smul, smul_eq_mul, mul_comm]
 
@@ -53,7 +104,7 @@ theorem UpperTheory.V.Z.Sym.Wt.trSwap :
       Finsupp.mapDomain (UpperTheory.V.Z.Sym.Wt.flip I d) (glue μ) = glue (fun k => μ (k.1, !k.2)) := by
     intro μ
     ext ⟨⟨i, b⟩, j⟩
-    have := Finsupp.mapDomain_apply hinj (glue μ) ((i, !b), j)
+    have := Finsupp.mapDomain_apply_of_injective hinj (glue μ) ((i, !b), j)
     rw [show UpperTheory.V.Z.Sym.Wt.flip I d ((i, !b), j) = ((i, b), j) by
       simp [UpperTheory.V.Z.Sym.Wt.flip]] at this
     rw [this, glue_apply, glue_apply]
@@ -86,8 +137,8 @@ theorem UpperTheory.V.Z.Sym.Wt.trSwap :
     apply Finset.prod_congr rfl
     intro v _
     rw [Fintype.prod_bool]
-    show MvPolynomial.coeff (μ (v, true))
-        ((sbs fun _ : Unit => invT ℂ d (g v)) (MvPolynomial.monomial (μ (v, false)) 1)) *
-      MvPolynomial.coeff (μ (v, false))
-        ((sbs fun _ : Unit => g v) (MvPolynomial.monomial (μ (v, true)) 1)) = _
+    show AddMonoidAlgebra.coeff ((sbs fun _ : Unit => invT ℂ d (g v)) (MvPolynomial.monomial (μ (v, false)) 1))
+        (μ (v, true)) *
+      AddMonoidAlgebra.coeff ((sbs fun _ : Unit => g v) (MvPolynomial.monomial (μ (v, true)) 1))
+        (μ (v, false)) = _
     exact mul_comm _ _

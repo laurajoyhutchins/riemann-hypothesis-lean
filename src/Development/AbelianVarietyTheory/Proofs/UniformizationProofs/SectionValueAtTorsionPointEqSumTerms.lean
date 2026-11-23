@@ -1,36 +1,77 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DataRigidSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DvrLem
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThetaVV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValuationMultiplicationInvariance
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PeriodicValuation
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
-import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
-import Development.AbelianVarietyTheory.Definitions.Uniformization.AllDV
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PeriodicValuation
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.AllDV
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CoefFe
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsActValue
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGenMulPullPowUnif
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsLeOnFinset
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsNsmulAndNeg
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecNeZero
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpBijFAndExpandsFLin
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpansionPullbackSectionEndomorphismStatement
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GenVOfPow
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ProductOfSectionsExpandsToConvolutionStatement
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PullMulValue
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumVOfConvolution
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumVRootOfConvolutionPow
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationTorsionMapsCompatibleInLevel
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValuationsTorusPointsFramesFamilyTerms
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullUUnitsCompatGeneric
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.SectionArithmetic
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsLeOnFinset
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumVOfConvolution
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFrameRatio
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpBijFAndExpandsFLin
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueAtOrigin
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsNsmulAndNeg
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValuationsTorusPointsFramesFamilyTerms
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ProductOfSectionsExpandsToConvolutionStatement
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.UniformisationTorsionMapsCompatibleInLevel
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpansionPullbackSectionEndomorphismStatement
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.SumVRootOfConvolutionPow
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsActValue
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecNeZero
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.CoefFe
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GenVOfPow
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PullMulValue
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGenMulPullPowUnif
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsNsmulIffEq
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TorsionCoordinatesEqDegenerationSeries
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.DVR
 open scoped CategoryTheory.Obj
@@ -218,23 +259,7 @@ theorem exists_frm_kap {k' k : ℕ} {b b' : TF (R := R) F ⟶ D.P.A} {a : D.P.A 
     (W : Frm D F k' b) (hW : W.IsGen) (κ : LB.Gen (kapLB D a k' k)) (hκ : κ.IsGen) :
     ∃ w : Frm D F k b', w.IsGen ∧ ∀ z J, Good D.P.L z J →
       val W (𝟙 _) z J * val κ b.left z J = val w (𝟙 _) z J := by
-  have a₁ : b.left ≫ a.left = b'.left := by rw [hb, Over.comp_left]
-  have a₂ : b.left ≫ (1 : D.P.A ⟶ D.P.A).left = (1 : TF (R := R) F ⟶ D.P.A).left := by
-    rw [← Over.comp_left, MonObj.comp_one]
-  obtain ⟨w, hw, hv⟩ := exists_gen D.P.isLB (φ' := DegPre.lineφ D F b') (ε' := DegPre.lineε k) (fun U _ h => by
-      refine (Fintype.prod_sum_type _).trans ?_
-      refine (congrArg₂ (· * ·) (prod_line k' b h) (Fin.prod_univ_three _)).trans ?_
-      rw [prod_line]
-      show _ * (h (b.left ≫ 𝟙 _) ^ (k' : ℤ) * h (b.left ≫ a.left) ^ (-(k : ℤ)) *
-        h (b.left ≫ (1 : D.P.A ⟶ D.P.A).left) ^ ((k : ℤ) - k')) = _
-      rw [Category.comp_id, a₁, a₂]
-      apply Additive.ofMul.injective
-      simp only [ofMul_mul, ofMul_inv, ofMul_zpow, ofMul_pow]
-      module)
-    (LB.mulGen D.P.L _ _ _ _ W (LB.pullGen D.P.L _ _ κ b.left))
-    (mulGen_isGen _ _ _ _ _ _ _ hW (pullGen_isGen _ _ _ _ hκ _))
-  refine ⟨w, hw, fun z J hJ => Eq.symm ((hv _ _ z J hJ).trans ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) rfl ?_)))⟩
-  exact (val_pull hJ _ _ _).trans (by rw [Category.id_comp])
+  apply _root_.GlobalTheory.Ex.CoordSeries.exists_frm_kap <;> assumption
 
 theorem exists_secA_mul {A : PolAV (Spec (CommRingCat.of (FractionRing R)))} {k k' : ℕ} (t : SecA A F k)
     (t' : SecA A F k') : ∃ t'' : SecA A F (k + k'), ∀ (Z : Scheme.{0}) (r : Z ⟶ (TFK (R := R) F ⊗ A.A).left) (z : Z) (J),
@@ -300,8 +325,8 @@ theorem frame_eq : LL → AllUV fun {V} _ _ _ {ϖ} hϖ {D} Q {F} _ _ {v} hv {A} 
   rw [l₁, cst_eq, map_one, _root_.one_mul] at this
   exact Units.ext this.symm
 
-attribute [local instance] TorusExt.gtGroup in
 
+attribute [local instance] TorusExt.gtGroup in
 theorem value_at_torsion : LL → TwistBCSpanStatement → TWM.VRatioGtStatement → TWStatement → UUStatement → AllUV fun {V} _ _ _ {ϖ} hϖ {D} Q {F} _ _ {v} hv {A} {G} _ _ U => ∀ w₀ ρ, NormW U.toUnifPre w₀ ρ → ∀ (n : ℕ), 1 ≤ n → ∀ (p : QkPt D.toPre F n) x, QkToAkU U.toUnifPre F n p x → ∀ e, IsTorsFrame A ρ n x e → ∃ w₁ : Frm D.toPre F 1 p.g.b, w₁.IsGen ∧ GenV hϖ hv w₁ ((Q p.y : ℚ) / (n : ℚ) ^ 2) ∧ ∀ (k : ℕ), 1 ≤ k → ∀ w : Frm D.toPre F k p.g.b, (w.IsGen ∧ ∀ z J, Good D.toPre.P.L z J → val w (𝟙 _) z J = val w₁ (𝟙 _) z J ^ k) → ∀ (t : SecA A F k) s (c : F), U.ExpandsF F k w₀ t s → (∀ z J, Good A.L z J → sA t (ptSecT A.A x).left z J = @id ((TFK (R := V) F).left.presheaf.stalk z) (cst (R := V) F z c) * (val (powFrame A.A A.L x e k) (𝟙 _) z J).val) → SumV v (coef s p.g w) c := by
   intro hL hT hVR hTW hUU V _ _ _ _ hcpl ϖ hϖ D Q hQ F _ _ _ v hv A G _ _ hG U w₀ ρ hN n hn p x hx e he
   have hA : AdmBase V (maximalIdeal V) := ⟨inferInstance, inferInstance, inferInstance, hcpl⟩
@@ -337,7 +362,7 @@ theorem value_at_torsion : LL → TwistBCSpanStatement → TWM.VRatioGtStatement
       let q : QkPt D.toPre F (n * m) := TorusExt.qkMk D.tau_bimult (m • p.y) p.g (by
         rw [mul_nsmul, TorusExt.qk_nsmul D.tau_bimult p, map_nsmul])
       have hq : QkToAkU U.toUnifPre F (n * m) q x :=
-        ((GlobalTheory.LevelCompat.qkToAkU_level hL V _ hA D A G hG U F n m _ hn hm rfl p q x).1 rfl rfl).1 hx
+        ((GlobalTheory.LevelCompat.qkToAkU_level hL V _ hA D A G hG U F n m _ hn hm rfl p q x).1 (by simp [q]) (by simp [q])).1 hx
       obtain ⟨κ, hκ, Hκ⟩ := EvalLevel.value_at_level hL V hcpl ϖ hϖ D Q hQ F v hv A G hG U w₀ ρ hN (n * m)
         (Nat.mul_pos hn hm) q x hq e he.2.1 (Ω _) (hΩ _)
       refine ⟨κ, hκ, ?_⟩

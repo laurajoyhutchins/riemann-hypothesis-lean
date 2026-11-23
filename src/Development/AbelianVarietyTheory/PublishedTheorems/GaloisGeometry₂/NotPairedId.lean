@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.GelfandKazhdanDual
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolarizedPairLineIff
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FinGLMemOfPow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.PolarizedPairLineIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,11 +47,7 @@ open NumberField IsDedekindDomain Matrix Formalism.L2.Host GlobalTheory.CuspRep 
 
 namespace GlobalTheory.Published.InvTransposeModel
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
-
-theorem rank_one (π : CuspSub E 1) : Paired π π invTOp := by
-  obtain ⟨χ, rfl⟩ := RankOne.exists_eq_twist π
-  exact paired_invTOp le_rfl χ
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
 theorem eq_triv (π : CuspSub E 0) : π = CuspSub.triv E (Nat.zero_le 1) := by
   refine CuspSub.ext (((CuspSub.triv E (Nat.zero_le 1)).irred π.V (fun φ _ => ?_) π.stable).resolve_left π.ne_bot)
@@ -55,27 +89,9 @@ theorem twist {π : CuspSub E a} (h : Paired π π invTOp) (χ : HChar E) : Pair
     have e3 : opMul χ (invTOp (.lie X)) = 1 := rfl
     have e4 : opMul χ (.lie X) = 1 := rfl
     rw [e2, e3, e4]
-    simp only [Units.val_one, one_smul, map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
+    simp only [Units.val_one, one_smul, map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
     linear_combination e
 
-theorem not_paired_id {s : ℂ} (hs : s ≠ 0) :
-    ¬ Paired (line le_rfl (CuspRep.Model.absC E s)) (line le_rfl (CuspRep.Model.absC E s)) id := fun h => by
-  obtain ⟨τ⟩ : Nonempty (E →+* ℂ) := inferInstance
-  have h3 := ((paired_line_iff _ _ _ _).1 h).2.2
-  have h4 : ∀ z, dchi (CuspRep.Model.absC E s) z = 0 := fun z => by
-    have := h3 fun _ _ => z
-    simp only [id, sc, opTriv, opAdd, mul_zero, zero_add, Matrix.trace, Fin.sum_univ_one, Matrix.diag,
-      Matrix.of_apply] at this
-    linear_combination this / 2
-  have := CuspRep.Model.expo_absC s τ
-  rw [expo, h4, h4] at this
-  exact hs (by simpa using this.symm)
-
-omit [IsTotallyComplex E] in
-
-theorem bracket (X Y : Matrix (Fin a) (Fin a) (Cinf E)) :
-    -(X * Y - Y * X)ᵀ = (-Xᵀ) * (-Yᵀ) - (-Yᵀ) * (-Xᵀ) := by
-  simp only [Matrix.transpose_sub, Matrix.transpose_mul, neg_mul_neg, neg_sub]
 
 end GlobalTheory.Published.InvTransposeModel
 

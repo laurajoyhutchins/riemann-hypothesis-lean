@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.KeyLemma
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.Reciprocity
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.KeyLemma
+import GroundTheory.LocalFields.AbstractLocalReciprocity.Unramified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.CoeNormEqProdSmulNorm
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -13,8 +66,8 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Comp
 
 namespace FrobeniusLift
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 def mul (s t : D.FrobeniusLift K) : D.FrobeniusLift K where
   elt := s.elt * t.elt
   mem := K.mul_mem s.mem t.mem
@@ -25,8 +78,8 @@ def mul (s t : D.FrobeniusLift K) : D.FrobeniusLift K where
     push_cast
     ring_nf
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 def ofDegOne {φ : G} (hφK : φ ∈ (K : Subgroup G))
     (hdφ : D.deg φ = Multiplicative.ofAdd (inertiaDegree D.deg K : ℤ̂)) : D.FrobeniusLift K where
   elt := φ
@@ -69,9 +122,9 @@ theorem valuation_norm_prime (s : D.FrobeniusLift K)
 
 section DegOne
 
+
 omit [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G]
   [((L : Subgroup G).subgroupOf K).Normal] in
-
 theorem smul_prod_pow_div (φ : G) (y : A) (n : ℕ) :
     φ • (∏ ν : Fin n, φ ^ (ν : ℕ) • y) / ∏ ν : Fin n, φ ^ (ν : ℕ) • y = φ ^ n • y / y := by
   rw [Finset.smul_prod']
@@ -85,8 +138,8 @@ theorem smul_prod_pow_div (φ : G) (y : A) (n : ℕ) :
     rw [smul_smul, ← pow_succ']
   rw [this, div_eq_div_iff_mul_eq_mul, ← hs', hs, mul_comm]
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 theorem valuation_eq_of_inf_ker_eq {S P : OpenSubgroup G}
     (h : (S : Subgroup G) ⊓ D.deg.ker = (P : Subgroup G) ⊓ D.deg.ker) {y : A}
     (hyS : y ∈ fixedModule A (S : Subgroup G)) (hyP : y ∈ fixedModule A (P : Subgroup G)) :
@@ -312,8 +365,8 @@ end DegOne
 
 section General
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 theorem exists_deg_eq (K : OpenSubgroup G) :
     ∃ φ ∈ (K : Subgroup G), D.deg φ = Multiplicative.ofAdd (inertiaDegree D.deg K : ℤ̂) := by
   obtain ⟨φ, hφ⟩ := D.relDeg_surjective K (Multiplicative.ofAdd 1)

@@ -1,9 +1,62 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsComplexGramMetricChange
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionMetricPair
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionFormsIndependent
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionDegree
+module
+
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockComplexGramMetricChange
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsComplexGramMetricChange
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionMetricPair
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionFormsIndependent
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionDegree
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergman
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ABridgeSt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -61,45 +114,16 @@ theorem pair_smul (m : ConeMetric ℂ (Ix κ)) {z : Ix κ → ℂ} (hz : z ≠ 0
 
 theorem continuous_diff {X : Type} [TopologicalSpace X] {A : FinHolAtlas D X} {L : HolLineBundle A}
     (W₁ W₀ : Weight L) : Continuous (Weight.diff W₁ W₀) := by
-  rw [continuous_iff_continuousAt]
-  intro x
-  have hx : x ∈ (A.chart (chartIdx A x)).source := Classical.choose_spec (A.cover x)
-  set j := chartIdx A x
-  have hT : (A.chart j).target ∩ (A.chart j).symm ⁻¹' (A.chart j).source = (A.chart j).target :=
-    Set.inter_eq_left.2 fun y hy => (A.chart j).map_target hy
-  have h₁ := (W₁.smooth j j).continuousOn
-  have h₀ := (W₀.smooth j j).continuousOn
-  rw [hT] at h₁ h₀
-  have hg := (h₁.sub h₀).continuousAt ((A.chart j).open_target.mem_nhds ((A.chart j).map_source hx))
-  refine (hg.comp ((A.chart j).continuousAt hx)).congr ?_
-  filter_upwards [(A.chart j).open_source.mem_nhds hx] with y hy
-  simp only [Pi.sub_apply, Function.comp_apply, (A.chart j).left_inv hy]
-  exact (Weight.diff_eq W₁ W₀ j hy).symm
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.BlockComplexGramMetricChange.continuous_diff <;> assumption
 
 theorem eventually_pow_le (C ε : ℝ) (hε : 0 < ε) (hD : 1 ≤ D) :
     ∀ᶠ n : ℕ in atTop, C * ((n : ℝ) + 1) ^ (D - 1) ≤ ε * (n : ℝ) ^ D := by
-  obtain ⟨D', rfl⟩ : ∃ D', D = D' + 1 := ⟨D - 1, by omega⟩
-  simp only [Nat.add_sub_cancel]
-  obtain ⟨N, hN⟩ := exists_nat_ge (|C| * 2 ^ D' / ε)
-  filter_upwards [eventually_ge_atTop (max N 1)] with n hn
-  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast le_of_max_le_right hn
-  have hnN : (N : ℝ) ≤ n := by exact_mod_cast le_of_max_le_left hn
-  have hkey : |C| * 2 ^ D' ≤ ε * n := by
-    have := hN.trans hnN
-    rw [div_le_iff₀ hε] at this
-    linarith
-  calc C * ((n : ℝ) + 1) ^ D' ≤ |C| * ((n : ℝ) + 1) ^ D' :=
-        mul_le_mul_of_nonneg_right (le_abs_self C) (by positivity)
-    _ ≤ |C| * (2 * (n : ℝ)) ^ D' :=
-        mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) (by linarith) _) (abs_nonneg C)
-    _ = (|C| * 2 ^ D') * (n : ℝ) ^ D' := by rw [mul_pow]; ring
-    _ ≤ (ε * n) * (n : ℝ) ^ D' := mul_le_mul_of_nonneg_right hkey (by positivity)
-    _ = ε * (n : ℝ) ^ (D' + 1) := by ring
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.BlockComplexGramMetricChange.eventually_pow_le <;> assumption
 
 end ComplexGramMetricChange
 
-open ComplexGramMetricChange in
 
+open ComplexGramMetricChange in
 theorem ComplexGramMetricChange.proof (hMC : MetricChange.Statement) (hPB : ProjectionBounds.Statement)
     (hFS : PullFSExtension.Statement) (hPair : ResolutionMetricPair.Statement)
     (hInd : ResolutionFormsIndependent.Statement) (hDeg : ResolutionDegree.Statement) :
@@ -166,12 +190,12 @@ theorem ComplexGramMetricChange.proof (hMC : MetricChange.Statement) (hPB : Proj
   have hC₀ : ∀ n, resCChi d n = -(1 / 2) * Real.log (Matrix.det (fun k l =>
       ∫ y, pairVal d.m n ((p n).2 k) ((p n).2 l) (resPt d y) ∂d.dV :
         Matrix (Fin (p n).1) (Fin (p n).1) ℂ)).re := fun n => by
-    rw [resCChi, dif_pos (hex n)]
+    rw [resCChi, dite_eq_left (hex n)]
     rfl
   have hC₁ : ∀ n, resCChi (d.withMetric m₁ P0₁ hs hc hle hp) n = -(1 / 2) * Real.log (Matrix.det (fun k l =>
       ∫ y, pairVal m₁ n ((p n).2 k) ((p n).2 l) (resPt d y) ∂d.dV :
         Matrix (Fin (p n).1) (Fin (p n).1) ℂ)).re := fun n => by
-    rw [resCChi, dif_pos (show ∃ q : (Σ r : ℕ, Fin r → MvPolynomial (Ix κ) ℚ),
+    rw [resCChi, dite_eq_left (show ∃ q : (Σ r : ℕ, Fin r → MvPolynomial (Ix κ) ℚ),
       IsSecBasis (d.withMetric m₁ P0₁ hs hc hle hp).x n q.2 from hex n)]
     rfl
 

@@ -1,8 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsParahoricVec
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
 import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIwVecTrivial
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCuspidalIffCompositions
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.SplitRead GlobalTheory.ThetaGL GlobalTheory.TameIwahori ValuativeRel
 open scoped TensorProduct
@@ -23,7 +70,7 @@ lemma rid_lTensor_map (φ : W →ₗ[ℂ] ℂ) (A : V →ₗ[ℂ] V) (B : W →�
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul v w => simp
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 lemma lid_rTensor_map (ψ : V →ₗ[ℂ] ℂ) (A : V →ₗ[ℂ] V) (B : W →ₗ[ℂ] W) (y : V ⊗[ℂ] W) :
     TensorProduct.lid ℂ W (ψ.rTensor W (TensorProduct.map A B y)) =
@@ -31,7 +78,7 @@ lemma lid_rTensor_map (ψ : V →ₗ[ℂ] ℂ) (A : V →ₗ[ℂ] V) (B : W →�
   induction y using TensorProduct.induction_on with
   | zero => simp
   | tmul v w => simp
-  | add y z hy hz => simp only [map_add, hy, hz]
+  | add y z hy hz => simp only [map_add (f := _), hy, hz]
 
 lemma exists_rid_ne_zero {x : V ⊗[ℂ] W} (hx : x ≠ 0) :
     ∃ φ : W →ₗ[ℂ] ℂ, TensorProduct.rid ℂ V (φ.lTensor V x) ≠ 0 := by
@@ -47,7 +94,7 @@ lemma exists_rid_ne_zero {x : V ⊗[ℂ] W} (hx : x ≠ 0) :
     induction w using TensorProduct.induction_on with
     | zero => simp
     | tmul v y => simp [e, TensorProduct.equivFinsuppOfBasisRight_apply_tmul_apply]
-    | add y z hy hz => simp only [map_add, hy, hz, Finsupp.add_apply]
+    | add y z hy hz => simp only [map_add (f := _), hy, hz, Finsupp.add_apply]
   rw [key]; simpa using hi
 
 lemma exists_lid_ne_zero {x : V ⊗[ℂ] W} (hx : x ≠ 0) :
@@ -62,7 +109,7 @@ lemma exists_lid_ne_zero {x : V ⊗[ℂ] W} (hx : x ≠ 0) :
     induction y using TensorProduct.induction_on with
     | zero => simp
     | tmul v w => simp
-    | add y z hy hz => simp only [map_add, hy, hz]
+    | add y z hy hz => simp only [map_add (f := _), hy, hz]
   rw [key]; exact hψ
 
 end Contract

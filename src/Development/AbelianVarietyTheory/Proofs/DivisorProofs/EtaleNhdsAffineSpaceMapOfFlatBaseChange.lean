@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.QuasiCompact
+module
+
+public import Mathlib.AlgebraicGeometry.AffineSpace
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.RingTheory.Extension.Cotangent.BaseChange
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,8 +82,7 @@ theorem notMem_support_of_flat {B D M N : Type} [CommRing B] [CommRing D] [Algeb
         Q.asIdeal := by
     intro z
     induction z with
-    | zero => simp
-    | add a b ha hb => rw [map_add, map_add]; exact Q.asIdeal.add_mem ha hb
+    | add a b ha hb => rw [map_add (f := _), map_add (f := _)]; exact Q.asIdeal.add_mem ha hb
     | tmul d r =>
       have hr : algebraMap B D r.1 ∈ Q.asIdeal := by
         by_contra h
@@ -41,8 +92,8 @@ theorem notMem_support_of_flat {B D M N : Type} [CommRing B] [CommRing D] [Algeb
   rw [hz] at this
   exact hf (by simpa using this)
 
-attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 theorem mem_etaleLocus_of_flat {A B C : Type} [CommRing A] [CommRing B] [CommRing C] [Algebra A B] [Algebra A C]
     [Module.Flat A C] (Q : PrimeSpectrum (C ⊗[A] B)) (hQ : Q ∈ Algebra.etaleLocus C (C ⊗[A] B)) :
     PrimeSpectrum.comap (algebraMap B (C ⊗[A] B)) Q ∈ Algebra.etaleLocus A B := by
@@ -56,8 +107,7 @@ theorem mem_etaleLocus_of_flat {A B C : Type} [CommRing A] [CommRing B] [CommRin
           (Algebra.IsPushout.cancelBaseChange A C B (C ⊗[A] B) Ω[B⁄A]).symm := by
       funext z
       induction z with
-      | zero => simp
-      | add x y hx hy => simp only [Function.comp_apply, map_add] at hx hy ⊢; rw [hx, hy]
+      | add x y hx hy => simp only [Function.comp_apply, map_add (f := _)] at hx hy ⊢; rw [hx, hy]
       | tmul s m =>
         rw [KaehlerDifferential.tensorKaehlerEquivBase_tmul, Function.comp_apply,
           Algebra.IsPushout.cancelBaseChange_symm_tmul, LinearMap.liftBaseChange_tmul, algebraMap_smul]
@@ -69,8 +119,7 @@ theorem mem_etaleLocus_of_flat {A B C : Type} [CommRing A] [CommRing B] [CommRin
           (Algebra.IsPushout.cancelBaseChange A C B (C ⊗[A] B) (Algebra.H1Cotangent A B)).symm := by
       funext z
       induction z with
-      | zero => simp
-      | add x y hx hy => simp only [Function.comp_apply, map_add] at hx hy ⊢; rw [hx, hy]
+      | add x y hx hy => simp only [Function.comp_apply, map_add (f := _)] at hx hy ⊢; rw [hx, hy]
       | tmul s m =>
         rw [Algebra.tensorH1CotangentOfFlat_tmul, Function.comp_apply, Algebra.IsPushout.cancelBaseChange_symm_tmul,
           LinearMap.liftBaseChange_tmul, algebraMap_smul]
@@ -78,8 +127,8 @@ theorem mem_etaleLocus_of_flat {A B C : Type} [CommRing A] [CommRing B] [CommRin
     rw [hc] at hi
     exact hi.of_comp_right (LinearEquiv.surjective _)
 
-attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 theorem exists_etale_spec {A B C : Type} [CommRing A] [CommRing B] [CommRing C] [Algebra A B] [Algebra A C]
     [Module.Flat A C] [Algebra.FinitePresentation A B] (W : (Spec (.of (C ⊗[A] B))).Opens)
     (p : Spec (.of (C ⊗[A] B))) (hp : p ∈ W)

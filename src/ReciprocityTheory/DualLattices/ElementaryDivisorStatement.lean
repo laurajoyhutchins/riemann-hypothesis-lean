@@ -1,7 +1,66 @@
-import ReciprocityTheory.DualLattices.DotSingle
-import ReciprocityTheory.DualLattices.EmbeddingSeparatingGroupStatement
-import ReciprocityTheory.DualLattices.UnramifiedCokernelLengthOfLengthEigenLengthProduct
-import ReciprocityTheory.DualLattices.EigenLengthProductStatementHolds
+module
+
+public import ReciprocityTheory.DualLattices.EmbeddingSeparatingGroupStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.DotSingle
+public import ReciprocityTheory.DualLattices.EigenLengthProductStatementHolds
+public import ReciprocityTheory.DualLattices.IsLocalOfIntegers
+public import ReciprocityTheory.DualLattices.UnramifiedCokernelLengthOfLengthEigenLengthProduct
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.RingTheory.Flat.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.LocalRing.Module
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,8 +116,9 @@ theorem finrank_split (hv : v.Integers R) {α : Type} [Fintype α] [DecidableEq 
     rw [Matrix.mulVec_mulVec, horth]
     split_ifs <;> simp
   have hs : ∀ w : α → R, ∑ i, P i *ᵥ w = w := fun w => by
+
     rw [← show (∑ i, P i) *ᵥ w = ∑ i, P i *ᵥ w from map_sum (Matrix.mulVec.addMonoidHomLeft w) P Finset.univ,
-      hsum, Matrix.one_mulVec]
+    hsum, Matrix.one_mulVec]
 
   let e : (α → R) ≃ₗ[R] ((i : Fin m) → LinearMap.range (Matrix.mulVecLin (P i))) :=
     { toFun := fun w i => ⟨P i *ᵥ w, w, rfl⟩
@@ -76,8 +136,9 @@ theorem finrank_split (hv : v.Integers R) {α : Type} [Fintype α] [DecidableEq 
         funext i
         apply Subtype.ext
         show P i *ᵥ ∑ j, (f j : α → R) = f i
+
         rw [show P i *ᵥ ∑ j, (f j : α → R) = ∑ j, P i *ᵥ (f j : α → R) from
-          map_sum (Matrix.mulVecLin (P i)) _ _]
+        map_sum (Matrix.mulVecLin (P i)) _ _]
         have hj : ∀ j, P i *ᵥ (f j : α → R) = if i = j then (f i : α → R) else 0 := by
           intro j
           obtain ⟨y, hy⟩ := (f j).2

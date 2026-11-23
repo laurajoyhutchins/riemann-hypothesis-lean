@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.GL3MeanSquares.LegendreCoefficient
-import Formalism.FormalGroupWitt.FormalGroupWittProofs.IntegralSubstVector
+module
+
+public import Formalism.GL3MeanSquares.LegendreCoefficient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Finset.MulAntidiagonal
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +100,6 @@ theorem expS_add (f g : MvPowerSeries σ K) (hf : MvPowerSeries.constantCoeff f 
   have hS : MvPowerSeries.HasSubst h := by
     first
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hh
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hh
     | exact ⟨fun s => by rw [hh s]; exact IsNilpotent.zero,
         by rw [Filter.cofinite_eq_bot]; exact Filter.tendsto_bot⟩
   have e2 : ∀ i, MvPowerSeries.subst h (MvPowerSeries.X i : MvPowerSeries (Fin 2) K) = h i :=
@@ -64,7 +110,7 @@ theorem expS_add (f g : MvPowerSeries σ K) (hf : MvPowerSeries.constantCoeff f 
     rfl
   have h0 : ∀ i : Fin 2, MvPowerSeries.constantCoeff (MvPowerSeries.X i : MvPowerSeries (Fin 2) K) = 0 :=
     fun i => MvPowerSeries.constantCoeff_X i
-  rw [← e1, ← subst_expS h hh _ (by rw [map_add, h0, h0, add_zero]), exp_biv,
+  rw [← e1, ← subst_expS h hh _ (by rw [map_add (f := _), h0, h0, add_zero]), exp_biv,
     MvPowerSeries.subst_mul hS, subst_expS h hh _ (h0 0), subst_expS h hh _ (h0 1), e2, e2]
   rfl
 
@@ -86,7 +132,6 @@ theorem Low.mul {m k : ℕ} {x y : MvPowerSeries σ K} (hx : Low m x) (hy : Low 
     rw [← hp]
     first
     | exact (map_add Finsupp.degree p.1 p.2).symm
-    | exact (Finsupp.degree_add p.1 p.2).symm
     | (rw [Finsupp.degree_eq_weight_one, Finsupp.degree_eq_weight_one,
         Finsupp.degree_eq_weight_one]; exact (map_add _ _ _).symm)
     | (simp only [Finsupp.degree]; exact (Finsupp.sum_add_index' (fun _ => rfl) (fun _ _ _ => rfl)).symm)
@@ -100,11 +145,9 @@ theorem low_one {x : MvPowerSeries σ K} (hx : MvPowerSeries.constantCoeff x = 0
     have h0 : d.degree = 0 := by omega
     first
     | exact (Finsupp.degree_eq_zero_iff d).mp h0
-    | exact Finsupp.degree_eq_zero_iff.mp h0
   subst hd0
   first
   | rw [MvPowerSeries.coeff_zero_eq_constantCoeff_apply]; exact hx
-  | simpa using hx
 
 theorem low_pow {x : MvPowerSeries σ K} (hx : MvPowerSeries.constantCoeff x = 0) (n : ℕ) :
     Low n (x ^ n) := by
@@ -123,7 +166,6 @@ theorem coeff_expS (f : MvPowerSeries σ K) (hf : MvPowerSeries.constantCoeff f 
     intro n _
     first
     | rw [PowerSeries.coeff_exp, smul_eq_mul]
-    | simp [PowerSeries.coeff_exp]
   · intro n hn
     rw [Function.mem_support] at hn
     rw [Finset.coe_range, Set.mem_Iio]
@@ -173,7 +215,6 @@ theorem integral_of_mul_eq_one [IsUltrametricDist K] {u v : MvPowerSeries σ K} 
       have hc : MvPowerSeries.coeff (0 : σ →₀ ℕ) u = 1 := by
         first
         | rw [MvPowerSeries.coeff_zero_eq_constantCoeff_apply]; exact hu0
-        | simpa using hu0
       simp only [hc, one_mul] at hmul
       rw [eq_sub_of_add_eq hmul]
       have hsub : ∀ a b : K, ‖a - b‖ ≤ max ‖a‖ ‖b‖ := by
@@ -203,44 +244,18 @@ theorem integral_of_mul_eq_one [IsUltrametricDist K] {u v : MvPowerSeries σ K} 
           rw [← hp2]
           first
           | exact (map_add Finsupp.degree p.1 p.2).symm
-          | exact (Finsupp.degree_add p.1 p.2).symm
         have hpos : 0 < p.1.degree := by
           rcases Nat.eq_zero_or_pos p.1.degree with h | h
           · exfalso
             apply hp1
             first
             | exact (Finsupp.degree_eq_zero_iff p.1).mp h
-            | exact Finsupp.degree_eq_zero_iff.mp h
           · exact h
         rw [norm_mul]
         exact (mul_le_mul (hu p.1) (ih p.2.degree (by omega) p.2 rfl) (norm_nonneg _)
           zero_le_one).trans (by norm_num)
   intro d
   exact key _ d rfl
-
-def CT (F : ℕ → MvPowerSeries σ K) (f : MvPowerSeries σ K) : Prop :=
-  ∀ n, Filter.Tendsto (fun k => MvPowerSeries.coeff n (F k)) Filter.atTop
-    (nhds (MvPowerSeries.coeff n f))
-
-theorem CT.mul {F G : ℕ → MvPowerSeries σ K} {f g : MvPowerSeries σ K} (hF : CT F f)
-    (hG : CT G g) : CT (fun k => F k * G k) (f * g) := by
-  classical
-  intro n
-  simp only [MvPowerSeries.coeff_mul]
-  apply tendsto_finset_sum
-  intro p _
-  exact (hF p.1).mul (hG p.2)
-
-theorem CT.pow {F : ℕ → MvPowerSeries σ K} {f : MvPowerSeries σ K} (hF : CT F f) (n : ℕ) :
-    CT (fun k => F k ^ n) (f ^ n) := by
-  induction n with
-  | zero =>
-    intro d
-    simp only [pow_zero]
-    exact tendsto_const_nhds
-  | succ n ih =>
-    simp only [pow_succ]
-    exact ih.mul hF
 
 theorem inLam_zero [IsUltrametricDist K] [Algebra ℚ K] : InLam (0 : MvPowerSeries σ K) := by
   refine ⟨map_zero _, ?_⟩
@@ -269,8 +284,6 @@ theorem inLam_neg [IsUltrametricDist K] [Algebra ℚ K] {f : MvPowerSeries σ K}
     rw [← expS_add f (-f) hf.1 (by simp [hf.1])]
     first
     | rw [add_neg_cancel, expS_zero]
-    | rw [add_right_neg, expS_zero]
-    | simp [expS_zero]
   exact integral_of_mul_eq_one h1 (constantCoeff_expS f hf.1) hf.2
 
 theorem inLam_nsmul [IsUltrametricDist K] [Algebra ℚ K] {f : MvPowerSeries σ K} (hf : InLam f)

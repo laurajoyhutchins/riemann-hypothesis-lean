@@ -1,7 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalPairSubGeneric
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ReducibleCuspidalPairNongenericSubquotientStatement
-import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.WhittakerCuspidal.WhitCuspOfSegCuspGeneric
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.SegmentCuspLines.CuspLinesIrr
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.SegmentDerivatives.CuspPairSubGeneric
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalPairSubGeneric
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicitySubquotientLe
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ReducibleCuspidalPairNongenericSubquotientStatement
+public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.WhittakerCuspidal.WhitCuspOfSegCuspGeneric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,9 +58,9 @@ namespace CuspPair
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
-theorem key {x y : IrrGL k} (hx : x.IsCusp) (hy : y.IsCusp) {N : ℕ} (hd : ∑ a, (![x, y] a).1 = N)
+theorem key {x y : IrrGL (k := k)} (hx : x.IsCusp) (hy : y.IsCusp) {N : ℕ} (hd : ∑ a, (![x, y] a).1 = N)
     {V : Type} [AddCommGroup V] [Module ℂ V] (τ : Representation ℂ (GL (Fin N) k) V)
-    (hτ : IsSubquotient τ (prodIrr ![x, y] hd)) (u : Fin 2 → IrrGL k) (hu : ∑ a, (u a).1 = N)
+    (hτ : IsSubquotient τ (prodIrr ![x, y] hd)) (u : Fin 2 → IrrGL (k := k)) (hu : ∑ a, (u a).1 = N)
     (hpos : ∀ a, 0 < (u a).1) (hj : 1 ≤ jm u hu τ) : u = ![x, y] ∨ u = ![y, x] := by
   have hxc : ∀ a, (![x, y] a).IsCusp := Fin.forall_fin_two.2 ⟨hx, hy⟩
   have hj' := GlobalTheory.CompanionTheory.JmMono.jm_le_of_isSubquotient u hu τ _ (isSmooth_prodIrr ![x, y] hd) hτ
@@ -29,8 +74,8 @@ theorem key {x y : IrrGL k} (hx : x.IsCusp) (hy : y.IsCusp) {N : ℕ} (hd : ∑ 
 
 end CuspPair
 
-open CuspPair in
 
+open CuspPair in
 theorem cuspPairIrr_of (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     (h : GlobalTheory.BZSeg.NuPair k) : GlobalTheory.BZSeg.CuspPairIrr k := by
   intro x y N hd hx hy h1 h2
@@ -43,7 +88,7 @@ theorem cuspPairIrr_of (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k
   have hp2 : ∀ a, 0 < (![β', α.nu 1] a).1 := Fin.forall_fin_two.2 ⟨hββ ▸ hβ, hα⟩
   have c1 := key hx hy hd τ.ρ hτ _ hd1 hp1 j1
   have c2 := key hx hy hd τ.ρ hτ _ hd2 hp2 j2
-  have e0 : ∀ {a b c d : IrrGL k}, ![a, b] = ![c, d] → a = c ∧ b = d := fun h =>
+  have e0 : ∀ {a b c d : IrrGL (k := k)}, ![a, b] = ![c, d] → a = c ∧ b = d := fun h =>
     ⟨congrFun h 0, congrFun h 1⟩
   rcases c1 with c1 | c1 <;> obtain ⟨rfl, -⟩ := e0 c1
   · rcases c2 with c2 | c2 <;> obtain ⟨-, h3⟩ := e0 c2

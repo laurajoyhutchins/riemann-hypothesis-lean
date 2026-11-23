@@ -1,9 +1,72 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsRepDict
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.MMRead
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.FormalExponentialAgree
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsRepDict
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.WeierstrassUniqueness.ExistsPeriodPairOfIsLat
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.BeWInertOfSigma
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.ExistsWittSeriesInverseFormalGroupIso
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.JetsModel
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.MMRead
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PadicNormTwoHundredSixteenEqOneOfFiveLe
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PowerSeriesEmbedding
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SigmaAlg
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.CmAll
+import Formalism.LocalToGlobal.TorsionIntegrality.ComplexLatticeClosure.LamConjTheta0
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.HasCMByStable
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.FinalC
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.FinalOfNRDense
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.ComplexMultiplicationFieldData
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.SecondLevelOfNorm
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.SingleLetterBiextensionRelation
 import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.ExistsWittSeriesInverseFormalGroupIso
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.JetsModel
+import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Joints
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.FinalFree
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.FamilyLogGammaSmallHolds
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsBeW
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,7 +139,7 @@ theorem isWq_scale (W : WeierstrassCurve ℂ_[p]) (wq : PowerSeries ℂ_[p]) (h 
   dsimp only at h ⊢
   conv_lhs => rw [h]
   rw [scale_weierstrass_a1, scale_weierstrass_a2, scale_weierstrass_a3, scale_weierstrass_a4, scale_weierstrass_a6]
-  simp only [map_add, map_mul, map_pow, map_one, PowerSeries.rescale_X, PowerSeries.algebraMap_eq, rescale_C']
+  simp only [map_add (f := _), map_mul, map_pow, map_one, PowerSeries.rescale_X, PowerSeries.algebraMap_eq, rescale_C']
   ring
 
 theorem omegaW_scale (W : WeierstrassCurve ℂ_[p]) (wq : PowerSeries ℂ_[p]) :
@@ -93,7 +156,7 @@ theorem omegaW_scale (W : WeierstrassCurve ℂ_[p]) (wq : PowerSeries ℂ_[p]) :
       algebraMap ℂ_[p] (PowerSeries ℂ_[p]) (ν⁻¹ ^ 3 * W.a₃) * PowerSeries.X ^ 3 * PowerSeries.rescale ν⁻¹ wq - 2) =
       PowerSeries.rescale ν⁻¹ (wq * (algebraMap ℂ_[p] (PowerSeries ℂ_[p]) W.a₁ * PowerSeries.X +
         algebraMap ℂ_[p] (PowerSeries ℂ_[p]) W.a₃ * PowerSeries.X ^ 3 * wq - 2)) := by
-    simp only [map_add, map_sub, map_mul, map_pow, map_ofNat, PowerSeries.rescale_X,
+    simp only [map_add (f := _), map_sub, map_mul, map_pow, map_ofNat, PowerSeries.rescale_X,
       PowerSeries.algebraMap_eq, rescale_C']
     ring
   rw [hnum, hden, ← rescale_inv, ← map_mul]
@@ -220,12 +283,14 @@ theorem dict_core (hp2 : p ≠ 2) (D : D7) {N N' r : ℕ} (lam : Qbar →+* ℂ_
           PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin r) ℂ_[p]) (flog (C • wModel lam Λ) wq)) := by
       apply MvPowerSeries.hasSubst_of_constantCoeff_zero
       intro k
+
       simp [map_sum, hXfl]
     have hT : MvPowerSeries.HasSubst (fun k : D.what₂.Tau × Fin N' × Fin N =>
         ∑ i, MvPowerSeries.C ((((C.u⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) * κ) * lamC lam (embT D k.1 (b i k.2.1 k.2.2))) *
           (MvPowerSeries.X i : MvPowerSeries (Fin r) ℂ_[p])) := by
       apply MvPowerSeries.hasSubst_of_constantCoeff_zero
       intro k
+
       simp [map_sum]
     have hP : MvPowerSeries.HasSubst (fun i : Fin r => PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin r) ℂ_[p]) L) :=
       MvPowerSeries.hasSubst_of_constantCoeff_zero (fun i => constantCoeff_inVar_eq_zero i L hL0)
@@ -235,6 +300,7 @@ theorem dict_core (hp2 : p ≠ 2) (D : D7) {N N' r : ℕ} (lam : Qbar →+* ℂ_
     erw [MvPowerSeries.subst_comp_subst_apply hT hP]
     congr 1
     funext k
+
     rw [← MvPowerSeries.coe_substAlgHom hSs, map_sum]
     erw [← MvPowerSeries.coe_substAlgHom hP, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -423,7 +489,7 @@ theorem rdictMain : Formalism.L2.KerInert.Rep.CurveDict := by
     have hw := (sqrtKur D.host.d hsqf hd4 l h5 hsq' ι).1
     have hmem : ∀ m n : ℤ, ι ((m : ℂ) + (n : ℂ) * omegaK D.host.d) ∈ MaximalUnramifiedExtension l := by
       intro m n
-      rw [map_add, map_mul, map_intCast, map_intCast]
+      rw [map_add (f := _), map_mul, map_intCast, map_intCast]
       exact add_mem (intCast_mem _ m) (mul_mem (intCast_mem _ n) hw)
     let S : Set (MaximalUnramifiedExtension l) := {a | ∃ m n : ℤ, ¬ (l : ℤ) ∣ normInt D.host.d m n ∧
       (a : ℂ_[l]) = ι ((m : ℂ) + (n : ℂ) * omegaK D.host.d)}

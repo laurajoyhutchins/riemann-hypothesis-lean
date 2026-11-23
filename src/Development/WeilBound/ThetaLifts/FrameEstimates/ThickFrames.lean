@@ -1,5 +1,49 @@
-import Development.WeilBound.ThetaLifts.FrameEstimates.HodgeTateFromSandwich
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+module
+
+public import Development.WeilBound.ThetaLifts.FrameEstimates.HodgeTateFromSandwich
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNatMulIntegralOfIsCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +74,7 @@ theorem theta_add (hp : IsPair B M χX χW om r s r' s') {Φ Ψ : Fn F n d} (hΦ
     rw [e, map_mul]
     exact h2
   unfold theta
-  rw [map_add]
+  rw [map_add (f := _)]
   exact GlobalTheory.WeilM.thetaSum_add F (hpres Φ hΦ) (hpres Ψ hΨ)
 
 theorem theta_smul (hp : IsPair B M χX χW om r s r' s') (c : ℂ) {Φ : Fn F n d} (hΦ : Φ ∈ schA F _) (g h) :
@@ -124,23 +168,23 @@ theorem dom_sum (hB : ThetaBasic) (hp : IsPair B M χX χW om r s r' s') {𝓕} 
         fun g => ∑ i, theta om (pureA F (f i) (φ i)) g h := funext fun g => hsum g h
     show IntegrableOn (fun g => theta om (∑ i, pureA F (f i) (φ i)) g h) M.dom M.μ
     rw [e]
-    exact integrable_finset_sum _ fun i _ => hconv i h
+    exact integrable_finsetSum _ fun i _ => hconv i h
   · obtain ⟨C, k, hCk⟩ := exists_common (fun h : UA σ W.J => (ht h : ℝ)) (fun h => one_le_ht' h) id
       (fun i h => ∫ g in M.dom, ‖theta om (pureA F (f i) (φ i)) g h‖ ∂M.μ) (fun i => ((hfac i).1 (f i)).2)
     refine ⟨C, k, fun h => le_trans ?_ (hCk h)⟩
     calc ∫ g in M.dom, ‖theta om (∑ i, pureA F (f i) (φ i)) g h‖ ∂M.μ
         ≤ ∫ g in M.dom, ∑ i, ‖theta om (pureA F (f i) (φ i)) g h‖ ∂M.μ := by
           refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun g => norm_nonneg _)
-            (integrable_finset_sum _ fun i _ => (hconv i h).norm) (Filter.Eventually.of_forall fun g => ?_)
+            (integrable_finsetSum _ fun i _ => (hconv i h).norm) (Filter.Eventually.of_forall fun g => ?_)
           show ‖theta om (∑ i, pureA F (f i) (φ i)) g h‖ ≤ ∑ i, ‖theta om (pureA F (f i) (φ i)) g h‖
           rw [hsum]
           exact norm_sum_le _ _
       _ = ∑ i, ∫ g in M.dom, ‖theta om (pureA F (f i) (φ i)) g h‖ ∂M.μ :=
-          integral_finset_sum _ fun i _ => (hconv i h).norm
+          integral_finsetSum _ fun i _ => (hconv i h).norm
   · show ∫ g in M.dom, theta om (∑ i, pureA F (f i) (φ i)) g h ∂M.μ =
       ∑ i, ∫ g in M.dom, theta om (pureA F (f i) (φ i)) g h ∂M.μ
     simp_rw [hsum]
-    exact integral_finset_sum _ fun i _ => hconv i h
+    exact integral_finsetSum _ fun i _ => hconv i h
 
 end
 
@@ -252,7 +296,7 @@ theorem soCont_of (hB : ThetaBasic) (hD : DomSoU) (hF : SoFin) : SoCont := by
   have e : (fun k => M.I om (∑ j, pureA F (u k j) (φ j)) h) = fun k => ∑ j, M.I om (pureA F (u k j) (ψ j)) h :=
     funext fun k => by rw [key _ (hu k), (dom_sum hB hp hdom (u k) ψ hψ fun i => (hψ i).1).2.2 h]
   rw [e]
-  exact tendsto_finset_sum _ fun j _ => (((dom_facts hB hp hdom (hψ j) (hψ j).1).2 h).tendsto _).comp (hφ j).2
+  exact tendsto_finsetSum _ fun j _ => (((dom_facts hB hp hdom (hψ j) (hψ j).1).2 h).tendsto _).comp (hφ j).2
 
 end PositivityTheory.ThKEst
 

@@ -1,11 +1,45 @@
-import Formalism.LocalToGlobal.ClassS
-import Formalism.LocalToGlobal.ClassSK
-import Formalism.LocalToGlobal.ClassSLinks
-import Formalism.LocalToGlobal.ClassSR
-import Formalism.LocalToGlobal.HilbertRowConditions.RowPinMin
-import Formalism.LocalToGlobal.RatioJoints.CharacterProductEqOne
-import Formalism.LocalToGlobal.UnitaryNorms.DatumS
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeilEq
+module
+
+public import Formalism.LocalToGlobal.HilbertRowConditions.RowPinMin
+public import Formalism.LocalToGlobal.RatioJoints.CharacterProductEqOne
+public import Formalism.LocalToGlobal.UnitaryNorms.DatumS
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeilEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,24 +64,6 @@ structure RecT (ex : Extra D L hT Gi Gl K Y cX) where
 
   weq : Theta.WeilCompatibleEquivariance T.toTiedDataS.theta.W
 
-def TiedRec (ex : Extra D L hT Gi Gl K Y cX) : Prop := Nonempty (RecT ex)
-
-theorem TiedRec.tiedSK {ex : Extra D L hT Gi Gl K Y cX} (h : TiedRec ex) : LinkedFamilyKernelCondition ex :=
-  let ⟨R⟩ := h; ⟨R.T⟩
-
 end
-
-def LayerTwoFamilyClass : FamClass := fun {_} Fm =>
-  (∃ x0 : ℝ, ∀ x (hx : Fm.x1 < x), x0 ≤ x → ∀ i : Fm.Ix x, TiedRec (Fm.ex x hx i)) ∧ LinkedFamiliesAligned Fm
-
-theorem LayerTwoFamilyClass.c2sk {eps : ℝ} {Fm : FamP eps} (h : LayerTwoFamilyClass Fm) : LinkedFamiliesKernelFrame Fm := by
-  obtain ⟨⟨x0, h⟩, _⟩ := h
-  exact ⟨x0, fun x hx hx0 i => (h x hx hx0 i).tiedSK⟩
-
-theorem LayerTwoFamilyClass.c2s {eps : ℝ} {Fm : FamP eps} (h : LayerTwoFamilyClass Fm) : LinkedFamiliesLevelClass Fm := h.c2sk.c2s
-
-theorem LayerTwoFamilyClass.c2sa {eps : ℝ} {Fm : FamP eps} (h : LayerTwoFamilyClass Fm) : LinkedFamiliesAligned Fm := h.2
-
-theorem gTiedF_of_C2Rec {eps : ℝ} (Fm : FamP eps) (h : LayerTwoFamilyClass Fm) : G.GroupCompatibilityFamily Fm := gTiedF_of_C2S Fm h.c2s
 
 end Formalism.L2

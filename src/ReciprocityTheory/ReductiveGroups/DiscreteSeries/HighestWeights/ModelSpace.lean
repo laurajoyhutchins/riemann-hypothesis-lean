@@ -1,6 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelFun
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.InhabA
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolyEntriesConjLeftRightMul
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelFun
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import Mathlib.RingTheory.MvPolynomial.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,7 +107,7 @@ theorem evalK_apply (ε : Fin n → Bool) (Q : MvPolynomial (Fin n × Fin n) ℂ
     evalK ε Q x = MvPolynomial.aeval (fun p : Fin n × Fin n => toMK x p.1 p.2) Q := by
   induction Q using MvPolynomial.induction_on
   next a => simp [evalK]
-  next p q hp hq => rw [map_add, map_add, Pi.add_apply, hp, hq]
+  next p q hp hq => rw [map_add (f := _), map_add (f := _), Pi.add_apply, hp, hq]
   next p i hp =>
     rw [map_mul, map_mul, Pi.mul_apply, hp]
     simp [evalK]
@@ -78,26 +129,13 @@ theorem rtr_evalK (ε : Fin n → Bool) (k : KG ε) (Q : MvPolynomial (Fin n × 
 theorem totalDegree_rsub (ε : Fin n → Bool) (k : KG ε) (p : Fin n × Fin n) :
     (rsub ε k p).totalDegree ≤ 1 := by
   simp only [rsub]
-  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le fun l _ => ?_)
+  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun l _ => ?_)
   refine (MvPolynomial.totalDegree_mul _ _).trans ?_
   simp [MvPolynomial.totalDegree_X, MvPolynomial.totalDegree_C]
 
 theorem totalDegree_bind₁_le {σ τ : Type*} (g : σ → MvPolynomial τ ℂ) (hg : ∀ i, (g i).totalDegree ≤ 1)
     (Q : MvPolynomial σ ℂ) : (MvPolynomial.bind₁ g Q).totalDegree ≤ Q.totalDegree := by
-  classical
-  conv_lhs => rw [Q.as_sum]
-  rw [map_sum]
-  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le fun d hd => ?_)
-  rw [MvPolynomial.bind₁_monomial]
-  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
-  rw [MvPolynomial.totalDegree_C, zero_add]
-  refine (MvPolynomial.totalDegree_finset_prod _ _).trans ?_
-  refine le_trans ?_ (MvPolynomial.le_totalDegree hd)
-  rw [Finsupp.sum]
-  refine Finset.sum_le_sum fun i _ => ?_
-  refine (MvPolynomial.totalDegree_pow _ _).trans ?_
-  calc d i * (g i).totalDegree ≤ d i * 1 := Nat.mul_le_mul_left _ (hg i)
-    _ = d i := mul_one _
+  apply GlobalTheory.PolyEntryMul.totalDegree_bind₁_le_of_le_one <;> assumption
 
 theorem rtr_polyK (ε : Fin n → Bool) (k : KG ε) (Q : MvPolynomial (Fin n × Fin n) ℂ) :
     rtr ε k (evalK ε Q) ∈ polyK ε Q.totalDegree := by
@@ -142,7 +180,7 @@ theorem differentiable_aeval_entries (Q : MvPolynomial (Fin n × Fin n) ℂ) :
   induction Q using MvPolynomial.induction_on
   next a => simp
   next p q hp hq =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact hp.add hq
   next p i hp =>
     have hX : Differentiable ℂ (fun M : Matrix (Fin n) (Fin n) ℂ => M i.1 i.2) := by
@@ -173,7 +211,7 @@ theorem hasDerivAt_of_mem_Vsp (ε : Fin n → Bool) (m : Fin n → ℤ) {f : KG 
   have hc : HasDerivAt (fun t : ℝ => toMK (kcurve ε X t)) X 0 := by
     have hk : ∀ t : ℝ, toMK (kcurve ε X t) = NormedSpace.exp ((t : ℝ) • X) := fun t => by
        unfold kcurve
-       rw [dif_pos hX, Classical.choose_spec (exists_curve ε hX) t, Complex.coe_smul]
+       rw [dite_eq_left hX, Classical.choose_spec (exists_curve ε hX) t, Complex.coe_smul]
     simp only [hk]
     letI iR : NormedRing (Matrix (Fin n) (Fin n) ℂ) := Matrix.linftyOpNormedRing
     letI : NormedAlgebra ℂ (Matrix (Fin n) (Fin n) ℂ) := Matrix.linftyOpNormedAlgebra
@@ -190,7 +228,7 @@ theorem hasDerivAt_of_mem_Vsp (ε : Fin n → Bool) (m : Fin n → ℤ) {f : KG 
     L.hasFDerivAt.comp_hasDerivAt 0 hc
   have h0 : toMK (kcurve ε X 0) = 1 := by
     unfold kcurve
-    rw [dif_pos hX, Classical.choose_spec (exists_curve ε hX) 0]
+    rw [dite_eq_left hX, Classical.choose_spec (exists_curve ε hX) 0]
     simp
   have hLx : L (toMK (kcurve ε X 0)) = toMK x := by
     rw [h0]

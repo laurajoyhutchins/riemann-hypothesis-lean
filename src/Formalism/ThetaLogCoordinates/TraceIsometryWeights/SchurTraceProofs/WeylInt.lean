@@ -1,6 +1,59 @@
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.SchurTraceOfHomInv
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.InvInv
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.InvInt
+module
+
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementA
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementB
+public import Formalism.PolynomialDimension.MultinomialDepth.MonoCount
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.HomRelationHolds
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.InvInt
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.InvInv
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.SchurTraceProofs.SchurTraceOfHomInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.PW
 
@@ -32,7 +85,7 @@ theorem wl_iso_le_iSup (G : GlW K V n) (W : Submodule K V) (la : Fin n → ℤ) 
 theorem wl_iso_wt (G : GlW K V n) (W : Submodule K V) (la : Fin n → ℤ) {x : V} (hx : x ∈ IsoW G W la)
     {ν : Fin n → ℤ} (hν : ¬ Dle ν la) : G.comp ν x = 0 := by
   refine Submodule.iSup_induction _ (motive := fun x => G.comp ν x = 0) (wl_iso_le_iSup G W la hx)
-    (fun v y hy => ?_) (by simp) (fun y z hy hz => by rw [map_add, hy, hz, add_zero])
+    (fun v y hy => ?_) (by simp) (fun y z hy hz => by rw [map_add (f := _), hy, hz, add_zero])
   by_contra h
   exact hν (G.wt_le_of_mem v.2.1 hy h)
 
@@ -55,8 +108,9 @@ theorem wl_comp_comm {U : Type} [AddCommGroup U] [Module K U] (G₁ : GlW K U n)
   obtain ⟨S, hS⟩ := G₁.dec x
   have hx' := G₁.sum_comp x (insert μ S) (fun ν hν => hS ν (fun h => hν (Finset.mem_insert_of_mem h)))
   conv_rhs => rw [← hx']
+
   rw [map_sum, map_sum, Finset.sum_eq_single μ (fun ν _ hν => by rw [G₂.comp_of_isWt (hwt ν), if_neg (Ne.symm hν)])
-    (fun h => absurd (Finset.mem_insert_self μ S) h), G₂.comp_of_isWt (hwt μ), if_pos rfl]
+  (fun h => absurd (Finset.mem_insert_self μ S) h), G₂.comp_of_isWt (hwt μ), if_pos rfl]
 
 theorem wl_transport (G : GlW K V n) {W : Submodule K V} (hW : G.Stable W) (hWf : G.FinW W) {la : Fin n → ℤ}
     {h h' : V} (hh : G.IsHW la h) (hh' : G.IsHW la h') (hhW : h ∈ W) (hh'W : h' ∈ W) (h0 : h ≠ 0) :

@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.PAdicHodge.BdRAlg
-import GroundTheory.PAdicHodge.BdRGalois
+module
+
+public import GroundTheory.PAdicHodge.BdRAlg
+public import GroundTheory.PAdicHodge.BdRGalois
+public import Mathlib.RingTheory.Etale.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Etale.Field
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -14,7 +60,7 @@ section AlgCl
 variable (p : ℕ) [Fact p.Prime]
 
 local notation "𝔹" => BDeRhamPlus (normInteger ℂ_[p]) p
-local notation "𝔪" => maximalIdeal (BDeRhamPlus (normInteger ℂ_[p]) p)
+local notation "𝔪" => maximalIdeal 𝔹
 
 instance isAdicComplete_maximalIdeal_bDeRhamPlus_padicComplex :
     IsAdicComplete (maximalIdeal (BDeRhamPlus (normInteger ℂ_[p]) p))
@@ -71,14 +117,6 @@ theorem eq_algClToQuot (n : ℕ) (g : PadicAlgCl p →ₐ[ℚ_[p]] 𝔹 ⧸ 𝔪
 theorem thetaQuot_factorₐ {k n : ℕ} (hle : k ≤ n) (y : 𝔹 ⧸ 𝔪 ^ (n + 1)) :
     thetaQuot p k (Ideal.Quotient.factorₐ ℚ_[p] (Ideal.pow_le_pow_right (Nat.succ_le_succ hle)) y) =
       thetaQuot p n y := by
-  obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective y
-  rfl
-
-theorem factorₐ_comp_factorₐ {a b c : ℕ} (hab : a ≤ b) (hbc : b ≤ c) :
-    (Ideal.Quotient.factorₐ ℚ_[p] (Ideal.pow_le_pow_right hab) : 𝔹 ⧸ 𝔪 ^ b →ₐ[ℚ_[p]] 𝔹 ⧸ 𝔪 ^ a).comp
-      (Ideal.Quotient.factorₐ ℚ_[p] (Ideal.pow_le_pow_right hbc)) =
-      Ideal.Quotient.factorₐ ℚ_[p] (Ideal.pow_le_pow_right (hab.trans hbc)) := by
-  ext y
   obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective y
   rfl
 
@@ -165,7 +203,7 @@ theorem gal_smul_algClToBdR (σ : Gal(PadicAlgCl p/K)) (x : PadicAlgCl p) :
           (σ : PadicAlgCl p →+* PadicAlgCl p))
       commutes' := fun q => by
         simp only [RingHom.toMonoidHom_eq_coe, OneHom.toFun_eq_coe, MonoidHom.toOneHom_coe,
-          MonoidHom.coe_coe, RingHom.coe_comp, Function.comp_apply, RingHom.coe_coe, galBdR_apply]
+          MonoidHom.coe_ofClass, RingHom.coe_comp, Function.comp_apply, RingHom.coe_coe, galBdR_apply]
         rw [IsScalarTower.algebraMap_apply ℚ_[p] K (PadicAlgCl p), AlgEquiv.commutes,
           ← IsScalarTower.algebraMap_apply, AlgHom.commutes, gal_smul_algebraMap_bdR] }
   have hg : g = algClToBdR p := eq_algClToBdR p g fun y => by

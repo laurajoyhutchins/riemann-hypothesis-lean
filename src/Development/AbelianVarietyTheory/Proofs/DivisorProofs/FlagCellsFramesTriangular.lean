@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSpMapEv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvRFrMapOfIsReduced
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemSpanOfPluckerProportional
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlagCellFrameChangeTriangular
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqSpMapEv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvRFrMapOfIsReduced
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemSpanOfPluckerProportional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,6 +109,28 @@ theorem col_tri (hZ : Cells A π g κ) (k k' : A.B × Pm Dw.mult) (σ : E →+* 
         (fun s => ((ev z _ hz').comp (cellθ κ k').toRingHom) (uC A k'.1 k'.2 σ s j)) =
       ((uC A k.1 k.2 σ).map ((ev z _ hz).comp (cellθ κ k).toRingHom)).mulVec a := by
   classical
+  have span_range_comp_eq_top : ∀ {A B : Type} [CommRing A] [CommRing B] {n : ℕ}
+      (v : Fin (n + 1) → A), Ideal.span (Set.range v) = ⊤ → (ψ : A →+* B) →
+      Ideal.span (Set.range (ψ ∘ v)) = ⊤ := by
+    intro A B _ _ n v hv ψ
+    rw [Set.range_comp, ← Ideal.map_span, hv, Ideal.map_top]
+  have spMap_pt : ∀ {O A B : Type} [CommRing O] [CommRing A] [CommRing B] {n : ℕ}
+      (c : O →+* A) (v : Fin (n + 1) → A) (hv : Ideal.span (Set.range v) = ⊤) (ψ : A →+* B),
+      spMap ψ ≫ pt c v hv = pt (ψ.comp c) (ψ ∘ v) (span_range_comp_eq_top v hv ψ) := by
+    intro O A B _ _ _ n c v hv ψ
+    letI := MvPolynomial.gradedAlgebra (σ := Fin (n + 1)) (R := O)
+    refine (ProjPoint.SpecMap_ofHom _ _ _ ψ).trans ?_
+    unfold pt
+    congr 1
+    exact MvPolynomial.ringHom_ext (fun r => by simp) (fun i => by simp)
+  have pt_str : ∀ {O A : Type} [CommRing O] [CommRing A] {N : ℕ}
+      (c : O →+* A) (v : Fin (N + 1) → A) (hv : Ideal.span (Set.range v) = ⊤),
+      pt c v hv ≫ PSpace.str O N = spMap c := by
+    intro O A _ _ N c v hv
+    rw [pt, PSpace.str, ProjPoint.ofHom_toSpecZero_assoc, ← Spec.map_comp]
+    congr 1
+    ext1
+    exact RingHom.ext fun r => MvPolynomial.eval₂Hom_C c v r
   have hx := le_comp_base hZ k z hz
   have hx' := le_comp_base hZ k' z hz'
   have ex := ev_comp_base hZ k z hz hx
@@ -113,6 +174,7 @@ theorem col_tri (hZ : Cells A π g κ) (k k' : A.B × Pm Dw.mult) (σ : E →+* 
     intro b w φ i
     funext r
     rw [uvec_cv, Matrix.mulVec_single_one]
+
     simp [Matrix.mul_apply, Matrix.mulVec, dotProduct, map_sum]
   let av : Fin (Dw.mult σ) → L := ∑ l, f l • Pi.single (Fin.castLE hj l) 1
   have hq : (fun s => ψ' (uC A k'.1 k'.2 σ s j)) = ((uC A k'.1 k'.2 σ).map ψ').mulVec (Pi.single j 1) := by

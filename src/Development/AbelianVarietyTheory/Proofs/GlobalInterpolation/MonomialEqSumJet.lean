@@ -1,7 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DerivationCoordinateChange
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.JetSumTable
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.DerivationCoordinateChange
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
+import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.L2.Th1.H GlobalTheory.IndefiniteRowSideFullHecke.JetSumTable GlobalTheory.MomT
 
 noncomputable section
@@ -20,7 +68,7 @@ theorem embT_injective : Function.Injective (TaylorLogMetric.embT D) := by
   exact congrArg (fun f : D.host.E →+* ℂ => f x) h
 
 theorem lamC_injOn {x y : ℂ} (hx : x ∈ TaylorLogMetric.Qbar) (hy : y ∈ TaylorLogMetric.Qbar) (h : TaylorLogMetric.lamC lam x = TaylorLogMetric.lamC lam y) : x = y := by
-  rw [TaylorLogMetric.lamC, TaylorLogMetric.lamC, dif_pos hx, dif_pos hy] at h
+  rw [TaylorLogMetric.lamC, TaylorLogMetric.lamC, dite_eq_left hx, dite_eq_left hy] at h
   exact congrArg Subtype.val (lam.injective h)
 
 theorem emb_mem {A : Type} [Field A] [NumberField A] (f : A →+* ℂ) (x : A) : f x ∈ TaylorLogMetric.Qbar :=
@@ -28,7 +76,7 @@ theorem emb_mem {A : Type} [Field A] [NumberField A] (f : A →+* ℂ) (x : A) :
 
 theorem lamC_add {x y : ℂ} (hx : x ∈ TaylorLogMetric.Qbar) (hy : y ∈ TaylorLogMetric.Qbar) :
     TaylorLogMetric.lamC lam (x + y) = TaylorLogMetric.lamC lam x + TaylorLogMetric.lamC lam y := by
-  rw [TaylorLogMetric.lamC, TaylorLogMetric.lamC, TaylorLogMetric.lamC, dif_pos hx, dif_pos hy, dif_pos (add_mem hx hy), ← map_add]
+  rw [TaylorLogMetric.lamC, TaylorLogMetric.lamC, TaylorLogMetric.lamC, dite_eq_left hx, dite_eq_left hy, dite_eq_left (add_mem hx hy), ← map_add (f := _)]
   rfl
 
 theorem lamC_sum {ι : Type} (s : Finset ι) (f : ι → ℂ) (hf : ∀ i, f i ∈ TaylorLogMetric.Qbar) :
@@ -36,7 +84,7 @@ theorem lamC_sum {ι : Type} (s : Finset ι) (f : ι → ℂ) (hf : ∀ i, f i �
   classical
   induction s using Finset.induction_on with
   | empty =>
-    rw [Finset.sum_empty, Finset.sum_empty, TaylorLogMetric.lamC, dif_pos (zero_mem _)]
+    rw [Finset.sum_empty, Finset.sum_empty, TaylorLogMetric.lamC, dite_eq_left (zero_mem _)]
     exact map_zero lam
   | insert a s ha ih =>
     rw [Finset.sum_insert ha, Finset.sum_insert ha, lamC_add lam (hf a) (sum_mem fun i _ => hf i), ih]
@@ -66,8 +114,8 @@ theorem exists_single (τ : D.what₂.Tau) : ∃ (k : ℕ) (γ : Fin k → ℂ_[
     rfl
   exact ⟨k, γ, x, by rw [key, Pi.single_eq_same], fun τ' h => by rw [key, Pi.single_eq_of_ne h]⟩
 
-open Classical in
 
+open Classical in
 theorem exists_vecY (v : D.what₂.Tau × Fin N' × Fin N) : ∃ (k : ℕ) (γ : Fin k → ℂ_[p])
     (z : Fin k → Matrix (Fin N') (Fin N) D.host.E), ∑ l, γ l • vecY D lam (z l) = Pi.single v 1 := by
   obtain ⟨τ, i, j⟩ := v
@@ -94,6 +142,7 @@ theorem lam_hYY (y Y : Matrix (Fin N') (Fin N) D.host.E) :
   refine Finset.sum_congr rfl fun τ _ => ?_
   obtain ⟨g, hg⟩ := exists_lamHom lam (TaylorLogMetric.embT D τ)
   rw [hg]
+
   simp only [vecY, TaylorLogMetric.tauEmb, hg, map_sum, map_mul, Fintype.sum_prod_type]
 
 theorem dirDer_sum {σ ι : Type} [Fintype σ] (s : Finset ι) (c : ι → ℂ_[p]) (w : ι → σ → ℂ_[p]) :
@@ -104,7 +153,7 @@ theorem dirDer_sum {σ ι : Type} [Fintype σ] (s : Finset ι) (c : ι → ℂ_[
   | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, dirDer_add, dirDer_smul, ih]
 
 theorem dirDer_single {σ : Type} [Fintype σ] [DecidableEq σ] (v : σ) (F : MvPowerSeries σ ℂ_[p]) :
-    dirDer (Pi.single v 1) F = pderiv ℂ_[p] v F := by
+    dirDer (Pi.single v 1) F = pderiv (R := ℂ_[p]) v F := by
   rw [dirDer_apply, Finset.sum_eq_single v]
   · simp
   · intro b _ hb
@@ -146,7 +195,7 @@ theorem exists_comb (n : ℕ) : ∀ α : TaylorLogMetric.Mono D N N', α.degree 
       exact Nat.one_le_iff_ne_zero.2 (Finsupp.mem_support_iff.1 hx)
     obtain ⟨β, rfl⟩ : ∃ β, α = β + Finsupp.single x 1 := ⟨α - Finsupp.single x 1, (tsub_add_cancel_of_le hle).symm⟩
     have hβ : β.degree = n := by
-      rw [map_add, Finsupp.degree_single] at hn
+      rw [map_add (f := _), Finsupp.degree_single] at hn
       omega
     obtain ⟨ι, _, γ, y, h1, h2⟩ := ih β hβ
     obtain ⟨k, δ, z, hz⟩ := exists_vecY D lam x
@@ -154,8 +203,9 @@ theorem exists_comb (n : ℕ) : ∀ α : TaylorLogMetric.Mono D N N', α.degree 
     · rw [jetAt_add_single, h1, Fintype.sum_prod_type]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [← dirDer_single, ← hz, dirDer_sum, jet_eq]
+
       simp only [jet_snoc, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, constantCoeff_smul,
-        smul_eq_mul, Finset.mul_sum, mul_assoc]
+      smul_eq_mul, Finset.mul_sum, mul_assoc]
     · rw [Finsupp.prod_add_index' (by simp) (fun _ _ _ => pow_add _ _ _), h2, Finsupp.prod_single_index (by simp),
         pow_one, Fintype.sum_prod_type, Finset.sum_mul]
       refine Finset.sum_congr rfl fun l _ => ?_

@@ -1,10 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.UnlinkedProductIrreducible
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
-import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsUnitarisableOfCharIff
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Matrix
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +79,7 @@ theorem act_eigen (σ : Representation ℂ K X) (ψ : K →* ℂˣ) (y : X)
     σ.asAlgebraHom c y = aug ψ c • y := by
   induction c using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => rw [map_add, map_add, LinearMap.add_apply, ha, hb, add_smul]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, ha, hb, add_smul]
   | single g r => rw [aug_single, Representation.asAlgebraHom_single, LinearMap.smul_apply, hy, smul_smul]
 
 theorem act_comm (σ : Representation ℂ K X) (τ : Representation ℂ K Y) (f : X →ₗ[ℂ] Y)
@@ -37,7 +87,7 @@ theorem act_comm (σ : Representation ℂ K X) (τ : Representation ℂ K Y) (f 
     f (σ.asAlgebraHom c x) = τ.asAlgebraHom c (f x) := by
   induction c using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
   | single g r => simp only [Representation.asAlgebraHom_single, LinearMap.smul_apply, map_smul, hf]
 
 theorem exists_kill [TopologicalSpace K] [IsTopologicalGroup K] [CompactSpace K]
@@ -63,6 +113,7 @@ theorem exists_kill [TopologicalSpace K] [IsTopologicalGroup K] [CompactSpace K]
     obtain ⟨x, rfl⟩ := (hO w).1 hw
     exact (hO _).2 ⟨g * x, by rw [map_mul, Module.End.mul_apply]⟩
   have hinv : ∀ g, π g (∑ w ∈ O, w) = ∑ w ∈ O, w := fun g => by
+
     rw [map_sum]
     refine Finset.sum_nbij' (fun w => π g w) (fun w => π g⁻¹ w) (hmem g) (hmem g⁻¹)
       (fun w _ => ?_) (fun w _ => ?_) (fun _ _ => rfl)
@@ -76,11 +127,13 @@ theorem exists_kill [TopologicalSpace K] [IsTopologicalGroup K] [CompactSpace K]
     rw [smul_smul, Units.mul_inv, one_smul]
   choose s hs using fun w : O => (hO w).1 w.2
   refine ⟨∑ w : O, MonoidAlgebra.single (s w) ((ψ (s w))⁻¹ : ℂˣ).val, ?_, ?_⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     simp only [aug_single, Units.inv_mul]
     have : O.Nonempty := ⟨z, (hO z).2 ⟨1, by simp⟩⟩
     simpa using this.ne_empty
-  · rw [map_sum, LinearMap.sum_apply, ← hz, ← Finset.sum_coe_sort O]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum, LinearMap.sum_apply, ← hz, ← Finset.sum_coe_sort O]
     refine Finset.sum_congr rfl fun w _ => ?_
     rw [Representation.asAlgebraHom_single, LinearMap.smul_apply]
     exact hs w
@@ -130,7 +183,7 @@ theorem exists_kill_tensor (ψ : K →* ℂˣ)
     obtain ⟨d, hd, hd'⟩ := hw (c * b)
     refine ⟨d * c, by rw [map_mul]; exact mul_ne_zero hd hc, ?_⟩
     rw [map_mul, Module.End.mul_apply] at hd'
-    rw [map_mul, Module.End.mul_apply, map_add, map_add, hc', zero_add, hd']
+    rw [map_mul, Module.End.mul_apply, map_add (f := _), map_add (f := _), hc', zero_add, hd']
 
 end Tensor
 

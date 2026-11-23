@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.StandardFiveNontrivial
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.StandardFiveNontrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open Polynomial Classical GlobalTheory.BadShare
@@ -243,6 +296,7 @@ lemma step {M : Type} [AddCommGroup M] [Module ℂ M] (ρ : Representation ℂ (
   have h3 : ∑ v : Fin N → ZMod g,
       L.ψ (-((L.co m : ZMod g) * v m)) • ρ (colElt n (tr v) (htr v n le_rfl)) (∑ h, φ h • ρ h x) = 0 := by
     simp [hs]
+
   simp only [map_sum, Finset.smul_sum] at h3
   rw [Finset.sum_comm, Finset.sum_congr rfl fun h _ => ((Finset.sum_congr rfl fun v _ => h1 v h).trans (Finset.sum_smul.symm.trans (h2 h))), ← Finset.smul_sum] at h3
   exact (smul_eq_zero.1 h3).resolve_left (Nat.cast_ne_zero.2 Fintype.card_ne_zero)
@@ -280,6 +334,7 @@ theorem translates_independent : ∀ (g : ℕ) [Fact g.Prime] (N : ℕ), ∀ (M 
     have hs' : ∑ p, φ (h₀ * p) • ρ p x = 0 := by
       have e := Equiv.sum_comp (Equiv.mulLeft h₀) (fun h => φ h • ρ h x)
       have e2 := congrArg (ρ h₀⁻¹) (e.trans hs)
+
       rw [map_sum, map_zero] at e2
       rw [← e2]
       refine Finset.sum_congr rfl fun p _ => ?_

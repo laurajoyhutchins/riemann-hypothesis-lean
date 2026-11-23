@@ -1,4 +1,44 @@
-import Formalism.LocalRingCardinality.DataParams₂
+module
+
+public import Formalism.LocalRingCardinality.DataParams₂
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,30 +67,6 @@ theorem unb (S : Scales la) (hla : 1 ≤ la) (y : ℝ) : ∃ x ∈ S.Win, y ≤ 
 
 def scale (S : Scales la) (x eps : ℝ) (hx : 1 < x) (h0 : 0 < eps) (h1 : eps < 1 / 52) : Scale :=
   ⟨x, eps, hx, h0, h1, S.J, S.one_le_J⟩
-
-theorem scale_mem (S : Scales la) {x eps : ℝ} (hx : 1 < x) (h0 : 0 < eps) (h1 : eps < 1 / 52) (hw : x ∈ S.Win) :
-    S.Mem (S.scale x eps hx h0 h1) := ⟨rfl, hw⟩
-
-theorem exists_mem (S : Scales la) (hla : 1 ≤ la) {eps : ℝ} (h0 : 0 < eps) (h1 : eps < 1 / 52) (y : ℝ) :
-    ∃ s : Scale, s.eps = eps ∧ y ≤ s.x ∧ S.Mem s := by
-  obtain ⟨x, hw, hx⟩ := S.unb hla (max y 2)
-  have h2 : 1 < x := lt_of_lt_of_le (by norm_num) (le_of_max_le_right hx)
-  exact ⟨S.scale x eps h2 h0 h1, rfl, le_of_max_le_left hx, S.scale_mem h2 h0 h1 hw⟩
-
-def above (S : Scales la) (x0 : ℝ) : Scales la where
-  J := S.J
-  one_le_J := S.one_le_J
-  Win := {x | x ∈ S.Win ∧ x0 < x}
-  windows y := by
-    obtain ⟨Y, h1, h2⟩ := S.windows (max y (x0 + 1))
-    refine ⟨Y, le_of_max_le_left h1, fun x a b => ⟨h2 x a b, ?_⟩⟩
-    have := le_of_max_le_right h1
-    linarith
-
-def univ (la J : ℝ) (hJ : 1 ≤ J) : Scales la := ⟨J, hJ, Set.univ, fun y => ⟨y, le_rfl, fun _ _ _ => trivial⟩⟩
-
-theorem mem_univ {J : ℝ} {hJ : 1 ≤ J} {s : Scale} : (univ la J hJ).Mem s ↔ s.J = J :=
-  ⟨fun h => h.1, fun h => ⟨h, trivial⟩⟩
 
 end Scales
 

@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.L2UnitaryRepresentationData
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialVectorChangeOrthonormalBasesSubst
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialActionOneMulAdjoint
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.L2UnitaryRepresentationData
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialActionOneMulAdjoint
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.APlusComm
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FockPolynomialVectorChangeOrthonormalBasesSubst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+
+@[expose] public section
 
 noncomputable section
 
@@ -259,8 +306,8 @@ theorem aPlus_smul_dir (e : Bool) (c : ℂ) (z : Matrix (Fin T.rank) (Fin S.rank
     generalize ((fockScale D τ : ℂ))⁻¹ = k
     linear_combination (k * (c.im : ℂ) * B) * Complex.I_sq + (k * (A - Complex.I * B)) * hre
 
-open GlobalTheory.FockIndep GlobalTheory.OrientedHeis Complex in
 
+open GlobalTheory.FockIndep GlobalTheory.OrientedHeis Complex in
 theorem aPlus_comm_at (hS : IsCartanInv (gramAt D S τ) sS) (hT : IsCartanInv (gramAt D T τ) sT)
     (z z' : Matrix (Fin T.rank) (Fin S.rank) ℂ) :
     Datum.aPlus (heisO ψ S T) θ τ (cplxO sS sT) z (Datum.aPlus (heisO ψ S T) θ τ (cplxO sS sT) z' f) =
@@ -432,10 +479,11 @@ theorem ptAt_basis : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam 
         unfold lsub
         rw [MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq]
       rw [e2, h0, h0]
-    | add Q R hQ hR => rw [map_add, map_add, map_add, hQ, hR]
+    | add Q R hQ hR => rw [map_add (f := _), map_add (f := _), map_add (f := _), hQ, hR]
     | mul_X Q v hQ =>
+
       rw [mul_comm, GlobalTheory.FockIndep.pure_X_mul hadd hsm hA' hc' Aadd' Asm' hf, hQ,
-        hN v _ (GlobalTheory.FockIndep.pure_mem hadd hsm hA hf _), map_mul, lsub_X, Finset.sum_mul, map_sum]
+      hN v _ (GlobalTheory.FockIndep.pure_mem hadd hsm hA hf _), map_mul, lsub_X, Finset.sum_mul, map_sum]
       refine Finset.sum_congr rfl fun w _ => ?_
       rw [mul_assoc, ← MvPolynomial.smul_eq_C_mul, map_smul, GlobalTheory.FockIndep.pure_X_mul hadd hsm hA hc Aadd Asm hf]
   rw [hς]

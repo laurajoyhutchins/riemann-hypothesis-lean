@@ -1,7 +1,52 @@
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.InertDef
-import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasLoc
-import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasFrame
-import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasAd
+module
+
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasAd
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.BigCellLocal
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueIsConjAt
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasFrame
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,8 +77,8 @@ end Alg
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {n : ℕ}
   {v : Pl F} {w : HeightOneSpectrum (𝓞 E)}
 
-variable (σ) in
 
+variable (σ) in
 def USub (X : Spc F E n) (v : Pl F) : Subgroup (UA σ X.J) where
   carrier := UAt σ X (evFin F v)
   one_mem' := fun u _ => by
@@ -131,20 +176,20 @@ theorem cols_mem {s : Fin m → AE F E} (hs : ∀ j, piE h (s j) ∈ Ov E w) : C
 include hw hC eC in
 theorem isLagAt_cols {c : w.adicCompletion E →+* w.adicCompletion E} (hc : IsConjAt σ h c) (hn : n = 2 * m)
     (hf : Function.Injective f) (h0 : ∀ i j, (a.1ᵀ * W.J.map (algebraMap E _) * a.1.map c : Matrix _ _ _) (f i) (f j) = 0) :
-    IsLagAt σ W v C where
-  rank := hn
-  supp := hC
-  iso := mat_inj hw h (at_sub (at_mul_right _ (at_map hC)) at_zero) (by
+    IsLagAt σ W v C := by
+  refine ⟨hn, hC, ?_, ?_⟩
+  · refine mat_inj hw h (at_sub (at_mul_right _ (at_map hC)) at_zero) ?_
     rw [map_gram hc, eC, Matrix.map_zero _ (map_zero _)]
-    exact Matrix.ext h0)
-  free := fun t ht e => vec_inj hw h (at_sub ht at_zero) (funext fun i => by
+    exact Matrix.ext h0
+  · intro t ht e
+    refine vec_inj hw h (at_sub ht at_zero) (funext fun i => ?_)
     have e1 := congrArg (fun y => ((a⁻¹).1 *ᵥ (piE h ∘ y)) (f i)) e
     have e2 : (a⁻¹).1 * a.1.submatrix id f = (1 : Matrix (Fin n) (Fin n) (w.adicCompletion E)).submatrix id f := by
       rw [← a.inv_mul]
       rfl
     simp only [piE_mulVec, eC, Matrix.mulVec_mulVec, e2] at e1
     rw [show piE h ∘ (0 : Fin n → AE F E) = 0 from funext fun _ => map_zero _, Matrix.mulVec_zero] at e1
-    simpa [Matrix.mulVec, dotProduct, Matrix.one_apply, hf.eq_iff] using e1)
+    simpa [Matrix.mulVec, dotProduct, Matrix.one_apply, hf.eq_iff] using e1
 
 end Frame
 

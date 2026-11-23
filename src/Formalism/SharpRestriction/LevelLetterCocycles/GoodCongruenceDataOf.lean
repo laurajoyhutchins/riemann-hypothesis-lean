@@ -1,6 +1,54 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.MapEqOfProdEq
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.MapEqOfProdEq
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RightIdealImageOfSurjective
 import Formalism.SharpRestriction.LevelLetterCocycles.SecondPropositionEveryLocalisation
-import Formalism.SharpRestriction.LevelLetterCocycles.IdempotentChoiceDepthZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,23 +103,6 @@ section Mk
 variable (g0 : GE N) (eB e₁ X0 : N.X i → MatN N i)
 
 abbrev Pf : N.X i → Polynomial (N.O i) := fun x => blockPoly (eB x) (X0 x)
-
-def mk51 (hfin : Finite (SplitPts R.t (Pf N eB X0))) (π' : SplitPts R.t (Pf N eB X0)) :
-    IdempotentChoiceData N i where
-  eB := eB
-  e1 := e₁
-  g0 := g0
-  X0 := X0
-  X' := SplitPts R.t (Pf N eB X0)
-  finX' := @Fintype.ofFinite _ hfin
-  decX' := Classical.decEq _
-  p := fun y => y.1.1
-  T' := splitT (N.T i) R.t (Pf N eB X0)
-  rr := fun c y => if h : 1 ≤ c ∧ c ≤ R.t then y.1.2 ⟨c - 1, by omega⟩ else 0
-  π' := π'
-  e := eG R.r R.t (KK N i)
-  ψρ := fun a => (a π').submatrix (Fin.castAdd R.t) (Fin.castAdd R.t)
-  ψχ := fun c a => a π' (Fin.natAdd R.r c) (Fin.natAdd R.r c)
 
 variable (hfin : Finite (SplitPts R.t (Pf N eB X0))) (π' : SplitPts R.t (Pf N eB X0))
 

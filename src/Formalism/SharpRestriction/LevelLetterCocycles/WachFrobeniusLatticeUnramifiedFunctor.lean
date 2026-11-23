@@ -1,10 +1,52 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedLocalConclusion
-import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationSaturationKiller
-import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
-import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
-import Formalism.SharpRestriction.LevelLetterCocycles.LiftFOf
-import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.GoodOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationSaturationKiller
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
+public import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+public import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.GoodOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.LiftFOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,9 +126,6 @@ def latD (I : BaseId W) (T : LocLat G Qp LL O) : Formalism.ExponentWindows.E.Lat
 
 @[simp] theorem latD_φ (I : BaseId W) (T : LocLat G Qp LL O) (i : ZMod n) (x : DV I T) :
     ((latD I T).φ i x).d = W.φD T x.d := rfl
-
-@[simp] theorem latD_γ (I : BaseId W) (T : LocLat G Qp LL O) (i : ZMod n) (x : DV I T) :
-    ((latD I T).γ i x).d = W.γD T W.gamK x.d := rfl
 
 theorem mem_sm_latD (I : BaseId W) (T : LocLat G Qp LL O) (i : ZMod n) (a : PowerSeries O) (x : DV I T) :
     x ∈ Formalism.ExponentWindows.E.sm a ((latD I T).N i) ↔
@@ -170,7 +209,7 @@ theorem latD_p5M (I : BaseId W) (T : LocLat G Qp LL O) (hs : W.s = 1) (hR : Ring
   have hq : I.d I.Bs.q = Formalism.MainNotions.WachCoordinates.qP W := by
     funext k
     change I.ι (PowerSeries.X + PowerSeries.C (I.Bs.ℓ : O)) = W.π₀₁ + ((PD.p : ℕ) : PowerSeries O)
-    rw [map_add, I.ι_X, I.ℓ_eq, map_natCast PowerSeries.C, map_natCast]
+    rw [map_add (f := _), I.ι_X, I.ℓ_eq, map_natCast PowerSeries.C, map_natCast]
   have hQ : W.Q = W.q := by
     show (W.φA ^ (W.s - 1)) W.q = W.q
     simp [hs]
@@ -250,7 +289,7 @@ theorem letE_letE (T : LocLat G Qp LL O) (i : ZMod n) (y : W.DD T) :
     (letE i : LetA O n) • ((letE i : LetA O n) • y) = (letE i : LetA O n) • y := by
   rw [smul_smul]
   congr 1
-  funext j
+  ext j
   simp only [letE, Pi.mul_apply, Pi.single_apply]
   split_ifs <;> simp
 
@@ -266,9 +305,9 @@ theorem wach_frobenius_divisibility_unique_solution [IsDomain O] (hR : RingA W) 
   have hE3 : I.Bs.E3 := frobenius_uniformizer_identity hR
   have hfree : ∀ i, (latD I T).Free i := latD_free I T hInj hFull hmod
   have hA := Formalism.ExponentWindows.E.lattice_filtration_first_form O I.Bs n M (DV I T) (latD I T) (fun _ => hh) hE3
-    (fun i => latD_p5M I T hs hR h5 i hh le_rfl) (fun _ => by exact hM)
+    (fun i => latD_p5M I T hs hR h5 i hh le_rfl) (fun _ => by simpa [I, baseIdOf] using hM)
   have hq : (latD I T).FrobeniusMapsXPow M := hA.1
-  have hC : (latD I T).Complete := Formalism.ExponentWindows.E.completion_holds O I.Bs n (DV I T) (latD I T) hcomp hfree
+  have hC : (latD I T).Complete := Formalism.ExponentWindows.E.completion_holds O I.Bs n (DV I T) (latD I T) (by simpa [I, baseIdOf] using hcomp) hfree
   have hX : (latD I T).XReg := Formalism.ExponentWindows.E.X_regular_on_lattice O I.Bs n (DV I T) (latD I T) hfree
   have hdX : I.d (PowerSeries.X ^ M) = W.π₀ ^ M := by rw [map_pow, I.d_X]
   have hdXq : I.d (PowerSeries.X ^ M * I.Bs.q) = W.π₀ ^ M * Formalism.MainNotions.WachCoordinates.qP W := by
@@ -303,7 +342,8 @@ theorem wach_frobenius_divisibility_unique_solution [IsDomain O] (hR : RingA W) 
       simpa [Formalism.ExponentWindows.E.Lat.dφ, t] using this
     refine ⟨∑ i, (z i).d, ⟨?_, ?_⟩, ?_⟩
     · exact mul_mem_sum T _ _ hzd
-    · rw [map_sum, ← sum_shift (fun i => W.φD T (z i).d), ← Finset.sum_sub_distrib]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        rw [map_sum, ← sum_shift (fun i => W.φD T (z i).d), ← Finset.sum_sub_distrib]
       rw [Finset.sum_congr rfl fun i _ => hdzi i, sum_letE_smul]
     · rintro Z ⟨⟨yZ, hyZ, rfl⟩, hZ⟩
       let z' : ZMod n → DV I T := fun i => toDV I ((letE i : LetA O n) • (W.π₀ ^ M • yZ))
@@ -456,7 +496,7 @@ theorem wach_frobenius_lattice_unramified_functor [IsDomain O] (hA : Formalism.M
           have e3 := coc_of x₃
           have e1 := coc_of x₁
           have e2 := coc_of x₂
-          rw [he, map_add] at e3
+          rw [he, map_add (f := _)] at e3
           have e4 : W.φD T (x₃ : W.DD T × W.DD T).2 - (x₃ : W.DD T × W.DD T).2 =
               (W.φD T (x₁ : W.DD T × W.DD T).2 - (x₁ : W.DD T × W.DD T).2) +
                 (W.φD T (x₂ : W.DD T × W.DD T).2 - (x₂ : W.DD T × W.DD T).2) := by

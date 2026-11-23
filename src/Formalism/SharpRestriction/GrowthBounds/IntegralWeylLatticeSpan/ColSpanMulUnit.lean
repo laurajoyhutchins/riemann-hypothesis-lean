@@ -1,7 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.RestGramW
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocBases
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.RestGramW
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.ChiMemSubfield
+public import Formalism.SharpRestriction.GrowthBounds.IntegralWeylLatticeSpan.IntSpanGSmul
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocBases
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGen
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PKerAtP
 import Formalism.LocalToGlobal.GlobalTheory.GL6.PSplitT
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.ChiMemSubfield
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Matrix Formalism.GradedWeylDivisibility Formalism.MainNotions.G Formalism.BasicNotions Formalism.L2.Forms Formalism.UG NumberField IsDedekindDomain
 open scoped TensorProduct
@@ -136,7 +183,7 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7} {X : Formalism.L2.Herm.Herm0 D}
 
-set_option maxHeartbeats 4000000 in
+
 theorem restLatO_of {T : ∀ u : D.what₂.Word, Forms0 D u} {Gt : GatTies D} {I : CmpIn D X}
     (hpos : ∀ u w hg v (s : Fin ((D.gat u w hg).P.n' v)) (x : D.host.E),
       I.embW u w hg (tEL D (Gt.gat_pos u w hg ⟨v, s⟩) (if Even s.val then x else sigD D x)) =
@@ -176,11 +223,13 @@ open Formalism.L2.GlobalTheoryTheory.LocalLatticeBases Formalism.L2.GlobalTheory
 theorem restExB (D : D7) : RestExB D := by
   intro u w _ c
   have : Fact (D.what₂.places.resChar w).Prime := ⟨D.what₂.places.resChar_prime w⟩
-  have hL := bwB_clsCrd_lat D u 0 (Nat.zero_le _) c
+  have hFull : Submodule.IsFullLattice D.host.E (clsCrd D u 0 (Nat.zero_le _) c) :=
+    { toIsLattice := bwB_clsCrd_lat D u 0 (Nat.zero_le _) c
+      span_eq_top := (tld_isLat 0 (Nat.zero_le _) c).2 }
   obtain ⟨d, hd, hle⟩ := dual_le_bnd (sigD D : D.host.E →+* D.host.E) (gramN D 0 (Nat.zero_le _))
-    (bwB_gramN_det D 0 (Nat.zero_le _)) _ hL
+    (bwB_gramN_det D 0 (Nat.zero_le _)) _ hFull
   have hLd : Ld D u 0 (Nat.zero_le _) c ≤ bnd d := hle
-  have hLd_sp := dual_span (sigD D : D.host.E →+* D.host.E) (gramN D 0 (Nat.zero_le _)) _ hL
+  have hLd_sp := dual_span (sigD D : D.host.E →+* D.host.E) (gramN D 0 (Nat.zero_le _)) _ hFull.toIsLattice
   obtain ⟨B, hB⟩ := exists_isLocBasis (D.what₂.places.resChar w) _ _ (fg_of_le_bnd hd hLd) hLd_sp
   refine ⟨B, ?_⟩
   have e : (Ld D u 0 (Nat.zero_le _) c : Set (Fin (D.R.N 0) → D.host.E)) =
@@ -219,7 +268,7 @@ theorem unitsW_of_pow {w : D.what₂.places.Pl} {r : D.what₂.LL} {N : ℕ} (hN
   have hinv : r⁻¹ = r ^ (N - 1) := (eq_inv_of_mul_eq_one_left (by rw [pow_sub_one_mul hN.ne', h])).symm
   exact ⟨r, hr, by rw [hinv]; exact pow_mem hr _, rfl⟩
 
-set_option maxHeartbeats 1000000 in
+
 theorem restChi_of (T : ∀ u : D.what₂.Word, Forms0 D u) (h : ∀ u, LevelZeroCharacterRational T u) : RestChi T := by
   intro u w _ κ
   have key : ((((T u).cls0).lev.chi κ : ℂˣ) : ℂ) ∈ unitsW D w := by

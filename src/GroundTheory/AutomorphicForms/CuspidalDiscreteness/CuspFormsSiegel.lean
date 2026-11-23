@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.TorusReduction
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDiff
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsNormRconvLeSiegel
+import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Translation
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelCount
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelFinite
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter Set MeasureTheory
 open scoped NumberField.AdeleRing Pointwise
@@ -25,7 +79,7 @@ theorem conj_unipGL_eq_archExp {r : ℕ} (x : AdelicGLn.AdelicGL K n) (P : UPos 
   refine Subtype.ext (Units.ext ?_)
   rw [coe_expG_top, exp_eq_one_add_of_mul_self_eq_zero (conjArch_mul_conjArch x P P)]
   show archMat K n ((g : AdelicGLn.AdelicGL K n) : Matrix (Fin n) (Fin n) 𝔸[K]) = _
-  rw [hg, coe_conj_unipGL, map_add, map_one]
+  rw [hg, coe_conj_unipGL, map_add (f := _), map_one]
   rfl
 
 theorem exists_norm_le_siegel_root {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : φ ∈ cuspForms K n)
@@ -123,7 +177,7 @@ theorem exists_norm_le_siegel_root {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : 
   refine (hC x Y hYY hYT).trans ?_
   have hprod : ∏ i, ‖Y i‖ ≤ (C₁' * gain) ^ k := by
     rw [← Fin.prod_const]
-    exact Finset.prod_le_prod (fun i _ => norm_nonneg _) fun i _ => hYn i
+    exact Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) fun i _ => hYn i
   have hh := pow_nonneg (height_pos x).le N
   calc C * (∏ i, ‖Y i‖) * height x ^ N ≤ max C 0 * (∏ i, ‖Y i‖) * height x ^ N :=
         mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (le_max_left _ _)
@@ -139,7 +193,7 @@ theorem exists_norm_le_height_pow_neg_siegel {φ : AdelicGLn.AdelicGL K n → �
     ∃ C : ℝ, ∀ b ∈ ω, ∀ (ρ : Fin n → ℝ) (hρ : ∀ i, 0 < ρ i),
       (∀ i j : Fin n, (j : ℕ) = i + 1 → t * ρ j ≤ ρ i) →
       ∀ kk ∈ (Reduction.maxCompact : Subgroup (AdelicGLn.AdelicGL K n)),
-      ∀ x : AdelicGLn.AdelicGL K n, x ∈ Reduction.normOneGL K n →
+      ∀ x : AdelicGLn.AdelicGL K n, x ∈ Reduction.normOneGL (K := K) (n := n) →
       x = b * Reduction.diagUnits n (fun i => Reduction.posIdele (K := K) (ρ i) (hρ i)) * kk →
       ‖φ x‖ ≤ C * (height x ^ N')⁻¹ := by
   obtain ⟨C₀, N₀, hC₀⟩ := hφ.1.hasModerateGrowth
@@ -255,13 +309,13 @@ theorem exists_norm_le_height_pow_neg_siegel {φ : AdelicGLn.AdelicGL K n → �
     simpa using this
 
 theorem exists_norm_le_of_mem_cuspForms {φ : AdelicGLn.AdelicGL K n → ℂ}
-    (hφ : φ ∈ cuspForms K n) : ∃ C : ℝ, ∀ x ∈ Reduction.normOneGL K n, ‖φ x‖ ≤ C := by
+    (hφ : φ ∈ cuspForms K n) : ∃ C : ℝ, ∀ x ∈ Reduction.normOneGL (K := K) (n := n), ‖φ x‖ ≤ C := by
   obtain ⟨ω, hω, hωB, t, ht, hsieg⟩ := Reduction.exists_siegelSet (K := K) n
   obtain ⟨C, hC⟩ := exists_norm_le_height_pow_neg_siegel hφ hω hωB ht 0
   refine ⟨C, fun x hx => ?_⟩
   obtain ⟨γ, hγ⟩ := hsieg x
   obtain ⟨b, hb, a, ⟨ρ, hρ, hs, rfl⟩, kk, hkk, hxe⟩ := hγ
-  have hγx : AdelicGLn.diagonal K n γ * x ∈ Reduction.normOneGL K n :=
+  have hγx : AdelicGLn.diagonal K n γ * x ∈ Reduction.normOneGL (K := K) (n := n) :=
     mul_mem (Reduction.rationalGL_le_normOneGL ⟨γ, rfl⟩) hx
   have h := hC b hb ρ hρ hs kk hkk _ hγx hxe
   rwa [pow_zero, inv_one, mul_one, hφ.1.isLeftInvariant γ x] at h

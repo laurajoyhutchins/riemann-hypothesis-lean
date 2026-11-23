@@ -1,4 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.TensFun
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +69,7 @@ theorem tp_monomial (α : Ix K n →₀ ℕ) : tp ev B (monomial α 1) = B ^ α.
 theorem tp_eq (p : MvPolynomial (Ix K n) ℂ) :
     tp ev B p = ∑ α ∈ p.support, p.coeff α • (B ^ α.degree * zm ev α) := by
   conv_lhs => rw [p.as_sum]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [← tp_monomial, ← map_smul, smul_monomial, smul_eq_mul, mul_one]
@@ -62,7 +106,7 @@ theorem mono_norm : ∃ D : ℝ, 1 ≤ D ∧ ∀ α : Ix K n →₀ ℕ, ‖B ^ 
     | zero => rintro rfl; simpa [zm_zero] using h1
     | add a b ha hb =>
       rintro rfl
-      rw [zm_add, map_add, pow_add]
+      rw [zm_add, map_add (f := _), pow_add]
       exact (norm_mul_le _ _).trans (mul_le_mul (ha _ rfl) (hb _ rfl) (norm_nonneg _) (by positivity))
     | single i e =>
       rintro rfl
@@ -155,6 +199,7 @@ theorem trunc_mul (hc : ∀ c : ℂ, ev (C (C c)) = c • 1) (hB : ∀ R, Commut
   have h1 : ∀ (p : MvPolynomial (Ix K n) ℂ) (V : H →L[ℂ] H), p.totalDegree ≤ d → am ev * B * V = V →
       ev (C (homog d p)) * V = am ev ^ d * (tp ev B p * V) := by
     intro p V hp hV
+
     rw [homog, tp_eq, map_sum, map_sum, Finset.sum_mul, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun α hα => ?_
     have hd := deg_le hp hα
@@ -165,8 +210,10 @@ theorem trunc_mul (hc : ∀ c : ℂ, ev (C (C c)) = c • 1) (hB : ∀ R, Commut
     rw [e, map_mul, map_mul, map_mul, map_mul, map_pow, map_pow, hc, e2]
     simp only [smul_mul_assoc, mul_smul_comm, one_mul, mul_assoc, e3]
     rfl
+
   rw [trunc, map_sum, Finset.sum_mul, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k hk => ?_
+
   rw [yk, map_sum, Finset.sum_mul, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun β _ => ?_
   have hd : ((G k).coeff β).totalDegree ≤ d := (hG k β).trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hk))

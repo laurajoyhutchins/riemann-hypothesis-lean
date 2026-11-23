@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open MvPowerSeries ReciprocityTheory.PGsh GlobalTheory.FGDepth
 
@@ -22,11 +67,11 @@ theorem exists_lipschitz_eval {C : Type} [Field C] (v : AddValuation C (WithTop 
     obtain ⟨K₁, h₁, h₁'⟩ := hp
     obtain ⟨K₂, h₂, h₂'⟩ := hq
     refine ⟨max K₁ K₂, fun a ha => ?_, fun M a a' ha ha' hM => ?_⟩
-    · rw [map_add]
+    · rw [map_add (f := _)]
       refine v.map_le_add (le_trans ?_ (h₁ a ha)) (le_trans ?_ (h₂ a ha))
       · exact WithTop.coe_le_coe.mpr (neg_le_neg (le_max_left _ _))
       · exact WithTop.coe_le_coe.mpr (neg_le_neg (le_max_right _ _))
-    · rw [map_add, map_add, add_sub_add_comm]
+    · rw [map_add (f := _), map_add (f := _), add_sub_add_comm]
       refine v.map_le_add (le_trans ?_ (h₁' M a a' ha ha' hM))
         (le_trans ?_ (h₂' M a a' ha ha' hM))
       · exact WithTop.coe_le_coe.mpr (sub_le_sub_left (le_max_left _ _) _)
@@ -70,6 +115,7 @@ theorem exists_poly_derivAt0_subst {C : Type} [Field C] {σ Λ : Type} [Fintype 
       simp [u, MvPowerSeries.smul_eq_C_mul]
     · ext d
       simp
+
   rw [← key, derivAt0, map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [map_mul, MvPolynomial.eval_C, coeff_map]

@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.ConjAction
+module
+
+public import GroundTheory.ProfiniteCohomology.InflationRestriction.CohomologyResMemCohomologyConjInvariants
+public import Mathlib.Algebra.Module.ZMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -20,22 +65,17 @@ def cochainsAddEquiv {A : Rep.{u} k G} {A' : Rep.{u} k' G} (e : A ≃+ A') (n : 
   right_inv _ := Subtype.ext (funext fun _ => e.apply_symm_apply _)
   map_add' _ _ := Subtype.ext (funext fun _ => map_add e _ _)
 
-@[simp]
-theorem cochainsAddEquiv_apply {A : Rep.{u} k G} {A' : Rep.{u} k' G} (e : A ≃+ A') (n : ℕ)
-    (x : locallyConstantCochains A n) (g : Fin n → G) :
-    (cochainsAddEquiv e n x : (Fin n → G) → A') g = e ((x : (Fin n → G) → A) g) :=
-  rfl
-
 variable [IsTopologicalGroup G] {A : Rep.{u} k G} {A' : Rep.{u} k' G} [IsDiscreteRep A]
   [IsDiscreteRep A'] (e : A ≃+ A') (he : ∀ (g : G) (a : A), e (A.ρ g a) = A'.ρ g (e a))
 
+
 omit [TopologicalSpace G] [IsTopologicalGroup G] [IsDiscreteRep A] [IsDiscreteRep A'] in
 include he in
-
 theorem addEquiv_inhomogeneousCochains_d (i : ℕ) (f : (Fin i → G) → A) (g : Fin (i + 1) → G) :
     e ((inhomogeneousCochains.d A i).hom f g) =
       (inhomogeneousCochains.d A' i).hom (fun h => e (f h)) g := by
-  rw [inhomogeneousCochains.d_hom_apply, inhomogeneousCochains.d_hom_apply, map_add, map_sum, he]
+
+  rw [inhomogeneousCochains.d_hom_apply, inhomogeneousCochains.d_hom_apply, map_add (f := _), map_sum, he]
   congr 1
   refine Finset.sum_congr rfl fun m _ => ?_
   have hk : ∀ (c : ℕ) (a : A), ((-1 : k) ^ c) • a = ((-1 : ℤ) ^ c) • a := fun c a => by
@@ -48,8 +88,8 @@ theorem addEquiv_inhomogeneousCochains_d (i : ℕ) (f : (Fin i → G) → A) (g 
     rfl
   rw [hk, hk', map_zsmul]
 
-include he in
 
+include he in
 theorem cochainsAddEquiv_d (i j : ℕ) (x : (cochainsComplex A).X i) :
     cochainsAddEquiv e j (((cochainsComplex A).d i j).hom x) =
       ((cochainsComplex A').d i j).hom (cochainsAddEquiv e i x) := by
@@ -146,26 +186,6 @@ theorem cohomologyAddEquivOfEquiv_mapAlong {H : Type u} [Group H] [TopologicalSp
       ext x <;> exact Subtype.ext (funext fun _ => hf _))
   exact congrArg (fun f => f.hom x) key
 
-theorem cohomologyAddEquivOfEquiv_cohomologyRes (S : Subgroup G) (n : ℕ) (x : cohomology A n) :
-    cohomologyAddEquivOfEquiv (A := Rep.res S.subtype A) (A' := Rep.res S.subtype A') e
-        (fun s a => he s a) n ((cohomologyRes A S n).hom x) =
-      (cohomologyRes A' S n).hom (cohomologyAddEquivOfEquiv e he n x) := by
-  rw [cohomologyRes_eq, cohomologyRes_eq]
-  exact cohomologyAddEquivOfEquiv_mapAlong e he S.subtype (continuous_subgroup_subtype S)
-    (B := Rep.res S.subtype A) (B' := Rep.res S.subtype A') e (fun s a => he s a) (𝟙 _) (𝟙 _)
-    (fun _ => rfl) n x
-
-theorem cohomologyAddEquivOfEquiv_cohomologyMap {B : Rep.{u} k G} {B' : Rep.{u} k' G}
-    [IsDiscreteRep B] [IsDiscreteRep B'] (eB : B ≃+ B')
-    (heB : ∀ (g : G) (b : B), eB (B.ρ g b) = B'.ρ g (eB b))
-    (f : A ⟶ B) (f' : A' ⟶ B') (hf : ∀ a : A, eB (f.hom a) = f'.hom (e a)) (n : ℕ)
-    (x : cohomology A n) :
-    cohomologyAddEquivOfEquiv eB heB n ((cohomologyMap f n).hom x) =
-      (cohomologyMap f' n).hom (cohomologyAddEquivOfEquiv e he n x) := by
-  have key := cohomologyAddEquivOfEquiv_mapAlong e he (MonoidHom.id G) continuous_id eB heB f f'
-    hf n x
-  rwa [cohomologyMapAlong_id_eq_cohomologyMap, cohomologyMapAlong_id_eq_cohomologyMap] at key
-
 theorem cohomologyAddEquivOfEquiv_cohomologyConj (N : Subgroup G) [N.Normal] (n : ℕ) (g : G)
     (x : cohomology (Rep.res N.subtype A) n) :
     cohomologyAddEquivOfEquiv (A := Rep.res N.subtype A) (A' := Rep.res N.subtype A') e
@@ -196,15 +216,8 @@ noncomputable def zmodRepOfTorsion : Rep.{0} (ZMod l) G :=
         ext a
         simp [Module.End.mul_apply] }
 
-theorem zmodRepOfTorsion_ρ_apply (g : G) (a : A) :
-    (zmodRepOfTorsion l A hA).ρ g a = A.ρ g a :=
-  rfl
-
 def zmodRepOfTorsionEquiv : A ≃+ zmodRepOfTorsion l A hA :=
   AddEquiv.refl A
-
-theorem zmodRepOfTorsionEquiv_apply (a : A) : zmodRepOfTorsionEquiv l A hA a = a :=
-  rfl
 
 variable [TopologicalSpace G]
 

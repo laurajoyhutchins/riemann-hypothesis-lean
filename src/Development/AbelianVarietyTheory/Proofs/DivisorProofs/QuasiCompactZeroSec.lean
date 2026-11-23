@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.TorsionTowersOfDivisibleGroup
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsIsoQuotToImOmegaLieOfSplit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsIsoQuotToImOmegaLieOfSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+import Development.AbelianVarietyTheory.Definitions.Divisors.KerIdealCompOfSurjective
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToSpanSingletonConstGenInjective
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -124,8 +166,8 @@ section Phi
 
 variable {O : Type} [CommRing O]
 
-variable (A : Over (Sp O)) [GrpObj A] in
 
+variable (A : Over (Sp O)) [GrpObj A] in
 def Wmod : Type := Γ(omega A, ⊤)
 
 instance (A : Over (Sp O)) [GrpObj A] : AddCommGroup (Wmod A) :=
@@ -153,49 +195,9 @@ section Tower
 
 open GlobalTheory.PDiv GlobalTheory.PDivGroup GlobalTheory.DeRham
 
-scoped instance cotOp {O B : Type} [CommRing O] [CommRing B] [Bialgebra O B] :
-    Module Oᵐᵒᵖ (Cot O B) := opModule O _
-
-scoped instance cotCentral {O B : Type} [CommRing O] [CommRing B] [Bialgebra O B] :
-    IsCentralScalar O (Cot O B) := opModule_central O _
-
 variable {p : ℕ} {O : Type} [CommRing O] {G : PDivGroup p O} {A : Over (Sp O)} [GrpObj A]
   {M : Type} [AddCommGroup M] [Module O M] [Module Oᵐᵒᵖ M] [IsCentralScalar O M]
 
-theorem zeroSec_spOver_y (t : G.TorsionTower A) (n : ℕ) (φ : G.A n →ₐ[O] TrivSqZeroExt O M)
-    (hφ : (TrivSqZeroExt.fstHom O O M).comp φ = Bialgebra.counitAlgHom O (G.A n)) :
-    zeroSec O M ≫ spOver φ ≫ t.y n = η[A] := by
-  have h1 := (t.eq_one_iff n (Bialgebra.counitAlgHom O (G.A n))).2 fun a => by simp
-  have h2 := congrArg Over.Hom.left h1
-  simp only [Over.comp_left] at h2
-  ext1
-  simp only [Over.comp_left]
-  have e : (zeroSec O M).left ≫ (spOver φ).left =
-      (spOver (Bialgebra.counitAlgHom O (G.A n))).left := by
-    change Spec.map _ ≫ Spec.map _ = Spec.map _
-    rw [← Spec.map_comp]
-    congr 1
-    ext a
-    exact congrArg (fun f => f a) (congrArg AlgHom.toRingHom hφ)
-  rw [← Category.assoc, e, h2]
-  have hu : (toUnit (Over.mk (spMap (algebraMap O O)))).left = 𝟙 (Sp O) := by
-    rw [Over.toUnit_left]; exact Spec.map_id _
-  change (toUnit (Over.mk (spMap (algebraMap O O)))).left ≫ η[A].left = η[A].left
-  erw [hu]
-  exact Category.id_comp _
-
-variable (G) in
-
-def univ (n : ℕ) : G.A n →ₐ[O] TrivSqZeroExt O (Cot O (G.A n)) :=
-  AugCot.toSqZero (Bialgebra.counitAlgHom O (G.A n)) LinearMap.id
-
-theorem fst_comp_univ (n : ℕ) :
-    (TrivSqZeroExt.fstHom O O (Cot O (G.A n))).comp (univ G n) =
-      Bialgebra.counitAlgHom O (G.A n) := by
-  ext a; simp [univ]
-
-def cn (t : G.TorsionTower A) (n : ℕ) : Wmod A →+ Cot O (G.A n) :=
-  Phi (spOver (univ G n) ≫ t.y n) (zeroSec_spOver_y t n _ (fst_comp_univ (G := G) n))
 
 end Tower
 

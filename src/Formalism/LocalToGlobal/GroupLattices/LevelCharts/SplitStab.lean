@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.GroupLattices.LevelCharts.JoinForms
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.LevelCharts.JoinForms
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,10 +118,12 @@ variable (s : A →+* A) (Jm : Matrix (Fin n) (Fin n) A) (spl : A ≃+* K × K)
 
 theorem hform_fst (hs : ∀ x, spl (s x) = ((spl x).2, (spl x).1)) (z y : Fin n → A) :
     (spl (hform s Jm z y)).1 = ∑ i, ∑ j, (spl (z i)).2 * (spl (Jm i j)).1 * (spl (y j)).1 := by
+
   simp only [hform, map_sum, map_mul, Prod.fst_sum, Prod.fst_mul, hs]
 
 theorem hform_snd (hs : ∀ x, spl (s x) = ((spl x).2, (spl x).1)) (z y : Fin n → A) :
     (spl (hform s Jm z y)).2 = ∑ i, ∑ j, (spl (z i)).1 * (spl (Jm i j)).2 * (spl (y j)).2 := by
+
   simp only [hform, map_sum, map_mul, Prod.snd_sum, Prod.snd_mul, hs]
 
 theorem fst_mulVec (g : GL (Fin n) A) (y : Fin n → A) (b : Fin n) :
@@ -211,14 +258,6 @@ def SelfDualAt (σ : E →ₐ[F] E) (J : Matrix (Fin n) (Fin n) E) (v : HeightOn
         tensInt (F := F) (v.adicCompletion F) (intOE E) (v.adicCompletionIntegers F).toSubring
 
 variable {σ : E →ₐ[F] E} {J : Matrix (Fin n) (Fin n) E} {T f : ℕ} {bad : Set (HeightOneSpectrum (𝓞 F))} {gp : Fin 2 → ℕ}
-
-def levAtG_of_GLev' (S : Formalism.L2.Forms.StepLevel F E σ J T f bad) (G : Formalism.L2.Forms.GLoc F E σ gp) (k m t j nb skip fc : ℕ)
-    (hfc : fc = fcX k m j n) (X : Formalism.L2.Forms.GLev S G (aX k m j) t nb skip fc (fixX m j))
-    (hint : ∀ (i : Fin 2) (v : HeightOneSpectrum (𝓞 F)) (h : (gp i : 𝓞 F) ∈ v.asIdeal), SplitInt v (G.sp i v h))
-    (hdual : ∀ (i : Fin 2) (v : HeightOneSpectrum (𝓞 F)), (gp i : 𝓞 F) ∈ v.asIdeal → SelfDualAt σ J v S.Lb) :
-    LevAtG σ J gp G.sp S.Lb S.Uloc k m t j :=
-  levAtG_of_GLev S G k m t j nb skip fc hfc X fun i v h =>
-    splitStabL_of σ J v (G.sp i v h) S.Lb (X.fr i v h) (G.sp_sig i v h) (hint i v h) (hdual i v h) (X.fr_lat i v h)
 
 end Conc
 

@@ -1,7 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CupProducts.Pairing
-import GroundTheory.ProfiniteCohomology.CartierDual
-import GroundTheory.ProfiniteCohomology.ClassFormations.CorestrictionDefs
+module
+
+public import GroundTheory.ProfiniteCohomology.ClassFormations.CorestrictionDefs
+public import GroundTheory.ProfiniteCohomology.CartierDualDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -21,9 +64,6 @@ variable {k G : Type u} [CommRing k] [Group G]
 abbrev dualRep (D M : Rep.{u} k G) : Rep.{u} k G :=
   Rep.of (Representation.linHom M.ρ D.ρ)
 
-theorem dualRep_eq_ihom (D M : Rep.{u} k G) : dualRep D M = (Rep.ihom M).obj D :=
-  rfl
-
 theorem dualRep_ρ_apply (D M : Rep.{u} k G) (σ : G) (f : M →ₗ[k] D) (m : M) :
     ((dualRep D M).ρ σ f : M →ₗ[k] D) m = D.ρ σ (f (M.ρ σ⁻¹ m)) :=
   rfl
@@ -35,11 +75,6 @@ def dualMap (D : Rep.{u} k G) {A B : Rep.{u} k G} (φ : A ⟶ B) : dualRep D B �
     refine LinearMap.ext fun f => LinearMap.ext fun a => ?_
     change D.ρ σ (f (B.ρ σ⁻¹ (φ.hom a))) = D.ρ σ (f (φ.hom (A.ρ σ⁻¹ a)))
     rw [Rep.hom_comm_apply]⟩
-
-@[simp]
-theorem dualMap_hom_apply (D : Rep.{u} k G) {A B : Rep.{u} k G} (φ : A ⟶ B) (f : B →ₗ[k] D)
-    (a : A) : ((dualMap D φ).hom f : A →ₗ[k] D) a = f (φ.hom a) :=
-  rfl
 
 theorem dualMap_id (D A : Rep.{u} k G) : dualMap D (𝟙 A) = 𝟙 (dualRep D A) :=
   rfl
@@ -72,18 +107,13 @@ theorem tensorHom_evalPairing (D : Rep.{u} k G) {A B : Rep.{u} k G} (φ : A ⟶ 
   induction x using TensorProduct.induction_on with
   | zero => simp only [map_zero]
   | tmul a f => rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def toDualDual (D M : Rep.{u} k G) : M ⟶ dualRep D (dualRep D M) :=
   Rep.ofHom ⟨dualEvalBilin D M, fun σ => by
     refine LinearMap.ext fun m => LinearMap.ext fun f => ?_
     change f (M.ρ σ m) = D.ρ σ (D.ρ σ⁻¹ (f (M.ρ σ⁻¹⁻¹ m)))
     rw [inv_inv, Representation.self_inv_apply]⟩
-
-@[simp]
-theorem toDualDual_hom_apply (D M : Rep.{u} k G) (m : M) (f : M →ₗ[k] D) :
-    ((toDualDual D M).hom m : (M →ₗ[k] D) →ₗ[k] D) f = f m :=
-  rfl
 
 end Dual
 

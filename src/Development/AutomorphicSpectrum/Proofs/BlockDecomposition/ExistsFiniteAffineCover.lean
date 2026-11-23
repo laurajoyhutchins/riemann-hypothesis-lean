@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.AffineScheme
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.RingTheory.FinitePresentation
+public import Mathlib.RingTheory.Valuation.ValuationRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Monoidal.Mon
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -138,7 +192,7 @@ lemma algebraMap_mk (a : ∀ i, V i) :
 
 instance [∀ i, IsFractionRing (V i) (K i)] : IsFractionRing (Ult U V) (Ult U K) := by
   have hinj : Function.Injective (algebraMap (Ult U V) (Ult U K)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨a, rfl⟩ := mk_surjective U x
     rw [algebraMap_mk, mk_eq_zero_iff] at hx
@@ -192,7 +246,7 @@ def ofFamily (h : ∀ i, B → A i) (h1 : ∀ᶠ i in (U : Filter ι), h i 1 = 1
     filter_upwards [hadd 0 0] with i hi
     simpa using hi
   map_add' a b := by
-    rw [← map_add, mk_eq_mk_iff]
+    rw [← map_add (f := _), mk_eq_mk_iff]
     exact hadd a b
 
 lemma ofFamily_apply (h : ∀ i, B → A i) (h1 hadd hmul) (b : B) :
@@ -201,7 +255,7 @@ lemma ofFamily_apply (h : ∀ i, B → A i) (h1 hadd hmul) (b : B) :
 def homOf (h : ∀ i, B → A i) (hh : IsAEHom U h) : B →+* Ult U A :=
   ofFamily U h
     (by filter_upwards [hh] with i ⟨p, hp⟩; rw [← hp, map_one])
-    (fun a b => by filter_upwards [hh] with i ⟨p, hp⟩; rw [← hp, map_add])
+    (fun a b => by filter_upwards [hh] with i ⟨p, hp⟩; rw [← hp, map_add (f := _)])
     (fun a b => by filter_upwards [hh] with i ⟨p, hp⟩; rw [← hp, map_mul])
 
 lemma homOf_apply (h : ∀ i, B → A i) (hh : IsAEHom U h) (b : B) :

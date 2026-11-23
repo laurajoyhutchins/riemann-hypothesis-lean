@@ -1,11 +1,52 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+public import Formalism.LocalRingCardinality.ConjSqrtMinusD
+public import Formalism.LocalToGlobal.ProjectiveLattices.LevelPb
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalRingCardinality.ConjSqrtMinusD
-import Formalism.LocalToGlobal.ProjectiveLattices.HostRank
-import Formalism.LocalToGlobal.ProjectiveLattices.LevelPb
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Principal
+import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+
+@[expose] public section
 
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum
 open scoped BigOperators
@@ -50,7 +91,7 @@ theorem exists_coords {x : D.host.E} (hx : x ∈ D.host.K) :
 theorem conj_coords (a b : ℚ) :
     D.host.conj ((a : D.host.E) + (b : D.host.E) * D.host.sqrtMinusD) =
       (a : D.host.E) - (b : D.host.E) * D.host.sqrtMinusD := by
-  rw [map_add, map_mul, map_ratCast, map_ratCast, D.host.conj_sqrtMinusD]
+  rw [map_add (f := _), map_mul, map_ratCast, map_ratCast, D.host.conj_sqrtMinusD]
   ring
 
 theorem conj_mem {x : D.host.E} (hx : x ∈ D.host.K) : D.host.conj x ∈ D.host.K := by
@@ -85,6 +126,7 @@ theorem trace_conj (y : D.host.E) :
     Algebra.trace D.host.K D.host.E (D.host.conj y) =
       conjK D (Algebra.trace D.host.K D.host.E y) := by
   apply Subtype.ext
+
   rw [coe_conjK, coe_trace, coe_trace, map_sum]
   exact Finset.sum_congr rfl fun τ _ => (conj_comm D τ y).symm
 
@@ -99,6 +141,7 @@ theorem trace_pos (y : D.host.E) (hy : y ≠ 0) :
   rw [hb, add_zero] at hab
   refine ⟨a, ?_, Subtype.ext (by rw [hab]; simp)⟩
   have h1 := congrArg D.host.φ₀ hab
+
   rw [coe_trace, map_sum, map_ratCast] at h1
   have h2 : ∀ τ : D.host.E ≃ₐ[D.host.K] D.host.E,
       D.host.φ₀ (τ (y * D.host.conj y)) = ((Complex.normSq (D.host.φ₀ (τ y)) : ℝ) : ℂ) := by

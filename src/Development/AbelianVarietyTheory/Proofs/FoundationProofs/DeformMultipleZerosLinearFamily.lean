@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NewtonPowerSeriesSurjectiveLinearizationSolutionStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowerSeriesTaylorSubstFirstOrderStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CcSubst
+public import Mathlib.RingTheory.PowerSeries.Derivative
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NewtonPowerSeriesSurjectiveLinearizationSolutionStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowerSeriesTaylorSubstFirstOrderStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial
 
@@ -32,7 +80,7 @@ noncomputable def lin (N : ℕ) (ξ : J → PowerSeries k) (s : I → J → Powe
     funext e; rcases e with _ | ⟨i, l⟩ <;> simp [linFun, Finset.mul_sum, mul_assoc, mul_add]
 
 lemma iter_eq (f : PowerSeries k) (l : ℕ) :
-    (PowerSeries.derivativeFun)^[l] f = (PowerSeries.derivative k)^[l] f := by
+    (PowerSeries.derivativeFun)^[l] f = (PowerSeries.derivative (R := k))^[l] f := by
   induction l generalizing f with
   | zero => rfl
   | succ n ih => rw [Function.iterate_succ_apply, Function.iterate_succ_apply, ih]; rfl
@@ -54,23 +102,7 @@ lemma dvd_step {m : ℕ} (hm : 1 ≤ m) (y g S S' : PowerSeries k) (y0 c A : k)
     (PowerSeries.X : PowerSeries k) ^ (m + 1) ∣
       (y + PowerSeries.X ^ m * g) * S' - y * S
         - PowerSeries.X ^ m * PowerSeries.C (PowerSeries.constantCoeff g * A + y0 * c) := by
-  obtain ⟨r, hr⟩ := hT
-  have hS' : S' = S + PowerSeries.X ^ m * PowerSeries.C c + PowerSeries.X ^ (m + 1) * r := by
-    linear_combination hr
-  obtain ⟨n, rfl⟩ : ∃ n, m = n + 1 := ⟨m - 1, by omega⟩
-  have heq : (y + PowerSeries.X ^ (n + 1) * g) * S' - y * S
-      - PowerSeries.X ^ (n + 1) * PowerSeries.C (PowerSeries.constantCoeff g * A + y0 * c)
-      = PowerSeries.X ^ (n + 1) * (y * PowerSeries.C c - PowerSeries.C (y0 * c)
-          + (g * S - PowerSeries.C (PowerSeries.constantCoeff g * A)))
-        + PowerSeries.X ^ (n + 1 + 1) * (y * r + PowerSeries.X ^ n *
-          (g * PowerSeries.C c + PowerSeries.X * g * r)) := by
-    rw [hS', map_add]; ring
-  rw [heq]
-  refine dvd_add ?_ (dvd_mul_right _ _)
-  rw [pow_succ]
-  refine mul_dvd_mul_left _ ?_
-  rw [PowerSeries.X_dvd_iff]
-  simp [hy, hS]
+  apply GlobalTheory.PicDiv.DeformZerosHasse.dvd_step <;> assumption
 
 end GlobalTheory.DeformZeros
 
@@ -120,7 +152,7 @@ theorem deform : ∀ (k J I : Type) [Field k] [CharZero k] [Fintype J] [Fintype 
             = w (some (i, l)) := by
           simp only [hA]
           have := hvl i l.1 hl
-          rw [dif_pos l.2] at this
+          rw [dite_eq_left l.2] at this
           calc ∑ j, hv j * ((l.1.factorial : k) * PowerSeries.coeff l.1 (s i j))
               = (l.1.factorial : k) * ∑ j, hv j * PowerSeries.coeff l.1 (s i j) := by
                 rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ => by ring
@@ -141,8 +173,10 @@ theorem deform : ∀ (k J I : Type) [Field k] [CharZero k] [Fintype J] [Fintype 
 
     intro e
     rcases e with _ | ⟨i, l⟩
+
     · simp [sys, map_sum, h0]
-    · simp only [sys, map_sum, map_mul, PowerSeries.constantCoeff_C, Sum.elim_inl, Sum.elim_inr]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [sys, map_sum, map_mul, PowerSeries.constantCoeff_C, Sum.elim_inl, Sum.elim_inr]
       have h' : ∀ j, PowerSeries.constantCoeff (((PowerSeries.derivativeFun)^[l.1] (s i j)).subst
           (PowerSeries.C ((0 : I → k) i)) : PowerSeries k) = (l.1.factorial : k) * PowerSeries.coeff l.1 (s i j) := by
         intro j; rw [cc_subst _ _ (by simp), hA]
@@ -167,6 +201,7 @@ theorem deform : ∀ (k J I : Type) [Field k] [CharZero k] [Fintype J] [Fintype 
       rw [heq, pow_succ]
       refine mul_dvd_mul_left _ ?_
       rw [PowerSeries.X_dvd_iff]
+
       simp [map_sum]
     · simp only [sys, lin, linFun, LinearMap.coe_mk, AddHom.coe_mk]
       set a := x (Sum.inr i)
@@ -194,8 +229,9 @@ theorem deform : ∀ (k J I : Type) [Field k] [CharZero k] [Fintype J] [Fintype 
           - PowerSeries.X ^ m * PowerSeries.C (PowerSeries.constantCoeff (h (Sum.inl j)) *
               PowerSeries.constantCoeff ((PowerSeries.derivativeFun)^[l.1] (s i j))
               + y₀ j * (PowerSeries.constantCoeff b * PowerSeries.coeff 1 ((PowerSeries.derivativeFun)^[l.1] (s i j))))) := by
+
         rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, ← Finset.mul_sum, ← map_sum,
-          Finset.sum_add_distrib, Finset.mul_sum (a := PowerSeries.constantCoeff b)]
+        Finset.sum_add_distrib, Finset.mul_sum (a := PowerSeries.constantCoeff b)]
         congr 4
         refine Finset.sum_congr rfl fun j _ => by ring
       rw [heq]

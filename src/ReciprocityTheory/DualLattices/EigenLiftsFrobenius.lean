@@ -1,6 +1,53 @@
-import ReciprocityTheory.DualLattices.LiftMonomialDeterminantStatement
-import ReciprocityTheory.DualLattices.PowMemCarrier
-import ReciprocityTheory.DualLattices.HasLenCokerDet
+module
+
+public import ReciprocityTheory.DualLattices.LiftMonomialDeterminantStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.UpSmith
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,14 +86,6 @@ lemma coefX_int (D : Lifts H U X) (hdet : (valM D).det ≠ 0)
     exact Finset.sum_congr rfl fun α _ => mul_comm _ _
   rw [coefX, hfv, Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ (isUnit_iff_ne_zero.mpr hdet),
     Matrix.one_mulVec]
-
-lemma coefX_add (D : Lifts H U X) (f f' : Nb p g → C) :
-    coefX D (f + f') = coefX D f + coefX D f' := by
-  simp only [coefX, Matrix.mulVec_add]
-
-lemma coefX_smul (D : Lifts H U X) (c : C) (f : Nb p g → C) :
-    coefX D (c • f) = c • coefX D f := by
-  simp only [coefX, Matrix.mulVec_smul]
 
 lemma xL_pow_mem (D : Lifts H U X) (hp : 2 ≤ p) (j : Ix g) :
     (fun y => xL D j y ^ p) ∈ sqIdeal (augIdeal H.AA.carrier) := by
@@ -146,13 +185,14 @@ theorem frob_of (h1 : LiftMonomialDeterminantStatement) (h2 : FrobeniusBlockStat
       rw [hyΨ]
       by_cases h : D.κ k = U.φ i
       · show (if h' : D.κ k = U.φ i then (Y.mulVecLin w) (eτ ⟨k, h'⟩) else 0) = _
-        rw [dif_pos h]
+        rw [dite_eq_left h]
         show ∑ b, Y (eτ ⟨k, h⟩) b * w b = _
         simp only [Y, Equiv.symm_apply_apply]
       · show (if h' : D.κ k = U.φ i then (Y.mulVecLin w) (eτ ⟨k, h'⟩) else 0) = _
-        rw [dif_neg h]
+        rw [dite_eq_right h]
         simp [c, h]
     show algebraMap R C ((y : Ix g → R) k) = _
+
     rw [hyk, map_sum]
     simp only [linX, coefX, Matrix.mulVec_sum, Finset.sum_apply]
     refine Finset.sum_congr rfl fun b _ => ?_

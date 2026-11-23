@@ -1,35 +1,62 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.NoetherianBlowup
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.BlowupSequenceBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.ControlledTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.PowerContainmentAndOrderLocus
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderAtMultiplicativity
-import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.PrincipalizationCertificate
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.GeometryHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.MaxOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.MonomialSplittingFunctoriality
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.OrderReductionAlgorithm
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.SequencePrefix
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CoordinateSubspaceIdeal
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialGeometryHypotheses
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CenterInvariant
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.MonomialSplitting
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IrreducibleComponentsAlongSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.ControlledTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.SingleBlowup
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.GeometryHypotheses
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.OrderReductionAlgorithm
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderAtMultiplicativity
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.PowerContainmentAndOrderLocus
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.SmoothComponentsDisjoint
 import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.SupportsAlongSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceTransforms
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.SmoothComponentsDisjoint
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.MaxOrder
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedOrderReduction.MonomialSplittingFunctoriality
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MonomialCase.CoordinateSubspaceIdeal
+import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.NoetherianBlowup
+public import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.ControlledTransform
+import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupCoproduct
+import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -48,11 +75,6 @@ def MarkedSequenceOfBlowups.monomialFactor (s : MarkedSequenceOfBlowups p N μ E
   | 0 => M.comap s.isoZero.hom
   | i + 1 =>
       (MarkedSequenceOfBlowups.monomialFactor s M m i).comap (s.transitionMapSucc i) * s.exceptionalDivisor i ^ (μ - m)
-
-@[simp]
-theorem MarkedSequenceOfBlowups.monomialFactor_zero (s : MarkedSequenceOfBlowups p N μ E) (M : X.IdealSheafData)
-    (m : ℕ) : MarkedSequenceOfBlowups.monomialFactor s M m 0 = M.comap s.isoZero.hom :=
-  rfl
 
 @[simp]
 theorem MarkedSequenceOfBlowups.monomialFactor_succ (s : MarkedSequenceOfBlowups p N μ E) (M : X.IdealSheafData)
@@ -347,36 +369,6 @@ def MarkedIdealWithBoundary.withIdealAndMult (T : MarkedIdealWithBoundary.{u}) (
     ideal := N
     mult := μ
     boundary := T.boundary }
-
-@[simp]
-theorem MarkedIdealWithBoundary.withIdealAndMult_baseField (T : MarkedIdealWithBoundary.{u}) (N : T.scheme.IdealSheafData)
-    (μ : ℕ) : (T.withIdealAndMult N μ).base = T.base :=
-  rfl
-
-@[simp]
-theorem MarkedIdealWithBoundary.withIdealAndMult_scheme (T : MarkedIdealWithBoundary.{u}) (N : T.scheme.IdealSheafData)
-    (μ : ℕ) : (T.withIdealAndMult N μ).scheme = T.scheme :=
-  rfl
-
-@[simp]
-theorem MarkedIdealWithBoundary.withIdealAndMult_structureMorphism (T : MarkedIdealWithBoundary.{u}) (N : T.scheme.IdealSheafData)
-    (μ : ℕ) : (T.withIdealAndMult N μ).structMap = T.structMap :=
-  rfl
-
-@[simp]
-theorem MarkedIdealWithBoundary.withIdealAndMult_ideal (T : MarkedIdealWithBoundary.{u}) (N : T.scheme.IdealSheafData)
-    (μ : ℕ) : (T.withIdealAndMult N μ).ideal = N :=
-  rfl
-
-@[simp]
-theorem MarkedIdealWithBoundary.withIdealAndMult_mult (T : MarkedIdealWithBoundary.{u}) (N : T.scheme.IdealSheafData)
-    (μ : ℕ) : (T.withIdealAndMult N μ).mult = μ :=
-  rfl
-
-@[simp]
-theorem MarkedIdealWithBoundary.withIdealAndMult_boundary (T : MarkedIdealWithBoundary.{u}) (N : T.scheme.IdealSheafData)
-    (μ : ℕ) : (T.withIdealAndMult N μ).boundary = T.boundary :=
-  rfl
 
 theorem MarkedIdealWithBoundary.IsAdmissible.withIdealAndMult {T : MarkedIdealWithBoundary.{u}} (hT : T.IsAdmissible)
     {M N : T.scheme.IdealSheafData} (hsplit : IsMonomialSplitting T.boundary T.ideal M N)

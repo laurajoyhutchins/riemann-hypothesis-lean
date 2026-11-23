@@ -1,8 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IndEtOfForallFinset
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdSubConjEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ProdSubConjEqZero
+public import Mathlib.FieldTheory.IsSepClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
 
@@ -124,7 +177,7 @@ theorem GlobalTheory.EtC.GalSec.Tens.lem_hom : ∀ (K Ω : Type) [Field K] [Fiel
     simp only [mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
   · simp [Tens.lev]
   · intro φ ψ
-    simp only [Tens.lev, LocallyConstant.coe_add, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+    simp only [Tens.lev, LocallyConstant.coe_add, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 private theorem polynomial_eval_eq_sum_eval_mul_idempotent {ι B : Type} [Fintype ι] [CommRing B] (e : ι → B) (he : ∑ i, e i = 1)
     (c : ι → B) (b : B) (hb : ∀ i, b * e i = c i * e i) (q : Polynomial B) :
     q.eval b = ∑ i, q.eval (c i) * e i := by
@@ -273,6 +326,7 @@ private theorem map_tens_lev {K Ω : Type} [Field K] [Field Ω] [Algebra K Ω] {
     (φ : LCRing K Ω k) :
     f (Tens.lev g₀ gs θ φ) = Tens.lev (f.comp g₀) (fun i => f.comp (gs i)) θ φ := by
   unfold Tens.lev
+
   simp only [map_sum, map_mul, map_prod, map_tens_idem, RingHom.comp_apply]
 
 private theorem tens_lev_legHom_eq_of_dependsOn {K Ω : Type} [Field K] [Field Ω] [Algebra K Ω] [IsSepClosure K Ω] (k : ℕ)
@@ -353,7 +407,7 @@ theorem lcRing_universal : ∀ (K Ω : Type) [Field K] [Field Ω] [Algebra K Ω]
       obtain ⟨η, h1, h2⟩ := hcommon φ ψ
       obtain ⟨v, hv⟩ := lem_hom K Ω B k g₀ gs hgs η
       show lev g₀ gs (θf (φ + ψ)) (φ + ψ) = lev g₀ gs (θf φ) φ + lev g₀ gs (θf ψ) ψ
-      rw [← hwd _ η (hdadd η φ ψ h1 h2), ← hwd φ η h1, ← hwd ψ η h2, ← hv, ← hv, ← hv, map_add]
+      rw [← hwd _ η (hdadd η φ ψ h1 h2), ← hwd φ η h1, ← hwd ψ η h2, ← hv, ← hv, ← hv, map_add (f := _)]
   have hlegs : ∀ i, u.comp (legHom K Ω k i) = g i := by
     intro i
     cases i using Fin.cases with

@@ -1,12 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import GroundTheory.HeightsAndTheta.Heights.StabilizerCovolume.CardZBasisEqMulFinrank
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CuspDataOfFamily
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannLatticeEigenProjectionStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicEigencomponentConjugateFormStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeCovolumePositiveStatement
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.StabilizerCovolume.CardZBasisEqMulFinrank
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CuspDataOfFamily
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicEigencomponentConjugateFormStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeCovolumePositiveStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannLatticeEigenProjectionStatement
+public import GroundTheory.HeightsAndTheta.Heights.Covolume
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField Matrix Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp GroundTheory.Heights₂.Heights.LowerBoundFree GroundTheory.Heights₂.Heights.Regular
 open NumberField.ComplexEmbedding GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.NineStatements GlobalTheory.CompanionTheory.Ar.Cusp.FamEx.Lin
@@ -63,7 +111,7 @@ theorem gram_tower (R : RiemLat E g Λ) {I : Submodule (𝓞 E) Λ} (hI : IsIsoS
   rw [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, Complex.ofRealHom_eq_coe, hre]
   simp only [towerZBasis_apply, R.act]
   rw [ip_act_act]
-  simp only [mul_apply, conjTranspose_apply, kroneckerMap_apply, one_apply, transpose_apply,
+  simp only [Matrix.mul_apply, conjTranspose_apply, kroneckerMap_apply, Matrix.one_apply, transpose_apply,
     blockDiagonal_apply, Fintype.sum_prod_type, basisMatrix_apply']
   simp only [ite_mul, one_mul, zero_mul, mul_ite, mul_zero, star_zero, apply_ite star,
     Finset.sum_ite_eq', Finset.mem_univ, if_true]
@@ -155,8 +203,8 @@ section Tower
 
 variable {Ψ : Type} [Fintype Ψ]
 
-open Classical in
 
+open Classical in
 theorem det_gram_tower (R : RiemLat E g Λ) {σ : Ψ → (𝓞 E →+* ℂ)} (hσ : IsCMFam σ) {I : Submodule (𝓞 E) Λ}
     (hI : IsIsoSub R.form I) {ρ : ℕ} {v : Fin ρ → Λ} (hv : ∀ a, v a ∈ I) (hli : LinearIndependent (𝓞 E) v) :
     (Matrix.of fun p q => (R.ip (R.P (towerZBasis hli p : Λ)) (R.P (towerZBasis hli q : Λ))).re).det =
@@ -178,8 +226,8 @@ theorem det_gram_tower (R : RiemLat E g Λ) {σ : Ψ → (𝓞 E →+* ℂ)} (h�
   linear_combination
     (∏ τ, ((R.gram fun a => eigComp R.B (σ τ) (R.P (v a))).det.re : ℂ) ^ 2) * key
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem card_basis_eq (htf : ∀ (n : ℕ) (x : Λ), n ≠ 0 → n • x = 0 → x = 0) {I : Submodule (𝓞 E) Λ} {ρ : ℕ}
     {v : Fin ρ → Λ} (hv : IsNzFamily I ρ v) {m : ℕ} (b : Module.Basis (Fin m) ℤ I) :
     m = ρ * Module.finrank ℚ E := by
@@ -203,7 +251,7 @@ theorem card_basis_eq (htf : ∀ (n : ℕ) (x : Λ), n ≠ 0 → n • x = 0 →
   have h1 : Function.Injective i1.toIntLinearMap := fun x y h =>
     Subtype.ext (congrArg (fun z : I => (z : Λ)) h)
   have h2 : Function.Injective i2.toIntLinearMap := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have hx' : J.toAddSubgroup.relIndex I.toAddSubgroup • (x : Λ) = 0 := congrArg (fun z : J => (z : Λ)) hx
     exact Subtype.ext (htf _ _ hidx hx')
@@ -211,9 +259,9 @@ theorem card_basis_eq (htf : ∀ (n : ℕ) (x : Λ), n ≠ 0 → n • x = 0 →
   have l2 := LinearMap.finrank_le_finrank_of_injective h2
   omega
 
+
 omit [IsCMField E] in
 open Classical in
-
 theorem det_gram_index (f : Λ →+ Λ →+ ℝ) {I : Submodule (𝓞 E) Λ} {ρ : ℕ} {v : Fin ρ → Λ}
     (hv : IsNzFamily I ρ v) {m : ℕ} (b : Module.Basis (Fin m) ℤ I) (hm : m = ρ * Module.finrank ℚ E) :
     (Matrix.of fun p q => f (towerZBasis hv.2.2.1 p : Λ) (towerZBasis hv.2.2.1 q : Λ)).det =
@@ -255,7 +303,8 @@ theorem det_gram_index (f : Λ →+ Λ →+ ℝ) {I : Submodule (𝓞 E) Λ} {ρ
         M.map (Int.cast : ℤ → ℝ) := by
     ext p q
     rw [Matrix.of_apply, hexp p, hexp q]
-    simp only [map_sum, map_zsmul, AddMonoidHom.finset_sum_apply, AddMonoidHom.coe_smul, Pi.smul_apply]
+
+    simp only [map_sum, map_zsmul, AddMonoidHom.finsetSum_apply, AddMonoidHom.coe_smul, Pi.smul_apply]
     simp only [zsmul_eq_mul, Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply,
       Matrix.submatrix_apply, Matrix.of_apply, Finset.sum_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => ?_
@@ -271,7 +320,7 @@ end Tower
 
 def reForm (R : RiemLat E g Λ) : Λ →+ Λ →+ ℝ :=
   AddMonoidHom.mk' (fun x => AddMonoidHom.mk' (fun y => (R.ip (R.P x) (R.P y)).re)
-    (fun a b => by simp [map_add, ip_add_right])) (fun a b => by ext y; simp [map_add, ip_add_left])
+    (fun a b => by simp [map_add (f := _), ip_add_right])) (fun a b => by ext y; simp [map_add (f := _), ip_add_left])
 
 theorem reForm_apply (R : RiemLat E g Λ) (x y : Λ) : reForm R x y = (R.ip (R.P x) (R.P y)).re := rfl
 

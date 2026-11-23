@@ -1,12 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.SelmerWindowSums
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankCyclotomicExtAndCyclotomicCharSurjective
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InclWFrobIter
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DeRhamJumpDescentStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GaloisUniformizerRingStableStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIntegersFiniteExtensionOpenStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsoluteGaloisMemFixingSubgroupMaxUnramified
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.SelmerWindowSums
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AbsoluteGaloisMemFixingSubgroupMaxUnramified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,36 +100,10 @@ open Formalism.MainNotions.LocalSituation
 
 variable {l : ℕ} [Fact l.Prime]
 
-def lineLat {K LL : FinExt l} {ψ : ↥(GK K) →* (↥LL.1)ˣ} (L : Lattice (O := ↥(OL LL)) (charRep ψ))
-    (hψ : Continuous fun g => ((ψ g : (↥LL.1)ˣ) : ↥LL.1)) : Lat K LL where
-  V := ↥LL.1
-  modO := Algebra.toModule
-  towO := inferInstance
-  ρ := charRep ψ
-  cont := fun _ => hψ.mul continuous_const
-  L := L
-
 variable (LT : LocTheory) (HW : HWOf LT) (AI : LocAinf l (LT l)) {K : FinExt l}
   {s : ℕ} {LL : FinExt l} (h : Good K s LL)
 
-def TorsionBoundUnder {P : LocPrime l} {K LL : FinExt l} {s : ℕ} (h : Good K s LL)
-    (Hyp : Lat K LL → ℕ → ℕ → Prop) (e : ℕ) : Prop :=
-  ∀ (Y Yt : Lat K LL) (ι : LatHom Y.L Yt.L) (π : LatHom Yt.L (unitLat K LL)),
-    IsSESLat (Qp := ℚ_[l]) ι π →
-    IsCrys (P.PD (levelField K s)) (resKs h Yt) →
-  ∀ M₀ h₀ : ℕ, Hyp Y M₀ h₀ →
-  ∀ U : Finset ℤ, (∀ u, u ∈ U ↔ IsJump P h Y u) →
-  ∀ x ∈ Yt.L.T, π.f x = 1 →
-  ∀ c : ↥(GK K) → ↥Y.L.T, (∀ g, ι.f (c g : Y.V) = Yt.ρ g x - x) →
-    PushInHf (P.PD K) (tateLat P K LL e) l (cTor K s (M₀ + h₀) U e) Y c
-
 variable (D : Formalism.BasicNotions.D7) (H : HWOf D.loc) (F : FonOf D.loc D.locA H)
-
-def TorsionTheoremModule : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL) (e : ℕ),
-    TorsionBoundUnder (P := D.loc l) h
-        (HypW (sit D.loc H l (D.locA l) K s LL h) ((F l).E K s LL h).tie) e ∧
-      FiniteClasses (D.loc l) K LL e ∧ LengthBound (D.loc l) K LL e
 
 end Final
 

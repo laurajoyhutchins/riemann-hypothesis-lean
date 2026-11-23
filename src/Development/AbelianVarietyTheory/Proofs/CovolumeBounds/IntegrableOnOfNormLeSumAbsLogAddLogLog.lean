@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EnormPowLeInvMeasureMulLintegralBall
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.MeasureTheory.Integral.CircleAverage
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EnormPowLeInvMeasureMulLintegralBall
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.JensenFormula
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.Connected
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Analytic.Order
+
+@[expose] public section
 
 open MeasureTheory Metric Set Filter Topology
 open scoped ENNReal Real
@@ -11,7 +64,7 @@ section Holomorphic
 theorem log_norm_le_circleAverage_log_norm {g : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g (closedBall 0 1))
     (h0 : g 0 ≠ 0) : Real.log ‖g 0‖ ≤ Real.circleAverage (fun z => Real.log ‖g z‖) 0 1 := by
   have hg' : AnalyticOnNhd ℂ g (closedBall 0 |(1 : ℝ)|) := by simpa using hg
-  rw [hg'.circleAverage_log_norm one_ne_zero h0, le_add_iff_nonneg_left]
+  rw [hg'.circleAverage_log_norm h0, le_add_iff_nonneg_left]
   refine finsum_nonneg fun u => ?_
   by_cases hu : u ∈ closedBall (0 : ℂ) |(1 : ℝ)|
   · refine mul_nonneg (by exact_mod_cast MeromorphicOn.AnalyticOnNhd.divisor_nonneg hg' u) ?_
@@ -131,7 +184,8 @@ theorem integrableOn_log_norm_ball_zero (μ : Measure E) [μ.IsAddHaarMeasure] {
   rw [hA] at hB
   have hC : ∫⁻ z in ball 0 r, logGap M (F z) ∂μ < ∞ :=
     (ENNReal.lt_top_of_mul_ne_top_left hB.ne (ENNReal.ofReal_pos.2 h2).ne')
-  have hFf : F =ᵐ[μ.restrict (ball 0 r)] f := piecewise_ae_eq_restrict measurableSet_ball
+  have hFf : F =ᵐ[μ.restrict (ball 0 r)] f :=
+    piecewise_ae_eq_restrict measurableSet_ball.nullMeasurableSet
   have hne : ∀ᵐ z ∂(μ.restrict (ball 0 r)), f z ≠ 0 := by
     filter_upwards [ae_lt_top ((measurable_logGap M).comp hFm) hC.ne, hFf] with z hz hz' h
     simp [hz', logGap, h] at hz
@@ -145,7 +199,7 @@ theorem integrableOn_log_norm_ball_zero (μ : Measure E) [μ.IsAddHaarMeasure] {
     refine ⟨aestronglyMeasurable_const.sub hmeas, ?_⟩
     refine lt_of_eq_of_lt (lintegral_congr_ae ?_) hC
     filter_upwards [hne, hFf, ae_restrict_mem measurableSet_ball] with z hz hz' hzb
-    rw [hz', logGap, if_neg hz, Real.enorm_eq_ofReal]
+    rw [hz', logGap, ite_eq_right hz, Real.eNorm_eq_ofReal]
     exact sub_nonneg.2 (Real.log_le_log (norm_pos_iff.2 hz) (hM z hzb))
   exact (hc.sub hsub).congr (Eventually.of_forall fun z => by simp)
 
@@ -183,29 +237,6 @@ theorem exists_integrableOn_log_norm_of_frequently_ne_zero (μ : Measure E) [μ.
   obtain ⟨h3, h4⟩ := integrableOn_log_norm_ball μ (f := f) (a := a) (r := 2 * R / 3)
     (fun z hz => (hB z (h1 hz)).1.differentiableWithinAt) (fun z hz => (hB z (h1 hz)).2) ha
   exact ⟨R / 3, by positivity, ae_restrict_of_ae_restrict_of_subset h2 h3, h4.mono_set h2⟩
-
-theorem locallyIntegrableOn_log_norm_of_frequently_ne_zero (μ : Measure E) [μ.IsAddHaarMeasure]
-    {f : E → ℂ} {U : Set E} (hU : IsOpen U) (hf : DifferentiableOn ℂ f U)
-    (hx : ∀ x ∈ U, ∃ᶠ z in 𝓝 x, f z ≠ 0) :
-    (∀ᵐ z ∂(μ.restrict U), f z ≠ 0) ∧ LocallyIntegrableOn (fun z => Real.log ‖f z‖) U μ := by
-  have : ProperSpace E := FiniteDimensional.proper ℂ E
-  have h : ∀ x ∈ U, ∃ r > 0, (∀ᵐ z ∂(μ.restrict (ball x r)), f z ≠ 0) ∧
-      IntegrableOn (fun z => Real.log ‖f z‖) (ball x r) μ := fun x hxU =>
-    exists_integrableOn_log_norm_of_frequently_ne_zero μ
-      (hf.eventually_differentiableAt (hU.mem_nhds hxU)) (hx x hxU)
-  refine ⟨?_, fun x hxU => ?_⟩
-  · rw [ae_restrict_iff'₀ hU.measurableSet.nullMeasurableSet, ae_iff]
-    refine measure_null_of_locally_null _ fun x hx' => ?_
-    have hxU : x ∈ U := by
-      by_contra hn
-      exact hx' fun h => absurd h hn
-    obtain ⟨r, hr, h1, -⟩ := h x hxU
-    rw [ae_restrict_iff' measurableSet_ball, ae_iff] at h1
-    refine ⟨_ ∩ ball x r, inter_mem_nhdsWithin _ (ball_mem_nhds x hr), measure_mono_null ?_ h1⟩
-    rintro z ⟨hz, hzb⟩ hz'
-    exact hz fun _ => hz' hzb
-  · obtain ⟨r, hr, -, h2⟩ := h x hxU
-    exact ⟨ball x r, mem_nhdsWithin_of_mem_nhds (ball_mem_nhds x hr), h2⟩
 
 theorem exists_integrableOn_log_norm_div (μ : Measure E) [μ.IsAddHaarMeasure]
     {g h : E → ℂ} {x : E} (hg : ∀ᶠ z in 𝓝 x, DifferentiableAt ℂ g z)

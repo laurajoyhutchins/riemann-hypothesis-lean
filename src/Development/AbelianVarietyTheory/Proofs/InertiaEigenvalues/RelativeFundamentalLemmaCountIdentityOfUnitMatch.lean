@@ -1,26 +1,77 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ValIrreducible
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ToMatrixTwRight
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCompactIntMatrix
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegralRightCosetFunEqFinsum
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemRangeAlgebraMapOfStarEqStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormLeIffValuationLe
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFixedBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SgnLatSpanBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanSelfDual
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ToMatrixTwRight
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ValIrreducible
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetTracePowAddMulUnitNeZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFixedBasis
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsPowerBasisOfCharpolySeparable
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetTracePowAddMulUnitNeZeroStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HermBasisOrthonormal
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OrthonormalIffUnitary
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitaryGroupPositiveCharacterTrivialAndUnimodulaStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GeneralLinearHaarIsMulRightInvariantUnramified
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JacquetRallisBorderedMatrixNormalFormInvariants
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JacquetRallisTransferFactorKrylovDet
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SelfDualHermitianLatticeBasisExistsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocallyCompactOfComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GeneralLinearHaarIsMulRightInvariantUnramified
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HermBasisOrthonormal
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegralRightCosetFunEqFinsum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsCompactIntMatrix
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JacquetRallisBorderedMatrixNormalFormInvariants
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.JacquetRallisTransferFactorKrylovDet
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocallyCompactOfComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemRangeAlgebraMapOfStarEqStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormLeIffValuationLe
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OrthonormalIffUnitary
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SelfDualHermitianLatticeBasisExistsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SgnLatSpanBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanSelfDual
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitaryGroupPositiveCharacterTrivialAndUnimodulaStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Data.Set.Card.Arithmetic
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Module MeasureTheory
 
@@ -58,6 +109,7 @@ theorem repr_sigma {n : ℕ} (e : Basis (Fin n) K.E B.A) (he : ∀ i, B.σ (e i)
     e.repr (B.σ y) i = K.c (e.repr y i) := by
   have : B.σ y = ∑ j, K.c (e.repr y j) • e j := by
     conv_lhs => rw [← e.sum_repr y]
+
     simp only [map_sum, sigma_smul, he]
   rw [this]; simp [Finsupp.single_apply]
 
@@ -87,8 +139,8 @@ theorem exists_iota {φ : K.E ≃+* E} (hs : ∀ y, φ (K.c y) = star (φ y)) {a
   obtain ⟨x, hx⟩ := GlobalTheory.T.mem_range_algebraMap_of_star_eq F E (φ a) (by rw [← hs, h])
   exact ⟨x, by rw [iota_apply, hx, RingEquiv.symm_apply_apply]⟩
 
-open Classical in
 
+open Classical in
 def wG (u : B.A) (L : Submodule K.O B.A) : ℂ :=
   if (∀ y ∈ L, B.g * y ∈ L) ∧ u ∈ L ∧ ∀ z ∈ L, Algebra.trace K.E B.A z ∈ (algebraMap K.O K.E).range
   then ((B.sgnLat L : ℚ) : ℂ) else 0
@@ -122,6 +174,7 @@ theorem tw_fixed {n : ℕ} {φ : K.E ≃+* E} (hs : ∀ y, φ (K.c y) = star (φ
     (e : Basis (Fin n) K.E B.A) (he : ∀ i, B.σ (e i) = e i) (γ : GL (Fin n) F) (j : Fin n) :
     B.σ (tw e (Matrix.GeneralLinearGroup.map (iota F φ) γ) j) =
       tw e (Matrix.GeneralLinearGroup.map (iota F φ) γ) j := by
+
   rw [tw_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [sigma_smul, he, ← map_inv, Matrix.GeneralLinearGroup.map_apply, c_iota hs]
@@ -206,8 +259,8 @@ theorem unit_iff {n : ℕ} {φ : K.E ≃+* E} (hs : ∀ y, φ (K.c y) = star (φ
   rw [h1, ← Matrix.map_mul, ← Matrix.map_one φ (map_zero φ) (map_one φ)]
   exact (Matrix.map_injective φ.injective).eq_iff.symm
 
-open Classical in
 
+open Classical in
 def wU (w : B.A) (L : Submodule K.O B.A) : ℂ :=
   if (∀ y ∈ L, B.g * y ∈ L) ∧ w ∈ L then 1 else 0
 
@@ -318,6 +371,7 @@ theorem repr_orth {n : ℕ} {x : B.A} (b : Basis (Fin n) K.E B.A)
   have h2 : ∀ j, (Algebra.trace K.E B.A ∘ₗ LinearMap.mulLeft K.E (x * B.σ (b i))) (b j) = if j = i then 1 else 0 :=
     fun j => by rw [← this, hb]
   rw [this]
+
   conv_rhs => rw [← b.sum_repr y, map_sum]
   simp only [map_smul, h2]
   simp

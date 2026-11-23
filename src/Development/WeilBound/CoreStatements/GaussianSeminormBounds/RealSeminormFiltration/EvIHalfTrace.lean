@@ -1,7 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
-import Development.WeilBound.ThetaLifts.SchwartzMoments.SchwartzDqTendsto
-import Development.WeilBound.ThetaLifts.SchwartzMoments.NormIterComp
+module
+
+import Development.WeilBound.ThetaLifts.LatticeBasics.RealInvL
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Development.WeilBound.ThetaLifts.SchwartzMoments.NormIterComp
+public import Development.WeilBound.ThetaLifts.SchwartzMoments.SchwartzDqTendsto
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,29 +79,11 @@ theorem dop_apply (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (x : V) :
 
 theorem hasDerivAt_hl (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (x : V) :
     HasDerivAt (fun t : ℝ => hl a L t f x) (dop a L f x) 0 := by
-  have h1 : HasDerivAt (fun t : ℝ => t * L x + t ^ 2 * (L a / 2)) (L x) 0 := by
-    have a1 : HasDerivAt (fun t : ℝ => t * L x) (L x) 0 := by simpa using (hasDerivAt_id (0 : ℝ)).mul_const (L x)
-    have a2 : HasDerivAt (fun t : ℝ => t ^ 2 * (L a / 2)) 0 0 := by
-      simpa using ((hasDerivAt_id (0 : ℝ)).pow 2).mul_const (L a / 2)
-    simpa using a1.fun_add a2
-  have h2 : HasDerivAt (fun t : ℝ => Complex.exp (-(2 * Real.pi * Complex.I) * ((t * L x + t ^ 2 * (L a / 2) : ℝ) : ℂ)))
-      (-(2 * Real.pi * Complex.I) * (L x : ℂ)) 0 := by
-    have := ((h1.ofReal_comp).const_mul (-(2 * Real.pi * Complex.I))).cexp
-    simpa using this
-  have h3 : HasDerivAt (fun t : ℝ => x + t • a) a 0 := by
-    simpa using ((hasDerivAt_id (0 : ℝ)).smul_const a).const_add x
-  have h4 : HasDerivAt (fun t : ℝ => f (x + t • a)) (fderiv ℝ f x a) 0 := by
-    have hf : HasFDerivAt f (fderiv ℝ f x) (x + (0 : ℝ) • a) := by
-      simpa using f.hasFDerivAt x
-    exact hf.comp_hasDerivAt (0 : ℝ) h3
-  refine (h2.fun_mul h4).congr_deriv ?_
-  rw [dop_apply]
-  simp
-  ring
+  apply GlobalTheory.ThK.Dbl.Dense.hasDerivAt_hl <;> assumption
 end Line
 
-open Complex in
 
+open Complex in
 theorem temperate_exp : Function.HasTemperateGrowth (fun t : ℝ => cexp (I * t)) := by
   have hd : ∀ n : ℕ, iteratedDeriv n (fun t : ℝ => cexp (I * t)) = fun t : ℝ => I ^ n * cexp (I * t) := by
     intro n
@@ -105,59 +137,7 @@ theorem hl_schwartz (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (t : ℝ) :
 theorem hl_line_deriv (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) :
     ∃ G : ℝ → 𝓢(V, ℂ), (∀ t x, G t x = hl a L t f x) ∧
       (a ≠ 0 → ∀ T : 𝓢(V, ℂ) →L[ℂ] ℂ, HasDerivAt (fun t => T (G t)) (T (dop a L f)) 0) := by
-  choose G hG using hl_schwartz a L f
-  refine ⟨G, hG, fun ha T => ?_⟩
-  have hna : ‖a‖ ≠ 0 := norm_ne_zero_iff.2 ha
-  obtain ⟨g₀, -, hg₀⟩ := exists_dual_vector ℝ a hna
-  set lam : V →L[ℝ] ℝ := ‖a‖⁻¹ • g₀ with hlam
-  have hla : lam a = 1 := by
-    simp only [hlam, ContinuousLinearMap.smul_apply, hg₀, smul_eq_mul]
-    simpa using inv_mul_cancel₀ hna
-  set q : V → ℝ := fun x => lam x * L x + (-(L a / 2)) * (lam x * lam x) with hq
-  have hqt : q.HasTemperateGrowth :=
-    (lam.hasTemperateGrowth.mul L.hasTemperateGrowth).add
-      ((Function.HasTemperateGrowth.const _).mul (lam.hasTemperateGrowth.mul lam.hasTemperateGrowth))
-  have hdiff : ∀ (x : V) (t : ℝ), q (x + t • a) - q x = t * L x + t ^ 2 * (L a / 2) := fun x t => by
-    simp only [hq, map_add, map_smul, hla, smul_eq_mul]
-    ring
-  have t1 := chirp_tg 1 hqt
-  have t2 := chirp_tg (-1) hqt
-  set P := SchwartzMap.smulLeftCLM ℂ (chirp 1 q) with hP
-  set Pi := SchwartzMap.smulLeftCLM ℂ (chirp (-1) q) with hPi
-  set g : 𝓢(V, ℂ) := P f with hg
-  have hGe : ∀ t, G t = Pi (SchwartzMap.compSubConstCLM ℂ (-(t • a)) g) := fun t => by
-    ext x
-    rw [hG, hPi, SchwartzMap.smulLeftCLM_apply_apply t2, SchwartzMap.compSubConstCLM_apply, sub_neg_eq_add, hg, hP,
-      SchwartzMap.smulLeftCLM_apply_apply t1, hl, ← hdiff]
-    simp only [smul_eq_mul]
-    rw [← mul_assoc, mul_comm (chirp (-1) q x), chirp_mul]
-  have hf : Pi g = f := by
-    ext x
-    rw [hPi, SchwartzMap.smulLeftCLM_apply_apply t2, hg, hP, SchwartzMap.smulLeftCLM_apply_apply t1]
-    simp only [smul_eq_mul]
-    rw [← mul_assoc, chirp_one, one_mul]
-  have hG0 : G 0 = f := by
-    ext x
-    rw [hG]
-    simp [hl]
-  have hder : ∀ T₁ : 𝓢(V, ℂ) →L[ℂ] ℂ, HasDerivAt (fun t => T₁ (G t)) (T₁ (Pi (∂_{a} g))) 0 := fun T₁ => by
-    rw [hasDerivAt_iff_tendsto_slope_zero]
-    have h := PositivityTheory.ThKOwn.schwartz_dq_tendsto g a
-    have h2 := (((T₁.comp Pi).restrictScalars ℝ).continuous.tendsto _).comp h
-    refine h2.congr fun t => ?_
-    simp only [Function.comp, map_smul, map_sub, ContinuousLinearMap.coe_restrictScalars', ContinuousLinearMap.comp_apply,
-      zero_add, hG0, hGe, hf]
-  have hid : Pi (∂_{a} g) = dop a L f := by
-    ext x
-    have h1 := hder (BoundedContinuousFunction.evalCLM ℂ x ∘L SchwartzMap.toBoundedContinuousFunctionCLM ℂ V ℂ)
-    have e : (fun t => (BoundedContinuousFunction.evalCLM ℂ x ∘L SchwartzMap.toBoundedContinuousFunctionCLM ℂ V ℂ) (G t)) =
-        fun t => hl a L t f x := by
-      funext t
-      exact hG t x
-    rw [e] at h1
-    exact h1.unique (hasDerivAt_hl a L f x)
-  rw [← hid]
-  exact hder T
+  apply GlobalTheory.ThK.Dbl.Dense.hl_line_deriv <;> assumption
 
 theorem exists_bump : ∃ φ : 𝓢(ℝ, ℂ), ∀ᶠ t in 𝓝 (0 : ℝ), φ t = 1 := by
   let b : ContDiffBump (0 : ℝ) := default
@@ -241,7 +221,9 @@ theorem evI_sum {ι : Type} (s : Finset ι) (g : ι → AF F) : evI F (∑ i ∈
   | insert i s hi ih => rw [Finset.sum_insert hi, Finset.sum_insert hi, evI_add, ih]
 
 theorem evI_realAd (t : ℝ) : evI F (realAd F t) = algebraMap ℝ (mixedEmbedding.mixedSpace F) t := by
-  simp [evI, realAd]
+  change (InfiniteAdeleRing.ringEquiv_mixedSpace F)
+    ((InfiniteAdeleRing.ringEquiv_mixedSpace F).symm (algebraMap ℝ _ t)) = _
+  exact (InfiniteAdeleRing.ringEquiv_mixedSpace F).apply_symm_apply _
 
 def linForm (B : κ → mixedEmbedding.mixedSpace F) : (κ → mixedEmbedding.mixedSpace F) →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -250,10 +232,11 @@ def linForm (B : κ → mixedEmbedding.mixedSpace F) : (κ → mixedEmbedding.mi
 
 theorem linForm_apply (B y : κ → mixedEmbedding.mixedSpace F) :
     linForm B y = Algebra.trace ℝ (mixedEmbedding.mixedSpace F) (∑ i, y i * B i) := by
-  simp [linForm, map_sum, LinearMap.sum_apply]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp [linForm, map_sum, LinearMap.sum_apply]
+
 
 open scoped Classical in
-
 theorem phase_line (ψ : AddChar (AF F) ℂ) (hψ : IsStd ψ) (a b x : κ → AF F) (hb : At (evI F) b) (t : ℝ) :
     ψ (x ⬝ᵥ (realAd F t • b) + ⅟(2 : AF F) * ((realAd F t • a) ⬝ᵥ (realAd F t • b))) =
       Complex.exp (-(2 * Real.pi * Complex.I) * ((t * linForm (fun i => evI F (b i)) (fun i => evI F (x i)) +
@@ -275,7 +258,7 @@ theorem phase_line (ψ : AddChar (AF F) ℂ) (hψ : IsStd ψ) (a b x : κ → AF
     congr 1
     · exact Finset.sum_congr rfl fun i _ => by ring
     · exact Finset.sum_congr rfl fun i _ => by ring
-  rw [ev, map_add, map_smul, map_smul, linForm_apply]
+  rw [ev, map_add (f := _), map_smul, map_smul, linForm_apply]
   simp [smul_eq_mul]
 
 theorem evI_half_trace (S : mixedEmbedding.mixedSpace F) :
@@ -287,7 +270,7 @@ theorem evI_half_trace (S : mixedEmbedding.mixedSpace F) :
   have h2 : S = evI F ⅟(2 : AF F) * S + evI F ⅟(2 : AF F) * S := by
     rw [← add_mul, h1, one_mul]
   have h3 := congrArg (Algebra.trace ℝ (mixedEmbedding.mixedSpace F)) h2
-  rw [map_add] at h3
+  rw [map_add (f := _)] at h3
   linarith
 
 theorem snd_eq_zero {z : κ → AF F} (hz : At (evI F) z) (i : κ) : (z i).2 = 0 := by
@@ -297,8 +280,8 @@ theorem snd_eq_zero {z : κ → AF F} (hz : At (evI F) z) (i : κ) : (z i).2 = 0
   have h' : (1 : Af F) * (z i).2 = 0 := congrArg Prod.snd h
   rwa [one_mul] at h'
 
-open scoped Classical in
 
+open scoped Classical in
 theorem schr_pure {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) {a b : κ → AF F} (ha : At (evI F) a) (hb : At (evI F) b)
     (f : (κ → mixedEmbedding.mixedSpace F) → ℂ) (g : (κ → Af F) → ℂ) (t : ℝ) :
     schr ψ (realAd F t • a, realAd F t • b) (pureA F f g) =

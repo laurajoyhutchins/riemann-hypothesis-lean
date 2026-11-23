@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.AbByPOfComm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.AbByPOfComm
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.MvPolynomial.Symmetric.Defs
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsCharacterEsymmRootsCharpoly
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.MatrixTraceIffIsCharacterOverSubfieldComplex
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.MultisetPowerSumNewtonIdentity
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.RootsCharpolyPowEqMapPow
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.VirtualCharactersMulComapConjIndLinear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.InvariantSubspaceMobiusInverseRecEqOfFinrankLt
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.MatrixTraceIffIsCharacterOverSubfieldComplex
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.VirtualCharactersMulComapConjIndLinear
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.RootsCharpolyPowEqMapPow
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsCharacterEsymmRootsCharpoly
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.MultisetPowerSumNewtonIdentity
+
+@[expose] public section
+
 open Polynomial GlobalTheory.CuspGL GlobalTheory.BI
 
 namespace GlobalTheory.EsymmVirt
@@ -32,7 +83,7 @@ theorem coeff_prod_one_add (s : Multiset ℂ) (n : ℕ) :
 
 theorem esymm_add (s t : Multiset ℂ) (n : ℕ) :
     (s + t).esymm n = ∑ i ∈ Finset.range (n + 1), s.esymm i * t.esymm (n - i) := by
-  rw [← coeff_prod_one_add, Multiset.map_add, Multiset.prod_add, coeff_mul,
+  rw [← coeff_prod_one_add, Multiset.map_add (f := _), Multiset.prod_add, coeff_mul,
     Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
   simp only [coeff_prod_one_add]
 
@@ -99,7 +150,7 @@ theorem exists_multisets {φ : G → ℂ} (hφ : φ ∈ Virt ℂ ℂ G) :
     obtain ⟨A', B', hA', hB', h'⟩ := hy
     refine ⟨fun g => A g + A' g, fun g => B g + B' g, esymm_add_mem_virt hA hA',
       esymm_add_mem_virt hB hB', fun g j hj => ?_⟩
-    simp only [Pi.add_apply, Multiset.map_add, Multiset.sum_add]
+    simp only [Pi.add_apply, Multiset.map_add (f := _), Multiset.sum_add]
     linear_combination h g j hj + h' g j hj
   | neg x _ hx =>
     obtain ⟨A, B, hA, hB, h⟩ := hx
@@ -114,7 +165,7 @@ theorem esymm_mem_virt : ∀ (G : Type) [Group G] [Finite G] (φ : G → ℂ) (x
   obtain ⟨A, B, hA, hB, h⟩ := exists_multisets hφ
   have he : ∀ g n, (x g + B g).esymm n = (A g).esymm n := fun g n =>
     esymm_eq_of_psum_eq _ _ (fun j hj => by
-      rw [Multiset.map_add, Multiset.sum_add, ← hx g j hj, h g j hj]) n
+      rw [Multiset.map_add (f := _), Multiset.sum_add, ← hx g j hj, h g j hj]) n
   induction s using Nat.strong_induction_on with
   | _ s ih =>
     have : (fun g => (x g).esymm s) = (fun g => (A g).esymm s) - ∑ i ∈ Finset.range s,

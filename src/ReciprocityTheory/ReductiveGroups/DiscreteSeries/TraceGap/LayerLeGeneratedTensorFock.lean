@@ -1,6 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.TensFockInfPhysSub
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.ProjectionCommutesDerivedAction
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.WKTensFockGenSub
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.GsBasisPhys
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CsqDdPt
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.ProjectionCommutesDerivedAction
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.GeneratedSubStable
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.MemTensorFockOfCoeffs
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.TraceEqTraceRestrictOfRangeLe
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TraceGap.TsubValInjective
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +103,7 @@ theorem gradT_D (E : Fin n → Fin n → Module.End ℂ N) (y : TensorProduct �
   have h1 := LinearMap.congr_fun (gradT_props ε E).2.1 y
   have h2 := LinearMap.congr_fun (gradT_props ε E).2.2 y
   simp only [Module.End.mul_apply, LinearMap.neg_apply] at h1 h2
-  rw [LinearMap.add_apply, map_add, h1, h2, LinearMap.add_apply, neg_add]
+  rw [LinearMap.add_apply, map_add (f := _), h1, h2, LinearMap.add_apply, neg_add]
 
 end T
 
@@ -81,7 +130,7 @@ theorem map_eq_smul_of_tensFock {S : Submodule ℂ N} {F : Module.End ℂ N} {c 
   | tmul m f =>
     simp only [TensorProduct.map_tmul, Submodule.coe_subtype, LinearMap.id_apply, hF m m.2,
       TensorProduct.smul_tmul']
-  | add x x' hx hx' => rw [map_add, map_add, hx, hx', smul_add]
+  | add x x' hx hx' => rw [map_add (f := _), map_add (f := _), hx, hx', smul_add]
 
 theorem layer_le_generated_tensorFock (J : ℕ) : Y0 ε E V J ≤ tensFock (n := n) (genSub E V) ⊓ physicalSubspace ε :=
   inf_le_inf_right _ (tensorFock_mono (layer_le_genSub J))
@@ -121,7 +170,7 @@ theorem YY_D (hE : IsGlRep E) (hVk : IsKStableSub ε E V) {c : ℂ} (hc : ∀ v 
     (J : ℕ) {y : TensorProduct ℂ N (Fock n)} (hy : y ∈ YY ε E V J) :
     (dOp ε (eT E) cpT + dOp' ε (eT E) cmT) y ∈ YY ε E V J := by
   obtain ⟨y0, hy0, y1, ⟨x, hx, rfl⟩, rfl⟩ := Submodule.mem_sup.1 hy
-  rw [map_add]
+  rw [map_add (f := _)]
   exact Submodule.add_mem _ (Submodule.mem_sup_right ⟨y0, hy0, rfl⟩)
     (Submodule.mem_sup_left (diracSquare_mem_layer hE hVk hc J hx))
 
@@ -129,7 +178,7 @@ theorem YY_gradT (J : ℕ) {y : TensorProduct ℂ N (Fock n)} (hy : y ∈ YY ε 
   obtain ⟨y0, hy0, y1, ⟨x, hx, rfl⟩, rfl⟩ := Submodule.mem_sup.1 hy
   have hG : ∀ z ∈ Y0 ε E V J, gradT z ∈ Y0 ε E V J := fun z hz =>
     ⟨tensFock_lTensor_stable _ hz.1, (physSub_stable ε E).2.2.2.2 z hz.2⟩
-  rw [map_add, gradT_D]
+  rw [map_add (f := _), gradT_D]
   exact Submodule.add_mem _ (Submodule.mem_sup_left (hG y0 hy0))
     (Submodule.mem_sup_right ⟨-gradT x, Submodule.neg_mem _ (hG x hx), by rw [map_neg]⟩)
 
@@ -174,7 +223,7 @@ theorem wK_D (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {k : Ma
   have h1 := LinearMap.congr_fun (wK_dOp hσ hD hk) x
   have h2 := LinearMap.congr_fun (wK_dOp' hσ hD hk) x
   simp only [Module.End.mul_apply] at h1 h2
-  rw [LinearMap.add_apply, map_add, h1, h2, LinearMap.add_apply]
+  rw [LinearMap.add_apply, map_add (f := _), h1, h2, LinearMap.add_apply]
 
 theorem compactAction_mem_layer (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) (hVs : IsKStableSub ε E V)
     (hVK : ∀ k ∈ Kset ε, ∀ v ∈ V, ∃ w ∈ V, (w : H) = σ k v) (J : ℕ) {k : Matrix (Fin n) (Fin n) ℂ}
@@ -185,11 +234,11 @@ theorem YY_wK (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) (hVs :
     (hVK : ∀ k ∈ Kset ε, ∀ v ∈ V, ∃ w ∈ V, (w : H) = σ k v) (J : ℕ) {k : Matrix (Fin n) (Fin n) ℂ}
     (hk : k ∈ Kset ε) {y : TensorProduct ℂ D (Fock n)} (hy : y ∈ YY ε E V J) : wK hD hk y ∈ YY ε E V J := by
   obtain ⟨y0, hy0, y1, ⟨x, hx, rfl⟩, rfl⟩ := Submodule.mem_sup.1 hy
-  rw [map_add, wK_D hσ hD hk]
+  rw [map_add (f := _), wK_D hσ hD hk]
   exact Submodule.add_mem _ (Submodule.mem_sup_left (compactAction_mem_layer hσ hD hVs hVK J hk hy0))
     (Submodule.mem_sup_right ⟨_, compactAction_mem_layer hσ hD hVs hVK J hk hx, rfl⟩)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem str_YY (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) (hVs : IsKStableSub ε E V)
     (hVK : ∀ k ∈ Kset ε, ∀ v ∈ V, ∃ w ∈ V, (w : H) = σ k v) {c : ℂ}

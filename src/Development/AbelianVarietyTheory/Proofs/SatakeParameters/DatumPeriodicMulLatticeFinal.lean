@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.WeightedChainData
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.MainNotions
 
 noncomputable section
@@ -57,8 +107,8 @@ theorem redP_det_congr {n : Type} [Fintype n] [DecidableEq n] (A B : Matrix n n 
   rw [key A hA, key B hB]
   simp only [h]
 
-theorem unitV_congr (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) {a b : E} (h : redP P a = redP P b) : unitV χ a = unitV χ b := by
-  unfold unitV
+theorem unitV_congr (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) {a b : E} (h : redP P a = redP P b) : LocE.unitV χ a = LocE.unitV χ b := by
+  unfold LocE.unitV
   rw [h]
 
 variable {q : ℕ}
@@ -89,16 +139,16 @@ theorem intAt_sum_div {ι : Type} (s : Finset ι) (f : ι → E) (h : ∀ i, Int
 
 theorem unitV_det_add (hq : (q : 𝓞 E) ∈ P.asIdeal) (hq0 : (q : E) ≠ 0) (χ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) {t : ℕ}
     (M Z : ℕ → ℕ → E) (hZ : ∀ p p', IntAt P (Z p p' / q)) (f : Fin t → ℕ) (hM : ∀ s s', IntAt P (M (f s) (f s'))) :
-    unitV χ (Matrix.det (Matrix.of fun s s' : Fin t => M (f s) (f s') + Z (f s) (f s'))) =
-      unitV χ (Matrix.det (Matrix.of fun s s' : Fin t => M (f s) (f s'))) :=
+    LocE.unitV χ (Matrix.det (Matrix.of fun s s' : Fin t => M (f s) (f s') + Z (f s) (f s'))) =
+      LocE.unitV χ (Matrix.det (Matrix.of fun s s' : Fin t => M (f s) (f s'))) :=
   unitV_congr χ (redP_det_congr _ _ (fun s s' => (hM s s').add (intAt_of_div hq0 (hZ _ _))) hM
     fun s s' => redP_add_q hq hq0 _ (hZ _ _))
 
 theorem prod_det_add (hq : (q : 𝓞 E) ∈ P.asIdeal) (hq0 : (q : E) ≠ 0) (χ : ℕ → (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) (r t j : ℕ)
     (M Z : ℕ → ℕ → E) (hZ : ∀ p p', IntAt P (Z p p' / q)) (hM : ∀ p p', p' < r + j * t → IntAt P (M p p')) :
-    ∏ i ∈ Finset.range j, unitV (χ i) (Matrix.det (Matrix.of fun s s' : Fin t =>
+    ∏ i ∈ Finset.range j, LocE.unitV (χ i) (Matrix.det (Matrix.of fun s s' : Fin t =>
         M (r + i * t + s.1) (r + i * t + s'.1) + Z (r + i * t + s.1) (r + i * t + s'.1))) =
-      ∏ i ∈ Finset.range j, unitV (χ i) (Matrix.det (Matrix.of fun s s' : Fin t =>
+      ∏ i ∈ Finset.range j, LocE.unitV (χ i) (Matrix.det (Matrix.of fun s s' : Fin t =>
         M (r + i * t + s.1) (r + i * t + s'.1))) := by
   refine Finset.prod_congr rfl fun i hi => ?_
   refine unitV_det_add hq hq0 (χ i) M Z hZ (fun s => r + i * t + s.1) fun s s' => hM _ _ ?_
@@ -245,6 +295,7 @@ theorem intAt_div_pow_le (hq0 : (q : E) ≠ 0) {a b : ℕ} (h : a ≤ b) {z : E}
 
 theorem form_apply {n : ℕ} (f : Sp E n →ₗ[E] E) (y : Sp E n) : f y = ∑ i, y i * f (Pi.single i 1) := by
   conv_lhs => rw [pi_eq_sum_univ' y]
+
   simp [map_sum]
 
 theorem psi_shift (hq0 : (q : E) ≠ 0) (psi : E → K) (D a b : ℕ) (hD : a + b ≤ D)

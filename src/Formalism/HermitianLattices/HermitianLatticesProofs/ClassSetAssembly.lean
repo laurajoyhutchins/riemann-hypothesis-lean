@@ -1,7 +1,56 @@
-import Mathlib
-import Formalism.HermitianLattices.GenusCovolBound
-import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
-import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+module
+
+public import Formalism.HermitianLattices.GenusCovolBound
+public import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module Matrix
 
@@ -15,15 +64,11 @@ variable {K V : Type*} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [
 
 theorem classSetAssembly_tr_add_left (h : V →ₗ⋆[K] V →ₗ[K] K) (x y z : V) :
     Algebra.trace ℚ K (h (x + y) z) = Algebra.trace ℚ K (h x z) + Algebra.trace ℚ K (h y z) := by
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
 
 theorem classSetAssembly_tr_sub_left (h : V →ₗ⋆[K] V →ₗ[K] K) (x y z : V) :
     Algebra.trace ℚ K (h (x - y) z) = Algebra.trace ℚ K (h x z) - Algebra.trace ℚ K (h y z) := by
   simp only [map_sub, LinearMap.sub_apply]
-
-theorem classSetAssembly_tr_add_right (h : V →ₗ⋆[K] V →ₗ[K] K) (x y z : V) :
-    Algebra.trace ℚ K (h z (x + y)) = Algebra.trace ℚ K (h z x) + Algebra.trace ℚ K (h z y) := by
-  simp only [map_add]
 
 theorem classSetAssembly_ratCast_mul (q : ℚ) (a : K) :
     Algebra.trace ℚ K ((q : K) * a) = q * Algebra.trace ℚ K a := by
@@ -44,11 +89,13 @@ theorem classSetAssembly_tr_qsmul_right (h : V →ₗ⋆[K] V →ₗ[K] K) (q : 
 theorem classSetAssembly_tr_sum_left (h : V →ₗ⋆[K] V →ₗ[K] K) {ι : Type*} (s : Finset ι)
     (f : ι → V) (y : V) :
     Algebra.trace ℚ K (h (∑ i ∈ s, f i) y) = ∑ i ∈ s, Algebra.trace ℚ K (h (f i) y) := by
+
   rw [map_sum, LinearMap.sum_apply, map_sum]
 
 theorem classSetAssembly_tr_sum_right (h : V →ₗ⋆[K] V →ₗ[K] K) {ι : Type*} (s : Finset ι)
     (f : ι → V) (y : V) :
     Algebra.trace ℚ K (h y (∑ i ∈ s, f i)) = ∑ i ∈ s, Algebra.trace ℚ K (h y (f i)) := by
+
   rw [map_sum, map_sum]
 
 theorem classSetAssembly_trace_int (o : NumberField.RingOfIntegers K) :
@@ -118,6 +165,7 @@ theorem classSetAssembly_qindep {n : ℕ} (ι : V →+ EuclideanSpace ℝ (Fin n
     (hg : ∑ i, (g i : K) • u i = 0) : g = 0 := by
   have hsum : ∑ i, ((g i : ℚ) : ℝ) • (ι ∘ u) i = 0 := by
     have e := congrArg ι hg
+
     rw [map_sum, map_zero] at e
     rw [← e]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -152,7 +200,7 @@ theorem classSetAssembly_span {n : ℕ} (h : V →ₗ⋆[K] V →ₗ[K] K)
       map_add' := fun a b => by funext j; simp [add_mul, Finset.sum_add_distrib]
       map_smul' := fun c a => by funext j; simp [Finset.mul_sum, mul_assoc] }
   have hinj : Function.Injective L := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro r hr0
     exact classSetAssembly_coord_zero h hpos ι hι u hu r (fun j => congrFun hr0 j)
   obtain ⟨t, ht⟩ := (LinearMap.injective_iff_surjective.mp hinj)
@@ -496,6 +544,7 @@ theorem classSetAssembly_exists_isom {n : ℕ} (h : V →ₗ⋆[K] V →ₗ[K] K
   show Algebra.trace ℚ K (h (φ x) (φ y)) = Algebra.trace ℚ K (h x y)
   obtain ⟨s, hs⟩ := classSetAssembly_span h hpos ι hι u hu y
   have hφy : φ y = ∑ j, (s j : K) • u' j := by
+
     rw [hs, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_smul, hφu j]

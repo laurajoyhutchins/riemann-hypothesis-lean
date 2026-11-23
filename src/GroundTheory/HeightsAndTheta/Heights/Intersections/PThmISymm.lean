@@ -1,10 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsWellDefined
-import GroundTheory.HeightsAndTheta.Heights.Intersections.ThmIExistsFamily
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PChoice
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotLtLtOfMemMinimalPrimes
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsWellDefined
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsUniqueStatement
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotLtLtOfMemMinimalPrimes
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PChoice
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ThmIExistsFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -47,6 +90,20 @@ theorem recR_comp_perm
     (hs : IsSectionOn P B s) (τ : Equiv.Perm (Fin n))
     (hI : ∀ W, IsArithVar W n → I W n (L ∘ τ) = I W n L) :
     recR I P (L ∘ τ) B s = recR I P L B s := by
+  have divSuppArith : DivSuppArithStatement := by
+    intro K _ ι _ P n A s W hP hs hW
+    obtain ⟨hK, ⟨hPp, hPh, -⟩, -, hPdim⟩ := hP
+    obtain ⟨a, -, hsa, hsP⟩ := hs
+    obtain ⟨hWmin, hWrel⟩ := hW
+    have hWp : W.IsPrime := hWmin.1.1
+    have hWmh : IsMultiHomogIdeal W := isMultiHomogIdeal_of_mem_minimalPrimes hPh hsa hWmin
+    have := hPp
+    have h1 := dim_quot_minimal_add_one P W s hsP hWmin
+    rw [hPdim] at h1
+    have hdim : ringKrullDim (MRing ι ⧸ W) = ((n + Fintype.card K : ℕ) : WithBot ℕ∞) :=
+      withBot_eq_of_add_one (by rw [h1, show n + 1 + Fintype.card K = n + Fintype.card K + 1 by omega])
+    exact ⟨fun hh => ⟨hK, ⟨hWp, hWmh, hWrel⟩, hh, hdim⟩,
+      fun hv => ⟨⟨hWp, hWmh, hWrel⟩, charOf_prime hWp hv, hdim⟩⟩
   unfold recR
   congr 1
   · refine finsum_mem_congr rfl fun W hW => ?_
@@ -139,6 +196,20 @@ theorem swap_half (hR : IsRFamily I) (hRS : RPositionAdd.Statement) (hSwap : Swa
     {y : MRing ι} (hy : IsSectionOn P Y y) :
     I P (m + 1 + 1) (Fin.snoc (Fin.snoc L X) Y) = I P (m + 1 + 1) (Fin.snoc (Fin.snoc L Y) X) := by
   classical
+  have divSuppArith : DivSuppArithStatement := by
+    intro K _ ι _ P n A s W hP hs hW
+    obtain ⟨hK, ⟨hPp, hPh, -⟩, -, hPdim⟩ := hP
+    obtain ⟨a, -, hsa, hsP⟩ := hs
+    obtain ⟨hWmin, hWrel⟩ := hW
+    have hWp : W.IsPrime := hWmin.1.1
+    have hWmh : IsMultiHomogIdeal W := isMultiHomogIdeal_of_mem_minimalPrimes hPh hsa hWmin
+    have := hPp
+    have h1 := dim_quot_minimal_add_one P W s hsP hWmin
+    rw [hPdim] at h1
+    have hdim : ringKrullDim (MRing ι ⧸ W) = ((n + Fintype.card K : ℕ) : WithBot ℕ∞) :=
+      withBot_eq_of_add_one (by rw [h1, show n + 1 + Fintype.card K = n + Fintype.card K + 1 by omega])
+    exact ⟨fun hh => ⟨hK, ⟨hWp, hWmh, hWrel⟩, hh, hdim⟩,
+      fun hv => ⟨⟨hWp, hWmh, hWrel⟩, charOf_prime hWp hv, hdim⟩⟩
   set S : Set (Ideal (MRing ι)) := insert P (divSupp P y)
   have hS : S.Finite := (divSupp_finite P y).insert P
   have hS' : ∀ W ∈ S, IsMultiProjPrime W := by

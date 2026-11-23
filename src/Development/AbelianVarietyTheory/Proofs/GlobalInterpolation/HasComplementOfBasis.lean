@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.UnitVectorOrthogonal
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnramifiedOfIsCMUnram
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
-import Development.AbelianVarietyTheory.PublishedTheorems.Landherr₂.LandherrStIffLandherr
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.UnitVectorOrthogonal
+public import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsCongrIffTraceFormsIsometricCm
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HasseNormTheoremQuadraticExtension
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLocalConjugationSelfDualLatticesHost
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnramifiedOfIsCMUnram
+public import Development.AbelianVarietyTheory.PublishedTheorems.Landherr₂.LandherrStIffLandherr
+import Formalism.FockGram.SymGramPosSemidef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.BitVec
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,8 +121,9 @@ theorem hasComplement_of_basis (W : HSpace E) {n : ℕ} (b : Module.Basis (Fin (
   have key : ∀ i v, W.hT (b i) v = sgn (neg i) * b.repr v i := by
     intro i v
     conv_lhs => rw [← b.sum_repr v]
+
     rw [map_sum, Finset.sum_eq_single i (fun j _ hj => by rw [map_smul, hb, if_neg hj.symm, smul_zero])
-      (by simp), map_smul, hb, if_pos rfl, smul_eq_mul, mul_comm]
+    (by simp), map_smul, hb, if_pos rfl, smul_eq_mul, mul_comm]
   have hperp : ∀ v, v ∈ perp W (b k) ↔ b.repr v k = 0 := by
     intro v
     change W.hT (b k) v = 0 ↔ _
@@ -98,8 +148,7 @@ theorem hasComplement_of_basis (W : HSpace E) {n : ℕ} (b : Module.Basis (Fin (
   have hx : b k ∈ L := Submodule.subset_span ⟨k, rfl⟩
   refine ⟨L, ⟨⟨Submodule.fg_span (Set.finite_range _), ?_⟩, ?_⟩, hx, ?_,
     stdSpace star_isIntegral n (fun i => neg (k.succAbove i)) p q, ι, hk, ?_, ?_, ?_⟩
-  · rw [Submodule.span_span_of_tower]
-    exact b.span_eq
+  · exact fun _ _ => (LinearIndependent.iff_fractionRing (𝓞 E) E).mp
   · have h := (Formalism.E.hermDual (𝓞 E) E W.V (Fin (n + 1)) W.hT b
       (IsFractionRing.injective (𝓞 E) E) (star_integral star_isIntegral)).2
       (Matrix.diagonal fun i => (sgn (neg i) : 𝓞 E)) (by
@@ -126,6 +175,7 @@ theorem hasComplement_of_basis (W : HSpace E) {n : ℕ} (b : Module.Basis (Fin (
   · change ∀ x y : Fin n → E, W.hT (ι x) (ι y) = diagForm n (fun i => neg (k.succAbove i)) x y
     intro x y
     conv_lhs => rw [hι x]
+
     rw [diagForm_apply, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, key, hιs, smul_eq_mul, mul_assoc]
@@ -198,7 +248,8 @@ theorem exists_isometry (hc : Formalism.HermitianLatticesTheory.IsCMUnram E) (W 
     rw [Matrix.det_transpose]; exact (GlobalTheory.IndefiniteRowSideFullHecke.AdelicUnitaryGroups.gram_det_isUnit W).ne_zero
   obtain ⟨P, hP0, hP⟩ := congr_signMatrix
     (GlobalTheory.LocalQuad.landherr_of_hasseNormSt GlobalTheory.QNorm.hasseNormSt)
-    GlobalTheory.QNorm.hasseNormSt hG hd (isLattice_coordLat W W.L0 W.standardTuple_isLattice)
+    GlobalTheory.QNorm.hasseNormSt hG hd
+    (isLattice_coordLat W W.L0 W.standardTuple_isLattice W.baseLattice_isUnimodular)
     (selfDual_coordLat W W.L0 W.baseLattice_isUnimodular)
     Set.univ (fun _ => Or.inl trivial) p fun τ _ => by
       have h0 := hs τ

@@ -1,11 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.UnifAlong
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KeyDatumFibreOfComposableBaseChangeStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusOfUnit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.UnifAlong
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasisBaseChange
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabComp
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsMetricConjugateFramedPoint
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LiePush
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.KeyEven
@@ -48,9 +81,6 @@ theorem main : ∀ (K : Type) [Field K] (G : Over (Sp K)) [GrpObj G] [IsCommMonO
   have hF := dual_eq_id F hF₁ hF₂
   have hF' := dual_eq_id F' hF₁' hF₂'
   subst hF hF'
-  have eD : spMap (Formalism.L2.Pj.dualMap (RingHom.id K)) = 𝟙 (Sp (DualNumber K)) := by
-    refine Eq.trans (congrArg spMap (RingHom.ext fun z => ?_)) e'
-    ext <;> simp [Formalism.L2.Pj.dualMap]
   have eR : spMap (Chart.dualMapR (RingHom.id K)) = 𝟙 (Sp (DualNumber K)) := by
     refine Eq.trans (congrArg spMap (RingHom.ext fun z => ?_)) e'
     ext <;> simp [Chart.dualMapR]
@@ -79,10 +109,10 @@ theorem main : ∀ (K : Type) [Field K] (G : Over (Sp K)) [GrpObj G] [IsCommMonO
   have hv : IsLieBasis v := Chart.isLieBasis_baseChange (RingHom.id K) hC
     (isLieBasis_cast hg'.symm x'.basis) hvχ
   refine ⟨v, hv, fun i => ?_, φ, he, ψ, RingHom.id _, hφ, hψ, hmaps, hsec, hF₁, hF₂, fun i => ?_⟩
-  · have h' : IsGrpPullback x.P.A G (spMap (RingHom.id K) ≫ 𝟙 (Sp K)) φ := by rw [Category.comp_id]; exact hφ
-    exact GlobalTheory.LamT.isLieComb_of_two_pullbacks (RingHom.id K) rfl (grpPullback_self G) h' rfl (hM i)
-      (fun j => by rw [hxv, eD, e', Category.comp_id]; rfl)
-      (by rw [hvφ, eD, Category.comp_id, Category.id_comp])
+  · apply Chart.comb_baseChange (RingHom.id K) hφ (hM i)
+    · intro j
+      rw [hxv, e', Category.id_comp, eR, Category.id_comp]
+    · rw [hvφ, eR, Category.id_comp]
   · rw [hvφ, e', Category.id_comp]
 
 end GlobalTheory.LieLift

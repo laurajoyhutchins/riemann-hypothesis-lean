@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.PeriodIntegrals.PairValDefs
+module
+
+public import Formalism.PeriodIntegrals.PairValDefs
+public import Formalism.SharpRestriction.CuspSpanNormBounds.FlagEEqHyperbolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,26 +56,6 @@ open Formalism.MainNotions.S PI.PairValDefs Matrix
 section Mat
 
 variable {K : Type} [Field K] [NumberField K]
-
-theorem isUpUni_mul {N : ℕ} {U V : Matrix (Fin N) (Fin N) K} (hU : IsUpUni U) (hV : IsUpUni V) :
-    IsUpUni (U * V) := by
-  intro i j
-  constructor
-  · intro hji
-    rw [Matrix.mul_apply]
-    refine Finset.sum_eq_zero fun k _ => ?_
-    by_cases hk : k < i
-    · rw [(hU i k).1 hk, zero_mul]
-    · rw [(hV k j).1 (lt_of_lt_of_le hji (not_lt.mp hk)), mul_zero]
-  · intro hij
-    subst hij
-    rw [Matrix.mul_apply, Finset.sum_eq_single i]
-    · rw [(hU i i).2 rfl, (hV i i).2 rfl, mul_one]
-    · intro k _ hki
-      rcases lt_or_gt_of_ne hki with h | h
-      · rw [(hU i k).1 h, zero_mul]
-      · rw [(hV k i).1 h, mul_zero]
-    · simp
 
 theorem sgUp_mul {N : ℕ} {U V : Matrix (Fin N) (Fin N) K} (hU : IsUpUni U) (hV : IsUpUni V) :
     sgUp (U * V) = sgUp U + sgUp V := by
@@ -64,12 +88,6 @@ theorem sgUp_one {N : ℕ} : sgUp (1 : Matrix (Fin N) (Fin N) K) = 0 := by
     rw [Fin.ext_iff] at e
     simp at e
   · rfl
-
-theorem isUpUni_one {N : ℕ} : IsUpUni (1 : Matrix (Fin N) (Fin N) K) := by
-  intro i j
-  refine ⟨fun h => Matrix.one_apply_ne (ne_of_gt h), fun h => ?_⟩
-  subst h
-  exact Matrix.one_apply_eq i
 
 theorem det_upUni {N : ℕ} {U : Matrix (Fin N) (Fin N) K} (hU : IsUpUni U) : U.det = 1 := by
   rw [Matrix.det_of_upperTriangular (fun i j h => (hU i j).1 h)]

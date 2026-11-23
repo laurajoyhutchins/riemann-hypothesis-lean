@@ -1,14 +1,59 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.GenIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemConeOfMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormsOfInduces
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SpanFinrankMaximalIdealLeNcardOfLeSupSq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RingKrullDimQuotientAddOneOfMemMinimalPrimesSup
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RingKrullDimQuotientEqOfMemMinimalPrimes
+module
+
+public import Development.WeilBound.CoreStatements.MinimalPrimeDimensions.GenIdeal
 import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.EventuallyExistsFiniteSubsetNonzeroLocus
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TopologicalKrullDimEqSucc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KrullDimQuotientMinimalPrimeOverL
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RingKrullDimQuotientEqOfMemMinimalPrimes
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KrullDimQuotientMinimalPrimeOverL
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RingKrullDimQuotientAddOneOfMemMinimalPrimesSup
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SpanFinrankMaximalIdealLeNcardOfLeSupSq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TopologicalKrullDimEqSucc
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.KrullDimension.PID
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AmpleOnAbelianBase
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemRiemannRochSpaceIffRegularAtEverywhere
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingKrullDimIntegers
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -51,13 +96,15 @@ theorem le_dim_quotient_horizontal (A : Type) [CommRing A] [IsDomain A] [CharZer
       obtain ⟨x, rfl⟩ := hx
       obtain ⟨y, rfl⟩ := hy
       exact ⟨x + y, map_add _ _ _⟩
-  have : (RingHom.ker φ).IsPrime := RingHom.ker_isPrime _
+  have : (RingHom.ker φ).IsPrime := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact RingHom.ker_isPrime _
   have hc : (RingHom.ker φ).comap (algebraMap A (ℚ ⊗[ℤ] A)) = q := by
     ext a
     rw [Ideal.mem_comap, RingHom.mem_ker, ← Ideal.Quotient.eq_zero_iff_mem,
       ← map_eq_zero_iff _ (IsLocalization.injective (ℚ ⊗[ℤ] (A ⧸ q)) hle')]
     exact Iff.rfl
-  have h2 := IsLocalization.height_comap (Algebra.algebraMapSubmonoid A (nonZeroDivisors ℤ)) (RingHom.ker φ)
+  have h2 := IsLocalization.height_under (Algebra.algebraMapSubmonoid A (nonZeroDivisors ℤ)) (RingHom.ker φ)
   replace h2 : q.height = (RingHom.ker φ).height := (congrArg Ideal.height hc).symm.trans h2
   have h3 := height_add_ringKrullDim_quotient_of_finiteType ℚ (RingHom.ker φ)
   have h4 : ringKrullDim ((ℚ ⊗[ℤ] A) ⧸ RingHom.ker φ) = ringKrullDim (ℚ ⊗[ℤ] (A ⧸ q)) :=

@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.UniformLevelMultiplicity
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffSetIntegralNat
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsSmoothAutomorphicFunctionTranslateAtRealPlace
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSmoothAutomorphicRightTranslateFinite
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffSetIntegralNat
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsSmoothAutomorphicFunctionTranslateAtRealPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -75,63 +116,7 @@ theorem rep_mem_sm (M : DSModel V S) (τ : D.what₂.Tau) {g : Matrix (Fin V.ran
 
 variable (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ))
 
-open Classical in
-
-def IsEqv (M : DSModel V S) (T : MMap M) : Prop :=
-  (∀ τ, ∀ g ∈ Formalism.QuantumDeterminants.UH (gramAt D V τ), ∀ (v : M.Vec) (w : M.sm τ),
-    (w : M.H τ) = M.rep τ g (v τ) → T (Function.update v τ w) = rTr V (atTau θ V τ g) (T v)) ∧
-  ∀ τ (v : M.Vec) (x : GA D V), ∃ ℓ : M.H τ →ₗ[ℂ] ℂ, Sobolev₂ (lieAt V τ) (M.rep τ) ℓ ∧
-    ∀ w : M.sm τ, ℓ w = T (Function.update v τ w) x
 
 variable {θ} {M : DSModel V S}
-
-theorem IsEqv.smul {T : MMap M} (h : IsEqv θ M T) (c : ℂ) : IsEqv θ M (c • T) := by
-  refine ⟨fun τ g hg v w e => ?_, fun τ v x => ?_⟩
-  · rw [_root_.smul_apply, h.1 τ g hg v w e]; rfl
-  · obtain ⟨ℓ, h1, h2⟩ := h.2 τ v x
-    exact ⟨c • ℓ, GlobalTheory.MultMem.sobCont_smul c h1, fun w => by rw [LinearMap.smul_apply, h2]; rfl⟩
-
-theorem IsEqv.add {T T' : MMap M} (h : IsEqv θ M T) (h' : IsEqv θ M T') : IsEqv θ M (T + T') := by
-  refine ⟨fun τ g hg v w e => ?_, fun τ v x => ?_⟩
-  · rw [_root_.add_apply, h.1 τ g hg v w e, h'.1 τ g hg v w e]; rfl
-  · obtain ⟨ℓ, h1, h2⟩ := h.2 τ v x
-    obtain ⟨ℓ', h1', h2'⟩ := h'.2 τ v x
-    exact ⟨ℓ + ℓ', GlobalTheory.MultMem.sobCont_add h1 h1', fun w => by rw [LinearMap.add_apply, h2, h2']; rfl⟩
-
-def trM (M : DSModel V S) (κ : GA D V) : MMap M →ₗ[ℂ] MMap M := postOn M (GlobalTheory.FinTranslate.rTrL V κ)
-
-def CyclicSmooth : Prop :=
-  ∀ (D : D7) (V : HSp D) (S : D.what₂.Tau → SPar) (M : DSModel V S) (τ : D.what₂.Tau) (ℓ : M.H τ →ₗ[ℂ] ℂ), Sobolev₂ (lieAt V τ) (M.rep τ) ℓ → ∀ v ∈ M.sm τ, v ≠ 0 → (∀ g ∈ Formalism.QuantumDeterminants.UH (gramAt D V τ), ℓ (M.rep τ g v) = 0) → ∀ w ∈ M.sm τ, ℓ w = 0
-
-theorem IsEqv.eq_zero (hc : CyclicSmooth) {T : MMap M} (h : IsEqv θ M T) {v : M.Vec} (hv : ∀ τ, (v τ : M.H τ) ≠ 0)
-    (h0 : T v = 0) : T = 0 := by
-  classical
-  have key : ∀ (s : Finset D.what₂.Tau) (w : M.Vec), T (s.piecewise w v) = 0 := by
-    intro s w
-    induction s using Finset.induction_on with
-    | empty => simpa using h0
-    | insert τ s hτ ih =>
-      funext x
-      obtain ⟨ℓ, h1, h2⟩ := h.2 τ (s.piecewise w v) x
-      have h3 := hc D V S M τ ℓ h1 (v τ) (v τ).2 (hv τ) (fun g hg => by
-        have e := h.1 τ g hg (s.piecewise w v) ⟨M.rep τ g (v τ), rep_mem_sm M τ hg (v τ).2⟩
-          (by rw [Finset.piecewise_eq_of_notMem _ _ _ hτ])
-        refine (h2 ⟨M.rep τ g (v τ), rep_mem_sm M τ hg (v τ).2⟩).trans ?_
-        rw [e, ih]
-        rfl) (w τ) (w τ).2
-      rw [h2] at h3
-      rw [Finset.piecewise_insert]
-      exact h3
-  ext w x
-  have := key Finset.univ w
-  rw [Finset.piecewise_univ] at this
-  rw [this]
-  rfl
-
-theorem IsEqv.ext (hc : CyclicSmooth) {T T' : MMap M} (h : IsEqv θ M T) (h' : IsEqv θ M T') {v : M.Vec}
-    (hv : ∀ τ, (v τ : M.H τ) ≠ 0) (h0 : T v = T' v) : T = T' := by
-  have := (h.add (h'.smul (-1))).eq_zero hc hv (by simp [h0])
-  rw [neg_one_smul, ← sub_eq_add_neg] at this
-  exact sub_eq_zero.1 this
 
 end GlobalTheory.UnifEvery

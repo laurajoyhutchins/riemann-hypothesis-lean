@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.LatticeLemmas
@@ -54,7 +101,7 @@ theorem re_det_le_of_posSemidef_smul_sub {n : Type*} [Fintype n] [DecidableEq n]
     change (((∏ i, hBpsd.1.eigenvalues i : ℝ) : ℂ)).re ≤ _
     rw [Complex.ofReal_re]
     calc ∏ i, hBpsd.1.eigenvalues i ≤ ∏ _i : n, c :=
-          Finset.prod_le_prod (fun i _ ↦ hBpsd.eigenvalues_nonneg i) (fun i _ ↦ heig i)
+          Finset.prod_le_prod₀ (fun i _ ↦ hBpsd.eigenvalues_nonneg i) (fun i _ ↦ heig i)
       _ = c ^ Fintype.card n := by rw [Finset.prod_const, Finset.card_univ]
   have hstar : star (det P) * det P = ((Complex.normSq (det P) : ℝ) : ℂ) := by
     rw [mul_comm]; exact Complex.mul_conj (det P)
@@ -90,49 +137,6 @@ theorem gramDet_le_of_norm_le {E : Type*} [AddCommGroup E] [Module (𝓞 K) E] [
   calc gramDet h' σ s ≤ (‖f‖ ^ 2) ^ r * gramDet h σ s := hmain
     _ ≤ (max A 0 ^ 2) ^ r * gramDet h σ s := by
       gcongr
-
-theorem NormComparison.proof : NormComparison.Statement := by
-  intro K _ _ M h' A hA
-  obtain ⟨s, hs⟩ := exists_linearIndependent_fin (K := K) (E := M.carrier)
-  have hlog : ∀ σ : K →+* ℂ, Real.log (gramDet h' σ s) ≤
-      2 * (Module.finrank (𝓞 K) M.carrier : ℝ) * Real.log (A σ) + Real.log (gramDet M.metric σ s) := by
-    intro σ
-    have hle := gramDet_le_of_norm_le M.metric h' σ (A σ) (hA σ) hs
-    have hg : 0 < gramDet M.metric σ s := gramDet_pos _ σ hs
-    have hg' : 0 < gramDet h' σ s := gramDet_pos _ σ hs
-    rcases Nat.eq_zero_or_pos (Module.finrank (𝓞 K) M.carrier) with hr | hr
-    · have h1 : (max (A σ) 0 ^ 2) ^ Module.finrank (𝓞 K) M.carrier = 1 := by rw [hr, pow_zero]
-      have h0 : ((Module.finrank (𝓞 K) M.carrier : ℕ) : ℝ) = 0 := by exact_mod_cast hr
-      rw [h1, one_mul] at hle
-      rw [h0, mul_zero, zero_mul, zero_add]
-      exact Real.log_le_log hg' hle
-    · have hpos : 0 < (max (A σ) 0 ^ 2) ^ Module.finrank (𝓞 K) M.carrier :=
-        (pos_iff_pos_of_mul_pos (lt_of_lt_of_le hg' hle)).mpr hg
-      have hmax : 0 < max (A σ) 0 := by
-        rcases (le_max_right (A σ) 0).lt_or_eq with h1 | h1
-        · exact h1
-        · rw [← h1] at hpos; simp [zero_pow (Nat.pos_iff_ne_zero.mp hr)] at hpos
-      have hApos : 0 < A σ := by
-        rcases le_or_gt (A σ) 0 with h1 | h1
-        · rw [max_eq_right h1] at hmax; exact absurd hmax (lt_irrefl 0)
-        · exact h1
-      rw [max_eq_left hApos.le] at hle
-      calc Real.log (gramDet h' σ s) ≤
-            Real.log ((A σ ^ 2) ^ Module.finrank (𝓞 K) M.carrier * gramDet M.metric σ s) :=
-            Real.log_le_log hg' hle
-        _ = 2 * (Module.finrank (𝓞 K) M.carrier : ℝ) * Real.log (A σ) + Real.log (gramDet M.metric σ s) := by
-          rw [Real.log_mul (by positivity) hg.ne', ← pow_mul, Real.log_pow]
-          push_cast; ring
-  simp only [HermitianBundle.deg, HermitianBundle.arithDegree]
-  rw [arithDegree_eq M.metric hs (Fintype.card_fin _), arithDegree_eq h' hs (Fintype.card_fin _)]
-  simp only [degreeWith]
-  rw [← sub_div]
-  apply div_le_div_of_nonneg_right _ (Nat.cast_nonneg _)
-  have hsum : ∑ σ : K →+* ℂ, Real.log (gramDet h' σ s) ≤
-      2 * (Module.finrank (𝓞 K) M.carrier : ℝ) * ∑ σ : K →+* ℂ, Real.log (A σ) + ∑ σ : K →+* ℂ, Real.log (gramDet M.metric σ s) := by
-    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
-    exact Finset.sum_le_sum fun σ _ ↦ hlog σ
-  linarith
 
 end
 

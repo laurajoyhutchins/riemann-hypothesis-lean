@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Objects
+public import Mathlib.Algebra.MonoidAlgebra.Grading
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -16,8 +65,8 @@ variable {Ω : Type w} [Field Ω] {N r : ℕ}
 
 abbrev LA (Ω : Type w) [Field Ω] : Type w := AddMonoidAlgebra Ω (ℤ × ℤ)
 
-set_option linter.unusedVariables false in
 
+set_option linter.unusedVariables false in
 def Amb (x : Fin (N + 1) → Ω) (η : Fin (r + 1) → Ω) : Type w := LA Ω
 
 variable (x : Fin (N + 1) → Ω) (η : Fin (r + 1) → Ω)
@@ -79,13 +128,14 @@ theorem psi_mem_tgr (s : Sy S r) : psi η S s ∈ tgr 0 := by
 theorem phi_mem_tgr {p : Poly (Sy S r) N} {d : ℕ} (hp : p.IsHomogeneous d) :
     phi x η S p ∈ tgr (d : ℤ) := by
   classical
+
   rw [p.as_sum, map_sum]
   refine Submodule.sum_mem _ fun μ hμ => ?_
   have hdeg : ∑ i ∈ μ.support, μ i = d := by
     have := hp (mem_support_iff.mp hμ)
     simpa [Finsupp.weight_apply, Finsupp.sum] using this
   rw [phi, coe_eval₂Hom, eval₂_monomial]
-  have h1 := psi_mem_tgr η S (MvPolynomial.coeff μ p)
+  have h1 := psi_mem_tgr η S (AddMonoidAlgebra.coeff p μ)
   have h2 : (∏ i ∈ μ.support, (single ((1 : ℤ), (0 : ℤ)) (x i) : LA Ω) ^ μ i) ∈
       tgr (∑ i ∈ μ.support, ((μ i : ℕ) : ℤ)) := by
     refine SetLike.prod_mem_graded _ _ _ fun i _ => ?_

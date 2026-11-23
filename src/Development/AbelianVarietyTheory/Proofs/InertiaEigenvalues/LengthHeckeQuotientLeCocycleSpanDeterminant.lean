@@ -1,9 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GlobalCore
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CMemCoeffSub
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeterminantLemmaDiscreteValuationRingQuotientLenStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CutValueMemHeckeValueIdealOffSupportStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ResidualSelmer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GlobalCore
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CMemCoeffSub
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CutValueMemHeckeValueIdealOffSupportStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeterminantLemmaDiscreteValuationRingQuotientLenStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ResidualSelmer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism Formalism.MainNotions Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module GlobalTheory.Pass GlobalTheory.Cut
 
@@ -118,6 +169,7 @@ theorem length_sol_le [IsPrincipalIdealRing O] {M Γ : Type} [Ring M] [Algebra O
       have h1 : a * ∑ q, (θ q : M) * y (γ q) = F (fun q => ⟨a, ha⟩ * θ q) := by
         rw [hF, Finset.mul_sum]
         simp [mul_assoc]
+
       rw [h1, ← hF, hφ, hφ, hG, hG, map_sum, ← hψ ⟨a, ha⟩]
       refine Finset.sum_congr rfl fun q _ => ?_
       rw [map_mul, ← matHom_apply, map_mul]
@@ -223,7 +275,7 @@ theorem exists_homs (hinj : Function.Injective (algebraMap O K)) {X ι ρ τ : T
     refine uniq _ _ (fun j => ψχ j (a + b)) (fun j => ψχ j a + ψχ j b) ?_
     rw [← h _ (A.add_mem a.2 b.2), Pi.add_apply, Matrix.map_add _ (map_add _), Matrix.mul_add, Matrix.add_mul,
       h _ a.2, h _ b.2, Matrix.fromBlocks_add]
-    simp [Matrix.map_add]
+    simp [Matrix.map_add (f := _)]
   have halg : ∀ c : O, ψρ (algebraMap O _ c) = algebraMap O _ c ∧ ∀ j, ψχ j (algebraMap O _ c) = c := by
     intro c
     refine uniq _ _ (fun j => ψχ j (algebraMap O _ c)) (fun _ => c) ?_
@@ -249,8 +301,8 @@ theorem exists_homs (hinj : Function.Injective (algebraMap O K)) {X ι ρ τ : T
        map_add' := fun a b => (hadd a b).2 j
        commutes' := fun c => (halg c).2 j }, fun _ => rfl⟩⟩
 
-open MvPolynomial in
 
+open MvPolynomial in
 theorem det_generic_blocks (hinj : Function.Injective (algebraMap O K)) {ι ρ τ G N : Type}
     [Fintype ι] [DecidableEq ι] [Fintype ρ] [DecidableEq ρ] [Fintype τ] [DecidableEq τ]
     [Fintype G] [DecidableEq G] [Fintype N]
@@ -290,8 +342,8 @@ theorem det_generic_blocks (hinj : Function.Injective (algebraMap O K)) {ι ρ �
     ext1 i j
     simp
 
-open MvPolynomial in
 
+open MvPolynomial in
 theorem det_generic_eq_zero (hinj : Function.Injective (algebraMap O K)) {ι G N : Type}
     [Fintype ι] [DecidableEq ι] [Fintype G] [DecidableEq G] [Fintype N]
     (a : N → G → G → Matrix ι ι O) (v : G → ι → K) (hv : v ≠ 0)
@@ -306,8 +358,9 @@ theorem det_generic_eq_zero (hinj : Function.Injective (algebraMap O K)) {ι G N
     have h1 : ∀ k, ∑ q, ∑ j, algebraMap O K (a k p q i j) * v q j = 0 := fun k => by
       simpa [Finset.sum_apply, Matrix.mulVec, dotProduct] using congrFun (h k p) i
     calc _ = ∑ k, (X k : MvPolynomial N K) * C (∑ q, ∑ j, algebraMap O K (a k p q i j) * v q j) := by
+
           simp only [Matrix.mulVec, dotProduct, RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply,
-            map_sum, map_mul, map_X, map_C, Finset.sum_mul, Finset.mul_sum, mul_assoc]
+          map_sum, map_mul, map_X, map_C, Finset.sum_mul, Finset.mul_sum, mul_assoc]
           rw [Finset.sum_comm]
           simp only [Fintype.sum_prod_type]
       _ = 0 := by simp [h1]
@@ -420,25 +473,29 @@ theorem main : ∀ (D : D7) (i : D.nd.Loc) (r : D.nd.X i → (GE D.nd →* GL (F
       intro x' hx hz
       obtain ⟨η, s, hs⟩ := h54 x' hx hz
       rw [det_generic_eq_zero hinj (fun k p q => (θ k p q : S.X' → MatN D.nd i) x')
-        (fun q => ((yg D.nd r S (γ q) x').map (toK D.nd i)).mulVec η) ?_ ?_, MvPolynomial.coeff_zero]
+        (fun q => ((yg D.nd r S (γ q) x').map (toK D.nd i)).mulVec η) ?_ ?_, AddMonoidAlgebra.coeff_zero]
+      · rfl
       · intro h0
         apply hs
         obtain ⟨t, ht⟩ := hγ 1 (fun _ => 1) (fun _ => s) (fun _ => A.one_mem)
         rw [Fin.sum_univ_one, one_mul] at ht
+
         rw [ht, Finset.sum_apply, ← RingHom.mapMatrix_apply, map_sum, Matrix.sum_mulVec]
         refine Finset.sum_eq_zero fun q _ => ?_
         rw [Pi.mul_apply, map_mul, ← Matrix.mulVec_mulVec, RingHom.mapMatrix_apply _ (yg D.nd r S (γ q) x'),
           show ((yg D.nd r S (γ q) x').map (toK D.nd i)).mulVec η = 0 from congrFun h0 q, Matrix.mulVec_zero]
       · intro k p
         have h3 := congrArg (fun z => ((toK D.nd i).mapMatrix z).mulVec η) (hθ k p x' hx)
+
         simp only [Finset.sum_apply, map_sum, Matrix.sum_mulVec, Pi.mul_apply, map_mul, map_zero,
-          Matrix.zero_mulVec, ← Matrix.mulVec_mulVec] at h3
+        Matrix.zero_mulVec, ← Matrix.mulVec_mulVec] at h3
         exact h3)
     rw [det_generic_blocks hinj P Q hPQ hQP (fun k p q => (θ k p q : S.X' → MatN D.nd i) S.π')
       (fun k p q => S.ψρ (θ k p q)) (fun c k p q => S.ψχ c (θ k p q))
       (fun k p q => hbl _ (θ k p q).2)] at h2
     rw [Fintype.prod_option]
-    convert h2 using 3
+    convert h2 using 2
+    congr 2
     · congr 1
       ext1 pa qb
       simp only [Matrix.of_apply, ← hfρ]

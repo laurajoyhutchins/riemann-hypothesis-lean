@@ -1,6 +1,61 @@
-import Mathlib
-import GroundTheory.LocalFields.AbstractLocalReciprocity.ExistsEqNsmulOfProjEqZero
-import GroundTheory.LocalFields.AbstractLocalReciprocity.Valuation
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.ExistsEqNsmulOfProjEqZero
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.ExistsOpenSubgroupMemFixedModule
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.Valuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.InductiveDimension.Functions
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.LocalField.Abstract
 
@@ -69,9 +124,9 @@ theorem deg_zpow_mul {N : ℕ} (hdσ : d σ = Multiplicative.ofAdd (N : ℤ̂)) 
 
 variable [TopologicalSpace G] [IsTopologicalGroup G]
 
-variable (d L σ) in
 
-def frobeniusClosure : Subgroup G :=
+variable (d L σ) in
+def frobeniusClosure (d : G →* Multiplicative ℤ̂) (L : Subgroup G) (σ : G) : Subgroup G :=
   (Subgroup.zpowers σ ⊔ (L ⊓ d.ker)).topologicalClosure
 
 theorem le_frobeniusClosure : L ⊓ d.ker ≤ frobeniusClosure d L σ :=
@@ -147,8 +202,8 @@ theorem frobeniusClosure_inf_ker (hd : Continuous d) (hL : IsOpen (L : Set G))
   rw [hx_eq]
   exact L.mul_mem (L.mul_mem (hU0 hσk) hj.1) (L.inv_mem (hU0 hU))
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 theorem map_frobeniusClosure (hd : Continuous d)
     (hσ : σ ∈ Subgroup.normalizer ((L ⊓ d.ker : Subgroup G) : Set G)) {N : ℕ}
     (hdσ : d σ = Multiplicative.ofAdd (N : ℤ̂)) :
@@ -207,8 +262,8 @@ theorem isOpen_frobeniusClosure (hd : Continuous d) (hL : IsOpen (L : Set G))
     ⟨by rw [← Subgroup.relIndex_mul_index le_sup_left]; exact mul_ne_zero h2 h1.index_ne_zero⟩
   exact Subgroup.isOpen_of_isClosed_of_finiteIndex _ isClosed_frobeniusClosure
 
-omit [TotallyDisconnectedSpace G] in
 
+omit [TotallyDisconnectedSpace G] in
 theorem inertiaDegree_frobeniusClosure (hd : Continuous d)
     (hσ : σ ∈ Subgroup.normalizer ((L ⊓ d.ker : Subgroup G) : Set G)) {N : ℕ} (hN : N ≠ 0)
     (hdσ : d σ = Multiplicative.ofAdd (N : ℤ̂)) :

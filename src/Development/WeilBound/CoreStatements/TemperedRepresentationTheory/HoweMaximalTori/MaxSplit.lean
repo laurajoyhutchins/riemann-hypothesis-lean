@@ -1,6 +1,44 @@
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.CompDef
-import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.LocalDef
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityUnitary
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityUnitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.CompactAveragingSplitting.EigenvectorLifting.FinSplit
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,16 +46,6 @@ namespace PositivityTheory.HoweDualityUnitaryAlt
 
 open scoped Matrix
 open NumberField IsDedekindDomain Topology GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes PositivityTheory.ThK
-
-def KSSub : Prop := AllLocal fun k _ _ _ _ _ K _ _ _ c ψ =>
-  ∀ (m n : ℕ) (κ : Type) [Fintype κ] (JA : Matrix (Fin m) (Fin m) K) (N : ℕ) (JB : Matrix (Fin N) (Fin N) K)
-    (d : Darboux (symp (R := k) c (-1) JA JB) κ) (χ : Kˣ →* Circle) (Cy : Matrix (Fin N) (Fin n) K) omA omB l, Continuous χ →
-    n < m → m < 2 * n → IsSplitPair c ψ JA JB d χ Cy omA omB l →
-    ∃ K₀ : Submodule ℂ (UG c JB → ℂ), K₀ ≤ (SB (κ → k)).map (secOf omB l) ∧ K₀ ≠ ⊥ ∧
-      (∀ S : Submodule ℂ (UG c JB → ℂ), S ≤ (SB (κ → k)).map (secOf omB l) → (∀ f ∈ S, ∀ h, (fun g => f (g * h)) ∈ S) →
-        S ≠ ⊥ → K₀ ≤ S) ∧
-      ∀ S : Submodule ℂ (UG c JB → ℂ), K₀ ≤ S → S ≤ (SB (κ → k)).map (secOf omB l) → (∀ f ∈ S, ∀ h, (fun g => f (g * h)) ∈ S) →
-        S = K₀ ∨ S = (SB (κ → k)).map (secOf omB l)
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
 
@@ -31,10 +59,6 @@ def MaxOn (Q : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField
       MaxAt om v ∧ MaxAt om' v
 
 def MaxFinT : Prop := MaxOn fun _ _ _ _ _ _ _ _ _ => True
-
-def MaxInert : Prop := MaxOn fun F E _ _ _ _ _ _ v => IsEmpty (E →ₐ[F] Fv F v)
-
-def MaxSplit : Prop := MaxOn fun F E _ _ _ _ _ _ v => Nonempty (E →ₐ[F] Fv F v)
 
 end PositivityTheory.HoweDualityUnitaryAlt
 

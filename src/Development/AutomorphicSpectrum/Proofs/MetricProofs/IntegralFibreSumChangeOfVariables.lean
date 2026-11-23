@@ -1,15 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsPtsBddConv
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FlagIndices
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.StLemmaETailMass
-import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PModelFibreSumAeSheet
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PModelFibreFinite
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.LintegralFibSum
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeI
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MixedDensityNonnegOffNullSet
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocDensDivJacN
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialOfFun
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocDensDivJacN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.ChartRestriction.G.Geo GroundTheory.Heights₂.Heights.LowerBoundFree
 
 namespace GlobalTheory.CompanionTheory.Ar.Giv.Push
@@ -29,7 +66,7 @@ theorem integrable_mInt_fibreSum {e : ℕ} {X : Type} [TopologicalSpace X] [Comp
       mInt A Φ G = ∫ y, ∑ᶠ x ∈ q ⁻¹' {y} \ S, G x * pushDens A Φ q x := by
   classical
   have hne : Nonempty (ChartPartition A) := existsPartition A
-  have hm : mInt A Φ G = integralWith A hne.some Φ G := by unfold mInt; rw [dif_pos hne]
+  have hm : mInt A Φ G = integralWith A hne.some Φ G := by unfold mInt; rw [dite_eq_left hne]
   set Pt := hne.some with hPt
   set hj : Fin A.n → (Fin e → ℂ) → ℝ := fun j u =>
     Pt.χ j ((A.chart j).symm u) * G ((A.chart j).symm u) * locDens A Φ j u with hhj
@@ -53,7 +90,7 @@ theorem integrable_mInt_fibreSum {e : ℕ} {X : Type} [TopologicalSpace X] [Comp
     intro j
     refine setIntegral_congr_set (ae_eq_set.mpr ⟨?_, ?_⟩)
     · exact measure_mono_null (target_diff_goodT_subset A q S hq j) (hS j)
-    · rw [Set.sdiff_eq_empty.mpr fun u hu => hu.1]; exact measure_empty
+    · rw [Set.sdiff_eq_empty.mpr fun u (hu : u ∈ goodT A q j) => hu.1]; exact measure_empty
   have hterm : ∀ j x, x ∈ (A.chart j).source → x ∉ S →
       hj j (A.chart j x) / jacN (q ∘ (A.chart j).symm) (A.chart j x) =
         Pt.χ j x * (G x * pushDens A Φ q x) := by

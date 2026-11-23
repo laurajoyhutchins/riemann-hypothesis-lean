@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.SplittingFromInequality
+module
+
+public import GroundTheory.GlobalFields.FirstInequalityStatement
+public import GroundTheory.GlobalFields.KummerTheory.Splitting
+public import GroundTheory.GlobalFields.SplittingFromInequality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -12,8 +60,8 @@ section Tower
 variable {K K' L : Type*} [Field K] [NumberField K] [Field K'] [NumberField K'] [Field L]
   [NumberField L] [Algebra K K'] [Algebra K' L] [Algebra K L] [IsScalarTower K K' L]
 
-omit [NumberField K] [NumberField L] in
 
+omit [NumberField K] [NumberField L] in
 theorem SplitsCompletely.of_liesOver {v : HeightOneSpectrum (𝓞 K)} (hv : SplitsCompletely L v)
     (v' : HeightOneSpectrum (𝓞 K')) [v'.asIdeal.LiesOver v.asIdeal] : SplitsCompletely L v' := by
   intro w hw
@@ -23,8 +71,8 @@ theorem SplitsCompletely.of_liesOver {v : HeightOneSpectrum (𝓞 K)} (hv : Spli
   rw [Ideal.inertiaDeg_tower (R := 𝓞 K) v'.asIdeal w.asIdeal] at hf
   exact ⟨(mul_eq_one.1 he).2, (mul_eq_one.1 hf).2⟩
 
-variable (K) in
 
+variable (K) in
 theorem eventually_splitsCompletely_of_tower
     (h : ∀ᶠ v : HeightOneSpectrum (𝓞 K) in cofinite, SplitsCompletely L v) :
     ∀ᶠ v' : HeightOneSpectrum (𝓞 K') in cofinite, SplitsCompletely L v' :=

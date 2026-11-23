@@ -1,6 +1,61 @@
-import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.LatticeBasisExistsHolds
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.StandardLattice
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.StandardLattice
+public import Formalism.LocalToGlobal.Columns.CoefficientsModP.LatticeBasisExistsHolds
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -332,8 +387,22 @@ theorem bnd_mono (d e : 𝓞 K) : (bnd d : Submodule (𝓞 K) (Fin n → K)) ≤
 
 theorem exists_le_bnd (L : Submodule (𝓞 K) (Fin n → K)) (hL : Submodule.IsLattice K L) :
     ∃ d : 𝓞 K, d ≠ 0 ∧ L ≤ bnd d := by
-  obtain ⟨d, hd, h1, -⟩ := lc_sandwich L hL
-  exact ⟨d, hd, fun x hx => h1 x hx⟩
+  classical
+  obtain ⟨S, hS⟩ := hL.fg
+  obtain ⟨d, hd⟩ := IsLocalization.exist_integer_multiples_of_finset (nonZeroDivisors (𝓞 K))
+    (S.biUnion fun x => Finset.univ.image fun a : Fin n => x a)
+  refine ⟨d, nonZeroDivisors.ne_zero d.2, ?_⟩
+  intro x hx
+  rw [← hS] at hx
+  induction hx using Submodule.span_induction with
+  | mem y hy =>
+    rw [mem_bnd]
+    intro a
+    obtain ⟨r, hr⟩ := hd (y a) (Finset.mem_biUnion.2 ⟨y, hy, Finset.mem_image.2 ⟨a, Finset.mem_univ _, rfl⟩⟩)
+    exact ⟨r, by simpa [Algebra.smul_def] using hr⟩
+  | zero => exact Submodule.zero_mem _
+  | add y z _ _ hy hz => exact Submodule.add_mem _ hy hz
+  | smul r y _ hy => exact Submodule.smul_mem _ r hy
 
 theorem sig_int (σ : K →+* K) (r : 𝓞 K) : ∃ r' : 𝓞 K, algebraMap (𝓞 K) K r' = σ (algebraMap (𝓞 K) K r) :=
   IsIntegralClosure.isIntegral_iff.1 ((NumberField.RingOfIntegers.isIntegral_coe r).map σ.toIntAlgHom)
@@ -342,7 +411,7 @@ theorem sig_ne_zero (σ : K →+* K) {d : 𝓞 K} (hd : d ≠ 0) : σ (algebraMa
   (map_ne_zero_iff σ σ.injective).2 (algebraMap_ne_zero hd)
 
 theorem dual_le_bnd (σ : K →+* K) (J : Matrix (Fin n) (Fin n) K) (hJ : IsUnit J.det)
-    (L : Submodule (𝓞 K) (Fin n → K)) (hL : Submodule.IsLattice K L) :
+    (L : Submodule (𝓞 K) (Fin n → K)) (hL : Submodule.IsFullLattice K L) :
     ∃ d : 𝓞 K, d ≠ 0 ∧ Submodule.span (𝓞 K) (Formalism.BasicNotions.dualSet σ J L) ≤ bnd d := by
   classical
   obtain ⟨d0, hd0, -, h2⟩ := lc_sandwich L hL
@@ -387,7 +456,10 @@ theorem dual_span (σ : K →+* K) (J : Matrix (Fin n) (Fin n) K)
     Submodule.span K ((Submodule.span (𝓞 K) (Formalism.BasicNotions.dualSet σ J L) : Submodule (𝓞 K) (Fin n → K)) :
       Set (Fin n → K)) = ⊤ := by
   classical
-  obtain ⟨d0, hd0, h1, -⟩ := lc_sandwich L hL
+  obtain ⟨d0, hd0, hbound⟩ := exists_le_bnd L hL
+  have h1 : ∀ x ∈ L, d0 • x ∈ colLat (1 : GL (Fin n) K) := by
+    intro x hx
+    exact hbound hx
   obtain ⟨d0', hd0'⟩ := sig_int σ d0
   have hd0'0 : d0' ≠ 0 := by
     intro h

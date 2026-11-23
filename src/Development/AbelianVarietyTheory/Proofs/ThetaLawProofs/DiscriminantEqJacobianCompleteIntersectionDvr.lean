@@ -1,24 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Mathlib.RingTheory.MvPowerSeries.Derivative
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsCombSubMemSupPow
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsFactorAssociatedJacobian
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsPowSpanXLeOfDense
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsCxOfFactor
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.JacEqUnitMulDetPderiv
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KosDApplyMap
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KosDExactGeneric
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.LePreimageOfClosedPoint
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MulVecCongrDeg
 import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SignInsert
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.LePreimageOfClosedPoint
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.JacEqUnitMulDetPderiv
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MulVecCongrDeg
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsCxOfFactor
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SpanModEquationsLift
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsPowSpanXLeOfDense
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KosDApplyMap
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsCombSubMemSupPow
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KosDExactGeneric
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsFactorAssociatedJacobian
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.SpanModEquationsLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -76,8 +114,8 @@ theorem valT_cst {R T : Type} [CommRing R] [CommRing T] {X : Scheme.{0}} (π : X
 
 theorem eval_det_pderiv_mul {O : Type} [CommRing O] {g : ℕ} (e : MvPowerSeries (Fin g) O →ₐ[O] O)
     (ω : MvPowerSeries (Fin g) O) (F : Fin g → MvPowerSeries (Fin g) O) (hF : ∀ i, e (F i) = 0) :
-    e (Matrix.of fun i j => MvPowerSeries.pderiv O j (ω * F i)).det =
-      e ω ^ g * e (Matrix.of fun i j => MvPowerSeries.pderiv O j (F i)).det := by
+    e (Matrix.of fun i j => MvPowerSeries.pderiv (R := O) j (ω * F i)).det =
+      e ω ^ g * e (Matrix.of fun i j => MvPowerSeries.pderiv (R := O) j (F i)).det := by
   rw [AlgHom.map_det, AlgHom.map_det]
   refine Eq.trans ?_ ((Matrix.det_smul _ (e ω)).trans (by rw [Fintype.card_fin]))
   congr 1
@@ -149,6 +187,7 @@ theorem main : Out.Laws → ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscrete
         exact notMem_nonzeroLocus (T := O) x _ _ (hz (r y)) _ (hs (r y) i))))
   have hmul : ∀ y i k, F y i * ρ 1 y k = ∑ k', m i 0 1 k' k • ρ 0 y k' := fun y i k => by
     have h := congrArg (valH (θ y) _ (hc y)) (hm i 0 i.pos k (ch (r y)))
+
     rw [map_mul, map_sum] at h
     refine (congrArg₂ (· * ·) (valT_eq _ _ (hc y) _) (valT_eq _ _ (hc y) _)).trans
       (h.trans (Finset.sum_congr rfl fun k' _ => (map_mul _ _ _).trans ?_))

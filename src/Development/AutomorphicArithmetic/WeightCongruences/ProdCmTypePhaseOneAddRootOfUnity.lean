@@ -1,8 +1,53 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataHost
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
-import Development.AutomorphicArithmetic.WeightCongruences.ProdNegOneZpow
-import Development.AutomorphicArithmetic.WeightCongruences.RootOfUnityGaloisActionCMDatum
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+public import Development.AutomorphicArithmetic.WeightCongruences.RootOfUnityGaloisActionCMDatum
+import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions
 
@@ -27,7 +72,7 @@ private theorem phase_pair (w : ℂ) (m : ℕ) (hm : 0 < m) (hw : w ^ m = 1) (hz
       rw [Complex.normSq_eq_norm_sq, hn, one_pow]
     rw [Complex.inv_def, this, inv_one, Complex.ofReal_one, mul_one]
   have hconj : 1 + w⁻¹ = (starRingEnd ℂ) (1 + w) := by
-    rw [hinv, map_add, map_one]
+    rw [hinv, map_add (f := _), map_one]
   rw [hconj, Complex.norm_conj]
   set a := 1 + w with ha
   have hna : (‖a‖ : ℂ) ≠ 0 := by
@@ -62,7 +107,7 @@ theorem UpperTheory.prod_cmType_phase_one_add_rootOfUnity :
         RingHom.comp_apply]
       change H.φ₀ ((H.gal.symm (g : R.GG) * H.gal.symm R.sg) (1 + z))
         = 1 + (H.φ₀ ((H.gal.symm (g : R.GG)) z))⁻¹
-      rw [AlgEquiv.mul_apply, map_add, map_one, hsg, map_add, map_one, map_inv₀, map_add,
+      rw [AlgEquiv.mul_apply, map_add (f := _), map_one, hsg, map_add (f := _), map_one, map_inv₀, map_add (f := _),
         map_one, map_inv₀]
     have hne : 1 + H.emb (g : R.GG) z ≠ 0 := by
       have : H.emb (g : R.GG) (1 + z) ≠ 0 := (map_ne_zero _).2 hz1

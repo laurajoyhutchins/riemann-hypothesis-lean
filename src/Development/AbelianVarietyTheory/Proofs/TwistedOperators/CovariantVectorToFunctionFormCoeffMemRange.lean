@@ -1,18 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.InvVolConjLevelOne
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ReprMemOfCoeff
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BranchingPairingMemCoefficientField
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.InvVolConjLevelOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BranchingPairingMemCoefficientField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ReprMemOfCoeff
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUniqueIsFunForm
+
+@[expose] public section
+
 open Formalism.L2.DIV MvPolynomial
 
 namespace GlobalTheory.RowFun
 
 theorem coeff_mem_of_mul_eq {s : Type} (K' : Subfield ℂ) (f P Q : MvPolynomial s ℂ) (hP : P ≠ 0)
-    (hPK : ∀ m, coeff m P ∈ K') (hQ : ∀ m, coeff m Q ∈ K') (h : f * P = Q) :
-    ∀ m, coeff m f ∈ K' := by
+    (hPK : ∀ m, AddMonoidAlgebra.coeff P m ∈ K') (hQ : ∀ m, AddMonoidAlgebra.coeff Q m ∈ K') (h : f * P = Q) :
+    ∀ m, AddMonoidAlgebra.coeff f m ∈ K' := by
   classical
   obtain ⟨φ, hφ1, hφ2⟩ := GlobalTheory.RowRat.exists_proj K'
-  let g : MvPolynomial s ℂ := ∑ m ∈ f.support, monomial m (φ (coeff m f))
-  have hg : ∀ m, coeff m g = φ (coeff m f) := by
+  let g : MvPolynomial s ℂ := ∑ m ∈ f.support, monomial m (φ (AddMonoidAlgebra.coeff f m))
+  have hg : ∀ m, AddMonoidAlgebra.coeff g m = φ (AddMonoidAlgebra.coeff f m) := by
     intro m
     simp only [g, coeff_sum, coeff_monomial, Finset.sum_ite_eq']
     split_ifs with hm
@@ -20,12 +60,13 @@ theorem coeff_mem_of_mul_eq {s : Type} (K' : Subfield ℂ) (f P Q : MvPolynomial
     · rw [notMem_support_iff.mp hm, map_zero]
   have key : g * P = f * P := by
     ext m
-    have hfix : coeff m (f * P) = φ (coeff m (f * P)) := by
+    have hfix : AddMonoidAlgebra.coeff (f * P) m = φ (AddMonoidAlgebra.coeff (f * P) m) := by
       rw [h]; exact (hφ1 ⟨_, hQ m⟩).symm
+
     rw [hfix, coeff_mul, coeff_mul, map_sum]
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [hg]
-    have hs := φ.map_smul (⟨coeff x.2 P, hPK _⟩ : K') (coeff x.1 f)
+    have hs := φ.map_smul (⟨AddMonoidAlgebra.coeff P x.2, hPK _⟩ : K') (AddMonoidAlgebra.coeff f x.1)
     rw [Subfield.smul_def, Subfield.smul_def, smul_eq_mul, smul_eq_mul] at hs
     rw [mul_comm, ← hs, mul_comm]
   have hgf : g = f := mul_right_cancel₀ hP key
@@ -35,14 +76,14 @@ theorem coeff_mem_of_mul_eq {s : Type} (K' : Subfield ℂ) (f P Q : MvPolynomial
 
 theorem coeff_funOf_mem_range {ι : Type} [Fintype ι] {n : ℕ} (σ : ι → Formalism.BasicNotions.DomWeight n) {L : Type}
     [Field L] (κ : L →+* ℂ) (hR : GlobalTheory.FunObj.ReadOK σ) (F : VV ℂ σ)
-    (hF : ∀ m, MvPolynomial.coeff m F.1 ∈ Set.range κ) :
-    ∀ m, MvPolynomial.coeff m (GlobalTheory.FunObj.funOf σ F).1 ∈ Set.range κ := by
+    (hF : ∀ m, AddMonoidAlgebra.coeff F.1 m ∈ Set.range κ) :
+    ∀ m, AddMonoidAlgebra.coeff (GlobalTheory.FunObj.funOf σ F).1 m ∈ Set.range κ := by
   classical
   have hf := hR.1 F
   unfold GlobalTheory.FunObj.IsFunForm at hf
   let G : MvPolynomial (ι × Fin n × Fin n) L :=
     ∑ m ∈ (F.1 : MvPolynomial (ι × Fin n × Fin n) ℂ).support,
-      monomial m (Function.invFun κ (coeff m F.1))
+      monomial m (Function.invFun κ (AddMonoidAlgebra.coeff F.1 m))
   have hG : MvPolynomial.map κ G = F.1 := by
     ext m
     rw [coeff_map]
@@ -51,7 +92,7 @@ theorem coeff_funOf_mem_range {ι : Type} [Fintype ι] {n : ℕ} (σ : ι → Fo
     · exact Function.invFun_eq (hF m)
     · simp [notMem_support_iff.mp hm]
   have hmem : ∀ (p : MvPolynomial (ι × Fin n × Fin n) L) m,
-      coeff m (MvPolynomial.map κ p) ∈ κ.fieldRange := fun p m => by
+      AddMonoidAlgebra.coeff (MvPolynomial.map κ p) m ∈ κ.fieldRange := fun p m => by
     rw [coeff_map]; exact RingHom.mem_fieldRange_self κ _
   have hmem_eq₁ : MvPolynomial.map κ (∏ τ, Formalism.L2.Ker.frDet L n τ ^ ∑ a, (σ τ).natW a)
       = ∏ τ, Formalism.L2.Ker.frDet ℂ n τ ^ ∑ a, (σ τ).natW a := by

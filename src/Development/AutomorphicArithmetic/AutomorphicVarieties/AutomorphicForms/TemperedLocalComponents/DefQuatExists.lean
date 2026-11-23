@@ -1,7 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.CuspSemisimpleReal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.RepNewform
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemNormGroupIffEverywhereNorm
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NegOneNotSqSqrtTwo
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.CuspSemisimpleReal
+public import Mathlib.Algebra.Quaternion
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NegOneNotSqSqrtTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Algebra.QuaternionBasis
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField GlobalTheory.CuspRep UpperTheory.V
 open scoped TensorProduct Quaternion
 
@@ -42,8 +88,8 @@ private theorem lift_bij {A : Type} [Ring A] [Algebra R A] [Algebra F A] [IsScal
   funext x
   exact LinearMap.congr_fun h x
 
-variable {R} in
 
+variable {R} in
 private noncomputable def spl {c d : R} (p q : R) (hc : c = -1) (hd : d = p ^ 2 + q ^ 2) :
     ℍ[R,c,0,d] →ₐ[R] Matrix (Fin 2) (Fin 2) R :=
   QuaternionAlgebra.Basis.liftHom
@@ -98,7 +144,7 @@ private theorem isUnit_of_neg (τ : F →+* ℝ) (ha : τ a < 0) (hb : τ b < 0)
   have hn0 : n ≠ 0 := by
     intro h
     have h1 := congrArg τ h
-    simp only [hn, map_add, map_sub, map_mul, map_pow, map_zero] at h1
+    simp only [hn, map_add (f := _), map_sub, map_mul, map_pow, map_zero] at h1
     have p1 := sq_nonneg (τ x.re)
     have p2 := mul_nonneg (neg_pos.2 ha).le (sq_nonneg (τ x.imI))
     have p3 := mul_nonneg (neg_pos.2 hb).le (sq_nonneg (τ x.imJ))
@@ -190,10 +236,11 @@ private theorem arith (F : Type) [Field F] [NumberField F] [IsTotallyReal F] (h 
   have e3 : InfinitePlace.Completion.extensionEmbeddingOfIsReal hw (algebraMap F w.Completion (t⁻¹ : Fˣ)) = τ (t⁻¹ : Fˣ) := by
     have hr : ComplexEmbedding.IsReal (Complex.ofRealHom.comp τ) := by
       rw [ComplexEmbedding.isReal_iff]; ext z; simp
-    refine (InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hw _).trans (Complex.ofReal_injective ?_)
+    rw [AbsoluteValue.Completion.algebraMap_def, InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe]
+    refine Complex.ofReal_injective ?_
     rw [InfinitePlace.embedding_of_isReal_apply, InfinitePlace.embedding_mk_eq_of_isReal hr]
     rfl
-  simp only [map_mul, map_neg, map_one, map_add, map_pow, e3] at e2
+  simp only [map_mul, map_neg, map_one, map_add (f := _), map_pow, e3] at e2
   refine lt_of_le_of_ne ?_ ((map_ne_zero τ).2 (Units.ne_zero _))
   nlinarith [sq_nonneg (InfinitePlace.Completion.extensionEmbeddingOfIsReal hw (x.1 w)),
     sq_nonneg (InfinitePlace.Completion.extensionEmbeddingOfIsReal hw (y.1 w))]

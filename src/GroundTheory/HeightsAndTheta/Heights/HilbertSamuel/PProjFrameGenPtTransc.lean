@@ -1,8 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsProjFrameGenPtTransc
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsProjFrameGenPtTransc
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjFrameFibrePt
 import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ProjFrameGraphChart
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PProjFrameFibrePt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.LemSec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.StepTStB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.LemSec
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -36,12 +79,14 @@ theorem proof : ProjFrameGenPtTransc.Statement := by
       rw [graphP, ← G.genericFibre_ker_target, RingHom.mem_ker]; exact h
     refine key _ ?_
     rw [Polynomial.aeval_def, Polynomial.eval₂_eq_sum, Polynomial.sum_def] at hq
+
     rw [← hq, map_sum]
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [map_mul, map_pow, aeval_X, aeval_rename]
     exact congrArg (· * _) (hg n)
   replace hFΓ : graphMap (coordIdeal ℤ x) (linForm (ι := GlobalTheory κ) (ι₂ := GlobalTheory (Fin (D + 1))) (projMat e))
       (∑ n ∈ q.support, rename (fun p : Ix κ => aV D p.2) (g n) * X (bV κ 0) ^ n) = 0 := hFΓ
+
   rw [map_sum] at hFΓ
   simp only [map_mul, map_pow, graphMap_rename_inl, graphMap_inr, ProjFrameGraph.linForm_projMat] at hFΓ
   simp only [mul_pow, ← mul_assoc, ← C_pow, ← C_mul] at hFΓ
@@ -51,8 +96,8 @@ theorem proof : ProjFrameGenPtTransc.Statement := by
   have hcoef : ∀ m, q.coeff m = 0 := by
     intro m
     by_cases hm : m ∈ q.support
-    · have h1 := congrArg (coeff (Finsupp.single () m)) hFΓ
-      rw [coeff_sum, coeff_zero, Finset.sum_eq_single m] at h1
+    · have h1 := congrArg (AddMonoidAlgebra.coeff · (Finsupp.single () m)) hFΓ
+      rw [coeff_sum, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, Finset.sum_eq_single m] at h1
       · rw [coeff_C_mul, coeff_X_pow, if_pos rfl, mul_one] at h1
         have h2 := (mul_eq_zero.1 h1).resolve_right (pow_ne_zero _ hX)
         rw [Ideal.Quotient.eq_zero_iff_mem] at h2
@@ -66,7 +111,9 @@ theorem proof : ProjFrameGenPtTransc.Statement := by
       · intro h
         exact absurd hm h
     · exact Polynomial.notMem_support_iff.1 hm
-  exact Polynomial.ext fun m => by rw [hcoef m, Polynomial.coeff_zero]
+  apply AddMonoidAlgebra.ext
+  ext m
+  simpa using congrArg Subtype.val (hcoef m)
 
 end ProjFrameGenPtTransc
 

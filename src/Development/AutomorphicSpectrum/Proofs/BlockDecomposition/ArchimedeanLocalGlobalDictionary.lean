@@ -1,5 +1,44 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.DictInf
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExtensionEmbeddingAlgebraMapOfTotallyReal
+public import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinContinuation.DictInf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -30,33 +69,13 @@ theorem conj_ext [IsTotallyReal F] (w : InfinitePlace F) (a : w.Completion) :
 theorem ext_algebraMap [IsTotallyReal F] (w : InfinitePlace E) (a : (w.comap (algebraMap F E)).Completion) :
     InfinitePlace.Completion.extensionEmbedding w (algebraMap _ w.Completion a) =
       InfinitePlace.Completion.extensionEmbedding (w.comap (algebraMap F E)) a := by
-  have c1 : Continuous fun a : (w.comap (algebraMap F E)).Completion =>
-      InfinitePlace.Completion.extensionEmbedding w (algebraMap _ w.Completion a) :=
-    (InfinitePlace.Completion.isometry_extensionEmbedding w).continuous.comp
-      (NumberField.LiesOver.continuous_completionMap (v := w.comap (algebraMap F E)) (w := w))
-  have c2 := (InfinitePlace.Completion.isometry_extensionEmbedding (w.comap (algebraMap F E))).continuous
-  refine congrFun ((InfinitePlace.Completion.denseRange_coe (w.comap (algebraMap F E))).equalizer c1 c2
-    (funext fun x => ?_)) a
-  obtain ⟨k, rfl⟩ := (WithAbs.equiv (w.comap (algebraMap F E)).1).symm.surjective x
-  change InfinitePlace.Completion.extensionEmbedding w (algebraMap _ w.Completion
-      (algebraMap F (w.comap (algebraMap F E)).Completion k)) =
-    InfinitePlace.Completion.extensionEmbedding (w.comap (algebraMap F E))
-      (algebraMap F (w.comap (algebraMap F E)).Completion k)
-  rw [← IsScalarTower.algebraMap_apply, IsScalarTower.algebraMap_apply F E]
-  have e1 : InfinitePlace.Completion.extensionEmbedding w (algebraMap E w.Completion (algebraMap F E k)) =
-      w.embedding (algebraMap F E k) :=
-    InfinitePlace.Completion.extensionEmbedding_coe w ((WithAbs.equiv w.1).symm (algebraMap F E k))
-  have e2 : InfinitePlace.Completion.extensionEmbedding (w.comap (algebraMap F E))
-      (algebraMap F (w.comap (algebraMap F E)).Completion k) = (w.comap (algebraMap F E)).embedding k :=
-    InfinitePlace.Completion.extensionEmbedding_coe _ ((WithAbs.equiv (w.comap (algebraMap F E)).1).symm k)
-  rw [e1, e2]
-  exact RingHom.congr_fun (embedding_comp w) k
+  apply GlobalTheory.CompanionTheory.RgEisSo.extensionEmbedding_algebraMap_of_totallyReal <;> assumption
 
 theorem phi_eqv [IsTotallyReal F] (w : InfinitePlace E) (z : AE F E) :
     (adStd E).φ w (eqv F E z) = piInf (embOf w) z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x =>
     have e : eqv F E (a ⊗ₜ x) = algebraMap E 𝔸[E] x * GroundTheory.Global.AdeleBaseChange.adeleMap F E a :=
       GroundTheory.BlockD.ThmBHecke.adeleEquiv_tmul a x
@@ -65,13 +84,15 @@ theorem phi_eqv [IsTotallyReal F] (w : InfinitePlace E) (z : AE F E) :
       InfinitePlace.Completion.extensionEmbedding (w.comap (algebraMap F E)) (a.1 (w.comap (algebraMap F E))) * w.embedding x
     rw [ext_algebraMap, mul_comm]
     congr 1
+    change InfinitePlace.Completion.extensionEmbedding w ((algebraMap E 𝔸[E] x).1 w) = w.embedding x
+    rw [AdeleRing.algebraMap_fst_apply]
     exact InfinitePlace.Completion.extensionEmbedding_coe w ((WithAbs.equiv w.1).symm x)
 
 theorem piInf_cA [IsTotallyReal F] {σ : E →ₐ[F] E} (h : IsCMExt F E σ) {w : InfinitePlace F} (τ : EmbOver E w)
     (z : AE F E) : piInf τ (cA σ z) = starRingEnd ℂ (piInf τ z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a x =>
     change InfinitePlace.Completion.extensionEmbedding w (a.1 w) * τ.1 (σ x) =
       starRingEnd ℂ (InfinitePlace.Completion.extensionEmbedding w (a.1 w) * τ.1 x)

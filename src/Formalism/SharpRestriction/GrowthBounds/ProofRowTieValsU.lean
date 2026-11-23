@@ -1,4 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.ProofRowTieValsE
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ProofRowTieValsE
+import Formalism.LocalToGlobal.CharacterGerms.IntSProd
+import Formalism.LocalToGlobal.CharacterGerms.LogCoordOfDpull
+import Formalism.LocalToGlobal.CharacterGerms.SubstSubst
+import Formalism.LocalToGlobal.CharacterGerms.TripleSubstSecondCoordinate
+public import Formalism.LocalToGlobal.CharacterGerms.ValuationEqSelfOfUnitGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,6 +80,7 @@ theorem exp_sum {σ ι : Type} (s : Finset ι) {f : ι → MvPowerSeries σ C}
   · intro a t ha ih h
     have ht : ∀ i ∈ t, MvPowerSeries.constantCoeff (f i) = 0 := fun i hi => h i (Finset.mem_insert_of_mem hi)
     rw [Finset.sum_insert ha, Finset.prod_insert ha, VP.exp_add (h a (Finset.mem_insert_self a t)), ih ht]
+
     rw [map_sum]
     exact Finset.sum_eq_zero ht
 
@@ -126,7 +177,7 @@ theorem HK_ad (x : O) {κ κ' : WVO (IS I0) → C} (h : GK Y p κ) (h' : GK Y p 
 theorem lamAct_tr : lamAct Y p Y.w0 + lamAct Y p (star Y.w0) = 1 := by
   funext w
   simp only [Pi.add_apply, Pi.one_apply, lamAct]
-  rw [← map_add, Y.halfIntegralGenerator_add_conj_eq_one, map_one]
+  rw [← map_add (f := _), Y.halfIntegralGenerator_add_conj_eq_one, map_one]
 
 theorem HK_pair {a b : WVO (IS I0) → C} (ha : GK Y p a) (hb : GK Y p b) :
     Cg V (AA Y p) (HK Y p a (lamAct Y p Y.w0 * b) + HK Y p b (lamAct Y p Y.w0 * a)) (HK Y p a b) := by
@@ -245,15 +296,11 @@ theorem pullback_exp_column (col : Fin 2) :
   have hAA : MvPowerSeries.HasSubst (VP.linPt Y (uS Y p)) := by
     first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hAA0
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun q => by
-          rw [(hAA0) q]; exact IsNilpotent.zero
   have hb0 : ∀ q : Fin 1 × Fin dd, MvPowerSeries.constantCoeff (AA Y p (col, q.2)) = 0 :=
     fun q => cc_AA Y p _
   have hb : MvPowerSeries.HasSubst (fun q : Fin 1 × Fin dd => AA Y p (col, q.2)) := by
     first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hb0
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun q => by
-          rw [(hb0) q]; exact IsNilpotent.zero
   have hpc0 : ∀ q : Fin 1 × Fin dd,
       MvPowerSeries.constantCoeff ((![pt C dd col] : Fin 1 → Pt C 2 dd) q.1 q.2) = 0 := by
     rintro ⟨j, i⟩
@@ -263,8 +310,6 @@ theorem pullback_exp_column (col : Fin 2) :
       (fun q : Fin 1 × Fin dd => (![pt C dd col] : Fin 1 → Pt C 2 dd) q.1 q.2) := by
     first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hpc0
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun q => by
-          rw [(hpc0) q]; exact IsNilpotent.zero
   have hp00 : ∀ q : Fin 1 × Fin dd,
       MvPowerSeries.constantCoeff ((![pt C dd 0] : Fin 1 → Pt C 1 dd) q.1 q.2) = 0 := by
     rintro ⟨j, i⟩
@@ -274,8 +319,6 @@ theorem pullback_exp_column (col : Fin 2) :
       (fun q : Fin 1 × Fin dd => (![pt C dd 0] : Fin 1 → Pt C 1 dd) q.1 q.2) := by
     first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hp00
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun q => by
-          rw [(hp00) q]; exact IsNilpotent.zero
   have hbX : ∀ i : Fin dd, MvPowerSeries.subst (fun q : Fin 1 × Fin dd => AA Y p (col, q.2))
       (MvPowerSeries.X ((0 : Fin 1), i) : MvPowerSeries (Fin 1 × Fin dd) C) = EK Y p (kCol Y p col) i := by
     intro i
@@ -345,20 +388,17 @@ theorem hRow_eqS (o : Orb) : (Y.rawSelf (p o)).hRow = (Y.k : C) • ∑ col : Fi
       (fun q : Fin 2 × (Fin 2 × Fin dd) => (Y.rawSelf (p o)).expPt q.1 q.2) :=
     by first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero fun q => cc_expPtS Y p o q.1 q.2
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun q => by
-          rw [cc_expPtS Y p o q.1 q.2]; exact IsNilpotent.zero
   unfold RawChart.hRow
   congr 1
   show MvPowerSeries.subst (fun q : Fin 2 × (Fin 2 × Fin dd) => (Y.rawSelf (p o)).expPt q.1 q.2)
     (∑ col, hCol col Y.h) = _
+
   rw [← MvPowerSeries.coe_substAlgHom hS, map_sum]
   refine Finset.sum_congr rfl fun col _ => ?_
   have hX : MvPowerSeries.HasSubst (fun q : Fin 2 × Fin dd =>
       (MvPowerSeries.X (q.1, (col, q.2)) : MvPowerSeries (Fin 2 × (Fin 2 × Fin dd)) C)) :=
     by first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero fun q => MvPowerSeries.constantCoeff_X _
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun q => by
-          rw [MvPowerSeries.constantCoeff_X]; exact IsNilpotent.zero
   rw [MvPowerSeries.coe_substAlgHom, hCol, MvPowerSeries.subst_comp_subst_apply hX hS]
   simp only [MvPowerSeries.subst_X hS]
   unfold VP.hAt
@@ -373,18 +413,18 @@ theorem toAllS_hRow (o : Orb) : toAllS (I := IS I0) o (mvExp (Y.rawSelf (p o)).h
       ((MvPowerSeries.X (⟨o, w⟩ : WVO (IS I0))) : MvPowerSeries (WVO (IS I0)) C) = 0 :=
     fun w => MvPowerSeries.constantCoeff_X _
   have hcc : MvPowerSeries.constantCoeff (Y.rawSelf (p o)).hRow = 0 := by
+
     rw [hRow_eqS, MvPowerSeries.smul_eq_C_mul, map_mul, map_sum,
-      Finset.sum_eq_zero fun col _ => VP.cc_hAt (Y := Y) (fun i => cc_expPtS Y p o 0 (col, i))
-        (fun i => cc_expPtS Y p o 1 (col, i)), mul_zero]
+    Finset.sum_eq_zero fun col _ => VP.cc_hAt (Y := Y) (fun i => cc_expPtS Y p o 0 (col, i))
+      (fun i => cc_expPtS Y p o 1 (col, i)), mul_zero]
   have hS : MvPowerSeries.HasSubst (fun w : WV (IS I0 o) =>
       ((MvPowerSeries.X (⟨o, w⟩ : WVO (IS I0))) : MvPowerSeries (WVO (IS I0)) C)) := by
     first
       | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hX
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent fun w => by
-          rw [hX w]; exact IsNilpotent.zero
   unfold toAllS
   rw [VP.subst_exp hX hcc, hRow_eqS]
   congr 1
+
   rw [← MvPowerSeries.coe_substAlgHom hS, map_smul, map_sum]
   congr 1
   refine Finset.sum_congr rfl fun col _ => ?_
@@ -420,6 +460,7 @@ theorem unitSelf_of {C : Type} [Field C] [CharZero C] {V : VF C} {O : Type} [Com
     intro o _
     have h0 : MvPowerSeries.constantCoeff (∑ col, VS.HK Y p (VS.lamG Y p o col 0 * VS.ind (o, 0))
         (VS.lamG Y p o col 1 * VS.ind (o, 1))) = 0 := by
+
       rw [map_sum]
       exact Finset.sum_eq_zero fun _ _ => VS.cc_HK Y p _ _
     exact (VS.Cg.nsmul hA (VS.Cg.refl (V := V) hA h0) Y.k).1

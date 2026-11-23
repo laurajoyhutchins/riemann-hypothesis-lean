@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyModelPrimeBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HermitianPairingTorsionFreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyPrimeHodgeBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyPrimeHodgeFinalStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLatFlagPair
+public import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.FarguesHodgeTate
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyModelPrimeBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyPrimeHodgeBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArithVarietyPrimeHodgeFinalStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HermitianPairingTorsionFreeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -140,8 +186,9 @@ theorem del_key {V : Type} [AddCommGroup V] [Module Ω V] {s N : ℕ} (Rs Rt : S
     have hl2 : l ⬝ᵥ (f ^ (m₁ + m') • (Fintype.linearCombination Ω (fun (i : Fin N) (k : Fin s) => Hs i (v k)) a -
         Fintype.linearCombination Ω (fun (i : Fin N) (k : Fin s) => Ht i (v k)) a)) =
         ∑ i, f ^ m₁ * a i * (f ^ m' * (Hs i (∑ k, l k • v k) - Ht i (∑ k, l k • v k))) := by
+
       simp only [map_sum, map_smul, smul_eq_mul, dotProduct, Pi.smul_apply, Pi.sub_apply,
-        Fintype.linearCombination_apply, Finset.sum_apply]
+      Fintype.linearCombination_apply, Finset.sum_apply]
       simp only [Finset.mul_sum, ← Finset.sum_sub_distrib]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => ?_
@@ -234,7 +281,7 @@ namespace GlobalTheory.CompanionTheory.Ar.Num.FamEx.SeqFam
 
 theorem emb_injective {E : Type} [Field E] [NumberField E] {Ω : Type} [Field Ω] [CharZero Ω] (g : 𝓞 E →+* Ω) :
     Function.Injective g := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro a ha
   have hk : RingHom.ker g = ⊥ := by
     apply Ideal.eq_bot_of_comap_eq_bot (R := ℤ)
@@ -285,7 +332,7 @@ theorem seqfam_holds : GlobalTheory.CompanionTheory.Ar.HT.FarguesHodgeTate → �
     rw [hwΩ, htΩ, ← map_mul, ← htp, map_natCast]
 
   have hOinj : Function.Injective (algebraMap O Ω) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨a, s, rfl⟩ := IsLocalization.exists_mk'_eq m.primeCompl x
     have h1 : algebraMap O Ω (IsLocalization.mk' O a s) * algebraMap O Ω (algebraMap A O s) =

@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 
 noncomputable section
@@ -26,12 +67,12 @@ def idealIncl : idealFree R P I ⟶ (freeP R).obj P where
     change Finsupp.mapRange (I.subtype) (map_zero _) (Finsupp.mapDomain _ (Finsupp.single x a)) =
       Finsupp.mapDomain _ (Finsupp.mapRange (I.subtype) (map_zero _) (Finsupp.single x a))
     simp only [Finsupp.mapDomain_single, Finsupp.mapRange_single]
-    erw [Finsupp.mapDomain_single]
     rfl
 
 instance : Mono (idealIncl R P I) := by
   have : ∀ U, Mono ((idealIncl R P I).app U) := fun U => by
-    rw [ModuleCat.mono_iff_injective]
+    apply (ModuleCat.mono_iff_injective _).2
+    change Function.Injective (Finsupp.mapRange (α := ULift.{1} (P.obj U)) I.subtype (map_zero _))
     exact Finsupp.mapRange_injective _ (map_zero _) Subtype.val_injective
   exact NatTrans.mono_of_mono_app _
 
@@ -43,7 +84,7 @@ variable (R : Type) [CommRing R] (P : PSh) (I : Ideal (ULift.{1} R)) (J : Shv R)
 
 def evalAt (U : Scheme.{0}ᵒᵖ) (x : ULift.{1} (P.obj U)) : I →ₗ[ULift.{1} R] J.obj.obj U where
   toFun a := ((g a).hom.app U).hom (((toSheafify Scheme.etaleTopology ((freeP R).obj P)).app U).hom (ModuleCat.freeMk x))
-  map_add' a b := by rw [map_add]; rfl
+  map_add' a b := by rw [map_add (f := _)]; rfl
   map_smul' r a := by rw [map_smul]; rfl
 
 def famHom : idealFree R P I ⟶ J.obj where
@@ -77,7 +118,7 @@ theorem hom_free_injective (R : Type) [CommRing R] (J : Shv R) [Injective J] (P 
     (presheafToSheaf Scheme.etaleTopology _).map (idealIncl R P I)
   let ψ' : (presheafToSheaf Scheme.etaleTopology _).obj (idealFree R P I) ⟶ J :=
     ((sheafificationAdjunction Scheme.etaleTopology _).homEquiv _ _).symm (famHom R P I J g)
-  haveI : Mono m := inferInstanceAs (Mono ((presheafToSheaf Scheme.etaleTopology _).map (idealIncl R P I)))
+  have : Mono m := inferInstanceAs (Mono ((presheafToSheaf Scheme.etaleTopology _).map (idealIncl R P I)))
   let f := Injective.factorThru ψ' m
   refine ⟨LinearMap.toSpanSingleton _ _ f, fun a ha => ?_⟩
   rw [LinearMap.toSpanSingleton_apply]
@@ -96,7 +137,7 @@ theorem hom_free_injective (R : Type) [CommRing R] (J : Shv R) [Injective J] (P 
           Category.assoc (toSheafify Scheme.etaleTopology (idealFree R P I)) (sheafifyMap Scheme.etaleTopology (idealIncl R P I)) f.hom
       _ = famHom R P I J g := by rw [hm, hψ]
   apply Sheaf.hom_ext
-  apply sheafify_hom_ext _ _ _ J.cond
+  apply sheafify_hom_ext _ _ _ J.property
   ext U : 2
   apply ModuleCat.free_hom_ext
   intro x

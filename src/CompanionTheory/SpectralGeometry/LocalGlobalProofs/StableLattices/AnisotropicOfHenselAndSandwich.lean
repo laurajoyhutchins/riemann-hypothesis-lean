@@ -1,5 +1,54 @@
-import Mathlib
-import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+module
+
+public import CompanionTheory.RealGroups.UnitaryAdmissibility.ArchimedeanUnitaryDual.StSandwich
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Group.Ultra
+
+@[expose] public section
 
 open CompanionTheory.Rg.FlB
 
@@ -14,7 +63,7 @@ variable {L : Type} [NontriviallyNormedField L] {V : Type} [AddCommGroup V] [Mod
 
 lemma add_left (hh : IsHerm s h) (x y z : V) : h (x + y) z = h x z + h y z := by
   have h1 := hh.2.2.1
-  rw [h1 z (x + y), hh.1, map_add, h1 z x, h1 z y]
+  rw [h1 z (x + y), hh.1, map_add (f := _), h1 z x, h1 z y]
 
 lemma smul_left (hh : IsHerm s h) (a : L) (x y : V) : h (a • x) y = s a * h x y := by
   have h1 := hh.2.2.1
@@ -39,7 +88,7 @@ lemma pair_le [IsUltrametricDist L] [CompleteSpace L] (hH : StHensel) (hs : IsIn
   have hbpos : 0 < ‖b‖ := by linarith
   have hb0 : b ≠ 0 := norm_pos_iff.mp hbpos
   have hsb : s b = b := by
-    rw [hbd, map_add, ← h1 x y, ← h1 y x, add_comm]
+    rw [hbd, map_add (f := _), ← h1 x y, ← h1 y x, add_comm]
   have hsx : s (h x x) = h x x := (h1 x x).symm
   have hsy : s (h y y) = h y y := (h1 y y).symm
   have hc1 : s (h y y / b ^ 2) = h y y / b ^ 2 := by
@@ -139,7 +188,6 @@ theorem aniso : StHensel → StSandwich → StAniso := by
     rw [hV₀] at hx ⊢
     rw [norm_q_smul hs hh]
     have := norm_nonneg a
-    have h2 := norm_nonneg (h x x)
     calc ‖a‖ * ‖a‖ * ‖h x x‖ ≤ 1 * 1 * 1 := by gcongr
       _ = 1 := by norm_num
   have hδle : ∀ x ∈ V₀, ∀ y ∈ V₀, ‖h x y‖ ≤ ‖δ‖ := by

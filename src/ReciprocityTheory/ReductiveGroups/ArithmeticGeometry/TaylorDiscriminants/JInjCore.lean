@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.LinearIndependent.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Galois.Infinite
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.TB
 
@@ -38,6 +92,7 @@ theorem rel_zero {K F C Pt : Type} [Field K] [Field F] [Algebra K F] [IsGalois K
       intro y
       obtain ⟨x, rfl⟩ := (hbij g).2 y
       have h1 := congrArg g (ha'rel x)
+
       rw [map_sum, map_zero] at h1
       simp only [map_mul, ← heq] at h1
       exact h1
@@ -56,6 +111,7 @@ theorem rel_zero {K F C Pt : Type} [Field K] [Field F] [Algebra K F] [IsGalois K
   choose! c hc using hK
   have hv0 : v (∑ i ∈ s, c i • b i) = 0 := by
     funext y
+
     rw [map_sum, Finset.sum_apply, Pi.zero_apply, ← ha'rel y]
     refine Finset.sum_congr rfl fun i hi => ?_
     rw [map_smul, Pi.smul_apply, Algebra.smul_def, hc i hi]
@@ -122,15 +178,5 @@ theorem indepDescent_holds : IndepDescentSt := by
     linearIndependent_algebraMap_comp_iff.mpr hS
   apply LinearIndependent.of_comp (LinearMap.funLeft ℂ ℂ (fun y : S => (y : Pt)))
   exact hC
-
-example (h : IndepDescentSt) :
-    LinearIndependent ℂ (fun _ : Fin 1 => (fun _ => ((1 : ℚ) : ℂ) : Unit → ℂ)) := by
-  have hv : Function.Injective (LinearMap.pi (fun _ : Unit => LinearMap.id) : ℚ →ₗ[ℚ] (Unit → ℚ)) := by
-    intro x y hxy
-    simpa using congrFun hxy ()
-  have := h ℚ ℚ (Rat.castHom ℂ) ℚ Unit (LinearMap.pi fun _ => LinearMap.id) (fun _ y => y)
-    (fun _ => Function.bijective_id) (fun g f y => by simp) hv 1 (fun _ => 1)
-    (linearIndependent_unique_iff.mpr one_ne_zero)
-  simpa using this
 
 end ReciprocityTheory.ChartRestriction.G.TB

@@ -1,7 +1,54 @@
-import Mathlib
-import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
-import GroundTheory.AutomorphicForms.GLnLocal
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsOpenAdditiveCharacterKernel
+public import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
+public import GroundTheory.AutomorphicForms.GLnLocal
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -51,8 +98,6 @@ def WT : Submodule ℂ (GL (Fin m) k → ℂ) where
     refine ⟨fun u hu g => ?_, h2.comp (a * ·), C, hC, fun g hg => h3 g fun e => hg (by simp [e])⟩
     simp only [Pi.smul_apply, smul_eq_mul, h1 u hu g]
     ring
-
-theorem mem_WT {f : GL (Fin m) k → ℂ} : f ∈ WT ψ ↔ IsWhitTest ψ f := Iff.rfl
 
 def rhoW : Representation ℂ (GL (Fin m) k) (WT (m := m) ψ) where
   toFun x :=
@@ -129,42 +174,14 @@ theorem isSmooth_rhoW : IsSmooth (rhoW (m := m) ψ) := fun x => by
   have : y = g * (g⁻¹ * y) := by simp
   rw [this, map_mul, Module.End.mul_apply, h (g⁻¹ * y) hy, hg']
 
-variable (ψ) in
 
+variable (ψ) in
 def Good (K : Subgroup (GL (Fin m) k)) : Prop :=
   IsOpen (K : Set (GL (Fin m) k)) ∧ IsCompact (K : Set (GL (Fin m) k)) ∧
     ∀ u ∈ unipB k (Fin m), u ∈ K → ψ (superDiag u) = 1
 
-theorem Good.mono {K K' : Subgroup (GL (Fin m) k)} (hK : Good ψ K) (h : K' ≤ K)
-    (ho : IsOpen (K' : Set (GL (Fin m) k))) : Good ψ K' :=
-  ⟨ho, hK.2.1.of_isClosed_subset (Subgroup.isClosed_of_isOpen _ ho) h, fun u hu hu' => hK.2.2 u hu (h hu')⟩
-
 theorem circle_eq_one {z : Circle} (h : ∀ n : ℕ, 0 < ((z ^ n : Circle) : ℂ).re) : z = 1 := by
-  by_contra hz
-  have h1 : (z : ℂ) ≠ 1 := fun e => hz (Subtype.ext e)
-  have hb : ∀ n : ℕ, ‖∑ i ∈ Finset.range n, (z : ℂ) ^ i‖ ≤ 2 / ‖(z : ℂ) - 1‖ := fun n => by
-    rw [geom_sum_eq h1, norm_div]
-    refine div_le_div_of_nonneg_right ((norm_sub_le _ _).trans ?_) (norm_nonneg _)
-    rw [norm_pow, Circle.norm_coe, one_pow, norm_one]
-    norm_num
-  have hq : ∀ n : ℕ, (1 / 2 : ℝ) ≤ ((z : ℂ) ^ n).re := fun n => by
-    have h2 := h (2 * n)
-    have h0 := h n
-    have hn : ((z : ℂ) ^ n).re ^ 2 + ((z : ℂ) ^ n).im ^ 2 = 1 := by
-      have : Complex.normSq ((z : ℂ) ^ n) = 1 := by
-        rw [map_pow, Circle.normSq_coe, one_pow]
-      rw [Complex.normSq_apply] at this
-      nlinarith
-    rw [Circle.coe_pow] at h0
-    rw [Circle.coe_pow, mul_comm, pow_mul, sq, Complex.mul_re] at h2
-    nlinarith
-  obtain ⟨n, hn⟩ := exists_nat_gt (2 * (2 / ‖(z : ℂ) - 1‖))
-  have h3 : (n : ℝ) * (1 / 2) ≤ (∑ i ∈ Finset.range n, (z : ℂ) ^ i).re := by
-    rw [Complex.re_sum]
-    calc (n : ℝ) * (1 / 2) = ∑ _i ∈ Finset.range n, (1 / 2 : ℝ) := by simp
-      _ ≤ _ := Finset.sum_le_sum fun i _ => hq i
-  have h4 := (Complex.re_le_norm _).trans (hb n)
-  linarith
+  apply GlobalTheory.CompanionTheory.LocalFieldChar.circle_eq_one_of_forall_re_pow_pos <;> assumption
 
 theorem exists_good (hψ : Continuous ψ) {U : Set (GL (Fin m) k)} (hU : U ∈ 𝓝 (1 : GL (Fin m) k)) :
     ∃ K : Subgroup (GL (Fin m) k), Good ψ K ∧ (K : Set (GL (Fin m) k)) ⊆ U := by
@@ -182,16 +199,16 @@ theorem exists_good (hψ : Continuous ψ) {U : Set (GL (Fin m) k)} (hU : U ∈ �
   rw [← hp]
   exact (hr (pow_mem huK n)).2
 
+
 open Classical in
 variable (ψ) in
-
 def deltaFun (K : Subgroup (GL (Fin m) k)) (g : GL (Fin m) k) : ℂ :=
   if h : ∃ u ∈ unipB k (Fin m), ∃ κ ∈ K, g = u * κ then (ψ (superDiag h.choose) : ℂ) else 0
 
 theorem deltaFun_mul {K : Subgroup (GL (Fin m) k)} (hK : Good ψ K) {u κ : GL (Fin m) k}
     (hu : u ∈ unipB k (Fin m)) (hκ : κ ∈ K) : deltaFun ψ K (u * κ) = (ψ (superDiag u) : ℂ) := by
   have h : ∃ u' ∈ unipB k (Fin m), ∃ κ' ∈ K, u * κ = u' * κ' := ⟨u, hu, κ, hκ, rfl⟩
-  rw [deltaFun, dif_pos h]
+  rw [deltaFun, dite_eq_left h]
   obtain ⟨hu', κ', hκ', e⟩ := h.choose_spec
   set u' := h.choose
   have e2 : u'⁻¹ * u = κ' * κ⁻¹ := by
@@ -203,7 +220,7 @@ theorem deltaFun_mul {K : Subgroup (GL (Fin m) k)} (hK : Good ψ K) {u κ : GL (
 
 theorem deltaFun_eq_zero {K : Subgroup (GL (Fin m) k)} {g : GL (Fin m) k}
     (h : ¬ ∃ u ∈ unipB k (Fin m), ∃ κ ∈ K, g = u * κ) : deltaFun ψ K g = 0 := by
-  rw [deltaFun, dif_neg h]
+  rw [deltaFun, dite_eq_right h]
 
 theorem deltaFun_right {K : Subgroup (GL (Fin m) k)} (hK : Good ψ K) (g : GL (Fin m) k) {κ : GL (Fin m) k}
     (hκ : κ ∈ K) : deltaFun ψ K (g * κ) = deltaFun ψ K g := by
@@ -229,15 +246,15 @@ theorem isWhitTest_deltaFun {K : Subgroup (GL (Fin m) k)} (hK : Good ψ K) : IsW
   · by_contra h
     exact hg (deltaFun_eq_zero h)
 
+
 open Classical in
 variable (ψ) in
-
 def delta (K : Subgroup (GL (Fin m) k)) : WT (m := m) ψ :=
   if h : Good ψ K then ⟨deltaFun ψ K, isWhitTest_deltaFun h⟩ else 0
 
 theorem coe_delta {K : Subgroup (GL (Fin m) k)} (hK : Good ψ K) :
     (delta ψ K : GL (Fin m) k → ℂ) = deltaFun ψ K := by
-  rw [delta, dif_pos hK]
+  rw [delta, dite_eq_left hK]
 
 theorem delta_mul {K : Subgroup (GL (Fin m) k)} (hK : Good ψ K) {u κ : GL (Fin m) k}
     (hu : u ∈ unipB k (Fin m)) (hκ : κ ∈ K) : (delta ψ K : GL (Fin m) k → ℂ) (u * κ) = (ψ (superDiag u) : ℂ) := by
@@ -247,7 +264,7 @@ theorem delta_eq_zero {K : Subgroup (GL (Fin m) k)} {g : GL (Fin m) k}
     (h : ¬ ∃ u ∈ unipB k (Fin m), ∃ κ ∈ K, g = u * κ) : (delta ψ K : GL (Fin m) k → ℂ) g = 0 := by
   by_cases hK : Good ψ K
   · rw [coe_delta hK, deltaFun_eq_zero h]
-  · rw [delta, dif_neg hK]
+  · rw [delta, dite_eq_right hK]
     rfl
 
 theorem rhoW_delta {K : Subgroup (GL (Fin m) k)} {κ : GL (Fin m) k} (hκ : κ ∈ K) :
@@ -255,7 +272,7 @@ theorem rhoW_delta {K : Subgroup (GL (Fin m) k)} {κ : GL (Fin m) k} (hκ : κ �
   by_cases hK : Good ψ K
   · refine Subtype.ext (funext fun g => ?_)
     rw [rhoW_apply, coe_delta hK, deltaFun_right hK g hκ]
-  · rw [delta, dif_neg hK, map_zero]
+  · rw [delta, dite_eq_right hK, map_zero]
 
 theorem apply_mul_of_fixed {x : WT (m := m) ψ} {κ : GL (Fin m) k} (h : rhoW ψ κ x = x) (g : GL (Fin m) k) :
     (x : GL (Fin m) k → ℂ) (g * κ) = (x : GL (Fin m) k → ℂ) g := by

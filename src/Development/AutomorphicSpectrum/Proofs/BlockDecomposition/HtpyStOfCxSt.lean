@@ -1,5 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.HodgeWedgeFields.H1CommutesBaseChange
+public import Mathlib.AlgebraicTopology.SimplexCategory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -129,14 +175,16 @@ theorem homotopy (n : ℕ) (f : Cn (Cyl G) (n + 1)) :
     ((-1 : R) ^ ((i : ℕ) + (j : ℕ))) • P G (SimplexCategory.δ i ≫ SimplexCategory.σ j)
       ((lab (n + 3) (j + 1)).comp (Fin.succAboveOrderEmb i).toOrderHom) f
   have e1 : dn G n (hop G n f) = ∑ i, ∑ j, S i j := by
+
     simp only [dn, hop, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, cof_P, Finset.smul_sum,
-      smul_smul, S, pow_add]
+    smul_smul, S, pow_add]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ ?_
     first | rfl | exact congrArg₂ (· • ·) (mul_comm _ _) rfl
   have e2 : hop G (n + 1) (dn (Cyl G) (n + 1) f) = ∑ j, ∑ i, T i j := by
+
     simp only [dn, hop, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, P_cof, Finset.smul_sum,
-      smul_smul, T, pow_add]
+    smul_smul, T, pow_add]
     rw [Finset.sum_comm]
   have h1 : ∀ i j, i ≤ j.castSucc → T i.castSucc j.succ = - S i j := by
     intro i j h
@@ -301,8 +349,8 @@ end GlobalTheory.CompanionTheory.Hodge.Prism
 
 namespace GlobalTheory.CompanionTheory.Hodge
 
-open Prism in
 
+open Prism in
 theorem htpySt_of_cxSt : CxSt → HtpySt := by
   intro hC R _ C _ F D _ G m m' θ hθ
   have hx := fun (k : ℕ) (z : Cn F k) ↦

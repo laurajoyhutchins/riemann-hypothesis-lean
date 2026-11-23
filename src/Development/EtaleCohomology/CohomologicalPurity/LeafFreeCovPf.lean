@@ -1,4 +1,46 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafHtpyMVPf
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafHtpyMVPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -27,9 +69,9 @@ theorem cover_mem :
     · exact (inferInstance : Etale (X.homOfLE (le_sup_right : V ≤ U ⊔ V)))
     · exact (inferInstance : Etale (X.homOfLE (le_sup_left : U ≤ U ⊔ V)))
 
-theorem sec_zero (R : Type) [CommRing R] (Zs : Shv R) (z : Zs.val.obj (op (U ⊔ V : X.Opens).toScheme))
-    (h : ∀ b, Zs.val.map (incl U V b).op z = 0) : z = 0 := by
-  have e := Presheaf.IsSheaf.hom_ext_ofArrows Zs.cond (incl U V) (cover_mem U V)
+theorem sec_zero (R : Type) [CommRing R] (Zs : Shv R) (z : Zs.obj.obj (op (U ⊔ V : X.Opens).toScheme))
+    (h : ∀ b, Zs.obj.map (incl U V b).op z = 0) : z = 0 := by
+  have e := Presheaf.IsSheaf.hom_ext_ofArrows Zs.property (incl U V) (cover_mem U V)
     (E := ModuleCat.of (ULift.{1} R) (ULift.{1} R))
     (x := ModuleCat.ofHom (LinearMap.toSpanSingleton (ULift.{1} R) _ z)) (y := 0) (fun b => by
       ext1
@@ -51,7 +93,7 @@ theorem main (R : Type) [CommRing R] :
   let g' := adj.homEquiv _ _ g
   let z := g'.app (op W) (ModuleCat.freeMk (ULift.up (𝟙 W)))
   have hval : ∀ (T : Scheme.{0}) (t : T ⟶ W),
-      g'.app (op T) (ModuleCat.freeMk (ULift.up t : uliftFunctor.{1, 0}.obj ((yoneda.obj W).obj (op T)))) = Zs.val.map t.op z := by
+      g'.app (op T) (ModuleCat.freeMk (ULift.up t : uliftFunctor.{1, 0}.obj ((yoneda.obj W).obj (op T)))) = Zs.obj.map t.op z := by
     intro T t
     have := congrArg (fun φ => φ.hom (ModuleCat.freeMk (ULift.up (𝟙 W) : uliftFunctor.{1, 0}.obj ((yoneda.obj W).obj (op W))))) (g'.naturality t.op)
     have key : ((freeP R).obj (yoneda.obj W)).map t.op (ModuleCat.freeMk (ULift.up (𝟙 W) : uliftFunctor.{1, 0}.obj ((yoneda.obj W).obj (op W)))) = ModuleCat.freeMk (ULift.up t : uliftFunctor.{1, 0}.obj ((yoneda.obj W).obj (op T))) := by
@@ -63,7 +105,7 @@ theorem main (R : Type) [CommRing R] :
     intro P
     rw [Adjunction.homEquiv_unit]
     simp
-  have hres : ∀ {Y : Scheme.{0}} (i : Y ⟶ W), (free R).map (yoneda.map i) ≫ g = 0 → Zs.val.map i.op z = 0 := by
+  have hres : ∀ {Y : Scheme.{0}} (i : Y ⟶ W), (free R).map (yoneda.map i) ≫ g = 0 → Zs.obj.map i.op z = 0 := by
     intro Y i hi
     have h1 : adj.homEquiv _ _ ((presheafToSheaf _ _).map ((freeP R).map (yoneda.map i)) ≫ g) =
         (freeP R).map (yoneda.map i) ≫ g' :=

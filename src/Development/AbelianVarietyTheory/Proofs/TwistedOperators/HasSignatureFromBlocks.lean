@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ChainMatrices
-import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.PosIndexMapEqCardOfCongrDiagonal
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.PosIndexMapEqCardOfCongrDiagonal
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta IsDedekindDomain NumberField Matrix
 open scoped TensorProduct
@@ -101,11 +147,13 @@ theorem gram_det_ne (S : Formalism.BasicNotions.HSpace E) : S.gram.det ≠ 0 := 
     intro i
     have h2 := congrFun hc i
     simp only [Matrix.mulVec, dotProduct, Pi.zero_apply, Formalism.BasicNotions.HSpace.gram] at h2
+
     rw [← h2, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_smul, smul_eq_mul, mul_comm]
   have hy : ∀ x, S.hT x (∑ j, c j • S.frame j) = 0 := by
     intro x
+
     rw [← S.frame.sum_repr x, map_sum S.hT, LinearMap.sum_apply]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [map_smulₛₗ, LinearMap.smul_apply, h1, smul_zero]
@@ -123,6 +171,7 @@ theorem exists_basis (X Y : Formalism.BasicNotions.HSpace E) (ι : X.V →ₗ[E]
     have h1 : ∀ i, Y.hT (ι (X.frame i)) y = 0 := fun i => by
       have := congrFun (LinearMap.mem_ker.mp hy) i
       simpa [φ] using this
+
     rw [← X.frame.sum_repr x, map_sum ι, map_sum Y.hT, LinearMap.sum_apply]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [map_smul, map_smulₛₗ, LinearMap.smul_apply, h1, smul_zero]

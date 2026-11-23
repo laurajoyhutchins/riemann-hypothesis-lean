@@ -1,7 +1,57 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachDeltaInvariantCoboundaries
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsUniqueSum
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoordApply
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddXMulDerivativeBin
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AssociatedRootSubOnePow
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardTorsionMulFinrank
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DvrComplete
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsUniqueSum
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachDeltaInvariantCoboundaries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +75,7 @@ theorem dvd_coeff_of_aeval {O : Type} [CommRing O] (a : O) (ξ w : O⟦X⟧) (s 
     have h0 : a ∣ E.coeff 0 := by
       have h1 := congrArg constantCoeff h
       rw [← hE] at h1
-      simp only [map_add, map_mul, Polynomial.aeval_X, Polynomial.aeval_C, hξ, map_pow,
+      simp only [map_add (f := _), map_mul, Polynomial.aeval_X, Polynomial.aeval_C, hξ, map_pow,
         constantCoeff_X, zero_pow hs.ne', zero_pow (Nat.mul_pos e.succ_pos hs).ne', mul_zero,
         zero_mul, zero_add, constantCoeff_C, PowerSeries.algebraMap_apply, Algebra.algebraMap_self,
         RingHom.id_apply] at h1
@@ -33,7 +83,7 @@ theorem dvd_coeff_of_aeval {O : Type} [CommRing O] (a : O) (ξ w : O⟦X⟧) (s 
     obtain ⟨d, hd⟩ := h0
     obtain ⟨w', hw'⟩ := hw.exists_right_inv
     have h2 : X ^ s * (w * Polynomial.aeval ξ E.divX - X ^ (e * s) * b) = C a * (c - C d) := by
-      rw [← hE, map_add, map_mul, Polynomial.aeval_X, Polynomial.aeval_C, hd] at h
+      rw [← hE, map_add (f := _), map_mul, Polynomial.aeval_X, Polynomial.aeval_C, hd] at h
       have hC : algebraMap O O⟦X⟧ (a * d) = C a * C d := by rw [← map_mul]; rfl
       rw [hC] at h
       nth_rewrite 1 [hξ] at h
@@ -175,11 +225,11 @@ theorem eisenstein_gen (R : Fr l O) (j : O⟦X⟧ →ₐ[O] O⟦X⟧) (ht : FrTi
   · refine ⟨R.u, R.u.isUnit, ?_⟩
     rw [← hφ, R.φ_X, map_mul, map_mul, map_pow, hjE, algHom_eq_subst j hj R.u]
   · refine ⟨R.κ, R.κ.isUnit, ?_⟩
-    rw [← hγ, R.γ_X, map_mul, map_add, map_one, map_mul, hjE, algHom_eq_subst j hj R.κ]
+    rw [← hγ, R.γ_X, map_mul, map_add (f := _), map_one, map_mul, hjE, algHom_eq_subst j hj R.κ]
     ring
 
-omit hp [CharZero O] [Algebra ℤ_[l] O] in
 
+omit hp [CharZero O] [Algebra ℤ_[l] O] in
 theorem eisAt_one [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) O]
     (hu : ¬ IsUnit (l : O)) (ξ : O⟦X⟧) (hq : lvl l O 0 ∣ ξ + (l : O⟦X⟧)) (e₀ : ℕ) (he₀ : e₀ = 1)
     (hA : HasEis W l e₀ ξ) : EisAt W l 1 ξ (Polynomial.X + Polynomial.C (l : O)) := by
@@ -201,8 +251,8 @@ theorem card_eq : (H.W K 1 LL h).DelF.card = (l - 1) / Module.finrank ↥(K0 K) 
     rw [h0] at hc; omega
   rw [← hc, Nat.mul_div_cancel _ h0]
 
-omit hl in
 
+omit hl in
 theorem free_and_invariants (ξ : (↥(OL LL))⟦X⟧)
     (hξ : Associated ξ (X ^ (H.W K 1 LL h).DelF.card))
     (hinv : ∀ δ ∈ (H.W K 1 LL h).DelF, (H.W K 1 LL h).γ₀ δ ξ = ξ) :
@@ -211,7 +261,36 @@ theorem free_and_invariants (ξ : (↥(OL LL))⟦X⟧)
     ∀ b : (↥(OL LL))⟦X⟧, (∀ δ ∈ (H.W K 1 LL h).DelF, (H.W K 1 LL h).γ₀ δ b = b) ↔
       ∃ g : (↥(OL LL))⟦X⟧, b = g.subst ξ := by
   obtain ⟨_, _, hu⟩ := GlobalTheory.FinExtIntegers.dvr_complete LL
-  obtain ⟨χ, hχ, -⟩ := GlobalTheory.exists_cyclotomicChar_padicInt_units P K LL (H.W K 1 LL h)
+  let W := H.W K 1 LL h
+  have hinj : Function.Injective (algebraMap ℤ_[l] ↥(OL LL)) := by
+    intro a b hab
+    apply (IsFractionRing.injective ℤ_[l] ℚ_[l])
+    apply (algebraMap ℚ_[l] ↥LL.1).injective
+    exact congrArg Subtype.val hab
+  have hex : ∀ g, ∃ y : ℤ_[l], algebraMap ℤ_[l] ↥(OL LL) y = (W.χΓ g : ↥(OL LL)) := by
+    intro g
+    obtain ⟨a, rfl⟩ := W.resΓ_onto g
+    have hm : algebraMap ℚ_[l] ↥LL.1 ((P.PD K).χ a : ℚ_[l]) ∈ OL LL := by
+      rw [← W.χΓ_res a]
+      exact (W.χΓ (W.resΓ a) : ↥(OL LL)).2
+    have hi : IsIntegral ℤ_[l] ((P.PD K).χ a : ℚ_[l]) :=
+      (isIntegral_algHom_iff (IsScalarTower.toAlgHom ℤ_[l] ℚ_[l] ↥LL.1)
+        (algebraMap ℚ_[l] ↥LL.1).injective).mp hm
+    obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.mp hi
+    refine ⟨y, Subtype.ext ?_⟩
+    show algebraMap ℤ_[l] ↥LL.1 y = _
+    rw [IsScalarTower.algebraMap_apply ℤ_[l] ℚ_[l] ↥LL.1, hy, ← W.χΓ_res a]
+    rfl
+  choose y hy using hex
+  have hmul : ∀ g, y g * y g⁻¹ = 1 := fun g => hinj (by
+    rw [map_mul, hy, hy, map_one, ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one, Units.val_one])
+  have hmul' : ∀ g, y g⁻¹ * y g = 1 := fun g => by simpa using hmul g⁻¹
+  let u : W.Gam → ℤ_[l]ˣ := fun g => ⟨y g, y g⁻¹, hmul g, hmul' g⟩
+  let χ : W.Gam →* ℤ_[l]ˣ := by
+    refine { toFun := u, map_one' := ?_, map_mul' := ?_ }
+    · apply Units.ext; apply hinj; simp [u, hy]
+    · intro g k; apply Units.ext; apply hinj; simp [u, hy]
+  have hχ : ∀ g, algebraMap ℤ_[l] ↥(OL LL) (χ g : ℤ_[l]) = (W.χΓ g : ↥(OL LL)) := fun g => hy g
   exact free_and_invariants_gen (H.W K 1 LL h) (P.PD_p K) hu χ hχ ξ hξ hinv
 
 theorem exists_eisenstein (ξ : (↥(OL LL))⟦X⟧)
@@ -223,7 +302,7 @@ theorem exists_eisenstein (ξ : (↥(OL LL))⟦X⟧)
     ⟨_, R.ϖ, rfl, R.ϖ_val, hr, eisenstein_gen (H.W K 1 LL h) (P.PD_p K) R j ht _ rfl⟩
   rwa [hj, he] at h1
 
-set_option maxHeartbeats 800000 in
+
 
 theorem trace_param (h1 : Module.finrank ↥(K0 K) ↥K.1 = 1) :
     (H.W K 1 LL h).DelF.card = l - 1 ∧
@@ -233,7 +312,36 @@ theorem trace_param (h1 : Module.finrank ↥(K0 K) ↥K.1 = 1) :
       (Polynomial.X + Polynomial.C ((l : ℕ) : ↥(OL LL))) := by
   have hc := card_eq H h hl
   rw [h1, Nat.div_one] at hc
-  obtain ⟨χ, hχ, -⟩ := GlobalTheory.exists_cyclotomicChar_padicInt_units P K LL (H.W K 1 LL h)
+  let W := H.W K 1 LL h
+  have hinj : Function.Injective (algebraMap ℤ_[l] ↥(OL LL)) := by
+    intro a b hab
+    apply (IsFractionRing.injective ℤ_[l] ℚ_[l])
+    apply (algebraMap ℚ_[l] ↥LL.1).injective
+    exact congrArg Subtype.val hab
+  have hex : ∀ g, ∃ y : ℤ_[l], algebraMap ℤ_[l] ↥(OL LL) y = (W.χΓ g : ↥(OL LL)) := by
+    intro g
+    obtain ⟨a, rfl⟩ := W.resΓ_onto g
+    have hm : algebraMap ℚ_[l] ↥LL.1 ((P.PD K).χ a : ℚ_[l]) ∈ OL LL := by
+      rw [← W.χΓ_res a]
+      exact (W.χΓ (W.resΓ a) : ↥(OL LL)).2
+    have hi : IsIntegral ℤ_[l] ((P.PD K).χ a : ℚ_[l]) :=
+      (isIntegral_algHom_iff (IsScalarTower.toAlgHom ℤ_[l] ℚ_[l] ↥LL.1)
+        (algebraMap ℚ_[l] ↥LL.1).injective).mp hm
+    obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.mp hi
+    refine ⟨y, Subtype.ext ?_⟩
+    show algebraMap ℤ_[l] ↥LL.1 y = _
+    rw [IsScalarTower.algebraMap_apply ℤ_[l] ℚ_[l] ↥LL.1, hy, ← W.χΓ_res a]
+    rfl
+  choose y hy using hex
+  have hmul : ∀ g, y g * y g⁻¹ = 1 := fun g => hinj (by
+    rw [map_mul, hy, hy, map_one, ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one, Units.val_one])
+  have hmul' : ∀ g, y g⁻¹ * y g = 1 := fun g => by simpa using hmul g⁻¹
+  let u : W.Gam → ℤ_[l]ˣ := fun g => ⟨y g, y g⁻¹, hmul g, hmul' g⟩
+  let χ : W.Gam →* ℤ_[l]ˣ := by
+    refine { toFun := u, map_one' := ?_, map_mul' := ?_ }
+    · apply Units.ext; apply hinj; simp [u, hy]
+    · intro g k; apply Units.ext; apply hinj; simp [u, hy]
+  have hχ : ∀ g, algebraMap ℤ_[l] ↥(OL LL) (χ g : ℤ_[l]) = (W.χΓ g : ↥(OL LL)) := fun g => hy g
   obtain ⟨p2, p3, p4⟩ := π₀₁_spec (H.W K 1 LL h) (P.PD_p K) χ hχ hl hc
   obtain ⟨_, _, hu⟩ := GlobalTheory.FinExtIntegers.dvr_complete LL
   exact ⟨hc, p2, p3, eisAt_one (H.W K 1 LL h) hu _ p4 _ h1 (exists_eisenstein H h hl _ p2 p3)⟩

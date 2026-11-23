@@ -1,5 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalRigidOfSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open IsLocalRing
@@ -19,43 +56,5 @@ theorem Taut.s_ne_zero (C : Taut ζ g n φ) (k : Fin C.m ⊕ Fin C.N) : C.s k �
   have h0 : algebraMap (MvPolynomial (Fin C.m ⊕ Fin C.N) C.W) C.R (MvPolynomial.X k) = 0 := h
   rw [h0] at hreg
   exact one_ne_zero (hreg (a₁ := (1 : C.R)) (a₂ := 0) (by simp))
-
-theorem Taut.t_mem_ne_zero (C : Taut ζ g n φ) (k : Fin C.m) : C.t k ∈ maximalIdeal C.R ∧ C.t k ≠ 0 :=
-  ⟨C.bd k, C.s_ne_zero (.inl k)⟩
-
-theorem Taut.comap_maximalIdeal (C : Taut ζ g n φ) : (maximalIdeal C.R).comap C.iw = maximalIdeal C.W := by
-  have := C.ψ_loc
-  exact IsLocalRing.maximalIdeal_comap (C.ψ.comp MvPolynomial.C)
-
-theorem isComplAt_intCast_rat : IsComplAt (Int.castRingHom ℚ) := by
-
-  have hm : maximalIdeal ℚ = ⊥ := IsLocalRing.maximalIdeal_eq_bot
-  refine ⟨inferInstance, ?_, ?_, ?_, ?_⟩
-  · rw [hm]; infer_instance
-  ·
-    rw [show Int.castRingHom ℚ = algebraMap ℤ ℚ from rfl, RingHom.flat_algebraMap_iff]
-    exact IsLocalization.flat _ (nonZeroDivisors ℤ)
-  · rw [hm]; exact le_antisymm Ideal.map_comap_le bot_le
-  ·
-    intro r
-    refine ⟨r.num, r.den, ?_, ?_⟩
-    · simp [isUnit_iff_ne_zero, r.den_nz]
-    · rw [hm, Ideal.mem_bot, sub_eq_zero]
-      simp [Rat.mul_den_eq_num]
-
-theorem not_isComplAt_powerSeries_C : ¬ IsComplAt (PowerSeries.C (R := ℚ)) := by
-  rintro ⟨-, -, -, h, -⟩
-
-  have hc : (maximalIdeal (PowerSeries ℚ)).comap (PowerSeries.C (R := ℚ)) = ⊥ := by
-    rcases Ideal.eq_bot_or_top ((maximalIdeal (PowerSeries ℚ)).comap (PowerSeries.C (R := ℚ))) with h' | h'
-    · exact h'
-    · exact absurd h' (Ideal.comap_ne_top _ (IsLocalRing.maximalIdeal.isMaximal _).ne_top)
-  rw [hc, Ideal.map_bot] at h
-
-  have hX : (PowerSeries.X : PowerSeries ℚ) ∈ maximalIdeal (PowerSeries ℚ) := by
-    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff, PowerSeries.isUnit_iff_constantCoeff]
-    simp
-  rw [← h, Ideal.mem_bot] at hX
-  exact PowerSeries.X_ne_zero hX
 
 end GlobalTheory.TChart

@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.ValFactSumLe
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.GoodCountMem
+public import Formalism.SharpRestriction.GrowthBounds.MonomialFactorials.SLetCastSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,13 +125,13 @@ theorem val_lvC_le (j : Fin G.T.t → ℕ) (jp : ℕ) (L : ℕ)
   have hp' := hp.out
   rw [lvC_eq]
   by_cases h0 : (∏ a, fL G j jp a) * ((∏ i, binT (r := r) G j jp i) * binP (r := r) G jp) = 0
-  · rw [h0, padicValNat.zero]
-    exact Nat.zero_le _
+  · simp [h0, Nat.padicValNat_def]
   obtain ⟨hA, hB⟩ := mul_ne_zero_iff.mp h0
   obtain ⟨hBt, hBp⟩ := mul_ne_zero_iff.mp hB
   have hD : (∏ a, (dLvl G j jp a)!) ≠ 0 :=
     Finset.prod_ne_zero_iff.mpr fun a _ => Nat.factorial_ne_zero _
-  rw [← Nat.factorization_def _ hp', ← Nat.factorization_def _ hp', Nat.factorization_mul hA hB,
+  rw [Nat.padicValNat_def, Nat.padicValNat_def,
+    ← Nat.factorization_def _ hp', ← Nat.factorization_def _ hp', Nat.factorization_mul hA hB,
     Nat.factorization_mul hBt hBp]
   simp only [Finsupp.add_apply]
   have h1' : (∏ a, fL G j jp a).factorization p ≤ (∏ a, (dLvl G j jp a)!).factorization p :=
@@ -93,7 +139,7 @@ theorem val_lvC_le (j : Fin G.T.t → ℕ) (jp : ℕ) (L : ℕ)
       (Finset.prod_dvd_prod_of_dvd _ _ fun a _ => fL_dvd G j jp a) p
   have h2' : (∏ i, binT (r := r) G j jp i).factorization p ≤ G.T.t * L := by
     rw [Nat.factorization_prod (fun i _ => Finset.prod_ne_zero_iff.mp hBt i (Finset.mem_univ _))]
-    simp only [Finsupp.coe_finset_sum, Finset.sum_apply]
+    rw [Finset.sum_apply']
     calc ∑ i, (binT (r := r) G j jp i).factorization p ≤ ∑ _i : Fin G.T.t, L :=
           Finset.sum_le_sum fun i _ => le_trans Nat.factorization_choose_le_log (h1 i)
       _ = G.T.t * L := by simp

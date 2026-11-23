@@ -1,10 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ThetaQuasiPeriods.ThetaQuasiPeriodStatement
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+module
+
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.NonemptyIsLimitBaseChange
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PullCub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AffineTransitionLimit
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finset.Functor
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Splits
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,31 +62,7 @@ theorem exists_gen_of_subcover {Y : Scheme.{0}} {N : LB Y} (hN : N.IsLB) {J : Ty
     (hu : ∀ k l y, y ∈ W k → y ∈ W l →
       gm (𝟙 Y) y _ (u k) = gm (𝟙 Y) y _ (N.g (a k) (a l)) * gm (𝟙 Y) y _ (u l)) :
     ∃ t : LB.Gen N, t.IsGen := by
-  have glue : ∀ i : N.ι, ∃ s : Γ(Y, N.U i)ˣ, ∀ k y, y ∈ N.U i → y ∈ W k →
-      gm (𝟙 Y) y _ s = gm (𝟙 Y) y _ (N.g i (a k)) * gm (𝟙 Y) y _ (u k) := by
-    intro i
-    let v : ∀ k, Γ(Y, N.U i ⊓ W k)ˣ := fun k =>
-      res (inf_le_inf_left _ (ha k)) (N.g i (a k)) * res inf_le_right (u k)
-    have hv : ∀ k y, y ∈ N.U i ⊓ W k →
-        gm (𝟙 Y) y _ (v k) = gm (𝟙 Y) y _ (N.g i (a k)) * gm (𝟙 Y) y _ (u k) := fun k y hy =>
-      (map_mul _ _ _).trans (congrArg₂ (· * ·) (gm_res _ y _ hy _) (gm_res _ y _ hy _))
-    obtain ⟨s, hs⟩ := glue_unit (N.U i) (fun k => N.U i ⊓ W k) (fun _ => inf_le_left)
-      (fun y hy => by
-        obtain ⟨k, hk⟩ := hW y
-        exact TopologicalSpace.Opens.mem_iSup.2 ⟨k, hy, hk⟩) v (fun k l y hy => by
-        rw [hv k y hy.1, hv l y hy.2, hu k l y hy.1.2 hy.2.2, ← _root_.mul_assoc,
-          gm_cocycle hN (𝟙 Y) y hy.1.1 (ha k hy.1.2) (ha l hy.2.2)])
-    refine ⟨s, fun k y hi hk => ?_⟩
-    rw [← hv k y ⟨hi, hk⟩, ← hs k]
-    exact (gm_res _ y _ (show y ∈ N.U i ⊓ W k from ⟨hi, hk⟩) _).symm
-  choose s hs using glue
-  refine ⟨⟨s⟩, fun i j => unit_ext fun y hy => ?_⟩
-  obtain ⟨k, hk⟩ := hW y
-  refine (gm_res _ y _ hy _).trans (Eq.trans ?_
-    ((map_mul _ _ _).trans (congrArg₂ (· * ·) rfl (gm_res _ y _ hy _))).symm)
-  show gm (𝟙 Y) y _ (s i) = _ * gm (𝟙 Y) y _ (s j)
-  rw [hs i k y hy.1 hk, hs j k y hy.2 hk, ← _root_.mul_assoc,
-    gm_cocycle hN (𝟙 Y) y hy.1 hy.2 (ha k hk)]
+  apply GlobalTheory.exists_gen_of_refinement <;> assumption
 
 theorem exists_forall_of_cofiltered {I : Type} [Category.{0} I] [IsCofiltered I] {i : I} {J : Type}
     [Finite J] (P : J → ∀ j : I, (j ⟶ i) → Prop)
@@ -79,8 +99,8 @@ theorem gm_mul_comp {X X' Y Z : Scheme.{0}} (r : Z ⟶ Y) (q : Y ⟶ X) (q' : Y 
     gm (r ≫ q) z U a = gm (r ≫ q') z W b * gm (r ≫ q) z V d := by
   rw [gm_comp r q z U hU, gm_comp r q z V hV, gm_comp r q' z W hW, h, map_mul]
 
-include hc in
 
+include hc in
 theorem exists_section [∀ i, QuasiSeparatedSpace (D.obj i)] {i : I} (U : (D.obj i).Opens)
     (hU : IsCompact (U : Set (D.obj i))) (s : Γ(c.pt, c.π.app i ⁻¹ᵁ U)) :
     ∃ (j : I) (f : j ⟶ i) (t : Γ(D.obj j, D.map f ⁻¹ᵁ U))
@@ -99,8 +119,8 @@ theorem exists_section [∀ i, QuasiSeparatedSpace (D.obj i)] {i : I} (U : (D.ob
     (show c.π.app i ⁻¹ᵁ U ≤ c.π.app j.left ⁻¹ᵁ (D.map j.hom ⁻¹ᵁ U) by
       rw [← Scheme.Hom.comp_preimage, c.w]))).symm
 
-include hc in
 
+include hc in
 theorem exists_unit [∀ i, QuasiSeparatedSpace (D.obj i)] {i : I} (U : (D.obj i).Opens)
     (hU : IsCompact (U : Set (D.obj i))) (s : Γ(c.pt, c.π.app i ⁻¹ᵁ U)ˣ) :
     ∃ (j : I) (f : j ⟶ i) (t : Γ(D.obj j, D.map f ⁻¹ᵁ U)ˣ),
@@ -134,8 +154,8 @@ theorem exists_unit [∀ i, QuasiSeparatedSpace (D.obj i)] {i : I} (U : (D.obj i
   congr 2
   simp only [w]
 
-include hc in
 
+include hc in
 theorem exists_unit_eq {i : I} (U : (D.obj i).Opens)
     (hU : IsCompact (U : Set (D.obj i))) (s t : Γ(D.obj i, U)ˣ)
     (h : ∀ z, c.π.app i z ∈ U → gm (c.π.app i) z _ s = gm (c.π.app i) z _ t) :
@@ -254,8 +274,8 @@ theorem exists_generator_stage_of_unit_descent [∀ i, CompactSpace (D.obj i)] [
   refine Eq.trans ?_ (gm_pull_g M _ (𝟙 _) y _ _ (hle' _ k hk) (hle' _ l hl)).symm
   rw [Category.id_comp, D.map_comp]
 
-include hc in
 
+include hc in
 theorem exists_gen_stage [∀ i, CompactSpace (D.obj i)] [∀ i, QuasiSeparatedSpace (D.obj i)] {i : I}
     {M : LB (D.obj i)} (hM : M.IsLB) (h : ∃ t : LB.Gen (M.pull (c.π.app i)), t.IsGen) :
     ∃ (j : I) (f : j ⟶ i) (t : LB.Gen (M.pull (D.map f))), t.IsGen :=

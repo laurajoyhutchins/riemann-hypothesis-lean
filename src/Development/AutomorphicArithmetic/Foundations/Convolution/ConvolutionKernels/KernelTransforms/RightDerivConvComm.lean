@@ -1,18 +1,64 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Height
-import GroundTheory.AutomorphicForms.TraceFormulaConvolution
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
-import GroundTheory.AutomorphicForms.MultiplicityOne.OpenSubgroupRep
-import GroundTheory.AutomorphicForms.MultiplicityOne.FiniteLevelGroups
-import GroundTheory.AutomorphicForms.MultiplicityOne.FiniteAdelicHaar
-import GroundTheory.AutomorphicForms.L2LocalComponents.CenterCommute
-import GroundTheory.AutomorphicForms.GKModules.KernelCalculus
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.LeftTranslate
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.DerivInt
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.InvSmooth
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.Unimod
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CenterTr
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.ExpGen
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.ArchSliceUAction
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Smoothing
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.CenterTr
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.ExpGen
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KernelTransforms.InvSmooth
+public import GroundTheory.AutomorphicForms.GKModules.KernelCalculus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStableConv
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Counting
+import GroundTheory.AutomorphicForms.QuotientMeasure
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -126,7 +172,7 @@ private theorem UpperTheory.ConvolutionTheory.Tf.commute_uAction {T : Module.End
     simp only [map_mul]
     exact ha.mul_right hb
   | add a b ha hb =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     exact ha.add_right hb
 
 variable [MeasurableSpace G] [BorelSpace G] (μ : Measure G) [μ.IsHaarMeasure]
@@ -228,11 +274,11 @@ private theorem UpperTheory.ConvolutionTheory.Tf.exists_transpose
     obtain ⟨Tb, hb1, hb2, hb3, hb4, hb5⟩ := hb
     refine ⟨Ta + Tb, fun Y => (ha1 Y).add_left (hb1 Y), fun x => (ha2 x).add_left (hb2 x),
       fun Ψ => ?_, fun Ψ hΨ => ?_, fun Ψ κ hΨ hκ => ?_⟩
-    · simp only [map_add, LinearMap.add_apply, Submodule.coe_add, Pi.add_apply, ha3, hb3]
+    · simp only [map_add (f := _), LinearMap.add_apply, Submodule.coe_add, Pi.add_apply, ha3, hb3]
     · exact (ha4 Ψ hΨ).add (hb4 Ψ hΨ)
     · have hcont : ∀ f : h.smoothFuns (F := ℂ), Continuous (f : G → ℂ) :=
         fun f => continuous_of_isSmoothFun f.2
-      simp only [map_add, LinearMap.add_apply, Submodule.coe_add, Pi.add_apply, add_mul, mul_add]
+      simp only [map_add (f := _), LinearMap.add_apply, Submodule.coe_add, Pi.add_apply, add_mul, mul_add]
       rw [integral_add (UpperTheory.ConvolutionTheory.Tf.integrable_mul_inv μ (hcont _) (hcont κ) (ha4 Ψ hΨ))
           (UpperTheory.ConvolutionTheory.Tf.integrable_mul_inv μ (hcont _) (hcont κ) (hb4 Ψ hΨ)),
         integral_add (UpperTheory.ConvolutionTheory.Tf.integrable_mul_inv μ (hcont Ψ) (hcont _) hΨ)
@@ -240,7 +286,7 @@ private theorem UpperTheory.ConvolutionTheory.Tf.exists_transpose
 end
 
 theorem UpperTheory.ConvolutionTheory.Tf.convZ :
-    ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K] (n : ℕ) (ν : Measure (archGroup K n)) [ν.IsHaarMeasure]
+    ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (n : ℕ) (ν : Measure (archGroup K n)) [ν.IsHaarMeasure]
       (β₁ β₂ : CompactlySupportedContinuousMap (archGroup K n) ℂ) (h₁ : (fun g => β₁ g⁻¹) ∈ (isExpLieAlgebra K n).smoothFuns (F := ℂ)) (h₂ : (fun g => β₂ g⁻¹) ∈ (isExpLieAlgebra K n).smoothFuns (F := ℂ))
       (z : UEnv K n), z ∈ (isExpLieAlgebra K n).centerU → ∀ x : archGroup K n,
         ∫ a, ((isExpLieAlgebra K n).rightUAction z ⟨fun g => β₁ g⁻¹, h₁⟩ : archGroup K n → ℂ) a⁻¹ * β₂ (a⁻¹ * x) ∂ν =

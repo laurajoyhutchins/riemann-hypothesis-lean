@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationSaturationKiller
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationSaturationKiller
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -146,7 +188,7 @@ theorem isUnit_EE_of_UPi (W : LocWach PD LL O v n) {g : LetA O n} (hg : UPi PD.p
       algebraMap (LetA O n) W.EE r := Units.mul_inv_cancel_left U _
   have e : algebraMap (LetA O n) W.EE ((u : LetA O n) * letπ ^ m + ((PD.p : ℕ) : LetA O n) * r) =
       (U : W.EE) * (1 + ((PD.p : ℕ) : W.EE) * ((↑U⁻¹ : W.EE) * algebraMap (LetA O n) W.EE r)) := by
-    rw [map_add, ← hU', map_mul, map_natCast, mul_add, mul_one, mul_left_comm (U : W.EE), key]
+    rw [map_add (f := _), ← hU', map_mul, map_natCast, mul_add, mul_one, mul_left_comm (U : W.EE), key]
   rw [e]
   exact U.isUnit.mul (isUnit_one_add_p W _)
 
@@ -253,7 +295,7 @@ theorem UPi_φpow (W : LocWach PD LL O v n)
     obtain ⟨w0, hw0⟩ := h3
     exact ⟨w0, PD.p - 1, 0, by rw [hw0, mul_zero, add_zero]⟩
   | succ s ih =>
-    rw [pow_succ, AlgHom.mul_apply, hw, map_mul, map_mul, map_pow, map_add, map_natCast]
+    rw [pow_succ, AlgHom.mul_apply, hw, map_mul, map_mul, map_pow, map_add (f := _), map_natCast]
     obtain ⟨w', hw'⟩ := w.isUnit.map (W.φA ^ s)
     rw [← hw']
     exact ((UPi.unit _ w').mul ih).mul (ih.add_p.pow _)
@@ -262,7 +304,7 @@ theorem UPi_qpow (W : LocWach PD LL O v n)
     (h3 : ∃ w : (LetA O n)ˣ, W.π₀ = (w : LetA O n) * letπ ^ (PD.p - 1))
     (h6 : ∃ w : (LetA O n)ˣ, W.φA W.π₀ = (w : LetA O n) * W.π₀ * (W.π₀ + ((PD.p : ℕ) : LetA O n)) ^ (PD.p - 1))
     (s : ℕ) : UPi PD.p ((W.φA ^ s) (W.π₀ + ((PD.p : ℕ) : LetA O n))) := by
-  rw [map_add, map_natCast]
+  rw [map_add (f := _), map_natCast]
   exact (UPi_φpow W h3 h6 s).add_p
 
 theorem UPi_π₀ (W : LocWach PD LL O v n)

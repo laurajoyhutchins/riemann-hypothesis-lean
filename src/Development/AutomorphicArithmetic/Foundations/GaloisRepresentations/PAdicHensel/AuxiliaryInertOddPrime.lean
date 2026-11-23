@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.PadicUnitNorm
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.HodgeTrAt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IntegOfMem
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.IntegOfMem
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.DatumToG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.DiagHermitianTrivialOfSumFourSquares
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ApartAllEmpty
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,27 +59,8 @@ def ArithK : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (d :
 def ScOf : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E], Even (Module.finrank ℚ (maximalRealSubfield E)) →
   ∀ (A : Arith E) (n p : ℕ) [Fact p.Prime] (S : Setup A n p), Odd n → Sc S.D S.G
 
-def DatumEx : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (l : ℕ) [Fact l.Prime] (a : ℕ), Odd a → ∀ d : ℕ,
-  FieldOK E l d → ∀ x : E, x ^ 2 = -(d : E) → ∀ (τ₀ : E →+* ℂ) (Q : Finset ℕ), (∀ q ∈ Q, ∃ _ : Fact q.Prime, SqAt d q) → ∀ b : ℕ,
-  ∃ (A : Arith E) (p : ℕ) (_ : Fact p.Prime) (S : Setup A a p), b < p ∧ p ∉ Q ∧ SqAt d p ∧ A.τ₀ = τ₀ ∧ Sc S.D S.G ∧
-    (∃ f : ℚ, f ≠ 0 ∧ 2 * (A.ω : E) - (A.tr : E) = (f : E) * x) ∧
-    (∀ (q : ℕ) [Fact q.Prime], SqAt d q → A.SplitK q) ∧ (∀ q ∈ Q, A.Good q) ∧
-    ∃ e : ℕ, 0 < e ∧ ∀ (q : ℕ) [Fact q.Prime], SqAt d q → ¬ q ∣ e → A.Good q
-
 def RootAt : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (A : Arith E) (q : ℕ), q.Prime → A.SplitK q →
   ∀ w : HeightOneSpectrum (𝓞 E), (q : 𝓞 E) ∈ w.asIdeal →
   ∃ r : ℤ, (q : ℤ) ∣ r ^ 2 - A.tr * r + A.nm ∧ A.ω - (r : 𝓞 E) ∈ w.asIdeal
-
-def AtPrimeEx : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (A : Arith E) (n p : ℕ) [Fact p.Prime] (S : Setup A n p)
-  (x : E) (f : ℚ), 2 * (A.ω : E) - (A.tr : E) = (f : E) * x → ∀ q : ℕ, q.Prime → q ≠ p → A.Good q →
-  ∀ w : HeightOneSpectrum (𝓞 E), (q : 𝓞 E) ∈ w.asIdeal →
-  ∃ r : ℤ, ∀ w' : HeightOneSpectrum (𝓞 E), OneK x w w' →
-    A.ω - (r : 𝓞 E) ∈ w'.asIdeal ∧ AtPrime S.D q r w'.asIdeal ∧ IsPl (D := S.D) (RingEquiv.refl E) w' w'.asIdeal
-
-def StdForm : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (A : Arith E) (n p : ℕ) [Fact p.Prime] (S : Setup A n p),
-  ∃ β : S.G.Cˣ, mat S β = Matrix.diagonal (fun i => ((A.dg n i : 𝓞 E) : E)) ∧ sh S.G β = β ∧
-    ∀ v : InfinitePlace S.G.F, ∀ x : Fin S.G.n → ℂ, x ≠ 0 →
-      (sigPosH (S.G.gram_herm v) = 1 → 0 < (star x ⬝ᵥ ((S.G.gram v * S.G.psi v ((β⁻¹ : S.G.Cˣ) : S.G.C)) *ᵥ x)).re) ∧
-      (sigPosH (S.G.gram_herm v) ≠ 1 → (star x ⬝ᵥ ((S.G.gram v * S.G.psi v ((β⁻¹ : S.G.Cˣ) : S.G.C)) *ᵥ x)).re < 0)
 
 end UpperTheory.Gal.G1

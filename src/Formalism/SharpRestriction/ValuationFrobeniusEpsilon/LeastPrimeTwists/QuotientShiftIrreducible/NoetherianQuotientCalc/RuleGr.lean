@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+module
+
+public import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Adjoin.FG
+public import Mathlib.RingTheory.FiniteType
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,7 +73,7 @@ theorem isInternal_comap (f : P →ₗ[B] M) (hf : Function.Injective f)
     induction y using DirectSum.induction_on with
     | zero => simp
     | of i x => simp [DirectSum.map_of, φ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   constructor
   · intro y y' h
     have h1 : DirectSum.map φ y = DirectSum.map φ y' :=
@@ -40,6 +89,7 @@ theorem isInternal_comap (f : P →ₗ[B] M) (hf : Function.Injective f)
     · show f (g x m) ∈ ℳ m
       rw [hg]; exact (decompose ℳ (f x) m).2
     · apply hf
+
       rw [map_sum, map_sum]
       conv_rhs => rw [← DirectSum.sum_support_decompose ℳ (f x)]
       refine Finset.sum_congr rfl (fun m _ => ?_)
@@ -63,7 +113,7 @@ theorem isInternal_map (g : M →ₗ[B] P) (hg : Function.Surjective g)
     induction y using DirectSum.induction_on with
     | zero => simp
     | of i x => simp [DirectSum.map_of, φ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   constructor
   · rw [injective_iff_map_eq_zero]
     intro y hy
@@ -211,8 +261,8 @@ theorem comp_mem_of_isHomSub
       simp only [add_smul, decompose_add, DirectSum.add_apply, Submodule.coe_add]
       exact N.add_mem (ha m) (hb m)
 
-omit [GradedAlgebra 𝒜] in
 
+omit [GradedAlgebra 𝒜] in
 theorem isHomSub_of_comp_mem {N : Submodule R F.M}
     (hN : ∀ x ∈ N, ∀ m, (decompose F.gr x m : F.M) ∈ N) : F.IsHomSub N := by
   classical

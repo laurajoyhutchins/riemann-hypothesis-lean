@@ -1,10 +1,65 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.IsArithVarBotDualBlocksUnit
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCoordCurveDegree
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveComplexPoint
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.Intersections.FlagBundleSt
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.POneBlockPoints
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.IsArithVarBotDualBlocksUnit
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCoordCurveAlgebraic
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.ProjLineRankTwoPushforwardHypotheses
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCoordCurveDegree
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveComplexPoint
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.FlagBundleSt
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.POneBlockPoints
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRatA
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -90,8 +145,8 @@ theorem ker_coneMapQ_eq {Ω : Type} [Field Ω] [CharZero Ω] (y : (Σ k, ι k) �
   simp only [hc, IndefiniteRowSideFullHecke.HeightsSet.CoordCurveDegree.comap_ker_coneMapQ] at h
   exact lt_irrefl _ h
 
-open IndefiniteRowSideFullHecke.HeightsSet.CoordCurveDegree in
 
+open IndefiniteRowSideFullHecke.HeightsSet.CoordCurveDegree in
 theorem aeval_ratio_eq_zero_of_le {Ω L : Type} [Field Ω] [CharZero Ω] [Field L] [CharZero L]
     {y : (Σ k, ι k) → Ω} {z : (Σ k, ι k) → L} (hyz : mCoordIdeal y ≤ mCoordIdeal z) (d : ∀ k, ι k)
     (hyd : ∀ k, y ⟨k, d k⟩ ≠ 0) (hzd : ∀ k, z ⟨k, d k⟩ ≠ 0) {g : MvPolynomial (Σ k, ι k) ℚ}
@@ -156,6 +211,7 @@ def linVal (w : Fin i → K) : ProjField K i :=
 
 theorem linVal_eq (w : Fin i → K) :
     linVal w = ∑ j, constK K i (w j) * algebraMap (MvPolynomial (Fin i) K) (ProjField K i) (X j) := by
+
   simp [linVal, map_sum, map_mul]
 
 theorem linVal_smul (a : K) (w : Fin i → K) : linVal (a • w) = constK K i a * linVal w := by
@@ -188,6 +244,7 @@ theorem exists_combo (b : Module.Basis T ℤ (dualLattice F)) (w : Fin i → K) 
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => ?_
   have h2 := congrArg (constK K i) (hj j)
+
   simp only [map_mul, map_intCast, map_sum] at h2
   rw [← mul_assoc, h2, Finset.sum_mul]
   exact Finset.sum_congr rfl fun t _ => mul_assoc _ _ _
@@ -258,6 +315,7 @@ theorem exists_point (b : Module.Basis T ℤ (dualLattice F)) {L : Type} [Field 
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [linVal_single, mul_div_assoc]
     have h2 := congrArg ψ e
+
     rw [map_sum, hψ] at h2
     simp only [map_mul] at h2
     rw [show ev2 (X ⟨(), t⟩) = z ⟨(), t⟩ from eval₂_X _ _ _] at h2

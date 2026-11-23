@@ -1,8 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResChiBounds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CNormSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResChiBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.GeometryOfNumbers.SphericalMonomials.ChiPSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CNormSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ChooseLePowDivFactorial
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ExistsNatMulMemConeRingIntFin
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.FibreSt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.SectionModuleEqSpanPow
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -34,7 +83,7 @@ theorem pnorm_smul (e : Fin (D + 1) → Ix κ) (c : ℂ) (z : Ix κ → ℂ) :
 theorem pnorm_eq_sqN (e : Fin (D + 1) → Ix κ) (z : Ix κ → ℂ) : pnorm e z = Real.sqrt (sqN (z ∘ e)) := by
   simp [pnorm, sqN]
 
-theorem fs_rho_eq (t : Fin (D + 1) → ℂ) : (fsMetric (Fin (D + 1))).ρ t = Real.sqrt (sqN t) := by
+theorem fs_rho_eq (t : Fin (D + 1) → ℂ) : (fsMetric (ι := Fin (D + 1))).ρ t = Real.sqrt (sqN t) := by
   simp [fsMetric, sqN, EuclideanSpace.norm_eq]
 
 theorem pnorm_pos {x : Ix κ → Ω} {e : Fin (D + 1) → Ix κ} (hfr : IsProjFrame x e) {z : Ix κ → ℂ}
@@ -158,8 +207,8 @@ theorem rank_bound {x : Ix κ → Ω} {e : Fin (D + 1) → Ix κ} (hfr : IsProjF
 
 end ProjectionBounds
 
-open ProjectionBounds in
 
+open ProjectionBounds in
 theorem ProjectionBounds.proof (hR : ResChiBounds.Statement) : ProjectionBounds.Statement := by
   classical
   intro D Ω _ _ κ _ d e hfr hFS
@@ -237,7 +286,7 @@ theorem ProjectionBounds.proof (hR : ResChiBounds.Statement) : ProjectionBounds.
             mul_le_mul h1 (hCE l z hz) (norm_nonneg _) (le_trans (norm_nonneg _) h1)
         _ = (c * ∑ l, Sl l) * (pnorm e z ^ n * pnorm e z ^ (kχ + k₀)) := by ring
     have hb := trace_le hfr (f * E l) g (hf.mul (hEh l)) hg htr' hS t
-    have hρt : 0 < (fsMetric (Fin (D + 1))).ρ t := (fsMetric _).pos t ht
+    have hρt : 0 < (fsMetric (ι := Fin (D + 1))).ρ t := (fsMetric (ι := Fin (D + 1))).pos t ht
     rw [ptNorm, div_le_iff₀ (pow_pos hρt _), fs_rho_eq]
     rw [fs_rho_eq] at hρt
     calc _ ≤ (projDeg d.x e : ℝ) * (c * ∑ l, Sl l) * Real.sqrt (sqN t) ^ (n + (kχ + k₀)) := hb
@@ -252,9 +301,10 @@ theorem ProjectionBounds.proof (hR : ResChiBounds.Statement) : ProjectionBounds.
     have hze : z ∘ e ≠ 0 := by
       obtain ⟨j, hj⟩ := exists_proj_ne_zero hfr hz
       exact fun h0 => hj (congrFun h0 j)
-    have hfsz : (fsMetric (Fin (D + 1))).ρ (z ∘ e) = pnorm e z := by rw [fs_rho_eq, pnorm_eq_sqN]
+    have hfsz : (fsMetric (ι := Fin (D + 1))).ρ (z ∘ e) = pnorm e z := by
+      rw [fs_rho_eq, pnorm_eq_sqN]
     have hc0 : ∀ l, 0 ≤ c l := fun l => le_trans
-      (div_nonneg (norm_nonneg _) (pow_nonneg ((fsMetric _).pos _ hze).le _)) (hc l (z ∘ e) hze)
+      (div_nonneg (norm_nonneg _) (pow_nonneg (hfsz ▸ hρ.le) _)) (hc l (z ∘ e) hze)
     have hQb : ∀ l, ‖eval (z ∘ e) (map (Int.castRingHom ℂ) (Q l))‖ ≤
         c l * pnorm e z ^ (n - (kχ + k₀)) := fun l => by
       have := hc l (z ∘ e) hze
@@ -262,6 +312,7 @@ theorem ProjectionBounds.proof (hR : ResChiBounds.Statement) : ProjectionBounds.
       exact (div_le_iff₀ (pow_pos hρ _)).mp this
     have hexp : eval z (map (Int.castRingHom ℂ) (∑ l, rename e (Q l) * E l)) =
         ∑ l, eval (z ∘ e) (map (Int.castRingHom ℂ) (Q l)) * eval z (map (Int.castRingHom ℂ) (E l)) := by
+
       simp only [map_sum, map_mul, map_rename, eval_rename]
     have hs0 : 0 ≤ ∑ l, c l := Finset.sum_nonneg fun l _ => hc0 l
     rw [ptNorm, hmz, div_le_iff₀ (pow_pos hρ n), hexp]

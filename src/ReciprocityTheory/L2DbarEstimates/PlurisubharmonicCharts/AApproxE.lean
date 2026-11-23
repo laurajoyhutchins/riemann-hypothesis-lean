@@ -1,4 +1,55 @@
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.AApproxD
+module
+
+public import ReciprocityTheory.L2DbarEstimates.IsLocalHomeomorph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.Y
 
@@ -6,21 +57,6 @@ open MeasureTheory Filter Topology Complex Metric
 open scoped ContDiff ENNReal ComplexConjugate
 
 noncomputable section
-
-theorem dbv_add {n : ℕ} (D₁ D₂ : V n →L[ℝ] ℂ) (ζ : V n) : dbv (D₁ + D₂) ζ = dbv D₁ ζ + dbv D₂ ζ := by
-  simp only [dbv, ContinuousLinearMap.add_apply]
-  ring
-
-theorem dbv_smul {n : ℕ} (c : ℂ) (D : V n →L[ℝ] ℂ) (ζ : V n) : dbv (c • D) ζ = c * dbv D ζ := by
-  simp only [dbv, ContinuousLinearMap.smul_apply, smul_eq_mul]
-  ring
-
-theorem dbv_holo {n : ℕ} {G : V n → ℂ} {v : V n} (hG : DifferentiableAt ℂ G v) (ζ : V n) :
-    dbv (fderiv ℝ G v) ζ = 0 := by
-  unfold dbv
-  rw [hG.fderiv_restrictScalars ℝ]
-  simp only [ContinuousLinearMap.coe_restrictScalars', map_smul, smul_eq_mul, ← mul_assoc, I_mul_I]
-  ring
 
 theorem leviV_smul_real {n : ℕ} (g : V n → ℂ) (u : V n) (r : ℝ) (ζ : V n) :
     leviV n g u (r • ζ).ofLp = ((r ^ 2 : ℝ) : ℂ) * leviV n g u ζ.ofLp := by
@@ -53,8 +89,10 @@ theorem levi_pos_compact {n : ℕ} {g : V n → ℂ} {U : Set (V n)} (hU : IsOpe
       (K0 ×ˢ Metric.sphere (0 : V n) 1) := by
     unfold leviV
     refine Complex.continuous_re.comp_continuousOn ?_
-    refine continuousOn_finset_sum _ fun j _ => continuousOn_finset_sum _ fun k _ => ?_
-    refine (((continuousOn_wd_wdb hU hg j k).comp continuousOn_fst fun q hq => hK0U hq.1).mul
+    refine continuousOn_finsetSum _ fun j _ => continuousOn_finsetSum _ fun k _ => ?_
+    have hfst : Set.MapsTo Prod.fst (K0 ×ˢ Metric.sphere (0 : V n) 1) U :=
+      fun _ hq => hK0U hq.1
+    refine (((continuousOn_wd_wdb hU hg j k).comp continuousOn_fst hfst).mul
       ((EuclideanSpace.proj j : V n →L[ℂ] ℂ).continuous.comp continuous_snd).continuousOn).mul
       (Complex.continuous_conj.comp
         ((EuclideanSpace.proj k : V n →L[ℂ] ℂ).continuous.comp continuous_snd)).continuousOn

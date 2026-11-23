@@ -1,7 +1,51 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMemberP
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeastVectorUniqueInClassModStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMemberP
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeastVectorUniqueInClassModStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightedLatticeQuadraticSumGeDiagonal
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RangeAlgebraMapEqIInfDiscreteValuationSubring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.TorRef GlobalTheory.PolDeg
@@ -20,7 +64,7 @@ def polW (W : Matrix (Fin s) (Fin s) ℤ) (β : LinearMap.BilinForm ℤ X) (x y 
 
 theorem qW_smul_add (β : LinearMap.BilinForm ℤ X) (a : ℤ) (x y : Fin s → X) :
     qW W β (a • x + y) = a ^ 2 * qW W β x + a * polW W β x y + qW W β y := by
-  simp only [qW, polW, Pi.add_apply, Pi.smul_apply, map_add, map_zsmul, LinearMap.add_apply,
+  simp only [qW, polW, Pi.add_apply, Pi.smul_apply, map_add (f := _), map_zsmul, LinearMap.add_apply,
     LinearMap.smul_apply, smul_eq_mul, Finset.mul_sum, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun u _ => Finset.sum_congr rfl fun v _ => ?_
   ring
@@ -307,6 +351,7 @@ theorem map_mono_eq_zero {O : Type} [CommRing O] {bar : O → O} {q s : ℕ} {W 
     · rw [hout mu hH]
       simp
   have hrestsum : ((q₀ + 1 : ℕ) : ℕ∞) ≤ addVal R (φ (∑ mu ∈ S.erase mu₀, Φ.term y mu c)) := by
+
     rw [map_sum]
     exact AddValuation.map_le_sum _ fun mu hmu => hrest mu hmu
   have hv₀ : addVal R (φ (Φ.term y mu₀ c)) = (q₀ : ℕ∞) := by
@@ -315,7 +360,7 @@ theorem map_mono_eq_zero {O : Type} [CommRing O] {bar : O → O} {q s : ℕ} {W 
     have hsplit := Finset.add_sum_erase S (fun mu => Φ.term y mu c) hmu₀S
     have h1 : φ (Φ.term y mu₀ c) =
         φ (∑ mu ∈ S, Φ.term y mu c) - φ (∑ mu ∈ S.erase mu₀, Φ.term y mu c) := by
-      rw [← hsplit, map_add]
+      rw [← hsplit, map_add (f := _)]
       ring
     rw [h1]
     exact le_trans (le_min hsum hrestsum) (AddValuation.map_sub _ _ _)

@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -11,8 +57,6 @@ abbrev Place (K : Type) [Field K] [NumberField K] := HeightOneSpectrum (𝓞 K)
 def normAt {K : Type} [Field K] [NumberField K] (w : Place K) : ℝ :=
   (Ideal.absNorm w.asIdeal : ℝ)
 
-def zetaR (σ : ℝ) : ℝ := (riemannZeta (σ : ℂ)).re
-
 section Euler
 
 variable {K : Type} [Field K] [NumberField K] {ι : Type}
@@ -22,20 +66,6 @@ def localFactor (I : Finset ι) (x : Place K → ι → ℂ) (w : Place K) : ℂ
 
 def eulerProd (T : Set (Place K)) (I : Finset ι) (x : Place K → ι → ℂ) : ℂ :=
   ∏' w : {w : Place K // w ∉ T}, localFactor I x w.1
-
-def localLog (I : Finset ι) (x : Place K → ι → ℂ) (w : Place K) : ℂ :=
-  ∑ i ∈ I, -Complex.log (1 - x w i)
-
-def eulerLog (T : Set (Place K)) (I : Finset ι) (x : Place K → ι → ℂ) : ℂ :=
-  ∑' w : {w : Place K // w ∉ T}, localLog I x w.1
-
-def ConvergesAbsolutely (T : Set (Place K)) (I : Finset ι) (x : Place K → ι → ℂ) : Prop :=
-  (∀ w, w ∉ T → ∀ i ∈ I, ‖x w i‖ < 1) ∧
-  Summable (fun w : {w : Place K // w ∉ T} => ‖localFactor I x w.1 - 1‖) ∧
-  Summable (fun w : {w : Place K // w ∉ T} => ‖localLog I x w.1‖) ∧
-  Multipliable (fun w : {w : Place K // w ∉ T} => localFactor I x w.1) ∧
-  eulerProd T I x ≠ 0 ∧
-  Complex.exp (eulerLog T I x) = eulerProd T I x
 
 end Euler
 
@@ -50,58 +80,18 @@ def dPart {F : Type} [Field F] [NumberField F] (S : Set (Place F)) (ω : Place F
     (r t : ℕ) : ℂ :=
   eulerProd S (Finset.Icc (t + 1) (r + t)) (twistTerm ω)
 
-def dLog {F : Type} [Field F] [NumberField F] (S : Set (Place F)) (ω : Place F → ℂ)
-    (r t : ℕ) : ℂ :=
-  eulerLog S (Finset.Icc (t + 1) (r + t)) (twistTerm ω)
-
 def placesOver {F : Type} [Field F] [NumberField F] (E : Type) [Field E] [NumberField E]
     [Algebra F E] (S : Set (Place F)) : Set (Place E) :=
   {w | ∃ v ∈ S, w.asIdeal.LiesOver v.asIdeal}
 
-def StandardBound : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] (f r : ℕ), Module.finrank ℚ E = 2 * f →
-    ∀ (s : ℝ), 7 / 2 ≤ s - ((r : ℝ) - 1) / 2 →
-    ∀ (T : Set (Place E)) (x : Place E → Fin r → ℂ), SatakeBound T r s x →
-      ConvergesAbsolutely T Finset.univ x ∧
-      ‖eulerLog T Finset.univ x‖ ≤ 2 * f * r * Real.log (zetaR (7 / 2)) ∧
-      |Real.log ‖eulerProd T Finset.univ x‖| ≤ 2 * f * r * Real.log (zetaR (7 / 2)) ∧
-      2 * f * r * Real.log (zetaR (7 / 2)) ≤ 0.24 * f * r
-
-def NormalisingBound : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (f r t : ℕ), Module.finrank ℚ F = f →
-    Odd t → r + 5 ≤ t →
-    ∀ (S : Set (Place F)) (ω : Place F → ℂ), (∀ v, v ∉ S → ‖ω v‖ ≤ 1) →
-      ConvergesAbsolutely S (Finset.Icc (t + 1) (r + t)) (twistTerm ω) ∧
-      (∀ i ∈ Finset.Icc (t + 1) (r + t), ConvergesAbsolutely S {i} (twistTerm ω)) ∧
-      dPart S ω r t = ∏ i ∈ Finset.Icc (t + 1) (r + t), eulerProd S {i} (twistTerm ω) ∧
-      ((∀ v, v ∉ S → (ω v).im = 0) → (dPart S ω r t).im = 0 ∧ 0 < (dPart S ω r t).re) ∧
-      ‖dLog S ω r t‖ ≤ f * r * Real.log (zetaR ((t : ℝ) + 1)) ∧
-      |Real.log ‖dPart S ω r t‖| ≤ f * r * Real.log (zetaR ((t : ℝ) + 1)) ∧
-      f * r * Real.log (zetaR ((t : ℝ) + 1)) ≤ 0.005 * f * r
-
-def QuotientBound : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (f r t : ℕ), Module.finrank ℚ F = f → Module.finrank F E = 2 → Odd t → r + 5 ≤ t →
-    ∀ (S : Set (Place F)) (ω : Place F → ℂ), (∀ v, v ∉ S → ‖ω v‖ ≤ 1) →
-    ∀ (x : Place E → Fin r → ℂ), SatakeBound (placesOver E S) r ((1 + (t : ℝ)) / 2) x →
-      eulerProd (placesOver E S) Finset.univ x ≠ 0 ∧ dPart S ω r t ≠ 0 ∧
-      Complex.exp (eulerLog (placesOver E S) Finset.univ x - dLog S ω r t)
-        = eulerProd (placesOver E S) Finset.univ x / dPart S ω r t ∧
-      ‖eulerLog (placesOver E S) Finset.univ x - dLog S ω r t‖ ≤ (f : ℝ) * r / 4 ∧
-      |Real.log ‖eulerProd (placesOver E S) Finset.univ x / dPart S ω r t‖| ≤ (f : ℝ) * r / 4
-
-def EulerLogBounds : Prop :=
-  StandardBound ∧ NormalisingBound ∧ QuotientBound
-
-def SharpConstant : Prop :=
-  2 * Real.log (zetaR (7 / 2)) ≤ 0.2387
 
 open Classical in
-
 def quadSign {F : Type} [Field F] [NumberField F] (E : Type) [Field E] [NumberField E]
     [Algebra F E] (v : Place F) : ℂ :=
-  if (placesOver E ({v} : Set (Place F))).ncard = 2 then 1
-  else if (v.asIdeal.map (algebraMap (𝓞 F) (𝓞 E))).IsPrime then -1 else 0
+  by
+    classical
+    exact if (placesOver E ({v} : Set (Place F))).ncard = 2 then 1
+      else if (v.asIdeal.map (algebraMap (𝓞 F) (𝓞 E))).IsPrime then -1 else 0
 
 end
 

@@ -1,11 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsGauss
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGaussGCTarget
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ISupMonomialHolderLogConvexStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AcrisValuationSubEqIntMulRadiusStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaussNormAcrisSubUnitLeDigitStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaussNormAcrisSubUnitLeDigit
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsGauss
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AcrisValuationSubEqIntMulRadiusStatement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaussNormAcrisRadiusPosDefiniteStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AcrisFrobeniusFixedEqPadicInt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GaussNormAcrisSubUnitLeDigitStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ISupMonomialHolderLogConvexStatement
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsGaussGCTarget
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AcrisFrobeniusFixedEqPadicInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.PMon.Gauss
 open scoped Formalism.Per
 
@@ -66,7 +112,7 @@ theorem pert {ρ : ℝ} (h0 : (l : ℝ)⁻¹ ≤ ρ) (h1 : ρ < 1) (W W' : Forma
     gC l ρ (W - zc l (c + (l : ℤ_[l]) ^ k * y) * W') ≤ max (gC l ρ (W - zc l c * W')) (ρ ^ k * gC l ρ W') := by
   have e : W - zc l (c + (l : ℤ_[l]) ^ k * y) * W' =
       (W - zc l c * W') + -((l : Formalism.Per.Acris l) ^ k * (zc l y * W')) := by
-    simp only [map_add, map_mul, map_pow, map_natCast]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast]
     ring
   rw [e]
   refine ((gauss h0 h1).2.1 _ _).trans (max_le_max le_rfl ?_)
@@ -96,27 +142,7 @@ theorem isClosed_digitSet (W W' : Formalism.Per.Acris l) (k : ℕ) : IsClosed (d
 theorem gC_eq_of_vr {V W' : Formalism.Per.Acris l} (hV : V ≠ 0) (hW' : W' ≠ 0) (n : ℤ)
     (hn : ∀ r ∈ Set.Ioc (0 : ℝ) 1, vr l r V - vr l r W' = n * r) {ρ : ℝ} (h0 : (l : ℝ)⁻¹ ≤ ρ) (h1 : ρ < 1) :
     gC l ρ V = ρ ^ n * gC l ρ W' := by
-  have hl : (1 : ℝ) < l := one_lt_l
-  have hρ0 : 0 < ρ := rho_pos h0
-  have hr : -Real.logb l ρ ∈ Set.Ioc (0 : ℝ) 1 := by
-    constructor
-    · linarith [Real.logb_neg hl hρ0 h1]
-    · have := (Real.logb_le_logb hl inv_l_pos hρ0).2 h0
-      rw [Real.logb_inv, Real.logb_self_eq_one hl] at this
-      linarith
-  have e := hn _ hr
-  have hpow : (l : ℝ) ^ (-(-Real.logb l ρ)) = ρ := by
-    rw [neg_neg, Real.rpow_logb (by linarith) (ne_of_gt hl) hρ0]
-  simp only [vr] at e
-  rw [hpow] at e
-  have hV0 := GlobalTheory.T.gaussNormAcrisRadius_pos_definite l V hV ρ h0 h1
-  have hW0 := GlobalTheory.T.gaussNormAcrisRadius_pos_definite l W' hW' ρ h0 h1
-  apply Real.logb_injOn_pos hl hV0 (mul_pos (zpow_pos hρ0 n) hW0)
-  have hz : Real.logb l (ρ ^ n) = n * Real.logb l ρ := by
-    simp only [Real.logb, Real.log_zpow]
-    ring
-  rw [Real.logb_mul (ne_of_gt (zpow_pos hρ0 n)) (ne_of_gt hW0), hz]
-  linarith
+  apply GlobalTheory.PMon.Gauss.gC_eq_zpow_mul_of_vr <;> assumption
 
 theorem digit_step {h s : ℕ} (hs : s < h) {W W' : Formalism.Per.Acris l}
     (he : (φc l)^[h] W' = (l : Formalism.Per.Acris l) ^ s * W') (hW' : W' ≠ 0)
@@ -148,7 +174,7 @@ theorem digit_step {h s : ℕ} (hs : s < h) {W W' : Formalism.Per.Acris l}
   refine ⟨c + u * (l : ℤ_[l]) ^ m, fun ρ h0 h1 => ?_⟩
   have e : W - zc l (c + u * (l : ℤ_[l]) ^ m) * W' =
       (W - zc l c * W') - zc l u * ((l : Formalism.Per.Acris l) ^ m * W') := by
-    simp only [map_add, map_mul, map_pow, map_natCast]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast]
     ring
   rw [e]
   refine (hu ρ h0 h1).trans ?_
@@ -186,8 +212,8 @@ theorem eq_zc_mul {h s : ℕ} (hs : s < h) {W W' : Formalism.Per.Acris l}
 
 end RatioProp
 
-open RatioProp in
 
+open RatioProp in
 theorem ratio_proportional_target : ∀ (l : ℕ) [Fact l.Prime] (h s : ℕ), s < h → ∀ w w' : Formalism.Per.Acris l,
     (φc l)^[h] w = (l : Formalism.Per.Acris l) ^ s * w → (φc l)^[h] w' = (l : Formalism.Per.Acris l) ^ s * w' → w' ≠ 0 →
     φc l w * w' = w * φc l w' → ∃ c d : ℤ_[l], c ≠ 0 ∧ zc l c * w = zc l d * w' := by

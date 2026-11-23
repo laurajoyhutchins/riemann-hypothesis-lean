@@ -1,5 +1,47 @@
-import Formalism.GradedWeylDivisibility.StatementA
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.BideterminantDominance
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Finset
 
@@ -37,47 +79,5 @@ theorem rowNu_partial_sum {r n : ℕ} (ν : Fin n → ℕ) (hnr : n ≤ r) (k : 
     have hin : ¬ i < n := by omega
     rw [hG]
     simp [hin]
-
-theorem dualWeylModuleDominanceOfSpan : DualWeylDominanceOf := by
-  intro hspan r n ν hnr hν f hf
-  rw [hspan r n ν hν] at hf
-  have htot : ∑ a : Fin r, rowNu (r := r) ν a = ∑ t : Fin n, ν t := by
-    have h := rowNu_partial_sum ν hnr r
-    first
-      | rwa [Finset.filter_true_of_mem (fun (a : Fin r) _ => a.isLt),
-          Finset.filter_true_of_mem (fun (t : Fin n) _ => lt_of_lt_of_le t.isLt hnr)] at h
-      | (have e1 : (Finset.univ.filter fun a : Fin r => a.val < r) = Finset.univ := by
-            ext a; simp [a.isLt]
-         have e2 : (Finset.univ.filter fun t : Fin n => t.val < r) = Finset.univ := by
-            ext t; simp only [Finset.mem_filter, Finset.mem_univ, true_and, iff_true]; omega
-         rw [e1, e2] at h
-         exact h)
-  induction hf using Submodule.span_induction with
-  | mem g hg =>
-    obtain ⟨K, sz, hsz, I, hshape, rfl⟩ := hg
-    intro m hm
-    obtain ⟨hpre, htot'⟩ := bideterminantDominance ℤ r n K sz hsz I m hm
-    refine ⟨fun k => ?_, ?_⟩
-    · rw [rowNu_partial_sum _ hnr k, ← hshape]
-      exact hpre k
-    · rw [htot, ← hshape]
-      exact htot'
-  | zero =>
-    intro m hm
-    simp at hm
-  | add x y _ _ hx hy =>
-    intro m hm
-    rcases Finset.mem_union.1 (MvPolynomial.support_add hm) with h | h
-    · exact hx m h
-    · exact hy m h
-  | smul c x _ hx =>
-    intro m hm
-    first
-      | exact hx m (MvPolynomial.support_smul hm)
-      | (apply hx m
-         rw [MvPolynomial.mem_support_iff] at hm ⊢
-         intro h0
-         apply hm
-         simp [h0])
 
 end Formalism.GradedWeylDivisibility

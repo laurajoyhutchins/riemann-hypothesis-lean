@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AutomorphicArithmetic.OrbitLabellings.ColDefs
-import Formalism.GaussJetBounds.OneLetterRadius
-import Development.AutomorphicArithmetic.OrbitLabellings.BeSConstantCoeffEqZeroAndWtGe
+module
+
+public import Development.AutomorphicArithmetic.OrbitLabellings.ColDefs
+public import Development.AutomorphicArithmetic.OrbitLabellings.BeSConstantCoeffEqZeroAndWtGe
+import Formalism.GaussJetBounds.GaussJetProofs.AsmRDotAddRight
+import Formalism.GaussJetBounds.GaussJetProofs.LogarithmWeightComparison
+import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
+import Formalism.GaussJetBounds.GaussJetProofs.SubstitutionWeightBound
+import Formalism.IncomingBounds.FlowDegreeBounds.ProdRangeEqFactorialMulProdIco
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped BigOperators
 open Formalism.DworkPowerSeriesWeights Formalism.IncomingBounds UpperTheory.G2
@@ -32,7 +84,7 @@ private theorem factA {K : Type} [NormedField K] [IsUltrametricDist K] [CharZero
   rw [hm, norm_prod]
   calc ∏ i, ‖(((κ i).factorial : ℕ) : K)‖
       ≤ ∏ i, ‖(l : K)‖ ^ ((κ i : ℝ) / ((l : ℝ) - 1) - (Real.logb l A + 1)) :=
-        Finset.prod_le_prod (fun i _ => norm_nonneg _) (fun i _ => key _ (hκ i))
+        Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) (fun i _ => key _ (hκ i))
     _ = ‖(l : K)‖ ^ ((∑ i, (κ i : ℝ) / ((l : ℝ) - 1)) -
           (Fintype.card ι : ℝ) * (Real.logb l A + 1)) := by
         rw [← Real.rpow_sum_of_pos hπ0, Finset.sum_sub_distrib, Finset.sum_const,

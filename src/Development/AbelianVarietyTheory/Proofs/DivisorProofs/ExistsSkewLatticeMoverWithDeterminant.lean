@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLocalComponentUnitaryMatrix
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMaximalAboveOfDvdNormHost
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleIntegralSeparatedComplete
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIdeleGenerator
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Hilbert90IntegralIdelesOfMovedPrimes
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RationalPointsIntegralPointsMembership
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryHeckeCharacterValues
+import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetVecEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMaximalAboveOfDvdNormHost
+
+@[expose] public section
+
 open scoped Pointwise
 open Formalism.BasicNotions Formalism.IndefR.Links IsDedekindDomain NumberField
 open Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3
@@ -115,7 +164,7 @@ theorem glue_one (D : D7) (e : AE D) : glue D e 1 = 1 := by
 
 theorem sgA_glue (D : D7) {e : AE D} (hs : sgA D e = e) (a : D.host.E) :
     sgA D (glue D e a) = glue D e (D.host.conj a) := by
-  unfold glue; rw [map_add, map_mul, map_sub, map_one, hs, PtsMem.sgA_inc]
+  unfold glue; rw [map_add (f := _), map_mul, map_sub, map_one, hs, PtsMem.sgA_inc]
 
 def glueU (D : D7) {e : AE D} (he : e * e = e) (a : D.host.E) (ha : a ≠ 0) : (AE D)ˣ :=
   ⟨glue D e a, glue D e a⁻¹, by rw [glue_mul D he, mul_inv_cancel₀ ha, glue_one],
@@ -273,7 +322,7 @@ theorem exists_skew_scalar (D : D7) (𝔪 : Ideal (𝓞 D.host.E)) (h0 : 𝔪 �
         simp only [hι, map_mul, map_natCast, Formalism.L2.Pj.algebraMap_conj_smul, conj_conj] at this
         rw [hb']; exact this
       have hcop : IsCoprime ((b * n0 : ℕ) : ℤ) ((M ^ (N' + 1) : ℕ) : ℤ) :=
-        Nat.isCoprime_iff_coprime.2 (Nat.Coprime.pow_right _ (Nat.Coprime.mul hb hn0M))
+        Nat.isCoprime_iff_coprime.2 (Nat.Coprime.pow_right _ (Nat.Coprime.mul_left hb hn0M))
       obtain ⟨u', v', huv⟩ := hcop
       have huv' := congrArg (Int.cast : ℤ → D.host.E) huv
       push_cast at huv'
@@ -287,7 +336,7 @@ theorem exists_skew_scalar (D : D7) (𝔪 : Ideal (𝓞 D.host.E)) (h0 : 𝔪 �
         rw [hr2]
         linear_combination (u' * D.host.conj (ι c)) * hr' - (u' * b * t) * hE -
           (v' * t * ι b0 * M) * hM' + (t * ι b0) * huv'
-      simp only [map_add, map_mul, map_intCast, map_natCast, Formalism.L2.Pj.algebraMap_conj_smul]
+      simp only [map_add (f := _), map_mul, map_intCast, map_natCast, Formalism.L2.Pj.algebraMap_conj_smul]
       exact fin
 
 end GlobalTheory.SkewCentral

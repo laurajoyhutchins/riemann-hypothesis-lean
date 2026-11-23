@@ -1,9 +1,50 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceDualASt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.TwoSplitIdem
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatMod
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.SplitInt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.InfPartSplitIdem
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceDualASt
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.TwoSplitIdem
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.CharLem
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemUniq
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.InfPartSplitIdem
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.LatMod
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.SplitInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +52,7 @@ open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.Glob
 open Formalism.IndefR.Datum
 open scoped TensorProduct
 
-set_option synthInstance.maxHeartbeats 160000
+
 
 namespace Formalism.IndefR.Fin.PDA
 
@@ -42,6 +83,7 @@ theorem splitIdem_cA {e : AE D} (h : IsSplitIdem D e) : IsSplitIdem D (cA D e) :
 theorem idemSum_mul_fI {e : AE D} {P : Finset (Formalism.L2.DIV.Pl D.host.E)} (he : IsIdemSum e P) :
     e * fI D = e ∧ cA D e * fI D = cA D e := by
   obtain ⟨⟨es, hes, rfl⟩, -⟩ := he
+
   rw [Finset.sum_mul, map_sum, Finset.sum_mul]
   exact ⟨Finset.sum_congr rfl fun PP hPP => splitIdem_mul_fI (hes PP hPP).1,
     Finset.sum_congr rfl fun PP hPP => splitIdem_mul_fI (splitIdem_cA (hes PP hPP).1)⟩
@@ -50,8 +92,10 @@ theorem idemSum_int {P : Finset (Formalism.L2.DIV.Pl D.host.E)} {e : AE D} (he :
     finPart D e ∈ intAE D ∧ finPart D (cA D e) ∈ intAE D := by
   obtain ⟨⟨es, hes, rfl⟩, -⟩ := he
   refine ⟨?_, ?_⟩
+
   · rw [map_sum]
     exact AddSubgroup.sum_mem _ fun PP hPP => splitIdem_int (hes PP hPP).1
+
   · rw [map_sum, map_sum]
     exact AddSubgroup.sum_mem _ fun PP hPP => splitIdem_int (splitIdem_cA (hes PP hPP).1)
 

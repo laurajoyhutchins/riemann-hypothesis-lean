@@ -1,5 +1,46 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StAvDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StAvDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -45,40 +86,5 @@ end Lie
 abbrev baseChange (R A : Type) [CommRing R] [CommRing A] [Algebra R A] :
     Over (Spec (CommRingCat.of R)) ⥤ Over (Spec (CommRingCat.of A)) :=
   Over.pullback (Spec.map (CommRingCat.ofHom (algebraMap R A)))
-
-def IsSaturatedTorus {R : Type} [CommRing R] [IsLocalRing R] {r : ℕ}
-    {G : Over (Spec (CommRingCat.of R))} [GrpObj G] (u : torus R r ⟶ G) [IsMonHom u] : Prop :=
-  IsClosedImmersion ((baseChange R (IsLocalRing.ResidueField R)).map u).left ∧
-    (∀ x y : LieG (torus R r),
-      LieCongr G (IsLocalRing.maximalIdeal R) (lieMap u x) (lieMap u y) →
-        LieCongr (torus R r) (IsLocalRing.maximalIdeal R) x y) ∧
-    (Function.Bijective (lieCoord : LieG (torus R r) → Fin r → R) ∧
-      (∀ x y : LieG (torus R r), lieCoord (lieAdd _ x y) = lieCoord x + lieCoord y) ∧
-      ∀ (a : R) (x : LieG (torus R r)), lieCoord (lieScale _ a x) = a • lieCoord x) ∧
-    ∃ ρ : LieG G → LieG (torus R r), IsLieLinear ρ ∧ ∀ x, ρ (lieMap u x) = x
-
-def TorusSaturated : Prop :=
-  ∀ (R : Type) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
-    (K : Type) [Field K] [Algebra R K] [IsFractionRing R K]
-    (G : Over (Spec (CommRingCat.of R))) [GrpObj G], IsSemiAbelian G →
-    ∀ (r : ℕ) (uK : (baseChange R K).obj (torus R r) ⟶ (baseChange R K).obj G),
-      IsMonHom uK → IsClosedImmersion uK.left →
-      ∃ (u : torus R r ⟶ G) (_ : IsMonHom u), (baseChange R K).map u = uK ∧
-        (∀ u' : torus R r ⟶ G, IsMonHom u' → (baseChange R K).map u' = uK → u' = u) ∧
-        IsSaturatedTorus u
-
-theorem isLieLinear_lieMap {R : Type} [CommRing R] {T G : Over (Spec (CommRingCat.of R))}
-    [GrpObj T] [GrpObj G] (u : T ⟶ G) [IsMonHom u] : IsLieLinear (lieMap u) :=
-  ⟨fun x y => Subtype.ext (MonObj.mul_comp x.1 y.1 u),
-    fun a x => Subtype.ext (Category.assoc _ _ _)⟩
-
-example (R K : Type) [CommRing R] [Field K] [Algebra R K] (r : ℕ) :
-    IsMonHom (𝟙 ((baseChange R K).obj (torus R r))) ∧
-      IsClosedImmersion (𝟙 ((baseChange R K).obj (torus R r)) : _ ⟶ _).left :=
-  ⟨inferInstance, by rw [Over.id_left]; infer_instance⟩
-
-example (R : Type) [CommRing R] (r : ℕ) :
-    ∃ ρ : LieG (torus R r) → LieG (torus R r), IsLieLinear ρ ∧ ∀ x, ρ (lieMap (𝟙 _) x) = x :=
-  ⟨id, ⟨fun _ _ => rfl, fun _ _ => rfl⟩, fun x => Subtype.ext (Category.comp_id x.1)⟩
 
 end GlobalTheory.IndefiniteRowSideFullHecke.LieAlgebraMaps

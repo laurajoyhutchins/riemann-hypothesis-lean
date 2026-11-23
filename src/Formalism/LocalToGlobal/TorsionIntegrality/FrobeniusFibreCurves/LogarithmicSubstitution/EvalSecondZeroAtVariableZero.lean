@@ -1,7 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementA
-import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementA
+public import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TopsChoicePartA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,13 +79,10 @@ theorem eval_second_zero_eq_algHom (h : MvPowerSeries (Fin 2) K) :
   rfl
 
 theorem evalYZero_add (g h : MvPowerSeries (Fin 2) K) : ev0 (g + h) = ev0 g + ev0 h := by
-  rw [eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, map_add]
+  rw [eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, map_add (f := _)]
 
 theorem eval_second_zero_sub (g h : MvPowerSeries (Fin 2) K) : ev0 (g - h) = ev0 g - ev0 h := by
   rw [eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, map_sub]
-
-theorem eval_second_zero_neg (h : MvPowerSeries (Fin 2) K) : ev0 (-h) = -ev0 h := by
-  rw [eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, map_neg]
 
 theorem evalYZero_mul (g h : MvPowerSeries (Fin 2) K) : ev0 (g * h) = ev0 g * ev0 h := by
   rw [eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, eval_second_zero_eq_algHom, map_mul]
@@ -198,7 +244,7 @@ variable {K : Type} [Field K] [CharZero K]
 theorem pd_atS (i : Fin 2) (f : PowerSeries K) : pd i (atS f) = atS (dz f) := by
   unfold atS
   unfold pd
-  rw [Formalism.G.LogCR.pderiv_psubst (by simp), map_add, MvPowerSeries.pderiv_X, MvPowerSeries.pderiv_X]
+  rw [Formalism.G.LogCR.pderiv_psubst (by simp), map_add (f := _), MvPowerSeries.pderiv_X, MvPowerSeries.pderiv_X]
   fin_cases i <;> simp
 
 theorem pderiv_zero_series_at_difference (f : PowerSeries K) : pd 0 (atD f) = atD (dz f) := by
@@ -226,13 +272,13 @@ theorem pderiv_at_variable_of_ne {i j : Fin 2} (hij : j ≠ i) (f : PowerSeries 
 
 theorem pderiv_zero_parallelogram_defect (f : PowerSeries K) :
     pd 0 (par0 f) = atS (dz f) + atD (dz f) - 2 * at1 0 (dz f) := by
-  simp only [par0, two_mul, map_add, map_sub, pd_atS, pderiv_zero_series_at_difference, partialDeriv_inVar_self,
+  simp only [par0, two_mul, map_add (f := _), map_sub, pd_atS, pderiv_zero_series_at_difference, partialDeriv_inVar_self,
     pderiv_at_variable_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
   abel
 
 theorem pderiv_one_parallelogram_defect (f : PowerSeries K) :
     pd 1 (par0 f) = atS (dz f) - atD (dz f) - 2 * at1 1 (dz f) := by
-  simp only [par0, two_mul, map_add, map_sub, pd_atS, pderiv_one_series_at_difference, partialDeriv_inVar_self,
+  simp only [par0, two_mul, map_add (f := _), map_sub, pd_atS, pderiv_one_series_at_difference, partialDeriv_inVar_self,
     pderiv_at_variable_of_ne (show (0 : Fin 2) ≠ 1 by decide)]
   abel
 
@@ -241,7 +287,7 @@ end
 theorem wave_operator_kills : WaveKills := by
   intro K _ _ f
   rw [pderiv_zero_parallelogram_defect, pderiv_one_parallelogram_defect]
-  simp only [two_mul, map_add, map_sub, map_neg, pd_atS, pderiv_zero_series_at_difference, pderiv_one_series_at_difference, partialDeriv_inVar_self,
+  simp only [two_mul, map_add (f := _), map_sub, map_neg, pd_atS, pderiv_zero_series_at_difference, pderiv_one_series_at_difference, partialDeriv_inVar_self,
     pderiv_at_variable_of_ne (show (1 : Fin 2) ≠ 0 by decide), pderiv_at_variable_of_ne (show (0 : Fin 2) ≠ 1 by decide)]
   ring
 

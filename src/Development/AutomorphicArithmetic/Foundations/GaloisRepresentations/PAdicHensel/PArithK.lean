@@ -1,6 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.AuxiliaryInertOddPrime
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ConjugateSqrtNeg
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.AuxiliaryInertOddPrime
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.CodiffUnit
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ConjugateSqrtNeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.DiagHermitianTrivialOfSumFourSquares
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ApartAllEmpty
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.PAdicHensel.PadicUnitNorm
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix GlobalTheory.UPel.HT GlobalTheory.LKTrip GlobalTheory.LKMid GlobalTheory.LKDef GlobalTheory.CuspRep GlobalTheory.UnitaryBC UpperTheory.Gal.W2.Seed UpperTheory.Gal.G1 UpperTheory.Gal.Int.Geo GlobalTheory.CongL
 open scoped TensorProduct
 
@@ -21,7 +66,7 @@ private lemma omega_at {E : Type} [Field E] [NumberField E] [IsCMField E] (bar :
   obtain ⟨w, hw⟩ : ∃ w : E, w = ((tr : E) + (f : E) * x) / 2 := ⟨_, rfl⟩
   obtain ⟨v, hv⟩ : ∃ v : E, v = ((tr : E) - (f : E) * x) / 2 := ⟨_, rfl⟩
   have hcw : IsCMField.complexConj E w = v := by
-    simp only [hw, hv, map_div₀, map_add, map_mul, map_intCast, map_ratCast, hcx, map_ofNat]
+    simp only [hw, hv, map_div₀, map_add (f := _), map_mul, map_intCast, map_ratCast, hcx, map_ofNat]
     ring
   have hsum : w + v = (tr : E) := by
     rw [hw, hv]; ring
@@ -45,7 +90,7 @@ private lemma omega_at {E : Type} [Field E] [NumberField E] [IsCMField E] (bar :
   have hbω : ((bar ω : 𝓞 E) : E) = v := by rw [hbar, hω', hcw]
   refine ⟨ω, ?_, ?_, ?_⟩
   · apply RingOfIntegers.ext
-    simp only [map_add, map_intCast, hω', hbω, hsum]
+    simp only [map_add (f := _), map_intCast, hω', hbω, hsum]
   · apply RingOfIntegers.ext
     simp only [map_mul, map_intCast, hω', hbω, hprod]
   · rw [hω', hw]; ring
@@ -61,7 +106,7 @@ theorem UpperTheory.Gal.G1.pArithK :
   have hmem : ∀ q : ℕ, q.Prime → q ∣ M → q ∈ Q := by
     intro q hq hqM
     rw [hMdef] at hqM
-    obtain ⟨a, ha, hqa⟩ := (Prime.dvd_finset_prod_iff hq.prime _).1 hqM
+    obtain ⟨a, ha, hqa⟩ := (Prime.dvd_finsetProd_iff hq.prime _).1 hqM
     rwa [(Nat.prime_dvd_prime_iff_eq hq (hprime a ha)).1 hqa]
   obtain ⟨bar, hbar⟩ := hBar E
   obtain ⟨tr, nm, f, hneg, hdisc, hsplit⟩ := hQuad d hd

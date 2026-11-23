@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.GroupTheory.MonoidLocalization.Away
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.Polynomial.Eisenstein.Distinguished
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.PowerSeries.Trunc
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,9 +61,6 @@ namespace GlobalTheory.NB.LT
 
 def F (R : Type) [CommRing R] (l : ℕ) : Polynomial R :=
   Polynomial.X * (Polynomial.X + Polynomial.C (l : R)) ^ (l - 1)
-
-def P (R : Type) [CommRing R] (l k : ℕ) : Polynomial R :=
-  Nat.rec (Polynomial.X + Polynomial.C (l : R)) (fun _ p => p.comp (F R l)) k
 
 abbrev EE (R : Type) [CommRing R] (l : ℕ) : Type :=
   AdicCompletion (Ideal.span {(l : Localization.Away (X : R⟦X⟧))}) (Localization.Away (X : R⟦X⟧))
@@ -38,9 +88,9 @@ private lemma order_map_toNat_eq_natDegree_of_isDistinguishedAt {I : Ideal R} {p
   rw [← this]
   simp
 
+
 open PowerSeries in
 variable {R S : Type} [CommRing R] [CommRing S] {l : ℕ} in
-
 theorem _root_.GlobalTheory.NB.LT.exists_poly_mod [Nontrivial R] {I : Ideal R} [IsAdicComplete I R] {p : Polynomial R}
     (H : p.IsDistinguishedAt I) (a : R⟦X⟧) :
     ∃ r : Polynomial R, r.degree < p.degree ∧ (p : R⟦X⟧) ∣ a - r := by
@@ -55,9 +105,9 @@ theorem _root_.GlobalTheory.NB.LT.exists_poly_mod [Nontrivial R] {I : Ideal R} [
   rw [order_map_toNat_eq_natDegree_of_isDistinguishedAt H hI] at hlt
   rwa [Polynomial.degree_eq_natDegree (Polynomial.Monic.ne_zero H.monic)]
 
+
 open PowerSeries in
 variable {R S : Type} [CommRing R] [CommRing S] {l : ℕ} in
-
 theorem _root_.GlobalTheory.NB.LT.poly_dvd_of_dvd {I : Ideal R} [IsAdicComplete I R] {p : Polynomial R}
     (H : p.IsDistinguishedAt I) {r : Polynomial R} (h : (p : R⟦X⟧) ∣ (r : R⟦X⟧)) : p ∣ r := by
   by_cases hI : I = ⊤
@@ -105,9 +155,9 @@ private lemma X_pow_dvd_sub_aeval_trunc (ρ : R⟦X⟧ →ₐ[R] R⟦X⟧) (hρ 
   rw [e, map_pow]
   exact (pow_dvd_pow_of_dvd hρ n).mul_right _
 
+
 open PowerSeries in
 variable {R S : Type} [CommRing R] [CommRing S] {l : ℕ} in
-
 theorem _root_.GlobalTheory.NB.LT.algHom_ext_X (σ τ : R⟦X⟧ →ₐ[R] R⟦X⟧) (h : σ X = τ X) (hX : X ∣ σ X) : σ = τ := by
   refine AlgHom.ext fun f => PowerSeries.ext fun m => ?_
   have h1 := X_pow_dvd_sub_aeval_trunc σ hX (m + 1) f

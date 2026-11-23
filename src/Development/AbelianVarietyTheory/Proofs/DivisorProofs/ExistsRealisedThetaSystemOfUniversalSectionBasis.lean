@@ -1,10 +1,74 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.LamRange
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThetaSystemRealisationRegularAtPrime
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaSectionGeneratorPower
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGoodTorsionTranslateGeometricPoint
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemeGlueAffineCover
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.RigGen
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.CoeNonzeroLocusCanonicalEqComplRange
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ClosureZmodPowEqTopOfMeetsTorsionCosetsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsIsTorsFrameOfSymLiftStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsNormalisedMulPullIsoOriginStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsOperators
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsSymLiftGlobalStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsThetaSystemOfPolarisedLevel
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsTorsionPointsOfSquareLevelStatement
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUniqueOfBasis
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemeGlueAffineCover
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaEmbeddingSectionsBaseChangeAffine
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaSectionGeneratorPower
+import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsThetaPtOverMove
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGeneratorNeZero
+import Development.AbelianVarietyTheory.Statements.TorsionEndomorphisms.ExistsGeneratorOfIsField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SumMulEqZeroOfSumToReal
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUnifOfIsMumfordOf
+import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnimodMod
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+
+@[expose] public section
 
 section
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
@@ -71,8 +135,8 @@ theorem exists_good_translate (hL : Laws) (hL₂ : Laws2) {S : Scheme.{0}} [IsAf
     GlobalTheory.UT.ExactTerm.gs_zero' β.left p ⊤ trivial, MulZeroClass.zero_mul] at q
   exact not_isUnit_zero q
 
-open VVRank in
 
+open VVRank in
 theorem linearIndependent_of_span (hS : SecBaseChangeAnySt) {R : Type} [CommRing R] [IsDomain R]
     (P : PolAV (Sp R)) (N : ℕ) (hN : 1 ≤ N) {κ : Type} [Fintype κ]
     (t : κ → SecM P.A P.L N (baseOver (Sp R))) (hcard : Fintype.card κ = N ^ P.g)
@@ -108,7 +172,7 @@ theorem linearIndependent_of_span (hS : SecBaseChangeAnySt) {R : Type} [CommRing
       obtain ⟨i, rfl⟩ := hy
       exact Submodule.subset_span ⟨i, rfl⟩
     | zero => rw [map_zero]; exact Submodule.zero_mem _
-    | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
     | smul d y _ hy => rw [LinearMap.map_smulₛₗ]; exact Submodule.smul_mem _ _ hy
   have hspanW : ⊤ ≤ Submodule.span Γ((overRes W).left, ⊤)
       (Set.range fun i => pullM P.A P.L N (overResι W) (t i)) := by
@@ -127,6 +191,7 @@ theorem linearIndependent_of_span (hS : SecBaseChangeAnySt) {R : Type} [CommRing
   rw [linearIndependent_iff'] at hli ⊢
   intro s g hg i hi
   have e := congrArg (pullM P.A P.L N (overResι W)) hg
+
   rw [map_sum, map_zero] at e
   simp only [LinearMap.map_smulₛₗ] at e
   exact hσ ((hli s (fun i => σ (g i)) e i hi).trans (map_zero σ).symm)
@@ -142,7 +207,7 @@ theorem exists_monomial_matrices_of_indep : ∀ (o A M : Type) [CommRing o] [Com
   let x : (Fin g ⊕ Fin g → ZMod m) → (Fin g ⊕ Fin g → ZMod (r * m ^ 2)) :=
     fun j i => (((j i).val : ℕ) : ZMod (r * m ^ 2))
   have hπadd : ∀ a b, π (a + b) = π a + π b := by
-    intro a b; funext i; simp only [π, Pi.add_apply, map_add]
+    intro a b; funext i; simp only [π, Pi.add_apply, map_add (f := _)]
   have hπsub : ∀ a b, π (a - b) = π a - π b := by
     intro a b; funext i; simp only [π, Pi.sub_apply, map_sub]
   have hπx : ∀ j, π (x j) = j := by
@@ -249,8 +314,8 @@ open ReciprocityTheory.AnForm.R GlobalTheory.ZH GlobalTheory.Poinc GlobalTheory.
 attribute [local instance] Over.cartesianMonoidalCategory
 open GlobalTheory.UT ReciprocityTheory.ChartRestriction.G.DVR
 
-open Classical GlobalTheory.ThetaReal GlobalTheory.ThetaSBasis in
 
+open Classical GlobalTheory.ThetaReal GlobalTheory.ThetaSBasis in
 theorem GlobalTheory.ThetaSBasis.exists_real_of_secBasis : ∀ (o Ω : Type) [CommRing o] [Field Ω] [Algebra o Ω] [ArithBase o Ω] (R : Subalgebra o Ω), R.FG → (∀ x : Ω, ∃ a ∈ R, ∃ b ∈ R, x = a / b) → ∀ (P : PolAV (Sp R)) (n k j : ℕ) (ze : oˣ), n.Prime → Odd n → 2 ≤ k → 1 ≤ j → IsUnit (n : o) → HypS P.A P.L → ∀ (th : LB.Sec (LPow P.A P.L 1 (baseOver (Sp R)))), IsSecBasis _ (fun _ : Fin 1 => th) → ∀ lev : Out.Level P ((n ^ j * (n ^ k) ^ 2) ^ 2) (unitOn (Units.map (algebraMap o R).toMonoidHom ze)), ∃ (S : ThetaSys o Ω) (ρ : S.Real) (h : R ≤ S.R) (φ : ρ.P.A.left ⟶ P.A.left), S.R = R ∧ ρ.n = n ∧ S.ζ = ze ∧ S.N = (n ^ k) ^ 2 ∧ S.r = n ^ j ∧ S.g = P.g ∧ IsGrpPullback ρ.P.A P.A (spMap (Subalgebra.inclusion h).toRingHom) φ ∧ LBIso ρ.P.L (P.L.pull φ) := by
   intro o Ω _ _ _ _ R fg frac P n k j ze hp ho hk hj hu hS th hth lev
   obtain ⟨hL, hL₂⟩ := GlobalTheory.abelianSchemeLaws_all

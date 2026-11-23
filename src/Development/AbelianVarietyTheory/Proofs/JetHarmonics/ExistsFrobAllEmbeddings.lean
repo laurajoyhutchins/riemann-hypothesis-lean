@@ -1,7 +1,55 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.HostTraceIdentity
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ImaginaryRootConj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.IsGaloisGroup
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Frobenius
+public import Mathlib.RingTheory.Ideal.Int
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Jets.DepthNumbersThresholdEq
 import Development.AbelianVarietyTheory.Definitions.Jets.IsSelfOf
-import Development.AbelianVarietyTheory.Definitions.Jets.TwoPlaces
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ImaginaryRootConj
+import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
+import Formalism.LocalToGlobal.Divisibility.Numbers
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -17,7 +65,7 @@ def frobKer {R C : Type} [CommRing R] [Field C] (V : VF C) (f : R →+* C) (hf :
   carrier := {x | V.MM (f x)}
   add_mem' := fun {a b} ha hb => by
     show 0 < V.v (f (a + b))
-    rw [map_add]
+    rw [map_add (f := _)]
     exact V.v.map_lt_add ha hb
   zero_mem' := by
     show 0 < V.v (f 0)
@@ -29,20 +77,18 @@ def frobKer {R C : Type} [CommRing R] [Field C] (V : VF C) (f : R →+* C) (hf :
     exact lt_of_lt_of_le hb (le_add_of_nonneg_left (hf a))
 
 theorem frobKer_isPrime {R C : Type} [CommRing R] [Field C] (V : VF C) (f : R →+* C) (hf : ∀ x, V.Ge 0 (f x)) :
-    (frobKer V f hf).IsPrime where
-  ne_top' := by
-    rw [Ideal.ne_top_iff_one]
+    (frobKer V f hf).IsPrime := by
+  constructor
+  · rw [Ideal.ne_top_iff_one]
     show ¬ 0 < V.v (f 1)
     rw [map_one, V.v.map_one]
     exact lt_irrefl _
-  mem_or_mem' := fun {a b} h => by
+  · intro a b h
     have h' : 0 < V.v (f (a * b)) := h
     rw [map_mul, V.v.map_mul] at h'
-    by_contra hn
-    push_neg at hn
-    have h1 : V.v (f a) ≤ 0 := not_lt.1 hn.1
-    have h2 : V.v (f b) ≤ 0 := not_lt.1 hn.2
-    exact absurd (add_nonpos h1 h2) (not_le.2 h')
+    change 0 < V.v (f a) ∨ 0 < V.v (f b)
+    by_contra! hn
+    exact (not_le_of_gt h') (add_nonpos hn.1 hn.2)
 
 theorem exists_frob_of_hom {E C : Type} [Field E] [NumberField E] [IsGalois ℚ E] [Field C] (V : VF C)
     (f : 𝓞 E →+* C) (hf : ∀ x, V.Ge 0 (f x)) :

@@ -1,6 +1,51 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpA
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliWordSumExpansion
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatOpA
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CapelliWordSumExpansion
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -55,8 +100,8 @@ theorem hsv_smul (c : ℂ) (A : Wq →L[ℂ] Wp) : B.hsVec (c • A) = c • B.h
   ext i
   simp
 
-open Classical in
 
+open Classical in
 def pTerm (P : B.Mat k r → ℂ) (w : List (B.Mat k r)) : B.DTerm k r Wp Wq where
   coef := fun g => P g • ContinuousLinearMap.id ℂ _
   coefAdj := fun g => star (P g) • ContinuousLinearMap.id ℂ _
@@ -208,13 +253,6 @@ theorem opOrder_append (Θ₁ Θ₂ : B.DiffOp k r Wp Wq) :
   exact foldr_max_init_lemma_3 _ _
 
 end basic₂
-
-def QMinorCov : Prop :=
-  ∀ (A : Type) [Ring A] [Algebra ℂ A] (n t : ℕ) (E : Fin n → Fin n → A) (Pm Qm : Matrix (Fin n) (Fin n) ℂ),
-    Qm * Pm = 1 → ∀ (a b : Fin t → Fin n) (u : ℂ),
-      qminor (Formalism.FourierDecayAlt.Q.Econj E Pm Qm) a b u =
-        ∑ a' : Fin t → Fin n, ∑ b' : Fin t → Fin n,
-          ((∏ k, Pm (a' k) (a k)) * ∏ k, Qm (b k) (b' k)) • qminor E a' b' u
 
 end
 

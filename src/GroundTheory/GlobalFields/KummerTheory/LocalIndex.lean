@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.LocalFields.UnitsBasic
-import GroundTheory.LocalFields.FilteredSurj
+module
+
+import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeAndRangePowLe
+public import GroundTheory.LocalFields.UnitsBasic
+public import GroundTheory.LocalFields.FilteredSurj
+public import Mathlib.RingTheory.RootsOfUnity.Basic
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -96,8 +148,8 @@ variable {ϖ : 𝒪[K]} (hϖ : Irreducible ϖ) {n d : ℕ} {ε : 𝒪[K]ˣ}
   (hnd : (n : 𝒪[K]) = ε * ϖ ^ d)
 include hϖ hnd
 
-omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] hϖ in
 
+omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] hϖ in
 theorem exists_one_add_uniformizer_pow_mul_pow_eq {j : ℕ} (hj : d + 1 ≤ j) (a : 𝒪[K]) :
     ∃ c : 𝒪[K], (1 + ϖ ^ j * a) ^ n = 1 + ϖ ^ (j + d) * (ε * a + ϖ * c) := by
   obtain ⟨c₀, hc₀⟩ := exists_one_add_pow_eq (ϖ ^ j * a) n
@@ -106,8 +158,8 @@ theorem exists_one_add_uniformizer_pow_mul_pow_eq {j : ℕ} (hj : d + 1 ≤ j) (
   rw [hc₀, hnd]
   ring
 
-omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] hϖ in
 
+omit [TopologicalSpace K] [IsNonarchimedeanLocalField K] hϖ in
 theorem exists_units_pow_eq {j : ℕ} (hj : d + 1 ≤ j) {u : 𝒪[K]ˣ} {a : 𝒪[K]}
     (hu : (u : 𝒪[K]) - 1 = ϖ ^ j * a) :
     ∃ c : 𝒪[K], ((u ^ n : 𝒪[K]ˣ) : 𝒪[K]) = 1 + ϖ ^ (j + d) * (ε * a + ϖ * c) := by
@@ -261,8 +313,8 @@ theorem natCard_rootsOfUnity_eq (hn : n ≠ 0) :
     Nat.card (rootsOfUnity n K) = Nat.card (powMonoidHom n : 𝒪[K]ˣ →* 𝒪[K]ˣ).ker := by
   rw [← map_unitsIncl_ker_powMonoidHom hn, Subgroup.card_map_of_injective unitsIncl_injective]
 
-omit [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem index_range_powMonoidHom_multiplicativeInt (n : ℕ) :
     (powMonoidHom n : Multiplicative ℤ →* Multiplicative ℤ).range.index = n := by
   have h : (powMonoidHom n : Multiplicative ℤ →* Multiplicative ℤ).range =
@@ -279,8 +331,8 @@ theorem index_range_powMonoidHom_multiplicativeInt (n : ℕ) :
   rw [h, AddSubgroup.index_toSubgroup, Int.index_zmultiples]
   simp
 
-omit [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem range_powMonoidHom_prod {G H : Type*} [CommGroup G] [CommGroup H] (n : ℕ) :
     (powMonoidHom n : G × H →* G × H).range =
       (powMonoidHom n : G →* G).range.prod (powMonoidHom n : H →* H).range := by
@@ -353,39 +405,7 @@ theorem uniformizer_pow_succ_dvd_of_valuation_lt {ϖ : 𝒪[K]} (hϖ : Irreducib
 
 theorem isOpen_range_powMonoidHom {n : ℕ} (hn : (n : K) ≠ 0) :
     IsOpen ((powMonoidHom n : Kˣ →* Kˣ).range : Set Kˣ) := by
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible 𝒪[K]
-  obtain ⟨d, ε, hnd, -⟩ := exists_natCast_eq_unit_mul_pow hn hϖ
-  apply Subgroup.isOpen_of_mem_nhds _ (g := 1)
-  set B : Set K := {y | valuation K (y - 1) < valuation K ((ϖ : K) ^ (d + d))}
-  have hB : B ∈ nhds (1 : K) := by
-    refine (IsValuativeTopology.hasBasis_nhds' (1 : K)).mem_of_mem ?_
-    rw [Ne, Valuation.zero_iff]
-    exact pow_ne_zero _ (by exact_mod_cast hϖ.ne_zero)
-  have hB' : Units.val ⁻¹' B ∈ nhds (1 : Kˣ) :=
-    Units.continuous_val.continuousAt.preimage_mem_nhds (by simpa using hB)
-  refine Filter.mem_of_superset hB' fun x hx ↦ ?_
-  simp only [Set.mem_preimage, Set.mem_ofPred_eq, B] at hx
-  have hlt1 : valuation K ((x : K) - 1) < 1 := by
-    refine hx.trans_le ?_
-    rw [map_pow]
-    exact pow_le_one' ϖ.2 _
-  have hy : (x : K) - 1 ∈ 𝒪[K] := hlt1.le
-  have hv1 : valuation K (x : K) = 1 := by
-    have := Valuation.map_add_eq_of_lt_right (valuation K) (x := (x : K) - 1) (y := 1)
-      (by rwa [map_one])
-    rwa [sub_add_cancel, map_one] at this
-  have hnv : normalizedValuation K (x : K) = 1 := by
-    rw [← map_one (normalizedValuation K), normalizedValuation_eq_iff, map_one, hv1]
-  obtain ⟨u, rfl⟩ := mem_range_unitsIncl_iff.mpr hnv
-  have hu : u ∈ unitFiltration K (d + 1 + d) := by
-    rw [mem_unitFiltration, mem_maximalIdeal_pow_iff hϖ]
-    have e1 : d + 1 + d = d + d + 1 := by omega
-    rw [e1]
-    apply uniformizer_pow_succ_dvd_of_valuation_lt hϖ
-    simpa using hx
-  rw [← map_powMonoidHom_unitFiltration hϖ hnd] at hu
-  obtain ⟨w, -, rfl⟩ := hu
-  exact ⟨unitsIncl K w, by simp⟩
+  apply GroundTheory.LocalField.isOpen_range_pow <;> assumption
 
 end Open
 

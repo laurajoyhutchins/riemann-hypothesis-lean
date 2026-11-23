@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPiTensorMvPolynomialProdEquivStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NonemptyInvFunEquiv
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsPiTensorMvPolynomialProdEquivStatement
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,7 +145,7 @@ theorem leftRep_prod (n : ℕ) (g : UG ι n) (f : ι → MvPolynomial (Fin n × 
   generalize f τ = q
   induction q using MvPolynomial.induction_on with
   | C a => simp [Formalism.GradedWeylDivisibility.rowAct]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, hp]
     congr 1
@@ -110,7 +157,7 @@ theorem hwVec_eq (n : ℕ) (hn : 0 < n) (lam : ι → ℕ → ℤ) (μ : ι → 
   unfold hwVec
   refine Finset.prod_congr rfl fun τ _ => ?_
   have hd : (μ τ).detShift = lam τ (n - 1) := by
-    rw [DomWeight.detShift, dif_pos hn]
+    rw [DomWeight.detShift, dite_eq_left hn]
     exact h τ ⟨n - 1, by omega⟩
   have hnat : ∀ i : Fin n, ((μ τ).natW i : ℤ) = lam τ i - lam τ (n - 1) := by
     intro i
@@ -137,7 +184,7 @@ theorem hwVec_eq (n : ℕ) (hn : 0 < n) (lam : ι → ℕ → ℤ) (μ : ι → 
     simp only [Fin.val_mk] at hst
     have hc : (((lam τ s - lam τ (s + 1)).toNat : ℕ) : ℤ) = lam τ s - lam τ (s + 1) :=
       Int.toNat_of_nonneg (by omega)
-    rw [Formalism.GradedWeylDivisibility.nuNext, dif_pos hs]
+    rw [Formalism.GradedWeylDivisibility.nuNext, dite_eq_left hs]
     omega
   · have ha := hnat s
     have hs' : (s : ℕ) = n - 1 := by omega
@@ -170,7 +217,7 @@ private theorem span_irr_orbit_extremal_eq_univ (n : ℕ) (μ : DomWeight n) :
   have hpad0 : (GlobalTheory.GLDuality.pad n a).detShift = 0 := by
     rw [DomWeight.detShift]
     split_ifs with hn
-    · rw [h1, DomWeight.natW, DomWeight.detShift, dif_pos hn, sub_self]
+    · rw [h1, DomWeight.natW, DomWeight.detShift, dite_eq_left hn, sub_self]
       rfl
     · rfl
   have hPQ : nablaSq ℂ n (GlobalTheory.GLDuality.pad n a) = nablaSq ℂ n μ := by
@@ -241,7 +288,7 @@ theorem outer_irr_iso_weylRep (ι : Type) [Fintype ι] [DecidableEq ι] (n : ℕ
     rw [← h2, ← h3, h1]
   have hds : ∀ τ, (μ τ).detShift = lam τ (n - 1) := by
     intro τ
-    rw [DomWeight.detShift, dif_pos hn]
+    rw [DomWeight.detShift, dite_eq_left hn]
     exact h τ ⟨n - 1, by omega⟩
   have htp : ∀ (g : UG ι n) (f : ∀ τ, nablaSq ℂ n (μ τ)),
       j (outer (fun τ => irr n (μ τ)) g (PiTensorProduct.tprod ℂ f)) =
@@ -259,7 +306,7 @@ theorem outer_irr_iso_weylRep (ι : Type) [Fintype ι] [DecidableEq ι] (n : ℕ
     intro g x
     induction x using PiTensorProduct.induction_on with
     | smul_tprod c f => rw [map_smul, map_smul, map_smul, map_smul, htp, smul_comm]
-    | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add, smul_add]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _), map_add (f := _), smul_add]
   have hv := span_orbit_outer (fun τ => irr n (μ τ))
     (fun τ => (⟨extremal ℂ n (μ τ), extremal_mem_nablaSq n (μ τ)⟩ : nablaSq ℂ n (μ τ))) (fun τ => span_irr_orbit_extremal_eq_univ n (μ τ))
   have hw : j (PiTensorProduct.tprod ℂ

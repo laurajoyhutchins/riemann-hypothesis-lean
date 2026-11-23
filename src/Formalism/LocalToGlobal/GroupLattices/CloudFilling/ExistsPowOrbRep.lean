@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.SecPsiMulPow
-import Formalism.SharpRestriction.InertJacobiLevels.VVEqEmptyOfNotIsResidueClassZero
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.SecPsiMulPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -98,13 +140,6 @@ theorem bsH_orb' (φ : Formalism.HC.Frame) (h t : φ.A) : ∃ i : ℕ, i < addOr
 theorem bsH_orb (φ : Formalism.HC.Frame) (h t : φ.A) : ∃ i : ℕ, bsH φ h t + i • h = t := by
   obtain ⟨i, -, hi⟩ := bsH_orb' φ h t
   exact ⟨i, hi⟩
-
-theorem bsH_add_nsmul (φ : Formalism.HC.Frame) (h t : φ.A) (i : ℕ) : bsH φ h (t + i • h) = bsH φ h t := by
-  unfold bsH
-  rw [vOfH_add_nsmul]
-
-theorem bsH_step (φ : Formalism.HC.Frame) (h t : φ.A) : bsH φ h (t + h) = bsH φ h t := by
-  simpa using bsH_add_nsmul φ h t 1
 
 theorem vOfH_bsH (φ : Formalism.HC.Frame) (h t : φ.A) : vOfH φ h (bsH φ h t) = vOfH φ h t := by
   obtain ⟨i, hi⟩ := bsH_orb φ h t

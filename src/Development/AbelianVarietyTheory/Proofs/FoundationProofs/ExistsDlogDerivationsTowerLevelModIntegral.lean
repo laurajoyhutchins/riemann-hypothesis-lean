@@ -1,9 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotCoboundaryConstantOne
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KummerTowerQqPowLevelEqQ
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DerivativeCyclotomicMul
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerLevelEmbeddingInjectiveRangeAdjoinRootsStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntPrimeDivRootOfUnitySubOnePowStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KummerTowerQqPowLevelEqQ
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DerivativeCyclotomicMul
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIntPrimeDivRootOfUnitySubOnePowStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerLevelEmbeddingInjectiveRangeAdjoinRootsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open GlobalTheory.K5 GlobalTheory.KumDlog Polynomial
 
@@ -13,7 +59,7 @@ namespace GlobalTheory.LevDer
 theorem int_div_of_mk {p : ℕ} [Fact p.Prime] {Ω : Type} [Field Ω] [Algebra (O0 p) Ω] [CharZero Ω]
     (m : ℕ) (a : integralClosure (O0 p) Ω)
     (ha : Ideal.Quotient.mk (Ideal.span {((p : integralClosure (O0 p) Ω)) ^ m}) a = 0) :
-    IsInt p ((a : Ω) / (p : Ω) ^ m) := by
+    IsInt (p := p) ((a : Ω) / (p : Ω) ^ m) := by
   rw [Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton'] at ha
   obtain ⟨c, rfl⟩ := ha
   have hp : (p : Ω) ^ m ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.2 (Fact.out : p.Prime).ne_zero)
@@ -25,8 +71,9 @@ theorem natCast_eq_pow {Ω : Type} [Field Ω] (N p k : ℕ) (h : N = p ^ (k + 1)
     (N : Ω) = (p : Ω) ^ (k + 1) := by
   subst h; push_cast; rfl
 
-set_option maxHeartbeats 2000000 in
 
+set_option maxHeartbeats 2000000 in
+set_option synthInstance.maxHeartbeats 200000 in
 theorem exists_levDer : ∀ (p : ℕ) [Fact p.Prime] (Ω : Type) [Field Ω] [Algebra (O0 p) Ω], IsClo p Ω → ∀ (T : Tower p Ω) (m : ℕ), 1 ≤ m →
     ∃ dz dq : Ω → Ω, IsDer (Lev T m) dz ∧ IsDer (Lev T m) dq ∧ Vals T m dz dq := by
   intro p _ Ω _ _ hC T m hm
@@ -61,15 +108,15 @@ theorem exists_levDer : ∀ (p : ℕ) [Fact p.Prime] (Ω : Type) [Field Ω] [Alg
     intro D
     refine ⟨fun x hx y hy => ?_, fun x hx y hy => ?_, fun c => ?_⟩
     · have e : g (x + y) = g x + g y :=
-        hgm _ (add_mem hx hy) _ (by rw [map_add, hg x hx, hg y hy])
+        hgm _ (add_mem hx hy) _ (by rw [map_add (f := _), hg x hx, hg y hy])
       refine int_congr (hdiv (lift (D (g (x + y))) - lift (D (g x)) - lift (D (g y))) ?_) ?_
-      · rw [map_sub, map_sub, hlift, hlift, hlift, e, map_add]; ring
+      · rw [map_sub (Ideal.Quotient.mk I), map_sub (Ideal.Quotient.mk I), hlift, hlift, hlift, e, map_add (f := _)]; ring
       · push_cast; ring
     · have e : g (x * y) = g x * g y :=
         hgm _ (mul_mem hx hy) _ (by rw [map_mul, hg x hx, hg y hy])
       refine int_congr (hdiv (lift (D (g (x * y))) - ιA (g x) * lift (D (g y))
         - ιA (g y) * lift (D (g x))) ?_) ?_
-      · rw [map_sub, map_sub, map_mul, map_mul, hlift, hlift, hlift, e, Derivation.leibniz,
+      · rw [map_sub (Ideal.Quotient.mk I), map_sub (Ideal.Quotient.mk I), map_mul (Ideal.Quotient.mk I), map_mul (Ideal.Quotient.mk I), hlift, hlift, hlift, e, Derivation.leibniz,
           Algebra.smul_def, Algebra.smul_def, halg, halg]; ring
       · push_cast; rw [hιAv, hιAv, hg x hx, hg y hy]; ring
     · have e : g (algebraMap (O0 p) Ω c) = algebraMap (O0 p) (On p m) c :=
@@ -124,13 +171,13 @@ theorem exists_levDer : ∀ (p : ℕ) [Fact p.Prime] (Ω : Type) [Field Ω] [Alg
     fun x => ((lift (Dq (g x)) : integralClosure (O0 p) Ω) : Ω) / (p : Ω) ^ (k + 1),
     hF Dz, hF Dq, ?_, ?_, ?_, ?_⟩
   · refine int_congr (hdiv (lift (Dz (xn p (k + 1))) - ιA ((p : On p (k + 1)) * xn p (k + 1))) ?_) ?_
-    · rw [map_sub, hlift, hzx, halg, sub_self]
+    · rw [map_sub (Ideal.Quotient.mk I), hlift, hzx, halg, sub_self]
     · simp only [hgz, MulMemClass.coe_mul, AddSubgroupClass.coe_sub, SubringClass.coe_natCast, hιAv, map_mul, map_natCast, hι.1]
       ring
   · exact int_congr (hdiv (lift (Dz (yn p (k + 1)))) (by rw [hlift, hzy])) (by simp only [hgq])
   · exact int_congr (hdiv (lift (Dq (xn p (k + 1)))) (by rw [hlift, hqx])) (by simp only [hgz])
   · refine int_congr (hdiv (lift (Dq (yn p (k + 1))) - ιA ((p : On p (k + 1)) * yn p (k + 1))) ?_) ?_
-    · rw [map_sub, hlift, hqy, halg, sub_self]
+    · rw [map_sub (Ideal.Quotient.mk I), hlift, hqy, halg, sub_self]
     · simp only [hgq, MulMemClass.coe_mul, AddSubgroupClass.coe_sub, SubringClass.coe_natCast, hιAv, map_mul, map_natCast, hι.2]
       ring
 

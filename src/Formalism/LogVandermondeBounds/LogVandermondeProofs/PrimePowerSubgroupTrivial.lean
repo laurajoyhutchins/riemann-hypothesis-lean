@@ -1,4 +1,56 @@
-import Formalism.LogVandermondeBounds.LogVandermondeVariationUnbounded
+module
+
+public import Formalism.LogVandermondeBounds.LogVandermondeVariationUnbounded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+
+@[expose] public section
 
 namespace Formalism.LogVandermondeBounds.StandardLattice
 
@@ -53,35 +105,5 @@ theorem primeOrderFinrank : PrimeOrderFinrank := by
     refine LinearMap.ext fun v => ?_
     have := LinearMap.congr_fun hf1 v
     simpa [f] using this
-
-theorem primePowerSubgroupTrivial : PrimePowerSubgroupTrivial := by
-  intro K _ _ n g Γ hg hfin hcard hlt
-  obtain ⟨e, he⟩ := hcard
-  rw [Subgroup.eq_bot_iff_forall]
-  intro γ hγ
-  by_contra hne
-  set x : Γ := ⟨γ, hγ⟩ with hxdef
-  have hx : x ≠ 1 := fun h => hne (congrArg Subtype.val h)
-  have hdvd : orderOf x ∣ g ^ e := by
-    rw [← he]
-    exact orderOf_dvd_natCard x
-  obtain ⟨m, -, hm⟩ := (Nat.dvd_prime_pow hg).1 hdvd
-  have hm0 : m ≠ 0 := by
-    rintro rfl
-    exact hx (orderOf_eq_one_iff.1 (by simpa using hm))
-  set y := x ^ (g ^ (m - 1)) with hy
-  have hyg : y ^ g = 1 := by
-    rw [hy, ← pow_mul, ← pow_succ, Nat.sub_add_cancel (Nat.one_le_iff_ne_zero.2 hm0), ← hm,
-      pow_orderOf_eq_one]
-  have hy1 : y ≠ 1 := by
-    intro h
-    have h3 := orderOf_dvd_of_pow_eq_one (show x ^ (g ^ (m - 1)) = 1 from h)
-    rw [hm] at h3
-    have := (Nat.pow_dvd_pow_iff_le_right hg.one_lt).1 h3
-    omega
-  have key := primeOrderFinrank K n g ((y : GL (Fin n) K) : Matrix (Fin n) (Fin n) K) hg
-    (by rw [← Units.val_pow_eq_pow_val, ← Subgroup.coe_pow, hyg]; rfl)
-    (fun h => hy1 (Subtype.ext (Units.ext (by simpa using h))))
-  omega
 
 end Formalism.LogVandermondeBounds.StandardLattice

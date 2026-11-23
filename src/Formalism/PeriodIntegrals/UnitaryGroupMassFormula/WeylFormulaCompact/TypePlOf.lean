@@ -1,5 +1,51 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylFormulaCompact.FormulaStep
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylFormulaCompact.FormulaStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylFormulaCompact.TrivKtype
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +59,8 @@ private theorem diagonal_exp_mem_Kset {N : ℕ} (ε : Fin N → Bool) (θ : Fin 
   · rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose, Matrix.diagonal_conjTranspose,
       Matrix.diagonal_mul_diagonal, ← Matrix.diagonal_one]
     congr 1
-    funext a
-    simp only [Pi.star_apply]
+    funext i
+    change Complex.exp ((θ i : ℂ) * Complex.I) * star (Complex.exp ((θ i : ℂ) * Complex.I)) = 1
     rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq, Complex.norm_exp_ofReal_mul_I]
     norm_num
   · show diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I)) * Jm ε = Jm ε * diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I))
@@ -64,7 +110,7 @@ theorem typePl_of (hB : Blocks) (hD : BlockDiag) (hT : TorusWt) (hW : WtUniq) (h
     { carrier := {u | u ∈ S ∧ ∀ θ : Fin (nPl ε) → ℝ, diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I)) ∈ Kset (allPos (nPl ε)) →
           sPl ε σ (diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I))) u = Complex.exp (((∑ a, μ a * θ a : ℝ) : ℂ) * Complex.I) • u}
       add_mem' := fun hx hy => ⟨S.add_mem hx.1 hy.1, fun θ hθ => by
-        rw [map_add, hx.2 θ hθ, hy.2 θ hθ, smul_add]⟩
+        rw [map_add (f := _), hx.2 θ hθ, hy.2 θ hθ, smul_add]⟩
       zero_mem' := ⟨S.zero_mem, fun θ _ => by rw [map_zero, smul_zero]⟩
       smul_mem' := fun c x hx => ⟨S.smul_mem c hx.1, fun θ hθ => by
         rw [map_smul, hx.2 θ hθ, smul_comm]⟩ }
@@ -119,7 +165,7 @@ theorem typeMi_of (hB : Blocks) (hD : BlockDiag) (hT : TorusWt) (hW : WtUniq) (h
     { carrier := {u | u ∈ S ∧ ∀ θ : Fin (nMi ε) → ℝ, diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I)) ∈ Kset (allPos (nMi ε)) →
           sMi ε σ (diagonal (fun a => Complex.exp ((θ a : ℂ) * Complex.I))) u = Complex.exp (((∑ a, μ a * θ a : ℝ) : ℂ) * Complex.I) • u}
       add_mem' := fun hx hy => ⟨S.add_mem hx.1 hy.1, fun θ hθ => by
-        rw [map_add, hx.2 θ hθ, hy.2 θ hθ, smul_add]⟩
+        rw [map_add (f := _), hx.2 θ hθ, hy.2 θ hθ, smul_add]⟩
       zero_mem' := ⟨S.zero_mem, fun θ _ => by rw [map_zero, smul_zero]⟩
       smul_mem' := fun c x hx => ⟨S.smul_mem c hx.1, fun θ hθ => by
         rw [map_smul, hx.2 θ hθ, smul_comm]⟩ }

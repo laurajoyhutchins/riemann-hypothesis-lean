@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CentralNilGL
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlkEquivInl
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlkEquivInl
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField MeasureTheory GlobalTheory.CuspRep
 
 noncomputable section
@@ -9,10 +53,10 @@ namespace GlobalTheory.SliceTwo
 
 open GlobalTheory.LeviGA
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a r : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a r : ℕ}
 
-omit [NumberField E] [IsTotallyComplex E] in
 
+omit [NumberField E] [_root_.NumberField.IsTotallyComplex E] in
 theorem blkMat_one_mem (hr : r ≤ a) (k : Kinf E (a - r)) :
     blkMat (Cinf E) hr (1, k.1) ∈ Matrix.unitaryGroup (Fin a) (Cinf E) := by
   have hs : star (blkMat (Cinf E) hr (1, k.1)) = blkMat (Cinf E) hr (1, star k.1) := by
@@ -27,12 +71,12 @@ theorem blkMat_one_mem (hr : r ≤ a) (k : Kinf E (a - r)) :
 
 def blkK (hr : r ≤ a) (k : Kinf E (a - r)) : Kinf E a := ⟨blkMat (Cinf E) hr (1, k.1), blkMat_one_mem hr k⟩
 
-omit [NumberField E] [IsTotallyComplex E] in
+omit [NumberField E] [_root_.NumberField.IsTotallyComplex E] in
 theorem toUnits_blkK (hr : r ≤ a) (k : Kinf E (a - r)) :
     Unitary.toUnits (blkK hr k) = blkGL hr (1, Unitary.toUnits k) := Units.ext rfl
 
-variable (E) in
 
+variable (E) in
 def slice [MeasurableSpace (BlockIx a r → Ad E)] (μ : Measure (BlockIx a r → Ad E)) (𝓕 : Set (BlockIx a r → Ad E))
     (hr : r ≤ a) (φ : GA E a → ℂ) (m₁ : GA E r) (t : GL (Fin a) (Af E)) (κ : Kinf E a) : GA E (a - r) → ℂ :=
   fun m₂ => ∫ x in 𝓕, φ (unip x * (blkGL hr (m₁, m₂) * finGL E a t * infGL E a (Unitary.toUnits κ))) ∂μ

@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsLeadBlockGaussTail
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsLeadBlockGaussTail
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Order.Chebyshev
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -17,22 +68,22 @@ theorem lintegral_pi_prod {E : Type*} [MeasurableSpace E] (μ : Measure E) [Sigm
       ∫⁻ x, ∏ i, f i (x i) ∂Measure.pi (fun _ => μ) = ∏ i, ∫⁻ y, f i y ∂μ
   | 0, f, _ => by simp
   | n + 1, f, hf => by
-      have e := measurePreserving_piFinSuccAbove (fun _ : Fin (n + 1) => μ) 0
+      have e := measurePreserving_piFinSuccAbove (α := fun _ : Fin (n + 1) => E)
+        (m := fun _ => inferInstance) (fun _ => μ) 0
       let g : E × (Fin n → E) → ℝ≥0∞ := fun a => f 0 a.1 * ∏ i : Fin n, f i.succ (a.2 i)
       have hg : Measurable fun a : Fin n → E => ∏ i : Fin n, f i.succ (a i) :=
         Finset.measurable_prod _ fun i _ => (hf i.succ).comp (measurable_pi_apply i)
-      calc ∫⁻ x, ∏ i, f i (x i) ∂Measure.pi (fun _ => μ)
-          = ∫⁻ x, g (MeasurableEquiv.piFinSuccAbove (fun _ : Fin (n + 1) => E) 0 x)
-              ∂Measure.pi (fun _ => μ) := by
-            refine lintegral_congr fun x => ?_
-            simp [g, Fin.prod_univ_succ, MeasurableEquiv.piFinSuccAbove, Fin.insertNthEquiv]
-            rfl
-        _ = ∫⁻ a, g a ∂(μ.prod (Measure.pi fun _ : Fin n => μ)) :=
-            e.lintegral_comp_emb (MeasurableEquiv.measurableEmbedding _) g
-        _ = (∫⁻ y, f 0 y ∂μ) * ∫⁻ x, ∏ i : Fin n, f i.succ (x i) ∂(Measure.pi fun _ : Fin n => μ) :=
-            lintegral_prod_mul (hf 0).aemeasurable hg.aemeasurable
-        _ = ∏ i, ∫⁻ y, f i y ∂μ := by
-            rw [lintegral_pi_prod μ n _ (fun i => hf i.succ), Fin.prod_univ_succ]
+      have hsplit : (∫⁻ x, ∏ i, f i (x i) ∂Measure.pi (fun _ => μ)) =
+          (∫⁻ x, g (MeasurableEquiv.piFinSuccAbove (fun _ : Fin (n + 1) => E) 0 x)
+            ∂Measure.pi (fun _ => μ)) := by
+        refine lintegral_congr fun x => ?_
+        simp [g, Fin.prod_univ_succ, MeasurableEquiv.piFinSuccAbove, Fin.insertNthEquiv]
+        rfl
+      rw [hsplit, e.lintegral_comp_emb (MeasurableEquiv.measurableEmbedding _) g]
+      change (∫⁻ a : E × (Fin n → E), f 0 a.1 * ∏ i, f i.succ (a.2 i)
+        ∂(μ.prod (Measure.pi fun _ : Fin n => μ))) = _
+      rw [lintegral_prod_mul (hf 0).aemeasurable hg.aemeasurable,
+        lintegral_pi_prod μ n _ (fun i => hf i.succ), Fin.prod_univ_succ]
 
 def halfGauss : ℝ≥0∞ := ∫⁻ z : ℂ, ENNReal.ofReal (Real.exp (-(‖z‖ ^ 2 / 2)))
 

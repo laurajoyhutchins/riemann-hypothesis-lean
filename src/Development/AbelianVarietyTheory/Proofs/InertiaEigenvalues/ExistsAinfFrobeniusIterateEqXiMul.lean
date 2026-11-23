@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism
 open scoped Formalism.Per
 
@@ -41,7 +85,8 @@ theorem xi_bar_ne_zero (e : Per.Fl l) (he : GlobalTheory.MemLoc.IsEps e) :
     WittVector.constantCoeff (GlobalTheory.MemLoc.xi e) ≠ 0 := by
   set e' := (frobeniusEquiv (Per.Fl l) l).symm e with he'
   have hxi : WittVector.constantCoeff (GlobalTheory.MemLoc.xi e) = ∑ i ∈ Finset.range l, e' ^ i := by
-    simp [GlobalTheory.MemLoc.xi, map_sum, map_pow, WittVector.constantCoeff_apply,
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp [GlobalTheory.MemLoc.xi, map_sum, map_pow, WittVector.constantCoeff_apply,
       WittVector.teichmuller_coeff_zero, he']
   have hpow : e' ^ l = e := by
     have := (frobeniusEquiv (Per.Fl l) l).apply_symm_apply e
@@ -79,7 +124,7 @@ theorem exists_step (e : Per.Fl l) (he : GlobalTheory.MemLoc.IsEps e) (n : ℕ) 
   refine ⟨y, dvd_of_constantCoeff _ ?_⟩
   rw [iterate_tm]
   simp only [eval_add, eval_sub, eval_pow, eval_X, eval_C, eval_mul] at hy
-  rw [map_add, map_sub, map_mul, WittVector.constantCoeff_apply (x := Per.tm _),
+  rw [map_add (f := _), map_sub, map_mul, WittVector.constantCoeff_apply (x := Per.tm _),
     WittVector.constantCoeff_apply (x := Per.tm _), WittVector.teichmuller_coeff_zero,
     WittVector.teichmuller_coeff_zero]
   rw [← hy]
@@ -92,7 +137,7 @@ theorem exists_start (e : Per.Fl l) (he : GlobalTheory.MemLoc.IsEps e) (n : ℕ)
   have hq1 : l ^ n - 1 ≠ 0 := by omega
   have hmon : (X ^ (l ^ n - 1) - C a : (Per.Fl l)[X]).Monic := monic_X_pow_sub_C a hq1
   have hnd : (X ^ (l ^ n - 1) - C a : (Per.Fl l)[X]).natDegree ≠ 0 := by
-    rw [natDegree_X_pow_sub_C]; exact hq1
+    rw [natDegree_X_pow_sub_C _]; exact hq1
   obtain ⟨y, hy⟩ := GlobalTheory.TiltAlgClosed.exists_root_preTilt ℂ_[l] hmon hnd
   simp only [eval_sub, eval_pow, eval_X, eval_C, sub_eq_zero] at hy
   refine ⟨y, ?_, ?_⟩
@@ -111,7 +156,7 @@ theorem period_solution : ∀ (l : ℕ) [Fact l.Prime] (e : Per.Fl l), GlobalThe
   let F : Per.Ainf l → Per.Ainf l := fun w => Φ w - ξ * w
   have F_sub : ∀ a b, F (a - b) = F a - F b := fun a b => by simp only [F, map_sub]; ring
   have F_lin : ∀ (m : ℕ) a b, F (a + (l : Per.Ainf l) ^ m * b) = F a + (l : Per.Ainf l) ^ m * F b :=
-    fun m a b => by simp only [F, map_add, map_mul, map_pow, map_natCast]; ring
+    fun m a b => by simp only [F, map_add (f := _), map_mul, map_pow, map_natCast]; ring
   have step : ∀ (k : ℕ) (w : Per.Ainf l), ∃ w' : Per.Ainf l,
       (l : Per.Ainf l) ^ (k + 1) ∣ F w →
         (l : Per.Ainf l) ^ (k + 2) ∣ F w' ∧ (l : Per.Ainf l) ^ (k + 1) ∣ w' - w := by
@@ -172,7 +217,7 @@ theorem period_solution : ∀ (l : ℕ) [Fact l.Prime] (e : Per.Fl l), GlobalThe
     have e1 : L = Per.tm w₀ + (l : Per.Ainf l) * (c' - c) := by
       rw [pow_one] at hc; rw [zero_add, pow_one] at hc'
       rw [mul_sub, ← hc, ← hc', ← hseq0]; ring
-    rw [e1, map_add, constantCoeff_natCast_mul, add_zero, WittVector.constantCoeff_apply,
+    rw [e1, map_add (f := _), constantCoeff_natCast_mul, add_zero, WittVector.constantCoeff_apply,
       WittVector.teichmuller_coeff_zero]
   refine ⟨L, fun h0 => ?_, ?_⟩
   · have := congrArg WittVector.constantCoeff h0

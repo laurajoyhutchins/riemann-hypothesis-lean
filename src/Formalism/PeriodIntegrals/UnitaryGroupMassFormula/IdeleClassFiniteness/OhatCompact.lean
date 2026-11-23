@@ -1,4 +1,47 @@
-import Formalism.UnipotentAdelicQuotients.ClassNumberFinite
+module
+
+public import Mathlib.RingTheory.DedekindDomain.FiniteAdeleRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,39 +96,11 @@ abbrev glIncl (F : Type) [Field F] [NumberField F] (n : ℕ) :
     GL (Fin n) F →* GL (Fin n) (FiniteAdeleRing (𝓞 F) F) :=
   Units.map (RingHom.mapMatrix (algebraMap F (FiniteAdeleRing (𝓞 F) F))).toMonoidHom
 
-def Kloc {F : Type} [Field F] [NumberField F] {n : ℕ} (S : Set (MvPolynomial (Fin n × Fin n) F))
-    (hS : HeckeCharacterZeroLocus.IsGroupLocus S) : Subgroup (HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F)) :=
-  (KGL F n).comap (HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F)).subtype
-
-def BorelK : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (n : ℕ) (S : Set (MvPolynomial (Fin n × Fin n) F))
-    (hS : HeckeCharacterZeroLocus.IsGroupLocus S),
-    ∃ T : Finset (HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F)),
-      ∀ x : HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F), ∃ γ : GL (Fin n) F, γ ∈ HeckeCharacterZeroLocus.zeroLocusGL S F ∧
-        ∃ s ∈ T, ∃ u ∈ Kloc S hS,
-          (x : GL (Fin n) (FiniteAdeleRing (𝓞 F) F)) = glIncl F n γ * (s : GL (Fin n) _) * (u : GL (Fin n) _)
-
 def BorelKGL : Prop :=
   ∀ (F : Type) [Field F] [NumberField F] (n : ℕ),
     ∃ T : Finset (GL (Fin n) (FiniteAdeleRing (𝓞 F) F)),
       ∀ x : GL (Fin n) (FiniteAdeleRing (𝓞 F) F), ∃ γ : GL (Fin n) F, ∃ s ∈ T, ∃ k ∈ KGL F n,
         x = glIncl F n γ * s * k
-
-def BorelRed : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (n : ℕ) (S : Set (MvPolynomial (Fin n × Fin n) F))
-    (hS : HeckeCharacterZeroLocus.IsGroupLocus S) (g : GL (Fin n) (FiniteAdeleRing (𝓞 F) F)),
-    ∃ T : Finset (HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F)),
-      ∀ x : HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F),
-        (∃ γ : GL (Fin n) F, ∃ k ∈ KGL F n, (x : GL (Fin n) (FiniteAdeleRing (𝓞 F) F)) = glIncl F n γ * g * k) →
-        ∃ δ : GL (Fin n) F, δ ∈ HeckeCharacterZeroLocus.zeroLocusGL S F ∧ ∃ s ∈ T, ∃ u ∈ Kloc S hS,
-          (x : GL (Fin n) (FiniteAdeleRing (𝓞 F) F)) = glIncl F n δ * (s : GL (Fin n) _) * (u : GL (Fin n) _)
-
-def KlocCompact : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] (n : ℕ) (S : Set (MvPolynomial (Fin n × Fin n) F))
-    (hS : HeckeCharacterZeroLocus.IsGroupLocus S), IsCompact (Kloc S hS : Set (HeckeCharacterZeroLocus.locusSubgroup S hS (FiniteAdeleRing (𝓞 F) F)))
-
-def OhatCompact : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F], IsCompact (Ohat F : Set (FiniteAdeleRing (𝓞 F) F))
 
 end PIW.ClassFinD
 

@@ -1,8 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.FinitePointsOfIsOpenImmersion
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteOfIsClosedSplitTorusOfPowEqOne
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+module
+
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteOfIsClosedSplitTorusOfPowEqOne
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Duality
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry NumberField MonoidalCategory CartesianMonoidalCategory MonObj ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open Topology
 attribute [local instance] Over.cartesianMonoidalCategory CategoryTheory.Hom.group
@@ -48,9 +100,9 @@ theorem finite_of_isClosed_torusZariski_of_smul {k : Type} [Field k] [IsAlgClose
     (hπ : ¬ IsUnit π) {H : Subgroup (Multiplicative X →* kˣ)}
     (hH : IsClosed[torusZariski k X] (H : Set (Multiplicative X →* kˣ)))
     (hstab : ∀ (a : O), ∀ s ∈ H,
-      s.comp (AddMonoidHom.toMultiplicative (DistribMulAction.toAddMonoidHom X a)) ∈ H)
+      s.comp (AddMonoidHom.toMultiplicative (DistribSMul.toAddMonoidHom X a)) ∈ H)
     (htors : ∀ s ∈ H,
-      s.comp (AddMonoidHom.toMultiplicative (DistribMulAction.toAddMonoidHom X π)) = 1 → s = 1) :
+      s.comp (AddMonoidHom.toMultiplicative (DistribSMul.toAddMonoidHom X π)) = 1 → s = 1) :
     Finite H := by
   let K : Submodule O X :=
     { carrier := {x | ∀ s ∈ H, s (Multiplicative.ofAdd x) = 1}
@@ -169,9 +221,9 @@ theorem finite_of_isClosed_of_no_pi_torsion :
       map_add' := hadd }
   letI : Module (𝓞 E) X := Module.compHom X ρ
   have hsmul : ∀ (a : 𝓞 E) (x : X), a • x = φ a x := fun a x => rfl
-  let e := splitTorusPointEquiv k X
+  let e := splitTorusPointEquiv (k := k) (X := X)
   have hpt : ∀ (s : Multiplicative X →* kˣ) (a : 𝓞 E), e s ≫ act.act a =
-      e (s.comp (AddMonoidHom.toMultiplicative (DistribMulAction.toAddMonoidHom X a))) := by
+      e (s.comp (AddMonoidHom.toMultiplicative (DistribSMul.toAddMonoidHom X a))) := by
     intro s a
     rw [hφ a]
     exact splitTorusPoint_comp_torusMap s (φ a)

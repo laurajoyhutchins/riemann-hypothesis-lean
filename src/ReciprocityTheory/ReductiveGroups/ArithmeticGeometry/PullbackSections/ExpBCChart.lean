@@ -1,6 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.JetSubstPCompJetBC
-import Formalism.LocalToGlobal.ProjectiveLattices.IsExpChart
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.BcField
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.BcField
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndRaw
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -21,15 +62,6 @@ section Maps
 
 variable {S S' : Type} [CommRing S] [CommRing S'] (ψ : S →+* S') {x0 : Sp S ⟶ Xo.X} {x0' : Sp S' ⟶ Xo.X}
   (hx : x0' = spMap ψ ≫ x0)
-
-def jbc (d m n : ℕ) : overAt x0' (Jet S' (Fin n × Fin d) m) ⟶ overAt x0 (Jet S (Fin n × Fin d) m) :=
-  Over.homMk (spMap (jetBC ψ (Fin n × Fin d) m)) (by subst hx; exact Over.w (rjBC ψ x0 d m n))
-
-def bcB : overAt x0' S' ⟶ overAt x0 S :=
-  Over.homMk (spMap ψ) (by
-    subst hx
-    show spMap ψ ≫ spMap (algebraMap S S) ≫ x0 = spMap (algebraMap S' S') ≫ spMap ψ ≫ x0
-    rw [← Category.assoc, ← Category.assoc, spMap_comp_spMap, spMap_comp_spMap])
 
 def bcD : overAt x0' (DualNumber S') ⟶ overAt x0 (DualNumber S) :=
   Over.homMk (spMap (dualMap ψ)) (by

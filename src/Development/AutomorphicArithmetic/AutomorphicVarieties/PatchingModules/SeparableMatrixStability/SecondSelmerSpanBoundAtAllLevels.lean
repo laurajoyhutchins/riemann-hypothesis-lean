@@ -1,5 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchedSupportCompletions
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ThetaCoefficientMapEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.ProfDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -127,10 +172,6 @@ def π0 (N : ℕ) : Λ.Ph0 →* (T.GN N).G₀ :=
 
 def πo0 : Λ.Ph0 →* Λ.G.G₀ := (Λ.πo.comp (Subgroup.subtype _)).codRestrict _ fun g => g.2
 
-@[simp] theorem coe_π0 (N : ℕ) (g : Λ.Ph0) : (Λ.π0 N g : (T.GN N).Γ) = Λ.π N g := rfl
-
-@[simp] theorem coe_πo0 (g : Λ.Ph0) : (Λ.πo0 g : Λ.G.Γ) = Λ.πo g := rfl
-
 theorem π0_cont (N : ℕ) : Continuous (Λ.π0 N) := ((Λ.π_cont N).comp continuous_subtype_val).subtype_mk _
 
 theorem πo0_cont : Continuous Λ.πo0 := (Λ.πo_cont.comp continuous_subtype_val).subtype_mk _
@@ -229,7 +270,7 @@ variable {x} (k : Kap x) (κ' : Fin k.g → G'.G₀ → Matrix (Fin n) (Fin n) x
       have := (g.bd_iff _ _ _).2 hc
       rw [e] at this
       convert this using 1
-      funext a
+      ext a
       simp only [Finset.sum_apply, Pi.smul_apply, hκ])
     gen := fun z hz => by
       have h1 := (g.sel_iff _ _ _ _ _ _).2 hz
@@ -238,8 +279,8 @@ variable {x} (k : Kap x) (κ' : Fin k.g → G'.G₀ → Matrix (Fin n) (Fin n) x
       refine ⟨s, c, (g.bd_iff _ _ _).1 ?_⟩
       rw [e]
       convert hc using 1
-      funext a
-      simp only [Pi.sub_apply, Finset.sum_apply, Pi.smul_apply, hκ] }
+      ext a
+      simp only [Pi.sub_apply, Pi.smul_apply, Finset.sum_apply, hκ] }
 
 end Desc
 

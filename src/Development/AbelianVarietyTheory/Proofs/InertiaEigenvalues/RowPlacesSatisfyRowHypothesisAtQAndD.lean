@@ -1,12 +1,47 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.EmbeddingTypeJumps
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Formalism.SharpRestriction.LevelLetterCocycles.LargeLevelLemmas
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.CommutingEndomorphismCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.UsedConclusionOfUsedInputs
-import Formalism.GaloisCohomology.LocalTateDualityK
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.RationalDualityOfAllCoefficients
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsCrystallineJumpsOfIsIsoMatrixGaloisRepresentat
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.EmbeddingTypeJumps
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsCrystallineJumpsOfIsIsoMatrixGaloisRepresentat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations Formalism.ConjugateSelfDual ReciprocityTheory.Gal NumberField IsDedekindDomain
 
 noncomputable section
@@ -14,22 +49,6 @@ noncomputable section
 namespace GlobalTheory.RowBoundB
 
 open Module
-
-theorem good_one {l : ℕ} [Fact l.Prime] {K LL : FinExt l} {s : ℕ} (hl : l ≠ 2) (h : Good K s LL)
-    (hK : K.1 ≤ Ks K 1) : Good K 1 LL := by
-  obtain ⟨hs, -, -, hτ⟩ := h
-  refine ⟨le_rfl, fun h2 => absurd h2 hl, hK, fun τ x => ?_⟩
-  have hle : Ks K 1 ≤ Ks K s := by
-    refine sup_le_sup_left (IntermediateField.adjoin.mono _ _ _ ?_) _
-    intro y hy
-    obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hs
-    simp only [Set.mem_setOf_eq] at hy ⊢
-    rw [pow_add, pow_mul, hy, one_pow]
-  obtain ⟨φ, hφ⟩ := IsAlgClosed.surjective_restrictDomain_of_isAlgebraic (K := ℚ_[l]) (L := ↥(Ks K 1))
-    (M := Om l) (E := Om l) τ
-  have := hτ (φ.comp (Ks K s).val) ⟨x.1, hle x.2⟩
-  rw [← hφ]
-  exact this
 
 theorem jump_windows (η Sc b : ℝ) (t : ℕ) (hη : 0 < η) (hS : 0 < Sc) (ht : 1 ≤ (t : ℝ))
     (hpar : Sc + η + t + 2 ≤ b) (s : ℤ) (Jc Jl : Finset ℤ)
@@ -193,7 +212,8 @@ theorem row_bound : ∀ (D : D7) (r : ∀ i : D.nd.Loc, D.nd.X i → (GE D.nd �
     have h := ((hLit i hi).2.2.1 w hw).2.2
     unfold Br.DegW at h
     rw [← h, ← he]
-    exact (Module.finrank_mul_finrank _ _ _).symm
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact (Module.finrank_mul_finrank _ _ _).symm
   have hT := hA (D.nd.l i) hl2 _ _ hG
   have hη := large₂.etaSz_pos
   have hS := large₂.Sc_pos

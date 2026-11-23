@@ -1,9 +1,59 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LinearChangeEulerProductStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LinearChangeEulerProductStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +73,8 @@ theorem map_eq_of_conj {W V : Type} [AddCommGroup W] [TopologicalSpace W] [IsTop
     funext x
     simp [← hc x]
   rw [hT, ← Measure.map_map hs.measurable (hB.measurable.comp he.measurable),
-    ← Measure.map_map hB.measurable he.measurable, hν, Measure.map_smul,
+    ← Measure.map_map hB.measurable he.measurable, hν,
+    Measure.map_smul c (hs.measurable.aemeasurable),
     Measure.map_map hs.measurable he.measurable]
   have : (e.symm ∘ e : W → W) = id := by
     funext x
@@ -39,7 +90,8 @@ theorem repr_mul_incl (y : R ⊗[F] E) (e : E) (k : Fin d) :
     (Algebra.TensorProduct.basis R b).repr (y * inclR R e) k =
       ∑ l, (Algebra.TensorProduct.basis R b).repr y l * algebraMap F R (b.repr (b l * e) k) := by
   conv_lhs => rw [← (Algebra.TensorProduct.basis R b).sum_repr y]
-  rw [Finset.sum_mul, map_sum, Finsupp.finset_sum_apply]
+
+  rw [Finset.sum_mul, map_sum, Finsupp.finsetSum_apply]
   refine Finset.sum_congr rfl fun l _ => ?_
   rw [smul_mul_assoc, map_smul, Finsupp.smul_apply, Algebra.TensorProduct.basis_apply]
   simp [inclR, Algebra.TensorProduct.tmul_mul_tmul, Algebra.TensorProduct.basis_repr_tmul]
@@ -65,7 +117,8 @@ theorem coE_rmul {n M : ℕ} (X : Fin n → Fin M → R ⊗[F] E) (g : Matrix (F
     coE b R n M (rmul R X (g.map (inclR R))) = (coMat b g M).map (algebraMap F R) *ᵥ coE b R n M X := by
   funext ⟨a, i, k⟩
   change (Algebra.TensorProduct.basis R b).repr (∑ c, X c i * inclR R (g c a)) k = _
-  rw [map_sum, Finsupp.finset_sum_apply]
+
+  rw [map_sum, Finsupp.finsetSum_apply]
   simp only [Matrix.mulVec, dotProduct, Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [repr_mul_incl, Finset.sum_eq_single i]

@@ -1,6 +1,50 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EigLatLe
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOneOfFiniteOrderUnipotentModTwoPrimes
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteOrderFibreAutAtLevelMoveFixedPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFixedComplexPointOfFixedFieldPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FreeActionFramedPointsOfUnipotentModTwoPrimes
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeriodLatticeActionOfFiniteOrderAutomorphismStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SubMemSmulTopOfNeatLevel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FreeActionFramedPointsOfUnipotentModTwoPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open CategoryTheory NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.L2.Pj GlobalTheory.DualWeyl GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.CompHt GlobalTheory.DefPt ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD
 open scoped Matrix Classical
 
@@ -37,7 +81,7 @@ theorem eq_one_of_prime_order [IsDomain R] [IsNoetherianRing R] [Module.Finite R
   obtain ⟨Q, hQ⟩ := exists_poly hg
   set N : Module.End R M := β - 1 with hN
   have hQ' := congrArg (Polynomial.aeval N) hQ
-  simp only [map_pow, map_add, map_mul, Polynomial.aeval_X, map_one, map_natCast] at hQ'
+  simp only [map_pow, map_add (f := _), map_mul, Polynomial.aeval_X, map_one, map_natCast] at hQ'
   set q : Module.End R M := Polynomial.aeval N Q with hq
   have hcomm : N * q = q * N := by
     have := congrArg (Polynomial.aeval N) (mul_comm Polynomial.X Q)
@@ -46,7 +90,7 @@ theorem eq_one_of_prime_order [IsDomain R] [IsNoetherianRing R] [Module.Finite R
   have hrel : ∀ z, (g : R) • (N z + N (N (q z))) = - (N ^ g) z := by
     intro z
     have := congrArg (fun T : Module.End R M => T z) hQ'
-    simp only [LinearMap.add_apply, Module.End.mul_apply, Module.End.one_apply, Module.End.natCast_apply, map_add] at this
+    simp only [LinearMap.add_apply, Module.End.mul_apply, Module.End.one_apply, Module.End.natCast_apply, map_add (f := _)] at this
     rw [Nat.cast_smul_eq_nsmul, eq_neg_iff_add_eq_zero]
     have e : z + ((g • (N z + N (N (q z)))) + (N ^ g) z) = z + 0 := by
       rw [add_zero, smul_add]; conv_rhs => rw [this]
@@ -252,7 +296,7 @@ theorem sub_mem_smul_top_of_level (E : Type) [Field E] [NumberField E] (La Λ Q 
 open AlgebraicGeometry Limits MonoidalCategory CartesianMonoidalCategory MonObj ReciprocityTheory.ChartRestriction.G.Semi
 attribute [local instance] Over.cartesianMonoidalCategory
 
-set_option maxHeartbeats 800000 in
+
 
 theorem free_of_unip_one (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H)
     (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (G : Type) [Group G] (h : G → (Dw.La →ₗ[𝓞 E] Dw.La)) (m q₀ : ℕ)

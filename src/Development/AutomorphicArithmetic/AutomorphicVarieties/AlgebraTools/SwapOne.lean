@@ -1,8 +1,61 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkBern
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.SwapOneAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqOneOfStrictMono
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkDefs
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqOneOfStrictMono
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkBern
 import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.HkInd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.SwapOneAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Equiv UpperTheory.V.AlgebraTools.Hk
 
@@ -29,7 +82,7 @@ private theorem swap_one {R : Type} [CommRing R] {n : ℕ} {q : R} {H : Type} [R
     omega
   have e := (hA a c h 1 hlt).2.2
   rw [mul_one, show invN (1 : Perm (Fin n)) = 0 by rw [invN, h1, Finset.card_empty], zero_add] at e
-  rw [(UpperTheory.V.AlgebraTools.hkOne R n q H b).1, e, pow_one]
+  rw [(UpperTheory.V.AlgebraTools.hkOne R n q H b).1 (swap a c), e, pow_one]
 
 private theorem step {R : Type} [CommRing R] [IsDomain R] {n : ℕ} {q : R} {H : Type} [Ring H] [Algebra R H]
     (b : Bern n q H) (K : Type) [Field K] [Algebra (MvPolynomial (Fin n) R) K]
@@ -47,14 +100,14 @@ private theorem step {R : Type} [CommRing R] [IsDomain R] {n : ℕ} {q : R} {H :
   · have e1 : (C q * rename (swap a c) y + (C q - 1) * (X a * z) : MvPolynomial (Fin n) R) =
         q • rename (swap a c) y + (q - 1) • (X a * z) := by
       rw [smul_eq_C_mul, smul_eq_C_mul, map_sub, map_one]
-    rw [hT, e1, map_add, map_smul, map_smul, add_mul, add_mul, mul_assoc, swap_one b h, mul_smul_comm,
+    rw [hT, e1, map_add (f := _), map_smul, map_smul, add_mul, add_mul, mul_assoc, swap_one b h, mul_smul_comm,
       smul_mul_assoc q]
   · have hne : algebraMap (MvPolynomial (Fin n) R) K (X a - X c) ≠ 0 := by
       rw [Ne, map_eq_zero_iff _ (IsFractionRing.injective _ K), sub_eq_zero]
       exact fun e => hac (X_injective e)
     have hz' := congrArg (algebraMap (MvPolynomial (Fin n) R) K) hz
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hne]
-    simp only [map_add, map_mul, map_sub, map_one] at hz' ⊢
+    simp only [map_add (f := _), map_mul, map_sub, map_one] at hz' ⊢
     linear_combination (algebraMap (MvPolynomial (Fin n) R) K (C q) - 1) *
       algebraMap (MvPolynomial (Fin n) R) K (X a) * hz'
 
@@ -88,7 +141,9 @@ theorem UpperTheory.V.AlgebraTools.hkAct :
       obtain ⟨y', hy', hyK'⟩ := step b K h y
       refine ⟨y', ?_, ?_⟩
       · rw [b.T_mul a c h w hw, mul_assoc (b.T _), mul_assoc (b.T _), hy, ← mul_assoc, hy']
-      · rw [hyK', ← hσ, hyK, map_sum, Finset.mul_sum, Finset.mul_sum]
+      ·
+
+        rw [hyK', ← hσ, hyK, map_sum, Finset.mul_sum, Finset.mul_sum]
         simp only [add_mul, Finset.sum_add_distrib, mul_assoc]
         congr 1
         refine Fintype.sum_equiv (Equiv.mulLeft (swap a c)) _ _ fun u => ?_

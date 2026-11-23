@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsIsoQuotToImOmegaLieOfSplit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsFrameOfForallExists
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.AlWellDefSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsEquivariantToBidual
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -28,19 +71,6 @@ section Frames
 
 variable {X : Scheme.{0}} {F : X.Modules}
 
-theorem isIso_toBidual_of_local_frames (h : ∀ x : X, ∃ (U : X.Opens) (n : ℕ) (e : Fin n → Γ(F, U)),
-    x ∈ U ∧ IsFrame e) : IsIso (cartierDualToBidual F) := by
-  choose U n e hx he using h
-  refine Twist.isIso_of_cover _ (U := U) (top_le_iff.1 fun x _ => Opens.mem_iSup.2 ⟨x, hx x⟩)
-    fun x W hW => ?_
-  have : appLinear (cartierDualToBidual F) W = ((he x).equiv (he x).dual.dual hW).toLinearMap :=
-    ((he x).basis hW).ext fun i => by
-      rw [IsFrame.basis_apply, LinearEquiv.coe_coe, IsFrame.equiv_resM_frame,
-        ← (he x).toBidual_app]
-      exact app_resM (cartierDualToBidual F) hW (e x i)
-  rw [← QCoh.coe_appLinear, this]
-  exact ((he x).equiv (he x).dual.dual hW).bijective
-
 theorem isQuasicoherent_of_frames (h : ∀ x : X, ∃ (U : X.Opens) (n : ℕ) (e : Fin n → Γ(F, U)),
     x ∈ U ∧ IsFrame e) : F.IsQuasicoherent := by
   choose U n e hx he using h
@@ -51,29 +81,6 @@ theorem isQuasicoherent_of_frames (h : ∀ x : X, ∃ (U : X.Opens) (n : ℕ) (e
       ((isFrame_restrict_iff (U x).ι _).2 ((he x).res ((U x).ι_image_le ⊤))))
 
 end Frames
-
-theorem dualApp_top_bijective {O : Type} [CommRing O] (F : (Sp O).Modules) [F.IsQuasicoherent] :
-    Function.Bijective fun l : Γ(dual F, ⊤) => dualApp l (le_refl ⊤) := by
-  have : IsIso ((tilde.adjunction (R := .of O)).counit.app F) :=
-    Scheme.Modules.isIso_fromTildeΓ_of_isQuasicoherent (R := .of O) F
-  have h := map_bijective_of_isIso_counit (tilde.adjunction (R := .of O)) F
-    (structureModule (Sp O))
-  constructor
-  · intro l l' e
-    apply (homGlobalEquiv F _).injective
-    apply h.1
-    ext s
-    exact congr($e s)
-  · intro f
-    let g : (moduleSpecΓFunctor (R := .of O)).obj F →ₗ[CommRingCat.of O]
-        (moduleSpecΓFunctor (R := .of O)).obj (structureModule (Sp O)) :=
-      { toFun := f
-        map_add' := f.map_add
-        map_smul' := fun a s => f.map_smul
-          ((Sp O).presheaf.map (Opens.leTop ⊤).op ((Scheme.ΓSpecIso (.of O)).inv a)) s }
-    obtain ⟨φ, hφ⟩ := h.2 (ConcreteCategory.ofHom (C := ModuleCat (CommRingCat.of O)) g)
-    refine ⟨(homGlobalEquiv F _).symm φ, LinearMap.ext fun s => ?_⟩
-    exact congr($hφ s)
 
 variable {O : Type} [CommRing O] {G : Over (Sp O)} [GrpObj G]
 
@@ -92,48 +99,5 @@ theorem fst_scale (a : O) (x : LieG G) : ptMap (TrivSqZeroExt.fstHom O O O) ≫
   rw [← Spec.map_comp]
   congr 1
   ext y <;> simp [dualScale]
-
-theorem toOmega_bijective (O : Type) [CommRing O] (G : Over (Sp O)) [GrpObj G]
-    [QuasiSeparated G.hom] [Smooth G.hom]
-    (ht : Function.Bijective (tangent : LieG G → Γ(Lie G, ⊤))) :
-    Function.Bijective (toOmega G) := by
-  have h₁ := isIso_toBidual_of_local_frames (exists_isFrame_omega G)
-  have h₂ : (Lie G).IsQuasicoherent := isQuasicoherent_of_frames fun x =>
-    have ⟨U, n, _, hx, he⟩ := exists_isFrame_omega G x
-    ⟨U, n, _, hx, he.dual⟩
-  have h₃ := (dualApp_top_bijective (Lie G)).comp
-    (ConcreteCategory.bijective_of_isIso ((cartierDualToBidual (LieVB.omega G)).app ⊤))
-  have key (w : Γ(LieVB.omega G, ⊤)) (l : Γ(Lie G, ⊤)) :
-      dualApp ((cartierDualToBidual (LieVB.omega G)).app ⊤ w) (le_refl ⊤) l = dualApp l le_top w := by
-    rw [dualSheafSectionApply_toBidual, resM_self]
-  have hc := ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (.of O)).hom
-  have hc' := ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (.of O)).inv
-  constructor
-  · intro w w' e
-    refine h₃.1 (LinearMap.ext fun l => ?_)
-    obtain ⟨x, rfl⟩ := ht.2 l
-    exact (key w _).trans ((hc.1 congr(($e).1 x)).trans (key w' _).symm)
-  · rintro ⟨f, hf₁, hf₂⟩
-    let t := Equiv.ofBijective _ ht
-    have ht' (x : LieG G) : t.symm (tangent x) = x := t.symm_apply_apply x
-    let g : Γ(Lie G, ⊤) →ₗ[Γ(Sp O, ⊤)] Γ(Sp O, ⊤) :=
-      { toFun := fun l => cst O (f (t.symm l))
-        map_add' := fun l l' => by
-          obtain ⟨x, rfl⟩ := ht.2 l
-          obtain ⟨y, rfl⟩ := ht.2 l'
-          rw [← tangent_mul x y (fst_mul x y), ht' x, ht' y, ← map_add, ← hf₁ x y (fst_mul x y)]
-          exact congrArg (fun y => cst O (f y)) (ht' _)
-        map_smul' := fun a l => by
-          obtain ⟨x, rfl⟩ := ht.2 l
-          obtain ⟨a, rfl⟩ : ∃ b, cst O b = a := hc'.2 a
-          rw [← tangent_scale a x (fst_scale a x), ht' x, RingHom.id_apply, smul_eq_mul, ← map_mul,
-            ← hf₂ a x (fst_scale a x)]
-          exact congrArg (fun y => cst O (f y)) (ht' _) }
-    obtain ⟨w, hw⟩ := h₃.2 g
-    refine ⟨w, Subtype.ext (funext fun x => ?_)⟩
-    have e : dualApp (tangent x) le_top w = cst O (f x) :=
-      (key w _).symm.trans (congr($hw (tangent x)).trans (congrArg (fun y => cst O (f y)) (ht' x)))
-    rw [toOmega_apply, e]
-    exact Iso.inv_hom_id_apply _ _
 
 end GlobalTheory.OmegaGlobal

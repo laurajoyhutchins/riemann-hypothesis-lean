@@ -1,20 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevChiEqOne
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.XiEqXiOffMul
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ChartsReadingStepMoveBasePointsOneOffLevelPrime
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.MemMoveLevUloc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleBasePointUnitaryNormalisesLevelStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryGroupAdelicClassesViaFiniteAdelicPart
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsDetRoot
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MoveCompactLevelInvariant
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RepresentativeImagePointOfLift
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotTopPtOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistPrimesAwayLevelAndTypePrimes
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitaryAdelicTwistDiagonalAtPrimes
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitaryDiagonalBasePointLevelPrime
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChartNonempty
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevChiEqOne
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.MemMoveLevUloc
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ResidueEqZeroIff
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotTopPtOne
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ChartNonempty
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MoveCompactLevelInvariant
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleBasePointUnitaryNormalisesLevelStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsDefiniteLaws
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartLevelTwistTrivialLocalMove
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsDetRoot
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitaryAdelicTwistDiagonalAtPrimes
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitaryDiagonalBasePointLevelPrime
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InclMulInvMul
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevOkTwists
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PointOverXHasAdelicPointBlockExtendMul
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RepresentativeImagePointOfLift
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoords
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TwistPrimesAwayLevelAndTypePrimes
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ChartsReadingStepMoveBasePointsOneOffLevelPrime
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryGroupAdelicClassesViaFiniteAdelicPart
+import Formalism.LocalToGlobal.Columns.RecLevelLocP
+import Formalism.LocalToGlobal.Columns.RecLevelStep
+import Formalism.LocalToGlobal.Columns.RowFormsAdelic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.FiniteDimensionalMram
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Forms Formalism.UG
 open NumberField IsDedekindDomain Matrix MeasureTheory GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.MixPer GlobalTheory.Core.Rk GlobalTheory.AdForm
 open scoped TensorProduct Classical
@@ -52,29 +102,23 @@ theorem reads_move' (I : TC B X) {u : B.Word} {a : I.ι} {i : ℕ} {Ch : Type}
     (hT : ∀ β (P : (B.primes X).vT u) (r j : Fin (B.R.N i)), r.1 + 1 = B.R.N i →
       HasRes P.1 (adAt B.host.F P.1 ((((k' β)⁻¹ * k β)⁻¹ : TC.GA B (B.R.N i)).1 r j))
         (if j = r then Ideal.Quotient.mk P.1.asIdeal (B.fields.conjO (X.piT u)) else 0)) :
-    I.Reads u a i chOf Lb U' chi' (fun c => y c * k' (chOf c)) st (fun β => (k' β)⁻¹ * k β) where
-  key := R.key
-  onto := R.onto
-  lb := R.lb
-  k_std := hstd
-  k_off := hoff
-  k_T := hT
-  pt := fun c => by
+    I.Reads u a i chOf Lb U' chi' (fun c => y c * k' (chOf c)) st (fun β => (k' β)⁻¹ * k β) := by
+  refine ⟨R.key, R.onto, R.lb, hstd, hoff, hT, ?_, ?_, ?_, R.stab⟩
+  · intro c
     have e : y c * k' (chOf c) * ((k' (chOf c))⁻¹ * k (chOf c)) = y c * k (chOf c) := by group
     rw [e]
     exact R.pt c
-  lev := fun c x q hq => by
+  · intro c x q hq
     have e : y c * k' (chOf c) * x * ((k' (chOf c))⁻¹ * k (chOf c)) = y c * (k' (chOf c) * x * (k' (chOf c))⁻¹) * k (chOf c) := by
       group
     rw [e] at hq
     exact (hU (chOf c) x).trans (R.lev c _ q hq)
-  chr := fun c x κ hκ hq => by
+  · intro c x κ hκ hq
     have e : y c * k' (chOf c) * x.1 * ((k' (chOf c))⁻¹ * k (chOf c)) =
         y c * (k' (chOf c) * x.1 * (k' (chOf c))⁻¹) * k (chOf c) := by group
     rw [e] at hq
     rw [hchi]
     exact R.chr c _ κ hκ hq
-  stab := R.stab
 
 section Gen
 
@@ -100,7 +144,7 @@ theorem exists_basePt_on (S : StepLevel F E σ J T f bad) (k : GL (Fin n) (E ⊗
 
 end Gen
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_mv {I : TC B X} (hI : I.Ok) (hP : TC.Pins B X) {l : I.Laws} {Z : TC.Later B (I.cols l)} {u : B.Word} {a : I.ι}
     {Ch : ℕ → Type} (A : TwDat I l Z u a Ch) (hA : A.Is) (i : ℕ) (hi : i ≤ B.R.m) (β : Ch i)
@@ -198,7 +242,7 @@ theorem isPtOf_move (S : Set (HeightOneSpectrum (𝓞 F))) {g k k₁ : GL (Fin n
   have hT : ∀ P ∈ ST, ∀ i j, adAt F P ((m : Matrix (Fin n) (Fin n) (AfE F E)) i j) =
       adAt F P (((1 : GL (Fin n) (AfE F E)) : Matrix (Fin n) (Fin n) (AfE F E)) i j) := fun P hP i j =>
     adAt_congr_bc (by rw [em2 _ (hST P hP), map_one]) i j
-  have hh : ∀ w : SG, LevRead.IsRed w.1 m ((1 : GLG E n SG) w) := fun w => by
+  have hh : ∀ w : SG, LevRead.IsRed w.1 m ((1 : GLG (E := E) (n := n) (SG := SG)) w) := fun w => by
     show LevRead.IsRed w.1 m ((1 : GL (Fin n) (𝓞 E ⧸ w.1.asIdeal)) : Matrix (Fin n) (Fin n) (𝓞 E ⧸ w.1.asIdeal))
     rw [Units.val_one]
     by_cases hw : w.1.under (𝓞 F) ∈ S
@@ -212,7 +256,7 @@ theorem isPtOf_move (S : Set (HeightOneSpectrum (𝓞 F))) {g k k₁ : GL (Fin n
     rfl
   have H := LevLiftPt.isPtOf_mul_fr hp hmU h1 h2 hT hh 1 hfr
   have e1 : g * k * m⁻¹ = g * k₁ := by rw [hm]; group
-  have e2 : ((1, 1, 1) : UF E n × GLG E n SG × GLQ E n Q) • p = p := one_smul _ p
+  have e2 : ((1, 1, 1) : UF E n × GLG (E := E) (n := n) (SG := SG) × GLQ E n Q) • p = p := one_smul _ p
   rw [e1, e2] at H
   exact H
 
@@ -268,7 +312,7 @@ theorem isRed_one_of_inv {P : HeightOneSpectrum (𝓞 E)} {k : GL (Fin n) (AfE F
 
 end Red
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem isRed_one_of_topPt (I : TC B X) (hI : I.Ok) (hP : TC.Pins B X) (l : I.Laws) (Z : TC.Later B (I.cols l)) (u : B.Word)
     (a : I.ι) (k : TC.GA B (B.R.N B.R.m))
@@ -331,10 +375,10 @@ theorem isRed_one_of_topPt (I : TC B X) (hI : I.Ok) (hP : TC.Pins B X) (l : I.La
     (fun i j => by rw [inv_inv]; exact (val_le_one_of_carries hkl w i j).1)
   have hA' : LevRead.IsRed w m A := fun i j => by rw [em]; exact hA i j
   have e1 : k0 * t * m⁻¹ = k := by rw [hm]; group
-  have hq' : IsPtOf B.sp.cm (k0 * t * m⁻¹) (((1, 1, 1) : UF B.fields.E (B.R.N B.R.m) × GLG B.fields.E (B.R.N B.R.m) (B.primes X).vGs ×
+  have hq' : IsPtOf B.sp.cm (k0 * t * m⁻¹) (((1, 1, 1) : UF B.fields.E (B.R.N B.R.m) × GLG (E := B.fields.E) (n := B.R.N B.R.m) (SG := (B.primes X).vGs) ×
       GLQ B.fields.E (B.R.N B.R.m) (QE I.sel (I.tup a))) • tilF I.sel (I.tup a) u
         (DecoF.base B.fields.E (B.R.N B.R.m - 1) ∅ (B.primes X).vGs (QE I.sel (I.tup a)))) := by
-    rw [e1, show ((1, 1, 1) : UF B.fields.E (B.R.N B.R.m) × GLG B.fields.E (B.R.N B.R.m) (B.primes X).vGs ×
+    rw [e1, show ((1, 1, 1) : UF B.fields.E (B.R.N B.R.m) × GLG (E := B.fields.E) (n := B.R.N B.R.m) (SG := (B.primes X).vGs) ×
       GLQ B.fields.E (B.R.N B.R.m) (QE I.sel (I.tup a))) = 1 from rfl, one_smul]
     exact hp
   have e2 := LevRead.eq_red hp' hq' ⟨w, hw⟩ hA'
@@ -357,7 +401,7 @@ def mvEl (hI : I.Ok) (hP : TC.Pins B X) (A : TwDat I l Z u a Ch) (hA : A.Is) (i 
     basePts (A.K i hi β).lev :=
   if i = B.R.m then (exists_mv hI hP A hA i hi β (offPl I u a) (offPl_finite I u a) fun _ hv => hv.2.1).choose else 1
 
-set_option maxHeartbeats 2000000 in
+
 theorem mvEl_spec (hI : I.Ok) (hP : TC.Pins B X) (A : TwDat I l Z u a Ch) (hA : A.Is) (i : ℕ) (hi : i ≤ B.R.m) (β : Ch i) :
     (∀ v : HeightOneSpectrum (𝓞 B.host.F), bc (prV (E := B.host.E) v) (mvEl hI hP A hA i hi β).1 = bc (prV (E := B.host.E) v) (A.kb i β) ∨
       bc (prV (E := B.host.E) v) (mvEl hI hP A hA i hi β).1 = 1) ∧
@@ -424,7 +468,7 @@ theorem mvW_spec (hI : I.Ok) (hP : TC.Pins B X) (A : TwDat I l Z u a Ch) (hA : A
   rw [e]
   exact mvLift_spec hI hP A hA i hi β
 
-set_option maxHeartbeats 2000000 in
+
 
 def moved (hI : I.Ok) (hP : TC.Pins B X) (A : TwDat I l Z u a Ch) (hA : A.Is) : TwDat I l Z u a Ch where
   bad := A.bad
@@ -485,7 +529,7 @@ section Main
 
 variable {I : TC B X} {l : I.Laws} {Z : TC.Later B (I.cols l)} {u : B.Word} {a : I.ι} {Ch : ℕ → Type}
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem moved_is (hI : I.Ok) (hP : TC.Pins B X) (A : TwDat I l Z u a Ch) (hA : A.Is) : (moved hI hP A hA).Is := by
   have hPr := l.pr
@@ -600,7 +644,7 @@ theorem moved_is (hI : I.Ok) (hP : TC.Pins B X) (A : TwDat I l Z u a Ch) (hA : A
     obtain ⟨n, hn, h⟩ := hA.fin i hi β
     exact ⟨n, hn, fun κ => h ⟨(mvEl hI hP A hA i hi β).1 * κ.1 * (mvEl hI hP A hA i hi β).1⁻¹, κ.2⟩⟩
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem exists_twDat_top_trivial : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → TC.Pins B X → ∀ (l : I.Laws) (Z : TC.Later B (I.cols l)) (u : B.Word) (a : I.ι) (Ch : ℕ → Type) (A : TwDat I l Z u a Ch), A.Is → Nonempty (Unique (Ch B.R.m)) → ∃ A' : TwDat I l Z u a Ch, A'.Is ∧ (∀ i, i < B.R.m → ∀ β, A'.kb i β = A.kb i β) ∧ ∀ β (v : HeightOneSpectrum (𝓞 B.host.F)), ((B.T u : ℕ) : 𝓞 B.host.F) ∉ v.asIdeal → ¬ I.UnderQ a v → Formalism.UG.bc (Formalism.UG.prV (E := B.host.E) v) (A'.kb B.R.m β) = 1 := by
   intro B X I hI hP l Z u a Ch A hA _

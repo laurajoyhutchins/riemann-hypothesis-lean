@@ -1,11 +1,46 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsAdaptedAt
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.LinPart
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsAdaptedAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 open NumberField Matrix MeasureTheory Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GroundTheory.Heights₂.Heights.FiniteCovolume GroundTheory.Automorphic GlobalTheory.CompanionTheory.Ar.Cusp.Dict
 open scoped ENNReal InnerProductSpace
@@ -18,14 +53,6 @@ namespace GlobalTheory.CompanionTheory.Ar.Cusp.Dict.Adapted
 section Lin
 
 variable {a b : ℕ}
-
-noncomputable def linPart (f : (Fin a → ℂ) →ₗ[ℝ] (Fin b → ℂ)) : (Fin a → ℂ) →ₗ[ℂ] (Fin b → ℂ) :=
-  _root_.UpperTheory.Reformulated.B.ComplexLinearPart.linPart f
-
-def starR : (Fin a → ℂ) →ₗ[ℝ] (Fin a → ℂ) where
-  toFun := star
-  map_add' := star_add
-  map_smul' r y := by funext i; simp
 
 end Lin
 
@@ -44,55 +71,6 @@ section Lat
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {Ψ : Type} [Fintype Ψ] {j j' n g : ℕ} {Λ : Type}
   [AddCommGroup Λ] [Module (𝓞 E) Λ] {F : UnivFam E Ψ j j' n g Λ} (C : LatEmb F) (R : RiemLat E g Λ)
 
-theorem vec_add (x y : Λ) : C.vec (x + y) = C.vec x + C.vec y := by
-  funext τ i
-  simp [LatEmb.vec]
-
-def vecHom : Λ →+ (Ψ → Fin (j + j') → ℂ) := AddMonoidHom.mk' C.vec (vec_add C)
-
-def imB : (Fin g → ℂ) →ₗ[ℝ] (Fin g → ℂ) →ₗ[ℝ] ℝ :=
-  LinearMap.mk₂ ℝ (fun z z' => (z ⬝ᵥ R.Hm *ᵥ star z').im)
-    (fun z z' w => by simp [add_dotProduct])
-    (fun r z w => by simp [smul_dotProduct])
-    (fun z w w' => by simp [star_add, mulVec_add, dotProduct_add])
-    (fun r z w => by simp [star_smul, mulVec_smul, dotProduct_smul])
-
-def fmB : (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] ℝ :=
-  LinearMap.mk₂ ℝ C.Fm
-    (fun z z' w => by
-      simp only [LatEmb.Fm, ← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl fun τ _ => ?_
-      simp [mulVec_add, dotProduct_add, mul_add])
-    (fun r z w => by
-      simp only [LatEmb.Fm, smul_eq_mul, Finset.mul_sum]
-      refine Finset.sum_congr rfl fun τ _ => ?_
-      simp [mulVec_smul, dotProduct_smul]
-      ring)
-    (fun z w w' => by
-      simp only [LatEmb.Fm, ← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl fun τ _ => ?_
-      simp [add_dotProduct, mul_add])
-    (fun r z w => by
-      simp only [LatEmb.Fm, smul_eq_mul, Finset.mul_sum]
-      refine Finset.sum_congr rfl fun τ _ => ?_
-      simp [star_smul, smul_dotProduct]
-      ring)
-
-def actV (c : 𝓞 E) : (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] (Ψ → Fin (j + j') → ℂ) where
-  toFun y τ := F.σ τ c • y τ
-  map_add' y y' := by funext τ i; simp [mul_add]
-  map_smul' r y := by funext τ i; simp; ring
-
-open Classical in
-
-def perAt (τ : Ψ) : (Fin (j + j') → ℂ) →ₗ[ℝ] (Fin g → ℂ) :=
-  C.perExt R ∘ₗ LinearMap.single ℝ (fun _ : Ψ => Fin (j + j') → ℂ) τ
-
-def pPartL (τ : Ψ) : (Fin (j + j') → ℂ) →ₗ[ℂ] (Fin g → ℂ) := linPart (perAt C R τ)
-
-def pBarL (τ : Ψ) : (Fin (j + j') → ℂ) →ₗ[ℂ] (Fin g → ℂ) := linPart (perAt C R τ ∘ₗ starR)
-
-def bs (τ : Ψ) (u v : Fin (j + j') → ℂ) : ℂ := star v ⬝ᵥ C.sgr τ *ᵥ u
 
 theorem exists_adapted_at (hF : R.form = F.form) (hS : R.HasSig F.σ j j') (τ : Ψ) :
     ∃ A : Matrix (Fin (j + j')) (Sg j j') ℂ, Aᴴ * C.sgr τ * A = sgI j j' ∧

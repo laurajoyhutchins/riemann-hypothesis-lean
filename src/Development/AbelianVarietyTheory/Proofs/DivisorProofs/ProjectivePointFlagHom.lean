@@ -1,4 +1,58 @@
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlagPtGenMat
+module
+
+public import Mathlib.AlgebraicGeometry.Properties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsFlagBundleRankOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.FirstChernLeviEqConstant
+import Development.AbelianVarietyTheory.Definitions.Divisors.NefFibOfIsNef
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+import Development.AbelianVarietyTheory.Definitions.Divisors.SemiposAtOfPositive
+import Development.AbelianVarietyTheory.Definitions.Divisors.SlopeTestRemainingChoices
+import Development.AbelianVarietyTheory.Definitions.Foundations.CurveCl
+import Formalism.DegreeFormula.FlagDegFormula
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open NumberField MvPolynomial Filter Topology Formalism.BasicNotions Formalism.MainNotions Formalism.DegreeFormula GlobalTheory.FlagPoly GlobalTheory.Mean4 GlobalTheory.Mean4O GlobalTheory.CovTop GlobalTheory.CovHt GlobalTheory.CovTest GlobalTheory.Published
 open CategoryTheory AlgebraicGeometry ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.ArInt
 open scoped Classical
@@ -23,21 +77,5 @@ theorem eq_genericPoint_of_krullDim_zero {X : Scheme.{0}} [IsIntegral X] (h : to
   have : (0 : WithBot ℕ∞) < topologicalKrullDim X := Order.krullDim_pos_iff.2 ⟨_, _, hlt⟩
   rw [h] at this
   exact lt_irrefl _ this
-
-theorem toPt_comp_str (Y : GlobalTheory.ProjVar.Var ℚ) : toPt Y ≫ (GlobalTheory.ProjVar.proj ℚ 0).str = Y.str := by
-  have e : @inv _ _ _ _ (GlobalTheory.ProjVar.proj ℚ 0).ι (GlobalTheory.ProjVar.isIso_proj_ι ℚ 0) ≫ (GlobalTheory.ProjVar.proj ℚ 0).str =
-      PSpace.str ℚ 0 := by
-    haveI := GlobalTheory.ProjVar.isIso_proj_ι ℚ 0
-    exact IsIso.inv_hom_id_assoc (GlobalTheory.ProjVar.proj ℚ 0).ι (PSpace.str ℚ 0)
-  rw [toPt, Category.assoc, Category.assoc]
-  erw [e]
-  rw [ptQ, GlobalTheory.ProjSpace.pt_str, show spMap (RingHom.id ℚ) = 𝟙 _ from Spec.map_id _, Category.comp_id]
-
-theorem exists_isHom_toPt : ∀ (Y : GlobalTheory.ProjVar.Var ℚ), ∃ φ : (GlobalTheory.ProjVar.proj ℚ 0).Fn →ₐ[ℚ] Y.Fn,
-    (GlobalTheory.FlagBundle.ratOf (GlobalTheory.ProjVar.proj ℚ 0)).IsHom (GlobalTheory.FlagBundle.ratOf Y) φ (GlobalTheory.FlagQ.toPt Y) := by
-  intro Y
-  refine GlobalTheory.FlagBundle.exists_isHom_of_generic (GlobalTheory.FlagBundle.ratOf (GlobalTheory.ProjVar.proj ℚ 0)) (GlobalTheory.FlagBundle.ratOf Y) (toPt Y) (toPt_comp_str Y) ?_
-  refine eq_genericPoint_of_krullDim_zero ?_ _
-  exact (GlobalTheory.ProjVar.Var.topologicalKrullDim_eq _).trans (by rw [GlobalTheory.ProjVar.proj_dim]; rfl)
 
 end GlobalTheory.FlagQ

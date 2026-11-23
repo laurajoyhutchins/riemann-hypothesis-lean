@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.MirabolicMackeyTheory.StatementT
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+module
+
+public import Formalism.MirabolicMackeyTheory.StatementT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.EigenvalueLevelCeiling
 
@@ -10,18 +51,6 @@ theorem depth_cases : DepthCases := by
   refine ⟨fun a h1 h2 => by linarith, fun h1 h2 h3 => by linarith,
     fun s T β h1 h2 h3 h4 => by linarith, fun s T h1 h2 h3 => by linarith,
     fun T nn nnc g2 h1 h2 h3 => by linarith⟩
-
-theorem unipotent_numeric : UnipNum := by
-  unfold UnipNum
-  intro f r d dK δq hf hr hd hq
-  have hr0 : 0 ≤ r - 1 := by linarith
-  have hA : 0 ≤ f * r * (r - 1) / 2 :=
-    div_nonneg (mul_nonneg (mul_nonneg hf (by linarith)) hr0) (by norm_num)
-  have h1 : f * r * (r - 1) / 2 * (d + dK / δq) ≤ f * r * (r - 1) / 2 * (4 * d) :=
-    mul_le_mul_of_nonneg_left (by linarith) hA
-  have h2 : 0 ≤ f * r * d := mul_nonneg (mul_nonneg hf (by linarith)) hd
-  have h3 : f * r * (r - 1) / 2 * (4 * d) = 2 * f * r ^ 2 * d - 2 * (f * r * d) := by ring
-  linarith
 
 theorem budget_numeric : BudgetNum := by
   unfold BudgetNum
@@ -45,39 +74,5 @@ theorem share_numeric : ShareNum := by
   have k4 : d * (7 / 8 * U) ≤ d * δq := mul_le_mul_of_nonneg_left k2 hd
   have k5 : 3 / 4 * d0 * U ≤ d * U := mul_le_mul_of_nonneg_right k3 hU.le
   nlinarith
-
-theorem level_pair : LevelPair := by
-  unfold LevelPair
-  intro en enc T vs vsc nn nnc frn Dp Dm F h1 h2 hT hf hvs hvsc hn hF
-  subst hvs hvsc hF
-  refine ⟨by linarith, by linarith, by linarith, by linarith⟩
-
-theorem normaliser_pair : NormaliserPair := by
-  unfold NormaliserPair
-  intro K _ _ _ w π hπ Dp Dm
-  have hV := Formalism.DivisionValues.valuation_basic_properties K w
-  have hsπ : star π ≠ 0 := star_ne_zero.mpr hπ
-  have hpow : ∀ x : K, x ≠ 0 → ∀ n : ℕ, Formalism.DivisionValues.vw w (x ^ n) = (n : ℤ) * Formalism.DivisionValues.vw w x := by
-    intro x hx n
-    induction n with
-    | zero => simp [hV.2.2.2.2.1]
-    | succ n ih =>
-      rw [pow_succ, hV.1 _ _ (pow_ne_zero _ hx) hx, ih]
-      push_cast
-      ring
-  rw [← hV.2.1, star_mul, star_pow, star_pow, star_star,
-    hV.1 (star π ^ Dp) (π ^ Dm) (pow_ne_zero _ hsπ) (pow_ne_zero _ hπ),
-    hV.1 (star π ^ Dm) (π ^ Dp) (pow_ne_zero _ hsπ) (pow_ne_zero _ hπ),
-    hV.1 π (star π) hπ hsπ, hpow _ hsπ Dp, hpow _ hπ Dm, hpow _ hsπ Dm, hpow _ hπ Dp]
-  ring
-
-theorem unit_change' : UnitChange := by
-  unfold UnitChange
-  intro ρ x y d r k δ ε hρ hδ
-  have hρ' : ρ ≠ 0 := hρ.ne'
-  have hδ' : δ ≠ 0 := hδ.ne'
-  first
-    | (field_simp; ring)
-    | field_simp
 
 end Formalism.EigenvalueLevelCeiling

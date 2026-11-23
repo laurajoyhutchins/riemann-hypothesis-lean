@@ -1,6 +1,50 @@
-import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHaarAdelicVectorsBoundsPureTensorsSlices
+module
+
+public import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHaarAdelicVectorsBoundsPureTensorsSlices
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +56,7 @@ open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.Inde
 
 theorem memLp_two_of_lintegral {X : Type} [MeasurableSpace X] {μ : Measure X} {f : X → ℂ}
     (hm : AEStronglyMeasurable f μ) (h : ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ ≠ ⊤) : MemLp f 2 μ := by
-  refine ⟨hm, ?_⟩
-  rw [eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top two_ne_zero ENNReal.ofNat_ne_top]
+  rw [memLp_iff, eLpNorm_lt_top_iff_lintegral_rpow_eNorm_lt_top two_ne_zero ENNReal.ofNat_ne_top hm]
   simpa using h.lt_top
 
 theorem integral_sq_eq {X : Type} [MeasurableSpace X] {μ : Measure X} {f : X → ℂ} (hm : AEStronglyMeasurable f μ) :
@@ -27,7 +70,7 @@ theorem integral_sq_eq {X : Type} [MeasurableSpace X] {μ : Measure X} {f : X �
 theorem polar_pt (a b : ℂ) : a * (starRingEnd ℂ) b =
     (1 / 4 : ℂ) * (((‖a + b‖ ^ 2 : ℝ) : ℂ) - ((‖a - b‖ ^ 2 : ℝ) : ℂ) +
       (Complex.I * ((‖a + Complex.I * b‖ ^ 2 : ℝ) : ℂ) - Complex.I * ((‖a - Complex.I * b‖ ^ 2 : ℝ) : ℂ))) := by
-  simp only [← Complex.normSq_eq_norm_sq, ← Complex.mul_conj, map_add, map_sub, map_mul, Complex.conj_I]
+  simp only [← Complex.normSq_eq_norm_sq, ← Complex.mul_conj, map_add (f := _), map_sub, map_mul, Complex.conj_I]
   linear_combination (a * (starRingEnd ℂ) b - b * (starRingEnd ℂ) a) / 2 * Complex.I_mul_I
 
 theorem polar_int {X : Type} [MeasurableSpace X] {μ : Measure X} {f g : X → ℂ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
@@ -40,8 +83,8 @@ theorem polar_int {X : Type} [MeasurableSpace X] {μ : Measure X} {f g : X → �
   have h3 := hf.add (hg.const_smul Complex.I)
   have h4 := hf.sub (hg.const_smul Complex.I)
   have I : ∀ {k : X → ℂ}, MemLp k 2 μ → Integrable (fun x => ((‖k x‖ ^ 2 : ℝ) : ℂ)) μ := fun hk =>
-    ((memLp_two_iff_integrable_sq_norm hk.1).1 hk).ofReal
-  rw [← integral_sq_eq h1.1, ← integral_sq_eq h2.1, ← integral_sq_eq h3.1, ← integral_sq_eq h4.1,
+    ((memLp_two_iff_integrable_sq_norm hk.aestronglyMeasurable).1 hk).ofReal
+  rw [← integral_sq_eq h1.aestronglyMeasurable, ← integral_sq_eq h2.aestronglyMeasurable, ← integral_sq_eq h3.aestronglyMeasurable, ← integral_sq_eq h4.aestronglyMeasurable,
     ← integral_complex_ofReal, ← integral_complex_ofReal, ← integral_complex_ofReal, ← integral_complex_ofReal,
     ← integral_const_mul, ← integral_const_mul, ← integral_sub (I h1) (I h2),
     ← integral_sub ((I h3).const_mul _) ((I h4).const_mul _),
@@ -60,8 +103,9 @@ theorem continuous_schA {Φ : (κ → AF F) → ℂ} (hΦ : Φ ∈ schA F κ) : 
 theorem lintegral_sq_schwartz_gen {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     {m : MeasurableSpace V} (hB : BorelSpace V) (μ : Measure V) (hμ : μ.IsAddHaarMeasure) (f : SchwartzMap V ℂ) :
     ∫⁻ z, ‖f z‖ₑ ^ 2 ∂μ ≠ ⊤ := by
-  have := (f.memLp 2 μ).2
-  rw [eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top two_ne_zero ENNReal.ofNat_ne_top] at this
+  have hmem := f.memLp 2 μ
+  have := hmem
+  rw [memLp_iff, eLpNorm_lt_top_iff_lintegral_rpow_eNorm_lt_top two_ne_zero ENNReal.ofNat_ne_top hmem.aestronglyMeasurable] at this
   simpa using this.ne
 
 open scoped Classical in
@@ -69,8 +113,8 @@ theorem lintegral_sq_schwartz (f : SchwartzMap (κ → mixedEmbedding.mixedSpace
   have h0 : BorelSpace (mixedEmbedding.mixedSpace F) := Prod.borelSpace
   exact lintegral_sq_schwartz_gen Pi.borelSpace _ (GlobalTheory.WeilAdm.HaarSplit.volume_isAddHaar F κ) f
 
-open scoped Classical in
 
+open scoped Classical in
 theorem memLp_two_schA (μ : Measure (κ → AF F)) [μ.IsAddHaarMeasure] {Φ : (κ → AF F) → ℂ} (hΦ : Φ ∈ schA F κ) :
     MemLp Φ 2 μ := by
   have : BorelSpace (κ → AF F) := ⟨rfl⟩

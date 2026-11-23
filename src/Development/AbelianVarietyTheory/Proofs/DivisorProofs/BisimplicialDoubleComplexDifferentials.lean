@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTotalBiChains
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomogeneousClassSubstitution
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTotalBiChains
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits Opposite AlgebraicTopology GlobalTheory.EZ
 universe u v
 
@@ -8,22 +55,7 @@ noncomputable section
 namespace GlobalTheory.EZ
 
 theorem fc_eq_δ (n : ℕ) (i : Fin (n + 2)) : fc (n + 1) n i = SimplexCategory.δ i := by
-  ext j
-  simp only [fc, clampHom, faceFun, SimplexCategory.δ, SimplexCategory.mkHom, SimplexCategory.Hom.toOrderHom_mk,
-    OrderHom.coe_mk, OrderEmbedding.toOrderHom_coe, Fin.succAboveOrderEmb_apply]
-  rcases Fin.lt_or_le (Fin.castSucc j) i with hj | hj
-  · rw [Fin.succAbove_of_castSucc_lt _ _ hj]
-    have : (j : ℕ) < i := hj
-    simp only [this, if_true, Fin.coe_castSucc]
-    have := j.isLt
-    simp only [SimplexCategory.len_mk] at this ⊢
-    omega
-  · rw [Fin.succAbove_of_le_castSucc _ _ hj]
-    have : ¬ (j : ℕ) < i := by simpa [Fin.le_iff_val_le_val] using hj
-    simp only [this, if_false, Fin.val_succ]
-    have := j.isLt
-    simp only [SimplexCategory.len_mk] at this ⊢
-    omega
+  apply GlobalTheory.EZ.fc_succ_eq_delta <;> assumption
 
 theorem idc_self (n : ℕ) : idc n n = 𝟙 _ := by
   ext j
@@ -40,8 +72,9 @@ variable {C : Type u} [Category.{v} C] [Preadditive C]
 
 theorem dbl_d_f (Y : SimplicialObject (SimplicialObject C)) (a b : ℕ) :
     ((dbl Y).d (a + 1) a).f b = (ev Y).map (dH (a + 1) b a b) := by
+
   simp only [dH, and_self, if_true, Functor.map_sum, Functor.map_zsmul, ev_map_bop,
-    idc_self, op_id, CategoryTheory.Functor.map_id, Category.comp_id]
+  idc_self, op_id, CategoryTheory.Functor.map_id, Category.comp_id]
   rw [Finset.sum_range]
   dsimp only [dbl, alternatingFaceMapComplex]
   rw [AlternatingFaceMapComplex.obj_d_eq, hsum_f]
@@ -51,8 +84,9 @@ theorem dbl_d_f (Y : SimplicialObject (SimplicialObject C)) (a b : ℕ) :
 
 theorem dbl_X_d (Y : SimplicialObject (SimplicialObject C)) (a b : ℕ) :
     ((dbl Y).X a).d (b + 1) b = (ev Y).map (dV a (b + 1) a b) := by
+
   simp only [dV, and_self, if_true, Functor.map_sum, Functor.map_zsmul, ev_map_bop,
-    idc_self, op_id, CategoryTheory.Functor.map_id, NatTrans.id_app, Category.id_comp]
+  idc_self, op_id, CategoryTheory.Functor.map_id, NatTrans.id_app, Category.id_comp]
   rw [Finset.sum_range]
   change (AlternatingFaceMapComplex.obj (Y.obj (op (SimplexCategory.mk a)))).d (b + 1) b = _
   rw [AlternatingFaceMapComplex.obj_d_eq]
@@ -138,7 +172,7 @@ theorem ιTotal_tot_d (Y : SimplicialObject (SimplicialObject C)) (a b k : ℕ)
   change _ ≫ ((dbl Y).total (ComplexShape.down ℕ)).d (k + 1) k = _
   rw [HomologicalComplex₂.total_d, Preadditive.comp_add, ιTotal_D₁ Y a b k h, ιTotal_D₂ Y a b k h]
   refine Eq.trans Finset.sum_add_distrib.symm (Finset.sum_congr rfl (fun x _ => ?_))
-  rw [dT, Functor.map_add, Functor.map_zsmul]
+  rw [dT, (ev Y).map_add, (ev Y).map_zsmul]
   first
     | (rw [Preadditive.add_comp, Preadditive.zsmul_comp])
     | (simp only [Preadditive.add_comp, Preadditive.zsmul_comp])
@@ -148,5 +182,3 @@ theorem ιTotal_tot_d (Y : SimplicialObject (SimplicialObject C)) (a b k : ℕ)
 end
 
 end GlobalTheory.EZ
-
-example : ∀ {C : Type u} [Category.{v} C] [Preadditive C] [HasFiniteCoproducts C] (Y : SimplicialObject (SimplicialObject C)) (a b k : ℕ) (h : a + b = k + 1), (dbl Y).ιTotal (ComplexShape.down ℕ) a b (k + 1) (by simpa only [ComplexShape.π_def] using h) ≫ (tot Y).d (k + 1) k = ∑ x ∈ (Finset.HasAntidiagonal.antidiagonal k).attach, (ev Y).map (dT a b x.1.1 x.1.2) ≫ (dbl Y).ιTotal (ComplexShape.down ℕ) x.1.1 x.1.2 k (by simpa only [ComplexShape.π_def] using Finset.HasAntidiagonal.mem_antidiagonal.1 x.2) := @GlobalTheory.EZ.ιTotal_tot_d

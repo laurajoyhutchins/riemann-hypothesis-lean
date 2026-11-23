@@ -1,14 +1,51 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SatakeRigidity.StFull
-import Development.WeilBound.CoreStatements.AutomorphicKernels.IsobaricBaseChange.IntegralCoefficientBaseChange.ResidualRigidity.SphLocProd
-import Development.WeilBound.CoreStatements.AutomorphicKernels.IsobaricBaseChange.UnramB
-import Development.WeilBound.CoreStatements.AutomorphicKernels.IsobaricBaseChange.SplitSph
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpehDataUnique
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.SatakeRigidity.StFull
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatGLOfInvT
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatGLOfIsCompAlongSplit
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsIdempotentElemCharIdem
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SatakeParameterSphericalProductSpehQuotients
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsUnramifiedOfSphericalVectorDictionary
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatGLOfIsCompAlongSplit
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasSatGLOfInvT
+import Development.WeilBound.CoreStatements.AutomorphicKernels.IsobaricBaseChange.SplitSph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,13 +59,13 @@ open GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions 
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem sc_hasSatGL_of_isSubquotient {w : HeightOneSpectrum (𝓞 E)} {V W : Type} [AddCommGroup V] [Module ℂ V]
     [AddCommGroup W] [Module ℂ W] (ρ : Representation ℂ (GL (Fin n) (w.adicCompletion E)) V) (hρs : IsSmooth ρ)
     (σ : Representation ℂ (GL (Fin n) (w.adicCompletion E)) W) (hsub : GlobalTheory.SmGL.IsSubquotient σ ρ)
-    (hsph : GlobalTheory.LGrp.IsSpherical σ (GlobalTheory.LFun.KGL w n)) (B : Multiset ℂˣ)
-    (hsat : ∀ f ∈ fixed ρ (GlobalTheory.LFun.KGL w n), f ≠ 0 → GlobalTheory.LFun.IsSatVecGL w ρ f B) :
+    (hsph : GlobalTheory.LGrp.IsSpherical σ (GlobalTheory.LFun.KGL w (n := n))) (B : Multiset ℂˣ)
+    (hsat : ∀ f ∈ fixed ρ (GlobalTheory.LFun.KGL w (n := n)), f ≠ 0 → GlobalTheory.LFun.IsSatVecGL w ρ f B) :
     GlobalTheory.LFun.HasSatGL w σ B := by
   obtain ⟨S, q, hq⟩ := hsub
   obtain ⟨-, hKc⟩ := GlobalTheory.LFun.SatCompare.isOpen_isCompact_KGL w n
@@ -37,12 +74,12 @@ theorem sc_hasSatGL_of_isSubquotient {w : HeightOneSpectrum (𝓞 E)} {V W : Typ
     ext g
     exact Subtype.ext_iff
   refine ⟨hsph, fun x hx hx0 => ?_⟩
-  have hx' : x ∈ (fixed S.toRepresentation (GlobalTheory.LFun.KGL w n)).map q.toLinearMap := by
+  have hx' : x ∈ (fixed S.toRepresentation (GlobalTheory.LFun.KGL w (n := n))).map q.toLinearMap := by
     rw [GlobalTheory.LocGL.map_fixed_of_surjective hSs hKc (f := q) hq]
     exact hx
   obtain ⟨u, hu, hux⟩ := Submodule.mem_map.1 hx'
   have hu0 : u ≠ 0 := fun e => hx0 (by rw [← hux, e, map_zero])
-  have huK : u.1 ∈ fixed ρ (GlobalTheory.LFun.KGL w n) :=
+  have huK : u.1 ∈ fixed ρ (GlobalTheory.LFun.KGL w (n := n)) :=
     GlobalTheory.LGrp.mem_fixed.2 fun k hk => congrArg Subtype.val (GlobalTheory.LGrp.mem_fixed.1 hu k hk)
   have hu1 : GlobalTheory.LFun.IsSatVecGL w ρ u.1 B := hsat _ huK fun e => hu0 (Subtype.ext e)
   have hu2 : GlobalTheory.LFun.IsSatVecGL w S.toRepresentation u B :=
@@ -54,7 +91,7 @@ theorem sc_hasSatGL_of_isSubquotient {w : HeightOneSpectrum (𝓞 E)} {V W : Typ
   exact hu3
 
 theorem sc_satVec (X : Pre E n) (w : HeightOneSpectrum (𝓞 E)) (B : Multiset ℂˣ) (h : X.Sat w B) :
-    ∀ f ∈ fixed (locProd X.h w (X.σ · w)) (GlobalTheory.LFun.KGL w n), f ≠ 0 →
+    ∀ f ∈ fixed (locProd X.h w (X.σ · w)) (GlobalTheory.LFun.KGL w (n := n)), f ≠ 0 →
       GlobalTheory.LFun.IsSatVecGL w (locProd X.h w (X.σ · w)) f B := by
   obtain ⟨b, hb, rfl⟩ := h
   intro f hf hf0

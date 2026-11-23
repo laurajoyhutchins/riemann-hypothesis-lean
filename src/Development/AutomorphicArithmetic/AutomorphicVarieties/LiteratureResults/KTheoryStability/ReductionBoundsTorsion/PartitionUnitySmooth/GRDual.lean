@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.PartitionUnitySmooth.Smoothing
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.PartitionUnitySmooth.Smoothing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -68,7 +117,7 @@ private theorem place (a : 𝓞 L) (ha : a ≠ 0) : ∃ w : InfinitePlace L, 1 �
     rwa [← w.norm_embedding_eq]
   have h2 := InfinitePlace.prod_eq_abs_norm (a : L)
   have h3 : ∏ w : InfinitePlace L, w (a : L) ^ w.mult < ∏ _w : InfinitePlace L, (1 : ℝ) :=
-    Finset.prod_lt_prod_of_nonempty
+    Finset.prod_lt_prod_of_nonempty₀
       (fun w _ => pow_pos (InfinitePlace.pos_iff.2 (RingOfIntegers.coe_ne_zero_iff.2 ha)) _)
       (fun w _ => pow_lt_one₀ (apply_nonneg w _) (h1 w) InfinitePlace.mult_ne_zero) Finset.univ_nonempty
   rw [h2, Finset.prod_const_one, ← Algebra.coe_norm_int] at h3
@@ -116,7 +165,7 @@ private theorem fin_num {A s m G P X Q : ℝ} (hA0 : 0 < A) (hsp : 0 < s) (hmp :
 
 attribute [local irreducible] lam ret term
 
-set_option maxHeartbeats 600000 in
+
 theorem pf_GRDual : GRDual := by
   classical
   intro hB hTr hE hTL L _ _ hC N hN μ hμ
@@ -220,7 +269,7 @@ theorem pf_GRDual : GRDual := by
         exact zpow_le_zpow_right₀ (by norm_num) (by omega)
       have h0 : evR z (∑ᶠ v : Lat L N, rho (q h v / 4 ^ k) • rk h v) = 0 := by
         refine finsum_induction (fun x => evR z x = 0) (map_zero _)
-          (fun x y hx hy => by rw [map_add, hx, hy, add_zero]) fun v => ?_
+          (fun x y hx hy => by rw [map_add (f := _), hx, hy, add_zero]) fun v => ?_
         rw [map_smul, smul_eq_mul]
         by_cases hv : f ⬝ᵥ v = 0
         · refine mul_eq_zero_of_right _ ?_
@@ -240,6 +289,7 @@ theorem pf_GRDual : GRDual := by
     exact hk1.le
   have hsum : evR z (∑ᶠ k : ℤ, rho ((4 : ℝ) ^ k * μ h) • term ((4 : ℝ) ^ k) h) ≤ 32 * s / m := by
     by_cases hfin : (Function.support fun k : ℤ => rho ((4 : ℝ) ^ k * μ h) • term ((4 : ℝ) ^ k) h).Finite
+
     · rw [finsum_eq_sum _ hfin, map_sum]
       refine (Finset.sum_le_sum fun k _ => hterm k).trans ?_
       rw [← Finset.mul_sum]
@@ -254,7 +304,7 @@ theorem pf_GRDual : GRDual := by
           mul_le_mul b1 hmC hm0 (mul_nonneg (abs_nonneg _) hD.le)
       _ = _ := by have := hD.ne'; clear * - this; generalize lamD h = x at *; field_simp
   have hR : (star y ⬝ᵥ (mat (ret μ h) w *ᵥ y)).re ≤ (12 * C1 * |C2| + 32) * s / m := by
-    rw [← hzz, ← evR_apply, ret, map_add, map_smul, smul_eq_mul, evR_apply z h, hzs]
+    rw [← hzz, ← evR_apply, ret, map_add (f := _), map_smul, smul_eq_mul, evR_apply z h, hzs]
     have : μ h * s ≤ 12 * C1 * |C2| * s / m := by
       rw [le_div_iff₀ hmp]
       exact (mul_right_comm _ _ _).trans_le (mul_le_mul_of_nonneg_right hμm hs0)

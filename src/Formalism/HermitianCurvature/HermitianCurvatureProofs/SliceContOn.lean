@@ -1,12 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixTranspose
+module
+
+public import Formalism.HermitianCurvature.StatementU
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.Block3MulBlocks
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSizesOfHypotheses
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.StrictUpperNeg
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.SymmetricScalarBlockMatrixMul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Block3MulBlocks
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateSizesOfHypotheses
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MulVecBvecApply
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.StrictUpperNeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.U
 
@@ -191,15 +233,6 @@ theorem gaXi_cont (σ : Equiv.Perm (Fin r)) (d : Fin r → ℂ) (hd : ∀ i, d i
   rw [e]
   exact (((Dx2.SplitF.rn_cont r 0).comp (continuous_fst.comp (continuous_fst.comp continuous_fst)).neg).matrix_mul hm).matrix_mul
     ((Dx2.SplitF.rn_cont r 0).comp (continuous_snd.comp (continuous_fst.comp continuous_fst)))
-
-def slF (σ : Equiv.Perm (Fin r)) (d : Fin r → ℂ) {E : Type*} (F : B.Mat k r → E) (γ0 : B.Mat k 0)
-    (p : (Mt k (r + 0) × Mt k (r + 0)) × U.Xi k r 0 0 σ) : E :=
-  F (U.gaXi k 0 σ d p.2 (fun a => a.elim0) ((midB r 0 (Matrix.of p.1.1))⁻¹ * γ0 * midB r 0 (Matrix.of p.1.2)))
-
-def slS (σ : Equiv.Perm (Fin r)) (z0 z0' : Fin (2 * 0 + k + 1) → ℂ) :
-    Set ((Mt k (r + 0) × Mt k (r + 0)) × U.Xi k r 0 0 σ) :=
-  ({h | Matrix.of h ∈ UWset k (r + 0) (liftVec k r 0 z0)} ×ˢ
-    {h | Matrix.of h ∈ UWset k (r + 0) (liftVec k r 0 z0')}) ×ˢ Set.univ
 
 end dom
 

@@ -1,14 +1,43 @@
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterIdeleCharacterMatchUnique
-import Formalism.LocalToGlobal.IndefiniteReal.HeckeNonvanishing.Imports
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.ThetaIntegralsAgree
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspAlongSmoothRows
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ToricSymbols
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterIdeleCharacterMatchUnique
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim
 open Formalism.L2.Host (HChar)
@@ -44,8 +73,8 @@ theorem isFrame_tr {D : D7} {V V' : HSp D} (e : V' = V) {Λ : Submodule (𝓞 D.
     (h : IsFrame β Λ) : IsFrame (trGL e β) Λ' := by
   subst e; cases hΛ; exact h
 
-open Matrix in
 
+open Matrix in
 theorem uLat_tr {D : D7} {V V' : HSp D} (e : V' = V) {Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)}
     {Λ' : Submodule (𝓞 D.host.E) (Fin V'.rank → D.host.E)} (hΛ : HEq Λ' Λ) {f : GL (Fin V.rank) D.host.E}
     {f' : GL (Fin V'.rank) D.host.E} (hf : HEq f' f) {u : GfC V} {u' : GfC V'} (hu : HEq u' u)
@@ -70,8 +99,8 @@ theorem uSupp_tr {D : D7} {V V' : HSp D} (e : V' = V) {u : GfC V} {u' : GfC V'} 
     ∃ (P : Finset (Pl D.host.E)) (e : AE D), IsIdemSum e P ∧ SuppAt e V' u'.1 ∧ ∀ w ∈ P, Off S w := by
   subst e; cases hu; exact h
 
-open Matrix in
 
+open Matrix in
 theorem top_tr {D : D7} {A A' B B' : HSp D} (eA : A' = A) (eB : B' = B) {ι : A.V →ₗ[D.host.E] B.V}
     {ι' : A'.V →ₗ[D.host.E] B'.V} (hι : HEq ι' ι) {a : Matrix (Fin B.rank) (Fin 1) D.host.E}
     {a' : Matrix (Fin B'.rank) (Fin 1) D.host.E} (ha : HEq a' a) (r : A.rank + 1 = B.rank) (r' : A'.rank + 1 = B'.rank)
@@ -92,8 +121,8 @@ theorem top_tr {D : D7} {A A' B B' : HSp D} (eA : A' = A) (eB : B' = B) {ι : A.
 
 abbrev dOf {D : D7} {T : Type} (_ : LevCh D T) : D7 := D
 
-open Matrix in
 
+open Matrix in
 theorem sumFrame_tr {D : D7} {A A' B B' : HSp D} (eA : A' = A) (eB : B' = B) {c : ℕ} {ι : A.V →ₗ[D.host.E] B.V}
     {ι' : A'.V →ₗ[D.host.E] B'.V} (hι : HEq ι' ι) {a : Matrix (Fin B.rank) (Fin c) D.host.E}
     {a' : Matrix (Fin B'.rank) (Fin c) D.host.E} (ha : HEq a' a) (r : A.rank + c = B.rank) (r' : A'.rank + c = B'.rank)
@@ -171,7 +200,7 @@ namespace GlobalTheory.RowEx
 
 open GlobalTheory.Mem GlobalTheory.RowEx.CarryTr
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem carryS : CarryS := by
   intro X X' T T' L L' μ₀ μ₀' ι hL sc G G' hG W W' hW S

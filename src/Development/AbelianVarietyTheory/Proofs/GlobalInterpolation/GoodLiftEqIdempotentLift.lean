@@ -1,11 +1,61 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.DeterminantCokernelCount.CokernelIndexFactors.StatementB
+public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsDualBasisOfUnimodularLatticeAtPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CmThetaOperatorInvariantOfLiftCongrOne
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ImagQuadraticMaximalOrderArithmeticAtSplitPrime
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MkLeContinuumOfDenseRange
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.OpUConstMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LatIntZero
-import Formalism.LocalToGlobal.KernelLattices.DeterminantCokernelCount.CokernelIndexFactors.StatementB
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ImagQuadraticMaximalOrderArithmeticAtSplitPrime
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MkLeContinuumOfDenseRange
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.OpUConstMul
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CmThetaOperatorInvariantOfLiftCongrOne
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsDualBasisOfUnimodularLatticeAtPrimeStatement
+
+@[expose] public section
 
 open GlobalTheory.MomN Formalism.L2.Ker.JMB
 open scoped ComplexConjugate
@@ -17,7 +67,7 @@ variable {g : ℕ} {q : ℕ} [Fact q.Prime]
 
 theorem hf_add_right (Hm : Matrix (Fin g) (Fin g) ℂ) (x y y' : Fin g → ℂ) :
     hf Hm x (y + y') = hf Hm x y + hf Hm x y' := by
-  simp only [hf, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem hf_neg_right (Hm : Matrix (Fin g) (Fin g) ℂ) (x y : Fin g → ℂ) : hf Hm x (-y) = -hf Hm x y := by
   have h := hf_smul_right Hm (-1) x y
@@ -58,7 +108,7 @@ namespace GlobalTheory.MomN
 open GlobalTheory.MomOne.LiftChange GlobalTheory.MomN.GoodLift
 open scoped ComplexOrder
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem goodLift_eq : ∀ (q : ℕ) [Fact q.Prime] (lam : Qbar →+* ℂ_[q]) (g : ℕ) (S : Setup g) (r : ℕ) (b : Fin r → Fin g → ℂ) (e : (Fin g → ℂ) → ℂ) (t : Fin g → ℂ), S.Ok → GlobalTheory.MomOne.Split S.d q → S.NNBasis q b → S.IsTheta e → ∀ N₀ : ℕ, 0 < N₀ → Nat.Coprime N₀ q → (N₀ : ℂ) • t ∈ S.La → ∀ (n : ℕ), ∀ y ∈ AddSubgroup.closure {y : Fin g → ℂ | ∃ κ ∈ OK S.d, ‖lamA lam (conj κ)‖ ≤ (q : ℝ) ^ (-(2 * n : ℤ)) ∧ ∃ x ∈ S.La, y = (κ * (N₀ : ℂ) / (q : ℂ) ^ n) • x}, (∃ z : ℤ, (beta S.d S.Hm y y).re = z) ∧ ∃ (m : ℕ) (eps : ℂ) (yt : Fin r → Fin (q ^ n)), IsIdem lam S.d m eps ∧ 2 * n ≤ m ∧ (∀ i, ∃ z : ℤ, (hf S.Hm (eps • b i) t).im = z) ∧ opW S.d S.Hm y (opU S.Hm t e) = opW S.d S.Hm (liftY q n eps b yt) (opU S.Hm t e) ∧ ∀ a : Fin r → ℕ, kap S.Hm (∑ i, (a i : ℂ) • b i) y = kap S.Hm (vecA n b fun i => (a i : ℤ_[q])) (liftY q n eps b yt) := by
   intro q _ lam g S r b e t hS hsp hb he N₀ hN₀ hcop hNt n y hy
@@ -69,7 +119,7 @@ theorem goodLift_eq : ∀ (q : ℕ) [Fact q.Prime] (lam : Qbar →+* ℂ_[q]) (g
   obtain ⟨⟨-, -, hcl⟩, hZ, hdiv, hid, -, -, -⟩ := GlobalTheory.MomOne.okArith S.d q ι hS.1 hS.2.1 hsp
   obtain ⟨H1, -, -, H4, H5, H6⟩ := GlobalTheory.HeisOps.heisenberg g S.d S.Hm hS.1.pos hS.2.2.1.isHermitian
   have hlam : ∀ x : ℂ, x ∈ Qbar → lamA lam x = ι x := fun x hx => by
-    rw [lamA, dif_pos hx]; exact (hι ⟨x, hx⟩).symm
+    rw [lamA, dite_eq_left hx]; exact (hι ⟨x, hx⟩).symm
   have hOK1 : ∀ α ∈ OK S.d, ‖ι α‖ ≤ 1 := fun α hα => by
     obtain ⟨⟨a, ha⟩, -⟩ := hZ α hα
     rw [ha, norm_zc]; exact PadicInt.norm_le_one a
@@ -124,7 +174,7 @@ theorem goodLift_eq : ∀ (q : ℕ) [Fact q.Prime] (lam : Qbar →+* ℂ_[q]) (g
       obtain ⟨v1, hv1, rfl, h1⟩ := ih1
       obtain ⟨v2, hv2, rfl, h2⟩ := ih2
       refine ⟨v1 + v2, add_mem hv1 hv2, (smul_add _ _ _).symm, fun x hx => ?_⟩
-      rw [bar, map_add]
+      rw [bar, map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (h1 x hx) (h2 x hx))
     | neg y1 _ ih =>
       obtain ⟨v1, hv1, rfl, h1⟩ := ih
@@ -236,6 +286,7 @@ theorem goodLift_eq : ∀ (q : ℕ) [Fact q.Prime] (lam : Qbar →+* ℂ_[q]) (g
           _ ≤ _ := by rw [mul_one]; exact hpow_le
       have h3 : ‖ι (beta S.d S.Hm w x)‖ = ‖ι ((s : ℂ) * beta S.d S.Hm w x)‖ := by
         rw [map_mul, norm_mul, hnat1 s hs, one_mul]
+
       rw [h3, hsum, map_sum]
       refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (hpos _) fun j _ => ?_
       rw [map_mul, norm_mul]

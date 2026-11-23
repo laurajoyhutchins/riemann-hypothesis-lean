@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
+public import Mathlib.Algebra.Module.Lattice.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open ValuativeRel Formalism.MainNotions.S.Loc NumberField IsDedekindDomain
@@ -119,19 +160,11 @@ def amp (d : G.Dat) (P : G.Lt → Prop) : ℂ :=
 def mass (d : G.Dat) (P : G.Lt → Prop) : ℝ≥0∞ :=
   ∑' o : Quot G.LRel, if G.IsTerm d o.out ∧ P o.out then ENNReal.ofReal (G.mu o.out) else 0
 
-def sumD (φ : G.Dat → ℝ≥0∞) : ℝ≥0∞ :=
-  ∑' o : Quot G.DRel, if ∃ Λ, G.IsTerm o.out Λ then
-    (((G.stabD o.out : Set G.GLV).encard : ℝ≥0∞))⁻¹ * φ o.out else 0
-
 def Gen (d : G.Dat) (Λ : G.Lt) : Prop := ∀ p, (G.S p).BBzero (d p) (A.lat p Λ)
 
 def Om : Set (HeightOneSpectrum (𝓞 F)) := {p | (G.S p).Hp ≠ 1}
 
 def Ht : ℝ := ∏ᶠ p, (G.S p).Hp
-
-def ngen (d₁ : G.Dat) (Λ₁ : G.Lt) : ℝ≥0∞ :=
-  G.sumD fun d => G.mass d fun Λ => G.Gen d Λ ∧
-    ∀ p, ∃ h ∈ (G.S p).St, (G.S p).Fr (d p) (A.lat p Λ) = h • (G.S p).Fr (d₁ p) (A.lat p Λ₁)
 
 def Zh : Matrix (Fin (r + 1)) (Fin (r + 1)) E :=
   Matrix.of fun a b => ∑ i, ∑ j, G.f' b i * G.Hm i j * sig (G.f a j)

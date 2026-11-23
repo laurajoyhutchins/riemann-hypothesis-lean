@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OfGroupPullbackDataBase
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OfGroupPullbackDataBase
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+import Development.AbelianVarietyTheory.Definitions.Divisors.NonemptyHomFixRepTrivial
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory.EndLoc
@@ -51,7 +102,7 @@ theorem isMonHom_of_cover {Z : Scheme.{0}} (𝒰 : Z.OpenCover) {G H : Over Z} [
 theorem lbIso_pull_pull {X Y Y' : Scheme.{0}} {L : LB X} (hL : L.IsLB) (a : Y ⟶ X) (b : Y' ⟶ Y) :
     LBIso ((L.pull a).pull b) (L.pull (b ≫ a)) :=
   LBIso.chartPull (chartPullLinComb L a (fun _ : PUnit => b) (fun _ => b ≫ a) (fun _ => 1) (𝟙 _)
-    fun _ => (Category.id_comp _).symm) (chartPullId _) (GlobalTheory.PolBaseChange.lbIso_refl (pull_isLB hL _))
+    fun _ => (Category.id_comp _).symm) (chartPullId _) (GlobalTheory.PolBaseChange.lbIso_refl (LB.isLB_pull hL _))
 
 variable {S : Scheme.{0}} {A B : Over S} [GrpObj A] [GrpObj B] {L : LB A.left} {M : LB B.left}
 
@@ -131,9 +182,9 @@ theorem local_iso (hL : L.IsLB) (hM : M.IsLB) {Z Z' : Scheme.{0}} {t : Z ⟶ S} 
     refine lbIso_pull hL hM E ?_ ?_ hI
     · rw [← e1, ← Category.assoc, hE, pullback.lift_fst]
     · rw [Category.assoc, hΦ, ← e3, ← Category.assoc, hE, ← Category.assoc, he']
-  exact LBIso.trans (pull_isLB (pull_isLB hL _) _) (pull_isLB hL _) (pull_isLB (pull_isLB (pull_isLB hM _) _) _)
-    (lbIso_pull_pull hL _ _) (LBIso.trans (pull_isLB hL _) (pull_isLB (pull_isLB hM _) _)
-      (pull_isLB (pull_isLB (pull_isLB hM _) _) _) h2 (lbIso_pull_pull (pull_isLB hM _) _ _).symm)
+  exact LBIso.trans (LB.isLB_pull (LB.isLB_pull hL _) _) (LB.isLB_pull hL _) (LB.isLB_pull (LB.isLB_pull (LB.isLB_pull hM _) _) _)
+    (lbIso_pull_pull hL _ _) (LBIso.trans (LB.isLB_pull hL _) (LB.isLB_pull (LB.isLB_pull hM _) _)
+      (LB.isLB_pull (LB.isLB_pull (LB.isLB_pull hM _) _) _) h2 (lbIso_pull_pull (LB.isLB_pull hM _) _ _).symm)
 
 theorem glue_wit : (∀ (H : Scheme.{0}) (A B : Over H) [GrpObj A] [IsCommMonObj A] [GrpObj B] [IsCommMonObj B] (L : LB A.left) (M : LB B.left) (Φ : A ⟶ B), IsMonHom Φ → IsAbelianScheme A → IsAbelianScheme B → L.IsLB → M.IsLB → Out.Rigidified A L → Out.Rigidified B M → (∀ h : H, ∃ W : H.Opens, h ∈ W ∧ LBIso (L.pull (A.hom ⁻¹ᵁ W).ι) ((M.pull Φ.left).pull (A.hom ⁻¹ᵁ W).ι)) → LBIso L (M.pull Φ.left)) → ∀ (S : Scheme.{0}) (A B : Over S) [GrpObj A] [IsCommMonObj A] [GrpObj B] [IsCommMonObj B] (L : LB A.left) (M : LB B.left), L.IsLB → M.IsLB → IsAbelianScheme A → IsAbelianScheme B → Out.Rigidified A L → Out.Rigidified B M → ∀ (Z : Scheme.{0}) (𝒰 : Z.OpenCover) (t : Z ⟶ S) (f : pullback A.hom t ⟶ B.left), (∀ i, HomGlue.Wit A B L M (𝒰.f i ≫ t) (HomGlue.pmap A t (𝒰.f i) ≫ f)) → HomGlue.Wit A B L M t f := by
   intro hiso S A B _ _ _ _ L M hL hM hA hB hrA hrB Z 𝒰 t f hw
@@ -143,12 +194,29 @@ theorem glue_wit : (∀ (H : Scheme.{0}) (A B : Over H) [GrpObj A] [IsCommMonObj
     Over.homMk (pullback.lift f (pullback.snd A.hom t) w) (pullback.lift_snd _ _ _)
   have hΦf : Φ.left ≫ pullback.fst B.hom t = f := pullback.lift_fst _ _ _
   have hΦ : IsMonHom Φ := isMonHom_of_cover 𝒰 Φ fun i => isMonHom_pull_of_wit (𝒰.f i) (hw i) Φ hΦf
-  have hA' := GlobalTheory.isAbelianScheme_pullback_obj t A hA
-  have hB' := GlobalTheory.isAbelianScheme_pullback_obj t B hB
+  have ab_pull (G : Over S) [GrpObj G] (hG : IsAbelianScheme G) :
+      IsAbelianScheme ((Over.pullback t).obj G) := by
+    letI := hG.comm
+    letI := hG.smooth
+    letI := hG.proper
+    letI := hG.geomConnected
+    constructor
+    case comm => infer_instance
+    case smooth =>
+      show Smooth (pullback.snd G.hom t)
+      infer_instance
+    case proper =>
+      show IsProper (pullback.snd G.hom t)
+      infer_instance
+    case geomConnected =>
+      show GeometricallyConnected (pullback.snd G.hom t)
+      infer_instance
+  have hA' := ab_pull A hA
+  have hB' := ab_pull B hB
   haveI : IsCommMonObj ((Over.pullback t).obj A) := hA'.comm
   haveI : IsCommMonObj ((Over.pullback t).obj B) := hB'.comm
   have hI : LBIso (L.pull (pullback.fst A.hom t)) ((M.pull (pullback.fst B.hom t)).pull Φ.left) :=
-    hiso Z _ _ _ _ Φ hΦ hA' hB' (pull_isLB hL _) (pull_isLB hM _)
+    hiso Z _ _ _ _ Φ hΦ hA' hB' (LB.isLB_pull hL _) (LB.isLB_pull hM _)
       (GlobalTheory.PolBaseChange.rigidified_pull (isGrpPullback_pullback A t) hrA)
       (GlobalTheory.PolBaseChange.rigidified_pull (isGrpPullback_pullback B t) hrB)
       fun z => ⟨(𝒰.f (𝒰.idx z)).opensRange, Scheme.Hom.mem_opensRange.2 (𝒰.covers z),

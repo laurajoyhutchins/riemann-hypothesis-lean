@@ -1,5 +1,60 @@
-import Mathlib
-import Lemmata.MiscLemmasC.Imports
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Mathlib.Algebra.Group.Subgroup.Map
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.GroupTheory.Coset.Defs
+public import Mathlib.SetTheory.Cardinal.Finite
+public import Lemmata.MiscLemmasC.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.style.haveILetI false
 
@@ -50,11 +105,6 @@ theorem IsInv.out_mk {k : ℕ} {H : AddSubgroup W} {g : W → ℂ} (hg : IsInv k
     g (((QuotientAddGroup.mk x : Qt k H).out : H) : W) = g x :=
   hg.mk_eq (QuotientAddGroup.out_eq' _)
 
-theorem IsInv.mul {k : ℕ} {H : AddSubgroup W} {g : W → ℂ} (hg : IsInv k H g) (j : ℕ) : IsInv (k * j) H g := by
-  intro t ht u hu
-  rw [← smul_smul]
-  exact hg t ht _ (H.nsmul_mem hu j)
-
 theorem avg_eq_sum (k : ℕ) (H : AddSubgroup W) [Fintype (Qt k H)] (g : W → ℂ) :
     avg k H g = (Fintype.card (Qt k H) : ℂ)⁻¹ * ∑ q : Qt k H, g ((q.out : H) : W) := by
   rw [avg, finsum_eq_sum_of_fintype, Nat.card_eq_fintype_card]
@@ -88,10 +138,11 @@ theorem avg_mul (k j : ℕ) (H : AddSubgroup W) [Finite (Qt k H)] [Finite (Qt (k
   simp_rw [key]
   exact avg_comp_surj π hπ (fun b => g ((b.out : H) : W))
 
-open Classical in
 
+open Classical in
 def integ (H : AddSubgroup W) (g : W → ℂ) : ℂ :=
-  if h : ∃ k, 0 < k ∧ IsInv k H g then avg h.choose H g else 0
+  by classical
+     exact if h : ∃ k, 0 < k ∧ IsInv k H g then avg h.choose H g else 0
 
 section Integ
 
@@ -100,7 +151,7 @@ include hfin
 
 theorem integ_eq {k : ℕ} (hk : 0 < k) {g : W → ℂ} (hg : IsInv k H g) : integ H g = avg k H g := by
   have h : ∃ k, 0 < k ∧ IsInv k H g := ⟨k, hk, hg⟩
-  rw [integ, dif_pos h]
+  rw [integ, dite_eq_left h]
   obtain ⟨hk0, hg0⟩ := h.choose_spec
   haveI := hfin _ hk0
   haveI := hfin _ hk
@@ -126,16 +177,8 @@ theorem integ_congr {g g' : W → ℂ} (h : ∀ t ∈ H, g t = g' t) : integ H g
   · have hg' : ¬ ∃ k, 0 < k ∧ IsInv k H g' := by
       rintro ⟨k, hk, hgk⟩
       exact hg ⟨k, hk, hgk.congr fun t ht => (h t ht).symm⟩
-    rw [integ, dif_neg hg, integ, dif_neg hg']
+    rw [integ, dite_eq_right hg, integ, dite_eq_right hg']
 
-omit hfin in
-theorem IsInv.add {k k' : ℕ} {g g' : W → ℂ} (hg : IsInv k H g) (hg' : IsInv k' H g') :
-    IsInv (k * k') H (fun t => g t + g' t) := by
-  have h1 := hg.mul k'
-  have h2 := hg'.mul k
-  rw [Nat.mul_comm] at h2
-  intro t ht u hu
-  simp only [h1 t ht u hu, h2 t ht u hu]
 
 omit hfin in
 theorem IsInv.cmul {k : ℕ} {g : W → ℂ} (hg : IsInv k H g) (c : ℂ) : IsInv k H (fun t => c * g t) := by
@@ -211,7 +254,7 @@ theorem integ_cmul' (g : W → ℂ) (c : ℂ) : integ H (fun t => c * g t) = c *
       refine hg ⟨k, hk, ?_⟩
       refine (hgk.cmul c⁻¹).congr fun t _ => ?_
       simp [hc]
-    rw [integ, dif_neg hn, integ, dif_neg hg, mul_zero]
+    rw [integ, dite_eq_right hn, integ, dite_eq_right hg, mul_zero]
 
 theorem integ_zero_of {g : W → ℂ} (h : ∀ t ∈ H, g t = 0) : integ H g = 0 := by
   have h1 : integ H g = integ H (fun t => (0 : ℂ) * (fun _ => (1 : ℂ)) t) :=

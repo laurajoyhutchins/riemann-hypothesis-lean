@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsCN
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsCN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -77,7 +128,7 @@ theorem IntNumAssoc.proof (h1 : PrimeFiltration.Statement.{u})
     by_contra hn
     apply Function.mem_support.mp hW
     unfold idealCycle
-    rw [dif_neg (fun h => hn h.1), zero_mul]
+    rw [dite_eq_right (fun h => hn h.1), zero_mul]
   unfold cycEval
   rw [finsum_eq_finsetSum_of_support_subset _ hsupp]
   refine Finset.sum_congr rfl fun W hW => ?_
@@ -86,7 +137,7 @@ theorem IntNumAssoc.proof (h1 : PrimeFiltration.Statement.{u})
   rw [IntNumAssoc.list_sum_ite_mul]
   unfold idealCycle
   by_cases hr : IsRelevant W
-  · rw [dif_pos ⟨hWm, hr⟩, if_pos hr]
+  · rw [dite_eq_left ⟨hWm, hr⟩, if_pos hr]
     have hcount : multAt J W = (l.map fun p => if p.1 = W then (1 : ℕ∞) else 0).sum := by
       rw [hmult W]
       congr 1
@@ -95,7 +146,7 @@ theorem IntNumAssoc.proof (h1 : PrimeFiltration.Statement.{u})
       have := (hl p hpl).1
       exact h3 F K ι J p.1 W (hl p hpl).2.2 hWm
     rw [hcount, IntNumAssoc.list_sum_ite_enat, ENat.toNat_natCast]
-  · rw [dif_neg (fun h => hr h.2), if_neg hr]
+  · rw [dite_eq_right (fun h => hr h.2), if_neg hr]
     simp
 
 end GroundTheory.Heights₂.Heights.NumbersDVR

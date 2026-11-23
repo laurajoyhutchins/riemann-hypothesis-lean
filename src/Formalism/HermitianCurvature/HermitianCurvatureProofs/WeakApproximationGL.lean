@@ -1,6 +1,53 @@
-import Formalism.HermitianCurvature.StatementG
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PhaseFunctionCriticalPoints
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousInvUpper
+module
+
+public import Formalism.HermitianCurvature.StatementG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousInvUpper
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory
 
@@ -208,7 +255,7 @@ theorem matrix_redOf (m : ℕ) (t ρ₁ : ℂ) (p : XY m) :
           rw [Fin.lt_def, Fin.val_castSucc, Fin.val_succ]
           rw [not_lt, Fin.le_iff_val_le_val] at hrc
           omega
-        rw [dif_neg hrc, tri_gt _ _ hcr]
+        rw [dite_eq_right hrc, tri_gt _ _ hcr]
         by_cases hrc' : r = c
         · subst hrc'
           simp
@@ -221,13 +268,6 @@ theorem matrix_redOf (m : ℕ) (t ρ₁ : ℂ) (p : XY m) :
         omega
       rw [if_neg hne, zero_add]
       rfl
-
-theorem strictUpper_injective {d : ℕ} {y y' : UT d → ℂ} {a b : Fin d → ℂ}
-    (h : Matrix.diagonal a + strictUpper y = Matrix.diagonal b + strictUpper y') : y = y' := by
-  funext q
-  obtain ⟨⟨i, j⟩, hij⟩ := q
-  have h' := congrArg (fun M : Matrix (Fin d) (Fin d) ℂ => M i j) h
-  simpa [strictUpper, hij, Matrix.diagonal_apply_ne _ hij.ne] using h'
 
 theorem diag_const (m : ℕ) (z : ℂ) :
     Matrix.diagonal (Fin.cons z (fun _ : Fin (m + 1) => z) : Fin (m + 2) → ℂ) =
@@ -253,18 +293,5 @@ theorem split_xy_coordinates : Formalism.FourierDecayAlt.G.SplitXY := by
 
 theorem split_xy_matrix : Formalism.FourierDecayAlt.G.SplitXYMatrix :=
   fun m t ρ₁ p => ⟨xOf_redOf m p, matrix_redOf m t ρ₁ p⟩
-
-theorem limit_coordinates : Formalism.FourierDecayAlt.G.LimitCoords := by
-  intro m z y
-  refine ⟨redOf m (fun _ => z, y), ⟨fun k => xOf_redOf m _ k, ?_⟩, ?_⟩
-  · rw [matrix_redOf, zero_smul, zero_add]
-    dsimp only
-    rw [diag_const]
-  · rintro q ⟨hx, hM⟩
-    obtain ⟨p', rfl⟩ := (redOf_bijective m).2 q
-    have h1 : p'.1 = fun _ => z := funext fun k => (xOf_redOf m p' k).symm.trans (hx k)
-    rw [matrix_redOf, zero_smul, zero_add, ← diag_const] at hM
-    have h2 : p'.2 = y := strictUpper_injective hM
-    rw [show p' = (fun _ => z, y) from Prod.ext h1 h2]
 
 end Formalism.FourierDecayAlt.P

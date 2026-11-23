@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -79,7 +124,8 @@ theorem cas_tensor {K I J : Type} [Fintype K] [Fintype I] [DecidableEq I] [Finty
           ∑ i', ∑ j', c k j' (Function.update u i j i') •
             W (Function.update (Function.update u i j) i' j') x)) := by
     intro k u x
-    simp only [hc, map_add, map_sum, map_smul, add_assoc]
+
+    simp only [hc, map_add (f := _), map_sum, map_smul, add_assoc]
   have hΨ' : ∀ u v, φ (W u (ι v)) = ⟪Ψ u, v⟫_ℂ := fun u v => (hΨ u v).symm
   have hΨe : ∀ k u v, φ (W u (e k (ι v))) = ⟪Ψ u, ρ k v⟫_ℂ := by
     intro k u v
@@ -87,11 +133,13 @@ theorem cas_tensor {K I J : Type} [Fintype K] [Fintype I] [DecidableEq I] [Finty
   have hcas : ∀ v, ∑ k, e k (e (σ k) (ι v)) = (c0 : ℂ) • ι v := by
     intro v
     have h := congrArg ι (LinearMap.congr_fun hc0 v)
+
     simpa only [LinearMap.sum_apply, Module.End.mul_apply, map_sum, hι, LinearMap.smul_apply,
-      Module.End.one_apply, map_smul] using h
+    Module.End.one_apply, map_smul] using h
   have hA : ∀ u v, ∑ k, φ (W u (e k (e (σ k) (ι v)))) = (c0 : ℂ) * ⟪Ψ u, v⟫_ℂ := by
     intro u v
     calc ∑ k, φ (W u (e k (e (σ k) (ι v)))) = φ (W u (∑ k, e k (e (σ k) (ι v)))) := by
+
           simp only [map_sum]
       _ = (c0 : ℂ) * ⟪Ψ u, v⟫_ℂ := by rw [hcas, map_smul, map_smul, hΨ', smul_eq_mul]
   have hF : ∀ w, ∑ k, (⟪PositivityTheory.KReal.positionA (c (σ k)) Ψ w, ρ (σ k) (Ψ w)⟫_ℂ +
@@ -100,9 +148,10 @@ theorem cas_tensor {K I J : Type} [Fintype K] [Fintype I] [DecidableEq I] [Finty
     intro w
     have h := hφ w (Ψ w)
     have h' := hA w (Ψ w)
-    simp only [map_sub, LinearMap.sum_apply, map_sum, Module.End.mul_apply, hk, map_add, map_smul,
-      smul_eq_mul, hΨ', hΨe, h3, Matrix.conjTranspose_apply, starRingEnd_apply, star_star,
-      Finset.mul_sum, mul_add, Finset.sum_add_distrib] at h
+
+    simp only [map_sub, LinearMap.sum_apply, map_sum, Module.End.mul_apply, hk, map_add (f := _), map_smul,
+    smul_eq_mul, hΨ', hΨe, h3, Matrix.conjTranspose_apply, starRingEnd_apply, star_star,
+    Finset.mul_sum, mul_add, Finset.sum_add_distrib] at h
     simp only [PositivityTheory.KReal.positionA, sum_inner, inner_smul_left, h3, Matrix.conjTranspose_apply,
       starRingEnd_apply, star_star, Finset.mul_sum, mul_add, Finset.sum_add_distrib]
     linear_combination h - h'
@@ -149,6 +198,7 @@ theorem cas_tensor {K I J : Type} [Fintype K] [Fintype I] [DecidableEq I] [Finty
       ⟪Ψ (Function.update w s j), ρ k (Ψ w)⟫_ℂ) := by
     intro s w
     rw [hH]
+
     simp only [map_sum, map_mul, Complex.conj_conj, inner_conj_symm, inner_smul_right, ← hadj]
   have hT2 : ∑ k, PositivityTheory.KReal.formT (PositivityTheory.KReal.positionA (c k) Ψ) (fun w => ρ k (Ψ w)) =
       ∑ w, ∑ s, ∑ k, ∑ j, starRingEnd ℂ (c k (w s) j) * ⟪Ψ (Function.update w s j), ρ k (Ψ w)⟫_ℂ := by
@@ -160,6 +210,7 @@ theorem cas_tensor {K I J : Type} [Fintype K] [Fintype I] [DecidableEq I] [Finty
     rw [hT2, Finset.sum_comm]
     have e1 : ∑ w, ∑ s, H s w = starRingEnd ℂ (∑ w, ∑ s, ∑ k, ∑ j, starRingEnd ℂ (c k (w s) j) *
         ⟪Ψ (Function.update w s j), ρ k (Ψ w)⟫_ℂ) := by
+
       simp only [hHc, map_sum]
     rw [e1, Complex.conj_re]
   have hQle : ∑ s, ∑ w, (q s w).re ≤ 0 := by

@@ -1,5 +1,62 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppA
-import Lemmata.GeneralBFactTerForm.Imports
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+public import Lemmata.GeneralBFactTerForm.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppA
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Ideal.Height
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.SimpleRing.Principal
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.WithBotEqOfAddOne
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +94,7 @@ theorem dim_quot_minimal_add_one (P W : Ideal (MvPolynomial σ ℤ)) [P.IsPrime]
   rw [hh] at key
   exact_mod_cast key
 
-theorem withBot_eq_of_add_one {x : WithBot ℕ∞} {m : ℕ} (h : x + 1 = ((m + 1 : ℕ) : WithBot ℕ∞)) :
+theorem withBot_eq_of_add_one_by_cancellation {x : WithBot ℕ∞} {m : ℕ} (h : x + 1 = ((m + 1 : ℕ) : WithBot ℕ∞)) :
     x = (m : WithBot ℕ∞) := by
   first | exact Bl.general_b_fact_ter_form.goal1 .. | (apply Bl.general_b_fact_ter_form.goal1 <;> assumption) | (intros; apply Bl.general_b_fact_ter_form.goal1 <;> assumption)
 
@@ -90,7 +147,7 @@ theorem isHomogeneous_of_mem_minimalPrimes {A : Type*} [CommRing A] (𝒜 : ℕ 
 theorem exists_blockComponent [DecidableEq K] {W : Ideal (MRing ι)}
     (hW : ∀ k, W.IsHomogeneous (weightedHomogeneousSubmodule ℤ (blockWeight (ι := ι) k)))
     (a : K → ℕ) (T : Finset K) {f : MRing ι} (hf : f ∈ W) :
-    ∃ g ∈ W, ∀ m, coeff m g = if (∀ k ∈ T, ∑ i, m ⟨k, i⟩ = a k) then coeff m f else 0 := by
+    ∃ g ∈ W, ∀ m, AddMonoidAlgebra.coeff g m = if (∀ k ∈ T, ∑ i, m ⟨k, i⟩ = a k) then AddMonoidAlgebra.coeff f m else 0 := by
   induction T using Finset.induction_on with
   | empty => exact ⟨f, hf, fun m => by simp⟩
   | @insert k T hk ih =>
@@ -111,7 +168,7 @@ theorem isMultiHomogIdeal_of_isHomogeneous [DecidableEq K] {W : Ideal (MRing ι)
     ext m
     rw [coeff_sum]
     have e : ∀ a : K → ℕ,
-        coeff m (g a) = if (fun k => ∑ i, m ⟨k, i⟩) = a then coeff m f else 0 := by
+        AddMonoidAlgebra.coeff (g a) m = if (fun k => ∑ i, m ⟨k, i⟩) = a then AddMonoidAlgebra.coeff f m else 0 := by
       intro a
       rw [hg a]
       by_cases h : (fun k => ∑ i, m ⟨k, i⟩) = a

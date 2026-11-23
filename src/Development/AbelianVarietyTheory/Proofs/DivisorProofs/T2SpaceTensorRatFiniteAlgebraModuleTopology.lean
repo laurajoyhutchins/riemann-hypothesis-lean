@@ -1,6 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
-import GroundTheory.GlobalFields.LocalAtPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Algebra.Valued.LocallyCompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +140,7 @@ def tensorInt (O : Subring R) : Subring (R ⊗[ℚ] F) where
     · exact O.zero_mem
   add_mem' := by
     intro x y hx hy i j
-    simp only [Set.mem_setOf_eq, map_add, Matrix.add_apply]
+    simp only [Set.mem_setOf_eq, map_add (f := _), Matrix.add_apply]
     exact add_mem (hx i j) (hy i j)
   zero_mem' := by intro i j; simp
   neg_mem' := by
@@ -111,7 +167,7 @@ def tensorIntAlg (A : Type) [Ring A] [Algebra ℚ A] [Module.Finite ℚ A] (O : 
     · exact O.zero_mem
   add_mem' := by
     intro x y hx hy i j
-    simp only [Set.mem_setOf_eq, map_add, Matrix.add_apply]
+    simp only [Set.mem_setOf_eq, map_add (f := _), Matrix.add_apply]
     exact add_mem (hx i j) (hy i j)
   zero_mem' := by intro i j; simp
   neg_mem' := by
@@ -180,8 +236,6 @@ section Entries
 
 variable {S : Type} [CommRing S] {n : ℕ}
 
-def EntriesIn (n : ℕ) (P : Subring S) : Set (Matrix (Fin n) (Fin n) S) := {M | ∀ i j, M i j ∈ P}
-
 end Entries
 
 variable {p : ℕ} [Fact p.Prime]
@@ -214,14 +268,14 @@ theorem level_exists : ∀ (p : ℕ) [Fact p.Prime] (G : HTGroup p), Nonempty G.
   have hσ : Continuous (fun y : AfP p ⊗[ℚ] G.C ↦ (starT G.star (AfP p) y).unop) := by
     let σl : (AfP p ⊗[ℚ] G.C) →ₗ[AfP p] (AfP p ⊗[ℚ] G.C) :=
       { toFun := fun y ↦ (starT G.star (AfP p) y).unop
-        map_add' := fun x y ↦ by simp only [map_add, MulOpposite.unop_add]
+        map_add' := fun x y ↦ by simp only [map_add (f := _), MulOpposite.unop_add]
         map_smul' := by
           intro r x
           induction x using TensorProduct.induction_on with
           | zero => simp
           | tmul a y =>
             simp only [TensorProduct.smul_tmul', smul_eq_mul, starT_tmul, RingHom.id_apply]
-          | add x y hx hy => simp only [smul_add, map_add, MulOpposite.unop_add, hx, hy, RingHom.id_apply] }
+          | add x y hx hy => simp only [smul_add, map_add (f := _), MulOpposite.unop_add, hx, hy, RingHom.id_apply] }
     exact IsModuleTopology.continuous_of_linearMap σl
   have hj : Continuous (algebraMap (AfP p) (AfP p ⊗[ℚ] G.C)) :=
     IsModuleTopology.continuous_of_linearMap (Algebra.linearMap (AfP p) (AfP p ⊗[ℚ] G.C))

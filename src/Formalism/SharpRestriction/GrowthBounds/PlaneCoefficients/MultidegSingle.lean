@@ -1,5 +1,46 @@
-import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.RestPlOf
-import Formalism.SharpRestriction.GrowthBounds.PolynomialLevels.FrRevInj
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.RestPlOf
+public import Formalism.SharpRestriction.GrowthBounds.PolynomialLevels.FrRevInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -168,11 +209,12 @@ end LkD
 theorem lkDeg : LkDeg := by
   intro p _ n' r _ _ O _ _ _ Fr L₁ N₁ hV J _ Dt hS hJ j F hF δ hδ ν hν m'
   have hFs := congrArg (PhiJ Fr Dt j) F.as_sum
+
   rw [map_sum] at hFs
   rw [hFs] at hν
   obtain ⟨μ, hμ, hν'⟩ := Finset.mem_biUnion.1 (MvPolynomial.support_sum hν)
   obtain ⟨ν0, a0, b0⟩ := LkD.PhiJ_monomial Dt hV hS.2.1 hJ j μ (fun v hv =>
-    (mem_supported.1 hF) (Finset.mem_coe.2 ((mem_vars v).2 ⟨μ, hμ, hv⟩)))
+    (mem_supported.1 hF) (Finset.mem_coe.2 ((mem_vars_iff_mem_support v).2 ⟨μ, hμ, hv⟩)))
   rw [a0] at hν'
   have := support_monomial_subset hν'
   rw [Finset.mem_singleton] at this
@@ -205,7 +247,7 @@ theorem lkVars : LkVars := by
     intro F
     induction F using MvPolynomial.induction_on with
     | C a => rw [MvPolynomial.algHom_C]; exact Subalgebra.algebraMap_mem _ a
-    | add f g hf hg => rw [map_add]; exact Subalgebra.add_mem _ hf hg
+    | add f g hf hg => rw [map_add (f := _)]; exact Subalgebra.add_mem _ hf hg
     | mul_X f u hf => rw [map_mul]; exact Subalgebra.mul_mem _ hf (hX u)
   intro F v hv
   exact (mem_supported.1 (hall F)) (Finset.mem_coe.2 hv)

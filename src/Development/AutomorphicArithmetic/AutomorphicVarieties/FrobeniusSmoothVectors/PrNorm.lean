@@ -1,7 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PresDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PrNorm1
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.JconjApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PrOfbox
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PresDefs
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.JconjApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PrNorm1
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.PrOfbox
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Matrix UpperTheory.V.Alg UpperTheory.V.U3 UpperTheory.V.Fr
 
@@ -11,21 +58,25 @@ section SlopeTestRemainingChoices
 
 variable {l : ℕ} [Fact l.Prime] {k : Type} [Field k] {F : Frame l k} {n : ℕ} {C C' : Type} [CommRing C] [CommRing C']
 
-private theorem conj_left {G : Type} [Group G] (h : GL (Fin n) C) (r : G →* GG n C) (s : G) :
+private theorem conj_left {G : Type} [Group G] (h : GL (Fin n) C)
+    (r : G →* GG (m := n) (R := C)) (s : G) :
     (conjBy h r s).left = h * (r s).left * sgnAct n C (r s).right h⁻¹ := by
   simp [conjBy, GG.ofGL, MulAut.conj_apply, SemidirectProduct.mul_left, SemidirectProduct.mul_right, mul_assoc]
 
-private theorem conj_right {G : Type} [Group G] (h : GL (Fin n) C) (r : G →* GG n C) (s : G) :
+private theorem conj_right {G : Type} [Group G] (h : GL (Fin n) C)
+    (r : G →* GG (m := n) (R := C)) (s : G) :
     (conjBy h r s).right = (r s).right := by
   simp [conjBy, GG.ofGL, MulAut.conj_apply, SemidirectProduct.mul_right]
 
-private theorem conj_mat {G : Type} [Group G] (h : GL (Fin n) C) (r : G →* GG n C) (s : G) (hs : (r s).right = 1) :
+private theorem conj_mat {G : Type} [Group G] (h : GL (Fin n) C)
+    (r : G →* GG (m := n) (R := C)) (s : G) (hs : (r s).right = 1) :
     (conjBy h r s).mat = (h : Matrix (Fin n) (Fin n) C) * (r s).mat *
       ((h⁻¹ : GL (Fin n) C) : Matrix (Fin n) (Fin n) C) := by
   unfold GG.mat
   rw [conj_left, hs, sgnAct_one, Units.val_mul, Units.val_mul]
 
-private theorem conj_mul {G : Type} [Group G] (h h' : GL (Fin n) C) (r : G →* GG n C) :
+private theorem conj_mul {G : Type} [Group G] (h h' : GL (Fin n) C)
+    (r : G →* GG (m := n) (R := C)) :
     conjBy (h * h') r = conjBy h (conjBy h' r) := by
   apply MonoidHom.ext
   intro s
@@ -87,6 +138,7 @@ private theorem cj_cont (hd : IsOpen (F.del.ker : Set F.Γ)) (I : Ideal C) (h : 
   filter_upwards [hdel, hM] with y hy hMy
   show Ideal.Quotient.mk (I ^ N) ((conjBy h B.r y).mat i j) = Ideal.Quotient.mk (I ^ N) ((conjBy h B.r x).mat i j)
   simp only [GG.mat] at hMy ⊢
+
   simp only [conj_left, B.nu, hy, Units.val_mul, Matrix.mul_apply, map_sum, map_mul, hMy]
 
 private theorem of_unique {B : Box F n C} {ρ ρ' : NRep F n C} (h : B.Of ρ) (h' : B.Of ρ') : ρ = ρ' := by
@@ -97,9 +149,9 @@ private theorem of_unique {B : Box F n C} {ρ ρ' : NRep F n C} (h : B.Of ρ) (h
   rw [← h.psi, ← h'.psi, e]
 
 private theorem star_mat (hc : F.del F.c = -1) (B : Box F n C) (h1 : (B.r F.c).mat = 1) (g : F.G0) :
-    (B.r (F.star g)).mat = Jmat C n * (B.r g).matᵀ * Jmat C n := by
+    (B.r (F.star g)).mat = Jmat (R := C) n * (B.r g).matᵀ * Jmat (R := C) n := by
   have t1 : theta (1 : GL (Fin n) C) = 1 := by
-    simpa [sgnAct_neg_one] using map_one (sgnAct n C (-1))
+    simpa [sgnAct_neg_one] using map_one (sgnAct (m := n) (R := C) (-1))
   have hX : B.r F.c = ⟨1, -1⟩ := SemidirectProduct.ext (Units.ext (by simpa [GG.mat] using h1)) ((B.nu _).trans hc)
   have hY : B.r (g : F.Γ) = ⟨(B.r g).left, 1⟩ := SemidirectProduct.ext rfl (frame_right_eq_one_of_G0 B g)
   rw [show ((F.star g : F.G0) : F.Γ) = F.c * (g : F.Γ)⁻¹ * F.c⁻¹ from rfl, map_mul, map_mul, map_inv, map_inv, hX, hY]
@@ -127,10 +179,11 @@ theorem UpperTheory.V.Fr.pr_norm :
   have hB1c : (B1.r F.c).mat = 1 := hc1
   have hB1map : B1.map (p : C' →+* C) = B'.map (p : C' →+* C) := cj_map _ h1 B' hh1
   have hB1cont : B1.Cont (maximalIdeal C') := cj_cont hF.del_open _ h1 B' hcont
-  have hstar : ∀ g : F.G0, (B1.r (F.star g)).mat = Jmat C' n * (B1.r g).matᵀ * Jmat C' n :=
+  have hstar : ∀ g : F.G0, (B1.r (F.star g)).mat =
+      Jmat (R := C') n * (B1.r g).matᵀ * Jmat (R := C') n :=
     star_mat hF.del_c B1 hB1c
   set Z := (B1.r F.g0).mat - (B1.r (F.star F.g0)).mat with hZ
-  have hJ : ∀ X : Matrix (Fin n) (Fin n) C', Jmat C' n * (Jmat C' n * X) = X := by
+  have hJ : ∀ X : Matrix (Fin n) (Fin n) C', Jmat (R := C') n * (Jmat (R := C') n * X) = X := by
     intro X
     rw [← Matrix.mul_assoc, Jmat_mul_Jmat, Matrix.one_mul]
   have hθ : thetaLie Z = Z := by

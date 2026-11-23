@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PPFContractedDim
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.Statements
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PPFContractedDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.GradedAlgebra.Radical
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -41,7 +93,7 @@ theorem component_blockDeg_of_isMultiHomog {p : MRing ι F} {b : K → ℕ} (hp 
     weightedHomogeneousComponent (blockDeg k) n p = if b k = n then p else 0 := by
   ext d
   rw [coeff_weightedHomogeneousComponent, weight_blockDeg]
-  by_cases hd : coeff d p = 0
+  by_cases hd : AddMonoidAlgebra.coeff p d = 0
   · split_ifs <;> simp [hd]
   · have hw : Finsupp.weight (blockWeight ι) d = b := hp hd
     rw [hw]
@@ -49,8 +101,9 @@ theorem component_blockDeg_of_isMultiHomog {p : MRing ι F} {b : K → ℕ} (hp 
 
 theorem blockDeg_component_mem {I : Ideal (MRing ι F)} (hI : IsMultiHomogIdeal I) (k : K) (n : ℕ)
     {r : MRing ι F} (hr : r ∈ I) : weightedHomogeneousComponent (blockDeg k) n r ∈ I := by
+
   rw [← sum_weightedHomogeneousComponent (blockWeight ι) r,
-    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp r), map_sum]
+  finsum_eq_sum _ (weightedHomogeneousComponent_finsupp r), map_sum]
   refine Ideal.sum_mem _ fun b _ => ?_
   rw [component_blockDeg_of_isMultiHomog (weightedHomogeneousComponent_isWeightedHomogeneous b r)]
   split_ifs
@@ -64,13 +117,13 @@ theorem isMultiHomogIdeal_of_blockDeg [Fintype K] {I : Ideal (MRing ι F)}
   intro r hr b
   let G : Finset K → MRing ι F := fun T =>
     ∑ d ∈ r.support.filter (fun d => ∀ k ∈ T, Finsupp.weight (blockWeight ι) d k = b k),
-      monomial d (coeff d r)
-  have hG : ∀ T d, coeff d (G T) =
-      if ∀ k ∈ T, Finsupp.weight (blockWeight ι) d k = b k then coeff d r else 0 := by
+      monomial d (AddMonoidAlgebra.coeff r d)
+  have hG : ∀ T d, AddMonoidAlgebra.coeff (G T) d =
+      if ∀ k ∈ T, Finsupp.weight (blockWeight ι) d k = b k then AddMonoidAlgebra.coeff r d else 0 := by
     intro T d
     simp only [G, coeff_sum, coeff_monomial, Finset.sum_ite_eq', Finset.mem_filter,
       mem_support_iff]
-    by_cases hc : coeff d r = 0 <;> simp [hc]
+    by_cases hc : AddMonoidAlgebra.coeff r d = 0 <;> simp [hc]
   have hmem : ∀ T, G T ∈ I := by
     intro T
     induction T using Finset.induction_on with

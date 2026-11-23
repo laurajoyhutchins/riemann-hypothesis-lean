@@ -1,6 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LemmaKOfSteps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.SChain
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.SPrism
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LemmaKOfSteps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.SChain
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.SPrism
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.SemidirectProduct
+import Mathlib.LinearAlgebra.Projectivization.Action
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Projectivization.Basic
+
+@[expose] public section
 
 open NumberField IsDedekindDomain UpperTheory.V UpperTheory.V.KL UpperTheory.V.ZK
 open scoped LinearAlgebra.Projectivization
@@ -83,8 +135,9 @@ private theorem IsCoc.tr_bd [Fintype X] {a : G → X → X} {c : G → X → M} 
     (z : Ch A G (m + 1)) : bd A M m (tr A a c (m + 1) z) = tr A a c m (bd A G m z) := by
   refine LinearMap.congr_fun (ext1 (f := (bd A M m).comp (tr A a c (m + 1)))
     (f' := (tr A a c m).comp (bd A G m)) fun g => ?_) z
-  simp only [LinearMap.comp_apply, tr_single, bd_single, map_sum, map_add, map_smul, Finset.sum_add_distrib,
-    Finset.smul_sum, h.contract, h.tail]
+
+  simp only [LinearMap.comp_apply, tr_single, bd_single, map_sum, map_add (f := _), map_smul, Finset.sum_add_distrib,
+  Finset.smul_sum, h.contract, h.tail]
   congr 1
   · exact Equiv.sum_comp (h.perm (g 0)) fun x => Finsupp.single (term a c x fun i => g i.succ) (1 : A)
   · exact Finset.sum_comm
@@ -204,10 +257,13 @@ private theorem quot_mk {l : V → kˣ} (hl : Homog l) {l' : W → kˣ} (hl' : H
 private theorem lc_mk (ρ : G →* (V ≃ₗ[k] V)) {l : V → kˣ} (hl : Homog l) (g : G) {v : V} (hv : v ≠ 0) :
     lc ρ l g (Projectivization.mk k v hv) = l v / l ((ρ g)⁻¹ v) := quot_mk hl hl _ hv
 
-private theorem isCoc (ρ : G →* (V ≃ₗ[k] V)) {l : V → kˣ} (hl : Homog l) : IsCoc (la ρ) (lc ρ l) where
-  a_one x := by simp [la]
-  a_mul g h x := by simp only [la, map_mul, mul_inv_rev, mul_smul]
-  c_mul g h x := by
+private theorem isCoc (ρ : G →* (V ≃ₗ[k] V)) {l : V → kˣ} (hl : Homog l) : IsCoc (la ρ) (lc ρ l) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro x
+    simp [la]
+  · intro g h x
+    simp only [la, map_mul, mul_inv_rev, mul_smul]
+  · intro g h x
     induction x using Projectivization.ind with
     | h v hv =>
       rw [la_mk, lc_mk ρ hl, lc_mk ρ hl, lc_mk ρ hl, map_mul, mul_inv_rev, LinearEquiv.mul_apply, div_mul_div_cancel]
@@ -308,7 +364,7 @@ private theorem projection_smul_invariant (u : kˣ) (v : V × W) (hv : v ≠ 0) 
     pr0 (k := k) (u • v) huv = pr0 v hv := by
   unfold pr0
   by_cases h : v.1 = 0
-  · rw [dif_pos h, dif_pos (by simp [h])]
+  · rw [dite_eq_left h, dite_eq_left (by simp [h])]
     exact congrArg _ ((Projectivization.mk_eq_mk_iff k _ _ _ _).2 ⟨u, rfl⟩)
   · rw [dif_neg h, dif_neg (show ¬(u • v).1 = 0 from (smul_ne_zero_iff_ne u).2 h)]
     exact congrArg _ ((Projectivization.mk_eq_mk_iff k _ _ _ _).2 ⟨u, rfl⟩)
@@ -325,7 +381,7 @@ private theorem pr_inl {v : V × W} (hv : v ≠ 0) (h : v.1 ≠ 0) :
     pr (Projectivization.mk k v hv) = Sum.inl (Projectivization.mk k v.1 h) := by rw [pr_mk, pr0, dif_neg h]
 
 private theorem pr_inr {v : V × W} (hv : v ≠ 0) (h : v.1 = 0) (h2 : v.2 ≠ 0) :
-    pr (Projectivization.mk k v hv) = Sum.inr (Projectivization.mk k v.2 h2) := by rw [pr_mk, pr0, dif_pos h]
+    pr (Projectivization.mk k v hv) = Sum.inr (Projectivization.mk k v.2 h2) := by rw [pr_mk, pr0, dite_eq_left h]
 
 private theorem card_inl (v : V) (hv : v ≠ 0) :
     Nat.card {x : ℙ k (V × W) // pr x = Sum.inl (Projectivization.mk k v hv)} = Nat.card W := by
@@ -373,7 +429,7 @@ private theorem theta_add [Finite k] [Finite V] [Finite W] (hk : (Nat.card k : A
     · simp only [if_neg h, if_neg (show ¬(u • y).1 = 0 from (smul_ne_zero_iff_ne u).2 h)]
       exact lam_homog _ _ h
   have hs : ∀ g (y : V × W), (sumRep ρ σ g)⁻¹ y = ((ρ g)⁻¹ y.1, (σ g)⁻¹ y.2) := fun g y => rfl
-  rw [theta_cm ht _ hl hz, theta_cm ht _ lam_homog hz, theta_cm ht _ lam_homog hz, ← map_add, ← tr_sum,
+  rw [theta_cm ht _ hl hz, theta_cm ht _ lam_homog hz, theta_cm ht _ lam_homog hz, ← map_add (f := _), ← tr_sum,
     tr_pull (MonoidHom.id _) pr (a' := fun g => Sum.map (la ρ g) (la σ g))
       (c' := fun g => Sum.elim (lc ρ (lam k V) g) (lc σ (lam k W) g)), cm_id]
   · intro g x

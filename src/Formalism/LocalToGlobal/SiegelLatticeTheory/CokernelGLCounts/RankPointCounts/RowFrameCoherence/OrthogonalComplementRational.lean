@@ -1,6 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.ClassFrameOO1FrameValPiIso
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.RowFrameCoherence.ClassFrameOO1FrameValPiIso
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.LinearIndependent.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +68,7 @@ theorem rank_le_rank_map {K L : Type*} [Field K] [Field L] (φ : K →+* L) {m n
     (A : Matrix m n K) : A.rank ≤ (A.map φ).rank := by
   letI := φ.toAlgebra
   haveI : FaithfulSMul K L := (faithfulSMul_iff_algebraMap_injective K L).2 φ.injective
-  rw [Matrix.rank_eq_finrank_span_cols, Matrix.rank_eq_finrank_span_cols]
+  rw [← Matrix.finrank_span_range_col, ← Matrix.finrank_span_range_col]
   obtain ⟨b, hbs, hspan, hli⟩ := exists_linearIndependent K (Set.range A.col)
   have hbfin : b.Finite := (Set.finite_range _).subset hbs
   haveI := hbfin.fintype
@@ -49,6 +101,7 @@ theorem ker_map_le_span {K L : Type*} [Field K] [Field L] (φ : K →+* L) {m n 
   have hmap : ∀ x : n → K, (A.map φ) *ᵥ (φ ∘ x) = φ ∘ (A *ᵥ x) := by
     intro x
     funext k
+
     simp [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum]
   have hT : Submodule.span L (Set.range w) ≤ LinearMap.ker (A.map φ).mulVecLin := by
     rw [Submodule.span_le]
@@ -66,7 +119,7 @@ theorem ker_map_le_span {K L : Type*} [Field K] [Field L] (φ : K →+* L) {m n 
     have h1 := LinearMap.finrank_range_add_finrank_ker A.mulVecLin
     have h2 := LinearMap.finrank_range_add_finrank_ker (A.map φ).mulVecLin
     have h3 := rank_le_rank_map φ A
-    unfold Matrix.rank at h3
+    rw [← Matrix.finrank_range_mulVecLin, ← Matrix.finrank_range_mulVecLin] at h3
     rw [Module.finrank_fintype_fun_eq_card] at h1 h2
     have hS : finrank K S = finrank K (LinearMap.ker A.mulVecLin) := rfl
     rw [hS]
@@ -217,7 +270,7 @@ theorem zhat_rat (M : Matrix (Fin X.B.I.n) (Fin X.B.I.n) X.B.I.E) :
 theorem dl_rat (Z : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) X.B.I.E) :
     Formalism.L2.SG.RealObj.Dl (Z.map (X.B.I.φ v)) (D.R.rS + 1) = X.B.I.φ v Z.det := by
   unfold Formalism.L2.SG.RealObj.Dl
-  rw [dif_pos le_rfl, RingHom.map_det]
+  rw [dite_eq_left le_rfl, RingHom.map_det]
   congr 1
 
 theorem adj_rat (Z : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) X.B.I.E) :
@@ -334,6 +387,7 @@ variable {D : D7} (X : HidaSetting D) (Y : Formalism.L2.SG.Full.Full X) (u u' : 
 theorem classFrameOO2_hE_expand (a x : Fin X.B.I.n → X.B.I.E) :
     Formalism.L2.SG.Pf.Level.hE X a x = ∑ j, Formalism.L2.SG.Pf.Level.hE X a (Pi.single j 1) * x j := by
   conv_lhs => rw [← Formalism.L2.SG.Pf.Level.sum_single X x]
+
   rw [← Formalism.L2.SG.Pf.Level.hEl_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, Formalism.L2.SG.Pf.Level.hEl_apply, smul_eq_mul, mul_comm]

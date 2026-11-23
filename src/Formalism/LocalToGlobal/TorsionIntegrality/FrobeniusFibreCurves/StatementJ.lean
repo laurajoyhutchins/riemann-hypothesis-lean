@@ -1,8 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementX
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.CMQuasiPeriodConst
-import Formalism.EllipticTorsion.FormalGroupPointsTorsionFree
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementI
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.IsFibreCurve
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementW
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -58,15 +98,5 @@ def ThetaZeroTwoAnalytic : Prop :=
     (∀ z, α * z - ω₀ / 2 ∈ L.lattice → ‖px W (ptW 2 L ι W z)‖ ≤ 1) →
     Simeq (ι := Unit) (evenSigmaLogAtTwoTorsion W (ι (Formalism.L2.Th1.F.s2 L)) (px W (ptW 2 L ι W (ω₀ / 2)))) 0 ∧
       OneUnit (inW 2 ι W (Formalism.L2.Th1.F.th0 L (ω₀ / 2)))
-
-def PointsIntTwo : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (L : PeriodPair) (ι : ℂ ≃+* ℂ_[l]) (W : WeierstrassCurve ℂ_[l]),
-    Unif l L ι W → IntCurve W → ∀ (α α' t0 t' t'' : ℂ),
-    (∀ t, Formalism.ELL.InFormalGroupPoints (ptW l L ι W t) → Formalism.ELL.InFormalGroupPoints (ptW l L ι W (α * t))) →
-    (∀ t, Formalism.ELL.InFormalGroupPoints (ptW l L ι W t) → Formalism.ELL.InFormalGroupPoints (ptW l L ι W (α' * t))) →
-    (∀ t, Formalism.ELL.InFormalGroupPoints (ptW l L ι W t) → α * t ∈ L.lattice → t ∈ L.lattice) →
-    t0 = t' + t'' → α' * t' ∈ L.lattice → α' * t'' - t'' ∈ L.lattice → t'' ∉ L.lattice →
-    α * t'' ∈ L.lattice →
-    ‖px W (ptW l L ι W t0)‖ ≤ 1 ∧ ∀ Q, α * Q - t0 ∈ L.lattice → ‖px W (ptW l L ι W Q)‖ ≤ 1
 
 end Formalism.L2.Th1.B

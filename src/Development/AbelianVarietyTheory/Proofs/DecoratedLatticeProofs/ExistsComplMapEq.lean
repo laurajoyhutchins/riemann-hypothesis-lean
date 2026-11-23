@@ -1,12 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSphGL
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.WeilSiegelFormulaUnitary
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousComplEquivSymm
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HomLatticeIndicatorOnSplitHalfEqHalfIndicator
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HasIwasawaDecompositionDoubledSplitPlace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSphGL
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSum
+public import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.LatticeAndConstantUnique
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousComplEquivSymm
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HasIwasawaDecompositionDoubledSplitPlace
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
-import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.LatticeAndConstantUnique
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HeckeFormNSOfHeckeForm
+import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IntegrandSZero
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MixSDblDecZero
+import Formalism.LocalToGlobal.IndefiniteReal.SelfDualFullLattice
+
+@[expose] public section
+
 open scoped ComplexConjugate Matrix NNReal ENNReal
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.Cusp GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel
@@ -49,7 +101,7 @@ theorem exists_gen {E : Type} [Field E] [NumberField E] (w : HeightOneSpectrum (
     induction ha using Submodule.span_induction with
     | mem x hx => exact hmax x hx
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add]; exact (Valuation.map_add _ _ _).trans (max_le hx hy)
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact (Valuation.map_add _ _ _).trans (max_le hx hy)
     | smul r x _ hx =>
       rw [Algebra.smul_def, map_mul, map_mul]
       have hr : Valued.v (algebraMap E (w.adicCompletion E) (algebraMap (𝓞 E) E r)) ≤ 1 :=
@@ -75,7 +127,7 @@ theorem mul_mem_gen {S : HSp D} {𝔞 : Set D.host.E} {L : Lat S} {P : FinPl D �
     (fun i => z * (pairA D.host.F 0 β ⊗ₜ[D.host.F] (a * x i))) ∈ latMul S 𝔞 L P := by
   let Φ : Af D.host.F ⊗[D.host.F] D.host.E →+ (Fin S.rank → AE D) :=
     AddMonoidHom.mk' (fun c i => GlobalTheory.LatticeStable.liftFin D (c * (β ⊗ₜ[D.host.F] (a * x i))))
-      fun c c' => funext fun i => by rw [add_mul, LinearMap.map_add]; rfl
+      fun c c' => funext fun i => by rw [add_mul, LinearMap.map_add (f := _)]; rfl
   have hle : intAE D ≤ (latMul S 𝔞 L P).comap Φ := by
     refine (AddSubgroup.closure_le _).2 ?_
     rintro _ ⟨γ, hγ, o, rfl⟩
@@ -166,13 +218,17 @@ theorem iota_mem (h : w.under (𝓞 D.host.F) = q) (hs : Formalism.MainNotions.S
 
 end GlobalTheory.Core.Rk.SWQ.LatHalf
 
-open GlobalTheory.Core.Rk.SWQ.LatHalf in
 
+open GlobalTheory.Core.Rk.SWQ.LatHalf in
 theorem GlobalTheory.Core.Rk.SWQ.LatHalf.mem_latO_iff_intM : ∀ (D : D7) (q : FinPl D) (w : HeightOneSpectrum (𝓞 D.host.E)) (h : w.under (𝓞 D.host.F) = q), Formalism.MainNotions.SchurIrreducible.IsSplit (E := D.host.E) q → ∀ (S T : HSp D) (LS : Lat S) (LT : Lat T), IsSelfDualC S LS → IsSelfDualC T LT → ∀ a : GL (Fin S.rank) (w.adicCompletion D.host.E), GlobalTheory.LFun.IsFrameAt w LS a → ∃ b : GL (Fin T.rank) (w.adicCompletion D.host.E), ∀ u : WO S T, offM q u = 0 → (∀ i j, cw h (cA D (u i j)) = 0) → (u ∈ latO S T (LS : Set (Fin S.rank → D.host.E)) (LT : Set (Fin T.rank → D.host.E)) (fun v => v = q) ↔ IntM ((b⁻¹).1 * u.map (cw h) * a.1)) := by
   intro D q w h hs S T LS LT hS hT a ha
   obtain ⟨ι, -, h1, -, -, h4, h5, -, -⟩ := GlobalTheory.Core.Rk.SplitIota.exists_iota D q w h hs
+  have hfull : ∀ (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)),
+      IsSelfDualC V Λ → Submodule.IsFullLattice D.host.E Λ := by
+    intro V Λ hΛ
+    exact Formalism.IndefR.Datum.IsSelfDualC.isFullLattice V Λ hΛ
   obtain ⟨e, ⟨⟨b₀, hb₀, -⟩, -⟩, -, -⟩ := GlobalTheory.LFun.SplitChart.exists_isSplitChart (isCMExt_host D)
-    (GlobalTheory.Doubling.isHermND_gram T) hT.1.fg hT.1.span_eq_top h hs
+    (GlobalTheory.Doubling.isHermND_gram T) hT.1.fg (hfull T LT hT).span_eq_top h hs
     (GlobalTheory.Core.Rk.IwSplit.isSelfDualAt_of_isSelfDualC hT q)
   clear e
   obtain ⟨a₀, ha₀, h0, hgen⟩ := exists_gen w D.host.AA (GlobalTheory.ModelLatticeCheck.AA_ne_zero D)
@@ -231,6 +287,7 @@ theorem GlobalTheory.Core.Rk.SWQ.LatHalf.mem_latO_iff_intM : ∀ (D : D7) (q : F
         (iota_mem h hs h1 h4 (𝔞 := {x | x ∈ D.host.AA}) ha₀ hM)
       funext i
       rw [← hπ, Pi.smul_apply, smul_eq_mul, mul_inv_cancel_left₀ hπ0]
+
       simp only [Matrix.mulVec, dotProduct, map_sum, Matrix.map_apply]
       refine Finset.sum_congr rfl fun j _ => ?_
       conv_lhs => rw [hu, mul_comm, h4, e, one_mul, mul_comm]

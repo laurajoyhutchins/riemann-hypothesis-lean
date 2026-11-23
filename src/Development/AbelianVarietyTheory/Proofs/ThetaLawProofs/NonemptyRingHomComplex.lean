@@ -1,13 +1,69 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Basic.Countable.Defs
+public import Mathlib.Algebra.MvPolynomial.Cardinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.IsAlgClosed.Classification
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Algebraic.Cardinality
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Localization.Cardinality
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRootOfKeyFormula
 import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
-import Development.AbelianVarietyTheory.Statements.FundamentalDomains.KeyFormulaPowOfKeyFormula
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyDataDescendCountableSubringsStatement
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ValueAtNormalForm
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusConstMul
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsKeyPBRing
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+public import Mathlib.Algebra.Algebra.Defs
+public import Mathlib.Algebra.MvPolynomial.Basic
+public import Mathlib.Analysis.Complex.Cardinality
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -19,10 +75,10 @@ open GlobalTheory.KeyCl GlobalTheory.KeyPow
 
 namespace GlobalTheory.KeyRuleUnique
 
+
 set_option autoImplicit false in
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory in
 open Cardinal in
-
 theorem _root_.GlobalTheory.KeyRuleUnique.nonempty_ringHom_complex (K : Type) [Field K] [CharZero K]
     [Countable K] : Nonempty (K →+* ℂ) := by
   let F := FractionRing (MvPolynomial ℝ K)
@@ -45,26 +101,5 @@ theorem _root_.GlobalTheory.KeyRuleUnique.nonempty_ringHom_complex (K : Type) [F
   obtain ⟨e⟩ := IsAlgClosed.ringEquiv_of_equiv_of_char_eq (K := L) (L := ℂ) 0 hlt
     (Cardinal.eq.1 (hL.trans mk_complex.symm))
   exact ⟨e.toRingHom.comp i⟩
-
-theorem value_of_normalAt {N : ℕ → ℕ} {κ : Rule} (hH : Homog N κ) (hT : ThetaOne κ) (x : KeyIn ℂ)
-    {τ M : Matrix (Fin x.P.g) (Fin x.P.g) ℂ} {a b : Fin x.P.g → ℂ} {c : ℂ} (hab : charHalf x.P.g a b) (hc : c ≠ 0)
-    (hM : M.det ≠ 0) (h : NormalAt x τ M a b c) : (κ ℂ x : ℂ) = (M.det ^ 4 / c ^ 8) ^ N x.P.g := by
-  refine value_at_normalForm N 0 (κ ℂ) x.P.g a b (Nat.zero_le _)
-    (fun P hg rig hr th hth v hv th' hth' v' hv' a M _ => hH ℂ P hg rig hr th hth v hv th' hth' v' hv' a M)
-    (fun y hy σ hσ => ?_) x rfl τ M c hc hM h
-  obtain ⟨u, h₁, h₂, h₃, h₄, h₅, h₆⟩ := (normalAt_one_iff y σ _ _).1 hσ
-  exact hT y u σ _ _ h₁ h₂ (fun i => hab.1 _) (fun i => hab.2 _) h₃ h₄ h₅ h₆
-
-theorem rule_unique : ∀ (N : ℕ → ℕ) (κ κ' : Rule), Homog N κ → Funct κ → ThetaOne κ → Homog N κ' → Funct κ' → ThetaOne κ' → ∀ (K : Type) [Field K] [CharZero K] (x : KeyIn K), κ K x = κ' K x := by
-  intro N κ κ' hH hF hT hH' hF' hT' K _ _ x
-  obtain ⟨K₀, x₀, hK₀, hx₀⟩ := (GlobalTheory.T.keyData_descend_countable_subrings GlobalTheory.firstFiveLaws.1).2 K x
-  obtain ⟨σ⟩ := nonempty_ringHom_complex K₀
-  obtain ⟨y, hy⟩ := exists_keyPB_ring x₀ σ
-  obtain ⟨⟨τ, M, a, b, c, hab, hc, hM, hN⟩, -⟩ := KeyNormalExists.exists_normalAt GlobalTheory.thetaUnifAV_all y
-  have e : (κ ℂ y : ℂ) = κ' ℂ y := by
-    rw [value_of_normalAt hH hT y hab hc hM hN, value_of_normalAt hH' hT' y hab hc hM hN]
-  rw [hF K₀ ℂ σ x₀ y hy, hF' K₀ ℂ σ x₀ y hy] at e
-  apply Units.ext
-  rw [hF K₀ K _ x₀ x hx₀, hF' K₀ K _ x₀ x hx₀, σ.injective e]
 
 end GlobalTheory.KeyRuleUnique

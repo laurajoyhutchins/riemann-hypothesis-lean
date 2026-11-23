@@ -1,8 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SuppInd
+module
+
+public import Mathlib.Algebra.Group.AddChar
+public import Mathlib.Analysis.Complex.Norm
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HalfLinearCocycle
-import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.LocalIntegralGL
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.LocalToGlobal.Divisibility.DefGroup
+import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues
 open Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.Cx
@@ -71,7 +134,7 @@ theorem finite_plancherel_schrodinger_intertwiner :
     obtain ⟨y, hHd, hy, hne⟩ := hwit (rep (c - d)) (by rw [hrep]; exact sub_ne_zero.mpr hcd)
     refine ⟨y, hHd, hy, fun heq => hne ?_⟩
     have h1 := hχ y hy (rep (c - d) + rep d)
-    have hr : red (rep (c - d) + rep d) = c := by rw [map_add, hrep, hrep, sub_add_cancel]
+    have hr : red (rep (c - d) + rep d) = c := by rw [map_add (f := _), hrep, hrep, sub_add_cancel]
     rw [hr, AddSubgroup.coe_add, hB, AddChar.map_add_eq_mul, ← hχd y d, heq] at h1
     have h0 : χ y d ≠ 0 := fun h => by simpa [h] using hχnorm y hy d
     exact mul_right_cancel₀ h0 (h1.trans (one_mul _).symm)
@@ -80,7 +143,7 @@ theorem finite_plancherel_schrodinger_intertwiner :
     apply hSB
     · intro t ht
       by_contra hmem
-      exact ht (by rw [hind, dif_neg hmem])
+      exact ht (by rw [hind, dite_eq_right hmem])
     · intro t u hu
       have hnu : Fintype.card G • u ∈ Λc := Λc.nsmul_mem hu _
       by_cases ht : t ∈ Λc
@@ -88,24 +151,23 @@ theorem finite_plancherel_schrodinger_intertwiner :
         have he : red ⟨t + Fintype.card G • u, ht'⟩ = red ⟨t, ht⟩ := by
           have : (⟨t + Fintype.card G • u, ht'⟩ : Λc) = ⟨t, ht⟩ + Fintype.card G • ⟨u, hu⟩ :=
             Subtype.ext (by simp)
-          rw [this, map_add, map_nsmul, card_nsmul_eq_zero, add_zero]
-        rw [hind, hind, dif_pos ht, dif_pos ht', he]
+          rw [this, map_add (f := _), map_nsmul, card_nsmul_eq_zero, add_zero]
+        rw [hind, hind, dite_eq_left ht, dite_eq_left ht', he]
       · have ht' : t + Fintype.card G • u ∉ Λc := fun h => ht (by simpa using Λc.sub_mem h hnu)
-        rw [hind, hind, dif_neg ht, dif_neg ht']
+        rw [hind, hind, dite_eq_right ht, dite_eq_right ht']
   have hmodg : ∀ y, Hd y → (∀ k : Λc, red k = 0 → ψ (B k y) = 1) → ∀ c,
       hs y (g c) = χ y c • g c := by
     intro y hHd hy c
     rw [hg, ← hmod (ind c) (hSBind c) y hHd, ← map_smul]
     congr 1
     funext t
-    simp only [Pi.smul_apply, smul_eq_mul]
-    rw [hind]
+    simp only [Pi.smul_apply, smul_eq_mul, hind]
     by_cases ht : t ∈ Λc
-    · rw [dif_pos ht]
+    · rw [dite_eq_left ht]
       by_cases hr : red ⟨t, ht⟩ = c
-      · rw [if_pos hr, mul_one, mul_one, ← hr]; exact hχ y hy ⟨t, ht⟩
-      · rw [if_neg hr]; simp
-    · rw [dif_neg ht]; simp
+      · rw [ite_eq_left hr, mul_one, mul_one, ← hr]; exact hχ y hy ⟨t, ht⟩
+      · rw [ite_eq_right hr]; simp
+    · rw [dite_eq_right ht]; simp
   have htrg : ∀ c, hs (rep c) (g c) = g 0 := by
     intro c
     rw [hg, hg, ← htr (ind c) (hSBind c) (rep c) (rep c).2]
@@ -116,11 +178,11 @@ theorem finite_plancherel_schrodinger_intertwiner :
     · have ht' : t + (rep c : X) ∈ Λc := Λc.add_mem ht (rep c).2
       have he : red ⟨t + rep c, ht'⟩ = red ⟨t, ht⟩ + c := by
         have : (⟨t + rep c, ht'⟩ : Λc) = ⟨t, ht⟩ + rep c := Subtype.ext (by simp)
-        rw [this, map_add, hrep]
-      rw [dif_pos ht, dif_pos ht', he]
+        rw [this, map_add (f := _), hrep]
+      rw [dite_eq_left ht, dite_eq_left ht', he]
       simp
     · have ht' : t + (rep c : X) ∉ Λc := fun h => ht (by simpa using Λc.sub_mem h (rep c).2)
-      rw [dif_neg ht, dif_neg ht']
+      rw [dite_eq_right ht, dite_eq_right ht']
   have hTh0 : Th 0 := by simpa using hThlin (-1) f₀ f₀ hThf₀ hThf₀
   have hThsmul : ∀ a f, Th f → Th (a • f) := fun a f hf => by simpa using hThlin a f 0 hf hTh0
   have hhs0 : ∀ w, hs w 0 = 0 := fun w => by simpa using hslin w 1 0 0
@@ -142,6 +204,7 @@ theorem finite_plancherel_schrodinger_intertwiner :
   have hf0sum : f₀ = ∑ c, g c := by
     rw [← hf₀]
     simp only [hg]
+
     rw [← map_sum]
     congr 1
     funext t
@@ -152,6 +215,7 @@ theorem finite_plancherel_schrodinger_intertwiner :
     · simp [ht]
   have hΦsum : (T fun t => if h : t ∈ Λc then Gd (red ⟨t, h⟩) else 0) = ∑ c, Gd c • g c := by
     simp only [hg, ← map_smul]
+
     rw [← map_sum]
     congr 1
     funext t

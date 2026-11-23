@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.JetAnalytic
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowerIntegralValuationLowerBoundIffForallEmbeddiStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotDvdDiscrIffRamificationIdx
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeValueIntegralityRamifiedOfExpansion
+public import Development.AbelianVarietyTheory.Definitions.Divisors.JetAnalytic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowerIntegralValuationLowerBoundIffForallEmbeddiStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotDvdDiscrIffRamificationIdx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -116,8 +159,8 @@ theorem prime_eq_of_mem {A : Type} [CommRing A] {v : Ideal A} (hv : v.IsPrime) {
   simp only [map_natCast] at *
   exact v.add_mem (v.mul_mem_left _ hpv) (v.mul_mem_left _ hqv)
 
-open GlobalTheory.IndefiniteRowSideFullHecke.ClassZetaValuationBounds (c_vp delta_vp IsFieldData) in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.ClassZetaValuationBounds (c_vp delta_vp IsFieldData) in
 theorem ne_d_of_c_eq_zero {E : Type} [Field E] [NumberField E] {I : Type} [Fintype I] {d : ℕ} {φ : I → E →+* ℂ}
     (hF : IsFieldData d φ) {𝔣 : Ideal (OF E)} (h𝔣 : IsBaseCond 𝔣) {l : ℕ} (hc : c_vp 𝔣 l = 0) : l ≠ d := by
   rintro rfl
@@ -140,53 +183,11 @@ theorem ne_d_of_c_eq_zero {E : Type} [Field E] [NumberField E] {I : Type} [Finty
 
 theorem card_eq_finrank {E : Type} [Field E] [NumberField E] [IsCMField E] {I : Type} [Fintype I]
     {φ : I → E →+* ℂ} (h : IsCMType φ) : Fintype.card I = Module.finrank ℚ (maximalRealSubfield E) := by
-  have hreal : ∀ i j, φ i ≠ ComplexEmbedding.conjugate (φ j) := by
-    intro i j hij
-    obtain ⟨k, -, hk⟩ := h (φ i)
-    have e : i = j := (hk i (Or.inl rfl)).trans (hk j (Or.inr hij)).symm
-    subst e
-    have hr : ComplexEmbedding.IsReal (φ i) := ComplexEmbedding.isReal_iff.mpr hij.symm
-    exact InfinitePlace.not_isReal_iff_isComplex.mpr (IsTotallyComplex.isComplex (InfinitePlace.mk (φ i)))
-      (InfinitePlace.isReal_mk_iff.mpr hr)
-  have hbij : Function.Bijective (Sum.elim φ (fun i => ComplexEmbedding.conjugate (φ i))) := by
-    refine ⟨?_, ?_⟩
-    · rintro (i | i) (j | j) hij
-      · simp only [Sum.elim_inl] at hij
-        obtain ⟨k, -, hk⟩ := h (φ i)
-        rw [hk i (Or.inl rfl), hk j (Or.inl hij)]
-      · exact absurd hij (hreal i j)
-      · exact absurd hij.symm (hreal j i)
-      · simp only [Sum.elim_inr] at hij
-        have hij' : φ i = φ j := by
-          simpa using congrArg ComplexEmbedding.conjugate hij
-        obtain ⟨k, -, hk⟩ := h (φ i)
-        rw [hk i (Or.inl rfl), hk j (Or.inl hij')]
-    · intro σ
-      obtain ⟨k, hk, -⟩ := h σ
-      rcases hk with hk | hk
-      · exact ⟨Sum.inl k, hk.symm⟩
-      · exact ⟨Sum.inr k, hk.symm⟩
-  have h1 := Fintype.card_of_bijective hbij
-  rw [Fintype.card_sum, NumberField.Embeddings.card E ℂ] at h1
-  have h3 : Module.finrank ℚ E = 2 * Module.finrank ℚ (maximalRealSubfield E) := by
-    rw [← Module.finrank_mul_finrank ℚ (maximalRealSubfield E) E,
-      Algebra.IsQuadraticExtension.finrank_eq_two (maximalRealSubfield E) E, mul_comm]
-  omega
+  apply GlobalTheory.LatValRam.card_eq_finrank <;> assumption
 
 theorem gamma_nat_add (k n : ℕ) (hk : 1 ≤ k) :
     Real.Gamma ((k : ℝ) + n) = ((k - 1).factorial : ℝ) * ∏ j ∈ Finset.range n, ((k : ℝ) + j) := by
-  induction n with
-  | zero =>
-    have : (k : ℝ) = ((k - 1 : ℕ) : ℝ) + 1 := by
-      rw [Nat.cast_sub hk]; ring
-    simp only [Nat.cast_zero, add_zero, Finset.range_zero, Finset.prod_empty, mul_one]
-    rw [this, Real.Gamma_nat_eq_factorial]
-  | succ n ih =>
-    have hpos : (k : ℝ) + n ≠ 0 := by
-      have : (1 : ℝ) ≤ k := by exact_mod_cast hk
-      positivity
-    rw [Finset.prod_range_succ, Nat.cast_succ, ← add_assoc, Real.Gamma_add_one hpos, ih]
-    ring
+  apply GlobalTheory.LatValRam.gamma_nat_add <;> assumption
 
 theorem exists_list_count {I : Type} [Fintype I] [DecidableEq I] (κ : I → ℕ) :
     ∃ u : List I, ∀ i, u.count i = κ i := by
@@ -227,8 +228,8 @@ theorem per_factor (a b Ω r π : ℂ) (k n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0)
   field_simp
   ring
 
-open GlobalTheory.IndefiniteRowSideFullHecke.ClassZetaValuationBounds (ValGe_vp betaBound_vp c_vp cE_vp a0 n_vp) in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.ClassZetaValuationBounds (ValGe_vp betaBound_vp c_vp cE_vp a0 n_vp) in
 theorem latIntUnr : GlobalTheory.IndefiniteRowSideFullHecke.DefiningCoordinates.Statement → JetInt → LatIntUnr := by
   intro hSt hJ E _ _ _ _ I _ d φ s hF hs z hz 𝔣 Λ h𝔣 hΛ l hl Q hQ hQl y hy hc κ S hS
   classical

@@ -1,6 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.Satake
-import GroundTheory.AutomorphicForms.GL2.GJUnramifiedDegree
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJZetaDefs
+public import GroundTheory.AutomorphicForms.SatakeNormalized
+public import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+public import GroundTheory.AutomorphicForms.GL2.GJLeviZetaBlocks
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -19,7 +73,6 @@ variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchi
 local notation "ϖ" => (GLnLocal.uniformizer F : F)
 
 variable (F) in
-
 def digitSum (m : ℕ) (a : Fin m → 𝓀[F]) : F :=
   ∑ t : Fin m, (residueLift F (a t) : F) * ϖ ^ (t : ℕ)
 
@@ -112,12 +165,12 @@ theorem eq_of_bdd_digitSum_sub (m : ℕ) {a b : Fin m → 𝓀[F]}
 
 abbrev UpperPairs (n : ℕ) : Type := {p : Fin n × Fin n // p.1 < p.2}
 
-variable (F) in
 
+variable (F) in
 abbrev NormalData (l : Fin n → ℕ) : Type _ := ∀ p : UpperPairs n, Fin (l p.1.1) → 𝓀[F]
 
-variable (F) in
 
+variable (F) in
 def normalMat (l : Fin n → ℕ) (c : NormalData F l) : Matrix (Fin n) (Fin n) F :=
   fun i j => if h : i < j then digitSum F (l i) (c ⟨(i, j), h⟩) else if i = j then ϖ ^ l i else 0
 
@@ -145,8 +198,8 @@ theorem det_normalMat_ne_zero (l : Fin n → ℕ) (c : NormalData F l) : (normal
   rw [det_normalMat]
   exact Finset.prod_ne_zero_iff.2 fun i _ => pow_ne_zero _ (Cartan.uniformizer_ne_zero F)
 
-variable (F) in
 
+variable (F) in
 def normalGL (l : Fin n → ℕ) (c : NormalData F l) : GL (Fin n) F :=
   ((Matrix.isUnit_iff_isUnit_det _).2 (isUnit_iff_ne_zero.2 (det_normalMat_ne_zero l c))).unit
 
@@ -407,8 +460,8 @@ theorem normalGL_apply_mem (l : Fin n → ℕ) (c : NormalData F l) (i j : Fin n
   · rw [normalMat_of_gt l c hij]
     exact (𝒪[F]).zero_mem
 
-variable (F n) in
 
+variable (F n) in
 def integralShell (k : ℕ) : Set (GL (Fin n) F) :=
   {g | (∀ i j, g i j ∈ 𝒪[F]) ∧ GodementJacquet.ordDet g = k}
 
@@ -500,8 +553,8 @@ theorem two_mul_sum_upperPairs_sub_rhoPair (l : Fin n → ℕ) :
 variable [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)]
   {μ : Measure (GL (Fin n) F)} [μ.IsHaarMeasure]
 
-variable (μ) in
 
+variable (μ) in
 def integralHecke (k : ℕ) : SphericalHecke μ (F := F) (n := n) :=
   indicatorHecke μ (integralShell F n k) (isCompact_integralShell k) (isOpen_integralShell k)
     fun a ha x => ⟨by simpa using mul_mem_integralShell_iff (g := x) (k := k) ha (integralGL F n).one_mem,
@@ -557,8 +610,9 @@ theorem evalAt_satakeTransform_integralHecke (z : Fin n → ℂˣ) (k : ℕ) :
     evalAt z (satakeTransform μ (integralHecke μ k)) =
       (μ.real (integralGL F n : Set (GL (Fin n) F)) : ℂ) * sqrtQ F ^ (((n : ℤ) - 1) * k) *
         ∑ l ∈ Finset.Nat.antidiagonalTuple n k, ∏ i, (z i : ℂ) ^ l i := by
+
   rw [satakeTransform_apply, evalAt_normalize, satake_integralHecke, map_smul, map_sum,
-    smul_eq_mul, mul_assoc]
+  smul_eq_mul, mul_assoc]
   congr 1
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun l hl => ?_

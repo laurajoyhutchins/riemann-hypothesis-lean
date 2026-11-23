@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.HermitianCurvature.StatementPB
-import Formalism.HermitianCurvature.StatementB
+module
+
+public import Formalism.HermitianCurvature.StatementPB
+public import Formalism.HermitianCurvature.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.C
 
@@ -251,10 +295,6 @@ def LemmaE (S : HidaSetting E Wp Wq) (jv : Fin S.f → ℝ) : Prop :=
     Tendsto (fun ε => (S.pd v).RR ε 0 (w.1 v) [] []) (𝓝[>] 0)
       (𝓝 ((S.sizeAt v (w.1 v) * jv v : ℝ) : ℂ))
 
-def EnergyLinkC [∀ x, FiniteDimensional ℂ (Wq x)] (S : HidaSetting E Wp Wq) (jv cE : Fin S.f → ℝ) : Prop :=
-  ∀ v, 0 < cE v ∧ B.normSq (S.pd v).bs (S.pd v).f0 ≠ ⊤ ∧
-    jv v = cE v * (B.normSq (S.pd v).bs (S.pd v).f0).toReal
-
 def PropGram (S : HidaSetting E Wp Wq) {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     (Vt : TB.Pt E → H) : Prop :=
   ∀ Y : Finset (TB.Pt E), (∀ p ∈ Y, TB.IsPt p (S.G.r + 1)) →
@@ -330,30 +370,6 @@ def RealInputsConcreteOfParts : Prop :=
   J.EmbFacts → J.EuclidFrame → J.TraceDual → S6.LatticesGeneral →
   GramPSDOfParts → WordsPosOfParts → EstWaveOfParts → PoissonInputOfParts → EstLiftOfParts →
   EstBlockOfParts → EstEOfParts → CutoffOfParts → RealInputsConcrete
-
-def TheoremAConcrete : Prop :=
-  ∀ C₁ C₄ : ℝ, 1 ≤ C₁ → 1 ≤ C₄ → ∃ C C' : ℝ,
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Wp Wq : InfinitePlace E → Type)
-    [∀ x, NormedAddCommGroup (Wp x)] [∀ x, InnerProductSpace ℂ (Wp x)]
-    [∀ x, NormedAddCommGroup (Wq x)] [∀ x, InnerProductSpace ℂ (Wq x)] [∀ x, FiniteDimensional ℂ (Wq x)]
-    (S : HidaSetting E Wp Wq) (jv cE : Fin S.f → ℝ) (Kr : ℕ → TB.Pt E → TB.Pt E → ℂ) (hK0 : Kr 0 [] [] = 1)
-    (Th : ℕ → ℕ → E → TB.Pt E → TB.Pt E → ℂ) (e : ℕ → ℝ) (Θ : ℝ)
-    (H : Type) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] (Vt : TB.Pt E → H)
-    (c : ℕ → TB.Pt E → ℂ),
-    1 ≤ S.f → 0 < S.G.g1 → 0 < S.G.g2 → 0 < Θ → C' ≤ Θ → ((S.G.r : ℝ) + 1) * (C / Θ) ^ S.f ≤ 1 →
-    (S.mkData Kr hK0 Th e).SizesBelow Θ →
-    ThmPPos S → GridsOK S → ThmPInt S → PlaneWaveBoundAllPlaces S → OffDiagonalLiftBound S → CorollaryT S C₄ → LemmaE S jv →
-    EnergyLinkC S jv cE → PropGram S Vt →
-    TC.KrPSD (S.mkData Kr hK0 Th e) → (S.mkData Kr hK0 Th e).KernelSupport → TC.EBounds (S.mkData Kr hK0 Th e) →
-    TC.DomAfter (S.mkData Kr hK0 Th e) →
-    (S.mkData Kr hK0 Th e).LatticeSums ((C₁ * Θ ^ (-((Kst : ℝ) - 5 / 2))) ^ S.f) →
-    (S.mkData Kr hK0 Th e).LeadingDomination Vt c →
-    ∀ R : Finset ℕ, ∑ ρ ∈ R, ‖∑' p, c ρ p • Vt p‖ ^ 2 ≤
-      (1 + C * ((S.G.r : ℝ) + 1) * (C / Θ) ^ S.f) * (∏ i ∈ Icc 1 (S.G.r + 1), (1 + e i)) * ∏ v, jv v
-
-def TheoremAConcreteOfParts : Prop :=
-  TC.TheoremAAfter → F7.PoissonStepText → J.PoissonJoint → J.PoissonStepJoint → RealInputsConcrete →
-  TheoremAConcrete
 
 end
 

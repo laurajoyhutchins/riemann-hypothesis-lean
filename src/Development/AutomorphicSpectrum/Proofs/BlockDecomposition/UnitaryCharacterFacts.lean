@@ -1,5 +1,55 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.StrictDominance.UnitaryExtremality.SatPowNonvan
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IwahoriFactorisation.StrictDominance.UnitaryExtremality.SatPowNonvan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -198,7 +248,7 @@ theorem v_eq_zpow {ϖ : L}
     {x : L} (hx : x ≠ 0) : Valued.v x = (Valued.v ϖ) ^ (ordL x) := by
   have h : Valued.v x ≠ 0 := (Valuation.ne_zero_iff _).2 hx
   unfold ordL
-  rw [dif_neg h, hϖ]
+  rw [dite_eq_right h, hϖ]
   conv_lhs => rw [← WithZero.coe_unzero h]
   rw [← WithZero.coe_zpow]
   congr 1
@@ -234,22 +284,22 @@ theorem v_entry {ϖ : L}
   unfold eps
   by_cases h1 : i.val < n / 2
   · have e1 : ext0 (ordVec t) i.val = ordL (((t : GL (Fin n) L) : Matrix (Fin n) (Fin n) L) i i) := by
-      unfold ext0; rw [dif_pos h1]; rfl
+      unfold ext0; rw [dite_eq_left h1]; rfl
     have e2 : ext0 (ordVec t) (n - 1 - i.val) = 0 := by
-      unfold ext0; rw [dif_neg (by omega)]
+      unfold ext0; rw [dite_eq_right (by omega)]
     rw [e1, e2, sub_zero]
     exact v_eq_zpow hϖ (diag_ne_zero ht i)
   · have e1 : ext0 (ordVec t) i.val = 0 := by
-      unfold ext0; rw [dif_neg h1]
+      unfold ext0; rw [dite_eq_right h1]
     by_cases h2 : j.val < n / 2
     · have e2 : ext0 (ordVec t) (n - 1 - i.val) =
           ordL (((t : GL (Fin n) L) : Matrix (Fin n) (Fin n) L) j j) := by
-        unfold ext0; rw [dif_pos (by omega)]; rfl
+        unfold ext0; rw [dite_eq_left (by omega)]; rfl
       rw [e1, e2, zero_sub, zpow_neg, ← v_eq_zpow hϖ (diag_ne_zero ht j)]
       exact eq_inv_of_mul_eq_one_left hv
     · have hji : j = i := Fin.ext (by omega)
       have e2 : ext0 (ordVec t) (n - 1 - i.val) = 0 := by
-        unfold ext0; rw [dif_neg (by omega)]
+        unfold ext0; rw [dite_eq_right (by omega)]
       rw [e1, e2, sub_zero, zpow_zero]
       rw [hji] at hv
       exact sq_one hv
@@ -280,6 +330,7 @@ theorem hom_prod {m : ℕ} (Φ : (Fin m → ℤ) → ℂˣ) (h : ∀ a b, Φ (a 
     simp [Finset.sum_apply, Pi.single_apply]
   have h2 : f a = ∑ i, a i • f (Pi.single i 1) := by
     conv_lhs => rw [ha]
+
     rw [map_sum]
     exact Finset.sum_congr rfl fun i _ => map_zsmul f _ _
   have h3 := congrArg Additive.toMul h2
@@ -315,7 +366,7 @@ theorem charU : PositivityTheory.SphericalProduct.CharU := by
   unfold chiDeltaU
   refine Finset.prod_congr rfl fun i _ => ?_
   have hi : i.val < n := lt_of_lt_of_le i.2 (Nat.div_le_self n 2)
-  rw [dif_pos hi]
+  rw [dite_eq_left hi]
   change _ = _ ^ (ordVec t i) * _ ^ (-(ordVec t i) * _)
   simp only [Units.val_zpow_eq_zpow_val, Units.val_mul, Units.val_mk0]
   rw [mul_zpow, mul_assoc, ← zpow_mul, ← zpow_add₀ hq0]

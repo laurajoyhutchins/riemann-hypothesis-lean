@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsHeisTrivial
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormalizedHeisenbergIntertwinerComp
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIntertwinerHeisenbergCocycleOfFixedVector
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumOpTransversalStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsHeisTrivial
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormalizedHeisenbergIntertwinerComp
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumOpTransversal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Classical GlobalTheory.FinWeil
 open scoped BigOperators
@@ -65,7 +112,7 @@ theorem _root_.GlobalTheory.FinWeil.isHeis_comp_rep {σ : R →+* R} {w : R} {γ
   · show W (ρ g 0) v = v
     rw [map_zero, h.zero]
   · show W (ρ g x) (W (ρ g y) v) = γ (w • x) y • W (ρ g (x + y)) v
-    rw [h.comp, map_add, ← hρ g (w • x) y, LinearMap.map_smul]
+    rw [h.comp, map_add (f := _), ← hρ g (w • x) y, LinearMap.map_smul]
 
 open Classical in
 open scoped BigOperators in
@@ -147,6 +194,7 @@ private theorem sum_smul_translate_eq_zero_of_fixes_selfDual {σ : R →+* R} {w
       U a (∑ x ∈ s, c x • U x z) - γ a x₀ • ∑ x ∈ s, c x • U x z =
         ∑ x ∈ s.erase x₀, (c x * (γ a x - γ a x₀)) • U x z := by
     intro U z hU hz x₀ hx₀ a ha
+
     rw [Finset.sum_erase _ (by simp) , map_sum, Finset.smul_sum, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [map_smul, apply_translate_eq_smul_of_fixes hU hz ha, smul_smul, smul_smul, ← sub_smul]
@@ -191,10 +239,10 @@ private theorem sum_smul_translate_eq_zero_of_fixes_selfDual {σ : R →+* R} {w
       rw [sub_smul, e2, sub_self]
     exact (smul_eq_zero.mp hzero).resolve_left (sub_ne_zero.mpr hγ)
 
+
 open Classical in
 open scoped BigOperators in
 variable {R X M : Type} [CommRing R] [AddCommGroup X] [Module R X] [AddCommGroup M] [Module ℂ M] in
-
 theorem _root_.GlobalTheory.FinWeil.exists_weil_rep : ∀ {R X M : Type} [CommRing R] [AddCommGroup X]
     [Module R X] [AddCommGroup M] [Module ℂ M] {σ : R →+* R} {w : R} {γ : X → X → ℂ}
     {W : X → M →ₗ[ℂ] M}, _root_.GlobalTheory.FinWeil.IsHeis σ w γ W → ∀ lam : ℕ →* ℂ,
@@ -267,8 +315,9 @@ theorem _root_.GlobalTheory.FinWeil.exists_weil_rep : ∀ {R X M : Type} [CommRi
           exact hi
         · dsimp only at hj
           rwa [← map_sub, hmem] at hj)
+
     rw [normOp_eq_inv_smul_sumOp (B := A.map (ρ g)), hsum', hn',
-      normOp_eq_inv_smul_sumOp (B := A) (C := A.map (ρ k)), hsum, hn, map_smul, map_sum]
+    normOp_eq_inv_smul_sumOp (B := A) (C := A.map (ρ k)), hsum, hn, map_smul, map_sum]
     simp only [hLe]
   refine ⟨{ toFun := L, map_one' := hL1, map_mul' := hLmul }, fun g x v => hLint g x v,
     fun g => ⟨hsd g, ?_⟩⟩

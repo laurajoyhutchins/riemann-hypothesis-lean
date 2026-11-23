@@ -1,6 +1,58 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.HostTraceIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Jets.DepthNumbersThresholdEq
 import Development.AbelianVarietyTheory.Definitions.Jets.IsSelfOf
-import Development.AbelianVarietyTheory.Definitions.Jets.TwoPlaces
+import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
+import Formalism.LocalToGlobal.Divisibility.Numbers
+
+@[expose] public section
+
 open scoped BigOperators TensorProduct
 open Classical NumberField IsDedekindDomain Formalism.L2.FormalSeriesBounds Formalism.IncomingBounds Formalism.L2.Pj Formalism.L2.DIV Formalism.BasicNotions GlobalTheory.RowLaw GlobalTheory.RowAt GlobalTheory.GoodDepth
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ
@@ -31,7 +83,7 @@ theorem exists_norm_eq_neg_one (K : Type) [Field K] (l : ℕ) (hl : l.Prime) (h2
   simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_X,
     Polynomial.eval_C] at hab
   have := congrArg (ZMod.castHom (dvd_refl l) K) hab
-  simp only [map_add, map_mul, map_pow, map_neg, map_one, map_intCast, map_zero] at this
+  simp only [map_add (f := _), map_mul, map_pow, map_neg, map_one, map_intCast, map_zero] at this
   rw [hdd] at this
   linear_combination this
 
@@ -93,12 +145,12 @@ theorem exists_norm_congr (h2 : V.l ≠ 2) (t : C) (ht : V.v t = 0) (htl : V.MM 
   have h1 : φ T ≠ 0 := by
     rw [Ne, hφ]; simp [T, VF.MM, ht]
   have h3 : φ T ^ V.l = -φ T := by
-    rw [← add_eq_zero_iff_eq_neg, ← map_pow, ← map_add, hφ]
+    rw [← add_eq_zero_iff_eq_neg, ← map_pow, ← map_add (f := _), hφ]
     simpa [T] using htl
   obtain ⟨a, b, hab⟩ := exists_norm_eq_neg_one K V.l V.l_prime h2 (φ T) h1 h3
   refine ⟨a, b, ?_⟩
   have : φ ((a : V.RR) ^ 2 - (b : V.RR) ^ 2 * T ^ 2 + 1) = 0 := by
-    simp only [map_add, map_sub, map_mul, map_pow, map_intCast, map_one, hab]; ring
+    simp only [map_add (f := _), map_sub, map_mul, map_pow, map_intCast, map_one, hab]; ring
   rw [hφ] at this
   simpa [T] using this
 
@@ -186,8 +238,8 @@ theorem exists_pair [IsAlgClosed C] (h2 : V.l ≠ 2) (O : Type) [CommRing O] [St
     convert this using 2; ring
   obtain ⟨a, b, hab⟩ := exists_norm_congr h2 t hx htl
   set w : O := a + b * (x - star x) with hw
-  have w0 : em 0 w = a + b * t := by rw [hw, map_add, map_mul, d0]; simp
-  have w1 : em 1 w = a - b * t := by rw [hw, map_add, map_mul, d1]; simp [sub_eq_add_neg]
+  have w0 : em 0 w = a + b * t := by rw [hw, map_add (f := _), map_mul, d0]; simp
+  have w1 : em 1 w = a - b * t := by rw [hw, map_add (f := _), map_mul, d1]; simp [sub_eq_add_neg]
   set u : C := -((a : C) ^ 2 - (b : C) ^ 2 * t ^ 2) with hu
   have hwu : ∀ c, em (c + 1) w * em c w = -u := by
     intro c

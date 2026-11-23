@@ -1,10 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SplittingProjection
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.OverPlaceIntegralForm
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsGlobalUniformizerResidueRepresentatives
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SplitUnitaryGroupIso
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Transport
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabstd
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SplittingProjection
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.OverPlaceIntegralForm
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsGlobalUniformizerResidueRepresentatives
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SplitUnitaryGroupIso
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Stabstd
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Transport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,7 +149,7 @@ def primeE (p : E ⊗[F] v.adicCompletion F →+* v.adicCompletion F)
       zero_mem' := by simp
       add_mem' := fun {a b} ha hb => by
         show Valued.v (p (((a + b : 𝓞 E) : E) ⊗ₜ[F] (1 : v.adicCompletion F))) < 1
-        rw [show ((a + b : 𝓞 E) : E) = (a : E) + (b : E) from rfl, TensorProduct.add_tmul, map_add]
+        rw [show ((a + b : 𝓞 E) : E) = (a : E) + (b : E) from rfl, TensorProduct.add_tmul, map_add (f := _)]
         exact lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt ha hb)
       smul_mem' := fun c a ha => by
         show Valued.v (p (((c * a : 𝓞 E) : E) ⊗ₜ[F] (1 : v.adicCompletion F))) < 1
@@ -221,7 +269,7 @@ theorem exists_primes (hdeg : Module.finrank F E = 2) {σ : E →ₐ[F] E}
       | zero => simp
       | one => simp
       | add x y _ _ hx hy =>
-        rw [map_add, Prod.fst_add, Prod.snd_add, add_sub_add_comm]
+        rw [map_add (f := _), Prod.fst_add, Prod.snd_add, add_sub_add_comm]
         exact lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt hx hy)
       | neg x _ hx =>
         rw [map_neg, Prod.fst_neg, Prod.snd_neg, neg_sub_neg, Valuation.map_sub_swap]; exact hx
@@ -276,16 +324,17 @@ theorem map_eq_primeOf (p : E ⊗[F] v.adicCompletion F →+* v.adicCompletion F
       intro h; rw [h, map_zero] at hu; exact zero_ne_one hu
     obtain ⟨y, hy, hy1, hy2⟩ := hsur (p x / π') 0 (by
       rw [map_div₀, hv, div_le_one₀ (by simp)]
-      exact WithZero.lt_mul_exp_iff_le (by simp) |>.1 (by simpa using hx')) (by simp)
+      exact WithZero.lt_mul_exp_iff_le (by simp) |>.1 (by
+        rw [← WithZero.exp_add]; norm_num; exact hx')) (by simp)
     obtain ⟨z, hz, hz1, hz2⟩ := hsur 0 (q x / q ((a : E) ⊗ₜ[F] (1 : v.adicCompletion F))) (by simp) (by
       rw [map_div₀, hu, div_one]; exact hq _ x.2)
     have : x = ⟨y, hy⟩ * GlobalTheory.IndefiniteRowSideFullHecke.OverPlaceIntegralForm.toIntV E v (algebraMap (𝓞 F) (𝓞 E) π) +
         ⟨z, hz⟩ * GlobalTheory.IndefiniteRowSideFullHecke.OverPlaceIntegralForm.toIntV E v a := by
       apply Subtype.ext
       apply hinj
-      · simp only [Subring.coe_add, Subring.coe_mul, map_add, map_mul, coe_toIntV, hy1, hz1,
+      · simp only [Subring.coe_add, Subring.coe_mul, map_add (f := _), map_mul, coe_toIntV, hy1, hz1,
           tmul_algebraMap, h1, ← hπ', zero_mul, add_zero, div_mul_cancel₀ _ hπ0]
-      · simp only [Subring.coe_add, Subring.coe_mul, map_add, map_mul, coe_toIntV, hy2, hz2,
+      · simp only [Subring.coe_add, Subring.coe_mul, map_add (f := _), map_mul, coe_toIntV, hy2, hz2,
           zero_mul, zero_add, div_mul_cancel₀ _ hu0]
     rw [this]
     exact add_mem (Ideal.mul_mem_left _ _ (Ideal.mem_map_of_mem _ hπP))
@@ -415,7 +464,7 @@ theorem IsFrame.exists_fun {Λ : Submodule O (n → K)} {b : GL n K} (h : IsFram
   let f0 : Λ → O ⧸ IsLocalRing.maximalIdeal O := fun x => ∑ i, φ i * Ideal.Quotient.mk _ (c x i)
   refine ⟨⟨⟨f0, fun x y => ?_⟩, fun a x => ?_⟩, fun y z hy => ?_⟩
   · show f0 (x + y) = f0 x + f0 y
-    simp only [f0, cadd, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [f0, cadd, map_add (f := _), mul_add, Finset.sum_add_distrib]
   · show f0 (a • x) = Ideal.Quotient.mk _ a * f0 x
     simp only [f0, csmul, map_mul, Finset.mul_sum]
     exact Finset.sum_congr rfl fun i _ => by ring
@@ -445,6 +494,7 @@ theorem IsFrame.exists_row {Λ : Submodule O (n → K)} {b : GL n K} (h : IsFram
     congr 1
     funext j
     simp [Finset.sum_apply, Pi.single_apply]
+
   rw [this, map_sum]
   refine Finset.sum_congr (M := IsLocalRing.ResidueField O) rfl fun i _ => ?_
   rw [map_smul]

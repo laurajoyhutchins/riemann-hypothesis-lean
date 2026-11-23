@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
-import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ClosedEqNabla
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardWeylLatticesFockDual
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NablaSchur
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Mathlib.LinearAlgebra.BilinearForm.Properties
+public import Mathlib.LinearAlgebra.BilinearForm.TensorProduct
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardWeylLatticesFockDual
+import Formalism.GradedWeylDivisibility.FinalB
+public import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ClosedEqNabla
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility TensorProduct
 
@@ -32,11 +80,11 @@ theorem lpTen_rTensor (p q : ℕ) (D D' : Module.End ℚ (MvPolynomial (Fin p ×
     lpTen p q (LinearMap.rTensor _ D u) v = lpTen p q u (LinearMap.rTensor _ D' v) := by
   induction u using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), LinearMap.add_apply, hx, hy]
   | tmul a b =>
     induction v using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul a' b' => simp only [LinearMap.rTensor_tmul, lpTen_tmul, hD]
 
 theorem lpTen_lTensor (p q : ℕ) (D D' : Module.End ℚ (MvPolynomial (Fin q × Fin q) ℚ))
@@ -44,11 +92,11 @@ theorem lpTen_lTensor (p q : ℕ) (D D' : Module.End ℚ (MvPolynomial (Fin q ×
     lpTen p q (LinearMap.lTensor _ D u) v = lpTen p q u (LinearMap.lTensor _ D' v) := by
   induction u using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), LinearMap.add_apply, hx, hy]
   | tmul a b =>
     induction v using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul a' b' => simp only [LinearMap.lTensor_tmul, lpTen_tmul, hD]
 
 def lpF (N : ℕ) (ν : Fin N → ℕ) : LinearMap.BilinForm ℚ (dualWeyl ℚ N N ν) :=
@@ -106,7 +154,7 @@ theorem lp_ext {N : ℕ} {ν : Fin N → ℕ} {a b : dualWeyl ℚ N N ν}
 theorem eV_val {N : ℕ} (ν : Fin N → ℕ) {a b : ℕ} (ha : a < N) (hb : b < N) (x : dualWeyl ℚ N N ν) :
     ((eV N ν a b x : dualWeyl ℚ N N ν) : MvPolynomial (Fin N × Fin N) ℚ) =
       Formalism.CohomologicalDescent.LR.der N N ⟨a, ha⟩ ⟨b, hb⟩ (x : MvPolynomial (Fin N × Fin N) ℚ) := by
-  rw [eV, dif_pos ⟨ha, hb⟩]
+  rw [eV, dite_eq_left ⟨ha, hb⟩]
   rfl
 
 theorem lp_hw (hHw : ResHw) (p q : ℕ) (ν : Fin (p + q) → ℕ) (hν : Antitone ν) :
@@ -141,7 +189,7 @@ theorem lp_vanish (hDer : ResDer) (p q : ℕ) (ν : Fin (p + q) → ℕ) (μ : �
         rw [← Fin.sum_univ_eq_sum_range (fun c => (wtZ ν c : ℚ))]
         refine Finset.sum_congr rfl fun c _ => ?_
         have hc : (c : ℕ) < p + q := by omega
-        rw [wtZ, dif_pos hc]
+        rw [wtZ, dite_eq_left hc]
         rfl
       rw [e]
       exact_mod_cast hlt.ne
@@ -228,7 +276,7 @@ theorem lp_ten_int (p q : ℕ) (ν : Fin (p + q) → ℕ) (hν : Antitone ν) (c
     | add x y _ _ hx hy =>
       obtain ⟨a, ha⟩ := hx
       obtain ⟨b, hb⟩ := hy
-      exact ⟨a + b, by rw [map_add, mul_add, ha, hb]; push_cast; ring⟩
+      exact ⟨a + b, by rw [map_add (f := _), mul_add, ha, hb]; push_cast; ring⟩
     | smul n x _ hx =>
       obtain ⟨a, ha⟩ := hx
       refine ⟨n * a, ?_⟩
@@ -238,7 +286,7 @@ theorem lp_ten_int (p q : ℕ) (ν : Fin (p + q) → ℕ) (hν : Antitone ν) (c
   | add x y _ _ hx hy =>
     obtain ⟨a, ha⟩ := hx
     obtain ⟨b, hb⟩ := hy
-    exact ⟨a + b, by rw [map_add, LinearMap.add_apply, mul_add, ha, hb]; push_cast; ring⟩
+    exact ⟨a + b, by rw [map_add (f := _), LinearMap.add_apply, mul_add, ha, hb]; push_cast; ring⟩
   | smul n x _ hx =>
     obtain ⟨a, ha⟩ := hx
     refine ⟨n * a, ?_⟩

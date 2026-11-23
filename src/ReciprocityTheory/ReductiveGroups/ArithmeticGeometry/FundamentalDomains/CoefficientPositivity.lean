@@ -1,9 +1,65 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LatticeMinorExistence
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ExponentialGrowthExclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HolomorphicPeriodicityExtension
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.M3bNormHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.BoundedSectionAlgebra
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsotropicOutsideLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.BoundedSectionAlgebra
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ExponentialGrowthExclusion
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FlowDomainCriterionHolds
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HolomorphicPeriodicityExtension
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LatticeMinorExistence
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.M3bNormHolds
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.SpanColsMul
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD.CoefficientPositivity
 
@@ -23,7 +79,7 @@ lemma chiAt_nonneg (X : Data E r) (u : Fin 2 → Fin r → E) (hu : IsIsoPair X.
     0 ≤ (X.chiAt χ a τ0).re := by
   classical
   by_contra hneg
-  push_neg at hneg
+  push Not at hneg
   have he : X.IsIsoV (X.uvec u a) := isIsoV_uvec (X := X) hu ha
   have hreal : ∀ s : X.Ψ → ℝ, F (X.flowV (X.uvec u a) (fun τ => (s τ : ℂ)) x0) =
       cexp (4 * Real.pi * I * ∑ τ, ((X.chiAt χ a τ).re : ℂ) * s τ) * F x0 := by
@@ -81,7 +137,7 @@ lemma chiAt_nonneg (X : Data E r) (u : Fin 2 → Fin r → E) (hu : IsIsoPair X.
   have hprod : ∏ τ, max (if τ = τ0 then y else 1) (if τ = τ0 then y else 1)⁻¹ ^ (X.spread la τ / 2) =
       y ^ (X.spread la τ0 / 2) := by
     rw [Finset.prod_eq_single τ0 (fun τ _ h => by simp [h]) (fun h => absurd (Finset.mem_univ τ0) h)]
-    rw [if_pos rfl, max_eq_left ((inv_le_one_of_one_le₀ hy1).trans hy1)]
+    rw [ite_eq_left rfl, max_eq_left ((inv_le_one_of_one_le₀ hy1).trans hy1)]
   rw [hprod] at hN
   have hY := BoundedSectionAlgebra.nfac_pos (X := X) hdom la
   have hypos : 0 < y ^ (X.spread la τ0 / 2) := Real.rpow_pos_of_pos (by linarith) _
@@ -148,7 +204,7 @@ lemma fz_zero_of_inv (X : Data E r) (u : Fin 2 → Fin r → E) (hu : ∀ i k, h
   let e : (Fin (4 * Fintype.card X.Ψ) → ℝ) → ℂ := fun t => cexp (-(4 * Real.pi * I) * X.pairR χ (B t))
   have hfz : ∀ y, X.fz u g χ P y = ∫ t in K, P (X.Zb u (B t) y) * e t := by
     intro y
-    simp only [Data.fz, if_pos hcond, dif_pos hωex]
+    simp only [Data.fz, ite_eq_left hcond, dite_eq_left hωex]
     rfl
   have hHerm : ∀ s t, IsHermFam (B t + R s) := by
     intro s t τ i k
@@ -156,7 +212,7 @@ lemma fz_zero_of_inv (X : Data E r) (u : Fin 2 → Fin r → E) (hu : ∀ i k, h
     have h2 := herm_rank1 X s a τ i k
     simp only at h2
     show (B t + R s) τ k i = conj ((B t + R s) τ i k)
-    simp only [Pi.add_apply, B, R, map_add, h1, h2]
+    simp only [Pi.add_apply, B, R, map_add (f := _), h1, h2]
   have hdom : ∀ s t, X.Zb u (B t + R s) x0 ∈ X.dom := fun s t => X.Zb_dom u hu _ (hHerm s t) hx0
   have hN0 := BoundedSectionAlgebra.nfac_pos (X := X) hx0 la
   have hbdP : ∀ s t, ‖P (X.Zb u (B t + R s) x0)‖ ≤ C / X.nfac la x0 := by
@@ -211,7 +267,7 @@ lemma fz_zero_of_inv (X : Data E r) (u : Fin 2 → Fin r → E) (hu : ∀ i k, h
     have hy := X.Zb_dom u hu (B t) (herm_comb (X := X) hωH t) hx0
     have hc := hcusp _ hy
     simp only [Data.fj] at hc
-    rw [if_pos (fun p _ => ⟨0, by simp⟩), dif_pos (exists_fd X la)] at hc
+    rw [ite_eq_left (fun p _ => ⟨0, by simp⟩), dite_eq_left (exists_fd X la)] at hc
     simp only [Pi.zero_apply, Complex.ofReal_zero, zero_mul, Finset.sum_const_zero, mul_zero,
       Complex.exp_zero, mul_one] at hc
     have hV : ((volume (exists_fd X la).choose).toReal : ℂ)⁻¹ ≠ 0 :=
@@ -236,7 +292,7 @@ private lemma herm_add_left_fundamental_domains (G : Matrix (Fin r) (Fin r) E) (
 
 private lemma herm_add_right_fundamental_domains (G : Matrix (Fin r) (Fin r) E) (x y z : Fin r → E) :
     herm G x (y + z) = herm G x y + herm G x z := by
-  simp only [herm, cc, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [herm, cc, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 private lemma herm_smul_left_fundamental_domains' (G : Matrix (Fin r) (Fin r) E) (t : E) (x y : Fin r → E) :
     herm G (t • x) y = t * herm G x y := by
@@ -257,10 +313,10 @@ theorem nonvanishing_coefficient_positivity_of (h2 : UnipotentLatticeLift (E := 
   obtain ⟨-, hinvP, hβ⟩ := h2 r X u hu hΛ
   have hcond : IsHermFam χ ∧ X.IsFreqZ X.g χ := by
     by_contra hc
-    exact hfz (by simp only [Data.fz, if_neg hc])
+    exact hfz (by simp only [Data.fz, ite_eq_right hc])
   have hωex : ∃ ω, X.IsLZBasis X.g ω := by
     by_contra hc
-    exact hfz (by simp only [Data.fz, if_pos hcond, dif_neg hc])
+    exact hfz (by simp only [Data.fz, ite_eq_left hcond, dite_eq_right hc])
   obtain ⟨⟨hPsec, C, hC⟩, hcusp⟩ := hP
   have hPinv := hinvP la P hPsec hχΓ
   obtain ⟨⟨hFd, -, hFZ⟩, hFn, -⟩ :=
@@ -314,7 +370,8 @@ theorem nonvanishing_coefficient_positivity_of (h2 : UnipotentLatticeLift (E := 
   have hemb : ∀ σ : X.Ψ, Data.emb σ.1 ξ = X.uvec u (fun σ i => σ.1 (e i)) σ := by
     intro σ
     funext j
-    simp [Data.emb, Data.uvec, hξ_def, Finset.sum_apply, map_sum, map_mul]
+
+    simp [Data.emb, Data.uvec, hξ_def, Finset.sum_apply, map_mul]
 
   have hinv : ∀ s : X.Ψ → ℝ, X.fz u X.g (X.embH β) P (X.flow ξ (fun τ => (s τ : ℂ)) x1) =
       X.fz u X.g (X.embH β) P x1 := by

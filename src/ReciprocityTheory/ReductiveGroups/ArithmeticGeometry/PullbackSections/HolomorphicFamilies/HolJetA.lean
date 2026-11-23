@@ -1,4 +1,57 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+public import Mathlib.AlgebraicGeometry.Stalk
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,20 +73,23 @@ theorem germ_stalkClosedPointTo_eq {R : CommRingCat.{0}} [IsLocalRing R] (f : Sp
   | rfl
   | congr 3
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem hom_ext_of_local {R : CommRingCat.{0}} [IsLocalRing R] {f₁ f₂ : Spec R ⟶ Y}
     (hpt : f₁ (IsLocalRing.closedPoint R) = f₂ (IsLocalRing.closedPoint R))
     (happ : ∀ (U : Y.Opens) (h₁ : ⊤ ≤ f₁ ⁻¹ᵁ U) (h₂ : ⊤ ≤ f₂ ⁻¹ᵁ U), f₁.appLE U ⊤ h₁ = f₂.appLE U ⊤ h₂) :
     f₁ = f₂ := by
   apply (SpecToEquivOfLocalRing Y R).injective
   refine SpecToEquivOfLocalRing_eq_iff.mpr ⟨hpt, ?_⟩
+  have hsep : Inseparable (f₁ (IsLocalRing.closedPoint R)) (f₂ (IsLocalRing.closedPoint R)) := by
+    rw [hpt]
+  change Scheme.stalkClosedPointTo f₁ =
+    (Y.presheaf.stalkCongr hsep).hom ≫ Scheme.stalkClosedPointTo f₂
   refine TopCat.Presheaf.stalk_hom_ext _ fun U hU => ?_
-  change Y.presheaf.germ U (f₁ (IsLocalRing.closedPoint R)) hU ≫ Scheme.stalkClosedPointTo f₁ =
-    Y.presheaf.germ U (f₁ (IsLocalRing.closedPoint R)) hU ≫ (Y.presheaf.stalkCongr _).hom ≫
-      Scheme.stalkClosedPointTo f₂
-  rw [TopCat.Presheaf.stalkCongr_hom, TopCat.Presheaf.germ_stalkSpecializes_assoc, germ_stalkClosedPointTo_eq,
-    germ_stalkClosedPointTo_eq, happ]
+  rw [Y.presheaf.stalkCongr_hom hsep,
+    Y.presheaf.germ_stalkSpecializes_assoc hU hsep.ge,
+    germ_stalkClosedPointTo_eq, germ_stalkClosedPointTo_eq]
+  exact congrArg (fun g => g ≫ (Scheme.ΓSpecIso R).hom) (happ U _ _)
 
 section Lift
 
@@ -94,8 +150,8 @@ theorem nbhdPt_closedPoint [IsLocalRing A] (ψ : ∀ U : Y.Opens, y₀ ∈ U →
     | simp
   rw [e, Scheme.fromSpecStalk_closedPoint]
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nbhdPt_appLE [IsLocalRing A] (ψ : ∀ U : Y.Opens, y₀ ∈ U → (Γ(Y, U) ⟶ A))
     (hψ : ∀ (U V : Y.Opens) (hU : y₀ ∈ U) (hV : y₀ ∈ V) (h : V ≤ U),
       Y.presheaf.map (homOfLE h).op ≫ ψ V hV = ψ U hU)
@@ -138,8 +194,8 @@ theorem nbhdPt_congr {ψ ψ' : ∀ U : Y.Opens, y₀ ∈ U → (Γ(Y, U) ⟶ A)}
   obtain rfl : ψ = ψ' := funext fun U => funext fun hU => e U hU
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem nbhdPt_comp_appLE [IsLocalRing A] {Y' : Scheme.{0}} (φ : Y ⟶ Y')
     (ψ : ∀ U : Y.Opens, y₀ ∈ U → (Γ(Y, U) ⟶ A))
     (hψ : ∀ (U V : Y.Opens) (hU : y₀ ∈ U) (hV : y₀ ∈ V) (h : V ≤ U),

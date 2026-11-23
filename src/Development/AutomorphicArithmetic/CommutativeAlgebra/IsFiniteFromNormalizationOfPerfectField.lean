@@ -1,7 +1,53 @@
-import Mathlib
-import Development.EtaleCohomology.EtaleSheaves.H0TwistOverClosedField
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ModuleFiniteIntegralClosureOfFiniteTypePerfect
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIntegralClosureOfEssFiniteTypeField
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.H0TwistOverClosedField
+public import Mathlib.AlgebraicGeometry.Normalization
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteIntegralClosureOfEssFiniteTypeField
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ModuleFiniteIntegralClosureOfFiniteTypePerfect
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite LateralTheory.E.E4
 
@@ -24,7 +70,7 @@ theorem UpperTheory.isFinite_fromNormalization_of_perfectField :
       haveI : Nonempty V := ⟨⟨x, hxV⟩⟩
       haveI : Nonempty (f ⁻¹ᵁ U) := ⟨⟨x, hx⟩⟩
       have hkt : (t.appLE ⊤ U (by simp)).hom.FiniteType :=
-        LocallyOfFiniteType.finiteType_of_affine_subset t (isAffineOpen_top _) hU (by simp)
+        LocallyOfFiniteType.finiteType_appLE t (isAffineOpen_top _) hU (by simp)
       let kA : k →+* Γ(T, U) :=
         (t.appLE ⊤ U (by simp)).hom.comp (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
       have hkA : kA.FiniteType :=
@@ -43,7 +89,7 @@ theorem UpperTheory.isFinite_fromNormalization_of_perfectField :
       letI : Algebra Γ(T, U) D.functionField := φ.toAlgebra
       have h1 : (D.germToFunctionField V).hom.EssFiniteType := GlobalTheory.essFiniteType_germ hV _ _
       have h2 : (f.appLE U V hVle).hom.EssFiniteType :=
-        (LocallyOfFiniteType.finiteType_of_affine_subset f hU hV hVle).essFiniteType
+        (LocallyOfFiniteType.finiteType_appLE f hU hV hVle).essFiniteType
       haveI : Algebra.EssFiniteType Γ(T, U) D.functionField := h2.comp h1
       haveI := UpperTheory.module_finite_integralClosure_of_finiteType_perfect k Γ(T, U) D.functionField
       let ψ : Γ(D, f ⁻¹ᵁ U) →ₐ[Γ(T, U)] D.functionField :=

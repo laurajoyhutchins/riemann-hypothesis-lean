@@ -1,5 +1,52 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.ExistsDualGen
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountingFormula.GoodRDet
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassLandSt
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SemidefG
+public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalGroupInFamilyNontrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.CntLocal
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,9 +67,10 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] {S : Formalism.BasicN
 theorem gram_comb' {ι : Type} [Fintype ι] (p : ι → S.V) (A : Matrix ι ι E) (b c : ι) :
     S.hT (∑ a, A a b • p a) (∑ a, A a c • p a) =
       (A.conjTranspose * Matrix.of (fun a a' => S.hT (p a) (p a')) * A) b c := by
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, map_smul, LinearMap.smul_apply, smul_eq_mul,
-    Matrix.mul_apply, Matrix.conjTranspose_apply, Matrix.of_apply, starRingEnd_apply, Finset.sum_mul,
-    Finset.mul_sum]
+  Matrix.mul_apply, Matrix.conjTranspose_apply, Matrix.of_apply, starRingEnd_apply, Finset.sum_mul,
+  Finset.mul_sum]
   first
     | (refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => ?_; ring)
     | (rw [Finset.sum_comm]; refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => ?_; ring)
@@ -32,8 +80,8 @@ variable {r : ℕ}
 def gv (y : Fin r → S.V) (z : S.V) (N : ℕ) : Fin (r + 1) → S.V :=
   Fin.snoc (α := fun _ => S.V) y ((-((N : E)⁻¹)) • z)
 
-variable (E) in
 
+variable (E) in
 def Gam (r N' : ℕ) : Matrix (Fin (r + 1)) (Fin (r + 1)) E :=
   Matrix.of fun a b => if a = Fin.last r ∧ b = Fin.last r then -(N' : E) else 0
 
@@ -124,12 +172,14 @@ theorem hf_pv (a a' : Fin (r + 1)) :
   obtain ⟨hwe, -, hwz⟩ := hw
   induction a using Fin.lastCases with
   | last =>
-    simp only [pv, Fin.snoc_last, map_add, map_sum, map_smul, smul_eq_mul, hsw0 S (h.ez _), mul_zero,
-      Finset.sum_const_zero, add_zero, hwz, hz_gv h hN]
+
+    simp only [pv, Fin.snoc_last, map_add (f := _), map_sum, map_smul, smul_eq_mul, hsw0 S (h.ez _), mul_zero,
+    Finset.sum_const_zero, add_zero, hwz, hz_gv h hN]
     simp [eq_comm]
   | cast a =>
-    simp only [pv, Fin.snoc_castSucc, map_add, map_sum, map_smul, smul_eq_mul, h.ee, mul_zero,
-      Finset.sum_const_zero, add_zero, hwe, he_gv h hN]
+
+    simp only [pv, Fin.snoc_castSucc, map_add (f := _), map_sum, map_smul, smul_eq_mul, h.ee, mul_zero,
+    Finset.sum_const_zero, add_zero, hwe, he_gv h hN]
     simp [eq_comm]
 
 theorem hpv_pv (ht : S.hT w0 w0 = tv N N' Z) (a a' : Fin (r + 1)) :
@@ -147,9 +197,10 @@ theorem hpv_pv (ht : S.hT w0 w0 = tv N N' Z) (a a' : Fin (r + 1)) :
       ∑ d, Psi N' Z d a' * S.hT (gv y z N a) (e d) +
       ∑ d, star (Psi N' Z d a) * S.hT (e d) (gv y z N a') +
       star (if a = Fin.last r then (1 : E) else 0) * (if a' = Fin.last r then (1 : E) else 0) * S.hT w0 w0 := by
-    simp only [pv, map_add, LinearMap.add_apply, map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, map_smul,
-      LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, h.ee, mul_zero, Finset.sum_const_zero, hgw, hwg,
-      hwe, hwe', add_zero, zero_add]
+
+    simp only [pv, map_add (f := _), LinearMap.add_apply, map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, map_smul,
+    LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, h.ee, mul_zero, Finset.sum_const_zero, hgw, hwg,
+    hwe, hwe', add_zero, zero_add]
     ring
   rw [key, hgv_gv h hN, ht]
   simp only [hgv_e h hN, he_gv h hN, mul_ite, mul_one, mul_zero]

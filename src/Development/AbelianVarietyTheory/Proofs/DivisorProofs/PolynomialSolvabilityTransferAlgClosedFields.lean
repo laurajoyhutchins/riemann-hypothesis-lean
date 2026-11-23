@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+public import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Jacobson.Ring
+
+@[expose] public section
+
 open MvPolynomial
 
 namespace GlobalTheory.PointTransfer
@@ -30,7 +83,7 @@ theorem eval₂Hom_partialEval {F A B σ τ : Type} [CommRing F] [CommRing A] [C
     eval₂Hom (ψ : A →+* B) y (partialEval u g) = aeval (Sum.elim (fun s => ψ (u s)) y) g := by
   induction g using MvPolynomial.induction_on with
   | C a => simp [partialEval, MvPolynomial.algebraMap_apply]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, hp]
     cases i <;> simp [partialEval]
@@ -40,7 +93,7 @@ theorem map_partialEval {F A B σ τ : Type} [CommRing F] [CommRing A] [CommRing
     MvPolynomial.map (ψ : A →+* B) (partialEval u g) = partialEval (fun s => ψ (u s)) g := by
   induction g using MvPolynomial.induction_on with
   | C a => simp [partialEval, MvPolynomial.algebraMap_apply]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp =>
     simp only [map_mul, hp]
     cases i <;> simp [partialEval]
@@ -77,6 +130,7 @@ theorem solvable_transfer (F σ τ : Type) [Field F] [Finite σ] [Finite τ]
     choose c' hc' using hc
     have hid : ∑ i, c' i * partialEval uA (g' i) = 1 := by
       apply MvPolynomial.map_injective (A.val : A →+* Ω) Subtype.val_injective
+
       rw [map_one, ← hsum, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_mul, hc', map_partialEval, smul_eq_mul, ← hg' i]
@@ -90,6 +144,7 @@ theorem solvable_transfer (F σ τ : Type) [Field F] [Finite σ] [Finite τ]
       have := DFunLike.congr_fun (MvPolynomial.comp_aeval uA ψ) p
       rw [← this, AlgHom.comp_apply, h0, map_zero])
     have := congrArg (eval₂Hom (ψ : A →+* AlgebraicClosure F) y) hid
+
     rw [map_one, map_sum, Finset.sum_eq_zero] at this
     · exact zero_ne_one this
     · intro i _

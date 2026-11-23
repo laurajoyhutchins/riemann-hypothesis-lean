@@ -1,7 +1,51 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.IsKumCoc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.KummerCupProducts.IsKumCoc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -228,7 +272,7 @@ abbrev pullC {T X : Scheme.{0}} (L : LB X) (i : T ⟶ X) : LB T where
   U j := i ⁻¹ᵁ L.U j
   g j k := pl i (fun _ hv => hv) (L.g j k)
 
-theorem isLB_pullC {T X : Scheme.{0}} {L : LB X} (hL : L.IsLB) (i : T ⟶ X) : (pullC L i).IsLB where
+theorem isLB_pullC {T X : Scheme.{0}} {L : LB X} (hL : L.IsLB) (i : T ⟶ X) : (pullC L i).IsLB := {
   cover := by
     refine top_le_iff.1 fun v _ => ?_
     obtain ⟨j, hj⟩ := Opens.mem_iSup.1 (hL.cover.ge (Set.mem_univ (i v)))
@@ -243,6 +287,6 @@ theorem isLB_pullC {T X : Scheme.{0}} {L : LB X} (hL : L.IsLB) (i : T ⟶ X) : (
     have e : i ⁻¹ᵁ L.U j ⊓ i ⁻¹ᵁ L.U k ⊓ i ⁻¹ᵁ L.U l ≤ i ⁻¹ᵁ (L.U j ⊓ L.U k ⊓ L.U l) := fun _ hv => hv
     rw [res_pl, res_pl, res_pl, ← pl_res i e (inf_le_left : L.U j ⊓ L.U k ⊓ L.U l ≤ L.U j ⊓ L.U k),
       ← pl_res i e (le_inf (inf_le_left.trans inf_le_right) inf_le_right : L.U j ⊓ L.U k ⊓ L.U l ≤ L.U k ⊓ L.U l),
-      ← map_mul, hL.cocycle, pl_res]
+      ← map_mul, hL.cocycle, pl_res] }
 
 end GlobalTheory.CompanionTheory.LineCech

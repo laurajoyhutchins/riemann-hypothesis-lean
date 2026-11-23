@@ -1,16 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LengthPosOfPosDef
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdjFormula
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ParamsEx
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.GaussianBinomialClosedForm
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.SqNormIntegralFundamentalDomainEqL2NormSq
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemRangeSrcForm
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegrableOnDownwardThetaLiftIntegrandStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SetIntegralFundamentalDomainRightTranslateInvari
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealFockAction
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ParamsEx
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SetIntegralFundamentalDomainRightTranslateInvari
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MemRangeSrcForm
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IntegrableOnDownwardThetaLiftIntegrandStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealFockAction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +89,7 @@ theorem downInt_add_datum (R : RealDat D A Ks) (i : Fin D.R.m) (t : T) (y : (R.H
   rw [← integral_add hf hf']
   congr 1
   funext h
-  simp only [thetaKO, map_add, Pi.add_apply, add_mul]
+  simp [thetaKO, add_mul]
 
 theorem downInt_smul_datum (R : RealDat D A Ks) (i : Fin D.R.m) (t : T) (y : (R.HV i t).H) (c : ℂ)
     (f : WO (Vc D i) (Wc D i) → ℂ) (l : (R.cV i).W →ₗ[ℂ] ℂ) (g : GA D (Wc D i)) :
@@ -62,7 +98,7 @@ theorem downInt_smul_datum (R : RealDat D A Ks) (i : Fin D.R.m) (t : T) (y : (R.
   rw [← integral_const_mul]
   congr 1
   funext h
-  simp only [thetaKO, map_smul, Pi.smul_apply, smul_eq_mul, mul_assoc]
+  simp [thetaKO, mul_assoc]
 
 theorem integral_expand {H W ι : Type} [MeasurableSpace H] (ν : Measure H) (s : Set H) [AddCommGroup W] [Module ℂ W]
     [Fintype ι] (b : Module.Basis ι ℂ W) (θ : H → ℂ) (F : H → W)
@@ -71,12 +107,13 @@ theorem integral_expand {H W ι : Type} [MeasurableSpace H] (ν : Measure H) (s 
   have e : ∀ h, θ h * l (F h) = ∑ k, l (b k) * (θ h * b.coord k (F h)) := by
     intro h
     conv_lhs => rw [← b.sum_repr (F h)]
+
     rw [map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, smul_eq_mul, Module.Basis.coord_apply]
     ring
   rw [show (fun h => θ h * l (F h)) = fun h => ∑ k, l (b k) * (θ h * b.coord k (F h)) from funext e,
-    integral_finset_sum _ fun k _ => (hf k).const_mul (l (b k))]
+    integral_finsetSum _ fun k _ => (hf k).const_mul (l (b k))]
   exact Finset.sum_congr rfl fun k _ => integral_const_mul _ _
 
 theorem downInt_expand (R : RealDat D A Ks) (i : Fin D.R.m) (t : T) (y : (R.HV i t).H) (f : WO (Vc D i) (Wc D i) → ℂ)
@@ -130,7 +167,7 @@ theorem pureTensor_sum {ι : Type} (s : Finset ι) (P : ι → PolF D (Wc D i).r
 theorem phi_add_w (x : LowT (R.MW i (sg0 D A))) (w w' : (R.cV i).W) :
     phi R i t x (w + w') = phi R i t x w + phi R i t x w' := by
   unfold phi
-  rw [map_add, pureTensor_add]
+  rw [map_add (f := _), pureTensor_add]
 
 theorem phi_smul_w (x : LowT (R.MW i (sg0 D A))) (c : ℂ) (w : (R.cV i).W) :
     phi R i t x (c • w) = c • phi R i t x w := by
@@ -140,7 +177,7 @@ theorem phi_smul_w (x : LowT (R.MW i (sg0 D A))) (c : ℂ) (w : (R.cV i).W) :
 theorem fockVectorOfTensor_add_tensor (x x' : LowT (R.MW i (sg0 D A))) (w : (R.cV i).W) :
     phi R i t (x + x') w = phi R i t x w + phi R i t x' w := by
   unfold phi
-  rw [map_add, LinearMap.add_apply, pureTensor_add]
+  rw [map_add (f := _), LinearMap.add_apply, pureTensor_add]
 
 theorem fockVectorOfTensor_smul_tensor (c : ℂ) (x : LowT (R.MW i (sg0 D A))) (w : (R.cV i).W) :
     phi R i t (c • x) w = c • phi R i t x w := by
@@ -152,6 +189,7 @@ theorem theta_expand (x : LowT (R.MW i (sg0 D A))) {ι : Type} [Fintype ι] (b :
     thetaKO (R.ωP i t) h g (phi R i t x w) = ∑ k, thetaKO (R.ωP i t) h g (phi R i t x (b k)) * b.coord k w := by
   conv_lhs => rw [← b.sum_repr w]
   unfold phi
+
   rw [map_sum, pureTensor_sum, thetaKO_eq_lin, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, pureTensor_smul, map_smul, smul_eq_mul, mul_comm, Module.Basis.coord_apply, ← thetaKO_eq_lin]
@@ -181,6 +219,7 @@ theorem exists_op
     simp only [hsm, mul_smul, RingHom.id_apply, Finset.smul_sum]
   · intro w l
     show l (∑ k, downInt R i t y (phi R i t x w) (b.coord k) g • b k) = _
+
     rw [map_sum, downInt_expand R i t y _ g b (fun k => hint _ _ (hth _)) l]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, smul_eq_mul, mul_comm]
@@ -245,13 +284,13 @@ theorem thF_eq_sum (hP : R.IsThP)
     fun h => theta_expand R i t g _ b h _
   rw [show (fun h => thetaKO (R.ωP i t) h g (R.ptP i t (R.ioP i (PiTensorProduct.tprod ℂ v) (R.extV i t y h)))) =
       fun h => ∑ k, thetaKO (R.ωP i t) h g (phi R i t (PiTensorProduct.tprod ℂ v) (b k)) * b.coord k (R.extV i t y h)
-      from funext e, integral_finset_sum _ fun k _ => hint _ _ (hth _)]
+      from funext e, integral_finsetSum _ fun k _ => hint _ _ (hth _)]
   rfl
 
 end GlobalTheory.GenRealSchur
 
-open GlobalTheory.GenRealSchur in
 
+open GlobalTheory.GenRealSchur in
 theorem GlobalTheory.GenRealSchur.lift_vanish_single : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T : Type) (A : FamIn D.what₂.LL G Pl0 T D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.LiftRows.Given R F → R.FullP → ∀ (i : Fin D.R.m) (t : T) (y : (R.HV i t).H), R.thF i t y = 0 → ∀ (x : LowT (R.MW i (sg0 D A))) (w : (R.cV i).W) (l : (R.cV i).W →ₗ[ℂ] ℂ) (g : GA D (Wc D i)), downInt R i t y (R.ptP i t (R.ioP i x w)) l g = 0 := by
   intro D G _ _ Pl0 T A Ks _ _ _ R F hG hF i t y hy x w l g
   have hM := hG.core.models

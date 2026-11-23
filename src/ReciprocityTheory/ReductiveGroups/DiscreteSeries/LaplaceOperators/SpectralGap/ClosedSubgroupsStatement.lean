@@ -1,7 +1,45 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.SpectralGap.NonvanishingHypotheses
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.ReproducingKernels.ReproCoreStatement
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.HermitianMeasures.OrbitIntegralAbsConvergent
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.ReproducingKernels.ReproCoreStatement
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,18 +74,5 @@ def SchurBStatement : Prop :=
     (μG : Measure (Mt k r)),
     Formalism.MainNotions.S.IsDSHpk k r ε lam σ → Formalism.MainNotions.S.IsHaarOn (UH (Hpk k r)) μG →
     Formalism.MainNotions.S.IsURepOn (UH (Hpk k r)) σ ∧ ∃ d : ℝ, S0.IsFdegB μG σ d
-
-def QuotScaleStatement : Prop :=
-  ∀ (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (μG μS μW μN ν : Measure (Mt k r)), inWb k r z → 0 < Tz k r z →
-    Formalism.MainNotions.S.IsHaarOn (UWset k r z) μW → Formalism.MainNotions.S.IsHaarOn (Nset k r) μN →
-    Formalism.MainNotions.S.IsHaarOn (Sset k r z) μS → Formalism.MainNotions.S.IsQuotMeas μG μS ν →
-    ∃ c : ℝ≥0, 0 < c ∧
-      Formalism.MainNotions.S.IsQuotMeas μG (ReciprocityTheory.ChartRestriction.DS.Mult1.S0.muSL μW μN) ((c : ℝ≥0∞) • ν)
-
-def ScaleNuStatement : Prop :=
-  ∀ (k r : ℕ) (Vp : Type) [NormedAddCommGroup Vp] (ν : Measure (Mt k r)) (c : ℝ≥0) (W : Mat k r → Vp),
-    Formalism.MainNotions.S.l2SG ((c : ℝ≥0∞) • ν) W = (c : ℝ≥0∞) * Formalism.MainNotions.S.l2SG ν W ∧
-      (0 < c → (AEStronglyMeasurable (fun x => W (Matrix.of x)) ((c : ℝ≥0∞) • ν) ↔
-        AEStronglyMeasurable (fun x => W (Matrix.of x)) ν))
 
 end ReciprocityTheory.ChartRestriction.DS.Lap

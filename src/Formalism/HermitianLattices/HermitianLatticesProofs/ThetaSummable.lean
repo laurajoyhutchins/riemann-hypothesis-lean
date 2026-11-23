@@ -1,5 +1,63 @@
-import Mathlib
-import Formalism.HermitianLattices.StatementTheta
+module
+
+public import Mathlib.Algebra.Module.Lattice.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Hermitian
+public import Mathlib.LinearAlgebra.Matrix.PosDef
+
+@[expose] public section
 
 open scoped BigOperators
 open Matrix
@@ -47,7 +105,7 @@ lemma thetaSummable_pi {ι : Type*} [Fintype ι] [DecidableEq ι] {g : ℤ → �
           (fun c _ _ => Finset.prod_nonneg (fun i _ => hg0 (c i)))
     _ = ∏ i, ∑ n ∈ S i, g n := (Finset.prod_univ_sum S (fun _ n => g n)).symm
     _ ≤ ∏ i : ι, ∑' n, g n :=
-        Finset.prod_le_prod (fun i _ => Finset.sum_nonneg (fun n _ => hg0 n))
+        Finset.prod_le_prod₀ (fun i _ => Finset.sum_nonneg (fun n _ => hg0 n))
           (fun i _ => hg.sum_le_tsum _ (fun n _ => hg0 n))
 
 section Alg
@@ -56,7 +114,7 @@ variable {K V : Type} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [M
 
 lemma thetaSummable_parallelogram (h : V →ₗ⋆[K] V →ₗ[K] K) (u v : V) :
     h (u + v) (u + v) + h (u - v) (u - v) = h u u + h u u + (h v v + h v v) := by
-  simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply]
+  simp only [map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply]
   ring
 
 lemma thetaSummable_trpara (h : V →ₗ⋆[K] V →ₗ[K] K) (u v : V) :
@@ -89,6 +147,7 @@ lemma thetaSummable_shift (h : V →ₗ⋆[K] V →ₗ[K] K)
 lemma thetaSummable_expand (h : V →ₗ⋆[K] V →ₗ[K] K) {ι : Type*} [Fintype ι] (e : ι → V) (c : ι → ℤ) :
     Algebra.trace ℚ K (h (∑ i, c i • e i) (∑ i, c i • e i)) =
       ∑ i, ∑ j, (c i : ℚ) * (c j : ℚ) * Algebra.trace ℚ K (h (e i) (e j)) := by
+
   simp only [map_sum, map_zsmul, LinearMap.sum_apply, LinearMap.smul_apply]
   simp only [zsmul_eq_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
@@ -168,7 +227,7 @@ lemma thetaSummable_coercive (G : Matrix ι ι ℚ)
     · exact hlt
     · exfalso
       have hSv : M *ᵥ v = 0 := by
-        refine (hPSD.dotProduct_mulVec_zero_iff v).mp ?_
+        refine (hPSD.dotProduct_mulVec_zero_iff).mp ?_
         rw [star_trivial]
         exact heq.symm
       have hdetS : M.det = 0 := Matrix.exists_mulVec_eq_zero_iff.mp ⟨v, hv, hSv⟩
@@ -294,7 +353,7 @@ variable {K V : Type} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [M
 lemma isAddTorsionFree_ringOfIntegers_submodule (L : Submodule (NumberField.RingOfIntegers K) V) :
     IsAddTorsionFree L := by
   constructor
-  intro n hn a b hab
+  intro n hn a b _ hab
   apply Subtype.ext
   have hab' : n • (a : V) = n • (b : V) := by
     have := congrArg (fun y : L => (y : V)) hab
@@ -312,7 +371,7 @@ lemma thetaSummable_main (h : V →ₗ⋆[K] V →ₗ[K] K)
         ((Algebra.trace ℚ K (h (γ + x) (γ + x)) : ℚ) : ℂ))) := by
   classical
   haveI : Module.Finite (NumberField.RingOfIntegers K) L :=
-    Module.Finite.iff_fg.mpr (Submodule.IsLattice.fg (A := K))
+    Module.Finite.iff_fg.mpr (Submodule.IsLattice.fg (A := K) L)
   haveI : Module.Finite ℤ L := Module.Finite.trans (NumberField.RingOfIntegers K) L
   haveI : IsAddTorsionFree L := isAddTorsionFree_ringOfIntegers_submodule L
   haveI : Module.IsTorsionFree ℤ L := by

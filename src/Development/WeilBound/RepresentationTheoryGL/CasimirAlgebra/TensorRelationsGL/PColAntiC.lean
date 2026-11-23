@@ -1,4 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.QdetFacts
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,10 +106,12 @@ theorem split {m : ℕ} (E : Fin n → Fin n → Module.End ℂ M) (col : Fin m 
     have hh := hsym (-c) hcs.neg_left hci.neg_left
     rwa [show (c - xJ E i) * (c - xJ E j) = (xJ E i + -c) * (xJ E j + -c) by noncomm_ring]
   let S : Set (Module.End ℂ (TV n M (Fin m))) := Set.range (xJ E)
-  have hcomm : ∀ a ∈ S, ∀ b ∈ S, a * b = b * a := by
-    rintro _ ⟨k, rfl⟩ _ ⟨l, rfl⟩
-    exact (hc k l).eq
-  letI : CommRing (Algebra.adjoin ℂ S) := Algebra.adjoinCommRingOfComm ℂ hcomm
+  have hcomm : S.Pairwise Commute := by
+    rintro _ ⟨k, rfl⟩ _ ⟨l, rfl⟩ _
+    exact hc k l
+  let _ : IsMulCommutative (Algebra.adjoin ℂ S) := Algebra.isMulCommutative_adjoin ℂ hcomm
+  let _ : CommRing (Algebra.adjoin ℂ S) :=
+    open scoped IsMulCommutative in inferInstance
   let x' : Fin m → Algebra.adjoin ℂ S := fun k => ⟨xJ E k, Algebra.subset_adjoin ⟨k, rfl⟩⟩
   let F : Fin m → Fin m → Algebra.adjoin ℂ S := fun p q =>
     if p < q ∧ col p = col q then x' p - x' q + 1 else 1
@@ -79,17 +131,7 @@ theorem split {m : ℕ} (E : Fin n → Fin n → Module.End ℂ M) (col : Fin m 
     | nil => exact hcoe_one
     | cons a l ih => rw [List.prod_cons, List.map_cons, List.prod_cons, hcoe_mul, ih]
   have hcolD : colD E col = ((∏ q, ∏ p, F p q : Algebra.adjoin ℂ S) : Module.End ℂ _) := by
-    simp only [← List.prod_ofFn]
-    rw [hlist, List.map_ofFn]
-    unfold colD
-    congr 1
-    congr 1
-    funext q
-    simp only [Function.comp_apply, hlist, List.map_ofFn, Function.comp_def]
-    congr 1
-    congr 1
-    funext p
-    exact (hF p q).symm
+    simp only [colD, ← List.prod_ofFn, hlist, List.map_ofFn, Function.comp_def, hF]
   have hjmem : j ∈ (Finset.univ : Finset (Fin m)).erase i :=
     Finset.mem_erase.mpr ⟨hne.symm, Finset.mem_univ _⟩
   have hsplit : ∀ g : Fin m → Algebra.adjoin ℂ S,

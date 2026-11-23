@@ -1,17 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSchemeOfThickenings
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsAffineOfIsAffinePullbackQuotientOfIsNilpotent
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsUniqueTorusCompat
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGraded
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableOfSurjective
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsHomOfRingMaps
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.KerAppEqMapAppLEOfIsPullback
+module
+
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsAffineOfIsAffinePullbackQuotientOfIsNilpotent
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsUniqueTorusCompat
+public import Mathlib.Tactic.ENatToNat
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.InvariantFunctionsDescend
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueZpowMulAppLE
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsHomOfRingMaps
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSchemeOfThickenings
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.KerAppEqMapAppLEOfIsPullback
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableAffineOpenFunctionsWeightGraded
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TorusStableOfSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Opposite
 open GlobalTheory.UU GlobalTheory.AffineThickening
@@ -43,7 +84,7 @@ theorem exists_factor {R T C : Type} [CommRing R] [CommRing T] [CommRing C] (f :
     (hf : Function.Injective f) (g : T →+* C) (h : ∀ t, ∃ r, f r = g t) : ∃ k : T →+* R, ∀ t, f (k t) = g t := by
   choose k hk using h
   exact ⟨⟨⟨⟨k, hf (by rw [hk, map_one, map_one])⟩, fun a b => hf (by simp only [hk, map_mul])⟩,
-    hf (by rw [hk, map_zero, map_zero]), fun a b => hf (by simp only [hk, map_add])⟩, hk⟩
+    hf (by rw [hk, map_zero, map_zero]), fun a b => hf (by simp only [hk, map_add (f := _)])⟩, hk⟩
 
 abbrev baseMap {A : Type} [CommRing A] {G : Scheme.{0}} (g : G ⟶ Spec (CommRingCat.of A)) (V : G.Opens) :
     A →+* Γ(G, V) := ((Scheme.ΓSpecIso (CommRingCat.of A)).inv ≫ g.appLE ⊤ V le_top).hom
@@ -65,8 +106,8 @@ theorem appLE_rs {Z Y : Scheme.{0}} (f : Z ⟶ Y) {V V' : Y.Opens} {U U' : Z.Ope
     (f.appLE V' U' e').hom (rs h a) = rs h' ((f.appLE V U e).hom a) :=
   congr($((f.map_appLE e' (homOfLE h).op).trans (f.appLE_map e (homOfLE h').op).symm).hom a)
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 theorem exists_quotient {A : Type} [CommRing A] {J : Ideal A} (hJ : IsNilpotent J) {G G₀ B₀ : Scheme.{0}}
     (g : G ⟶ Spec (CommRingCat.of A)) (F : G₀ ⟶ G) [IsClosedImmersion F] [Surjective F]
     (b₀ : B₀ ⟶ Spec (CommRingCat.of (A ⧸ J))) (q₀ : G₀ ⟶ B₀) (hF : F ≫ g = q₀ ≫ b₀ ≫ red J)
@@ -373,7 +414,7 @@ theorem exists_units_hom [Module.Free ℤ X] (h : ∀ χ, χ ∈ unitWts i V) :
     { carrier := {χ | IsWt i V (l χ).toMul.val χ}
       add_mem' := fun {a b} ha hb => by
         change IsWt i V (l (a + b)).toMul.val _
-        rw [map_add]; exact IsWt.mul ha hb
+        rw [map_add (f := _)]; exact IsWt.mul ha hb
       zero_mem' := by
         change IsWt i V (l 0).toMul.val _
         rw [map_zero]; exact isWt_one

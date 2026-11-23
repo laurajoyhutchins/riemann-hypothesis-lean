@@ -1,6 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.CoefficientRepTrivialOnUnramified
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.LeSpanIntegralValuedOfGaloisStable
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.ExistsIntegralRepDetectingInvariantSubspace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsIrreducibleIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.ExistsIntegralRepDetectingInvariantSubspace
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.LeSpanIntegralValuedOfGaloisStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.Invariants
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.CuspRep
 
 noncomputable section
@@ -21,6 +71,7 @@ private theorem avg {Q N : Type} [Group Q] [Fintype Q] [AddCommGroup N] [Module 
       have : ∑ i, ξ g⁻¹ v i • (Pi.single i 1 : Fin d → ℂ) = ξ g⁻¹ v := by
         ext j
         simp [Finset.sum_apply, Pi.single_apply]
+
       simp only [← map_smul, ← map_sum]
       rw [this, ← he, ← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
     have h2 : ∑ g : Q, f v = 0 := by
@@ -31,8 +82,9 @@ private theorem avg {Q N : Type} [Group Q] [Fintype Q] [AddCommGroup N] [Module 
   · rintro ⟨i, v, n, h⟩
     refine ⟨∑ g, (LinearMap.toSpanSingleton ℂ N (π g n)) ∘ₗ (LinearMap.proj i) ∘ₗ ξ g⁻¹, fun h0 => h ?_, fun k v => ?_⟩
     · simpa using LinearMap.congr_fun h0 v
-    · simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.comp_apply, LinearMap.toSpanSingleton_apply,
-        LinearMap.proj_apply, map_sum, map_smul]
+    · set_option synthInstance.maxHeartbeats 100000 in
+        simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.comp_apply, LinearMap.toSpanSingleton_apply,
+          LinearMap.proj_apply, map_sum, map_smul]
       rw [← Equiv.sum_comp (Equiv.mulLeft k)]
       refine Finset.sum_congr rfl fun g _ => ?_
       rw [Equiv.coe_mulLeft, ← Module.End.mul_apply (ξ _), ← map_mul, mul_inv_rev, inv_mul_cancel_right, map_mul,
@@ -116,6 +168,7 @@ theorem UpperTheory.V.Hi.typeLoc : ∀ (O : Type) [CommRing O] [IsDomain O] [IsP
   obtain ⟨m, τ, hτ⟩ := UpperTheory.exists_integral_rep_detecting_invariant_subspace O (K ⧸ U) I (fun g x hx π hπ v => by
       rw [← Equiv.sum_comp (Equiv.mulLeft g)]
       have := congrArg (RQ π g) (hx π hπ v)
+
       simp only [map_sum, map_smul, map_zero] at this
       simpa only [Equiv.coe_mulLeft, inv_mul_cancel_left, map_mul, Module.End.mul_apply] using this)
     (UpperTheory.le_span_integralValued_of_galoisStable O (K ⧸ U) I fun γ x hx π' hπ' v' => by
@@ -125,6 +178,7 @@ theorem UpperTheory.V.Hi.typeLoc : ∀ (O : Type) [CommRing O] [IsDomain O] [IsP
         rw [f.apply_symm_apply]
         exact v'.2 u
       have h1 := congrArg (fun y : N π => f y) (hx π (fun h => hπ' (hγ γ π π' f hf he h)) ⟨_, hv⟩)
+
       simp only [Submodule.coe_sum, Submodule.coe_smul, map_sum, hf, Submodule.coe_zero, map_zero] at h1
       refine Subtype.ext ?_
       rw [Submodule.coe_sum, Submodule.coe_zero, ← h1]

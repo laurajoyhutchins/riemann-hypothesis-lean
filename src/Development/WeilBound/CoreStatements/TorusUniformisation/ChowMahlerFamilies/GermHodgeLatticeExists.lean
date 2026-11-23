@@ -1,12 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalIsomorphismTransportStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalDataBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalHermitianActionPairingStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapFromSpecStalk
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapGermEqGenMapGerm
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapFromSpecStalk
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FormalDataBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapGermEqGenMapGerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
 open scoped CategoryTheory.Obj
@@ -67,7 +110,8 @@ theorem span_stdLat (A : Subring Ω) (T : ((Fin d → Ω) × (Fin d → Ω)) →
   rw [eq_top_iff]
   rintro y -
   obtain ⟨y, rfl⟩ := hT y
-  rw [decomp y, map_add, map_sum, map_sum]
+
+  rw [decomp y, map_add (f := _), map_sum, map_sum]
   refine Submodule.add_mem _ (Submodule.sum_mem _ fun i _ => ?_) (Submodule.sum_mem _ fun i _ => ?_) <;>
     rw [map_smul] <;> refine Submodule.smul_mem _ _ (Submodule.subset_span (Submodule.subset_span ?_))
   · exact ⟨_, fun j => ⟨single_mem A i j, A.zero_mem⟩, rfl⟩
@@ -93,13 +137,15 @@ theorem exists_finite (f : R →+* Ω) {J : Type} [Fintype J] (w : J → (Fin d 
     fun A hA T => le_antisymm ?_ ?_⟩
   · have key : ∀ y, (∀ k, f (c y k) ∈ A) → T (mp f y) ∈ Submodule.span A (Set.range fun i => T (mp f (w i))) := by
       intro y hy
+
       rw [← hc y, mp_sum, map_sum]
       refine Submodule.sum_mem _ fun k _ => ?_
       rw [map_smul]
       exact Submodule.smul_mem _ (⟨_, hy k⟩ : A) (Submodule.subset_span ⟨k, rfl⟩)
     rw [stdLat, Submodule.span_le]
     rintro _ ⟨y, hy, rfl⟩
-    rw [decomp y, map_add, map_sum, map_sum]
+
+    rw [decomp y, map_add (f := _), map_sum, map_sum]
     refine Submodule.add_mem _ (Submodule.sum_mem _ fun i _ => ?_) (Submodule.sum_mem _ fun i _ => ?_) <;>
       rw [map_smul]
     · refine Submodule.smul_mem _ (⟨_, (hy i).1⟩ : A) ?_
@@ -172,7 +218,7 @@ end Alg
 
 section Geo
 
-open Formalism.L2.Pj
+open Formalism.L2.Pj (IsCombAtG)
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {X0 : Scheme.{0}}
 

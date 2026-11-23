@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.LocalFields.LocalReciprocityFinite
-import GroundTheory.LocalFields.AbstractLocalReciprocity.NormGroups
+module
+
+public import GroundTheory.LocalFields.AbstractLocalReciprocity.NormGroups
+public import GroundTheory.LocalFields.LocalAxiomDictionary
+public import Mathlib.FieldTheory.Galois.Profinite
+public import GroundTheory.LocalFields.LocalReciprocityFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import GroundTheory.LocalFields.LocalAxiom
+
+@[expose] public section
 
 namespace GroundTheory.LocalField
 
@@ -13,8 +58,8 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchi
 
 attribute [local instance] isDiscreteModule_units
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem normal_subgroupOf_top_fixingOpenSubgroup_iff (L : IntermediateField K Ω)
     [FiniteDimensional K L] :
     ((fixingOpenSubgroup L : Subgroup (Ω ≃ₐ[K] Ω)).subgroupOf
@@ -48,8 +93,8 @@ theorem isAbelianExtension_fixingOpenSubgroup_iff (L : IntermediateField K Ω) [
       ⟨⟨fun p q => (baseQuotientEquiv L).injective (by rw [map_mul, map_mul, hc])⟩⟩
     exact isAbelianExtension_of_isMulCommutative le_top
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem map_baseUnitsEquiv_normGroup (L : IntermediateField K Ω) [FiniteDimensional K L] :
     (normGroup Ωˣ ⊤ (fixingOpenSubgroup L)).map
       (baseUnitsEquiv (K := K) (Ω := Ω) : fixedModule Ωˣ (⊤ : Subgroup (Ω ≃ₐ[K] Ω)) →* Kˣ) =
@@ -66,8 +111,8 @@ theorem map_baseUnitsEquiv_normGroup (L : IntermediateField K Ω) [FiniteDimensi
     change baseUnitsEquiv (Abstract.norm Ωˣ ⊤ L.fixingSubgroup _) = _
     rw [baseUnitsEquiv_norm, MulEquiv.apply_symm_apply]
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem mem_normGroup_iff_mem_range_normUnits (L : IntermediateField K Ω) [FiniteDimensional K L]
     (a : fixedModule Ωˣ (⊤ : Subgroup (Ω ≃ₐ[K] Ω))) :
     a ∈ normGroup Ωˣ ⊤ (fixingOpenSubgroup L) ↔ baseUnitsEquiv a ∈ (normUnits K L).range := by
@@ -78,8 +123,8 @@ theorem mem_normGroup_iff_mem_range_normUnits (L : IntermediateField K Ω) [Fini
   · rintro ⟨b, hb, hba⟩
     rwa [← baseUnitsEquiv.injective hba]
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem normGroup_eq_comap (L : IntermediateField K Ω) [FiniteDimensional K L] :
     normGroup Ωˣ ⊤ (fixingOpenSubgroup L) =
       (normUnits K L).range.comap
@@ -88,26 +133,6 @@ theorem normGroup_eq_comap (L : IntermediateField K Ω) [FiniteDimensional K L] 
   exact mem_normGroup_iff_mem_range_normUnits L a
 
 variable (L : IntermediateField K Ω) [FiniteDimensional K L]
-
-noncomputable def maximalAbelianSubextension : IntermediateField K Ω :=
-  IntermediateField.fixedField (maxAbelian (le_top : fixingOpenSubgroup L ≤ ⊤) : Subgroup (Ω ≃ₐ[K] Ω))
-
-instance finiteDimensional_maximalAbelianSubextension :
-    FiniteDimensional K (maximalAbelianSubextension L) :=
-  finiteDimensional_fixedField_openSubgroup _
-
-theorem fixingOpenSubgroup_maximalAbelianSubextension :
-    fixingOpenSubgroup (maximalAbelianSubextension L) = maxAbelian (le_top : fixingOpenSubgroup L ≤ ⊤) :=
-  fixingOpenSubgroup_fixedField _
-
-theorem isAbelianExtension_fixingOpenSubgroup_maximalAbelianSubextension :
-    IsAbelianExtension ⊤ (fixingOpenSubgroup (maximalAbelianSubextension L)) := by
-  rw [fixingOpenSubgroup_maximalAbelianSubextension]
-  exact isAbelianExtension_maxAbelian _
-
-instance isGalois_maximalAbelianSubextension : IsGalois K (maximalAbelianSubextension L) :=
-  ((isAbelianExtension_fixingOpenSubgroup_iff _).1
-    (isAbelianExtension_fixingOpenSubgroup_maximalAbelianSubextension L)).1
 
 end Dictionary
 

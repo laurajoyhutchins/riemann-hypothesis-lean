@@ -1,6 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsNeZeroNormSqLeMulCovolumeRpow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+public import Mathlib.Analysis.InnerProductSpace.GramMatrix
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsNeZeroNormSqLeMulCovolumeRpow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.LinearIndependent.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.EquivReindex
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsLinearIndependentNormLeSuccMin
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DiscreteTopologySpanOfLinearIndependent
+
+@[expose] public section
 
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
@@ -45,7 +100,7 @@ theorem prod_pow_le_prod_of_mono (l : ℕ → ℝ) (hl : ∀ i, 0 ≤ l i) (d N 
     refine mul_le_mul (ih fun i j hij hj => hm i j hij (by nlinarith)) ?_ (pow_nonneg (hl _) _)
       (Finset.prod_nonneg fun _ _ => hl _)
     calc l (d * N + 1) ^ d = ∏ _j ∈ Finset.range d, l (d * N + 1) := by simp
-      _ ≤ _ := Finset.prod_le_prod (fun _ _ => hl _) fun j hj => hm _ _ (by omega) (by
+      _ ≤ _ := Finset.prod_le_prod₀ (fun _ _ => hl _) fun j hj => hm _ _ (by omega) (by
           have := Finset.mem_range.1 hj
           rw [mul_add]; omega)
 
@@ -115,7 +170,7 @@ theorem exists_linearIndependent_prod_norm_le {E U V ι : Type} [Field E] [Numbe
   refine le_trans ?_ (prod_pow_le_prod_of_mono (succMin L) (succMin_nonneg L) d N
     fun i j hij hj => succMin_mono hij (by rwa [hrR]))
   rw [← Fin.prod_univ_eq_prod_range (fun i => succMin L (d * i + 1) ^ d)]
-  exact Finset.prod_le_prod (fun _ _ => by positivity) fun i _ =>
+  exact Finset.prod_le_prod₀ (fun _ _ => by positivity) fun i _ =>
     pow_le_pow_left₀ (norm_nonneg _) (hS i).2 _
 
 theorem posDef_map_mul_conjTranspose {E m n : Type} [Field E] [Fintype m] [Fintype n]
@@ -132,11 +187,8 @@ noncomputable def rowEmb {E m n : Type} [Field E] [Fintype n] (W : Matrix n m E)
       map_zero' := by ext p; simp
       map_add' := fun s t => by ext p; simp [add_vecMul] }
 
-@[simp] theorem rowEmb_apply {E m n : Type} [Field E] [Fintype n] (W : Matrix n m E) (t : n → E)
-    (p : (E →+* ℂ) × m) : rowEmb W t p = p.1 ((t ᵥ* W) p.2) := rfl
-
+open scoped Classical in
 open Classical in
-
 theorem det_gram_rowEmb {E m : Type} [Field E] [NumberField E] [Fintype m] {N : ℕ}
     (W : Matrix (Fin N) m E) (ω : (E →+* ℂ) → E) :
     (((gram ℝ fun p : Fin N × (E →+* ℂ) => rowEmb W (Pi.single p.1 (ω p.2))).det : ℝ) : ℂ) =
@@ -151,19 +203,21 @@ theorem det_gram_rowEmb {E m : Type} [Field E] [NumberField E] [Fintype m] {N : 
     ext ⟨i, k⟩ ⟨i', k'⟩
     have hR : (P * blockDiagonal (fun σ : E →+* ℂ => W.map σ * (W.map σ)ᴴ) * Pᴴ)ᵀ (i, k) (i', k')
         = ∑ σ : E →+* ℂ, ∑ j, σ (ω k' * W i' j) * conj (σ (ω k * W i j)) := by
-      simp only [transpose_apply, mul_apply, Fintype.sum_prod_type, hP, hA, kroneckerMap_apply,
-        one_apply, blockDiagonal_apply, conjTranspose_apply, of_apply, map_apply]
+      simp only [transpose_apply, Matrix.mul_apply, Fintype.sum_prod_type, hP, hA, kroneckerMap_apply,
+        Matrix.one_apply, blockDiagonal_apply, conjTranspose_apply, of_apply, map_apply]
       simp [Finset.mul_sum, Finset.sum_mul, apply_ite]
       refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
     rw [hR]
     have hreal : conj (∑ σ : E →+* ℂ, ∑ j, σ (ω k' * W i' j) * conj (σ (ω k * W i j))) =
         ∑ σ : E →+* ℂ, ∑ j, σ (ω k' * W i' j) * conj (σ (ω k * W i j)) := by
+
       rw [map_sum]
       refine Fintype.sum_equiv (Function.Involutive.toPerm _
         (ComplexEmbedding.involutive_conjugate E)) _ _ fun σ => ?_
+
       simp [map_sum]
     rw [← conj_eq_iff_re.1 hreal]
-    simp [gram_apply, PiLp.inner_apply, Fintype.sum_prod_type, Complex.inner, single_vecMul]
+    simp [gram_apply, PiLp.inner_apply, Fintype.sum_prod_type, Complex.inner, rowEmb]
   rw [← ofRealHom_eq_coe, RingHom.map_det, RingHom.mapMatrix_apply, key, det_transpose, det_mul,
     det_mul, det_conjTranspose, hdP, det_blockDiagonal, normSq_eq_conj_mul_self]
   simp only [star_pow, RCLike.star_def]
@@ -178,7 +232,7 @@ theorem IsType.prod_det_eq_sq {E m n : Type} [Field E] [NumberField E] [IsCMFiel
   have h1 : W.map (ComplexEmbedding.conjugate τ.1) * (W.map (ComplexEmbedding.conjugate τ.1))ᴴ =
       (W.map τ.1 * (W.map τ.1)ᴴ)ᵀ := by
     ext i j
-    simp [mul_apply, mul_comm]
+    simp [Matrix.mul_apply, mul_comm]
   have h2 : (((W.map τ.1 * (W.map τ.1)ᴴ).det.re : ℝ) : ℂ) = (W.map τ.1 * (W.map τ.1)ᴴ).det :=
     conj_eq_iff_re.1 (by
       rw [← RCLike.star_def, ← det_conjTranspose, conjTranspose_mul, conjTranspose_conjTranspose])
@@ -232,9 +286,9 @@ theorem exists_short_independent_rows :
     · exact fun x y _ _ hx hy j => (hx j).add (hy j)
     · exact fun c x _ hx j => (hx j).smul c
   · exact ((Matrix.isUnit_iff_isUnit_det _).1
-      (linearIndependent_rows_iff_isUnit.1 (show LinearIndependent E (Matrix.of a).row from ha))).ne_zero
+      (linearIndependent_row_iff_isUnit.1 (show LinearIndependent E (Matrix.of a).row from ha))).ne_zero
   · rw [hdet, Real.sqrt_sq (by positivity), ← mul_assoc, hΨ.finrank_eq] at hle
-    refine le_trans (Finset.prod_le_prod (fun _ _ => by positivity) fun i _ => ?_) hle
+    refine le_trans (Finset.prod_le_prod₀ (fun _ _ => by positivity) fun i _ => ?_) hle
     rw [pow_mul, EuclideanSpace.norm_sq_eq, Fintype.sum_prod_type]
     refine pow_le_pow_left₀ (by positivity) ?_ _
     rw [Finset.sum_coe_sort Ψ (fun τ => ∑ j, ‖τ ((Matrix.of a * W) i j)‖ ^ 2)]

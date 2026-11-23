@@ -1,11 +1,58 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.JacquetLanglands.TorusKernels.IsHolVOf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.HolCap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.UopSum
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RDual2
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.TemperedLocalComponents.SatR
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.AbsPowOneNotIsAlgRat
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.JacquetLanglands.TorusKernels.IsHolVOf
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.AbsPowOneNotIsAlgRat
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsUnitaryOfCharIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.DcSumEqOfMk
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.UopSum
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FiniteCosetsInDoset
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.GlintPrincRelIndexNeZero
+import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +83,7 @@ theorem proj {φ : TR.Sm F a} (h0 : φ ≠ 0) (h : φ ∈ ⨆ π : TR.CuspSub F 
       by_cases h3 : ψ = 0
       · exact ih (by rw [← e2, h3, zero_add]; exact h2)
       refine ⟨π, ψ, h1, h3, fun z hz c hc => ?_⟩
-      rw [← e2, map_add, smul_add] at hc
+      rw [← e2, map_add (f := _), smul_add] at hc
       have h4 : z ψ - c • ψ ∈ π.V ⊓ ⨆ π ∈ S, π.V := by
         refine ⟨sub_mem (hz _ π.stable _ h1) (π.V.smul_mem c h1), ?_⟩
         have : z ψ - c • ψ = c • ψ' - z ψ' := by linear_combination (norm := module) hc
@@ -70,6 +117,7 @@ theorem lie_eq_sum (X : Matrix (Fin a) (Fin a) (TR.Rinf F)) :
     simp [Matrix.sum_apply, Matrix.single_apply, ite_and, Pi.single_apply, ite_apply]
   change L X = _
   conv_lhs => rw [e]
+
   simp only [map_sum, map_smul]
   rfl
 
@@ -134,7 +182,7 @@ theorem hecke_eq_dc {G V : Type} [Group G] [AddCommGroup V] [Module ℂ V] (ρ :
 
 variable {F : Type} [Field F] [NumberField F] (w : HeightOneSpectrum (𝓞 F))
 
-theorem iwahori_level_zero_eq : K1 w 0 = KGL w 2 := by
+theorem iwahori_level_zero_eq : K1 w 0 = KGL w (n := 2) := by
   ext g
   refine ⟨fun ⟨k, _, e⟩ => ⟨k, e⟩, fun ⟨k, e⟩ => ⟨k, ?_, e⟩⟩
   haveI : Subsingleton (w.adicCompletionIntegers F ⧸ IsLocalRing.maximalIdeal (w.adicCompletionIntegers F) ^ 0) :=
@@ -143,11 +191,11 @@ theorem iwahori_level_zero_eq : K1 w 0 = KGL w 2 := by
 
 theorem hecke_Tj {V : Type} [AddCommGroup V] [Module ℂ V] (ρ : Representation ℂ (GL (Fin 2) (w.adicCompletion F)) V)
     (j : ℕ) (a : GL (Fin 2) (w.adicCompletion F)) (ha : a.val = diagJ 2 (atFin w (unif w) : w.adicCompletion F) j) (x : V) :
-    heckeVec ρ (KGL w 2) (Tj ℂ 2 (Ov F w) (atFin w (unif w) : w.adicCompletion F) j) x = Hi.dc ρ (KGL w 2) (KGL w 2) a x := by
+    heckeVec ρ (KGL w (n := 2)) (Tj ℂ 2 (Ov F w) (atFin w (unif w) : w.adicCompletion F) j) x = Hi.dc ρ (KGL w (n := 2)) (KGL w (n := 2)) a x := by
   refine hecke_eq_dc ρ _ a _ (fun g hg => ?_) (fun g hg => ?_)
     (Formalism.UG.P.finite_support_cosets (Final.GLintComm F w 2) (Tj_mem_hecke (unif_spec w) j).2) x
   · obtain ⟨k, hk⟩ := hg
-    have h : ((k : GL (Fin 2) (w.adicCompletion F)) * a)⁻¹ * g ∈ KGL w 2 := QuotientGroup.eq.1 hk
+    have h : ((k : GL (Fin 2) (w.adicCompletion F)) * a)⁻¹ * g ∈ KGL w (n := 2) := QuotientGroup.eq.1 hk
     rw [Tj, Set.indicator_of_mem, Pi.one_apply]
     refine ⟨k, k.2, _, h, ?_⟩
     rw [← ha, ← Units.val_mul, ← Units.val_mul, mul_inv_cancel_left]
@@ -168,15 +216,16 @@ theorem sat_two {V : Type} [AddCommGroup V] [Module ℂ V] {ρ : Representation 
       h.2.2.2 _ (unif_spec w) 1 (by norm_num)]
     congr 1
     rw [Complex.ofReal_cpow (by positivity)]
-    have : qV F w = normV w := rfl
+    have : qV F w = normV w := by
+      simp [normV, qV, Ideal.absNorm_apply, Submodule.cardQuot_apply]
     simp [satEig, Multiset.esymm, Multiset.powersetCard_one, this]
     norm_num [add_comm]
   · have h2 := h.2.2.2 _ (unif_spec w) 2 le_rfl
     set z := GeneralLinearGroup.scalar (Fin 2) (atFin w (unif w))
     rw [hecke_Tj w ρ 2 z (by ext i j; fin_cases i <;> fin_cases j <;> simp [z, diagJ])] at h2
-    have ho : ∀ q ∈ MulAction.orbit (KGL w 2) (z : _ ⧸ KGL w 2), q = z := by
+    have ho : ∀ q ∈ MulAction.orbit (KGL w (n := 2)) (z : _ ⧸ KGL w (n := 2)), q = z := by
       rintro _ ⟨k, rfl⟩
-      change (((k : GL (Fin 2) (w.adicCompletion F)) * z : GL (Fin 2) (w.adicCompletion F)) : _ ⧸ KGL w 2) = _
+      change (((k : GL (Fin 2) (w.adicCompletion F)) * z : GL (Fin 2) (w.adicCompletion F)) : _ ⧸ KGL w (n := 2)) = _
       rw [← GlobalTheory.CuspRep.scalar_comm]
       exact QuotientGroup.mk_mul_of_mem _ k.2
     rw [(Hi.dcSum ℂ _ V ρ _ _ z ((Set.finite_singleton _).subset ho)).1 {z}
@@ -204,7 +253,8 @@ theorem uop_map {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [M
     rw [e]
   have hd : ∀ u, GeneralLinearGroup.det (aff (atFin w (unif w)) u) = atFin w (unif w) := fun u =>
     Units.ext (by simp [aff, Matrix.det_fin_two])
-  rw [(uopSum F w V ρ c x hx).2 _ hS, (uopSum F w W ρ' c _ hx').2 _ hS, map_add, map_sum, smul_add, Finset.smul_sum]
+
+  rw [(uopSum F w V ρ c x hx).2 _ hS, (uopSum F w W ρ' c _ hx').2 _ hS, map_add (f := _), map_sum, smul_add, Finset.smul_sum]
   simp only [hf, hd]
   congr 1
   split_ifs

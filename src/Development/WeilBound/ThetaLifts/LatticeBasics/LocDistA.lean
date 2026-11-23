@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactOpenAddSubgroup
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactOpenAddSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.LocallyConstant.Algebra
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Filter Topology GlobalTheory.WeilM
 
@@ -91,6 +142,7 @@ theorem kill_tens {X V : Type} [TopologicalSpace X] [T2Space X] [AddCommGroup V]
     · intro h
       rw [hx, image_eq_zero_of_notMem_tsupport (f := F) (x := (x, v)), zero_mul]
       exact fun hs => h (hfin.mem_toFinset.2 ⟨_, hs, rfl⟩)
+
   rw [this, map_sum]
   refine Finset.sum_eq_zero fun q _ => ?_
   exact h (fun x => F (x, q.out)) (sb_comp (fun x => (x, q.out)) Prod.fst (by fun_prop) (by fun_prop) (fun _ => rfl) hF)
@@ -109,7 +161,7 @@ theorem kill_loc {V : Type} [AddCommGroup V] [TopologicalSpace V] [Nonarchimedea
     · rintro s t hst ⟨A, h1, h2, h3⟩; exact ⟨A, h1, hst.trans h2, h3⟩
     · rintro s t ⟨A, h1, h2, h3⟩ ⟨B, k1, k2, k3⟩
       refine ⟨A ∪ B, h1.union k1, Set.union_subset_union h2 k2, fun ψ hψ h => ?_⟩
-      rw [← Set.indicator_self_add_compl A ψ, map_add, h3 _ (sb_cut h1 hψ) (fun y hy => Set.indicator_of_notMem hy _),
+      rw [← Set.indicator_self_add_compl A ψ, map_add (f := _), h3 _ (sb_cut h1 hψ) (fun y hy => Set.indicator_of_notMem hy _),
         k3 _ (sb_cut h1.compl hψ), add_zero]
       intro y hy
       by_cases hA : y ∈ A
@@ -117,7 +169,7 @@ theorem kill_loc {V : Type} [AddCommGroup V] [TopologicalSpace V] [Nonarchimedea
       · rw [Set.indicator_of_mem hA]; exact h y (not_or.2 ⟨hA, hy⟩)
     · intro x hx
       obtain ⟨U, hU, hl⟩ := h x hx
-      have : (fun k => k + x) ⁻¹' U ∈ 𝓝 (0 : V) := (continuous_add_right x).continuousAt.preimage_mem_nhds (by simpa using hU)
+      have : (fun k => k + x) ⁻¹' U ∈ 𝓝 (0 : V) := (continuous_add_const x).continuousAt.preimage_mem_nhds (by simpa using hU)
       obtain ⟨K, hK⟩ := NonarchimedeanAddGroup.is_nonarchimedean _ this
       have hA : IsClopen ((fun y => y - x) ⁻¹' (K : Set V)) := K.isClopen.preimage (by fun_prop)
       refine ⟨_, mem_nhdsWithin_of_mem_nhds (hA.isOpen.mem_nhds (by simp)), _, hA, subset_rfl,

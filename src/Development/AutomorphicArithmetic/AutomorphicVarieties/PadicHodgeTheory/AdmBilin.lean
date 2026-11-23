@@ -1,9 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineFormalismOfRegular
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BcrisRegularOfTensorInjStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgClosureTensorBcrisToBdRInjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RatioInvariantInK0
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgClosureTensorBcrisToBdRInjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BcrisRegularOfTensorInjStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FontaineFormalismOfRegular
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LinearIndepOnOfInvariant
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 noncomputable section
@@ -25,12 +73,12 @@ private theorem sig_smul (ρ : G → V →ₗ[Q] V) (g : G) (b : B) (w : B ⊗[Q
   induction w using TensorProduct.induction_on with
   | zero => simp
   | tmul c v => simp [sig_tmul, TensorProduct.smul_tmul']
-  | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+  | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
 
 private def DD (ρ : G → V →ₗ[Q] V) : Submodule F (B ⊗[Q] V) where
   carrier := {w | ∀ g, sig a ρ g w = w}
   zero_mem' := fun g => map_zero _
-  add_mem' := fun hx hy g => by rw [map_add, hx g, hy g]
+  add_mem' := fun hx hy g => by rw [map_add (f := _), hx g, hy g]
   smul_mem' := fun c x hx g => by rw [← algebraMap_smul B, sig_smul, ha, hx g]
 
 private theorem finrank_swap (ρ : G → V →ₗ[Q] V) (D : Submodule Q (V ⊗[Q] B))
@@ -42,7 +90,7 @@ private theorem finrank_swap (ρ : G → V →ₗ[Q] V) (D : Submodule Q (V ⊗[
     induction w using TensorProduct.induction_on with
     | zero => simp
     | tmul c v => simp [sig_tmul]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   let e : ↥(DD F a ha ρ) ≃ₗ[Q] ↥D :=
     { toFun := fun x => ⟨TensorProduct.comm Q B V x, (hD _).2 fun g => by rw [← hc, x.2 g]⟩
       invFun := fun y => ⟨(TensorProduct.comm Q B V).symm y, fun g => by
@@ -70,11 +118,11 @@ private theorem span_bilin (ρ : G → V →ₗ[Q] V) (ρ' : G → V' →ₗ[Q] 
     intro g x y
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx']
+    | add x x' hx hx' => simp only [map_add (f := _), LinearMap.add_apply, hx, hx']
     | tmul c v =>
       induction y using TensorProduct.induction_on with
       | zero => simp
-      | add x x' hx hx' => simp only [map_add, hx, hx']
+      | add x x' hx hx' => simp only [map_add (f := _), hx, hx']
       | tmul c' v' => simp only [sig_tmul, hm, map_mul, hb]
   set S := Submodule.span B (DD F a ha π : Set (B ⊗[Q] W))
   have key : ∀ x y, m x y ∈ S := by
@@ -140,16 +188,18 @@ private theorem span_eq_top_of_invariant [FiniteDimensional Q V] (ρ : G → V �
     ext j
     have := congrFun hc0 j
     simp only [Matrix.mulVec, dotProduct, A, Basis.toMatrix_apply, Pi.zero_apply] at this
-    simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.smul_apply,
-      smul_eq_mul, map_zero, Finsupp.zero_apply]
+
+    simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
+    smul_eq_mul, map_zero, Finsupp.zero_apply]
     rw [← this]
     exact Finset.sum_congr rfl fun k _ => mul_comm _ _
   have hrep : ∀ g (w : B ⊗[Q] V) k, e.repr (sig a ρ g w) k =
       ∑ j, algebraMap Q B (v.repr (ρ g (v j)) k) * a g (e.repr w j) := by
     intro g w k
     conv_lhs => rw [← e.sum_repr w]
-    simp only [map_sum, sig_smul, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.smul_apply,
-      smul_eq_mul]
+
+    simp only [map_sum, sig_smul, map_smul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
+    smul_eq_mul]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [mul_comm]
     congr 1

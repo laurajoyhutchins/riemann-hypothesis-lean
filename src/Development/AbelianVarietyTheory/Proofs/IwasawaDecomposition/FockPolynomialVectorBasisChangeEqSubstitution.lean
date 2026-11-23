@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TotalDegreeSubstFLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TotalDegreeSubstFLe
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfPderivStable
+public import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.HeisenbergDirectionalDerivFormulaAndSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.FockTheta.RealPlaceImaginaryGeneratorReEqZero
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.IndefR.Datum GlobalTheory.CompactHowe Matrix Complex
 open scoped TensorProduct Real Classical
@@ -120,6 +166,11 @@ theorem aPlus_comm_one (τ : D.what₂.Tau) (z : Matrix (Fin T.rank) (Fin S.rank
     (z' : Matrix (Fin T.rank) (Fin S.rank) ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) :
     aPlus (heisO ψ S T) θ τ (cplxO 1 1) z (aPlus (heisO ψ S T) θ τ' (cplxO 1 1) z' f) =
     aPlus (heisO ψ S T) θ τ' (cplxO 1 1) z' (aPlus (heisO ψ S T) θ τ (cplxO 1 1) z f) := by
+  have theta_add {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThetaFunO ψ S T g) :
+      IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add hf hg
+  have theta_smul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) :=
+    Formalism.IndefR.Fock.CCR.theta_smul hf c
   have ht := fun τ z => theta_dRho hθ hψ τ z hf
   have hc := fun τ z τ' z' => dRho_comm hψ hθ τ z τ' z' hf
   obtain ⟨h1, h2⟩ := omDir_I τ z τ' z'
@@ -139,30 +190,42 @@ theorem pureTensorO_X_mul (BS : D.what₂.Tau → Matrix (Fin S.rank) (Fin S.ran
     pureTensorO ψ θ S T (fun _ => 1) (fun _ => 1) BS BT f (MvPolynomial.X v * Q) =
       aPlus (heisO ψ S T) θ v.1 (cplxO 1 1) (unitMap (BS v.1) (BT v.1) v.2.1 v.2.2)
         (pureTensorO ψ θ S T (fun _ => 1) (fun _ => 1) BS BT f Q) := by
+  have theta_add {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThetaFunO ψ S T g) :
+      IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add hf hg
+  have theta_smul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) :=
+    Formalism.IndefR.Fock.CCR.theta_smul hf c
   unfold pureTensorO
   exact pure_X_mul (A := aPlusAll (heisO ψ S T) θ (fun _ => cplxO 1 1) BS BT) (P := IsThetaFunO ψ S T)
     (fun _ _ => theta_add) (fun a _ => theta_smul a)
     (fun _ _ h => aPlus_theta hψ hθ _ _ _ h) (fun i j _ h => aPlus_comm_one hψ hθ i.1 _ j.1 _ h)
     (fun i _ _ h h' => aPlus_add hψ hθ i.1 _ _ h h') (fun i a _ h => aPlus_smul hψ hθ i.1 _ _ a h) hf Q v
 
-omit hψ hθ in
 
+omit hψ hθ in
 theorem pureTensorO_subst : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (S T : HSp D), IsStdChar D ψ (-1) → IsInfFam θ → ∀ (BS g : D.what₂.Tau → Matrix (Fin S.rank) (Fin S.rank) ℂ) (BT h : D.what₂.Tau → Matrix (Fin T.rank) (Fin T.rank) ℂ) (f : WO S T → ℂ), IsThetaFunO ψ S T f → ∀ P, pureTensorO ψ θ S T (fun _ => 1) (fun _ => 1) (fun τ => BS τ * g τ) (fun τ => BT τ * h τ) f P = pureTensorO ψ θ S T (fun _ => 1) (fun _ => 1) BS BT f (substF h (fun τ => ((g τ)⁻¹)ᵀ) P) := by
   intro D ψ θ S T hψ hθ BS g BT h f hf P
+  have theta_add {f g : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) (hg : IsThetaFunO ψ S T g) :
+      IsThetaFunO ψ S T (f + g) :=
+    Formalism.IndefR.Fock.CCR.theta_add hf hg
+  have theta_smul (c : ℂ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f) : IsThetaFunO ψ S T (c • f) :=
+    Formalism.IndefR.Fock.CCR.theta_smul hf c
   induction P using MvPolynomial.induction_on with
   | C a =>
     rw [← mul_one (MvPolynomial.C a), MvPolynomial.C_mul', map_smul, map_smul, map_smul, map_one (substF _ _)]
     unfold pureTensorO
     rw [pure_one, pure_one]
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
   | mul_X p v hp =>
     have hm : IsThetaFunO ψ S T
         (pureTensorO ψ θ S T (fun _ => 1) (fun _ => 1) BS BT f (substF h (fun τ => ((g τ)⁻¹)ᵀ) p)) :=
       pure_mem (P := IsThetaFunO ψ S T) (fun _ _ => theta_add) (fun a _ => theta_smul a)
         (fun _ _ h => aPlus_theta hψ hθ _ _ _ h) hf _
+
     rw [mul_comm, pureTensorO_X_mul hψ hθ _ _ hf, hp, map_mul, substF_X, unitMap_mul, aPlus_dir_sum hψ hθ _ _ _ hm,
-      Finset.sum_mul, map_sum]
+    Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
+
     rw [aPlus_dir_sum hψ hθ _ _ _ hm, Finset.sum_mul, map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [aPlus_dir_smul hψ hθ _ _ _ hm, mul_assoc, MvPolynomial.C_mul', map_smul, pureTensorO_X_mul hψ hθ _ _ hf]

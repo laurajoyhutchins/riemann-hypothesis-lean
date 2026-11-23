@@ -1,7 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DetIdNormOneMul
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SpanImageLeOf
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPrimeUnder
+import Formalism.LocalToGlobal.Columns.BaseLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.JetSumTable
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DetIdNormOneMul
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPrimeUnder
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.L2.Th1.H GlobalTheory.IndefiniteRowSideFullHecke.JetSumTable GlobalTheory.MomT
 
@@ -41,6 +90,7 @@ theorem functional_frame {P : HeightOneSpectrum (𝓞 E)} {N : Submodule (𝓞 E
   choose r hr using (mem_stdLat _).1 hsz
   have h1 : s • f z = ∑ i, r i • f (Pi.single i 1) := by
     rw [← algebraMap_smul E s, ← map_smul]
+
     simp only [← algebraMap_smul E (r _), ← map_smul, ← map_sum]
     congr 1
     funext j
@@ -49,6 +99,7 @@ theorem functional_frame {P : HeightOneSpectrum (𝓞 E)} {N : Submodule (𝓞 E
     rw [← hsm s _ ((hf z).2 hz), h1, functional_sum _ φ hadd hsm _ _ _ fun i => (hf _).2 (single_mem_stdAt P i)]
     simp [hc]
   have h3 : algebraMap (𝓞 E) E (∑ i, r i * c i) = algebraMap (𝓞 E) E s * ∑ i, algebraMap (𝓞 E) E (c i) * z i := by
+
     rw [map_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, hr, Pi.smul_apply, Algebra.smul_def]
@@ -171,14 +222,14 @@ theorem val_of_simple {P : HeightOneSpectrum (𝓞 E)} {a : 𝓞 E} (h1 : a ∈ 
   push_cast at e1 e2
   omega
 
-theorem relDet_companion {SG : Finset (HeightOneSpectrum (𝓞 E))} {ϖ : 𝓞 E} (d : DecoSet E n (divs ϖ) SG)
+theorem relDet_companion {SG : Finset (HeightOneSpectrum (𝓞 E))} {ϖ : 𝓞 E} (d : DecoSet (E := E) (n := n) (ST := divs ϖ) (SG := SG))
     {N'' : Submodule (𝓞 E) (Sp E n)} (h0 : ϖ ≠ 0) (hcop : IsCoprime ϖ (cO E ϖ)) (hsq : ∀ P ∈ divs ϖ, ϖ ∉ P.asIdeal ^ 2)
     (hN'' : IsSdLat N'') (h1 : ∀ y ∈ d.1.N, (ϖ : E) • y ∈ N'') (h2 : ∀ y ∈ N'', star (ϖ : E) • y ∈ d.1.N)
     (h3 : ∀ (P : ↥(divs ϖ)) (y : Sp E n), y ∈ localization₂ P.1.asIdeal N'' ↔ y ∈ d.1.at P.1 ∧ d.1.f P y = 0) :
     relDet d.1.N N'' = Submodule.span (𝓞 E) {(ϖ : E) / star (ϖ : E)} := by
   have hN : IsSdLat d.1.N := ⟨d.2.lat, d.2.uni⟩
-  choose f hf using fun P => exists_isFr P hN.1
-  choose f'' hf'' using fun P => exists_isFr P hN''.1
+  choose f hf using fun P => exists_isFr P hN
+  choose f'' hf'' using fun P => exists_isFr P hN''
   have hϖ : (ϖ : E) ≠ 0 := by simpa using h0
   have hϖ' : star (ϖ : E) ≠ 0 := star_ne_zero.2 hϖ
   have hnot : ∀ P : HeightOneSpectrum (𝓞 E), ϖ ∈ P.asIdeal → cO E ϖ ∉ P.asIdeal := fun P a b => by
@@ -255,7 +306,7 @@ theorem det_set_rel {E' : Type} [Field E'] [NumberField E'] (e : E ≃+* E') (L 
 
 end General
 
-theorem chi_move : ∀ (D : D7) (X : Fields) (s : Seam D X) (χ : TaylorLogMetric.IdE D → ℂ) (b : ℕ) (SG : Finset (HeightOneSpectrum (𝓞 X.E))) (ϖ : 𝓞 X.E) (d : DecoSet X.E b (divs ϖ) SG) (N'' : Submodule (𝓞 X.E) (Sp X.E b)), X.Ok → s.Ok → TaylorLogMetric.IsChi D χ → ϖ ≠ 0 → IsCoprime ϖ (X.conjO ϖ) → (∀ P ∈ divs ϖ, ϖ ∉ P.asIdeal ^ 2) → IsSdLat N'' → ((∀ y ∈ d.1.N, (ϖ : X.E) • y ∈ N'') ∧ (∀ y ∈ N'', star (ϖ : X.E) • y ∈ d.1.N) ∧ ∀ (P : ↥(divs ϖ)) (y : Sp X.E b), y ∈ localization₂ P.1.asIdeal N'' ↔ y ∈ d.1.at P.1 ∧ d.1.f P y = 0) → χ (TaylorLogMetric.detId D (s.lat d.1.N) (s.lat N'')) = ∏ τ, (s.σ₀ (X.emb τ ((ϖ : X.E) / star (ϖ : X.E))))⁻¹ := by
+theorem chi_move : ∀ (D : D7) (X : Fields) (s : Seam D X) (χ : TaylorLogMetric.IdE D → ℂ) (b : ℕ) (SG : Finset (HeightOneSpectrum (𝓞 X.E))) (ϖ : 𝓞 X.E) (d : DecoSet (E := X.E) (n := b) (ST := divs ϖ) (SG := SG)) (N'' : Submodule (𝓞 X.E) (Sp X.E b)), X.Ok → s.Ok → TaylorLogMetric.IsChi D χ → ϖ ≠ 0 → IsCoprime ϖ (X.conjO ϖ) → (∀ P ∈ divs ϖ, ϖ ∉ P.asIdeal ^ 2) → IsSdLat N'' → ((∀ y ∈ d.1.N, (ϖ : X.E) • y ∈ N'') ∧ (∀ y ∈ N'', star (ϖ : X.E) • y ∈ d.1.N) ∧ ∀ (P : ↥(divs ϖ)) (y : Sp X.E b), y ∈ localization₂ P.1.asIdeal N'' ↔ y ∈ d.1.at P.1 ∧ d.1.f P y = 0) → χ (TaylorLogMetric.detId D (s.lat d.1.N) (s.lat N'')) = ∏ τ, (s.σ₀ (X.emb τ ((ϖ : X.E) / star (ϖ : X.E))))⁻¹ := by
   intro D X s χ b SG ϖ d N'' _ hs hχ h0 hcop hsq hN'' ⟨h1, h2, h3⟩
   have hϖ : (ϖ : X.E) ≠ 0 := by simpa using h0
   have hϖ' : star (ϖ : X.E) ≠ 0 := star_ne_zero.2 hϖ

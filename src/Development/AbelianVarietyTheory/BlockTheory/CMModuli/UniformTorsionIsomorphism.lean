@@ -1,8 +1,47 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegOUnif
-import Development.AbelianVarietyTheory.BlockTheory.CMModuli.TorusGraphMaps
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegOUnif
+public import Development.AbelianVarietyTheory.BlockTheory.CMModuli.TorusGraphMaps
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -54,28 +93,9 @@ structure OUnif (t : SAB H (Spec (CommRingCat.of R))) (Δ : OData H I) where
   cub_eq : HEq U.cubG t.cub
   lin : letI := hostStar H; U.toUnifPre.OLinear (𝓞 E) Δ.ac actA (ringActOf t.act)
 
-structure PELUnif (I : Ideal R) (t : SAB H (Spec (CommRingCat.of R))) where
-
-  dat : OData H I
-
-  unif : OUnif t dat
-
 section Points
 
 variable {F : Type} [Field F] [Algebra (FractionRing R) F]
-
-def toGen {G : Over (Spec (CommRingCat.of R))} (x : TF (R := R) F ⟶ G) :
-    TFK (R := R) F ⟶ (Over.pullback (jK R)).obj G :=
-  Over.homMk (pullback.lift x.left (jFK (R := R) F) (Over.w x)) (pullback.lift_snd _ _ _)
-
-lemma toGen_fst {G : Over (Spec (CommRingCat.of R))} (x : TF (R := R) F ⟶ G) :
-    (toGen x).left ≫ pullback.fst G.hom (jK R) = x.left :=
-  pullback.lift_fst _ _ _
-
-lemma toGen_injective {G : Over (Spec (CommRingCat.of R))} :
-    Function.Injective (toGen (R := R) (F := F) (G := G)) := fun x y h => by
-  ext
-  rw [← toGen_fst x, ← toGen_fst y, h]
 
 end Points
 
@@ -84,51 +104,6 @@ namespace OUnif
 variable {t : SAB H (Spec (CommRingCat.of R))} {Δ : OData H I} (u : OUnif t Δ)
 variable (F : Type) [Field F] [Algebra (FractionRing R) F]
 
-def ptA (x : TF (R := R) F ⟶ t.G) : TFK (R := R) F ⟶ u.A.A := toGen x ≫ u.U.gen.hom
-
-lemma ptA_injective : Function.Injective (u.ptA F) := fun _ _ h =>
-  toGen_injective ((cancel_mono u.U.gen.hom).1 h)
-
-def ToAk (k : ℕ) (p : QkPt Δ.D.toPre F k) (x : TF (R := R) F ⟶ t.G) : Prop :=
-  QkToAkU u.U.toUnifPre F k p (u.ptA F x)
-
-structure TorsIso (k : ℕ) : Prop where
-
-  total : ∀ p : QkPt Δ.D.toPre F k, ∃! x : TF (R := R) F ⟶ t.G, u.ToAk F k p x
-
-  onto : ∀ x : TF (R := R) F ⟶ t.G, x ^ k = 1 ↔ ∃ p : QkPt Δ.D.toPre F k, u.ToAk F k p x
-
-  inj : ∀ (p p' : QkPt Δ.D.toPre F k) (x x' : TF (R := R) F ⟶ t.G),
-    u.ToAk F k p x → u.ToAk F k p' x' → (QkPt.Equiv Δ.D.toPre F p p' ↔ x' = x)
-
-  add : ∀ (p p' p'' : QkPt Δ.D.toPre F k) (x x' x'' : TF (R := R) F ⟶ t.G),
-    u.ToAk F k p x → u.ToAk F k p' x' → u.ToAk F k p'' x'' → (QkAdd p p' p'' ↔ x'' = x * x')
-
-  smul : ∀ (a : 𝓞 E) (p p' : QkPt Δ.D.toPre F k) (x x' : TF (R := R) F ⟶ t.G),
-    u.ToAk F k p x → u.ToAk F k p' x' →
-      ((letI := hostStar H; QkSmul Δ.ac a p p') ↔ x' = x ≫ t.act.act a)
-
-  weil : ∀ (p p' : QkPt Δ.D.toPre F k) (x x' : TF (R := R) F ⟶ t.G),
-    u.ToAk F k p x → u.ToAk F k p' x' → ∀ ζ : Fˣ,
-      (WeilIs t.G t.PP.L (k : ℤ) x x' (unitOn ζ) ↔ WeilQkIs Δ.D.toPre F k p p' (ζ : F))
-
-def TorsClause : Prop :=
-  ∀ (F : Type) [Field F] [IsAlgClosed F] [Algebra (FractionRing R) F] (k : ℕ), 1 ≤ k →
-    u.TorsIso F k
-
-example (h : u.TorsIso F 1) (p : QkPt Δ.D.toPre F 1) : u.ToAk F 1 p 1 := by
-  obtain ⟨x, hx, -⟩ := h.total p
-  have h1 : x ^ 1 = 1 := (h.onto x).2 ⟨p, hx⟩
-  rw [pow_one] at h1
-  exact h1 ▸ hx
-
 end OUnif
-
-abbrev PELUnif.ToAk {t : SAB H (Spec (CommRingCat.of R))} (P : PELUnif I t) (F : Type) [Field F]
-    [Algebra (FractionRing R) F] (k : ℕ) (p : QkPt P.dat.D.toPre F k)
-    (x : TF (R := R) F ⟶ t.G) : Prop := P.unif.ToAk F k p x
-
-abbrev PELUnif.TorsClause {t : SAB H (Spec (CommRingCat.of R))} (P : PELUnif I t) : Prop :=
-  P.unif.TorsClause
 
 end GlobalTheory.IndefiniteRowSideFullHecke.UniformTorsionIsomorphism

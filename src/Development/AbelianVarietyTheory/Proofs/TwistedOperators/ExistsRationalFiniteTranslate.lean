@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SplitOff
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRationalSplitStabilizerDecomposition
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemSplitPlaceFinitePointsOffPrimesOfSupported
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatticeOfStabiliserMulInvEqStandardLattice
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.VertexLatticeEqAtMulSplitSupported
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
+import Development.AbelianVarietyTheory.Definitions.Divisors.CmHostImaginaryGeneratorNeZero
+import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.TwistPlacesOffPrimeQZero
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FrT
+import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.FormulaAt
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.IndefiniteWeightData
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim
@@ -37,54 +86,13 @@ theorem eqAt_trans {D : D7} {N : ℕ} {q : ℕ} {L L₁ L₂ : Submodule (𝓞 D
     (h' : EqAt D q L₁ L₂) : EqAt D q L L₂ := by
   obtain ⟨a, ha, hL₁, hL₁'⟩ := h
   obtain ⟨b, hb, hL₂, hL₂'⟩ := h'
-  refine ⟨a * b, Nat.Coprime.mul ha hb, fun x hx => ?_, fun x hx => ?_⟩
+  refine ⟨a * b, Nat.Coprime.mul_left ha hb, fun x hx => ?_, fun x hx => ?_⟩
   ·
     have h1 : ((b : D.host.E) • ((a : D.host.E) • x)) ∈ L₂ := hL₂ _ (hL₁ x hx)
     rwa [smul_smul, mul_comm, ← Nat.cast_mul] at h1
   ·
     have h1 : ((a : D.host.E) • ((b : D.host.E) • x)) ∈ L := hL₁' _ (hL₂' x hx)
     rwa [smul_smul, ← Nat.cast_mul] at h1
-
-theorem exists_dec : GlobalTheory.FunPr.Hypotheses₂ → (∀ D, GlobalTheory.NormSum.Inp D) → ∀ {D : D7} {Γ : Type} [Group Γ] [Fintype Γ] {Pl0 T : Type}
-    {A : FamIn D.what₂.LL Γ Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] {R : RealDat D A Ks}
-    (ch : Choice R), ch.Is → ∀ (X : Node), DefNode D.R.m X → ∀ (Q : Finset ℕ), (∀ q ∈ Q, q.Prime) → ∀ x : FinPt ch.G X,
-    ∃ r s x₀ : FinPt ch.G X, GlobalTheory.MovedKappaEx.RatFin _ r ∧ s ∈ GlobalTheory.MovedKappaEx.splitOff _ Q ∧
-      GlobalTheory.SumSize.latAt ch.S.toGridChoice X x₀ = stdL D _ ∧ (∀ q ∈ Q, EqAt D q (GlobalTheory.SumSize.latAt ch.S.toGridChoice X (s * x₀)) (stdL D _)) ∧ x = r * s * x₀ := by
-  intro _ _ D Γ _ _ Pl0 T A Ks _ _ _ R ch _ X hX Q hQ x
-  set S := ch.S.toGridChoice with hSdef
-  set u := S.N.u X with hudef
-  have hN : 0 < ∏ q ∈ Q, q := Finset.prod_pos fun q hq => (hQ q hq).pos
-
-  obtain ⟨r, s, k, hr, hs, hk, hxu⟩ :=
-    GlobalTheory.RatSplitLat.exists_rat_split_lat (ch.G.V X) (S.N.fr X) (∏ q ∈ Q, q) hN (x * u)
-  have hsQ : s ∈ GlobalTheory.MovedKappaEx.splitOff _ Q := GlobalTheory.MovedKappaEx.mem_splitOff_of_suppSplit _ Q s hs
-  have hstd : GlobalTheory.SumSize.latAt S X (k * u⁻¹) = stdL D _ := GlobalTheory.LatStdStab.latAt_mul_inv_eq_stdL S X hX k hk
-  refine ⟨r, s, k * u⁻¹, hr, hsQ, hstd, fun q hq => ?_, ?_⟩
-  ·
-    have key : ∀ g ∈ GlobalTheory.MovedKappaEx.splitOff (ch.G.V X) Q, ∀ y : FinPt ch.G X,
-        EqAt D q (GlobalTheory.SumSize.latAt S X (g * y)) (GlobalTheory.SumSize.latAt S X y) := by
-      intro g hg
-      induction hg using Subgroup.closure_induction with
-      | mem g hgen =>
-        obtain ⟨e, he, hoff, hsupp⟩ := hgen
-        intro y
-        exact GlobalTheory.MovedSplitEq.eqAt_latAt_mul S X hX q (hQ q hq) e he (hoff q hq) g y hsupp
-      | one =>
-        intro y
-        rw [one_mul]
-        exact _root_.GlobalTheory.MovedKappaDec.eqAt_refl q _
-      | mul g₁ g₂ _ _ ih₁ ih₂ =>
-        intro y
-        rw [mul_assoc]
-        exact _root_.GlobalTheory.MovedKappaDec.eqAt_trans (ih₁ (g₂ * y)) (ih₂ y)
-      | inv g _ ih =>
-        intro y
-        have h := ih (g⁻¹ * y)
-        rw [mul_inv_cancel_left] at h
-        exact _root_.GlobalTheory.MovedKappaDec.eqAt_symm h
-    have h := key s hsQ (k * u⁻¹)
-    rwa [hstd] at h
-  · rw [← mul_assoc, ← hxu, mul_inv_cancel_right]
 
 end GlobalTheory.MovedKappaDec
 

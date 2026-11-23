@@ -1,4 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.AffineSplittingSpan.HhZero
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.AffineSplittingSpan.CoreSteps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.AffineSplittingSpan.HhZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.AffineSplittingSpan.SuccAboveEqFc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -157,7 +208,7 @@ theorem aeval_diff {a b : ℕ} {z : Bi P Q a (b + 2)} (hz : PInv pr z) (hdz : dv
     · intro g x y
       simp only [Pi.add_apply]
       rw [h1 g x y, h2 g x y]
-    · rw [map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, hdvadd, ← e1, ← e2]
+    · rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, hdvadd, ← e1, ← e2]
       abel
   | monomial n c =>
     obtain ⟨E, hE, e⟩ := pow_diff pr s hs u hu hz hdz n
@@ -203,7 +254,7 @@ theorem e2VanishingFirstColumn_of_colKillP (hK : ColKillP) : E2VanishingFirstCol
   have hev : ∀ g : Polynomial ℝ, Polynomial.aeval (RuL (P := P) u 1 (q + 2)) g w = g.eval 1 • w := by
     intro g
     induction g using Polynomial.induction_on' with
-    | add p r hp hr => rw [map_add, LinearMap.add_apply, hp, hr, Polynomial.eval_add, add_smul]
+    | add p r hp hr => rw [map_add (f := _), LinearMap.add_apply, hp, hr, Polynomial.eval_add, add_smul]
     | monomial n c =>
       rw [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply,
         Polynomial.eval_monomial, one_pow, mul_one]
@@ -322,10 +373,10 @@ theorem e2VanishingOtherColumns_of_colKillP (hK : ColKillP) : E2VanishingOtherCo
     | add r t hr ht =>
       refine ⟨?_, ?_⟩
       · intro g' x' y
-        rw [map_add, LinearMap.add_apply]
+        rw [map_add (f := _), LinearMap.add_apply]
         simp only [Pi.add_apply]
         rw [hr.1 g' x' y, ht.1 g' x' y]
-      · rw [map_add, LinearMap.add_apply, hdvadd, hr.2, ht.2, add_zero]
+      · rw [map_add (f := _), LinearMap.add_apply, hdvadd, hr.2, ht.2, add_zero]
     | monomial n c =>
       rw [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply]
       obtain ⟨h1, h2⟩ := pow_closed pr s hs u hu hB hC n
@@ -340,7 +391,7 @@ theorem e2VanishingOtherColumns_of_colKillP (hK : ColKillP) : E2VanishingOtherCo
     intro g F
     induction g using Polynomial.induction_on' with
     | add r t hr ht =>
-      rw [map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, hr, ht, hdhadd]
+      rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, hr, ht, hdhadd]
     | monomial n c =>
       rw [Polynomial.aeval_monomial, Polynomial.aeval_monomial, Module.End.mul_apply,
         Module.End.mul_apply, Module.algebraMap_end_apply, Module.algebraMap_end_apply, hdhsmul]

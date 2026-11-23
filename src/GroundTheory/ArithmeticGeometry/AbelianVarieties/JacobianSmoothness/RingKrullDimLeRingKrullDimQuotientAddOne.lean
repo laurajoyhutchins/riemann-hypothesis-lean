@@ -1,5 +1,68 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.ToricVarieties.Dimension
+module
+
+public import Mathlib.RingTheory.AlgebraicIndependent.Basic
+public import Mathlib.RingTheory.Ideal.Height
+public import GroundTheory.ArithmeticGeometry.ToricVarieties.Dimension
+public import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.IntegralClosure.GoingDown
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+public import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian.Jacobian
 
@@ -44,16 +107,16 @@ theorem ringKrullDim_eq_trdeg [IsDomain A] : ringKrullDim A = (trdeg k A).toENat
   rw [h1, h2]
   simp
 
-include k in
 
+include k in
 theorem ringKrullDim_lt_top : ringKrullDim A < ⊤ := by
   nontriviality A
   obtain ⟨s, g, hinj, hint⟩ := exists_integral_inj_algHom_of_fg k A
   rw [ringKrullDim_eq_of_normalization k g hinj hint]
   exact WithBot.coe_lt_coe.mpr (ENat.natCast_lt_top s)
 
-omit [Algebra.FiniteType k A] in
 
+omit [Algebra.FiniteType k A] in
 theorem trdeg_eq_of_isFractionRing [IsDomain A] (K : Type u) [Field K] [Algebra A K]
     [IsFractionRing A K] [Algebra k K] [IsScalarTower k A K] : trdeg k K = trdeg k A := by
   have _ : FaithfulSMul A K :=
@@ -134,8 +197,8 @@ section Formula
 variable (k : Type u) [Field k] {A : Type u} [CommRing A] [IsDomain A] [Algebra k A]
   [Algebra.FiniteType k A]
 
-include k in
 
+include k in
 theorem ringKrullDim_le_ringKrullDim_quotient_add_one (p : Ideal A) [p.IsPrime]
     (hp : p.height = 1) : ringKrullDim A ≤ ringKrullDim (A ⧸ p) + 1 := by
   obtain ⟨s, g, hinj, hint⟩ := exists_integral_inj_algHom_of_fg k A
@@ -187,8 +250,8 @@ theorem ringKrullDim_le_ringKrullDim_quotient_add_one (p : Ideal A) [p.IsPrime]
   have : s ≤ m + 1 := by omega
   exact_mod_cast this
 
-omit [IsDomain A] [Algebra k A] [Algebra.FiniteType k A] in
 
+omit [IsDomain A] [Algebra k A] [Algebra.FiniteType k A] in
 lemma coheight_eq_ringKrullDim_quotient (p : PrimeSpectrum A) :
     (Order.coheight p : WithBot ℕ∞) = ringKrullDim (A ⧸ p.asIdeal) := by
   rw [ringKrullDim_quotient, Order.coheight_eq_krullDim_Ici]
@@ -196,8 +259,8 @@ lemma coheight_eq_ringKrullDim_quotient (p : PrimeSpectrum A) :
   ext q
   simp [PrimeSpectrum.mem_zeroLocus, ← PrimeSpectrum.asIdeal_le_asIdeal]
 
-omit [Algebra k A] [Algebra.FiniteType k A] in
 
+omit [Algebra k A] [Algebra.FiniteType k A] in
 lemma height_map_quotient_add_one_le [IsNoetherianRing A] {p₁ p : Ideal A} [p₁.IsPrime]
     [p.IsPrime] (h : p₁ ≤ p) (h0 : p₁ ≠ ⊥) :
     (p.map (Ideal.Quotient.mk p₁)).height + 1 ≤ p.height := by
@@ -269,10 +332,10 @@ theorem ringKrullDim_le_height_add_ringKrullDim_quotient : ∀ (n : ℕ) (A : Ty
     _ = (((p.map (Ideal.Quotient.mk p₁)).height + 1 : ℕ∞) : WithBot ℕ∞) + ringKrullDim (A ⧸ p) := by
       push_cast
       ring
-    _ ≤ p.height + ringKrullDim (A ⧸ p) := by gcongr; exact_mod_cast hh
+    _ ≤ p.height + ringKrullDim (A ⧸ p) := by gcongr
+
 
 include k in
-
 theorem height_add_ringKrullDim_quotient (p : Ideal A) [p.IsPrime] :
     (p.height : WithBot ℕ∞) + ringKrullDim (A ⧸ p) = ringKrullDim A := by
   refine le_antisymm ?_ ?_

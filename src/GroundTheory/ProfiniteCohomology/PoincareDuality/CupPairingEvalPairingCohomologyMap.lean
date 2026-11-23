@@ -1,8 +1,54 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
-import GroundTheory.ProfiniteCohomology.ShapiroDefs
-import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+module
+
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.NsmulEqZeroOfNonemptyAddEquiv
+public import GroundTheory.ProfiniteCohomology.CartierDual
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+public import GroundTheory.ProfiniteCohomology.PoincareDuality.Torsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Shapes.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -27,8 +73,8 @@ theorem cohomologyMap_finsetSum {B C : Rep.{u} k G} [IsDiscreteRep B] [IsDiscret
   | empty => simp [cohomologyMap_zero]
   | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, cohomologyMap_add, ih]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem dualMap_add (D : Rep.{u} k G) {A B : Rep.{u} k G} (f₁ f₂ : A ⟶ B) :
     dualMap D (f₁ + f₂) = dualMap D f₁ + dualMap D f₂ := by
   apply Rep.Hom.ext
@@ -38,7 +84,7 @@ theorem dualMap_add (D : Rep.{u} k G) {A B : Rep.{u} k G} (f₁ f₂ : A ⟶ B) 
   apply LinearMap.ext
   intro a
   show g ((f₁ + f₂).hom a) = g (f₁.hom a) + g (f₂.hom a)
-  rw [Rep.add_hom, Representation.IntertwiningMap.coe_add, Pi.add_apply, map_add]
+  rw [Rep.add_hom, Representation.IntertwiningMap.coe_add, Pi.add_apply, map_add (f := _)]
 
 omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem dualMap_zero (D : Rep.{u} k G) {A B : Rep.{u} k G} :
@@ -52,8 +98,8 @@ theorem dualMap_zero (D : Rep.{u} k G) {A B : Rep.{u} k G} :
   show g ((0 : A ⟶ B).hom a) = 0
   rw [Rep.zero_hom, Representation.IntertwiningMap.coe_zero, Pi.zero_apply, map_zero]
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
 
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 theorem dualMap_finsetSum (D : Rep.{u} k G) {A B : Rep.{u} k G} {ι : Type*} (s : Finset ι)
     (f : ι → (A ⟶ B)) : dualMap D (∑ i ∈ s, f i) = ∑ i ∈ s, dualMap D (f i) := by
   classical
@@ -124,7 +170,9 @@ theorem bijective_dualityMap_of_sum {J : Type*} [Fintype J] (X : J → Rep.{u} k
     choose a ha using fun j => (hX j).2 (χ.comp (cohomologyMap (dualMap D (p j)) s).hom.toAddMonoidHom)
     refine ⟨∑ j, cohomologyMap (i j) r (a j), ?_⟩
     ext y
+
     rw [map_sum, AddMonoidHom.finsetSum_apply]
+
     conv_rhs => rw [← hdual y, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [dualityMap_cohomologyMap, ha j]

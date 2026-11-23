@@ -1,14 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TheoremOfCubeOfAdditionFormulas
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableSqTh
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TaylorSeriesInParameterRescaleOfAlgebraic
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DifferentiableSqTh
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.AdditionIdentityOfSigmaFormula
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenusOneDatumModelLatticeAlgebraicData
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MvPowerSeriesThreeEqZeroOfSubstLines
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SigmaStarCubeColumnsModelParameterSeries
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SigmaStarSquareQuotientInModelParameter
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenusOneDatumModelLatticeAlgebraicData
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SigmaStarCubeColumnsModelParameterSeries
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MvPowerSeriesThreeEqZeroOfSubstLines
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TaylorSeriesInParameterRescaleOfAlgebraic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
+
+@[expose] public section
+
 open NumberField Classical Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 GlobalTheory.NormSum GlobalTheory.EvenTheta
 open scoped BigOperators
 
@@ -51,7 +94,7 @@ theorem map_gap {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S) (s T : P
     fun a ha f => PowerSeries.map_subst (HasSubst.of_constantCoeff_zero ha) f
   simp only [gap, map_sub, map_mul]
   rw [e _ (by simp), e _ (by simp), e _ (by simp), e _ (by simp), e _ (by simp), e _ (by simp)]
-  simp only [map_add, map_sub, MvPowerSeries.map_X]
+  simp only [map_add (f := _), map_sub, MvPowerSeries.map_X]
 
 theorem add_entire {Λ : AddSubgroup ℂ} (h : IsLat Λ) {v : ℂ} (hv : v ∉ Λ) (z w : ℂ) :
     sgStar Λ (z + w) * sgStar Λ (z - w) =
@@ -77,7 +120,7 @@ theorem tay_mul {F G : ℂ → ℂ} (hF : Differentiable ℂ F) (hG : Differenti
 theorem tay_add {F G : ℂ → ℂ} (hF : Differentiable ℂ F) (hG : Differentiable ℂ G) :
     PowerSeries.mk (coef1 fun z => F z + G z) = PowerSeries.mk (coef1 F) + PowerSeries.mk (coef1 G) := by
   ext n
-  simp only [map_add, coeff_mk, GlobalTheory.SerTransport.taylorCoeff_add_entire hF hG]
+  simp only [map_add (f := _), coeff_mk, GlobalTheory.SerTransport.taylorCoeff_add_entire hF hG]
 
 theorem tay_scale {F : ℂ → ℂ} (hF : Differentiable ℂ F) (c : ℂ) :
     (subst (C c * X : PowerSeries ℂ) (PowerSeries.mk (coef1 F)) : PowerSeries ℂ) =
@@ -112,7 +155,7 @@ theorem gap_taylor {Λ : AddSubgroup ℂ} (h : IsLat Λ) {v : ℂ} (hv : v ∉ �
     funext z
     rw [add_mul, sub_mul, add_entire h hv]
     ring
-  rw [map_add, map_sub, add_mul, sub_mul] at key
+  rw [map_add (f := _), map_sub, add_mul, sub_mul] at key
   unfold gap
   linear_combination key
 
@@ -209,7 +252,7 @@ theorem sigma_add_param : ∀ D : D7, Formalism.MainNotions.Ext.CutA.PAdicSigmaA
     rw [subst_mul hs, subst_mul hs, subst_X hs, subst_C]
   have hwq : constantCoeff g.wq ≠ 0 := by
     have e := congrArg constantCoeff (show g.wq = _ from hq)
-    simp only [map_add, map_mul, map_pow, map_one, constantCoeff_X] at e
+    simp only [map_add (f := _), map_mul, map_pow, map_one, constantCoeff_X] at e
     rw [e]
     simp
   have sT : ∀ a : MvPowerSeries (Fin 2) ℂ_[p], MvPowerSeries.constantCoeff a = 0 →

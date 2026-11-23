@@ -1,22 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.CmpPair
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.CmpSt
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.PadicIntegersHenselianFiniteResidue
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.HodgeComparisonCompatibility
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Proportional
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.HodgeCompactificationInteriorPointStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptMultihomogFormStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptIsoCompareStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TwistedHodgeCptFlagStatement
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.HodgeComparisonCompatibility
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.RootOnFund
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CmTypeHostAutPermutationStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptFiniteExtensionStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptIsoCompareStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptMultihomogFormStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StalkSpecializesBijective
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.HodgeCompactPullback
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptFiniteExtensionStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.CmTypeHostAutPermutationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TwistedHodgeCptCompareStatement
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.JNormal
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.LGenflag
-import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.TIdeal
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TwistedHodgeCptCompareStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TwistedHodgeCptFlagStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HodgeCompactificationInteriorPointStatement
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.HodgeCompactPullback
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.JNormal
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.LGenflag
+public import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.TIdeal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MvPolynomial AlgebraicGeometry CategoryTheory NumberField Filter Topology ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cmp
 open ReciprocityTheory.ChartRestriction.G.AI.I1 (IsBlockMap pullDeg)
 open ReciprocityTheory.ChartRestriction.G.AI.I4 (IsPullHerm imageZ blockFnField)
@@ -172,8 +215,8 @@ theorem flagStep_cast {Ω₃ F : Type} [Field Ω₃] [AddCommGroup F] [Module Ω
   subst h
   rfl
 
-open ReciprocityTheory.ChartRestriction.G.Geo.Tor in
 
+open ReciprocityTheory.ChartRestriction.G.Geo.Tor in
 theorem pull_both {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {D : Datum H} {l : Level H}
     {Xo : Moduli D l} {c : Coeff l} {O : Type} [CommRing O] {β : O →+* c.F} {Y : Model Xo c β} {S : Finset ℕ}
     {Ω Ω' : Type} [Field Ω] [Field Ω'] (i : Ω →+* Ω') {K K' : Type} [Fintype K] [Fintype K'] {J : K → Type}
@@ -351,6 +394,7 @@ theorem pair_iso : HodgeComparisonCompatibility → ThetaUnifAV → ∀ (E : Typ
     · intro k
       congr 1
       funext a
+
       rw [p6, hm₁ a, map_sum]
       refine Finset.sum_congr rfl fun q _ => ?_
       rw [p5.1, p9]
@@ -359,6 +403,7 @@ theorem pair_iso : HodgeComparisonCompatibility → ThetaUnifAV → ∀ (E : Typ
       have e1 : (fun a => Fl₂.b (Equiv.sumCongr π₀ π₀ s) (Fin.cast (hrl s).symm a)) =
           fun a => ∑ q, i₂ (m₂ q a) • Fl₂.j (θ₃ (θ₁ (cc q))) := by
         funext a
+
         rw [q6, hm₂ a, map_sum]
         refine Finset.sum_congr rfl fun q _ => ?_
         rw [q5.1, hθ₃, q9]

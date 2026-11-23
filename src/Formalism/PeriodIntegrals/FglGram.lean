@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.RingTheory.PowerSeries.Substitution
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,10 +66,6 @@ def hP {p : ℕ} [Fact p.Prime] {ι : Type*} [Fintype ι] (x y : ι → ℂ_[p] 
   ∑ k, x k * (y k).swap
 
 abbrev Xv {p : ℕ} [Fact p.Prime] {σ : Type*} (i : σ) : MvPowerSeries σ ℂ_[p] := MvPowerSeries.X i
-
-def DualIso {p : ℕ} [Fact p.Prime] {κ ι : Type*} [Fintype κ] (b b' : ι → κ → ℂ_[p] × ℂ_[p]) : Prop :=
-  (∀ e e', hP (b e) (b e') = 0) ∧ (∀ e e', hP (b' e) (b' e') = 0) ∧
-    ∀ e e', hP (b e) (b' e') = if e = e' then 1 else 0
 
 section
 
@@ -56,10 +96,6 @@ end
 def PhOn {p : ℕ} [Fact p.Prime] (l ex ph : PowerSeries ℂ_[p]) {κ ι : Type*} [Fintype κ] [Fintype ι]
     (b : ι → κ → ℂ_[p] × ℂ_[p]) : MvPowerSeries ι ℂ_[p] :=
   ∑ k, phAt ph (lin l ex (fun e => (b e k).1) (fun e => Xv e))
-
-def beSum {p : ℕ} [Fact p.Prime] (l ex ph : PowerSeries ℂ_[p]) (ι : Type*) [Fintype ι] :
-    MvPowerSeries (ι ⊕ ι) ℂ_[p] :=
-  ∑ e : ι, be l ex ph (Xv (Sum.inl e)) (Xv (Sum.inr e))
 
 def GramRhs {p : ℕ} [Fact p.Prime] (l ex ph : PowerSeries ℂ_[p]) {κ : Type*} [Fintype κ] {k : ℕ}
     (A : Fin k → κ → ℂ_[p] × ℂ_[p]) : MvPowerSeries (Fin k) ℂ_[p] :=
@@ -98,18 +134,5 @@ def GramUnit : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (l ex ph : PowerSeries ℂ_[p]), Data l ex ph →
     ∀ (n : ℕ) (de : Fin n → Fin n → ℂ_[p] × ℂ_[p]), (∀ i j, hP (de i) (de j) = if i = j then 1 else 0) →
       GramRhs l ex ph de = ∑ j, phAt ph (Xv j)
-
-def GramIso : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (l ex ph : PowerSeries ℂ_[p]), Data l ex ph →
-    ∀ (κ : Type) [Fintype κ] (r : ℕ) (b : Fin r → κ → ℂ_[p] × ℂ_[p]), (∀ e e', hP (b e) (b e') = 0) →
-      GramRhs l ex ph b = 0
-
-def PhDualGram : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (l ex ph : PowerSeries ℂ_[p]) (S : Set (ℂ_[p] × ℂ_[p])), Data l ex ph →
-    (∀ (κ : Type) [Fintype κ] (k : ℕ) (A : Fin k → κ → ℂ_[p] × ℂ_[p]), (∀ j i, A j i ∈ S) →
-      Simeq (PhOn l ex ph A) (GramRhs l ex ph A)) →
-    ∀ (κ ι : Type) [Fintype κ] [Fintype ι] (b b' : ι → κ → ℂ_[p] × ℂ_[p]), (∀ e k, b e k ∈ S) →
-      (∀ e k, b' e k ∈ S) → DualIso b b' →
-      Simeq (PhOn l ex ph (Sum.elim b b')) (beSum l ex ph ι)
 
 end PI.FglGram

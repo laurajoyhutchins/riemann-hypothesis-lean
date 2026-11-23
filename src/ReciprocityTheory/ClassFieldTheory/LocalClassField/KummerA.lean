@@ -1,6 +1,49 @@
-import Mathlib
-import ReciprocityTheory.NeutralLocalFields.Duality
-import ReciprocityTheory.GroupCohomology.LowLES
+module
+
+public import ReciprocityTheory.NeutralLocalFields.Duality
+public import ReciprocityTheory.GroupCohomology.ContinuousContractNth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.Kummer
 
@@ -31,26 +74,10 @@ def oneCocyclesScalarEquiv : Z1 rho ≃+ Z1 rho' where
   right_inv _ := rfl
   map_add' _ _ := rfl
 
-def twoCocyclesScalarEquiv : Z2 rho ≃+ Z2 rho' where
-  toFun f := ⟨f.1, f.2.1, fun g k l => by rw [← h]; exact f.2.2 g k l⟩
-  invFun f := ⟨f.1, f.2.1, fun g k l => by rw [h]; exact f.2.2 g k l⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-  map_add' _ _ := rfl
-
 def h1ScalarEquiv : H1 rho ≃+ H1 rho' :=
   quotAddCongr _ _ (oneCocyclesScalarEquiv rho rho' h) fun f => by
     show f.1 ∈ Bd1 rho ↔ f.1 ∈ Bd1 rho'
     simp only [mem_contCoboundaries1, h]
-
-def h2ScalarEquiv : H2 rho ≃+ H2 rho' :=
-  quotAddCongr _ _ (twoCocyclesScalarEquiv rho rho' h) fun f => by
-    show f.1 ∈ Bd2 rho ↔ f.1 ∈ Bd2 rho'
-    have hd : ∀ c : G → M, d1 rho c = d1 rho' c := fun c => by
-      funext x
-      show rho x.1 (c x.2) - c (x.1 * x.2) + c x.1 = rho' x.1 (c x.2) - c (x.1 * x.2) + c x.1
-      rw [h]
-    simp only [mem_contCoboundaries2, hd]
 
 end Scalars
 
@@ -111,7 +138,7 @@ theorem muMap_equiv (ζ : (PadicAlgCl p)ˣ) (hζ : ζ ^ n = 1) (g : GK p K) (k :
   refine congrArg Additive.ofMul (Units.ext ?_)
   have h1 : ((ζ ^ k.val : (PadicAlgCl p)ˣ) : PadicAlgCl p) ^ n = 1 := by
     rw [← Units.val_pow_eq_pow_val, ← pow_mul, mul_comm, pow_mul, hζ, one_pow, Units.val_one]
-  have h2 := cycN_spec (K := K) g _ h1
+  have h2 := cycN_spec (K := K) (L := PadicAlgCl p) (n := n) g _ h1
   show _ = g ((ζ ^ k.val : (PadicAlgCl p)ˣ) : PadicAlgCl p)
   rw [h2, ← Units.val_pow_eq_pow_val, ZMod.val_mul, ← pow_eq_pow_mod _ hζ, ← pow_mul, mul_comm]
 
@@ -119,8 +146,8 @@ theorem muMap_injective {ζ : (PadicAlgCl p)ˣ} (hζ : IsPrimitiveRoot ζ n) : F
   intro a b hab
   exact ZMod.val_injective n (hζ.pow_inj (ZMod.val_lt a) (ZMod.val_lt b) hab)
 
-variable (p n) in
 
+variable (p n) in
 def powMap : KbarMult p →ₗ[ℤ] KbarMult p := (n : ℤ) • LinearMap.id
 
 theorem powMap_apply (x : (PadicAlgCl p)ˣ) :

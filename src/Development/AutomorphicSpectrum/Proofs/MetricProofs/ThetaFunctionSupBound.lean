@@ -1,13 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ZhangDimensionPushDownGrassmannianHeightBounds
-import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
-import GroundTheory.HeightsAndTheta.Heights.LatticeLemmas.StatementsBundles
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FourierCoeffUnitCubeTranslateOfEntirePeriodic
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.EntirePeriodicEqZeroOfFourierCoeffEqZero
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependent
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependentThetaPrincipal
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsThetaMeanSquareNorm
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependent
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CardLePowOfLinearIndependentThetaPrincipal
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.EntirePeriodicEqZeroOfFourierCoeffEqZero
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FourierCoeffUnitCubeTranslateOfEntirePeriodic
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.AbsMax
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.InnerProductSpace.OfNorm
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,10 +94,10 @@ theorem continuous_hh_diag : Continuous fun w : Fin g → ℂ => hh Hm w w := by
   have h : Continuous fun w : Fin g → ℂ => Hm.mulVec (star w) :=
     continuous_pi fun i => by
       simp only [mulVec, dotProduct, Pi.star_apply]
-      exact continuous_finset_sum _ fun j _ =>
+      exact continuous_finsetSum _ fun j _ =>
         continuous_const.mul ((continuous_apply j).star)
   simp only [hh, dotProduct]
-  exact continuous_finset_sum _ fun j _ => (continuous_apply j).mul ((continuous_apply j).comp h)
+  exact continuous_finsetSum _ fun j _ => (continuous_apply j).mul ((continuous_apply j).comp h)
 
 theorem dense_torsion (Λ : Submodule ℤ (Fin g → ℂ)) [DiscreteTopology Λ]
     (hs : Submodule.span ℝ (Λ : Set (Fin g → ℂ)) = ⊤) :
@@ -463,7 +514,7 @@ theorem span_of_reps (Λ : Submodule ℤ (Fin g → ℂ)) [DiscreteTopology Λ]
     have h2 : F ∉ Submodule.span ℂ (Set.range fun k => f (s (eqv.symm k))) := by
       rwa [show (Set.range fun k => f (s (eqv.symm k))) = Set.range fun a => f (s a) from
         eqv.symm.surjective.range_comp fun a => f (s a)]
-    have h3 := linearIndependent_fin_cons.2 ⟨h1, h2⟩
+    have h3 := linearIndependent_finCons.2 ⟨h1, h2⟩
     have h4 := card_le_of_unimodular Λ hs hH hpos χ hχ hint huni (m ^ 2) (Nat.one_le_pow _ _ hm)
       (Fintype.card J + 1) _ (fun k => by
         refine Fin.cases ?_ (fun j => ?_) k

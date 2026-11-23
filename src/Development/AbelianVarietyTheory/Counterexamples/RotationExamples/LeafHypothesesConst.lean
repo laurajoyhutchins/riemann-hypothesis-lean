@@ -1,5 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefSide
 import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.FunctionalLowerBoundOfConditionsNumeric
+public import Formalism.PairingDivisors.StatementH
+import Formalism.PairingDivisors.StatementN
+public import Formalism.PairingDivisors.StatementX
+import Formalism.QuotientMetricDivisors.Statement
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open Formalism.DivisionValues (vw lw)
@@ -11,45 +62,6 @@ noncomputable section
 namespace GlobalTheory.LeafRestExamples
 
 variable {K : Type} [Field K] [NumberField K] [StarRing K] {Bs : DefBase K}
-
-def constRecord (Df : DefSide Bs) (n : ℕ) (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ)
-    (M : Submodule (𝓞 K) (Fin n → K)) (t : ℕ) : FunData K Df where
-  n := n
-  X' := X
-  M := M
-  vmu := fun _ => 0
-  Tf := ∅
-  dF := fun _ => 0
-  m := 2
-  rq := fun _ _ => 1
-  dl := fun _ => 0
-  Sd := ∅
-  Se := ∅
-  N0 := fun _ _ _ => 0
-  zA := fun _ => 1
-  zA' := fun _ => 1
-  zT := fun _ _ => 1
-  zTd := fun _ _ _ => 1
-  gT := fun _ _ _ => 0
-  ch := fun _ => true
-  dd := fun _ => 0
-  hd := fun _ => 0
-  yy := fun _ => 0
-  Sq := Unit
-  S0 := ∅
-  sv0 := ()
-  cc := fun _ => 0
-  qq := fun _ => 0
-  f := 16
-  k := 16
-  tt := t
-  cl := fun _ _ => 0
-  g1 := 0
-  g2 := 0
-  pd := 0
-  pd' := 0
-  dE := 0
-  Bw := 1
 
 def truncZero (y : ℝ) : ℤ := if 0 ≤ y then ⌊y⌋ else ⌈y⌉
 

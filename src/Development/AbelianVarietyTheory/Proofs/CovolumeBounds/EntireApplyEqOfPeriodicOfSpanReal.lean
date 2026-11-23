@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.ZLattice.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.TaylorSeries
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.DiffContOnCl
+public import Mathlib.Analysis.Complex.Liouville
+
+@[expose] public section
 
 open Set Metric Filter Topology
 open scoped Nat
@@ -10,46 +63,14 @@ section Periodic
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   [NormedAddCommGroup V] [NormedSpace ℂ V]
 
-theorem entire_apply_eq_of_values_on_compact {F : E → V} (hF : Differentiable ℂ F) {K : Set E}
-    (hK : IsCompact K) (hcov : ∀ x, ∃ k ∈ K, F x = F k) (z w : E) : F z = F w := by
-  refine hF.apply_eq_apply_of_bounded ((hK.image hF.continuous).isBounded.subset ?_) z w
-  rintro _ ⟨x, rfl⟩
-  obtain ⟨k, hk, h⟩ := hcov x
-  exact ⟨k, hk, h.symm⟩
-
-theorem entire_apply_eq_of_periodic_of_compact {F : E → V} (hF : Differentiable ℂ F)
-    {G K : Set E} (hK : IsCompact K) (hcov : ∀ x, ∃ k ∈ K, ∃ g ∈ G, x = k + g)
-    (hper : ∀ x, ∀ g ∈ G, F (x + g) = F x) (z w : E) : F z = F w := by
-  refine entire_apply_eq_of_values_on_compact hF hK (fun x => ?_) z w
-  obtain ⟨k, hk, g, hg, rfl⟩ := hcov x
-  exact ⟨k, hk, hper k g hg⟩
-
-theorem entire_apply_eq_of_periodic_of_bounded [FiniteDimensional ℂ E] {F : E → V}
-    (hF : Differentiable ℂ F) {G K : Set E} (hK : Bornology.IsBounded K)
-    (hcov : ∀ x, ∃ k ∈ K, ∃ g ∈ G, x = k + g)
-    (hper : ∀ x, ∀ g ∈ G, F (x + g) = F x) (z w : E) : F z = F w := by
-  haveI : ProperSpace E := FiniteDimensional.proper ℂ E
-  refine entire_apply_eq_of_periodic_of_compact hF hK.isCompact_closure (fun x => ?_) hper z w
-  obtain ⟨k, hk, g, hg, h⟩ := hcov x
-  exact ⟨k, subset_closure hk, g, hg, h⟩
-
-theorem entire_const_of_addSubgroup_periodic [FiniteDimensional ℂ E] {F : E → V}
-    (hF : Differentiable ℂ F) (G : AddSubgroup E) {K : Set E} (hK : Bornology.IsBounded K)
-    (hcov : ∀ x, ∃ g ∈ G, ∃ k ∈ K, x = g + k)
-    (hper : ∀ x, ∀ g ∈ G, F (x + g) = F x) : ∃ c, ∀ z, F z = c := by
-  refine ⟨F 0, fun z => entire_apply_eq_of_periodic_of_bounded hF (G := G) hK (fun x => ?_)
-    hper z 0⟩
-  obtain ⟨g, hg, k, hk, h⟩ := hcov x
-  exact ⟨k, hk, g, hg, h.trans (add_comm _ _)⟩
-
 theorem entire_apply_eq_of_isZLattice_periodic [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {F : E → V} (hF : Differentiable ℂ F) (L : Submodule ℤ E) [DiscreteTopology L]
     [IsZLattice ℝ L] (hper : ∀ x, ∀ g ∈ L, F (x + g) = F x) (z w : E) : F z = F w :=
   hF.apply_eq_apply_of_bounded
     (IsZLattice.isCompact_range_of_periodic L F hF.continuous hper).isBounded z w
 
-omit [NormedSpace ℂ E] [NormedAddCommGroup V] [NormedSpace ℂ V] in
 
+omit [NormedSpace ℂ E] [NormedAddCommGroup V] [NormedSpace ℂ V] in
 theorem periodic_of_mem_span_int {F : E → V} {S : Set E}
     (hper : ∀ x, ∀ g ∈ S, F (x + g) = F x) :
     ∀ x, ∀ g ∈ Submodule.span ℤ S, F (x + g) = F x := by
@@ -130,7 +151,7 @@ theorem entire_exists_polynomial_of_poly_bound {F : ℂ → ℂ} (hF : Different
   refine ⟨∑ k ∈ Finset.range (m + 1), Polynomial.monomial k (a k), ?_, fun z => ?_⟩
   · refine Polynomial.natDegree_sum_le_of_forall_le _ _ fun k hk => ?_
     exact (Polynomial.natDegree_monomial_le _).trans (by simpa [Nat.lt_succ_iff] using hk)
-  · rw [ha z, Polynomial.eval_finset_sum]
+  · rw [ha z, Polynomial.eval_finsetSum]
     refine Finset.sum_congr rfl fun k _ => ?_
     simp [mul_comm]
 

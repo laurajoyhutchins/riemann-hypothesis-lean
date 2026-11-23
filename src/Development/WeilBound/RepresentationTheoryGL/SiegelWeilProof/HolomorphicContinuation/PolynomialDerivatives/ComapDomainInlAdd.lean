@@ -1,4 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.PairSym
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.PolynomialDerivatives.CoreSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,13 +67,13 @@ abbrev Dk (k : Ix m n) : Module.End ℂ (PX m n) := (pderiv (R := ℂ) k).toLine
 theorem pderiv_comm (i j : Ix m n) (p : PX m n) : pderiv i (pderiv j p) = pderiv j (pderiv i p) := by
   induction p using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p k hp =>
     have hc : ∀ a b : Ix m n, pderiv a (pderiv b (X k : PX m n)) = 0 := by
       intro a b; rw [pderiv_X]; by_cases h : b = k
       · subst h; simp
       · simp [Pi.single_apply, h]
-    simp only [pderiv_mul, map_add, hp, hc, mul_zero, add_zero]
+    simp only [pderiv_mul, map_add (f := _), hp, hc, mul_zero, add_zero]
     ring
 
 theorem dk_comm (i j : Ix m n) : Commute (Dk i) (Dk j) :=
@@ -71,7 +121,7 @@ theorem opMono_eq (t : Ix m n ⊕ Ix m n →₀ ℕ) (f : PX m n) :
     opMono t f = monomial (t.comapDomain Sum.inl Sum.inl_injective.injOn) 1 * dvE (fun k => t (Sum.inr k)) f := rfl
 
 theorem opMono_add (t : Ix m n ⊕ Ix m n →₀ ℕ) (f g : PX m n) : opMono t (f + g) = opMono t f + opMono t g := by
-  simp only [opMono_eq, map_add, mul_add]
+  simp only [opMono_eq, map_add (f := _), mul_add]
 
 theorem opMono_smul (t : Ix m n ⊕ Ix m n →₀ ℕ) (a : ℂ) (f : PX m n) : opMono t (a • f) = a • opMono t f := by
   simp only [opMono_eq, map_smul, mul_smul_comm]
@@ -89,13 +139,13 @@ theorem op_add (u v : Sym m n) (f : PX m n) : op (u + v) f = op u f + op v f := 
     op_eq_of_subset u (u.support ∪ v.support) Finset.subset_union_left,
     op_eq_of_subset v (u.support ∪ v.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun t _ => ?_
-  rw [coeff_add, add_smul]
+  rw [MvPolynomial.coeff_add, add_smul]
 
 theorem op_smul (a : ℂ) (u : Sym m n) (f : PX m n) : op (a • u) f = a • op u f := by
   classical
   rw [op_eq_of_subset (a • u) u.support MvPolynomial.support_smul, op, Finset.smul_sum]
   refine Finset.sum_congr rfl fun t _ => ?_
-  rw [coeff_smul, smul_eq_mul, mul_smul]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul, mul_smul]
 
 theorem op_zero (f : PX m n) : op (0 : Sym m n) f = 0 := by simp [op]
 
@@ -175,7 +225,7 @@ theorem op_X_mul (u : Sym m n) : ∀ (k : Ix m n) (g : PX m n),
     op u (X k * g) = X k * op u g + op (pderiv (Sum.inr k) u) g := by
   induction u using MvPolynomial.induction_on with
   | C a => intro k g; simp [op_C, op_zero, mul_smul_comm]
-  | add p q hp hq => intro k g; rw [op_add, op_add, hp, hq, map_add, op_add]; ring
+  | add p q hp hq => intro k g; rw [op_add, op_add, hp, hq, map_add (f := _), op_add]; ring
   | mul_X p j hp =>
     intro k g
     rcases j with j | j

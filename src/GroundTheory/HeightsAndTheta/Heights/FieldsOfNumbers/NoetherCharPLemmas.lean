@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Expand
+public import Mathlib.FieldTheory.Separable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.MvPolynomial.Expand
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.GoingUp
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FieldNumbers
@@ -12,7 +65,9 @@ theorem exists_pow_eq_map_expand {σ k k' : Type*} [Field k] [Field k'] [Algebra
       N' ^ p ^ e = MvPolynomial.map (algebraMap k k') (MvPolynomial.expand (p ^ e) N) := by
   choose r hr using hN
   refine ⟨∑ m ∈ N.support, MvPolynomial.monomial m (r m), ?_⟩
+
   rw [← MvPolynomial.map_iterateFrobenius_expand p, map_sum, map_sum]
+
   conv_rhs => rw [N.as_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   simp [MvPolynomial.expand_monomial, iterateFrobenius_def, hr]
@@ -56,7 +111,7 @@ theorem injective_of_isIntegral {B B' Ω : Type*} [CommRing B] [Nontrivial B] [C
     (h : Function.Injective (ψ.comp (algebraMap B B'))) : Function.Injective ψ := by
   have : RingHom.ker ψ = ⊥ := by
     apply Ideal.eq_bot_of_comap_eq_bot (R := B)
-    rw [RingHom.comap_ker]
+    rw [Ideal.under_def, RingHom.comap_ker]
     exact (RingHom.injective_iff_ker_eq_bot _).mp h
   exact (RingHom.injective_iff_ker_eq_bot ψ).mpr this
 
@@ -69,8 +124,9 @@ theorem isSeparable_of_pow_coeff {F F' Ω : Type*} [Field F] [Field F'] [Field �
   set h : F'[X] := ∑ i ∈ Finset.range (g.natDegree + 1), C (d i) * X ^ i
   have hmap : (h.map (algebraMap F' Ω)).map (iterateFrobenius Ω p e) = g.map (algebraMap F Ω) := by
     ext i
+
     simp only [h, coeff_map, Polynomial.map_sum, Polynomial.map_mul, Polynomial.map_pow, map_X,
-      map_C, finsetSum_coeff, coeff_C_mul_X_pow]
+    map_C, finsetSum_coeff, coeff_C_mul_X_pow]
     rw [Finset.sum_ite_eq]
     split_ifs with hi
     · rw [iterateFrobenius_def, hd]

@@ -1,7 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTerm
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OfRoots
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RatCoordCont
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.OfRoots
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.RealObj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LoopTieOf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.ParametersTermRelations
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.PoincareConstantEq
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.TermTieOf
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.L2.SG.HidaSetting Formalism.L2.SG.Full Formalism.L2.SG.PackageTie2 Formalism.L2.SG.TermTieOf Formalism.L2.SG.LoopTieOf
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -54,11 +101,16 @@ theorem bwd {K : Type*} [Zero K] : ∀ (bs : List (K × ℕ)), (∀ p ∈ bs, p.
     · have hb : ¬ b < s := by omega
       have hbl' : blkOf bs (a - s) = blkOf bs (b - s) := by
         simpa [blkOf, ha, hb] using hbl
-      obtain ⟨i, j, hji, his, hi, hj⟩ := bwd bs (fun p hp => hnz p (by simp [hp])) (a - s) (b - s) (by omega)
-        (by omega) hbl'
-      refine ⟨i + s, j + s, by omega, by omega, ?_, ?_⟩
-      · rw [Formalism.MainNotions.S.ptEntry, if_neg (by omega), if_pos ⟨by omega, by omega⟩]; simpa using hi
-      · rw [Formalism.MainNotions.S.ptEntry, if_neg (by omega), if_pos ⟨by omega, by omega⟩]; simpa using hj
+      have htail :
+          ∃ i j, j < i ∧ i < (bs.map Prod.snd).sum ∧
+            Formalism.MainNotions.S.ptEntry bs i (a - s) ≠ 0 ∧
+            Formalism.MainNotions.S.ptEntry bs j (b - s) ≠ 0 :=
+        bwd bs (fun p hp => hnz p (List.mem_cons_of_mem _ hp)) (a - s) (b - s)
+          (by omega) (by omega) hbl'
+      rcases htail with ⟨i, j, hji, his, hi, hj⟩
+      refine ⟨i + s, j + s, Nat.add_lt_add_right hji s, by omega, ?_, ?_⟩
+      · simpa [Formalism.MainNotions.S.ptEntry, ha, Nat.le_of_not_gt ha] using hi
+      · simpa [Formalism.MainNotions.S.ptEntry, hb, Nat.le_of_not_gt hb] using hj
 
 end GlobalTheory.RootsBijection
 

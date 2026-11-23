@@ -1,4 +1,61 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSELeib
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSELeib
+import Aesop.Main
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.MeasurableOfContinuousOnZero
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormDiagonalEntryDilationGeneratorLeOne
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.FDeriv.Pi
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped ComplexConjugate
@@ -27,7 +84,7 @@ theorem pi_single_decomp (l : Fin r) (h : ℂ) :
 theorem clm_single_wirt (L : (Fin r → ℂ) →L[ℝ] E) (l : Fin r) (h : ℂ) :
     L (Pi.single l h) = h • ((1 / 2 : ℂ) • (L (Pi.single l 1) - Complex.I • L (Pi.single l Complex.I))) +
       conj h • ((1 / 2 : ℂ) • (L (Pi.single l 1) + Complex.I • L (Pi.single l Complex.I))) := by
-  rw [pi_single_decomp l h, map_add, map_smul, map_smul]
+  rw [pi_single_decomp l h, map_add (f := _), map_smul, map_smul]
   rw [← Complex.coe_smul, ← Complex.coe_smul]
   simp only [smul_add, smul_sub, smul_smul]
   match_scalars
@@ -166,8 +223,8 @@ theorem hsVec_smul' (a : ℂ) (A : Wq →L[ℂ] Wp) : B.hsVec (a • A) = a • 
   ext i
   simp [B.hsVec]
 
-omit [FiniteDimensional ℂ Wp] in
 
+omit [FiniteDimensional ℂ Wp] in
 def hsVecLin : (Wq →L[ℂ] Wp) →ₗ[ℂ] PiLp 2 (fun _ : Fin (Module.finrank ℂ Wq) => Wp) where
   toFun := B.hsVec
   map_add' := hsVec_add'
@@ -228,7 +285,7 @@ theorem slice_bound (Ξ1 Ξ2 : RadSp k r z z' π π') (h1 : Ξ1 ∈ lcSub k r z 
   set C : Set (Mt k r) := (fun g : Mx k r => (Matrix.of.symm g : Mt k r)) '' (K ∩ Glev k r (Fin.last r)) with hCdef
   have hCmem : ∀ g : Mt k r, g ∈ C ↔ Matrix.of g ∈ K ∧ Matrix.of g ∈ Glev k r (Fin.last r) := by
     intro g; constructor
-    · rintro ⟨g', hg', rfl⟩; simpa using hg'
+    · rintro ⟨g', hg', rfl⟩; simpa only [Equiv.apply_symm_apply, Set.mem_inter_iff] using hg'
     · intro hg; exact ⟨Matrix.of g, hg, rfl⟩
   have hCc : IsCompact C := (hKc.inter_right (P.Qx5.Glev_closed _)).image continuous_id
   have hmap : Continuous (fun p : ℂ × Mt k r => (Function.update y l p.1, (Matrix.of p.2 : Mx k r))) :=

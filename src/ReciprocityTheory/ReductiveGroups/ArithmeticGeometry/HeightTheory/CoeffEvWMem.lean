@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.SumLeSqrtCardMul
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.SumLeSqrtCardMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -13,14 +63,9 @@ noncomputable def evW (w : Fin (N + 1) → B) :
   aeval (Sum.elim X fun i => ∑ j, X (i, j) * C (w j))
 
 def CoeffIn (W : Submodule R B) (m : ℕ) (p : MvPolynomial (Fin (D + 2) × Fin (N + 1)) B) : Prop :=
-  ∀ β, coeff β p ∈ W ^ m
+  ∀ β, AddMonoidAlgebra.coeff p β ∈ W ^ m
 
 variable (W : Submodule R B)
-
-theorem coeffIn_add {m : ℕ} {p q : MvPolynomial (Fin (D + 2) × Fin (N + 1)) B}
-    (hp : CoeffIn W m p) (hq : CoeffIn W m q) : CoeffIn W m (p + q) := fun β => by
-  rw [coeff_add]
-  exact Submodule.add_mem _ (hp β) (hq β)
 
 theorem coeffIn_mul {m m' : ℕ} {p q : MvPolynomial (Fin (D + 2) × Fin (N + 1)) B}
     (hp : CoeffIn W m p) (hq : CoeffIn W m' q) : CoeffIn W (m + m') (p * q) := fun β => by
@@ -84,9 +129,10 @@ private theorem sum_support_inr_eq_xDeg {D N : ℕ} (s : UXVar D N →₀ ℕ) :
 theorem coeffIn_evW (w : Fin (N + 1) → B) (hw : ∀ j, w j ∈ W) {n : ℕ}
     (Q : MvPolynomial (UXVar D N) R) (hx : XHom n Q) : CoeffIn W n (evW w Q) := by
   intro β
+
   rw [Q.as_sum, map_sum, coeff_sum]
   refine Submodule.sum_mem _ fun s hs => ?_
-  have hterm : CoeffIn W n (evW w (monomial s (coeff s Q))) := by
+  have hterm : CoeffIn W n (evW w (monomial s (AddMonoidAlgebra.coeff Q s))) := by
     rw [evW, aeval_monomial, MvPolynomial.algebraMap_apply]
     apply coeffIn_smul
     rw [Finsupp.prod, ← hx s hs, ← sum_support_inr_eq_xDeg s]
@@ -98,7 +144,7 @@ theorem coeffIn_evW (w : Fin (N + 1) → B) (hw : ∀ j, w j ∈ W) {n : ℕ}
 
 theorem coeff_evW_mem (w : Fin (N + 1) → B) {n : ℕ} (Q : MvPolynomial (UXVar D N) R)
     (hx : XHom n Q) (β : Fin (D + 2) × Fin (N + 1) →₀ ℕ) :
-    coeff β (evW w Q) ∈
+    AddMonoidAlgebra.coeff (evW w Q) β ∈
       Submodule.span R (Set.range fun s : Fin n → Fin (N + 1) => ∏ k, w (s k)) := by
   have h := coeffIn_evW (Submodule.span R (Set.range w)) w (fun j => Submodule.subset_span ⟨j, rfl⟩) Q hx β
   rw [Submodule.span_pow] at h
@@ -119,6 +165,7 @@ theorem evW_factor {R S B : Type*} [CommRing R] [CommRing S] [CommRing B] [Algeb
     (Q : MvPolynomial (UXVar D N) R) (hx : XHom n Q) :
     evW (fun j => algebraMap S B (y j) * w0) Q =
       MvPolynomial.map (algebraMap S B) (evW y Q) * C (w0 ^ n) := by
+
   rw [Q.as_sum, map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun s hs => ?_
   simp only [evW, aeval_monomial, MvPolynomial.algebraMap_apply, map_mul, map_C, Finsupp.prod,
@@ -131,6 +178,7 @@ theorem evW_factor {R S B : Type*} [CommRing R] [CommRing S] [CommRing B] [Algeb
   cases x with
   | inl p => simp
   | inr i =>
+
     simp only [Sum.elim_inr, map_sum, map_mul, map_X, map_C]
     rw [← mul_pow, Finset.sum_mul]
     congr 1

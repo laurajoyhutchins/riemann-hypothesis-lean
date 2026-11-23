@@ -1,6 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsFETranslateFeTranslate
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsFETranslateFeTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValPowGen
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -197,7 +245,7 @@ theorem be_add_div_two (a : ArcIn D l β k b) (x x' : a.D₀.X) :
   have d₁ : (2 : ℤ) ∣ a.be x x := (Dvd.intro _ rfl).trans (a.be_dvd x x)
   have d₂ : (2 : ℤ) ∣ a.be x' x' := (Dvd.intro _ rfl).trans (a.be_dvd x' x')
   have s := a.be_symm x' x
-  simp only [map_add, LinearMap.add_apply]
+  simp only [map_add (f := _), LinearMap.add_apply]
   omega
 
 include hW in
@@ -212,13 +260,13 @@ theorem deltaφ_comp (α mu : a.D₀.X) (i : Fin 4 ⊕ Fin 4) : DegPre.deltaφ P
       Sum.elim (a.D₀.famφB (α + j • mu)) (fun i => (trB a.D₀ mu).left ≫ a.D₀.famφB α i) i := by
   rcases i with i | i
   · show DegPre.famφ P.toPre F (e α + j • e mu) i ≫ φ = _
-    rw [← map_nsmul, ← map_add]
+    rw [← map_nsmul, ← map_add (f := _)]
     exact famφ_comp hW F _ i
   · show ((DegPre.trF P.toPre F (e mu)).left ≫ DegPre.famφ P.toPre F (e α) i) ≫ φ = _ ≫ _ ≫ _
     rw [Category.assoc, famφ_comp hW, ← Category.assoc, trF_comp_φ hW, Category.assoc]
 
-include hW hG in
 
+include hW hG in
 theorem val_fe (α mu : a.D₀.X)
     (u u' : LB.Gen (LB.LinComb P.toPre.P.L (DegPre.deltaφ P.toPre F j (e α) (e mu)) (DegPre.deltaε j)))
     (hu : u.IsGen) (hc : LB.Gen.Corr P.toPre.P.L _ _ _ _ (LB.pullGen P.toPre.P.L _ _ u (DegPre.zF P.toPre F).left)
@@ -265,12 +313,12 @@ theorem val_fe (α mu : a.D₀.X)
   have v₂ := val_corr hJ hc (𝟙 _)
   rw [val_pull hJ, Category.id_comp] at v₂
   replace v₂ := v₂.trans (val_famMult (𝟙 (TF (R := PowerSeries k) F)) hJ j (e mu) (e α))
-  rw [UUA.val_powGen', UUA.val_powGen', val_tau _ _ hJ, Over.id_left, Category.id_comp, ← map_add] at v₂
+  rw [UUA.val_powGen', UUA.val_powGen', val_tau _ _ hJ, Over.id_left, Category.id_comp, ← map_add (f := _)] at v₂
   have q₁ := val_psi hW F hF hJ₀ hJ (mu + α)
   have q₂ := val_psi hW F hF hJ₀ hJ mu
   have q₃ := val_psi hW F hF hJ₀ hJ α
   have q₄ := val_rig hW F hF hJ₀ hJ
-  rw [be_add_div_two, map_add, cPoint_add, mul_comm (cP P.toPre _ (e mu)), ← map_add] at q₁
+  rw [be_add_div_two, map_add (f := _), cPoint_add, mul_comm (cP P.toPre _ (e mu)), ← map_add (f := _)] at q₁
   refine Eq.trans ?_ (congrArg (· * _) ((xUnit_zpow F y _).trans (toStk_eq y _)))
   rw [← Units.val_mul]
   exact congrArg Units.val (fe_alg j _ _ _ v₁ v₂ q₁ q₂ q₃ q₄)
@@ -289,7 +337,7 @@ theorem constFam_add_nsmul (α mu : a.D₀.X) (s₀ : SecBMod a.D₀ j α) :
         (val u (𝟙 _) y J).val := by
     rintro _ rfl
     exact (secRel_iff P.toPre.P.isLB _ _ _ _ _ _ _ _ _ u).1 ((constFam hW F hG hj α s₀).fe _ _ u hu hc) _ _ y J hJ
-  have hi : e α + j • e mu = e (α + j • mu) := by rw [map_add, map_nsmul]
+  have hi : e α + j • e mu = e (α + j • mu) := by rw [map_add (f := _), map_nsmul]
   refine (key _ hi).trans (Eq.trans ?_ (sval_smul' hJ _ _ _).symm)
   rw [show (constFam hW F hG hj α s₀).s (e α) = pullF hW F j α s₀ from constFam_self hW F hG hj α s₀,
     val_fe hW F hG α mu u u' hu hc hu' hv _ hJ, mul_left_comm]

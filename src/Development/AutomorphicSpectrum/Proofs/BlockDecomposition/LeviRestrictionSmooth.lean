@@ -1,12 +1,53 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CommuteRtOfMemZalg
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OneMemGoodCT
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CommuteRtOfMemZalg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField GlobalTheory.CuspRep GlobalTheory.CompanionTheory.CTFin Matrix
 
 noncomputable section
 namespace GlobalTheory.CompanionTheory.CTFin.Slice1
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {r s : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {r s : ℕ}
+
 
 variable (E r s) in
-
 def blockOne (x : Lie E r) : Lie E (r + s) :=
   toL (Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
     (Matrix.fromBlocks (Matrix.of x) 0 0 1))
@@ -18,7 +59,7 @@ theorem contDiff_blockOne : ContDiff ℝ (⊤ : ℕ∞) (blockOne E r s) := by
   generalize (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i = i'
   generalize (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j = j'
   rcases i' with i' | i' <;> rcases j' with j' | j'
-  · exact contDiff_apply_apply ℝ (Cinf E) i' j'
+  · exact contDiff_apply_apply ℝ i' j'
   · exact contDiff_const
   · exact contDiff_const
   · exact contDiff_const
@@ -26,7 +67,16 @@ theorem contDiff_blockOne : ContDiff ℝ (⊤ : ℕ∞) (blockOne E r s) := by
 theorem blockOne_val (y : GL (Fin r) (Cinf E)) :
     blockOne E r s (toL (y : Matrix (Fin r) (Fin r) (Cinf E))) =
       toL ((lev (Cinf E) r s (y, 1) : GL _ _) : Matrix (Fin (r + s)) (Fin (r + s)) (Cinf E)) := by
-  rw [GlobalTheory.SmGL.val_emb₂]
+  have hv (g : GL (Fin r) (Cinf E) × GL (Fin s) (Cinf E)) :
+      (GlobalTheory.SmGL.emb₂ (Cinf E) (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) g).val =
+        Matrix.reindex (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)) (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s))
+          (Matrix.fromBlocks g.1.val 0 0 g.2.val) := by
+    ext i j
+    simp [GlobalTheory.SmGL.emb₂, GlobalTheory.SmGL.leviEmb, GlobalTheory.SmGL.leviTwo,
+      GlobalTheory.SmGL.two, Matrix.reindex_apply, Matrix.blockDiagonal']
+    rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm i with a | a <;>
+      rcases (GlobalTheory.SmGL.stdSum (rfl : r + s = r + s)).symm j with b | b <;> simp
+  rw [lev, hv]
   rfl
 
 theorem exists_val_of_mem_invSet {x : Lie E r} (hx : x ∈ invSet E r) :
@@ -37,7 +87,7 @@ theorem toL_val_mem_invSet (y : GL (Fin r) (Cinf E)) :
     toL (y : Matrix (Fin r) (Fin r) (Cinf E)) ∈ invSet E r :=
   show IsUnit (Matrix.of (Matrix.of.symm (y : Matrix (Fin r) (Fin r) (Cinf E)))) from y.isUnit
 
-theorem sm_lev_slice (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (r s : ℕ) (F : GA E (r + s) → ℂ)
+theorem sm_lev_slice (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (r s : ℕ) (F : GA E (r + s) → ℂ)
     (hF : F ∈ Sm E (r + s)) : (fun m : GA E r => F (lev (Ad E) r s (m, 1))) ∈ Sm E r := by
   intro g
   have hmaps : Set.MapsTo (blockOne E r s) (invSet E r) (invSet E (r + s)) := by

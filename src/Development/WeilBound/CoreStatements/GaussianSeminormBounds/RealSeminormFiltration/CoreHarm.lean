@@ -1,4 +1,61 @@
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreLie
+module
+
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.KroneckerOneRightSwap
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreLie
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.ExistsMonomialWeight
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.FockOperatorsKernel
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.RedOps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +76,7 @@ theorem hc_hc (d e : ℕ) (P : MvPolynomial σ ℂ) :
 
 theorem hc_ext {P Q : MvPolynomial σ ℂ} (h : ∀ d, homogeneousComponent d P = homogeneousComponent d Q) : P = Q := by
   ext m
-  have := congrArg (coeff m) (h m.degree)
+  have := congrArg (AddMonoidAlgebra.coeff · m) (h m.degree)
   simpa [coeff_homogeneousComponent] using this
 
 theorem mp_hc (A : Module.End ℂ (MvPolynomial σ ℂ)) (P : MvPolynomial σ ℂ) (d : ℕ) :
@@ -68,7 +125,7 @@ theorem mp_zero (g : MvPolynomial σ ℂ) : minusPart (0 : Module.End ℂ (MvPol
 theorem mp_add_right (A : Module.End ℂ (MvPolynomial σ ℂ)) (g g' : MvPolynomial σ ℂ) :
     minusPart A (g + g') = minusPart A g + minusPart A g' := by
   refine hc_ext fun d => ?_
-  simp only [map_add, mp_hc]
+  simp only [map_add (f := _), mp_hc]
 
 theorem mp_smul_right (A : Module.End ℂ (MvPolynomial σ ℂ)) (c : ℂ) (g : MvPolynomial σ ℂ) :
     minusPart A (c • g) = c • minusPart A g := by
@@ -152,6 +209,7 @@ theorem rename_first_lowering (a b : Ix p q) (P : Pol p q r s) :
       PI.FockOneDegW.lowOp (p := r) (q := s) a b (rename (sw p q r s) P) := by
   rw [PI.FockOneDegW.RedOps.lowOp_apply]
   unfold low1
+
   rw [LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
   have hl : linePos ((c, b) : Ln r s p q) = linePos ((b, c) : Ln p q r s) := linePos_sw (b, c)
@@ -168,6 +226,7 @@ theorem minus1_eq (Z : Mat p q) (hZ : IsPC Z) (P : Pol p q r s) :
   apply rename_sw_injective p q r s
   rw [minusPart_rename (sw p q r s) _ _ (fun Q => (rename_fockAct1 Z Q).symm) P,
     PI.FockOneDegW.minus2_eq _ hZ]
+
   simp only [map_neg, map_sum, map_smul, rename_first_lowering]
 
 theorem first_lowering_commute_lowering (a b : Ix p q) (c d : Ix r s) :
@@ -313,6 +372,7 @@ theorem harmonic_stable_lowering {c d : Ix r s} (hcd : ¬ sameBlock c d) {g : Po
       PI.FockOneDegW.lowOp (p := p) (q := q) c d (low1 a b g) :=
     fun a b => LinearMap.congr_fun (first_lowering_commute_lowering a b c d).eq g
   have h2 := congrArg (PI.FockOneDegW.lowOp (p := p) (q := q) c d) h
+
   simpa only [map_neg, map_sum, map_smul, map_zero, e] using h2
 
 private theorem homogeneousComponent_fockAct1_of_isKC (Z : Mat p q) (hZ : IsKC Z) (e : ℕ) (P : Pol p q r s) :
@@ -321,6 +381,7 @@ private theorem homogeneousComponent_fockAct1_of_isKC (Z : Mat p q) (hZ : IsKC Z
     conv_lhs => rw [Matrix.matrix_eq_sum_single Z]
     simp only [Eab, Matrix.smul_single, smul_eq_mul, mul_one]
   rw [hZs]
+
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply]
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
   by_cases hab : sameBlock a b
@@ -359,6 +420,7 @@ theorem low_homog_small (c d : Ix r s) {e : ℕ} (he : e < 2) {g : Pol p q r s}
 private theorem fockAct2_Eab_eq_sum_omE (c d : Ix r s) (P : Pol p q r s) :
     fockAct2 p q r s (Eab c d) P = ∑ a : Ix p q, omE (a, c) (a, d) P := by
   apply PI.FockOneDegW.Swap.rename_sw_injective p q r s
+
   rw [PI.FockOneDegW.Swap.rename_fockAct2, PI.FockOneDegW.fockAct1_Eab_apply, map_sum]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [PI.FockOneDegW.Swap.rename_omE]

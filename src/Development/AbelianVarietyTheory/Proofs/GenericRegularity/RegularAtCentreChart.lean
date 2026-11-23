@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.RegularAtCentre
+module
+
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CombinedBoundAtTrivialValuationsOfCharts
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.RegularAtCentre
+import Formalism.LocalToGlobal.ProjectiveLattices.RegModelC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +110,7 @@ theorem vr_of_over {V : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRing
   field_simp
   linarith
 
-set_option maxHeartbeats 1000000 in
+
 theorem combined_place {la : HeightOneSpectrum (𝓞 c.F)}
     (S : SCharts Xo c la) {m : ℕ} (ws : Fin m → Rul Xo c) (hF : S.FamW ws)
     {aL nL} (hws : ∀ k, ws k ∈ sec Xo c aL nL)
@@ -137,7 +180,7 @@ theorem combined_place {la : HeightOneSpectrum (𝓞 c.F)}
     _ ≤ ((nu + c' * t : ℝ) : EReal) := EReal.coe_le_coe_iff.2 hlim
     _ = (nu : EReal) + (c' : EReal) * v et := by rw [ht, EReal.coe_add, EReal.coe_mul]
 
-set_option maxHeartbeats 1000000 in
+
 theorem combined_trivial {la : HeightOneSpectrum (𝓞 c.F)}
     (S : SCharts Xo c la) (hQ : S.CovQ) {m : ℕ} (ws : Fin m → Rul Xo c) (hF : S.FamW ws)
     {aL nL} (hws : ∀ k, ws k ∈ sec Xo c aL nL)
@@ -146,70 +189,9 @@ theorem combined_trivial {la : HeightOneSpectrum (𝓞 c.F)}
     (hyp : ∀ v ∈ valSet Xo c (algCls Xo c) la, 0 ≤ v et ∧
       (v et ≠ ⊤ → (⨅ k, v (ws k)) ≤ (nu : EReal) + (c' : EReal) * v et)) :
     ∀ q ∈ trivSet Xo c, q et ≠ ⊤ → (⨅ k, q (ws k)) ≤ (c' : EReal) * q et := by
-  intro q hq hT
-  obtain ⟨kj, hkj⟩ := hF
-  obtain ⟨j, V, _, _, _, _, φ, hcen, hunit, ⟨x, hxE, hφx⟩, hChV⟩ := hQ q hq
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible S.O
-  have heO : 0 < S.eO := S.overO.1
-  have hx0 : x ≠ 0 := fun h => hφx (by rw [h, map_zero])
-  have hu := hunit ϖ hϖ
-  have hϖ0 : algebraMap S.O V ϖ ≠ 0 := hu.ne_zero
-  obtain ⟨hfw0, hrat, hinv⟩ := hkj j
-  obtain ⟨yw, tw, hyw⟩ := hinv x hxE ϖ hϖ
-  obtain ⟨ye, te, hye⟩ := S.reg j aE nE et het x hxE ϖ hϖ
-  have hP : ∀ k : ℕ, φ ((algebraMap S.O (S.A j) ϖ * x) ^ k) ≠ 0 := fun k => by
-    rw [map_pow, map_mul, AlgHom.commutes]; exact pow_ne_zero _ (mul_ne_zero hϖ0 hφx)
-  have hWc := hChV aL nL (ws (kj j)) (hws _)
-  have hTc := hChV aE nE et het
-  obtain ⟨w, hw⟩ := w_fin hWc _ yw hyw hfw0 (hP tw)
-  obtain ⟨t, ht⟩ := fin_of_ne_top hT (chval_ne_bot hTc)
-  have hye0 : ye ≠ 0 := by
-    rintro rfl
-    rw [map_zero] at hye
-    have hPK : algebraMap (S.A j) (FractionRing (S.A j)) ((algebraMap S.O (S.A j) ϖ * x) ^ te) ≠ 0 := by
-      intro h0
-      apply hP te
-      rw [IsFractionRing.injective (S.A j) (FractionRing (S.A j)) (h0.trans (map_zero _).symm), map_zero]
-    have hfe0 : S.ch j et = 0 := (mul_eq_zero.1 hye).resolve_right hPK
-    rw [hfe0] at hTc
-    exact hT (chval_zero hTc)
-  have ht0 : 0 ≤ t := by
-    have := integral_trivial S hQ het (fun v' hv' => (hyp v' hv').1) q hq
-    rw [ht] at this
-    exact_mod_cast this
-  have hκ : vr 1 (algebraMap S.O V ϖ) = 0 := by
-    unfold vr
-    rw [vV_unit _ (fun h => (IsLocalRing.mem_maximalIdeal _).1 h hu)]
-    simp
-  have hqq : (maximalIdeal V).comap φ.toRingHom ⊔
-      Ideal.map (algebraMap S.O (S.A j)) (maximalIdeal S.O) ≠ ⊤ := by
-    have hm : maximalIdeal S.O = Ideal.span {ϖ} :=
-      (IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ).1 hϖ
-    rw [hm, Ideal.map_span, Set.image_singleton, sup_comm]
-    exact hcen ϖ hϖ
-  have key : ∀ N : ℕ, 0 < N → (N : ℝ) * w ≤ (⌈(N : ℝ) * c'⌉₊ : ℝ) * t := by
-    intro N _
-    have := comb_core ϖ S.eO heO (S.ch j (ws (kj j))) (S.ch j et) hfw0 x hx0 ye hye0 te hye yw tw hyw
-      nu c' N ⌈(S.eO : ℝ) * N * nu⌉ ⌈(N : ℝ) * c'⌉₊ (Int.le_ceil _) (Nat.le_ceil _)
-      (fun V' _ _ _ _ _ φ' hφ'x => by
-        obtain ⟨ioV', e', hov', hϖ', v', hv', hch'⟩ := S.pts j V' φ' ⟨x, hxE, hφ'x⟩
-        refine ⟨e', v' (ws (kj j)), v' et, hov'.1, hϖ' ϖ hϖ, hch' aL nL _ (hws _),
-          hch' aE nE et het, (hyp v' hv').1, fun hT' => ?_⟩
-        refine le_trans (le_iInf fun k => ?_) ((hyp v' hv').2 hT')
-        obtain ⟨xk, hxk⟩ := hrat k
-        have h2 := hch' aL nL (ws k) (hws k)
-        rw [hxk] at h2
-        exact ratio_ge (hch' aL nL _ (hws _)) h2)
-      V φ hφx hϖ0 hqq 1 w t (hw ▸ hWc) (ht ▸ hTc)
-    rw [hκ, mul_zero, zero_add] at this
-    exact this
-  have hlim := limit_triv w t c' ht0 hc' key
-  calc (⨅ k, q (ws k)) ≤ q (ws (kj j)) := iInf_le _ _
-    _ = (w : EReal) := hw
-    _ ≤ ((c' * t : ℝ) : EReal) := EReal.coe_le_coe_iff.2 hlim
-    _ = (c' : EReal) * q et := by rw [ht, EReal.coe_mul]
+  apply GlobalTheory.Reg.TrivBound.comb_triv <;> assumption
 
-set_option maxHeartbeats 1000000 in
+
 theorem family_place {la : HeightOneSpectrum (𝓞 c.F)}
     (S : SCharts Xo c la) {m : ℕ} (ws : Fin m → Rul Xo c) (hF : S.FamW ws)
     {aL nL} (hws : ∀ k, ws k ∈ sec Xo c aL nL) (nu : ℝ)

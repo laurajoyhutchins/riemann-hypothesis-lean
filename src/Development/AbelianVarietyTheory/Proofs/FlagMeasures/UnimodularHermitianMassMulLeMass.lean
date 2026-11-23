@@ -1,10 +1,58 @@
-import Mathlib
+module
+
+public import Formalism.HermitianLattices.StatementMass
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LValEtaBoundsStatement
+public import Formalism.HermitianLattices.HermitianLatticesProofs.MassTelescope
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LValEtaBoundsStatement
-import Formalism.HermitianLattices.HermitianLatticesProofs.MassTelescope
+import Formalism.FlagUnipotentLattices.MemOfOrthogonalAnisotropic
+
+@[expose] public section
+
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical
 
@@ -17,8 +65,6 @@ lemma core_two (ms m : ℕ → ℝ) (D B Mb : ℝ) (hD : 1 ≤ D) (hB : 1 ≤ B)
     (h2 : ms 2 ≤ Mb) (t : ℕ) (ht : 2 ≤ t) (s : ℕ) (hs : 2 ≤ s) :
     ms s * ms t ≤ ms (s + t) * (Mb * (D * D) * B ^ (s * (s + t))) := by
   have hMb : 0 < Mb := (hpos 2).trans_le h2
-  have hB0 : 0 < B := by linarith
-  have hD0 : 0 < D := by linarith
   have hm : ∀ n, 2 ≤ n → 0 < m (n + 1) := by
     intro n hn
     have := hpos (n + 1)
@@ -65,7 +111,6 @@ lemma core_one (ms m : ℕ → ℝ) (D B Mb : ℝ) (hD : 1 ≤ D) (hB : 1 ≤ B)
     (h1 : ms 1 ≤ Mb) (t : ℕ) (ht : 2 ≤ t) (e : ℕ) (he : t + 1 ≤ e) :
     ms 1 * ms t ≤ ms (t + 1) * (Mb * (D * D) * B ^ e) := by
   have hMb : 0 < Mb := (hpos 1).trans_le h1
-  have hB0 : 0 < B := by linarith
   have hD0 : 0 < D := by linarith
   have p1 : 0 < m (t + 1) := by
     have := hpos (t + 1)
@@ -123,7 +168,6 @@ lemma cmp_base (v : ℝ) (hv : 1 ≤ v) (i t : ℕ) (ht : 1 ≤ t) :
     rw [div_mul_eq_mul_div, le_div_iff₀ hp]; linarith
   have h' : (4 : ℝ) ≤ (v / Real.pi * 16) ^ t :=
     h.trans (le_self_pow₀ (by linarith) (by omega))
-  have hv0 : 0 < v := by linarith
   calc _ ≤ ((Nat.factorial (i + t - 1) : ℕ) : ℝ) * (v / Real.pi) ^ i * (v / Real.pi * 16) ^ t := by
         gcongr
     _ = _ := by rw [mul_pow, pow_add]; ring
@@ -140,8 +184,6 @@ theorem mass_mul_mass_le : Formalism.HermitianLatticesTheory.SiegelMassRatio →
   have hD : 1 ≤ Real.sqrt ((2 * v) ^ f) := Real.one_le_sqrt.mpr hX
   have hDD : Real.sqrt ((2 * v) ^ f) * Real.sqrt ((2 * v) ^ f) = (2 * v) ^ f :=
     Real.mul_self_sqrt (by linarith)
-  have hv0 : 0 < v := by linarith
-  have hp := Real.pi_pos
   have key := core ms (Formalism.HermitianLatticesTheory.massRatioRightSide K) (Real.sqrt ((2 * v) ^ f)) (16 ^ f) Mb hD
     (one_le_pow₀ (by norm_num))
     (fun n => hstd n ▸ Formalism.HermitianLatticesTheory.massTelescope_std_pos K hCM n)
@@ -156,7 +198,6 @@ theorem mass_mul_mass_le : Formalism.HermitianLatticesTheory.SiegelMassRatio →
     unfold Formalism.HermitianLatticesTheory.massRatioRightSide
     rw [← hvdef, ← hfdef]
     set D := Real.sqrt ((2 * v) ^ f)
-    have hD0 : 0 < D := by linarith
     set A := ((Nat.factorial (i - 1) : ℕ) : ℝ) * (v / Real.pi) ^ i
     have e : A ^ f / D * Formalism.HermitianLatticesTheory.lValEta K i * D * (16 ^ f) ^ i
         = (A * 16 ^ i) ^ f * Formalism.HermitianLatticesTheory.lValEta K i := by
@@ -172,9 +213,6 @@ theorem mass_mul_mass_le : Formalism.HermitianLatticesTheory.SiegelMassRatio →
     unfold Formalism.HermitianLatticesTheory.massRatioRightSide
     rw [← hvdef, ← hfdef]
     set D := Real.sqrt ((2 * v) ^ f)
-    have hD0 : 0 < D := by linarith
-    have hA : 0 ≤ ((Nat.factorial (i - 1) : ℕ) : ℝ) * (v / Real.pi) ^ i := by positivity
-    have hA' : 0 ≤ ((Nat.factorial (i + t - 1) : ℕ) : ℝ) * (v / Real.pi) ^ (i + t) := by positivity
     set A := ((Nat.factorial (i - 1) : ℕ) : ℝ) * (v / Real.pi) ^ i
     set A' := ((Nat.factorial (i + t - 1) : ℕ) : ℝ) * (v / Real.pi) ^ (i + t)
     have e4 : (4 : ℝ) ^ f = 2 ^ f * 2 ^ f := by rw [← mul_pow]; norm_num

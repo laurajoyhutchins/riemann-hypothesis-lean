@@ -1,6 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.Bridge
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.BridgeWt
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.MeasurePreservingMulRight
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DefsRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,15 +77,11 @@ private lemma exp_smul_mem_Kset_of_skew_of_commute_Jm (X : Matrix (Fin n) (Fin n
         NormedSpace.exp (-((t : ℂ) • X)) * NormedSpace.exp ((t : ℂ) • X) := by
       first
       | exact Matrix.exp_add_of_commute _ _ hc
-      | exact Matrix.exp_add_of_commute hc
-      | exact NormedSpace.exp_add_of_commute hc
     rw [← he, neg_add_cancel]
     first
     | exact NormedSpace.exp_zero
-    | simp
   · first
     | exact ((show Commute X (Jm ε) from hJ).smul_left (t : ℂ)).exp_left
-    | exact Commute.exp_left ((show Commute X (Jm ε) from hJ).smul_left (t : ℂ))
 
 private lemma mem_UJset_of_mem_Kset' {g : Matrix (Fin n) (Fin n) ℂ} (hg : g ∈ Kset ε) : g ∈ UJset ε := by
   have hg' : g ∈ Matrix.unitaryGroup (Fin n) ℂ ∧ g * Jm ε = Jm ε * g := hg
@@ -87,7 +131,6 @@ private lemma diagonal_I_conjTranspose_eq_neg (φ : Fin n → ℝ) :
   · subst hij
     first
     | simp [Matrix.conjTranspose_apply]
-    | simp [Matrix.conjTranspose_apply, Complex.star_def]
   · simp [Matrix.conjTranspose_apply, Matrix.diagonal_apply_ne _ hij,
       Matrix.diagonal_apply_ne _ (Ne.symm hij)]
 
@@ -150,8 +193,6 @@ private lemma sigma_exp_smul_eq_exp_smul_of_actM_eigen (hσ : IsURepOn (UJset ε
         (σ (NormedSpace.exp ((t : ℂ) • X)) (c • (w : H))) t := by
       first
       | exact h0.comp_sub_const t t
-      | exact HasDerivAt.comp_sub_const t t h0
-      | exact h0.comp_sub_const
     have heq : (fun s : ℝ => σ (NormedSpace.exp ((t : ℂ) • X))
         (σ (NormedSpace.exp (((s - t : ℝ) : ℂ) • X)) (w : H))) =
         fun s : ℝ => σ (NormedSpace.exp ((s : ℂ) • X)) (w : H) := by
@@ -163,8 +204,6 @@ private lemma sigma_exp_smul_eq_exp_smul_of_actM_eigen (hσ : IsURepOn (UJset ε
           NormedSpace.exp ((t : ℂ) • X) * NormedSpace.exp (((s - t : ℝ) : ℂ) • X) := by
         first
         | exact Matrix.exp_add_of_commute _ _ hc
-        | exact Matrix.exp_add_of_commute hc
-        | exact NormedSpace.exp_add_of_commute hc
       rw [← he, ← add_smul, show (t : ℂ) + ((s - t : ℝ) : ℂ) = (s : ℂ) by push_cast; ring]
     rw [heq, map_smul] at hL2
     exact hL2
@@ -194,7 +233,6 @@ private lemma antisymmetric_unit_conjTranspose_eq_neg (a b : Fin n) :
   split_ifs
   all_goals first
     | simp
-    | simp [Complex.star_def]
     | (simp; exact Complex.conj_I)
 
 private lemma antisymmetric_unit_commute_Jm_of_same_sign {a b : Fin n} (hab : ε a = ε b) :
@@ -227,7 +265,6 @@ private lemma symmetric_I_unit_conjTranspose_eq_neg (a b : Fin n) :
   split_ifs
   all_goals first
     | simp
-    | simp [Complex.star_def]
     | (simp; exact Complex.conj_I)
 
 private lemma symmetric_I_unit_commute_Jm_of_same_sign {a b : Fin n} (hab : ε a = ε b) :
@@ -272,7 +309,6 @@ theorem isKTypeOf_of_isKIrrHW (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn �
     haveI := hV.1
     first
     | exact Module.Finite.map V D.subtype
-    | exact Module.Finite.map _ _
   refine ⟨hW, ?_, ?_, ?_, ?_⟩
   · intro g hg v hv
     obtain ⟨x, hxV, hxv⟩ := Submodule.mem_map.mp hv
@@ -307,7 +343,6 @@ theorem isKTypeOf_of_isKIrrHW (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn �
       refine Submodule.mem_comap.mpr ?_
       first
       | exact (S'.smul_mem_iff two_ne_zero).mp h3
-      | exact (Submodule.smul_mem_iff _ two_ne_zero).mp h3
     rcases hV.2.2.1 (V ⊓ S'.comap D.subtype) inf_le_left hTs with h | h
     · left
       rw [Submodule.eq_bot_iff]

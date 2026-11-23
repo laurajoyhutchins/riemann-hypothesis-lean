@@ -1,12 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsOmPinsLev
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinsMerge
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneMapRowOfBaseTupleIdentityRowSpan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VectorValuedLiftFieldChange
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterIdeleCharacterMatchUnique
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PinsMerge
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PredMemGamRanks
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ActLevAndActBC
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnfoldingFrameDeltaChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VectorValuedLiftFieldChange
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.JEvExists
+
+@[expose] public section
 
 set_option autoImplicit false
-set_option synthInstance.maxHeartbeats 200000
+
 
 noncomputable section
 
@@ -81,7 +125,7 @@ structure IsBC (κ : WeightFamilies.Wt D ((i : ℕ) + 1)) (ι : (C.Q.Dw ((i : �
   plc : ∀ x, O.Plc () x ↔ ∃ x₀, Place R i A.μ0 h O.c0' (jVx R i A.μ0 x₀) x
   pins : (bc O c₃ hs c0₃ io₃ hw₃ h v₀).Pins κ v₀ ι x₀
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_isBC (hV : R.models_HV) {κ ι x₀} (hO : O.Pins κ v₀ ι x₀)
     (hc0 : ∀ (v : VsV D i O.c'.F) (v' : VsV D i c₃.F), (v' : Pol c₃.F D.what₂.Tau (Vc D i).rank) =
@@ -113,9 +157,9 @@ end Change
 
 section Tuple
 
+
 open Classical in
 variable (D) in
-
 def TupOver (i : Fin D.R.m) (Pg Q : Finset (Formalism.L2.DIV.Pl D.host.E)) (βV : ∀ i, GL (Fin (Vc D i).rank) (Lev.EAf D))
     (βW : ∀ i, GL (Fin (Wc D i).rank) (Lev.EAf D)) (χ : Formalism.L2.Host.HChar D.host.E) (ξ : (AE D)ˣ →* Circle)
     (ξR : ∀ PP : Formalism.L2.DIV.Pl D.host.E, (kP PP)ˣ →* ℂˣ) {K' : Type} [Field K'] (σ' : K' →+* ℂ)
@@ -150,7 +194,7 @@ variable {i : Fin D.R.m} {K' : Type} [Field K'] {σ' : K' →+* ℂ}
   {J' : Subgroup (Bridge.Gf (Vc D i))} {Lh : Cl → Submodule (𝓞 D.host.E) (Fin (Vc D i).rank → D.host.E)} {gam : Cl → ℕ} {vol : K'}
   {B : Ideal (𝓞 D.host.E) → K'} {xi : (Af D.host.F ⊗[D.host.F] D.host.E)ˣ →* ℂˣ} {φ : (Fin (Vc D i).rank → La ⧸ N) → K'}
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem tupOver_iff {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (t : T0) :
     TupOver D i R.Pg (R.Q t) R.βV R.βW (R.C.mu0 i * R.xiH t * R.C.eta⁻¹) (R.xi t) (R.xiR t) σ' ι bad Mb I N h J' Lh gam vol B xi φ ↔

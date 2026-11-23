@@ -1,6 +1,65 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.SumInvMulTrace
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CardLe
+module
+
+import Development.WeilBound.CoreStatements.HodgeTatePoints.RaTlog
+public import Mathlib.Basic.NNReal.Defs
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.NumberTheory.MulChar.Basic
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.Valuation.Integers
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CardLe
+import Mathlib.Algebra.GroupWithZero.Torsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.SumInvMulTrace
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+
+@[expose] public section
 
 open scoped Matrix TensorProduct
 open Matrix
@@ -21,22 +80,7 @@ theorem val_eq_one_of_pow_eq_one {K : Type} [Field K] (v : Valuation K NNReal) {
 
 theorem val_sub_one_pow {K : Type} [Field K] (v : Valuation K NNReal) (p : ℕ) [Fact p.Prime]
     {ζ : K} (hζ : IsPrimitiveRoot ζ p) : v (ζ - 1) ^ (p - 1) = v (p : K) := by
-  have hp : p.Prime := Fact.out
-  have hprod : (p : K) = ∏ μ ∈ primitiveRoots p K, (1 - μ) := by
-    rw [← Polynomial.eval_one_cyclotomic_prime (R := K) (p := p),
-      Polynomial.cyclotomic_eq_prod_X_sub_primitiveRoots hζ, Polynomial.eval_prod]
-    simp
-  have hval : ∀ μ ∈ primitiveRoots p K, v (1 - μ) = v (1 - ζ) := by
-    intro μ hμ
-    have hμ' : IsPrimitiveRoot μ p := (mem_primitiveRoots hp.pos).mp hμ
-    obtain ⟨i, -, rfl⟩ := hζ.eq_pow_of_pow_eq_one hμ'.pow_eq_one
-    obtain ⟨j, -, hj⟩ := hμ'.eq_pow_of_pow_eq_one hζ.pow_eq_one
-    refine le_antisymm (val_one_sub_pow_le v (val_eq_one_of_pow_eq_one v hp.ne_zero
-      hζ.pow_eq_one) i) ?_
-    conv_lhs => rw [← hj]
-    exact val_one_sub_pow_le v (val_eq_one_of_pow_eq_one v hp.ne_zero hμ'.pow_eq_one) j
-  rw [hprod, map_prod, Finset.prod_congr rfl hval, Finset.prod_const, hζ.card_primitiveRoots,
-    Nat.totient_prime hp, Valuation.map_sub_swap]
+  apply PositivityTheory.HtPt.Ra.val_prim <;> assumption
 
 theorem exists_mulShift_eq {F K : Type} [Field F] [Fintype F] [Field K] (ψ₀ ψ : AddChar F K)
     (h₀ : ψ₀ ≠ 1) : ∃ c, ψ = AddChar.mulShift ψ₀ c :=
@@ -46,7 +90,7 @@ def ltOneIdeal {C : Type} [Field C] (v : Valuation C NNReal) (R : Type) [CommRin
     [Algebra R C] (hv : v.Integers R) : Ideal R where
   carrier := {r | v (algebraMap R C r) < 1}
   add_mem' := fun {a b} ha hb => by
-    simp only [Set.mem_setOf_eq, map_add] at *
+    simp only [Set.mem_setOf_eq, map_add (f := _)] at *
     exact v.map_add_lt ha hb
   zero_mem' := by simp
   smul_mem' := fun c x hx => by
@@ -89,7 +133,7 @@ theorem gauss_value : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgCl
       map_mul' := fun a b => by simp
       map_zero' := by simp [MulChar.map_zero]
       map_add' := fun a b => by
-        rw [← map_add, Ideal.Quotient.eq]
+        rw [← map_add (f := _), Ideal.Quotient.eq]
         have := hspan (hσ a b)
         rwa [sub_sub] at this }
 
@@ -135,6 +179,7 @@ theorem gauss_value : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgCl
   have hG : ∑ b, algebraMap R C (σ⁻¹ b) * ψ₀ b =
       (algebraMap R C z - 1) * (algebraMap R C y - 1) := by
     have := congrArg (algebraMap R C) hy
+
     simp only [map_sum, map_mul, map_pow, map_sub, map_one] at this
     rw [← this]
     exact Finset.sum_congr rfl fun a _ => by rw [hψ₀]

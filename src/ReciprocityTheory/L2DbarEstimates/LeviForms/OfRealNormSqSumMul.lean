@@ -1,4 +1,57 @@
-import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+module
+
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+
+@[expose] public section
 
 open Complex ComplexConjugate Filter Topology
 
@@ -30,6 +83,7 @@ variable {n : ℕ}
 theorem ofReal_normSq_sum_mul (a ξ : Fin n → ℂ) :
     ((Complex.normSq (∑ j, a j * ξ j) : ℝ) : ℂ) =
       ∑ j, ∑ kk, a j * conj (a kk) * ξ j * conj (ξ kk) := by
+
   rw [← mul_conj, map_sum, Finset.sum_mul_sum]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun kk _ => ?_
   rw [map_mul]; ring
@@ -184,9 +238,6 @@ theorem logPshAt_normSq {g : V n → ℂ} {x : V n} (hg : ContDiffAt ℂ 2 g x) 
   rw [this, normSq_mul, normSq_conj]
   exact ⟨Complex.normSq_nonneg _, le_rfl⟩
 
-theorem logPshAt_one (x : V n) : LogPshAt n (fun y => Complex.normSq ((fun _ : V n => (1 : ℂ)) y)) x :=
-  logPshAt_normSq contDiffAt_const
-
 theorem leviV_log_sum_nonneg {m : ℕ} {u : Fin m → V n → ℝ} {x : V n}
     (hu : ∀ i, ContDiffAt ℝ 2 (u i) x) (hl : ∀ i, LogPshAt n (u i) x) (hpos : 0 < ∑ i, u i x)
     (ξ : Fin n → ℂ) : 0 ≤ (leviV n (fun y => ((Real.log (∑ i, u i y) : ℝ) : ℂ)) x ξ).re := by
@@ -234,13 +285,5 @@ theorem lseV : LSEVStatement := by
         simp [mul_conj]
       exact ⟨hns.congr_of_eventuallyEq hev.symm, (logPshAt_normSq hgx).congr hev⟩
   exact leviV_log_sum_nonneg (fun i => (hgood i).1) (fun i => (hgood i).2) (hpos x hx) ξ
-
-theorem lseV_hyp_inhabited (n : ℕ) :
-    ∃ (U : Set (V n)) (u : Fin 1 → V n → ℝ), IsOpen U ∧ U.Nonempty ∧
-      (∀ i, ∃ φ : V n → ℝ, ContDiffOn ℝ 2 φ U ∧ LeviNonnegOn n φ U ∧
-        ∀ y ∈ U, u i y = Real.exp (φ y)) ∧ (∀ y ∈ U, 0 < ∑ i, u i y) :=
-  ⟨Set.univ, fun _ _ => 1, isOpen_univ, Set.univ_nonempty,
-    fun _ => ⟨fun _ => 0, contDiffOn_const, leviNonnegOn_const 0 _, fun _ _ => by simp⟩,
-    fun _ _ => by simp⟩
 
 end ReciprocityTheory.L2DbarEstimates

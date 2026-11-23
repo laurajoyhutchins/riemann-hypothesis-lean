@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.CharP.Defs
+public import Mathlib.Basic.NNReal.Defs
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.RingTheory.Ideal.Quotient.Basic
+public import Mathlib.RingTheory.Valuation.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.CharP.Basic
+public import Mathlib.Algebra.Ring.Hom.InjSurj
+public import Mathlib.Data.Matrix.Basic
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +69,7 @@ variable {C : Type} [Field C] {v : Valuation C NNReal} {R : Type} [CommRing R] [
 def mI (hv : v.Integers R) : Ideal R where
   carrier := {r | v (algebraMap R C r) < 1}
   add_mem' {a b} ha hb := by
-    simp only [Set.mem_ofPred_eq, map_add] at *
+    simp only [Set.mem_ofPred_eq, map_add (f := _)] at *
     exact v.map_add_lt ha hb
   zero_mem' := by simp
   smul_mem' c x hx := by
@@ -74,31 +132,5 @@ theorem idem_eq_zero (hv : v.Integers R) {n : Type} [Fintype n] [DecidableEq n]
   have hu : IsUnit (1 - e) := (Matrix.isUnit_iff_isUnit_det _).2 hdet
   have : e * (1 - e) = 0 := by rw [mul_sub, mul_one, he, sub_self]
   exact (hu.mul_left_eq_zero).1 this
-
-theorem root_eq (hv : v.Integers R) {n : ℕ} (hn : (n : R) ∉ mI hv) {x y : R} (hx : x ^ n = 1)
-    (hy : y ^ n = 1) (hxy : x - y ∈ mI hv) : x = y := by
-  have := isDomain hv
-  have hgeom := (Commute.all x y).geom_sum₂_mul n
-  rw [hx, hy, sub_self] at hgeom
-  rcases mul_eq_zero.1 hgeom with h | h
-  · exfalso
-    have hres : res hv (∑ i ∈ range n, x ^ i * y ^ (n - 1 - i)) = (n : R ⧸ mI hv) * res hv x ^ (n - 1) := by
-      have hxy' : res hv x = res hv y := by
-        rw [← sub_eq_zero, ← map_sub]; exact Ideal.Quotient.eq_zero_iff_mem.2 hxy
-      rw [map_sum]
-      simp only [map_mul, map_pow, ← hxy']
-      rw [Finset.sum_congr rfl (g := fun _ => res hv x ^ (n - 1)), Finset.sum_const, Finset.card_range,
-        nsmul_eq_mul]
-      intro i hi
-      rw [← pow_add]; congr 1; have := Finset.mem_range.1 hi; omega
-    have hn0 : n ≠ 0 := by rintro rfl; simp at hn
-    have hx0 : res hv x ≠ 0 := by
-      intro h0; have := congrArg (res hv) hx; rw [map_pow, h0, zero_pow hn0, map_one] at this
-      exact zero_ne_one this
-    have hnn : (n : R ⧸ mI hv) ≠ 0 := by
-      rw [← map_natCast (res hv)]; exact fun h0 => hn (Ideal.Quotient.eq_zero_iff_mem.1 h0)
-    rw [h, map_zero] at hres
-    exact mul_ne_zero hnn (pow_ne_zero _ hx0) hres.symm
-  · exact sub_eq_zero.1 h
 
 end ReciprocityTheory.PGsh.Up.FrobeniusGroupField

@@ -1,30 +1,78 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsAdmissibleIntegralBasisChangeOne
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsNormalFormLattice
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LatticeNormalFormCoordinates
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeightedBoxSumAtPrimeEqOfBoundedSchwartz
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnfoldingBoundedIntegral
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnipotentRadicalsActAffineUnfoldingSpaces
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsAdmissibleIntegralBasisChangeOne
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsNormalFormLattice
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LatticeNormalFormCoordinates
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocalUnfoldingIntegrandBoundedSchwartz
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormalFormAtPrime
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ParahoricLeIntegralGl
 import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnfoldingAffineSpaceMemIffIntrinsic
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ParahoricLeIntegralGl
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsNormEqOfSplitFactor
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PhiMapsAndOmegaLaw
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleRepresentativesFiniteLevelCosetsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LatticeNormalFormModuloUnipotentSemidirectStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasLatticeNormalFormOfBetweenStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowTypeMulOnLevelAtTwistPrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowTypeMulOnSymmetricLevelAtTypePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowTypeOneAddPrimeSmulEqOneStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepDatumBoundedAtTypePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AffineEigenvalueEqOneOfBoxSumNeZeroStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnfoldingCharArgMulLeftUnipotentStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormOneDetEqOneStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLevelGroupModTypePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelGroupReductionStepZeroTypePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelCharacterStepZeroTypePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelStepZeroAtTwistPrimeFullStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ProjConjLevelLeIntegralGLAtTypePrimeStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LatticeNormalFormViaMatrixStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnfoldingBoundedIntegral
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnipotentRadicalsActAffineUnfoldingSpaces
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeightedBoxSumAtPrimeEqOfBoundedSchwartz
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdmissibleRepresentativesFiniteLevelCosetsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AffineEigenvalueEqOneOfBoxSumNeZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLevelGroupModTypePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasLatticeNormalFormOfBetweenStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LatticeNormalFormModuloUnipotentSemidirectStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LatticeNormalFormViaMatrixStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevQFiniteIndexAndRoot
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelCharacterStepZeroTypePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelGroupReductionStepZeroTypePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelStepZeroAtTwistPrimeFullStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NormOneDetEqOneStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ProjConjLevelLeIntegralGLAtTypePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowTypeMulOnLevelAtTwistPrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowTypeMulOnSymmetricLevelAtTypePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RowTypeOneAddPrimeSmulEqOneStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StepDatumBoundedAtTypePrimeStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TameHeckeCharLocalEqInvTypeCharacter
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnfoldingCharArgMulLeftUnipotentStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AbsNormEqOfSplitFactor
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IntAtNatCast
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LastTwoStepsGuarded
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PhiMapsAndOmegaLaw
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,11 +120,6 @@ theorem homBdd_mono {N N' a b : ℕ} (h : N ≤ N') {Psi : Loc.SF E K a b} (H : 
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le h
   rw [pow_add, mul_smul]
   exact H.2 x _ (intHom_pow_smul k hy)
-
-theorem homBdd_add {N B a b : ℕ} (h : N ≤ B) {Psi : Loc.SF E K a b} (H : HomBdd P N Psi) (x y : (Fin a → E) →ₗ[E] (Fin b → E))
-    (hy : IntHom P (((qOf P : E) ^ B)⁻¹ • y)) : Psi (x + y) = Psi x := by
-  have := (homBdd_mono h H).2 x _ hy
-  rwa [smul_inv_smul₀ (pow_ne_zero _ (qOf_ne_zero P))] at this
 
 open GlobalTheory.Proof.localUnfoldingIntegrand_boundedSchwartz in
 theorem integrand_funBdd {n' c' n c : ℕ} {psi : E → K} {D N : ℕ} {Psi : Loc.SF E K (n' + c') (n + c)}
@@ -129,7 +172,7 @@ theorem of_intHom_joinCol {n' c' n c : ℕ} (hc' : 1 ≤ c') {x₀ : HomE E n' n
     have h2 := h _ h1 (Fin.castAdd c l)
     have e : atNL E (n' + c') n' (Loc.inX E n' c' v) = 0 := by
       unfold atNL
-      rw [dif_pos hn, LinearMap.proj_apply, inX_apply, dif_neg (lt_irrefl _)]
+      rw [dif_pos hn, LinearMap.proj_apply, inX_apply, dite_eq_right (lt_irrefl _)]
     change IntAt P (u * Loc.inX E n c (x₀ (LinearMap.funLeft E E (Fin.castAdd c') (Loc.inX E n' c' v)) +
       atNL E (n' + c') n' (Loc.inX E n' c' v) • y) (Fin.castAdd c l)) at h2
     rwa [inX_castAdd, e, zero_smul, add_zero, LastSteps.funLeft_inX] at h2
@@ -316,8 +359,8 @@ theorem exists_levQ {j : ℕ} {h : AutY X R j} (H : ChiMul Ch sel mu cst j P h) 
       exact h1.symm)
   exact ⟨⟨_, lam⟩, rfl, hl⟩
 
-variable (Pr) in
 
+variable (Pr) in
 def Rep (j : ℕ) (P : HeightOneSpectrum (𝓞 X.E)) (h : AutY X R j) : Prop := admitted Pr j P h ∧ (P ∉ Pr.vGs → NF Pr j P h)
 
 theorem rep_one (j : ℕ) (P : HeightOneSpectrum (𝓞 X.E)) : Rep Pr j P (1 : AutY X R j) :=
@@ -438,8 +481,8 @@ theorem psiAt_add {m2 : ℕ} {P : rowSG Pr sel mu} {hal : AutY X R m2} {N B : �
   rw [← LastSteps.joinCol_add, smul_inv_smul₀ hq, smul_inv_smul₀ hq] at this
   exact this
 
-open Classical in
 
+open Classical in
 theorem exists_chIdx_of_cst {G : ChGlob X R.m} (hd : ∀ P : rowSG Pr sel mu, DegOneUnram P.1)
     (hdis : ∀ P ∈ QE sel (mu : Chr X.F X.E X.K), P ∉ Pr.vGs) (hc : cst.Ok) (hs : cst.sharp = true) (hM : R.m ≤ cst.M)
     (hxi : XiUnitAt (rowSG Pr sel mu) G.xi0) (hW : cst.WeilTied G.σ₀ G.xi0)

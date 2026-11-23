@@ -1,5 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.SimpleRing.Principal
 import GroundTheory.ArithmeticGeometry.AbelianVarieties.FunctionFieldPoint
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -96,7 +147,7 @@ theorem isDiscreteValuationRing_of_maximalIdeal_mul_eq {R : Type*} [CommRing R] 
   have hprinc := Ideal.IsPrincipal.of_finite_maximals_of_isUnit
     ((Set.finite_singleton (IsLocalRing.maximalIdeal R)).subset
       fun I hI => IsLocalRing.eq_maximalIdeal hI) hunit
-  exact ((IsDiscreteValuationRing.TFAE R hnf).out 0 4).mpr hprinc
+  exact ((IsDiscreteValuationRing.TFAE R hnf).out 1 5).mpr hprinc
 
 section AlgClosed
 
@@ -139,8 +190,8 @@ theorem exists_eq_XYIdeal {P : Ideal W.toAffine.CoordinateRing} [hP : P.IsPrime]
       ((isMaximal_XYIdeal ((equation_neg ..).mpr hy)).eq_of_le hP.ne_top h1).symm⟩
   · exact ⟨x, y, hns, ((isMaximal_XYIdeal hy).eq_of_le hP.ne_top h1).symm⟩
 
-omit [IsAlgClosed F] [W.IsElliptic] in
 
+omit [IsAlgClosed F] [W.IsElliptic] in
 theorem isDiscreteValuationRing_localization_XYIdeal {x y : F} (h : W.toAffine.Nonsingular x y)
     [(XYIdeal W.toAffine x (C y)).IsPrime] :
     IsDiscreteValuationRing (Localization.AtPrime (XYIdeal W.toAffine x (C y))) := by
@@ -158,13 +209,14 @@ theorem isDiscreteValuationRing_localization_XYIdeal {x y : F} (h : W.toAffine.N
   rw [← IsLocalization.AtPrime.map_eq_maximalIdeal (XYIdeal W.toAffine x (C y)), ← Ideal.map_mul, mul_comm,
     XYIdeal_neg_mul h, XIdeal, Ideal.map_span, Set.image_singleton]
 
-instance isDedekindDomainDvr_coordinateRing : IsDedekindDomainDvr W.toAffine.CoordinateRing where
-  is_dvr_at_nonzero_prime P hP0 hP := by
-    obtain ⟨x, y, h, rfl⟩ := exists_eq_XYIdeal W hP0
-    exact isDiscreteValuationRing_localization_XYIdeal W h
+theorem isDedekindDomainDvr_coordinateRing (P : Ideal W.toAffine.CoordinateRing) (hP0 : P ≠ ⊥)
+    (hP : P.IsPrime) : IsDiscreteValuationRing (Localization.AtPrime P) := by
+  obtain ⟨x, y, h, rfl⟩ := exists_eq_XYIdeal W hP0
+  exact isDiscreteValuationRing_localization_XYIdeal W h
 
 instance isDedekindDomain_coordinateRing : IsDedekindDomain W.toAffine.CoordinateRing :=
-  inferInstance
+  isDedekindDomain_iff_isDiscreteValuationRing_atPrime.mpr
+    ⟨inferInstance, isDedekindDomainDvr_coordinateRing W⟩
 
 noncomputable def affinePointEquiv :
     {xy : F × F // W.toAffine.Nonsingular xy.1 xy.2} ≃

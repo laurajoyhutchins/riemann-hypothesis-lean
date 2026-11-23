@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.VolumeInputs
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TowerOrigin
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.SumFundCoMulSumIic
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsIffCentres
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TowerOrigin
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AlgebraicElementHomogRelation
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsIffCentres
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIffChartLocalizationStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginCoordField
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AlgebraicElementHomogRelation
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RootOriginCoordField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.HasMultiplier
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsVBOneOfChartGenerators
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SumFundCoMulSumIic
+
+@[expose] public section
+
 open MvPolynomial NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top GlobalTheory.CompanionTheory.Ar.Small
 open ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.Small.Fund
 
@@ -29,7 +80,7 @@ theorem valAt_iff {a : Ω} {r : ℂ} : ValAt ξ z a r ↔ ∃ (h : genPt ξ ⤳ 
 theorem valAt_add {a b : Ω} {r s : ℂ} (ha : ValAt ξ z a r) (hb : ValAt ξ z b s) : ValAt ξ z (a + b) (r + s) := by
   obtain ⟨h, g, hg, hr⟩ := valAt_iff.1 ha
   obtain ⟨h', g', hg', hs⟩ := valAt_iff.1 hb
-  exact valAt_iff.2 ⟨h, g + g', by rw [map_add, hg, hg'], by rw [map_add, hr, hs]⟩
+  exact valAt_iff.2 ⟨h, g + g', by rw [map_add (f := _), hg, hg'], by rw [map_add (f := _), hr, hs]⟩
 
 theorem valAt_mul {a b : Ω} {r s : ℂ} (ha : ValAt ξ z a r) (hb : ValAt ξ z b s) : ValAt ξ z (a * b) (r * s) := by
   obtain ⟨h, g, hg, hr⟩ := valAt_iff.1 ha
@@ -190,9 +241,9 @@ theorem exists_form_of_mem (hz : genPt ξ ⤳ centre z) (hw : CoordsAt ξ y z w)
       form_add (form_mul f₁ (form_mono c _)) ?_, ?_, ?_⟩
     · rw [← e₂]
       exact form_mul f₂ (form_mono c _)
-    · simp only [map_add, map_mul, y₁, y₂, aeval_mono, Finset.prod_pow]
+    · simp only [map_add (f := _), map_mul, y₁, y₂, aeval_mono, Finset.prod_pow]
       ring
-    · simp only [map_add, map_mul, w₁, w₂, aeval_mono, Finset.prod_pow]
+    · simp only [map_add (f := _), map_mul, w₁, w₂, aeval_mono, Finset.prod_pow]
       ring
   | mul a b _ _ ha hb =>
     obtain ⟨r₁, d₁, F₁, v₁, f₁, y₁, w₁⟩ := ha

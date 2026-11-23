@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD.GramDeterminantReal
 open Complex Matrix
@@ -24,6 +69,7 @@ theorem hermC_smul_left (a : ℂ) (u v : Fin r → ℂ) : hermC τ G (a • u) v
 theorem hC_sum_left {n : ℕ} (f : Fin n → Fin r → ℂ) (w : Fin n → ℂ) (v : Fin r → ℂ) :
     hermC τ G (∑ b, w b • f b) v = ∑ b, w b * hermC τ G (f b) v := by
   change (hL τ G v) (∑ b, w b • f b) = ∑ b, w b * (hL τ G v) (f b)
+
   rw [map_sum]
   simp only [map_smul, smul_eq_mul]
 
@@ -106,6 +152,7 @@ variable {τ G} (hG : ∀ a b, τ (G b a) = conj (τ (G a b)))
 include hG
 
 theorem hC_conj (u v : Fin r → ℂ) : hermC τ G v u = conj (hermC τ G u v) := by
+
   simp only [hermC, map_sum, map_mul, Complex.conj_conj]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
@@ -116,11 +163,7 @@ theorem hC_self_real (u : Fin r → ℂ) : (hermC τ G u u).im = 0 := Complex.co
 
 theorem hC_add_right (u v v' : Fin r → ℂ) :
     hermC τ G u (v + v') = hermC τ G u v + hermC τ G u v' := by
-  simp only [hermC, Pi.add_apply, map_add, mul_add, Finset.sum_add_distrib]
-
-theorem hC_sub_right (u v v' : Fin r → ℂ) :
-    hermC τ G u (v - v') = hermC τ G u v - hermC τ G u v' := by
-  simp only [hermC, Pi.sub_apply, map_sub, mul_sub, Finset.sum_sub_distrib]
+  simp only [hermC, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem hermC_smul_right (a : ℂ) (u v : Fin r → ℂ) :
     hermC τ G u (a • v) = conj a * hermC τ G u v := by
@@ -130,6 +173,7 @@ theorem hermC_smul_right (a : ℂ) (u v : Fin r → ℂ) :
 
 theorem hC_sum_right {n : ℕ} (f : Fin n → Fin r → ℂ) (w : Fin n → ℂ) (v : Fin r → ℂ) :
     hermC τ G v (∑ b, w b • f b) = ∑ b, conj (w b) * hermC τ G v (f b) := by
+
   rw [hC_conj hG (∑ b, w b • f b) v, hC_sum_left, map_sum]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [map_mul, hC_conj hG (f b) v]
@@ -185,6 +229,7 @@ theorem mt_eq {n : ℕ} (f : Fin n → Fin r → ℂ) (e : Fin r → ℂ) (hA : 
     rw [starRingEnd_apply]
     exact h3
   unfold mt yv
+
   simp only [Matrix.vecMul, dotProduct, map_sum, map_mul, hI, Finset.sum_mul]
   refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
   ring

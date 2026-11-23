@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Complex.Schwarz
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Analytic.ChangeOrigin
+public import Mathlib.Analysis.Analytic.Composition
+public import Mathlib.Analysis.Analytic.Constructions
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+
+@[expose] public section
 
 open Complex Matrix Filter Topology Asymptotics
 open scoped BigOperators Real
@@ -163,9 +223,9 @@ private lemma eventually_nhds_zero_comp_of_continuous {E F' : Type*} [Topologica
     {p : F' → Prop} (h : ∀ᶠ y in 𝓝 0, p y) : ∀ᶠ x in 𝓝 0, p (T x) :=
   (hT.tendsto' 0 0 h0).eventually h
 
+
 open Complex Matrix Filter Topology Asymptotics in
 open scoped BigOperators Real in
-
 theorem _root_.GlobalTheory.LocalCube.exists_third_difference :
     (∀ (g : ℕ) (h : (Fin g → ℂ) → ℂ), AnalyticAt ℂ h 0 → h =O[𝓝 0] (fun z => ‖z‖ ^ 3) → ∃ k : (Fin g → ℂ) → ℂ, AnalyticAt ℂ k 0 ∧ k =O[𝓝 0] (fun z => ‖z‖ ^ 3) ∧ ∀ᶠ z in 𝓝 0, k ((2 : ℂ) • z) - 3 * k z - k (-z) = h z) → (∀ (E : Type) [NormedAddCommGroup E] [NormedSpace ℂ E] (F : E → ℂ), F =O[𝓝 0] (fun z => ‖z‖ ^ 3) → (∀ᶠ z in 𝓝 0, F ((2 : ℂ) • z) = 3 * F z + F (-z)) → ∀ᶠ z in 𝓝 0, F z = 0) → (∀ (g : ℕ) (F : (Fin 3 → Fin g → ℂ) → ℂ), AnalyticAt ℂ F 0 → F 0 ≠ 0 → ((∀ a : Fin 3, ∀ᶠ x in 𝓝 (0 : Fin 3 → Fin g → ℂ), x a = 0 → F x = F 0) ∧ (∀ᶠ x in 𝓝 (0 : Fin 3 → Fin g → ℂ), F ((2 : ℂ) • x) * (∏ I : Finset (Fin 3), F ![∑ a ∈ I, x a, ∑ a ∈ I, x a, -∑ a ∈ I, x a] ^ ((-1 : ℤ) ^ (3 - I.card))) * F 0 ^ 3 = F x ^ 3 * F (-x))) → ∃ k : (Fin g → ℂ) → ℂ, AnalyticAt ℂ k 0 ∧ k 0 = 0 ∧ ∀ᶠ x in 𝓝 (0 : Fin 3 → Fin g → ℂ), F x = F 0 * ∏ I : Finset (Fin 3), cexp (k (∑ a ∈ I, x a)) ^ ((-1 : ℤ) ^ (3 - I.card))) := by
   intro hA hB g F hF hF0 hcond
@@ -233,14 +293,14 @@ theorem _root_.GlobalTheory.LocalCube.exists_third_difference :
     Filter.eventually_all.2 fun I => eventually_nhds_zero_comp_of_continuous
       (T := fun x : Fin 3 → Fin g → ℂ => M (∑ a ∈ I, x a))
       (p := fun y => F y = cexp (L + f y))
-      (M.continuous.comp (continuous_finset_sum _ fun a _ => continuous_apply a)) (by simp) hFexp
+      (M.continuous.comp (continuous_finsetSum _ fun a _ => continuous_apply a)) (by simp) hFexp
   have evk : ∀ᶠ x in 𝓝 (0 : Fin 3 → Fin g → ℂ), ∀ I : Finset (Fin 3),
       k ((2 : ℂ) • ∑ a ∈ I, x a) - 3 * k (∑ a ∈ I, x a) - k (-∑ a ∈ I, x a) =
         -φ (∑ a ∈ I, x a) :=
     Filter.eventually_all.2 fun I => eventually_nhds_zero_comp_of_continuous
       (T := fun x : Fin 3 → Fin g → ℂ => ∑ a ∈ I, x a)
       (p := fun z => k ((2 : ℂ) • z) - 3 * k z - k (-z) = -φ z)
-      (continuous_finset_sum _ fun a _ => continuous_apply a) (by simp) hkeq
+      (continuous_finsetSum _ fun a _ => continuous_apply a) (by simp) hkeq
   have hEt : ∀ᶠ x in 𝓝 (0 : Fin 3 → Fin g → ℂ),
       ‖f ((2 : ℂ) • x) + D φ x - 3 * f x - f (-x)‖ < 2 * π := by
     have h2x : (fun x : Fin 3 → Fin g → ℂ => f ((2 : ℂ) • x)) =O[𝓝 0] fun x => ‖x‖ ^ 3 := by

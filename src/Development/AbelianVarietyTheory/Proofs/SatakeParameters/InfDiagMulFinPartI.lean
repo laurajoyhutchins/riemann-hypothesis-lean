@@ -1,7 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.UnitaryNorms.CharTied
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteIndexUnitIdlSup
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ContinuousCharacterFiniteOrderIntegralUnits
+module
+
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTied
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ContinuousCharacterFiniteOrderIntegralUnits
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteIndexUnitIdlSup
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsOpenNsmulAdelicCompletionOfVectorSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,30 +120,5 @@ theorem exists_pow_eq (x : Ideles L) (hx : IsFinIdele x) :
   have hf : finPartI L x = x := Units.ext (Prod.ext (funext hx).symm rfl)
   refine ⟨finPartI L u, k, fun _ => rfl, hu, ?_⟩
   rw [← hf, ← map_pow, ← e, map_mul, mul_assoc, mul_comm _ (infDiag k), infDiag_mul_finPartI]
-
-theorem exists_pow_mem {I : Type} [Fintype I] (φ : I → L →+* ℂ) (K : Subfield ℂ) (h1 : ∀ i x, φ i x ∈ K)
-    (h2 : ∀ i x, starRingEnd ℂ (φ i x) ∈ K) (χ : HChar L) (hχ : χ.IsUnitary) (n : I → ℤ) (hn : χ.HasInf φ n)
-    (x : Ideles L) (hx : IsFinIdele x) : ∃ m : ℕ, 0 < m ∧ ((χ.1 x : ℂˣ) : ℂ) ^ m ∈ K := by
-  obtain ⟨m, hm, hu⟩ := finUnit_pow χ hχ
-  obtain ⟨h, hh, u, k, u1, u2, e⟩ := exists_pow_eq x hx
-  have e1 := congrArg χ.1 e
-  rw [map_mul, map_mul, map_pow, χ.2.2 k, mul_one, ← eq_mul_inv_iff_mul_eq] at e1
-  have hK : ((χ.1 (infDiag k) : ℂˣ) : ℂ) ^ 2 ∈ K := by
-    have : ((χ.1 (infDiag k) : ℂˣ) : ℂ) = _ := hn k
-    rw [this, ← Finset.prod_pow]
-    refine prod_mem fun i _ => ?_
-    rw [← zpow_natCast, ← zpow_mul, mul_comm, zpow_mul, zpow_natCast, div_pow, ← Complex.mul_conj']
-    exact zpow_mem (div_mem (pow_mem (h1 _ _) _) (mul_mem (h1 _ _) (h2 _ _))) _
-  refine ⟨h * (m * 2), by positivity, ?_⟩
-  rw [pow_mul, ← Units.val_pow_eq_pow_val (χ.1 x), e1, Units.val_mul, mul_pow, pow_mul, hu u u1 u2, one_pow, one_mul,
-    Units.val_inv_eq_inv_val, inv_pow, mul_comm, pow_mul]
-  exact inv_mem (pow_mem hK _)
-
-theorem exists_pow_mem_host {R : Formalism.BasicNotions.Ranks} (H : Formalism.BasicNotions.Host R) (χ : HChar H.E) (hχ : χ.IsUnitary)
-    (n : R.Psi → ℤ) (hn : χ.HasInf (embPsi H) n) (x : Ideles H.E) (hx : IsFinIdele x) :
-    ∃ m : ℕ, 0 < m ∧ ((χ.1 x : ℂˣ) : ℂ) ^ m ∈ H.φ₀.fieldRange := by
-  have hcm : IsCMField H.E := H.isCMField_hostE
-  refine exists_pow_mem (embPsi H) H.φ₀.fieldRange (fun i y => ⟨H.sigmaOf _ y, rfl⟩) (fun i y => ?_) χ hχ n hn x hx
-  exact ⟨IsCMField.complexConj H.E (H.sigmaOf _ y), IsCMField.complexEmbedding_complexConj H.E H.φ₀ _⟩
 
 end GlobalTheory.UnUnitCmp.Val

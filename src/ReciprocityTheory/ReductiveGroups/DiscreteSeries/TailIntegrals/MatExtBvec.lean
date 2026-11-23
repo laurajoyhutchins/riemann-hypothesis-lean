@@ -1,4 +1,51 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.InductiveHeisenbergInputs
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.ReproducingKernels.OneLeGN
+public import Formalism.HermitianCurvature.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+
+@[expose] public section
 
 noncomputable section
 open Matrix MeasureTheory
@@ -13,22 +60,7 @@ def sg (k r i : ℕ) : ℕ := if i < r ∨ r + k < i then 2 * r + k - i else i
 
 theorem hpk_apply (k r : ℕ) (i j : Fin (2 * r + k + 1)) :
     Hpk k r i j = if j.val = sg k r i.val then (if i.val = r + k then -1 else 1) else 0 := by
-  unfold Hpk sg
-  by_cases h1 : i.val < r ∨ r + k < i.val
-  · rw [if_pos h1]
-    rcases h1 with h1 | h1
-    · by_cases h2 : i.val + j.val = 2 * r + k
-      · rw [if_pos ⟨h1, h2⟩, if_pos (by omega), if_neg (by omega)]
-      · rw [if_neg (fun h => h2 h.2), if_neg (fun h => h2 h.2), if_neg (by omega), if_neg (by omega)]
-    · by_cases h2 : i.val + j.val = 2 * r + k
-      · rw [if_neg (by omega), if_pos ⟨by omega, h2⟩, if_pos (by omega), if_neg (by omega)]
-      · rw [if_neg (fun h => h2 h.2), if_neg (fun h => h2 h.2), if_neg (by omega), if_neg (by omega)]
-  · rw [if_neg h1]
-    push Not at h1
-    rw [if_neg (by omega), if_neg (by omega)]
-    by_cases h2 : i = j
-    · subst h2; rw [if_pos ⟨h1.1, h1.2, rfl⟩, if_pos rfl]
-    · rw [if_neg (fun h => h2 h.2.2), if_neg (fun h => h2 (Fin.ext h.symm))]
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.S0.DecA.hpk_apply <;> assumption
 
 theorem hpk_symm (k r : ℕ) (i j : Fin (2 * r + k + 1)) : Hpk k r j i = Hpk k r i j := by
   rw [hpk_apply, hpk_apply]; unfold sg
@@ -53,19 +85,7 @@ theorem hpk_apply' (k r i : ℕ) (hi : i < 2 * r + k + 1) (j : Fin (2 * r + k + 
   hpk_apply k r ⟨i, hi⟩ j
 
 theorem hpk_mul (k r : ℕ) : Hpk k r * Hpk k r = 1 := by
-  ext i j
-  rw [Matrix.mul_apply, Finset.sum_eq_single (⟨sg k r i.val, sg_lt i.2⟩ : Fin _)]
-  · rw [hpk_apply k r i ⟨sg k r i.val, sg_lt i.2⟩, hpk_apply' k r _ (sg_lt i.2) j, sg_sg i.2, Matrix.one_apply,
-      if_pos (show ((⟨sg k r i.val, sg_lt i.2⟩ : Fin (2 * r + k + 1)).val = sg k r i.val) from rfl)]
-    have hs := sg_rk (k := k) (r := r) i.2
-    by_cases hij : i = j
-    · subst hij; rw [if_pos rfl, if_pos rfl]
-      by_cases h : i.val = r + k
-      · rw [if_pos h, if_pos (hs.2 h)]; norm_num
-      · rw [if_neg h, if_neg (fun h' => h (hs.1 h'))]; norm_num
-    · rw [if_neg hij, if_neg (fun h : j.val = i.val => hij (Fin.ext h.symm)), mul_zero]
-  · intro b _ hb; rw [hpk_apply k r i b, if_neg (fun h => hb (Fin.ext h)), zero_mul]
-  · intro h; exact absurd (Finset.mem_univ _) h
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.S0.DecA.hpk_mul <;> assumption
 
 theorem sum_mid {n N : ℕ} (h : N = n + 2) (f : Fin N → ℂ) (h0 : ∀ q : Fin N, q.val = 0 → f q = 0)
     (h1 : ∀ q : Fin N, q.val = n + 1 → f q = 0) : ∑ q, f q = ∑ q : Fin n, f ⟨q.val + 1, by omega⟩ := by
@@ -95,29 +115,29 @@ theorem sum_sh (f : Fin (2 * (1 + r') + k + 1) → ℂ) (h0 : ∀ q : Fin _, q.v
   sum_mid (n := 2 * r' + k + 1) (by omega) f h0 (fun q hq => h1 q (by omega))
 
 theorem lv_in (v : Fin (2 * r' + k + 1) → ℂ) (q : Fin (2 * r' + k + 1)) : liftVec k 1 r' v (sh q) = v q := by
-  unfold liftVec; rw [dif_pos (show 1 ≤ (sh q).val ∧ (sh q).val < 2 * r' + k + 1 + 1 from ⟨by simp [sh], by have := q.2; simp [sh]; omega⟩)]
+  unfold liftVec; rw [dite_eq_left (show 1 ≤ (sh q).val ∧ (sh q).val < 2 * r' + k + 1 + 1 from ⟨by simp [sh], by have := q.2; simp [sh]; omega⟩)]
   congr 1
 
 theorem lv_out (v : Fin (2 * r' + k + 1) → ℂ) (p : Fin (2 * (1 + r') + k + 1))
     (hp : p.val = 0 ∨ p.val = 2 * (1 + r') + k) : liftVec k 1 r' v p = 0 := by
-  unfold liftVec; rw [dif_neg (by omega)]
+  unfold liftVec; rw [dite_eq_right (by omega)]
 
 theorem io_in (g : Mat k r') (p q : Fin (2 * r' + k + 1)) : ιLev k 1 r' g (sh p) (sh q) = g p q := by
   unfold ιLev
-  rw [dif_pos (show 1 ≤ (sh p).val ∧ (sh p).val < 2 * r' + k + 1 + 1 from ⟨by simp [sh], by have := p.2; simp [sh]; omega⟩),
-    dif_pos (show 1 ≤ (sh q).val ∧ (sh q).val < 2 * r' + k + 1 + 1 from ⟨by simp [sh], by have := q.2; simp [sh]; omega⟩)]
+  rw [dite_eq_left (show 1 ≤ (sh p).val ∧ (sh p).val < 2 * r' + k + 1 + 1 from ⟨by simp [sh], by have := p.2; simp [sh]; omega⟩),
+    dite_eq_left (show 1 ≤ (sh q).val ∧ (sh q).val < 2 * r' + k + 1 + 1 from ⟨by simp [sh], by have := q.2; simp [sh]; omega⟩)]
   congr 1
 
 theorem io_out (g : Mat k r') (p q : Fin (2 * (1 + r') + k + 1))
     (hq : q.val = 0 ∨ q.val = 2 * (1 + r') + k) : ιLev k 1 r' g p q = if p = q then 1 else 0 := by
   unfold ιLev
   by_cases hp : 1 ≤ p.val ∧ p.val < 2 * r' + k + 1 + 1
-  · rw [dif_pos hp, dif_neg (by omega), if_neg (fun h => by subst h; omega)]
-  · rw [dif_neg hp]
+  · rw [dite_eq_left hp, dite_eq_right (by omega), if_neg (fun h => by subst h; omega)]
+  · rw [dite_eq_right hp]
 
 theorem io_out' (g : Mat k r') (p q : Fin (2 * (1 + r') + k + 1))
     (hp : p.val = 0 ∨ p.val = 2 * (1 + r') + k) : ιLev k 1 r' g p q = if p = q then 1 else 0 := by
-  unfold ιLev; rw [dif_neg (by omega)]
+  unfold ιLev; rw [dite_eq_right (by omega)]
 
 theorem io_lv (g : Mat k r') (v : Fin (2 * r' + k + 1) → ℂ) :
     ιLev k 1 r' g *ᵥ liftVec k 1 r' v = liftVec k 1 r' (g *ᵥ v) := by
@@ -168,10 +188,10 @@ theorem io_conjT (g : Mat k r') : ιLev k 1 r' gᴴ = (ιLev k 1 r' g)ᴴ := by
   rw [conjTranspose_apply]; unfold ιLev
   by_cases hp : 1 ≤ p.val ∧ p.val < 2 * r' + k + 1 + 1 <;>
     by_cases hq : 1 ≤ q.val ∧ q.val < 2 * r' + k + 1 + 1
-  · rw [dif_pos hp, dif_pos hq, dif_pos hq, dif_pos hp, conjTranspose_apply]
-  · rw [dif_pos hp, dif_neg hq, dif_neg hq, if_neg (fun h => by subst h; exact hq hp), star_zero]
-  · rw [dif_neg hp, dif_pos hq, dif_neg hp, if_neg (fun h => by subst h; exact hp hq), star_zero]
-  · rw [dif_neg hp, dif_neg hq]; by_cases h : p = q
+  · rw [dite_eq_left hp, dite_eq_left hq, dite_eq_left hq, dite_eq_left hp, conjTranspose_apply]
+  · rw [dite_eq_left hp, dite_eq_right hq, dite_eq_right hq, if_neg (fun h => by subst h; exact hq hp), star_zero]
+  · rw [dite_eq_right hp, dite_eq_left hq, dite_eq_right hp, if_neg (fun h => by subst h; exact hp hq), star_zero]
+  · rw [dite_eq_right hp, dite_eq_right hq]; by_cases h : p = q
     · subst h; simp
     · rw [if_neg h, if_neg (Ne.symm h), star_zero]
 

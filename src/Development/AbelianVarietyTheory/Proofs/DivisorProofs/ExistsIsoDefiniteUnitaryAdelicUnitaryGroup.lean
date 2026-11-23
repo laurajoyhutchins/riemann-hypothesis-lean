@@ -1,10 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnramifiedOfIsCMUnram
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinsetDefiniteUnitaryDoubleCosets
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.QuotientMeasureEqChosenProbability
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisOfRegularForms
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStableComplBot
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.QuotientMeasureEqChosenProbability
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnramifiedOfIsCMUnram
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFinsetDefiniteUnitaryDoubleCosets
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S IsDedekindDomain NumberField Formalism.L2.Theta
 open Formalism.IndefR.Mult Formalism.UG GlobalTheory.SphPar GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.DefTransfer
@@ -85,7 +131,7 @@ section Ring
 
 variable (E : Type) [Field E] [NumberField E] [IsCMField E]
 
-local notation "F₀" => maximalRealSubfield E
+local notation3 "F₀" => maximalRealSubfield E
 
 theorem exists_ring : ∃ (ψ : Ad E ≃+* AF F₀ ⊗[F₀] E) (Θ : Ainf F₀ ⊗[F₀] E ≃+* Cinf E),
     Continuous ψ ∧ Continuous ψ.symm ∧ (∀ x : E, ψ (algebraMap E (Ad E) x) = inclR (AF F₀) x) ∧
@@ -122,7 +168,7 @@ theorem exists_ring : ∃ (ψ : Ad E ≃+* AF F₀ ⊗[F₀] E) (Θ : Ainf F₀ 
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a x => rfl
-    | add x y h1 h2 => simp only [map_add, h1, h2]
+    | add x y h1 h2 => simp only [map_add (f := _), h1, h2]
   refine ⟨p.trans e.symm, Θ, h6.comp hp, hp'.comp h5, fun x => hext _ _ ?_ ?_, fun a => hext _ _ ?_ ?_, hf, hi,
     fun τ θ hθ z => ?_⟩
   · refine (hi _).trans (Θ.symm_apply_eq.2 (funext fun w => ?_))
@@ -164,8 +210,8 @@ section Group
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
-local notation "F₀" => maximalRealSubfield E
-local notation "σ₀" => (IsCMField.complexConj E : E →ₐ[maximalRealSubfield E] E)
+local notation3 "F₀" => maximalRealSubfield E
+local notation3 "σ₀" => (IsCMField.complexConj E : E →ₐ[F₀] E)
 
 theorem conj_eq_one_iff {G : Type} [Group G] (a x : G) : a * x * a⁻¹ = 1 ↔ x = 1 := by
   rw [mul_inv_eq_one, mul_eq_left]
@@ -179,7 +225,7 @@ theorem bc_eq_one_iff {R S : Type} [CommRing R] [CommRing S] (φ : R ≃+* S) (x
 theorem exists_group (J : Matrix (Fin n) (Fin n) E) (M : GL (Fin n) E) (hM : cT (σ₀ : E →+* E) M.val * J * M.val = 1) :
     ∃ j : UA E n ≃ₜ* HA (AF F₀) σ₀ J,
       (∀ x, x ∈ ratU E n ↔ j x ∈ HFinIn (AF F₀) σ₀ J) ∧
-      (∀ x, x ∈ finU E n ↔
+      (∀ x, x ∈ finU (E := E) (n := n) ↔
         bc (Algebra.TensorProduct.map (fstA F₀) (AlgHom.id F₀ E)).toRingHom (HA.mat (AF F₀) σ₀ J (j x)) = 1) ∧
       (∀ x, x ∈ infU E n ↔
         bc (Algebra.TensorProduct.map (sndA F₀) (AlgHom.id F₀ E)).toRingHom (HA.mat (AF F₀) σ₀ J (j x)) = 1) ∧
@@ -262,9 +308,10 @@ theorem exists_matrix (D : D7) [IsCMField D.host.E] (V : HSp D) (hs : V.SigOK) (
       simp [Matrix.one_apply, Pi.single_apply]
     rw [← h1]
     conv_rhs => rw [← V.frame.sum_repr (b i), ← V.frame.sum_repr (b k)]
+
     simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, Matrix.mul_apply, cT,
-      Finset.sum_mul, Finset.mul_sum, Matrix.transpose_apply, Matrix.map_apply, Module.Basis.toMatrix_apply,
-      HSpace.gram]
+    Finset.sum_mul, Finset.mul_sum, Matrix.transpose_apply, Matrix.map_apply, Module.Basis.toMatrix_apply,
+    HSpace.gram]
     exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun c _ => mul_comm _ _
   exact ⟨⟨_, _, mul_eq_one_comm.1 hM, hM⟩, hM⟩
 
@@ -273,7 +320,7 @@ theorem exists_iso : ∀ (D : D7) [IsCMField D.host.E] (V : HSp D) (θ : D.what�
     ∃ (j : UA D.host.E V.rank ≃ₜ* GA D V) (M : Matrix (Fin V.rank) (Fin V.rank) D.host.E),
       cT (D.sp.cm.sig : D.host.E →+* D.host.E) M * V.gram * M = 1 ∧
       (∀ x, x ∈ ratU D.host.E V.rank ↔ j x ∈ GQ V) ∧
-      (∀ x, x ∈ finU D.host.E V.rank ↔ j x ∈ GfC V) ∧
+      (∀ x, x ∈ finU (E := D.host.E) (n := V.rank) ↔ j x ∈ GfC V) ∧
       (∀ x, x ∈ infU D.host.E V.rank ↔ j x ∈ GinfC V) ∧
       (∃ A : D.what₂.Tau → Matrix (Fin V.rank) (Fin V.rank) ℂ, (∀ τ, IsUnit (A τ)) ∧
         ∀ τ x, infMat D.sp.cm.sig V.gram (θ τ) (j x) =

@@ -1,8 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.Lemma5aAt
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.Lemma5aAt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardFilterValLt
+public import Formalism.SharpRestriction.GrowthBounds.Joints
 import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
-import Formalism.SharpRestriction.GrowthBounds.Joints
-import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardFilterValLt
+public import Formalism.SharpRestriction.GrowthBounds.ValuationLowestDegreeMapFractionField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -118,7 +162,7 @@ theorem colStep_congr {n : ℕ} {P : Type*} [CommRing P] {c c' : ℤ} (hc : 1 �
 
 theorem Kcol_ge (R : Type*) [CommRing R] {N n : ℕ} (mu : Fin (N + 1) → Fin n → ℤ) (c : ℤ) (j : ℕ) (h : ¬ j < N) :
     Kcol R mu c (j + 1) = Kcol R mu c j := by
-  rw [Kcol, dif_neg h]
+  rw [Kcol, dite_eq_right h]
 
 theorem Kcol_congr (R : Type*) [CommRing R] {N n : ℕ} (mu mu' : Fin (N + 1) → Fin n → ℤ) (c c' : ℤ)
     (hc : 1 ≤ c ↔ 1 ≤ c') (hh : ∀ i, colH (mu i) c = colH (mu' i) c') :
@@ -311,7 +355,7 @@ theorem twistSub_empty {R : Type*} [CommRing R] {ι : Type*} {n : ℕ} (LL : Let
     twistSub LL (∅ : Set ι) j F = MvPolynomial.map (coefL R n) F := by
   induction F using MvPolynomial.induction_on with
   | C a => simp [twistSub]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, map_X]
     congr 1
@@ -348,6 +392,7 @@ theorem exists_lift {σ : Type} (F : MvPolynomial σ (KK O)) (h : ∀ m, ∃ o :
     ∃ F0 : MvPolynomial σ O, MvPolynomial.map (algebraMap O (KK O)) F0 = F := by
   choose o ho using h
   refine ⟨∑ m ∈ F.support, monomial m (o m), ?_⟩
+
   rw [map_sum]
   simp only [map_monomial, ← ho]
   exact F.support_sum_monomial_coeff
@@ -365,6 +410,7 @@ theorem comb_of_span {ι : Type} [Fintype ι] {σ : Type} (Ψ0 : ι → MvPolyno
   obtain ⟨l, hl, rfl⟩ := (Finsupp.mem_span_image_iff_linearCombination O).1 h
   refine ⟨fun b => l b, fun b hb => ?_, ?_⟩
   · exact (Finsupp.mem_supported O l).1 hl (Finsupp.mem_support_iff.2 hb)
+
   · rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype l (fun i a => a • Ψ0 i) (fun i => zero_smul _ _), map_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     rw [MvPolynomial.smul_eq_C_mul, MvPolynomial.smul_eq_C_mul, map_mul, map_C]

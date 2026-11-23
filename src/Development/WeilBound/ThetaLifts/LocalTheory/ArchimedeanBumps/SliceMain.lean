@@ -1,6 +1,64 @@
-import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.SliceLine
-import Development.WeilBound.ThetaLifts.FrameEstimates.GrpTop
-import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsMaximalCompactInfinite
+module
+
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
+public import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.ArchSlice
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+import Development.AbelianVarietyTheory.Definitions.Foundations.ConstTermOnMulLeftOfNormalizer
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.ExistsMaximalCompactInfinite
+public import Development.WeilBound.ThetaLifts.FrameEstimates.GrpTop
+public import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.SliceAn
+public import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.SliceLine
+import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.TracePiReal
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lp
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +124,7 @@ theorem dom_int {ι : Type} [Fintype ι] (z : ℕ) : ∃ N : ℕ,
   set a := 2 * Fintype.card ι * z
   set b := Module.finrank ℝ (ι → ℂ) + 1
   have hc : Continuous fun c : ι → ℂ => (∏ w, ‖c w‖ ^ 2) ^ z / (1 + ‖c‖) ^ (a + b) :=
-    Continuous.div (by fun_prop) (by fun_prop) fun c => by positivity
+    Continuous.div₀ (by fun_prop) (by fun_prop) fun c => by positivity
   have hi : Integrable fun c : ι → ℂ => (∏ w, ‖c w‖ ^ 2) ^ z / (1 + ‖c‖) ^ (a + b) := by
     refine (integrable_one_add_norm (μ := volume) (r := b) (by simp [b])).mono' hc.aestronglyMeasurable
       (Eventually.of_forall fun c => ?_)
@@ -74,7 +132,7 @@ theorem dom_int {ι : Type} [Fintype ι] (z : ℕ) : ∃ N : ℕ,
       div_eq_mul_inv]
     refine mul_le_of_le_one_left (by positivity) ((div_le_one (by positivity)).2 ?_)
     have : ∏ w, ‖c w‖ ^ 2 ≤ ∏ _w : ι, (1 + ‖c‖) ^ 2 :=
-      Finset.prod_le_prod (fun _ _ => by positivity) fun w _ => by
+      Finset.prod_le_prod₀ (fun _ _ => by positivity) fun w _ => by
         have := norm_le_pi_norm c w
         gcongr; linarith
     calc _ ≤ (∏ _w : ι, (1 + ‖c‖) ^ 2) ^ z := by gcongr
@@ -231,7 +289,7 @@ theorem cone_core (hSt : StabEx) (hO : ArchOp) (hS : Slice) (hH : ArchHeis) (hU 
   have hwc : Continuous fun t : idAt E (evI F) => wt ν z t.1 := by
     simp only [wt, hab]
     refine (continuous_subtype_val.comp (hν.comp continuous_subtype_val)).mul (Continuous.pow (Complex.continuous_ofReal.comp ?_) _)
-    exact continuous_finset_prod _ fun w _ => ((hL.cont w).comp (Units.continuous_val.comp continuous_subtype_val)).norm.pow 2
+    exact continuous_finsetProd _ fun w _ => ((hL.cont w).comp (Units.continuous_val.comp continuous_subtype_val)).norm.pow 2
   have hwn : ∀ t : idAt E (evI F), ‖wt ν z t.1‖ = (∏ w, ‖piInf (B.emb w) (t.1 : AE F E)‖ ^ 2) ^ z := fun t => by
     rw [wt, norm_mul, Circle.norm_coe, one_mul, norm_pow, Complex.norm_real, hab, Real.norm_of_nonneg (by positivity)]
   let G : kAt K (evI F) × idAt E (evI F) → SInf F (Fin n × Fin d) →L[ℂ] SInf F (Fin n₁ × Fin d₁) :=

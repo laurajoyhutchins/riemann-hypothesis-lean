@@ -1,14 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LineLatAt
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevAtZ
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.StandardCharacterConductorAlmostAll
-import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LineLatAt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.StandardCharacterConductorAlmostAll
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
 import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,7 +106,7 @@ theorem chi_mul_int {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1))
     rwa [← mul_add, add_neg_cancel, mul_zero, Conductor.chi_zero, hy, one_mul, eq_comm] at this
 
 theorem psiE_add (ψ : AddChar (AF D.host.F) ℂ) (a b : AE D) : psiE ψ (a + b) = psiE ψ a * psiE ψ b := by
-  rw [psiE, psiE, psiE, map_add, ψ.map_add_eq_mul]
+  rw [psiE, psiE, psiE, map_add (f := _), ψ.map_add_eq_mul]
 
 theorem psiE_zero (ψ : AddChar (AF D.host.F) ℂ) : psiE ψ (0 : AE D) = 1 := by
   rw [psiE, map_zero, ψ.map_zero_eq_one]
@@ -107,13 +140,13 @@ theorem finPart_lift (z : Af D.host.F ⊗[D.host.F] D.host.E) : finPart D (lift 
   induction z using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul α x => rw [lift_tmul, GlobalTheory.LatVac.finPart_pair]
-  | add x y hx hy => rw [LinearMap.map_add, RingHom.map_add, hx, hy]
+  | add x y hx hy => rw [LinearMap.map_add (f := _), RingHom.map_add (f := _), hx, hy]
 
 theorem infPart_lift (z : Af D.host.F ⊗[D.host.F] D.host.E) : infPart D (lift D z) = 0 := by
   induction z using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul α x => rw [lift_tmul, GlobalTheory.LatVac.infPart_pair]
-  | add x y hx hy => rw [LinearMap.map_add, RingHom.map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [LinearMap.map_add (f := _), RingHom.map_add (f := _), hx, hy, add_zero]
 
 theorem eq_lift {s : AE D} (h : infPart D s = 0) : s = lift D (finPart D s) := by
   rw [← sub_eq_zero]
@@ -131,7 +164,7 @@ theorem lift_int_mem (v : Pl D) (hε : singleV D.host.F v 1 ∈ intAf D.host.F) 
       (mem_dI_iff _).2 (trInt_coe o), lift_tmul _ _⟩
     rw [map_mul, Conductor.ev_ne hw, zero_mul]
   | zero => rw [mul_zero, map_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [mul_add, map_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [mul_add, map_add (f := _)]; exact add_mem hx hy
   | neg x _ hx => rw [mul_neg, map_neg]; exact neg_mem hx
 
 theorem backward {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1)) (v : Pl D) {s : AE D}
@@ -158,7 +191,7 @@ theorem backward {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1)) (v
   have hfin : finPart D s = singleV D.host.F v 1 ⊗ₜ[D.host.F] x +
       (singleV D.host.F v 1 ⊗ₜ[D.host.F] (1 : D.host.E)) * u := by
     rw [← hz, e, mul_add, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-  rw [eq_lift hs1, hfin, map_add]
+  rw [eq_lift hs1, hfin, map_add (f := _)]
   exact add_mem (AddSubgroup.subset_closure ⟨_, hε, fun w hw => Conductor.ev_ne hw, x, (mem_dI_iff x).2 hx,
     lift_tmul _ _⟩) (lift_int_mem v hε hu)
 

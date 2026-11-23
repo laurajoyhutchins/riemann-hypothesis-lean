@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIntegralBasisCompletion
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceMatrixEqOfAgreeWithFramedGL
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousSplitPlaceHermitianFrameGLEmbedding
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsMaximalCompactUnnComponentStandardCartanIn
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceHermitianFrameProperties
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ContinuousSplitPlaceHermitianFrameGLEmbedding
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceHermitianFrameProperties
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIntegralBasisCompletion
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.InfPartOfSplitIdem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows GlobalTheory.Asc
@@ -36,7 +76,7 @@ theorem mem_idOff_iff_pr {D : D7} {k : Type} [Field k] [ValuativeRel k] [Topolog
       exact Algebra.TensorProduct.one_def.symm
     · rw [hαo w hw, TensorProduct.zero_tmul]
   have hinf : infPart D E' = 0 := by
-    rw [← hsum, map_add, Formalism.IndefR.Fin.LevelGroupLemmas.Lat.infPart_of_splitIdem hsplit,
+    rw [← hsum, map_add (f := _), Formalism.IndefR.Fin.LevelGroupLemmas.Lat.infPart_of_splitIdem hsplit,
       Formalism.IndefR.Fin.LevelGroupLemmas.Lat.infPart_of_splitIdem hsplitc, add_zero]
   have hoff : a ∈ idOff D (· = p.v) ↔ GlobalTheory.FinPl.compAt D p.v a = 0 := by
     simp only [GlobalTheory.FinPl.idOff, Submodule.mem_iInf, RingHom.mem_ker]
@@ -148,11 +188,11 @@ theorem core_coord {O k : Type} [CommRing O] [Field k] [Algebra O k] (hinj : Fun
     ⟨_, fun _ _ => rfl⟩
   have hξ : ∀ p i, algebraMap O k (ξ p i) = s p * (P + PA) i p := by
     intro p i
-    rw [hξd, map_add, hz1, Matrix.add_apply, mul_add, h1]
+    rw [hξd, map_add (f := _), hz1, Matrix.add_apply, mul_add, h1]
     split_ifs <;> simp
   have hη : ∀ q i, algebraMap O k (η q i) = t q * (Q + QA) q i := by
     intro q i
-    rw [hηd, map_add, hz2, Matrix.add_apply, mul_add, h2]
+    rw [hηd, map_add (f := _), hz2, Matrix.add_apply, mul_add, h2]
     split_ifs <;> simp
   have hξI : ∀ p i, ξ p i - (if i = ι p then 1 else 0) ∈ I := by
     intro p i
@@ -181,6 +221,7 @@ theorem core_coord {O k : Type} [CommRing O] [Field k] [Algebra O k] (hinj : Fun
     intro p q
     apply hinj
     have e1 : algebraMap O k (η q ⬝ᵥ ξ p) = ∑ i, algebraMap O k (η q i) * algebraMap O k (ξ p i) := by
+
       simp [dotProduct, map_sum]
     rw [e1, ← hsum1, hpair, hsum2]
     split_ifs <;> simp
@@ -203,6 +244,7 @@ theorem core_coord {O k : Type} [CommRing O] [Field k] [Algebra O k] (hinj : Fun
     rw [Matrix.mul_apply, hQ]
     calc ∑ i, (Q + QA) q i * (K.1.map (algebraMap O k)) i j
         = (t q)⁻¹ * algebraMap O k (∑ i, η q i * K.1 i j) := by
+
           rw [map_sum, Finset.mul_sum]
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [hQA', Matrix.map_apply, map_mul, mul_assoc]
@@ -310,7 +352,7 @@ theorem uni_last {D : D7} {ρ : ℕ} (u : UX D (ρ + 1)) (j : Fin (ρ + 1)) :
     exact (hu (Fin.last ρ) (Fin.last ρ)).2
   · exact (hu (Fin.last ρ) j).1 (lt_of_le_of_ne (Fin.le_last j) hj)
 
-set_option maxHeartbeats 1000000 in
+
 theorem one_orbit : ∀ (D : D7) (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   (p : GlobalTheory.FinPl.SplitPt D k) (W : HSp D) (ρ : ℕ) (β : GlobalTheory.FinPl.Frame p W (Fin W.rank)) (x : Mx D W.rank (ρ + 1))
   (ι ι' : Fin (ρ + 1) → Fin W.rank) (s t : Fin (ρ + 1) → k) (e : ℕ), 0 < e → Function.Injective ι → Function.Injective ι' →

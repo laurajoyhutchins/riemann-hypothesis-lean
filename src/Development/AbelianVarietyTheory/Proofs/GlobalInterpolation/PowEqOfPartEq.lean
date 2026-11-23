@@ -1,12 +1,46 @@
-import Mathlib
-import Formalism.SharpRestriction.InertJacobiLevels.AsmIface
-import Formalism.LocalToGlobal.GlobalTheory.IsResidueClassZero
-import Formalism.SharpRestriction.GrowthBounds.SmallOrderPrimes
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.PairRowIffQdRows
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.DisjointExceptional
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ThinScalesIffHostBound
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LogCondLeThree
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabelledCharactersEqAndCongrPrimeToPart
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab Formalism.L2.GlobalTheoryTheory GlobalTheory.EX NumberField
 
@@ -14,23 +48,7 @@ namespace GlobalTheory.EX.DC.TameGen
 
 theorem part_pow {G : Type} [Monoid G] {l : ℕ} (hl : l.Prime) {x : G} (hx : IsOfFinOrder x) :
     ∃ a : ℕ, Formalism.CyclotomicNorms.primeToPart l x ^ (l ^ a) = x ^ (l ^ a) := by
-  have hn : orderOf x ≠ 0 := hx.orderOf_pos.ne'
-  set a := (orderOf x).factorization l with ha
-  set M := orderOf x / l ^ a with hM
-  have hmul : l ^ a * M = orderOf x := Nat.ordProj_mul_ordCompl_eq_self _ _
-  have hcop : M.Coprime l := (Nat.coprime_ordCompl hl hn).symm
-  have hM0 : M ≠ 0 := (Nat.ordCompl_pos l hn).ne'
-  haveI : NeZero M := ⟨hM0⟩
-  set u := (((l ^ a : ℕ) : ZMod M)⁻¹).val with hu
-  have hz : Formalism.CyclotomicNorms.primeToPart l x = x ^ (l ^ a * u) := rfl
-  have hone : (x ^ (l ^ a)) ^ M = 1 := by rw [← pow_mul, hmul, pow_orderOf_eq_one]
-  have hmod : l ^ a * u ≡ 1 [MOD M] := by
-    rw [← ZMod.natCast_eq_natCast_iff, Nat.cast_mul, hu, ZMod.natCast_zmod_val, Nat.cast_one]
-    exact ZMod.coe_mul_inv_eq_one _ (Nat.Coprime.pow_left a hcop.symm)
-  refine ⟨a, ?_⟩
-  rw [hz, ← pow_mul, mul_comm, pow_mul]
-  have := pow_eq_pow_of_modEq hmod hone
-  rwa [pow_one] at this
+  apply GlobalTheory.ParamLabel.Congr.part_pow <;> assumption
 
 theorem pow_eq_of_part_eq {G : Type} [Monoid G] {l : ℕ} (hl : l.Prime) {x y : G} (hx : IsOfFinOrder x)
     (hy : IsOfFinOrder y) (h : Formalism.CyclotomicNorms.primeToPart l x = Formalism.CyclotomicNorms.primeToPart l y) :
@@ -133,7 +151,7 @@ theorem tameDistinct_gen : ∀ (r g m : ℕ) [Fact g.Prime] (w : (ZMod g)ˣ), or
       rw [← Real.rpow_natCast, ← Real.rpow_mul (by positivity)]; norm_num
     rw [h5, ← pow_mul, mul_comm] at h4
     refine Or.inr ⟨1, le_rfl, hr, hl, ?_⟩
-    rw [pow_one, ← Nat.factorization_def _ hl, ← hv]
+    rw [pow_one, Nat.padicValNat_def, ← Nat.factorization_def _ hl, ← hv]
     exact_mod_cast h4
   · intro j
     exact ⟨w ^ (j.1 + 1), by rw [← pow_add, ← two_mul]⟩

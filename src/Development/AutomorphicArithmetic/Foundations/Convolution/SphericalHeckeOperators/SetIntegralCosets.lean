@@ -1,6 +1,59 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.SymSum
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DcoShape
-import GroundTheory.AutomorphicForms.WhittakerGroups
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.SymSum
+import Aesop.Main
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalHeckeOperators.DcoShape
+public import GroundTheory.AutomorphicForms.WhittakerGroups
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory GroundTheory.Automorphic GroundTheory.Automorphic.Spherical GroundTheory.Automorphic.GLnLocal GroundTheory.Automorphic.Iwasawa UpperTheory.ConvolutionTheory.H
 
@@ -169,11 +222,11 @@ private theorem exists_depth (F : Type) [Field F] [ValuativeRel F] [TopologicalS
   · exact ⟨0, fun e _ => by simp [hx]⟩
   obtain ⟨z, u, rfl⟩ := exists_zpow_mul_unit F hx
   refine ⟨(-z).toNat, fun e he => ?_⟩
-  have h0 : ((0 : ℕ) : ℤ) ≤ e + z := by push_cast; omega
-  rw [← mul_assoc, ← zpow_add₀ (GLnLocal.uniformizer_ne_zero F)]
-  have h1 := Parabolic.valuation_zpow_mul_le_pow_mul (F := F) (x := ((u : (ValuativeRel.valuation F).integer) : F)) h0
-  rw [pow_zero, one_mul] at h1
-  exact h1.trans ((Valuation.mem_integer_iff _ _).1 (u : (ValuativeRel.valuation F).integer).2)
+  have h0 : 0 ≤ e + z := by omega
+  rw [← mul_assoc, ← zpow_add₀ (Parabolic.uniformizer_ne_zero (F := F)),
+    ← Int.toNat_of_nonneg h0, zpow_natCast]
+  exact (Valuation.mem_integer_iff _ _).1
+    (mul_mem (pow_mem (GLnLocal.uniformizer F).2 _) (u : (ValuativeRel.valuation F).integer).2)
 
 private theorem exists_deep (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F]
     (n : ℕ) {ι : Type*} [Finite ι] (u : ι → GL (Fin n) F) (hu : ∀ i, u i ∈ unipotent F n) :
@@ -192,7 +245,7 @@ private theorem exists_deep (F : Type) [Field F] [ValuativeRel F] [TopologicalSp
         (GLnLocal.uniformizer F : F) ^ (a r - a s) * (u i : Matrix (Fin n) (Fin n) F) r s := by
       intro r s
       rw [← torusPow_neg, Units.val_mul, Units.val_mul, coe_torusPow, coe_torusPow, Matrix.mul_diagonal,
-        Matrix.diagonal_mul, sub_eq_add_neg, zpow_add₀ (GLnLocal.uniformizer_ne_zero F), Pi.neg_apply]
+        Matrix.diagonal_mul, sub_eq_add_neg, zpow_add₀ (Parabolic.uniformizer_ne_zero (F := F)), Pi.neg_apply]
       ring
     refine (mem_unipotent_inf_integralGL_iff F n).2 ⟨hN, fun r s => ?_⟩
     rcases lt_trichotomy r s with h | h | h

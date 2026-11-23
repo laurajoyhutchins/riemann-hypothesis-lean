@@ -1,21 +1,68 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.LawsChart
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AlgOverHomSurjective
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAffineUnitChartSmoothGroupSchemeStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasicOpenFactorFieldPointAffineOpenStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsArcQuotientTwoVariableCoordsStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SubstTwoVariablesIdentitiesStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsLeadingQuotientWeightedArcsStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.InfinitePowCharEqOneOfAdditiveFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsOneParameterSubgroupOfRationalFamilyStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ArcExtendsOfRegularSecondAxisStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PowerSeriesGenericRelationChainStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.WeightedOrderSlopeComparisonStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AlgOverHomSurjective
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ArcExtendsOfRegularSecondAxisStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsAffineUnitChartSmoothGroupSchemeStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsArcQuotientTwoVariableCoordsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsBasicOpenFactorFieldPointAffineOpenStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsLeadingQuotientWeightedArcsStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsOneParameterSubgroupOfRationalFamilyStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.InfinitePowCharEqOneOfAdditiveFamilyStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PowerSeriesGenericRelationChainStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.SubstTwoVariablesIdentitiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.WeightedOrderSlopeComparisonStatement
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -82,8 +129,8 @@ theorem exists_sig {z : PowerSeries k} (h : PowerSeries.constantCoeff z = 0 ∧ 
     exact IsUnit.mk0 _ fun e => h.2 (toK_injective (e.trans (map_zero _).symm)))
   exact ⟨σ, fun x => by rw [hσ, AlgHom.comp_apply, PowerSeries.coe_substAlgHom]⟩
 
-open scoped Classical in
 
+open scoped Classical in
 def sig (z : PowerSeries k) : FractionRing (PowerSeries k) →ₐ[k] FractionRing (PowerSeries k) :=
   if h : PowerSeries.constantCoeff z = 0 ∧ z ≠ 0 then (exists_sig h).choose else AlgHom.id k _
 
@@ -287,8 +334,8 @@ theorem TwoVar.shear (hc : IsChart G j ε f) (ht : TwoVar j f a h d) (hd : (MvPo
     mul_right_cancel₀ hp (by rw [e.choose_spec i, h1, (hy i).2])
   exact ⟨e.choose_spec, by rwa [this]⟩
 
-omit [IsAlgClosed k] in
 
+omit [IsAlgClosed k] in
 theorem add_step {m n : ℕ} (hmn : m < n) {Pd : Polynomial k} {P : Fin r → Polynomial k} {ψ : k → (A →ₐ[k] k)}
     (hg : ∀ (s t : k) (z w : PowerSeries k), s ≠ 0 → (m : ℕ∞) ≤ z.order → (n : ℕ∞) ≤ (w - z).order →
         PowerSeries.coeff m z = s ^ m → PowerSeries.coeff n (w - z) = s ^ n * t → Pd.eval t ≠ 0 → w ≠ 0 →
@@ -303,7 +350,7 @@ theorem add_step {m n : ℕ} (hmn : m < n) {Pd : Polynomial k} {P : Fin r → Po
   have e : (PowerSeries.C 1 * PowerSeries.X ^ m + PowerSeries.C (t + u) * PowerSeries.X ^ n : PowerSeries k) -
       (PowerSeries.C 1 * PowerSeries.X ^ m + PowerSeries.C u * PowerSeries.X ^ n) =
       PowerSeries.C t * PowerSeries.X ^ n := by
-    rw [map_add]; ring
+    rw [map_add (f := _)]; ring
   refine hg 1 t _ _ one_ne_zero ?_ ?_ ?_ ?_ ht (ne_zero_of_coeff (n := m) (by rw [c]; exact one_ne_zero))
   · refine le_trans (le_min (le_order_mon 1 m) (le_trans ?_ (le_order_mon u n))) (PowerSeries.min_order_le_order_add _ _)
     exact_mod_cast hmn.le

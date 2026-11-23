@@ -1,9 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.UnitRatioDivisorSupportEq
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartLatticeNormMembership
+module
+
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.LengthCokerEqKerAddDimOneOrderSum
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.UnitRatioDivisorSupportEq
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ChartLatticeNormMembership
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PLocalRep
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionOrderAtPoint
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.Values
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PVertFactorSmooth
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -157,7 +214,7 @@ theorem chart_form (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (hc : ∀ k, y �
     refine ⟨e₁ + e₂, fun e he => ?_⟩
     obtain ⟨f, hf, ef⟩ := h₁ e (le_trans le_self_add he)
     obtain ⟨g, hg, eg⟩ := h₂ e (le_trans le_add_self he)
-    exact ⟨f + g, LowerBoundFree.isMultiHomog_add hf hg, by rw [map_add, ef, eg, add_mul]⟩
+    exact ⟨f + g, LowerBoundFree.isMultiHomog_add hf hg, by rw [map_add (f := _), ef, eg, add_mul]⟩
   | mul a b _ _ ha hb =>
     obtain ⟨e₁, h₁⟩ := ha
     obtain ⟨e₂, h₂⟩ := hb
@@ -213,7 +270,8 @@ theorem div_le_of_integral (y : (Σ k, ι k) → Ω) (hP : (mCoordIdeal y).IsPri
       rw [e3]
       show _ = _ * ((p.coeff j : Ω) * t ^ j)
       ring
-    rw [map_add, map_sum, Finset.sum_congr rfl hsum, ← Finset.mul_sum, map_mul, map_pow, ht, mul_pow]
+
+    rw [map_add (f := _), map_sum, Finset.sum_congr rfl hsum, ← Finset.mul_sum, map_mul, map_pow, ht, mul_pow]
     simp only [map_prod, map_pow, aeval_X]
     linear_combination ((∏ k, y ⟨k, c k⟩ ^ e k) * aeval y b ^ n) * hp
 
@@ -302,13 +360,14 @@ theorem div_const_on {P W : Ideal (MRing ι)} (hP : P.IsPrime) (hH : IsHorizonta
     divCycle P (C (m : ℤ)) W = padicValNat (charOf W) m * divCycle P (C (charOf W : ℤ)) W := by
   set p := charOf W with hpd
   have : Fact p.Prime := ⟨hp⟩
-  obtain ⟨m', hm'⟩ : p ^ padicValNat p m ∣ m := pow_padicValNat_dvd
+  obtain ⟨m', hm'⟩ : p ^ padicValNat p m ∣ m := (_root_.Dvd.intro_left _ (_root_.Nat.divMaxPow_mul_pow_padicValNat _ _))
   have hm0 : 0 < m' := Nat.pos_of_ne_zero fun h => by rw [h, mul_zero] at hm'; omega
   have hnd : ¬ p ∣ m' := by
     intro hd
     refine pow_succ_padicValNat_not_dvd (p := p) hm.ne' ?_
     rw [pow_succ]
     conv_rhs => rw [hm']
+    rw [← Nat.padicValNat_def]
     exact Nat.mul_dvd_mul_left _ hd
   have e : (C (m : ℤ) : MRing ι) = C (p : ℤ) ^ padicValNat p m * C (m' : ℤ) := by
     rw [← map_pow, ← map_mul]

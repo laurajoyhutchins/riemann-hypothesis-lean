@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexProjective
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexProjective
+public import GroundTheory.HeightsAndTheta.Heights.ProjTopology
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Geometry.Manifold.StructureGroupoid
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -133,33 +187,6 @@ def chartIndex (x : CP N) : Fin (N + 1) := (exists_mem_chartDomain x).choose
 
 lemma mem_chartDomain_chartIndex (x : CP N) : x ∈ chartDomain (chartIndex x) :=
   (exists_mem_chartDomain x).choose_spec
-
-instance instChartedSpace : ChartedSpace (Fin N → ℂ) (CP N) where
-  atlas := range chart
-  chartAt x := chart (chartIndex x)
-  mem_chart_source x := mem_chartDomain_chartIndex x
-  chart_mem_atlas _ := mem_range_self _
-
-lemma chartCoord_chartInv_eq (i j : Fin (N + 1)) (z : Fin N → ℂ) :
-    chartCoord j (chartInv i z) = fun k => chartVec i z (j.succAbove k) / chartVec i z j := rfl
-
-lemma contDiffOn_transition (i j : Fin (N + 1)) :
-    ContDiffOn ℂ ∞ (fun z => chartCoord j (chartInv i z)) {z | chartVec i z j ≠ 0} := by
-  simp only [chartCoord_chartInv_eq]
-  refine contDiffOn_pi.mpr fun k => ?_
-  exact (contDiff_chartVec_apply ℂ i _).contDiffOn.div (contDiff_chartVec_apply ℂ i _).contDiffOn
-    fun z hz => hz
-
-instance instIsManifold : IsManifold 𝓘(ℂ, Fin N → ℂ) ∞ (CP N) := by
-  apply isManifold_of_contDiffOn
-  rintro e e' ⟨i, rfl⟩ ⟨j, rfl⟩
-  simp only [modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm, range_id, inter_univ,
-    preimage_id_eq, Function.id_comp, Function.comp_id]
-  refine (contDiffOn_transition i j).congr_mono ?_ ?_
-  · intro _ _; rfl
-  · intro z hz
-    simp only [OpenPartialHomeomorph.trans_source, OpenPartialHomeomorph.symm_toPartialEquiv] at hz
-    exact hz.2
 
 end CP
 

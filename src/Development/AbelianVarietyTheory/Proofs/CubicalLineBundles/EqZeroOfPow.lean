@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CMLattices.LamLetters
-import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.PointsSumsEqProducts
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsMulEquivPointsOfIsGrpPullback
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.LamLetters
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.AwayToAwayRightEqOfComp
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsMulEquivPointsOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.CMLattices.IsCyclotomicExtensionCyclotomicField28
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ConjSymm
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory Formalism.L2.LamCM
 open scoped CategoryTheory.Obj ComplexOrder
@@ -38,8 +81,8 @@ theorem prod_comp {T G₁ : Over S} [GrpObj G₁] [IsCommMonObj G₁] (F : G ⟶
     {J : Type} (s : Finset J) (x : J → (T ⟶ G)) : (∏ i ∈ s, x i) ≫ F = ∏ i ∈ s, x i ≫ F :=
   map_prod (MonoidHom.mk' (fun y : T ⟶ G => y ≫ F) fun a b => MonObj.mul_comp a b F) x s
 
-omit [GrpObj G] [IsCommMonObj G] in
 
+omit [GrpObj G] [IsCommMonObj G] in
 theorem eq_zero_of_pow {K : Type} [Field K] [CharZero K] {A : Over (Sp K)} [GrpObj A]
     [IsCommMonObj A] {n : ℕ} {v : Fin n → (epsR K ⟶ A)} (hv : IsLieBasis v) {c : Fin n → K}
     {N : ℕ} (hN : 0 < N) (h : tanExp v c ^ N = 1) : c = 0 := by
@@ -83,9 +126,19 @@ theorem lamInd : LamIndSt := by
     refine (tanExp_tanExp o.xB.basis.1 (fun k => L.U k) c).trans ?_
     rw [← Matrix.vecMul_eq_sum, hc]
     exact lieExp_eq_one o.xB.basis.1 _ (fun _ => rfl) _
-  obtain ⟨-, hpad, hpow, hps⟩ :
-      _ ∧ (∀ a b : Over.mk ((epsR o.K₁).hom ≫ gmap o.K₁) ⟶ o.B.A, padd _ a b = a * b) ∧ _ :=
-    points_sums_eq_products.1 _ _ _
+  have hpad : ∀ a b : Over.mk ((epsR o.K₁).hom ≫ gmap o.K₁) ⟶ o.B.A,
+      padd _ a b = a * b := fun _ _ => rfl
+  have hps : ∀ (n : ℕ) (f : Fin n → (Over.mk ((epsR o.K₁).hom ≫ gmap o.K₁) ⟶ o.B.A)),
+      psumPt f = (List.ofFn f).prod := by
+    intro n f
+    rw [List.prod_eq_foldr]
+    rfl
+  have hpow : ∀ (G : Over (Sp (𝓞 o.K₁))) [GrpObj G] (n : ℕ)
+      (a : Over.mk ((epsR o.K₁).hom ≫ gmap o.K₁) ⟶ G), pnsmulPt n a = a ^ n := by
+    intro G _ n a
+    induction n with
+    | zero => rw [pow_zero]; rfl
+    | succ n ih => rw [pow_succ, ← ih]; rfl
   let a := fun j => ΦΨ (tanExp o.xΨ.v fun i => c (e.symm (.inl (j, i))))
   let a' := fun j => Φ' (tanExp o.x'.v fun i => c (e.symm (.inr (j, i))))
   have hs : padd o.B.A (psumPt fun k => a k ≫ o.φΨ k) (psumPt fun k => a' k ≫ o.φ' k) = 1 := by
@@ -117,11 +170,11 @@ theorem lamInd : LamIndSt := by
   obtain ⟨q, rfl⟩ := e.symm.surjective k
   rcases q with ⟨j, i⟩ | ⟨j, i⟩
   · have h := (p₁ j).symm.trans (q₁ j)
-    rw [(points_sums_eq_products.1 _ _ _).2.2.1, (points_sums_eq_products.1 _ _ _).2.2.1, one_pow,
+    rw [hpow _, hpow _, one_pow,
       ← map_pow, map_eq_one_iff _ ΦΨ.injective] at h
     exact congrFun (eq_zero_of_pow o.xΨ.basis hN h) i
   · have h := (p₂ j).symm.trans (q₂ j)
-    rw [(points_sums_eq_products.1 _ _ _).2.2.1, (points_sums_eq_products.1 _ _ _).2.2.1, one_pow,
+    rw [hpow _, hpow _, one_pow,
       ← map_pow, map_eq_one_iff _ Φ'.injective] at h
     exact congrFun (eq_zero_of_pow o.x'.basis hN h) i
 

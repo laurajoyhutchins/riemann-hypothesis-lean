@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.PrimeDiscriminants.SlopeTestRemainingChoices
-import Development.AutomorphicArithmetic.CMTraceForms.CmDatumDiscriminantDepthBounds
+module
+
+public import Development.AutomorphicArithmetic.PrimeDiscriminants.SlopeTestRemainingChoices
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Development.AutomorphicArithmetic.CMTraceForms.CmDatumDiscriminantDepthBounds
+import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HC
 
@@ -14,14 +62,15 @@ theorem UpperTheory.KR.small_vd_sum :
     have hlogQ : Real.log (H.QS : ℝ) = ∑ p ∈ H.small, (padicValNat p H.QS : ℝ) * Real.log p := by
       show _ = ∑ p ∈ H.QS.primeFactors, (padicValNat p H.QS : ℝ) * Real.log p
       have hprod : (H.QS : ℝ) = ∏ p ∈ H.QS.primeFactors, (p : ℝ) ^ (H.QS.factorization p) := by
-        conv_lhs => rw [← Nat.factorization_prod_pow_eq_self hQ0]
+        conv_lhs => rw [← Nat.prod_factorization_pow_eq_self hQ0]
         rw [Finsupp.prod, Nat.support_factorization]
         push_cast
         rfl
       rw [hprod, Real.log_prod]
       · apply Finset.sum_congr rfl
         intro p hp
-        rw [Real.log_pow, Nat.factorization_def _ (Nat.prime_of_mem_primeFactors hp)]
+        rw [Real.log_pow, Nat.factorization_def _ (Nat.prime_of_mem_primeFactors hp),
+          ← Nat.padicValNat_def]
       · intro p hp
         exact pow_ne_zero _ (Nat.cast_ne_zero.mpr (Nat.prime_of_mem_primeFactors hp).ne_zero)
     have hlog2 : Real.log (H.QS : ℝ) ≤ Real.logb 2 H.QS := by
@@ -40,7 +89,7 @@ theorem UpperTheory.KR.small_vd_sum :
           obtain ⟨hpp, hpd⟩ := (H.mem_small_iff).mp hp
           haveI := Fact.mk hpp
           have hv1 : (1 : ℝ) ≤ padicValNat p H.QS := by
-            exact_mod_cast one_le_padicValNat_of_dvd hQ0 hpd
+            exact_mod_cast (by simpa only [Nat.padicValNat_def] using one_le_padicValNat_of_dvd hQ0 hpd)
           have hvd := (hsm p hp).1
           have hlp : 0 ≤ Real.log p := Real.log_natCast_nonneg p
           nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 3 / 2 * padicValNat p H.QS - 1 - H.vdH p / 2) hlp]

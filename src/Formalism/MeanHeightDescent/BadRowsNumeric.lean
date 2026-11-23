@@ -1,4 +1,47 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset
 
@@ -44,19 +87,5 @@ def SumComponents : Prop :=
     max 0 ((1 - ρ) * cs - X - cc) ≤ (∑ c, (h c + cs)) / (Fintype.card ι : ℝ) →
     -(T * (X + cc)) - cs * (6 * D + 10 + T * (z + 2 * ρ)) - (A * Real.log (max A 1) + 4) - R1
         - 2 * z * R2 ≤ (∑ c, degc c) / (∑ c, dc c)
-
-def DescentNumeric : Prop :=
-  ∀ dA dB muA muN cfl X P Λ Q ε : ℝ,
-    0 < dA → dA ≤ dB → (1 - ε) * dB ≤ dA → 0 ≤ ε → 0 ≤ X → 0 ≤ P →
-    dA * (muA - P) + (dB - dA) * (-Λ) ≤ dB * muN →
-    cfl - X ≤ muA → |cfl| ≤ Q → Λ ≤ Q →
-    cfl - X - P - 2 * ε * Q ≤ muN
-
-def BadRowsNumeric : Prop :=
-  ∀ d dg db muN muG mmax G Q δ : ℝ,
-    0 < d → d = dg + db → 0 ≤ db → db ≤ 3 * δ * d → 0 ≤ δ → δ ≤ 1 / 12 →
-    d * muN ≤ dg * muG + db * (mmax + G) →
-    |muN| ≤ Q → mmax ≤ Q → G ≤ Q →
-    muN - 12 * δ * Q ≤ muG
 
 end Formalism.ExtensionFiltration

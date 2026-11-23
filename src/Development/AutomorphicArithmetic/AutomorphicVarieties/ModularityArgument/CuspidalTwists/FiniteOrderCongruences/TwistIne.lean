@@ -1,4 +1,42 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalTwists.TnOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalTwists.TnOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Hypotheses2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,20 +103,8 @@ def TenInd : Prop :=
       (s : ValuationSubring Ω → c₁.O), RepIso ρ (mapRep (algebraMap c₁.O (PadicAlgCl l)) ρ₁).toHomUnits →
       TauDat ι K' g0 m c₁ τ s κ → IsInd K' (Af.tw (ρ.comp (resQ K')) κ) (tenB ρ₁ τ)
 
-def IndAtt : Prop :=
-  ∀ (Ω : Type) [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] (l : ℕ) [Fact l.Prime] (ι : Qbar l ≃+* ℂ)
-    (K' : IntermediateField ℚ Ω) [NumberField K'], Module.finrank ℚ K' = 2 →
-    ∀ (sat : HeightOneSpectrum (𝓞 K') → Multiset ℂˣ → Prop) (sat' : HeightOneSpectrum (𝓞 ℚ) → Multiset ℂˣ → Prop)
-      (r : G K' Ω →* GL (Fin 2) (Qbar l)) (R : G ℚ Ω →* GL (Fin 4) (Qbar l)), AttachedSys ι r sat → IsInd K' r R → IsSSRep R →
-      (∀ᶠ v : HeightOneSpectrum (𝓞 ℚ) in Filter.cofinite,
-        (∀ w w' : HeightOneSpectrum (𝓞 K'), w ≠ w' → w.under (𝓞 ℚ) = v → w'.under (𝓞 ℚ) = v →
-          ∀ B B', sat w B → sat w' B' → sat' v (B + B')) ∧
-        ∀ w : HeightOneSpectrum (𝓞 K'), w.under (𝓞 ℚ) = v → normV w = normV v ^ 2 →
-          ∀ C : Multiset ℂˣ, sat w (C.map (· ^ 2)) → sat' v (C + C.map (· * (-1)))) →
-      AttachedSys ι (Af.tw R (cycBar ℚ Ω l)⁻¹) sat'
-
 def GoodJ : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [IsTotallyComplex K], Module.finrank ℚ K = 2 → ∀ π : CuspSub K 2, (CG.mk π).IsRegAlg →
+  ∀ (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K], Module.finrank ℚ K = 2 → ∀ π : CuspSub K 2, (CG.mk π).IsRegAlg →
     ∀ m : ℕ, 1 ≤ m → ∃ j : ℕ, 1 ≤ j ∧ j ≤ 9 ∧ ∀ (Y : HChar K) (a : (K →+* ℂ) → ℤ) (e : K →+* ℂ), IsAlgPos Y a →
       a e = -((m * j : ℕ) : ℤ) → a (ComplexEmbedding.conjugate e) = ((m * j : ℕ) : ℤ) →
       ∃ M M' : Multiset ℂ, (π.twist Y).HasInfChar e M ∧ (π.twist Y).HasInfChar (ComplexEmbedding.conjugate e) M' ∧ M ≠ 0 ∧

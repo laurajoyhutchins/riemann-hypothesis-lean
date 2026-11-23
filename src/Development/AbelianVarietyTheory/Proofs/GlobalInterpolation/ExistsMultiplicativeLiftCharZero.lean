@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.WittVector.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.Domain
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.WittVector.Identities
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -17,38 +65,5 @@ theorem charZero_wittVector_of_field (p : ℕ) [hp : Fact p.Prime] (K : Type) [F
     exact WittVector.p_nonzero p K h1
   · subst h
     exact CharP.charP_to_charZero _
-
-theorem exists_multiplicative_lift_charZero :
-    ∀ (K : Type) [Field K], ∃ (K' : Type) (_ : Field K') (_ : CharZero K') (τ : K →*₀ K'), Function.Injective τ ∧ ∀ (ι : Type) (s : Finset ι) (f : ι → K), ∑ i ∈ s, τ (f i) = 0 → ∑ i ∈ s, f i = 0 := by
-  intro K _
-  obtain ⟨p, hp⟩ := CharP.exists K
-  rcases CharP.char_is_prime_or_zero K p with h | h
-  · haveI : Fact p.Prime := ⟨h⟩
-    haveI := charZero_wittVector_of_field p K
-    have hinj := IsFractionRing.injective (WittVector p K) (FractionRing (WittVector p K))
-    haveI : CharZero (FractionRing (WittVector p K)) := charZero_of_injective_algebraMap hinj
-    let τ : K →*₀ FractionRing (WittVector p K) :=
-      { toFun := fun a => algebraMap (WittVector p K) _ (WittVector.teichmuller p a)
-        map_zero' := by simp
-        map_one' := by simp
-        map_mul' := by intro a b; simp }
-    have hτ : ∀ a, τ a = algebraMap (WittVector p K) _ (WittVector.teichmuller p a) := fun _ => rfl
-    have hc : ∀ a : K, (WittVector.constantCoeff : WittVector p K →+* K)
-        (WittVector.teichmuller p a) = a := fun a => by
-      simp [WittVector.constantCoeff_apply]
-    refine ⟨FractionRing (WittVector p K), inferInstance, inferInstance, τ, ?_, ?_⟩
-    · intro a b hab
-      rw [hτ, hτ] at hab
-      have := congrArg (WittVector.constantCoeff : WittVector p K →+* K) (hinj hab)
-      rwa [hc, hc] at this
-    · intro ι s f hf
-      simp only [hτ] at hf
-      rw [← map_sum, ← map_zero (algebraMap (WittVector p K) (FractionRing (WittVector p K)))] at hf
-      have := congrArg (WittVector.constantCoeff : WittVector p K →+* K) (hinj hf)
-      rw [map_sum, map_zero] at this
-      simpa only [hc] using this
-  · subst h
-    haveI : CharZero K := CharP.charP_to_charZero K
-    exact ⟨K, inferInstance, inferInstance, MonoidWithZeroHom.id K, fun _ _ h => h, fun _ _ _ h => h⟩
 
 end GlobalTheory

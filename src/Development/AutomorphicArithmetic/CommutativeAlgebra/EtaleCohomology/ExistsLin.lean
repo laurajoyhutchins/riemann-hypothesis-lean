@@ -1,12 +1,53 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.ExistsGlRep
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AdmissiblePi
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.CrysCopy
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AdmissiblePi
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.ExistsGlRep
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.BrauerTraceSplitting.AnnModel
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.BrauerTraceSplitting.HeckeCl
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.GoodOf
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.LocTowerHolds
 import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.NegVan
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.GoodOf
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.BrauerTraceSplitting.HeckeCl
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.AnnihilatorModels.BrauerTraceSplitting.AnnModel
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtSideGoodHolds
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.CrystallineTowers.LocTowerHolds
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.EtaleDualityTraceIsomorphism
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtSideGoodHolds
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,6 +97,7 @@ private theorem exists_lin {F L : Type*} [Field F] [Field L] [Algebra F L] {V W 
     ∃ b : (Fin a → L) →ₗ[L] L ⊗[F] V, ∀ x, Φ.baseChange L (b x) = ∑ i, x i • y i := by
   choose w hw using hy
   refine ⟨Fintype.linearCombination L w, fun x => ?_⟩
+
   simp only [Fintype.linearCombination_apply, map_sum, map_smul, hw]
 
 private theorem lin_inj {F L : Type*} [Field F] [Field L] [Algebra F L] {V W : Type*} [AddCommGroup V] [Module F V]
@@ -77,6 +119,7 @@ private theorem lin_equiv {F L : Type*} [Field F] [Field L] [Algebra F L] {V W :
     have := LinearMap.congr_fun (congrArg (LinearMap.baseChange L) hc) (b x)
     rw [LinearMap.baseChange_comp, LinearMap.baseChange_comp] at this
     exact this.symm
+
   rw [h1, hb, hb, map_sum]
   simp only [map_smul, hR, Matrix.mulVec, dotProduct, Finset.sum_smul, Finset.smul_sum, smul_smul]
   rw [Finset.sum_comm]
@@ -95,6 +138,7 @@ private theorem lin_eig {F L : Type*} [Field F] [Field L] [Algebra F L] [CharZer
     rw [LinearMap.comp_apply, LinearMap.smul_apply, LinearMap.comp_apply] at this
     rw [this, Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul]
   have h2 : h.baseChange L (Φ.baseChange L (b x)) = θ • Φ.baseChange L (b x) := by
+
     rw [hb, map_sum]
     simp only [map_smul, hy, Finset.smul_sum]
     exact Finset.sum_congr rfl fun i _ => smul_comm _ _ _
@@ -109,6 +153,7 @@ private theorem sum_comp {F : Type*} [Field F] {I : Type*} [Fintype I] [Decidabl
     (hc : ∀ i, h ∘ₗ φ i = c • (φ i ∘ₗ t i)) :
     h ∘ₗ (∑ i, φ i ∘ₗ LinearMap.proj i) = c • ((∑ i, φ i ∘ₗ LinearMap.proj i) ∘ₗ t') := by
   refine LinearMap.ext fun x => ?_
+
   simp only [LinearMap.comp_apply, LinearMap.smul_apply, LinearMap.sum_apply, LinearMap.proj_apply, map_sum, ht, Finset.smul_sum]
   exact Finset.sum_congr rfl fun i _ => by
     have := LinearMap.congr_fun (hc i) (x i)
@@ -141,6 +186,7 @@ private theorem e_facts {F : Type*} [Field F] {A : ℤ → Type*} [∀ n, AddCom
     funext i
     have h1 : DirectSum.component F ℤ A ((i : ℕ) : ℤ) (e x) = (β i).equivFun.symm (x i) := by
       rw [he]
+
       simp only [LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.proj_apply, map_sum]
       rw [Finset.sum_eq_single i]
       · simp [DirectSum.component.lof_self]
@@ -225,6 +271,7 @@ private theorem core {F L : Type*} [Field F] [Field L] [Algebra F L] [CharZero L
     p ∘ₗ (DirectSum.lof F ℤ A ((i : ℕ) : ℤ)) ∘ₗ (β i).equivFun.symm.toLinearMap
   have hφ : p ∘ₗ e = ∑ i : Fin N, φ i ∘ₗ LinearMap.proj i := by
     refine LinearMap.ext fun x => ?_
+
     simp [e, φ, map_sum]
   have hy' : ∀ i, y i ∈ LinearMap.range ((p ∘ₗ e).baseChange L) := fun i => by
     rw [← hz i]

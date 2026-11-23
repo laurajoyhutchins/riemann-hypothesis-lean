@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsCompactIsOpenUnitsAt
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFinsetOfEventually
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LintegralFintypeProdEqProd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdemSmulUnitary
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,17 +55,6 @@ open GlobalTheory.Doubling (absE absEv unitFin ideleAt)
 section Lemmas
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-
-theorem compFin_unitAt (v : Pl F) (l : (AE F E)ˣ) :
-    compFin F E v (unitAt E v l : AE F E) = compFin F E v (l : AE F E) := by
-  rw [unitAt, val_idemUnit, map_add, compFin_smul, compFin_smul, map_sub, map_one, eFin, GlobalTheory.LatVac.evFin_liftV,
-    sub_self, zero_smul, one_smul, add_zero]
-
-theorem unitAt_mem_unitsAt_iff (v : Pl F) (l : (AE F E)ˣ) :
-    unitAt E v l ∈ unitsAt E v ↔ compFin F E v (l : AE F E) ∈ intLoc F E v ∧
-      compFin F E v ((l⁻¹ : (AE F E)ˣ) : AE F E) ∈ intLoc F E v := by
-  rw [mem_unitsAt, ← map_inv, compFin_unitAt, compFin_unitAt]
-  exact and_iff_right (unitAt_mem v l)
 
 theorem isOpen_integral_everywhere : IsOpen {z : AE F E | ∀ v : Pl F, compFin F E v z ∈ intLoc F E v} := by
   classical
@@ -68,6 +95,7 @@ theorem isOpen_integral_everywhere : IsOpen {z : AE F E | ∀ v : Pl F, compFin 
       (isOpen_set_pi Set.finite_univ fun _ _ => ho)
   have hsub : φ '' (Set.univ.pi fun _ => W) ⊆ (S : Set (AE F E)) := by
     rintro _ ⟨a, ha, rfl⟩ v
+
     rw [hφ, map_sum]
     refine sum_mem fun i _ => ?_
     rw [show b i = ((RingOfIntegers.basis E i : 𝓞 E) : E) from integralBasis_apply E i]
@@ -87,19 +115,5 @@ open scoped TensorProduct NNReal Matrix ENNReal
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK GlobalTheory.ThK.ConeEuler
 open GlobalTheory.Doubling (absE absEv unitFin ideleAt)
-
-theorem isOpen_setOf_forall_unitAt_mem_unitsAt : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E]
-    [Algebra F E], IsOpen {l : (AE F E)ˣ | ∀ v : Pl F, unitAt E v l ∈ unitsAt E v} := by
-  intro F E _ _ _ _ _
-  have e : {l : (AE F E)ˣ | ∀ v : Pl F, unitAt E v l ∈ unitsAt E v} =
-      (fun l : (AE F E)ˣ => (l : AE F E)) ⁻¹' {z : AE F E | ∀ v : Pl F, compFin F E v z ∈ intLoc F E v} ∩
-      (fun l : (AE F E)ˣ => ((l⁻¹ : (AE F E)ˣ) : AE F E)) ⁻¹'
-        {z : AE F E | ∀ v : Pl F, compFin F E v z ∈ intLoc F E v} := by
-    ext l
-    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage, UnitsOpen.unitAt_mem_unitsAt_iff]
-    exact forall_and
-  rw [e]
-  exact (UnitsOpen.isOpen_integral_everywhere.preimage Units.continuous_val).inter
-    (UnitsOpen.isOpen_integral_everywhere.preimage Units.continuous_coe_inv)
 
 end GlobalTheory.ThK.ConeEuler

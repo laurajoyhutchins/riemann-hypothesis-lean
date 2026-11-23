@@ -1,10 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusOfSpec
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedOrbitalIntegralSummandGoodPlaceIndicator
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsOrthonormalBasisUnimodularHermitianLocalRi
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWittBasis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedQuadraticNormsTraceUniformizerFactsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeEqIntegralCoords
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorusOfSpec
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsOrthonormalBasisUnimodularHermitianLocalRi
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeEqIntegralCoords
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsWittBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedQuadraticNormsTraceUniformizerFactsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField GlobalTheory.UnitaryBC IsDedekindDomain Matrix Polynomial GlobalTheory.CuspRep Formalism.UG GlobalTheory.BCT GlobalTheory.KapLat GlobalTheory.KapOrb
 open scoped Classical
 
@@ -29,7 +74,7 @@ theorem exists_orthonormal_of_selfDual : ∀ (K : GlobalTheory.UnitLemma.UQ) (V 
   obtain ⟨hN, ⟨t, ht⟩, -⟩ := GlobalTheory.T.unramifiedQuadratic_norms_trace_uniformizer_facts K
   have hadd2 : ∀ y z z', h y (z + z') = h y z + h y z' := by
     intro y z z'
-    rw [hsym, hadd, map_add, ← hsym, ← hsym]
+    rw [hsym, hadd, map_add (f := _), ← hsym, ← hsym]
   have hlin2 : ∀ (a : K.E) y z, h y (a • z) = K.c a * h y z := by
     intro a y z
     rw [hsym, hlin, map_mul, ← hsym]
@@ -46,6 +91,7 @@ theorem exists_orthonormal_of_selfDual : ∀ (K : GlobalTheory.UnitLemma.UQ) (V 
   have hsum2 : ∀ (S : Finset (Fin (Module.finrank K.E V))) (c : Fin (Module.finrank K.E V) → K.E) (u : Fin (Module.finrank K.E V) → V) y,
       h y (∑ i ∈ S, c i • u i) = ∑ i ∈ S, K.c (c i) * h y (u i) := by
     intro S c u y
+
     rw [hsym, hsum1, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, ← hsym]
@@ -109,6 +155,7 @@ theorem exists_orthonormal_of_selfDual : ∀ (K : GlobalTheory.UnitLemma.UQ) (V 
   have hQR : Matrix.of Q * Matrix.of R = 1 := by
     ext i j
     apply inj
+
     simp only [Matrix.mul_apply, Matrix.of_apply, map_sum, map_mul, hQ, hR]
     have h5 : h (d j) (b i) = ∑ k, b.repr (d j) k * h (b k) (b i) := by
       conv_lhs => rw [hexp (d j)]
@@ -120,7 +167,7 @@ theorem exists_orthonormal_of_selfDual : ∀ (K : GlobalTheory.UnitLemma.UQ) (V 
   have hQu : IsUnit (Matrix.of Q) :=
     (Matrix.isUnit_iff_isUnit_det _).mpr (Matrix.isUnit_det_of_right_inverse hQR)
   obtain ⟨a, ha⟩ := GlobalTheory.Core.Rk.Exh.exists_orthonormal_of_isLocalRing K.O s hss
-    ⟨t, inj (by rw [map_add, hs, ht, map_one])⟩
+    ⟨t, inj (by rw [map_add (f := _), hs, ht, map_one])⟩
     (by
       intro u hu hsu
       obtain ⟨z, hz⟩ := hN hu.unit (by rw [IsUnit.unit_spec, ← hs, hsu])
@@ -133,8 +180,9 @@ theorem exists_orthonormal_of_selfDual : ∀ (K : GlobalTheory.UnitLemma.UQ) (V 
   have hfo : ∀ i j, h (f i) (f j) = if i = j then 1 else 0 := by
     intro i j
     have hM := congrArg (fun M : Matrix (Fin (Module.finrank K.E V)) (Fin (Module.finrank K.E V)) K.O => algebraMap K.O K.E (M j i)) ha
+
     simp only [cT, Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, Matrix.of_apply, map_sum,
-      map_mul, Matrix.one_apply] at hM
+    map_mul, Matrix.one_apply] at hM
     simp only [f, hsum1, hsum2]
     simp only [hs, hQ, apply_ite (algebraMap K.O K.E), map_one, map_zero] at hM
     rw [show (if i = j then (1 : K.E) else 0) = if j = i then 1 else 0 by
@@ -153,6 +201,7 @@ theorem exists_orthonormal_of_selfDual : ∀ (K : GlobalTheory.UnitLemma.UQ) (V 
     have h6 : ∀ k, ∑ j, algebraMap K.O K.E (A k j) * algebraMap K.O K.E (A' j l) = if k = l then 1 else 0 := by
       intro k
       have := congrArg (fun M : Matrix (Fin (Module.finrank K.E V)) (Fin (Module.finrank K.E V)) K.O => algebraMap K.O K.E (M k l)) hAA'
+
       simpa [Matrix.mul_apply, map_sum, Matrix.one_apply, apply_ite] using this
     calc b l = ∑ k, (if k = l then (1 : K.E) else 0) • b k := by simp
       _ = ∑ k, (∑ j, algebraMap K.O K.E (A k j) * algebraMap K.O K.E (A' j l)) • b k := by simp only [h6]
@@ -180,7 +229,7 @@ theorem exists_unitary_pullLat_eq : ∀ (E : Type) [Field E] [NumberField E] [Is
     rw [← hc, ← hc, K.c_c]
   have hadd : ∀ y y' z, B.herm x (y + y') z = B.herm x y z + B.herm x y' z := by
     intro y y' z
-    simp only [GlobalTheory.UnitLemma.InvAlg.herm, mul_add, add_mul, map_add]
+    simp only [GlobalTheory.UnitLemma.InvAlg.herm, mul_add, add_mul, map_add (f := _)]
   have hlin : ∀ (a : K.E) y z, B.herm x (a • y) z = a * B.herm x y z := by
     intro a y z
     simp only [GlobalTheory.UnitLemma.InvAlg.herm]
@@ -190,6 +239,7 @@ theorem exists_unitary_pullLat_eq : ∀ (E : Type) [Field E] [NumberField E] [Is
     intro y z
     apply e.injective
     rw [hc, ← hψh, ← hψh]
+
     simp only [stdH, map_sum, map_mul, hcc]
     exact Finset.sum_congr rfl fun k _ => mul_comm _ _
   have hnd : ∀ y, (∀ z, B.herm x y z = 0) → y = 0 := by

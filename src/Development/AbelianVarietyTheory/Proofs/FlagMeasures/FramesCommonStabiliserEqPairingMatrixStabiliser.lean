@@ -1,9 +1,61 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SpanToLePerp
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.EichlerIsometry
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SpanToLePerp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
 
@@ -60,10 +112,10 @@ theorem isom_span (L : LocE F E) {n : ℕ} (Hm : Matrix (Fin n) (Fin n) E)
     induction hy using Submodule.span_induction with
     | mem y hy => exact h x hx y hy
     | zero => simp [hf]
-    | add a b _ _ ha hb => rw [map_add, hf_add_r, hf_add_r, ha, hb]
+    | add a b _ _ ha hb => rw [map_add (f := _), hf_add_r, hf_add_r, ha, hb]
     | smul c a _ ha => rw [map_smul, hf_smul_r, hf_smul_r, ha]
   | zero => simp [hf]
-  | add a b _ _ ha hb => rw [map_add, hf_add_l, hf_add_l, ha, hb]
+  | add a b _ _ ha hb => rw [map_add (f := _), hf_add_l, hf_add_l, ha, hb]
   | smul c a _ ha => rw [map_smul, hf_smul_l, hf_smul_l, ha]
 
 variable {L : LocE F E} {r k : ℕ} (S : Frames L r k)
@@ -115,7 +167,7 @@ theorem step_mem (g : Fin (r + 1) → S.V)
     · rw [hs.1 i j h]; simp
   | zero => simp
   | add x y _ _ hx hy =>
-    have : h (x + y) - (x + y) = (h x - x) + (h y - y) := by rw [map_add]; abel
+    have : h (x + y) - (x + y) = (h x - x) + (h y - y) := by rw [map_add (f := _)]; abel
     rw [this]; exact add_mem hx hy
   | smul c x _ hx =>
     rw [map_smul, ← smul_sub]; exact Submodule.smul_mem _ _ hx
@@ -158,7 +210,7 @@ theorem mem_Nof [IsArtinianRing E] (g g' : Fin (r + 1) → S.V) (T : Fˣ)
     rw [hf_sub_l, hz3]
     linear_combination -hz2
   have : h (x + y + w) - (x + y + w) = h x - x := by
-    rw [map_add, map_add, hw w hw', sub_eq_zero.1 hy0]; abel
+    rw [map_add (f := _), map_add (f := _), hw w hw', sub_eq_zero.1 hy0]; abel
   rw [this]
   exact (hu r).2 x hx
 
@@ -224,7 +276,7 @@ theorem stab_eq : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace F]
       rw [Submodule.span_union, Submodule.span_eq, hco'.sup_eq_top] at h1
       exact fun x y => h1 x trivial y trivial
     have hinj : Function.Injective φ := by
-      rw [injective_iff_map_eq_zero]
+      set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro v hv
       apply Matrix.vecMul_injective_of_isUnit ((Matrix.isUnit_iff_isUnit_det _).2 S.herm.2)
       funext j
@@ -256,6 +308,7 @@ theorem stab_eq : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace F]
         apply Matrix.vecMul_injective_of_isUnit ((Matrix.isUnit_iff_isUnit_det _).2 hU')
         funext a
         have h1 := congrArg L.cj (h0 _ (mem_spanTo S S.f' a.2))
+
         rw [hf_sum_l, map_zero, map_sum] at h1
         simp only [map_mul, hf_cj L S.herm.1] at h1
         simp only [Matrix.zero_vecMul, Pi.zero_apply]

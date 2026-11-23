@@ -1,8 +1,49 @@
-import Mathlib
+module
 
-theorem UpperTheory.Reformulated.B.SesquilinearFlipConj.aux1 :
-    SMulCommClass ℂ ℂ ℂ := by
-  infer_instance
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable def UpperTheory.Reformulated.B.SesquilinearFlipConj.HasSesq :
     {G V : Type} → [inst : Group G] → [inst_1 : AddCommGroup V] → [inst_2 : _root_.Module ℂ V] → Representation ℂ G V → Prop :=
@@ -18,9 +59,9 @@ namespace UpperTheory.Reformulated.B.SesquilinearFlipConj.Helpers
 private noncomputable def flipConj {V : Type} [AddCommGroup V] [Module ℂ V]
     (B : V →ₗ[ℂ] V →ₗ⋆[ℂ] ℂ) : V →ₗ[ℂ] V →ₗ⋆[ℂ] ℂ :=
   LinearMap.mk₂'ₛₗ (RingHom.id ℂ) (starRingEnd ℂ) (fun v w => starRingEnd ℂ (B w v))
-    (by intro v₁ v₂ w; simp [map_add])
+    (by intro v₁ v₂ w; simp [map_add (f := _)])
     (by intro c v w; simp [map_smulₛₗ, smul_eq_mul])
-    (by intro v w₁ w₂; simp [map_add])
+    (by intro v w₁ w₂; simp [map_add (f := _)])
     (by intro c v w; simp [map_smulₛₗ, smul_eq_mul])
 
 private theorem flipConj_apply {V : Type} [AddCommGroup V] [Module ℂ V]
@@ -66,7 +107,7 @@ theorem UpperTheory.Reformulated.B.SesquilinearFlipConj.main :
       simp only [LinearMap.smul_apply, smul_eq_mul, hBinv]
   · refine ⟨B + flipConj B, hH, ?_, ?_⟩
     · intro v w
-      simp only [LinearMap.add_apply, flipConj_apply, map_add, Complex.conj_conj]
+      simp only [LinearMap.add_apply, flipConj_apply, map_add (f := _), Complex.conj_conj]
       ring
     · intro g v w
       simp only [LinearMap.add_apply, flipConj_apply, hBinv]

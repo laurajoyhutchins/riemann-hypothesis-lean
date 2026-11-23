@@ -1,6 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.PeriodRingUnits.DieudonneManinBasisModification
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.AinfMapSurjective
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.InvRestrictScalarsMem
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.PeriodRingUnits.DieudonneManinBasisModification
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.AinfMapSurjective
+import Development.WeilBound.CoreStatements.CrystallinePeriodRings.FrobAinfMapFrobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -9,7 +53,7 @@ noncomputable section
 namespace period_ring_base
 
 open Formalism.Per6 hiding σB aB
-open GroundTheory.PAdicHodge DeRhamPotentiallySemistable.DRPst PfDRPst Matrix
+open GroundTheory.PAdicHodge DeRhamPotentiallySemistable.DRPst Matrix
 
 namespace BaseC
 
@@ -19,15 +63,6 @@ theorem inv_uniq {R : Type*} [CommRing R] {a b c : R} (ha : a * c = 1) (hb : b *
     _ = b := by rw [ha, one_mul]
 
 variable {l : ℕ} [Fact l.Prime]
-
-theorem ι_eq : ι l = PositivityTheory.LocInh.ιCD l :=
-  PositivityTheory.LocInh.bcris_hom_ext fun x =>
-    (Loc2.lift_mk₀ (iC l) (isUnit_iC_l l) (isUnit_image_period l) x).trans (PositivityTheory.LocInh.ιCD_cB x).symm
-
-theorem qB_eq : qB l = PositivityTheory.LocInh.qB l :=
-  IsLocalization.ringHom_ext (nonZeroDivisors ℤ_[l]) (RingHom.ext fun z => by
-    rw [RingHom.comp_apply, RingHom.comp_apply, qB, IsLocalization.lift_eq]
-    exact (PositivityTheory.LocInh.qB_coe z).symm)
 
 theorem aB_ainfMap (a : WittVector l (PreTilt ↥(PadicComplexInt l) l)) :
     aB l (ainfMap l a) = Formalism.Per6.aB l a := rfl
@@ -88,7 +123,7 @@ def rep (l : ℕ) [Fact l.Prime] : Subring (B l) where
   add_mem' := by
     rintro _ _ ⟨a, k, rfl⟩ ⟨b, j, rfl⟩
     refine ⟨a * (l : AInf ℂ_[l] l) ^ j + b * (l : AInf ℂ_[l] l) ^ k, k + j, ?_⟩
-    rw [map_add, map_mul, map_mul, map_pow, map_pow, map_natCast]
+    rw [map_add (f := _), map_mul, map_mul, map_pow, map_pow, map_natCast]
     calc aB l a * u l ^ k + aB l b * u l ^ j =
         aB l a * (l : B l) ^ j * u l ^ j * u l ^ k + aB l b * (l : B l) ^ k * u l ^ k * u l ^ j := by
           rw [pow_u, pow_u]

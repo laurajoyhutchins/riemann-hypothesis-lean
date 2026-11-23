@@ -1,5 +1,43 @@
-import Development.WeilBound.CoreStatements.BranchingTraces.HeBranching
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.IsHWSmooth
+module
+
+public import Development.WeilBound.CoreStatements.BranchingTraces.HeBranching
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -104,19 +142,5 @@ def Frame : Prop :=
     ∃ g : UJ ε, (∀ Y, trace (dg d * (um g⁻¹ * blk0 e Y * um g)) = trace (dg d' * Y)) ∧
       ∃ C : ℝ, 0 < C ∧ ∀ h : UJ ε', hs (um h - 1) ≤ C * hs (emb e (um h)) *
         hs (dg d - (um g⁻¹ * emb e (um h⁻¹) * um g) * dg d * (um g⁻¹ * emb e (um h) * um g))
-
-def HWEx : Prop :=
-  ∀ (m : ℕ) (ε : Fin m → Bool) (lam : Fin m → ℝ) (K : Type) [NormedAddCommGroup K] [InnerProductSpace ℂ K] [CompleteSpace K]
-    (σ : Matrix (Fin m) (Fin m) ℂ → (K →L[ℂ] K)), 2 ≤ m → Formalism.QuantumDeterminants.IsHCParam lam → IsDS ε lam σ →
-    Formalism.QuantumDeterminants.GapAtLeast ε lam (200 * (m : ℝ) ^ 3) →
-    ∃ w ∈ lowKSub ε lam σ, ReciprocityTheory.ChartRestriction.DS.Lap.Base.IsHWSmooth ε σ lam w
-
-def Conc : Prop :=
-  ∀ (m : ℕ) (ε : Fin m → Bool) (d Λ₀ : Fin m → ℝ) (k : ℕ), 2 ≤ m → ∃ C : ℝ, 0 ≤ C ∧ ∀ t : ℝ, 1 ≤ t →
-    ∀ (lam : Fin m → ℝ) (K : Type) [NormedAddCommGroup K] [InnerProductSpace ℂ K] [CompleteSpace K]
-      (σ : Matrix (Fin m) (Fin m) ℂ → (K →L[ℂ] K)) (w : K), Formalism.QuantumDeterminants.IsHCParam lam → IsDS ε lam σ →
-      Formalism.QuantumDeterminants.GapAtLeast ε lam (200 * (m : ℝ) ^ 3) → w ∈ lowKSub ε lam σ →
-      ReciprocityTheory.ChartRestriction.DS.Lap.Base.IsHWSmooth ε σ lam w → ReciprocityTheory.ChartRestriction.DS.lowK ε lam = t • d + Λ₀ →
-      ∀ x : UJ ε, (t * hs (dg d - um x⁻¹ * dg d * um x)) ^ k * ‖⟪w, σ (um x) w⟫_ℂ‖ ^ 2 ≤ C * hs (um x) ^ (2 * k)
 
 end PositivityTheory.RgHe

@@ -1,9 +1,54 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.JumpsLetOfWin
-import Formalism.SharpRestriction.LevelLetterCocycles.SaturationPullbackOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorGeneralOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
-import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
-import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.JumpsLetOfWin
+public import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationSaturationKiller
+public import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorGeneralOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.SaturationPullbackOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+public import Formalism.SharpRestriction.LevelLetterCocycles.SecondComparisonInCoordinates
+
+@[expose] public section
 
 noncomputable section
 
@@ -270,7 +315,7 @@ theorem φpow_span (T : LocLat G Qp LL O) (S : Set (W.DD T)) (k : ℕ) (z : W.DD
   let U : Submodule (LetA O n) (W.DD T) :=
     { carrier := {z | ((W.φD T) ^ k) z ∈ Submodule.span (LetA O n) (((W.φD T) ^ (k + 1)) '' S)}
       add_mem' := fun {a b} ha hb => by
-        simp only [Set.mem_ofPred_eq, map_add] at ha hb ⊢; exact Submodule.add_mem _ ha hb
+        simp only [Set.mem_ofPred_eq, map_add (f := _)] at ha hb ⊢; exact Submodule.add_mem _ ha hb
       zero_mem' := by simp only [Set.mem_ofPred_eq, map_zero]; exact Submodule.zero_mem _
       smul_mem' := fun c z hz => by
         simp only [Set.mem_ofPred_eq] at hz ⊢
@@ -324,6 +369,7 @@ theorem span_pow_le (T : LocLat G Qp LL O) {r : ℕ} (b : Fin r → W.DD T)
   rw [Submodule.span_le]
   rintro _ ⟨_, ⟨z, hz, rfl⟩, rfl⟩
   obtain ⟨aa, haa⟩ := hb z hz
+
   rw [SetLike.mem_coe, LinearMap.smul_apply, LinearMap.id_apply, haa, Finset.smul_sum, map_sum]
   refine Submodule.sum_mem _ fun j _ => ?_
   rw [smul_comm, SatPW.φD_pow_smulA]
@@ -431,7 +477,7 @@ theorem crisMap_φVB {T₁ T₂ : LocLat G Qp LL O} (f : T₁.V →ₗ[LL] T₂.
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [Formalism.MainNotions.TruncatedSeriesCountingBounds.crisMap, φVB]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem crisMap_φVB_pow {T₁ T₂ : LocLat G Qp LL O} (f : T₁.V →ₗ[LL] T₂.V) (e : ℕ) (z : T₁.V ⊗[Qp] B) :
     Formalism.MainNotions.TruncatedSeriesCountingBounds.crisMap B f (((φVB PD (LL := LL) (V := T₁.V)) ^ e) z) =
@@ -472,6 +518,7 @@ theorem arcL_at [NeZero n] (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) : Formalism.
   have hx₁N : x₁ ∈ W.N T₁ := Nl_le_N W T₁ c' hx₁l
   have hx₁Δ : ∀ δ' ∈ W.DelF, W.γD T₁ δ' x₁ = x₁ := by
     intro δ' hδ'
+
     rw [hx₁, map_smul, map_sum]
     congr 1
     refine Finset.sum_equiv (Equiv.mulLeft δ') (fun δ => ?_) (fun δ _ => ?_)
@@ -480,6 +527,7 @@ theorem arcL_at [NeZero n] (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) : Formalism.
   have hlp : Formalism.MainNotions.LiftingTheory.lp W rr • x₂ = (((PD.p : ℕ) : O) ^ rr) • x₂ := by
     rw [← algebraMap_smul (LetA O n) (((PD.p : ℕ) : O) ^ rr) x₂, map_pow, map_natCast]; rfl
   have hmap1 : W.map F x₁ = (((PD.p : ℕ) : O) ^ rr) • x₂ := by
+
     rw [hx₁, map_smulO, map_sum]
     have h1 : ∀ δ ∈ W.DelF, W.map F (W.γD T₁ δ x₁') = (((PD.p : ℕ) : O) ^ rr) • x₂ := by
       intro δ hδ
@@ -489,7 +537,7 @@ theorem arcL_at [NeZero n] (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) : Formalism.
   have hN2 : W.map F x₁ ∈ W.N T₂ := W.map_N F hSur.1 hSur.2.1 x₁ hx₁N
   refine ⟨x₁, ⟨⟨hx₁N, hx₁Δ⟩, hx₁l⟩, ?_⟩
   unfold Formalism.MainNotions.ArcLiftingSetup.cmpD
-  rw [dif_pos hx₁N, dif_pos hx₂N, crisMap_φVB_pow]
+  rw [dite_eq_left hx₁N, dite_eq_left hx₂N, crisMap_φVB_pow]
   have hc := W.cmp_map F hSur.1 hSur.2.1 ⟨x₁, hx₁N⟩ hN2
   have e1 : Formalism.MainNotions.TruncatedSeriesCountingBounds.crisMap B F.f (W.cmp T₁ ⟨x₁, hx₁N⟩) = W.cmp T₂ ⟨W.map F x₁, hN2⟩ := hc.symm
   have e2 : (⟨W.map F x₁, hN2⟩ : ↥(W.N T₂)) = (((PD.p : ℕ) : O) ^ rr) • ⟨x₂, hx₂N⟩ :=

@@ -1,6 +1,56 @@
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AwayRepIsoLoc
-import Development.AutomorphicArithmetic.ThetaCorrespondence.CuspidalSupport.CuspOfCq
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.TrivialLocalCondition
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.AutomorphicGaloisAdmissible
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AwayRepIsoLoc
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LocalInvariantsMatchSemisimple
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
+import Formalism.AlgebraicWeights.IsAlgWeight
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.TypesDefs
+import Formalism.LocalToGlobal.PairingIndexBounds.ModelLatticeMoves.IsBichar
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.Automorphisms.PlaceA
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT NumberField IsDedekindDomain Polynomial GlobalTheory.HeightCounting GlobalTheory.RowTie GlobalTheory.SplitRead GlobalTheory.NPin
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
@@ -11,25 +61,6 @@ namespace GlobalTheory.BCGal
 open Formalism.MainNotions.SumRepresentations.At GlobalTheory.TwistLG
 
 variable {R : Ranks} {H : Host R} {what₂ : Rows.Data R} (N : NData R H what₂) (A : NAut N) (i : N.Loc)
-
-theorem awayRepN_zero_lpZero : UpperTheory.GalS.AwayRepN N A i 0 A.lpZero := by
-  refine ⟨1, continuous_const, ss_zero _, fun w hw _ => eq_lpZero N A _ ?_ (A.wdOf_dim i _ w)⟩
-  exact (A.wdOf_unr i _ w hw continuous_const).2 fun σ _ => rfl
-
-theorem awayRepN_congr {m m' : ℕ} {L L' : ∀ w, A.LP w} (h : UpperTheory.GalS.AwayRepN N A i m L) (hm : m = m')
-    (hL : ∀ w, L w = L' w) : UpperTheory.GalS.AwayRepN N A i m' L' := by
-  subst hm
-  obtain ⟨r, c, s, f⟩ := h
-  exact ⟨r, c, s, fun w hw => hL w ▸ f w hw⟩
-
-theorem liftSetupOverExtendedData_classSum_eq (hGal : TieGal N A) {m m' : ℕ} {L L' : ∀ w, A.LP w} (h : UpperTheory.GalS.AwayRepN N A i m L)
-    (h' : UpperTheory.GalS.AwayRepN N A i m' L') : UpperTheory.GalS.AwayRepN N A i (m + m') fun w => A.lpSum (L w) (L' w) := by
-  obtain ⟨r, c, s, f⟩ := h
-  obtain ⟨r', c', s', f'⟩ := h'
-  obtain ⟨-, -, hsum, -⟩ := hGal.2.2.2 i
-  refine ⟨sumRep r r', cont_sumRep r r' c c', ss_sumRep r r' s s', fun w hw hu => ?_⟩
-  rw [(hsum m m' r r' c c').2.1 w (Or.inl hw) (Or.inl hw)]
-  rw [f w hw ((A.unr_sum _ _).1 hu).1, f' w hw ((A.unr_sum _ _).1 hu).2]
 
 theorem galois_relation_away_from_l (hLP : TieLP N A) (hAut : TieAut N A) (hGal : TieGal N A) (hG : UpperTheory.GalS.AutomorphicGaloisAdmissible N A)
     {a : ℕ} (ha : 1 ≤ a) (π : A.CG a) (hc : A.csd π) (m : ℤ)
@@ -84,13 +115,5 @@ theorem galois_relation_away_from_l (hLP : TieLP N A) (hAut : TieAut N A) (hGal 
     convert k1 using 2
     push_cast
     ring
-
-theorem awayRep_piece_alt (hLP : TieLP N A) (hAut : TieAut N A) (hGal : TieGal N A) (hG : UpperTheory.GalS.AutomorphicGaloisAdmissible N A)
-    {a : ℕ} (ha : 1 ≤ a) (π : A.CG a) (hc : A.csd π) (m : ℤ)
-    (hinf : ∀ τ, (A.infG π τ).Nodup ∧
-      ∀ z ∈ A.infG π τ, ∃ n : ℤ, z + (((m : ℝ) / 2 : ℝ) : ℂ) = (n : ℂ) + ((a : ℂ) - 1) / 2) :
-    UpperTheory.GalS.AwayRepN N A i a fun w => A.lpTw (A.locG π w) ((m : ℝ) / 2 + (1 - (a : ℝ)) / 2) := by
-  obtain ⟨r, c, s, f⟩ := galois_relation_away_from_l N A i hLP hAut hGal hG ha π hc m hinf
-  exact ⟨r, c, s, fun w hw => (f w hw).eq_of_unr⟩
 
 end GlobalTheory.BCGal

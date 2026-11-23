@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.Smooth
+module
+
+import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.Transport
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.SmRight
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.CapelliHighestWeightConjugated
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.REAL Formalism.QuantumDeterminants
 
@@ -80,36 +126,7 @@ lemma foldr_congr (H : Matrix (Fin n) (Fin n) ℂ) (hKH : H⁻¹ * H = 1) (hHK :
       rdV_congr H H⁻¹ _ hKH hHK (hpart2_mem H _ hKH hHK hH) ih hx]
 
 theorem capelliH_local : PI.UnitaryGroupMassFormula.CapelliEig.Loc := by
-  intro n ε E _ _ H P Q F₁ F₂ u g hQP hPQ hH hF hg
-  have hinv := ioh_Hinv ε H P Q hQP hPQ hH
-  have hc : Pᴴ * Qᴴ = 1 := by rw [← Matrix.conjTranspose_mul, hQP, Matrix.conjTranspose_one]
-  have hHK : H * H⁻¹ = 1 := by
-    rw [hinv]
-    calc H * (Q * Jm ε * Qᴴ) = Pᴴ * (Jm ε * ((P * Q) * (Jm ε * Qᴴ))) := by
-          rw [hH]; simp only [Matrix.mul_assoc]
-      _ = Pᴴ * Qᴴ := by
-          rw [hPQ, Matrix.one_mul, ← Matrix.mul_assoc (Jm ε), Jm_mul_self, Matrix.one_mul]
-      _ = 1 := hc
-  have hKH : H⁻¹ * H = 1 := mul_eq_one_comm.mp hHK
-  have hJ : (Jm ε)ᴴ = Jm ε := by
-    unfold Jm
-    rw [Matrix.diagonal_conjTranspose]
-    congr 1
-    funext i
-    by_cases h : ε i <;> simp [h]
-  have hHh : Hᴴ = H := by
-    rw [hH]
-    simp only [Matrix.conjTranspose_mul, hJ, Matrix.conjTranspose_conjTranspose, Matrix.mul_assoc]
-  unfold capelliH qdetOp qminorOp
-  simp only [Finset.sum_apply, Pi.smul_apply]
-  refine Finset.sum_congr rfl fun σ _ => ?_
-  congr 1
-  have e1 : (List.ofFn fun k : Fin n => Formalism.QuantumDeterminants.Top (E := E) (EabH H) (u - ((k : ℕ) : ℂ)) (id (σ k)) (id k)) =
-        (List.ofFn fun k : Fin n => (u - ((k : ℕ) : ℂ), σ k, k)).map
-          fun p => Formalism.QuantumDeterminants.Top (EabH H) p.1 p.2.1 p.2.2 := by
-    rw [List.map_ofFn]; rfl
-  rw [e1]
-  exact foldr_congr H hKH hHK hHh _ hF g hg
+  apply CompanionTheory.CapEig.capelli_localization <;> assumption
 
 end GlobalTheory.CapelliLocality
 

@@ -1,5 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,16 +66,20 @@ theorem bessel {V : Type} [AddCommGroup V] [Module ℂ V] (B : V →ₗ⋆[ℂ] 
     ∑ j ∈ Finset.range T, (B (w j) (w j)).re ≤ (B v v).re := by
   set S : V := ∑ j ∈ Finset.range T, w j with hS
   have e1 : B v S = ∑ j ∈ Finset.range T, B (w j) (w j) := by
+
     rw [hS, map_sum]; exact Finset.sum_congr rfl fun j _ => h1 j
   have e2 : B S v = ∑ j ∈ Finset.range T, B (w j) (w j) := by
+
     rw [hS, map_sum, LinearMap.sum_apply]; exact Finset.sum_congr rfl fun j _ => h2 j
   have e3 : B S S = ∑ j ∈ Finset.range T, B (w j) (w j) := by
     have e5 : ∀ u, B S u = ∑ j ∈ Finset.range T, B (w j) u := fun u => by
+
       rw [hS, map_sum, LinearMap.sum_apply]
     rw [e5]
     refine Finset.sum_congr rfl fun i hi => ?_
+
     rw [hS, map_sum, Finset.sum_eq_single i (fun j _ hj => h3 i j hj.symm)
-      (fun h => absurd hi h)]
+    (fun h => absurd hi h)]
   have h := hpsd (v - S)
   have e4 : B (v - S) (v - S) = B v v - ∑ j ∈ Finset.range T, B (w j) (w j) := by
     simp only [map_sub, LinearMap.sub_apply, e1, e2, e3]; ring
@@ -74,12 +128,12 @@ theorem dg_mul_col (hn : 1 < n) (i₀ : Fin n) (h₀ : (i₀ : ℕ) = 0) (s : F�
   rw [Matrix.diagonal_mul, Matrix.mul_diagonal]
   simp only [cM, Matrix.of_apply]
   by_cases h : (j : ℕ) = 0 + 1 ∧ (i : ℕ) < 0 + 1
-  · rw [dif_pos h, dif_pos h]
+  · rw [dite_eq_left h, dite_eq_left h]
     have e1 : i = i₀ := Fin.ext (by omega)
     have e2 : j ≠ i₀ := fun e => by subst e; omega
     subst e1
     simp [Pi.mulSingle_eq_of_ne e2]
-  · rw [dif_neg h, dif_neg h]; simp
+  · rw [dite_eq_right h, dite_eq_right h]; simp
 
 end Diag
 
@@ -144,8 +198,8 @@ theorem div_col (c : ℕ) (y : Fin (0 + 1) → F)
   rw [add_sub_cancel_left]
   simp only [cM, Matrix.of_apply]
   by_cases h : (j : ℕ) = 0 + 1 ∧ (i : ℕ) < 0 + 1
-  · rw [dif_pos h]; exact hy _
-  · rw [dif_neg h]; exact ⟨0, (𝒪[F]).zero_mem, by simp⟩
+  · rw [dite_eq_left h]; exact hy _
+  · rw [dite_eq_right h]; exact ⟨0, (𝒪[F]).zero_mem, by simp⟩
 
 theorem exists_unit_of_one_add (y : F) (hy : y ∈ 𝒪[F]) :
     ∃ e : (𝒪[F])ˣ, ((e : 𝒪[F]) : F) = 1 + (uniformizer F : F) * y := by

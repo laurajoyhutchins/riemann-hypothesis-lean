@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.LinearAlgebra.BilinearMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Rat.Cast.CharZero
+
+@[expose] public section
 
 namespace GlobalTheory.RationalValueRealScalar
 
@@ -40,7 +86,7 @@ theorem exists_rat_bilinForm {U : Type} [AddCommGroup U] [Module ℝ U] (om : U 
   refine ⟨LinearMap.mk₂ ℚ q ?_ ?_ ?_ ?_, fun u v => hq u v⟩
   · intro u1 u2 v
     apply Rat.cast_injective (α := ℝ)
-    rw [Rat.cast_add, hq, hq, hq, map_add, LinearMap.map_add, LinearMap.add_apply]
+    rw [Rat.cast_add, hq, hq, hq, map_add (f := _), LinearMap.map_add (f := _), LinearMap.add_apply]
     ring
   · intro c u v
     apply Rat.cast_injective (α := ℝ)
@@ -48,7 +94,7 @@ theorem exists_rat_bilinForm {U : Type} [AddCommGroup U] [Module ℝ U] (om : U 
     ring
   · intro u v1 v2
     apply Rat.cast_injective (α := ℝ)
-    rw [Rat.cast_add, hq, hq, hq, map_add, LinearMap.map_add]
+    rw [Rat.cast_add, hq, hq, hq, map_add (f := _), LinearMap.map_add (f := _)]
     ring
   · intro c u v
     apply Rat.cast_injective (α := ℝ)

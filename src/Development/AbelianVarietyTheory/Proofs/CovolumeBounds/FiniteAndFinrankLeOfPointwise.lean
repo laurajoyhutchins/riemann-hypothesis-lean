@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Group.Integral
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 open MeasureTheory Module
 open scoped InnerProductSpace BigOperators
@@ -15,6 +71,7 @@ theorem norm_sq_le_sum_mul {E : Type*} [SeminormedAddCommGroup E] [NormedSpace �
     ‖l f‖ ^ 2 ≤ (∑ i, ‖l (b i)‖ ^ 2) * ‖f‖ ^ 2 := by
   have h1 : l f = ∑ i, ⟪b i, f⟫_ℂ • l (b i) := by
     conv_lhs => rw [← b.sum_repr' f]
+
     simp [map_sum, map_smul]
   have h2 : ‖l f‖ ≤ ∑ i, ‖l (b i)‖ * ‖⟪b i, f⟫_ℂ‖ := by
     rw [h1]
@@ -34,10 +91,12 @@ theorem sum_norm_sq_eq (b : OrthonormalBasis ι ℂ V) (c : OrthonormalBasis κ 
     have hb : ∀ i, ⟪l (b i), l (b i)⟫_ℂ = ∑ j, ⟪b i, c j⟫_ℂ * ⟪l (c j), l (b i)⟫_ℂ := by
       intro i
       conv_lhs => enter [2]; rw [← c.sum_repr' (b i)]
+
       simp [map_sum, map_smul, sum_inner, inner_smul_left, mul_comm]
     have hc : ∀ j, ⟪l (c j), l (c j)⟫_ℂ = ∑ i, ⟪b i, c j⟫_ℂ * ⟪l (c j), l (b i)⟫_ℂ := by
       intro j
       conv_lhs => enter [3]; rw [← b.sum_repr' (c j)]
+
       simp [map_sum, map_smul, inner_sum, inner_smul_right]
     simp_rw [hb, hc]
     exact Finset.sum_comm
@@ -94,7 +153,7 @@ theorem integral_sum_eq_finrank' {ι : Type*} [Fintype ι] (l : ∀ x, V →ₗ[
     (hint : ∀ f, Integrable (fun x => ‖l x f‖ ^ 2) μ)
     (hnorm : ∀ f, ‖f‖ ^ 2 = ∫ x, ‖l x f‖ ^ 2 ∂μ) (b : OrthonormalBasis ι ℂ V) :
     ∫ x, ∑ i, ‖l x (b i)‖ ^ 2 ∂μ = finrank ℂ V := by
-  rw [integral_finset_sum _ fun i _ => hint (b i)]
+  rw [integral_finsetSum _ fun i _ => hint (b i)]
   simp_rw [← hnorm, b.orthonormal.1]
   simp [finrank_eq_card_basis b.toBasis]
 
@@ -106,7 +165,7 @@ theorem finrank_le_of_finite' [IsFiniteMeasure μ] [FiniteDimensional ℂ V]
     (finrank ℂ V : ℝ) ≤ r * C * μ.real Set.univ := by
   rw [← integral_sum_eq_finrank' l hint hnorm (stdOrthonormalBasis ℂ V)]
   calc _ ≤ ∫ _x, (r * C : ℝ) ∂μ := by
-        refine integral_mono (integrable_finset_sum _ fun i _ => hint _) (integrable_const _) ?_
+        refine integral_mono (integrable_finsetSum _ fun i _ => hint _) (integrable_const _) ?_
         intro x
         refine (sum_norm_sq_le _ (l x) hC fun f => h f x).trans ?_
         have : (finrank ℂ (E x) : ℝ) ≤ r := by exact_mod_cast hr x
@@ -128,7 +187,7 @@ theorem finite_and_finrank_le' [IsFiniteMeasure μ]
         (fun f => hint f) (fun f => hnorm f) hC (fun f x => h f x)
       rw [hW] at this
       exact Nat.le_floor this
-    exact Module.rank_lt_aleph0_iff.1 (hrank.trans_lt (Cardinal.nat_lt_aleph0 _))
+    exact Module.rank_lt_aleph0_iff.1 (hrank.trans_lt Cardinal.natCast_lt_aleph0)
   exact ⟨hfin, finrank_le_of_finite' hr l hint hnorm hC h⟩
 
 theorem sum_eq_finrank_of_homogeneous' [IsProbabilityMeasure μ] {ι : Type*} [Fintype ι]
@@ -335,27 +394,5 @@ theorem norm_sq_le_finrank_mul_fun {G : Type*} [Group G] [MulAction G X]
       rw [inv_smul_smul]) ⟨f, hf⟩ x
 
 end Functions
-
-example (f : Fin 2 → ℂ) (x : Fin 2) :
-    ‖f x‖ ^ 2 ≤ finrank ℂ (⊤ : Submodule ℂ (Fin 2 → ℂ)) *
-      ∫ y, ‖f y‖ ^ 2 ∂((2 : ENNReal)⁻¹ • (Measure.count : Measure (Fin 2))) := by
-  haveI : IsProbabilityMeasure ((2 : ENNReal)⁻¹ • (Measure.count : Measure (Fin 2))) :=
-    ⟨by simp [ENNReal.inv_mul_cancel]⟩
-  haveI : MeasurableConstSMul (Equiv.Perm (Fin 2)) (Fin 2) := ⟨fun _ => measurable_from_top⟩
-  haveI : SMulInvariantMeasure (Equiv.Perm (Fin 2)) (Fin 2) (Measure.count : Measure (Fin 2)) :=
-    ⟨fun g s _ => by
-      rw [Measure.count_apply MeasurableSet.of_discrete, Measure.count_apply MeasurableSet.of_discrete]
-      exact congrArg _ (Set.encard_preimage_of_bijective g.bijective s)⟩
-  refine norm_sq_le_finrank_mul_fun (G := Equiv.Perm (Fin 2)) ⊤ (fun _ _ => Integrable.of_finite)
-    (fun f _ hf => ?_) (fun _ _ _ => trivial) trivial x
-  rw [integral_smul_measure, integral_count] at hf
-  simp only [Fin.sum_univ_two, smul_eq_mul, mul_eq_zero] at hf
-  have h : ‖f 0‖ ^ 2 + ‖f 1‖ ^ 2 = 0 := hf.resolve_left (by simp)
-  have h0 : ‖f 0‖ = 0 := by nlinarith [norm_nonneg (f 0), norm_nonneg (f 1)]
-  have h1 : ‖f 1‖ = 0 := by nlinarith [norm_nonneg (f 0), norm_nonneg (f 1)]
-  ext i
-  fin_cases i
-  · simpa using h0
-  · simpa using h1
 
 end GlobalTheory.Bergman

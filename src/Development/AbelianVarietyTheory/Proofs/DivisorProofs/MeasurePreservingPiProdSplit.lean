@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 open scoped NNReal ENNReal
@@ -15,27 +66,26 @@ variable {ι : Type*} [Fintype ι] {α β γ : ι → Type*} [∀ i, MeasurableS
 def piProdSplit (α β : ι → Type*) [∀ i, MeasurableSpace (α i)] [∀ i, MeasurableSpace (β i)] :
     (∀ i, α i × β i) ≃ᵐ (∀ i, α i) × (∀ i, β i) where
   toEquiv := Equiv.arrowProdEquivProdArrow ι α β
-  measurable_toFun := (measurable_pi_lambda _ fun i => (measurable_pi_apply i).fst).prodMk
-    (measurable_pi_lambda _ fun i => (measurable_pi_apply i).snd)
-  measurable_invFun := measurable_pi_lambda _ fun i =>
+  measurable_toFun := (Measurable.of_eval fun i => (measurable_pi_apply i).fst).prodMk
+    (Measurable.of_eval fun i => (measurable_pi_apply i).snd)
+  measurable_invFun := Measurable.of_eval fun i =>
     ((measurable_pi_apply i).comp measurable_fst).prodMk ((measurable_pi_apply i).comp measurable_snd)
 
 theorem measurePreserving_piProdSplit (μ : ∀ i, Measure (α i)) (ν : ∀ i, Measure (β i)) [∀ i, SigmaFinite (μ i)]
     [∀ i, SigmaFinite (ν i)] : MeasurePreserving (piProdSplit α β) (.pi fun i => (μ i).prod (ν i))
-      ((Measure.pi μ).prod (Measure.pi ν)) where
-  measurable := (piProdSplit α β).measurable
-  map_eq := by
-    refine (Measure.FiniteSpanningSetsIn.ext ?_ (isPiSystem_pi.prod isPiSystem_pi)
-      ((Measure.FiniteSpanningSetsIn.pi fun i ↦ (μ i).toFiniteSpanningSetsIn).prod
-      (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn))) ?_).symm
-    · refine (generateFrom_eq_prod generateFrom_pi generateFrom_pi ?_ ?_).symm
-      · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (μ i).toFiniteSpanningSetsIn)).isCountablySpanning
-      · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn)).isCountablySpanning
-    · rintro _ ⟨s, ⟨s, _, rfl⟩, ⟨_, ⟨t, _, rfl⟩, rfl⟩⟩
-      rw [MeasurableEquiv.map_apply, show piProdSplit α β ⁻¹' (Set.univ.pi s ×ˢ Set.univ.pi t) =
-          (Set.univ.pi fun i ↦ s i ×ˢ t i) by
-          ext; simp only [Set.mem_preimage, Set.mem_prod, Set.mem_univ_pi, forall_and]; rfl]
-      simp_rw [Measure.pi_pi, Measure.prod_prod, Measure.pi_pi, Finset.prod_mul_distrib]
+      ((Measure.pi μ).prod (Measure.pi ν)) := by
+  refine ⟨(piProdSplit α β).measurable, ?_⟩
+  refine (Measure.FiniteSpanningSetsIn.ext ?_ (isPiSystem_pi.prod isPiSystem_pi)
+    ((Measure.FiniteSpanningSetsIn.pi fun i ↦ (μ i).toFiniteSpanningSetsIn).prod
+    (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn))) ?_).symm
+  · refine (generateFrom_eq_prod generateFrom_pi generateFrom_pi ?_ ?_).symm
+    · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (μ i).toFiniteSpanningSetsIn)).isCountablySpanning
+    · exact (Measure.FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn)).isCountablySpanning
+  · rintro _ ⟨s, ⟨s, _, rfl⟩, ⟨_, ⟨t, _, rfl⟩, rfl⟩⟩
+    rw [MeasurableEquiv.map_apply, show piProdSplit α β ⁻¹' (Set.univ.pi s ×ˢ Set.univ.pi t) =
+        (Set.univ.pi fun i ↦ s i ×ˢ t i) by
+        ext; simp only [Set.mem_preimage, Set.mem_prod, Set.mem_univ_pi, forall_and]; rfl]
+    simp_rw [Measure.pi_pi, Measure.prod_prod, Measure.pi_pi, Finset.prod_mul_distrib]
 
 theorem integral_prod_mul_of_split {μ : ∀ i, Measure (α i)} {ν : ∀ i, Measure (β i)} {ρ : ∀ i, Measure (γ i)}
     [∀ i, SigmaFinite (μ i)] [∀ i, SigmaFinite (ν i)] [∀ i, SigmaFinite (ρ i)]
@@ -49,7 +99,7 @@ theorem integral_prod_mul_of_split {μ : ∀ i, Measure (α i)} {ν : ∀ i, Mea
       ∫ a, (∏ i, ∫ b, F i (g i (a i, b)) ∂(ν i)) * H a ∂(Measure.pi μ) := by
   have hI : Integrable (fun e : ∀ i, γ i => (∏ i, F i (e i)) * H fun i => p i (e i)) (Measure.pi ρ) :=
     (Integrable.fintype_prod_dep hF).mul_bdd
-      (hH.comp (measurable_pi_lambda _ fun i => (hp i).comp (measurable_pi_apply i))).aestronglyMeasurable
+      (hH.comp (Measurable.of_eval fun i => (hp i).comp (measurable_pi_apply i))).aestronglyMeasurable
       (Filter.Eventually.of_forall fun _ => hb _)
   have hΘ := (measurePreserving_pi _ _ hg).comp (measurePreserving_piProdSplit μ ν).symm
   have hJ := (hΘ.integrable_comp hI.aestronglyMeasurable).2 hI
@@ -83,17 +133,17 @@ end Fubini
 section Step
 variable {k : Type*} [Field k] {n : Type*} {c : ℕ} {n' : Type*}
 
-variable (n c n') in
 
+variable (n c n') in
 abbrev KeptVar : Type _ := {rs : (n ⊕ Fin c) × (n' ⊕ Fin (c + 1)) // Kept rs}
 
-variable (n c n') in
 
+variable (n c n') in
 abbrev FreeVar : Type _ := {rs : (n ⊕ Fin c) × (n' ⊕ Fin (c + 1)) // Free (c / 2 + 1) rs}
+
 
 open Classical in
 variable (n c n') in
-
 def stepVarEquiv : KeptVar n c n' ⊕ FreeVar n c n' ≃ StepVar n c n' where
   toFun := Sum.elim (fun rs => ⟨rs.1, Or.inr rs.2⟩) fun rs => ⟨rs.1, Or.inl rs.2⟩
   invFun rs := if h : Kept rs.1 then .inl ⟨rs.1, h⟩ else .inr ⟨rs.1, rs.2.resolve_right h⟩
@@ -108,8 +158,8 @@ def joinVars (p : (KeptVar n c n' → k) × (FreeVar n c n' → k)) : StepVar n 
 
 def keptPart (e : StepVar n c n' → k) : KeptVar n c n' → k := fun rs => e ⟨rs.1, Or.inr rs.2⟩
 
-omit [Field k] in
 
+omit [Field k] in
 theorem keptPart_joinVars (w : KeptVar n c n' → k) (f : FreeVar n c n' → k) : keptPart (joinVars (w, f)) = w := by
   funext rs
   exact congrArg (Sum.elim w f) ((stepVarEquiv n c n').symm_apply_apply (.inl rs))
@@ -162,16 +212,16 @@ theorem continuous_keptPt : Continuous (keptPt : (KeptVar n c n' → k) → _) :
 
 variable [Fintype n] [DecidableEq n] [Fintype n'] [DecidableEq n'] [MeasurableSpace k] [BorelSpace k]
 
+
 open Classical in
 omit [DecidableEq n] [DecidableEq n'] in
-
 theorem integrable_step {ψ : AddChar k Circle} (hψ : Continuous ψ) (ν : Measure k) [ν.IsAddHaarMeasure]
     {Φ : Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k → ℂ} (hΦ : Φ ∈ SB _) (x₀ : Matrix n n' k) :
     Integrable (fun e : StepVar n c n' → k => Φ (stepPt x₀ e) * (ψ (-ch (stepPt x₀ e)) : ℂ)) (Measure.pi fun _ => ν) := by
   obtain ⟨_, _⟩ := SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
   have h := isClosedEmbedding_stepPt (c := c) x₀
   refine Continuous.integrable_of_hasCompactSupport ((hΦ.1.continuous.comp h.continuous).mul
-    (continuous_subtype_val.comp (hψ.comp (continuous_finset_sum _ fun i _ => h.continuous.matrix_elem _ _).neg))) ?_
+    (continuous_subtype_val.comp (hψ.comp (continuous_finsetSum _ fun i _ => h.continuous.matrix_elem _ _).neg))) ?_
   exact (hΦ.2.comp_isClosedEmbedding h).mul_right
 
 end Step
@@ -263,13 +313,13 @@ theorem stepDatum_mem_SB {φ : ∀ b : Edge, Matrix (Fin (G.rank b.tgt)) (Fin (G
   exact ⟨hφ.1.comp_continuous (key _ _).continuous, hφ.2.comp_isClosedEmbedding (key _ _)⟩
 
 theorem continuous_pairPhase (x : ColArgs G) : Continuous (pairPhase x) := by
-  refine continuous_finset_sum _ fun j _ => ?_
+  refine continuous_finsetSum _ fun j _ => ?_
   split_ifs
-  · refine continuous_finset_sum _ fun r _ => Continuous.mul ?_
+  · refine continuous_finsetSum _ fun r _ => Continuous.mul ?_
       ((continuous_keptPt.comp (continuous_apply j)).matrix_elem _ _)
     unfold keptRow
     split_ifs with h
-    · refine continuous_finset_sum _ fun l _ => ?_
+    · refine continuous_finsetSum _ fun l _ => ?_
       split_ifs
       · exact (continuous_keptPt.comp (continuous_apply (⟨_, h⟩ : Fin (G.m - 1)))).matrix_elem _ _
       · exact continuous_const
@@ -278,9 +328,9 @@ theorem continuous_pairPhase (x : ColArgs G) : Continuous (pairPhase x) := by
 
 variable [MeasurableSpace k] [BorelSpace k] (ψ : AddChar k Circle) (ν : Measure k)
 
+
 open Classical in
 variable (G) in
-
 def keptVol : Measure (KeptVars G) := Measure.pi fun _ => Measure.pi fun _ => ν
 
 def contractIntegrand (φ : ∀ b : Edge, Matrix (Fin (G.rank b.tgt)) (Fin (G.rank b.src)) k → ℂ) (x : ColArgs G)
@@ -309,7 +359,7 @@ theorem flatTensor_pureTensor [ν.IsAddHaarMeasure] (hm : 0 < G.m) (hψ : Contin
     (g := fun j : Fin (G.m - 1) => joinVars (k := k) (n := Fin (topRank G (j + 1))) (c := G.m - 2 - j)
       (n' := Fin (topRank G j)))
     (fun j => measurePreserving_elim ν (stepVarEquiv _ _ _))
-    (p := fun j => keptPart) (fun j => measurable_pi_lambda _ fun _ => measurable_pi_apply _)
+    (p := fun j => keptPart) (fun j => Measurable.of_eval fun _ => measurable_pi_apply _)
     (fun j => keptPart_joinVars)
     (fun j => by convert integrable_step hψ ν (stepDatum_mem_SB hs j (hφ j j.2)) (x j))
     (H := fun w => (ψ (-pairPhase x w) : ℂ))

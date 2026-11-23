@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.HermitianLattices.StatementLat
+module
+
+public import Formalism.HermitianLattices.StatementLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -125,7 +169,7 @@ def locBasic_sigma (hinj : Function.Injective (algebraMap R K))
       (hstar b).choose_spec, star_mul'])
   map_zero' := hinj (by rw [(hstar 0).choose_spec, map_zero, star_zero])
   map_add' a b := hinj (by
-    rw [(hstar (a + b)).choose_spec, map_add, map_add, (hstar a).choose_spec,
+    rw [(hstar (a + b)).choose_spec, map_add (f := _), map_add (f := _), (hstar a).choose_spec,
       (hstar b).choose_spec, star_add])
 
 theorem locBasic_sigma_spec (hinj : Function.Injective (algebraMap R K))
@@ -219,7 +263,7 @@ theorem locBasic : LocBasic := by
         · refine key (s + t) (by rw [add_smul]; exact L.add_mem hsx htx) ?_ ?_
           · intro h
             exact hs' (by simpa using p.sub_mem h h2)
-          · rw [map_add]
+          · rw [map_add (f := _)]
             intro h
             exact ht' (by simpa using p.sub_mem h h1)
         · exact key t htx h2 ht'

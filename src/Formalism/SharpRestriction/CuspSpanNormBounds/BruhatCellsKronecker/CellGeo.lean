@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellDef
-import Formalism.SharpRestriction.CuspSpanNormBounds.LatticeGluingRadicals
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelevantCarrierNonempty.InSCarrierNonempty
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,8 +102,9 @@ theorem geo_R (v : ι → S.V) (h : IsUnit (geoGram v).det) (z : S.V)
     (hz : z ∈ Submodule.span E (Set.range v)) (y : S.V) :
     S.hT z y = ∑ k, S.hT z (v k) * geoC v k y := by
   obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun (R := E)).1 hz
+
   simp only [map_sum, map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    Finset.sum_mul]
+  Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [geo_repr v h i y, Finset.mul_sum]
@@ -73,16 +117,19 @@ theorem geo_skew (v w : ι → S.V) (h : IsUnit (geoGram v).det)
     S.hT (geoY v w x) y + S.hT x (geoY v w y) = 0 := by
   have e1 : S.hT (geoY v w x) y = ∑ i, ∑ k, star (geoC v i x) * (S.hT (w i) (v k) * geoC v k y) := by
     rw [geo_Y_apply]
+
     simp only [map_sum, map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-      starRingEnd_apply]
+    starRingEnd_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [geo_R v h (w i) (hw i) y, Finset.mul_sum]
   have e2 : S.hT x (geoY v w y) = ∑ i, ∑ k, star (geoC v i x) * (S.hT (v i) (w k) * geoC v k y) := by
     rw [geo_Y_apply]
+
     simp only [map_sum, map_smul, smul_eq_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun k _ => ?_
     have hx : S.hT x (w k) = ∑ i, S.hT (v i) (w k) * star (geoC v i x) := by
+
       rw [← S.herm.eq (w k) x, geo_R v h (w k) (hw k) x, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_mul, S.herm.eq, starRingEnd_apply]
@@ -152,24 +199,7 @@ theorem geo_fvec_perp (F : FlagG S r T) (p : Fin (r + 1)) : F.fvec p ∈ perpS S
 
 theorem geo_coefX (F : FlagG S r T) (a : Fin r) (c : E) (y : S.V) (hy : y ∈ F.Xa a.val) :
     F.coefX (c • F.e a + y) a = c := by
-  classical
-  unfold FlagG.Xa at hy
-  obtain ⟨l, hl, rfl⟩ := (Finsupp.mem_span_image_iff_linearCombination (R := E)).1 hy
-  have hmem : c • F.e a + Finsupp.linearCombination E F.e l ∈ Submodule.span E (Set.range F.e) := by
-    refine Submodule.add_mem _ (Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, rfl⟩)) ?_
-    exact Submodule.span_mono (Set.image_subset_range _ _)
-      ((Finsupp.mem_span_image_iff_linearCombination (R := E)).2 ⟨l, hl, rfl⟩)
-  have hla : l a = 0 := by
-    by_contra hne
-    rw [Finsupp.mem_supported] at hl
-    have := hl (Finset.mem_coe.2 (Finsupp.mem_support_iff.2 hne))
-    simp at this
-  have heq : F.e_indep.repr ⟨_, hmem⟩ = Finsupp.single a c + l := by
-    apply F.e_indep.repr_eq
-    simp [Finsupp.linearCombination_single]
-  unfold FlagG.coefX
-  rw [dif_pos hmem, heq]
-  simp [hla]
+  apply PI.UnitaryGroupMassFormula.InSRelevantW.coefX_single_add <;> assumption
 
 variable {j : ℕ} (hj : j ≤ r + 1)
 
@@ -354,9 +384,11 @@ theorem geometric_decomposition_maps_perp_into_flag (F : FlagG S r T) (F' : Flag
       sum_mem fun a _ => Submodule.smul_mem _ _ (geo_Xa_le_X F' _ (geo_img_mem F' hj A' hA' a))
     have hYimg : ∀ a : Fin j, Y (geoImg F hj A a) ∈ F.X := by
       intro a
+
       simp only [geoImg, map_sum, map_smul, H2]
       exact sum_mem fun b _ => Submodule.smul_mem _ _ (geo_Xa_le_X F _ (geo_img_mem F hj A hA b))
     have hs1 : S.hT (Y x) (∑ a, α a • geoImg F hj A a) = 0 := by
+
       rw [map_sum]
       refine Finset.sum_eq_zero fun a _ => ?_
       rw [map_smul]
@@ -379,12 +411,12 @@ theorem geometric_decomposition_maps_perp_into_flag (F : FlagG S r T) (F' : Flag
       have hQQ : S.hT Q Q = 0 := geo_X_X F' _ _ hQ hQ
       have hQP : S.hT Q P = 0 := by
         have h5 := hs1
-        rw [hYx, map_add, LinearMap.add_apply, hPP, zero_add] at h5
+        rw [hYx, map_add (f := _), LinearMap.add_apply, hPP, zero_add] at h5
         exact h5
       have hPQ : S.hT P Q = 0 := by
         rw [← S.herm.eq Q P, hQP, map_zero]
       rw [hYx]
-      simp only [map_add, LinearMap.add_apply, hPP, hQQ, hPQ, hQP, add_zero]
+      simp only [map_add (f := _), LinearMap.add_apply, hPP, hQQ, hPQ, hQP, add_zero]
 
 end Pair
 
@@ -405,9 +437,10 @@ theorem geo_cross (F : FlagG S r T) (F' : FlagG S r T') (hj : j ≤ r + 1) (A A'
     S.hT (geoImg F hj A a) (F'.fvec (Fin.castLE hj c)) + S.hT (F.fvec (Fin.castLE hj a)) (geoImg F' hj A' c) =
       (Aᴴ * (Zhat F F').submatrix (Fin.castLE hj) (Fin.castLE hj) +
         (Zhat F F').submatrix (Fin.castLE hj) (Fin.castLE hj) * A') a c := by
+
   simp only [geoImg, map_sum, map_smulₛₗ, map_smul, LinearMap.sum_apply,
-    LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, Matrix.add_apply, Matrix.mul_apply,
-    Matrix.conjTranspose_apply, Matrix.submatrix_apply, Zhat, brS]
+  LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, Matrix.add_apply, Matrix.mul_apply,
+  Matrix.conjTranspose_apply, Matrix.submatrix_apply, Zhat, brS]
   congr 1
   exact Finset.sum_congr rfl fun b _ => mul_comm _ _
 

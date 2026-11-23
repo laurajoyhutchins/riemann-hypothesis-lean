@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SphericalEisensteinSeriesOnGroup
-import Development.AbelianVarietyTheory.Definitions.Divisors.AnisoClauseOfFirstTerm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinearIndependentSiegelCols
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsClosedHermN
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AdelicConjTransposeBlockMatrixTwoByTwoFin
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockMatrixTwoByTwoFinTranspose
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitarySchrodinger
+public import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AdelicConjTransposeBlockMatrixTwoByTwoFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RegularisedSiegelWeilFirstTerm
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,55 +111,10 @@ theorem exists_wPart (j : ℕ) : ∃ g : StdUnn.G D n, StdUnn.mat g = wMat (AE D
     rw [ha]
     exact wMat_key _ e1
 
-variable (D n) in
 
-def wPart (j : ℕ) : StdUnn.G D n := (exists_wPart (D := D) (n := n) j).choose
 
-variable (D n) in
 
-def hermJ (j : ℕ) : AddSubgroup (Mx D n n) where
-  carrier := {b | adj b = b ∧ ∀ i k : Fin n, (i.val < n - j ∨ k.val < n - j) → b i k = 0}
-  add_mem' := by
-    rintro a b ⟨ha, ha'⟩ ⟨hb, hb'⟩
-    refine ⟨by rw [adj_add, ha, hb], fun i k h => ?_⟩
-    simp [ha' i k h, hb' i k h]
-  zero_mem' := ⟨adj_zero, fun _ _ _ => rfl⟩
-  neg_mem' := by
-    rintro a ⟨ha, ha'⟩
-    refine ⟨by rw [adj_neg, ha], fun i k h => ?_⟩
-    simp [ha' i k h]
 
-variable (D n) in
-
-def ratHermJ (j : ℕ) : AddSubgroup (hermJ D n j) := (ratMx D n n).addSubgroupOf (hermJ D n j)
-
-def nPart {j : ℕ} (b : hermJ D n j) : StdUnn.G D n := GlobalTheory.ResAniso.nElt ⟨b.1, b.2.1⟩
-
-variable (D n) in
-
-def firstSpan (j : ℕ) : Submodule D.host.E (Fin n → D.host.E) :=
-  LinearMap.ker (LinearMap.funLeft D.host.E D.host.E (Subtype.val : {i : Fin n // n - j ≤ i.val} → Fin n))
-
-variable (D n) in
-
-def Qpar (j : ℕ) : Subgroup (GL (Fin n) D.host.E) := Formalism.UG.stabGL (firstSpan D n j)
-
-def mRat (a : GL (Fin n) D.host.E) : StdUnn.G D n :=
-  (StdUnn.Model.exists_levi (Matrix.GeneralLinearGroup.map (incA D) a)).choose
-
-def intwJ (j : ℕ) (db : Measure (hermJ D n j)) (f : StdUnn.G D n → ℂ) (g : StdUnn.G D n) : ℂ :=
-  ∫ b, f (wPart D n j * nPart b * g) ∂db
-
-def eisJ (j : ℕ) (db : Measure (hermJ D n j)) (f : StdUnn.G D n → ℂ) (g : StdUnn.G D n) : ℂ :=
-  cosetSum (Qpar D n j) ⊤ (fun a => intwJ j db f (mRat a * g)) 1
-
-def lowerRank (γ : StdUnn.G D n) : ℕ :=
-  if h : ∃ M : Matrix (Fin (n + n)) (Fin (n + n)) D.host.E, rat M = StdUnn.mat γ then
-    ((h.choose.submatrix finSumFinEquiv finSumFinEquiv).toBlocks₂₁).rank else 0
-
-def cellSum (j : ℕ) (f : StdUnn.G D n → ℂ) (g : StdUnn.G D n) : ℂ :=
-  ∑' q : Cosets (StdUnn.P D n) (StdUnn.GF D n),
-    if lowerRank ((q.out : StdUnn.GF D n) : StdUnn.G D n) = j then term (StdUnn.P D n) (StdUnn.GF D n) f g q else 0
 
 end GlobalTheory.SiegelCells
 

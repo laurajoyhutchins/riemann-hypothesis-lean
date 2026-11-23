@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SameSetup
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsBasisAtTransport
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SameSetup
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsBasisAtTransport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,11 +46,9 @@ open Formalism.MainNotions.IntegralHeckeForms (TwOK ClsQ HkIdx V0 Fm0 FullRk SgJ
 open Formalism.L2.Host (embLL0 CharFrame)
 open GlobalTheory.TwSys GlobalTheory.TwAll GlobalTheory.SupLaw GlobalTheory.LiftLeaf
 open scoped TensorProduct
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 1600000
-attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-local macro:max "kc% " e:term:max : term => `((by kexactB $e))
+
+attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 namespace GlobalTheory.TwInputs.Move.RatUp
 
@@ -25,32 +60,43 @@ theorem placeMap_up {S T : HSp D} (B : Base S T) (a : AE D) :
       (IsPlaceModel (baseUp r B).F.ψ (symplO _ _) (heisO (baseUp r B).F.ψ _ _) ((by with_unfolding_all exact (a :))) (baseUp r B).F.lat 1 (baseUp r B).F.f₀
         ((by with_unfolding_all exact (Tm :))))) = IsPlaceModel B.F.ψ (symplO S T) (heisO B.F.ψ S T) a B.F.lat 1 B.F.f₀ :=
     funext fun Tm => propext ⟨fun g => ⟨(by with_unfolding_all exact (g.1 :)), (by with_unfolding_all exact (g.2 :)), (by with_unfolding_all exact (g.3 :))⟩, fun g => ⟨(by with_unfolding_all exact (g.1 :)), (by with_unfolding_all exact (g.2 :)), (by with_unfolding_all exact (g.3 :))⟩⟩
-  exact (by with_unfolding_all exact ((heq_of_eq (congrArg Classical.epsilon h)) :))
+  delta Frame.placeMap
+  with_unfolding_all exact heq_of_eq (congrArg Classical.epsilon h)
 
 open Classical in
 theorem vecAt_up {S T : HSp D} (B : Base S T) : (baseUp r B).vecAt = (B.vecAt) := by
   delta ExportSeries.Base.vecAt Frame.vec
   rewrite [show (baseUp r B).F.placeMap = ((by with_unfolding_all exact (B.F.placeMap :))) from (by with_unfolding_all exact ((funext fun a => eq_of_heq (placeMap_up r B a)) :))]
-  exact (by with_unfolding_all exact ((Eq.refl B.vecAt) :))
+  dsimp only [halfIdem, Frame.datumFn, ExportSeries.Base.locFn, baseUp, twistUp]
+  rfl
+
+private theorem series_up {S T : HSp D} (B : Base S T) :
+    @series (overD D r) S T (baseUp r B).F = @series D S T B.F := by
+  funext ω f g
+  refine LinearMap.ext fun P => funext fun x => ?_
+  delta series thetaKO
+  with_unfolding_all refine congrArg (fun v : WO S T → ℂ => ω (g, x) v 0) ?_
+  dsimp only [Frame.fock, pureTensorO, aPlusAll, aPlus, crea, Datum.dRho, baseUp]
+  rfl
 
 theorem theta_up {S T : HSp D} (B : Base S T) : (baseUp r B).theta = (B.theta) := by
   delta ExportSeries.Base.theta ExportSeries.Base.vecBase
-  rewrite [vecAt_up r B]
-  exact (by with_unfolding_all exact ((Eq.refl B.theta) :))
+  rewrite [vecAt_up r B, series_up r B]
+  rfl
 
 theorem genSet_up {S T : HSp D} (B : Base S T) (ω) (t : Twist D Circle) :
     (baseUp r B).genSet (((ω : PairRep S T))) (twistUp r t) = ((B.genSet ω t : GA (overD D r) S → PolF (overD D r) T.rank S.rank → Set (GA (overD D r) T → ℂ))) := by
   delta ExportSeries.Base.genSet ExportSeries.Base.gen ExportSeries.Base.vecFlat
-  rewrite [vecAt_up r B]
-  exact (by with_unfolding_all exact ((Eq.refl (B.genSet ω t)) :))
+  rewrite [vecAt_up r B, series_up r B]
+  rfl
 
 def univUp {A : Type} [AddCommGroup A] (t : UnivTwist D A) : UnivTwist (overD D r) A := ⟨(by with_unfolding_all exact (t.del :)), (by with_unfolding_all exact (t.kap :))⟩
 
 theorem xiCoef_up {S T : HSp D} {A : Type} [AddCommGroup A] [Fintype A] (B : Base S T) (ω) (u : UnivTwist D A) :
     (baseUp r B).xiCoef (((ω : PairRep S T))) (univUp r u) = ((B.xiCoef ω u : (Q : Finset (Pl (overD D r).host.E)) → ((PP : Pl (overD D r).host.E) → A → Matrix (Fin T.rank) (Fin S.rank) (kP PP) → ℚ) → GA (overD D r) S → PolF (overD D r) T.rank S.rank → (↥Q → A) → GA (overD D r) T → ℂ)) := by
   delta ExportSeries.Base.xiCoef ExportSeries.Base.xi ExportSeries.Base.vecFam
-  rewrite [vecAt_up r B]
-  exact (by with_unfolding_all exact ((Eq.refl (B.xiCoef ω u)) :))
+  rewrite [vecAt_up r B, series_up r B]
+  rfl
 
 section Lat
 
@@ -91,11 +137,27 @@ theorem se_gens : (setupUp r ρ).gens ((i)) ((j)) b = (ρ.gens i j b) := by
   funext k Q ψ
   exact (by with_unfolding_all exact ((genSet_up r (ρ.B i j b) (ρ.om i j b 1) (ρ.tw i b k ((by with_unfolding_all exact (Q :))) ((by with_unfolding_all exact (ψ :))))) :))
 
+private theorem univOf_up (Q : Finset (Pl D.host.E)) (M : ℕ) :
+    univOf (overD D r).nexp i Q M (setupUp r ρ).rc =
+      univUp r (univOf D.nexp i Q M ρ.rc) := by
+  dsimp only [setupUp, univOf, univUp, coord, Recip.pull, Recip.sym, resOf, IsResAt]
+  rfl
+
 theorem se_xi : (setupUp r ρ).xi ((i)) ((j)) b (overD D r).nexp = (ρ.xi i j b D.nexp) := by
   funext Q M
-  exact (by with_unfolding_all exact ((congrFun (congrFun (xiCoef_up r (ρ.B i j b) (ρ.om i j b 1) (univOf D.nexp i (admissibleConjugatePairPlaces D.ntw i ((by with_unfolding_all exact (Q :))) M) M ρ.rc))
-    ((by with_unfolding_all exact ((half (ρ.ch i) (admissibleConjugatePairPlaces D.ntw i ((Q)) M)) : _))))
-    ((by with_unfolding_all exact ((ExportSeries.Base.univFam (univOf D.nexp i (admissibleConjugatePairPlaces D.ntw i ((Q)) M) M ρ.rc) (ρ.β j)) : _)))) :))
+  let Q₀ := admissibleConjugatePairPlaces (overD D r).ntw i Q M
+  let u := univOf D.nexp i Q₀ M ρ.rc
+  let ω := ρ.om i j b 1
+  let Φ := ExportSeries.Base.univFam u (ρ.β j)
+  have atFam := congrArg
+    (fun F : type_of% ((ρ.B i j b).xiCoef ω u) => F (half (ρ.ch i) Q₀) Φ)
+    (xiCoef_up r (ρ.B i j b) ω u)
+  delta Setup.xi
+  rewrite [univOf_up r ρ i Q₀ M]
+  dsimp only [setupUp, ω, Φ, u, Q₀, univUp, ExportSeries.Base.univFam,
+    admissibleConjugatePairPlaces, Formalism.MainNotions.NAdm.AdmQ,
+    Formalism.MainNotions.NAdm.TWSet] at atFam ⊢
+  exact atFam
 
 variable {r ρ i j b} {ι : D.what₂.LL →+* (overD D r).what₂.LL} {e : ↥(overD D r).LL0 ≃+* ↥D.LL0} (h : CopyTw D (overD D r) ι e)
 include h
@@ -115,9 +177,9 @@ theorem datum_dn {s g P} (d : (setupUp r ρ).IsDatum ((i)) ((j)) b s g P) : ρ.I
     have c := (le_of_eq a) ((by with_unfolding_all exact (d.mem :)) : ((by with_unfolding_all exact (P :))) ∈ _)
     exact (by with_unfolding_all exact (c :))⟩
 
+
 omit h in
 variable (r) in
-
 def rdUp (rd : Rd ρ D.nexp i j b) : Rd (setupUp r ρ) (overD D r).nexp ((i)) ((j)) b := (rd)
 
 theorem rat_up {hρ : ρ.Good} {hρ' : (setupUp r ρ).Good} {rd : Rd ρ D.nexp i j b} (g : SeriesTie.Rat hρ rd) :

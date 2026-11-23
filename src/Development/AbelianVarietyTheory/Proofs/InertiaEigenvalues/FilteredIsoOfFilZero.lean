@@ -1,8 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.DualExactSequence
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.JumpMultiplicityDual
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ActQdRPeriodTEqCyclotomicBottom
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.DualExactSequence
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.JumpMultiplicityDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,36 +61,7 @@ variable {G : Type} [Group G] {Qp K₀ K : Type} [Field Qp] [Field K₀] [Field 
     (PD : PeriodData G Qp K₀ K B BdR)
     {LL O : Type} [Field LL] [Algebra Qp LL] [CommRing O] [Algebra O LL]
 
-def charLatticeOf (hinj : Function.Injective (algebraMap O LL)) (χ : G →* LLˣ)
-    (hχ : ∀ g, ∃ a : O, algebraMap O LL a = χ g) : Lattice (O := O) (charRep χ) where
-  T := LinearMap.range (Algebra.linearMap O LL)
-  stable := by
-    rintro g _ ⟨a, rfl⟩
-    obtain ⟨c, hc⟩ := hχ g
-    refine ⟨c * a, ?_⟩
-    change algebraMap O LL (c * a) = (χ g : LL) * algebraMap O LL a
-    rw [map_mul, hc]
-  fg := by
-    rw [← Submodule.map_top]
-    exact Module.Finite.fg_top.map _
-  free := Module.Free.of_equiv (LinearEquiv.ofInjective (Algebra.linearMap O LL) hinj)
-  span := by
-    rw [eq_top_iff]
-    intro x _
-    have h : (1 : LL) ∈ Submodule.span LL (LinearMap.range (Algebra.linearMap O LL) : Set LL) :=
-      Submodule.subset_span ⟨1, by simp⟩
-    simpa using Submodule.smul_mem _ x h
-
 variable [TopologicalSpace G] [TopologicalSpace LL]
-
-def charLocLat (Qp : Type) [Field Qp] [Algebra Qp LL] [IsTopologicalRing LL]
-    (hinj : Function.Injective (algebraMap O LL)) (χ : G →* LLˣ)
-    (hχ : ∀ g, ∃ a : O, algebraMap O LL a = χ g) (hc : Continuous fun g => (χ g : LL)) :
-    LocLat G Qp LL O where
-  V := LL
-  ρ := charRep χ
-  cont := fun _ => hc.mul continuous_const
-  L := charLatticeOf hinj χ hχ
 
 section Whole
 
@@ -68,19 +78,6 @@ end Generic
 section At
 
 variable (K LL : FinExt l)
-
-def cycLat : DualExactSequence.Lat K LL :=
-  charLocLat ℚ_[l] Subtype.val_injective (cycLL (P.PD K) ↥LL.1)
-    (fun g => ⟨algebraMap ℤ_[l] ↥(OL LL) ⟨_, ((GlobalTheory.Cyc.cyc_basic l P.χQ P.χQ_cyc).1 g).le⟩, by
-      change _ = algebraMap ℚ_[l] ↥LL.1 (((P.PD K).χ g : ℚ_[l]ˣ) : ℚ_[l])
-      rw [P.PD_χ]
-      rfl⟩)
-    (by
-      change Continuous fun g : ↥(GK K) =>
-        algebraMap ℚ_[l] ↥LL.1 (((P.PD K).χ g : ℚ_[l]ˣ) : ℚ_[l])
-      simp only [P.PD_χ]
-      exact (continuous_algebraMap ℚ_[l] ↥LL.1).comp
-        ((GlobalTheory.Cyc.cyc_basic l P.χQ P.χQ_cyc).2.1.comp continuous_subtype_val))
 
 end At
 

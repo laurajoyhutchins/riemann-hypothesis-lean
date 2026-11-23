@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpBijectiveUniformisation
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsChartIff
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -20,27 +62,7 @@ variable {V : Type} [CommRing V] {G' G : Over (Sp V)} [GrpObj G'] [GrpObj G] {n 
 def zV (pG : IsPowGrp G' G n) (xT : ∀ m, jOG (𝟙 (Sp V)) d m 1 ⟶ G) (m : ℕ) : jOG (𝟙 (Sp V)) d m n ⟶ G' :=
   pG.lim.lift (Fan.mk _ fun i => homAt (𝟙 (Sp V)) (jetCopy (S := V) d m i) ≫ xT m)
 
-lemma jet_square (I : Ideal V) (e m : ℕ) :
-    spMap (jetCoef (Ideal.Quotient.mk (I ^ (e + 1))) (Fin n × Fin d) m) ≫ spMap (algebraMap V (Jet V (Fin n × Fin d) m)) =
-      spMap (algebraMap (V ⧸ I ^ (e + 1)) (Jet (V ⧸ I ^ (e + 1)) (Fin n × Fin d) m)) ≫ thick V I e := by
-  simp only [spMap, thick, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  congr 2
-  ext x
-  simp only [RingHom.comp_apply]
-  rw [← Ideal.Quotient.mk_algebraMap, ← Ideal.Quotient.mk_algebraMap, jetCoef, Ideal.Quotient.lift_mk]
-  simp [MvPolynomial.algebraMap_eq]
-
-def zE (I : Ideal V) (pG : IsPowGrp G' G n) (xT : ∀ m, jOG (𝟙 (Sp V)) d m 1 ⟶ G) (e m : ℕ) :
-    Sp (Jet (V ⧸ I ^ (e + 1)) (Fin n × Fin d) m) ⟶ (thickObj V I e G').left :=
-  pullback.lift (spMap (jetCoef (Ideal.Quotient.mk (I ^ (e + 1))) (Fin n × Fin d) m) ≫ (zV pG xT m).left)
-    (spMap (algebraMap (V ⧸ I ^ (e + 1)) _)) (by
-      rw [Category.assoc, Over.w (zV pG xT m)]
-      simpa using jet_square (n := n) (d := d) I e m)
-
 end Jets
-
-def jetVal {A : Type} [CommRing A] {X : Scheme.{0}} (h : Sp A ⟶ X) (W : X.Opens) (hW : h ⁻¹ᵁ W = ⊤) (φ : Γ(X, W)) : A :=
-  (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom ((h.appLE W ⊤ hW.ge).hom φ)
 
 section Coord
 
@@ -48,26 +70,8 @@ variable {V : Type} [CommRing V] [IsDomain V] {I : Ideal V} {D' : DegData V I}
   {A' : PolAV (Spec (CommRingCat.of (FractionRing V)))} {G' G : Over (Sp V)} [GrpObj G'] [IsCommMonObj G'] [GrpObj G]
   {n d : ℕ}
 
-def coordSet (U' : Unif I D' A' G') (pG : IsPowGrp G' G n) (xT : ∀ m, jOG (𝟙 (Sp V)) d m 1 ⟶ G) (e m : ℕ) :
-    Set (Jet (V ⧸ I ^ (e + 1)) (Fin n × Fin d) m) :=
-  {x | ∃ (W : D'.toPre.P.A.left.Opens) (hW : (zE I pG xT e m ≫ (U'.gt e).pG.left) ⁻¹ᵁ W = ⊤)
-      (φ : Γ(D'.toPre.P.A.left, W)), x = jetVal _ W hW φ} ∪
-  {x | ∃ (χ : D'.toPre.X) (j : Fin 4 → D'.toPre.P.L.ι)
-      (hj : zE I pG xT e m ⁻¹ᵁ LB.wchart D'.toPre.P.L (D'.toPre.Oφ (U'.gt e).pG χ) j = ⊤),
-      x = jetVal _ _ hj (((U'.gt e).t χ).s j).val}
-
 end Coord
 
-open IsLocalRing in
-
-def UnifChartTieSt : Prop :=
-  ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l)
-    (c : Coeff l) [StarRing (𝓞 E)], (∀ a : 𝓞 E, star a = H.bar a) →
-  ∀ (T : CDVR) (io : c.F →+* T.Fr) (y : IntFr Xo c T io) (C : IntegralChartA3 Xo c T io y) (n : ℕ)
-    (D' : DegData T.V (maximalIdeal T.V)) (A' : PolAV (Spec (CommRingCat.of T.Fr)))
-    (G' : Over (Sp T.V)) [GrpObj G'] [IsCommMonObj G'] (pG : IsPowGrp G' C.I.G.G n)
-    (U' : Unif (maximalIdeal T.V) D' A' G') (e m : ℕ),
-    Algebra.adjoin (T.V ⧸ maximalIdeal T.V ^ (e + 1)) (coordSet U' pG C.xT e m) = ⊤
 
 end BidegreeTwoJet
 end Formalism.MainNotions.ModuliIntegralCharts.H1

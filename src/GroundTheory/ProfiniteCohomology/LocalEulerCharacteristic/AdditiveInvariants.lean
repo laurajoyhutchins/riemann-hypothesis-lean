@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveDefs
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalEulerCharacteristic.AdditiveDefs
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.RepresentationTheory.Invariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Flat.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -15,8 +65,8 @@ variable {k Γ : Type*} [Field k] [Group Γ] [Fintype Γ]
   [AddCommGroup X₃] [Module k X₃]
   {ρ₁ : Representation k Γ X₁} {ρ₂ : Representation k Γ X₂} {ρ₃ : Representation k Γ X₃}
 
-omit [Fintype Γ] in
 
+omit [Fintype Γ] in
 theorem mapsTo_invariants {f : X₁ →ₗ[k] X₂} (hf : ρ₁.IsIntertwiningMap ρ₂ f) (x : X₁)
     (hx : x ∈ ρ₁.invariants) : f x ∈ ρ₂.invariants := fun γ => by
   rw [← hf.isIntertwining, hx γ]
@@ -27,6 +77,7 @@ theorem exists_invariant_preimage (hΓ : (Fintype.card Γ : k) ≠ 0) {g : X₂ 
   obtain ⟨x, rfl⟩ := hs y
   refine ⟨(Fintype.card Γ : k)⁻¹ • ρ₂.norm x, fun γ => by rw [map_smul, self_norm_apply], ?_⟩
   have hnorm : g (ρ₂.norm x) = ρ₃.norm (g x) := by
+
     simp [Representation.norm, LinearMap.sum_apply, map_sum, hg.isIntertwining]
   have hinv : ρ₃.norm (g x) = (Fintype.card Γ : k) • g x := by
     have hy' : ∀ γ, ρ₃ γ (g x) = g x := hy
@@ -73,7 +124,7 @@ theorem isIntertwiningMap_rTensor {k Γ X Y N : Type*} [CommRing k] [Monoid Γ] 
     induction v using TensorProduct.induction_on with
     | zero => simp
     | tmul x n => simp [hf.isIntertwining]
-    | add v w hv hw => simp only [map_add, hv, hw]⟩
+    | add v w hv hw => simp only [map_add (f := _), hv, hw]⟩
 
 namespace AdditiveFunction
 

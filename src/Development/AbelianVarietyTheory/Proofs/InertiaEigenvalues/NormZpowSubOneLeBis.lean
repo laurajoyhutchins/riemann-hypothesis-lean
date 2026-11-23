@@ -1,10 +1,58 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerGeneratorMatrixPerturbation
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTateOperatorLevelComplement
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPrimitiveRootPrimePowSubOnePadicComplex
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormZpowSubOneLe
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TateDecompositionCompletedCyclotomicIntegers
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTateOperatorLevelComplement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormZpowSubOneLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.Cyc
 
@@ -37,7 +85,7 @@ theorem map_mulVec {r : ℕ} (X : AddSubgroup C) (O : Set C) (hOX : ∀ o ∈ O,
   let T' : X →+ C := AddMonoidHom.mk' (fun x => T x) fun x x' => hadd _ x.2 _ x'.2
   funext a
   have h := map_sum T' (fun b => (⟨B a b * v b, hOX _ (hB a b) _ (hv b)⟩ : X)) Finset.univ
-  simp only [T', AddMonoidHom.mk'_apply, AddSubgroup.val_finset_sum] at h
+  simp only [T', AddMonoidHom.mk'_apply, AddSubgroup.val_finsetSum] at h
   simp only [Matrix.mulVec, dotProduct]
   rw [h]
   exact Finset.sum_congr rfl fun b _ => hlin _ (hB a b) _ (hv b)
@@ -153,41 +201,7 @@ theorem exists_quot {χ : GQ l →* ℚ_[l]ˣ} {K : FinExt l} {j : ℕ} (hj : Le
     ∃ (B : Matrix (Fin r) (Fin r) (PadicComplex l)) (c : ℝ), 0 ≤ c ∧ c < 1 ∧
       (∀ a b, ‖B a b‖ ≤ c) ∧ (∀ a b, B a b ∈ intC (Ks K j)) ∧
       chiC χ i g • U = 1 + (ζ - 1) • B := by
-  have hz := norm_root_sub_one h
-  have hz0 : ζ - 1 ≠ 0 := sub_ne_zero.2 (h.ne_one hl.1.one_lt)
-  have hzp : 0 < ‖ζ - 1‖ := norm_pos_iff.2 hz0
-  have hc := norm_chiC_sub_one hj hg i
-  have hc1 : ‖chiC χ i g‖ ≤ 1 := by
-    have := IsUltrametricDist.norm_add_le_max (chiC χ i g - 1) 1
-    rw [sub_add_cancel, norm_one] at this
-    exact this.trans (max_le (hc.trans rho_lt_one).le le_rfl)
-  let B : Matrix (Fin r) (Fin r) (PadicComplex l) := (ζ - 1)⁻¹ • (chiC χ i g • U - 1)
-  have hB : ∀ a b, ‖B a b‖ < 1 := by
-    intro a b
-    have e : B a b = (ζ - 1)⁻¹ * (chiC χ i g * (U - 1) a b
-        + (chiC χ i g - 1) * (1 : Matrix (Fin r) (Fin r) (PadicComplex l)) a b) := by
-      simp only [B, Matrix.smul_apply, Matrix.sub_apply, smul_eq_mul]; ring
-    rw [e, norm_mul, norm_inv, inv_mul_lt_iff₀ hzp, mul_one, hz]
-    refine (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ?_ ?_)
-    · rw [norm_mul]
-      exact (mul_le_of_le_one_left (norm_nonneg _) hc1).trans_lt (hU1 a b)
-    · rw [norm_mul]
-      refine (mul_le_of_le_one_right (norm_nonneg _) ?_).trans_lt hc
-      rw [Matrix.one_apply]; split_ifs <;> simp
-  refine ⟨B, ‖fun p : Fin r × Fin r => B p.1 p.2‖, norm_nonneg _,
-    (pi_norm_lt_iff one_pos).2 fun p => hB _ _,
-    fun a b => norm_le_pi_norm (fun p : Fin r × Fin r => B p.1 p.2) (a, b),
-    fun a b => ⟨?_, (hB a b).le⟩, ?_⟩
-  · have m1 := (mem_inC_iff _ _).1 (root_mem_inC K hj.1 h)
-    have m2 := (mem_inC_iff _ _).1 (chiC_mem_inC χ i g (Ks K j))
-    have m3 := (mem_inC_iff _ _).1 (hU a b).1
-    rw [mem_inC_iff]
-    simp only [B, Matrix.smul_apply, Matrix.sub_apply, smul_eq_mul]
-    refine mul_mem (inv_mem (sub_mem m1 (one_mem _))) (sub_mem (mul_mem m2 m3) ?_)
-    rw [Matrix.one_apply]; split_ifs
-    · exact one_mem _
-    · exact zero_mem _
-  · simp only [B, smul_smul, mul_inv_cancel₀ hz0, one_smul]; abel
+  apply GlobalTheory.CycPerturb.exists_quot <;> assumption
 
 theorem twAct_sub {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)} {χ : GQ l →* ℚ_[l]ˣ} {i : ℤ}
     {r : ℕ} {U : GQ l → Matrix (Fin r) (Fin r) (PadicComplex l)} {g : GQ l} {p : PadicComplex l}
@@ -207,7 +221,7 @@ theorem act_inC {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)} (ha : Is
 
 theorem ohat_norm (K : FinExt l) {y : PadicComplex l} (hy : y ∈ Ohat K) : ‖y‖ ≤ 1 := by
   have : closure (intC (Kinf K)) ⊆ {y : PadicComplex l | ‖y‖ ≤ 1} :=
-    closure_minimal (fun _ h => h.2) (isClosed_le continuous_norm continuous_const)
+    closure_minimal (by exact fun _ h => h.2) (isClosed_le continuous_norm continuous_const)
   exact this hy
 
 theorem twAct_fixed_eq_zero {act : GQ l →* (PadicComplex l ≃+* PadicComplex l)}
@@ -234,7 +248,7 @@ theorem twAct_fixed_eq_zero {act : GQ l →* (PadicComplex l ≃+* PadicComplex 
   have hp0 : ζ - 1 ≠ 0 := sub_ne_zero.2 (hζ.ne_one hl.1.one_lt)
   refine eq_zero_of_small (Xj K j) (fun x hx => ohat_norm K (hO x hx)) _ hmul
     (fun x => S (act g x)) (fun x hx => (hS _ (hgX x hx)).1)
-    (fun x hx x' hx' => by rw [map_add, hadd _ (hgX x hx) _ (hgX x' hx')])
+    (fun x hx x' hx' => by rw [map_add (f := _), hadd _ (hgX x hx) _ (hgX x' hx')])
     (fun o ho x hx => by rw [map_mul, act_inC hact hg.1 ho.1, hlin _ ho _ (hgX x hx)])
     (-B) hBO' hc0 hc1 (fun a b => by rw [Matrix.neg_apply, norm_neg]; exact hB a b) y hy ?_
   rw [← map_mulVec (Xj K j) _ hmul S hadd hlin (-B) hBO' _ fun a => hgX _ (hy a)]

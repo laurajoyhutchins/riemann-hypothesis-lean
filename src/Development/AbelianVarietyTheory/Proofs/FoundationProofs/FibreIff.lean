@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsAbelianGaloisHost
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.GeometricComponentEmbedding
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.RamifiedPlacesSplitEigen
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EigenvectorLieDegree
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.FramedFlatCoordinates
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.CMLattices.IsCyclotomicExtensionCyclotomicField28
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VecMulMapEqZero
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -90,25 +132,5 @@ def EigStable {S : Scheme.{0}} (T : SAB H S) (c : Coeff l) : Prop :=
 
 variable {Xo : Moduli Dw l} {c : Coeff l} {O : Type} [CommRing O] {β : O →+* c.F} {Y : Model Xo c β}
   {U : (Xo.XF c).Opens} {τ : E →+* ℂ}
-
-def IsSqNorm (sig : FramedFlatCoordinates.Rule Y U τ) (s : c.F →+* ℂ) (κ : ℝ) : Prop :=
-  ∃ (a : FramedFlatCoordinates.Framed Y U τ ℂ s) (y : Sp ℂ ⟶ Xo.XF c) (t : SAB H (Sp ℂ)) (v : Fin Dw.p → (epsR ℂ ⟶ t.G))
-    (w : Fin Dw.q → (epsR ℂ ⟶ t.G)) (g : ℕ) (u : HolUnif t.G t.PP.L g) (Hm : Matrix (Fin g) (Fin g) ℂ) (χ : u.Λ → ℂ)
-    (zv : Fin Dw.p → Fin g → ℂ) (zw : Fin Dw.q → Fin g → ℂ),
-    LiesOver a y ∧ IsFibre a t v w ∧ u.IsAH Hm χ ∧ (∀ i, u.IsDiff (zv i) (v i)) ∧ (∀ i, u.IsDiff (zw i) (w i)) ∧
-    0 < EigenbasisGramSquares.gramSq Hm zv ∧ 0 < EigenbasisGramSquares.gramSq Hm zw ∧
-    κ = ‖sig ℂ s a‖ ^ 2 * (EigenbasisGramSquares.gramSq Hm zv / EigenbasisGramSquares.gramSq Hm zw)
-
-def IsValue (sig : FramedFlatCoordinates.Rule Y U τ) {ℓ : ℕ} [Fact ℓ.Prime] {K : Type} [Field K] (i : K →+* ℂ_[ℓ]) (φ : c.F →+* K)
-    (x : ℝ) : Prop :=
-  ∃ (V : ValuationSubring K) (a : FramedFlatCoordinates.Framed Y U τ K φ) (y : Sp K ⟶ Xo.XF c) (t : SAB H (Sp K))
-    (v : Fin Dw.p → (epsR K ⟶ t.G)) (w : Fin Dw.q → (epsR K ⟶ t.G)) (𝒢 : Over (Sp V)) (_ : GrpObj 𝒢)
-    (b : OAct (𝓞 E) 𝒢) (ψ : t.G.left ⟶ 𝒢.left) (χ χ' : 𝓞 E →+* V) (u : Fin Dw.p → (epsR V ⟶ 𝒢))
-    (u' : Fin Dw.q → (epsR V ⟶ 𝒢)),
-    (∀ z : K, z ∈ V ↔ ‖i z‖ ≤ 1) ∧ LiesOver a y ∧ IsFibre a t v w ∧ IsSemiAbelian 𝒢 ∧
-    IsGrpPullback t.G 𝒢 (spMap (algebraMap V K)) ψ ∧ (∀ z, (t.act.act z).left ≫ ψ = ψ ≫ (b.act z).left) ∧
-    (algebraMap V K).comp χ = FramedFlatCoordinates.chr c τ φ ∧ (algebraMap V K).comp χ' = FramedFlatCoordinates.chr c (conjEmb τ) φ ∧
-    EigenvectorLieDegree.IsEigBasis b χ u ∧ EigenvectorLieDegree.IsEigBasis b χ' u' ∧ (∀ k, IsVecOver (algebraMap V K) ψ (u k) (v k)) ∧
-    (∀ k, IsVecOver (algebraMap V K) ψ (u' k) (w k)) ∧ ‖i (sig K φ a)‖ = (ℓ : ℝ) ^ (-x)
 
 end GlobalTheory.FlatRow

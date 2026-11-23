@@ -1,5 +1,54 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.TauDefs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.ZhatNormLinearBound
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialProperness.TauDefs
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.C2
 
@@ -28,7 +77,6 @@ def esIe (k r : ℕ) : Fin r ↪ Fin (2 * r + k + 1) :=
     have ha := a.isLt; have hb := b.isLt
     simp only [esI] at h1; omega)⟩
 
-theorem eI_val (k r : ℕ) (a : Fin r) : (eI k r a).val = a.val := rfl
 theorem eIe_apply (k r : ℕ) (a : Fin r) : eIe k r a = eI k r a := rfl
 theorem esIe_apply (k r : ℕ) (a : Fin r) : esIe k r a = esI k r a := rfl
 theorem esI_val (k r : ℕ) (a : Fin r) : (esI k r a).val = 2 * r + k - a.val := rfl
@@ -154,7 +202,7 @@ theorem uh_of_herm {m : ℕ} {H g : Matrix (Fin m) (Fin m) ℂ}
 theorem mX_eI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (a : Fin r) (j : Fin (2 * r + k + 1)) :
     mX k r vX (eI k r a) j = if h : j.val < r then vX a ⟨j.val, h⟩ else 0 := by
   unfold mX
-  rw [dif_pos (show (eI k r a).val < r from a.isLt)]
+  rw [dite_eq_left (show (eI k r a).val < r from a.isLt)]
   rfl
 
 theorem mX_esI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (a : Fin r) (j : Fin (2 * r + k + 1)) :
@@ -162,19 +210,19 @@ theorem mX_esI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (a : Fin r) (j : Fi
       if h : r + k < j.val then (vXᴴ)⁻¹ a ⟨2 * r + k - j.val, by omega⟩ else 0 := by
   have ha := a.isLt
   unfold mX
-  rw [dif_neg (show ¬ ((esI k r a).val < r) by show ¬ (2 * r + k - a.val < r); omega),
-    dif_pos (show r + k < (esI k r a).val by show r + k < 2 * r + k - a.val; omega)]
+  rw [dite_eq_right (show ¬ ((esI k r a).val < r) by show ¬ (2 * r + k - a.val < r); omega),
+    dite_eq_left (show r + k < (esI k r a).val by show r + k < 2 * r + k - a.val; omega)]
   by_cases hj : r + k < j.val
-  · rw [dif_pos hj, dif_pos hj]
+  · rw [dite_eq_left hj, dite_eq_left hj]
     have e : (⟨2 * r + k - (esI k r a).val, by rw [esI_val]; omega⟩ : Fin r) = a :=
       Fin.ext (by show 2 * r + k - (esI k r a).val = a.val; rw [esI_val]; omega)
     rw [e]
-  · rw [dif_neg hj, dif_neg hj]
+  · rw [dite_eq_right hj, dite_eq_right hj]
 
 theorem mX_mid (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (i j : Fin (2 * r + k + 1))
     (h1 : r ≤ i.val) (h2 : i.val ≤ r + k) : mX k r vX i j = if i = j then 1 else 0 := by
   unfold mX
-  rw [dif_neg (show ¬ (i.val < r) by omega), dif_neg (show ¬ (r + k < i.val) by omega)]
+  rw [dite_eq_right (show ¬ (i.val < r) by omega), dite_eq_right (show ¬ (r + k < i.val) by omega)]
 
 theorem mX_mulVec_eI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (x : Fin (2 * r + k + 1) → ℂ) (a : Fin r) :
     (mX k r vX *ᵥ x) (eI k r a) = (vX *ᵥ pX k r x) a := by
@@ -183,11 +231,11 @@ theorem mX_mulVec_eI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (x : Fin (2 *
   · intro i hi
     by_cases h : i.val < r
     · exact absurd (Fin.ext rfl : eIe k r ⟨i.val, h⟩ = i) (hi _)
-    · rw [dif_neg h, zero_mul]
+    · rw [dite_eq_right h, zero_mul]
   · apply Finset.sum_congr rfl
     intro t _
     have hc : ((eIe k r) t).val < r := t.isLt
-    rw [dif_pos hc]
+    rw [dite_eq_left hc]
     rfl
 
 theorem mX_mulVec_esI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (x : Fin (2 * r + k + 1) → ℂ) (a : Fin r) :
@@ -203,12 +251,12 @@ theorem mX_mulVec_esI (k r : ℕ) (vX : Matrix (Fin r) (Fin r) ℂ) (x : Fin (2 
       rw [esIe_apply, esI_val]
       show 2 * r + k - (2 * r + k - i.val) = i.val
       omega
-    · rw [dif_neg h, zero_mul]
+    · rw [dite_eq_right h, zero_mul]
   · apply Finset.sum_congr rfl
     intro t _
     have ht := t.isLt
     have hc : r + k < ((esIe k r) t).val := by rw [esIe_apply, esI_val]; omega
-    rw [dif_pos hc]
+    rw [dite_eq_left hc]
     have e : (⟨2 * r + k - ((esIe k r) t).val, by rw [esIe_apply, esI_val]; omega⟩ : Fin r) = t :=
       Fin.ext (by show 2 * r + k - ((esIe k r) t).val = t.val; rw [esIe_apply, esI_val]; omega)
     rw [e]
@@ -271,7 +319,7 @@ theorem mxFacts : MXFacts := by
     · intro a i hai
       unfold mX
       by_cases hi : i.val < r
-      · rw [dif_pos hi, dif_pos (show (eI k r a).val < r from a.isLt)]
+      · rw [dite_eq_left hi, dite_eq_left (show (eI k r a).val < r from a.isLt)]
         by_cases hia : i = eI k r a
         · rw [if_pos hia]
           subst hia
@@ -282,7 +330,7 @@ theorem mxFacts : MXFacts := by
           show a.val < i.val
           have hai' : a.val ≤ i.val := hai
           omega
-      · rw [dif_neg hi]
+      · rw [dite_eq_right hi]
         have hne : i ≠ eI k r a := by
           intro h
           apply hi
@@ -290,16 +338,16 @@ theorem mxFacts : MXFacts := by
           exact a.isLt
         by_cases hi2 : r + k < i.val
         · have ha := a.isLt
-          rw [dif_pos hi2, dif_neg (show ¬ (r + k < (eI k r a).val) by show ¬ (r + k < a.val); omega),
+          rw [dite_eq_left hi2, dite_eq_right (show ¬ (r + k < (eI k r a).val) by show ¬ (r + k < a.val); omega),
             if_neg hne]
-        · rw [dif_neg hi2]
+        · rw [dite_eq_right hi2]
     · intro i j hj1 hj2 hi
       unfold mX
-      rw [dif_neg (show ¬ (i.val < r) by omega)]
+      rw [dite_eq_right (show ¬ (i.val < r) by omega)]
       by_cases hi2 : r + k < i.val
-      · rw [dif_pos hi2, dif_neg (show ¬ (r + k < j.val) by omega),
+      · rw [dite_eq_left hi2, dite_eq_right (show ¬ (r + k < j.val) by omega),
           if_neg (show i ≠ j from fun h => by rw [h] at hi2; omega)]
-      · rw [dif_neg hi2]
+      · rw [dite_eq_right hi2]
   · intro p
     funext i
     have hiL := i.isLt
@@ -312,14 +360,14 @@ theorem mxFacts : MXFacts := by
         funext a
         show xiV k r p (eI k r a) = p a
         unfold xiV
-        rw [dif_pos (show (eI k r a).val < r from a.isLt)]
+        rw [dite_eq_left (show (eI k r a).val < r from a.isLt)]
         try rfl
       rw [hp]
       unfold xiV
-      rw [dif_pos hi]
+      rw [dite_eq_left hi]
     · have hz : xiV k r (vX *ᵥ p) i = 0 := by
         unfold xiV
-        rw [dif_neg hi]
+        rw [dite_eq_right hi]
       rw [hz]
       by_cases hi2 : r + k < i.val
       · have h1 := mX_mulVec_esI k r vX (xiV k r p) ⟨2 * r + k - i.val, by omega⟩
@@ -332,11 +380,11 @@ theorem mxFacts : MXFacts := by
           have ha := a.isLt
           show xiV k r p (esI k r a) = 0
           unfold xiV
-          rw [dif_neg (show ¬ ((esI k r a).val < r) by show ¬ (2 * r + k - a.val < r); omega)]
+          rw [dite_eq_right (show ¬ ((esI k r a).val < r) by show ¬ (2 * r + k - a.val < r); omega)]
         rw [hq, Matrix.mulVec_zero, Pi.zero_apply]
       · rw [mX_mulVec_mid k r vX _ i (by omega) (by omega)]
         unfold xiV
-        rw [dif_neg hi]
+        rw [dite_eq_right hi]
   · intro w hw
     funext i
     have hiL := i.isLt

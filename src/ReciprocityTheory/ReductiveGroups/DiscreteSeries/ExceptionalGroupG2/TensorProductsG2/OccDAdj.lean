@@ -1,8 +1,57 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccDAdjB
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.OccDAdj
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccDAdjB
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccCExistsPs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Closure
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.AnalyticVectors.Unitary
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumIrr
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RregRep
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccDAdjA
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccDTensKStable
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,38 +77,7 @@ theorem adjB_K (dual : Bool) (hσ : IsURepOn (UJset ε) σ) {M : Submodule ℂ D
     {u : Fin n → D} (h : adjR ε M ps x u) {f' : Fin n → D} (hf' : f' ∈ tensSub M)
     (hff : (fun c => ((f' c : D) : H)) = kDiag dual σ k (fun c => ((u c : D) : H))) :
     adjR ε M ps x'' f' := by
-  classical
-  refine ⟨hf', fun c y hy => ?_⟩
-  have hkh := adjB_star_Kset hk
-  obtain ⟨y', hy'M, hy'⟩ := hMK kᴴ hkh y hy
-  have hL : inner ℂ (f' c) y = ∑ d, (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) * inner ℂ (u d) y' := by
-    rw [Submodule.coe_inner, show ((f' c : D) : H) = kDiag dual σ k (fun c => ((u c : D) : H)) c from congrFun hff c]
-    simp only [kDiag, sum_inner, inner_smul_left]
-    refine Finset.sum_congr rfl fun d _ => ?_
-    rw [adjB_inner hσ hk, ← hy', ← Submodule.coe_inner]
-  set g : Fin n → D := fun d => (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) • y'
-  have hg : g ∈ tensSub M := tset_mem.2 fun d => M.smul_mem _ hy'M
-  have hgk : (fun d => ((g d : D) : H)) =
-      kDiag dual σ kᴴ (fun d => (((Pi.single c y : Fin n → D) d : D) : H)) := by
-    funext d
-    simp only [kDiag, g, Submodule.coe_smul]
-    rw [Finset.sum_eq_single c (fun e _ he => by simp [he]) (by simp)]
-    simp only [Pi.single_eq_same, hy']
-    congr 1
-    cases dual <;> simp [Matrix.conjTranspose_apply]
-  have hps := hps3 kᴴ hkh _ (adjA_single_mem c hy) g hg hgk
-  have hgsum : g = ∑ d, (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) • (Pi.single d y' : Fin n → D) := by
-    funext e
-    simp [g, Finset.sum_apply, Pi.single_apply]
-  have hR : inner ℂ x'' (ps (Pi.single c y)) =
-      ∑ d, (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) * (adjSg ε d * inner ℂ (u d) y') := by
-    rw [Submodule.coe_inner, hxx, adjB_inner hσ hk, ← hps, ← Submodule.coe_inner, hgsum, map_sum, inner_sum]
-    refine Finset.sum_congr rfl fun d _ => ?_
-    rw [map_smul, inner_smul_right, adjR_inv h d hy'M]
-  rw [hL, hR, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun d _ => ?_
-  have := adjB_sgn hk dual c d
-  linear_combination (-inner ℂ (u d) y') * this
+  apply ReciprocityTheory.ChartRestriction.DS.adjB_K <;> assumption
 
 theorem adjB_emb (dual : Bool) (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E)
     {lam lam' : Fin n → ℝ} {V V' : Submodule ℂ D} (hgap : StdGap ε lam) (hV : IsKIrrHW ε E (lowK ε lam) V)
@@ -135,6 +153,7 @@ theorem adjB_emb (dual : Bool) (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn 
     apply hps0
     rw [← inner_self_eq_zero (𝕜 := ℂ)]
     calc inner ℂ (ps f₀) (ps f₀) = ∑ c, inner ℂ (ps f₀) (ps (Pi.single c (f₀ c))) := by
+
           rw [← inner_sum, ← map_sum, Finset.univ_sum_single]
       _ = 0 := Finset.sum_eq_zero fun c _ => h0 c
 

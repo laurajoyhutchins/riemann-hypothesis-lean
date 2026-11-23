@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.CompactDerivativesBounded
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirReductionTheory.OneParameterDerivatives.AdmissibleCasimirScalars.CompactDerivativesBounded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology
 open scoped InnerProductSpace
@@ -20,7 +66,7 @@ variable {n : ℕ} {ε : Fin n → Bool} {H : Type} [NormedAddCommGroup H] [Inne
 theorem re_coef_ge {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} {g : UJ ε} {v : H} (hv : ‖v‖ = 1)
     (h : ‖σ (umat g) v - v‖ ≤ ‖v‖ / 2) : (1 / 2 : ℝ) ≤ (coefOn σ v v g).re := by
   have h1 : coefOn σ v v g = ⟪v, v⟫_ℂ + ⟪v, σ (umat g) v - v⟫_ℂ := by
-    simp [coefOn, inner_sub_right]
+    simp [coefOn]
   have h2 : ‖⟪v, σ (umat g) v - v⟫_ℂ‖ ≤ 1 / 2 := by
     calc _ ≤ ‖v‖ * ‖σ (umat g) v - v‖ := norm_inner_le_norm _ _
       _ ≤ 1 / 2 := by rw [hv] at h ⊢; linarith
@@ -72,11 +118,11 @@ theorem integral_sumCoef {ι : Type} [Fintype ι] [DecidableEq ι] {σ : Matrix 
     · simp [h, Ne.symm h]
   refine ⟨?_, ?_⟩
   · rw [hexp]
-    exact integrable_finset_sum _ fun i _ => integrable_finset_sum _ fun j _ => hint i j
-  · rw [hexp, integral_finset_sum _ fun i _ => integrable_finset_sum _ fun j _ => hint i j]
+    exact integrable_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hint i j
+  · rw [hexp, integral_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hint i j]
     calc _ = ∑ i, ∑ j, ∫ g, coefOn σ (v i) (v i) g * star (coefOn σ (v j) (v j) g) ∂(muG ε) := by
           refine Finset.sum_congr rfl fun i _ => ?_
-          exact integral_finset_sum _ fun j _ => hint i j
+          exact integral_finsetSum _ fun j _ => hint i j
       _ = _ := by
           simp only [hij, Finset.sum_ite_eq, Finset.mem_univ, if_true, Finset.sum_const,
             Finset.card_univ, nsmul_eq_mul]
@@ -94,7 +140,7 @@ theorem card_le {ι : Type} [Fintype ι] {σ : Matrix (Fin n) (Fin n) ℂ → (H
   let f : UJ ε → ℝ := fun g => (sumCoef σ v g * star (sumCoef σ v g)).re
   have hfint : Integrable f (muG ε) := hint.re
   have hfn : ∀ g, f g = Complex.normSq (sumCoef σ v g) := fun g => by
-    simp [f, Complex.star_def, Complex.mul_conj]
+    simp [f, Complex.mul_conj]
   have hf0 : ∀ g, 0 ≤ f g := fun g => by rw [hfn]; exact Complex.normSq_nonneg _
   have hm0 : 0 ≤ m := by positivity
   have hK' : ∀ g ∈ K, (m / 2) ^ 2 ≤ f g := by

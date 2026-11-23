@@ -1,5 +1,45 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.RestPathFrom
-import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.DividedPowerZeroOfGlActionZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialPolynomialIdentities.RestPathFrom
+public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.Branch
+public import Formalism.SharpRestriction.GrowthBounds.FrobeniusPaths.DividedPowerZeroOfGlActionZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,27 +63,13 @@ theorem hstrip_iff {n : ℕ} (nu mu : Fin n → ℤ) (b : ℕ) :
   · rw [Finset.sum_sub_distrib]
 
 theorem ext_of_lt {N n : ℕ} (mu : Fin (N + 1) → Fin n → ℤ) {i : ℕ} (h : i < N + 1) : ext mu i = mu ⟨i, h⟩ := by
-  unfold ext; rw [dif_pos h]
-
-theorem ext_of_ge {N n : ℕ} (mu : Fin (N + 1) → Fin n → ℤ) {i : ℕ} (h : N < i) : ext mu i = 0 := by
-  unfold ext; rw [dif_neg (by omega)]
+  unfold ext; rw [dite_eq_left h]
 
 theorem isV_of_lt {N : ℕ} (LL : Letters (Fin N)) {i : ℕ} (h : i < N) : isV LL i = LL.vec ⟨i, h⟩ := by
-  unfold isV; rw [dif_pos h]
+  unfold isV; rw [dite_eq_left h]
 
 theorem Bn_of_lt {N : ℕ} (B : Fin N → ℕ) {i : ℕ} (h : i < N) : Bn B i = B ⟨i, h⟩ := by
-  unfold Bn; rw [dif_pos h]
-
-theorem res_ext {N n : ℕ} (mu : Fin (N + 1) → Fin n → ℤ) : res N (ext mu) = mu := by
-  funext i
-  unfold res
-  rw [ext_of_lt mu i.2]
-
-theorem ext_res {N n : ℕ} (μ : ℕ → Fin n → ℤ) (h : ∀ i, N < i → μ i = 0) : ext (res N μ) = μ := by
-  funext i
-  by_cases hi : i < N + 1
-  · rw [ext_of_lt _ hi]; rfl
-  · rw [ext_of_ge _ (by omega), h i (by omega)]
+  unfold Bn; rw [dite_eq_left h]
 
 theorem restPathTo : RestPathTo := by
   intro n N LL B P
@@ -91,8 +117,6 @@ theorem cnt_succ {n : ℕ} (A : Finset (Fin n)) (t : Fin n) :
     Formalism.InvariantFactorPaths.GelfandTsetlinBases.Branch.cnt A (t.val + 1) = (A.filter (· ≤ t)).card := by
   unfold Formalism.InvariantFactorPaths.GelfandTsetlinBases.Branch.cnt
   congr 1
-  ext a
-  simp only [mem_filter, Fin.le_def, Nat.lt_succ_iff]
 
 theorem dom_iff_le {n : ℕ} (A B : Finset (Fin n)) :
     Formalism.InvariantFactorPaths.GelfandTsetlinBases.Branch.Dom A B ↔ ∀ t : Fin n, (B.filter (· ≤ t)).card ≤ (A.filter (· ≤ t)).card := by

@@ -1,12 +1,64 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ExistsReduction
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnipotentQuotientInvariantProbability
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FiniteAdelicUnitaryCongruenceTopology
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaussianRapidDecay
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalUnitaryPointsDiscreteFundamentalDomainStatement
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.StrongApproximationUnitaryUnipotentRadicalStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CmDataIsCMExtAndGramIsHermND
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsArchAdeleTensorEquivComplexCmType
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.TopfBasis
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsCuspHom
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.DiscreteSpectrumKFiniteDecomposition
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnipotentQuotientInvariantProbability
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsAdelicUnitaryGroupModelsEquiv
+import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +136,7 @@ theorem quot_unique (Γ : Subgroup H) [Countable Γ]
       ← hlin (fun m => ∑' γ : Γ, A.indicator (1 : H → ENNReal) (γ * m)) _ _ g]
     · refine lintegral_congr fun m => tsum_congr fun γ => ?_
       rw [← mul_assoc]; rfl
-    · exact Measurable.ennreal_tsum fun γ => (measurable_one.indicator hA).comp (measurable_const_mul (γ : H))
+    · exact Measurable.tsum fun γ => (measurable_one.indicator hA).comp (measurable_const_mul (γ : H))
     · intro δ hδ y
       rw [← (Equiv.mulRight (⟨δ, hδ⟩ : Γ)).tsum_eq fun γ : Γ => A.indicator (1 : H → ENNReal) (γ * y)]
       exact tsum_congr fun γ => by rw [← mul_assoc]; rfl⟩
@@ -125,7 +177,7 @@ theorem quot_unique (Γ : Subgroup H) [Countable Γ]
     rw [Measure.inv_inv] at this
     rw [this]
     conv_rhs => rw [← Measure.inv_inv μ]
-    exact Measure.map_smul _ _ _
+    exact Measure.map_smul _ measurable_inv.aemeasurable
   refine ⟨c, fun f hf hi => ?_⟩
   have e : ν.map f = (κ.restrict D).map f := by
     ext B hB
@@ -375,15 +427,14 @@ theorem adele_tens_eq_zero {F E A B : Type} [Field F] [Field E] [Algebra F E] [C
         (Algebra.TensorProduct.map (AlgHom.snd F A B) (AlgHom.id F E) z) := by
     intro z
     induction z with
-    | zero => simp
     | tmul x y => simp [← TensorProduct.add_tmul]
     | add x y hx hy =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [add_add_add_comm, ← hx, ← hy]
   rw [hz z, a, b, map_zero, map_zero, add_zero]
 
-open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes (HA AF Ainf inclR fstA sndA) in
 
+open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes (HA AF Ainf inclR fstA sndA) in
 theorem mem_NA_iff (I : AutInst) (θ : InfinitePlace I.F → (Ainf I.F ⊗[I.F] I.E →+* ℂ))
     (hθ : ∀ v, Formalism.MainNotions.StandardLattice.IsInfEmb (I.φ v) (θ v)) (h : HA (AF I.F) I.cm.sig I.J) (x : I.GA)
     (hf : I.fmat x.2 = (Formalism.MainNotions.StandardLattice.finMat I.cm.sig I.J h).map (Algebra.TensorProduct.comm I.F _ _))

@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.CoordStep
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SesquilinearRowSplitting.CoordStep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Localization.Submodule
+
+@[expose] public section
 
 open NumberField Module
 
@@ -20,15 +67,18 @@ theorem sesquilinearRepresentation : RepStep := by
       Submodule.dualAnnihilator_bot]
 
   obtain ⟨s, hsΛ, hspan, hli⟩ := exists_linearIndependent E (Λ : Set V)
-  have hs_top : Submodule.span E s = ⊤ := hspan.trans hΛ.span_eq_top
-  let b : Basis s E V := Basis.mk hli (le_of_eq (by rw [Subtype.range_coe, hs_top]))
-  let φ : V →ₗ[E] E := b.constr E (fun i => ℓ ⟨i.1, hsΛ i.2⟩)
+  classical
+  have hs : LinearIndepOn E id s := hli
+  let b := Basis.extend hs
+  let f : hs.extend (Set.subset_univ s) → E :=
+    fun i => if hi : (i : V) ∈ s then ℓ ⟨i, hsΛ hi⟩ else 0
+  let φ : V →ₗ[E] E := b.constr E f
   have hφb : ∀ v (hv : v ∈ s), φ v = ℓ ⟨v, hsΛ hv⟩ := by
     intro v hv
-    have hb : b ⟨v, hv⟩ = v := Basis.mk_apply _ _ _
-    have e := b.constr_basis E (fun i : s => ℓ ⟨i.1, hsΛ i.2⟩) ⟨v, hv⟩
-    rw [hb] at e
-    exact e
+    let i : hs.extend (Set.subset_univ s) := ⟨v, Basis.subset_extend hs hv⟩
+    calc
+      φ v = φ (b i) := congrArg φ (Basis.extend_apply_self hs i).symm
+      _ = _ := by simpa only [f, i, dite_eq_left hv] using b.constr_basis E f i
 
   have hind : ∀ y ∈ Submodule.span (𝓞 E) (s : Set V), ∃ hy : y ∈ Λ, ℓ ⟨y, hy⟩ = φ y := by
     intro y hy
@@ -40,7 +90,7 @@ theorem sesquilinearRepresentation : RepStep := by
       obtain ⟨hv', ev⟩ := hv
       refine ⟨add_mem hu' hv', ?_⟩
       have e : (⟨u + v, add_mem hu' hv'⟩ : Λ) = ⟨u, hu'⟩ + ⟨v, hv'⟩ := rfl
-      rw [e, map_add, map_add, eu, ev]
+      rw [e, map_add (f := _), map_add (f := _), eu, ev]
     | smul a u _ hu =>
       obtain ⟨hu', eu⟩ := hu
       refine ⟨Λ.smul_mem a hu', ?_⟩
@@ -50,8 +100,8 @@ theorem sesquilinearRepresentation : RepStep := by
   have key : ∀ x : Λ, φ x = ℓ x := by
     intro x
     have hxE : (x : V) ∈ Submodule.span E s := by
-      rw [hs_top]
-      exact Submodule.mem_top
+      rw [hspan]
+      exact Submodule.subset_span x.property
     obtain ⟨y, hy, z, hxy⟩ := (IsLocalization.mem_span_iff (nonZeroDivisors (𝓞 E))).mp hxE
     have hzx : (z : 𝓞 E) • (x : V) = y := by
       rw [hxy, ← algebraMap_smul E (z : 𝓞 E), smul_smul, IsLocalization.mk'_spec', map_one,

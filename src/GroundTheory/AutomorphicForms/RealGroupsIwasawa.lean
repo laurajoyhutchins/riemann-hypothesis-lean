@@ -1,5 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.RealGroupsPolar
+module
+
+import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.IwaChol
+public import Mathlib.Analysis.Matrix.LDL
+public import GroundTheory.AutomorphicForms.RealGroupsPolar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Star.Unitary
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -12,7 +67,7 @@ variable {𝕜 : Type*} [RCLike 𝕜] {n : Type*} [Fintype n] [LinearOrder n]
 
 theorem mul_apply_self_of_isUpperTriangular {A B : Matrix n n 𝕜} (hA : A.IsUpperTriangular)
     (hB : B.IsUpperTriangular) (i : n) : (A * B) i i = A i i * B i i := by
-  rw [mul_apply, Finset.sum_eq_single i]
+  rw [Matrix.mul_apply, Finset.sum_eq_single i]
   · intro k _ hk
     rcases lt_or_gt_of_ne hk with h | h
     · rw [hA h, zero_mul]
@@ -44,7 +99,7 @@ theorem eq_one_of_mem_unitaryGroup_of_isUpperTriangular {t : Matrix n n 𝕜}
   have hii : ∀ i, t i i = 1 := by
     intro i
     have e := congrFun (congrFun h1 i) i
-    rw [mul_apply, Finset.sum_eq_single i (fun k _ hk => by rw [hdiag k i hk, mul_zero])
+    rw [Matrix.mul_apply, Finset.sum_eq_single i (fun k _ hk => by rw [hdiag k i hk, mul_zero])
       (fun h => absurd (Finset.mem_univ i) h), one_apply_eq, conjTranspose_apply] at e
     obtain ⟨hre, him⟩ := RCLike.pos_iff.1 (hpos i)
     have hr : t i i = (RCLike.re (t i i) : 𝕜) := by
@@ -64,8 +119,7 @@ variable [WellFoundedLT n] [LocallyFiniteOrderBot n]
 
 theorem exists_isUpperTriangular_conjTranspose_mul_self {S : Matrix n n 𝕜} (hS : S.PosDef) :
     ∃ R : Matrix n n 𝕜, R.IsUpperTriangular ∧ Rᴴ * R = S := by
-  have hLi : (LDL.lowerInv hS).IsLowerTriangular := fun i j hij =>
-    LDL.lowerInv_triangular hS (OrderDual.toDual_lt_toDual.1 hij)
+  have hLi : (LDL.lowerInv hS).IsLowerTriangular := LDL.isLowerTriangular_lowerInv hS
   have hL : (LDL.lower hS).IsLowerTriangular := blockTriangular_inv_of_blockTriangular hLi
   have hD : (LDL.diag hS).PosDef := by
     rw [LDL.diag_eq_lowerInv_conj]
@@ -108,21 +162,7 @@ theorem star_mul_self_norm_div {x : 𝕜} (hx : x ≠ 0) :
 theorem exists_cholesky {S : Matrix n n 𝕜} (hS : S.PosDef) :
     ∃ B : Matrix n n 𝕜, ∃ a : n → ℝ, B.IsUpperTriangular ∧ (∀ i, 0 < a i) ∧
       (∀ i, B i i = a i) ∧ Bᴴ * B = S := by
-  obtain ⟨R, hR, hRS⟩ := exists_isUpperTriangular_conjTranspose_mul_self hS
-  have hdet : S.det ≠ 0 := (isUnit_iff_isUnit_det S).1 hS.isUnit |>.ne_zero
-  have hRi : ∀ i, R i i ≠ 0 := by
-    have : R.det ≠ 0 := by
-      intro h; apply hdet; rw [← hRS, det_mul, h, mul_zero]
-    rw [det_of_isUpperTriangular hR] at this
-    exact fun i => Finset.prod_ne_zero_iff.1 this i (Finset.mem_univ i)
-  refine ⟨diagonal (fun i => (‖R i i‖ : 𝕜) / R i i) * R, fun i => ‖R i i‖,
-    (blockTriangular_diagonal _).mul hR, fun i => norm_pos_iff.2 (hRi i), fun i => ?_, ?_⟩
-  · rw [diagonal_mul, div_mul_cancel₀ _ (hRi i)]
-  · rw [conjTranspose_mul, Matrix.mul_assoc, ← Matrix.mul_assoc (diagonal _)ᴴ,
-      diagonal_conjTranspose, diagonal_mul_diagonal]
-    have : (fun i => (star (fun i => (‖R i i‖ : 𝕜) / R i i)) i * ((‖R i i‖ : 𝕜) / R i i)) =
-        fun _ => 1 := funext fun i => star_mul_self_norm_div (hRi i)
-    rw [this, diagonal_one, Matrix.one_mul, hRS]
+  apply CompanionTheory.D.gk.admitted.CholeskyDecomposition.exists_cholesky <;> assumption
 
 theorem exists_KAN (g : GL n 𝕜) :
     ∃ k : unitaryGroup n 𝕜, ∃ a : n → ℝ, (∀ i, 0 < a i) ∧ ∃ u : Matrix n n 𝕜,
@@ -233,26 +273,26 @@ open Filter Set
 
 variable [WellFoundedLT n] [LocallyFiniteOrderBot n]
 
-variable (n) in
 
+variable (n) in
 abbrev PosDiag := {a : n → ℝ // ∀ i, 0 < a i}
 
 abbrev UpperUnitriangular (n 𝕜 : Type*) [RCLike 𝕜] [LinearOrder n] :=
   {u : Matrix n n 𝕜 // u.IsUpperTriangular ∧ ∀ i, u i i = 1}
 
-theorem isUnit_det_iwasawa (x : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜) :
+theorem isUnit_det_iwasawa (x : unitaryGroup n 𝕜 × PosDiag (n := n) × UpperUnitriangular n 𝕜) :
     IsUnit ((x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1).det := by
   rw [Matrix.mul_assoc, det_mul]
   exact (UnitaryGroup.det_isUnit x.1).mul
     (isUnit_det_diagonal_mul_of_unitriangular x.2.1.2 x.2.2.2.1 x.2.2.2.2)
 
-noncomputable def iwasawaMul (x : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜) :
+noncomputable def iwasawaMul (x : unitaryGroup n 𝕜 × PosDiag (n := n) × UpperUnitriangular n 𝕜) :
     GL n 𝕜 :=
   ⟨(x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1,
     ((x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1)⁻¹,
     mul_nonsing_inv _ (isUnit_det_iwasawa x), nonsing_inv_mul _ (isUnit_det_iwasawa x)⟩
 
-@[simp] theorem coe_iwasawaMul (x : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜) :
+@[simp] theorem coe_iwasawaMul (x : unitaryGroup n 𝕜 × PosDiag (n := n) × UpperUnitriangular n 𝕜) :
     ((iwasawaMul x : GL n 𝕜) : Matrix n n 𝕜) =
       (x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1 := rfl
 
@@ -266,7 +306,7 @@ theorem iwasawaMul_injective : Function.Injective (iwasawaMul (n := n) (𝕜 := 
   obtain ⟨h1, h2, h3⟩ := KAN_unique ha ha' hu hu' hu1 hu1' (congrArg Units.val h)
   subst h1 h2 h3; rfl
 
-noncomputable def iwasawaEquiv : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜 ≃ GL n 𝕜 :=
+noncomputable def iwasawaEquiv : unitaryGroup n 𝕜 × PosDiag (n := n) × UpperUnitriangular n 𝕜 ≃ GL n 𝕜 :=
   Equiv.ofBijective iwasawaMul ⟨iwasawaMul_injective, iwasawaMul_surjective⟩
 
 theorem isCompact_unitaryGroup : IsCompact (unitaryGroup n 𝕜 : Set (Matrix n n 𝕜)) := by
@@ -408,66 +448,6 @@ open scoped Matrix.Norms.L2Operator Topology
 open Filter Set
 
 variable [WellFoundedLT n] [LocallyFiniteOrderBot n]
-
-theorem iwasawaEquiv_symm_A (g : GL n 𝕜) (i : n) :
-    (iwasawaEquiv.symm g).2.1.1 i = RCLike.re ((((iwasawaK g : Matrix n n 𝕜))ᴴ * g) i i) := by
-  rw [iwasawaK_conjTranspose_mul, diagonal_mul, (iwasawaEquiv.symm g).2.2.2.2 i, mul_one,
-    RCLike.ofReal_re]
-
-theorem iwasawaEquiv_symm_N (g : GL n 𝕜) :
-    (iwasawaEquiv.symm g).2.2.1 = diagonal (fun i => (((iwasawaEquiv.symm g).2.1.1 i : 𝕜))⁻¹) *
-      (((iwasawaK g : Matrix n n 𝕜))ᴴ * g) := by
-  rw [iwasawaK_conjTranspose_mul, ← Matrix.mul_assoc, diagonal_mul_diagonal]
-  have : (fun i => (((iwasawaEquiv.symm g).2.1.1 i : 𝕜))⁻¹ * ((iwasawaEquiv.symm g).2.1.1 i : 𝕜)) =
-      fun _ => 1 := funext fun i => inv_mul_cancel₀ (by exact_mod_cast ((iwasawaEquiv.symm g).2.1.2 i).ne')
-  rw [this, diagonal_one, Matrix.one_mul]
-
-noncomputable def iwasawaHomeomorph :
-    unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜 ≃ₜ GL n 𝕜 where
-  toEquiv := iwasawaEquiv
-  continuous_toFun := by
-    have hM : Continuous (fun x : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜 =>
-        (x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1) :=
-      ((continuous_subtype_val.comp continuous_fst).mul (Continuous.matrix_diagonal
-        (continuous_pi fun i => RCLike.continuous_ofReal.comp
-          ((continuous_apply i).comp (continuous_subtype_val.comp
-            (continuous_fst.comp continuous_snd)))))).mul
-        (continuous_subtype_val.comp (continuous_snd.comp continuous_snd))
-    refine Units.continuous_iff.2 ⟨hM, ?_⟩
-    exact continuousOn_matrix_inv.comp_continuous hM
-      (fun x => (isUnit_iff_isUnit_det _).2 (isUnit_det_iwasawa x))
-  continuous_invFun := by
-    have hK : Continuous (iwasawaK : GL n 𝕜 → unitaryGroup n 𝕜) := continuous_iwasawaK
-    have hR : Continuous (fun g : GL n 𝕜 => ((iwasawaK g : Matrix n n 𝕜))ᴴ * g) :=
-      (continuous_subtype_val.comp hK).matrix_conjTranspose.mul Units.continuous_val
-    have ha : Continuous fun g : GL n 𝕜 => (iwasawaEquiv.symm g).2.1.1 := by
-      have e : (fun g : GL n 𝕜 => (iwasawaEquiv.symm g).2.1.1) =
-          fun g i => RCLike.re ((((iwasawaK g : Matrix n n 𝕜))ᴴ * g) i i) :=
-        funext fun g => funext fun i => iwasawaEquiv_symm_A g i
-      rw [e]
-      exact continuous_pi fun i => RCLike.continuous_re.comp (hR.matrix_elem i i)
-    have hu : Continuous fun g : GL n 𝕜 => (iwasawaEquiv.symm g).2.2.1 := by
-      have e := funext (iwasawaEquiv_symm_N (n := n) (𝕜 := 𝕜))
-      rw [e]
-      refine Continuous.mul (Continuous.matrix_diagonal (continuous_pi fun i => ?_)) hR
-      refine Continuous.inv₀ (RCLike.continuous_ofReal.comp ((continuous_apply i).comp ha)) ?_
-      intro g
-      exact_mod_cast ((iwasawaEquiv.symm g).2.1.2 i).ne'
-    exact hK.prodMk ((ha.subtype_mk _).prodMk (hu.subtype_mk _))
-
-@[simp] theorem coe_iwasawaHomeomorph_apply
-    (x : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜) :
-    ((iwasawaHomeomorph x : GL n 𝕜) : Matrix n n 𝕜) =
-      (x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1 := rfl
-
-theorem iwasawa_decomposition (g : GL n 𝕜) :
-    ∃! x : unitaryGroup n 𝕜 × PosDiag n × UpperUnitriangular n 𝕜,
-      (x.1 : Matrix n n 𝕜) * diagonal (fun i => (x.2.1.1 i : 𝕜)) * x.2.2.1 = g := by
-  refine ⟨iwasawaHomeomorph.symm g, congrArg Units.val (iwasawaHomeomorph.apply_symm_apply g), ?_⟩
-  intro x hx
-  apply iwasawaHomeomorph.injective
-  rw [Homeomorph.apply_symm_apply]
-  exact Units.ext hx
 
 end Homeomorph3
 

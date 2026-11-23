@@ -1,20 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IntFormsSubset
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.XiValIffXiAt
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsObjMapOfCoprime
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ValuesAlgIffValuesUnitOfNe
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameUniformEmbeddingSecond
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLatticeEmbeddingLiftDatumHermitianSpace
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DetOfTriangular
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0OfIsPullback
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0CompLinear
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TransvectionEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IntFormsSubset
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointsLiftToLevelCover
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPinnedOfIsUnf
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsObjMapOfCoprime
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MarkedLatticeIsometryDoubleCosetMove
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.VerticalDerivativeInCoordinates
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MarkedLatticeIsometryDoubleCosetMove
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointsLiftToLevelCover
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPinnedOfIsUnf
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ValuesAlgIffValuesUnitOfNe
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DetOfTriangular
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLatticeEmbeddingLiftDatumHermitianSpace
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameUniformEmbeddingSecond
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0CompLinear
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsDerivAt0OfIsPullback
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TransvectionEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.PermutesRefl
+import Development.AbelianVarietyTheory.Definitions.HeightFunctions.XiValIffXiAt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Pj GlobalTheory.CoverRead GlobalTheory.Member GlobalTheory.CompRat GlobalTheory.FinalJoin
 open scoped TensorProduct Matrix
 
@@ -28,8 +70,8 @@ section Lattice
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem exists_latEquiv (L₁ L₂ : Submodule (𝓞 E) (Fin r → E)) (γ : GL (Fin r) E)
     (h : (L₁ : Set (Fin r → E)) = (γ : Matrix (Fin r) (Fin r) E).mulVec '' (L₂ : Set _)) :
     ∃ f : L₂ ≃ₗ[𝓞 E] L₁, ∀ a, (f a : Fin r → E) = (γ : Matrix (Fin r) (Fin r) E) *ᵥ (a : Fin r → E) := by
@@ -64,11 +106,11 @@ theorem perFr_move (X X' : Data E r) (hΨ : ∀ τ, τ ∈ X'.Ψ ↔ τ ∈ X.Ψ
   by_cases h₁ : τ ∈ X.Ψ
   · rw [dif_pos h₁, dif_pos ((hΨ τ).2 h₁), hx τ h₁, GlobalTheory.PerMove.emb_mulVec, Matrix.mul_inv_rev, Matrix.mulVec_mulVec,
       Matrix.mul_assoc, Matrix.nonsing_inv_mul _ (hu _), Matrix.mul_one]
-  · rw [dif_neg h₁, dif_neg (mt (hΨ τ).1 h₁)]
+  · rw [dite_eq_right h₁, dite_eq_right (mt (hΨ τ).1 h₁)]
     by_cases h₂ : conjEmb τ ∈ X.Ψ
     · rw [dif_pos h₂, dif_pos ((hΨ _).2 h₂), hx _ h₂]
       simp only [GlobalTheory.PerMove.emb_mulVec, GlobalTheory.PerMove.col_mul, GlobalTheory.PerMove.hermC_unitary _ _ _ hγ]
-    · rw [dif_neg h₂, dif_neg (mt (hΨ _).1 h₂)]
+    · rw [dite_eq_right h₂, dite_eq_right (mt (hΨ _).1 h₂)]
 
 end Lattice
 
@@ -81,7 +123,7 @@ theorem congr_of_mul {A : Type} [AddCommGroup A] (L : AddSubgroup A) (M p : ℕ)
   obtain ⟨w, hw, e⟩ := h
   exact ⟨p • w, nsmul_mem hw p, e.trans (mul_smul M p w)⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem move_mark {D : D7} (V : HSp D) {r : ℕ} (hr : V.rank = r) (h γ₁ γ₂ : GA D V) (hγ₁ : γ₁ ∈ GQ V) (hγ₂ : γ₂ ∈ GQ V)
     (L₁ : Submodule (𝓞 D.host.E) (Fin r → D.host.E))
@@ -198,7 +240,7 @@ theorem read_of_over {D : D7} {T : CoreJ D} {j : ℕ} {σ : T.Q.c.F →+* ℂ} (
 
 end Read
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem rdU_cover_eq : ∀ (D : D7) (T : CoreJ D), LawsJ T → ∀ j, Formalism.L2.Pj.InR D j → ∀ σ : T.Q.c.F →+* ℂ, GoodEmb T.Q.c σ → ∀ C : Cover T j σ, C.IsUnif → ∀ (h : GA D (T.V j σ)) (γ : GL (Fin D.R.r) D.host.E), (((T.U j σ).X (T.dict j σ h).1).Λ : Set (Fin D.R.r → D.host.E)) = (γ : Matrix (Fin D.R.r) (Fin D.R.r) D.host.E).mulVec '' ((C.U₂.X (C.dict₂ h).1).Λ : Set _) → (∀ v w, herm ((T.U j σ).X (T.dict j σ h).1).Gm ((γ : Matrix (Fin D.R.r) (Fin D.R.r) D.host.E).mulVec v) ((γ : Matrix (Fin D.R.r) (Fin D.R.r) D.host.E).mulVec w) = herm (C.U₂.X (C.dict₂ h).1).Gm v w) → (∀ (τ : D.host.E →+* ℂ) (h₂ : τ ∈ (C.U₂.X (C.dict₂ h).1).Ψ) (h₁ : τ ∈ ((T.U j σ).X (T.dict j σ h).1).Ψ), mat (T.dict j σ h).2 ⟨τ, h₁⟩ = (γ : Matrix (Fin D.R.r) (Fin D.R.r) D.host.E).map τ * mat (C.dict₂ h).2 ⟨τ, h₂⟩) → ∀ (x : Frame (C.U₂.X (C.dict₂ h).1).Ψ D.R.r) (x' : Frame ((T.U j σ).X (T.dict j σ h).1).Ψ D.R.r), x ∈ (C.U₂.X (C.dict₂ h).1).dom → x' ∈ ((T.U j σ).X (T.dict j σ h).1).dom → (∀ (τ : D.host.E →+* ℂ) (h₂ : τ ∈ (C.U₂.X (C.dict₂ h).1).Ψ) (h₁ : τ ∈ ((T.U j σ).X (T.dict j σ h).1).Ψ), mat x' ⟨τ, h₁⟩ = (γ : Matrix (Fin D.R.r) (Fin D.R.r) D.host.E).map τ * mat x ⟨τ, h₂⟩) → ∃ t : ℂ, t ≠ 0 ∧ ∀ n : ℕ, ∀ (a : (D.host.E →+* ℂ) × ℕ → ℕ), Dom a n → ∀ f ∈ sec (T.Q.Xo j) T.Q.c a n, ∀ f₂ ∈ sec C.d.Xo₂ C.d.c₂ a n, C.IsPull f f₂ → rdU C.U₂ f₂ (C.dict₂ h).1 x = t ^ n * rdU (T.U j σ) f (T.dict j σ h).1 x' := by
   intro D T hT j hj σ hσ C hC h γ hlat hiso hfr x x' hx hx' hxx
@@ -252,7 +294,7 @@ theorem rdU_cover_eq : ∀ (D : D7) (T : CoreJ D), LawsJ T → ∀ j, Formalism.
       obtain ⟨u, hu, e⟩ := hδm T.Q.l.M C.d.pd (by have := T.Q.l.three_le; omega) _ _ _
         (hm₁ a (Submodule.smul_mono_left (Ideal.map_mono hlev.1.2.1) ha)) b₂
       refine ⟨(φ₁ _).symm ⟨u, hu⟩, (φ₁ (T.dict j σ h).1).injective (Subtype.ext ?_)⟩
-      rw [hgam, hγδ, e, map_add, map_nsmul, LinearEquiv.apply_symm_apply]
+      rw [hgam, hγδ, e, map_add (f := _), map_nsmul, LinearEquiv.apply_symm_apply]
       rfl)
     (fun a i => by
       rw [hP₁, hP₂, hgam, Equiv.apply_symm_apply, hrel]

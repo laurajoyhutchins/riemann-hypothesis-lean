@@ -1,25 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CentreAtOfIsAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLogMult
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AngehrnSiuNotKltAtSeveralPointsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.H0LowerBoundIntersectionNumberClosureStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLtBinomialBoundOfMulPowLtStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsResidueMapClosurePointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalEquationEffectiveQCartierDivisor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLogCanonicalLocalEquationAddSmulDivisor
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSectionsRestrictBasis
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitAtFnOfOfNotMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocModelLocRingAndExistsTrBasis
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CentreAtOfIsAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AngehrnSiuNotKltAtSeveralPointsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiscrepancySubQCartierCoeffNonposStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DvrPlaceTopFormOrdersApi
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalEquationEffectiveQCartierDivisor
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLtBinomialBoundOfMulPowLtStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsResidueMapClosurePointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSectionsRestrictBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTrBasisMemOfIsLocalRingOfVarietyPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.H0LowerBoundIntersectionNumberClosureStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntegrallyClosedPointLocalRingNormalSchemeStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocModelLocRingAndExistsTrBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLogCanonicalEquationChangeFormPerturbedDivisorStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLogCanonicalLocalEquationAddSmulDivisor
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsProjOverLocallyOfFiniteType
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalResidueFieldClosedPointProjectiveComplexStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntegrallyClosedPointLocalRingNormalSchemeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsTrBasisMemOfIsLocalRingOfVarietyPointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLogCanonicalEquationChangeFormPerturbedDivisorStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiscrepancySubQCartierCoeffNonposStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalResidueFieldClosedPointProjectiveComplexStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Filter
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -147,7 +189,7 @@ theorem not_kltAt_of_local : ∀ (X : Scheme.{0}) [IsIntegral X] [IsLocallyNoeth
     rw [h1, h2]; push_cast; ring
   have hdψ (E : Place (Cartier.constFn p)) : E.disc ω (Finsupp.mapDomain (fun g : locRing x => (g : X.functionField)) φ) =
       E.formOrd η - E.ord gG / m - (1 - δ) * (E.ord fD / mD) := by
-    rw [Place.disc, hmap, map_add, map_sub, Place.ordQ_single, Place.ordQ_single, Place.ordQ_single, ← hF0,
+    rw [Place.disc, hmap, map_add (f := _), map_sub, Place.ordQ_single, Place.ordQ_single, Place.ordQ_single, ← hF0,
       E.formOrd_smul hxi hω0 hF0ne]
     have := hord E
     have e : (1 / (m : ℚ)) * E.ord a₁ - 1 / m * E.ord b₁ = E.ord gG / m - E.ord F0 := by
@@ -156,7 +198,7 @@ theorem not_kltAt_of_local : ∀ (X : Scheme.{0}) [IsIntegral X] [IsLocallyNoeth
     linear_combination -e
   have hdψs (E : Place (Cartier.constFn p)) (ψ : X.functionField →₀ ℚ) (s : X.functionField) (t : ℚ) :
       E.disc ω (ψ + Finsupp.single s t) = E.disc ω ψ - t * E.ord s := by
-    rw [Place.disc, Place.disc, map_add, Place.ordQ_single]; ring
+    rw [Place.disc, Place.disc, map_add (f := _), Place.ordQ_single]; ring
   have hs0 : (g : X.functionField) * (aX : X.functionField) ^ l ≠ 0 :=
     mul_ne_zero g.ne_zero (pow_ne_zero _ aX.ne_zero)
   have hψ0 : Finsupp.mapDomain (fun g : locRing x => (g : X.functionField)) φ 0 = 0 := by
@@ -170,6 +212,9 @@ theorem not_kltAt_of_local : ∀ (X : Scheme.{0}) [IsIntegral X] [IsLocallyNoeth
     · obtain ⟨E', rfl⟩ := (placeEquiv p).surjective E
       have h1 := hKlt.lt_disc hE
       rw [disc_placeEquiv, hdisc₂ E'] at h1
+      change -1 < (E'.formOrd ω : ℚ) + E'.ord (Units.mk0 F0 hF0ne) -
+        E'.ord gG / m - (1 - δ) * (E'.ord fD / mD) -
+        h / l * E'.ord (g * aX ^ l) at h1
       rw [hdψs, hdψ, ← hF0, (placeEquiv p E').formOrd_smul hxi hω0 hF0ne]
       have e1 : (placeEquiv p E').ord ((g : X.functionField) * (aX : X.functionField) ^ l) =
           E'.ord (g * aX ^ l) := by rw [← ord_placeEquiv]; push_cast; rfl

@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.FinProjOpen
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.SdUniq
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.HaarIdxGlobOfFinProj
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelStructures.FinProjOpen
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.SdUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,8 +89,8 @@ theorem Jt_mul (hj : ∀ x y, j (x * y) = j x * j y) (x y : R' ⊗[F] E) :
     | zero => rw [mul_zero, map_zero, mul_zero]
     | tmul b e' =>
       rw [Algebra.TensorProduct.tmul_mul_tmul, Jt_tmul, Jt_tmul, Jt_tmul, hj, Algebra.TensorProduct.tmul_mul_tmul]
-    | add y y' hy hy' => rw [mul_add, map_add, hy, hy', map_add, mul_add]
-  | add x x' hx hx' => rw [add_mul, map_add, hx, hx', map_add, add_mul]
+    | add y y' hy hy' => rw [mul_add, map_add (f := _), hy, hy', map_add (f := _), mul_add]
+  | add x x' hx hx' => rw [add_mul, map_add (f := _), hx, hx', map_add (f := _), add_mul]
 
 def eps (j : R' →ₗ[F] R) : R ⊗[F] E := Jt j 1
 
@@ -69,7 +115,7 @@ theorem sigR_Jt (σ : E →ₐ[F] E) (x : R' ⊗[F] E) : sigR R σ (Jt j x) = Jt
       Jt j (Algebra.TensorProduct.map (AlgHom.id F R') σ (a ⊗ₜ e))
     rw [Jt_tmul, Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.map_tmul, Jt_tmul]
     rfl
-  | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _), map_add (f := _)]
 
 theorem tensMap_Jt (φ : R →ₐ[F] R') (hφ : ∀ x, φ (j x) = x) (x : R' ⊗[F] E) :
     tensMap (E := E) φ (Jt j x) = x := by
@@ -79,7 +125,7 @@ theorem tensMap_Jt (φ : R →ₐ[F] R') (hφ : ∀ x, φ (j x) = x) (x : R' ⊗
     show Algebra.TensorProduct.map φ (AlgHom.id F E) (Jt j (a ⊗ₜ e)) = a ⊗ₜ e
     rw [Jt_tmul, Algebra.TensorProduct.map_tmul, hφ]
     rfl
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 section Mat
 
@@ -94,6 +140,7 @@ include hj
 theorem mapJ_mul (A B : Matrix (Fin n) (Fin n) (R' ⊗[F] E)) :
     (A * B).map (Jt j) = A.map (Jt j) * B.map (Jt j) := by
   ext i k
+
   simp only [Matrix.map_apply, Matrix.mul_apply, map_sum, Jt_mul hj]
 
 theorem eps_smul_mapJ (A : Matrix (Fin n) (Fin n) (R' ⊗[F] E)) : eps (E := E) j • A.map (Jt j) = A.map (Jt j) := by
@@ -206,8 +253,8 @@ open Formalism.MainNotions.S (AutInst)
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [Algebra F E]
 
-open Classical in
 
+open Classical in
 def singleL (v : HeightOneSpectrum (𝓞 F)) : Fv F v →ₗ[F] Af F where
   toFun := singleV F v
   map_add' x y := by
@@ -259,7 +306,7 @@ theorem Jt_smul (v : HeightOneSpectrum (𝓞 F)) (a : Fv F v) (z : Fv F v ⊗[F]
   | tmul b e =>
     rw [TensorProduct.smul_tmul', EvalVW.Jt_tmul, EvalVW.Jt_tmul, TensorProduct.smul_tmul', smul_eq_mul, smul_eq_mul,
       uHom_mul_single]
-  | add x y hx hy => rw [smul_add, map_add, hx, hy, map_add, smul_add]
+  | add x y hx hy => rw [smul_add, map_add (f := _), hx, hy, map_add (f := _), smul_add]
 
 theorem continuous_Jt_single (v : HeightOneSpectrum (𝓞 F)) :
     Continuous (EvalVW.Jt (E := E) (singleL v)) := by

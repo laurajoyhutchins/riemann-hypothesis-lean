@@ -1,4 +1,60 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.AdBridge
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InvariantTopologyComparison.LinearIndependentOneBeta
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.AdBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,23 +77,7 @@ def KgS (g : ℕ) : Set I.Gf :=
     ∀ y ∈ I.Lf, ∃ z ∈ I.Lf, (I.fmat x - 1) *ᵥ y = (g : EAf I) • z}
 
 theorem exists_beta : ∃ β : I.E, β ∈ Formalism.UG.intOE I.E ∧ β ∉ Set.range (algebraMap I.F I.E) := by
-  by_contra hcon
-  push_neg at hcon
-  have hall : ∀ z : I.E, z ∈ Set.range (algebraMap I.F I.E) := by
-    intro z
-    obtain ⟨a, b, _, rfl⟩ := IsFractionRing.div_surjective (A := 𝓞 I.E) z
-    obtain ⟨x, hx⟩ := hcon _ (by exact RingHom.mem_range.mpr ⟨a, rfl⟩)
-    obtain ⟨y, hy⟩ := hcon _ (by exact RingHom.mem_range.mpr ⟨b, rfl⟩)
-    exact ⟨x / y, by rw [map_div₀, hx, hy]⟩
-  have hw : ∀ w : I.E, ∃ c : I.F, c • (1 : I.E) = w := fun w => by
-    obtain ⟨c, hc⟩ := hall w
-    exact ⟨c, by rw [← hc, Algebra.algebraMap_eq_smul_one]⟩
-  have hle : Module.finrank I.F I.E ≤ 1 := by
-    first
-      | exact finrank_le_one (1 : I.E) hw
-      | exact Module.finrank_le_one (1 : I.E) hw
-  have h2 := I.cm.deg2
-  omega
+  apply PI.InvTopW.exists_beta <;> assumption
 
 def beta : I.E := (exists_beta I).choose
 
@@ -343,6 +383,7 @@ private theorem thetaV_tmul_lemma_2 (v : InfinitePlace I.F) (a : Formalism.MainN
 theorem alg_theta (v : InfinitePlace I.F) (y : TT I) :
     thetaV I v y = evV I v ((alg_B I).repr y 0) + evV I v ((alg_B I).repr y 1) * I.φ v (beta I) := by
   conv_lhs => rw [alg_y_eq I y]
+
   rw [map_sum, Fin.sum_univ_two, thetaV_tmul_lemma_2, thetaV_tmul_lemma_2, bas_zero, bas_one, map_one, mul_one]
 
 private theorem tauF_tmul_lemma (a : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F) (b : I.E) :
@@ -355,6 +396,7 @@ private theorem tauF_tmul_lemma (a : Formalism.MainNotions.GlobalTheoryTheory.Ge
 theorem alg_tau (y : TT I) :
     tauF I y = (1 : I.E) ⊗ₜ[I.F] ((alg_B I).repr y 0).2 + beta I ⊗ₜ[I.F] ((alg_B I).repr y 1).2 := by
   conv_lhs => rw [alg_y_eq I y]
+
   rw [map_sum, Fin.sum_univ_two, tauF_tmul_lemma, tauF_tmul_lemma, bas_zero, bas_one]
 
 theorem alg_comm_eq (c : Fin 2 → Af I.F) :
@@ -423,7 +465,7 @@ theorem TT_surj (z : InfinitePlace I.F → ℂ) (w : EAf I) :
   let A : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F := (xa, c 0)
   let B : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.AF I.F := (ya, c 1)
   refine ⟨A ⊗ₜ[I.F] (1 : I.E) + B ⊗ₜ[I.F] beta I, fun v => ?_, ?_⟩
-  · rw [map_add, thetaV_tmul_lemma_2, thetaV_tmul_lemma_2, map_one, mul_one]
+  · rw [map_add (f := _), thetaV_tmul_lemma_2, thetaV_tmul_lemma_2, map_one, mul_one]
     have hA : evV I v A = (xr v : ℂ) := by
       rw [alg_evV_apply, ← NumberField.InfinitePlace.Completion.extensionEmbeddingOfIsReal_apply (hv v)]
       exact congrArg _ (Function.surjInv_eq (he v) (xr v))
@@ -438,7 +480,7 @@ theorem TT_surj (z : InfinitePlace I.F → ℂ) (w : EAf I) :
     · simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, zero_mul, add_zero,
         zero_add, yr]
       exact div_mul_cancel₀ _ hb
-  · rw [map_add, tauF_tmul_lemma, tauF_tmul_lemma]
+  · rw [map_add (f := _), tauF_tmul_lemma, tauF_tmul_lemma]
     exact hc
 
 section AfFacts
@@ -597,11 +639,13 @@ theorem top_expand (y : TT I) : y = ∑ i, (top_eq I y i) ⊗ₜ[I.F] bas I i :=
 theorem top_theta_formula (v : InfinitePlace I.F) (y : TT I) :
     thetaV I v y = ∑ i, evV I v (top_eq I y i) * I.φ v (bas I i) := by
   conv_lhs => rw [top_expand I y]
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => thetaV_tmul_lemma_2 I v _ _
 
 theorem top_tau_formula (y : TT I) : tauF I y = ∑ i, bas I i ⊗ₜ[I.F] (top_eq I y i).2 := by
   conv_lhs => rw [top_expand I y]
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => tauF_tmul_lemma I _ _
 
@@ -618,7 +662,7 @@ theorem continuous_thetaV (v : InfinitePlace I.F) : Continuous (thetaV I v) := b
   have h : ⇑(thetaV I v) = fun y => ∑ i, evV I v (top_eq I y i) * I.φ v (bas I i) :=
     funext fun y => top_theta_formula I v y
   rw [h]
-  exact continuous_finset_sum _ fun i _ => ((top_cont_evV I v).comp (top_cont_coord I i)).mul continuous_const
+  exact continuous_finsetSum _ fun i _ => ((top_cont_evV I v).comp (top_cont_coord I i)).mul continuous_const
 
 theorem top_natCast_EAf (c : ℕ) : (c : EAf I) = (1 : I.E) ⊗ₜ[I.F] (c : Af I.F) := by
   exact (map_natCast (Algebra.TensorProduct.includeRight : Af I.F →ₐ[I.F] EAf I) c).symm
@@ -685,6 +729,7 @@ theorem top_kappa_bas (i j : Fin 2) (a : Af I.F) :
   split_ifs <;> simp
 
 theorem top_kappa_tau (i : Fin 2) (y : TT I) : top_kappa I i (tauF I y) = (top_eq I y i).2 := by
+
   rw [top_tau_formula, map_sum]
   simp_rw [top_kappa_bas]
   simp
@@ -725,6 +770,7 @@ theorem top_coord_den : ∃ D : ℕ, 1 ≤ D ∧ ∀ o ∈ Formalism.UG.intOE I.
   · have h := Int.natAbs_pos.mpr hy0
     nlinarith
   obtain ⟨o', rfl⟩ := ho
+
   rw [← (NumberField.RingOfIntegers.basis I.E).sum_repr o', map_sum, map_sum, Finset.mul_sum]
   refine IsIntegral.sum _ (fun k _ => ?_)
   rw [map_zsmul, map_zsmul, mul_smul_comm]
@@ -772,7 +818,7 @@ theorem top_kappa_int (D : ℕ)
     rw [map_zero, mul_zero]
     exact zero_mem _
   | add a b _ _ ha hb =>
-    rw [map_add, mul_add]
+    rw [map_add (f := _), mul_add]
     exact add_mem ha hb
   | neg a _ ha =>
     rw [map_neg, mul_neg]
@@ -1023,7 +1069,7 @@ theorem tauF_sigR (x : TT I) :
       simp only [Formalism.UG.sigR, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
         Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
     rw [h1, tauF_tmul_lemma, tauF_tmul_lemma, h2]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem Fm_injective : Function.Injective (Fm I) := by
   rw [injective_iff_map_eq_one]
@@ -1287,7 +1333,7 @@ theorem continuousAt_entry (i j : Fin I.n) :
   rw [hsymm1, hone] at hW'
 
   have hW : {y : TT I | y + (1 : Matrix (Fin I.n) (Fin I.n) (TT I)) i j ∈ W'} ∈ nhds (0 : TT I) :=
-    (continuous_add_right ((1 : Matrix (Fin I.n) (Fin I.n) (TT I)) i j)).continuousAt.preimage_mem_nhds
+    (continuous_add_const ((1 : Matrix (Fin I.n) (Fin I.n) (TT I)) i j)).continuousAt.preimage_mem_nhds
       (by rw [zero_add]; exact hW')
   obtain ⟨δ, hδ, c, hc1, hsmall⟩ := tt_small I _ hW
   have hmm : 1 ≤ c * mm I ^ 2 := by

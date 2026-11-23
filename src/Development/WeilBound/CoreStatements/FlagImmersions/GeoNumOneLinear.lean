@@ -1,13 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import GroundTheory.HeightsAndTheta.Heights.Intersections.IsMultiProjPrimeImageZ
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ProjDeg
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ProjContract
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PFnDegRelDeg
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.GeoNum
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.HomFracDegZeroEqFunField
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PContractRelDimLe
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.IsMultiProjPrimeImageZ
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.FieldNumbersProjectionFormulaDegree
 import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ExistsUnique
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PContractRelDimLe
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.FieldNumbersProjectionFormulaDegree
+import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.GeoNum
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PFnDegRelDeg
+import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ProjContract
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.ProjDeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogIdealChain
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,16 +100,16 @@ theorem geoNum_one_linear {K : Type} [Fintype K] {ι : K → Type} [∀ k, Finty
       split_ifs
       · exact Int.natCast_nonneg _
       · exact le_rfl
-    · rw [geoNum, dif_pos h]
+    · rw [geoNum, dite_eq_left h]
       rfl
   · refine ⟨0, fun _ => le_rfl, fun a => ?_⟩
-    rw [geoNum, dif_neg h]
+    rw [geoNum, dite_eq_right h]
     simp
 
 end SlopeTestRemainingChoices
 
-open ReciprocityTheory.ChartRestriction.G.AI.I1 GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.Inter.PointVertical in
 
+open ReciprocityTheory.ChartRestriction.G.AI.I1 GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.Inter.PointVertical in
 theorem nefAt_pull {K K' : Type} [Fintype K] [Fintype K'] {ι : K → Type} {ι' : K' → Type} [∀ k, Fintype (ι k)]
     [∀ k, Fintype (ι' k)] {κ : K → K'} {v : (Σ k, ι k) → Σ k, ι' k} (hv : IsBlockMap κ v) {P : Ideal (MRing ι)}
     {P' : Ideal (MRing ι')} (hP : P ≤ imageZ v P') {p : ℕ} (hp : p.Prime) {a : K → ℤ} (h : PB.NefAt P p a) :

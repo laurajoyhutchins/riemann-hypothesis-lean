@@ -1,19 +1,66 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
-import ReciprocityTheory.ThetaQuasiPeriods.Transl
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfFderivEqZero
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.IsUnitOfLagrangian
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsEtaleCoordsVanishing
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsTestFunctionsSubsetOfMemNhds
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsUniquePointOfRingHom
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FderivEqZeroOfAffine
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.LevelThreeSeparatesPoints
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.PolarisedTorusAlgebraicOfParts
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
 import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsUniquePointOfRingHom
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsTestFunctionsSubsetOfMemNhds
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsEtaleCoordsVanishing
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.LevelThreeSeparatesPoints
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.FderivEqZeroOfAffine
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.PolarisedTorusAlgebraicOfParts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ThetaQuasiPeriods.Transl
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,48 +94,7 @@ theorem fderiv_eq_zero_at (w : Fin g → ℂ)
 theorem eq_zero_of_fderiv_eq_zero (w : Fin g → ℂ)
     (hw : ∀ (U : A.left.Opens) (f : Γ(A.left, U)), ⊤ ≤ (u.ex 0).left ⁻¹ᵁ U →
       fderiv ℂ (fun z => valAt' (u.ex z).left U f) 0 w = 0) : w = 0 := by
-  obtain ⟨_, ⟨U, hU, rfl⟩, h0, -⟩ := A.left.isBasis_affineOpens.exists_subset_of_mem_open
-    (Set.mem_univ ((u.ex 0).left (default : PrimeSpectrum ℂ))) isOpen_univ
-  have h0' : ⊤ ≤ (u.ex 0).left ⁻¹ᵁ U := (top_le_preimage_iff_mem _ _).2 h0
-  have hc : Continuous fun t : ℂ => t • w := by fun_prop
-  have hO : IsOpen {t : ℂ | ⊤ ≤ (u.ex (t • w)).left ⁻¹ᵁ U} := (u.hol U 0).1.preimage hc
-  obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.1 hO 0 (by simpa using h0')
-  have hmem : ∀ t ∈ Metric.ball (0 : ℂ) r, t • w ∈ u.Λ := by
-    intro t ht
-    rw [← u.ker, ← TangentOrigin.ex_zero u]
-    have hval : ∀ f : Γ(A.left, U), valAt' (u.ex (t • w)).left U f = valAt' (u.ex 0).left U f := by
-      intro f
-      have hd : ∀ s ∈ Metric.ball (0 : ℂ) r,
-          HasDerivAt (fun s : ℂ => valAt' (u.ex (s • w)).left U f) 0 s := by
-        intro s hs
-        have h1 : DifferentiableAt ℂ (fun z => valAt' (u.ex z).left U f) (s • w) :=
-          (u.hol U f).2.differentiableAt ((u.hol U f).1.mem_nhds (hball hs))
-        have h2 : HasDerivAt (fun s : ℂ => s • w) w s := by
-          simpa using (hasDerivAt_id s).smul_const w
-        have h3 := h1.hasFDerivAt.comp_hasDerivAt s h2
-        rw [fderiv_eq_zero_at u w hw _ U f (hball hs)] at h3
-        exact h3
-      have := Metric.isOpen_ball.is_const_of_deriv_eq_zero (convex_ball (0 : ℂ) r).isPreconnected
-        (fun s hs => (hd s hs).differentiableAt.differentiableWithinAt) (fun s hs => (hd s hs).deriv)
-        ht (Metric.mem_ball_self hr)
-      simpa using this
-    exact (existsUnique_point_of_ringHom A U hU (valAtHom _ U h0')
-      (fun a => by
-        rw [← valAt'_eq_valAtHom]
-        exact valAt'_constFn _ _ (Over.w (u.ex 0)) U a h0')).unique
-      ⟨hball ht, fun f => by rw [hval, valAt'_eq_valAtHom]⟩
-      ⟨h0', fun f => valAt'_eq_valAtHom _ h0' f⟩
-  have := u.discrete
-  obtain ⟨V, hV, hV'⟩ := (isOpen_induced_iff (f := ((↑) : u.Λ → Fin g → ℂ))).1 (isOpen_discrete ({0} : Set u.Λ))
-  have hV0 : (0 : Fin g → ℂ) ∈ V := by
-    have : (0 : u.Λ) ∈ ((↑) : u.Λ → Fin g → ℂ) ⁻¹' V := by rw [hV']; rfl
-    exact this
-  have hev : ∀ᶠ t : ℂ in 𝓝[≠] 0, t • w ∈ V ∧ t ∈ Metric.ball (0 : ℂ) r :=
-    nhdsWithin_le_nhds (Filter.inter_mem ((hV.preimage hc).mem_nhds (by simpa using hV0)) (Metric.ball_mem_nhds _ hr))
-  obtain ⟨t, ⟨h1, h2⟩, h3⟩ := (hev.and self_mem_nhdsWithin).exists
-  have h4 : (⟨t • w, hmem t h2⟩ : u.Λ) ∈ ((↑) : u.Λ → Fin g → ℂ) ⁻¹' V := h1
-  rw [hV'] at h4
-  exact (smul_eq_zero.1 (congrArg Subtype.val h4)).resolve_left h3
+  apply (config := { allowSynthFailures := true }) GlobalTheory.UnifTangent.eq_zero_of_fderiv_eq_zero <;> assumption
 
 theorem tangent_bijective (hs : SmoothOfRelativeDimension g A.hom) :
     (∀ v, IsTangent v → ∃! w, u.IsDiff w v) ∧ (∀ w, ∃! v, IsTangent v ∧ u.IsDiff w v) :=
@@ -106,7 +112,7 @@ def reparam (ψ : (Fin g → ℂ) ≃ₗ[ℂ] (Fin g → ℂ)) (q : (Fin g → �
     (Λ : Submodule ℤ (Fin g → ℂ)) (hd : DiscreteTopology Λ) (hf : Submodule.span ℝ (Λ : Set (Fin g → ℂ)) = ⊤)
     (hΛ : ∀ z, ψ z ∈ u.Λ ↔ z ∈ Λ) : HolUnif A L g where
   ex z := u.ex (ψ z)
-  ex_add z w := by rw [map_add, u.ex_add]
+  ex_add z w := by rw [map_add (f := _), u.ex_add]
   ex_onto := u.ex_onto.comp ψ.surjective
   Λ := Λ
   ker z := (u.ker _).trans (hΛ z)
@@ -316,7 +322,7 @@ theorem torus_algebraic_of_siegel :
   have h2 := autFactor_mul_exp hY hYτ (n l) (m l) (φ.symm z) (φ.symm l) (hmn l)
   change u.fr i (φ.symm z) * cexp (-SiegelNormalForm.quad (Y.map (↑)) 0 (φ.symm z)) =
     _ * (u.fr i (φ.symm (z + l)) * cexp (-SiegelNormalForm.quad (Y.map (↑)) 0 (φ.symm (z + l))))
-  rw [hform', hform', map_add, h1]
+  rw [hform', hform', map_add (f := _), h1]
   linear_combination u.fr i (φ.symm z + φ.symm l) * h2
 
 end GlobalTheory.TorusTransfer

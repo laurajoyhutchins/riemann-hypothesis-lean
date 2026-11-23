@@ -1,6 +1,50 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.GeoDefs
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjSpaceHom
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.ConeSectionRestriction.GeoDefs
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.ProjSpaceHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory AlgebraicGeometry ReciprocityTheory.ChartRestriction.G.Geo.Tor CrystallineSemistableComparison.Pb
@@ -34,7 +78,7 @@ theorem X_mem_of_finite {K : Type} [Field K] {n m : ℕ}
     | add a b _ _ ha hb =>
       obtain ⟨c, hc⟩ := ha
       obtain ⟨d, hd⟩ := hb
-      exact ⟨c + d, by rw [map_add, hc, hd, map_add, map_add]⟩
+      exact ⟨c + d, by rw [φ.map_add, hc, hd, (MvPolynomial.C : K →+* MvPolynomial (Fin n) K).map_add, (Ideal.Quotient.mk P).map_add]⟩
     | mul a b _ _ ha hb =>
       obtain ⟨c, hc⟩ := ha
       obtain ⟨d, hd⟩ := hb
@@ -60,12 +104,12 @@ theorem X_mem_of_finite {K : Type} [Field K] {n m : ℕ}
         apply hle
         rw [Ideal.mem_comap]
         change φ (x.1 * algebraMap K _ c⁻¹ - 1) = 0
-        rw [map_sub, map_mul, hc, map_one]
+        rw [φ.map_sub, φ.map_mul, hc, φ.map_one]
         change _ * Ideal.Quotient.mk P (MvPolynomial.C c⁻¹) - 1 = 0
-        rw [← map_mul, ← map_mul, mul_inv_cancel₀ hc', map_one, map_one, sub_self]
+        rw [← map_mul (Ideal.Quotient.mk P), ← map_mul MvPolynomial.C, mul_inv_cancel₀ hc', map_one, map_one, sub_self]
       have := J.sub_mem (J.mul_mem_right (algebraMap K _ c⁻¹) hxJ) hm
       simpa using this
-  have hQ : Q.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_comap
+  have hQ : Q.IsMaximal := Ideal.isMaximal_of_isIntegral_of_isMaximal_under
     (R := Algebra.adjoin K (Set.range fun k => Ideal.Quotient.mk I (y k))) Q hmax
   have hjQ : Ideal.Quotient.mk I (MvPolynomial.X j) ∉ Q := fun h =>
     hj (Ideal.Quotient.eq_zero_iff_mem.1 ((hφ _).symm.trans (RingHom.mem_ker.1 h)))
@@ -73,15 +117,15 @@ theorem X_mem_of_finite {K : Type} [Field K] {n m : ℕ}
   obtain ⟨g, rfl⟩ := Ideal.Quotient.mk_surjective a
   have h2 : Ideal.Quotient.mk P (g * MvPolynomial.X j - 1) = 0 := by
     have := congrArg φ hab
-    rw [map_add, map_mul, hφ, hφ, show φ b = 0 from hb, add_zero, map_one] at this
-    rw [map_sub, map_mul, this, map_one, sub_self]
+    rw [φ.map_add, φ.map_mul, hφ, hφ, show φ b = 0 from hb, add_zero, map_one] at this
+    rw [(Ideal.Quotient.mk P).map_sub, (Ideal.Quotient.mk P).map_mul, this, (Ideal.Quotient.mk P).map_one, sub_self]
   have h3 : MvPolynomial.homogeneousComponent 0 (g * MvPolynomial.X j - 1) ∈ P := by
     rw [← MvPolynomial.decomposition.decompose'_apply]
     exact hP 0 (Ideal.Quotient.eq_zero_iff_mem.1 h2)
-  have h4 : MvPolynomial.coeff 0 (g * MvPolynomial.X j - 1) = -1 := by
-    have : MvPolynomial.constantCoeff (g * MvPolynomial.X j - 1) = -1 := by simp
+  have h4 : AddMonoidAlgebra.coeff (g * MvPolynomial.X j - 1) 0 = -1 := by
+    have : MvPolynomial.constantCoeff (g * MvPolynomial.X j - 1) = -1 := by simp only [(MvPolynomial.constantCoeff : MvPolynomial (Fin n) K →+* K).map_sub, (MvPolynomial.constantCoeff : MvPolynomial (Fin n) K →+* K).map_mul, MvPolynomial.constantCoeff_X, mul_zero, (MvPolynomial.constantCoeff : MvPolynomial (Fin n) K →+* K).map_one, zero_sub]
     rwa [MvPolynomial.constantCoeff_eq] at this
-  rw [MvPolynomial.homogeneousComponent_zero, h4, map_neg, map_one] at h3
+  rw [MvPolynomial.homogeneousComponent_zero, h4, (MvPolynomial.C : K →+* MvPolynomial (Fin n) K).map_neg, (MvPolynomial.C : K →+* MvPolynomial (Fin n) K).map_one] at h3
   exact hPp.ne_top ((Ideal.eq_top_iff_one _).2 (by simpa using P.neg_mem h3))
 
 theorem mem_of_evV_eq_zero {K : Type} [Field K] {X : Scheme.{0}} {N : ℕ} (i : X ⟶ PSpace K N) (p : X)

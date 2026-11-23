@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CoordStepsOf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoordStepsOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +64,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {O : Type} [CommRing O] [Algebra O LL] [TopologicalSpace LL]
     {v : AddValuation LL (WithTop ℚ)} {n : ℕ} [NeZero n] {W : LocWach PD LL O v n}
 
-variable (W) in
 
+variable (W) in
 abbrev pfCoeff_J (k : ℕ) : Ideal W.EE := Ideal.span {((PD.p : ℕ) : W.EE) ^ k}
 
 theorem pfCoeff_smod (x y : W.EE) (k : ℕ) :
@@ -76,8 +119,8 @@ section Ext
 
 variable (f : LetA O n →+* LetA O n) (hf : IsUnit (algebraMap (LetA O n) W.EE (f letπ)))
 
-variable (W) in
 
+variable (W) in
 def pfCoeff_Good (x y : W.EE) : Prop :=
   ∀ k, ∃ (a : LetA O n) (m : ℕ),
     x * algebraMap (LetA O n) W.EE (letπ ^ m) - algebraMap (LetA O n) W.EE a ∈ pfCoeff_J W k ∧
@@ -186,7 +229,7 @@ theorem pfCoeff_good_add {x x' y y' : W.EE} (h : pfCoeff_Good W f x y) (h' : pfC
             (x * algebraMap (LetA O n) W.EE (letπ ^ m₁) - algebraMap (LetA O n) W.EE a₁) +
           algebraMap (LetA O n) W.EE (letπ ^ m₁) *
             (x' * algebraMap (LetA O n) W.EE (letπ ^ m₂) - algebraMap (LetA O n) W.EE a₂) := by
-      rw [pow_add, map_add, map_mul, map_mul, map_mul]; ring
+      rw [pow_add, map_add (f := _), map_mul, map_mul, map_mul]; ring
     rw [e]
     exact (pfCoeff_J W k).add_mem ((pfCoeff_J W k).mul_mem_left _ hx₁) ((pfCoeff_J W k).mul_mem_left _ hx₂)
   · have e : (y + y') * algebraMap (LetA O n) W.EE (f (letπ ^ (m₁ + m₂))) -
@@ -195,7 +238,7 @@ theorem pfCoeff_good_add {x x' y y' : W.EE} (h : pfCoeff_Good W f x y) (h' : pfC
             (y * algebraMap (LetA O n) W.EE (f (letπ ^ m₁)) - algebraMap (LetA O n) W.EE (f a₁)) +
           algebraMap (LetA O n) W.EE (f (letπ ^ m₁)) *
             (y' * algebraMap (LetA O n) W.EE (f (letπ ^ m₂)) - algebraMap (LetA O n) W.EE (f a₂)) := by
-      rw [pow_add, map_add f, map_mul f, map_mul f, map_mul f, map_add, map_mul, map_mul, map_mul]; ring
+      rw [pow_add, map_add f, map_mul f, map_mul f, map_mul f, map_add (f := _), map_mul, map_mul, map_mul]; ring
     rw [e]
     exact (pfCoeff_J W k).add_mem ((pfCoeff_J W k).mul_mem_left _ hy₁) ((pfCoeff_J W k).mul_mem_left _ hy₂)
 
@@ -270,8 +313,8 @@ theorem pfCoeff_sw_γ (i : ZMod n) (g₀ : PowerSeries O →ₐ[O] PowerSeries O
 theorem pfCoeff_sw_d (hR : Ring9 W) (i : ZMod n) (a : PowerSeries O) :
     pfCoeff_sw i ((baseIdOf hR).d a) = (baseIdOf hR).d a := rfl
 
-variable (W) in
 
+variable (W) in
 def pfCoeff_σ (i : ZMod n) : W.EE →+* W.EE :=
   pfCoeff_ext (pfCoeff_sw i) (by rw [pfCoeff_sw_π]; exact W.EE_π)
 
@@ -312,8 +355,8 @@ theorem pfCoeff_letE_mem (j : ZMod n) : algebraMap (LetA O n) W.EE (letE j) ∈ 
   rw [W.γE_ext]
   exact congrArg _ (γA_letE W δ j)
 
-variable (W) in
 
+variable (W) in
 abbrev pfCoeff_mod (hR : Ring9 W) : Module (PowerSeries O) W.EE :=
   Module.compHom W.EE ((algebraMap (LetA O n) W.EE).comp (baseIdOf hR).d.toRingHom)
 

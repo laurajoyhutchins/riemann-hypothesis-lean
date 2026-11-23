@@ -1,7 +1,50 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValPowGen
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ExistsZeroGt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.PhiPow
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValPowGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.PhiPow
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FamMod
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PhiGenPf
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,7 +67,7 @@ theorem sval_zero_of {X Y Z : Scheme.{0}} {L : LB X} {K : Type} [Fintype K] {φ 
   unfold sval
   rw [h']
   unfold gs
-  rw [dif_pos hm]
+  rw [dite_eq_left hm]
   erw [map_zero, map_zero]
 
 theorem trF_add (a b : D.X) : DegPre.trF D F a ≫ DegPre.trF D F b = DegPre.trF D F (a + b) := by
@@ -79,7 +122,7 @@ theorem exists_fam_rep (hG : GlobalFnsSt) (hB : D.TauBimult) (k : ℕ) (ρ : D.X
       if h : ∃ mu, ρ + k • mu = β then cst h.choose_spec (tm h.choose) else (0 : Fam D F k).s β
   have hSρ : S ρ = σ := by
     dsimp only [S]
-    rw [dif_pos rfl]
+    rw [dite_eq_left rfl]
   have hA : ∀ (mu β : D.X), ρ + k • mu = β → ∀ (T : Over (Spec (CommRingCat.of R)))
       (ρ' : T ⟶ DegPre.BF D F) (z : T.left) (J), Good D.P.L z J →
       sval (S β) ρ'.left z J = sval σ (ρ' ≫ DegPre.trF D F mu).left z J *
@@ -101,14 +144,14 @@ theorem exists_fam_rep (hG : GlobalFnsSt) (hB : D.TauBimult) (k : ℕ) (ρ : D.X
         rw [htm c _ ρ'.left z J hJ, sval_pullMulSec _ _ _ _ _ _ hJ, hval c T ρ' z J hJ]
         simp only [Over.comp_left]
       dsimp only [S]
-      rw [dif_neg hβ, dif_pos hex]
+      rw [dite_eq_right hβ, dite_eq_left hex]
       exact key _ _
   have hZ : ∀ β : D.X, (∀ mu, ρ + k • mu ≠ β) → ∀ j, (S β).f j = 0 := by
     intro β hβ j
     have h1 : ¬ ρ = β := fun h => hβ 0 (by rw [smul_zero, add_zero]; exact h)
     have h2 : ¬ ∃ mu, ρ + k • mu = β := fun ⟨mu, h⟩ => hβ mu h
     dsimp only [S]
-    rw [dif_neg h1, dif_neg h2]
+    rw [dite_eq_right h1, dite_eq_right h2]
     exact zero_f _ _
   refine ⟨⟨S, ?_⟩, hSρ, hZ⟩
   intro mu' α v hv hcv

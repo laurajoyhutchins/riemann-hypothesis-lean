@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.QuotientTorusMinimumBound
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.QuotientTorusMinimumBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2
 
@@ -33,20 +78,21 @@ theorem Uh_add (X : PT E) (q : ℕ) {a b : Vsp X.dim} (ha : a ∈ X.L) (hb : b �
     exact_mod_cast hε
 
   have h1 : Hf v (a + b) = Hf v a + Hf v b := by
-    simp only [Hf, PiLp.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [Hf, PiLp.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
   have h2 : Hf (v - a) b = Hf v b - Hf a b := by
     simp only [Hf, PiLp.sub_apply, sub_mul, Finset.sum_sub_distrib]
   have h3 : Hf (a + b) (a + b) = Hf a a + Hf a b + Hf b a + Hf b b := by
-    simp only [Hf, PiLp.add_apply, map_add, mul_add, add_mul, Finset.sum_add_distrib]
+    simp only [Hf, PiLp.add_apply, map_add (f := _), mul_add, add_mul, Finset.sum_add_distrib]
     ring
   have h4 : Hf b a = (starRingEnd ℂ) (Hf a b) := by
+
     simp only [Hf, map_sum, map_mul, Complex.conj_conj]
     exact Finset.sum_congr rfl fun i _ => mul_comm _ _
   have h5 : Hf b a - Hf a b = -(2 * (k : ℂ) * Complex.I) := by
     rw [h4]
     have hz := Complex.re_add_im (Hf a b)
     rw [← hz, hk]
-    simp only [map_add, map_mul, Complex.conj_ofReal, Complex.conj_I]
+    simp only [map_add (f := _), map_mul, Complex.conj_ofReal, Complex.conj_I]
     push_cast
     ring
   have hexp : Complex.exp (-(q * Real.pi * (2 * (k : ℂ) * Complex.I)) / 2) =
@@ -106,7 +152,7 @@ theorem zeroModeLift_add_lattice {x : Vsp X.dim} (hx : x ∈ Ip X I) (v : Vsp X.
   have hd1 := Hf_decomp (K := IR I) (hK_of hI) v x
   have hd2 := Hf_decomp (K := IR I) (hK_of hI) x x
   unfold F0 S
-  rw [map_add, h1, Hf_wmap (hK_of hI), Hf_wmap (hK_of hI), hd1, hd2]
+  rw [map_add (f := _), h1, Hf_wmap (hK_of hI), Hf_wmap (hK_of hI), hd1, hd2]
   simp only [hz, hzr]
   have hexp : ∀ a b c d : ℂ, a + b = c + d → cexp a * cexp b = cexp c * cexp d := by
     intro a b c d h

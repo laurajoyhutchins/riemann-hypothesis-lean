@@ -1,7 +1,46 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.ThStmt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GeometricSideEstimates.PositivityAtAllPlaces
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GeometricSideEstimates.RationalPointRetractionExistsCmDatum
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.DifferentialTranslates.FinField
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.LieGeometryGrowth.ThStmt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GeometricSideEstimates.PositivityAtAllPlaces
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GeometricSideEstimates.RationalPointRetractionExistsCmDatum
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.DifferentialTranslates.FinField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField Matrix GlobalTheory.CuspRep GlobalTheory.GKCoh UpperTheory.V.Af GlobalTheory.UnitaryBC UpperTheory.V.Lit.Dr UpperTheory.V.Lit.Bor
 open GroundTheory.Automorphic GroundTheory.Automorphic.CuspidalSpectrum
 open UpperTheory.V.Lit.Geo
@@ -19,11 +58,11 @@ private theorem back {R S : Type} [CommRing R] [CommRing S] {a : ℕ} (f : R →
   rwa [Matrix.mulVec_mulVec, ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one,
     Units.val_one, Matrix.one_mulVec] at h2
 
-private theorem abs_inf {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (x : E) (w : InfinitePlace E) :
+private theorem abs_inf {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (x : E) (w : InfinitePlace E) :
     ‖pInf E (algebraMap E (Ad E) x) w‖ = w x := by
   rw [pInf_algebraMap, InfinitePlace.norm_embedding_eq]
 
-private theorem inf_ne {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (x : E) (hx : x ≠ 0) :
+private theorem inf_ne {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (x : E) (hx : x ≠ 0) :
     pInf E (algebraMap E (Ad E) x) ≠ 0 := by
   intro h
   obtain ⟨w⟩ : Nonempty (InfinitePlace E) := inferInstance
@@ -33,7 +72,7 @@ private theorem inf_ne {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
   simp at h1
   exact h2.ne h1
 
-private theorem sep {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] (T : Set (Af E)) (hT : IsCompact T) :
+private theorem sep {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (T : Set (Af E)) (hT : IsCompact T) :
     ∃ c : ℝ, 0 < c ∧ ∀ x : E, algebraMap E (Af E) x ∈ T → x = 0 ∨ c ≤ ‖pInf E (algebraMap E (Ad E) x)‖ := by
   have hf := UpperTheory.V.Lit.Dr.finField E 1 T hT
   have hf2 := (hf.subset (Set.diff_subset (t := {0}))).image fun x => ‖pInf E (algebraMap E (Ad E) x)‖⁻¹
@@ -72,10 +111,12 @@ theorem UpperTheory.convex_separation_positive_distance :
   · have e1 : pt (rt g) v ⬝ᵥ ((GeneralLinearGroup.map (pInf E) (rt g)⁻¹).val *ᵥ vInf ξ)
         = pInf E (algebraMap E (Ad E) (v ⬝ᵥ ξ)) := by
       refine (dot_cancel (pInf E) (rt g) (vInf v) (vInf ξ)).trans ?_
+
       simp only [dotProduct, vInf, map_sum, map_mul]
     have e2 : ptF (rt g) v ⬝ᵥ ((GeneralLinearGroup.map (pFin E) (rt g)⁻¹).val *ᵥ vFin ξ)
         = algebraMap E (Af E) (v ⬝ᵥ ξ) := by
       refine (dot_cancel (pFin E) (rt g) (vFin v) (vFin ξ)).trans ?_
+
       simp only [dotProduct, vFin, map_sum, map_mul]
     have hv' : ptF (rt g) v ∈ L := by rw [(hR g).2.2]; exact hv
     rw [e1]

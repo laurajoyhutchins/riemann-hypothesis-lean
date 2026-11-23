@@ -1,7 +1,63 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CmHalfIntegralGeneratorMemAlgebraicClosure
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylConjugationFixedColumn.ReflectionScalarDualIsotropic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
+public import Mathlib.LinearAlgebra.Lagrange
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CmHalfIntegralGeneratorMemAlgebraicClosure
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+
+@[expose] public section
 
 open Matrix Formalism.YangianSpanCharacter.T
 
@@ -13,6 +69,10 @@ open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Form
 open scoped ContDiff
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
+
+local macro "distrib_module" : tactic =>
+  `(tactic| (simp only [mul_sub, sub_mul, mul_add, add_mul, smul_mul_assoc, mul_smul_comm,
+    mul_assoc, smul_sub, smul_add, smul_smul]; module))
 
 section Qdet
 
@@ -26,10 +86,6 @@ theorem rtt_entry (QQ : ℂ → Matrix (Fin 2) (Fin 2) A) (h : Formalism.Fourier
     simp [E1, E2, Pf, Matrix.mul_apply, Matrix.sub_apply, Matrix.smul_apply, Matrix.one_apply,
       Fintype.sum_prod_type, Fin.sum_univ_two, sub_mul, mul_sub] at h0 ⊢ <;>
     (rw [smul_sub]; linear_combination (norm := abel) h0)
-
-macro "distrib_module" : tactic =>
-  `(tactic| (simp only [mul_sub, sub_mul, mul_add, add_mul, smul_mul_assoc, mul_smul_comm, mul_assoc, smul_sub, smul_add,
-      smul_smul]; module))
 
 theorem idempotent_mul_comm (r s t : Matrix (Fin 2) (Fin 2) A) (D : ℂ)
     (hst : ∀ a b c d, (1 : ℂ) • (s a b * t c d - t c d * s a b) = s c b * t a d - t c b * s a d)
@@ -634,22 +690,7 @@ lemma weyl_cell_mulVec (c : ℂ) (y : Fin (2 * r + k + 1) → ℂ) :
       ring
 
 lemma weyl_cell_mem_level_group {c : ℂ} (hc : c ≠ 0) : w1 k r l c ∈ Glev k r l.castSucc := by
-  have hc' : conj c ≠ 0 := (map_ne_zero _).2 hc
-  refine ⟨?_, fun a ha => ?_⟩
-  · apply B2x8.mem_UH_of
-    intro u w
-    have h1 : ⟪𝐞, w⟫ = conj ⟪w, 𝐞⟫ := (B2x8.herm_conj _ Hh _ _).symm
-    have h2 : ⟪𝐬, w⟫ = conj ⟪w, 𝐬⟫ := (B2x8.herm_conj _ Hh _ _).symm
-    rw [weyl_cell_mulVec, weyl_cell_mulVec]
-    simp only [B2x8.herm_add_left, B2x8.herm_add_right, B2x8.herm_smul_left, B2x8.herm_smul_right, h_e_e, h_es_es,
-      h_e_es, h_es_e, if_true, h1, h2, map_sub, map_mul, map_inv₀, Complex.conj_conj]
-    field_simp
-    ring
-  · have hne : a ≠ l := fun h' => by
-      rw [h', Fin.val_castSucc] at ha; exact lt_irrefl l.val ha
-    constructor
-    · rw [weyl_cell_mulVec, h_e_e, h_e_es, if_neg hne]; simp
-    · rw [weyl_cell_mulVec, h_es_e, h_es_es, if_neg hne]; simp
+  apply PI.IsotropicReflections.reflection_mem_Glev_castSucc <;> assumption
 
 lemma reflection_mul_mem_lower_level {c : ℂ} (hc : c ≠ 0) {g : Mx k r} (hg : g ∈ Glev k r l.succ) :
     w1 k r l c * g ∈ Glev k r l.castSucc := by

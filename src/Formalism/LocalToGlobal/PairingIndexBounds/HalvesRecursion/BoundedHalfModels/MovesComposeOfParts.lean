@@ -1,5 +1,52 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.BoundedHalfModels.SplitElementExistsHolds
-import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.ModelXiAll
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PIopNorm
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.BoundedHalfModels.EqOffBound
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.Statement
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.BoundedHalfModels.AdicBoxOpenness.CentralCharacterLocalHolds
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.BoundedHalfModels.Assemble
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.BoundedHalfModels.SplitElementExistsHolds
+import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.RecursiveLatticeMembership.Bridge
+public import Formalism.LocalToGlobal.PairingIndexBounds.HalvesRecursion.RecursiveLatticeMembership.MemLamOfIff
+public import Formalism.LocalToGlobal.PairingIndexBounds.ModelLatticeMoves.MovesComposeU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -75,7 +122,7 @@ theorem good_rec (hA : HfIntRec) (hB : SelfDualRec) (D : D7) (cc : Ideal (𝓞 D
     intro z hz
     obtain ⟨y, hy, rfl⟩ := AddSubgroup.mem_map.1 hz
     obtain ⟨a, ha, b, hb, rfl⟩ := c1 y hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact AddSubgroup.add_mem_sup
       ⟨AddSubgroup.mem_map_of_mem _ (Submodule.mem_inf.1 ha).1, AddSubgroup.mem_map_of_mem _ (Submodule.mem_inf.1 ha).2⟩
       ⟨AddSubgroup.mem_map_of_mem _ (Submodule.mem_inf.1 hb).1, AddSubgroup.mem_map_of_mem _ (Submodule.mem_inf.1 hb).2⟩
@@ -89,7 +136,7 @@ theorem good_rec (hA : HfIntRec) (hB : SelfDualRec) (D : D7) (cc : Ideal (𝓞 D
   obtain ⟨a', ha', rfl⟩ := AddSubgroup.mem_map.1 ha
   obtain ⟨b', hb', rfl⟩ := AddSubgroup.mem_map.1 hb
   rw [hΛ] at hab ⊢
-  rw [← map_add, AddSubgroup.mem_map_iff_mem hinj] at hab
+  rw [← map_add (f := _), AddSubgroup.mem_map_iff_mem hinj] at hab
   exact AddSubgroup.mem_map_of_mem _ (c2 a' ha' b' hb' hab)
 
 theorem movesCompose_of_parts (hA : HfIntRec) (hB : SelfDualRec) (D : D7) : movesCompose D := by

@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarFwd
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarLocInA
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarNMove
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocFacts
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SaturatedPf
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarFwd
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfB
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocFacts
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SaturatedPf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfD
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarLocInA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.FStarNMove
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfA
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,6 +76,7 @@ theorem exists_dual {r : ℕ} {T : D.host.E} (F0 : FlagG (VS D) r T) :
       intro x
       conv_lhs => rw [show x = ∑ a, x a • Pi.single a (1 : D.host.E) by
         ext i; simp [Finset.sum_apply, Pi.single_apply]]
+
       simp [map_sum, map_smul, hk]
     have hzero : ∀ y, ∑ a, (VS D).hT (F0.e a) y * k a = 0 := by
       intro y
@@ -39,6 +86,7 @@ theorem exists_dual {r : ℕ} {T : D.host.E} (F0 : FlagG (VS D) r T) :
     have hu : (∑ a, star (k a) • F0.e a) = 0 := by
       apply (VS D).nondeg.1
       intro y
+
       rw [map_sum, LinearMap.sum_apply]
       simp only [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, star_star]
       rw [← hzero y]
@@ -79,21 +127,23 @@ theorem locX_move {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (n : (VS D).V ≃�
     intro j
     have key : ∀ a, (VS D).hT (F0.e a) (π j) = 0 := by
       intro a
+
       simp only [hπ, map_sub, map_sum, map_smul, smul_eq_mul, hy, mul_ite, mul_one, mul_zero,
-        Finset.sum_ite_eq, Finset.mem_univ, if_true, hkk, sub_self]
+      Finset.sum_ite_eq, Finset.mem_univ, if_true, hkk, sub_self]
     simp only [orth, Submodule.mem_iInf, LinearMap.mem_ker]
     intro x hx
     change x ∈ Submodule.span D.host.E (Set.range F0.e) at hx
     induction hx using Submodule.span_induction with
     | mem z hz => obtain ⟨a, rfl⟩ := hz; exact key a
     | zero => simp
-    | add z w _ _ hz hw => rw [map_add, LinearMap.add_apply, hz, hw, add_zero]
+    | add z w _ _ hz hw => rw [map_add (f := _), LinearMap.add_apply, hz, hw, add_zero]
     | smul c z _ hz => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hz, smul_zero]
   have hdec : ∀ j, n (b j) - b j = (n (π j) - π j) + ∑ c, kk j c • (n (y c) - y c) := by
     intro j
     have e1 : b j = π j + ∑ c, kk j c • y c := by simp [hπ]
     conv_lhs => rw [e1]
-    simp only [map_add, map_sum, map_smul, smul_sub, Finset.sum_sub_distrib]
+
+    simp only [map_add (f := _), map_sum, map_smul, smul_sub, Finset.sum_sub_distrib]
     abel
   have hκ : ∀ c : Fin D.R.rS, ∑ j, v j * (D.s.atP p).ιE (kk j c) = 0 := by
     intro c
@@ -112,12 +162,13 @@ theorem locX_move {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (n : (VS D).V ≃�
     exact h2
   have hev : betaP p n v - v = ∑ j, v j • baseChange₂ D p (n (b j) - b j) := by
     conv_lhs => rw [vp_eq_sum p v]
+
     rw [map_sum, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [map_smul, betaP_bc, map_sub, smul_sub]
   have hsplit : ∑ j, v j • baseChange₂ D p (n (b j) - b j) = ∑ j, v j • baseChange₂ D p (n (π j) - π j) +
       ∑ c, (∑ j, v j * (D.s.atP p).ιE (kk j c)) • baseChange₂ D p (n (y c) - y c) := by
-    simp only [hdec, map_add, baseChangeAt_sum, smul_add, Finset.sum_add_distrib, Finset.smul_sum, smul_smul,
+    simp only [hdec, map_add (f := _), baseChangeAt_sum, smul_add, Finset.sum_add_distrib, Finset.smul_sum, smul_smul,
       Finset.sum_smul]
     congr 1
     exact Finset.sum_comm
@@ -133,7 +184,7 @@ theorem fvec_fix {T : D.host.E} {F0 : FlagG (VS D) D.R.rS T} {n : (VS D).V ≃�
   | last => simpa [FlagG.fvec] using hz
   | cast b => simpa [FlagG.fvec] using he b
 
-theorem frame_moves {T' : D.host.E} {F' F'' : LFlag (VS D) D.R.rS T'} {n : (VS D).V ≃ₗ[D.host.E] (VS D).V}
+theorem frame_moves {T' : D.host.E} {F' F'' : LFlag (D.sp.Y 0) D.R.rS T'} {n : (VS D).V ≃ₗ[D.host.E] (VS D).V}
     (hm : Moves n F' F'') (b : Fin (D.R.rS + 1)) : n (frame F' b) = frame F'' b := by
   obtain ⟨he, hz⟩ := hm
   induction b using Fin.lastCases with
@@ -207,7 +258,7 @@ def LprPart : Prop :=
             ⟨lattice₂ D Zd.M p γ.lam, (tLoc Zd p γ).f, locF' Zd p F', (tLoc Zd p γ).T, (tLoc Zd p γ).T'⟩
 
 def GenXi : Prop :=
-  IsRowReps D F0 what₂ → ∀ (γ : TermDef.Term D u u' F0 what₂) (F' : LFlag (VS D) D.R.rS ((Tu D u' : ℕ) : D.host.E))
+  IsRowReps D F0 what₂ → ∀ (γ : TermDef.Term D u u' F0 what₂) (F' : LFlag (D.sp.Y 0) D.R.rS (((D.mem u').A.T : ℕ) : D.host.E))
     (p : PlF D), AdmWit γ.lam (gS D) (lf D F0) F' 1 → IsLift γ.lam F' →
     (locH Zd p).IsGeneric (locTerm Zd p γ.lam (lf D F0) F' (Tu D u) (Tu D u')) →
     (locH Zd p).IsGeneric ⟨lattice₂ D Zd.M p γ.lam, (tLoc Zd p γ).f, locF' Zd p F', (tLoc Zd p γ).T, (tLoc Zd p γ).T'⟩

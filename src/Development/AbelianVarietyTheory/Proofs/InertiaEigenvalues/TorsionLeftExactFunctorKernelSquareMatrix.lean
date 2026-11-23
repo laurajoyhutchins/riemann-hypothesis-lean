@@ -1,10 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.H1MapSubgroup
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGeneratorsOfCardHomResidueFieldLeStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCompatibleGeneratorsTowerLocalRingStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChainLeIInfSupPowSmulTopOfPrecompleteStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTorsionModuleExtendingResidueMapsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LeftExactFunctorRepresentableTorsionModulesStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.H1MapSubgroup
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ChainLeIInfSupPowSmulTopOfPrecompleteStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCompatibleGeneratorsTowerLocalRingStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGeneratorsOfCardHomResidueFieldLeStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTorsionModuleExtendingResidueMapsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LeftExactFunctorRepresentableTorsionModulesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,6 +97,7 @@ theorem lin_eq_sum {Λ : Type} [CommRing Λ] {a : ℕ} {B : Type} [AddCommGroup 
     ext j
     simp [Finset.sum_apply, Pi.single_apply]
   conv_lhs => rw [hc]
+
   rw [map_sum]
   simp only [map_smul]
 
@@ -177,7 +222,7 @@ theorem assemble [IsNoetherianRing Λ] [Finite (ResidueField Λ)] (F : ModuleCat
           exact Finset.sum_eq_zero fun i _ => by
             rw [Pi.smul_apply, smul_eq_mul, mul_comm, mul_smul, hn r hr i, smul_zero]
         have h2 : L c2 = 0 := hsm hc2
-        rw [LinearMap.mem_ker, map_add, h2, add_zero, hL]
+        rw [LinearMap.mem_ker, map_add (f := _), h2, add_zero, hL]
         exact (mem_sol.mp x.2) c1 hc1
       refine ⟨_, n, ModuleCat.ofHom ((LinearMap.ker (p n)).liftQ L hker ∘ₗ
         (LinearMap.quotKerEquivOfSurjective (p n) (hp n)).symm.toLinearMap), fun c => ?_, rfl⟩
@@ -217,7 +262,7 @@ theorem assemble [IsNoetherianRing Λ] [Finite (ResidueField Λ)] (F : ModuleCat
       refine ⟨max n n', ψ + ψ', fun c => ?_, ?_⟩
       · rw [ModuleCat.hom_add, LinearMap.add_apply, g1, g1', ← Finset.sum_add_distrib]
         exact Finset.sum_congr rfl fun i _ => (smul_add _ _ _).symm
-      · rw [F.map_add, ModuleCat.hom_add, LinearMap.add_apply, g2, g2']
+      · rw [F.map_add (f := _), ModuleCat.hom_add, LinearMap.add_apply, g2, g2']
     · rintro r x y ⟨n, φ, h1, h2⟩
       refine ⟨n, r • φ, fun c => ?_, ?_⟩
       · rw [ModuleCat.hom_smul, LinearMap.smul_apply, h1, Finset.smul_sum]
@@ -230,6 +275,7 @@ theorem assemble [IsNoetherianRing Λ] [Finite (ResidueField Λ)] (F : ModuleCat
   have w1 : ∀ c, (φ ≫ f).hom (p n c) = ∑ i, c i • x'.1 i := by
     intro c
     show f.hom (φ.hom (p n c)) = _
+
     rw [h1, map_sum]
     simp only [map_smul, hx]
   have w2 : (F.map (φ ≫ f)).hom (ξ n) = (F.map f).hom (e B hB x) := by

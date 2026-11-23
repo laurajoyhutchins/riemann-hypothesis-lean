@@ -1,4 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.TruncSpec
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockEvaluation.TruncSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Lagrange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open UpperTheory.ConvolutionTheory.Ci
 
@@ -9,7 +53,7 @@ open Polynomial
 private theorem semiconj_aeval {A : Type} [Ring A] [Algebra ℂ A] {a x y : A} (h : SemiconjBy a x y) (p : ℂ[X]) :
     SemiconjBy a (aeval x p) (aeval y p) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => simpa only [map_add] using hp.add_right hq
+  | add p q hp hq => simpa only [map_add (f := _)] using hp.add_right hq
   | monomial n c =>
     simp only [aeval_monomial, ← Algebra.smul_def]
     have := (h.pow_right n).eq
@@ -97,7 +141,8 @@ private theorem trace_eq {W : Type} [AddCommGroup W] [Module ℂ W] [FiniteDimen
   have h2 : LinearMap.trace ℂ W (aeval (U 0) (r * q) * B) = 0 :=
     (LinearMap.isNilpotent_trace_of_isNilpotent h1).eq_zero
   have h3 : U 0 ^ j = aeval (U 0) (X ^ j : ℂ[X]) := by simp
-  rw [h3, hq, map_add, add_mul, map_add, h2, zero_add, map_sum, Finset.sum_mul, map_sum]
+
+  rw [h3, hq, map_add (f := _), add_mul, map_add (f := _), h2, zero_add, map_sum, Finset.sum_mul, map_sum]
   refine Finset.sum_congr rfl fun z _ => ?_
   rw [map_mul (aeval (U 0)), aeval_C, ← Algebra.smul_def, smul_mul_assoc, map_smul, smul_eq_mul, mul_comm]
 

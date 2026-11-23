@@ -1,5 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+module
+
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open ReciprocityTheory.ChartRestriction.G.Geo MvPolynomial
 
@@ -62,25 +114,7 @@ theorem form_natCast_mul {f : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f a) 
 
 theorem cone_form (y : (Σ k, ι k) → Ω) {h : MRing ι} {d : K → ℕ} (hh : IsMultiHomog h d) :
     mConeMap y h = MvPolynomial.C (aeval y h) * ∏ k, (X k : MvPolynomial K Ω) ^ d k := by
-  classical
-  have key : ∀ v ∈ h.support, mConeMap y (monomial v (coeff v h)) =
-      MvPolynomial.C (aeval y (monomial v (coeff v h))) * ∏ k, (X k : MvPolynomial K Ω) ^ d k := by
-    intro v hv
-    have hX : (v.prod fun p e => (X p.1 : MvPolynomial K Ω) ^ e) = ∏ k, (X k : MvPolynomial K Ω) ^ d k := by
-      rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _), Fintype.prod_sigma]
-      exact Finset.prod_congr rfl fun k _ => by simp only [Finset.prod_pow_eq_pow_sum, hh v hv k]
-    have h1 : (v.prod fun p e => (MvPolynomial.C (y p) * X p.1 : MvPolynomial K Ω) ^ e) =
-        MvPolynomial.C (v.prod fun p e => y p ^ e) * v.prod fun p e => (X p.1 : MvPolynomial K Ω) ^ e := by
-      rw [map_finsuppProd, ← Finsupp.prod_mul]
-      exact Finsupp.prod_congr fun p _ => by simp only [mul_pow, map_pow]
-    show (aeval fun p => MvPolynomial.C (y p) * (X p.1 : MvPolynomial K Ω)) (monomial v (coeff v h)) = _
-    simp only [MvPolynomial.aeval_monomial]
-    rw [h1, hX, map_mul]
-    simp only [algebraMap_int_eq, eq_intCast, Int.coe_castRingHom, map_intCast]
-    ring
-  rw [h.as_sum]
-  simp only [map_sum, Finset.sum_mul]
-  exact Finset.sum_congr rfl key
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.SectionBounded.mConeMap_homog <;> assumption
 
 theorem mem_of_aeval_eq_zero {y : (Σ k, ι k) → Ω} {h : MRing ι} {d : K → ℕ} (hh : IsMultiHomog h d)
     (h0 : aeval y h = 0) : h ∈ mCoordIdeal y := by
@@ -118,12 +152,12 @@ theorem lift_poly {y : (Σ k, ι k) → Ω} {b : K → ℕ} {H : MRing ι} (P : 
   choose! g hg using hP
   refine ⟨∑ j ∈ P.support, Polynomial.monomial j (g j), fun j => ?_, ?_⟩
   · rw [Polynomial.finsetSum_coeff]
-    simp only [Polynomial.coeff_monomial, Finset.sum_ite_eq']
+    simp only [Polynomial.coeff_monomial_apply, Finset.sum_ite_eq']
     split_ifs with hj
     · exact (hg j hj).1
     · exact form_zero b
   · ext n
-    simp only [Polynomial.coeff_map, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial,
+    simp only [Polynomial.coeff_map, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial_apply,
       Finset.sum_ite_eq', Polynomial.coeff_C_mul]
     split_ifs with hn
     · exact ((hg n hn).2).trans (mul_comm _ _)
@@ -178,7 +212,7 @@ theorem core {Ω' : Type} [Field Ω'] {y : (Σ k, ι k) → Ω} (hy : Birational
     · exact form_zero _
   have hEm : (U * M + V * Polynomial.derivative M - Polynomial.C (H * H)).map
       (aeval y : MRing ι →ₐ[ℤ] Ω).toRingHom = 0 := by
-    rw [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul,
+    rw [Polynomial.map_sub, Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_mul,
       ← Polynomial.derivative_map, Polynomial.map_C, hUm, hVm, hMm, Polynomial.derivative_C_mul]
     simp only [map_mul, AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
     linear_combination (Polynomial.C (aeval y H) * Polynomial.C (aeval y H)) * huv
@@ -186,7 +220,7 @@ theorem core {Ω' : Type} [Field Ω'] {y : (Σ k, ι k) → Ω} (hy : Birational
       mCoordIdeal y := by
     intro j
     refine mem_of_aeval_eq_zero (hEh j) ?_
-    have h2 := congrArg (fun p => Polynomial.coeff p j) hEm
+    have h2 := congrArg (fun p => _root_.AddMonoidAlgebra.coeff (M := ℕ) p j) hEm
     simp only [Polynomial.coeff_map, Polynomial.coeff_zero] at h2
     exact h2
   refine ⟨M.natDegree, fun j => M.coeff j, b, H, b, hMh, hH, notMem_of_aeval_ne_zero hH hH0, ?_, ?_⟩
@@ -204,7 +238,7 @@ theorem core {Ω' : Type} [Field Ω'] {y : (Σ k, ι k) → Ω} (hy : Birational
       ext j
       rw [Polynomial.coeff_map, Polynomial.coeff_zero, evalAt_apply]
       exact key j
-    rw [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_mul, Polynomial.map_mul,
+    rw [Polynomial.map_sub, Polynomial.map_add (f := _), Polynomial.map_mul, Polynomial.map_mul,
       ← Polynomial.derivative_map, Polynomial.map_C] at hE0
     have hMe : (M.map (evalAt w)).eval τ = 0 := by
       rw [← sum_eval (M.map (evalAt w)) M.natDegree Polynomial.natDegree_map_le τ]

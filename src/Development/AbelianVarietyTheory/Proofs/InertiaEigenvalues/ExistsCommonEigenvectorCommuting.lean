@@ -1,6 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImportsBis
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImportsBisFurther
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImportsBis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImportsBisFurther
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped BigOperators
 
 namespace GlobalTheory.CommTriang
@@ -60,7 +115,7 @@ theorem lift_eigen : ∀ (k ι V : Type) [Field k] [AddCommGroup V] [Module k V]
   have htd : t * (μ i₀ - χ i₀) = r i₀ := div_mul_cancel₀ _ hd
   have hfx : ∀ j, f j (u + t • v) = μ j • (u + t • v) + (r j + t * χ j - t * μ j) • v := by
     intro j
-    rw [map_add, map_smul, hu, hv]
+    rw [map_add (f := _), map_smul, hu, hv]
     module
   have h0 : f i₀ (u + t • v) = μ i₀ • (u + t • v) := by
     rw [hfx]
@@ -71,7 +126,7 @@ theorem lift_eigen : ∀ (k ι V : Type) [Field k] [AddCommGroup V] [Module k V]
   refine ⟨x, hx ▸ hu0 t, fun j => ?_⟩
   have e1 : f i₀ (f j x) = f j (f i₀ x) := by
     rw [← Module.End.mul_apply, hc, Module.End.mul_apply]
-  rw [h0, map_smul, hfx j, map_add, map_smul, map_smul, h0, hv] at e1
+  rw [h0, map_smul, hfx j, map_add (f := _), map_smul, map_smul, h0, hv] at e1
   have e2 : ((r j + t * χ j - t * μ j) * (χ i₀ - μ i₀)) • v = 0 := by
     linear_combination (norm := module) e1
   rcases smul_eq_zero.mp e2 with h | h
@@ -93,30 +148,27 @@ def blockOne {k : Type} [Field k] {n : ℕ} (Q : Matrix (Fin n) (Fin n) k) : Mat
 section
 variable {k : Type} [Field k] {n : ℕ}
 
-@[simp] theorem blockOne_zero_zero (Q : Matrix (Fin n) (Fin n) k) : blockOne Q 0 0 = 1 := rfl
-@[simp] theorem blockOne_zero_succ (Q : Matrix (Fin n) (Fin n) k) (b : Fin n) : blockOne Q 0 b.succ = 0 := rfl
-@[simp] theorem blockOne_succ_zero (Q : Matrix (Fin n) (Fin n) k) (a : Fin n) : blockOne Q a.succ 0 = 0 := rfl
-@[simp] theorem blockOne_succ_succ (Q : Matrix (Fin n) (Fin n) k) (a b : Fin n) : blockOne Q a.succ b.succ = Q a b := rfl
-
 theorem blockOne_mul (Q R : Matrix (Fin n) (Fin n) k) : blockOne Q * blockOne R = blockOne (Q * R) := by
   ext a b
-  cases a using Fin.cases <;> cases b using Fin.cases <;> simp [Matrix.mul_apply, Fin.sum_univ_succ]
+  cases a using Fin.cases <;> cases b using Fin.cases <;>
+    simp [blockOne, Matrix.mul_apply, Fin.sum_univ_succ]
 
 theorem blockOne_one : blockOne (1 : Matrix (Fin n) (Fin n) k) = 1 := by
   ext a b
-  cases a using Fin.cases <;> cases b using Fin.cases <;> simp [Matrix.one_apply, Fin.succ_ne_zero] <;> exact (Fin.succ_ne_zero _).symm
+  cases a using Fin.cases <;> cases b using Fin.cases <;>
+    simp [blockOne, Matrix.one_apply] <;> exact (Fin.succ_ne_zero _).symm
 
 theorem conj_succ_succ (R Q : Matrix (Fin n) (Fin n) k) (S : Matrix (Fin (n+1)) (Fin (n+1)) k) (a b : Fin n) :
     (blockOne R * S * blockOne Q) a.succ b.succ = (R * S.submatrix Fin.succ Fin.succ * Q) a b := by
-  simp [Matrix.mul_apply, Fin.sum_univ_succ]
+  simp [blockOne, Matrix.mul_apply, Fin.sum_univ_succ]
 
 theorem conj_succ_zero (R Q : Matrix (Fin n) (Fin n) k) (S : Matrix (Fin (n+1)) (Fin (n+1)) k) (a : Fin n) :
     (blockOne R * S * blockOne Q) a.succ 0 = ∑ c, R a c * S c.succ 0 := by
-  simp [Matrix.mul_apply, Fin.sum_univ_succ]
+  simp [blockOne, Matrix.mul_apply, Fin.sum_univ_succ]
 
 theorem conj_zero_zero (R Q : Matrix (Fin n) (Fin n) k) (S : Matrix (Fin (n+1)) (Fin (n+1)) k) :
     (blockOne R * S * blockOne Q) 0 0 = S 0 0 := by
-  simp [Matrix.mul_apply, Fin.sum_univ_succ]
+  simp [blockOne, Matrix.mul_apply, Fin.sum_univ_succ]
 
 end
 

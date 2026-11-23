@@ -1,5 +1,64 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementA
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalA
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.StatementA
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.Several
+import Formalism.EllipticTorsion.EllipticTorsionProofs.NDeriv
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalA
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.ConstantCoeffCMulSqSum
+import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.HurwitzB
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -16,6 +75,7 @@ open Formalism.DworkPowerSeriesWeights (JetsIntegral)
 theorem GramSeries_proof : GramSeries := by
   intro K _ n m _ _ c A
   rw [linSub_sqSum]
+
   simp only [sq, Finset.sum_mul, Finset.mul_sum, map_sum, map_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun x _ => ?_
@@ -37,13 +97,16 @@ theorem linSub_linSub {n m p : Type} [Finite n] [Fintype m] [Fintype p] (A : n �
   rw [MvPowerSeries.subst_comp_subst_apply (hasSubst_lin A) (hasSubst_lin B)]
   congr 1
   funext i
+
   rw [← linSub, ← linSubHom_apply, map_sum]
   simp only [map_mul, linSubHom_apply, linSub_X]
   have hc : ∀ w, linSubHom B (MvPowerSeries.C (A i w)) = MvPowerSeries.C (A i w) := fun w => by
     rw [linSubHom_apply, linSub_C]
+
   simp only [hc, Finset.mul_sum, map_sum, map_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun x _ => ?_
+
   simp only [Finset.sum_mul, map_sum, map_mul]
   refine Finset.sum_congr rfl fun w _ => ?_
   simp only [linSub_C]
@@ -217,6 +280,7 @@ def quadForm {m : Type} [Fintype m] (q : m → m → K) : MvPowerSeries m K :=
 theorem cc_quadForm {m : Type} [Fintype m] (q : m → m → K) :
     MvPowerSeries.constantCoeff (quadForm q) = 0 := by
   unfold quadForm
+
   simp [map_sum, map_mul]
 
 theorem jetsIn_quadForm {R : Subring K} {m : Type} [Fintype m] {q : m → m → K}
@@ -225,6 +289,7 @@ theorem jetsIn_quadForm {R : Subring K} {m : Type} [Fintype m] {q : m → m → 
   refine R.mul_mem (natCast_mem R _) ?_
   classical
   unfold quadForm
+
   simp only [map_sum]
   refine R.sum_mem fun x _ => R.sum_mem fun y _ => ?_
   rw [mul_assoc, MvPowerSeries.coeff_C_mul, MvPowerSeries.X_def, MvPowerSeries.X_def,
@@ -253,6 +318,7 @@ theorem gramFrameComposition_mvExp_fact {ι : Type} [Finite ι] {f : MvPowerSeri
     refine Finset.induction_on s (by simp [h0]) ?_
     intro a s ha ih
     rw [Finset.prod_insert ha, Finset.sum_insert ha, ih, hadd _ _ (hcc a) ?_]
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun k _ => hcc k
   exact key Finset.univ
@@ -278,6 +344,7 @@ theorem ShapeLin_proof : ShapeLin := by
     rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, h,
       MvPowerSeries.coeff_zero_eq_constantCoeff_apply, hccβ]
   have hccbe : MvPowerSeries.constantCoeff (∑ a : Fin 4, inBlock a (betaPair H N0 N1 u)) = 0 := by
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun a _ => hccB a
   have hccs : ∀ {ι : Type} (r : K) (f : MvPowerSeries ι K), MvPowerSeries.constantCoeff f = 0 →
@@ -288,7 +355,7 @@ theorem ShapeLin_proof : ShapeLin := by
   have hgram' : linSub Cm (sqSum (fun _ => (1 : K))) =
       MvPowerSeries.C 2 * ∑ a : Fin 4, inBlock a (betaPair H N0 N1 u) + MvPowerSeries.C th * quadForm q := by
     rw [GramSeries_proof]
-    simp only [one_mul, hgram, map_add, add_mul, Finset.sum_add_distrib]
+    simp only [one_mul, hgram, map_add (f := _), add_mul, Finset.sum_add_distrib]
     rw [pair_form]
     congr 1
     unfold quadForm

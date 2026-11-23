@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AcyclicTensorAcyclicFlatEtaleComplexStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleLocalPropertyCalculusRules
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleSheafComplexMappingConeAcyclicOfQuasiIso
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AcyclicTensorAcyclicFlatEtaleComplexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleSheafComplexMappingConeAcyclicOfQuasiIso
+public import Mathlib.Algebra.Homology.HomotopyCategory.Plus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 
 noncomputable section
@@ -192,7 +236,7 @@ theorem tDecomp (f : I ⟶ I') (U : Scheme.{0}) (w : ℤ) (x : Tens (mappingCone
         (Sec.map ((mappingCone.inr f).f s) (Sec.map ((mappingCone.snd f).v s s (add_zero s)) a) ⊗ₜ b) =
       DirectSum.lof (ULift.{1} R) {p : ℤ × ℤ // p.1 + p.2 = w}
         (fun q => Sec ((mappingCone f).X q.1.1) U ⊗[ULift.{1} R] Sec (J.X q.1.2) U) ⟨(s, t), hp⟩ (a ⊗ₜ b)
-    rw [lof_shift f U w s t hp _ (by omega), ← map_add, ← TensorProduct.add_tmul, ← cone_eta]
+    rw [lof_shift f U w s t hp _ (by omega), ← map_add (f := _), ← TensorProduct.add_tmul, ← cone_eta]
   exact congrArg (fun k => k x) this
 
 theorem res_tInl (f : I ⟶ I') {V U : Scheme.{0}} (g : V ⟶ U) (w : ℤ) (x : Tens I J U (w + 1)) :
@@ -233,9 +277,9 @@ theorem conePair_isTensor (τ : Pair I J T) (τ' : Pair I' J T') (f : I ⟶ I') 
     refine loc_mono _ _ _ (loc_and _ _ _ h1 h2) ?_
     rintro V g ⟨⟨x1, hx1⟩, ⟨x2, hx2⟩⟩
     refine ⟨tInl f V w x1 + tInr f V w x2, ?_⟩
-    rw [map_add, lift_tInl, lift_tInr, hx1, hx2, sm_res, sm_res, ← rs_madd, ← cone_eta]
+    rw [map_add (f := _), lift_tInl, lift_tInr, hx1, hx2, sm_res, sm_res, ← rs_madd, ← cone_eta]
   · intro U w x hx
-    rw [← tDecomp f U w x, map_add, lift_tInl, lift_tInr] at hx
+    rw [← tDecomp f U w x, map_add (f := _), lift_tInl, lift_tInr] at hx
     have e1 : τ.lift U (w + 1) (tFst f U w x) = 0 := by
       have := congrArg (fun z => Sec.map ((mappingCone.fst u).1.v w (w + 1) rfl) z) hx
       simpa only [sm_madd, fst_inl, fst_inr, add_zero, sm_mzero] using this
@@ -244,7 +288,7 @@ theorem conePair_isTensor (τ : Pair I J T) (τ' : Pair I' J T') (f : I ⟶ I') 
       simpa only [sm_madd, snd_inl, snd_inr, zero_add, sm_mzero] using this
     refine loc_mono _ _ _ (loc_and _ _ _ (hτ.2 U (w + 1) _ e1) (hτ'.2 U w _ e2)) ?_
     rintro V g ⟨h1, h2⟩
-    rw [← tDecomp f U w x, map_add, res_tInl, res_tInr, h1, h2, map_zero, map_zero, add_zero]
+    rw [← tDecomp f U w x, map_add (f := _), res_tInl, res_tInr, h1, h2, map_zero, map_zero, add_zero]
 
 theorem quasiIso_of_cone_acyclic {𝒜 : Type*} [Category 𝒜] [Abelian 𝒜]
     {K L : CochainComplex 𝒜 ℤ} (u : K ⟶ L) (h : (CochainComplex.mappingCone u).Acyclic) : QuasiIso u := by

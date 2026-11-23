@@ -1,9 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.MeanSquareAddFundamentalDomainOfCocompact
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsNhdsZeroPrincipalEqZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DifferentiableAtChart
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsNhdsZeroPrincipalEqZero
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,8 +67,8 @@ def IsCoLat (Γ : AddSubgroup G) : Prop :=
 
 def Per (Γ : AddSubgroup G) (Φ : G → ℂ) : Prop := Continuous Φ ∧ ∀ γ ∈ Γ, ∀ x, Φ (γ + x) = Φ x
 
-open Classical in
 
+open Classical in
 def avg (Γ : AddSubgroup G) (Φ : G → ℂ) : ℂ :=
   letI : MeasurableSpace G := borel G
   if h : ∃ p : Measure G × Set G, p.1.IsAddHaarMeasure ∧ IsAddFundamentalDomain Γ p.2 p.1 ∧ p.1 p.2 = 1
@@ -109,7 +156,7 @@ theorem posU_zero {p : ι → Fin a × Fin a} (hp : IsNil p) : posU hp (0 : ι �
 theorem continuous_posU [TopologicalSpace R] [IsTopologicalRing R] {p : ι → Fin a × Fin a} (hp : IsNil p) :
     Continuous (posU hp : (ι → R) → GL (Fin a) R) := by
   have h : Continuous fun x : ι → R => posM p x := by
-    refine continuous_finset_sum _ fun t _ => ?_
+    refine continuous_finsetSum _ fun t _ => ?_
     refine continuous_matrix fun i j => ?_
     simp only [Matrix.single_apply]
     split_ifs
@@ -133,15 +180,16 @@ section Fn
 
 variable {E : Type} [Field E] [NumberField E] {a : ℕ}
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem map_posU {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S) {ι : Type} [Fintype ι]
     {p : ι → Fin a × Fin a} (hp : IsNil p) (x : ι → R) :
     GeneralLinearGroup.map φ (posU hp x) = posU hp (fun t => φ (x t)) := by
   apply Units.ext
   ext i j
   change φ ((1 + posM p x) i j) = (1 + posM p fun t => φ (x t)) i j
-  simp only [posM, Matrix.add_apply, Matrix.sum_apply, map_add, map_sum, Matrix.one_apply, Matrix.single_apply]
+
+  simp only [posM, Matrix.add_apply, Matrix.sum_apply, map_add (f := _), map_sum, Matrix.one_apply, Matrix.single_apply]
   congr 1
   · split_ifs <;> simp
   · refine Finset.sum_congr rfl fun t _ => ?_
@@ -165,8 +213,6 @@ def colT (ψ : AddChar (Ad E) ℂ) (k : ℕ) (f : GA E a → ℂ) : GA E a → �
 
 def whit (ψ : AddChar (Ad E) ℂ) (m : ℕ) : (GA E a → ℂ) → GA E a → ℂ :=
   Nat.rec (fun f => f) (fun m ih f => ih (colT ψ (m + 1) f)) m
-
-theorem whit_zero (ψ : AddChar (Ad E) ℂ) (f : GA E a → ℂ) : whit ψ 0 f = f := rfl
 
 theorem whit_succ (ψ : AddChar (Ad E) ℂ) (m : ℕ) (f : GA E a → ℂ) : whit ψ (m + 1) f = whit ψ m (colT ψ (m + 1) f) := rfl
 
@@ -199,11 +245,12 @@ theorem StdPsi.map_dot (hψ : StdPsi ψ) {ι : Type} [Fintype ι] (ξ c : ι →
     ψ (dot ξ ((fun t => algebraMap E (Ad E) (c t)) + x)) = ψ (dot ξ x) := by
   have : dot ξ ((fun t => algebraMap E (Ad E) (c t)) + x) =
       algebraMap E (Ad E) (∑ t, ξ t * c t) + dot ξ x := by
+
     simp only [dot, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_sum, map_mul]
   rw [this, AddChar.map_add_eq_mul, hψ.rat, one_mul]
 
 theorem continuous_dot {ι : Type} [Fintype ι] (ξ : ι → E) : Continuous (dot ξ : (ι → Ad E) → Ad E) :=
-  continuous_finset_sum _ fun t _ => continuous_const.mul (continuous_apply t)
+  continuous_finsetSum _ fun t _ => continuous_const.mul (continuous_apply t)
 
 theorem per_blk {r m : ℕ} {f : GA E a → ℂ} (hc : Continuous f)
     (hl : ∀ (c : UnipotentBlockColumnIndex a r m → E) g, f (ratGL E a (blkU c) * g) = f g) (g : GA E a) :

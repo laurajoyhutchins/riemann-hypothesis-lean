@@ -1,4 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.QSurjective
+public import Mathlib.Tactic.ENatToNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -155,8 +203,8 @@ lemma coeff_sum_single {A : Type} [CommRing A] (s : Finset X) (g : X → A) (χ�
     (∑ c ∈ s, AddMonoidAlgebra.single c (g c)).coeff χ₀ = g χ₀ := by
   classical
   first
-  | simp [AddMonoidAlgebra.coeff, Finsupp.finset_sum_apply, Finsupp.single_apply, h]
-  | simp [Finsupp.finset_sum_apply, Finsupp.single_apply, h]
+  | simp [AddMonoidAlgebra.coeff, Finsupp.finsetSum_apply, Finsupp.single_apply, h]
+  | simp [Finsupp.finsetSum_apply, Finsupp.single_apply, h]
   | simp [AddMonoidAlgebra.coeff_sum, AddMonoidAlgebra.coeff_single, h]
 
 theorem eq_zero_of_sum {V : Y.left.Opens} (s : Finset X) (h : X → Γ(Y.left, V))
@@ -181,10 +229,12 @@ theorem eq_zero_of_sum {V : Y.left.Opens} (s : Finset X) (h : X → Γ(Y.left, V
     rw [← CommRingCat.comp_apply, ← CommRingCat.comp_apply, Scheme.Hom.app_eq_appLE,
       Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map, Scheme.Hom.map_appLE]
   have hres := congrArg ((splitTorus S X ⊗ Y).left.presheaf.map (homOfLE hle).op).hom hs
+
   simp only [map_sum, map_mul, map_zero, e1, e2] at hres
   have hev := congrArg (ev hW) hres
+
   simp only [map_sum, map_mul, map_zero, ev_chi, ev_snd, AddMonoidAlgebra.single_mul_single,
-    add_zero, one_mul] at hev
+  add_zero, one_mul] at hev
   have hc := congrArg (fun f => f.coeff χ₀) hev
   rw [coeff_sum_single X s _ χ₀ hχ₀, AddMonoidAlgebra.coeff_zero, Finsupp.coe_zero, Pi.zero_apply] at hc
   have hg := TopCat.Presheaf.germ_res_apply Y.left.presheaf (homOfLE hWV) x hxW (h χ₀)

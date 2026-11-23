@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmooth
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.ArchBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TensSmooth
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.PositionOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +60,7 @@ private theorem fin_prod {ι X : Type} [Fintype ι] {Y : ι → Type} (p : ∀ i
     FiniteDimensional ℂ (Submodule.span ℂ
       {f : X → ℂ | ∃ s : ∀ i, Y i → ℂ, (∀ i, s i ∈ S i) ∧ f = fun x => ∏ i, s i (p i x)}) := by
   classical
-  let T : MultilinearMap ℂ (fun i => Y i → ℂ) (X → ℂ) :=
+  let T : (∀ i, Y i → ℂ) →ₘₗ[ℂ] (X → ℂ) :=
     (MultilinearMap.mkPiAlgebra ℂ ι (X → ℂ)).compLinearMap (fun i => LinearMap.funLeft ℂ ℂ (p i))
   have hT : ∀ s x, T s x = ∏ i, s i (p i x) := by
     intro s x
@@ -37,11 +80,12 @@ private theorem fin_prod {ι X : Type} [Fintype ι] {Y : ι → Type} (p : ∀ i
       have h := (b i).sum_repr ⟨s i, hs' i⟩
       calc s i = ((⟨s i, hs' i⟩ : Submodule.span ℂ (S i)) : Y i → ℂ) := rfl
         _ = ((∑ j, c i j • b i j : Submodule.span ℂ (S i)) : Y i → ℂ) := by rw [h]
-        _ = _ := by rw [AddSubmonoidClass.coe_finset_sum]; rfl
+        _ = _ := by rw [AddSubmonoidClass.coe_finsetSum]; rfl
     have e : (fun x => ∏ i, s i (p i x)) = T s := funext fun x => (hT s x).symm
     have e2 : T s = T fun i => ∑ j, c i j • ((b i j : Submodule.span ℂ (S i)) : Y i → ℂ) :=
       congrArg T (funext hsum)
     show (fun x => ∏ i, s i (p i x)) ∈ (Submodule.span ℂ R : Set (X → ℂ))
+
     rw [e, e2, MultilinearMap.map_sum]
     refine Submodule.sum_mem _ fun r _ => ?_
     rw [MultilinearMap.map_smul_univ]
@@ -101,7 +145,7 @@ private theorem tens_smooth (D : InfD σ m) (n : ℕ) (φ : Fin (m + 1) → TI F
   refine contDiff_prod fun i _ => ?_
   exact ((IsExpLieAlgebra.isSmoothFun_iff (isExpLieAlgebra F n)).1 (hφ i) _).comp (thetaL D n i).contDiff
 
-private theorem tens_fin [IsTotallyComplex F] (D : InfD σ m) (n : ℕ) (φ : Fin (m + 1) → TI F n) (β : TI E n)
+private theorem tens_fin [_root_.NumberField.IsTotallyComplex F] (D : InfD σ m) (n : ℕ) (φ : Fin (m + 1) → TI F n) (β : TI E n)
     (hβ : IsTens D φ β) (hφ : ∀ i, LeftFin (φ i)) : LeftFin β := by
   haveI := fin_prod (ι := Fin (m + 1)) (X := archGroup E n) (Y := fun _ => archGroup F n) (fun i => compA D n i)
     (fun i => Set.range fun k : archCompact F n => fun g : archGroup F n => φ i ((k : archGroup F n) * g)) hφ

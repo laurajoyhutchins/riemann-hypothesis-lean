@@ -1,7 +1,58 @@
-import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelQuotientFinite
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelNonzeroModulusDeterminantEq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralLatticeRefinementIdentity
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.EqZeroOfIdealCompact
+public import Formalism.HermitianCurvature.ThetaExistenceInductiveFromPieces
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralLatticeRefinementIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.KernelQuotientFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,40 +116,7 @@ theorem eq_zero_of_ideal (hD : LocalDatum K R ψ) (h0 : ∀ n : ℕ, n ≠ 0 →
 theorem small (hD : LocalDatum K R ψ) (h0 : ∀ n : ℕ, n ≠ 0 → IsUnit (n : K)) {ϖ : Kˣ}
     (hϖ : (ϖ : K) ∈ R) (hϖ' : ∀ x : K, ∃ m : ℕ, (ϖ : K) ^ m * x ∈ R) (V : Set K)
     (hV : V ∈ 𝓝 (0 : K)) : ∃ n : ℕ, ∀ r ∈ R, (ϖ : K) ^ n * r ∈ V := by
-  have := hD.t2
-  have hcl : ∀ n : ℕ, IsClosed ((fun r => (ϖ : K) ^ n * r) '' (R : Set K)) := fun n =>
-    (hD.isCompact.image (continuous_const.mul continuous_id)).isClosed
-  have hC : IsCompact ((R : Set K) \ interior V) := hD.isCompact.diff isOpen_interior
-  obtain ⟨n, hn⟩ := hC.elim_directed_cover
-    (fun n : ℕ => ((fun r => (ϖ : K) ^ n * r) '' (R : Set K))ᶜ) (fun n => (hcl n).isOpen_compl)
-    (by
-      intro y hy
-      rw [Set.mem_iUnion]
-      by_contra hcon
-      push Not at hcon
-      have hy0 : y = 0 := by
-        apply eq_zero_of_ideal hD h0
-        intro z
-        obtain ⟨m, hm⟩ := hϖ' z
-        have := hcon m
-        rw [Set.notMem_compl_iff] at this
-        obtain ⟨r, hr, rfl⟩ := this
-        have e : (ϖ : K) ^ m * r * z = r * ((ϖ : K) ^ m * z) := by ring
-        show (ϖ : K) ^ m * r * z ∈ R
-        rw [e]; exact R.mul_mem hr hm
-      exact hy.2 (hy0 ▸ mem_interior_iff_mem_nhds.2 hV))
-    (by
-      apply directed_of_isDirected_le
-      intro a b hab
-      apply Set.compl_subset_compl.2
-      rintro _ ⟨r, hr, rfl⟩
-      obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hab
-      exact ⟨(ϖ : K) ^ k * r, R.mul_mem (R.pow_mem hϖ k) hr, by simp only [pow_add]; ring⟩)
-  refine ⟨n, fun r hr => ?_⟩
-  by_contra hcon
-  have h1 : (ϖ : K) ^ n * r ∈ (R : Set K) \ interior V :=
-    ⟨R.mul_mem (R.pow_mem hϖ n) hr, fun h => hcon (interior_subset h)⟩
-  exact hn h1 ⟨r, hr, rfl⟩
+  apply Formalism.FourierDecayAlt.P.A6x5.pow_small <;> assumption
 
 theorem big (hD : LocalDatum K R ψ) {ϖ : Kˣ}
     (hϖ : (ϖ : K) ∈ R) (hϖ' : ∀ x : K, ∃ m : ℕ, (ϖ : K) ^ m * x ∈ R) (C : Set K)
@@ -399,7 +417,7 @@ theorem main (hGM : GaussModulus) (hGI : GaussIndep) (hHD : HessDet) (hMM : ModM
     have hc := hex.choose_spec
     have hγa : γ a = intK R hex.choose.2 m (gaussF ψ hex.choose.1 (hessM m a)) / ((N a : ℝ) : ℂ) := by
       simp only [hγ]
-      rw [dif_pos hex]
+      rw [dite_eq_left hex]
     rw [hγa, div_mul_cancel₀ _ (hNC a)]
     exact hGI K R ψ hD hch m (hessM m a) (hessM_symm m a) (hdetU a) p.1 p.2 hex.choose.1
       hex.choose.2 hp.1 hp.2.1 hc.1 hc.2.1 hp.2.2.1 hp.2.2.2 hc.2.2.1 hc.2.2.2
@@ -424,7 +442,7 @@ theorem main (hGM : GaussModulus) (hGI : GaussIndep) (hHD : HessDet) (hMM : ModM
       rw [h1, hdetN a, norm_mul, Complex.norm_real, Real.norm_of_nonneg (hNpos a).le] at h2
       exact mul_right_cancel₀ (hNpos a).ne' (h2.trans (one_mul _).symm)
     · simp only [hγ]
-      rw [dif_neg hex, norm_one]
+      rw [dite_eq_right hex, norm_one]
   · intro a b
     have hNab : N (a * b ^ 2) = N a * modK R (b : K) ^ m := by
       simp only [hN]
@@ -454,7 +472,7 @@ theorem main (hGM : GaussModulus) (hGI : GaussIndep) (hHD : HessDet) (hMM : ModM
         rw [h2] at h1
         exact ⟨_, h1⟩
       simp only [hγ]
-      rw [dif_neg hex, dif_neg hex']
+      rw [dite_eq_right hex, dite_eq_right hex']
   · intro a L Λ hL hΛ hA hI
     exact key a (L, Λ) ⟨hL, hΛ, hA, hI⟩
 
@@ -660,8 +678,8 @@ open Matrix Formalism.DoubleCosetMeasures Formalism.FourierDecayAlt.A5 Formalism
 
 namespace Formalism.FourierDecayAlt.P.A6x7.Ind
 
-open Classical in
 
+open Classical in
 theorem finsum_zero_of_fibres {X Y : Type} (κ : X → Y) (g : X → ℂ)
     (hfin : (Function.support g).Finite)
     (h : ∀ c, ∑ᶠ x, (if κ x = c then g x else 0) = 0) : ∑ᶠ x, g x = 0 := by

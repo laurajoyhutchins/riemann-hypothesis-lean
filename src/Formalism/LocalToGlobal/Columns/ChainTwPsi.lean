@@ -1,4 +1,54 @@
-import Formalism.LocalToGlobal.Columns.ChainTwOk
+module
+
+public import Formalism.LocalToGlobal.Columns.ChainTwOk
+public import Formalism.LocalToGlobal.Columns.AtTOwedC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module
 
@@ -12,9 +62,12 @@ section TwPsi
 
 variable {X : Fields} {P : HeightOneSpectrum (𝓞 X.E)}
 
-theorem twDvd_of_intAt (hq : (qOf P).Prime) : ∀ (D : ℕ) (b : ℤ), IntAt P ((b : X.E) / (qOf P : X.E) ^ D) → ((qOf P : ℤ) ^ D) ∣ b
-  | 0, b, _ => by simp
-  | D + 1, b, h => by
+theorem twDvd_of_intAt (hq : (qOf P).Prime) : ∀ (D : ℕ) (b : ℤ), IntAt P ((b : X.E) / (qOf P : X.E) ^ D) → ((qOf P : ℤ) ^ D) ∣ b := by
+  intro D
+  induction D with
+  | zero => simp
+  | succ D ih =>
+      intro b h
       have hq0 : (qOf P : X.E) ≠ 0 := by exact_mod_cast hq.ne_zero
       have h1 : IntAt P ((b : X.E) / (qOf P : X.E) ^ D) := by
         have e : (b : X.E) / (qOf P : X.E) ^ D = (qOf P : X.E) * ((b : X.E) / (qOf P : X.E) ^ (D + 1)) := by
@@ -22,7 +75,8 @@ theorem twDvd_of_intAt (hq : (qOf P).Prime) : ∀ (D : ℕ) (b : ℤ), IntAt P (
           ring
         rw [e]
         exact (ciIntAt_q (P := P) (q := qOf P)).mul h
-      obtain ⟨b', rfl⟩ := twDvd_of_intAt hq D b h1
+      have hb : ((qOf P : ℤ) ^ D) ∣ b := ih b h1
+      obtain ⟨b', rfl⟩ := hb
       have h2 : IntAt P ((b' : X.E) / (qOf P : X.E)) := by
         have e : (b' : X.E) / (qOf P : X.E) = (((qOf P : ℤ) ^ D * b' : ℤ) : X.E) / (qOf P : X.E) ^ (D + 1) := by
           push_cast
@@ -34,21 +88,30 @@ theorem twDvd_of_intAt (hq : (qOf P).Prime) : ∀ (D : ℕ) (b : ℤ), IntAt P (
         have e : (b' : X.E) = (qOf P : X.E) * ((b' : X.E) / (qOf P : X.E)) := by field_simp
         rw [e, reduction_mul (ciIntAt_q (P := P) (q := qOf P)) h2, redP_natCast_eq_zero (ciQ_mem P), zero_mul]
       rw [redP_intCast] at h3
+      have hfin : Finite (𝓞 X.E ⧸ P.asIdeal) := ciFinite (w := P) hq.ne_zero
       have h4 := (owedC_intCast_eq_iff (A := 𝓞 X.E ⧸ P.asIdeal) hq (ciCard P) b' 0).1 (by rw [h3, Int.cast_zero])
       rw [sub_zero] at h4
       obtain ⟨c, rfl⟩ := h4
       exact ⟨c, by ring⟩
 
 theorem twRes_exists (hq : (qOf P).Prime) (hu : ((qOf P : ℕ) : 𝓞 X.E) ∉ P.asIdeal ^ 2) :
-    ∀ (D : ℕ) (y : X.E), IntAt P y → ∃ b : ℤ, IntAt P ((y - b) / (qOf P : X.E) ^ D)
-  | 0, y, hy => ⟨0, by simpa using hy⟩
-  | D + 1, y, hy => by
+    ∀ (D : ℕ) (y : X.E), IntAt P y → ∃ b : ℤ, IntAt P ((y - b) / (qOf P : X.E) ^ D) := by
+  intro D
+  induction D with
+  | zero =>
+      intro y hy
+      exact ⟨0, by simpa using hy⟩
+  | succ D ih =>
+      intro y hy
       have hq0 : (qOf P : X.E) ≠ 0 := by exact_mod_cast hq.ne_zero
-      obtain ⟨b0, hb0⟩ := owedC_exists_int (A := 𝓞 X.E ⧸ P.asIdeal) hq (ciCard P) (redP P y)
+      have hfin : Finite (𝓞 X.E ⧸ P.asIdeal) := ciFinite (w := P) hq.ne_zero
+      have hex : ∃ b0 : ℤ, redP P y = (b0 : 𝓞 X.E ⧸ P.asIdeal) :=
+        owedC_exists_int hq (ciCard P) (redP P y)
+      obtain ⟨b0, hb0⟩ := hex
       have hz : IntAt P ((y - b0) / (qOf P : X.E)) :=
         ciIntAt_div (ciQ_mem P) hu (ciIntAt_sub hy (ciIntAt_intCast b0))
           (by rw [redP_sub hy (ciIntAt_intCast b0), redP_intCast, hb0, sub_self])
-      obtain ⟨b1, hb1⟩ := twRes_exists hq hu D _ hz
+      obtain ⟨b1, hb1⟩ := ih _ hz
       refine ⟨b0 + (qOf P : ℤ) * b1, ?_⟩
       have e : (y - ((b0 + (qOf P : ℤ) * b1 : ℤ) : X.E)) / (qOf P : X.E) ^ (D + 1) =
           ((y - b0) / (qOf P : X.E) - b1) / (qOf P : X.E) ^ D := by
@@ -89,15 +152,15 @@ theorem twZeta_zpow_congr (hz : σ₀ (twZeta σ₀ (qOf P ^ D)) = Complex.exp (
     field_simp
   rw [e, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
 
-open Classical in
 
+open Classical in
 theorem twPsiQ_eq (hz : σ₀ (twZeta σ₀ (qOf P ^ D)) = Complex.exp (2 * Real.pi * Complex.I / ((qOf P ^ D : ℕ) : ℂ)))
     (hq : (qOf P).Prime) {a : X.E} (ha : IntAt P ((qOf P : X.E) ^ D * a)) {b : ℤ}
     (hb : IntAt P (xi0 * a - (b : X.E) / (qOf P : X.E) ^ D)) :
     twPsiQ σ₀ xi0 P D a = twZeta σ₀ (qOf P ^ D) ^ b := by
   have hex : ∃ b : ℤ, IntAt P ((qOf P : X.E) ^ D * a) ∧ IntAt P (xi0 * a - (b : X.E) / (qOf P : X.E) ^ D) := ⟨b, ha, hb⟩
   unfold twPsiQ
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   have hc := hex.choose_spec.2
   apply twZeta_zpow_congr hz hq
   apply twDvd_of_intAt hq D
@@ -256,7 +319,7 @@ theorem twJ_of_close (sharp : Bool) {j : ℕ} {P : HeightOneSpectrum (𝓞 X.E)}
     have : h' v = h v + q • w v := by
       show h' v = h v + q • (q⁻¹ • (h' v - h v))
       rw [smul_smul, mul_inv_cancel₀ hq0, one_smul, add_sub_cancel]
-    rw [this, map_add, map_smul]
+    rw [this, map_add (f := _), map_smul]
     simp
   have hκi : ∀ v, (h⁻¹ * h')⁻¹ v = v - q • h'⁻¹ (w v) := fun v => by
     show (h'⁻¹ * h) v = _
@@ -331,8 +394,8 @@ theorem twAlg {E : Type} [Field E] {q y y' : E} {j : ℕ} {b b' k : ℤ} (hq : q
   field_simp
   ring
 
-open Classical in
 
+open Classical in
 def twDig (P : HeightOneSpectrum (𝓞 X.E)) (N : ℕ) (y : X.E) : ℤ :=
   if h : ∃ b : ℤ, IntAt P ((y - b) / (qOf P : X.E) ^ N) then h.choose else 0
 
@@ -340,7 +403,7 @@ theorem twDig_spec {P : HeightOneSpectrum (𝓞 X.E)} (hq : (qOf P).Prime) (hu :
     {y : X.E} (hy : IntAt P y) : IntAt P ((y - twDig P N y) / (qOf P : X.E) ^ N) := by
   have hex := twRes_exists hq hu N y hy
   unfold twDig
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   exact hex.choose_spec
 
 theorem twFin_bdd (sharp : Bool) {j : ℕ} {P : HeightOneSpectrum (𝓞 X.E)} (hP : P ∉ Pr.vGs) (hd : TwDegOne X P) :

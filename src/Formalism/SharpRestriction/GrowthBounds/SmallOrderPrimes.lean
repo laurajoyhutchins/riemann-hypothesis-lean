@@ -1,7 +1,43 @@
-import Formalism.LocalRingCardinality.DataParams₂
-import Formalism.SharpRestriction.ParConsts
-import Formalism.SharpRestriction.ElevenLe
-import Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero
+module
+
+public import Formalism.SharpRestriction.ParConsts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,13 +58,13 @@ def Conclusion1 (D : D7) (L : SizeData₂ D) (X : Inst D L) (K : Consts) (C bo :
 
 def Conclusion2 (D : D7) (L : SizeData₂ D) (X : Inst D L) (K : Consts) : Prop := MeanKappaBound X K
 
-open Classical in
 
+open Classical in
 def cands (D : D7) (L : SizeData₂ D) (K : Consts) : Finset ℕ :=
   (Finset.range ⌈L.sc.X'⌉₊).filter (fun p => Cand D L K p)
 
-open Classical in
 
+open Classical in
 def WReq (X : Inst D L) (K : Consts) (a b : HH D → ℤ) : Prop :=
   ∑ p ∈ cands D L K, Real.log p / p *
       (2 * (if L.sc.x ^ (-L.sc.eps) < Sig X K a b p then (1 : ℝ) else 0) + 4 * Sig X K a b p) ≤
@@ -65,8 +101,8 @@ def WeightedPrimeSumBound (D : D7) (L : SizeData₂ D) (X : Inst D L) (K : Const
 def admW (D : D7) (L : SizeData₂ D) (X : Inst D L) (K : Consts) : Prop :=
   aL L ∈ box D (winA D L.sc) ∧ bL L ∈ box D (winB D K L.sc) ∧ WReq X K (aL L) (bL L)
 
-open Classical in
 
+open Classical in
 def adm1 (D : D7) (L : SizeData₂ D) (X : Inst D L) (Ce : ℝ) : Prop :=
   ∀ p : ℕ, p.Prime → IsResidueClassZero D p → L.sc.x ^ (L.sc.eps / 4) ≤ (addOrderOf (hP D p) : ℝ) →
     L2 D L.sc < goodU L.sc.delta1 → 3 * Gp L.sc ≤ addOrderOf (hP D p) →
@@ -80,13 +116,13 @@ def adm1 (D : D7) (L : SizeData₂ D) (X : Inst D L) (Ce : ℝ) : Prop :=
         ((Finset.Icc 1 (L1 D L.sc p)).filter (fun d =>
           i - d • hP D p ∈ D.host.TT ∧ IsV X p (i - d • hP D p))).card < rG L.sc)
 
-open Classical in
 
+open Classical in
 def primesResidueBelow (D : D7) (y : ℝ) : Finset ℕ :=
   (Finset.range ⌈y⌉₊).filter (fun p => p.Prime ∧ (p : ℝ) < y ∧ IsResidueClassZero D p)
 
-open Classical in
 
+open Classical in
 def BTT (D : D7) (L : SizeData₂ D) (X : Inst D L) : ℝ :=
   ∑ p ∈ (primesResidueBelow D L.sc.X').filter (fun p => L.sc.x ^ (L.sc.eps / 4) ≤ (addOrderOf (hP D p) : ℝ)),
     Real.log p / p * ((D.host.TT.filter (fun t => ¬ Good X p (X.bs (stepP D p) t))).card : ℝ)
@@ -95,15 +131,15 @@ def adm2 (D : D7) (L : SizeData₂ D) (X : Inst D L) : Prop :=
   ((D.R.n : ℝ) * L.sc.delta1 / 2 ≤ (D.host.TT.card : ℝ) ∧ (D.host.TT.card : ℝ) ≤ 2 * (D.R.n : ℝ) * L.sc.delta1) ∧
   BTT D L X ≤ (D.host.TT.card : ℝ) * L.sc.x ^ (-2 + L.sc.eps)
 
-open Classical in
 
+open Classical in
 def adm3 (D : D7) (L : SizeData₂ D) : Prop :=
   ∑ p ∈ (primesResidueBelow D (L.sc.X'' D.R.n)).filter
       (fun p => (addOrderOf (hP D p) : ℝ) < L.sc.x ^ (L.sc.eps / 4)), Real.log p / p ≤
     L.sc.x ^ (-hG L.sc + L.sc.eps)
 
-open Classical in
 
+open Classical in
 def ArchimedeanSignatureMatching (D : D7) (L : SizeData₂ D) (K : Consts) : Prop :=
   rho D K L.sc ≤ L.sc.x ^ (-2 : ℝ) ∧
   ∑ p ∈ (Finset.range ⌈L.sc.X'⌉₊).filter (fun p => p.Prime ∧ InBand0 D K L.sc p), Real.log p / p ≤
@@ -214,9 +250,6 @@ def lowU (D : D7) (u : D.what₂.Word) (w : D.what₂.places.Pl) : ℝ :=
 def unitBoundAtTwistedPlaces (D : D7) (L : SizeData₂ D) (X : Inst D L) (Y : LatInst D) (K : Consts) : Prop :=
   UnitBoundLowTerm D L X Y K (lowU D)
 
-def UnitBoundDifferenceTerm (D : D7) (L : SizeData₂ D) (X : Inst D L) (Y : LatInst D) (K : Consts) : Prop :=
-  UnitBoundLowTerm D L X Y K (lowFE L)
-
 def admG1 (D : D7) (L : SizeData₂ D) (X : Inst D L) (Y : LatInst D) (K : Consts) : Prop :=
   ∀ hT : GatTies D, LatTied hT X Y → ∀ (u : D.what₂.Word) (w : D.what₂.places.Pl)
     (hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)),
@@ -245,13 +278,6 @@ def admitted (D : D7) (L : SizeData₂ D) (X : Inst D L) (Y : LatInst D) (K : Co
 
 def Conclusion₂ (D : D7) (L : SizeData₂ D) (X : Inst D L) (K : Consts) (C bo : ℝ) : Prop :=
   Conclusion1 D L X K C bo ∧ Conclusion2 D L X K ∧ PointsLemma D L X K ∧ WeightVectorExists D L X K ∧ Conclusion0 D L X ∧ WeightedPrimeSumBound D L X K C
-
-def Stmt (D : D7) (L : SizeData₂ D) (K : Consts) (A : AConsts) (C bo : ℝ) : Prop :=
-  K.Nonneg → ∀ (X : Inst D L) (Y : LatInst D), admitted D L X Y K A → Conclusion₂ D L X K C bo
-
-def ClosedFormOfAdmitted (D : D7) (L : SizeData₂ D) : Prop :=
-  ∀ K : Consts, K.Nonneg → ∀ A : AConsts, ∃ C bo : ℝ, 0 ≤ C ∧ 0 ≤ bo ∧
-    ∀ (X : Inst D L) (Y : LatInst D), admitted D L X Y K A → Conclusion₂ D L X K C bo
 
 def AdmF {eps : ℝ} (Fm : FamP eps) (K : Consts) (X : ∀ x (i : Fm.Ix x), Inst (Fm.D x i) (Fm.L x i))
     (Y : ∀ x (i : Fm.Ix x), LatInst (Fm.D x i)) : Prop :=

@@ -1,5 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.HasGen
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.HasGen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,7 +88,6 @@ lemma lf_pull (h : T' ⟶ T) (F : (T ⟶ A) →₀ ℤ) :
   rfl
 
 lemma padd_eq_mul (a b : T ⟶ A) : padd A a b = a * b := rfl
-lemma pzero_eq_one : pzero A T = 1 := rfl
 
 lemma comp_psum {n : ℕ} (h : T' ⟶ T) (x : Fin n → (T ⟶ A)) (I : Finset (Fin n)) :
     h ≫ psum A x I = psum A (fun k => h ≫ x k) I := by
@@ -58,13 +105,6 @@ lemma cartesian_lift_three_comp_projection (x y z : T ⟶ A) : (fun k => lift x 
 def lamP (u v : T ⟶ A) : (T ⟶ A) →₀ ℤ :=
   Finsupp.single (u * v) 1 - Finsupp.single u 1 - Finsupp.single v 1 + Finsupp.single 1 1
 
-open scoped Classical in
-lemma univ_finset_powerset_fin_three : (Finset.univ : Finset (Finset (Fin 3))) =
-    {∅, {0}, {1}, {2}, {0, 1}, {0, 2}, {1, 2}, {0, 1, 2}} := by
-  first
-  | decide
-  | rfl
-  | (ext I; fin_cases I <;> simp)
 
 private lemma fsum_eq_sum_single {X Y : Scheme} {K : Type} [Fintype K] (φ : K → (Y ⟶ X)) (ε : K → ℤ) :
     fsum φ ε = ∑ k, Finsupp.single (φ k) (ε k) := rfl
@@ -106,7 +146,7 @@ variable {M : LB A.left}
 
 private lemma mapDomain_comp_fsum {X Y Z : Scheme} {K : Type} [Fintype K] (φ : K → (Y ⟶ X)) (ε : K → ℤ) (h : Z ⟶ Y) :
     Finsupp.mapDomain (fun ψ => h ≫ ψ) (fsum φ ε) = fsum (fun k => h ≫ φ k) ε := by
-  rw [fsum_eq_sum_single, fsum_eq_sum_single, Finsupp.mapDomain_finset_sum]
+  rw [fsum_eq_sum_single, fsum_eq_sum_single, Finsupp.mapDomain_finsetSum]
   simp only [Finsupp.mapDomain_single]
 
 lemma hasGen_theta (t : LB.Gen (Theta A M)) (ht : t.IsGen) (x y z : T ⟶ A) :
@@ -148,16 +188,6 @@ lemma mapDomain_add' {α β : Type} (f : α → β) (F G : α →₀ ℤ) :
 lemma mapDomain_sub' {α β : Type} (f : α → β) (F G : α →₀ ℤ) :
     Finsupp.mapDomain f (F - G) = Finsupp.mapDomain f F - Finsupp.mapDomain f G := by
   exact map_sub (Finsupp.mapDomain.addMonoidHom f) F G
-
-lemma mapDomain_lamP (h : T' ⟶ T) (u v : T ⟶ A) :
-    Finsupp.mapDomain (fun x => h ≫ x) (lamP u v) = lamP (h ≫ u) (h ≫ v) := by
-  unfold lamP
-  have hs : ∀ (P Q : (T ⟶ A) →₀ ℤ), Finsupp.mapDomain (fun x => h ≫ x) (P - Q) =
-      Finsupp.mapDomain (fun x => h ≫ x) P - Finsupp.mapDomain (fun x => h ≫ x) Q :=
-    fun P Q => map_sub (Finsupp.mapDomain.addMonoidHom _) P Q
-  rw [Finsupp.mapDomain_add, hs, hs, Finsupp.mapDomain_single,
-    Finsupp.mapDomain_single, Finsupp.mapDomain_single, Finsupp.mapDomain_single, MonObj.comp_mul,
-    MonObj.comp_one]
 
 lemma single_two {α : Type} (a : α) : Finsupp.single a (2 : ℤ) = Finsupp.single a 1 + Finsupp.single a 1 := by
   rw [← Finsupp.single_add]
@@ -236,7 +266,8 @@ lemma act_zero' (ra : Out.RingAct A O) : ra.act 0 = 1 := by
 
 lemma act_natCast (ra : Out.RingAct A O) : ∀ n : ℕ, ra.act (n : O) = (𝟙 A) ^ n
   | 0 => by rw [Nat.cast_zero, act_zero', pow_zero]
-  | n + 1 => by rw [Nat.cast_succ, ra.map_add, padd_eq_mul, act_natCast ra n, ra.map_one, pow_succ]
+  | n + 1 => by
+    rw [Nat.cast_succ, ra.map_add, padd_eq_mul, act_natCast ra n, ra.map_one, pow_succ]
 
 theorem hasGen_pullMul (ra : Out.RingAct A O) (w0 a : O) (N : ℕ) (hN : a * star a = (N : O))
     (uΨ : LB.Gen (LB.LinComb M (K := Fin 4)

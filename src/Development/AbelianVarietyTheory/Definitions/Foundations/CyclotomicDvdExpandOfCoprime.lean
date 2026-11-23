@@ -1,5 +1,54 @@
-import Mathlib
-import Formalism.PieriBlockIdeals.PieriColumnMinors.HeightDescentMinors
+module
+
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.HeightDescentMinors
+public import Mathlib.RingTheory.WittVector.Compare
+public import Mathlib.RingTheory.WittVector.Frobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.WittVector.Complete
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Expand
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,16 +68,14 @@ variable {R}
 
 theorem hasSubst_om (p : ℕ) (hp : 0 < p) : PowerSeries.HasSubst (((1 + PowerSeries.X : PowerSeries R) ^ p) - 1) := by
   apply PowerSeries.HasSubst.of_constantCoeff_zero
-  simp only [map_sub, map_pow, map_add, map_one]
+  simp only [map_sub, map_pow, map_add (f := _), map_one]
   erw [PowerSeries.constantCoeff_X]
   simp
 
 def phi (p : ℕ) (hp : 0 < p) : PowerSeries R →ₐ[R] PowerSeries R :=
   PowerSeries.substAlgHom (hasSubst_om (R := R) p hp)
 
-def dd (h : PowerSeries R) : PowerSeries R := (1 + PowerSeries.X) * PowerSeries.derivative R h
-
-def dlog (u : (PowerSeries R)ˣ) : PowerSeries R := dd (u : PowerSeries R) * ((u⁻¹ : (PowerSeries R)ˣ) : PowerSeries R)
+def dd (h : PowerSeries R) : PowerSeries R := (1 + PowerSeries.X) * PowerSeries.derivative (R := R) h
 
 end GlobalTheory.Col
 
@@ -39,12 +86,12 @@ theorem phi_X (p : ℕ) (hp : 0 < p) : phi (R := R) p hp PowerSeries.X = ((1 + P
   unfold phi; rw [PowerSeries.substAlgHom_X]
 
 theorem phi_one_add_X (p : ℕ) (hp : 0 < p) : phi (R := R) p hp (1 + PowerSeries.X) = (1 + PowerSeries.X) ^ p := by
-  rw [map_add, map_one, phi_X]; ring
+  rw [map_add (f := _), map_one, phi_X]; ring
 
 theorem phi_eval₂ (p : ℕ) (hp : 0 < p) (P : R[X]) :
     phi (R := R) p hp (P.eval₂ PowerSeries.C (1 + PowerSeries.X)) = (Polynomial.expand R p P).eval₂ PowerSeries.C (1 + PowerSeries.X) := by
   induction P using Polynomial.induction_on' with
-  | add f g hf hg => simp [Polynomial.eval₂_add, map_add, hf, hg]
+  | add f g hf hg => simp [Polynomial.eval₂_add, map_add (f := _), hf, hg]
   | monomial n a =>
     simp only [Polynomial.eval₂_monomial, Polynomial.expand_monomial, map_mul, map_pow, phi_one_add_X, ← pow_mul]
     congr 1
@@ -76,10 +123,6 @@ def normOp (p : ℕ) [hp : Fact p.Prime] (h : PowerSeries R) : PowerSeries R :=
   letI := (phi (R := R) p hp.out.pos).toRingHom.toAlgebra
   Algebra.norm (PowerSeries R) h
 
-def trOp (p : ℕ) [hp : Fact p.Prime] (h : PowerSeries R) : PowerSeries R :=
-  letI := (phi (R := R) p hp.out.pos).toRingHom.toAlgebra
-  Algebra.trace (PowerSeries R) (PowerSeries R) h
-
 structure FrobLift (R : Type) [CommRing R] (p : ℕ) (σ : R ≃+* R) : Prop where
   dom : IsDomain R
   prime : Prime (p : R)
@@ -91,7 +134,7 @@ abbrev smap (σ : R ≃+* R) : PowerSeries R →+* PowerSeries R := PowerSeries.
 
 theorem hasSubst_pow (b : ℕ) : PowerSeries.HasSubst (((1 + PowerSeries.X : PowerSeries R) ^ b) - 1) := by
   apply PowerSeries.HasSubst.of_constantCoeff_zero
-  simp only [map_sub, map_pow, map_add, map_one]
+  simp only [map_sub, map_pow, map_add (f := _), map_one]
   erw [PowerSeries.constantCoeff_X]
   simp
 
@@ -103,19 +146,19 @@ namespace GlobalTheory.Col
 variable {R : Type} [CommRing R]
 
 theorem FrobLift.witt (p : ℕ) [hp : Fact p.Prime] (k : Type) [Field k] [CharP k p] [PerfectRing k p] :
-    FrobLift (WittVector p k) p (WittVector.frobeniusEquiv p k) where
-  dom := inferInstance
-  prime := (WittVector.irreducible p).prime
-  complete := WittVector.isAdicCompleteIdealSpanP
-  frob := by
-    intro x
+    FrobLift (WittVector p k) p (WittVector.frobeniusEquiv p k) := by
+  refine { dom := inferInstance
+           prime := (WittVector.irreducible p).prime
+           complete := WittVector.isAdicCompleteIdealSpanP
+           frob := ?_
+           perfect := ?_ }
+  · intro x
     rw [WittVector.mem_span_p_iff_coeff_zero_eq_zero]
     have : WittVector.constantCoeff (WittVector.frobeniusEquiv p k x - x ^ p) = 0 := by
       rw [map_sub, map_pow]
       simp [WittVector.constantCoeff_apply, WittVector.coeff_frobenius_charP]
     exact this
-  perfect := by
-    intro x
+  · intro x
     refine ⟨(WittVector.frobeniusEquiv p k).symm x, ?_⟩
     rw [WittVector.mem_span_p_iff_coeff_zero_eq_zero]
     have : WittVector.constantCoeff (((WittVector.frobeniusEquiv p k).symm x) ^ p - x) = 0 := by
@@ -123,9 +166,6 @@ theorem FrobLift.witt (p : ℕ) [hp : Fact p.Prime] (k : Type) [Field k] [CharP 
       rw [RingEquiv.symm_apply_apply, map_sub, map_pow]
       simp [WittVector.constantCoeff_apply, WittVector.coeff_frobenius_charP]
     exact this
-
-example (p : ℕ) [Fact p.Prime] : FrobLift (WittVector p (AlgebraicClosure (ZMod p))) p
-    (WittVector.frobeniusEquiv p (AlgebraicClosure (ZMod p))) := FrobLift.witt p _
 
 def padicToWitt (p : ℕ) [Fact p.Prime] (k : Type) [CommRing k] [CharP k p] : ℤ_[p] →+* WittVector p k :=
   (WittVector.map (ZMod.castHom (dvd_refl p) k)).comp (WittVector.equiv p).symm.toRingHom
@@ -139,12 +179,8 @@ theorem padicHom_ext (p : ℕ) [Fact p.Prime] [IsHausdorff (Ideal.span {(p : R)}
   rw [SModEq.zero, smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow, Ideal.mem_span_singleton']
   refine ⟨f e - g e, ?_⟩
   rw [hx]
-  simp only [map_add, map_mul, map_pow, map_natCast]
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast]
   ring
-
-def trLev (p m : ℕ) [Fact p.Prime] (hm : 1 ≤ m) : lev R p (m + 1) →+ lev R p m :=
-  letI := (up (R := R) p m hm).toAlgebra
-  (Algebra.trace (lev R p m) (lev R p (m + 1))).toAddMonoidHom
 
 def levZeta (R : Type) [CommRing R] (p m : ℕ) : lev R p m := ev R p m (1 + PowerSeries.X)
 
@@ -204,7 +240,7 @@ theorem sbp_apply (b : ℤ_[p]) (h : PowerSeries R) : sbp p b h = act p R b h :=
 
 theorem sbp_one_add_X (b : ℤ_[p]) :
     sbp p b (1 + PowerSeries.X : PowerSeries R) = PowerSeries.binomialSeries R b := by
-  rw [map_add, map_one, sbp, PowerSeries.substAlgHom_X, br]; ring
+  rw [map_add (f := _), map_one, sbp, PowerSeries.substAlgHom_X, br]; ring
 
 theorem sbp_nat (b : ℕ) : sbp (R := R) p (b : ℤ_[p]) = sb b := by
   unfold sbp sb
@@ -247,12 +283,12 @@ theorem ev_binomialSeries (m : ℕ) (b : ℤ_[p]) (n : ℕ) (hn : b - n ∈ Idea
   obtain ⟨s, hs⟩ := (cyc_dvd_level (R := R) p m).trans h1
   have h2 : PowerSeries.binomialSeries R (e * ((p ^ m : ℕ) : ℤ_[p])) = 1 + cyc R p m * s := by
     rw [← hs, br]; ring
-  rw [hb, PowerSeries.binomialSeries_add, PowerSeries.binomialSeries_nat, h2, map_mul, map_add, map_mul, ev_cyc_self,
+  rw [hb, PowerSeries.binomialSeries_add, PowerSeries.binomialSeries_nat, h2, map_mul, map_add (f := _), map_mul, ev_cyc_self,
     map_pow, levZeta]
   simp
 
-omit hp [Algebra ℤ_[p] R] in
 
+omit hp [Algebra ℤ_[p] R] in
 theorem cyclotomic_dvd_expand_of_coprime (N : ℕ) : ∀ n : ℕ, n ≠ 0 → n.Coprime N →
     Polynomial.cyclotomic N R ∣ Polynomial.expand R n (Polynomial.cyclotomic N R) := by
   intro n
@@ -287,7 +323,7 @@ theorem ev_sbp_cyc (m : ℕ) (b : ℤ_[p]ˣ) : ev R p m (sbp p (b : ℤ_[p]) (cy
       ev R p m ((Polynomial.expand R n P).eval₂ PowerSeries.C (1 + PowerSeries.X)) := by
     intro P
     induction P using Polynomial.induction_on' with
-    | add f g hf hg => simp only [Polynomial.eval₂_add, map_add, hf, hg]
+    | add f g hf hg => simp only [Polynomial.eval₂_add, map_add (f := _), hf, hg]
     | monomial k a =>
       have hC : sbp p (b : ℤ_[p]) (PowerSeries.C a : PowerSeries R) = PowerSeries.C a := (sbp p (b : ℤ_[p])).commutes a
       rw [Polynomial.expand_monomial, Polynomial.eval₂_monomial, Polynomial.eval₂_monomial, map_mul, map_pow,
@@ -324,25 +360,6 @@ theorem levF_levAct [IsHausdorff (Ideal.span {(p : R)}) R] (σ : R ≃+* R) (m :
   obtain ⟨h, rfl⟩ := Ideal.Quotient.mk_surjective x
   rw [levAct_ev, levF_ev, levF_ev, levAct_ev, smap_sbp]
 
-example : sbp p (-1) (1 + PowerSeries.X : PowerSeries R) * (1 + PowerSeries.X) = 1 := by
-  have h : (1 + PowerSeries.X : PowerSeries R) = PowerSeries.binomialSeries R ((1 : ℕ) : ℤ_[p]) := by
-    rw [PowerSeries.binomialSeries_nat, pow_one]
-  rw [sbp_one_add_X, h, ← PowerSeries.binomialSeries_add]
-  simpa using (PowerSeries.binomialSeries_nat (R := ℤ_[p]) (A := R) 0)
-
 end Act
-
-example (p : ℕ) [Fact p.Prime] (k : Type) [Field k] [CharP k p] [PerfectRing k p] (m : ℕ) (b : ℤ_[p]ˣ)
-    (x : lev (WittVector p k) p m) :
-    letI := (padicToWitt p k).toAlgebra
-    levF (WittVector.frobeniusEquiv p k) p m (levAct p m b x) = levAct p m b (levF (WittVector.frobeniusEquiv p k) p m x) :=
-  letI := (padicToWitt p k).toAlgebra
-  haveI := (FrobLift.witt p k).complete
-  levF_levAct p _ m b x
-
-example : dd (1 + PowerSeries.X : PowerSeries R) = 1 + PowerSeries.X := by simp [dd]
-
-example : cyc R 2 1 = PowerSeries.X + 2 := by
-  simp [cyc, Polynomial.cyclotomic_two]; ring
 
 end GlobalTheory.Col

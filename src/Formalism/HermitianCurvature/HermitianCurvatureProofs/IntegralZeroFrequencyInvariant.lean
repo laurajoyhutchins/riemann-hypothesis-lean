@@ -1,4 +1,61 @@
-import Formalism.HermitianCurvature.StatementB
+module
+
+public import Formalism.HermitianCurvature.StatementB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Shift
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal
@@ -108,13 +165,6 @@ theorem polar : Polarisation := by
     ((β y x - γ y x - (β x y - γ x y)) / 2) * Complex.I_sq
 
 theorem coreC : FormCoreC := core semi polar
-
-theorem core0 : FormCore := by
-  intro V _ _ W β βi hβ hβi hnn hle hW
-  refine coreC V W β βi hβ hβi hnn hle ?_
-  intro x hx
-  obtain ⟨Φ, t₀, h0, hc, ht, U, hU, hae⟩ := hW x hx
-  exact ⟨Φ, fun t => βi (Φ t) (Φ t), t₀, h0, by simp only [h0], hc, ht, U, hU, hae⟩
 
 theorem fatou : FatouParam := by
   intro Q _ μ E _ U J c hU hJm hJc hc hae τ hτ
@@ -297,7 +347,7 @@ theorem intZero : IntRdZeroInv := by
   have hR : ∀ s : ℝ, Measurable (rmulF (E s)) := fun s => hΨ.comp measurable_prodMk_right
   set ν : Measure ℝ := volume.restrict (Set.Ioc 0 1) with hν
   have hq : Measure.QuasiMeasurePreserving Ψ (μ.prod ν) μ := by
-    refine ⟨hΨ, Measure.AbsolutelyContinuous.mk fun s hs h0 => ?_⟩
+    refine ⟨hΨ.aemeasurable, Measure.AbsolutelyContinuous.mk fun s hs h0 => ?_⟩
     rw [Measure.map_apply hΨ hs, Measure.prod_apply_symm (hΨ hs)]
     have : ∀ y : ℝ, μ ((fun x => (x, y)) ⁻¹' (Ψ ⁻¹' s)) = 0 := by
       intro y
@@ -365,18 +415,12 @@ end Formalism.FourierDecayAlt.P.B1
 
 namespace Formalism.FourierDecayAlt.P
 
-theorem seminorm_inequality : Formalism.FourierDecayAlt.B.SeminormIneq := B1.semi
-
 theorem bilinear_form_continuity : Formalism.FourierDecayAlt.B.FormCoreC := B1.coreC
-
-theorem bilinear_form_at_zero : Formalism.FourierDecayAlt.B.FormCore := B1.core0
 
 theorem fatou_lemma_in_parameter : Formalism.FourierDecayAlt.B.FatouParam := B1.fatou
 
 theorem integration_by_parts_regularised : Formalism.FourierDecayAlt.B.RegIBP := B1.ibp
 
 theorem test_function_decay : Formalism.FourierDecayAlt.B.TestDecay := B1.decay B1.ibp
-
-theorem integral_zero_frequency_invariant : Formalism.FourierDecayAlt.B.IntRdZeroInv := B1.intZero
 
 end Formalism.FourierDecayAlt.P

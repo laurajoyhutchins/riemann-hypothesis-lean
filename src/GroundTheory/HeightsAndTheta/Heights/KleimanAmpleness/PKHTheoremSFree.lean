@@ -1,11 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeEmbedSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeDecompSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeIndepSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombContractSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombCyclicSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeBadFiniteSt
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.CechHcSubsingletonOfBij
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeEmbedSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeDecompSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeIndepSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombContractSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHCombCyclicSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.KHFreeBadFiniteSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgSFreeSt
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.CechHcSubsingletonOfBij
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -52,6 +100,7 @@ theorem cocycle_decomp (hE : KHFreeEmbed.Statement) (hD : KHFreeDecomp.Statement
   obtain ⟨A, f, hA, rfl⟩ := hD S K ι c d n z hz.1
   refine ⟨A, f, hA, rfl, hI S K ι (n + 1) A (fun a => combD S (negSet a) n (f a)) ?_⟩
   have h0 : KH.cechD S ι _ n (∑ a ∈ A, embed S a n (f a)) = 0 := hz.2
+
   rw [map_sum] at h0
   simpa only [(hE S K ι _).1] using h0
 
@@ -73,8 +122,8 @@ theorem part_cyclic (hC : KHCombContract.Statement) (hY : KHCombCyclic.Statement
     rw [zero_smul, sub_zero]
     rwa [h0, sub_zero] at hg'
 
-omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 
+omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 theorem negSet_empty {a : (Σ k, ι k) → ℤ} {e : K → ℤ} (ha : blockSum a = e) (he : ∀ k, 0 ≤ e k) (hb : Bad a)
     (k : K) : negSet a k = ∅ := by
   rcases hb k with h | h
@@ -94,8 +143,8 @@ theorem nonneg_of_negSet_empty {a : (Σ k, ι k) → ℤ} (h : ∀ k, negSet a k
   rw [h p.1] at hm
   exact Finset.notMem_empty _ hm
 
-omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 
+omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 theorem singOne_eq_zero {J : ∀ k, Finset (ι k)} (hJ : ∀ k, J k = ∅) {n : ℕ} (hn : 1 ≤ n) :
     singOne S J n = 0 := by
   funext I
@@ -107,8 +156,8 @@ theorem singOne_eq_zero {J : ∀ k, Finset (ι k)} (hJ : ∀ k, J k = ∅) {n : 
   simp only [h1, Finset.sum_const_zero] at hs
   omega
 
-omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 
+omit [LinearOrder K] [∀ k, LinearOrder (ι k)] in
 theorem singOne_zero {J : ∀ k, Finset (ι k)} (I : CombCell ι J 0) : singOne S J 0 I = 1 := by
   simp only [singOne]
   rw [if_pos]
@@ -209,6 +258,7 @@ theorem sections (hE : KHFreeEmbed.Statement) (hD : KHFreeDecomp.Statement) (hI 
   choose! m hm hmI using hpart
   refine ⟨∑ a ∈ A, m a, Submodule.sum_mem _ hm, fun I => ?_⟩
   rw [Finset.sum_apply]
+
   rw [← LocalizedModule.mkLinearMap_apply, map_sum]
   exact Finset.sum_congr rfl fun a ha => by rw [hmI a ha, LocalizedModule.mkLinearMap_apply]
 

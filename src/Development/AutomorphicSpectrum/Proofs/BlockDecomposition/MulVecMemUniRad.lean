@@ -1,5 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMulRightInvariantOfCenter
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecondCountableNilrad
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.QuotientVanishing.QuotVanish
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.EqZeroOfCommuteOfSeparable
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsIsometryFlagOfEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegralEqSmulIntegralAvg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMulRightInvariantOfCenter
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TwCentPreservesFlag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,7 +117,7 @@ instance uniRad_normal (hW : W₁ ≤ W₂) : ((uniRad hW).subgroupOf (flagStab 
   exact h⟩
 
 theorem isClosed_stab (A : Submodule ℂ (Fin n → ℂ)) : IsClosed {g : GL (Fin n) ℂ | img g A = A} := by
-  have hA : IsClosed (A : Set (Fin n → ℂ)) := Submodule.closed_of_finiteDimensional A
+  have hA : IsClosed (A : Set (Fin n → ℂ)) := Submodule.isClosed_of_finiteDimensional A
   have e : {g : GL (Fin n) ℂ | img g A = A} =
       (⋂ y ∈ A, (fun g : GL (Fin n) ℂ => g.val *ᵥ y) ⁻¹' (A : Set (Fin n → ℂ))) ∩
       ⋂ y ∈ A, (fun g : GL (Fin n) ℂ => (g⁻¹ : GL (Fin n) ℂ).val *ᵥ y) ⁻¹' (A : Set (Fin n → ℂ)) := by
@@ -114,10 +164,20 @@ theorem map_nmul [MeasurableSpace (nilrad W₁ W₂)] [BorelSpace (nilrad W₁ W
     Continuous.subtype_mk (continuous_const.matrix_mul continuous_subtype_val) _
   have hsh : Measure.map (fun X => X + P X) ν = ν :=
     GlobalTheory.CompanionTheory.NilChangeVar.map_shear ν (GlobalTheory.CompanionTheory.NilChangeVar.nilrad2 W₁ W₂) P hPc
-      (fun X => GlobalTheory.CompanionTheory.NilChangeVar.nil_mul_mem A.2 X.2)
+      (fun X => ⟨fun y => by
+        rw [← Matrix.mulVec_mulVec]
+        exact A.2.2.1 _ (X.2.1 y), fun y hy => by
+        rw [← Matrix.mulVec_mulVec]
+        exact A.2.2.2 _ (X.2.2.1 y hy)⟩)
       (fun X Y hY => Subtype.ext (by
         change A.1 * (X.1 + Y.1) = A.1 * X.1
-        rw [mul_add, GlobalTheory.CompanionTheory.NilChangeVar.nil_mul_two A.2 hY.1, add_zero]))
+        rw [mul_add]
+        have hzero : A.1 * Y.1 = 0 := by
+          apply Matrix.ext_iff_mulVec.2
+          intro y
+          rw [← Matrix.mulVec_mulVec, Matrix.zero_mulVec]
+          exact A.2.2.2 _ (hY.1 y)
+        rw [hzero, add_zero]))
   have hf : GlobalTheory.CompanionTheory.LocVan.nmul hW A = (fun X => X + A) ∘ fun X => X + P X := by
     funext X
     refine Subtype.ext ?_
@@ -178,7 +238,8 @@ theorem quotVanish : QuotVanish := by
     rw [← GlobalTheory.CompanionTheory.FlagCent.perpD_perpD _ hσ, h₁, h₂]
   have g₂ : img (d * thetaR (starRingEnd ℂ) n d) W₂ = W₂ := by
     rw [← GlobalTheory.CompanionTheory.FlagCent.perpD_perpD _ hσ, h₂, h₁]
-  obtain ⟨V₂, V₃, c₁, d₁, c₂, d₂, s₂, s₃⟩ := exists_levi_spaces _ hs hW g₁ g₂
+  obtain ⟨V₂, V₃, c₁, d₁, c₂, d₂, s₂, s₃⟩ :=
+    exists_levi_spaces (d * thetaR (starRingEnd ℂ) n d) hs hW g₁ g₂
   haveI := isHaar_radHomeo hW ν
   refine absVanish μ (flagStab W₁ W₂) (uK n) (isClosed_flagStab W₁ W₂) (isCompact_uK n) ?_
     ((uniRad hW).subgroupOf (flagStab W₁ W₂)) ((flagStab V₂ V₃).subgroupOf (flagStab W₁ W₂))
@@ -192,10 +253,12 @@ theorem quotVanish : QuotVanish := by
     obtain ⟨u, m, e, hu, m₁, m₂, m₃, m₄⟩ := levi_decomp c₁ d₁ c₂ d₂ q.1 q.2.1 q.2.2
     exact ⟨⟨u, uniRad_le hW hu⟩, Subgroup.mem_subgroupOf.2 hu, ⟨m, m₁, m₂⟩,
       Subgroup.mem_subgroupOf.2 ⟨m₃, m₄⟩, Subtype.ext e⟩
-  · refine eq_bot_iff.2 fun x hx => ?_
-    have hN := Subgroup.mem_subgroupOf.1 hx.1
-    have hM := Subgroup.mem_subgroupOf.1 hx.2
-    exact Subgroup.mem_bot.2 (Subtype.ext (levi_inf c₁ d₁ c₂ d₂ x.1 hN hM.1 hM.2))
+  · rw [Subgroup.eq_bot_iff_forall]
+    intro x hx
+    obtain ⟨hxN, hxM⟩ := Subgroup.mem_inf.1 hx
+    have hN := Subgroup.mem_subgroupOf.1 hxN
+    have hM := Subgroup.mem_subgroupOf.1 hxM
+    exact Subtype.ext (levi_inf c₁ d₁ c₂ d₂ x.1 hN hM.1 hM.2)
   · intro t ht
     have hc := GlobalTheory.CompanionTheory.FlagCent.commute_norm (starRingEnd ℂ) hσ ht
     obtain ⟨t₁, t₂⟩ := GlobalTheory.CompanionTheory.FlagCent.twCent_preserves_flag (starRingEnd ℂ) hσ d hs W₁ W₂ h₁ h₂ ht

@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.IoBlockNeZero
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.TCoreDef
+public import Formalism.SharpRestriction.GrowthBounds.StandardPolynomials.TopKeyFormSelfSoft
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,7 +67,7 @@ theorem ioD_scal (l : Fin (BDk C0 CE1 CE2 mu X β j).T.t) (bb : Bool) :
   rw [ioD_X]
   have hl : ((Fin.castSucc l : Fin ((BDk C0 CE1 CE2 mu X β j).T.t + 1)) : ℕ) < (X.seg C0 CE1 CE2 j).t := l.2
   simp only [symVar, symLev]
-  rw [dif_pos hl, dif_pos hl]
+  rw [dite_eq_left hl, dite_eq_left hl]
   rfl
 
 theorem ioD_scalLast (bb : Bool) :
@@ -33,7 +77,7 @@ theorem ioD_scalLast (bb : Bool) :
   have hl : ¬ ((Fin.last (BDk C0 CE1 CE2 mu X β j).T.t : Fin ((BDk C0 CE1 CE2 mu X β j).T.t + 1)) : ℕ) <
       (X.seg C0 CE1 CE2 j).t := lt_irrefl _
   simp only [symVar, symLev]
-  rw [dif_neg hl, dif_neg hl, pow_one]
+  rw [dite_eq_right hl, dite_eq_right hl, pow_one]
 
 theorem ioD_odd (i : Fin (segS X.TT j)) (e : ℕ) (he : e < 2) (a : Fin (2 * segS X.TT j + 1 + 1)) (ha : (a : ℕ) = 2 * i + e)
     (c : Fin X.m) :
@@ -43,7 +87,7 @@ theorem ioD_odd (i : Fin (segS X.TT j)) (e : ℕ) (he : e < 2) (a : Fin (2 * seg
   have hi := i.2
   have hl : (a : ℕ) < 2 * segS X.TT j := by omega
   simp only [symVar, symLev]
-  rw [dif_pos hl, dif_pos hl]
+  rw [dite_eq_left hl, dite_eq_left hl]
   have e1 : (⟨(a : ℕ) / 2, by omega⟩ : Fin (segS X.TT j)) = i := Fin.ext (by simp only; omega)
   have e2 : decide ((a : ℕ) % 2 = 0) = decide (e = 0) := by
     congr 1
@@ -57,7 +101,7 @@ theorem ioD_end (e : ℕ) (he : e < 2) (a : Fin (2 * segS X.TT j + 1 + 1)) (ha :
   rw [ioD_X]
   have hl : ¬ (a : ℕ) < 2 * segS X.TT j := by omega
   simp only [symVar, symLev]
-  rw [dif_neg hl, dif_neg hl, pow_one]
+  rw [dite_eq_right hl, dite_eq_right hl, pow_one]
   have e2 : decide ((a : ℕ) = 2 * segS X.TT j) = decide (e = 0) := by
     congr 1
     apply propext
@@ -68,7 +112,8 @@ theorem ioD_Ehat (l : Fin (BDk C0 CE1 CE2 mu X β j).T.t) :
     ioD O C0 CE1 CE2 mu X β j ((BDk C0 CE1 CE2 mu X β j).Ehat O (r := X.m) l) =
       EhatT O X (topOdd X j (uTop (X.seg C0 CE1 CE2 j) l)) ((X.seg C0 CE1 CE2 j).P X.p (uTop (X.seg C0 CE1 CE2 j) l)) := by
   unfold BlockData.Ehat EhatT scalZ scalS
-  rw [map_add, map_mul, map_sum, ioD_scal, ioD_scal]
+
+  rw [map_add (f := _), map_mul, map_sum, ioD_scal, ioD_scal]
   congr 1
   refine Finset.sum_congr rfl fun c _ => ?_
   have hu := (uTop (X.seg C0 CE1 CE2 j) l).2
@@ -85,7 +130,8 @@ theorem ioD_Eplus :
   unfold hTop hKey
   rw [Fin.sum_univ_succ]
   unfold BlockData.Eplus scalZ scalS xiVar
-  rw [map_add, map_mul, map_sum, ioD_scalLast, ioD_scalLast]
+
+  rw [map_add (f := _), map_mul, map_sum, ioD_scalLast, ioD_scalLast]
   congr 1
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [map_mul, ioD_end β j 0 (by omega) _ (by rfl), ioD_end β j 1 (by omega) _ (by rfl)]

@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.InvariantSubspaceMobiusInverseRecEqOfFinrankLt
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyLinearEquiStatement
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyEqFinsumPsiStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.InvariantSubspaceMobiusInverseRecEqOfFinrankLt
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyEqFinsumPsi
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvariantSubspaceMobiusInverseCharpolyLinearEqui
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial GlobalTheory.CuspGL
 
@@ -76,7 +124,7 @@ private lemma card_invariant_complements_over_eq_card_nilRad (F : Type) [Field F
   let Γ : (U →ₗ[F] A) → (U →ₗ[F] V) := fun τ => σ ∘ₗ U.subtype + A.subtype ∘ₗ τ
   have hΓ : ∀ τ (u : U), A.mkQ (Γ τ u) = u := by
     intro τ u
-    simp only [Γ, LinearMap.add_apply, LinearMap.comp_apply, map_add, hσ']
+    simp only [Γ, LinearMap.add_apply, LinearMap.comp_apply, map_add (f := _), hσ']
     simp [(Submodule.Quotient.mk_eq_zero A).2 (τ u).2]
   have memN : ∀ k : (V ⧸ A) →ₗ[F] A, A.subtype ∘ₗ k ∘ₗ A.mkQ ∈ _root_.GlobalTheory.CuspGL.nilRad A :=
     fun k => ⟨fun x => by simp, fun x hx => by simp [(Submodule.Quotient.mk_eq_zero A).2 hx]⟩
@@ -175,7 +223,7 @@ private lemma card_invariant_complements_over_eq_card_nilRad (F : Type) [Field F
       have hgn : (g + n) (Γ τ u) = Γ τ (gU u) := by
         have := @hinj ⟨_, hinv _ hmemu⟩ ⟨_, hmemg⟩ (by
           simp only [LinearMap.comp_apply, Submodule.subtype_apply]
-          rw [hΓ, LinearMap.add_apply, map_add, hmapQ, hΓ,
+          rw [hΓ, LinearMap.add_apply, map_add (f := _), hmapQ, hΓ,
             show A.mkQ (n (Γ τ u)) = 0 from (Submodule.Quotient.mk_eq_zero A).2 (hn.1 _), add_zero]
           rfl)
         exact congrArg Subtype.val this
@@ -213,9 +261,9 @@ private lemma psi_restrict_complement_eq_psi_quotient (F : Type) [Field F] (V : 
   simp only [LinearEquiv.conj_apply_apply, LinearEquiv.symm_apply_apply, LinearMap.restrict_apply]
   simp [e, hn.1 w.1]
 
+
 open Polynomial in
 variable {F : Type} [Field F] {V : Type} [AddCommGroup V] [Module F V] in
-
 theorem _root_.GlobalTheory.CuspGL.finsum_psi_transversal : ∀ (F : Type) [Field F] [Finite F] (V : Type) [AddCommGroup V] [Module F V] [FiniteDimensional F V] (s : F[X] → ℂ) (A : Submodule F V) (g : Module.End F V) (hg : ∀ x ∈ A, g x ∈ A), ∑ᶠ x : {x : Module.End F V × Submodule F V // x.1 ∈ _root_.GlobalTheory.CuspGL.nilRad A ∧ x.2 ⊓ A = ⊥ ∧ ∀ v ∈ x.2, (g + x.1) v ∈ x.2}, _root_.GlobalTheory.CuspGL.psi s x.1.2 ((g + x.1.1).restrict x.2.2.2) = (Nat.card (_root_.GlobalTheory.CuspGL.nilRad A) : ℂ) * s (LinearMap.charpoly (A.mapQ A g (fun x hx => hg x hx))) := by
   intro F _ _ V _ _ _ s A g hg
   classical
@@ -239,7 +287,7 @@ theorem _root_.GlobalTheory.CuspGL.finsum_psi_transversal : ∀ (F : Type) [Fiel
     obtain ⟨w, hw, rfl⟩ := Submodule.mem_map.1 hy
     refine Submodule.mem_map.2 ⟨(g + x.1.1) w, x.2.2.2 w hw, ?_⟩
     have h1 : A.mkQ (x.1.1 w) = 0 := (Submodule.Quotient.mk_eq_zero A).2 (x.2.1.1 w)
-    simp only [LinearMap.add_apply, map_add, h1, add_zero]
+    simp only [LinearMap.add_apply, map_add (f := _), h1, add_zero]
     rfl
   have hpsi : ∀ x : {x : Module.End F V × Submodule F V // x.1 ∈ _root_.GlobalTheory.CuspGL.nilRad A ∧
       x.2 ⊓ A = ⊥ ∧ ∀ v ∈ x.2, (g + x.1) v ∈ x.2},

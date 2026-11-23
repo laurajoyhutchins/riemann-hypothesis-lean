@@ -1,5 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,15 +103,6 @@ theorem not_isUnit {l : Level H} (c : Coeff l) (W : ValuationSubring ℂ) (p : �
   have : W.valuation p * W.valuation ((v : c.F) : ℂ) < 1 := mul_lt_one_of_lt_of_le hW h2
   exact this.ne h3
 
-theorem exists_lift {l : Level H} {Xo : Moduli D l} {c : Coeff l} (W : ValuationSubring ℂ)
-    (Y : Model Xo c (algebraMap (𝓞 c.F) c.F)) (b : 𝓞 c.F →+* c.V W)
-    (hb : ∀ x, ((b x : c.V W) : c.F) = (x : c.F)) :
-    ∃ a : Xo.XF c ⟶ pullback Y.s (spMap b), a ≫ pullback.fst _ _ = Y.j := by
-  have hc : (c.V W).subtype.comp b = algebraMap (𝓞 c.F) c.F := RingHom.ext hb
-  refine ⟨pullback.lift Y.j (pullback.snd _ _ ≫ spMap (c.V W).subtype) ?_, pullback.lift_fst _ _ _⟩
-  rw [Model.j, Category.assoc, pullback.condition, ← Category.assoc, Y.jQ_over, Category.assoc,
-    ← Spec.map_comp, ← CommRingCat.ofHom_comp, hc]
-
 theorem goodAt_of_coprime (l : Level H) (a b : ℕ) (ha : 3 ≤ a) (hb : 3 ≤ b) (hab : a.Coprime b)
     (hM : l.M = a * b) (p : ℕ) (hp : p.Prime) : l.GoodAt p := by
   unfold Level.GoodAt
@@ -74,12 +113,6 @@ theorem goodAt_of_coprime (l : Level H) (a b : ℕ) (ha : 3 ≤ a) (hb : 3 ≤ b
   · refine key b hb (hM ▸ dvd_mul_left _ _) fun h' => hp.one_lt.ne' ?_
     exact Nat.eq_one_of_dvd_coprimes hab h h'
   · exact key a ha (hM ▸ dvd_mul_right _ _) h
-
-theorem not_goodAt_pow (l : Level H) (p k : ℕ) (hp : p.Prime) (hM : l.M = p ^ k) : ¬ l.GoodAt p := by
-  unfold Level.GoodAt
-  rw [hM, Nat.factorization_pow, Finsupp.smul_apply, hp.factorization_self, smul_eq_mul, mul_one,
-    Nat.div_self (pow_pos hp.pos k)]
-  omega
 
 theorem exists_good_level (H : Host E) : ∃ l : Level H, l.A = 1 ∧ ∀ p : ℕ, p.Prime → l.GoodAt p := by
   have hd := H.d_mod
@@ -116,7 +149,7 @@ theorem exists_good_level (H : Host E) : ∃ l : Level H, l.A = 1 ∧ ∀ p : �
   have o2 : Odd N₂ := ⟨2 * N₁ ^ 2 + 8 * e + 3, by omega⟩
   let α : 𝓞 E := (2 + r) * (2 * N₁ + r)
   have hα : H.bar α = (2 - r) * (2 * N₁ - r) := by
-    simp only [α, map_mul, map_add, map_natCast, map_ofNat, hbar]; ring
+    simp only [α, map_mul, map_add (f := _), map_natCast, map_ofNat, hbar]; ring
   have n1 : (2 + r) * (2 - r) = (N₁ : 𝓞 E) := by rw [hN₁]; push_cast; linear_combination -hr2
   have n2 : (2 * N₁ + r) * (2 * N₁ - r) = (N₂ : 𝓞 E) := by rw [hN₂]; push_cast; linear_combination -hr2
   have cZ : ∀ a b : ℕ, a.Coprime b → IsCoprime (a : 𝓞 E) (b : 𝓞 E) := fun a b h => Nat.Coprime.cast h

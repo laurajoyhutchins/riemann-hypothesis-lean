@@ -1,4 +1,47 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafCokIsoPf
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafCokIsoPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits Opposite GlobalTheory.EtC
@@ -14,7 +57,7 @@ theorem fin_pb {α β γ δ M : Type*} [AddCommMonoid M] (t : α → β) (l : α
   have hsupp : ∀ s ∈ x.support, s ∈ Set.range t := by
     intro s hs
     have h1 : (Finsupp.mapDomain r x) (r s) ≠ 0 := by
-      rw [Finsupp.mapDomain_apply hr]; exact Finsupp.mem_support_iff.1 hs
+      rw [Finsupp.mapDomain_apply_of_injective hr]; exact Finsupp.mem_support_iff.1 hs
     rw [h] at h1
     have h2 : r s ∈ (Finsupp.mapDomain b y).support := Finsupp.mem_support_iff.2 h1
     have h3 := Finsupp.mapDomain_support h2
@@ -56,17 +99,17 @@ theorem modfree_pb (R : Type) [CommRing R] {A' A B' B : Type} (t : A' ⟶ B') (l
   refine ⟨congrArg (forget _).map sq, ?_, ?_⟩
   · rintro x y ⟨h1, -⟩
     have hu : Function.Injective (uliftFunctor.{1}.map t) := fun a c h =>
-      ULift.ext _ _ (ht (congrArg ULift.down h))
+      ULift.ext (ht (congrArg ULift.down h))
     exact Finsupp.mapDomain_injective hu h1
   · intro x y h
     exact fin_pb (uliftFunctor.{1}.map t) (uliftFunctor.{1}.map l) (uliftFunctor.{1}.map r)
       (uliftFunctor.{1}.map b) hw
       (fun x y h => by
         obtain ⟨a, ha1, ha2⟩ := hex x.down y.down (congrArg ULift.down h)
-        exact ⟨ULift.up a, ULift.ext _ _ ha1, ULift.ext _ _ ha2⟩)
-      (fun a c h => ULift.ext _ _ (ht (congrArg ULift.down h)))
-      (fun a c h => ULift.ext _ _ (hr (congrArg ULift.down h)))
-      (fun a c h => ULift.ext _ _ (hb (congrArg ULift.down h))) x y h
+        exact ⟨ULift.up a, ULift.ext ha1, ULift.ext ha2⟩)
+      (fun a c h => ULift.ext (ht (congrArg ULift.down h)))
+      (fun a c h => ULift.ext (hr (congrArg ULift.down h)))
+      (fun a c h => ULift.ext (hb (congrArg ULift.down h))) x y h
 
 theorem leafFreePb : LeafFreePb := by
   intro R _ A' A B' B t l r b hpb hr hb

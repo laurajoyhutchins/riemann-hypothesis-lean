@@ -1,38 +1,56 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.BlowupProjections.BlowupProjStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.Monomial
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.ConclusionOfSmooth
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.NotSubsetOfDenseCompl
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinalTheorems
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.Monomial
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.RegDom
+
+@[expose] public section
 
 noncomputable section
 
 namespace GlobalTheory.CompanionTheory.Hypotheses₂
 
 open AlgebraicGeometry CategoryTheory Limits ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
-
-def ResolutionAndPrincipalisationCharZero : Prop := ResolutionCharZero ∧ PrincipalisationCharZero
-
-def ResK : Prop := ReciprocityTheory.ChartRestriction.G.Geo.ResK.ResKStatement
-
-def IsSncIdeal {Y : Scheme.{0}} (I : Y.IdealSheafData) : Prop :=
-  ∀ y : Y, ∃ (V : Y.affineOpens) (hy : y ∈ V.1) (n : ℕ) (z : Fin n → Γ(Y, V.1)) (a : Fin n → ℕ),
-    FinalTheorems.Rsp (Y.presheaf.stalk y) n (fun i => Y.presheaf.germ V.1 y hy (z i)) ∧
-      I.ideal V = Ideal.span {∏ i, z i ^ a i}
-
-def ProjResolution : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (X : Scheme.{0}) (g : X ⟶ Sp K) [LocallyOfFinitePresentation g],
-    IsIntegral X → IsProjOver g →
-    ∃ (X' : Scheme.{0}) (f : X' ⟶ X),
-      Smooth (f ≫ g) ∧ IsProjOver (f ≫ g) ∧ IsIso (f ∣_ g.smoothLocus) ∧
-        Dense ((f ⁻¹ᵁ g.smoothLocus : X'.Opens) : Set X')
-
-def Principalization : Prop :=
-  ∀ (K : Type) [Field K] [CharZero K] (Y : Scheme.{0}) (g : Y ⟶ Sp K) (I : Y.IdealSheafData),
-    IsIntegral Y → Smooth g → IsProjOver g → I ≠ ⊥ →
-    ∃ (Y' : Scheme.{0}) (f : Y' ⟶ Y),
-      Smooth (f ≫ g) ∧ IsProjOver (f ≫ g) ∧ IsIso (f ∣_ I.support.compl) ∧ IsSncIdeal (I.comap f)
 
 theorem exists_closed_in_prod {K : Type} [Field K] {M : ℕ} {X' : Scheme.{0}} (h : X' ⟶ PSpace K M)
     (hp : IsProjOver (h ≫ PSpace.str K M)) :

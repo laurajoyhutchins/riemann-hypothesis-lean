@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsTwistSplit
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Objects
+public import Mathlib.Algebra.MonoidAlgebra.Grading
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -27,13 +75,13 @@ section Obj
 variable {S : Type u} [CommRing S] {Ω : Type w} [Field Ω] [Algebra S Ω] {N : ℕ}
   (x : Fin (N + 1) → Ω) {r : ℕ} (η : Fin (r + 1) → Ω)
 
-variable (S) in
 
+variable (S) in
 def yHom : MvPolynomial (Fin (r + 1)) S →ₐ[S] LaurUT Ω :=
   aeval fun j => single ((1, 0) : ℤ × ℤ) (η j)
 
-variable (S) in
 
+variable (S) in
 def xyHom : Poly (MvPolynomial (Fin (r + 1)) S) N →+* LaurUT Ω :=
   eval₂Hom (yHom S η).toRingHom fun i => single ((0, 1) : ℤ × ℤ) (x i)
 
@@ -63,11 +111,12 @@ theorem yHom_mem_tDeg (c : MvPolynomial (Fin (r + 1)) S) : yHom S η c ∈ tDeg 
 
 theorem xyHom_mem_tDeg {p : Poly (MvPolynomial (Fin (r + 1)) S) N} {d : ℕ} (hp : p.IsHomogeneous d) :
     xyHom S x η p ∈ tDeg Ω d := by
+
   rw [p.as_sum, map_sum]
   refine Submodule.sum_mem _ fun α hα => ?_
   have hdeg := hp (mem_support_iff.mp hα)
   rw [xyHom, coe_eval₂Hom, eval₂_monomial]
-  have h1 : (yHom S η).toRingHom (coeff α p) ∈ tDeg Ω 0 := yHom_mem_tDeg η _
+  have h1 : (yHom S η).toRingHom (p.coeff α) ∈ tDeg Ω 0 := yHom_mem_tDeg η _
   have h2 : (α.prod fun i k => single ((0, 1) : ℤ × ℤ) (x i) ^ k) ∈
       tDeg Ω (∑ i ∈ α.support, α i • (1 : ℤ)) := by
     rw [Finsupp.prod]
@@ -84,10 +133,12 @@ theorem xyHom_map_C {f : Poly S N} {e : ℕ} (hf : f.IsHomogeneous e) :
     xyHom S x η (MvPolynomial.map (C : S →+* MvPolynomial (Fin (r + 1)) S) f) = single ((0 : ℤ), (e : ℤ)) (aeval x f) := by
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, map_sum]
-  rw [show single ((0 : ℤ), (e : ℤ)) (∑ α ∈ f.support, aeval x (monomial α (coeff α f))) =
-      ∑ α ∈ f.support, single ((0 : ℤ), (e : ℤ)) (aeval x (monomial α (coeff α f))) from
-    map_sum (singleAddHom ((0 : ℤ), (e : ℤ))) _ _]
+
+  rw [show single ((0 : ℤ), (e : ℤ)) (∑ α ∈ f.support, aeval x (monomial α (f.coeff α))) =
+    ∑ α ∈ f.support, single ((0 : ℤ), (e : ℤ)) (aeval x (monomial α (f.coeff α))) from
+  map_sum (singleAddHom ((0 : ℤ), (e : ℤ))) _ _]
   refine Finset.sum_congr rfl fun α hα => ?_
   have hdeg := hf (mem_support_iff.mp hα)
   rw [map_monomial, xyHom, coe_eval₂Hom, eval₂_monomial, aeval_monomial]
@@ -113,8 +164,8 @@ theorem exists_yHom_eq {n : ℕ} {q : Ω} (hq : q ∈ Set.range η ^ n) :
     congr 1
     ext <;> simp [add_comm]
 
-variable {x} in
 
+variable {x} in
 def twPart (M₀ : FinGradedSub (S := S) (x := x) Ω) (a b : ℤ) : Submodule S Ω :=
   if 0 ≤ b then Submodule.span S ((M₀.piece a : Set Ω) * Set.range η ^ b.toNat) else ⊥
 
@@ -197,7 +248,7 @@ theorem isTw_xyHom_mul (M₀ : FinGradedSub (S := S) (x := x) Ω)
       rw [yHom_C, coeff_single_mul_sub, sub_zero]
       have := Submodule.smul_mem _ c (hv k)
       rwa [Algebra.smul_def] at this
-    | add p q hp hq => rw [map_add, add_mul]; exact isTw_add η M₀ (hp hv) (hq hv)
+    | add p q hp hq => rw [map_add (f := _), add_mul]; exact isTw_add η M₀ (hp hv) (hq hv)
     | mul_X p j hp =>
       rw [map_mul, mul_assoc]
       apply hp
@@ -205,7 +256,7 @@ theorem isTw_xyHom_mul (M₀ : FinGradedSub (S := S) (x := x) Ω)
       rw [yHom_X, coeff_single_mul_sub]
       have := twPart_eta_mul η M₀ j (hv (k - (1, 0)))
       simpa using this
-  | add p q hp hq => rw [map_add, add_mul]; exact isTw_add η M₀ (hp hv) (hq hv)
+  | add p q hp hq => rw [map_add (f := _), add_mul]; exact isTw_add η M₀ (hp hv) (hq hv)
   | mul_X p i hp =>
     rw [map_mul, mul_assoc]
     apply hp
@@ -214,18 +265,18 @@ theorem isTw_xyHom_mul (M₀ : FinGradedSub (S := S) (x := x) Ω)
     have := twPart_x_mul η M₀ i (hv (k - (0, 1)))
     simpa using this
 
-variable (x) in
 
+variable (x) in
 def UT (_ : Fin (N + 1) → Ω) (_ : Fin (r + 1) → Ω) : Type w := LaurUT Ω
 
 instance : CommRing (UT x η) := inferInstanceAs (CommRing (LaurUT Ω))
 
-variable {η} in
 
+variable {η} in
 def UT.toL (v : UT x η) : LaurUT Ω := v
 
-variable {η} in
 
+variable {η} in
 def UT.ofL (v : LaurUT Ω) : UT x η := v
 
 instance : Algebra (Poly (MvPolynomial (Fin (r + 1)) S) N) (UT x η) :=
@@ -243,8 +294,8 @@ def twSub (M₀ : FinGradedSub (S := S) (x := x) Ω) :
 
 abbrev TwM (M₀ : FinGradedSub (S := S) (x := x) Ω) : Type w := ↥(twSub η M₀)
 
-variable {η} in
 
+variable {η} in
 def TwM.val {M₀ : FinGradedSub (S := S) (x := x) Ω} (m : TwM η M₀) : LaurUT Ω := UT.toL (m : UT x η)
 
 instance (M₀ : FinGradedSub (S := S) (x := x) Ω) : Module (MvPolynomial (Fin (r + 1)) S) (TwM η M₀) :=
@@ -280,8 +331,8 @@ variable {η} in
 theorem TwM.val_injective {M₀ : FinGradedSub (S := S) (x := x) Ω} :
     Function.Injective (TwM.val (η := η) (M₀ := M₀)) := fun _ _ h => Subtype.ext h
 
-variable {η} in
 
+variable {η} in
 def TwM.mk {M₀ : FinGradedSub (S := S) (x := x) Ω} (v : LaurUT Ω) (hv : IsTw η M₀ v) : TwM η M₀ :=
   ⟨UT.ofL v, hv⟩
 

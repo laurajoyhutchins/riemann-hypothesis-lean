@@ -1,38 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Geometry₂.NefRR
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionsDimZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsKodairaGeneric
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCoordCurveAlgebraic
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionsDimZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.IsSaturatedFirstCoordinateLine
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+
+@[expose] public section
 
 namespace GlobalTheory.CompanionTheory.Ar.Pub.NefRRModel
 
 open ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.ArakelovGeometry GroundTheory.Heights₂.Heights.HilbertSamuel Filter Topology
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.HeightsSet
 
-open ProjLine in
 
-theorem hyps_projLine :
-    IsArithVar (mCoordIdeal (ι := GlobalTheory (Fin 2)) y) (1 + 1) ∧ Birational (ι := GlobalTheory (Fin 2)) y ∧
-      NefOnGenericDeg (mCoordIdeal (ι := GlobalTheory (Fin 2)) y) (fun _ => 1) ∧
-      genDeg (mCoordIdeal (ι := GlobalTheory (Fin 2)) y) 1 (fun _ => 1) = 1 := by
-  refine ⟨isArithVar_y', birational_y, ?_, genDeg_y⟩
-  intro W hW hPW
-  rw [← IsArithVar.eq_of_le isArithVar_y' hW hPW, genDeg_y]
-  norm_num
-
-open ProjLine in
-
-theorem projLine_limit (h : NefRR) :
-    Tendsto (fun τ : ℕ => (Module.finrank ℚ (Submodule.span ℚ
-      (chartLatNm (ι := GlobalTheory (Fin 2)) y (fun _ => 1) τ : Set FnField)) : ℝ) / (τ : ℝ)) atTop (𝓝 1) := by
-  obtain ⟨h1, h2, h3, h4⟩ := hyps_projLine
-  have := (h _ _ _ y 1 _ h1 h2 h3).2
-  rw [h4] at this
-  simpa using this
-
-theorem genDeg_nonneg (h : NefRR) (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (Ω : Type) [Field Ω]
-    [CharZero Ω] (y : (Σ k, ι k) → Ω) (D : ℕ) (a : K → ℤ) (h1 : IsArithVar (mCoordIdeal y) (D + 1))
-    (h2 : Birational y) (h3 : NefOnGenericDeg (mCoordIdeal y) a) : 0 ≤ genDeg (mCoordIdeal y) D a := by
-  have := ge_of_tendsto' (h K ι Ω y D a h1 h2 h3).2 (b := 0) (fun τ => by positivity)
-  exact_mod_cast this
 
 section DimZero
 

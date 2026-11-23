@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open KaehlerDifferential GlobalTheory.CechDR GlobalTheory.PD GlobalTheory.WH GlobalTheory.W1 UpperTheory.Gal.productCup_of_system
 open scoped TensorProduct
 
@@ -17,7 +69,7 @@ private lemma UpperTheory.Gal.productCup_of_system.yb_val_add (hV : ValBasic) {L
   obtain ⟨-, ⟨ev, hev⟩, -, -⟩ := hV L B e
   obtain ⟨h1, rfl⟩ := (hev _ _).1 h
   obtain ⟨h2, rfl⟩ := (hev _ _).1 h'
-  exact (hev _ _).2 ⟨(loc B e).add_mem h1 h2, by rw [← map_add]; rfl⟩
+  exact (hev _ _).2 ⟨(loc B e).add_mem h1 h2, by rw [← map_add (f := _)]; rfl⟩
 
 private lemma UpperTheory.Gal.productCup_of_system.yb_val_sub (hV : ValBasic) {L : Type} [Field L] [Algebra ℂ L]
     (B : Subalgebra ℂ L) (e : B →ₐ[ℂ] ℂ) {v w : L} {a b : ℂ}
@@ -82,7 +134,7 @@ private lemma UpperTheory.Gal.productCup_of_system.yb_val_tensor (hV : ValBasic)
     have := UpperTheory.Gal.productCup_of_system.yb_val_mul hV _ e ha hb
     simpa [gS, Algebra.TensorProduct.lmul'_apply_tmul] using this
   | add a b ha hb =>
-    simpa [map_add] using UpperTheory.Gal.productCup_of_system.yb_val_add hV _ e ha hb
+    simpa [map_add (f := _)] using UpperTheory.Gal.productCup_of_system.yb_val_add hV _ e ha hb
 
 private lemma UpperTheory.Gal.productCup_of_system.yb_lmul_map (B : Subalgebra ℂ K) (t : B ⊗[ℂ] B) :
     Algebra.TensorProduct.lmul' ℂ (Algebra.TensorProduct.map B.val B.val t) =
@@ -90,7 +142,7 @@ private lemma UpperTheory.Gal.productCup_of_system.yb_lmul_map (B : Subalgebra �
   induction t using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp [Algebra.TensorProduct.lmul'_apply_tmul]
-  | add a b ha hb => simp [map_add, ha, hb]
+  | add a b ha hb => simp [map_add (f := _), ha, hb]
 
 private lemma UpperTheory.Gal.productCup_of_system.yb_val_diag (hV : ValBasic) (e : rB ℂ K' (xv x) {0} →ₐ[ℂ] ℂ)
     (w : rB ℂ K (xv x) {0} →ₐ[ℂ] ℂ)

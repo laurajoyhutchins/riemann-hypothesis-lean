@@ -1,12 +1,61 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsMMInv
-import Formalism.LocalToGlobal.InertKernelTheory.DefsBasis
-import Formalism.LocalToGlobal.InertKernelTheory.StatementCc
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.CurveIdealPrimeReduction
-import Formalism.LocalToGlobal.InertKernelTheory.StatementModel
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.FormalExponentialAgree
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.FirstGeometricConditionOfProperties
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsMMInv
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementCc
+public import Formalism.LocalToGlobal.InertKernelTheory.StatementModel
+public import Formalism.PeriodIntegrals.FglPhSplit
+public import Mathlib.RingTheory.PowerSeries.Exp
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.CurveIdealPrimeReduction
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.FormalExponentialAgree
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.IntBasis
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupCommon.ExpLog
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalGroupSplitting.ExpCongruenceExtendsToSum
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.AdditionIdentityOfSigmaFormulaUnit
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.BeConjOfNormHolds
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.FormalGroupLawFirstHalfHolds
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.LevelRestrictionOfGroupLawHolds
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.RetcutA
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.TestVectorMemSchwartzBruhat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,6 +93,7 @@ theorem expMv_sum {σ ι : Type} (s : Finset ι) (f : ι → MvPowerSeries σ �
   · simpa using (expMv_zero' (σ := σ) (p := p))
   · intro a s ha ih
     have h0 : MvPowerSeries.constantCoeff (∑ i ∈ s, f i) = 0 := by
+
       rw [map_sum]; exact Finset.sum_eq_zero fun i _ => hf i
     rw [Finset.sum_insert ha, Finset.prod_insert ha, expMv_add'' (hf a) h0, ih]
 
@@ -95,9 +145,9 @@ theorem add_eq_subst (hOk : g.Ok) {σ : Type} {a b : MvPowerSeries σ ℂ_[p]}
     MvPowerSeries.hasSubst_of_constantCoeff_zero (fun i => by fin_cases i <;> simpa)
   have hX : ∀ i : Fin 2, MvPowerSeries.constantCoeff (Xv i : MvPowerSeries (Fin 2) ℂ_[p]) = 0 := fun i => by simp
   have h0 : MvPowerSeries.constantCoeff (g.lg (Xv 0) + g.lg (Xv 1) : MvPowerSeries (Fin 2) ℂ_[p]) = 0 := by
-    rw [map_add, cc_lg g (hX 0), cc_lg g (hX 1), add_zero]
+    rw [map_add (f := _), cc_lg g (hX 0), cc_lg g (hX 1), add_zero]
   unfold G1.add G1.pt
-  rw [msubst_psubst h0 hs, ← MvPowerSeries.coe_substAlgHom hs, map_add, MvPowerSeries.coe_substAlgHom hs,
+  rw [msubst_psubst h0 hs, ← MvPowerSeries.coe_substAlgHom hs, map_add (f := _), MvPowerSeries.coe_substAlgHom hs,
     subst_lg g (hX 0) hs, subst_lg g (hX 1) hs, MvPowerSeries.subst_X hs, MvPowerSeries.subst_X hs]
   rfl
 
@@ -125,6 +175,7 @@ theorem lin_partial (hOk : g.Ok) {r : ℕ} (c : Fin r → ℂ_[p])
   have hT : ∀ t : Finset (Fin r),
       MvPowerSeries.constantCoeff (∑ j ∈ t, MvPowerSeries.C (c j) * g.lg (Xv j) : MvPowerSeries (Fin r) ℂ_[p]) = 0 := by
     intro t
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun j _ => by rw [map_mul, cc_lg g (hX j), mul_zero]
   refine Finset.induction_on s ?_ ?_
@@ -146,7 +197,7 @@ theorem lin_partial (hOk : g.Ok) {r : ℕ} (c : Fin r → ℂ_[p])
       unfold G1.mulBy
       rw [lg_pt g hOk (by rw [map_mul, cc_lg g (hX j), mul_zero])]
     rw [e]
-    refine ⟨cc_pt g hOk (by rw [map_add, cc_lg g hm0, cc_lg g ih.1, add_zero]), ?_⟩
+    refine ⟨cc_pt g hOk (by rw [map_add (f := _), cc_lg g hm0, cc_lg g ih.1, add_zero]), ?_⟩
     change IntegralMv (g.add _ _)
     rw [add_eq_subst g hOk hm0 ih.1]
     exact IntegralOrthonormalChange.integral_subst _ (fun i => by fin_cases i <;> simp [hm0, ih.1])
@@ -164,6 +215,7 @@ theorem lg_lin (hOk : g.Ok) {r : ℕ} (c : Fin r → ℂ_[p]) :
       ∑ j, MvPowerSeries.C (c j) * g.lg (Xv j : MvPowerSeries (Fin r) ℂ_[p]) := by
   unfold G1.lin
   refine lg_pt g hOk ?_
+
   rw [map_sum]
   exact Finset.sum_eq_zero fun j _ => by rw [map_mul, cc_lg g (by simp), mul_zero]
 
@@ -251,14 +303,17 @@ theorem core (D : D7) (g : G1 p) (hOk : g.Ok) (hp : p ≠ 2)
     have hPh : g.PhOn de = ∑ i : Fin r, g.phAt (S i) := rfl
     have hX0 : ∀ i : Fin r, MvPowerSeries.constantCoeff (Xv i : MvPowerSeries (Fin r) ℂ_[p]) = 0 := fun i => by simp
     have hsum0 : MvPowerSeries.constantCoeff (∑ i : Fin r, g.phAt (Xv i) : MvPowerSeries (Fin r) ℂ_[p]) = 0 := by
+
       rw [map_sum]; exact Finset.sum_eq_zero fun i _ => PowerSeries.constantCoeff_subst_eq_zero (hX0 i) _ (ph0 g)
     have hsumS : MvPowerSeries.subst S (∑ i : Fin r, g.phAt (Xv i) : MvPowerSeries (Fin r) ℂ_[p]) =
         ∑ i : Fin r, g.phAt (S i) := by
+
       rw [← MvPowerSeries.coe_substAlgHom hS, map_sum, MvPowerSeries.coe_substAlgHom hS]
       refine Finset.sum_congr rfl fun i _ => ?_
       unfold G1.phAt
       rw [msubst_psubst (hX0 i) hS, MvPowerSeries.subst_X hS]
     have hS0 : MvPowerSeries.constantCoeff (∑ i : Fin r, g.phAt (S i) : MvPowerSeries (Fin r) ℂ_[p]) = 0 := by
+
       rw [map_sum]; exact Finset.sum_eq_zero fun i _ => PowerSeries.constantCoeff_subst_eq_zero (hSI i).1 _ (ph0 g)
     obtain ⟨hG0, hGI⟩ := hG
     rw [hPh] at hG0 hGI

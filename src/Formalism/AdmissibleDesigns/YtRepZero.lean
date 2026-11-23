@@ -1,4 +1,54 @@
-import Formalism.AdmissibleDesigns.ContOfInjY
+module
+
+public import Formalism.AdmissibleDesigns.ContOfInjY
+public import Formalism.AdmissibleDesigns.TrCMemZ1D
+public import Formalism.WachLatticeTwists.CoprimeLiftBounds.FirstSummandRepresentation
+public import Formalism.AdmissibleDesigns.TensSubsingleton
+import Mathlib.Algebra.Module.Torsion.Prod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -90,8 +140,8 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
 abbrev ytVG : Representation LL G (TrV e (MK (O := O) (↥(Ymod r χ E) × O))) :=
   repL e (locRep (resRep (ytRep O r χ E) Dw)) eG.symm.toMonoidHom
 
-variable (Qp) in
 
+variable (Qp) in
 def ytG [Module.Finite O A] [NoZeroSMulDivisors O A] (hfd : FiniteDimensional LL (TrV e (MK (O := O) (↥(Ymod r χ E) × O))))
     (hcont : ∀ x, Continuous fun g => ytVG (e := e) r χ E Dw eG g x) : YtLat (G := G) (Qp := Qp) LL Ow :=
   haveI := finY (O := O) r χ E
@@ -99,10 +149,6 @@ def ytG [Module.Finite O A] [NoZeroSMulDivisors O A] (hfd : FiniteDimensional LL
   haveI := nzsdY (O := O) r χ E
   haveI := nzsd_prod (O := O) (N := ↥(Ymod r χ E))
   mkYt heO eG.symm.toMonoidHom Qp (resRep (ytRep O r χ E) Dw) (fun _ _ => rfl) hcont
-
-theorem ytG_ρ [Module.Finite O A] [NoZeroSMulDivisors O A] (hfd : FiniteDimensional LL (TrV e (MK (O := O) (↥(Ymod r χ E) × O))))
-    (hcont : ∀ x, Continuous fun g => ytVG (e := e) r χ E Dw eG g x) :
-    (ytG Qp heO r χ E Dw eG hfd hcont).ρ = ytVG (e := e) r χ E Dw eG := rfl
 
 theorem ytG_psi [Module.Finite O A] [NoZeroSMulDivisors O A] (hfd : FiniteDimensional LL (TrV e (MK (O := O) (↥(Ymod r χ E) × O))))
     (hcont : ∀ x, Continuous fun g => ytVG (e := e) r χ E Dw eG g x)

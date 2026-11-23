@@ -1,6 +1,56 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.Automorphisms.SplitCoeAlgebraMap
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIntegerUnitSplitPlaceConjugatePrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.AlgebraicWeights.IsAlgWeight
 import Formalism.LocalToGlobal.GaloisLevelStructure.DefsAut
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsIntegerUnitSplitPlaceConjugatePrime
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2
 
@@ -10,49 +60,9 @@ namespace GlobalTheory.SplitPlaceExt
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => NumberField.maximalRealSubfield L
-local notation3 "cc" => IsCMField.complexConj L
-
-theorem algHom_eq_or_conj {K : Type} [Field K] [Algebra L⁺ K] (i j : L →ₐ[L⁺] K) :
-    j = i ∨ ∀ x, j x = i (cc x) := by
-  obtain ⟨θ, hθ⟩ : ∃ θ : L, cc θ ≠ θ := by
-    by_contra h
-    push Not at h
-    exact IsCMField.complexConj_ne_one L (AlgEquiv.ext h)
-  obtain ⟨δ, hδ⟩ : ∃ δ : L, δ = θ - cc θ := ⟨_, rfl⟩
-  have hcδ : cc δ = -δ := by rw [hδ, map_sub, IsCMField.complexConj_apply_apply, neg_sub]
-  have hδ0 : δ ≠ 0 := by rw [hδ]; exact sub_ne_zero.mpr (Ne.symm hθ)
-  have hfix : ∀ y : L, cc y = y → j y = i y := by
-    intro y hy
-    have e : y = algebraMap L⁺ L ⟨y, (IsCMField.complexConj_eq_self_iff (K := L) _).mp hy⟩ := rfl
-    rw [e, AlgHom.commutes, AlgHom.commutes]
-  have hdec : ∀ x : L, ∃ a b : L, cc a = a ∧ cc b = b ∧ x = a + b * δ := by
-    intro x
-    refine ⟨(x + cc x) / 2, (x - cc x) / (2 * δ), ?_, ?_, ?_⟩
-    · rw [map_div₀, map_add, IsCMField.complexConj_apply_apply, map_ofNat, add_comm]
-    · rw [map_div₀, map_sub, IsCMField.complexConj_apply_apply, map_mul, map_ofNat, hcδ]
-      field_simp
-      ring
-    · field_simp
-      ring
-  have hsq : j δ * j δ = i δ * i δ := by
-    rw [← map_mul, ← map_mul]
-    apply hfix
-    rw [map_mul, hcδ, neg_mul_neg]
-  rcases mul_self_eq_mul_self_iff.mp hsq with h | h
-  · left
-    ext x
-    obtain ⟨a, b, ha, hb, rfl⟩ := hdec x
-    rw [map_add, map_add, map_mul, map_mul, hfix a ha, hfix b hb, h]
-  · right
-    intro x
-    obtain ⟨a, b, ha, hb, rfl⟩ := hdec x
-    rw [map_add, map_add, map_mul, map_mul, hfix a ha, hfix b hb, h, ha, hb, hcδ, map_add, map_mul,
-      map_neg]
 
 open NumberField IsDedekindDomain in
 variable {L : Type} [Field L] [NumberField L] [IsCMField L] in
-
 theorem _root_.GlobalTheory.SplitPlaceExt.eq_of_w_eq : ∀ (L : Type) [Field L] [NumberField L] [IsCMField L]
     (s s' : _root_.ReciprocityTheory.Aut.SplitPlace L), s'.w = s.w → s' = s := by
   intro L _ _ _ s s' h
@@ -62,7 +72,7 @@ theorem _root_.GlobalTheory.SplitPlaceExt.eq_of_w_eq : ∀ (L : Type) [Field L] 
   obtain rfl : v = v' := hv.symm
   have key : ∀ x : 𝓞 L, Valued.v (i' x) < 1 ↔ Valued.v (i x) < 1 := fun x =>
     Iff.of_eq (congrArg (fun P : HeightOneSpectrum (𝓞 L) => x ∈ P.asIdeal) h)
-  obtain ⟨e, he1, he2⟩ := _root_.GlobalTheory.SplitSep.exists_sep L ⟨v, i⟩
+  obtain ⟨e, he1, he2⟩ := _root_.GlobalTheory.SplitSep.exists_sep (L := L) ⟨v, i⟩
   set c := i.comp (IsCMField.complexConj L).toAlgHom with hc
   have hce : c e = i (IsCMField.complexConj L e) := rfl
   have hic : i ≠ c := by

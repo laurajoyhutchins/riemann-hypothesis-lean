@@ -1,12 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
-import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.UniformizationBaseChange
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+public import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.RigidPullbackIdentification
+public import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.UniformizationBaseChange
 import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsPullDegEquivApply
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsoEqOfMapsAlongSection
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.RigidifiedIsoRespectsCubeAndSymmetry
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.GlobalFnsHolds
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,40 +74,8 @@ theorem isGrpPullback_of_bc (bc : G' ≅ (Over.pullback (specOf φ)).obj G) (hbc
     IsGrpPullback G' G (specOf φ) (bc.hom.left ≫ pullback.fst G.hom (specOf φ)) :=
   ((isGrpPullback_of_iso bc).comp (isGrpPullback_pullback G (specOf φ))).congr (Category.id_comp _) rfl
 
-def toGrpPull (bc : G' ≅ (Over.pullback (specOf φ)).obj G) (hbc : IsMonHom bc.hom) : GrpPull φ G G' where
-  F := bc.hom.left ≫ pullback.fst G.hom (specOf φ)
-  cart := (isGrpPullback_of_bc bc hbc).1
-  F_one := PolBaseChange.eSec_comm (isGrpPullback_of_bc bc hbc)
-  F_mul := (isGrpPullback_iff (isGrpPullback_of_bc bc hbc).1).1 (isGrpPullback_of_bc bc hbc)
-
-omit [IsDomain R] [IsDomain R'] in
-theorem exists_toGrpPull_eq (p : GrpPull φ G G') :
-    ∃ (bc : G' ≅ (Over.pullback (specOf φ)).obj G) (hbc : IsMonHom bc.hom), toGrpPull bc hbc = p := by
-  obtain ⟨e, me, he⟩ := grpPullback_iso ((isGrpPullback_iff p.cart).2 p.F_mul)
-    (isGrpPullback_pullback G (specOf φ))
-  obtain ⟨F, cart, F₁, Fm⟩ := p
-  dsimp only at he
-  subst he
-  exact ⟨e, me, rfl⟩
-
-def grpPullEquiv (φ : R →+* R') (G : Over (Spec (CommRingCat.of R))) [GrpObj G]
-    (G' : Over (Spec (CommRingCat.of R'))) [GrpObj G'] :
-    {bc : G' ≅ (Over.pullback (specOf φ)).obj G // IsMonHom bc.hom} ≃ GrpPull φ G G' :=
-  Equiv.ofBijective (fun b => toGrpPull b.1 b.2)
-    ⟨fun b b' H => Subtype.ext (Iso.ext (Over.OverMorphism.ext (pullback.hom_ext (congrArg GrpPull.F H)
-      ((Over.w b.1.hom).trans (Over.w b'.1.hom).symm)))),
-     fun p => let ⟨bc, hbc, e⟩ := exists_toGrpPull_eq p; ⟨⟨bc, hbc⟩, e⟩⟩
 
 variable [IsCommMonObj G] [IsCommMonObj G']
-
-def rigPullEquiv (p : GrpPull φ G G') (L : RigLB G) (L' : RigLB G') :
-    {w : LB.Iso L'.L (L.L.pull p.F) // w.IsGen ∧
-      LB.Gen.Maps (LB.linCombIso w (K := PUnit) (fun _ => eSec G') (fun _ => 1)) L'.rig
-        (rigPullOf p.F (specOf φ) p.F_one L.L L.rig)} ≃ RigPull p L L' where
-  toFun w := ⟨w.1, w.2.1, (rig_iff _ _ p.F_one _ _ w.1 L.rig L'.rig).1 w.2.2⟩
-  invFun r := ⟨r.w, r.w_gen, (rig_iff _ _ p.F_one _ _ r.w L.rig L'.rig).2 r.w_rig⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
 
 variable {I : Ideal R} {I' : Ideal R'}
 

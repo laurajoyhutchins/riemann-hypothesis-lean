@@ -1,4 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.FormsFin
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.TraceFormulaEigenvalues.FormsFin
+public import Mathlib.Algebra.DirectSum.LinearMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open Module
 
@@ -55,7 +109,7 @@ private theorem trTheta_nil {Λ M : Type} [AddCommGroup M] [Module ℂ M] [Finit
           obtain ⟨y1, hy1, g1, hg1, rfl⟩ := Submodule.mem_sup.mp (hF hy)
           obtain ⟨y2, hy2, rfl⟩ := Submodule.mem_map.mp hy1
           refine ⟨y2, hy2, (n c ^ k) g1 + g, G.add_mem (powinv k g1 hg1) hg, ?_⟩
-          rw [map_add, show (n c ^ k) (n c y2) = (n c ^ (k + 1)) y2 by
+          rw [map_add (f := _), show (n c ^ k) (n c y2) = (n c ^ (k + 1)) y2 by
             rw [pow_succ, Module.End.mul_apply], add_assoc]
       obtain ⟨m, hm⟩ := hn c
       intro x hx
@@ -111,7 +165,7 @@ private theorem trTheta_ext {ι M : Type} [AddCommGroup M] [Module ℂ M] {V : �
   ext x
   have hx : x ∈ ⨆ i, V i := by rw [htop]; exact Submodule.mem_top
   exact Submodule.iSup_induction V (motive := fun x => f x = g x) hx (fun i y hy => h i y hy)
-    (by simp) (fun y z hy hz => by simp only [map_add, hy, hz])
+    (by simp) (fun y z hy hz => by simp only [map_add (f := _), hy, hz])
 
 private theorem trTheta_proj {ι M : Type} [AddCommGroup M] [Module ℂ M] {V : ι → Submodule ℂ M}
     (hind : iSupIndep V) (htop : ⨆ i, V i = ⊤) (i : ι) :
@@ -204,6 +258,7 @@ theorem UpperTheory.V.Z.Sym.Tf.trTheta :
   · intro a
     have decomp : u a * Θ = ∑ χ ∈ F, u a * Θ * P χ := by
       rw [← Finset.mul_sum, sumP, mul_one]
+
     rw [decomp, map_sum, Finset.sum_filter]
     refine Finset.sum_congr rfl fun χ hχ => ?_
     split_ifs with hfix
@@ -260,7 +315,7 @@ theorem UpperTheory.V.Z.Sym.Tf.trTheta :
           change P χ (Θ ((u b - χ b • (1 : End ℂ M)) y)) = (u (σ b) - χ (σ b) • (1 : End ℂ M)) (P χ (Θ y))
           rw [hP1 χ _ m1, hP1 χ _ m2]
           exact LinearMap.congr_fun hE y
-        rw [hEq, add_mul, map_add, smul_mul_assoc, one_mul, map_smul, smul_eq_mul,
+        rw [hEq, add_mul, map_add (f := _), smul_mul_assoc, one_mul, map_smul, smul_eq_mul,
           trTheta_nil N T σ hcN hnN hTN a, add_zero, mul_comm]
       · intro ψ _ hne
         have hz : (u a * Θ * P χ).restrict (hg ψ) = 0 := by

@@ -1,5 +1,68 @@
-import Mathlib
-import GroundTheory.Brauer.BaseChangeCSA
+module
+
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
+public import GroundTheory.Brauer.BaseChangeCSA
+import GroundTheory.Brauer.TensorSimple
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleModule.WedderburnArtin
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+public import Mathlib.RingTheory.SimpleModule.Isotypic
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -13,8 +76,9 @@ private lemma trace_restrictScalars_rat {F W : Type} [Field F] [NumberField F] [
   classical
   let b := Module.finBasis ℚ F
   let d := Module.finBasis F W
+
   rw [LinearMap.trace_eq_matrix_trace ℚ (b.smulTower d), LinearMap.trace_eq_matrix_trace F d,
-    Matrix.trace, Matrix.trace, map_sum, Fintype.sum_prod_type, Finset.sum_comm]
+  Matrix.trace, Matrix.trace, map_sum, Fintype.sum_prod_type, Finset.sum_comm]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [Algebra.trace_eq_matrix_trace b, Matrix.trace]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -73,7 +137,7 @@ private lemma embedding_trace_mulLeft_eq_mul_trace {F A : Type} [Field F] [Ring 
       rw [TensorProduct.comm_tmul]
       simp only [G, H, Algebra.TensorProduct.lift_tmul, AlgHom.restrictScalars_apply, ι, Algebra.ofId_apply]
       exact Algebra.commutes z _
-    | add x y hx hy => simp [map_add, hx, hy]
+    | add x y hx hy => simp [map_add (f := _), hx, hy]
   have hG : Function.Injective G := by
     intro x y hxy
     rw [hGH, hGH] at hxy
@@ -99,7 +163,7 @@ private lemma embedding_trace_mulLeft_eq_mul_trace {F A : Type} [Field F] [Ring 
       simp only [G, Algebra.TensorProduct.lift_tmul, ι, Algebra.ofId_apply, LinearMap.mulLeft_apply]
       show algebraMap ℂ _ z * φ (c * a) = φ c * (algebraMap ℂ _ z * φ a)
       rw [map_mul, ← mul_assoc, ← mul_assoc, Algebra.commutes z (φ c)]
-    | add x y hx hy => simp [map_add, hx, hy, mul_add]
+    | add x y hx hy => simp [map_add (f := _), hx, hy, mul_add]
   rw [← trace_mulLeft_matrix, ← hconj, LinearMap.trace_conj', LinearMap.trace_baseChange]
   rfl
 
@@ -124,8 +188,8 @@ set_option autoImplicit false in
 private lemma trace_and_finrank_of_linearEquiv_pi {A M S : Type} [Ring A] [Algebra ℚ A] [AddCommGroup M]
     [Module A M] [Module ℚ M] [IsScalarTower ℚ A M] [AddCommGroup S] [Module A S] [Module ℚ S]
     [IsScalarTower ℚ A S] [FiniteDimensional ℚ S] (k : ℕ) (e : M ≃ₗ[A] (Fin k → S)) (c : A) :
-    LinearMap.trace ℚ M (DistribMulAction.toLinearMap ℚ M c) =
-        k * LinearMap.trace ℚ S (DistribMulAction.toLinearMap ℚ S c) ∧
+    LinearMap.trace ℚ M (DistribSMul.toLinearMap ℚ M c) =
+        k * LinearMap.trace ℚ S (DistribSMul.toLinearMap ℚ S c) ∧
       Module.finrank ℚ M = k * Module.finrank ℚ S := by
   let e' : M ≃ₗ[ℚ] (Fin k → S) := e.restrictScalars ℚ
   refine ⟨?_, ?_⟩
@@ -142,8 +206,8 @@ set_option autoImplicit false in
 private lemma trace_mul_finrank_eq_finrank_mul_trace {A M : Type} [Ring A] [Algebra ℚ A] [FiniteDimensional ℚ A]
     [IsSimpleRing A] [AddCommGroup M] [Module A M] [Module ℚ M] [IsScalarTower ℚ A M]
     [FiniteDimensional ℚ M] (c : A) :
-    LinearMap.trace ℚ M (DistribMulAction.toLinearMap ℚ M c) * Module.finrank ℚ A =
-      Module.finrank ℚ M * LinearMap.trace ℚ A (DistribMulAction.toLinearMap ℚ A c) := by
+    LinearMap.trace ℚ M (DistribSMul.toLinearMap ℚ M c) * Module.finrank ℚ A =
+      Module.finrank ℚ M * LinearMap.trace ℚ A (DistribSMul.toLinearMap ℚ A c) := by
   haveI : IsArtinianRing A := IsArtinianRing.of_finite ℚ A
   haveI : IsSemisimpleRing A := (IsSimpleRing.isSemisimpleRing_iff_isArtinianRing (R := A)).mpr inferInstance
   haveI : Module.Finite A M := Module.Finite.of_restrictScalars_finite ℚ A M
@@ -171,8 +235,8 @@ private lemma trace_mul_finrank_eq_finrank_mul_trace {A M : Type} [Ring A] [Alge
   push_cast
   ring
 
-set_option autoImplicit false in
 
+set_option autoImplicit false in
 theorem _root_.GlobalTheory.QTrace.q_trace : ∀ {F A V : Type} [Field F] [NumberField F] [Ring A] [Algebra F A] [FiniteDimensional F A] [Algebra.IsCentral F A]
     [IsSimpleRing A] [AddCommGroup V] [Module ℚ V] [FiniteDimensional ℚ V] (n : ℕ), Module.finrank F A = n ^ 2 →
     ∀ (ρ : A →+* Module.End ℚ V) (ψ : (F →+* ℂ) → (A →+* Matrix (Fin n) (Fin n) ℂ)),
@@ -195,8 +259,8 @@ theorem _root_.GlobalTheory.QTrace.q_trace : ∀ {F A V : Type} [Field F] [Numbe
   haveI : IsScalarTower ℚ A V := ⟨fun q a v => by
     show ρ (q • a) v = q • ρ a v
     rw [Algebra.smul_def, map_mul, Module.End.mul_apply, hρq, Module.algebraMap_end_apply]⟩
-  have hV : LinearMap.trace ℚ V (DistribMulAction.toLinearMap ℚ V c) = LinearMap.trace ℚ V (ρ c) := rfl
-  have hA : LinearMap.trace ℚ A (DistribMulAction.toLinearMap ℚ A c) =
+  have hV : LinearMap.trace ℚ V (DistribSMul.toLinearMap ℚ V c) = LinearMap.trace ℚ V (ρ c) := rfl
+  have hA : LinearMap.trace ℚ A (DistribSMul.toLinearMap ℚ A c) =
       Algebra.trace ℚ F (LinearMap.trace F A (LinearMap.mulLeft F c)) := by
     rw [← trace_restrictScalars_rat]
     rfl

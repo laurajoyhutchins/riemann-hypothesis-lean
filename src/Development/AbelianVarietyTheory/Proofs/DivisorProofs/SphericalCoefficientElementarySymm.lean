@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisOfRegularForms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisOfRegularForms
+public import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+public import Formalism.SatakeDualWeyl.StatementE
+public import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsDedekindDomain NumberField Formalism.UG Formalism.IndefR.Mult GlobalTheory.SphPar Polynomial
 
@@ -24,14 +65,6 @@ theorem diagonal_dualLab_splitLab {L : Type} [Field L] (n k : ℕ) (ϖ : L) :
   funext i
   rw [dualLab_splitLab_getD]
   split_ifs <;> simp
-
-theorem exists_isUnifV (E : Type) [Field E] [NumberField E] (P : HeightOneSpectrum (𝓞 E)) :
-    ∃ ϖ : P.adicCompletion E, IsUnifV E P ϖ := by
-  obtain ⟨π, hπ⟩ := P.valuation_exists_uniformizer E
-  refine ⟨(π : P.adicCompletion E), ?_⟩
-  unfold IsUnifV
-  rw [HeightOneSpectrum.valuedAdicCompletion_eq_valuation', hπ]
-  rfl
 
 theorem Tj_eq_of_isUnifV (E : Type) [Field E] [NumberField E] (P : HeightOneSpectrum (𝓞 E)) (n k : ℕ)
     {ϖ ϖ' : P.adicCompletion E} (h : IsUnifV E P ϖ) (h' : IsUnifV E P ϖ') :
@@ -63,30 +96,5 @@ theorem divInd_dualLab_splitLab (E : Type) [Field E] [NumberField E] (P : Height
     refine hg ⟨ϖ, h, ?_⟩
     rw [diagonal_dualLab_splitLab]
     exact hab
-
-theorem parGL_dualLab_splitLab (E : Type) [Field E] [NumberField E] (P : HeightOneSpectrum (𝓞 E)) (n : ℕ)
-    (lab : List ℤ → Prop) (c : List ℤ → ℂ) (s : Multiset ℂ) (k : ℕ) (hs : ParGL P n lab c s) (hk : k ≤ n)
-    (hl : lab (dualLab (splitLab n k))) :
-    c (dualLab (splitLab n k)) = (qV E P : ℂ) ^ (((k : ℂ) * ((n : ℂ) - k)) / 2) * s.esymm k := by
-  obtain ⟨hcard, h0, hpar⟩ := hs
-  obtain ⟨α, hα⟩ : ∃ α : Fin n → ℂ, Finset.univ.val.map α = s := by
-    induction s using Quotient.inductionOn with
-    | h l =>
-      have hl' : l.length = n := by simpa using hcard
-      subst hl'
-      refine ⟨l.get, ?_⟩
-      rw [Fin.univ_val_map, List.ofFn_get]
-      rfl
-  have hne : ∀ i, α i ≠ 0 := fun i e => h0 (by
-    rw [← hα]; exact Multiset.mem_map.2 ⟨i, Finset.mem_univ_val i, e⟩)
-  obtain ⟨φ, hφ, h1, -⟩ := Final.SphericalExists E P n α hne
-  obtain ⟨ϖ, hϖ⟩ := exists_isUnifV E P
-  have hO : ϖ ∈ Ov E P := (HeightOneSpectrum.mem_adicCompletionIntegers _ _ _).2 (by
-    unfold IsUnifV at hϖ
-    rw [hϖ, ← WithZero.coe_one, WithZero.coe_le_coe, ← ofAdd_zero, Multiplicative.ofAdd_le]
-    omega)
-  have h2 := hpar α hα φ hφ _ hl
-  rw [divInd_dualLab_splitLab E P n k hϖ, Final.SatakeTj E P n ϖ hO hϖ α hne φ hφ k hk, hα] at h2
-  simpa [h1] using h2.symm
 
 end GlobalTheory.SphPar

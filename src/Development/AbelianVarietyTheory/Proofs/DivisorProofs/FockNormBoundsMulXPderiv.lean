@@ -1,6 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+
+@[expose] public section
+
 open Formalism.BasicNotions.TH Formalism.MainNotions.SchurIrreducible GlobalTheory.FockAlg MvPolynomial
 
 noncomputable section
@@ -9,6 +55,7 @@ namespace GlobalTheory.FockNormBound
 theorem norm_sum_sq_of_orth {κ H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     (s : Finset κ) (v : κ → H) (h : ∀ a b, a ≠ b → inner ℂ (v a) (v b) = 0) :
     ‖∑ a ∈ s, v a‖ ^ 2 = ∑ a ∈ s, ‖v a‖ ^ 2 := by
+
   rw [← inner_self_eq_norm_sq (𝕜 := ℂ), sum_inner, map_sum]
   refine Finset.sum_congr rfl fun a ha => ?_
   rw [inner_sum, Finset.sum_eq_single a, inner_self_eq_norm_sq]
@@ -47,6 +94,7 @@ theorem norm_comb (h : IsFockIP ι) (s : Finset (σ →₀ ℕ)) (c : (σ →₀
     ‖ι (∑ a ∈ s, monomial (g a) (c a))‖ ^ 2 = ∑ a ∈ s, ‖c a‖ ^ 2 * mfact (g a) := by
   have e : ∀ a, ι (monomial (g a) (c a)) = c a • ι (monomial (g a) 1) := by
     intro a; rw [← map_smul, smul_monomial]; simp
+
   rw [map_sum, norm_sum_sq_of_orth]
   · refine Finset.sum_congr rfl fun a _ => ?_
     rw [e, norm_smul, mul_pow, norm_mono h]
@@ -67,16 +115,17 @@ theorem fock_norm_bounds (σ : Type) [DecidableEq σ] (H : Type) [NormedAddCommG
     intro a ha
     have h1 : a i ≤ P.degreeOf i := monomial_le_degreeOf i ha
     exact_mod_cast h1.trans ((degreeOf_le_totalDegree P i).trans hP)
-  have h0 : ‖ι P‖ ^ 2 = ∑ a ∈ P.support, ‖coeff a P‖ ^ 2 * mfact a := by
+  have h0 : ‖ι P‖ ^ 2 = ∑ a ∈ P.support, ‖AddMonoidAlgebra.coeff P a‖ ^ 2 * mfact a := by
     conv_lhs => rw [P.as_sum]
     exact norm_comb h _ _ id (fun a b hab _ _ => hab)
-  have h1 : X i * P = ∑ a ∈ P.support, monomial (a + Finsupp.single i 1) (coeff a P) := by
+  have h1 : X i * P = ∑ a ∈ P.support, monomial (a + Finsupp.single i 1) (AddMonoidAlgebra.coeff P a) := by
     conv_lhs => rw [P.as_sum]
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [X, monomial_mul, add_comm, one_mul]
-  have h2 : pderiv i P = ∑ a ∈ P.support, monomial (a - Finsupp.single i 1) (coeff a P * a i) := by
+  have h2 : pderiv i P = ∑ a ∈ P.support, monomial (a - Finsupp.single i 1) (AddMonoidAlgebra.coeff P a * a i) := by
     conv_lhs => rw [P.as_sum]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [pderiv_monomial]
@@ -89,11 +138,11 @@ theorem fock_norm_bounds (σ : Type) [DecidableEq σ] (H : Type) [NormedAddCommG
     refine Finset.sum_le_sum fun a ha => ?_
     rw [mfact_add]
     have := hd a ha
-    have h3 : 0 ≤ ‖coeff a P‖ ^ 2 * mfact a := mul_nonneg (by positivity) (mfact_nonneg a)
+    have h3 : 0 ≤ ‖AddMonoidAlgebra.coeff P a‖ ^ 2 * mfact a := mul_nonneg (by positivity) (mfact_nonneg a)
     nlinarith
   · rw [h2, norm_comb h, h0, Finset.mul_sum]
     · refine Finset.sum_le_sum fun a ha => ?_
-      have h3 : 0 ≤ ‖coeff a P‖ ^ 2 * mfact a := mul_nonneg (by positivity) (mfact_nonneg a)
+      have h3 : 0 ≤ ‖AddMonoidAlgebra.coeff P a‖ ^ 2 * mfact a := mul_nonneg (by positivity) (mfact_nonneg a)
       by_cases hz : a i = 0
       · simp only [hz, Nat.cast_zero, mul_zero, norm_zero, ne_eq, OfNat.ofNat_ne_zero,
           not_false_eq_true, zero_pow, zero_mul]
@@ -106,9 +155,9 @@ theorem fock_norm_bounds (σ : Type) [DecidableEq σ] (H : Type) [NormedAddCommG
         exact_mod_cast this
       rw [h5] at h4
       rw [norm_mul, Complex.norm_natCast]
-      calc (‖coeff a P‖ * a i) ^ 2 * mfact (a - Finsupp.single i 1)
-          = a i * (‖coeff a P‖ ^ 2 * mfact a) := by rw [h4]; ring
-        _ ≤ d * (‖coeff a P‖ ^ 2 * mfact a) := mul_le_mul_of_nonneg_right (hd a ha) h3
+      calc (‖AddMonoidAlgebra.coeff P a‖ * a i) ^ 2 * mfact (a - Finsupp.single i 1)
+          = a i * (‖AddMonoidAlgebra.coeff P a‖ ^ 2 * mfact a) := by rw [h4]; ring
+        _ ≤ d * (‖AddMonoidAlgebra.coeff P a‖ ^ 2 * mfact a) := mul_le_mul_of_nonneg_right (hd a ha) h3
     · intro a b hab ha hb hh
       have ha' : a i ≠ 0 := fun z => ha (by simp [z])
       have hb' : b i ≠ 0 := fun z => hb (by simp [z])

@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ProjectiveAutomorphicHecke.MapWopWmap
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LatticeDataThicknessBound
-import Development.AbelianVarietyTheory.Definitions.Divisors.EntireEqOfHalfPlane
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DefiniteUnitaryRealApproxAndFiniteInfiniteSplit
-import GroundTheory.GlobalFields.Adele.BaseChange.FiniteMap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceUnitaryLocalPointsEquivGL
+public import GroundTheory.GlobalFields.Adele.BaseChange.FiniteMap
+public import Development.AbelianVarietyTheory.Statements.EllipticCurveLevels.ClosedAtLConclusionOfMem
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteUnitaryClassSetFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,22 +117,22 @@ def rat : Gam0 E n →* GUf E n :=
         by_cases hij : i = j <;> simp [hij, Matrix.one_apply]
       exact (congrArg (· * _) e1).trans (h'.trans e2.symm)
 
-def ofU : finU E n →* GUf E n :=
-  ((((GeneralLinearGroup.map (pFin E)).comp (UA E n).subtype).comp (finU E n).subtype).prod 1).codRestrict _ fun u => by
+def ofU : finU (E := E) (n := n) →* GUf E n :=
+  ((((GeneralLinearGroup.map (pFin E)).comp (UA E n).subtype).comp (finU (E := E) (n := n)).subtype).prod 1).codRestrict _ fun u => by
     refine mem_Sim.2 ?_
     have h := GlobalTheory.DefU.ClassFin.cT_pFin u.1
     exact h.trans (by simp)
 
-@[simp] theorem sim_ofU (u : finU E n) : sim (ofU u) = 1 := rfl
+@[simp] theorem sim_ofU (u : finU (E := E) (n := n)) : sim (ofU u) = 1 := rfl
 
-@[simp] theorem comp_ofU (w : Plc E) (u : finU E n) : comp w (ofU u) = cLoc w u.1 := rfl
+@[simp] theorem comp_ofU (w : Plc E) (u : finU (E := E) (n := n)) : comp w (ofU u) = cLoc w u.1 := rfl
 
 def locE {w : Plc E} (hw : IsSplitAt w) : locU n w ≃ₜ* GL (Fin n) (w.adicCompletion E) := (GlobalTheory.locU_equiv_GL E n w hw).choose
 
 theorem locE_apply {w : Plc E} (hw : IsSplitAt w) (x : locU n w) : locE hw x = cLoc w x.1 := (GlobalTheory.locU_equiv_GL E n w hw).choose_spec x
 
-def locF {w : Plc E} (hw : IsSplitAt w) : GL (Fin n) (w.adicCompletion E) →* finU E n :=
-  (Subgroup.inclusion (inf_le_left : locU n w ≤ finU E n)).comp (locE hw).symm.toMulEquiv.toMonoidHom
+def locF {w : Plc E} (hw : IsSplitAt w) : GL (Fin n) (w.adicCompletion E) →* finU (E := E) (n := n) :=
+  (Subgroup.inclusion (inf_le_left : locU n w ≤ finU (E := E) (n := n))).comp (locE hw).symm.toMulEquiv.toMonoidHom
 
 theorem locF_mem {w : Plc E} (hw : IsSplitAt w) (x : GL (Fin n) (w.adicCompletion E)) : (locF hw x).1 ∈ locU n w :=
   ((locE hw).symm x).2
@@ -124,10 +164,10 @@ def ZU : Subgroup AfQˣ where
     rwa [map_mul, ha v, one_mul] at h
 
 def lev (S : Finset (Plc E)) (Kw : ∀ w : Plc E, Subgroup (GL (Fin n) (w.adicCompletion E))) : Subgroup (GUf E n) :=
-  ZU.comap sim ⊓ (⨅ w ∈ S, (Kw w).comap (comp w)) ⊓ ⨅ (w : Plc E) (_ : w ∉ S ∧ cj w ∉ S), (KGL w n).comap (comp w)
+  ZU.comap sim ⊓ (⨅ w ∈ S, (Kw w).comap (comp w)) ⊓ ⨅ (w : Plc E) (_ : w ∉ S ∧ cj w ∉ S), (KGL w (n := n)).comap (comp w)
 
 theorem mem_lev {S : Finset (Plc E)} {Kw : ∀ w : Plc E, Subgroup (GL (Fin n) (w.adicCompletion E))} {k : GUf E n} :
-    k ∈ lev S Kw ↔ sim k ∈ ZU ∧ (∀ w ∈ S, comp w k ∈ Kw w) ∧ ∀ w, w ∉ S → cj w ∉ S → comp w k ∈ KGL w n := by
+    k ∈ lev S Kw ↔ sim k ∈ ZU ∧ (∀ w ∈ S, comp w k ∈ Kw w) ∧ ∀ w, w ∉ S → cj w ∉ S → comp w k ∈ KGL w (n := n) := by
   simp only [lev, Subgroup.mem_inf, Subgroup.mem_iInf, Subgroup.mem_comap, and_assoc, and_imp]
 
 def embAll (E : Type) [Field E] (n : ℕ) : GL (Fin n) E →* (InfinitePlace E → GL (Fin n) ℂ) :=
@@ -150,8 +190,8 @@ def IsCen (x : E) (w : Plc E) (z : GUf E n) : Prop :=
   ∀ u : Plc E, (SameK x (cj u) w → (comp u z).val = ((Ideal.absNorm w.asIdeal : ℕ) : u.adicCompletion E) • (1 : Matrix (Fin n) (Fin n) _)) ∧
     (¬ SameK x (cj u) w → comp u z = 1)
 
-open Classical in
 
+open Classical in
 def mOf (x : E) (W : Wt E n) (J : ℤ) (φ : E →+* ℂ) : ℤ :=
   J - ∑ v : InfinitePlace E, if v.embedding x = -φ x then ∑ i, (W v).w i else 0
 

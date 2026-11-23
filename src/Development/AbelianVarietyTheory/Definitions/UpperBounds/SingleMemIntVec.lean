@@ -1,6 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsIntegralCc
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsIntegralCc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR.Inst
 open scoped ComplexConjugate ComplexOrder Matrix
@@ -9,10 +56,10 @@ namespace GlobalTheory.Up.Definite
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
 
+
 open NumberField in
 open scoped ComplexConjugate ComplexOrder Matrix in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} in
-
 theorem _root_.GlobalTheory.Up.Definite.herm_one (x y : Fin r → E) :
     _root_.ReciprocityTheory.ChartRestriction.G.FD.herm (1 : Matrix (Fin r) (Fin r) E) x y = ∑ a, x a * _root_.ReciprocityTheory.ChartRestriction.G.FD.cc (y a) := by
   unfold _root_.ReciprocityTheory.ChartRestriction.G.FD.herm
@@ -23,12 +70,13 @@ theorem _root_.GlobalTheory.Up.Definite.herm_one (x y : Fin r → E) :
     simp [Matrix.one_apply, Ne.symm hb]
   · simp
 
+
 open NumberField in
 open scoped ComplexConjugate ComplexOrder Matrix in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} in
-
 theorem _root_.GlobalTheory.Up.Definite.map_herm_one_self (φ : E →+* ℂ) (x : Fin r → E) :
     φ (_root_.ReciprocityTheory.ChartRestriction.G.FD.herm (1 : Matrix (Fin r) (Fin r) E) x x) = ((∑ a, ‖φ (x a)‖ ^ 2 : ℝ) : ℂ) := by
+
   rw [_root_.GlobalTheory.Up.Definite.herm_one, map_sum]
   push_cast
   refine Finset.sum_congr rfl fun a _ => ?_
@@ -36,15 +84,15 @@ theorem _root_.GlobalTheory.Up.Definite.map_herm_one_self (φ : E →+* ℂ) (x 
   push_cast
   rfl
 
-variable (E r) in
 
+variable (E r) in
 def intVec : Submodule (𝓞 E) (Fin r → E) := Submodule.pi Set.univ fun _ => (1 : Submodule (𝓞 E) E)
+
 
 open NumberField in
 open scoped ComplexConjugate ComplexOrder Matrix in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} in
 omit [NumberField E] [IsCMField E] in
-
 theorem _root_.GlobalTheory.Up.Definite.mem_intVec (x : Fin r → E) :
     x ∈ _root_.GlobalTheory.Up.Definite.intVec E r ↔ ∀ a, IsIntegral ℤ (x a) := by
   simp only [_root_.GlobalTheory.Up.Definite.intVec, Submodule.mem_pi, Set.mem_univ, true_implies,
@@ -54,11 +102,11 @@ theorem _root_.GlobalTheory.Up.Definite.mem_intVec (x : Fin r → E) :
   rw [← hy]
   exact y.isIntegral_coe
 
+
 open NumberField in
 open scoped ComplexConjugate ComplexOrder Matrix in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} in
 omit [NumberField E] [IsCMField E] in
-
 theorem _root_.GlobalTheory.Up.Definite.single_mem_intVec (b : Fin r) :
     (Pi.single b 1 : Fin r → E) ∈ _root_.GlobalTheory.Up.Definite.intVec E r := by
   rw [_root_.GlobalTheory.Up.Definite.mem_intVec]
@@ -87,18 +135,18 @@ private theorem finite_GL_of_scaled_entries_integral_bounded (c : E) (hc : c ≠
   simp only [Set.mem_preimage, Set.mem_pi, Set.mem_univ, true_implies, Set.mem_setOf_eq]
   exact fun a b => hγ a b
 
+
 open NumberField in
 open scoped ComplexConjugate ComplexOrder Matrix in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} in
 omit [IsCMField E] in
-
 theorem _root_.GlobalTheory.Up.Definite.finite_small :
     {γ : GL (Fin r) E | ∀ a b, IsIntegral ℤ ((γ : Matrix (Fin r) (Fin r) E) a b) ∧
       ∀ φ : E →+* ℂ, ‖φ ((γ : Matrix (Fin r) (Fin r) E) a b)‖ ≤ 1}.Finite := by
   simpa using finite_GL_of_scaled_entries_integral_bounded (r := r) (1 : E) one_ne_zero 1
 
-variable (E r) in
 
+variable (E r) in
 noncomputable def data : Data E r where
   Ψ := (inhab (E := E)).Ψ
   cmType := inhab.cmType
@@ -174,48 +222,5 @@ noncomputable def data : Data E r where
     ext a b
     simp [transvMat, hξ, Matrix.one_apply]
 
-theorem gram_one (τ : E →+* ℂ) (x : Matrix (Fin r) (Fin r) ℂ) :
-    gram τ (1 : Matrix (Fin r) (Fin r) E) x = (x.map conj)ᴴ * x.map conj := by
-  ext a b
-  simp [gram, hermC, col, Matrix.one_apply, apply_ite, Matrix.mul_apply]
-
-theorem mem_dom (x : Frame (data E r).Ψ r) : x ∈ (data E r).dom ↔ ∀ τ, (mat x τ).det ≠ 0 := by
-  refine ⟨fun h τ => (h τ).1, fun h τ => ⟨h τ, fun i => ?_⟩⟩
-  have hp : psgn r i = 1 := by
-    refine Finset.prod_eq_one fun a ha => ?_
-    have := Finset.mem_range.mp ha
-    have := i.isLt
-    exact if_pos (by omega)
-  have hd : ((mat x τ).map conj).det ≠ 0 := by
-    rw [← RingHom.mapMatrix_apply, ← RingHom.map_det]
-    simpa using h τ
-  have hpd : (gram τ.1 (1 : Matrix (Fin r) (Fin r) E) (mat x τ)).PosDef := by
-    rw [gram_one]
-    exact Matrix.PosDef.conjTranspose_mul_self _
-      (Matrix.mulVec_injective_iff_isUnit.mpr ((Matrix.isUnit_iff_isUnit_det _).mpr hd.isUnit))
-  have := (hpd.submatrix (Fin.castLE_injective (Nat.le_of_lt_succ i.isLt))).det_pos
-  change 0 < psgn r i * (lminor (gram τ.1 (1 : Matrix (Fin r) (Fin r) E) (mat x τ)) i).re
-  rw [hp, one_mul]
-  exact (Complex.lt_def.mp this).1
-
-omit [NumberField E] [IsCMField E] in
-
-theorem lact_one {Ψ : Finset (E →+* ℂ)} (x : Frame Ψ r) : lact 1 x = x := by
-  funext τ
-  simp only [lact, Units.val_one, Matrix.map_one _ (map_zero _) (map_one _), Matrix.one_mul]
-  rfl
-
-theorem card_cmType (X : Data E r) (h : Module.finrank ℚ E = 2) : Fintype.card X.Ψ = 1 := by
-  classical
-  have hc : Fintype.card (E →+* ℂ) = 2 := by rw [Embeddings.card, h]
-  have hb : X.Ψ.card = X.Ψᶜ.card := by
-    refine Finset.card_bij (fun τ _ => ComplexEmbedding.conjugate τ)
-      (fun τ hτ => Finset.mem_compl.mpr ((X.cmType τ).mp hτ)) (fun _ _ _ _ h => star_injective h)
-      fun τ hτ => ⟨ComplexEmbedding.conjugate τ, (X.cmType _).mpr ?_, star_star τ⟩
-    rw [show ComplexEmbedding.conjugate (ComplexEmbedding.conjugate τ) = τ from star_star τ]
-    exact Finset.mem_compl.mp hτ
-  have := X.Ψ.card_add_card_compl
-  rw [Fintype.card_coe]
-  omega
 
 end GlobalTheory.Up.Definite

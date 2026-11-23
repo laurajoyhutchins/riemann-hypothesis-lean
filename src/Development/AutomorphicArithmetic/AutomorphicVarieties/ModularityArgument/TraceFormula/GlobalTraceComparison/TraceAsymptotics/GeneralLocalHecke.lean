@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TraceOfNotFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SupportOutFinite
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDimensionalFixedOpenSubgroupGLw
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.TraceAsymptotics.SplitLineAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDimensionalFixedOpenSubgroupGLw
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SupportOutFinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TraceOfNotFinite
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain Matrix Polynomial Filter Topology
@@ -93,12 +138,12 @@ private theorem blk_zero {n : ℕ} (w : Pl E) (g : GLw n w) (m : GLw 0 w) (X : M
   have key : ∀ (M : Matrix (Fin n) (Fin n) (w.adicCompletion E)), M = g.val →
       (if hM : IsUnit M then hM.unit else (1 : GLw n w)) = g := by
     rintro _ rfl
-    rw [dif_pos g.isUnit]
+    rw [dite_eq_left g.isUnit]
     exact Units.ext rfl
   exact key _ hM
 
 private theorem constant_term_parabolic_average {n : ℕ} (w : Pl E) (hw : IsSplitAt w) (μ : HChar E) (f : ∀ w : Pl E, GLw n w → ℂ) (g : GLw n w) :
-    ct0 μ (Nat.add_zero n) f w (g, 1) = avg fun k : KGL w n => f w ((k : GLw n w)⁻¹ * g * k) := by
+    ct0 μ (Nat.add_zero n) f w (g, 1) = avg fun k : KGL w (n := n) => f w ((k : GLw n w)⁻¹ * g * k) := by
   haveI : Subsingleton (Multiplicative (Matrix (Fin n) (Fin 0) (w.adicCompletion E))) :=
     ⟨fun a b => Multiplicative.toAdd.injective (by ext i j; exact j.elim0)⟩
   have hU : ∀ y : GLw n w, y ∈ UL n w := fun y => by
@@ -107,7 +152,7 @@ private theorem constant_term_parabolic_average {n : ℕ} (w : Pl E) (hw : IsSpl
     trivial
   have hs : ∀ y : GLw n w, (toSub (UL n w) y : GLw n w) = y := fun y => by
     unfold toSub
-    rw [dif_pos (hU y)]
+    rw [dite_eq_left (hU y)]
   unfold ct0 ctMu ct
   rw [hint_sub]
   simp only [blk_zero, hs]
@@ -126,7 +171,7 @@ theorem trAvg : TrAvg := by
   have hfN : IsHecke N (f w) := ⟨hH.1, fun k hk x => hH.2 k (hNK₀ hk) x⟩
   obtain ⟨hFN, -, -, htr⟩ := GlobalTheory.ConjAvg.conjAvg E n w τ.V τ.ρ N hNo hNK hNn (f w) hfN
   have hct : (fun g => ct0 μ (Nat.add_zero n) f w (g, 1)) =
-      fun g => avg fun k : KGL w n => f w ((k : GLw n w)⁻¹ * g * k) :=
+      fun g => avg fun k : KGL w (n := n) => f w ((k : GLw n w)⁻¹ * g * k) :=
     funext fun g => constant_term_parabolic_average w hw μ f g
   rw [hct, trc_eq τ.ρ _ N hKc hNo hNK hfd _ hFN, trc_eq τ.ρ _ N hKc hNo hNK hfd _ hfN, htr]
 

@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfC
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +104,7 @@ theorem baseChange_mem_span {ι : Type} (v : ι → (VS D).V) {x : (VS D).V}
   induction hx using Submodule.span_induction with
   | mem x hx => obtain ⟨i, rfl⟩ := hx; exact Submodule.subset_span ⟨i, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul e x _ hx => rw [baseChange_smul₂]; exact Submodule.smul_mem _ _ hx
 
 theorem mem_orthogonal_frame_iff (u v : Fin (D.R.rS + 1) → Vp D p) (w : Vp D p) :
@@ -97,7 +137,7 @@ theorem scalar_frame_w_zero_exists (Λ : Submodule (𝓞 D.host.E) (VS D).V) (f 
     conv_lhs => rw [vp_eq_sum p w]
     rw [hU, hHh, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [← smul_add, ← map_add, add_sub_cancel]
+    rw [← smul_add, ← map_add (f := _), add_sub_cancel]
   have hHperp : ∀ i, (locH Z p).h Hh (baseChange₂ D p (Sum.elim f g1 i)) = 0 := by
     intro i
     rw [hHh, h_sum_left]
@@ -153,6 +193,7 @@ theorem scalar_frame_w_zero_exists (Λ : Submodule (𝓞 D.host.E) (VS D).V) (f 
   · have e : betaP p β w - ∑ j, w j • baseChange₂ D p (x2 j) =
         ∑ j, w j • baseChange₂ D p (β ((VS D).frame j - u j) - x2 j) := by
       nth_rewrite 1 [hw']
+
       rw [hHh, map_sum, ← Finset.sum_sub_distrib]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [map_smul, betaP_bc, ← smul_sub, ← map_sub]

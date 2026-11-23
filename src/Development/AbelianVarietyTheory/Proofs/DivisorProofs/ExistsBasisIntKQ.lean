@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MatchMu
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.ValUnitsD
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.ValUnitsD
+public import Development.AbelianVarietyTheory.Definitions.Divisors.TwOrbMEqTwOrbUOfNormal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ClassFieldTheory.LocalClassField.UnrExtC
-open Matrix GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.BCFL
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsRootSelectionUnitaryRankOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsCyclotomicExtensionQI
+
+@[expose] public section
+
+open Matrix GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid
 open scoped TensorProduct Classical
 
 noncomputable section
@@ -32,6 +74,7 @@ theorem exists_basis_OK (K : IntermediateField ℚ_[p] (PadicAlgCl p)) (hK : Fin
   · let z : _ → ℤ_[p] := fun i => ⟨β.repr x i, hx i⟩
     have hx' : x = algebraMap (OK p K) K (∑ i, z i • β₀ i) := by
       conv_lhs => rw [← β.sum_repr x]
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [Algebra.smul_def, Algebra.smul_def, map_mul, ← IsScalarTower.algebraMap_apply ℤ_[p] (OK p K) K,
@@ -59,7 +102,7 @@ variable {p β γ}
 
 theorem intCoord_add {z w : A ⊗[ℚ_[p]] B} (hz : IntCoord p β γ z) (hw : IntCoord p β γ w) :
     IntCoord p β γ (z + w) := fun k => by
-  rw [map_add, Finsupp.add_apply]
+  rw [map_add (f := _), Finsupp.add_apply]
   exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hz k) (hw k))
 
 theorem intCoord_smul {z : A ⊗[ℚ_[p]] B} (hz : IntCoord p β γ z) {c : ℚ_[p]} (hc : ‖c‖ ≤ 1) :

@@ -1,5 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical UpperHalfPlane MatrixGroups CongruenceSubgroup Manifold
@@ -58,7 +101,7 @@ theorem isMF_AA : IsMF 12 AA := by
 
 theorem isMF_DD : IsMF 12 DD := by
   first
-    | exact ⟨ModularFormClass.modularForm ModularForm.discriminantCuspForm, fun τ => rfl⟩
+    | exact ⟨ModularFormClass.modularForm CuspForm.discriminant, fun τ => rfl⟩
     | exact ⟨ModularFormClass.modularForm CuspForm.discriminant, fun τ => rfl⟩
 
 theorem IsMF.smul_eq {k : ℤ} {f : ℍ → ℂ} (h : IsMF k f) (γ : SL(2, ℤ)) (τ : ℍ) :
@@ -117,25 +160,8 @@ theorem zetaC_pow_self {m : ℕ} (hm : 0 < m) : zetaC m ^ m = 1 := by
   have : (m : ℂ) * (2 * Real.pi * Complex.I / m) = 2 * Real.pi * Complex.I := by field_simp
   rw [this, Complex.exp_two_pi_mul_I]
 
-theorem zetaC_mul {a e : ℕ} (ha : 0 < a) (he : 0 < e) : zetaC (a * e) ^ a = zetaC e := by
-  unfold zetaC
-  rw [← Complex.exp_nat_mul]
-  have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
-  have he' : (e : ℂ) ≠ 0 := by exact_mod_cast he.ne'
-  congr 1
-  push_cast
-  field_simp
-
 theorem zetaC_mem (m : ℕ) : zetaC m ∈ Rm m := by
   exact Subring.subset_closure (Set.mem_singleton _)
-
-theorem zetaC_inv_mem {m : ℕ} (hm : 0 < m) : (zetaC m)⁻¹ ∈ Rm m := by
-  have h : (zetaC m)⁻¹ = zetaC m ^ (m - 1) := by
-    symm
-    apply eq_inv_of_mul_eq_one_left
-    rw [← pow_succ, Nat.sub_add_cancel hm, zetaC_pow_self hm]
-  rw [h]
-  exact pow_mem (zetaC_mem m) _
 
 theorem Rm_isIntegral {m : ℕ} (hm : 0 < m) {x : ℂ} (hx : x ∈ Rm m) : IsIntegral ℤ x := by
   have hζ : IsIntegral ℤ (zetaC m) :=

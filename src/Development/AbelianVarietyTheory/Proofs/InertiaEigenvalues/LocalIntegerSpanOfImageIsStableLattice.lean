@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanLStable
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SpanLStable
 import Formalism.LocalRingCardinality.SpanPowerMembership.NDLocE
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SplitOfClosure
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PotentiallyCrystallineModuleEqCrystallineRestricStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSummandTw
+import Formalism.SharpRestriction.LevelLetterCocycles.PairedCharacterCondition
+
+@[expose] public section
+
 open Formalism Formalism.MainNotions Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.WeaklyAdmissibleFiltrations NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module GlobalTheory.Pass Formalism.MainNotions.PairedCharacterCondition GlobalTheory.Pass.LocDual GlobalTheory.Pass.LocDual.OneX
 set_option maxHeartbeats 1000000
 set_option synthInstance.maxHeartbeats 400000
@@ -93,6 +136,9 @@ theorem latY_span {a : ℕ} (Y : Submodule (D.nd.O i) (Fin a → Fin D.R.nV → 
 
 theorem latY_free {a : ℕ} (Y : Submodule (D.nd.O i) (Fin a → Fin D.R.nV → KK D.nd i)) (hY : Y.FG) :
     Module.Free (Br.OLL D.nbr i w hw) ↥(latY i w hw Y) := by
+  letI : CommRing (Br.OLL D.nbr i w hw) := inferInstance
+  letI : AddCommGroup ↥(latY i w hw Y) := inferInstance
+  letI : Module (Br.OLL D.nbr i w hw) ↥(latY i w hw Y) := inferInstance
   haveI : Module.Finite (Br.OLL D.nbr i w hw) ↥(latY i w hw Y) :=
     Module.Finite.iff_fg.2 (latY_fg i w hw Y hY)
   haveI : NoZeroSMulDivisors (Br.OLL D.nbr i w hw) ↥(latY i w hw Y) := by
@@ -108,7 +154,11 @@ theorem latY_free {a : ℕ} (Y : Submodule (D.nd.O i) (Fin a → Fin D.R.nV → 
       intro h0; apply hc; exact Subtype.val_injective h0
     have := (smul_eq_zero.1 h2).resolve_left hc'
     exact Subtype.ext this
-  exact Module.free_of_finite_type_torsion_free'
+  haveI : IsPrincipalIdealRing (Br.OLL D.nbr i w hw) := inferInstance
+  haveI : IsDomain (Br.OLL D.nbr i w hw) := inferInstance
+  haveI : IsTorsionFree (Br.OLL D.nbr i w hw) ↥(latY i w hw Y) := inferInstance
+  exact @Module.free_of_finite_type_torsion_free' (Br.OLL D.nbr i w hw) inferInstance
+    ↥(latY i w hw Y) inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
 
 theorem latY_lattice : ∀ (D : D7) (i : D.nd.Loc) (w : HeightOneSpectrum (𝓞 D.host.E))
     (hw : w ∈ placesOver D.host.E (D.nd.l i)) (r : D.nd.X i → (GE D.nd →* GL (Fin D.R.nV) (D.nd.O i)))

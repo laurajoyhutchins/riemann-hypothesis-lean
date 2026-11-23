@@ -1,11 +1,57 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.Coords
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.CechPairings.Imports
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperFiniteness
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechSeparated
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.NaturalLeray
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSheafSecPresheaf
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSheafSecPresheaf
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.CechFunctor
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheaf
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.Tactic.ENatToNat
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.NaturalLeray
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.QcohLocal
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperFiniteness
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -181,6 +227,7 @@ theorem coc3 (i : Fin 3 → ι) (W : X.Opens) (hW : W ≤ capO U i) (h₁ : W �
       refine Finset.sum_congr rfl fun k' _ => ?_
       rw [V.e_chg 2 1 2 x i k', Finset.mul_sum]
       exact Finset.sum_congr rfl fun k'' _ => mul_assoc _ _ _) v
+
   simp only [map_sum, map_mul, rs_trans, Finset.sum_mul] at key
   simp only [Finset.mul_sum]
   rw [Finset.sum_comm]
@@ -283,7 +330,7 @@ def toCochain (n : ℕ) : K.X n ≃+ Cochain (modulesAb (toMod V.g)).obj U n whe
     exact (congrArg (secRes V.g (inter_le_capO U i)) h).trans
       ((secRes_secRes V.g (capO_le_inter U i) (inter_le_capO U i) le_rfl _).trans (secRes_self V.g le_rfl _))
   map_add' a b := funext fun i => by
-    rw [map_add]
+    rw [map_add (f := _)]
     exact map_add (secRes V.g (inter_le_capO U i)) _ _
 
 end Bridge
@@ -292,8 +339,8 @@ theorem str_eq {O : Type} [CommRing O] {X : Scheme.{0}} (q : X ⟶ Spec (CommRin
     ((Scheme.ΓSpecIso (CommRingCat.of O)).inv ≫ q.appLE ⊤ W le_top).hom c =
       rs (le_top : W ≤ ⊤) (q.appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of O)).inv.hom c)) := rfl
 
-attribute [local instance] VB.fin algebraOfOver in
 
+attribute [local instance] VB.fin algebraOfOver in
 theorem finite_H_cx : ∀ {O : Type} [CommRing O] [IsNoetherianRing O] {X : Scheme.{0}} (q : X ⟶ Spec (CommRingCat.of O)) [IsProper q]
     {ι : Type} [Fintype ι] (U : ι → X.Opens) (hU : (⨆ α, U α) = ⊤) (ha : ∀ n (i : Fin (n + 1) → ι), IsAffineOpen (capO U i))
     (K : Cos.{1} O) (V : VB (fun W => ((Scheme.ΓSpecIso (CommRingCat.of O)).inv ≫ q.appLE ⊤ W le_top).hom) U K) (p : ℕ),
@@ -317,6 +364,7 @@ theorem finite_H_cx : ∀ {O : Type} [CommRing O] [IsNoetherianRing O] {X : Sche
     funext i
     rw [d_apply]
     change secRes V.g (inter_le_capO U i) (toSec V (n + 1) (K.d n x) i) = _
+
     rw [Cos.d_apply, map_sum, Finset.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_zsmul, Pi.smul_apply, map_zsmul, toSec_δ]

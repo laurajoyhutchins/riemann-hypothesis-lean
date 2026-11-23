@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SemisimpleOfInjective
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverStd
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FiniteDimensionalForms
-import Formalism.LocalToGlobal.IndefiniteReal.CongNatCastEqOneTmul
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsInvariantHermitianWeightForm
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
+public import Formalism.LocalToGlobal.IndefiniteReal.CongNatCastEqOneTmul
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 NumberField IsDedekindDomain Polynomial GlobalTheory.EtaJoin GlobalTheory.CoefDuty
 
 open scoped TensorProduct
@@ -14,27 +54,9 @@ namespace GlobalTheory.StabFin
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ}
 
-local notation3 "L⁺" => NumberField.maximalRealSubfield L
-
 theorem norm_entry_le_one {g : GL (Fin n) L} (hg : g ∈ GQ0 L n) (φ : L →+* ℂ) (i j : Fin n) :
     ‖φ ((g : Matrix (Fin n) (Fin n) L) i j)‖ ≤ 1 := by
-  have h0 : (g : Matrix (Fin n) (Fin n) L) * conjT (IsCMField.complexConj L : L →+* L) g = 1 := hg
-  have h1 := congrFun (congrFun h0 i) i
-  simp only [Matrix.mul_apply, conjT, Matrix.transpose_apply, Matrix.map_apply, Matrix.one_apply_eq] at h1
-  have h2 := congrArg φ h1
-  simp only [map_sum, map_mul, map_one] at h2
-  have h3 : ∑ k, ((‖φ ((g : Matrix (Fin n) (Fin n) L) i k)‖ ^ 2 : ℝ) : ℂ) = 1 := by
-    rw [← h2]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    have := IsCMField.complexEmbedding_complexConj L φ ((g : Matrix (Fin n) (Fin n) L) i k)
-    rw [show ((IsCMField.complexConj L : L →+* L) ((g : Matrix (Fin n) (Fin n) L) i k)) =
-      IsCMField.complexConj L ((g : Matrix (Fin n) (Fin n) L) i k) from rfl, this, Complex.mul_conj', Complex.ofReal_pow]
-  have h4 : ∑ k, ‖φ ((g : Matrix (Fin n) (Fin n) L) i k)‖ ^ 2 = 1 := by exact_mod_cast h3
-  have h5 : ‖φ ((g : Matrix (Fin n) (Fin n) L) i j)‖ ^ 2 ≤ 1 := by
-    rw [← h4]
-    exact Finset.single_le_sum (f := fun k => ‖φ ((g : Matrix (Fin n) (Fin n) L) i k)‖ ^ 2)
-      (fun k _ => sq_nonneg _) (Finset.mem_univ j)
-  nlinarith [norm_nonneg (φ ((g : Matrix (Fin n) (Fin n) L) i j))]
+  apply GlobalTheory.InvFormBdd.norm_emb_le_one <;> assumption
 
 theorem exists_common_denom {ι : Type} [Fintype ι] (x : ι → AL L) :
     ∃ D : ℕ, 0 < D ∧ ∀ a, (D : AL L) * x a ∈ ALint L := by
@@ -46,7 +68,7 @@ theorem exists_common_denom {ι : Type} [Fintype ι] (x : ι → AL L) :
 
 theorem exists_rat (γ : GQ L n) : ∃ g : GL (Fin n) L, g ∈ GQ0 L n ∧
     ∀ i j, (((γ : GAf L n) : GL (Fin n) (AL L)) : Matrix (Fin n) (Fin n) (AL L)) i j =
-      ((g : Matrix (Fin n) (Fin n) L) i j) ⊗ₜ[L⁺] (1 : AFplus L) := by
+      ((g : Matrix (Fin n) (Fin n) L) i j) ⊗ₜ[NumberField.maximalRealSubfield L] (1 : AFplus L) := by
   have h : ((γ : GAf L n) : GL (Fin n) (AL L)) ∈ (GQ0 L n).map (Matrix.GeneralLinearGroup.map
       (Algebra.TensorProduct.includeLeftRingHom : L →+* AL L)) := Subgroup.mem_subgroupOf.1 γ.2
   obtain ⟨g, hg, he⟩ := Subgroup.mem_map.1 h
@@ -54,8 +76,14 @@ theorem exists_rat (γ : GQ L n) : ∃ g : GL (Fin n) L, g ∈ GQ0 L n ∧
   rw [← he]
   rfl
 
-theorem isIntegral_of_mem (z : L) (hz : z ⊗ₜ[L⁺] (1 : AFplus L) ∈ ALint L) : IsIntegral ℤ z :=
-  Formalism.UG.P.csGlob_int (F := L⁺) z (GlobalTheory.AlgFormsFin.ALint_le L hz)
+theorem isIntegral_of_mem (z : L) (hz : z ⊗ₜ[NumberField.maximalRealSubfield L] (1 : AFplus L) ∈ ALint L) :
+    IsIntegral ℤ z := by
+  have hle : ALint L ≤ Formalism.MainNotions.S.IntAf (NumberField.maximalRealSubfield L) L := by
+    rw [ReciprocityTheory.Aut.ALint, Subring.closure_le]
+    rintro x (⟨y, rfl⟩ | ⟨a, ha, rfl⟩)
+    · exact Subring.subset_closure (Or.inl ⟨⟨(y : L), y, rfl⟩, rfl⟩)
+    · exact Subring.subset_closure (Or.inr ⟨⟨a, ha⟩, rfl⟩)
+  exact Formalism.UG.P.csGlob_int (F := NumberField.maximalRealSubfield L) z (hle hz)
 
 end GlobalTheory.StabFin
 

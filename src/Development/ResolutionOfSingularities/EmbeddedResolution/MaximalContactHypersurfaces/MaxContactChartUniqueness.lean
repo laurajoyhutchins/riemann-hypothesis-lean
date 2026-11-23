@@ -1,23 +1,67 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupBasic
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleChartFiberProduct
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleCoordinates
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdeal
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheaf
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderPullback
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafOrderDecrease
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafSmoothPullback
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.TaylorExpansion
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.TaylorExpansionComparison
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleChartFiberProduct
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
+public import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.MaxContactIdeal
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafOrderDecrease
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.DerivativeIdealSheafSmoothPullback
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderPullback
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.TaylorExpansionComparison
+public import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.StalkIdealSpreadOut
+import Development.ResolutionOfSingularities.Foundations.Schemes.AffineOpens
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
 import Development.ResolutionOfSingularities.Foundations.Schemes.SchemeMorphismProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.MaxContactIdeal
-import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.StalkIdealSpreadOut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.SpreadingOut
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.TaylorExpansion
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory CategoryTheory.Limits Opposite AlgebraicGeometry TopologicalSpace
@@ -30,10 +74,6 @@ section
 
 variable {X : Scheme.{u}} {k : Type u} [Field k] {p : X ⟶ Spec (CommRingCat.of k)}
   {U : X.Opens} {m : ℕ}
-
-theorem coordTop_topIso_eq_coord (c : EtaleChart p U m) (j : Fin m) :
-    U.topIso.hom.hom (c.coordTop j) = c.coord j :=
-  rfl
 
 private theorem opensι_appLE_self_top_eq_topIso_inv {X₁ : Scheme.{u}} (V : X₁.Opens)
     (e : (⊤ : (V.toScheme).Opens) ≤ V.ι ⁻¹ᵁ V) :
@@ -216,12 +256,34 @@ private theorem map_le_map_and_sub_mem_of_etaleCoordinates_shift (kk : Type u) [
     (∀ M J : Ideal R, b ∈ M → M * derivIdeal kk J ≤ J → Ideal.map φ' J ≤ Ideal.map φ J)
       ∧ (∀ Iid : Ideal B, φ b ∈ Iid → ∀ f : R, φ f - φ' f ∈ Iid) := by
   classical
-  have hD1 : (EtaleCoordinates.partialDeriv kk ι R j) (EtaleCoordinates.coord kk ι R j) = 1 :=
-    EtaleCoordinates.partialDeriv_coord_self kk ι R j
-  have hD0 : ∀ i : ι, i ≠ j →
-      (EtaleCoordinates.partialDeriv kk ι R j) (EtaleCoordinates.coord kk ι R i) = 0 :=
-    fun i hi => EtaleCoordinates.partialDeriv_coord_of_ne kk ι R j i (Ne.symm hi)
-  have hderivConst : ∀ c : kk, (EtaleCoordinates.partialDeriv kk ι R j)
+  let e := EtaleCoordinates.basisKaehler kk ι R
+  let L : R →ₗ[kk] R := {
+    toFun := fun x => e.repr (KaehlerDifferential.D kk R x) j
+    map_add' := by
+      intro x y
+      simp only [map_add, Finsupp.add_apply]
+    map_smul' := by
+      intro c x
+      have h : KaehlerDifferential.D kk R (c • x) =
+          algebraMap kk R c • KaehlerDifferential.D kk R x := by
+        rw [Algebra.smul_def, Derivation.leibniz, Derivation.map_algebraMap, smul_zero, add_zero]
+      simp only [h, LinearEquiv.map_smul, Finsupp.smul_apply, smul_eq_mul,
+        ← Algebra.smul_def, RingHom.id_apply] }
+  let δ : Derivation kk R R := Derivation.mk' L (by
+    intro a b
+    change e.repr (KaehlerDifferential.D kk R (a * b)) j = _
+    rw [Derivation.leibniz, map_add, Finsupp.add_apply, LinearEquiv.map_smul,
+      LinearEquiv.map_smul, Finsupp.smul_apply, Finsupp.smul_apply]
+    rfl)
+  have hδ (i : ι) : δ (EtaleCoordinates.coord kk ι R i) = Finsupp.single i (1 : R) j := by
+    change e.repr (KaehlerDifferential.D kk R (EtaleCoordinates.coord kk ι R i)) j = _
+    rw [← EtaleCoordinates.basisKaehler_apply kk ι R i, Module.Basis.repr_self]
+  have hD1 : δ (EtaleCoordinates.coord kk ι R j) = 1 := by
+    rw [hδ, Finsupp.single_eq_same]
+  have hD0 : ∀ i : ι, i ≠ j → δ (EtaleCoordinates.coord kk ι R i) = 0 := by
+    intro i hi
+    rw [hδ, Finsupp.single_eq_of_ne (Ne.symm hi)]
+  have hderivConst : ∀ c : kk, δ
       (algebraMap (MvPolynomial ι kk) R (MvPolynomial.C c)) = 0 := by
     intro c
     have hmap : algebraMap (MvPolynomial ι kk) R (MvPolynomial.C c) = algebraMap kk R c := by
@@ -230,7 +292,7 @@ private theorem map_le_map_and_sub_mem_of_etaleCoordinates_shift (kk : Type u) [
     rw [hmap]
     exact Derivation.map_algebraMap _ c
   have hvar : ∀ (i : ι) (N : ℕ), 1 ≤ N →
-      TaylorExpansion.truncatedSeries φ (EtaleCoordinates.partialDeriv kk ι R j) (φ b) N
+      TaylorExpansion.truncatedSeries φ δ (φ b) N
           (algebraMap (MvPolynomial ι kk) R (MvPolynomial.X i)) -
         φ' (algebraMap (MvPolynomial ι kk) R (MvPolynomial.X i))
           ∈ IsLocalRing.maximalIdeal B ^ N := by
@@ -260,14 +322,14 @@ private theorem map_le_map_and_sub_mem_of_etaleCoordinates_shift (kk : Type u) [
           hne i hij, sub_self]
         exact Submodule.zero_mem _
   have hrep := isTaylorExpansionOn_mvPolynomial (k := kk) (ι := ι) φ φ'
-    (EtaleCoordinates.partialDeriv kk ι R j) (φ b) hβ hconst hderivConst hvar
+    δ (φ b) hβ hconst hderivConst hvar
   have : Algebra.FormallyUnramified (MvPolynomial ι kk) R := inferInstance
   refine ⟨fun M J hbM hMJ => ?_, fun Iid hbI f => ?_⟩
   · exact map_le_map_of_pow_mul_iterate_deriv_mem (MvPolynomial ι kk) φ φ'
-      (EtaleCoordinates.partialDeriv kk ι R j) (φ b) b J hcong hβ hrep rfl
-      (pow_mul_iterate_deriv_mem_of_mul_derivIdeal_le kk M J (EtaleCoordinates.partialDeriv kk ι R j) b hMJ hbM)
+      δ (φ b) b J hcong hβ hrep rfl
+      (pow_mul_iterate_deriv_mem_of_mul_derivIdeal_le kk M J δ b hMJ hbM)
   · exact sub_mem_of_isTaylorExpansionOn (MvPolynomial ι kk) φ φ'
-      (EtaleCoordinates.partialDeriv kk ι R j) (φ b) hcong hβ hrep Iid hbI f
+      δ (φ b) hcong hβ hrep Iid hbI f
 
 private theorem map_le_map_and_sub_mem_of_etaleChart_coord_shift (k : Type u) [Field k] [CharZero k] {X : Scheme.{u}}
     (p : X ⟶ Spec (CommRingCat.of k)) [AlgebraicGeometry.Smooth p] [LocallyOfFiniteType p]

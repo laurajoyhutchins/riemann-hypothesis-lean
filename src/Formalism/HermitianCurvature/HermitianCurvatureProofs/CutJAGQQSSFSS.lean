@@ -1,7 +1,52 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAGQQSSFCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormalFormOrderZeroOfParts
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateCommuteRaisingConstant
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCRadSpSmooth
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAGQQSSFCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGCRadSpSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -46,6 +91,7 @@ theorem pj_mul_ne {ρ σ : M.Ty P} (h : ρ ≠ σ) : pj κ ρ * pj κ σ = 0 := 
 
 theorem sum_pj : ∑ ρ, pj κ ρ = 1 := by
   unfold pj
+
   rw [← map_sum, ← map_one κ]
   congr 1
   funext σ
@@ -154,7 +200,7 @@ private theorem lo_le_rho_and_rho_le_hi (hP : P.OK) {m : ℕ} (h1 : 1 ≤ m) (h2
       _ ≤ P.hi m - P.lo m := Nat.floor_le (by linarith)
   have h0 : (0 : ℝ) ≤ (((ρ ⟨m - 1, by omega⟩ : Fin _) : ℕ) : ℝ) := Nat.cast_nonneg _
   unfold M.rho
-  rw [dif_pos ⟨h1, h2⟩]
+  rw [dite_eq_left ⟨h1, h2⟩]
   constructor <;> linarith
 
 private theorem hi_succ_lt_lo (m : ℕ) : P.hi (m + 1) < P.lo m := by

@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsKSValueOneOfRetraction
+public import Mathlib.RingTheory.WittVector.Frobenius
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -43,39 +82,6 @@ def AbelianDieudonne : Prop :=
         ∀ (f : A ⟶ B) (g : B ⟶ C) [IsMonHom f] [IsMonHom g], map (f ≫ g) = map g ∘ₗ map f
 
 namespace AbelianDieudonne
-
-theorem exists_action (H : AbelianDieudonne) (p : ℕ) [Fact p.Prime] {k : Type} [Field k] [CharP k p]
-    [PerfectRing k p] {A : Over (Sp k)} [GrpObj A] {g : ℕ} (hA : IsAbelianScheme A)
-    (hg : SmoothOfRelativeDimension g A.hom) {O : Type} [CommRing O] (a : OAct O A) :
-    ∃ (M : Type) (_ : AddCommGroup M) (_ : Module (WittVector p k) M)
-      (ρ : O →+* Module.End (WittVector p k) M)
-      (F : M →ₛₗ[(WittVector.frobenius : WittVector p k →+* WittVector p k)] M)
-      (red : M →ₛₗ[(WittVector.constantCoeff : WittVector p k →+* k)] HdR A),
-      Module.Free (WittVector p k) M ∧ Module.Finite (WittVector p k) M ∧
-      Module.finrank (WittVector p k) M = 2 * g ∧ Function.Injective F ∧
-      (∀ x m, ρ x (F m) = F (ρ x m)) ∧ Function.Surjective red ∧
-      (∀ m, red m = 0 ↔ ∃ n, m = p • n) ∧
-      ∀ x m, red (ρ x m) = act (dp0 k) (𝟙 _) a x (red m) := by
-  obtain ⟨M, map, F, V, red, h1, h2, h3⟩ := H p k
-  obtain ⟨hfree, hfin, hrk, -, hVF, hs, hk, -, hid⟩ := h1 A g hA hg
-  obtain ⟨hnat, hadd⟩ := h2 A A hA hA
-  have hc : ∀ {f f' : A ⟶ A} [IsMonHom f] [IsMonHom f'], f = f' → map f = map f' := by
-    intro f f' _ _ e; subst e; rfl
-  have := a.hom
-  let ρ : O →+* Module.End (WittVector p k) (M A) := RingHom.mk'
-    { toFun x := map (a.act x)
-      map_one' := (hc a.one).trans hid
-      map_mul' x y := (hc ((congrArg a.act (mul_comm x y)).trans (a.mul y x))).trans
-        (h3 A A A hA hA hA _ _) }
-    fun x y ↦ by
-      have : IsMonHom (a.act x * a.act y) := a.add x y ▸ a.hom _
-      exact (hc (a.add x y)).trans (hadd _ _)
-  refine ⟨M A, inferInstance, inferInstance, ρ, F A, red A, hfree, hfin, hrk, ?_,
-    fun x m ↦ (hnat _ m).1, hs, hk, fun x m ↦ (hnat _ m).2.2⟩
-  refine (injective_iff_map_eq_zero _).2 fun m hm ↦ ?_
-  have e := hVF m
-  rw [hm, map_zero, ← Nat.cast_smul_eq_nsmul (WittVector p k)] at e
-  exact (smul_eq_zero.1 e.symm).resolve_left (WittVector.p_nonzero p k)
 
 end AbelianDieudonne
 

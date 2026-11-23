@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -44,19 +88,6 @@ def DetOrdFin : Prop :=
       (∀ p, p.Prime → S p → AtP {x : E | x ∈ I} (gp p) p) →
         {p : ℕ | p.Prime ∧ S p ∧ ordK (pp p) (detRel (gp p) g₀) ≠ 0}.Finite
 
-def FourSq : Prop :=
-  ∀ (K E : Type) [Field K] [NumberField K] [Field E] [NumberField E] [Algebra K E] (cj : E ≃ₐ[ℚ] E) (n : Type) [Fintype n],
-    Module.finrank ℚ K = 2 → Fintype.card n = Module.finrank K E → IsConj K cj →
-    (∀ x : E, x ≠ 0 → 0 < Algebra.trace ℚ E (x * cj x)) →
-      ∃ g : (Fin 4 → E) ≃ₗ[K] (Fin 4 × n → K), IsIsom cj g
-
-def ExtC : Prop :=
-  ∀ (K E : Type) [Field K] [Field E] [Algebra K E] [FiniteDimensional K E] (n : Type) [Fintype n] (φ : K →+* ℂ)
-    (τ : n → E →+* ℂ), Function.Injective τ → (∀ i k, τ i (algebraMap K E k) = φ k) →
-    Fintype.card n = Module.finrank K E → ∀ g : (Fin 4 → E) ≃ₗ[K] (Fin 4 × n → K),
-      ∃ gC : (Fin 4 × n → ℂ) ≃ₗ[ℂ] (Fin 4 × n → ℂ),
-        ∀ x : Fin 4 → E, gC (fun w => τ w.2 (x w.1)) = fun w => φ (g x w)
-
 def SplitsAt (K : Type) {E : Type} [Field K] [NumberField K] [Field E] [NumberField E] [Algebra K E] (cj : E ≃ₐ[ℚ] E) (p : ℕ) : Prop :=
   ∃ P : Ideal (𝓞 K), P.IsPrime ∧ ((p : ℕ) : 𝓞 K) ∈ P ∧ ∃ a b : 𝓞 K,
     cj (algebraMap K E (a : K)) = algebraMap K E (b : K) ∧ a ∈ P ∧ b ∉ P
@@ -64,12 +95,5 @@ def SplitsAt (K : Type) {E : Type} [Field K] [NumberField K] [Field E] [NumberFi
 def SelfDualI (K : Type) {E : Type} [Field K] [NumberField K] [Field E] [NumberField E] [Algebra K E] (cj : E ≃ₐ[ℚ] E)
     (I : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) : Prop :=
   ∀ y : E, y ∈ I ↔ ∀ x ∈ I, Algebra.trace K E (x * cj y) ∈ (algebraMap (𝓞 K) K).range
-
-def LocIso : Prop :=
-  ∀ (K E : Type) [Field K] [NumberField K] [Field E] [NumberField E] [Algebra K E] (cj : E ≃ₐ[ℚ] E) (n : Type) [Fintype n]
-    (I : FractionalIdeal (nonZeroDivisors (𝓞 E)) E) (p : ℕ),
-    Module.finrank ℚ K = 2 → IsConj K cj → p.Prime → SplitsAt K cj p → SelfDualI K cj I →
-    (∃ g₀ : (Fin 4 → E) ≃ₗ[K] (Fin 4 × n → K), IsIsom cj g₀) →
-      ∃ g : (Fin 4 → E) ≃ₗ[K] (Fin 4 × n → K), IsIsom cj g ∧ AtP {x : E | x ∈ I} g p
 
 end PI.KerIso

@@ -1,13 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AbelianHeightsDuality.GelfandKazhdanDuality.IsCuspFormDualMap
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspDiscreteDecompositionGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartStarInvT
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SatakeParameterGLStarEqInvOfUnitarisable
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteAutomorphicRepGLLocalComponentIsUnitaris
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFiniteMeasureQuotMeasure
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfMemWeakIn
+module
+
+public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.GelfandKazhdanDuality.IsCuspFormDualMap
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspDiscreteDecompositionGL
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DualIsConjByOne
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOfBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfMemWeakIn
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DiscreteAutomorphicRepGLLocalComponentIsUnitaris
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOfIsOpenStab
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFiniteMeasureQuotMeasure
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ConjOpInvolutive
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SatakeParameterGLStarEqInvOfUnitarisable
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartStarInvT
+import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +70,7 @@ theorem star_Tj (ϖ : w.adicCompletion F) (j : ℕ) (g : GL (Fin n) (w.adicCompl
 theorem isSatVecGL_of_conj (ρ₁ : Representation ℂ (GL (Fin n) (w.adicCompletion F)) V₁)
     (ρ₂ : Representation ℂ (GL (Fin n) (w.adicCompletion F)) V₂) (D : V₂ →+ V₁) (hinj : Function.Injective D)
     (hsmul : ∀ (c : ℂ) v, D (c • v) = starRingEnd ℂ c • D v) (hρ : ∀ g v, D (ρ₂ g v) = ρ₁ g (D v)) {y : V₂}
-    {B : Multiset ℂˣ} (hy0 : y ≠ 0) (hyf : y ∈ fixed ρ₂ (KGL w n)) (h : IsSatVecGL w ρ₁ (D y) B) :
+    {B : Multiset ℂˣ} (hy0 : y ≠ 0) (hyf : y ∈ fixed ρ₂ (KGL w (n := n))) (h : IsSatVecGL w ρ₁ (D y) B) :
     IsSatVecGL w ρ₂ y (B.map star) := by
   refine ⟨hy0, hyf, by rw [Multiset.card_map, h.2.2.1], fun ϖ hϖ j hj => hinj ?_⟩
   have hfin := finite_heckeVec (Final.GLintComm F w n) (Tj_mem_hecke hϖ j) ρ₂ y
@@ -41,10 +81,10 @@ theorem isSatVecGL_of_conj (ρ₁ : Representation ℂ (GL (Fin n) (w.adicComple
 
 end Transport
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem invA_invA (g : GA E a) : PositivityTheory.PRW.GKD.invA E a (PositivityTheory.PRW.GKD.invA E a g) = g := by
   have h := (GlobalTheory.DiscreteUnit.transInv (Ad E) a).left_inv g
   exact (congrArg (GlobalTheory.DiscreteUnit.transInv (Ad E) a) (Units.ext rfl : PositivityTheory.PRW.GKD.invA E a g =
@@ -68,17 +108,17 @@ theorem act_val (o : Op E a) {y ψ : Sm E a} (hy : ∀ g, y.1 g = star (ψ.1 (in
 abbrev invW (w : HeightOneSpectrum (𝓞 E)) (a : ℕ) : GL (Fin a) (w.adicCompletion E) ≃* GL (Fin a) (w.adicCompletion E) :=
   ConjPlace.invT (RingEquiv.refl (w.adicCompletion E)) a
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem invW_invW (w : HeightOneSpectrum (𝓞 E)) (g : GL (Fin a) (w.adicCompletion E)) : invW w a (invW w a g) = g :=
   Units.ext (Matrix.ext fun i j => by
     rw [ConjPlace.invT_val, ← map_inv, ConjPlace.invT_val, inv_inv]; rfl)
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem invW_symm (w : HeightOneSpectrum (𝓞 E)) (g : GL (Fin a) (w.adicCompletion E)) : (invW w a).symm g = invW w a g :=
   (MulEquiv.symm_apply_eq _).2 (invW_invW w g).symm
 
-omit [IsTotallyComplex E] in
 
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem invT_locGL (w : HeightOneSpectrum (𝓞 E)) (g : GL (Fin a) (w.adicCompletion E)) :
     invT a (Af E) (locGL E a w g) = locGL E a w ((invW w a).symm g) := by
   rw [invW_symm]
@@ -171,7 +211,7 @@ theorem hasSat_dual (hB : GlobalTheory.Published.CuspFormsBoundedGL) {π : CuspS
       have e : φ = (Df y).1 := Subtype.ext (funext fun h => by rw [hDv, hy, invA_invA, star_star])
       rw [e]
       exact (Df y).2
-    have hst : IsStable S := fun o φ ⟨y, hy⟩ => ⟨σ.op (invTOp o) y, fun g => by
+    have hst : _root_.GlobalTheory.CuspRep.IsStable S := fun o φ ⟨y, hy⟩ => ⟨σ.op (invTOp o) y, fun g => by
       change (act (invTOp o) y.1).1 g = _
       rw [act_val (invTOp o) hy, GlobalTheory.CsdBack.invTOp_involutive o]⟩
     have hne : S ≠ ⊥ := by
@@ -194,9 +234,9 @@ theorem hasSat_dual (hB : GlobalTheory.Published.CuspFormsBoundedGL) {π : CuspS
     rfl
   let c := RingEquiv.refl (w.adicCompletion E)
   have hc : ∀ a, Valued.v (c a) = Valued.v a := fun _ => rfl
-  have hK : ∀ g, g ∈ KGL w a ↔ invW w a g ∈ KGL w a :=
+  have hK : ∀ g, g ∈ KGL w (n := a) ↔ invW w a g ∈ KGL w (n := a) :=
     ConjPlace.mem_iff_invT (n := a) c (ConjPlace.map_mem_Ov_iff c hc)
-  have hfix : ∀ y : σ.V, y ∈ fixed (σ.locRep w) (KGL w a) ↔ D y ∈ fixed (π.locRep w) (KGL w a) := fun y => by
+  have hfix : ∀ y : σ.V, y ∈ fixed (σ.locRep w) (KGL w (n := a)) ↔ D y ∈ fixed (π.locRep w) (KGL w (n := a)) := fun y => by
     rw [GlobalTheory.LGrp.mem_fixed, GlobalTheory.LGrp.mem_fixed]
     constructor
     · intro hy k hk

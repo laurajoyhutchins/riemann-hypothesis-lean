@@ -1,8 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceMassFinite
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceFormMass
-import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartHomogenise
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.MeasurableOfContinuousOnNeZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Statements
+public import GroundTheory.HeightsAndTheta.Heights.ChowForms.PChartHomogenise
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.MeasurableOfContinuousOnNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.EqZeroOfMemZeroLocusLineOriginIdeal
+import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.Statements
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -24,7 +77,7 @@ theorem SliceMassFinite.exists_projClosure {n e : ℕ} (I : Ideal (MvPolynomial 
     refine mem_nonZeroDivisors_of_ne_zero fun h0 => hP.ne_top ?_
     have h00 := hW.isHomog _ (Ideal.Quotient.eq_zero_iff_mem.mp h0) 0
     rw [homogeneousComponent_zero] at h00
-    have hc : coeff 0 (linForm ℓ - 1) = -1 := by
+    have hc : AddMonoidAlgebra.coeff (linForm ℓ - 1) 0 = -1 := by
       simp [linForm, coeff_sum, coeff_C_mul, coeff_X]
     rw [hc, map_neg, map_one, Ideal.neg_mem_iff] at h00
     exact (Ideal.eq_top_iff_one W).mpr h00
@@ -35,7 +88,7 @@ theorem SliceMassFinite.exists_projClosure {n e : ℕ} (I : Ideal (MvPolynomial 
 
   have h2 : ringKrullDim (MvPolynomial (Fin n) ℂ ⧸ W) ≤ (n : WithBot ℕ∞) := by
     have := ringKrullDim_quotient_le W
-    rwa [MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field, zero_add,
+    rwa [MvPolynomial.ringKrullDim_of_isNoetherianRing_of_finite, ringKrullDim_eq_zero_of_field, zero_add,
       Nat.card_eq_fintype_card, Fintype.card_fin] at this
 
   have hdimW : ringKrullDim (MvPolynomial (Fin n) ℂ ⧸ W) = ((e + 1 + 1 : ℕ) : WithBot ℕ∞) := by
@@ -60,28 +113,6 @@ theorem SliceMassFinite.exists_projClosure {n e : ℕ} (I : Ideal (MvPolynomial 
         rfl
   obtain ⟨F, hFW⟩ := (IndefiniteRowSideFullHecke.ComplexSets.exists_isChowForm_iff (e := e + 1) hW).mpr ⟨hP, hdimW⟩
   exact ⟨W, F, hW, hFW, hℓW, hWI⟩
-
-theorem SliceMassFinite.proof (hF : SliceFormMass.Statement) : SliceMassFinite.Statement := by
-  intro n d h I ℓ A hI hℓ hdim hA
-  cases d with
-  | zero =>
-    have hconst : chartAbsDens I A (fun _ => 1) (fun _ x => Real.log (h.dualNorm x)) =
-        fun _ => chartAbsDens I A (fun _ => 1) (fun _ x => Real.log (h.dualNorm x)) 0 :=
-      funext fun y => congrArg _ (Subsingleton.elim y 0)
-    rw [hconst]
-    have : IsFiniteMeasure (volume : Measure (Fin 0 → ℂ)) := by
-      rw [MeasureTheory.volume_pi, Measure.pi_of_empty (x := 0)]
-      infer_instance
-    exact integrable_const _
-  | succ e =>
-    obtain ⟨W, F, hW, hFW, hℓW, hWI⟩ := SliceMassFinite.exists_projClosure I ℓ hI hℓ hdim
-    have hA2 : IsFiniteProjection (W ⊔ Ideal.span {linForm ℓ - 1}) A := by
-      rw [hWI]
-      exact hA
-    have hmass := hF n e h W F ℓ A (fun _ => 1) (fun _ => 1) (fun _ _ => 0) hW hFW hℓW hA2
-      (fun _ _ _ => rfl) continuousOn_const (fun _ _ _ _ => rfl) (fun _ => contDiffOn_const)
-    rw [hWI] at hmass
-    simpa only [one_mul, add_zero] using hmass
 
 end
 

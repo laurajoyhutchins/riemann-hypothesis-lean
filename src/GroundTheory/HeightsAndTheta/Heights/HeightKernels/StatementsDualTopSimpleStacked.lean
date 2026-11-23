@@ -1,6 +1,47 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopSimpleSub
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopStacked
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.ScaledExample
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -23,26 +64,6 @@ def DualTopSimpleStacked.Statement : Prop :=
         (∑ t, Real.log |(a t : ℝ)|) *
           geomDeg (grassIdeal 1 1 (i - 1)) (fsMulti (plBlocks 1 1 (i - 1))) (1 * 1 * (i - 1))
 
-open DualTopSimpleSubExample in
-
-example : ∃ (T : Type) (_ : Fintype T) (_ : DecidableEq T)
-    (b : Module.Basis T ℤ (dualLattice (HermLattice.standard ℚ 1)))
-    (b' : Module.Basis T ℤ (dualLattice HermLattice.twiceStandardExample)) (a : T → ℤ),
-    Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b)) ∧
-      Function.Bijective (Matrix.mulVecLin (dualEmbMatrix b')) ∧
-      HermLattice.twiceStandardExample.lattice < (HermLattice.standard ℚ 1).lattice ∧
-      (∀ N : Submodule (𝓞 ℚ) (Fin 1 → ℚ), HermLattice.twiceStandardExample.lattice ≤ N →
-        N ≤ (HermLattice.standard ℚ 1).lattice →
-        N = HermLattice.twiceStandardExample.lattice ∨ N = (HermLattice.standard ℚ 1).lattice) ∧
-      (∀ t, (b t : Fin 1 → ℚ) = a t • (b' t : Fin 1 → ℚ)) ∧ 1 ≤ 1 := by
-  obtain ⟨T', hT', hdT', ⟨b'⟩⟩ := DualLatticeBasisExists.proof ℚ 1 HermLattice.twiceStandardExample
-  have hcard : Fintype.card Unit = Fintype.card T' := by
-    rw [DualTopStackedExistence.card_eq_of_bijective dualBasisStandard dualEmbMatrix_standard_bijective,
-      DualTopStackedExistence.card_eq_of_bijective b' (DualEmbBijective.proof ℚ 1 _ T' b')]
-  obtain ⟨b₁, b₁', a, hab⟩ := DualTopStackedExistence.exists_stacked twiceStandardExample_le
-    dualBasisStandard b' hcard
-  exact ⟨T', hT', hdT', b₁, b₁', a, DualEmbBijective.proof ℚ 1 _ T' b₁,
-    DualEmbBijective.proof ℚ 1 _ T' b₁', twice_lt, twice_cover, hab, le_rfl⟩
 
 end
 

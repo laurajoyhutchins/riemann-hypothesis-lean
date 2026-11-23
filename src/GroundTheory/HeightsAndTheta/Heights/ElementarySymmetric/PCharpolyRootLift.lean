@@ -1,6 +1,70 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsCharpolyRootLift
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsRingHomExtendOfIsIntegral
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsCharpolyRootLift
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsRingHomExtendOfIsIntegral
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.FibreNormCharpolyFalse
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Minpoly
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -91,8 +155,10 @@ theorem exists_homogenization {ι : Type*} (a : ι) (G : MvPolynomial ι ℚ) :
     have hG : aeval (fun k => y k / y a) G = ∑ i ∈ Finset.range (G.totalDegree + 1),
         aeval (fun k => y k / y a) (homogeneousComponent i G) := by
       conv_lhs => rw [← sum_homogeneousComponent G]
+
       rw [map_sum]
     rw [hG]
+
     simp only [map_sum, map_mul, map_pow, aeval_X, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i hi => ?_
     have hi' : i ≤ G.totalDegree := by simp at hi; omega
@@ -197,8 +263,8 @@ theorem exists_ringHom_extend_of_isIntegral {R S K : Type*} [CommRing R] [CommRi
 
 end CharpolyRootLift
 
-open IntermediateField.algebraAdjoinAdjoin in
 
+open IntermediateField.algebraAdjoinAdjoin in
 theorem CharpolyRootLift.proof : CharpolyRootLift.Statement := by
   intro Ω _ _ D l P _ hP hgen j m u c hlj hc0 hhom hchar a hu ζ hζa w hw
   have hl := CharpolyRootLift.ne_zero_of_generic hgen
@@ -251,8 +317,9 @@ theorem CharpolyRootLift.proof : CharpolyRootLift.Statement := by
         rw [(minpoly.monic (IsIntegral.of_finite P x)).leadingCoeff, map_one]; exact one_ne_zero),
       ← Polynomial.pow_scaleRoots_of_isReduced, ← Polynomial.map_pow, ← hcp, hchar,
       CharpolyRootLift.scaleRoots_sum_C_mul_X_pow_sub _ _ (by rw [hc0, map_one])]
+
     simp only [QA, Polynomial.map_sum, Polynomial.map_mul, Polynomial.map_C, Polynomial.map_pow,
-      Polynomial.map_X]
+    Polynomial.map_X]
     refine Finset.sum_congr rfl fun i hi => ?_
     have hi' : i ≤ n := by simp only [Finset.mem_range] at hi; omega
     congr 2

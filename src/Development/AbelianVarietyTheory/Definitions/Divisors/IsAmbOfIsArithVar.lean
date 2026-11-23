@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NontrivialIsomClassInt
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ArFormExists
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolEqMultiDiff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalSectionDivisorPullbackGeneric
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolEqMultiDiff
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsFiniteLengthOfIsArtinianRingAnnihilator
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProjOverCompFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -69,14 +109,14 @@ def recVal (h : Y → ℝ) (L : Fin e → HermLB q) (M : HermLB q) {r : M.B.ι �
 
 end Val
 
-open Classical in
 
+open Classical in
 def resArch {q : Y ⟶ Sp k} {e : ℕ} (L : Fin e → HermLB q) (N : HermLB q) (t : N.B.Sec) (z : Y) : ℝ :=
   if h : genericPoint (clo z) ∈ nonzeroLocus (secPull t (cloι z)) then
     mixArch (fun a => (L a).restr (cloι z)) (N.restr (cloι z)) (isRatSec_ratOfSec _ h) else 0
 
-open Classical in
 
+open Classical in
 def resCyc [IsLocallyNoetherian Y] {B : LB Y} (hB : B.IsLB) (t : B.Sec) (g : Y → ℝ) (z : Y) : ℝ :=
   if h : genericPoint (clo z) ∈ nonzeroLocus (secPull t (cloι z)) then
     ∑ᶠ w, ((divOfSec (LB.isLB_pull hB (cloι z)) _ h).mult w : ℝ) * g (cloι z w) else 0
@@ -99,13 +139,12 @@ structure IsMix (p : X ⟶ Sp k) (m : ℕ) (T : ∀ d : ℕ, (Fin d → HermLB p
     (∀ a, ((L a).pull i hi).Isometric (L' a)) → ∀ (r : M'.B.ι → Y.functionFieldˣ) (hr : IsRatSec M'.B r),
       T (e + 1) (Fin.cons M L) (i (genericPoint Y)) = recVal (fun z => T e L (i z)) L' M' hr
 
-theorem isMix_zero (p : X ⟶ Sp k) : IsMix p 0 fun _ _ x => Real.log (Nat.card (X.residueField x)) where
-  iso _ _ _ _ _ _ _ := rfl
-  symm _ _ _ _ _ _ := rfl
-
-  add := by intros; omega
-  zero _ _ _ := rfl
-  recur := by intros; omega
+theorem isMix_zero (p : X ⟶ Sp k) : IsMix p 0 (fun _ _ x => Real.log (Nat.card (X.residueField x))) := by
+  refine ⟨fun _ _ _ _ _ _ _ => rfl, fun _ _ _ _ _ _ => rfl, ?_, fun _ _ _ => rfl, ?_⟩
+  · intros
+    omega
+  · intros
+    omega
 
 def ArchInteg : Prop := ∀ (k : Type) [CommRing k] (Y : Scheme.{0}) [IsIntegral Y] (q : Y ⟶ Sp k) (e : ℕ), IsArithVar q e →
   ∀ (M N : HermLB q) (r : M.B.ι → Y.functionFieldˣ) (hr : IsRatSec M.B r), N.ArchIntegrable M e hr
@@ -118,12 +157,5 @@ def ArchRecip : Prop := ∀ (k : Type) [CommRing k] (Y : Scheme.{0}) [IsIntegral
         ∑ᶠ z, ((divOfSec M.isLB s hs).mult z : ℝ) * resArch L N t z =
       mixArch (Fin.cons M L : Fin (e + 1) → HermLB q) N (isRatSec_ratOfSec t ht) +
         ∑ᶠ z, ((divOfSec N.isLB t ht).mult z : ℝ) * resArch L M s z
-
-def ArchLelong : Prop := ∀ (k : Type) [CommRing k] (Y : Scheme.{0}) [IsIntegral Y] [IsLocallyNoetherian Y] (q : Y ⟶ Sp k)
-  (e : ℕ), IsArithVar q (e + 1) → ∀ (M N : HermLB q) (L : Fin e → HermLB q) (s : M.B.Sec) (t : N.B.Sec)
-  (hs : genericPoint Y ∈ nonzeroLocus s) (ht : genericPoint Y ∈ nonzeroLocus t), nonzeroLocus t = ⊤ →
-    mixArch (Fin.cons N L : Fin (e + 1) → HermLB q) M (isRatSec_ratOfSec s hs) +
-        ∑ᶠ z, ((divOfSec M.isLB s hs).mult z : ℝ) * resArch L N t z =
-      mixArch (Fin.cons M L : Fin (e + 1) → HermLB q) N (isRatSec_ratOfSec t ht)
 
 end GlobalTheory.MixHt

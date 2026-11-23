@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.GroupTheory.Index
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.Topology.Algebra.Group.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Topology.Algebra.Monoid
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -21,7 +71,7 @@ theorem exists_corestriction_cocycle : ∀ (R G X : Type) [CommRing R] [Group G]
     intro a b x
     rw [map_mul]; rfl
   refine ⟨fun g => ∑ q : G ⧸ H, ρ (g • q).out (f ((g • q).out⁻¹ * g * q.out)), ?_, ?_, ?_, ?_⟩
-  · refine continuous_finset_sum _ fun q _ => ?_
+  · refine continuous_finsetSum _ fun q _ => ?_
     rw [continuous_iff_continuousAt]
     intro g₀
     have hk : Continuous fun g : G => (g₀ • q).out⁻¹ * g * q.out := by fun_prop
@@ -41,6 +91,7 @@ theorem exists_corestriction_cocycle : ∀ (R G X : Type) [CommRing R] [Group G]
       exact QuotientGroup.eq.mpr (by simpa [mul_assoc] using hg)
     rw [this]
   · intro g h
+
     simp only [map_sum]
     rw [← Equiv.sum_comp (MulAction.toPerm h)
       (fun q : G ⧸ H => ρ (g • q).out (f ((g • q).out⁻¹ * g * q.out))), ← Finset.sum_add_distrib]
@@ -48,7 +99,7 @@ theorem exists_corestriction_cocycle : ∀ (R G X : Type) [CommRing R] [Group G]
     simp only [MulAction.toPerm_apply, mul_smul]
     have e : (g • h • q).out⁻¹ * (g * h) * q.out =
         ((g • h • q).out⁻¹ * g * (h • q).out) * ((h • q).out⁻¹ * h * q.out) := by group
-    rw [e, hc _ (corCoc_mem H g (h • q)) _ (corCoc_mem H h q), map_add, hmul, hmul]
+    rw [e, hc _ (corCoc_mem H g (h • q)) _ (corCoc_mem H h q), map_add (f := _), hmul, hmul]
     congr 3
     group
   · refine ⟨0, fun h hh => ?_⟩
@@ -71,8 +122,9 @@ theorem exists_corestriction_cocycle : ∀ (R G X : Type) [CommRing R] [Group G]
     have hre : ∑ q : G ⧸ H, (f₀ q.out + ρ q.out x) =
         ∑ q : G ⧸ H, (f₀ (g • q).out + ρ (g • q).out x) :=
       (Equiv.sum_comp (MulAction.toPerm g) (fun q : G ⧸ H => f₀ q.out + ρ q.out x)).symm
+
     rw [hidx, map_sum, hre, ← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib,
-      ← Finset.sum_sub_distrib]
+    ← Finset.sum_sub_distrib]
     refine Y.sum_mem fun q _ => ?_
     set s' := (g • q).out
     set s := q.out
@@ -85,7 +137,7 @@ theorem exists_corestriction_cocycle : ∀ (R G X : Type) [CommRing R] [Group G]
     rw [map_sub, map_sub, map_sub, hmul, e] at a1
     have := Y.add_mem (Y.sub_mem a1 a2) a3
     convert this using 1
-    rw [map_add, hmul]
+    rw [map_add (f := _), hmul]
     abel
 
 end GlobalTheory

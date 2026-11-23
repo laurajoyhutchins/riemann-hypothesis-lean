@@ -1,5 +1,59 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHyp
-import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.HeightAddRingKrullDimQuotientMvPolynomialField
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHyp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+public import Mathlib.RingTheory.MvPolynomial.EulerIdentity
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import ReciprocityTheory.CommutativeAlgebra.PolynomialHeights.HeightAddRingKrullDimQuotientMvPolynomialField
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -85,6 +139,7 @@ theorem aeval_smul_of_isMultiHomog {T : Type*} [CommRing T] [Algebra ℂ T]
   classical
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
+
   simp only [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [aeval_monomial, aeval_monomial, Finsupp.prod_pow, Finsupp.prod_pow]
@@ -177,6 +232,7 @@ theorem ringKrullDim_quotient_le_of_chartIdeal_le {P : Ideal (MvPolynomial (Σ k
       (mem_nonZeroDivisors_of_ne_zero (X_ne_zero q.1))
       ((Subalgebra.mem_algebraicClosure _ _).mp (hRAC _ (hXk q.1)))
       ((Subalgebra.mem_algebraicClosure _ _).mp (hRAC _ (hXq q))))
+  set_option synthInstance.maxHeartbeats 200000 in
   have hCAC : ∀ f : (MvPolynomial (Σ k, ι k) ℂ), C (Ideal.Quotient.mk 𝔮 f) ∈ AC := by
     intro f
     refine MvPolynomial.induction_on (motive := fun f => C (Ideal.Quotient.mk 𝔮 f) ∈ AC) f ?_ ?_ ?_
@@ -186,7 +242,9 @@ theorem ringKrullDim_quotient_le_of_chartIdeal_le {P : Ideal (MvPolynomial (Σ k
       simp only [θ, aeval_C, MvPolynomial.algebraMap_apply]
       rfl
     · intro f g hf hg
-      rw [map_add, map_add]
+      rw [map_add (Ideal.Quotient.mk 𝔮),
+        map_add (MvPolynomial.C : (MvPolynomial (Σ k, ι k) ℂ ⧸ 𝔮) →+*
+          MvPolynomial K (MvPolynomial (Σ k, ι k) ℂ ⧸ 𝔮))]
       exact AC.add_mem hf hg
     · intro f q hf
       rw [map_mul, map_mul]
@@ -216,8 +274,8 @@ theorem ringKrullDim_quotient_le_of_chartIdeal_le {P : Ideal (MvPolynomial (Σ k
   rw [hAdim]
   exact_mod_cast (by omega : sA ≤ e)
 
-open Classical in
 
+open Classical in
 noncomputable def blockWt (k : K) (q : Σ k, ι k) : ℕ := if q.1 = k then 1 else 0
 
 theorem isWeightedHomogeneous_blockWt {f : MvPolynomial (Σ k, ι k) ℂ} {dg : K → ℕ}
@@ -236,6 +294,7 @@ theorem sum_blockWt_eval {f : MvPolynomial (Σ k, ι k) ℂ} {dg : K → ℕ} (h
     (k : K) (z : (Σ k, ι k) → ℂ) :
     ∑ q, (blockWt k q : ℂ) * (z q * eval z (pderiv q f)) = (dg k : ℂ) * eval z f := by
   have h := congrArg (eval z) (isWeightedHomogeneous_blockWt hf k).sum_weight_X_mul_pderiv
+
   simpa [map_sum, nsmul_eq_mul] using h
 
 end ReciprocityTheory.AnForm.R

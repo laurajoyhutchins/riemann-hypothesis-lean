@@ -1,5 +1,51 @@
-import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.NormLeOneOfIntegralInt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.FinalTheorems
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LengthCyclotomicBlockCocyclesLeSha
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.NormLeOneOfIntegralInt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2
 open scoped Matrix
 
@@ -13,8 +59,8 @@ abbrev Ix : Type := Module.Free.ChooseBasisIndex ℤ_[l] c.O
 
 def bas : Module.Basis (Ix c) ℤ_[l] c.O := Module.Free.chooseBasis ℤ_[l] c.O
 
-open Classical in
 
+open Classical in
 def crd (n : ℕ) (i : Ix c) (x : Qbar l) : ZMod (l ^ n) :=
   if h : x ∈ c.O then PadicInt.toZModPow n ((bas c).repr ⟨x, h⟩ i) else 0
 
@@ -25,14 +71,14 @@ variable {c}
 
 theorem crd_of_mem {n : ℕ} (i : Ix c) {x : Qbar l} (hx : x ∈ c.O) :
     crd c n i x = PadicInt.toZModPow n ((bas c).repr ⟨x, hx⟩ i) := by
-  unfold crd; rw [dif_pos hx]
+  unfold crd; rw [dite_eq_left hx]
 
 theorem crd_add {n : ℕ} (i : Ix c) {x y : Qbar l} (hx : x ∈ c.O) (hy : y ∈ c.O) :
     crd c n i (x + y) = crd c n i x + crd c n i y := by
-  rw [crd_of_mem i hx, crd_of_mem i hy, crd_of_mem i (c.O.add_mem hx hy), ← map_add]
+  rw [crd_of_mem i hx, crd_of_mem i hy, crd_of_mem i (c.O.add_mem hx hy), ← map_add (f := _)]
   congr 1
   have : (⟨x + y, c.O.add_mem hx hy⟩ : c.O) = ⟨x, hx⟩ + ⟨y, hy⟩ := rfl
-  rw [this, map_add]; rfl
+  rw [this, map_add (f := _)]; rfl
 
 theorem crd_sub {n : ℕ} (i : Ix c) {x y : Qbar l} (hx : x ∈ c.O) (hy : y ∈ c.O) :
     crd c n i (x - y) = crd c n i x - crd c n i y := by
@@ -210,8 +256,8 @@ section Glob
 variable {Ω : Type} [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω] {n : ℕ} {S : Finset Pl}
   {ξ : G ℚ Ω → G ℚ Ω → Qbar l}
 
-variable (c n S ξ) in
 
+variable (c n S ξ) in
 def zc (i : Ix c) (p : GS Ω (S : Set Pl) × GS Ω (S : Set Pl)) : ZMod (l ^ n) :=
   crd c n i (ξ (Quotient.out p.1) (Quotient.out p.2))
 

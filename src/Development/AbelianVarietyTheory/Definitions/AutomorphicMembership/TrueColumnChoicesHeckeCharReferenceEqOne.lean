@@ -1,10 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BaseDataEmbeddingConj
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DuStarPos
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsDiscriminantTwelfthRootOfIdealLatticeIffDelta1
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.BaseDataEmbeddingConj
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DuStarPos
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AssembleLattice
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsDiscriminantTwelfthRootOfIdealLatticeIffDelta1
+public import Formalism.LocalToGlobal.KernelLattices.ThDistC
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,16 +105,11 @@ theorem Reads.inj {μ μ' : Chr F E K} {ξ : HChar E} (h : Reads σ μ ξ) (h' :
   obtain ⟨a, rfl⟩ := finAf_surjective F E y
   exact Units.ext (σ.injective ((h a).symm.trans (h' a)))
 
-variable (σ) in
 
+variable (σ) in
 theorem reads_one : Reads σ (1 : Chr F E K) (1 : HChar E) := fun a => by
   show ((1 : ℂˣ) : ℂ) = σ ((1 : Kˣ) : K)
   simp
-
-theorem Reads.mul {μ μ' : Chr F E K} {ξ ξ' : HChar E} (h : Reads σ μ ξ) (h' : Reads σ μ' ξ') : Reads σ (μ * μ') (ξ * ξ') :=
-  fun a => by
-    show ((ξ.1 a * ξ'.1 a : ℂˣ) : ℂ) = σ ((μ (finAf F E a) * μ' (finAf F E a) : Kˣ) : K)
-    rw [Units.val_mul, Units.val_mul, map_mul, h a, h' a]
 
 theorem Reads.apply {μ : Chr F E K} {ξ : HChar E} (h : Reads σ μ ξ) (a : Ideles E) (y : (AfE F E)ˣ)
     (hy : afIso F E (y : AfE F E) = (a : AdeleRing (𝓞 E) E).2) : ((ξ.1 a : ℂˣ) : ℂ) = σ ((μ y : Kˣ) : K) := by
@@ -210,15 +252,15 @@ def A : Amb B.fields := I.J.amb B I.chi
 
 abbrev Q (a : I.ι) : Finset (HeightOneSpectrum (𝓞 B.fields.E)) := QE I.sel (I.tup a : Chr B.fields.F B.fields.E B.fields.K)
 
-open Classical in
 
+open Classical in
 def SQ : Finset (HeightOneSpectrum (𝓞 B.host.E)) := Finset.univ.biUnion I.Q
 
 abbrev dat : Dat := B.dat X I.Ch
 
 structure Ok : Prop where
 
-  spaces : letI := B.host.cmStar; DiagSpaces B.sp
+  spaces : letI := B.host.cmStar; _root_.GlobalTheory.Mem.DiagSpaces B.sp
   ch_ok : I.Ch.Ok
 
   ch_tied : I.Ch.Tied B.embLL (fun j τ => (B.hc τ).e j) I.C.mu0 I.C.eta
@@ -241,20 +283,12 @@ structure Ok : Prop where
 
   sharp : ∀ a, (I.cst a).sharp = true
 
-  idx_ok : ∀ a, (I.idx a).Ok I.Ch I.sel (I.tup a) (I.cst a) I.glob (B.R.m - 2)
+  idx_ok : ∀ a, ChIdx.Ok I.Ch I.sel (I.tup a) (I.cst a) (I.idx a) I.glob (B.R.m - 2)
   amb_ok : I.J.Ok
 
   duStar : ∀ u, (B.duStar u : ℝ) = duStarOf B.host (B.hcW u)
 
-theorem glob_σ₀ : I.glob.σ₀ = B.embLL := rfl
-
-theorem globalXi_reference : I.glob.xi0 = B.host.xi0 := rfl
-
-theorem globalCharacters_reference : I.glob.mu0 = I.C.mu0 := rfl
-
 theorem A_σ₀ : I.A.σ₀ = B.embLL := rfl
-
-theorem A_δ : I.A.δ = I.J.δ := rfl
 
 theorem A_cD : I.A.cD = I.J.cD := rfl
 
@@ -315,9 +349,6 @@ theorem Ok.two_q_d_mem (h : I.Ok) : 2 ∈ I.S ∧ B.host.q ∈ I.S ∧ B.host.d 
   ⟨h.mem_of_dvd_QS Nat.prime_two ((dvd_pow_self 2 (Nat.succ_ne_zero _)).trans B.host.tower_dvd),
     h.mem_of_dvd_QSq B.host.hyp.1 (dvd_mul_left _ _), h.ram_mem _ B.host.hyp.2.1 (dvd_mul_left _ _)⟩
 
-theorem Ok.not_dvd_condN (h : I.Ok) {p : ℕ} (hp : p.Prime) (hS : p ∉ I.S) : ¬ p ∣ B.host.condN :=
-  fun hd => hS (h.ram_mem p hp hd)
-
 theorem Ok.hm (h : I.Ok) : B.R.m = (B.R.m - 2) + 2 := (h.idx_ok I.mu0).hm
 
 end ColIn
@@ -351,25 +382,7 @@ theorem AmbIn.ok_iff (J : AmbIn B.host) :
     J.Ok ↔ TaylorLogMetric.IsDiscriminantTwelfthRootOfIdealLattice (assemble B C W V S N G) ⊤ J.δ ∧ IsDgen (assemble B C W V S N G) J.cD :=
   ⟨fun h => ⟨h.delta, h.dgen⟩, fun h => ⟨h.1, h.2⟩⟩
 
-theorem duStarOf_eq (u : B.Word) : duStarOf B.host (B.hcW u) = StandardLattice.duStarU (assemble B C W V S N G) u := rfl
-
 end Record
-
-example {B : Base} {X : PreX B.toPre} (I : ColIn B X) (h : I.Ok) (v : HeightOneSpectrum (𝓞 B.host.E))
-    (hv : Formalism.L2.Host.OverP B.host B.host.pde v) : I.muStar ≠ I.mu0 := by
-  intro e
-  have h1 : I.C.del = 1 := by rw [← h.xi_star, e, h.trueColumnChoices_heckeChar_reference_eq_one]
-  have h2 := (I.C.isDel.ine v hv 1).1 fun x _ => by rw [h1]; simp
-  omega
-
-example {F E K : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [Field K] (σ : K →+* ℂ)
-    (μ : Chr F E K) (ξ : HChar E) (h : Reads σ μ ξ) (a : Ideles E) (ha : (a : AdeleRing (𝓞 E) E).2 = 1) : ξ.1 a = 1 := by
-  apply Units.ext
-  rw [h.apply a 1 (by rw [ha, Units.val_one, map_one])]
-  simp
-
-example {R : Ranks} (H : Host R) (χ : HChar H.E) (N N' : ℕ) : Th.chiFac H (chiId χ) N N' (Th.stdL H N) (Th.stdL H N') = 1 := by
-  simp [Th.chiFac, detId_std, chiId_one]
 
 end GlobalTheory.Mem.Col2
 

@@ -1,4 +1,46 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ScalePowMono
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DualMapSCompScaleS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ScalePowMono
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,7 +65,7 @@ abbrev Rv {S : Type} [CommRing S] (a b c : S) : Type := Localization.Away (algeb
 
 variable {S : Type} [CommRing S] {G : Over (Spec (CommRingCat.of S))} [GrpObj G] [∀ s : S, Smooth (Gs G s).hom]
 
-set_option maxHeartbeats 800000 in
+
 
 theorem pair_compat (a b t : S) (C : Chart (Gs G a)) {y₀ : sp (R₀ := S) (DualNumber (Localization.Away t)) ⟶ G}
     {za : sp (R₀ := S) (DualNumber (Localization.Away a)) ⟶ G} {zb : sp (R₀ := S) (DualNumber (Localization.Away b)) ⟶ G}
@@ -53,7 +95,7 @@ theorem pair_compat (a b t : S) (C : Chart (Gs G a)) {y₀ : sp (R₀ := S) (Dua
       ← res_res, hbr, res_scale, map_pow, AlgHom.commutes, res_res]
   rw [e1, e2, show ρa.comp (qR a t) = ρb.comp (qR b t) from away_ext _ _ _]
 
-set_option maxHeartbeats 800000 in
+
 theorem tan_extend {n : ℕ} (s : Fin n → S) (hs : Ideal.span (Set.range s) = ⊤) (C : ∀ k, Chart (Gs G (s k)))
     (k0 : Fin n) {y₀ : sp (R₀ := S) (DualNumber (Localization.Away (s k0))) ⟶ G} (hy₀ : TanS y₀) :
     ∃ N : ℕ, ∃ w : sp (R₀ := S) (DualNumber S) ⟶ G, TanS w ∧

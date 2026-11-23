@@ -1,8 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.CjApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.IsModel
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.RiEntries
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.OrdInt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.RootsNormLe
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.CjApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.DecompSigmaOrd
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.InOfIntIff
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.IsModel
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.OrdInt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.RiEntries
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.RootsNormLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open IsLocalRing Matrix NumberField Formalism.ConjugateSelfDual ReciprocityTheory.Gal UpperTheory.V UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Pa UpperTheory.V.HV UpperTheory.V.Th UpperTheory.V.Th.Nm GlobalTheory.GalOfCusp
 
 private theorem model_small {l : ℕ} [Fact l.Prime] {ι : Type} [Finite ι] (x : ι → Qbar l) :
@@ -33,12 +75,15 @@ private theorem model_ordAt {l : ℕ} [Fact l.Prime] {n : ℕ} {F : GFrame l} {K
 private theorem model_coc {l : ℕ} [Fact l.Prime] {n : ℕ} {F : GFrame l} {ρ : F.G₀ →* GL (Fin n) (Qbar l)}
     {P : GL (Fin n) (Qbar l)} {I : F.St → Subgroup F.G₀} {ψ : ∀ v, Fin n → F.Gv v →* (Qbar l)ˣ}
     {z : F.G₀ → Matrix (Fin n) (Fin n) (Qbar l)} (h : IsOrdCoc F ρ P I ψ z) (a : Qbar l) :
-    IsOrdCoc F ρ P I ψ fun g => a • z g where
-  cont := h.cont.const_smul a
-  coc g g' := by rw [h.coc, smul_add, Matrix.mul_smul, Matrix.smul_mul]
-  pol g := by rw [Matrix.mul_smul, h.pol, Matrix.transpose_smul, Matrix.smul_mul, smul_neg]
-  ine u g hg := by rw [h.ine u g hg, smul_zero]
-  ord v := by
+    IsOrdCoc F ρ P I ψ (fun g => a • z g) := by
+  refine ⟨h.cont.const_smul a, ?_, ?_, ?_, ?_⟩
+  · intro g g'
+    rw [h.coc, smul_add, Matrix.mul_smul, Matrix.smul_mul]
+  · intro g
+    rw [Matrix.mul_smul, h.pol, Matrix.transpose_smul, Matrix.smul_mul, smul_neg]
+  · intro u g hg
+    rw [h.ine u g hg, smul_zero]
+  · intro v
     obtain ⟨w, Y, hw⟩ := h.ord v
     exact ⟨w, a • Y, model_ordAt (F := F) (ψ := ψ v) hw a⟩
 

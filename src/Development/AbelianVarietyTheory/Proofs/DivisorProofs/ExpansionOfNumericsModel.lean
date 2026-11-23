@@ -1,11 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SumExpSt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimePowerLatticeInclusionOfLocalModelsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExponentDatumLeOfPrimePowerLatticeInclusionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExponentOfRecordVsFormulas
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumExponentLogLeOfCut
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SumExpSt
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.SingleIndexPlacesAreTwisted
+public import Formalism.PieriBlockIdeals.StatementE
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExponentDatumLeOfPrimePowerLatticeInclusionStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExponentOfRecordVsFormulas
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimePowerLatticeInclusionOfLocalModelsStatement
+public import Development.AutomorphicArithmetic.PrimeDiscriminants.ExcSet
 import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.RamBasic
-import Development.AutomorphicArithmetic.PrimeDiscriminants.ExcSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Pj GlobalTheory.BigTop GlobalTheory.BigOn GlobalTheory.ExpTie Formalism.CohomologicalDescent.LogSmallConstantBounds Formalism.CohomologicalDescent.ShortWeightBounds
 
@@ -45,8 +82,8 @@ variable {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : Formalism.MainNotio
 theorem splitPartNumbers_exponent_eq_liftExponent (C CH : ℝ) (t : p.P.T) (w : HeightOneSpectrum (𝓞 D.what₂.LL)) (j : Fin D.R.m) :
     ((R2 p).num (F2 p) C CH).J0 t w j = (((blk p j t).JexpU (lvlL p) (subZ p j t) w : ℚ) : ℝ) := rfl
 
-open Classical in
 
+open Classical in
 theorem hasExpBound_at (hcut : Formalism.CohomologicalDescent.E.ExCut) {c : OnConst} (O : Obj p c)
     (hm : O.m = (D.R.m : ℝ)) (hx : O.x = L.sc.x) (heps : O.eps = L.sc.eps) (hT2 : O.T2 = D.host.T2.card)
     (Pj : Fin D.R.m → Par) (Wj : Fin D.R.m → Wts D.what₂.Tau) (hD : ∀ j, Dict L j (Pj j) (Wj j))
@@ -54,12 +91,18 @@ theorem hasExpBound_at (hcut : Formalism.CohomologicalDescent.E.ExCut) {c : OnCo
     (hS : ∀ j t w, LIncl (blk p j t) (lvlL p) (subZ p j t) w ((Wj j).JA (Pj j) (Formalism.EigenvalueLevelCeiling.plc w)))
     (hM : ∀ j, ∀ w ∈ p.R.twPl, (Wj j).WRange (Pj j) (Formalism.EigenvalueLevelCeiling.plc w) → ModelAt p j (Pj j) (Wj j) w) (C CH : ℝ) :
     HasExpBound ((R2 p).num (F2 p) C CH) O := by
-  refine ⟨fun w _ j => ?_, fun j l => ((Wj j).Jrec7 (Pj j) l : ℝ), fun j => ⟨fun l => Nat.cast_nonneg _, fun Q hQ => ?_⟩,
-    fun w hw j => ?_⟩
-  · have h := (GlobalTheory.T.exponent_datum_le_of_primePowerLatticeInclusion _ _ _ _ _ _ w _ (hS j ((S2 p).μ w) w)).1
+  constructor
+  · intro w _ j
+    have h := (GlobalTheory.T.exponent_datum_le_of_primePowerLatticeInclusion _ _ _ _ _ _ w _ (hS j ((S2 p).μ w) w)).1
     rw [splitPartNumbers_exponent_eq_liftExponent]
     exact_mod_cast h
-  · obtain ⟨hHyp, hLarge, hOk, X', A, hRows, hBig⟩ := hN j
+  refine ⟨fun j l => ((Wj j).Jrec7 (Pj j) l : ℝ), ?_, ?_⟩
+  · intro j
+    constructor
+    · intro l
+      exact Nat.cast_nonneg _
+    intro Q hQ
+    obtain ⟨hHyp, hLarge, hOk, X', A, hRows, hBig⟩ := hN j
     have hcard : Fintype.card D.what₂.Tau = (Pj j).f := by rw [← Nat.card_eq_fintype_card]; exact (hD j).card
     have h := UpperTheory.ExcSet.sum_exponent_log_le hcut D (Pj j) X' A hHyp hLarge hRows hBig D.what₂.Tau (Wj j) hOk hcard (hD j).f
       (hD j).special O.T2
@@ -70,32 +113,13 @@ theorem hasExpBound_at (hcut : Formalism.CohomologicalDescent.E.ExCut) {c : OnCo
     show _ ≤ 30 * (O.T2 : ℝ) * O.m * O.b * O.xe ^ 2 + 2 * O.m * O.b
     rw [hxe, hb, hm']
     exact h
-  · have hle := jexpU_le_jrec7 hcut (blk p j (p.R.mu w)) (lvlL p) (subZ p j (p.R.mu w)) w (Pj j) (Wj j) (hN j)
+  · intro w hw j
+    have hle := jexpU_le_jrec7 hcut (blk p j (p.R.mu w)) (lvlL p) (subZ p j (p.R.mu w)) w (Pj j) (Wj j) (hN j)
       (fun _ => hS j _ w) (fun hR => hM j w hw hR)
     show (((blk p j (p.R.mu w)).JexpU (lvlL p) (subZ p j (p.R.mu w)) w : ℚ) : ℝ) ≤ ((Wj j).Jrec7 (Pj j) (Formalism.EigenvalueLevelCeiling.plc w) : ℝ)
     exact_mod_cast hle
 
 end Point
-
-theorem expSt_of : Formalism.CohomologicalDescent.E.ExCut → NumSt → SumExpSt → ModelSt → ExpSt := by
-  intro hcut hN hS hM
-  obtain ⟨a, ha, H⟩ := (hN.and hS).and hM
-  refine ⟨a, ha, fun e he hle => ?_⟩
-  obtain ⟨K, hK⟩ := H e he hle
-  refine ⟨K, fun Fm CH hc hL => ?_⟩
-  obtain ⟨⟨⟨x1, N1⟩, ⟨x2, S1⟩⟩, ⟨x3, M1⟩⟩ := hK Fm CH hc hL
-  refine ⟨0, fun c _ _ => ⟨max x1 (max x2 x3), fun x hx hle i p hp hMo r O hR => ?_⟩⟩
-  have h1 : x1 ≤ x := (le_max_left _ _).trans hle
-  have h2 : x2 ≤ x := (le_max_left _ _).trans ((le_max_right _ _).trans hle)
-  have h3 : x3 ≤ x := (le_max_right _ _).trans ((le_max_right _ _).trans hle)
-  choose Pj Wj hPW using N1 x hx h1 i p hp hMo
-  obtain ⟨st, hRT⟩ := hR.1.depth
-  letI := st
-  letI := hostAlg (Fm.D x i)
-  intro C CH'
-  exact hasExpBound_at p hcut O hRT.m_eq hRT.x_eq hRT.eps_eq hR.1.realisedChain_torus_eq Pj Wj (fun j => (hPW j).1) (fun j => (hPW j).2)
-    (fun j t w => S1 x hx h2 i p hp hMo j (Pj j) (Wj j) (hPW j).1 (hPW j).2 t w)
-    (fun j w hw hR' => M1 x hx h3 i p hp hMo j (Pj j) (Wj j) (hPW j).1 (hPW j).2 w hw hR') C CH'
 
 end GlobalTheory.ExpTie.Asm
 

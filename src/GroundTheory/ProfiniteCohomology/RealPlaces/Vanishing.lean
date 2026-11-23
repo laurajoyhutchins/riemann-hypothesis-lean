@@ -1,17 +1,60 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingPrimes
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyTransfer
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.GSDefs
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingCriterion
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingMackeyTransfer
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IsDedekindDomain GroundTheory.Global
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 attribute [local instance 2000] Rep.hV2
 
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   (ιr : ∀ v : {v : InfinitePlace K.1 // v.IsReal}, ℚ̄ →ₐ[K.1] AlgebraicClosure v.1.Completion)
@@ -34,45 +77,51 @@ theorem subsingleton_gsTateCompactCohomology {n : ℕ} (hn : n ≠ 0)
   ⟨fun x y => (gsTateCompactCohomology_eq_zero S ιr ιs hn hS M hM hr x).trans
     (gsTateCompactCohomology_eq_zero S ιr ιs hn hS M hM hr y).symm⟩
 
-set_option maxHeartbeats 4000000 in
 
+set_option maxHeartbeats 32000000 in
 theorem injective_gsRealRes_of_four_le {n : ℕ} (hn : n ≠ 0)
     (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((n : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
     (M : Rep.{0} (ULift.{0} ℤ) (galUnramifiedOutside K.1 ℚ̄ S)) [IsDiscreteRep M] [Finite M]
     (hM : ∀ m : M, n • m = 0) {r : ℕ} (hr : 4 ≤ r) :
-    Function.Injective (gsRealRes S ιr M r).hom := by
-  obtain ⟨ιs'⟩ : Nonempty (∀ v : S,
-      ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1)) :=
-    ⟨fun _ => Classical.choice nonempty_algHom_of_isSepClosed⟩
-  obtain ⟨p, rfl⟩ : ∃ p, r = p + 1 := ⟨r - 1, by omega⟩
-  exact (injective_tateGlobalToLocal_iff (gsFinFamily S ιs') (gsRealFamily S ιr) M
-    (fun v => Rep.res (gsFinFamily S ιs' v).toMonoidHom M) (fun _ => 𝟙 _)
-    (fun w => Rep.res (gsRealFamily S ιr w).toMonoidHom M) (fun _ => 𝟙 _) (p + 1)
-    (fun v => subsingleton_cohomology_gsFinFamily_of_three_le S ιs' hn M hM v (by omega))).1
-    (injective_tateGlobalToLocal_of_eq_zero (gsFinFamily S ιs') (gsRealFamily S ιr) M
-      (fun v => Rep.res (gsFinFamily S ιs' v).toMonoidHom M) (fun _ => 𝟙 _)
-      (fun w => Rep.res (gsRealFamily S ιr w).toMonoidHom M) (fun _ => 𝟙 _) p
-      (gsTateCompactCohomology_eq_zero S ιr ιs' hn hS M hM hr))
+    Function.Injective (gsRealRes S ιr M r).hom := set_option maxHeartbeats 16000000 in by
+  let ιs' := someFinEmbeddings S
+  cases r with
+  | zero => exact (Nat.not_succ_le_zero _ hr).elim
+  | succ p =>
+    let φ := gsFinFamily S ιs'
+    let ψ := gsRealFamily S ιr
+    let Mᵥ v := Rep.res (φ v).toMonoidHom M
+    let Mᵣ w := Rep.res (ψ w).toMonoidHom M
+    have h₃ : 3 ≤ p + 1 := Nat.le_trans (Nat.le_succ 3) hr
+    exact (injective_tateGlobalToLocal_iff φ ψ M
+      Mᵥ (fun v => 𝟙 (Mᵥ v)) Mᵣ (fun w => 𝟙 (Mᵣ w)) (p + 1)
+      (fun v => subsingleton_cohomology_gsFinFamily_of_three_le S ιs' hn M hM v h₃)).1
+      (injective_tateGlobalToLocal_of_eq_zero φ ψ M
+        Mᵥ (fun v => 𝟙 (Mᵥ v)) Mᵣ (fun w => 𝟙 (Mᵣ w)) p
+        (gsTateCompactCohomology_eq_zero S ιr ιs' hn hS M hM hr))
 
-set_option maxHeartbeats 4000000 in
 
+set_option maxHeartbeats 32000000 in
 theorem surjective_gsRealRes_of_three_le {n : ℕ} (hn : n ≠ 0)
     (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((n : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
     (M : Rep.{0} (ULift.{0} ℤ) (galUnramifiedOutside K.1 ℚ̄ S)) [IsDiscreteRep M] [Finite M]
     (hM : ∀ m : M, n • m = 0) {r : ℕ} (hr : 3 ≤ r) :
-    Function.Surjective (gsRealRes S ιr M r).hom := by
-  obtain ⟨ιs'⟩ : Nonempty (∀ v : S,
-      ℚ̄ →ₐ[K.1] AlgebraicClosure ((v : HeightOneSpectrum (𝓞 K.1)).adicCompletion K.1)) :=
-    ⟨fun _ => Classical.choice nonempty_algHom_of_isSepClosed⟩
-  obtain ⟨p, rfl⟩ : ∃ p, r = p + 1 := ⟨r - 1, by omega⟩
-  exact (surjective_tateGlobalToLocal_iff (gsFinFamily S ιs') (gsRealFamily S ιr) M
-    (fun v => Rep.res (gsFinFamily S ιs' v).toMonoidHom M) (fun _ => 𝟙 _)
-    (fun w => Rep.res (gsRealFamily S ιr w).toMonoidHom M) (fun _ => 𝟙 _) (p + 1)
-    (fun v => subsingleton_cohomology_gsFinFamily_of_three_le S ιs' hn M hM v (by omega))).1
-    (surjective_tateGlobalToLocal_of_eq_zero (gsFinFamily S ιs') (gsRealFamily S ιr) M
-      (fun v => Rep.res (gsFinFamily S ιs' v).toMonoidHom M) (fun _ => 𝟙 _)
-      (fun w => Rep.res (gsRealFamily S ιr w).toMonoidHom M) (fun _ => 𝟙 _) p
-      (gsTateCompactCohomology_eq_zero S ιr ιs' hn hS M hM (by omega)))
+    Function.Surjective (gsRealRes S ιr M r).hom := set_option maxHeartbeats 16000000 in by
+  let ιs' := someFinEmbeddings S
+  cases r with
+  | zero => exact (Nat.not_succ_le_zero _ hr).elim
+  | succ p =>
+    let φ := gsFinFamily S ιs'
+    let ψ := gsRealFamily S ιr
+    let Mᵥ v := Rep.res (φ v).toMonoidHom M
+    let Mᵣ w := Rep.res (ψ w).toMonoidHom M
+    have h₄ : 4 ≤ p + 2 := Nat.succ_le_succ hr
+    exact (surjective_tateGlobalToLocal_iff φ ψ M
+      Mᵥ (fun v => 𝟙 (Mᵥ v)) Mᵣ (fun w => 𝟙 (Mᵣ w)) (p + 1)
+      (fun v => subsingleton_cohomology_gsFinFamily_of_three_le S ιs' hn M hM v hr)).1
+      (surjective_tateGlobalToLocal_of_eq_zero φ ψ M
+        Mᵥ (fun v => 𝟙 (Mᵥ v)) Mᵣ (fun w => 𝟙 (Mᵣ w)) p
+        (gsTateCompactCohomology_eq_zero S ιr ιs' hn hS M hM h₄))
 
 end
 

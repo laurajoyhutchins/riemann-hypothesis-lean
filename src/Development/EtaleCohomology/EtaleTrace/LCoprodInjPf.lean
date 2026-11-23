@@ -1,48 +1,51 @@
-import Development.EtaleCohomology.EtaleTrace.LadicH0LocallyConstant
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC
 
 namespace LateralTheory.EtaleTrace
-
-def LCoprodEmpty : Prop := Base → ∀ (l : ℕ) [Fact l.Prime] (E : Scheme.{0}), IsInitial E → ∀ (N : ℤ) (u : V l E N), u = 0
-
-def LCoprodTwo : Prop := Base → ∀ (l : ℕ) [Fact l.Prime] {A B E : Scheme.{0}} (i : A ⟶ E) (j : B ⟶ E),
-  IsColimit (BinaryCofan.mk i j) → ∀ (N : ℤ) (u : V l E N), pb l i N u = 0 → pb l j N u = 0 → u = 0
-
-def splitCofan {n : ℕ} {W : Fin (n + 1) → Scheme.{0}} {E : Scheme.{0}} (ι : ∀ i, W i ⟶ E)
-    (hc : IsColimit (Cofan.mk E ι)) :
-    IsColimit (BinaryCofan.mk (ι 0) (Sigma.desc (fun i : Fin n => ι i.succ))) :=
-  BinaryCofan.IsColimit.mk _
-    (fun {T} f g => hc.desc (Cofan.mk T (Fin.cases (motive := fun i => W i ⟶ T) f (fun i => Sigma.ι (fun i : Fin n => W i.succ) i ≫ g))))
-    (fun {T} f g => by
-      have := hc.fac (Cofan.mk T (Fin.cases (motive := fun i => W i ⟶ T) f (fun i => Sigma.ι (fun i : Fin n => W i.succ) i ≫ g))) ⟨0⟩
-      exact this)
-    (fun {T} f g => by
-      show Sigma.desc (fun i : Fin n => ι i.succ) ≫ hc.desc (Cofan.mk T (Fin.cases (motive := fun i => W i ⟶ T) f (fun i => Sigma.ι (fun i : Fin n => W i.succ) i ≫ g))) = g
-      apply Sigma.hom_ext
-      intro i
-      have := hc.fac (Cofan.mk T (Fin.cases (motive := fun i => W i ⟶ T) f (fun i => Sigma.ι (fun i : Fin n => W i.succ) i ≫ g))) ⟨i.succ⟩
-      rw [Sigma.ι_desc_assoc]
-      exact this)
-    (fun {T} f g (m : E ⟶ T) h1 h2 => by
-      apply hc.hom_ext
-      rintro ⟨i⟩
-      rw [hc.fac]
-      refine Fin.cases ?_ (fun i => ?_) i
-      · exact h1
-      · have h2' : Sigma.desc (fun i : Fin n => ι i.succ) ≫ m = g := h2
-        show ι i.succ ≫ m = Sigma.ι (fun i : Fin n => W i.succ) i ≫ g
-        rw [← h2', ← Category.assoc, Sigma.ι_desc])
-
-def LEmptyH : Prop := Base → ∀ (R : Type) [CommRing R] (E : Scheme.{0}), IsInitial E → ∀ (F : Shv R) (n : ℤ),
-  Subsingleton (H R (sch.obj E) F n)
-
-def LTwoH : Prop := Base → ∀ (R : Type) [CommRing R] {A B E : Scheme.{0}} (i : A ⟶ E) (j : B ⟶ E),
-  IsColimit (BinaryCofan.mk i j) → ∀ (F : Shv R) (n : ℤ) (x : H R (sch.obj E) F n),
-  pull R (sch.map i) F n x = 0 → pull R (sch.map j) F n x = 0 → x = 0
-
-def LFreeEmpty : Prop := ∀ (R : Type) [CommRing R] (E : Scheme.{0}), IsInitial E → IsZero ((free R).obj (yoneda.obj E))
 
 theorem chains_zero (R : Type) [CommRing R] (E : Scheme.{0}) (hZ : IsZero ((free R).obj (yoneda.obj E))) (p : ℤ) :
     IsZero (((chains R).obj (sch.obj E)).X p) := by

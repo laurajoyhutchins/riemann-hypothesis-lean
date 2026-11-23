@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsGenLab
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsFrameTwoLevels
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UtestGeomNonempty
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TorsionValuesCoordsOperatorPermute
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsGenLab
+public import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsThetaPtOverMove
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.SymmetricLiftOddOrderExistsUnique
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsFramesOnUniformisedModelFibre
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ThetaPtEqUnitMulTh
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TorsionValuesCoordsOperatorPermute
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UtestGeomNonempty
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsFrameTwoLevels
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIsGenSecNear
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -25,8 +68,8 @@ section Move
 variable {S S' : Scheme.{0}} {f : S' ⟶ S} {P : PolAV S} {P₀ : PolAV S'} {a : P₀.A.left ⟶ P.A.left}
   (hp : IsGrpPullback P₀.A P.A f a) {w : LB.Iso P₀.L (P.L.pull a)} (hw : w.IsGen)
 
-include hp hw in
 
+include hp hw in
 theorem exists_frames {T : Over S} {T' : Over S'} {g : T'.left ⟶ T.left}
     {rig : LB.Gen (P.L.pull (eSec P.A))} (hrig : rig.IsGen) {I : Type} {x : I → (T ⟶ P.A)} {x' : I → (T' ⟶ P₀.A)}
     (hx : ∀ i, (x' i).left ≫ a = g ≫ (x i).left) {n : ℕ}
@@ -47,8 +90,8 @@ theorem exists_frames {T : Over S} {T' : Over S'} {g : T'.left ⟶ T.left}
   have := Hτ i _ (𝟙 _) z J J' hJ hJ'
   rwa [Fin.prod_univ_one, zpow_one, Category.id_comp, Category.id_comp] at this
 
-include hw in
 
+include hw in
 theorem isTwVal_move {T T₀ : Over S} {T' : Over S'} {σ : T'.left ⟶ T.left} (hσ : σ ≫ T.hom = T'.hom ≫ f)
     {β : T ⟶ T₀} {g : T'.left ⟶ T₀.left} (hg : g ≫ T₀.hom = T'.hom ≫ f) (hβ : σ ≫ β.left = g)
     {θ : LB.Sec (LPow P.A P.L 1 T₀)} {θ₁ : LB.Sec (LPow P₀.A P₀.L 1 T')} (hθ : SecRel hp g hg w θ₁ θ)
@@ -186,6 +229,7 @@ theorem isValueAt_act {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω] {S : 
   have hgs : ∀ b : S.R, gs (𝟙 (baseOver (Sp S.R)).left) y ⊤ (fn b) = g b := fun b => gs_eq _ y ⊤ trivial _
   have b₂ := EvCrd.sval_sum (ρ.U_act t ρ.i₀ σ H) (ρ.pt h) hJ
   simp only [fun l => ThetaCompare.sval_valueAt (ρ.ev_val l h) hJ, hgs, ← _root_.mul_assoc, ← Finset.sum_mul] at b₂
+
   rw [Category.id_comp, hgs, map_sum]
   simp only [map_mul]
   exact b₂
@@ -236,6 +280,7 @@ theorem exists_generic_data {o Ω : Type} [CommRing o] [Field Ω] [Algebra o Ω]
     obtain ⟨σ, hσ⟩ := exists_secRel hp g hg hw hL₀ hL₁ σ₀
     have q := isValueAt_move hp g hg hL₀ hL₁ (hX h).symm (ThetaGeom.genThrough_pow g (vτ h) S.N) hσ
       (isValueAt_act ρ t h hσ₀)
+
     rw [spMap_appTop_fn, map_sum] at q
     have q' := sv_of_isValueAt q (𝟙 _) z hJ
     have b₀ := VVRank.sv_of_isTwistPull P₀.A (hU' _ _ _ _ hs hσ hσ₀) (ptSecT P₀.A (X h)).left z hJ

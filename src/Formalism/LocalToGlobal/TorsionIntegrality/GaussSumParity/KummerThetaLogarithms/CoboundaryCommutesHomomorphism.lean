@@ -1,4 +1,57 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.NormLeInvOfLtOne
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementC
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.BiextensionHypothesesOfConditions
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.NormLeInvOfLtOne
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstZeroOfConstantCoeff
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.TilInvariantLOf
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FinalS
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.LogarithmEquivalence
+import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.TheoremSFromKOneOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -19,8 +72,6 @@ private theorem hasSubst_finite_of_constantCoeff_eq_zero {σ τ : Type} [Finite 
     (ha : ∀ s, constantCoeff (a s) = 0) : HasSubst a := by
   first
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
-  | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent fun s => by rw [ha s]; exact IsNilpotent.zero
 
 private theorem hasSubst_vec_pair_of_constantCoeff_eq_zero {τ : Type} {a b : MvPowerSeries τ K} (ha : constantCoeff a = 0)
     (hb : constantCoeff b = 0) : HasSubst ![a, b] :=
@@ -31,21 +82,18 @@ private theorem mvSubst_add_of_hasSubst {ι κ : Type} {φ : ι → MvPowerSerie
   first
   | exact MvPowerSeries.subst_add hφ f g
   | (rw [← coe_substAlgHom hφ]; exact map_add _ f g)
-  | exact map_add (substAlgHom hφ) f g
 
 private theorem mvSubst_sub_of_hasSubst {ι κ : Type} {φ : ι → MvPowerSeries κ K} (hφ : HasSubst φ)
     (f g : MvPowerSeries ι K) : subst φ (f - g) = subst φ f - subst φ g := by
   first
   | exact MvPowerSeries.subst_sub hφ f g
   | (rw [← coe_substAlgHom hφ]; exact map_sub _ f g)
-  | exact map_sub (substAlgHom hφ) f g
 
 private theorem mvSubst_zero_of_hasSubst {ι κ : Type} {φ : ι → MvPowerSeries κ K} (hφ : HasSubst φ) :
     subst φ (0 : MvPowerSeries ι K) = 0 := by
   first
   | exact MvPowerSeries.subst_zero hφ
   | (rw [← coe_substAlgHom hφ]; exact map_zero _)
-  | simp
 
 private theorem powerSeries_subst_add_of_constantCoeff_eq_zero {τ : Type} {a : MvPowerSeries τ K} (ha : constantCoeff a = 0)
     (f g : PowerSeries K) :
@@ -94,11 +142,6 @@ theorem constantCoeff_first_two_of_three {F : MvPowerSeries (Fin 2) K} (hF0 : co
   first
   | exact constantCoeff_subst_eq_zero hx F hF0
   | exact constantCoeff_subst_eq_zero (hasSubst_finite_of_constantCoeff_eq_zero hx) hx hF0
-  | exact constantCoeff_subst_eq_zero hx hF0
-  | exact constantCoeff_subst_eq_zero (hasSubst_finite_of_constantCoeff_eq_zero hx) hx F hF0
-  | exact constantCoeff_subst_eq_zero (hasSubst_finite_of_constantCoeff_eq_zero hx) F hx hF0
-  | exact constantCoeff_subst_eq_zero (hasSubst_finite_of_constantCoeff_eq_zero hx) hF0 hx
-  | exact constantCoeff_subst_eq_zero (hasSubst_finite_of_constantCoeff_eq_zero hx) F hF0 hx
   | (apply constantCoeff_subst_eq_zero <;> first | assumption | exact hasSubst_finite_of_constantCoeff_eq_zero hx)
 
 theorem cob_add {F : MvPowerSeries (Fin 2) K} (hF0 : constantCoeff F = 0) (f g : PowerSeries K) :
@@ -127,7 +170,7 @@ theorem cc_ps_gen {τ : Type} {a : MvPowerSeries τ K} (ha : constantCoeff a = 0
   have e : f = PowerSeries.C (PowerSeries.constantCoeff f) +
       (f - PowerSeries.C (PowerSeries.constantCoeff f)) := by ring
   conv_lhs => rw [e]
-  rw [PowerSeries.subst_add hs, PowerSeries.subst_C, map_add, Pair.cc_ps ha (by simp), add_zero,
+  rw [PowerSeries.subst_add hs, PowerSeries.subst_C, map_add (f := _), Pair.cc_ps ha (by simp), add_zero,
     constantCoeff_C]
 
 theorem cob_hom {F FE : MvPowerSeries (Fin 2) K} {θ : PowerSeries K}
@@ -361,7 +404,6 @@ theorem transport_first_level_holds : CoboundaryCocycleTransportAlongHom := by
     first
     | exact h0
     | rwa [coeff_zero_eq_constantCoeff_apply] at h0
-    | simpa using h0
   have hphE : PowerSeries.constantCoeff phE = 0 := cc_of_cob hFE0 hccE
   have hph : PowerSeries.constantCoeff ph = 0 := by
     have h1 := hsim.1

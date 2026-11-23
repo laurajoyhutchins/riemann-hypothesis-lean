@@ -1,7 +1,44 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LineModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsFrameCover
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.TwistingSheafOneChartEqPreimageStandardChart
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemRangeCompIffOfIsClosedImmersion
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +54,7 @@ private theorem valR_ne_zero_of_mem_basicOpen {A : Type} [CommRing A] {X : Schem
     (h : ⊤ ≤ w ⁻¹ᵁ V) (s : Γ(X, V)) (z : Sp A) (hs : w z ∈ X.basicOpen s) : valR w V s ≠ 0 := by
   intro h0
   unfold valR at h0
-  rw [dif_pos h] at h0
+  rw [dite_eq_left h] at h0
   have h1 : (w.appLE V ⊤ h).hom s = 0 := by
     have h3 := congrArg (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom h0
     rw [map_zero] at h3
@@ -42,7 +79,7 @@ private theorem valR_ne_zero_of_mem_basicOpen {A : Type} [CommRing A] {X : Schem
 private theorem valR_sub_iwasawa_decomposition {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X) (V : X.Opens)
     (h : ⊤ ≤ x ⁻¹ᵁ V) (s t : Γ(X, V)) : valR x V (s - t) = valR x V s - valR x V t := by
   unfold valR
-  rw [dif_pos h, dif_pos h, dif_pos h, map_sub, map_sub]
+  rw [dite_eq_left h, dite_eq_left h, dite_eq_left h, map_sub, map_sub]
 
 theorem eq_of_valR {Y : Scheme.{0}} [IsReduced Y] {V : Y.Opens} {f g : Γ(Y, V)}
     (H : ∀ (k : Type) [Field k] (w : Sp k ⟶ Y), ⊤ ≤ w ⁻¹ᵁ V → valR w V f = valR w V g) : f = g := by
@@ -72,7 +109,7 @@ private theorem valR_resG_iwasawa_decomposition {A : Type} [CommRing A] {X : Sch
     (e : V ≤ U) (h : ⊤ ≤ x ⁻¹ᵁ V) (s : Γ(X, U)) : valR x V (resG X e s) = valR x U s := by
   have hU : ⊤ ≤ x ⁻¹ᵁ U := h.trans (fun z hz => e hz)
   unfold valR
-  rw [dif_pos h, dif_pos hU]
+  rw [dite_eq_left h, dite_eq_left hU]
   congr 1
   show (X.presheaf.map (homOfLE e).op ≫ x.appLE V ⊤ h).hom s = _
   rw [Scheme.Hom.map_appLE]
@@ -80,7 +117,7 @@ private theorem valR_resG_iwasawa_decomposition {A : Type} [CommRing A] {X : Sch
 private theorem valR_mul_degeneration {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X) (V : X.Opens)
     (h : ⊤ ≤ x ⁻¹ᵁ V) (s t : Γ(X, V)) : valR x V (s * t) = valR x V s * valR x V t := by
   unfold valR
-  rw [dif_pos h, dif_pos h, dif_pos h, map_mul, map_mul]
+  rw [dite_eq_left h, dite_eq_left h, dite_eq_left h, map_mul, map_mul]
 
 theorem valR_frac_mul {A τ : Type} [CommRing A] [SetLike τ A] [AddSubgroupClass τ A] (𝒜 : ℕ → τ) [GradedRing 𝒜]
     {C : Type} [CommRing C] (y : Sp C ⟶ Proj 𝒜) {U₁ U₂ U₃ : (Proj 𝒜).Opens} {d : ℕ} {a b c : A}
@@ -176,7 +213,7 @@ private theorem valR_app_eq_valR_comp {A : Type} [CommRing A] {X Y : Scheme.{0}}
     (h : ⊤ ≤ w ⁻¹ᵁ (e ⁻¹ᵁ D)) (r : Γ(Y, D)) : valR w (e ⁻¹ᵁ D) ((e.app D).hom r) = valR (w ≫ e) D r := by
   have h' : ⊤ ≤ (w ≫ e) ⁻¹ᵁ D := h
   unfold valR
-  rw [dif_pos h, dif_pos h']
+  rw [dite_eq_left h, dite_eq_left h']
   congr 1
 
 theorem exists_cover {O : Type} [CommRing O] {X : Scheme.{0}} {s : X ⟶ Sp O} (hs : IsProjOver s)
@@ -190,7 +227,7 @@ theorem exists_cover {O : Type} [CommRing O] {X : Scheme.{0}} {s : X ⟶ Sp O} (
   obtain ⟨m, d, F, σ, hd, hF, hle, hcov⟩ := exists_forms e U hU
   refine ⟨m, fun i => e ⁻¹ᵁ Proj.basicOpen (grading O N) (F i), σ,
     fun i i' => Units.map (e.app (Proj.basicOpen (grading O N) (F i) ⊓ Proj.basicOpen (grading O N) (F i'))).hom.toMonoidHom
-      (fracUnit (grading O N) (Proj.basicOpen (grading O N) (F i) ⊓ Proj.basicOpen (grading O N) (F i')) (F i') (F i)
+      (fracUnit (𝒜 := grading O N) (Proj.basicOpen (grading O N) (F i) ⊓ Proj.basicOpen (grading O N) (F i')) (F i') (F i)
         (hF i') (hF i) inf_le_right inf_le_left),
     fun i i' => (e.app (Proj.basicOpen (grading O N) (F i))).hom
       (frac (grading O N) (Proj.basicOpen (grading O N) (F i)) (F i') (F i) (hF i') (hF i) le_rfl),
@@ -228,12 +265,12 @@ theorem exists_cover {O : Type} [CommRing O] {X : Scheme.{0}} {s : X ⟶ Sp O} (
 private theorem valR_pow_iwasawa_decomposition {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X) (V : X.Opens)
     (h : ⊤ ≤ x ⁻¹ᵁ V) (s : Γ(X, V)) (m : ℕ) : valR x V (s ^ m) = valR x V s ^ m := by
   unfold valR
-  rw [dif_pos h, dif_pos h, map_pow, map_pow]
+  rw [dite_eq_left h, dite_eq_left h, map_pow, map_pow]
 
 private theorem le_preimage_basicOpen_of_valR_ne_zero {k : Type} [Field k] {X : Scheme.{0}} (w : Sp k ⟶ X) (V : X.Opens)
     (h : ⊤ ≤ w ⁻¹ᵁ V) (s : Γ(X, V)) (hs : valR w V s ≠ 0) : ⊤ ≤ w ⁻¹ᵁ X.basicOpen s := by
   unfold valR at hs
-  rw [dif_pos h] at hs
+  rw [dite_eq_left h] at hs
   have hu : IsUnit ((w.appLE V ⊤ h).hom s) := by
     have h3 := (Ne.isUnit hs).map (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
     have e : (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
@@ -289,12 +326,12 @@ private theorem valF_eq_valR_iwasawa_decomposition {k : Type} [Field k] {X : Sch
 private theorem valR_one_iwasawa_decomposition {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X) (V : X.Opens)
     (h : ⊤ ≤ x ⁻¹ᵁ V) : valR x V 1 = 1 := by
   unfold valR
-  rw [dif_pos h, map_one, map_one]
+  rw [dite_eq_left h, map_one, map_one]
 
 private theorem valR_zero_iwasawa_decomposition {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X) (V : X.Opens)
     (h : ⊤ ≤ x ⁻¹ᵁ V) : valR x V 0 = 0 := by
   unfold valR
-  rw [dif_pos h, map_zero, map_zero]
+  rw [dite_eq_left h, map_zero, map_zero]
 
 private theorem valR_res_units_coe {A : Type} [CommRing A] {X : Scheme.{0}} (x : Sp A ⟶ X) {U V : X.Opens} (e : V ≤ U)
     (h : ⊤ ≤ x ⁻¹ᵁ V) (u : Γ(X, U)ˣ) : valR x V ((res e u : Γ(X, V)ˣ) : Γ(X, V)) = valR x U u :=

@@ -1,7 +1,54 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsUniqueLbIsoPullEqOfCoheightLeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsLinearHomPull
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasDefect
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
 import Development.AbelianVarietyTheory.Definitions.Divisors.RigidForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ToroidalCompactificationBis
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.LieBridgeB
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField IsLocalRing
 open scoped CategoryTheory.Obj Matrix TensorProduct
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj
@@ -29,8 +76,8 @@ variable {J : Type} (V : J → Z.Opens) (e : J → ∀ O : Z.Opens, Γ(Z, O) →
 def loc (O : Z.Opens) (f : Γ(Z, O)) (i : J) : Γ(Z, O ⊓ V i) :=
   e i (O ⊓ V i) (resG Z inf_le_left f)
 
-open Classical in
 
+open Classical in
 def glue (O : Z.Opens) (f : Γ(Z, O)) : Γ(Z, O) :=
   if h : ∃ s : Γ(Z, O), ∀ i, resG Z (inf_le_left : O ⊓ V i ≤ O) s = loc V e O f i then h.choose else 0
 
@@ -60,7 +107,7 @@ theorem glue_eq (he : ∀ i, IsField (V i) (e i))
     (hs : ∀ i, resG Z (inf_le_left : O ⊓ V i ≤ O) s = loc V e O f i) : glue V e O f = s := by
   obtain ⟨t, -, hu⟩ := glue_ex he hc hO f
   have h : ∃ s : Γ(Z, O), ∀ i, resG Z (inf_le_left : O ⊓ V i ≤ O) s = loc V e O f i := ⟨s, hs⟩
-  rw [glue, dif_pos h]
+  rw [glue, dite_eq_left h]
   exact (hu _ h.choose_spec).trans (hu _ hs).symm
 
 theorem res_glue (he : ∀ i, IsField (V i) (e i))
@@ -79,12 +126,12 @@ theorem GlobalTheory.LogKS.isField_glue : ∀ (Z : Scheme.{0}) (J : Type) (V : J
   refine ⟨glue V e, ⟨?_, ?_, ?_⟩, ?_⟩
   · intro W hW f f'
     refine glue_eq he hc hW _ _ fun i => ?_
-    rw [map_add, res_glue he hc hW f, res_glue he hc hW f']
-    simp only [loc, map_add]
+    rw [map_add (f := _), res_glue he hc hW f, res_glue he hc hW f']
+    simp only [loc, map_add (f := _)]
     exact ((he i).1 _ inf_le_right _ _).symm
   · intro W hW f f'
     refine glue_eq he hc hW _ _ fun i => ?_
-    rw [map_add, map_mul, map_mul, res_glue he hc hW f, res_glue he hc hW f']
+    rw [map_add (f := _), map_mul, map_mul, res_glue he hc hW f, res_glue he hc hW f']
     simp only [loc, map_mul]
     exact ((he i).2.1 _ inf_le_right _ _).symm
   · intro W W' h hW f

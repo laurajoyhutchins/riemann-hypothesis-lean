@@ -1,5 +1,56 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSRhR
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSOpR
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutSERDSRhR
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.IsAdmissibleSplittingCharPairMulTwist
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellConjTransposeMulApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 open scoped Matrix
@@ -74,7 +125,8 @@ theorem rowSide_chain (X : ActualOps k r z z' π π') (L : R.LevelData (Pr (RadS
     have e : rowP L Y 0 = 1 := by simp [rowP]
     rw [e]
     refine ⟨rfl, ?_⟩
-    simp [vABs, crd, fst_zero_apply]
+    simp [vABs, crd]
+    rfl
   | n + 1, hn, Ψ, x, hx => by
     have h : n < r := by omega
     have ih := rowSide_chain X L hL Y n (by omega)
@@ -90,16 +142,19 @@ theorem rowSide_chain (X : ActualOps k r z z' π π') (L : R.LevelData (Pr (RadS
     have e01 : rowP L Y (n + 1) 0 1 = rowP L Y n 0 0 * L.cbi ⟨n, h⟩ := by
       rw [partialProduct_succ L Y n h]
       simp [Matrix.mul_apply, Fin.sum_univ_two, R.LevelData.Tvl]
-    have hpb : (L.pb ⟨n, h⟩).1 = X.op ⟨n, h⟩ 3 := by rw [hL.2.1]; rfl
-    have hcb : (L.cb ⟨n, h⟩).1 = X.op ⟨n, h⟩ 4 := by rw [hL.2.2.2.2.1]; rfl
+    have hpb : JCx2.rma_fst _ (L.pb ⟨n, h⟩) = X.op ⟨n, h⟩ 3 := by rw [hL.2.1]; rfl
+    have hcb : JCx2.rma_fst _ (L.cb ⟨n, h⟩) = X.op ⟨n, h⟩ 4 := by rw [hL.2.2.2.2.1]; rfl
     have hcbi : (L.cbi ⟨n, h⟩).1 = X.op ⟨n, h⟩ 5 := by rw [hL.2.2.2.2.2.1]; rfl
     refine ⟨?_, ?_⟩
     · have h1 : (((rowP L Y (n + 1) 0 0).1 Ψ : RadSp k r z z' π π') : Fn k r (Wq →L[ℂ] Wp)) x.1 x.2 =
           (((rowP L Y n 0 0).1 (Y • Ψ - X.op ⟨n, h⟩ 3 Ψ) : RadSp k r z z' π π') : Fn k r (Wq →L[ℂ] Wp)) x.1 x.2 -
             (((rowP L Y n 0 1).1 (X.op ⟨n, h⟩ 4 Ψ) : RadSp k r z z' π π') : Fn k r (Wq →L[ℂ] Wp)) x.1 x.2 := by
+        change (JCx2.rma_fst _ (rowP L Y (n + 1) 0 0) Ψ : Fn k r (Wq →L[ℂ] Wp)) x.1 x.2 = _
         rw [e00]
-        simp only [fst_add_apply, fst_mul_apply, fst_sub_apply, fst_neg_apply, fst_algebraMap_apply, hpb, hcb,
-          map_neg, ← sub_eq_add_neg, Submodule.coe_sub, Pi.sub_apply]
+        simp only [map_add, map_mul, map_sub, map_neg, AlgHom.commutes, LinearMap.add_apply,
+          LinearMap.sub_apply, LinearMap.neg_apply, mul_apply_eq_comp, Module.algebraMap_end_apply,
+          hpb, hcb, ← sub_eq_add_neg, Submodule.coe_sub, Pi.sub_apply]
+        rfl
       rw [h1, (ih _ x hx).1, (ih _ x hx).2, ev]
       simp only [Submodule.coe_sub, Submodule.coe_smul, X.op_apply]
       rfl

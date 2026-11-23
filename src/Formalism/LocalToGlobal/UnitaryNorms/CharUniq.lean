@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.UnitaryNorms.CharHost
+module
+
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsUnitaryOfOrder
+public import Formalism.LocalToGlobal.UnitaryNorms.CharHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,21 +93,25 @@ theorem TrivOn.inv {χ : HChar L} (h : χ.TrivOn F) : (χ⁻¹).TrivOn F :=
 theorem ResEta.mul {χ ξ : HChar L} (h : χ.ResEta F) (h' : ξ.TrivOn F) : (χ * ξ).ResEta F :=
   ⟨fun v k => by rw [resFin_mul, h.1, h'.1, mul_one], fun w k => by rw [resInf_mul, h.2, h'.2, mul_one]⟩
 
-theorem ResEta.div {χ χ' : HChar L} (h : χ.ResEta F) (h' : χ'.ResEta F) : (χ' * χ⁻¹).TrivOn F :=
-  ⟨fun v k => by rw [resFin_mul, resFin_inv, h.1, h'.1, mul_inv_cancel],
-    fun w k => by rw [resInf_mul, resInf_inv, h.2, h'.2, mul_inv_cancel]⟩
-
 theorem LevelLe.mul {χ χ' : HChar L} {v : HeightOneSpectrum (𝓞 L)} {n : ℕ} (h : χ.LevelLe v n) (h' : χ'.LevelLe v n) :
-    (χ * χ').LevelLe v n := fun x hx hx' => by rw [loc_mul, h x hx hx', h' x hx hx', one_mul]
+    (χ * χ').LevelLe v n := fun x hx hx' => by
+  have hloc : (χ * χ').loc v x = χ.loc v x * χ'.loc v x := rfl
+  rw [hloc, h x hx hx', h' x hx hx', one_mul]
 
 theorem LevelLe.inv {χ : HChar L} {v : HeightOneSpectrum (𝓞 L)} {n : ℕ} (h : χ.LevelLe v n) :
-    (χ⁻¹).LevelLe v n := fun x hx hx' => by rw [loc_inv, h x hx hx', inv_one]
+    (χ⁻¹).LevelLe v n := fun x hx hx' => by
+  have hloc : (χ⁻¹).loc v x = (χ.loc v x)⁻¹ := rfl
+  rw [hloc, h x hx hx', inv_one]
 
 theorem UnrAt.mul {χ χ' : HChar L} {v : HeightOneSpectrum (𝓞 L)} (h : χ.UnrAt v) (h' : χ'.UnrAt v) :
-    (χ * χ').UnrAt v := fun x hx => by rw [loc_mul, h x hx, h' x hx, one_mul]
+    (χ * χ').UnrAt v := fun x hx => by
+  have hloc : (χ * χ').loc v x = χ.loc v x * χ'.loc v x := rfl
+  rw [hloc, h x hx, h' x hx, one_mul]
 
 theorem UnrAt.inv {χ : HChar L} {v : HeightOneSpectrum (𝓞 L)} (h : χ.UnrAt v) :
-    (χ⁻¹).UnrAt v := fun x hx => by rw [loc_inv, h x hx, inv_one]
+    (χ⁻¹).UnrAt v := fun x hx => by
+  have hloc : (χ⁻¹).loc v x = (χ.loc v x)⁻¹ := rfl
+  rw [hloc, h x hx, inv_one]
 
 theorem UnrAt.levelLe {χ : HChar L} {v : HeightOneSpectrum (𝓞 L)} (h : χ.UnrAt v) (n : ℕ) : χ.LevelLe v n :=
   fun x hx _ => h x hx
@@ -88,14 +138,6 @@ theorem HasInfQ.mul_triv {I : Type} [Fintype I] {φ : I → L →+* ℂ} {a : I 
   obtain ⟨n, hn, h⟩ := h
   exact ⟨n, hn, h.mul_triv h'⟩
 
-theorem HasInfQ.div {I : Type} [Fintype I] {φ : I → L →+* ℂ} {a : I → ℚ} {χ χ' : HChar L}
-    (h : χ.HasInfQ φ a) (h' : χ'.HasInfQ φ a) (k : Lˣ) : (χ' * χ⁻¹).inf k = 1 := by
-  obtain ⟨n, hn, h⟩ := h
-  obtain ⟨n', hn', h'⟩ := h'
-  have e : n' = n := funext fun i => by exact_mod_cast (hn' i).trans (hn i).symm
-  subst e
-  exact h.div h' k
-
 end HChar
 
 end General
@@ -110,20 +152,12 @@ theorem isClsF_one : IsClsF H (1 : HChar H.E) :=
 theorem IsEtaT.mul_cls {χ ξ : HChar H.E} (h : IsEtaT H χ) (hξ : IsClsF H ξ) : IsEtaT H (χ * ξ) :=
   ⟨h.unitary.mul hξ.unitary, fun v => (h.unr v).mul (hξ.unr v), h.res.mul hξ.triv, h.inf.mul_triv hξ.inf⟩
 
-theorem IsEtaT.div_cls {χ χ' : HChar H.E} (h : IsEtaT H χ) (h' : IsEtaT H χ') : IsClsF H (χ' * χ⁻¹) :=
-  ⟨h'.unitary.mul h.unitary.inv, fun v => (h'.unr v).mul (h.unr v).inv, h.inf.div h'.inf, h.res.div h'.res⟩
-
-theorem IsChiPsi.mul_cls {χ ξ : HChar H.E} (h : IsChiPsi H χ) (hξ : IsClsF H ξ) : IsChiPsi H (χ * ξ) :=
-  ⟨h.unitary.mul hξ.unitary, fun v => (h.unr v).mul (hξ.unr v), h.triv.mul hξ.triv, h.inf.mul_triv hξ.inf⟩
-
 theorem IsChiPsi.div_cls {χ χ' : HChar H.E} (h : IsChiPsi H χ) (h' : IsChiPsi H χ') : IsClsF H (χ' * χ⁻¹) :=
   ⟨h'.unitary.mul h.unitary.inv, fun v => (h'.unr v).mul (h.unr v).inv, h.inf.div h'.inf, h'.triv.mul h.triv.inv⟩
 
-theorem IsEtaT.sq_chiPsi {χ : HChar H.E} (h : IsEtaT H χ) : IsChiPsi H (χ * χ) where
-  unitary := h.unitary.mul h.unitary
-  unr v := (h.unr v).mul (h.unr v)
-  triv := by
-    refine ⟨fun v k => ?_, fun w k => ?_⟩
+theorem IsEtaT.sq_chiPsi {χ : HChar H.E} (h : IsEtaT H χ) : IsChiPsi H (χ * χ) := by
+  refine ⟨h.unitary.mul h.unitary, fun v => (h.unr v).mul (h.unr v), ?_, ?_⟩
+  · refine ⟨fun v k => ?_, fun w k => ?_⟩
     · rw [HChar.resFin_mul, h.res.1]
       unfold etaFin
       split_ifs
@@ -132,7 +166,7 @@ theorem IsEtaT.sq_chiPsi {χ : HChar H.E} (h : IsEtaT H χ) : IsChiPsi H (χ * �
     · rw [HChar.resInf_mul, h.res.2]
       unfold etaInf
       split_ifs <;> simp
-  inf k := by
+  · intro k
     rw [HChar.inf_mul, Units.val_mul, h.inf k, ← Finset.prod_mul_distrib]
     refine Finset.prod_congr rfl fun g _ => ?_
     rw [← zpow_add' (by right; left; norm_num)]
@@ -146,58 +180,12 @@ theorem PiBar.overP (P : PiBar H) {k : Fin 2} {w : HeightOneSpectrum (𝓞 H.E)}
 
 theorem isUnitAt_nat {p a : ℕ} {w : HeightOneSpectrum (𝓞 H.E)} (hw : OverP H p w) (ha : a.Coprime p) {x : H.Eˣ}
     (hx : (x : H.E) = (a : H.E)) : IsUnitAt w (atFin w x) := by
-  have hna : ((a : ℕ) : 𝓞 H.E) ∉ w.asIdeal := by
-    intro hmem
-    obtain ⟨u, v, huv⟩ := (Nat.isCoprime_iff_coprime.mpr ha)
-    have h1 : (1 : 𝓞 H.E) ∈ w.asIdeal := by
-      have e : (1 : 𝓞 H.E) = (u : 𝓞 H.E) * ((a : ℕ) : 𝓞 H.E) + (v : 𝓞 H.E) * ((p : ℕ) : 𝓞 H.E) := by
-        have := congrArg (fun z : ℤ => (z : 𝓞 H.E)) huv
-        push_cast at this
-        exact this.symm
-      rw [e]
-      exact w.asIdeal.add_mem (w.asIdeal.mul_mem_left _ hmem) (w.asIdeal.mul_mem_left _ hw)
-    exact w.isPrime.ne_top ((Ideal.eq_top_iff_one _).mpr h1)
-  have h := valued_algebraMap_eq_one H.E w _ hna
-  show Valued.v (algebraMap H.E (w.adicCompletion H.E) (x : H.E)) = 1
-  rw [hx]
-  simpa using h
+  apply GlobalTheory.Mem.Chr.isUnitAt_nat <;> assumption
 
-theorem IsMu0.mul_cls {P : PiBar H} {W : Omg H} {e : R.Psi → ℚ} {j : ℕ} {χ ξ : HChar H.E}
-    (h : IsMu0 P W e j χ) (hξ : IsClsF H ξ) : IsMu0 P W e j (χ * ξ) where
-  unitary := h.unitary.mul hξ.unitary
-  triv := h.triv.mul hξ.triv
-  inf := h.inf.mul_triv hξ.inf
-  unr v hv := (h.unr v hv).mul (hξ.unr v)
-  tame v := (h.tame v).mul ((hξ.unr v).levelLe 1)
-  atg k w hw a ha x hx := by
-    have h1 : ξ.locK w x = 1 := hξ.unr w _ (isUnitAt_nat (P.overP hw) ha hx)
-    show χ.locK w x * ξ.locK w x = _
-    rw [h1, mul_one, h.atg k w hw a ha x hx]
-
-theorem IsMu0.div_cls {P : PiBar H} {W : Omg H} {e : R.Psi → ℚ} {j : ℕ} {χ χ' : HChar H.E}
-    (h : IsMu0 P W e j χ) (h' : IsMu0 P W e j χ')
-    (hg : ∀ k v, OverP H (H.g k) v → (χ' * χ⁻¹).UnrAt v) : IsClsF H (χ' * χ⁻¹) where
-  unitary := h'.unitary.mul h.unitary.inv
-  unr v := by
-    by_cases hv : ∀ k, ¬ OverP H (H.g k) v
-    · exact (h'.unr v hv).mul (h.unr v hv).inv
-    · push Not at hv
-      obtain ⟨k, hk⟩ := hv
-      exact hg k v hk
-  inf := h.inf.div h'.inf
-  triv := h'.triv.mul h.triv.inv
-
-def Mu0Unique (P : PiBar H) (W : Omg H) (e : R.Psi → ℚ) (j : ℕ) : Prop :=
-  (∀ k, {v : HeightOneSpectrum (𝓞 H.E) | OverP H (H.g k) v}.ncard = Module.finrank ℚ H.E) →
-    ∀ χ χ' : HChar H.E, IsMu0 P W e j χ → IsMu0 P W e j χ' → IsClsF H (χ' * χ⁻¹)
-
-theorem isPsi_one (l : ℕ) : IsPsi (H := H) l ∅ (1 : HChar H.E) where
-  ord := ⟨0, one_pow _⟩
-  triv := isClsF_one.triv
-  tame := fun _ _ _ _ => rfl
-  ram := fun v => ⟨fun _ => Finset.notMem_empty v, fun _ _ _ => rfl⟩
-  atl := fun _ _ _ => rfl
-  split := fun _ hv => absurd hv (Finset.notMem_empty _)
+theorem isPsi_one (l : ℕ) : IsPsi (H := H) l ∅ (1 : HChar H.E) :=
+  ⟨⟨0, one_pow _⟩, isClsF_one.triv, fun _ _ _ _ => rfl,
+    fun v => ⟨fun _ => Finset.notMem_empty v, fun _ _ _ => rfl⟩,
+    fun _ _ _ => rfl, fun _ hv => absurd hv (Finset.notMem_empty _)⟩
 
 theorem HChar.isUnitary_of_order {L : Type} [Field L] [NumberField L] {χ : HChar L} {n : ℕ} (hn : 0 < n) (h : χ.OrderDvd n) :
     χ.IsUnitary := fun x => by

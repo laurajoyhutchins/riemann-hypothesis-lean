@@ -1,11 +1,61 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ImportsAlt
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.DivAddLogbLeEightMulErrorScale
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LiftsAtThickLetterType
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.FilVSep
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.AcoordSumVecMul
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LemGBInImgIff
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.PhiSqPi0PowPowerSeries
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Numerics
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LiftsAtThickLetterType
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+public import Formalism.SharpRestriction.LevelLetterCocycles.LetterConditionGlobal
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.AcoordSumVecMul
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcLenThreeThickLetters
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.DvOSmulO
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.FilVSep
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LemGBInImgIff
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.MemPairXIff
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Numerics
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.PhiSqPi0PowPowerSeries
+import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ConstantLeRpowOfThreeLe
+
+@[expose] public section
 
 noncomputable section
 
@@ -271,12 +321,14 @@ theorem arc_length_three_case_c [NeZero n] [Fintype (K →ₐ[Qp] LL)] [IsDomain
     obtain ⟨u, hu, hku⟩ := hK k
     rw [hΛ] at hku
     have h0 := ArcLengthThreeFiltration.coeff_zero_of_coord Br hinj a K (b + η + S) _ _ u hu hku j (by omega)
+
     rw [map_sub, map_sum, sub_eq_zero] at h0
     simpa only [PowerSeries.coeff_C_mul, PowerSeries.coeff_mul_C] using h0
 
   have hpr2 : ∀ j < size (c - 1) + S - η, Formalism.MainNotions.TruncatedSeriesCountingBounds.crisMap B F.f (dvO W T₁ 2 b₁ (fun m => PowerSeries.coeff j (Gs m))) =
       algebraMap O LL (PowerSeries.coeff j Fser) • dv W T₂ 2 bb (Pi.single k₀ 1) := by
     intro j hj
+
     rw [ArcLengthThreeFiltration.dvO_eq, map_sum]
     simp_rw [map_smul, hμ]
     rw [← ArcLengthThreeFiltration.dvO_lin, ← ArcLengthThreeFiltration.dvO_single, ← ArcLengthThreeFiltration.dvO_smulO]

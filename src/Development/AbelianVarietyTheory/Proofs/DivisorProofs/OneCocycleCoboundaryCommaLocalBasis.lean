@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ComparisonMemCechHodgeFiltration
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VanishingH1InvertingMorphisms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VanishingH1InvertingMorphisms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -28,7 +74,7 @@ theorem eq_zero_of_local (F : C ⥤ CommAlgCat.{0} R) (G : C' ⥤ C) (H : HasLoc
   obtain ⟨w₁⟩ := h₁
   obtain ⟨w₂⟩ := h₂
   obtain ⟨n, b, hb, h⟩ := hdir t₁ t₂ S w₁ w₂
-  exact sep_std H hb z fun S' ψ ⟨i, hi⟩ ↦ by
+  exact sep_std (H := H) (hb := hb) z fun S' ψ ⟨i, hi⟩ ↦ by
     obtain ⟨t₃, h1, h2, h3⟩ := h i S' ψ hi
     exact hz t₃ S' ψ h1 h2 h3
 
@@ -86,12 +132,12 @@ theorem exists_glue_points (F : C ⥤ CommAlgCat.{0} R) (G : C' ⥤ C) [Quiver.I
     by_cases hS : Nonempty (G.obj t₁ ⟶ S) ∧ Nonempty (G.obj t₂ ⟶ S)
     · obtain ⟨⟨w₁⟩, ⟨w₂⟩⟩ := hS
       obtain ⟨n, b, hb, hcov⟩ := hdir t₁ t₂ S w₁ w₂
-      obtain ⟨x, hx⟩ := glue_std H hb (fun S' _ ↦ σ S') fun S' S'' ψ χ ⟨i, hi⟩ ↦ by
+      obtain ⟨x, hx⟩ := glue_std (H := H) (hb := hb) (fun S' _ ↦ σ S') fun S' S'' ψ χ ⟨i, hi⟩ ↦ by
         obtain ⟨t, h1, h2, ⟨w⟩⟩ := hcov i S' ψ hi
         show σ S'' = mp F χ (σ S')
         rw [hσ t S'' (w ≫ χ) h1 h2, hσ t S' w h1 h2, mp_comp]
       refine ⟨x, fun _ _ t S' ψ w h1 h2 ↦
-        sub_eq_zero.1 <| sep_std H (span_map_eq_top F ψ hb) _ fun S'' χ ⟨i, hi⟩ ↦ ?_⟩
+        sub_eq_zero.1 <| sep_std (H := H) (hb := span_map_eq_top F ψ hb) _ fun S'' χ ⟨i, hi⟩ ↦ ?_⟩
       have hi' : IsUnit (mp F (ψ ≫ χ) (b i)) := by rw [mp_comp]; exact hi
       rw [map_sub, ← mp_comp, hx S'' (ψ ≫ χ) ⟨i, hi'⟩, ← mp_comp, hσ t S'' (w ≫ χ) h1 h2,
         sub_self]
@@ -158,12 +204,12 @@ theorem oneCocycle_coboundary_comma_localBasis (F : C ⥤ CommAlgCat.{0} R) (G :
     intro i j k S u hi hj hk
     refine eq_zero_of_local₃ F G H hdir (hp i S u hi) (hp j S u hj) (hp k S u hk) _
       fun t S' ψ ai aj ak ⟨w⟩ ↦ ?_
-    rw [map_add, map_sub, hc j k S (hp j S u hj) (hp k S u hk) t S' ψ w aj ak,
+    rw [map_add (f := _), map_sub, hc j k S (hp j S u hj) (hp k S u hk) t S' ψ w aj ak,
       hc i k S (hp i S u hi) (hp k S u hk) t S' ψ w ai ak,
       hc i j S (hp i S u hi) (hp j S u hj) t S' ψ w ai aj]
     simp only [map_sub]
     ring
-  obtain ⟨e, he, he'⟩ := cech1 H hb (fun i j S (_ : T ⟶ S) ↦ c i j S) hs hcc
+  obtain ⟨e, he, he'⟩ := cech1 (H := H) (hb := hb) (fun i j S (_ : T ⟶ S) ↦ c i j S) hs hcc
   have he'' : ∀ i j S (u : T ⟶ S), IsUnit (mp F u (b i)) → IsUnit (mp F u (b j)) →
       c i j S = e j S u - e i S u := he'
 
@@ -183,7 +229,7 @@ theorem oneCocycle_coboundary_comma_localBasis (F : C ⥤ CommAlgCat.{0} R) (G :
     intro t u S ψ i j hi hj
     have key : X i t u S - X j t u S + c i j S = 0 :=
       eq_zero_of_local₃ F G H hdir ⟨ψ⟩ (hp i S _ hi) (hp j S _ hj) _ fun t' S' χ a0 ai aj ⟨w⟩ ↦ by
-        rw [map_add, map_sub, hX i t u S ⟨ψ⟩ (hp i S _ hi) t' S' χ w a0 ai,
+        rw [map_add (f := _), map_sub, hX i t u S ⟨ψ⟩ (hp i S _ hi) t' S' χ w a0 ai,
           hX j t u S ⟨ψ⟩ (hp j S _ hj) t' S' χ w a0 aj,
           hc i j S (hp i S _ hi) (hp j S _ hj) t' S' χ w ai aj]
         simp only [map_sub]
@@ -200,7 +246,7 @@ theorem oneCocycle_coboundary_comma_localBasis (F : C ⥤ CommAlgCat.{0} R) (G :
       have h : ∃ i, IsUnit (mp F (u ≫ ψ) (b i)) := ⟨i, hi⟩
       simp only [σ, dif_pos h]
       exact indep t u S ψ _ i h.choose_spec hi
-    obtain ⟨x, hx⟩ := glue_std H (span_map_eq_top F u hb) σ fun S S' ψ χ ⟨i, hi⟩ ↦ by
+    obtain ⟨x, hx⟩ := glue_std (H := H) (hb := span_map_eq_top F u hb) σ fun S S' ψ χ ⟨i, hi⟩ ↦ by
       have hi' : IsUnit (mp F (u ≫ ψ) (b i)) := by rw [mp_comp]; exact hi
       have hi'' : IsUnit (mp F (u ≫ ψ ≫ χ) (b i)) := by
         rw [← Category.assoc, mp_comp]; exact hi'.map _
@@ -211,7 +257,7 @@ theorem oneCocycle_coboundary_comma_localBasis (F : C ⥤ CommAlgCat.{0} R) (G :
   choose g hg using hg0
   refine ⟨g, fun t t' u a ↦ ?_⟩
   rw [hyb]
-  refine sub_eq_zero.1 (sep_std H (span_map_eq_top F (u ≫ G.map a) hb) _ fun S χ ⟨i, hi⟩ ↦ ?_)
+  refine sub_eq_zero.1 (sep_std (H := H) (hb := span_map_eq_top F (u ≫ G.map a) hb) _ fun S χ ⟨i, hi⟩ ↦ ?_)
   have hi' : IsUnit (mp F ((u ≫ G.map a) ≫ χ) (b i)) := by rw [mp_comp]; exact hi
   have hi'' : IsUnit (mp F (u ≫ G.map a ≫ χ) (b i)) := by rw [← Category.assoc]; exact hi'
   rw [map_sub, map_sub, hg t' (u ≫ G.map a) S χ i hi', ← mp_comp, hg t u S (G.map a ≫ χ) i hi'',
@@ -221,7 +267,7 @@ theorem oneCocycle_coboundary_comma_localBasis (F : C ⥤ CommAlgCat.{0} R) (G :
       rw [map_sub, map_sub, hX i t' (u ≫ G.map a) S ⟨χ⟩ (hp i S _ hi') t'' S' ψ w ⟨a'⟩ ai,
         hX i t u S ⟨G.map a ≫ χ⟩ (hp i S _ hi') t'' S' ψ w ⟨a ≫ a'⟩ ai, ← mp_comp,
         (Subsingleton.elim _ _ : χ ≫ ψ = G.map a' ≫ w), mp_comp, hyc t t' t'' u a a']
-      simp only [map_sub, map_add]
+      simp only [map_sub, map_add (f := _)]
       ring
   linear_combination key
 

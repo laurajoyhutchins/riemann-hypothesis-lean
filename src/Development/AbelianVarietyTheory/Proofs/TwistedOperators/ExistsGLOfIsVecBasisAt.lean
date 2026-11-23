@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatIffOfSelfDual
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHatIffOfSelfDual
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -132,8 +173,8 @@ theorem sameAt_of_smul_eq {Q : Pl D.host.E} {n : ℕ} {β β' : GL (Fin n) (EAf 
     SameAt Q (lat β) (lat β') := fun y => by
   rw [mem_hat_lat, mem_hat_lat, inv_mulVec_smul h]
 
-theorem eq_of_sameAt {n : ℕ} {Λ Λ' : Submodule (𝓞 D.host.E) (Fin n → D.host.E)} (h : Submodule.IsLattice D.host.E Λ)
-    (h' : Submodule.IsLattice D.host.E Λ') (H : ∀ Q, SameAt Q Λ Λ') : Λ = Λ' := by
+theorem eq_of_sameAt {n : ℕ} {Λ Λ' : Submodule (𝓞 D.host.E) (Fin n → D.host.E)} (h : Submodule.IsFullLattice D.host.E Λ)
+    (h' : Submodule.IsFullLattice D.host.E Λ') (H : ∀ Q, SameAt Q Λ Λ') : Λ = Λ' := by
   ext x
   rw [← inc_mem_hat_iff h, ← inc_mem_hat_iff h']
   exact ⟨fun hx => mem_hat_of_idem h'.fg fun w => (H w _).1 (smul_mem_hat (idem_mem w) hx),
@@ -170,7 +211,7 @@ theorem isBasisAt_lat {V : HSp D} (w : Pl D.host.E) (β : GL (Fin V.rank) (EAf D
   refine ⟨rfl, idem w, isPlIdem_idem w, by rw [smul_smul, idem_mul_self], fun y => ?_⟩
   rw [← basis_gen (OA D) (idem_mul_self w) (idem_mem w) β y, InCmp, mem_hat_lat]
 
-theorem isVecBasisAt_of_isBasisAt {V : HSp D} {w : Pl D.host.E} {Λ : Lat V} (hΛ : Submodule.IsLattice D.host.E Λ)
+theorem isVecBasisAt_of_isBasisAt {V : HSp D} {w : Pl D.host.E} {Λ : Lat V} (hΛ : Submodule.IsFullLattice D.host.E Λ)
     {B : Matrix (Fin V.rank) (Fin V.rank) (EAf D)} (h : IsBasisAt V w Λ B) : IsVecBasisAt V w B := by
   obtain ⟨β, rfl⟩ := exists_eq_lat hΛ
   obtain ⟨-, e, he, h1, h2⟩ := h
@@ -226,11 +267,11 @@ theorem exists_orth_basis {V : HSp D} {Λ : Lat V} (hΛ : IsSelfDualC V Λ) {S :
     (h : ∀ w ∈ S, IsBasisAt V w Λ (B w)) :
     ∃ β : GL (Fin V.rank) (EAf D), Λ = lat β ∧ gramOf V β = 1 ∧ ∀ w ∈ S, idem w • β.val = B w := by
   obtain ⟨β₀, rfl, h₀⟩ := exists_orth hΛ
-  obtain ⟨β, h1, h2, h3⟩ := exists_orth_mix β₀ h₀ hS B fun w hw => isVecBasisAt_of_isBasisAt hΛ.1 (h w hw)
+  obtain ⟨β, h1, h2, h3⟩ := exists_orth_mix β₀ h₀ hS B fun w hw => isVecBasisAt_of_isBasisAt (selfDual_isFullLattice hΛ) (h w hw)
   have hβ := isSelfDualC_of_orth h1
   have hs : ∀ w ∈ S, SameAt w (lat β₀) (lat β) := fun w hw =>
     sameAt_of_isBasisAt (h w hw) (h2 w hw ▸ isBasisAt_lat w β)
-  refine ⟨β, eq_of_sameAt hΛ.1 hβ.1 fun Q => ?_, h1, h2⟩
+  refine ⟨β, eq_of_sameAt (selfDual_isFullLattice hΛ) (selfDual_isFullLattice hβ) fun Q => ?_, h1, h2⟩
   by_cases hQ : Q ∈ S
   · exact hs Q hQ
   by_cases hQ' : cP Q ∈ S
@@ -282,7 +323,7 @@ theorem splitGlueSt_of (D : D7) (hloc : ∀ (n : ℕ) (Λ Λ' : Submodule (𝓞 
   refine ⟨lat β, ⟨hβ, hb, fun v hv => (hloc _ _ _ hβ.1.fg h₀.1.fg v).2 fun Q hQ =>
     sameAt_of_smul_eq (h3 Q (fun h => hv Q h hQ) fun h => hv _ h ((GlobalTheory.IdemSupport.under_cP Q).trans hQ))⟩, ?_⟩
   rintro Λ ⟨a1, a2, a3⟩
-  refine eq_of_sameAt a1.1 hβ.1 fun Q => ?_
+  refine eq_of_sameAt (selfDual_isFullLattice a1) (selfDual_isFullLattice hβ) fun Q => ?_
   by_cases hQ : Q ∈ S
   · exact sameAt_of_isBasisAt (a2 Q hQ) (hb Q hQ)
   by_cases hQ' : cP Q ∈ S

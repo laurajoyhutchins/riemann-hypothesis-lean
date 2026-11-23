@@ -1,4 +1,44 @@
-import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.OneSidedLemma4Realisable
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.OneSidedLemma4Realisable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,9 +126,9 @@ theorem xiAt_of {K : ℕ} [NeZero r] [NeZero K] {hk : m + 1 = r + K} {Fr : Frame
   obtain ⟨nq, o, sig, hs, hv⟩ := hN F1 h1 h2 h3
   refine ⟨nq, fun q => if o q ≤ tF then o q else 0, fun q => if o q ≤ tF then sig q else 0, fun q => ?_, ?_⟩
   · by_cases hq : o q ≤ tF
-    · simp only [if_pos hq]
+    · simp only [ite_eq_left hq]
       exact ⟨hq, (hs q).1, (hs q).2⟩
-    · simp only [if_neg hq]
+    · simp only [ite_eq_right hq]
       exact ⟨Nat.zero_le _, Submodule.zero_mem _, lemma4_element_zero (Fact.out : p.Prime).pos Fr N₁ G' cP _ Y hk 0⟩
   · have e1 : fock (subst p n' O w n' r g (F1 : MvPolynomial (TV n' (m + 1)) (KK O)))
         (∑ q, if o q ≤ tF then sig q else 0) =
@@ -99,8 +139,9 @@ theorem xiAt_of {K : ℕ} [NeZero r] [NeZero K] {hk : m + 1 = r + K} {Fr : Frame
       rw [coeff_sum, coeff_sum]
       refine Finset.sum_congr rfl fun q _ => ?_
       by_cases hq : o q ≤ tF
-      · rw [if_pos hq]
-      · rw [if_neg hq, coeff_zero]
+      · rw [ite_eq_left hq]
+      · rw [ite_eq_right hq]
+        change 0 = _
         by_contra hne
         have h4 : mm ∈ (sig q).support := mem_support_iff.2 (Ne.symm hne)
         have h5 := lemma4_element_normal_degree hk (hs q).2 mm h4
@@ -193,7 +234,7 @@ theorem restXi_of (D : Formalism.BasicNotions.D7) (CLa Ck Crk Cdeg CH CE C6 C18 
   refine ⟨Ct0, CDf, max C₂ C₃, h0, h1, lt_of_lt_of_le hC2 (le_max_left _ _), ?_⟩
   intro C hCC p W Qq O Kf _ _ _ _ _ _ _ _ _ _ ι σ j w n' m r _ _ TT L₁ L₂ de h x lam0 aT bT a Y cpp c0 Dp cStar hSet H φ hφ K
     _ _ hk hrk F hFr E' hE' nb B hB hli hc e he htgt hm g hhm hg hbasis
-  letI : Algebra (WF p n') O := algOfIdent j φ
+  let : Algebra (WF p n') O := algOfIdent j φ
   intro FsB hFsB Θ hΘ
   exact xiAt_of
     (hN C (le_trans (le_max_left _ _) hCC) p W Qq O Kf ι σ j w n' m r TT L₁ L₂ de h x lam0 aT bT a Y

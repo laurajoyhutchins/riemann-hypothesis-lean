@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Theta.RealSignature
-import GroundTheory.AutomorphicForms.AdelicUnitaryGroups
-import GroundTheory.AutomorphicForms.HermitianLocalForms
+module
+
+public import GroundTheory.AutomorphicForms.HermitianLocalForms
+public import GroundTheory.AutomorphicForms.AdelicUnitaryGroups.Topology
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.NumberField.Completion.InfinitePlace
+public import GroundTheory.AutomorphicForms.HermitianBinaryValues
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Theta
 
@@ -27,9 +78,9 @@ noncomputable def quadComplexEquiv : QuadraticAlgebra R a 0 ≃+* ℂ where
   map_mul' z w := by
     have hsq : Real.sqrt (-φ a) * Real.sqrt (-φ a) = -φ a := Real.mul_self_sqrt (neg_pos.2 ha).le
     apply Complex.ext
-    · simp only [QuadraticAlgebra.re_mul, map_add, map_mul, Complex.mul_re]
+    · simp only [QuadraticAlgebra.re_mul, map_add (f := _), map_mul, Complex.mul_re]
       linear_combination (φ z.im * φ w.im) * hsq
-    · simp only [QuadraticAlgebra.im_mul, map_add, map_mul, zero_mul, add_zero,
+    · simp only [QuadraticAlgebra.im_mul, map_add (f := _), map_mul, zero_mul, add_zero,
         Complex.mul_im]
       ring
   map_add' z w := by
@@ -48,7 +99,11 @@ theorem quadComplexEquiv_star (z : QuadraticAlgebra R a 0) :
 
 theorem quadComplexEquiv_algebraMap (r : R) :
     quadComplexEquiv φ ha (algebraMap R (QuadraticAlgebra R a 0) r) = (φ r : ℂ) := by
-  apply Complex.ext <;> simp [quadComplexEquiv_apply, QuadraticAlgebra.algebraMap_eq]
+  apply Complex.ext
+  · change φ r = φ r
+    rfl
+  · change φ 0 * Real.sqrt (-φ a) = 0
+    rw [map_zero, zero_mul]
 
 end QuadComplex
 
@@ -62,18 +117,18 @@ theorem two_ne_zero_of_infinitePlace (w : InfinitePlace K) : (2 : K) ≠ 0 := by
   rw [map_ofNat, map_zero] at this
   exact two_ne_zero this
 
+
 omit [Algebra.IsQuadraticExtension K E] in
 variable (E) in
-
 def IsNonsplitAt (w : InfinitePlace K) : Prop := IsField (w.Completion ⊗[K] E)
 
-variable (K E) in
 
+variable (K E) in
 noncomputable def quadD (w : InfinitePlace K) : K :=
   (exists_algEquiv_quadraticAlgebra K E (two_ne_zero_of_infinitePlace w)).choose
 
-variable (K E) in
 
+variable (K E) in
 noncomputable def quadPsi (w : InfinitePlace K) : E ≃ₐ[K] QuadraticAlgebra K (quadD K E w) 0 :=
   (exists_algEquiv_quadraticAlgebra K E (two_ne_zero_of_infinitePlace w)).choose_spec.choose
 
@@ -107,23 +162,28 @@ theorem realPlaceD_neg (hE : IsNonsplitAt E w) : realPlaceD (E := E) hw < 0 := b
   set c := algebraMap w.Completion (QuadraticAlgebra w.Completion dw 0) r
   have hprod : (ω - c) * (ω + c) = 0 := by
     ext
-    · simp [ω, c, QuadraticAlgebra.algebraMap_eq, hr]
-    · simp [ω, c, QuadraticAlgebra.algebraMap_eq]
+    · change (0 - r) * (0 + r) + dw * (1 - 0) * (1 + 0) = 0
+      rw [← hr]
+      ring
+    · change (0 - r) * (1 + 0) + (1 - 0) * (0 + r) + 0 * (1 - 0) * (1 + 0) = 0
+      ring
   have hne : ω - c ≠ 0 := by
     intro h
     have := congrArg QuadraticAlgebra.im h
-    simp [ω, c, QuadraticAlgebra.algebraMap_eq] at this
+    change (1 : w.Completion) - 0 = 0 at this
+    exact one_ne_zero (by simpa only [sub_zero] using this)
   have hne' : ω + c ≠ 0 := by
     intro h
     have := congrArg QuadraticAlgebra.im h
-    simp [ω, c, QuadraticAlgebra.algebraMap_eq] at this
+    change (1 : w.Completion) + 0 = 0 at this
+    exact one_ne_zero (by simpa only [add_zero] using this)
   obtain ⟨y, hy⟩ := hF.mul_inv_cancel hne
   apply hne'
   calc ω + c = (y * (ω - c)) * (ω + c) := by rw [mul_comm y, hy, one_mul]
     _ = 0 := by rw [mul_assoc, hprod, mul_zero]
 
-omit [Algebra.IsQuadraticExtension K E] in
 
+omit [Algebra.IsQuadraticExtension K E] in
 theorem isNonsplitAt_of_algEquiv {d : K} (ψ : E ≃ₐ[K] QuadraticAlgebra K d 0)
     (hd : ringEquivRealOfIsReal hw (algebraMap K w.Completion d) < 0) : IsNonsplitAt E w :=
   MulEquiv.isField (MulEquiv.isField (Field.toIsField ℂ) (quadComplexEquiv _ hd).toMulEquiv)
@@ -217,49 +277,13 @@ variable {K E : Type*} [Field K] [Field E] [Algebra K E] [Algebra.IsQuadraticExt
 variable {w : InfinitePlace K} (hw : w.IsReal) (hE : IsNonsplitAt E w)
 variable {ι : Type*} [Fintype ι] [DecidableEq ι] (H : Matrix ι ι E)
 
-noncomputable def realPlaceMatrix : Matrix ι ι ℂ :=
-  (H.map (Algebra.TensorProduct.includeRight : E →ₐ[K] w.Completion ⊗[K] E)).map
-    (realPlaceEquiv hw hE)
-
 attribute [local instance] tensorTopology isModuleTopology_tensor isTopologicalRing_tensor
-
-noncomputable def unitaryPointsRealEquiv :
-    unitaryPoints K E H w.Completion ≃ₜ*
-      unitaryGroupMatrix (starRingEnd ℂ) (realPlaceMatrix hw hE H) where
-  toMulEquiv := unitaryGroupMatrixCongr (realPlaceEquiv hw hE) (realPlaceEquiv_conjBase hw hE) rfl
-  continuous_toFun := by
-    have hv : Continuous fun g : unitaryPoints K E H w.Completion =>
-        ((g : GL ι (w.Completion ⊗[K] E)) : Matrix ι ι (w.Completion ⊗[K] E)) :=
-      Units.continuous_val.comp continuous_subtype_val
-    have h1 : Continuous fun g : unitaryPoints K E H w.Completion =>
-        ((g : GL ι (w.Completion ⊗[K] E)) : Matrix ι ι (w.Completion ⊗[K] E)).map
-          (realPlaceEquiv hw hE) :=
-      hv.matrix_map (continuous_realPlaceEquiv hw hE)
-    have h2 : Continuous fun g : unitaryPoints K E H w.Completion =>
-        ((((g : GL ι (w.Completion ⊗[K] E))⁻¹ : GL ι (w.Completion ⊗[K] E))) :
-          Matrix ι ι (w.Completion ⊗[K] E)).map (realPlaceEquiv hw hE) :=
-      ((Units.continuous_coe_inv.comp continuous_subtype_val)).matrix_map
-        (continuous_realPlaceEquiv hw hE)
-    exact Continuous.subtype_mk (Units.continuous_iff.2 ⟨h1, h2⟩) _
-  continuous_invFun := by
-    have h1 : Continuous fun g : unitaryGroupMatrix (starRingEnd ℂ) (realPlaceMatrix hw hE H) =>
-        ((g : GL ι ℂ) : Matrix ι ι ℂ).map (realPlaceEquiv hw hE).symm :=
-      (Units.continuous_val.comp continuous_subtype_val).matrix_map
-        (continuous_realPlaceEquiv_symm hw hE)
-    have h2 : Continuous fun g : unitaryGroupMatrix (starRingEnd ℂ) (realPlaceMatrix hw hE H) =>
-        ((((g : GL ι ℂ))⁻¹ : GL ι ℂ) : Matrix ι ι ℂ).map (realPlaceEquiv hw hE).symm :=
-      (Units.continuous_coe_inv.comp continuous_subtype_val).matrix_map
-        (continuous_realPlaceEquiv_symm hw hE)
-    exact Continuous.subtype_mk (Units.continuous_iff.2 ⟨h1, h2⟩) _
 
 variable {H}
 
 end Unitary
 
 section Example
-
-instance fact_sq_ne_neg_one : Fact (∀ r : ℚ, r ^ 2 ≠ -1 + 0 * r) :=
-  ⟨fun r h => by nlinarith [sq_nonneg r]⟩
 
 end Example
 

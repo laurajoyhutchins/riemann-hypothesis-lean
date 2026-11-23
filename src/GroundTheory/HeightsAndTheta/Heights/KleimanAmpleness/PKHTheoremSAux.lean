@@ -1,11 +1,61 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgCechSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgSFreeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgFiltSt
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.CechHcSubsingletonOfBij
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGradedSubquot
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenSESStep
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgCechSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AlgFiltSt
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsGradedSubquot
+public import Mathlib.Algebra.Order.PUnit
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.AmpleSt
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.CechHcSubsingletonOfBij
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.H1VanishGeneratedOfLocalizedSubsingleton
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenSESStep
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenTwistGenerated
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGradedSubquot
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PQuotPartGraded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsKleimanScheme
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -60,7 +110,7 @@ theorem exists_mem_of_surjective {M M'' : Type} [AddCommGroup M] [Module (MRingO
       obtain ⟨y₂, hy₂, e₂⟩ := h₂
       refine ⟨y₁ + y₂, add_mem hy₁ hy₂, ?_⟩
       have : h (x₁ + x₂) - h (y₁ + y₂) = (h x₁ - h y₁) + (h x₂ - h y₂) := by
-        simp only [map_add]
+        simp only [map_add (f := _)]
         abel
       rw [this]
       exact add_mem e₁ e₂
@@ -94,13 +144,14 @@ theorem cellRes_locMap {M N : Type} [AddCommGroup M] [Module (MRingOver S ι) M]
       rw [lmap_mk, GenTwistGenerated.cellRes_mk h, GenTwistGenerated.cellRes_mk h,
         lmap_mk]
   · unfold KH.cellRes
-    rw [dif_neg h, dif_neg h, LinearMap.zero_apply, LinearMap.zero_apply, map_zero]
+    rw [dite_eq_right h, dite_eq_right h, LinearMap.zero_apply, LinearMap.zero_apply, map_zero]
 
 theorem cechD_cechMap {M N : Type} [AddCommGroup M] [Module (MRingOver S ι) M] [AddCommGroup N]
     [Module (MRingOver S ι) N] (g : M →ₗ[MRingOver S ι] N) (n : ℕ) (z : KH.CechC S ι M n) :
     KH.cechD S ι N n (KH.cechMap S ι g n z) = KH.cechMap S ι g (n + 1) (KH.cechD S ι M n z) := by
   funext I
   rw [cechMap_apply]
+
   simp only [KH.cechD, LinearMap.pi_apply, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun i _ => ?_
   split_ifs with hI

@@ -1,4 +1,55 @@
-import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Convolution
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +88,8 @@ theorem isOpen_units : IsOpen {M : LieI ι a | IsUnit (Matrix.of M)} := by
   rw [this]; exact Units.isOpen.preimage hc
 
 theorem isUnit_oneI : IsUnit (Matrix.of (oneI ι a)) := by
-  simp [oneI]
+  change IsUnit (1 : Matrix (Fin a) (Fin a) (ι → ℂ))
+  exact isUnit_one
 
 def conjL (A B : LieI ι a) : LieI ι a →L[ℝ] LieI ι a :=
   LinearMap.toContinuousLinearMap
@@ -53,8 +105,8 @@ section Orb
 variable {ι : Type} [Fintype ι] {a : ℕ} {X : Type} [NormedAddCommGroup X] [NormedSpace ℂ X]
   (ρ : GL (Fin a) (ι → ℂ) →* (X →L[ℂ] X))
 
-open Classical in
 
+open Classical in
 def opI (M : LieI ι a) : X →L[ℂ] X := if h : IsUnit (Matrix.of M) then ρ h.unit else 0
 
 theorem orb_eq (v : X) (M : LieI ι a) : orb ρ v M = opI ρ M v := by
@@ -74,14 +126,14 @@ theorem opI_mul (M N : LieI ι a) (v : X) : opI ρ M (opI ρ N v) = opI ρ (mulI
   by_cases hM : IsUnit (Matrix.of M)
   · by_cases hN : IsUnit (Matrix.of N)
     · have hMN : IsUnit (Matrix.of (mulI M N)) := by rw [of_mulI]; exact hM.mul hN
-      rw [dif_pos hM, dif_pos hN, dif_pos hMN, ← ContinuousLinearMap.mul_apply, ← map_mul]
+      rw [dite_eq_left hM, dite_eq_left hN, dite_eq_left hMN, ← ContinuousLinearMap.mul_apply, ← map_mul]
       congr 2
       ext : 1
       simp [of_mulI]
     · have hMN : ¬ IsUnit (Matrix.of (mulI M N)) := by rw [of_mulI, isUnit_mul_iff']; tauto
-      rw [dif_neg hN, dif_neg hMN]; simp
+      rw [dite_eq_right hN, dite_eq_right hMN]; simp
   · have hMN : ¬ IsUnit (Matrix.of (mulI M N)) := by rw [of_mulI, isUnit_mul_iff']; tauto
-    rw [dif_neg hM, dif_neg hMN]; simp
+    rw [dite_eq_right hM, dite_eq_right hMN]; simp
 
 end Orb
 
@@ -206,7 +258,8 @@ theorem hasFDerivAt_orb_mul {w : X} {Dw : LieI ι a →L[ℝ] X} (hw : HasFDeriv
     simp only [ContinuousLinearMap.coe_restrictScalars', orb_eq, opI_mul, conjL_apply, hm]
   have h1 : conjL T S (oneI ι a) = oneI ι a := by
     apply Matrix.of.injective
-    simp [conjL_apply, of_mulI, oneI, hTS]
+    change Matrix.of T * (1 * Matrix.of S) = 1
+    simpa using hTS
   have h2 : HasFDerivAt (fun M => orb ρ w (conjL T S M)) (Dw.comp (conjL T S)) (oneI ι a) := by
     have hw2 := hw
     rw [← h1] at hw2
@@ -236,6 +289,7 @@ theorem hasFDerivAt_FT_param (y : V) {Ψ : P × V → X} {s : Set P} {k : Set V}
     {p0 : P} (hp0 : p0 ∈ s) (L : V → P →L[ℝ] X) (hL : ∀ x, HasFDerivAt (fun p => Ψ (p, x)) (L x) p0) :
     ∃ D' : P →L[ℝ] X, (∀ Z, D' Z = ∫ x, Complex.exp (-(β x y : ℝ) * Complex.I) • L x Z ∂μ) ∧
       HasFDerivAt (fun p => FT μ β (fun x => Ψ (p, x)) y) D' p0 := by
+  open scoped Pointwise in
   set f : V → ℂ := fun t => Complex.exp (-(β t y : ℝ) * Complex.I) with hf_def
   have hf : LocallyIntegrable f μ := (continuous_ch β y).locallyIntegrable
   set g : P → V → X := fun p t => Ψ (p, -t) with hg_def
@@ -357,8 +411,9 @@ theorem good_gen (hS4 : S4) (hβ : ∀ y, (∀ x, β x y = 0) → y = 0)
         LinearMap.coe_toContinuousLinearMap', ContinuousLinearMap.comp_apply,
         ContinuousLinearMap.coe_restrictScalars', orb_eq]
       conv_lhs => rw [← b.sum_repr (conjL (τ x) (σ x) Z)]
+
       simp only [map_sum, map_smul, ContinuousLinearMap.map_smul_of_tower, Finset.smul_sum, mul_smul,
-        Complex.coe_smul, Module.Basis.coord_apply]
+      Complex.coe_smul, Module.Basis.coord_apply]
     rw [hD']
     beta_reduce
     rw [Finset.sum_apply]
@@ -376,7 +431,7 @@ theorem good_gen (hS4 : S4) (hβ : ∀ y, (∀ x, β x y = 0) → y = 0)
         (integrable_ch μ β (hF η w hη hηO hw).continuous (hFc η w hηc) y)]
       congr 1
       funext x
-      simp only [map_smul, hΨ, orb_eq, opI_mul]
+      simp [hΨ, orb_eq, opI_mul]
     rw [e]
     exact hder
 

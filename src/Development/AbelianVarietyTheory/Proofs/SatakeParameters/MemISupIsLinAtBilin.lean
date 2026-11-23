@@ -1,8 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsUniqueVec
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.ConjugateSelfDual ReciprocityTheory.Gal ReciprocityTheory.Aut Formalism.AUTREP Formalism.L2 Formalism.L2.Host Formalism.L2.NT NumberField IsDedekindDomain Polynomial GlobalTheory.HeightCounting GlobalTheory.RowTie GlobalTheory.SplitRead GlobalTheory.NPin
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
@@ -24,21 +58,6 @@ theorem isLinAt_comp {Θ Ω : Type} [AddCommGroup Θ] [Module ℂ Θ] [AddCommGr
   refine ⟨c, hc, hc', fun h g hh hg Φ Φ' hΦ => ?_⟩
   simp only [LinearMap.comp_apply]
   rw [← hT _ _ (hP Φ), hι h g hh hg Φ Φ' hΦ, map_smul]
-
-def valAct {G Θ A B : Type} [Monoid G] [AddCommGroup Θ] [Module ℂ Θ] [AddCommGroup A] [Module ℂ A]
-    [AddCommGroup B] [Module ℂ B] (ω : G →* Module.End ℂ Θ) : G →* Module.End ℂ (A →ₗ[ℂ] B →ₗ[ℂ] Θ) where
-  toFun p :=
-    { toFun := fun φ => φ.compr₂ (ω p)
-      map_add' := fun φ φ' => by ext; simp
-      map_smul' := fun c φ => by ext; simp }
-  map_one' := by ext; simp
-  map_mul' p q := by ext; simp
-
-def single {Θ A B : Type} [AddCommGroup Θ] [Module ℂ Θ] [AddCommGroup A] [Module ℂ A]
-    [AddCommGroup B] [Module ℂ B] (α : A →ₗ[ℂ] ℂ) (β : B →ₗ[ℂ] ℂ) : Θ →ₗ[ℂ] (A →ₗ[ℂ] B →ₗ[ℂ] Θ) where
-  toFun f := α.smulRight (β.smulRight f)
-  map_add' f f' := by ext; simp
-  map_smul' c f := by ext; simp [smul_comm c]
 
 end GlobalTheory.ThetaLoc
 

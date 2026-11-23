@@ -1,5 +1,48 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ExponentTerms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ScaledBasisMemChainLattice
+
+@[expose] public section
 
 open MeasureTheory ValuativeRel Matrix
 open scoped Pointwise
@@ -14,26 +57,10 @@ theorem isLattice_stdLat_and_act : ∀ (k : Type) [Field k] [ValuativeRel k] [To
     refine Submodule.fg_pi fun _ => ?_
     rw [Submodule.one_eq_span]
     exact Submodule.fg_span_singleton _
-  · rw [eq_top_iff]
-    intro v _
-    have hv : v = ∑ i, v i • (Pi.single i (1 : k) : ι → k) := by
-      ext j
-      simp [Pi.single_apply]
-    rw [hv]
-    refine Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span ?_)
-    refine mem_stdLat.2 fun j => ?_
-    rw [Pi.single_apply]
-    split_ifs
-    · exact one_mem _
-    · exact zero_mem _
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
   · exact hL.fg.map _
-  · have himg : ((act g L : Submodule 𝒪[k] (ι → k)) : Set (ι → k))
-        = (g : Matrix ι ι k).mulVecLin '' (L : Set (ι → k)) := by
-      ext v
-      exact mem_act
-    rw [himg, ← Submodule.map_span, hL.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
-    intro w
-    refine ⟨((g⁻¹ : GL ι k) : Matrix ι ι k) *ᵥ w, ?_⟩
-    rw [Matrix.mulVecLin_apply, Matrix.mulVec_mulVec, Units.mul_inv, Matrix.one_mulVec]
+  · intro s hs hli
+    exact (LinearIndependent.iff_fractionRing _ _).mp hli
 
 end GlobalTheory.RootEx.UnfoldShape

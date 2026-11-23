@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ArithmeticGapBounds.AEConst
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.ArithmeticGapBounds.AEConst
+public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.Projection.Submodule
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +65,7 @@ section One
 variable (W : Submodule ℝ H) [W.HasOrthogonalProjection]
 
 lemma q_add (x y : H) : q W (x + y) = q W x + q W y := by
-  simp only [q, map_add]; abel
+  simp only [q, map_add (f := _)]; abel
 
 lemma q_smul (c : ℝ) (x : H) : q W (c • x) = c • q W x := by
   simp only [q, map_smul, smul_sub]
@@ -126,7 +175,7 @@ lemma form_cs (D : H →L[ℝ] H) (hsym : ∀ x y, ⟪D x, y⟫_ℝ = ⟪x, D y�
   have h : ∀ t : ℝ, 0 ≤ ⟪D y, y⟫_ℝ * (t * t) + (2 * ⟪D x, y⟫_ℝ) * t + ⟪D x, x⟫_ℝ := by
     intro t
     have := hpos (x + t • y)
-    simp only [map_add, map_smul, inner_add_left, inner_add_right, real_inner_smul_left,
+    simp only [map_add (f := _), map_smul, inner_add_left, inner_add_right, real_inner_smul_left,
       real_inner_smul_right] at this
     rw [e] at this
     nlinarith [this]

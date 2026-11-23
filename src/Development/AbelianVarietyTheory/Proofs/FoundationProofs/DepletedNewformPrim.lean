@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.PetIPSmulRight
-import Development.AbelianVarietyTheory.Definitions.Foundations.RepL
-import Development.AbelianVarietyTheory.Statements.CuspidalUnitaryTwists.Chapter
-import CompanionTheory.EightfoldTheory.VariationTheory.AutomorphicForms.Newform
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularFormCoeffSeqLinearStructureStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCuspFormCoeffSeqDirichletTwistLevelMulSqStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Gamma1CharElementary
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.PetIPSmulRight
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.Gamma1CharElementary
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCuspFormCoeffSeqDirichletTwistLevelMulSqStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ModularFormCoeffSeqLinearStructureStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open UpperHalfPlane Complex MeasureTheory CongruenceSubgroup GlobalTheory.EisM UpperTheory.V.Af Filter Topology
 open scoped MatrixGroups Real ComplexConjugate Manifold ModularForm
 noncomputable section
@@ -71,7 +111,7 @@ theorem depleted_newform_prim : ∀ (k r : ℕ) (g : Newform k), 1 ≤ k → 2 �
         rcases Nat.eq_zero_or_pos n with h0 | h0
         · subst h0; rw [Nat.coprime_zero_left] at hn; nlinarith
         · exact h0
-      have hqn : (q * n).Coprime (g.M * r) := Nat.Coprime.mul hqL hn
+      have hqn : (q * n).Coprime (g.M * r) := Nat.Coprime.mul_left hqL hn
       rw [if_pos hqn, if_pos hn]
       have e := heig n hn1
       by_cases hd : q ∣ n
@@ -89,7 +129,7 @@ theorem depleted_newform_prim : ∀ (k r : ℕ) (g : Newform k), 1 ≤ k → 2 �
           intro h
           apply hn
           rw [← Nat.mul_div_cancel' hd]
-          exact Nat.Coprime.mul hqL h
+          exact Nat.Coprime.mul_left hqL h
         rw [if_pos hd, if_neg hnq]; simp
       · rw [if_neg hd]; simp
 

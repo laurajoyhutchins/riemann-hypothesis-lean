@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdNonnegReal
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlockMatrixApplyInrInr
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFinsetIntOff
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousCutc
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.EmDefs
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.SqNormIntegralFundamentalDomainEqL2NormSq
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.BlockMatrixApplyInrInr
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousThetaKernelComponents
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsFinsetIntOff
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsClosedHermSVal
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacobiMapsExist
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProdNonnegReal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SchwartzBoundFiniteInfinite
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasChr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -121,7 +170,7 @@ theorem eisMeas : IdemEx → BumpEx → Major → FixW → FixTh → ThProd → 
         have hnn := GlobalTheory.CompanionTheory.EisE.prod_nonneg_real Finset.univ _ hre
         refine ⟨hnn.1, hnn.2, ?_⟩
         rw [norm_prod]
-        refine Finset.prod_le_one (fun i _ => norm_nonneg _) (fun i _ => ?_)
+        refine Finset.prod_le_one₀ (fun i _ => norm_nonneg _) (fun i _ => ?_)
         obtain ⟨h0, h1, h2⟩ := (hη i).2.2.2.1 (y.submatrix (fun _ => i) id)
         have h3 : η i (y.submatrix (fun _ => i) id) = ((η i (y.submatrix (fun _ => i) id)).re : ℂ) :=
           Complex.ext (by simp) (by simp [h2])

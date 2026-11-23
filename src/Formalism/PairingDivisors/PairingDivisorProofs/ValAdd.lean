@@ -1,7 +1,50 @@
-import Mathlib
-import Formalism.PairingDivisors.StatementA
-import Formalism.PairingDivisors.StatementN
-import Formalism.PairingDivisors.PairingDivisorProofs.Height
+module
+
+public import Formalism.PairingDivisors.StatementH
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open Formalism.DivisionValues (vw lw conjPl)
@@ -88,92 +131,6 @@ theorem vw_add (w : Pl K) (a b : K) (ha : a ≠ 0) (hb : b ≠ 0) (hab : a + b �
     vw_div_eq_sub_of_ne_zero w _ _ (nz _ hs) hde, min_sub_sub_right]
   exact sub_le_sub_right (min_vw_le_vw_add_of_ne_zero w _ _ hxe hyd hs) _
 
-def GeV (w : Pl K) (c : ℝ) (x : K) : Prop := x = 0 ∨ c ≤ (vw w x : ℝ)
-
-theorem GeV.add {w : Pl K} {c : ℝ} {x y : K} (hx : GeV w c x) (hy : GeV w c y) :
-    GeV w c (x + y) := by
-  unfold GeV at *
-  rcases hx with hx | hx
-  · rw [hx, zero_add]; exact hy
-  rcases hy with hy | hy
-  · rw [hy, add_zero]; exact Or.inr hx
-  by_cases hx0 : x = 0
-  · rw [hx0, zero_add]; exact Or.inr hy
-  by_cases hy0 : y = 0
-  · rw [hy0, add_zero]; exact Or.inr hx
-  by_cases hxy : x + y = 0
-  · exact Or.inl hxy
-  right
-  have h := vw_add w x y hx0 hy0 hxy
-  have h2 : min (vw w x : ℝ) (vw w y : ℝ) ≤ (vw w (x + y) : ℝ) := by exact_mod_cast h
-  exact le_trans (le_min hx hy) h2
-
-theorem GeV.sum {w : Pl K} {c : ℝ} {ι : Type} (s : Finset ι) (f : ι → K)
-    (h : ∀ i ∈ s, GeV w c (f i)) : GeV w c (∑ i ∈ s, f i) := by
-  exact Finset.sum_induction f (GeV w c) (fun a b ha hb => GeV.add ha hb) (Or.inl rfl) h
-
-theorem GeV.mul {w : Pl K} {c c' : ℝ} {x y : K} (hx : GeV w c x) (hy : GeV w c' y) :
-    GeV w (c + c') (x * y) := by
-  unfold GeV at *
-  rcases hx with hx | hx
-  · left; rw [hx, zero_mul]
-  rcases hy with hy | hy
-  · left; rw [hy, mul_zero]
-  by_cases hx0 : x = 0
-  · left; rw [hx0, zero_mul]
-  by_cases hy0 : y = 0
-  · left; rw [hy0, mul_zero]
-  right
-  rw [vw_mul_lemma w x y hx0 hy0]
-  push_cast
-  linarith
-
-theorem GeV.mul0 {w : Pl K} {x y : K} (hx : GeV w 0 x) (hy : GeV w 0 y) : GeV w 0 (x * y) := by
-  have h := GeV.mul hx hy
-  rwa [add_zero] at h
-
-theorem GeV.of_eq_zero {w : Pl K} {x : K} (h : vw w x = 0) : GeV w 0 x := by
-  unfold GeV
-  right
-  rw [h]
-  simp
-
-theorem GeV.int (w : Pl K) (x : 𝓞 K) : GeV w 0 (x : K) := by
-  unfold GeV
-  by_cases hx : x = 0
-  · left
-    rw [hx]
-    first
-    | rfl
-    | simp
-    | exact map_zero (algebraMap (𝓞 K) K)
-  right
-  rw [vw_ringOfIntegers_eq_count_factors_span w x hx]
-  positivity
-
-theorem GeV.one (w : Pl K) : GeV w 0 (1 : K) := by
-  apply GeV.of_eq_zero
-  have h0 := vw_pow w (1 : K) one_ne_zero 0
-  simpa using h0
-
-theorem GeV.negOne (w : Pl K) : GeV w 0 (-1 : K) := by
-  apply GeV.of_eq_zero
-  have h1 := vw_pow w (-1 : K) (neg_ne_zero.mpr one_ne_zero) 2
-  have h0 := vw_pow w (1 : K) one_ne_zero 0
-  simp at h0
-  rw [neg_one_sq, h0] at h1
-  push_cast at h1
-  omega
-
-theorem GeV.sub {w : Pl K} {x y : K} (hx : GeV w 0 x) (hy : GeV w 0 y) : GeV w 0 (x - y) := by
-  rw [sub_eq_add_neg, neg_eq_neg_one_mul]
-  exact GeV.add hx (GeV.mul0 (GeV.negOne w) hy)
-
 end Val
-
-theorem valuation_add : ValAdd := by
-  unfold ValAdd
-  intro K _ _ _ w a b ha hb hab
-  exact vw_add w a b ha hb hab
 
 end Formalism.PairingDivisionLocalBalance

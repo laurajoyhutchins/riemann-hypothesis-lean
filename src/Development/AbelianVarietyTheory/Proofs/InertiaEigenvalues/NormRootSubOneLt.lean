@@ -1,12 +1,66 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerTraceAlmostSurjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImportsLast
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPrimitiveRootPrimePowSubOnePadicComplex
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerTraceAlmostSurjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SumTranslateEq
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ImportsLast
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SumTranslateEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc
 
 namespace GlobalTheory.Cyc.TraceTilt
@@ -133,6 +187,7 @@ theorem rel_trace (hn : ∀ (g : GQ l) (x : Om l), ‖g x‖ = ‖x‖) (K : Fin
     a ha ha1
   have hfix : ∀ y ∈ L ⊔ E, ∀ n ∈ L.fixingSubgroup, n (∑ t ∈ T, t y) = ∑ t ∈ T, t y := by
     intro y hy n hnL
+
     rw [map_sum]
     refine sum_shift L.fixingSubgroup E.fixingSubgroup T hT hT' (fun g => g y) ?_ n hnL
     intro g v hv hv'
@@ -144,6 +199,7 @@ theorem rel_trace (hn : ∀ (g : GQ l) (x : Om l), ‖g x‖ = ‖x‖) (K : Fin
   rw [Finset.sum_image hinj, Finset.sum_product] at he
   rw [← he]
   refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (norm_nonneg _) fun s _ => ?_
+
   rw [← hn s (∑ t ∈ T, t e), map_sum]
   rfl
 
@@ -238,7 +294,7 @@ theorem approx_root (hn : ∀ (g : GQ l) (x : Om l), ‖g x‖ = ‖x‖) (K : F
 
 theorem mem_OC (x : PadicComplex l) : x ∈ PadicComplexInt l ↔ ‖x‖ ≤ 1 := by
   have hv : ((Valued.v x : NNReal) : ℝ) = ‖x‖ := by
-    rw [PadicComplex.norm_eq_norm, Valued.v.norm_def, PadicComplex.RankOne.hom_eq_embedding,
+    rw [PadicComplex.norm_eq_norm, Valued.v.norm_def, (show Valuation.RankLeOne.hom' Valued.v = MonoidWithZeroHom.ValueGroup₀.embedding from rfl),
       Valuation.embedding_restrict]
   rw [← hv]
   change Valued.v x ≤ 1 ↔ _
@@ -307,14 +363,17 @@ theorem exists_tilt {P : LocPrime l} (AI : LocAinf l P) (N : Subgroup (GQ l)) (S
     rw [map_pow, hB _ g hg]
   · choose y hy hy' using fun s => AI.actT_coeff s x 0 _ (hx 0)
     have h1 := congrArg (PreTilt.coeff 0) h0
+
     rw [map_sum, map_zero, Finset.sum_congr rfl fun s _ => hy' s] at h1
     have h2 : Ideal.Quotient.mk (Ideal.span {((l : ℕ) : OC l)}) (∑ s ∈ S, y s) = 0 := by
+
       rw [map_sum]; exact h1
     rw [mk_eq_zero_iff] at h2
     have h3 : ((∑ s ∈ S, y s : OC l) : PadicComplex l) =
         ∑ s ∈ S, AI.actC s ((B k : PadicComplex l) ^ l ^ k) := by
+
       rw [show ((∑ s ∈ S, y s : OC l) : PadicComplex l) = ∑ s ∈ S, (y s : PadicComplex l) from
-        map_sum (PadicComplexInt l).subtype _ _]
+      map_sum (PadicComplexInt l).subtype _ _]
       refine Finset.sum_congr rfl fun s _ => ?_
       rw [hy s, zero_add]
       rfl
@@ -334,7 +393,7 @@ theorem exists_tilt {P : LocPrime l} (AI : LocAinf l P) (N : Subgroup (GQ l)) (S
           ∑ s ∈ S, AI.actC s ((B k : PadicComplex l) ^ l ^ k) := by
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun s _ => ?_
-      rw [← map_add, sub_add_cancel]
+      rw [← map_add (f := _), sub_add_cancel]
     refine absurd htr (not_lt.2 ?_)
     rw [h5]
     refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le_max ?_ (h3 ▸ h2))
@@ -396,13 +455,16 @@ theorem main : ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) 
     simp only [F]
     rw [map_mul AI.actT, RingAut.mul_apply, hxN v hv]
   have ht : ∀ h ∈ Hinf K, AI.actWCb h (∑ s ∈ S, F s) = ∑ s ∈ S, F s := fun h hh => by
+
     rw [map_sum]
     simp only [hF]
     exact sum_shift (Hinf K) L.fixingSubgroup S hS hS' F (fun g v _ hv => hFv g v hv) h hh
   have hu : IsUnit (∑ s ∈ S, F s) := by
     apply WittVector.isUnit_of_coeff_zero_ne_zero
+
     rw [← WittVector.constantCoeff_apply, map_sum]
     simp only [F, WittVector.constantCoeff_apply, WittVector.teichmuller_coeff_zero]
+
     rw [← map_sum]
     exact fun h => hx (IsFractionRing.injective (OCb l) (Cb l) (h.trans (map_zero _).symm))
   obtain ⟨w, hw⟩ := hu.exists_right_inv

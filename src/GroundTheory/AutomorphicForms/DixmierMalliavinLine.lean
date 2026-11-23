@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.DixmierMalliavinLineBounds
-import GroundTheory.AutomorphicForms.DixmierMalliavinLineLimit
+module
+
+public import GroundTheory.AutomorphicForms.DixmierMalliavinLineStage
+public import GroundTheory.AutomorphicForms.DixmierMalliavinLineBounds
+public import GroundTheory.AutomorphicForms.DixmierMalliavinLineLimit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.SmoothSeries
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Group.Tannery
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 namespace GroundTheory.Automorphic
 
@@ -98,8 +150,6 @@ section Sequence
 variable {M : ℕ → ℝ} {ε : ℝ} (hε : 0 < ε) {a : ℕ → ℝ} (hg : ∀ j, Good M ε j (a j))
 include hε hg
 
-theorem good_pos (j : ℕ) : 0 < a j := (hg j).1
-
 theorem coef_le_weight (n p : ℕ) : coef a n p ≤ weight M p := by
   refine coef_le_of (fun j => (hg j).1) (by simp [weight]) (fun p => (weight_pos M p).le)
     (fun n p hp hpn => (hg n).2.1 p (Finset.mem_range.2 (by omega)) hp) n p
@@ -174,10 +224,6 @@ theorem contDiff_remSum : ContDiff ℝ ∞ (remSum (ε := ε) (a := a)) := by
     fun k j t _ => ?_
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv]
   exact norm_iteratedDeriv_ρ_le_majorant hε hg k j t
-
-theorem summable_ρ (t : ℝ) : Summable fun j => ρ a (radii ε) j t :=
-  Summable.of_norm_bounded (summable_majorant hε hg 0) fun j => by
-    simpa using norm_iteratedDeriv_ρ_le_majorant hε hg 0 j t
 
 theorem support_remSum_subset : support (remSum (ε := ε) (a := a)) ⊆ Icc 0 (ε / 2) := by
   intro t ht
@@ -292,8 +338,8 @@ end Limit
 
 end LineKernel
 
-open LineKernel in
 
+open LineKernel in
 theorem exists_dixmierMalliavin_line (M : ℕ → ℝ) {ε : ℝ} (hε : 0 < ε) :
     ∃ (c : ℕ → ℝ) (g h : ℝ → ℂ), ContDiff ℝ ∞ g ∧ ContDiff ℝ ∞ h ∧
       tsupport g ⊆ Set.Icc (-ε) ε ∧ tsupport h ⊆ Set.Icc (-ε) ε ∧

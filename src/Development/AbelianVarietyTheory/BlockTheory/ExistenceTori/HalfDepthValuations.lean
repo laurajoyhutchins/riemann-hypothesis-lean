@@ -1,10 +1,44 @@
-import Mathlib
-import Development.AutomorphicArithmetic.PrimeDiscriminants.SlopeTestRemainingChoices
-import Formalism.LocalToGlobal.ProjectiveLattices.CuspidalL2Subspace
-import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthPins
-import Formalism.LocalRingCardinality.DataErr
-import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.OEOsInjective
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Formalism.LocalToGlobal.ProjectiveLattices.PartitionExtendByZeroAntitone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.KaSmallNonpos
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,80 +48,13 @@ open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions F
 
 variable {D : D7}
 
-def halfE (Q : Par D) (i : Fin 2) : Ideal (𝓞 D.host.E) :=
-  Q.l.Mb ⊔ Ideal.span {((D.host.g i : ℕ) : 𝓞 D.host.E)}
 
-def halfK (Q : Par D) (i : Fin 2) : Ideal (𝓞 D.host.K) :=
-  (halfE Q i).comap (algebraMap (𝓞 D.host.K) (𝓞 D.host.E))
-
-def piGBar (X : ErrX D) (i : Fin 2) : 𝓞 D.host.E := barE D (X.piG i)
-
-open Classical in
-
-def piOf (Q : Par D) (X : ErrX D) (i : Fin 2) : 𝓞 D.host.E :=
-  if piGBar X i ∈ halfE Q i then piGBar X i else X.piG i
-
-open Classical in
-
-def vdOf (D : D7) (p : ℕ) : ℝ :=
-  if p ∈ D.host.small then D.host.vdH p
-  else if p = D.host.q ∨ p = D.host.d then 1 / 2 else 0
-
-def vdDiff (D : D7) (p : ℕ) : ℝ :=
-  (padicValInt p (NumberField.discr D.host.E) : ℝ) / (Module.finrank ℚ D.host.E : ℝ)
-
-def pageAt (D : D7) (T : ℕ) : DepPage where
-  T := T
-  g1 := D.host.g 0
-  g2 := D.host.g 1
-  q1 := D.host.q
-  dd := D.host.d
-  sm := D.host.small
-  f := D.R.f
-  r := D.R.r
-  vd := vdOf D
-
-def pageOf {L : SizeData₂ D} {P : ParameterChoice' D L} (PT : ParamsT D L P) : DepPage := pageAt D PT.TO
-
-def depAt (Q : Par D) (X : ErrX D) (T : ℕ) (ka wL wF : ∀ j, WeightFamilies.Wt D j) : DepData D.host.E where
-  Q := pageAt D T
-  aL j := wtA (wL j)
-  aF j := wtA (wF j)
-  nW j := (wL j).n
-  Dp j := ∑ τ, ∑ i, (ka j).aP τ i
-  Dm j := ∑ τ, ∑ i, (ka j).aM τ i
-  pi := piOf Q X
 
 section Rec
 
 variable {L : SizeData₂ D} {P : ParameterChoice' D L}
 
-def depOf (Q : Par D) (X : ErrX D) (PT : ParamsT D L P) (hK : DV.KapDef D) : DepData D.host.E :=
-  depAt Q X PT.TO (kaR PT hK) (lR PT hK) (fR PT hK)
-
-def depCore (T : Core D) (X : ErrX D) (PT : ParamsT D L P) (hK : DV.KapDef D) : DepData D.host.E :=
-  depOf T.Q X PT hK
-
 end Rec
-
-def Orient (Q : Par D) (X : ErrX D) : Prop := ∀ i, halfE Q i = Ideal.span {piGBar X i}
-
-def OrientCore (T : Core D) (X : ErrX D) : Prop := Orient T.Q X
-
-def PiGenSt (D : D7) : Prop :=
-  ∀ (Q : Par D) (X : ErrX D), Q.PinHost → Q.PinLevel → ∀ i,
-    Ideal.span {piOf Q X i} = halfE Q i ∧ (halfK Q i).IsMaximal ∧
-      (halfK Q i).map (algebraMap (𝓞 D.host.K) (𝓞 D.host.E)) = halfE Q i ∧
-      (X.piG i ∈ halfE Q i ↔ piGBar X i ∉ halfE Q i)
-
-def PiHalfSt (D : D7) : Prop :=
-  ∀ (Q : Par D) (X : ErrX D), Q.PinHost → Q.PinLevel →
-    ∀ (T : ℕ) (ka wL wF : ∀ j, WeightFamilies.Wt D j), PiHalf Q.l (depAt Q X T ka wL wF)
-
-def HalfCoreSt (D : D7) : Prop :=
-  ∀ T : Core D, LawsM T → ∀ i, halfK T.Q i = (T.pb i).asIdeal
-
-def VdSt (D : D7) : Prop := ∀ p : ℕ, p.Prime → vdOf D p = vdDiff D p
 
 theorem bar_eq_barE (Q : Par D) (a : 𝓞 D.host.E) : Q.H.bar a = barE D a := by
   apply IsFractionRing.injective (𝓞 D.host.E) D.host.E

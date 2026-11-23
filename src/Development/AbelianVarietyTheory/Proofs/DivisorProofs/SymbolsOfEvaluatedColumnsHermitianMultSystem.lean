@@ -1,5 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
-import ReciprocityTheory.SemistableReduction.TorusL2CauchyInequality
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HermSysHypOneLeLambdaZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField MvPolynomial ReciprocityTheory.MultiplicativeHeights ReciprocityTheory.GeometryOfNumbersTheory
 open GlobalTheory GlobalTheory.ChowHt GlobalTheory.Adelic GlobalTheory.HermTools GlobalTheory.HilbertSamuel GlobalTheory.HSChoice GlobalTheory.HSShort
 
@@ -25,13 +69,32 @@ theorem word_join (hc : ∀ u v, mul u * mul v = mul v * mul u) {D t : ℕ} (s :
       pw mul s α * mul l ^ (Finset.univ.filter fun q => β q = Fin.last D).card := by
   classical
   let P := Submonoid.closure (Set.range mul)
-  letI : CommMonoid P := Submonoid.closureCommMonoidOfComm _ (by rintro _ ⟨u, rfl⟩ _ ⟨v, rfl⟩; exact hc u v)
+  letI : CommMonoid P := { P.toMonoid with
+    mul_comm := by
+      intro ⟨x, hx⟩ ⟨y, hy⟩
+      apply Subtype.ext
+      exact Submonoid.closure_induction₂
+        (by rintro _ _ ⟨u, rfl⟩ ⟨v, rfl⟩; exact hc u v)
+        (by simp) (by simp)
+        (by
+          intro x y z _ _ _ h1 h2
+          change x * z = z * x at h1
+          change y * z = z * y at h2
+          change (x * y) * z = z * (x * y)
+          rw [mul_assoc, h2, ← mul_assoc, h1, mul_assoc])
+        (by
+          intro x y z _ _ _ h1 h2
+          change z * x = x * z at h1
+          change z * y = y * z at h2
+          change z * (x * y) = (x * y) * z
+          rw [← mul_assoc, h1, mul_assoc, h2, ← mul_assoc]) hx hy }
   let G : (Fin N → K) → P := fun u => ⟨mul u, Submonoid.subset_closure ⟨u, rfl⟩⟩
   let φ : P →* Module.End K A := P.subtype
   have key : ∀ {n : ℕ} (f : Fin n → P), (List.ofFn fun i => φ (f i)).prod = φ (∏ i, f i) := by
     intro n f
-    rw [← List.prod_ofFn, map_list_prod, List.map_ofFn]
-    rfl
+    rw [← List.prod_ofFn]
+    change (List.ofFn (φ ∘ f)).prod = _
+    rw [← List.map_ofFn, map_list_prod]
   let H : Fin (D + 1) → Fin N → K := Fin.lastCases (motive := fun _ => Fin N → K) l s
   have h1 : word mul (fun q k => join s l (β q, k)) = φ (∏ q, G (H (β q))) := by
     rw [← key]
@@ -46,7 +109,7 @@ theorem word_join (hc : ∀ u v, mul u * mul v = mul v * mul u) {D t : ℕ} (s :
   rw [Finset.prod_comp (fun b => G (H b)) β]
   rw [Finset.prod_subset (Finset.subset_univ _)]
   · rw [Fin.prod_univ_castSucc]
-    congr 1
+    apply congrArg₂ (fun (x y : P) => x * y)
     · refine Finset.prod_congr rfl fun i _ => ?_
       simp [H, hα]
     · simp [H]
@@ -55,7 +118,8 @@ theorem word_join (hc : ∀ u v, mul u * mul v = mul v * mul u) {D t : ℕ} (s :
       rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
       intro q _ hq
       exact hb (Finset.mem_image.2 ⟨q, Finset.mem_univ _, hq⟩)
-    rw [this, pow_zero]
+    rw [this]
+    exact pow_zero _
 
 theorem card_fibers {D t : ℕ} (β : Fin t → Fin (D + 1)) :
     ∑ i : Fin D, (Finset.univ.filter fun q => β q = i.castSucc).card +

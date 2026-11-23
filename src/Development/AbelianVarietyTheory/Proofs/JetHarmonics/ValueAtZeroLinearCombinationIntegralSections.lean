@@ -1,13 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.VRatioGtStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIntegralExpansionsOfValuationGe
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionValueZero
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsNilpotentOfMemKerJetTruncR
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ValSerGermFnVal
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.TopLePreimageWchart
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ValueAtZeroOfSectionValue
+module
+
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.SecLinIffComb
+public import Development.AbelianVarietyTheory.Definitions.Jets.ColValMonomial
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBC
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifBaseChangeSt
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.IsNilpotentOfMemKerJetTruncR
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.TopLePreimageWchart
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ValSerGermFnVal
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsIntegralExpansionsOfValuationGe
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ValueAtZeroOfSectionValue
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionValueZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.GenCalc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullGenPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.LevelFrameOfLaws
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -55,19 +104,7 @@ theorem sval_of_secLin {φ₁ : K' → (Y₁ ⟶ X)} {ε₁ : K' → ℤ} {s₁ 
     {ε : K → ℤ} {n : ℕ} {s : Fin n → LB.Sec (LB.LinComb L φ ε)} {h : Y₁ ⟶ Y} {c : Fin n → Γ(Y₁, ⊤)}
     (H : GeneratorPullback.SecLin L φ₁ ε₁ s₁ φ ε s h c) (r : Z ⟶ Y₁) (z : Z) {J} (hJ : Good L z J) :
     sval s₁ r z J = ∑ i, gs r z ⊤ (c i) * sval (s i) (r ≫ h) z J := by
-  simp only [sval_of (s _) (r ≫ h) z J (fun k => J (r ≫ h ≫ φ k)) (fun k => by rw [Category.assoc])]
-  have hm : r z ∈ LB.wchart L φ₁ (fun k => J (r ≫ φ₁ k)) ⊓
-      LB.wchart L (fun k => h ≫ φ k) (fun k => J (r ≫ h ≫ φ k)) :=
-    ⟨hJ.mem φ₁ _, hJ.mem (fun k => h ≫ φ k) _⟩
-  have e := H (fun k => J (r ≫ φ₁ k)) (fun k => J (r ≫ h ≫ φ k)) (by
-    rintro (a | a) (b | b) e <;> exact congrArg (fun q => J (r ≫ q)) e)
-  have a₂ : LB.wchart L φ₁ (fun k => J (r ≫ φ₁ k)) ⊓ LB.wchart L (fun k => h ≫ φ k) (fun k => J (r ≫ h ≫ φ k)) ≤
-      h ⁻¹ᵁ LB.wchart L φ (fun k => J (r ≫ h ≫ φ k)) :=
-    inf_le_right.trans (fun _ hy => Set.mem_iInter.2 fun k => Set.mem_iInter.1 hy k)
-  refine (gs_res _ z _ hm _).symm.trans ((congrArg (gs r z _) e).trans ?_)
-  refine ((gs_eq _ z _ hm _).trans (by rw [map_sum, map_sum])).trans (Finset.sum_congr rfl fun i _ =>
-    (gs_eq _ z _ hm _).symm.trans ((gs_mul _ z _ hm _ _).trans (congrArg₂ (· * ·) (gs_res _ z _ hm _)
-      ((gs_res _ z a₂ hm _).trans (gs_pull _ h z _ (a₂ hm) _)))))
+  apply _root_.GlobalTheory.PullExpField.secLin_val <;> assumption
 
 end Generic
 
@@ -196,6 +233,7 @@ theorem val_eq_of_approx {V : Type} [CommRing V] [IsDomain V] [IsDiscreteValuati
     rw [← _root_.add_assoc, Finset.add_sum_erase T (fun β => ∑ i, c i * TWO.algVF (V := V) (F := F) (a i β))
       (Finset.mem_insert_self _ _), Finset.sum_comm, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun i _ => ?_
+
     rw [← Finset.mul_sum, ← map_sum, map_sub]
     ring
   rw [e, AddValuation.map_add_eq_of_lt_left, hχ]
@@ -223,6 +261,7 @@ theorem main : Laws → Laws4 → TwistBCSpanStatement → JetSer.JetAlgSt → J
         MvPowerSeries.map (TWO.algVF (V := V) (F := F)) (S i * (w⁻¹).val)) :=
       ⟨l', c', σ', fi', fun i => S i * (w⁻¹).val, ρ, hE', hlin', hρ,
         fun i => ⟨S i, hS i, by rw [← hw, Units.inv_mul_cancel_right]⟩, rfl⟩
+
     rw [(hgm s f).1 hf, ← (hgm s _).1 hf', map_sum]
     refine y.v.map_le_sum fun i _ => ?_
     rw [MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_map, AddValuation.map_mul]
@@ -247,6 +286,7 @@ theorem main : Laws → Laws4 → TwistBCSpanStatement → JetSer.JetAlgSt → J
       (fun β hβ => GC.valuation_ge_at_zero y.hϖ y.hv (ho β hβ) (PhiValue.valueAtZero_of_sectionValue _ F q β _ _ (hv0 β)))
     have e : MvPowerSeries.constantCoeff f = (∑ i, c i * TWO.algVF (V := V) (F := F) (x₀ i)) *
         TWO.algVF (V := V) (F := F) ((u * w⁻¹) ^ q).val := by
+
       rw [hfe, map_sum, Finset.sum_mul]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_mul, MvPowerSeries.constantCoeff_C, MvPowerSeries.constantCoeff_map, hgi, map_mul, _root_.mul_assoc]

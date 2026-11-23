@@ -1,38 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelPlusSubgroup
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitaryConvergent
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.DiscreteSeriesCoefficientsCuspidalIffOneSided
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DiscreteBranchingUpq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LargeScaleSizesImplyGapConditionsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GoodRowsPrincipalLevelAreRowsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelTowerConvergenceStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowSeparationByRealFunctionalsOfChainStepsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstRowTowerMultiplicitySpacesOfArrowStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelInductionFromPairsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelModelsOfFunctorialityStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PairExistenceOfFunctorialityStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DualCoefSpaceIsTensorOverRealPlacesStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TopSeparationStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BasicModelsOfFunctorialityStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LevelTowerRapidDecayStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PeriodNonvanishingOfArchimedeanInputs
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaSurjectiveDefiniteLevelStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BesselPeriodNonvanishingAscentOfDepthDataStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DependenceFixedStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealInputOfBranching
-import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.SepGap
-import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.RankLeOneOfDep
+module
+
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.BurGapOfHyp
+public import CompanionTheory.AutomorphicTheory.BesselOrbitBounds.BesselMapUniqueness.BesselMapUniqGapAlt
+public import Development.AutomorphicArithmetic.ThetaCorrespondence.BesselModels.RankLeOneOfDep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+
+@[expose] public section
 
 namespace UpperTheory.Lit
 
 open GlobalTheory.SepRows
 
 theorem burGapPos : Bur.BurGapPos := Bur.BurPos.burGapPos_of_bmu CompanionTheory.Bmu.besselMapUniqGap
-
-theorem separate_of_steps_gap (P : GlobalTheory.FunPr.Hypotheses₂) (hT : RowTower) :
-    SizeGap → GoodRows → RowConv → WeakSep → GlobalTheory.IndefiniteRowSideFullHecke.LevelPlusSubgroup.FunctionalsSeparate :=
-  Bur.separate_of_burGapPos burGapPos GlobalTheory.T.dualCoefSpace_isTensorOverRealPlaces (GlobalTheory.T.top_separation P) hT
 
 end UpperTheory.Lit

@@ -1,8 +1,58 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LocalQuadraticDensityNearOneStatement
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LocalQuadraticDensityNearOneStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.StandardLocalHaarPropertiesStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRingStatement
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
@@ -153,7 +203,7 @@ theorem lam_scale {lam : Measure (Fv F v)} (hstd : IsStdV v lam) {π : Fv F v}
   have h1 : (lam.map (fun t => π * t)).map (fun t => π * t) A = lam {z | π * (π * z) ∈ A} := by
     rw [Measure.map_map (measurable_const_mul π) (measurable_const_mul π), Measure.map_apply ((measurable_const_mul π).comp (measurable_const_mul π)) hA]
     rfl
-  rw [← h1, hm, Measure.map_smul, hm, Measure.smul_apply, Measure.smul_apply, smul_eq_mul,
+  rw [← h1, hm, Measure.map_smul _ (measurable_const_mul π).aemeasurable, hm, Measure.smul_apply, Measure.smul_apply, smul_eq_mul,
     smul_eq_mul, ← mul_assoc, sq]
 
 theorem isOpen_unit_sphere : IsOpen {x : Fv F v | Valued.v x = 1} := by
@@ -241,7 +291,6 @@ theorem bound_step {q : ℝ} {M : ℕ} (hq : 2 ≤ q) (hM : 3 ≤ M) {Dp D' : �
     (hD' : |D' - 1| ≤ 2 / q ^ (M - 1))
     (hDp : |Dp - 1| ≤ 1 / q ^ (M - 1) + 1 / q ^ (2 * M - 1)) :
     |Dp + q ^ 2 / q ^ (2 * M) * D' - 1| ≤ 2 / q ^ (M - 1) := by
-  have hq0 : 0 < q := by linarith
   obtain ⟨k, rfl⟩ : ∃ k, M = k + 3 := ⟨M - 3, by omega⟩
   have e1 : k + 3 - 1 = k + 2 := by omega
   have e2 : 2 * (k + 3) - 1 = 2 * (k + 2) + 1 := by omega
@@ -257,7 +306,6 @@ theorem bound_step {q : ℝ} {M : ℕ} (hq : 2 ≤ q) (hM : 3 ≤ M) {Dp D' : �
     have h1 : q ^ 2 ≤ q ^ (k + 2) := pow_le_pow_right₀ (by linarith) (by omega)
     nlinarith
   generalize q ^ (k + 2) = t at ht4 hD' hDp ⊢
-  have htpos : 0 < t := by linarith
   have hqr : q ^ 2 / (t ^ 2 * q ^ 2) * D' = (1 / t) ^ 2 * D' := by
     field_simp
   have hf1 : 1 / (t ^ 2 * q) = (1 / t) ^ 2 * (1 / q) := by field_simp
@@ -279,7 +327,6 @@ theorem bound_step {q : ℝ} {M : ℕ} (hq : 2 ≤ q) (hM : 3 ≤ M) {Dp D' : �
   have p3 := mul_le_mul_of_nonneg_left hr2 (sq_nonneg u)
   have p4 := mul_le_mul_of_nonneg_left hu4 hu0.le
   have p5 := mul_le_mul_of_nonneg_left hu4 (sq_nonneg u)
-  have p6 := mul_nonneg (sq_nonneg u) hr0.le
   constructor <;> nlinarith
 
 theorem local_quadratic_density_bound_at_level {lam : Measure (Fv F v)} (hstd : IsStdV v lam) (h2 : Valued.v (2 : Fv F v) = 1)

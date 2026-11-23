@@ -1,5 +1,63 @@
-import Formalism.PadicSubsetSums.StableGradedCounts.LocalEstimateIVOfTypeSetWeight
-import Lemmata.TwistedIdempotents.TwistedIdem
+module
+
+public import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+public import Formalism.PadicSubsetSums.StableGradedCounts.LocalEstimateIVOfTypeSetWeight
+public import Lemmata.TwistedIdempotents.TwistedIdem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 section
 open Finset
@@ -78,8 +136,10 @@ theorem antiLift_idem (σ : G → G) (hσ : ∀ x y, σ (x * y) = σ y * σ x) (
       invFun := fun u => ⟨σ u, (hJ u).1⟩
       left_inv := fun u => Subtype.ext (hσσ u)
       right_inv := fun u => Subtype.ext (hσσ u) }
+
   rw [twistedIdem_def, map_sum]
   show _ = MulOpposite.opAddEquiv _
+
   rw [map_sum]
   refine Fintype.sum_equiv s _ _ (fun u => ?_)
   rw [map_smul, antiLift_of, MulOpposite.opAddEquiv_apply, MulOpposite.op_smul]
@@ -114,7 +174,7 @@ theorem hecke_comm (σ : G → G) (hσ : ∀ x y, σ (x * y) = σ y * σ x) (hσ
     | of g =>
       rw [map_mul, map_mul, antiLift_idem σ hσ hσσ J χ hJ, antiLift_of, ← MulOpposite.op_mul,
         ← MulOpposite.op_mul, ← mul_assoc, key]
-    | add x y hx hy => rw [mul_add, add_mul, map_add, hx, hy, MulOpposite.op_add]
+    | add x y hx hy => rw [mul_add, add_mul, map_add (f := _), hx, hy, MulOpposite.op_add]
     | smul r x hx => rw [mul_smul_comm, smul_mul_assoc, map_smul, hx, MulOpposite.op_smul]
   have h := map_mul (antiLift σ hσ) (twistedIdem J χ * MonoidAlgebra.of ℂ G g * twistedIdem J χ)
     (twistedIdem J χ * MonoidAlgebra.of ℂ G g' * twistedIdem J χ)

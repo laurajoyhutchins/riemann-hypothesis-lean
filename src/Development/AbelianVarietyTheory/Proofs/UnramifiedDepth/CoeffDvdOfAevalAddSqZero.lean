@@ -1,5 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.Data.Nat.Prime.Defs
+public import Mathlib.Algebra.DualNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.Coprime.Basic
+public import Mathlib.RingTheory.Coprime.Lemmas
+public import Mathlib.RingTheory.Ideal.Defs
+public import Mathlib.RingTheory.Ideal.Operations
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+import ReciprocityTheory.DualLattices.CotangentSurjective
 import ReciprocityTheory.DualLattices.FormalChartAtZero
+import ReciprocityTheory.DualLattices.SqZeroOfSpan
+
+@[expose] public section
+
 open TensorProduct IsLocalRing Matrix ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Be2
 
 namespace GlobalTheory
@@ -10,9 +69,9 @@ private lemma polCoef_taylor {R₀ A : Type} [CommRing R₀] [CommRing A] [Algeb
       = MvPolynomial.aeval a G + MvPolynomial.aeval a (MvPolynomial.pderiv i G) * ε := by
   induction G using MvPolynomial.induction_on with
   | C r => simp
-  | add f h hf hh => simp only [map_add, hf, hh]; ring
+  | add f h hf hh => simp only [map_add (f := _), hf, hh]; ring
   | mul_X f j hf =>
-    simp only [map_mul, hf, MvPolynomial.aeval_X, Derivation.leibniz, smul_eq_mul, map_add,
+    simp only [map_mul, hf, MvPolynomial.aeval_X, Derivation.leibniz, smul_eq_mul, map_add (f := _),
       MvPolynomial.pderiv_X, Pi.add_apply]
     by_cases hij : j = i
     · subst hij
@@ -55,7 +114,7 @@ private lemma polCoef_pderiv {R₀ : Type} [CommRing R₀] (p : ℕ) {g N : ℕ}
 
 private lemma polCoef_span {R : Type} [CommRing R] {g N : ℕ} (f : MvPolynomial (Fin g) R)
     (hf : f ∈ Ideal.span (Set.range fun j : Fin g => (MvPolynomial.X j : MvPolynomial (Fin g) R) ^ N)) :
-    ∀ m : Fin g →₀ ℕ, (∀ i, m i < N) → MvPolynomial.coeff m f = 0 := by
+    ∀ m : Fin g →₀ ℕ, (∀ i, m i < N) → AddMonoidAlgebra.coeff f m = 0 := by
   rw [Ideal.mem_span_range_iff_exists_fun] at hf
   obtain ⟨c, rfl⟩ := hf
   intro m hm
@@ -71,7 +130,7 @@ theorem coeff_dvd_of_aeval_add_sq_zero :
   (∀ {R₀ : Type} [CommRing R₀] (p : ℕ) [Fact p.Prime] (g N : ℕ) (G : MvPolynomial (Fin g) R₀),
     (∀ (S : Type) [CommRing S] [Algebra R₀ S], (p : S) = 0 → ∀ a e : Fin g → S, (∀ i, a i ^ N = 0) → (∀ i j, e i * e j = 0) →
       MvPolynomial.aeval (a + e) G = MvPolynomial.aeval a G) →
-    ∀ m : Fin g →₀ ℕ, (∀ i, m i < N) → (∃ i, ¬ p ∣ m i) → ∃ r : R₀, MvPolynomial.coeff m G = p * r) := by
+    ∀ m : Fin g →₀ ℕ, (∀ i, m i < N) → (∃ i, ¬ p ∣ m i) → ∃ r : R₀, AddMonoidAlgebra.coeff G m = p * r) := by
   intro R₀ _ p hp g N G H m hm ⟨i, hi⟩
   let I : Ideal R₀ := Ideal.span {(p : R₀)}
   let R := R₀ ⧸ I
@@ -95,7 +154,7 @@ theorem coeff_dvd_of_aeval_add_sq_zero :
     intro f
     induction f using MvPolynomial.induction_on with
     | C r => simp only [MvPolynomial.aeval_C, MvPolynomial.map_C]; rfl
-    | add f h hf hh => simp only [map_add, hf, hh]
+    | add f h hf hh => simp only [map_add (f := _), hf, hh]
     | mul_X f j hf => simp only [map_mul, hf, MvPolynomial.aeval_X, MvPolynomial.map_X, x]
   rw [h5, Ideal.Quotient.eq_zero_iff_mem] at h4
   have hpos : 1 ≤ m i := by
@@ -106,7 +165,7 @@ theorem coeff_dvd_of_aeval_add_sq_zero :
     (fun j => lt_of_le_of_lt (by simp) (hm j))
   have hle : Finsupp.single i 1 ≤ m := Finsupp.single_le_iff.mpr hpos
   rw [MvPolynomial.coeff_map, MvPolynomial.coeff_pderiv, tsub_add_cancel_of_le hle] at h6
-  have h7 : MvPolynomial.coeff m G * (m i : R₀) ∈ I := by
+  have h7 : AddMonoidAlgebra.coeff G m * (m i : R₀) ∈ I := by
     rw [← Ideal.Quotient.eq_zero_iff_mem]
     have e : (((m - Finsupp.single i 1 : Fin g →₀ ℕ) i : ℕ) : R₀) + 1 = (m i : R₀) := by
       rw [Finsupp.tsub_apply, Finsupp.single_eq_same, Nat.cast_sub hpos]; simp
@@ -116,7 +175,7 @@ theorem coeff_dvd_of_aeval_add_sq_zero :
   have hc : IsCoprime (p : R₀) (m i : R₀) :=
     Nat.Coprime.cast ((Nat.Prime.coprime_iff_not_dvd hp.out).mpr hi)
   obtain ⟨u, v, huv⟩ := hc
-  exact ⟨u * MvPolynomial.coeff m G + v * s, by
-    linear_combination (-MvPolynomial.coeff m G) * huv - v * hs⟩
+  exact ⟨u * AddMonoidAlgebra.coeff G m + v * s, by
+    linear_combination (-AddMonoidAlgebra.coeff G m) * huv - v * hs⟩
 
 end GlobalTheory

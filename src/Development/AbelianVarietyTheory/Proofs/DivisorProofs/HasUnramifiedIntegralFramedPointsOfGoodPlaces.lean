@@ -1,33 +1,80 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.FormalAlgebraisation
-import Development.AbelianVarietyTheory.Definitions.Divisors.MulSmulIdemMem
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ComponentMassSum
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsHomogeneousCompIdeal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KchMul
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.FibreFramesOnModels
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SupremumOnGoodPlaces
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CanonicalOfAbelianDeRham
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrysToDRBijective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsPureBCId
-import Development.AbelianVarietyTheory.Definitions.CMLattices.ExistsIsThetaDegOfIsLocalModel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFramedPointLiesOnComponentCmCurveField
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompositumIntermediateFieldExistsPlaceValuationE
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFinitePointMemClosed
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.FormalAlgebraisation
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MulSmulIdemMem
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CanonicalOfAbelianDeRham
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.PermutesRefl
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmEllipticCurveIsPureHodgeEndomorphismBaseChangeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CompositumIntermediateFieldExistsPlaceValuationE
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCmEllipticCurveGaloisTorsionSectionsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsComplexLinearOfPureTypesFiniteIndexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFramedPointLiesOnComponentCmCurveField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeIsometryConjPointSplitUpToIndexStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeSplitIndexPrimeToStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnramifiedFieldOfInertiaPropertyStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InertiaFixesComplexFibrePureEndomorphismTorsionStatement
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNumberFieldPoint
 import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsAlgebraMapEqOfValVLeOne
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsModelPushInvertibleOverCompleteDVR
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ConjugationActsOnCmTorsionByMultiplication
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PrincipalRootReZeroImSq
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CmModuliConsequenceOfAbelianSchemeLaws
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CompactifiedModuliPartOne
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsModuliSchemePolarizedAbelianLevel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeSplitIndexPrimeToStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeIsometryConjPointSplitUpToIndexStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsComplexLinearOfPureTypesFiniteIndexStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsUnramifiedFieldOfInertiaPropertyStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CmEllipticCurveIsPureHodgeEndomorphismBaseChangeStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.InertiaFixesComplexFibrePureEndomorphismTorsionStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCmEllipticCurveGaloisTorsionSectionsStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PointEqIffIsometryClosed
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PrincipalRootReZeroImSq
+public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.DegenerationDataAtModelPointOfUniformisation
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ConjugationActsOnCmTorsionByMultiplication
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIntegralFramesModelInvertiblePushforward
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsModelPushInvertibleOverCompleteDVR
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsPermPeriodSpacesComplexAut
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.PermutesPeriodSpacesIdOfFixesCmCurveTorsion
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RegularFunctionConstOfFiniteValuesAnyLevel
+import Formalism.LocalToGlobal.ProjectiveLattices.CompSplitPfD
+import Formalism.LocalToGlobal.ProjectiveLattices.GenFrPf
+import Formalism.LocalToGlobal.ProjectiveLattices.RealPtGeo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ComponentMassSum
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.CMLattices.IntegralOf
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KchMul
 
-set_option synthInstance.maxHeartbeats 400000
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -84,7 +131,7 @@ theorem exists_eq_add_nsmul {D : Datum H} {l : Level H} {Xo : Moduli D l} {σ : 
   have h0 : (m : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hm.ne'
   have e : F.ex i P ((m : ℂ)⁻¹ • P t) = F.ex i P ((m : ℂ)⁻¹ • P w) := Over.OverMorphism.ext h
   have e' := F.ex_add i P hP ((m : ℂ)⁻¹ • P (w - t)) ((m : ℂ)⁻¹ • P t)
-  rw [← smul_add, ← map_add, sub_add_cancel, e] at e'
+  rw [← smul_add, ← map_add (f := _), sub_add_cancel, e] at e'
   obtain ⟨x, hx⟩ := (F.ex_ker i P hP _).1 (mul_eq_right.1 e'.symm)
   refine ⟨x, ?_⟩
   rw [← sub_eq_iff_eq_add']
@@ -161,7 +208,11 @@ theorem exists_fixed_point (hD : 1 ≤ Dw.p + Dw.q) {q : ℕ} (hq : q.Prime) (hq
   obtain ⟨F⟩ := GlobalTheory.closing_of_abelianSchemeLaws E H Dw l Xo (algebraMap (KA l) ℂ) g ty hD rfl hty
   obtain ⟨L, _, _, j, x₁, hx₁, hZ₁⟩ := exists_numberField_point Z
   letI : Algebra c.F L := j.toAlgebra
-  let k : L →ₐ[c.F] ℂ := IsAlgClosed.lift
+  let k : L →ₐ[c.F] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   obtain ⟨h1, h2⟩ := GlobalTheory.FlatLine.point_ext hx₁ hZ₁ k.toRingHom
   have e : k.toRingHom.comp j = algebraMap c.F ℂ := k.comp_algebraMap
   rw [e] at h1

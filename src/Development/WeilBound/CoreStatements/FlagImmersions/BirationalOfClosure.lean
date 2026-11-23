@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogResolutionReindexed
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HomogRelationRatioReindex
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.UnitRatioDivisorSupportEq
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsSmoothHermTrivLine
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HomogRelationRatioReindex
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LogResolutionReindexed
 import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.UnitRatioDivisorSupportEq
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,9 +222,11 @@ theorem zeros_proj {Ω₀ Ω : Type} [Field Ω₀] [Field Ω] (y₀ : (Σ k, J�
             GlobalTheory.CompanionTheory.Ar.Rel.pow_mul_pow_sub_eq _ _ hMy hjn, Algebra.smul_def, map_mul]
           show _ = _ * (i (p.coeff j) * α ^ j)
           ring
+
         simp only [Φ, map_sum]
         rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum, hpa, mul_zero]
       have hev := hz.2 Φ (mem_mCoordIdeal_of_aeval_eq_zero y hΦh hΦy)
+
       simp only [Φ, map_sum, map_mul, map_pow, hFz] at hev
       rw [Finset.sum_eq_single 0 (fun j _ hj => by simp [hj]) (by simp), eval_map_rename'] at hev
       have hMz : eval z (map (Int.castRingHom ℂ) M) ≠ 0 := by
@@ -220,7 +270,7 @@ theorem birational_of_closure {Ω : Type} [Field Ω] {n : ℕ} (yf : Fin n → �
     obtain ⟨d', g', h', hg', hh', h0', he'⟩ := hy
     refine ⟨d + d', g * h' + h * g', h * h', homog_add (isMultiHomog_mul' hg hh') (isMultiHomog_mul' hh hg'),
       isMultiHomog_mul' hh hh', by rw [map_mul]; exact mul_ne_zero h0 h0', ?_⟩
-    simp only [map_add, map_mul, he, he']
+    simp only [map_add (f := _), map_mul, he, he']
     ring
   | neg x _ hx =>
     obtain ⟨d, g, h, hg, hh, h0, he⟩ := hx

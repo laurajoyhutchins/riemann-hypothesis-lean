@@ -1,5 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RadfordShufflePolynomialHolds
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RadfordShufflePolynomialHolds
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Data.ENat.Monoid
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.ENat.BigOperators
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.RingTheory.Localization.Integer
+
+@[expose] public section
+
 open GlobalTheory
 
 namespace GlobalTheory.ShuffleCount
@@ -26,8 +85,8 @@ private theorem aeval_killCompl {S B : Type*} [CommRing B] [Algebra ℚ B] (U : 
 
 private theorem coeff_killCompl_comapDomain {S : Type*} (U : Set S) (P : MvPolynomial S ℚ) (m : S →₀ ℕ)
     (hm : ↑m.support ⊆ Set.range (Subtype.val : U → S)) :
-    coeff (m.comapDomain (Subtype.val : U → S) (Subtype.val_injective : Function.Injective (Subtype.val : U → S)).injOn)
-      (killCompl (R := ℚ) (Subtype.val_injective : Function.Injective (Subtype.val : U → S)) P) = coeff m P := by
+    AddMonoidAlgebra.coeff (killCompl (R := ℚ) (Subtype.val_injective : Function.Injective (Subtype.val : U → S)) P)
+      (m.comapDomain (Subtype.val : U → S) (Subtype.val_injective : Function.Injective (Subtype.val : U → S)).injOn) = AddMonoidAlgebra.coeff P m := by
   classical
   induction P using MvPolynomial.induction_on' with
   | monomial n r =>
@@ -42,15 +101,18 @@ private theorem coeff_killCompl_comapDomain {S : Type*} (U : Set S) (P : MvPolyn
         · rintro rfl
           rfl
       simp only [hiff]
-    · rw [killCompl_monomial_eq_zero_of_not_subset _ _ hn, coeff_zero, coeff_monomial, if_neg]
-      rintro rfl
-      exact hn hm
-  | add P Q hP hQ => rw [map_add, coeff_add, coeff_add, hP, hQ]
+    · rw [killCompl_monomial_eq_zero_of_not_subset _ _ hn, AddMonoidAlgebra.coeff_zero,
+        coeff_monomial]
+      split_ifs with h
+      · subst n
+        exact (hn hm).elim
+      · rfl
+  | add P Q hP hQ => rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hP, hQ]
 
 theorem coeff_eq_zero_of_aeval_eq_zero {S B : Type*} [CommRing B] [Algebra ℚ B] (U : Set S)
     (φ : S → B) (hind : AlgebraicIndependent ℚ (fun Δ : U => φ Δ)) (h0 : ∀ Δ ∉ U, φ Δ = 0)
     (P : MvPolynomial S ℚ) (hP : aeval φ P = 0) (m : S →₀ ℕ) (hm : ∀ Δ ∈ m.support, Δ ∈ U) :
-    coeff m P = 0 := by
+    AddMonoidAlgebra.coeff P m = 0 := by
   classical
   have hm' : ↑m.support ⊆ Set.range (Subtype.val : U → S) := fun Δ hΔ =>
     ⟨⟨Δ, hm Δ (Finset.mem_coe.1 hΔ)⟩, rfl⟩
@@ -58,7 +120,8 @@ theorem coeff_eq_zero_of_aeval_eq_zero {S B : Type*} [CommRing B] [Algebra ℚ B
   have hQ : killCompl (R := ℚ) (Subtype.val_injective : Function.Injective (Subtype.val : U → S)) P = 0 := by
     apply algebraicIndependent_iff_injective_aeval.1 hind
     rw [map_zero, aeval_killCompl U φ h0 P, hP]
-  rw [hQ, coeff_zero]
+  rw [hQ]
+  simp
 
 theorem separates_of_shuffle_count : ∀ (I S : Type 1) (A : Type) [DecidableEq A] [LinearOrder A] (Ψ : (I →₀ ℤ) ≃+ MvPolynomial S ℤ) (M : I → List A → ℕ∞) (U : Set S) (ℓ : S → List A) (φ : S → ShuffleAlgebra ℚ A), Set.InjOn ℓ U → (∀ Δ ∈ U, IsLyndon (ℓ Δ) ∧ φ Δ = ShuffleAlgebra.word ℚ (ℓ Δ)) → (∀ Δ ∉ U, φ Δ = 0) → (∀ m : S →₀ ℕ, 0 ≤ Ψ.symm (MvPolynomial.monomial m 1) ∧ ∃ s : Multiset (List A), (∀ w, ((Ψ.symm (MvPolynomial.monomial m 1)).sum fun x a => (a.toNat : ℕ∞) * M x w) = (s.count w : ℕ∞)) ∧ (s.map (ShuffleAlgebra.word ℚ)).sum = m.prod fun Δ e => φ Δ ^ e) → ∀ (n : ℕ) (p : Fin n → I) (c : Fin n → ℂ), Function.Injective p → (∀ i, ∃ w, M (p i) w ≠ 0) → (∀ w, ∑ i, c i * ((M (p i) w).toNat : ℂ) = 0) → ∀ i, c i = 0 := by
   intro I S A _ _ Ψ M U ℓ φ hinj hU hφ0 hcnt n p c hp hne hc
@@ -100,7 +163,7 @@ theorem separates_of_shuffle_count : ∀ (I S : Type 1) (A : Type) [DecidableEq 
       simp only [eq_intCast, Int.cast_mul, Int.cast_natCast]
       congr
     | add P Q hP hQ =>
-      simp only [map_add, Finsupp.add_apply, hP, hQ, Int.cast_add]
+      simp only [map_add (f := _), Finsupp.add_apply, hP, hQ, Int.cast_add]
   have K2 : ∀ m : S →₀ ℕ, (∃ Δ ∈ m.support, Δ ∉ U) →
       ∀ x, Ψ.symm (MvPolynomial.monomial m 1) x ≠ 0 → ∀ w, M x w = 0 := by
     rintro m ⟨Δ, hΔ, hΔU⟩ x hx w
@@ -141,6 +204,7 @@ theorem separates_of_shuffle_count : ∀ (I S : Type 1) (A : Type) [DecidableEq 
     by_contra hki
     set y : I →₀ ℤ := ∑ j, Finsupp.single (p j) (k j) with hy
     have hRy : ∀ w, Rh w y = 0 := fun w => by
+
       rw [hy, map_sum]
       simp only [hRs]
       exact hk w
@@ -158,6 +222,7 @@ theorem separates_of_shuffle_count : ∀ (I S : Type 1) (A : Type) [DecidableEq 
     have hyP : y = ∑ m ∈ P.support, P.coeff m • Ψ.symm (MvPolynomial.monomial m 1) := by
       have h : y = Ψ.symm P := by rw [hPdef, AddEquiv.symm_apply_apply]
       conv_lhs => rw [h, P.as_sum]
+
       rw [map_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
       rw [← map_zsmul, MvPolynomial.smul_monomial, smul_eq_mul, mul_one]
@@ -207,6 +272,7 @@ theorem separates_of_shuffle_count : ∀ (I S : Type 1) (A : Type) [DecidableEq 
     apply KQ (fun j => ψ (c j))
     intro w
     have h := congrArg ψ (hc w)
+
     rw [map_sum, map_zero] at h
     rw [← h]
     refine Finset.sum_congr rfl fun j _ => ?_

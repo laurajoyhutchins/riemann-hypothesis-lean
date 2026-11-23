@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteSupport
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SubstitutionTotalDegreeLe
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteSupport
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SubstitutionTotalDegreeLe
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum
 open Matrix MeasureTheory GlobalTheory.Chain GlobalTheory.Chain.RealIt
@@ -20,7 +61,7 @@ section General
 
 variable {G σ : Type} [TopologicalSpace G]
 
-def CoefCont (F : G → MvPolynomial σ ℂ) : Prop := ∀ m, Continuous fun k => MvPolynomial.coeff m (F k)
+def CoefCont (F : G → MvPolynomial σ ℂ) : Prop := ∀ m, Continuous fun k => AddMonoidAlgebra.coeff (F k) m
 
 theorem CoefCont.const (P : MvPolynomial σ ℂ) : CoefCont fun _ : G => P := fun _ => continuous_const
 
@@ -32,7 +73,7 @@ theorem CoefCont.add {F F' : G → MvPolynomial σ ℂ} (h : CoefCont F) (h' : C
 theorem CoefCont.mul {F F' : G → MvPolynomial σ ℂ} (h : CoefCont F) (h' : CoefCont F') :
     CoefCont fun k => F k * F' k := fun m => by
   simp only [MvPolynomial.coeff_mul]
-  exact continuous_finset_sum _ fun p _ => (h _).mul (h' _)
+  exact continuous_finsetSum _ fun p _ => (h _).mul (h' _)
 
 theorem CoefCont.smul {s : G → ℂ} {F : G → MvPolynomial σ ℂ} (hs : Continuous s) (h : CoefCont F) :
     CoefCont fun k => s k • F k := fun m => by
@@ -42,7 +83,7 @@ theorem CoefCont.smul {s : G → ℂ} {F : G → MvPolynomial σ ℂ} (hs : Cont
 theorem CoefCont.sum {ι : Type} [Fintype ι] {F : ι → G → MvPolynomial σ ℂ} (h : ∀ i, CoefCont (F i)) :
     CoefCont fun k => ∑ i, F i k := fun m => by
   simp only [MvPolynomial.coeff_sum]
-  exact continuous_finset_sum _ fun i _ => h i m
+  exact continuous_finsetSum _ fun i _ => h i m
 
 theorem CoefCont.aeval {τ : Type} {g : G → τ → MvPolynomial σ ℂ} (h : ∀ v, CoefCont fun k => g k v)
     (P : MvPolynomial τ ℂ) : CoefCont fun k => MvPolynomial.aeval (g k) P := by
@@ -52,12 +93,12 @@ theorem CoefCont.aeval {τ : Type} {g : G → τ → MvPolynomial σ ℂ} (h : �
   | mul_X p v hp => simpa using hp.mul (h v)
 
 theorem exists_monomials [Finite σ] (N : ℕ) : ∃ (n : ℕ) (e : Fin n → σ →₀ ℕ), ∀ P : MvPolynomial σ ℂ,
-    P.totalDegree ≤ N → P = ∑ i, MvPolynomial.coeff (e i) P • MvPolynomial.monomial (e i) (1 : ℂ) := by
+    P.totalDegree ≤ N → P = ∑ i, AddMonoidAlgebra.coeff P (e i) • MvPolynomial.monomial (e i) (1 : ℂ) := by
   let T := (Finsupp.finite_of_degree_le (σ := σ) N).toFinset
   refine ⟨T.card, fun i => (T.equivFin.symm i : σ →₀ ℕ), fun P hP => ?_⟩
-  rw [T.equivFin.symm.sum_comp (fun d : T => MvPolynomial.coeff (d : σ →₀ ℕ) P •
+  rw [T.equivFin.symm.sum_comp (fun d : T => AddMonoidAlgebra.coeff P (d : σ →₀ ℕ) •
     MvPolynomial.monomial (d : σ →₀ ℕ) (1 : ℂ)),
-    Finset.sum_coe_sort T fun d => MvPolynomial.coeff d P • MvPolynomial.monomial d (1 : ℂ)]
+    Finset.sum_coe_sort T fun d => AddMonoidAlgebra.coeff P d • MvPolynomial.monomial d (1 : ℂ)]
   simp only [MvPolynomial.smul_monomial, smul_eq_mul, mul_one]
   conv_lhs => rw [P.as_sum]
   refine Finset.sum_subset (fun d hd => ?_) fun d _ hd => ?_
@@ -70,12 +111,13 @@ theorem exists_coefFam [Group G] [Finite σ] (ρ : G → Module.End ℂ (MvPolyn
     (hc : ∀ P, CoefCont fun k => ρ k P) (φ : MvPolynomial σ ℂ) :
     ∃ (n : ℕ) (φs : Fin n → MvPolynomial σ ℂ) (c : Fin n → G → ℂ), IsCoefFam c ∧ ∀ k, ρ k φ = ∑ i, c i k • φs i := by
   obtain ⟨n, e, he⟩ := exists_monomials (σ := σ) φ.totalDegree
-  refine ⟨n, fun i => MvPolynomial.monomial (e i) 1, fun i k => MvPolynomial.coeff (e i) (ρ k φ),
-    ⟨fun i => hc φ _, fun k₀ i => ⟨fun j => MvPolynomial.coeff (e i) (ρ k₀ (MvPolynomial.monomial (e j) 1)),
+  refine ⟨n, fun i => MvPolynomial.monomial (e i) 1, fun i k => AddMonoidAlgebra.coeff (ρ k φ) (e i),
+    ⟨fun i => hc φ _, fun k₀ i => ⟨fun j => AddMonoidAlgebra.coeff (ρ k₀ (MvPolynomial.monomial (e j) 1)) (e i),
       fun k => ?_⟩⟩, fun k => he _ (hd k φ)⟩
   beta_reduce
   rw [hm]
   conv_lhs => rw [he _ (hd k φ)]
+
   simp only [map_sum, map_smul, MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul]
   exact Finset.sum_congr rfl fun j _ => mul_comm _ _
 

@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ZetaValueIdeals
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SiegelKlingenDeligneRibet
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ZetaValueIdeals
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Multiplicity
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TranslateWideInd
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.SiegelKlingenDeligneRibet
+import Formalism.SharpRestriction.GlobalSchurBounds.ShortIntervalPrimes
+
+@[expose] public section
+
 open NumberField Module Formalism.MainNotions.ShortIntervalPrimes GlobalTheory.RayZeta GlobalTheory.IndefiniteRowSideFullHecke.ZetaValueIdeals GlobalTheory.ZetaDenom
 open scoped nonZeroDivisors
 
@@ -19,6 +66,7 @@ theorem mE_le_padicValNat {l n a : ℕ} (hl : l.Prime) (hn : 2 ≤ n) (he : Even
       norm_num at this
     have ha1 : 1 < a := by omega
     have := padicValNat.pow_two_sub_one_ge ha1 hodd (by omega) he
+    simp only [← Nat.padicValNat_def] at this
     omega
   · obtain ⟨k, rfl⟩ := hd
     have hl3 : 3 ≤ l := by have := hl.two_le; omega
@@ -36,14 +84,20 @@ theorem mE_le_padicValNat {l n a : ℕ} (hl : l.Prime) (hn : 2 ≤ n) (he : Even
       rw [hac] at this
       exact hl.one_lt.ne' (Nat.dvd_one.mp this)
     have hpow : a ^ ((l - 1) * k) - 1 = b ^ k - 1 ^ k := by rw [pow_mul, one_pow]
-    rw [hpow, padicValNat.pow_sub_pow hodd hb1 (by simpa using hfer) hnd hk]
-    have hv1 : 1 ≤ padicValNat l (b - 1) := one_le_padicValNat_of_dvd (by omega) hfer
+    rw [hpow]
+    have hval := padicValNat.pow_sub_pow hodd hb1 (by simpa using hfer) hnd hk
+    simp only [← Nat.padicValNat_def] at hval
+    rw [hval]
+    have hv1 : 1 ≤ padicValNat l (b - 1) := by
+      rw [Nat.padicValNat_def]
+      exact one_le_multiplicity_of_dvd (by omega) hfer
     have hvl : padicValNat l (l - 1) = 0 := by
-      apply padicValNat.eq_zero_of_not_dvd
+      rw [Nat.padicValNat_def]
+      apply multiplicity_eq_zero_of_not_dvd
       intro h
       have := Nat.le_of_dvd (by omega) h
       omega
-    rw [padicValNat.mul (by omega) hk, hvl]
+    rw [(show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (by omega) hk, hvl]
     omega
   · exact Nat.zero_le _
 

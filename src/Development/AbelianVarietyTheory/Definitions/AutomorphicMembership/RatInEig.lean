@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonzeroPlacesOverPrimes
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonemptyAllIff
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SplitRep
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.EMtLevel
-import Formalism.LocalToGlobal.IndefiniteReal.TensCastR
-import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.RatDatOfReal
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonzeroPlacesOverPrimes
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonemptyAllIff
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SplitRep
+public import Formalism.LocalToGlobal.IndefiniteReal.TensCastR
+public import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.RatDatOfReal
+public import Formalism.LocalToGlobal.UnitaryNorms.MemFIffReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Lean.Meta.Injective
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,13 +52,13 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.L2 Formalism.L2.Host
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option maxHeartbeats 1000000 in
+
 
 def ratL {D : D7} (L : LocAll (lay0 D)) (S : RatDat D.ntw) : RatDat (withLoc L).ntw := { S with }
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-set_option maxHeartbeats 1000000 in
 
 structure NAt (hL : GlobalTheory.Published.LocalLanglandsGL) (D : D7) (cf : CharFrame D) (nch : NChoice D) (tp : TupTied D cf nch) :
     Type 1 where
@@ -54,9 +90,9 @@ section Rows
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 I0 T : Type} {A3 : FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m} {Ks : Type}
   [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL]
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-set_option maxHeartbeats 1000000 in
 
 structure NRow {hL : GlobalTheory.Published.LocalLanglandsGL} {cf : CharFrame D} {nch : NChoice D} {tp : TupTied D cf nch}
     (a : NAt hL D cf nch tp) (R : RealDat3 D A3 Ks) (F : Face3 D A3) (cG : G0 R.Pg D.R.r ≃* G0g D.nd) {X0 : BaseLevelRowSide D}
@@ -89,8 +125,6 @@ abbrev NExt (hL : GlobalTheory.Published.LocalLanglandsGL) : Type 2 :=
 
 def NX (hL : GlobalTheory.Published.LocalLanglandsGL) (E : NExt hL) : NCondition := fun K B f T w Z Wt p0 t nch n xd =>
   Σ c : NCore hL t n, E K B f T w Z Wt p0 t nch n xd c
-
-def NExt.none (hL : GlobalTheory.Published.LocalLanglandsGL) : NExt hL := fun _ _ _ _ _ _ _ _ _ _ _ _ _ => PUnit
 
 end GlobalTheory.Mem.Top.Bl
 

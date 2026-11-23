@@ -1,6 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.AssemblyAlt
-import Formalism.RealPlaceAnalysis.InstMeasurableSpaceUJ
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TotalDegreeLinear
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.AssemblyAlt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.TotalDegreeLinear
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+public import Mathlib.Algebra.MvPolynomial.Funext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+public import Mathlib.MeasureTheory.Group.Integral
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,12 +68,14 @@ theorem eval_sub (g h : Matrix ι ι ℂ) (z : (ι × A) ⊕ (ι × B) → ℂ) 
     eval z (sub g h p) = eval (actP g h z) p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp [sub]
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
   | mul_X p s hp =>
     rw [map_mul, map_mul, map_mul, hp]
     congr 1
     rcases s with x | y
+
     · simp [sub, actP, map_sum]
+
     · simp [sub, actP, map_sum]
 
 theorem actP_actP (g h g' h' : Matrix ι ι ℂ) (z : (ι × A) ⊕ (ι × B) → ℂ) :
@@ -45,16 +95,16 @@ theorem totalDegree_sub_le (g h : Matrix ι ι ℂ) (p : PV ι A B) : (sub g h p
   _root_.UpperTheory.Reformulated.B.TotalDegreeLinear.main g h p
 
 theorem continuous_coeff_sub {K : Type} [TopologicalSpace K] (g h : K → Matrix ι ι ℂ) (hg : Continuous g)
-    (hh : Continuous h) (p : PV ι A B) : ∀ m, Continuous fun k => coeff m (sub (g k) (h k) p) := by
+    (hh : Continuous h) (p : PV ι A B) : ∀ m, Continuous fun k => AddMonoidAlgebra.coeff (sub (g k) (h k) p) m := by
   classical
   induction p using MvPolynomial.induction_on with
   | C a => intro m; simp only [sub, aeval_C, algebraMap_eq]; exact continuous_const
-  | add p q hp hq => intro m; simp only [map_add, coeff_add]; exact (hp m).add (hq m)
+  | add p q hp hq => intro m; simp only [map_add (f := _), MvPolynomial.coeff_add]; exact (hp m).add (hq m)
   | mul_X p s hp =>
     intro m
     rcases s with x | y
-    · have e : ∀ k, coeff m (sub (g k) (h k) (p * X (Sum.inl x))) =
-          ∑ j, g k x.1 j * coeff m (sub (g k) (h k) p * X (Sum.inl (j, x.2))) := by
+    · have e : ∀ k, AddMonoidAlgebra.coeff (sub (g k) (h k) (p * X (Sum.inl x))) m =
+          ∑ j, g k x.1 j * AddMonoidAlgebra.coeff (sub (g k) (h k) p * X (Sum.inl (j, x.2))) m := by
         intro k
         simp only [map_mul, sub, aeval_X, Sum.elim_inl, Finset.mul_sum, coeff_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
@@ -65,8 +115,8 @@ theorem continuous_coeff_sub {K : Type} [TopologicalSpace K] (g h : K → Matrix
       split_ifs
       · exact hp _
       · exact continuous_const
-    · have e : ∀ k, coeff m (sub (g k) (h k) (p * X (Sum.inr y))) =
-          ∑ j, h k y.1 j * coeff m (sub (g k) (h k) p * X (Sum.inr (j, y.2))) := by
+    · have e : ∀ k, AddMonoidAlgebra.coeff (sub (g k) (h k) (p * X (Sum.inr y))) m =
+          ∑ j, h k y.1 j * AddMonoidAlgebra.coeff (sub (g k) (h k) p * X (Sum.inr (j, y.2))) m := by
         intro k
         simp only [map_mul, sub, aeval_X, Sum.elim_inr, Finset.mul_sum, coeff_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
@@ -143,24 +193,26 @@ theorem avg : Avg := by
     refine Finset.mem_filter.2 ⟨Finset.mem_image.2 ⟨fun s => ⟨m s, Nat.lt_succ_of_le ?_⟩, Finset.mem_univ _, ?_⟩, hdeg⟩
     · exact (Finsupp.le_degree ..).trans hdeg
     · ext s; simp
-  have hcont : ∀ m, Continuous fun k => coeff m (F k) := fun m =>
+  have hcont : ∀ m, Continuous fun k => AddMonoidAlgebra.coeff (F k) m := fun m =>
     continuous_coeff_sub _ _ (continuous_toMK N)
       (continuous_pi fun i => continuous_pi fun j => continuous_star.comp
         ((continuous_apply j).comp ((continuous_apply i).comp (continuous_toMK N)))) p m
-  have hint : ∀ m, Integrable (fun k => coeff m (F k)) μ := fun m =>
+  have hint : ∀ m, Integrable (fun k => AddMonoidAlgebra.coeff (F k) m) μ := fun m =>
     integrableOn_univ.1 ((hcont m).continuousOn.integrableOn_compact isCompact_univ)
-  let P : PV (Fin N) A B := ∑ m ∈ S, monomial m (∫ k, coeff m (F k) ∂μ)
-  have hF : ∀ k, F k = ∑ m ∈ S, monomial m (coeff m (F k)) := by
+  let P : PV (Fin N) A B := ∑ m ∈ S, monomial m (∫ k, AddMonoidAlgebra.coeff (F k) m ∂μ)
+  have hF : ∀ k, F k = ∑ m ∈ S, monomial m (AddMonoidAlgebra.coeff (F k) m) := by
     intro k
     conv_lhs => rw [(F k).as_sum]
     exact Finset.sum_subset (hsupp k) fun m _ hm => by rw [notMem_support_iff.1 hm, monomial_zero]
   have heval : ∀ z, eval z P = ∫ k, eval z (F k) ∂μ := by
     intro z
-    have e : ∀ k, eval z (F k) = ∑ m ∈ S, coeff m (F k) * (m.prod fun n e => z n ^ e) := by
+    have e : ∀ k, eval z (F k) = ∑ m ∈ S, AddMonoidAlgebra.coeff (F k) m * (m.prod fun n e => z n ^ e) := by
       intro k
       conv_lhs => rw [hF k]
+
       simp only [map_sum, eval_monomial]
     rw [integral_congr_ae (Filter.Eventually.of_forall e), integral_finsetSum _ (fun m _ => (hint m).mul_const _)]
+
     simp only [P, map_sum, eval_monomial, integral_mul_const]
   refine ⟨P, ?_, ?_, heval⟩
   · intro u hu

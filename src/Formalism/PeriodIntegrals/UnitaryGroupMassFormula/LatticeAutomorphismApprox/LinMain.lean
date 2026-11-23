@@ -1,5 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismApprox.LinLeg
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismApprox.LinDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismApprox.LinLeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismApprox.LinBase
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +62,6 @@ private theorem valuationSubring_valuation_le_one_of_mem {K : Type} [Field K] (O
     (hx : x ∈ O) : O.valuation x ≤ 1 := by
   first
   | exact (O.valuation_le_one_iff x).mpr hx
-  | exact O.valuation_le_one ⟨x, hx⟩
-  | exact (ValuationSubring.valuation_le_one_iff O x).2 hx
 
 theorem v_small {g y : K} (hg : O.valuation g < 1) (hy : y ∈ O) : O.valuation (g * y) < 1 := by
   rw [map_mul]
@@ -34,15 +79,12 @@ theorem v_add_small {e m : K} (he : O.valuation e = 1) (hm : O.valuation m < 1) 
   have h : O.valuation m < O.valuation e := by rw [he]; exact hm
   first
   | exact (Valuation.map_add_eq_of_lt_left _ h).trans he
-  | exact (O.valuation.map_add_eq_of_lt_left h).trans he
   | (rw [add_comm]; exact (Valuation.map_add_eq_of_lt_right _ h).trans he)
   | (rw [add_comm]; exact (O.valuation.map_add_eq_of_lt_right h).trans he)
 
 theorem v_neg_one : O.valuation (-1 : K) = 1 := by
   first
   | simp
-  | exact (Valuation.map_neg _ 1).trans (map_one _)
-  | rw [Valuation.map_neg, map_one]
 
 end Main
 
@@ -138,8 +180,6 @@ private theorem exists_isAdmissible_of_chain_lemma_8 {K : Type} [Field K] {O : V
       (T2 : Matrix (Fin n) (Fin n) K) * (T1 : Matrix (Fin n) (Fin n) K) := by
     first
     | exact Units.val_mul T2 T1
-    | rfl
-    | simp
   refine ⟨T2 * T1, good_mul _ _ _ _ _ _ _ _ hT2 hT1, ?_, ?_⟩
   · rw [hcoe, ← Matrix.mulVec_mulVec, hT1u, hT2u]
   · rw [hcoe, ← Matrix.vecMul_vecMul, hT2φ, smul_vecMul_field, hT1φ, smul_smul]
@@ -216,7 +256,6 @@ theorem existsLatticeAutomorphismApprox : LocLin := by
     rw [← hTu, Matrix.mulVec_mulVec]
     first
     | simp
-    | rw [← Units.val_mul, inv_mul_cancel, Units.val_one, Matrix.one_mulVec]
   have hφ0e : φ0 = φ1 + g • w2 := by
     rw [hφ1e]
     abel

@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+module
+
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+public import Development.AbelianVarietyTheory.CrystallinePeriods.AdicMaps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+public import Mathlib.RingTheory.AdicCompletion.Topology
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
-import Development.AbelianVarietyTheory.CrystallinePeriods.AdicMaps
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.MemLoc
 open scoped Formalism.Per
@@ -63,15 +106,6 @@ theorem torsionFree (ha : ∀ s : R, a * s = 0 → s = 0) (x : AdicCompletion (I
   obtain ⟨t, ht⟩ := (dvd_iff a _ _).1 h1
   exact ⟨t, sub_eq_zero.1 (ha _ (by linear_combination ht))⟩
 
-theorem basic (p : ℕ) (R : Type) [CommRing R] (hp : ∀ s : R, (p : R) * s = 0 → s = 0) :
-    IsAdicComplete (Ideal.span {(p : AdicCompletion (Ideal.span {(p : R)}) R)}) (AdicCompletion (Ideal.span {(p : R)}) R) ∧
-    (∀ x : AdicCompletion (Ideal.span {(p : R)}) R, (p : AdicCompletion (Ideal.span {(p : R)}) R) * x = 0 → x = 0) ∧
-    (∀ (x : AdicCompletion (Ideal.span {(p : R)}) R) (r : ℕ), ∃ (s : R) (z : AdicCompletion (Ideal.span {(p : R)}) R),
-      x = algebraMap R (AdicCompletion (Ideal.span {(p : R)}) R) s + (p : AdicCompletion (Ideal.span {(p : R)}) R) ^ r * z) ∧
-    ∀ (s : R) (r : ℕ), (p : AdicCompletion (Ideal.span {(p : R)}) R) ^ r ∣ algebraMap R (AdicCompletion (Ideal.span {(p : R)}) R) s ↔ (p : R) ^ r ∣ s := by
-  rw [← map_natCast (algebraMap R (AdicCompletion (Ideal.span {(p : R)}) R)) p]
-  exact ⟨complete _, torsionFree _ hp, dense _, dvd_iff _⟩
-
 theorem basic_of_equiv_pt (p : ℕ) (R A : Type) [CommRing R] [CommRing A] [Algebra R A]
     (hp : ∀ s : R, (p : R) * s = 0 → s = 0)
     (e : A ≃+* AdicCompletion (Ideal.span {(p : R)}) R)
@@ -92,7 +126,7 @@ theorem basic_of_equiv_pt (p : ℕ) (R A : Type) [CommRing R] [CommRing A] [Alge
     rw [← hpe, ← map_mul, hx, map_zero]
   · obtain ⟨s, z, hz⟩ := dense (p : R) (e x) r
     refine ⟨s, e.symm z, e.injective ?_⟩
-    rw [map_add, map_mul, map_pow, he, hpe, RingEquiv.apply_symm_apply]
+    rw [map_add (f := _), map_mul, map_pow, he, hpe, RingEquiv.apply_symm_apply]
     exact hz
   · rw [← dvd_iff (p : R) s r, ← hpe, ← he, ← map_pow, map_dvd_iff]
 

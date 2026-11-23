@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LiftResMulSub
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemMatLatSmulBlockLat
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LiftResMulSub
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PairPtsClasses
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ValuationGdetKapAt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix ValuativeRel GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.ExpansionInvariance GlobalTheory.SplitFlip GlobalTheory.SplitWeil GlobalTheory.RootEx
 attribute [local instance] Formalism.BasicNotions.Host.cmStar GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField borelKw borelSpaceKw
@@ -84,16 +132,16 @@ theorem GlobalTheory.BlockSubst.fourierSum_blockDiag_one : ∀ {k : Type} [Field
     ext i (j | j)
     · rw [hX1]
       simp only [setCols, Matrix.of_apply]
-      rw [dif_pos (by simp [hP, Assignment.block]), Matrix.mul_apply, hsumP]
+      rw [dite_eq_left (by simp [hP, Assignment.block]), Matrix.mul_apply, hsumP]
       refine Finset.sum_congr rfl fun l _ => ?_
-      rw [dif_pos (by simp [hP, Assignment.block])]
+      rw [dite_eq_left (by simp [hP, Assignment.block])]
       simp only [Matrix.submatrix_apply, Equiv.symm_apply_apply]
       rfl
     · rw [hX2]
       simp only [setCols, Matrix.of_apply]
-      rw [dif_neg (by simp [hP, Assignment.block]), hYHdef, hX2]
+      rw [dite_eq_right (by simp [hP, Assignment.block]), hYHdef, hX2]
       refine Finset.sum_congr rfl fun l _ => ?_
-      rw [dif_neg (by simp [hP, Assignment.block])]
+      rw [dite_eq_right (by simp [hP, Assignment.block])]
   have hpc : ∀ (Z : Matrix A (D₁ ⊕ D₂) k) (S : Matrix A ↥P k),
       pairCols P Z S = ∑ i, ∑ j : D₁, S i (E j) * Z i (Sum.inl j) := by
     intro Z S; simp only [pairCols]; exact Finset.sum_congr rfl fun i _ => hsumP _
@@ -135,7 +183,10 @@ theorem GlobalTheory.BlockSubst.fourierSum_blockDiag_one : ∀ {k : Type} [Field
         rw [Valuation.mem_integer_iff, map_mul]
         exact (show valuation k (Z i j) * valuation k (YH i j) ≤ valuation k ((ϖ ^ e : kˣ) : k) * valuation k (YH i j) by
           gcongr; exact hZ i j).trans h3
-      · refine FourierDepth.mem_matLat_smul_stdLat.2 fun i j => ?_
+      · rw [GlobalTheory.SplitFlip.stdLat, smul_diagLat]
+        simp only [Pi.one_apply, mul_one]
+        change ∀ i j, valuation k (setCols P 0 Z i j) ≤ valuation k ((ϖ ^ e : kˣ) : k)
+        intro i j
         by_cases hj : j ∈ P
         · simpa [setCols, hj] using hZ i ⟨j, hj⟩
         · simp [setCols, hj]

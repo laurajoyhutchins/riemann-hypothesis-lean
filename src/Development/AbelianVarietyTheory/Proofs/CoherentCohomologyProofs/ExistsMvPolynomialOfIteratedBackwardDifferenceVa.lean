@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Multilinear.Basic
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
+public import Mathlib.Tactic.Continuity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.HasseDeriv
+public import Mathlib.Algebra.Polynomial.Taylor
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+public import Mathlib.RingTheory.Polynomial.Basic
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -71,8 +126,9 @@ theorem multiDiff_eq_shiftAct {ι : Type*} [Fintype ι] (g : ι → G) (φ : G �
   classical
   ext x
   simp only [diffElt, sub_eq_add_neg]
+
   rw [prod_one_add, powerset_univ, map_sum, LinearMap.sum_apply, Finset.sum_apply,
-    multiDiff_apply]
+  multiDiff_apply]
   refine sum_congr rfl fun S _ ↦ ?_
   rw [prod_neg, ← of'_sum]
   have : (-1 : AddMonoidAlgebra ℤ G) ^ S.card * AddMonoidAlgebra.of' ℤ G (∑ i ∈ S, g i) =
@@ -185,11 +241,6 @@ theorem DiffVanish.mono {m n : ℕ} {φ : G → M} (h : DiffVanish m φ) (hmn : 
 theorem diffVanish_zero_iff {φ : G → M} : DiffVanish 0 φ ↔ φ = 0 := by
   simp [DiffVanish]
 
-theorem diffVanish_succ_iff {n : ℕ} {φ : G → M} :
-    DiffVanish (n + 1) φ ↔ ∀ a, DiffVanish n (bwdDiff a φ) := by
-  refine ⟨fun h a g ↦ by rw [← multiDiff_cons', h], fun h g ↦ ?_⟩
-  rw [← Fin.cons_self_tail g, multiDiff_cons', h]
-
 theorem DiffVanish.map {N : Type*} [AddCommGroup N] {n : ℕ} {φ : G → M} (h : DiffVanish n φ)
     (f : M →+ N) : DiffVanish n (f ∘ φ) := fun g ↦ by
   rw [multiDiff_map, h]; ext; simp
@@ -223,11 +274,11 @@ theorem DiffVanish.multiDiff_update_add {d : ℕ} {φ : G → M} (h : DiffVanish
     exact Ideal.mul_mem_mul (diffElt_mem a)
       (by simpa using prod_diffElt_mem univ (Function.update g i b))
   simp only [multiDiff_eq_shiftAct, key]
-  rw [diffElt_add, sub_mul, add_mul, mul_assoc, map_sub, map_add, LinearMap.sub_apply,
+  rw [diffElt_add, sub_mul, add_mul, mul_assoc, map_sub, map_add (f := _), LinearMap.sub_apply,
     h.shiftAct_eq_zero hm, sub_zero, LinearMap.add_apply]
 
 def DiffVanish.form {d : ℕ} {φ : G → M} (h : DiffVanish (d + 1) φ) :
-    MultilinearMap ℤ (fun _ : Fin d ↦ G) M :=
+    MultilinearMap (RingHom.id ℤ) (fun _ : Fin d ↦ G) M :=
   MultilinearMap.mk' (fun g ↦ multiDiff g φ 0)
     (fun g i a b ↦ by exact congrFun (h.multiDiff_update_add g i a b) 0)
     (fun g i c a ↦ by
@@ -304,10 +355,11 @@ theorem diffElt_sub_sum_mem {ι : Type*} (s : Finset ι) (g : ι → G) (x : G) 
     diffElt (x - ∑ i ∈ s, g i) - (diffElt x - ∑ i ∈ s, diffElt (g i)) ∈ diffIdeal G ^ 2 := by
   let f : G →+ AddMonoidAlgebra ℤ G ⧸ diffIdeal G ^ 2 :=
     AddMonoidHom.mk' (fun g ↦ Ideal.Quotient.mk _ (diffElt g)) fun a b ↦ by
-      rw [← map_add, Ideal.Quotient.eq, diffElt_add, sub_sub_cancel_left, neg_mem_iff, sq]
+      rw [← map_add (f := _), Ideal.Quotient.eq, diffElt_add, sub_sub_cancel_left, neg_mem_iff, sq]
       exact Ideal.mul_mem_mul (diffElt_mem a) (diffElt_mem b)
   have hf : ∀ g, Ideal.Quotient.mk _ (diffElt g) = f g := fun _ ↦ rfl
   rw [← Ideal.Quotient.eq]
+
   simp only [map_sub, map_sum, hf]
 
 theorem DiffVanish.multiDiff_form_diag {d : ℕ} {φ : G → M} (h : DiffVanish (d + 1) φ)
@@ -323,9 +375,10 @@ theorem DiffVanish.multiDiff_form_diag {d : ℕ} {φ : G → M} (h : DiffVanish 
     simp
   have := multiDiff_pow (fun i ↦ diffElt (g i)) (diffElt x)
   rw [multiDiff_apply] at this
+
   rw [multiDiff_apply, h.form_apply _ 0, multiDiff_eq_shiftAct, ← Pi.smul_apply,
-    ← LinearMap.smul_apply, ← map_nsmul, nsmul_eq_mul, ← this, map_sum, LinearMap.sum_apply,
-    Finset.sum_apply]
+  ← LinearMap.smul_apply, ← map_nsmul, nsmul_eq_mul, ← this, map_sum, LinearMap.sum_apply,
+  Finset.sum_apply]
   refine sum_congr rfl fun S _ ↦ ?_
   rw [e, map_zsmul, LinearMap.smul_apply, Pi.smul_apply]
 
@@ -362,6 +415,7 @@ theorem DiffVanish.eval_diffTopPoly {d : ℕ} {φ : G → K} (h : DiffVanish (d 
     [Fintype ι] [DecidableEq ι] (g : ι → G) (x : G) (n : ι → ℤ) :
     MvPolynomial.eval (fun i ↦ (n i : K)) (diffTopPoly d g φ x) =
       (d.factorial : K)⁻¹ * h.form fun _ ↦ ∑ i, n i • g i := by
+
   rw [MultilinearMap.map_sum, mul_sum, diffTopPoly, map_sum]
   refine sum_congr rfl fun a _ ↦ ?_
   rw [MultilinearMap.map_smul_univ, ← h.form_apply]
@@ -385,8 +439,8 @@ theorem exists_mvPolynomial_of_iteratedBackwardDifferenceVanish {ι : Type*} [Fi
     have h0 := isHomogeneous_diffTopPoly (d + 1) g φ 0
     refine ⟨Q + diffTopPoly (d + 1) g φ 0, (MvPolynomial.totalDegree_add _ _).trans
       (max_le (by omega) h0.totalDegree_le), fun n ↦ ?_, ?_⟩
-    · rw [map_add, hQ', h.eval_diffTopPoly]; simp
-    · rw [map_add, MvPolynomial.homogeneousComponent_of_mem h0, if_pos rfl,
+    · rw [map_add (f := _), hQ', h.eval_diffTopPoly]; simp
+    · rw [map_add (f := _), MvPolynomial.homogeneousComponent_of_mem h0, if_pos rfl,
         MvPolynomial.homogeneousComponent_eq_zero _ _ (by omega), zero_add]
 
 theorem DiffVanish.exists_mvPolynomial {d : ℕ} {φ : G → K} (h : DiffVanish (d + 1) φ)

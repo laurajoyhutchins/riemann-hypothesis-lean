@@ -1,5 +1,50 @@
-import Development.EtaleCohomology.EtaleTrace.LTwoEpiPf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
 import Development.EtaleCohomology.EtaleTrace.LDblPf
+public import Development.EtaleCohomology.EtaleTrace.LTwoEpiPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -21,11 +66,11 @@ theorem cov {X : Scheme.{0}} (O1 O2 : X.Opens) (hcov : O1 ⊔ O2 = ⊤) :
   · exact ⟨_, 𝟙 _, O1.ι, ⟨true⟩, Category.id_comp _⟩
 
 theorem psi (R : Type) [CommRing R] {X : Scheme.{0}} (O1 O2 : X.Opens) (hcov : O1 ⊔ O2 = ⊤) (G : Shv R)
-    (ψ : (freeP R).obj (yoneda.obj X) ⟶ G.val)
+    (ψ : (freeP R).obj (yoneda.obj X) ⟶ G.obj)
     (hi : (freeP R).map (yoneda.map O1.ι) ≫ ψ = 0) (hj : (freeP R).map (yoneda.map O2.ι) ≫ ψ = 0) : ψ = 0 := by
   let s := (ψ.app (op X)).hom (ModuleCat.freeMk (ULift.up (𝟙 X)))
   have nat : ∀ (T : Scheme.{0}) (t : T ⟶ X),
-      (ψ.app (op T)).hom (ModuleCat.freeMk (ULift.up t)) = (G.val.map t.op).hom s := by
+      (ψ.app (op T)).hom (ModuleCat.freeMk (ULift.up t)) = (G.obj.map t.op).hom s := by
     intro T t
     have h := congrArg (fun φ => φ.hom (ModuleCat.freeMk (ULift.up (𝟙 X)))) (ψ.naturality t.op)
     change (ψ.app (op T)).hom (((ModuleCat.free (ULift.{1} R)).map (uliftFunctor.map ((yoneda.obj X).map t.op))).hom
@@ -33,7 +78,7 @@ theorem psi (R : Type) [CommRing R] {X : Scheme.{0}} (O1 O2 : X.Opens) (hcov : O
     erw [LateralTheory.EtaleTrace.ltwo_fm] at h
     simp at h
     exact h
-  have hz : ∀ {Y : Scheme.{0}} (f : Y ⟶ X), (freeP R).map (yoneda.map f) ≫ ψ = 0 → (G.val.map f.op).hom s = 0 := by
+  have hz : ∀ {Y : Scheme.{0}} (f : Y ⟶ X), (freeP R).map (yoneda.map f) ≫ ψ = 0 → (G.obj.map f.op).hom s = 0 := by
     intro Y f hf
     rw [← nat]
     have h := congrArg (fun φ => (φ.app (op Y)).hom (ModuleCat.freeMk (ULift.up (𝟙 Y)))) hf
@@ -43,7 +88,7 @@ theorem psi (R : Type) [CommRing R] {X : Scheme.{0}} (O1 O2 : X.Opens) (hcov : O
     simpa using h
   have hs : s = 0 := by
     have key : ModuleCat.ofHom (LinearMap.toSpanSingleton (ULift.{1} R) _ s) = 0 := by
-      refine Presheaf.IsSheaf.hom_ext_ofArrows G.cond _ (cov O1 O2 hcov) (fun b => ?_)
+      refine Presheaf.IsSheaf.hom_ext_ofArrows G.property _ (cov O1 O2 hcov) (fun b => ?_)
       refine ModuleCat.hom_ext (LinearMap.ext_ring ?_)
       cases b
       · simpa using hz O2.ι hj

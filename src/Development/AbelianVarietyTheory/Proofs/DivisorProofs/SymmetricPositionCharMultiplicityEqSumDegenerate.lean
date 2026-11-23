@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SplitDoublingNBlock
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankMirabolicWhittakerEigenspaceStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SplitDoublingNBlock
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankMirabolicWhittakerEigenspaceStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +144,7 @@ def tailUnip (F : Type) [Field F] (r k : ℕ) : Subgroup (GL (Fin r) F) where
   mul_mem' := by
     rintro x y ⟨hx, hx1⟩ ⟨hy, hy1⟩
     refine ⟨Subgroup.mul_mem _ hx hy, fun i hi => ?_⟩
-    rw [Units.val_mul, mul_apply, Finset.sum_eq_single i, hx1 i hi, hy1 i hi, one_mul]
+    rw [Units.val_mul, Matrix.mul_apply, Finset.sum_eq_single i, hx1 i hi, hy1 i hi, one_mul]
     · intro l _ hl
       rcases lt_or_gt_of_ne hl with h | h
       · have h' : l.val < i.val := h
@@ -110,7 +157,7 @@ def tailUnip (F : Type) [Field F] (r k : ℕ) : Subgroup (GL (Fin r) F) where
     have hi := Subgroup.inv_mem _ hx
     refine ⟨hi, fun i hk => ?_⟩
     have h1 : ((x * x⁻¹ : GL (Fin r) F) : Matrix (Fin r) (Fin r) F) i i = 1 := by simp
-    rw [Units.val_mul, mul_apply, Finset.sum_eq_single i, hx1 i hk, one_mul] at h1
+    rw [Units.val_mul, Matrix.mul_apply, Finset.sum_eq_single i, hx1 i hk, one_mul] at h1
     · exact h1
     · intro l _ hl
       rcases lt_or_gt_of_ne hl with h | h
@@ -168,7 +215,7 @@ theorem tailUnip_le (k : ℕ) : tailUnip F r k ≤ blockTri (blk2 (k + 1)) := by
 
 theorem one_castLE {n : ℕ} (h : n ≤ r) (i j : Fin n) :
     (1 : Matrix (Fin r) (Fin r) F) (Fin.castLE h i) (Fin.castLE h j) = (1 : Matrix (Fin n) (Fin n) F) i j := by
-  simp [one_apply]
+  simp [Matrix.one_apply]
 
 def corner {k : ℕ} (h : k + 1 ≤ r) : tailUnip F r k →* tailUnip F (k + 1) k :=
   ((blkR h).comp (Subgroup.inclusion (tailUnip_le k))).codRestrict _ fun g =>
@@ -195,7 +242,7 @@ theorem corner_surj {k : ℕ} (h : k + 1 ≤ r) : Function.Surjective (corner (F
     fun a b => by simp [g, f]
   have h1 : ∀ a b, (1 : Matrix _ _ F) (e a) (e b) =
       fromBlocks (1 : Matrix (Fin (k + 1)) (Fin (k + 1)) F) 0 0 (1 : Matrix (Fin c) (Fin c) F) a b :=
-    fun a b => by rw [fromBlocks_one]; simp [one_apply]
+    fun a b => by rw [fromBlocks_one]; simp [Matrix.one_apply]
   refine ⟨⟨g, mem_tailUnip.2 fun i j hi hj => ?_⟩, ?_⟩
   · obtain ⟨a, rfl⟩ := e.surjective i
     obtain ⟨b, rfl⟩ := e.surjective j
@@ -219,7 +266,8 @@ def tailHom (F : Type) [Field F] (r k : ℕ) : tailUnip F r k →* Multiplicativ
     (fun x hx y hy i j h => by
       obtain ⟨h1, h2⟩ := h
       have hij : i ≠ j := fun e => by rw [e] at h1; omega
-      rw [Units.val_mul, mul_apply, Finset.sum_eq_add i j hij, hx.2 i h2, hy.2 j (by omega), one_mul, mul_one, add_comm]
+      rw [Units.val_mul, Matrix.mul_apply, Finset.sum_eq_add i j hij, hx.2 i h2, hy.2 j (by omega),
+        one_mul, mul_one, add_comm]
       · rintro l _ ⟨hli, hlj⟩
         have a1 : l.val ≠ i.val := fun e => hli (Fin.ext e)
         have a2 : l.val ≠ j.val := fun e => hlj (Fin.ext e)

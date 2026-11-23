@@ -1,7 +1,46 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.BcrisRegularPeriodRing
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.AbsProps
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.HodgeTateFromSandwich
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.BcrisRegularPeriodRing
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.HodgeTateFromSandwich
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -20,9 +59,6 @@ def Seam {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl l)}
 
 def SeamS : Prop := ∀ (l : ℕ) [Fact l.Prime] (K : IntermediateField ℚ_[l] (PadicAlgCl l)) [FiniteDimensional ℚ_[l] K],
   ∃ D : Dat (per l K), Seam Model.Sm D ∧ D.Span Model.Sm (Bcr l)
-
-def SeamAll : Prop := ∀ (l : ℕ) [Fact l.Prime] (K : IntermediateField ℚ_[l] (PadicAlgCl l)) [FiniteDimensional ℚ_[l] K],
-  ∃ D : Dat (per l K), Seam Model.Good D ∧ D.Span Model.Good (Bst l)
 
 def Pre.cmp {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl l)} {G : Model l K → Prop} (P : Pre G (per l K)) (E : EtSide G)
     (h : ∀ M, G M → ∀ n, P.Inj M n ∧ P.Strict M n) : ComparisonOn G where
@@ -43,39 +79,5 @@ def Pre.cmp {l : ℕ} [Fact l.Prime] {K : IntermediateField ℚ_[l] (PadicAlgCl 
   nat := P.nat
 
 theorem t_inv_mem (l : ℕ) [Fact l.Prime] : (tQ l)⁻¹ ∈ Bcr l := Subring.subset_closure (Or.inr (Or.inr rfl))
-
-theorem smooth_of (h1 : PeriodRingFacts) (h2 : BcrisRegularPeriodRing) (h3 : ComparisonPairing) (h4 : ComparisonInjectiveStrict) (h5 : ComparisonAdmissible) (h6 : EtaleSideSmoothAndSemistable)
-    (hI : ZIn) (hS : SeamS) : SmoothModelCrystalline ∧ DeRhamComparisonSmooth := by
-  constructor
-  · intro l _ K _ M hM hs n a b
-    obtain ⟨D, ⟨hL, ⟨e⟩, ⟨β⟩, ⟨κ⟩⟩, hsp⟩ := hS l K
-    obtain ⟨P, hP⟩ := h3 l K _ _ D (h1 l K) (h6 hI l K).1 hL e β κ
-    exact h5 l K _ _ P _ (h2 l K) M ⟨hM, hs⟩ n (h4 l K _ _ P (h1 l K) (h6 hI l K).1 M ⟨hM, hs⟩ n).1
-      (hP _ _ (t_inv_mem l) (h2 l K).q_mem hsp M ⟨hM, hs⟩ ⟨hM, hs⟩ n) a b
-  · intro l _ K _
-    obtain ⟨D, ⟨hL, ⟨e⟩, ⟨β⟩, ⟨κ⟩⟩, -⟩ := hS l K
-    obtain ⟨P, -⟩ := h3 l K _ _ D (h1 l K) (h6 hI l K).1 hL e β κ
-    exact ⟨P.cmp (h6 hI l K).1 (h4 l K _ _ P (h1 l K) (h6 hI l K).1)⟩
-
-theorem bcr_le_bst (l : ℕ) [Fact l.Prime] : Bcr l ≤ Bst l :=
-  Subring.closure_mono (Set.union_subset_union_right _ (by
-    intro x hx
-    rcases hx with h | h
-    · exact Or.inl h
-    · exact Or.inr (Or.inl h)))
-
-theorem narrow_of (h1 : PeriodRingFacts) (h2 : BcrisRegularPeriodRing) (h2' : BstRegularPeriodRing) (h3 : ComparisonPairing) (h4 : ComparisonInjectiveStrict) (h5 : ComparisonAdmissible) (h6 : EtaleSideSmoothAndSemistable)
-    (hI : ZIn) (hS : SeamS) (hA : SeamAll) : CstNarrow ∧ DeRhamComparisonSemistable := by
-  have hd : DeRhamComparisonSemistable := by
-    intro l _ K _
-    obtain ⟨D, ⟨hL, ⟨e⟩, ⟨β⟩, ⟨κ⟩⟩, -⟩ := hA l K
-    obtain ⟨P, -⟩ := h3 l K _ _ D (h1 l K) (h6 hI l K).2 hL e β κ
-    exact ⟨P.cmp (h6 hI l K).2 (h4 l K _ _ P (h1 l K) (h6 hI l K).2)⟩
-  refine ⟨⟨?_, (smooth_of h1 h2 h3 h4 h5 h6 hI hS).1, hd.dr⟩, hd⟩
-  intro l _ K _ M hM n a b
-  obtain ⟨D, ⟨hL, ⟨e⟩, ⟨β⟩, ⟨κ⟩⟩, hsp⟩ := hA l K
-  obtain ⟨P, hP⟩ := h3 l K _ _ D (h1 l K) (h6 hI l K).2 hL e β κ
-  exact h5 l K _ _ P _ (h2' l K) M hM n (h4 l K _ _ P (h1 l K) (h6 hI l K).2 M hM n).1
-    (hP _ _ (bcr_le_bst l (t_inv_mem l)) (h2' l K).q_mem hsp M hM hM n) a b
 
 end CrystallineSemistableComparison

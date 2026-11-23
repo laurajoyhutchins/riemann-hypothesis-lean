@@ -1,21 +1,58 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ExistsReduction
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurePreservingReindex
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOfInnerSmooth
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WordDerivatives
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicUnitaryHaarBiInvariantStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivativeAlongLieAlgebraPreservesSmoothSpaceStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RightRegularRepUnitaryStronglyContinuous
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DerivedActionSmoothVectorRealLinear
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivariantMapCarriesGelfandInvariantToFunction
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GelfandInvariantActionSmoothVectorsScalar
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LieWordCommutesOneParameterDerivativeStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SobolevContinuousFormSumLieWordInnerStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.TopfBasis
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsCuspHom
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.DiscreteSpectrumKFiniteDecomposition
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivariantMapCarriesGelfandInvariantToFunction
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GelfandInvariantActionSmoothVectorsScalar
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DerivedActionSmoothVectorRealLinear
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ContinuousRepresentativeProperties
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurePreservingReindex
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RightRegularRepUnitaryStronglyContinuous
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicTransportMeasureSecond
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivativeClosedClassBoundedByInverseLeastSizeStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HeightBoundByInfinityNorm
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivativeAlongLieAlgebraPreservesSmoothSpaceStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -115,7 +152,7 @@ theorem gelf_scalar (he : IsEquiv θ Φ) (hs : IsSob Φ) (τ : D.what₂.Tau) (k
     rw [Submodule.coe_smul, ← hc _ ((MultGelf.mem_sm M τ).1 (v τ).2), Submodule.coe_sum]
     exact Finset.sum_congr rfl fun idx _ => (hf1 idx).symm
   have h2 : c • Φ v = Φ (Function.update v τ (c • v τ)) := by
-    rw [Φ.map_update_smul, Function.update_eq_self]
+    rw [Φ.map_update_smul, RingHom.id_apply, Function.update_eq_self]
   rw [h2, h1]
   refine Eq.trans ?_ (map_sum (Φ.toLinearMap v τ) f Finset.univ).symm
   exact Finset.sum_congr rfl fun idx _ => hf2 idx
@@ -126,7 +163,7 @@ theorem zfin (he : IsEquiv θ Φ) (hs : IsSob Φ) (u : M.Vec) :
   obtain ⟨a, rfl⟩ := Submodule.mem_span_singleton.1 hf
   obtain ⟨c, hc⟩ := gelf_scalar he hs τ k
   have h2 : a • Φ u = Φ (Function.update u τ (a • u τ)) := by
-    rw [Φ.map_update_smul, Function.update_eq_self]
+    rw [Φ.map_update_smul, RingHom.id_apply, Function.update_eq_self]
   rw [h2, hc, ← h2]
   exact Submodule.smul_mem _ _ hf
 
@@ -148,7 +185,7 @@ theorem smooth (hθ : IsInfFam θ) (he : IsEquiv θ Φ) (hs : IsSob Φ) (hc : �
     have h3 : der v τ hXY = (a : ℂ) • der v τ hX + der v τ hY :=
       Subtype.ext ((h1 _ haX _ hY).trans (by rw [h2 a X hX]; rfl))
     simp only [rder_apply he hs τ v hX, rder_apply he hs τ v hY, rder_apply he hs τ v hXY]
-    rw [h3, Φ.map_update_add, Φ.map_update_smul]
+    rw [h3, Φ.map_update_add, Φ.map_update_smul, RingHom.id_apply]
 
 theorem foldr_rder (he : IsEquiv θ Φ) (hs : IsSob Φ) (u : M.Vec)
     (l : List (D.what₂.Tau × Matrix (Fin V.rank) (Fin V.rank) ℂ)) (hl : ∀ p ∈ l, p.2 ∈ lieAt V p.1) :
@@ -160,19 +197,6 @@ theorem foldr_rder (he : IsEquiv θ Φ) (hs : IsSob Φ) (u : M.Vec)
     exact ⟨_, by rw [List.foldr_cons, hv, rder_apply he hs p.1 v (hl p List.mem_cons_self)]⟩
 
 section Inst
-
-variable {pl : InfinitePlace D.host.F ≃ D.what₂.Tau} {X : ModInst D V M pl} {T : GA D V ≃* X.inst.GA}
-
-theorem conj_lie (τ : D.what₂.Tau) {E : Matrix (Fin V.rank) (Fin V.rank) ℂ} (hE : Formalism.REAL.inG (M.ε τ) E) :
-    (M.fr τ)⁻¹ * E * M.fr τ ∈ lieAt V τ := by
-  have hd : IsUnit (M.fr τ).det := (Matrix.isUnit_iff_isUnit_det _).1 (M.fr_unit τ)
-  have hk : Eᴴ * Formalism.REAL.Jm (M.ε τ) + Formalism.REAL.Jm (M.ε τ) * E = 0 := hE
-  have h1 : ((M.fr τ)⁻¹)ᴴ * (M.fr τ)ᴴ = 1 := by rw [← conjTranspose_mul, mul_nonsing_inv _ hd, conjTranspose_one]
-  change ((M.fr τ)⁻¹ * E * M.fr τ)ᴴ * gramAt D V τ + gramAt D V τ * ((M.fr τ)⁻¹ * E * M.fr τ) = 0
-  calc _ = (M.fr τ)ᴴ * (Eᴴ * (((M.fr τ)⁻¹)ᴴ * (M.fr τ)ᴴ) * Formalism.REAL.Jm (M.ε τ) +
-        Formalism.REAL.Jm (M.ε τ) * (M.fr τ * (M.fr τ)⁻¹) * E) * M.fr τ := by
-        rw [← M.fr_gram τ]; simp only [conjTranspose_mul, Matrix.mul_assoc, Matrix.mul_add, Matrix.add_mul]
-    _ = 0 := by rw [h1, mul_nonsing_inv _ hd, Matrix.mul_one, Matrix.mul_one, hk]; simp
 
 @[reducible] def bundle (I : AutInst) (μf : Measure I.Gf) [μf.IsHaarMeasure] [SigmaFinite μf]
     (fund : Set I.GA) (R : I.GA → (I.L2 μf fund →L[ℂ] I.L2 μf fund)) (H : InfinitePlace I.F → Type)

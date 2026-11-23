@@ -1,4 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightSpaceEqBotOutsideSupport
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.OperatorsKillInvariantProjection
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.WeightSpaceEqBotOutsideSupport
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,7 +110,7 @@ theorem weightProjection_diagonal_apply_eq_smul [CharZero K] (E : GLOps n K V) (
       rfl
     · rw [hπ.2 mu hmu y hy, smul_zero, smul_zero]
   · simp
-  · simp only [map_add, hy, hw, smul_add]
+  · simp only [map_add (f := _), hy, hw, smul_add]
 
 theorem homRepresentation_isRep [CharZero K] [FiniteDimensional K V] [FiniteDimensional K V'] (E : GLOps n K V)
     (E' : GLOps n K V') (hE : IsGLRep E) (hE' : IsGLRep E') : IsGLRep (homRepresentation E E') := by
@@ -85,6 +133,7 @@ theorem homRepresentation_isRep [CharZero K] [FiniteDimensional K V] [FiniteDime
       ext x
       simp only [LinearMap.sum_apply, LinearMap.comp_apply]
       rw [Finset.sum_comm]
+
       simp only [← map_sum]
       rw [hsum x, hsum' (f x)]
     rw [hf]
@@ -128,45 +177,5 @@ theorem restriction_is_representation : RestrictionIsRepresentation := by
 theorem hom_space_is_representation : HomSpaceIsRepresentation := by
   intro n K V V' _ _ _ _ _ _ _ _ E E' hE hE'
   exact homRepresentation_isRep E E' hE hE'
-
-theorem homRep_ell_bounded_by_target : HomRepEllBoundedByTarget := by
-  intro n K W _ _ _ _ _ E hE L hL
-  refine csSup_le' ?_
-  rintro k ⟨a, b, hab, hk⟩
-  have hres := restrictRepresentation_isRep E hE L hL
-
-  have hne : weightSp (homRepresentation (restrictRepresentation E L hL) E) ((k : ℤ) • rootW a b) ≠ ⊥ := by
-    intro h0; apply hk; rw [h0, bot_inf_eq]
-  obtain ⟨g, hg, hg0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hne
-  have hex : ∃ nu, ∃ x ∈ weightSp (restrictRepresentation E L hL) nu, g x ≠ 0 := by
-    by_contra hc
-    apply hg0
-    refine linearMap_ext_on_weightSpaces _ hres g 0 fun nu x hx => ?_
-    by_contra h1
-    exact hc ⟨nu, x, hx, h1⟩
-  obtain ⟨nu, x, hx, hgx⟩ := hex
-  have hx' : (x : W) ∈ weightSp E nu := (restrict_mem_weightSpace_iff E L hL nu x).1 hx
-  have hx0 : (x : W) ≠ 0 := by
-    intro h0
-    apply hgx
-    have : x = 0 := Subtype.ext h0
-    rw [this, map_zero]
-  have hgw : g x ∈ weightSp E ((k : ℤ) • rootW a b + nu) := by
-    rw [mem_weightSp_iff_diagonal_apply]
-    intro c
-    have h1 := congrArg (fun f : L →ₗ[K] W => f x) ((mem_weightSp_iff_diagonal_apply _ _ g).1 hg c)
-    simp only [homRepresentation_apply, LinearMap.smul_apply] at h1
-    have h2 : restrictRepresentation E L hL c c x = (nu c : K) • x := (mem_weightSp_iff_diagonal_apply _ _ x).1 hx c
-    rw [h2, map_smul, sub_eq_iff_eq_add] at h1
-    rw [h1, Pi.add_apply, Int.cast_add, add_smul]
-  refine le_csSup (root_differences_bddAbove E hE ⊤) ⟨(k : ℤ) • rootW a b + nu, ?_, nu, ?_, a, b, hab, by abel⟩
-  · intro h0
-    have : g x ∈ weightSp E ((k : ℤ) • rootW a b + nu) ⊓ ⊤ := ⟨hgw, trivial⟩
-    rw [h0] at this
-    exact hgx ((Submodule.mem_bot K).1 this)
-  · intro h0
-    have : (x : W) ∈ weightSp E nu ⊓ ⊤ := ⟨hx', trivial⟩
-    rw [h0] at this
-    exact hx0 ((Submodule.mem_bot K).1 this)
 
 end Formalism.MainNotions.G.GLWeightTheory

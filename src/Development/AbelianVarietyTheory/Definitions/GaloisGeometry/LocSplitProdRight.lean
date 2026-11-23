@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.Bridge
-import Formalism.LocalToGlobal.Columns.HeckeSp
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.Bridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.HkB
 
@@ -20,24 +60,6 @@ theorem locSplit_prod_left {G H : Type} [Group G] [Group H] (A : Subgroup G) (B 
     have hl2 : l.2 = 1 := Subgroup.mem_bot.1 (Subgroup.mem_prod.1 hl).2
     show (1, k.2) * l = l * (1, k.2)
     ext <;> simp [hl2]
-
-theorem LocSplit.map {G H : Type} [Group G] [Group H] {J L : Subgroup G} (h : LocSplit J L) (e : G ≃* H) :
-    LocSplit (J.map e.toMonoidHom) (L.map e.toMonoidHom) := by
-  intro k hk
-  obtain ⟨k', hk', rfl⟩ := Subgroup.mem_map.1 hk
-  obtain ⟨k₁, hk₁, k₂, hk₂, hk₁L, hsplit, hc⟩ := h k' hk'
-  refine ⟨e.toMonoidHom k₁, Subgroup.mem_map_of_mem _ hk₁, e.toMonoidHom k₂, Subgroup.mem_map_of_mem _ hk₂,
-    Subgroup.mem_map_of_mem _ hk₁L, by rw [hsplit, map_mul], ?_⟩
-  intro l hl
-  obtain ⟨l', hl', rfl⟩ := Subgroup.mem_map.1 hl
-  exact (hc l' hl').map e.toMonoidHom
-
-theorem LocSplit.conj_mem {G : Type} [Group G] {J L : Subgroup G} (h : LocSplit J L) {k l : G} (hk : k ∈ J) (hl : l ∈ L) :
-    k * l * k⁻¹ ∈ L := by
-  obtain ⟨k₁, _, k₂, _, hk₁L, rfl, hc⟩ := h k hk
-  have hcl : k₂ * l * k₂⁻¹ = l := by rw [(hc l hl).eq, mul_inv_cancel_right]
-  rw [show k₁ * k₂ * l * (k₁ * k₂)⁻¹ = k₁ * (k₂ * l * k₂⁻¹) * k₁⁻¹ by group, hcl]
-  exact L.mul_mem (L.mul_mem hk₁L hl) (L.inv_mem hk₁L)
 
 section Operators
 
@@ -104,6 +126,7 @@ theorem LocSplit.dcOp_mem (ρ : Γ →* Module.End ℂ W) {J L : Subgroup G} {χ
     rw [hjj, map_mul, hχ ⟨j₁, hj₁J⟩ hj₁L, one_mul]
   have hsum := sum_mul_reps ι ρ hχ hA hA hAL hAL hF hj₁J hj₁L g
   simp only [dcOp]
+
   rw [← hsum, map_sum, Finset.smul_sum, hχj]
   refine Finset.sum_congr rfl fun a ha => ?_
   have e : ι γ * g * (j : G) * a = ι γ * (g * j₁ * a) * ((⟨j₂, hj₂J⟩ : J) : G) := by
@@ -112,13 +135,5 @@ theorem LocSplit.dcOp_mem (ρ : Γ →* Module.End ℂ W) {J L : Subgroup G} {χ
   exact hF' γ (g * j₁ * a) ⟨j₂, hj₂J⟩
 
 end Operators
-
-example : LocSplit ((Subgroup.zpowers (Equiv.swap (0 : Fin 3) 1)).prod (⊤ : Subgroup (Equiv.Perm (Fin 3))))
-    ((⊤ : Subgroup (Equiv.Perm (Fin 3))).prod ⊥) := locSplit_prod_left _ _
-
-example {G : Type} [Group G] {J L : Subgroup G} (h : J ≤ L) : LocSplit J L :=
-  fun k hk => ⟨k, hk, 1, J.one_mem, h hk, (mul_one k).symm, fun l _ => Commute.one_left l⟩
-
-example : Formalism.L2.Col.gaussBin 2 4 2 = 35 := by decide
 
 end GlobalTheory.HkB

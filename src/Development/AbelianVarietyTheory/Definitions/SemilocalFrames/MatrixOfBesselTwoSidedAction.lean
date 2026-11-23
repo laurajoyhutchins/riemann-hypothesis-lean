@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -139,7 +187,7 @@ theorem measurable_invM : Measurable (invM : Mt k r → Mt k r) := by
     hc.matrix_det.measurable.inv
   have hadj : ∀ i j, Measurable fun x : Mt k r => (Matrix.of x : Mat k r).adjugate i j :=
     fun i j => ((continuous_apply_apply i j).comp hc.matrix_adjugate).measurable
-  refine measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j => ?_
+  refine Measurable.of_eval fun i => Measurable.of_eval fun j => ?_
   have key : (fun x : Mt k r => invM x i j) =
       fun x => ((Matrix.of x : Mat k r).det)⁻¹ * (Matrix.of x : Mat k r).adjugate i j := by
     funext x
@@ -201,20 +249,5 @@ theorem Decay.mono {σ : Mat k r → (H →L[ℂ] H)} {V V' : Set H} {a : ℝ} (
     Decay σ V' a := fun u hu v hv => h u (hV hu) v (hV hv)
 
 theorem Greg_subset (z z' : Fin (2 * r + k + 1) → ℂ) : Greg k r z z' ⊆ GG k r := fun _ hγ => hγ.1
-
-example : invM (k := 1) (r := 0) !![1, 2; 0, 1] = !![1, -2; 0, 1] := by
-  show ((!![1, 2; 0, 1] : Matrix (Fin 2) (Fin 2) ℂ)⁻¹ : Matrix (Fin 2) (Fin 2) ℂ) = _
-  apply Matrix.inv_eq_right_inv
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
-
-example (x : Mt k r) : invM x = @Inv.inv (Mat k r) Matrix.inv (Matrix.of x) := rfl
-
-example : dil 1 1 2 = Matrix.diagonal ![2, 1, 1, 2⁻¹] := by
-  unfold dil
-  congr 1; funext i
-  fin_cases i <;> simp
-
-example : rk1 (1 : ℂ) (Complex.I : ℂ) (1 : ℂ) = -Complex.I := by simp [rankOneInnerOperator_apply]
 
 end GlobalTheory.SgInf

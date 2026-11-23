@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedVectorEqOfStandardData
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsTwIffCanonEq
-import Formalism.LocalToGlobal.HilbertRowConditions.TiedEMt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HermitianFormLastCoordinateUniformizerVectorSelf
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CevInjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HermitianFormLastCoordinateUniformizerVectorSelf
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StdLvPr
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwSymP
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.BaseFieldsPrimesOk
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnSpacesStandardInFrameCoordsStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TrueColumnsPeriodMapDatumOkAndOverLevelPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 
@@ -76,7 +120,7 @@ theorem eq_extM_of_laws (g : Matrix (Fin n) (Fin n) A) (G : Matrix (Fin N) (Fin 
     exact congrFun (h1 _) _
 
 end ExtL
-set_option maxHeartbeats 1600000 in
+
 theorem exists_ka_tw (u : B.Word) (a : I.ι) {Ch : Type} {chOf : (I.stp u a B.R.m).Cl → Ch}
     {Lb : Ch → Submodule (𝓞 B.host.E) (Fin (B.R.N B.R.m) → B.host.E)}
     {U : Ch → Subgroup (GA B (B.R.N B.R.m))} {chi : ∀ β, U β →* ℂˣ} {y : (I.stp u a B.R.m).Cl → GA B (B.R.N B.R.m)}
@@ -102,7 +146,7 @@ theorem exists_ka_tw (u : B.Word) (a : I.ι) {Ch : Type} {chOf : (I.stp u a B.R.
     exact h
   have hact : ((I.stp u a B.R.m).act (I.perIn u a).b0 κ0 ((I.stp u a B.R.m).rep ((I.perIn u a).tilC c))).1.1 =
       (((m.1 : UF B.fields.E (B.R.N B.R.m))⁻¹, 1, 1) :
-        UF B.fields.E (B.R.N B.R.m) × GLG B.fields.E (B.R.N B.R.m) (B.primes X).vGs × GLQ B.fields.E (B.R.N B.R.m) (I.Q a)) •
+        UF B.fields.E (B.R.N B.R.m) × GLG (E := B.fields.E) (n := B.R.N B.R.m) (SG := (B.primes X).vGs) × GLQ B.fields.E (B.R.N B.R.m) (I.Q a)) •
         (tilF (Pr := B.primes X) (R := B.R) I.sel (I.tup a) u ((I.stX a).rep c).1.1) := by
     have e1 : FrmG.incl _ _ m • ((I.stp u a B.R.m).rep ((I.perIn u a).tilC c)).1.1 =
         tilF (Pr := B.primes X) (R := B.R) I.sel (I.tup a) u ((I.stX a).rep c).1.1 :=
@@ -112,7 +156,7 @@ theorem exists_ka_tw (u : B.Word) (a : I.ι) {Ch : Type} {chOf : (I.stp u a B.R.
     have e2 : FrmG.incl (levGAt I.sel (I.tup a) (I.idx a) (I.Tp a) B.R.m (I.perIn u a).b0)
         (levQAt I.sel (I.tup a) (I.idx a) (I.Tp a) B.R.m (I.perIn u a).b0) κ0 =
         (((m.1 : UF B.fields.E (B.R.N B.R.m))⁻¹, 1, 1) :
-        UF B.fields.E (B.R.N B.R.m) × GLG B.fields.E (B.R.N B.R.m) (B.primes X).vGs × GLQ B.fields.E (B.R.N B.R.m) (I.Q a)) *
+        UF B.fields.E (B.R.N B.R.m) × GLG (E := B.fields.E) (n := B.R.N B.R.m) (SG := (B.primes X).vGs) × GLQ B.fields.E (B.R.N B.R.m) (I.Q a)) *
         FrmG.incl _ _ m := by
       refine Prod.ext ?_ (Prod.ext ?_ ?_)
       · exact (inv_mul_cancel _).symm
@@ -164,7 +208,7 @@ theorem til_lat_eq_tw (hI : I.Ok) (l : I.Laws) (Z : TC.Later B (I.cols l))
     (piT_dvd_of_mem (base_fields_primes_ok B X).1 hPr u) _ (iXc (I.rec7 l Z)) hiX (z0v B X u) (fun j => rfl)] at e2
   exact (mulLat_toGLm m.1.1 _).trans e2.symm
 
-set_option maxHeartbeats 1600000 in
+
 theorem til_fv_eq_tw (hI : I.Ok) (l : I.Laws) (Z : TC.Later B (I.cols l))
     (hg : gramN (I.rec7 l Z) B.R.m le_rfl = 1) (u : B.Word) (a : I.ι)
     {lat : (I.stp u a B.R.m).Cl → Submodule (𝓞 B.host.E) (Fin (B.R.N B.R.m) → B.host.E)}
@@ -248,7 +292,7 @@ theorem til_fv_eq_tw (hI : I.Ok) (l : I.Laws) (Z : TC.Later B (I.cols l))
   rw [hresv, ← hpv]
   exact mul_left_cancel₀ (M₀ := Res v.1) hs0 h9
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem til_tw (hI : I.Ok) (hP : TC.Pins B X) (l : I.Laws) (Z : TC.Later B (I.cols l)) {l0 : I.Law0 l} {inQ : I.ι → HeightOneSpectrum (𝓞 (I.rec7 l Z).host.F) → Prop} {H : Formalism.L2.Herm.HermColsCh (I.rec7 l Z)}
     {F : ∀ u, FormsTiedSym (I.rec7 l Z) u (H.Ch u) (H.chOf u)} {T : Formalism.L2.Herm.TwChTied (I.rec7 l Z) inQ} {J : Formalism.L2.Herm.TwChJointS T H}

@@ -1,6 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.FrobeniusLocalPairs.FrobeniusTwistedHilbertNinetyAlt
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.FrobeniusLocalPairs.CptConj
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.FrobeniusLocalPairs.FrobeniusTwistedHilbertNinetyAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,12 +162,12 @@ private theorem sum_transfer {G H : Type} [Group G] [Group H] (j : H →* G) (hj
     fun p => DoubleCoset.mk (T₀.map j) K (j (Quotient.out p))
   have hval : ∀ x, F (Quotient.out (DoubleCoset.mk (T₀.map j) K x)) = F x := by
     intro x
-    obtain ⟨a, b, ha, hb, hx⟩ := DoubleCoset.mk_out_eq_mul (T₀.map j) K x
+    obtain ⟨a, ha, b, hb, hx⟩ := DoubleCoset.mk_out_eq_mul (T₀.map j) K x
     rw [hx]
     exact hinv a ha b hb x
   have he' : ∀ h, e (DoubleCoset.mk T₀ K₀ h) = DoubleCoset.mk (T₀.map j) K (j h) := by
     intro h
-    obtain ⟨a, b, ha, hb, hab⟩ := DoubleCoset.mk_out_eq_mul T₀ K₀ h
+    obtain ⟨a, ha, b, hb, hab⟩ := DoubleCoset.mk_out_eq_mul T₀ K₀ h
     show DoubleCoset.mk (T₀.map j) K (j (Quotient.out (DoubleCoset.mk T₀ K₀ h))) = _
     rw [hab, DoubleCoset.eq]
     refine ⟨(j a)⁻¹, (T₀.map j).inv_mem (Subgroup.mem_map_of_mem j ha), (j b)⁻¹,
@@ -139,7 +181,7 @@ private theorem sum_transfer {G H : Type} [Group G] [Group H] (j : H →* G) (hj
     rw [DoubleCoset.eq] at hpp'
     obtain ⟨a, ha, b, hb, hab⟩ := hpp'
     obtain ⟨a₀, ha₀, rfl⟩ := Subgroup.mem_map.mp ha
-    rw [← DoubleCoset.out_eq' T₀ K₀ p, ← DoubleCoset.out_eq' T₀ K₀ p', DoubleCoset.eq]
+    rw [← DoubleCoset.out_eq' p, ← DoubleCoset.out_eq' p', DoubleCoset.eq]
     have hjb : j ((a₀ * Quotient.out p)⁻¹ * Quotient.out p') = b := by
       rw [map_mul, map_inv, map_mul, hab]
       group
@@ -152,7 +194,7 @@ private theorem sum_transfer {G H : Type} [Group G] [Group H] (j : H →* G) (hj
     intro q hq
     obtain ⟨h, κ, hκ, hx⟩ := hsupp _ hq
     refine ⟨DoubleCoset.mk T₀ K₀ h, ?_⟩
-    rw [he', ← DoubleCoset.out_eq' (T₀.map j) K q, DoubleCoset.eq]
+    rw [he', ← DoubleCoset.out_eq' q, DoubleCoset.eq]
     exact ⟨1, (T₀.map j).one_mem, κ, hκ, by rw [hx, one_mul]⟩
   have hfull : ∑ᶠ q ∈ Set.range e, F (Quotient.out q) =
       ∑ᶠ q : DoubleCoset.Quotient ((T₀.map j : Subgroup G) : Set G) (K : Set G),

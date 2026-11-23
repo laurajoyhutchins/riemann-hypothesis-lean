@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+module
+
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Lean.Meta.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -11,49 +54,6 @@ open MvPolynomial
 noncomputable section
 
 open MvPolynomial
-
-abbrev flagTwoFirstRoot : RootRing 1 (1+1) := X ((0:Fin 1), (0 : Fin (1+1)))
-abbrev flagTwoSecondRoot : RootRing 1 (1+1) := X ((0:Fin 1), (1 : Fin (1+1)))
-
-theorem inh_mu_eq : smallBlockMu 1 1 1 .last = flagTwoSecondRoot := by
-  simp [smallBlockMu, yRoot, yIndex, SmallBlock.sign]
-
-theorem inh_fib_eq : fibreClass 1 1 1 .last = 1 := by
-  simp [fibreClass, vandermondeOf]
-
-theorem inh_F_eq : restPolynomial 1 1 1 .last = flagTwoSecondRoot ^ 2 := by
-  simp [restPolynomial, inh_mu_eq, inh_fib_eq]
-
-theorem inh_decomp : IsPowerSumDecomposition 1 (1+1) (restPolynomial 1 1 1 .last)
-    (fun k _ => if k = 1 then C (2⁻¹) * (flagTwoSecondRoot - flagTwoFirstRoot) else if k = 2 then C (2⁻¹) else 0) := by
-  have h2 : (C (2⁻¹ : ℚ) : RootRing 1 (1+1)) * 2 = 1 := by
-    have : (2 : RootRing 1 (1+1)) = C 2 := (map_ofNat C 2).symm
-    rw [this, ← C_mul]; norm_num
-  have hI : Finset.Icc 1 (1+1) = ({1, 2} : Finset ℕ) := by decide
-  rw [inh_F_eq, IsPowerSumDecomposition, hI]
-  simp [blockPowerSum, Fin.sum_univ_two]
-  linear_combination (-(flagTwoSecondRoot ^ 2)) * h2
-
-theorem inh_van_eq : blockVandermonde 1 (1+1) = flagTwoFirstRoot - flagTwoSecondRoot := by
-  have hIoi0 : Finset.Ioi (0 : Fin (1+1)) = {1} := by decide
-  have hIoi1 : Finset.Ioi (1 : Fin (1+1)) = ∅ := by decide
-  simp [blockVandermonde, vandermondeOf, Fin.prod_univ_two, hIoi0, hIoi1]
-
-theorem inh_J_eq : fibreDegree 1 1 1 .last = -1 := by
-  have hH : smallBlockMu 1 1 1 .last ^ (1 * (1 * 1)) * fibreClass 1 1 1 .last = flagTwoSecondRoot := by
-    simp [inh_mu_eq, inh_fib_eq]
-  rw [fibreDegree, hH, flagIntegral, inh_van_eq]
-  have hne : ((0:Fin 1), (0 : Fin (1+1))) ≠ ((0:Fin 1), (1 : Fin (1+1))) := by decide
-  rw [Finset.sum_eq_single (Finsupp.single ((0:Fin 1), (1 : Fin (1+1))) 1)]
-  · simp [flagTwoFirstRoot, flagTwoSecondRoot, coeff_X', Finsupp.single_left_inj, hne, hne.symm, Finsupp.single_eq_single_iff]
-  · intro b _ hb
-    have : coeff b flagTwoSecondRoot = 0 := by
-      rw [coeff_X']; exact if_neg (fun h => hb h.symm)
-    simp [this]
-  · intro h
-    have : coeff (Finsupp.single ((0:Fin 1), (1 : Fin (1+1))) 1) (flagTwoFirstRoot - flagTwoSecondRoot) = 0 := by
-      simpa using h
-    simp [flagTwoFirstRoot, flagTwoSecondRoot, coeff_X', Finsupp.single_eq_single_iff, hne, hne.symm] at this
 
 end
 

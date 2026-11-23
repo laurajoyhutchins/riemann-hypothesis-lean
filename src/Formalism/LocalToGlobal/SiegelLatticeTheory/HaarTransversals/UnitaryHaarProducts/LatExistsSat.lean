@@ -1,6 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsDefs
-import Lemmata.MiscLemmasD.Imports
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LatExistsDefs
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Lemmata.MiscLemmasD.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +106,8 @@ lemma sub_smul_mem_span_init {n : ℕ} (w : Fin (n + 1) → V) (f : V →ₗ[E] 
   rw [Fin.sum_univ_castSucc]
   have hfx : f (∑ i : Fin n, k i.castSucc • w i.castSucc + k (Fin.last n) • w (Fin.last n)) =
       k (Fin.last n) := by
-    simp [map_sum, hf0, hf1]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp [map_sum, hf0, hf1]
   rw [hfx, add_sub_cancel_right]
   exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
 
@@ -286,7 +342,16 @@ private lemma fi_exists_ne_lemma {R K : Type} [CommRing R] [Field K] [Algebra R 
   rw [FractionalIdeal.mem_zero_iff]
   exact ⟨h x, fun hx => hx ▸ FractionalIdeal.mem_coe.1 (Submodule.zero_mem _)⟩
 
-theorem satBasisV_holds : SatBasisV := by
+theorem satBasisV_holds :
+  ∀ (E V : Type) [Field E] [NumberField E] [AddCommGroup V] [Module E V] [Module (𝓞 E) V]
+    [IsScalarTower (𝓞 E) E V] [FiniteDimensional E V] (Λ : Submodule (𝓞 E) V),
+    Submodule.IsFullLattice E Λ →
+    ∀ (n : ℕ) (w : Fin (n + 1) → V), LinearIndependent E w →
+    ∀ a : Fin n → FractionalIdeal (nonZeroDivisors (𝓞 E)) E, (∀ i, a i ≠ 0) →
+    ∃ (e : Fin (n + 1) → V) (c : FractionalIdeal (nonZeroDivisors (𝓞 E)) E),
+      LinearIndependent E e ∧ Submodule.span E (Set.range e) = Submodule.span E (Set.range w) ∧ c ≠ 0 ∧
+      Λ ⊓ (Submodule.span E (Set.range w)).restrictScalars (𝓞 E) =
+        latSpanV (Fin.snoc (α := fun _ => FractionalIdeal (nonZeroDivisors (𝓞 E)) E) a c) e := by
   intro E V _ _ _ _ _ _ _ Λ hΛ n w hw a ha
   have hMfg : (Λ ⊓ (Submodule.span E (Set.range w)).restrictScalars (𝓞 E)).FG :=
     fg_of_le_lemma hΛ.fg inf_le_left

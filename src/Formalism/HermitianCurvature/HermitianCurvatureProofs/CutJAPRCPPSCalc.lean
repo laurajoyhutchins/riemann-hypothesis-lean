@@ -1,5 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRCoreCut
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRAsmPS
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRCoreCut
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAPRAsmPS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.Q NumberField
 open scoped ComplexConjugate Matrix
@@ -93,17 +142,17 @@ structure DPS (TT : ℝ) (f : ℂ → ℂ) : Prop where
   dz : PS TT (NF.dZ f)
   dzb : PS TT (NF.dZb f)
 
-theorem DPS.congr {f g : ℂ → ℂ} (hf : DPS TT f) (h : ∀ ζ : ℂ, TT < Complex.normSq ζ → g ζ = f ζ) : DPS TT g where
+theorem DPS.congr {f g : ℂ → ℂ} (hf : DPS TT f) (h : ∀ ζ : ℂ, TT < Complex.normSq ζ → g ζ = f ζ) : DPS TT g := {
   diff := fun ζ hζ => (hf.diff ζ hζ).congr_of_eventuallyEq ((ev_ann hζ).mono h)
   ps := PS.congr hf.ps h
   dz := PS.congr hf.dz fun _ hζ => dZ_congr h hζ
-  dzb := PS.congr hf.dzb fun _ hζ => dZb_congr h hζ
+  dzb := PS.congr hf.dzb fun _ hζ => dZb_congr h hζ }
 
-theorem DPS.const (TT : ℝ) (c : ℂ) : DPS TT (fun _ => c) where
+theorem DPS.const (TT : ℝ) (c : ℂ) : DPS TT (fun _ => c) := {
   diff := fun _ _ => differentiableAt_const c
   ps := PS.const TT c
   dz := PS.congr (PS.const TT 0) fun ζ _ => dZ_const c ζ
-  dzb := PS.congr (PS.const TT 0) fun ζ _ => dZb_const c ζ
+  dzb := PS.congr (PS.const TT 0) fun ζ _ => dZb_const c ζ }
 
 theorem PS.id (TT : ℝ) : PS TT id := ⟨0, MvPolynomial.X 0, fun ζ _ => by simp⟩
 
@@ -118,30 +167,30 @@ theorem gg_ne {ζ : ℂ} (h : TT < Complex.normSq ζ) : gg TT ζ ≠ 0 := by
 theorem PS.ggi (TT : ℝ) : PS TT (fun ζ => (gg TT ζ)⁻¹) :=
   ⟨1, 1, fun ζ hζ => by rw [pow_one, mul_inv_cancel₀ (gg_ne hζ), map_one]⟩
 
-theorem DPS.id (TT : ℝ) : DPS TT id where
+theorem DPS.id (TT : ℝ) : DPS TT id := {
   diff := fun _ _ => differentiableAt_id
   ps := PS.id TT
   dz := PS.congr (PS.const TT 1) fun ζ _ => dZ_id ζ
-  dzb := PS.congr (PS.const TT 0) fun ζ _ => dZb_id ζ
+  dzb := PS.congr (PS.const TT 0) fun ζ _ => dZb_id ζ }
 
-theorem DPS.conj (TT : ℝ) : DPS TT (fun ζ => conj ζ) where
+theorem DPS.conj (TT : ℝ) : DPS TT (fun ζ => conj ζ) := {
   diff := fun ζ _ => (conj_hasFDerivAt ζ).differentiableAt
   ps := PS.conj TT
   dz := PS.congr (PS.const TT 0) fun ζ _ => dZ_conj ζ
-  dzb := PS.congr (PS.const TT 1) fun ζ _ => dZb_conj ζ
+  dzb := PS.congr (PS.const TT 1) fun ζ _ => dZb_conj ζ }
 
-theorem DPS.add {f g : ℂ → ℂ} (hf : DPS TT f) (hg : DPS TT g) : DPS TT (fun ζ => f ζ + g ζ) where
+theorem DPS.add {f g : ℂ → ℂ} (hf : DPS TT f) (hg : DPS TT g) : DPS TT (fun ζ => f ζ + g ζ) := {
   diff := fun ζ hζ => (hf.diff ζ hζ).add (hg.diff ζ hζ)
   ps := PS.add hf.ps hg.ps
   dz := PS.congr (PS.add hf.dz hg.dz) fun ζ hζ => dZ_add (hf.diff ζ hζ) (hg.diff ζ hζ)
-  dzb := PS.congr (PS.add hf.dzb hg.dzb) fun ζ hζ => dZb_add (hf.diff ζ hζ) (hg.diff ζ hζ)
+  dzb := PS.congr (PS.add hf.dzb hg.dzb) fun ζ hζ => dZb_add (hf.diff ζ hζ) (hg.diff ζ hζ) }
 
-theorem DPS.mul {f g : ℂ → ℂ} (hf : DPS TT f) (hg : DPS TT g) : DPS TT (fun ζ => f ζ * g ζ) where
+theorem DPS.mul {f g : ℂ → ℂ} (hf : DPS TT f) (hg : DPS TT g) : DPS TT (fun ζ => f ζ * g ζ) := {
   diff := fun ζ hζ => (hf.diff ζ hζ).mul (hg.diff ζ hζ)
   ps := PS.mul hf.ps hg.ps
   dz := PS.congr (PS.add (PS.mul hf.ps hg.dz) (PS.mul hg.ps hf.dz)) fun ζ hζ => dZ_mul (hf.diff ζ hζ) (hg.diff ζ hζ)
   dzb := PS.congr (PS.add (PS.mul hf.ps hg.dzb) (PS.mul hg.ps hf.dzb))
-    fun ζ hζ => dZb_mul (hf.diff ζ hζ) (hg.diff ζ hζ)
+    fun ζ hζ => dZb_mul (hf.diff ζ hζ) (hg.diff ζ hζ) }
 
 theorem DPS.pow {f : ℂ → ℂ} (hf : DPS TT f) (m : ℕ) : DPS TT (fun ζ => f ζ ^ m) := by
   induction m with
@@ -247,21 +296,21 @@ theorem dZb_ggi {ζ : ℂ} (h : TT < Complex.normSq ζ) :
   rw [h2]
   ring
 
-theorem DPS.sig (TT : ℝ) : DPS TT (sig TT) where
+theorem DPS.sig (TT : ℝ) : DPS TT (sig TT) := {
   diff := fun _ hζ => sig_diff hζ
   ps := PS.sig TT
   dz := PS.congr (PS.mul (PS.const TT (1 / 2)) (PS.mul (PS.conj TT) (PS.mul (PS.sig TT) (PS.ggi TT))))
     fun _ hζ => dZ_sig hζ
   dzb := PS.congr (PS.mul (PS.const TT (1 / 2)) (PS.mul (PS.id TT) (PS.mul (PS.sig TT) (PS.ggi TT))))
-    fun _ hζ => dZb_sig hζ
+    fun _ hζ => dZb_sig hζ }
 
-theorem DPS.ggi (TT : ℝ) : DPS TT (fun ζ => (gg TT ζ)⁻¹) where
+theorem DPS.ggi (TT : ℝ) : DPS TT (fun ζ => (gg TT ζ)⁻¹) := {
   diff := fun _ hζ => ggi_diff hζ
   ps := PS.ggi TT
   dz := PS.congr (PS.mul (PS.const TT (-1)) (PS.mul (PS.conj TT) (PS.mul (PS.ggi TT) (PS.ggi TT))))
     fun _ hζ => dZ_ggi hζ
   dzb := PS.congr (PS.mul (PS.const TT (-1)) (PS.mul (PS.id TT) (PS.mul (PS.ggi TT) (PS.ggi TT))))
-    fun _ hζ => dZb_ggi hζ
+    fun _ hζ => dZb_ggi hζ }
 
 theorem DPS.coord (TT : ℝ) (i : Fin 3) : DPS TT (fun ζ => (![ζ, conj ζ, PR.sig TT ζ] : Fin 3 → ℂ) i) := by
   fin_cases i
@@ -313,6 +362,7 @@ theorem PSV.map {V V' : Type*} [AddCommGroup V] [Module ℂ V] [AddCommGroup V']
   obtain ⟨n, b, v, hb, hf⟩ := hf
   refine ⟨n, b, fun i => L (v i), hb, fun ζ hζ => ?_⟩
   show L (f ζ) = ∑ i, b i ζ • L (v i)
+
   rw [hf ζ hζ, map_sum]
   exact Finset.sum_congr rfl fun i _ => map_smul _ _ _
 

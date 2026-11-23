@@ -1,8 +1,55 @@
-import Formalism.SizeWindowBrackets.FrameTraceRatioFinEquiv
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Formalism.SizeWindowBrackets.ChainSlopeWindows.TraceConjTransposeMulSelf
-import Formalism.SizeWindowBrackets.ChainSlopeWindows.CorollaryModelSideCondition
-import Formalism.SizeWindowBrackets.ChainSlopeWindows.ExistsNsmulMem
+module
+
+public import Formalism.SizeWindowBrackets.FrameTraceRatioFinEquiv
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Formalism.HarderNarasimhan.ShiftInvariance
+public import Formalism.SizeWindowBrackets.ChainSlopeWindows.TraceConjTransposeMulSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField Matrix
 open Formalism.CorankShareLayerCake.FR Formalism.HN
@@ -59,6 +106,7 @@ theorem weighted_frame_operator_to_lin {I α : Type} [Fintype I] [Fintype α] [D
     [∀ i, Fintype (ι i)] [∀ i, DecidableEq (ι i)] (B : ∀ i, Matrix α (ι i) ℂ) (ga : I → ℝ) :
     frQ ga (fun i => Matrix.toEuclideanLin (B i)) = Matrix.toEuclideanLin (QmG B ga) := by
   unfold frQ QmG
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, to_euclidean_lin_mul, to_euclidean_lin_adjoint_eq]
@@ -103,6 +151,7 @@ theorem quadratic_matrix_fin_reindex {I α : Type} [Fintype I] [Fintype α] {ι 
     HilbertSchmidtNormSquare.Qm (toFin B) ga
       = Matrix.reindex (Fintype.equivFin α) (Fintype.equivFin α) (QmG B ga) := by
   unfold HilbertSchmidtNormSquare.Qm QmG toFin
+
   rw [← Matrix.coe_reindexLinearEquiv ℂ ℂ, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   simp only [Matrix.coe_reindexLinearEquiv, Matrix.reindex_apply, Matrix.conjTranspose_submatrix,
@@ -156,11 +205,6 @@ theorem second_family_transfer_holds : FrameDeviationFinEquiv := by
   simp only [h2, fun i => hilbert_schmidt_transfer_holds I α ι B ga i (hga i)]
   rfl
 
-theorem transfer_conclusion_holds : BridgeConcl := by
-  intro s mu logI δ u HH η e
-  unfold PhiMonotonicityLemmas.ConclF PhiMonotonicityLemmas.ErrF PhiMonotonicityLemmas.phi
-  rw [mul_assoc 4 u]
-
 theorem ramification_linear_case_holds : RamLin := by
   intro I α _ _ ιf ι _ _ _ _ Bf Vr ga Dstar sg η0 η1 e0 de hV hga hD hsg hsg20 hR h0 h0' h1 he0 hse
     hde hde4 hcor hS
@@ -192,7 +236,7 @@ theorem flat_lattice_theorem_holds : TheoremFLat := by
     g9 g10 g11 n1 n2 n3 n4 n5 g12 g13 g14 g15 hγ hF2 he he4 hF1 hη
 
 theorem sharp_flat_lattice_theorem_holds :
-  ∀ (K W κ κ₁ I : Type) [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+  ∀ (K W κ κ₁ I : Type) [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
     [AddCommGroup W] [Module K W] [Module (𝓞 K) W] [IsScalarTower (𝓞 K) K W]
     [Fintype κ] [DecidableEq κ] [Fintype κ₁] [DecidableEq κ₁] [Fintype I] [Nonempty I]
     (V ι : I → Type) [∀ i, AddCommGroup (V i)] [∀ i, Module K (V i)] [∀ i, Module (𝓞 K) (V i)]
@@ -213,7 +257,7 @@ theorem sharp_flat_lattice_theorem_holds :
     g7 g8 g9 g10 g11 n1 n2 n3 n4 n5 g12 g13 g14 g15 hγ hF2 he he4 hF1 hη
 
 theorem ramification_condition_holds :
-  ∀ (K W κ κ₁ I : Type) [Field K] [NumberField K] [StarRing K] [IsTotallyComplex K]
+  ∀ (K W κ κ₁ I : Type) [Field K] [NumberField K] [StarRing K] [_root_.NumberField.IsTotallyComplex K]
     [AddCommGroup W] [Module K W] [Module (𝓞 K) W] [IsScalarTower (𝓞 K) K W]
     [Fintype κ] [DecidableEq κ] [Fintype κ₁] [DecidableEq κ₁] [Fintype I] [Nonempty I]
     (V ι : I → Type) [∀ i, AddCommGroup (V i)] [∀ i, Module K (V i)] [∀ i, Module (𝓞 K) (V i)]

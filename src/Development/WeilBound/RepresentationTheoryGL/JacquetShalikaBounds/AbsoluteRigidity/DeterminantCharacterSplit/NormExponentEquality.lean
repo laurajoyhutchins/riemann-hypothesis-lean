@@ -1,6 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.CauchyLoc
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsChiDetSplitCentre
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalEqTwistNormalised
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.CauchyLoc
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsChiDetSplitCentre
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalEqTwistNormalised
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Matrix
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DiscreteSpectrumGLTwoOfCuspidalSpectrum
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,9 +55,9 @@ open GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.UnitaryH
 
 namespace PositivityTheory.RgJS.NormExponentLemmas
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
-omit [IsTotallyComplex E] in
+omit [_root_.NumberField.IsTotallyComplex E] in
 theorem cpow_val (s : ℂ) (x) :
     (((cpowChar E s).1 x : ℂˣ) : ℂ) = Complex.exp (s * Real.log (ideleNorm (E := E) x)) := rfl
 
@@ -34,9 +80,18 @@ theorem chiDet_split {a : ℕ} (ha : 0 < a) (c : ℝ) :
   let D : ℝ →+ ℝ := AddMonoidHom.mk'
     (fun t => Real.log (ideleNorm (E := E) (GeneralLinearGroup.det (splitCentre E a t)))) fun x y => by
       rw [splitCentre_add, map_mul, map_mul, Real.log_mul (ideleNorm_ne_zero _) (ideleNorm_ne_zero _)]
+  have hc : Continuous (splitCentre E a) := by
+    have e : splitCentre E a = fun t : ℝ =>
+        GeneralLinearGroup.scalar (Fin a) (infId E (expU fun _ : InfinitePlace E => (t : ℂ))) :=
+      funext splitCentre_eq_scalar
+    rw [e]
+    refine Continuous.units_map _ ?_ |>.comp ((continuous_infId E).comp
+      (continuous_expU.comp (continuous_pi fun _ => Complex.continuous_ofReal)))
+    change Continuous fun x : Ad E => Matrix.diagonal fun _ : Fin a => x
+    exact (continuous_pi fun _ => continuous_id).matrix_diagonal
   have hD : Continuous D :=
     (continuous_ideleNorm.comp (GeneralLinearGroup.continuous_det.comp
-      GlobalTheory.OneRep.SplitTwist.continuous_splitCentre)).log fun _ => ideleNorm_ne_zero _
+      hc)).log fun _ => ideleNorm_ne_zero _
   have hDt : ∀ t, D t = t * D 1 := fun t => by simpa using map_real_smul D hD t 1
   have hD1 : 0 < D 1 := by
     change 0 < Real.log (ideleNorm (E := E) (GeneralLinearGroup.det (splitCentre E a 1)))
@@ -66,9 +121,6 @@ theorem val_eq (τ : ℝ) (w : HeightOneSpectrum (𝓞 E)) :
     have hϖ := unif_spec (L := E) w
     rw [FinitePlace.norm_def, show Valued.v ((atFin w (unif w) : (w.adicCompletion E)ˣ) : w.adicCompletion E) =
       WithZero.exp (-1 : ℤ) from hϖ, WithZeroMulInt.toNNReal_neg_apply _ WithZero.exp_ne_zero]
-    have : Multiplicative.toAdd (WithZero.unzero
-        (WithZero.exp_ne_zero : WithZero.exp (-1 : ℤ) ≠ 0)) = -1 := rfl
-    rw [this]
     simp
   rw [HChar.val, HChar.locK, MonoidHom.comp_apply, HChar.loc, MonoidHom.comp_apply, cpow_val]
   rw [show ideleNorm (Neutral.B1.localIdele E w (atFin w (unif w))) =

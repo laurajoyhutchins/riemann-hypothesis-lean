@@ -1,7 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValRingLocRing
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SchrodingerImagesOrthogonalDisjointSplitSupport
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeIsometrySignFirst
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValRingLocRing
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.TwistSeries
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.BaseIntSet
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsInertTop
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddNsmulResidueAssoc
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeIsometrySignFirst
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SchrodingerImagesOrthogonalDisjointSplitSupport
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
+
+@[expose] public section
+
 open NumberField Matrix Complex IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Dict GlobalTheory.AdTh GlobalTheory.ClsVal
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor hiding Level Host
@@ -10,7 +61,7 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Form
 open GlobalTheory.SingleDatum GlobalTheory.CoverRead
 open scoped TensorProduct Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
+
 open GlobalTheory.LevelSeries
 
 noncomputable section
@@ -39,8 +90,8 @@ theorem char_sum {A ι : Type} [AddCommMonoid A] (ψ : AddChar A ℂ) (s : Finse
   refine Finset.induction_on s (by simp) fun a s ha ih => ?_
   rw [Finset.sum_insert ha, Finset.prod_insert ha, AddChar.map_add_eq_mul, ih]
 
-open GlobalTheory.LatFinMod GlobalTheory.LatVac in
 
+open GlobalTheory.LatFinMod GlobalTheory.LatVac in
 theorem gens (D : D7) (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E))
     (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)) (hS : ΛS.FG) (hT : ΛT.FG) :
     ∃ (K : ℕ) (g : Fin K → WO S T),
@@ -126,7 +177,7 @@ theorem root_mem {D : D7} {S T : HSp D} {ΛS : Submodule (𝓞 D.host.E) (Fin S.
   rw [← hi]
   exact Subring.pow_mem _ hz i
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem smul_mem_trSp : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (V W : HSp D) (χV χW : (AE D)ˣ →* Circle) (om : GA D V × GA D W →* Module.End ℂ (WO V W → ℂ)) (ΛV : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)) (ΛW : Submodule (𝓞 D.host.E) (Fin W.rank → D.host.E)) (sW : D.what₂.Tau → Matrix (Fin W.rank) (Fin W.rank) ℂ) (f₀ : WO V W → ℂ), VacPair ψ θ V W χV χW om ΛV ΛW sW f₀ → ∃ K : ℕ, ∀ (M : ℕ) (e : AE D) (P : Finset (Formalism.L2.DIV.Pl D.host.E)) (O : Subring ℂ) (Φ φ : WO V W → ℂ), M ≠ 0 → Nat.Coprime M (GlobalTheory.Tow.badN D) → IsIdemSum e P → (∀ PP ∈ P, ((M : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal) → zeta M ∈ O → GlobalTheory.IndefiniteRowSideFullHecke.TwistSeries.IsLevelFn (cA D e) (latO V W ΛV ΛW fun _ => True) M Φ → (∀ x, Φ x ∈ O) → IsThetaAt ψ (symplO V W) (heisO ψ V W) (cA D e) (latO V W ΛV ΛW fun _ => True) 1 f₀ Φ φ → ((M : ℂ) ^ K) • φ ∈ trSp ψ V W ΛV ΛW f₀ e M O := by
   intro D ψ θ V W χV χW om ΛV ΛW sW f₀ hP
@@ -168,6 +219,7 @@ theorem smul_mem_trSp : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfF
   have hprod : ∀ t c, ψ (symplO V W t (y c)) = ∏ i, ψ (symplO V W t (h i)) ^ (c i : ℕ) := fun t c => by
     let F := AddMonoidHom.mk' (symplO V W t) (GlobalTheory.PlaceModel.symplO_add_right V W t)
     change ψ (F (y c)) = ∏ i, ψ (F (h i)) ^ (c i : ℕ)
+
     simp only [y, map_sum, map_nsmul, char_sum, AddChar.map_nsmul_eq_pow]
   have hroot : ∀ t ∈ Λ, ∀ i, ψ (symplO V W t (h i)) ^ M = 1 := fun t ht i =>
     (root_mem hψ hSV hSW hM (O := ⊤) (Subring.mem_top _) ht (by rw [hMh]; exact heg i)).1
@@ -182,18 +234,20 @@ theorem smul_mem_trSp : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfF
       rw [GlobalTheory.LatVac.cA_cA, GlobalTheory.PlaceModel.mem_half] at hzh
       obtain ⟨n, u, hu, hzn⟩ := hgen M hMpos z hzΛ
       let ρ : WO V W →+ WO V W :=
-        (DistribMulAction.toAddMonoidHom _ r).comp (DistribMulAction.toAddMonoidHom _ e)
+        (DistribSMul.toAddMonoidHom _ r).comp (DistribSMul.toAddMonoidHom _ e)
       have hρ : r • z = ∑ i, n i • h i + e • u := by
         have e1 : r • z = ρ z := by
-          simp only [ρ, AddMonoidHom.comp_apply, DistribMulAction.toAddMonoidHom_apply, hzh]
-        rw [e1, hzn, map_add, map_sum, map_nsmul]
+          simp only [ρ, AddMonoidHom.comp_apply, DistribSMul.toAddMonoidHom_apply, hzh]
+
+        rw [e1, hzn, map_add (f := _), map_sum, map_nsmul]
         simp only [map_zsmul]
         congr 1
         exact hkrz (e • u)
       rw [GlobalTheory.PlaceModel.symplO_smul, hcr, hρ]
       let F := AddMonoidHom.mk' (symplO V W t) (GlobalTheory.PlaceModel.symplO_add_right V W t)
       change ψ (F _) = 1
-      rw [map_add, AddChar.map_add_eq_mul, map_sum, char_sum]
+
+      rw [map_add (f := _), AddChar.map_add_eq_mul, map_sum, char_sum]
       simp only [map_zsmul, AddChar.map_zsmul_eq_zpow]
       change (∏ i, ψ (symplO V W t (h i)) ^ n i) * ψ (symplO V W t (e • u)) = 1
       rw [Finset.prod_eq_one fun i _ => by rw [hall i, _root_.one_zpow], one_mul]

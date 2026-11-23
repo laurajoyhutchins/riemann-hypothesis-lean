@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsTorsionFreeOfForallExists
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsFrameOfForallExists
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToBidualNaturalityDualSheafTranspose
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -26,13 +68,15 @@ theorem bijective_sumElim_iff {ι κ : Type} [Fintype ι] [Fintype κ] (hf : Fun
   have h1 (a : ι ⊕ κ → R) : Fintype.linearCombination R (Sum.elim (fun i => f (e i)) t) a =
       f (Fintype.linearCombination R e fun i => a (.inl i)) +
         Fintype.linearCombination R t fun j => a (.inr j) := by
+
     simp [Fintype.linearCombination_apply, Fintype.sum_sum_type, map_sum]
   have h2 (b : κ → R) : g (Fintype.linearCombination R t b) =
       Fintype.linearCombination R (fun j => g (t j)) b := by
+
     simp [Fintype.linearCombination_apply, map_sum]
   have h3 (b : κ → R) (m m' : M₁) (h : f m + Fintype.linearCombination R t b = f m') : b = 0 := by
     have := congrArg g h
-    rw [map_add, hfg.apply_apply_eq_zero, hfg.apply_apply_eq_zero, zero_add, h2] at this
+    rw [map_add (f := _), hfg.apply_apply_eq_zero, hfg.apply_apply_eq_zero, zero_add, h2] at this
     exact ht.1 (this.trans (map_zero _).symm)
   constructor
   · refine fun H => ⟨(injective_iff_map_eq_zero _).2 fun a ha => ?_, fun m => ?_⟩
@@ -108,8 +152,10 @@ theorem germ_det [DecidableEq ι] {e : ι → Γ(F, U)} (he : IsFrame e) (v : ι
   ext i j
   rw [Module.Basis.toMatrix_apply]
   conv_rhs => rw [← (he.basis le_rfl).sum_repr (v j)]
+
   simp only [map_sum, QCoh.germ_smul, IsFrame.basis_apply, resM_self]
   simp only [← he.stalkBasis_apply x hx]
+
   rw [← map_sum, Module.Basis.repr_sum_self]
   rfl
 
@@ -157,7 +203,6 @@ theorem isVB_X₁_of_shortExact : ∀ (X : Scheme.{0}) (S : ShortComplex X.Modul
             ← LinearMap.range_eq_top, Fintype.range_linearCombination]
           exact ⟨β.linearIndependent, β.span_eq⟩)
       convert this using 3
-      · rfl
       funext k
       rcases k with i | j
       · rw [Sum.elim_inl, Sum.elim_inl, ← he, QCoh.stalkLinear_germ]

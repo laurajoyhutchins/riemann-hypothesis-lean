@@ -1,5 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.ContravariantIsotypicOrthogonal
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsotypicStableGlOperator
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjPol
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsotypicStableGlOperator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +100,7 @@ theorem isotypic_stable_commuting (E : GLOps n K V) (X : Module.End K V) (hX : �
         simp only [Module.End.mul_apply] at h2
         rw [← h2, hv.2.2 a b hab, map_zero]
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ _ hx
 
 theorem isotypic_projector_commutes (E : GLOps n K V) (hT : (⨆ mu : Fin n → ℤ, isoSub E mu) = ⊤) (lam : Fin n → ℤ)
@@ -69,7 +116,7 @@ theorem isotypic_projector_commutes (E : GLOps n K V) (hT : (⨆ mu : Fin n → 
       rw [he.1 x hx, he.1 _ (hX _ x hx)]
     · rw [he.2 mu h x hx, he.2 mu h _ (hX _ x hx), map_zero]
   | zero => simp
-  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | add x y _ _ hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem isotypic_projector_selfAdjoint (E : GLOps n K V) (hT : (⨆ mu : Fin n → ℤ, isoSub E mu) = ⊤) (lam : Fin n → ℤ)
     (e : Module.End K V) (he : IsIsoProj E lam e) (B : V →ₗ[K] V →ₗ[K] K)
@@ -92,9 +139,9 @@ theorem isotypic_projector_selfAdjoint (E : GLOps n K V) (hT : (⨆ mu : Fin n �
         · subst h'; rw [he.1 y hy, hB mu nu h x hx y hy]
         · rw [he.2 nu h' y hy, map_zero]
     | zero => simp
-    | add y z _ _ hy hz => simp only [map_add, hy, hz]
+    | add y z _ _ hy hz => simp only [map_add (f := _), hy, hz]
   | zero => simp
-  | add x z _ _ hx hz => simp only [map_add, LinearMap.add_apply, hx, hz]
+  | add x z _ _ hx hz => simp only [map_add (f := _), LinearMap.add_apply, hx, hz]
 
 end abs
 

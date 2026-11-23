@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
+module
+
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+public import Development.AbelianVarietyTheory.CrystallinePeriods.CrisIncl
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
-import Development.AbelianVarietyTheory.CrystallinePeriods.CrisIncl
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+
+@[expose] public section
 
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.MemLoc
 open scoped Formalism.Per
@@ -28,7 +74,7 @@ theorem one_add_mul_derivative_trunc {R : Type} [CommRing R] (n : ℕ) (u : R[X]
     have hs : derivative ((-1 : R[X]) ^ k) = 0 := by
       rcases neg_one_pow_eq_or R[X] k with h | h <;> simp [h]
     rw [derivative_mul, derivative_mul, hs, derivative_natCast, derivative_pow_succ, ← hc, neg_pow u]
-    simp only [map_add, map_natCast, map_one]
+    simp only [map_add (f := _), map_natCast, map_one]
     ring
   have h2 : (1 + u) * ∑ k ∈ Finset.range n, (-u) ^ k = 1 := by
     have := mul_neg_geom_sum (-u) n
@@ -68,7 +114,7 @@ theorem trunc_add {R : Type} [CommRing R] (hR : ∀ m : ℕ, m ≠ 0 → IsUnit 
     cases k with
     | zero => simp only [coeff_C_zero]
     | succ k =>
-      have h := congrArg (fun p => coeff p k) hD
+      have h := congrArg (fun (p : R[X]) => p.coeff k) hD
       simp only [coeff_derivative, coeff_zero] at h
       rw [coeff_C_succ]
       have hu : IsUnit ((k : R) + 1) := by exact_mod_cast hR (k + 1) (Nat.succ_ne_zero k)
@@ -111,7 +157,7 @@ theorem log_add : ∀ (l : ℕ) [Fact l.Prime], ∀ (e e' : Per.Fl l) (y y' z : 
     have := (GlobalTheory.RingBasics.isUnit_nat l m hm).map q
     rwa [map_natCast] at this
   apply (hR _ n.factorial_ne_zero).mul_left_cancel
-  rw [map_add, mul_add, GlobalTheory.CrisIncl.factorial_mul_ev l e y he hy n,
+  rw [map_add (f := _), mul_add, GlobalTheory.CrisIncl.factorial_mul_ev l e y he hy n,
     GlobalTheory.CrisIncl.factorial_mul_ev l e' y' he' hy' n,
     GlobalTheory.CrisIncl.factorial_mul_ev l _ z (by rw [map_mul, he, he', mul_one]) hz n]
   have hI : ((Per.kerP l).map q) ^ n = ⊥ := by
@@ -123,7 +169,8 @@ theorem log_add : ∀ (l : ℕ) [Fact l.Prime], ∀ (e e' : Per.Fl l) (y y' z : 
   generalize algebraMap (Per.Ainf l) (Per.AinfP l) (Per.tm e - 1) = a at key ⊢
   generalize algebraMap (Per.Ainf l) (Per.AinfP l) (Per.tm e' - 1) = b at key ⊢
   change q _ = q _ + q _
-  simp only [map_sum, map_mul, map_pow, map_neg, map_one, map_natCast, map_add]
+
+  simp only [map_sum, map_mul, map_pow, map_neg, map_one, map_natCast, map_add (f := _)]
   exact key
 
 end GlobalTheory.MemLoc.LogAdd

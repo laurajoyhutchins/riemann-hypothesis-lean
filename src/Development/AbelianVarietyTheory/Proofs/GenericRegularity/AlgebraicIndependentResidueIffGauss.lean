@@ -1,5 +1,51 @@
-import Mathlib
-import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+module
+
+public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -14,13 +60,14 @@ theorem residue_valuationSubring_ne_zero_iff {U Γ : Type*} [Field U]
 private theorem residue_eval₂_comap {F U : Type} [Field F] [Field U] (f : F →+* U)
     (v : Valuation U (WithZero (Multiplicative ℤ))) (σ : Type) (t : σ → U)
     (ht : ∀ s, t s ∈ v.valuationSubring) (p : MvPolynomial σ (v.valuationSubring.comap f)) :
-    letI := ReciprocityTheory.MultiplicativeHeights.residueAlgebra v.valuationSubring f
     IsLocalRing.residue v.valuationSubring
         (MvPolynomial.eval₂ (ReciprocityTheory.MultiplicativeHeights.comapInclusion v.valuationSubring f)
           (fun s => ⟨t s, ht s⟩) p) =
-      MvPolynomial.aeval (fun s => IsLocalRing.residue v.valuationSubring ⟨t s, ht s⟩)
+      @MvPolynomial.aeval _ _ _ _ _
+        (ReciprocityTheory.MultiplicativeHeights.residueAlgebra v.valuationSubring f)
+        (fun s => IsLocalRing.residue v.valuationSubring ⟨t s, ht s⟩)
         (MvPolynomial.map (IsLocalRing.residue (v.valuationSubring.comap f)) p) := by
-  letI := ReciprocityTheory.MultiplicativeHeights.residueAlgebra v.valuationSubring f
+  let := ReciprocityTheory.MultiplicativeHeights.residueAlgebra v.valuationSubring f
   rw [MvPolynomial.aeval_def, MvPolynomial.eval₂_map, MvPolynomial.eval₂_comp_left]
   congr 1
 
@@ -48,7 +95,7 @@ theorem algebraicIndependent_residue_iff_gauss (F U : Type) [Field F] [Field U] 
       (fun s => IsLocalRing.residue v.valuationSubring ⟨t s, ht s⟩)) ↔
     ∀ p : MvPolynomial σ F, (∀ α, v (f (p.coeff α)) ≤ 1) → (∃ α, v (f (p.coeff α)) = 1) →
       v (MvPolynomial.eval₂ f t p) = 1 := by
-  letI := ReciprocityTheory.MultiplicativeHeights.residueAlgebra v.valuationSubring f
+  let := ReciprocityTheory.MultiplicativeHeights.residueAlgebra v.valuationSubring f
   rw [algebraicIndependent_iff]
   constructor
   · intro hind p hle hone
@@ -61,8 +108,8 @@ theorem algebraicIndependent_residue_iff_gauss (F U : Type) [Field F] [Field U] 
     rw [MvPolynomial.coeff_map] at hα
     rw [← coe_eval₂_comapInclusion_eq_eval₂_map f v σ t ht q, ← residue_valuationSubring_ne_zero_iff, residue_eval₂_comap]
     intro h0
-    have hq := congrArg (MvPolynomial.coeff α) (hind _ h0)
-    rw [MvPolynomial.coeff_map, MvPolynomial.coeff_zero] at hq
+    have hq := congrArg (AddMonoidAlgebra.coeff · α) (hind _ h0)
+    rw [MvPolynomial.coeff_map, AddMonoidAlgebra.coeff_zero] at hq
     exact (residue_comap_ne_zero_iff_valuation_eq_one f v (q.coeff α)).mpr hα hq
   · intro hg r hr
     by_contra hne

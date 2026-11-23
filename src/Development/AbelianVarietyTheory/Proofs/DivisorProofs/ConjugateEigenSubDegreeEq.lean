@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -123,6 +168,7 @@ theorem trace_pi (ι : Type) [Fintype ι] [DecidableEq ι] (V : Type) [AddCommGr
         have hs : (A ∘ₗ ∑ i : ι, LinearMap.single ℂ (fun _ => V) i ∘ₗ LinearMap.proj i) =
             ∑ i : ι, (A ∘ₗ LinearMap.single ℂ (fun _ => V) i) ∘ₗ LinearMap.proj i := by
           apply LinearMap.ext; intro v; simp
+
         rw [hs, map_sum]
     _ = _ := by
         refine Finset.sum_congr rfl fun i _ => ?_
@@ -139,7 +185,7 @@ theorem lift_add {Γ K : Subgroup G} (ξ : Representation ℂ Γ W)
     (v v' : DoubleCoset.Quotient (Γ : Set G) (K : Set G) → W) :
     lift Γ K ξ (v + v') = lift Γ K ξ v + lift Γ K ξ v' := by
   funext g
-  simp only [lift, Pi.add_apply, map_add]
+  simp only [lift, Pi.add_apply, map_add (f := _)]
   rw [← finsum_add_distrib (Set.toFinite _) (Set.toFinite _)]
   congr 1; funext q
   rw [finsum_mem_add_distrib (cosetSet_finite hloc _ g), smul_add]
@@ -166,7 +212,7 @@ theorem lift_ev {Γ K : Subgroup G} (ξ : Representation ℂ Γ W)
     lift Γ K ξ (fun q => φ (Quotient.out q)) g = φ g := by
   simp only [lift, sum_cosetSet_ev ξ hloc φ h1 h2]
   rw [finsum_eq_single _ (DoubleCoset.mk Γ K g)]
-  · obtain ⟨γ₀, hγ₀, k, hk, he⟩ := (DoubleCoset.eq Γ K _ _).1 (DoubleCoset.out_eq' Γ K (DoubleCoset.mk Γ K g))
+  · obtain ⟨γ₀, hγ₀, k, hk, he⟩ := (@DoubleCoset.eq _ _ Γ K _ _).1 (DoubleCoset.out_eq' (DoubleCoset.mk Γ K g))
     have hc := card_cosetSet Γ K (Quotient.out (DoubleCoset.mk Γ K g)) ⟨γ₀, hγ₀⟩ k hk
     rw [← he] at hc
     rw [hc, smul_smul]
@@ -223,8 +269,9 @@ theorem lift_mul_left {Γ K : Subgroup G} (ξ : Representation ℂ Γ W)
   have hin : ∀ x w, ∑ᶠ γ' ∈ cosetSet Γ K x ((γ : G) * g), ξ γ' w = ξ γ (∑ᶠ γ' ∈ cosetSet Γ K x g, ξ γ' w) := by
     intro x w
     have hfin := cosetSet_finite hloc x g
+
     rw [cosetSet_mul_left, finsum_mem_image (mul_right_injective γ).injOn,
-      finsum_mem_eq_finite_toFinset_sum _ hfin, finsum_mem_eq_finite_toFinset_sum _ hfin, map_sum]
+    finsum_mem_eq_finite_toFinset_sum _ hfin, finsum_mem_eq_finite_toFinset_sum _ hfin, map_sum]
     refine Finset.sum_congr rfl fun γ' _ => ?_
     rw [map_mul, Module.End.mul_apply]
   simp only [lift, hin]
@@ -332,6 +379,7 @@ theorem finite_trace_formula : ∀ (G : Type) [Group G] (Γ K : Subgroup G) (W :
       by_contra hn
       have h0 : f ((Quotient.out q)⁻¹ * γ * Quotient.out q) = 0 := by_contra fun h => hn (hS γ h)
       exact hγ (by simp [h0])
+
   rw [hblock, map_smul, map_sum, smul_eq_mul, one_div]
   congr 1
   rw [finsum_eq_sum_of_support_subset _ (s := S)]

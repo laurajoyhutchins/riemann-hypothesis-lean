@@ -1,9 +1,54 @@
-import Mathlib
-import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
-import Development.DiscreteGroups.GlobalIrreducibility.LConvUnifA
-import GroundTheory.AutomorphicForms.JacquetAdmissible
-import GroundTheory.AutomorphicForms.Cartan
-import GroundTheory.AutomorphicForms.IwahoriFactorization
+module
+
+public import GroundTheory.AutomorphicForms.Cartan
+public import GroundTheory.AutomorphicForms.InductionParabolicGroups
+public import GroundTheory.AutomorphicForms.IwahoriFactorization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,12 +119,29 @@ theorem conj_mem_congruenceSubgroup_of_zero {r : ℕ} (c : Fin n → ℤ) (H : S
               exact pow_le_one' (GLnLocal.valuation_uniformizer_lt_one F).le d
           _ = valuation F (y i j) := one_mul _
           _ ≤ _ := hyK
-  apply mem_congruenceSubgroup_of_le
-  · exact hb x hx
-  · have he : (diagPow F n c * x * (diagPow F n c)⁻¹)⁻¹ = diagPow F n c * x⁻¹ * (diagPow F n c)⁻¹ := by
+  have h2 : ∀ i j, valuation F (((diagPow F n c * x * (diagPow F n c)⁻¹)⁻¹ : GL (Fin n) F) i j -
+      (1 : Matrix (Fin n) (Fin n) F) i j) ≤ valuation F (GLnLocal.uniformizer F : F) ^ r := by
+    have he : (diagPow F n c * x * (diagPow F n c)⁻¹)⁻¹ = diagPow F n c * x⁻¹ * (diagPow F n c)⁻¹ := by
       group
     rw [he]
     exact hb x⁻¹ (H.inv_mem hx)
+  have hle : valuation F (GLnLocal.uniformizer F : F) ^ r ≤ 1 :=
+    pow_le_one' (GLnLocal.valuation_uniformizer_lt_one F).le r
+  have hint : ∀ (z : F) (i j : Fin n),
+      valuation F (z - (1 : Matrix (Fin n) (Fin n) F) i j) ≤
+        valuation F (GLnLocal.uniformizer F : F) ^ r → z ∈ 𝒪[F] := by
+    intro z i j hz
+    refine (Valuation.mem_integer_iff _ _).mpr ?_
+    have he : z = (z - (1 : Matrix (Fin n) (Fin n) F) i j) +
+        (1 : Matrix (Fin n) (Fin n) F) i j := by ring
+    rw [he]
+    apply Valuation.map_add_le _ (hz.trans hle)
+    by_cases hij : i = j
+    · rw [hij, one_apply_eq, map_one]
+    · rw [one_apply_ne hij, map_zero]
+      exact zero_le
+  rw [GLnLocal.mem_congruenceSubgroup_iff F n, GLnLocal.mem_integralGL_iff F n]
+  exact ⟨⟨fun i j => hint _ i j (hb x hx i j), fun i j => hint _ i j (h2 i j)⟩, hb x hx⟩
 
 theorem diagPow_comm_of_mem_levi (c : Fin n → ℤ) {y : GL (Fin n) F}
     (hy : y ∈ levi F n (id : Fin n → Fin n)) : diagPow F n c * y = y * diagPow F n c := by

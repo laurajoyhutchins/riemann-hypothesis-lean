@@ -1,6 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SameForm
-import Formalism.LocalToGlobal.Columns.ToHLatLemmas
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SameForm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +49,7 @@ open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions F
 
 attribute [local instance] GlobalTheory.Mem.Col2.starE
 
-set_option maxHeartbeats 1000000
+
 
 theorem inner_eq_of_norm_sq {K V E M : Type} [Field K] [AddCommGroup V] [Module ℂ V] [NormedAddCommGroup E] [InnerProductSpace ℂ E]
     [AddCommGroup M] [Module K M] (σ : K →+* ℂ) (j : M →ₛₗ[σ] V) (hspan : Submodule.span ℂ (Set.range j) = ⊤) (k : K)
@@ -18,9 +57,9 @@ theorem inner_eq_of_norm_sq {K V E M : Type} [Field K] [AddCommGroup V] [Module 
     (y y' : V) : inner ℂ (e y) (e y') = q y y' := by
   let D : V →ₗ⋆[ℂ] V →ₗ[ℂ] ℂ := LinearMap.mk₂'ₛₗ (starRingEnd ℂ) (RingHom.id ℂ)
     (fun y y' => inner ℂ (e y) (e y') - q y y')
-    (fun y z y' => by simp only [map_add, inner_add_left, LinearMap.add_apply]; ring)
+    (fun y z y' => by simp only [map_add (f := _), inner_add_left, LinearMap.add_apply]; ring)
     (fun c y y' => by simp only [map_smul, inner_smul_left, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul]; ring)
-    (fun y y' z => by simp only [map_add, inner_add_right]; ring)
+    (fun y y' z => by simp only [map_add (f := _), inner_add_right]; ring)
     (fun c y y' => by simp only [map_smul, inner_smul_right, smul_eq_mul, RingHom.id_apply]; ring)
   have hDapp : ∀ y y', D y y' = inner ℂ (e y) (e y') - q y y' := fun y y' => rfl
   have h0 : ∀ m, D (j m) (j m) = 0 := by
@@ -30,7 +69,7 @@ theorem inner_eq_of_norm_sq {K V E M : Type} [Field K] [AddCommGroup V] [Module 
   have hsym : ∀ m m', D (j m) (j m') + D (j m') (j m) = 0 := by
     intro m m'
     have h := h0 (m + m')
-    simp only [map_add, LinearMap.add_apply, h0 m, h0 m'] at h
+    simp only [map_add (f := _), LinearMap.add_apply, h0 m, h0 m'] at h
     linear_combination h
   have hpair : ∀ m m', D (j m) (j m') = 0 := by
     intro m m'
@@ -83,7 +122,7 @@ def cTerm (a : I.ι) (c : (rowS I a).Cl) (F G : MtCx I a) : ℂ :=
 
 theorem cTerm_add_left (a : I.ι) (c : (rowS I a).Cl) (F F' G : MtCx I a) :
     cTerm I a c (F + F') G = cTerm I a c F G + cTerm I a c F' G := by
-  simp only [cTerm, Submodule.coe_add, Pi.add_apply, map_add, LinearMap.add_apply, mul_add]
+  simp only [cTerm, Submodule.coe_add, Pi.add_apply, map_add (f := _), LinearMap.add_apply, mul_add]
 
 theorem cTerm_smul_left (a : I.ι) (c : (rowS I a).Cl) (r : ℂ) (F G : MtCx I a) :
     cTerm I a c (r • F) G = starRingEnd ℂ r * cTerm I a c F G := by
@@ -92,7 +131,7 @@ theorem cTerm_smul_left (a : I.ι) (c : (rowS I a).Cl) (r : ℂ) (F G : MtCx I a
 
 theorem cTerm_add_right (a : I.ι) (c : (rowS I a).Cl) (F G G' : MtCx I a) :
     cTerm I a c F (G + G') = cTerm I a c F G + cTerm I a c F G' := by
-  simp only [cTerm, Submodule.coe_add, Pi.add_apply, map_add, mul_add]
+  simp only [cTerm, Submodule.coe_add, Pi.add_apply, map_add (f := _), mul_add]
 
 theorem cTerm_smul_right (a : I.ι) (c : (rowS I a).Cl) (r : ℂ) (F G : MtCx I a) :
     cTerm I a c F (r • G) = r * cTerm I a c F G := by

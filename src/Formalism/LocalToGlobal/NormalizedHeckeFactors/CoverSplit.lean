@@ -1,7 +1,57 @@
-import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverAct
-import ReciprocityTheory.Automorphisms.SplitCoeAlgebraMap
-import ReciprocityTheory.Automorphisms.InstMainA
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PSplitT
+module
+
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitExEveryDatum
+public import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverAct
+public import Formalism.LocalToGlobal.GaloisLevelStructure.TiedHecke
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PSplitT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.Automorphisms.InstMainA
+import ReciprocityTheory.Automorphisms.PlaceA
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,31 +91,7 @@ theorem eq_or_eq_conjPlE (P w : PlE D.host)
     (hw : w.asIdeal.comap (algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E)) =
       P.asIdeal.comap (algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E))) :
     w = P ∨ w = conjPlE P := by
-  by_contra hne
-  push Not at hne
-  obtain ⟨h1, h2⟩ := hne
-  have nle : ∀ Q : PlE D.host, w ≠ Q → ¬ w.asIdeal ≤ Q.asIdeal := fun Q h hle =>
-    h (HeightOneSpectrum.ext (w.isMaximal.eq_of_le Q.isPrime.ne_top hle))
-  obtain ⟨a, ha, haP⟩ := Set.not_subset.mp (nle P h1)
-  obtain ⟨b, hb, hbQ⟩ := Set.not_subset.mp (nle _ h2)
-  have key : ∃ x ∈ w.asIdeal, x ∉ P.asIdeal ∧ x ∉ (conjPlE P).asIdeal := by
-    by_cases haQ : a ∈ (conjPlE P).asIdeal
-    · by_cases hbP : b ∈ P.asIdeal
-      · refine ⟨a + b, w.asIdeal.add_mem ha hb, fun h => haP ?_, fun h => hbQ ?_⟩
-        · simpa using P.asIdeal.sub_mem h hbP
-        · simpa using (conjPlE P).asIdeal.sub_mem h haQ
-      · exact ⟨b, hb, hbP, hbQ⟩
-    · exact ⟨a, ha, haP, haQ⟩
-  obtain ⟨x, hx, hxP, hxQ⟩ := key
-  rw [mem_conjPlE] at hxQ
-  have hfix : cO (x * cO x) = x * cO x := by rw [map_mul, cO_cO, mul_comm]
-  obtain ⟨y, hy⟩ := (IsCMField.ringOfIntegersComplexConj_eq_self_iff D.host.E _).1 hfix
-  have hyw : y ∈ w.asIdeal.comap (algebraMap (𝓞 (maximalRealSubfield D.host.E)) (𝓞 D.host.E)) := by
-    rw [Ideal.mem_comap, hy]; exact w.asIdeal.mul_mem_right _ hx
-  rw [hw, Ideal.mem_comap, hy] at hyw
-  rcases P.isPrime.mem_or_mem hyw with h | h
-  · exact hxP h
-  · exact hxQ h
+  apply GlobalTheory.SplitConjPlace.eq_or_eq_conjPlE <;> assumption
 
 def conjSplit (s : SplitPlace D.host.E) : SplitPlace D.host.E :=
   ⟨s.v, s.i.comp (IsCMField.complexConj D.host.E).toAlgHom⟩
@@ -149,14 +175,14 @@ def belowE (v : PlE D.host) : HeightOneSpectrum (𝓞 Fp) where
 theorem fixed_of_cO {x : 𝓞 D.host.E} (hx : cO x = x) : ∃ y : 𝓞 Fp, algebraMap (𝓞 Fp) (𝓞 D.host.E) y = x :=
   (IsCMField.ringOfIntegersComplexConj_eq_self_iff D.host.E _).1 hx
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 200000 in
+
+
 
 theorem exists_splitPlace (v : PlE D.host) (x0 : 𝓞 D.host.E) (hx0 : x0 ∈ v.asIdeal) (hc0 : cO x0 ∉ v.asIdeal) :
     ∃ s : SplitPlace D.host.E, s.v = belowE v := by
   classical
   set v₀ := belowE v
-  obtain ⟨a, ha⟩ := fixed_of_cO (x := x0 + cO x0) (by rw [map_add, cO_cO, add_comm])
+  obtain ⟨a, ha⟩ := fixed_of_cO (x := x0 + cO x0) (by rw [map_add (f := _), cO_cO, add_comm])
   obtain ⟨b, hb⟩ := fixed_of_cO (x := x0 * cO x0) (by rw [map_mul, cO_cO, mul_comm])
   have hbv : b ∈ v₀.asIdeal := by
     show algebraMap _ _ b ∈ v.asIdeal
@@ -255,21 +281,6 @@ theorem exists_splitPlace (v : PlE D.host) (x0 : 𝓞 D.host.E) (hx0 : x0 ∈ v.
   exact ⟨⟨v₀, i⟩, rfl⟩
 
 theorem splitEx_of_star (hstar : ∀ x : D.host.E, D.host.conj x = IsCMField.complexConj D.host.E x) : SplitEx D := by
-  refine splitEx_of hstar fun v₀ ⟨w, w', hne, hw, hw'⟩ => ?_
-
-  have key : ∃ x0 ∈ w.asIdeal, cO x0 ∉ w.asIdeal := by
-    rcases eq_or_eq_conjPlE w w' (hw'.trans hw.symm) with h | h
-    · exact absurd h.symm hne
-    · by_contra hall
-      push Not at hall
-      apply hne
-      rw [h]
-      ext1
-      refine le_antisymm (fun x hx => hall x hx) ?_
-      exact w.isMaximal.eq_of_le (conjPlE w).isPrime.ne_top (fun x hx => hall x hx) ▸ le_refl _
-  obtain ⟨x0, hx0, hc0⟩ := key
-  obtain ⟨s, hs⟩ := exists_splitPlace w x0 hx0 hc0
-  refine ⟨s, hs.trans ?_⟩
-  exact HeightOneSpectrum.ext hw
+  apply GlobalTheory.SplitConjPlace.splitEx_of_star <;> assumption
 
 end Formalism.L2

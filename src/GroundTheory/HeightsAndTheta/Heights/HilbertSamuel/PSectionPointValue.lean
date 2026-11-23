@@ -1,6 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionPointValue
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSectionPointValue
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -77,7 +129,7 @@ theorem val_spec {y : (Σ k, ι k) → Ω} {A : HermLine ι} {n : ℕ} {s : Ω} 
     eval z (map (Int.castRingHom ℂ) g) =
       val y A n s z * eval z (map (Int.castRingHom ℂ) h) * (A.h z : ℂ) ^ n := by
   have H := (exists_rep_at hs hz).choose_spec
-  rw [val, dif_pos ⟨hs, hz⟩]
+  rw [val, dite_eq_left ⟨hs, hz⟩]
   have hc := cross hr H.1 hz
   have h1 := H.2
   have h2 := metric_ne (A := A) hz n
@@ -105,7 +157,7 @@ theorem rep_add {y : (Σ k, ι k) → Ω} {a : K → ℤ} {n : ℕ} {s t : Ω} {
   · simp only [Pi.add_apply]
     push_cast
     linear_combination hd₁ k
-  · rw [map_add, map_mul, map_mul, map_mul, hy₁, hy₂]
+  · rw [map_add (f := _), map_mul, map_mul, map_mul, hy₁, hy₂]
     ring
 
 theorem rep_mul {y : (Σ k, ι k) → Ω} {a : K → ℤ} {n m : ℕ} {s t : Ω} {g₁ h₁ g₂ h₂ : MRing ι}
@@ -130,7 +182,7 @@ def w (y : (Σ k, ι k) → Ω) (A : HermLine ι) (n : ℕ) : chartLat y A.a n �
       have hT := metric_ne (A := A) hz n
       rw [AddSubgroup.coe_add, val_eq (add_mem s.2 t.2) hz (rep_add r₁ r₂) (by simpa using mul_ne_zero n₁ n₂),
         val_eq s.2 hz r₁ n₁, val_eq t.2 hz r₂ n₂]
-      simp only [map_add, map_mul]
+      simp only [map_add (f := _), map_mul]
       field_simp
     · simp [val, hz]
 
@@ -143,7 +195,7 @@ theorem val_continuousOn {y : (Σ k, ι k) → Ω} {A : HermLine ι}
     fun f => MvPolynomial.continuous_eval _
   have hAc : ContinuousWithinAt (fun z => (A.h z : ℂ) ^ n) (mcPts (mCoordIdeal y)) z₀ :=
     (Complex.continuous_ofReal.continuousAt.comp_continuousWithinAt
-      ((hA z₀ hz₀.1).mono fun z hz => hz.1)).pow n
+      ((hA z₀ hz₀.1).mono fun z (hz : z ∈ mcPts (mCoordIdeal y)) => hz.1)).pow n
   have hF : ContinuousWithinAt (fun z => eval z (map (Int.castRingHom ℂ) g) /
       (eval z (map (Int.castRingHom ℂ) h) * (A.h z : ℂ) ^ n)) (mcPts (mCoordIdeal y)) z₀ :=
     (hcont g).continuousWithinAt.div ((hcont h).continuousWithinAt.mul hAc)
@@ -227,8 +279,8 @@ theorem common_denom {y : (Σ k, ι k) → Ω} {a : K → ℤ} {n r : ℕ} (hrel
 
 end SectionPointValue
 
-open SectionPointValue in
 
+open SectionPointValue in
 theorem SectionPointValue.proof : SectionPointValue.Statement := by
   intro K _ ι _ Ω _ y A hrel hA
   refine ⟨fun n => w y A n, fun n s => val_continuousOn hA s.2, ?_, ?_, ?_, ?_⟩

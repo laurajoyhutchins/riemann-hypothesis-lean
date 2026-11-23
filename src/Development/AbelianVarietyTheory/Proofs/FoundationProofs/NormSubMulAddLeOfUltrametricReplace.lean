@@ -1,15 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.ShCocOn
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsLocallyConstantCycMod
-import Development.AbelianVarietyTheory.Definitions.Foundations.IwSys2
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnramifiedCocycleKillsRoots
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LocalConditionsIndependentOfPlaceOver
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsPlaceOverRat
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RatUnramToIntUnram
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TameOfShCoc
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GlobOfShapiroSystem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TameClassLimitOfNormCompatibleShapiroSystemStatement
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TameShapiroSystemLimitUnramifiedAwayFromLStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ShCocOn
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsLocallyConstantCycMod
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IwSys2
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.AlgebraMapPadicIntQbarContinuous
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsPlaceOverRat
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GlobOfShapiroSystem
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsCocycleOfPadicLimitOfApproxCocyclesStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KummerScalarLayerLinkOfShapiroSpecializationApprStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LocalConditionsIndependentOfPlaceOver
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RatUnramToIntUnram
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SpecApproxCocycle
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SpecCauchy
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TameClassLimitOfNormCompatibleShapiroSystemStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TameOfShCoc
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TameShapiroSystemLimitUnramifiedAwayFromLStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnramifiedAwayFromLOfTwistedShapiroLimitStatement
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnramifiedCocycleKillsRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.HV GlobalTheory.Ord2 GlobalTheory.KZ GlobalTheory.KA
 open scoped Matrix
@@ -18,8 +62,8 @@ noncomputable section
 
 namespace GlobalTheory.KZ
 
-open GlobalTheory.KZGlobAsm in
 
+open GlobalTheory.KZGlobAsm in
 theorem glob_of_shapiro_system_noLayer (l : ℕ) [Fact l.Prime] (Ω : Type) [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω]
     (W : R2 Ω l) (c : Coef l) (A : ValuationSubring Ω) (e : ℕ) (χ : ∀ r : ℕ, (ZMod (l ^ r))ˣ → Qbar l)
     (θ : G ℚ Ω →* (Qbar l)ˣ) (ρ : G ℚ Ω → Matrix (Fin 2) (Fin 2) (Qbar l))
@@ -63,7 +107,7 @@ theorem glob_of_shapiro_system_noLayer (l : ℕ) [Fact l.Prime] (Ω : Type) [Fie
   have hac : ∀ r i, Continuous fun s => a r s i := by
     intro r i
     simp only [haE]
-    exact continuous_finset_sum _ fun x _ => continuous_const.mul (hYc r x i)
+    exact continuous_finsetSum _ fun x _ => continuous_const.mul (hYc r x i)
   have hyc : Continuous y := by
     refine continuous_pi fun i => ?_
     refine TendstoUniformly.continuous (F := fun r s => a r s i) (p := Filter.atTop) ?_

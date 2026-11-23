@@ -1,7 +1,51 @@
-import Development.WeilBound.CoreStatements.VolumeEquality.RootBranches
-import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsAlg
-import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsPoint
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+module
+
+public import Development.WeilBound.CoreStatements.VolumeEquality.RootBranches
+public import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsAlg
+public import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsForm
+public import Development.WeilBound.CoreStatements.VolumeEquality.ChartMeetsPoint
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +60,7 @@ theorem trdeg_of_arithVar {K : Type} [Fintype K] {J : K → Type} [∀ k, Fintyp
   obtain ⟨_, ⟨hP, _, _⟩, hhor, hdim⟩ := h
   haveI := hP
   have hinj : Function.Injective (algebraMap ℤ (MRing J ⧸ P)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     have hmem : (MvPolynomial.C a : MRing J) ∈ P := by
       rw [← Ideal.Quotient.eq_zero_iff_mem]
@@ -34,7 +78,7 @@ theorem trdeg_of_arithVar {K : Type} [Fintype K] {J : K → Type} [∀ k, Fintyp
     exact_mod_cast hdim
   have h3 : Cardinal.toENat (Algebra.trdeg ℤ (MRing J ⧸ P)) = ((n + Fintype.card K : ℕ) : ℕ∞) :=
     WithTop.add_right_cancel ENat.one_ne_top h4
-  exact Cardinal.toENat_eq_nat.1 h3
+  exact Cardinal.toENat_eq_natCast.1 h3
 
 theorem chartMeets : ChartMeets := by
   intro X Ω _ _ ξ K _ J _ y n Bd χ U htie hspec harith hU
@@ -75,7 +119,7 @@ theorem chartMeets : ChartMeets := by
         exact Ideal.subset_span hs
       rw [hscale c w s a ha, hconv, hw.2 s hsP, mul_zero]
     | zero => simp
-    | add f₁ f₂ _ _ h₁ h₂ => rw [map_add, h₁, h₂, add_zero]
+    | add f₁ f₂ _ _ h₁ h₂ => rw [map_add (f := _), h₁, h₂, add_zero]
     | smul r f₁ _ h₁ => rw [smul_eq_mul, map_mul, h₁, mul_zero]
   obtain ⟨g, hg, hgU⟩ := SheetDecomposition.ChartForm.exists_form htie U hU
   have h0b : (0 : Fin n → ℂ) ∈ Metric.ball (0 : Fin n → ℂ) 1 := Metric.mem_ball_self one_pos
@@ -110,7 +154,7 @@ theorem chartMeets : ChartMeets := by
     refine (h1.mul h2).congr_fderiv (ContinuousLinearMap.ext fun v => ?_)
     simp [L] <;> ring
   have hinjL : Function.Injective L := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨v, d⟩ h0
     have hcomp : ∀ p : (k : K) × J k, D v p + χ.γ 0 p * d p.1 = 0 := by
       intro p

@@ -1,8 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedVectorEqOfStandardData
-import Formalism.SharpRestriction.Divisibility.StatementFT.PeriodPointConditions
-import Formalism.SharpRestriction.GlobalSchurBounds.ProductFirstZerothParts
-import Formalism.LocalToGlobal.KernelLattices.InterlaceAll
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.InterlaceAll
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.LatAtLattice
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwSymAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -73,9 +109,6 @@ variable {B : Base} {X : PreX B.toPre} (I : TC B X) (l : I.Laws)
 def RowVal (u : B.Word) (a : I.ι) (G : (I.per l u a).Mt) : Prop :=
   ∀ c : (I.stX a).Cl, ∃ y ∈ nabAt B.fields.emb B.wts.sgTrue ((I.stX a).rep c).1.1.deco.1.N,
     (I.perIn u a).rd B.fields.emb B.embLL G c = MvPolynomial.map B.embLL y.1
-
-theorem rowVal_zero (u : B.Word) (a : I.ι) : RowVal I l u a 0 := fun c => ⟨0, Submodule.zero_mem _, by
-  rw [map_zero]; exact (map_zero _).symm⟩
 
 structure RowInt (Z : TC.Later B (I.cols l)) : Prop where
   ref : ∀ u, ∀ F ∈ ((I.rec7 l Z).what₂.Mtilde (I.rec7 l Z).what₂.mu0).carrier, RowVal I l u I.mu0 (((I.rec7 l Z).eMt u).symm F)

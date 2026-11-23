@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsFactorisationCuspidal
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.FlathTensorProduct
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.UnitaryIrreducibleAdmissible
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RepresentationTheory.Invariants
+public import Mathlib.RepresentationTheory.Irreducible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,6 +84,7 @@ theorem card_ne (N : Subgroup H) [Fintype (H ⧸ N)] : (Fintype.card (H ⧸ N) :
 
 theorem apply_mean (τ : Representation ℂ H V) (N : Subgroup H) [Fintype (H ⧸ N)] {v : V}
     (hv : ∀ n ∈ N, τ n v = v) (k : H) : τ k (mean τ N v) = mean τ N v := by
+
   rw [mean_apply, map_smul, map_sum]
   congr 1
   have := sum_out_comp N (fun x => τ x v) (fun x n hn => by simp [hv n hn]) (fun x => k * x)
@@ -85,7 +134,7 @@ theorem exists_projector (τ : Representation ℂ H V)
         obtain ⟨N, h1, h2, h3⟩ := hx
         obtain ⟨N', h1', h2', h3'⟩ := hy
         refine ⟨N ⊓ N', inferInstance, inferInstance, fun M hM hn _ => ?_⟩
-        rw [map_add, h3 M (hM.trans inf_le_left) hn, h3' M (hM.trans inf_le_right) hn, add_zero]
+        rw [map_add (f := _), h3 M (hM.trans inf_le_left) hn, h3' M (hM.trans inf_le_right) hn, add_zero]
       | smul c x _ hx =>
         obtain ⟨N, h1, h2, h3⟩ := hx
         exact ⟨N, h1, h2, fun M hM hn _ => by rw [map_smul, h3 M hM hn, smul_zero]⟩
@@ -179,6 +228,7 @@ theorem hecke_comm (K : Subgroup G) (θ : G → G) (hmul : ∀ x y, θ (x * y) =
   obtain ⟨a, ha, b, hb, hh⟩ := hdc h
   obtain ⟨c, hc, d, hd, hg⟩ := hdc g
   rw [hm N (ρ h v) (fun n hn => p2 n hn.1.2), hm N (ρ g v) (fun n hn => p1 n hn.1.1), mean_apply, mean_apply]
+
   simp only [map_smul, map_sum]
   congr 1
   have := sum_out_comp N (fun k : K => e (ρ h (ρ k (ρ g v))))

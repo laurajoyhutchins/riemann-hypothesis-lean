@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsotypicOfJointlyInjectiveIntoIsotypic
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RepresentationTheory.Irreducible
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsotypicOfJointlyInjectiveIntoIsotypic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.CuspRep
 
 private def eqv {Γ X Y : Type} [Group Γ] [AddCommGroup X] [Module ℂ X] [AddCommGroup Y] [Module ℂ Y]
@@ -8,7 +56,7 @@ private def eqv {Γ X Y : Type} [Group Γ] [AddCommGroup X] [Module ℂ X] [AddC
   carrier := {f | ∀ g v, f (σ g v) = ρ g (f v)}
   add_mem' := by
     intro a b ha hb g v
-    simp only [LinearMap.add_apply, map_add, ha g v, hb g v]
+    simp only [LinearMap.add_apply, map_add (f := _), ha g v, hb g v]
   zero_mem' := by intro g v; simp
   smul_mem' := by
     intro c a ha g v
@@ -36,13 +84,13 @@ private theorem multi_fin (n : ℕ) : ∀ (Γ : Fin n → Type) [∀ i, Group (�
     ∀ (Y : Type) [AddCommGroup Y] [Module ℂ Y] [Nontrivial Y] (ρ : ∀ i, Representation ℂ (Γ i) Y),
     (∀ i j, i ≠ j → ∀ a b y, ρ i a (ρ j b y) = ρ j b (ρ i a y)) →
     (∀ i, (⨆ f : {f : X i →ₗ[ℂ] Y // ∀ g v, f (σ i g v) = ρ i g (f v)}, LinearMap.range f.1) = ⊤) →
-    ∃ μ : MultilinearMap ℂ X Y, μ ≠ 0 ∧
+    ∃ μ : MultilinearMap (RingHom.id ℂ) X Y, μ ≠ 0 ∧
       ∀ i g (x : ∀ i, X i), μ (Function.update x i (σ i g (x i))) = ρ i g (μ x) := by
   induction n with
   | zero =>
     intro Γ _ X _ _ _ σ _ Y _ _ _ ρ _ _
     obtain ⟨y, hy⟩ := exists_ne (0 : Y)
-    refine ⟨MultilinearMap.constOfIsEmpty ℂ X y, fun h => hy ?_, fun i => i.elim0⟩
+    refine ⟨MultilinearMap.constOfIsEmpty (RingHom.id ℂ) X y, fun h => hy ?_, fun i => i.elim0⟩
     simpa using DFunLike.congr_fun h 0
   | succ n ih =>
     intro Γ _ X _ _ _ σ hσ Y _ _ _ ρ hc hiso
@@ -86,7 +134,7 @@ private theorem multi_fin (n : ℕ) : ∀ (Γ : Fin n → Type) [∀ i, Group (�
         exact congrArg (fun f : eqv (σ (Fin.last n)) (ρ (Fin.last n)) => f.1 (x (Fin.last n))) this
 
 theorem UpperTheory.exists_multilinear_intertwiner_of_commuting_subgroups :
-    ∀ (G I : Type) [Group G] [Finite I] [DecidableEq I] (H : I → Subgroup G), (∀ i j, i ≠ j → ∀ a ∈ H i, ∀ b ∈ H j, a * b = b * a) → ∀ (X : I → Type) [∀ i, AddCommGroup (X i)] [∀ i, Module ℂ (X i)] [∀ i, FiniteDimensional ℂ (X i)] (σ : ∀ i, Representation ℂ (H i) (X i)), (∀ i, (σ i).IsIrreducible) → ∀ (Y : Type) [AddCommGroup Y] [Module ℂ Y] [Nontrivial Y] (ρ : Representation ℂ G Y), (∀ i, (⨆ f : {f : X i →ₗ[ℂ] Y // ∀ (g : H i) v, f (σ i g v) = ρ g (f v)}, LinearMap.range f.1) = ⊤) → ∃ μ : MultilinearMap ℂ X Y, μ ≠ 0 ∧ ∀ i (g : H i) (x : ∀ i, X i), μ (Function.update x i (σ i g (x i))) = ρ g (μ x) := by
+    ∀ (G I : Type) [Group G] [Finite I] [DecidableEq I] (H : I → Subgroup G), (∀ i j, i ≠ j → ∀ a ∈ H i, ∀ b ∈ H j, a * b = b * a) → ∀ (X : I → Type) [∀ i, AddCommGroup (X i)] [∀ i, Module ℂ (X i)] [∀ i, FiniteDimensional ℂ (X i)] (σ : ∀ i, Representation ℂ (H i) (X i)), (∀ i, (σ i).IsIrreducible) → ∀ (Y : Type) [AddCommGroup Y] [Module ℂ Y] [Nontrivial Y] (ρ : Representation ℂ G Y), (∀ i, (⨆ f : {f : X i →ₗ[ℂ] Y // ∀ (g : H i) v, f (σ i g v) = ρ g (f v)}, LinearMap.range f.1) = ⊤) → ∃ μ : MultilinearMap (RingHom.id ℂ) X Y, μ ≠ 0 ∧ ∀ i (g : H i) (x : ∀ i, X i), μ (Function.update x i (σ i g (x i))) = ρ g (μ x) := by
   intro G I _ _ _ H hH X _ _ _ σ hσ Y _ _ _ ρ hiso
   obtain ⟨n, ⟨e⟩⟩ := Finite.exists_equiv_fin I
   obtain ⟨μ, hμ, hμe⟩ := multi_fin n (fun k => H (e.symm k)) (fun k => X (e.symm k))
@@ -96,7 +144,7 @@ theorem UpperTheory.exists_multilinear_intertwiner_of_commuting_subgroups :
       rw [← Module.End.mul_apply, ← map_mul, hH _ _ (fun h => hij (e.symm.injective h)) _ a.2 _ b.2,
         map_mul, Module.End.mul_apply])
     (fun k => hiso _)
-  refine ⟨(MultilinearMap.domDomCongrLinearEquiv' ℂ ℂ X Y e).symm μ,
+  refine ⟨(MultilinearMap.domDomCongrLinearEquiv' ℂ (RingHom.id ℂ) X Y e).symm μ,
     fun h => hμ ((LinearEquiv.map_eq_zero_iff _).1 h), fun i => ?_⟩
   obtain ⟨k, rfl⟩ := e.symm.surjective i
   intro g x

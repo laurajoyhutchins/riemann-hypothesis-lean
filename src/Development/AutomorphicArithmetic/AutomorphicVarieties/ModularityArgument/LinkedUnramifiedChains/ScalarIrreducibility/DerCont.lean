@@ -1,6 +1,58 @@
+module
+
+public import Mathlib
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.LeAdicClosure
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.FiniteResidue
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.ScalarIrreducibility.NormLeOneOfInt
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSpanModSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.FlipTwoThree
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.RedDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.LinkedUnramifiedChains.ScalarIrreducibility.NormLeOneOfInt
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSpanModSq
+
+@[expose] public section
 
 open NumberField Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.GalOfCusp IsLocalRing UpperTheory.V UpperTheory.V.HV UpperTheory.V.U3 UpperTheory.V.Base UpperTheory.V.Af UpperTheory.V.Pr UpperTheory.V.Alg UpperTheory.V.J
 
@@ -80,7 +132,7 @@ private theorem derCont_abs [IsLocalRing O] [Finite (ResidueField O)] [IsLocalRi
     intro x hx
     rw [pow_two] at hx
     refine Submodule.mul_induction_on hx (fun f hf g hg => ?_)
-      (fun a b ha hb => by rw [map_add, ha, hb, add_zero])
+      (fun a b ha hb => by rw [map_add (f := _), ha, hb, add_zero])
     have hf' : y f = 0 := RingHom.mem_ker.1 hf
     have hg' : y g = 0 := RingHom.mem_ker.1 hg
     rw [hD, hf', hg']
@@ -98,6 +150,7 @@ private theorem derCont_abs [IsLocalRing O] [Finite (ResidueField O)] [IsLocalRi
       rwa [map_sub, sub_eq_zero] at this
     rw [e0]
     obtain ⟨f, rfl⟩ := Submodule.mem_span_finset'.1 hb₀
+
     rw [map_sum, ← Finset.sum_coe_sort s]
     refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun e _ => ?_)
     rw [map_smul, Algebra.smul_def, norm_mul]
@@ -125,10 +178,10 @@ private theorem derCont_abs [IsLocalRing O] [Finite (ResidueField O)] [IsLocalRi
   have e1 : b * algebraMap O R p ^ n = p ^ n • b := by
     rw [Algebra.smul_def, map_pow, mul_comm]
   constructor
-  · rw [map_add, hDq c hc, add_zero, e1, map_smul, Algebra.smul_def, norm_mul, map_pow, norm_pow, ← hyp]
+  · rw [map_add (f := _), hDq c hc, add_zero, e1, map_smul, Algebra.smul_def, norm_mul, map_pow, norm_pow, ← hyp]
     have := mul_le_mul_of_nonneg_left (hbd b) hρ0
     nlinarith
-  · rw [map_add, hyq c hc, add_zero, map_mul, norm_mul, map_pow, norm_pow]
+  · rw [map_add (f := _), hyq c hc, add_zero, map_mul, norm_mul, map_pow, norm_pow]
     have := mul_le_mul (hle b) (le_refl (‖y (algebraMap O R p)‖ ^ n)) hρ0 zero_le_one
     nlinarith
 

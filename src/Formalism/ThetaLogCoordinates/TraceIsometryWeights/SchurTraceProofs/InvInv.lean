@@ -1,4 +1,57 @@
-import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementA
+module
+
+public import Formalism.ThetaLogCoordinates.TraceIsometryWeights.StatementA
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.InvariantFactorPaths.PW
 
@@ -15,11 +68,13 @@ theorem Om_nat (E : ι → ι → Module.End K W) (E' : ι → ι → Module.End
   | zero => intro x; simp [Om]
   | succ q ih =>
     intro x
+
     simp only [Om, LinearMap.sum_apply, map_sum, Module.End.mul_apply, ih, h]
 
 theorem Pstep_nat (E : ι → ι → Module.End K W) (E' : ι → ι → Module.End K W') (θ : W →ₗ[K] W')
     (h : ∀ a b x, θ (E a b x) = E' a b (θ x)) (S : Finset ι) (z : ι) (l : ℕ) (x : W) :
     θ (Pstep E S z l x) = Pstep E' S z l (θ x) := by
+
   simp only [Pstep, LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, Om_nat E E' θ h]
 
 theorem invariant_natural_holds : InvNat := by
@@ -323,7 +378,7 @@ theorem E_Pstep_apply [CharZero K] (h : GlRel E) {S : Finset ι} {z j : ι} (hz 
     simp [Om, cc_zero]
   | succ n ih =>
     rw [Pstep_eq, Finset.sum_range_succ, ← Pstep_eq]
-    simp only [LinearMap.add_apply, map_add, ih, LinearMap.smul_apply, map_smul,
+    simp only [LinearMap.add_apply, map_add (f := _), ih, LinearMap.smul_apply, map_smul,
       E_Om_apply h hz hj hS hzz n]
     rw [eq_neg_of_add_eq_zero_left (cc_rec (K := K) S.card n)]
     module

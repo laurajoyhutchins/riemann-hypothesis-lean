@@ -1,12 +1,65 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComparisonIsFiltered
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDataComparison
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedIsCrysAndJumpEqZero
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NonemptyThetaDeRhamFilZeroConcretePeriod
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.MatrixExtendByZeroApply
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.MemIK
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsCrysOfInertia
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.MatrixExtendByZeroApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.WtMatFix
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnramifiedIsCrysAndJumpEqZero
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PeriodDataComparison
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamComparisonIsFiltered
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.WtMatFix
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormSubLtOneOfFix
+
+@[expose] public section
+
 open Formalism.WeaklyAdmissibleFiltrations Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc ReciprocityTheory.Gal TensorProduct Module UpperTheory.V.Loc Topology
 
 private theorem exists_int_basis {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [TopologicalSpace G] [CompactSpace G]
@@ -43,8 +96,9 @@ private theorem exists_int_basis {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [
     rw [h2]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
   haveI : Submodule.IsLattice ℚ_[l] Λ :=
-    { fg := (Submodule.fg_span (Set.finite_range _)).of_le hle
-      span_eq_top := by
+    Submodule.IsLattice.of_fg ℚ_[l] ((Submodule.fg_span (Set.finite_range _)).of_le hle)
+  haveI : Submodule.IsFullLattice ℚ_[l] Λ :=
+    { span_eq_top := by
         rw [eq_top_iff, ← e₀.span_eq]
         refine Submodule.span_mono ?_
         rintro _ ⟨i, rfl⟩
@@ -59,20 +113,25 @@ private theorem exists_int_basis {l : ℕ} [Fact l.Prime] {G : Type} [Group G] [
       obtain ⟨⟨h, j⟩, rfl⟩ := hx
       exact Submodule.subset_span ⟨(g * h, j), by simp⟩
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add]; exact Λ.add_mem hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Λ.add_mem hx hy
     | smul a x _ hx => rw [LinearMap.map_smul_of_tower]; exact Λ.smul_mem a hx
-  refine ⟨_, b.extendOfIsLattice ℚ_[l], fun g i j => ?_⟩
-  have h1 : ρ g (b.extendOfIsLattice ℚ_[l] j) =
-      ∑ k, ((b.repr ⟨_, hst g _ (b j).2⟩ k : ℤ_[l]) : ℚ_[l]) • b.extendOfIsLattice ℚ_[l] k := by
+  refine ⟨_, b.extendOfIsFullLattice ℚ_[l], fun g i j => ?_⟩
+  have h1 : ρ g (b.extendOfIsFullLattice ℚ_[l] j) =
+      ∑ k, ((b.repr ⟨_, hst g _ (b j).2⟩ k : ℤ_[l]) : ℚ_[l]) • b.extendOfIsFullLattice ℚ_[l] k := by
     have := congrArg Λ.subtype (b.sum_repr ⟨_, hst g _ (b j).2⟩)
+
     rw [map_sum] at this
-    simp only [Basis.extendOfIsLattice_apply]
-    exact this.symm
+    convert this.symm using 1
+    · rw [Basis.extendOfIsFullLattice_apply]; rfl
+    · apply Finset.sum_congr rfl
+      intro k hk
+      rw [Basis.extendOfIsFullLattice_apply]
+      rfl
   rw [h1, Basis.repr_sum_self]
   exact PadicInt.norm_le_one _
 
-open GlobalTheory.UnramifiedRep GlobalTheory.UnramifiedCrys GlobalTheory.Cyc in
 
+open GlobalTheory.UnramifiedRep GlobalTheory.UnramifiedCrys GlobalTheory.Cyc in
 private theorem exists_split {l : ℕ} [Fact l.Prime] (P : LocPrime l) (AI : LocAinf l P) (Ti : LocTied l P AI)
     (K : FinExt l) {V : Type} [AddCommGroup V] [Module ℚ_[l] V] [FiniteDimensional ℚ_[l] V] [TopologicalSpace V]
     [IsModuleTopology ℚ_[l] V] (ρ : Representation ℚ_[l] ↥(GK K) V) (hcont : ∀ x, Continuous fun g => ρ g x)
@@ -94,7 +153,6 @@ private theorem exists_split {l : ℕ} [Fact l.Prime] (P : LocPrime l) (AI : Loc
         norm_sub_lt_one_of_fix AI g (fun m hm y hy => hg m hm y hy) x hx)
       rw [← map_one M]
       ext i j
-      apply PadicInt.ext
       rw [hM, hM, h, map_one, Module.End.one_apply])
   have hB : ∀ g, (Matrix.of fun i j => algebraMap ℚ_[l] P.R.B (e.repr (ρ g (e j)) i)) *
       (AI.ιA.mapMatrix W).map ((P.PD K).actB g) = AI.ιA.mapMatrix W := fun g => by
@@ -239,7 +297,7 @@ private theorem map_mem_FilT {V V' : Type} [AddCommGroup V] [Module ℚ_[l] V] [
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => exact ⟨f v ⊗ₜ ⟨s b.1, hs _ b.2⟩, rfl⟩
-  | add x y hx hy => rw [map_add, map_add]; exact Submodule.add_mem _ hx hy
+  | add x y hx hy => simp only [map_add]; exact Submodule.add_mem _ hx hy
 
 private theorem act_mem_fil (g : GQ l) (a : ℤ) (b : Bdr l) (hb : b ∈ ((PP l).PD (botExt l)).Fil a) :
     (PP l).actQdR g b ∈ ((PP l).PD (botExt l)).Fil a := by
@@ -275,7 +333,7 @@ private theorem fst_act (c : G → V) (hc : ∀ g h, c (g * h) = c g + ρ g (c h
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [UpperTheory.V.Loc.actD, extRep_apply, add_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]; abel
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]; abel
 
 private theorem snd_act (c : G → V) (hc : ∀ g h, c (g * h) = c g + ρ g (c h)) (g : G)
     (z : (V × ℚ_[l]) ⊗[ℚ_[l]] Bdr l) :
@@ -285,7 +343,7 @@ private theorem snd_act (c : G → V) (hc : ∀ g h, c (g * h) = c g + ρ g (c h
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [UpperTheory.V.Loc.actD, extRep_apply]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 private theorem decomp (z : (V × ℚ_[l]) ⊗[ℚ_[l]] Bdr l) :
     z = TensorProduct.map (LinearMap.inl ℚ_[l] V ℚ_[l]) LinearMap.id
@@ -296,7 +354,7 @@ private theorem decomp (z : (V × ℚ_[l]) ⊗[ℚ_[l]] Bdr l) :
   | zero => simp
   | tmul v b => simp [← add_tmul]
   | add x y hx hy =>
-    simp only [map_add]
+    simp only [map_add (f := _)]
     conv_lhs => rw [hx, hy]
     abel
 

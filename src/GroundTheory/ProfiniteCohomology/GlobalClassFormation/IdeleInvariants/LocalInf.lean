@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleInvariants.BrauerInvZOfIsSepClosureIdelesLocalResIdelesResF
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleRestriction.ExistsInfIdelesLocalResIdelesResFieldEqZeroOfInf
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleInvariants.Transport
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleRestriction.IsDiscreteRepResGlobalDecompLimitRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -9,13 +53,12 @@ open CategoryTheory NumberField IntermediateField GroundTheory.Global FiniteSubf
 
 open scoped NumberField.LiesOver
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
 
-variable {K E : FiniteSubfield} [Fact (K ≤ E)]
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
-set_option maxHeartbeats 4000000 in
+variable {K E : GroundTheory.Global.FiniteSubfield} [Fact (K ≤ E)]
+
 
 theorem quadraticInv_infIdelesLocalRes_idelesResField_of_finrank_eq_one {v : InfinitePlace K.1}
     (ι : ℚ̄ →ₐ[K.1] AlgebraicClosure v.Completion)
@@ -81,7 +124,11 @@ theorem quadraticInv_infIdelesLocalRes_idelesResField_of_finrank_eq_one {v : Inf
     refine key.trans ?_
     rw [unitsScalarsRes, cohomologyMapAlong_comp]
     rfl
-  rw [infIdelesLocalRes_eq_of_algHom ιE0 ιE, key']
+  refine (congrArg (quadraticInv (infPlaceOfEmbedding ι E : InfinitePlace E.1).Completion
+    (AlgebraicClosure (infPlaceOfEmbedding ι E : InfinitePlace E.1).Completion)
+    (infAlgClosure_finrank_le_two _) (infAlgClosure_mul_mem_range_norm _))
+    ((congrArg (fun f => f.hom ((idelesResField K E 2).hom y))
+      (infIdelesLocalRes_eq_of_algHom ιE0 ιE 2)).trans key')).trans ?_
 
   have hbot := Subalgebra.bot_eq_top_of_finrank_eq_one h1
   have hfix : ∀ (σ : Gal(AlgebraicClosure v.Completion / v.Completion))
@@ -128,7 +175,9 @@ theorem quadraticInv_infIdelesLocalRes_idelesResField_of_finrank_eq_one {v : Inf
       intro x hx
       have hT : ∀ i, ψ σ (b i : AlgebraicClosure (infPlaceOfEmbedding ι E : InfinitePlace E.1).Completion) =
           b i := fun i => by
-        rw [hψ_apply, hσ _ (IntermediateField.subset_adjoin v.Completion T ⟨i, rfl⟩), AlgEquiv.symm_apply_apply]
+        change θ.symm (σ (θ (b i : AlgebraicClosure (infPlaceOfEmbedding ι E : InfinitePlace E.1).Completion))) = _
+        exact (congrArg θ.symm (hσ _ (IntermediateField.subset_adjoin v.Completion T ⟨i, rfl⟩))).trans
+          (θ.symm_apply_apply _)
       have hlin : (ψ σ).toAlgHom.toLinearMap ∘ₗ M.val.toLinearMap = M.val.toLinearMap :=
         b.ext fun i => hT i
       exact LinearMap.congr_fun hlin ⟨x, hx⟩

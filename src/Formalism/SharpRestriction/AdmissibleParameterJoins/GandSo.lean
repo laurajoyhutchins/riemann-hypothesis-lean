@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Algebra.Rat
+public import Mathlib.RingTheory.PowerSeries.Exp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Nat.Choose.Cast
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,7 +66,6 @@ private theorem powerSeries_hasSubst_of_constantCoeff_eq_zero {τ : Type} {f : M
     PowerSeries.HasSubst f := by
   first
   | exact PowerSeries.HasSubst.of_constantCoeff_zero hf
-  | (show IsNilpotent _; rw [hf]; exact IsNilpotent.zero)
 
 private theorem coeff_diagS [DecidableEq ι] (a : PowerSeries R) (i : ι) (e : ι →₀ ℕ) :
     coeff e (diagS a i : MvPowerSeries ι R) =
@@ -29,7 +78,6 @@ private theorem coeff_diagS [DecidableEq ι] (a : PowerSeries R) (i : ι) (e : �
     intro d
     first
     | (rw [MvPowerSeries.coeff_X_pow, smul_eq_mul]; split_ifs <;> simp)
-    | (rw [MvPowerSeries.X_pow_eq, MvPowerSeries.coeff_monomial, smul_eq_mul]; split_ifs <;> simp)
   simp_rw [hterm]
   rw [finsum_eq_single _ (e i)]
   intro d hd
@@ -50,27 +98,23 @@ theorem cc_dg {a : PowerSeries R} (ha : PowerSeries.constantCoeff a = 0) (i : ι
   exact coeff_diagS_eq_zero_of_apply_eq_zero ha i 0 (by simp)
 
 theorem hs_dg {a : PowerSeries R} (ha : PowerSeries.constantCoeff a = 0) :
-    HasSubst (diagS a : ι → MvPowerSeries ι R) where
-  const_coeff s := by rw [cc_dg ha]; exact IsNilpotent.zero
-  coeff_zero d := by
+    HasSubst (diagS a : ι → MvPowerSeries ι R) := by
+  constructor
+  · intro s
+    rw [cc_dg ha]
+    exact IsNilpotent.zero
+  · intro d
     classical
     refine (d.support.finite_toSet).subset ?_
     intro s hs
-    simp only [Set.mem_setOf_eq] at hs
-    unfold diagS at hs
-    rw [PowerSeries.coeff_subst_single] at hs
+    change coeff d (diagS a s) ≠ 0 at hs
     by_contra hns
-    have h0 : d s = 0 := by simpa using hns
-    split_ifs at hs with h1
-    · rw [h0] at hs
-      exact hs (by rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, ha])
-    · exact hs rfl
+    exact hs (coeff_diagS_eq_zero_of_apply_eq_zero ha s d (by simpa using hns))
 
 private theorem hasSubst_of_finite_constantCoeff_eq_zero {σ τ : Type} [Finite σ] {c : σ → MvPowerSeries τ R}
     (hc : ∀ s, constantCoeff (c s) = 0) : HasSubst c := by
   first
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hc
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hc
 
 theorem subst_psubst {c : ι → MvPowerSeries κ R} (hc : HasSubst c) {f : MvPowerSeries ι R}
     (hf : constantCoeff f = 0) (a : PowerSeries R) :
@@ -78,7 +122,6 @@ theorem subst_psubst {c : ι → MvPowerSeries κ R} (hc : HasSubst c) {f : MvPo
   have hf' : HasSubst (fun _ : Unit => f) := hasSubst_of_finite_constantCoeff_eq_zero (fun _ => hf)
   first
   | exact MvPowerSeries.subst_comp_subst_apply hf' hc a
-  | (rw [PowerSeries.subst, PowerSeries.subst, MvPowerSeries.subst_comp_subst_apply hf' hc])
 
 theorem dg_comp {a b : PowerSeries R} (hb : PowerSeries.constantCoeff b = 0) (i : ι) :
     subst (diagS b) (diagS a i : MvPowerSeries ι R) = diagS (PowerSeries.subst b a) i := by
@@ -104,19 +147,6 @@ theorem map_dg (h : R →+* S) (a : PowerSeries R) (i : ι) :
   · rw [PowerSeries.coeff_map]
   · exact map_zero h
 
-theorem dg_X (i : ι) : (diagS (PowerSeries.X : PowerSeries R) i : MvPowerSeries ι R) = X i := by
-  classical
-  ext e
-  rw [coeff_diagS, MvPowerSeries.coeff_X, PowerSeries.coeff_X]
-  by_cases h3 : e = Finsupp.single i 1
-  · subst h3
-    simp
-  · rw [if_neg h3]
-    split_ifs with h1 h2
-    · exact absurd (h1.trans (congrArg (Finsupp.single i) h2)) h3
-    · rfl
-    · rfl
-
 private theorem diagS_unit (a : PowerSeries R) :
     (diagS a () : MvPowerSeries Unit R) = (a : MvPowerSeries Unit R) := by
   refine MvPowerSeries.ext fun e => ?_
@@ -133,8 +163,6 @@ private theorem constantCoeff_powerSeries_subst_eq_zero_admissible_parameter_joi
   obtain ⟨b, rfl⟩ := PowerSeries.X_dvd_iff.mpr ha
   first
   | rw [PowerSeries.subst_mul (powerSeries_hasSubst_of_constantCoeff_eq_zero hf), PowerSeries.subst_X (powerSeries_hasSubst_of_constantCoeff_eq_zero hf), map_mul, hf, zero_mul]
-  | rw [← PowerSeries.coe_substAlgHom (powerSeries_hasSubst_of_constantCoeff_eq_zero hf), map_mul, PowerSeries.coe_substAlgHom,
-      PowerSeries.subst_X (powerSeries_hasSubst_of_constantCoeff_eq_zero hf), map_mul, hf, zero_mul]
 
 theorem coeff_pow_zero {f : MvPowerSeries ι R} (hf : constantCoeff f = 0) :
     ∀ (d : ℕ) (n : ι →₀ ℕ), n.degree < d → coeff n (f ^ d) = 0 := by
@@ -155,13 +183,11 @@ theorem coeff_pow_zero {f : MvPowerSeries ι R} (hf : constantCoeff f = 0) :
         first
         | exact (Finsupp.degree_add p.1 p.2).symm
         | exact (map_add Finsupp.degree p.1 p.2).symm
-        | simp [Finsupp.degree_add]
       have hpos : p.2.degree ≠ 0 := by
         intro h
         apply h2
         first
         | exact (Finsupp.degree_eq_zero_iff _).mp h
-        | exact Finsupp.degree_eq_zero_iff.mp h
       rw [ih p.1 (by omega), zero_mul]
 
 end AlgebraTools
@@ -199,6 +225,7 @@ theorem map_Ex (h : K →+* K') {f : MvPowerSeries ι K} (hf : constantCoeff f =
   ext n
   have hf' : constantCoeff (map h f) = 0 := by
     rw [MvPowerSeries.constantCoeff_map, hf, map_zero]
+
   rw [MvPowerSeries.coeff_map, coeff_Ex_eq_sum_inv_factorial_coeff_pow hf, coeff_Ex_eq_sum_inv_factorial_coeff_pow hf', map_sum]
   apply Finset.sum_congr rfl
   intro k _
@@ -216,6 +243,7 @@ theorem Ex_zero : Ex (0 : MvPowerSeries ι K) = 1 := by
 private theorem coeff_X_zero_add_X_one_pow (n : Fin 2 →₀ ℕ) (k : ℕ) :
     coeff n ((X 0 + X 1 : MvPowerSeries (Fin 2) K) ^ k) =
       if k = n 0 + n 1 then ((k.choose (n 0) : ℕ) : K) else 0 := by
+
   rw [add_pow, map_sum]
   have hterm : ∀ m ∈ Finset.range (k + 1),
       coeff n ((X 0 : MvPowerSeries (Fin 2) K) ^ m * X 1 ^ (k - m) *
@@ -225,10 +253,6 @@ private theorem coeff_X_zero_add_X_one_pow (n : Fin 2 →₀ ℕ) (k : ℕ) :
     first
     | (rw [← nsmul_eq_mul', map_nsmul, MvPowerSeries.X_pow_eq, MvPowerSeries.X_pow_eq,
         MvPowerSeries.monomial_mul_monomial, one_mul, MvPowerSeries.coeff_monomial, nsmul_eq_mul]
-       split_ifs <;> simp)
-    | (rw [MvPowerSeries.X_pow_eq, MvPowerSeries.X_pow_eq, MvPowerSeries.monomial_mul_monomial, one_mul,
-        ← map_natCast (MvPowerSeries.C (σ := Fin 2) (R := K)), MvPowerSeries.coeff_mul_C,
-        MvPowerSeries.coeff_monomial]
        split_ifs <;> simp)
   rw [Finset.sum_congr rfl hterm]
   split_ifs with hk
@@ -305,9 +329,6 @@ theorem Ex_biv : Ex (X 0 + X 1 : MvPowerSeries (Fin 2) K) = Ex (X 0) * Ex (X 1) 
   have hne : ((n 0 + n 1).factorial : K) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   first
   | (rw [div_mul_div_comm, one_mul, div_mul_cancel_left₀ hne]; simp)
-  | (field_simp; done)
-  | (field_simp; rw [mul_inv_cancel₀ hne, one_mul])
-  | (field_simp; simp [hne])
   all_goals first | ring | exact mul_comm _ _
 
 theorem Ex_add {f g : MvPowerSeries ι K} (hf : constantCoeff f = 0) (hg : constantCoeff g = 0) :
@@ -343,7 +364,6 @@ theorem exists_lift (O : Subring K) (A : MvPowerSeries ι K) (h : ∀ n, coeff n
   ext n
   first
   | rfl
-  | (erw [MvPowerSeries.coeff_map]; rfl)
 
 private theorem finsum_mem_subring (O : Subring K) {α : Type} (F : α → K) (hF : ∀ x, F x ∈ O) :
     ∑ᶠ x, F x ∈ O := by
@@ -380,11 +400,6 @@ private theorem coeff_subst_mem_subring {σ τ : Type} (O : Subring K) (A : MvPo
     exact Subring.pow_mem _ ((mem_range_map_subring_iff O (c s)).mpr (hcO s)) _
   exact (mem_range_map_subring_iff O _).mp hmem e
 
-theorem int_subst [Finite ι] (O : Subring K) (A : MvPowerSeries ι K) (hA : ∀ n, coeff n A ∈ O)
-    (c : ι → MvPowerSeries κ K) (hc0 : ∀ i, constantCoeff (c i) = 0) (hc : ∀ i n, coeff n (c i) ∈ O) :
-    ∀ n, coeff n (subst c A) ∈ O := by
-  exact coeff_subst_mem_subring O A hA c (hasSubst_of_finite_constantCoeff_eq_zero hc0) hc
-
 theorem int_dg (O : Subring K) (a : PowerSeries K) (ha : ∀ n, PowerSeries.coeff n a ∈ O) (i : ι) (n : ι →₀ ℕ) :
     coeff n (diagS a i : MvPowerSeries ι K) ∈ O := by
   classical
@@ -392,13 +407,6 @@ theorem int_dg (O : Subring K) (a : PowerSeries K) (ha : ∀ n, PowerSeries.coef
   split_ifs
   · exact ha _
   · exact O.zero_mem
-
-theorem exists_plift (O : Subring K) (a : PowerSeries K) (h : ∀ n, PowerSeries.coeff n a ∈ O) :
-    ∃ a' : PowerSeries O, PowerSeries.map O.subtype a' = a := by
-  refine ⟨PowerSeries.mk (fun n => ⟨PowerSeries.coeff n a, h n⟩), ?_⟩
-  ext n
-  rw [PowerSeries.coeff_map, PowerSeries.coeff_mk]
-  rfl
 
 theorem int_subst_dg (O : Subring K) (A : MvPowerSeries ι K) (hA : ∀ n, coeff n A ∈ O) (a : PowerSeries K)
     (ha0 : PowerSeries.constantCoeff a = 0) (ha : ∀ n, PowerSeries.coeff n a ∈ O) :

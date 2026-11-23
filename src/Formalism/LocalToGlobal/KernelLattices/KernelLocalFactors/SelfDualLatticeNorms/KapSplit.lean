@@ -1,7 +1,54 @@
-import Formalism.LocalToGlobal.KernelLattices.KerStd
-import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
-import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdOK
-import Formalism.LocalToGlobal.GlobalTheory.GL3.NormNatCoprime
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.LateralTheory
+import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.NormNatCoprime
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.BaseEx
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.IsAdmissibleFlagPairOfUnitriangularLeftAutomorph
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -28,6 +75,7 @@ theorem detRel_unitary (γ γ₀ : IsoK D) :
     rw [← h2] at h1
     simp only [LinearEquiv.apply_symm_apply] at h1
     have h3 := congrArg D.host.φ₀ h1
+
     simp only [map_sum, map_mul, phi_conj] at h3
     exact h3
   set M : Matrix (Fin 4 × D.what₂.Tau) (Fin 4 × D.what₂.Tau) D.host.K := LinearMap.toMatrix' T with hM
@@ -64,7 +112,7 @@ theorem exists_conj (a : 𝓞 D.host.K) :
       map_isIntegral_int (algebraMap D.host.K D.host.E) (NumberField.RingOfIntegers.isIntegral_coe a)
     exact map_isIntegral_int D.host.conj.toRingEquiv.toRingHom h1
   have hk : IsIntegral ℤ (⟨D.host.conj ((a : D.host.K) : D.host.E), conj_mem_K D.host (a : D.host.K)⟩ : D.host.K) :=
-    (isIntegral_algebraMap_iff (A := D.host.K) (B := D.host.E) (algebraMap D.host.K D.host.E).injective).1 hi
+    (isIntegral_algebraMap_iff (A := D.host.K) (B := D.host.E) ).1 hi
   exact ⟨⟨_, hk⟩, rfl⟩
 
 theorem repr_K (x : D.host.K) : ∃ r s : ℚ, (x : D.host.E) =
@@ -76,7 +124,7 @@ theorem repr_K (x : D.host.K) : ∃ r s : ℚ, (x : D.host.E) =
   · exact ⟨0, 1, by simp⟩
   · intro r; exact ⟨r, 0, by simp⟩
   · rintro _ _ ⟨r, s, rfl⟩ ⟨r', s', rfl⟩
-    exact ⟨r + r', s + s', by simp only [map_add]; ring⟩
+    exact ⟨r + r', s + s', by simp only [map_add (f := _)]; ring⟩
   · rintro _ ⟨r, s, rfl⟩
     by_cases h0 : r = 0 ∧ s = 0
     · exact ⟨0, 0, by rw [h0.1, h0.2]; simp⟩
@@ -99,12 +147,12 @@ theorem repr_K (x : D.host.K) : ∃ r s : ℚ, (x : D.host.E) =
         ring
       have h1 := congrArg (algebraMap ℚ D.host.E) q1
       have h2 := congrArg (algebraMap ℚ D.host.E) q2
-      simp only [map_add, map_mul, map_neg, map_natCast, map_one, map_zero] at h1 h2
+      simp only [map_add (f := _), map_mul, map_neg, map_natCast, map_one, map_zero] at h1 h2
       linear_combination (algebraMap ℚ D.host.E s * algebraMap ℚ D.host.E (-s / (r ^ 2 + (D.host.d : ℚ) * s ^ 2))) * hsq + h1 +
         D.host.sqd * h2
   · rintro _ _ ⟨r, s, rfl⟩ ⟨r', s', rfl⟩
     refine ⟨r * r' - (D.host.d : ℚ) * (s * s'), r * s' + s * r', ?_⟩
-    simp only [map_add, map_sub, map_mul, map_natCast]
+    simp only [map_add (f := _), map_sub, map_mul, map_natCast]
     linear_combination (algebraMap ℚ D.host.E s * algebraMap ℚ D.host.E s') * hsq
 
 theorem norm_int (t t' : 𝓞 D.host.K) (h : ((t' : D.host.K) : D.host.E) = D.host.conj ((t : D.host.K) : D.host.E)) :
@@ -114,19 +162,19 @@ theorem norm_int (t t' : 𝓞 D.host.K) (h : ((t' : D.host.K) : D.host.E) = D.ho
   obtain ⟨r, s, hrs⟩ := repr_K (t : D.host.K)
   have hc : ((t' : D.host.K) : D.host.E) =
       algebraMap ℚ D.host.E r - algebraMap ℚ D.host.E s * D.host.sqd := by
-    rw [h, hrs, map_add, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, conj_b]
+    rw [h, hrs, map_add (f := _), map_mul, AlgEquiv.commutes, AlgEquiv.commutes, conj_b]
     ring
   have hprod : (((t * t' : 𝓞 D.host.K) : D.host.K) : D.host.E) = algebraMap ℚ D.host.E (r ^ 2 + (D.host.d : ℚ) * s ^ 2) := by
     have e : (((t * t' : 𝓞 D.host.K) : D.host.K) : D.host.E) = ((t : D.host.K) : D.host.E) * ((t' : D.host.K) : D.host.E) := by
       push_cast; rfl
     rw [e, hrs, hc]
-    simp only [map_add, map_mul, map_pow, map_natCast]
+    simp only [map_add (f := _), map_mul, map_pow, map_natCast]
     linear_combination (-(algebraMap ℚ D.host.E s * algebraMap ℚ D.host.E s)) * hsq
   have hi : IsIntegral ℤ (algebraMap ℚ D.host.E (r ^ 2 + (D.host.d : ℚ) * s ^ 2)) := by
     rw [← hprod]
     exact map_isIntegral_int (algebraMap D.host.K D.host.E) (NumberField.RingOfIntegers.isIntegral_coe (t * t'))
   have hq : IsIntegral ℤ (r ^ 2 + (D.host.d : ℚ) * s ^ 2) :=
-    (isIntegral_algebraMap_iff (A := ℚ) (B := D.host.E) (algebraMap ℚ D.host.E).injective).1 hi
+    (isIntegral_algebraMap_iff (A := ℚ) (B := D.host.E) ).1 hi
   obtain ⟨n, hn⟩ := IsIntegrallyClosed.isIntegral_iff.1 hq
   refine ⟨n, ?_⟩
   apply NumberField.RingOfIntegers.coe_injective

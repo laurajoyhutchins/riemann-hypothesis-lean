@@ -1,13 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BdryChart
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.IsPshLocallyIntegrableStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeGramDeterminantStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeCovolumePositiveStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicEigencomponentConjugateFormStatement
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LinearIndependentRealOfIntOfDiscrete
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.PMinkowskiCovolumeBound
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.PCuspWeightBound
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LinearIndependentRealOfIntOfDiscrete
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicEigencomponentConjugateFormStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeCovolumePositiveStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeGramDeterminantStatement
+public import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.PCuspWeightBound
+public import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.PMinkowskiCovolumeBound
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Matrix Filter Topology GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Cusp GroundTheory.Heights₂.Heights.LowerBoundFree GroundTheory.Heights₂.Heights.Regular
 
@@ -188,6 +239,7 @@ theorem gram_re_posSemidef {n : ℕ} (u : Fin n → Fin g → ℂ) :
     have e : (R.ip (∑ i, x i • u i) (∑ i, x i • u i)).re =
         star x ⬝ᵥ (Matrix.of fun i j => (R.ip (u i) (u j)).re) *ᵥ x := by
       rw [← reForm_apply_alt]
+
       simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, reForm_apply_alt]
       simp [dotProduct, mulVec, Finset.mul_sum, mul_assoc]
       rw [Finset.sum_comm]
@@ -210,8 +262,8 @@ theorem card_le_of_isNzFamily {σ : Ψ → (𝓞 E →+* ℂ)} {m : ℕ} (hm : R
   rw [hm τ] at this
   simpa using this
 
-include R in
 
+include R in
 theorem free_finite_submodule (I : Submodule (𝓞 E) Λ) : Module.Free ℤ I ∧ Module.Finite ℤ I := by
   haveI := R.free
   haveI := R.fin
@@ -263,12 +315,14 @@ theorem neg_log_covolume_le {σ : Ψ → (𝓞 E →+* ℂ)} {m : ℕ} (hσ : Is
       have := pow_le_pow_left₀ hlam.le h1 2
       rwa [Real.sq_sqrt (R.normSq_nonneg_bis w)] at this
     have h3 : R.P w = ∑ i, (c i : ℝ) • R.P (b i : Λ) := by
+
       rw [hw, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_zsmul, Int.cast_smul_eq_zsmul]
     have h4 : R.normSq w = ∑ i, ∑ j, (c i : ℝ) * (c j : ℝ) * G i j := by
       show (R.ip (R.P w) (R.P w)).re = _
       rw [h3, ← reForm_apply_alt]
+
       simp only [map_sum, LinearMap.sum_apply, map_smul, LinearMap.smul_apply, reForm_apply_alt]
       simp only [smul_eq_mul, Finset.mul_sum, hG, of_apply]
       rw [Finset.sum_comm]
@@ -293,8 +347,8 @@ theorem neg_log_covolume_le {σ : Ψ → (𝓞 E →+* ℂ)} {m : ℕ} (hσ : Is
 
 end RiemLat
 
-open RiemLat in
 
+open RiemLat in
 theorem cuspW_le : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (g : ℕ) (Λ : Type) [AddCommGroup Λ] [Module (𝓞 E) Λ] (Ψ : Type) [Fintype Ψ] (R : RiemLat E g Λ) (σ : Ψ → (𝓞 E →+* ℂ)) (m : ℕ), IsCMFam σ → R.HasRank σ m → 1 ≤ m → 0 < R.lam1 ∧ (∀ v : Λ, v ≠ 0 → R.lam1 ≤ Real.sqrt (R.normSq v)) ∧ (∀ I, R.IsCusp I → -Real.log (R.nz σ I) ≤ R.cuspW σ ∧ Module.finrank (𝓞 E) I ≤ m) ∧ 0 ≤ R.cuspW σ ∧ R.cuspW σ ≤ Fintype.card Ψ * m * (2 * max 0 (Real.log (1 / R.lam1)) + Real.log (2 * Fintype.card Ψ * m * (|(discr E : ℝ)| ^ (1 / (Module.finrank ℚ E : ℝ))))) := by
   intro E _ _ _ g Λ _ _ Ψ _ R σ m hσ hm hm1
   obtain ⟨τ⟩ : Nonempty Ψ := by

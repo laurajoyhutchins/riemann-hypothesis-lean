@@ -1,6 +1,48 @@
-import Mathlib
-import Formalism.GradedWeylDivisibility.StatementA
-import Formalism.BranchSandwichDivisors.StatementR
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Formalism.BranchSandwichDivisors.StatementR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Formalism.GradedWeylDivisibility
 open Formalism.REAL (fockF)
@@ -43,42 +85,6 @@ def BranchMap : Prop :=
       (∀ h : ↥(dualWeyl R n n sg), (h : MvPolynomial (Fin n × Fin n) R) = hw R le_rfl sg →
         io h = ((cCap (lamZ lam) (fun i => (sg i : ℤ)) : ℤ) : R) • xiB R lam sg) ∧
       (∀ f, ∀ m ∈ (io f).support, rowDeg m (Fin.last n) = ∑ i, (lam i - sg i))
-
-def BranchIsometry : Prop :=
-  ∀ (n : ℕ) (sg : Fin n → ℕ), Antitone sg →
-    ∀ io : ↥(dualWeyl ℂ n n sg) →ₗ[ℂ] MvPolynomial (Fin (n + 1) × Fin n) ℂ,
-      (∀ (g : Matrix (Fin n) (Fin n) ℂ) (f f' : ↥(dualWeyl ℂ n n sg)),
-        (f' : MvPolynomial (Fin n × Fin n) ℂ) = rowAct ℂ g (f : MvPolynomial (Fin n × Fin n) ℂ) →
-          io f' = rowAct ℂ (extM ℂ g) (io f)) →
-      ∀ f h : ↥(dualWeyl ℂ n n sg), (h : MvPolynomial (Fin n × Fin n) ℂ) = hw ℂ le_rfl sg →
-        fockF (io f) (io f) * fockF (h : MvPolynomial (Fin n × Fin n) ℂ) h =
-          fockF (io h) (io h) * fockF (f : MvPolynomial (Fin n × Fin n) ℂ) f
-
-def zScale (n : ℕ) (t : ℝ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ :=
-  Matrix.diagonal fun a => if a = Fin.last n then (t : ℂ) else 1
-
-def BranchScale : Prop :=
-  ∀ (n k d : ℕ) (t : ℝ) (F : MvPolynomial (Fin (n + 1) × Fin k) ℂ),
-    (∀ m ∈ F.support, rowDeg m (Fin.last n) = d) →
-      rowAct ℂ (zScale n t) F = ((t : ℂ) ^ d) • F ∧
-      fockF (rowAct ℂ (zScale n t) F) (rowAct ℂ (zScale n t) F) = ((t : ℂ) ^ (2 * d)) * fockF F F
-
-def BranchNormT : Prop :=
-  ∀ (n : ℕ) (lam sg : Fin n → ℕ) (t : ℝ), Interlace (lamZ lam) (fun i => (sg i : ℤ)) →
-    ∀ io : ↥(dualWeyl ℂ n n sg) →ₗ[ℂ] MvPolynomial (Fin (n + 1) × Fin n) ℂ,
-      (∀ (g : Matrix (Fin n) (Fin n) ℂ) (f f' : ↥(dualWeyl ℂ n n sg)),
-        (f' : MvPolynomial (Fin n × Fin n) ℂ) = rowAct ℂ g (f : MvPolynomial (Fin n × Fin n) ℂ) →
-          io f' = rowAct ℂ (extM ℂ g) (io f)) →
-      (∀ h : ↥(dualWeyl ℂ n n sg), (h : MvPolynomial (Fin n × Fin n) ℂ) = hw ℂ le_rfl sg →
-        io h = ((cCap (lamZ lam) (fun i => (sg i : ℤ)) : ℤ) : ℂ) • xiB ℂ lam sg) →
-      (∀ f, ∀ m ∈ (io f).support, rowDeg m (Fin.last n) = ∑ i, (lam i - sg i)) →
-      rowAct ℂ (zScale n t) (hw ℂ (Nat.le_succ n) lam) = hw ℂ (Nat.le_succ n) lam ∧
-      ∀ f : ↥(dualWeyl ℂ n n sg),
-        fockF (rowAct ℂ (zScale n t) (io f)) (rowAct ℂ (zScale n t) (io f)) *
-            fockF (hw ℂ le_rfl sg) (hw ℂ le_rfl sg) =
-          ((t : ℂ) ^ (2 * ∑ i, (lam i - sg i))) *
-            (((cCap (lamZ lam) (fun i => (sg i : ℤ)) : ℤ) : ℂ) ^ 2) *
-            fockF (xiB ℂ lam sg) (xiB ℂ lam sg) * fockF (f : MvPolynomial (Fin n × Fin n) ℂ) f
 
 def XiNorm : Prop :=
   ∀ (n : ℕ) (lam sg : Fin n → ℕ), Interlace (lamZ lam) (fun i => (sg i : ℤ)) →

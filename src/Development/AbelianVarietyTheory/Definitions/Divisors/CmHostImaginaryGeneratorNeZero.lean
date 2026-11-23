@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Formalism.LocalRingCardinality.ConjSqrtMinusD
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedBessel
+public import Formalism.LocalToGlobal.Divisibility.DefGroup
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,8 +127,8 @@ theorem isSelfDualC_neg {V : HSp D} {Λ : Submodule (𝓞 D.host.E) (Fin V.rank 
   rw [e]
   exact ⟨fun ⟨b, hb⟩ => ⟨-b, by simp [hb]⟩, fun ⟨b, hb⟩ => ⟨-b, by simp [hb]⟩⟩
 
-variable (D) in
 
+variable (D) in
 structure LSp where
 
   sp : HSp D
@@ -173,7 +219,9 @@ theorem isIsoSub_iso (ρ : ℕ) (h : 2 * ρ ≤ c) : IsIsoSub B (d.iso ρ h) := 
         (Fin.castLE (by omega) : Fin ρ → Fin c) = 1 := by
       refine Matrix.ext fun p q => ?_
       have := p.2; have := q.2
-      simp only [submatrix_apply, antiDiagonalSignGramMatrix, Fin.val_rev, Fin.val_castLE, one_apply, Fin.ext_iff]
+      have hp : p.1 + 1 ≤ c := by omega
+      have hrev : ρ ≤ c - (p.1 + 1) := by omega
+      simp only [submatrix_apply, antiDiagonalSignGramMatrix, Fin.val_rev, Fin.val_castLE, Matrix.one_apply, Fin.ext_iff]
       split_ifs <;> first | rfl | omega
     have h4 := congrArg (· *ᵥ u) (h2.trans h3)
     simp only [one_mulVec, ← mulVec_mulVec] at h4
@@ -293,7 +341,7 @@ def cosInd (e : AE D) {m n : ℕ} {Λ : Submodule (𝓞 D.host.E) (Fin n → D.h
   (cosSet e κ).indicator 1
 
 theorem homLat_fg {m n : ℕ} {Λ : Submodule (𝓞 D.host.E) (Fin n → D.host.E)}
-    {Λ' : Submodule (𝓞 D.host.E) (Fin m → D.host.E)} (h : Submodule.IsLattice D.host.E Λ) (h' : Λ'.FG) :
+    {Λ' : Submodule (𝓞 D.host.E) (Fin m → D.host.E)} (h : Submodule.IsFullLattice D.host.E Λ) (h' : Λ'.FG) :
     Module.Finite (𝓞 D.host.E) (homLat Λ Λ') := by
   obtain ⟨s, hs⟩ := h.fg
   haveI : Module.Finite (𝓞 D.host.E) Λ' := Module.Finite.iff_fg.2 h'
@@ -308,7 +356,7 @@ theorem homLat_fg {m n : ℕ} {Λ : Submodule (𝓞 D.host.E) (Fin n → D.host.
   exact Matrix.toLin'.injective (by rw [Matrix.toLin'_apply', h2]; simp)
 
 theorem finite_cos {m n : ℕ} {Λ : Submodule (𝓞 D.host.E) (Fin n → D.host.E)}
-    {Λ' : Submodule (𝓞 D.host.E) (Fin m → D.host.E)} (h : Submodule.IsLattice D.host.E Λ) (h' : Λ'.FG)
+    {Λ' : Submodule (𝓞 D.host.E) (Fin m → D.host.E)} (h : Submodule.IsFullLattice D.host.E Λ) (h' : Λ'.FG)
     {𝔪 : Ideal (𝓞 D.host.E)} (h𝔪 : 𝔪 ≠ ⊥) : Finite (Cos Λ Λ' 𝔪) := by
   haveI := homLat_fg h h'
   haveI : Finite (𝓞 D.host.E ⧸ 𝔪) := Ideal.finiteQuotientOfFreeOfNeBot 𝔪 h𝔪
@@ -316,32 +364,11 @@ theorem finite_cos {m n : ℕ} {Λ : Submodule (𝓞 D.host.E) (Fin n → D.host
     Module.Finite.of_restrictScalars_finite (𝓞 D.host.E) _ _
   exact Module.finite_of_finite (𝓞 D.host.E ⧸ 𝔪) (M := homLat Λ Λ' ⧸ (𝔪 • ⊤ : Submodule (𝓞 D.host.E) (homLat Λ Λ')))
 
-example : antiDiagonalSignGramMatrix 3 (-1 : ℤ) = !![0, 0, 1; 0, -1, 0; 1, 0, 0] := by decide
-
-example : antiDiagonalSignGramMatrix 4 (-1 : ℤ) = !![0, 0, 0, 1; 0, 0, 1, 0; 0, 1, 0, 0; 1, 0, 0, 0] := by decide
-
 abbrev diagSp (D : D7) (n : ℕ) (neg : Fin n → Bool) (p q : ℕ) : HSp D := Examples₂.stdSpace Examples₂.star_isIntegral n neg p q
 
 theorem diagSp_gram (n : ℕ) (neg : Fin n → Bool) (p q : ℕ) :
     (diagSp D n neg p q).gram = Matrix.diagonal fun i : Fin n => (Examples₂.sgn (neg i) : D.host.E) :=
   Matrix.ext fun i j => Examples₂.stdSpace_gram_apply _ n neg p q i j
-
-def exDec (D : D7) : HermitianOrthogonalExtensionData (diagSp D 0 ![] 0 0) (diagSp D 3 ![false, true, true] 1 2) 3 (-1) where
-  ι := 0
-  isom := fun x y => by
-    have : x = 0 := funext fun i => i.elim0
-    subst this; simp
-  a := (!![1, 0, 1 / 2; 1, 0, -1 / 2; 0, 1, 0] : Matrix (Fin 3) (Fin 3) D.host.E)
-  gram := by
-    rw [diagSp_gram]
-    show Formalism.UG.cT (D.sp.cm.sig : D.host.E →+* D.host.E) (!![1, 0, 1 / 2; 1, 0, -1 / 2; 0, 1, 0] : Matrix (Fin 3) (Fin 3) D.host.E) *
-      (Matrix.diagonal fun i : Fin 3 => (Examples₂.sgn (![false, true, true] i) : D.host.E)) *
-      (!![1, 0, 1 / 2; 1, 0, -1 / 2; 0, 1, 0] : Matrix (Fin 3) (Fin 3) D.host.E) = _
-    refine Matrix.ext fun i j => ?_
-    simp only [Matrix.mul_apply, Fin.sum_univ_three, Formalism.UG.cT, transpose_apply, map_apply]
-    fin_cases i <;> fin_cases j <;> simp [antiDiagonalSignGramMatrix, Examples₂.sgn, Matrix.diagonal, map_ofNat] <;> norm_num
-  perp := Matrix.ext fun i => i.elim0
-  rank := rfl
 
 end GlobalTheory.ChiGrid
 

@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.Submodule
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.SimpleModule.Basic
+
+@[expose] public section
 
 open scoped MonoidAlgebra
 
@@ -19,18 +67,19 @@ private theorem ss_proj {R V : Type} [Ring R] [AddCommGroup V] [Module R V]
   refine ⟨K, inferInstance, fun i => LinearMap.range (j i.1), fun i => Q i.1, ?_, ?_, ?_⟩
   · intro i
     rw [← isSimpleModule_iff_isAtom]
-    haveI := ht i.1
+    have := ht i.1
     exact IsSimpleModule.congr (LinearEquiv.ofInjective _ (hj i.1)).symm
   · intro i w
     exact ⟨e w i.1, rfl⟩
   · intro w hw
     rw [Finset.sum_coe_sort K (fun i => Q i w)]
     apply e.injective
+
     rw [map_sum]
     have h1 : ∀ i, e (Q i w) = DFinsupp.single i (e w i) := fun i => by simp [Q]
     simp_rw [h1]
     ext1 m
-    rw [DFinsupp.finset_sum_apply]
+    rw [DFinsupp.finsetSum_apply]
     rw [Finset.sum_eq_single m]
     · simp
     · intro b _ hb
@@ -48,11 +97,11 @@ private noncomputable def toSub (U : Submodule ℂ W) (hU : ∀ g, ∀ u ∈ U, 
     Submodule ℂ[H] ρ.asModule where
   carrier := {x | ρ.asModuleEquiv x ∈ U}
   add_mem' := fun {a b} ha hb => by
-    simp only [Set.mem_setOf_eq, map_add] at *
+    simp only [Set.mem_ofPred_eq, map_add (f := _)] at *
     exact U.add_mem ha hb
   zero_mem' := by simp
   smul_mem' := fun c x hx => by
-    simp only [Set.mem_setOf_eq] at *
+    simp only [Set.mem_ofPred_eq] at *
     rw [Representation.asModuleEquiv_map_smul]
     exact ρ.asAlgebraHom_mem_of_forall_mem U hU _ hx c
 
@@ -113,7 +162,7 @@ theorem UpperTheory.exists_equivariant_projections_of_sum_irreducible :
     ∀ (H W : Type) [Group H] [AddCommGroup W] [Module ℂ W] (ρ : Representation ℂ H W), (∀ x : W, x ∈ ⨆ U : {U : Submodule ℂ W // U ≠ ⊥ ∧ (∀ g, ∀ u ∈ U, ρ g u ∈ U) ∧ ∀ N ≤ U, (∀ g, ∀ u ∈ N, ρ g u ∈ N) → N = ⊥ ∨ N = U}, U.1) → ∀ M : Submodule ℂ W, FiniteDimensional ℂ M → ∃ (κ : Type) (_ : Fintype κ) (U : κ → Submodule ℂ W) (P : κ → W →ₗ[ℂ] W), (∀ i, U i ≠ ⊥ ∧ (∀ g, ∀ u ∈ U i, ρ g u ∈ U i) ∧ ∀ N ≤ U i, (∀ g, ∀ u ∈ N, ρ g u ∈ N) → N = ⊥ ∨ N = U i) ∧ (∀ i w, P i w ∈ U i) ∧ (∀ i g w, P i (ρ g w) = ρ g (P i w)) ∧ ∀ w ∈ M, ∑ i, P i w = w := by
   intro H W _ _ _ ρ hsum M hM
   classical
-  haveI : IsSemisimpleModule ℂ[H] ρ.asModule := by
+  have : IsSemisimpleModule ℂ[H] ρ.asModule := by
     apply IsSemisimpleModule.of_sSup_simples_eq_top
     rw [eq_top_iff]
     intro y _
@@ -152,7 +201,8 @@ theorem UpperTheory.exists_equivariant_projections_of_sum_irreducible :
     induction hw using Submodule.span_induction with
     | mem x hx =>
       simp_rw [hQ]
+
       rw [← map_sum, hsum' _ (Finset.mem_image_of_mem _ hx), LinearEquiv.apply_symm_apply]
     | zero => simp
-    | add x y _ _ hx hy => simp_rw [map_add]; rw [Finset.sum_add_distrib, hx, hy]
+    | add x y _ _ hx hy => simp_rw [map_add (f := _)]; rw [Finset.sum_add_distrib, hx, hy]
     | smul c x _ hx => simp_rw [map_smul]; rw [← Finset.smul_sum, hx]

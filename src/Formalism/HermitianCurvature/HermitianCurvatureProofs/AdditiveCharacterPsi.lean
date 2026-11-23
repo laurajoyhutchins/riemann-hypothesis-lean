@@ -1,4 +1,55 @@
-import Formalism.HermitianCurvature.StatementG
+module
+
+public import Formalism.HermitianCurvature.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory
 
@@ -109,33 +160,6 @@ theorem additive_character_psi : Formalism.FourierDecayAlt.G.PsiChar := by
   · simp only [psi]; rw [mul_comm]; exact Complex.norm_exp_ofReal_mul_I _
   · simp [psi]
 
-theorem character_additive : Formalism.FourierDecayAlt.G.CharAdditive := by
-  intro n p q
-  have key : ∀ p q : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ, IsUpperUni p → IsUpperUni q →
-      superSum (p * q) = superSum p + superSum q := by
-    intro p q hp hq
-    simp only [superSum, ← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [Matrix.mul_apply]
-    have hne : i.castSucc ≠ i.succ := (Fin.castSucc_lt_succ).ne
-    rw [Finset.sum_eq_add i.castSucc i.succ hne]
-    · rw [hp.1, hq.1]; ring
-    · intro k _ hk
-      rcases lt_trichotomy k i.castSucc with h | h | h
-      · rw [hp.2 _ _ h]; ring
-      · exact absurd h hk.1
-      · have : i.succ < k := by
-          rcases lt_or_eq_of_le (Fin.castSucc_lt_iff_succ_le.1 h) with h' | h'
-          · exact h'
-          · exact absurd h'.symm hk.2
-        rw [hq.2 _ _ this]; ring
-    · simp
-    · simp
-  refine ⟨key p q, fun hp hq => ?_⟩
-  have := key qᵀ pᵀ hq hp
-  have e : ∀ l : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ, subSum l = superSum lᵀ := fun l => rfl
-  rw [e, e, e, Matrix.transpose_mul, this]; ring
-
 theorem det_weyl_matrix : Formalism.FourierDecayAlt.G.DetMatch :=
   fun n => ⟨det_wMat_succ n, det_wMat_ne_zero n⟩
 
@@ -210,7 +234,6 @@ theorem phase_formula : Formalism.FourierDecayAlt.G.PhaseFormula := by
         intro h
         apply hi
         rw [← Fin.rev_rev i, h, Fin.rev_zero]
-      have hnl : ¬ i.rev < 0 := by simp
       simp [upper, strictUpper, Matrix.one_apply_ne hne]
     · simp
   have h3 : ∀ k : Fin (m + 1), xOf (Xof t v) (t • b) k = t * blk (upper v) b 0 1 k.castSucc k.succ := by

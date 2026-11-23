@@ -1,12 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSpanFormsNeBot
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasInfCharInfCharOfCommute
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsOpenIsCompact
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsSpanFormsNeBot
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIsOpenIsCompact
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EquivOfISupRange
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasInfCharInfCharOfCommute
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,8 +116,8 @@ theorem eq_zero_of_mem_nullPart {ρ : Representation ℂ G V} (hρ : IsSmooth ρ
   rw [map_one] at h3
   exact Submodule.disjoint_def.1 (LocGL.isCompl_fixed_twKer hρ hK).disjoint x h1 h3
 
-omit [IsTopologicalGroup G] in
 
+omit [IsTopologicalGroup G] in
 theorem exists_irred {ρ : Representation ℂ G V} (hρ : IsSmooth ρ) {K : Subgroup G} (hK : IsOpen (K : Set G))
     (h2 : ∀ W : Submodule ℂ V, (∀ g, ∀ v ∈ W, ρ g v ∈ W) → W ⊓ fixed ρ K = ⊥ → W = ⊥)
     (U : Submodule ℂ V) (hU : ∀ g, ∀ v ∈ U, ρ g v ∈ U) (h0 : U ≠ ⊥)
@@ -133,7 +178,7 @@ theorem map_pLoc_inv_mul (w : HeightOneSpectrum (𝓞 E)) (k : GL (Fin a) (Af E)
     GeneralLinearGroup.map (pLoc E w) ((locGL E a w (GeneralLinearGroup.map (pLoc E w) k))⁻¹ * k) = 1 := by
   rw [map_mul, map_inv, pLoc_locGL, inv_mul_cancel]
 
-variable [IsTotallyComplex E]
+variable [_root_.NumberField.IsTotallyComplex E]
 
 theorem nullPart_op (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E)) (K : Subgroup (GL (Fin a) (w.adicCompletion E)))
     (o : Op E a) {x : π.V} (hx : x ∈ nullPart (π.locRep w) K) : π.op o x ∈ nullPart (π.locRep w) K := by
@@ -202,7 +247,7 @@ def typePart (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E)) (L : Subgroup (
     {W : Type} [AddCommGroup W] [Module ℂ W] (ρ : Representation ℂ (Kinf E a) W) : Submodule ℂ π.V where
   carrier := {ψ | (∀ k ∈ L, GeneralLinearGroup.map (pLoc E w) k = 1 → π.finPart k ψ = ψ) ∧
     ∀ g : GA E a, (fun k : Kinf E a => (cptRep E a k ψ.1).1 g) ∈ AutFin.coeffSpan ρ}
-  add_mem' := fun hx hy => ⟨fun k h1 h2 => by rw [map_add, hx.1 k h1 h2, hy.1 k h1 h2],
+  add_mem' := fun hx hy => ⟨fun k h1 h2 => by rw [map_add (f := _), hx.1 k h1 h2, hy.1 k h1 h2],
     fun g => add_mem (hx.2 g) (hy.2 g)⟩
   zero_mem' := ⟨fun _ _ _ => map_zero _, fun _ => zero_mem _⟩
   smul_mem' := fun c _ hx => ⟨fun k h1 h2 => by rw [map_smul, hx.1 k h1 h2],
@@ -245,7 +290,7 @@ theorem finiteDimensional_typePart (h : AutomorphicFormsFiniteGL) (π : CuspSub 
     exact h2
   exact congrArg Subtype.val h3
 
-theorem exists_isLocComp (h : AutomorphicFormsFiniteGL) : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E]
+theorem exists_isLocComp (h : AutomorphicFormsFiniteGL) : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
     (a : ℕ) (π : CuspSub E a) (w : HeightOneSpectrum (𝓞 E)),
     ∃ σ : SmIrr (GL (Fin a) (w.adicCompletion E)), π.IsLocComp w σ ∧ IsAdmissible σ.ρ := by
   intro E _ _ _ a π w

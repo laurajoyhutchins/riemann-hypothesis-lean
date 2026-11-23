@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NotIsSplitOfIsInertAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.NormEulerPolySubOneLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyNormFinLeOne
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,38 +102,11 @@ section Rep
 
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.UG GlobalTheory.PRep GlobalTheory.AdelicU
 
-theorem SimplePole.rep (h : SimplePole) (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E)
-    (L : Submodule (𝓞 E) (Fin n → E)) {Vl : HeightOneSpectrum (𝓞 F) → Type} [∀ v, AddCommGroup (Vl v)]
-    [∀ v, Module ℂ (Vl v)] (π : ∀ v, Representation ℂ (GLoc σ J v) (Vl v))
-    {S : Set (HeightOneSpectrum (𝓞 F))} (hS : S.Finite) {r t : ℕ} (ht : r + 5 ≤ t) {c : Fam E}
-    (μ χ : (AF F ⊗[F] E)ˣ →* Circle)
-    (hc : ∀ w ∉ above E S, (c w).card = r ∧
-      ∀ b ∈ c w, ‖(b : ℂ)‖ ≤ ((Ideal.absNorm w.asIdeal : ℕ) : ℝ) ^ (((r : ℝ) - 1) / 2))
-    (hπ : ∀ w ∉ above E S, paramFam σ J L π w = liftFam c (val μ) (val χ) t w) :
-    ∃ Λ : ℂ → ℂ, MeromorphicOn Λ {s | ((r : ℝ) + 1) / 2 < s.re} ∧
-      (∀ s : ℂ, ((t : ℝ) + 1) / 2 < s.re → Λ s = LSRep σ J L S π (val χ) s) ∧
-      HasSimplePole Λ ((1 + (t : ℂ)) / 2) := by
-  obtain ⟨-, -, ⟨Z, hZ⟩, h4⟩ := h F E S r t c _ (val μ) (val χ)
-    ⟨hS, ht, fun w hw => ⟨(hc w hw).1, (hc w hw).2, norm_val μ w, norm_val χ w, hπ w hw⟩⟩
-  exact ⟨_, (h4 Z hZ).1, (h4 Z hZ).2.2.1, (h4 Z hZ).2.2.2⟩
-
 end Rep
 
 theorem twist_liftFam (c : Fam E) (m x : HeightOneSpectrum (𝓞 E) → ℂˣ) (t : ℕ) :
     twist (liftFam c m x t) x⁻¹ = twist c m⁻¹ + segFam 1 t := by
   rw [liftFam, twist_add, twist_twist, twist_segFam, inv_mul_cancel_left, inv_mul_cancel]
-
-example : Hyp (F := F) (E := E) ∅ 1 7 (fun _ => {1}) (liftFam (fun _ => {1}) 1 1 7) 1 1 :=
-  ⟨Set.finite_empty, by norm_num, fun w _ => by simp⟩
-
-example : HasSimplePole (fun s => s⁻¹) 0 := by
-  refine ⟨(MeromorphicAt.id 0).inv, ?_, 1, one_ne_zero, ?_⟩
-  · have h : meromorphicOrderAt (id⁻¹ : ℂ → ℂ) 0 = -meromorphicOrderAt (id : ℂ → ℂ) 0 := meromorphicOrderAt_inv
-    rw [meromorphicOrderAt_id] at h
-    exact h
-  · refine tendsto_const_nhds.congr' ?_
-    filter_upwards [self_mem_nhdsWithin] with s hs
-    rw [sub_zero, mul_inv_cancel₀ hs]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.SimplePoleTwistedLift
 

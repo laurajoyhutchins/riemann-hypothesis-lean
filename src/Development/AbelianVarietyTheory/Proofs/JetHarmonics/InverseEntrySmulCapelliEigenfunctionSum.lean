@@ -1,11 +1,52 @@
-import Mathlib
-import Formalism.HermitianCurvature.StatementU
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.HermitianCurvature.LetterProductDoubleDegreeCount
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CovectorMultiplierShift
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.EhInvEntry
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CapelliModuleModel
+module
+
+public import Formalism.HermitianCurvature.StatementQ
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CapelliModuleModel
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CovectorMultiplierShift
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.EhInvEntry
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.REAL Formalism.QuantumDeterminants Finset
 
@@ -65,6 +106,7 @@ theorem inv_entry_smul_eigen_split : ∀ (k r : ℕ) (Wp Wq : Type) [NormedAddCo
       (fun a _ => inCC_inv_entry_smul a j (hcc (v t a) m))
     refine ⟨b, Formalism.FourierDecayAlt.P.JCx2.mn_ccle_congr (fun g hg => ?_) hb⟩
     beta_reduce
+
     rw [map_sum, Finset.sum_apply]
     exact Finset.sum_congr rfl fun a _ => (hx _ _ g hg).symm
   · rw [← hqC _ _ g hg, hv2, map_smul, Pi.smul_apply]
@@ -72,6 +114,7 @@ theorem inv_entry_smul_eigen_split : ∀ (k r : ℕ) (Wp Wq : Type) [NormedAddCo
     push_cast
     refine Finset.prod_congr rfl fun s _ => ?_
     split_ifs <;> push_cast <;> ring
+
   · rw [← hw g hg, ← hx i _ g hg, hv1, map_sum, Finset.sum_apply]
 
 end GlobalTheory

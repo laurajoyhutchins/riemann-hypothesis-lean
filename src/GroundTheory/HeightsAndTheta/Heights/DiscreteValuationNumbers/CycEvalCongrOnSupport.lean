@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BlowUpPushHypothesesExample
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BlowUpPushHypothesesExample
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.GroupWithZero.Indicator
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -22,13 +70,13 @@ theorem powMonomial_isMultiHomog (e : K → ℕ) (i : ∀ k, ι k) :
   rw [key] at h
   exact h
 
-omit [Fintype K] [DecidableEq K] in
 
+omit [Fintype K] [DecidableEq K] in
 theorem liftForm_C_eq {J : Type} (a : R) : liftForm (ι := ι) (J := J) (C a : MRing ι R) = C a := by
   simp [liftForm]
 
-omit [Fintype K] [DecidableEq K] in
 
+omit [Fintype K] [DecidableEq K] in
 theorem cycEval_congr_on_support {n n' : Ideal (MRing ι R) → ℤ} (Z : Ideal (MRing ι R) → ℤ)
     (h : ∀ W, Z W ≠ 0 → n W = n' W) : cycEval n Z = cycEval n' Z := by
   unfold cycEval
@@ -37,9 +85,10 @@ theorem cycEval_congr_on_support {n n' : Ideal (MRing ι R) → ℤ} (Z : Ideal 
   · rw [hW, zero_mul, zero_mul]
   · rw [h W hW]
 
+
+open scoped Classical in
 omit [Fintype K] [DecidableEq K] in
 open Classical in
-
 theorem cycEval_ite (p : Ideal (MRing ι R) → Prop) (A B : Ideal (MRing ι R) → ℤ)
     (Z : Ideal (MRing ι R) → ℤ) (hZ : (Function.support Z).Finite) :
     cycEval (fun W => if p W then A W else B W) Z =
@@ -51,8 +100,8 @@ theorem cycEval_ite (p : Ideal (MRing ι R) → Prop) (A B : Ideal (MRing ι R) 
   dsimp only
   split_ifs <;> ring
 
-omit [Fintype K] [DecidableEq K] in
 
+omit [Fintype K] [DecidableEq K] in
 theorem vecCons_liftMDeg {d : ℕ} (c : K → ℕ) (L : Fin d → K → ℤ) :
     Matrix.vecCons (fun k => ((liftMDeg c k : ℕ) : ℤ)) (liftDegs L) =
       liftDegs (Matrix.vecCons (fun k => (c k : ℤ)) L) := by
@@ -112,16 +161,16 @@ theorem BlowUpInvariance.proof (hvert : BlowUpVerticalPush.Statement.{u})
   rw [cycEval_ite _ _ _ _ (hfin O (Option K) (extIdx ι (BlowUpIdx ι)) (blowUpOf P (blowUpGens s g f m e))
     (liftForm s)), cycEval_ite _ _ _ _ (hfin O K ι P s)]
   congr 1
-  · have hv := hvert O ϖ hϖ K ι _ P (d + 1) hP _ _ hN ⟨some none, hfm⟩ c s hs hsP (Matrix.vecCons b L)
-    convert hv using 4
-    congr 1
-    funext i
-    exact Fin.cases rfl (fun i => rfl) i
+  · have hdegrees : Matrix.vecCons (liftDeg b) (liftDegs L) = liftDegs (Matrix.vecCons b L) := by
+      funext i
+      exact Fin.cases rfl (fun _ => rfl) i
+    rw [hdegrees]
+    exact hvert O ϖ hϖ K ι _ P (d + 1) hP _ _ hN ⟨some none, hfm⟩ c s hs hsP (Matrix.vecCons b L)
   rw [← htrans (fun W => cycEval (fun G => vNum G L) (ratDiv W f g))]
   refine cycEval_congr_on_support _ fun W hW => ?_
   by_cases hϖ' : (C ϖ : MRing (extIdx ι (BlowUpIdx ι)) O) ∈ W
-  · simp only [if_pos hϖ']
-  rw [if_neg hϖ', if_neg hϖ']
+  · simp only [ite_eq_left hϖ']
+  rw [ite_eq_right hϖ', ite_eq_right hϖ']
   obtain ⟨hWs, hWeq⟩ := hpt W hW hϖ'
   have hϖW : (C ϖ : MRing ι O) ∉ W.comap (liftForm (ι := ι) (J := BlowUpIdx ι) (R := O)) := by
     rwa [Ideal.mem_comap, liftForm_C_eq]

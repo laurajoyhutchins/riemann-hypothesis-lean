@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
+public import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.Div
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+public import Mathlib.RingTheory.PowerSeries.Order
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -13,28 +67,6 @@ variable {O LL : Type} [CommRing O] [IsDomain O] [Field LL] [Algebra O LL]
   (u : PowerSeries LL) (hu : IsUnit u) (hψ : ψ (PowerSeries.X + PowerSeries.C l) = PowerSeries.X * u)
 include hinj hψC hu hψ
 
-theorem dvd_cancel_unit {k : ℕ} {f : PowerSeries LL} (h : PowerSeries.X ^ k ∣ u * f) :
-    PowerSeries.X ^ k ∣ f := by
-  have dvd_of_dvd_isUnit_mul_lemma {R : Type _} [CommRing R] {u f g : R} (hu : IsUnit u)
-      (h : g ∣ u * f) : g ∣ f := by
-    obtain ⟨v, rfl⟩ := hu
-    have e : f = ↑v⁻¹ * (↑v * f) := by rw [← mul_assoc, Units.inv_mul, one_mul]
-    rw [e]
-    exact dvd_mul_of_dvd_right h _
-  exact
-       dvd_of_dvd_isUnit_mul_lemma hu h
-
-omit hinj hψC hψ in
-theorem dvd_cancel_unit' {k : ℕ} {f : PowerSeries LL} (h : PowerSeries.X ^ k ∣ u * f) :
-    PowerSeries.X ^ k ∣ f := by
-  have dvd_of_dvd_isUnit_mul_lemma {R : Type _} [CommRing R] {u f g : R} (hu : IsUnit u)
-      (h : g ∣ u * f) : g ∣ f := by
-    obtain ⟨v, rfl⟩ := hu
-    have e : f = ↑v⁻¹ * (↑v * f) := by rw [← mul_assoc, Units.inv_mul, one_mul]
-    rw [e]
-    exact dvd_mul_of_dvd_right h _
-  exact
-       dvd_of_dvd_isUnit_mul_lemma hu h
 
 theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
     PowerSeries.X ^ k ∣ ψ (r : PowerSeries O) → r = 0 := by
@@ -46,7 +78,7 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
     exact dvd_mul_of_dvd_right h _
   have hψX : ψ PowerSeries.X = PowerSeries.X * u - PowerSeries.C (algebraMap O LL l) := by
     have h := hψ
-    rw [map_add, hψC] at h
+    rw [map_add (f := _), hψC] at h
     exact eq_sub_of_add_eq h
   intro k
   induction k with
@@ -70,8 +102,6 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
           (Polynomial.X + Polynomial.C l) * Polynomial.divByMonic r (Polynomial.X + Polynomial.C l) = r := by
         first
           | exact Polynomial.modByMonic_add_div r (Polynomial.X + Polynomial.C l)
-          | exact Polynomial.modByMonic_add_div r _ hmon
-          | exact Polynomial.modByMonic_add_div r hmon
       rw [hrem] at h1
       exact h1.symm
     have hqdeg : (Polynomial.divByMonic r (Polynomial.X + Polynomial.C l)).degree < k := by
@@ -79,19 +109,15 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
       · rw [hq0, Polynomial.degree_zero]
         first
           | exact WithBot.bot_lt_coe _
-          | simp
       · have hr0 : r ≠ 0 := by
           rintro rfl
           exact hq0 (Polynomial.zero_divByMonic _)
         have hpos : 0 < (Polynomial.X + Polynomial.C l : Polynomial O).degree := by
           first
             | (rw [Polynomial.degree_X_add_C]; exact zero_lt_one)
-            | simp
         have h1 : (Polynomial.divByMonic r (Polynomial.X + Polynomial.C l)).degree < r.degree := by
           first
             | exact Polynomial.degree_divByMonic_lt r (Polynomial.X + Polynomial.C l) hr0 hpos
-            | exact Polynomial.degree_divByMonic_lt r _ hmon hr0 hpos
-            | exact Polynomial.degree_divByMonic_lt r hmon hr0 hpos
         rw [Polynomial.degree_eq_natDegree hq0, Polynomial.degree_eq_natDegree hr0] at h1
         rw [Polynomial.degree_eq_natDegree hr0] at hr
         rw [Polynomial.degree_eq_natDegree hq0]
@@ -114,9 +140,8 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
       (dvd_pow_self _ (Nat.succ_ne_zero k)).trans hdvd
     rw [hψr, PowerSeries.X_dvd_iff] at hX
     first
-      | simp only [map_add, map_mul, PowerSeries.constantCoeff_C, PowerSeries.constantCoeff_X,
+      | simp only [map_add (f := _), map_mul, PowerSeries.constantCoeff_C, PowerSeries.constantCoeff_X,
           zero_mul, add_zero] at hX
-      | simp at hX
     have hc0 : c = 0 := hinj (hX.trans (map_zero _).symm)
     simp only [hc0, map_zero, zero_add] at hψr
     rw [hψr, pow_succ'] at hdvd
@@ -131,7 +156,7 @@ theorem dvd_of_dvd_image [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIde
     (ha : PowerSeries.X ^ k ∣ ψ a) : (PowerSeries.X + PowerSeries.C l) ^ k ∣ a := by
   have hres : PowerSeries.map (IsLocalRing.residue O) ((PowerSeries.X + PowerSeries.C l) ^ k) =
       PowerSeries.X ^ k := by
-    rw [map_pow, map_add, PowerSeries.map_X, PowerSeries.map_C,
+    rw [map_pow, map_add (f := _), PowerSeries.map_X, PowerSeries.map_C,
       (IsLocalRing.residue_eq_zero_iff l).mpr hlm, map_zero, add_zero]
   have hg : PowerSeries.map (IsLocalRing.residue O) ((PowerSeries.X + PowerSeries.C l) ^ k) ≠ 0 := by
     rw [hres]; exact pow_ne_zero _ PowerSeries.X_ne_zero
@@ -141,19 +166,16 @@ theorem dvd_of_dvd_image [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIde
     have hz : Ideal.Quotient.mk (IsLocalRing.maximalIdeal O) l = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hlm
     first
       | simpa [hz, PowerSeries.order_X_pow] using h
-      | simpa [hz] using h
       | (rw [hres, PowerSeries.order_X_pow, ENat.toNat_coe] at h; exact h)
       | (simp only [hres, PowerSeries.order_X_pow, ENat.toNat_coe] at h; exact h)
-      | simpa [hres] using h
   have hψa : ψ a = (PowerSeries.X * u) ^ k * ψ q + ψ (r : PowerSeries O) := by
-    rw [hdiv.eq_mul_add, map_add, map_mul, map_pow, hψ]
+    rw [hdiv.eq_mul_add, map_add (f := _), map_mul, map_pow, hψ]
   have h1 : PowerSeries.X ^ k ∣ (PowerSeries.X * u) ^ k * ψ q :=
     dvd_mul_of_dvd_left (pow_dvd_pow_of_dvd (dvd_mul_right _ _) k) _
   have h2 : PowerSeries.X ^ k ∣ ψ (r : PowerSeries O) := by
     rw [hψa] at ha
     first
       | exact (dvd_add_right h1).mp ha
-      | simpa using dvd_sub ha h1
   have hr0 : r = 0 := poly_eq_zero hinj l ψ hψC u hu hψ k r hdeg h2
   rw [hdiv.eq_mul_add, hr0, Polynomial.coe_zero, add_zero]
   exact dvd_mul_right _ _

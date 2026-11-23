@@ -1,4 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SupportPhiZeroSubset
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SupportPhiZeroSubset
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBI
 
@@ -21,12 +70,12 @@ section lin
 variable {r : ℕ} (T' : ℝ)
 
 theorem hco_add_left (c c' d : Co r) : hco T' (c + c') d = hco T' c d + hco T' c' d := by
-  simp only [hco, Prod.fst_add, Prod.snd_add, Pi.add_apply, map_add, add_mul, mul_add,
+  simp only [hco, Prod.fst_add, Prod.snd_add, Pi.add_apply, map_add (f := _), add_mul, mul_add,
     Finset.sum_add_distrib]
   ring
 
 theorem hco_add_right (c d d' : Co r) : hco T' c (d + d') = hco T' c d + hco T' c d' := by
-  simp only [hco, Prod.fst_add, Prod.snd_add, Pi.add_apply, map_add, add_mul, mul_add,
+  simp only [hco, Prod.fst_add, Prod.snd_add, Pi.add_apply, map_add (f := _), add_mul, mul_add,
     Finset.sum_add_distrib]
   ring
 
@@ -73,7 +122,8 @@ theorem hco_sum_right {ι : Type*} (s : Finset ι) (c : Co r) (f : ι → Co r) 
   rw [Finset.sum_insert ha, Finset.sum_insert ha, hco_add_right, ih]
 
 theorem hco_symm (c d : Co r) : hco T' d c = conj (hco T' c d) := by
-  simp only [hco, map_add, map_sub, map_mul, map_sum, Complex.conj_conj, Complex.conj_ofReal]
+
+  simp only [hco, map_add (f := _), map_sub, map_mul, map_sum, Complex.conj_conj, Complex.conj_ofReal]
   have e1 : ∑ a, d.1 a * conj (c.2.1 a) = ∑ a, conj (c.2.1 a) * d.1 a :=
     Finset.sum_congr rfl fun _ _ => mul_comm _ _
   have e2 : ∑ a, d.2.1 a * conj (c.1 a) = ∑ a, conj (c.1 a) * d.2.1 a :=
@@ -95,10 +145,6 @@ theorem cvec_smul (x : ℂ) (c : Co r) : cvec k z' ν' (x • c) = x • cvec k 
   simp only [cvec, Prod.smul_fst, Prod.smul_snd, Pi.smul_apply, smul_eq_mul, mul_smul,
     ← Finset.smul_sum, smul_add]
 
-theorem cvec_sub (c d : Co r) : cvec k z' ν' (c - d) = cvec k z' ν' c - cvec k z' ν' d := by
-  simp only [cvec, Prod.fst_sub, Prod.snd_sub, Pi.sub_apply, sub_smul, Finset.sum_sub_distrib]
-  abel
-
 theorem cvec_sum {ι : Type*} (s : Finset ι) (f : ι → Co r) :
     cvec k z' ν' (∑ i ∈ s, f i) = ∑ i ∈ s, cvec k z' ν' (f i) := by
   classical
@@ -116,8 +162,9 @@ theorem herm_cvec (hz' : inWb k r z') (hν : inWb k r ν') (hνz : herm (Hpk k r
   have hsym : ∀ v w : Fin (2 * r + k + 1) → ℂ,
       herm (Hpk k r) v w = conj (herm (Hpk k r) w v) := by
     intro v w
+
     simp only [herm, dotProduct, Matrix.mulVec, Pi.star_apply, map_sum, map_mul, Finset.mul_sum,
-      Finset.sum_mul, Complex.star_def, Complex.conj_conj]
+    Finset.sum_mul, Complex.star_def, Complex.conj_conj]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     rw [← hH j i]
@@ -130,7 +177,7 @@ theorem herm_cvec (hz' : inWb k r z') (hν : inWb k r ν') (hνz : herm (Hpk k r
     intro x v w; simp only [herm, Matrix.mulVec_smul, dotProduct_smul, smul_eq_mul]
   have a2 : ∀ v w w' : Fin (2 * r + k + 1) → ℂ,
       herm (Hpk k r) v (w + w') = herm (Hpk k r) v w + herm (Hpk k r) v w' := by
-    intro v w w'; rw [hsym, a1, map_add, ← hsym, ← hsym]
+    intro v w w'; rw [hsym, a1, map_add (f := _), ← hsym, ← hsym]
   have s2 : ∀ (x : ℂ) (v w : Fin (2 * r + k + 1) → ℂ),
       herm (Hpk k r) v (x • w) = conj x * herm (Hpk k r) v w := by
     intro x v w; rw [hsym, s1, map_mul, ← hsym]

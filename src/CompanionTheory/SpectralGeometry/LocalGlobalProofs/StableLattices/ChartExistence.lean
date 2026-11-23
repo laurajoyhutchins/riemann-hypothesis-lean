@@ -1,8 +1,58 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.BesselOrbitBounds.BesselMapUniqueness.BesselMapUniqGap
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothCyc
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.PhMeas
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.IwaCore
+module
+
+public import CompanionTheory.AutomorphicTheory.BesselOrbitBounds.BesselMapUniqueness.BesselMapUniqGap
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.PhMeas
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChainRuleSmooth.ExpIntertwine
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.QuantumDeterminants CompanionTheory.D.Upq.Sm CompanionTheory.Bmu
 open scoped ContDiff
@@ -56,7 +106,7 @@ theorem smooth_solve {P F V : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
       rw [hv, ← mul_apply_eq_comp, Ring.mul_inverse_cancel _ ht']; rfl
     have h2 : M t (r v) + (v - π v) = y t := h1
     have h3 := congrArg π h2
-    rw [map_add, map_sub, hπ (M t (r v)), hp' _ (hL _ _), hπ (π v), hp' (π v) (p v).2, hπ (y t),
+    rw [map_add (f := _), map_sub, hπ (M t (r v)), hp' _ (hL _ _), hπ (π v), hp' (π v) (p v).2, hπ (y t),
       hp' _ (hyL t), sub_self, add_zero] at h3
     exact h3
 
@@ -183,7 +233,7 @@ theorem prodEx_mem {Hm : Mat n} : ∀ {d : ℕ} (X : Fin d → Mat n), (∀ j, L
 
 theorem contDiff_tail {d : ℕ} :
     ContDiff ℝ ∞ (fun (t : Fin (d + 1) → ℝ) (j : Fin d) => t j.succ) :=
-  contDiff_pi.2 fun j => contDiff_apply ℝ ℝ j.succ
+  contDiff_pi.2 fun j => contDiff_apply ℝ (fun _ => ℝ) j.succ
 
 theorem contDiff_prodEx : ∀ {d : ℕ} (X : Fin d → Mat n), ContDiff ℝ ∞ (prodEx X)
   | 0, X => by
@@ -191,17 +241,22 @@ theorem contDiff_prodEx : ∀ {d : ℕ} (X : Fin d → Mat n), ContDiff ℝ ∞ 
     rw [this]; exact contDiff_const
   | d + 1, X => by
     rw [show prodEx X = _ from funext (prodEx_succ X)]
-    exact contDiff_mul' ((contDiff_ex (X 0)).comp (contDiff_apply ℝ ℝ 0))
+    exact contDiff_mul' ((contDiff_ex (X 0)).comp (contDiff_apply ℝ (fun _ => ℝ) 0))
       ((contDiff_prodEx _).comp contDiff_tail)
 
 theorem exists_fields {Hm : Mat n} (h : Hm * Hm = 1) : ∀ {d : ℕ} (X : Fin d → Mat n),
     (∀ j, Lie Hm (X j)) → ∃ Z : Fin d → (Fin d → ℝ) → Mat n, (∀ j t, Lie Hm (Z j t)) ∧
       (∀ j t (τ : ℝ), prodEx X (t + τ • (Pi.single j 1 : Fin d → ℝ)) = prodEx X t * ex (Z j t) τ) ∧
-      (∀ j, ContDiff ℝ ∞ (Z j)) ∧ ∀ j, Z j 0 = X j
-  | 0, X, _ => ⟨fun j => j.elim0, fun j => j.elim0, fun j => j.elim0, fun j => j.elim0,
+      (∀ j, ContDiff ℝ ∞ (Z j)) ∧ ∀ j, Z j 0 = X j := by
+  intro d
+  induction d with
+  | zero =>
+    intro X hX
+    exact ⟨fun j => j.elim0, fun j => j.elim0, fun j => j.elim0, fun j => j.elim0,
       fun j => j.elim0⟩
-  | d + 1, X, hX => by
-    obtain ⟨Z, h1, h2, h3, h4⟩ := exists_fields h (fun j : Fin d => X j.succ) (fun j => hX j.succ)
+  | succ d ih =>
+    intro X hX
+    obtain ⟨Z, h1, h2, h3, h4⟩ := ih (fun j : Fin d => X j.succ) (fun j => hX j.succ)
     have hm := prodEx_mem (fun j : Fin d => X j.succ) (fun j => hX j.succ)
     refine ⟨Fin.cons (α := fun _ => (Fin (d + 1) → ℝ) → Mat n)
       (fun t => (prodEx (fun j : Fin d => X j.succ) (fun j => t j.succ))⁻¹ * X 0 *

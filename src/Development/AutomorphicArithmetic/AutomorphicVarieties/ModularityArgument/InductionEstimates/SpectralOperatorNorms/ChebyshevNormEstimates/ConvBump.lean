@@ -1,20 +1,67 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.KillExempt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.HeckeP
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.ActUniq
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.IntegrableAeCpt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.CompLine
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.EqZeroOfSlices
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.KillExempt
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.CompLine
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.EqZeroOfSlices
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.HeckeP
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.ChebyshevNormEstimates.IntegrableAeCpt
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.UnipotentBlockMatrices.ClosedKernelMinors.FlatInt
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ScatteringLimits.ConvolutionSpectra.ConvSpec
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.Imports
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.AmpRep
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.RepOps
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.AmpRep
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.CompBound
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.CompCap
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.CompShift
+public import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.RepOps
 import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.UmgOps
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.CompBound
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.CompCap
-import Development.AutomorphicArithmetic.Foundations.Convolution.BlockHeckeSlices.CuspidalNormBounds.CompShift
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CommuteCapOfCommuteEop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.InductionEstimates.SpectralOperatorNorms.BloIn
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain MvPolynomial Filter Topology
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -120,7 +167,7 @@ private theorem coef (n i : ℕ) (hi : i ≤ n) (m : Multiset ℂ) (hm : m.card 
   have hinj : Set.InjOn (fun j : Fin (n + 1) => ((j : ℕ) : ℂ)) (Finset.univ : Finset (Fin (n + 1))) := fun a _ b _ h =>
     Fin.ext (Nat.cast_injective h)
   have h1 := congrArg (fun q : Polynomial ℂ => q.coeff (n - i)) (Lagrange.eq_interpolate hinj hd)
-  simp only [Lagrange.interpolate_apply, Polynomial.finset_sum_coeff, Polynomial.coeff_C_mul] at h1
+  simp only [Lagrange.interpolate_apply, Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul] at h1
   have h2 : p.coeff (n - i) = m.esymm i := by
     rw [hp, Multiset.prod_X_add_C_coeff m (by omega), hm, Nat.sub_sub_self hi]
   rw [← h2, h1]
@@ -130,7 +177,7 @@ private theorem coef (n i : ℕ) (hi : i ≤ n) (m : Multiset ℂ) (hm : m.card 
 
 open GlobalTheory.CuspRep UpperTheory.V.Cm
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {S : Set (Pl E)} (b b' : BW.Blo S 2)
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {S : Set (Pl E)} (b b' : BW.Blo S 2)
 
 private def Loc (ψ : Sm E (2 + 2)) (a : ℂ) : Prop :=
   BW.Umg ψ ∧ ∀ t : Fin 2 → ℝ, |t 0 - t 1| < 1 → (dat2 b b').comp ψ.1 t = a * Complex.exp ((t 0 - t 1 : ℝ) : ℂ)
@@ -163,6 +210,7 @@ private theorem Loc.der {ψ : Sm E (2 + 2)} {a : ℂ} (h : Loc b b' ψ a) (j : F
     Loc b b' ((dat2 b b').J j ψ) ((![1, -1] j : ℝ) * a) := by
   refine ⟨?_, fun t ht => der_loc ((dat2 b b').comp ψ.1) a h.2 j t ht _ ((BW.compShift E S _ (dat2 b b') ψ t h.1).2 j)⟩
   have : ∃ u, (dat2 b b').J j = uC E (2 + 2) u := by
+
     simp only [BW.Dat.J, ← uC_genC, ← map_sum, ← map_smul]
     exact ⟨_, rfl⟩
   obtain ⟨u, hu⟩ := this
@@ -213,6 +261,7 @@ private theorem Loc.capelli {ψ : Sm E (2 + 2)} {a : ℂ} (h : Loc b b' ψ a) (�
 private theorem zop_X {n : ℕ} (y : Ix E n) : BW.zop (X y) = ∑ j : Fin (n + 1),
     (Lagrange.basis Finset.univ (fun j : Fin (n + 1) => ((j : ℕ) : ℂ)) j).coeff (n - (y.2 + 1)) •
       (cap y.1 ((j : ℕ) : ℂ) : Module.End ℂ (Sm E n)) := by
+
   simp only [BW.zop, BW.evZ, aeval_X, BW.zC, map_sum, map_smul, uC_capC]
 
 private theorem Loc.z {ψ : Sm E (2 + 2)} {a : ℂ} (h : Loc b b' ψ a) (y : Ix E (2 + 2)) :
@@ -242,7 +291,7 @@ private theorem Loc.kill {ψ : Sm E (2 + 2)} {a : ℂ} {g : GA E (2 + 2)} (h : L
   have l₂ := h.z y
   rw [lam_eq, hm] at l₂
   have l₃ := (h.lin l₂ (-m.esymm (y.2 + 1))).2 0 (by simp)
-  rw [map_add, map_smul, rt_zop, l₃]
+  rw [map_add (f := _), map_smul, rt_zop, l₃]
   ring
 
 private theorem comb {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V] (c : ℂ) {u v : ℝ → V} {U W : L V}
@@ -259,7 +308,7 @@ end UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.BumpConvolutionOperators
 
 open UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.BumpConvolutionOperators in
 theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.genZ :
-    ∀ {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {μ : Measure (normOneGL E (2 + 2))} [μ.IsHaarMeasure] {θ : Twist μ} {𝔢 : Side θ 2} (𝔵 : Fam 𝔢) (y : Ix E (2 + 2)),
+    ∀ {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {μ : Measure (normOneGL (K := E) (n := (2 + 2)))} [μ.IsHaarMeasure] {θ : Twist μ} {𝔢 : Side θ 2} (𝔵 : _root_.UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.Fam 𝔢) (y : Ix E (2 + 2)),
       (∃ β, Ker β ∧ Conv 𝔵.A'.J 𝔵.A'.J (𝔢.toAmp.Z y) β ∧ symb β 0 = (𝔵.Λ y.1).esymm (y.2 + 1) • 𝔵.a₀) ∧
         𝔢.toAmp.Z y ∘L 𝔵.P = 𝔵.P ∘L 𝔢.toAmp.Z y := by
   intro E _ _ _ μ _ θ 𝔢 𝔵 y
@@ -283,7 +332,7 @@ theorem UpperTheory.V.Z.InvariantSubmoduleMonicPolynomial.genZ :
   set φ := Lm (𝔵.A'.J U)
   set s := (𝔵.Λ y.1).esymm (y.2 + 1) with hs
   have r₃ := (BW.repOps E (2 + 2) μ (by norm_num) _ _ r₁).2.1 _ _ (-s) r₂
-  rw [← map_smul, ← map_add] at r₃
+  rw [← map_smul, ← map_add (f := _)] at r₃
   have key : (-s) • 𝔵.a₀ e + symb β 0 e = 0 := by
     refine bloEx 𝔵 _ fun b b' hb hb' k hk => ?_
     obtain ⟨c, hc0, hcl⟩ := compLine 𝔵 b b' hb hb'

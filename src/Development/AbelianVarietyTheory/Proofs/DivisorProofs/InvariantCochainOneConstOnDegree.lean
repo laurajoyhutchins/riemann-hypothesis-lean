@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EllFamNontrivial
-import Development.AbelianVarietyTheory.Definitions.Divisors.FstTszeSec
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsParameterFunctionOfFibreDerivZero
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsJetMorphismExtendingTranslationStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CochainEqOfSameDegreeChartMorphismStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EllFamNontrivial
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CochainEqOfSameDegreeChartMorphismStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsJetMorphismExtendingTranslationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsParameterFunctionOfFibreDerivZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FstTszeSec
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,11 +67,11 @@ theorem ptHom_deg_eq (K : Charts F) {m m' : Λ} {k : K.K} (T : K.Obj) (e : K.le 
 
 theorem ptHom_triv_comp (K : Charts F) {l m : Λ} {k k' : K.K} (e : K.le l k' k) (T : K.Obj)
     (e₂ : K.le m T.k k') : ptHom (K.triv k') e ≫ ptHom T e₂ = ptHom T (K.le_trans e e₂) :=
-  hom_ext (fun c ↦ show T.ρ (sh e₂ (sh e c)) = T.ρ (sh (K.le_trans e e₂) c) by rw [sh_sh]) rfl
+  hom_ext (fun c ↦ show T.ρ (K.sh e₂ (K.sh e c)) = T.ρ (K.sh (K.le_trans e e₂) c) by rw [sh_sh]) rfl
 
 theorem ptHom_eq_comp (K : Charts F) {m : Λ} {k : K.K} (T : K.Obj) (e : K.le m T.k k) :
     ptHom T e = ptHom (K.triv T.k) e ≫ ptHom T (K.le_refl T.k) :=
-  hom_ext (fun c ↦ show T.ρ (sh e c) = T.ρ (sh (K.le_refl T.k) (sh e c)) by rw [sh_refl]) (add_zero m).symm
+  hom_ext (fun c ↦ show T.ρ (K.sh e c) = T.ρ (K.sh (K.le_refl T.k) (K.sh e c)) by rw [sh_refl]) (add_zero m).symm
 
 theorem invCochain_const : ∀ {I : Type} [Fintype I] {g : ℕ} {Λ : Type} [AddCommGroup Λ] {F : Fam I g Λ}
     (K : Charts F), K.Rich → ∀ (h : C1 K.Oc) (l : Λ),
@@ -46,7 +89,7 @@ theorem invCochain_const : ∀ {I : Type} [Fintype I] {g : ℕ} {Λ : Type} [Add
     rw [ptHom_deg_eq K (K.triv k') e hm]
 
   have hR : ∀ {k k' k'' : K.K} (e : K.le l k' k) (e₂ : K.le 0 k'' k'),
-      sh e₂ (B k' k e) = B k'' k (le_of_deg_eq (K.le_trans e e₂) (add_zero l)) := by
+      K.sh e₂ (B k' k e) = B k'' k (le_of_deg_eq (K.le_trans e e₂) (add_zero l)) := by
     intro k k' k'' e e₂
     have := hA _ _ _ (ptHom (K.triv k') e) (ptHom (K.triv k'') e₂) rfl rfl
     rw [ptHom_triv_comp, hBv _ (add_zero l)] at this
@@ -69,7 +112,7 @@ theorem invCochain_const : ∀ {I : Type} [Fintype I] {g : ℕ} {Λ : Type} [Add
     have := congrArg (fun x : TrivSqZeroExt (Hol (K.W k')) (Fin g → Hol (K.W k')) ↦ x.snd a) (e0.trans e1.symm)
     have s0 : ∀ x : Hol (K.W k'), ((jet0 k').φ x : TrivSqZeroExt (Hol (K.W k')) (Fin g → Hol (K.W k'))).snd a = 0 :=
       fun x ↦ by
-        show (TrivSqZeroExt.inl (sh (K.le_refl k') x) : TrivSqZeroExt (Hol (K.W k')) (Fin g → Hol (K.W k'))).snd a = 0
+        show (TrivSqZeroExt.inl (K.sh (K.le_refl k') x) : TrivSqZeroExt (Hol (K.W k')) (Fin g → Hol (K.W k'))).snd a = 0
         rw [TrivSqZeroExt.snd_inl]; rfl
     have s1 : ∀ x : Hol (K.W k'), ((jet1 k').φ x : TrivSqZeroExt (Hol (K.W k')) (Fin g → Hol (K.W k'))).snd a = dw a x :=
       fun x ↦ snd_tszeSec _ x a
@@ -105,7 +148,7 @@ theorem invCochain_const : ∀ {I : Type} [Fintype I] {g : ℕ} {Λ : Type} [Add
         ⟨le_of_deg_eq (K.le_trans gm j₀) (add_zero m), fm⟩⟩
   obtain ⟨p, hp⟩ := GlobalTheory.AnPer.Charts.exists_cst_of_dw_eq_zero K' hK' (fun x ↦ B x.1.1 x.1.2 x.2)
     (fun x y e ↦ by
-      show sh (K := K) e.1 (B _ _ x.2) = B _ _ y.2
+      show K.sh e.1 (B _ _ x.2) = B _ _ y.2
       rw [hR x.2 e.1]
       exact hC e.2 y.2)
     (fun x i ↦ hD x.2 i)
@@ -117,7 +160,7 @@ theorem invCochain_const : ∀ {I : Type} [Fintype I] {g : ℕ} {Λ : Type} [Add
     have s4 := hA _ _ _ (ptHom (K.triv T'.k) e) (ptHom T' (K.le_refl T'.k)) hm rfl
     rw [← ptHom_eq_comp, hBv e hm, hp'] at s4
     rw [s4]
-    show T'.ρ (sh (K.le_refl T'.k) (K.cst T'.k p)) = _
+    show T'.ρ (K.sh (K.le_refl T'.k) (K.cst T'.k p)) = _
     rw [sh_cst, T'.ρ_cst]
   refine ⟨p, fun T T' φ hφ ↦ ?_⟩
   have hd : (ptHom T (K.le_refl T.k) ≫ φ).deg = l := by

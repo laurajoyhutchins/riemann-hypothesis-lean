@@ -1,4 +1,44 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocalRepresentationL2
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.CentreSplitting.LocalRepresentationL2
+public import GroundTheory.AutomorphicForms.L2LocalComponents.Summand
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace
@@ -14,14 +54,14 @@ theorem UpperTheory.ConvolutionTheory.Dp.clsBasic :
   refine ⟨fun φ hφ h => eq_zero_of_cuspVecL_eq_zero hφ (toLp_injective μ (h.trans (map_zero (toLp μ)).symm)),
     fun φ => (cuspToL2 μ φ).2, fun φ hφ ψ g h => ?_, fun φ _ => ?_⟩
   · have h1 := (hr φ).translate (retractOne g)
-    have e : (fun y : normOneGL K n => (φ : AdelicGLn.AdelicGL K n → ℂ) ((y * retractOne g : normOneGL K n) : AdelicGLn.AdelicGL K n)) =
-        fun y : normOneGL K n => (ψ : AdelicGLn.AdelicGL K n → ℂ) (y : AdelicGLn.AdelicGL K n) := funext fun y => by
+    have e : (fun y : normOneGL (K := K) (n := n) => (φ : AdelicGLn.AdelicGL K n → ℂ) ((y * retractOne g : normOneGL (K := K) (n := n)) : AdelicGLn.AdelicGL K n)) =
+        fun y : normOneGL (K := K) (n := n) => (ψ : AdelicGLn.AdelicGL K n → ℂ) (y : AdelicGLn.AdelicGL K n) := funext fun y => by
       have e1 : g = (retractOne g : AdelicGLn.AdelicGL K n) * centralSection K n (detModule K n g) := by
         rw [coe_retractOne, inv_mul_cancel_right]
       rw [h]
       conv_rhs => rw [e1, ← mul_assoc, apply_mul_centralSection_of_mem hφ]
       rfl
-    have h2 : IsContRep μ (RG μ g (clsL μ φ)) fun y : normOneGL K n => (ψ : AdelicGLn.AdelicGL K n → ℂ) (y : AdelicGLn.AdelicGL K n) := by
+    have h2 : IsContRep μ (RG μ g (clsL μ φ)) fun y : normOneGL (K := K) (n := n) => (ψ : AdelicGLn.AdelicGL K n → ℂ) (y : AdelicGLn.AdelicGL K n) := by
       rw [← e]
       exact h1
     exact Lp.ext ((hr ψ).ae_eq_quotFun.trans h2.ae_eq_quotFun.symm)

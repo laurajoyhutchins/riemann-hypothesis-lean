@@ -1,8 +1,46 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Formalism.WeaklyAdmissibleFiltrations.StatementTor
-import Formalism.GaloisCohomology.LocalTateDualityK
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,22 +52,6 @@ variable {l : ℕ} [Fact l.Prime]
 
 def intSub (LL : FinExt l) : Submodule ↥(OL LL) ↥LL.1 :=
   LinearMap.range (Algebra.linearMap ↥(OL LL) ↥LL.1)
-
-def FracModInt (LL : FinExt l) : Type := ↥LL.1 ⧸ intSub LL
-
-instance (LL : FinExt l) : AddCommGroup (FracModInt LL) :=
-  inferInstanceAs (AddCommGroup (↥LL.1 ⧸ intSub LL))
-instance (LL : FinExt l) : Module ↥(OL LL) (FracModInt LL) :=
-  Submodule.Quotient.module (intSub LL)
-instance (LL : FinExt l) : TopologicalSpace (FracModInt LL) := ⊥
-instance (LL : FinExt l) : DiscreteTopology (FracModInt LL) := ⟨rfl⟩
-instance (LL : FinExt l) : IsTopologicalAddGroup (FracModInt LL) where
-  continuous_add := continuous_of_discreteTopology
-  continuous_neg := continuous_of_discreteTopology
-instance (LL : FinExt l) : ContinuousConstSMul ↥(OL LL) (FracModInt LL) where
-  continuous_const_smul _ := continuous_of_discreteTopology
-
-def FracModInt.mk (LL : FinExt l) : ↥LL.1 →ₗ[↥(OL LL)] FracModInt LL := (intSub LL).mkQ
 
 theorem norm_chi_le_one (P : LocPrime l) (K : FinExt l) (g : ↥(GK K)) :
     ‖(((P.PD K).χ g : ℚ_[l]ˣ) : ℚ_[l])‖ ≤ 1 := by
@@ -49,36 +71,5 @@ def chiInt (P : LocPrime l) (K : FinExt l) : ↥(GK K) →* ℤ_[l] where
     change (((P.PD K).χ (g * h) : ℚ_[l]ˣ) : ℚ_[l]) =
       (((P.PD K).χ g : ℚ_[l]ˣ) : ℚ_[l]) * (((P.PD K).χ h : ℚ_[l]ˣ) : ℚ_[l])
     rw [map_mul, Units.val_mul])
-
-def chiO (P : LocPrime l) (K LL : FinExt l) : ↥(GK K) →* (↥(OL LL))ˣ :=
-  ((algebraMap ℤ_[l] ↥(OL LL)).toMonoidHom.comp (chiInt P K)).toHomUnits
-
-def fracModIntTwist (P : LocPrime l) (K LL : FinExt l) :
-    Representation ↥(OL LL) ↥(GK K) (FracModInt LL) :=
-  Formalism.GaloisCohomology.scalRep (FracModInt LL) (chiO P K LL)
-
-theorem fracModIntTwist_mk (P : LocPrime l) (K LL : FinExt l) (g : ↥(GK K)) (x : ↥LL.1) :
-    fracModIntTwist P K LL g (FracModInt.mk LL x) =
-      FracModInt.mk LL (algebraMap ℚ_[l] ↥LL.1 (((P.PD K).χ g : ℚ_[l]ˣ) : ℚ_[l]) * x) := by
-  rw [fracModIntTwist, Formalism.GaloisCohomology.scalRep_apply, ← map_smul]
-  congr 1
-
-def H2IsoCoefficients {R G M : Type} [CommRing R] [Group G] [TopologicalSpace G] [AddCommGroup M]
-    [Module R M] [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousConstSMul R M]
-    (rho : Representation R G M) : Prop :=
-  Nonempty (ReciprocityTheory.Gal.H2 rho ≃ₗ[R] M)
-
-def TateLocalDualityDegreeTwoAt (P : LocPrime l) (K LL : FinExt l) : Prop :=
-  H2IsoCoefficients (fracModIntTwist P K LL)
-
-def TateLocalDualityDegreeTwoAll (D : D7) : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K LL : FinExt l), TateLocalDualityDegreeTwoAt (D.loc l) K LL
-
-def TateLocalDualityDegreeTwoGood (D : D7) : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l), Good K s LL →
-    TateLocalDualityDegreeTwoAt (D.loc l) K LL
-
-theorem TateLocalDualityDegreeTwoAll.tateDualityTop_of_all {D : D7} (h : TateLocalDualityDegreeTwoAll D) : TateLocalDualityDegreeTwoGood D :=
-  fun l _ K _ LL _ => h l K LL
 
 end GlobalTheory.IndefiniteRowSideFullHecke.TateLocalDualityDegreeTwo

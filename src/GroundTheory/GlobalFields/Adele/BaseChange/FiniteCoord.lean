@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.GlobalFields.Adele.BaseChange.FiniteMap
+module
+
+public import GroundTheory.GlobalFields.SemilocalAlgebras.Finite
+public import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+public import GroundTheory.GlobalFields.SemilocalAlgebras.NormTrace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Algebra.RestrictedProduct.Basic
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -42,22 +90,23 @@ def localCoord (v : HeightOneSpectrum (𝓞 K)) (i : ι) :
   ((Algebra.TensorProduct.basis (v.adicCompletion K) b).coord i).comp
     (tensorEquiv L v).symm.toLinearEquiv.toLinearMap
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem sum_localCoord (v : HeightOneSpectrum (𝓞 K)) (z : CompletionsOver L v) :
     ∑ i, algebraMap (v.adicCompletion K) (CompletionsOver L v) (localCoord b v i z) *
       algebraMap L (CompletionsOver L v) (b i) = z := by
   have h := (Algebra.TensorProduct.basis (v.adicCompletion K) b).sum_repr
     ((tensorEquiv L v).symm z)
   have h2 := congrArg (tensorEquiv L v) h
+
   rw [AlgEquiv.apply_symm_apply, map_sum] at h2
   conv_rhs => rw [← h2]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [Algebra.TensorProduct.basis_apply, map_smul, tensorEquiv_one_tmul, Algebra.smul_def]
   rfl
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem localCoord_algebraMap (v : HeightOneSpectrum (𝓞 K)) (i : ι) (l : L) :
     localCoord b v i (algebraMap L (CompletionsOver L v) l) =
       algebraMap K (v.adicCompletion K) (b.repr l i) := by
@@ -96,8 +145,8 @@ theorem localCoord_mem (v : HeightOneSpectrum (𝓞 K)) (i : ι) (z : Completion
   rw [localCoord_eq_sum_trace]
   exact sum_mem fun w _ ↦ trace_mem_adicCompletionIntegers v w.1 (hz w)
 
-omit [Fintype ι] [DecidableEq ι] in
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem continuous_localCoord (v : HeightOneSpectrum (𝓞 K)) (i : ι) :
     Continuous (localCoord b v i) :=
   IsModuleTopology.continuous_of_linearMap (localCoord b v i)

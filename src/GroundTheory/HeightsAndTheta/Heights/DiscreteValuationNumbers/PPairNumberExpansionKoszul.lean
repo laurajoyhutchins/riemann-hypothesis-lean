@@ -1,7 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagIndependenceAlgebra
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyCN
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagIndependenceAlgebra
 import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PMixedDiffLinear
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVerticalDivisorsCommute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -53,7 +109,7 @@ theorem exists_sub_rename_pairCollapse (p : Fin n) (G : MvPolynomial (Fin n ⊕ 
     obtain ⟨Q₁, h₁⟩ := hG
     obtain ⟨Q₂, h₂⟩ := hH
     refine ⟨Q₁ + Q₂, ?_⟩
-    rw [map_add, mul_add, ← h₁, ← h₂]
+    rw [map_add (f := _), mul_add, ← h₁, ← h₂]
     ring
   | mul_X G s hG =>
     obtain ⟨Q, hQ⟩ := hG
@@ -131,6 +187,7 @@ theorem koszul_finset (s : Finset (Fin n)) :
 
     have hcol : ∑ i, (if i = p then 0 else pairDiff i * G' i) = 0 := by
       have h := congrArg (rename (pairCollapse p)) hrel'
+
       rw [map_sum, map_zero] at h
       refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) h
       rw [map_mul, rename_pairCollapse_pairDiff]
@@ -182,8 +239,9 @@ theorem koszul_homogeneous {m : ℕ} (G : Fin n → MvPolynomial (Fin n ⊕ Fin 
     · exact isHomogeneous_zero _ _ _
     · exact homogeneousComponent_isHomogeneous _ _
   · have h := congrArg (homogeneousComponent (m - 1)) (hGK i)
+
     rw [homogeneousComponent_of_mem ((mem_homogeneousSubmodule _ _).mpr (hG i)), if_pos rfl,
-      map_sum] at h
+    map_sum] at h
     simp only [homogeneousComponent_linear_mul (isHomogeneous_pairDiff _)] at h
     rw [h]
     by_cases hm : m - 1 = 0
@@ -211,8 +269,8 @@ theorem vNum_vecCons_eq (W : Ideal (MRing ι O)) {k : ℕ} (b : K → ℤ) (L : 
   rw [List.ofFn_succ]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_succ]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem foldr_diffStep_perm {l₁ l₂ : List (K → ℤ)} (hl : l₁.Perm l₂) (h : (K → ℤ) → ℤ) :
     l₁.foldr diffStep h = l₂.foldr diffStep h := by
   induction hl with
@@ -227,8 +285,8 @@ theorem vNumL_perm (W : Ideal (MRing ι O)) {l₁ l₂ : List (K → ℤ)} (hl :
     vNumL W l₁ = vNumL W l₂ := by
   rw [vNumL_eq_foldr, vNumL_eq_foldr, foldr_diffStep_perm hl]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem classList_single_add_perm {σ : Type*} (cls : σ → K → ℤ) (s : σ) (μ : σ →₀ ℕ) :
     (classList cls (Finsupp.single s 1 + μ)).Perm (cls s :: classList cls μ) := by
   rw [← Multiset.coe_eq_coe]
@@ -236,8 +294,8 @@ theorem classList_single_add_perm {σ : Type*} (cls : σ → K → ℤ) (s : σ)
   rw [Multiset.coe_toList, ← Multiset.cons_coe, Multiset.coe_toList]
   simp [Finsupp.toMultiset_single]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem classList_length_of_mem_support {σ : Type*} (cls : σ → K → ℤ) {H : MvPolynomial σ ℤ}
     {t : ℕ} (hH : H.IsHomogeneous t) {μ : σ →₀ ℕ} (hμ : μ ∈ H.support) :
     (classList cls μ).length = t := by

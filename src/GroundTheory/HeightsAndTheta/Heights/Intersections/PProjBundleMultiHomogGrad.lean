@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.MvPolynomial.WeightedHomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -31,45 +77,7 @@ theorem aeval_weightedHomogeneousComponent_of_weights (w : σ → M) (ω : τ �
     · rw [(isWeightedHomogeneous_monomial w d c
         (m := Finsupp.weight w d) rfl).weightedHomogeneousComponent_ne m
         (Ne.symm hdm), hmon.weightedHomogeneousComponent_ne m (Ne.symm hdm), map_zero]
-  | add p q hp hq => simp only [map_add, hp, hq]
-
-theorem isWeightedHomogeneous_aeval_of_weights {w : σ → M} {ω : τ → M} {e : σ → MvPolynomial τ R}
-    (he : ∀ v, IsWeightedHomogeneous ω (e v) (w v)) {p : MvPolynomial σ R} {a : M}
-    (hp : IsWeightedHomogeneous w p a) : IsWeightedHomogeneous ω (aeval e p) a := by
-  rw [← hp.weightedHomogeneousComponent_same, aeval_weightedHomogeneousComponent_of_weights w ω e he]
-  exact weightedHomogeneousComponent_isWeightedHomogeneous _ _
-
-theorem weightedHomogeneousComponent_mem_map_aeval [DecidableEq M] {w : σ → M} {ω : τ → M}
-    {e : σ → MvPolynomial τ R} (he : ∀ v, IsWeightedHomogeneous ω (e v) (w v))
-    (G : Set (MvPolynomial σ R)) (hG : ∀ f ∈ G, ∃ a, IsWeightedHomogeneous w f a)
-    {f : MvPolynomial τ R} (hf : f ∈ Ideal.map (aeval e) (Ideal.span G)) (m : M) :
-    weightedHomogeneousComponent ω m f ∈ Ideal.map (aeval e) (Ideal.span G) := by
-  let _ := weightedGradedAlgebra R ω
-  have hom : (Ideal.map (aeval e) (Ideal.span G)).IsHomogeneous (weightedHomogeneousSubmodule R ω) := by
-    rw [Ideal.map_span]
-    refine Ideal.homogeneous_span _ _ fun x hx => ?_
-    obtain ⟨f, hfG, rfl⟩ := hx
-    obtain ⟨a, ha⟩ := hG f hfG
-    exact ⟨a, (mem_weightedHomogeneousSubmodule R ω a _).mpr (isWeightedHomogeneous_aeval_of_weights he ha)⟩
-  exact weightedHomogeneousComponent_mem_of_mem R ω hom hf m
-
-theorem weightedHomogeneousComponent_mul_of_left {M : Type*} [AddCancelCommMonoid M] {w : σ → M}
-    {c : MvPolynomial σ R} {m : M} (hc : IsWeightedHomogeneous w c m) (γ : M) (L : MvPolynomial σ R) :
-    weightedHomogeneousComponent w (γ + m) (c * L) = c * weightedHomogeneousComponent w γ L := by
-  classical
-  induction L using MvPolynomial.induction_on' with
-  | monomial d r =>
-    have hd := isWeightedHomogeneous_monomial w d r (m := Finsupp.weight w d) rfl
-    have hcd := hc.mul hd
-    by_cases hdm : Finsupp.weight w d = γ
-    · rw [(hdm ▸ hd : IsWeightedHomogeneous w (monomial d r) γ).weightedHomogeneousComponent_same]
-      rw [show γ + m = m + Finsupp.weight w d by rw [hdm, add_comm]]
-      exact hcd.weightedHomogeneousComponent_same
-    · rw [hd.weightedHomogeneousComponent_ne γ (Ne.symm hdm), mul_zero]
-      refine hcd.weightedHomogeneousComponent_ne _ fun h => hdm ?_
-      rw [add_comm m] at h
-      exact (add_right_cancel h).symm
-  | add p q hp hq => simp only [mul_add, map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
 
 end Graded
 

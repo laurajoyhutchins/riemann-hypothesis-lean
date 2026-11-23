@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.CechFunctor
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.CechNaturality.CechFunctor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -39,6 +82,7 @@ lemma cochain_apply (Φ : CechFamily U P P') (n : ℕ) (σ : Cochain P U n) (i :
 lemma cochain_d (Φ : CechFamily U P P') (n : ℕ) (σ : Cochain P U n) :
     Φ.cochain (n + 1) (d P U n σ) = d P' U n (Φ.cochain n σ) := by
   funext i
+
   rw [cochain_apply, d_apply, d_apply, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_zsmul, Φ.res_comm]
@@ -80,7 +124,8 @@ def ofHom (f : P ⟶ P') : CechFamily U P P' where
 lemma ofHom_cechH (f : P ⟶ P') (n : ℕ) (x : GroundTheory.Arith.SchemeCoh.cechH P U n) :
     (ofHom (U := U) f).cechH n x = cechHMap U f n x := by
   obtain ⟨σ, hσ, rfl⟩ := exists_cls x
-  rfl
+  rw [cechH_cls, cechHMap_cls]
+  exact cls_congr U (by funext i; rfl) _ _
 
 def comp (Φ : CechFamily U P P') (Ψ : CechFamily U P' P'') : CechFamily U P P'' where
   φ i := (Ψ.φ i).comp (Φ.φ i)
@@ -93,19 +138,6 @@ lemma comp_cechH (Φ : CechFamily U P P') (Ψ : CechFamily U P' P'') (n : ℕ)
     (Φ.comp Ψ).cechH n x = Ψ.cechH n (Φ.cechH n x) := by
   obtain ⟨σ, hσ, rfl⟩ := exists_cls x
   rfl
-
-def add (Φ Ψ : CechFamily U P P') : CechFamily U P P' where
-  φ i := Φ.φ i + Ψ.φ i
-  res_comm i j h x := by
-    simp only [AddMonoidHom.add_apply, map_add]
-    rw [Φ.res_comm, Ψ.res_comm]
-
-lemma add_cechH (Φ Ψ : CechFamily U P P') (n : ℕ) (x : GroundTheory.Arith.SchemeCoh.cechH P U n) :
-    (Φ.add Ψ).cechH n x = Φ.cechH n x + Ψ.cechH n x := by
-  obtain ⟨σ, hσ, rfl⟩ := exists_cls x
-  rw [cechH_cls, cechH_cls, cechH_cls]
-  exact cls_congr U (by funext i; rfl) _ (by
-    rw [map_add, ← cochain_d, ← cochain_d, hσ, map_zero, map_zero, add_zero])
 
 lemma cechH_congr {Φ Ψ : CechFamily U P P'} (h : ∀ {n : ℕ} (i : Fin (n + 1) → ι) x, Φ.φ i x = Ψ.φ i x)
     (n : ℕ) (x : GroundTheory.Arith.SchemeCoh.cechH P U n) : Φ.cechH n x = Ψ.cechH n x := by

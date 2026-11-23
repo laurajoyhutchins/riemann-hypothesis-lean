@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExponentAndTwistData
-import Formalism.LocalToGlobal.Divisibility.CoefMod
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.FiniteAdeleRingNontrivial
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import ReciprocityTheory.Automorphisms.Unitary
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.FiniteAdeleRingNontrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +83,8 @@ def ratFun (γ : GQ L n) : GL (Fin n) L := (Subgroup.mem_map.1 (mem_incGL γ)).c
 
 theorem ratFun_mem (γ : GQ L n) : ratFun γ ∈ GQ0 L n := (Subgroup.mem_map.1 (mem_incGL γ)).choose_spec.1
 
-theorem incGL_ratFun (γ : GQ L n) : incGL (ratFun γ) = ((γ : GA L n) : GL (Fin n) (AL L)) :=
+theorem incGL_ratFun (γ : GQ L n) :
+    incGL (L := L) (n := n) (ratFun γ) = ((γ : GA L n) : GL (Fin n) (AL L)) :=
   (Subgroup.mem_map.1 (mem_incGL γ)).choose_spec.2
 
 def ratHom : GQ L n →* GL (Fin n) L where
@@ -43,13 +92,14 @@ def ratHom : GQ L n →* GL (Fin n) L where
   map_one' := incGL_injective (by rw [incGL_ratFun, map_one]; rfl)
   map_mul' γ δ := incGL_injective (by rw [map_mul, incGL_ratFun, incGL_ratFun, incGL_ratFun]; rfl)
 
-theorem ratHom_mem (γ : GQ L n) : ratHom γ ∈ GQ0 L n := ratFun_mem γ
+theorem ratHom_mem (γ : GQ L n) : ratHom (L := L) (n := n) γ ∈ GQ0 L n := ratFun_mem γ
 
 theorem ratHom_eq_of_match (γ : GQ L n) (γ₀ : GL (Fin n) L)
     (h : (((γ : GA L n) : GL (Fin n) (AL L)) : Matrix (Fin n) (Fin n) (AL L)) =
-      (γ₀ : Matrix (Fin n) (Fin n) L).map (Algebra.TensorProduct.includeLeftRingHom)) : γ₀ = ratHom γ := by
+      (γ₀ : Matrix (Fin n) (Fin n) L).map (Algebra.TensorProduct.includeLeftRingHom)) :
+    γ₀ = ratHom (L := L) (n := n) γ := by
   apply incGL_injective
-  rw [show ratHom γ = ratFun γ from rfl, incGL_ratFun]
+  rw [show ratHom (L := L) (n := n) γ = ratFun γ from rfl, incGL_ratFun]
   exact (Units.ext h).symm
 
 end Rat

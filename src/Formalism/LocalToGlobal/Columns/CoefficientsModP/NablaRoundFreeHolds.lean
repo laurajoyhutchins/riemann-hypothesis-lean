@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.NablaIndependenceHolds
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.TauLatticeLatticeHolds
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.NumberTheory.NumberField.Basic
+
+@[expose] public section
 
 open MvPolynomial NumberField IsDedekindDomain
 open scoped Matrix
@@ -20,10 +69,6 @@ section Tensor
 
 variable {K : Type} [Field K] {ι : Type} [Fintype ι] {n : ℕ}
 
-def rdSq (lam : DomWeight n) (g : GL (Fin n) K) :
-    MvPolynomial (Fin n × Fin n) K →ₗ[K] MvPolynomial (Fin n × Fin n) K :=
-  detPow K n g lam.detShift • (Formalism.GradedWeylDivisibility.rowAct K (n := n) (g : Matrix (Fin n) (Fin n) K)ᵀ).toLinearMap
-
 theorem rd_rowAct_one (f : MvPolynomial (Fin n × Fin n) K) :
     Formalism.GradedWeylDivisibility.rowAct K (1 : Matrix (Fin n) (Fin n) K) f = f := by
   have h : Formalism.GradedWeylDivisibility.rowAct K (n := n) (1 : Matrix (Fin n) (Fin n) K) = AlgHom.id K _ := by
@@ -36,10 +81,6 @@ theorem rd_rowAct_one (f : MvPolynomial (Fin n × Fin n) K) :
       simp [Ne.symm hb]
     · simp
   rw [h]; rfl
-
-theorem rd_rowAct_rowAct (g h : Matrix (Fin n) (Fin n) K) (f : MvPolynomial (Fin n × Fin n) K) :
-    Formalism.GradedWeylDivisibility.rowAct K g (Formalism.GradedWeylDivisibility.rowAct K h f) = Formalism.GradedWeylDivisibility.rowAct K (h * g) f := by
-  rw [← Formalism.GradedWeylDivisibility.rowActMul K n n g h]; rfl
 
 end Tensor
 

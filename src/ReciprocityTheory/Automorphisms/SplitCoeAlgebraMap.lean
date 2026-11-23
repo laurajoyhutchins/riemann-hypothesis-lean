@@ -1,5 +1,54 @@
-import ReciprocityTheory.Automorphisms.Unitary
-import ReciprocityTheory.Automorphisms.PlaceA
+module
+
+public import ReciprocityTheory.Automorphisms.Unitary
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.Automorphisms.PlaceA
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +84,7 @@ def SplitPlace.ideal (s : SplitPlace L) : Ideal (𝓞 L) where
   carrier := {x | Valued.v (s.i (x : L)) < 1}
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_ofPred_eq, RingOfIntegers.coe_eq_algebraMap, map_add] at *
+    simp only [Set.mem_ofPred_eq, RingOfIntegers.coe_eq_algebraMap, map_add (f := _)] at *
     exact lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt ha hb)
   zero_mem' := by
     simp
@@ -116,16 +165,5 @@ def SplitPlace.q (s : SplitPlace L) : ℕ := Nat.card (𝓞 L⁺ ⧸ s.v.asIdeal
 
 def SplitPlace.Above (s : SplitPlace L) (l : ℕ) : Prop := ((l : ℕ) : 𝓞 L⁺) ∈ s.v.asIdeal
 
-variable (L) in
-
-structure LPlaces (l : ℕ) where
-  ι : Type
-  fin : Fintype ι
-  s : ι → SplitPlace L
-  inj : ∀ a b, (s a).v = (s b).v → a = b
-  above : ∀ a, (s a).Above l
-  cover : ∀ v : HeightOneSpectrum (𝓞 L⁺), ((l : ℕ) : 𝓞 L⁺) ∈ v.asIdeal → ∃ a, (s a).v = v
-  ϖ : ∀ a, (s a).v.adicCompletion L⁺
-  unif : ∀ a, Valued.v (ϖ a) = WithZero.exp (-1 : ℤ)
 
 end ReciprocityTheory.Aut

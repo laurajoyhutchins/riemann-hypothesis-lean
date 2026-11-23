@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.NefFibOfIsNef
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ValuationRingOfFlatOfFormallyUnramified
-import ReciprocityTheory.SemistableReduction.AeBlockSphereEvalNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsClosedImmersionGenericPoint
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ValuationRingOfFlatOfFormallyUnramified
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+public import ReciprocityTheory.SemistableReduction.AeBlockSphereEvalNeZero
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -18,8 +61,8 @@ namespace GlobalTheory.SemiPosBir
 variable {k : Type} [CommRing k] {X Z : Scheme.{0}} {p : X ⟶ Sp k} {q : Z ⟶ Sp k} {σ : k →+* ℂ}
   {D : ℕ}
 
-open ReciprocityTheory.L2DbarEstimates in
 
+open ReciprocityTheory.L2DbarEstimates in
 theorem continuousAt_levi {g : V D → ℂ} {x : V D} (hg : ContDiffAt ℝ 2 g x) (ξ : Fin D → ℂ) :
     ContinuousAt (fun v => leviV D g v ξ) x := by
   have h1 : ContDiffAt ℝ 1 (fderiv ℝ g) x := hg.fderiv_right (by norm_num)
@@ -32,7 +75,7 @@ theorem continuousAt_levi {g : V D → ℂ} {x : V D} (hg : ContDiffAt ℝ 2 g x
     exact ((h4.clm_apply continuousAt_const).sub
       (continuousAt_const.mul (h4.clm_apply continuousAt_const))).div_const 2
   unfold leviV
-  exact tendsto_finset_sum _ fun j _ => tendsto_finset_sum _ fun l _ =>
+  exact tendsto_finsetSum _ fun j _ => tendsto_finsetSum _ fun l _ =>
     ((h3 j l).mul continuousAt_const).mul continuousAt_const
 
 theorem ae_mem [IsDomain k] [IsIntegral X] (hσ : Function.Injective σ) (c : AlgChart p σ D)
@@ -72,8 +115,8 @@ theorem ae_mem [IsDomain k] [IsIntegral X] (hσ : Function.Injective σ) (c : Al
   refine (RingHom.congr_fun e₁ r).symm.trans ?_
   rw [RingHom.comp_apply, e₂, ← ev_eq, ev_mul, e, zero_mul]
 
-variable (D) in
 
+variable (D) in
 def PosOn (f : CxPts p σ → ℝ) (S : Set (CxPts p σ)) : Prop :=
   ∀ c : AlgChart p σ D, ∀ y ∈ c.e.source ∩ S, ∀ ξ : Fin D → ℂ,
     0 ≤ (leviV D (fun v => (f (c.e.symm v) : ℂ)) (c.e y) ξ).re
@@ -194,7 +237,7 @@ theorem semiPos_iff_pull : ∀ (k : Type) [CommRing k] (X X' : Scheme.{0}) (p : 
   have hσ : Function.Injective σ := by
     rw [RingHom.injective_iff_ker_eq_bot]
     refine Ideal.eq_bot_of_comap_eq_bot (R := ℤ) ?_
-    rw [RingHom.comap_ker, ← RingHom.injective_iff_ker_eq_bot]
+    rw [Ideal.under_def, RingHom.comap_ker, ← RingHom.injective_iff_ker_eq_bot]
     exact RingHom.injective_int _
   have : Nonempty U.toScheme := hU.to_subtype
   have : Nonempty (π ⁻¹ᵁ U).toScheme := (π ∣_ U).surjective.nonempty

@@ -1,5 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.EpsilonEtaMatrices.EpsilonEtaTensorDual
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TwistedDualEvalBidualApply
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.DegreeCountCohomology.IsDualPair
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.HopfAlgebra.Basic
+public import ReciprocityTheory.Hypotheses.GalCoh
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TwistedDualEvalBidualApply
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.PoitouTateNineTermTransgressionZeroApply
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Matrix Filter NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.Pa
 
 noncomputable section
@@ -141,7 +194,7 @@ variable {ρ₁ : Representation R₁ G₁ M₁} {ρ₂ : Representation R₂ G�
 private theorem transport_cocycle_mem (h : ∀ g m, β (ρ₁ g m) = ρ₂ (e g) (β m)) {z : G₁ → M₁} (hz : z ∈ Zl ρ₁) : tr e β z ∈ Zl ρ₂ := by
   refine ⟨(hz.1.comp β).comp_continuous e.symm.continuous, fun g g' => ?_⟩
   change β (z (e.symm (g * g'))) = β (z (e.symm g)) + ρ₂ g (β (z (e.symm g')))
-  rw [map_mul, hz.2, map_add, h, e.apply_symm_apply]
+  rw [map_mul, hz.2, map_add (f := _), h, e.apply_symm_apply]
 
 private theorem transport_coboundary_mem (h : ∀ g m, β (ρ₁ g m) = ρ₂ (e g) (β m)) {z : G₁ → M₁} (hz : z ∈ Bl ρ₁) : tr e β z ∈ Bl ρ₂ := by
   obtain ⟨m, hm⟩ := (mem_Bl _).1 hz
@@ -238,7 +291,7 @@ private theorem cup_inj {R Γ D M : Type} [CommRing R] [TopologicalSpace R] [Dis
     Function.Injective (cupH1H1TwistedDual χ ρ φ hρ) := by
   subst e
   have e1 : (twDual χ ρ).comp φ = (twDual (χ.comp φ) (ρ.comp φ)).comp (MonoidHom.id D) := by
-    refine MonoidHom.ext fun g => LinearMap.ext fun y => TDual.ext fun m => ?_
+    refine MonoidHom.ext fun g => LinearMap.ext fun y => DFunLike.ext _ _ fun m => ?_
     simp only [MonoidHom.comp_apply, MonoidHom.id_apply, twDual_apply, map_inv φ]
   have gen : ∀ (σ σ' : Representation R D (TDual R M)) (_ : σ = σ') h1 h2,
       Function.Injective (cupProductH1H1 σ' (ρ.comp φ) ((charRep χ).comp φ) evalPair.flip
@@ -264,8 +317,8 @@ private theorem ex_dual (p : ℕ) (hp : p.Prime) (M M' : Type) [AddCommGroup M] 
   haveI : Finite (TDual (ZMod p) M') := GlobalTheory.DualSide.finite_TDual
   let f : M' →+ TDual (ZMod p) M :=
     { toFun := fun y => TDual.mk ((b.flip y).toZModLinearMap p)
-      map_zero' := TDual.ext fun x => map_zero (b x)
-      map_add' := fun y y' => TDual.ext fun x => map_add (b x) y y' }
+      map_zero' := DFunLike.ext _ _ fun x => map_zero (b x)
+      map_add' := fun y y' => DFunLike.ext _ _ fun x => map_add (b x) y y' }
   have hf : Function.Injective f := (injective_iff_map_eq_zero f).2 fun y h => hr y fun x => DFunLike.congr_fun h x
   have hg : Function.Injective fun x => (TDual.mk ((b x).toZModLinearMap p) : TDual (ZMod p) M') := fun x x' h =>
     sub_eq_zero.1 (hl _ fun y => by
@@ -330,7 +383,7 @@ theorem UpperTheory.V.Pa.gwBare :
   have heq : ∀ g φ, β.symm (twDual μ ρS g φ) = ρ' (e g) (β.symm φ) := fun g φ => by
     obtain ⟨y, rfl⟩ := β.surjective φ
     rw [β.symm_apply_apply, β.symm_apply_eq]
-    refine TDual.ext fun m => ?_
+    refine DFunLike.ext _ _ fun m => ?_
     rw [twDual_apply, hβ', hβ', hμε, ← map_mul, ← hb.equiv, hρS, map_inv e, ← Module.End.mul_apply, ← map_mul,
       mul_inv_cancel, map_one, Module.End.one_apply]
   let σ : T ≃ W := pl.symm

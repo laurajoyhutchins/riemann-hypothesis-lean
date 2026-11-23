@@ -1,11 +1,59 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.InvLevCoreOfParts
-import Formalism.SharpRestriction.LevelLetterCocycles.IsUnitOfMk
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LevBasicsD
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorGeneralOfRingCondition
-import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvLevCoreOfParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LevBasicsD
+public import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorGeneralOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorLevelsUnramifiedStatement
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.IsAdicCompleteOfLe
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LevBasicsOf
+public import Mathlib.Tactic.Linter.HaveILetI
+public import Mathlib.Tactic.Linter.Style
+import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.IsUnitOfMk
 import Formalism.SharpRestriction.LevelLetterCocycles.IsobaricMultiplicityOne
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.LMemMaxOL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Multiplicity
+public import Mathlib.NumberTheory.Padics.Hensel
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.MainNotions.UnusedSlot80.InvCutPfL
 
@@ -204,23 +252,24 @@ theorem invCutPf_orderOf (hl2 : l ≠ 2) (s : ℕ) (u : ℤ_[l]ˣ)
       rw [Nat.dvd_iff_mod_eq_zero, hA]; exact one_ne_zero
     have hm0 : m - 1 ≠ 0 := by omega
     have hv1 : padicValNat l (m - 1) = 1 := by
-      have a1 : 1 ≤ padicValNat l (m - 1) := (padicValNat_dvd_iff_le hm0).1 (by rw [pow_one]; exact hdvd1)
-      have a2 : ¬ 2 ≤ padicValNat l (m - 1) := fun h => hndvd2 ((padicValNat_dvd_iff_le hm0).2 h)
+      have a1 : 1 ≤ padicValNat l (m - 1) := ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) hm0).1 (by rw [pow_one]; exact hdvd1)
+      have a2 : ¬ 2 ≤ padicValNat l (m - 1) := fun h => hndvd2 (((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) hm0).2 h)
       omega
     have hodd : Odd l := hl.odd_of_ne_two hl2
     have hv : ∀ j : ℕ, padicValNat l (m ^ (l ^ j) - 1) = 1 + j := by
       intro j
       have := padicValNat.pow_sub_pow hodd hm1 hdvd1 hndvd (pow_ne_zero j hl.ne_zero)
       rw [one_pow] at this
-      rw [this, hv1, padicValNat.prime_pow]
+      rw [Nat.padicValNat_def] at hv1 ⊢
+      rw [this, hv1, Nat.multiplicity_prime_pow]
     have hne : ∀ j : ℕ, m ^ (l ^ j) - 1 ≠ 0 := by
       intro j
       have := Nat.one_lt_pow (pow_ne_zero j hl.ne_zero) hm1
       omega
     apply orderOf_eq_prime_pow
-    · rw [invCutPf_pow_eq_one_iff (t + 1) u m hmu hm1.le, padicValNat_dvd_iff_le (hne t), hv]
+    · rw [invCutPf_pow_eq_one_iff (t + 1) u m hmu hm1.le, (by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) (hne t), hv]
       omega
-    · rw [invCutPf_pow_eq_one_iff (t + 1) u m hmu hm1.le, padicValNat_dvd_iff_le (hne (t + 1)), hv]
+    · rw [invCutPf_pow_eq_one_iff (t + 1) u m hmu hm1.le, (by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) (hne (t + 1)), hv]
       omega
 
 theorem invCutPf_card_ker (s : ℕ) : Nat.card (invCutPf_rho (l := l) s).ker = l ^ s := by

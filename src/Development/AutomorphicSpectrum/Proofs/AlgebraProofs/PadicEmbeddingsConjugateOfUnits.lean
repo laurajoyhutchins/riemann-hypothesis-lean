@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+module
+
+import Development.AutomorphicArithmetic.FrobeniusLocalisation.LocStab
+public import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.CompanionTheory.Ar.Fl
 
@@ -34,7 +83,7 @@ theorem exists_padicAlgCl_factor {K : Type} [Field K] [NumberField K] (κ : K �
             map_one' := hjinj (by rw [hf, map_one, map_one])
             map_mul' := fun a b => hjinj (by rw [hf, map_mul, map_mul, hf, hf])
             map_zero' := hjinj (by rw [hf, map_zero, map_zero])
-            map_add' := fun a b => hjinj (by rw [hf, map_add, map_add, hf, hf]) }, fun a => hf a⟩
+            map_add' := fun a b => hjinj (by rw [hf, map_add (f := _), map_add (f := _), hf, hf]) }, fun a => hf a⟩
 
 theorem norm_aeval_monomial_sub (x : PadicAlgCl p) (n : ℕ) (r : ℚ) (c : ℚ_[p]) :
     ‖aeval x (monomial n r) - aeval x (monomial n c)‖ = ‖(r : ℚ_[p]) - c‖ * ‖x‖ ^ n := by
@@ -44,29 +93,7 @@ theorem norm_aeval_monomial_sub (x : PadicAlgCl p) (n : ℕ) (r : ℚ) (c : ℚ_
 
 theorem exists_rat_poly_approx (x y : PadicAlgCl p) (e : ℚ_[p][X]) {ε : ℝ} (hε : 0 < ε) :
     ∃ u : ℚ[X], ‖aeval x u - aeval x e‖ < ε ∧ ‖aeval y u - aeval y e‖ < ε := by
-  obtain ⟨N, hN⟩ : ∃ N, e.natDegree < N := ⟨_, Nat.lt_succ_self _⟩
-  have hSx : 0 ≤ ∑ i ∈ Finset.range N, ‖x‖ ^ i := Finset.sum_nonneg fun i _ => by positivity
-  have hSy : 0 ≤ ∑ i ∈ Finset.range N, ‖y‖ ^ i := Finset.sum_nonneg fun i _ => by positivity
-  obtain ⟨δ, hδ0, hδx, hδy⟩ : ∃ δ : ℝ, 0 < δ ∧ δ * ∑ i ∈ Finset.range N, ‖x‖ ^ i < ε ∧
-      δ * ∑ i ∈ Finset.range N, ‖y‖ ^ i < ε := by
-    have hD : 0 < ∑ i ∈ Finset.range N, ‖x‖ ^ i + ∑ i ∈ Finset.range N, ‖y‖ ^ i + 1 := by linarith
-    refine ⟨ε / (∑ i ∈ Finset.range N, ‖x‖ ^ i + ∑ i ∈ Finset.range N, ‖y‖ ^ i + 1),
-      div_pos hε hD, ?_, ?_⟩
-    · rw [div_mul_eq_mul_div, div_lt_iff₀ hD]
-      nlinarith [mul_nonneg hε.le hSy]
-    · rw [div_mul_eq_mul_div, div_lt_iff₀ hD]
-      nlinarith [mul_nonneg hε.le hSx]
-  have hr' : ∀ i, ∃ r : ℚ, ‖e.coeff i - (r : ℚ_[p])‖ < δ := fun i => Padic.rat_dense p (e.coeff i) hδ0
-  choose r hr using hr'
-  have key : ∀ z : PadicAlgCl p, ‖aeval z (∑ i ∈ Finset.range N, monomial i (r i)) - aeval z e‖ ≤
-      δ * ∑ i ∈ Finset.range N, ‖z‖ ^ i := by
-    intro z
-    conv_lhs => rw [e.as_sum_range' N hN]
-    rw [map_sum, map_sum, ← Finset.sum_sub_distrib, Finset.mul_sum]
-    refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
-    rw [norm_aeval_monomial_sub, norm_sub_rev]
-    exact mul_le_mul_of_nonneg_right (hr i).le (by positivity)
-  exact ⟨_, (key x).trans_lt hδx, (key y).trans_lt hδy⟩
+  apply UpperTheory.HF.LocStab.approx <;> assumption
 
 theorem norm_natCast_prime : ‖(p : PadicAlgCl p)‖ = (p : ℝ)⁻¹ := by
   rw [← map_natCast (algebraMap ℚ_[p] (PadicAlgCl p)) p, PadicAlgCl.norm_extends, Padic.norm_p]

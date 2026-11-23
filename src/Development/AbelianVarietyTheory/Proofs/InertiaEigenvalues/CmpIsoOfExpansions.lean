@@ -1,12 +1,54 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLevelExpansionAtRootOfUnity
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineFrobeniusBijOnLettersDirectSumStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionBasisDivisibilityStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqStdPowerSeriesAtZeroStatement
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.WachCrystallineComparison
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.WachCrystallineComparison
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CrystallineFrobeniusBijOnLettersDirectSumStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NBasisLoc
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachExpansionBasisDivisibilityStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLatticeEqStdPowerSeriesAtZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WachLevelExpansionAtRootOfUnity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,6 +159,7 @@ theorem const_lev (i : ZMod n) (a : LetA O n) :
   simp [PowerSeries.algebraMap_apply]
 
 theorem const_lev_Q (i : ZMod n) : PowerSeries.constantCoeff (W.lev i 1 W.Q) = (PD.p : LL) := by
+
   rw [LevPt.Q_eq, map_sum, map_sum]
   simp [const_lev_π]
 
@@ -134,6 +177,7 @@ theorem π_dvd_of_van (hinj : Function.Injective (algebraMap O LL)) (a : LetA O 
 
 theorem cmp_eq_sum [NeZero n] (T : LocLat G Qp LL O) (x : ↥(W.N T)) :
     W.cmp T x = ∑ i : ZMod n, W.cmp T ((letE i : LetA O n) • x) := by
+
   rw [← map_sum, ← Finset.sum_smul, sum_letE, one_smul]
 
 theorem cmp_iso_of_expansions [NeZero n] (hinj : Function.Injective (algebraMap O LL))
@@ -162,7 +206,7 @@ theorem cmp_iso_of_expansions [NeZero n] (hinj : Function.Injective (algebraMap 
     have h0 : ∀ i, ex i x 0 = 0 := by
       intro i
       rw [← hcmp]
-      exact (iSupIndep_iff_finset_sum_eq_zero_imp_eq_zero _).1 hind Finset.univ
+      exact (iSupIndep_iff_finsetSum_eq_zero_imp_eq_zero _).1 hind Finset.univ
         (fun i => W.cmp T ((letE i : LetA O n) • x)) (fun i _ => W.cmp_letter T i x) hx i
         (Finset.mem_univ _)
     have hv : ∀ j, (letπ : LetA O n) ∣ nb.repr x j := fun j =>
@@ -187,10 +231,11 @@ theorem cmp_iso_of_expansions [NeZero n] (hinj : Function.Injective (algebraMap 
       rintro _ ⟨x, rfl⟩
       exact ⟨_, rfl⟩
   · intro x m hx
+
     rw [cmp_eq_sum W T x, cmp_eq_sum, map_sum, Finset.smul_sum,
-      ← Equiv.sum_comp (Equiv.subRight (1 : ZMod n))
-        (fun i => (PD.p : LL) ^ m •
-          φVB PD (LL := LL) (V := T.V) (W.cmp T ((letE i : LetA O n) • x)))]
+    ← Equiv.sum_comp (Equiv.subRight (1 : ZMod n))
+      (fun i => (PD.p : LL) ^ m •
+        φVB PD (LL := LL) (V := T.V) (W.cmp T ((letE i : LetA O n) • x)))]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [hcmp, hcmp, Equiv.subRight_apply, hφ, finsum_eq_single _ 0]
     · rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, map_pow, map_pow, const_lev_Q]
@@ -201,7 +246,7 @@ theorem cmp_iso_of_expansions [NeZero n] (hinj : Function.Injective (algebraMap 
 
 end Generic
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem cmp_iso (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW)
     (Cm : CmpOf D.loc D.locA HW F) (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l)

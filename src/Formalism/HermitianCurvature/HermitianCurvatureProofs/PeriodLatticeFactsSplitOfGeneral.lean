@@ -1,4 +1,56 @@
-import Formalism.HermitianCurvature.PrimeToDifferent
+module
+
+public import Formalism.HermitianCurvature.PrimeToDifferent
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.S6x1
 
@@ -122,7 +174,6 @@ theorem localTwistedLattice : Formalism.FourierDecayAlt.S6.LocTw := by
 theorem scaledIdealNorm : Formalism.FourierDecayAlt.S6.NormIdl := by
   intro E _ _ _ g k ν hg
   have hdeg := degreeFacts_statement E
-  have hgR : (0 : ℝ) < g := by exact_mod_cast hg
   have hD0 : (0 : ℝ) ≤ ((|discr E| : ℤ) : ℝ) := by exact_mod_cast abs_nonneg _
   have hrd : 0 < rd E := by
     unfold rd
@@ -157,13 +208,6 @@ theorem scaledIdealNorm : Formalism.FourierDecayAlt.S6.NormIdl := by
     congr 2 <;> (push_cast; ring)
   rw [this, Real.sqrt_sq (by positivity)]
 
-theorem discrSquare : Formalism.FourierDecayAlt.S6.DiscrSquare := by
-  intro E _ _ _ h
-  have := natAbs_discr_eq_absNorm_differentIdeal_mul_natAbs_discr_pow (maximalRealSubfield E)
-    (𝓞 (maximalRealSubfield E)) E (𝓞 E)
-  rw [(unramRelative E h).1, Algebra.IsQuadraticExtension.finrank_eq_two] at this
-  simpa using this
-
 theorem twistedLatticeBetween : Formalism.FourierDecayAlt.S6.Between := by
   intro E _ _ _ A B s hBA hB
   refine ⟨fun t ht => ?_, fun t ht => ((mem_twLat E A B s t).1 ht).1⟩
@@ -182,9 +226,5 @@ theorem dualIdealEqLiftIdeal : Formalism.FourierDecayAlt.S6.IdealsMatch := by
   · unfold dualIdl liftIdl nuBlock; congr 1; ring
   · unfold dualIdl nuBlock; congr 1; ring
   · unfold nuBlock; ring
-
-theorem periodLatticeFactsSplitOfGeneral : Formalism.FourierDecayAlt.S6.TextFromGeneral := by
-  intro h E _ _ _ hU g₁ g₂ h₁ h₂ ν s _
-  exact h E hU _ ν s (Nat.mul_pos h₁.1.pos h₂.1.pos)
 
 end Formalism.FourierDecayAlt.P

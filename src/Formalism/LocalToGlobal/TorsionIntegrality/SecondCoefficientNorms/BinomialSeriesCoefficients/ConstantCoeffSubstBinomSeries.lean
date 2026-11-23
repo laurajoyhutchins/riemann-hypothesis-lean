@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.IntBinomScalar
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.DegreeLeOfMemAntidiagonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -41,9 +89,9 @@ theorem binom_zero_succ (k : ℕ) : binom (0 : K) (k + 1) = 0 := by
 def binomSeries (z : K) : PowerSeries K := PowerSeries.mk (binom z)
 
 theorem binomSeries_ode (z : K) :
-    (1 + PowerSeries.X) * PowerSeries.derivative K (binomSeries z) = z • binomSeries z := by
+    (1 + PowerSeries.X) * PowerSeries.derivative (R := K) (binomSeries z) = z • binomSeries z := by
   ext n
-  rw [add_mul, one_mul, map_add, PowerSeries.coeff_derivative, PowerSeries.coeff_smul]
+  rw [add_mul, one_mul, map_add (f := _), PowerSeries.coeff_derivative, PowerSeries.coeff_smul]
   cases n with
   | zero =>
     have h := binom_succ z 0
@@ -79,7 +127,7 @@ theorem subst_binomSeries_eq_mvExp (z : K) {f : MvPowerSeries σ K}
     rw [MvPowerSeries.smul_eq_C_mul, map_mul, hf, mul_zero]
   have hnzf : MvPowerSeries.constantCoeff (-(z • f)) = 0 := by rw [map_neg, hzf, neg_zero]
   set B := PowerSeries.subst (mvExp f - 1) (binomSeries z) with hB
-  have hode : mvExp f * PowerSeries.subst (mvExp f - 1) (PowerSeries.derivative K (binomSeries z))
+  have hode : mvExp f * PowerSeries.subst (mvExp f - 1) (PowerSeries.derivative (R := K) (binomSeries z))
       = z • B := by
     have h := congrArg (PowerSeries.subst (mvExp f - 1)) (binomSeries_ode z)
     rw [PowerSeries.subst_mul hs, PowerSeries.subst_add hs, PowerSeries.subst_X hs,
@@ -87,8 +135,8 @@ theorem subst_binomSeries_eq_mvExp (z : K) {f : MvPowerSeries σ K}
       PowerSeries.coe_substAlgHom hs] at h
     rw [hB, ← h]
     ring
-  have hd : ∀ i, MvPowerSeries.pderiv K i B =
-      MvPowerSeries.C z * MvPowerSeries.pderiv K i f * B := by
+  have hd : ∀ i, MvPowerSeries.pderiv (R := K) i B =
+      MvPowerSeries.C z * MvPowerSeries.pderiv (R := K) i f * B := by
     intro i
     apply (isUnit_mvExp hf).mul_left_cancel
     rw [hB, IntegralMvPolynomialLemmas.pderiv_subst _ hg, ← mul_assoc, hode, map_sub, MvPowerSeries.pderiv_one, sub_zero,

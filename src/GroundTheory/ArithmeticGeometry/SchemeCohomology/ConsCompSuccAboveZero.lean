@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Category.Grp.Preadditive
+public import Mathlib.Algebra.Group.Pi.Hom
+public import Mathlib.AlgebraicTopology.AlternatingFaceMapComplex
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.Topology.Category.TopCat.Basic
+public import Mathlib.Topology.Sets.Opens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Pi
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -78,8 +132,8 @@ lemma d_d (n : ℕ) (σ : Cochain P U n) : d P U (n + 1) (d P U n σ) = 0 := by
   have h2 := congrArg (fun f => f.hom σ) this
   exact h2
 
-variable {P} in
 
+variable {P} in
 def push {P' : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (φ : P ⟶ P') (n : ℕ) :
     Cochain P U n →+ Cochain P' U n where
   toFun σ i := φ.app _ (σ i)
@@ -95,6 +149,7 @@ variable {P} in
 lemma push_d {P' : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (φ : P ⟶ P') (n : ℕ) (σ : Cochain P U n) :
     push U φ (n + 1) (d P U n σ) = d P' U n (push U φ n σ) := by
   funext i
+
   simp only [push, AddMonoidHom.coe_mk, ZeroHom.coe_mk, d_apply, map_sum, map_zsmul, app_res]
 
 variable {P} in
@@ -123,8 +178,8 @@ lemma push_injective {P' : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (φ : P ⟶ P'
     Function.Injective (push U φ n) := fun _ _ hστ =>
   funext fun i => h i (congrFun hστ i)
 
-variable {P} in
 
+variable {P} in
 lemma CechAcyclic.of_retract {G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (ι' : P ⟶ G) (r : G ⟶ P)
     (hr : ι' ≫ r = 𝟙 P) (hG : CechAcyclic G U) : CechAcyclic P U := by
   intro n σ hσ
@@ -132,34 +187,6 @@ lemma CechAcyclic.of_retract {G : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (ι' : 
   refine ⟨push U r n τ, ?_⟩
   rw [← push_d, hτ, push_comp, hr, push_id]
 
-variable {P} in
-
-lemma CechAcyclic.of_shortExact {F I Q : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (f : F ⟶ I) (g : I ⟶ Q)
-    (hfg : f ≫ g = 0)
-    (hinj : ∀ {n : ℕ} (i : Fin n → ι), Function.Injective (f.app (op (inter U i))))
-    (hex : ∀ {n : ℕ} (i : Fin n → ι) (y : I.obj (op (inter U i))),
-      g.app _ y = 0 → ∃ x, f.app _ x = y)
-    (hsurj : ∀ {n : ℕ} (i : Fin n → ι), Function.Surjective (g.app (op (inter U i))))
-    (hF : CechAcyclic F U) (hI : CechAcyclic I U) : CechAcyclic Q U := by
-  intro n σ hσ
-
-  choose τ hτ using fun i => hsurj i (σ i)
-  have hτ' : push U g (n + 1) τ = σ := funext hτ
-
-  have h0 : push U g (n + 2) (d I U (n + 1) τ) = 0 := by rw [push_d, hτ', hσ]
-  choose ρ hρ using fun j => hex j _ (congrFun h0 j)
-  have hρ' : push U f (n + 2) ρ = d I U (n + 1) τ := funext hρ
-
-  have hρc : d F U (n + 2) ρ = 0 := by
-    apply push_injective U f (n + 3) (fun j => hinj j)
-    rw [map_zero, push_d, hρ', d_d]
-  obtain ⟨α, hα⟩ := hF (n + 1) ρ hρc
-
-  have hc : d I U (n + 1) (τ - push U f (n + 1) α) = 0 := by
-    rw [map_sub, ← push_d, hα, hρ', sub_self]
-  obtain ⟨β, hβ⟩ := hI n _ hc
-  refine ⟨push U g n β, ?_⟩
-  rw [← push_d, hβ, map_sub, hτ', push_comp, hfg, push_zero', sub_zero]
 
 def discPresheaf (A : X → AddCommGrpCat.{u}) : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u} where
   obj W := AddCommGrpCat.of (∀ x : W.unop, A x.1)
@@ -189,6 +216,7 @@ lemma ev_d {n : ℕ} (σ : Cochain (discPresheaf A) U n) (i : Fin (n + 2) → ι
     (hx : x ∈ inter U i) :
     ev A x hx (d (discPresheaf A) U n σ i) = ∑ k : Fin (n + 2), ((-1 : ℤ) ^ (k : ℕ)) •
       ev A x (inter_le_comp U i k.succAbove hx) (σ (i ∘ k.succAbove)) := by
+
   rw [d_apply, map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_zsmul, ev_res]

@@ -1,8 +1,68 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.FormalDegreeBessel.FinalG
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RankOneEmbeddings
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RankOneEmbeddings
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal
@@ -82,56 +142,7 @@ lemma bc_one_mid (c : Fin r → ℂ) (i j : Fin (2 * r + k + 1)) (hi : mid k r i
   · rw [if_neg (by omega), if_neg h]
 
 theorem bigCellFactor : BigCellFactor := by
-  intro k r c μ
-  constructor
-  · ext i j
-    rw [Matrix.mul_apply]
-    by_cases hj : mid k r j
-    · by_cases hi : mid k r i
-      · rw [Finset.sum_eq_single i]
-        · rw [bc_one_mid c i i hi hi, if_pos rfl, one_mul, emb_mid μ i j hi hj, bc_mid_col c μ i j hj, dif_pos hi]
-        · intro q _ hq
-          by_cases hqm : mid k r q
-          · rw [bc_one_mid c i q hi hqm, if_neg (fun h => hq h.symm), zero_mul]
-          · rw [bc_mid_row_out c 1 i q hi hqm, zero_mul]
-        · intro h; exact absurd (Finset.mem_univ _) h
-      · rw [bc_mid_col c μ i j hj, dif_neg hi]
-        symm
-        apply Finset.sum_eq_zero
-        intro q _
-        by_cases hqm : mid k r q
-        · rw [bc_mid_col c 1 i q hqm, dif_neg hi, zero_mul]
-        · rw [emb_out_row μ q j hqm, if_neg (show ¬ (q = j) from fun h => hqm (h ▸ hj)), mul_zero]
-    · rw [Finset.sum_eq_single j]
-      · rw [emb_out_col μ j j hj, if_pos rfl, mul_one]
-        exact bc_out_col c μ 1 i j hj
-      · intro q _ hq
-        rw [emb_out_col μ q j hj, if_neg hq, mul_zero]
-      · intro h; exact absurd (Finset.mem_univ _) h
-  · ext i j
-    rw [Matrix.mul_apply]
-    by_cases hi : mid k r i
-    · by_cases hj : mid k r j
-      · rw [Finset.sum_eq_single j]
-        · rw [bc_one_mid c j j hj hj, if_pos rfl, mul_one, emb_mid μ i j hi hj, bc_mid_col c μ i j hj, dif_pos hi]
-        · intro q _ hq
-          by_cases hqm : mid k r q
-          · rw [bc_one_mid c q j hqm hj, if_neg hq, mul_zero]
-          · rw [emb_out_col μ i q hqm, if_neg (show ¬ (i = q) from fun h => hqm (h ▸ hi)), zero_mul]
-        · intro h; exact absurd (Finset.mem_univ _) h
-      · rw [bc_mid_row_out c μ i j hi hj]
-        symm
-        apply Finset.sum_eq_zero
-        intro q _
-        by_cases hqm : mid k r q
-        · rw [bc_mid_row_out c 1 q j hqm hj, mul_zero]
-        · rw [emb_out_col μ i q hqm, if_neg (show ¬ (i = q) from fun h => hqm (h ▸ hi)), zero_mul]
-    · rw [Finset.sum_eq_single i]
-      · rw [emb_out_row μ i i hi, if_pos rfl, one_mul]
-        exact bc_out_row c μ 1 i j hi
-      · intro q _ hq
-        rw [emb_out_row μ i q hi, if_neg (fun h => hq h.symm), zero_mul]
-      · intro h; exact absurd (Finset.mem_univ _) h
+  apply Formalism.FourierDecayAlt.P.bruhat_big_cell_factorization <;> assumption
 
 lemma mid_wI (a : Fin (k + 1)) : mid k r (wI k r a) := by
   have := a.isLt
@@ -290,8 +301,7 @@ lemma Hb_herm : (Hb k)ᴴ = Hb k := by
   rw [Matrix.diagonal_conjTranspose]
   congr 1
   funext j
-  simp only [Pi.star_apply]
-  split_ifs <;> simp
+  by_cases h : j = Fin.last k <;> simp [h]
 
 lemma Hb_sq : Hb k * Hb k = 1 := by
   unfold Hb
@@ -1468,17 +1478,27 @@ theorem hypInv : HypInv := by
       (((volume : Measure ℂ).withDensity fun ζ => ENNReal.ofReal (zWeight k (Tz k r z) (Tz k r z') ζ)).prod μW).map
         (fun p : ℂ × Mt k r => act p.2 (embWb k r (μsec p.1) *ᵥ z')) := rfl
   rw [hdef]
-  by_cases hf : AEMeasurable (fun p : ℂ × Mt k r => act p.2 (embWb k r (μsec p.1) *ᵥ z'))
-      (((volume : Measure ℂ).withDensity fun ζ => ENNReal.ofReal (zWeight k (Tz k r z) (Tz k r z') ζ)).prod μW)
-  swap
-  · rw [Measure.map_of_not_aemeasurable hf, Measure.map_zero]
   have : IsFiniteMeasureOnCompacts μW := ⟨fun K hK => hW.finite_compact K hK⟩
   have : SigmaFinite μW := inferInstance
+  have hf : AEMeasurable (fun p : ℂ × Mt k r => act p.2 (embWb k r (μsec p.1) *ᵥ z'))
+      (((volume : Measure ℂ).withDensity fun ζ => ENNReal.ofReal (zWeight k (Tz k r z) (Tz k r z') ζ)).prod μW) := by
+    have hs := RankOneEmbeddings.R1.secF_meas hsec
+    have hm := RankOneEmbeddings.R1.measurable_inv_mulVec_embWb_of_measSec (r := r) hs z'
+    refine hm.aemeasurable.congr ?_
+    have hae : ∀ᵐ p ∂(((volume : Measure ℂ).withDensity fun ζ => ENNReal.ofReal (zWeight k (Tz k r z) (Tz k r z') ζ)).prod μW),
+        Tz k r z * Tz k r z' < Complex.normSq p.1 := by
+      apply (Measure.ae_prod_iff_ae_ae ((isOpen_lt continuous_const Complex.continuous_normSq).measurableSet.preimage measurable_fst)).2
+      filter_upwards [ae_weight k (Tz k r z) (Tz k r z')] with ζ hζ
+      exact Filter.Eventually.of_forall fun _ => hζ
+    filter_upwards [hae] with p hp
+    rw [RankOneEmbeddings.R1.secF_on (show p.1 ∈ RankOneEmbeddings.R1.Om k r z z' from hp)]
+    rfl
   obtain ⟨c, hc0, hc1, hkey⟩ := key hk hz hz' hT hT' hsec hW hf
   have hν : (((volume : Measure ℂ).withDensity fun ζ => ENNReal.ofReal (zWeight k (Tz k r z) (Tz k r z') ζ)).prod μW).map
         (fun p : ℂ × Mt k r => act p.2 (embWb k r (μsec p.1) *ᵥ z')) = c⁻¹ • ((μW Set.univ) • σV k r (Tz k r z')) := by
     rw [← hkey, smul_smul, ENNReal.inv_mul_cancel hc0 hc1, one_smul]
-  rw [hν, Measure.map_smul, Measure.map_smul, σV_inv _ hm]
+  rw [hν, Measure.map_smul _ ((mulVec_meas m).aemeasurable.smul_measure _),
+    Measure.map_smul _ (mulVec_meas m).aemeasurable, σV_inv _ hm]
 
 end PartE
 

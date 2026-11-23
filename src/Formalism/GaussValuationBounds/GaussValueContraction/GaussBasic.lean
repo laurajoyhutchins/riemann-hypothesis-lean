@@ -1,4 +1,50 @@
-import Formalism.GaussValuationBounds.GaussUnit
+module
+
+public import Formalism.GaussValuationBounds.GaussUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +61,7 @@ theorem minLeGaussValAdd : GaussAdd := by
         ((((addVal O (PowerSeries.coeff n g) : ℕ∞)) : ℝ≥0∞) + ENNReal.ofReal (x * n)) :=
     min_le_min (iInf_le _ n) (iInf_le _ n)
   refine h1.trans ?_
-  rw [min_add_add_right, map_add]
+  rw [min_add_add_right, map_add (f := _)]
   gcongr ?_ + _
   have h2 := addVal_add (R := O) (a := PowerSeries.coeff n f) (b := PowerSeries.coeff n g)
   rcases le_total (addVal O (PowerSeries.coeff n f)) (addVal O (PowerSeries.coeff n g)) with h | h
@@ -41,58 +87,5 @@ theorem gaussValUnit : GaussUnit := by
   rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, ← hw, addVal_eq_zero_of_unit]
   simp
 
-open IsDiscreteValuationRing in
-theorem gaussEis_true : GaussEis := by
-  intro O _ _ _ ϖ hϖ x hx E N hN hE hdeg
-  have hc : ∀ n, PowerSeries.coeff n (E : PowerSeries O) = E.coeff n := fun n => Polynomial.coeff_coe _ _
-  have hv1 : addVal O ϖ = 1 := addVal_uniformizer hϖ
-  have hlow : ∀ n, n < N → 1 ≤ addVal O (E.coeff n) := by
-    intro n hn
-    have hm : E.coeff n ∈ Ideal.span {ϖ} := hE.2 (by rw [hdeg]; exact hn)
-    rw [Ideal.mem_span_singleton] at hm
-    rw [← hv1]
-    exact addVal_le_iff_dvd.mpr hm
-  have h0 : addVal O (E.coeff 0) ≤ 1 := by
-    by_contra h
-    push_neg at h
-    have h2 : 2 ≤ addVal O (E.coeff 0) := by
-      have h6 := Order.add_one_le_of_lt h
-      rwa [one_add_one_eq_two] at h6
-    have h3 : addVal O (ϖ ^ 2) ≤ addVal O (E.coeff 0) := by
-      rw [addVal_pow, hv1]
-      simpa using h2
-    apply hE.3
-    rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton]
-    exact addVal_le_iff_dvd.mp h3
-  have hN0 : addVal O (E.coeff N) = 0 := by
-    have hl := hE.1
-    rw [Polynomial.leadingCoeff, hdeg, Ideal.mem_span_singleton] at hl
-    have h4 : addVal O (E.coeff N) < 1 := by
-      rw [← hv1]
-      exact lt_of_not_ge (fun h => hl (addVal_le_iff_dvd.mp h))
-    exact ENat.lt_one_iff_eq_zero.mp h4
-  have hmin : ENNReal.ofReal (min 1 (x * N)) = min 1 (ENNReal.ofReal (x * N)) := by
-    rw [ENNReal.ofReal_mono.map_min, ENNReal.ofReal_one]
-  unfold gaussV
-  rw [hmin]
-  refine le_antisymm (le_min ?_ ?_) (le_iInf fun n => ?_)
-  · refine (iInf_le _ 0).trans ?_
-    rw [hc]
-    simp only [Nat.cast_zero, mul_zero, ENNReal.ofReal_zero, add_zero]
-    have h5 := ENat.toENNReal_le.mpr h0
-    simpa using h5
-  · refine (iInf_le _ N).trans ?_
-    rw [hc, hN0]
-    simp
-  · rw [hc]
-    rcases lt_trichotomy n N with h | rfl | h
-    · refine (min_le_left _ _).trans ?_
-      refine le_trans ?_ le_self_add
-      have h5 := ENat.toENNReal_le.mpr (hlow n h)
-      simpa using h5
-    · rw [hN0]
-      simp
-    · rw [Polynomial.coeff_eq_zero_of_natDegree_lt (by rw [hdeg]; exact h), addVal_zero]
-      simp
 
 end Formalism.NOK

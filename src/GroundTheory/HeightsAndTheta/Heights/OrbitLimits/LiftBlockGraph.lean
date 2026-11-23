@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsLiftBlockDatum
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PCoordArithOfFnField
-import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsLiftBlockDatum
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.GenericFibreKerTarget
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PCoordArithOfFnField
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Targets
@@ -32,8 +83,8 @@ theorem exists_ne_zero_of_generatesOn [Fintype K] {r : ℕ} (y : (Σ k, ι k) �
 
 variable [CharZero Ω] [Fintype K] [∀ k, Fintype (ι k)]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem chartRingZ_le_blockFnField (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) {x : Ω} (hx : x ∈ chartRingZ y c) :
     x ∈ blockFnField y := by
   induction hx using Algebra.adjoin_induction with
@@ -82,8 +133,8 @@ theorem isArithVar_addBlock {D : ℕ} (y : (Σ k, ι k) → Ω) (n : K → ℤ) 
     exact ⟨j, hj⟩
   · exact ⟨c k, hc k⟩
 
-omit [CharZero Ω] in
 
+omit [CharZero Ω] in
 theorem isMultiHomog_rename_none [DecidableEq K] {ι' : Type} [Fintype ι'] {g : MRing (fun _ : Unit => ι')} {e : Unit → ℕ}
     (hg : IsMultiHomog g e) :
     IsMultiHomog (rename (fun p : Σ _ : Unit, ι' =>
@@ -106,7 +157,7 @@ theorem isMultiHomog_rename_none [DecidableEq K] {ι' : Type} [Fintype ι'] {g :
       intro i
       have : (⟨none, i⟩ : Σ k, addIdx ι (Fintype.card ι') k) = φ ⟨(), (Fintype.equivFin ι').symm i⟩ := by
         simp [hφ]
-      rw [this, Finsupp.mapDomain_apply hinj]
+      rw [this, Finsupp.mapDomain_apply_of_injective hinj]
     change ∑ i : Fin (Fintype.card ι'), (Finsupp.mapDomain φ m0) ⟨none, i⟩ = _
     simp only [hterm]
     rw [Fintype.sum_equiv (Fintype.equivFin ι').symm (fun i => m0 ⟨(), (Fintype.equivFin ι').symm i⟩)
@@ -123,8 +174,8 @@ theorem isMultiHomog_rename_none [DecidableEq K] {ι' : Type} [Fintype ι'] {g :
       exact absurd (congrArg Sigma.fst hp) (by simp)
     simp [hterm, blockDeg]
 
-omit [CharZero Ω] in
 
+omit [CharZero Ω] in
 theorem blockBirational_addBlock [DecidableEq K] {ι' : Type} [Fintype ι'] (y : (Σ k, ι k) → Ω) (x' : ι' → Ω)
     (hb : Birational (fun p : Σ _ : Unit, ι' => x' p.2)) :
     BlockBirational (addBlock y (liftCoords x')) (none : Option K) := by
@@ -146,8 +197,8 @@ theorem blockBirational_addBlock [DecidableEq K] {ι' : Type} [Fintype ι'] (y :
   · rw [hev, hev, hs]
     field_simp
 
-omit [CharZero Ω] in
 
+omit [CharZero Ω] in
 theorem isMultiHomogIdeal_top : IsMultiHomogIdeal (⊤ : Ideal (MRing ι)) :=
   ⟨{1}, fun f hf => ⟨0, by rw [Set.mem_singleton_iff.mp hf]; exact Inter.AvoidRing.isMultiHomog_one⟩,
     Ideal.span_singleton_one.symm⟩

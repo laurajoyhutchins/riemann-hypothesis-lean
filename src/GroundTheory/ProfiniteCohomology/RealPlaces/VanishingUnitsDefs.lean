@@ -1,17 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.GSDefs
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingCriterion
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.EqZeroOfPowNsmulCohomologySUnitsOfOdd
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.Dimension
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalRestriction
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.HighUnitsLocal
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.CupSymbolBridge
-import GroundTheory.ProfiniteCohomology.ClassFormations.HighFormations
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
-import GroundTheory.ProfiniteCohomology.Characters
-import GroundTheory.ProfiniteCohomology.CupProducts.Cocycles
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.ConeMap
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighSUnits
 import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality.Naturality
+import GroundTheory.ProfiniteCohomology.GaloisCohomology.Kummer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -105,12 +137,6 @@ def sUnitsLocalMor : Rep.res θ (galSUnitsMax K.1 ℚ̄ S) ⟶ galUnits.{0} Kv �
       (((Additive.toMul x : sUnitsMax K.1 ℚ̄ S) : (maxUnramifiedOutside K.1 ℚ̄ S)ˣ) :
         maxUnramifiedOutside K.1 ℚ̄ S)))⟩
 
-theorem sUnitsLocalMor_hom_apply (x : Additive (sUnitsMax K.1 ℚ̄ S)) :
-    ((Additive.toMul ((sUnitsLocalMor S θ j hj).hom x) : Ωvˣ) : Ωv) =
-      j (((Additive.toMul x : sUnitsMax K.1 ℚ̄ S) : (maxUnramifiedOutside K.1 ℚ̄ S)ˣ) :
-        maxUnramifiedOutside K.1 ℚ̄ S) :=
-  rfl
-
 def rootsLocalMor : Rep.res θ (galRootsOfUnity.{0} K.1 (maxUnramifiedOutside K.1 ℚ̄ S) 2) ⟶ galUnits.{0} Kv Ωv :=
   Rep.ofHom ⟨uliftIntLinearMap (MonoidHom.toAdditive (α := rootsOfUnity 2 (maxUnramifiedOutside K.1 ℚ̄ S))
       (β := Ωvˣ) ((Units.map j.toMonoidHom).comp (rootsOfUnity 2 (maxUnramifiedOutside K.1 ℚ̄ S)).subtype)),
@@ -138,10 +164,6 @@ def localKummerSeq : ShortComplex (Rep.{0} (ULift.{0} ℤ) Gal(Ωv/Kv)) :=
         (maxUnramifiedOutside K.1 ℚ̄ S)ˣ)) ^ 2 = 1 := (mem_rootsOfUnity 2 _).1 (Additive.toMul x).2
     change ((Additive.toMul ((rootsLocalMor S θ j hj).hom x) : Ωvˣ) : Ωv) ^ 2 = 1
     rw [rootsLocalMor_hom_apply, ← map_pow, ← Units.val_pow_eq_pow_val, hx2, Units.val_one, map_one])
-
-theorem localKummerSeq_f : (localKummerSeq S θ j hj).f = rootsLocalMor S θ j hj := rfl
-
-theorem localKummerSeq_g : (localKummerSeq S θ j hj).g = 2 • 𝟙 (galUnits.{0} Kv Ωv) := rfl
 
 theorem localKummerSeq_shortExact [IsAlgClosed Ωv] : (localKummerSeq S θ j hj).ShortExact := by
   have h2' : (2 : maxUnramifiedOutside K.1 ℚ̄ S) ≠ 0 := two_ne_zero
@@ -269,7 +291,7 @@ theorem unitsLocalRes_gsBrauerInfl_sUnitsToUnitsZ (r : ℕ)
   · intro a
     rfl
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem unitsLocalRes_sUnitsInfl (r : ℕ) (y : cohomology (galSUnitsMax K.1 ℚ̄ S) r) :
     (unitsLocalRes Kv ι r).hom (sUnitsInfl K S r y) =
@@ -291,18 +313,6 @@ theorem unitsLocalRes_sUnitsInfl (r : ℕ) (y : cohomology (galSUnitsMax K.1 ℚ
   exact unitsLocalRes_gsBrauerInfl_sUnitsToUnitsZ S ι r _
 
 end Compat
-
-def realLocalEmbeddings (ιr : ∀ v : {v : InfinitePlace K.1 // v.IsReal}, ℚ̄ →ₐ[K.1] AlgebraicClosure v.1.Completion) :
-    LocalEmbeddings K where
-  fin _ := Classical.choice nonempty_algHom_of_isSepClosed
-  inf v := by
-    classical
-    exact if h : v.IsReal then ιr ⟨v, h⟩ else Classical.choice nonempty_algHom_of_isSepClosed
-
-theorem realLocalEmbeddings_inf (ιr : ∀ v : {v : InfinitePlace K.1 // v.IsReal}, ℚ̄ →ₐ[K.1] AlgebraicClosure v.1.Completion)
-    (w : {v : InfinitePlace K.1 // v.IsReal}) : (realLocalEmbeddings ιr).inf w.1 = ιr w := by
-  unfold realLocalEmbeddings
-  exact dif_pos w.2
 
 end
 

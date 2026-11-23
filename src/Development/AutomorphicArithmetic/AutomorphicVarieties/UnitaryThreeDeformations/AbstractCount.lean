@@ -1,24 +1,71 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.FiniteResidue
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.AbsCoord
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.NormBoundOfIntegralValues
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.WPresEx
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.ExistsRelations
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.CommAlgFunctorCoboundaryZeroMemCocyclesOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.Origin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.TangentCoordEqZeroOfNonposWeight
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.PrecompleteOfPowLe
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.PtSign
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsPtHomAct
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPtOfIsPtHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.UnitEqOneOfPowEqOneOfResidueOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.TypeIOfTwoSigned
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.NormTwoEqOne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.ContinuousCompOfFilteredContinuity
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.FiniteResidue
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.OrbitVanishingLocal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsHostFrame
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.AbsCoord
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.CommAlgFunctorCoboundaryZeroMemCocyclesOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.ContinuousCompOfFilteredContinuity
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.ExistsRelations
 import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.ExistsUniqueIsPtHom
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsCharZeroPtOfIsPtHom
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.IsPtHomAct
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.NormBoundOfIntegralValues
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.NormTwoEqOne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.Origin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.PrecompleteOfPowLe
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.PtSign
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.TangentCoordEqZeroOfNonposWeight
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.TypeIOfTwoSigned
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.UnitEqOneOfPowEqOneOfResidueOne
+import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeDeformations.WPresEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Matrix IsLocalRing ReciprocityTheory.Gal UpperTheory.V.HV UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.UnitaryThreeInertia
 
-private theorem conjBy_one' {R : Type} [CommRing R] {D : Type} [Group D] (r : D →* GG 3 R) :
+private theorem conjBy_one' {R : Type} [CommRing R] {D : Type} [Group D] (r : D →* GG (m := 3) (R := R)) :
     conjBy 1 r = r := by
   apply MonoidHom.ext; intro g; simp [conjBy, GG.ofGL]
 
@@ -27,11 +74,11 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
       [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [Algebra O (PadicAlgCl l)] [IsScalarTower ℤ_[l] O (PadicAlgCl l)] [FaithfulSMul O (PadicAlgCl l)]
       {G Γ ι : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
       [Group Γ] [TopologicalSpace Γ] [IsTopologicalGroup Γ] [CompactSpace Γ] [T2Space Γ] [TotallyDisconnectedSpace Γ] [Finite ι] (F : Frame O G Γ ι), F.Ok →
-    F.LocVan → F.Count → F.VanE → F.Cl1 → F.Xpp → ∀ (g₁ : Γ), F.Marked g₁ → ∀ {R : Type} [CommRing R] [Algebra O R] [IsCO O R] (u : Γ →* GG 3 R), F.IsUniv g₁ u →
-    Module.Finite O (wpart O u 0) → ∀ (φ : Γ) (Good : (Γ →* GG 3 (PadicAlgCl l)) → Prop),
-      (∀ (ξ : Sring O u →ₐ[O] (PadicAlgCl l)) (r : Γ →* GG 3 (PadicAlgCl l)), IsPtHom u ξ r → TypeI F.η r → Good r) →
+    F.LocVan → F.Count → F.VanE → F.Cl1 → F.Xpp → ∀ (g₁ : Γ), F.Marked g₁ → ∀ {R : Type} [CommRing R] [Algebra O R] [IsCO O R] (u : Γ →* GG (m := 3) (R := R)), F.IsUniv g₁ u →
+    Module.Finite O (wpart O u 0) → ∀ (φ : Γ) (Good : (Γ →* GG (m := 3) (R := PadicAlgCl l)) → Prop),
+      (∀ (ξ : Sring (O := O) u →ₐ[O] (PadicAlgCl l)) (r : Γ →* GG (m := 3) (R := PadicAlgCl l)), IsPtHom u ξ r → TypeI F.η r → Good r) →
       (∀ r, F.IsCharZeroPt g₁ r → TypeI F.η r → Good r → F.Rigid r ∧ (r φ).mat.trace ≠ (F.rz (PadicAlgCl l) φ).mat.trace) →
-      ∃ (n : ℕ) (r : Fin n → (Γ →* GG 3 (PadicAlgCl l))) (V : ℕ), (∀ i, F.IsCharZeroPt g₁ (r i) ∧ TypeI F.η (r i) ∧ Good (r i)) ∧
+      ∃ (n : ℕ) (r : Fin n → (Γ →* GG (m := 3) (R := PadicAlgCl l))) (V : ℕ), (∀ i, F.IsCharZeroPt g₁ (r i) ∧ TypeI F.η (r i) ∧ Good (r i)) ∧
         (∀ i i', MatIso F.η.ker (mats (r i)) (mats (r i')) → i = i') ∧ (∀ a : O, a ≠ 0 → F.shaLen a ≤ V) ∧
         (V : ℝ) ≤ 2 * (Base.eO l O).toNat * ∑ i, vl1 l ((r i φ).mat.trace - (F.rz (PadicAlgCl l) φ).mat.trace) := by
   intro hM hM' l _ O _ _ _ _ _ _ _ _ _ _ _ G Γ ι _ _ _ _ _ _ _ _ _ _ _ _ _ F hOk hLV hC hVE hCl hX g₁ hm R _ _ _ u hU hfin φ Good hGood hRig
@@ -41,9 +88,9 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
   have hent : ∀ g x y, W.origin h ((u g).mat x y) = (r0 F.η F.Ψ g).mat x y := by
     intro g x y
     exact congrArg (fun q => (q g).mat x y) hpush
-  have hpt : ∀ ξ : Sring O u →ₐ[O] PadicAlgCl l, ∃ r, IsPtHom u ξ r :=
+  have hpt : ∀ ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l, ∃ r, IsPtHom u ξ r :=
     fun ξ => (existsUnique_isPtHom u ξ).exists
-  have hval : ∀ (ξ : Sring O u →ₐ[O] PadicAlgCl l) r, IsPtHom u ξ r → ∀ g x y,
+  have hval : ∀ (ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l) r, IsPtHom u ξ r → ∀ g x y,
       ξ ⟨(u g).mat x y, mem_Sring u (entry_mem u g x y)⟩ = (r g).mat x y := by
     intro ξ r hr g x y
     rw [(hr g).2]
@@ -57,21 +104,24 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
   set a : R := (u φ).mat.trace - algebraMap O R ((r0 F.η F.Ψ φ).mat.trace) with ha_def
   have ha0 : a ∈ wpart O u 0 :=
     Submodule.sub_mem _ (Submodule.sum_mem _ fun i _ => hdiag i) (halg _)
-  have hξa : ∀ (ξ : Sring O u →ₐ[O] PadicAlgCl l) r, IsPtHom u ξ r →
+  have hξa : ∀ (ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l) r, IsPtHom u ξ r →
       ξ ⟨a, mem_Sring u ha0⟩ = (r φ).mat.trace - (F.rz (PadicAlgCl l) φ).mat.trace := by
     intro ξ r hr
-    have hsplit : (⟨a, mem_Sring u ha0⟩ : Sring O u) =
-        ∑ i, ⟨(u φ).mat i i, mem_Sring u (hdiag i)⟩ - algebraMap O (Sring O u) ((r0 F.η F.Ψ φ).mat.trace) := by
+    have hsplit : (⟨a, mem_Sring u ha0⟩ : Sring (O := O) u) =
+        ∑ i, ⟨(u φ).mat i i, mem_Sring u (hdiag i)⟩ - algebraMap O (Sring (O := O) u) ((r0 F.η F.Ψ φ).mat.trace) := by
       apply Subtype.ext
       simp [a, Matrix.trace]
+
     rw [hsplit, map_sub, map_sum, AlgHom.commutes]
     simp only [Matrix.trace, Matrix.diag]
     congr 1
     · exact Finset.sum_congr rfl fun i _ => hval ξ r hr φ i i
+
     · simp [Frame.rz, map_sum]
   have hao : W.origin h a = 0 := by
+
     simp [a, Matrix.trace, map_sum, hent]
-  have hfacts : ∀ (ξ : Sring O u →ₐ[O] PadicAlgCl l) r, IsPtHom u ξ r →
+  have hfacts : ∀ (ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l) r, IsPtHom u ξ r →
       (¬∀ j < 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       (¬∀ j > 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       F.IsCharZeroPt g₁ r ∧ TypeI F.η r ∧ Good r := by
@@ -96,7 +146,7 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
     change _ + Frame.defect j ≤ _
     rw [← hd]
     omega
-  have horig : ∀ (ξ : Sring O u →ₐ[O] PadicAlgCl l),
+  have horig : ∀ (ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l),
       (∀ j < 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       (∀ j > 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       ∀ (j : ℤ) (x : R) (hx : x ∈ wpart O u j),
@@ -106,8 +156,8 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
     have hs := isPtHom_sign F hOk g₁ hm u hU ξ r hr
     have hz := isCharZeroPt_of_isPtHom F hOk g₁ hm u hU hfin ξ r hr
     have hrz := eq_rz_of_diag F hOk hCl g₁ hm r hz (hs.1.2 hneg) (hs.2.2 hpos)
-    let ξ0 : Sring O u →ₐ[O] PadicAlgCl l :=
-      (Algebra.ofId O (PadicAlgCl l)).comp ((W.origin h).comp (Sring O u).val)
+    let ξ0 : Sring (O := O) u →ₐ[O] PadicAlgCl l :=
+      (Algebra.ofId O (PadicAlgCl l)).comp ((W.origin h).comp (Sring (O := O) u).val)
     have h0 : IsPtHom u ξ0 (F.rz (PadicAlgCl l)) := by
       intro g
       refine ⟨?_, ?_⟩
@@ -120,7 +170,7 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
       exact hr
     have := (isPtHom_act F hOk g₁ hm u hU hfin ξ0 _ h0 ξ 1).1 hr' j x hx
     simpa [ξ0] using this
-  have hder : ∀ (ξ : Sring O u →ₐ[O] PadicAlgCl l),
+  have hder : ∀ (ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l),
       (¬∀ j < 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       (¬∀ j > 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       ∀ D ∈ PtDer ξ (PadicAlgCl l), ∃ c, ∀ (j : ℤ) (x : R) (hx : x ∈ wpart O u j),
@@ -129,7 +179,7 @@ theorem UpperTheory.V.UnitaryThreeInertia.abstract_count :
     obtain ⟨r, hr⟩ := hpt ξ
     obtain ⟨hz, hT, hG⟩ := hfacts ξ r hr hneg hpos
     exact tangent_eq_orbit F hOk g₁ hm u hU hfin ξ r hr (hRig r hz hT hG).1 D hD
-  have hne : ∀ (ξ : Sring O u →ₐ[O] PadicAlgCl l),
+  have hne : ∀ (ξ : Sring (O := O) u →ₐ[O] PadicAlgCl l),
       (¬∀ j < 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       (¬∀ j > 0, ∀ (x : R) (hx : x ∈ wpart O u j), ξ ⟨x, mem_Sring u hx⟩ = 0) →
       ξ ⟨a, mem_Sring u ha0⟩ ≠ 0 := by

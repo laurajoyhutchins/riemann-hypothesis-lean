@@ -1,14 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EigLat
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieChart
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinearStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalizationSheafGlueModulesStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProjectiveModulesGlueCoverStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalizedModuleBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualModuleFiniteProjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualNumberPointsGlueStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieChart
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualModuleFiniteProjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DualNumberPointsGlueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueSemilinearStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalizationSheafGlueModulesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalizedModuleBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ProjectiveModulesGlueCoverStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar
@@ -99,14 +143,14 @@ theorem spMap_dual_alg {A B : Type} [CommRing A] [CommRing B] (c : A →+* B) :
       spMap (algebraMap B (DualNumber B)) ≫ spMap c := by
   rw [spMap_comp', spMap_comp']
   congr 1
-  ext a <;> simp [dualMap, TrivSqZeroExt.algebraMap_eq_inl]
+  ext a <;> simp [GlobalTheory.CompanionTheory.Ar.dualMap, TrivSqZeroExt.algebraMap_eq_inl]
 
 theorem spMap_fst_dual {A B : Type} [CommRing A] [CommRing B] (c : A →+* B) :
     spMap c ≫ spMap (TrivSqZeroExt.fstHom A A A).toRingHom =
       spMap (TrivSqZeroExt.fstHom B B B).toRingHom ≫ spMap (dualMap c) := by
   rw [spMap_comp', spMap_comp']
   congr 1
-  ext a <;> simp [dualMap, TrivSqZeroExt.algebraMap_eq_inl]
+  ext a <;> simp [GlobalTheory.CompanionTheory.Ar.dualMap, TrivSqZeroExt.algebraMap_eq_inl]
 
 abbrev Idx {R J : Type} [CommRing R] (f : J → R) : Type := {g : R // ∃ i, f i ∣ g}
 

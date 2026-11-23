@@ -1,6 +1,56 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.UnitaryConstant
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.MatrixFormFourfoldBlock
-import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.LocalComponentGL
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.UnitaryConstant
+public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.MatrixFormFourfoldBlock
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -75,7 +125,7 @@ theorem altE_cayC (x y : V) :
     LinearMap.smul_apply, smul_eq_mul, Complex.sub_im, key]
 
 theorem cayC_add (x y : V) : cayC Ae (x + y) = cayC Ae x + cayC Ae y := by
-  simp only [cayC, map_add, smul_add]
+  simp only [cayC, map_add (f := _), smul_add]
   abel
 
 theorem ud_phi_add (h : UnitaryData H Λ α δ Ae) {x x' : V} (hx : x ∈ Λ) (hx' : x' ∈ Λ) :
@@ -97,7 +147,7 @@ theorem ud_phi_add (h : UnitaryData H Λ α δ Ae) {x x' : V} (hx : x ∈ Λ) (h
         * Complex.exp (-(2 * (Real.pi : ℂ)) * Complex.I * (altE H (Ae.symm x) x' : ℂ)) := by
     rw [← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add, Complex.exp_eq_exp_iff_exists_int]
     refine ⟨m, ?_⟩
-    simp only [cayC_add, map_add, LinearMap.add_apply]
+    simp only [cayC_add, map_add (f := _), LinearMap.add_apply]
     linear_combination (-(Real.pi : ℂ)) * h1 + (-(Real.pi : ℂ)) * h2
       + (-(2 * (Real.pi : ℂ) * Complex.I)) * h3 + (2 * (Real.pi : ℂ) * Complex.I) * h4
   simp only [phiC, bC]
@@ -125,7 +175,7 @@ theorem bC_add_left (x x' x'' : V) : bC H Ae (x + x') x'' = bC H Ae x x'' * bC H
   unfold bC
   rw [← Complex.exp_add]
   congr 1
-  simp only [altE, map_add, LinearMap.add_apply, Complex.add_im, Complex.ofReal_add]
+  simp only [altE, map_add (f := _), LinearMap.add_apply, Complex.add_im, Complex.ofReal_add]
   ring
 
 theorem mem_latA {x : V} : x ∈ latA Λ δ Ae ↔ ∃ w ∈ Λ, δ w ∈ Λ ∧ Ae (δ w) = x := by
@@ -194,7 +244,7 @@ theorem ud_phi_latA (h : UnitaryData H Λ α δ Ae) {w : V} (hw : w ∈ Λ) (hy 
     module
   have hH : H (cayC Ae (Ae (δ w))) (Ae (δ w)) = Complex.I * (altE H w (δ w) : ℂ) := by
     rw [hcy, hyd]
-    simp only [map_smul, map_add, map_sub, LinearMap.smul_apply, LinearMap.add_apply, smul_eq_mul]
+    simp only [map_smul, map_add (f := _), map_sub, LinearMap.smul_apply, LinearMap.add_apply, smul_eq_mul]
     have i1 : H (δ w) (δ w) = H w w := h.isom w w
     have i2 : H (δ w) w = (starRingEnd ℂ) (H w (δ w)) := h.herm w (δ w)
     rw [i1, i2]
@@ -332,17 +382,16 @@ theorem bQ_mk (h : UnitaryData H Λ α δ Ae) (x y : Λ) :
   rw [bC_add_left, ud_radical_of_mem h hk hyk, mul_one, ud_b_symm h x.2 hyk, bC_add_left,
     ud_radical_of_mem h hk' x.2, mul_one, ud_b_symm h y.2 x.2]
 
-theorem ud_isQuadFn (h : UnitaryData H Λ α δ Ae) : IsQuadFn (phiQ H Λ α δ Ae) (bQ H Λ δ Ae) where
-  add := by
-    intro c d
+theorem ud_isQuadFn (h : UnitaryData H Λ α δ Ae) : IsQuadFn (phiQ H Λ α δ Ae) (bQ H Λ δ Ae) := by
+  constructor
+  · intro c d
     induction c using QuotientAddGroup.induction_on with
     | H x =>
       induction d using QuotientAddGroup.induction_on with
       | H y =>
         rw [← QuotientAddGroup.mk_add, phiQ_mk h, phiQ_mk h, phiQ_mk h, bQ_mk h]
         exact ud_phi_add h x.2 y.2
-  left := by
-    intro c d e
+  · intro c d e
     induction c using QuotientAddGroup.induction_on with
     | H x =>
       induction d using QuotientAddGroup.induction_on with
@@ -351,14 +400,12 @@ theorem ud_isQuadFn (h : UnitaryData H Λ α δ Ae) : IsQuadFn (phiQ H Λ α δ 
         | H z =>
           rw [← QuotientAddGroup.mk_add, bQ_mk h, bQ_mk h, bQ_mk h]
           exact bC_add_left _ _ _
-  sq := by
-    intro k c
+  · intro k c
     induction c using QuotientAddGroup.induction_on with
     | H x =>
       rw [← QuotientAddGroup.mk_nsmul, phiQ_mk h, phiQ_mk h]
       exact ud_phi_nsmul h x.2 k
-  ne := by
-    intro c
+  · intro c
     induction c using QuotientAddGroup.induction_on with
     | H x =>
       rw [phiQ_mk h]
@@ -366,8 +413,7 @@ theorem ud_isQuadFn (h : UnitaryData H Λ α δ Ae) : IsQuadFn (phiQ H Λ α δ 
       have := ud_norm h x.2
       rw [h0, norm_zero] at this
       exact zero_ne_one this
-  nondeg := by
-    intro c hc
+  · intro c hc
     induction c using QuotientAddGroup.induction_on with
     | H x =>
       rw [QuotientAddGroup.eq_zero_iff, AddSubgroup.mem_addSubgroupOf]

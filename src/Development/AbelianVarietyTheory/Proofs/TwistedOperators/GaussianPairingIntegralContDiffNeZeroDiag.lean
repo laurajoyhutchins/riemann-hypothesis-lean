@@ -1,5 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PairInfApply
+module
+
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Constructions.HaarToSphere
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+
+@[expose] public section
+
 open MeasureTheory
 
 noncomputable section
@@ -159,8 +222,7 @@ theorem fderiv_gaussMoment_apply (ys : List (V →L[ℝ] V →L[ℝ] ℂ)) {B : 
   unfold gaussMoment
   congr 1
   funext x
-  simp only [integrandDeriv, diagProd, ContinuousLinearMap.smul_apply, evalDiag_apply, smul_eq_mul,
-    List.map_cons, List.prod_cons]
+  simp [integrandDeriv, diagProd]
   ring
 
 theorem contDiffOn_gaussMoment (n : ℕ) :
@@ -180,24 +242,22 @@ theorem contDiffOn_gaussMoment (n : ℕ) :
         rw [fderivWithin_of_isOpen isOpen_negDef hB, fderiv_gaussMoment_apply μ ys hB])
     exact_mod_cast this
 
-omit [MeasurableSpace V] [BorelSpace V] in
 
+omit [MeasurableSpace V] [BorelSpace V] in
 def toCont (N : V →ₗ[ℝ] V →ₗ[ℝ] ℂ) : V →L[ℝ] V →L[ℝ] ℂ :=
   LinearMap.toContinuousLinearMap
     ((LinearMap.toContinuousLinearMap : (V →ₗ[ℝ] ℂ) ≃ₗ[ℝ] (V →L[ℝ] ℂ)).toLinearMap ∘ₗ N)
 
-omit [MeasurableSpace V] [BorelSpace V] in
-@[simp] theorem toCont_apply (N : V →ₗ[ℝ] V →ₗ[ℝ] ℂ) (x y : V) : toCont N x y = N x y := rfl
+
 
 omit [MeasurableSpace V] [BorelSpace V] in
-
 def pairForm (M : ℝ → V →ₗ[ℝ] V →ₗ[ℝ] ℂ) (p : ℝ × ℝ) : V →L[ℝ] V →L[ℝ] ℂ :=
   toCont (M p.1 + (M p.2).compr₂ (Complex.conjAe.toLinearMap))
 
 omit [MeasurableSpace V] [BorelSpace V] in
 @[simp] theorem pairForm_apply (M : ℝ → V →ₗ[ℝ] V →ₗ[ℝ] ℂ) (p : ℝ × ℝ) (x y : V) :
     pairForm M p x y = M p.1 x y + starRingEnd ℂ (M p.2 x y) := by
-  simp [pairForm]
+  simp [pairForm, toCont]
 
 theorem gauss_pairing_smooth_ne_zero (M : ℝ → V →ₗ[ℝ] V →ₗ[ℝ] ℂ)
     (hM : ∀ x y, ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) fun t => M t x y)

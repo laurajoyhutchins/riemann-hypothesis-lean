@@ -1,9 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.CuspSemisimpleReal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.RepNewform
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RTwist
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHasCentChar
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CasimirScalarOfCapelliDeterminantEigenvalue
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.RealCusp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHasCentChar
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CasimirScalarOfCapelliDeterminantEigenvalue
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QdetTopThreeOrders
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField GlobalTheory.CuspRep UpperTheory.V
 
@@ -30,7 +75,8 @@ theorem casMem : ∀ (A : Type) [Ring A] [Algebra ℂ A] (n : ℕ) (E : Fin n �
     (fun i j => φ (E i i * E j j - E j i * E i j)) (fun d => φ (Rm d)) (φ 1) 0 (fun Y => by
       have h2 := congrArg φ (hR Y).symm
       rw [h0 _ (h Y)] at h2
-      simp only [map_add, map_sum, map_smul, smul_eq_mul, sub_eq_add_neg (a := Y)] at h2
+
+      simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, sub_eq_add_neg (a := Y)] at h2
       simp only [add_zero]
       rw [h2, h0 1 (one_mem S), mul_zero])
   have h2 := core.2
@@ -38,6 +84,7 @@ theorem casMem : ∀ (A : Type) [Ring A] [Algebra ℂ A] (n : ℕ) (E : Fin n �
   have h4 := h0 _ ht
   rw [map_sub, h0 _ (mul_mem ht ht)] at h3
   simp only [h0 1 (one_mem S), mul_zero, zero_add, Finset.sum_erase_eq_sub (Finset.mem_univ _)] at h2
+
   simp only [map_sub φ, map_sum, map_smul, smul_eq_mul] at h3 h2 h4
   apply hφ
   simp only [sub_mul, Finset.sum_sub_distrib, ← Finset.mul_sum, h4, mul_assoc, neg_mul, one_mul, Finset.sum_neg_distrib] at h2 h3
@@ -112,6 +159,7 @@ theorem polySlices : ∀ (T M ι : Type) [AddCommGroup T] [Module ℂ T] [AddCom
   have hev : ∀ i (q : Polynomial ℂ) x, s i (Polynomial.aeval C q x) = Polynomial.aeval D q (s i x) := by
     intro i q x
     rw [Polynomial.aeval_eq_sum_range, Polynomial.aeval_eq_sum_range]
+
     simp only [LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, hpow]
   have hpow2 : ∀ (n : ℕ) (y : U), (((D.restrict hD ^ n) y : U) : M) = (D ^ n) y := by
     intro n

@@ -1,5 +1,47 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.LeftEquivariantFunctions.ComplexMatrixCalculus.EigOf
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContDiffOnChartInv
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.LeftEquivariantFunctions.ComplexMatrixCalculus.EigOf
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContDiffOnChartInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,22 +86,22 @@ theorem clm_apply' (M : Matrix (Ix n lam) (Ix n lam) ℂ) (u : EV n lam) :
   rw [Fintype.sum_prod_type (f := fun i : Ix n lam × Ix n lam => (M i.1 i.2 * u i.2) • EuclideanSpace.single i.1 (1 : ℂ))]
   ext r
   rw [clm_entry]
-  simp [Finset.sum_apply, EuclideanSpace.single_apply, Pi.single_apply]
+  simp [Finset.sum_apply, Pi.single_apply]
 
 theorem mem_GLs_inv' {x : Mat n} (hx : x ∈ GLs n) : x⁻¹ ∈ GLs n := by
-  simp only [GLs, Set.mem_setOf_eq] at hx ⊢
+  simp only [GLs, Set.mem_ofPred_eq] at hx ⊢
   rw [Matrix.det_nonsing_inv, Ring.inverse_eq_inv']
   exact inv_ne_zero hx
 
 theorem mem_GLs_conjInv {x : Mat n} (hx : x ∈ GLs n) : (x⁻¹)ᴴ ∈ GLs n := by
   have h := mem_GLs_inv' hx
-  simp only [GLs, Set.mem_setOf_eq] at h ⊢
+  simp only [GLs, Set.mem_ofPred_eq] at h ⊢
   rw [Matrix.det_conjTranspose]
   exact star_ne_zero.2 h
 
 theorem contDiff_conjT : ContDiff ℝ ∞ (fun y : Mat n => yᴴ) := by
   refine contDiff_pi.2 fun i => contDiff_pi.2 fun j => ?_
-  exact Complex.conjCLE.contDiff.comp ((contDiff_apply ℝ ℂ i).comp (contDiff_apply ℝ (Fin n → ℂ) j))
+  exact Complex.conjCLE.contDiff.comp ((contDiff_apply ℝ (fun _ => ℂ) i).comp (contDiff_apply ℝ (fun _ => (Fin n → ℂ)) j))
 
 theorem contDiffOn_theta : ContDiffOn ℝ ∞ (fun y : Mat n => (y⁻¹)ᴴ) (GLs n) :=
   contDiff_conjT.comp_contDiffOn GlobalTheory.CompanionTheory.MatInv.contDiffOn_inv
@@ -67,7 +109,7 @@ theorem contDiffOn_theta : ContDiffOn ℝ ∞ (fun y : Mat n => (y⁻¹)ᴴ) (GL
 theorem contDiffOn_entry {J : Type} [Fintype J] [DecidableEq J] {f : Mat n → Matrix J J ℂ} (hf : ContDiffOn ℝ ∞ f (GLs n))
     (a b : J) : ContDiffOn ℝ ∞ (fun x => (f x * (1 : Matrix J J ℂ) : Matrix J J ℂ) a b) (GLs n) := by
   simp only [Matrix.mul_one]
-  exact ((contDiff_apply ℝ ℂ b).comp (contDiff_apply ℝ (J → ℂ) a)).comp_contDiffOn hf
+  exact ((contDiff_apply ℝ (fun _ => ℂ) b).comp (contDiff_apply ℝ (fun _ => (J → ℂ)) a)).comp_contDiffOn hf
 
 end PositivityTheory.RgBcC.Cxh
 
@@ -78,7 +120,7 @@ open PositivityTheory.RgTw (Mat hb)
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
-set_option maxHeartbeats 800000 in
+
 theorem eigOf : EigOf := by
   intro hAvg hG hRm hHol hAnti hProd hLoc n lam hlam w
   obtain ⟨hu, -, -, -, -⟩ := hAvg n lam
@@ -106,6 +148,7 @@ theorem eigOf : EigOf := by
   symm
   rw [← ContinuousLinearMap.mul_apply, frame_inv_mul_sym_zero hu hG]
   change (sqQ lam * (clm lam (gamM (0 : Matrix (Md n) (Md n) ℂ) ⊗ₖ rhoW lam x⁻¹) * Ring.inverse (sqQ lam))) w = _
+
   rw [ContinuousLinearMap.mul_apply, ContinuousLinearMap.mul_apply, clm_apply', map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul]

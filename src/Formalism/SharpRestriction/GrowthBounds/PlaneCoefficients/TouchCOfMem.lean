@@ -1,4 +1,51 @@
-import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.DigOKAddInl
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PlaneCoefficients.DigOKAddInl
+public import Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.MemLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.GrowthBounds.DualFockLinear.IsMultiHom
+import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.DvdOfAdd
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +68,7 @@ private theorem X_mul_monomialPlaneCoefficients {σ R : Type} [CommSemiring R] (
 private theorem liftMon_apply_liftVar (mo : TL J Dt.nL r × Fin r →₀ ℕ) (w : TL J Dt.nL r × Fin r) :
     liftMon Dt mo (Dt.liftVar w) = mo w / Pof Dt w := by
   unfold liftMon
-  rw [Finsupp.mapDomain_apply (liftVar_inj Dt)]
+  rw [Finsupp.mapDomain_apply_of_injective (liftVar_inj Dt)]
   simp [liftE, Finsupp.onFinset_apply]
 
 private theorem liftMon_eq_add_single_of_eq_off (mo mo' : TL J Dt.nL r × Fin r →₀ ℕ) (v : TL J Dt.nL r × Fin r) (d : ℕ)
@@ -147,7 +194,7 @@ theorem Fdig_der_inl (j0 : ZMod J) (l : Fin (Dt.nL j0)) (a0 : Fin r) (rho : (ZMo
           (by simp only [Pof_inl, Nat.div_one, Finsupp.tsub_apply, Finsupp.single_eq_same]; omega)
         rw [e2, add_tsub_cancel_right]
     · rw [if_neg (fun h => hd ((digOK_iff_of_eq_off_inl Dt j0 l a0 rho mo _ e1).1 h)), if_neg hd, map_zero]
-  · rw [map_add, Fdig_add, Fdig_add, hp, hq, map_add]
+  · rw [map_add (f := _), Fdig_add, Fdig_add, hp, hq, map_add (f := _)]
 
 section Tau
 
@@ -270,7 +317,7 @@ theorem Fdig_der_lt (h : rho ((j0, m0), a0) + 1 < Dt.P j0 m0) (H : MvPolynomial 
               · subst hw
                 omega
               · simp
-            rw [hs, smul_monomial, smul_monomial, ← map_add, smul_eq_mul, smul_eq_mul, ← hc]
+            rw [hs, smul_monomial, smul_monomial, ← map_add (f := _), smul_eq_mul, smul_eq_mul, ← hc]
             congr 1
             ring
         · rw [if_neg (fun h' => hd' (hd.1 h')), if_neg hd']
@@ -287,7 +334,7 @@ theorem Fdig_der_lt (h : rho ((j0, m0), a0) + 1 < Dt.P j0 m0) (H : MvPolynomial 
           omega
         rw [if_neg hn, if_neg hn']
         simp
-  · simp only [map_add, Fdig_add, hp, hq, smul_add, mul_add]
+  · simp only [map_add (f := _), Fdig_add, hp, hq, smul_add, mul_add]
     abel
 
 theorem Fdig_der_eq (h : rho ((j0, m0), a0) + 1 = Dt.P j0 m0) (H : MvPolynomial (TL J Dt.nL r × Fin r) (KK O)) :
@@ -338,7 +385,7 @@ theorem Fdig_der_eq (h : rho ((j0, m0), a0) + 1 = Dt.P j0 m0) (H : MvPolynomial 
           ring
         · rw [if_neg (fun h' => hd' (hd.1 h')), if_neg hd']
           simp
-  · simp only [map_add, Fdig_add, hp, hq, smul_add]
+  · simp only [map_add (f := _), Fdig_add, hp, hq, smul_add]
 
 end Tau
 

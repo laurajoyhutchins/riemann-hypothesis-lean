@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DPairOneIrr
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.MarkWeightedFixedPointEqDefinitePairOdd
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.FinitelyManyMarkedClassesTermDegreeOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MarkedFieldPairsEquivDefiniteFieldPairsOdd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MarkedRootRealSignatureOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DotConjTransposeMulMul
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DPairOneIrr
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.MarkWeightedFixedPointEqDefinitePairOdd
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.FinitelyManyMarkedClassesTermDegreeOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DotConjTransposeMulMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MarkedFieldPairsEquivDefiniteFieldPairsOdd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MarkedRootRealSignatureOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix NumberField GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKCount GlobalTheory.LKCx GlobalTheory.LKDef
 open scoped TensorProduct Classical
@@ -55,7 +94,7 @@ theorem markWeightedFixedPoint_definitePair_odd_of_counts : GlobalTheory.LKDef.M
     · refine finsum_congr fun q => ?_
       set P : Pair G := Quot.out q
       by_cases hm : ∃ μ, P.Mark μ
-      · rw [dif_pos hm]
+      · rw [dite_eq_left hm]
         by_cases hi : Irreducible P.pol
         · have hμ := hm.choose_spec
           obtain ⟨j, hj⟩ := (hmem P.pol (hmon _) P.reg.1 _).1 (mark_isRoot_pol p G P _ ha hμ v hv)
@@ -75,7 +114,7 @@ theorem markWeightedFixedPoint_definitePair_odd_of_counts : GlobalTheory.LKDef.M
           · intro h; exact absurd (Finset.mem_univ _) h
         · rw [h0 P hm hi, mul_zero]
           exact (Finset.sum_eq_zero fun i _ => if_neg fun h => hi h.1).symm
-      · rw [dif_neg hm]
+      · rw [dite_eq_right hm]
         exact (Finset.sum_eq_zero fun i _ => if_neg fun h => hm ⟨_, h.2⟩).symm
     · intro i _
       refine hF.subset fun q hq => ?_

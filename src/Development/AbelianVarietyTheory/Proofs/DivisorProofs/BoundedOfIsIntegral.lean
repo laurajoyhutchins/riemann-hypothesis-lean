@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CharacterTheory.RootsCharpolyPowEqMapPow
+module
+
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Completion
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.RootsCharpolyPowEqMapPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.IsAlgClosed.Spectrum
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Algebra.Spectrum.Basic
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Polynomial
 
@@ -10,18 +67,15 @@ namespace GlobalTheory.LocBounded
 theorem isIntegral_mul_of_commute {R A : Type} [CommRing R] [Ring A] [Algebra R A] {x y : A}
     (hc : Commute x y) (hx : IsIntegral R x) (hy : IsIntegral R y) : IsIntegral R (x * y) := by
   let S := Algebra.adjoin R ({x, y} : Set A)
-  letI : CommRing S := Algebra.adjoinCommRingOfComm R (by
-    intro a ha b hb
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ha hb
-    rcases ha with rfl | rfl <;> rcases hb with rfl | rfl
-    exacts [rfl, hc.eq, hc.eq.symm, rfl])
+  letI : IsMulCommutative S :=
+    Algebra.isMulCommutative_adjoin R (Set.pairwise_pair.2 fun _ => ⟨hc, hc.symm⟩)
   have hx' : x ∈ S := Algebra.subset_adjoin (by simp)
   have hy' : y ∈ S := Algebra.subset_adjoin (by simp)
   have h1 : IsIntegral R (⟨x, hx'⟩ : S) :=
     (isIntegral_algHom_iff S.val Subtype.val_injective).1 hx
   have h2 : IsIntegral R (⟨y, hy'⟩ : S) :=
     (isIntegral_algHom_iff S.val Subtype.val_injective).1 hy
-  exact (h1.mul h2).map S.val
+  exact open scoped IsMulCommutative in (h1.mul h2).map S.val
 
 theorem isIntegral_trace_of_isIntegral {R K : Type} [CommRing R] [Field K] [Algebra R K] {n : ℕ}
     (M : Matrix (Fin n) (Fin n) K) (hM : IsIntegral R M) : IsIntegral R M.trace := by
@@ -30,9 +84,10 @@ theorem isIntegral_trace_of_isIntegral {R K : Type} [CommRing R] [Field K] [Alge
     (IsScalarTower.toAlgHom R K L).mapMatrix
   have hM' : IsIntegral R (φ M) := hM.map φ
   have htr : algebraMap K L M.trace = (φ M).trace := by
+
     simp only [Matrix.trace, Matrix.diag, map_sum]
     rfl
-  rw [← isIntegral_algebraMap_iff (A := K) (B := L) (algebraMap K L).injective, htr,
+  rw [← isIntegral_algebraMap_iff (A := K) (B := L) , htr,
     Matrix.trace_eq_sum_roots_charpoly]
   refine IsIntegral.multiset_sum fun μ hμ => ?_
   have hroot : IsRoot (φ M).charpoly μ := (mem_roots'.1 hμ).2
@@ -103,6 +158,7 @@ theorem det_hankel_trace_ne_zero (K : Type) [Field K] (n : ℕ) (N : Matrix (Fin
       Matrix.of fun j k : Fin n => (M ^ ((j : ℕ) + (k : ℕ))).trace := by
     ext j k
     simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, hM, ← Matrix.map_pow]
+
     simp [Matrix.trace, map_sum]
   intro h0
   have h1 : f (Matrix.of fun j k : Fin n => (N ^ ((j : ℕ) + (k : ℕ))).trace).det = 0 := by

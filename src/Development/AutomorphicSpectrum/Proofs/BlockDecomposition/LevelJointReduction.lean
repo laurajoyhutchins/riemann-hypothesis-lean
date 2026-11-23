@@ -1,8 +1,54 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnramifiedWhittaker.CProps
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SeriesEqDens
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LatticeVolumeUnramifiedStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LevelCharactersUnramifiedStatement
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnramifiedWhittaker.CProps
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
+import Aesop.Main
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LatticeVolumeUnramifiedStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LevelCharactersUnramifiedStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SeriesEqDens
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedQuotientCardStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +82,7 @@ theorem integral_of_factor {V P Q : Type} [AddCommGroup V] [MeasurableSpace V] [
       · have hx' : r x = 0 := hx
         simp [hx', hs]
       · have hxy' : ι x = -ι (s c) + y := hxy
-        rw [map_add, hxy']
+        rw [map_add (f := _), hxy']
         abel
   have hPm : ∀ c, MeasurableSet (Pc c) := fun c => by
     rw [hPc]
@@ -91,7 +137,7 @@ theorem integral_of_factor {V P Q : Type} [AddCommGroup V] [MeasurableSpace V] [
       exact hy ⟨x, rfl⟩
   have hint : ∀ c, Integrable ((Pc c).indicator (fun _ => g c)) μ := fun c =>
     (integrable_indicator_iff (hPm c)).2 (integrableOn_const (by rw [hPμ]; exact hHfin))
-  rw [hdec, integral_finset_sum _ (fun c _ => hint c)]
+  rw [hdec, integral_finsetSum _ (fun c _ => hint c)]
   simp only [integral_indicator_const _ (hPm _)]
   have : ∀ c, μ.real (Pc c) = ((Fintype.card Q : ℝ))⁻¹ := fun c => by
     rw [← hreal, Measure.real, Measure.real, hPμ]
@@ -208,13 +254,14 @@ theorem trace_red (hG : GoodLoc σ J T bs v ψv S σS ϖ ε) (k : ℕ) (X : Matr
     simp only [red]
     exact (Matrix.map_mul (f := Ideal.Quotient.mk (lev hG.pS k))).symm
   rw [e, hm, hm, hm]
+
   simp only [Matrix.trace, Matrix.diag_apply, red, Matrix.map_apply, map_sum]
 
 theorem gram_emb (hG : GoodLoc σ J T bs v ψv S σS ϖ ε) (x : Matrix (Fin M) (Fin n) S) (c a : Fin n) :
     gramR (Fv F v) σ J (emb S M n x) c a =
       ((PositivityTheory.PfSWUS.Loc.cT σS x * matS S J hG.J_int * x) c a : S) := by
   simp only [gramR, hR, hform, JR, Matrix.mul_apply, PositivityTheory.PfSWUS.Loc.cT, Matrix.transpose_apply, Matrix.map_apply, emb, matS,
-    Matrix.of_apply, AddMonoidHom.coe_mk, ZeroHom.coe_mk, AddSubmonoidClass.coe_finset_sum, Subring.coe_mul, hG.sig,
+    Matrix.of_apply, AddMonoidHom.coe_mk, ZeroHom.coe_mk, AddSubmonoidClass.coe_finsetSum, Subring.coe_mul, hG.sig,
     Finset.sum_mul]
   exact Finset.sum_comm
 
@@ -229,7 +276,7 @@ theorem psi_gram (hG : GoodLoc σ J T bs v ψv S σS ϖ ε) (k : ℕ) (X : Matri
   have e2 : (∑ a, ∑ c, (hG.hermLev k X hX : Matrix (Fin n) (Fin n) (Fv F v ⊗[F] E)) a c *
         gramR (Fv F v) σ J (emb S M n x) c a) =
       (ϖ ^ k)⁻¹ • ((Matrix.trace (X * (PositivityTheory.PfSWUS.Loc.cT σS x * matS S J hG.J_int * x)) : S) : Fv F v ⊗[F] E) := by
-    simp only [gram_emb hG, Matrix.trace, Matrix.diag_apply, Matrix.mul_apply (M := X), AddSubmonoidClass.coe_finset_sum,
+    simp only [gram_emb hG, Matrix.trace, Matrix.diag_apply, Matrix.mul_apply (M := X), AddSubmonoidClass.coe_finsetSum,
       Subring.coe_mul, Finset.smul_sum]
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun c _ => ?_
     show ((ϖ ^ k)⁻¹ • (X a c : Fv F v ⊗[F] E)) * _ = _

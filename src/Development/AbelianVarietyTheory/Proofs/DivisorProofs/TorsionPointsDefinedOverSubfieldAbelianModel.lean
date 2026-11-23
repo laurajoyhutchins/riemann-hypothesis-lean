@@ -1,17 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SepAtBIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolAV
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RigidifiedSymmetricKernelTrivialDescendFieldExt
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsRigTransport
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsCoordPtLocal
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsCoordPtFibre
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsionIsoOfGroupPullbackGeneric
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefOverOfFiniteOrbit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FromBase
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsChartMember
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.SmoothOfRelativeDimensionOfFibre
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsCoordPtFibre
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ThetaCoordinatesExistUniqueSeparatePoints
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolAVPointDefinedOverOfCoordsProportionalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsionCoordinatesScalarMulSubfieldValuedStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsionIsoOfGroupPullbackGeneric
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsRigTransport
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsProjBySmoothIsProperGeometricallyIntegral
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RelAmpleOfFaithfullyFlat
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RigidifiedSymmetricKernelTrivialDescendFieldExt
 import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsThetaPtOverOfSubsingleton
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsionCoordinatesScalarMulSubfieldValuedStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolAVPointDefinedOverOfCoordsProportionalStatement
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ProperRelAmpleKTrivOfFieldExtension
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocalC
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsOverIff
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SepAtBIff
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZH GlobalTheory.Poinc GlobalTheory.UPoinc GlobalTheory.TorRef
@@ -45,11 +89,29 @@ theorem points_defOver : ∀ (g n : ℕ), n.Prime → Odd n → ∃ j₀ : ℕ, 
   haveI : IsNoetherianRing V₁ := hCN.1
   haveI : IsCommMonObj D.P.A := D.P.isAb.comm
   haveI : IsCommMonObj B' := GlobalTheory.PolPull.isCommMonObj_of_isGrpPullback h₁
-  let P' : PolAV (Sp K) := GlobalTheory.TorsionTauCompare.polOfPullback D.P B' h₁
+  let P' : PolAV (Sp K) :=
+    { A := B'
+      isAb :=
+        { comm := inferInstance
+          smooth := MorphismProperty.of_isPullback (P := @Smooth) h₁.1 D.P.isAb.smooth
+          proper := MorphismProperty.of_isPullback (P := @IsProper) h₁.1 D.P.isAb.proper
+          geomConnected := MorphismProperty.of_isPullback (P := @GeometricallyConnected) h₁.1 D.P.isAb.geomConnected }
+      g := D.P.g
+      smoothDim := (smoothOfRelativeDimension_isStableUnderBaseChange _).of_isPullback h₁.1 D.P.smoothDim
+      L := D.P.L.pull π₁
+      isLB := pull_isLB D.P.isLB _
+      rigid := GlobalTheory.PolBaseChange.rigidified_pull h₁ D.P.rigid
+      sym := GlobalTheory.PolBaseChange.sym_pull h₁ D.P.sym
+      ample := by
+        haveI := D.P.isAb.proper
+        exact GlobalTheory.AmpleBaseChange.relAmple_of_isPullback D.P.isLB D.P.ample h₁.1
+      ktriv := kTriv_pull h₁ D.P.isLB (pull_isLB D.P.isLB _)
+        ((isGen_iff _).1 (GlobalTheory.TorsionTauCompare.isGen_refl (pull_isLB D.P.isLB π₁))) D.P.ktriv }
   have hw' : LBIso P'.L (M₀.pull π₀) := ⟨w, hw⟩
   have hSym : Out.Sym B₀ M₀ := (GlobalTheory.PolDescent.rigidified_sym_kTriv_descend k₀ K k₀.subtype B₀ B' π₀ M₀ P'.L hB₀ h₀
     hM₀ P'.isLB hw').2.1 P'.sym
   have h₀' : IsGrpPullback P'.A B₀ (spMap (algebraMap k₀ K)) π₀ := h₀
+  set_option synthInstance.maxHeartbeats 400000 in
   have : Flat (spMap k₀.subtype) := Flat.SpecMap_iff.2 (RingHom.flat_algebraMap_iff.2 inferInstance)
   let P₀ : PolAV (Sp k₀) :=
     { A := B₀, isAb := hB₀, g := P'.g,

@@ -1,9 +1,62 @@
-import Mathlib
-import GroundTheory.GlobalFields.ExistenceTheorem.PowerIndex
-import GroundTheory.GlobalFields.ExistenceTheorem.LocalPowers
-import GroundTheory.GlobalFields.IdeleGroups.IndexFormula
-import GroundTheory.GlobalFields.IdeleGroups.IndexProductFormula
-import GroundTheory.GlobalFields.IdeleGroups.LocalConditionIndex
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.LocalConditionIndex
+public import GroundTheory.GlobalFields.FirstInequalityStatement
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+public import GroundTheory.GlobalFields.ExistenceTheorem.LocalPowers
+public import GroundTheory.GlobalFields.ExistenceTheorem.PowerIndex
+public import GroundTheory.GlobalFields.IdeleGroups.IndexFormula
+public import GroundTheory.GlobalFields.IdeleGroups.IndexProductFormula
+import GroundTheory.GlobalFields.KummerTheory.LocalIndexAtPlace
+public import GroundTheory.GlobalFields.SplittingFromInequality
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.DedekindDomain.SelmerGroup
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -25,8 +78,8 @@ theorem index_range_powMonoidHom_adicCompletion_mul_norm (v : HeightOneSpectrum 
   rw [index_range_powMonoidHom_adicCompletion v (NeZero.ne n), hζv.card_rootsOfUnity,
     div_mul_cancel₀ _ hn, sq]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem eq_one_or_eq_two_of_isReal {w : InfinitePlace K} (hw : w.IsReal) : n = 1 ∨ n = 2 := by
   obtain ⟨ζ, hζ⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot K n
   have h := hζ.map_of_injective (InfinitePlace.embedding_of_isReal hw).injective
@@ -37,16 +90,18 @@ theorem eq_one_or_eq_two_of_isReal {w : InfinitePlace K} (hw : w.IsReal) : n = 1
   have hx2 : x ^ 2 = 1 := by rw [← sq_abs, habs, one_pow]
   exact (Nat.dvd_prime Nat.prime_two).1 (h.dvd_of_pow_eq_one 2 hx2)
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem index_range_powMonoidHom_infinitePlaceCompletion_mul_norm (w : InfinitePlace K) :
     ((powMonoidHom n : (w.Completion)ˣ →* (w.Completion)ˣ).range.index : ℝ) *
       ‖(n : w.Completion)‖ ^ w.mult = (n : ℝ) ^ 2 := by
   have hnorm : ‖(n : w.Completion)‖ = n := by
-    have h : ‖(n : w.Completion)‖ = w (n : K) := by
-      rw [← map_natCast (algebraMap K w.Completion) n]
-      exact InfinitePlace.Completion.norm_coe (K := K) (v := w) _
-    rw [h, InfinitePlace.map_natCast]
+    have hc (m : ℕ) : ((m : WithAbs w.1) : w.Completion) = m := by
+      induction m with
+      | zero => simp
+      | succ m ih => simp [Nat.cast_succ, ih]
+    simpa [hc, InfinitePlace.map_natCast] using
+      (InfinitePlace.Completion.norm_coe (v := w) (n : WithAbs w.1))
   rw [index_range_powMonoidHom_infinitePlaceCompletion w (NeZero.ne n), hnorm]
   rcases w.isReal_or_isComplex with hw | hw
   · rw [hw.mult_eq_one, pow_one]

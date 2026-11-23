@@ -1,11 +1,62 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalToGlobal.Divisibility.Tuples
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntegralFiniteAdeleCompleteSeparated
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HeightOneSpectrumPlacesOverFiniteSet
+module
+
+public import Formalism.LocalToGlobal.Divisibility.Tuples
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.HeightOneSpectrumPlacesOverFiniteSet
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntegralFiniteAdeleCompleteSeparated
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsUniqueIdeleOfLinearEquivQuotientLocal
+import Formalism.FrobeniusOrbits.Statement
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.FrobeniusOrbits Formalism.L2.DIV Formalism.UG Formalism.UG.P
 open scoped TensorProduct
@@ -56,8 +107,8 @@ theorem exists_locMap (F : Type) [Field F] [NumberField F] [Algebra F E]
   rw [← WithZero.exp_zero, WithZero.exp_le_exp]
   omega
 
-variable (F) in
 
+variable (F) in
 def locMap (P : HeightOneSpectrum (𝓞 E)) :
     (P.under (𝓞 F)).adicCompletion F →+* P.adicCompletion E := (exists_locMap F P).choose
 
@@ -76,8 +127,8 @@ theorem locMap_int (P : HeightOneSpectrum (𝓞 E)) (a : (P.under (𝓞 F)).adic
   rw [HeightOneSpectrum.mem_adicCompletionIntegers] at ha ⊢
   simpa using locMap_valued P 0 a (by simpa using ha)
 
-variable (F E) in
 
+variable (F E) in
 def adMap : FiniteAdeleRing (𝓞 F) F →+* FiniteAdeleRing (𝓞 E) E where
   toFun a := ⟨fun P => locMap F P (a (P.under (𝓞 F))), by
     have h : {v : HeightOneSpectrum (𝓞 F) | a v ∉ v.adicCompletionIntegers F}.Finite :=
@@ -156,7 +207,7 @@ theorem coord_tmul (i : Fin (Module.finrank F E)) (x : E) (a : FiniteAdeleRing (
 theorem sum_coord (y : AfE F E) : ∑ i, Module.finBasis F E i ⊗ₜ[F] coord i y = y := by
   induction y using TensorProduct.induction_on with
   | zero => simp
-  | add y y' hy hy' => simp only [map_add, TensorProduct.tmul_add, Finset.sum_add_distrib, hy, hy']
+  | add y y' hy hy' => simp only [map_add (f := _), TensorProduct.tmul_add, Finset.sum_add_distrib, hy, hy']
   | tmul x a =>
     simp only [coord_tmul, ← TensorProduct.smul_tmul]
     rw [← TensorProduct.sum_tmul, Module.Basis.sum_repr]
@@ -170,6 +221,7 @@ theorem exists_coord_denom : ∃ D : ℕ, 0 < D ∧ ∀ y ∈ RInt F E, ∀ i, D
       (Module.finBasis F E).repr (algebraMap (𝓞 E) E (g p.1)) p.2)
   refine ⟨D, hD, fun y hy i => ?_⟩
   obtain ⟨r, hr, rfl⟩ := levelaf_decomp g hg hy
+
   rw [map_sum, Finset.smul_sum]
   refine sum_mem fun j _ => ?_
   obtain ⟨o, ho⟩ := h _ (Finset.mem_image_of_mem _ (Finset.mem_univ (j, i)))
@@ -205,7 +257,7 @@ theorem exists_limit (x : ℕ → AfE F E) (hx : ∀ N, x N ∈ RInt F E)
     refine (GlobalTheory.AdLat.integral_finiteAdele_complete_separated F).2 (fun N => D • coord i (x N))
       (fun N => hc _ (hx N) i) fun N k hN hk => ?_
     obtain ⟨w, hw, e⟩ := h N k hN hk
-    exact ⟨_, hc w hw i, by rw [e, map_add, map_nsmul, smul_add, smul_comm D N]⟩
+    exact ⟨_, hc w hw i, by rw [e, map_add (f := _), map_nsmul, smul_add, smul_comm D N]⟩
   choose y hy using key
   refine ⟨M * D, Nat.mul_pos hM hD, ∑ i, algebraMap (𝓞 E) E (o i) ⊗ₜ[F] y i, fun N hN => ?_⟩
   choose a ha hya using fun i => hy i N hN
@@ -228,6 +280,7 @@ theorem map_tmul_one (x : E) : ι (x ⊗ₜ[F] 1) = algebraMap E _ x := by
 theorem map_mem_int {y : AfE F E} (hy : y ∈ RInt F E) : ι y ∈ intAd E := by
   obtain ⟨m, g, hg⟩ := Module.Finite.exists_fin (R := ℤ) (M := 𝓞 E)
   obtain ⟨r, hr, rfl⟩ := levelaf_decomp g hg hy
+
   rw [map_sum]
   refine sum_mem fun j _ => ?_
   rw [hι]
@@ -235,14 +288,14 @@ theorem map_mem_int {y : AfE F E} (hy : y ∈ RInt F E) : ι y ∈ intAd E := by
 
 theorem mem_int_of_map {y : AfE F E} (hy : ι y ∈ intAd E) : y ∈ RInt F E := by
   obtain ⟨x, r, hr, rfl⟩ := exists_approx y
-  rw [map_add, map_tmul_one hι] at hy
+  rw [map_add (f := _), map_tmul_one hι] at hy
   have h1 := sub_mem hy (map_mem_int hι hr)
   rw [add_sub_cancel_right] at h1
   obtain ⟨o, rfl⟩ := exists_int_of_mem h1
   exact add_mem (levelaf_tmul_mem o (one_mem _)) hr
 
 theorem map_injective : Function.Injective ι := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro y hy
   refine eq_zero_of_divisible y fun N hN => ⟨(N : E)⁻¹ ⊗ₜ[F] 1 * y, mem_int_of_map hι ?_, ?_⟩
   · rw [map_mul, hy, mul_zero]; exact zero_mem _
@@ -282,7 +335,7 @@ theorem exists_map_eq_of_int {s : FiniteAdeleRing (𝓞 E) E} (hs : s ∈ intAd 
     refine (GlobalTheory.AdLat.integral_finiteAdele_complete_separated E).1 _ fun N hN => ?_
     obtain ⟨w, hw, e⟩ := hy N hN
     refine ⟨ι w - D • a N, sub_mem (map_mem_int hι hw) (nsmul_mem (ha N) D), ?_⟩
-    rw [e, map_add, map_nsmul, map_nsmul, map_tmul_one hι]
+    rw [e, map_add (f := _), map_nsmul, map_nsmul, map_tmul_one hι]
     conv_lhs => rw [hxa N hN]
     rw [smul_add, smul_sub, smul_comm D N]
     abel
@@ -293,7 +346,7 @@ theorem map_surjective : Function.Surjective ι := by
   intro z
   obtain ⟨x, a, ha, rfl⟩ := (GlobalTheory.AdLat.strong_approximation_mod_nat E 1 one_pos).1 z
   obtain ⟨y, rfl⟩ := exists_map_eq_of_int hι ha
-  exact ⟨x ⊗ₜ[F] 1 + y, by rw [map_add, map_tmul_one hι, one_smul]⟩
+  exact ⟨x ⊗ₜ[F] 1 + y, by rw [map_add (f := _), map_tmul_one hι, one_smul]⟩
 
 theorem map_eps_mul_apply (v : HeightOneSpectrum (𝓞 F)) (z : AfE F E)
     (P : HeightOneSpectrum (𝓞 E)) :

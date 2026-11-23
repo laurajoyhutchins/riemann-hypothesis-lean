@@ -1,8 +1,45 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.WeilBound.ThetaLifts.TowerModels.TwistedSums.StandardAddCharSymplecticLocalLatticeEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtPlace
-import Development.WeilBound.ThetaLifts.TowerModels.TwistedSums.StandardAddCharSymplecticLocalLatticeEqOne
+
+@[expose] public section
 
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice
 open IsDedekindDomain NumberField MeasureTheory Matrix
@@ -33,6 +70,7 @@ theorem conj_hTens (hc : ∀ z, c (c z) = z) {JA : Matrix α α A} {JB : Matrix 
     (hA : ∀ i j, c (JA j i) = JA i j) (hB : ∀ i j, c (JB j i) = -JB i j) (x y : Matrix α β A) :
     c (GlobalTheory.WeilM.hTens c JA JB y x) = -GlobalTheory.WeilM.hTens c JA JB x y := by
   unfold GlobalTheory.WeilM.hTens
+
   simp only [map_sum, map_mul, hc, hA, hB, ← Finset.sum_neg_distrib]
   rw [sum_four_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ =>
@@ -48,7 +86,7 @@ theorem symp_swap (hc : ∀ z, c (c z) = z) {JA : Matrix α α A} {JB : Matrix �
     GlobalTheory.WeilM.symp (R := R) c ξ JA JB y x =
       GlobalTheory.WeilM.symp (R := R) c ξ JA JB x y + GlobalTheory.WeilM.symp (R := R) c (-1) JA JB x y := by
   unfold GlobalTheory.WeilM.symp
-  rw [← trace_conj c hc, map_mul, conj_hTens c hc hA hB, ← map_add]
+  rw [← trace_conj c hc, map_mul, conj_hTens c hc hA hB, ← map_add (f := _)]
   congr 1
   linear_combination (-GlobalTheory.WeilM.hTens c JA JB x y) * hξ
 
@@ -56,7 +94,7 @@ end General
 
 theorem psi_half_symp_add : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
     (B : Base F E), B.IsGood σ → ∀ {n d : ℕ} (X : Spc F E n) (Y : Spc F E d) (r s r' s' : ℕ),
-    X.IsHerm σ B r s → Y.IsSkew σ B r' s' → ∀ θ : 𝓞 E, (θ : E) + σ θ = 1 → ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl F,
+    X.IsHerm σ B r s → Y.IsSkew σ B r' s' → ∀ θ : 𝓞 E, (θ : E) + σ θ = 1 → ∀ v : GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.Pl (F := F),
     ∀ γ ∈ GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.latAtV X Y v, ∀ γ' ∈ GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.latAtV X Y v,
       B.ψ (⅟(2 : AF F) * GlobalTheory.WeilM.symp (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA σ) (inclR (F := F) (AF F) (θ : E))
           (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM F X.J) (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM F Y.J) (γ + γ') (γ + γ')) =
@@ -75,12 +113,12 @@ theorem psi_half_symp_add : ∀ {F E : Type} [Field F] [NumberField F] [Field E]
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a e => simp [GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA, hσ]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hi : ∀ e : E, GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA σ (inclR (F := F) (AF F) e) = inclR (F := F) (AF F) (σ e) := fun e => rfl
   have hsw := symp_swap (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.cA σ) hc (JA := GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM F X.J) (JB := GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM F Y.J)
     (fun i j => by simp only [GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM, Matrix.map_apply, hi, hX.herm])
     (fun i j => by simp only [GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.incM, Matrix.map_apply, hi, hY.skew, map_neg])
-    (ξ := inclR (F := F) (AF F) (θ : E)) (by rw [hi, ← map_add, hθ, map_one]) γ γ'
+    (ξ := inclR (F := F) (AF F) (θ : E)) (by rw [hi, ← map_add (f := _), hθ, map_one]) γ γ'
   have h1 := Tw.LatVacArith.psi_symp_latAtV σ B X Y r s r' s' hB hX hY v θ 1
     (by rw [map_one]; exact one_mem _) γ hγ γ' hγ'
   have h2 := Tw.LatVacArith.psi_symp_latAtV σ B X Y r s r' s' hB hX hY v (-1) 1

@@ -1,4 +1,48 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.PendingAdmissibility.LocalFDerivAdmissibility.RepRed
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceIffAdditiveMapsExist
+public import Formalism.LocalToGlobal.PairingIndexBounds.PendingAdmissibility.LocalFDerivAdmissibility.AdmTwoPendantIff
+public import Formalism.LocalToGlobal.PairingIndexBounds.PendingAdmissibility.LocalFDerivAdmissibility.SubstInvFActS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -123,7 +167,7 @@ def Adm3Rep (X : Sys p) [IsFractionRing X.G.O X.G.Kf] (E : CEmbC X.G) (hfin : �
   letI := algKfC E.toCEmb
   ∀ j < X.mm, ∀ (L0 : X.Lt j), L0 ∈ repOf X.Lv hfin j → ∀ La' : X.Lt (j + 1), (X.Pj (j + 1)).IsLatTup La'.2 →
     ∀ (φ : Frm X j L0 La') (I : X.ColCh j) (n : X.FrI j →₀ ℕ),
-      GeZ (MvPolynomial.coeff n (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j (thA ℂ_[p] φ (thFOf X pos F j L0 La')))))
+      GeZ (AddMonoidAlgebra.coeff (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j (thA ℂ_[p] φ (thFOf X pos F j L0 La')))) n)
 
 theorem adm_three_iff_representative (D : Formalism.BasicNotions.D7) (X : Sys p) [IsFractionRing X.G.O X.G.Kf] (E : CEmbC X.G)
     (hfin : ∀ j c, (X.Lv.lev j c).FinClasses) (hst : FinStab X.Lv) {g : Formalism.MainNotions.GL3Theta.G1 p} (hLT : LTIso g) {T : Type}
@@ -133,14 +177,15 @@ theorem adm_three_iff_representative (D : Formalism.BasicNotions.D7) (X : Sys p)
   let _ := wittFractionAlgebraCp p
   let _ := algKfC E.toCEmb
   have key : ∀ j (La : X.Lt j) (La' : X.Lt (j + 1)) (φ : Frm X j La La') (I : X.ColCh j) (n : X.FrI j →₀ ℕ),
-      MvPolynomial.coeff n (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j ((pendT X E hfin hst hLT pos F).ThA j La La' φ))) =
-        chiN X ℂ_[p] hfin j La • MvPolynomial.coeff n (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j
+      AddMonoidAlgebra.coeff (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j ((pendT X E hfin hst hLT pos F).ThA j La La' φ))) n =
+        chiN X ℂ_[p] hfin j La • AddMonoidAlgebra.coeff (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j
           (thA ℂ_[p] (frmMove X (delt X hfin j La.1 La.2) (lsmul_lsmul_inv _ _ _).symm φ)
-            (thFOf X pos F j (La.1, (X.Lv.lev j La.1).smul (delt X hfin j La.1 La.2)⁻¹ La.2) La')))) := by
+            (thFOf X pos F j (La.1, (X.Lv.lev j La.1).smul (delt X hfin j La.1 La.2)⁻¹ La.2) La')))) n := by
     intro j La La' φ I n
     rw [← thA_SA X ℂ_[p] (delt X hfin j La.1 La.2) (lsmul_lsmul_inv _ _ _).symm φ, ← MvPolynomial.coeff_smul,
       ← applyD_C_mul, Sys.ThZA, Sys.ThZA, ← subst_C_mul' (hasSubst_coordZA' X ℂ_[p] j)]
     congr 3
+    congr 1
     exact subst_C_mul' (hasSubst_invF ℂ_[p] φ) _ _
   have hn : ∀ j (La : X.Lt j), ‖chiN X ℂ_[p] hfin j La‖ = 1 := fun j La => norm_chiN X E.toCEmb hfin j La
   constructor
@@ -149,8 +194,8 @@ theorem adm_three_iff_representative (D : Formalism.BasicNotions.D7) (X : Sys p)
     have hh : L1 = (X.Lv.lev j c).smul (delt X hfin j c L1) ((X.Lv.lev j c).smul (delt X hfin j c L1)⁻¹ L1) :=
       (lsmul_lsmul_inv _ _ _).symm
     have A : ∀ φ' : Frm X j (c, (X.Lv.lev j c).smul (delt X hfin j c L1)⁻¹ L1) La',
-        GeZ (MvPolynomial.coeff n (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j
-          (thA ℂ_[p] φ' (thFOf X pos F j (c, (X.Lv.lev j c).smul (delt X hfin j c L1)⁻¹ L1) La'))))) := by
+        GeZ (AddMonoidAlgebra.coeff (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j
+          (thA ℂ_[p] φ' (thFOf X pos F j (c, (X.Lv.lev j c).smul (delt X hfin j c L1)⁻¹ L1) La')))) n) := by
       intro φ'
       have H1 := H j hj (c, L1) La' hL0 hL' (frmBack X (La := (c, L1)) (delt X hfin j c L1) hh φ') I n
       change GeZ _ at H1
@@ -163,8 +208,8 @@ theorem adm_three_iff_representative (D : Formalism.BasicNotions.D7) (X : Sys p)
       conv_lhs => rw [e2]
       rw [lsmul_inv_lsmul, h21]
     have B : ∀ L3 (_ : (X.Lv.lev j c).smul (delt X hfin j c L1)⁻¹ L1 = L3) (φ' : Frm X j (c, L3) La'),
-        GeZ (MvPolynomial.coeff n (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j
-          (thA ℂ_[p] φ' (thFOf X pos F j (c, L3) La'))))) := by
+        GeZ (AddMonoidAlgebra.coeff (applyD (X.PI j I fun _ => 0) (X.ThZA ℂ_[p] j
+          (thA ℂ_[p] φ' (thFOf X pos F j (c, L3) La')))) n) := by
       intro L3 e
       subst e
       exact A

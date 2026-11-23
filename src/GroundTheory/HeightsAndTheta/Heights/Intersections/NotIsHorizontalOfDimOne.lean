@@ -1,9 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.Intersections.IsMultiHomogTwoXc
-import GroundTheory.HeightsAndTheta.Heights.Intersections.MultAtHorizontalEqZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsArith
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.IsMultiHomogTwoXc
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.LengthCokerEqKerAddDimOneOrderSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Inter
@@ -64,8 +110,8 @@ theorem divCycle_mul' {P : Ideal (MRing ι)} (hP : P.IsPrime) {f g : MRing ι}
   · rw [if_neg h, if_neg fun h2 => h (mem_divSupp_mul_left' hP hg h2),
       if_neg fun h2 => h (by rw [mul_comm]; exact mem_divSupp_mul_left' hP hf h2)]
 
-open Classical in
 
+open Classical in
 def cycWeight (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → HermLine ι) → ℝ) {n : ℕ}
     (L : Fin n → HermLine ι) (W : Ideal (MRing ι)) : ℝ :=
   if IsHorizontal W then I W n L else (geoNum n W (fun j => (L j).a) : ℝ) * Real.log (charOf W)
@@ -161,22 +207,6 @@ theorem ptsIntegral_add_of_dimOne (hFF : FibreFiniteStatement) {P : Ideal (MRing
     · simp
   · simp
 
-theorem arInt_mul_of_dimOne (h0 : ArithVarZeroStatement) (hFF : FibreFiniteStatement)
-    {P : Ideal (MRing ι)} (hP : IsArithVar P 1) {A B : HermLine ι} {s t : MRing ι}
-    (hs : IsSectionOn P A s) (ht : IsSectionOn P B t) :
-    arInt P (s * t) (A.tensor B) (Fin.elim0 : Fin 0 → HermLine ι) =
-      arInt P s A (Fin.elim0 : Fin 0 → HermLine ι) + arInt P t B (Fin.elim0 : Fin 0 → HermLine ι) := by
-  unfold arInt
-  refine ptsIntegral_add_of_dimOne hFF hP _ fun z hz => ?_
-  have hs0 := eval_ne_zero_of_dimOne h0 hP hs hz
-  have ht0 := eval_ne_zero_of_dimOne h0 hP ht hz
-  have hA := A.pos z hz.1
-  have hB := B.pos z hz.1
-  unfold logNorm
-  rw [show (A.tensor B).h z = A.h z * B.h z from rfl, map_mul, map_mul, norm_mul, mul_div_mul_comm]
-  exact Real.log_mul (div_ne_zero (norm_ne_zero_iff.mpr hs0) hA.ne')
-    (div_ne_zero (norm_ne_zero_iff.mpr ht0) hB.ne')
-
 end Integral
 
 theorem SpecIntHeightFormula.proof (h0 : ArithVarZeroStatement) : SpecIntHeightFormula.Statement := by
@@ -186,13 +216,6 @@ theorem SpecIntHeightFormula.proof (h0 : ArithVarZeroStatement) : SpecIntHeightF
   unfold cycR vertR
   refine finsum_mem_congr rfl fun W hW => ?_
   simp [not_isHorizontal_of_dimOne h0 hP hs hW]
-
-theorem RegularityAdditive.proof (h0 : ArithVarZeroStatement) (hFF : FibreFiniteStatement) : RegularityAdditive.Statement := by
-  intro K _ ι _ I P A B s t hP _ _ hs ht
-  obtain ⟨_, _, _, hsP⟩ := id hs
-  obtain ⟨_, _, _, htP⟩ := id ht
-  rw [recR_eq, recR_eq, recR_eq, cycR_mul I hP.2.1.1 _ hsP htP, arInt_mul_of_dimOne h0 hFF hP hs ht]
-  ring
 
 theorem cycR_eq_vertR_of_dimOne (h0 : ArithVarZeroStatement) (I : Ideal (MRing ι) → (n : ℕ) → (Fin n → HermLine ι) → ℝ)
     {P : Ideal (MRing ι)} {A : HermLine ι} {s : MRing ι} (hP : IsArithVar P 1) (hs : IsSectionOn P A s) :
@@ -227,10 +250,6 @@ theorem RegularityIndependence.proof (h0 : ArithVarZeroStatement) (hFF : FibreFi
   have hpf := hPF K ι P s t b hP hsa htb hsP htP
   rw [recR_eq, recR_eq, cycR_eq_vertR_of_dimOne h0 I hP hs, cycR_eq_vertR_of_dimOne h0 I hP ht, hsplit]
   linarith
-
-theorem R1.proof (h0 : ArithVarZeroStatement) (hFF : FibreFiniteStatement)
-    (hPF : RegularityProductFormula.Statement) : GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.Inter.R1.Statement :=
-  GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.Inter.R1.of_first ⟨RegularityIndependence.proof h0 hFF hPF, RegularityAdditive.proof h0 hFF⟩
 
 end
 

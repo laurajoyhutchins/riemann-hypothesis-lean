@@ -1,9 +1,66 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.Torus2GammaBijective
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FinitePresentationOfInjective
+module
+
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomBaseChangeBijectiveOfLeNilradical
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.Torus2GammaBijective
+public import Mathlib.AlgebraicGeometry.Geometrically.Integral
+public import Mathlib.AlgebraicGeometry.Morphisms.Etale
+public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FinitePresentationOfInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+public import Mathlib.GroupTheory.IndexNSmul
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsaRos
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
+
+@[expose] public section
 
 universe u
 
@@ -17,8 +74,8 @@ namespace GlobalTheory.Diag
 
 variable (S : Scheme.{u}) {X Y Z : Type u} [AddCommGroup X] [AddCommGroup Y] [AddCommGroup Z]
 
-omit [AddCommGroup X] [AddCommGroup Y] [AddCommGroup Z] in
 
+omit [AddCommGroup X] [AddCommGroup Y] [AddCommGroup Z] in
 theorem isPullback_toUnit_of_lift {K G H : Over S} {i : K ⟶ G} {f : G ⟶ H} {e : 𝟙_ (Over S) ⟶ H}
     (hw : i ≫ f = toUnit _ ≫ e)
     (hmono : ∀ {T : Over S} {a b : T ⟶ K}, a ≫ i = b ≫ i → a = b)
@@ -105,8 +162,8 @@ theorem diagMap_chi (u : Y →+ X) (y : Y) : (diagMap S u).left.appTop.hom (chi 
     Category.comp_id]
   rfl
 
-variable {S} in
 
+variable {S} in
 theorem hom_ext {T : Over S} {s t : T ⟶ splitTorus S X}
     (h : ∀ x, (coord s).hom (AddMonoidAlgebra.single x 1) =
       (coord t).hom (AddMonoidAlgebra.single x 1)) : s = t :=
@@ -120,15 +177,15 @@ theorem diagMap_comp (u : Y →+ X) (v : Z →+ Y) : diagMap S (u.comp v) = diag
     rw [coord_comp_diagMap_single, ← Category.id_comp (diagMap S u), coord_comp_diagMap_single,
       ← Category.id_comp (diagMap S (u.comp v)), coord_comp_diagMap_single]; rfl
 
-variable {S} in
 
+variable {S} in
 theorem coord_one (T : Over S) (x : X) :
     (coord (1 : T ⟶ splitTorus S X)).hom (AddMonoidAlgebra.single x 1) = 1 := by
   rw [← MonObj.comp_one (1 : T ⟶ splitTorus S X), ← diagMap_zero, coord_comp_diagMap_single,
     AddMonoidHom.zero_apply, ← AddMonoidAlgebra.one_def, map_one]
 
-variable {S} in
 
+variable {S} in
 def ofCoord (T : Over S) (φ : torusRing ZU X ⟶ Γ(T.left, ⊤)) : T ⟶ splitTorus S X :=
   Over.homMk (pullback.lift (T.left.toSpecΓ ≫ Spec.map φ) T.hom (specULiftZIsTerminal.hom_ext _ _))
     (pullback.lift_snd _ _ _)
@@ -140,8 +197,8 @@ theorem coord_ofCoord (T : Over S) (φ : torusRing ZU X ⟶ Γ(T.left, ⊤)) :
   rw [coord, this, Scheme.Hom.comp_appTop, ← Category.assoc, ← Scheme.ΓSpecIso_inv_naturality]
   simp
 
-variable {S} in
 
+variable {S} in
 def ofChar (T : Over S) (g : Multiplicative X →* Γ(T.left, ⊤)) : T ⟶ splitTorus S X :=
   ofCoord T (CommRingCat.ofHom (AddMonoidAlgebra.liftNCRingHom
     ((Int.castRingHom _).comp (ULift.ringEquiv : ULift.{u} ℤ ≃+* ℤ).toRingHom) g
@@ -164,8 +221,8 @@ theorem coord_single_add {T : Over S} (t : T ⟶ splitTorus S X) (x y : X) :
       (coord t).hom (AddMonoidAlgebra.single x 1) * (coord t).hom (AddMonoidAlgebra.single y 1) := by
   rw [← map_mul, AddMonoidAlgebra.single_mul_single, _root_.one_mul]
 
-variable {S} in
 
+variable {S} in
 theorem coord_mul {T : Over S} (s t : T ⟶ splitTorus S X) (x : X) :
     (coord (s * t)).hom (AddMonoidAlgebra.single x 1) =
       (coord s).hom (AddMonoidAlgebra.single x 1) * (coord t).hom (AddMonoidAlgebra.single x 1) := by
@@ -229,7 +286,7 @@ theorem isPullback_of_exact (u : Y →+ X) (q : X →+ Z) (hq : Function.Surject
         rw [h2 _ 0 (by rw [hσ, _root_.map_zero]; rfl), ← AddMonoidAlgebra.one_def, map_one]
       map_mul' := fun a b => by
         rw [← map_mul, AddMonoidAlgebra.single_mul_single, _root_.one_mul]
-        exact h2 _ _ (by rw [_root_.map_add, hσ, hσ, hσ]; rfl) }
+        exact h2 _ _ (by rw [_root_.map_add (f := _), hσ, hσ, hσ]; rfl) }
   let c : ULift.{u} ℤ →+* Γ(T.left, ⊤) :=
     (Int.castRingHom _).comp (ULift.ringEquiv : ULift.{u} ℤ ≃+* ℤ).toRingHom
   let φ : AddMonoidAlgebra (ULift.{u} ℤ) Z →+* Γ(T.left, ⊤) :=
@@ -251,15 +308,11 @@ theorem isPullback_torsion (n : ℕ) :
       (mulN (splitTorus S X) n) (η : 𝟙_ (Over S) ⟶ splitTorus S X) := by
   rw [mulN_eq_diagMap]; exact isPullback_ker S _
 
-variable (X) in
 
+variable (X) in
 def torsionIso (n : ℕ) :
     torsion (splitTorus S X) n ≅ splitTorus S (X ⧸ (nsmulAddMonoidHom n : X →+ X).range) :=
   (isPullback_torsion S n).isoPullback.symm
-
-theorem torsionIso_inv_ι (n : ℕ) : (torsionIso S X n).inv ≫ torsion.ι _ n =
-    diagMap S (QuotientAddGroup.mk' (nsmulAddMonoidHom n : X →+ X).range) :=
-  (isPullback_torsion S n).isoPullback_hom_fst
 
 theorem torsionIso_hom_diagMap (n : ℕ) : (torsionIso S X n).hom ≫
     diagMap S (QuotientAddGroup.mk' (nsmulAddMonoidHom n : X →+ X).range) = torsion.ι _ n :=
@@ -268,9 +321,6 @@ theorem torsionIso_hom_diagMap (n : ℕ) : (torsionIso S X n).hom ≫
 theorem of_ringMap (P : MorphismProperty Scheme.{u}) [P.IsStableUnderBaseChange] (u : Y →+ X)
     (h : P (Spec.map (ringMap u))) : P (diagMap S u).left :=
   P.of_isPullback (isPullback_diagMap S u) h
-
-instance isAffineHom_diagMap (u : Y →+ X) : IsAffineHom (diagMap S u).left :=
-  of_ringMap S @IsAffineHom u inferInstance
 
 theorem isClosedImmersion_diagMap {u : Y →+ X} (hu : Function.Surjective u) :
     IsClosedImmersion (diagMap S u).left :=
@@ -337,8 +387,8 @@ theorem isPullback_groupRing :
   exact isPullback_SpecMap_of_isPushout _ _ _ _
     (CommRingCat.isPushout_of_isPushout ZU.{u} (AddMonoidAlgebra ZU.{u} X) R (AddMonoidAlgebra R X))
 
-variable {S R} in
 
+variable {S R} in
 theorem exists_isPullback (g : S ⟶ Spec (.of R)) :
     ∃ a : (splitTorus S X).left ⟶ Spec (.of (AddMonoidAlgebra R X)),
       IsPullback a (splitTorus S X).hom
@@ -421,7 +471,7 @@ variable (X : Type u) [AddCommGroup X] {n : ℕ}
 
 theorem nsmul_injective [Module.Free ℤ X] (hn : n ≠ 0) :
     Function.Injective (nsmulAddMonoidHom n : X →+ X) := by
-  have : IsAddTorsionFree X := Module.isTorsionFree_int_iff_isAddTorsionFree.1 inferInstance
+  have : HasUniqueDiv X := Module.isTorsionFree_int_iff_hasUniqueDiv.1 inferInstance
   exact nsmul_right_injective hn
 
 theorem finiteIndex_nsmul [Module.Finite ℤ X] (hn : n ≠ 0) :
@@ -474,8 +524,8 @@ theorem baseChangeIso_hom_torusFst (X : Type u) [AddCommGroup X] :
       pullback.fst (splitTorus S X).hom f ≫ torusFst S X :=
   (isPullback_baseChange f X).isoPullback_hom_fst
 
-omit [AddCommGroup X] [AddCommGroup Y] [AddCommGroup Z] in
 
+omit [AddCommGroup X] [AddCommGroup Y] [AddCommGroup Z] in
 theorem isMonHom_of_comp {B : Scheme.{u}} (h : S ⟶ B) (g : S' ⟶ B) (e : g = f ≫ h) (G : Over B)
     [GrpObj G] (φ : (Over.pullback f).obj ((Over.pullback h).obj G) ⟶ (Over.pullback g).obj G)
     (hφ : φ.left ≫ pullback.fst _ _ = pullback.fst _ _ ≫ pullback.fst _ _) : IsMonHom φ := by
@@ -509,23 +559,7 @@ theorem baseChangeIso_naturality (u : Y →+ X) :
 end BaseChange
 
 theorem chi_injective [Nonempty S] : Function.Injective (chi (S := S) X) := by
-  obtain ⟨s⟩ := ‹Nonempty S›
-  intro a b hab
-  let K := S.residueField s
-  let p : Spec K ⟶ S := S.fromSpecResidueField s
-  let φ : torusRing ZU X ⟶ CommRingCat.of (AddMonoidAlgebra K X) :=
-    CommRingCat.ofHom (AddMonoidAlgebra.mapRingHom X
-      ((Int.castRingHom K).comp (ULift.ringEquiv : ULift.{u} ℤ ≃+* ℤ).toRingHom))
-  let T : Over S := Over.mk (Spec.map (CommRingCat.ofHom (algebraMap K (AddMonoidAlgebra K X))) ≫ p)
-  let t : T ⟶ splitTorus S X := ofCoord T (φ ≫ (Scheme.ΓSpecIso _).inv)
-  have h1 : ∀ x, (coord t).hom (AddMonoidAlgebra.single x 1) = t.left.appTop.hom (chi X x) :=
-    fun x => by rw [← Category.comp_id t, coord_comp, Category.comp_id]; rfl
-  have h2 := (h1 a).trans ((congrArg _ hab).trans (h1 b).symm)
-  rw [coord_ofCoord] at h2
-  have h3 : φ.hom (AddMonoidAlgebra.single a 1) = φ.hom (AddMonoidAlgebra.single b 1) :=
-    (cr_iso_bij (Scheme.ΓSpecIso (.of (AddMonoidAlgebra K X))).symm).1 h2
-  simp only [φ, CommRingCat.hom_ofHom, AddMonoidAlgebra.mapRingHom_single, map_one] at h3
-  exact AddMonoidAlgebra.single_left_injective one_ne_zero h3
+  apply GlobalTheory.SplitTorus.chi_injective <;> assumption
 
 theorem diagMap_injective [Nonempty S] :
     Function.Injective (diagMap S : (Y →+ X) → (splitTorus S X ⟶ splitTorus S Y)) := by
@@ -579,8 +613,8 @@ instance isSemiAbelian : IsSemiAbelian (splitTorus S X) where
   geomConnected := inferInstance
   fibres := fun _ _ _ p => ⟨torusExtension S X p⟩
 
-omit [Module.Free ℤ X] [Module.Finite ℤ X] in
 
+omit [Module.Free ℤ X] [Module.Finite ℤ X] in
 theorem isGrpPullback {S S' : Scheme.{0}} (f : S' ⟶ S) :
     ReciprocityTheory.ChartRestriction.G.Geo.Tor.IsGrpPullback (splitTorus S' X) (splitTorus S X) f
       ((baseChangeIso f X).inv.left ≫ pullback.fst (splitTorus S X).hom f) := by

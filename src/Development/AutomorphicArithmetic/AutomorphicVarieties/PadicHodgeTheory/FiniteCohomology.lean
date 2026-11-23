@@ -1,9 +1,51 @@
-import Mathlib
-import ReciprocityTheory.GaloisValuations.ContinuousConstSMulQuotient
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EqOfPowEqOneOfNormSubLt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLocalPrimeAinf
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLocalPrimeAinf
+public import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+public import ReciprocityTheory.GaloisValuations.SeparatedDvrSecondCohomologyMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,8 +59,8 @@ variable (v : ℕ) [Fact v.Prime]
 
 def Iq : Subgroup (GQ v) := (MaximalUnramifiedExtension v).fixingSubgroup
 
-variable {v} in
 
+variable {v} in
 def IsFrob (σ : GQ v) : Prop := ∀ x : Om v, ‖x‖ ≤ 1 → ‖σ x - x ^ v‖ < 1
 
 def cyc (l : ℕ) [Fact l.Prime] : GQ v →* ℤ_[l]ˣ :=
@@ -101,8 +143,8 @@ def Dcr : Submodule A (V ⊗[ℚ_[l]] Bcr l) := ⨅ g : G, LinearMap.ker (actC �
 
 def Ddr : Submodule A (V ⊗[ℚ_[l]] Bdr l) := ⨅ g : G, LinearMap.ker (actD φ ρ g - LinearMap.id)
 
-variable (A V) in
 
+variable (A V) in
 def FilT (a : ℤ) : Submodule A (V ⊗[ℚ_[l]] Bdr l) :=
   LinearMap.range (AlgebraTensorModule.map (LinearMap.id : V →ₗ[A] V)
     ((((PP l).PD (botExt l)).Fil a).restrictScalars ℚ_[l]).subtype)
@@ -116,7 +158,7 @@ def finiteCocycles [TopologicalSpace G] [TopologicalSpace V] [IsTopologicalAddGr
   add_mem' := by
     rintro a b ⟨ha, x, hx⟩ ⟨hb, y, hy⟩
     refine ⟨(Z1 ρ).add_mem ha hb, x + y, fun g => ?_⟩
-    simp only [Pi.add_apply, add_tmul, hx, hy, map_add]
+    simp only [Pi.add_apply, add_tmul, hx, hy, map_add (f := _)]
     abel
   smul_mem' := by
     rintro c a ⟨ha, x, hx⟩
@@ -139,17 +181,15 @@ def Crys (K : FinExt l) (ρ : Representation A ↥(GK K) V) : Prop := IsCrys ((P
 
 def DeRham (K : FinExt l) (ρ : Representation A ↥(GK K) V) : Prop := IsDR ((PP l).PD K) (resCoef ℚ_[l] ρ)
 
-def Semist (K : FinExt l) (ρ : Representation A ↥(GK K) V) : Prop := GlobalTheory.Pst.IsSst (PP l) (resCoef ℚ_[l] ρ)
 
 variable (V) in
-
 def smulD (K : FinExt l) : A ⊗[ℚ_[l]] ↥K.1 →ₗ[ℚ_[l]] Module.End ℚ_[l] (V ⊗[ℚ_[l]] Bdr l) :=
   (TensorProduct.homTensorHomMap (RingHom.id ℚ_[l]) V (Bdr l) V (Bdr l)).comp
     (TensorProduct.map (Algebra.lsmul ℚ_[l] ℚ_[l] V : A →ₐ[ℚ_[l]] Module.End ℚ_[l] V).toLinearMap
       (Algebra.lsmul ℚ_[l] ℚ_[l] (Bdr l) : ↥K.1 →ₐ[ℚ_[l]] Module.End ℚ_[l] (Bdr l)).toLinearMap)
 
-variable (V) in
 
+variable (V) in
 def smulC (K : FinExt l) : A ⊗[ℚ_[l]] ↥(K0 K) →ₗ[ℚ_[l]] Module.End ℚ_[l] (V ⊗[ℚ_[l]] Bcr l) :=
   (TensorProduct.homTensorHomMap (RingHom.id ℚ_[l]) V (Bcr l) V (Bcr l)).comp
     (TensorProduct.map (Algebra.lsmul ℚ_[l] ℚ_[l] V : A →ₐ[ℚ_[l]] Module.End ℚ_[l] V).toLinearMap

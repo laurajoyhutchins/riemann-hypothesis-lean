@@ -1,13 +1,60 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.CompRightEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.KappaSt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
-import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.XPerPoint
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.XPolyDelta
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralMultilinearExpansion
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
+public import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralMultilinearExpansion
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.XPerPoint
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.XPolyDelta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
 import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
+import ReciprocityTheory.AnalyticForms.PotentialTheory.PotentialContDiffAt
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights
 open scoped ComplexOrder
 
@@ -17,7 +64,7 @@ theorem c2on {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X) (U 
     (ph : X → ℝ) (hth : IsPotential A th) (hph : A.SmoothOn U ph) (x : X) (k : Fin A.n) :
     ContDiffOn ℝ 2 ((th + LocPot.ofFun ph).φ x ∘ (A.chart k).symm)
       ((A.chart k).target ∩ (A.chart k).symm ⁻¹' (th.U x ∩ U)) :=
-  ((potSmoothOn A th hth x k).mono fun _ hy => ⟨hy.1, hy.2.1⟩).add
+  ((potSmoothOn A th hth x k).mono (by exact fun _ hy => ⟨hy.1, hy.2.1⟩)).add
     (((hph k).of_le (WithTop.coe_le_coe.2 le_top)).mono fun _ hy => ⟨hy.1, hy.2.2⟩)
 
 theorem c2at {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X) (U : Set X) (hU : IsOpen U)
@@ -69,8 +116,8 @@ theorem cont_chart {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e 
 
 end PositivityTheory.Xgp.per_int
 
-open PositivityTheory.Xgp.per_int in
 
+open PositivityTheory.Xgp.per_int in
 theorem PositivityTheory.Xgp.t_per_int : ∀ (e : ℕ) (X : Type) [TopologicalSpace X] [CompactSpace X] [T2Space X] (A : FinHolAtlas e X) (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N j : ℕ) (U : Set X) (th : Ψ × Fin N → LocPot X) (ph : Ψ × Fin N → X → ℝ), j ≤ N → e = antisymDegree Ψ N → IsOpen U → IsNull A Uᶜ → (∀ p, IsPotential A (th p)) → (∀ p, A.SmoothOn U (ph p)) → IsUniformised A U j (fun p => th p + LocPot.ofFun (ph p)) → (∀ w : Fin e → Ψ × Fin N, MIntegrable A (fun i => th (w i) + LocPot.ofFun (ph (w i))) (fun _ => 1)) → ∃ v : ℝ, 0 < v ∧ toWt (formPoly e fun w => mInt A (fun i => th (w i) + LocPot.ofFun (ph (w i))) (fun _ => 1)) = C v * antisymDelta Ψ N := by
   intro e X _ _ _ A Ψ _ _ N j U th ph hj he hU hN hth hph hun hI
   let pot : Ψ × Fin N → LocPot X := fun p => th p + LocPot.ofFun (ph p)
@@ -79,7 +126,7 @@ theorem PositivityTheory.Xgp.t_per_int : ∀ (e : ℕ) (X : Type) [TopologicalSp
     Finset.prod_pos fun τ _ => Finset.prod_pos fun i _ => Finset.prod_pos fun l hl =>
       Finset.sum_pos (fun _ _ => one_pos) ⟨i, Finset.mem_Ico.2 ⟨le_rfl, Finset.mem_Ioi.1 hl⟩⟩
   have hC : ∀ a, ∀ x ∈ U, IsTwiceDifferentiableAt A (pot a) x := fun a x hx k hk =>
-    c2at A U hU _ _ (hth a) (hph a) x k
+    per_int.c2at A U hU _ _ (hth a) (hph a) x k
       ⟨(A.chart k).map_source hk, by simpa [(A.chart k).left_inv hk] using ⟨(th a).mem_U x, hx⟩⟩
   have hexp := fun c : Ψ × Fin N → ℝ => mInt_sumPot_expand e X A _ U pot (fun _ => c) (fun _ => 1) hN hC hI
   have hpt : ∀ k, ∀ᵐ y, y ∈ (A.chart k).target → ∃ ν : ℝ, 0 ≤ ν ∧
@@ -128,14 +175,14 @@ theorem PositivityTheory.Xgp.t_per_int : ∀ (e : ℕ) (X : Type) [TopologicalSp
     have hcd : ContinuousAt (locDens A (fun _ => sumPot (fun _ => 1) pot) k) (A.chart k x) := by
       have h1 : ContinuousAt (fun y => ∑ w : Fin e → Ψ × Fin N, (∏ _i : Fin e, (1 : ℝ)) *
           locDens A (fun i => pot (w i)) k y) (A.chart k x) :=
-        tendsto_finset_sum _ fun w _ => continuousAt_const.mul
-          (dens_cont A U hU _ _ (fun i => hth (w i)) (fun i => hph (w i)) k _ hyt (by rwa [hsx]))
+        tendsto_finsetSum _ fun w _ => continuousAt_const.mul
+          (per_int.dens_cont A U hU _ _ (fun i => hth (w i)) (fun i => hph (w i)) k _ hyt (by rwa [hsx]))
       refine h1.congr ?_
       filter_upwards [((A.chart k).isOpen_inter_preimage_symm hU).mem_nhds ⟨hyt, show _ ∈ U by rwa [hsx]⟩] with y hy
       exact (locDens_sumPot_expand A pot (fun _ _ => 1) k hy.1 fun a => hC a _ hy.2).symm
     have hcf : ContinuousAt (fun y => hne.some.χ k ((A.chart k).symm y) * 1 *
         locDens A (fun _ => sumPot (fun _ => 1) pot) k y) (A.chart k x) :=
-      ((cont_chart A _ (hne.some.smooth k) k _ hyt).mul continuousAt_const).mul hcd
+      ((per_int.cont_chart A _ (hne.some.smooth k) k _ hyt).mul continuousAt_const).mul hcd
     obtain ⟨ν, -, hν, h⟩ := PositivityTheory.Xgp.t_per_point e X A Ψ N j hj pot x V g hg he k hxk
     have hv : hne.some.χ k ((A.chart k).symm (A.chart k x)) * 1 *
         locDens A (fun _ => sumPot (fun _ => 1) pot) k (A.chart k x) ≠ 0 := by
@@ -144,5 +191,6 @@ theorem PositivityTheory.Xgp.t_per_int : ∀ (e : ℕ) (X : Type) [TopologicalSp
     exact Measure.measure_pos_of_mem_nhds _ (inter_mem (hcf.eventually_ne hv) ((A.chart k).open_target.mem_nhds hyt))
   refine ⟨_, div_pos hpos hP1, (PositivityTheory.Xgp.t_poly_delta Ψ N _ _ fun c => ?_).1⟩
   rw [← hprop c, (hexp c).2]
+
   simp only [formPoly, map_sum, map_mul, eval_C, map_prod, eval_X]
   exact Finset.sum_congr rfl fun w _ => mul_comm _ _

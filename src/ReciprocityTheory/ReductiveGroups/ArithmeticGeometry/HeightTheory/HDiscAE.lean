@@ -1,7 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscAC
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscAD
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.KTFiniteDimensional
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValNorm
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscAD
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.AlgebraMapOLInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HDiscAC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.OpIsDVR
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.ValNorm
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -27,7 +75,7 @@ private theorem op_isFractionRing' (D N : ℕ) (la : HeightOneSpectrum (𝓞 K))
     exact MvPolynomial.map_injective _ (IsFractionRing.injective (𝓞 K) K)
   have hinj : Function.Injective (algebraMap (Op D N la) (KTf K D N)) := by
     show Function.Injective (OpToKT D N la)
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨⟨a, s⟩, rfl⟩ := IsLocalization.mk'_surjective (laT D N la).primeCompl x
     unfold OpToKT at hx
@@ -54,13 +102,11 @@ private theorem op_isFractionRing' (D N : ℕ) (la : HeightOneSpectrum (𝓞 K))
       congr 1
       first
         | (field_simp; done)
-        | (rw [mul_div_assoc', mul_div_cancel_left₀ _ hy'])
-        | (field_simp; ring)
     next p q hp hq =>
       obtain ⟨s1, hs1, p1, hp1⟩ := hp
       obtain ⟨s2, hs2, q1, hq1⟩ := hq
       refine ⟨s1 * s2, mul_ne_zero hs1 hs2, MvPolynomial.C s2 * p1 + MvPolynomial.C s1 * q1, ?_⟩
-      rw [map_add, map_mul, map_mul, hp1, hq1, hC, hC, map_mul (algebraMap (𝓞 K) K),
+      rw [map_add (f := _), map_mul, map_mul, hp1, hq1, hC, hC, map_mul (algebraMap (𝓞 K) K),
         MvPolynomial.C_mul]
       ring
     next p i hp =>
@@ -111,8 +157,6 @@ private theorem op_isFractionRing' (D N : ℕ) (la : HeightOneSpectrum (𝓞 K))
     have h2 := hCne sp hsp
     first
       | (field_simp; done)
-      | (field_simp; ring)
-      | (rw [div_mul_eq_mul_div, div_eq_iff hq0]; ring)
   · intro x y hxy
     exact ⟨1, by rw [hinj hxy]⟩
 
@@ -193,7 +237,6 @@ private theorem isDedekindDomain_Op (D N : ℕ) (la : HeightOneSpectrum (𝓞 K)
   haveI : IsNoetherianRing (Op D N la) := by
     first
       | infer_instance
-      | exact IsLocalization.isNoetherianRing (laT D N la).primeCompl (Op D N la) inferInstance
   have hnf : ¬ IsField (Op D N la) := by
     rw [IsLocalRing.isField_iff_maximalIdeal_eq]
     intro h
@@ -201,7 +244,7 @@ private theorem isDedekindDomain_Op (D N : ℕ) (la : HeightOneSpectrum (𝓞 K)
     rw [h] at hxm
     exact Ideal.mem_bot.mp hxm
   have hprinc : (IsLocalRing.maximalIdeal (Op D N la)).IsPrincipal := ⟨⟨x, hm⟩⟩
-  exact ((IsDiscreteValuationRing.TFAE (Op D N la) hnf).out 4 2).mp hprinc
+  exact ((IsDiscreteValuationRing.TFAE (Op D N la) hnf).out 5 3).mp hprinc
 
 theorem comp_facts (hd : d.AxH 𝒜) (h : d.S1) (la : HeightOneSpectrum (𝓞 K)) (c : ι) :
     letI : Algebra (KTf K d.D d.N) (OmS (Ω c) d.D d.N) := (d.KTtoS h c).toAlgebra
@@ -256,11 +299,9 @@ theorem comp_facts (hd : d.AxH 𝒜) (h : d.S1) (la : HeightOneSpectrum (𝓞 K)
   · first
       | exact integralClosure.isDedekindDomain (A := Op d.D d.N la) (K := KTf K d.D d.N)
           (L := OmS (Ω c) d.D d.N)
-      | exact integralClosure.isDedekindDomain (Op d.D d.N la) (KTf K d.D d.N) (OmS (Ω c) d.D d.N)
   · first
       | exact integralClosure.isFractionRing_of_finite_extension (A := Op d.D d.N la)
           (K := KTf K d.D d.N) (L := OmS (Ω c) d.D d.N)
-      | exact integralClosure.isFractionRing_of_finite_extension (KTf K d.D d.N) (OmS (Ω c) d.D d.N)
 
 theorem plOver_eq (h : d.S1) (la : HeightOneSpectrum (𝓞 K)) (c : ι) :
     letI : Algebra (Op d.D d.N la) (OmS (Ω c) d.D d.N) := d.algOp h la c
@@ -302,9 +343,6 @@ theorem plOver_eq (h : d.S1) (la : HeightOneSpectrum (𝓞 K)) (c : ι) :
       first
         | exact IsLocalization.AtPrime.to_map_mem_maximal_iff (S := Op d.D d.N la)
             (I := laT d.D d.N la) x
-        | (rw [← IsLocalization.mk'_one (M := (laT d.D d.N la).primeCompl) (Op d.D d.N la) x]
-           exact IsLocalization.AtPrime.mk'_mem_maximal_iff (S := Op d.D d.N la)
-            (I := laT d.D d.N la) x 1)
     rw [hOS, key] at this
     exact this
 
@@ -319,7 +357,7 @@ theorem comp_g (hd : d.AxH 𝒜) (h : d.S1) (la : HeightOneSpectrum (𝓞 K)) (c
   letI := algOpKT (K := K) d.D d.N la
   obtain ⟨i1, i2, i3, i4, i5, i6⟩ := d.comp_facts hd h la c
   haveI := Op_isDVR (K := K) d.D d.N la
-  obtain ⟨g, hg0, hg⟩ := HDiscVal.exists_val_eq (Op d.D d.N la) (KTf K d.D d.N) n
+  obtain ⟨g, hg0, hg⟩ := HDiscVal.exists_val_eq (O := Op d.D d.N la) (F := KTf K d.D d.N) n
   rw [d.plOver_eq h la c]
   refine ⟨g, hg0, hg, fun y => ?_⟩
   rw [HDiscVal.mem_integralClosure_iff (Op d.D d.N la) (KTf K d.D d.N)]

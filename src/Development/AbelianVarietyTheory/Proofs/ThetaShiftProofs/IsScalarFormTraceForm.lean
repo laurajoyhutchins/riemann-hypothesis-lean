@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsPowEqOfBaseChange
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.NonemptyFiniteRootsOfBimul
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsHomDivMulRefine
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.NonemptyFiniteRootsOfBimul
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullUUnitsCompatGeneric
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsPowEqOfBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,10 +95,6 @@ theorem map (f : U →* U') : IsScalarForm O fun y x => f (t y x) :=
 theorem inv : IsScalarForm O fun y x => (t y x)⁻¹ := ht.map invMonoidHom
 
 theorem pow (n : ℕ) : IsScalarForm O fun y x => t y x ^ n := ht.map (powMonoidHom n)
-
-theorem mul (hs : IsScalarForm O s) : IsScalarForm O fun y x => t y x * s y x :=
-  ⟨fun y x x' => by rw [ht.add_right, hs.add_right, _root_.mul_mul_mul_comm], fun y x => by rw [ht.symm, hs.symm],
-    fun a y x => by rw [ht.bal, hs.bal]⟩
 
 theorem mem_balForms : Forms.bilOfMul t ht.add_left ht.add_right ∈ Forms.balForms ℤ O X (Additive U) :=
   ⟨ht.symm, ht.bal⟩
@@ -149,21 +187,6 @@ theorem val_tau_rescale (q : D.X → (FractionRing R)ˣ) {a b : D.X} {x : (Fract
   simp only [ofMul_mul, ofMul_inv]
   abel
 
-theorem psiUnitOn_rescale (q : D.X → (FractionRing R)ˣ) {χ : D.X} (u : Rˣ)
-    (hu : q χ = Units.map (algebraMap R (FractionRing R)).toMonoidHom u) {U : Set (Sp R)} (h : PsiUnitOn D χ U) :
-    PsiUnitOn (rescale D q) χ U := by
-  intro j V hV hU hc hle
-  obtain ⟨r, hr, e⟩ := h j V hV hU hc hle
-  refine ⟨(res (le_top : V ≤ ⊤) (unitOn u)).val * r, (Units.isUnit _).mul hr, ?_⟩
-  rw [map_mul, e]
-  refine Eq.trans (congrArg₂ (· * ·) ?_ rfl) (map_mul _ (res le_top (unitOn (q χ))).val ((D.psi χ).s j).val).symm
-  refine fn_ext fun y hy => ?_
-  refine (gs_pull (𝟙 _) (jK R) y V hy _).trans ((gs_unit _ y V hy _).trans (Eq.trans ?_
-    ((gs_res (𝟙 _) y hle hy _).trans (gs_unit _ y _ (hle hy) _)).symm))
-  refine congrArg Units.val ((gm_res _ y le_top hy _).trans (Eq.trans ?_ (gm_res _ y le_top (hle hy) _).symm))
-  rw [hu]
-  exact unitAt_spMap (𝟙 _) (algebraMap R (FractionRing R)) y u
-
 section Twist
 
 variable [Module O D.X] {w : O} {t : D.X → D.X → (FractionRing R)ˣ}
@@ -217,10 +240,6 @@ theorem psi_weight_zero_twist {oa : D.OAct O} (h : TraceFormTwistIso D oa w) : T
   rw [_root_.mul_assoc, _root_.mul_assoc]
   exact congrArg _ e
 
-omit hw ht in
-theorem psiUnitOn_twist (w : O) (t₀ : D.X → D.X → Rˣ) {χ : D.X} {U : Set (Sp R)} (h : PsiUnitOn D χ U) :
-    PsiUnitOn (twist D w fun y x => Units.map (algebraMap R (FractionRing R)).toMonoidHom (t₀ y x)) χ U :=
-  psiUnitOn_rescale _ (t₀ χ (w • χ)) rfl h
 
 end Twist
 

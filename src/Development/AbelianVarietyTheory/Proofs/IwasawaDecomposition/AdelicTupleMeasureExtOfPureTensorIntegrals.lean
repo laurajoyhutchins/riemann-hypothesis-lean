@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeasurableEmbeddingAdelicTupleLocalComponentsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntegralPointsFinitePlaceTensorPropertiesStatement
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntegralPointsFinitePlaceTensorPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MeasurableEmbeddingAdelicTupleLocalComponentsStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.RieszMarkovKakutani.Real
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.GaugeEx
 open scoped TensorProduct NNReal ENNReal
 
@@ -26,7 +78,7 @@ theorem basis_compact_open (Z : Type) [TopologicalSpace Z] [T2Space Z] [LocallyC
   refine TopologicalSpace.isTopologicalBasis_of_isOpen_of_nhds (fun u hu => hu.2) ?_
   intro a u hau hu
   obtain ⟨C, hCa, hCu, hC⟩ := local_compact_nhds (hu.mem_nhds hau)
-  obtain ⟨V, hV, haV, hVC⟩ := (loc_compact_Haus_tot_disc_of_zero_dim (H := Z)).mem_nhds_iff.mp hCa
+  obtain ⟨V, hV, haV, hVC⟩ := (loc_compact_Haus_tot_disc_of_zero_dim (X := Z)).mem_nhds_iff.mp hCa
   exact ⟨V, ⟨hC.of_isClosed_subset hV.1 hVC, hV.2⟩, haV, hVC.trans hCu⟩
 
 theorem exists_seq_cover {Z : Type} [TopologicalSpace Z] [T2Space Z] [LocallyCompactSpace Z]
@@ -128,15 +180,15 @@ theorem ext_of_pure {X I Z₀ : Type} {Z : I → Type} [mX : MeasurableSpace X] 
         exact this
     have := hm.comap_le
     rwa [he.comap_eq] at this
-  have hpi : ∀ t, generatePiSystem G t → ∀ K : ∀ v, Set (Z v),
+  have hpi : ∀ t, t ∈ generatePiSystem G → ∀ K : ∀ v, Set (Z v),
       (∀ v, IsCompact (K v) ∧ IsOpen (K v)) → (∀ᶠ v in Filter.cofinite, K v = L v) →
       ∀ A : Set Z₀, MeasurableSet A → ∃ K' : ∀ v, Set (Z v),
       (∀ v, IsCompact (K' v) ∧ IsOpen (K' v)) ∧ (∀ᶠ v in Filter.cofinite, K' v = L v) ∧
       ∃ A' : Set Z₀, MeasurableSet A' ∧ t ∩ (p ⁻¹' A ∩ {x | ∀ v, q v x ∈ K v}) =
         p ⁻¹' A' ∩ {x | ∀ v, q v x ∈ K' v} := by
     intro t ht
-    induction ht with
-    | base hs =>
+    induction ht using generatePiSystem_induction with
+    | base _ hs =>
       intro K hK hKL A hA
       rcases hs with ⟨B, hB, rfl⟩ | ⟨w, U, hU, rfl⟩
       · exact ⟨K, hK, hKL, B ∩ A, hB.inter hA, by rw [Set.preimage_inter, Set.inter_assoc]⟩
@@ -166,7 +218,7 @@ theorem ext_of_pure {X I Z₀ : Type} {Z : I → Type} [mX : MeasurableSpace X] 
             · subst hv; exact h4.2
             · have := h3 v
               rwa [Function.update_of_ne hv] at this
-    | inter _ _ _ ih1 ih2 =>
+    | inter _ _ _ _ _ ih1 ih2 =>
       intro K hK hKL A hA
       obtain ⟨K1, hK1, hKL1, A1, hA1, e1⟩ := ih2 K hK hKL A hA
       obtain ⟨K2, hK2, hKL2, A2, hA2, e2⟩ := ih1 K1 hK1 hKL1 A1 hA1

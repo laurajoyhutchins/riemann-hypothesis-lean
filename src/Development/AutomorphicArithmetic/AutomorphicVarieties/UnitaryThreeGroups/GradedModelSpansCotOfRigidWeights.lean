@@ -1,9 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.Rigid0
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.TanDet
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.NormCob
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ZetaReducibleRepEqSubInvAndIsUnit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.NormO
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.Rigid0
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.NormO
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.AdRepBaseLiftApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.NormCob
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.TanDet
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.ZetaReducibleRepEqSubInvAndIsUnit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open Matrix IsLocalRing UpperTheory.V.U3 UpperTheory.V.Alg UpperTheory.V.HV
 
@@ -30,7 +81,7 @@ private theorem exists_form {O K P : Type} [CommRing O] [Field K] [Algebra O K] 
     (hi : Function.Injective (algebraMap O K)) (T : Submodule O P) (p : P) (hp : ∀ c : O, c ≠ 0 → c • p ∉ T) :
     ∃ lam : P →ₗ[O] K, lam p = 1 ∧ ∀ y ∈ T, lam y = 0 := by
   have hinj : Function.Injective (LinearMap.toSpanSingleton O (P ⧸ T) (T.mkQ p)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro c hc
     by_contra h0
     apply hp c h0
@@ -65,7 +116,7 @@ private theorem spans_of_der {O A K ι : Type} [CommRing O] [IsDomain O] [CommRi
       simp only [he, map_mul, Algebra.smul_def]; ring
     have h4 : (satSq x).mkQ (e a * e b) = 0 := (Submodule.Quotient.mk_eq_zero _).2 h2
     simp only [δ, LinearMap.comp_apply]
-    rw [h3, map_add, h4, zero_add, map_add, map_smul, map_smul, map_add, map_smul, map_smul]
+    rw [h3, map_add (f := _), h4, zero_add, map_add (f := _), map_smul, map_smul, map_add (f := _), map_smul, map_smul]
   let D : A →ₗ[O] K := δ ∘ₗ GradedAlgebra.proj 𝒜 j
   have hD1 : ∀ a ∈ 𝒜 j, D a = δ a := fun a ha => by
     simp only [D, LinearMap.comp_apply, GradedAlgebra.proj_apply, DirectSum.decompose_of_mem_same 𝒜 ha]
@@ -97,11 +148,11 @@ private theorem spans_of_der {O A K ι : Type} [CommRing O] [IsDomain O] [CommRi
     intro a b
     induction a using DirectSum.Decomposition.inductionOn 𝒜 with
     | zero => simp
-    | add a a' h h' => simp only [add_mul, map_add, h, h', add_smul, smul_add]; abel
+    | add a a' h h' => simp only [add_mul, map_add (f := _), h, h', add_smul, smul_add]; abel
     | homogeneous a =>
       induction b using DirectSum.Decomposition.inductionOn 𝒜 with
       | zero => simp
-      | add b b' h h' => simp only [mul_add, map_add, h, h', add_smul, smul_add]; abel
+      | add b b' h h' => simp only [mul_add, map_add (f := _), h, h', add_smul, smul_add]; abel
       | homogeneous b => exact hhom _ _ _ a.2 _ b.2
   have hδ0 : ∀ a, x a = 0 → δ a = lam ((satSq x).mkQ a) := fun a ha => by
     simp only [δ, LinearMap.comp_apply, he, ha, map_zero, sub_zero]

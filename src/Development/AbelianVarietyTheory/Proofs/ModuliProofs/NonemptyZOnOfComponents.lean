@@ -1,33 +1,70 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsIsoStalkMapOfFlatOfSurjectiveOnStalks
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HasThetaConstantsRingBaseChangeStatement
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaConstantsUniqueUpToUnit
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaPointsVanishingIdealRadicalHomogeneous
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIdealOfLocally
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemePullback
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HasThetaConstantsIffOfThetaLevelPullback
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.TopAmpExists
+public import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ImmersedBy
+public import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
+public import Development.AbelianVarietyTheory.PublishedTheorems.SemistableReduction₂.SemistableReductionSt
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
+public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProjectiveModel
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CmModelCoefficientSubringDedekindCompatibleEmbed
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsIdealOfLocally
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaConstantsLocallyOnBase
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsThetaLevelAbelianSchemePullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GenericPointsOpenIntegralCoverStatement
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HasThetaConstantsIffOfThetaLevelPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HasThetaConstantsRingBaseChangeStatement
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsIsoStalkMapOfFlatOfSurjectiveOnStalks
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PolPull
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.CmModelCoefficientSubringDedekindCompatibleEmbed
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GenericPointsOpenIntegralCoverStatement
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsProjectiveModel
-import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaConstantsUniqueUpToUnit
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaPointsVanishingIdealRadicalHomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbProj
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HeckeKer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigidSys
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Splits
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GtBaseChangeSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.TopAmpExists
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ArcFamSt
-import Development.AbelianVarietyTheory.Definitions.Degenerations.HomExtSt
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.FiniteHomogeneousInf
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.ImmersedBy
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
-import Development.AbelianVarietyTheory.PublishedTheorems.SemistableReduction₂.SemistableReductionSt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj TensorProduct Pointwise
@@ -209,8 +246,59 @@ theorem exists_pull {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host
       TMap u t f ∧ IsMonHom e.hom ∧ LBIso t₀.PP.L (u.L.pull e.hom.left) := by
   obtain ⟨u, hu⟩ := tObj_pull o g k J b S S' s s' f t hf
   obtain ⟨t₀, ⟨m⟩⟩ : ∃ t₀ : SAB H S', Nonempty (SABMap t₀ τ f) := by
-    obtain ⟨_, _, _, _, _, m, -⟩ := sabPull Out.CubePf.cubePull f τ
+    have hC := Out.CubePf.cubePull
+    have hsemi : IsSemiAbelian ((Over.pullback f).obj τ.G) := by
+      refine { comm := ?_, smooth := ?_, separated := ?_, quasiCompact := ?_, geomConnected := ?_, fibres := ?_ }
+      · have := τ.semi.comm
+        infer_instance
+      · have := τ.semi.smooth
+        change Smooth (pullback.snd τ.G.hom f)
+        infer_instance
+      · have := τ.semi.separated
+        change IsSeparated (pullback.snd τ.G.hom f)
+        infer_instance
+      · have := τ.semi.quasiCompact
+        change QuasiCompact (pullback.snd τ.G.hom f)
+        infer_instance
+      · have := τ.semi.geomConnected
+        change GeometricallyConnected (pullback.snd τ.G.hom f)
+        infer_instance
+      · intro Ω _ _ q
+        obtain ⟨A⟩ := τ.semi.fibres Ω (q ≫ f)
+        exact ⟨torusExtOfIso (pullCompIso q f τ.G) A⟩
+    have hp : ∃ (PP' : RigLB ((Over.pullback f).obj τ.G)) (cub : CubicalStr _ PP') (sym : PP'.IsSymmetric) (adj : _) (prim : _)
+        (m : SABMap ⟨(Over.pullback f).obj τ.G, hsemi, OAct.pullback f τ.G τ.act, PP', cub,
+          sym, adj, prim⟩ τ f), m.φ = pullback.fst τ.G.hom f := by
+      have h := isGrpPullback_pullback τ.G f
+      obtain ⟨hL, hr, ⟨c', hc'⟩, hs⟩ := hC S S' τ.G _ (cubeMapOf h) τ.PP τ.cub
+      have hact : ∀ a, ((OAct.pullback f τ.G τ.act).act a).left ≫ pullback.fst τ.G.hom f =
+          pullback.fst τ.G.hom f ≫ (τ.act.act a).left := fun a => pullback.lift_fst _ _ _
+      have pa : ∀ {T : Over S'} (x : T ⟶ (Over.pullback f).obj τ.G) a,
+          pushPt h.1.w (x ≫ (OAct.pullback f τ.G τ.act).act a) = pushPt h.1.w x ≫ τ.act.act a := fun x a =>
+        Over.OverMorphism.ext (by
+          show (x.left ≫ _) ≫ _ = (x.left ≫ _) ≫ _
+          rw [Category.assoc, hact, Category.assoc])
+      refine ⟨(cubeMapOf h).rigLB τ.PP hL hr, c', hs τ.sym, fun a => ?_, ?_, ⟨cubeMapOf h, h, rfl, hact, hc'⟩, rfl⟩
+      · let U := lift (pushPt h.1.w (fst ((Over.pullback f).obj τ.G) ((Over.pullback f).obj τ.G)))
+          (pushPt h.1.w (snd ((Over.pullback f).obj τ.G) ((Over.pullback f).obj τ.G)))
+        refine LBIso.chartPull (chartPullLinComb τ.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down)
+          (chartPullLinComb τ.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) (τ.adj a)
+        · fin_cases i
+          · exact (pa _ a).trans (by simp [U])
+          · simp [U]
+        · fin_cases i
+          · simp [U]
+          · exact (pa _ _).trans (by simp [U])
+      · let U := pushPt h.1.w (𝟙 ((Over.pullback f).obj τ.G))
+        refine LBIso.chartPull (chartPullPull τ.PP.L _)
+          (chartPullLinComb τ.PP.L _ _ _ _ U.left fun I => psum_push h _ _ U (fun i => ?_) I.down) τ.prim
+        fin_cases i
+        · simp [U]
+        · exact (congrArg (pushPt h.1.w) (Category.id_comp _).symm).trans (pa _ _)
+    obtain ⟨_, _, _, _, _, m, -⟩ := hp
     exact ⟨_, ⟨m⟩⟩
+  have pull_isLB {X Y : Scheme.{0}} {L : LB X} (hL : L.IsLB) (F : Y ⟶ X) : (L.pull F).IsLB :=
+    ReciprocityTheory.ChartRestriction.G.Geo.Tor.pull_isLB hL F
   have hu' := hu
   obtain ⟨ψ, hψ, hLu, -⟩ := hu'
   obtain ⟨e, he, hc⟩ := grpPullback_iso ((m.cart.comp (isGrpPullback_of_iso φ)).congr (Category.comp_id _) rfl) hψ

@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsJointIntEigenvectorOfStable
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsEqMulProdMinors
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CommuteRowOpRightMixedOp
+public import Formalism.LocalRingCardinality.DataTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Minpoly
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,9 +101,10 @@ private theorem sum_neg_index_smul_diag_apply_comm {V : Type*} [AddCommGroup V] 
     · subst ha; simp [hb]
     · subst hb; simp [ha]
     · simp [ha, hb]
+
   simp only [LinearMap.sum_apply, LinearMap.smul_apply, map_sum, map_smul, h1, smul_add,
-    Finset.sum_add_distrib, smul_sub, Finset.sum_sub_distrib, smul_ite, smul_zero,
-    Finset.sum_ite_eq', Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  Finset.sum_add_distrib, smul_sub, Finset.sum_sub_distrib, smul_ite, smul_zero,
+  Finset.sum_ite_eq', Finset.sum_ite_eq, Finset.mem_univ, if_true]
   rw [sub_smul, neg_smul, neg_smul]
   abel
 
@@ -147,7 +194,7 @@ theorem exists_highest_pair {V : Type*} [AddCommGroup V] [Module ℂ V] {k l : �
       e i j ((∑ a : Fin k, (-((a : ℕ) : ℂ)) • e a a +
         ∑ b : Fin l, (-((b : ℕ) : ℂ)) • f b b) x) + (((j : ℕ) : ℂ) - ((i : ℕ) : ℂ)) • e i j x := by
     intro i j x
-    rw [LinearMap.add_apply, LinearMap.add_apply, map_add, sum_neg_index_smul_diag_apply_comm e he,
+    rw [LinearMap.add_apply, LinearMap.add_apply, map_add (f := _), sum_neg_index_smul_diag_apply_comm e he,
       sum_smul_apply_comm_of_commute (e i j) (fun b => f b b) _ (fun b => hef i j b b)]
     abel
   have hHf : ∀ i j (x : V), (∑ a : Fin k, (-((a : ℕ) : ℂ)) • e a a +
@@ -155,7 +202,7 @@ theorem exists_highest_pair {V : Type*} [AddCommGroup V] [Module ℂ V] {k l : �
       f i j ((∑ a : Fin k, (-((a : ℕ) : ℂ)) • e a a +
         ∑ b : Fin l, (-((b : ℕ) : ℂ)) • f b b) x) + (((j : ℕ) : ℂ) - ((i : ℕ) : ℂ)) • f i j x := by
     intro i j x
-    rw [LinearMap.add_apply, LinearMap.add_apply, map_add, sum_neg_index_smul_diag_apply_comm f hf,
+    rw [LinearMap.add_apply, LinearMap.add_apply, map_add (f := _), sum_neg_index_smul_diag_apply_comm f hf,
       sum_smul_apply_comm_of_commute (f i j) (fun a => e a a) _ (fun a => (hef a a i j).symm)]
     abel
   set H : Module.End ℂ V := ∑ a : Fin k, (-((a : ℕ) : ℂ)) • e a a +
@@ -273,7 +320,7 @@ theorem iSup_eigenspace_eq_top {σ ι : Type*} (g : ι → Module.End ℂ (MvPol
   rw [Submodule.mem_iInf]
   intro i
   rw [Module.End.mem_eigenspace_iff]
-  have h : monomial n (coeff n P) = coeff n P • monomial n (1 : ℂ) := by
+  have h : monomial n (AddMonoidAlgebra.coeff P n) = AddMonoidAlgebra.coeff P n • monomial n (1 : ℂ) := by
     rw [smul_monomial, smul_eq_mul, mul_one]
   rw [h, map_smul, hg, smul_comm]
 
@@ -301,15 +348,16 @@ theorem rowOp_monomial {σ I J : Type*} [Fintype J] (z : I × J → σ) (a : I) 
 
 private theorem coeff_apply_of_diagonal_on_monomials {σ : Type*} (g : MvPolynomial σ ℂ →ₗ[ℂ] MvPolynomial σ ℂ)
     (w : (σ →₀ ℕ) → ℂ) (hg : ∀ n, g (monomial n 1) = w n • monomial n 1)
-    (P : MvPolynomial σ ℂ) (m : σ →₀ ℕ) : coeff m (g P) = w m * coeff m P := by
+    (P : MvPolynomial σ ℂ) (m : σ →₀ ℕ) : AddMonoidAlgebra.coeff (g P) m = w m * AddMonoidAlgebra.coeff P m := by
   classical
-  have hmon : ∀ n, g (monomial n (coeff n P)) = (coeff n P * w n) • monomial n 1 := by
+  have hmon : ∀ n, g (monomial n (AddMonoidAlgebra.coeff P n)) = (AddMonoidAlgebra.coeff P n * w n) • monomial n 1 := by
     intro n
-    have h : monomial n (coeff n P) = coeff n P • monomial n (1 : ℂ) := by
+    have h : monomial n (AddMonoidAlgebra.coeff P n) = AddMonoidAlgebra.coeff P n • monomial n (1 : ℂ) := by
       rw [smul_monomial, smul_eq_mul, mul_one]
     rw [h, map_smul, hg, smul_smul]
+
   conv_lhs => rw [P.as_sum, map_sum]
-  simp only [hmon, coeff_sum, coeff_smul, smul_eq_mul]
+  simp only [hmon, coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul]
   simp only [MvPolynomial.coeff_monomial, mul_ite, mul_one, mul_zero]
   rw [Finset.sum_ite_eq']
   split_ifs with h
@@ -326,12 +374,12 @@ theorem colOp_eq_smul_iff {σ I J : Type*} [Fintype I] (z : I × J → σ) (k : 
     simp only [Nat.cast_sum, Int.cast_sum, Int.cast_natCast]
   constructor
   · intro h m hm
-    have h1 := congrArg (coeff m) h
-    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, coeff_smul, smul_eq_mul] at h1
+    have h1 := congrArg (AddMonoidAlgebra.coeff · m) h
+    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, MvPolynomial.coeff_smul, smul_eq_mul] at h1
     exact mul_right_cancel₀ (mem_support_iff.mp hm) h1
   · intro h
     ext m
-    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, coeff_smul, smul_eq_mul]
+    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, MvPolynomial.coeff_smul, smul_eq_mul]
     by_cases hm : m ∈ P.support
     · rw [h m hm]
     · rw [notMem_support_iff.mp hm, mul_zero, mul_zero]
@@ -346,12 +394,12 @@ theorem rowOp_eq_smul_iff {σ I J : Type*} [Fintype J] (z : I × J → σ) (a : 
     simp only [Nat.cast_sum, Int.cast_sum, Int.cast_natCast]
   constructor
   · intro h m hm
-    have h1 := congrArg (coeff m) h
-    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, coeff_smul, smul_eq_mul] at h1
+    have h1 := congrArg (AddMonoidAlgebra.coeff · m) h
+    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, MvPolynomial.coeff_smul, smul_eq_mul] at h1
     exact mul_right_cancel₀ (mem_support_iff.mp hm) h1
   · intro h
     ext m
-    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, coeff_smul, smul_eq_mul]
+    rw [coeff_apply_of_diagonal_on_monomials _ _ hw, MvPolynomial.coeff_smul, smul_eq_mul]
     by_cases hm : m ∈ P.support
     · rw [h m hm]
     · rw [notMem_support_iff.mp hm, mul_zero, mul_zero]

@@ -1,10 +1,63 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaPartD
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBoundUnitary
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermInf
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatC
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ModerateGrowthSchwartz
+import Development.AbelianVarietyTheory.Definitions.Foundations.AestronglyMeasurableQuotMeasureIffLift
+import Development.AbelianVarietyTheory.Definitions.Foundations.EventuallyEqOfIsPreconnected
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsIwasawaOfIsCompact
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.CovolOneIntegralAdd
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelWeilUnitarySchrodinger
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SecondCountableHermC
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MatC
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.ThetaOrbits
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+import Formalism.LocalToGlobal.ProjectiveLattices.ErealAddIInf
+
+@[expose] public section
+
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel GlobalTheory.StdUnn PositivityTheory.GramSchwartzFunctions PositivityTheory.GramSchwartzFunctions.BC GlobalTheory.CompanionTheory.SiegelND
@@ -46,7 +99,7 @@ theorem linInd_one (h : IsCMExt F E σ) {θ : E} (hθ : σ θ ≠ θ) :
   intro s t hst
   have h1 : s • (1 : E) + t • σ θ = 0 := by
     have := congrArg σ hst
-    simp only [Algebra.smul_def, map_add, map_mul, AlgHom.commutes, map_one, map_zero] at this ⊢
+    simp only [Algebra.smul_def, map_add (f := _), map_mul, AlgHom.commutes, map_one, map_zero] at this ⊢
     exact this
   have h2 : t • (σ θ - θ) = 0 := by
     rw [smul_sub, sub_eq_zero]
@@ -158,7 +211,11 @@ theorem exists_isCoord : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
   have hex : ∀ w : InfinitePlace F, ∃ t : E →+* ℂ, ∀ x, t (algebraMap F E x) = w.embedding x := by
     intro w
     letI : Algebra F ℂ := w.embedding.toAlgebra
-    let t : E →ₐ[F] ℂ := IsAlgClosed.lift
+    let t : E →ₐ[F] ℂ := (by
+      refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+      solve_by_elim* (maxDepth := 2) only [*,
+        @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+        @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
     exact ⟨t, fun x => t.commutes x⟩
   choose τ hτ using hex
   obtain ⟨θ, hθ⟩ := exists_moved h
@@ -177,7 +234,7 @@ theorem exists_isCoord : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
         basisOne_zero, basisOne_one, TensorProduct.smul_tmul', TensorProduct.smul_tmul']
       simp
     funext w
-    conv_rhs => rw [hy, map_add, Pi.add_apply, hΘ, hΘ, map_one, mul_one]
+    conv_rhs => rw [hy, map_add (f := _), Pi.add_apply, hΘ, hΘ, map_one, mul_one]
     rfl
   have hbij : Function.Bijective Θ := by
     have : (Θ : Ainf F ⊗[F] E → _) = H := funext fun y => (hH y).symm
@@ -196,7 +253,7 @@ theorem exists_isCoord : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
       have : sigR (Ainf F) σ (a ⊗ₜ[F] x) = a ⊗ₜ[F] σ x := by simp [sigR]
       rw [this, hΘ, hΘ, h.2.2.2, map_mul, Complex.conj_ofReal]
       rfl
-    | add y y' hy hy' => simp only [map_add, Pi.add_apply, hy, hy']
+    | add y y' hy hy' => simp only [map_add (f := _), Pi.add_apply, hy, hy']
   · intro x w
     simp only [RingEquiv.ofBijective_apply]
     rw [hΘ, map_one]
@@ -207,13 +264,13 @@ theorem exists_isCoord : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
     | zero => simp
     | tmul a x =>
       have h1 : τ w x + conj (τ w x) = ((ρ w (Algebra.trace F E x) : ℝ) : ℂ) := by
-        rw [hρ, ← hτ, ← GlobalTheory.GaussMean.OneVec.add_sigma h, map_add, h.2.2.2]
+        rw [hρ, ← hτ, ← GlobalTheory.GaussMean.OneVec.add_sigma h, map_add (f := _), h.2.2.2]
         rfl
       rw [GlobalTheory.GaussMean.OneVec.trace_tmul, map_mul, Pi.mul_apply, hx, hΘ, map_mul, Complex.conj_ofReal,
         Complex.ofReal_mul, ← h1]
       ring
     | add y y' hy hy' =>
-      simp only [map_add, Pi.add_apply, Complex.ofReal_add, hy, hy']
+      simp only [map_add (f := _), Pi.add_apply, Complex.ofReal_add, hy, hy']
       ring
 
 end GlobalTheory.CompanionTheory.SiegelND.Integ.Arch

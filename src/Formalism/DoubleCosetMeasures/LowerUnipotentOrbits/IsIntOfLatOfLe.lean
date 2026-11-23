@@ -1,6 +1,51 @@
-import Formalism.DoubleCosetMeasures.Statement
+module
 
-set_option maxHeartbeats 400000
+public import Formalism.DoubleCosetMeasures.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 noncomputable section
 
@@ -120,58 +165,6 @@ section Lat
 
 variable {K : Type} [CommRing K] (R : Subring K) {n : ℕ}
 
-theorem mem_latOf (g : GL (Fin n) K) (w : Fin n → K) :
-    w ∈ latOf R g ↔ ∃ v : Fin n → R, (g : Matrix (Fin n) (Fin n) K) *ᵥ (fun j => (v j : K)) = w := by
-  unfold latOf
-  simp only [Submodule.mem_map, Submodule.mem_top, true_and]
-  rfl
-
-theorem latOf_le (g h : GL (Fin n) K)
-    (hM : IsInt R (((g⁻¹ * h : GL (Fin n) K)) : Matrix (Fin n) (Fin n) K)) :
-    latOf R h ≤ latOf R g := by
-  intro w hw
-  obtain ⟨v, rfl⟩ := (mem_latOf R h w).1 hw
-  rw [mem_latOf]
-  set M : Matrix (Fin n) (Fin n) K := ((g⁻¹ * h : GL (Fin n) K) : Matrix (Fin n) (Fin n) K) with hMdef
-  refine ⟨fun i => ⟨(M *ᵥ (fun j => (v j : K))) i, ?_⟩, ?_⟩
-  · simp only [Matrix.mulVec, dotProduct]
-    exact R.sum_mem fun k _ => R.mul_mem (hM i k) (v k).2
-  · have hgM : (g : Matrix (Fin n) (Fin n) K) * M = h := by
-      rw [hMdef, Units.val_mul, ← Matrix.mul_assoc, ← Units.val_mul, mul_inv_cancel,
-        Units.val_one, Matrix.one_mul]
-    change (g : Matrix (Fin n) (Fin n) K) *ᵥ (M *ᵥ (fun j => (v j : K))) = _
-    rw [Matrix.mulVec_mulVec, hgM]
-
-theorem isInt_of_latOf_le (g h : GL (Fin n) K) (hle : latOf R h ≤ latOf R g) :
-    IsInt R (((g⁻¹ * h : GL (Fin n) K)) : Matrix (Fin n) (Fin n) K) := by
-  intro i j
-  have hmem : (h : Matrix (Fin n) (Fin n) K) *ᵥ (fun k => ((Pi.single j (1 : R) : Fin n → R) k : K))
-      ∈ latOf R h := (mem_latOf R h _).2 ⟨_, rfl⟩
-  obtain ⟨v, hv⟩ := (mem_latOf R g _).1 (hle hmem)
-  have hcoe : (fun k => ((Pi.single j (1 : R) : Fin n → R) k : K)) = Pi.single j (1 : K) := by
-    ext k
-    by_cases hk : k = j
-    · subst hk; simp
-    · simp [hk]
-  rw [hcoe] at hv
-  have key : (((g⁻¹ * h : GL (Fin n) K)) : Matrix (Fin n) (Fin n) K) *ᵥ Pi.single j (1 : K) =
-      fun k => (v k : K) := by
-    rw [Units.val_mul, ← Matrix.mulVec_mulVec, ← hv, Matrix.mulVec_mulVec, ← Units.val_mul,
-      inv_mul_cancel, Units.val_one, Matrix.one_mulVec]
-  have := congrFun key i
-  rw [Matrix.mulVec_single_one] at this
-  simp only [Matrix.col_apply] at this
-  rw [this]
-  exact (v i).2
-
 end Lat
-
-theorem latticeCoset : Formalism.DoubleCosetMeasures.LatticeCoset := by
-  intro K _ R n g h
-  constructor
-  · intro e
-    exact ⟨isInt_of_latOf_le R g h (le_of_eq e.symm), isInt_of_latOf_le R h g (le_of_eq e)⟩
-  · rintro ⟨h1, h2⟩
-    exact le_antisymm (latOf_le R h g h2) (latOf_le R g h h1)
 
 end Formalism.DoubleCosetMeasures.P

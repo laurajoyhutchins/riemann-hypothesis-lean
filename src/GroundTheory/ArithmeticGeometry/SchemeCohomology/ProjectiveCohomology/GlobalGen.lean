@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafAlt
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.Generation
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.IsQuasicoherentTensorOfInvertible
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafCore
+public import Mathlib.Tactic.ENatToNat
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.Generation
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.TwistingSheafAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -37,7 +83,7 @@ variable {A : Type u} [CommRing A] {n : ℕ}
 private abbrev yR (k j : Fin (n + 1)) : Γ(projectiveSpace A n, stdOpen A n k) :=
   ProjTwist.ratio (grading A n) (X_mem k) (X_mem j)
 
-private def upowS (k : Fin (n + 1)) (m : ℤ) :
+def upowS (k : Fin (n + 1)) (m : ℤ) :
     ((preMod (projectiveSpace A n)).obj (twistingSheaf (grading A n) m)).obj (op (stdOpen A n k)) :=
   ProjTwist.upow (grading A n) (X_mem k) m
 
@@ -221,8 +267,15 @@ def twistLinear (G : (projectiveSpace A n).Modules) (j : Fin (n + 1)) (q : ℤ) 
   map_smul' r m := tensorBasisMap_smul _ r m
 
 lemma twistLinear_surjective (G : (projectiveSpace A n).Modules) (j : Fin (n + 1)) (q : ℤ) :
-    Function.Surjective (twistLinear G j q) :=
-  (tensorBasisMap_bijective (ProjTwist.isBasisOn_upow (grading A n) (X_mem j) q) le_rfl).2
+    Function.Surjective (twistLinear G j q) := by
+  have hb : IsBasisOn ((preMod (projectiveSpace A n)).obj (twistingSheaf (grading A n) q))
+      (stdOpen A n j) (upowS j q) :=
+    ProjTwist.isBasisOn_upow (grading A n) (X_mem j) q
+  intro t
+  change ∃ s : Γ(G, stdOpen A n j),
+    tensorBasisMap G (twistingSheaf (grading A n) q) (upowS j q)
+      (le_rfl : stdOpen A n j ≤ stdOpen A n j) s = t
+  exact (tensorBasisMap_bijective (M := G) hb (le_rfl : stdOpen A n j ≤ stdOpen A n j)).2 t
 
 theorem exists_generatingSections_twist (G : (projectiveSpace A n).Modules) (hG : IsCoherent G) :
     ∃ q₀ : ℕ, ∀ q : ℕ, q₀ ≤ q → ∃ σ : (twist G q).GeneratingSections, σ.IsFiniteType := by

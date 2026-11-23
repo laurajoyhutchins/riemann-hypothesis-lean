@@ -1,4 +1,68 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.LinearAlgebra.Trace
+
+@[expose] public section
 
 open Matrix UpperTheory.V.U3
 
@@ -35,7 +99,7 @@ private theorem exists_compl {Γ κ V : Type*} [Group Γ] [Field κ] [AddCommGro
   have hcom : ∀ (X : Submodule κ V) (g : Γ), (∀ h ∈ H, ∀ v ∈ X, σ h v ∈ X) →
       ∀ h ∈ H, ∀ v ∈ X.comap (σ g), σ h v ∈ X.comap (σ g) := by
     intro X g hX h hh v hv
-    have := hX (g * h * g⁻¹) (Subgroup.Normal.conj_mem ‹_› h hh g) _ hv
+    have := hX (g * h * g⁻¹) (Subgroup.Normal.conj_mem h hh g) _ hv
     rw [hmul, inv_mul_cancel_right, ← hmul] at this
     exact this
   obtain ⟨W, ⟨hW0, hWst⟩, hmin⟩ := (wellFounded_lt (α := Submodule κ V)).has_min
@@ -71,7 +135,7 @@ private theorem exists_compl {Γ κ V : Type*} [Group Γ] [Field κ] [AddCommGro
     have hX : ∀ h ∈ H, ∀ v ∈ U.comap (σ g) ⊔ W, σ h v ∈ U.comap (σ g) ⊔ W := by
       intro h hh v hv
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hv
-      rw [map_add]
+      rw [map_add (f := _)]
       exact Submodule.add_mem_sup (hU' h hh a ha) (hWst h hh b hb)
     have hle : U ≤ (U.comap (σ g) ⊔ W).comap (σ g⁻¹) := fun u hu =>
       Submodule.mem_sup_left (hback u hu)
@@ -147,7 +211,7 @@ private theorem exists_twist {Γ κ V : Type*} [Group Γ] [Field κ] [IsAlgClose
     intro g T hT
     refine ⟨?_, fun h hh => ?_⟩
     · rw [hf, LinearMap.trace_mul_comm, mul_assoc, ← map_mul]; simpa using hT.1
-    · have h1 := hT.2 (g⁻¹ * h * g) (by simpa using Subgroup.Normal.conj_mem ‹_› h hh g⁻¹)
+    · have h1 := hT.2 (g⁻¹ * h * g) (by simpa using Subgroup.Normal.conj_mem h hh g⁻¹)
       have e1 : σ h * σ g = σ g * σ (g⁻¹ * h * g) := by
         rw [← map_mul, ← map_mul]; congr 1; group
       have e2 : σ g⁻¹ * σ h = σ (g⁻¹ * h * g) * σ g⁻¹ := by

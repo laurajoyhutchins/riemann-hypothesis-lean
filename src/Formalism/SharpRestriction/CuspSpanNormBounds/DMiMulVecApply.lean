@@ -1,4 +1,53 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.ContinuousCjIT
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.ContinuousCjIT
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.SharpRestriction.CuspSpanNormBounds.OnePlaceEstimates
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset
 
@@ -69,8 +118,8 @@ theorem dM_mulVec_fvec {z : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (a : 
     dM k r κ τ *ᵥ fvec k r ((τ : ℂ) • z) a = ((tF r κ τ a.val : ℝ) : ℂ) • fvec k r z a := by
   unfold fvec
   by_cases h : a.val < r
-  · rw [dif_pos h, dif_pos h, dM_mulVec_bvec, tV_eI]
-  · rw [dif_neg h, dif_neg h, dM_mulVec_wb (inWb_smul hz _)]
+  · rw [dite_eq_left h, dite_eq_left h, dM_mulVec_bvec, tV_eI]
+  · rw [dite_eq_right h, dite_eq_right h, dM_mulVec_wb (inWb_smul hz _)]
     have : a.val = r := by omega
     simp [tF, this]
 
@@ -80,7 +129,7 @@ theorem ell_cj (hκ : 0 < κ) (hτ : 0 < τ) {z : Fin (2 * r + k + 1) → ℂ} (
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
   by_cases h : a.val + 1 < r
-  · rw [dif_pos h, dif_pos h, cj_apply, tV_eI, tV_eI]
+  · rw [dite_eq_left h, dite_eq_left h, cj_apply, tV_eI, tV_eI]
     have e : r - a.val = (r - (a.val + 1)) + 1 := by omega
     have hk := pow_pos hκ (r - (a.val + 1))
     have hκc : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ.ne'
@@ -90,7 +139,7 @@ theorem ell_cj (hκ : 0 < κ) (hτ : 0 < τ) {z : Fin (2 * r + k + 1) → ℂ} (
     rw [e, pow_succ]
     push_cast
     field_simp
-  · rw [dif_neg h, dif_neg h, cj_mulVec, dM_mulVec_wb (inWb_smul hz _), Matrix.mulVec_smul,
+  · rw [dite_eq_right h, dite_eq_right h, cj_mulVec, dM_mulVec_wb (inWb_smul hz _), Matrix.mulVec_smul,
       dMi_mulVec_apply, tV_eI, Pi.smul_apply, smul_eq_mul]
     have e : r - a.val = 1 := by omega
     have hκc : (κ : ℂ) ≠ 0 := by exact_mod_cast hκ.ne'

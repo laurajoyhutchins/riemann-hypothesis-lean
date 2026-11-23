@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BijectiveGsLocalInvRootsOfPlaces
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCores
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BasePairing
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BijectiveGsLocalInvRootsOfPlaces
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseCores
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseFixed
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.BaseInputs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BasePairing
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.Finite
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.FiniteOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -18,8 +63,8 @@ variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1))) [Fintype 
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
   (hodd : Odd n ∨ IsTotallyComplex K.1) (h3 : Subsingleton (cohomology (gsRoots S n) 3))
 
-include hℓ hnk hS in
 
+include hℓ hnk hS in
 theorem gsBaseBijective_of_fixing (hP : GsPairingInput n ℓ)
     (hcores : ∀ U : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S),
       Function.Surjective (compactCores (gsFinFamily S ιs) U (gsRoots S n) 3).hom)
@@ -27,13 +72,17 @@ theorem gsBaseBijective_of_fixing (hP : GsPairingInput n ℓ)
     (hW₀ : ∀ σ ∈ W₀, ∀ ζ : (maxUnramifiedOutside K.1 ℚ̄ S)ˣ, ζ ^ n = 1 →
       σ (ζ : maxUnramifiedOutside K.1 ℚ̄ S) = ζ)
     (U : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S)) (hU : U ≤ W₀) :
-    GsBaseBijective S ιs n U (gsCompactInv S ιs n hodd h3) :=
-  (exists_gsOpenSubgroup_eq K S U).elim fun _ h1 => h1.elim fun _ h2 => h2.elim fun hL hUeq =>
-    hUeq ▸ gsBaseBijective_of_le S ιs n ℓ k hℓ hnk hS hodd h3 hP hcores W₀ hW₀ hL (hUeq ▸ hU)
+    GsBaseBijective S ιs n U (gsCompactInv S ιs n hodd h3) := by
+  obtain ⟨L, hKL, hL, hUeq⟩ := exists_gsOpenSubgroup_eq K S U
+  subst U
+  -- Infer the application type before comparing it with the goal.
+  have hbase := @gsBaseBijective_of_le K S ‹Fintype S› ιs n ℓ k ‹NeZero n›
+    hℓ hnk hS hodd h3 hP hcores W₀ hW₀ L hKL hL hU
+  assumption
 
-set_option maxHeartbeats 1600000 in
+
+
 include hℓ hnk hS in
-
 theorem exists_compactDualityHypotheses_gs_of_pairing (hP : GsPairingInput n ℓ) :
     ∃ U₀ : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S),
       CompactDualityHypotheses (gsFinFamily S ιs) n (gsRoots S n) (gsCompactInv S ιs n hodd h3) U₀ := by
@@ -41,23 +90,30 @@ theorem exists_compactDualityHypotheses_gs_of_pairing (hP : GsPairingInput n ℓ
   have hSn : ∀ v : HeightOneSpectrum (𝓞 K.1), ((n : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S :=
     mem_of_natCast_pow_mem S n ℓ k hnk hS
   have hD := nonempty_addEquiv_gsRoots_of_places S n hnS
-  have : Finite (gsRoots S n) := hD.elim fun e => Finite.of_equiv _ e.toEquiv.symm
+  have hfin : Finite (gsRoots S n) := hD.elim fun e => Finite.of_equiv (ZMod n) e.toEquiv.symm
+  have hn : n ≠ 0 := NeZero.ne n
   have hcores : ∀ U : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S),
       Function.Surjective (compactCores (gsFinFamily S ιs) U (gsRoots S n) 3).hom := fun U =>
-    surjective_gs_compactCores_three K S ιs (NeZero.ne n) hSn hodd U (gsRoots S n) (nsmul_gsRoots S n)
-  exact (exists_openSubgroup_fixing_rootsOfUnity K S n (NeZero.ne n)).elim fun W₀ hW₀ => ⟨W₀,
-    { nonempty_addEquiv := hD
-      subsingleton_four := fun M _ _ hM => subsingleton_compactCohomology_four K S (NeZero.ne n) hSn hodd ιs M hM
-      bijective_base := fun U hU {r s} h => gsBaseBijective_of_fixing S ιs n ℓ k hℓ hnk hS hodd h3 hP hcores W₀ hW₀
-        U hU h }⟩
+    @surjective_gs_compactCores_three K S ιs n hn hSn hodd U (gsRoots S n)
+      (isDiscreteRep_gsRoots S n) hfin (nsmul_gsRoots S n)
+  obtain ⟨W₀, hW₀⟩ := exists_openSubgroup_fixing_rootsOfUnity K S n hn
+  refine ⟨W₀, { nonempty_addEquiv := hD, subsingleton_four := ?_, bijective_base := ?_ }⟩
+  · intro M hdiscrete _ hM
+    exact @subsingleton_compactCohomology_four K S n hn hSn hodd ιs M hdiscrete hM
+  · intro U hU
+    have hbase := @gsBaseBijective_of_fixing K S ‹Fintype S› ιs n ℓ k ‹NeZero n›
+      hℓ hnk hS hodd h3 hP hcores W₀ hW₀ U hU
+    -- The field uses the same map with a different proof of the torsion condition.
+    unfold GsBaseBijective at hbase
+    with_reducible assumption
+
 
 include hℓ hnk in
-
 theorem gsPairingInput : GsPairingInput n ℓ := fun _ S' _ ιs' hS' _ hodd' h3' =>
   ⟨gsCompactInv_ker_left S' ιs' n ℓ k hℓ hnk hS' hodd' h3', gsCompactInv_ker_right S' ιs' n ℓ k hℓ hnk hS' hodd' h3'⟩
 
-include hℓ hnk hS in
 
+include hℓ hnk hS in
 theorem exists_compactDualityHypotheses_gs :
     ∃ U₀ : OpenSubgroup (galUnramifiedOutside K.1 ℚ̄ S),
       CompactDualityHypotheses (gsFinFamily S ιs) n (gsRoots S n) (gsCompactInv S ιs n hodd h3) U₀ :=

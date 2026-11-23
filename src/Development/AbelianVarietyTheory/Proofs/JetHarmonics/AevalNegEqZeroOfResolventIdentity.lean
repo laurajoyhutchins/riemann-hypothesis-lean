@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Basic.Complex.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.RealPlaceAnalysis.StatementA
+public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 open Formalism.REAL Finset
 
@@ -14,7 +64,7 @@ theorem shift_coeff_of_eval_identity {N : Type} [AddCommGroup N] [Module ℂ N]
       (∑ i ∈ Finset.range M, Polynomial.monomial i (f (a i))).coeff k = f (a k) := by
     intro f k
     rw [Polynomial.finsetSum_coeff]
-    simp only [Polynomial.coeff_monomial]
+    simp only [Polynomial.coeff_monomial_apply]
     rw [Finset.sum_ite_eq']
     split_ifs with hk
     · rfl
@@ -27,7 +77,8 @@ theorem shift_coeff_of_eval_identity {N : Type} [AddCommGroup N] [Module ℂ N]
     apply Polynomial.funext
     intro u
     have h1 := congrArg f (h u)
-    simp only [map_add, map_smul, map_sum, smul_eq_mul] at h1
+
+    simp only [map_add (f := _), map_smul, map_sum, smul_eq_mul] at h1
     simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_X,
       Polynomial.eval_finsetSum, Polynomial.eval_monomial, Polynomial.eval_C,
       LinearMap.comp_apply]
@@ -36,17 +87,17 @@ theorem shift_coeff_of_eval_identity {N : Type} [AddCommGroup N] [Module ℂ N]
   refine ⟨?_, fun k => ?_⟩
   · rw [← sub_eq_zero, ← Module.forall_dual_apply_eq_zero_iff ℂ]
     intro f
-    have h1 := congrArg (fun P => Polynomial.coeff P 0) (key f)
+    have h1 := congrArg (fun P => _root_.AddMonoidAlgebra.coeff (M := ℕ) P 0) (key f)
     simp only [Polynomial.coeff_add, Polynomial.coeff_X_mul_zero, hc, Polynomial.coeff_mul_C,
       zero_add] at h1
     rw [LinearMap.comp_apply] at h1
     rw [map_sub, map_smul, smul_eq_mul, h1, sub_self]
   · rw [← sub_eq_zero, ← Module.forall_dual_apply_eq_zero_iff ℂ]
     intro f
-    have h1 := congrArg (fun P => Polynomial.coeff P (k + 1)) (key f)
+    have h1 := congrArg (fun P => _root_.AddMonoidAlgebra.coeff (M := ℕ) P (k + 1)) (key f)
     simp only [Polynomial.coeff_add, Polynomial.coeff_X_mul, hc, Polynomial.coeff_mul_C] at h1
     rw [LinearMap.comp_apply] at h1
-    rw [map_sub, map_add, map_smul, smul_eq_mul, h1, sub_self]
+    rw [map_sub, map_add (f := _), map_smul, smul_eq_mul, h1, sub_self]
 
 theorem aeval_neg_eq_zero_and_eigen_of_resolvent_identity :
     ∀ (N : Type) [AddCommGroup N] [Module ℂ N] (Ω : Module.End ℂ N) (X : ℂ → Module.End ℂ N) (d : ℕ) (c : ℕ → Module.End ℂ N) (p : Polynomial ℂ), (∀ u, X u = ∑ i ∈ Finset.range d, u ^ i • c i) → (∀ (u : ℂ) (w : N), u • X u w + Ω (X u w) = p.eval u • w) → Polynomial.aeval (-Ω) p = 0 ∧ ∀ (α : ℂ) (w : N), Ω w = α • w → ∀ (q : Polynomial ℂ), p = (Polynomial.X + Polynomial.C α) * q → ∀ u : ℂ, X u w = q.eval u • w := by
@@ -76,7 +127,7 @@ theorem aeval_neg_eq_zero_and_eigen_of_resolvent_identity :
       induction n with
       | zero => simp [(hco w).1]
       | succ n ih =>
-        rw [Finset.sum_range_succ, ih, ← map_smul, ← (hco w).2 n, map_add, ← add_assoc]
+        rw [Finset.sum_range_succ, ih, ← map_smul, ← (hco w).2 n, map_add (f := _), ← add_assoc]
         have : ((-Ω) ^ (n + 1)) (a w n) = - ((-Ω) ^ n) (Ω (a w n)) := by
           rw [pow_succ, Module.End.mul_apply, LinearMap.neg_apply, map_neg]
         rw [this, add_neg_cancel, zero_add]

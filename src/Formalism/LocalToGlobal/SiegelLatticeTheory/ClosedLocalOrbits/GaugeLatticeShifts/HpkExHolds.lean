@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacLocOfHpk
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingExistence
-import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.SigmaFiniteRestrictSubgroup
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralAeConvergenceContinuity
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JBePosA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacLocOfHpk
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Formalism.DoubleCosetMeasures.StatementZ
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingExistence
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.SigmaFiniteRestrictSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationContinuousOnInvertible
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,28 +67,13 @@ open Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.Fourier
 variable {k r : ℕ}
 
 theorem meas_invM : Measurable (invM : Mt k r → Mt k r) := by
-  unfold invM
-  have hof : Continuous fun x : Mt k r => (Matrix.of x : Mat k r) := continuous_id
-  have hc : Continuous fun x : Mt k r => ((Matrix.of x).adjugate : Mt k r) := hof.matrix_adjugate
-  have hdc : Continuous fun x : Mt k r => (Matrix.of x : Mat k r).det := hof.matrix_det
-  have hd : Measurable fun x : Mt k r => Ring.inverse (Matrix.of x : Mat k r).det := by
-    simp only [Ring.inverse_eq_inv']
-    exact hdc.measurable.inv
-  have he : (fun x : Mt k r => (((Matrix.of x : Mat k r)⁻¹ : Mat k r) : Mt k r)) =
-      fun x : Mt k r => (Ring.inverse (Matrix.of x).det • (Matrix.of x).adjugate : Mt k r) := by
-    funext x
-    rw [Matrix.inv_def]
-  have hc' : Measurable fun x : Mt k r => ((Matrix.of x).adjugate : Mt k r) :=
-    measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j =>
-      ((continuous_apply j).comp ((continuous_apply i).comp hc)).measurable
-  rw [he]
-  exact hd.smul hc'
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.BesselPositivity.bp_meas_inv <;> assumption
 
 theorem meas_mulM : Measurable (mulM : Mt k r × Mt k r → Mt k r) := by
   unfold mulM
   have hc : Continuous (fun p : Mt k r × Mt k r => (Matrix.of p.1 * Matrix.of p.2 : Mat k r)) :=
     Continuous.matrix_mul continuous_fst continuous_snd
-  exact measurable_pi_lambda _ fun i => measurable_pi_lambda _ fun j =>
+  exact Measurable.of_eval fun i => Measurable.of_eval fun j =>
     ((continuous_apply j).comp ((continuous_apply i).comp hc)).measurable
 
 def Cm (g : Mt k r) (p : SS k r) : Mt k r := mulM (mulM (mulM (mulM (p.1.1, p.1.2), g), p.2.2), p.2.1)
@@ -133,8 +169,10 @@ theorem hpkEx_holds : HpkEx := by
   have iW := Formalism.FourierDecayAlt.P.haar_measure_inversion k r _ μW0 cW hW0
   have iW' := Formalism.FourierDecayAlt.P.haar_measure_inversion k r _ μW0' cW' hW0'
   have iN := Formalism.FourierDecayAlt.P.haar_measure_inversion k r _ μN0 cN hN0
-  have jW' : (b' • μW0').map invM = b' • μW0' := by rw [Measure.map_smul, iW']
-  have jN : (d • μN0).map invM = d • μN0 := by rw [Measure.map_smul, iN]
+  have jW' : (b' • μW0').map invM = b' • μW0' := by
+    rw [Measure.map_smul b' meas_invM.aemeasurable, iW']
+  have jN : (d • μN0).map invM = d • μN0 := by
+    rw [Measure.map_smul d meas_invM.aemeasurable, iN]
   set κ : ℝ≥0∞ := b * d * (b' * d) with hκ
   have hκ0 : κ ≠ 0 := by simp [hκ, hb0, hd0, hb0']
   have hκt : κ ≠ ⊤ := by simp [hκ, ENNReal.mul_eq_top, hbt, hdt, hbt']

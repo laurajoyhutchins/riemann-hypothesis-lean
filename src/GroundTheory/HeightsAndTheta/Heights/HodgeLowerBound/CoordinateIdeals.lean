@@ -1,6 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -138,21 +180,6 @@ theorem isMultiHomog_C_zero (a : ℤ) : IsMultiHomog (C a : MRing ι) 0 := by
     simp
   · exact absurd rfl hm
 
-theorem IsVerticalDivisorAt.ofPrime {P : Ideal (MRing ι)} (hP : IsHorizontal P) {p : ℕ}
-    (hp : p ≠ 0) : IsVerticalDivisorAt P p 0 (C (p : ℤ)) 1 where
-  degrees := ⟨0, 0, isMultiHomog_C_zero _, by simpa using isMultiHomog_C_zero (ι := ι) 1, by
-    funext k; simp⟩
-  num_not_mem := fun h => by
-    have : (p : ℤ) ∈ P.comap (C : ℤ →+* MRing ι) := h
-    rw [hP, Ideal.mem_bot] at this
-    exact hp (by exact_mod_cast this)
-  den_not_mem := fun h => by
-    have : (1 : ℤ) ∈ P.comap (C : ℤ →+* MRing ι) := by simpa [Ideal.mem_comap] using h
-    rw [hP, Ideal.mem_bot] at this
-    exact one_ne_zero this
-  unit_off_fibre := fun W hW _ _ hpW =>
-    ⟨1, C (p : ℤ), fun h => hW.ne_top ((Ideal.eq_top_iff_one W).mpr h), hpW, by simp⟩
-
 end Divisors
 
 section Positive
@@ -235,10 +262,6 @@ def f (_ : ComponentData II Ψ K ι Ω E) : ℕ := Fintype.card Ψ
 def j' : ℕ := D.N - D.j
 
 def n : ℕ := Fintype.card Ψ * D.j * (D.N - D.j)
-
-theorem n_eq : D.n = D.f * D.j * D.j' := rfl
-
-def PX : Ideal (MRing ι) := mCoordIdeal D.y
 
 def Xo : Set ((Σ k, ι k) → ℂ) := mcPts (mCoordIdeal D.y) \ D.Bd
 

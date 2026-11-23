@@ -1,48 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Statements
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.StatementsFibreCompDimZ
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.GeoNum
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.CycDim
+module
+
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Lean.Meta.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSuppAA
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G
-
-theorem GeometricArithmeticNumbers.proof (hF : WeightedDegree.Statement) (hZ : FibreCompDimZ.Statement) :
-    GeometricArithmeticNumbers.Statement := by
-  intro ι _ _ n P D hdim a p hp
-  rw [hF ι n P D hdim a p, NumbersDVR.cycEval, finsum_mem_def]
-  refine finsum_congr fun W ↦ ?_
-  by_cases hW : W ∈ Geo.divSupp (ι := blockIdx n) P.ideal (C (p : ℤ))
-  · rw [Set.indicator_of_mem hW]
-    have hW' : W ∈ (P.ideal ⊔ Ideal.span {C (p : ℤ)}).minimalPrimes ∧ NumbersDVR.IsRelevant W := hW
-    have hWp : W.IsPrime := hW.1.1.1
-    have hpW : (C (p : ℤ) : MvPolynomial (Coord n) ℤ) ∈ W :=
-      hW.1.1.2 (Ideal.mem_sup_right (Ideal.subset_span rfl))
-    have hC : Geo.IsMultiHomog (ι := blockIdx n) (C (p : ℤ) : MvPolynomial (Coord n) ℤ) 0 := by
-      intro m hm k
-      have h0 := MvPolynomial.mem_support_iff.mp hm
-      rw [coeff_C] at h0
-      split_ifs at h0 with h
-      · subst h
-        simp
-      · exact absurd rfl h0
-    have hMP : Geo.IsMultiProjPrime (ι := blockIdx n) W :=
-      ⟨hWp, ReciprocityTheory.ChartRestriction.G.AI.I1.cyc_isMultiHomogIdeal_of_mem_minimalPrimes
-        P.isMultiProjPrime.2.1 hC hW.1, hW.2⟩
-    have hdimW : ringKrullDim (Geo.MRing (blockIdx n) ⧸ W) =
-        ((D + Fintype.card ι : ℕ) : WithBot ℕ∞) := by
-      refine hZ (Coord n) P.ideal P.isPrime P.isHorizontal (D + Fintype.card ι) p hp.out ?_ W hW.1
-      rw [show D + Fintype.card ι + 1 = D + 1 + Fintype.card ι by omega]
-      exact hdim
-    have hm : Geo.multAt (ι := blockIdx n) (P.ideal ⊔ Ideal.span {C (p : ℤ)}) W =
-        (NumbersDVR.multAt (P.ideal ⊔ Ideal.span {C (p : ℤ)}) W).toNat := by
-      rw [Geo.multAt, dif_pos hWp]
-      rfl
-    rw [NumbersDVR.divCycle, dif_pos hW', hm,
-      Bridge.intNum_map_eq_geoNum p D W hMP hpW hdimW a]
-  · have hW' : ¬(W ∈ (P.ideal ⊔ Ideal.span {C (p : ℤ)}).minimalPrimes ∧ NumbersDVR.IsRelevant W) := hW
-    rw [Set.indicator_of_notMem hW, NumbersDVR.divCycle, dif_neg hW', zero_mul]
 
 end GroundTheory.Heights₂.Heights

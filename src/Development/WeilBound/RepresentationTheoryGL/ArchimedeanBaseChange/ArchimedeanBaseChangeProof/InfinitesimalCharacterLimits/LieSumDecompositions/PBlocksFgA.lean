@@ -1,8 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.PBlocksDefs
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CapelliDetDiagonalBlockActsByInfinitesimalCharac
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.PBlocksDefs
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CapelliDetDiagonalBlockActsByInfinitesimalCharac
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliLeviFactorizationSum
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LieDSingleLeviEmbEqZero
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CapelliLeviFactorizationSum
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PSliceTens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.IsSliceMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,8 +88,6 @@ theorem right_slice_apply (m₁ : GA E r) (F : Sm E (r + s)) (m₂ : GA E s) :
     (Function.update (CapFactor.levPair (n := ![r, s]) (m₁, 1)) 1 m₂)) = _
   rw [update1]
   exact congrArg F.1 (CapFactor.lev_eq_leviEmb (R := Ad E) ![r, s] (h2 r s) (m₁, m₂)).symm
-
-example {a : ℕ} (A B : Matrix (Fin a) (Fin a) (Cinf E)) : toL (A + B) = toL A + toL B := rfl
 
 theorem yp_one {a : ℕ} : BlockDerivatives.yp (1 : Kinf E a) (1 : GL (Fin a) (Af E)) = 1 := by
   simp [BlockDerivatives.yp]
@@ -108,8 +148,10 @@ theorem lie_sum_single (X : Lie E (r + s)) (F : Sm E (r + s)) :
   have hdec : X = ∑ p, ∑ q, (toL (Matrix.single p q (X p q)) : Lie E (r + s)) :=
     Matrix.matrix_eq_sum_single (Matrix.of X)
   conv_lhs => rw [hdec]
+
   rw [map_sum, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun p _ => ?_
+
   rw [map_sum, LinearMap.sum_apply]
 
 theorem right_slice_eq_sum (F : Sm E (r + s)) {n : ℕ} (b : Fin n → Sm E r) (q : Fin n → Sm E s)
@@ -133,8 +175,9 @@ theorem left_slice_lie_second_block (F : Sm E (r + s)) {n : ℕ} (b : Fin n → 
     (m₂ : GA E s) :
     sl0 m₂ (lie E (r + s) (GlobalTheory.BlockCap.blockCLM (e2 r s) 1 Y) F) = ∑ i, (lie E s Y (q i)).1 m₂ • b i := by
   refine Subtype.ext (funext fun m₁ => ?_)
+
   rw [left_slice_apply, ← right_slice_apply, right_slice_lie_second_block, right_slice_eq_sum F b q hexp, map_sum, Submodule.coe_sum, Finset.sum_apply,
-    Submodule.coe_sum, Finset.sum_apply]
+  Submodule.coe_sum, Finset.sum_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul]
   change (b i).1 m₁ * (lie E s Y (q i)).1 m₂ = (lie E s Y (q i)).1 m₂ * (b i).1 m₁
@@ -145,8 +188,9 @@ theorem right_slice_lie_first_block (F : Sm E (r + s)) {n : ℕ} (b : Fin n → 
     (m₁ : GA E r) :
     sl1 m₁ (lie E (r + s) (GlobalTheory.BlockCap.blockCLM (e2 r s) 0 Y) F) = ∑ i, (lie E r Y (b i)).1 m₁ • q i := by
   refine Subtype.ext (funext fun m₂ => ?_)
+
   rw [right_slice_apply, ← left_slice_apply, left_slice_lie_first_block, left_slice_eq_sum F b q hexp, map_sum, Submodule.coe_sum, Finset.sum_apply,
-    Submodule.coe_sum, Finset.sum_apply]
+  Submodule.coe_sum, Finset.sum_apply]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul]
   change (q i).1 m₂ * (lie E r Y (b i)).1 m₁ = (lie E r Y (b i)).1 m₁ * (q i).1 m₂
@@ -180,14 +224,16 @@ theorem right_slice_single_first (F : Sm E (r + s)) {n : ℕ} (b : Fin n → Sm 
   rw [toL_single_cc]
   exact right_slice_lie_first_block F b q hexp _ m₁
 
-theorem key_left (W : Submodule ℂ (Sm E r)) (hW : IsStable W) (F : Sm E (r + s))
+theorem key_left (W : Submodule ℂ (Sm E r)) (hW : _root_.GlobalTheory.CuspRep.IsStable W) (F : Sm E (r + s))
     (hu : ∀ (x : BlockIx (r + s) r → Ad E) g, F.1 (unip x * g) = F.1 g)
     (hP : ∀ m₂, sl0 m₂ F ∈ W) {n : ℕ} (b : Fin n → Sm E r) (q : Fin n → Sm E s) (hb : ∀ i, b i ∈ W)
     (hexp : ∀ m : GA E r × GA E s, F.1 (lev (Ad E) r s m) = ∑ i, (b i).1 m.1 * (q i).1 m.2)
     (X : Lie E (r + s)) (hX : ∀ (i : Fin s) (j : Fin r), X (Fin.natAdd r i) (Fin.castAdd s j) = 0)
     (m₂ : GA E s) : sl0 m₂ (lie E (r + s) X F) ∈ W := by
+
   rw [lie_sum_single, map_sum]
   refine W.sum_mem fun p _ => ?_
+
   rw [map_sum]
   refine W.sum_mem fun q' _ => ?_
   induction p using Fin.addCases with
@@ -213,14 +259,16 @@ theorem key_left (W : Submodule ℂ (Sm E r)) (hW : IsStable W) (F : Sm E (r + s
       rw [left_slice_single_second F b q hexp]
       exact W.sum_mem fun i _ => W.smul_mem _ (hb i)
 
-theorem key_right (W : Submodule ℂ (Sm E s)) (hW : IsStable W) (F : Sm E (r + s))
+theorem key_right (W : Submodule ℂ (Sm E s)) (hW : _root_.GlobalTheory.CuspRep.IsStable W) (F : Sm E (r + s))
     (hu : ∀ (x : BlockIx (r + s) r → Ad E) g, F.1 (unip x * g) = F.1 g)
     (hP : ∀ m₁, sl1 m₁ F ∈ W) {n : ℕ} (b : Fin n → Sm E r) (q : Fin n → Sm E s) (hq : ∀ i, q i ∈ W)
     (hexp : ∀ m : GA E r × GA E s, F.1 (lev (Ad E) r s m) = ∑ i, (b i).1 m.1 * (q i).1 m.2)
     (X : Lie E (r + s)) (hX : ∀ (i : Fin s) (j : Fin r), X (Fin.natAdd r i) (Fin.castAdd s j) = 0)
     (m₁ : GA E r) : sl1 m₁ (lie E (r + s) X F) ∈ W := by
+
   rw [lie_sum_single, map_sum]
   refine W.sum_mem fun p _ => ?_
+
   rw [map_sum]
   refine W.sum_mem fun q' _ => ?_
   induction p using Fin.addCases with

@@ -1,14 +1,60 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainImageOfMapVecLattice
-import GroundTheory.AutomorphicForms.FourierWhittaker.Series
-import GroundTheory.AutomorphicForms.FourierWhittaker.AlgebraMapIntegerMemIntegralFiniteAdeles
-import GroundTheory.AutomorphicForms.FourierWhittaker.AdelicCharPairTorusPtSingle
-import GroundTheory.AutomorphicForms.FourierWhittaker.UMatColXEqFromBlocks
-import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffDiagonalBlockGLEqVecCoeff
-import GroundTheory.AutomorphicForms.FourierWhittaker.Smooth
-import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffBlockGLEqOfVecMulEq
-import GroundTheory.AutomorphicForms.FourierWhittaker.Single
-import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainShearSymm
+module
+
+public import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainImageOfMapVecLattice
+public import GroundTheory.AutomorphicForms.FourierWhittaker.Series
+public import GroundTheory.AutomorphicForms.FourierWhittaker.AlgebraMapIntegerMemIntegralFiniteAdeles
+public import GroundTheory.AutomorphicForms.FourierWhittaker.AdelicCharPairTorusPtSingle
+public import GroundTheory.AutomorphicForms.FourierWhittaker.UMatColXEqFromBlocks
+public import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffDiagonalBlockGLEqVecCoeff
+public import GroundTheory.AutomorphicForms.FourierWhittaker.Smooth
+public import GroundTheory.AutomorphicForms.FourierWhittaker.PartialCoeffBlockGLEqOfVecMulEq
+public import GroundTheory.AutomorphicForms.FourierWhittaker.Single
+public import GroundTheory.AutomorphicForms.FourierWhittaker.IsAddFundamentalDomainShearSymm
+import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Uniform
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField NumberField.mixedEmbedding MeasureTheory Topology Set Filter IsDedekindDomain Matrix
 open scoped NumberField.AdeleRing
@@ -38,7 +84,7 @@ theorem whittaker_eq_partialCoeff_zero {ϕ : AdelicGLn.AdelicGL K n → ℂ} (h�
   have hext : ∀ Z : GePos n 0 → 𝔸[K], extGe Z = E Z := by
     intro Z
     funext p
-    rw [extGe, dif_pos (Nat.zero_le _)]
+    rw [extGe, dite_eq_left (Nat.zero_le _)]
     simp [E, MeasurableEquiv.piCongrLeft, Equiv.piCongrLeft, gePosZeroEquiv]
   have hpre : E ⁻¹' vecDomain K (Pos n) = vecDomain K (GePos n 0) := by
     ext Z
@@ -76,23 +122,37 @@ theorem whittaker_eq_partialCoeff {ϕ : AdelicGLn.AdelicGL K n → ℂ} (hϕ : C
   rw [whittaker_eq_partialCoeff_zero hϕ, partialCoeff_zero_eq_one ϕ hn]
 
 theorem isUSmooth_of_isAutomorphicForm {ϕ : AdelicGLn.AdelicGL K n → ℂ} (hϕ : IsAutomorphicForm ϕ) :
-    IsUSmooth ϕ where
-  arch := hϕ.isSmooth.1
-  fin := by
-    obtain ⟨U, -, hU⟩ := exists_openSubgroup_rightInvariant hϕ.isSmooth hϕ.isKFinite
-    exact ⟨U, hU⟩
-  left := hϕ.isLeftInvariant
+    IsUSmooth ϕ := by
+  obtain ⟨U, -, hU⟩ := exists_openSubgroup_rightInvariant hϕ.isSmooth hϕ.isKFinite
+  exact ⟨hϕ.isSmooth.1, ⟨U, hU⟩, hϕ.isLeftInvariant⟩
 
 theorem hasSum_partialCoeff_cusp {ϕ : AdelicGLn.AdelicGL K n → ℂ} (hϕ : ϕ ∈ cuspForms K n) {k : ℕ}
     (hk0 : 0 < k) (hk : k < n) (g : AdelicGLn.AdelicGL K n) :
     HasSum (fun ξ : {ξ : Fin k → K // ξ ≠ 0} =>
         partialCoeff ϕ k (AdelicGLn.diagonal K n (blockGL hk.le (rowCompletion ξ.1)) * g))
-      (partialCoeff ϕ (k + 1) g) :=
-  hasSum_partialCoeff_of_vecCoeff_zero (isUSmooth_of_isAutomorphicForm hϕ.1) hk
-    (fun g => vecCoeff_zero_of_isCuspidal hϕ.1.continuous hϕ.1.isLeftInvariant hϕ.2 hk0 hk g) g
+      (partialCoeff ϕ (k + 1) g) := by
+  have hzero (g' : AdelicGLn.AdelicGL K n) :
+      vecCoeff (fun x => partialCoeff ϕ (k + 1) (colGL k x * g')) 0 = 0 := by
+    have hconstant (B : LowPos n k → 𝔸[K]) :
+        ∫ A in vecDomain K (UPos n k), ϕ (uGL (extLow B + extU A) * g')
+            ∂vecMeasure K (UPos n k) = constantTerm k ϕ (uGL (extLow B) * g') := by
+      have hrepr (A : UPos n k → 𝔸[K]) :
+          uGL (extLow B + extU A) = unipGL ((shear B).symm A) * uGL (extLow B) := by
+        apply Units.ext
+        rw [Units.val_mul, coe_unipGL, coe_uGL, coe_uGL, unipMatrix_mul_uMat_extLow,
+          AddEquiv.apply_symm_apply]
+      simp_rw [hrepr, mul_assoc]
+      rw [setIntegral_comp_addEquiv (shear B).symm (continuous_shear_symm B) (continuous_shear B)
+        (isAddFundamentalDomain_shear_symm B) (f := fun A => ϕ (unipGL A * (uGL (extLow B) * g')))
+        fun ξ hξ x => hϕ.1.isLeftInvariant.unipGL_vadd _ ⟨ξ, hξ⟩ x]
+      rfl
+    rw [vecCoeff_zero_eq_setIntegral_low hϕ.1.continuous hk g']
+    refine (setIntegral_congr_fun measurableSet_vecDomain fun B _ => ?_).trans (integral_zero _ _)
+    rw [hconstant B, hϕ.2 k hk0 hk, mul_zero]
+  exact hasSum_partialCoeff_of_vecCoeff_zero (isUSmooth_of_isAutomorphicForm hϕ.1) hk hzero g
+
 
 variable (K) in
-
 def mirabolic (k : ℕ) : Subgroup (GL (Fin k) K) where
   carrier := {h | IsLastRowUnit ((h : GL (Fin k) K) : Matrix (Fin k) (Fin k) K)}
   one_mem' := by
@@ -186,7 +246,7 @@ theorem partialCoeff_eq_nestedWhittaker {ϕ : AdelicGLn.AdelicGL K n → ℂ} (h
       have hlt : m + 1 < n := by omega
       rw [nestedWhittaker]
       dsimp only
-      rw [dif_pos hlt, ← (hasSum_partialCoeff_cusp_cosets hϕ hk0 hlt g).tsum_eq, ih hk0 hlt.le]
+      rw [dite_eq_left hlt, ← (hasSum_partialCoeff_cusp_cosets hϕ hk0 hlt g).tsum_eq, ih hk0 hlt.le]
 
 theorem eq_nestedWhittaker {ϕ : AdelicGLn.AdelicGL K n → ℂ} (hϕ : ϕ ∈ cuspForms K n) (hn : 0 < n)
     (g : AdelicGLn.AdelicGL K n) : ϕ g = nestedWhittaker ϕ n g := by

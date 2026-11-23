@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.TotallyRealRoots.UnitsMapSurjOfZmod
+module
+
+public import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.TotallyRealRoots.LeNuIffPowMemPrinc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.GroupTheory.Exponent
+public import Mathlib.GroupTheory.SpecificGroups.Cyclic
+
+@[expose] public section
 
 namespace KStar.TotallyRealRoots
 
@@ -18,22 +65,5 @@ theorem nu_pos_iff (U : Subgroup ℤ_[l]ˣ) (tr : ℕ) : 0 < nu l U tr ↔ resOr
     exact Subtype.ext (h u hu)
   · intro h u hu
     exact congrArg Subtype.val (h ⟨red l u, u, hu, rfl⟩)
-
-private theorem nb_two_dvd (u : ℤ_[2]ˣ) : ((2 : ℕ) : ℤ_[2]) ∣ (u : ℤ_[2]) - 1 :=
-  nb_red_eq_one.mp (Subsingleton.elim _ _)
-
-theorem nu_two_of_odd (U : Subgroup ℤ_[2]ˣ) {tr : ℕ} (htr : Odd tr) :
-    nu 2 U tr = nu 2 U 1 ∧ 1 ≤ nu 2 U tr := by
-  constructor
-  · refine nuStar_eq_nuStar_one PadicInt.prime_p ?_ ?_
-    · rintro _ ⟨u, -, rfl⟩
-      exact nb_two_dvd u
-    · intro h
-      rw [← PadicInt.norm_lt_one_iff_dvd, PadicInt.norm_natCast_lt_one_iff] at h
-      exact (Nat.not_even_iff_odd.mpr htr) (even_iff_two_dvd.mpr h)
-  · rw [← Nat.cast_one (R := ℕ∞), le_nu_iff]
-    intro u _
-    rw [pow_one, ← Units.val_pow_eq_pow_val]
-    exact nb_two_dvd _
 
 end KStar.TotallyRealRoots

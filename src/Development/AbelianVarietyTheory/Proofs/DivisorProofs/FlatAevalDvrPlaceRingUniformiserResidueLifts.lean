@@ -1,9 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GeometricallyConnectedOfIsIsoRestrict
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLocModelIsPrimeOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.NotDominatesTopPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToQMemMaximalIdealIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoePolyMapX
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToQMemMaximalIdealIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open GlobalTheory GlobalTheory.Cartier GlobalTheory.TopForm GlobalTheory.Discrepancy GlobalTheory.FieldPair GlobalTheory.GraphLocal
@@ -19,13 +59,13 @@ open MvPolynomial
 
 instance isPrime_span_X_zero (m : ℕ) :
     (Ideal.span {(X 0 : MvPolynomial (Fin (m + 1)) ℂ)}).IsPrime :=
-  (Ideal.span_singleton_prime (X_ne_zero 0)).2 X_prime
+  (Ideal.span_singleton_prime (X_ne_zero 0)).2 prime_X
 
 theorem exists_X_zero_pow_mul {m : ℕ} {f : MvPolynomial (Fin (m + 1)) ℂ} (hf : f ≠ 0) :
     ∃ (n : ℕ) (g : MvPolynomial (Fin (m + 1)) ℂ),
       g ∉ Ideal.span {(X 0 : MvPolynomial (Fin (m + 1)) ℂ)} ∧ f = X 0 ^ n * g := by
   obtain ⟨n, g, hg, e⟩ := WfDvdMonoid.max_power_factor hf
-    (X_prime (R := ℂ) (i := (0 : Fin (m + 1)))).irreducible
+    (prime_X (R := ℂ) (i := (0 : Fin (m + 1)))).irreducible
   exact ⟨n, g, fun h => hg (Ideal.mem_span_singleton.1 h), e⟩
 
 theorem isDVR_atPrime (m : ℕ) : IsDiscreteValuationRing
@@ -100,7 +140,7 @@ theorem flat_aeval_placeAlg (k : ℕ) (R : Subring K)
     | C a =>
       rw [show (Polynomial.C (MvPolynomial.C a) : Polynomial (MvPolynomial (Fin k) ℂ)) =
         algebraMap ℂ _ a from rfl, AlgEquiv.commutes, AlgHom.commutes, aeval_C]
-    | add p r hp hr => rw [Polynomial.C_add, map_add, map_add, hp, hr, map_add]
+    | add p r hp hr => simp only [map_add, hp, hr]
     | mul_X p i hp =>
       rw [Polynomial.C_mul, map_mul, map_mul, hp, ← finSuccEquiv_X_succ, AlgEquiv.symm_apply_apply,
         map_mul, aeval_X, aeval_X]
@@ -149,7 +189,7 @@ theorem flat_aeval_placeAlg (k : ℕ) (R : Subring K)
     set u : placeAlg E := aeval (fun i : Fin k => x i.succ) g
     set v : placeAlg E := φ ((finSuccEquiv ℂ k).symm p.divX)
     have hf' : φ f = x 0 * v + u := by
-      rw [hfp, hp, map_add, map_mul, map_add, map_mul, hX, hC]
+      rw [hfp, hp, map_add (f := _), map_mul, map_add (f := _), map_mul, hX, hC]
     let uE : E.ring := ⟨(u : K), u.2⟩
     let vE : E.ring := ⟨(v : K), v.2⟩
     have huE : IsUnit uE := isUnit_of_ord_eq_zero uE (by rw [← hwK] at *; simpa [uE, ← hwK] using hw0)

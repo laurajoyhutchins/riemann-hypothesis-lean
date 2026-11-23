@@ -1,4 +1,58 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RepresentationTheory.Basic
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+public import Mathlib.Algebra.MvPolynomial.Funext
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,11 +106,11 @@ theorem act_mul (g h : K → GL (Fin d) ℂ) (x : K × Fin d → ℂ) : act (g *
 
 variable [Fintype K]
 
-variable (d) in
 
+variable (d) in
 def MH (n : K → ℕ) : Submodule ℂ (MvPolynomial (K × Fin d) ℂ) where
   carrier := {P | ∀ (s : K → ℂ) (x : K × Fin d → ℂ), eval (fun p => s p.1 * x p) P = (∏ v, s v ^ n v) * eval x P}
-  add_mem' h h' s x := by rw [map_add, map_add, h, h', mul_add]
+  add_mem' h h' s x := by rw [map_add (f := _), map_add (f := _), h, h', mul_add]
   zero_mem' s x := by simp
   smul_mem' c P h s x := by rw [smul_eval, smul_eval, h]; ring
 
@@ -67,8 +121,8 @@ theorem sbs_mem {n : K → ℕ} (g : K → GL (Fin d) ℂ) {P : MvPolynomial (K 
   funext p
   simp [act, Finset.mul_sum, mul_assoc]
 
-variable (d) in
 
+variable (d) in
 def mRep (n : K → ℕ) : Representation ℂ (K → GL (Fin d) ℂ) (MH d n) where
   toFun g := (sbs g).toLinearMap.restrict fun _ h => sbs_mem g h
   map_one' := by
@@ -89,25 +143,25 @@ section Bi
 
 variable {I : Type} {d : ℕ}
 
-variable (d) in
 
+variable (d) in
 def dbl : (I → GL (Fin d) ℂ) →* (I × Bool → GL (Fin d) ℂ) where
   toFun g k := if k.2 then invT ℂ d (g k.1) else g k.1
   map_one' := by funext k; by_cases h : k.2 <;> simp [h]
   map_mul' g h := by funext k; by_cases hk : k.2 <;> simp [hk]
 
-variable (I d) in
 
+variable (I d) in
 def flip (p : (I × Bool) × Fin d) : (I × Bool) × Fin d := ((p.1.1, !p.1.2), p.2)
 
 variable [Fintype I]
 
-variable (d) in
 
+variable (d) in
 abbrev Bi (n : I → ℕ) : Submodule ℂ (MvPolynomial ((I × Bool) × Fin d) ℂ) := MH d fun k : I × Bool => n k.1
 
-variable (d) in
 
+variable (d) in
 def biRep (n : I → ℕ) : Representation ℂ (I → GL (Fin d) ℂ) (Bi d n) := (mRep d _).comp (dbl d)
 
 theorem flip_mem {n : I → ℕ} {P : MvPolynomial ((I × Bool) × Fin d) ℂ} (h : P ∈ Bi d n) : rename (flip I d) P ∈ Bi d n := by
@@ -118,27 +172,27 @@ theorem flip_mem {n : I → ℕ} {P : MvPolynomial ((I × Bool) × Fin d) ℂ} (
   congr 1
   simp [Fintype.prod_prod_type, mul_comm]
 
-variable (d) in
 
+variable (d) in
 def swp (n : I → ℕ) : Module.End ℂ (Bi d n) := (rename (flip I d)).toLinearMap.restrict fun _ h => flip_mem h
 
 def dg (j : ℕ) (S : I → Bool) (v : I) : ℕ := if S v then j - 1 else j
 
 def sg (S : I → Bool) : ℂ := ∏ v, if S v then -1 else 1
 
-variable (I) in
 
+variable (I) in
 abbrev VG (j : ℕ) : Type := ∀ S : I → Bool, Bi 3 (dg j S)
 
-variable (I) in
 
+variable (I) in
 def repG (j : ℕ) : Representation ℂ (I → GL (Fin 3) ℂ) (VG I j) where
   toFun g := LinearMap.pi fun S => (biRep 3 (dg j S) g).comp (LinearMap.proj S)
   map_one' := by refine LinearMap.ext fun P => funext fun S => ?_; simp
   map_mul' g h := by refine LinearMap.ext fun P => funext fun S => ?_; simp
 
-variable (I) in
 
+variable (I) in
 def thG (j : ℕ) : Module.End ℂ (VG I j) := LinearMap.pi fun S => (sg S • swp 3 (dg j S)).comp (LinearMap.proj S)
 
 theorem repG_apply (j : ℕ) (g : I → GL (Fin 3) ℂ) (P : VG I j) (S : I → Bool) : repG I j g P S = biRep 3 (dg j S) g (P S) := rfl
@@ -148,7 +202,7 @@ theorem thG_apply (j : ℕ) (P : VG I j) (S : I → Bool) : thG I j P S = sg S �
 end Bi
 
 def infG {R I : Type} [CommRing R] (em : I → R →+* ℂ) (n : ℕ) : GL (Fin n) R →* (I → GL (Fin n) ℂ) :=
-  Pi.monoidHom fun w => Matrix.GeneralLinearGroup.map (em w)
+  MonoidHom.pi fun w => Matrix.GeneralLinearGroup.map (em w)
 
 def WG {R I : Type} [CommRing R] [Fintype I] (em : I → R →+* ℂ) (j : ℕ) : Representation ℂ (GL (Fin 3) R) (VG I j) :=
   (repG I j).comp (infG em 3)
@@ -172,8 +226,6 @@ def WD {R I : Type} [CommRing R] [Fintype I] (em : I → R →+* ℂ) (n : ℕ) 
   (repD I n e).comp (infG em 2)
 
 def chi {R I : Type} [CommRing R] [Fintype I] (em : I → R →+* ℂ) (j : ℕ) (τ : R) : ℂ := ∏ w, hq (em w τ) 1 j
-
-example : (1 : MvPolynomial (Unit × Fin 2) ℂ) ∈ MH 2 (fun _ : Unit => 0) := fun s x => by simp
 
 end UpperTheory.V.Z.Sym.Wt
 

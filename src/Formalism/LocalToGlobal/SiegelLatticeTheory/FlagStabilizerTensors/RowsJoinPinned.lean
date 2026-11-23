@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowsJoinS
-import Formalism.LocalToGlobal.IndefiniteReal.RationalEmbedding
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.RationalEmbedding
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.IndefiniteReal.AutomorphicEvaluation
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RowDict
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,16 +68,6 @@ variable {G' : Type} [Group G'] [Fintype G'] {Pl0 T : Type} {A : FamIn D.what₂
 abbrev MP (R : RealDat D A Ks) : DSModel (D.sp.Y 0) (parB (tparRec D) 0) := R.MY 0
 
 abbrev EP (R : RealDat D A Ks) (F : Face D A) : Submodule ℂ (MMap (MP R)) := R.EEat (R.levR F true)
-
-def RowsJoinPinned (R : RealDat D A Ks) (F : Face D A) (X : Formalism.L2.SG.HidaSetting.HidaSetting D) (G : GoodOp X)
-    (h : X.B.I = Formalism.L2.SG.InstExistsPf.instOf D) (ιH : D.s.HH ≃ₗᵢ[ℂ] HHX X) : Prop :=
-  ∃ c : ℝ, 0 < c ∧ (X.B.I.muA X.B.μf).map (iotaX X h).symm = ENNReal.ofReal c • R.ν0 ∧
-    ∃ v₀ : (MP R).Vec, IsLowVec (MP R) v₀ ∧
-      ∃ (j : EP R F ≃ₗ[ℂ] EEC X G) (k : D.what₂.EE ≃ₗ[ℂ] EP R F),
-        (∀ T : EP R F, ((j T : EEC X G) : L2X X) =ᵐ[muX X]
-            (fun x => ev (MP R) v₀ (T : MMap (MP R)) ((iotaX X h).symm x)) ∧
-          ‖((j T : EEC X G) : L2X X)‖ ^ 2 = c * (ipM (MP R) R.ν0 R.fd0 (T : MMap (MP R)) (T : MMap (MP R))).re) ∧
-        ∀ F' : D.what₂.EE, ιH (D.sEE F') = conjHH X G (j (k F'))
 
 variable {R : RealDat D A Ks} {F : Face D A} {X : Formalism.L2.SG.HidaSetting.HidaSetting D} {G : GoodOp X}
   {h : X.B.I = Formalism.L2.SG.InstExistsPf.instOf D} {ιH : D.s.HH ≃ₗᵢ[ℂ] HHX X}

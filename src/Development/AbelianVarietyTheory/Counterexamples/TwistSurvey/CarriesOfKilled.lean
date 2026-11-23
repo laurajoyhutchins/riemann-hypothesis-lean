@@ -1,6 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
-import Formalism.LocalToGlobal.IndefiniteReal.BaseLiftsPackageOfPrimitiveLinks
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.RealLowestKTypeCoeffSquareIntegrable
+public import Formalism.LocalToGlobal.IndefiniteReal.BaseLiftsPackageOfPrimitiveLinks
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,8 +52,6 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 variable {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 I0 T : Type} {A3 : FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m}
   {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL]
-
-def shift (R : RealDat3 D A3 Ks) : RealDat3 D A3 Ks := { R with lam3 := fun i t p v => R.lam3 i t p v + 1 }
 
 theorem apply_eq_smul_of_unique_eigenvalue {M : Type} [AddCommGroup M] [Module ℂ M] (f : M → M) (h0 : f 0 = 0) (P : Submodule ℂ M) (m : ℝ)
     (h : ∀ l : ℝ, P ≠ ⊥ → (∀ x ∈ P, f x = (l : ℂ) • x) → m = l) (hA : ∃ l : ℝ, ∀ x ∈ P, f x = (l : ℂ) • x) :
@@ -42,12 +77,15 @@ theorem scal_of_one {M C : Type} [AddCommGroup M] [Module ℂ M] (f : M → M) (
       exact hc ⟨c', hc', fun e => hn e.le⟩
     rw [(Submodule.mem_bot ℂ).1 (hle hx), h0, smul_zero]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem iff_of_pin (R : RealDat3 D A3 Ks) (h : R.eigenvalue_at_base_of_scalar) :
     R.PThmA ↔ ∀ i t p, ∃ l : ℝ, ∀ x ∈ R.Wp3 i p, R.thG i t (LinearMap.adjoint (R.thG i t) x) = (l : ℂ) • x := by
-  refine ⟨fun hA i t p => ⟨_, hA i t p⟩, fun hA i t p => ?_⟩
-  exact apply_eq_smul_of_unique_eigenvalue (fun x => R.thG i t (LinearMap.adjoint (R.thG i t) x)) (by simp only [map_zero]) (R.Wp3 i p) _ (h i t p) (hA i t p)
+  constructor
+  · intro hA i t p
+    exact ⟨R.lam3 i t p A3.A.v0, hA i t p⟩
+  · intro hA i t p
+    exact apply_eq_smul_of_unique_eigenvalue (fun x => R.thG i t (LinearMap.adjoint (R.thG i t) x)) (by simp only [map_zero]) (R.Wp3 i p) _ (h i t p) (hA i t p)
 
 def OnePart (R : RealDat3 D A3 Ks) : Prop := ∀ i p c c', R.Carries p c → R.Carries p c' → R.Wc' i c = R.Wc' i c'
 
@@ -62,7 +100,7 @@ theorem ex_of_aForm {A : FamIn D.what₂.LL G Pl0 T D.R.m} {R : RealDat D A Ks} 
 theorem scalC_of_aForm (R : RealDat3 D A3 Ks) (hA : GlobalTheory.LiftRows.AForm R.toRealDat R.SF) : ScalC R :=
   fun i t c hn => ex_of_aForm hA i t c hn
 
-set_option maxHeartbeats 1000000 in
+
 theorem of_scalC (R : RealDat3 D A3 Ks) (hA : ScalC R) (h : R.eigenvalue_at_base_of_scalar) (h1 : OnePart R) : R.PThmA :=
   (iff_of_pin R h).2 fun i t p =>
     scal_of_one (fun x => R.thG i t (LinearMap.adjoint (R.thG i t) x)) (by simp only [map_zero]) (R.Wc' i) (R.Carries p)

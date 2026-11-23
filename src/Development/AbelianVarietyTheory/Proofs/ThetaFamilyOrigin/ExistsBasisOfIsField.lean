@@ -1,7 +1,51 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsIndepSections
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.ExistsIndepSections
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj Complex Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -78,17 +122,18 @@ theorem exists_basis_of_isField {R M : Type} [CommRing R] [AddCommGroup M] [Modu
 
 attribute [local instance] Over.cartesianMonoidalCategory
 
-open Out in
 
+open Out in
 theorem exists_basis_sections (H : Out.GlobalSectionsRankAlgClosed) (K : Type) [Field K] [IsAlgClosed K]
     (P : Out.PolAV (Sp K)) (n : ℕ) (hn : 1 ≤ n) :
     ∃ s : Fin (n ^ P.g) → (lbPow P.L n).Sec, ∀ t : (lbPow P.L n).Sec,
       ∃! a : Fin (n ^ P.g) → K, ∀ j, t.f j = ∑ i, constFn P.A.hom _ (a i) * (s i).f j := by
   have hr := H K P n hn
-  let T : Over (Sp K) := baseOver (Sp K)
+  let T : Over (Sp K) := ReciprocityTheory.ChartRestriction.G.Out.baseOver (Sp K)
   let c : Γ(T.left, ⊤) ≃+* K := (Scheme.ΓSpecIso (CommRingCat.of K)).commRingCatIsoToRingEquiv
   have hfield : IsField Γ(T.left, ⊤) := c.toMulEquiv.isField (Field.toIsField K)
-  obtain ⟨b⟩ := exists_basis_of_isField (R := Γ(T.left, ⊤)) (M := SecM P.A P.L n T) hfield (pow_pos hn _) hr
+  obtain ⟨b⟩ := exists_basis_of_isField (R := Γ(T.left, ⊤))
+    (M := ReciprocityTheory.ChartRestriction.G.Out.SecM P.A P.L n T) hfield (pow_pos hn _) hr
   let ρ : P.A ⟶ T ⊗ P.A := lift (Over.homMk P.A.hom (Category.comp_id _)) (𝟙 _)
   have ρ₂ : ρ.left ≫ (snd T P.A).left = 𝟙 _ := congrArg (fun q => q.left) (lift_snd _ _ : ρ ≫ _ = _)
   have ρ₁ : ρ.left ≫ (fst T P.A).left = P.A.hom := congrArg (fun q => q.left) (lift_fst _ _ : ρ ≫ _ = _)
@@ -98,18 +143,20 @@ theorem exists_basis_sections (H : Out.GlobalSectionsRankAlgClosed) (K : Type) [
         ((Category.comp_id _).trans (Category.id_comp _).symm)))
     · exact (Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) ρ₂).trans ((Category.comp_id _).trans (Category.id_comp _).symm))
   haveI : IsIso ρ.left := ⟨_, ρ₂, ρ₃⟩
-  let D : SecM P.A P.L n T → (lbPow P.L n).Sec := fun v =>
-    down P.L (snd T P.A).left ρ.left ρ₂ n (SecM.toSec P.A v)
+  let D : ReciprocityTheory.ChartRestriction.G.Out.SecM P.A P.L n T → (lbPow P.L n).Sec := fun v =>
+    down P.L (snd T P.A).left ρ.left ρ₂ n (ReciprocityTheory.ChartRestriction.G.Out.SecM.toSec P.A v)
   have hlin : ∀ (a : Fin (n ^ P.g) → K) j,
       (D (∑ i, c.symm (a i) • b i)).f j = ∑ i, constFn P.A.hom _ (a i) * (D (b i)).f j := by
     intro a j
     show (ρ.left.appLE _ _ (chart_eq P.L (snd T P.A).left ρ.left ρ₂ j).le).hom
-      ((∑ i, c.symm (a i) • b i : SecM P.A P.L n T).1 (fun _ => j PUnit.unit)) = _
+      ((∑ i, c.symm (a i) • b i : ReciprocityTheory.ChartRestriction.G.Out.SecM P.A P.L n T).1
+        (fun _ => j PUnit.unit)) = _
     rw [Submodule.coe_sum]
     refine (congrArg _ (Finset.sum_apply _ _ _)).trans ?_
     refine (map_sum (ρ.left.appLE _ _ (chart_eq P.L (snd T P.A).left ρ.left ρ₂ j).le).hom _ _).trans
       (Finset.sum_congr rfl fun i _ => ?_)
-    refine (map_mul _ (liftHom P.A _ (c.symm (a i))) ((b i).1 fun _ => j PUnit.unit)).trans (congrArg₂ (· * ·) ?_ rfl)
+    refine (map_mul _ (ReciprocityTheory.ChartRestriction.G.Out.liftHom P.A _ (c.symm (a i)))
+      ((b i).1 fun _ => j PUnit.unit)).trans (congrArg₂ (· * ·) ?_ rfl)
     have h1 := (Scheme.Hom.appLE_comp_appLE ρ.left (fst T P.A).left ⊤ _ _ (fun _ _ => trivial)
       (chart_eq P.L (snd T P.A).left ρ.left ρ₂ j).le).trans (appLE_congr ρ₁ ⊤ _ _ (fun _ _ => trivial))
     exact congrArg (fun φ => φ.hom (c.symm (a i))) h1
@@ -120,12 +167,13 @@ theorem exists_basis_sections (H : Out.GlobalSectionsRankAlgClosed) (K : Type) [
     exact appLE_injective ρ.left _ _ (chart_eq P.L (snd T P.A).left ρ.left ρ₂ (fun _ => k)) (h fun _ => k)
   refine ⟨fun i => D (b i), fun t => ?_⟩
   obtain ⟨w, hw⟩ := down_surjective P.L (snd T P.A).left ρ.left ρ₂ n t
-  have hw' : D (SecM.ofSec P.A w) = t := hw
-  refine ⟨fun i => c (b.repr (SecM.ofSec P.A w) i), fun j => ?_, fun a ha => ?_⟩
+  have hw' : D (ReciprocityTheory.ChartRestriction.G.Out.SecM.ofSec P.A w) = t := hw
+  refine ⟨fun i => c (b.repr (ReciprocityTheory.ChartRestriction.G.Out.SecM.ofSec P.A w) i),
+    fun j => ?_, fun a ha => ?_⟩
   · rw [← hlin]
     simp only [RingEquiv.symm_apply_apply]
     rw [b.sum_repr, hw']
-  · have h0 : SecM.ofSec P.A w = ∑ i, c.symm (a i) • b i :=
+  · have h0 : ReciprocityTheory.ChartRestriction.G.Out.SecM.ofSec P.A w = ∑ i, c.symm (a i) • b i :=
       hinj _ _ fun j => by rw [hw', hlin]; exact ha j
     funext i
     rw [h0, b.repr_sum_self]

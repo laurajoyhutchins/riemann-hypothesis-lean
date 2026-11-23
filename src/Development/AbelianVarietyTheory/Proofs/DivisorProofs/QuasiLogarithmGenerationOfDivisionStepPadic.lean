@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfLinearZeroCoboundaryZeroFractionsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapCoboundarySwapPullbackCommute
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqZeroOfLinearZeroCoboundaryZeroFractionsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapCoboundarySwapPullbackCommute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -45,7 +88,7 @@ theorem comb_add_mul {ι : Type} [Fintype ι] (x y : ι → O) (c : O)
     (e : ι → MvPowerSeries (Fin d) E) :
     comb (fun i => x i + c * y i) e = comb x e + algebraMap O E c • comb y e := by
   unfold comb
-  simp only [map_add, map_mul, add_smul, mul_smul, Finset.sum_add_distrib, Finset.smul_sum]
+  simp only [map_add (f := _), map_mul, add_smul, mul_smul, Finset.sum_add_distrib, Finset.smul_sum]
 
 def IntD (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) O) (g : MvPowerSeries (Fin d) E) : Prop :=
   (∀ i, ∃ b : O, lin g i = algebraMap O E b) ∧ In (⊤ : Ideal O) (cob1 (up E μ) g)
@@ -70,11 +113,11 @@ theorem IntD.add (hμ : ∀ i, constantCoeff (μ i) = 0) {g g' : MvPowerSeries (
   · obtain ⟨b, hb⟩ := hg.1 i
     obtain ⟨b', hb'⟩ := hg'.1 i
     refine ⟨b + b', ?_⟩
-    simp only [lin, map_add] at hb hb' ⊢
+    simp only [lin, map_add (f := _)] at hb hb' ⊢
     rw [hb, hb']
   · obtain ⟨b, -, hb⟩ := hg.2 α
     obtain ⟨b', -, hb'⟩ := hg'.2 α
-    exact ⟨b + b', trivial, by rw [formalCoboundary_add (up_const hμ), map_add, hb, hb', map_add]⟩
+    exact ⟨b + b', trivial, by rw [formalCoboundary_add (up_const hμ), map_add (f := _), hb, hb', map_add (f := _)]⟩
 
 theorem IntD.smul (hμ : ∀ i, constantCoeff (μ i) = 0) (c : O) {g : MvPowerSeries (Fin d) E}
     (hg : IntD μ g) : IntD μ (algebraMap O E c • g) := by
@@ -158,7 +201,9 @@ theorem generate_of_step : ∀ (p : ℕ) [Fact p.Prime] (O E : Type) [CommRing O
           ∑ n ∈ Finset.range N, (p : E) ^ n • map (algebraMap O E) (sf (F n)) +
             (p : E) ^ N • map (algebraMap O E) T := by
         ext α
-        rw [coeff_map, hSd, hcS α, map_add, map_add, coeff_smul, coeff_map, hTd, map_sum (coeff α)]
+
+        rw [coeff_map, hSd, hcS α, map_add (f := _), map_add (f := _), coeff_smul, coeff_map, hTd, map_sum (coeff α)]
+
         simp only [coeff_smul, coeff_map, map_sum, map_mul, map_pow, map_natCast]
       rw [h1, h2]
       linear_combination (norm := module) tele N

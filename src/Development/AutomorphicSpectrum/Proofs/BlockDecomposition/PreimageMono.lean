@@ -1,28 +1,59 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.ResCoeff
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.InclStd
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubMemOfMk
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormCocycle
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAdd
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedFormLocalOfFrame
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationProperty
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGood
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartDividedPowersGradedConstant
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubMemOfLift
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartDividedPowersGradedConstant
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGood
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpenStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoverCupActionBasis
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChart
 import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChartFromCoordinates
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsChart
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LiftCocycleMem
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubMemOfLift
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedCechCohomologyFinite
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoverCupActionBasis
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StableCoverCechVanishing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.TruncatedWittIsNoetherian
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGradedVanishing
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CoordinatesRestrictAffineOpenStatement
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobSerre
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.PolyAll
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GradedCechCohomologyFinite
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocalGradedVanishing
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SheafFiltrationProperty
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.PolynomialSiteTraces.PolyAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option backward.isDefEq.respectTransparency false
 open CategoryTheory Limits AlgebraicGeometry TensorProduct GlobalTheory.LogCris DividedPowers CrystallineSemistableComparison CrystallineSemistableComparison.Pb
 
@@ -221,8 +252,8 @@ theorem free_at (hp : p ≠ 0) (hn : IsNilpotent (p : R)) {V W : X.Opens} (h : W
   exact free_of_frame _ GlobalTheory.CompanionTheory.LocGrStep.loc_gr (fun T => sq_inY hI _ T.property) u _ E σ θ hGr hbot hco hσ hpt Qp r
     (fun r' _ => (hQp r').1)
 
-include hI in
 
+include hI in
 theorem off_at (hp : p ≠ 0) (hn : IsNilpotent (p : R)) {W : X.Opens} {d : ℕ} (c : Coord q W d) (r j : ℕ) (hj : j ≠ r) :
     Subsingleton (HU (GF (nlFun γ p X q κ) r) (SQ q κ γ p W) j) := by
   obtain ⟨E, σ, θ, hGr, hbot, -⟩ := frame_at (γ := γ) (p := p) (κ := κ) hI hp hn c
@@ -308,6 +339,7 @@ theorem vb_cech (hp : p ≠ 0) (hn : IsNilpotent (p : R)) (U : Cov q) (r : ℕ) 
       intro T h
       exact ⟨(h a).1, _, rfl, le_preimage_inf (pt T) (sq_inU (hle i a T h)) (sq_inU (hle i a' T h))⟩
     have h1 := congrArg ((resU _ hle2).pull r) (hg' (i a) (i a') k')
+
     rw [GlobalTheory.CompanionTheory.GrCech.res_res, map_sum] at h1
     refine h1.trans (Finset.sum_congr rfl fun k _ => ?_)
     refine (res_fAct 𝔭 (isF _) (hq2 _ _) r (isF _) (hT i) (le_inf (capO_le U' i a) (capO_le U' i a')) hle2 _ _).trans ?_
@@ -328,17 +360,6 @@ theorem cover_pre (U : Cov q) : (⨆ α, jF hI q κ ⁻¹ᵁ U.U α) = ⊤ := by
   obtain ⟨α, hα⟩ := TopologicalSpace.Opens.mem_iSup.1 hx
   exact TopologicalSpace.Opens.mem_iSup.2 ⟨α, hα⟩
 
-include hI in
-theorem cech_fin [IsNoetherianRing R] (hp : p ≠ 0) (hn : IsNilpotent (p : R)) [IsProper q] (U : Cov q) (r a : ℕ) :
-    Module.Finite R ((CrystallineSemistableComparison.Pb.cechH (GF (nlFun γ p X q κ) r) (fun α => SQ q κ γ p (U.U α)) r).cx.H a) := by
-  haveI : IsProper (qF hI q κ) := MorphismProperty.pullback_snd (P := @IsProper) _ _ inferInstance
-  obtain ⟨V⟩ := vb_cech (γ := γ) (p := p) (κ := κ) hI hp hn U r
-  have ha : ∀ n (i : Fin (n + 1) → U.ι), IsAffineOpen (capO (fun α => jF hI q κ ⁻¹ᵁ U.U α) i) := fun n i => by
-    rw [capO_pre]
-    exact aff_pre hI (GlobalTheory.CompanionTheory.GrCech.capO_affine U n i)
-  have h := @vb_fin R _ _ (XF hI q κ) (qF hI q κ) _ U.ι _ (fun α => jF hI q κ ⁻¹ᵁ U.U α) (cover_pre hI U) ha
-      (CrystallineSemistableComparison.Pb.cechH (GF (nlFun γ p X q κ) r) (fun α => SQ q κ γ p (U.U α)) r) V a
-  exact h
 end Fin
 
 end GlobalTheory.CompanionTheory.FibGr

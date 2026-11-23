@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.AbelianVarieties.Torsion
-import GroundTheory.ProfiniteCohomology.GaloisModules.Discrete
-import GroundTheory.ProfiniteCohomology.GaloisModules.FixedField
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.FieldTheory.Galois.Notation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.ProfiniteCohomology.DiscreteModules
+public import Mathlib.FieldTheory.IsSepClosed
+
+@[expose] public section
 
 namespace GroundTheory.Arith.Abelian
 
@@ -22,10 +66,6 @@ noncomputable def galPointsHom : Gal(L/K) →* AddMonoid.End (W.baseChange L).to
     refine AddMonoidHom.ext fun P => ?_
     cases P <;> rfl
 
-@[simp]
-theorem galPointsHom_zero (σ : Gal(L/K)) : galPointsHom K L W σ 0 = 0 :=
-  rfl
-
 theorem galPointsHom_some (σ : Gal(L/K)) {x y : L}
     (h : (W.baseChange L).toAffine.Nonsingular x y) :
     ∃ h' : (W.baseChange L).toAffine.Nonsingular (σ x) (σ y),
@@ -40,104 +80,13 @@ theorem galPointsHom_some_eq_self {σ : Gal(L/K)} {x y : L}
   simp only [Affine.Point.some.injEq]
   exact ⟨hx, hy⟩
 
-noncomputable def galTorsionHom (n : ℕ) :
-    Gal(L/K) →* AddMonoid.End (torsionBy (W.baseChange L).toAffine.Point n) where
-  toFun σ :=
-    { toFun := fun P => ⟨galPointsHom K L W σ P, by
-        rw [torsionBy.nsmul_iff, ← map_nsmul, torsionBy.nsmul_iff.mp P.2, map_zero]⟩
-      map_zero' := Subtype.ext (map_zero _)
-      map_add' := fun P Q => Subtype.ext (map_add _ _ _) }
-  map_one' := by
-    refine AddMonoidHom.ext fun P => Subtype.ext ?_
-    show galPointsHom K L W 1 P = P
-    rw [map_one]
-    rfl
-  map_mul' σ τ := by
-    refine AddMonoidHom.ext fun P => Subtype.ext ?_
-    show galPointsHom K L W (σ * τ) P = galPointsHom K L W σ (galPointsHom K L W τ P)
-    rw [map_mul]
-    rfl
-
-@[simp]
-theorem coe_galTorsionHom_apply (n : ℕ) (σ : Gal(L/K))
-    (P : torsionBy (W.baseChange L).toAffine.Point n) :
-    ((galTorsionHom K L W n σ P : torsionBy (W.baseChange L).toAffine.Point n) :
-      (W.baseChange L).toAffine.Point) = galPointsHom K L W σ P :=
-  rfl
-
-noncomputable abbrev galPoints : Rep.{u} (ULift.{w} ℤ) Gal(L/K) :=
-  Rep.of (intRep.{w} (galPointsHom K L W))
-
-noncomputable abbrev galPointsZ : Rep.{u} ℤ Gal(L/K) :=
-  Rep.of ((addMonoidEndRingEquivInt (W.baseChange L).toAffine.Point).toRingHom.toMonoidHom.comp
-    (galPointsHom K L W))
-
-noncomputable abbrev galTorsion (n : ℕ) : Rep.{u} (ULift.{w} ℤ) Gal(L/K) :=
-  Rep.of (intRep.{w} (galTorsionHom K L W n))
-
-noncomputable abbrev galTorsionZ (n : ℕ) : Rep.{u} ℤ Gal(L/K) :=
-  Rep.of ((addMonoidEndRingEquivInt
-    (torsionBy (W.baseChange L).toAffine.Point n)).toRingHom.toMonoidHom.comp
-    (galTorsionHom K L W n))
-
-theorem galPoints_ρ_apply (σ : Gal(L/K)) (P : (W.baseChange L).toAffine.Point) :
-    (galPoints.{w} K L W).ρ σ P = galPointsHom K L W σ P :=
-  rfl
-
-theorem galPointsZ_ρ_apply (σ : Gal(L/K)) (P : (W.baseChange L).toAffine.Point) :
-    (galPointsZ K L W).ρ σ P = galPointsHom K L W σ P :=
-  rfl
-
-theorem galTorsion_ρ_apply (n : ℕ) (σ : Gal(L/K)) (P : torsionBy (W.baseChange L).toAffine.Point n) :
-    (galTorsion.{w} K L W n).ρ σ P = galTorsionHom K L W n σ P :=
-  rfl
-
-theorem galTorsionZ_ρ_apply (n : ℕ) (σ : Gal(L/K))
-    (P : torsionBy (W.baseChange L).toAffine.Point n) :
-    (galTorsionZ K L W n).ρ σ P = galTorsionHom K L W n σ P :=
-  rfl
-
 end Action
 
 section Discrete
 
 variable {K L : Type u} [Field K] [Field L] [Algebra K L] [DecidableEq L] (W : WeierstrassCurve K)
 
-theorem isOpen_of_forall_apply_eq_apply_eq_mem [Algebra.IsIntegral K L] (H : Subgroup Gal(L/K))
-    (x y : L) (h : ∀ σ : Gal(L/K), σ x = x → σ y = y → σ ∈ H) : IsOpen (H : Set Gal(L/K)) := by
-  have : FiniteDimensional K K⟮x⟯ := adjoin.finiteDimensional (Algebra.IsIntegral.isIntegral x)
-  have : FiniteDimensional K K⟮y⟯ := adjoin.finiteDimensional (Algebra.IsIntegral.isIntegral y)
-  refine Subgroup.isOpen_mono (H₁ := (K⟮x⟯).fixingSubgroup ⊓ (K⟮y⟯).fixingSubgroup)
-    (fun σ hσ => h σ (apply_eq_of_mem_fixingSubgroup_adjoin hσ.1)
-      (apply_eq_of_mem_fixingSubgroup_adjoin hσ.2)) ?_
-  rw [Subgroup.coe_inf]
-  exact (fixingSubgroup_isOpen _).inter (fixingSubgroup_isOpen _)
-
-theorem isOpen_stabilizer_point [Algebra.IsIntegral K L] (H : Subgroup Gal(L/K))
-    (P : (W.baseChange L).toAffine.Point) (h : ∀ σ, galPointsHom K L W σ P = P → σ ∈ H) :
-    IsOpen (H : Set Gal(L/K)) := by
-  rcases P with _ | ⟨x, y, hP⟩
-  · have : H = ⊤ := eq_top_iff.mpr fun σ _ => h σ rfl
-    rw [this]
-    exact isOpen_univ
-  · exact isOpen_of_forall_apply_eq_apply_eq_mem H x y fun σ hx hy =>
-      h σ (galPointsHom_some_eq_self K L W hP hx hy)
-
 variable [Algebra.IsIntegral K L]
-
-instance isDiscreteRep_galPoints : IsDiscreteRep (galPoints.{w} K L W) :=
-  ⟨fun P => isOpen_stabilizer_point W _ P fun _ h => h⟩
-
-instance isDiscreteRep_galPointsZ : IsDiscreteRep (galPointsZ K L W) :=
-  ⟨fun P => isOpen_stabilizer_point W _ P fun _ h => h⟩
-
-instance isDiscreteRep_galTorsion (n : ℕ) : IsDiscreteRep (galTorsion.{w} K L W n) :=
-  ⟨fun P => isOpen_stabilizer_point W _ (P : (W.baseChange L).toAffine.Point) fun _ h =>
-    Subtype.ext h⟩
-
-instance isDiscreteRep_galTorsionZ (n : ℕ) : IsDiscreteRep (galTorsionZ K L W n) :=
-  ⟨fun P => isOpen_stabilizer_point W _ (P : (W.baseChange L).toAffine.Point) fun _ h =>
-    Subtype.ext h⟩
 
 end Discrete
 

@@ -1,6 +1,58 @@
-import Mathlib
+module
+
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CapelliComplements.EqIdOfFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CapelliComplements.EqIdOfFixed
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -29,7 +81,7 @@ variable {F E : Type} [Field F] [Field E] [Algebra F E] (σ : E →ₐ[F] E) {M 
 
 theorem hE_add_left (x x' y : Fin M → E) :
     hE σ T (x + x') y = hE σ T x y + hE σ T x' y := by
-  simp only [hE, HeckeCharacterZeroLocus.SiegelWeilU.hform, Pi.add_apply, map_add, add_mul, Finset.sum_add_distrib]
+  simp only [hE, HeckeCharacterZeroLocus.SiegelWeilU.hform, Pi.add_apply, map_add (f := _), add_mul, Finset.sum_add_distrib]
 
 theorem hE_add_right (x y y' : Fin M → E) :
     hE σ T x (y + y') = hE σ T x y + hE σ T x y' := by
@@ -62,9 +114,6 @@ theorem exists_repr : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Numb
       by_contra hc
       push_neg at hc
       exact hdet (by rw [show T = 0 from Matrix.ext hc, Matrix.det_zero])
-    have hne : i ≠ j := by
-      rintro rfl
-      exact hij (hd i)
     refine ⟨2, Pi.single i (σ (T i j)⁻¹) + Pi.single j 1, two_ne_zero, ?_⟩
     have hji : T j i = σ (T i j) := (hH j i).symm
     have hs : σ (σ (T i j)⁻¹) = (T i j)⁻¹ := sig_sig hσ _

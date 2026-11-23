@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.QuotStage
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.LocalGroupAnalysis.QuotStage
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory
 open scoped ENNReal
@@ -15,7 +62,9 @@ private theorem uni_smul [TopologicalSpace G] [IsTopologicalGroup G] [BorelSpace
     (h : Uni μ) {a : NNReal} (ha : a ≠ 0) : Uni (a • μ) := by
   obtain ⟨h1, h2⟩ := h
   exact ⟨Measure.IsHaarMeasure.nnreal_smul μ ha,
-    ⟨by rw [Measure.inv, Measure.map_smul, Measure.map_inv_eq_self]⟩⟩
+    ⟨by
+      rw [Measure.inv, Measure.map_smul, Measure.map_inv_eq_self]
+      exact continuous_inv.measurable.aemeasurable⟩⟩
 
 private theorem isNrm_div {j : T →* G} {ν : Measure T} {ρ : G → ℝ≥0∞} (h : IsNrm j ν ρ)
     {b : NNReal} (hb : b ≠ 0) : IsNrm j (b • ν) (fun x => (b : ℝ≥0∞)⁻¹ * ρ x) := by
@@ -76,7 +125,7 @@ theorem UpperTheory.ConvolutionTheory.G.quotLin_of :
   · have hsum : QInt μ j ν (fun g => ∑ i ∈ s, c i * F i g) := by
       refine ⟨Finset.measurable_sum s fun i hi => measurable_const.mul (hF i hi).1,
         fun t g => Finset.sum_congr rfl fun i hi => by rw [(hF i hi).2.1], fun ρ hρ => ?_⟩
-      have := integrable_finset_sum s (fun i hi => ((hF i hi).2.2 ρ hρ).const_mul (c i))
+      have := integrable_finsetSum s (fun i hi => ((hF i hi).2.2 ρ hρ).const_mul (c i))
       refine this.congr (Filter.Eventually.of_forall fun x => ?_)
       simp only [Finset.sum_mul, mul_assoc]
     refine ⟨hsum, ?_⟩
@@ -84,7 +133,7 @@ theorem UpperTheory.ConvolutionTheory.G.quotLin_of :
       Finset.sum_congr rfl fun i hi => by
         rw [(hE G T μ j ν hP _ (hF i hi).1 (hF i hi).2.1 _ hρ₀).2.2]]
     simp only [Finset.sum_mul, mul_assoc]
-    rw [integral_finset_sum s fun i hi => ((hF i hi).2.2 _ hρ₀).const_mul (c i)]
+    rw [integral_finsetSum s fun i hi => ((hF i hi).2.2 _ hρ₀).const_mul (c i)]
     exact Finset.sum_congr rfl fun i _ => integral_const_mul _ _
   · have hP' : Pair (a • μ) j (b • ν) := ⟨uni_smul hP.1 ha, hP.2.1, uni_smul hP.2.2 hb⟩
     refine ⟨hP', fun F hF hinv => ⟨qInt_iff ha hb, ?_⟩⟩

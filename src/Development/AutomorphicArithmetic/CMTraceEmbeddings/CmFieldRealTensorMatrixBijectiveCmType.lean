@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.OrientEv
-import Development.AutomorphicArithmetic.CMTraceEmbeddings.CmFieldRealTensorBijectiveCmType
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.OrientEv
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.AlgebraEquivSetup.CodiffUnit
+public import Development.AutomorphicArithmetic.CMTraceEmbeddings.CmFieldRealTensorBijectiveCmType
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen GlobalTheory.LKTrip GlobalTheory.LKGeo UpperTheory.Gal.W2.Seed UpperTheory.Gal.W2.Seed.Ori
 open scoped TensorProduct
@@ -26,7 +66,7 @@ private theorem evaluation_baseChange_entry {E : Type} [Field E] [NumberField E]
     rw [LinearMap.baseChange_tmul, realTensorEvalAlgHom_tmul, evM_tmul]
     change r • σ (x i j) = _
     simp
-  | add a b ha hb => simp only [map_add, ha, hb, Matrix.add_apply]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb, Matrix.add_apply]
 
 private theorem evM_sg {E : Type} [Field E] [NumberField E] {n : ℕ} (σ : E →+* ℂ) (i j : Fin n)
     (w : ℝ ⊗[ℚ] E) :
@@ -38,7 +78,7 @@ private theorem evM_sg {E : Type} [Field E] [NumberField E] {n : ℕ} (σ : E �
     ext a b
     simp [sgL, Matrix.single_apply]
   | add a b ha hb =>
-    rw [map_add, map_add, ha, hb, map_add, Matrix.single_add]
+    rw [map_add (f := _), map_add (f := _), ha, hb, map_add (f := _), Matrix.single_add]
 
 private theorem sum_sg_ent {E : Type} [Field E] [NumberField E] {n : ℕ}
     (z : ℝ ⊗[ℚ] Matrix (Fin n) (Fin n) E) :
@@ -52,7 +92,7 @@ private theorem sum_sg_ent {E : Type} [Field E] [NumberField E] {n : ℕ}
     rfl
   | add a b ha hb =>
     conv_lhs => rw [ha, hb]
-    simp only [map_add, ← Finset.sum_add_distrib]
+    simp only [map_add (f := _), ← Finset.sum_add_distrib]
 
 theorem UpperTheory.cmField_real_tensor_matrix_bijective_cmType :
     TraceType → ∀ {E : Type} [Field E] [NumberField E] [IsCMField E] (A : Arith E) (n : ℕ), Function.Bijective (fun (z : ℝ ⊗[ℚ] Matrix (Fin n) (Fin n) E) (τ : Phi A) => evM τ.1 z) := by
@@ -73,6 +113,7 @@ theorem UpperTheory.cmField_real_tensor_matrix_bijective_cmType :
     choose w hw using fun i j => hb.2 (fun τ => f τ i j)
     refine ⟨∑ i, ∑ j, (sgL i j).baseChange ℝ (w i j), ?_⟩
     funext τ
+
     simp only [map_sum, evM_sg]
     have hw' : ∀ i j, ev1 τ.1 (w i j) = f τ i j := fun i j => congrFun (hw i j) τ
     simp only [hw']

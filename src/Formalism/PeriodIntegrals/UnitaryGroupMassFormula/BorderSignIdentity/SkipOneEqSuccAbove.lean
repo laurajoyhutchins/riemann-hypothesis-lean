@@ -1,7 +1,55 @@
-import Formalism.PeriodIntegrals.QmBorderES
-import Formalism.PeriodIntegrals.QmColExp
-import Formalism.PeriodIntegrals.QmRowExp
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.QuantumDetHighestWeightHolds
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BorderMinorRotation.SkipTwoSuccAboveComp
+public import Formalism.PeriodIntegrals.QmBorderES
+public import Formalism.PeriodIntegrals.QmColExp
+public import Formalism.PeriodIntegrals.QmRowExp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.GroupTheory.Perm.Fin
+
+@[expose] public section
 
 open Finset Formalism.REAL
 
@@ -18,8 +66,8 @@ theorem cons_comp_finRotate {n t : ℕ} (e : Fin n) (f : Fin t → Fin n) :
     PI.bE e f ∘ (finRotate (t + 1) : Fin (t + 1) → Fin (t + 1)) = PI.bS f e := by
   funext i
   refine Fin.lastCases ?_ (fun j => ?_) i
-  · simp [PI.bE, PI.bS, finRotate_succ_apply, Fin.last_add_one]
-  · simp [PI.bE, PI.bS, finRotate_succ_apply, Fin.coeSucc_eq_succ]
+  · simp [PI.bE, PI.bS, finRotate_apply, Fin.last_add_one]
+  · simp [PI.bE, PI.bS, finRotate_apply, Fin.coeSucc_eq_succ]
 
 theorem neg_one_pow_mul_self (t : ℕ) : ((-1 : ℤ) ^ t) * ((-1 : ℤ) ^ t) = 1 := by
   rw [← mul_pow, neg_one_mul, neg_neg, one_pow]
@@ -27,24 +75,7 @@ theorem neg_one_pow_mul_self (t : ℕ) : ((-1 : ℤ) ^ t) * ((-1 : ℤ) ^ t) = 1
 theorem qminor_bE_eq {A : Type} [Ring A] [Algebra ℂ A] {n t : ℕ} (E : Fin n → Fin n → A) (e : Fin n)
     (f : Fin t → Fin n) (b : Fin (t + 1) → Fin n) (u : ℂ) :
     qminor E (PI.bE e f) b u = (((-1 : ℤ) ^ t : ℤ) : A) * qminor E (PI.bS f e) b u := by
-  have key : ∀ (a a' : Fin (t + 1) → Fin n) (ρ : Equiv.Perm (Fin (t + 1))), a ∘ ρ = a' →
-      qminor E a b u = ((Equiv.Perm.sign ρ : ℤ) : A) * qminor E a' b u := by
-    intro a a' ρ hρ
-    unfold qminor
-    rw [Finset.mul_sum]
-    refine Fintype.sum_equiv (Equiv.mulLeft ρ⁻¹) _ _ (fun σ => ?_)
-    have hu : Equiv.Perm.sign σ = Equiv.Perm.sign ρ * Equiv.Perm.sign (ρ⁻¹ * σ) := by
-      rw [Equiv.Perm.sign_mul, Equiv.Perm.sign_inv, ← mul_assoc, Int.units_mul_self, one_mul]
-    have hp : (List.ofFn fun k : Fin (t + 1) => Tm E (u - (k : ℂ)) (a (σ k)) (b k)) =
-        List.ofFn fun k : Fin (t + 1) => Tm E (u - (k : ℂ)) (a' ((ρ⁻¹ * σ) k)) (b k) := by
-      congr 1
-      funext k
-      rw [← hρ]
-      simp [Equiv.Perm.mul_apply]
-    rw [Equiv.coe_mulLeft, hu, Units.val_mul, Int.cast_mul, hp, mul_assoc]
-  rw [key (PI.bE e f) (PI.bS f e) (finRotate (t + 1)) (cons_comp_finRotate e f), sign_finRotate]
-  push_cast
-  rfl
+  apply PI.UnitaryGroupMassFormula.QmBorderFull.Four.qminor_bE_eq <;> assumption
 
 theorem qminor_bS_eq {A : Type} [Ring A] [Algebra ℂ A] {n t : ℕ} (E : Fin n → Fin n → A) (e : Fin n)
     (f : Fin t → Fin n) (b : Fin (t + 1) → Fin n) (u : ℂ) :

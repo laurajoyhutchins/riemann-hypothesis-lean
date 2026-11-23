@@ -1,7 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsLocalCoeffLocal
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.SwapLoc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsLocalCoeffLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.MemDivSuppOfDivCycleNeZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.SwapLoc
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -69,8 +118,8 @@ theorem mem_minimalPrimes_iff {a : A} (ha : a ≠ 0) (W : Ideal A) [W.IsPrime] :
       exact absurd this (by decide)
     · exact hQ
 
-omit [IsDomain A] [IsNoetherianRing A] in
 
+omit [IsDomain A] [IsNoetherianRing A] in
 theorem max_mem_minimalPrimes [IsLocalRing A] (h2 : ringKrullDim A = 2) (W : Ideal A) [hW : W.IsPrime]
     (h1 : W.height = 1) {b : A} (hbW : b ∉ W) (hbm : b ∈ maximalIdeal A) :
     maximalIdeal A ∈ (W ⊔ Ideal.span {b}).minimalPrimes := by
@@ -93,8 +142,8 @@ theorem max_mem_minimalPrimes [IsLocalRing A] (h2 : ringKrullDim A = 2) (W : Ide
 
 end DimTwoSumReading
 
-open DimTwoSumReading in
 
+open DimTwoSumReading in
 theorem DimTwoSumReading.proof : DimTwoSumReading.Statement := by
   intro A _ _ _ _ h2 a b ha hab
   classical
@@ -110,20 +159,20 @@ theorem DimTwoSumReading.proof : DimTwoSumReading.Statement := by
     have hmin := (mem_minimalPrimes_iff ha p.asIdeal).mpr hp
     have hlA := length_loc_eq_ordLoc p.asIdeal a
     refine ⟨⟨?_, ?_⟩, ?_⟩
-    · unfold locCycle; rw [dif_pos hmin]; exact congrArg (fun x : ℕ∞ => (x.toNat : ℤ)) hlA
+    · unfold locCycle; rw [dite_eq_left hmin]; exact congrArg (fun x : ℕ∞ => (x.toNat : ℤ)) hlA
     · rw [← hlA]; exact ReciprocityTheory.ChartRestriction.G.AI.I1.locLen_ne_top hmin
     by_cases hbm : b ∈ maximalIdeal A
     · have hmm := max_mem_minimalPrimes h2 p.asIdeal hp.1 (hab _ p.isPrime hp.1 hp.2) hbm
       have hlB := length_max_eq_ordMod p.asIdeal b
       refine ⟨?_, ?_⟩
-      · unfold locCycle; rw [dif_pos hmm]; exact congrArg (fun x : ℕ∞ => (x.toNat : ℤ)) hlB
+      · unfold locCycle; rw [dite_eq_left hmm]; exact congrArg (fun x : ℕ∞ => (x.toNat : ℤ)) hlB
       · rw [← hlB]; exact ReciprocityTheory.ChartRestriction.G.AI.I1.locLen_ne_top hmm
     · have h0 : ordMod p b = 0 := Ring.ord_of_isUnit ((notMem_maximalIdeal.mp hbm).map _)
       have hnm : maximalIdeal A ∉ (p.asIdeal ⊔ Ideal.span {b}).minimalPrimes := fun h =>
         hbm (h.1.2 (Ideal.mem_sup_right (Ideal.subset_span rfl)))
       rw [h0]
       refine ⟨?_, ENat.zero_ne_top⟩
-      unfold locCycle; rw [dif_neg hnm]; rfl
+      unfold locCycle; rw [dite_eq_right hnm]; rfl
   have hsupp : Function.support (fun W : Ideal A => locCycle (Ideal.span {a}) W *
       locCycle (W ⊔ Ideal.span {b}) (maximalIdeal A)) ⊆
       (hT.toFinset.map ⟨PrimeSpectrum.asIdeal, by intro p q h; exact PrimeSpectrum.ext h⟩ : Finset (Ideal A)) := by
@@ -131,7 +180,7 @@ theorem DimTwoSumReading.proof : DimTwoSumReading.Statement := by
     have hne : locCycle (Ideal.span {a}) W ≠ 0 := left_ne_zero_of_mul hW
     have hmin : W ∈ (Ideal.span {a}).minimalPrimes := by
       by_contra h
-      exact hne (by unfold locCycle; rw [dif_neg h])
+      exact hne (by unfold locCycle; rw [dite_eq_right h])
     have := hmin.1.1
     rw [Finset.coe_map, Set.Finite.coe_toFinset]
     exact ⟨⟨W, hmin.1.1⟩, (mem_minimalPrimes_iff ha W).mp hmin, rfl⟩

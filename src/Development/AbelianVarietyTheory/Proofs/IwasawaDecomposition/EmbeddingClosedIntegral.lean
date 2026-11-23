@@ -1,51 +1,70 @@
-import Mathlib
+module
+
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Topology.Algebra.Valued.NormedValued
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GlobalTheory.CoefEmbed
 
 open IsLocalRing Topology
 
 variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O]
-
-theorem norm_le_one (f : O →+* PadicAlgCl l)
-    (hf : ∀ z : ℤ_[l], f (algebraMap ℤ_[l] O z) = algebraMap ℚ_[l] (PadicAlgCl l) (z : ℚ_[l]))
-    (a : O) : ‖f a‖ ≤ 1 := by
-  obtain ⟨p, hp, hp0⟩ : IsIntegral ℤ_[l] a := Algebra.IsIntegral.isIntegral a
-  by_contra hlt
-  push Not at hlt
-  rw [Polynomial.eval₂_eq_sum_range, Finset.sum_range_succ, hp.coeff_natDegree, map_one,
-    one_mul] at hp0
-  have hp1 := congrArg f hp0
-  simp only [map_add, map_sum, map_mul, map_pow, map_zero, hf] at hp1
-  set y := f a
-  have h1 : y ^ p.natDegree =
-      - ∑ i ∈ Finset.range p.natDegree,
-        algebraMap ℚ_[l] (PadicAlgCl l) (p.coeff i : ℚ_[l]) * y ^ i := by
-    linear_combination hp1
-  have hpos : 0 < ‖y‖ ^ p.natDegree := pow_pos (by linarith) _
-  have h2 : ‖∑ i ∈ Finset.range p.natDegree,
-      algebraMap ℚ_[l] (PadicAlgCl l) (p.coeff i : ℚ_[l]) * y ^ i‖ < ‖y‖ ^ p.natDegree := by
-    refine Finset.sum_induction _ (fun z => ‖z‖ < ‖y‖ ^ p.natDegree) ?_ (by simpa using hpos) ?_
-    · intro u v hu hv
-      exact lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max u v) (max_lt hu hv)
-    · intro i hi
-      rw [norm_mul, norm_pow]
-      have h3 : ‖algebraMap ℚ_[l] (PadicAlgCl l) (p.coeff i : ℚ_[l])‖ ≤ 1 := by
-        rw [norm_algebraMap']
-        exact (p.coeff i).2
-      calc _ ≤ 1 * ‖y‖ ^ i := by gcongr
-        _ = ‖y‖ ^ i := one_mul _
-        _ < _ := pow_lt_pow_right₀ hlt (Finset.mem_range.mp hi)
-  rw [← norm_neg, ← h1, norm_pow] at h2
-  exact lt_irrefl _ h2
-
-theorem norm_unit (f : O →+* PadicAlgCl l)
-    (hf : ∀ z : ℤ_[l], f (algebraMap ℤ_[l] O z) = algebraMap ℚ_[l] (PadicAlgCl l) (z : ℚ_[l]))
-    {a : O} (ha : IsUnit a) : ‖f a‖ = 1 := by
-  obtain ⟨b, hb⟩ := ha.exists_right_inv
-  have h : ‖f a‖ * ‖f b‖ = 1 := by rw [← norm_mul, ← map_mul, hb, map_one, norm_one]
-  refine le_antisymm (norm_le_one f hf a) ?_
-  calc (1 : ℝ) = ‖f a‖ * ‖f b‖ := h.symm
-    _ ≤ ‖f a‖ := mul_le_of_le_one_right (norm_nonneg _) (norm_le_one f hf b)
 
 open IsLocalRing Topology in
 variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] in
@@ -59,36 +78,17 @@ variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [Algebra ℤ_[l] O] [M
 private lemma norm_le_one_of_monic_root_lemma {R F : Type*} [CommRing R] [NormedField F]
     [IsUltrametricDist F] (f : R →+* F) (hf : ∀ r, ‖f r‖ ≤ 1) {P : Polynomial R}
     (hP : P.Monic) {y : F} (hy : P.eval₂ f y = 0) : ‖y‖ ≤ 1 := by
-  by_contra h
-  push_neg at h
-  rw [Polynomial.eval₂_eq_sum_range, Finset.sum_range_succ, hP.coeff_natDegree, map_one,
-    one_mul] at hy
-  obtain ⟨k, hk⟩ : ∃ k, P.natDegree = k + 1 := by
-    refine ⟨P.natDegree - 1, ?_⟩
-    rcases Nat.eq_zero_or_pos P.natDegree with h0 | h0
-    · rw [h0] at hy
-      simp at hy
-    · omega
-  rw [hk] at hy
-  have hsum : ‖∑ i ∈ Finset.range (k + 1), f (P.coeff i) * y ^ i‖ ≤ ‖y‖ ^ k := by
-    apply IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (by positivity)
-    intro i hi
-    rw [norm_mul, norm_pow]
-    calc ‖f (P.coeff i)‖ * ‖y‖ ^ i ≤ 1 * ‖y‖ ^ k :=
-          mul_le_mul (hf _) (pow_le_pow_right₀ h.le (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)))
-            (by positivity) zero_le_one
-      _ = ‖y‖ ^ k := one_mul _
-  have heq : y ^ (k + 1) = -∑ i ∈ Finset.range (k + 1), f (P.coeff i) * y ^ i := by
-    linear_combination hy
-  have h1 : ‖y‖ ^ (k + 1) ≤ ‖y‖ ^ k := by
-    rw [← norm_pow, heq, norm_neg]
-    exact hsum
-  have h2 : ‖y‖ ^ k < ‖y‖ ^ (k + 1) := pow_lt_pow_right₀ h (Nat.lt_succ_self k)
-  linarith
+  let v := NormedField.valuation (K := F)
+  let g : R →+* v.integer := f.codRestrict v.integer (fun r => hf r)
+  have hg : (algebraMap v.integer F).comp g = f := RingHom.ext fun _ => rfl
+  have hy' : IsIntegral v.integer y := by
+    refine ⟨P.map g, hP.map g, ?_⟩
+    simpa only [Polynomial.aeval_def, Polynomial.eval₂_map, hg] using hy
+  exact ((Valuation.integer.integers v).isIntegral_iff_v_le_one.mp hy')
+
 
 open IsLocalRing Topology in
 variable {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] in
-
 theorem _root_.GlobalTheory.CoefEmbed.embedding_closed_integral : ∀ (l : ℕ) [Fact l.Prime] (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Algebra ℤ_[l] O] [Module.Finite ℤ_[l] O] [TopologicalSpace O] [IsTopologicalRing O], IsAdic (IsLocalRing.maximalIdeal O) → ∀ κ : FractionRing O →+* PadicAlgCl l, (∀ z : ℤ_[l], κ (algebraMap O (FractionRing O) (algebraMap ℤ_[l] O z)) = algebraMap ℚ_[l] (PadicAlgCl l) (z : ℚ_[l])) → Topology.IsEmbedding (fun x : O => κ (algebraMap O (FractionRing O) x)) ∧ IsClosed (Set.range κ) ∧ (∀ x : FractionRing O, ‖κ x‖ ≤ 1 → ∃ y : O, algebraMap O (FractionRing O) y = x) ∧ ((l : ℕ) : O) ∈ IsLocalRing.maximalIdeal O := by
   intro l _ O _ _ _ _ _ _ _ hO κ hκ
   set g : O →+* PadicAlgCl l := κ.comp (algebraMap O (FractionRing O)) with hg
@@ -188,7 +188,7 @@ theorem _root_.GlobalTheory.CoefEmbed.embedding_closed_integral : ∀ (l : ℕ) 
     induction hx using Submodule.span_induction with
     | mem y hy => exact Submodule.subset_span ⟨y, hy, rfl⟩
     | zero => rw [map_zero]; exact V.zero_mem
-    | add y z _ _ hy hz => rw [map_add]; exact V.add_mem hy hz
+    | add y z _ _ hy hz => rw [map_add (f := _)]; exact V.add_mem hy hz
     | smul z y _ hy =>
       rw [Algebra.smul_def, map_mul, hgz, ← Algebra.smul_def]
       exact V.smul_mem _ hy

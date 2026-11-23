@@ -1,6 +1,49 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.CoeffRescaleExpandOfNotDvd
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical UpperHalfPlane MatrixGroups CongruenceSubgroup Manifold
@@ -44,7 +87,7 @@ theorem conv_of_hasSum {f : PowerSeries ℂ}
 theorem Conv.add {f g : PowerSeries ℂ} (hf : Conv f) (hg : Conv g) : Conv (f + g) := by
   intro x hx
   refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_) ((hf x hx).add (hg x hx))
-  rw [map_add, ← add_mul]
+  rw [map_add (f := _), ← add_mul]
   exact mul_le_mul_of_nonneg_right (norm_add_le _ _) (by positivity)
 
 theorem Conv.sub {f g : PowerSeries ℂ} (hf : Conv f) (hg : Conv g) : Conv (f - g) := by
@@ -86,16 +129,6 @@ theorem Conv.pow {f : PowerSeries ℂ} (hf : Conv f) (n : ℕ) : Conv (f ^ n) :=
   induction n with
   | zero => rw [pow_zero]; exact conv_one
   | succ n ih => rw [pow_succ]; exact ih.mul hf
-
-theorem Conv.prod {α : Type*} (s : Finset α) (f : α → PowerSeries ℂ) (hf : ∀ t ∈ s, Conv (f t)) :
-    Conv (∏ t ∈ s, f t) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => rw [Finset.prod_empty]; exact conv_one
-  | @insert a s ha ih =>
-    rw [Finset.prod_insert ha]
-    exact (hf a (Finset.mem_insert_self a s)).mul
-      (ih fun t ht => hf t (Finset.mem_insert_of_mem ht))
 
 theorem Conv.C_mul {f : PowerSeries ℂ} (hf : Conv f) (c : ℂ) : Conv (PowerSeries.C c * f) := by
   intro x hx
@@ -153,7 +186,7 @@ theorem ev_add {f g : PowerSeries ℂ} (hf : Conv f) (hg : Conv g) {x : ℂ} (hx
   have e : (fun n => PowerSeries.coeff n (f + g) * x ^ n) =
       fun n => PowerSeries.coeff n f * x ^ n + PowerSeries.coeff n g * x ^ n := by
     funext n
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
   rw [← e] at h
   exact h.tsum_eq
 

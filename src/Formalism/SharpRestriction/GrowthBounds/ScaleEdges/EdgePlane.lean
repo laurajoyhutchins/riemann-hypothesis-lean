@@ -1,6 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.ScaleEdges.ManyEdges
-import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
-import Formalism.SharpRestriction.GrowthBounds.WittFrameLocaliserOrders
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ObjBridge
+public import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -338,8 +384,10 @@ private theorem cc_zero_lemma_3 (r : ℕ) (g g' : Matrix (Fin k) (Fin k) (WF p n
       intro hli
       exact hi (hli ▸ hl)
     have h2 := congrArg WittVector.constantCoeff h1
+
     rw [Matrix.mul_apply, map_sum] at h2
     simpa [map_mul] using h2
+
   rw [Matrix.mul_apply, map_sum]
   simp only [map_mul, hrow, Finset.sum_mul]
   rw [Finset.sum_comm]
@@ -359,6 +407,7 @@ theorem tgt_le_of_plane (φ : WF p n' ≃+* W) (r : ℕ) (hpQ : (p : Qq) ≠ 0)
     obtain ⟨w, hw⟩ := dvd_of_cc_lemma_4 _ (cc_zero_lemma_3 r g g' hg' hpl c i hc hi)
     refine ⟨φ w, ?_⟩
     have hZe : (Ngi φ g' * Ng φ g) i c = φ ((g⁻¹ * g') c i) := by
+
       simp only [Matrix.mul_apply, Ngi, Ng, map_sum, map_mul]
       exact Finset.sum_congr rfl (fun j _ => mul_comm _ _)
     rw [hZe, hw, map_mul, map_natCast]
@@ -428,6 +477,7 @@ theorem plane_le_of_tgt [IsDomain W] [IsFractionRing W Qq] (φ : WF p n' ≃+* W
     rw [← h3, mul_assoc, inv_mul_cancel₀ hpQ, mul_one]
   have h4 : algebraMap W Qq (φ (g⁻¹ c j)) = algebraMap W Qq
       (∑ i, φ (g'⁻¹ i j) * (if i.val < r then 1 else (p : W)) * Y c i) := by
+
     rw [h5, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     by_cases hi : i.val < r
@@ -437,10 +487,12 @@ theorem plane_le_of_tgt [IsDomain W] [IsFractionRing W Qq] (φ : WF p n' ≃+* W
       ring
   have h6 := hinj h4
   have h7 : g⁻¹ c j = ∑ i, g'⁻¹ i j * (if i.val < r then 1 else (p : WF p n')) * φ.symm (Y c i) := by
+
     rw [← φ.symm_apply_apply (g⁻¹ c j), h6, map_sum]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     by_cases hi : i.val < r <;> simp [hi]
   simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, ite_apply, Pi.zero_apply]
+
   rw [h7, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   by_cases hi : i.val < r
@@ -481,6 +533,7 @@ theorem edgePlane : EdgePlane := by
     have hggi : g * gi = 1 := by
       refine Matrix.ext fun a b => ?_
       apply φ.injective
+
       rw [Matrix.mul_apply, map_sum, hg, hgi]
       simp only [map_mul, RingEquiv.apply_symm_apply]
       have h1 := congrFun (congrFun hUU b) a

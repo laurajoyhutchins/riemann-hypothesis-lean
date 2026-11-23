@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsLieDataCircle
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ConjAtFixedIff
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsQuadOfPlane
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,13 +73,13 @@ theorem exists_shift (A : Fin n → Fin n → Module.End ℂ S) (B : Fin n → F
   have key : ∀ i j k l, (if j = k then lam i l else 0) = (if l = i then lam k j else 0) := by
     intro i j k l
     have h1 : (A i j * A k l - A k l * A i j) (L y f) = L y ((B i j * B k l - B k l * B i j) f) := by
-      simp only [LinearMap.sub_apply, Module.End.mul_apply, h, map_add, map_smul, map_sub, smul_add]
+      simp only [LinearMap.sub_apply, Module.End.mul_apply, h, map_add (f := _), map_smul, map_sub, smul_add]
       module
     rw [hA, hB] at h1
     have h2 : ((if j = k then lam i l else 0) - (if l = i then lam k j else 0)) • L y f = 0 := by
       rw [sub_smul]
       split_ifs at h1 ⊢ <;>
-        simp only [LinearMap.sub_apply, LinearMap.zero_apply, h, map_add, map_smul, map_sub, map_zero,
+        simp only [LinearMap.sub_apply, LinearMap.zero_apply, h, map_add (f := _), map_smul, map_sub, map_zero,
           zero_smul] at h1 ⊢ <;>
         linear_combination (norm := module) h1
     exact sub_eq_zero.1 ((smul_eq_zero.1 h2).resolve_right h0)
@@ -59,6 +106,7 @@ theorem prod_intertwine (L : M →ₗ[ℂ] S) : ∀ (k : ℕ) (a : Fin k → Mod
 theorem gelfA_intertwine (L : M →ₗ[ℂ] S) (A : Fin n → Fin n → Module.End ℂ S) (B : Fin n → Fin n → Module.End ℂ M)
     (h : ∀ i j f, A i j (L f) = L (B i j f)) (k : ℕ) (f : M) :
     GlobalTheory.SmoothForms.gelfA A k (L f) = L (GlobalTheory.SmoothForms.gelfA B k f) := by
+
   rw [GlobalTheory.SmoothForms.gelfA, GlobalTheory.SmoothForms.gelfA, LinearMap.sum_apply, LinearMap.sum_apply, map_sum]
   exact Finset.sum_congr rfl fun idx _ => prod_intertwine L _ _ _ (fun _ => h _ _) f
 
@@ -80,7 +128,7 @@ theorem gelf_kernel : ∀ (D : D7) (θ : InfF D), IsInfFam θ → ∀ (V : HSp D
     generalize (1 / 2 : ℂ) • (Z + conjAt V τ Z) = P at e ⊢
     generalize (1 / (2 * Complex.I)) • (Z - conjAt V τ Z) = P' at e ⊢
     rw [← e]
-    simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, Pi.add_apply, Pi.smul_apply]
+    simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, Pi.add_apply, Pi.smul_apply]
     module
   choose l hl using hC
   let L : Y → M →ₗ[ℂ] SmFun θ V := fun y =>

@@ -1,8 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.RootOfUnityEightQMemCoeffGaloisSubfield
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
-import Formalism.SharpRestriction.InertJacobiLevels.HostFam
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DiagSingleSingle
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.RootOfUnityEightQMemCoeffGaloisSubfield
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DiagSingleSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +82,7 @@ theorem planeVec_planeVec (N n h p : ℕ) (hN : n + 2 * h ≤ N) (hp : p = n + h
   have hj := j.isLt
   have c1 : cut N (n + h) ⟨n + i, by omega⟩ = false := by simp [cut]
   have c2 : cut N (n + h) ⟨n + h + i, by omega⟩ = true := by simp [cut]
-  simp only [planeVec, map_add, LinearMap.add_apply, diag_single_single, c1, c2]
+  simp only [planeVec, map_add (f := _), LinearMap.add_apply, diag_single_single, c1, c2]
   have e1 : ¬ (n + (i : ℕ) = n + h + j) := by omega
   have e2 : ¬ (n + h + (i : ℕ) = n + j) := by omega
   rw [if_neg e1, if_neg e2]
@@ -52,7 +97,7 @@ theorem planeVec_planeVec (N n h p : ℕ) (hN : n + 2 * h ≤ N) (hp : p = n + h
 
 theorem ext_planeVec (N n h : ℕ) (hN : n + 2 * h ≤ N) (neg : Fin N → Bool) (x : Fin n → E) (a b : E)
     (i : Fin h) : diagForm N neg (extTo n N x) (planeVec N n h hN a b i) = 0 := by
-  rw [planeVec, map_add, diag_ext_single, diag_ext_single, add_zero]
+  rw [planeVec, map_add (f := _), diag_ext_single, diag_ext_single, add_zero]
   · simp only; omega
   · simp only; omega
 
@@ -60,7 +105,7 @@ theorem single_planeVec (N n h : ℕ) (hN : n + 2 * h ≤ N) (neg : Fin N → Bo
     (hl : n + 2 * h ≤ l) (c a b : E) (i : Fin h) :
     diagForm N neg (Pi.single l c) (planeVec N n h hN a b i) = 0 := by
   have hi := i.isLt
-  rw [planeVec, map_add, diag_single_single, diag_single_single, if_neg, if_neg, add_zero]
+  rw [planeVec, map_add (f := _), diag_single_single, diag_single_single, if_neg, if_neg, add_zero]
   · simp only; omega
   · simp only; omega
 
@@ -147,10 +192,6 @@ theorem spacesNorm_coord :
   · have h : R.rankY 0 = R.k + R.m - 1 := by simp [Ranks.rankY, Ranks.r]
     refine signSpace_cut_eq _ (R.rankY 0) R.r (R.k + j - 1) (R.m - j) h ?_ ?_ <;> omega
   · exact signSpace_false_eq _ _
-
-theorem spacesNorm_T : (spacesNorm R cm T hT pz hpz).T = T := rfl
-
-theorem spacesNorm_Vneg (j : ℕ) : (spacesNorm R cm T hT pz hpz).Vneg j = false := rfl
 
 theorem spacesNorm_Y_sig (j : ℕ) (τ : E →+* ℂ) : ((spacesNorm R cm T hT pz hpz).Y j).sig τ = sigYD R j :=
   spY_sig R j τ

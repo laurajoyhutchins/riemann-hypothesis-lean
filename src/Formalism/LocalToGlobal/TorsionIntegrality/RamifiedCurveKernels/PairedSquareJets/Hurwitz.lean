@@ -1,6 +1,54 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementH
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
-import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.StatementH
+public import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.BinomialSeriesCoefficients.CoeffPowEqZeroOfCc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -65,7 +113,7 @@ theorem jetsIn_X (i : ι) : JetsIn R (MvPowerSeries.X i : MvPowerSeries ι K) :=
 theorem jetsIn_add {f g : MvPowerSeries ι K} (hf : JetsIn R f) (hg : JetsIn R g) :
     JetsIn R (f + g) := by
   intro κ
-  rw [map_add, mul_add]
+  rw [map_add (f := _), mul_add]
   exact R.add_mem (hf κ) (hg κ)
 
 theorem jetsIn_neg {f : MvPowerSeries ι K} (hf : JetsIn R f) : JetsIn R (-f) := by
@@ -104,13 +152,8 @@ theorem jetsIn_prod {α : Type} (s : Finset α) (f : α → MvPowerSeries ι K)
   exact Finset.prod_induction f (JetsIn R) (fun a b ha hb => jetsIn_mul ha hb)
     jetsIn_one hf
 
-theorem jetsIn_pow {f : MvPowerSeries ι K} (hf : JetsIn R f) (n : ℕ) : JetsIn R (f ^ n) := by
-  induction n with
-  | zero => simpa using (jetsIn_one (R := R) (ι := ι))
-  | succ n ih => rw [pow_succ]; exact jetsIn_mul ih hf
-
 theorem jet_pderiv (f : MvPowerSeries ι K) (i : ι) (κ : ι →₀ ℕ) :
-    ((mfact κ : ℕ) : K) * MvPowerSeries.coeff κ (MvPowerSeries.pderiv K i f) =
+    ((mfact κ : ℕ) : K) * MvPowerSeries.coeff κ (MvPowerSeries.pderiv (R := K) i f) =
       ((mfact (κ + Finsupp.single i 1) : ℕ) : K) *
         MvPowerSeries.coeff (κ + Finsupp.single i 1) f := by
   rw [mfact_add_single, MvPowerSeries.coeff_pderiv]
@@ -118,14 +161,14 @@ theorem jet_pderiv (f : MvPowerSeries ι K) (i : ι) (κ : ι →₀ ℕ) :
   ring
 
 theorem jetsIn_pderiv {f : MvPowerSeries ι K} (hf : JetsIn R f) (i : ι) :
-    JetsIn R (MvPowerSeries.pderiv K i f) := by
+    JetsIn R (MvPowerSeries.pderiv (R := K) i f) := by
   intro κ
   rw [jet_pderiv]
   exact hf _
 
 theorem jetsIn_iff_pderiv (f : MvPowerSeries ι K) :
     JetsIn R f ↔ MvPowerSeries.constantCoeff f ∈ R ∧
-      ∀ i, JetsIn R (MvPowerSeries.pderiv K i f) := by
+      ∀ i, JetsIn R (MvPowerSeries.pderiv (R := K) i f) := by
   constructor
   · intro hf
     refine ⟨?_, fun i => jetsIn_pderiv hf i⟩
@@ -156,20 +199,16 @@ theorem integral_jets_holds : IntJets := by
   intro K _ R ι f hf
   exact jetsIn_of_int hf
 
-theorem jets_deriv_holds : JetsDeriv := by
-  intro K _ R ι f
-  exact jetsIn_iff_pderiv f
-
 section CharZero
 
 variable {K : Type} [Field K] [CharZero K] {R : Subring K} {ι : Type}
 
 theorem pderiv_divPow (a : MvPowerSeries ι K) (i : ι) (m : ℕ) :
-    MvPowerSeries.pderiv K i (MvPowerSeries.C (((m + 1).factorial : K)⁻¹) * a ^ (m + 1)) =
-      (MvPowerSeries.C ((m.factorial : K)⁻¹) * a ^ m) * MvPowerSeries.pderiv K i a := by
-  have hC : ∀ c : K, MvPowerSeries.pderiv K i (MvPowerSeries.C c : MvPowerSeries ι K) = 0 := by
+    MvPowerSeries.pderiv (R := K) i (MvPowerSeries.C (((m + 1).factorial : K)⁻¹) * a ^ (m + 1)) =
+      (MvPowerSeries.C ((m.factorial : K)⁻¹) * a ^ m) * MvPowerSeries.pderiv (R := K) i a := by
+  have hC : ∀ c : K, MvPowerSeries.pderiv (R := K) i (MvPowerSeries.C c : MvPowerSeries ι K) = 0 := by
     intro c
-    have h := (MvPowerSeries.pderiv K i : Derivation K (MvPowerSeries ι K) (MvPowerSeries ι K)).map_algebraMap c
+    have h := (MvPowerSeries.pderiv (R := K) i : Derivation K (MvPowerSeries ι K) (MvPowerSeries ι K)).map_algebraMap c
     simpa [MvPowerSeries.algebraMap_apply] using h
   have hN : ((m + 1 : ℕ) : MvPowerSeries ι K) = MvPowerSeries.C ((m + 1 : ℕ) : K) :=
     (map_natCast _ _).symm

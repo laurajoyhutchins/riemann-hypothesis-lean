@@ -1,5 +1,48 @@
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaBOfComponents
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselScaling
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal NNReal
@@ -11,29 +54,8 @@ namespace Formalism.FourierDecayAlt.P.HaarScaling
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.FourierDecayAlt.B2
 
 theorem haar_smul {k r : ℕ} {U : Set (Mat k r)} {μ : Measure (Mt k r)} (h : IsHaarOn U μ) (c : ℝ≥0) (hc : 0 < c) :
-    IsHaarOn U (c • μ) where
-  conc := by
-    rw [Measure.smul_apply, h.conc, smul_zero]
-  left := fun a ha => by rw [Measure.map_smul, h.left a ha]
-  right := fun a ha => by rw [Measure.map_smul, h.right a ha]
-  finite_compact := fun K hK => by
-    rw [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul]
-    exact ENNReal.mul_lt_top ENNReal.coe_lt_top (h.finite_compact K hK)
-  ne_zero := by
-    intro h0
-    apply h.ne_zero
-    have h1 : (c • μ) Set.univ = 0 := by rw [h0]; rfl
-    rw [Measure.smul_apply, ENNReal.smul_def, smul_eq_mul] at h1
-    rcases mul_eq_zero.mp h1 with h2 | h2
-    · exact absurd (by exact_mod_cast h2 : c = 0) hc.ne'
-    · exact Measure.measure_univ_eq_zero.mp h2
-
-theorem AB_le (k r : ℕ) (A : ℝ) (h : 2 * ((2 * r + k + 1 : ℕ) : ℝ) ^ 2 < A) : AB k r ≤ A := by
-  have hk : (0 : ℝ) ≤ k := Nat.cast_nonneg k
-  have hr : (0 : ℝ) ≤ r := Nat.cast_nonneg r
-  unfold AB
-  push_cast at h
-  nlinarith [mul_nonneg hk hr, mul_nonneg hk hk, mul_nonneg hr hr]
+    IsHaarOn U (c • μ) := by
+  apply Formalism.FourierDecayAlt.P.BesselScaling.haar_smul <;> assumption
 
 section
 variable {k r : ℕ} {Wp Wq : Type} [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp]
@@ -60,33 +82,14 @@ theorem ph_scale (D : RealPlaceData k r Wp Wq) (c : ℝ≥0) (hc : 0 < c) (F F' 
   have hμ : (scaleG D c hc).μG = c • D.μG := rfl
   unfold Ph
   rw [hμ, integral_smul_nnreal_measure, NNReal.smul_def, Complex.real_smul]
-  try rfl
+  rfl
 
 theorem betaInf_scale (D : RealPlaceData k r Wp Wq) (c : ℝ≥0) (hc : 0 < c) (F F' : Mat k r → (Wq →L[ℂ] Wp)) :
     betaInf (scaleG D c hc) F F' = ((c : ℝ) : ℂ) * betaInf D F F' := by
-  have hreg : ∀ p, regBracket (scaleG D c hc) F F' p =
-      fun a b => ((c : ℝ) : ℂ) * regBracket D F F' p a b := by
-    intro p
-    funext a b
-    have hχ : (scaleG D c hc).χ = D.χ := rfl
-    simp only [regBracket]
-    rw [ph_scale, hχ]
-    ring
-  have hz : (scaleG D c hc).z = D.z := rfl
-  have hz' : (scaleG D c hc).z' = D.z' := rfl
-  have hS : (scaleG D c hc).μSS = D.μSS := rfl
-  unfold betaInf betaInfTau
-  simp only [hreg, hz, hz', hS, oneMinusDD_const_mul, mul_assoc, integral_const_mul]
-  rw [← integral_const_mul]
-  congr 1
-  funext p
-  ring
+  apply Formalism.FourierDecayAlt.P.BesselScaling.betaInf_scale <;> assumption
 
 theorem beta_scale (D : RealPlaceData k r Wp Wq) (c : ℝ≥0) (hc : 0 < c) (F F' : Mat k r → (Wq →L[ℂ] Wp)) :
     beta (scaleG D c hc) F F' = beta D F F' := rfl
-
-theorem normSq_scale (D : RealPlaceData k r Wp Wq) (c : ℝ≥0) (hc : 0 < c) (F : Mat k r → (Wq →L[ℂ] Wp)) :
-    normSq (scaleG D c hc) F = normSq D F := rfl
 
 end
 
@@ -99,10 +102,6 @@ open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Fo
 theorem lemma_b_normalised_of_parts : Formalism.FourierDecayAlt.B2.LemmaBNormFromParts := by
   intro hC hJ hD hI k r Wp Wq _ _ _ _ _ _ D A hA hF
   exact hC k r Wp Wq D A hA hF (hJ k r Wp Wq D) (hD k r Wp Wq D) (hI k r Wp Wq D A hA)
-
-theorem lemma_b_crude_of_parts : Formalism.FourierDecayAlt.B2.LemmaBCrudeFromParts := by
-  intro hC hJ hD hI k r Wp Wq _ _ _ _ _ _ D A hA hF
-  exact hC k r Wp Wq D A (AB_le k r A hA) hF (hJ k r Wp Wq D) (hD k r Wp Wq D) (hI k r Wp Wq D A hA)
 
 theorem lemma_b_any_measure_from_normalised : Formalism.FourierDecayAlt.B2.LemmaBAnyFromNorm := by
   intro hN hB k r Wp Wq _ _ _ _ _ _ D A hA

@@ -1,6 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.Phi2
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.FixOfPerp
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.HermitianFormBaseVectorRight
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.Phi2
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.FixOfPerp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.HermitianFormBaseVectorRight
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.UHMulInv
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,7 +127,7 @@ theorem lev_sq (k r' : ℕ) : ιLev k 1 r' (Hpk k r') * ιLev k 1 r' (Hpk k r') 
   have e : (fun j => (ιLev k 1 r' (Hpk k r') *ᵥ v) (levPos k 1 r' j)) =
       Hpk k r' *ᵥ fun j => v (levPos k 1 r' j) := by
     funext j
-    rw [RankOneLeviIdentities.ιLev_mulVec, dif_pos ⟨Nat.le_add_left 1 j.val, by
+    rw [RankOneLeviIdentities.ιLev_mulVec, dite_eq_left ⟨Nat.le_add_left 1 j.val, by
       show j.val + 1 < 2 * r' + k + 1 + 1; omega⟩]
     congr 1
   ext p
@@ -85,7 +135,7 @@ theorem lev_sq (k r' : ℕ) : ιLev k 1 r' (Hpk k r') * ιLev k 1 r' (Hpk k r') 
   split_ifs with h
   · rw [e, Hpk_mulVec_mulVec]
     exact congrArg v (Fin.ext (show p.val - 1 + 1 = p.val by omega))
-  · rw [RankOneLeviIdentities.ιLev_mulVec, dif_neg h]
+  · rw [RankOneLeviIdentities.ιLev_mulVec, dite_eq_right h]
 
 theorem lev_inv (k r' : ℕ) : (ιLev k 1 r' (Hpk k r'))⁻¹ = ιLev k 1 r' (Hpk k r') :=
   Matrix.inv_eq_left_inv (lev_sq k r')
@@ -148,19 +198,19 @@ theorem tm_mp (k r' : ℕ) : MeasurePreserving (tm k r') volume volume :=
 
 theorem lsq_cont {p m : ℕ} (l : Fin (p + 1)) : Continuous fun x : Xp p m => Lsq x l := by
   unfold Lsq
-  exact continuous_const.add (continuous_finset_sum _ fun j _ => Continuous.if_const _
+  exact continuous_const.fun_add (continuous_finsetSum _ fun j _ => Continuous.if_const _
     (((continuous_apply j).comp continuous_fst).norm.pow 2) continuous_const)
 
 theorem de_cont {p m : ℕ} (l : Fin (p + 1)) : Continuous fun x : Xp p m => de x l := by
   unfold de
   refine Real.continuous_sqrt.comp (((lsq_cont l).mul ?_).add ?_)
   · unfold rhoSq
-    exact ((lsq_cont _).add (continuous_finset_sum _ fun i _ =>
+    exact ((lsq_cont _).add (continuous_finsetSum _ fun i _ =>
       ((continuous_apply i).comp (continuous_fst.comp (continuous_snd.comp continuous_snd))).norm.pow 2)).add
-      (continuous_finset_sum _ fun j _ => Continuous.if_const _
+      (continuous_finsetSum _ fun j _ => Continuous.if_const _
         (((continuous_apply j).comp (continuous_fst.comp continuous_snd)).norm.pow 2) continuous_const)
   · have h2 : Continuous fun x : Xp p m => ∑ j : Fin p, if (l : ℕ) ≤ (j : ℕ) then x.2.1 j * star (x.1 j) else 0 :=
-      continuous_finset_sum _ fun j _ => Continuous.if_const _
+      continuous_finsetSum _ fun j _ => Continuous.if_const _
         (((continuous_apply j).comp (continuous_fst.comp continuous_snd)).mul
           ((continuous_apply j).comp continuous_fst).star) continuous_const
     unfold bco

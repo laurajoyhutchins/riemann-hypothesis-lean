@@ -1,21 +1,73 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsOpenSameModel
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.PeriodEqTriangularOrthonormal
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ImNegOfFramePeriodVector
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.Reframe
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TriangularFrameMovesPeriodBlockTriangular
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsComponentOfModelChartsStatement
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsCountableFlagSpaceAtlasStatement
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsCountableHolomorphicFamiliesSmoothStatement
 import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsHolomorphicPeriodsAdapted
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ImNegOfFramePeriodVector
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.PeriodCoordinatesFramesLiftTendstoStatement
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.SupCLeISupGeneric
 import Development.AbelianVarietyTheory.Proofs.GenericRegularity.TriangularFrameChangeOfTriangularPeriod
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsInvariantNatLengthLattice
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CmTypeLetterFrameColumnDictionary
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFrameOfIsPeriod
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsPeriodMulVec
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsCountableFlagSpaceAtlasStatement
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsComponentOfModelChartsStatement
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsCountableHolomorphicFamiliesSmoothStatement
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.PeriodCoordinatesFramesLiftTendstoStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PairUnfoldPfA
-import Formalism.LocalToGlobal.ProjectiveLattices.PetersonNormSubspace
-import Formalism.LocalToGlobal.ProjectiveLattices.CompOrd
-import Formalism.LocalToGlobal.ProjectiveLattices.CompHt
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UniformizationPeriodLatticeChange
 import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+public import Mathlib.Algebra.MvPolynomial.Cardinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PairUnfoldPfA
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FrMapComp
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+
+@[expose] public section
 
 open NumberField Topology Filter ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj GlobalTheory.Reg
 open scoped Matrix
@@ -149,8 +201,8 @@ end Frames
 
 section Dictionary
 
-open Formalism.L2.PjFree in
 
+open Formalism.L2.PjFree in
 theorem dictionary {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E}
     {Dw : Datum H} {l : Level H} (c : Coeff l) (σ : c.F →+* ℂ) {g : ℕ} (e : Fin g ≃ Σ τ : E →+* ℂ, Fin (Dw.mult τ))
     (D : Datum H) {r : ℕ} (X : Data E r) (φ : D.La ≃ₗ[𝓞 E] X.Λ) (hσ : Formalism.L2.PjFree.GoodEmb c σ) (hp : D.p = Dw.p)
@@ -197,7 +249,7 @@ theorem dictionary {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Recip
       rw [dif_pos a, dif_pos hn]
     · rw [if_pos (by omega)]
       unfold Formalism.L2.PjFree.perFr
-      rw [dif_neg a, dif_pos (show conjEmb (Formalism.L2.PjFree.relab c σ (e j).1) ∈ X.Ψ from hτ), dif_pos hn]
+      rw [dite_eq_right a, dif_pos (show conjEmb (Formalism.L2.PjFree.relab c σ (e j).1) ∈ X.Ψ from hτ), dif_pos hn]
       rfl
   · obtain ⟨h1, h2⟩ := PerBor.moveMat_support _ idx hb j j' hne
     rw [← hqq] at h2
@@ -323,6 +375,8 @@ theorem isMeagre_family (U : Formalism.L2.PjFree.Unf Xo c σ r) (hσ : Formalism
   obtain ⟨b₀, hb₀, hbb⟩ := Set.mem_iUnion₂.1 (hcov hb)
   exact Set.mem_iUnion₂.2 ⟨b₀, hb₀, hx, b, hbb, h⟩
 
+attribute [local instance 1100] Subalgebra.algebra in
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem isMeagre_chart (U : Formalism.L2.PjFree.Unf Xo c σ r) (hσ : Formalism.L2.PjFree.GoodEmb c σ)
     (hU : Formalism.L2.PjFree.IsUnf U) (k : U.Comp) {h : GenFrEx Xo c} (C : FChart h) :
     IsMeagre {x | ∃ hx : x ∈ (U.X k).dom, ∃ (ψ : C.R →ₐ[c.F] CAt σ) (z : FrPt Xo c (CAt σ)) (t : Ix Dw → (CAt σ)ˣ),
@@ -374,6 +428,8 @@ theorem isMeagre_chart (U : Formalism.L2.PjFree.Unf Xo c σ r) (hσ : Formalism.
   rw [e']
   exact ha0
 
+attribute [local instance 1100] Subalgebra.algebra in
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem exists_generic_of_injective {h : GenFrEx Xo c} (C : FChart h) (ψ : C.R →ₐ[c.F] CAt σ)
     (hψ : Function.Injective ψ) {z : FrPt Xo c (CAt σ)} (hz : FrMap ψ C.y z) :
     ∃ (φ : Om C.Z →ₐ[c.F] CAt σ) (y' : FrPt Xo c (CAt σ)) (t : Ix Dw → (CAt σ)ˣ),

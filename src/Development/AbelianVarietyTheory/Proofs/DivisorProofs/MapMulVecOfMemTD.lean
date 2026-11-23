@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsoRows
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HaarMapLinearScalingByDeterminant
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+module
+
+public import Mathlib.MeasureTheory.Measure.Haar.DistribChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,6 +113,7 @@ private lemma exists_map_mulVec_eq_smul_of_invertible {R : Type} [CommRing R] [T
   refine ⟨c, fun μ hμ => ?_⟩
   obtain ⟨k, hk⟩ : ∃ k : ℝ≥0, μ = k • μ₀ := ⟨_, Measure.isAddLeftInvariant_eq_smul _ _⟩
   rw [hk, Measure.map_smul, hc, smul_comm]
+  exact he.measurable.aemeasurable
 
 private lemma map_transvection_mulVec_addHaar_eq_self {R : Type} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
     [LocallyCompactSpace R] [SecondCountableTopology R] {κ : Type} [Fintype κ] [DecidableEq κ]
@@ -97,15 +146,18 @@ private lemma map_transvection_mulVec_addHaar_eq_self {R : Type} [CommRing R] [T
   have haa : a * a = 1 := by
     have h := map_mul_lemma_2 D D μ
     rw [hD, hone, ha μ inferInstance, Measure.map_smul, ha μ inferInstance, smul_smul] at h
+    all_goals try exact (Continuous.matrix_mulVec continuous_const continuous_id).measurable.aemeasurable
     exact nnreal_eq_of_smul_addHaar_eq μ (by rw [one_smul]; exact h.symm)
   have htt : t' * t = 1 := by
     have h := map_mul_lemma_2 (transvection i j c) (transvection i j (-c)) μ
     rw [hT, hone, ht' μ inferInstance, Measure.map_smul, ht μ inferInstance, smul_smul] at h
+    all_goals try exact (Continuous.matrix_mulVec continuous_const continuous_id).measurable.aemeasurable
     exact nnreal_eq_of_smul_addHaar_eq μ (by rw [one_smul]; exact h.symm)
   have hcj : t' = a * t * a := by
     have h := map_mul_lemma_2 (D * transvection i j c) D μ
     rw [hconj, ht' μ inferInstance, ha μ inferInstance, Measure.map_smul, map_mul_lemma_2,
       ht μ inferInstance, Measure.map_smul, ha μ inferInstance, smul_smul, smul_smul] at h
+    all_goals try exact (Continuous.matrix_mulVec continuous_const continuous_id).measurable.aemeasurable
     exact nnreal_eq_of_smul_addHaar_eq μ h
   have h2 : t * t = 1 := by
     rw [hcj] at htt
@@ -149,14 +201,16 @@ private lemma map_diagonal_mulVec_eq_inv_prod_smul {R : Type} [CommRing R] [Topo
     haveI : ∀ i, SigmaFinite ((Measure.addHaar : Measure R).map (fun y => (d i : R) * y)) := fun i => by
       rw [h1]; infer_instance
     rw [hf, hν0, Measure.pi_map_pi (f := fun i y => (d i : R) * y)
-      (fun i => (continuous_mul_left (d i : R)).measurable.aemeasurable)]
+      (fun i => (continuous_const_mul (d i : R)).measurable.aemeasurable)]
     simp_rw [h1]
     refine Measure.pi_eq (fun s hs => ?_)
     rw [Measure.smul_apply, Measure.nnreal_smul_coe_apply, Measure.pi_pi]
     simp only [Measure.smul_apply, Measure.nnreal_smul_coe_apply, ← Finset.prod_inv_distrib,
-      Finset.prod_mul_distrib, ENNReal.coe_finset_prod]
+      Finset.prod_mul_distrib]
+    norm_cast
   obtain ⟨k, hk⟩ : ∃ k : ℝ≥0, μ = k • ν := ⟨_, Measure.isAddLeftInvariant_eq_smul _ _⟩
   rw [hk, Measure.map_smul, hν, smul_comm]
+  exact (Continuous.matrix_mulVec continuous_const continuous_id).measurable.aemeasurable
 
 private lemma exists_unit_det_map_mulVec_haar_eq_inv_smul {R : Type} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
     [LocallyCompactSpace R] [SecondCountableTopology R] {κ : Type} [Fintype κ] [DecidableEq κ]
@@ -179,6 +233,7 @@ private lemma exists_unit_det_map_mulVec_haar_eq_inv_smul {R : Type} [CommRing R
     obtain ⟨w, hw, hwμ⟩ := hN
     refine ⟨v * w, by simp [hv, hw, det_mul], fun μ hμ => ?_⟩
     rw [map_mul_lemma_2, hwμ μ hμ, Measure.map_smul, hvμ μ hμ, smul_smul, map_mul, mul_inv, mul_comm]
+    exact (Continuous.matrix_mulVec continuous_const continuous_id).measurable.aemeasurable
 
 theorem map_mulVec_of_mem_TD : ∀ (R : Type) [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
     [LocallyCompactSpace R] [SecondCountableTopology R] [T2Space R] (κ : Type) [Fintype κ] [DecidableEq κ]

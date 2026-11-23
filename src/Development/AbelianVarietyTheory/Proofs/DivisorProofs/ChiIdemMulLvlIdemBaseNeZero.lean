@@ -1,22 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DimPartsAtIffBadAndOff
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumCoeffChiIdemMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspProdCharTransport
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspIndProdCharOfIsProdCuspChar
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DimPartsAtIffBadAndOff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockTriangularPrimitiveCharacters
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.CuspidalProductMultiplicity
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCuspidalIffCompositions
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+public import Formalism.UnipotentAdelicQuotients.CuspidalCharExists
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.AsAlgebraHomSurjectiveOfFinrankIntertwiningMapEq
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.FiniteGroupFunctionPairingCharacterEqFinrankInte
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.FiniteGroupFunctionPairingSelfIrreducibleAlgClos
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.IsCharacterOverSubfieldOfRepresentation
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.VirtualCharactersMulComapConjIndLinear
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLabelsSemisimpleParameterGLFiniteField
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobeniusOrbitRootPolynomialFactorizationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodCharsGoodFamilyOfProductIrreducible
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GreenCuspidalCharIsCuspidalOfMinpolyOfParam
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspIndProdCharOfIsProdCuspChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCuspProdCharTransport
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PrimeToPartFrob
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockTriangularPrimitiveCharacters
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodCharsGoodFamilyOfProductIrreducible
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TraceCompLeftFunLeft
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ThetaOfPow
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumCoeffChiIdemMul
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TraceCompLeftFunLeft
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CuspidalCharExistsOfGreen
+import Formalism.LocalToGlobal.Divisibility.ProjLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RepresentationTheory.FinGroupCharZero
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharacterExtendScalarsRep
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,7 +141,11 @@ theorem isIrrChar_of_isAbsIrrChar {K G : Type} [Field K] [CharZero K] [Group G] 
   letI : Algebra K ℂ := emb.toAlgebra
   haveI : CharZero (AlgebraicClosure K) :=
     charZero_of_injective_algebraMap (algebraMap K (AlgebraicClosure K)).injective
-  let φ : AlgebraicClosure K →ₐ[K] ℂ := IsAlgClosed.lift
+  let φ : AlgebraicClosure K →ₐ[K] ℂ := (by
+    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
+    solve_by_elim* (maxDepth := 2) only [*,
+      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
+      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
   letI : Algebra (AlgebraicClosure K) ℂ := φ.toRingHom.toAlgebra
   have h1 := pair_self_of_isIrrChar_algClosed (AlgebraicClosure K) G _ ⟨n, ρ, hi, fun _ => rfl⟩
   rw [pair_character_eq_finrank] at h1
@@ -114,6 +167,7 @@ theorem exists_eq_of_idemOf {K G ι : Type} [Field K] [CharZero K] [Group G] [Fi
   have e1 : ∀ (k : ℕ) (σ : Representation ℂ G (Fin k → ℂ)), algebraMap ℂ ℂ (σ.character 1) = k := by
     intro k σ; simp
   have h1 : (n : ℂ) = ∑ i ∈ Y, (m i : ℂ) * (Module.finrank ℂ ((τ i).IntertwiningMap ρ) : ℂ) := by
+
     rw [← e1 n ρ, ← hρ, ← h0, map_sum]
     simp only [map_mul, h, Finset.sum_mul]
     rw [Finset.sum_comm]
@@ -368,7 +422,7 @@ theorem isCuspProdChar_typeChar {s : SSParam p ℂ r} (hs : IsRegularParam s) :
     rw [h1]
     unfold ext0
     by_cases hz : y⁻¹ * x * y ∈ blockTri (κ := ZMod p) (b₀ ∘ w)
-    · rw [dif_pos hz, if_pos ((hm _).2 hz), hch]
+    · rw [dite_eq_left hz, if_pos ((hm _).2 hz), hch]
       refine Finset.prod_congr rfl fun c _ => ?_
       unfold cuspOn
       congr 1
@@ -377,7 +431,7 @@ theorem isCuspProdChar_typeChar {s : SSParam p ℂ r} (hs : IsRegularParam s) :
       simp only [e, Equiv.trans_apply, cycEquiv_apply]
       rw [← conj_permGL_apply w, Equiv.apply_symm_apply, Equiv.apply_symm_apply]
       rfl
-    · rw [dif_neg hz, if_neg (mt (hm _).1 hz)]
+    · rw [dite_eq_right hz, if_neg (mt (hm _).1 hz)]
 
 theorem isChar_of_isCuspProdChar {θ : GL (Fin r) (ZMod p) → ℂ} (h : GlobalTheory.IndefiniteRowSideFullHecke.CuspidalProductMultiplicity.IsCuspProdChar θ) : IsChar ℂ ℂ θ := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩

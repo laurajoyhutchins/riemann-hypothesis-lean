@@ -1,17 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LengthPosOfPosDef
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdjFormula
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LevelSubgroupRestrictedProductOfLawsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffHeckePolyOfComplex
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdjFormula
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffHeckePolyOfComplex
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DoubleCosetSumFundamentalDomain
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMulRightInvariantHaarAdelicUnitaryGroupHermitiStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormIntegralStarMulSqLeMulStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFiniteLocalDoubleCosetRepresentativesStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalHeckeSumPreservesPrincipalLevelFormsStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DoubleCosetHeckeSumPreservesPrincipalFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DoubleCosetHeckeSumPreservesPrincipalFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsFiniteLocalDoubleCosetRepresentativesStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LevelSubgroupRestrictedProductOfLawsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalHeckeSumPreservesPrincipalLevelFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormIntegralStarMulSqLeMulStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContDiffDerivSnoc
+import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -109,7 +152,7 @@ theorem int_tr {F : Face D A} (hL : Laws R F) {T T' : MMap (R.MW i (sg0 D A))} (
   haveI : IsTopologicalGroup (GA D (Wc D i)) := Formalism.L2.GlobalTheoryTheory.GenusMassVolumes.Unfold.topGroupHA _ _
   haveI : BorelSpace (GA D (Wc D i)) := ⟨rfl⟩
   exact GlobalTheory.DoubleCosetAdjoint.integrableOn_star_mul (R.νW i) (R.fdW i) (T v) (fun g => T' v' (g * δ))
-    (cont hT v) ((cont hT' v').comp (continuous_mul_right δ)) (sq_int hL hT v) (sq_int_tr hL hT' v' δ)
+    (cont hT v) ((cont hT' v').comp (continuous_mul_const δ)) (sq_int hL hT v) (sq_int_tr hL hT' v' δ)
 
 theorem exists_ip {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) {γ : GA D (Wc D i)} (hγ : γ ∈ GfC (Wc D i))
     {T T' : MMap (R.MW i (sg0 D A))} (hT : T ∈ R.Wall i (sg0 D A)) (hT' : T' ∈ R.Wall i (sg0 D A)) :
@@ -135,12 +178,12 @@ theorem exists_ip {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) {γ : GA D 
     have h2 := (hc v v').2
     rw [hy] at h2
     simp only [heckeOn_apply, Finset.mul_sum] at h2
-    rw [integral_finset_sum _ fun δ _ => int_tr hL hT hT' v v' δ, Finset.sum_congr rfl key, Finset.sum_const,
+    rw [integral_finsetSum _ fun δ _ => int_tr hL hT hT' v v' δ, Finset.sum_congr rfl key, Finset.sum_const,
       nsmul_eq_mul] at h2
     simp only [heckeOn_single_apply]
     rw [div_mul_eq_mul_div, eq_div_iff hn, mul_comm, h2]
 
-set_option maxHeartbeats 1600000 in
+
 theorem transLaws_of {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) : TransLaws R i := by
   classical
   have hHW := hL.models.HW i (sg0 D A)
@@ -197,7 +240,7 @@ theorem transLaws_of {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) : TransL
     refine ⟨y', hy', fun γ hγ x => ?_⟩
     have hCf : ∀ δ ∈ C, δ ∈ GfC (Wc D i) := fun δ hδ => (hR.1 δ hδ).1
     rw [htp γ hγ, Finset.sum_congr rfl fun δ hδ => htp (γ * δ) (mul_mem hγ (hCf δ hδ)) x y, ← Finset.sum_div,
-      ← Finset.mul_sum, ← integral_finset_sum _ fun δ _ => hI x y (γ * δ)]
+      ← Finset.mul_sum, ← integral_finsetSum _ fun δ _ => hI x y (γ * δ)]
     congr 3
     funext g
     rw [hy', heckeOn_apply, Finset.mul_sum]
@@ -239,7 +282,7 @@ theorem transLaws_of {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) : TransL
       ‖∫ g in R.fdW i, star (e x v0 g) * e x v0 g ∂(R.νW i)‖ * ‖∫ g in R.fdW i, star (e y v0 g) * e y v0 g ∂(R.νW i)‖ := by
     intro x y
     have hcs' := norm_integral_star_mul_sq_le ((R.νW i).restrict (R.fdW i)) (e x v0) (fun g => e y v0 (g * γ))
-      (cont (hW x) v0).aestronglyMeasurable ((cont (hW y) v0).comp (continuous_mul_right γ)).aestronglyMeasurable
+      (cont (hW x) v0).aestronglyMeasurable ((cont (hW y) v0).comp (continuous_mul_const γ)).aestronglyMeasurable
       (sq_int hL (hW x) v0) (sq_int_tr hL (hW y) v0 γ)
     have hsh := shift hL (fun g => star (e y v0 g) * e y v0 g)
       (fun δ hδ g => by simp only [linv (hW y) v0 hδ]) γ
@@ -265,7 +308,7 @@ theorem transLaws_of {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) : TransL
     intro x1 x2 y
     have hf : ∀ g : GA D (Wc D i), star (e (x1 + x2) v0 g) * e y v0 (g * γ) =
         star (e x1 v0 g) * e y v0 (g * γ) + star (e x2 v0 g) * e y v0 (g * γ) := fun g => by
-      simp only [map_add, MultilinearMap.add_apply, Pi.add_apply, Complex.star_def, add_mul]
+      simp only [map_add (f := _), MultilinearMap.add_apply, Pi.add_apply, Complex.star_def, add_mul]
     rw [htp γ hγ, htp γ hγ, htp γ hγ]
     simp only [hf]
     rw [integral_add (hI x1 y γ) (hI x2 y γ)]
@@ -284,7 +327,7 @@ theorem transLaws_of {F : Face D A} (hL : Laws R F) (hLP : LevProd R i) : TransL
     intro x y1 y2
     have hf : ∀ g : GA D (Wc D i), star (e x v0 g) * e (y1 + y2) v0 (g * γ) =
         star (e x v0 g) * e y1 v0 (g * γ) + star (e x v0 g) * e y2 v0 (g * γ) := fun g => by
-      simp only [map_add, MultilinearMap.add_apply, Pi.add_apply, mul_add]
+      simp only [map_add (f := _), MultilinearMap.add_apply, Pi.add_apply, mul_add]
     rw [htp γ hγ, htp γ hγ, htp γ hγ]
     simp only [hf]
     rw [integral_add (hI x y1 γ) (hI x y2 γ)]

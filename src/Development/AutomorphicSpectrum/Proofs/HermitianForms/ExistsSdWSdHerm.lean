@@ -1,11 +1,72 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.SiegelWeilUnitaryConvergent
-import Formalism.UnipotentAdelicQuotients.StdAdditiveCharExists
-import Development.AutomorphicSpectrum.Proofs.HermitianForms.IndicatorInSchrodingerSpanStatement
-import Development.AutomorphicSpectrum.Proofs.HermitianForms.AdelicCharacterLocalNontrivial
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSmallDualLattices
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdditiveCharConductorExists
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdditiveCharConductorExists
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsSmallDualLattices
+public import Development.AutomorphicSpectrum.Proofs.HermitianForms.AdelicCharacterLocalNontrivial
+public import Development.AutomorphicSpectrum.Proofs.HermitianForms.IndicatorInSchrodingerSpanStatement
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Tjcosets
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Valued.LocallyCompact
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
+@[expose] public section
 
 open NumberField IsDedekindDomain MeasureTheory HeckeCharacterZeroLocus.SiegelWeilU Topology
 open scoped TensorProduct
@@ -30,6 +91,7 @@ theorem exists_of_std (ψ : AddChar K ℂ) (hψ : GlobalTheory.JR.IsStdChar ψ) 
   have hB : ∀ x y, β x y = ∑ i, e.repr x i * e'.repr y i := by
     intro x y
     conv_lhs => rw [← e.sum_repr x]
+
     simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [LinearMap.BilinForm.dualBasis_repr_apply, hs.eq]
@@ -157,13 +219,13 @@ variable {F E : Type} [Field F] [Field E] [Algebra F E]
 theorem sigR_smul (c : R) (z : R ⊗[F] E) : sigR R σ (c • z) = c • sigR R σ z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [smul_add, map_add, ha, hb]
+  | add a b ha hb => simp only [smul_add, map_add (f := _), ha, hb]
   | tmul a e => rfl
 
 theorem sigR_sigR (hσ : ∀ x, σ (σ x) = x) (z : R ⊗[F] E) : sigR R σ (sigR R σ z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e =>
     show a ⊗ₜ[F] σ (σ e) = _
     rw [hσ]
@@ -189,7 +251,7 @@ theorem trace_nondeg [FiniteDimensional F E] [Algebra.IsSeparable F E] (z : R �
     intro k z
     induction z using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy, add_mul]
+    | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy, add_mul]
     | tmul a e =>
       rw [Algebra.TensorProduct.tmul_mul_tmul, trace_tmul, Algebra.TensorProduct.basis_repr_tmul]
       simp [b', LinearMap.BilinForm.dualBasis_repr_apply, Algebra.traceForm_apply]
@@ -200,7 +262,7 @@ theorem trace_sigR [FiniteDimensional F E] (z : R ⊗[F] E) :
     Algebra.trace R (R ⊗[F] E) (sigR R σ z) = Algebra.trace R (R ⊗[F] E) z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e =>
     show Algebra.trace R (R ⊗[F] E) (a ⊗ₜ[F] σ e) = _
     rw [trace_tmul, trace_tmul]
@@ -226,6 +288,7 @@ theorem hR_symm [FiniteDimensional F E] (hσ : ∀ x, σ (σ x) = x) (hJ : IsHer
     Algebra.trace R (R ⊗[F] E) (hR R σ J x y) = Algebra.trace R (R ⊗[F] E) (hR R σ J y x) := by
   rw [← trace_sigR R σ]
   congr 1
+
   simp only [hR, hform, map_sum, map_mul, sigR_sigR R σ hσ]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -298,7 +361,7 @@ theorem pairHerm_nondeg [FiniteDimensional F E] [Algebra.IsSeparable F E] [CharZ
   refine trace_nondeg R _ fun w => ?_
   have hT : (Matrix.single b a w + Matrix.single a b (sigR R σ w)) ∈ HermR R σ n := by
     intro i j
-    simp only [Matrix.add_apply, Matrix.single_apply, map_add, apply_ite (sigR R σ), map_zero,
+    simp only [Matrix.add_apply, Matrix.single_apply, map_add (f := _), apply_ite (sigR R σ), map_zero,
       sigR_sigR R σ hσ]
     rw [add_comm]
     simp only [and_comm]
@@ -309,7 +372,7 @@ theorem pairHerm_nondeg [FiniteDimensional F E] [Algebra.IsSeparable F E] [CharZ
     rw [map_mul, S.2 b a]
     simp [Matrix.single_apply, mul_add, Finset.sum_add_distrib, ite_and]
   simp only [pairHerm] at h1
-  rw [h2, map_add, trace_sigR, ← two_mul, ← mul_assoc] at h1
+  rw [h2, map_add (f := _), trace_sigR, ← two_mul, ← mul_assoc] at h1
   have h3 : algebraMap F R (1 / 2) * 2 = 1 := by
     rw [← map_ofNat (algebraMap F R) 2, ← map_mul]; simp
   rwa [h3, one_mul] at h1

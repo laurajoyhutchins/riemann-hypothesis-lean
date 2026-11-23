@@ -1,7 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.StarDet
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.StarApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.StarDet
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Polynomial Matrix UpperTheory.V UpperTheory.V.W
 
@@ -9,7 +54,7 @@ private theorem star_single_X_sub_mapRingHom_C {l : ℕ} [Fact l.Prime] (F : GFr
     F.star O R[X] n (MonoidAlgebra.single 1 X - MonoidAlgebra.mapRingHom F.G₀ C x) = MonoidAlgebra.single 1 X - MonoidAlgebra.mapRingHom F.G₀ C (F.star O R n x) := by
   have h1 : pushCh (C : R →+* R[X]) (F.eps O R) = F.eps O R[X] := by
     ext x
-    simp [GFrame.eps, pushCh, Polynomial.algebraMap_apply]
+    simp [GFrame.eps, pushCh, Polynomial.coeff_C, Finsupp.single_apply, eq_comm]
   have he : ∀ (h : F.G₀) (k : ℤ), (C : R →+* R[X]) ((F.eps O R h ^ k : Rˣ) : R) = ((F.eps O R[X] h ^ k : R[X]ˣ) : R[X]) := by
     intro h k
     rw [← h1, pushCh, MonoidHom.comp_apply, ← map_zpow (Units.map ((C : R →+* R[X]) : R →* R[X]))]
@@ -32,7 +77,7 @@ private theorem star_single_X_sub_mapRingHom_C {l : ℕ} [Fact l.Prime] (F : GFr
   have hmap : MonoidAlgebra.mapRingHom F.G₀ C (F.star O R n x) = F.star O R[X] n (MonoidAlgebra.mapRingHom F.G₀ C x) := by
     induction x using MonoidAlgebra.induction_linear with
     | zero => rw [hz, map_zero, hz]
-    | add a b ha hb => rw [hadd, map_add, ha, hb, map_add, hadd]
+    | add a b ha hb => rw [hadd, map_add (f := _), ha, hb, map_add (f := _), hadd]
     | single h r =>
       rw [hs, MonoidAlgebra.mapRingHom_single, MonoidAlgebra.mapRingHom_single, hs, map_mul, he]
   rw [hsub, hone, hmap]

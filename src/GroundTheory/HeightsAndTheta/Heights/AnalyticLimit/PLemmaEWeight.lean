@@ -1,12 +1,59 @@
-import Mathlib
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.StLemmaEWeight
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.EnergyStep
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PKaehlerBound
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PLemmaETailLog
+public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PLogNormHolo
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PChartLeviThGe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PshRegMax
 import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
-import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PshRegMax
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PChartLeviThGe
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.StLemmaEWeight
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PLemmaETailLog
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PKaehlerBound
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.PLogNormHolo
-import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.EnergyStep
+public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.ContinuousTmaxShift
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.AnalyticLimit
@@ -132,8 +179,8 @@ theorem eventually_le_rSec {A : FinHolAtlas D X} {L : LocPot X} {s : X → X →
 def eWeightPair (L : LocPot X) (s : X → X → ℂ) (c₀ l : ℝ) (z : X) : Fin 2 → ℝ :=
   ![-(c₀ * rSec L s z), -l]
 
-open Classical in
 
+open Classical in
 def eWeight (L : LocPot X) (s : X → X → ℂ) (c₀ l : ℝ) (z : X) : ℝ :=
   if z ∈ secOpen s then regMax 1 (eWeightPair L s c₀ l z) - 1 else -l - 1
 

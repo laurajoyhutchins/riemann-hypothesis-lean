@@ -1,8 +1,60 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.OneBlockPnPt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemMIdealOverIff
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockEqChartRing
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPointDegreePos
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.OneBlockPnPt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Objects
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ChartRingOverOneBlockEqChartRing
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsMultiProjPrimeMIdealOverGraph
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.MemMIdealOverIff
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PHilbertPositive
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPointDegreePos
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PPrimeFiltrationPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -56,7 +108,7 @@ theorem residue_coe {F : Type} [Field F] {K : Type} {ι : K → Type} {Ω : Type
     IndefiniteRowSideFullHecke.Kleiman2.residue F y c p (a : Ω) =
       algebraMap (chartRingOver F y c ⧸ p) (IndefiniteRowSideFullHecke.Kleiman2.ResField F y c p) (Ideal.Quotient.mk p a) := by
   unfold IndefiniteRowSideFullHecke.Kleiman2.residue
-  rw [dif_pos a.2]
+  rw [dite_eq_left a.2]
 
 theorem mIdealOver_oneBlock_eq {S : Type} [CommRing S] {Ω' : Type} [Field Ω'] [Algebra S Ω'] {N : ℕ}
     (z : Fin (N + 1) → Ω') :

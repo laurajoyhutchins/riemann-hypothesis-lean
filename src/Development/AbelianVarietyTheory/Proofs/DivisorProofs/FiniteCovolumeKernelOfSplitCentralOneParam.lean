@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+
+@[expose] public section
+
 open MeasureTheory Topology
 
 namespace GlobalTheory.KernelCovolume
@@ -49,8 +99,8 @@ def splitHomeo {H : Subgroup G} {s : G → ℝ} {c : ℝ → G} (hs : Continuous
 end GlobalTheory.KernelCovolume
 
 open scoped Pointwise
-open GlobalTheory.KernelCovolume in
 
+open GlobalTheory.KernelCovolume in
 theorem GlobalTheory.finiteCovolume_kernel : ∀ (G : Type) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [LocallyCompactSpace G] [SecondCountableTopology G] [T2Space G] [MeasurableSpace G] [BorelSpace G] (H Γ Λ : Subgroup G) (s : G → ℝ) (c : ℝ → G), Continuous s → (∀ g h, s (g * h) = s g + s h) → Continuous c → (∀ x y, c (x + y) = c x * c y) → (∀ t g, c t * g = g * c t) → (∀ t, s (c t) = t) → (∀ g, g ∈ H ↔ s g = 0) → Γ ≤ H → Λ = Γ ⊔ Subgroup.zpowers (c 1) → DiscreteTopology Λ → (∀ (ν : Measure G) (D : Set G), ν.IsHaarMeasure → IsFundamentalDomain Λ D ν → ν D ≠ ⊤) → ∀ (π : Measure H) (D : Set H), π.IsHaarMeasure → IsFundamentalDomain (Γ.subgroupOf H) D π → π D ≠ ⊤ := by
   intro G _ _ _ _ _ _ _ _ H Γ Λ s c hs hsa hc hca hcc hsc hH hΓ hΛ _hdisc hfin π D hπ hD
   have hcl : IsClosed (H : Set G) := by
@@ -59,7 +109,7 @@ theorem GlobalTheory.finiteCovolume_kernel : ∀ (G : Type) [Group G] [Topologic
   haveI : LocallyCompactSpace H := hcl.locallyCompactSpace
   haveI : SigmaCompactSpace H := hcl.sigmaCompactSpace
   haveI : SigmaFinite π := inferInstance
-  set φ : H × ℝ ≃ₜ G := splitHomeo hs hsa hc hca hsc hH with hφdef
+  set φ : H × ℝ ≃ₜ G := GlobalTheory.KernelCovolume.splitHomeo hs hsa hc hca hsc hH with hφdef
   have hφ : ∀ p : H × ℝ, φ p = (p.1 : G) * c p.2 := fun p => rfl
   set μ0 : Measure (H × ℝ) := π.prod volume with hμ0
   set ν : Measure G := μ0.map φ with hνdef
@@ -79,10 +129,10 @@ theorem GlobalTheory.finiteCovolume_kernel : ∀ (G : Type) [Group G] [Topologic
     rw [hΛ] at hl
     obtain ⟨y, hy, z, hz, rfl⟩ := Subgroup.mem_sup_of_normal_right.1 hl
     obtain ⟨n, rfl⟩ := Subgroup.mem_zpowers_iff.1 hz
-    exact ⟨y, hy, n, by rw [c_int hca]⟩
+    exact ⟨y, hy, n, by rw [GlobalTheory.KernelCovolume.c_int hca]⟩
   have hmemΛ : ∀ γ ∈ Γ, ∀ n : ℤ, γ * c n ∈ Λ := by
     intro γ hγ n
-    rw [hΛ, c_int hca]
+    rw [hΛ, GlobalTheory.KernelCovolume.c_int hca]
     exact Subgroup.mul_mem _ (Subgroup.mem_sup_left hγ)
       (Subgroup.mem_sup_right (Subgroup.zpow_mem_zpowers _ _))
 
@@ -115,7 +165,7 @@ theorem GlobalTheory.finiteCovolume_kernel : ∀ (G : Type) [Group G] [Topologic
     have hx : l⁻¹ • φ p = φ ((⟨γ, hΓ hγ⟩ : H)⁻¹ * p.1, ((-n : ℤ) : ℝ) + p.2) := by
       rw [← hmulφ, Subgroup.smul_def, smul_eq_mul]
       congr 1
-      simp only [Subgroup.coe_inv, e, mul_inv_rev, c_neg hca, Int.cast_neg]
+      simp only [Subgroup.coe_inv, e, mul_inv_rev, GlobalTheory.KernelCovolume.c_neg hca, Int.cast_neg]
       exact hcc _ _
     rw [hx] at hp
     simpa [hD', hS] using hp

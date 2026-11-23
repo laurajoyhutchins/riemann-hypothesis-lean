@@ -1,4 +1,47 @@
-import Formalism.GradedWeylDivisibility.StatementC
+module
+
+public import Formalism.GradedWeylDivisibility.StatementC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -12,10 +55,6 @@ private theorem cmIdx_val_eq {r n : ℕ} (v : Fin r × Fin n) :
     ((cmIdx r n v : Fin (n * r)) : ℕ) = v.1.val + r * v.2.val := by
   first
   | rfl
-  | (simp only [cmIdx, Equiv.trans_apply, Equiv.prodComm_apply, Prod.fst_swap,
-      Prod.snd_swap, finProdFinEquiv_apply_val]; done)
-  | (simp [cmIdx, finProdFinEquiv_apply_val, Nat.mul_comm, Nat.add_comm]; done)
-  | (simp [cmIdx]; ring)
 
 private theorem col_lt_or_col_eq_row_lt_of_cmIdx_lt {r n : ℕ} {v w : Fin r × Fin n}
     (h : cmIdx r n v < cmIdx r n w) :
@@ -34,33 +73,26 @@ private theorem col_lt_or_col_eq_row_lt_of_cmIdx_lt {r n : ℕ} {v w : Fin r × 
     have hm : r * (w.2.val + 1) ≤ r * v.2.val := by
       first
       | exact Nat.mul_le_mul_left r h1
-      | exact Nat.mul_le_mul_left h1 r
-      | exact Nat.mul_le_mul (le_refl r) h1
     rw [Nat.mul_add, Nat.mul_one] at hm
     first
     | omega
-    | linarith
 
 private theorem domCongr_cmIdx_apply_cmIdx {r n : ℕ} (x : Fin r × Fin n →₀ ℕ) (v : Fin r × Fin n) :
     (Finsupp.domCongr (cmIdx r n) x) (cmIdx r n v) = x v := by
   first
   | (simp [Finsupp.domCongr_apply, Finsupp.equivMapDomain_apply]; done)
-  | (rw [Finsupp.domCongr_apply, Finsupp.equivMapDomain_apply, Equiv.symm_apply_apply])
-  | (simp; done)
 
 private theorem sum_single_castLE_apply' {r n s : ℕ} (τ : Fin s → Fin r) (hs : s ≤ n) (b : Fin r) (t : Fin n) :
     (∑ q : Fin s, Finsupp.single (τ q, Fin.castLE hs q) 1 : Fin r × Fin n →₀ ℕ) (b, t) =
       if h : t.val < s then (if τ ⟨t.val, h⟩ = b then 1 else 0) else 0 := by
-  rw [Finsupp.finset_sum_apply]
+  rw [Finsupp.finsetSum_apply]
   by_cases h : t.val < s
-  · rw [dif_pos h, Finset.sum_eq_single ⟨t.val, h⟩]
+  · rw [dite_eq_left h, Finset.sum_eq_single ⟨t.val, h⟩]
     · rw [Finsupp.single_apply]
       by_cases hb : τ ⟨t.val, h⟩ = b
       · have hp : (τ ⟨t.val, h⟩, Fin.castLE hs ⟨t.val, h⟩) = (b, t) := by
           first
           | exact Prod.ext hb (Fin.ext rfl)
-          | exact Prod.ext_iff.2 ⟨hb, Fin.ext rfl⟩
-          | (subst hb; rfl)
         rw [if_pos hp, if_pos hb]
       · rw [if_neg, if_neg hb]
         intro he
@@ -74,7 +106,7 @@ private theorem sum_single_castLE_apply' {r n s : ℕ} (τ : Fin s → Fin r) (h
       exact h2
     · intro hq
       exact absurd (Finset.mem_univ _) hq
-  · rw [dif_neg h]
+  · rw [dite_eq_right h]
     apply Finset.sum_eq_zero
     intro q _
     rw [Finsupp.single_apply, if_neg]
@@ -89,10 +121,6 @@ private theorem toLex_lt_of_eq_below_of_apply_lt {N : ℕ} (x y : Fin N →₀ �
     (h1 : ∀ j, j < i → x j = y j) (h2 : x i < y i) : toLex x < toLex y := by
   first
   | exact ⟨i, h1, h2⟩
-  | exact Finsupp.Lex.lt_of_forall_lt_of_lt _ _ i h1 h2
-  | (show Finsupp.Lex (· < ·) (· < ·) x y; exact ⟨i, h1, h2⟩)
-  | (show Pi.Lex (· < ·) (· < ·) x y; exact ⟨i, h1, h2⟩)
-  | (rw [Finsupp.lex_def]; exact ⟨i, h1, h2⟩)
 
 private theorem colLex_lt_of_toLex_domCongr_cmIdx_lt {r n : ℕ} {c d : Fin r × Fin n →₀ ℕ}
     (h : toLex (Finsupp.domCongr (cmIdx r n) c) <
@@ -108,7 +136,6 @@ theorem minorExponentLt : MinorExpLt := by
     ext x
     first
     | (rw [h x]; rfl)
-    | simp [h x]
   obtain ⟨q0, hq0, hmin⟩ := (wellFounded_lt (α := Fin s)).has_min {q | σ q ≠ q} hex
   have hq0' : σ q0 ≠ q0 := hq0
   have hfix : ∀ q, q < q0 → σ q = q := fun q hq => by
@@ -147,10 +174,10 @@ theorem minorExponentLt : MinorExpLt := by
       have hlt' : (⟨t.val, ht⟩ : Fin s) < q0 := by
         show t.val < q0.val
         omega
-      rw [dif_pos ht, dif_pos ht, hfix _ hlt']
-    · rw [dif_pos ht0, dif_pos ht0, e1, if_neg (lt_trans hb hIlt).ne', if_neg hb.ne']
+      rw [dite_eq_left ht, dite_eq_left ht, hfix _ hlt']
+    · rw [dite_eq_left ht0, dite_eq_left ht0, e1, if_neg (lt_trans hb hIlt).ne', if_neg hb.ne']
   · rw [domCongr_cmIdx_apply_cmIdx, domCongr_cmIdx_apply_cmIdx, hA, hB]
-    rw [dif_pos ht0, dif_pos ht0, e1, if_neg hIlt.ne', if_pos (rfl : I q0 = I q0)]
+    rw [dite_eq_left ht0, dite_eq_left ht0, e1, if_neg hIlt.ne', if_pos (rfl : I q0 = I q0)]
     exact Nat.zero_lt_one
 
 end Formalism.GradedWeylDivisibility

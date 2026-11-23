@@ -1,16 +1,69 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.CompRightEqZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.KappaSt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.StatementsFibreLocal
-import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogDetComparableGramBound
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogDetComparableGramBoundStatement
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.XPerCell
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.AnalyticForms.LeviForms.HomDens
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsOpenFlagDomainNondegenerateMinorsStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogDetComparableGramBoundStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.GramLogUnitaryTriangularInvarianceStatement
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.XPerCell
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagPotentialLeviFormCellStatement
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.Antisymmetric.Statements
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.PeriodChartPotentialLeviForm
+
+@[expose] public section
 
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights
 open scoped ComplexOrder
@@ -1020,67 +1073,10 @@ theorem pairEquiv_lt_snd {j : ℕ} (hj : j ≤ N) (p : Pairs N) (i : Fin N) :
 
 end PerDiag
 
-open PerDiag in
 
+open PerDiag in
 theorem levi_diagonal_of_isPeriodChart :
-    ∀ (e : ℕ) (X : Type) [TopologicalSpace X] (A : FinHolAtlas e X) (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N j : ℕ), j ≤ N → ∀ (pot : Ψ × Fin N → LocPot X) (x : X) (V : Set X) (g : Ψ → X → Matrix (Fin N) (Fin N) ℂ), IsPeriodChart A j pot x V g → ∀ k, x ∈ (A.chart k).source → ∃ Lm : (Fin e → ℂ) →ₗ[ℂ] (Ψ × Pairs N → ℂ), (∀ p, ContDiffAt ℝ 2 ((pot p).φ x ∘ (A.chart k).symm) (A.chart k x)) ∧ (∀ (p : Ψ × Fin N) v, levi ((pot p).φ x ∘ (A.chart k).symm) (A.chart k x) v = ∑ q : Pairs N, if q.1.1 ≤ p.2 ∧ p.2 < q.1.2 then (1 / 2 : ℝ) * ‖Lm v (p.1, q)‖ ^ 2 else 0) ∧ (IsFlagImmersionAt A g x → Function.Injective Lm) := by
-  intro e X _ A Ψ _ _ N j hj pot x V g hP k hx
-  obtain ⟨hVo, hxV, hhol, hdom, hpot⟩ := hP
-  have hz0t : A.chart k x ∈ (A.chart k).target := (A.chart k).map_source hx
-  have hsx : (A.chart k).symm (A.chart k x) = x := (A.chart k).left_inv hx
-  have hmem : A.chart k x ∈ (A.chart k).target ∩ (A.chart k).symm ⁻¹' V :=
-    ⟨hz0t, by simp only [Set.mem_preimage, hsx]; exact hxV⟩
-  have hev : ∀ᶠ w in 𝓝 (A.chart k x), (A.chart k).symm w ∈ V := by
-    have hc : ContinuousAt (A.chart k).symm (A.chart k x) := (A.chart k).continuousAt_symm hz0t
-    exact hc.preimage_mem_nhds (by rw [hsx]; exact hVo.mem_nhds hxV)
-  have hcell : ∀ τ : Ψ, ∃ z : (Fin e → ℂ) → Pairs N → ℂ, AnalyticAt ℂ z (A.chart k x) ∧
-      z (A.chart k x) = 0 ∧
-      (∀ i, PlurRe (A.chart k x) fun w =>
-        stepPot N j i (g τ ((A.chart k).symm w)) - stepPot N j i (cellMat N (z w))) ∧
-      ∀ v, fderiv ℂ z (A.chart k x) v = 0 ↔
-        ((g τ ((A.chart k).symm (A.chart k x)))⁻¹ * Matrix.of fun a b =>
-          fderiv ℂ (fun w => g τ ((A.chart k).symm w) a b) (A.chart k x) v).BlockTriangular id := by
-    intro τ
-    refine exists_cell_coords hj (fun w => g τ ((A.chart k).symm w)) (A.chart k x) (fun a b => ?_) ?_
-    · exact hhol τ a b k (A.chart k x) hmem
-    · filter_upwards [hev] with w hw
-      exact hdom τ _ hw
-  choose zc hzan hz0' hzpl hzker using hcell
-  let Lm : (Fin e → ℂ) →ₗ[ℂ] (Ψ × Pairs N → ℂ) :=
-    { toFun := fun v tq => fderiv ℂ (zc tq.1) (A.chart k x) v ((pairEquiv hj).symm tq.2)
-      map_add' := by
-        intro v w
-        ext tq
-        simp
-      map_smul' := by
-        intro c v
-        ext tq
-        simp }
-  have hf : ∀ p : Ψ × Fin N, PlurRe (A.chart k x) fun w =>
-      ((pot p).φ x ∘ (A.chart k).symm) w - stepPot N j p.2 (cellMat N (zc p.1 w)) := by
-    intro p
-    obtain ⟨G, hG, hGe⟩ := hpot p
-    have h1 : PlurRe (A.chart k x) fun w => (G ((A.chart k).symm w)).re :=
-      ⟨fun w => G ((A.chart k).symm w), hG k (A.chart k x) hmem, Filter.Eventually.of_forall fun _ => rfl⟩
-    refine (h1.add (hzpl p.1 p.2)).congr ?_
-    filter_upwards [hev] with w hw
-    simp only [Function.comp_apply, hGe _ hw]
-    ring
-  refine ⟨Lm, fun p => (levi_of_cell hj p.2 (hzan p.1) (hz0' p.1) (hf p)).1, ?_, ?_⟩
-  · intro p v
-    rw [(levi_of_cell hj p.2 (hzan p.1) (hz0' p.1) (hf p)).2 v]
-    refine Eq.trans ?_ ((pairEquiv hj).sum_comp _)
-    refine Finset.sum_congr rfl fun q _ => ?_
-    simp only [Lm, LinearMap.coe_mk, AddHom.coe_mk, Equiv.symm_apply_apply, pairEquiv_fst_le,
-      pairEquiv_lt_snd]
-  · intro himm
-    refine (injective_iff_map_eq_zero Lm).2 fun v hv => ?_
-    refine himm k hx v fun τ => ?_
-    have hz : fderiv ℂ (zc τ) (A.chart k x) v = 0 := by
-      ext q
-      have := congrFun hv (τ, pairEquiv hj q)
-      simpa [Lm] using this
-    have := (hzker τ v).1 hz
-    rwa [hsx] at this
+    ∀ (e : ℕ) (X : Type) [TopologicalSpace X] (A : FinHolAtlas e X) (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N j : ℕ), j ≤ N → ∀ (pot : Ψ × Fin N → LocPot X) (x : X) (V : Set X) (g : Ψ → X → Matrix (Fin N) (Fin N) ℂ), IsPeriodChart A j pot x V g → ∀ k, x ∈ (A.chart k).source → ∃ Lm : (Fin e → ℂ) →ₗ[ℂ] (Ψ × Pairs N → ℂ), (∀ p, ContDiffAt ℝ 2 ((pot p).φ x ∘ (A.chart k).symm) (A.chart k x)) ∧ (∀ (p : Ψ × Fin N) v, levi ((pot p).φ x ∘ (A.chart k).symm) (A.chart k x) v = ∑ q : Pairs N, if q.1.1 ≤ p.2 ∧ p.2 < q.1.2 then (1 / 2 : ℝ) * ‖Lm v (p.1, q)‖ ^ 2 else 0) ∧ (IsFlagImmersionAt A g x → Function.Injective Lm) :=
+  _root_.GlobalTheory.CompanionTheory.Ar.PB.levi_diagonal_of_isPeriodChart
 
 end PositivityTheory.Xgp.per_diag

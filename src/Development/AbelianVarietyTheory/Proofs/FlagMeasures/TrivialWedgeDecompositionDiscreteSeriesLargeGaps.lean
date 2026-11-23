@@ -1,10 +1,54 @@
-import Mathlib
-import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.IsDSOfIsDG
-import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.PieriTensorDecompositionStatement
-import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.TensorDecompositionParametersStatement
-import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.DiscreteSeriesParameterUniqueStatement
-import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.TensorDecompositionInjectiveParameters
+module
+
+public import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.IsDSOfIsDG
+public import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.DiscreteSeriesParameterUniqueStatement
+public import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.DiscreteSeriesUnitarySmoothBasicStatement
+public import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.SmoothMapsClosureStatement
+public import CompanionTheory.AutomorphicTheory.PieriRules.ThetaBesselIsometries.TensorDecompositionInjectiveParameters
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChainRuleSmooth.ExpIntertwine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open BranchingSupport Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
@@ -52,18 +96,16 @@ theorem dsigW_equiv (U : R.H ≃ₗᵢ[ℂ] R'.H) (hU : ∀ g ∈ GG k r, ∀ x,
     rw [ih hW', dsig_equiv U hU (hW X List.mem_cons_self)]
 
 theorem smMap_of_equiv (U : R.H ≃ₗᵢ[ℂ] R'.H) (hU : ∀ g ∈ GG k r, ∀ x, U (R.σ g x) = R'.σ g (U x)) :
-    SmMap R R' (fun v => U v) where
-  mem v hv := by
-    intro g₀ hg₀
+    SmMap R R' (fun v => U v) := by
+  refine ⟨?_, fun v _ w _ => map_add U v w, fun a v _ => map_smul U a v, ?_⟩
+  · intro v hv g₀ hg₀
     obtain ⟨O, Fn, hO, hgO, hF, hag⟩ := hv g₀ hg₀
     let L : R.H →L[ℝ] R'.H := (U.toContinuousLinearEquiv.toContinuousLinearMap).restrictScalars ℝ
     refine ⟨O, fun x => L (Fn x), hO, hgO, L.contDiff.comp_contDiffOn hF, fun x hx hxH => ?_⟩
     show R'.σ x (U v) = U (Fn x)
     rw [← hU x hxH]
     exact congrArg U (hag x hx hxH)
-  add v _ w _ := map_add _ _ _
-  smul a v _ := map_smul _ _ _
-  cont W hW := by
+  · intro W hW
     refine ⟨1, [W], ?_, fun v _ => ?_⟩
     · intro w hw Y hY
       rw [List.mem_singleton.mp hw] at hY
@@ -107,11 +149,11 @@ theorem dsigW_zero (R : Rep k r) (W : List (Mx k r)) : PI.UpqRep.dsigW (k := k) 
     rw [ih]
     simp [PI.UpqRep.dsig]
 
-theorem smMap_zero (R R' : Rep k r) : SmMap R R' (fun _ => 0) where
-  mem _ _ := R'.smSub.zero_mem
-  add _ _ _ _ := (add_zero 0).symm
-  smul a _ _ := (smul_zero a).symm
-  cont W _ := ⟨0, [], by simp, fun v _ => by simp [dsigW_zero]⟩
+theorem smMap_zero (R R' : Rep k r) : SmMap R R' (fun _ => 0) := by
+  refine ⟨fun _ _ => R'.smSub.zero_mem, fun _ _ _ _ => (add_zero 0).symm,
+    fun a _ _ => (smul_zero a).symm, ?_⟩
+  intro W _
+  exact ⟨0, [], by simp, fun _ _ => by simp [dsigW_zero]⟩
 
 theorem isInvForm_of_smMap (hK : PI.KFinSmooth) {ε : Fin (2 * r + k + 1) → Bool} {m' : Fin (2 * r + k + 1) → ℝ}
     {R R' : Rep k r} (hR' : R'.IsDG ε m') {T : R.H → R'.H} (hT : SmMap R R' T)

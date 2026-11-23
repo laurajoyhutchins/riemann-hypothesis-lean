@@ -1,5 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
-import Formalism.LocalRingCardinality.SpanPowerMembership.GatRing
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
+public import Mathlib.Algebra.QuadraticAlgebra.Basic
+public import Mathlib.FieldTheory.Finite.GaloisField
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+public import Formalism.LocalRingCardinality.SpanPowerMembership.GatRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.WittVector.Complete
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,31 +106,33 @@ theorem sigN_period (hn : n ≠ 0) : sigN p n ^ n = 1 := by
 
 theorem hidaSettingOfEven (h5 : 5 ≤ p) (h2 : 2 ≤ n) (he : Even n) :
     HidaSetting p n (Wn p n) (Qn p n) (On p n) (Kn p n) (iotaN p n) (sigN p n)
-      (algebraMap (Wn p n) (On p n)) ω where
-  prime := hp.out
-  five_le := h5
-  two_le := h2
-  even := he
-  frac_alt := inferInstance
-  frac_O := inferInstance
-  p_unif := WittVector.irreducible p
-  res_card := by
-    rw [Nat.card_congr (WittVector.quotientPEquiv (p := p) (k := GaloisField p n)).toEquiv,
-      GaloisField.card p n (by omega)]
-  eq_sum_herm_smul_frame_of_inW := inferInstance
-  frob := fun x => by
-    have h : WittVector.frobenius x - x ^ p ∈ Ideal.span {(p : Wn p n)} := by
-      rw [WittVector.mem_span_p_iff_coeff_zero_eq_zero]
-      show WittVector.constantCoeff (WittVector.frobenius x - x ^ p) = 0
-      rw [map_sub, map_pow]
-      show (WittVector.frobenius x).coeff 0 - x.coeff 0 ^ p = 0
-      rw [WittVector.coeff_frobenius_charP, sub_self]
-    obtain ⟨y, hy⟩ := Ideal.mem_span_singleton.mp h
-    exact ⟨y, by rw [sigN_alg, ← hy]; congr 1; ring⟩
-  period := sigN_period p n (by omega)
-  ι_comp := fun x => IsFractionRing.lift_algebraMap (inj_WK p n) x
-  finite := RingHom.finite_algebraMap.mpr inferInstance
-  complete_O := GatR.isAdicComplete (WittVector.irreducible p) inferInstance
-  w_sq := by rw [GatR.om_sq, map_natCast]
+      (algebraMap (Wn p n) (On p n)) ω := by
+  exact {
+    prime := hp.out
+    five_le := h5
+    two_le := h2
+    even := he
+    frac_alt := inferInstance
+    frac_O := inferInstance
+    p_unif := WittVector.irreducible p
+    res_card := by
+      rw [Nat.card_congr (WittVector.quotientPEquiv (p := p) (k := GaloisField p n)).toEquiv,
+        GaloisField.card p n (by omega)]
+    eq_sum_herm_smul_frame_of_inW := inferInstance
+    frob := fun x => by
+      have h : WittVector.frobenius x - x ^ p ∈ Ideal.span {(p : Wn p n)} := by
+        rw [WittVector.mem_span_p_iff_coeff_zero_eq_zero]
+        show WittVector.constantCoeff (WittVector.frobenius x - x ^ p) = 0
+        rw [map_sub, map_pow]
+        show (WittVector.frobenius x).coeff 0 - x.coeff 0 ^ p = 0
+        rw [WittVector.coeff_frobenius_charP, sub_self]
+      obtain ⟨y, hy⟩ := Ideal.mem_span_singleton.mp h
+      exact ⟨y, by rw [sigN_alg, ← hy]; congr 1; ring⟩
+    period := sigN_period p n (by omega)
+    ι_comp := fun x => IsFractionRing.lift_algebraMap (inj_WK p n) x
+    finite := RingHom.finite_algebraMap.mpr inferInstance
+    complete_O := GatR.isAdicComplete (WittVector.irreducible p) inferInstance
+    w_sq := by rw [GatR.om_sq, map_natCast]
+  }
 
 end Formalism.BasicNotions.Examples₂.LevelValuationRings

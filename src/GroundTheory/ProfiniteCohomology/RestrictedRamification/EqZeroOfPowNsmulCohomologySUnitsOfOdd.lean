@@ -1,16 +1,63 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighSUnits
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighDivisor
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighDecompLadic
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighSUnits
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.HighUnits
+import GroundTheory.ProfiniteCohomology.Colimit
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.HighUnitsLocal
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.Brauer
+import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighDecomp
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighDecompLadic
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.HighDivisor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory Limits NumberField IsDedekindDomain GroundTheory.Global
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 section TwoTorsion
 
@@ -30,33 +77,28 @@ theorem two_nsmul_cohomology_unitsLimitRep {r : ℕ} (hr : 4 ≤ r) (y : cohomol
   · have := subsingleton_localGaloisCohomology_of_isReal_of_odd v.1 v.2 ho
     exact Subsingleton.elim _ _
 
-theorem eq_zero_of_pow_nsmul_cohomology_unitsLimitRep_of_odd {ℓ : ℕ} (hℓ : ℓ.Prime) (h2 : ℓ ≠ 2) {r : ℕ}
-    (hr : 4 ≤ r) (y : cohomology (unitsLimitRep K) r) {k : ℕ} (hk : ℓ ^ k • y = 0) : y = 0 :=
-  eq_zero_of_coprime_nsmul_eq_zero ((Nat.coprime_primes Nat.prime_two hℓ).2 h2.symm)
-    (two_nsmul_cohomology_unitsLimitRep hr y) hk
-
 end TwoTorsion
 
 variable (K : FiniteSubfield) (S : Set (HeightOneSpectrum (𝓞 K.1))) {ℓ : ℕ} (hℓ : ℓ.Prime)
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S)
 
-include hℓ hS in
 
+include hℓ hS in
 theorem eq_zero_of_pow_nsmul_cohomology_gsDiv_QZ (ιs : LocalEmbeddings K) {p : ℕ} (hp : 2 ≤ p)
     (x : cohomology (gsDiv K S ιs QZ) p) (k : ℕ) (hx : ℓ ^ k • x = 0) : x = 0 :=
   eq_zero_of_pow_nsmul_cohomology_divFunRep (gsDecomp K S ιs) (continuous_gsDecomp K S ιs) hℓ (by omega)
     (fun v y hy => hy.elim fun j hj => eq_zero_of_pow_nsmul_cohomology_range_gsDecomp K S ιs v hℓ hS hp y j hj)
     x k hx
 
-include hℓ hS in
 
+include hℓ hS in
 theorem isIsoModCoprime_sUnitsToUnits_of_four_le {r : ℕ} (hr : 4 ≤ r) :
     IsIsoModCoprime ℓ (cohomologyMap (sUnitsToUnits S (maxUnramifiedOutside K.1 ℚ̄ S)) r).hom.toAddMonoidHom :=
   isIsoModCoprime_sUnitsToUnits K S (nonempty_localEmbeddings K).some hℓ hS
     (fun _ hp x k hx => eq_zero_of_pow_nsmul_cohomology_gsDiv_QZ K S hℓ hS _ hp x k hx) hr
 
-include hℓ hS in
 
+include hℓ hS in
 theorem isIsoModCoprime_sUnitsInfl {r : ℕ} (hr : 4 ≤ r) : IsIsoModCoprime ℓ (sUnitsInfl K S r) :=
   (isIsoModCoprime_gsUnitsInfl K S hℓ hS (by omega)).comp (isIsoModCoprime_sUnitsToUnits_of_four_le K S hℓ hS hr)
 
@@ -67,40 +109,15 @@ noncomputable def sUnitsToUnitsPrimaryEquiv {r : ℕ} (hr : 4 ≤ r) :
     ((isIsoModCoprime_sUnitsToUnits_of_four_le K S hℓ hS hr).bijective_primaryComponentMap hℓ
       (isTorsion_cohomology _ (by omega)))
 
-theorem coe_sUnitsToUnitsPrimaryEquiv_apply {r : ℕ} (hr : 4 ≤ r)
-    (x : AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 ℚ̄ S) r) ℓ) :
-    (sUnitsToUnitsPrimaryEquiv K S hℓ hS hr x : cohomology (galUnits K.1 (maxUnramifiedOutside K.1 ℚ̄ S)) r) =
-      (cohomologyMap (sUnitsToUnits S (maxUnramifiedOutside K.1 ℚ̄ S)) r).hom x :=
-  rfl
-
 noncomputable def sUnitsInflPrimaryEquiv {r : ℕ} (hr : 4 ≤ r) :
     AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 ℚ̄ S) r) ℓ ≃+
       AddCommGroup.primaryComponent (cohomology (unitsLimitRep K) r) ℓ :=
   AddEquiv.ofBijective _
     ((isIsoModCoprime_sUnitsInfl K S hℓ hS hr).bijective_primaryComponentMap hℓ (isTorsion_cohomology _ (by omega)))
 
-theorem coe_sUnitsInflPrimaryEquiv_apply {r : ℕ} (hr : 4 ≤ r)
-    (x : AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 ℚ̄ S) r) ℓ) :
-    (sUnitsInflPrimaryEquiv K S hℓ hS hr x : cohomology (unitsLimitRep K) r) = sUnitsInfl K S r x :=
-  rfl
-
 section Odd
 
-include hℓ hS in
 
-theorem eq_zero_of_pow_nsmul_cohomology_gsUnits_of_odd (h2 : ℓ ≠ 2) {r : ℕ} (hr : 4 ≤ r)
-    (x : cohomology (galUnits K.1 (maxUnramifiedOutside K.1 ℚ̄ S)) r) {k : ℕ} (hk : ℓ ^ k • x = 0) : x = 0 :=
-  eq_zero_of_gsUnitsInfl_eq_zero K S hℓ hS (by omega) x
-    (eq_zero_of_pow_nsmul_cohomology_unitsLimitRep_of_odd hℓ h2 hr _ (k := k)
-      ((map_nsmul _ _ _).symm.trans ((congrArg _ hk).trans (map_zero _)))) hk
-
-include hℓ hS in
-
-theorem eq_zero_of_pow_nsmul_cohomology_sUnits_of_odd (h2 : ℓ ≠ 2) {r : ℕ} (hr : 4 ≤ r)
-    (x : cohomology (galSUnitsMax K.1 ℚ̄ S) r) {k : ℕ} (hk : ℓ ^ k • x = 0) : x = 0 :=
-  (isIsoModCoprime_sUnitsInfl K S hℓ hS hr).eq_zero_of_pow_nsmul
-    (eq_zero_of_pow_nsmul_cohomology_unitsLimitRep_of_odd hℓ h2 hr _ (k := k)
-      ((map_nsmul _ _ _).symm.trans ((congrArg _ hk).trans (map_zero _)))) hk
 
 end Odd
 
@@ -130,11 +147,6 @@ noncomputable def gsUnitsRealPrimaryEquiv {r : ℕ} (hr : 4 ≤ r) :
       ∀ v : {v : InfinitePlace K.1 // v.IsReal}, localGaloisCohomology K r (.inl v.1) :=
   AddEquiv.ofBijective _ (bijective_realLocalization_comp_primaryComponent K ι hr (gsUnitsInfl K S r)
     (isIsoModCoprime_gsUnitsInfl K S Nat.prime_two h2S (by omega)) (isTorsion_cohomology _ (by omega)))
-
-theorem gsUnitsRealPrimaryEquiv_apply {r : ℕ} (hr : 4 ≤ r)
-    (x : AddCommGroup.primaryComponent (cohomology (galUnits K.1 (maxUnramifiedOutside K.1 ℚ̄ S)) r) 2) :
-    gsUnitsRealPrimaryEquiv K S ι h2S hr x = realLocalization ι (r := r) (by omega) (gsUnitsInfl K S r x) :=
-  rfl
 
 noncomputable def sUnitsRealPrimaryEquiv {r : ℕ} (hr : 4 ≤ r) :
     AddCommGroup.primaryComponent (cohomology (galSUnitsMax K.1 ℚ̄ S) r) 2 ≃+

@@ -1,20 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemSpanOfForallGermMemSpan
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsMaximalOfFinitePrimes
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KoszulExactOfRegular
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CubeCutRegularSequence
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.RingKrullDimLocalizationQuotientLe
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsLeNatCastNeZero
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqBasicOpen
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Mathlib.RingTheory.Regular.RegularSequence
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqBasicOpen
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CubeCutRegularSequence
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsLeNatCastNeZero
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsMaximalOfFinitePrimes
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KoszulExactOfRegular
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemSpanOfForallGermMemSpan
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.RingKrullDimLocalizationQuotientLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -81,9 +125,6 @@ theorem co_ext {x y : SecOn (pw L l) V} (h : ∀ k, co x k = co y k) : x = y := 
 
 theorem co_add (x y : SecOn (pw L l) V) (k : L.ι) : co (x + y) k = co x k + co y k := rfl
 theorem co_sub (x y : SecOn (pw L l) V) (k : L.ι) : co (x - y) k = co x k - co y k := rfl
-theorem co_zero (k : L.ι) : co (0 : SecOn (pw L l) V) k = 0 := rfl
-theorem co_smul (a : Γ(X, V)) (x : SecOn (pw L l) V) (k : L.ι) :
-    co (a • x) k = rs X inf_le_left a * co x k := rfl
 theorem co_restrict (h : W ≤ V) (x : SecOn (pw L l) V) (k : L.ι) :
     co (SecOn.restrict _ h x) k = rs X (inf_le_inf_right _ h) (co x k) := rfl
 theorem co_ofSec (s : LB.Sec (pw L l)) (k : L.ι) :
@@ -127,7 +168,7 @@ def mulPw (s : LB.Sec (pw L n)) (l l' : ℤ) (V : X.Opens) :
 
 theorem co_mulPw (s : LB.Sec (pw L n)) (h : l' = l + n) (x : SecOn (pw L l) V) (k : L.ι) :
     co (mulPw s l l' V x) k = rs X inf_le_right (sf s k) * co x k := by
-  rw [mulPw, dif_pos h]; rfl
+  rw [mulPw, dite_eq_left h]; rfl
 
 theorem mulPw_restrict (s : LB.Sec (pw L n)) (h : W ≤ V) (x : SecOn (pw L l) V) :
     mulPw s l l' W (SecOn.restrict _ h x) = SecOn.restrict _ h (mulPw s l l' V x) := by
@@ -160,6 +201,7 @@ theorem sum_mulPw_iff (hL : L.IsLB) (k : L.ι) (h : V ≤ L.U k) {J : Type} (T :
     exact ⟨fun j => ch hL l k h (t j), by simp only [map_sum, ch_mulPw hL k h _ e]⟩
   · rintro ⟨r, hr⟩
     refine ⟨fun j => (ch hL l k h).symm (r j), (ch hL l' k h).injective ?_⟩
+
     simp only [hr, map_sum, ch_mulPw hL k h _ e, LinearEquiv.apply_symm_apply]
 
 variable {R : Type} [CommRing R] (f : X ⟶ Spec (CommRingCat.of R)) {κ : Type} (D : κ → X.Opens)
@@ -189,6 +231,7 @@ theorem exists_sec_sum_of_ofSec_eq_sum (hV : V = ⊤) {J : Type} (T : Finset J) 
   refine ⟨ta, fun k => ?_⟩
   have hk : L.U k ≤ V ⊓ L.U k := le_inf (hV ▸ le_top) le_rfl
   have := congrArg (fun z => rs X hk (co z k)) ht
+
   simp only [co_sum, co_mulPw _ e, ← hta, co_ofSec, map_sum, map_mul, rs_rs, rs_self] at this
   exact this
 
@@ -253,6 +296,7 @@ theorem gs_sum_mem {J : Type} (T : Finset J) (s : J → LB.Sec (pw L n)) (e : l'
     (t : J → SecOn (pw L l) V) (y : X) (hy : y ∈ V) {k : L.ι} (hk : y ∈ L.U k) :
     gs (𝟙 X) y (V ⊓ L.U k) (co (∑ j ∈ T, mulPw (s j) l l' V (t j)) k) ∈ zI s y k := by
   have hO : y ∈ V ⊓ L.U k := ⟨hy, hk⟩
+
   rw [co_sum, gs_germ y hO, map_sum]
   refine Ideal.sum_mem _ fun j _ => ?_
   rw [co_mulPw _ e, map_mul, ← gs_germ y hO, gs_rs y _ hO]
@@ -357,6 +401,7 @@ theorem cut_global {K : Type} [Field K] (p : X ⟶ Sp K) [IsSeparated p] (hp : L
         (H1 i l (l + n) (GlobalTheory.LB.ofSec y _ : SecOn (pw L l) _) rfl hi
           ((mem_mulCube_iff p D (fun j : Fin g => (j : ℕ) < i) s ∅
             (mulPw (s i) l (l + n) _ (GlobalTheory.LB.ofSec y _))).2 ⟨fun j => GlobalTheory.LB.ofSec (ta j) _, co_ext fun k => ?_⟩)))
+
     simp only [co_sum, co_mulPw _ rfl, co_ofSec, ← map_mul, ← map_sum, e k]
   · choose σ hσ using fun b : I => exists_interp p hp hL (haff {b} (by simp)) (hin {b} b (by simp)) s hZ c hc a l
     obtain ⟨y₀, hy₀⟩ := (H2 l hl).2 σ fun b b' => by
@@ -398,8 +443,8 @@ end GlobalTheory.KosField
 
 namespace GlobalTheory
 
-open KosField in
 
+open KosField in
 theorem koszul_sections_exact_field : Out.Laws → ∀ (K : Type) [Field K] [IsAlgClosed K] (x : KeyIn K) (n l : ℕ) (s : Fin x.P.g → RR x n) (b : ∀ j, Fin ((l - j * n) ^ x.P.g) → RR x (l - j * n)) (m) (c : x.P.A.left → x.P.L.ι), 1 ≤ n → x.P.g * n < l → FinZ x s → (∀ j ≤ x.P.g, IsBasis x (b j)) → IsMul x l s b m → (∀ y, y ∈ x.P.L.U (c y)) → (∀ v : KIx x.P.g 0 (fun j => (l - j * n) ^ x.P.g) → K, (kosD m (fun _ => 0)).mulVec v = 0 → ∃ w, ∀ p, p.1 ≠ ∅ → v (.inl p) = (kosD (d := 0) m (fun _ => 0)).mulVec w (.inl p)) ∧ (∀ a : ∀ y : x.P.A.left, x.P.A.left.presheaf.stalk y, ∃ sg : RR x l, ∀ y, (∀ i, y ∉ Out.nonzeroLocus (s i)) → gs (𝟙 _) y (x.P.L.U (c y)) (sg.f (c y)) - a y ∈ Ideal.span (Set.range fun i => gs (𝟙 _) y (x.P.L.U (c y)) ((s i).f (c y)))) ∧ ∀ sg : RR x l, (∀ y, (∀ i, y ∉ Out.nonzeroLocus (s i)) → gs (𝟙 _) y (x.P.L.U (c y)) (sg.f (c y)) ∈ Ideal.span (Set.range fun i => gs (𝟙 _) y (x.P.L.U (c y)) ((s i).f (c y)))) → ∃ ta : Fin x.P.g → RR x (l - 1 * n), ∀ c', (show Γ(x.P.A.left, x.P.L.U c') from sg.f c') = ∑ i, (show Γ(x.P.A.left, x.P.L.U c') from (s i).f c') * (show Γ(x.P.A.left, x.P.L.U c') from (ta i).f c') := by
   intro hlaw K _ _ x n l s b m c hn hl hZ hb hm hc
   haveI := x.P.isAb.proper

@@ -1,10 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SandwichNormalForm
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SourceLatticeInvariance
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.LatticeNormalFormUnipotent
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormalFormAtPrime
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnipotentCharacterArgumentMulStabilizer
+module
+
+public import Formalism.LocalToGlobal.Columns.FiniteSumNonzeroLargeDepth
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnipotentCharacterArgumentMulStabilizer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.DIV Formalism.L2.Col GlobalTheory.QNormal
 
 namespace GlobalTheory.Proof.unipotentRadicals_act_affine_unfoldingSpaces
@@ -28,7 +72,7 @@ noncomputable def linPart (xj : (Fin n' → F) →ₗ[F] (Fin n → F)) :
 
 theorem unfoldingAffineLinearMap_apply_freeEntry (xj : (Fin n' → F) →ₗ[F] (Fin n → F)) (t : Loc.FC n' c' n c → F) (p : Loc.FC n' c' n c) :
     Loc.xx1 xj t (Pi.single p.1.2 1) p.1.1 = t p := by
-  rw [linearMap_unfolding_apply_single, dif_pos p.2]
+  rw [linearMap_unfolding_apply_single, dite_eq_left p.2]
 
 theorem map_Ufl {xj : (Fin n' → F) →ₗ[F] (Fin n → F)} {x : (Fin (n' + c') → F) →ₗ[F] (Fin (n + c) → F)}
     (h1 : ∀ v, x (Loc.inX F n' c' v) = Loc.inX F n c (xj v))
@@ -63,6 +107,7 @@ theorem map_Ufl {xj : (Fin n' → F) →ₗ[F] (Fin n → F)} {x : (Fin (n' + c'
       rw [hsingle, ← sub_add_cancel (x (Loc.eN F (n' + c') (n' + (l.1 - n'))))
         (Loc.eN F (n + c) (n + (l.1 - n')))]
       exact Submodule.add_mem _ (Ufl_mono (by omega) (h3 (l.1 - n'))) (eN_mem_Ufl (by omega))
+
   rw [← Finset.univ_sum_single v, map_sum]
   refine Submodule.sum_mem _ fun l _ => ?_
   by_cases hl : l.1 < n' + s
@@ -122,7 +167,7 @@ theorem affine_action : (∀ (F : Type) [Field F] (n' c' n c : ℕ), 1 ≤ c →
     ⟨{ toFun := fun t p => (r.toLinearMap ∘ₗ linPart xj t ∘ₗ r'.toLinearMap) (Pi.single p.1.2 1) p.1.1
        map_add' := fun t u => by
          funext p
-         simp only [map_add, LinearMap.add_comp, LinearMap.comp_add, LinearMap.add_apply, Pi.add_apply]
+         simp only [map_add (f := _), LinearMap.add_comp, LinearMap.comp_add, LinearMap.add_apply, Pi.add_apply]
        map_smul' := fun a t => by
          funext p
          simp only [map_smul, LinearMap.smul_comp, LinearMap.comp_smul, LinearMap.smul_apply, Pi.smul_apply,

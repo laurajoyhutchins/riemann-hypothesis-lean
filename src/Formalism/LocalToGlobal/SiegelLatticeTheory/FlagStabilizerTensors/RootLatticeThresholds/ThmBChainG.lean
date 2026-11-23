@@ -1,6 +1,48 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.BDataOfR
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LoopTermLem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.ThmBChain
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.AmplitudeBoundsAllChoicesUniform
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +84,7 @@ theorem jointAmplitudeRotated_generic (Y : Full X) (u : D.what₂.Word) (large�
     rw [one_div_mul_cancel hfc.ne', Real.rpow_one]
   refine ⟨gamP C u u w', fun _ => th, fun τ => (ENNReal.ofReal th)⁻¹ • nu1P C u u w' τ, fun τ => ?_, ?_⟩
   · have hnu : ∃ ν₁, RMeas D (locW C u u τ) (gamP C u u w' τ) 1 ν₁ := hM w' hb hrep τ
-    have hnuP : nu1P C u u w' τ = hnu.choose := by unfold nu1P; rw [dif_pos hnu]
+    have hnuP : nu1P C u u w' τ = hnu.choose := by unfold nu1P; rw [dite_eq_left hnu]
     refine ⟨hR w' hb hrep τ, hT w' hb hJ', ?_⟩
     obtain ⟨p, μR, hR1, hQ⟩ := hnu.choose_spec
     refine ⟨p, μR, hR1, ?_⟩
@@ -70,27 +112,10 @@ theorem jointAmplitudeRotated_generic (Y : Full X) (u : D.what₂.Word) (large�
     rw [ENNReal.ofReal_one, one_mul, ← ENNReal.ofReal_prod_of_nonneg (fun τ _ => hnn τ), hprod]
     exact le_rfl
 
-theorem rowBDataGR_of_rest {large₂ : SizeData₂ D} {Y : Full X} {u : D.what₂.Word}
-    {ν : X.B.I.Ginf → Measure X.B.I.Ginf} {C1 Cn Ire : ℝ} (h : RowRestR large₂ Y u u ν C1 Cn Ire) :
-    RowBDataGR large₂ Y u ν C1 Cn Ire := by
-  obtain ⟨hIre, θ, C, hB, h0, hw, hl, hM, hP, hT, hN⟩ := h
-  exact ⟨hIre, θ, C, hB, h0, hw, hl, 1, zero_le_one,
-    fun νL ng => jointAmplitudeRotated_generic Y u large₂ C1 C hB ν νL ng (Formalism.L2.SG.Pf.RelPtR.relPtExPR_holds C u u) hM hP hT,
-    fun sec hs => by rw [ENNReal.ofReal_one, one_mul]; exact hN sec hs⟩
-
-theorem rowBDataUnifGR_of (h : RowRestUnifR) : RowBDataUnifGR := by
-  intro Cg cb Cw cT CT C0
-  obtain ⟨C1, Cn, a, b, h2⟩ := h Cg cb Cw cT CT C0
-  exact ⟨C1, Cn, a, b, fun C' Cl h1 h3 D large₂ X Y u hc hb X0 ψ hT sd C Th F0 what₂ vR Q i0 i0' νq Irat Ire hO ν hp =>
-    rowBDataGR_of_rest (h2 C' Cl h1 h3 D large₂ X Y u u hc hb X0 ψ hT sd C Th F0 what₂ vR Q i0 i0' νq Irat Ire hO ν hp)⟩
-
 end Formalism.L2.SG.Pf.ThmBChainG
 
 namespace Formalism.L2.SG.Pf
 
 open Formalism.L2.SG.Pf.ThmBChainG
-
-theorem theoremB_generic_final (hB : JointNormBoundRotatedUniform) (hA : AmpUnif) (hR : RowRestUnifR) : StepThmBG :=
-  stepThmBG_ofR hB hA Formalism.L2.SG.PointUniformity.ptUnifG (rowBDataUnifGR_of hR)
 
 end Formalism.L2.SG.Pf

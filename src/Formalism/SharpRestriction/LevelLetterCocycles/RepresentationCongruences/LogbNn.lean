@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.TsumThree
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.TsumThree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,18 +72,5 @@ lemma sg_ge (l h w S η : ℕ) (hl : 11 ≤ l) (h1 : 1 ≤ h) :
   have a4 : 0 ≤ (η:ℝ) * (l:ℝ)⁻¹ := by positivity
   rw [sg_eq]
   refine ⟨a1, a2, a3, a4, hlg, by linarith, by linarith⟩
-
-lemma r3 {x H : ℝ} (hx : 11 ≤ x) (hH : 0 ≤ H) :
-    H * (2 * x - 1) / (x - 1) ^ 2 * (x - 1)⁻¹ ≤ 77 / 30 * H * x⁻¹ ^ 2 := by
-  have hx1 : 0 < x - 1 := by linarith
-  have hx0 : 0 < x := by linarith
-  have hy : 0 ≤ x - 11 := by linarith
-  have key : (2 * x - 1) / (x - 1) ^ 3 ≤ 77 / 30 * x⁻¹ ^ 2 := by
-    rw [inv_pow, ← div_eq_mul_inv, div_le_div_iff₀ (by positivity) (by positivity)]
-    nlinarith [mul_nonneg (mul_nonneg hy hy) hy, mul_nonneg hy hy]
-  calc H * (2 * x - 1) / (x - 1) ^ 2 * (x - 1)⁻¹ = H * ((2 * x - 1) / (x - 1) ^ 3) := by
-        field_simp
-    _ ≤ H * (77 / 30 * x⁻¹ ^ 2) := mul_le_mul_of_nonneg_left key hH
-    _ = 77 / 30 * H * x⁻¹ ^ 2 := by ring
 
 end Formalism.MainNotions.N.FrobeniusPowerSeries.CaseA

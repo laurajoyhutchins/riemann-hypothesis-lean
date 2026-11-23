@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StMajorantTransport
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StMajorantTransport
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights.FiniteCovolume
 
@@ -9,7 +61,7 @@ open scoped MatrixOrder ComplexOrder
 noncomputable section
 
 variable {F E : Type*} [Field F] [Field E] [NumberField F] [NumberField E] [Algebra F E]
-  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [IsTotallyComplex E]
+  [Algebra.IsQuadraticExtension F E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E]
 variable {W : Type*} [AddCommGroup W] [Module E W] {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 namespace MajorantTransport
@@ -35,8 +87,8 @@ theorem measurePreserving_mulVec {A : Matrix ι ι ℂ} (hA : Complex.normSq A.d
   refine ⟨hm, ?_⟩
   simpa using hmap
 
-omit [NumberField F] [NumberField E] [IsTotallyReal F] [IsTotallyComplex E] in
 
+omit [NumberField F] [NumberField E] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] in
 theorem normSq_det (h : HermitianForm F E W) (v : Basis ι E W) (g : archUnitary h v)
     (w : InfinitePlace E) : Complex.normSq ((g : InfinitePlace E → GL ι ℂ) w : Matrix ι ι ℂ).det = 1 := by
   have hg := mem_archUnitary.mp g.2 w
@@ -62,8 +114,8 @@ def sqrtMap (Q : InfinitePlace E → Matrix ι ι ℂ) :
   map_add' y z := by ext p; simp [mulVec_add]
   map_smul' c y := by ext p; simp [mulVec_smul]
 
-omit [IsTotallyComplex E] [DecidableEq ι] in
 
+omit [_root_.NumberField.IsTotallyComplex E] [DecidableEq ι] in
 theorem norm_sq_sqrtMap (Q : InfinitePlace E → Matrix ι ι ℂ) (y : InfinitePlace E → ι → ℂ) :
     ‖sqrtMap Q y‖ ^ 2 = ∑ w, (star (y w) ⬝ᵥ (((Q w)ᴴ * Q w) *ᵥ y w)).re := by
   rw [EuclideanSpace.norm_sq_eq, Fintype.sum_prod_type]
@@ -74,8 +126,8 @@ theorem norm_sq_sqrtMap (Q : InfinitePlace E → Matrix ι ι ℂ) (y : Infinite
   refine Finset.sum_congr rfl fun i _ => ?_
   norm_cast
 
-omit [NumberField F] [IsTotallyReal F] [IsTotallyComplex E] in
 
+omit [NumberField F] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] in
 theorem exists_isometry {h : HermitianForm F E W} {v : Basis ι E W} (M : Majorant h v) :
     ∃ (d : ℕ) (S : (InfinitePlace E → ι → ℂ) ≃L[ℝ] EuclideanSpace ℝ (Fin d)),
       ∀ y, ‖S y‖ = M.len y := by
@@ -122,8 +174,8 @@ def invApplyEquiv {h : HermitianForm F E W} {v : Basis ι E W} (g : archUnitary 
       left_inv := fun y => by funext w; simp [invApply, mulVec_mulVec]
       right_inv := fun y => by funext w; simp [invApply, mulVec_mulVec] }
 
-omit [NumberField F] [IsTotallyReal F] [IsTotallyComplex E] in
 
+omit [NumberField F] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] in
 theorem measurePreserving_invApply {h : HermitianForm F E W} {v : Basis ι E W}
     (g : archUnitary h v) : MeasurePreserving (invApply g) volume volume :=
   measurePreserving_pi (fun _ => volume) (fun _ => volume)
@@ -131,8 +183,8 @@ theorem measurePreserving_invApply {h : HermitianForm F E W} {v : Basis ι E W}
 
 end MajorantTransport
 
-omit [NumberField F] [IsTotallyReal F] [IsTotallyComplex E] in
 
+omit [NumberField F] [IsTotallyReal F] [_root_.NumberField.IsTotallyComplex E] in
 theorem MajorantTransport.proof (h : HermitianForm F E W) (v : Basis ι E W) :
     MajorantTransport.Statement h v := by
   intro M
@@ -153,7 +205,8 @@ theorem MajorantTransport.proof (h : HermitianForm F E W) (v : Basis ι E W) :
   have hmap : Measure.map T.symm volume = c • (volume : Measure (InfinitePlace E → ι → ℂ)) := by
     have hcomp : ⇑T.symm = (MajorantTransport.invApplyEquiv g).symm ∘ S.symm := rfl
     rw [hcomp, ← Measure.map_map (MajorantTransport.invApplyEquiv g).symm.continuous.measurable
-      S.symm.continuous.measurable, hc, Measure.map_smul, hsymm,
+      S.symm.continuous.measurable, hc,
+      Measure.map_smul c (MajorantTransport.invApplyEquiv g).symm.continuous.measurable.aemeasurable, hsymm,
       (MajorantTransport.measurePreserving_invApply g⁻¹).map_eq]
   let b := Module.Free.chooseBasis ℤ L
   rw [ZLattice.covolume_eq_measure_fundamentalDomain L _ (ZLattice.isAddFundamentalDomain b _),

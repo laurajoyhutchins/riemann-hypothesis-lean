@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LatticeBlockClasses.CBlockValAlt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.ClassCounting.LatticeBlockClasses.CBlockValAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.CoassocSimps
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain UpperTheory.V UpperTheory.V.KL UpperTheory.V.ZK UpperTheory.V.ZK.Cl
 
@@ -23,7 +70,7 @@ private theorem exists_ibar {R k M V : Type} [CommRing R] [Field k] [AddCommGrou
       have e₁ := congrFun hz j
       have e₂ := congrFun hw j
       simp only [Function.comp_apply, Pi.zero_apply] at e₁ e₂ ⊢
-      rw [map_add, Pi.add_apply, map_add, e₁, e₂, add_zero]
+      rw [map_add (f := _), Pi.add_apply, map_add (f := _), e₁, e₂, add_zero]
   have wd : ∀ x y : M, π x = π y → r ∘ i x = r ∘ i y := by
     intro x y hxy
     have hz : x - y ∈ RingHom.ker r • (⊤ : Submodule R M) := h3 _ (by rw [map_sub, hxy, sub_self])
@@ -35,8 +82,8 @@ private theorem exists_ibar {R k M V : Type} [CommRing R] [Field k] [AddCommGrou
   choose pre hpre using h2
   refine ⟨{ toFun := fun v => r ∘ i (pre v), map_add' := ?_, map_smul' := ?_ }, ?_⟩
   · intro v w
-    have e : π (pre (v + w)) = π (pre v + pre w) := by rw [map_add, hpre, hpre, hpre]
-    rw [wd _ _ e, map_add]
+    have e : π (pre (v + w)) = π (pre v + pre w) := by rw [map_add (f := _), hpre, hpre, hpre]
+    rw [wd _ _ e, map_add (f := _)]
     funext j
     simp
   · intro c v
@@ -57,6 +104,7 @@ private theorem exists_sbar {R k M V : Type} [CommRing R] [Field k] [AddCommGrou
   have hx : x = ∑ j, x j • (Pi.single j 1 : Fin N → R) := by
     funext i
     simp [Finset.sum_apply, Pi.single_apply]
+
   conv_rhs => rw [hx, map_sum, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, h1]
@@ -117,7 +165,7 @@ theorem UpperTheory.V.ZK.Cl.cFree :
     rw [← hfa]
     exact hfw.symm
   have hv : π (s x) = w.1 := by
-    rw [← hsb, hyw, map_add, sbib, LinearMap.mem_ker.1 w.2.2, add_zero]
+    rw [← hsb, hyw, map_add (f := _), sbib, LinearMap.mem_ker.1 w.2.2, add_zero]
   rw [red_apply_map]
   have hlam : ((lam h : GL (Fin N) R) : Matrix (Fin N) (Fin N) R).mulVec x = E h x := by
     show (LinearMap.toMatrix' (E h)).mulVec x = E h x

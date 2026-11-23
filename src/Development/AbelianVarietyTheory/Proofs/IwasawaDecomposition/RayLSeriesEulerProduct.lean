@@ -1,5 +1,63 @@
-import Mathlib
+module
+
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LineLatticeClassMeanSumNonzeroUnfold
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.LSeries.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Mathlib.Algebra.BigOperators.Ring.Nat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Group.Tannery
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Log.Summable
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.EulerProduct.ExpLog
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.DedekindZeta
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonemptyRayDataOfNeZero
+public import Mathlib.NumberTheory.LSeries.SumCoeff
+
+@[expose] public section
 
 open NumberField IsDedekindDomain GlobalTheory.Mem Complex Filter Topology
 open scoped ComplexOrder
@@ -88,24 +146,7 @@ theorem tsum_eq_exp_tsum_neg_log_of_primes {α ι : Type*} [CommMonoidWithZero �
 
 theorem lseriesSummable_card_absNorm (K : Type) [Field K] [NumberField K] {s : ℂ} (hs : 1 < s.re) :
     LSeriesSummable (fun n => ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) : ℂ)) s := by
-  refine LSeriesSummable_of_sum_norm_bigO_and_nonneg (r := 1) ?_ (fun _ => Nat.cast_nonneg _)
-    zero_le_one hs
-  have h : Tendsto (fun n : ℕ => (∑ k ∈ Finset.Icc 1 n,
-      (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = k} : ℝ)) / (n : ℝ)) atTop
-      (𝓝 (dedekindZeta_residue K)) := by
-    refine ((Ideal.tendsto_norm_le_div_atTop₀ K).comp tendsto_natCast_atTop_atTop).congr fun n ↦ ?_
-    simp only [Function.comp_apply, Nat.cast_le, ← Nat.cast_sum]
-    congr
-    rw [← add_left_inj 1, ← Ideal.card_norm_le_eq_card_norm_le_add_one,
-      show Finset.Icc 1 n = Finset.Ioc 0 n from Finset.Icc_succ_left_eq_Ioc _ _,
-      show 1 = Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = 0} by simp [Ideal.absNorm_eq_zero_iff],
-      Finset.sum_Ioc_add_eq_sum_Icc (n.zero_le),
-      ← Finset.card_preimage_eq_sum_card_image_eq (fun k _ ↦ Ideal.finite_setOfPred_absNorm_eq k)]
-    simp [Set.coe_eq_subtype]
-  simp only [Real.rpow_one]
-  exact Asymptotics.isBigO_of_div_tendsto_nhds (by
-    filter_upwards [eventually_gt_atTop 0] with n hn h0
-    exact absurd (Nat.cast_eq_zero.1 h0) hn.ne') _ h
+  apply GlobalTheory.FlagBase.SiegelUnfold.lseriesSummable_idealCount <;> assumption
 
 instance finite_absNorm_fiber (K : Type) [Field K] [NumberField K] (n : ℕ) :
     Finite {I : Ideal (𝓞 K) // Ideal.absNorm I = n} :=
@@ -127,105 +168,5 @@ theorem summable_norm_absNorm_cpow (K : Type) [Field K] [NumberField K] {s : ℂ
   · simp [hs0]
   · rw [LSeries.term_of_ne_zero hn, div_eq_mul_inv, ← cpow_neg, norm_mul]
     simp
-
-open Classical in
-
-theorem RayData.coef_eq_tsum {K : Type} [Field K] [NumberField K] {M : ℕ} (D : RayData K M)
-    (χ : D.G →* ℂˣ) (n : ℕ) :
-    D.coef χ n = ∑' I : {I : Ideal (𝓞 K) // Ideal.absNorm I = n},
-      if IsCoprime I.1 (Ideal.span {(M : 𝓞 K)}) then (χ (D.cls I.1) : ℂ) else 0 := by
-  have := Fintype.ofFinite {I : Ideal (𝓞 K) // Ideal.absNorm I = n}
-  rw [tsum_fintype, RayData.coef, ← Finset.sum_filter,
-    ← Finset.sum_fiberwise (g := fun I : {I : Ideal (𝓞 K) // Ideal.absNorm I = n} => D.cls I.1)]
-  refine Finset.sum_congr rfl fun c _ => ?_
-  rw [Finset.sum_congr rfl (g := fun _ => (χ c : ℂ)) (fun I hI => by
-    rw [(Finset.mem_filter.1 hI).2]), Finset.sum_const, nsmul_eq_mul, mul_comm, RayData.cnt]
-  congr 2
-  rw [← Fintype.card_coe, ← Nat.card_eq_fintype_card]
-  refine Nat.card_congr
-    { toFun := fun I => ⟨⟨I.1, I.2.2.1⟩, by simp [I.2.1, I.2.2.2]⟩
-      invFun := fun I => ⟨I.1.1, by
-        have := I.2
-        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at this
-        exact ⟨this.1, I.1.2, this.2⟩⟩
-      left_inv := fun _ => rfl
-      right_inv := fun _ => rfl }
-
-theorem RayData.lseries_eq_exp_tsum :
-    ∀ (K : Type) [Field K] [NumberField K] (M : ℕ), 2 ≤ M → ∀ (D : RayData K M) (χ : D.G →* ℂˣ) (s : ℂ), 1 < s.re → LSeriesSummable (D.coef χ) s ∧ Summable (fun v : D.Pr => ‖((Ideal.absNorm v.1.asIdeal : ℕ) : ℂ) ^ (-s)‖) ∧ LSeries (D.coef χ) s = Complex.exp (∑' v : D.Pr, -Complex.log (1 - (χ (D.cls v.1.asIdeal) : ℂ) * ((Ideal.absNorm v.1.asIdeal : ℕ) : ℂ) ^ (-s))) := by
-  classical
-  intro K _ _ M _ D χ s hs
-  have hs0 : s ≠ 0 := by rintro rfl; norm_num at hs
-  have hχ : ∀ c, ‖(χ c : ℂ)‖ = 1 := fun c => by
-    refine (norm_eq_one_of_pow_eq_one (n := Fintype.card D.G) ?_ Fintype.card_ne_zero)
-    rw [← Units.val_pow_eq_pow_val, ← map_pow, pow_card_eq_one, map_one, Units.val_one]
-  set f : Ideal (𝓞 K) → ℂ := fun I =>
-    (if IsCoprime I (Ideal.span {(M : 𝓞 K)}) then (χ (D.cls I) : ℂ) else 0) *
-      ((Ideal.absNorm I : ℕ) : ℂ) ^ (-s) with hf
-  have hS := summable_norm_absNorm_cpow K hs
-  have hsum : Summable fun I => ‖f I‖ := by
-    refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun I => ?_) hS
-    simp only [hf, norm_mul]
-    split_ifs <;> simp [hχ]
-  have pinj : Function.Injective fun v : D.Pr => v.1.asIdeal := fun v w h =>
-    Subtype.ext (HeightOneSpectrum.ext h)
-  have hfp : ∀ v : D.Pr, f v.1.asIdeal =
-      (χ (D.cls v.1.asIdeal) : ℂ) * ((Ideal.absNorm v.1.asIdeal : ℕ) : ℂ) ^ (-s) := fun v => by
-    simp only [hf]
-    rw [if_pos v.2]
-  have hL : HasSum (LSeries.term (D.coef χ) s) (∑' I, f I) := by
-    have h := hsum.of_norm.hasSum
-    rw [← (Equiv.sigmaFiberEquiv (fun I : Ideal (𝓞 K) => Ideal.absNorm I)).hasSum_iff] at h
-    refine h.sigma fun n => ?_
-    have : ∀ I : {I : Ideal (𝓞 K) // Ideal.absNorm I = n},
-        (f ∘ (Equiv.sigmaFiberEquiv (fun I : Ideal (𝓞 K) => Ideal.absNorm I))) ⟨n, I⟩ =
-          (if IsCoprime I.1 (Ideal.span {(M : 𝓞 K)}) then (χ (D.cls I.1) : ℂ) else 0) *
-            (n : ℂ) ^ (-s) := by
-      rintro ⟨I, rfl⟩; rfl
-    simp only [this]
-    have e : LSeries.term (D.coef χ) s n = D.coef χ n * (n : ℂ) ^ (-s) := by
-      rcases eq_or_ne n 0 with rfl | hn
-      · simp [hs0]
-      · rw [LSeries.term_of_ne_zero hn, div_eq_mul_inv, ← cpow_neg]
-    rw [e, RayData.coef_eq_tsum]
-    exact (Summable.of_finite.hasSum).mul_right _
-  refine ⟨hL.summable, hS.comp_injective pinj, ?_⟩
-  rw [LSeries, hL.tsum_eq]
-  simp only [← hfp]
-  have hone : D.cls 1 = 1 := by
-    have h := D.cls_mul 1 1 isCoprime_one_left isCoprime_one_left
-    rw [mul_one] at h
-    exact left_eq_mul.1 h
-  refine tsum_eq_exp_tsum_neg_log_of_primes (fun v : D.Pr => v.1.asIdeal) (fun v => v.1.prime)
-    (fun v w h => pinj ?_) f (fun I J => ?_) ?_ (fun I hI hfI => ?_) hsum (fun v => ?_)
-  · exact (w.1.isMaximal.eq_of_le v.1.isPrime.ne_top (Ideal.le_of_dvd h)).symm
-  · simp only [hf, IsCoprime.mul_left_iff, map_mul, Nat.cast_mul]
-    rw [natCast_mul_natCast_cpow]
-    by_cases hI : IsCoprime I (Ideal.span {(M : 𝓞 K)})
-    · by_cases hJ : IsCoprime J (Ideal.span {(M : 𝓞 K)})
-      · simp only [hI, hJ, and_self, if_true, D.cls_mul I J hI hJ, map_mul, Units.val_mul]
-        ring
-      · simp [hJ]
-    · simp [hI]
-  · simp only [hf]
-    rw [if_pos isCoprime_one_left, hone]
-    simp
-  · have hc : IsCoprime I (Ideal.span {(M : 𝓞 K)}) := by
-      by_contra hc
-      simp [hf, hc] at hfI
-    have h0 : I ≠ ⊥ := by
-      rintro rfl
-      simp [hf, hs0] at hfI
-    obtain ⟨P, hP, hIP⟩ := Ideal.exists_le_maximal I (by simpa using hI)
-    have hP0 : P ≠ ⊥ := fun h => h0 (le_bot_iff.1 (h ▸ hIP))
-    have hd : P ∣ I := Ideal.dvd_iff_le.2 hIP
-    exact ⟨⟨⟨P, hP.isPrime, hP0⟩, hc.of_isCoprime_of_dvd_left hd⟩, hd⟩
-  · intro h
-    have h1 : ‖f v.1.asIdeal‖ = 1 := by rw [← sub_eq_zero.1 h, norm_one]
-    have hN : 1 < Ideal.absNorm v.1.asIdeal := NumberField.HeightOneSpectrum.one_lt_absNorm v.1
-    rw [hfp, norm_mul, hχ, one_mul, norm_natCast_cpow_of_pos (by omega)] at h1
-    refine absurd h1 (Real.rpow_lt_one_of_one_lt_of_neg (by exact_mod_cast hN) ?_).ne
-    simp only [neg_re]
-    linarith
 
 end GlobalTheory.Mem

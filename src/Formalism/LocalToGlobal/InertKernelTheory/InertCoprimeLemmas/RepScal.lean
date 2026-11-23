@@ -1,5 +1,48 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsRep
-import Formalism.LocalToGlobal.PairingIndexBounds.PendingAdmissibility.LocalFDerivAdmissibility.IteratedFDerivConstSmul
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.IsDiscriminantTwelfthRootOfIdealLattice
+public import Formalism.LocalToGlobal.PairingIndexBounds.PendingAdmissibility.LocalFDerivAdmissibility.IteratedFDerivConstSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.DescentCore
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,20 +75,5 @@ theorem isComb_scalar (D : D7) (T : Tor D) (e : FamE D) {N N' p : ℕ} [Fact p.P
     rfl
   rw [e1]
   exact isComb_smul D T e lam h hk
-
-theorem combAt_scalar {p : ℕ} [Fact p.Prime] (X : Sys p) (hfin : ∀ j c, (X.Lv.lev j c).FinClasses) (D : D7)
-    (large₂ : ∀ j, X.Lt j → X.Lt (j + 1) → Submodule (𝓞 D.host.E) (Fin ((X.Pj j).m + 1) → D.host.E))
-    (Lg' : ∀ j, X.Lt j → X.Lt (j + 1) → Submodule (𝓞 D.host.E) (Fin ((X.Pj (j + 1)).m + 1) → D.host.E))
-    (T : Tor D) (e : FamE D) (lam : Qbar →+* ℂ_[p])
-    (G : ∀ j, X.Lt j → X.Lt (j + 1) → VC D ((X.Pj j).m + 1) ((X.Pj (j + 1)).m + 1) → ℂ)
-    (s : ∀ j, X.Lt j → X.Lt (j + 1) → ℂ) (k : ∀ j, X.Lt j → X.Lt (j + 1) → ℤ)
-    (h : CombAt X hfin D large₂ Lg' (fun j La La' => pSer D lam (G j La La')) T e lam)
-    (hs : ∀ j (L0 : X.Lt j), L0 ∈ Formalism.L2.G.Pend.repOf X.Lv hfin j → ∀ La' : X.Lt (j + 1),
-      (X.Pj (j + 1)).IsLatTup La'.2 → s j L0 La' ∈ Qbar ∧ ‖(p : ℂ_[p]) ^ k j L0 La' * lamC lam (s j L0 La')‖ ≤ 1) :
-    CombAt X hfin D large₂ Lg'
-      (fun j La La' => ((p : ℂ_[p]) ^ k j La La') • pSer D lam (fun z => s j La La' * G j La La' z)) T e lam := by
-  intro j L0 h0 La' hL'
-  obtain ⟨hA, hC⟩ := h j L0 h0 La' hL'
-  exact ⟨hA, isComb_scalar D T e lam _ hC (hs j L0 h0 La' hL').1 _ (hs j L0 h0 La' hL').2⟩
 
 end Formalism.L2.KerInert.Rep

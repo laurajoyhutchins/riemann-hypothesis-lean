@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SpecializesOfUnits
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UnitSectionDivisorEq
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PGeoNumCut
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SpecializesOfUnits
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EtaleLocalizationAtPrimeTensorOfLowHeight
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.UnitSectionDivisorEq
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PGeoNumCut
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory MvPolynomial
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -98,7 +147,16 @@ theorem geoNum_eq_zero (y : (Σ k, J k) → Ω) (lam : Ω) (hl : lam ≠ 0) (b :
       have := hd k; have := hd' k; simp only [Pi.add_apply]; omega
     rw [mem_coord_iff y (homog_sub (homog_mul hG' hF) (e ▸ homog_mul hF' hG)), map_sub, map_mul, map_mul, hFG, hFG']
     ring
-  obtain ⟨hs, hm, -⟩ := Flat.cycles_eq_of_isUnitSec K J W F G hu
+  have hs : divSupp W F = divSupp W G :=
+    Set.Subset.antisymm (GlobalTheory.CompanionTheory.Ar.Flat.divSupp_subset_of_isUnitSec hu)
+      (GlobalTheory.CompanionTheory.Ar.Flat.divSupp_subset_of_isUnitSec
+        (GlobalTheory.CompanionTheory.Ar.Flat.IsUnitSec.symm hu))
+  have hm : ∀ U ∈ divSupp W F, multAt (W ⊔ Ideal.span {F}) U =
+      multAt (W ⊔ Ideal.span {G}) U := by
+    rintro U ⟨hmin, hrel⟩
+    have hUp : U.IsPrime := hmin.1.1
+    obtain ⟨s, t, hs, ht, hst⟩ := hu U hUp (le_sup_left.trans hmin.1.2) hrel
+    exact GlobalTheory.CompanionTheory.Ar.Flat.multAt_sup_span_eq_of_sub_mem hUp hs ht hst
   have hp := PB.prime_charOf_of_ne_zero hW.1 hch
   have hD : ∀ (d : K → ℕ) (s : MRing J), IsMultiHomog s d → s ∉ W →
       geoNum 1 W (fun _ => fun k => (d k : ℤ)) =

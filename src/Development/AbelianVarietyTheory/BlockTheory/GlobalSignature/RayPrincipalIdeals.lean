@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SmulCommClassGalIntegers
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SmulCommClassGalIntegers
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,17 +123,6 @@ def RayField : Prop :=
       ∃ Art : RayClassGroup 𝔪 ≃* (L ≃ₐ[K] L),
         ∀ (𝔭 : HeightOneSpectrum (𝓞 K)) (h : ¬ 𝔭.asIdeal ∣ 𝔪),
           GlobalTheory.NT.UnramIn L 𝔭 ∧ GlobalTheory.NT.IsFrob L 𝔭 (Art (primeClass 𝔪 𝔭 h))
-
-example : idealsPrimeTo (⊤ : Ideal (𝓞 K)) = ⊤ := by
-  refine eq_top_iff.2 fun J _ 𝔭 h => absurd ?_ 𝔭.isPrime.ne_top
-  exact top_le_iff.1 (Ideal.le_of_dvd h)
-
-example (𝔪 : Ideal (𝓞 ℚ)) : (-1 : ℚˣ) ∉ rayUnits 𝔪 := by
-  rintro ⟨a, b, ⟨-, -, -, -, -, hp⟩, hx⟩
-  have := hp (Rat.castHom ℝ)
-  rw [← hx] at this
-  simp only [Units.val_neg, Units.val_one, map_mul, map_neg, map_one] at this
-  nlinarith [mul_self_nonneg ((Rat.castHom ℝ) (b : ℚ))]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.RayPrincipalIdeals
 

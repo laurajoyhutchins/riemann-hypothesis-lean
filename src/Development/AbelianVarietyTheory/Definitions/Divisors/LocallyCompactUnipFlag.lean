@@ -1,6 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsotropicUnipotentRadicalsRationalCocompact
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsSmoothModerateOfIsAutFunSm
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsotropicUnipotentRadicalsRationalCocompact
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ConstTermOnMulLeftOfNormalizer
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.EmbRelExistsUnique
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.TwoStepUnipotentCompactModSubring
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -237,12 +285,12 @@ theorem adjA_adjA (X : Matrix (Fin n) (Fin n) (AF F ⊗[F] E)) : adjA σ J (adjA
     induction X i j using TensorProduct.induction_on with
     | zero => simp
     | tmul a x => exact congrArg (a ⊗ₜ[F] ·) (hσ x)
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   simp only [adjA_apply, cT_mul, GlobalTheory.AutFunCounterexample.cT_map_gen, cT_form hJ, cT_form_inv hJ, h, Matrix.mul_assoc]
   rw [inv_mul_form hJ, Matrix.mul_one, ← Matrix.mul_assoc, inv_mul_form hJ, Matrix.one_mul]
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 theorem exists_dualCols {C : Matrix (Fin n) (Fin r) E} (hC : IsIsoCols σ J C) :
     ∃ L : Matrix (Fin r) (Fin n) E, L * C = 1 ∧ L * J⁻¹ * cT (σ : E →+* E) L = 0 := by
   obtain ⟨hC, h0⟩ := hC
@@ -446,7 +494,7 @@ theorem cocompact_unipFlag : GlobalTheory.Cusp.Cocompact (ratPts σ J) (unipFlag
     (Matrix.scalar _ (φ (1 / 2))) (Set.pi Set.univ fun _ => Set.pi Set.univ fun _ => K) hcont
     (adjA_mul hJ) (adjA_adjA hJ hσ) hst0
     ⟨Matrix.scalar _ (1 / 2), by ext i j; by_cases h : i = j <;> simp [h]⟩
-    (by rw [← map_add, ← map_add, add_halves, map_one, map_one])
+    (by rw [← map_add (f := _), ← map_add (f := _), add_halves, map_one, map_one])
     (fun x => (Matrix.scalar_commute _ (fun _ => Commute.all _ _) x).eq)
     (isCompact_univ_pi fun _ => isCompact_univ_pi fun _ => hK)
     (fun X => by

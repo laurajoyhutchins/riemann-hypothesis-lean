@@ -1,5 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfA
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,7 +67,9 @@ theorem baseChangeAt_eq_sum (x : (VS D).V) :
 theorem betaL_bc (β : (VS D).V →ₗ[D.host.E] (VS D).V) (x : (VS D).V) :
     betaL p β (baseChange₂ D p x) = baseChange₂ D p (β x) := by
   have hx : x = ∑ i, (VS D).frame.repr x i • (VS D).frame i := ((VS D).frame.sum_repr x).symm
+
   rw [baseChangeAt_eq_sum p x, map_sum]
+
   conv_rhs => rw [hx, map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, map_smul, baseChange_smul₂]
@@ -73,8 +117,9 @@ private theorem h_bc_lemma (u w : (VS D).V) :
   show LocFacts₂ Z.M p (baseChange₂ D p u) (baseChange₂ D p w) = _
   simp only [LocFacts₂, hb, cj_iota (Z.hcj p), gramV, brS]
   conv_rhs => rw [hw, hu]
+
   simp only [map_sum, map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-    starRingEnd_apply, RingHom.id_apply, map_mul, Finset.mul_sum]
+  starRingEnd_apply, RingHom.id_apply, map_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => ?_
   ring
 
@@ -88,6 +133,7 @@ theorem h_sum_bc {ι : Type} [Fintype ι] (a b : ι → (D.s.atP p).Ep) (x y : �
   have hR : ∀ (v : Vp D p) (g : ι → Vp D p),
       (locH Z p).h v (∑ j, g j) = ∑ j, (locH Z p).h v (g j) := by
     intro v g
+
     rw [(locH Z p).h_herm (∑ j, g j) v, hL, map_sum]
     exact Finset.sum_congr rfl fun j _ => ((locH Z p).h_herm (g j) v).symm
   have hS : ∀ (v : Vp D p) (c : (D.s.atP p).Ep) (w : Vp D p),
@@ -105,6 +151,7 @@ theorem betaP_iso (β : (VS D).V ≃ₗ[D.host.E] (VS D).V)
     (hiso : ∀ x y, (VS D).hT (β x) (β y) = (VS D).hT x y) (v w : Vp D p) :
     (locH Z p).h (betaP p β v) (betaP p β w) = (locH Z p).h v w := by
   rw [vp_eq_sum p v, vp_eq_sum p w]
+
   simp only [map_sum, map_smul, betaP_bc]
   rw [h_sum_bc, h_sum_bc]
   simp only [brS, hiso]
@@ -118,7 +165,7 @@ theorem betaP_lat (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (Λ : Submodule (�
     rw [betaP_bc]
     exact Submodule.subset_span ⟨β v, hβ v hv, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul c y _ hy =>
     have e : betaP p β (c • y) = c • betaP p β y := LinearMapClass.map_smul_of_tower _ c y
     rw [e]
@@ -134,7 +181,7 @@ theorem betaP_symm_lat (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (Λ : Submodule
     rw [betaP_symm_bc]
     exact Submodule.subset_span ⟨β.symm v, hβ v hv, rfl⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul c y _ hy =>
     have e : (betaP p β).symm (c • y) = c • (betaP p β).symm y := LinearMapClass.map_smul_of_tower _ c y
     rw [e]
@@ -156,7 +203,7 @@ theorem bcP_mem_X (u : Fin (D.R.rS + 1) → (VS D).V) (c : Fin (D.R.rS + 1) → 
     rw [h1]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, rfl⟩)
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul e y _ hy => rw [baseChange_smul₂]; exact Submodule.smul_mem _ _ hy
 
 theorem betaP_mem_X (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (u v : Fin (D.R.rS + 1) → (VS D).V)
@@ -176,7 +223,7 @@ theorem betaP_mem_X (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (u v : Fin (D.R.rS
     rw [map_smul, betaP_bc]
     exact Submodule.smul_mem _ _ (bcP_mem_X Z p v c hc (hmap a))
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul e y _ hy => rw [map_smul]; exact Submodule.smul_mem _ _ hy
 
 theorem betaP_symm_mem_X (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (u v : Fin (D.R.rS + 1) → (VS D).V)
@@ -196,7 +243,7 @@ theorem betaP_symm_mem_X (β : (VS D).V ≃ₗ[D.host.E] (VS D).V) (u v : Fin (D
     rw [map_smul, betaP_symm_bc]
     exact Submodule.smul_mem _ _ (bcP_mem_X Z p u c hc (hmap a))
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul e y _ hy => rw [map_smul]; exact Submodule.smul_mem _ _ hy
 
 end Beta

@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.IntAllProof
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,42 +67,5 @@ theorem vV_alg_nonneg (T : CDVR) (r : T.V) : 0 ≤ vV T.V (algebraMap T.V T.Fr r
 variable {T T' : CDVR} (iT : T.Fr →+* T'.Fr) {e' : ℕ}
   (hv : ∀ a : T.Fr, a ≠ 0 → vV T'.V (iT a) = (e' : ℤ) * vV T.V a)
 
-include hv in
-theorem iT_int (r : T.V) : iT (algebraMap T.V T.Fr r) ∈ (algebraMap T'.V T'.Fr).range := by
-  have key : ∀ x : T'.Fr, 0 ≤ vV T'.V x → x ∈ (algebraMap T'.V T'.Fr).range := by
-    intro x hx
-    unfold vV valV at hx
-    have hle : (HeightOneSpectrum.valuation T'.Fr (IsDiscreteValuationRing.maximalIdeal T'.V)) x ≤ 1 := by
-      generalize (HeightOneSpectrum.valuation T'.Fr (IsDiscreteValuationRing.maximalIdeal T'.V)) x = y at hx ⊢
-      induction y using WithZero.recZeroCoe with
-      | zero => exact zero_le'
-      | coe a =>
-        have hl : (↑a : WithZero (Multiplicative ℤ)).log = Multiplicative.toAdd a := by
-          simp [WithZero.log]
-        rw [hl] at hx
-        have h2 : Multiplicative.toAdd a ≤ 0 := by omega
-        exact WithZero.coe_le_one.mpr h2
-    apply HeightOneSpectrum.mem_integers_of_valuation_le_one
-    intro w
-    have hw : w = IsDiscreteValuationRing.maximalIdeal T'.V := by
-      ext1
-      rw [IsLocalRing.eq_maximalIdeal w.isMaximal,
-        IsLocalRing.eq_maximalIdeal (IsDiscreteValuationRing.maximalIdeal T'.V).isMaximal]
-    rw [hw]
-    exact hle
-  by_cases hr : algebraMap T.V T.Fr r = 0
-  · rw [hr, map_zero]
-    exact zero_mem _
-  · apply key
-    rw [hv _ hr]
-    exact mul_nonneg (by positivity) (vV_alg_nonneg T r)
-
-def eqV (T' : CDVR) : T'.V ≃+* (algebraMap T'.V T'.Fr).range :=
-  RingEquiv.ofBijective (algebraMap T'.V T'.Fr).rangeRestrict
-    ⟨fun a b h => IsFractionRing.injective T'.V T'.Fr (congrArg Subtype.val h),
-      (algebraMap T'.V T'.Fr).rangeRestrict_surjective⟩
-
-def phiV : T.V →+* T'.V :=
-  (eqV T').symm.toRingHom.comp ((iT.comp (algebraMap T.V T.Fr)).codRestrict _ (iT_int iT hv))
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections

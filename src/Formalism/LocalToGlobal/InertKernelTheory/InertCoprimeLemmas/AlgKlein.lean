@@ -1,15 +1,59 @@
-import Formalism.LocalToGlobal.InertKernelTheory.KerTransAll
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.AlgTrans
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SigmaAlg
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SigmaLogDeriv2
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.Th0TranslateProduct
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.Taylor
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.AlgTrans
+import Formalism.LocalToGlobal.GlobalTheory.GL3.PStdOK
+import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.FourthTensorThetaEqKernel
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.SigmaAlg
 import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.PDeriv
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.Taylor
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SigmaLogDeriv2
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.Th0TranslateProduct
 import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.BaseChangeCompatible
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GaloisTorsionConjugacy.TorsValsFinite
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GaloisTorsionConjugacy.TorsValsFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,7 +93,7 @@ theorem succ_mem (m : ℕ) : ((m : ℂ) + 1) ∈ M := add_mem (natCast_mem M m) 
 
 theorem succ_ne (m : ℕ) : ((m : ℂ) + 1) ≠ 0 := by exact_mod_cast m.succ_ne_zero
 
-theorem rec1 (P V : PowerSeries ℂ) (h : PowerSeries.derivative ℂ P = V * P)
+theorem rec1 (P V : PowerSeries ℂ) (h : PowerSeries.derivative (R := ℂ) P = V * P)
     (hV : ∀ k, PowerSeries.coeff k V ∈ M) (h0 : PowerSeries.coeff 0 P ∈ M) : ∀ n, PowerSeries.coeff n P ∈ M := by
   intro n
   induction n using Nat.strong_induction_on with
@@ -65,7 +109,7 @@ theorem rec1 (P V : PowerSeries ℂ) (h : PowerSeries.derivative ℂ P = V * P)
       have := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
       omega
 
-theorem rec0 (V Q : PowerSeries ℂ) (h : PowerSeries.derivative ℂ V = Q)
+theorem rec0 (V Q : PowerSeries ℂ) (h : PowerSeries.derivative (R := ℂ) V = Q)
     (hQ : ∀ k, PowerSeries.coeff k Q ∈ M) (h0 : PowerSeries.coeff 0 V ∈ M) : ∀ n, PowerSeries.coeff n V ∈ M := by
   intro n
   cases n with
@@ -78,7 +122,7 @@ theorem rec0 (V Q : PowerSeries ℂ) (h : PowerSeries.derivative ℂ V = Q)
     exact hQ m
 
 theorem rec2 (W : PowerSeries ℂ) (c : ℂ) (hc : c ∈ M)
-    (h : PowerSeries.derivative ℂ (PowerSeries.derivative ℂ W) = PowerSeries.C (6 : ℂ) * (W * W) + PowerSeries.C c)
+    (h : PowerSeries.derivative (R := ℂ) (PowerSeries.derivative (R := ℂ) W) = PowerSeries.C (6 : ℂ) * (W * W) + PowerSeries.C c)
     (h0 : PowerSeries.coeff 0 W ∈ M) (h1 : PowerSeries.coeff 1 W ∈ M) : ∀ n, PowerSeries.coeff n W ∈ M := by
   intro n
   induction n using Nat.strong_induction_on with
@@ -88,7 +132,7 @@ theorem rec2 (W : PowerSeries ℂ) (c : ℂ) (hc : c ∈ M)
     | 1, _ => exact h1
     | m + 2, ih =>
       have e := congrArg (PowerSeries.coeff m) h
-      rw [PowerSeries.coeff_derivative, PowerSeries.coeff_derivative, map_add, PowerSeries.coeff_C_mul,
+      rw [PowerSeries.coeff_derivative, PowerSeries.coeff_derivative, map_add (f := _), PowerSeries.coeff_C_mul,
         PowerSeries.coeff_mul, PowerSeries.coeff_C] at e
       have h6 : (6 : ℂ) ∈ M := by
         have := natCast_mem M 6
@@ -174,11 +218,11 @@ theorem caseA (L : PeriodPair) (ω₀ s : ℂ) (hω : ω₀ ∈ L.lattice) (hh :
   have hvA : AnalyticAt ℂ v 0 := analyticAt_of_eventually (hev.mono fun z hz => (hV z hz).differentiableAt)
   have hwA : AnalyticAt ℂ w 0 := analyticAt_of_eventually (hev.mono fun z hz => (hW z hz).differentiableAt)
 
-  have TG : PowerSeries.derivative ℂ (taylor0 (opU L s (th0 L (ω₀ / 2)))) =
+  have TG : PowerSeries.derivative (R := ℂ) (taylor0 (opU L s (th0 L (ω₀ / 2)))) =
       taylor0 v * taylor0 (opU L s (th0 L (ω₀ / 2))) := by
     rw [← Taylor.taylor0_deriv, ← Taylor.taylor0_mul hvA hgA]
     exact Taylor.taylor0_congr (hev.mono fun z hz => (hG z hz).deriv)
-  have TV : PowerSeries.derivative ℂ (taylor0 v) = PowerSeries.C (-1 : ℂ) * taylor0 w + PowerSeries.C (-(s2 L)) := by
+  have TV : PowerSeries.derivative (R := ℂ) (taylor0 v) = PowerSeries.C (-1 : ℂ) * taylor0 w + PowerSeries.C (-(s2 L)) := by
     rw [← Taylor.taylor0_deriv]
     have e1 := Taylor.taylor0_add (f := fun z => (-1 : ℂ) * w z) (g := fun _ => -(s2 L))
       (analyticAt_const.mul hwA) analyticAt_const
@@ -192,7 +236,7 @@ theorem caseA (L : PeriodPair) (ω₀ s : ℂ) (hω : ω₀ ∈ L.lattice) (hh :
     hev.mono fun z hz => (hW z hz).deriv
   have hdw' : ∀ᶠ z in 𝓝 (0 : ℂ), ∀ᶠ y in 𝓝 z, deriv w y = L.derivWeierstrassP (y + (s + ω₀ / 2)) :=
     hdw.eventually_nhds
-  have TW : PowerSeries.derivative ℂ (PowerSeries.derivative ℂ (taylor0 w)) =
+  have TW : PowerSeries.derivative (R := ℂ) (PowerSeries.derivative (R := ℂ) (taylor0 w)) =
       PowerSeries.C (6 : ℂ) * (taylor0 w * taylor0 w) + PowerSeries.C (-(L.g₂ / 2)) := by
     rw [← Taylor.taylor0_deriv, ← Taylor.taylor0_deriv]
     have e1 := Taylor.taylor0_add (f := fun z => (6 : ℂ) * (w z * w z)) (g := fun _ => -(L.g₂ / 2))
@@ -231,7 +275,7 @@ theorem caseA (L : PeriodPair) (ω₀ s : ℂ) (hω : ω₀ ∈ L.lattice) (hh :
   have hVc : ∀ n, PowerSeries.coeff n (taylor0 v) ∈ M := by
     refine rec0 M _ _ TV ?_ ?_
     · intro k
-      rw [map_add, PowerSeries.coeff_C_mul, PowerSeries.coeff_C]
+      rw [map_add (f := _), PowerSeries.coeff_C_mul, PowerSeries.coeff_C]
       refine add_mem (mul_mem (neg_mem (one_mem _)) (hWc k)) ?_
       split_ifs
       · exact neg_mem hs2

@@ -1,8 +1,47 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducibleStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +52,7 @@ namespace GlobalTheory.CompanionTheory.CanonOrder
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 variable (k) in
-
-def lineSetoid : Setoid (IrrGL k) where
+def lineSetoid : Setoid (IrrGL (k := k)) where
   r x y := ∃ m : ℤ, y = x.nu m
   iseqv :=
     { refl := fun x => ⟨0, by simp⟩
@@ -26,24 +64,23 @@ def lineSetoid : Setoid (IrrGL k) where
         exact ⟨m + n, by simp⟩ }
 
 variable (k) in
-
 def Line : Type 1 := Quotient (lineSetoid k)
 
-instance lineLinearOrder : LinearOrder (Line k) := (exists_wellOrder (Line k)).choose
+instance lineLinearOrder : LinearOrder (Line k) := (exists_wellFoundedLT (Line k)).choose
 
-def lineOf (x : IrrGL k) : Line k := Quotient.mk (lineSetoid k) x
+def lineOf (x : IrrGL (k := k)) : Line k := Quotient.mk (lineSetoid k) x
 
-def lineRep (x : IrrGL k) : IrrGL k := Quotient.out (s := lineSetoid k) (Quotient.mk (lineSetoid k) x)
+def lineRep (x : IrrGL (k := k)) : IrrGL (k := k) := Quotient.out (s := lineSetoid k) (Quotient.mk (lineSetoid k) x)
 
-theorem exists_height (x : IrrGL k) : ∃ m : ℤ, x = (lineRep x).nu m := by
+theorem exists_height (x : IrrGL (k := k)) : ∃ m : ℤ, x = (lineRep x).nu m := by
   exact @Quotient.mk_out _ (lineSetoid k) x
 
-def height (x : IrrGL k) : ℤ := (exists_height x).choose
+def height (x : IrrGL (k := k)) : ℤ := (exists_height x).choose
 
-theorem nu_height (x : IrrGL k) : (lineRep x).nu (height x) = x := by
+theorem nu_height (x : IrrGL (k := k)) : (lineRep x).nu (height x) = x := by
   exact (exists_height x).choose_spec.symm
 
-theorem lineRep_eq {x y : IrrGL k} (h : lineOf x = lineOf y) : lineRep x = lineRep y := by
+theorem lineRep_eq {x y : IrrGL (k := k)} (h : lineOf x = lineOf y) : lineRep x = lineRep y := by
   unfold lineRep
   unfold lineOf at h
   rw [h]
@@ -58,7 +95,7 @@ theorem key_injective : Function.Injective (key (k := k)) := by
   refine Segment.ext_first ?_ h3
   rw [← nu_height Δ.first, ← nu_height Δ'.first, lineRep_eq h1, h2]
 
-private theorem lineOf_eq_height_eq_add_of_eq_nu {x y : IrrGL k} (hy : 0 < y.fst) {n : ℤ} (h : x = y.nu n) :
+private theorem lineOf_eq_height_eq_add_of_eq_nu {x y : IrrGL (k := k)} (hy : 0 < y.fst) {n : ℤ} (h : x = y.nu n) :
     lineOf x = lineOf y ∧ height x = height y + n := by
   have hl : lineOf x = lineOf y := by
     unfold lineOf

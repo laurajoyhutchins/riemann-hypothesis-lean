@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RosatiNormLEOfStarNormLE
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.RosatiNormLEOfStarNormLE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.ThetaFamilyOrigin.IsThetaPtOverOfSubsingleton
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -14,8 +56,6 @@ namespace GlobalTheory.Published
 
 def TateCharPolySt : Prop := EndCharPolySt
 
-theorem tateCharPolySt_iff : TateCharPolySt ↔ EndCharPolySt := Iff.rfl
-
 end GlobalTheory.Published
 
 namespace GlobalTheory.TateCharPoly
@@ -24,36 +64,6 @@ open ThetaDetCompare ThetaCoord
 
 variable {K : Type} [Field K] {P : PolAV (Sp K)}
 
-def IsCharPoly (P : PolAV (Sp K)) (ψ : P.A ⟶ P.A) (χ : Polynomial ℤ) : Prop :=
-  ∀ l r : ℕ, l.Prime → (l : K) ≠ 0 → ∀ y, Frame P (l ^ r) y →
-    ∀ B : Matrix (Fin (2 * P.g)) (Fin (2 * P.g)) (ZMod (l ^ r)), Rep y ψ B →
-      B.charpoly = χ.map (Int.castRingHom (ZMod (l ^ r)))
-
-theorem tateCharPolySt_iff_isCharPoly : Published.TateCharPolySt ↔
-    ∀ (K : Type) [Field K] [IsAlgClosed K] (P : PolAV (Sp K)) (ψ : P.A ⟶ P.A), IsMonHom ψ →
-      ∃ χ : Polynomial ℤ, χ.Monic ∧ χ.natDegree = 2 * P.g ∧ IsCharPoly P ψ χ := by
-  refine ⟨fun h K _ _ P ψ hψ => ?_, fun h K _ _ P ψ hψ => ?_⟩
-  · obtain ⟨χ, hm, hd, hc⟩ := h K P ψ hψ
-    exact ⟨χ, hm, hd, fun l r hl hK y hy B hB => hc l r hl hK y hy.1 hy.2 B hB⟩
-  · obtain ⟨χ, hm, hd, hc⟩ := h K P ψ hψ
-    exact ⟨χ, hm, hd, fun l r hl hK y h₁ h₂ B hB => hc l r hl hK y ⟨h₁, h₂⟩ B hB⟩
-
 variable [IsAlgClosed K]
-
-theorem IsCharPoly.unique (hL : Laws) {ψ : P.A ⟶ P.A} [IsMonHom ψ] {χ χ' : Polynomial ℤ} (h : IsCharPoly P ψ χ)
-    (h' : IsCharPoly P ψ χ') : χ = χ' :=
-  Polynomial.ext fun n => int_eq_of_frames hL P fun l r hl hK y hy => by
-    obtain ⟨B, hB⟩ := hy.exists_rep ψ
-    simpa using congrArg (·.coeff n) ((h l r hl hK y hy B hB).symm.trans (h' l r hl hK y hy B hB))
-
-theorem IsCharPoly.eq_of_id (hL : Laws) {χ : Polynomial ℤ} (h : IsCharPoly P (𝟙 _) χ) :
-    χ = (Polynomial.X - 1) ^ (2 * P.g) :=
-  Polynomial.ext fun n => int_eq_of_frames hL P fun l r hl hK y hy => by
-    have : NeZero (l ^ r) := ⟨pow_ne_zero _ hl.ne_zero⟩
-    have h₁ := h l r hl hK y hy 1 (repRing (endAct P) hy.1).one_mem
-    have h₂ : (1 : Matrix (Fin (2 * P.g)) (Fin (2 * P.g)) (ZMod (l ^ r))).charpoly =
-        ((Polynomial.X - 1) ^ (2 * P.g) : Polynomial ℤ).map (Int.castRingHom (ZMod (l ^ r))) := by
-      simp [Matrix.charpoly_one]
-    simpa only [Polynomial.coeff_map, eq_intCast] using congrArg (·.coeff n) (h₁.symm.trans h₂)
 
 end GlobalTheory.TateCharPoly

@@ -1,9 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermContinuity
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGInt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGCongr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGSlice
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEX_UwTop
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimE
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermContinuity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BaseCutoffIsTruncation
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CcCoefMMono
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutEX_UwTop
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimE
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormsJointContinuity
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OpApplyZeroNear
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGCongr
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGInt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGSlice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBP
 
@@ -19,7 +64,7 @@ theorem rr_congr_below {P : M.Par} {Wp Wq : Type} [NormedAddCommGroup Wp] [Inner
     (a b : C.LPt) : p.RR F i w a b = p.RR F₂ i w a b := by
   by_cases hl : D.IsLocPt a i ∧ D.IsLocPt b i
   · unfold KB.Pl.RR D.RRplace
-    rw [dif_pos hl, dif_pos hl, dif_pos hi, dif_pos hi]
+    rw [dite_eq_left hl, dite_eq_left hl, dite_eq_left hi, dite_eq_left hi]
     have hU : ∀ (e : Wd.Ix (Fin w.length)), ∀ g ∈ B.GV P.k P.r,
         D.uwG P.k P.r p.T.base.z p.T.base.z' F₂ i hi w e g = D.uwG P.k P.r p.T.base.z p.T.base.z' F i hi w e g :=
       fun e g hg => (Formalism.FourierDecayAlt.P.CutEXUw.uwG_congrG p.T.base.z p.T.base.z' i hi isOpen_univ

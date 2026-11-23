@@ -1,7 +1,53 @@
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountDefs
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.FirstCoefficientFacts
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountUp
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CoarseDegreeAlternative
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.FirstCoefficientFacts
 import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.LeAndHalfLeProdOneSubExpNegOfBounds
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.CountUp
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.SegmentStatementHolds
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.ThresholdLowerBounds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,8 +87,8 @@ def KeptPair (p : ℕ) (La : ℝ) {s r : ℕ} [NeZero r] (Ai Ci : Fin s → ℕ)
         La * max ((pairC mu i : ℤ) : ℝ) (Ai i : ℝ) / ((r : ℝ) + 1) ∧
       (Ci i : ℝ) * (1 - La / ((r : ℝ) + 1)) ≤ ((pairN (s := s) lam i : ℤ) : ℝ)
 
-open Classical in
 
+open Classical in
 def keptPairSum (p : ℕ) (La : ℝ) {s r : ℕ} [NeZero r] (A : ℕ) (Ai Ci : Fin s → ℕ) : ℚ :=
   ∑ᶠ x : (Fin (2 * s + 1 + 1) → Fin (r + 1) → ℤ) × (Fin r → ℤ),
     if IsPair A Ai Ci x.1 x.2 ∧ KeptPair p La Ai Ci x.1 x.2 then wdim x.2 else 0
@@ -544,7 +590,7 @@ theorem cl_Fs_finite {C0 CYb Cde Ck CD Cb CE1 CE2 Cc : ℝ} (hCD : ChainDimAt)
     rw [if_neg hn]
   exact (finsum_le_of_inj (Fs C0 CE1 CE2 X j m rz ry)
     (Gt (r := X.m) (mmLetters C0 CE1 CE2 X j rz ry) (X.seg C0 CE1 CE2 j).bPlus) Φ
-    (Gt_nonneg _ _) (Gt_support_finite hCD _ _) (hinj.mono hsupp) (by
+    (Gt_nonneg _ _) (Gt_support_finite hCD _ _) (hinj.mono (fun _ hz => hsupp _ hz)) (by
       intro z hz
       have hz' := hsupp z hz
       obtain ⟨h1, h2, h3, h4⟩ := hΦ z hz'

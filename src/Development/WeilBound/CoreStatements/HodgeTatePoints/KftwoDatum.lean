@@ -1,14 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsHomFamilyOfPureTypeComplexTriple
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTateIsoOfPeriods
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PelStructureDescendsFieldExtension
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyDataDescendCountableSubrings
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.NonemptyRingHomComplex
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsObjOfUniformisedTripleComplex
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmCurveBaseChangeComp
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsPullback
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.RelAmpleOfLocallyOnBase
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.CmCurveBaseChangeComp
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsHomFamilyOfPureTypeComplexTriple
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsPullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.DetCondIffOfFieldExtension
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsPushEquiv
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsTripleOfFieldExtension
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUnitOfPowEqOne
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomIffOfIsGrpPullback
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.OActDescendOfGenerators
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PelStructureDescendsFieldExtension
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyDataDescendCountableSubrings
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MorphismDescendsToSubring
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.NonemptyRingHomComplex
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsObjOfUniformisedTripleComplex
+import Development.AbelianVarietyTheory.Statements.HyperbolicHypotheses.HypothesesInhabitedHyperbolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Algebraic.Cardinality
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +98,7 @@ theorem exists_datum_tate_complex (T : GlobalTheory.CM.PAT H (Sp ℂ)) (hg : 1 �
       omega
   · obtain ⟨I, -⟩ := GlobalTheory.UnifObj.exists_tateIso D D ty Pe (Q := 𝟙_ (Over (Sp ℂ)) ⟶ T.t.G)
       (fun a g => g ≫ T.t.act.act a) (fun n g g' c => Out.WeilIs T.t.G T.t.PP.L n g g' (unitOn c))
-      (fun z => u.ex (F z)) (fun _ => LinearMap.id) hP.1 hP.2.1 (fun z z' => by rw [map_add, u.ex_add])
+      (fun z => u.ex (F z)) (fun _ => LinearMap.id) hP.1 hP.2.1 (fun z z' => by rw [map_add (f := _), u.ex_add])
       (u.ex_onto.comp F.surjective) (fun z => (u.ker _).trans (hF z)) hact
       (fun k a b c hk hc => by
         have ha : F (Pe a) ∈ u.Λ := (hF _).2 ⟨a, rfl⟩
@@ -68,7 +124,8 @@ theorem exists_countable_algClosed {Ω : Type} [Field Ω] [IsAlgClosed Ω] (s : 
   · exact (algebraicClosure F Ω).algebraMap_mem (⟨x, Subfield.subset_closure hx⟩ : F)
   · show Countable (algebraicClosure F Ω)
     rw [← Cardinal.mk_le_aleph0_iff]
-    exact (Algebra.IsAlgebraic.cardinalMk_le_max F _).trans (max_le Cardinal.mk_le_aleph0 le_rfl)
+    set_option synthInstance.maxHeartbeats 200000 in
+      exact (Algebra.IsAlgebraic.cardinalMk_le_max F _).trans (max_le Cardinal.mk_le_aleph0 le_rfl)
   · show IsAlgClosed (algebraicClosure F Ω)
     exact IsAlgClosure.isAlgClosed F
 

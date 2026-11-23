@@ -1,10 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
-import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsUnitarisableOfCharIff
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
-import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsSubquotientDetRepParInd
+public import Mathlib.Topology.Algebra.Group.Units
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,9 +106,9 @@ theorem hasFiniteLength_iff_wellFounded (ρ : Representation F G V) :
   rw [HasFiniteLength, isFiniteLength_iff_isNoetherian_isArtinian, isNoetherian_iff', isArtinian_iff]
   refine and_congr ⟨fun _ => φ.toOrderEmbedding.wellFoundedGT,
     fun _ => φ.symm.toOrderEmbedding.wellFoundedGT⟩ ⟨fun h => ?_, fun _ => ?_⟩
-  · haveI : WellFoundedLT (Submodule (MonoidAlgebra F G) ρ.asModule) := ⟨h⟩
+  · haveI : WellFoundedLT (Submodule (MonoidAlgebra F G) ρ.asModule) := h
     exact φ.toOrderEmbedding.wellFoundedLT
-  · exact φ.symm.toOrderEmbedding.wellFoundedLT.wf
+  · exact φ.symm.toOrderEmbedding.wellFoundedLT
 
 theorem hasFiniteLength_comp_iff (ρ : Representation F G V) (s : H →* G) (hs : Function.Surjective s) :
     HasFiniteLength (ρ.comp s : Representation F H V) ↔ HasFiniteLength ρ := by
@@ -116,59 +156,11 @@ theorem InductionContragredient.nonempty_equiv (h : InductionContragredient k) (
   obtain ⟨Φ, -⟩ := h _ _ _ e Measure.haar W ρ hρ
   exact ⟨Φ⟩
 
-theorem JacquetFiniteLength.lower (h : JacquetFiniteLength k) (e : (Σ a, m a) ≃ n)
-    {π : Representation ℂ (GL n k) V} (hπ : IsSmooth π) (hl : HasFiniteLength π) :
-    HasFiniteLength (jacLower e π) := by
-  have : jacLower e π = jac (opp e) π := MonoidHom.ext (jacLower_eq e π)
-  rw [this]
-  exact h _ _ _ (opp e) V π hπ hl
-
-theorem InductionFiniteLength.lower (h : InductionFiniteLength k) (e : (Σ a, m a) ≃ n)
-    {ρ : Representation ℂ (Levi k m) W} (hρ : IsSmooth ρ) (hl : HasFiniteLength ρ) :
-    HasFiniteLength (parIndLower e ρ) := by
-  have key : ∀ χ : Levi k m →* ℂˣ, deltaHalf k (fun a : αᵒᵈ => m (OrderDual.ofDual a)) = χ →
-      HasFiniteLength (smInd (parabLower k e) ((twist ρ χ).comp (leviProjLower k e))) := by
-    rintro _ rfl
-    exact h _ _ _ (opp e) W ρ hρ hl
-  exact key _ (MonoidHom.ext fun g => deltaHalf_opp (m := m) g)
-
-theorem InductionContragredient.lower (h : InductionContragredient k) (e : (Σ a, m a) ≃ n)
-    [MeasurableSpace (GL n k)] [BorelSpace (GL n k)] (μ : Measure (GL n k)) [μ.IsHaarMeasure]
-    {ρ : Representation ℂ (Levi k m) W} (hρ : IsSmooth ρ) :
-    ∃ Φ : (parIndLower e (contra ρ)).Equiv (contra (parIndLower e ρ)),
-      ∀ (f' : IndSpLower e (contra ρ)) (f : IndSpLower e ρ),
-        (Φ f' : Module.Dual ℂ (IndSpLower e ρ)) f =
-          ∫ x in (KO k n : Set (GL n k)), (f'.1.1 x : Module.Dual ℂ W) (f.1.1 x) ∂μ := by
-  have key : ∀ χ : Levi k m →* ℂˣ, deltaHalf k (fun a : αᵒᵈ => m (OrderDual.ofDual a)) = χ →
-      ∃ Φ : (smInd (parabLower k e) ((twist (contra ρ) χ).comp (leviProjLower k e))).Equiv
-          (contra (smInd (parabLower k e) ((twist ρ χ).comp (leviProjLower k e)))),
-        ∀ f' f, (Φ f').1 f =
-          ∫ x in (KO k n : Set (GL n k)), (f'.1.1 x : Module.Dual ℂ W) (f.1.1 x) ∂μ := by
-    rintro _ rfl
-    exact h _ _ _ (opp e) μ W ρ hρ
-  exact key _ (MonoidHom.ext fun g => deltaHalf_opp (m := m) g)
-
 section Two
 
 variable {a b : Type} [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b]
 
-theorem JacquetFiniteLength.two (h : JacquetFiniteLength k) (e : a ⊕ b ≃ n)
-    {π : Representation ℂ (GL n k) V} (hπ : IsSmooth π) (hl : HasFiniteLength π) :
-    HasFiniteLength (jac₂ e π) :=
-  (hasFiniteLength_comp_iff _ _ (leviTwo k a b).surjective).2 (h _ _ _ (SmGL.two e) V π hπ hl)
-
 end Two
-
-example {χ : kˣ →* ℂˣ} (hχ : IsSmoothChar χ) :
-    IsSmooth (detRep n χ) ∧ (detRep n χ).IsIrreducible ∧ HasFiniteLength (detRep n χ) ∧
-      IsAdmissible (detRep n χ) :=
-  have h := (isSmooth_ofChar_iff _).2 (hχ.detChar (n := n))
-  ⟨h, isIrreducible_ofChar _, hasFiniteLength_of_isIrreducible (isIrreducible_ofChar _), h,
-    fun _ _ _ => inferInstance⟩
-
-example : IsSmooth (ofChar (deltaHalf k m)) ∧ HasFiniteLength (ofChar (deltaHalf k m)) :=
-  ⟨(isSmooth_ofChar_iff _).2 (isSmoothChar_deltaHalf k),
-    hasFiniteLength_of_isIrreducible (isIrreducible_ofChar _)⟩
 
 end SmGL
 

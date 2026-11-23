@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalMaximality.ResidueOfTraceIsFiberSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open KaehlerDifferential GlobalTheory.CechDR GlobalTheory.PD GlobalTheory.WH GlobalTheory.W1 UpperTheory.Gal.productCup_of_system
 open scoped TensorProduct
@@ -26,7 +73,7 @@ private theorem locOne_nak {L : Type} [Field L] [Algebra ℂ L] (B O : Subalgebr
       | mem y hy => exact Submodule.subset_span ⟨y, hy, rfl⟩
       | algebraMap r => simp
       | add y z _ _ hy hz =>
-        rw [Subalgebra.coe_add, map_add]
+        rw [Subalgebra.coe_add, map_add (f := _)]
         exact Submodule.add_mem _ hy hz
       | mul y z _ _ hy hz =>
         rw [Subalgebra.coe_mul, Derivation.leibniz]
@@ -66,7 +113,8 @@ private theorem locOne_nak {L : Type} [Field L] [Algebra ℂ L] (B O : Subalgebr
         have h5 := congrArg (fun u : O => (u : L)) ha
         push_cast at h5
         linear_combination h5
-      rw [h1, map_add, Derivation.map_algebraMap, zero_add, map_sum]
+
+      rw [h1, map_add (f := _), Derivation.map_algebraMap, zero_add, map_sum]
       refine Finset.sum_congr rfl fun l _ => ?_
       rw [Derivation.leibniz]
       rfl
@@ -108,7 +156,7 @@ theorem UpperTheory.Gal.productCup_of_system.locOne_of :
     intro v h0
     obtain ⟨a, ha, hv'⟩ := hMax F L d x hc hred e v ((hev _ _).2 ⟨v.2, h0⟩)
     refine ⟨fun l => ⟨a l, ha l⟩, Subtype.ext ?_⟩
-    rw [hv', AddSubmonoidClass.coe_finset_sum]
+    rw [hv', AddSubmonoidClass.coe_finsetSum]
     rfl
   have hmem := locOne_nak _ _ hle ev hunit hden t ht hmax ⟨v, hv⟩
   obtain ⟨c, hc'⟩ := (Submodule.mem_span_range_iff_exists_fun _).1 hmem

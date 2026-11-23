@@ -1,16 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FactorBounds
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeightedNormSquareRows
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OrthogonalNormSquareSum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CosetRefinement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrthNormLogBoundIffOrthBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BranchingAdmissibleFacts
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualWeylLastZeroInclusion
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.OrthogonalNormSquareSum
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.ScaledCoisometryNorms
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CapelliDeterminantFirstRowsMemBmW
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SplitLastBlockActX
+public import Formalism.LocalToGlobal.Columns.CoefColLemmas
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CoefficientSpaceEqSpanOrbitExtremalVector
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BranchingAdmissibleFacts
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BranchingListCharacterProduct
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualWeylLastZeroInclusion
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockPairingLastRowMonomialReadsCoefficient
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BranchingListCharacterProduct
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StatementWithTransposeOfBranching
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrthNormLogBoundIffOrthBound
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ColAddGenRenameCastSucc
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousCoeffBlockAct
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.StatementWithTransposeOfBranching
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeightedLeadingTermSplitZMinor
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousCoeffBlockAct
+import Formalism.BranchSandwichDivisors.DivFromPassageAndNorm
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open MvPolynomial Formalism.BasicNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Col.Br
 open scoped ComplexOrder Matrix
@@ -25,8 +74,8 @@ open Formalism.GradedWeylDivisibility GlobalTheory.BrCompare
 
 variable {K : Type} [Field K] {n : ℕ}
 
-open GlobalTheory.Branching.AddColumn in
 
+open GlobalTheory.Branching.AddColumn in
 theorem incl_mem (ν : Fin (n + 1) → ℕ) (hν : ν (Fin.last n) = 0) (f : MvPolynomial (Fin (n + 1) × Fin n) K)
     (hf : f ∈ dualWeyl K (n + 1) n fun i => ν i.castSucc) : BrCompare.incl K n f ∈ dualWeyl K (n + 1) (n + 1) ν := by
   unfold BrCompare.incl
@@ -112,17 +161,17 @@ open GlobalTheory.BrCompare GlobalTheory.BranchFormula
 variable {K : Type} [Field K] [CharZero K] {ι : Type} [Fintype ι] {n : ℕ}
   {lam : ι → DomWeight (n + 1)} {sg : ι → DomWeight n}
 
-variable (K sg) in
 
+variable (K sg) in
 def hiV : VV K sg := ⟨extVV K sg, extVV_mem K sg⟩
 
-variable (K) in
 
+variable (K) in
 def xiV (hI : ∀ τ, Interlace rfl (lam τ) (sg τ)) (hS : ∀ τ, SameShift (lam τ) (sg τ)) : VV K lam :=
   ⟨ten fun τ => xiBr K rfl (lam τ) (sg τ), Submodule.subset_span ⟨_, fun τ => xi_mem (hI τ) (hS τ), rfl⟩⟩
 
-variable (K lam sg) in
 
+variable (K lam sg) in
 def tr : VV K sg →ₗ[K] VV K lam :=
   (LinearMap.BilinForm.toDual (pairBK (K := K) lam) (pairingBNondegenerate_holds K ι _ lam)).symm.toLinearMap ∘ₗ
     (brStd rfl lam sg).dualMap ∘ₗ pairBK sg
@@ -160,7 +209,7 @@ theorem pair_hi {F : Pol K ι (n + 1)} (hF : F ∈ VV K lam) :
     field_simp
     linear_combination ((cBr rfl (lam τ) (sg τ) : ℤ) : K) * h
   | zero => simp
-  | add y z _ _ hy hz => simp only [map_add, LinearMap.add_apply, Submodule.coe_add, mul_add, hy, hz]
+  | add y z _ _ hy hz => simp only [map_add (f := _), LinearMap.add_apply, Submodule.coe_add, mul_add, hy, hz]
   | smul a y _ hy => simp only [map_smul, LinearMap.smul_apply, Submodule.coe_smul, ← hy, smul_eq_mul]; ring
 
 theorem tr_hi : tr K lam sg (hiV K sg) = (∏ τ, ((cBr rfl (lam τ) (sg τ) : ℤ) : K)) • xiV K hI hS := by
@@ -205,7 +254,7 @@ theorem br_tr (y : VV K sg) : brStd rfl lam sg (tr K lam sg y) =
   | add x z hx hz h1 h2 =>
     rw [← GlobalTheory.OrbitSpan.VV_eq_span_orbit] at hx hz
     change brStd rfl lam sg (tr K lam sg (⟨x, hx⟩ + ⟨z, hz⟩)) = _ • (⟨x, hx⟩ + ⟨z, hz⟩ : VV K sg)
-    rw [map_add, map_add, h1, h2, smul_add]
+    rw [map_add (f := _), map_add (f := _), h1, h2, smul_add]
   | smul a x hx h1 =>
     rw [← GlobalTheory.OrbitSpan.VV_eq_span_orbit] at hx
     change brStd rfl lam sg (tr K lam sg (a • ⟨x, hx⟩)) = _ • (a • ⟨x, hx⟩ : VV K sg)

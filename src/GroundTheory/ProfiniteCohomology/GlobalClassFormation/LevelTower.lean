@@ -1,8 +1,57 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LevelCyclic
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderInfRes
-import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassEquivIdeleClassMapOfComm
-import GroundTheory.TateCohomology.InfRes
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderInfRes
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LevelDefs
+public import GroundTheory.GlobalFields.IdeleClassGroup.IdeleClassEquivIdeleClassMapOfComm
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LevelCyclic
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.OrderBound
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -14,8 +63,8 @@ section Tower
 variable (K F M : Type) [Field K] [NumberField K] [Field F] [NumberField F] [Field M]
   [NumberField M] [Algebra K F] [Algebra K M] [Algebra F M] [IsScalarTower K F M]
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem smul_ideleClassMap_restrictNormal [Normal K F] (σ : Gal(M/K)) (c : IdeleClassGroup F) :
     σ • ideleClassMap F M c = ideleClassMap F M (AlgEquiv.restrictNormalHom F σ • c) :=
   ideleClassEquiv_ideleClassMap_of_comm (AlgEquiv.restrictNormalHom F σ : F ≃+* F) (σ : M ≃+* M)
@@ -29,15 +78,15 @@ noncomputable def classFixingCohomologyIso (n : ℕ) :
   groupCohomology.mapIso (galFixingEquiv K F M) (LinearEquiv.refl _ _)
     (fun _ => LinearMap.ext fun _ => rfl) n
 
-omit [NumberField K] [NumberField F] [IsGalois K M] in
 
+omit [NumberField K] [NumberField F] [IsGalois K M] in
 theorem isZero_groupCohomology_one_classFixing
     (h : IsZero (groupCohomology (ideleClassRep F M) 1)) :
     IsZero (groupCohomology (Rep.res (galFixing K F M).subtype (ideleClassRep K M)) 1) :=
   h.of_iso (classFixingCohomologyIso K F M 1).symm
 
-omit [NumberField K] [IsGalois K M] in
 
+omit [NumberField K] [IsGalois K M] in
 theorem smul_ideleClassMap_of_mem_galFixing (g : galFixing K F M) (c : IdeleClassGroup F) :
     (g : Gal(M/K)) • ideleClassMap F M c = ideleClassMap F M c := by
   rw [smul_ideleClassMap_restrictNormal, MonoidHom.mem_ker.1 g.2, one_smul]
@@ -51,8 +100,8 @@ noncomputable def classToInvariants :
     congrArg Additive.ofMul
       (smul_ideleClassMap_of_mem_galFixing K F M g (Additive.toMul (α := IdeleClassGroup F) x))
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem classToInvariants_bijective : Function.Bijective (classToInvariants K F M) := by
   have : IsGalois F M := IsGalois.tower_top_of_isGalois K F M
   constructor
@@ -93,8 +142,8 @@ noncomputable def classQuotientCohomologyIso (n : ℕ) :
 
 variable {K F M}
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem isZero_groupCohomology_one_ideleClassRep_of_tower
     (hF : IsZero (groupCohomology (ideleClassRep K F) 1))
     (hM : IsZero (groupCohomology (ideleClassRep F M) 1)) :
@@ -166,7 +215,7 @@ theorem ideleClassRep_of_isPGroup_of_finrank (p : ℕ) [Fact p.Prime] (n : ℕ) 
   obtain ⟨N, hN, hbot, htop⟩ := exists_normal_ne_bot_ne_top_of_not_isCyclic hcyc
   have hpos : 0 < finrank K (fixedField N) := Module.finrank_pos
   have hLE : finrank (fixedField N) L = Nat.card N := finrank_fixedField_eq_card N
-  have hmul := Module.finrank_mul_finrank K (fixedField N) L
+  have hmul := (letI : Module.Free (fixedField N) L := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank K (fixedField N) L)
   have hcardG : Nat.card Gal(L/K) = finrank K L := IsGalois.card_aut_eq_finrank K L
   have hNlt : Nat.card N < finrank K L := by
     rw [← hcardG]

@@ -1,5 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StCut1p
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.UnitaryGroupStructuralFacts
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.UHMulInv
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StCut1p
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.UnitaryGroupStructuralFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,67 +60,40 @@ section hpk
 variable (k r : ℕ)
 
 theorem Hpk_out {i : Fin (2 * r + k + 1)} (h : i.val < r ∨ r + k < i.val) (j : Fin (2 * r + k + 1)) :
-    Hpk k r i j = if j.val = 2 * r + k - i.val then 1 else 0 := by
-  rcases i with ⟨i, hi⟩; rcases j with ⟨j, hj⟩
-  simp only [Hpk, Fin.mk.injEq] at h ⊢
-  split_ifs <;> first | rfl | (exfalso; omega)
+    Hpk k r i j = if j.val = 2 * r + k - i.val then 1 else 0 :=
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.Hpk_out k r h j
 
 theorem Hpk_mid {i : Fin (2 * r + k + 1)} (h : ¬(i.val < r ∨ r + k < i.val)) (j : Fin (2 * r + k + 1)) :
-    Hpk k r i j = if j.val = i.val then (if i.val = r + k then -1 else 1) else 0 := by
-  rcases i with ⟨i, hi⟩; rcases j with ⟨j, hj⟩
-  simp only [Hpk, Fin.mk.injEq] at h ⊢
-  split_ifs <;> first | rfl | (exfalso; omega)
+    Hpk k r i j = if j.val = i.val then (if i.val = r + k then -1 else 1) else 0 :=
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.Hpk_mid k r h j
 
 theorem Hpk_mulVec (v : Fin (2 * r + k + 1) → ℂ) (i : Fin (2 * r + k + 1)) :
     (Hpk k r *ᵥ v) i = if i.val < r ∨ r + k < i.val then v ⟨2 * r + k - i.val, by omega⟩
-      else if i.val = r + k then -v i else v i := by
-  simp only [mulVec, dotProduct]
-  by_cases h1 : i.val < r ∨ r + k < i.val
-  · rw [if_pos h1]
-    simp only [Hpk_out k r h1]
-    rw [Finset.sum_eq_single ⟨2 * r + k - i.val, by omega⟩]
-    · simp
-    · intro b _ hb; rw [if_neg (fun h => hb (Fin.ext h))]; simp
-    · simp
-  · rw [if_neg h1]
-    simp only [Hpk_mid k r h1]
-    rw [Finset.sum_eq_single i]
-    · split_ifs <;> first | (exfalso; omega) | simp
-    · intro b _ hb; rw [if_neg (fun h => hb (Fin.ext h))]; simp
-    · simp
+      else if i.val = r + k then -v i else v i :=
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.Hpk_mulVec k r v i
 
-theorem Hpk_mulVec_mulVec (v : Fin (2 * r + k + 1) → ℂ) : Hpk k r *ᵥ (Hpk k r *ᵥ v) = v := by
-  ext i
-  rw [Hpk_mulVec]
-  by_cases h1 : i.val < r ∨ r + k < i.val
-  · rw [if_pos h1, Hpk_mulVec]
-    have e1 : ((⟨2 * r + k - i.val, by omega⟩ : Fin (2 * r + k + 1)).val) = 2 * r + k - i.val := rfl
-    rw [if_pos (by rw [e1]; omega)]
-    congr 1; ext; simp; omega
-  · rw [if_neg h1, Hpk_mulVec, if_neg h1]
-    split_ifs <;> simp
+theorem Hpk_mulVec_mulVec (v : Fin (2 * r + k + 1) → ℂ) : Hpk k r *ᵥ (Hpk k r *ᵥ v) = v :=
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.Hpk_mulVec_mulVec k r v
 
 theorem mat_eq_of_mulVec {A B : Mat k r} (h : ∀ v, A *ᵥ v = B *ᵥ v) : A = B := by
   ext i j
   simpa [Matrix.mulVec_single_one] using congrFun (h (Pi.single j 1)) i
 
 theorem Hpk_sq : Hpk k r * Hpk k r = 1 :=
-  mat_eq_of_mulVec k r fun v => by rw [← Matrix.mulVec_mulVec, Hpk_mulVec_mulVec, Matrix.one_mulVec]
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.Hpk_sq k r
 
-theorem UH_left_inv {g : Mat k r} (hg : g ∈ GV k r) : Hpk k r * gᴴ * Hpk k r * g = 1 := by
-  have hg' : gᴴ * Hpk k r * g = Hpk k r := hg
-  calc Hpk k r * gᴴ * Hpk k r * g = Hpk k r * (gᴴ * Hpk k r * g) := by simp only [Matrix.mul_assoc]
-    _ = 1 := by rw [hg', Hpk_sq]
+theorem UH_left_inv {g : Mat k r} (hg : g ∈ GV k r) : Hpk k r * gᴴ * Hpk k r * g = 1 :=
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.UH_left_inv k r hg
 
 end hpk
 
 variable {k r : ℕ}
 
-theorem GV_inv_mul {g : Mat k r} (hg : g ∈ GV k r) : g⁻¹ * g = 1 := by
-  rw [Matrix.inv_eq_left_inv (UH_left_inv k r hg)]; exact UH_left_inv k r hg
+theorem GV_inv_mul {g : Mat k r} (hg : g ∈ GV k r) : g⁻¹ * g = 1 :=
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.UH_inv_mul k r hg
 
 theorem GV_mul_inv {g : Mat k r} (hg : g ∈ GV k r) : g * g⁻¹ = 1 :=
-  mul_eq_one_comm.mp (GV_inv_mul hg)
+  ReciprocityTheory.ChartRestriction.DS.Xi.StepA.UH_mul_inv k r hg
 
 theorem GV_mul_mem {g h : Mat k r} (hg : g ∈ GV k r) (hh : h ∈ GV k r) : g * h ∈ GV k r := by
   show (g * h)ᴴ * Hpk k r * (g * h) = Hpk k r

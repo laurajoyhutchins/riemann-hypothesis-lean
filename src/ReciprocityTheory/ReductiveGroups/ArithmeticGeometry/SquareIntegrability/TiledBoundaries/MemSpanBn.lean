@@ -1,4 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TiledBoundaries.PointwiseNormSqPullbackTensorEqProd
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.TiledBoundaries.PointwiseNormSqPullbackTensorEqProd
+public import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.LemmaNA
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.I2.TiledBoundaries
 
@@ -14,9 +64,7 @@ def Bn (X : PT E) (n : ℕ) :
 
 theorem Bn_repr (X : PT E) (n : ℕ) (v : Fin n → Vsp X.dim) (k : Fin n)
     (i : Fin (2 * Fintype.card (Idx X.dim))) : (Bn X n).repr v ⟨k, i⟩ = X.b.repr (v k) i := by
-  first
-    | exact Pi.basis_repr _ _ _
-    | simp [Bn, Pi.basis_repr]
+  exact Pi.basis_repr _ _ _
 
 instance volHaar (X : PT E) (n : ℕ) : (volume : Measure (Fin n → Vsp X.dim)).IsAddHaarMeasure :=
   Measure.pi.isAddHaarMeasure (fun _ => volume)
@@ -26,7 +74,7 @@ instance cntL (X : PT E) (n : ℕ) : Countable (Submodule.span ℤ (Set.range (B
 
 theorem fd_eq (X : PT E) (n : ℕ) : X.fd n = ZSpan.fundamentalDomain (Bn X n) := by
   ext v
-  simp only [PT.fd, Set.mem_setOf_eq, ZSpan.mem_fundamentalDomain, Sigma.forall, Bn_repr]
+  simp only [PT.fd, Set.mem_ofPred_eq, ZSpan.mem_fundamentalDomain, Sigma.forall, Bn_repr]
 
 theorem mem_spanBn (X : PT E) (n : ℕ) (v : Fin n → Vsp X.dim) :
     v ∈ Submodule.span ℤ (Set.range (Bn X n)) ↔ ∀ k, v k ∈ X.L := by
@@ -42,9 +90,8 @@ theorem fd_bdd (X : PT E) (n : ℕ) : Bornology.IsBounded (X.fd n) := by
   exact ZSpan.fundamentalDomain_isBounded (Bn X n)
 
 theorem fd_ne_zero (X : PT E) (n : ℕ) : volume (X.fd n) ≠ 0 := by
-  first
-    | exact (fd_fund X n).measure_ne_zero (NeZero.ne volume)
-    | (rw [fd_eq]; exact ZSpan.measure_fundamentalDomain_ne_zero (Bn X n))
+  rw [fd_eq]
+  exact ZSpan.measure_fundamentalDomain_ne_zero (Bn X n)
 
 theorem fd_ne_top (X : PT E) (n : ℕ) : volume (X.fd n) ≠ ⊤ := (fd_bdd X n).measure_lt_top.ne
 
@@ -76,6 +123,9 @@ theorem stepT : StepT := by
     (measurableEmbedding_addRight a) (fun v => g (v - a)) (X.fd n)
   simp only [add_sub_cancel_right] at h1
   rw [← h1]
+  haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range (Bn X n))).toAddSubgroup
+      (Fin n → Vsp X.dim) volume :=
+    ⟨fun g s _ => measure_preimage_add volume (g : Fin n → Vsp X.dim) s⟩
   exact (fd_trans X n a).setIntegral_eq (fd_fund X n) (per_span X n g hper)
 
 theorem stepPos : StepPos := by
@@ -104,13 +154,12 @@ theorem stepPos : StepPos := by
         rw [Set.mem_vadd_set_iff_neg_vadd_mem]
         show 0 < X.ptN2 q F (-g +ᵥ v) ↔ 0 < X.ptN2 q F v
         rw [per_span X n (X.ptN2 q F) hper (-g) v]
-      have hfd := (fd_fund X n).measure_eq_tsum U
-      simp only [hinv, tsum_const] at hfd
+      haveI : VAddInvariantMeasure (Submodule.span ℤ (Set.range (Bn X n))).toAddSubgroup
+          (Fin n → Vsp X.dim) volume :=
+        ⟨fun g s _ => measure_preimage_add volume (g : Fin n → Vsp X.dim) s⟩
       rw [pos_iff_ne_zero]
       intro h0
-      rw [h0] at hfd
-      simp at hfd
-      exact hUpos.ne' hfd)
+      exact hUpos.ne' ((fd_fund X n).measure_zero_of_invariant U hinv h0))
   have hint : IntegrableOn (X.ptN2 q F) (X.fd n) volume :=
     (hc.continuousOn.integrableOn_compact (fd_bdd X n).isCompact_closure).mono_set subset_closure
   have hpos : 0 < ∫ v in X.fd n, X.ptN2 q F v := by
@@ -130,9 +179,7 @@ theorem stepF : StepF := by
     ext v
     simp [PT.fd]
   rw [setAverage_eq, setAverage_eq, hset, volume_pi]
-  first
-    | simp only [measureReal_def, Measure.pi_pi, Measure.restrict_pi_pi]
-    | simp only [Measure.real_def, Measure.pi_pi, Measure.restrict_pi_pi]
+  simp only [measureReal_def, Measure.pi_pi, Measure.restrict_pi_pi]
   rw [integral_fintype_prod_eq_prod (f := fun _ => f)]
   simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin, ENNReal.toReal_pow, smul_eq_mul]
   rw [mul_pow, inv_pow]
@@ -143,7 +190,7 @@ theorem stepDual : StepDual := by
   choose! m hm using hx
   have hHadd : ∀ z y y' : Vsp X.dim, Hf z (y + y') = Hf z y + Hf z y' := by
     intro z y y'
-    simp only [Hf, PiLp.add_apply, map_add, mul_add, Finset.sum_add_distrib]
+    simp only [Hf, PiLp.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
   have hHsub : ∀ z z' y : Vsp X.dim, Hf (z - z') y = Hf z y - Hf z' y := by
     intro z z' y
     simp only [Hf, PiLp.sub_apply, sub_mul, Finset.sum_sub_distrib]
@@ -174,6 +221,7 @@ theorem stepDual : StepDual := by
   have hA : ∀ y, (Hf z y).im = 0 := by
     intro y
     have h1 : (Hf z y).im = A y := rfl
+
     rw [h1, ← X.b.sum_repr y, map_sum]
     refine Finset.sum_eq_zero (fun i _ => ?_)
     show (Hf z (X.b.repr y i • X.b i)).im = 0

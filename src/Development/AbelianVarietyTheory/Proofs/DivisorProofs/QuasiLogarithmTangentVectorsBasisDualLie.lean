@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdaptedQuasiLogBasisPDivGroupLieDualStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupDualTangentOfQuasiLogarithmStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAdaptedQuasiLogBasisPDivGroupLieDualStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupDualTangentLinearKillsIntegralStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupDualTangentOfQuasiLogarithmStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
+
 open MvPowerSeries GlobalTheory GlobalTheory.Katz GlobalTheory.QLog GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
 set_option autoImplicit false
@@ -35,7 +78,7 @@ theorem defect_add_smul {μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) O}
     (hμ : ∀ i, constantCoeff (μ i) = 0) (n : ℕ) (f g : MvPowerSeries (Fin d) E) (a : O) :
     defect μ n (f + a • g) = defect μ n f + a • defect μ n g := by
   have hs := hasSubst_up_nmul (Q := E) hμ n
-  simp only [defect, ← coe_substAlgHom hs, ← algebraMap_smul E a, map_add, map_smul]
+  simp only [defect, ← coe_substAlgHom hs, ← algebraMap_smul E a, map_add (f := _), map_smul]
   module
 
 theorem isLie_add_smul {p : ℕ} {G : PDivGroup p O} (c : QLog.Chart G d)
@@ -52,7 +95,7 @@ theorem isLie_add_smul {p : ℕ} {G : PDivGroup p O} (c : QLog.Chart G d)
     rw [LinearMap.map_smul] at this
     exact this
   · have := dvd_add (H w φ hφ) (dvd_mul_of_dvd_right (H' w φ hφ) a)
-    rw [LinearMap.add_apply, LinearMap.smul_apply, map_add, map_smul, map_add, map_smul,
+    rw [LinearMap.add_apply, LinearMap.smul_apply, map_add (f := _), map_smul, map_add (f := _), map_smul,
       smul_eq_mul, smul_eq_mul]
     convert this using 1
     ring
@@ -82,6 +125,7 @@ theorem mul_eq_one {μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) O} {ι κ : T
   have h2 : In (⊤ : Ideal O) (f l - comb (∑ m, P l m • R m) f) := by
     have e1 : f l - comb (∑ m, P l m • R m) f =
         (f l - comb (P l) g) + ∑ m, P l m • (g m - comb (R m) f) := by
+
       simp only [comb_eq, map_sum, map_smul]
       simp only [Fintype.linearCombination_apply, smul_sub, Finset.sum_sub_distrib]
       abel

@@ -1,6 +1,56 @@
-import Development.WeilBound.ThetaLifts.SmallCones.FourierUniq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantFinprodSchwartzBruhatFiniteAdel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportFinprodSchwartzBruhatFiniteAdel
+module
+
+public import Development.WeilBound.ThetaLifts.SmallCones.ThetaUniq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportFinprodSchwartzBruhatFiniteAdel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantFinprodSchwartzBruhatFiniteAdel
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionNonzeroAdmissibleStatement
+public import Development.WeilBound.ThetaLifts.SmallCones.FourierUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -19,7 +69,7 @@ variable {R : Type} [CommRing R] [Invertible (2 : R)] {V : Type} [AddCommGroup V
 
 theorem rho_rho (a b : V) (Φ : (κ → R) → ℂ) : d.rho ψ a (d.rho ψ b Φ) = ψ (⅟(2 : R) * B a b) • d.rho ψ (a + b) Φ := by
   funext x
-  simp only [Darboux.rho, schr, Pi.smul_apply, smul_eq_mul, ← mul_assoc, ← AddChar.map_add_eq_mul, map_add, d.form,
+  simp only [Darboux.rho, schr, Pi.smul_apply, smul_eq_mul, ← mul_assoc, ← AddChar.map_add_eq_mul, map_add (f := _), d.form,
     Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add, add_assoc]
   congr 2
   have h : ⅟(2 : R) * 2 = 1 := invOf_mul_self _
@@ -50,9 +100,9 @@ theorem rho_rho_of (a b : V) (h : B a b = 0) (Φ : (κ → R) → ℂ) : d.rho �
   rw [rho_rho, h, mul_zero, AddChar.map_zero_eq_one, one_smul]
 
 def formL : V →ₗ[R] V →ₗ[R] R :=
-  LinearMap.mk₂ R B (fun a b c => by simp only [d.form, map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
+  LinearMap.mk₂ R B (fun a b c => by simp only [d.form, map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
     (fun c a b => by simp only [d.form, map_smul, Prod.smul_fst, Prod.smul_snd, smul_dotProduct, dotProduct_smul, smul_eq_mul]; ring)
-    (fun a b c => by simp only [d.form, map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
+    (fun a b c => by simp only [d.form, map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]; ring)
     (fun c a b => by simp only [d.form, map_smul, Prod.smul_fst, Prod.smul_snd, smul_dotProduct, dotProduct_smul, smul_eq_mul]; ring)
 
 theorem form_eq (a b : V) : B a b = formL d a b := rfl
@@ -60,11 +110,13 @@ theorem form_eq (a b : V) : B a b = formL d a b := rfl
 include d in
 theorem form_sum_left {ι : Type} (s : Finset ι) (t : ι → R) (v : ι → V) (b : V) :
     B (∑ j ∈ s, t j • v j) b = ∑ j ∈ s, t j * B (v j) b := by
+
   simp only [form_eq d, map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul]
 
 include d in
 theorem form_sum_right {ι : Type} (s : Finset ι) (t : ι → R) (v : ι → V) (b : V) :
     B b (∑ j ∈ s, t j • v j) = ∑ j ∈ s, t j * B b (v j) := by
+
   simp only [form_eq d, map_sum, map_smul, smul_eq_mul]
 
 end Gen
@@ -237,6 +289,7 @@ theorem incM_lin (a : Fin m → F) : incM F (∑ j, a j • u j) = lin u fun j =
   let j : Matrix (Fin n) (Fin d) E →ₗ[F] Ten F E n d :=
     (Algebra.TensorProduct.includeRight : E →ₐ[F] AF F ⊗[F] E).toLinearMap.mapMatrix
   show j _ = _
+
   rw [map_sum, lin]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, algebraMap_smul]
@@ -248,7 +301,7 @@ theorem rho_rat (h : IsStd B.ψ) (hP : Polar σ X W X₁ W₁ ι ι' I u z) (x :
         (M.co.rho B.ψ (incM F ι * incM F x₁ * (incM F ι')ᵀ) Φ)) := by
   obtain ⟨a, b, x₁, rfl⟩ := hP.span x
   refine ⟨a, b, x₁, fun Φ => ?_⟩
-  rw [rho_rho_of _ _ _ _ (sy_lin_zm M hP _ _), rho_rho, form_eq M.co, map_add, ← form_eq M.co, ← form_eq M.co,
+  rw [rho_rho_of _ _ _ _ (sy_lin_zm M hP _ _), rho_rho, form_eq M.co, map_add (f := _), ← form_eq M.co, ← form_eq M.co,
     show symp (R := AF F) (cA σ) (-1) (incM F X.J) (incM F W.J) _ _ = _ from sy_lin_um M hP _ _, show symp (R := AF F) (cA σ) (-1) (incM F X.J) (incM F W.J) _ _ = _ from sy_lin_uz M hP.toDual _ _, add_zero,
     show ⅟(2 : AF F) * -((fun j => algebraMap F (AF F) (a j)) ⬝ᵥ fun j => algebraMap F (AF F) (b j)) =
       algebraMap F (AF F) (2⁻¹ * -(a ⬝ᵥ b)) by

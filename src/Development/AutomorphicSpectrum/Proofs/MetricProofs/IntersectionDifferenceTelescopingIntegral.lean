@@ -1,11 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.Pull1
-import Development.AutomorphicSpectrum.Statements.MetricStatements.AgreementIffGuarded
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GenFibreExists
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.PtsIntegralLogNormRatEqBaseStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.RealisationPotentialDegreeCompatibilityStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.AnalyticSystemRegularityProperties
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PLCurveA
+module
+
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GenFibreExists
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.AnalyticSystemRegularityProperties
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PtsIntegralLogNormRatEqBaseStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.AnalyticForms.PotentialTheory.IntegrableOnTargetOfTsupport
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PLCurveA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDerived
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.PermFinTwoUniv
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 
 noncomputable section
@@ -14,8 +62,8 @@ namespace GlobalTheory.CompanionTheory.Ar.PB.Tele
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-open Classical in
 
+open Classical in
 def ratioWt (A B : HermLine ι) (z : (Σ k, ι k) → ℂ) : ℝ :=
   if ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0 then Real.log (A.h z) - Real.log (B.h z) else 0
 
@@ -47,8 +95,6 @@ theorem ratioWt_smooth {A B : HermLine ι} (hA : IsSmoothHerm A) (hB : IsSmoothH
 
 def wtLine {A B : HermLine ι} (hab : A.a = B.a) : HermLine ι :=
   HermLine.ofWeight (ratioWt A B) fun c z hc => ratioWt_smul hab c z hc
-
-theorem wtLine_a {A B : HermLine ι} (hab : A.a = B.a) : (wtLine hab).a = 0 := rfl
 
 theorem wtLine_h {A B : HermLine ι} (hab : A.a = B.a) (z : (Σ k, ι k) → ℂ) :
     (wtLine hab).h z = Real.exp (-ratioWt A B z) := rfl
@@ -138,13 +184,33 @@ end GlobalTheory.CompanionTheory.Ar.PB.Tele
 
 namespace GlobalTheory.CompanionTheory.Ar.PB
 
-open Tele in
 
+open Tele in
 theorem num_sub_num : Inputs → ∀ (II : IntersectionSystem), IsFullIntersectionSystem II → ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (D : ℕ) (σ : Type) [Fintype σ] (S : AnSys D σ) (P : Ideal (MRing ι)) (Re : Realis S P) (t t' : ℝ) (w : Fin (D + 1) → σ), 0 < t → t ≤ S.t₀ → 0 < t' → t' ≤ S.t₀ → Re.num II t w - Re.num II t' w = ∑ r : Fin (D + 1), mInt S.A (fun i => S.potT (w (r.succAbove i)) (if r.succAbove i < r then t else t')) (fun x => S.phT (w r) t x - S.phT (w r) t' x) := by
   intro hIn II hII K _ ι _ D σ _ S P Re t t' w ht ht0 ht' ht'0
   have hF := hII.1
   have hP := Re.arith
-  have hpot := (GlobalTheory.T.realisation_potential_degree_compatibility hIn.resExists K ι D σ S P Re).1
+  have hpot : ∀ a t, 0 < t → t ≤ S.t₀ → SamePot Re.R.A Set.univ
+      (potOf Re.R (Re.line a t)) ((S.potT a t).pullback Re.π Re.holo.1) := by
+    intro a s hs hs0 x _
+    obtain ⟨V, hV, hxV, G, hG, hVG⟩ := Re.ref_pot a x (Set.mem_univ x)
+    refine ⟨V ∩ Re.R.U x, hV.inter (Re.R.isOpen_U x), ⟨hxV, Re.R.mem_U x⟩, G, ?_, ?_⟩
+    · intro j
+      exact (hG j).mono fun y hy => ⟨hy.1, hy.2.1⟩
+    · rintro y ⟨hyV, hyU⟩
+      have hm := Re.R.mem x y hyU
+      obtain ⟨c, hc, e⟩ := Re.R.compat y x y ⟨Re.R.mem_U y, hyU⟩
+      have h := Re.line_eq a s hs hs0 y
+      rw [e, (Re.line a s).smul c _ hc, (Re.ref a).smul c _ hc, Re.line_deg] at h
+      have hp : (∏ k, ‖c k‖ ^ (Re.ref a).a k) ≠ 0 :=
+        Finset.prod_ne_zero_iff.2 fun k _ => zpow_ne_zero _ (norm_ne_zero_iff.2 (hc k))
+      rw [Real.log_mul hp ((Re.line a s).pos _ hm.1).ne',
+        Real.log_mul hp ((Re.ref a).pos _ hm.1).ne'] at h
+      have hvg : Real.log ((Re.ref a).h (Re.R.lift x y)) -
+          (S.th a).φ (Re.π x) (Re.π y) = (G y).re := hVG y hyV
+      show Real.log ((Re.line a s).h (Re.R.lift x y)) -
+        ((S.th a).φ (Re.π x) (Re.π y) + S.phT a s (Re.π y)) = (G y).re
+      linarith
   have hbasic := (anSys_open_basics D σ S).2.2.2.1
   have hsc : ∀ (b : Prop) [Decidable b], 0 < (if b then t else t') ∧ (if b then t else t') ≤ S.t₀ := by
     intro b _

@@ -1,9 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FinitePartTraceCharacterIdempotentInverseDiffere
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalBlockDetBlockTriangular
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdempotentSumAuxiliaryPlaces
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsAuxiliaryVectorWittDec
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FinitePartTraceCharacterIdempotentInverseDiffere
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatSelfDualOfUnimod
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiagonalBlockDetBlockTriangular
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIdempotentSumAuxiliaryPlaces
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuationLeOneOfMem
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Grow GlobalTheory.Unf GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.SepRows GlobalTheory.Asc
@@ -26,8 +67,8 @@ def bnd (I : FractionalIdeal (𝓞 D.host.E)⁰ D.host.E) : AddSubgroup (AE D) w
     (∀ s ∈ I, Q.valuation D.host.E (d * s) ≤ 1) → Valued.v (cpt (D := D) Q (toEAf D (incA D d * t))) ≤ 1}
   zero_mem' := ⟨RingHom.map_zero _, fun Q d _ => by
     rw [mul_zero, RingHom.map_zero, RingHom.map_zero, Valuation.map_zero]; exact zero_le⟩
-  add_mem' := fun {a b} ha hb => ⟨by rw [RingHom.map_add, ha.1, hb.1, add_zero], fun Q d h => by
-    rw [mul_add, RingHom.map_add, RingHom.map_add]
+  add_mem' := fun {a b} ha hb => ⟨by rw [RingHom.map_add (f := _), ha.1, hb.1, add_zero], fun Q d h => by
+    rw [mul_add, RingHom.map_add (f := _), RingHom.map_add (f := _)]
     exact Valuation.map_add_le _ (ha.2 Q d h) (hb.2 Q d h)⟩
   neg_mem' := fun {a} ha => ⟨by rw [RingHom.map_neg, ha.1, neg_zero], fun Q d h => by
     rw [mul_neg, RingHom.map_neg, RingHom.map_neg, Valuation.map_neg]
@@ -62,7 +103,7 @@ theorem psiE_eq_one {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1))
       rw [RingHom.map_mul (incA D), mul_assoc, RingHom.map_mul (finPart D), GlobalTheory.LatVac.finPart_incA]
       exact h2
     · intro x y hx hy
-      rw [RingHom.map_add, add_mul, RingHom.map_add, GlobalTheory.FinPl.Conductor.chi_add, hx, hy, one_mul]
+      rw [RingHom.map_add (f := _), add_mul, RingHom.map_add (f := _), GlobalTheory.FinPl.Conductor.chi_add, hx, hy, one_mul]
   rw [GlobalTheory.FinPl.Conductor.psiE_eq_chi ψ h0]
   rwa [RingHom.map_one, one_mul] at key
 
@@ -103,6 +144,7 @@ theorem coef_mem_bnd {m n : ℕ} (r : Fin m → D.host.E) (z : Fin n → D.host.
     obtain ⟨α, hα, x, hx, rfl⟩ := hw
     have e : ratV r ⬝ᵥ (Matrix.of fun i j => (pairA D.host.F 0 α) ⊗ₜ[D.host.F] x i j : Mx D m n) *ᵥ ratV z =
         (pairA D.host.F 0 α) ⊗ₜ[D.host.F] (r ⬝ᵥ x *ᵥ z) := by
+
       simp only [GlobalTheory.IdeleAA.tmul_eq, dotProduct, mulVec, ratV, Matrix.of_apply, map_sum, map_mul, Finset.mul_sum]
       refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
     rw [e]
@@ -325,7 +367,7 @@ theorem exists_AA {μ₀ : T} (hL : L.Is μ₀) (hq : OffQ D) (G : GridData L sc
   have h3 := FractionalIdeal.mul_mem_mul (FractionalIdeal.mem_coeIdeal_of_mem (𝓞 D.host.E)⁰ h1) h2
   rwa [mul_one] at h3
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem ychar : OnStd fun {D} _ _ {sc} {G} W F => ∀ ρ (h : 2 * ρ + 2 ≤ D.R.m), ∀ u ∈ latRow G (2 * ρ + 1), W.ψ (symplO (F.V₀ ρ) (G.V (.grid (2 * ρ + 1) 0)) ((F.dJ ρ h).incAdj (F.V₀ ρ) (yBF F ρ h)) ((F.dJ ρ h).incX (F.V₀ ρ) ((F.dJ ρ h).pX ⬝ (u ⬝ (F.dB ρ h).j0)))) = 1 := by
   intro D hq T L μ₀ hL sc G W M _ F hF ρ h u hu

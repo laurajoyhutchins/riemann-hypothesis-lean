@@ -1,7 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.OrbitalCosetFiniteness.CvGelfandAlt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemMaxCompactGLOfCommuteEtaleCharpolyBounded
-import GroundTheory.AutomorphicForms.Cartan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RegularTwistedOrbitLocalFiniteness
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.OrbitalCosetFiniteness.CvGelfandAlt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemMaxCompactGLOfCommuteEtaleCharpolyBounded
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.HasSatakeGLOfIsSatVecGL
+public import GroundTheory.AutomorphicForms.Cartan
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +70,7 @@ private theorem trG_trG {F : Type} [Field F] {n : ℕ} (x : GL (Fin n) F) : trG 
 variable {E : Type} [Field E] [NumberField E] {n : ℕ}
 
 private theorem trG_mem {w : HeightOneSpectrum (𝓞 E)} {k : GL (Fin n) (w.adicCompletion E)}
-    (hk : k ∈ KGL w n) : trG k ∈ KGL w n := by
+    (hk : k ∈ KGL w (n := n)) : trG k ∈ KGL w (n := n) := by
   have h := GlobalTheory.StabInt.mem_integralGL_of_mem_KGL hk
   rw [GLnLocal.mem_integralGL_iff] at h
   refine GlobalTheory.StabInt.mem_KGL_of_mem_integralGL ?_
@@ -41,12 +82,12 @@ private theorem trG_diagPow (w : HeightOneSpectrum (𝓞 E)) (μ : Fin n → ℤ
   Units.ext (by rw [trG_val, Cartan.coe_diagPow, Matrix.diagonal_transpose])
 
 private theorem trG_double (w : HeightOneSpectrum (𝓞 E)) (x : GL (Fin n) (w.adicCompletion E)) :
-    ∃ k ∈ KGL w n, ∃ k' ∈ KGL w n, trG x = k * x * k' := by
+    ∃ k ∈ KGL w (n := n), ∃ k' ∈ KGL w (n := n), trG x = k * x * k' := by
   obtain ⟨μ, -, k₁, h₁, k₂, h₂, rfl⟩ := Cartan.exists_eq_mul_diagPow_mul (w.adicCompletion E) n x
   have h₁' := GlobalTheory.StabInt.mem_KGL_of_mem_integralGL h₁
   have h₂' := GlobalTheory.StabInt.mem_KGL_of_mem_integralGL h₂
-  refine ⟨trG k₂ * k₁⁻¹, (KGL w n).mul_mem (trG_mem h₂') ((KGL w n).inv_mem h₁'),
-    k₂⁻¹ * trG k₁, (KGL w n).mul_mem ((KGL w n).inv_mem h₂') (trG_mem h₁'), ?_⟩
+  refine ⟨trG k₂ * k₁⁻¹, (KGL w (n := n)).mul_mem (trG_mem h₂') ((KGL w (n := n)).inv_mem h₁'),
+    k₂⁻¹ * trG k₁, (KGL w (n := n)).mul_mem ((KGL w (n := n)).inv_mem h₂') (trG_mem h₁'), ?_⟩
   rw [trG_mul, trG_mul, trG_diagPow]
   group
 

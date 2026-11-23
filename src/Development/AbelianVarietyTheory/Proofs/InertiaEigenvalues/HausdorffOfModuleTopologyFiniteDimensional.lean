@@ -1,10 +1,55 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorProperties
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicTowerLevelGeneratorProperties
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,7 +102,7 @@ theorem oneTensor_map {R : Type} [CommRing R] [Algebra O R] {T T' : LocLat G Qp 
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a t => simp [oneTensor, TWmap]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem oneTensor_act {R : Type} [CommRing R] [Algebra O R] {T T' : LocLat G Qp LL O}
     (f : LatHom T.L T'.L) (φ : R →ₐ[O] R) (g : G) (x : TW R T) :
@@ -68,7 +113,7 @@ theorem oneTensor_act {R : Type} [CommRing R] [Algebra O R] {T T' : LocLat G Qp 
     simp only [oneTensor, TWact, TensorProduct.map_tmul]
     congr 1
     exact Subtype.ext (f.equiv g t)
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem one_tmul_inj {R : Type} [CommRing R] [Algebra O R] (hR : Function.Injective (algebraMap O R))
     (T : LocLat G Qp LL O) (t t' : ↥T.L.T) (h : (1 : R) ⊗ₜ[O] t = (1 : R) ⊗ₜ[O] t') : t = t' := by
@@ -131,7 +176,7 @@ section Concrete
 variable {l : ℕ} [Fact l.Prime]
 
 theorem zl_wcb_injective : Function.Injective (algebraMap ℤ_[l] (WCb l)) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   by_contra h0
   rw [PadicInt.unitCoeff_spec h0, map_mul, map_pow, map_natCast] at hx
@@ -140,6 +185,7 @@ theorem zl_wcb_injective : Function.Injective (algebraMap ℤ_[l] (WCb l)) := by
   · exact WittVector.p_nonzero l (Cb l) (eq_zero_of_pow_eq_zero h)
 
 theorem ol_rw_injective (LL : FinExt l) : Function.Injective (algebraMap ↥(OL LL) (RW LL)) := by
+  set_option synthInstance.maxHeartbeats 200000 in
   haveI : Module.Flat ℤ_[l] ↥(OL LL) := by
     rw [Module.Flat.flat_iff_torsion_eq_bot_of_isBezout, eq_bot_iff]
     rintro x ⟨⟨a, ha⟩, hx⟩
@@ -161,7 +207,7 @@ theorem le_v_iff (P : LocPrime l) (LL : FinExt l) (x : ℚ_[l]) (k : ℕ) :
   have h1 : 0 ≤ P.v LL (algebraMap ℚ_[l] ↥LL.1 y) ↔ ‖y‖ ≤ 1 := by
     rw [P.v_O]
     change IsIntegral ℤ_[l] _ ↔ _
-    rw [isIntegral_algebraMap_iff (algebraMap ℚ_[l] ↥LL.1).injective,
+    rw [isIntegral_algebraMap_iff ,
       IsIntegrallyClosed.isIntegral_iff]
     constructor
     · rintro ⟨z, rfl⟩
@@ -190,7 +236,7 @@ theorem norm_eq_of_v_eq (P : LocPrime l) (LL : FinExt l) (x : ℚ_[l]) (k : ℕ)
   have : k + 1 ≤ k := by exact_mod_cast h2
   omega
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_lift_dense (P : LocPrime l) (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL)
     (act : GQ l →* (PadicComplex l ≃+* PadicComplex l)) (hact : IsActC act)
@@ -239,7 +285,7 @@ theorem exists_lift_dense (P : LocPrime l) (K : FinExt l) (s : ℕ) (LL : FinExt
 
 end Concrete
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem clNat : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW), adm9 D HW F →
     ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL),

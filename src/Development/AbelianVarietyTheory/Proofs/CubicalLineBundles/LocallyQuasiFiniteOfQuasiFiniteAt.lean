@@ -1,10 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.TrdegEqOfLocallyIsStandardSmoothOfRelativeDimens
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ForallGeometricallyIntegralOfSmoothOfGeometrical
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.LocallyQuasiFiniteOfIsPullbackSurjective
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
+module
+
+public import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.AbelianSchemeQuotients.IsAbelianScheme
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ForallGeometricallyIntegralOfSmoothOfGeometrical
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.TrdegEqOfLocallyIsStandardSmoothOfRelativeDimens
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.LocallyQuasiFiniteOfIsPullbackSurjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.AlgebraicGeometry.AlgClosed.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+public import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+
+@[expose] public section
 
 noncomputable section
 
@@ -120,8 +167,12 @@ theorem isFinite_of_surjective {K : Type} [Field K] {A B : Over (Sp K)} [GrpObj 
   let t : Sp (AlgebraicClosure K) ⟶ Sp K := spMap (algebraMap K (AlgebraicClosure K))
   have gA := isGrpPullback_pullback A t
   have gB := isGrpPullback_pullback B t
-  have hA' := PolPull.isAbelianScheme_of_isGrpPullback hA gA
-  have hB' := PolPull.isAbelianScheme_of_isGrpPullback hB gB
+  have geomIntegralPullback (C : Over (Sp K)) [GrpObj C] (hC : IsAbelianScheme C) :
+      GeometricallyIntegral ((Over.pullback t).obj C).hom := by
+    have sqC := (isGrpPullback_pullback C t).1
+    exact forall_geometricallyIntegral_of_smooth_of_geometricallyConnected _ _ _
+      (MorphismProperty.of_isPullback (P := @Smooth) sqC hC.smooth)
+      (MorphismProperty.of_isPullback (P := @GeometricallyConnected) sqC hC.geomConnected)
   let f' := (Over.pullback t).map f
   have sq : IsPullback (pullback.fst A.hom t) f'.left f.left (pullback.fst B.hom t) := by
     refine IsPullback.of_bot ?_ (pullback.lift_fst _ _ _).symm gB.1
@@ -131,13 +182,14 @@ theorem isFinite_of_surjective {K : Type} [Field K] {A B : Over (Sp K)} [GrpObj 
   have : IsProper f'.left := MorphismProperty.of_isPullback (P := @IsProper) sq ‹_›
   have : Surjective t := ⟨fun y => ⟨IsLocalRing.closedPoint _, Subsingleton.elim (α := PrimeSpectrum K) _ _⟩⟩
   have : Surjective (pullback.fst B.hom t) := inferInstance
-  have iA := forall_geometricallyIntegral_of_smooth_of_geometricallyConnected _ _ _ hA'.smooth hA'.geomConnected
-  have iB := forall_geometricallyIntegral_of_smooth_of_geometricallyConnected _ _ _ hB'.smooth hB'.geomConnected
+  have iA := geomIntegralPullback A hA
+  have iB := geomIntegralPullback B hB
   have : IsIntegral ((Over.pullback t).obj A).left :=
     GeometricallyIntegral.isIntegral_of_subsingleton ((Over.pullback t).obj A).hom
   have : IsIntegral ((Over.pullback t).obj B).left :=
     GeometricallyIntegral.isIntegral_of_subsingleton ((Over.pullback t).obj B).hom
-  have := hA'.proper
+  have : IsProper ((Over.pullback t).obj A).hom :=
+    MorphismProperty.of_isPullback (P := @IsProper) gA.1 hA.proper
   have hq := quasiFiniteAt_genericPoint ((Over.pullback t).obj B).hom f'.left g
     (by rw [Over.w]; exact (smoothOfRelativeDimension_isStableUnderBaseChange g).of_isPullback gA.1 dA)
     ((smoothOfRelativeDimension_isStableUnderBaseChange g).of_isPullback gB.1 dB)

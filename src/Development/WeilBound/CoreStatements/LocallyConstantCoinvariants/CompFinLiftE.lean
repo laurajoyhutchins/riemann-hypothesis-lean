@@ -1,8 +1,55 @@
-import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.IndicatorMem
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HermitianSelfDualLatticeSpaceFormHermitianNondeg
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionNonzeroAdmissible
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatAtVAtStable
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ExistsNhdsInvariant
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsStdCharNegOneOfStandardTraceAdelicAddChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardAddCharSymplecticLocalLatticeEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAdelicAddCharLocalComponentNeOne
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.ThetaDistributionNonzeroAdmissible
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,7 +81,7 @@ def liftE (v : Pl F) : Fv F v ⊗[F] E →ₗ[F] AE F E := TensorProduct.map (li
 theorem compFin_liftE (p : Fv F v ⊗[F] E) : compFin F E v (liftE v p) = p := by
   induction p using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e =>
     change evFin F v (liftV v a) ⊗ₜ e = _
     rw [evFin_liftV]
@@ -42,7 +89,7 @@ theorem compFin_liftE (p : Fv F v ⊗[F] E) : compFin F E v (liftE v p) = p := b
 theorem smul_eq_liftE (z : AE F E) : liftV v 1 • z = liftE v (compFin F E v z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, smul_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), smul_add, hx, hy]
   | tmul a e =>
     change (liftV v 1 * a) ⊗ₜ e = liftV v (evFin F v a) ⊗ₜ e
     rw [GlobalTheory.LatVacArith.liftV_one_mul]
@@ -56,7 +103,7 @@ theorem eq_zero_of_at (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) {z : AE F E}
 theorem piW_cA (h : IsCMExt F E σ) (t : E →ₐ[F] Fv F v) (z : AE F E) : piW (t.comp σ) (cA σ z) = piW t z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul a e =>
     change evFin F v a * t (σ (σ e)) = evFin F v a * t e
     rw [cm_conj_conj h]
@@ -188,6 +235,7 @@ theorem rho_apply (ψ : AddChar (AF F) ℂ) {u : Matrix (Fin n) (Fin d) (AE F E)
     M.co.rho ψ u Ψ x = ψ (⅟(2 : AF F) * ((M.co.e u).1 ⬝ᵥ (M.co.e u).2)) *
       (ψ (liftV v ((fun i => evFin F v (x i)) ⬝ᵥ fun i => evFin F v ((M.co.e u).2 i))) * Ψ (x + (M.co.e u).1)) := by
   have e : x ⬝ᵥ (M.co.e u).2 = liftV v ((fun i => evFin F v (x i)) ⬝ᵥ fun i => evFin F v ((M.co.e u).2 i)) := by
+
     simp only [dotProduct, map_sum]
     exact Finset.sum_congr rfl fun i _ => by rw [← mul_liftV, ← at_eq (at_co M hu i).2]
   simp only [Darboux.rho, schr, AddChar.map_add_eq_mul, e]
@@ -198,7 +246,7 @@ theorem rho_tens (ψ : AddChar (AF F) ℂ) {u : Matrix (Fin n) (Fin d) (AE F E)}
     M.co.rho ψ u (tens (evFin F v) φ r) = tens (evFin F v) (locRho M ψ v u φ) r := by
   funext x
   rw [rho_apply M ψ hu]
-  simp only [tens, locRho, hr x _ (fun a ha => funext fun i => (at_co M hu i).1 a ha), Pi.add_apply, map_add]
+  simp only [tens, locRho, hr x _ (fun a ha => funext fun i => (at_co M hu i).1 a ha), Pi.add_apply, map_add (f := _)]
   rw [show (fun i => evFin F v (x i) + evFin F v ((M.co.e u).1 i)) =
     (fun i => evFin F v (x i)) + fun i => evFin F v ((M.co.e u).1 i) from rfl]
   ring
@@ -209,7 +257,7 @@ theorem repl_add {κ : Type} [Fintype κ] (z : κ → AF F) (y s : κ → Fv F v
   refine Prod.ext (add_zero _) ?_
   change (finPart z - epsK v (piK v (finPart z)) + epsK v y) i + epsK v s i =
     (finPart z - epsK v (piK v (finPart z)) + epsK v (y + s)) i
-  rw [map_add, ← add_assoc]
+  rw [map_add (f := _), ← add_assoc]
   rfl
 
 theorem slice_rho (ψ : AddChar (AF F) ℂ) {u : Matrix (Fin n) (Fin d) (AE F E)} (hu : At (evFin F v) u)

@@ -1,4 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.CintIdx
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LcountNorm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.CintIdx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open QuadraticAlgebra UpperTheory.V.Z.Sym UpperTheory.V.Z.Sym.Loc Matrix
 
@@ -48,12 +101,12 @@ variable {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Fie
 private theorem j_eq (j : Etau K τ →ₐ[K] Matrix (Fin 2) (Fin 2) K) (x : Etau K τ) :
     j x = x.re • (1 : Matrix (Fin 2) (Fin 2) K) + x.im • j ω := by
   conv_lhs => rw [show x = algebraMap K (Etau K τ) x.re + x.im • ω by ext <;> simp]
-  rw [map_add, map_smul, AlgHom.commutes, Algebra.algebraMap_eq_smul_one]
+  rw [map_add (f := _), map_smul, AlgHom.commutes, Algebra.algebraMap_eq_smul_one]
 
 private theorem j_det_one (j : Etau K τ →ₐ[K] Matrix (Fin 2) (Fin 2) K) (ht : (j ω).trace = τ) :
     (j ω).det = 1 := by
   have h : j ω * j ω = (-1 : K) • 1 + τ • j ω := by
-    rw [← map_mul, omega_mul_omega_eq_add, map_add, map_smul, map_smul, map_one]
+    rw [← map_mul, omega_mul_omega_eq_add, map_add (f := _), map_smul, map_smul, map_one]
   have h00 := congrFun (congrFun h 0) 0
   rw [Matrix.trace_fin_two] at ht
   rw [Matrix.det_fin_two]
@@ -227,7 +280,7 @@ private theorem cint_zk (h : IsLoc O Δ) (j : Etau K τ →ₐ[K] Matrix (Fin 2)
     have h2 := congrArg QuadraticAlgebra.trace h1
     rw [mul_comm, ← Algebra.smul_def, map_smul, sq_eq_trace_smul_sub_norm, map_sub, map_smul,
       QuadraticAlgebra.trace_algebraMap, smul_eq_mul, smul_eq_mul, ← hc, htw, hnw] at h2
-    simp only [map_mul, map_add, map_ofNat]
+    simp only [map_mul, map_add (f := _), map_ofNat]
     linear_combination h2)
   have hm : ∀ x : O, ¬ IsUnit x → x ∈ IsLocalRing.maximalIdeal O := fun x hx => hx
   have hnu : IsUnit n := by
@@ -327,7 +380,7 @@ private theorem orbit_imp (h : IsLoc O Δ) (j : Etau K τ →ₐ[K] Matrix (Fin 
   let B₀ : Matrix (Fin 2) (Fin 2) O := s₀ • (k₀ : Matrix (Fin 2) (Fin 2) O) - e • 1
   have hB₀ : B₀.map (algebraMap O K) = Yi * A * Y := by
     have h1 : j z = algebraMap O K e • (1 : Matrix (Fin 2) (Fin 2) K) + A := by
-      rw [hze, map_add, AlgHom.commutes, Algebra.algebraMap_eq_smul_one]
+      rw [hze, map_add (f := _), AlgHom.commutes, Algebra.algebraMap_eq_smul_one]
     have h2 : Yi * j z * Y = algebraMap O K e • (1 : Matrix (Fin 2) (Fin 2) K) + Yi * A * Y := by
       rw [h1, mul_add, add_mul, mul_smul_comm, smul_mul_assoc, mul_one, hYiY]
     have h3 : Yi * A * Y = (s : K) • (k₀ : Matrix (Fin 2) (Fin 2) O).map (algebraMap O K) - algebraMap O K e • (1 : Matrix (Fin 2) (Fin 2) K) := by

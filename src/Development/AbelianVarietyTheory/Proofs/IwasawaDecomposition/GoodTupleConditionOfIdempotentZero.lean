@@ -1,13 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NcardPrimesOverOfStabilizer
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.DedekindZetaEqSumRealEisenstein
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonemptyRingHomComplexOfLeContinuum
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTameGenAtOfValuationSubring
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEq
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsTameGenAtOfValuationSubring
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NonemptyRingHomComplexOfLeContinuum
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.DedekindZetaEqSumRealEisenstein
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsRingHomOfIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NcardPrimesOverOfStabilizer
+public import Formalism.CyclotomicNorms.NonsquarefreeBounds.NonsquarefreeMonicBoundHolds
 import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.SplitK
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.DiscrB
-import Formalism.CyclotomicNorms.NonsquarefreeBounds.NonsquarefreeMonicBoundHolds
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsRingHomOfIsIntegral
+import Formalism.TameInertiaTowers.CentralOrderTwo.OddEqOneOfSubOneMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +91,7 @@ theorem isAlgebraic_rat (F Ω : Type) [Field F] [NumberField F] [Field Ω] [Alge
 
 variable {R : Ranks}
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 theorem exists_isCMConjOm (H : Host R) (Ω : Type) [Field Ω] [Algebra H.E Ω] [IsAlgClosure H.E Ω] :
     ∃ c : Ω ≃+* Ω, IsCMConjOm H.E Ω c := by
@@ -236,7 +284,7 @@ theorem exists_iota (g l : ℕ) [Fact g.Prime] [hl : Fact l.Prime] : ∃ ι : Fo
     rw [map_mul, map_mul, h2, ← map_mul, ← map_mul, mul_inv_cancel₀ hy, map_one, map_one]
   have h3 : IsPrimitiveRoot (1 : Formalism.CyclotomicNorms.Fbar l) n := by
     rw [← isRoot_cyclotomic_iff, ← h1, ← map_cyclotomic n ρ]
-    exact (hprim.isRoot_cyclotomic hnpos).map
+    exact (hprim.isRoot_cyclotomic hnpos).map ρ
   have h4 : n = 1 := h3.unique IsPrimitiveRoot.one
   exact (mul_inv_eq_one₀ hy).1 (orderOf_eq_one_iff.1 h4)
 
@@ -251,8 +299,9 @@ theorem two_le_r (R : Ranks) : 2 ≤ R.r := by
   omega
 
 theorem f_pos (R : Ranks) : 0 < R.f := by
+  have := R.ord_pos
   unfold Ranks.f Ranks.n
-  positivity
+  omega
 
 def lData (H : Host R) (p : ℕ) [Fact p.Prime] : Formalism.GaloisCohomology.LData H.E (AlgebraicClosure H.E) p :=
   (nonempty_lData H.E (AlgebraicClosure H.E) p).some
@@ -272,7 +321,7 @@ theorem monic_unip {K : Type} [CommRing K] [Nontrivial K] (n : ℕ) :
   have h' : (X - 1 : K[X]).natDegree = 1 := by simpa using natDegree_X_sub_C (1 : K)
   exact ⟨h.pow n, by rw [h.natDegree_pow, h', mul_one]⟩
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def nData (H : Host R) (what₂ : Rows.Data R) (hsha : ∀ p e, what₂.shaLen p e = shaTrue H p e)
     (hs : ∀ k, (placesOver H.E (H.g k)).ncard = Module.finrank ℚ H.E)
@@ -281,7 +330,7 @@ def nData (H : Host R) (what₂ : Rows.Data R) (hsha : ∀ p e, what₂.shaLen p
   plOm := ⟨placeOf _, isPlaceOver_placeOf _⟩
   ldat := lData H
   sha_eq := fun p hp e _ _ n h => by
-    rw [hsha, shaTrue, dif_pos hp.out]
+    rw [hsha, shaTrue, dite_eq_left hp.out]
     show ((Formalism.GaloisCohomology.shaLen (lData H p) (e : ℤ)).toNat : ℚ) = n
     rw [h, ENat.toNat_natCast]
   Loc := Empty
@@ -383,7 +432,7 @@ abbrev UnrFam (H : Host R) (a : ℕ) : Type :=
 def negOneFam (H : Host R) : UnrFam H 1 :=
   ⟨(fun _ => ⟨{-1}, by simp⟩, fun _ => {0}), fun _ => rfl, fun _ => rfl⟩
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def nAut (N : NData R H what₂) [IsEmpty N.Loc] (pl : ∀ k, N.PlG k → PlE H)
     (h1 : ∀ k v, pl k v ∈ placesOver H.E (H.g k)) (h2 : ∀ k, Function.Injective (pl k))
@@ -548,7 +597,7 @@ section Twist
 
 variable [NumberField what₂.LL] [StarRing what₂.LL] (LL0 : IntermediateField ℚ what₂.LL)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def nTw (N : NData R H what₂) [IsEmpty N.Loc] : NTw R H what₂ LL0 N where
   cc := (exists_isCMConjOm H N.Om).choose
@@ -670,7 +719,7 @@ def nTw (N : NData R H what₂) [IsEmpty N.Loc] : NTw R H what₂ LL0 N where
 
 variable {LL0}
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def nExp {N : NData R H what₂} (tw : NTw R H what₂ LL0 N) [IsEmpty tw.Tw] : NExp R H what₂ LL0 N tw where
   U := ⊥
@@ -720,7 +769,7 @@ def nExp {N : NData R H what₂} (tw : NTw R H what₂ LL0 N) [IsEmpty tw.Tw] : 
   eH := fun i => isEmptyElim i
   eH_idem := fun i => isEmptyElim i
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def nTh {N : NData R H what₂} {tw : NTw R H what₂ LL0 N} [IsEmpty tw.Tw] (ex : NExp R H what₂ LL0 N tw) :
     NTh R H what₂ LL0 N tw ex where
@@ -780,8 +829,8 @@ section Types
 
 variable {H : Host R} {what₂ : Rows.Data R}
 
-open Classical in
 
+open Classical in
 def unipSer (K : Type) [Field K] (r : ℕ) (A : Type) [Ring A] (f : K[X]) : A :=
   if f = (X - 1) ^ r then 1 else 0
 
@@ -820,7 +869,7 @@ def cenTriv (Γ : Type) [Group Γ] (V : Type) [AddCommGroup V] [Module ℂ V] :
     Subalgebra.center ℂ (MonoidAlgebra ℂ Γ) →ₐ[ℂ] Module.End ℂ V :=
   (MonoidAlgebra.lift ℂ (Module.End ℂ V) Γ 1).comp (Subalgebra.val _)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 def nTypes (N : NData R H what₂) [IsEmpty N.Loc] (pl : ∀ k, N.PlG k → PlE H)
     (h1 : ∀ k v, pl k v ∈ placesOver H.E (H.g k)) (h2 : ∀ k, Function.Injective (pl k))
@@ -911,9 +960,9 @@ theorem idempotent_good_tuples_eq_zero {N : NData R H what₂} {A : NAut N} (T :
 theorem good_tuple_condition_of_idempotent_zero {N : NData R H what₂} {A : NAut N} (T : NTypes A) (h : T.e0 = 0)
     (h1 : ∀ μ, what₂.eOp μ = 0) (h2 : ∀ μ j, what₂.eMt μ j = 0) : T.IdempotentMatchesAction := by
   refine ⟨fun μ => ?_, fun μ j => ?_⟩
-  · rw [h, h1, NTypes.onAmb, dif_pos (zero_mem _)]
+  · rw [h, h1, NTypes.onAmb, dite_eq_left (zero_mem _)]
     exact (map_zero (T.cenAmb μ)).symm
-  · rw [h, h2, NTypes.onMt, dif_pos (zero_mem _)]
+  · rw [h, h2, NTypes.onMt, dite_eq_left (zero_mem _)]
     exact (map_zero (T.cenMt μ j)).symm
 
 end Types
@@ -976,10 +1025,6 @@ def adapt {B : Base} {C : Cols B} (W : RowsRest B C) : RowsRest B C :=
 theorem exists_nStage_adapt (B : Base) (C : Cols B) (W : RowsRest B C) (L : LocStage) :
     ∃ N : NStage B C (adapt W), N.toLocStage = L :=
   exists_nStage_of_rows B C (adapt W) L (fun _ _ => rfl) (fun _ _ _ _ => rfl) (fun _ => rfl) (fun _ _ => rfl)
-
-theorem exists_nStage : ∀ (B : Base) (C : Cols B) (W : RowsRest B C) (L : LocStage),
-    ∃ W' : RowsRest B C, W' = adapt W ∧ ∃ N : NStage B C W', N.toLocStage = L :=
-  fun B C W L => ⟨adapt W, rfl, exists_nStage_adapt B C W L⟩
 
 end GlobalTheory.Mem.GaloisStage
 

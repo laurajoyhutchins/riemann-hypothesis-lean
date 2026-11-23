@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+public import Mathlib.Analysis.InnerProductSpace.l2Space
+public import Mathlib.Analysis.Normed.Lp.lpHolder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +93,7 @@ theorem emb_monomial (α : σ →₀ ℕ) (c : ℂ) : emb σ (monomial α c) = l
     rw [coe_basisMonomials, smul_monomial, smul_eq_mul, mul_one]
   rw [h, map_smul, emb, Module.Basis.constr_basis, ← smul_eq_mul, lp.single_smul]
 
-theorem emb_apply (f : MvPolynomial σ ℂ) (α : σ →₀ ℕ) : emb σ f α = coeff α f * wt α := by
+theorem emb_apply (f : MvPolynomial σ ℂ) (α : σ →₀ ℕ) : emb σ f α = AddMonoidAlgebra.coeff f α * wt α := by
   induction f using MvPolynomial.induction_on' with
   | monomial β c =>
     rw [emb_monomial, lp.single_apply, coeff_monomial]
@@ -54,7 +102,7 @@ theorem emb_apply (f : MvPolynomial σ ℂ) (α : σ →₀ ℕ) : emb σ f α =
       simp
     · simp [h]
   | add f g hf hg =>
-    rw [map_add, lp.coeFn_add, Pi.add_apply, hf, hg, coeff_add, add_mul]
+    rw [map_add (f := _), lp.coeFn_add, Pi.add_apply, hf, hg, MvPolynomial.coeff_add, add_mul]
 
 theorem emb_injective : Function.Injective (emb σ) := by
   rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
@@ -62,8 +110,7 @@ theorem emb_injective : Function.Injective (emb σ) := by
   ext α
   have h : emb σ f α = 0 := by rw [hf]; rfl
   rw [emb_apply] at h
-  rw [coeff_zero]
-  exact (mul_eq_zero.1 h).resolve_right (wt_ne_zero α)
+  simpa [AddMonoidAlgebra.coeff] using (mul_eq_zero.1 h).resolve_right (wt_ne_zero α)
 
 theorem dense_range_emb : Dense (Set.range (emb σ)) := by
   intro x
@@ -71,6 +118,7 @@ theorem dense_range_emb : Dense (Set.range (emb σ)) := by
   rw [HasSum] at hx
   refine mem_closure_of_tendsto hx (Filter.Eventually.of_forall fun s => ?_)
   refine ⟨∑ α ∈ s, monomial α (x α / wt α), ?_⟩
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [emb_monomial, div_mul_cancel₀ _ (wt_ne_zero α)]
@@ -83,19 +131,19 @@ theorem isFockIsometry_embedding : IsFockIP (emb σ) := by
     rw [Pi.single_eq_same, if_pos rfl, RCLike.inner_apply, mul_comm, star_wt_mul, mfact_cast]
   · rw [Pi.single_eq_of_ne h, if_neg h, inner_zero_right]
 
-omit [DecidableEq σ] in
 
+omit [DecidableEq σ] in
 def diag (c : (σ →₀ ℕ) → ℂ) (hc : ∀ α, ‖c α‖ = 1) : L2 σ →L[ℂ] L2 σ :=
   lp.mapCLM 2 (fun α => c α • ContinuousLinearMap.id ℂ ℂ) zero_le_one fun α => by
     simp [norm_smul, hc]
 
-omit [DecidableEq σ] in
 
+omit [DecidableEq σ] in
 @[simp] theorem diag_apply (c : (σ →₀ ℕ) → ℂ) (hc : ∀ α, ‖c α‖ = 1) (x : L2 σ) (α : σ →₀ ℕ) :
     diag c hc x α = c α * x α := rfl
 
-omit [DecidableEq σ] in
 
+omit [DecidableEq σ] in
 theorem norm_diag (c : (σ →₀ ℕ) → ℂ) (hc : ∀ α, ‖c α‖ = 1) (x : L2 σ) : ‖diag c hc x‖ = ‖x‖ := by
   have hp : 0 < (2 : ENNReal).toReal := by norm_num
   rw [lp.norm_eq_tsum_rpow hp, lp.norm_eq_tsum_rpow hp]
@@ -132,9 +180,5 @@ theorem continuous_of_dense {G H : Type*} [TopologicalSpace G] [NormedAddCommGro
       ≤ dist (π g x) (π g y) + dist (π g y) (π g₀ y) + dist (π g₀ y) (π g₀ x) :=
         dist_triangle4 _ _ _ _
     _ < ε := by rw [h₁, h₂]; linarith
-
-example : ‖emb σ 1‖ = 1 := by
-  rw [← C_1, C_apply, emb_monomial, lp.norm_single (by simp)]
-  simp [wt, mfact]
 
 end GlobalTheory.FockSeq

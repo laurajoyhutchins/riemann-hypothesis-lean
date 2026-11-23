@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Group.End
+public import Mathlib.Algebra.MonoidAlgebra.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Basic.Finite.Prod
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,17 +81,6 @@ theorem tens_eq_zero (x : ∀ i, MonoidAlgebra k (G i)) (i : I) (h : x i = 0) : 
   rw [tens_coeff]
   exact Finset.prod_eq_zero (Finset.mem_univ i) (by rw [h]; rfl)
 
-theorem tens_ne_zero (x : ∀ i, MonoidAlgebra k (G i)) (h : ∀ i, x i ≠ 0) : tens x ≠ 0 := by
-  have h1 : ∀ i, ∃ g : G i, (x i).coeff g ≠ 0 := fun i => by
-    by_contra hc
-    push Not at hc
-    exact h i (MonoidAlgebra.coeff_injective (Finsupp.ext hc))
-  choose g hg using h1
-  intro h0
-  have := congrArg (fun z => z.coeff g) h0
-  simp only [tens_coeff] at this
-  exact (Finset.prod_ne_zero_iff.mpr fun i _ => hg i) this
-
 theorem tens_single [DecidableEq I] (g : ∀ i, G i) : tens (fun i => (single (g i) 1 : MonoidAlgebra k (G i))) = single g 1 := by
   classical
   apply MonoidAlgebra.coeff_injective
@@ -76,9 +112,10 @@ theorem tens_central (x : ∀ i, MonoidAlgebra k (G i)) (h : ∀ i a, x i * a = 
 variable {L : I → Type} [∀ i, Fintype (L i)] [DecidableEq I] (E : ∀ i, L i → MonoidAlgebra k (G i))
   (S : (∀ i, L i) → Prop)
 
-open Classical in
 
-def eSum : MonoidAlgebra k (∀ i, G i) := ∑ a : (∀ i, L i), if S a then tens (fun i => E i (a i)) else 0
+open Classical in
+def eSum : MonoidAlgebra k (∀ i, G i) :=
+  open Classical in ∑ a : (∀ i, L i), if S a then tens (fun i => E i (a i)) else 0
 
 variable (hidem : ∀ i l, E i l * E i l = E i l) (hcen : ∀ i l a, E i l * a = a * E i l)
   (horth : ∀ i l l', l ≠ l' → E i l * E i l' = 0)
@@ -130,52 +167,15 @@ theorem eSum_idem : eSum E S * eSum E S = eSum E S := by
     exact this
   · simp
 
-include hidem horth in
-theorem eSum_ne_zero (b : ∀ i, L i) (hb : S b) (hne : ∀ i, E i (b i) ≠ 0) : eSum E S ≠ 0 := by
-  intro h0
-  have := eSum_mul_tens E S hidem horth b
-  rw [if_pos hb, h0, zero_mul] at this
-  exact tens_ne_zero _ hne this.symm
 
 theorem eSum_coeff (g : ∀ i, G i) : (eSum E S).coeff g =
     open Classical in ∑ a : (∀ i, L i), if S a then ∏ i, (E i (a i)).coeff (g i) else 0 := by
   classical
   unfold eSum
-  rw [MonoidAlgebra.coeff_sum, Finsupp.finset_sum_apply]
+  rw [MonoidAlgebra.coeff_sum, Finsupp.finsetSum_apply]
   refine Finset.sum_congr rfl fun a _ => ?_
   split_ifs
   · rfl
   · rfl
-
-theorem exists_char_comm (Z : Type) [CommRing Z] [Algebra ℂ Z] [FiniteDimensional ℂ Z] (e : Z)
-    (hi : e * e = e) (h0 : e ≠ 0) : ∃ ω : Z →ₐ[ℂ] ℂ, ω e = 1 := by
-  have hne : Ideal.span {1 - e} ≠ ⊤ := by
-    intro h
-    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp ((Ideal.eq_top_iff_one _).mp h)
-    apply h0
-    calc e = (c * (1 - e)) * e := by rw [hc, one_mul]
-      _ = c * (e - e * e) := by ring
-      _ = 0 := by rw [hi, sub_self, mul_zero]
-  obtain ⟨m, hm, hle⟩ := Ideal.exists_le_maximal _ hne
-  let _ : Field (Z ⧸ m) := Ideal.Quotient.field m
-  have : FiniteDimensional ℂ (Z ⧸ m) := Module.Finite.of_surjective (Ideal.Quotient.mkₐ ℂ m).toLinearMap
-    (Ideal.Quotient.mkₐ_surjective ℂ m)
-  have hb := IsAlgClosed.algebraMap_bijective_of_isIntegral (k := ℂ) (K := Z ⧸ m)
-  let φ : ℂ ≃ₐ[ℂ] (Z ⧸ m) := AlgEquiv.ofBijective (Algebra.ofId ℂ (Z ⧸ m)) hb
-  refine ⟨φ.symm.toAlgHom.comp (Ideal.Quotient.mkₐ ℂ m), ?_⟩
-  have h1 : Ideal.Quotient.mkₐ ℂ m e = 1 := by
-    have : Ideal.Quotient.mk m (1 - e) = 0 :=
-      Ideal.Quotient.eq_zero_iff_mem.mpr (hle (Ideal.mem_span_singleton_self _))
-    rw [map_sub, map_one, sub_eq_zero] at this
-    exact this.symm
-  show φ.symm (Ideal.Quotient.mkₐ ℂ m e) = 1
-  rw [h1, map_one]
-
-theorem exists_char {Γ : Type} [Group Γ] [Finite Γ] (e : MonoidAlgebra ℂ Γ)
-    (hc : e ∈ Subalgebra.center ℂ (MonoidAlgebra ℂ Γ)) (hi : e * e = e) (h0 : e ≠ 0) :
-    ∃ ω : Subalgebra.center ℂ (MonoidAlgebra ℂ Γ) →ₐ[ℂ] ℂ, ω ⟨e, hc⟩ = 1 := by
-  have hfd : FiniteDimensional ℂ (MonoidAlgebra ℂ Γ) :=
-    Module.Finite.equiv (MonoidAlgebra.coeffLinearEquiv ℂ).symm
-  exact exists_char_comm _ ⟨e, hc⟩ (Subtype.ext hi) (fun h => h0 (congrArg Subtype.val h))
 
 end Formalism.BasicNotions.Examples₂.NZ

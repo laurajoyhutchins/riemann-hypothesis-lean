@@ -1,4 +1,58 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafTw0LocSplitOf
+module
+
+import Development.EtaleCohomology.KummerTheory.PrimTorsPf
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -14,22 +68,7 @@ theorem pow_q_eq_one {q : ℕ} {B : Type} [CommRing B] (x : B)
 
 theorem local_eq {q : ℕ} [NeZero q] {B : Type} [CommRing B] [IsLocalRing B] (hq : IsUnit (q : B)) {x y : B}
     (hx : x ^ q = 1) (hy : y ^ q = 1) (hr : IsLocalRing.residue B x = IsLocalRing.residue B y) : x = y := by
-  have hg := geom_sum₂_mul x y q
-  rw [hx, hy, sub_self] at hg
-  have hyu : IsUnit y := IsUnit.of_pow_eq_one hy (NeZero.ne q)
-  have hres : IsLocalRing.residue B (∑ i ∈ Finset.range q, x ^ i * y ^ (q - 1 - i)) =
-      IsLocalRing.residue B ((q : B) * y ^ (q - 1)) := by
-    rw [map_sum, map_mul, map_pow, map_natCast]
-    rw [Finset.sum_congr rfl (g := fun _ => IsLocalRing.residue B y ^ (q - 1))]
-    · simp
-    · intro i hi
-      rw [map_mul, map_pow, map_pow, hr, ← pow_add]
-      congr 1; have := Finset.mem_range.1 hi; omega
-  have hu' : IsUnit (∑ i ∈ Finset.range q, x ^ i * y ^ (q - 1 - i)) := by
-    have h1 : IsUnit (IsLocalRing.residue B ((q : B) * y ^ (q - 1))) := (hq.mul (hyu.pow _)).map _
-    rw [← hres] at h1
-    exact (isUnit_map_iff (IsLocalRing.residue B) _).1 h1
-  exact sub_eq_zero.1 ((IsUnit.mul_right_eq_zero hu').1 hg)
+  apply (config := { allowSynthFailures := true }) LateralTheory.KummerTheory.PrimitiveRootTorsion.uniq <;> assumption
 
 theorem res_root {q : ℕ} {B : Type} [CommRing B] [IsLocalRing B] (z : B)
     (hz : Polynomial.aeval z (Polynomial.cyclotomic q ℤ) = 0) :

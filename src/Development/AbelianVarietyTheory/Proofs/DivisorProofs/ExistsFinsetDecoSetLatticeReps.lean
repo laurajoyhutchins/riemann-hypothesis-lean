@@ -1,6 +1,57 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.Columns.StdLatUnimodular
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinsetSelfDualClassesRootDiscr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.ThetaLiftGeometry.BadPrimesPeriodBound
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsClassFam
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsFinsetSelfDualClassesRootDiscr
+import Formalism.LocalToGlobal.KernelLattices.XiIndCClass
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open Formalism.BasicNotions Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker
@@ -15,7 +66,7 @@ variable {E : Type} [Field E] [StarRing E] {n : ℕ}
 
 noncomputable def unitEquiv (γ : Matrix (Fin n) (Fin n) E) (h : γ * γ.conjTranspose = 1) :
     Sp E n ≃ₗ[E] Sp E n :=
-  LinearEquiv.ofLinear (Matrix.mulVecLin γ.conjTranspose) (Matrix.mulVecLin γ)
+  LinearEquiv.ofLinearMap (Matrix.mulVecLin γ.conjTranspose) (Matrix.mulVecLin γ)
     (by rw [← Matrix.mulVecLin_mul, mul_eq_one_comm.1 h, Matrix.mulVecLin_one])
     (by rw [← Matrix.mulVecLin_mul, h, Matrix.mulVecLin_one])
 
@@ -37,8 +88,8 @@ theorem mem_one_iff [NumberField E] (a : E) :
 
 end DecoLatticeClasses
 
-open DecoLatticeClasses in
 
+open DecoLatticeClasses in
 theorem exists_finset_decoSet_lattice_reps :
     ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] [StarRing E],
     (∀ x : E, star x = IsCMField.complexConj E x) → ∀ n : ℕ,
@@ -46,13 +97,43 @@ theorem exists_finset_decoSet_lattice_reps :
       (Rs.card : ℝ) ≤ (3 * ((Module.finrank ℚ E : ℝ) ^ 2 * (n : ℝ) ^ 4 *
         (|(discr E : ℝ)| ^ ((1 : ℝ) / (Module.finrank ℚ E : ℝ))) ^ 2)) ^
           (3 * Module.finrank ℚ E * n ^ 2) ∧
-      ∀ (ST SG : Finset (HeightOneSpectrum (𝓞 E))) (d : DecoSet E n ST SG),
-        ∃ g : UF E n, ((g, (1 : GLG E n SG)) • d).1.N ∈ Rs := by
+      ∀ (ST SG : Finset (HeightOneSpectrum (𝓞 E))) (d : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)),
+        ∃ g : UF E n,
+          (((g, (1 : GLG (E := E) (n := n) (SG := SG))) • d :
+            DecoSet (E := E) (n := n) (ST := ST) (SG := SG))).1.N ∈ Rs := by
   intro E _ _ _ _ hs n
   obtain ⟨R, hR, H⟩ := GlobalTheory.exists_finset_selfDual_classes_rootDiscr E n
   refine ⟨R, hR, fun ST SG d => ?_⟩
   have hu : Formalism.HermitianLatticesTheory.dual (hStd E n) d.1.N = d.1.N := d.2.uni
-  obtain ⟨L₀, hL₀, γ, hγ, hm⟩ := H d.1.N d.2.lat.fg d.2.lat.span_eq_top (fun y => by
+  have hspan : Submodule.span E (d.1.N : Set (Sp E n)) = ⊤ := by
+    let W := Submodule.span E (d.1.N : Set (Sp E n))
+    change W = ⊤
+    by_contra hW
+    let e : Sp E n ≃ₗ⋆[E] Sp E n := starLinearEquiv E
+    let g : Sp E n →ₗ[E] Module.Dual E W :=
+      (LinearMap.domRestrict' W).comp ((hStd E n).comp e.toLinearMap)
+    have hdim : Module.finrank E (Module.Dual E W) < Module.finrank E (Sp E n) := by
+      rw [Subspace.dual_finrank_eq]
+      exact Submodule.finrank_lt hW
+    obtain ⟨x, hx, hx₀⟩ :=
+      Submodule.exists_mem_ne_zero_of_ne_bot (LinearMap.ker_ne_bot_of_finrank_lt (f := g) hdim)
+    -- Self-duality puts the whole line through the orthogonal vector in the lattice.
+    have hsmul (a : E) : a • e x ∈ d.1.N := by
+      rw [← hu, mem_dual]
+      intro y hy
+      have hxy : hStd E n (e x) y = 0 :=
+        congrArg (fun f : Module.Dual E W => f ⟨y, Submodule.subset_span hy⟩)
+          (LinearMap.mem_ker.mp hx)
+      rw [map_smul, hStd_isSymm.isRefl (e x) y hxy, smul_zero]
+      exact Submodule.zero_mem _
+    let i : E →ₗ[𝓞 E] d.1.N :=
+      ((LinearMap.toSpanSingleton E _ (e x)).restrictScalars (𝓞 E)).codRestrict d.1.N hsmul
+    let : Module.Finite (𝓞 E) d.1.N := Module.Finite.iff_fg.mpr d.2.lat.fg
+    let : Module.Finite (𝓞 E) E := Module.Finite.of_injective i fun a b hab =>
+      smul_left_injective E (fun hzero => hx₀ (e.map_eq_zero_iff.mp hzero)) (congrArg Subtype.val hab)
+    exact RingOfIntegers.not_isField E
+      (isField_of_isIntegral_of_isField (IsFractionRing.injective (𝓞 E) E) (Field.toIsField E))
+  obtain ⟨L₀, hL₀, γ, hγ, hm⟩ := H d.1.N d.2.lat.fg hspan (fun y => by
     conv_lhs => rw [← hu, mem_dual]
     simp only [mem_one_iff, hStd_apply, hs])
   have hγ' : γ * γ.conjTranspose = 1 := by

@@ -1,5 +1,74 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ContinuousAevalMvPolynomial
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ContinuousAevalMvPolynomial
+public import Mathlib.Analysis.Analytic.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.RingTheory.RingHom.Etale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Analytic.Polynomial
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Analytic.ChangeOrigin
+public import Mathlib.Analysis.Analytic.Composition
+public import Mathlib.Analysis.Analytic.Constructions
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Comp
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Topology.OpenPartialHomeomorph.IsImage
+
+@[expose] public section
 
 namespace GlobalTheory.AffinePoints
 
@@ -17,7 +86,7 @@ theorem analyticAt_aevalTower {σ ι : Type*} [Fintype σ] [Fintype ι]
     exact AnalyticAt.aeval_mvPolynomial (A := 𝕜) (f := fun w : (σ → 𝕜) × (ι → 𝕜) => w.1)
       (fun i => ((ContinuousLinearMap.proj (R := 𝕜) (φ := fun _ : σ => 𝕜) i).comp
         (ContinuousLinearMap.fst 𝕜 (σ → 𝕜) (ι → 𝕜))).analyticAt w) a
-  | add P Q hP hQ => simp only [map_add]; exact hP.add hQ
+  | add P Q hP hQ => simp only [map_add (f := _)]; exact hP.add hQ
   | mul_X P i hP =>
     simp only [map_mul, aevalTower_X]
     exact hP.mul (((ContinuousLinearMap.proj (R := 𝕜) (φ := fun _ : ι => 𝕜) i).comp
@@ -31,7 +100,7 @@ theorem hasDerivAt_aevalTower_line {R ι : Type*} [CommRing R] [Algebra 𝕜 R] 
   induction q using MvPolynomial.induction_on with
   | C a => simpa using hasDerivAt_const (0 : 𝕜) (φ a)
   | add P Q hP hQ =>
-    simp only [map_add, add_mul, Finset.sum_add_distrib]
+    simp only [map_add (f := _), add_mul, Finset.sum_add_distrib]
     exact hP.add hQ
   | mul_X P i hP =>
     have hX : HasDerivAt (fun t : 𝕜 => y i + t * v i) (v i) 0 := by
@@ -107,7 +176,7 @@ theorem exists_chart_of_etale (g : MvPolynomial (Fin d) 𝕜 →ₐ[𝕜] A) (hg
     intro q
     refine MvPolynomial.algHom_ext' ?_ ?_
     · ext i
-      simp [ev, j, π, RingHom.algebraMap_toAlgebra]
+      simp [ev, j, π, coords, RingHom.algebraMap_toAlgebra]
     · intro i; simp [ev, j, π]
   have hker : ∀ a, π a = 0 ↔ a ∈ Ideal.span (range P.relation) := by
     intro a
@@ -122,7 +191,7 @@ theorem exists_chart_of_etale (g : MvPolynomial (Fin d) 𝕜 →ₐ[𝕜] A) (hg
       exact this ((hker a).1 ha)
     refine ⟨q, ?_, hq⟩
     ext i
-    · simpa [ev, π, j, RingHom.algebraMap_toAlgebra] using DFunLike.congr_fun hq (C (X i))
+    · simpa [ev, π, j, coords, RingHom.algebraMap_toAlgebra] using DFunLike.congr_fun hq (C (X i))
     · simpa [ev, π, j] using DFunLike.congr_fun hq (X i)
   have hjinj : Function.Injective j := by
     intro q q' h
@@ -142,7 +211,7 @@ theorem exists_chart_of_etale (g : MvPolynomial (Fin d) 𝕜 →ₐ[𝕜] A) (hg
   have hΨan : AnalyticAt 𝕜 Ψ (j p) :=
     analyticAt_fst.prod (analyticAt_pi_iff.2 fun r => analyticAt_aevalTower _ _)
   have hinj : Function.Injective (fderiv 𝕜 Ψ (j p)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨u, v⟩ huv
     have hline : HasDerivAt (fun t : 𝕜 => Ψ (j p + t • (u, v))) 0 0 := by
       have h1 : HasDerivAt (fun t : 𝕜 => j p + t • (u, v)) (u, v) 0 := by
@@ -229,10 +298,5 @@ theorem exists_chart_of_etale (g : MvPolynomial (Fin d) 𝕜 →ₐ[𝕜] A) (hg
   · have := Φ.right_inv hz
     rw [← (hs z hz).1, hΦ, hΨj] at this
     exact congrArg Prod.fst this
-
-theorem isLocalHomeomorph_coords_of_etale (g : MvPolynomial (Fin d) 𝕜 →ₐ[𝕜] A) (hg : g.Etale) :
-    IsLocalHomeomorph (coords g : (A →ₐ[𝕜] 𝕜) → Fin d → 𝕜) := fun p => by
-  obtain ⟨e, h1, h2, -⟩ := exists_chart_of_etale g hg p
-  exact ⟨e, h1, h2.symm⟩
 
 end GlobalTheory.AffinePoints

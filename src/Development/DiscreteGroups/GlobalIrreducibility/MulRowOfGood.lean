@@ -1,4 +1,54 @@
-import Development.DiscreteGroups.GlobalIrreducibility.ColUSingleOfGe
+module
+
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.NotIsGenericDetRepTwo
+public import Lean.Elab.MutualDef
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,14 +76,14 @@ def Good (j : ℕ) (x : Matrix (Fin n) (Fin n) k) : Prop :=
 
 theorem mul_col_of_good {j : ℕ} {Y : Matrix (Fin n) (Fin n) k} (hY : Good j Y) (M : Matrix (Fin n) (Fin n) k)
     {i l : Fin n} (hl : j + 1 ≤ l.val) : (M * Y) i l = M i l := by
-  rw [mul_apply, Finset.sum_eq_single l]
+  rw [Matrix.mul_apply, Finset.sum_eq_single l]
   · rw [hY l l (Or.inr hl), one_apply_eq, mul_one]
   · intro b _ hb; rw [hY b l (Or.inr hl), one_apply_ne hb, mul_zero]
   · simp
 
 theorem mul_row_of_good {j : ℕ} {X : Matrix (Fin n) (Fin n) k} (hX : Good j X) (M : Matrix (Fin n) (Fin n) k)
     {i l : Fin n} (hi : j ≤ i.val) : (X * M) i l = M i l := by
-  rw [mul_apply, Finset.sum_eq_single i]
+  rw [Matrix.mul_apply, Finset.sum_eq_single i]
   · rw [hX i i (Or.inl hi), one_apply_eq, one_mul]
   · intro b _ hb; rw [hX i b (Or.inl hi), one_apply_ne (Ne.symm hb), zero_mul]
   · simp
@@ -53,14 +103,14 @@ theorem good_conj {j : ℕ} (x : GL (Fin n) k) (hx : Good j (x : Matrix (Fin n) 
     intro i l hl
     have hGY : ∀ a, (G * Y) a l = Y a l := by
       intro a
-      rw [mul_apply, ← one_mul Y, mul_apply, one_mul]
+      rw [Matrix.mul_apply, ← one_mul Y, Matrix.mul_apply, one_mul]
       refine Finset.sum_congr rfl fun b _ => ?_
       by_cases hb : b.val < j + 1
       · exact congrArg (· * Y b l) (hg a b (Or.inr hb))
       · have h1 : Y b l = 0 := by
           rw [hy b l (Or.inl (by omega)), one_apply_ne]; intro h; rw [h] at hb; omega
         rw [h1, mul_zero, mul_zero]
-    rw [Matrix.mul_assoc, mul_apply, ← hXY, mul_apply]
+    rw [Matrix.mul_assoc, Matrix.mul_apply, ← hXY, Matrix.mul_apply]
     exact Finset.sum_congr rfl fun a _ => by rw [hGY]
 
   have hB : ∀ i l : Fin n, j ≤ i.val → j + 1 ≤ l.val → (X * G * Y) i l = G i l := by

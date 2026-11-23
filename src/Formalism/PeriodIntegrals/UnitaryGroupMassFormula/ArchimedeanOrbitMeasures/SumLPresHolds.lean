@@ -1,5 +1,46 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.ExpCut
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.ExpCut
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +59,7 @@ def sumL {n : ℕ} (ε : Fin n → Bool) (m h : Submodule ℝ (EuclideanSpace �
     EuclideanSpace ℝ ι × EuclideanSpace ℝ η →ₗ[ℝ] gLie ε where
   toFun p := ⟨(L₀ p.1 : EuclideanSpace ℝ _) + (L₁ p.2 : EuclideanSpace ℝ _), by
     rw [← hmh]; exact Submodule.add_mem_sup (L₀ p.1).2 (L₁ p.2).2⟩
-  map_add' p q := by ext1; simp only [Prod.fst_add, Prod.snd_add, map_add, Submodule.coe_add]; abel
+  map_add' p q := by ext1; simp only [Prod.fst_add, Prod.snd_add, map_add (f := _), Submodule.coe_add]; abel
   map_smul' c p := by ext1; simp [smul_add]
 
 def SumLPres : Prop := ∀ (n : ℕ) (ε : Fin n → Bool) (m h : Submodule ℝ (EuclideanSpace ℝ (Fin n × Fin n × Bool)))
@@ -34,7 +75,8 @@ theorem cayProdU_of (hC : CayDensG) (hP : SumLPres) : CayProdU := by
   obtain ⟨r₀, hr₀, f₀, hm, hc, h0, hS⟩ := hC n ε hG
   obtain ⟨_, hPS⟩ := hP n ε m h hmh horth ι η L₀ L₁
   set F := sumL ε m h hmh L₀ L₁ with hF
-  have hFc : Continuous F := LinearMap.continuous_of_finiteDimensional F
+  set_option synthInstance.maxHeartbeats 200000 in
+    have hFc : Continuous F := LinearMap.continuous_of_finiteDimensional F
   refine ⟨r₀ / 2, by positivity, fun p => f₀ (F p), hc.comp_of_eq hFc.continuousAt (map_zero F), ?_,
     hm.comp hFc.measurable, ?_⟩
   · show f₀ (F 0) = gaugeU ε

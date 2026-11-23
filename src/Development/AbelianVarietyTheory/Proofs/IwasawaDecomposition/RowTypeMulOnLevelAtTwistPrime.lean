@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LambdaQuotientCharMulInvEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.UnipotentCharacterArgumentMulStabilizer
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsAdmissibleIntegralBasisChangeOne
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LambdaQuotientCharMulInvEqOne
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.L2.Col Formalism.L2.DIV GlobalTheory.QNormal GlobalTheory.Mem.Col2.IdxEx
 
@@ -20,15 +65,15 @@ theorem isUnit_of_reduction_mul {K : Type} [Field K] {P : HeightOneSpectrum (�
     rw [h] at hab
     have ha : IsUnit (redP P a) := isUnit_of_mul_isUnit_left hab
     have hb : IsUnit (redP P b) := isUnit_of_mul_isUnit_right hab
-    rw [dif_pos ha, dif_pos hb, dif_pos hc, ← Units.val_mul, ← map_mul]
+    rw [dite_eq_left ha, dite_eq_left hb, dite_eq_left hc, ← Units.val_mul, ← map_mul]
     have : hc.unit = ha.unit * hb.unit := Units.ext (by simpa using h)
     rw [this]
-  · rw [dif_neg hc]
+  · rw [dite_eq_right hc]
     by_cases ha : IsUnit (redP P a)
     · by_cases hb : IsUnit (redP P b)
       · exact absurd (h ▸ ha.mul hb) hc
-      · rw [dif_neg hb, mul_zero]
-    · rw [dif_neg ha, zero_mul]
+      · rw [dite_eq_right hb, mul_zero]
+    · rw [dite_eq_right ha, zero_mul]
 
 variable [StarRing E]
 
@@ -58,7 +103,7 @@ theorem block_mul' (P : HeightOneSpectrum (𝓞 E)) (q : ℕ) (hq0 : q ≠ 0) (h
       rw [if_pos hl, zero_add, Finset.sum_eq_single (⟨l.1 - kj, by omega⟩ : Fin (n - kj))]
       · have e : kj + (l.1 - kj) = l.1 := by omega
         simp only [e, if_true, mul_one, Loc.atN]
-        rw [dif_pos hl2]
+        rw [dite_eq_left hl2]
       · intro u _ hu
         rw [if_neg, mul_zero]
         intro h
@@ -99,11 +144,12 @@ theorem block_mul' (P : HeightOneSpectrum (𝓞 E)) (q : ℕ) (hq0 : q ≠ 0) (h
     apply Subtype.ext
     have h2 : (blockD P kj n (mul_mem hg hg') s t : E) = g v ⟨kj + s.1, hs⟩ := by
       simp only [blockD, Matrix.of_apply, Loc.atN]
-      rw [dif_pos hs]
+      rw [dite_eq_left hs]
       rfl
     have h1 : g v ⟨kj + s.1, hs⟩ = g w ⟨kj + s.1, hs⟩ +
         ∑ u : Fin (n - kj), Loc.atN v (kj + u.1) * g (Loc.eN E (n + c) (kj + u.1)) ⟨kj + s.1, hs⟩ := by
-      conv_lhs => rw [hdec, map_add, map_sum]
+
+      conv_lhs => rw [hdec, map_add (f := _), map_sum]
       simp only [map_smul, Pi.add_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
     rw [h2, h1, Matrix.mul_apply, Subring.coe_add, AddSubmonoidClass.coe_finsetSum]
     congr 1
@@ -111,9 +157,9 @@ theorem block_mul' (P : HeightOneSpectrum (𝓞 E)) (q : ℕ) (hq0 : q ≠ 0) (h
     rw [Subring.coe_mul, mul_comm]
     congr 1
     simp only [blockD, Matrix.of_apply, Loc.atN]
-    rw [dif_pos hs]
+    rw [dite_eq_left hs]
   have h3 := congrArg (redHom P) key
-  rw [map_add, redHom_apply, hred, zero_add] at h3
+  rw [map_add (f := _), redHom_apply, hred, zero_add] at h3
   rw [RingHom.mapMatrix_apply, Matrix.map_apply, h3]
   rfl
 

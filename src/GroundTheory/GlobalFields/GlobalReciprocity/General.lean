@@ -1,14 +1,60 @@
-import Mathlib
-import GroundTheory.GlobalFields.GlobalReciprocity.RangeDiagonalLeKerIdeleSymbol
+module
+
+public import GroundTheory.GlobalFields.IdeleClassGroup.InvariantsGalois
+public import GroundTheory.GlobalFields.NormResidueSymbol.RangeIdeleNormLeKerIdeleSymbol
+public import GroundTheory.GlobalFields.GlobalReciprocity.RangeDiagonalLeKerIdeleSymbol
+import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms.InfiniteAdeleRingMapInfiniteAdeleRingMap
 import GroundTheory.GlobalFields.NormResidueSymbol.Functorial
+import GroundTheory.GlobalFields.NormResidueSymbol.Surjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
 open IsDedekindDomain NumberField IntermediateField IdeleGroup AdeleBaseChange
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 namespace FiniteSubfield
 
@@ -42,24 +88,24 @@ variable {K K' L L' : Type*} [Field K] [NumberField K] [Field K'] [NumberField K
   [NumberField L] [Field L'] [NumberField L'] [Algebra K K'] [Algebra K L] [Algebra K L']
   [Algebra K' L'] [Algebra L L'] [IsScalarTower K K' L'] [IsScalarTower K L L']
 
-omit [NumberField K] [NumberField K'] in
 
+omit [NumberField K] [NumberField K'] in
 theorem finrank_eq_one_of_bijective (hK : Function.Bijective (algebraMap K K')) :
     Module.finrank K K' = 1 :=
   (AlgEquiv.ofBijective (Algebra.ofId K K') hK).toLinearEquiv.finrank_eq.symm.trans
     (Module.finrank_self K)
 
+
 omit [Algebra K L] [Algebra K L'] [Algebra K' L'] [Algebra L L'] [IsScalarTower K K' L']
   [IsScalarTower K L L'] in
-
 theorem ideleNorm_ideleEmbedding_of_bijective (hK : Function.Bijective (algebraMap K K'))
     (x : IdeleGroup K) : ideleNorm K K' (ideleEmbedding K K' x) = x := by
   rw [ideleNorm_ideleEmbedding, finrank_eq_one_of_bijective hK, pow_one]
 
 variable [IsGalois K L]
 
-omit [NumberField K] [NumberField K'] [NumberField L] [NumberField L'] in
 
+omit [NumberField K] [NumberField K'] [NumberField L] [NumberField L'] in
 theorem restrictNormal_restrictScalars_eq_one (hL : Function.Bijective (algebraMap L L'))
     {σ : L' ≃ₐ[K'] L'} (h : (σ.restrictScalars K).restrictNormal L = 1) : σ = 1 := by
   refine AlgEquiv.ext fun y ↦ ?_
@@ -180,13 +226,13 @@ theorem ker_ideleSymbol : (ideleSymbol K L).ker = (diagonal K).range ⊔ (ideleN
   le_antisymm ideleSymbol_diagonal_and_ker_le.2
     (sup_le diagonal_range_le_ker_ideleSymbol (range_ideleNorm_le_ker_ideleSymbol L))
 
-omit [IsGalois K L] [IsMulCommutative (L ≃ₐ[K] L)] in
 
+omit [IsGalois K L] [IsMulCommutative (L ≃ₐ[K] L)] in
 instance ideleClassNorm_range_normal : (ideleClassNorm K L).range.Normal :=
   ⟨fun n hn g ↦ by rwa [mul_comm g n, mul_inv_cancel_right]⟩
 
-variable (K L) in
 
+variable (K L) in
 def reciprocityMap : IdeleClassGroup K →* (L ≃ₐ[K] L) :=
   QuotientGroup.lift _ (ideleSymbol K L) diagonal_range_le_ker_ideleSymbol
 
@@ -231,16 +277,11 @@ theorem reciprocityMap_surjective : Function.Surjective (reciprocityMap K L) := 
   let ⟨x, hx⟩ := ideleSymbol_surjective (K := K) (L := L) σ
   ⟨IdeleClassGroup.mk K x, hx⟩
 
-variable (K L) in
 
+variable (K L) in
 def reciprocityMapEquiv : IdeleClassGroup K ⧸ (ideleClassNorm K L).range ≃* (L ≃ₐ[K] L) :=
   (QuotientGroup.quotientMulEquivOfEq (ker_reciprocityMap (K := K) (L := L)).symm).trans
     (QuotientGroup.quotientKerEquivOfSurjective _ reciprocityMap_surjective)
-
-@[simp]
-theorem reciprocityMapEquiv_mk (x : IdeleGroup K) :
-    reciprocityMapEquiv K L (QuotientGroup.mk (IdeleClassGroup.mk K x)) = ideleSymbol K L x :=
-  rfl
 
 theorem index_range_ideleClassNorm_eq_finrank_of_isMulCommutative : (ideleClassNorm K L).range.index = Module.finrank K L := by
   rw [Subgroup.index, Nat.card_congr (reciprocityMapEquiv K L).toEquiv, IsGalois.card_aut_eq_finrank]

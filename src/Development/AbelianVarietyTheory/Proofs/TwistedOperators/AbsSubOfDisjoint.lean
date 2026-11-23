@@ -1,13 +1,60 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.SchurIrreducible
-import Formalism.LocalToGlobal.BesselHermitianTheta.DefsReal
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PderivEqZeroOfColOp
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ColumnDegrees
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DerivationProdPow
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulMinorPoly
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowColWeightsAgree
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FnShapeOfJointShape
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LengthAddLeOfDisjoint
+module
+
+public import Formalism.SharpRestriction.Divisibility.SchurIrreducible
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PderivEqZeroOfColOp
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsFockIPOfFockData
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ISupEigenspaceEqTop
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExistsEqMulProdMinors
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ColumnDegrees
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DerivationProdPow
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsEqMulMinorPoly
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FnShapeOfJointShape
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LengthAddLeOfDisjoint
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineKroneckerRightMatrixConjTranspose
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RowColWeightsAgree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.EulerIdentity
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -442,8 +489,8 @@ theorem joint_harmonics (μ : Ix p q → ℚ) (μ' : Ix r s → ℚ) :
 
 end Joint
 
-open Formalism.MainNotions.SchurIrreducible in
 
+open Formalism.MainNotions.SchurIrreducible in
 theorem fock_polynomials (X : ProvA) : admH2 X := by
   intro p q r s
   have hι := isFockIsometry_of_fockData (X.fock p q r s)

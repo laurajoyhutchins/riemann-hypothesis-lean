@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.BlockTriangularOfSubOne
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.BlockTriangularOfSubOne
 import Formalism.MirabolicMackeyTheory.MirabolicIsMackey
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,14 +72,14 @@ theorem vanish_off_uni (ψ₀ : AddChar k ℂ) (hψ : ψ₀ ≠ 1) (f : mirabSub
   by_contra hf
   exact hne (mul_left_cancel₀ hf (h2.symm.trans (mul_comm _ _)))
 
-open Classical in
 
+open Classical in
 def deltaU (ψ₀ : AddChar k ℂ) (x : mirabSub k n) : ℂ :=
   if h : x ∈ uniSub k n then genericChar n ψ₀ ⟨x, h⟩ else 0
 
 theorem deltaU_one (ψ₀ : AddChar k ℂ) : deltaU n ψ₀ 1 = 1 := by
   unfold deltaU
-  rw [dif_pos (one_mem _)]
+  rw [dite_eq_left (one_mem _)]
   exact map_one (genericChar n ψ₀)
 
 theorem deltaU_mem (ψ₀ : AddChar k ℂ) : deltaU n ψ₀ ∈ MirabInducedSpace n ψ₀ := by
@@ -44,7 +88,7 @@ theorem deltaU_mem (ψ₀ : AddChar k ℂ) : deltaU n ψ₀ ∈ MirabInducedSpac
   by_cases hx : x ∈ uniSub k n
   · have hux : (u : mirabSub k n) * x ∈ uniSub k n := mul_mem u.2 hx
     unfold deltaU
-    rw [dif_pos hx, dif_pos hux, ← map_mul]
+    rw [dite_eq_left hx, dite_eq_left hux, ← map_mul]
     exact congrArg (genericChar n ψ₀) (Subtype.ext rfl)
   · have hux : (u : mirabSub k n) * x ∉ uniSub k n := by
       intro hm
@@ -52,7 +96,7 @@ theorem deltaU_mem (ψ₀ : AddChar k ℂ) : deltaU n ψ₀ ∈ MirabInducedSpac
       rw [← mul_assoc, inv_mul_cancel, one_mul] at this
       exact hx this
     unfold deltaU
-    rw [dif_neg hx, dif_neg hux, mul_zero]
+    rw [dite_eq_right hx, dite_eq_right hux, mul_zero]
 
 theorem char_inv_mul (ψ₀ : AddChar k ℂ) (u : uniSub k n) :
     genericChar n ψ₀ (u⁻¹) * genericChar n ψ₀ u = 1 := by

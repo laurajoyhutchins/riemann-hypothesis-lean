@@ -1,18 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Statements.CuspidalUnitaryTwists.ExistsSmallSpherical
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicValuationThetaKernelJetBound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HighestWeightBelow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.VwNatCastNonneg
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JetKapIff
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMapEqOfMemNabStd
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StdWeylLatticesFgAndSpanCoeffSpace
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsMulAddEqOneOfNotMem
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TensorLatSpan
-import Development.AutomorphicArithmetic.CyclotomicBounds.WildJets.BvvInt
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMapEqOfMemNabStd
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StdWeylLatticesFgAndSpanCoeffSpace
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsMulAddEqOneOfNotMem
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.TensorLatSpan
+public import Development.AutomorphicArithmetic.CyclotomicBounds.WildJets.BvvInt
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim GlobalTheory.TestLat GlobalTheory.SumSize
 open Formalism.DivisionValues (vw lw)
@@ -42,12 +78,12 @@ private theorem lca_coord {K : Type} [Field K] [NumberField K] {ι : Type} [Fint
     refine ⟨GlobalTheory.CoefModel.mapVV (φ.comp (Rat.castHom K)) lam ⟨y, hyV⟩, ?_, fun i => ?_⟩
     · rw [GlobalTheory.CoefModel.mapVV_coe, MvPolynomial.map_map]
     · obtain ⟨z, hz⟩ := UpperTheory.WildA.bvvInt lam (GlobalTheory.CoefModel.mapVV (φ.comp (Rat.castHom K)) lam ⟨y, hyV⟩) (fun m => by
-        refine ⟨Rat.ringOfIntegersEquiv (MvPolynomial.coeff m Q), ?_⟩
+        refine ⟨Rat.ringOfIntegersEquiv (AddMonoidAlgebra.coeff Q m), ?_⟩
         rw [GlobalTheory.CoefModel.mapVV_coe, MvPolynomial.coeff_map]
-        have h2 : MvPolynomial.coeff m y = ((MvPolynomial.coeff m Q : 𝓞 ℚ) : ℚ) := by
+        have h2 : AddMonoidAlgebra.coeff y m = ((AddMonoidAlgebra.coeff Q m : 𝓞 ℚ) : ℚ) := by
           rw [← hQ]; exact MvPolynomial.coeff_map _ _ _
-        change (φ.comp (Rat.castHom K)) (MvPolynomial.coeff m y) = _
-        have h3 : ((MvPolynomial.coeff m Q : 𝓞 ℚ) : ℚ) = ((Rat.ringOfIntegersEquiv (MvPolynomial.coeff m Q) : ℤ) : ℚ) :=
+        change (φ.comp (Rat.castHom K)) (AddMonoidAlgebra.coeff y m) = _
+        have h3 : ((AddMonoidAlgebra.coeff Q m : 𝓞 ℚ) : ℚ) = ((Rat.ringOfIntegersEquiv (AddMonoidAlgebra.coeff Q m) : ℤ) : ℚ) :=
           (Rat.ringOfIntegersEquiv_apply_coe _).symm
         rw [h2, h3, map_intCast]) i
       refine ⟨(z : 𝓞 K), ?_⟩

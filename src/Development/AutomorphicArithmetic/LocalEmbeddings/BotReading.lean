@@ -1,5 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TripleFrameBaseExists
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHermitianLatticeLocalBases
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemPairLat
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BlkGLMem
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsReading
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FrameCoordsMemSelfDualLatticeCoordsIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjTauEOverRealPlace
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNegConjMemberHermitianLatticeSpaceData
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GridSquareSkewSumSpaceIsSkewHermitianSelfDual
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasArchimedeanCharExponentsConjOfHasInfExp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RestrictsToQuadraticSignPowOfRestrictsToQuadrati
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ScaledBlockSumSelfDualTraceSkewForm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsGoodPlace
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LieAlgebrasAtPlaceActFockVectorsByFockOperators
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NsmulProjectionXColumnsMemSelfDualLattice
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TripleFrameBaseExists
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.DivisionValues
@@ -25,11 +82,12 @@ theorem exists_isHerm_lat {D : D7} (B : Base D.host.F D.host.E) (τf : InfiniteP
     (hsd : IsSelfDualC S Λ) (s : D.what₂.Tau → Matrix (Fin S.rank) (Fin S.rank) ℂ)
     (hs : ∀ τ, IsCartanInv (gramAt D S τ) (s τ)) {p q : ℕ} (hsig : ∀ τ, Formalism.UG.HasSignature (gramAt D S τ) p q) :
     ∃ bas, Spc.IsHerm D.sp.cm.sig B (Spc.mk ((-1 : D.host.E) • S.gram) (conjSub Λ) (fun w => -s (τf w)) bas) q p := by
-  have hlat := GlobalTheory.TripleSpaceW.conjSub_isLattice hsd.1
-  obtain ⟨bas, hbas⟩ := exists_bas B _ hlat
+  have hfull := GlobalTheory.TripleSpaceW.conjSub_isFullLattice
+    (GlobalTheory.ProjXCols.selfDual_isFullLattice _ _ hsd)
+  obtain ⟨bas, hbas⟩ := exists_bas B _ hfull
   have eJ : ∀ w, ((-1 : D.host.E) • S.gram).map (B.emb w).1 = -((gramAt D S (τf w)).map star) := fun w => by
     ext a b; simp [gramAt, hB]
-  refine ⟨bas, ⟨fun a b => ?_, fun w => ?_, hlat, fun y => GlobalTheory.TripleSpace.mem_starLat_iff_form S hsd y, fun w => ?_, hbas⟩⟩
+  refine ⟨bas, ⟨fun a b => ?_, fun w => ?_, hfull, fun y => GlobalTheory.TripleSpace.mem_starLat_iff_form S hsd y, fun w => ?_, hbas⟩⟩
   · show star (((-1 : D.host.E) • S.gram) b a) = ((-1 : D.host.E) • S.gram) a b
     simp only [Matrix.smul_apply, smul_eq_mul, star_mul', star_neg, star_one, GlobalTheory.TripleSpace.star_gram]
   · show GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.HasSig (((-1 : D.host.E) • S.gram).map (B.emb w).1) _ _
@@ -39,8 +97,8 @@ theorem exists_isHerm_lat {D : D7} (B : Base D.host.F D.host.E) (τf : InfiniteP
     rw [eJ]
     exact GlobalTheory.TripleSpace.isCartan_neg_conj (hs _)
 
-open scoped ComplexOrder in
 
+open scoped ComplexOrder in
 theorem exists_isSkew_lat {D : D7} (B : Base D.host.F D.host.E) (τf : InfinitePlace D.host.F → D.what₂.Tau)
     (hB : ∀ w x, (B.emb w).1 x = conj (tauE D (τf w) x)) (X : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin X.rank → D.host.E))
     (hA : IsSelfDualC X Λ) {k : ℕ} (e : Fin k ≃ Fin X.rank)
@@ -54,11 +112,15 @@ theorem exists_isSkew_lat {D : D7} (B : Base D.host.F D.host.E) (τf : InfiniteP
   have hJ : D.host.xi0 • (X.gramᵀ).submatrix e e = GlobalTheory.IndefiniteRowSideFullHecke.UnitaryConjugation.skewGram X (zeroSp D) e' :=
     congrArg (D.host.xi0 • ·) (blk_empty e _ _).symm
   have hZ := GlobalTheory.LineSelfDual.isSelfDualC_selfDualLatticeCoordsInFrame D (zeroSp D)
-  have hlat := GlobalTheory.SkewLat.isLattice_pairLat GlobalTheory.SkewLat.DualPair.AA_ne hA.1 hZ.1 e'
-  obtain ⟨bas, hbas⟩ := exists_bas B _ hlat
+  have hfull := GlobalTheory.SkewLat.pairLat_isFull
+    (GlobalTheory.SkewLat.scLat_isFull GlobalTheory.SkewLat.DualPair.AA_ne
+      (GlobalTheory.ProjXCols.selfDual_isFullLattice _ _ hA))
+    (GlobalTheory.SkewLat.scLat_isFull GlobalTheory.SkewLat.DualPair.AA_ne
+      (GlobalTheory.ProjXCols.selfDual_isFullLattice _ _ hZ)) e'
+  obtain ⟨bas, hbas⟩ := exists_bas B _ hfull
   have hsub : Subsingleton (Matrix (Fin (zeroSp D).rank) (Fin (zeroSp D).rank) ℂ) :=
     inferInstanceAs (Subsingleton (Matrix (Fin 0) (Fin 0) ℂ))
-  refine ⟨_, bas, fun y hy => ?_, ⟨fun a b => ?_, fun w => ?_, hlat, fun y => ?_, fun w => ?_, hbas⟩⟩
+  refine ⟨_, bas, fun y hy => ?_, ⟨fun a b => ?_, fun w => ?_, hfull, fun y => ?_, fun w => ?_, hbas⟩⟩
   · refine GlobalTheory.SkewLat.mem_pairLat.2 ⟨hy, ?_⟩
     have : (fun k => y (e' (.inr k))) = 0 := funext fun k => Fin.elim0 k
     rw [this]

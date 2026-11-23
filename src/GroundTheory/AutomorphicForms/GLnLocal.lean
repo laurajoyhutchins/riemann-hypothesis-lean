@@ -1,5 +1,56 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.LocallyProfinite
+module
+
+public import Mathlib.Algebra.Group.Submonoid.Units
+public import Mathlib.NumberTheory.LocalField.Basic
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,14 +83,8 @@ theorem integralGLHom_apply (u : GL (Fin n) 𝒪[F]) (i j : Fin n) :
     integralGLHom F n u i j = (u i j : F) :=
   rfl
 
-theorem integralGLHom_injective : Function.Injective (integralGLHom F n) := fun _ _ h =>
-  Units.ext <| Matrix.ext fun i j => Subtype.ext (congrArg (fun g : GL (Fin n) F => g i j) h)
-
 def integralGL : Subgroup (GL (Fin n) F) :=
   (integralGLHom F n).range
-
-def integralGLEquiv : GL (Fin n) 𝒪[F] ≃* integralGL F n :=
-  MonoidHom.ofInjective (integralGLHom_injective F n)
 
 theorem mem_integralGL_iff {g : GL (Fin n) F} :
     g ∈ integralGL F n ↔ (∀ i j, g i j ∈ 𝒪[F]) ∧ ∀ i j, (g⁻¹ : GL (Fin n) F) i j ∈ 𝒪[F] := by
@@ -231,12 +276,6 @@ theorem conj_mem_congruenceSubgroup {m : ℕ} {k x : GL (Fin n) F} (hk : k ∈ i
   obtain ⟨y, hy, rfl⟩ := hx
   exact ⟨u * y * u⁻¹, (reduction F n m).normal_ker.conj_mem y hy u, by simp [map_mul, map_inv]⟩
 
-theorem congruenceSubgroup_normal (m : ℕ) :
-    ((congruenceSubgroup F n m).subgroupOf (integralGL F n)).Normal :=
-  ⟨fun x hx k => by
-    rw [Subgroup.mem_subgroupOf] at hx ⊢
-    simpa using conj_mem_congruenceSubgroup F n k.2 hx⟩
-
 theorem isOpen_congruenceSubgroup (m : ℕ) :
     IsOpen (congruenceSubgroup F n m : Set (GL (Fin n) F)) := by
   have : (congruenceSubgroup F n m : Set (GL (Fin n) F)) = (integralGL F n : Set _) ∩
@@ -287,7 +326,7 @@ theorem hasBasis_nhds_one :
     fun m m' h => Set.inter_subset_inter_left _
       (SetLike.coe_subset_coe.mpr (congruenceSubgroup_antitone F n h))
   obtain ⟨m, hm⟩ :=
-    (isCompact_integralGL F n).elim_directed_family_closed _ hclosed hempty hanti.directed_ge
+    ((isCompact_integralGL F n).elim_directed_family_closed _ hclosed (Set.disjoint_iff_inter_eq_empty.2 hempty) hanti.directed_ge).imp (fun _ => Disjoint.inter_eq)
   refine ⟨m, trivial, fun g hg => interior_subset (by_contra fun h => ?_)⟩
   have : g ∈ (integralGL F n : Set (GL (Fin n) F)) ∩
       ((congruenceSubgroup F n m : Set (GL (Fin n) F)) ∩ (interior U)ᶜ) :=

@@ -1,8 +1,50 @@
-import Formalism.AdmissibleDesigns.BkLocCol
-import Formalism.AdmissibleDesigns.InvariantsMapEquivariant
-import Formalism.AdmissibleDesigns.RankReductionIdempotentOne
-import Formalism.AdmissibleDesigns.CoboundaryMemFiniteClasses
-import Formalism.AdmissibleDesigns.FgTopContinuousLinearMap
+module
+
+public import Formalism.AdmissibleDesigns.InvariantsMapEquivariant
+public import Formalism.AdmissibleDesigns.CoboundaryMemFiniteClasses
+public import Formalism.AdmissibleDesigns.FgTopContinuousLinearMap
+public import Formalism.WachLatticeTwists.RealDisplaySplitting.RealDisplayProofs.SurjectionOfRankOneIdempotent
+public import Formalism.AdmissibleDesigns.BkLocCol
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core] [hH0Fin : Fact Formalism.MainNotions.N.K.H0.FinCore]
 
@@ -49,7 +91,7 @@ theorem psiB_cont {w : HeightOneSpectrum (𝓞 D.host.E)} (hw : w ∈ placesOver
     Continuous (psiB i Dd hw) :=
   IsModuleTopology.continuous_of_linearMap (psiB i Dd hw)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 theorem psiB_comp {w : HeightOneSpectrum (𝓞 D.host.E)} (hw : w ∈ placesOver D.host.E (D.nd.l i))
     (v : VB i Dd) :
@@ -73,8 +115,8 @@ variable {D : D7} {i : D.nd.Loc} (dc : TruncatedSeriesCountingIdentities.Decl D 
   {Dd : Formalism.RepresentationBoundsCohomology.ringDataObjects.RingData (D.nd.O i) (D.nd.X i) (Fin D.R.nV) (GE D.nd) D.R.t (RepresentationBoundsCohomology.blk D.R)}
   [∀ k, SMulCommClass Dd.R' (D.nd.O i) (blockRestrictedRepresentationType (RepresentationBoundsCohomology.blk D.R) Dd.ρk k)]
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 theorem psiB_equiv
     (hD : Formalism.RepresentationBoundsCohomology.ringDataObjects.RingDef (D.nd.O i) (D.nd.T i) (RepresentationBoundsCohomology.repX D.nd r) π (chiU D.nd i 1) (epsU D.nd i) g0 eB e₁ s Dd)
@@ -90,6 +132,7 @@ theorem psiB_equiv
     psiB i Dd hw v b
   show eK (D.nbr i _ hw) (∑ c, (Dd.ρk 0 (uElt Dd.r Dd.χ ((Br.iota D.nbr i _ hw g : decs D.host.E (Aw i dc) n) : GE D.nd)))
       (H0.e0 a) c • (show VB i Dd from v) c) = _
+
   rw [map_sum, ← Equiv.sum_comp (H0.e0 (D := D))]
   refine Finset.sum_congr rfl fun b _ => ?_
   rw [H0.unipotent_block_zero_entry hD hN, Algebra.smul_def, map_mul, eK_apply, Br.toLLK_alg]
@@ -140,8 +183,8 @@ theorem hfW_rep (n : ℕ) [ContinuousConstSMul (FractionRing (D.nd.O i)) (VT n)]
     exact ⟨c, rfl, hc⟩
   exact hle hh
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 800000 in
+
+
 
 theorem frow_le_col (n : ℕ) [ContinuousConstSMul (FractionRing (D.nd.O i)) (VT n)]
     {M : Type} [AddCommGroup M] [Module (D.nd.O i) M] (ρM : Representation (D.nd.O i) ↥(Γn i dc n) M)
@@ -164,7 +207,7 @@ theorem frow_le_col (n : ℕ) [ContinuousConstSMul (FractionRing (D.nd.O i)) (VT
     intro g g'
     have e := c.2.2 g g'
     simp only at e ⊢
-    rw [e, Submodule.Quotient.mk_add, map_add, hsym]
+    rw [e, Submodule.Quotient.mk_add, map_add (f := _), hsym]
   have hk : kRow (Dat n) ρM u hu ((Dat n).q (Submodule.mkQ _ c)) =
       Submodule.mkQ _ (⟨_, hcoc⟩ : coZ1s ρM) := by
     show ReciprocityTheory.ChartRestriction.T2.traceH1 (MulEquiv.refl _) u ρM (Dat n).ρA hu
@@ -254,7 +297,7 @@ def FcolK (n : ℕ) : Submodule (D.nd.O i) (H1z (rhoM i dc Dd n)) :=
 def FK (n : ℕ) : Submodule (D.nd.O i) (H1z (rhoM i dc Dd n)) :=
   Fρ i dc (rowsN i dc) (rhoM i dc Dd) (FrowK i dc Dd hK hε hM) (FcolK i dc Dd) n
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 
 theorem fK_le (n : ℕ) : FK i dc Dd hK hε hM n ≤ FcolK i dc Dd n := by
   unfold FK Fρ
@@ -267,8 +310,8 @@ theorem fK_le (n : ℕ) : FK i dc Dd hK hε hM n ≤ FcolK i dc Dd n := by
       (uD_symm_mk Dd.r Dd.χ (RepresentationBoundsCohomology.blk D.R) Dd.ρk (epsU D.nd i) (Aw i dc) hK hε hM n)
   · exact le_rfl
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 theorem bkLoc_rec
     (hD : Formalism.RepresentationBoundsCohomology.ringDataObjects.RingDef (D.nd.O i) (D.nd.T i) (RepresentationBoundsCohomology.repX D.nd r) π (chiU D.nd i 1) (epsU D.nd i) g0 eB e₁ s Dd)

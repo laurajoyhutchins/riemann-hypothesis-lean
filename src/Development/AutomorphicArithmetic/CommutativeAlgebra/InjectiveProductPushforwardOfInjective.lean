@@ -1,6 +1,47 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.BconeDefs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleToSheafifyLocallyBijectiveAndLiftStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BigEtaleModuleSheafMonoEpiIffSectionsStatement
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.BconeDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC UpperTheory.Bc
 
@@ -96,8 +137,8 @@ private instance (W : C) : (lamF (S := S) W).PreservesMonomorphisms where
 
 variable [HasBinaryProducts C]
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 private noncomputable def adjTo (W : C) {P Q : Cᵒᵖ ⥤ ModuleCat.{1} S} (α : lam W P ⟶ Q) :
     P ⟶ (prod.functor.obj W).op ⋙ Q where
   app T := ModuleCat.ofHom
@@ -140,8 +181,8 @@ private lemma invApp_single (W : C) {P Q : Cᵒᵖ ⥤ ModuleCat.{1} S}
   simp only [invApp, Finsupp.lsum_single, LinearMap.comp_apply]
   try rfl
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 private noncomputable def adjInv (W : C) {P Q : Cᵒᵖ ⥤ ModuleCat.{1} S}
     (u : P ⟶ (prod.functor.obj W).op ⋙ Q) : lam W P ⟶ Q where
   app T := ModuleCat.ofHom (invApp W u T)
@@ -159,8 +200,8 @@ private noncomputable def adjInv (W : C) {P Q : Cᵒᵖ ⥤ ModuleCat.{1} S}
     exact pmap_op Q ((prod.functor.obj W).map h.unop) (prod.lift (h.unop ≫ g) (𝟙 T'.unop))
       (prod.lift g (𝟙 T.unop)) h.unop (by apply Limits.prod.hom_ext <;> simp) _
 
-set_option backward.isDefEq.respectTransparency false in
 
+set_option backward.isDefEq.respectTransparency false in
 private noncomputable def lamAdj (W : C) :
     lamF (S := S) W ⊣ (Functor.whiskeringLeft _ _ (ModuleCat.{1} S)).obj (prod.functor.obj W).op :=
   Adjunction.mkOfHomEquiv
@@ -211,8 +252,8 @@ private noncomputable def lamAdj (W : C) :
 
 end UpperTheory.PwInj
 
-open UpperTheory.PwInj in
 
+open UpperTheory.PwInj in
 private noncomputable def UpperTheory.PwInj.sheafAdj (R : Type) [CommRing R] (W : Scheme.{0}) :
     (sheafToPresheaf Scheme.etaleTopology.{0} (ModuleCat.{1} (ULift.{1} R)) ⋙ lamF W ⋙
       presheafToSheaf Scheme.etaleTopology.{0} (ModuleCat.{1} (ULift.{1} R))) ⊣ pw R W :=

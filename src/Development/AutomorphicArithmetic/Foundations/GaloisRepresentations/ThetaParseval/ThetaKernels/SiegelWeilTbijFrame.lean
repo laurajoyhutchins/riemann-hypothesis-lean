@@ -1,9 +1,49 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaBijections.SySmulRight
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.SiegelWeilDatumProperties
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.SiegelWeilDatumProperties
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaBijections.AlgInjective
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaBijections.SySmulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
+
 
 section
 noncomputable section
@@ -26,11 +66,11 @@ theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_eq (w w' : Matri
   d.dd.form w w'
 theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_add_left (w₁ w₂ w' : Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E)) :
     _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d (w₁ + w₂) w' = _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w₁ w' + _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w₂ w' := by
-  simp only [_root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_eq, map_add, om, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
+  simp only [_root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_eq, map_add (f := _), om, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
   ring
 theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_add_right (w w₁ w₂ : Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E)) :
     _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w (w₁ + w₂) = _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w w₁ + _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w w₂ := by
-  simp only [_root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_eq, map_add, om, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
+  simp only [_root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_eq, map_add (f := _), om, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
   ring
 theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_smul_right (a : AF F) (w w' : Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E)) :
     _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w (a • w') = a * _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w w' := by
@@ -38,8 +78,9 @@ theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_smul_right (a : 
   ring
 theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_sum_left {ι : Type} (s : Finset ι) (a : ι → AF F) (v : ι → Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E))
     (w' : Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E)) : _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d (∑ i ∈ s, a i • v i) w' = ∑ i ∈ s, a i * _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d (v i) w' := by
+
   simp only [_root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_eq, map_sum, map_smul, om, Prod.fst_sum, Prod.snd_sum, Prod.smul_fst, Prod.smul_snd, sum_dotProduct,
-    dotProduct_sum, smul_dotProduct, dotProduct_smul, smul_eq_mul, Finset.mul_sum, ← Finset.sum_sub_distrib]
+  dotProduct_sum, smul_dotProduct, dotProduct_smul, smul_eq_mul, Finset.mul_sum, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
   ring
 theorem _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy_antisymm (w w' : Matrix (Fin d.m) (Fin d.n ⊕ Fin d.n) (AE F E)) : _root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w w' = -_root_.PositivityTheory.SiegelWeilFormula.TBij_k.Adp.sy d w' w := by

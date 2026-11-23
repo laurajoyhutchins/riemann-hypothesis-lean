@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPairNumberExpansionIndependence
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.BundleObjects
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Statements
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyCN
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.OfSteps
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PFlagIndependenceAlgebra
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PPairNumberExpansionIndependence
+import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PVerticalDivisorsCommute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -104,8 +158,8 @@ section Cut
 variable {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {ϖ : O}
   {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-open Classical in
 
+open Classical in
 theorem cut_list (hC3 : CutByEffectiveDivisor.Statement.{0}) (hϖ : Irreducible ϖ) {P : Ideal (MRing ι O)}
     {b : K → ℤ} {f g : MRing ι O} (hD : IsVerticalDivisor P ϖ b f g) {c : K → ℕ} {s : MRing ι O}
     (hs : IsMultiHomog s c) (hsP : s ∉ P)
@@ -118,20 +172,34 @@ theorem cut_list (hC3 : CutByEffectiveDivisor.Statement.{0}) (hϖ : Irreducible 
   simp only [vNum_vecCons_eq, List.ofFn_get] at h
   exact h
 
-open Classical in
 
+open Classical in
 theorem cut_list_ratDiv (hC3 : CutByEffectiveDivisor.Statement.{0}) (hϖ : Irreducible ϖ)
     {P : Ideal (MRing ι O)} {b : K → ℤ} {f g : MRing ι O} (hD : IsVerticalDivisor P ϖ b f g)
     {cs ch : K → ℕ} {s h : MRing ι O} (hs : IsMultiHomog s cs) (hh : IsMultiHomog h ch) (hsP : s ∉ P)
     (hhP : h ∉ P)
-    (hgen : ∀ H, (divCycle P s H ≠ 0 ∨ divCycle P h H ≠ 0) → (C ϖ : MRing ι O) ∉ H →
+    (hgen : ∀ H, (((ReciprocityTheory.ChartRestriction.G.Geo.divCycle P s) H : ℤ) ≠ 0 ∨ ((ReciprocityTheory.ChartRestriction.G.Geo.divCycle P h) H : ℤ) ≠ 0) → (C ϖ : ReciprocityTheory.ChartRestriction.G.Geo.MRingOver O ι) ∉ H →
       IsVerticalDivisor H ϖ b f g)
     (l : List (K → ℤ)) (hP : IsModelOver P (l.length + 1)) :
     cycEval (fun G => vNumL G ((fun k => (cs k : ℤ) - ch k) :: l)) (ratDiv P f g) =
       cycEval (fun W => if (C ϖ : MRing ι O) ∈ W then vNumL W (b :: l)
         else cycEval (fun G => vNumL G l) (ratDiv W f g)) (ratDiv P s h) := by
-  have e1 := cut_list hC3 hϖ hD hs hsP (fun H hH => hgen H (Or.inl hH)) l hP
-  have e2 := cut_list hC3 hϖ hD hh hhP (fun H hH => hgen H (Or.inr hH)) l hP
+  have hcycle (a : MRing ι O) (W : Ideal (MRing ι O)) :
+      divCycle P a W = (ReciprocityTheory.ChartRestriction.G.Geo.divCycle P a W : ℤ) := by
+    have hL : (ReciprocityTheory.ChartRestriction.G.Geo.divCycle P a W : ℕ) =
+        if W ∈ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P a then
+          ReciprocityTheory.ChartRestriction.G.Geo.multAt (P ⊔ Ideal.span {a}) W else 0 := rfl
+    rw [divCycle, hL]
+    by_cases hw : W ∈ (P ⊔ Ideal.span {a}).minimalPrimes ∧ IsRelevant W
+    · have hw' : W ∈ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P a := hw
+      rw [dite_eq_left hw, if_pos hw', ReciprocityTheory.ChartRestriction.G.Geo.multAt,
+        dite_eq_left hw.1.1.1]
+      rfl
+    · have hw' : W ∉ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P a := hw
+      rw [dite_eq_right hw, if_neg hw']
+      simp
+  have e1 := cut_list hC3 hϖ hD hs hsP (fun H hH => hgen H (Or.inl (by rwa [← hcycle]))) l hP
+  have e2 := cut_list hC3 hϖ hD hh hhP (fun H hH => hgen H (Or.inr (by rwa [← hcycle]))) l hP
   have hr : ratDiv P s h = divCycle P s - divCycle P h := rfl
   have hfg := ratDiv_finite_support P f g
   rw [hr, ← cycEval_sub_cycle _ _ _ (divCycle_finite_support P s) (divCycle_finite_support P h), ← e1, ← e2,
@@ -147,14 +215,14 @@ theorem cut_list_ratDiv (hC3 : CutByEffectiveDivisor.Statement.{0}) (hϖ : Irred
   rw [hadd]
   ring
 
-open Classical in
 
+open Classical in
 theorem pairNum_cut_section (hC3 : CutByEffectiveDivisor.Statement.{0}) (hϖ : Irreducible ϖ)
     {P : Ideal (MRing ι O)} {e : ℕ} (hP : IsModelOver P (e + 1)) {r : ℕ} (z z' : Fin r → K → ℤ)
     (fs gs : Fin r → MRing ι O) (hD : ∀ i, IsVerticalDivisor P ϖ (z i - z' i) (fs i) (gs i))
     {cs ch : K → ℕ} {s h : MRing ι O} (hs : IsMultiHomog s cs) (hh : IsMultiHomog h ch) (hsP : s ∉ P)
     (hhP : h ∉ P)
-    (hgen : ∀ H, (divCycle P s H ≠ 0 ∨ divCycle P h H ≠ 0) → (C ϖ : MRing ι O) ∉ H →
+    (hgen : ∀ H, (((ReciprocityTheory.ChartRestriction.G.Geo.divCycle P s) H : ℤ) ≠ 0 ∨ ((ReciprocityTheory.ChartRestriction.G.Geo.divCycle P h) H : ℤ) ≠ 0) → (C ϖ : ReciprocityTheory.ChartRestriction.G.Geo.MRingOver O ι) ∉ H →
       ∀ i, IsVerticalDivisor H ϖ (z i - z' i) (fs i) (gs i))
     {m : ℕ} (hm : 1 ≤ m) {A : MvPolynomial (Fin r) ℤ} {Bs : Fin r → MvPolynomial (Fin r ⊕ Fin r) ℤ}
     (hBs : IsPairExpansion m A Bs) (Q : List (K → ℤ)) (hQ : Q.length + m = e + 1) :

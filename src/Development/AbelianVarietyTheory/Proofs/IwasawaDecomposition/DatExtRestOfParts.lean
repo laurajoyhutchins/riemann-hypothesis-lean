@@ -1,18 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Forms
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CoefAEqOfHeq
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsIsBIffCoreB
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CrdOver
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Forms
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CrdOver
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksExistW
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Cx Formalism.IndefR.RecTie
@@ -23,8 +55,8 @@ open GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Me
 theorem GlobalTheory.Mem.R3.Rw.frame_pb_heq {P P' : Pre} (e : P' = P) {g' : Fr P'} {g : Fr P} (h : HEq g' g) : HEq g'.P.pb g.P.pb := by
   subst e; cases h; rfl
 
-set_option maxHeartbeats 8000000 in
 
+set_option maxHeartbeats 8000000 in
 theorem GlobalTheory.Mem.R3.Rw.datExt_rest_of_parts :
     (GlobalTheory.Published.DiscreteSeriesCover → GlobalTheory.Published.HarishChandraModules → GlobalTheory.Published.CuspRapidDecay → GlobalTheory.Published.CasselmanWallach → GlobalTheory.Published.WeilRepresentationUnitaryPair → GlobalTheory.Published.DiscreteSeriesExists → GlobalTheory.Published.HarishChandraFinite → (StepW Pinned fun K B' f' T' w' => ∀ (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T), Enl0 B B' →
   HEq f' f → Pinned K B f T w → HEq w'.px w.px → ∀ (Z : w.Lt) (hX : B.fields.Ok) (Wt : Set B.places.Pl)
@@ -122,7 +154,9 @@ theorem GlobalTheory.Mem.R3.Rw.datExt_rest_of_parts :
   intro k1 k2 k3 h1 h2 h3 h4 h5 h6 h7
   refine (((k1 h1 h2 h3 h4 h5 h6 h7).and (k2 h1 h2 h3 h4 h5 h6 h7)).and (k3 h1 h2 h3 h4 h5 h6 h7)).trans
     (Step.of_all fun K B' f' T' _ _ _ _ w' hw => ?_)
-  obtain ⟨⟨ha, hb⟩, hd⟩ := hw
+  have ha := hw.1.1
+  have hb := hw.1.2
+  have hd := hw.2
   intro B f T w hE hf hP hpx Z hX Wt z hG hGA hF hH Z' hX' hG' hGA' hV core' alg' ha1 ha2 ha3 hc hL hC hD hpb
   obtain ⟨Xg, tr₀, R₀, cG, s0⟩ :=
     ha B f T w hE hf hP hpx Z hX Wt z hG hGA hF hH Z' hX' hG' hGA' hV core' alg' ha1 ha2 ha3 hc hL hC hD hpb
@@ -130,30 +164,48 @@ theorem GlobalTheory.Mem.R3.Rw.datExt_rest_of_parts :
     hb B f T w hE hf hP hpx Z hX Wt z hG hGA hF hH Z' hX' hG' hGA' hV core' alg' ha1 ha2 ha3 hc hL hC hD hpb Xg tr₀ R₀ cG s0
   obtain ⟨geo, hg⟩ :=
     hd B f T w hE hf hP hpx Z hX Wt z hG hGA hF hH Z' hX' hG' hGA' hV core' alg' ha1 ha2 ha3 hc hL hC hD hpb Xg tr R' cG' s1
-  obtain ⟨p, l, i, g, m, s, e, ⟨rW, rT⟩⟩ := s1
-  letI := alg'
-  refine ⟨⟨Xg, tr, core', ha1, R', cG', geo, p, l, i, g, m, ha2, ha3⟩, rfl, e, hg.1, s, ?_⟩
-  obtain ⟨hH, hl, hcc, hDw, hXo, hU, hV', hdict, hmu, hKf, hcE, hchiW, hx₀, hiota⟩ := hc
-  obtain ⟨rψ, rθ, rβW, rβY, rΛY, rnW, rβV, rΛV, rΛW, rPg, reG, rSb, rI, rjL⟩ := rW
+  -- Project the conjuncts directly to avoid carrying the dependent goal through case splits.
+  have sStd := s1.2.2.2.2.2
+  have realSide := sStd.2.2
+  have rW := realSide.1
+  have rT := realSide.2
+  let z' : Dat (w'.st Z') w'.I hX' T' {v | B'.places.resChar v ∈ T'.pl} :=
+    @Dat.mk (w'.st Z') w'.px w'.I hX' T' _ Xg tr core' alg' ha1 R' cG' geo
+      s1.1 s1.2.1 s1.2.2.1 s1.2.2.2.1 s1.2.2.2.2.1 ha2 ha3
+  refine ⟨z', rfl, sStd.2.1, hg.1, sStd.1, ?_⟩
+  have hcRest := hc.2.2.2.2.2
+  have hcLast := hcRest.2.2.2.2.2
+  have rGroups := rW.2.2.2.2.2.2
+  have rPlaces := rGroups.2.2.2.2.2.2
+  have rI := rPlaces.1
+  have rMW := fun i i' hi => (rI i i' hi).2.2.2.2.2.2.2
+  have geoAt := hg.2.1
   exact
-    { H := hH, l := hl, c := hcc, Dw := hDw, Xo := hXo, U := hU, V := hV', dict := hdict, mu := hmu, Kf := hKf, cE := hcE,
-      chiW := hchiW, x₀ := hx₀, iota := hiota, ψ := rψ, θ := rθ, βW := rβW, βY := rβY, nW := rnW, βV := rβV, ΛV := rΛV,
-      ΛW := rΛW, Pg := rPg, eG := reG, Sb := rSb
-      BV := fun i i' hi => by
-        obtain ⟨a1, a2, -, -, a5, a6, a7, -⟩ := rI i i' hi
-        exact ⟨a1, a2, a5, a6, (rT i i' hi).1, a7⟩
-      MW := fun i i' hi => by
-        obtain ⟨-, -, -, -, -, -, -, b1, b2, b3, b4, b5, b6, b7, b8, b9, -⟩ := rI i i' hi
-        exact ⟨b1, b2, b3, b4, b5, b6, b7, b8, b9, (hg.2.1 i i' hi).1, (hg.2.1 i i' hi).2.1⟩
+    { H := hc.1, l := hc.2.1, c := hc.2.2.1, Dw := hc.2.2.2.1, Xo := hc.2.2.2.2.1
+      U := hcRest.1, V := hcRest.2.1, dict := hcRest.2.2.1, mu := hcRest.2.2.2.1, Kf := hcRest.2.2.2.2.1
+      cE := hcLast.1, chiW := hcLast.2.1, x₀ := hcLast.2.2.1, iota := hcLast.2.2.2
+      ψ := rW.1, θ := rW.2.1, βW := rW.2.2.1, βY := rW.2.2.2.1, nW := rW.2.2.2.2.2.1
+      βV := rGroups.1, ΛV := rGroups.2.1, ΛW := rGroups.2.2.1
+      Pg := rGroups.2.2.2.1, eG := rGroups.2.2.2.2.1, Sb := rGroups.2.2.2.2.2.1
+      BV := fun i i' hi =>
+        have h := rI i i' hi
+        have hv := h.2.2.2.2
+        ⟨h.1, h.2.1, hv.1, hv.2.1, (rT i i' hi).1, hv.2.2.1⟩
+      MW := fun i i' hi =>
+        have h := rMW i i' hi
+        have hLast := h.2.2.2.2.2
+        have hGeo := geoAt i i' hi
+        ⟨h.1, h.2.1, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1,
+          hLast.1, hLast.2.1, hLast.2.2.1, hLast.2.2.2.1, hGeo.1, hGeo.2.1⟩
       forms := hg.2.2
-      cV := fun i i' hi => by
-        obtain ⟨-, -, a3, a4, -⟩ := rI i i' hi
-        exact ⟨a3, a4⟩
+      cV := fun i i' hi =>
+        have h := (rI i i' hi).2.2
+        ⟨h.1, h.2.1⟩
       pb := (heq_of_eq hpb).trans ((GlobalTheory.Mem.R3.Rw.frame_pb_heq hE.1 hf).trans (heq_of_eq hF.2.2.1.2.2.2.symm))
-      ΛY := rΛY
-      κ := fun i i' hi => (hg.2.1 i i' hi).2.2
-      ref := fun i i' hi => by
-        obtain ⟨-, t2, t3, t4, t5, t6, t7⟩ := rT i i' hi
-        obtain ⟨-, -, -, -, -, -, -, -, -, -, -, -, -, -, -, -, c1, c2, -⟩ := rI i i' hi
-        exact ⟨t2, t3, t4, t5, t6, t7, c1, c2⟩
-      jL := rjL }
+      ΛY := rW.2.2.2.2.1
+      κ := fun i i' hi => (geoAt i i' hi).2.2
+      ref := fun i i' hi =>
+        have hT := (rT i i' hi).2
+        have hRef := (rMW i i' hi).2.2.2.2.2.2.2.2.2
+        ⟨hT.1, hT.2.1, hT.2.2.1, hT.2.2.2.1, hT.2.2.2.2.1, hT.2.2.2.2.2, hRef.1, hRef.2.1⟩
+      jL := rPlaces.2 }

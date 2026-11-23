@@ -1,6 +1,51 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
-import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.LatticeBoundsOfThreeParts
+public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfMembership
+import Formalism.SharpRestriction.LevelLetterCocycles.SaturationUnramifiedOfRingCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open Classical
@@ -25,7 +70,7 @@ theorem cmpD_add {x y : W.DD T} (hx : x ∈ W.N T) (hy : y ∈ W.N T) :
     Formalism.MainNotions.ArcLiftingSetup.cmpD W T (x + y) = Formalism.MainNotions.ArcLiftingSetup.cmpD W T x + Formalism.MainNotions.ArcLiftingSetup.cmpD W T y := by
   rw [Formalism.MainNotions.UnusedSlot80.ArcF.cmpD_of_mem W T hx, Formalism.MainNotions.UnusedSlot80.ArcF.cmpD_of_mem W T hy,
     Formalism.MainNotions.UnusedSlot80.ArcF.cmpD_of_mem W T ((W.N T).add_mem hx hy)]
-  rw [← map_add]
+  rw [← map_add (f := _)]
   rfl
 
 theorem cmpD_sum {ι : Type} (s : Finset ι) (y : ι → W.DD T) (hy : ∀ k ∈ s, y k ∈ W.N T) :
@@ -120,6 +165,7 @@ theorem ker_NDl [IsDomain O] (c : ZMod n) (h3 : Formalism.MainNotions.DeltaInvar
   choose g hgΔ hg using fun k => frobenius_uniformizer_pow_dvd hR (ha k).1 (ha k).2 (hcc k)
   refine ⟨∑ k, g k • b k, Submodule.sum_mem _ fun k _ => (W.N T).smul_mem _ (hbN k),
     fun δ hδ => ?_, ?_⟩
+
   · rw [map_sum]
     exact Finset.sum_congr rfl fun k _ =>
       (Formalism.MainNotions.UnusedSlot80.SatW.smul_mem_NΔ W T (hgΔ k) (hb.1 k).1).2 δ hδ
@@ -147,6 +193,7 @@ theorem cmpD_mem_NDl (i : ZMod n) (hmod : Formalism.MainNotions.DeltaInvariantLa
   · rw [hy, Finset.smul_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [smul_comm, hb'l j]
   · intro δ hδ
+
     rw [hy, map_sum]
     exact Finset.sum_congr rfl fun j _ => by rw [map_smul, (hb'Δ j).2 δ hδ]
   · rw [hxs, cmpD_sum W T _ _ (fun j _ => (W.N T).smul_mem _ (hb'Δ j).1), hy,

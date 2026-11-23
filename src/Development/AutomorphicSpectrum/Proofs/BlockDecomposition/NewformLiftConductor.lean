@@ -1,5 +1,53 @@
-import Mathlib
-import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.VerticalStrips.UnramifiedEulerProductIntegral
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CuspidalContinuity.ArchimedeanCuspidal.VerticalStrips.UnramifiedEulerProductIntegral
+import GroundTheory.GlobalFields.CompletionAtPlace.Integers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,8 +161,8 @@ theorem exists_finite_part (p : ℕ) (hp : p ≠ 0) : ∃ pf : Afˣ, (pf : Af) =
     rw [h1, hAv, Units.val_pow_eq_pow_val]
     show ((e w).symm r) ^ m = (p : w.Completion)
     rw [← map_pow, hrm, map_natCast]
-  have hA : A = ((prodEquiv ℚ).symm (T, 1)) ^ m * ofFinite pf := by
-    apply (prodEquiv ℚ).injective
+  have hA : A = ((IdeleGroup.prodEquiv ℚ).symm (T, 1)) ^ m * ofFinite pf := by
+    apply (IdeleGroup.prodEquiv ℚ).injective
     have h2 : prodEquiv ℚ (ofFinite pf) = (1, pf) := by
       show prodEquiv ℚ ((ContinuousMulEquiv.symm (prodEquiv ℚ)) (1, pf)) = _
       rw [ContinuousMulEquiv.apply_symm_apply]
@@ -129,7 +177,7 @@ theorem exists_finite_part (p : ℕ) (hp : p ≠ 0) : ∃ pf : Afˣ, (pf : Af) =
     | succ k ih =>
       rw [pow_succ, pow_succ, ← ih]
       rfl
-  have h3 : ω.toIdele ((prodEquiv ℚ).symm (T, 1)) ^ m = 1 := by
+  have h3 : ω.toIdele ((IdeleGroup.prodEquiv ℚ).symm (T, 1)) ^ m = 1 := by
     rw [← hpow, hωm]; rfl
   have h4 := ω.toIdele_diagonal (Units.mk0 (p : ℚ) hq)
   change ω.toIdele A = 1 at h4

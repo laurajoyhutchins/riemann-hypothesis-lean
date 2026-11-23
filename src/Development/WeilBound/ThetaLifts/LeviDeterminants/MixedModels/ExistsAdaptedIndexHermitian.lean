@@ -1,5 +1,52 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.PlaneC
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRationalDarbouxCoordinatesTensorHermitian
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddCharHalfTraceTensorLatticeHeisenbergCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallySelfDualLatticeIndicatorIsVacuum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRationalDarbouxCoordinatesTensorHermitian
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.PlaneC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.AdaptC
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +60,7 @@ namespace PositivityTheory.Mix
 
 open Adapt
 
-set_option maxHeartbeats 1000000 in
+
 theorem exists_adapted_index_hermitian : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E) (B : Base F E)
     (n d : ℕ) (X : Spc F E n) (W : Spc F E d) (r s r' s' : ℕ), B.IsGood σ → X.IsHerm σ B r s → W.IsSkew σ B r' s' →
     ∀ (n₁ : ℕ) (X₁ : Spc F E n₁) (H : Plane E n n₁) (j₀ j₁ : ℕ) (M₁ : Model σ X₁ W) (r₁ s₁ : ℕ), X₁.IsHerm σ B r₁ s₁ →
@@ -68,8 +115,10 @@ theorem exists_adapted_index_hermitian : ∀ (F E : Type) [Field F] [NumberField
   let p : Matrix (Fin n) (Fin d) (AE F E) → Fin d × Fin 2 → AF F := fun z k => βA.repr (b z k.1) k.2
   let q : Matrix (Fin n) (Fin d) (AE F E) → Fin d × Fin 2 → AF F := fun z k => -Tr (βA k.2 * D z k.1)
   have hpq : ∀ z z', p z ⬝ᵥ q z' = -Tr (b z ⬝ᵥ D z') := fun z z' => by
+
     simp only [dotProduct, Fintype.sum_prod_type, map_sum, ← Finset.sum_neg_distrib]
     refine Finset.sum_congr rfl fun k _ => ?_
+
     conv_rhs => rw [← βA.sum_repr (b z k), Finset.sum_mul, map_sum, ← Finset.sum_neg_distrib]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [smul_mul_assoc, map_smul, smul_eq_mul, ← mul_neg]
@@ -84,8 +133,8 @@ theorem exists_adapted_index_hermitian : ∀ (F E : Type) [Field F] [NumberField
   let Φ : Matrix (Fin n) (Fin d) (AE F E) →ₗ[AF F] (Fin n × Fin d → AF F) × (Fin n × Fin d → AF F) :=
     { toFun := fun z => (glue ε (p z) (M₁.co.e (π z)).1, glue ε (q z) (M₁.co.e (π z)).2)
       map_add' := fun z z' => by
-        rw [Prod.mk_add_mk, glue_add, glue_add, hπ.map_add, map_add]
-        congr 2 <;> funext k <;> simp [p, q, hb.map_add, hD.map_add, mul_add, add_comm]
+        rw [Prod.mk_add_mk, glue_add, glue_add, hπ.map_add (f := _), map_add (f := _)]
+        congr 2 <;> funext k <;> simp [p, q, hb.map_add (f := _), hD.map_add (f := _), mul_add, add_comm]
       map_smul' := fun c z => by
         rw [Prod.smul_mk, glue_smul, glue_smul, hπ.map_smul, map_smul]
         congr 2 <;> funext k <;> simp [p, q, hb.map_smul, hD.map_smul] }
@@ -94,16 +143,15 @@ theorem exists_adapted_index_hermitian : ∀ (F E : Type) [Field F] [NumberField
     have h1 := M₁.co.form (π z) (π z')
     show Tr _ = glue ε _ _ ⬝ᵥ glue ε _ _ - glue ε _ _ ⬝ᵥ glue ε _ _
     change Tr _ = _ at h1
-    rw [glue_dot, glue_dot, hpq, hpq, hH', mul_add, map_add, h1, neg_one_mul, map_neg, map_sub, hTr]
+    rw [glue_dot, glue_dot, hpq, hpq, hH', mul_add, map_add (f := _), h1, neg_one_mul, map_neg, map_sub, hTr]
     ring
   have hbij : Function.Bijective Φ := by
-    have := (bijective_of_symp (Φ ∘ₗ c₀.e.symm.toLinearMap) fun u w => by
+    have h := (bijective_of_symp (Φ ∘ₗ c₀.e.symm.toLinearMap) fun u w => by
       have h1 := c₀.form (c₀.e.symm u) (c₀.e.symm w)
       rw [hΦ, LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply] at h1
       exact h1).comp c₀.e.bijective
-    convert this using 1
-    funext z
-    simp
+    simpa only [LinearMap.coe_comp, Function.comp_def, LinearEquiv.coe_coe,
+      LinearEquiv.symm_apply_apply] using h
   let co : Darboux (symp (R := AF F) (cA σ) (-1) (incM F X.J) (incM F W.J)) (Fin n × Fin d) :=
     ⟨LinearEquiv.ofBijective Φ hbij, hΦ⟩
   have hco : ∀ z, co.e z = (glue ε (p z) (M₁.co.e (π z)).1, glue ε (q z) (M₁.co.e (π z)).2) := fun z => rfl
@@ -113,6 +161,7 @@ theorem exists_adapted_index_hermitian : ∀ (F E : Type) [Field F] [NumberField
     have hy : b (incM F x) = fun k => inclR (F := F) (AF F) ((Q * x) (.inr 1) k) := by simp only [b, ← incM_mul]; rfl
     have hy' : D (incM F x) = fun k => inclR (F := F) (AF F) (∑ l, W.J k l * σ ((Q * x) (.inr 0) l)) := by
       funext k
+
       simp only [D, ← incM_mul, map_sum, map_mul]
       rfl
     refine ⟨glue ε (fun k => β.repr ((Q * x) (.inr 1) k.1) k.2) u,
@@ -126,18 +175,29 @@ theorem exists_adapted_index_hermitian : ∀ (F E : Type) [Field F] [NumberField
       rw [map_neg, ← GlobalTheory.VacIndic.trace_inclR, map_mul (inclR (F := F) (AF F)), Algebra.TensorProduct.basis_apply]
       rfl
   · have e := mul_iota hA z
-    have h1 : p (incM F H.ι * z) = 0 := funext fun k => by simp [p, b, e]
-    have h2 : q (incM F H.ι * z) = 0 := funext fun k => by simp [q, D, e]
-    have h3 : π (incM F H.ι * z) = z := by simp only [π, e, rows_sub]
+    have h1 : p (incM F H.ι * z) = 0 := funext fun k => by simp [p, b, e, what₂, Sum.elim]
+    have h2 : q (incM F H.ι * z) = 0 := funext fun k => by simp [q, D, e, what₂, Sum.elim]
+    have h3 : π (incM F H.ι * z) = z := by
+      dsimp only [π]
+      rw [e]
+      rfl
     rw [hco, h1, h2, h3, Adapt.extend_eq, Adapt.extend_eq]
   · have e := adapted_frame_mul_vecMulVec hA z
-    have h1 : p (Matrix.vecMulVec (incV F H.x) z) = 0 := funext fun k => by simp [p, b, e]
-    have h3 : π (Matrix.vecMulVec (incV F H.x) z) = 0 := by simp only [π, e, rows_sub]
+    have h1 : p (Matrix.vecMulVec (incV F H.x) z) = 0 := funext fun k => by
+      simp [p, b, e, what₂, Sum.elim]
+    have h3 : π (Matrix.vecMulVec (incV F H.x) z) = 0 := by
+      dsimp only [π]
+      rw [e]
+      rfl
     rw [hco, h1, h3, map_zero]
     exact ⟨glue_zero ε, fun k => glue_inr ε _ _ k⟩
   · have e := mul_y hA z
-    have h1 : q (Matrix.vecMulVec (incV F H.y) z) = 0 := funext fun k => by simp [q, D, e]
-    have h3 : π (Matrix.vecMulVec (incV F H.y) z) = 0 := by simp only [π, e, rows_sub]
+    have h1 : q (Matrix.vecMulVec (incV F H.y) z) = 0 := funext fun k => by
+      simp [q, D, e, what₂, Sum.elim]
+    have h3 : π (Matrix.vecMulVec (incV F H.y) z) = 0 := by
+      dsimp only [π]
+      rw [e]
+      rfl
     rw [hco, h1, h3, map_zero]
     exact ⟨glue_zero ε, fun k => glue_inr ε _ _ k⟩
 

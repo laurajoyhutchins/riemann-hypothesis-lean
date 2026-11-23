@@ -1,5 +1,45 @@
-import Formalism.PieriBlockIdeals.MertensReciprocalElementary
-import Formalism.PieriBlockIdeals.HidaLatticeInclusionAtCoarseWeightBound
+module
+
+public import Formalism.PieriBlockIdeals.LatticeInclusionRealSettingAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -76,19 +116,6 @@ def TailInequalitySum : Prop :=
     totalBound P T (30 * (P.m : ℝ) * P.b * P.L ^ 2) ≤
       30 * (T : ℝ) * (P.m : ℝ) * P.b * P.L ^ 2 + 2 * (P.m : ℝ) * P.b
 
-def TailInequalityEventually : Prop :=
-  ∀ ε C : ℝ, 0 < ε → ∃ x0 : ℝ, ∀ P : Par, P.Hyp → x0 ≤ P.x → P.L = P.x ^ ε →
-    Rows P (Real.exp (P.x ^ (ε / 3))) (P.x ^ C) → ∀ T : ℕ, T ≤ P.f →
-    totalBound P T (30 * (P.m : ℝ) * P.b * P.x ^ (2 * ε)) ≤
-      30 * (T : ℝ) * (P.m : ℝ) * P.b * P.x ^ (2 * ε) + 2 * (P.m : ℝ) * P.b
-
-def Corollary8Tail : Prop :=
-  PrimeCountingBound → ∀ (P : Par) (X' A : ℝ), P.Hyp → P.Large → Rows P X' A → Big P.L P.x X' A →
-    ∀ (ι : Type) [Fintype ι] (D : SizeData₂ ι), D.Inputs P → Places D P →
-    ∀ Q : Finset ℕ, (∀ l ∈ Q, l.Prime) →
-      ∑ l ∈ Q, (D.J l : ℝ) * Real.log (l : ℝ) ≤
-        30 * (D.T2.card : ℝ) * (P.m : ℝ) * P.b * P.L ^ 2 + 2 * (P.m : ℝ) * P.b
-
 section Real7
 
 open TensorProduct MvPolynomial
@@ -113,18 +140,6 @@ end Real7
 def LargeOfRows : Prop :=
   ∀ (P : Par) (X' A : ℝ), P.Hyp → Rows P X' A → Big P.L P.x X' A →
     P.b ^ ((4 : ℝ) / 5) ≤ P.w'' / P.S → 4 * A ^ 4 * P.x ^ 2 * P.L ^ 2 < P.b ^ ((4 : ℝ) / 5) → P.Large
-
-def BigEv2 : Prop :=
-  ∀ ε C : ℝ, 0 < ε → ∃ x0 : ℝ, ∀ x : ℝ, x0 ≤ x →
-    4 * (x ^ C) ^ 4 * x ^ 2 * (x ^ ε) ^ 2 < Real.exp (x ^ ε) ^ ((4 : ℝ) / 5)
-
-def Corollary8Ev : Prop :=
-  PrimeCountingBound → ∀ ε C : ℝ, 0 < ε → ∃ x0 : ℝ, ∀ P : Par, P.Hyp → x0 ≤ P.x → P.L = P.x ^ ε →
-    Rows P (Real.exp (P.x ^ (ε / 3))) (P.x ^ C) → P.b ^ ((4 : ℝ) / 5) ≤ P.w'' / P.S →
-    ∀ (ι : Type) [Fintype ι] (D : SizeData₂ ι), D.Inputs P → Places D P →
-    ∀ Q : Finset ℕ, (∀ l ∈ Q, l.Prime) →
-      ∑ l ∈ Q, (D.J l : ℝ) * Real.log (l : ℝ) ≤
-        30 * (D.T2.card : ℝ) * (P.m : ℝ) * P.b * P.x ^ (2 * ε) + 2 * (P.m : ℝ) * P.b
 
 section Real7Ev
 

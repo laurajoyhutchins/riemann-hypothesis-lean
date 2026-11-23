@@ -1,5 +1,55 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.UnipotentCoefficientShift
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalLatticeDecomposition
+module
+
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.EqZeroOfSumSq
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsIntegralCc
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.UnipotentCoefficientShift
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.FD
 
@@ -34,7 +84,8 @@ private theorem hermC_smul_right_embedding (τ : E →+* ℂ) (G : Matrix (Fin r
 
 private theorem hermC_emb_emb_eq_tau_herm (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E) (x y : Fin r → E) :
     hermC τ G (Data.emb τ x) (Data.emb τ y) = τ (herm G x y) := by
-  simp only [hermC, herm, Data.emb, map_sum, map_mul, emb_cc]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [hermC, herm, Data.emb, map_sum, map_mul, emb_cc]
 
 theorem Hf_zero_right (z : Frame X.Ψ r) (τ : X.Ψ) (u : Fin r → ℂ) : X.Hf z τ u 0 = 0 := by
   simp [Data.Hf, hermC]
@@ -182,36 +233,7 @@ theorem gI_self {z : Frame X.Ψ r} (hz : z ∈ X.dom) (u : X.Ψ → Fin r → �
 
 theorem trace_eq_sum (a : E) :
     ((Algebra.trace ℚ E a : ℚ) : ℝ) = ∑ τ : X.Ψ, 2 * (τ.1 a).re := by
-  classical
-
-  have h1 : ((Algebra.trace ℚ E a : ℚ) : ℂ) = ∑ σ : E →+* ℂ, σ a := by
-    rw [show ((Algebra.trace ℚ E a : ℚ) : ℂ) = algebraMap ℚ ℂ (Algebra.trace ℚ E a) from (eq_ratCast _ _).symm,
-      trace_eq_sum_embeddings ℂ]
-    exact Fintype.sum_equiv (RingHom.equivRatAlgHom E ℂ).symm _ _ (fun σ => rfl)
-
-  have h2 : ∑ σ ∈ X.Ψᶜ, σ a = ∑ σ ∈ X.Ψ, conj (σ a) := by
-    refine Finset.sum_nbij' ComplexEmbedding.conjugate ComplexEmbedding.conjugate ?_ ?_ ?_ ?_ ?_
-    · intro σ hσ
-      rw [Finset.mem_compl] at hσ
-      rw [X.cmType, ComplexEmbedding.involutive_conjugate E σ]
-      exact hσ
-    · intro σ hσ
-      rw [Finset.mem_compl]
-      exact (X.cmType σ).mp hσ
-    · intro σ _
-      exact ComplexEmbedding.involutive_conjugate E σ
-    · intro σ _
-      exact ComplexEmbedding.involutive_conjugate E σ
-    · intro σ _
-      rw [ComplexEmbedding.conjugate_coe_eq, Complex.conj_conj]
-  apply Complex.ofReal_injective
-  push_cast
-  rw [h1, ← Finset.sum_add_sum_compl X.Ψ (fun σ => σ a), h2, ← Finset.sum_add_distrib,
-    ← Finset.sum_coe_sort X.Ψ]
-  refine Finset.sum_congr rfl fun τ _ => ?_
-  rw [Complex.add_conj]
-  push_cast
-  ring
+  apply GlobalTheory.ArcQ.IsoTime.trace_cm <;> assumption
 
 private theorem hermC_ucomp_ucomp_of_herm_eq_zero {z : Frame X.Ψ r} {ξ : Fin r → E} (hξξ : herm X.Gm ξ ξ = 0)
     {μ ν : Fin r → E} (hμ : herm X.Gm μ ξ = 0) (hν : herm X.Gm ν ξ = 0) (τ : X.Ψ) :

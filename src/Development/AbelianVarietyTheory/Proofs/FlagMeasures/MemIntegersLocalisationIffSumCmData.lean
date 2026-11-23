@@ -1,6 +1,58 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
-import Formalism.LocalRingCardinality.DataSpaces
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
+public import Formalism.LocalRingCardinality.DataSpaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.S.Loc ValuativeRel
 open scoped nonZeroDivisors
@@ -94,12 +146,12 @@ theorem mem_O_iff : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Number
       | mem _ hx =>
         obtain ⟨x, rfl⟩ := hx
         obtain ⟨a, b, rfl⟩ := exists_coord hc θ hne x
-        exact ⟨A.ιF a, A.ιF b, by rw [map_add, map_mul, A.compat, A.compat]⟩
+        exact ⟨A.ιF a, A.ιF b, by rw [map_add (f := _), map_mul, A.compat, A.compat]⟩
       | zero => exact ⟨0, 0, by simp⟩
       | add _ _ _ _ h1 h2 =>
         obtain ⟨a, b, rfl⟩ := h1
         obtain ⟨a', b', rfl⟩ := h2
-        exact ⟨a + a', b + b', by rw [map_add, map_add]; ring⟩
+        exact ⟨a + a', b + b', by rw [map_add (f := _), map_add (f := _)]; ring⟩
       | smul c _ _ h1 =>
         obtain ⟨a, b, rfl⟩ := h1
         exact ⟨c * a, c * b, by rw [map_mul, map_mul, Algebra.smul_def]; ring⟩
@@ -109,7 +161,7 @@ theorem mem_O_iff : ∀ {F E : Type} [Field F] [NumberField F] [Field E] [Number
         (algebraMap A.Fp A.Ep a + algebraMap A.Fp A.Ep b * A.ιE (t : E)) := by
       have e : A.cj (algebraMap A.Fp A.Ep a + algebraMap A.Fp A.Ep b * A.ιE (θ : E)) =
           algebraMap A.Fp A.Ep a + algebraMap A.Fp A.Ep b * A.ιE (t : E) := by
-        rw [map_add, map_mul, A.cj.commutes, A.cj.commutes, A.cj_ιE, hsig, ht]
+        rw [map_add (f := _), map_mul, A.cj.commutes, A.cj.commutes, A.cj_ιE, hsig, ht]
       rw [← e]; exact hcj
     have hbd : b * A.ιF (d : F) ∈ 𝒪[A.Fp] := by
       apply mem_integer_of_isIntegral A

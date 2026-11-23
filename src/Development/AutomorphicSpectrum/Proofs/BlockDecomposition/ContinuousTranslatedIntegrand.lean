@@ -1,7 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.HeisenbergTheta.HeisenbergThetaConstant.ThetaC
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsSummableMajorantLatticeSumStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousSetIntegralOfContinuousUncurry
+module
+
+import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SchwartzBruhatMajorants.ExistsSchwartzBruhatPiMajorant
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.HeisenbergTheta.HeisenbergThetaConstant.ThetaC
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousSetIntegralOfContinuousUncurry
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsSummableMajorantLatticeSumStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField Matrix MeasureTheory Filter Topology
 open scoped NumberField.AdeleRing
 open PositivityTheory.He2M1 GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.GJMatrix IdeleGroup PositivityTheory.RgEis
@@ -11,28 +53,13 @@ namespace GlobalTheory.CompanionTheory.EpsteinThetaC
 variable {k : Type} [Field k] [NumberField k] {ι : Type} [Fintype ι] [DecidableEq ι]
 
 theorem continuous_scalC : Continuous (scalC : IdeleGroup k → GL ι 𝔸[k]) := by
-  have hinv : Continuous fun a : IdeleGroup k ↦ ((a⁻¹ : IdeleGroup k) : 𝔸[k]) :=
-    Units.continuous_val.comp continuous_inv
-  refine Units.continuous_iff.2 ⟨?_, ?_⟩
-  · refine continuous_matrix fun i j ↦ ?_
-    by_cases hij : i = j
-    · subst hij
-      simpa [Function.comp_def, scalC, Matrix.scalar_apply] using
-        (Units.continuous_val : Continuous fun a : IdeleGroup k ↦ (a : 𝔸[k]))
-    · simpa [Function.comp_def, scalC, Matrix.scalar_apply, Matrix.diagonal_apply_ne _ hij]
-        using continuous_const
-  · refine continuous_matrix fun i j ↦ ?_
-    by_cases hij : i = j
-    · subst hij
-      simpa [Function.comp_def, scalC, Matrix.scalar_apply] using hinv
-    · simpa [Function.comp_def, scalC, Matrix.scalar_apply, Matrix.diagonal_apply_ne _ hij]
-        using continuous_const
+  apply GlobalTheory.CompanionTheory.EpsteinUnfold.Hd.continuous_scalC <;> assumption
 
 theorem thetaC_ltr (A h : GL ι 𝔸[k]) (F : (ι → 𝔸[k]) → ℂ) :
     thetaC (ltr A F) h = thetaC F (A * h) := by
   simp only [thetaC, ltr, Units.val_mul, Matrix.mulVec_mulVec]
 
-theorem continuous_thetaC {F : (ι → 𝔸[k]) → ℂ} (hF : F ∈ schwartzBruhatPi k ι) :
+theorem continuous_thetaC {F : (ι → 𝔸[k]) → ℂ} (hF : F ∈ schwartzBruhatPi (K := k) (ι := ι)) :
     Continuous (thetaC F : GL ι 𝔸[k] → ℂ) := by
   refine continuous_iff_continuousAt.2 fun h₀ ↦ ?_
   obtain ⟨C, hC, hh₀⟩ := exists_compact_mem_nhds h₀
@@ -49,7 +76,7 @@ noncomputable def translatedIntegrand (w : InfinitePlace k) (Ψ : (ι → 𝔸[k
     (ω.toIdele (u : IdeleGroup k) : ℂ)
 
 theorem continuous_translatedIntegrand (w : InfinitePlace k) {Ψ : (ι → 𝔸[k]) → ℂ}
-    (hΨ : Ψ ∈ schwartzBruhatPi k ι) (ω : HeckeCharacter k) :
+    (hΨ : Ψ ∈ schwartzBruhatPi (K := k) (ι := ι)) (ω : HeckeCharacter k) :
     Continuous (Function.uncurry (translatedIntegrand w Ψ ω)) := by
   have hu : Continuous fun x : ({r : ℝ // 0 < r} × GL ι 𝔸[k]) × normOneSubgroup k ↦
       (x.2 : IdeleGroup k) := continuous_subtype_val.comp continuous_snd
@@ -63,7 +90,7 @@ theorem continuous_translatedIntegrand (w : InfinitePlace k) {Ψ : (ι → 𝔸[
 
 theorem continuous_thetaCInt_ltr {k : Type} [Field k] [NumberField k] {ι : Type} [Fintype ι]
     [DecidableEq ι] (w : InfinitePlace k) {Ψ : (ι → 𝔸[k]) → ℂ}
-    (hΨ : Ψ ∈ schwartzBruhatPi k ι) (ω : HeckeCharacter k) :
+    (hΨ : Ψ ∈ schwartzBruhatPi (K := k) (ι := ι)) (ω : HeckeCharacter k) :
     Continuous fun p : {r : ℝ // 0 < r} × GL ι 𝔸[k] ↦ thetaCInt w (ltr p.2 Ψ) ω p.1 := by
   have h := GlobalTheory.CompanionTheory.EisRk1Theta.continuous_setIntegral_of_continuous_uncurry (normOneMeasure k)
     (isCompact_closure_normOneFundamentalDomain k)

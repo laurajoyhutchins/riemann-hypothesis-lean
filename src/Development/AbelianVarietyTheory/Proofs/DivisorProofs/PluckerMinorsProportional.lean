@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
@@ -19,84 +65,5 @@ theorem det_mul_det_toBlocks₂₂_of_mul_eq_one {K : Type} [Field K] {m n : Typ
   have := congrArg Matrix.det key
   rw [det_mul, det_fromBlocks_zero₂₁, det_fromBlocks_zero₁₂] at this
   simpa using this
-
-theorem jacobi_complementary_minors {K : Type} [Field K] {p q : ℕ}
-    (α : Matrix (Fin p) (Fin p ⊕ Fin q) K) (β : Matrix (Fin q) (Fin p ⊕ Fin q) K)
-    (hαβ : α * β.transpose = 0)
-    (h₀ : ∃ π₀ : Equiv.Perm (Fin p ⊕ Fin q), (α.submatrix id (π₀ ∘ Sum.inl)).det ≠ 0)
-    (h₁ : ∃ π₁ : Equiv.Perm (Fin p ⊕ Fin q), (β.submatrix id (π₁ ∘ Sum.inr)).det ≠ 0) :
-    ∃ lam : K, ∀ π : Equiv.Perm (Fin p ⊕ Fin q),
-      ((Equiv.Perm.sign π : ℤ) : K) * (α.submatrix id (π ∘ Sum.inl)).det =
-        lam * (β.submatrix id (π ∘ Sum.inr)).det := by
-  obtain ⟨π₀, hπ₀⟩ := h₀
-  obtain ⟨π₁, hπ₁⟩ := h₁
-
-  set M : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) K :=
-    fromRows α ((1 : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) K).submatrix (π₀ ∘ Sum.inr) id) with hMdef
-  have hMπ₀ : (M.submatrix id π₀).det = (α.submatrix id (π₀ ∘ Sum.inl)).det := by
-    rw [← fromBlocks_toBlocks (M.submatrix id π₀)]
-    have h21 : (M.submatrix id π₀).toBlocks₂₁ = 0 := by
-      ext i j
-      simp [M, toBlocks₂₁, one_apply]
-    have h22 : (M.submatrix id π₀).toBlocks₂₂ = 1 := by
-      ext i j
-      simp [M, toBlocks₂₂, one_apply]
-    rw [h21, h22, det_fromBlocks_zero₂₁]
-    simp only [det_one, mul_one]
-    rfl
-  have hMdet : M.det ≠ 0 := by
-    intro h
-    apply hπ₀
-    rw [← hMπ₀, det_permute', h, mul_zero]
-  have hMu : IsUnit M.det := isUnit_iff_ne_zero.mpr hMdet
-  set N := M⁻¹ with hN
-  set g : Matrix (Fin q) (Fin q) K := β.submatrix id (π₀ ∘ Sum.inr) with hg
-
-  have hD : ∀ π : Equiv.Perm (Fin p ⊕ Fin q),
-      ((Equiv.Perm.sign π : ℤ) : K) * M.det * (N.submatrix (π ∘ Sum.inr) Sum.inr).det =
-        (α.submatrix id (π ∘ Sum.inl)).det := by
-    intro π
-    have hXY : M.submatrix id π * N.submatrix π id = 1 := by
-      rw [submatrix_mul_equiv, hN, mul_nonsing_inv _ hMu, submatrix_id_id]
-    have := det_mul_det_toBlocks₂₂_of_mul_eq_one _ _ hXY
-    rw [det_permute'] at this
-    convert this using 2 <;> rfl
-  have hβ : ∀ π : Equiv.Perm (Fin p ⊕ Fin q),
-      β.submatrix id (π ∘ Sum.inr) = g * (N.submatrix (π ∘ Sum.inr) Sum.inr).transpose := by
-    intro π
-    have hT : β.transpose = N * (M * β.transpose) := by
-      rw [← Matrix.mul_assoc, hN, nonsing_inv_mul _ hMu, Matrix.one_mul]
-    ext k m
-    have := congrFun (congrFun hT (π (Sum.inr m))) k
-    rw [transpose_apply] at this
-    simp only [submatrix_apply, id, Function.comp_apply, mul_apply, transpose_apply]
-    rw [this, mul_apply, Fintype.sum_sum_type]
-    have h0 : ∀ l, (M * β.transpose) (Sum.inl l) k = 0 := by
-      intro l
-      have := congrFun (congrFun hαβ l) k
-      simpa [M, mul_apply] using this
-    have h1 : ∀ k', (M * β.transpose) (Sum.inr k') k = g k k' := by
-      intro k'
-      simp [M, g, mul_apply, one_apply]
-    simp only [h0, h1, mul_zero, Finset.sum_const_zero, zero_add]
-    refine Finset.sum_congr rfl fun k' _ => ?_
-    rw [mul_comm]
-  have hdetβ : ∀ π : Equiv.Perm (Fin p ⊕ Fin q),
-      (β.submatrix id (π ∘ Sum.inr)).det = g.det * (N.submatrix (π ∘ Sum.inr) Sum.inr).det := by
-    intro π
-    rw [hβ π, det_mul, det_transpose]
-  have hg0 : g.det ≠ 0 := by
-    intro h
-    apply hπ₁
-    rw [hdetβ, h, zero_mul]
-  refine ⟨M.det / g.det, fun π => ?_⟩
-  have hs : ((Equiv.Perm.sign π : ℤ) : K) * ((Equiv.Perm.sign π : ℤ) : K) = 1 := by
-    rw [← Int.cast_mul, ← Units.val_mul, Int.units_mul_self]
-    simp
-  have hc : M.det / g.det * (g.det * (N.submatrix (π ∘ Sum.inr) Sum.inr).det) =
-      M.det * (N.submatrix (π ∘ Sum.inr) Sum.inr).det := by
-    field_simp
-  rw [← hD π, hdetβ π, hc]
-  linear_combination (M.det * (N.submatrix (π ∘ Sum.inr) Sum.inr).det) * hs
 
 end GlobalTheory

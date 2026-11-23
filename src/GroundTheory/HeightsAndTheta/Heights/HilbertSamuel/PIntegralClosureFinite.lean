@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNmSectionsRational
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsNmSectionsFinite
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ProjDefs
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -30,34 +74,5 @@ theorem secM_mul_mem (y : (Σ k, ι k) → Ω) {d e : K → ℕ} {s t : Ω} (hs 
   | zero => simp
   | add x z _ _ hx hz => rw [add_mul]; exact add_mem hx hz
   | smul n x _ hx => rw [smul_mul_assoc]; exact zsmul_mem hx n
-
-theorem IntegralClosureFinite.proof (hR : NmSectionsRational.Statement) (hF : NmSectionsFinite.Statement) :
-    IntegralClosureFinite.Statement := by
-  unfold IntegralClosureFinite.Statement KH.NormalizationBoundedIndexStatement
-  unfold NmSectionsRational.Statement at hR
-  unfold NmSectionsFinite.Statement at hF
-  intro K _ ι _ Ω _ _ y a ha hy hbir hnorm
-  obtain ⟨τ₀, hτ₀⟩ := hR K ι Ω y a ha hy hbir hnorm
-  obtain ⟨J, _, d, e, τ₁, he, hgen⟩ := hF K ι Ω y a ha hy hbir τ₀
-  choose m hm1 hme using fun j => hτ₀ (d j) (he j).1 (e j) (he j).2.2
-  classical
-  refine ⟨∏ j, m j, τ₁, Nat.one_le_iff_ne_zero.mpr (Finset.prod_pos fun j _ => hm1 j).ne', ?_⟩
-  intro τ hτ s hs
-  obtain ⟨r, hr, rfl⟩ := hgen τ hτ s hs
-  rw [Finset.mul_sum]
-  refine sum_mem fun j _ => ?_
-  have hsplit : (∏ i, m i : ℕ) = (∏ i ∈ Finset.univ.erase j, m i) * m j :=
-    (Finset.prod_erase_mul _ _ (Finset.mem_univ j)).symm
-  have hdeg : (fun k => τ * a k) = (fun k => (τ - d j) * a k) + (fun k => d j * a k) := by
-    funext k
-    simp only [Pi.add_apply]
-    rw [← add_mul, Nat.sub_add_cancel (le_trans (he j).2.1 hτ)]
-  have hval : ((∏ i, m i : ℕ) : Ω) * (r j * e j) =
-      ((∏ i ∈ Finset.univ.erase j, m i : ℕ) : ℤ) • (r j * ((m j : Ω) * e j)) := by
-    rw [hsplit, zsmul_eq_mul]
-    push_cast
-    ring
-  rw [hval, hdeg]
-  exact zsmul_mem (secM_mul_mem y (hr j) (hme j)) _
 
 end GroundTheory.Heights₂.Heights.HilbertSamuel

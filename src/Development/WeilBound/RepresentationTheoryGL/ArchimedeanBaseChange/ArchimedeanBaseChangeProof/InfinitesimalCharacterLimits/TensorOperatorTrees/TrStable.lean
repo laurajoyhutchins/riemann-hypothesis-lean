@@ -1,7 +1,52 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMap
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
-import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PPrAut
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.AllLeaves
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapD
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteDimensionalSpanCompactOrbitLieDerivative
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CapCommuteRtInfGL
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMap
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapE
+import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PIndMapF
+public import Development.WeilBound.RepresentationTheoryGL.ResidualSpectrum.SliceTensors.PProjA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,7 +60,7 @@ open PositivityTheory.Rg.Rs PositivityTheory.Rg.Rs.InducedTensorMap PositivityTh
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r s : ℕ}
 
-theorem tensor_span_hasDerivAt {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : IsStable U₁) (hU₂ : IsStable U₂)
+theorem tensor_span_hasDerivAt {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : _root_.GlobalTheory.CuspRep.IsStable U₁) (hU₂ : _root_.GlobalTheory.CuspRep.IsStable U₂)
     (γ₁ : ℝ → GL (Fin r) (Cinf E)) (γ₂ : ℝ → GL (Fin s) (Cinf E)) (Z₁ : Lie E r) (Z₂ : Lie E s) (h₁ : γ₁ 0 = 1)
     (h₂ : γ₂ 0 = 1) (hγ₁ : HasDerivAt (fun t => toL (γ₁ t).val) Z₁ 0)
     (hγ₂ : HasDerivAt (fun t => toL (γ₂ t).val) Z₂ 0) {F : GA E r × GA E s → ℂ} (hF : F ∈ tens2 U₁ U₂) :
@@ -33,8 +78,8 @@ theorem tensor_span_hasDerivAt {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule
     exact this
   exact key
 
-theorem res_one_lie_mem {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : IsStable U₁)
-    (hU₂ : IsStable U₂) {F : Sm E (r + s)} (hF : F ∈ indSub U₁ U₂) (hK : F ∈ finVec (cptRep E (r + s)))
+theorem res_one_lie_mem {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : _root_.GlobalTheory.CuspRep.IsStable U₁)
+    (hU₂ : _root_.GlobalTheory.CuspRep.IsStable U₂) {F : Sm E (r + s)} (hF : F ∈ indSub U₁ U₂) (hK : F ∈ finVec (cptRep E (r + s)))
     (X : Lie E (r + s)) : res 1 (lie E (r + s) X F).1 ∈ tens2 U₁ U₂ := by
   obtain ⟨n, G, C, b₁, b₂, hG, hC, hb₁, hb₂, h₁, h₂, e⟩ := exists_expansion hF hK
   have g₁ : (fun t : ℝ => b₁ (oneL E (r + s) + t • X)) 0 = 1 := by simp only [zero_smul, add_zero, h₁]
@@ -58,8 +103,8 @@ theorem res_one_lie_mem {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (S
   rw [eq1]
   exact Submodule.sum_mem _ fun j _ => add_mem (Submodule.smul_mem _ _ (hG j)) (Submodule.smul_mem _ _ (hG' j))
 
-theorem lie_mem_indSub {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : IsStable U₁)
-    (hU₂ : IsStable U₂) {F : Sm E (r + s)} (hF : F ∈ indSub U₁ U₂) (hK : F ∈ finVec (cptRep E (r + s)))
+theorem lie_mem_indSub {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : _root_.GlobalTheory.CuspRep.IsStable U₁)
+    (hU₂ : _root_.GlobalTheory.CuspRep.IsStable U₂) {F : Sm E (r + s)} (hF : F ∈ indSub U₁ U₂) (hK : F ∈ finVec (cptRep E (r + s)))
     (X : Lie E (r + s)) : lie E (r + s) X F ∈ indSub U₁ U₂ := by
   refine ⟨fun u x => ?_, fun k g => ?_⟩
   · change lieD X F.1 (unip u * x) = lieD X F.1 x
@@ -79,16 +124,16 @@ theorem lie_mem_indSub {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm
     have ec : res (cf (r + s) k g) (lie E (r + s) X F).1 =
         res 1 (lie E (r + s) X' (rt E (r + s) (cf (r + s) k g) F)).1 := funext fun m => by
       have := congrArg (fun f : Module.End ℂ (Sm E (r + s)) => (f F).1 (lev (Ad E) r s m * 1)) hX'
-      simp only [Module.End.mul_apply, rt_apply, mul_one] at this
+      simp only [mul_apply_eq_comp, rt_apply, mul_one] at this
       rw [res_apply, res_apply, mul_one]
       exact this
     change res (cf (r + s) k g) (lie E (r + s) X F).1 ∈ tens2 U₁ U₂
     rw [ec]
     exact res_one_lie_mem hU₁ hU₂ (isInd_rt hF k g) (finVec_rt hK k g) X'
 
-theorem isStable_indFin {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : IsStable U₁)
-    (hU₂ : IsStable U₂) :
-    IsStable (Submodule.span ℂ {φ | MemInd2 U₁ U₂ φ ∧ φ ∈ finVec (cptRep E (r + s))}) := by
+theorem isStable_indFin {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (Sm E s)} (hU₁ : _root_.GlobalTheory.CuspRep.IsStable U₁)
+    (hU₂ : _root_.GlobalTheory.CuspRep.IsStable U₂) :
+    _root_.GlobalTheory.CuspRep.IsStable (Submodule.span ℂ {φ | MemInd2 U₁ U₂ φ ∧ φ ∈ finVec (cptRep E (r + s))}) := by
   have hS : {φ : Sm E (r + s) | MemInd2 U₁ U₂ φ ∧ φ ∈ finVec (cptRep E (r + s))} =
       ((indSub U₁ U₂ ⊓ finVec (cptRep E (r + s)) : Submodule ℂ (Sm E (r + s))) : Set (Sm E (r + s))) :=
     Set.ext fun _ => Iff.rfl
@@ -107,11 +152,17 @@ theorem isStable_indFin {U₁ : Submodule ℂ (Sm E r)} {U₂ : Submodule ℂ (S
     exact ⟨isInd_rt hI k 1, finVec_rt hK k 1⟩
   | lie X => exact ⟨lie_mem_indSub hU₁ hU₂ hI hK X, GlobalTheory.CuspRep.KFin.kfin_lie E (r + s) X φ hK⟩
 
-theorem isStable_space : ∀ {N : ℕ} (t : Tr E N), (t.AllLeaves fun _ V => IsStable V) → IsStable t.space
-  | _, .leaf V z, h => ParabolicProjection.isStable_tw h z
-  | _, .node t₁ t₂, h => by
-    obtain ⟨h₁, h₂⟩ := h
-    exact isStable_indFin (ParabolicProjection.isStable_tw (isStable_space t₁ h₁) _) (ParabolicProjection.isStable_tw (isStable_space t₂ h₂) _)
+theorem isStable_space : ∀ {N : ℕ} (t : Tr E N), (t.AllLeaves fun _ V => _root_.GlobalTheory.CuspRep.IsStable V) →
+    _root_.GlobalTheory.CuspRep.IsStable t.space := by
+  intro N t
+  induction t with
+  | leaf V z =>
+    simp only [Tr.AllLeaves, Tr.space]
+    exact fun h => ParabolicProjection.isStable_tw h z
+  | node t₁ t₂ ih₁ ih₂ =>
+    simp only [Tr.AllLeaves, Tr.space]
+    intro ⟨h₁, h₂⟩
+    exact isStable_indFin (ParabolicProjection.isStable_tw (ih₁ h₁) _) (ParabolicProjection.isStable_tw (ih₂ h₂) _)
 
 theorem trStable : TrStable := fun _ _ _ _ _ t h => isStable_space t h
 

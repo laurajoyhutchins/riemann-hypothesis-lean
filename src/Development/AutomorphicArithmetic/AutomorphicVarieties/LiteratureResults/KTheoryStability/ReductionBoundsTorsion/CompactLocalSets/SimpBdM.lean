@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Normed.Module.Alternating.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Aesop.Main
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +101,7 @@ lemma isCompact_KS {q : ℕ} (A : Fin (q + 1) → V →L[ℝ] V) {B : Set V} (hB
   have hSc : IsClosed {τ : Fin (q + 1) → ℝ | (∀ j, 0 ≤ τ j) ∧ ∑ j, τ j = 1} := by
     simp only [Set.setOf_and, Set.setOf_forall]
     exact (isClosed_iInter fun j => isClosed_le continuous_const (continuous_apply j)).inter
-      (isClosed_eq (continuous_finset_sum _ fun j _ => continuous_apply j) continuous_const)
+      (isClosed_eq (by fun_prop) continuous_const)
   have hS : IsCompact {τ : Fin (q + 1) → ℝ | (∀ j, 0 ≤ τ j) ∧ ∑ j, τ j = 1} := by
     refine IsCompact.of_isClosed_subset (isCompact_univ_pi fun _ : Fin (q + 1) => isCompact_Icc (a := (0:ℝ)) (b := 1)) hSc ?_
     intro τ hτ j _
@@ -61,16 +118,14 @@ lemma isCompact_KS {q : ℕ} (A : Fin (q + 1) → V →L[ℝ] V) {B : Set V} (hB
       exact ⟨τ, h0, h1, y, fun j => hy j (Set.mem_univ j), rfl⟩
   rw [hK]
   refine (hS.prod (isCompact_univ_pi fun _ => hB)).image ?_
-  refine continuous_finset_sum _ fun j _ => ?_
-  exact ((continuous_apply j).comp continuous_fst).smul
-    ((A j).continuous.comp ((continuous_apply j).comp continuous_snd))
+  fun_prop
 
 lemma isClosed_Sx (q : ℕ) : IsClosed (Sx q) := by
   have h1 : IsClosed {t : Fin q → ℝ | ∀ j, 0 ≤ t j} := by
     simp only [Set.setOf_forall]
     exact isClosed_iInter fun j => isClosed_le continuous_const (continuous_apply j)
   have h2 : IsClosed {t : Fin q → ℝ | ∑ j, t j ≤ 1} :=
-    isClosed_le (continuous_finset_sum _ fun j _ => continuous_apply j) continuous_const
+    isClosed_le (by fun_prop) continuous_const
   simp only [Sx, Set.setOf_and]
   exact h1.inter h2
 
@@ -209,7 +264,7 @@ lemma coord_step {q : ℕ} (μ : Measure V) [μ.IsAddHaarMeasure] (A : Fin (q + 
     |(LinearMap.det Ai)⁻¹|) * ∫⁻ x, G x ∂μ with hK
   have hFm : Measurable fun y : Fin (q + 1) → V => G (∑ j, τ j • A j (y j)) := by
     refine hG.comp (Continuous.measurable ?_)
-    exact continuous_finset_sum _ fun j _ => continuous_const.smul ((A j).continuous.comp (continuous_apply j))
+    fun_prop
   have hinner : ∀ z : Fin q → V, ∫⁻ x, G (∑ j, τ j • A j (Fin.insertNth (α := fun _ => V) i x z j)) ∂ν ≤ K := by
     intro z
     have hrw : ∀ x : V, ∑ j, τ j • A j (Fin.insertNth (α := fun _ => V) i x z j) =
@@ -318,7 +373,7 @@ theorem main (μ : Measure V) [μ.IsAddHaarMeasure] (q : ℕ) (A : Fin (q + 1) �
     intro y hy
     have hy' : ∀ j, y j ∈ B := fun j => hy j (Set.mem_univ j)
     calc ∏ j : Fin q, ‖A j.succ (y j.succ) - A 0 (y 0)‖ ≤ ∏ _j : Fin q, (2 * a * max r 0) :=
-          Finset.prod_le_prod (fun j _ => norm_nonneg _) fun j _ => by
+          Finset.prod_le_prod₀ (fun j _ => norm_nonneg _) fun j _ => by
             calc ‖A j.succ (y j.succ) - A 0 (y 0)‖ ≤ ‖A j.succ (y j.succ)‖ + ‖A 0 (y 0)‖ := norm_sub_le _ _
               _ ≤ a * max r 0 + a * max r 0 := add_le_add (hAx _ _ (hy' _)) (hAx _ _ (hy' _))
               _ = 2 * a * max r 0 := by ring
@@ -363,7 +418,7 @@ theorem main (μ : Measure V) [μ.IsAddHaarMeasure] (q : ℕ) (A : Fin (q + 1) �
     refine (enorm_integral_le_lintegral_enorm _).trans ?_
     refine setLIntegral_mono ?_ ?_
     · exact measurable_const.mul (hGm.comp (continuous_const.add
-        (continuous_finset_sum _ fun j _ => (continuous_apply j).smul continuous_const)).measurable)
+        (by fun_prop)).measurable)
     · intro t ht
       have hmem : A 0 (y 0) + ∑ j, t j • (A j.succ (y j.succ) - A 0 (y 0)) ∈
           KS (fun j => (A j : V →L[ℝ] V)) B := mem_KS _ B ht hy'

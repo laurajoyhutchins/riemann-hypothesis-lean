@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotDvdCardStabFrm
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotDvdCardStabFrm
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LatticeFactsAt
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ValuationLeOneOfMemZmu
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ActPMemLocPDelStdOfIsBasisAt
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LatticeExtensionAlongFieldEmbeddingDuals
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ChainWideTwistTransport
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsMulAddEqOneOfNotMem
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LastTwoStepsGuarded
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NotDvdCardOfInjective
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ColInst
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,10 +79,6 @@ def JetLossAll (D : D7) (EX : ErrX D) (sel : HeightOneSpectrum (𝓞 D.host.F) �
   HostTie EX → IsSel (recFields D) sel → AnTie D δ χ cD →
     JetLossAllAt (recPrimes EX) D.R (ambOf (recSeam D) B χ cD) sel (badS D)
 
-example {X : Fields} (A : Amb X) {a b : ℕ} (S : Finset (HeightOneSpectrum (𝓞 X.E))) (cA c : ℕ)
-    (N : Submodule (𝓞 X.E) (Sp X.E a)) (N' : Submodule (𝓞 X.E) (Sp X.E b)) (e : DVar X.Tau a b →₀ ℕ) :
-    e ∈ RatIdx A S cA c N N' fun _ => 0 := fun _ _ h => absurd rfl h
-
 variable {X : Fields} {Pr : Primes X} {R : Ranks} (W : Wts X Pr.Word R) (Ch : Chars X Pr R.m)
   (sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)) {S : Set ℕ}
   (mu : Tup X.F X.E X.K S) (cst : LocCst X (rowSG Pr sel mu))
@@ -52,7 +95,7 @@ theorem kerOf_bound_all (hJ : JetLossAllAt Pr R A sel S) (hO : JetOpWeyl) (hW : 
     (hdeg : (∑ τ, ∑ a, (W.nuW u (j + 1) τ).w a) + 1 < Pr.g i)
     (hrat : GlobalTheory.IndefiniteRowSideFullHecke.BadPrimesPeriodBound.JetsRatDeg A (R.N j) (R.N (j + 1)) (Sall sel mu u) (cAof sel mu cst * cBof sel mu cst u)
       fun τ => ∑ a, (W.nuW u (j + 1) τ).w a)
-    {SG SG' : Finset (HeightOneSpectrum (𝓞 X.E))} (d : DecoSet X.E (R.N j) (Pr.vT u) SG) (d' : DecoSet X.E (R.N j') (Pr.vT u) SG')
+    {SG SG' : Finset (HeightOneSpectrum (𝓞 X.E))} (d : DecoSet (E := X.E) (n := R.N j) (ST := Pr.vT u) (SG := SG)) (d' : DecoSet (E := X.E) (n := R.N j') (ST := Pr.vT u) (SG := SG'))
     (hs : StdOver (Pr.g i) d.1.N) (hs' : StdOver (Pr.g i) d'.1.N) {fr : Frs X.E (R.N j) (rowSG Pr sel mu)}
     {fr' : Frs X.E (R.N j') (rowSG Pr sel mu)} (hf : IsFrames d.1.N fr) (hf' : IsFrames d'.1.N fr')
     {Ξ : HomE X.E (R.N j) (R.N j') → X.K}
@@ -74,8 +117,8 @@ theorem kerOf_bound_all (hJ : JetLossAllAt Pr R A sel S) (hO : JetOpWeyl) (hW : 
   · rw [map_mul, map_inv₀, hscal _ _ _ hsd hs hf, hscal _ _ _ hsd' hs' hf', inv_one, one_mul]
   obtain ⟨s, s', hwt, hnu⟩ := hW X Pr R W u j hj
   refine hO X.K w X.Tau _ _ _ _ _ s s' _ hwt _ _
-    (fun τ => GlobalTheory.TauLat.tauLatLattice X.E X.K X.Tau _ X.emb τ _ d.2.lat)
-    (fun τ => GlobalTheory.TauLat.tauLatLattice X.E X.K X.Tau _ X.emb τ _ d'.2.lat)
+    (fun τ => (GlobalTheory.TauLat.tauLatLattice X.E X.K X.Tau _ X.emb τ _ (Formalism.L2.Ker.full_of_sd hsd)).toIsLattice)
+    (fun τ => (GlobalTheory.TauLat.tauLatLattice X.E X.K X.Tau _ X.emb τ _ (Formalism.L2.Ker.full_of_sd hsd')).toIsLattice)
     (latWithBasis_of_stdOver X.emb (hPr.g_prime i).ne_zero d.2.lat hs w hw)
     (latWithBasis_of_stdOver X.emb (hPr.g_prime i).ne_zero d'.2.lat hs' w hw) _ _ (fun e he => ?_) v hv
   · have h1 : ∀ τ, ((∑ β, ∑ α, e (τ, β, α) : ℕ) : ℤ) = ∑ a, (W.nuW u (j + 1) τ).w a := fun τ => by
@@ -109,7 +152,7 @@ end
 
 variable (L : ChIdx X Pr R (QE sel (mu : Chr X.F X.E X.K))) (A : Amb X)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem colMu_bound_all (hJ : JetLossAllAt Pr R A sel S) (hO : JetOpWeyl) (hW : ChainWeights) (hM : StdMove)
     (hLP : LevelPrimes) (hSU : ScalarUnit) (hEG : EntryAtG) (hEQ : EntryAtQ) (hTQ : TopAtQ)

@@ -1,14 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsFlipDet
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FlipIdxNeZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IdemSumMulOfSubset
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ApplyAddInfRat
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsNeZeroOfIsVacO
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompAtMtOfMemGfC
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsInertTop
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FlipIdxNeZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqZeroOrEqOfPlaceIdem
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsInertTop
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.BaseIntSet
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IntFormsSubset
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ValRingLocRing
+
+@[expose] public section
+
 open NumberField Matrix Complex IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Dict GlobalTheory.AdTh GlobalTheory.ClsVal
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor hiding Level Host
@@ -17,7 +54,7 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Form
 open GlobalTheory.SingleDatum GlobalTheory.CoverRead
 open scoped TensorProduct Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-set_option synthInstance.maxHeartbeats 400000
+
 open GlobalTheory.LevelSeries
 
 noncomputable section
@@ -67,9 +104,9 @@ theorem flipElt_eq (e : AE D) (m : ℕ) :
 
 theorem cA_intPart (e : AE D) (m : ℕ) :
     cA D (e * (m : AE D) + (1 - e - cA D e)) = cA D e * (m : AE D) + (1 - cA D e - e) := by
-  simp only [map_add, map_mul, map_sub, map_one, cA_cA, map_natCast]
+  simp only [map_add (f := _), map_mul, map_sub, map_one, cA_cA, map_natCast]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem phase_eq {ψ : AddChar (AF D.host.F) ℂ} {e c b k : AE D} {m : ℕ} (hc : cA D e = c) (hcc : c * c = c)
     (hec : e * c = 0) (hcb : cA D b = c * (m : AE D) + (1 - c - e)) (hmk : (m : AE D) * k = 1)
@@ -101,7 +138,7 @@ theorem phase_eq {ψ : AddChar (AF D.host.F) ℂ} {e c b k : AE D} {m : ℕ} (hc
   rw [key, AddChar.map_add_eq_mul ψ (symplOH S T (y + (c * k) • x) (b • x) + symplO S T (b • x) y) (symplOH S T x (c • x)),
     AddChar.map_add_eq_mul ψ (symplOH S T (y + (c * k) • x) (b • x)) (symplO S T (b • x) y), hwy', hwy, hxx, mul_one, mul_one]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem heisO_translate {ψ : AddChar (AF D.host.F) ℂ} {ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E)}
     {ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)} {f₀ : WO S T → ℂ}
@@ -137,7 +174,7 @@ namespace GlobalTheory.FlipFixSum
 
 open GlobalTheory.PlaceModel GlobalTheory.PlaceModelSum GlobalTheory.LevelSeries
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem flip_fix : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (V W : HSp D) (χV χW : (AE D)ˣ →* Circle) (om : GA D V × GA D W →* Module.End ℂ (WO V W → ℂ)) (ΛV : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)) (ΛW : Submodule (𝓞 D.host.E) (Fin W.rank → D.host.E)) (sW : D.what₂.Tau → Matrix (Fin W.rank) (Fin W.rank) ℂ) (f₀ : WO V W → ℂ), VacPair ψ θ V W χV χW om ΛV ΛW sW f₀ → ∀ (T : Finset (Formalism.L2.DIV.Pl D.host.E)) (m : ℕ) (eT : AE D), IsIdemSum eT T → Odd m → Nat.Coprime m (GlobalTheory.Tow.badN D) → (∀ PP ∈ T, ((m : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal) → ∀ Y : Finset (WO V W), (∀ y ∈ Y, IsHalf (cA D eT) y ∧ m • y ∈ latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True)) → (∀ y ∈ Y, ∀ y' ∈ Y, y - y' ∈ latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True) → y = y') → (∀ y : WO V W, IsHalf (cA D eT) y → m • y ∈ latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True) → ∃ y' ∈ Y, y - y' ∈ latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True)) → (∀ u ∈ latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True), heisO ψ V W (flipElt eT m • (2 • u)) (∑ y ∈ Y, heisO ψ V W y f₀) = ∑ y ∈ Y, heisO ψ V W y f₀) ∧ ∀ e : AE D, IsSplitIdem D e → ∀ u ∈ latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True), IsHalf e u → heisO ψ V W (flipElt eT m • u) (∑ y ∈ Y, heisO ψ V W y f₀) = ∑ y ∈ Y, heisO ψ V W y f₀ := by
   intro D ψ θ V W χV χW om ΛV ΛW sW f₀ hP T m eT hT hm _ _ Y hY hdist hcompl
@@ -166,6 +203,7 @@ theorem flip_fix : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D)
     intro x hx hw hxx
     rw [flipElt_eq]
     change heisL V W ψ _ (∑ y ∈ Y, heisO ψ V W y f₀) = _
+
     rw [map_sum]
     refine sum_reindex Y _ _ (fun y y' => y + (cA D eT * incA D ((m : D.host.E)⁻¹)) • x - y' ∈
         latO V W (ΛV : Set (Fin V.rank → D.host.E)) (ΛW : Set (Fin W.rank → D.host.E)) (fun _ => True))

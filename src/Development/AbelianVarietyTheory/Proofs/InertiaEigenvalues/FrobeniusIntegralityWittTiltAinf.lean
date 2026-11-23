@@ -1,6 +1,57 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Mathlib.RingTheory.Perfectoid.Untilt
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ValuationCoeEqNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.WittVector.Complete
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
 import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ValuationCoeEqNorm
+
+@[expose] public section
 
 open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation
 
@@ -164,8 +215,9 @@ theorem step (S : Matrix p p (WittVector l R)) (S' : Matrix q q (WittVector l R)
     (Y.map WittVector.constantCoeff) (by
       ext a b
       have h1 := congrArg WittVector.constantCoeff (congrFun (congrFun h a) b)
-      simp only [Matrix.map_apply, Matrix.add_apply, Matrix.mul_apply, map_add, map_sum,
-        map_mul] at h1 ⊢
+
+      simp only [Matrix.map_apply, Matrix.add_apply, Matrix.mul_apply, map_add (f := _), map_sum,
+      map_mul] at h1 ⊢
       simpa [hι, hφ, WittVector.map_coeff, frobenius_def] using h1)
   choose r hr using h0
   let Z₀ : Matrix p q (WittVector l R) := fun a b => WittVector.teichmuller l (r a b)
@@ -232,7 +284,7 @@ theorem approx (S : Matrix p p (WittVector l R)) (S' : Matrix q q (WittVector l 
     obtain ⟨A, w, hA⟩ := ih Z' Y' h2 a b
     refine ⟨Z₀ a b + l * A, w, ?_⟩
     rw [h1]
-    simp only [Matrix.add_apply, Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, hA, map_add,
+    simp only [Matrix.add_apply, Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, hA, map_add (f := _),
       map_mul, map_natCast]
     ring
 

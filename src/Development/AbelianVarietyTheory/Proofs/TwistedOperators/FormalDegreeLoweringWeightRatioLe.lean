@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OneMemNbh
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DiscreteBranchingUpq
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.FdCons
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.PsiFor
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.StdGapOfGapLap
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OneMemNbh
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Transported
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.FdCons
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.FdegTransfer
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarMirror
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.Exists
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.StdGapOfGapLap
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.PsiFor
+import Std.Tactic.BVDecide.Normalize.Prop
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.EqZeroOfDatumEmbeddingEqZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,12 +64,12 @@ theorem thrStar_lt {N : ℕ} (ε : Fin N → Bool) {M : ℝ} (hNM : (N : ℝ) �
     ReciprocityTheory.ChartRestriction.DS.thrStar ε + 1 < 1000 * M ^ 3 - 1 := by
   have hp : (ReciprocityTheory.ChartRestriction.DS.pOf ε : ℝ) ≤ M := by
     have : ReciprocityTheory.ChartRestriction.DS.pOf ε ≤ N := by
-      unfold ReciprocityTheory.ChartRestriction.DS.pOf
+      delta ReciprocityTheory.ChartRestriction.DS.pOf
       exact (Finset.card_filter_le _ _).trans (by simp)
     exact le_trans (by exact_mod_cast this) hNM
   have hq : (ReciprocityTheory.ChartRestriction.DS.qOf ε : ℝ) ≤ M := by
     have : ReciprocityTheory.ChartRestriction.DS.qOf ε ≤ N := by
-      unfold ReciprocityTheory.ChartRestriction.DS.qOf
+      delta ReciprocityTheory.ChartRestriction.DS.qOf
       exact (Finset.card_filter_le _ _).trans (by simp)
     exact le_trans (by exact_mod_cast this) hNM
   have hq0 : (ReciprocityTheory.ChartRestriction.DS.S7.q0 ε : ℝ) ≤ M := by
@@ -45,7 +91,7 @@ theorem thrStar_lt {N : ℕ} (ε : Fin N → Bool) {M : ℝ} (hNM : (N : ℝ) �
   have hM3 : M ^ 2 ≤ M ^ 3 := by nlinarith
   have hMM : M * M * M = M ^ 3 := by ring
   have hMM2 : 16 * M * M = 16 * M ^ 2 := by ring
-  unfold ReciprocityTheory.ChartRestriction.DS.thrStar
+  delta ReciprocityTheory.ChartRestriction.DS.thrStar
   have hmax : max ((N : ℝ) * (ReciprocityTheory.ChartRestriction.DS.pOf ε : ℝ) * (ReciprocityTheory.ChartRestriction.DS.qOf ε : ℝ) + 1)
       (16 * (N : ℝ) * (ReciprocityTheory.ChartRestriction.DS.S7.q0 ε : ℝ) + 8 * Real.sqrt (2 * (ReciprocityTheory.ChartRestriction.DS.S7.q0 ε : ℝ))) <
       1000 * M ^ 3 - 2 := by
@@ -65,11 +111,11 @@ theorem fdeg_const (N : ℕ) (ε : Fin N → Bool) : ∃ c : ℝ, 0 < c ∧ ∀ 
   have : Nontrivial H := hσ.2.1
   have hp : 1 ≤ ReciprocityTheory.ChartRestriction.DS.pOf ε := by
     obtain ⟨a, ha⟩ := ht
-    unfold ReciprocityTheory.ChartRestriction.DS.pOf
+    delta ReciprocityTheory.ChartRestriction.DS.pOf
     exact Finset.card_pos.2 ⟨a, by simpa using ha⟩
   have hq : 1 ≤ ReciprocityTheory.ChartRestriction.DS.qOf ε := by
     obtain ⟨a, ha⟩ := hf
-    unfold ReciprocityTheory.ChartRestriction.DS.qOf
+    delta ReciprocityTheory.ChartRestriction.DS.qOf
     exact Finset.card_pos.2 ⟨a, by simpa using ha⟩
   have hq0 : 1 ≤ ReciprocityTheory.ChartRestriction.DS.S7.q0 ε := le_min hp hq
   have h8 : 8 * (N : ℝ) * ReciprocityTheory.ChartRestriction.DS.S7.q0 ε < h := ReciprocityTheory.ChartRestriction.DS.fdc_eight hh
@@ -167,8 +213,8 @@ theorem fdegHC_le {N : ℕ} (lam : Fin N → ℝ) (s : Fin N) (hw : ∀ a c, a <
     calc ∏ a : Fin N, ∏ b ∈ univ.filter (fun b : Fin N => a < b), |lam a - lam b|
         ≤ ∏ a : Fin N, ∏ b ∈ univ.filter (fun b : Fin N => a < b),
             ((if a = s then (2 : ℝ) else 1) * |lam' a - lam' b|) :=
-          Finset.prod_le_prod (fun a _ => Finset.prod_nonneg fun b _ => abs_nonneg _) fun a _ =>
-            Finset.prod_le_prod (fun b _ => abs_nonneg _) fun b hb => hfac a b (Finset.mem_filter.1 hb).2
+          Finset.prod_le_prod₀ (fun a _ => Finset.prod_nonneg fun b _ => abs_nonneg _) fun a _ =>
+            Finset.prod_le_prod₀ (fun b _ => abs_nonneg _) fun b hb => hfac a b (Finset.mem_filter.1 hb).2
       _ = (∏ a : Fin N, ∏ b ∈ univ.filter (fun b : Fin N => a < b), (if a = s then (2 : ℝ) else 1)) *
             ∏ a : Fin N, ∏ b ∈ univ.filter (fun b : Fin N => a < b), |lam' a - lam' b| := by
           rw [← Finset.prod_mul_distrib]
@@ -181,7 +227,7 @@ theorem fdegHC_le {N : ℕ} (lam : Fin N → ℝ) (s : Fin N) (hw : ∀ a c, a <
       have hab : a < b := (Finset.mem_filter.1 hb).2
       have : ((a : ℕ) : ℝ) < ((b : ℕ) : ℝ) := by exact_mod_cast hab
       linarith
-  unfold Formalism.QuantumDeterminants.fdegHC
+  delta Formalism.QuantumDeterminants.fdegHC
   rw [← mul_div_assoc]
   exact div_le_div_of_nonneg_right hnum hD.le
 

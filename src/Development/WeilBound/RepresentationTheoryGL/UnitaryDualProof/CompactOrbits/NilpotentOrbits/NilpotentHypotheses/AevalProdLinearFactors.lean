@@ -1,4 +1,53 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +69,7 @@ theorem pow_mem (K : Submodule ℂ M) (R : Module.End ℂ M) (hK : ∀ m ∈ K, 
 theorem aeval_mem (K : Submodule ℂ M) (R : Module.End ℂ M) (hK : ∀ m ∈ K, R m ∈ K) (p : ℂ[X]) :
     ∀ m ∈ K, (aeval R p) m ∈ K := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => intro m hm; rw [map_add, LinearMap.add_apply]; exact K.add_mem (hp m hm) (hq m hm)
+  | add p q hp hq => intro m hm; rw [map_add (f := _), LinearMap.add_apply]; exact K.add_mem (hp m hm) (hq m hm)
   | monomial j a =>
     intro m hm
     rw [aeval_monomial, Module.End.mul_apply, Algebra.algebraMap_eq_smul_one, LinearMap.smul_apply,
@@ -122,13 +171,11 @@ theorem bez' {M : Type*} [AddCommGroup M] [Module ℂ M] (K : Submodule ℂ M) (
     linarith
   obtain ⟨u, v, huv⟩ := hcop
   have key := congrArg (fun p => (aeval (R : Module.End ℂ M) p) ζ) huv
-  simp only [map_add, map_mul, map_one, LinearMap.add_apply, Module.End.mul_apply, Module.End.one_apply] at key
+  simp only [map_add (f := _), map_mul, map_one, LinearMap.add_apply, Module.End.mul_apply, Module.End.one_apply] at key
   rw [← key]
   refine K.add_mem (aeval_mem K R hK u _ ?_) (aeval_mem K R hK v _ ?_)
   · rw [aeval_prod_lin R γ a]; exact h1
   · rw [aeval_prod_linear_factors R β γ a]
     convert hQ using 3
-    refine List.map_congr_left fun x _ => ?_
-    rfl
 
 end PositivityTheory.RgUd.T.Nil.Asm

@@ -1,4 +1,49 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Complex.Circle
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -70,8 +115,8 @@ def intAE : AddSubgroup (Af F ⊗[F] E) :=
 def idF : (AF F)ˣ →* (AE F E)ˣ :=
   Units.map (algebraMap (AF F) (AE F E)).toMonoidHom
 
-open HeckeCharacterZeroLocus.ThmBIn in
 
+open HeckeCharacterZeroLocus.ThmBIn in
 def IsHeckeChar (χ : (AE F E)ˣ →* Circle) : Prop :=
   Continuous χ ∧ ∀ x : Eˣ, χ (Units.map (incA F E).toMonoidHom x) = 1
 
@@ -103,8 +148,9 @@ def IsUnramAt (σ : E →ₐ[F] E) (χ : (AE F E)ˣ →* Circle) (P : HeightOneS
   ∃ e f : AE F E, IsPrimeIdem σ P e f ∧ ∀ x : (AE F E)ˣ, (x : AE F E) = e * (x : AE F E) + (1 - e) →
     finPart F E (x : AE F E) ∈ intAE F E → finPart F E ((x⁻¹ : (AE F E)ˣ) : AE F E) ∈ intAE F E → χ x = 1
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def chiAt (σ : E →ₐ[F] E) (χ : (AE F E)ˣ →* Circle) (P : HeightOneSpectrum (𝓞 E)) : ℂ :=
   if h : IsUnramAt σ χ P ∧ ∃ x, IsUnifIdele σ P x then ((χ h.2.choose : Circle) : ℂ) else 0
 
@@ -113,27 +159,7 @@ def normP (P : HeightOneSpectrum (𝓞 E)) : ℕ := Ideal.absNorm P.asIdeal
 def lfac (σ : E →ₐ[F] E) (χ : (AE F E)ˣ →* Circle) (P : HeightOneSpectrum (𝓞 E)) (s : ℂ) : ℂ :=
   (1 - chiAt σ χ P * (normP P : ℂ) ^ (-s))⁻¹
 
-def lEuler (σ : E →ₐ[F] E) (χ : (AE F E)ˣ →* Circle) (s : ℂ) : ℂ :=
-  ∏' P : HeightOneSpectrum (𝓞 E), lfac σ χ P s
-
 end Hecke
-
-def HeckeLNonvanish : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E),
-    IsCMExt F E σ →
-    ∀ χ : (AE F E)ˣ →* Circle, IsHeckeChar F E χ → (∀ a : (AF F)ˣ, χ (idF F E a) = 1) → χ ≠ 1 →
-      (∀ s : ℂ, 1 < s.re → Multipliable (fun P : HeightOneSpectrum (𝓞 E) => lfac σ χ P s)) ∧
-      ∃ (L : ℂ → ℂ) (ε : ℝ), 0 < ε ∧ DifferentiableOn ℂ L {s | 1 - ε < s.re} ∧
-        (∀ s : ℂ, 1 < s.re → L s = lEuler σ χ s) ∧ L 1 ≠ 0
-
-def LfinHol : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E),
-    IsCMExt F E σ →
-    ∀ χ : (AE F E)ˣ →* Circle, IsHeckeChar F E χ → (∀ a : (AF F)ˣ, χ (idF F E a) = 1) → χ ≠ 1 →
-      ∃ (L : ℂ → ℂ) (ε : ℝ), 0 < ε ∧ DifferentiableOn ℂ L {s | 1 - ε < s.re} ∧
-        (∀ s : ℂ, 1 < s.re → Multipliable (fun P : HeightOneSpectrum (𝓞 E) => lfac σ χ P s) ∧
-          L s = lEuler σ χ s) ∧
-        ∀ n : ℕ, 1 ≤ n → (L n).im = 0 ∧ 0 < (L n).re
 
 end HeckeCharacterZeroLocus.ThmBIn
 

@@ -1,8 +1,68 @@
+module
+
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.CMField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.GaloisCohomologyLength.LevelInertiaLeLevelDec
 import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.KummerTheory.Mk0IdMapCongr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.GaloisCohomology.Statement
+public import Mathlib.Algebra.Algebra.Equiv
+public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
+public import Mathlib.Algebra.Star.Basic
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Data.ZMod.QuotientGroup
+public import Mathlib.FieldTheory.Fixed
+public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.GaloisCohomology UpperTheory.V UpperTheory.V.LDataCardLeFinrank UpperTheory.V.Base UpperTheory.V.Kum
 
-private theorem isCM_of_conj (K : Type) [Field K] [NumberField K] [IsTotallyComplex K]
+private theorem isCM_of_conj (K : Type) [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K]
     (h : ∀ x : K, ∃ y : K, ∀ φ : K →+* ℂ, φ y = starRingEnd ℂ (φ x)) : IsCMField K := by
   classical
   choose c hc using h
@@ -14,7 +74,7 @@ private theorem isCM_of_conj (K : Type) [Field K] [NumberField K] [IsTotallyComp
       left_inv := hcc
       right_inv := hcc
       map_mul' := fun x y => φ.injective (by simp only [hc, map_mul])
-      map_add' := fun x y => φ.injective (by simp only [hc, map_add]) }
+      map_add' := fun x y => φ.injective (by simp only [hc, map_add (f := _)]) }
   let σ : K ≃ₐ[ℚ] K := AlgEquiv.ofRingEquiv (f := τ) (fun q => by simp)
   have hσ : ∀ ψ : K →+* ℂ, ComplexEmbedding.IsConj ψ σ := fun ψ => by
     ext x
@@ -38,41 +98,3 @@ private theorem isCM_of_conj (K : Type) [Field K] [NumberField K] [IsTotallyComp
     rw [← hσ', Nat.card_eq_fintype_card]
     exact FixedPoints.finrank_eq_card (Subgroup.zpowers σ) K⟩
   exact IsCMField.ofCMExtension L K
-
-theorem UpperTheory.V.Kum.fnCM :
-    ∀ (F Ω : Type) [Field F] [NumberField F] [IsCMField F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime] (n : ℕ), IsCMField (Fn F Ω l n) := by
-  intro F Ω _ _ _ _ _ _ l _ n
-  have : IsTotallyComplex (Fn F Ω l n) := isTotallyComplex_of_algebra F (Fn F Ω l n)
-  refine isCM_of_conj _ ?_
-  rintro ⟨x, hx⟩
-  have hN0 : l ^ n ≠ 0 := pow_ne_zero _ (Fact.out : l.Prime).ne_zero
-  induction hx using IntermediateField.adjoin_induction with
-  | mem x hx =>
-    have hx1 : x ^ l ^ n = 1 := by
-      have := Polynomial.aeval_eq_zero_of_mem_rootSet hx
-      simpa [sub_eq_zero] using this
-    let z : Fn F Ω l n := ⟨x, IntermediateField.subset_adjoin F _ hx⟩
-    have hz : z ^ l ^ n = 1 := Subtype.ext hx1
-    refine ⟨z⁻¹, fun φ => ?_⟩
-    have : ‖φ z‖ = 1 := Complex.norm_eq_one_of_pow_eq_one (by rw [← map_pow, hz, map_one]) hN0
-    rw [map_inv₀, Complex.inv_eq_conj this]
-  | algebraMap a =>
-    exact ⟨algebraMap F _ (IsCMField.complexConj F a), fun φ =>
-      IsCMField.complexEmbedding_complexConj F (φ.comp (algebraMap F (Fn F Ω l n))) a⟩
-  | add x y hx hy ihx ihy =>
-    obtain ⟨a, ha⟩ := ihx
-    obtain ⟨b, hb⟩ := ihy
-    refine ⟨a + b, fun φ => ?_⟩
-    rw [map_add, ha, hb, ← map_add, ← map_add]
-    rfl
-  | inv x hx ihx =>
-    obtain ⟨a, ha⟩ := ihx
-    refine ⟨a⁻¹, fun φ => ?_⟩
-    rw [map_inv₀, ha, ← map_inv₀, ← map_inv₀]
-    rfl
-  | mul x y hx hy ihx ihy =>
-    obtain ⟨a, ha⟩ := ihx
-    obtain ⟨b, hb⟩ := ihy
-    refine ⟨a * b, fun φ => ?_⟩
-    rw [map_mul, ha, hb, ← map_mul, ← map_mul]
-    rfl

@@ -1,11 +1,52 @@
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.DepthCond
-import Formalism.LocalToGlobal.ProjectiveLattices.DepRun
+module
+
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.DepthCond
+public import Formalism.LocalToGlobal.ProjectiveLattices.ConjNeSelfOfCM
+public import Formalism.LocalToGlobal.ProjectiveLattices.DepLaws
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.DepthCondPf
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ONLeaves
 import Formalism.LocalToGlobal.ProjectiveLattices.CrudeVal
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.VwEqZeroOfNotMem
+public import Formalism.LocalToGlobal.ProjectiveLattices.DepRun
 import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.RamBasic
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.ONLeaves
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.DepthCondPf
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -385,7 +426,7 @@ theorem sprimeRam (hT : O.T = ((Dd.Q.T : ℕ) : ℝ))
       · rw [h, h4]
         exact Dvd.dvd.mul_left (pow_dvd_pow _ (Nat.le_add_right _ _)) _
     have hle : ((Dd.Q.T : ℕ) : ℝ) * (Dd.Q.cP (DF (Dw (ι j)) (Dd.aL (ι j))) (plc v) : ℝ) ≤ (padicValNat (plc v) N : ℝ) := by
-      exact_mod_cast (padicValNat_dvd_iff_le hN).1 hdvd
+      exact_mod_cast ((by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) hN).1 hdvd
     have hnn0 : (0 : ℝ) ≤ (vw v (nnKAt (H := H) (LL := K) Dd (ι j)) : ℝ) :=
       by exact_mod_cast vw_nonneg_of_isIntegral v _ (nnK_isIntegral Dd (ι j))
     have he := ramw_pos v

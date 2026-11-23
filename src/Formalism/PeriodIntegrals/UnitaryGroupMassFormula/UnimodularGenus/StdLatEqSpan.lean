@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnimodularGenus.Development
+module
+
+public import Formalism.PeriodIntegrals.UnimodGenus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField
 
@@ -12,6 +60,7 @@ theorem hStd_apply (E : Type) [Field E] [StarRing E] (n : ℕ) (x y : Sp E n) :
 
 theorem hStd_isSymm (E : Type) [Field E] [StarRing E] (n : ℕ) : (hStd E n).IsSymm := by
   refine LinearMap.isSymm_def.mpr fun x y => ?_
+
   rw [hStd_apply, hStd_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [starRingEnd_apply, star_mul, star_star, mul_comm]
@@ -35,25 +84,5 @@ theorem hStd_eStd (E : Type) [Field E] [StarRing E] (n : ℕ) (i j : Fin n) :
     · subst hk
       simp [eStd, Ne.symm h]
     · simp [eStd, Pi.single_apply, hk]
-
-theorem stdLat_eq_span (E : Type) [Field E] [NumberField E] (n : ℕ) :
-    stdLat E n = Submodule.span (𝓞 E) (Set.range (eStd E n)) := by
-  apply le_antisymm
-  · intro x hx
-    have h' : ∀ i, ∃ a : 𝓞 E, algebraMap (𝓞 E) E a = x i := fun i =>
-      Submodule.mem_one.mp ((Submodule.mem_pi.mp hx) i (Set.mem_univ i))
-    choose a ha using h'
-    have hx' : x = ∑ i, a i • eStd E n i := by
-      ext k
-      simp [eStd, Pi.single_apply, Finset.sum_apply, ← ha, Algebra.smul_def]
-    rw [hx']
-    exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
-  · rw [Submodule.span_le]
-    rintro _ ⟨i, rfl⟩
-    refine Submodule.mem_pi.mpr fun k _ => Submodule.mem_one.mpr ?_
-    by_cases h : k = i
-    · subst h
-      exact ⟨1, by simp [eStd]⟩
-    · exact ⟨0, by simp [eStd, h]⟩
 
 end PI.UG.W

@@ -1,5 +1,67 @@
-import Mathlib
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.RowDeg
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.FieldTheory.IntermediateField.Basic
+import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.PerCEmb
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AdmissibleEmptyOfGood
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivOfNotLinearIndependent
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IMemSiegel
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsInertTop
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LowerTriangularMul
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.JetIndepStatement
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+
+@[expose] public section
+
 open NumberField Matrix Complex IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Dict GlobalTheory.AdTh GlobalTheory.ClsVal
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor hiding Level Host
@@ -9,7 +71,7 @@ open GlobalTheory.ExportSeries (Base Twist Weight PairRep GLR detChar detFam foc
 open scoped TensorProduct Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.SingleDatum
-set_option synthInstance.maxHeartbeats 400000
+
 
 noncomputable section
 
@@ -32,8 +94,12 @@ theorem coeff_coefFun (p : MvPolynomial σ ℂ) (m : σ →₀ ℕ) : (coefFun F
 
 def coefMap : MvPolynomial σ ℂ →+ MvPolynomial σ F where
   toFun := coefFun F lam
-  map_zero' := by ext m; rw [coeff_coefFun, coeff_zero, coeff_zero, map_zero]
-  map_add' p q := by ext m; rw [coeff_coefFun, coeff_add, coeff_add, coeff_coefFun, coeff_coefFun, map_add]
+  map_zero' := by
+    ext m
+    simp only [coeff_coefFun, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, map_zero]
+  map_add' p q := by
+    ext m
+    simp only [coeff_coefFun, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, map_add]
 
 variable {F lam}
 
@@ -44,13 +110,13 @@ theorem coeff_coefMap (p : MvPolynomial σ ℂ) (m : σ →₀ ℕ) :
 theorem coefMap_monomial (m : σ →₀ ℕ) (c : ℂ) :
     coefMap F lam (monomial m c) = lam c • monomial m (1 : F) := by
   ext m'
-  rw [coeff_coefMap, coeff_smul, coeff_monomial, coeff_monomial]
+  rw [coeff_coefMap, MvPolynomial.coeff_smul, coeff_monomial, coeff_monomial]
   split_ifs <;> simp
 
 theorem coefMap_smul_map (c : ℂ) (R : MvPolynomial σ F) :
     coefMap F lam (c • map (algebraMap F ℂ) R) = lam c • R := by
   ext m
-  rw [coeff_coefMap, coeff_smul, coeff_map, coeff_smul, smul_eq_mul, smul_eq_mul]
+  rw [coeff_coefMap, MvPolynomial.coeff_smul, coeff_map, MvPolynomial.coeff_smul, smul_eq_mul, smul_eq_mul]
   have : c * algebraMap F ℂ (R.coeff m) = R.coeff m • c := by
     rw [Algebra.smul_def, mul_comm]
   rw [this, map_smul, smul_eq_mul, mul_comm]
@@ -63,12 +129,13 @@ theorem coefMap_comm (Φ : MvPolynomial σ ℂ →ₗ[ℂ] MvPolynomial σ ℂ) 
     have hm : (monomial m c : MvPolynomial σ ℂ) = c • map (algebraMap F ℂ) (monomial m (1 : F)) := by
       rw [map_monomial, map_one, smul_monomial, smul_eq_mul, mul_one]
     rw [hm, map_smul, h, coefMap_smul_map, ← hm, coefMap_monomial, map_smul]
-  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _), map_add (f := _)]
 
 variable {T : Type} (r : T → ℕ) (n : ℕ)
 
 theorem lap_map (τ τ' : T) (a : Fin (r τ)) (a' : Fin (r τ')) (Q : MvPolynomial (Letter T r n) F) :
     lap r n ℂ 1 τ τ' a a' (map (algebraMap F ℂ) Q) = map (algebraMap F ℂ) (lap r n F 1 τ τ' a a' Q) := by
+
   simp only [lap, LinearMap.sum_apply, map_sum, LinearMap.smul_apply]
   refine Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun b' _ => ?_
   rw [Matrix.one_apply, Matrix.one_apply]

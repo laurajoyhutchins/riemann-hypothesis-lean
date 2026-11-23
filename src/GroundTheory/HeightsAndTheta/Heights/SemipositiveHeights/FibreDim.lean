@@ -1,8 +1,59 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.ContractMixedFieldStatement
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PEvalKerKrullDim
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PFibreMultiHomog
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MixedFieldContraction.ContractMixedFieldStatement
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PEvalKerKrullDim
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.PFibreMultiHomog
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.PIntDomainDim
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -74,8 +125,8 @@ theorem aeval_mem_closure {σ : Type} {L : Type} [Field L] (y : σ → L) (f : M
 
 end FibreTranscendenceDegree
 
-open FibreTranscendenceDegree in
 
+open FibreTranscendenceDegree in
 theorem FibreDim.proof : FibreDimStatement := by
   intro K _ ι _ K' _ ι' _ κ v P' d r G hv hP' hP
   classical
@@ -91,7 +142,7 @@ theorem FibreDim.proof : FibreDimStatement := by
     (Set.range fun q : (Σ k : FibreBlock κ, ι' k.1) => G.x' ⟨q.1.1, q.2⟩) with hEdef
 
   have hZ : Function.Injective (algebraMap ℤ G.Φ) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     have hmem : (C a : MRing ι) ∈ imageZ v P' := by
       rw [← G.ker_x, RingHom.mem_ker, aeval_C]
@@ -119,7 +170,7 @@ theorem FibreDim.proof : FibreDimStatement := by
     intro f
     induction f using MvPolynomial.induction_on with
     | C a => simp
-    | add f g hf hg => simp only [map_add, IntermediateField.coe_add, hf, hg]
+    | add f g hf hg => simp only [map_add (f := _), IntermediateField.coe_add, hf, hg]
     | mul_X f i hf =>
       simp only [map_mul, IntermediateField.coe_mul, hf, aeval_X]
       rfl
@@ -156,7 +207,7 @@ theorem FibreDim.proof : FibreDimStatement := by
           intro f
           induction f using MvPolynomial.induction_on with
           | C a => simp
-          | add f g hf hg => simp only [map_add, hf, hg]
+          | add f g hf hg => simp only [map_add (f := _), hf, hg]
           | mul_X f i hf => simp only [map_mul, hf, aeval_X, rename_X, G.compat]
         rw [map_div₀, key, key]
         exact div_mem (aeval_mem_closure _ _) (aeval_mem_closure _ _)

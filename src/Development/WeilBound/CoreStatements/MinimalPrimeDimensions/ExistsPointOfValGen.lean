@@ -1,5 +1,72 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ExistsPointOfVal
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.OneLtAbsNormReal
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.ExistsAlgebraMapEqOfValVLeOne
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsValuationSubringLiftOfSpecialFibre
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.NumberFieldFinitePlaceCompletionEmbedding
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.ExistsPointOfVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.FirstChernLeviEqConstant
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+import Development.AbelianVarietyTheory.Definitions.Divisors.SemiposAtOfPositive
+import Development.AbelianVarietyTheory.Definitions.Divisors.SlopeTestRemainingChoices
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsProbabilityMeasureMuPart
+import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PairRelationOfScaledRatio
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OnbPerp
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Pj Formalism.BasicNotions.TH Formalism.L2.Theta ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.CompHt GlobalTheory.CovTop GlobalTheory.CovHt GlobalTheory.Mean4 GlobalTheory.Mean4O
 open scoped ENNReal Classical
 open GlobalTheory GlobalTheory.CompanionTheory GlobalTheory.CompanionTheory.SmallFin
@@ -51,7 +118,7 @@ theorem exists_point_of_val_gen {K Ω : Type} [Field K] [NumberField K] [Field �
   have hmax : (m.comap (algebraMap (𝓞 K) A)) = la.asIdeal :=
     (la.isMaximal.eq_of_le (Ideal.IsPrime.ne_top inferInstance) hlaM).symm
   have hinj' : Function.Injective (algebraMap (𝓞 K) (A ⧸ q.asIdeal)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro a ha
     by_contra ha0
     have h1 : a ∈ q.asIdeal.comap (algebraMap (𝓞 K) A) :=
@@ -74,7 +141,7 @@ theorem exists_point_of_val_gen {K Ω : Type} [Field K] [NumberField K] [Field �
   · have : φ (Ideal.Quotient.mk _ t) = 0 := h
     exact Ideal.Quotient.eq_zero_iff_mem.1 ((map_eq_zero_iff φ hφi).1 this)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_cdvr_point_gen {K Ω : Type} [Field K] [NumberField K] [Field Ω] [Algebra K Ω]
     (la : HeightOneSpectrum (𝓞 K)) {Γ : Type} [LinearOrderedCommGroupWithZero Γ] (ν : Valuation Ω Γ)
@@ -168,7 +235,9 @@ theorem exists_cdvr_point_gen {K Ω : Type} [Field K] [NumberField K] [Field Ω]
   have : Finite (𝓞 L ⧸ w.asIdeal) := w.asIdeal.finiteQuotientOfFreeOfNeBot w.ne_bot
   have : CharZero (HeightOneSpectrum.adicCompletionIntegers L w) :=
     charZero_of_injective_algebraMap (FaithfulSMul.algebraMap_injective (𝓞 L) (HeightOneSpectrum.adicCompletionIntegers L w))
-  obtain ⟨e1, he1, h1e⟩ := GlobalTheory.AdicCompl.exists_e (L := L) w
+  obtain ⟨e1, he1, h1e⟩ : ∃ e : ℕ, 0 < e ∧ ∀ x : L,
+      valV (HeightOneSpectrum.adicCompletionIntegers L w) (GlobalTheory.AdicCompl.kMap w x) =
+        w.valuation L x ^ e := GlobalTheory.AdicCompl.exists_e (L := L) w
   let T : CDVR := { V := HeightOneSpectrum.adicCompletionIntegers L w, cpl := GlobalTheory.AdicCompl.isAdicComplete w }
   let k : L →+* T.Fr := GlobalTheory.AdicCompl.kMap w
   have hvk : ∀ x : L, vV T.V (k x) = (e1 : ℤ) * vLa w x := fun x => by
@@ -182,7 +251,9 @@ theorem exists_cdvr_point_gen {K Ω : Type} [Field K] [NumberField K] [Field Ω]
     refine ⟨Nat.mul_pos (Nat.pos_of_ne_zero he2) he1, fun a => ?_⟩
     show vV (HeightOneSpectrum.adicCompletionIntegers L w) (GlobalTheory.AdicCompl.kMap w (algebraMap K L a)) = _
     simp only [vV, vLa]
-    rw [h1e, ← HeightOneSpectrum.valuation_liesOver L la w a, ← pow_mul, WithZero.log_pow]
+    rw [h1e, ← HeightOneSpectrum.valuation_liesOver L la w a,
+      ← Ideal.ramificationIdx'_eq_ramificationIdx la.asIdeal w.asIdeal la.ne_bot,
+      ← pow_mul, WithZero.log_pow]
     push_cast
     simp
   have hfin : T.FinRes := GlobalTheory.AdicCompl.finite_res w

@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.L2LocalComponents.NonEmptyOps
-import GroundTheory.AutomorphicForms.MultiplicityOne.ArchTypeExists
+module
+
+public import GroundTheory.AutomorphicForms.L2LocalComponents.NonEmptyOps
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+public import GroundTheory.AutomorphicForms.L2LocalComponents.Summand
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsContinuous
+public import GroundTheory.AutomorphicForms.L2LocalComponents.ArchBump
+public import GroundTheory.AutomorphicForms.L2LocalComponents.CenterCommute
+public import GroundTheory.AutomorphicForms.MultiplicityOne.ArchTypeExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Spectrum
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology
 open scoped InnerProductSpace
@@ -17,7 +68,7 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-variable (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 theorem uAction_mem {V : Submodule ℂ (CuspL2 μ)} (hVc : IsClosed (V : Set (CuspL2 μ)))
     (hV : (cuspRepT μ).IsInvariant V) (u : UEnv K n) (v : (isExpLieAlgebra K n).smoothVectors (archRepT μ))
@@ -69,7 +120,7 @@ theorem archRepT_comm_starProjection {V : Submodule ℂ (CuspL2 μ)} [CompleteSp
   have := congrArg (fun T : CuspL2 μ →L[ℂ] CuspL2 μ => T y) h
   exact this.symm
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem exists_isZKFinite_of_summand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V]
     (hV : (cuspRepT μ).IsInvariant V) (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible) :
@@ -275,9 +326,9 @@ theorem exists_isZKFinite_of_summand (V : Submodule ℂ (CuspL2 μ)) [CompleteSp
     have hk₂ : AutomorphicForm.finPart (k : AdelicGLn.AdelicGL K n) ∈ AdelicGLn.integralFiniteGL K n :=
       finPart_mem_integralFiniteGL k.2
     set k₂ : AdelicGLn.integralFiniteGL K n := ⟨_, hk₂⟩
-    have h1 : ((archP K n k₁ : normOneGL K n) : AdelicGLn.AdelicGL K n) = infEmb K n k₁ :=
+    have h1 : ((archP K n k₁ : normOneGL (K := K) (n := n)) : AdelicGLn.AdelicGL K n) = infEmb K n k₁ :=
       congrArg Subtype.val (archimedeanProjection_maximalCompact ⟨k₁, hk₁⟩)
-    have hdec : (⟨k, Reduction.maxCompact_le_normOneGL k.2⟩ : normOneGL K n) =
+    have hdec : (⟨k, Reduction.maxCompact_le_normOneGL k.2⟩ : normOneGL (K := K) (n := n)) =
         finOne K n k₂ * archP K n k₁ := by
       rw [finOne_archP_comm]
       ext1

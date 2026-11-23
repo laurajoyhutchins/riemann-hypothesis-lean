@@ -1,12 +1,55 @@
-import Development.AutomorphicArithmetic.AdelicQuotients.ExistsCompactFundamentalSetOfHeightLe
-import Development.AutomorphicArithmetic.AdelicQuotients.ExistsHeightBoundOfTwistedEllipticSupport
-import Development.AutomorphicArithmetic.AdelicQuotients.ExistsIrreducibleCharpolyNormMatchOfTwistedEllip
-import Development.AutomorphicArithmetic.AdelicQuotients.CharpolyEqOfNormEqOfTwistedConj
-import Development.AutomorphicArithmetic.AdelicQuotients.AdelicGLGaloisBaseChangeDiagonalCompat
-import Development.AutomorphicArithmetic.AdelicQuotients.ExistsClosedEmbeddingNormOneAdelicGLBaseChange
-import Development.AutomorphicArithmetic.AdelicQuotients.UnimodularFiniteQuotientMeasureOfCocompact
-import Development.AutomorphicArithmetic.AdelicQuotients.QuotientIntegralLtTopOfInvariantClosedEmbedding
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.EllipticityFromProductFormula
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.SelmerRankBounds.EllipticityFromProductFormula
+public import Development.AutomorphicArithmetic.AdelicQuotients.AdelicGLGaloisBaseChangeDiagonalCompat
+public import Development.AutomorphicArithmetic.AdelicQuotients.CharpolyEqOfNormEqOfTwistedConj
+public import Development.AutomorphicArithmetic.AdelicQuotients.ExistsClosedEmbeddingNormOneAdelicGLBaseChange
+public import Development.AutomorphicArithmetic.AdelicQuotients.ExistsCompactFundamentalSetOfHeightLe
+public import Development.AutomorphicArithmetic.AdelicQuotients.ExistsHeightBoundOfTwistedEllipticSupport
+public import Development.AutomorphicArithmetic.AdelicQuotients.ExistsIrreducibleCharpolyNormMatchOfTwistedEllip
+public import Development.AutomorphicArithmetic.AdelicQuotients.QuotientIntegralLtTopOfInvariantClosedEmbedding
+public import Development.AutomorphicArithmetic.AdelicQuotients.UnimodularFiniteQuotientMeasureOfCocompact
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory NumberField IsDedekindDomain Polynomial
 open GroundTheory.Automorphic GroundTheory.Automorphic.Reduction GroundTheory.Automorphic.RightCosetSpace GroundTheory.Global GroundTheory.Global.SemiLocal
 open GroundTheory.Global.AdeleBaseChange
@@ -112,6 +155,8 @@ private theorem termF (hU : U2) {F : Type} [Field F] [NumberField F] {n : ℕ} (
     rw [Subgroup.mem_centralizer_singleton_iff]
     change x⁻¹ * g * x = g ↔ _
     rw [mul_assoc, inv_mul_eq_iff_eq_mul, eq_comm]
+    rfl
+  set_option synthInstance.maxHeartbeats 400000 in
   refine (hU (G1 F n) (Subgroup.centralizer {g}) μ ν (Subgroup.centralizer {g}).subtype
     (closedCent g).isClosedEmbedding_subtypeVal _ (Gam F n ⊓ twCent (tw (Twist.id μ)) g) ?_ hv
     (fun x => f (x⁻¹ * g * tw (Twist.id μ) x)) (contTw _ f g) ?_ hi).1
@@ -168,7 +213,8 @@ private theorem termE (hU : U2) (q1 : Q1) (q2 : Q2) (n3 : N3) (n5 : N5)
     congrArg f (twConj_mul_left (tw θ) (d1 δ) ((hcent _).2 ⟨t, rfl⟩) x)
   obtain ⟨h1, h2⟩ := hU (G1 E n) (Subgroup.centralizer {d1 γ}) μ ν i hic _ _ hmap hv
     (fun x => f (x⁻¹ * d1 δ * tw θ x)) (contTw _ f _) hinv hi
-  have h3 := UpperTheory.quotientIntegral_lt_top_of_invariant_closedEmbedding q1 q2 (AdelicGLn.AdelicGL E n) _ (normOneGL E n) isClosed_normOneGL μ ν i hic
+  set_option synthInstance.maxHeartbeats 400000 in
+  have h3 := UpperTheory.quotientIntegral_lt_top_of_invariant_closedEmbedding q1 q2 (AdelicGLn.AdelicGL E n) _ (normOneGL (K := E) (n := n)) isClosed_normOneGL μ ν i hic
     (fun x => f (x⁻¹ * d1 δ * tw θ x)) (contTw _ f _) hinv h2
   rw [h1, ← h3]
   congr 2

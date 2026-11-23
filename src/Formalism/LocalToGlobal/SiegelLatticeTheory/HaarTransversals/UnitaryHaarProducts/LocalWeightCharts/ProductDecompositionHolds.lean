@@ -1,5 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.HaarWN
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.SubgroupHypothesisHolds
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.InstLocallyCompactSpace
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.WavePacketL1L2
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.NotMidCases
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.SubgroupHypothesisHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +78,7 @@ lemma lmul_meas (a : Mx k r) : Measurable (lmulM (k := k) (r := r) a) := by
     unfold Formalism.QuantumDeterminants.lmulM
     refine continuous_pi fun i => continuous_pi fun j => ?_
     simp only [Matrix.mul_apply, Matrix.of_apply]
-    exact continuous_finset_sum _ fun l _ => by fun_prop
+    exact continuous_finsetSum _ fun l _ => by fun_prop
   exact hc.measurable
 
 lemma mulP_meas : Measurable (mulP : Mt k r × Mt k r → Mt k r) := by
@@ -41,7 +86,7 @@ lemma mulP_meas : Measurable (mulP : Mt k r × Mt k r → Mt k r) := by
     unfold WlocSk.mulP
     refine continuous_pi fun i => continuous_pi fun j => ?_
     simp only [Matrix.mul_apply, Matrix.of_apply]
-    exact continuous_finset_sum _ fun l _ => by fun_prop
+    exact continuous_finsetSum _ fun l _ => by fun_prop
   exact hc.measurable
 
 theorem s_closed (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (hT : 0 < Tz k r z) :
@@ -129,7 +174,7 @@ theorem prod_haar (z : Fin (2 * r + k + 1) → ℂ) (hz : inWb k r z) (hT : 0 < 
   have hρ0 : (μW.prod μN).map mulP ≠ 0 := by
     intro h0
     have h1 := congrArg (fun ν : Measure (Mt k r) => ν Set.univ) h0
-    simp only [Measure.map_apply hm MeasurableSet.univ, Measure.coe_zero, Pi.zero_apply] at h1
+    simp only [Measure.map_apply hm MeasurableSet.univ, FunLike.coe_zero, Pi.zero_apply] at h1
     rw [Set.preimage_univ, ← Set.univ_prod_univ, Measure.prod_prod, mul_eq_zero] at h1
     rcases h1 with h | h
     · exact hW0 (Measure.measure_univ_eq_zero.mp h)

@@ -1,4 +1,51 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -38,7 +85,7 @@ theorem eq_on_poly (φ ψ : MvPowerSeries σ R →+* A) (hC : ∀ c, φ (C c) = 
     (hX : ∀ i, φ (X i) = ψ (X i)) (P : MvPolynomial σ R) : φ P = ψ P := by
   induction P using MvPolynomial.induction_on with
   | C c => rw [MvPolynomial.coe_C, hC]
-  | add P Q hP hQ => rw [MvPolynomial.coe_add, map_add, map_add, hP, hQ]
+  | add P Q hP hQ => rw [MvPolynomial.coe_add, map_add (f := _), map_add (f := _), hP, hQ]
   | mul_X P i hP => rw [MvPolynomial.coe_mul, map_mul, map_mul, hP, MvPolynomial.coe_X, hX]
 
 theorem ext_of_cont (p : ℕ) [IsHausdorff (Ideal.span {(p : A)}) A] (φ ψ : MvPowerSeries σ R →+* A)
@@ -75,6 +122,7 @@ theorem dvd_aeval_of_coeff (p : ℕ) (x : σ → A) (S : ℕ) (hS : ∀ i, (p : 
     (p : A) ^ m ∣ MvPolynomial.aeval x P := by
   classical
   conv_rhs => rw [P.as_sum]
+
   rw [map_sum]
   refine Finset.dvd_sum fun α hα => ?_
   rw [MvPolynomial.aeval_monomial]
@@ -129,7 +177,7 @@ theorem exists_isEval (p : ℕ) [IsAdicComplete (Ideal.span {(p : A)}) A] (x : �
     intro f g
     refine huniq _ _ fun m => ?_
     have e : s m (f + g) - (L f + L g) = (s m f - L f) + (s m g - L g) := by
-      simp only [s, map_add]; ring
+      simp only [s, map_add (f := _)]; ring
     rw [e]
     exact dvd_add (hL f m) (hL g m)
   have hmul : ∀ f g, L (f * g) = L f * L g := by

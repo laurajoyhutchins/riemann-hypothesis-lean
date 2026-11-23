@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspRapidDecaySiegelGL
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStable
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SmMemArchSmooth
-import Development.AutomorphicSpectrum.Proofs.HermitianForms.CasOfCapelliVec
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OmegaOpCommLiB
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousConjFin
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QdetTopThreeOrders
+public import Development.AutomorphicSpectrum.Proofs.HermitianForms.CasOfCapelliVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.AltSum
+import GroundTheory.AutomorphicForms.ReductionBlock
+import GroundTheory.GlobalFields.KummerTheory.LocalIndex
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 open NumberField GlobalTheory.CuspRep GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.Reduction
 open scoped NumberField.AdeleRing
@@ -54,7 +94,8 @@ theorem cas_mem_of_qdet_mem {A : Type} [Ring A] [Algebra ℂ A] (S : Subalgebra 
         have h1 := hf _ (hcap Y)
         rw [hR] at h1
         have e : f 1 = 0 := hf 1 (Subalgebra.one_mem _)
-        simp only [map_add, map_sum, map_smul, smul_eq_mul, add_sub_assoc] at h1
+
+        simp only [map_add (f := _), map_sum, map_smul, smul_eq_mul, add_sub_assoc] at h1
         simp only [e, mul_zero] at h1 ⊢
         exact h1)
   have hT : ∑ i, E i i ∈ S := by
@@ -62,6 +103,7 @@ theorem cas_mem_of_qdet_mem {A : Type} [Ring A] [Algebra ℂ A] (S : Subalgebra 
     have e : f 1 = 0 := hf 1 (Subalgebra.one_mem _)
     have := (core f hf).1
     rw [hρ0, e] at this
+
     simp only [map_sum]
     linear_combination this
   have hW : (2 : ℂ) • ∑ i, ∑ j ∈ univ.filter (fun j => i < j), (E i i * E j j - E j i * E i j)
@@ -71,6 +113,7 @@ theorem cas_mem_of_qdet_mem {A : Type} [Ring A] [Algebra ℂ A] (S : Subalgebra 
     have h2 := (core f hf).2
     rw [e] at h2
     simp only [sum_erase_eq_sub (mem_univ _), hρ0] at h2
+
     simp only [map_sub f, map_sum, map_smul, smul_eq_mul]
     have h5 : ∑ i : Fin n, ((n : ℂ) - 1 - 2 * (i : ℕ)) * f (E i i)
         = - (2 * ∑ i, (0 - ρ i) * f (E i i)) := by
@@ -88,7 +131,7 @@ theorem cas_mem_of_qdet_mem {A : Type} [Ring A] [Algebra ℂ A] (S : Subalgebra 
   rw [this]
   exact Subalgebra.sub_mem _ (Subalgebra.mul_mem _ hT hT) hW
 
-theorem cas_mem_Zalg : ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (a : ℕ) (τ : E →+* ℂ),
+theorem cas_mem_Zalg : ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (a : ℕ) (τ : E →+* ℂ),
     Formalism.REAL.Cas (Eop (a := a) τ) ∈ Zalg E a := by
   intro F _ _ _ n τ
   have hcap : ∀ Y : ℂ, cap (a := n) τ Y ∈ Zalg F n := fun Y =>

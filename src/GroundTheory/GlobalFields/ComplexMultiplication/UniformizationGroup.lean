@@ -1,9 +1,55 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticFunctions
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.Uniformization
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import GroundTheory.GlobalFields.ComplexMultiplication.EllipticRational
-import GroundTheory.GlobalFields.ComplexMultiplication.EllipticDegree
-import GroundTheory.GlobalFields.ComplexMultiplication.Uniformization
-import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationAddition
+public import GroundTheory.GlobalFields.ComplexMultiplication.UniformizationAddition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Complex Filter Topology Set
 open scoped PeriodPair
@@ -19,7 +65,7 @@ variable {L : PeriodPair}
 
 theorem exists_weierstrassP_eq (c : ℂ) : ∃ z, z ∉ L.lattice ∧ ℘[L] z = c := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   have h2 := finsum_toNat_torusOrder_weierstrassP_sub (L := L) c
   have h0 : ∀ x : Torus L, (torusOrder L (fun w ↦ ℘[L] w - c) x).toNat = 0 := by
     intro x
@@ -43,20 +89,20 @@ theorem exists_weierstrassP_eq (c : ℂ) : ∃ z, z ∉ L.lattice ∧ ℘[L] z =
       rfl
   simp [h0] at h2
 
-variable (L) in
 
-def toPoint (z : ℂ) : (weierstrassCurve L).toAffine.Point :=
+variable (L) in
+def toPoint (L : PeriodPair) (z : ℂ) : (weierstrassCurve L).toAffine.Point :=
   haveI := Classical.propDecidable (z ∈ L.lattice)
   if h : z ∈ L.lattice then 0 else
     .some (℘[L] z) (℘'[L] z / 2) (equation_iff_nonsingular.1 (equation_weierstrassP L h))
 
 lemma toPoint_of_mem {z : ℂ} (h : z ∈ L.lattice) : toPoint L z = 0 := by
-  rw [toPoint, dif_pos h]
+  rw [toPoint, dite_eq_left h]
 
 lemma toPoint_of_notMem {z : ℂ} (h : z ∉ L.lattice) :
     toPoint L z = .some (℘[L] z) (℘'[L] z / 2)
       (equation_iff_nonsingular.1 (equation_weierstrassP L h)) := by
-  rw [toPoint, dif_neg h]
+  rw [toPoint, dite_eq_right h]
 
 lemma point_some_congr {x y x' y' : ℂ} {h : (weierstrassCurve L).toAffine.Nonsingular x y}
     {h' : (weierstrassCurve L).toAffine.Nonsingular x' y'} (hx : x = x') (hy : y = y') :
@@ -171,16 +217,16 @@ theorem toPoint_surjective : Function.Surjective (toPoint L) := by
     exact point_some_congr (by rw [L.weierstrassP_neg, hx])
       (by rw [L.derivWeierstrassP_neg]; linear_combination -h1)
 
-variable (L) in
 
-def toPointHom : ℂ →+ (weierstrassCurve L).toAffine.Point where
+variable (L) in
+def toPointHom (L : PeriodPair) : ℂ →+ (weierstrassCurve L).toAffine.Point where
   toFun := toPoint L
   map_zero' := toPoint_zero
   map_add' := toPoint_add
 
-variable (L) in
 
-def torusToPoint : Torus L →+ (weierstrassCurve L).toAffine.Point :=
+variable (L) in
+def torusToPoint (L : PeriodPair) : Torus L →+ (weierstrassCurve L).toAffine.Point :=
   QuotientAddGroup.lift L.lattice.toAddSubgroup (toPointHom L) fun _ hl ↦ toPoint_of_mem hl
 
 @[simp]
@@ -192,17 +238,6 @@ lemma torusToPoint_injective : Function.Injective (torusToPoint L) := by
   rw [torusToPoint_mk, toPoint_eq_zero_iff] at hx
   exact (QuotientAddGroup.eq_zero_iff z).2 hx
 
-lemma torusToPoint_surjective : Function.Surjective (torusToPoint L) := fun P ↦ by
-  obtain ⟨z, hz⟩ := toPoint_surjective (L := L) P
-  exact ⟨Torus.mk L z, hz⟩
-
-variable (L) in
-
-def torusEquivPoint : Torus L ≃+ (weierstrassCurve L).toAffine.Point :=
-  AddEquiv.ofBijective (torusToPoint L) ⟨torusToPoint_injective, torusToPoint_surjective⟩
-
-@[simp]
-theorem torusEquivPoint_mk (z : ℂ) : torusEquivPoint L (Torus.mk L z) = toPoint L z := rfl
 
 end Elliptic
 end GroundTheory.Global

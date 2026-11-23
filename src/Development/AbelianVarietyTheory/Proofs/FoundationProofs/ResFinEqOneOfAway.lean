@@ -1,14 +1,63 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
-import Formalism.PairingDivisors.StatementA
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsFinSetSplitPlacesCoprimeConductor
-import Development.AbelianVarietyTheory.BlockTheory.AdelicCMFields.UnitaryHeckeCharacterIdele
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPlaceOverMoveValConjPl
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedPowSubOneLtOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HostCmData
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSplitPlOfTwoMem
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeLEntireAndNonzeroAtOneHolds
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.AdelicCMFields.UnitaryHeckeCharacterIdele
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DenseRangeUnits
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeCharacterUnramifiedAeAndExistsLevel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsPlaceOverMoveValConjPl
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalIdeleSndSelf
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnderEqIffConjPl
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ValuedPowSubOneLtOne
+import Formalism.LocalToGlobal.UnitaryNorms.CharUniq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GaloisValuations.GlobalB
+import Std.Tactic.BVDecide.Normalize.Prop
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,7 +118,7 @@ variable {E : Type} [Field E] [NumberField E] {χ : HChar E} {m : ℕ}
 theorem isUnitary_of_pow (hm : m ≠ 0) (h : ∀ x, χ.1 x ^ m = 1) : χ.IsUnitary := fun x =>
   Complex.norm_eq_one_of_pow_eq_one (by rw [← Units.val_pow_eq_pow_val, h, Units.val_one]) hm
 
-theorem locInf_of_pow [IsTotallyComplex E] (hm : m ≠ 0) (h : ∀ x, χ.1 x ^ m = 1) (w : InfinitePlace E)
+theorem locInf_of_pow [_root_.NumberField.IsTotallyComplex E] (hm : m ≠ 0) (h : ∀ x, χ.1 x ^ m = 1) (w : InfinitePlace E)
     (x : (w.Completion)ˣ) : χ.locInf w x = 1 := by
   let e := InfinitePlace.Completion.ringEquivComplexOfIsComplex (IsTotallyComplex.isComplex w)
   obtain ⟨z, hz⟩ := IsAlgClosed.exists_pow_nat_eq (e x) (Nat.pos_of_ne_zero hm)
@@ -82,7 +131,7 @@ theorem locInf_of_pow [IsTotallyComplex E] (hm : m ≠ 0) (h : ∀ x, χ.1 x ^ m
   rw [e2, map_pow]
   exact h _
 
-theorem inf_of_pow [IsTotallyComplex E] (hm : m ≠ 0) (h : ∀ x, χ.1 x ^ m = 1) (k : Eˣ) : χ.inf k = 1 := by
+theorem inf_of_pow [_root_.NumberField.IsTotallyComplex E] (hm : m ≠ 0) (h : ∀ x, χ.1 x ^ m = 1) (k : Eˣ) : χ.inf k = 1 := by
   show χ.1 (infDiag k) = 1
   rw [infDiag, MonoidHom.finsetProd_apply, map_prod]
   exact Finset.prod_eq_one fun w _ => locInf_of_pow hm h w _
@@ -152,7 +201,6 @@ theorem ordF_up (hu : ∀ P : HeightOneSpectrum (𝓞 E), Algebra.IsUnramifiedAt
   have : (P.asIdeal.under (𝓞 F)).IsMaximal := (P.under (𝓞 F)).isMaximal
   have h : P.valuation E (algebraMap F E k) = (P.under (𝓞 F)).valuation F k := by
     rw [← HeightOneSpectrum.valuation_liesOver E (P.under (𝓞 F)) P (k : F),
-      Ideal.ramificationIdx'_eq_ramificationIdx _ _ (P.under (𝓞 F)).ne_bot,
       Ideal.ramificationIdx_eq_one_iff.2 (hu P), pow_one]
   unfold ordF
   rw [← h]
@@ -187,8 +235,8 @@ theorem ideleMap_local (v : HeightOneSpectrum (𝓞 F)) (k : Fˣ) :
     · rw [ev_local_ne hw, map_one]
       exact (Finset.prod_eq_one fun P hP => ev_local_ne (fun e : w = P => hw (e ▸ mem_aboveF.1 hP)) _).symm
 
-open GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele in
 
+open GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele in
 theorem resFin_eq_one_of_away (χ : HChar E) (S : Finset (HeightOneSpectrum (𝓞 F)))
     (h : ∀ v ∉ S, ∀ k, χ.resFin v k = 1) (v : HeightOneSpectrum (𝓞 F)) (k : Fˣ) : χ.resFin v k = 1 := by
   have e : ∀ (v : HeightOneSpectrum (𝓞 F)) (k : Fˣ),

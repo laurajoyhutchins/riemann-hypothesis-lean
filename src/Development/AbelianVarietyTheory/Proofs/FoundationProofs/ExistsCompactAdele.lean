@@ -1,14 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.CdScaleTieIff
-import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CdScaleTieIff
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.InfAdeleTensorBijective
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsCompactLatticeStabilizerBoundedReal
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ArchimedeanMatrixUnitaryContinuousMultiplicative
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFinPartMat
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+import Mathlib.Topology.Baire.LocallyCompactRegular
+import Mathlib.Topology.UniformSpace.Uniformizable
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LeftInvOfUnitary
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DiscreteTopologyRationalPointsHermitianSpace
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsCompactLatticeStabilizerBoundedReal
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFinPartMat
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplit
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ArchimedeanMatrixUnitaryContinuousMultiplicative
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.InfAdeleTensorBijective
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsIsFundamentalDomainAndQuotMeasureEq
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +79,7 @@ theorem infEmb_unique (h : IsCMExt F E σ) {τ : E →+* ℂ} {θ θ' : Ainf F �
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul a x => rw [infEmb_tmul h hθ, infEmb_tmul h hθ']
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem infEmb_continuous {τ : E →+* ℂ} {θ : Ainf F ⊗[F] E →+* ℂ} (hθ : IsInfEmb τ θ) : Continuous θ :=
   haveI : IsModuleTopology (Ainf F) (Ainf F ⊗[F] E) := ⟨rfl⟩
@@ -48,7 +94,7 @@ theorem infEmb_sigR (h : IsCMExt F E σ) {τ : E →+* ℂ} {θ : Ainf F ⊗[F] 
     have e : sigR (Ainf F) σ (a ⊗ₜ x) = a ⊗ₜ σ x := rfl
     rw [e, infEmb_tmul h hθ, infEmb_tmul h hθ, map_mul, GlobalTheory.InfAdeleCM.conj_ext, h.2.2.2]
     rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem infEmb_bijective (h : IsCMExt F E σ) {I : Type} {τ : I → (E →+* ℂ)} (hτ : IsCMFam τ)
     {θ : I → (Ainf F ⊗[F] E →+* ℂ)} (hθ : ∀ ρ, IsInfEmb (τ ρ) (θ ρ)) :
@@ -137,37 +183,8 @@ theorem infMat_unitary (h : IsCMExt F E σ) {τ : E →+* ℂ} {θ : Ainf F ⊗[
   rw [← JR_map J hθ]
   exact h2.symm.trans (congrArg (fun X => X.map θ) hm)
 
-theorem exists_real_point (h : IsCMExt F E σ) (hJ : J.det ≠ 0) {I : Type} {τ : I → (E →+* ℂ)} (hτ : IsCMFam τ)
-    {θ : I → (Ainf F ⊗[F] E →+* ℂ)} (hθ : ∀ ρ, IsInfEmb (τ ρ) (θ ρ)) (u : I → Matrix (Fin M) (Fin M) ℂ)
-    (hu : ∀ ρ, (u ρ)ᴴ * J.map (τ ρ) * u ρ = J.map (τ ρ)) :
-    ∃ g : HA (AF F) σ J, finMat σ J g = 1 ∧ ∀ ρ, infMat σ J (θ ρ) g = u ρ := by
-  obtain ⟨a, ha, hau⟩ := GlobalTheory.Member.Arch.exists_lift (sigR (Ainf F) σ) θ (infEmb_bijective h hτ hθ)
-    (fun ρ => infEmb_sigR h (hθ ρ)) (JR (Ainf F) J) (fun ρ => by
-      rw [JR_map J (hθ ρ)]
-      have : (J.map (τ ρ)).det = τ ρ J.det := ((τ ρ).map_det J).symm
-      rw [this]
-      exact (map_ne_zero (τ ρ)).2 hJ) u (fun ρ => by rw [JR_map J (hθ ρ)]; exact hu ρ)
-  let p := (Algebra.TensorProduct.map (fstA F) (AlgHom.id F E)).toRingHom
-  let q := (Algebra.TensorProduct.map (sndA F) (AlgHom.id F E)).toRingHom
-  obtain ⟨e, he, -⟩ := GlobalTheory.AdSplit.exists_adele_equiv F E
-  have hi : ∀ x y, p x = p y → q x = q y → x = y := fun x y h1 h2 =>
-    e.injective (Prod.ext (((he x).1.trans h1).trans (he y).1.symm) (((he x).2.trans h2).trans (he y).2.symm))
-  have hs : ∀ a b, ∃ x, p x = a ∧ q x = b := fun a b => by
-    refine ⟨e.symm (a, b), (he _).1.symm.trans ?_, (he _).2.symm.trans ?_⟩ <;> simp
-  obtain ⟨g, g1, g2⟩ := GlobalTheory.UnitarySplit.gl_glue p q hi hs a 1
-  have hg : g ∈ HR (AF F) σ J := by
-    refine (GlobalTheory.UnitarySplit.mem_iff p q hi (sigR _ σ) (sigR _ σ) (sigR _ σ) (GlobalTheory.UnitarySplit.map_sig _ _)
-      (GlobalTheory.UnitarySplit.map_sig _ _) (JR _ J) g).2 ⟨?_, ?_⟩
-    · rw [g1, GlobalTheory.UnitarySplit.map_JR]
-      exact ha
-    · rw [g2]
-      exact one_mem _
-  refine ⟨⟨g, hg⟩, congrArg Units.val g2, fun ρ => ?_⟩
-  rw [← hau, ← g1]
-  rfl
 
 variable (σ) in
-
 def stab (L : Set (Fin M → E)) : Subgroup (HA (AF F) σ J) where
   carrier := {h | StabHat F L (finMat σ J h)}
   one_mem' := fun y => by rw [finMat_one, Matrix.one_mulVec]
@@ -217,7 +234,9 @@ theorem exists_lattice (W : HSpace E) : ∃ L : Submodule (𝓞 E) (Fin W.rank �
   let f := W.frame.equivFun.toLinearMap
   refine ⟨W.L0.map (f.restrictScalars (𝓞 E)), W.standardTuple_isLattice.fg.map _, ?_, ?_⟩
   · have : (W.L0.map (f.restrictScalars (𝓞 E)) : Set (Fin W.rank → E)) = f '' W.L0 := rfl
-    rw [this, ← Submodule.map_span, W.standardTuple_isLattice.span_eq_top, Submodule.map_top, LinearEquiv.range]
+    have hspan : Submodule.span E (W.L0 : Set W.V) = ⊤ :=
+      Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top W.baseLattice_isUnimodular W.herm W.standardTuple_isLattice.fg
+    rw [this, ← Submodule.map_span, hspan, Submodule.map_top, LinearEquiv.range]
   · ext v
     constructor
     · rintro ⟨x, hx, rfl⟩

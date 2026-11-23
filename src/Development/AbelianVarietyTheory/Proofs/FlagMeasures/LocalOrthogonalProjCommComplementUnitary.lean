@@ -1,7 +1,45 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ScalarFramePfA
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped Classical ENNReal
 open NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.HidaSetting Formalism.L2.SG.TermOp Formalism.L2.SG.Full Formalism.L2.SG.RowsConc Formalism.L2.SG.NGData Formalism.L2.SG.TermLoc GlobalTheory.Unfold
@@ -53,6 +91,7 @@ theorem projP_apply (U : Submodule D.host.E (VS D).V) (y : Vp D p) :
 
 theorem baseChangeAt_proj (U : Submodule D.host.E (VS D).V) (x : (VS D).V) :
     baseChange₂ D p (proj U x) = projP Z p U (baseChange₂ D p x) := by
+
   rw [proj_apply, projP_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [baseChange_smul₂, RingHom.map_mulVec]
@@ -78,7 +117,7 @@ theorem localLattice_sup (Λ₁ Λ₂ : LV D) : lattice₂ D Z.M p (Λ₁ ⊔ Λ
   rw [lattice₂, Submodule.span_le]
   rintro _ ⟨x, hx, rfl⟩
   obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hx
-  rw [map_add]
+  rw [map_add (f := _)]
   exact Submodule.add_mem _ (Submodule.mem_sup_left (Submodule.subset_span ⟨a, ha, rfl⟩))
     (Submodule.mem_sup_right (Submodule.subset_span ⟨b, hb, rfl⟩))
 
@@ -115,6 +154,7 @@ theorem mem_orth_of_bU (U : Submodule D.host.E (VS D).V) (y : (VS D).V)
   rw [mem_orth_iff]
   intro u hu
   obtain ⟨c, rfl⟩ := exists_sum_bU U hu
+
   simp [map_sum, LinearMap.sum_apply, h]
 
 theorem gram_det_isUnit (U : Submodule D.host.E (VS D).V)
@@ -128,6 +168,7 @@ theorem gram_det_isUnit (U : Submodule D.host.E (VS D).V)
     apply mem_orth_of_bU
     intro i
     have h1 : (VS D).hT (bU U i) (∑ j, v j • bU U j) = ∑ j, gram U i j * v j := by
+
       simp only [map_sum, map_smul, smul_eq_mul, gram, Matrix.of_apply]
       exact Finset.sum_congr rfl fun j _ => mul_comm _ _
     rw [h1]
@@ -152,6 +193,7 @@ theorem sub_proj_mem_orth (U : Submodule D.host.E (VS D).V) (hG : IsUnit (gram U
     intro w
     simp only [Matrix.mulVec, dotProduct, gram, Matrix.of_apply]
     exact Finset.sum_congr rfl fun i _ => mul_comm _ _
+
   rw [map_sub, proj_apply, map_sum, sub_eq_zero]
   simp only [map_smul, smul_eq_mul]
   rw [← key (Matrix.mulVec (gram U)⁻¹ fun j => (VS D).hT (bU U j) x), Matrix.mulVec_mulVec,
@@ -162,7 +204,7 @@ end GlobalTheory.FrameProj
 namespace GlobalTheory.FrameProj
 variable {D : D7} (Z : LocDat D) (p : PlF D)
 
-theorem Xplus_le_span {T : D.host.E} (F : LFlag (VS D) D.R.rS T) :
+theorem Xplus_le_span {T : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) :
     Xplus F ≤ Submodule.span D.host.E (Set.range (frame F)) := by
   have hf : ∀ a, frame F a ∈ Submodule.span D.host.E (Set.range (frame F)) :=
     fun a => Submodule.subset_span ⟨a, rfl⟩
@@ -182,7 +224,7 @@ def fixSub (g : Vp D p ≃ₗ[(D.s.atP p).Ep] Vp D p) : Submodule D.host.E (VS D
   add_mem' := by
     intro a b ha hb
     simp only [Set.mem_setOf_eq] at *
-    rw [map_add, map_add, ha, hb]
+    rw [map_add (f := _), map_add (f := _), ha, hb]
   zero_mem' := by simp
   smul_mem' := by
     intro c a ha
@@ -203,7 +245,7 @@ def commSub (P : Vp D p →ₗ[(D.s.atP p).Ep] Vp D p) : Subgroup (Vp D p ≃ₗ
     rw [← ha]
     simp
 
-theorem localOrthogonalProj_comm_complementUnitary {T T' : D.host.E} (F : LFlag (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T')
+theorem localOrthogonalProj_comm_complementUnitary {T T' : D.host.E} (F : LFlag (D.sp.Y 0) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T')
     (FP : LocNG.FPair (locH Z p) D.R.rS)
     (hA : FP.A.f = fun a => frFac Z.δ p a • baseChange₂ D p (frame F a))
     (hB : FP.B.f = fun a => frFac Z.δ p a • baseChange₂ D p (frame F' a))
@@ -248,6 +290,7 @@ theorem localOrthogonalProj_comm_complementUnitary {T T' : D.host.E} (F : LFlag 
       exact (hunit a).smul_left_cancel.mp h1
   have hb : ∀ i, g (baseChange₂ D p (bU (Xplus F ⊔ Xplus F') i)) = baseChange₂ D p (bU (Xplus F ⊔ Xplus F') i) :=
     fun i => hfixU (bU_mem _ i)
+
   rw [projP_apply, projP_apply, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_smul, hb i]

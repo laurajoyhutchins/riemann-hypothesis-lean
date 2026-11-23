@@ -1,4 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ContinuousCoboundaries2
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ContinuousCoboundaries2
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.UnitaryThreeReflectionRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,12 +72,12 @@ theorem ordProd_map {H K K' : Type} [CommRing K] [CommRing K'] {n : ℕ} (f : K 
   simp only [Function.comp_apply, map_sub]
   congr 1
   ext a b
-  by_cases h : a = b <;> simp [h, Matrix.one_apply]
+  by_cases h : a = b <;> simp [h]
 
 @[ext] structure NRep (K : Type) [CommRing K] where
   r : F.G0 →* Matrix (Fin n) (Fin n) K
   ψ : ∀ v, Fin n → F.Gv v →* Kˣ
-  pol : ∀ g, r (F.star g) = Jmat K n * (r g)ᵀ * Jmat K n
+  pol : ∀ g, r (F.star g) = Jmat (R := K) n * (r g)ᵀ * Jmat (R := K) n
   diag : ∀ i j, i ≠ j → (r F.g0 - r (F.star F.g0)) i j = 0
   ord : ∀ v g, ordProd (fun s => r (F.loc0 v s)) (fun i s => (ψ v i s : K)) g = 0
 
@@ -39,7 +89,8 @@ def map (f : K →+* K') (ρ : NRep F n K) : NRep F n K' where
   r := (f.mapMatrix : Matrix (Fin n) (Fin n) K →+* _).toMonoidHom.comp ρ.r
   ψ v i := (Units.map f.toMonoidHom).comp (ρ.ψ v i)
   pol g := by
-    show f.mapMatrix (ρ.r (F.star g)) = Jmat K' n * (f.mapMatrix (ρ.r g))ᵀ * Jmat K' n
+    show f.mapMatrix (ρ.r (F.star g)) =
+      Jmat (R := K') n * (f.mapMatrix (ρ.r g))ᵀ * Jmat (R := K') n
     rw [ρ.pol, map_mul, map_mul]
     simp only [RingHom.mapMatrix_apply, Jmat_map, Matrix.transpose_map]
   diag i j h := by
@@ -113,9 +164,6 @@ def mon (ρ : NRep F n K) (j : ℤ) : Set K :=
 
 end NRep
 
-def Irr {H K : Type} [Field K] {ι : Type} [Fintype ι] (r : H → Matrix ι ι K) : Prop :=
-  ∀ U : Submodule K (ι → K), (∀ g, ∀ u ∈ U, r g *ᵥ u ∈ U) → U = ⊥ ∨ U = ⊤
-
 def adicClosure {O R : Type} [CommRing O] [CommRing R] [IsLocalRing R] [Algebra O R] (S : Subalgebra O R) :
     Subalgebra O R where
   carrier := {x | ∀ N : ℕ, ∃ y ∈ S, x - y ∈ maximalIdeal R ^ N}
@@ -149,7 +197,6 @@ section Space
 variable {l : ℕ} [Fact l.Prime] (O : Type) [CommRing O] [IsLocalRing O] (F : Frame l (ResidueField O)) (n : ℕ)
 
 variable {F n} in
-
 def IsLift {R : Type} [CommRing R] [Algebra O R] [IsCO O R] (ρ : NRep F n R) : Prop :=
   ρ.Cont (maximalIdeal R) ∧ (ρ.map (res O R : R →+* ResidueField O)).IsBar (RingHom.id _) ∧
     (ρ.map (res O R : R →+* ResidueField O)).IsDiag

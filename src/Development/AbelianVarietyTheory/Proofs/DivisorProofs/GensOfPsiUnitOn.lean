@@ -1,19 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsMonoFamNontrivial
-import Development.AbelianVarietyTheory.Definitions.Divisors.EvenDefect
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsProperToroidalModelStructureMap
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsScalarFormTraceForm
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TraceFormTwistIsoOfPullback
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullbackDegPreStrictLineBundleIso
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValEqOfAppInjective
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TauBimultOfIsPullDeg
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EvenDefect
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsScalarFormTraceForm
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValEqOfAppInjective
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FromBaseAlt
 import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.BetaAtClosedPoint
-import Development.AbelianVarietyTheory.Definitions.Divisors.FromBaseAlt
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsUnifOfIsMumfordOf
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeriodsInCoordinatesFromBasePullDeg
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToUnitTKLeft
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsLastFurther
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPullbackDegPreStrictLineBundleIso
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ImportsLastFurther
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeriodsInCoordinatesFromBasePullDeg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ToUnitTKLeft
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllSixAbelianSchemeLawsHold
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.TauBimultOfIsPullDeg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,7 +107,7 @@ theorem diag_eq_two_mul {O : Type} [CommRing O] [StarRing O] {X : Type} [AddComm
     {β : LinearMap.BilinForm ℤ X} (hβ : β ∈ GlobalTheory.PolFan.balForms (star : O → O) X) {w0 : O}
     (hw : w0 + star w0 = 1) (y : X) : β y y = 2 * β y (w0 • y) := by
   have h1 : β y y = β y (w0 • y) + β y (star w0 • y) := by
-    rw [← map_add, ← add_smul, hw, one_smul]
+    rw [← map_add (f := _), ← add_smul, hw, one_smul]
   have h2 : β y (star w0 • y) = β y (w0 • y) := by
     rw [← hβ.2 w0 y y, hβ.1]
   rw [h1, h2]; ring
@@ -95,8 +131,9 @@ theorem finite_sublevel {X : Type} [AddCommGroup X] [Module.Free ℤ X] [Module.
     have h1 : β (x - y) (x - y) = 0 := by
       generalize x - y = z at h0
       have e := congrArg (fun w => β w z) (b.sum_repr z)
+
       simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, h0, smul_zero,
-        Finset.sum_const_zero] at e
+      Finset.sum_const_zero] at e
       exact e.symm
     exact (hp _ hz).ne' h1
   refine Set.Finite.of_finite_image ?_ hinj.injOn
@@ -105,7 +142,7 @@ theorem finite_sublevel {X : Type} [AddCommGroup X] [Module.Free ℤ X] [Module.
   have hx' : β x x ≤ C := hx
   have e1 := hnn (b j + x)
   have e2 := hnn (b j - x)
-  simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply, hs x (b j)] at e1 e2
+  simp only [map_add (f := _), map_sub, LinearMap.add_apply, LinearMap.sub_apply, hs x (b j)] at e1 e2
   simp only [Set.mem_Icc, F]
   constructor <;> nlinarith [hnn x]
 
@@ -164,8 +201,8 @@ theorem gens_of_psiUnitOn {R : Type} [CommRing R] [IsDomain R] (D : DegPre R) (h
       val (D.tau a b) (𝟙 _) z J = val (τ₀ a b) (toUnit (TK R)).left z J :=
   GlobalTheory.DDataGens.main R D hb hU
 
-open GlobalTheory.UChart in
 
+open GlobalTheory.UChart in
 theorem fromBase_self {V : Type} [CommRing V] [IsDomain V] (Q : DegPre V) (τ₀ : Gens Q) (h : ∀ a b, (τ₀ a b).IsGen) :
     FromBase Q τ₀ (RingHom.id V) := by
   have hs : spMap (RingHom.id V) = 𝟙 (Sp V) := Spec.map_id _
@@ -267,7 +304,7 @@ theorem main (W R : Type) [CommRing W] [IsDomain W] [CommRing R] [IsDomain R] [I
     · exact GlobalTheory.PolFan.pull_mem _ (hδ i)
     · exact GlobalTheory.PolFan.pull_mem _ (hε j)
   have hs : GlobalTheory.TauTwist.IsScalarForm O (fun a b : D'.X => ∏ k, v k ^ β k a b) :=
-    ⟨fun y x x' => by simp only [map_add, zpow_add, Finset.prod_mul_distrib],
+    ⟨fun y x x' => by simp only [map_add (f := _), zpow_add, Finset.prod_mul_distrib],
       fun y x => by simp only [(hβ _).1 y x],
       fun a y x => by simp only [(hβ _).2 a y x]⟩
   refine ⟨D', hD, iM, e, fun y => rfl, ?_⟩

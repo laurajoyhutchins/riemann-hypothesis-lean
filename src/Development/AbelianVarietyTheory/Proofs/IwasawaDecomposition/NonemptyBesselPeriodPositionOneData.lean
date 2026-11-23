@@ -1,13 +1,60 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GSplit
-import Formalism.SharpRestriction.Divisibility.BoundaryLocalData
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocallyCompactSecondCountableT2
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AbsNormEqOfNcardPlacesOver
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ObjOnNarrowOfObjectsExist
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPartConjMem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+public import Formalism.LocalToGlobal.Columns.DecoFin
+public import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinPartConjMem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EvalVAlgebraMapMem
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ObjOnNarrowOfObjectsExist
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AbsNormEqOfNcardPlacesOver
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocallyCompactSecondCountableT2
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.SharpRestriction.Divisibility.BoundaryLocalData
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,6 +95,7 @@ theorem fix_inv {g g' : Matrix (Fin n) (Fin n) R} (hg : g' * g = 1) {v : Fin n �
 
 theorem fix_sum {m : ℕ} {g : Matrix (Fin n) (Fin n) R} {v : Fin m → Fin n → R} (h : ∀ l, ε • (g *ᵥ v l - v l) = 0)
     (y : Fin m → R) : ε • (g *ᵥ (∑ l, y l • v l) - ∑ l, y l • v l) = 0 := by
+
   rw [← Matrix.mulVecLin_apply, map_sum, ← Finset.sum_sub_distrib, Finset.smul_sum]
   refine Finset.sum_eq_zero fun l _ => ?_
   rw [map_smul, ← smul_sub, smul_comm, Matrix.mulVecLin_apply, h, smul_zero]
@@ -236,7 +284,7 @@ theorem exists_typePrime (D : D7) (i : Fin 2) : ∃ 𝔭 : Ideal (𝓞 D.host.K)
   have hK : (Formalism.MainNotions.BoundaryLocalData.w0 D : D.host.E) ∈ D.host.K :=
     div_mem (add_mem (one_mem _) (IntermediateField.mem_adjoin_simple_self ℚ _)) (ofNat_mem _ 2)
   let w : 𝓞 D.host.K := ⟨⟨_, hK⟩, by
-    exact (isIntegral_algebraMap_iff (algebraMap D.host.K D.host.E).injective).1 (Formalism.MainNotions.BoundaryLocalData.w0 D).2⟩
+    exact (isIntegral_algebraMap_iff ).1 (Formalism.MainNotions.BoundaryLocalData.w0 D).2⟩
   have hw : algebraMap _ (𝓞 D.host.E) w = Formalism.MainNotions.BoundaryLocalData.w0 D := rfl
   have hm : w - n ∈ Q.asIdeal.comap (algebraMap (𝓞 D.host.K) (𝓞 D.host.E)) := by
     rw [Ideal.mem_comap, map_sub, map_intCast, hw, ← Ideal.Quotient.eq, map_intCast, hn]
@@ -328,8 +376,8 @@ theorem exists_list (S : AE D → Prop) (N : ℕ) (hN : N ≠ 0)
 
 end Places
 
-open Formalism.L2.Col in
 
+open Formalism.L2.Col in
 theorem nonempty_besselPeriodPositionOneData : ∀ D : D7, Nonempty (Pos1 D) := by
   intro D
   choose π hπ1 hπ2 hπ3 using exists_levelGen D

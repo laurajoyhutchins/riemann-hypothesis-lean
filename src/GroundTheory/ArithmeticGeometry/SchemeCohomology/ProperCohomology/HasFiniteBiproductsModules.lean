@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.CokernelCoherent
+module
+
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProjectiveCohomology.QcohLocal
+public import GroundTheory.ArithmeticGeometry.SchemeCohomology.ProperCohomology.CokernelCoherent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Arith.SchemeCoh
@@ -42,14 +86,6 @@ lemma biproduct_app_eq_sum (U : X.Opens) (m : Γ(⨁ M, U)) :
       rfl
   exact this Finset.univ
 
-lemma biproduct_π_app_ι_app (U : X.Opens) (i j : ι) (x : Γ(M i, U)) :
-    (biproduct.π M j).app U ((biproduct.ι M i).app U x) =
-      if h : i = j then (eqToHom (congrArg M h)).app U x else 0 := by
-  rw [← ConcreteCategory.comp_apply, ← Scheme.Modules.Hom.comp_app, biproduct.ι_π]
-  split_ifs with h
-  · rfl
-  · rfl
-
 theorem isQuasicoherent_biproduct [∀ i, (M i).IsQuasicoherent] : (⨁ M).IsQuasicoherent := by
   refine isQuasicoherent_of_affineCover _ (fun V : X.affineOpens => (V : X.Opens)) (fun V => V.2)
     (iSup_affineOpens_eq_top X) ?_ ?_
@@ -60,6 +96,7 @@ theorem isQuasicoherent_biproduct [∀ i, (M i).IsQuasicoherent] : (⨁ M).IsQua
       fun j => qcoh_exists_res_eq (M j) V.2 f _
     choose e m' hm' using key
     refine ⟨∑ j, e j, ∑ j, (biproduct.ι M j).app _ (f ^ (∑ k, e k - e j) • m' j), ?_⟩
+
     rw [map_sum]
     conv_rhs => rw [biproduct_app_eq_sum M _ m, Finset.smul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_

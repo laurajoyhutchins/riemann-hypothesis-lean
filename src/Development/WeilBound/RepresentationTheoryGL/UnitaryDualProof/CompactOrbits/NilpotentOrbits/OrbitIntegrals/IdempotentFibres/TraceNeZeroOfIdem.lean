@@ -1,4 +1,63 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.ZNClosed
+module
+
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.FourierTransforms.IsSemisimpleRing
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.ZNClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Trace
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,8 +69,8 @@ open PositivityTheory.RgUd.T PositivityTheory.RgUd.T.Nil PositivityTheory.RgUd.T
 
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] {n : ℕ}
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem trace_ne_zero_of_idem [CharZero k] {e : Matrix (Fin n) (Fin n) k} (he : IsIdempotentElem e) (h0 : e ≠ 0) :
     trace e ≠ 0 := by
   have he' : IsIdempotentElem (Matrix.toLin' e) := by
@@ -27,8 +86,8 @@ theorem trace_ne_zero_of_idem [CharZero k] {e : Matrix (Fin n) (Fin n) k} (he : 
   have h1 := (LinearMap.IsIdempotentElem.trace_eq_zero_iff (e := Matrix.toLin' e) he').1 ht
   exact Matrix.toLin'.injective (by rw [h1, map_zero])
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem exists_pow_eq {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} {c : Matrix (Fin n) (Fin n) k} (hc : c ∈ Z) :
     ∃ (m : ℕ) (d : Matrix (Fin n) (Fin n) k), d ∈ Z ∧ c ^ m = c ^ (m + 1) * d := by
   let W : ℕ → Submodule k (Matrix (Fin n) (Fin n) k) := fun j =>
@@ -57,56 +116,14 @@ theorem exists_pow_eq {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} {c : Matrix 
   obtain ⟨d, hd, e⟩ := Submodule.mem_map.1 hcm
   exact ⟨m, d, hd, by simpa using e.symm⟩
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem eq_zero_of_trace [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ : CR Z)
     {c : Matrix (Fin n) (Fin n) k} (hc : c ∈ Z) (h : ∀ b ∈ Z, trace (b * c) = 0) : c = 0 := by
-  obtain ⟨m, d, hd, hmd⟩ := exists_pow_eq hc
-  have hcomm : ∀ a ∈ Z, ∀ b ∈ Z, a * b = b * a := hZ.1
-  have hdc : d * c = c * d := hcomm d hd c hc
+  apply PositivityTheory.RgUd.T.Nil.Four.Alg.trZ_nondeg <;> assumption
 
-  have key : ∀ j, c ^ m = c ^ (m + j) * d ^ j := by
-    intro j
-    induction j with
-    | zero => simp
-    | succ j ih =>
-      rw [ih]
-      calc c ^ (m + j) * d ^ j = c ^ j * c ^ m * d ^ j := by rw [← pow_add, add_comm]
-        _ = c ^ j * (c ^ (m + 1) * d) * d ^ j := by rw [← hmd]
-        _ = c ^ j * c ^ (m + 1) * (d * d ^ j) := by simp only [mul_assoc]
-        _ = c ^ (m + (j + 1)) * d ^ (j + 1) := by
-          rw [← pow_add, pow_succ' d j, show j + (m + 1) = m + (j + 1) by omega]
-  set e := c ^ m * d ^ m with he_def
-  have hcd : Commute c d := by rw [Commute, SemiconjBy, hdc]
-  have he_idem : IsIdempotentElem e := by
-    unfold IsIdempotentElem
-    have h2 := key m
-    calc e * e = c ^ m * (d ^ m * c ^ m) * d ^ m := by simp only [he_def, mul_assoc]
-      _ = c ^ m * (c ^ m * d ^ m) * d ^ m := by rw [← (hcd.pow_pow m m).eq]
-      _ = c ^ (m + m) * d ^ m * d ^ m := by rw [pow_add]; simp only [mul_assoc]
-      _ = c ^ m * d ^ m := by rw [← h2]
-  have he_mem : e ∈ Z := Z.mul_mem (Z.pow_mem hc m) (Z.pow_mem hd m)
-  by_contra hne
-  by_cases he0 : e = 0
-  ·
-    have hcm0 : c ^ m = 0 := by
-      have h2 := key m
-      rw [h2, pow_add, mul_assoc, ← he_def, he0, mul_zero]
-    have hnil : IsNilpotent (⟨c, hc⟩ : Z) := ⟨m, Subtype.ext (by simpa using hcm0)⟩
-    have := hZ.2
-    have := hnil.eq_zero
-    exact hne (by simpa using congrArg Subtype.val this)
-  ·
-    have hb : c ^ m * d ^ (m + 1) ∈ Z := Z.mul_mem (Z.pow_mem hc m) (Z.pow_mem hd _)
-    have hbe : c ^ m * d ^ (m + 1) * c = e := by
-      calc c ^ m * d ^ (m + 1) * c = c ^ m * (c * d ^ (m + 1)) := by
-            rw [mul_assoc, ← (hcd.pow_right (m + 1)).eq]
-        _ = c ^ (m + 1) * (d * d ^ m) := by rw [← mul_assoc, ← pow_succ, pow_succ' d m]
-        _ = e := by rw [← mul_assoc, ← hmd]
-    exact trace_ne_zero_of_idem he_idem he0 (by rw [← hbe]; exact h _ hb)
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
-
 theorem qZ_add (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) (x y : Matrix (Fin n) (Fin n) k) :
     qZ Z (x + y) = qZ Z x + qZ Z y := by
   funext i
@@ -118,8 +135,8 @@ theorem qZ_sub (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) (x y : Matrix (Fin 
   funext i
   simp [qZ, mul_sub, trace_sub]
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem qZ_nil (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) {x : Matrix (Fin n) (Fin n) k} (hx : x ∈ Bz Z)
     (hn : IsNilpotent x) : qZ Z x = 0 := by
   funext i
@@ -128,8 +145,8 @@ theorem qZ_nil (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) {x : Matrix (Fin n)
   have := Matrix.isNilpotent_trace_of_isNilpotent (hcomm.isNilpotent_mul_left hn)
   simpa [qZ] using this.eq_zero
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem qZ_inj [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ : CR Z) {c c' : Matrix (Fin n) (Fin n) k}
     (hc : c ∈ Z) (hc' : c' ∈ Z) (h : qZ Z c = qZ Z c') : c = c' := by
   have h0 : qZ Z (c - c') = 0 := by rw [qZ_sub, h, sub_self]
@@ -144,8 +161,8 @@ theorem qZ_inj [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ : 
     simpa [qZ, ℓ] using this
   exact congrArg (fun f : Z →ₗ[k] k => f ⟨b, hb⟩) hℓ
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 
+omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem qZ_surj [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ : CR Z)
     (y : Fin (Module.finrank k Z) → k) : ∃ c ∈ Z, qZ Z c = y := by
   let φ : Z →ₗ[k] (Fin (Module.finrank k Z) → k) :=
@@ -158,14 +175,6 @@ theorem qZ_surj [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ :
   obtain ⟨c, hc⟩ := hsurj y
   exact ⟨c, c.2, hc⟩
 
-omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
-
-theorem piZ_spec [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ : CR Z) (x : Matrix (Fin n) (Fin n) k) :
-    piZ Z x ∈ Z ∧ qZ Z (piZ Z x) = qZ Z x := by
-  have h : ∃ c ∈ Z, qZ Z c = qZ Z x := qZ_surj hZ _
-  unfold piZ
-  rw [dif_pos h]
-  exact h.choose_spec
 
 theorem fibZN [CharZero k] : FibZN (k := k) := by
   intro n Z hZ y

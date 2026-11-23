@@ -1,18 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.KeyFormula.IsSquareDeterminantComparison
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.IsPluriharmonicSiegel
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.VeryAmpleByOfRelAmple
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSymmetricInterpolating
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsSquareDetComparisonScaleSec
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.MemNonzeroLocusVia
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.VeryAmpleByOfRelAmple
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsLieBasisIffIsUnitDet
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.IsSquareDetComparisonScaleSec
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSymmetricInterpolating
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.OneCSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,7 +80,16 @@ theorem GlobalTheory.VeryAmpleJet.veryAmpleBy_of_veryAmpleAt {R : Type} [CommRin
   obtain ⟨ψ, hiso, hψ⟩ : ∃ ψ : X ⟶ (A.hom ⁻¹ᵁ ⊤).toScheme, IsIso ψ ∧ ψ ≫ (A.hom ⁻¹ᵁ ⊤).ι = e :=
     ⟨e ≫ inv (A.hom ⁻¹ᵁ ⊤).ι, inferInstance, by simp⟩
   have hP := linComb_isLB L hL (K := Fin N) (fun _ => (A.hom ⁻¹ᵁ ⊤).ι) (fun _ => 1)
-  have hP' := isLB_pw hH N
+  have hP' : (pw H N).IsLB := {
+    cover := hH.cover
+    g_self := fun i => by
+      have h := congrArg (· ^ (N : ℤ)) (hH.g_self i)
+      simp only [one_zpow, ← map_zpow] at h
+      exact h
+    cocycle := fun i j k => by
+      have h := congrArg (· ^ (N : ℤ)) (hH.cocycle i j k)
+      simp only [mul_zpow, ← map_zpow] at h
+      exact h }
   obtain ⟨W, hW⟩ := LBIso.chartPull (chartPullPw H N)
     (chartPullOut L (fun _ : Fin N => (A.hom ⁻¹ᵁ ⊤).ι) (fun _ => 1) ψ _
       fun _ => (Category.id_comp _).trans hψ.symm)
@@ -128,7 +182,7 @@ theorem exists_rows_det_ne_zero {K m : Type} [Field K] [Fintype m] {g : ℕ} (M 
   have hr : M.rank = g := by
     have h1 := LinearMap.finrank_range_add_finrank_ker M.mulVecLin
     rw [LinearMap.ker_eq_bot'.2 h, finrank_bot, add_zero, Module.finrank_fin_fun] at h1
-    exact h1
+    simpa only [Matrix.finrank_range_mulVecLin] using h1
   have hκ : Fintype.card κ = g := by
     rw [← finrank_span_eq_card hli, hsp, ← Matrix.rank_eq_finrank_span_row, hr]
   let e : Fin g ≃ κ := (Fintype.equivFinOfCardEq hκ).symm
@@ -203,15 +257,15 @@ theorem exists_cutting (f : X ⟶ Sp K) {H : LB X} {m : ℕ} {s : Fin (m + 1) �
     obtain ⟨F, rfl⟩ := hsurj x
     induction F using MvPolynomial.induction_on with
     | C c => rw [MvPolynomial.eval₂Hom_C, valH_cst_eq f w w' e]
-    | add F G hF hG => rw [map_add, map_add, map_add, hF, hG]
+    | add F G hF hG => rw [map_add (f := _), map_add (f := _), map_add (f := _), hF, hG]
     | mul_X F j hF =>
       rw [map_mul, MvPolynomial.eval₂Hom_X', map_mul, map_mul, hF, aux w hw j _ (h j), aux w' hw' j _ (h' j),
         valH_cst_eq f w w' e]
 
 end GlobalTheory.VeryAmpleJet
 
-open GlobalTheory.VeryAmpleJet GlobalTheory.KeyKa.EtBaseChange GlobalTheory.PointInterp in
 
+open GlobalTheory.VeryAmpleJet GlobalTheory.KeyKa.EtBaseChange GlobalTheory.PointInterp in
 theorem GlobalTheory.KeyKa.sections_separate_points_and_tangents : Out.Laws → ∀ (K : Type) [Field K] (x : KeyIn K) (n : ℕ), 4 ≤ n → (∀ (z : Pt x) (c : x.P.L.ι), ⊤ ≤ z.left ⁻¹ᵁ x.P.L.U c → (∃ s₀ : RR x n, valT (T := K) z.left (x.P.L.U c) (s₀.f c) ≠ 0) ∧ ∃ s : Fin x.P.g → RR x n, (∀ i, valT (T := K) z.left (x.P.L.U c) ((s i).f c) = 0) ∧ jac x s z c ≠ 0) ∧ ∀ (z z' : Pt x) (c c' : x.P.L.ι), z ≠ z' → ⊤ ≤ z.left ⁻¹ᵁ x.P.L.U c → ⊤ ≤ z'.left ⁻¹ᵁ x.P.L.U c' → ∃ s₀ : RR x n, valT (T := K) z.left (x.P.L.U c) (s₀.f c) = 0 ∧ valT (T := K) z'.left (x.P.L.U c') (s₀.f c') ≠ 0 := by
   intro hL K _ x n hn
   obtain ⟨m, s, hs⟩ := veryAmpleBy_of_veryAmpleAt x.P.isLB (hL.ample _ x.P n hn).2 (𝟙 x.P.A.left)
@@ -236,7 +290,17 @@ theorem GlobalTheory.KeyKa.sections_separate_points_and_tangents : Out.Laws → 
         have e' : w d = w 0 := mul_left_cancel (Over.OverMorphism.ext e)
         exact (x.basis.2 _ (htan _ _ (hw 0))).unique (e' ▸ hw d) (hw 0)
     exact ⟨fun i => t (a i), fun i => ht _, ha⟩
-  · obtain ⟨σ, h₁, h₂⟩ := exists_separating x.P.A.hom (isLB_pw x.P.isLB n) hs z'.left z.left (Over.w z') (Over.w z)
+  · have hpow : (pw x.P.L n).IsLB := {
+      cover := x.P.isLB.cover
+      g_self := fun i => by
+        have h := congrArg (· ^ (n : ℤ)) (x.P.isLB.g_self i)
+        simp only [one_zpow, ← map_zpow] at h
+        exact h
+      cocycle := fun i j k => by
+        have h := congrArg (· ^ (n : ℤ)) (x.P.isLB.cocycle i j k)
+        simp only [mul_zpow, ← map_zpow] at h
+        exact h }
+    obtain ⟨σ, h₁, h₂⟩ := exists_separating x.P.A.hom hpow hs z'.left z.left (Over.w z') (Over.w z)
       fun e => hne (Over.OverMorphism.ext e.symm)
     refine ⟨σ, (valT_eq (T := K) z.left _ hc _).trans ?_, (valT_eq (T := K) z'.left _ hc' _).trans_ne ?_⟩
     · exact not_not.1 fun h => h₂ ((top_le_nonzeroLocus_iff σ z.left c hc).2 h)

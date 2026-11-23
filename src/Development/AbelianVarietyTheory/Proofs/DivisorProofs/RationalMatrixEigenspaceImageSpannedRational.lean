@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentIdealSmulMemSpanRational
+module
+
+public import Mathlib.LinearAlgebra.Matrix.ToLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
+
+@[expose] public section
+
 open NumberField
 
 namespace GlobalTheory.RationalSpan
 
-open Classical in
 
+open Classical in
 theorem expand {K L : Type} [Field K] [Field L] [Algebra K L] {n : ℕ} {s : Type}
     (b : Module.Basis s K L) (v : Fin n → L) :
     v = ∑ j ∈ Finset.univ.biUnion (fun i => (b.repr (v i)).support),
@@ -26,7 +71,8 @@ theorem expand {K L : Type} [Field K] [Field L] [Algebra K L] {n : ℕ} {s : Typ
 theorem repr_coord {K L : Type} [Field K] [Field L] [Algebra K L] {n : ℕ} {s : Type}
     (b : Module.Basis s K L) (a : Fin n → K) (y : Fin n → L) (j : s) :
     b.repr (∑ k, algebraMap K L (a k) * y k) j = ∑ k, a k * b.repr (y k) j := by
-  simp [← Algebra.smul_def, map_sum, Finsupp.finset_sum_apply]
+
+  simp [← Algebra.smul_def, map_sum, Finsupp.finsetSum_apply]
 
 theorem map_mulVec_comp {K L : Type} [Field K] [Field L] [Algebra K L] {n : ℕ}
     (M : Matrix (Fin n) (Fin n) K) (x : Fin n → K) :
@@ -74,6 +120,7 @@ theorem GlobalTheory.rational_eigen_image_span : ∀ (K L : Type) [Field K] [Fie
       simp [f, Algebra.smul_def]
     exact hle h
   · obtain ⟨z, rfl⟩ := h
+
     rw [GlobalTheory.RationalSpan.expand b z, map_sum]
     refine Submodule.sum_mem _ (fun j _ => ?_)
     rw [map_smul]

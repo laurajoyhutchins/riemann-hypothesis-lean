@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MembershipCriteria.GoodChar
-import Development.AutomorphicSpectrum.Proofs.MembershipProofs.GoodCharIsLocallyConstant
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MembershipProofs.GoodCharIsLocallyConstant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,8 +60,8 @@ theorem locallyCompact_of_goodChar [T2Space R] {ψ : AddChar R ℂ} {O : Subring
     LocallyCompactSpace R := by
   exact h.compact.locallyCompactSpace_of_mem_nhds_of_addGroup (h.isOpen.mem_nhds O.zero_mem)
 
-omit [CommRing R] [IsTopologicalRing R] in
 
+omit [CommRing R] [IsTopologicalRing R] in
 theorem integrable_pair {κ : Type} (μ : @Measure (κ → R) (borel _))
     (hμ : @IsFiniteMeasureOnCompacts _ (borel _) _ μ) (φ φ' : SB (κ → R)) :
     @Integrable _ _ _ _ (borel _) (fun x => (starRingEnd ℂ) ((φ : (κ → R) → ℂ) x) * (φ' : (κ → R) → ℂ) x) μ := by
@@ -31,8 +77,8 @@ theorem integrable_pair {κ : Type} (μ : @Measure (κ → R) (borel _))
   haveI : BorelSpace (κ → R) := ⟨rfl⟩
   exact Continuous.integrable_of_hasCompactSupport hcont hsupp
 
-omit [CommRing R] [IsTopologicalRing R] in
 
+omit [CommRing R] [IsTopologicalRing R] in
 def form {κ : Type} (μ : @Measure (κ → R) (borel _)) (hμ : @IsFiniteMeasureOnCompacts _ (borel _) _ μ) :
     SB (κ → R) →ₗ⋆[ℂ] SB (κ → R) →ₗ[ℂ] ℂ :=
   LinearMap.mk₂'ₛₗ (starRingEnd ℂ) (RingHom.id ℂ) (fun φ φ' => pair μ φ φ')
@@ -61,8 +107,8 @@ def form {κ : Type} (μ : @Measure (κ → R) (borel _)) (hμ : @IsFiniteMeasur
       funext x
       simp [mul_left_comm])
 
-omit [CommRing R] [IsTopologicalRing R] in
 
+omit [CommRing R] [IsTopologicalRing R] in
 theorem pair_conj {κ : Type} (μ : @Measure (κ → R) (borel _)) (φ φ' : (κ → R) → ℂ) :
     (starRingEnd ℂ) (pair μ φ φ') = pair μ φ' φ := by
   show (starRingEnd ℂ) (∫ x, (starRingEnd ℂ) (φ x) * φ' x ∂μ) = ∫ x, (starRingEnd ℂ) (φ' x) * φ x ∂μ
@@ -71,8 +117,8 @@ theorem pair_conj {κ : Type} (μ : @Measure (κ → R) (borel _)) (φ φ' : (κ
   funext x
   rw [map_mul, Complex.conj_conj, mul_comm]
 
-omit [IsTopologicalRing R] in
 
+omit [IsTopologicalRing R] in
 theorem pair_pos {κ : Type} (μ : @Measure (κ → R) (borel _))
     (hμ : @Measure.IsAddHaarMeasure _ _ _ (borel _) μ) (φ : SB (κ → R)) (hφ : φ ≠ 0) :
     0 < (pair μ (φ : (κ → R) → ℂ) φ).re := by
@@ -125,12 +171,12 @@ def sys {ψ : AddChar R ℂ} {O : Subring R} {u : Rˣ} (h : GoodChar ψ O u) (d 
     c_add_left := fun x x' y => by
       rw [← AddChar.map_add_eq_mul]
       congr 1
-      simp only [d.form, map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
+      simp only [d.form, map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
       ring
     c_add_right := fun x y y' => by
       rw [← AddChar.map_add_eq_mul]
       congr 1
-      simp only [d.form, map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
+      simp only [d.form, map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
       ring
     c_self := fun x => by simp [d.form]
     c_norm := fun x y => h.norm_one _

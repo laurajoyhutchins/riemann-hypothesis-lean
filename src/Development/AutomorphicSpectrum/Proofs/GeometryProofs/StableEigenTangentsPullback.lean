@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
-import Formalism.LocalToGlobal.ProjectiveLattices.RulInst
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEig
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StableEig
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLineGenOn
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits NumberField ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.LocFn
 
@@ -57,11 +97,6 @@ theorem tanMap_mul (h : IsGrpPullback G' G f φ) (y : Sp R ⟶ S') (a b : epsAt 
   apply Over.OverMorphism.ext
   exact (h.2 _ a b (pushAt h a) (pushAt h b) rfl rfl).symm
 
-theorem tanMap_one (h : IsGrpPullback G' G f φ) (y : Sp R ⟶ S') :
-    tanMap h y (1 : epsAt y ⟶ G') = 1 := by
-  rw [tanMap_eq, pushAt_one, Hom.one_def, Hom.one_def, ← Category.assoc,
-    toUnit_unique (rebase₂ y f ≫ toUnit _) (toUnit _)]
-
 theorem left_eq_of_comp (h : IsGrpPullback G' G f φ) {Z : Scheme.{0}} {a b : Z ⟶ G'.left}
     (h₁ : a ≫ φ = b ≫ φ) (h₂ : a ≫ G'.hom = b ≫ G'.hom) : a = b :=
   h.1.hom_ext h₁ h₂
@@ -83,9 +118,6 @@ theorem tanMap_surjective (h : IsGrpPullback G' G f φ) (y : Sp R ⟶ S') : Func
 def tanEquiv (h : IsGrpPullback G' G f φ) (y : Sp R ⟶ S') : (epsAt y ⟶ G') ≃* (epsAt (y ≫ f) ⟶ G) :=
   { Equiv.ofBijective (tanMap h y) ⟨tanMap_injective h y, tanMap_surjective h y⟩ with
     map_mul' := tanMap_mul h y }
-
-@[simp] theorem tanEquiv_apply (h : IsGrpPullback G' G f φ) (y : Sp R ⟶ S') (v : epsAt y ⟶ G') :
-    tanEquiv h y v = tanMap h y v := rfl
 
 theorem one_left_comp (h : IsGrpPullback G' G f φ) (y : Sp R ⟶ S') :
     (1 : Over.mk y ⟶ G').left ≫ φ = (1 : Over.mk (y ≫ f) ⟶ G).left :=

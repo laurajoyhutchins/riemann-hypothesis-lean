@@ -1,18 +1,53 @@
-import Mathlib
-import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
-import Formalism.PadicSubsetSums.StableGradedCounts.PropositionOneCentralCount
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRCycleProbSum
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRPrimeRecipSum
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRLemmaLWeight
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRPrimeToPartEqIff
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRPrimeToPartSpec
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRLemmaP
-import Formalism.GaloisIrreducibility.NoSolvableTransitive
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRCentralIdemSelfAdjoint
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRIrredCountUpper
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRSquarefreeCount
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRTypeCountExact
-import Formalism.PadicSubsetSums.StableGradedCounts.IRRCycleTypeProb
+module
+
+public import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Bl.CyclicComponents
 
@@ -138,6 +173,7 @@ theorem goal1 :
     ⟨_, rfl⟩
   have hP : ∀ v, P v = ∑ u : J, ((↑(Nat.card J) : ℂ)⁻¹ * ↑(χ u)⁻¹) • ρ ↑u v := by
     intro v
+
     rw [hPdef, Formalism.IrreducibleCountingLemmas.GaloisIrreducibility.twistedIdem.eq_def, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun u _ => ?_)
     rw [map_smul, LinearMap.smul_apply, Representation.asAlgebraHom_of]
@@ -146,6 +182,7 @@ theorem goal1 :
     rw [Formalism.IrreducibleCountingLemmas.GaloisIrreducibility.eqvSpace.eq_def]
     show ∀ u : J, ρ ↑u (P v) = (χ u : ℂ) • P v
     intro u0
+
     rw [hP, map_sum, Finset.smul_sum]
     refine Fintype.sum_equiv (Equiv.mulLeft u0) _ _ (fun u => ?_)
     simp only [Equiv.coe_mulLeft, map_smul, Subgroup.coe_mul, map_mul, Module.End.mul_apply, smul_smul,

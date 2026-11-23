@@ -1,5 +1,40 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAlgebraicOfRoot
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAlgebraicOfRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -8,8 +43,8 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.DIV.Cons
 open Formalism.IndefR.FWT GlobalTheory.BigTop GlobalTheory.OntoChain GlobalTheory.RealIndexBound GlobalTheory.OnTies GlobalTheory.SeriesTie
 open GlobalTheory.BigOn GlobalTheory.BigOn.Exp Formalism.L2.Theta GlobalTheory.ExportSeries GlobalTheory.ConjTwist Formalism.IndefR.Lev
 open scoped TensorProduct
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 namespace GlobalTheory.BigOn.Exp.TwConj
@@ -41,24 +76,24 @@ structure TwLev (R : RealDat D A Ks) (χ : Formalism.L2.Host.HChar D.host.E) (xi
   guard : ∀ PP ∈ Q, ((D.host.QS * D.host.q * Ideal.absNorm D.host.ccK : ℕ) : 𝓞 D.host.E) ∉ PP.asIdeal
 
 theorem twLev_of_core {R : RealDat D A Ks} {F : Face D A} (hC : GlobalTheory.Hk3.Core R F) (hG : QGuard R) (t : T0) :
-    TwLev R (R.xiH t) (R.xi t) (R.Q t) (R.xiR t) where
-  xi := hC.lev.xi t
-  xi_fin := hC.lev.xi_fin t
-  xi_triv := hC.lev.xi_triv t
-  xi_tame := hC.lev.xi_tame t
-  Q_pl := hC.lev.Q_pl t
-  Q_off := hC.lev.Q_off t
-  Q_de p hp := by
-    obtain ⟨𝔭, h𝔭⟩ := hC.lev.Q_de p hp
-    exact ⟨𝔭, h𝔭, h𝔭 t⟩
-  Q_ram := hC.lev.Q_ram t
-  xiR := hC.lev.xiR t
-  roots PP hPP := hC.fam.roots t PP (Or.inr hPP)
-  muVal i P hP := by
-    obtain ⟨g, c0R, c0L, ht⟩ := hC.fam.tie
-    exact ⟨A.muVal i t P, hC.fam.muVal i t P ((ht.ok t P).2 hP)⟩
-  half := hG.1 t
-  guard := hG.2 t
+    TwLev R (R.xiH t) (R.xi t) (R.Q t) (R.xiR t) :=
+  { xi := hC.lev.xi t
+    xi_fin := hC.lev.xi_fin t
+    xi_triv := hC.lev.xi_triv t
+    xi_tame := hC.lev.xi_tame t
+    Q_pl := hC.lev.Q_pl t
+    Q_off := hC.lev.Q_off t
+    Q_de := fun p hp => by
+      obtain ⟨𝔭, h𝔭⟩ := hC.lev.Q_de p hp
+      exact ⟨𝔭, h𝔭, h𝔭 t⟩
+    Q_ram := hC.lev.Q_ram t
+    xiR := hC.lev.xiR t
+    roots := fun PP hPP => hC.fam.roots t PP (Or.inr hPP)
+    muVal := fun i P hP => by
+      obtain ⟨g, c0R, c0L, ht⟩ := hC.fam.tie
+      exact ⟨A.muVal i t P, hC.fam.muVal i t P ((ht.ok t P).2 hP)⟩
+    half := hG.1 t
+    guard := hG.2 t }
 
 end Lev
 
@@ -112,17 +147,6 @@ end Laws
 
 section Point
 
-open Classical in
-
-def TwLevAt : Prop := AtTw fun Fm x hx i p w j => ∀ ρ ρ' : Setup (Fm.D x i).ntw, ρ.Good → ρ'.Good → RealPin p.R p.cG ρ →
-  SameBut ρ ρ' → (Adapted p w ρ ∨ Adapted p w ρ') →
-  ∃ (χ χ' : Formalism.L2.Host.HChar (Fm.D x i).host.E) (xiR xiR' : ∀ PP : Pl (Fm.D x i).host.E, (kP PP)ˣ →* ℂˣ),
-    TwLev p.R.toRealDat χ ((baseW (Fm.ex x hx i) w j ρ).de.chi * (twW (Fm.ex x hx i) w ρ).chi)
-      ((baseW (Fm.ex x hx i) w j ρ).de.Q ∪ (twW (Fm.ex x hx i) w ρ).Q) xiR ∧
-    TwLev p.R.toRealDat χ' ((baseW (Fm.ex x hx i) w j ρ).de.chi * (twW (Fm.ex x hx i) w ρ').chi)
-      ((baseW (Fm.ex x hx i) w j ρ).de.Q ∪ (twW (Fm.ex x hx i) w ρ').Q) xiR' ∧
-    χ ≠ 1 ∧ χ' ≠ 1 ∧ (χ ≠ χ' ∨ (baseW (Fm.ex x hx i) w j ρ).de.chi * (twW (Fm.ex x hx i) w ρ).chi =
-      (baseW (Fm.ex x hx i) w j ρ).de.chi * (twW (Fm.ex x hx i) w ρ').chi)
 
 end Point
 

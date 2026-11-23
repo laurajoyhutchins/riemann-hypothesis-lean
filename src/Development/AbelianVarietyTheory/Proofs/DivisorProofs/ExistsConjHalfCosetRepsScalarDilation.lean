@@ -1,12 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NabBaseChange
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.ActsLinOfSplitLin
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartDetAtInvInt
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ConjTupRefl
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.PlaceS
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddNsmulResidueAssoc
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.NotMemSpanOfCommute
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmVacuumEqSplitFacSmulSum
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulMemLatO
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CompletedLatticeIntegralityFacts
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddNsmulResidueAssoc
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmVacuumEqSplitFacSmulSum
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CompletedLatticeIntegralityFacts
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.ActsLinOfSplitLin
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FinPartDetAtInvInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.KerDatTuple
+import Development.AbelianVarietyTheory.Definitions.Foundations.ThetaSeriesTies
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsSplitOfMemAdmissibleConjugatePairPlaces
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivOfNotLinearIndependent
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NabBaseChange
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice IsDedekindDomain NumberField Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR
 open Formalism.IndefR.Links Formalism.IndefR.Datum Formalism.IndefR.FWT Formalism.L2.Pj
 open GlobalTheory.ConjTwist GlobalTheory.ExportSeries GlobalTheory.SeriesTie GlobalTheory.OnTies GlobalTheory.OnCmp GlobalTheory.BaseCmp
@@ -111,8 +161,8 @@ end GlobalTheory.ScalarReps
 
 namespace GlobalTheory.ScalarReps
 
-open GlobalTheory.FinPl.FrameLat in
 
+open GlobalTheory.FinPl.FrameLat in
 theorem int_at {D : D7} (P : Pl D.host.E) (ep : AE D) (hep : Formalism.L2.NTheta.IsIdemAt ep P) (N : ℕ)
     (hN : (N : 𝓞 D.host.E) ∈ P.asIdeal) (ϖ : 𝓞 D.host.E) (h1 : ϖ ∈ P.asIdeal) (h2 : ϖ ∉ P.asIdeal ^ 2) :
     finPart D (ep * incA D ((N : D.host.E) * (ϖ : D.host.E)⁻¹)) ∈ intAE D := by
@@ -151,6 +201,7 @@ theorem int_sum {D : D7} (Q : Finset (Pl D.host.E)) (e : AE D) (he : IsIdemSum e
     finPart D (cA D (e * incA D ((N : D.host.E) * (ϖ : D.host.E)⁻¹))) ∈ intAE D := by
   rw [GlobalTheory.FinPl.FrameLat.cA_int_iff]
   obtain ⟨⟨es, hes, rfl⟩, -⟩ := he
+
   rw [Finset.sum_mul, map_sum]
   exact AddSubgroup.sum_mem _ fun PP hP => int_at PP (es PP) (hes PP hP) N (hN PP hP) ϖ (hϖ PP hP).1 (hϖ PP hP).2
 
@@ -188,8 +239,6 @@ def halfSub {D : D7} (S T : HSp D) (c : AE D) : AddSubgroup (WO S T) where
   neg_mem' := fun {x} hx i j => by
     show c * (-x i j) = -x i j
     rw [mul_neg, hx i j]
-
-theorem mem_halfSub {D : D7} {S T : HSp D} {c : AE D} {w : WO S T} : w ∈ halfSub S T c ↔ IsHalf c w := Iff.rfl
 
 end GlobalTheory.ScalarReps
 
@@ -258,10 +307,11 @@ theorem scalar_half_reps : ∀ (D : D7) (S T : HSp D) (ΛS : Submodule (𝓞 D.h
       rw [← mul_assoc, key, mul_comm (cA D e), mul_assoc, hw i j, nsmul_eq_mul]
     rw [heq]
     exact GlobalTheory.LatticeStable.smul_mem_latO D S T _ _ _ _ hint _ hbw
-  let f : WO S T →+ WO S T := DistribMulAction.toAddMonoidHom (WO S T) (cA D (incA D (ϖ : D.host.E)))
+  let f : WO S T →+ WO S T := DistribSMul.toAddMonoidHom (WO S T) (cA D (incA D (ϖ : D.host.E)))
   have hf : ∀ w, f w = cA D (incA D (ϖ : D.host.E)) • w := fun w => rfl
   obtain ⟨R, hR⟩ := half_finite_mod S T ΛS ΛT hS hT (cA D e)
-    (by rw [← map_mul, Formalism.IndefR.Fin.LevelGroupLemmas.idemSum_sq he]) N (Nat.pos_of_ne_zero hN)
+    (by simpa only [map_mul] using (congrArg (fun x => cA D x)
+      (Formalism.IndefR.Fin.LevelGroupLemmas.idemSum_sq he))) N (Nat.pos_of_ne_zero hN)
   obtain ⟨Rr, hRr1, hRr2, hRr3⟩ := exists_reps' (latAll S T ΛS ΛT) (halfSub S T (cA D e)) f N hN
     (natCast_smul_cancel S T N hN) (fun w hw hh => by rw [hf]; exact hbL w hw)
     (fun w hh hfw => hNL w hh (by rw [← hf]; exact hfw)) R

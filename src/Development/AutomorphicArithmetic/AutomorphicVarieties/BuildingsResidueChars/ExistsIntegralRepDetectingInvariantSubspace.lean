@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.Localization.Module
+
+@[expose] public section
 
 open Matrix
 
@@ -19,6 +72,7 @@ private theorem UpperTheory.sum_B_smul_pi_sum_smul_eq_sum_smul {G N : Type} [Gro
     rw [map_mul]
     rfl
   calc _ = ∑ h, u i (g * h) • π (g * h) v := by
+
         simp_rw [map_sum, map_smul, hπ, Finset.smul_sum, smul_smul]
         rw [Finset.sum_comm]
         refine Finset.sum_congr rfl (fun h _ => ?_)
@@ -49,8 +103,9 @@ private theorem UpperTheory.sum_smul_pi_average_eq_card_smul_of_dual {G N : Type
       = ∑ h, ∑ g, ∑ k, (u i h * c k (g⁻¹ * h)) • π g (F k) := by
         refine Finset.sum_congr rfl (fun h _ => ?_)
         rw [← Equiv.sum_comp (Equiv.mulLeft h⁻¹)]
+
         simp only [Equiv.coe_mulLeft, map_sum, map_smul, hπ, Finset.smul_sum, smul_smul,
-          _root_.mul_inv_rev, inv_inv, mul_inv_cancel_left]
+        _root_.mul_inv_rev, inv_inv, mul_inv_cancel_left]
     _ = ∑ g, ∑ k, (∑ h, u i h * c k (g⁻¹ * h)) • π g (F k) := by
         rw [Finset.sum_comm]
         refine Finset.sum_congr rfl (fun g _ => ?_)
@@ -96,12 +151,14 @@ private theorem UpperTheory.exists_dual_family_of_linearIndependent' (O : Type) 
     (pi_eq_sum_univ (w j)).symm
   have h2 : ∑ h, P (fun h' => if h = h' then 1 else 0) k * w j h = if k = j then 1 else 0 := by
     have := congrFun (congrArg P hsum) k
+
     rw [map_sum, hPw] at this
     simp only [map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
     rw [eq_comm] at this
     simp only [mul_comm]
     rw [← this]
     simp [eq_comm]
+
   simp only [IsScalarTower.algebraMap_apply O (FractionRing O) ℂ, ← map_mul, ← map_sum]
   rw [show (∑ h, P (fun h' => if h = h' then 1 else 0) k * algebraMap O (FractionRing O) (u j h))
     = if k = j then 1 else 0 from h2]
@@ -151,6 +208,7 @@ theorem UpperTheory.exists_integral_rep_detecting_invariant_subspace :
   let B : G → Matrix (Fin m) (Fin m) ℂ := fun g j i => algebraMap O ℂ (A g⁻¹ j i)
   have hR : ∀ g i h, u' i (g * h) = ∑ j, B g j i * u' j h := by
     intro g i h
+
     simp only [u', B, hRO, map_sum, map_mul]
   have hsp : I ≤ Submodule.span ℂ (Set.range u') := by
     refine hspan.trans (Submodule.span_le.2 ?_)
@@ -169,6 +227,7 @@ theorem UpperTheory.exists_integral_rep_detecting_invariant_subspace :
       simp only [Submodule.coe_sum, Submodule.coe_smul, Finset.sum_apply, Pi.smul_apply,
         smul_eq_mul] at e2
       simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, u']
+
       rw [← hy g, ← e2, map_sum]
       simp [map_mul]
     rw [hx]

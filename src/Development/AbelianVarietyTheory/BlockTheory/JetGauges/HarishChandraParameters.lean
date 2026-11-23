@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Analysis.InnerProductSpace.Defs
+public import Mathlib.LinearAlgebra.UnitaryGroup
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped BigOperators
 open Matrix
@@ -8,12 +59,6 @@ noncomputable section
 namespace GlobalTheory.IndefiniteRowSideFullHecke.HarishChandraRootData
 
 variable {n : ℕ}
-
-def formJ (ε : Fin n → Bool) : Matrix (Fin n) (Fin n) ℂ :=
-  Matrix.diagonal fun c => if ε c then 1 else -1
-
-def grpG (ε : Fin n → Bool) : Set (Matrix (Fin n) (Fin n) ℂ) :=
-  {g | gᴴ * formJ ε * g = formJ ε}
 
 def grpK (ε : Fin n → Bool) : Set (Matrix (Fin n) (Fin n) ℂ) :=
   {k | k ∈ Matrix.unitaryGroup (Fin n) ℂ ∧ ∀ a b, ε a ≠ ε b → k a b = 0}
@@ -25,19 +70,10 @@ def posPairs (n : ℕ) : Finset (Fin n × Fin n) := Finset.univ.filter fun x => 
 def cptPairs (ε : Fin n → Bool) : Finset (Fin n × Fin n) :=
   Finset.univ.filter fun x => x.1 < x.2 ∧ ε x.1 = ε x.2
 
-def ncPairs (ε : Fin n → Bool) : Finset (Fin n × Fin n) :=
-  Finset.univ.filter fun x => x.1 < x.2 ∧ ε x.1 ≠ ε x.2
-
 def rho (n : ℕ) : Fin n → ℝ := (1 / 2 : ℝ) • ∑ x ∈ posPairs n, root x.1 x.2
-
-def rhoC (ε : Fin n → Bool) : Fin n → ℝ := (1 / 2 : ℝ) • ∑ x ∈ cptPairs ε, root x.1 x.2
-
-def rhoNC (ε : Fin n → Bool) : Fin n → ℝ := (1 / 2 : ℝ) • ∑ x ∈ ncPairs ε, root x.1 x.2
 
 def IsHCParam (μ : Fin n → ℝ) : Prop :=
   StrictAnti μ ∧ ∀ i, ∃ m : ℤ, μ i = (m : ℝ) + ((n : ℝ) - 1) / 2
-
-def lowestWeight (ε : Fin n → Bool) (μ : Fin n → ℝ) : Fin n → ℝ := μ + rhoNC ε - rhoC ε
 
 def torus (θ : Fin n → ℝ) : Matrix (Fin n) (Fin n) ℂ :=
   Matrix.diagonal fun a => Complex.exp (Complex.I * (θ a : ℂ))
@@ -63,7 +99,7 @@ def weightSpace (σ : Matrix (Fin n) (Fin n) ℂ → H →L[ℂ] H) (ω : Fin n 
   carrier := {v | ∀ θ : Fin n → ℝ, σ (torus θ) v = wtChar ω θ • v}
   add_mem' := by
     intro a b ha hb θ
-    rw [map_add, ha θ, hb θ, smul_add]
+    rw [map_add (f := _), ha θ, hb θ, smul_add]
   zero_mem' := by intro θ; simp
   smul_mem' := by
     intro c v hv θ
@@ -84,26 +120,6 @@ structure IsKType (ε : Fin n → Bool) (σ : Matrix (Fin n) (Fin n) ℂ → H �
   exists_highest : ∃ v ∈ S, IsWeightVector σ Λ v
   le_highest : ∀ ω : Fin n → ℝ, ∀ v ∈ S, IsWeightVector σ ω v → CptLE ε ω Λ
 
-def isotypic (ε : Fin n → Bool) (σ : Matrix (Fin n) (Fin n) ℂ → H →L[ℂ] H)
-    (ν : Fin n → ℝ) : Submodule ℂ H :=
-  sSup {S : Submodule ℂ H | IsKType ε σ S ν}
-
-def isotypicWeight (ε : Fin n → Bool) (σ : Matrix (Fin n) (Fin n) ℂ → H →L[ℂ] H)
-    (ν ω : Fin n → ℝ) : Submodule ℂ H :=
-  isotypic ε σ ν ⊓ weightSpace σ ω
-
-def lowestIsotypic (ε : Fin n → Bool) (σ : Matrix (Fin n) (Fin n) ℂ → H →L[ℂ] H)
-    (μ : Fin n → ℝ) : Submodule ℂ H :=
-  isotypic ε σ (lowestWeight ε μ)
-
-def IsLowestTypeUnit (ε : Fin n → Bool) (σ : Matrix (Fin n) (Fin n) ℂ → H →L[ℂ] H)
-    (μ : Fin n → ℝ) (w : H) : Prop :=
-  w ∈ lowestIsotypic ε σ μ ∧ ‖w‖ = 1
-
-def IsLowestVector (ε : Fin n → Bool) (σ : Matrix (Fin n) (Fin n) ℂ → H →L[ℂ] H)
-    (μ : Fin n → ℝ) (w : H) : Prop :=
-  w ∈ isotypicWeight ε σ (lowestWeight ε μ) (lowestWeight ε μ) ∧ ‖w‖ = 1
-
 end Rep
 
 def rhoU (k : ℕ) : Fin k → ℝ := fun i => ((k : ℝ) - 1) / 2 - (i : ℕ)
@@ -118,7 +134,5 @@ theorem grpK_const (k : ℕ) : grpK (fun _ : Fin k => true) =
     (Matrix.unitaryGroup (Fin k) ℂ : Set (Matrix (Fin k) (Fin k) ℂ)) := by
   ext g
   simp [grpK]
-
-def detRep (n : ℕ) (g : Matrix (Fin n) (Fin n) ℂ) : ℂ →L[ℂ] ℂ := g.det • (1 : ℂ →L[ℂ] ℂ)
 
 end GlobalTheory.IndefiniteRowSideFullHecke.HarishChandraRootData

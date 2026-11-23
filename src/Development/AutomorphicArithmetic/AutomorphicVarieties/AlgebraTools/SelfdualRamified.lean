@@ -1,6 +1,63 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.AlmostSelfdual
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.SmithZeroOne
+module
+
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.AlmostSelfdual
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DualLattice
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.SmithZeroOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Determinant
+public import Mathlib.LinearAlgebra.Matrix.BilinearForm
+
+@[expose] public section
 
 open Polynomial Matrix IsLocalRing TensorProduct
 
@@ -57,9 +114,9 @@ private theorem UpperTheory.V.AlgebraTools.selfdual_ramified_basis {A : Type} [C
     simp only [hρ, Matrix.toBilin'_apply']
     rw [← Matrix.vecMul_transpose, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec,
       Matrix.mulVec_mulVec, hr, Matrix.smul_mulVec, dotProduct_smul, smul_eq_mul]
-  have hY₀ : Submodule.IsLattice F (Submodule.span A (Set.range (Pi.basisFun F (Fin n)))) := by
-    refine ⟨Submodule.fg_span (Set.finite_range _), ?_⟩
-    rw [Submodule.span_span_of_tower, Module.Basis.span_eq]
+  have hY₀ : Submodule.IsFullLattice F (Submodule.span A (Set.range (Pi.basisFun F (Fin n)))) := by
+    exact { toIsLattice := Submodule.IsLattice.of_fg _ (Submodule.fg_span (Set.finite_range _))
+            span_eq_top := by rw [Submodule.span_span_of_tower, Module.Basis.span_eq] }
   have hst : ∀ g, ∀ y ∈ Submodule.span A (Set.range (Pi.basisFun F (Fin n))),
       ρ g y ∈ Submodule.span A (Set.range (Pi.basisFun F (Fin n))) := by
     intro g y hy
@@ -70,7 +127,7 @@ private theorem UpperTheory.V.AlgebraTools.selfdual_ramified_basis {A : Type} [C
     simp only [Pi.basisFun_repr] at ha
     simp [hρ, Matrix.mulVec, dotProduct, ha]
   obtain ⟨Y, hY, h1, h2, h3, h4⟩ :=
-    UpperTheory.V.AlgebraTools.almost_selfdual (Matrix.toBilin' H) ρ σ u hs hn hσ hB _ hY₀ hst
+    UpperTheory.V.AlgebraTools.almost_selfdual (Matrix.toBilin' H) ρ σ u hs hn hσ hB _ (by first | exact hY₀ | exact hY₀.toIsLattice) hst
   have hZ := (UpperTheory.V.AlgebraTools.dual_lattice (Matrix.toBilin' H) hs hn Y hY).1
   obtain ⟨b, S, hb1, hb2⟩ := UpperTheory.V.AlgebraTools.smith_zero_one ϖ Y _ hϖ hZ h3 h4
   have hfin : Module.finrank F (Fin n → F) = n := by simp
@@ -144,6 +201,7 @@ private theorem UpperTheory.V.AlgebraTools.selfdual_ramified_mat {A : Type} [Com
   have hz : ∀ k j, Matrix.toBilin' H (∑ i, (Qᵀ * H * Q * D)⁻¹ k i • b i) (c j) =
       (1 : Matrix (Fin n) (Fin n) F) k j := by
     intro k j
+
     rw [← Matrix.nonsing_inv_mul _ hXdet, Matrix.mul_apply, map_sum, LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_smul, LinearMap.smul_apply, hX, smul_eq_mul]
@@ -169,7 +227,9 @@ private theorem UpperTheory.V.AlgebraTools.selfdual_ramified_mat {A : Type} [Com
     ext k j
     apply hinj
     have := hz k j
+
     rw [← hN, map_sum, LinearMap.sum_apply] at this
+
     rw [Matrix.mul_apply, map_sum]
     refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) (this.trans ?_)
     · rw [← algebraMap_smul F (N k i), map_smul, LinearMap.smul_apply, ← hM, map_mul]

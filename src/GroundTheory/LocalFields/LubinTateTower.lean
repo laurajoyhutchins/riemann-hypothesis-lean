@@ -1,8 +1,54 @@
-import Mathlib
-import GroundTheory.LocalFields.LubinTatePoints
-import GroundTheory.LocalFields.LubinTateTorsion
-import GroundTheory.LocalFields.Eisenstein
-import GroundTheory.LocalFields.UnitsBasic
+module
+
+public import GroundTheory.LocalFields.LubinTateTorsion
+public import GroundTheory.LocalFields.Integers
+public import GroundTheory.LocalFields.Eisenstein
+import GroundTheory.LocalFields.SeparableClosure
+public import GroundTheory.LocalFields.UnitsBasic
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Norm.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,16 +67,16 @@ variable {Ω : Type*} [Field Ω] [ValuativeRel Ω] [TopologicalSpace Ω] [IsValu
   [Algebra K Ω] [ValuativeExtension K Ω] [Algebra.IsAlgebraic K Ω]
 variable {π : 𝒪[K]} {f g : PowerSeries 𝒪[K]}
 
-variable (Ω) in
 
+variable (Ω) in
 def lubinTateField (hπ : Irreducible π) (hf : IsLubinTateSeries π f) (n : ℕ) :
     IntermediateField K Ω :=
   adjoin K (IdealPoint.val ''
     (lubinTateTorsion Ω hf n : Set (IdealPoint Ω (lubinTateFormalGroup hπ hf))))
 
+
 omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] [ValuativeRel Ω]
   [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension K Ω] in
-
 theorem finiteDimensional_adjoin_simple (x : Ω) : FiniteDimensional K K⟮x⟯ :=
   adjoin.finiteDimensional (Algebra.IsAlgebraic.isAlgebraic x).isIntegral
 
@@ -86,8 +132,8 @@ theorem lubinTateField_eq (hf : IsLubinTateSeries π f) (hg : IsLubinTateSeries 
       fun _ => m'.valuation_lt_one
   exact le_antisymm (key hf hg) (key hg hf)
 
-omit [IsSepClosed Ω] in
 
+omit [IsSepClosed Ω] in
 theorem image_val_lubinTateTorsion_ltPoly (n : ℕ) :
     IdealPoint.val '' (lubinTateTorsion Ω (isLubinTateSeries_ltPoly π) n :
       Set (IdealPoint Ω (lubinTateFormalGroup hπ (isLubinTateSeries_ltPoly π)))) =
@@ -124,10 +170,10 @@ theorem exists_lubinTateField_eq_adjoin_eisenstein (hf : IsLubinTateSeries π f)
   rw [hann, Ideal.mem_span_singleton, pow_dvd_pow_iff hπ.ne_zero hπ.not_isUnit] at h1
   omega
 
+
 omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] [ValuativeRel Ω]
   [TopologicalSpace Ω] [IsValuativeTopology Ω] [ValuativeExtension K Ω] [Algebra.IsAlgebraic K Ω]
   [IsSepClosed Ω] in
-
 theorem adjoin_simple_eq_top_of_eq {E : IntermediateField K Ω} {a : Ω} (hE : E = K⟮a⟯) :
     K⟮(⟨a, hE ▸ mem_adjoin_simple_self K a⟩ : E)⟯ = ⊤ := by
   rw [eq_top_iff]
@@ -221,8 +267,8 @@ def galPoint {F : _root_.FormalGroup 𝒪[K]} {E : IntermediateField K Ω} [Fini
       ← valuation_coe_lt_one_iff]
     exact x.valuation_lt_one)
 
-omit [TopologicalSpace Ω] [IsValuativeTopology Ω] in
 
+omit [TopologicalSpace Ω] [IsValuativeTopology Ω] in
 theorem galPoint_val {F : _root_.FormalGroup 𝒪[K]} {E : IntermediateField K Ω}
     [FiniteDimensional K E] (σ : E ≃ₐ[K] E) (x : IdealPoint Ω F) (hx : x.val ∈ E) :
     (galPoint σ x hx).val = ((σ ⟨x.val, hx⟩ : E) : Ω) := rfl
@@ -330,8 +376,8 @@ theorem exists_galEquiv_lubinTateField (hf : IsLubinTateSeries π f) (n : ℕ) :
   obtain ⟨b, rfl⟩ := hgen x hx
   rw [← galPoint_val σ (b • l) (hmem hx), hgal σ _ hx, smul_comm, ← ha, smul_comm]
 
-variable (hπ) in
 
+variable (hπ) in
 def lubinTateGalEquiv (hf : IsLubinTateSeries π f) (n : ℕ) :
     (lubinTateField Ω hπ hf n ≃ₐ[K] lubinTateField Ω hπ hf n) ≃* (𝒪[K] ⧸ Ideal.span {π ^ n})ˣ :=
   Classical.choose (exists_galEquiv_lubinTateField (Ω := Ω) (hπ := hπ) hf n)
@@ -368,15 +414,6 @@ theorem residueDegree_lubinTateField (hf : IsLubinTateSeries π f) {n : ℕ} (hn
     residueDegree K (lubinTateField Ω hπ hf n) = 1 :=
   residueDegree_eq_one_of_ramificationIndex_eq_finrank K _
     (ramificationIndex_lubinTateField hπ hf hn)
-
-theorem exists_isEisensteinAt_lubinTateField (hf : IsLubinTateSeries π f) {n : ℕ} (hn : 0 < n) :
-    ∃ (p : 𝒪[K][X]) (α : Ω), p.IsEisensteinAt (IsLocalRing.maximalIdeal 𝒪[K]) ∧
-      p.natDegree = (Nat.card 𝓀[K] - 1) * Nat.card 𝓀[K] ^ (n - 1) ∧
-      aeval α (p.map (algebraMap 𝒪[K] K)) = 0 ∧ lubinTateField Ω hπ hf n = K⟮α⟯ := by
-  obtain ⟨m, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn.ne'
-  obtain ⟨α, hE, hα⟩ := exists_lubinTateField_eq_adjoin_eisenstein (Ω := Ω) hπ hf m
-  exact ⟨ltEisenstein π m, α, isEisensteinAt_ltEisenstein hπ m, (ltEisenstein_monic π m).2, hα,
-    hE⟩
 
 theorem coeff_zero_ltEisenstein (π : 𝒪[K]) (n : ℕ) : (ltEisenstein π n).coeff 0 = π := by
   have hq := one_lt_card_residueField' K
@@ -415,18 +452,6 @@ section SeparableClosure
 
 variable (K : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K]
   {π : 𝒪[K]} (hπ : Irreducible π) {f : PowerSeries 𝒪[K]} (hf : IsLubinTateSeries π f)
-
-example {n : ℕ} (hn : 0 < n) :
-    Module.finrank K (lubinTateField (SeparableClosure K) hπ hf n) =
-      (Nat.card 𝓀[K] - 1) * Nat.card 𝓀[K] ^ (n - 1) :=
-  finrank_lubinTateField hπ hf hn
-
-example (n : ℕ) : IsGalois K (lubinTateField (SeparableClosure K) hπ hf n) := inferInstance
-
-example (n : ℕ) :
-    (lubinTateField (SeparableClosure K) hπ hf n ≃ₐ[K] lubinTateField (SeparableClosure K) hπ hf n)
-      ≃* (𝒪[K] ⧸ Ideal.span {π ^ n})ˣ :=
-  lubinTateGalEquiv hπ hf n
 
 end SeparableClosure
 

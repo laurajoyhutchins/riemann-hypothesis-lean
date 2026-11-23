@@ -1,8 +1,55 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.UnitarySchrodingerModel.UnitarySchrodingerLemmas.FockLatticeHeights.HWDefs
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SiegelParabolicUnnMatrixBlockUpperTriangular
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.UnitarySchrodingerModel.UnitarySchrodingerLemmas.FockLatticeHeights.HWDefs
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCompactIsOpenUnitsAt
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SiegelParabolicUnnMatrixBlockUpperTriangular
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrablePowerNormCompact
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddEquivAddHaarCharMulVecArtinianReduced
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsCompactIsOpenUnitsAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegrablePowerNormCompact
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.Paracompact
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -128,7 +175,7 @@ theorem nu2_eq_modu {B : Type} [CommRing B] [TopologicalSpace B] [IsTopologicalR
 
 end Haar
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem hwFin : PositivityTheory.PfSWUS.SwFockk.HWFin := by
   intro D n w hw nb hnb b p k hp hk hwk a ha v lam hlam
@@ -171,7 +218,7 @@ theorem hwFin : PositivityTheory.PfSWUS.SwFockk.HWFin := by
     intro z
     induction z using TensorProduct.induction_on with
     | zero => simp only [map_zero]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul x y => rfl
   have hdetinv : ((a⁻¹ : GL (Fin n) (AE D)).1).det = (((Matrix.GeneralLinearGroup.det a)⁻¹ : (AE D)ˣ) : AE D) :=
     congrArg Units.val (map_inv Matrix.GeneralLinearGroup.det a)
@@ -186,7 +233,7 @@ theorem hwFin : PositivityTheory.PfSWUS.SwFockk.HWFin := by
   have hx : IsUnit (cf.mapMatrix (adj (a⁻¹).1)).det := by rw [hdet]; exact Units.isUnit _
   have hmodu : (GlobalTheory.GaugeEx.modu (Fv D.host.F v ⊗[D.host.F] D.host.E) (cf.mapMatrix (adj (a⁻¹).1)).det : ℝ) =
       ((absEv D.host.F D.host.E v (unitFin D.host.F D.host.E v (Matrix.GeneralLinearGroup.det a)) : ℝ≥0) : ℝ)⁻¹ := by
-    rw [GlobalTheory.GaugeEx.modu, dif_pos hx, GlobalTheory.LocTateInt.distribHaarChar_Ev, IsUnit.unit_spec, hdet, ← absEv_apply,
+    rw [GlobalTheory.GaugeEx.modu, dite_eq_left hx, GlobalTheory.LocTateInt.distribHaarChar_Ev, IsUnit.unit_spec, hdet, ← absEv_apply,
       absEv_conjUnit, map_inv, NNReal.coe_inv]
 
   have hOset : ((PositivityTheory.PfSWUS.SwFockk.lstd D.host.F D.host.E n v : AddSubgroup _) :

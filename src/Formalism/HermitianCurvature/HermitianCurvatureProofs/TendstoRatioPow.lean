@@ -1,5 +1,53 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MemLpBzOfSup
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TendstoIntegralInnerGermMoving
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AestronglyMeasurableMainD
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermRealisation
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralNormCvecSq
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GermFibreKernels
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MemLpBzOfSup
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TendstoIntegralInnerGermMoving
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBK
 
@@ -143,8 +191,9 @@ theorem GermD.propG (hG : GermD s β ε Y ut bt SS) :
     refine ⟨s * SS, fun h hh x hx => ?_⟩
     obtain ⟨hab, habS⟩ := hG.memLp_abar hh
     have hmD := hG.memLp_mainD hh x
-    have i1 : Integrable (fun D => ‖mainD s β ε (bt h) x D‖ ^ 2) := (memLp_two_iff_integrable_sq_norm hmD.1).1 hmD
-    have i2 : Integrable (fun D => abar s ε (bt h) D ^ 2) := (memLp_two_iff_integrable_sq hab.1).1 hab
+    have i1 : Integrable (fun D => ‖mainD s β ε (bt h) x D‖ ^ 2) :=
+      (memLp_two_iff_integrable_sq_norm hmD.aestronglyMeasurable).1 hmD
+    have i2 : Integrable (fun D => abar s ε (bt h) D ^ 2) := hab.integrable_sq
     calc ‖gramL volume (Ac s β ε bt) (Ac s β ε bt) (h, x) (h, x)‖
         ≤ ∫ c, ‖⟪Ac s β ε bt (h, x) c, Ac s β ε bt (h, x) c⟫_ℂ‖ := norm_integral_le_integral_norm _
       _ = ∫ c, ‖Ac s β ε bt (h, x) c‖ ^ 2 := by

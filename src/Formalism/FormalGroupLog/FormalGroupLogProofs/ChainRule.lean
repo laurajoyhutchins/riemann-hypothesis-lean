@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.PowerSeries.Derivative
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,11 +65,11 @@ theorem Agree.mono {N M : ℕ} {f g : MvPowerSeries σ R} (h : Agree N f g) (hMN
     Agree M f g := fun d hd => h d (lt_of_lt_of_le hd hMN)
 
 theorem Agree.pderiv {N : ℕ} {f g : MvPowerSeries σ R} (h : Agree (N + 1) f g) (i : σ) :
-    Agree N (MvPowerSeries.pderiv R i f) (MvPowerSeries.pderiv R i g) := by
+    Agree N (MvPowerSeries.pderiv (R := R) i f) (MvPowerSeries.pderiv (R := R) i g) := by
   classical
   intro d hd
   rw [coeff_pderiv, coeff_pderiv, h (d + Finsupp.single i 1) ?_]
-  rw [map_add, Finsupp.degree_single]
+  rw [map_add (f := _), Finsupp.degree_single]
   omega
 
 theorem Agree.mul {N : ℕ} {x x' y y' : MvPowerSeries σ R} (hx : Agree N x x')
@@ -44,7 +94,7 @@ theorem agree_iff [Finite σ] {N : ℕ} {f g : MvPowerSeries σ R} :
     · exact h d hd
     · rfl
   · intro h d hd
-    have := congrArg (MvPolynomial.coeff d) h
+    have := congrArg (AddMonoidAlgebra.coeff · d) h
     rwa [coeff_truncTotal _ hd, coeff_truncTotal _ hd] at this
 
 theorem agree_truncTotal [Finite σ] (N : ℕ) (f : MvPowerSeries σ R) :
@@ -63,14 +113,14 @@ theorem Agree.subst [Finite σ] [Finite τ] {N : ℕ} {f f' : MvPowerSeries σ R
   rw [this]
 
 theorem pderiv_aeval [Fintype σ] (p : MvPolynomial σ R) (A : σ → MvPowerSeries τ R) (i : τ) :
-    MvPowerSeries.pderiv R i (MvPolynomial.aeval A p) =
-      ∑ j, MvPolynomial.aeval A (MvPolynomial.pderiv j p) * MvPowerSeries.pderiv R i (A j) := by
+    MvPowerSeries.pderiv (R := R) i (MvPolynomial.aeval A p) =
+      ∑ j, MvPolynomial.aeval A (MvPolynomial.pderiv j p) * MvPowerSeries.pderiv (R := R) i (A j) := by
   classical
   induction p using MvPolynomial.induction_on with
   | C r => simp
   | add p q hp hq => simp [hp, hq, add_mul, Finset.sum_add_distrib]
   | mul_X p j hp =>
-    simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_X, map_add, map_mul,
+    simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_X, map_add (f := _), map_mul,
       MvPolynomial.aeval_X, add_mul, Finset.sum_add_distrib]
     rw [Derivation.leibniz, hp, smul_eq_mul, smul_eq_mul]
     rw [add_comm]
@@ -81,8 +131,8 @@ theorem pderiv_aeval [Fintype σ] (p : MvPolynomial σ R) (A : σ → MvPowerSer
 
 theorem pderiv_subst [Fintype σ] [Finite τ] {a : σ → MvPowerSeries τ R}
     (ha : ∀ j, constantCoeff (a j) = 0) (f : MvPowerSeries σ R) (i : τ) :
-    MvPowerSeries.pderiv R i (f.subst a) =
-      ∑ j, (MvPowerSeries.pderiv R j f).subst a * MvPowerSeries.pderiv R i (a j) := by
+    MvPowerSeries.pderiv (R := R) i (f.subst a) =
+      ∑ j, (MvPowerSeries.pderiv (R := R) j f).subst a * MvPowerSeries.pderiv (R := R) i (a j) := by
   classical
   ext d
   set N := d.degree + 2 with hN
@@ -94,28 +144,29 @@ theorem pderiv_subst [Fintype σ] [Finite τ] {a : σ → MvPowerSeries τ R}
     exact this.symm
   have hfP : Agree N f (P : MvPowerSeries σ R) := agree_truncTotal N f
   have haA : ∀ j, Agree N (a j) (A j) := fun j => agree_truncTotal N (a j)
-  have h1 : Agree (d.degree + 1) (MvPowerSeries.pderiv R i (f.subst a))
-      (MvPowerSeries.pderiv R i ((P : MvPowerSeries σ R).subst A)) :=
+  have h1 : Agree (d.degree + 1) (MvPowerSeries.pderiv (R := R) i (f.subst a))
+      (MvPowerSeries.pderiv (R := R) i ((P : MvPowerSeries σ R).subst A)) :=
     (Agree.subst ha hA0 hfP haA).pderiv i
   have h2 : ∀ j, Agree (d.degree + 1)
-      ((MvPowerSeries.pderiv R j f).subst a * MvPowerSeries.pderiv R i (a j))
-      ((MvPowerSeries.pderiv R j (P : MvPowerSeries σ R)).subst A *
-        MvPowerSeries.pderiv R i (A j)) := fun j =>
+      ((MvPowerSeries.pderiv (R := R) j f).subst a * MvPowerSeries.pderiv (R := R) i (a j))
+      ((MvPowerSeries.pderiv (R := R) j (P : MvPowerSeries σ R)).subst A *
+        MvPowerSeries.pderiv (R := R) i (A j)) := fun j =>
     Agree.mul (Agree.subst ha hA0 (hfP.pderiv j) fun k => (haA k).mono (by omega))
       ((haA j).pderiv i)
-  have key : MvPowerSeries.pderiv R i ((P : MvPowerSeries σ R).subst A) =
-      ∑ j, (MvPowerSeries.pderiv R j (P : MvPowerSeries σ R)).subst A *
-        MvPowerSeries.pderiv R i (A j) := by
+  have key : MvPowerSeries.pderiv (R := R) i ((P : MvPowerSeries σ R).subst A) =
+      ∑ j, (MvPowerSeries.pderiv (R := R) j (P : MvPowerSeries σ R)).subst A *
+        MvPowerSeries.pderiv (R := R) i (A j) := by
     rw [subst_coe, pderiv_aeval]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [MvPowerSeries.pderiv_coe P, subst_coe]
+
   rw [h1 d (by omega), key, map_sum, map_sum]
   exact Finset.sum_congr rfl fun j _ => (h2 j d (by omega)).symm
 
 theorem pderiv_psubst [Finite τ] {a : MvPowerSeries τ R} (ha : constantCoeff a = 0)
     (f : PowerSeries R) (i : τ) :
-    MvPowerSeries.pderiv R i (f.subst a) =
-      (PowerSeries.derivative R f).subst a * MvPowerSeries.pderiv R i a := by
+    MvPowerSeries.pderiv (R := R) i (f.subst a) =
+      (PowerSeries.derivative (R := R) f).subst a * MvPowerSeries.pderiv (R := R) i a := by
   have := pderiv_subst (σ := Unit) (a := fun _ => a) (fun _ => ha) f i
   simpa [PowerSeries.subst_def, PowerSeries.derivative] using this
 

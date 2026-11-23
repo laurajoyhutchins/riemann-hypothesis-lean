@@ -1,5 +1,45 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.SplitROfSteps
-import Formalism.SharpRestriction.LevelLetterCocycles.FontExAll
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.SplitROfSteps
+public import Formalism.SharpRestriction.LevelLetterCocycles.FontExAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -56,32 +96,6 @@ def GamPiStep : Prop :=
 def OneGenStep : Prop :=
   ∀ (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
     (CA CB CK : ℝ), Adm1 D HW F Cm CA CB CK → oneGenR D HW
-
-def UnivStep : Prop :=
-  ∀ (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
-    (CA CB CK : ℝ), Adm1 D HW F Cm CA CB CK → univR D HW
-
-theorem killR_of_stepProps (hd : DvdStep) (hq : QuotStep) (hn : NormStep) (h9 : DeltaInvariantUniformizer)
-    (he : ExtStep) (hw : WStep) (hk : KerLamStep) (hl : NinLamStep) (hg : GradNStep)
-    (hf : FrobPiNStep) (hγ : GamPiStep) (ho : OneGenStep) (hu : UnivStep) :
-    ∀ (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
-    (CA CB CK : ℝ), FontExAll D HW F → Adm1 D HW F Cm CA CB CK → killR D :=
-  fun D HW F Cm CA CB CK hFont hA =>
-    killR_of_steps D HW hd (hq D hA.2.2.2.2.2.2.2.2.2.2.1 hA.2.2.2.2.2.2.2.2.2.2.2.1) (hn D)
-      (h9 D HW F Cm hA.1)
-      (splitR_of_steps D HW F hA.2.1 hA.2.2.2.2.1 (he D HW F Cm CA CB CK hA) (hw D HW F Cm CA CB CK hA)
-        (hk D HW F Cm CA CB CK hA hFont) (hl D HW F Cm CA CB CK hA) (hg D HW F Cm CA CB CK hA)
-        (hf D HW F Cm CA CB CK hA) (hγ D HW F Cm CA CB CK hA) (ho D HW F Cm CA CB CK hA))
-      (hu D HW F Cm CA CB CK hA)
-
-theorem local_theorem_of_lemma_properties (hG : GenStep) (hL : LiftStep) (hd : DvdStep) (hq : QuotStep)
-    (hn : NormStep) (h9 : DeltaInvariantUniformizer) (he : ExtStep) (hw : WStep) (hk : KerLamStep) (hl : NinLamStep)
-    (hg : GradNStep) (hf : FrobPiNStep) (hγ : GamPiStep) (ho : OneGenStep) (hu : UnivStep) :
-    ∀ (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F)
-      (CA CB CK C : ℝ), 160 ≤ C → FontExAll D HW F → IntegralityFromMetric D HW F Cm CA CB CK C :=
-  fun D HW F Cm CA CB CK C hC hFont =>
-    local_theorem_of_three_inputs D HW F Cm CA CB CK C hC (hG D HW F Cm CA CB CK) (hL D HW F Cm CA CB CK)
-      (killR_of_stepProps hd hq hn h9 he hw hk hl hg hf hγ ho hu D HW F Cm CA CB CK hFont)
 
 end Formalism.MainNotions.N.Ln34
 

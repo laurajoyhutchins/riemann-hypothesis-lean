@@ -1,16 +1,60 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsIntegralIff
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NcardImageOfLe
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
+public import Development.AbelianVarietyTheory.Definitions.Foundations.IsIntegralIff
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NcardImageOfLe
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AlgMem
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CongruentOneMatricesTransitiveNearHermitianStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryNearIdentityCloseTuplesStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryTupleMatrixRightMulNearIdentityStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsPrincipalIdealRingOfHenselian
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CongruentOneMatricesTransitiveNearHermitianStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MatrixCongruentOneModUniformizerPowGroupAndOrbitStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryNearIdentityCloseTuplesStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIsometryTupleMatrixRightMulNearIdentityStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AlgMem
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MatrixCongruentOneModUniformizerPowGroupAndOrbitStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL MeasureTheory
 open scoped Pointwise ENNReal Classical
 
@@ -38,21 +82,6 @@ theorem pow_mem (L : LocE F E) (ϖ : 𝒪[F]) (k : ℕ) : algebraMap F E ((ϖ : 
 
 theorem smul_mem (L : LocE F E) {n : ℕ} {Λ : Submodule L.O (Fin n → E)} {c : E} (hc : c ∈ L.O)
     {v : Fin n → E} (hv : v ∈ Λ) : c • v ∈ Λ := Λ.smul_mem ⟨c, hc⟩ hv
-
-theorem exists_pow_mul_mem (L : LocE F E) {ϖ : 𝒪[F]} (hϖ : Irreducible ϖ) (c : E) :
-    ∃ k : ℕ, algebraMap F E ((ϖ : F) ^ k) * c ∈ L.O := by
-  have := L.free
-  have : Module.Finite F E := Module.finite_of_finrank_pos (by rw [L.rank]; norm_num)
-  have h1 : IsAlgebraic F c := (Algebra.IsIntegral.isIntegral (R := F) c).isAlgebraic
-  have h2 : IsAlgebraic 𝒪[F] c := (IsFractionRing.isAlgebraic_iff 𝒪[F] F E).2 h1
-  obtain ⟨d, hd, hi⟩ := h2.exists_integral_multiple
-  obtain ⟨k, u, rfl⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hd hϖ
-  refine ⟨k, (L.O_def _).2 ?_⟩
-  have h3 := hi.smul (↑u⁻¹ : 𝒪[F])
-  rw [smul_smul, ← mul_assoc, Units.inv_mul, one_mul, Algebra.smul_def] at h3
-  convert h3 using 2
-  rw [IsScalarTower.algebraMap_apply 𝒪[F] F E, map_pow, map_pow, map_pow]
-  rfl
 
 theorem pow_add_smul (ϖ : 𝒪[F]) {V : Type} [AddCommGroup V] [Module E V] (a b : ℕ) (v : V) :
     algebraMap F E ((ϖ : F) ^ (a + b)) • v =
@@ -222,7 +251,7 @@ theorem exists_close (L : LocE F E) {ϖ : 𝒪[F]} (hϖ : Irreducible ϖ) {n : �
       algebraMap F E ((ϖ : F) ^ (N' + N' + j + e + e)) * hf L Hm (u b) (u a)
   have hD : IsHerm L D := by
     ext a b
-    simp only [cT, D, Matrix.of_apply, map_add, map_mul, AlgEquiv.commutes, ← GlobalTheory.HL.Model.hf_symm L hH.1]
+    simp only [cT, D, Matrix.of_apply, map_add (f := _), map_mul, AlgEquiv.commutes, ← GlobalTheory.HL.Model.hf_symm L hH.1]
     ring
   have hD' : IsIntM L D := fun a b =>
     L.O.add_mem (L.O.mul_mem (pow_mem L ϖ _) (L.O.add_mem (hint _ (hy b) _ (hu a))
@@ -290,7 +319,7 @@ theorem main : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace F] [I
   obtain ⟨M, hM⟩ := exists_close L hϖ hH hΛ hh hΓ N e i (by omega)
   obtain ⟨-, hC, -⟩ := GlobalTheory.T.matrixCongruentOneModUniformizerPow_group_and_orbits L ϖ hϖ m i (by omega)
   let B : AddSubgroup (Fin m → Fin n → E) :=
-    (tupLat L Λ m).map (DistribMulAction.toAddMonoidHom _ (algebraMap F E ((ϖ : F) ^ M)))
+    (tupLat L Λ m).map (DistribSMul.toAddMonoidHom _ (algebraMap F E ((ϖ : F) ^ M)))
   have hB : ∀ w : Fin m → Fin n → E, (∀ a, w a ∈ Λ) → algebraMap F E ((ϖ : F) ^ M) • w ∈ B :=
     fun w hw => ⟨w, fun a _ => hw a, rfl⟩
   obtain ⟨k, hk⟩ := exists_pow_le L hϖ hΛ.1 hΛs.1

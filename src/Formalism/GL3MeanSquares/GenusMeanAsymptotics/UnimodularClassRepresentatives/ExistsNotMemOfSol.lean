@@ -1,4 +1,55 @@
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityEighth
+module
+
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityEighth
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensitySeventh
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module Matrix
 
@@ -74,7 +125,13 @@ theorem card_vec_succ (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) {𝔭
     refine Matrix.ext fun a b => ?_
     simp only [Matrix.conjTranspose_apply, Matrix.of_apply]
     rw [idealPowerSpanBounds.star_def]
-    exact conjO_map hF n
+    apply RingOfIntegers.ext
+    have hn : ((ι n : 𝓞 K) : K) = algebraMap F K (n : F) :=
+      (IsScalarTower.algebraMap_apply (𝓞 F) (𝓞 K) K n).symm.trans
+        (IsScalarTower.algebraMap_apply (𝓞 F) F K n)
+    change star ((ι n : 𝓞 K) : K) = ((ι n : 𝓞 K) : K)
+    rw [hn]
+    exact (hF _).mpr ⟨_, rfl⟩
   have RC'' : ∀ X : Matrix m Unit (𝓞 K), (fun X => p' (fun i => X i ())) (X.map (mkk K 𝔭 k)) →
       (∀ a b, (Xᴴ * H * X - T) a b ∈ extP K 𝔭 ^ k) → ∀ S : Matrix Unit Unit (𝓞 K),
       (∀ a b, S a b ∈ extP K 𝔭 ^ k) → (∀ a b, (Sᴴ - S) a b ∈ extP K 𝔭 ^ (k + 1)) →
@@ -116,15 +173,6 @@ theorem card_vec_succ (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) {𝔭
 section star
 
 variable {A : Type*} [CommRing A] [StarRing A]
-
-theorem mulVec_eq_star {H : Matrix m m A} (hH : Hᴴ = H) (x : m → A) :
-    H *ᵥ x = star (star x ᵥ* H) := by
-  ext i
-  have hHij : ∀ j, star (H j i) = H i j := fun j => by
-    rw [← Matrix.conjTranspose_apply, hH]
-  simp only [Matrix.mulVec, Matrix.vecMul, dotProduct, Pi.star_apply, star_sum, star_mul',
-    star_star, hHij]
-  exact Finset.sum_congr rfl (fun j _ => mul_comm _ _)
 
 theorem fm_eq (H : Matrix m m A) (x y : m → A) : fm H x y = (star x ᵥ* H) ⬝ᵥ y := Matrix.dotProduct_mulVec (star x) H y
 
@@ -265,7 +313,15 @@ theorem exists_notMem_of_sol {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {H
   have h3 : ∀ i, ι D * x i ∈ extP K 𝔭 ^ (c + 1) := by
     intro i
     have h4 := conjO_mem_pow hF 𝔭 (c + 1) _ (h1 i)
-    rw [map_mul, conjO_map hF, ← idealPowerSpanBounds.star_def, star_star] at h4
+    have hDconj : conjO K (ι D) = ι D := by
+      apply RingOfIntegers.ext
+      have hDcoe : ((ι D : 𝓞 K) : K) = algebraMap F K (D : F) :=
+        (IsScalarTower.algebraMap_apply (𝓞 F) (𝓞 K) K D).symm.trans
+          (IsScalarTower.algebraMap_apply (𝓞 F) F K D)
+      change star ((ι D : 𝓞 K) : K) = ((ι D : 𝓞 K) : K)
+      rw [hDcoe]
+      exact (hF _).mpr ⟨_, rfl⟩
+    rw [map_mul, hDconj, ← idealPowerSpanBounds.star_def, star_star] at h4
     exact h4
   have h5 : ι D * fm H x x ∈ extP K 𝔭 ^ (d + v + 1) := by
     rw [fm_eq]
@@ -285,8 +341,14 @@ theorem exists_notMem_of_sol {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {H
       ring
     rw [e]
     exact Ideal.sub_mem _ h5 h7
-  rw [mem_pow_iff] at h8
-  exact idealPowerSpanBounds.mul_notMem h𝔭.isPrime (idealPowerSpanBounds.ne_bot h𝔭) hDd hn h8
+  have hDn : D * n ∈ 𝔭 ^ (d + v + 1) := by
+    change ι (D * n) ∈ (Ideal.map ι 𝔭) ^ (d + v + 1) at h8
+    rw [← Ideal.map_pow] at h8
+    have hcomap : Ideal.comap ι (Ideal.map ι (𝔭 ^ (d + v + 1))) = 𝔭 ^ (d + v + 1) :=
+      Ideal.comap_map_eq_self_of_faithfullyFlat _
+    rw [← hcomap]
+    exact Ideal.mem_comap.mpr h8
+  exact idealPowerSpanBounds.mul_notMem h𝔭.isPrime (idealPowerSpanBounds.ne_bot h𝔭) hDd hn hDn
 
 theorem nkM_eq_nkQ {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {H : Matrix m m (𝓞 K)}
     (hH : Hᴴ = H) {D n : 𝓞 F} (hD : H.det = ι D) {d v c k : ℕ} (hDd : D ∉ 𝔭 ^ (d + 1))

@@ -1,6 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+module
+
+public import Mathlib.CategoryTheory.Abelian.Projective.Dimension
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Etale.Weakly
+public import Mathlib.RingTheory.Ideal.UFD
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.CommutativeAlgebra.MaximalIdealSquares.RingKrullDimQuotientSpanSingletonAddOne
+public import Mathlib.Algebra.Module.FinitePresentation
+public import Mathlib.RingTheory.Ideal.Height
+public import Mathlib.RingTheory.LocalProperties.Projective
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
 
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Semi
@@ -11,18 +68,6 @@ namespace GlobalTheory
 namespace RegularFactorial
 
 open IsLocalRing
-
-theorem isRegularRing_of_isLocalization {R : Type*} [CommRing R] [IsRegularRing R]
-    (M : Submonoid R) (S : Type*) [CommRing S] [Algebra R S] [IsLocalization M S] :
-    IsRegularRing S := by
-  have : IsNoetherianRing S := IsLocalization.isNoetherianRing M S inferInstance
-  rw [isRegularRing_iff]
-  intro P hP
-  have h := IsLocalization.isLocalization_isLocalization_atPrime_isLocalization M
-    (Localization.AtPrime P) P
-  exact IsRegularLocalRing.of_ringEquiv
-    (IsLocalization.algEquiv (P.comap (algebraMap R S)).primeCompl
-      (Localization.AtPrime (P.comap (algebraMap R S))) (Localization.AtPrime P)).toRingEquiv
 
 end RegularFactorial
 
@@ -130,11 +175,11 @@ private lemma uniqueFactorizationMonoid_localization_of_height_le
         IsLocalRing.le_maximalIdeal (Ideal.comap_ne_top _ hq.ne_top)
       have hq₂Q : q₂ < Q := by
         refine lt_of_le_of_ne ?_ ?_
-        · rw [← IsLocalization.AtPrime.comap_maximalIdeal (Localization.AtPrime Q) Q]
+        · rw [← IsLocalization.AtPrime.under_maximalIdeal (Localization.AtPrime Q) Q]
           exact Ideal.comap_mono hq₁m
         · intro h
           apply hxq₁
-          have := IsLocalization.map_comap Q.primeCompl (Localization.AtPrime Q) q₁
+          have := IsLocalization.map_under Q.primeCompl (Localization.AtPrime Q) q₁
           rw [← this]
           change x ∈ Ideal.map _ q₂
           rw [h, IsLocalization.AtPrime.map_eq_maximalIdeal]
@@ -189,10 +234,10 @@ private lemma uniqueFactorizationMonoid_localization_of_height_le
     have hp : p = ⊥ := le_bot_iff.1 (hbot ▸ IsLocalRing.le_maximalIdeal (Ideal.IsPrime.ne_top ‹_›))
     exact absurd hph (by rw [hp, Ideal.height_bot]; exact zero_ne_one)
 
+
 open CategoryTheory CategoryTheory.Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry in
 attribute [local instance] Over.cartesianMonoidalCategory in
 open IsLocalRing in
-
 theorem _root_.GlobalTheory.uniqueFactorizationMonoid_of_isRegularRing_of_isLocalRing :
     (∀ (R : Type) [CommRing R] [IsRegularLocalRing R] (M : Type) [AddCommGroup M] [Module R M]
       [Module.Finite R M], ∃ n : ℕ, HasProjectiveDimensionLE (ModuleCat.of R M) n) →

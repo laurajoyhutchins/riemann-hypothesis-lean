@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ToroidalChartsForFan
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.NotHasChartOfOfMinEqZero
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFineInvariantFan
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ToricChartsPolarizedModel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SncToroidalGenericBoundaryOfSncBoundary
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.DenseInterior
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.SiegelToroidalIntegral
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ToroidalChartsForFan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SncToroidalGenericBoundaryOfSncBoundary
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFineInvariantFan
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ToricChartsPolarizedModel
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.NotHasChartOfOfMinEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.AnalyticForms.RegularLocalRings.DivSheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -100,22 +140,6 @@ theorem exists_model_charts (hS : SiegelToroidalIntegral) (h : ToroidalForFanKS)
       HasLogKS Y.t Y.s (interior Y) ∧ ∀ x ∈ genBd Y, HasChart Y x := by
   obtain ⟨φ, Y, BD, d, k, -, -, -, -, -, a₁, a₂, a₃, -, -, a₄, -⟩ := h.exists_model hS hr Xo c
   exact ⟨Y, a₁, a₂, a₃, fun x hx => (a₄ x hx).hasChart⟩
-
-theorem exists_torModel (hS : SiegelToroidalIntegral) (h : ToroidalForFanKS) (hr : 1 ≤ Dw.p + Dw.q)
-    {l : Geo.Tor.Level H} (Xo : Moduli Dw l) (c : Coeff l) :
-    ∃ (Y : Model Xo c (RingHom.id c.F)) (T : TorModel Y), T.Z = Y ∧
-      SmoothOfRelativeDimension Dw.dim T.Z.s ∧ FinalTheorems.Snc (boundary T.Z) ∧ HasLogKS T.Z.t T.Z.s (interior T.Z) ∧
-      (GlobalTheory.FlagMod.detOm T.Z).IsLB ∧ GlobalTheory.IsAmpleLB (GlobalTheory.TorRef.polOf T.Z T.m0 T.BD) := by
-  obtain ⟨φ, Y, BD, d, k, -, -, -, -, hk, a₁, a₂, a₃, a₄, a₅, a₆, a₇, a₈⟩ := h.exists_model hS hr Xo c
-  exact ⟨Y, GlobalTheory.TorRef.selfTor Y (smooth_gen_iff.2 a₁) (snc_gen_iff.2 a₂)
-    (fun x hx => (hasChart_iff Y x).1 (a₆ x hx).hasChart) BD a₄ a₅ k hk, rfl, a₁, a₂, a₃, a₇, a₈⟩
-
-theorem toroidalCompactification (hS : SiegelToroidalIntegral) (h : ToroidalForFanKS) : ToroidalCompactification :=
-  fun _ _ _ _ _ _ hr _ Xo c => (h.exists_model_charts hS hr Xo c).imp fun _ a => ⟨a.1, a.2.1, a.2.2.1⟩
-
-theorem toroidalCharts (hS : SiegelToroidalIntegral) (h : ToroidalForFanKS) : ToroidalCharts :=
-  fun _ _ _ _ _ _ hr _ Xo c =>
-    (h.exists_model_charts hS hr Xo c).imp fun _ a => ⟨smooth_gen_iff.2 a.1, snc_gen_iff.2 a.2.1, a.2.2.2⟩
 
 end ToroidalForFanKS
 

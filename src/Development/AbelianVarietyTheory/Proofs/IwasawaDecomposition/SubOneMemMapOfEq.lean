@@ -1,9 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.AbelianHostFieldConditions
-import Formalism.LocalToGlobal.Columns.RowForms
-import Formalism.LocalToGlobal.Divisibility.Tuples
-import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.RamBasic
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+module
+
+public import Formalism.LocalToGlobal.Columns.RowForms
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.L2.DIV Formalism.UG Formalism.UG.P Formalism.EigenvalueLevelCeiling GlobalTheory.AdeleBaseChange
 open scoped TensorProduct
@@ -24,8 +64,8 @@ theorem intValuation_eq_one {K : Type} [Field K] [NumberField K] (P : HeightOneS
     (h : b ∉ P.asIdeal) : P.intValuation b = 1 :=
   le_antisymm (P.intValuation_le_one b) (not_lt.1 fun h' => h ((P.intValuation_lt_one_iff_mem b).1 h'))
 
-variable (F E) in
 
+variable (F E) in
 abbrev toId : (RInt F E)ˣ →* (AfE F E)ˣ := Units.map (RInt F E).subtype.toMonoidHom
 
 theorem exists_toId_eq {x : (AfE F E)ˣ} (hx : x ∈ intU F E) : ∃ u, toId F E u = x :=
@@ -95,12 +135,6 @@ theorem under_eq_iff {P : HeightOneSpectrum (𝓞 E)} {v : HeightOneSpectrum (�
     P.under (𝓞 F) = v ↔ P.asIdeal.under (𝓞 F) = v.asIdeal :=
   ⟨fun h => h ▸ rfl, fun h => HeightOneSpectrum.ext h⟩
 
-theorem exists_rep {P : HeightOneSpectrum (𝓞 E)} (a : (𝓞 E ⧸ P.asIdeal)ˣ) :
-    ∃ b : 𝓞 E, Ideal.Quotient.mk P.asIdeal b = a ∧ b ∉ P.asIdeal := by
-  obtain ⟨b, hb⟩ := Ideal.Quotient.mk_surjective (a : 𝓞 E ⧸ P.asIdeal)
-  have := P.isPrime
-  exact ⟨b, hb, fun h => a.ne_zero (hb ▸ Ideal.Quotient.eq_zero_iff_mem.2 h)⟩
-
 end Res
 
 section Datum
@@ -128,14 +162,9 @@ theorem exists_of_conj_eq (hX : X.Ok) {a : 𝓞 X.E} (ha : X.conjO a = a) :
   rw [hM, IntermediateField.mem_bot] at h2
   obtain ⟨x, hx⟩ := h2
   have h3 : IsIntegral ℤ x := by
-    rw [← isIntegral_algebraMap_iff (algebraMap X.F X.E).injective, hx]
+    rw [← isIntegral_algebraMap_iff (B := X.E), hx]
     exact RingOfIntegers.isIntegral_coe _
   exact ⟨⟨x, h3⟩, RingOfIntegers.ext hx⟩
-
-theorem conjO_conjO (a : 𝓞 X.E) : X.conjO (X.conjO a) = a := RingOfIntegers.ext (star_star (a : X.E))
-
-def qdatOf (sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)) (ξ : Chr X.F X.E X.K) : QDat X :=
-  ⟨QE sel ξ, fun P => resChar ξ P.1⟩
 
 variable {S : Set ℕ} {sel : HeightOneSpectrum (𝓞 X.F) → HeightOneSpectrum (𝓞 X.E)}
 
@@ -144,7 +173,7 @@ theorem mem_QE_iff (hsel : IsSel X sel) (ξ : Tup X.F X.E X.K S) {P : HeightOneS
       P.under (𝓞 X.F) ∈ Qprime (ξ : Chr X.F X.E X.K) ∧ sel (P.under (𝓞 X.F)) = P := by
   classical
   have hf := finite_Qprime (ξ := (ξ : Chr X.F X.E X.K)) ξ.2.1.1.1.1.2
-  rw [QE, dif_pos hf, Finset.mem_image]
+  rw [QE, dite_eq_left hf, Finset.mem_image]
   simp only [Set.Finite.mem_toFinset]
   refine ⟨?_, fun h => ⟨_, h.1, h.2⟩⟩
   rintro ⟨v, hv, rfl⟩

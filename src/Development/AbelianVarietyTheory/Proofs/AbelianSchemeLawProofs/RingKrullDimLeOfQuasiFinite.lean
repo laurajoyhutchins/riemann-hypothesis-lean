@@ -1,6 +1,65 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqOfLbIso
+module
+
+public import Mathlib.AlgebraicGeometry.Geometrically.Integral
+public import Mathlib.RingTheory.QuasiFinite.Basic
+public import Mathlib.Tactic.ENatToNat
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqOfLbIso
+public import Mathlib.Algebra.Module.Submodule.Union
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.KrullDimension.Field
+public import Mathlib.RingTheory.KrullDimension.Polynomial
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.Unramified.LocalStructure
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaCore
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBLocal
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,12 +103,14 @@ theorem exists_quotient (s t : M.Sec) :
 theorem gs_sum_mul {I : Type} [Fintype I] (c : I → Γ(Y, ⊤)) {U : Y.Opens} (b : I → Γ(Y, U)) (y : Y)
     (hy : y ∈ U) :
     gs (𝟙 Y) y U (∑ i, resG Y le_top (c i) * b i) = ∑ i, gs (𝟙 Y) y ⊤ (c i) * gs (𝟙 Y) y U (b i) := by
+
   rw [gs_eq _ y U hy, map_sum, map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [← gs_eq _ y U hy, gs_mul _ y U hy, gs_res _ y _ hy]
 
 theorem exists_sec_sum {I : Type} [Fintype I] (c : I → Γ(Y, ⊤)) (s : I → M.Sec) :
     ∃ t : M.Sec, ∀ k, t.f k = ∑ i, resG Y le_top (c i) * (s i).f k :=
   ⟨⟨fun k => ∑ i, resG Y le_top (c i) * (s i).f k, fun j j' => by
+
     rw [map_sum, map_sum, Finset.mul_sum]
     exact Finset.sum_congr rfl fun i _ => (DVR.SecOps.secScale (c i) (s i)).compat j j'⟩, fun _ => rfl⟩
 
@@ -173,7 +234,7 @@ theorem coheight_le_of_smooth {K : Type} [Field K] {X : Scheme.{0}} (f : X ⟶ S
     ← coheight_eq_of_isOpenImmersion (x := hV.primeIdealOf ⟨x, hx⟩) hV.fromSpec] at h₂
   have h₃ : hV.fromSpec.base (hV.primeIdealOf ⟨x, hx⟩) = x := hV.fromSpec_primeIdealOf ⟨x, hx⟩
   rw [h₃] at h₂
-  simp only [zero_add, Nat.card_eq_fintype_card, Fintype.card_fin] at h₂
+  simp only [zero_add, ENat.card_eq_coe_natCard, Nat.card_eq_fintype_card, Fintype.card_fin] at h₂
   exact_mod_cast h₂
 
 theorem exists_cover_of_infinite (K : Type) [Field K] [Infinite K] (P : PolAV (Spec (CommRingCat.of K))) :

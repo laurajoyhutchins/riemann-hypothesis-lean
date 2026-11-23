@@ -1,4 +1,45 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj TensorProduct WithConv
 open ReciprocityTheory.ChartRestriction.G.Geo.Tor (Sp spMap epsR IsTangent IsGrpPullback)
 open ReciprocityTheory.ChartRestriction.G.Semi (IsAbelianScheme LB RigLB CubicalStr Theta thφ thε thK x3)
@@ -24,7 +65,7 @@ theorem trivEquiv_symm_π (T : Thick (dp0 R) (X.hom ≫ 𝟙 _)) (hT : T.J = ⊥
   (trivEquiv T hT).symm_apply_apply b
 
 def trivPt (T : Thick (dp0 R) (X.hom ≫ 𝟙 _)) (hT : T.J = ⊥) : Pt X T.B :=
-  Over.homMk (spMap ((trivEquiv T hT).symm.toRingHom) ≫ T.x) (by
+  Over.homMk (U := SpAlg R T.B) (spMap ((trivEquiv T hT).symm.toRingHom) ≫ T.x) (by
     have h : T.x ≫ X.hom = spMap (T.π.comp (algebraMap R T.B)) :=
       ((Category.comp_id _).symm.trans (Category.assoc _ _ _)).trans T.w
     change (spMap _ ≫ T.x) ≫ X.hom = spMap (algebraMap R T.B)
@@ -60,8 +101,8 @@ def trivCoc (u : Fn1 X) (hu : IsCoc (whole X) u) :
 
 end GlobalTheory.PtExt.Lift
 
-open GlobalTheory.PtExt.Lift in
 
+open GlobalTheory.PtExt.Lift in
 theorem GlobalTheory.PtExt.cohom_fv_of_toH1O_surjective : ∀ (R : Type) [CommRing R] (X : Over (Sp R)),
     Function.Surjective (toH1O (X.hom ≫ 𝟙 _)) → ∀ u : Fn1 X, IsCoc (whole X) u →
       ∃ f : Z1 (O (dp0 R) (X.hom ≫ 𝟙 _)), Cohom (whole X) u (fv f) := by
@@ -73,9 +114,14 @@ theorem GlobalTheory.PtExt.cohom_fv_of_toH1O_surjective : ∀ (R : Type) [CommRi
   obtain ⟨g, hg⟩ := H1.mk_eq_mk.1 hc'
   refine ⟨f, fun D _ _ x ↦ -g ⟨trivAt x, rfl⟩, ?_⟩
   intro D _ _ D' _ _ φ x _
-  have h := congrFun (congrFun (congrFun hg ⟨trivAt x, rfl⟩) ⟨trivAt (spOver φ ≫ x), rfl⟩) ⟨trivMap φ x⟩
-  change @id D' (g ⟨trivAt (spOver φ ≫ x), rfl⟩) - φ (@id D (g ⟨trivAt x, rfl⟩)) = ev f (trivMap φ x) - u D D' φ (trivPt (trivAt x) rfl) at h
+  let T : (IsTriv (X.hom ≫ 𝟙 _)).FullSubcategory := ⟨trivAt x, rfl⟩
+  let T' : (IsTriv (X.hom ≫ 𝟙 _)).FullSubcategory := ⟨trivAt (spOver φ ≫ x), rfl⟩
+  let a : T ⟶ T' := ObjectProperty.homMk (trivMap φ x)
+  let b : D := g T
+  let b' : D' := g T'
+  have h := congrFun (congrFun (congrFun hg T) T') a
+  change b' - φ b = ev f (trivMap φ x) - u D D' φ (trivPt (trivAt x) rfl) at h
   rw [trivPt_trivAt] at h
-  change u D D' φ x + -ev f (trivMap φ x) = -@id D' (g ⟨trivAt (spOver φ ≫ x), rfl⟩) - φ (-(@id D (g ⟨trivAt x, rfl⟩)))
+  change u D D' φ x + -ev f (trivMap φ x) = -b' - φ (-b)
   rw [map_neg]
   linear_combination h

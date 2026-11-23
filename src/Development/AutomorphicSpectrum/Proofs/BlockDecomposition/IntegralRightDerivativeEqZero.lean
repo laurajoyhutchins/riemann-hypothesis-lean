@@ -1,21 +1,66 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OrderedCechToCatCochainsOneApplyValueAtSubset
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousOnFderivApply
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+
+@[expose] public section
 
 noncomputable section
 
-open Matrix Finset MeasureTheory
-open scoped ContDiff ComplexConjugate InnerProductSpace
-open PositivityTheory.RgBcC PositivityTheory.RgBcC.Real PositivityTheory.RgBcC.RealD
+open Matrix MeasureTheory
+open scoped ContDiff
+open PositivityTheory.RgBcC (GLs Rd)
 open PositivityTheory.RgTw (Mat)
-open GlobalTheory.CompanionTheory.GLK (e1 e2 f1)
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 namespace GlobalTheory.CompanionTheory.ModelS.SkewInt
 
 open scoped Matrix.Norms.Operator in
-
 theorem exp_entry_hasDerivAt {n : ℕ} (X : Mat n) (t : ℝ) (i j : Fin n) :
     HasDerivAt (fun s : ℝ => (NormedSpace.exp (s • X) : Mat n) i j)
       ((NormedSpace.exp (t • X) * X : Mat n) i j) t := by
@@ -55,15 +100,17 @@ theorem integral_Rd_skew : ∀ (n : ℕ) [MeasurableSpace (Matrix.unitaryGroup (
   haveI : SecondCountableTopology (Mat n) := inferInstanceAs (SecondCountableTopology (Fin n → Fin n → ℂ))
   haveI : SecondCountableTopology (Matrix.unitaryGroup (Fin n) ℂ) :=
     TopologicalSpace.Subtype.secondCountableTopology _
+  have hmem (k : Matrix.unitaryGroup (Fin n) ℂ) : k.1 ∈ GLs n :=
+    (Matrix.UnitaryGroup.det_isUnit k).ne_zero
   let kt : ℝ → Matrix.unitaryGroup (Fin n) ℂ := fun t => ⟨NormedSpace.exp (t • X), exp_mem_unitary hX t⟩
   have hval : ∀ (y : Matrix.unitaryGroup (Fin n) ℂ) (t : ℝ),
       y.1 * (NormedSpace.exp (t • X) : Mat n) = (y * kt t).1 := fun _ _ => rfl
   have hcv : Continuous fun k : Matrix.unitaryGroup (Fin n) ℂ => k.1 := continuous_subtype_val
   have hRd := GlobalTheory.CompanionTheory.RCalc.Rd_contDiffOn X hu
   have cU : Continuous fun k : Matrix.unitaryGroup (Fin n) ℂ => u k.1 :=
-    hu.continuousOn.comp_continuous hcv unit_mem
+    hu.continuousOn.comp_continuous hcv hmem
   have cR : Continuous fun k : Matrix.unitaryGroup (Fin n) ℂ => Rd X u k.1 :=
-    hRd.continuousOn.comp_continuous hcv unit_mem
+    hRd.continuousOn.comp_continuous hcv hmem
   obtain ⟨C, hC⟩ := isCompact_univ.exists_bound_of_continuousOn cR.continuousOn
   have key := GlobalTheory.CompanionTheory.RCalc.ByParts.integral_deriv_eq_zero (μ := κ) (V := ℂ)
     (F := fun t y => u (y.1 * (NormedSpace.exp (t • X) : Mat n)))
@@ -72,13 +119,13 @@ theorem integral_Rd_skew : ∀ (n : ℕ) [MeasurableSpace (Matrix.unitaryGroup (
   · simpa using key
   · intro t _
     simp only [hval]
-    exact cU.comp (continuous_mul_right (kt t))
+    exact cU.comp (continuous_mul_const (kt t))
   · simp only [hval]
-    exact cR.comp (continuous_mul_right (kt 0))
+    exact cR.comp (continuous_mul_const (kt 0))
   · intro y t _
     have hg : y.1 * (NormedSpace.exp (t • X) : Mat n) ∈ GLs n := by
       rw [hval]
-      exact unit_mem _
+      exact hmem _
     have h := (GlobalTheory.CompanionTheory.RCalc.differentiableAt_of_smooth hu hg).hasFDerivAt.comp_hasDerivAt t
       (curve_hasDerivAt y.1 X t)
     exact h

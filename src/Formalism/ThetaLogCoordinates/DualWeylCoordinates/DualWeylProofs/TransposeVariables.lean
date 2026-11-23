@@ -1,5 +1,53 @@
-import Formalism.ThetaLogCoordinates.DualWeylCoordinates.StatementH
-import Formalism.GradedWeylDivisibility.StatementE
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Formalism.ThetaLogCoordinates.DualWeylCoordinates.DefsMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -75,13 +123,13 @@ theorem qn_deriv_rowGen (n : ℕ) (a b : Fin n) (hab : a ≠ b) (f : MvPolynomia
     rw [hD]
     simp [transposeVariables, rowGen]
   | add p q hp hq =>
-    simp only [map_add, Polynomial.derivative_add, hp, hq]
+    simp only [map_add (f := _), Polynomial.derivative_add, hp, hq]
   | mul_X p i hp =>
     have hL : qn_D n a b (p * X i) = p * qn_D n a b (X i) + X i * qn_D n a b p := by
       rw [Derivation.leibniz]
       simp [smul_eq_mul]
     rw [hL]
-    simp only [map_add, map_mul, Polynomial.derivative_mul, hp, hX i]
+    simp only [map_add (f := _), map_mul, Polynomial.derivative_mul, hp, hX i]
     ring
 
 theorem qn_deriv_rowGen_diag (n : ℕ) (a : Fin n) (f : MvPolynomial (Fin n × Fin n) ℚ) :
@@ -104,14 +152,14 @@ theorem qn_deriv_rowGen_diag (n : ℕ) (a : Fin n) (f : MvPolynomial (Fin n × F
     rw [hD]
     simp [transposeVariables, rowGen]
   | add p q hp hq =>
-    simp only [map_add, Polynomial.derivative_add, mul_add, hp, hq]
+    simp only [map_add (f := _), Polynomial.derivative_add, mul_add, hp, hq]
   | mul_X p i hp =>
     have hL : qn_D n a a (p * X i) = p * qn_D n a a (X i) + X i * qn_D n a a p := by
       rw [Derivation.leibniz]
       simp [smul_eq_mul]
     rw [hL, map_mul, map_mul, Polynomial.derivative_mul, mul_add, ← mul_assoc,
       mul_left_comm (1 + Polynomial.X) (rowGen ℚ a a (transposeVariables ℚ n p)), hp, hX i]
-    simp only [map_add, map_mul]
+    simp only [map_add (f := _), map_mul]
     ring
 
 end Formalism.InvariantFactorPaths.ColumnFamilies

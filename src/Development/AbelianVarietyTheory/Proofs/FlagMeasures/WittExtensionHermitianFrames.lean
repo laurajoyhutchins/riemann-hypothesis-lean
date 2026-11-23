@@ -1,14 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.InFrameStabilizer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.InFrameStabilizer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix
 
 namespace GlobalTheory.SgAlg.WittField
 
 variable {E : Type} [Field E] {σ : E →+* E} {n : ℕ} {J : Matrix (Fin n) (Fin n) E}
-
-theorem form_add_left (v v' w : Fin n → E) : form σ J (v + v') w = form σ J v w + form σ J v' w := by
-  simp [form, mulVec_add, dotProduct_add]
 
 theorem form_sub_left (v v' w : Fin n → E) : form σ J (v - v') w = form σ J v w - form σ J v' w := by
   simp [form, mulVec_sub, dotProduct_sub]
@@ -30,6 +75,7 @@ theorem herm_entry (hJ : cT σ J = J) (i j : Fin n) : σ (J j i) = J i j := by
 
 theorem form_conj (hσ : ∀ x, σ (σ x) = x) (hJ : cT σ J = J) (v w : Fin n → E) :
     form σ J w v = σ (form σ J v w) := by
+
   simp only [form, dotProduct, mulVec, map_sum, map_mul, hσ, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -37,12 +83,13 @@ theorem form_conj (hσ : ∀ x, σ (σ x) = x) (hJ : cT σ J = J) (v w : Fin n �
   ring
 
 theorem form_add_right (v w w' : Fin n → E) : form σ J v (w + w') = form σ J v w + form σ J v w' := by
-  simp only [form, Pi.add_apply, map_add]
+  simp only [form, Pi.add_apply, map_add (f := _)]
   rw [show (fun i => σ (w i) + σ (w' i)) = (fun i => σ (w i)) + (fun i => σ (w' i)) from rfl, add_dotProduct]
 
 theorem conj_mulVec (B : Matrix (Fin n) (Fin n) E) (w : Fin n → E) :
     (fun i => σ ((B *ᵥ w) i)) = (fun i => σ (w i)) ᵥ* cT σ B := by
   funext k
+
   simp [mulVec, vecMul, dotProduct, cT, map_sum, map_mul, mul_comm]
 
 theorem form_mulVec (A B : Matrix (Fin n) (Fin n) E) (v w : Fin n → E) :
@@ -228,8 +275,8 @@ theorem pairM_entry {a : ℕ} (X : Matrix (Fin n) (Fin a) E) (i j : Fin a) :
 
 end GlobalTheory.SgAlg.WittField
 
-open GlobalTheory.SgAlg Matrix in
 
+open GlobalTheory.SgAlg Matrix in
 theorem GlobalTheory.SgAlg.witt_free_field : ∀ {E : Type} [Field E] (σ : E →+* E), IsQA σ → ∀ {n a : ℕ}
     (J : Matrix (Fin n) (Fin n) E), IsHermU σ J → ∀ (X X' : Matrix (Fin n) (Fin a) E), Free X →
     Free X' → pairM σ J X X = pairM σ J X' X' → ∃ g, IsUn σ J g ∧ g * X = X' := by

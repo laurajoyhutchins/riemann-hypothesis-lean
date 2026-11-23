@@ -1,7 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
-import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
-import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -65,8 +104,9 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.UnitaryAdjointCongruence.
     (σ : E →+* ℂ) (i : Fin (Dw.mult σ)) (b : Fin n → E) :
     _root_.GlobalTheory.IndefiniteRowSideFullHecke.UnitaryAdjointCongruence.pushLet c γ (_root_.Formalism.L2.Pj.letB c σ i b) = _root_.Formalism.L2.Pj.letB c σ i (γ.mulVec b) := by
   unfold _root_.GlobalTheory.IndefiniteRowSideFullHecke.UnitaryAdjointCongruence.pushLet _root_.Formalism.L2.Pj.letB
+
   simp only [map_sum, map_mul, aeval_C, aeval_X, Matrix.mulVec, dotProduct, Finset.mul_sum,
-    Finset.sum_mul, MvPolynomial.algebraMap_eq]
+  Finset.sum_mul, MvPolynomial.algebraMap_eq]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -78,13 +118,13 @@ def LevMoves {n : ℕ} (γ : Matrix (Fin n) (Fin n) E) (q q' : Fin n → LevQ Dw
 def FixesDatum {n : ℕ} (γ : Matrix (Fin n) (Fin n) E) (w : (Fin n → LevQ Dw l) → c.F) : Prop :=
   ∀ q q', LevMoves γ q q' → w q' = w q
 
-variable (Dw) in
 
+variable (Dw) in
 def IsBeta {n : ℕ} (Λ : GenLat E n) (β : c.F) : Prop :=
   β ≠ 0 ∧ BetaIs (Dw := Dw) c Λ β ∧ BetaAbs (Dw := Dw) c Λ β
 
-variable (l) in
 
+variable (l) in
 def BadOK (bad : ℕ) : Prop :=
   0 < bad ∧ 2 ∣ bad ∧ l.M ∣ bad ∧ ∀ p : ℕ, p.Prime → (p : ℤ) ∣ NumberField.discr E → p ∣ bad
 
@@ -106,48 +146,7 @@ def ChangeWith [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) (good : c.F → P
     IsBeta Dw c Λ β → IsBeta Dw c (actLat γ Λ) β' →
     ∃ ζ : c.F, good ζ ∧ RepId Xo c nab Λ β γ β' ζ
 
-def ChangeId [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) : Prop :=
-  ChangeWith Xo c nab n fun ζ => ζ ≠ 0
-
-def ChangeAbs [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) : Prop :=
-  ChangeWith Xo c nab n fun ζ => ∀ σ : c.F →+* ℂ, ‖σ ζ‖ = 1
-
 def ChangeRoot [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) : Prop :=
   ChangeWith Xo c nab n fun ζ => ∃ k : ℕ, 0 < k ∧ ζ ^ k = 1
-
-def IsTh (nab : NabV Xo c) {n : ℕ} (w : (Fin n → LevQ Dw l) → c.F) (Λ : GenLat E n) (β : c.F) (N : ℕ)
-    (P : MvPolynomial (LtN Dw n) c.F) (f : Rul Xo c) : Prop :=
-  ∀ (p : TRing c.F) (y : FrPt Xo c p.R), ShortValAt Xo c nab w Λ β N P y (f p y)
-
-def thSpan (nab : NabV Xo c) {n : ℕ} (w : (Fin n → LevQ Dw l) → c.F) (Λ : GenLat E n) (β : c.F) (N : ℕ)
-    (a : (E →+* ℂ) × ℕ → ℕ) : Submodule (𝓞 c.F) (Rul Xo c) :=
-  Submodule.span (𝓞 c.F) {f | f ∈ sec Xo c a n ∧ ∃ P ∈ harmL c Λ a, IsTh Xo c nab w Λ β N P f}
-
-def SpanClass [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) : Prop :=
-  HidaSetting Xo c nab n → ∀ (bad : ℕ), BadOK l bad →
-  ∀ (Λ : GenLat E n) (γ : Matrix (Fin n) (Fin n) E) (β β' : c.F),
-    Λ.Unimod → IsUnitaryM γ → Λ.TrivAt bad → (actLat γ Λ).TrivAt bad →
-    IsBeta Dw c Λ β → IsBeta Dw c (actLat γ Λ) β' →
-    ∀ (w : (Fin n → LevQ Dw l) → c.F), FixesDatum c γ w →
-    ∀ (N N' : ℕ), Λ.LevOK N l.M → (actLat γ Λ).LevOK N' l.M → ∀ a : (E →+* ℂ) × ℕ → ℕ,
-      thSpan Xo c nab w (actLat γ Λ) β' N' a = thSpan Xo c nab w Λ β N a
-
-def OnPairs [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) : Prop :=
-  HidaSetting Xo c nab n → ∀ (bad : ℕ), BadOK l bad →
-  ∀ (Λ₀ : GenLat E n) (ι : Λ₀.La →ₗ[𝓞 E] StdMod E n l.M) (γ₁ γ₂ : Matrix (Fin n) (Fin n) E) (β₁ β₂ : c.F),
-    Λ₀.Unimod → IsIsomMod Λ₀ l.M ι → IsRep Λ₀ l.M ι bad γ₁ → IsRep Λ₀ l.M ι bad γ₂ →
-    IsBeta Dw c (actLat γ₁ Λ₀) β₁ → IsBeta Dw c (actLat γ₂ Λ₀) β₂ →
-    ∃ ζ : c.F, (∃ k : ℕ, 0 < k ∧ ζ ^ k = 1) ∧
-      ∀ (w : (Fin n → LevQ Dw l) → c.F) (N₁ N₂ : ℕ),
-        (actLat γ₁ Λ₀).LevOK N₁ l.M → (actLat γ₂ Λ₀).LevOK N₂ l.M → ∀ a : (E →+* ℂ) × ℕ → ℕ,
-        (∀ P ∈ harmL c Λ₀ a, ∀ (S : Type) [CommRing S] [Algebra c.F S] (y : FrPt Xo c S) (v₁ v₂ : S),
-          ShortValAt Xo c nab w (actLat γ₁ Λ₀) β₁ N₁ (pushLet c γ₁ P) y v₁ →
-          ShortValAt Xo c nab w (actLat γ₂ Λ₀) β₂ N₂ (pushLet c γ₂ P) y v₂ →
-            v₂ = algebraMap c.F S ζ * v₁) ∧
-        thSpan Xo c nab w (actLat γ₂ Λ₀) β₂ N₂ a = thSpan Xo c nab w (actLat γ₁ Λ₀) β₁ N₁ a
-
-def ChangeOfRepresentative [StarRing (𝓞 E)] (nab : NabV Xo c) (n : ℕ) : Prop :=
-  RepExists E n ∧ ChangeId Xo c nab n ∧ ChangeAbs Xo c nab n ∧ ChangeRoot Xo c nab n ∧
-    SpanClass Xo c nab n ∧ OnPairs Xo c nab n
 
 end GlobalTheory.IndefiniteRowSideFullHecke.UnitaryAdjointCongruence

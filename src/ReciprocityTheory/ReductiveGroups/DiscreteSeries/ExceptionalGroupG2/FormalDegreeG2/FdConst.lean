@@ -1,11 +1,56 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.FormalDegreeG2.ProdSubLtEqFactorial
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.RhoNSubNab
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.VolUFactProdMulLe
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.TraceMulSelfEqSumEigenvaluesSq
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.FdConst
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.FormalDegreeG2.FdDefs
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.FormalDegreeG2.ProdSubLtEqFactorial
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.RhoNSubNab
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.TraceMulSelfEqSumEigenvaluesSq
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.VolUFactProdMulLe
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,73 +137,6 @@ theorem formal_degree_constant_eq {ε : Fin n → Bool} {lam : Fin n → ℝ} (h
     (hlow : ENNReal.ofReal (cPQ ε * PiW ε 0) ≤ Filter.liminf (fun t : ℕ => ENNReal.ofReal ((t : ℝ) ^ (pOf ε * qOf ε) *
       (Module.finrank ℂ (T t).V : ℝ) / d t)) Filter.atTop) :
     d 0 = dimVlam lam := by
-  have hV := vand_pos hlam.1
-  have hVt : ∀ t, 0 < Vand (lamT lam t) := fun t => vand_pos (strictAnti_lamT hlam.1 t)
-  have hFp : 0 < (∏ i ∈ range (pOf ε), (i.factorial : ℝ)) * ∏ i ∈ range (qOf ε), (i.factorial : ℝ) :=
-    mul_pos (volU_factProd_pos _) (volU_factProd_pos _)
-  have hP := fdc_ncpos ε
-  have hform : ∀ t : ℕ, (t : ℝ) ^ (pOf ε * qOf ε) * (Module.finrank ℂ (T t).V : ℝ) / d t =
-      Vand lam / (d 0 * ((∏ i ∈ range (pOf ε), (i.factorial : ℝ)) * ∏ i ∈ range (qOf ε), (i.factorial : ℝ))) *
-        (∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b ∧ ε a = ε b),
-          ((lamT lam t a - lamT lam t b + (nab ε a b : ℝ)) / (lamT lam t a - lamT lam t b))) *
-        ∏ ab : PCoord ε, ((t : ℝ) / (lamT lam t ab.1.2 - lamT lam t ab.1.1)) := by
-    intro t
-    have hsplit := fdc_vand_split ε (lamT lam t)
-    have hd : d t = d 0 / Vand lam * Vand (lamT lam t) := by
-      have := h1 t; rw [div_eq_iff (hVt t).ne'] at this; exact this
-    have hne : Vand (lamT lam t) ≠ 0 := (hVt t).ne'
-    rw [hsplit] at hne
-    have hQ := left_ne_zero_of_mul hne
-    have hPn := right_ne_zero_of_mul hne
-    simp only [Finset.prod_div_distrib, Finset.prod_const, Finset.card_univ, card_PCoord]
-    rw [hd, lemma7 (T t), hsplit]
-    field_simp
-  have hR1 : Tendsto (fun t : ℕ => ∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b ∧ ε a = ε b),
-      ((lamT lam t a - lamT lam t b + (nab ε a b : ℝ)) / (lamT lam t a - lamT lam t b))) atTop
-      (𝓝 (∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b ∧ ε a = ε b), (1 : ℝ))) := by
-    refine tendsto_finsetProd _ fun a _ => tendsto_finsetProd _ fun b hb => ?_
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hb
-    simp only [lamT_sub]
-    refine fdc_tend1 _ _ _ (sub_pos.2 ?_)
-    exact_mod_cast hb.1
-  have hR2 : Tendsto (fun t : ℕ => ∏ ab : PCoord ε, ((t : ℝ) / (lamT lam t ab.1.2 - lamT lam t ab.1.1))) atTop
-      (𝓝 (∏ ab : PCoord ε, 1 / (((ab.1.1 : ℕ) : ℝ) - ((ab.1.2 : ℕ) : ℝ)))) := by
-    refine tendsto_finsetProd _ fun ab _ => ?_
-    simp only [lamT_sub]
-    refine fdc_tend2 _ _ (sub_pos.2 ?_)
-    exact_mod_cast ab.2.1
-  have hX := ((tendsto_const_nhds (x := Vand lam / (d 0 * ((∏ i ∈ range (pOf ε), (i.factorial : ℝ)) *
-      ∏ i ∈ range (qOf ε), (i.factorial : ℝ))))).mul hR1).mul hR2
-  have hval : Vand lam / (d 0 * ((∏ i ∈ range (pOf ε), (i.factorial : ℝ)) * ∏ i ∈ range (qOf ε), (i.factorial : ℝ))) *
-        (∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b ∧ ε a = ε b), (1 : ℝ)) *
-        (∏ ab : PCoord ε, 1 / (((ab.1.1 : ℕ) : ℝ) - ((ab.1.2 : ℕ) : ℝ))) =
-      Vand lam / (d 0 * ((∏ i ∈ range (pOf ε), (i.factorial : ℝ)) *
-        ∏ i ∈ range (qOf ε), (i.factorial : ℝ))) * (1 / ∏ ab : PCoord ε, (((ab.1.1 : ℕ) : ℝ) - ((ab.1.2 : ℕ) : ℝ))) := by
-    simp only [Finset.prod_const_one, mul_one, Finset.prod_div_distrib]
-  rw [hval] at hX
-  have hX' := hX.congr (fun t => (hform t).symm)
-  have hE := ENNReal.tendsto_ofReal hX'
-  have e1 := hE.limsup_eq
-  have e2 := hE.liminf_eq
-  rw [e1] at hup
-  rw [e2] at hlow
-  have hC : 0 ≤ cPQ ε * PiW ε 0 := by
-    rw [pi_weight_at_zero_eq]; unfold cPQ
-    have := volU_factProd_pos n
-    have := volU_factProd_pos (pOf ε)
-    have := volU_factProd_pos (qOf ε)
-    positivity
-  have hL : 0 ≤ Vand lam / (d 0 * ((∏ i ∈ range (pOf ε), (i.factorial : ℝ)) *
-      ∏ i ∈ range (qOf ε), (i.factorial : ℝ))) * (1 / ∏ ab : PCoord ε, (((ab.1.1 : ℕ) : ℝ) - ((ab.1.2 : ℕ) : ℝ))) := by
-    positivity
-  have heq := (ENNReal.ofReal_eq_ofReal_iff hL hC).1 (le_antisymm hup hlow)
-  rw [pi_weight_at_zero_eq] at heq
-  unfold cPQ at heq
-  have hpi : 0 < Real.pi ^ (pOf ε * qOf ε) := pow_pos Real.pi_pos _
-  have hI := volU_factProd_pos n
-  rw [dimVlam_eq_vand hlam.1]
-  field_simp at heq
-  field_simp
-  nlinarith [heq]
+  apply ReciprocityTheory.ChartRestriction.DS.formal_degree_constant_eq <;> assumption
 
 end ReciprocityTheory.ChartRestriction.DS.G2

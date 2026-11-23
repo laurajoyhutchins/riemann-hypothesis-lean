@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksChar
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.BridgeTie
+public import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+public import Formalism.LocalToGlobal.IndefiniteReal.SubgroupCharExtensionOneApply
+public import Formalism.LocalToGlobal.UnitaryNorms.CharHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S IsDedekindDomain NumberField Formalism.L2.Theta Formalism.L2.NTheta Formalism.IndefR.Mult
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -77,7 +122,7 @@ theorem exists_norm (D : D7) (x : 𝓞 D.host.K) :
     exact sub_mem (SubfieldClass.ratCast_mem _ u) (mul_mem (SubfieldClass.ratCast_mem _ v) hb)
   have hinj : Function.Injective (algebraMap D.host.K D.host.E) := (algebraMap D.host.K D.host.E).injective
   have hint : IsIntegral ℤ (⟨_, hmem⟩ : D.host.K) := by
-    rw [← isIntegral_algebraMap_iff hinj]
+    rw [← isIntegral_algebraMap_iff (B := D.host.E)]
     exact (cO D.host.E (algebraMap (𝓞 D.host.K) (𝓞 D.host.E) x)).isIntegral_coe
   let x' : 𝓞 D.host.K := ⟨⟨_, hmem⟩, hint⟩
   have hq : ((x * x' : 𝓞 D.host.K) : D.host.K) = algebraMap ℚ D.host.K (u ^ 2 + D.host.d * v ^ 2) := by
@@ -88,7 +133,7 @@ theorem exists_norm (D : D7) (x : 𝓞 D.host.K) :
     push_cast
     linear_combination (-(v : D.host.E) ^ 2) * sqrt_sq D
   have hi : IsIntegral ℤ (u ^ 2 + D.host.d * v ^ 2 : ℚ) := by
-    rw [← isIntegral_algebraMap_iff (algebraMap ℚ D.host.K).injective, ← hq]
+    rw [← isIntegral_algebraMap_iff (B := D.host.K), ← hq]
     exact (x * x').isIntegral_coe
   obtain ⟨n, hn⟩ := IsIntegrallyClosed.isIntegral_iff.1 hi
   refine ⟨x', n, RingOfIntegers.ext rfl, RingOfIntegers.ext ?_⟩
@@ -97,9 +142,9 @@ theorem exists_norm (D : D7) (x : 𝓞 D.host.K) :
 
 end SplitOffPlaces
 
-open SplitOffPlaces Formalism.L2.Col Formalism.HermitianLatticesTheory in
 
-theorem splitOff_places : ∀ {D : D7} (Pb : Formalism.L2.Host.PiBar D.host) (Pg : Finset (HeightOneSpectrum (𝓞 D.host.E))) (S : Finset (HeightOneSpectrum (𝓞 D.host.F))) (P : HeightOneSpectrum (𝓞 D.host.E)), (∀ PP, PP ∈ Pg ↔ ∃ k, Pb.Div k PP) → (∀ v ∈ S, ∃ PP ∈ Pg, PP.under (𝓞 D.host.F) = v) → Formalism.IndefR.Bridge.SplitOff P (Pg : Set (HeightOneSpectrum (𝓞 D.host.E))) → ((D.host.g 0 * D.host.g 1 : ℕ) : 𝓞 D.host.E) ∉ P.asIdeal ∧ (∀ PP ∈ Pg, PP ≠ P ∧ ¬ Formalism.IndefR.Lev.IsConjPl PP P) ∧ OffS D S P := by
+open SplitOffPlaces Formalism.L2.Col Formalism.HermitianLatticesTheory in
+theorem splitOff_places : ∀ {D : D7} (Pb : Formalism.L2.Host.PiBar D.host) (Pg : Finset (HeightOneSpectrum (𝓞 D.host.E))) (S : Finset (HeightOneSpectrum (𝓞 D.host.F))) (P : HeightOneSpectrum (𝓞 D.host.E)), (∀ PP, PP ∈ Pg ↔ ∃ k, Pb.Div k PP) → (∀ v ∈ S, ∃ PP ∈ Pg, (_root_.IsDedekindDomain.HeightOneSpectrum.under (𝓞 D.host.F) PP) = v) → Formalism.IndefR.Bridge.SplitOff P (Pg : Set (HeightOneSpectrum (𝓞 D.host.E))) → ((D.host.g 0 * D.host.g 1 : ℕ) : 𝓞 D.host.E) ∉ P.asIdeal ∧ (∀ PP ∈ Pg, PP ≠ P ∧ ¬ Formalism.IndefR.Lev.IsConjPl PP P) ∧ OffS D S P := by
   intro D Pb Pg S P hPg hS hP
   obtain ⟨-, hP1, hP2⟩ := hP
   have hne : ∀ PP ∈ Pg, PP ≠ P := fun PP h e => hP1 (e ▸ h)
@@ -152,7 +197,7 @@ theorem splitOff_places : ∀ {D : D7} (Pb : Formalism.L2.Host.PiBar D.host) (Pg
       rw [star_mul, star_star]
     obtain ⟨a, ha⟩ := (D.sp.cm.fixed _).1 hfix
     have hint : IsIntegral ℤ a := by
-      rw [← isIntegral_algebraMap_iff (algebraMap D.host.F D.host.E).injective, ha]
+      rw [← isIntegral_algebraMap_iff (B := D.host.E), ha]
       exact (x * cO D.host.E x).isIntegral_coe
     have e : algebraMap (𝓞 D.host.F) (𝓞 D.host.E) ⟨a, hint⟩ = x * cO D.host.E x := RingOfIntegers.ext ha
     refine ⟨⟨a, hint⟩, ?_, fun y hy hyP => ?_⟩

@@ -1,5 +1,57 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.SubFlag
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.SubFlag
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GroupFactorizationHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.C2 Formalism.QuantumDeterminants.GBasic
 
@@ -152,11 +204,6 @@ lemma herm_add_right {m : ℕ} (H : Matrix (Fin m) (Fin m) ℂ) (v a b : Fin m �
     herm H v (a + b) = herm H v a + herm H v b := by
   unfold herm
   rw [star_add, add_dotProduct]
-
-lemma herm_sub_left {m : ℕ} (H : Matrix (Fin m) (Fin m) ℂ) (a b w : Fin m → ℂ) :
-    herm H (a - b) w = herm H a w - herm H b w := by
-  unfold herm
-  rw [Matrix.mulVec_sub, dotProduct_sub]
 
 lemma herm_inv {m : ℕ} {H g : Matrix (Fin m) (Fin m) ℂ} (hg : gᴴ * H * g = H) (v w : Fin m → ℂ) :
     herm H (g *ᵥ v) (g *ᵥ w) = herm H v w := by
@@ -340,7 +387,7 @@ theorem unipotent_nilpotent_radical : UnipN := by
   have hzp : perpX k r z := fun i hi => hz i (Or.inr hi)
   have row_out : ∀ i j, (i.val < r ∨ r + k < i.val) → (u * m) i j = m i j := by
     intro i j hi
-    rw [mul_apply, Finset.sum_eq_single i]
+    rw [Matrix.mul_apply, Finset.sum_eq_single i]
     · rw [hb.2 i i hi, if_pos rfl, one_mul]
     · intro l _ hl; rw [hb.2 i l hi, if_neg (Ne.symm hl), zero_mul]
     · intro h; exact absurd (Finset.mem_univ _) h
@@ -350,7 +397,7 @@ theorem unipotent_nilpotent_radical : UnipN := by
     by_cases hi : i.val < r ∨ r + k < i.val
     · rw [row_out i j hi]; exact hmc i j (by omega) (Or.inl hij)
     · have hne : i ≠ j := by intro h; subst h; omega
-      rw [if_neg hne, mul_apply]
+      rw [if_neg hne, Matrix.mul_apply]
       refine Finset.sum_eq_zero (fun l _ => ?_)
       by_cases hl : l.val < r ∨ r + k < l.val
       · rw [hb.1 i l hl, if_neg (by intro h; subst h; omega), zero_mul]

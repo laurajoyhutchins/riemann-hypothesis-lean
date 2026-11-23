@@ -1,5 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.TransposeUnitary
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Matrix.ConjTranspose
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Spectrum
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.Star.Unitary
+public import Mathlib.Analysis.Complex.Exponential
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,23 +66,6 @@ namespace ReciprocityTheory.ChartRestriction.DS.Mult1
 namespace TransM
 
 variable {S : Type} [Fintype S] [DecidableEq S]
-
-def cE (S : Type) [Fintype S] : EuclideanSpace ℂ S ≃ₗᵢ⋆[ℂ] EuclideanSpace ℂ S where
-  toFun v := WithLp.toLp 2 (fun i => conj (v.ofLp i))
-  invFun v := WithLp.toLp 2 (fun i => conj (v.ofLp i))
-  map_add' u v := by ext i; simp
-  map_smul' a v := by ext i; simp
-  left_inv v := by ext i; simp
-  right_inv v := by ext i; simp
-  norm_map' v := by
-    simp only [LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, EuclideanSpace.norm_eq]
-    congr 1
-    refine Finset.sum_congr rfl fun i _ => ?_
-    simp
-
-abbrev TE (S : Type) [Fintype S] [DecidableEq S] :
-    Matrix S S ℂ ≃⋆ₐ[ℂ] (EuclideanSpace ℂ S →L[ℂ] EuclideanSpace ℂ S) :=
-  Matrix.toEuclideanCLM (n := S) (𝕜 := ℂ)
 
 private theorem unitary_exists_unit_scalar_isUnit_det_one_add (m : Matrix S S ℂ) (hm : mᴴ * m = 1) :
     ∃ ζ : ℂ, starRingEnd ℂ ζ * ζ = 1 ∧ IsUnit (1 + ζ • m).det := by
@@ -54,7 +92,6 @@ private theorem unitary_exists_unit_scalar_isUnit_det_one_add (m : Matrix S S �
     have hsm : (ζ • m) *ᵥ v = ζ • (m *ᵥ v) := by
       first
         | exact Matrix.smul_mulVec ζ m v
-        | exact Matrix.smul_mulVec_assoc ζ m v
         | (funext k; simp [Matrix.mulVec, dotProduct, Finset.mul_sum, mul_assoc])
     simp only [Matrix.add_mulVec, Matrix.one_mulVec, hsm, Pi.add_apply,
       Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at h1
@@ -78,18 +115,15 @@ private theorem unitary_exists_unit_scalar_isUnit_det_one_add (m : Matrix S S �
     rw [hW, ← Matrix.star_eq_conjTranspose (hH.eigenvectorUnitary : Matrix S S ℂ)]
     first
       | exact Unitary.star_mul_self_of_mem hH.eigenvectorUnitary.2
-      | exact unitary.star_mul_self_of_mem hH.eigenvectorUnitary.2
   have hW2 : W * Wᴴ = 1 := by
     rw [hW, ← Matrix.star_eq_conjTranspose (hH.eigenvectorUnitary : Matrix S S ℂ)]
     first
       | exact Unitary.mul_star_self_of_mem hH.eigenvectorUnitary.2
-      | exact unitary.mul_star_self_of_mem hH.eigenvectorUnitary.2
   have hsp : m + mᴴ = W * Matrix.diagonal (fun j => (hH.eigenvalues j : ℂ)) * Wᴴ := by
     rw [hW]
     conv_lhs => rw [hH.spectral_theorem]
     first
       | rfl
-      | simp [Unitary.conjStarAlgAut_apply, Matrix.star_eq_conjTranspose, Function.comp_def]
   obtain ⟨y, hy⟩ : ∃ y : S → ℂ, y = Wᴴ *ᵥ v := ⟨_, rfl⟩
   have hy0 : y ≠ 0 := by
     intro h
@@ -151,19 +185,16 @@ private theorem unitary_exists_diagonalization (m : Matrix S S ℂ) (hm : mᴴ *
     rw [hW, ← Matrix.star_eq_conjTranspose (hH.eigenvectorUnitary : Matrix S S ℂ)]
     first
       | exact Unitary.star_mul_self_of_mem hH.eigenvectorUnitary.2
-      | exact unitary.star_mul_self_of_mem hH.eigenvectorUnitary.2
   have hW2 : W * Wᴴ = 1 := by
     rw [hW, ← Matrix.star_eq_conjTranspose (hH.eigenvectorUnitary : Matrix S S ℂ)]
     first
       | exact Unitary.mul_star_self_of_mem hH.eigenvectorUnitary.2
-      | exact unitary.mul_star_self_of_mem hH.eigenvectorUnitary.2
   obtain ⟨ev, hev⟩ : ∃ ev : S → ℝ, ev = hH.eigenvalues := ⟨_, rfl⟩
   have hsp : Complex.I • X = W * Matrix.diagonal (fun j => (ev j : ℂ)) * Wᴴ := by
     rw [hW, hev]
     conv_lhs => rw [hH.spectral_theorem]
     first
       | rfl
-      | simp [Unitary.conjStarAlgAut_apply, Matrix.star_eq_conjTranspose, Function.comp_def]
   have hY : Wᴴ * X * W = Matrix.diagonal (fun j => -Complex.I * (ev j : ℂ)) := by
     have h := congrArg (fun M => Wᴴ * M * W) hsp
     try simp only at h
@@ -242,7 +273,6 @@ theorem exists_transpose_mat (m : Matrix S S ℂ) (hm : mᴴ * m = 1) (w : S →
     · rw [mul_comm]
       first
         | exact Complex.norm_mul_exp_arg_mul_I (x i)
-        | exact Complex.abs_mul_exp_arg_mul_I (x i)
   obtain ⟨e, he⟩ : ∃ e : S → ℂ, ∀ i, e i = starRingEnd ℂ (p i) ^ 2 := ⟨_, fun _ => rfl⟩
   have he1 : ∀ i, e i * x i = starRingEnd ℂ (x i) := by
     intro i
@@ -283,7 +313,6 @@ theorem exists_transpose_mat (m : Matrix S S ℂ) (hm : mᴴ * m = 1) (w : S →
     funext i
     first
       | simp [Matrix.mulVec, dotProduct, map_sum]
-      | simp [Matrix.mulVec, Matrix.dotProduct, map_sum]
   refine ⟨V.map (starRingEnd ℂ) * Matrix.diagonal e * Vᴴ, ?_, ?_, ?_⟩
   · rw [Matrix.conjTranspose_mul, Matrix.conjTranspose_mul, Matrix.conjTranspose_conjTranspose, hcVH]
     simp only [Matrix.mul_assoc]

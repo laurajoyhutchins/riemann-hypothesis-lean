@@ -1,4 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.MeasureTheory.Group.FundamentalDomain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.LocallyConvex.SeparatingDual
+public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,7 +95,6 @@ private theorem measurableSMul_and_smulInvariantMeasure_subgroup (Γ : Subgroup 
   refine ⟨?_, ?_⟩
   · first
     | infer_instance
-    | exact ⟨fun c => measurable_const_mul (c : G), fun x => (measurable_mul_const x).comp measurable_subtype_coe⟩
   · constructor
     intro c s hs
     have hc := hν (c : G) c.2
@@ -67,46 +117,6 @@ theorem SF_mul_right {S : Set G} {Ω : Set G} (h : SF S Ω) (y : G) : SF S {r | 
 
 variable (h : G)
 
-def conjSub (Γ : Subgroup G) : Subgroup G := Γ.map (MulAut.conj h⁻¹).toMonoidHom
-
-theorem mem_conjSub {Γ : Subgroup G} {s : G} : s ∈ conjSub h Γ ↔ h * s * h⁻¹ ∈ Γ := by
-  unfold conjSub
-  rw [Subgroup.mem_map]
-  constructor
-  · rintro ⟨g, hg, rfl⟩
-    simpa [mul_assoc] using hg
-  · intro hs
-    exact ⟨h * s * h⁻¹, hs, by simp [mul_assoc]⟩
-
-instance countable_conjSub (Γ : Subgroup G) [Countable Γ] : Countable (conjSub h Γ) := by
-  unfold conjSub
-  exact Countable.of_equiv _ (Γ.equivMapOfInjective _ (MulAut.conj h⁻¹).injective).toEquiv
-
-theorem SF_conj {Γ : Subgroup G} {Ω : Set G} (hΩ : SF (Γ : Set G) Ω) :
-    SF (conjSub h Γ : Set G) {r | h * r * h⁻¹ ∈ Ω} := by
-  refine ⟨hΩ.1.preimage ((measurable_const_mul h).mul_const h⁻¹), fun x => ?_, fun x hx t ht htx => ?_⟩
-  · obtain ⟨s, hs, hsx⟩ := hΩ.2.1 (h * x * h⁻¹)
-    refine ⟨h⁻¹ * s * h, ?_, ?_⟩
-    · show h⁻¹ * s * h ∈ conjSub h Γ
-      rw [mem_conjSub]
-      simpa [mul_assoc] using hs
-    · show h * (h⁻¹ * s * h * x) * h⁻¹ ∈ Ω
-      simpa [mul_assoc] using hsx
-  · have ht' : h * t * h⁻¹ ∈ Γ := (mem_conjSub h).1 ht
-    have h1 : (h * t * h⁻¹) * (h * x * h⁻¹) ∈ Ω := by simpa [mul_assoc] using htx
-    have h2 : h * t * h⁻¹ = 1 := hΩ.2.2 (h * x * h⁻¹) hx (h * t * h⁻¹) ht' h1
-    calc t = h⁻¹ * (h * t * h⁻¹) * h := by group
-      _ = 1 := by rw [h2]; group
-
-theorem SF_transl {Γ : Subgroup G} {Ω : Set G} (hΩ : SF (Γ : Set G) Ω) (y : G) :
-    SF (conjSub h Γ : Set G) {r | h * (r * y) ∈ Ω} := by
-  have H := SF_mul_right (SF_conj h hΩ) (y * h)
-  have hset : {r | h * (r * y) ∈ Ω} = {r | r * (y * h) ∈ {r | h * r * h⁻¹ ∈ Ω}} := by
-    ext r
-    simp [mul_assoc]
-  rw [hset]
-  exact H
-
 end SF
 
 section Unfold
@@ -119,19 +129,16 @@ theorem ind_mul_right {M : Type*} [Zero M] [One M] {B : Set G} (x : G) :
   funext r
   first
   | rfl
-  | simp only [Set.indicator_apply, Set.mem_setOf_eq, Pi.one_apply]
 
 theorem ind_inv_mul {M : Type*} [Zero M] [One M] {A : Set G} (y : G) :
     (fun r => A.indicator (1 : G → M) (r⁻¹ * y)) = {r | r⁻¹ * y ∈ A}.indicator 1 := by
   funext r
   first
   | rfl
-  | simp only [Set.indicator_apply, Set.mem_setOf_eq, Pi.one_apply]
 
 private theorem measurable_one_ennreal : Measurable (1 : G → ℝ≥0∞) := by
   first
   | exact measurable_one
-  | exact measurable_const
 
 theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c : ℝ≥0∞)
     (hcB : ∀ x, ν {r | r * x ∈ B} = c) (hcA : ∀ y, ν {r | r⁻¹ * y ∈ A} = c)
@@ -141,7 +148,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   have hL : c * ∫⁻ x in A, g x ∂μ = ∫⁻ x, ∫⁻ r, A.indicator (1 : G → ℝ≥0∞) x * B.indicator (1 : G → ℝ≥0∞) (r * x) * g x ∂ν ∂μ := by
     first
     | rw [← lintegral_indicator hA]
-    | rw [← lintegral_indicator _ hA]
     rw [← lintegral_const_mul'' c (hg.indicator hA)]
     refine lintegral_congr fun x => ?_
     have hm : Measurable fun r : G => B.indicator (1 : G → ℝ≥0∞) (r * x) :=
@@ -162,7 +168,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   have hR : c * ∫⁻ y in B, g y ∂μ = ∫⁻ y, ∫⁻ r, A.indicator (1 : G → ℝ≥0∞) (r⁻¹ * y) * B.indicator (1 : G → ℝ≥0∞) y * g y ∂ν ∂μ := by
     first
     | rw [← lintegral_indicator hB]
-    | rw [← lintegral_indicator _ hB]
     rw [← lintegral_const_mul'' c (hg.indicator hB)]
     refine lintegral_congr fun y => ?_
     have hm : Measurable fun r : G => A.indicator (1 : G → ℝ≥0∞) (r⁻¹ * y) :=
@@ -183,10 +188,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   have h3 : AEMeasurable (fun p : G × G => g p.1) (μ.prod ν) := by
     first
     | exact hg.comp_quasiMeasurePreserving Measure.quasiMeasurePreserving_fst
-    | exact hg.comp_quasiMeasurePreserving (Measure.quasiMeasurePreserving_fst (μ := μ) (ν := ν))
-    | exact hg.comp_fst
-    | exact hg.fst_prod
-    | exact hg.fst
   have hF : AEMeasurable (Function.uncurry fun (x r : G) =>
       A.indicator (1 : G → ℝ≥0∞) x * B.indicator (1 : G → ℝ≥0∞) (r * x) * g x) (μ.prod ν) := by
     have k1 : Measurable fun p : G × G => A.indicator (1 : G → ℝ≥0∞) p.1 :=
@@ -210,7 +211,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   refine lintegral_congr fun y => ?_
   first
   | simp only [mul_inv_cancel_left, hr]
-  | simp [hr]
 
 end Unfold
 
@@ -251,15 +251,12 @@ theorem int_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteS
     have hg : AEMeasurable (fun x => ‖f x‖ₑ) μ := by
       first
       | exact hf.enorm
-      | exact (continuous_enorm.comp_aestronglyMeasurable hf).aemeasurable
     have e := lint_eq (μ := μ) ν hA hB c hcB hcA
       (fun x => ‖f x‖ₑ) hg (by filter_upwards [hinv] with r hr x; simp only [hr])
     have e' := ennreal_eq_of_mul_left_eq hc0 hct e
     have hA' : ∫⁻ x in A, ‖f x‖ₑ ∂μ < ⊤ := by
       first
       | exact hfA.2
-      | exact hfA.hasFiniteIntegral
-      | exact hasFiniteIntegral_iff_enorm.1 hfA.2
     refine ⟨hf.restrict, ?_⟩
     first
     | (show ∫⁻ x in B, ‖f x‖ₑ ∂μ < ⊤; rw [← e']; exact hA')
@@ -276,7 +273,6 @@ theorem int_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteS
   | (obtain ⟨L, hL⟩ : ∃ L : E →L[ℝ] ℝ, L (∫ x in A, f x ∂μ) ≠ L (∫ x in B, f x ∂μ) :=
         SeparatingDual.exists_separating_of_ne hne
      exact hL (key L))
-  | exact hne ((NormedSpace.eq_iff_forall_dual_eq ℝ).2 key)
 
 end Boch
 
@@ -353,7 +349,6 @@ theorem shift_general (μ : Measure G) [SigmaFinite μ] [μ.IsMulLeftInvariant]
     have hu := SF_measure_univ Γ ν hνΓ hΩ
     first
     | (rw [h0, tsum_zero] at hu; exact Measure.measure_univ_eq_zero.1 hu)
-    | simpa [h0] using hu
   have hcB : ∀ x, ν {r | r * x ∈ {y | h * y ∈ Ω}} = ν Ω := by
     intro x
     have hm : Measurable fun y : G => h⁻¹ * y * h := (measurable_const_mul h⁻¹).mul_const h

@@ -1,14 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousFourierGau
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfAeFundamentalDomain
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharacterHalfSymplecticFormRealPoint
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefinite
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FockVacuumAnnihilationEquationRealCoordinates
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaNormSqSumHeisenbergTranslatesDistinctChars
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousFourierGau
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.OmAtSmulRight
+public import Mathlib.RingTheory.PiTensorProduct
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfAeFundamentalDomain
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealSymplecticFormAlternatingInvariantDefinite
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharacterHalfSymplecticFormRealPoint
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ThetaNormSqSumHeisenbergTranslatesDistinctChars
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.CocompactTensor
+import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Order
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,7 +102,7 @@ theorem cpt_blk (b : O → Matrix (Fin m) (Fin m) ℂ) (a : O → Matrix (Fin n)
   ext i j
   simp only [cpt, blk, of_apply, blockDiagonal_mulVec]
   simp only [mulVec, dotProduct, Fintype.sum_prod_type, kroneckerMap_apply,
-    transpose_apply, mul_apply, of_apply, Finset.sum_mul]
+    transpose_apply, Matrix.mul_apply, of_apply, Finset.sum_mul]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
@@ -74,7 +124,7 @@ theorem blk_conjTranspose (b : O → Matrix (Fin m) (Fin m) ℂ) (a : O → Matr
 omit [DecidableEq O] in
 theorem star_dotProduct_eq (x y : (Fin m × Fin n) × O → ℂ) :
     star y ⬝ᵥ x = ∑ τ, ((cpt y τ)ᴴ * cpt x τ).trace := by
-  simp only [dotProduct, Fintype.sum_prod_type, trace, diag_apply, mul_apply, conjTranspose_apply, cpt, of_apply,
+  simp only [dotProduct, Fintype.sum_prod_type, trace, diag_apply, Matrix.mul_apply, conjTranspose_apply, cpt, of_apply,
     Pi.star_apply]
   rw [Finset.sum_comm]
   simp only [Finset.sum_comm (s := (Finset.univ : Finset (Fin m))) (t := (Finset.univ : Finset O))]
@@ -160,7 +210,7 @@ def trB (b : X → ℂ) (w : X) (hb : Continuous b) (hn : ∀ x, ‖b x‖ = 1)
     (hq : ∀ f : X → ℂ, (∀ γ x, f (r γ + x) = q γ x * f x) →
       ∀ γ x, b (r γ + x) * f (r γ + x + w) = q γ x * (b x * f (x + w))) : QB r q →L[ℂ] QB r q :=
   LinearMap.mkContinuous
-    { toFun := fun f => mkB (fun x => b x * f.1 (x + w)) (hb.mul (f.1.continuous.comp (continuous_add_right w)))
+    { toFun := fun f => mkB (fun x => b x * f.1 (x + w)) (hb.mul (f.1.continuous.comp (continuous_add_const w)))
         ⟨‖f‖, fun x => by rw [norm_mul, hn, one_mul]; exact norm_ev_le _ f⟩ (hq f.1 f.2)
       map_add' := fun f g => QB_ext fun x => mul_add _ _ _
       map_smul' := fun a f => QB_ext fun x => mul_left_comm _ _ _ }
@@ -181,9 +231,9 @@ omit [ContinuousAdd X] in
 theorem lintegral_norm_sq_eq_toL2 [MeasurableSpace X] [BorelSpace X] [SecondCountableTopology X] (ν : Measure X)
     [IsFiniteMeasure ν] (f : QB r q) : ∫⁻ w, ‖f.1 w‖ₑ ^ 2 ∂ν = ‖toL2 r q ν f‖ₑ ^ 2 := by
   have h := eLpNorm_congr_ae (p := 2) (BoundedContinuousFunction.coeFn_toLp 2 ν ℂ f.1)
-  have e : ‖toL2 r q ν f‖ₑ = eLpNorm f.1 2 ν := by rw [← h]; exact Lp.enorm_def _
-  rw [e, eLpNorm_eq_lintegral_rpow_enorm_toReal two_ne_zero ENNReal.ofNat_ne_top, ENNReal.toReal_ofNat, ← ENNReal.rpow_two,
-    ← ENNReal.rpow_mul]
+  have e : ‖toL2 r q ν f‖ₑ = eLpNorm f.1 2 ν := by rw [← h]; exact Lp.eNorm_def _
+  rw [e, eLpNorm_eq_lintegral_rpow_eNorm_toReal two_ne_zero ENNReal.ofNat_ne_top
+    f.1.continuous.aestronglyMeasurable, ENNReal.toReal_ofNat, ← ENNReal.rpow_two, ← ENNReal.rpow_mul]
   simp
 
 end Quasi
@@ -240,8 +290,8 @@ abbrev Ix (S T : HSp D) : Type := (Fin T.rank × Fin S.rank) × D.what₂.Tau
 
 def iotaV (σ : (D.what₂.Tau → ℂ) →+ Formalism.L2.Theta.AE D) (S T : HSp D) (v : Ix S T → ℂ) : WO S T := iotaW σ T S (unvecL v)
 
-open Classical in
 
+open Classical in
 def HM (S T : HSp D) : Matrix (Ix S T) (Ix S T) ℂ :=
   blk (fun τ => ((2 * (tauE D τ D.host.xi0).im : ℝ) : ℂ) • gramAt D T τ) fun τ => (gramAt D S τ)⁻¹
 
@@ -262,7 +312,7 @@ theorem im_HM (x y : Ix S T → ℂ) : (star y ⬝ᵥ HM S T *ᵥ x).im = -Globa
 
 theorem iotaV_add (x y : Ix S T → ℂ) : iotaV σ S T (x + y) = iotaV σ S T x + iotaV σ S T y := by
   unfold iotaV
-  rw [map_add, AddMonoidHom.map_add]
+  rw [map_add (f := _), AddMonoidHom.map_add (f := _)]
 
 theorem real_iotaV (h : Chart θ σ) (x : Ix S T → ℂ) : (iotaV σ S T x).map (finPart D) = 0 := h.real_iota T S _
 
@@ -316,8 +366,8 @@ theorem HM_det : (HM S T).det ≠ 0 := by
     · rw [mul_nonsing_inv _ (GlobalTheory.SmoothForms.RealPts.gramAt_unit S τ)]
   exact (isUnit_det_of_right_inverse this).ne_zero
 
-open Classical in
 
+open Classical in
 def mM (θ : InfFam D) (S T : HSp D) : GA D S × GA D T →* Matrix (Ix S T) (Ix S T) ℂ where
   toFun p := blk (fun τ => compAt θ τ (Formalism.L2.Theta.mt T p.2)) fun τ => compAt θ τ (Formalism.L2.Theta.mt S p.1⁻¹)
   map_one' := by

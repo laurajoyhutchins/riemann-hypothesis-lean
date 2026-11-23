@@ -1,4 +1,51 @@
-import Development.EtaleCohomology.EtaleSheaves.LCBijPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LCBijPf
+import Mathlib.Algebra.Category.ModuleCat.FilteredColimits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC LateralTheory.E.t_E1Cut LateralTheory.E.LocallyConstantH0
@@ -14,20 +61,20 @@ theorem prim_isPrimitiveRoot (z : Prim q L) : IsPrimitiveRoot z.1 q := by
   rw [Polynomial.aeval_def, Polynomial.eval₂_eq_eval_map, Polynomial.map_cyclotomic] at h
   exact Polynomial.isRoot_cyclotomic_iff.1 h
 
-open Classical in
 
+open Classical in
 def lg (q : ℕ) (z x : L) : ZMod q := if h : ∃ n : ℕ, z ^ n = x then (h.choose : ZMod q) else 0
 
 theorem lg_pow {z : L} (hz : IsPrimitiveRoot z q) (n : ℕ) : lg q z (z ^ n) = n := by
   have h : ∃ m : ℕ, z ^ m = z ^ n := ⟨n, rfl⟩
   unfold lg
-  rw [dif_pos h, ZMod.natCast_eq_natCast_iff]
+  rw [dite_eq_left h, ZMod.natCast_eq_natCast_iff]
   have h2 := h.choose_spec
   have h3 := ((hz.isOfFinOrder (NeZero.ne q)).pow_eq_pow_iff_modEq).1 h2
   rwa [← hz.eq_orderOf] at h3
 
-open Classical in
 
+open Classical in
 def fv (q : ℕ) (i : ℤ) (z x : L) : ZMod q :=
   if h : IsUnit (lg q z x) then ((h.unit ^ i : (ZMod q)ˣ) : ZMod q) else 0
 
@@ -42,12 +89,12 @@ theorem fv_rel (i : ℤ) (z : Prim q L) (ζ ξ : Prim q L) (a : (ZMod q)ˣ) (h :
   unfold fv
   by_cases hu : IsUnit (lg q z.1 ζ.1)
   · have hu' : IsUnit (lg q z.1 ξ.1) := hl ▸ hu.mul a.isUnit
-    rw [dif_pos hu, dif_pos hu']
+    rw [dite_eq_left hu, dite_eq_left hu']
     have : hu'.unit = hu.unit * a := Units.ext (by simp [hl])
     rw [this, mul_zpow, Units.val_mul, mul_comm]
   · have hu' : ¬ IsUnit (lg q z.1 ξ.1) := by
       rw [hl]; exact fun h' => hu ((Units.isUnit_mul_units _ a).1 h')
-    rw [dif_neg hu, dif_neg hu', mul_zero]
+    rw [dite_eq_right hu, dite_eq_right hu', mul_zero]
 
 theorem fv_self (i : ℤ) (z : Prim q L) : fv q i z.1 z.1 = 1 := by
   have hl : lg q z.1 z.1 = 1 := by
@@ -56,7 +103,7 @@ theorem fv_self (i : ℤ) (z : Prim q L) : fv q i z.1 z.1 = 1 := by
     rw [this, Nat.cast_one]
   unfold fv
   have hu : IsUnit (lg q z.1 z.1) := hl ▸ isUnit_one
-  rw [dif_pos hu]
+  rw [dite_eq_left hu]
   have : hu.unit = 1 := Units.ext (by simp [hl])
   rw [this, one_zpow, Units.val_one]
 

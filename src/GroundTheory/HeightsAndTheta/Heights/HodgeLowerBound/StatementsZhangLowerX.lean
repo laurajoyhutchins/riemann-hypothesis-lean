@@ -1,7 +1,47 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.IsSaturatedFirstCoordinateLine
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.IsSaturatedFirstCoordinateLine
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.LowerBoundFree
@@ -15,15 +55,5 @@ def ZhangLowerX.Statement : Prop :=
     NefOnFibres P A.a → IsConjInvariantH A →
     (∀ W, IsArithVar W 1 → P ≤ W → e ≤ IndefiniteRowSideFullHecke.HeightsSet.height (II K ι) A W) →
     ((n + 1 : ℕ) : ℝ) * e * geomDeg P A n ≤ II K ι P (n + 1) (fun _ => A)
-
-theorem ZhangLowerX.hyps_inhabited :
-    IsArithVar (mCoordIdeal (ι := ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.GlobalTheory (Fin 2)) HilbertSamuel.ProjLine.y) (1 + 1) ∧
-      ⊥ ≤ mCoordIdeal (ι := ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.GlobalTheory (Fin 2)) HilbertSamuel.ProjLine.y ∧
-      IsSemipositiveRel ⊥ (mCoordIdeal (ι := ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.GlobalTheory (Fin 2)) HilbertSamuel.ProjLine.y)
-        HilbertSamuel.ProjLine.fsLine1 ∧
-      NefOnFibres (mCoordIdeal (ι := ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.GlobalTheory (Fin 2)) HilbertSamuel.ProjLine.y)
-        HilbertSamuel.ProjLine.fsLine1.a ∧
-      IsConjInvariantH HilbertSamuel.ProjLine.fsLine1 :=
-  HilbertSamuel.G5.hyps_inhabited
 
 end GroundTheory.Heights₂.Heights.LowerBoundFree

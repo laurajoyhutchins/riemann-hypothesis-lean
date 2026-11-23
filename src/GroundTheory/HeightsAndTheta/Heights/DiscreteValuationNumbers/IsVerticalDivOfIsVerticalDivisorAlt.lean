@@ -1,6 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.MemOfMemSupportDivCycle
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsIntersectionFamily
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -59,25 +105,6 @@ theorem isMultiProjPrime_iff (P : Ideal (MRing ι R)) :
   ⟨fun h => ⟨h.isPrime, (isMultiHomogIdeal_iff P).mp h.multiHomog, h.relevant⟩,
     fun h => ⟨h.1, (isMultiHomogIdeal_iff P).mpr h.2.1, h.2.2⟩⟩
 
-omit [DecidableEq K] in
-
-theorem intCyc_divCycle [IsNoetherianRing R] (P : Ideal (MRing ι R)) (s : MRing ι R)
-    (W : Ideal (MRing ι R)) :
-    GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.intCyc (ReciprocityTheory.ChartRestriction.G.Geo.divCycle P s) W =
-      divCycle P s W := by
-  classical
-  have hc : (ReciprocityTheory.ChartRestriction.G.Geo.divCycle P s : Ideal (MRing ι R) → ℕ) W =
-      if W ∈ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P s then
-        ReciprocityTheory.ChartRestriction.G.Geo.multAt (P ⊔ Ideal.span {s}) W else 0 := by
-    unfold ReciprocityTheory.ChartRestriction.G.Geo.divCycle
-    rw [Finsupp.ofSupportFinite_coe]
-  rw [GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.intCyc, Finsupp.mapRange_apply, hc, divCycle]
-  by_cases h : W ∈ (P ⊔ Ideal.span {s}).minimalPrimes ∧ IsRelevant W
-  · have h' : W ∈ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P s := h
-    rw [if_pos h', dif_pos h, ReciprocityTheory.ChartRestriction.G.Geo.multAt, dif_pos h.1.1.1]
-    all_goals rfl
-  · have h' : W ∉ ReciprocityTheory.ChartRestriction.G.Geo.divSupp P s := h
-    rw [if_neg h', dif_neg h, Nat.cast_zero]
 
 end Ring
 
@@ -85,44 +112,9 @@ section DVR
 
 variable {O : Type*} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
 
-theorem divO_eq_ratDiv (P : Ideal (MRing ι O)) (f g : MRing ι O) (W : Ideal (MRing ι O)) :
-    GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.divO P f g W = ratDiv P f g W := by
-  rw [GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.divO, Finsupp.sub_apply, intCyc_divCycle,
-    intCyc_divCycle, ratDiv]
 
-omit [Fintype K] [DecidableEq K] [∀ k, Fintype (ι k)] in
-
-theorem redEval_eq_cycEval (J : Ideal (MRing ι (IsLocalRing.ResidueField O)) → ℤ)
-    (Z : Ideal (MRing ι O) →₀ ℤ) :
-    GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.redEval J Z =
-      cycEval (fun W => J (specialIdeal W)) Z := by
-  classical
-  rw [GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.redEval, cycEval,
-    finsum_eq_sum_of_support_subset _ (s := Z.support) fun W hW =>
-      Finsupp.mem_support_iff.mpr (left_ne_zero_of_mul (Function.mem_support.mp hW))]
-  rfl
-
-omit [IsDomain O] [IsDiscreteValuationRing O] in
-
-theorem isModelOver_iff (P : Ideal (MRing ι O)) (d : ℕ) :
-    IsModelOver P d ↔ GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.IsModelOver P d :=
-  ⟨fun h => ⟨(isMultiProjPrime_iff P).mp h.multiProj, h.noTorsion, h.dim⟩,
-    fun h => ⟨(isMultiProjPrime_iff P).mpr h.1, h.2.1, h.2.2⟩⟩
 
 end DVR
-
-theorem equiv (O : Type*) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] :
-    (∀ (f : MRing ι O) (b : K → ℕ), IsMultiHomog f b ↔ ReciprocityTheory.ChartRestriction.G.Geo.IsMultiHomog f b) ∧
-    (∀ P : Ideal (MRing ι O), IsMultiProjPrime P ↔ ReciprocityTheory.ChartRestriction.G.Geo.IsMultiProjPrime P) ∧
-    (∀ (P : Ideal (MRing ι O)) (s : MRing ι O) (W : Ideal (MRing ι O)),
-      GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.intCyc (ReciprocityTheory.ChartRestriction.G.Geo.divCycle P s) W =
-        divCycle P s W) ∧
-    (∀ (P : Ideal (MRing ι O)) (f g : MRing ι O) (W : Ideal (MRing ι O)),
-      GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.divO P f g W = ratDiv P f g W) ∧
-    (∀ (J : Ideal (MRing ι (IsLocalRing.ResidueField O)) → ℤ) (Z : Ideal (MRing ι O) →₀ ℤ),
-      GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.redEval J Z =
-        cycEval (fun W => J (specialIdeal W)) Z) :=
-  ⟨isMultiHomog_iff, isMultiProjPrime_iff, intCyc_divCycle, divO_eq_ratDiv, redEval_eq_cycEval⟩
 
 end Objects
 

@@ -1,4 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.IsLocPres
+module
+
+public import Aesop.BuiltinRules
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.FramedTwoCoboundaries
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.GRepresents
+public import Std.Tactic.BVDecide.Normalize.Bool
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,29 +77,31 @@ theorem blockPairingForm_JR (O R : Type) [CommRing O] [CommRing R] [Algebra O R]
     (form6 O).JR R = Matrix.fromBlocks 0 (Jmat R 3) (Jmat R 3) 0 := by
   simp [FormData.JR, form6, Matrix.fromBlocks_map, Jmat_map]
 
-theorem emb_apply {m : ℕ} {R : Type*} [CommRing R] (x : GG m R) :
+theorem emb_apply {m : ℕ} {R : Type*} [CommRing R] (x : GG (m := m) (R := R)) :
     emb x = if x.right = 1 then Matrix.fromBlocks x.mat 0 0 (theta x.left : GL (Fin m) R)
       else Matrix.fromBlocks 0 x.mat (theta x.left : GL (Fin m) R) 0 := rfl
 
-theorem emb_map' {m : ℕ} {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) (x : GG m R) :
+theorem emb_map' {m : ℕ} {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S)
+    (x : GG (m := m) (R := R)) :
     emb (GG.map f x) = (emb x).map f := by
   have h : (theta (GG.map f x).left : Matrix (Fin m) (Fin m) S) = (theta x.left : Matrix (Fin m) (Fin m) R).map f :=
     (congrArg Units.val (map_theta f x.left)).symm
   rw [emb_apply, emb_apply, h, GG.map_mat, GG.map_right]
   split_ifs <;> simp [Matrix.fromBlocks_map]
 
-theorem mat_eq_emb' {m : ℕ} {R : Type*} [CommRing R] (x : GG m R) (a b : Fin m) :
+theorem mat_eq_emb' {m : ℕ} {R : Type*} [CommRing R] (x : GG (m := m) (R := R)) (a b : Fin m) :
     x.mat a b = emb x (.inl a) (.inl b) + emb x (.inl a) (.inr b) := by
   rw [emb_apply]
   split_ifs <;> simp
 
-theorem eq_of_emb {m : ℕ} {R : Type*} [CommRing R] {x y : GG m R} (h : x.right = y.right) (e : emb x = emb y) :
+theorem eq_of_emb {m : ℕ} {R : Type*} [CommRing R] {x y : GG (m := m) (R := R)}
+    (h : x.right = y.right) (e : emb x = emb y) :
     x = y := by
   refine SemidirectProduct.ext (Units.ext ?_) h
   ext a b
   exact (mat_eq_emb' x a b).trans (e ▸ (mat_eq_emb' y a b).symm)
 
-theorem emb_form (O : Type) [CommRing O] {R : Type} [CommRing R] [Algebra O R] (x : GG 3 R) :
+theorem emb_form (O : Type) [CommRing O] {R : Type} [CommRing R] [Algebra O R] (x : GG (m := 3) (R := R)) :
     (emb x)ᵀ * (form6 O).JR R * emb x = (form6 O).JR R := by
   have h1 : x.matᵀ * Jmat R 3 * (theta x.left : GL (Fin 3) R) = Jmat R 3 := by
     rw [theta_val, ← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.mul_assoc _ (Jmat R 3) (Jmat R 3), Jmat_mul_Jmat,
@@ -60,7 +114,8 @@ theorem emb_form (O : Type) [CommRing O] {R : Type} [CommRing R] [Algebra O R] (
   rw [blockPairingForm_JR, emb_apply]
   split_ifs <;> simp [Matrix.fromBlocks_transpose, Matrix.fromBlocks_multiply, h1, h2]
 
-theorem emb_blk {m : ℕ} {R : Type*} [CommRing R] (x : GG m R) (a b : Fin m ⊕ Fin m) (h : emb x a b ≠ 0) :
+theorem emb_blk {m : ℕ} {R : Type*} [CommRing R] (x : GG (m := m) (R := R)) (a b : Fin m ⊕ Fin m)
+    (h : emb x a b ≠ 0) :
     a.isLeft = if x.right = 1 then b.isLeft else !b.isLeft := by
   rw [emb_apply] at h
   split_ifs at h ⊢ <;> rcases a with a | a <;> rcases b with b | b <;> simp at h ⊢

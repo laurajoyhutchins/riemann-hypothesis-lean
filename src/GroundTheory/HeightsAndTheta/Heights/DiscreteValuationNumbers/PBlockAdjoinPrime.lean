@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsCN
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsCN
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -12,10 +62,12 @@ namespace BlockAdjoinPrime
 
 variable {R : Type*} [CommRing R] {K : Type*} {ι : K → Type*}
 
-open Classical in
 
+open Classical in
 def killB (B : Set K) : MRing ι R →ₐ[R] MRing ι R :=
-  aeval fun v => if v.1 ∈ B then 0 else X v
+  by
+    classical
+    exact aeval fun v => if v.1 ∈ B then 0 else X v
 
 def varIdeal (B : Set K) : Ideal (MRing ι R) :=
   Ideal.span {p | ∃ v : Σ k, ι k, v.1 ∈ B ∧ p = X v}
@@ -47,7 +99,7 @@ theorem killB_monomial (B : Set K) (d : (Σ k, ι k) →₀ ℕ) (a : R) :
 
 open Classical in
 theorem coeff_killB (B : Set K) (p : MRing ι R) (d : (Σ k, ι k) →₀ ℕ) :
-    coeff d (killB B p) = if ∀ v ∈ d.support, v.1 ∉ B then coeff d p else 0 := by
+    AddMonoidAlgebra.coeff (killB B p) d = if ∀ v ∈ d.support, v.1 ∉ B then AddMonoidAlgebra.coeff p d else 0 := by
   induction p using MvPolynomial.induction_on' with
   | monomial e a =>
     rw [killB_monomial]
@@ -56,7 +108,7 @@ theorem coeff_killB (B : Set K) (p : MRing ι R) (d : (Σ k, ι k) →₀ ℕ) :
       split_ifs <;> simp
     · split_ifs <;> simp [coeff_monomial, hed]
   | add p q hp hq =>
-    rw [map_add, coeff_add, hp, hq]
+    rw [map_add (f := _), MvPolynomial.coeff_add, hp, hq]
     split_ifs <;> simp
 
 theorem sub_killB_mem (B : Set K) (p : MRing ι R) : p - killB B p ∈ varIdeal (R := R) B := by
@@ -64,7 +116,7 @@ theorem sub_killB_mem (B : Set K) (p : MRing ι R) : p - killB B p ∈ varIdeal 
   induction p using MvPolynomial.induction_on with
   | C a => simp
   | add p q hp hq =>
-    rw [map_add, add_sub_add_comm]
+    rw [map_add (f := _), add_sub_add_comm]
     exact add_mem hp hq
   | mul_X p v hp =>
     have e : p * X v - killB B (p * X v) =
@@ -108,7 +160,7 @@ theorem killB_mem {Q : Ideal (MRing ι R)} (hQ : IsMultiHomogIdeal Q) (B : Set K
     rw [coeff_killB, coeff_sum]
     simp_rw [coeff_weightedHomogeneousComponent]
     rw [Finset.sum_ite_eq]
-    by_cases hd : coeff d q = 0
+    by_cases hd : AddMonoidAlgebra.coeff q d = 0
     · simp [hd]
     · have hmem : d ∈ q.support := mem_support_iff.mpr hd
       have hiff : Finsupp.weight (blockWeight ι) d ∈ M ↔ ∀ v ∈ d.support, v.1 ∉ B := by

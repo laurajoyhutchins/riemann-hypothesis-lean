@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.PhiGam.Window
@@ -74,7 +125,7 @@ theorem gam_zpow {l : ℕ} (R : RingPG k l) (b : ℤ) :
   have hv : vv k = ι PowerSeries.X := vv_coe
   set w : k⸨X⸩ := 1 - (κ : k⸨X⸩) * vv k with hw
   have hw1 : w = 1 - vv k - ι c0 * vv k ^ 2 := by
-    rw [hw, hι, hκ', hv]; simp only [map_add, map_mul, map_one]; ring
+    rw [hw, hι, hκ', hv]; simp only [map_add (f := _), map_mul, map_one]; ring
   have hww : w * ι w' = 1 := by
     have := congrArg ι hw'
     simp only [map_mul, map_sub, map_one] at this
@@ -88,14 +139,14 @@ theorem gam_zpow {l : ℕ} (R : RingPG k l) (b : ℤ) :
       obtain ⟨c, hc⟩ := ih
       refine ⟨(n : k⟦X⟧) - c0 + (n : k⟦X⟧) * c0 * PowerSeries.X + c * (1 - PowerSeries.X - c0 * PowerSeries.X ^ 2), ?_⟩
       rw [zpow_add_one₀ hw0, hc, hw1]
-      simp only [map_add, map_sub, map_mul, map_one, map_pow, map_natCast, ← hv]
+      simp only [map_add (f := _), map_sub, map_mul, map_one, map_pow, map_natCast, ← hv]
       push_cast
       ring
     | pred n ih =>
       obtain ⟨c, hc⟩ := ih
       refine ⟨w' * (c + ((n : k⟦X⟧) + 1) + c0 + ((n : k⟦X⟧) + 1) * c0 * PowerSeries.X), ?_⟩
       rw [zpow_sub_one₀ hw0, hc, hinv]
-      simp only [map_add, map_sub, map_mul, map_one, map_pow, map_natCast, ← hv]
+      simp only [map_add (f := _), map_sub, map_mul, map_one, map_pow, map_natCast, ← hv]
       push_cast
       rw [hw1] at hww
       linear_combination (1 + ((n : k⸨X⸩) + 1) * vv k) * hww
@@ -172,7 +223,7 @@ theorem finite_quot {N : Submodule k⟦X⟧ V} (hN : N.FG) :
     induction hn' using Submodule.span_induction with
     | mem x hx => exact Submodule.subset_span ⟨x, hx, rfl⟩
     | zero => simp
-    | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+    | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
     | smul c x hx ih =>
       have hxN : x ∈ N := by rw [← hs]; exact hx
       obtain ⟨c', hc'⟩ : (PowerSeries.X : k⟦X⟧) ∣ c - algebraMap k k⟦X⟧ (PowerSeries.constantCoeff c) := by
@@ -231,6 +282,6 @@ theorem nab_bijective_window : ∀ {k : Type} [Field k] {l : ℕ} [Fact l.Prime]
     obtain ⟨x, hx, hx'⟩ := i2 y hy
     obtain ⟨z, hz, hz'⟩ := g2 _ hx'
     refine ⟨x + z, Submodule.add_mem _ hx (sh_add_le a m N hz), ?_⟩
-    rw [map_add, ← sub_sub]; exact hz'
+    rw [map_add (f := _), ← sub_sub]; exact hz'
 
 end GlobalTheory.PhiGam.Window

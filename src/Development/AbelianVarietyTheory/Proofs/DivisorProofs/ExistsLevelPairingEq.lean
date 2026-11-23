@@ -1,8 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsGPull
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsConjIdempotentModPrimePowStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLinearEquivOfAdjointSkewPairingsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
 import Development.AbelianVarietyTheory.Definitions.Divisors.IsEtPlace
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsConjIdempotentModPrimePowStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLinearEquivOfAdjointSkewPairingsStatement
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,9 +68,6 @@ def mulSub (O L : Type) [Ring O] [AddCommGroup L] [Module O L] (N : ℕ) : Submo
   smul_mem' := by
     rintro c _ ⟨a, rfl⟩
     exact ⟨c • a, smul_comm c N a⟩
-
-theorem mem_mulSub {O L : Type} [Ring O] [AddCommGroup L] [Module O L] {N : ℕ} {x : L} :
-    x ∈ mulSub O L N ↔ ∃ y, x = N • y := Iff.rfl
 
 theorem finite_quot (O L : Type) [Ring O] [AddCommGroup L] [Module O L] [Module.Finite ℤ L] {N : ℕ}
     (hN : 0 < N) : Finite (L ⧸ mulSub O L N) := by
@@ -45,7 +90,7 @@ theorem mem_of_dvd {p : ℕ} [Fact p.Prime] (D : Datum p) (r : ℕ) (x : D.La)
   choose q hq using h
   let f₀ : D.La →ₗ[ℤ] ℤ :=
     { toFun := q
-      map_add' := fun a b => mul_left_cancel₀ hN (by rw [mul_add, ← hq, ← hq, ← hq, map_add])
+      map_add' := fun a b => mul_left_cancel₀ hN (by rw [mul_add, ← hq, ← hq, ← hq, map_add (f := _)])
       map_smul' := fun c a => mul_left_cancel₀ hN (by
         rw [← hq, map_smul, hq]; simp only [smul_eq_mul, RingHom.id_apply]; ring) }
   obtain ⟨w, hw⟩ := hperf f₀
@@ -90,7 +135,7 @@ theorem exists_level_pairing_eq : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (k 
     intro x y
     obtain ⟨x, rfl⟩ := surj x
     obtain ⟨y, rfl⟩ := surj y
-    rw [← map_add, hfb, hfb, hfb, fadd]
+    rw [← map_add (f := _), hfb, hfb, hfb, fadd]
   have fblin : ∀ (c : D.O) x, fb (c • x) = act c (fb x) := by
     intro c x
     obtain ⟨x, rfl⟩ := surj x
@@ -134,7 +179,7 @@ theorem exists_level_pairing_eq : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (k 
   have hskew : ∀ x y, D.EF x y + D.EF y x = 0 := by
     intro x y
     have h := D.alt (x + y)
-    rw [map_add D.EF, LinearMap.add_apply, map_add, map_add, D.alt, D.alt] at h
+    rw [map_add D.EF, LinearMap.add_apply, map_add (f := _), map_add (f := _), D.alt, D.alt] at h
     linarith
   obtain ⟨g, hg⟩ := GlobalTheory.T.exists_linearEquiv_of_adjoint_skewPairings D.O (fun c => (D.star c).unop) (D.La ⧸ K) k
     (fun x y => W (fb x) (fb y)) E (algebraMap (𝓞 D.F) D.O ε) D.star_star
@@ -142,7 +187,7 @@ theorem exists_level_pairing_eq : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (k 
     (fun c => by simp only [hst]; exact Algebra.commutes _ c)
     (fun x => by
       simp only [hst]
-      rw [← add_smul, ← map_add, hε1, map_add, map_one, add_smul, one_smul, hkill, add_zero])
+      rw [← add_smul, ← map_add (f := _), hε1, map_add (f := _), map_one, add_smul, one_smul, hkill, add_zero])
     (fun x => by
       simp only [hst]
       rw [← mul_smul, ← map_mul, hε2, hkill])
@@ -161,7 +206,7 @@ theorem exists_level_pairing_eq : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (k 
       obtain ⟨x, rfl⟩ := surj x
       obtain ⟨x', rfl⟩ := surj x'
       obtain ⟨y, rfl⟩ := surj y
-      rw [← map_add, hE, hE, hE, map_add, LinearMap.add_apply, zpow_add])
+      rw [← map_add (f := _), hE, hE, hE, map_add (f := _), LinearMap.add_apply, zpow_add])
     (fun x y => by
       obtain ⟨x, rfl⟩ := surj x
       obtain ⟨y, rfl⟩ := surj y
@@ -177,7 +222,7 @@ theorem exists_level_pairing_eq : ∀ (p : ℕ) [Fact p.Prime] (D : Datum p) (k 
       rw [hE] at this
       exact (hζ.zpow_eq_one_iff_dvd _).1 this)
   refine ⟨fun x => fb (g (K.mkQ x)), ⟨fun x y => ?_, fun c x => ?_, fun x => ?_, fun q => ?_⟩, fun x y => ?_⟩
-  · simp only [map_add, fbadd]
+  · simp only [map_add (f := _), fbadd]
   · simp only [map_smul, fblin]
   · simp only []
     rw [fbker, g.map_eq_zero_iff, hmk]

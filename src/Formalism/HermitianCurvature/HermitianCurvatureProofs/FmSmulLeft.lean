@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.HermitianCurvature.StatementTB
+module
+
+public import Formalism.HermitianCurvature.StatementTB
+public import Mathlib.Analysis.InnerProductSpace.Completion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.GermFibreKernels
 
@@ -30,13 +78,9 @@ theorem herm (x y : α) : conj (P.K y x) = P.K x y := by
   have := congrFun (congrFun h ⟨x, hx⟩) ⟨y, hy⟩
   simpa [Matrix.conjTranspose_apply, Matrix.of_apply] using this
 
-theorem fm_inner_add (x : α) (g₁ g₂ : α →₀ ℂ) :
-    ((g₁ + g₂).sum fun y b => P.K x y * b) = (g₁.sum fun y b => P.K x y * b) + g₂.sum fun y b => P.K x y * b :=
-  Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => by ring)
-
 theorem fm_add_left (f₁ f₂ g : α →₀ ℂ) : P.fm (f₁ + f₂) g = P.fm f₁ g + P.fm f₂ g := by
   unfold fm
-  exact Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => by simp [map_add]; ring)
+  exact Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => by simp [map_add (f := _)]; ring)
 
 theorem fm_smul_left (f g : α →₀ ℂ) (r : ℂ) : P.fm (r • f) g = conj r * P.fm f g := by
   unfold fm
@@ -46,6 +90,7 @@ theorem fm_smul_left (f g : α →₀ ℂ) (r : ℂ) : P.fm (r • f) g = conj r
 
 theorem fm_conj (f g : α →₀ ℂ) : conj (P.fm g f) = P.fm f g := by
   unfold fm
+
   simp only [Finsupp.sum, map_sum, map_mul, Complex.conj_conj, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun y _ => Finset.sum_congr rfl fun x _ => ?_

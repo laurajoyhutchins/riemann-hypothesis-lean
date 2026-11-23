@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CyclicCupDefs
-import GroundTheory.TateCohomology.TateLow
-import GroundTheory.TateCohomology.TateZeroClass
+module
+
+public import GroundTheory.ProfiniteCohomology.CyclicCupDefs
+public import GroundTheory.TateCohomology.TateLow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -200,6 +246,7 @@ theorem smul_norm_mem_coboundaries₂ (χ : Additive G →+ AddCircle (1 : ℚ))
     exact_mod_cast this
   have hshift : A.ρ x (∑ h, normWeight χ h x' • A.ρ h b) =
       ∑ h, normWeight χ (x⁻¹ * h) x' • A.ρ h b := by
+
     rw [map_sum]
     simp_rw [map_zsmul, ← Module.End.mul_apply, ← map_mul]
     exact Fintype.sum_equiv (Equiv.mulLeft x) _ _ (fun h => by simp)
@@ -241,12 +288,13 @@ theorem exists_sub_mem_coboundaries₂ (χ : Additive G →+ AddCircle (1 : ℚ)
       intro x
       rw [(hz h x g)]
       abel
+
     rw [hadef, map_sum, Finset.sum_congr rfl (fun x _ => e x), Finset.sum_sub_distrib,
-      Finset.sum_add_distrib,
-      Fintype.sum_equiv (Equiv.mulLeft h) (fun x => z (h * x, g)) (fun x => z (x, g))
-        (fun x => rfl),
-      Fintype.sum_equiv (Equiv.mulRight g) (fun x => z (h, x * g)) (fun x => z (h, x))
-        (fun x => rfl)]
+    Finset.sum_add_distrib,
+    Fintype.sum_equiv (Equiv.mulLeft h) (fun x => z (h * x, g)) (fun x => z (x, g))
+      (fun x => rfl),
+    Fintype.sum_equiv (Equiv.mulRight g) (fun x => z (h, x * g)) (fun x => z (h, x))
+      (fun x => rfl)]
     abel
   set φ : G → A := fun x => c (x, g) • a - z (x, g) with hφdef
   have hsum : ∑ x, c (x, g) • a = (∑ x, c (x, g)) • a := by
@@ -420,8 +468,8 @@ theorem exists_generator_sum_charCocycle [IsCyclic G] (χ : Additive G →+ AddC
     rw [hy, mul_one_div_cancel hmpos.ne'] at this
     exact_mod_cast this
 
-omit [Fintype G] in
 
+omit [Fintype G] in
 theorem mem_coboundaries₂_of_subsingleton [Subsingleton G] (z : cocycles₂ A) :
     ⇑z ∈ coboundaries₂ A := by
   refine ⟨fun _ => z (1, 1), ?_⟩
@@ -442,21 +490,6 @@ theorem cupCharClass_eq_zero_of_mem (χ : Additive G →+ AddCircle (1 : ℚ)) (
   change (fun p => charCocycle χ p • (a : A)) ∈ coboundaries₂ A
   rw [← hb]
   exact smul_norm_mem_coboundaries₂ χ b
-
-noncomputable def tateZeroToH2 (A : Rep ℤ G) (χ : Additive G →+ AddCircle (1 : ℚ)) :
-    tateCohomology A 0 ⟶ H2 A :=
-  ((tateCohomologyZeroIso ℤ G).app A).hom ≫
-    ModuleCat.ofHom ((normRangeInvariants A).liftQ (cupCharClass A χ).hom
-      (fun a ha => cupCharClass_eq_zero_of_mem χ a ha))
-
-theorem tateZeroToH2_tateZeroClass (χ : Additive G →+ AddCircle (1 : ℚ)) (a : A.ρ.invariants) :
-    (tateZeroToH2 A χ).hom (tateZeroClass A a) = (cupCharClass A χ).hom a := by
-  change ((normRangeInvariants A).liftQ (cupCharClass A χ).hom
-      (fun a ha => cupCharClass_eq_zero_of_mem χ a ha))
-    ((((tateCohomologyZeroIso ℤ G).app A).inv ≫ ((tateCohomologyZeroIso ℤ G).app A).hom).hom
-      (Submodule.Quotient.mk a)) = _
-  rw [Iso.inv_hom_id]
-  rfl
 
 variable [IsCyclic G]
 
@@ -488,26 +521,6 @@ theorem cupCharClass_surjective (χ : Additive G →+ AddCircle (1 : ℚ)) (hχ 
       refine ⟨⟨a, ha⟩, ?_⟩
       rw [cupCharClass_apply_charCocycle, H2π_eq_iff]
       exact hmem
-
-theorem tateZeroToH2_bijective (χ : Additive G →+ AddCircle (1 : ℚ)) (hχ : Function.Injective χ) :
-    Function.Bijective (tateZeroToH2 A χ).hom := by
-  refine ⟨fun x y hxy => ?_, fun y => ?_⟩
-  · obtain ⟨a, rfl⟩ := tateZeroClass_surjective A x
-    obtain ⟨b, rfl⟩ := tateZeroClass_surjective A y
-    rw [tateZeroToH2_tateZeroClass, tateZeroToH2_tateZeroClass, ← sub_eq_zero, ← map_sub,
-      cupCharClass_eq_zero_iff χ hχ] at hxy
-    rw [← sub_eq_zero, ← map_sub]
-    change ((tateCohomologyZeroIso ℤ G).app A).inv.hom (Submodule.Quotient.mk (a - b)) = 0
-    rw [(Submodule.Quotient.mk_eq_zero _).2 hxy]
-    exact map_zero _
-  · obtain ⟨a, rfl⟩ := cupCharClass_surjective χ hχ y
-    exact ⟨tateZeroClass A a, tateZeroToH2_tateZeroClass χ a⟩
-
-noncomputable def tateZeroIsoH2 (A : Rep ℤ G) (χ : Additive G →+ AddCircle (1 : ℚ))
-    (hχ : Function.Injective χ) : tateCohomology A 0 ≅ H2 A :=
-  have : IsIso (tateZeroToH2 A χ) :=
-    (ConcreteCategory.isIso_iff_bijective _).2 (tateZeroToH2_bijective χ hχ)
-  asIso (tateZeroToH2 A χ)
 
 end Cyclic
 

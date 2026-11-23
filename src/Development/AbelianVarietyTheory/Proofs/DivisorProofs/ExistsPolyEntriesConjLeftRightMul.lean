@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Monad
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.Data.Matrix.Mul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Star.BigOperators
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,7 +60,8 @@ theorem totalDegree_bind₁_le_of_le_one {σ τ : Type*} (f : σ → MvPolynomia
     (hf : ∀ i, (f i).totalDegree ≤ 1) (Q : MvPolynomial σ ℂ) :
     (bind₁ f Q).totalDegree ≤ Q.totalDegree := by
   classical
-  conv_lhs => rw [Q.as_sum, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    conv_lhs => rw [Q.as_sum, map_sum]
   refine totalDegree_finsetSum_le fun s hs => ?_
   rw [bind₁_monomial]
   refine (totalDegree_mul _ _).trans ?_
@@ -40,12 +91,14 @@ theorem main : ∀ (n : ℕ) (a b : Matrix (Fin n) (Fin n) ℂ) (P : MvPolynomia
   rw [eval]
   refine congrArg (fun x => eval₂Hom (RingHom.id ℂ) x P) (funext fun i => ?_)
   rcases i with z | z
-  · simp only [Sum.elim_inl, subst, map_sum, map_mul, coe_eval₂Hom, eval₂_C, eval₂_X,
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [Sum.elim_inl, subst, map_sum, map_mul, coe_eval₂Hom, eval₂_C, eval₂_X,
       RingHom.id_apply, Matrix.mul_apply, Finset.sum_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun l _ => Finset.sum_congr rfl fun k _ => ?_
     ring
-  · simp only [Sum.elim_inr, subst, map_sum, map_mul, coe_eval₂Hom, eval₂_C, eval₂_X,
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [Sum.elim_inr, subst, map_sum, map_mul, coe_eval₂Hom, eval₂_C, eval₂_X,
       RingHom.id_apply, Matrix.mul_apply, Finset.sum_mul, star_sum, star_mul']
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl fun l _ => Finset.sum_congr rfl fun k _ => ?_

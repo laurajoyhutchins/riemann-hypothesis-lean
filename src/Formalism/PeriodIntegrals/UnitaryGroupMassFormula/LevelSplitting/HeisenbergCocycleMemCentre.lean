@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.UnipotentRadicalActionFormula
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.NCDefs
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.ToMatrixLin
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.UnipotentRadicalActionFormula
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.NCDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.ProjHA
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.ToMatrixLin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.SemiAlg
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +68,7 @@ theorem fix_span {Φ : (n → A) →ₗ[A] (n → A)} (he : ∀ a, Φ (D.e a) = 
   | (induction hx using Submodule.span_induction with
       | mem y hy => obtain ⟨a, rfl⟩ := hy; exact he a
       | zero => exact map_zero Φ
-      | add y z _ _ hy hz => rw [map_add, hy, hz]
+      | add y z _ _ hy hz => rw [map_add (f := _), hy, hz]
       | smul c y _ hy => rw [map_smul, hy])
 
 def sMat (D : Dat A n r) (half : A) (y : Fin r → n → A) : Matrix n n A :=
@@ -206,7 +252,7 @@ theorem yH_mul_Z {g : HA R σ J} (hg : g ∈ PI.LevelKSplit.W.NC.LevelUnipotentS
   rw [yH_eq (T := T), yH_eq (T := T), lin_mul]
   have e : lin R σ J z ((datR R σ J P T).f a) = (datR R σ J P T).f a +
       (lin R σ J z ((datR R σ J P T).f a) - (datR R σ J P T).f a) := by abel
-  rw [e, map_add, fix_span (unipotent_radical_fixes_frame hg) (Z_f hJ H hh hz a), map_add, pWp_span H (Z_f hJ H hh hz a),
+  rw [e, map_add (f := _), fix_span (unipotent_radical_fixes_frame hg) (Z_f hJ H hh hz a), map_add (f := _), pWp_span H (Z_f hJ H hh hz a),
     add_zero]
 
 theorem Z_comm {z : HA R σ J} (hz : z ∈ PI.LevelKSplit.W.NC.Zsub R σ J P) {g : HA R σ J}
@@ -231,12 +277,12 @@ theorem Z_comm {z : HA R σ J} (hz : z ∈ PI.LevelKSplit.W.NC.Zsub R σ J P) {g
           congr 1; abel
       _ = lin R σ J z ((datR R σ J P T).f a) +
             (lin R σ J g ((datR R σ J P T).f a) - (datR R σ J P T).f a) := by
-          rw [map_add, Z_fix hJ H hh hz hnf]
+          rw [map_add (f := _), Z_fix hJ H hh hz hnf]
       _ = lin R σ J g ((datR R σ J P T).f a) +
             (lin R σ J z ((datR R σ J P T).f a) - (datR R σ J P T).f a) := by abel
       _ = lin R σ J g ((datR R σ J P T).f a +
             (lin R σ J z ((datR R σ J P T).f a) - (datR R σ J P T).f a)) := by
-          rw [map_add, fix_span (unipotent_radical_fixes_frame hg) (Z_f hJ H hh hz a)]
+          rw [map_add (f := _), fix_span (unipotent_radical_fixes_frame hg) (Z_f hJ H hh hz a)]
       _ = lin R σ J g (lin R σ J z ((datR R σ J P T).f a)) := by
           congr 1; abel
 
@@ -302,8 +348,10 @@ theorem H_conj_sHG {g : HA R σ J} (hg : g ∈ Hsub R σ J P) {y : Fin r → Fin
     rw [← hu, lin_lin_inv]
   have luv : ∀ a, lin R σ J g (uv (datR R σ J P T) half y a) =
       uv (datR R σ J P T) half (fun b => lin R σ J g (y b)) a := fun a => by
-    simp only [uv, cf, map_add, map_sum, map_smul, H_e hJ H hh hg, hu]
-  simp only [map_add, map_sub, map_sum, map_smul, e1, e2, luv, H_e hJ H hh hg, lin_lin_inv]
+
+    simp only [uv, cf, map_add (f := _), map_sum, map_smul, H_e hJ H hh hg, hu]
+
+  simp only [map_add (f := _), map_sub, map_sum, map_smul, e1, e2, luv, H_e hJ H hh hg, lin_lin_inv]
 
 theorem H_xp {h : HA R σ J} (hh' : h ∈ Hsub R σ J P) {v : Fin M → R ⊗[F] E}
     (hv : Xp (datR R σ J P T) v) : Xp (datR R σ J P T) (lin R σ J h v) :=
@@ -320,7 +368,7 @@ theorem H_comm_Z {g : HA R σ J} (hg : g ∈ Hsub R σ J P) {z : HA R σ J}
   · rw [lin_mul, lin_mul, H_f hJ H hh hgi a]
     have e : lin R σ J z ((datR R σ J P T).f a) = (datR R σ J P T).f a +
         (lin R σ J z ((datR R σ J P T).f a) - (datR R σ J P T).f a) := by abel
-    rw [e, map_add, H_f hJ H hh hg a, fix_span (H_e hJ H hh hg) (Z_f hJ H hh hz a)]
+    rw [e, map_add (f := _), H_f hJ H hh hg a, fix_span (H_e hJ H hh hg) (Z_f hJ H hh hz a)]
 
 end Sec
 

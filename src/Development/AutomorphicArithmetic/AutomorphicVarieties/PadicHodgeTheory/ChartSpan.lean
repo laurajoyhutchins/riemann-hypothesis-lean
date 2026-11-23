@@ -1,4 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsInertiaInfiniteCyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open UpperTheory.V.Loc UpperTheory.V.Alg IsLocalRing
 
 private theorem coeff1_mul {σ E : Type} [CommRing E] (j : σ) (f g : MvPowerSeries σ E) :
@@ -31,7 +83,7 @@ private theorem exists_den {O R E : Type} [CommRing O] [IsDomain O] [CommRing R]
     | add a b _ _ ha hb =>
       obtain ⟨o, ho⟩ := ha
       obtain ⟨o', ho'⟩ := hb
-      exact ⟨o + o', by rw [map_add, ho, ho', hadd, mul_add]⟩
+      exact ⟨o + o', by rw [map_add (f := _), ho, ho', hadd, mul_add]⟩
     | smul r a ha' ha =>
       obtain ⟨o, ho⟩ := ha
       rw [hT] at ha'
@@ -78,8 +130,8 @@ private theorem der_zero {O R E : Type} [CommRing O] [IsDomain O] [CommRing R] [
   have inj := IsFractionRing.injective O E
   have hc' : algebraMap O E c ≠ 0 := fun h => hc (inj (by rw [h, map_zero]))
   have := hsep
-    (dualHom x d (fun a b => inj (by rw [map_add, hd, hd, hd, hadd, mul_add]))
-      (fun a b => inj (by rw [map_add, map_mul, map_mul, hd, hd, hd, hmul]; ring))
+    (dualHom x d (fun a b => inj (by rw [map_add (f := _), hd, hd, hd, hadd, mul_add]))
+      (fun a b => inj (by rw [map_add (f := _), map_mul, map_mul, hd, hd, hd, hmul]; ring))
       (fun o => inj (by rw [hd, halg, mul_zero, map_zero])))
     (dualHom x (fun _ => 0) (by simp) (by simp) (by simp))
     (fun s => by
@@ -114,14 +166,14 @@ theorem UpperTheory.V.Loc.chartSpan :
     · intro a ha b hb
       rw [hLmul, hm a ha, hm b hb]; simp
     · intro a b ha hb
-      rw [map_add, ha, hb, add_zero]
+      rw [map_add (f := _), ha, hb, add_zero]
   have hspan : Submodule.span E (Set.range fun s => L (φ (e s))) = ⊤ := by
     by_contra hne
     obtain ⟨lam, hlam, hker⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.mpr hne)
     have hD := der_zero x (fun a => lam (L (φ a))) (fun a b => by simp)
       (fun a b => by
         rw [map_mul, hLmul, h.const, h.const]
-        simp only [map_add, map_smul, smul_eq_mul]
+        simp only [map_add (f := _), map_smul, smul_eq_mul]
         ring)
       (fun o => by
         have : L (φ (algebraMap O R o)) = 0 := by

@@ -1,8 +1,52 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementA
-import Formalism.EllipticTorsion.FormalGroupPointsNoTorsion
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
-import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.LogSigmaOnePullbackSpec
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Series
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementA
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementT
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.LogSigmaOnePullbackSpec
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.Series
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -67,13 +111,13 @@ theorem nsmul_ptOf (hA : PtOfAdd) (hZ : PtOfZero) (t : ℂ) (N : ℕ) :
     push_cast
     ring
 
-open Classical in
 
+open Classical in
 def piOf (hA : PtOfAdd) : ℂ →+ (curveL l L ι).toAffine.Point :=
   AddMonoidHom.mk' (ptOf l L ι) (hA l L ι)
 
-open Classical in
 
+open Classical in
 theorem restrict (hS : AnalyticSys) (hA : PtOfAdd) (hZ : PtOfZero) (hI : PtOfInt)
     (hW : IntCurve (curveL l L ι)) (t : ℂ) (N : ℕ) (hN : 0 < N) (hlN : ¬ l ∣ N)
     (hNt : (N : ℂ) * t ∈ L.lattice) :
@@ -134,8 +178,8 @@ end Tor
 
 open Tor
 
-open Classical in
 
+open Classical in
 theorem PtOfInt_of (hA : PtOfAdd) (hZ : PtOfZero) (hT : TorsionIntegral) : PtOfInt := by
   intro l _ L ι hW t N _ hlN hNt ht
   refine hT ℂ_[l] (curveL l L ι) hW (ptOf l L ι t) N (norm_natCast l hlN) ?_ ?_
@@ -175,8 +219,8 @@ theorem KernelPtInt_of (hI : PtOfInt) : KernelPtInt := by
     rw [h', Int.cast_neg, neg_mul]
     exact neg_mem hnt
 
-open Classical in
 
+open Classical in
 theorem AnalyticTrans_of (hS : AnalyticSys) (hA : PtOfAdd) (hZ : PtOfZero) (hI : PtOfInt)
     (hU : TransUnit) : AnalyticTrans := by
   intro l _ L ι hW t N hN hlN hNt ht
@@ -190,8 +234,8 @@ theorem AnalyticTrans_of (hS : AnalyticSys) (hA : PtOfAdd) (hZ : PtOfZero) (hI :
     (fun h0 => ht ((hZ l L ι t).1 h0))
   simpa only [cc_gT] using h
 
-open Classical in
 
+open Classical in
 theorem Th0Analytic_of (hS : AnalyticSys) (hA : PtOfAdd) (hZ : PtOfZero) (hI : PtOfInt)
     (hU : TransUnit) (hG : TransGauss) (hO : OpUTh0Root) : ThetaZeroAnalytic := by
   intro l _ L ι hl2 hW ω₀ hω hω2
@@ -227,7 +271,7 @@ theorem Th0Analytic_of (hS : AnalyticSys) (hA : PtOfAdd) (hZ : PtOfZero) (hI : P
   · change constantCoeff (phL l L ι - phPrime l L ι (ω₀ / 2)) = 0
     have h1 : constantCoeff (fLog (inU l L ι (th0 L (ω₀ / 2)))) = 0 :=
       Formalism.L2.Th1.B.constantCoeff_fLog hcc
-    rw [phPrime, sub_neg_eq_add, map_add, cc_phL, h1, add_zero]
+    rw [phPrime, sub_neg_eq_add, map_add (f := _), cc_phL, h1, add_zero]
   · change Formalism.DworkPowerSeriesWeights.Integral (ι := Unit) (fExp (phL l L ι - phPrime l L ι (ω₀ / 2)))
     rw [key]
     exact (Ser.intS_iff_integral _).1 hOne.2

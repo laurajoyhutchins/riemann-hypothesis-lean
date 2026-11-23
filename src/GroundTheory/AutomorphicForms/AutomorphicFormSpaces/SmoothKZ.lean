@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Translation
+module
+
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.HasModerateGrowthZero
+public import GroundTheory.AutomorphicForms.GKModules.ZKFinite
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Translation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter Set
 open scoped NumberField.AdeleRing
@@ -23,7 +69,7 @@ theorem UEnv.induction {L : Type*} [LieRing L] [LieAlgebra ℝ L]
   | algebraMap r => rw [AlgHom.commutes]; exact halg r
   | ι x => exact hι x
   | mul a b ha hb => rw [map_mul]; exact hmul _ _ ha hb
-  | add a b ha hb => rw [map_add]; exact hadd _ _ ha hb
+  | add a b ha hb => rw [map_add (f := _)]; exact hadd _ _ ha hb
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
@@ -63,7 +109,7 @@ theorem fg_span_AdU (u : UEnv K n) :
     refine (ha.sup hb).of_le (Submodule.span_le.2 ?_)
     rintro _ ⟨g, rfl⟩
     dsimp only
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem_sup (Submodule.subset_span ⟨g, rfl⟩) (Submodule.subset_span ⟨g, rfl⟩)
 
 structure IsSmoothKZ (φ : AdelicGLn.AdelicGL K n → ℂ) : Prop where
@@ -80,8 +126,8 @@ theorem IsAutomorphicForm.isSmoothKZ {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ 
     IsSmoothKZ φ :=
   (isAutomorphicForm_iff.1 hφ).1
 
-variable (K n) in
 
+variable (K n) in
 def smoothKZ : Submodule ℂ (AdelicGLn.AdelicGL K n → ℂ) where
   carrier := {φ | IsSmoothKZ φ}
   zero_mem' := ⟨isLeftInvariant_zero, isSmooth_zero, isKFinite_zero, isZFinite_zero⟩
@@ -186,7 +232,7 @@ theorem IsSmoothKZ.isKFinite_uAction {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ 
     · rw [map_zero, LinearMap.zero_apply]
       exact M.zero_mem
     · intro x y _ _ hx hy
-      rw [map_add, LinearMap.add_apply]
+      rw [map_add (f := _), LinearMap.add_apply]
       exact M.add_mem hx hy
     · intro r x _ hx
       rw [map_smul, LinearMap.smul_apply]
@@ -194,25 +240,14 @@ theorem IsSmoothKZ.isKFinite_uAction {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ 
   exact Submodule.finiteDimensional_of_le hle
 
 theorem IsSmoothKZ.uAction {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : IsSmoothKZ φ) (u : UEnv K n) :
-    IsSmoothKZ (AutomorphicForm.uAction u ⟨φ, hφ.isSmooth.1⟩ : AdelicGLn.AdelicGL K n → ℂ) where
-  isLeftInvariant := IsLeftInvariant.uAction hφ.isLeftInvariant u
-  isSmooth := hφ.isSmooth_uAction u
-  isKFinite := hφ.isKFinite_uAction u
-  isZFinite := hφ.isZFinite.uAction u
-
-theorem IsSmoothKZ.rightTranslate_finEmb {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : IsSmoothKZ φ)
-    (h : AdelicGLn.FiniteAdelicGL K n) : IsSmoothKZ (rightTranslate (finEmb K n h) φ) where
-  isLeftInvariant := hφ.isLeftInvariant.translate _
-  isSmooth := hφ.isSmooth.rightTranslate_finEmb h
-  isKFinite := IsKFinite.rightTranslate_finEmb hφ.isSmooth hφ.isKFinite h
-  isZFinite := hφ.isZFinite.map_rtFin h
+    IsSmoothKZ (AutomorphicForm.uAction u ⟨φ, hφ.isSmooth.1⟩ : AdelicGLn.AdelicGL K n → ℂ) :=
+  ⟨IsLeftInvariant.uAction hφ.isLeftInvariant u, hφ.isSmooth_uAction u,
+    hφ.isKFinite_uAction u, hφ.isZFinite.uAction u⟩
 
 theorem IsSmoothKZ.rightTranslate_infEmb {φ : AdelicGLn.AdelicGL K n → ℂ} (hφ : IsSmoothKZ φ)
-    {a : archGroup K n} (ha : a ∈ archCompact K n) : IsSmoothKZ (rightTranslate (infEmb K n a) φ) where
-  isLeftInvariant := hφ.isLeftInvariant.translate _
-  isSmooth := hφ.isSmooth.rightTranslate_infEmb a
-  isKFinite := hφ.isKFinite.rightTranslate_of_mem_maxCompact ha
-  isZFinite := hφ.isZFinite.map_rtInf a
+    {a : archGroup K n} (ha : a ∈ archCompact K n) : IsSmoothKZ (rightTranslate (infEmb K n a) φ) :=
+  ⟨hφ.isLeftInvariant.translate _, hφ.isSmooth.rightTranslate_infEmb a,
+    hφ.isKFinite.rightTranslate_of_mem_maxCompact ha, hφ.isZFinite.map_rtInf a⟩
 
 end AutomorphicForm
 

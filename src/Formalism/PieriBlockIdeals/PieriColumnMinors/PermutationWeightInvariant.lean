@@ -1,5 +1,57 @@
-import Formalism.PieriBlockIdeals.StatementLC
-import Formalism.PieriBlockIdeals.PieriColumnMinors.BinaryFormsExample
+module
+
+public import Formalism.PieriBlockIdeals.StatementLC
+public import Formalism.PieriBlockIdeals.PieriColumnMinors.BinaryFormsExample
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.CohomologicalDescent.LC
 
@@ -145,20 +197,20 @@ theorem exchange' : Exchange := by
   have hjj' : j ≠ j' := by
     intro e; have := congrArg Fin.val e; simp [hj'] at this
   refine ⟨?_, fun l => ?_⟩
-  · rw [map_add, map_smul, hz.1, lc_c_eig (commute_casimir_zero EM s fun a b => permSecond_commute_onModule K _ _) hz.1]
+  · rw [map_add (f := _), map_smul, hz.1, lc_c_eig (commute_casimir_zero EM s fun a b => permSecond_commute_onModule K _ _) hz.1]
     module
   · by_cases hl : l = j
     · subst hl
-      rw [Function.comp_apply, Equiv.swap_apply_left, map_add, map_smul, e2, hz.2 l]
+      rw [Function.comp_apply, Equiv.swap_apply_left, map_add (f := _), map_smul, e2, hz.2 l]
       have e : b * ((c l : ℤ) : K) - 1 = ((c j' : ℤ) : K) * b := by linear_combination hb
       calc _ = ((c j' : ℤ) : K) • s z + (b * ((c l : ℤ) : K) - 1) • z := by module
         _ = _ := by rw [e]; module
     · by_cases hl' : l = j'
-      · rw [hl', Function.comp_apply, Equiv.swap_apply_right, map_add, map_smul, e1, hz.2 j']
+      · rw [hl', Function.comp_apply, Equiv.swap_apply_right, map_add (f := _), map_smul, e1, hz.2 j']
         have e : 1 + b * ((c j' : ℤ) : K) = ((c j : ℤ) : K) * b := by linear_combination (-1 : K) * hb
         calc _ = ((c j : ℤ) : K) • s z + (1 + b * ((c j' : ℤ) : K)) • z := by module
           _ = _ := by rw [e]; module
-      · rw [Function.comp_apply, Equiv.swap_apply_of_ne_of_ne hl hl', map_add, map_smul, hz.2 l,
+      · rw [Function.comp_apply, Equiv.swap_apply_of_ne_of_ne hl hl', map_add (f := _), map_smul, hz.2 l,
           lc_c_eig (hH.2 l hl hl') (hz.2 l)]
         module
 
@@ -179,7 +231,7 @@ theorem good_swap_exists : GoodSwap := by
     have := LinearMap.congr_fun hss z
     simpa using this
   have e : s z' - b • z' = (1 - b * b) • z := by
-    rw [hz'def, map_add, map_smul, hssz]
+    rw [hz'def, map_add (f := _), map_smul, hssz]
     module
   have t3 : (1 - b * b) • toSym K z = 0 := by
     rw [← map_smul, ← e, map_sub, map_smul, t1, t2]; simp

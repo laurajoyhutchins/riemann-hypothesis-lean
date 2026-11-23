@@ -1,0 +1,91 @@
+{
+  "after": {
+    "counting_rule": "tracked src/**/*.lean files; wc -l newline count; byte lengths",
+    "entrypoint_sha256": {
+      "src/Main.lean": "8747f40b178740867ed8aa53b5a6f6f32a23b7b8bc4fcbca898fe72fbf0fcdf6",
+      "src/Statements.lean": "3ab58a3af2384def08e6f71531c33939a83a1408e31ac5b0e75bf4afa488a463"
+    },
+    "files_missing_trailing_newline": 1,
+    "lean_files": 148230,
+    "lean_lines": 20567741,
+    "lean_source_bytes": 1110823285
+  },
+  "before": {
+    "counting_rule": "tracked src/**/*.lean files; wc -l newline count; byte lengths",
+    "entrypoint_sha256": {
+      "src/Main.lean": "8747f40b178740867ed8aa53b5a6f6f32a23b7b8bc4fcbca898fe72fbf0fcdf6",
+      "src/Statements.lean": "3ab58a3af2384def08e6f71531c33939a83a1408e31ac5b0e75bf4afa488a463"
+    },
+    "files_missing_trailing_newline": 1,
+    "lean_files": 149217,
+    "lean_lines": 20788899,
+    "lean_source_bytes": 1123524557
+  },
+  "changed_paths_applied_in_fork": 3369,
+  "changed_paths_in_upstream_diff": 3369,
+  "difference": {
+    "files_missing_trailing_newline": 0,
+    "lean_files": -987,
+    "lean_lines": -221158,
+    "lean_source_bytes": -12701272
+  },
+  "entrypoints_unchanged": true,
+  "fork_base": "b98d11cae860c084b6831bd7e34a847010643aa0",
+  "fork_original_census": {
+    "counting_rule": "tracked src/**/*.lean files; wc -l newline count; byte lengths",
+    "entrypoint_sha256": {
+      "src/Main.lean": "017645ca448f2fd1f6fd5c4c2cb2c6e96e472725be13f6e180ca6e1574360939",
+      "src/Statements.lean": "79ef7ca776e42abe1f46caee13ea09bd19f1e2d0b1620d8d5d200258f33b47bf"
+    },
+    "files_missing_trailing_newline": 0,
+    "lean_files": 175187,
+    "lean_lines": 17374215,
+    "lean_source_bytes": 1030531854
+  },
+  "method": "complete parent1..merge git binary patch, git apply --3way --index",
+  "upstream_first_parent": "97ed34c57bc0d159b51c77a9e7e2ba59932b1256",
+  "upstream_merge": "98cc3736f046abae883d8cda839c84f3004257a7",
+  "upstream_pr": 221,
+  "upstream_pre221_sync": {
+    "after": {
+      "counting_rule": "tracked src/**/*.lean files; wc -l newline count; byte lengths",
+      "entrypoint_sha256": {
+        "src/Main.lean": "8747f40b178740867ed8aa53b5a6f6f32a23b7b8bc4fcbca898fe72fbf0fcdf6",
+        "src/Statements.lean": "3ab58a3af2384def08e6f71531c33939a83a1408e31ac5b0e75bf4afa488a463"
+      },
+      "files_missing_trailing_newline": 1,
+      "lean_files": 149217,
+      "lean_lines": 20788899,
+      "lean_source_bytes": 1123524557
+    },
+    "before": {
+      "counting_rule": "tracked src/**/*.lean files; wc -l newline count; byte lengths",
+      "entrypoint_sha256": {
+        "src/Main.lean": "017645ca448f2fd1f6fd5c4c2cb2c6e96e472725be13f6e180ca6e1574360939",
+        "src/Statements.lean": "79ef7ca776e42abe1f46caee13ea09bd19f1e2d0b1620d8d5d200258f33b47bf"
+      },
+      "files_missing_trailing_newline": 0,
+      "lean_files": 175187,
+      "lean_lines": 17374215,
+      "lean_source_bytes": 1030531854
+    },
+    "difference": {
+      "files_missing_trailing_newline": 1,
+      "lean_files": -25970,
+      "lean_lines": 3414684,
+      "lean_source_bytes": 92992703
+    },
+    "entrypoints_unchanged": false,
+    "warning": "Source equality is not elaborated type equality; a Lean kernel rebuild and axiom audit are separate obligations."
+  },
+  "upstream_second_parent": "af9ae2a2f8f14d910823f837d4771792dc60cbb8",
+  "verification": {
+    "axiom_equivalence": "not checked",
+    "census_self_test": "passed",
+    "elaborated_theorem_type_equality": "not checked",
+    "independent_clean_kernel_rebuild": "not checked",
+    "new_proof_gap_token_screen": "passed",
+    "source_patch": "applied with zero conflicts"
+  },
+  "warning": "Source equality is not elaborated type equality; a Lean kernel rebuild and axiom audit are separate obligations."
+}

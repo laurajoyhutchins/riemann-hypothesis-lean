@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermHyperbolic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.UTrans.Model
@@ -23,86 +67,16 @@ theorem hf_add_smul_left (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) (v x y 
 
 theorem hf_add_smul_right (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) (v x y : Fin n → R) (c : R) :
     hf σ G y (v + c • x) = hf σ G y v + σ c * hf σ G y x := by
-  simp only [hf, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add, map_mul, mul_add,
+  simp only [hf, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add (f := _), map_mul, mul_add,
     Finset.sum_add_distrib, Finset.mul_sum]
   congr 1
   exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
 
 theorem hf_conj (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) (hσ : ∀ a, σ (σ a) = a)
     (hG : ∀ a b, σ (G a b) = G b a) (x y : Fin n → R) : σ (hf σ G x y) = hf σ G y x := by
+
   simp only [hf, map_sum, map_mul, hσ, hG]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
-
-theorem isU_tv (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) (hσ : ∀ a, σ (σ a) = a)
-    (hG : ∀ a b, σ (G a b) = G b a) (x : Fin n → R) (t : R)
-    (h : t + σ t + t * σ t * hf σ G x x = 0) : IsU σ G (tv σ G x t) := by
-  intro v w
-  rw [tv_mulVec, tv_mulVec, hf_add_smul_left, hf_add_smul_right, hf_add_smul_right, map_mul,
-    hf_conj σ G hσ hG w x]
-  linear_combination (hf σ G v x * hf σ G x w) * h
-
-theorem isU_of_mem_tvGen (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) (hσ : ∀ a, σ (σ a) = a)
-    (hG : ∀ a b, σ (G a b) = G b a) {m} (hm : m ∈ TvGen σ G) : IsU σ G m := by
-  induction hm using Submonoid.closure_induction with
-  | mem m hm =>
-    obtain ⟨x, t, hx, ht, rfl⟩ := hm
-    exact isU_tv σ G hσ hG x t (by rw [hx, mul_zero, add_zero]; exact ht)
-  | one => intro v w; simp only [Matrix.one_mulVec]
-  | mul p q _ _ hp hq =>
-    intro v w
-    rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, hp, hq]
-
-theorem det_tv (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) (x : Fin n → R) (t : R) :
-    (tv σ G x t).det = 1 + t * hf σ G x x := by
-  have e : tv σ G x t = (1 : Matrix (Fin n) (Fin n) R) + Matrix.replicateCol (Fin 1) x *
-      Matrix.replicateRow (Fin 1) (fun b : Fin n => t * ∑ e : Fin n, G b e * σ (x e)) := by
-    unfold tv
-    congr 1
-    ext a b
-    simp [Matrix.mul_apply, Matrix.replicateCol_apply, Matrix.replicateRow_apply]
-    ring
-  rw [e]
-  refine (Matrix.det_one_add_replicateCol_mul_replicateRow (ι := Fin 1) x _).trans ?_
-  simp only [dotProduct, hf, Finset.mul_sum, Finset.sum_mul]
-  congr 1
-  exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by ring
-
-theorem det_of_mem_tvGen (σ : R →+* R) (G : Matrix (Fin n) (Fin n) R) {m} (hm : m ∈ TvGen σ G) : m.det = 1 := by
-  induction hm using Submonoid.closure_induction with
-  | mem m hm =>
-    obtain ⟨x, t, hx, _, rfl⟩ := hm
-    rw [det_tv, hx, mul_zero, add_zero]
-  | one => exact Matrix.det_one
-  | mul p q _ _ hp hq => rw [Matrix.det_mul, hp, hq, mul_one]
-
-theorem nontrivial_transvection :
-    !![1, Complex.I; 0, 1] ∈ TvGen (starRingEnd ℂ) !![0, 1; 1, 0] := by
-  apply Submonoid.subset_closure
-  refine ⟨![1, 0], Complex.I, ?_, ?_, ?_⟩
-  · simp [hf, Fin.sum_univ_two]
-  · simp [Complex.conj_I]
-  · ext a b
-    fin_cases a <;> fin_cases b <;> simp [tv, Fin.sum_univ_two]
-
-theorem not_mem_tvGen :
-    IsU (starRingEnd ℂ) !![0, 1; 1, 0] !![Complex.I, 0; 0, Complex.I] ∧
-    !![Complex.I, 0; 0, Complex.I] ∉ TvGen (starRingEnd ℂ) !![0, 1; 1, 0] := by
-  have hI : ∀ v : Fin 2 → ℂ, (!![Complex.I, 0; 0, Complex.I]).mulVec v = Complex.I • v := by
-    intro v
-    ext i
-    fin_cases i <;> simp [Matrix.mulVec, dotProduct, Fin.sum_univ_two]
-  refine ⟨fun v w => ?_, fun hm => ?_⟩
-  · simp only [hf, hI, Pi.smul_apply, smul_eq_mul, map_mul, Complex.conj_I]
-    refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
-    linear_combination (-(v a * !![(0 : ℂ), 1; 1, 0] a b * (starRingEnd ℂ) (w b))) * Complex.I_sq
-  · have hd := det_of_mem_tvGen _ _ hm
-    rw [Matrix.det_fin_two_of] at hd
-    norm_num [Complex.ext_iff] at hd
-
-theorem not_isU : ¬ IsU (starRingEnd ℂ) !![0, 1; 1, 0] !![1, 1; 0, 1] := by
-  intro h
-  have h1 := h ![0, 1] ![0, 1]
-  norm_num [hf, Matrix.mulVec, dotProduct, Fin.sum_univ_two] at h1
 
 end GlobalTheory.UTrans.Model

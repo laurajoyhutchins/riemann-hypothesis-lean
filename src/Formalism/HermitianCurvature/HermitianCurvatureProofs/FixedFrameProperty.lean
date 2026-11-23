@@ -1,4 +1,49 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.FlagSpanVanishing
+module
+
+public import Formalism.HermitianCurvature.FiniteOrderIntersectionInSmooth
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FlagSpanVanishing
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormFlagVector
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LinearChangeOfVariablesBis
+
+@[expose] public section
 
 open Matrix Formalism.FourierDecayAlt Formalism.QuantumDeterminants
 
@@ -22,46 +67,5 @@ theorem fixed_frame_property : C2.FixFrame := by
     refine ⟨hS'.1, fun a => ?_⟩
     rw [((unipotent_map_frame k r z hz).1 g hS).1 a, hU]
     simp [Matrix.one_apply]
-
-theorem fibre_stabilizer : C2.FibreStab := by
-  intro k r z z' hstd g hg _
-  have hHdet : IsUnit (Hpk k r).det :=
-    Matrix.isUnit_det_of_right_inverse (majorant_estimate k r).2.1
-  obtain ⟨_, hmul, hinv⟩ := uHGroup _ (Hpk k r) hHdet
-  have hgu : IsUnit g.det := (hinv g hg).1
-  have hFz := fixed_frame_property k r z hstd.2.1
-  have hFz' := fixed_frame_property k r z' hstd.2.2
-  ext ⟨p, q⟩
-  simp only [Set.mem_setOf_eq, Set.mem_image, Prod.mk.injEq]
-  constructor
-  · rintro ⟨hp, hq, hpq⟩
-    rw [← hFz] at hp
-    have hpu : IsUnit p.det := (hinv p hp.1).1
-    have h1 : g * q = p * g := by
-      calc g * q = p * (p⁻¹ * g * q) := by
-            rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hpu, Matrix.one_mul]
-        _ = p * g := by rw [hpq]
-    have hq_eq : g⁻¹ * p * g = q := by
-      calc g⁻¹ * p * g = g⁻¹ * (g * q) := by rw [h1, Matrix.mul_assoc]
-        _ = q := by rw [← Matrix.mul_assoc, Matrix.nonsing_inv_mul _ hgu, Matrix.one_mul]
-    refine ⟨p, ⟨hp.1, ?_⟩, rfl, hq_eq⟩
-    rintro (a | b)
-    · exact hp.2 a
-    · rw [← hFz'] at hq
-      show p *ᵥ (g *ᵥ fvec k r z' b) = g *ᵥ fvec k r z' b
-      rw [Matrix.mulVec_mulVec, ← h1, ← Matrix.mulVec_mulVec, hq.2 b]
-  · rintro ⟨h, ⟨hhV, hhfix⟩, rfl, rfl⟩
-    have hhu : IsUnit h.det := (hinv h hhV).1
-    refine ⟨?_, ?_, ?_⟩
-    · rw [← hFz]
-      exact ⟨hhV, fun a => hhfix (Sum.inl a)⟩
-    · rw [← hFz']
-      refine ⟨hmul _ (hmul _ (hinv g hg).2 h hhV) g hg, fun b => ?_⟩
-      have hb : h *ᵥ (g *ᵥ fvec k r z' b) = g *ᵥ fvec k r z' b := hhfix (Sum.inr b)
-      rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec, hb, Matrix.mulVec_mulVec,
-        Matrix.nonsing_inv_mul _ hgu, Matrix.one_mulVec]
-    · calc h⁻¹ * g * (g⁻¹ * h * g) = h⁻¹ * (g * g⁻¹) * h * g := by simp only [Matrix.mul_assoc]
-        _ = g := by
-          rw [Matrix.mul_nonsing_inv _ hgu, Matrix.mul_one, Matrix.nonsing_inv_mul _ hhu, Matrix.one_mul]
 
 end Formalism.FourierDecayAlt.P

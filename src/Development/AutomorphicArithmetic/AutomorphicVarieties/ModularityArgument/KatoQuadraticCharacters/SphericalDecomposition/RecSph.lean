@@ -1,10 +1,61 @@
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedPrincipalSeriesNoInvariant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.LocIsotypic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.InertiaFixesRootsOfUnityPrimeToResidueChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MonodromyZeroOfWeilDeligneRepClassIff
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.WeakOfAtt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.KatoTwoOfUseN
 import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.KatoQuadraticCharacters.SphericalDecomposition.SphOfWit
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.LocalDoubleCosets.OfSupportHolds
-import Development.AutomorphicArithmetic.Foundations.Convolution.SphericalIdeles.UnlSph
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.AutomorphyLifting.QuadraticCharpolySplitting.RcChars
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.InertiaFixesRootsOfUnityPrimeToResidueChar
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PlainTorExistsChars
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsSphericalTwistOfUnr
+import Development.AutomorphicArithmetic.Foundations.LocalLanglands.IsRecTOfIsRec
+
+@[expose] public section
 
 noncomputable section
 
@@ -72,42 +123,3 @@ end WD
 
 end UpperTheory.V.Z.Kato.WeilSphericalRecords.SphericalReciprocity
 
-open UpperTheory.V.Z.Kato.WeilSphericalRecords.SphericalReciprocity in
-theorem UpperTheory.V.Z.Kato.WeilSphericalRecords.recSph :
-    Af.Hypotheses₂ → RecSph := by
-  intro _ E Ω _ _ _ _ _ A w h rc ⟨a, ha, L⟩ n σ hP hlev
-  haveI : CharZero (w.adicCompletion E) := charZero_of_injective_algebraMap (algebraMap E _).injective
-  have hxu : (rc (IrrGL.of σ.ρ σ.smooth σ.irred)).unr := by
-    have h0 := unr_of_level hlev
-    rwa [algNorm, L.nu, WD.unr_tw] at h0
-  obtain ⟨ξ, hξ, hs, hu⟩ := GlobalTheory.RoadU.plainTor_exists_chars _ _ hP
-  have hun : ∀ i, IsUnram (ξ i) := fun i u hu1 => by
-    obtain ⟨g, rfl⟩ := ha.surj u
-    have h0 : deg g = 0 := by
-      have h1 := ha.ord_eq g
-      rw [ord_eq_zero_iff.2 hu1] at h1
-      omega
-    have hr : ((rc (IrrGL.of σ.ρ σ.smooth σ.irred)).charPol (ineIncl h ⟨g, deg_eq_zero_iff.1 h0⟩)).IsRoot
-        ((ξ i (a g) : ℂˣ) : ℂ) := by
-      rw [charPol_of_chars L _ ξ hξ hs]
-      refine IsRoot.dvd ?_ (Finset.dvd_prod_of_mem _ (Finset.mem_univ i))
-      simp only [eval_sub, eval_X, eval_C, IsRoot.def]
-      exact sub_self _
-    exact Units.ext (eq_one_of_root hxu _ hr)
-  choose α hα using fun i => exists_unr (hun i)
-  obtain rfl : ξ = fun i => GlobalTheory.SmGL.unrChar _ (α i) := funext hα
-  have hs' : HasSupport σ.ρ (GlobalTheory.RoadU.chars _ hξ) := hs.of_equiv (IrrGL.equivOf σ.ρ σ.smooth σ.irred).symm
-  obtain ⟨-, hq⟩ := (UpperTheory.Gal.LocD.ofSupport_holds _ n σ.V σ.ρ _ hξ).1 hs'
-  have hN : (resCard (w.adicCompletion E) : ℂ) = (Ideal.absNorm w.asIdeal : ℂ) := by
-    have := GlobalTheory.CompanionTheory.ResCardAbsNorm.resCard_completion_eq_absNorm E w
-    exact_mod_cast this
-  have hne : ∀ i j, (α i : ℂ) ≠ (Ideal.absNorm w.asIdeal : ℂ) * α j := fun i j e => by
-    have hm : ∀ l, IrrGL.ofChar (GlobalTheory.SmGL.unrChar _ (α l)) (hξ l) ∈ GlobalTheory.RoadU.chars _ hξ := fun l =>
-      Multiset.mem_map_of_mem (fun i => IrrGL.ofChar (GlobalTheory.SmGL.unrChar _ (α i)) (hξ i)) (Finset.mem_univ l)
-    refine hu _ (hm j) _ (hm i) ?_
-    simp only [IrrGL.nu, IrrGL.tw_ofChar, IrrGL.ofChar_inj]
-    exact unr_eq (by rw [hN]; exact e)
-  have hsph := UpperTheory.ConvolutionTheory.Sph.unlSph E n w σ α hne hq
-  obtain ⟨v, hv, hv0⟩ := (Submodule.ne_bot_iff _).1 hsph
-  rw [GlobalTheory.SmGL.SphCompletion.KO_completion w n] at hv
-  exact ⟨v, hv0, GlobalTheory.LGrp.mem_fixed.1 hv⟩

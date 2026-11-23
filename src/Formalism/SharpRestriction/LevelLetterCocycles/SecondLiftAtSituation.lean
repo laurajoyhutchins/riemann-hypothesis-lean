@@ -1,7 +1,56 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelMembershipPackage
-import Formalism.SharpRestriction.LevelLetterCocycles.CoboundaryMemInvariantCocycles
-import Formalism.SharpRestriction.LevelLetterCocycles.ExistsLinearLiftOfFree
-import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationQuotientFiniteDimensional
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CocyclesToWachVectorsBoundOfExtTool
+public import Formalism.SharpRestriction.LevelLetterCocycles.IsTruncIff
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.RkMultVNonneg
+public import Formalism.SharpRestriction.LevelLetterCocycles.CoboundaryMemInvariantCocycles
+public import Formalism.SharpRestriction.LevelLetterCocycles.ExistsLinearLiftOfFree
+public import Formalism.SharpRestriction.LevelLetterCocycles.FiltrationQuotientFiniteDimensional
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusDifferenceIdentity
+import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterIdempotentOfFixed
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelMembershipPackage
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.CmpOfMemX
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ExistsInIInPNPowSmulSubMap
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.Pi0PowSmulInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +70,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     {PD : PeriodData G Qp K₀ K B BdR} {LL O : Type} [Field LL] [Algebra Qp LL] [TopologicalSpace LL]
     [CommRing O] [Algebra O LL] {v : AddValuation LL (WithTop ℚ)} {n : ℕ}
 
-set_option maxHeartbeats 1000000 in
+
 theorem second_lift_at_situation [NeZero n] (W : LocWach PD LL O v n) (hZ : TTool2Z W)
     (hF : Formalism.MainNotions.CrystallineLiftingInputs.FTool W) (hB : Sh.BasTool W) (hK : Sh.LemK W) (hD : Sh.FilDim W)
     (hR : Sh.ExpRing W) (hE : Sh.ExpRules W)
@@ -314,7 +363,7 @@ theorem second_lift_at_situation [NeZero n] (W : LocWach PD LL O v n) (hZ : TToo
         (fun c' => tL c' (Submodule.inclusion hle f)) c) =
       frobeniusSquareDefectOfLiftCorrection W T₂ s₁ σ (y f) (fun c' => ms c' f) (fun c' => tL c' (Submodule.inclusion hle f)) c := by
     intro c hc f δ hδ
-    rw [cocycleY_eq_frobenius_add, ← hw, map_add, gammaD_frobenius_comm, (hfacts c hc f).2.2.2 δ hδ,
+    rw [cocycleY_eq_frobenius_add, ← hw, map_add (f := _), gammaD_frobenius_comm, (hfacts c hc f).2.2.2 δ hδ,
       (htL c hc (Submodule.inclusion hle f)).2.1.2 δ hδ]
   have hpack : ∀ f : ↥F₂, ∀ c, ∃ (xc : ↥(W.wachCocyclesDelta T₂)) (κc : G → T₂.V) (hκc : κc ∈ latticeCocycles T₂.L),
       c ∈ evens n d → (RhoCoc W T₂ c M η σ (wL c f) κc ∧
@@ -348,11 +397,12 @@ theorem second_lift_at_situation [NeZero n] (W : LocWach PD LL O v n) (hZ : TToo
       (fun c' => tL c' f₁) d) = liftCorrectionSum W T₂ s₁ σ (y f) (fun c' => ms c' f) (fun c' => tL c' f₁) d := by
     intro δ hδ
     unfold liftCorrectionSum
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun c hc => ?_
     have h1 : W.γD T₂ δ (liftCorrection W T₂ s₁ σ (y f) (fun c' => ms c' f) (fun c' => tL c' f₁) c) =
         liftCorrection W T₂ s₁ σ (y f) (fun c' => ms c' f) (fun c' => tL c' f₁) c := (hmhDL c hc f₁).2 δ hδ
-    rw [map_add, map_add, map_smul, gammaD_letter_smul, ((hyz f).2 δ hδ).1, gammaD_frobenius_comm, h1]
+    rw [map_add (f := _), map_add (f := _), map_smul, gammaD_letter_smul, ((hyz f).2 δ hδ).1, gammaD_frobenius_comm, h1]
   have hcls := Step2C.sum_clK_eq_pow_smul_clK_of_level_decomposition W T₂ M (s₁ + σ) σ (evens n d) hgam hπ F2c2
     (fun i x h1 h2 h3 => ((F2c3 i x h1 h2).1 h3)) hcob x0 _ hmE
     (fun c => frobeniusSquareDefectOfLiftCorrection W T₂ s₁ σ (y f) (fun c' => ms c' f) (fun c' => tL c' f₁) c) xc

@@ -1,5 +1,46 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.FramesTr
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.FramesTr
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.LatticeComparisonCompatible
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ValUniqOf
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.RecAct
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,15 +90,16 @@ structure CmpHyp0 (T : ∀ u : D.what₂.Word, Forms0 D u) (Gt : GatTies D) (I :
     (cmpRec T Gt I u w hg '' (((D.fm u).lat 0).L : Set ((D.fm u).lat 0).V)) = (D.gat u w hg).M
 
 theorem CmpHyp0.toHyp {T : ∀ u : D.what₂.Word, Forms0 D u} {Gt : GatTies D} {I : CmpIn D X} (H : CmpHyp0 T Gt I) :
-    CmpHyp T Gt I where
-  ex := H.ex
-  uniq := fun u w hg => valUniq_of (embT_conj D) (H.evInj u w hg) (H.ptEx u w hg)
-  pos := H.pos
-  chi := H.chi
-  li := fun u w hg => cmpC_li (e := I.embW u w hg) (embT_conj D) (H.ex u w hg)
-    (valUniq_of (embT_conj D) (H.evInj u w hg) (H.ptEx u w hg)) (H.ptAll u w hg) (embFr_inj T u)
-    ((D.fm u).lat 0).b ((D.fm u).lat 0).b.linearIndependent
-  latM := H.latM
+    CmpHyp T Gt I := by
+  exact {
+    ex := H.ex
+    uniq := fun u w hg => valUniq_of (embT_conj D) (H.evInj u w hg) (H.ptEx u w hg)
+    pos := H.pos
+    chi := H.chi
+    li := fun u w hg => cmpC_li (e := I.embW u w hg) (embT_conj D) (H.ex u w hg)
+      (valUniq_of (embT_conj D) (H.evInj u w hg) (H.ptEx u w hg)) (H.ptAll u w hg) (embFr_inj T u)
+      ((D.fm u).lat 0).b ((D.fm u).lat 0).b.linearIndependent
+    latM := H.latM }
 
 end Formalism.L2.G.Cmp
 

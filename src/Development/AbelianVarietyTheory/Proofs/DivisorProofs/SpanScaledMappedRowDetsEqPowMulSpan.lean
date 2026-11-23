@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PointShiftSt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.Dets
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.Dets
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField
 
 open Pointwise
@@ -19,7 +63,7 @@ theorem twistDet_rows {E K : Type} [Field E] [Field K] (τE : E →+* K) {p : �
 theorem pow_eq_span_prod_set {K : Type} [Field K] [NumberField K] (p : ℕ) (𝔟 : Submodule (𝓞 K) K) :
     𝔟 ^ p = Submodule.span (𝓞 K) (∏ _i ∈ (Finset.univ : Finset (Fin p)), (𝔟 : Set K)) := by
   rw [← Submodule.prod_span]
-  simp [Finset.prod_const, Finset.card_fin]
+  simp [Finset.prod_const]
 
 theorem span_twistDets_eq {E K : Type} [Field E] [NumberField E] [Field K] [NumberField K]
     (τ : 𝓞 E →+* 𝓞 K) (τE : E →+* K) (hτ : ∀ x : 𝓞 E, τE x = ((τ x : 𝓞 K) : K)) (p : ℕ)
@@ -41,7 +85,7 @@ theorem span_twistDets_eq {E K : Type} [Field E] [NumberField E] [Field K] [Numb
     refine Submodule.mul_mem_mul ?_ ?_
     · rw [hpow]
       refine Submodule.subset_span ?_
-      rw [Set.mem_finset_prod]
+      rw [Set.mem_finsetProd]
       exact ⟨β, fun {i} _ => hβ i, rfl⟩
     · exact Submodule.subset_span ⟨_, Submodule.subset_span ⟨c, hc, rfl⟩, rfl⟩
   · rw [Submodule.mul_le]
@@ -52,7 +96,7 @@ theorem span_twistDets_eq {E K : Type} [Field E] [NumberField E] [Field K] [Numb
       rw [hpow] at hm
       induction hm using Submodule.span_induction with
       | mem x hx =>
-        rw [Set.mem_finset_prod] at hx
+        rw [Set.mem_finsetProd] at hx
         obtain ⟨β, hβ, rfl⟩ := hx
         refine Submodule.subset_span ⟨fun i => β i • fun a => τE (c i a), fun i => ?_, ?_⟩
         · exact ⟨β i, hβ (Finset.mem_univ i), c i, hc i, rfl⟩
@@ -69,7 +113,7 @@ theorem span_twistDets_eq {E K : Type} [Field E] [NumberField E] [Field K] [Numb
         exact key c hc
       | zero => intro m _; simp
       | add x y _ _ hx hy =>
-        intro m hm; rw [map_add, mul_add]; exact add_mem (hx m hm) (hy m hm)
+        intro m hm; rw [map_add (f := _), mul_add]; exact add_mem (hx m hm) (hy m hm)
       | smul a x _ hx =>
         intro m hm
         rw [Algebra.smul_def, map_mul]

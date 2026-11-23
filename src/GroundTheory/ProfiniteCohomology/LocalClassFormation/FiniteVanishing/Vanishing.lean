@@ -1,13 +1,60 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.KummerOpen
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Trivial
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.FormationThree
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Subgroup
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.NotDvdSuperIndexBotOfIsProPGroup
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.CdpOpenSubgroupLe
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Closed
-import GroundTheory.ProfiniteCohomology.NotDvdSuperIndexIffMap
-import GroundTheory.ProfiniteCohomology.CartierDual
+module
+
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.KummerOpen
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Trivial
+public import GroundTheory.ProfiniteCohomology.CartierDual
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.PrimaryComponentCohomologyEqBotOfScdpLt
+public import GroundTheory.ProfiniteCohomology.IsProPGroupSubgroupIffIsPGroupMap
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.CdpOpenSubgroupLe
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.NotDvdSuperIndexBotOfIsProPGroup
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Subgroup
+import GroundTheory.ProfiniteCohomology.CohomologicalDimension.SubsingletonCohomologyOfPrimaryOfFinite
+public import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.FormationThree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Closed
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -48,7 +95,7 @@ theorem subsingleton_cohomology_three_galUnits_open (U : OpenSubgroup Gal(Ksep/K
 theorem subsingleton_cohomology_three_rootsOfUnity {n : ℕ} (hn : (n : K) ≠ 0)
     (U : OpenSubgroup Gal(Ksep/K)) :
     Subsingleton (cohomology (Rep.res (U : Subgroup Gal(Ksep/K)).subtype (galRootsOfUnity.{0} K Ksep n)) 3) :=
-  subsingleton_cohomology_three_rootsOfUnity_open K Ksep hn U
+  subsingleton_cohomology_three_rootsOfUnity_open K Ksep (V := U) hn
     (subsingleton_cohomology_three_galUnits_open K Ksep U)
 
 end Local
@@ -110,8 +157,8 @@ theorem apply_eq_of_isProPGroup {ℓ : ℕ} (hℓ : ℓ.Prime) {P : Subgroup Gal
 
 variable (K Ksep) [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K]
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 
+omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] in
 theorem nonempty_zmod_addEquiv_rootsOfUnity {ℓ : ℕ} (hℓ : ℓ.Prime) (hℓK : (ℓ : K) ≠ 0) :
     Nonempty (ZMod ℓ ≃+ Additive (rootsOfUnity ℓ Ksep)) := by
   have : Fact ℓ.Prime := ⟨hℓ⟩
@@ -168,8 +215,8 @@ theorem cdp_galois_le_two {ℓ : ℕ} (hℓ : ℓ.Prime) (hℓK : (ℓ : K) ≠ 
         rw [hfix]⟩
   have hcomp : ψ ≫ ψ' = 𝟙 _ := by
     ext x
-    change e.symm (e x.down) = x.down
-    exact e.symm_apply_apply x.down
+    simp [ψ, ψ', Rep.Hom.hom, uliftIntLinearEquivAddHom]
+    exact congrArg ULift.up (e.symm_apply_apply x.down)
   have hinj : Function.Injective (cohomologyMap ψ 3).hom := fun x y h => by
     have h' := congrArg (cohomologyMap ψ' 3).hom h
     rwa [← ModuleCat.comp_apply, ← ModuleCat.comp_apply, ← cohomologyMap_comp, hcomp,

@@ -1,5 +1,56 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.GaloisValuations.Global
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.Foundations.MatrixMeasurableSpace
+import Development.AbelianVarietyTheory.Definitions.Foundations.SmoothPartStable
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsOrbitProd
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ValuativeRel
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal
@@ -25,38 +76,8 @@ theorem mem_Dec_of_iff {F : Type} [Field F] [NumberField F] [Algebra F Ω] {A : 
 variable (s : L ≃ₐ[K] L) (g : G K Ω) (hgs : ∀ x : L, g (algebraMap L Ω x) = algebraMap L Ω (s x))
 include hgs
 
-def conjL (τ : G L Ω) : G L Ω :=
-  AlgEquiv.ofRingEquiv (f := g.toRingEquiv.trans (τ.toRingEquiv.trans g.symm.toRingEquiv)) fun x => by
-    show g.symm (τ (g (algebraMap L Ω x))) = algebraMap L Ω x
-    rw [hgs, AlgEquiv.commutes, AlgEquiv.symm_apply_eq, hgs]
-
-omit [NumberField K] [NumberField L] in
-@[simp] theorem conjL_apply (τ : G L Ω) (z : Ω) : conjL s g hgs τ z = g⁻¹ (τ (g z)) := rfl
 
 variable {A : ValuationSubring Ω}
-
-theorem conjL_mem_Weil (hgA : g ∈ Dec (F := K) A) {u : HeightOneSpectrum (𝓞 L)} (h' : IsPlaceOver A u)
-    {τ : G L Ω} (hτ : τ ∈ Weil h') : conjL s g hgs τ ∈ Weil h' := by
-  obtain ⟨a, b, hD, hab⟩ := hτ
-  have hgi : g⁻¹ ∈ Dec (F := K) A := (Dec (F := K) A).inv_mem hgA
-  refine ⟨a, b, mem_Dec_of_iff fun x => ?_, fun x hx => ?_⟩
-  · rw [conjL_apply, apply_mem_iff_of_mem_Dec hgi, apply_mem_iff_of_mem_Dec hD, apply_mem_iff_of_mem_Dec hgA]
-  · have hy : A.valuation (g x) ≤ 1 := val_apply_le_one hgA hx
-    have h1 := hab (g x) hy
-    rw [← valuation_apply_lt_one_iff hgi] at h1
-    have e : (g⁻¹ : G K Ω) ((τ (g x)) ^ (normV u ^ b) - (g x) ^ (normV u ^ a)) =
-        (conjL s g hgs τ x) ^ (normV u ^ b) - x ^ (normV u ^ a) := by
-      rw [map_sub, map_pow, map_pow, conjL_apply]
-      congr 2
-      show (g⁻¹ * g) x = x
-      rw [inv_mul_cancel]; rfl
-    rwa [e] at h1
-
-def conjW (hgA : g ∈ Dec (F := K) A) {u : HeightOneSpectrum (𝓞 L)} (h' : IsPlaceOver A u) (τ : Weil h') : Weil h' :=
-  ⟨conjL s g hgs τ, conjL_mem_Weil s g hgs hgA h' τ.2⟩
-
-@[simp] theorem coe_conjW (hgA : g ∈ Dec (F := K) A) {u : HeightOneSpectrum (𝓞 L)} (h' : IsPlaceOver A u) (τ : Weil h')
-    (z : Ω) : (conjW s g hgs hgA h' τ : G L Ω) z = g⁻¹ ((τ : G L Ω) (g z)) := rfl
 
 omit hgs
 

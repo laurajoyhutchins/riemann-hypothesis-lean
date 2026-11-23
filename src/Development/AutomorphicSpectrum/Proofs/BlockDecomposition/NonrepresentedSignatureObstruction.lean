@@ -1,16 +1,64 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBlockNFZeroOne
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableOfMulUnimodular
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsWeilFormulas
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CongrOfSignatureOfAdelicNorm
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsBlockNFZeroOne
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IntegrableOfMulUnimodular
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.WeilSiegelTheta.BigCellDefs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DenseRangeRealEmbeddings
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemMultTOfEquivariant
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CongrOfSignatureOfAdelicNorm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsAuxiliaryHyperbolicVectors
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasSignatureFromBlocks
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsAuxiliaryHyperbolicVectors
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SignCompatibleNumberingOfWittTowerLower
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemMultTOfEquivariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DenseRangeRealEmbeddings
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SignCompatibleNumberingOfWittTowerLower
 import Development.AbelianVarietyTheory.PublishedTheorems.AdelicLattices₂.AlgebraMapNormOfBasisOneSqrt
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.InfFam
-import Formalism.LocalToGlobal.NumberFieldFamilies.ThetaCS
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.MixModel GlobalTheory.StdUnn PositivityTheory.GramSchwartzFunctions PositivityTheory.GramSchwartzFunctions.BC
@@ -153,7 +201,7 @@ theorem eq_or_conj_of_restrict {F E : Type} [Field F] [NumberField F] [Field E] 
   · left
     ext x
     obtain ⟨u, v, hu, hv, rfl⟩ := hdec x
-    simp only [map_add, map_mul, hfix u hu, hfix v hv, sub_eq_zero.1 h3]
+    simp only [map_add (f := _), map_mul, hfix u hu, hfix v hv, sub_eq_zero.1 h3]
   · right
     have hθ' : τ' θ = starRingEnd ℂ (τ θ) := by
       rw [← hst, hθ, map_neg]
@@ -161,7 +209,7 @@ theorem eq_or_conj_of_restrict {F E : Type} [Field F] [NumberField F] [Field E] 
     have hc : ∀ w : E, star w = w → starRingEnd ℂ (τ w) = τ w := fun w hw => by rw [← hst, hw]
     ext x
     obtain ⟨u, v, hu, hv, rfl⟩ := hdec x
-    simp only [RingHom.comp_apply, map_add, map_mul, hfix u hu, hfix v hv, hc u hu, hc v hv, hθ']
+    simp only [RingHom.comp_apply, map_add (f := _), map_mul, hfix u hu, hfix v hv, hc u hu, hc v hv, hθ']
 
 theorem frame_of_congr {E : Type} [Field E] [StarRing E] {m t k n : ℕ} (G P : Matrix (Fin m) (Fin m) E)
     (hP : P.det ≠ 0) (e : Fin m ≃ Fin t ⊕ ((Fin k ⊕ Fin k) ⊕ Fin n)) (B : Matrix (Fin t) (Fin t) E)
@@ -504,8 +552,8 @@ theorem exists_frame_of_sig {F E : Type} [Field F] [NumberField F] [Field E] [Nu
 
 end GlobalTheory.CompanionTheory.WeilSiegel.NoFrame.Hasse
 
-open GlobalTheory.CompanionTheory.WeilSiegel.NoFrame GlobalTheory.CompanionTheory.WeilSiegel.NoFrame.Hasse in
 
+open GlobalTheory.CompanionTheory.WeilSiegel.NoFrame GlobalTheory.CompanionTheory.WeilSiegel.NoFrame.Hasse in
 theorem GlobalTheory.CompanionTheory.WeilSiegel.NoFrame.exists_obstruction : ∀ (D : D7) (r : ℕ) (V : HSp D), 2 * r < V.rank → ∀ (t : ℕ) (β : HermE D r), GlobalTheory.CompanionTheory.WeilSiegel.Deg.IsBlockNF t β → (¬ ∃ x : Matrix (Fin V.rank) (Fin r) D.host.E, x.rank = r ∧ gramQ V x = β.1) → ∃ (ρ : D.what₂.Tau) (ε : ℝ) (S : Submodule ℂ (Fin r → ℂ)), (ε = 1 ∨ ε = -1) ∧ GlobalTheory.CompanionTheory.WeilSiegel.NoFrame.NonnegOn ε (β.1.map (tauE D ρ)) S ∧ ∀ T : Submodule ℂ (Fin V.rank → ℂ), GlobalTheory.CompanionTheory.WeilSiegel.NoFrame.PosOn ε (gramAt D V ρ) T → Module.finrank ℂ T < Module.finrank ℂ S := by
   intro D r V h2r t β hNF hno
   by_contra hcon

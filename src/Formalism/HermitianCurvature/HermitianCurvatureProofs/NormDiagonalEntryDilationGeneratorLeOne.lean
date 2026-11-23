@@ -1,10 +1,72 @@
-import Formalism.HermitianCurvature.StatementB
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralZeroFrequencyInvariant
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointnessPolynomiallyBounded
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
+module
+
+public import Formalism.HermitianCurvature.StatementB
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnitaryEquivHolds
 import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.BesselUnitaryEquivHolds
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AdjointnessPolynomiallyBounded
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralZeroFrequencyInvariant
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Order.Group.Lattice
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.Calculus.ParametricIntegral
+public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ComplexConjugate ENNReal
@@ -160,7 +222,6 @@ theorem exp_dilation_generator_eq_aDil (k r : ℕ) (s : ℝ) :
   congr 1
   funext i
   rw [Pi.coe_exp, Pi.smul_apply, smul_eq_mul, ← Complex.exp_eq_exp_ℂ]
-  have hr : (rr r) ≠ 0 := (rr_pos r).ne'
   unfold dilationGeneratorDiagonal
   split_ifs with h1 h2
   · rw [← Real.exp_nat_mul, ← Complex.ofReal_mul, ← Complex.ofReal_exp]
@@ -185,13 +246,6 @@ theorem exp_neg_dilation_generator_eq_aDil (k r : ℕ) (s : ℝ) :
 
 theorem exp_neg_mem (k r : ℕ) (s : ℝ) : NormedSpace.exp (-((s : ℂ) • X0 k r)) ∈ GV k r := by
   rw [exp_neg_dilation_generator_eq_aDil]; exact aDil_mem k r (Real.exp_pos _)
-
-theorem aDil_one (k r : ℕ) : aDil k r 1 = 1 := by
-  unfold aDil
-  rw [← Matrix.diagonal_one]
-  congr 1
-  funext i
-  split_ifs <;> simp
 
 theorem aDil_mul_eq_mul_aDil (k r : ℕ) (t t' : ℝ) : aDil k r (t * t') = aDil k r t * aDil k r t' := by
   unfold aDil
@@ -533,15 +587,6 @@ theorem dilationAction_continuousOn (k r : ℕ) :
   · exact continuousOn_conj_by_dilation k r (fun q => q.1.2.2) (continuous_snd.comp (continuous_snd.comp continuous_fst))
       (fun q => q.2.2) (continuous_snd.comp continuous_snd) (fun q hq => hq.2.2)
 
-theorem dilationAction_one (p : SS k r) : dilation₂ (1, 1) p = p := by
-  have h : ∀ x : Mt k r, conjM (aDil k r 1) x = x := by
-    intro x
-    unfold conjM
-    rw [aDil_one, inv_one, Matrix.one_mul, Matrix.mul_one]
-    rfl
-  unfold dilation₂
-  simp only [h]
-
 theorem inSS_mem (D : RealPlaceData k r Wp Wq) {p : SS k r} (hp : D.inSS p) :
     (Matrix.of p.1.2 * Matrix.of p.1.1 : Mat k r) ∈ GV k r ∧ (Matrix.of p.2.2 * Matrix.of p.2.1 : Mat k r) ∈ GV k r :=
   ⟨WeylGroupFacts.uh_mul (Nset_sub k r hp.2.1) (UWset_sub k r _ hp.1),
@@ -560,7 +605,6 @@ theorem sgs_dil (hU : DilUW) (D : RealPlaceData k r Wp Wq) {p : SS k r} (hp : D.
   have ua := WeylGroupFacts.isUnit_of_uh (aDil_mem k r hx)
   have ub := WeylGroupFacts.isUnit_of_uh (aDil_mem k r hy)
   have uh := WeylGroupFacts.isUnit_of_uh (UWset_sub k r _ hp.1)
-  have uh' := WeylGroupFacts.isUnit_of_uh (UWset_sub k r _ hp.2.2.1)
   have k1 : aDil k r x * (Matrix.of h : Mat k r) = Matrix.of h * aDil k r x := hU k r D.z x _ hp.1
   have k2 : aDil k r y * (Matrix.of h' : Mat k r) = Matrix.of h' * aDil k r y := hU k r D.z' y _ hp.2.2.1
   have c1 : (Matrix.of h : Mat k r)⁻¹ * aDil k r x = aDil k r x * (Matrix.of h : Mat k r)⁻¹ := by
@@ -1078,7 +1122,6 @@ theorem norm_hilbertSchmidt_rho_pointwise_le (H : Hyp D Ξ α) {A B : Mat k r �
       (Module.finrank ℂ Wq : ℝ) * (cA * M ^ α * cB) * (gN g ^ (-α) * gN g ^ (-α)) := by
   have hxy := inSS_mem D hp
   have hcA := admissible_constant_nonneg hA
-  have hcB := admissible_constant_nonneg hB
   have h1 := admissible_norm_bound (admissible_two_sided_translate H.α_nonneg hA (WeylGroupFacts.uh_inv hxy.1) hxy.2) hg
   rw [Matrix.nonsing_inv_nonsing_inv _ (WeylGroupFacts.isUnit_of_uh hxy.1)] at h1
   have h2 := admissible_norm_bound hB hg
@@ -1918,7 +1961,6 @@ theorem lorentzian_weight_bound {τ : ℝ} (h : 0 < τ) (l : ℝ) :
   have hl : l ^ 2 = |l| ^ 2 := (sq_abs l).symm
   rw [hl]
   set a := |l| with ha
-  have ha0 : 0 ≤ a := abs_nonneg l
   set M := max 1 (τ ^ 2)⁻¹
   have : (1 + τ ^ 2 * a ^ 2) * (2 * M) = 2 * M + 2 * (M * τ ^ 2) * a ^ 2 := by ring
   rw [this]
@@ -1940,8 +1982,8 @@ theorem wt_continuous (D : RealPlaceData k r Wp Wq) : Continuous (fun x : (ℝ �
     (lam_continuous k r D.z).comp (continuous_snd.comp (continuous_fst.comp continuous_snd))
   have c2 : Continuous (fun x : (ℝ × ℝ) × SS k r => lam k r D.z' (Matrix.of x.2.2.2)) :=
     (lam_continuous k r D.z').comp (continuous_snd.comp (continuous_snd.comp continuous_snd))
-  refine Continuous.mul (Continuous.inv₀ (by fun_prop) (fun x => by positivity))
-    (Continuous.inv₀ (by fun_prop) (fun x => by positivity))
+  refine Continuous.fun_mul (Continuous.fun_inv₀ (by fun_prop) (fun x => by positivity))
+    (Continuous.fun_inv₀ (by fun_prop) (fun x => by positivity))
 
 theorem phase_continuous (D : RealPlaceData k r Wp Wq) :
     Continuous (fun x : ((ℝ × ℝ) × SS k r) × (ℝ × ℝ) => phase D x.1.1 x.1.2 x.2) := by
@@ -2164,7 +2206,6 @@ theorem Ef_bound (H : Hyp D Ξ α) : ∃ K : ℝ, 0 ≤ K ∧ ∀ (F F' : Mat k 
   have hc := admissible_constant_nonneg (admissible_of_weighted hF)
   have hc' := admissible_constant_nonneg (admissible_of_weighted hF')
   have hX := XX_nonneg Ξ p
-  have nn : 0 ≤ K * c * c' * XX Ξ p := by positivity
   by_cases ht : t ∈ Set.Ioo (1 / 2 : ℝ) 2 ×ˢ Set.Ioo (1 / 2 : ℝ) 2
   · unfold Ef
     have term : ∀ m ∈ Finset.range 3, ∀ l ∈ Finset.range 3,
@@ -2202,7 +2243,7 @@ theorem Et_eq (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] Wp
   unfold Et
   by_cases ht : t ∈ Quad
   · rw [Set.indicator_of_mem (show (p, t) ∈ {p | D.inSS p} ×ˢ Quad from ⟨hp, ht⟩)]
-  · rw [Set.indicator_of_notMem (fun h => ht h.2)]
+  · rw [Set.indicator_of_notMem (by exact fun h => ht h.2)]
     exact (Ef_zero D F F' p (fun h => ht (box_subset_quadrant h))).symm
 
 theorem Et_zero (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] Wp)) (p : SS k r) {t : ℝ × ℝ}
@@ -2213,7 +2254,7 @@ theorem Et_zero (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] 
   · exact Set.indicator_of_notMem h _
 
 theorem Et_zero' (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] Wp)) {p : SS k r} (hp : ¬ D.inSS p)
-    (t : ℝ × ℝ) : Et D F F' (p, t) = 0 := Set.indicator_of_notMem (fun h => hp h.1) _
+    (t : ℝ × ℝ) : Et D F F' (p, t) = 0 := Set.indicator_of_notMem (by exact fun h => hp h.1) _
 
 theorem stronglyMeasurable_indicator_of_continuousOn' {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurableSpace X]
     {s : Set X} (hs : MeasurableSet s) {f : X → ℂ} (hf : ContinuousOn f s) :
@@ -2308,7 +2349,7 @@ theorem Bt_eq (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] Wp
   unfold Bt
   by_cases ht : t ∈ Quad
   · rw [Set.indicator_of_mem (show (p, t) ∈ {p | D.inSS p} ×ˢ Quad from ⟨hp, ht⟩)]
-  · rw [Set.indicator_of_notMem (fun h => ht h.2)]
+  · rw [Set.indicator_of_notMem (by exact fun h => ht h.2)]
     exact (regularized_bracket_zero_off_box D F F' p (fun h => ht (box_subset_quadrant h))).symm
 
 theorem Bt_zero (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] Wp)) (p : SS k r) {t : ℝ × ℝ}
@@ -2319,7 +2360,7 @@ theorem Bt_zero (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] 
   · exact Set.indicator_of_notMem h _
 
 theorem Bt_zero' (D : RealPlaceData k r Wp Wq) (F F' : Mat k r → (Wq →L[ℂ] Wp)) {p : SS k r} (hp : ¬ D.inSS p)
-    (t : ℝ × ℝ) : Bt D F F' (p, t) = 0 := Set.indicator_of_notMem (fun h => hp h.1) _
+    (t : ℝ × ℝ) : Bt D F F' (p, t) = 0 := Set.indicator_of_notMem (by exact fun h => hp h.1) _
 
 theorem Bt_measurable (H : Hyp D Ξ α) {F F' : Mat k r → (Wq →L[ℂ] Wp)} {c c' : ℝ} (hF : AdmW α c 2 2 F)
     (hF' : AdmW α c' 2 2 F') : StronglyMeasurable (Bt D F F') := by
@@ -2358,7 +2399,6 @@ theorem Bt_bound (H : Hyp D Ξ α) : ∃ K : ℝ, 0 ≤ K ∧ ∀ (F F' : Mat k 
   have hc := admissible_constant_nonneg (admissible_of_weighted hF)
   have hc' := admissible_constant_nonneg (admissible_of_weighted hF')
   have hX := XX_nonneg Ξ p
-  have nn : 0 ≤ K * c * c' * XX Ξ p := by positivity
   by_cases hp : D.inSS p
   · by_cases ht : t ∈ Set.Ioo (1 / 2 : ℝ) 2 ×ˢ Set.Ioo (1 / 2 : ℝ) 2
     · rw [Bt_eq D F F' hp, regBracket_eq, norm_mul, Complex.norm_real, norm_mul]
@@ -2634,7 +2674,7 @@ theorem phase_function_add_left (H : Hyp D Ξ α) {A₁ A₂ B : Mat k r → (Wq
   rw [← integral_add (ph_integrable H h₁ hB hq) (ph_integrable H h₂ hB hq)]
   congr 1
   funext g
-  rw [rho_eq, rho_eq, rho_eq, Pi.add_apply, map_add, hsInner_add_left]
+  rw [rho_eq, rho_eq, rho_eq, Pi.add_apply, map_add (f := _), hsInner_add_left]
 
 theorem phase_function_add_right (H : Hyp D Ξ α) {A B₁ B₂ : Mat k r → (Wq →L[ℂ] Wp)} {cA c₁ c₂ : ℝ} (hA : admitted α cA A)
     (h₁ : admitted α c₁ B₁) (h₂ : admitted α c₂ B₂) {q : SS k r} (hq : D.inSS q) :
@@ -2750,7 +2790,7 @@ theorem exists_bound_isTest_support {w : ℝ → ℝ} (h : IsTest w) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ τ, w τ ≠ 0 → 0 < τ ∧ max 1 (τ ^ 2)⁻¹ ≤ M := by
   obtain ⟨_, hc, hs⟩ := h
   have hcont : ContinuousOn (fun τ : ℝ => (τ ^ 2)⁻¹) (tsupport w) := by
-    apply ContinuousOn.inv₀ (by fun_prop)
+    apply ContinuousOn.fun_inv₀ (by fun_prop)
     intro τ hτ
     have : 0 < τ := hs hτ
     positivity
@@ -2940,7 +2980,6 @@ theorem scaled_decay_weight_bound {t : ℝ} (ht : 1 / 2 ≤ t) (x : ℝ) :
   have h1 : |t * x| = t * |x| := by rw [abs_mul, abs_of_nonneg (by linarith)]
   rw [h1, ← div_eq_mul_inv, inv_eq_one_div, div_le_div_iff₀ (by positivity) (by positivity)]
   have h2 : 1 + |x| ≤ 2 * (1 + t * |x|) := by nlinarith
-  have h3 : 0 ≤ 1 + |x| := by positivity
   nlinarith
 
 end avg2pre
@@ -3013,8 +3052,6 @@ theorem fourier_weighted_phase_integrable (H : Hyp D Ξ α) {F F' : Mat k r → 
   obtain ⟨C₁, hC₁, d₁⟩ := fourier_transform_quadratic_decay h₁
   obtain ⟨C₂, hC₂, d₂⟩ := fourier_transform_quadratic_decay h₂
   obtain ⟨K, hK, hb⟩ := ph_bound H
-  have hc := admissible_constant_nonneg hF
-  have hc' := admissible_constant_nonneg hF'
   refine Integrable.mono' ((xi_integrable H).const_mul (C₁ * C₂ * (K * c * c'))) (aestronglyMeasurable_dilation_pair_integrand H hF hF' h₁ h₂) ?_
   filter_upwards [ae_inSS D] with p hp
   unfold fourierWeightedPhase
@@ -3023,7 +3060,6 @@ theorem fourier_weighted_phase_integrable (H : Hyp D Ξ α) {F F' : Mat k r → 
   have e2 := d₂ (-lam k r D.z' (Matrix.of p.2.2))
   rw [abs_neg] at e2
   have e3 := hb F F' c c' hF hF' p hp
-  have hX := XX_nonneg Ξ p
   calc ‖om w₁ (lam k r D.z (Matrix.of p.1.2))‖ * ‖om w₂ (-lam k r D.z' (Matrix.of p.2.2))‖ * ‖Ph D F F' p‖
       ≤ (C₁ * (1 + |lam k r D.z (Matrix.of p.1.2)|) ^ (-2 : ℝ)) *
           (C₂ * (1 + |lam k r D.z' (Matrix.of p.2.2)|) ^ (-2 : ℝ)) * (K * c * c' * XX Ξ p) := by
@@ -3203,13 +3239,9 @@ theorem top_beta_zero [Subsingleton (Wq →L[ℂ] Wp)] (D : RealPlaceData k r Wp
   simp [hb, ho]
 
 theorem top_hyp (hN : DilN) (hU : DilUW) [Nontrivial (Wq →L[ℂ] Wp)] {D : RealPlaceData k r Wp Wq}
-    {Ξ : Mat k r → NNReal} {A : ℝ} (hA : AB k r ≤ A) (h1 : CoefBound D Ξ A) (h2 : XiInt D Ξ 2) : Hyp D Ξ A where
-  α_nonneg := le_trans (B2.AB_nonneg k r) hA
-  coef := h1
-  xi := h2
-  T0 := exists_norm_eq (Wq →L[ℂ] Wp) zero_le_one
-  dilN := hN
-  dilUW := hU
+    {Ξ : Mat k r → NNReal} {A : ℝ} (hA : AB k r ≤ A) (h1 : CoefBound D Ξ A) (h2 : XiInt D Ξ 2) : Hyp D Ξ A := by
+  exact ⟨le_trans (B2.AB_nonneg k r) hA, h1, h2,
+    exists_norm_eq (Wq →L[ℂ] Wp) zero_le_one, hN, hU⟩
 
 theorem top_regBound (hN : DilN) (hU : DilUW) : StepRegBound := by
   intro k r Wp Wq _ _ _ _ _ _ D Ξ A hA h1 h2

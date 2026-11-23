@@ -1,6 +1,65 @@
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.BesselOrbitConvolutions.BesselNonvanishingReduction
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OoConvOf
-import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.BesselOrbitConvolutions.PhiReg
+module
+
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.BesselOrbitConvolutions.BesselNonvanishingReduction
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.BesselOrbitConvolutions.PhiReg
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ContinuousMulMt
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.GNMulRpow
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.InnerBound
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.L1QuotientIntegralBound
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MapInvMEq
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OoConvOf
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbConvDDOfDecDD
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TripleIntegrandMeasurable
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UhMeasurableSet
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.UhMemMeasurableSet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+set_option backward.isDefEq.respectTransparency false
+
+@[expose] public section
 
 noncomputable section
 open MeasureTheory Matrix
@@ -13,7 +72,7 @@ variable {k r : ℕ}
 
 namespace G
 
-set_option maxHeartbeats 1000000 in
+
 theorem ooConv_of (hSch : SchurH) (hNIs : CompanionTheory.D.Upq.BesselFunctionalConstruction.NormIdSm) (hNI : NormInv) (hGG : GrowthG) (hDD : CompanionTheory.D.Upq.BesselFunctionalConstruction.DecDD)
     (hBC : CompanionTheory.D.Upq.BesselFunctionalConstruction.BeConv) : CompanionTheory.D.Upq.BesselFunctionalConstruction.OOConv := by
   intro hIn k r Wp Wq _ _ _ _ _ _ _ _ D ε lam h H _ _ _ σ w0 u u' νq νq' hS1 hS2 l l' hbe hbe' γ hγ
@@ -39,9 +98,9 @@ theorem ooConv_of (hSch : SchurH) (hNIs : CompanionTheory.D.Upq.BesselFunctional
   have hop : ContinuousOn (fun g : Mx k r => (innerSL ℂ (l' (σ (γ⁻¹ * g) w0))).smulRight (l (σ g w0)))
       (Formalism.QuantumDeterminants.UH (Formalism.QuantumDeterminants.Hpk k r)) := by
     have ha : ContinuousOn (fun g : Mx k r =>
-        ContinuousLinearMap.smulRightL ℂ Wq Wp (innerSL ℂ (l' (σ (γ⁻¹ * g) w0))))
+        StrongDual.smulRightL ℂ Wq Wp (innerSL ℂ (l' (σ (γ⁻¹ * g) w0))))
         (Formalism.QuantumDeterminants.UH (Formalism.QuantumDeterminants.Hpk k r)) :=
-      (ContinuousLinearMap.smulRightL ℂ Wq Wp).continuous.comp_continuousOn
+      (StrongDual.smulRightL ℂ Wq Wp).continuous.comp_continuousOn
         ((innerSL ℂ).continuous.comp_continuousOn cont2')
     exact (ha.clm_apply hP1.1).congr fun g _ => rfl
   have hmeas : AEStronglyMeasurable (fun x : Formalism.QuantumDeterminants.Mt k r =>

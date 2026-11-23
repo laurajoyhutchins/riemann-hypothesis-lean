@@ -1,7 +1,46 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TrDefs
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatImage
-import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.UnitsTrace
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.TrDefs
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.MatImage
+public import Development.AutomorphicArithmetic.Foundations.Convolution.IntegrableConvolution.UnitsTrace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 private theorem factor_alg {A B C : Type} [Ring A] [Ring B] [Ring C] [Algebra ℂ A] [Algebra ℂ B] [Algebra ℂ C]
     (p : A →ₐ[ℂ] B) (hp : Function.Surjective p) (g : A →ₐ[ℂ] C) (h : ∀ a, p a = 0 → g a = 0) :
@@ -32,7 +71,7 @@ private theorem comm_lift {X E : Type} [Ring E] [Algebra ℂ E] (T : X → E) (S
   | grade0 r => rw [AlgHom.commutes]; exact (Algebra.commutes r S).symm
   | grade1 x => rw [FreeAlgebra.lift_ι_apply]; exact h x
   | mul a b ha hb => rw [map_mul]; exact ha.mul_right hb
-  | add a b ha hb => rw [map_add]; exact ha.add_right hb
+  | add a b ha hb => rw [map_add (f := _)]; exact ha.add_right hb
 
 theorem UpperTheory.ConvolutionTheory.L1.algTrace :
     UpperTheory.ConvolutionTheory.L1.AlgTrace := by
@@ -55,7 +94,7 @@ theorem UpperTheory.ConvolutionTheory.L1.algTrace :
     | grade0 r => intro w; simp [Algebra.algebraMap_eq_smul_one]
     | grade1 x => intro w; rw [hρι, hρι, hU]
     | mul a b ha hb => intro w; simp only [map_mul, Module.End.mul_apply, ha, hb]
-    | add a b ha hb => intro w; simp only [map_add, LinearMap.add_apply, ha, hb]
+    | add a b ha hb => intro w; simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
   have hker : ∀ a, ρ 0 a = 0 → ∀ i, ρ i a = 0 := by
     intro a ha i
     induction i using Fin.induction with

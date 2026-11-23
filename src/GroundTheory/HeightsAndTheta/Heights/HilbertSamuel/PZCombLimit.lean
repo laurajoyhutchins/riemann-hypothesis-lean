@@ -1,10 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsZCombLimit
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsHilbert
-import GroundTheory.HeightsAndTheta.Heights.Intersections.PThmAExpand
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PGenericFibreDim
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRat
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsZCombLimit
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsHilbert
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.PThmAExpand
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PGenericFibreDim
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.IsMultiHomogIdealIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.IntToRat
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.Intersections.Statements
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -108,11 +157,13 @@ theorem eq_famExt_of_position (Q : HermLine ι → Prop) (e : Fin 2 → HermLine
       congrArg (Function.update (fun j => if j ∈ T then w else (Pi.single (t j) 1 : Fin 2 → ℝ)) a) hw,
       MultilinearMap.map_update_add, MultilinearMap.map_update_smul, MultilinearMap.map_update_smul, hV0, hV1,
       smul_eq_mul, smul_eq_mul]
+    rfl
 
 theorem famExt_const_smul (e : Fin 2 → HermLine ι) (c : ℝ) (w : Fin 2 → ℝ) :
     famExt J P n e (fun _ => c • w) = c ^ n * famExt J P n e (fun _ => w) := by
   rw [show (fun _ : Fin n => c • w) = fun i => (fun _ : Fin n => c) i • (fun _ : Fin n => w) i from rfl,
     MultilinearMap.map_smul_univ, smul_eq_mul, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+  rfl
 
 theorem exists_delta (e : Fin 2 → HermLine ι) (k : ℕ) (ε : ℝ) (hε : 0 < ε) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ t : ℝ, |t| < δ →
@@ -159,8 +210,8 @@ theorem famExt_div (e : Fin 2 → HermLine ι) (k p q : ℕ) (hq : 0 < q) :
 
 end ZCombLimit
 
-open GroundTheory.Heights₂.Heights.NumbersDVR in
 
+open GroundTheory.Heights₂.Heights.NumbersDVR in
 theorem ZCombLimit.genericFibre {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} [∀ k, Fintype (ι k)]
     {P : Ideal (ReciprocityTheory.ChartRestriction.G.Geo.MRing ι)} {d : ℕ} (hP : IsArithVar P (d + 1)) :
     GroundTheory.Heights₂.Heights.NumbersDVR.IsMultiProjPrime (P.map (MvPolynomial.map (Int.castRingHom ℚ))) ∧

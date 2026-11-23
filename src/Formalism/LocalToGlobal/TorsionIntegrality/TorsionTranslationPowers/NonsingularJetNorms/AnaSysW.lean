@@ -1,5 +1,75 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementW
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.ShiftPtsInt
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementW
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorWp
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementC
+public import Mathlib.Analysis.Normed.Field.Instances
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.Bridge
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.PDeriv
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.Taylor
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.AnalyticIdentityTheorems.TaylorSigma
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EllipticOnePole
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.MulStableIntegral
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.QuasiPeriodConstUnique
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SigmaLogDeriv2
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.BaseChangeCompatible
+public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.LogSigmaOnePullbackSpec
+import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.LogarithmicSubstitution.OneAddMulDerivLogSubst
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.AnaSys
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.ExistsFinitePartOneIdeleSplitCongruenceQuotient
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.BridgeTwoMore
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.ChordEquation
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.FlowTwoTorsionWp
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -32,8 +102,6 @@ theorem lg_ne : A.logSer W ≠ 0 := by
 theorem lgS : HasSubst (A.logSer W) := by
   first
   | exact HasSubst.of_constantCoeff_zero' (lg0 (W := W))
-  | exact PowerSeries.HasSubst.of_constantCoeff_zero' (lg0 (W := W))
-  | exact PowerSeries.HasSubst.of_constantCoeff_zero (lg0 (W := W))
 
 theorem inW_mul {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (hg : AnalyticAt ℂ g 0) :
     inW l ι W (fun z => f z * g z) = inW l ι W f * inW l ι W g := by
@@ -42,20 +110,16 @@ theorem inW_mul {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (hg : AnalyticAt �
   rw [h, map_mul]
   first
   | exact PowerSeries.subst_mul (lgS (W := W)) _ _
-  | exact PowerSeries.subst_mul (ha := lgS (W := W)) _ _
   | (rw [← PowerSeries.coe_substAlgHom (lgS (W := W))]; exact map_mul _ _ _)
-  | simp [PowerSeries.subst_mul, lgS]
 
 theorem inW_add {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (hg : AnalyticAt ℂ g 0) :
     inW l ι W (fun z => f z + g z) = inW l ι W f + inW l ι W g := by
   have h := (F.taylorRing.1 f g hf hg).1
   unfold inW
-  rw [h, map_add]
+  rw [h, map_add (f := _)]
   first
   | exact PowerSeries.subst_add (lgS (W := W)) _ _
-  | exact PowerSeries.subst_add (ha := lgS (W := W)) _ _
   | (rw [← PowerSeries.coe_substAlgHom (lgS (W := W))]; exact map_add _ _ _)
-  | simp [PowerSeries.subst_add, lgS]
 
 theorem inW_const (c : ℂ) : inW l ι W (fun _ => c) = C (ι c) := by
   unfold inW
@@ -64,15 +128,12 @@ theorem inW_const (c : ℂ) : inW l ι W (fun _ => c) = C (ι c) := by
   | exact PowerSeries.subst_C (lgS (W := W)) _
   | exact PowerSeries.subst_C (ha := lgS (W := W)) _
   | (rw [← PowerSeries.coe_substAlgHom (lgS (W := W))]; exact (PowerSeries.substAlgHom _).commutes _)
-  | simp [PowerSeries.subst_C, lgS]
 
 theorem inW_id : inW l ι W (fun z => z) = A.logSer W := by
   unfold inW
   rw [F.taylorRing.2.2.1, PowerSeries.map_X]
   first
   | exact PowerSeries.subst_X (lgS (W := W))
-  | exact PowerSeries.subst_X (ha := lgS (W := W))
-  | simp [PowerSeries.subst_X, lgS]
 
 theorem inW_congr {f g : ℂ → ℂ} (h : f =ᶠ[nhds 0] g) : inW l ι W f = inW l ι W g := by
   unfold inW
@@ -88,15 +149,12 @@ theorem cc_inW (f : ℂ → ℂ) : constantCoeff (inW l ι W f) = ι (f 0) := by
   have hX : PowerSeries.subst (A.logSer W) (X : PowerSeries ℂ_[l]) = A.logSer W := by
     first
     | exact PowerSeries.subst_X ha
-    | exact PowerSeries.subst_X (ha := ha)
-    | simp [PowerSeries.subst_X, ha]
   have hC : ∀ c : ℂ_[l], PowerSeries.subst (A.logSer W) (C c : PowerSeries ℂ_[l]) = C c := by
     intro c
     first
     | exact PowerSeries.subst_C ha c
     | exact PowerSeries.subst_C (ha := ha) c
     | (rw [← PowerSeries.coe_substAlgHom ha]; exact (PowerSeries.substAlgHom ha).commutes c)
-    | simp [PowerSeries.subst_C, ha]
   rw [PowerSeries.eq_shift_mul_X_add_const (PowerSeries.map (ι : ℂ →+* ℂ_[l]) (F.taylor0 f)),
     ← PowerSeries.coe_substAlgHom ha, map_add, map_mul, PowerSeries.coe_substAlgHom, hX, hC]
   simp [h0, hS]
@@ -133,7 +191,6 @@ theorem Rd.opU (x : ℂ) :
   refine ⟨?_, rfl⟩
   first
   | exact hd.analyticAt 0
-  | exact Differentiable.analyticAt hd 0
 
 theorem cc_phW : constantCoeff (phW l L ι W) = 0 := by
   unfold phW
@@ -221,12 +278,9 @@ theorem nonsing (hU : Unif l L ι W) (t : ℂ) (ht : t ∉ L.lattice) :
   have hn : (curveL l L ι).toAffine.Nonsingular (ι (L.weierstrassP t)) (ι (L.derivWeierstrassP t) / 2) := by
     first
     | exact AnaSys.nonsing (l := l) (L := L) (ι := ι) t ht
-    | exact AddThm.nonsing (l := l) (L := L) (ι := ι) t ht
   have he : (curveL l L ι).toAffine.Equation (ι (L.weierstrassP t)) (ι (L.derivWeierstrassP t) / 2) := by
     first
     | exact hn.1
-    | exact hn.left
-    | exact (WeierstrassCurve.Affine.nonsingular_iff' _ _).1 hn |>.1
   rw [WeierstrassCurve.Affine.equation_iff] at he
   simp only [curveL, A.shortW] at he
   have heq : W.toAffine.Equation (xc l L ι W t) (yc l L ι W t) := by
@@ -330,7 +384,6 @@ theorem T_xf (ht : t ∉ L.lattice) : T (xf L V t) (F.taylor0 (xf L V t)) := by
     first
     | exact (AnaSys.T_wp ht).1
     | exact (AnaSys.T_wp (L := L) (t := t) ht).1
-    | exact (AnaSys.T_wp L t ht).1
   exact h.add analyticAt_const
 
 theorem T_yf (ht : t ∉ L.lattice) : T (yf L V t) (F.taylor0 (yf L V t)) := by
@@ -339,7 +392,6 @@ theorem T_yf (ht : t ∉ L.lattice) : T (yf L V t) (F.taylor0 (yf L V t)) := by
     first
     | exact (AnaSys.T_dwp ht).1
     | exact (AnaSys.T_dwp (L := L) (t := t) ht).1
-    | exact (AnaSys.T_dwp L t ht).1
   have hx := (T_xf L V t ht).1
   exact analyticAt_const.mul (h.add ((analyticAt_const.mul hx).add analyticAt_const))
 
@@ -348,7 +400,6 @@ theorem hasDeriv_xf (z : ℂ) (hz : z + t ∉ L.lattice) :
   have h := F.PDeriv.hasDerivAt_P L hz
   first
   | exact (h.comp_add_const z t).add_const _
-  | exact (HasDerivAt.comp_add_const z t h).add_const _
 
 theorem hasDeriv_yf (z : ℂ) (hz : z + t ∉ L.lattice) :
     HasDerivAt (yf L V t) ((1 / 2) * ((6 * L.weierstrassP (z + t) ^ 2 - L.g₂ / 2) +
@@ -356,14 +407,14 @@ theorem hasDeriv_yf (z : ℂ) (hz : z + t ∉ L.lattice) :
   have h2 : HasDerivAt (fun w => L.derivWeierstrassP (w + t)) (6 * L.weierstrassP (z + t) ^ 2 - L.g₂ / 2) z := by
     first
     | exact (F.pSecond L (z + t) hz).comp_add_const z t
-    | exact HasDerivAt.comp_add_const z t (F.pSecond L (z + t) hz)
   have hx := hasDeriv_xf L V t z hz
   exact (h2.add ((hx.const_mul (-V.a₁)).add_const (-V.a₃))).const_mul (1 / 2)
 
 variable {L V}
 
 theorem flowC (h2 : A.g₂ V = L.g₂) (h3 : A.g₃ V = L.g₃) (ht : t ∉ L.lattice) :
-    A.IsFlow (A.curveS V) (derivative ℂ) (F.taylor0 (xf L V t)) (F.taylor0 (yf L V t)) := by
+    A.IsFlow (A.curveS V) (PowerSeries.derivative (R := ℂ))
+      (F.taylor0 (xf L V t)) (F.taylor0 (yf L V t)) := by
   have hr := F.taylorRing
   have hx := T_xf L V t ht
   have hy := T_yf L V t ht
@@ -426,12 +477,12 @@ end Trans
 
 theorem map_analytic_x_at_zero (t : ℂ) : ι (xf L (W0 l ι W) t 0) = xc l L ι W t := by
   first
-  | (simp only [xf, xc, W0, WeierstrassCurve.map_b₂, zero_add, map_add, map_neg, map_div₀, RingEquiv.coe_toRingHom, RingEquiv.apply_symm_apply, map_ofNat]; ring)
+  | (simp only [xf, xc, W0, WeierstrassCurve.map_b₂, zero_add, map_add (f := _), map_neg, map_div₀, RingEquiv.coe_toRingHom, RingEquiv.apply_symm_apply, map_ofNat]; ring)
   | (simp [xf, xc, W0, map_div₀, sub_eq_add_neg])
 
 theorem map_analytic_y_at_zero (t : ℂ) : ι (yf L (W0 l ι W) t 0) = yc l L ι W t := by
   first
-  | (simp only [yf, yc, xf, W0, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃, WeierstrassCurve.map_b₂, zero_add, map_add, map_neg, map_mul, map_div₀, map_one, RingEquiv.coe_toRingHom, RingEquiv.apply_symm_apply, map_ofNat]; ring)
+  | (simp only [yf, yc, xf, W0, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃, WeierstrassCurve.map_b₂, zero_add, map_add (f := _), map_neg, map_mul, map_div₀, map_one, RingEquiv.coe_toRingHom, RingEquiv.apply_symm_apply, map_ofNat]; ring)
   | (simp [yf, yc, xf, W0, map_div₀]; ring)
 
 theorem transW (hU : Unif l L ι W) (t : ℂ) (ht : t ∉ L.lattice) :
@@ -518,13 +569,9 @@ theorem ptW_add_lattice (hU : Unif l L ι W) (t ω : ℂ) (hω : ω ∈ L.lattic
     have e1 : L.weierstrassP (t + ω) = L.weierstrassP t := by
       first
       | exact L.weierstrassP_add_coe t ⟨ω, hω⟩
-      | exact L.weierstrassP_add_coe ⟨ω, hω⟩ t
-      | simpa using L.weierstrassP_add_coe t ⟨ω, hω⟩
     have e2 : L.derivWeierstrassP (t + ω) = L.derivWeierstrassP t := by
       first
       | exact L.derivWeierstrassP_add_coe t ⟨ω, hω⟩
-      | exact L.derivWeierstrassP_add_coe ⟨ω, hω⟩ t
-      | simpa using L.derivWeierstrassP_add_coe t ⟨ω, hω⟩
     rw [ptW_notMem hU _ h', ptW_notMem hU _ ht, WeierstrassCurve.Affine.Point.some.injEq]
     exact ⟨by simp only [xc, e1], by simp only [yc, e1, e2]⟩
 
@@ -557,7 +604,7 @@ theorem ptW_add_generic (hU : Unif l L ι W) (s t : ℂ) (hs : s ∉ L.lattice) 
   have hx : xc l L ι W s ≠ xc l L ι W t := sub_ne_zero.1 (by rw [hd]; exact hne')
   have hX := congrArg ι (AddThm.P_add L s t hs ht hp hm)
   have hY := congrArg ι (AddThm.collinear L s t hs ht hp)
-  simp only [map_pow, map_sub, map_mul, map_add, map_neg, map_div₀, map_ofNat] at hX hY
+  simp only [map_pow, map_sub, map_mul, map_add (f := _), map_neg, map_div₀, map_ofNat] at hX hY
   rw [ptW_notMem hU s hs, ptW_notMem hU t ht, ptW_notMem hU _ hp,
     WeierstrassCurve.Affine.Point.add_of_X_ne hx]
   have e1 : xc l L ι W (s + t) =
@@ -629,8 +676,8 @@ theorem analytic_point_eq_zero_iff : PtWZero := by
   intro l _ L ι W hU t
   exact AnaSysW.ptW_zero_iff hU t
 
-open Classical in
 
+open Classical in
 theorem analytic_point_map_add : PtWAdd := by
   intro l _ L ι W hU s t
   exact AnaSysW.ptW_add hU s t
@@ -640,8 +687,8 @@ theorem weierstrass_series_eq_transported (l : ℕ) [Fact l.Prime] (L : PeriodPa
     Formalism.L2.Th1.A.wpReg W = PowerSeries.map (ι : ℂ →+* ℂ_[l]) (Formalism.L2.Th1.F.pSeries L) := by
   exact AnaSysW.wpBridge hU
 
-open Classical in
 
+open Classical in
 theorem analytic_translate_system_model : AnalyticSysW := by
   unfold AnalyticSysW
   intro l _ L ι W hU π hπ

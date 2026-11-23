@@ -1,10 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockVacuumRealRestrictionGaussianEntire
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FockVacuumAnnihilationEquationRealCoordinates
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCongLevelIntG
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsInverseChart
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FockVacuumAnnihilationEquationRealCoordinates
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ActOMemFinSub
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockVacuumRealRestrictionGaussianEntire
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormPeriodSq
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaEqZeroOfReal
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.EqZeroOfLintegralEqZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.InfPartOneSubEInfSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField MeasureTheory
 open scoped Classical
@@ -77,6 +122,7 @@ theorem omO_gram_one {S T : HSp D} (hS1 : S.gram = 1) (hT1 : T.gram = 1) (z v : 
         Complex.I * (Formalism.L2.Pj.xiR D : ℂ) * conj (∑ τ, ∑ i, ∑ j, z τ i j * conj (v τ i j)) := by
   show ((∑ τ, GlobalTheory.OrientedHeis.formAt S T τ (z τ) (v τ) : ℝ) : ℂ) = _
   rw [Complex.ofReal_sum]
+
   simp only [formAt_gram_one hS1 hT1, map_sum, Finset.mul_sum, Finset.sum_sub_distrib]
 
 theorem reads_isFockVacAt : ∀ {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (θ : InfFam D) (S T : HSp D) {a d : ℕ} (hS : S.rank = a) (hT : T.rank = d)
@@ -107,7 +153,7 @@ theorem reads_isFockVacAt : ∀ {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (θ : 
     have a1 := congrFun (congrFun hw i) j
     have a2 := congrFun (congrFun h2 i) j
     simp only [Matrix.map_apply, Matrix.zero_apply] at a1 a2 ⊢
-    rw [Matrix.add_apply, (finPart D).map_add, a1, a2, add_zero]
+    rw [Matrix.add_apply, map_add (finPart D), a1, a2, add_zero]
   have hval : ∀ w : WO S T, w.map (finPart D) = 0 → f w = E (piW θ T S w) * Φ (piW θ T S w) := by
     intro w hw
     rw [hR' w hw]
@@ -133,7 +179,7 @@ theorem reads_isFockVacAt : ∀ {D : D7} (ψ : AddChar (AF D.host.F) ℂ) (θ : 
         Complex.exp ((t : ℂ) * (-(Real.pi * Complex.I) * ((GlobalTheory.OrientedHeis.omO S T (piW θ T S w) x : ℝ) : ℂ))) *
           (E (piW θ T S w + t • x) * Φ (piW θ T S w + t • x)) := by
       funext t
-      rw [hx t, heisO_iota h hψ, hval _ (hreal w hw _), AddMonoidHom.map_add, h.pi_iota T S, LinearMap.map_smul]
+      rw [hx t, heisO_iota h hψ, hval _ (hreal w hw _), AddMonoidHom.map_add (f := _), h.pi_iota T S, LinearMap.map_smul]
       congr 2
       rw [smul_eq_mul, Complex.ofReal_mul]
       ring

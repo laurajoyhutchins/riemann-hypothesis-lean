@@ -1,8 +1,45 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LabelDatum
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCharLab
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PadicIntGLSmulMemPrincipalCongruenceFixed
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCharLab
+public import Mathlib.RepresentationTheory.Coinduced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -35,24 +72,5 @@ inductive InInd : GLRep g → List (GLRep g) → Prop
   | nil (π : GLRep g) : π.1 = 0 → IsIrrRep π.2.ρ → InInd π []
   | cons (π σ ρ : GLRep g) (S : List (GLRep g)) : IsIrrRep π.2.ρ → IsIrrRep ρ.2.ρ → InInd σ S →
       MapsToProd π.2.ρ σ.2.ρ ρ.2.ρ → InInd π (ρ :: S)
-
-def tameRep (χ : (ZMod g)ˣ →* ℂˣ) : GLRep g := ⟨1, Rep.of (Model.detRep 1 (Model.tame χ))⟩
-
-def SuppAdds (σ π : GLRep g) (t : ℕ) {s : ℕ} (χ : Fin s → (ZMod g)ˣ →* ℂˣ) : Prop :=
-  ∃ S S' : List (GLRep g), InInd π S ∧ InInd σ S' ∧
-    S.Perm (S' ++ (List.ofFn fun i => List.replicate t (tameRep (χ i))).flatten)
-
-def chainVecs {n : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] (π : Representation ℂ (GL (Fin n) ℚ_[g]) V)
-    (r t : ℕ) {s : ℕ} (χ : Fin s → (ZMod g)ˣ →* ℂˣ) : Submodule ℂ V where
-  carrier := {v | ∀ (h : GL (Fin n) ℤ_[g]) (y : Fin s → Gn g t), tl r (red g n h : Mt g n) = 1 →
-    (∀ i : Fin s, InPar (r + i * t) (red g n h : Mt g n)) →
-    (∀ i : Fin s, br (r + i * t) t (red g n h : Mt g n) = (y i : Mt g t)) →
-    π (inc g n h) v = ((∏ i, χ i (Matrix.GeneralLinearGroup.det (y i)) : ℂˣ) : ℂ) • v}
-  add_mem' := fun {a b} ha hb h y h1 h2 h3 => by rw [map_add, ha h y h1 h2 h3, hb h y h1 h2 h3, smul_add]
-  zero_mem' := fun h y _ _ _ => by rw [map_zero, smul_zero]
-  smul_mem' := fun c v hv h y h1 h2 h3 => by rw [map_smul, hv h y h1 h2 h3, smul_comm]
-
-theorem InInd.irr {π : GLRep g} {S : List (GLRep g)} (h : InInd π S) : IsIrrRep π.2.ρ := by
-  cases h <;> assumption
 
 end GlobalTheory.GLp.Supp

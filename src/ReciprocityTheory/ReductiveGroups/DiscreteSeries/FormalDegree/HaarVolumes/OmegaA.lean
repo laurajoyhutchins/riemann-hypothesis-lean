@@ -1,5 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriDens
-import Formalism.LocalRingCardinality.DataCD
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriDens
+public import Formalism.LocalRingCardinality.DataCD
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -139,19 +193,6 @@ instance instHaarUCoOm : (volume : Measure (UCo N)).IsAddHaarMeasure := by
 instance instHaarUCo2Om : (volume : Measure (UCo N × UCo N)).IsAddHaarMeasure := by
   rw [Measure.volume_eq_prod]; exact Measure.prod.instIsAddHaarMeasure _ _
 
-theorem isClosed_unitaryLie :
-    IsClosed (Formalism.BasicNotions.lieU N 0 : Set (Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ)) := by
-  have hc : Continuous (fun X : Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ =>
-      Xᴴ * Formalism.UG.Jpq N 0 + Formalism.UG.Jpq N 0 * X) :=
-    (continuous_id.matrix_conjTranspose.matrix_mul continuous_const).add
-      (continuous_const.matrix_mul continuous_id)
-  exact isClosed_eq hc continuous_const
-
-instance instLocallyCompactSpaceUnitaryLie : LocallyCompactSpace (Formalism.BasicNotions.lieU N 0) :=
-  haveI : LocallyCompactSpace (Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ) :=
-    inferInstanceAs (LocallyCompactSpace (Fin N ⊕ Fin 0 → Fin N ⊕ Fin 0 → ℂ))
-  isClosed_unitaryLie.isClosedEmbedding_subtypeVal.locallyCompactSpace
-
 instance instSecondCountableTopologyUnitaryLie : SecondCountableTopology (Formalism.BasicNotions.lieU N 0) :=
   haveI : SecondCountableTopology (Matrix (Fin N ⊕ Fin 0) (Fin N ⊕ Fin 0) ℂ) :=
     inferInstanceAs (SecondCountableTopology (Fin N ⊕ Fin 0 → Fin N ⊕ Fin 0 → ℂ))
@@ -234,7 +275,7 @@ def gaussEOm (Z : (Fin N ⊕ Fin 0) × (Fin N ⊕ Fin 0) → ℂ) : ℝ := ∏ p
 
 theorem continuous_gaussEOm : Continuous (gaussEOm (N := N)) := by
   unfold gaussEOm
-  exact continuous_finset_prod _ fun p _ => Real.continuous_exp.comp
+  exact continuous_finsetProd _ fun p _ => Real.continuous_exp.comp
     (continuous_const.mul (Complex.continuous_normSq.comp (continuous_apply p)))
 
 theorem integral_gaussEOm : ∫ Z, gaussEOm (N := N) Z = Real.pi ^ (N * N) := by

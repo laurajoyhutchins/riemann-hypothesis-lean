@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.JointBlockShapes.MinusPart
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockRaisingLowering.SameSign
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockRaisingLowering.SameSign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,7 +89,7 @@ theorem plus_eq (R L : Module.End ℂ (MvPolynomial σ ℂ))
       R (homogeneousComponent d P) := by
     intro d
     have hmem := hR d _ (homogeneousComponent_mem d P)
-    rw [LinearMap.add_apply, map_add, hL, hc_hc,
+    rw [LinearMap.add_apply, map_add (f := _), hL, hc_hc,
       if_neg (show ¬ (d + 2 + 2 = d) by omega), map_zero, add_zero,
       homogeneousComponent_of_mem hmem, if_pos rfl]
   have hsupp : (Function.support fun d => R (homogeneousComponent d P)) ⊆
@@ -59,8 +103,9 @@ theorem plus_eq (R L : Module.End ℂ (MvPolynomial σ ℂ))
       apply homogeneousComponent_eq_zero
       omega
     rw [h0, map_zero]
+
   rw [FockH1Action.plusPart, finsum_congr hterm, finsum_eq_sum_of_support_subset _ hsupp,
-    ← map_sum R, sum_homogeneousComponent]
+  ← map_sum R, sum_homogeneousComponent]
 
 private theorem apply_homogeneousComponent_eq_zero_of_lt_two (L : Module.End ℂ (MvPolynomial σ ℂ))
     (hL : ∀ (e : ℕ) (P : MvPolynomial σ ℂ),
@@ -80,7 +125,7 @@ theorem minus_eq (R L : Module.End ℂ (MvPolynomial σ ℂ))
       L (homogeneousComponent (d + 2) P) := by
     intro d
     have hmem := hR (d + 2) _ (homogeneousComponent_mem (d + 2) P)
-    rw [LinearMap.add_apply, map_add, hL, hc_hc, if_pos rfl,
+    rw [LinearMap.add_apply, map_add (f := _), hL, hc_hc, if_pos rfl,
       homogeneousComponent_of_mem hmem]
     split_ifs with hc
     · exact absurd hc (by omega)
@@ -105,6 +150,7 @@ theorem minus_eq (R L : Module.End ℂ (MvPolynomial σ ℂ))
         simp only [zero_add, apply_homogeneousComponent_eq_zero_of_lt_two L hL P 1 (by norm_num), add_zero]
         try rfl
     _ = L P := by
+
         rw [← map_sum L, sum_hc_of_le P (P.totalDegree + 1 + 1 + 1) (by omega)]
 
 theorem raisingLoweringSplit : FockRL.PMSplit := by

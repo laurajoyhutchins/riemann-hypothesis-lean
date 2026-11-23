@@ -1,8 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantOrbit
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MatrixRegular
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantOrbit
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MatrixRegular
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,12 +113,12 @@ end Cong
 
 section Red
 
-variable (k) in
 
+variable (k) in
 abbrev incl (n : ℕ) : GL (Fin n) 𝒪[k] →* GL (Fin n) k := Matrix.GeneralLinearGroup.map (algebraMap 𝒪[k] k)
 
-variable (k) in
 
+variable (k) in
 abbrev red (n : ℕ) : GL (Fin n) 𝒪[k] →* GL (Fin n) 𝓀[k] :=
   Matrix.GeneralLinearGroup.map (IsLocalRing.residue 𝒪[k])
 
@@ -168,7 +218,7 @@ theorem qr_mul_pr : qr e T A * pr e T A = 0 := by
   ext i j; rw [qr_mul_apply]; simp only [pr, diagonal_apply]; split_ifs <;> simp_all
 
 theorem pr_add_qr : pr e T A + qr e T A = 1 := by
-  ext i j; simp only [pr, qr, Matrix.add_apply, diagonal_apply, one_apply]; split_ifs <;> simp_all
+  ext i j; simp only [pr, qr, Matrix.add_apply, diagonal_apply, Matrix.one_apply]; split_ifs <;> simp_all
 
 theorem ne_of_side {i j : Fin n} (h : ¬ (blk e i ∈ T ↔ blk e j ∈ T)) : i ≠ j := by
   rintro rfl; exact h Iff.rfl
@@ -318,10 +368,10 @@ theorem exists_lift {Z : Fin n → Fin n → Prop} (hZ : ∀ i l j, Z i l → Z 
     by rw [show (1 - Y) * (1 + Y) = 1 - Y * Y by noncomm_ring, hYY, sub_zero]⟩, Units.ext ?_, ?_, ?_⟩
   · have : (IsLocalRing.residue 𝒪[k]).mapMatrix Y = u.val - 1 := by ext i j; exact hL _
     show (IsLocalRing.residue 𝒪[k]).mapMatrix (1 + Y) = u.val
-    rw [map_add, map_one, this, add_sub_cancel]
+    rw [map_add (f := _), map_one, this, add_sub_cancel]
   · intro i j h
     show ((algebraMap 𝒪[k] k).mapMatrix (1 + Y) - 1) i j = 0
-    rw [map_add, map_one, add_sub_cancel_left]
+    rw [map_add (f := _), map_one, add_sub_cancel_left]
     simp [hYz i j h]
   · intro i j h
     show ((algebraMap 𝒪[k] k).mapMatrix (1 - Y) - 1) i j = 0
@@ -333,11 +383,11 @@ theorem red_sub_apply {a : GL (Fin n) 𝒪[k]} {i j : Fin n} (h : ((incl k n a).
   have h1 : ((a.val i j : 𝒪[k]) : k) = (((1 : Matrix (Fin n) (Fin n) 𝒪[k]) i j : 𝒪[k]) : k) := by
     rw [Matrix.sub_apply, sub_eq_zero] at h
     refine h.trans ?_
-    simp only [one_apply]; split_ifs <;> simp
+    simp only [Matrix.one_apply]; split_ifs <;> simp
   have h2 : a.val i j = (1 : Matrix (Fin n) (Fin n) 𝒪[k]) i j := Subtype.ext h1
   show (IsLocalRing.residue 𝒪[k] (a.val i j)) - (1 : Matrix (Fin n) (Fin n) 𝓀[k]) i j = 0
   rw [h2, sub_eq_zero]
-  simp only [one_apply]; split_ifs <;> simp
+  simp only [Matrix.one_apply]; split_ifs <;> simp
 
 theorem intM_incl (a : GL (Fin n) 𝒪[k]) : IntM (incl k n a).val := fun i j => (a.val i j).2
 
@@ -347,8 +397,8 @@ section Conj
 
 variable {n s : ℕ} {d : Fin s → ℕ}
 
-variable (e : (Σ a, Fin (d a)) ≃ Fin n) in
 
+variable (e : (Σ a, Fin (d a)) ≃ Fin n) in
 abbrev Gp : Subgroup (GL (Fin n) k) := KOne k (Fin n) ⊔ (unipRad k e ⊓ KO k (Fin n))
 
 def ind (T : Finset (Fin s)) (a : Fin s) : ℕ := if a ∈ T then 1 else 0
@@ -361,7 +411,7 @@ variable {e : (Σ a, Fin (d a)) ≃ Fin n} {T : Finset (Fin s)} {c : k} {hc : c 
 
 theorem one_apply_blk (a : Fin s) (i j : Fin (d a)) :
     (1 : Matrix (Fin n) (Fin n) k) (e ⟨a, i⟩) (e ⟨a, j⟩) = (1 : Matrix (Fin (d a)) (Fin (d a)) k) i j := by
-  simp only [one_apply, EmbeddingLike.apply_eq_iff_eq, Sigma.mk.injEq, heq_eq_eq, true_and]
+  simp only [Matrix.one_apply, EmbeddingLike.apply_eq_iff_eq, Sigma.mk.injEq, heq_eq_eq, true_and]
 
 theorem mem_unipRad_of {g : GL (Fin n) k} (h : ∀ i j, ¬ blk e i < blk e j → (g.val - 1) i j = 0) :
     g ∈ unipRad k e := by
@@ -585,8 +635,8 @@ section Step
 
 variable {n s : ℕ} {d : Fin s → ℕ} {V : Type} [AddCommGroup V] [Module ℂ V]
 
-variable (e : (Σ a, Fin (d a)) ≃ Fin n) (π : Representation ℂ (GL (Fin n) k) V) {c : k} (hc : c ≠ 0) in
 
+variable (e : (Σ a, Fin (d a)) ≃ Fin n) (π : Representation ℂ (GL (Fin n) k) V) {c : k} (hc : c ≠ 0) in
 def Claim (C : Fin s → ℕ) : Prop :=
   ∀ w ∈ fixed π (Gp e), π (dia e hc C) w ∈ twKer π (KOne k (Fin n)) 1 → w = 0
 
@@ -617,6 +667,7 @@ theorem step {T : Finset (Fin s)} (hT : ∀ a b : Fin s, a ≤ b → b ∈ T →
   set W := GlobalTheory.OppRad.S (repF π) (GlobalTheory.OppRad.U (pr e T 𝓀[k]) (qr e T 𝓀[k])) X with hW
   have hW2 : π (dia e hc C) (W : V) ∈ twKer π (KOne k (Fin n)) 1 := by
     haveI := Fintype.ofFinite (GlobalTheory.OppRad.U (pr e T 𝓀[k]) (qr e T 𝓀[k]))
+
     rw [hW, GlobalTheory.OppRad.S_apply, Submodule.coe_sum, map_sum]
     refine Submodule.sum_mem _ fun u _ => ?_
     obtain ⟨a, hau, ha, hai⟩ := exists_lift (Z := fun i j => blk e i ∈ T ∧ blk e j ∉ T)

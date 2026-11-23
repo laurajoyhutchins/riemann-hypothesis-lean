@@ -1,14 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaSeriesDataHypothesesBelowMaximalLevel
-import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.TiedCls
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsMidLevIff
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.FrecAt
-import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.MovDXiAtRecStep
-import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.LocalClassDataOfTrivialStabilizers
-import Formalism.LocalToGlobal.InertKernelTheory.ProjRSurj
-import Formalism.LocalToGlobal.InertKernelTheory.TieSerPin
-import Formalism.LocalToGlobal.HermitianColumns.FullSym
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LocSpBot
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ThetaSeriesDataHypothesesBelowMaximalLevel
+public import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.ClsChartedLabAt
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsMidLevIff
+public import Formalism.LocalToGlobal.PairingIndexBounds.OrthogonalChartLevels.MovDXiAtRecStep
+public import Formalism.SharpRestriction.GrowthBounds.ChartedClasses.LocalClassDataOfTrivialStabilizers
+public import Formalism.LocalToGlobal.InertKernelTheory.ProjRSurj
+public import Formalism.LocalToGlobal.InertKernelTheory.TieSerPin
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LocSpBot
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.FrobeniusSqIterateTeichmuller
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,9 +65,9 @@ def castSt {D : D7} {u : D.what₂.Word} {C C' : ColumnChain D.R D.what₂.Tau (
 variable {D : D7} {L : SizeData₂ D} {hT : GatTies D} {Gi : G.Inst D L} {Gl : G.LatInst D} {Kc : G.Consts} {Dx : DivX D} {cX : ExtraC}
   {ex : Extra D L hT Gi Gl Kc Dx cX}
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-set_option maxHeartbeats 2000000 in
 
 structure Joint (t : KerEntTied ex) {u : D.what₂.Word} {μ : D.what₂.Tup} {w : D.what₂.places.Pl}
     {hg : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)} {Lv : Levels (Gl.Fl u w hg)} {I : CmpJIn ex.tw u μ w hg Lv}
@@ -111,8 +148,8 @@ def Joint.IsPt (j : ℕ) (hj : j ≤ D.R.m) (La : (sysS H X std).Lt j)
 def Joint.pt (j : ℕ) (hj : j ≤ D.R.m) (La : (sysS H X std).Lt j) : UPts (sigD D) (gramN D j hj) (FiniteAdeleRing (𝓞 D.host.F) D.host.F) :=
   Classical.epsilon (J.IsPt std j hj La)
 
-open Classical in
 
+open Classical in
 def Joint.xi0 (Xi : AdDatum J.St) (j : ℕ) (La : (sysS H X std).Lt j) (La' : (sysS H X std).Lt (j + 1))
     (z : Formalism.L2.Col.HomE D.host.E (((sysS H X std).Pj j).m + 1) (((sysS H X std).Pj (j + 1)).m + 1)) : ℂ :=
   if h : j + 1 ≤ D.R.m ∧ ((sysS H X std).Pj j).m + 1 = D.R.N j ∧ ((sysS H X std).Pj (j + 1)).m + 1 = D.R.N (j + 1) then
@@ -128,9 +165,9 @@ def Joint.Dict : Prop :=
     HEq ((J.fd std).kerN j La) (latK D.sp (gramN D j hj) J.a (J.pt std j hj La).1 ((J.St j hj).K (J.chart std j hj La)).lev.Lb) ∧
     (J.fd std).dt j La = Matrix.GeneralLinearGroup.det (J.pt std j hj La).1
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure Joint.At where
   E : CEmbC (sysS H X std).G
   lam : TaylorLogMetric.Qbar →+* ℂ_[D.what₂.places.resChar w]

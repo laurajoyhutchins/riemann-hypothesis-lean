@@ -1,6 +1,47 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
-import Development.EtaleCohomology.TateTwists.EtaleTensorTripleProductOfFamilyAndLeibniz
+module
+
+public import Development.EtaleCohomology.TateTwists.EtaleTensorTripleProductOfFamilyAndLeibniz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
 open scoped DirectSum TensorProduct
@@ -56,8 +97,8 @@ lemma lift_res (τ : Pair I J T) {V U : Scheme.{0}} (g : V ⟶ U) (w : ℤ) (x :
       simp only [Pair.lift, Tens.res, DirectSum.lmap_lof, DirectSum.toModule_lof, TensorProduct.map_tmul,
         TensorProduct.lift.tmul]
       exact (τ.nat g _ _ _ _ a b).symm
-    | add y y' hy hy' => simp only [map_add, hy, hy']
-  | add x x' hx hx' => simp only [map_add, hx, hx']
+    | add y y' hy hy' => simp only [map_add (f := _), hy, hy']
+  | add x x' hx hx' => simp only [map_add (f := _), hx, hx']
 
 lemma lift_single (τ : Pair I J T) (U : Scheme.{0}) (s t st : ℤ) (h1 : s + t = st) (a : Sec (I.X s) U)
     (b : Sec (J.X t) U) :
@@ -100,8 +141,8 @@ lemma B_res (μ' : Pair J K M) (ν' : Pair I M L) {W V : Scheme.{0}} (k : W ⟶ 
       simp only [B, Bp, Tens.res, DirectSum.lmap_lof, DirectSum.toModule_lof, TensorProduct.map_tmul,
         TensorProduct.lift.tmul, LinearMap.mk₂_apply, LinearMap.comp_apply]
       rw [ν'.nat, μ'.nat]
-    | add y y' hy hy' => simp only [map_add, LinearMap.add_apply, hy, hy']
-  | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx']
+    | add y y' hy hy' => simp only [map_add (f := _), LinearMap.add_apply, hy, hy']
+  | add x x' hx hx' => simp only [map_add (f := _), LinearMap.add_apply, hx, hx']
 
 end
 
@@ -150,7 +191,7 @@ lemma mraw_add_a {U : Scheme.{0}} {st u w : ℤ} {h2 : st + u = w} (a a' : Sec (
   apply (hg R (L.X w) U).1
   refine loc_mono (loc_inter (hτ.1 U st a) (hτ.1 U st a')) fun V g hV => ?_
   obtain ⟨⟨x, hx⟩, ⟨x', hx'⟩⟩ := hV
-  rw [res_add, res_mraw_eq_of_lift hg τ hτ μ' ν' (a + a') c g (x + x') (by rw [map_add, hx, hx', res_add]),
+  rw [res_add, res_mraw_eq_of_lift hg τ hτ μ' ν' (a + a') c g (x + x') (by rw [map_add (f := _), hx, hx', res_add]),
     res_mraw_eq_of_lift hg τ hτ μ' ν' a c g x hx, res_mraw_eq_of_lift hg τ hτ μ' ν' a' c g x' hx', map_add, LinearMap.add_apply]
 
 lemma mraw_smul_a {U : Scheme.{0}} {st u w : ℤ} {h2 : st + u = w} (r : ULift.{1} R) (a : Sec (T.X st) U) (c : Sec (K.X u) U) :
@@ -203,8 +244,8 @@ end
 
 end LateralTheory.EtaleFoundations.TensTriFamPf
 
-open LateralTheory.EtaleFoundations.TensTriFamPf in
 
+open LateralTheory.EtaleFoundations.TensTriFamPf in
 theorem LateralTheory.EtaleFoundations.etale_tensor_triple_product_family_of_gluing (hglue : SecGlue) : LateralTheory.EtaleFoundations.EtaleTensorTripleProductFamilyExists := by
   intro R _ I J K T τ hτ M L μ' ν'
   refine ⟨fun U st u w h2 => mfam hglue τ hτ μ' ν' U st u w h2, ?_, ?_⟩

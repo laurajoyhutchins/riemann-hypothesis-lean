@@ -1,4 +1,54 @@
-import Formalism.WachLatticeTwists.RealDisplaySplitting.GaloisTheoremThirdForms
+module
+
+public import Formalism.CharacterColumnKernels.CharacterColumnKernelEqualityForm
+public import Formalism.WachLatticeTwists.RealClassMaps.RealClassMapTheorem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -9,18 +59,6 @@ namespace Formalism.MainNotions.N.KLat
 open Matrix
 open Formalism.NG Formalism.RepresentationBoundsCohomology.LOC Formalism.RepresentationBoundsCohomology.FIN Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology ReciprocityTheory.Gal
 open ReciprocityTheory.ChartRestriction.T2 (PadicCoeff FracTop IsFGTop)
-
-theorem padic_isOpen_span {ℓ : ℕ} {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [TopologicalSpace O]
-    (hO : PadicCoeff ℓ O) {a : O} (ha : a ≠ 0) : IsOpen ((Ideal.span {a} : Ideal O) : Set O) := by
-  haveI := hO.ring
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible O
-  have hne : (Ideal.span {a} : Ideal O) ≠ ⊥ := by rwa [Ne, Ideal.span_singleton_eq_bot]
-  obtain ⟨k, hk⟩ := IsDiscreteValuationRing.ideal_eq_span_pow_irreducible hne hϖ
-  have hm : IsLocalRing.maximalIdeal O = Ideal.span {ϖ} := (IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ).1 hϖ
-  have h := (isAdic_iff.1 hO.adic).1 k
-  rw [hm, Ideal.span_singleton_pow] at h
-  rw [hk]
-  exact h
 
 theorem fgTop_continuous_linearMap {ℓ : ℕ} {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
     [TopologicalSpace O] {M N : Type} [AddCommGroup M] [Module O M] [TopologicalSpace M] [ContinuousAdd M]
@@ -59,6 +97,7 @@ theorem matK_mulVec_alg (A : Matrix n n O) (y : n → O) :
     matK A *ᵥ (fun a => algebraMap O (FractionRing O) (y a)) =
       fun a => algebraMap O (FractionRing O) ((A *ᵥ y) a) := by
   funext a
+
   simp only [matK, Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum, map_mul]
 
 variable {Γ : Type} [Group Γ]
@@ -99,9 +138,6 @@ def repL' (ε : Γ →* Oˣ) (M : Γ →* Matrix n n O) : Representation O Γ (n
     simp only [map_mul, Units.val_mul, LinearMap.smul_apply,
       Matrix.mulVecLin_apply, Module.End.mul_apply, Matrix.mulVec_smul, smul_smul]
     rw [_root_.mul_inv_rev, map_mul, Matrix.transpose_mul, ← Matrix.mulVec_mulVec]
-
-theorem repL'_apply (ε : Γ →* Oˣ) (M : Γ →* Matrix n n O) (g : Γ) (v : n → O) :
-    repL' ε M g v = ((ε g : Oˣ) : O) • ((M g⁻¹)ᵀ *ᵥ v) := rfl
 
 def pairStd : (n → FractionRing O) →ₗ[O] (n → FractionRing O) →ₗ[O] FractionRing O :=
   LinearMap.mk₂ O (fun x y => x ⬝ᵥ y) (fun x x' y => add_dotProduct x x' y)
@@ -148,21 +184,21 @@ theorem contAction_repV' (ε : Γ →* Oˣ) (M : Γ →* Matrix n n O)
   refine continuous_pi fun a => ?_
   simp only [repV'_apply, Pi.smul_apply, matK_mulVec]
   refine (hε.comp continuous_fst).smul ?_
-  refine continuous_finset_sum _ fun j _ => ?_
-  exact ((hM a j).comp continuous_fst).smul ((continuous_apply j).comp continuous_snd)
+  exact continuous_finsetSum _ fun j _ =>
+    ((hM a j).comp continuous_fst).smul ((continuous_apply j).comp continuous_snd)
 
 theorem contAction_repV (M : Γ →* Matrix n n O) (hM : ∀ a b, Continuous fun g => M g a b) :
     ContAction (repV M) := by
   show Continuous fun p : Γ × (n → FractionRing O) => repV M p.1 p.2
   refine continuous_pi fun a => ?_
   simp only [repV_apply, matK_mulVec]
-  exact continuous_finset_sum _ fun j _ =>
+  exact continuous_finsetSum _ fun j _ =>
     ((hM a j).comp continuous_fst).smul ((continuous_apply j).comp continuous_snd)
 
 theorem cont_pairStd [ContinuousMul (FractionRing O)] :
     Continuous fun p : (n → FractionRing O) × (n → FractionRing O) => pairStd p.1 p.2 := by
   simp only [pairStd_apply, dotProduct]
-  exact continuous_finset_sum _ fun i _ =>
+  exact continuous_finsetSum _ fun i _ =>
     ((continuous_apply i).comp continuous_fst).mul ((continuous_apply i).comp continuous_snd)
 
 def datStd (hK : ContinuousMul (FractionRing O)) (ε : Γ →* Oˣ) (M : Γ →* Matrix n n O)
@@ -194,6 +230,7 @@ def vMap : (n → O) →ₗ[O] dualLat (pairStd (O := O) (n := n)) latT where
     intro x hx
     obtain ⟨z, rfl⟩ := (mem_latT x).1 hx
     refine Submodule.mem_one.2 ⟨∑ a, z a * y a, ?_⟩
+
     simp [pairStd_apply, dotProduct, map_sum, map_mul]⟩
   map_add' y y' := Subtype.ext (funext fun a => by simp)
   map_smul' c y := Subtype.ext (funext fun a => by simp [Algebra.smul_def])
@@ -253,6 +290,7 @@ theorem gamStd_eq (t : n → O) (m : n → KO O) :
   rw [uStd_mk, gamStd_apply]
   simp only [pairKO, Submodule.liftQ_apply, LinearMap.compr₂_apply, LinearMap.compl₂_apply,
     Submodule.subtype_apply, pairStd_apply, dotProduct, vStd_apply]
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [← map_smul, Algebra.smul_def, mul_comm]
@@ -281,58 +319,6 @@ theorem t2Space_fractionRing_of_padicCoeff (ℓ : ℕ) (hO : PadicCoeff ℓ O) (
     subst hvw'
     exact Set.disjoint_left.1 hd hv hw'
   · exact ⟨_, hF.emb.isOpen_range.mem_nhds ⟨0, map_zero _⟩, h⟩
-
-theorem frac_nhds {ℓ : ℕ} (hO : PadicCoeff ℓ O) (hF : FracTop O) {ϖ : O} (hϖ : Irreducible ϖ)
-    {U : Set (FractionRing O)} (hU : U ∈ nhds (0 : FractionRing O)) :
-    ∃ k : ℕ, algebraMap O (FractionRing O) '' ((Ideal.span {ϖ ^ k} : Ideal O) : Set O) ⊆ U := by
-  haveI := hO.ring
-  have hpre : algebraMap O (FractionRing O) ⁻¹' U ∈ nhds (0 : O) :=
-    hF.emb.continuous.continuousAt.preimage_mem_nhds (by rwa [map_zero])
-  obtain ⟨k, hk⟩ := (isAdic_iff.1 hO.adic).2 _ hpre
-  have hm : IsLocalRing.maximalIdeal O = Ideal.span {ϖ} :=
-    (IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ).1 hϖ
-  refine ⟨k, ?_⟩
-  rw [Set.image_subset_iff, ← Ideal.span_singleton_pow, ← hm]
-  exact hk
-
-theorem frac_open {ℓ : ℕ} (hO : PadicCoeff ℓ O) (hF : FracTop O) {a : O} (ha : a ≠ 0) :
-    algebraMap O (FractionRing O) '' ((Ideal.span {a} : Ideal O) : Set O) ∈ nhds (0 : FractionRing O) := by
-  exact (hF.emb.isOpenMap _ (padic_isOpen_span hO ha)).mem_nhds ⟨0, (Ideal.span {a}).zero_mem, map_zero _⟩
-
-theorem frac_topRing {ℓ : ℕ} (hO : PadicCoeff ℓ O) (hF : FracTop O) : IsTopologicalRing (FractionRing O) := by
-  haveI := hO.ring
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible O
-  have hϖ0 : ϖ ≠ 0 := hϖ.ne_zero
-  have key : ∀ x₀ : FractionRing O, Filter.Tendsto (fun x => x₀ * x) (nhds 0) (nhds 0) := by
-    intro x₀
-    obtain ⟨⟨p, q⟩, hpq⟩ := IsLocalization.surj (nonZeroDivisors O) x₀
-    have hpq' : x₀ * algebraMap O (FractionRing O) q = algebraMap O (FractionRing O) p := hpq
-    have hq0 : (q : O) ≠ 0 := nonZeroDivisors.ne_zero q.2
-    refine Filter.tendsto_def.2 fun U hU => ?_
-    obtain ⟨k, hk⟩ := frac_nhds hO hF hϖ (by simpa using hU)
-    refine Filter.mem_of_superset (frac_open hO hF (mul_ne_zero hq0 (pow_ne_zero k hϖ0))) ?_
-    rintro _ ⟨y, hy, rfl⟩
-    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.1 hy
-    rw [Set.mem_preimage]
-    refine hk ⟨p * c * ϖ ^ k, Ideal.mem_span_singleton'.2 ⟨p * c, rfl⟩, ?_⟩
-    simp only [map_mul]
-    rw [← hpq']
-    ring
-  have hmul : Filter.Tendsto (Function.uncurry ((· * ·) : FractionRing O → FractionRing O → FractionRing O))
-      (nhds 0 ×ˢ nhds 0) (nhds 0) := by
-    refine Filter.tendsto_def.2 fun U hU => ?_
-    obtain ⟨k, hk⟩ := frac_nhds hO hF hϖ hU
-    have hV := frac_open hO hF (pow_ne_zero k hϖ0)
-    refine Filter.mem_of_superset (Filter.prod_mem_prod hV hV) ?_
-    rintro ⟨_, _⟩ ⟨⟨a, ha, rfl⟩, ⟨b, hb, rfl⟩⟩
-    rw [Set.mem_preimage]
-    exact hk ⟨a * b, Ideal.mul_mem_right b _ ha, map_mul _ _ _⟩
-  exact IsTopologicalRing.of_addGroup_of_nhds_zero hmul key
-    (fun x₀ => Filter.Tendsto.congr (fun x => mul_comm x₀ x) (key x₀))
-
-theorem frac_contMul {ℓ : ℕ} (hO : PadicCoeff ℓ O) (hF : FracTop O) : ContinuousMul (FractionRing O) := by
-  haveI := frac_topRing hO hF
-  infer_instance
 
 theorem latT_fg : (latT : Submodule O (n → FractionRing O)).FG := by
   have h : (latT : Submodule O (n → FractionRing O)) = Submodule.map
@@ -385,15 +371,18 @@ theorem latT_open (hF : FracTop O) :
 theorem realLat_datStd (ℓ : ℕ) (hO : PadicCoeff ℓ O) (hF : FracTop O) (hK : ContinuousMul (FractionRing O))
     (ε : Γ →* Oˣ) (M : Γ →* Matrix n n O) (hε : Continuous fun g => ((ε g : Oˣ) : O))
     (hM : ∀ a b, Continuous fun g => M g⁻¹ b a) (hM' : ∀ a b, Continuous fun g => M g a b) :
-    RealLat (datStd hK ε M hε hM) where
-  lat := ⟨latT_fg, latT_span⟩
-  perf := perf_pairStd
-  contT := contAction_repV M hM'
-  openT := latT_open hF
-  t2 := by haveI := t2Space_fractionRing_of_padicCoeff ℓ hO hF; infer_instance
-  t2' := by haveI := t2Space_fractionRing_of_padicCoeff ℓ hO hF; infer_instance
-  cs := by haveI := hK; infer_instance
-  cs' := by haveI := hK; infer_instance
+    RealLat (datStd hK ε M hε hM) := by
+  have := t2Space_fractionRing_of_padicCoeff ℓ hO hF
+  have := hK
+  exact
+    { lat := ⟨latT_fg, latT_span⟩
+      perf := perf_pairStd
+      contT := contAction_repV M hM'
+      openT := latT_open hF
+      t2 := inferInstance
+      t2' := inferInstance
+      cs := inferInstance
+      cs' := inferInstance }
 
 end RL
 
@@ -550,8 +539,6 @@ def uHom : (Ω ≃ₐ[Ek] Ω) →* R' where
 def M0 : (Ω ≃ₐ[Ek] Ω) →* Matrix {a // bl a = 0} {a // bl a = 0} O :=
   (ρk 0).toRingHom.toMonoidHom.comp (uHom r χ)
 
-theorem block_zero_apply (g : Ω ≃ₐ[Ek] Ω) : M0 r χ bl ρk g = ρk 0 (uElt r χ g) := rfl
-
 def Mw (w : ℕ) : decs Ek Aw w →* Matrix {a // bl a = 0} {a // bl a = 0} O :=
   (M0 r χ bl ρk).comp (decs Ek Aw w).subtype
 
@@ -589,11 +576,6 @@ def vD (w : ℕ) : ({a // bl a = 0} → O) ≃ₗ[O] (Dat r χ bl ρk ε Aw hK h
 
 def gam : ({a // bl a = 0} → O) →ₗ[O] blockRestrictedRepresentationType bl ρk 0 →ₗ[O] KO O :=
   gamStd.compl₂ (blkEquiv bl ρk).toLinearMap
-
-theorem gam_apply (y : {a // bl a = 0} → O) (m : blockRestrictedRepresentationType bl ρk 0) :
-    gam bl ρk y m = ∑ a, y a • blkEquiv bl ρk m a := rfl
-
-theorem dat_eps (w : ℕ) (g : decs Ek Aw w) : (Dat r χ bl ρk ε Aw hK hε hM w).ε g = ε g := rfl
 
 theorem vD_equiv (w : ℕ) (g : decs Ek Aw w) (y : {a // bl a = 0} → O) :
     vD r χ bl ρk ε Aw hK hε hM w (rho2 r χ bl ρk ε g y) =
@@ -654,7 +636,9 @@ theorem block_zero_continuous {ℓ : ℕ} (hO : PadicCoeff ℓ O) (hR : IsFGTop 
     { toFun := fun x => ρk 0 x a b
       map_add' := fun x y => by simp
       map_smul' := fun c x => by simp }
-  have hf : Continuous f := fgTop_continuous_linearMap hR hO f
+  have hf : Continuous f := by
+    set_option synthInstance.maxHeartbeats 100000 in
+      exact fgTop_continuous_linearMap hR hO f
   exact hf.comp hu
 
 end Cont2

@@ -1,17 +1,58 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultilinearZeroOfKillsTranslatesTensorStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultiplicityMapRealTranslateEqRightTranslationStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultiplicitySpaceEqZeroOfApplyNonzeroTensorZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PeriodIntegrableBoundedByProductOfNormsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelPlusSubgroup
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.DepthPays
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SchurMultMultiplicitySpacesOfRapidDecayStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MultTApplyRapidDec
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultiplicitySpaceEqZeroOfApplyNonzeroTensorZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultValueLeftContLevel
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepMemSm
-import Formalism.LocalToGlobal.IndefiniteReal.SchurOrthogonality
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultilinearZeroOfKillsTranslatesTensorStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultiplicityMapRealTranslateEqRightTranslationStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PeriodIntegrableBoundedByProductOfNormsStatement
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.OffQOfSizeRows
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RepMemSm
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.Grow
 open GlobalTheory.IndefiniteRowSideFullHecke.LevelPlusSubgroup (coefPlus Cols SizeRows)
@@ -33,7 +74,7 @@ theorem integral_eq_zero_of_translates : GlobalTheory.Published.CuspRapidDecay �
   let ℓ : SmT M →ₗ[ℂ] ℂ :=
     { toFun := fun x => ∫ g in v.𝓕, F g * t x g ∂v.μ
       map_add' := fun x y => by
-        simp only [map_add, Pi.add_apply, mul_add]
+        simp only [map_add (f := _), Pi.add_apply, mul_add]
         exact integral_add (hint x) (hint y)
       map_smul' := fun r x => by
         simp only [map_smul, Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
@@ -42,7 +83,7 @@ theorem integral_eq_zero_of_translates : GlobalTheory.Published.CuspRapidDecay �
         funext g
         ring }
   have hℓ : ∀ x, ℓ x = ∫ g in v.𝓕, F g * t x g ∂v.μ := fun x => rfl
-  let L : MultilinearMap ℂ (fun τ => M.sm τ) ℂ := ℓ.compMultilinearMap (PiTensorProduct.tprod ℂ)
+  let L : MultilinearMap (RingHom.id ℂ) (fun τ => M.sm τ) ℂ := ℓ.compMultilinearMap (PiTensorProduct.tprod ℂ)
   have hL : ∀ u, L u = ℓ (PiTensorProduct.tprod ℂ u) := fun u => rfl
   have hx : w ∈ Submodule.span ℂ (Set.range (PiTensorProduct.tprod ℂ (s := fun τ => M.sm τ))) := by
     rw [PiTensorProduct.span_tprod_eq_top]; trivial
@@ -56,6 +97,7 @@ theorem integral_eq_zero_of_translates : GlobalTheory.Published.CuspRapidDecay �
     exact hw (GlobalTheory.eq_zero_of_tprodInnerFun w hcon)
   have hφ' : (∑ j, c j * ∏ τ, ⟪((φ τ : M.sm τ) : M.H τ), (vv j τ : M.H τ)⟫_ℂ) ≠ 0 := by
     rw [hw'] at hφ
+
     simpa [map_sum, GlobalTheory.tprodInnerFun_tprod, Submodule.coe_inner] using hφ
   have hinv : ∀ τ (g : Formalism.IndefR.SchurOrthogonalityAlt.Gt V τ), ∀ x ∈ M.sm τ, Formalism.IndefR.SchurOrthogonalityAlt.piR M τ g x ∈ M.sm τ :=
     fun τ g x hx => GlobalTheory.SmoothStable.rep_mem_sm D V S M τ _ (Formalism.IndefR.SchurOrthogonalityAlt.gm_mem g) x hx
@@ -70,6 +112,7 @@ theorem integral_eq_zero_of_translates : GlobalTheory.Published.CuspRapidDecay �
         (fun τ => ⟨Formalism.IndefR.SchurOrthogonalityAlt.piR M τ (gs τ) (vv j τ), hinv τ (gs τ) _ (vv j τ).2⟩)) x) := by
       intro x
       rw [hw']
+
       simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       have e1 := hPe (vv j) x
@@ -78,7 +121,7 @@ theorem integral_eq_zero_of_translates : GlobalTheory.Published.CuspRapidDecay �
       rw [← e1]
       ring
     simp_rw [e] at h0
-    rw [integral_finset_sum _ (fun j _ => (hint _).const_mul (c j))] at h0
+    rw [integral_finsetSum _ (fun j _ => (hint _).const_mul (c j))] at h0
     simp_rw [integral_const_mul] at h0
     exact h0
   have hB := GlobalTheory.T.multilinear_zero_of_kills_translates_tensor D.what₂.Tau (fun τ => M.H τ) (fun τ => Formalism.IndefR.SchurOrthogonalityAlt.Gt V τ) (fun τ => Formalism.IndefR.SchurOrthogonalityAlt.piR M τ) (Formalism.IndefR.SchurOrthogonalityAlt.piR_norm M)
@@ -88,7 +131,7 @@ theorem integral_eq_zero_of_translates : GlobalTheory.Published.CuspRapidDecay �
   have hℓ0 : ℓ w' = 0 := by
     induction w' using PiTensorProduct.induction_on with
     | smul_tprod r u => rw [map_smul, ← hL, hL0, smul_zero]
-    | add x y hx hy => rw [map_add, hx, hy, add_zero]
+    | add x y hx hy => rw [map_add (f := _), hx, hy, add_zero]
   rw [← hℓ]; exact hℓ0
 
 end GlobalTheory.TransOrth

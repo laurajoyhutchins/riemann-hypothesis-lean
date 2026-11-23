@@ -1,12 +1,68 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDiagonalSectionDifference
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionsDimZero
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSerreGraded
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMultigradedHilbertPolynomial
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PEventualPolynomial
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PShiftDegreePolynomial
-import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.GradedSpanProducts
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDiagonalSectionDifference
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionsDimZero
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSerreGraded
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.GradedSpanProducts
+import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCoordCurveAlgebraic
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PEventualPolynomial
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PHilbFnValueSpan
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PMultigradedHilbertPolynomial
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSerreGraded
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PShiftDegreePolynomial
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.IsSaturatedFirstCoordinateLine
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -215,13 +271,13 @@ theorem pow_sub_pow_le (t : ℚ) (ht : 1 ≤ t) (e : ℕ) : t ^ (e + 1) - (t - 1
 
 theorem poly_diff_bound {σ : Type} (p : MvPolynomial σ ℚ) (D : ℕ) (hp : p.totalDegree ≤ D) :
     ∃ C : ℚ, ∀ t : ℚ, 1 ≤ t → eval (fun _ => t) p - eval (fun _ => t - 1) p ≤ C * t ^ (D - 1) := by
-  have hev : ∀ t : ℚ, eval (fun _ => t) p = ∑ m ∈ p.support, coeff m p * t ^ (m.sum fun _ e => e) := by
+  have hev : ∀ t : ℚ, eval (fun _ => t) p = ∑ m ∈ p.support, AddMonoidAlgebra.coeff p m * t ^ (m.sum fun _ e => e) := by
     intro t
     rw [MvPolynomial.eval_eq]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [Finset.prod_pow_eq_pow_sum]
     rfl
-  refine ⟨∑ m ∈ p.support, |coeff m p| * (m.sum fun _ e => e : ℕ), fun t ht => ?_⟩
+  refine ⟨∑ m ∈ p.support, |AddMonoidAlgebra.coeff p m| * (m.sum fun _ e => e : ℕ), fun t ht => ?_⟩
   rw [hev, hev, ← Finset.sum_sub_distrib, Finset.sum_mul]
   refine Finset.sum_le_sum fun m hm => ?_
   have he : (m.sum fun _ e => e) ≤ D := (le_totalDegree hm).trans hp
@@ -237,10 +293,10 @@ theorem poly_diff_bound {σ : Type} (p : MvPolynomial σ ℚ) (D : ℕ) (hp : p.
       calc t ^ (e' + 1) - (t - 1) ^ (e' + 1) ≤ (e' + 1) * t ^ e' := h3
         _ ≤ (e' + 1) * t ^ (D - 1) := by gcongr
         _ = ((e' + 1 : ℕ) : ℚ) * t ^ (D - 1) := by push_cast; ring
-  calc coeff m p * t ^ e - coeff m p * (t - 1) ^ e = coeff m p * (t ^ e - (t - 1) ^ e) := by ring
-    _ ≤ |coeff m p| * (t ^ e - (t - 1) ^ e) := mul_le_mul_of_nonneg_right (le_abs_self _) (by linarith)
-    _ ≤ |coeff m p| * ((e : ℚ) * t ^ (D - 1)) := mul_le_mul_of_nonneg_left h2 (abs_nonneg _)
-    _ = |coeff m p| * (e : ℚ) * t ^ (D - 1) := by ring
+  calc AddMonoidAlgebra.coeff p m * t ^ e - AddMonoidAlgebra.coeff p m * (t - 1) ^ e = AddMonoidAlgebra.coeff p m * (t ^ e - (t - 1) ^ e) := by ring
+    _ ≤ |AddMonoidAlgebra.coeff p m| * (t ^ e - (t - 1) ^ e) := mul_le_mul_of_nonneg_right (le_abs_self _) (by linarith)
+    _ ≤ |AddMonoidAlgebra.coeff p m| * ((e : ℚ) * t ^ (D - 1)) := mul_le_mul_of_nonneg_left h2 (abs_nonneg _)
+    _ = |AddMonoidAlgebra.coeff p m| * (e : ℚ) * t ^ (D - 1) := by ring
 
 end DiagonalSectionDifference
 

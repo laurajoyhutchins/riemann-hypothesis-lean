@@ -1,14 +1,52 @@
-import Mathlib
-import Formalism.LocalRingCardinality.Lemmas
-import Formalism.SharpRestriction.InertJacobiLevels.AsmIface
-import Formalism.LocalToGlobal.GlobalTheory.IsResidueClassZero
-import Formalism.SharpRestriction.GrowthBounds.SmallOrderPrimes
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.PairRowIffQdRows
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.DisjointExceptional
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ThinScalesIffHostBound
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LogCondLeThree
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes
+module
+
+public import Formalism.LocalRingCardinality.DataDIVDefs
+public import Formalism.LocalRingCardinality.DataLatDefs
+public import Formalism.LocalRingCardinality.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SetUnipotentTranslate
+import Development.AutomorphicArithmetic.PrimeDiscriminants.Scales
+import Formalism.LocalToGlobal.GlobalTheory.IsResidueClassZero
+import Formalism.SharpRestriction.InertJacobiLevels.AsmIface
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab Formalism.L2.GlobalTheoryTheory GlobalTheory.EX GlobalTheory.EX.OB GlobalTheory.Mem NumberField
 
 namespace GlobalTheory.EX.OB
@@ -49,7 +87,7 @@ theorem mem_span_of_semilinear {B K O Kf V W ι : Type*} [CommRing B] [IsDomain 
     induction hy' using Submodule.span_induction with
     | mem z hz => obtain ⟨i, rfl⟩ := hz; exact Submodule.subset_span ⟨i, rfl⟩
     | zero => simp
-    | add z z' _ _ h h' => rw [map_add]; exact Submodule.add_mem _ h h'
+    | add z z' _ _ h h' => rw [map_add (f := _)]; exact Submodule.add_mem _ h h'
     | smul a z _ h =>
       obtain ⟨o, ho⟩ := (hσ (algebraMap B K a)).2 ⟨a, rfl⟩
       rw [← algebraMap_smul K a z, hφ, ← ho, algebraMap_smul]
@@ -68,6 +106,7 @@ theorem mem_span_of_semilinear {B K O Kf V W ι : Type*} [CommRing B] [IsDomain 
   have heq : ∀ i, σ (k i) = algebraMap O Kf (o i) := by
     apply Fintype.linearIndependent_iffₛ.1 hli
     simp only [algebraMap_smul, ho]
+
     rw [← hk, map_sum]
     simp [hφ]
   rw [← hk]

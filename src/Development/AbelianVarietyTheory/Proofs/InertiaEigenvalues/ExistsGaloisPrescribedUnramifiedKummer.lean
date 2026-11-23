@@ -1,8 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsGenIsUnitSub
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RootOfUnityPrimeToTeichmullerLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.OneSubPhiOntoOfFilZero
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BhattScholzeCrystallineLattices
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.ConductorExponents
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations TensorProduct PowerSeries GlobalTheory.Prism GlobalTheory.BK GlobalTheory.BKReal GlobalTheory.BKGal GlobalTheory.Per Matrix
 open scoped Formalism.Per
 
@@ -45,8 +89,8 @@ theorem iotaO_injective : Function.Injective (iotaO l a) := by
   have hc : Function.Injective ((iotaO l a).comp (algebraMap ℤ_[l] (Wq l a))) := fun u v h => by
     simp only [RingHom.comp_apply, iotaO_algebraMap] at h
     exact Subtype.val_injective ((algebraMap ℚ_[l] (Om l)).injective h)
-  refine (RingHom.injective_iff_ker_eq_bot _).2 (Ideal.eq_bot_of_comap_eq_bot (R := ℤ_[l]) ?_)
-  rw [RingHom.comap_ker]
+  refine (RingHom.injective_iff_ker_eq_bot _).2 (Ideal.eq_bot_of_under_eq_bot (R := ℤ_[l]) ?_)
+  rw [Ideal.under_def, RingHom.comap_ker]
   exact (RingHom.injective_iff_ker_eq_bot _).1 hc
 
 def iota : Wq l a →+* ↥(Kunr l a) := (iotaO l a).codRestrict (Kunr l a) (iotaO_mem l a)
@@ -97,7 +141,7 @@ theorem exists_frac (y : ↥(Kunr l a)) : ∃ w s : Wq l a, s ≠ 0 ∧ (y : Om 
     obtain ⟨w1, s1, hs1, h1⟩ := hx
     obtain ⟨w2, s2, hs2, h2⟩ := hy
     refine ⟨w1 * s2 + w2 * s1, s1 * s2, mul_ne_zero hs1 hs2, ?_⟩
-    rw [map_add, map_mul, map_mul, map_mul, ← h1, ← h2]
+    rw [map_add (f := _), map_mul, map_mul, map_mul, ← h1, ← h2]
     ring
   | mul x y _ _ hx hy =>
     obtain ⟨w1, s1, hs1, h1⟩ := hx
@@ -112,14 +156,16 @@ attribute [local instance] algK
 
 theorem algebraMap_K (w : Wq l a) : algebraMap (Wq l a) ↥(Kunr l a) w = iota l a w := rfl
 
-theorem isFractionRing : IsFractionRing (Wq l a) ↥(Kunr l a) where
-  map_units s := by
+theorem isFractionRing : IsFractionRing (Wq l a) ↥(Kunr l a) := by
+  refine (isLocalization_iff (nonZeroDivisors (Wq l a)) ↥(Kunr l a)).2 ⟨?_, ?_, ?_⟩
+  · intro s
     refine IsUnit.mk0 _ fun h => nonZeroDivisors.coe_ne_zero s (iota_injective l a ?_)
     rw [← algebraMap_K, h, map_zero]
-  surj y := by
+  · intro y
     obtain ⟨w, s, hs, h⟩ := exists_frac l a y
     exact ⟨⟨w, ⟨s, mem_nonZeroDivisors_of_ne_zero hs⟩⟩, Subtype.ext (by simpa [algebraMap_K] using h)⟩
-  exists_of_eq h := ⟨1, by rw [iota_injective l a h]⟩
+  · intro x y h
+    exact ⟨1, by rw [iota_injective l a h]⟩
 
 end GlobalTheory.TameFrob
 
@@ -208,7 +254,7 @@ theorem irreducible_X_pow_add_prime_over_witt (e : ℕ) [NeZero e] : Irreducible
 theorem irreducible_K (e : ℕ) [NeZero e] : Irreducible (Polynomial.X ^ e + Polynomial.C (l : ↥(Kunr l a))) := by
   have hmon : (Polynomial.X ^ e + Polynomial.C (l : Wq l a)).Monic := monic_X_pow_add_C _ (NeZero.ne e)
   have h := (hmon.irreducible_iff_irreducible_map_fraction_map (K := ↥(Kunr l a))).1 (irreducible_X_pow_add_prime_over_witt l a e)
-  simpa [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X, Polynomial.map_C] using h
+  simpa [Polynomial.map_add (f := _), Polynomial.map_pow, Polynomial.map_X, Polynomial.map_C] using h
 
 end GlobalTheory.TameFrob
 
@@ -251,7 +297,5 @@ theorem exists_cover : ∀ (l : ℕ) [Fact l.Prime] (a e : ℕ) [NeZero a] [NeZe
     exact τ.commutes ⟨_, hm⟩
   · rw [AlgEquiv.mul_apply, AlgEquiv.restrictScalars_apply]
     exact hτ
-
-example : ∀ (l : ℕ) [Fact l.Prime] (a e : ℕ) [NeZero a] [NeZero e] (ϖ : PiSys l e), e + 1 = l ^ a → ∀ (m : ZMod a) (ζ : Om l), ζ ^ e = 1 → ∃ g : GQ l, (∀ x : Om l, x ^ l ^ a = x → g x = x ^ l ^ m.val) ∧ g (ϖ.seq 0) = ζ * ϖ.seq 0 := exists_cover
 
 end GlobalTheory.TameFrob

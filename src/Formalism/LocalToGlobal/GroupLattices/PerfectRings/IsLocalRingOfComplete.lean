@@ -1,4 +1,55 @@
-import Formalism.LocalToGlobal.GroupLattices.PerfectRings.ExistsSqEqIntCast
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.CompleteOfPow
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Noetherian
+public import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Basic
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+
+@[expose] public section
 
 open Polynomial
 
@@ -31,21 +82,7 @@ theorem precomplete_equiv {R M N : Type*} [CommRing R] [AddCommGroup M] [Module 
 
 theorem complete_of_pow {R : Type*} [CommRing R] (J : Ideal R) {n : ℕ} (hn : 0 < n)
     (h : IsAdicComplete (J ^ n) R) : IsAdicComplete J R := by
-  refine { toIsHausdorff := ⟨fun x hx => h.toIsHausdorff.haus x fun k => ?_⟩,
-           toIsPrecomplete := ⟨fun f hf => ?_⟩ }
-  · rw [← pow_mul]
-    exact hx (n * k)
-  · obtain ⟨L, hL⟩ := h.toIsPrecomplete.prec (f := fun k => f (n * k)) (fun {a b} hab => by
-      rw [← pow_mul]
-      exact hf (Nat.mul_le_mul_left n hab))
-    refine ⟨L, fun k => ?_⟩
-    have hk : k ≤ n * k := Nat.le_mul_of_pos_left k hn
-    have h1 : f k ≡ f (n * k) [SMOD (J ^ k • ⊤ : Submodule R R)] := hf hk
-    have h2 : f (n * k) ≡ L [SMOD (J ^ k • ⊤ : Submodule R R)] := by
-      have := hL k
-      rw [← pow_mul] at this
-      exact SModEq.mono (Submodule.smul_mono_left (Ideal.pow_le_pow_right hk)) this
-    exact h1.trans h2
+  apply Formalism.MainNotions.CrystallineLiftingInputs.OL.complete_of_pow <;> assumption
 
 private theorem mem_ideal_smul_top_pi_iff' {R : Type*} [CommRing R] {n : ℕ} (J : Ideal R) (x : Fin n → R) :
     x ∈ (J • ⊤ : Submodule R (Fin n → R)) ↔ ∀ i, x i ∈ J := by
@@ -224,7 +261,7 @@ theorem not_isField : ¬ IsField (integralClosure A L) := by
 theorem isDVR (hC : IsAdicComplete (maximalIdeal A) A) : IsDiscreteValuationRing (integralClosure A L) := by
   have := dedekind A K L
   have := isLocalRing A K L hC
-  exact ((IsDiscreteValuationRing.TFAE (integralClosure A L) (not_isField A K L)).out 2 0).mp
+  exact ((IsDiscreteValuationRing.TFAE (integralClosure A L) (not_isField A K L)).out 3 1).mp
     (dedekind A K L)
 
 theorem complete (hC : IsAdicComplete (maximalIdeal A) A) :
@@ -235,7 +272,7 @@ theorem complete (hC : IsAdicComplete (maximalIdeal A) A) :
   have hcm := complete_map A K L hC
   have h6 : ∀ J : Ideal (integralClosure A L), J ≠ ⊥ →
       ∃ n : ℕ, J = maximalIdeal (integralClosure A L) ^ n :=
-    ((IsDiscreteValuationRing.TFAE (integralClosure A L) (not_isField A K L)).out 0 6).mp
+    ((IsDiscreteValuationRing.TFAE (integralClosure A L) (not_isField A K L)).out 1 7).mp
       (isDVR A K L hC)
   obtain ⟨n, hn⟩ := h6 _ (map_ne_bot A K L)
   rcases Nat.eq_zero_or_pos n with h0 | hpos

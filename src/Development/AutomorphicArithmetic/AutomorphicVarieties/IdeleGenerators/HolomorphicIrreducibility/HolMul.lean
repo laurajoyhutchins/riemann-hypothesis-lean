@@ -1,12 +1,57 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.WeightChange
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.HolLin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Mulsm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Zfinof
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Trzero
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Mulaut
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Fixunit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.FinSupp
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Boxfin
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.WeightChange
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.HolomorphicIrreducibility.HolLin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Boxfin
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.FinSupp
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Fixunit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Mulaut
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Mulsm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Trzero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ScalarStabilizers.Zfinof
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.UniformSpace.Uniformizable
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +81,7 @@ private theorem genD_unique {y : Af F} {𝔪 𝔫 : Ideal (𝓞 F)} (h : GenD y 
 
 private theorem coefAt_eq {y : Af F} {𝔪 : Ideal (𝓞 F)} (h : GenD y 𝔪) (a : Ideal (𝓞 F) → ℂ) : coefAt a y = a 𝔪 := by
   have h' : ∃ 𝔪, GenD y 𝔪 := ⟨𝔪, h⟩
-  rw [coefAt, dif_pos h', genD_unique h'.choose_spec h]
+  rw [coefAt, dite_eq_left h', genD_unique h'.choose_spec h]
 
 private theorem coefAt_zero {y : Af F} (h : ¬ ∃ 𝔪, GenD y 𝔪) (a : Ideal (𝓞 F) → ℂ) : coefAt a y = 0 := dif_neg h
 
@@ -98,7 +143,7 @@ private theorem genD_add {y z : Af F} (hu : IsUnit (y + z)) (hy : ∃ 𝔪, GenD
   obtain ⟨𝔪, -, hy⟩ := hy
   obtain ⟨𝔫, -, hz⟩ := hz
   refine genD_of_le hu fun w => ?_
-  rw [map_add]
+  rw [map_add (f := _)]
   refine Valuation.map_add_le _ ?_ ?_
   · rw [hy, WithZero.exp_le_exp]; omega
   · rw [hz, WithZero.exp_le_exp]; omega
@@ -236,7 +281,7 @@ private theorem cv_norm {l : ℕ} [Fact l.Prime] (ι : Qbar l ≃+* ℂ) {a b : 
   have hf := Hm.boxfin F y ξ
   rw [cv, tsum_eq_sum (s := hf.toFinset)]
   · refine Finset.sum_induction _ (fun z => ‖ι.symm z‖ < 1) (fun x z hx hz => ?_) (by simp) fun η _ => ?_
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt hx hz)
     · by_cases h : cf a y η * cf b y (ξ - η) = 0
       · simp [h]
@@ -321,7 +366,7 @@ theorem UpperTheory.V.Sd.holMul :
     have h3 := (h1.mul_right (d₀ y)).add (conv h1 h2)
     refine (hasSum_cf (fun 𝔪 => A (Y 𝔪)) y E _).2 ?_
     have hp : 0 < (∏ v, t.val v) * absF y := mul_pos (Finset.prod_pos fun v _ => ht v) ((Hm.absf F).1 y)
-    convert h3 using 1
+    convert (preTransparency := .reducible) h3 using 1
     · rfl
     · funext ξ
       have e : ∑' η, cf a y η * E η * (cf b y (ξ - η) * E (ξ - η)) = cv a b y ξ * E ξ := by
@@ -346,7 +391,7 @@ theorem UpperTheory.V.Sd.holMul :
       ring
   · have e : A (Y 𝔪) - a 𝔪 = a 𝔪 * (d₀ (Y 𝔪) - 1) + cv a b (Y 𝔪) 1 := by
       simp only [A, cf1, coefAt_eq (hY 𝔪 hm)]; ring
-    rw [e, map_add, map_mul, map_sub, map_one]
+    rw [e, map_add (f := _), map_mul, map_sub, map_one]
     refine (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ?_ (cv_norm ι ha hb _ _))
     rw [norm_mul]
     exact mul_lt_one_of_nonneg_of_lt_one_right (ha _ hm) (norm_nonneg _) (hd _)

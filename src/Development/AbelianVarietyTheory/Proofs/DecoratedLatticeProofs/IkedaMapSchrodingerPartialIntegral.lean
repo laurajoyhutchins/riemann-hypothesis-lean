@@ -1,20 +1,83 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.MeanPair
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.RegularisingElement
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.EisensteinResidue
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.FirstTermIdentitySchrodinger
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.EisensteinMaximalParabolic
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelEisensteinPolesStd
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.SiegelEisensteinSimplePoleOfDoublingMethod
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.WeilThetaConvergence
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MixedCoordinatesOfThetaFunctionAreThetaFunctions
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SphericalEisensteinSeriesOnGroup
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.HeckeFormNSOfHeckeForm
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsThetaFam
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MixedModelTargetHeisenbergAnisotropicPart
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ComplexEmbeddingHermitianQuadrupleSum
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicMatrixSchwartzMajorantMeasurableRationalSh
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.DoubledPairSchrodingerFunctionContinuousIntegrab
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergOperatorThetaFunctionalMixedSourceMode
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.DoubledPairSchrodingerFunctionContinuousIntegrab
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicMatrixSchwartzMajorantMeasurableRationalSh
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousIsotropicSandwichMeanTranslation
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergSupSobolevSeminormThetaLawsStatement
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IntegrableMajorantCoordinateCosetMeasure
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MixedCoordinateThetaFunLeSchwartzMajorantLevel
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MixedCoordinatesOfThetaFunctionAreThetaFunctions
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisThetaLaws
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MixedModelTargetHeisenbergAnisotropicPart
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousIsotropicSandwichMeanTranslation
+import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+namespace I195MixedCoordinates_41e0c4a6f0d84a965825a95e
+
+open Formalism.BasicNotions Formalism.BasicNotions.TH
+open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
+open Formalism.L2.Theta Formalism.IndefR.Datum GlobalTheory.MixModel MeasureTheory
+attribute [local instance] Formalism.BasicNotions.Host.cmStar
+
+public noncomputable abbrev source
+    {D : D7} {S S₀ : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) (T : HSp D)
+    (ψ : AddChar (AF D.host.F) ℂ) (μ : Measure (Mx D T.rank ρ))
+    (𝓕 : Set (Mx D T.rank ρ)) (f : WO S T → ℂ) (x : Mx D T.rank ρ) : WO S₀ T → ℂ :=
+  fun w₀ => ∫ a in 𝓕, heisO ψ S T (a * d.pY)
+    (heisO ψ S T (x * d.pX) (heisO ψ S T (w₀ * d.p0) f)) 0 ∂μ
+
+end I195MixedCoordinates_41e0c4a6f0d84a965825a95e
+
+@[expose] public section
+
 open scoped Matrix NNReal TensorProduct Classical
 open MeasureTheory NumberField IsDedekindDomain Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum
 open GlobalTheory.AutomorphicL2Unitary GlobalTheory.AdelicU GlobalTheory.Doubling GlobalTheory.Cont GlobalTheory.Eis GlobalTheory.MixModel GlobalTheory.RegSW GlobalTheory.RegSch
@@ -38,14 +101,15 @@ theorem trace_incA (x : D.host.E) : Algebra.trace (AF D.host.F) (AE D) (incA D x
   rw [Algebra.trace_apply, Algebra.trace_apply, ← Algebra.baseChange_lmul, LinearMap.trace_baseChange]
 
 theorem trace_rat {ρ : ℕ} (M : Matrix (Fin ρ) (Fin ρ) D.host.E) : (rat M : Mx D ρ ρ).trace = incA D M.trace := by
-  simp only [Matrix.trace, Matrix.diag, rat, Matrix.map_apply, map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [Matrix.trace, Matrix.diag, rat, Matrix.map_apply, map_sum]
 
 def chi (ψ : AddChar (AF D.host.F) ℂ) {k ρ : ℕ} (M : Matrix (Fin k) (Fin ρ) D.host.E) (z : Mx D k ρ) : ℂ :=
   ψ (Algebra.trace (AF D.host.F) (AE D) (incA D D.host.xi0 * (adj z ⬝ (rat M : Mx D k ρ)).trace))
 
 theorem chi_add {k ρ : ℕ} (M : Matrix (Fin k) (Fin ρ) D.host.E) (z z' : Mx D k ρ) :
     chi ψ M (z + z') = chi ψ M z * chi ψ M z' := by
-  simp only [chi, adj_add, Matrix.add_mul, Matrix.trace_add, mul_add, map_add, AddChar.map_add_eq_mul]
+  simp only [chi, adj_add, Matrix.add_mul, Matrix.trace_add, mul_add, map_add (f := _), AddChar.map_add_eq_mul]
 
 theorem chi_rat (hψ : IsCharAF D.host.F ψ) {k ρ : ℕ} (M γ : Matrix (Fin k) (Fin ρ) D.host.E) : chi ψ M (rat γ) = 1 := by
   rw [chi, ← rat_conjTranspose, ← rat_mul, trace_rat, ← map_mul, trace_incA]
@@ -206,9 +270,9 @@ variable {S T T' : HSp D} {ρ t : ℕ} (e : HypDec S (zeroSp D) ρ) (d : HypDec 
 
 theorem integrable_slice (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM D T.rank ρ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f)
     {μ : Measure (Mx D t ρ)} {𝓕 : Set (Mx D t ρ)} (hμ : IsCovolOne (ratMx D t ρ) μ 𝓕) :
-    Continuous (fun x : Mx D t ρ => e.mixS T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0) ∧
-      Integrable (fun x : Mx D t ρ => e.mixS T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0) μ := by
-  have hc : Continuous (fun x : Mx D t ρ => e.mixS T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0) :=
+    Continuous (fun x : Mx D t ρ => (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0) ∧
+      Integrable (fun x : Mx D t ρ => (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0) μ := by
+  have hc : Continuous (fun x : Mx D t ρ => (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0) :=
     (GlobalTheory.Core.Rk.SchInt.mixS_continuous_integrable hψ e v hf 0).1.comp (continuous_const.matrix_mul continuous_id)
   refine ⟨hc, ?_⟩
   obtain ⟨θ, hθ⟩ := GlobalTheory.DualPairCompare.exists_infFam D
@@ -241,12 +305,15 @@ theorem integrable_slice (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM 
 theorem hasSum_recon (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM D T.rank ρ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f)
     (x y : Mx D T.rank ρ) :
     HasSum (fun η : Matrix (Fin T.rank) (Fin ρ) D.host.E =>
-      ψ (symplO S T (e.extX T (rat η + x)) (e.extY T y)) * e.mixS T ψ v.μ v.𝓕 f (rat η + x) 0)
+      ψ (symplO S T (e.extX T (rat η + x)) (e.extY T y)) * (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (rat η + x) 0)
       (ψ (symplOH S T (e.extX T x) (e.extY T y)) * f (e.extX T x + e.extY T y)) := by
   have hH := (GlobalTheory.HeisThetaLaws.heis_theta_laws D ψ hψ S T).1
   have h5 := (GlobalTheory.HeisMixSource.heis_mixS D ψ hψ S (zeroSp D) T ρ e v _
     (hH (e.extX T x) _ (hH (e.extY T y) _ hf))).2.2.2.2 0
+  change HasSum (fun η => e.mixS T ψ v.μ v.𝓕 (heisO ψ S T (e.extX T x) (heisO ψ S T (e.extY T y) f)) (rat η) 0) _ at h5
   simp only [Check.mixS_heis_extX, Check.mixS_heis_extY e v.covol hf] at h5
+  change HasSum (fun η : Matrix (Fin T.rank) (Fin ρ) D.host.E =>
+    ψ (symplO S T (e.extX T (rat η + x)) (e.extY T y)) * e.mixS T ψ v.μ v.𝓕 f (rat η + x) 0) _
   simpa only [heisO, map_zero, symplOH_zero_left, AddChar.map_zero_eq_one, one_mul, zero_add] using h5
 
 theorem symplO_add_right (x y y' : WO S T) : symplO S T x (y + y') = symplO S T x y + symplO S T x y' := by
@@ -276,14 +343,14 @@ theorem tsum_reindex (G : Matrix (Fin T.rank) (Fin ρ) D.host.E → ℂ) :
     simpa only [Matrix.add_mul, HypDec.q0, HypDec.qY, Matrix.mul_assoc d.e, Matrix.mul_assoc d.i₀, Matrix.mul_assoc d.e',
       Matrix.mul_assoc T'.gram⁻¹, hY, h0, Matrix.mul_zero, add_zero, Matrix.one_mul] using this
 
-set_option maxHeartbeats 1000000 in
 
+set_option maxHeartbeats 1000000 in
 theorem inner_mean (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM D T.rank ρ) {f : WO S T → ℂ} (hf : IsThetaFunO ψ S T f)
     {μ : Measure (Mx D t ρ)} {𝓕 : Set (Mx D t ρ)} (hμ : IsCovolOne (ratMx D t ρ) μ 𝓕)
     {ν : Measure (Mx D T'.rank ρ)} {𝓨 : Set (Mx D T'.rank ρ)} (hν : IsCovolOne (ratMx D T'.rank ρ) ν 𝓨) (u : Mx D t ρ) :
     ∫ (z : Mx D t ρ) in 𝓕, ∫ (b : Mx D T'.rank ρ) in 𝓨, f (d.jX ⬝ (u ⬝ e.pX + z ⬝ e.pY) + d.j0 ⬝ (b ⬝ e.pY)) ∂ν ∂μ =
-      ∑' γ : Matrix (Fin t) (Fin ρ) D.host.E, e.mixS T ψ v.μ v.𝓕 f (d.jX ⬝ (rat γ + u)) 0 := by
-  set G : Matrix (Fin T.rank) (Fin ρ) D.host.E → ℂ := fun η => e.mixS T ψ v.μ v.𝓕 f (rat η + d.jX ⬝ u) 0 with hG
+      ∑' γ : Matrix (Fin t) (Fin ρ) D.host.E, (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (d.jX ⬝ (rat γ + u)) 0 := by
+  set G : Matrix (Fin T.rank) (Fin ρ) D.host.E → ℂ := fun η => (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (rat η + d.jX ⬝ u) 0 with hG
   have hs : Summable fun η => ‖G η‖ := by
     have h := summable_norm_iff.2 (hasSum_recon e hψ v hf (d.jX ⬝ u) 0).summable
     simpa only [norm_mul, hψ.1.2.1, one_mul] using h
@@ -301,7 +368,7 @@ theorem inner_mean (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM D T.ra
         Matrix.mul_add, add_assoc]
     rw [← e1, ← h]
     refine tsum_congr fun η => ?_
-    rw [← mul_assoc, ← AddChar.map_add_eq_mul, ← symplO_add_right, ← map_add, add_comm (rat d.i₀ ⬝ b),
+    rw [← mul_assoc, ← AddChar.map_add_eq_mul, ← symplO_add_right, ← map_add (f := _), add_comm (rat d.i₀ ⬝ b),
       map_add (e.extX T), ← Check.symplOH_add_self, ← Check.symplOH_add_self, GlobalTheory.OrientedHeis.symplOH_add_left, h0,
       add_zero]
     rfl
@@ -323,7 +390,7 @@ theorem at_zero (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM D T.rank 
     {μ₁ : Measure (Mx D t S.rank)} {𝓕₁ : Set (Mx D t S.rank)} (h₁ : IsCovolOne (ratMx D t S.rank) μ₁ 𝓕₁)
     {μ : Measure (Mx D t ρ)} {𝓕 : Set (Mx D t ρ)} (hμ : IsCovolOne (ratMx D t ρ) μ 𝓕)
     {ν : Measure (Mx D T'.rank ρ)} {𝓨 : Set (Mx D T'.rank ρ)} (hν : IsCovolOne (ratMx D T'.rank ρ) ν 𝓨) :
-    e.mixS T' ψ ν 𝓨 (ikeda ψ d μ₁ 𝓕₁ f) 0 0 = ∫ x : Mx D t ρ, e.mixS T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0 ∂μ := by
+    (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T' ψ ν 𝓨 (ikeda ψ d μ₁ 𝓕₁ f) 0 0 = ∫ x : Mx D t ρ, (_root_.I195MixedCoordinates_41e0c4a6f0d84a965825a95e.source e) T ψ v.μ v.𝓕 f (d.jX ⬝ x) 0 ∂μ := by
   obtain ⟨i1, i2, i3, i4, i5, -⟩ := lattice_Mx D t S.rank
   obtain ⟨j1, j2, j3, j4, j5, -⟩ := lattice_Mx D T'.rank ρ
   haveI : BorelSpace (Mx D t S.rank) := ⟨rfl⟩
@@ -337,6 +404,7 @@ theorem at_zero (hψ : IsStdChar D ψ (-1)) (v : GlobalTheory.Unf.VolM D T.rank 
     hf.cont.comp ((continuous_const.matrix_mul continuous_snd).add
       (continuous_const.matrix_mul (continuous_fst.matrix_mul continuous_const)))
   have hm := continuous_mean (ν.restrict 𝓨) _ hc C fun _ => hC _
+  change e.mixS T' ψ ν 𝓨 (ikeda ψ d μ₁ 𝓕₁ f) 0 0 = _
   simp only [Check.mixS_eq e ν, map_zero, symplOH_zero_right, AddChar.map_zero_eq_one, one_mul, add_zero, ikeda_apply,
     HypDec.extY_apply]
   rw [integral_integral_swap (f := fun (b : Mx D T'.rank ρ) (ξ : Mx D t S.rank) => f (d.jX ⬝ ξ + d.j0 ⬝ (b ⬝ e.pY)))
@@ -358,8 +426,13 @@ theorem sch_ikeda : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D �
   have h := at_zero (dblDec A) d hψ ⟨ν, 𝓨, hν⟩ hF h₁ h₂ hν'
   have e1 : (dblDec A).extX T (d.j0 ⬝ a) = d.inc0 (dblSp A) ((dblDec A).extX T' a) := by
     rw [HypDec.extX_apply, HypDec.extX_apply, HypDec.wittDecomp_inclAnisotropicHom_apply, Matrix.mul_assoc]
-  simp only [Check.mixS_heis_extX] at h
-  rw [e1, ikeda, Check.mixedModelTarget_heisenberg_anisotropic_part, Check.mixS_heis_extX, zero_add] at h
+  change (dblDec A).mixS T' ψ ν' 𝓨' (d.mixT (dblSp A) ψ μ₁ 𝓕₁ (heisO ψ (dblSp A) T ((dblDec A).extX T (d.j0 ⬝ a)) φ) 0) 0 0 =
+    ∫ x : Mx D t A.rank, (dblDec A).mixS T ψ ν 𝓨 (heisO ψ (dblSp A) T ((dblDec A).extX T (d.j0 ⬝ a)) φ) (d.jX ⬝ x) 0 ∂μ₂ at h
+  rw [e1, Check.mixedModelTarget_heisenberg_anisotropic_part] at h
+  rw [← e1] at h
+  simp only [Check.mixS_heis_extX, zero_add] at h
+  change (dblDec A).mixS T' ψ ν' 𝓨' (d.mixT (dblSp A) ψ μ₁ 𝓕₁ φ 0) a 0 =
+    ∫ x : Mx D t A.rank, (dblDec A).mixS T ψ ν 𝓨 φ (d.jX ⬝ x + d.j0 ⬝ a) 0 ∂μ₂
   exact h
 
 end GlobalTheory.IkedaSch

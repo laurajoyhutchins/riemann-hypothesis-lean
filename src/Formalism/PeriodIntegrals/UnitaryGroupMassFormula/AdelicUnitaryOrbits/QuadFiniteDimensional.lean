@@ -1,5 +1,58 @@
-import Mathlib
-import Formalism.PeriodIntegrals.AdelicOrbitU
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -63,7 +116,7 @@ private lemma exists_mul_self_eq_and_sigma_eq_sub_of_not_mem (h2 : Module.finran
   obtain ⟨t, s, hts⟩ := exists_eq_add_mul_of_finrank_two_of_linearIndependent h2 (linearIndependent_one_of_not_mem_range ha) (a * a)
   refine ⟨s, t, hts, ?_⟩
   have hσ := congrArg σ hts
-  simp only [map_mul, map_add, AlgHom.commutes] at hσ
+  simp only [map_mul, map_add (f := _), AlgHom.commutes] at hσ
   have hne : σ a ≠ a := fun h => ha ((hfix a).mp h)
   have key : (σ a - a) * (σ a + a - algebraMap F E s) = 0 := by
     linear_combination hσ - hts
@@ -85,7 +138,7 @@ theorem quad_li [CharZero F] {θ : E} (hθ0 : θ ≠ 0) (hσθ : σ θ = -θ) :
   intro s t hst
   have h' : s • (1 : E) - t • θ = 0 := by
     have := congrArg σ hst
-    simp only [map_add, map_smul, map_one, hσθ, smul_neg, map_zero] at this
+    simp only [map_add (f := _), map_smul, map_one, hσθ, smul_neg, map_zero] at this
     linear_combination this
   have h3 : t • θ + t • θ = 0 := by linear_combination hst - h'
   have ht : t = 0 := by
@@ -116,7 +169,7 @@ theorem quad_exists_theta [CharZero F] (h2 : Module.finrank F E = 2)
     linear_combination (-(algebraMap F E 2⁻¹)) * h + a * e
   have hsq : (2 * a - algebraMap F E s) * (2 * a - algebraMap F E s) =
       algebraMap F E (4 * t + s ^ 2) := by
-    rw [map_add, map_mul, map_pow, map_ofNat]
+    rw [map_add (f := _), map_mul, map_pow, map_ofNat]
     linear_combination 4 * hts
   have hd0 : (4 * t + s ^ 2 : F) ≠ 0 := by
     intro hd
@@ -164,7 +217,7 @@ theorem quad_coord_eq (a b : R) :
       a • quadBasisR h2 hli R 0 + b • quadBasisR h2 hli R 1 := by
     rw [quadBasisR_zero, quadBasisR_one, TensorProduct.smul_tmul', TensorProduct.smul_tmul',
       smul_eq_mul, smul_eq_mul, mul_one, mul_one]
-  rw [e, map_add, map_smul, map_smul, Module.Basis.repr_self, Module.Basis.repr_self]
+  rw [e, map_add (f := _), map_smul, map_smul, Module.Basis.repr_self, Module.Basis.repr_self]
   funext i
   fin_cases i <;> simp
 
@@ -190,7 +243,7 @@ private lemma sigR_tmul_adelic_unitary_orbits (x : R) (y : E) : sigR R σ (x ⊗
 
 theorem quad_sig (hσθ : σ θ = -θ) (a b : R) :
     sigR R σ (a ⊗ₜ[F] (1 : E) + b ⊗ₜ[F] θ) = a ⊗ₜ[F] (1 : E) + (-b) ⊗ₜ[F] θ := by
-  rw [map_add, sigR_tmul_adelic_unitary_orbits, sigR_tmul_adelic_unitary_orbits, map_one, hσθ, TensorProduct.tmul_neg,
+  rw [map_add (f := _), sigR_tmul_adelic_unitary_orbits, sigR_tmul_adelic_unitary_orbits, map_one, hσθ, TensorProduct.tmul_neg,
     TensorProduct.neg_tmul]
 
 theorem quad_tmul_algebraMap (x : R) (d : F) :
@@ -198,8 +251,8 @@ theorem quad_tmul_algebraMap (x : R) (d : F) :
   rw [show algebraMap F E d = d • (1 : E) from Algebra.algebraMap_eq_smul_one d,
     ← TensorProduct.smul_tmul, Algebra.smul_def]
 
-include h2 hli in
 
+include h2 hli in
 theorem quad_trace {d : F} (hd : θ * θ = algebraMap F E d) (a b : R) :
     Algebra.trace R (R ⊗[F] E) (a ⊗ₜ[F] (1 : E) + b ⊗ₜ[F] θ) = 2 * a := by
   have e1 : (a ⊗ₜ[F] (1 : E) + b ⊗ₜ[F] θ) * ((1 : R) ⊗ₜ[F] θ) =
@@ -216,7 +269,7 @@ theorem quad_sig_sig (hσσ : ∀ a : E, σ (σ a) = a) (z : R ⊗[F] E) : sigR 
   induction z using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul x y => rw [sigR_tmul_adelic_unitary_orbits, sigR_tmul_adelic_unitary_orbits, hσσ]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 end Ring
 

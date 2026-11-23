@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierSchwartz
-import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierCoordinates
+module
+
+public import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierSchwartz
+public import GroundTheory.AutomorphicForms.GL2.GJMatrixAdelic
+public import GroundTheory.HeightsAndTheta.Theta.Weil.PartialFourierCoordinates
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Theta
 
@@ -14,23 +58,17 @@ set_option linter.unusedSectionVars false
 
 variable {K : Type} [Field K] [NumberField K] {ι κ : Type} [Fintype ι] [Fintype κ]
 
-variable (K ι κ) in
 
+variable (K ι κ) in
 def toEuclidSplit : ((ι ⊕ κ) → mixedSpace K) ≃L[ℝ] (ι → mixedSpace K) × EuclidPi K κ :=
   (LinearEquiv.sumArrowLequivProdArrow ι κ ℝ (mixedSpace K)).toContinuousLinearEquiv.trans
     ((ContinuousLinearEquiv.refl ℝ (ι → mixedSpace K)).prodCongr (toEuclidPi K))
 
-variable (K ι κ) in
 
+variable (K ι κ) in
 def toEuclidSplitConj : ((ι ⊕ κ) → mixedSpace K) ≃L[ℝ] (ι → mixedSpace K) × EuclidPi K κ :=
   (LinearEquiv.sumArrowLequivProdArrow ι κ ℝ (mixedSpace K)).toContinuousLinearEquiv.trans
     ((ContinuousLinearEquiv.refl ℝ (ι → mixedSpace K)).prodCongr (toEuclidPiConj K))
-
-theorem toEuclidSplitConj_apply (x : (ι ⊕ κ) → mixedSpace K) :
-    toEuclidSplitConj K ι κ x = (fun i ↦ x (.inl i), toEuclidPiConj K fun k ↦ x (.inr k)) := rfl
-
-theorem toEuclidSplit_symm_apply (a : ι → mixedSpace K) (v : EuclidPi K κ) :
-    (toEuclidSplit K ι κ).symm (a, v) = Sum.elim a ((toEuclidPi K).symm v) := rfl
 
 def mixedPartialFourier (φ : ((ι ⊕ κ) → mixedSpace K) → ℂ) (x : (ι ⊕ κ) → mixedSpace K) : ℂ :=
   mixedFourierPi K (fun u : κ → mixedSpace K ↦ φ (Sum.elim (fun i ↦ x (.inl i)) u))
@@ -114,23 +152,49 @@ theorem partialFourierPi_schwartzBruhatTensorPi (φ : 𝓢((ι ⊕ κ) → mixed
     partialFourierPi (schwartzBruhatTensorPi φ g) =
       schwartzBruhatTensorPi (mixedPartialFourierSchwartz φ) (finitePartialFourier g) := by
   funext z
+  let c := infPartPi fun i ↦ z (.inl i)
+  let L : (κ → mixedSpace K) →L[ℝ] ((ι ⊕ κ) → mixedSpace K) :=
+    ContinuousLinearMap.pi fun s ↦
+      Sum.elim (fun _ ↦ (0 : (κ → mixedSpace K) →L[ℝ] mixedSpace K))
+        (fun j ↦ ContinuousLinearMap.proj j) s
+  have hL (u : κ → mixedSpace K) : L u = Sum.elim (0 : ι → mixedSpace K) u := by
+    funext s
+    cases s <;> rfl
+  have hgrowth : (fun u : κ → mixedSpace K ↦ (Sum.elim c u : (ι ⊕ κ) → mixedSpace K)).HasTemperateGrowth := by
+    have h : (fun u : κ → mixedSpace K ↦ (Sum.elim c u : (ι ⊕ κ) → mixedSpace K)) =
+        fun u ↦ L u + Sum.elim c 0 := by
+      funext u s
+      rw [hL]
+      cases s <;> simp
+    rw [h]
+    exact L.hasTemperateGrowth.add (Function.HasTemperateGrowth.const _)
+  have hupper : ∃ (k : ℕ) (C : ℝ), ∀ u : κ → mixedSpace K,
+      ‖u‖ ≤ C * (1 + ‖(Sum.elim c u : (ι ⊕ κ) → mixedSpace K)‖) ^ k := by
+    refine ⟨1, 1, fun u ↦ ?_⟩
+    have hle : ‖u‖ ≤ ‖(Sum.elim c u : (ι ⊕ κ) → mixedSpace K)‖ :=
+      (pi_norm_le_iff_of_nonneg (norm_nonneg _)).mpr fun j ↦ by
+        simpa using norm_le_pi_norm (Sum.elim c u : (ι ⊕ κ) → mixedSpace K) (Sum.inr j)
+    rw [pow_one, one_mul]
+    linarith
+  let slice : 𝓢(κ → mixedSpace K, ℂ) :=
+    SchwartzMap.compCLM ℝ hgrowth hupper φ
   have hslice : (fun y : κ → 𝔸[K] ↦ schwartzBruhatTensorPi φ g (Sum.elim (fun i ↦ z (.inl i)) y)) =
-      schwartzBruhatTensorPi (schwartzMapSliceSumElim (infPartPi fun i ↦ z (.inl i)) φ)
+      schwartzBruhatTensorPi slice
         (fun t ↦ g (Sum.elim (finPartPi fun i ↦ z (.inl i)) t)) := by
     funext y
     simp only [schwartzBruhatTensorPi, infPartPi_sumElim, finPartPi_sumElim,
-      schwartzMapSliceSumElim_apply]
+      slice, SchwartzMap.compCLM_apply, Function.comp_apply, c]
   rw [partialFourierPi, hslice, adelicFourierPi_schwartzBruhatTensorPi, schwartzBruhatTensorPi,
     schwartzBruhatTensorPi, mixedPartialFourierSchwartz_apply, mixedFourierPiSchwartz_apply]
   rfl
 
 theorem integrable_partialFourierPi_slice {F : ((ι ⊕ κ) → 𝔸[K]) → ℂ}
-    (hF : F ∈ schwartzBruhatPi K (ι ⊕ κ)) (a : ι → 𝔸[K]) :
+    (hF : F ∈ schwartzBruhatPi (K := K) (ι := ι ⊕ κ)) (a : ι → 𝔸[K]) :
     Integrable (fun y : κ → 𝔸[K] ↦ F (Sum.elim a y)) (adeleMeasurePi K) :=
   integrable_of_mem_schwartzBruhatPi (schwartzBruhatPi_sumElim_mem hF a)
 
-theorem partialFourierPi_mem {F : ((ι ⊕ κ) → 𝔸[K]) → ℂ} (hF : F ∈ schwartzBruhatPi K (ι ⊕ κ)) :
-    partialFourierPi F ∈ schwartzBruhatPi K (ι ⊕ κ) := by
+theorem partialFourierPi_mem {F : ((ι ⊕ κ) → 𝔸[K]) → ℂ} (hF : F ∈ schwartzBruhatPi (K := K) (ι := ι ⊕ κ)) :
+    partialFourierPi F ∈ schwartzBruhatPi (K := K) (ι := ι ⊕ κ) := by
   induction hF using Submodule.span_induction with
   | mem G hG =>
     obtain ⟨φ, g, hg, rfl⟩ := hG
@@ -170,7 +234,7 @@ theorem tsum_sumElim {f : ((ι ⊕ κ) → K) → ℂ} (hf : Summable fun ξ ↦
   rw [← e.symm.tsum_eq, h1.tsum_prod' fun c ↦ h1.prod_factor c]
   rfl
 
-theorem tsum_partialFourierPi {F : ((ι ⊕ κ) → 𝔸[K]) → ℂ} (hF : F ∈ schwartzBruhatPi K (ι ⊕ κ)) :
+theorem tsum_partialFourierPi {F : ((ι ⊕ κ) → 𝔸[K]) → ℂ} (hF : F ∈ schwartzBruhatPi (K := K) (ι := ι ⊕ κ)) :
     ∑' ξ : (ι ⊕ κ) → K, partialFourierPi F (fun s ↦ algebraMap K 𝔸[K] (ξ s)) =
       ∑' ξ : (ι ⊕ κ) → K, F (fun s ↦ algebraMap K 𝔸[K] (ξ s)) := by
   rw [tsum_sumElim (poisson_of_mem_schwartzBruhatPi (partialFourierPi_mem hF)).1,

@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FirstDeriv
-import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.StatementM
+module
+
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.IsLawOfLog
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,52 +81,5 @@ def GcUnique : Prop :=
   ∀ (K : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] (p : ℕ)
     (σ : K →+* K), UnrOK K p σ →
     ∀ c d : K, σ (σ c) = c → σ (σ d) = d → Simeq (Gser p c (σ c)) (Gser p d (σ d)) → c = d
-
-def LogCoord : Prop :=
-  ∀ (K : Type) [Field K] (p : ℕ) (ϖ : K) (μ : PowerSeries K), 2 ≤ p → (p : K) ≠ 0 →
-    PowerSeries.constantCoeff μ = 0 →
-    (PowerSeries.subst μ (lamF p ϖ) : PowerSeries K) = PowerSeries.X →
-    (PowerSeries.subst (PowerSeries.C ϖ * μ) (lgF K p) : PowerSeries K) =
-      PowerSeries.C ϖ * PowerSeries.X
-
-def OmBridge : Prop :=
-  ∀ (F L : Type) [Field F] [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L] (ν : ℕ)
-    [NeZero ν] (b : Module.Basis (Fin ν) F L) (φ : L ≃+* L) (g : L ≃ₐ[F] L),
-    (∀ x, φ (φ x) = g x) → orderOf g = ν →
-    ∀ s s' : ZMod (2 * ν), s.val % 2 = s'.val % 2 →
-      ∑ r, (φ ^ s.val) ((Algebra.traceForm F L).dualBasis (traceForm_nondegenerate F L) b r) *
-        (φ ^ s'.val) (b r) = if s = s' then 1 else 0
-
-def HhModP : Prop :=
-  ∀ (K : Type) [NormedField K] [IsUltrametricDist K] (p ν r0 r1 E D : ℕ) [NeZero ν]
-    (u : ZMod (2 * ν) → K), p.Prime → 2 < p → ‖(p : K)‖ = (p : ℝ)⁻¹ → (∀ s, ‖u s‖ ≤ 1) →
-    D < p ^ (2 * E) →
-    ∃ Y : MvPowerSeries (ZV ν r0 r1) K, Integral Y ∧
-      ∀ n : ZV ν r0 r1 →₀ ℕ, n.degree ≤ D →
-        MvPowerSeries.coeff n (hhS (r0 := r0) (r1 := r1) p u) = MvPowerSeries.coeff n
-          (∑ s : ZMod (2 * ν), ∑ l : Fin E, ∑ l' : Fin E, ∑ ab : Fin r0 × Fin r1,
-            MvPowerSeries.C (u s * (-1) ^ (l.val + l'.val)) *
-              ((MvPowerSeries.X (s - 2 * (l.val : ZMod (2 * ν)), ab) :
-                  MvPowerSeries (ZV ν r0 r1) K) ^ (p ^ (1 + 2 * l.val)) *
-                MvPowerSeries.X (s + 1 - 2 * (l'.val : ZMod (2 * ν)), ab) ^ (p ^ (2 * l'.val))) +
-            MvPowerSeries.C (p : K) * Y)
-
-def ThmSPlaces : Prop :=
-  ∀ (K Pl : Type) [NormedField K] [IsUltrametricDist K] [CharZero K] [Fintype Pl] [DecidableEq Pl]
-    (p r0 r1 : ℕ) (ν : Pl → ℕ) [∀ v, NeZero (ν v)]
-    (om oms : ∀ v, Fin (ν v) → ZMod (2 * ν v) → K) (c c' : Pl → K) (ϖ : K) (μ : PowerSeries K)
-    (U : MvPowerSeries (Σ v, Bool × EV (ν v) r0 r1) K), p.Prime →
-    ‖(p : K)‖ = (p : ℝ)⁻¹ → ϖ ^ (p ^ 2 - 1) = (p : K) → (∀ v, OmOK p (ν v) (om v) (oms v)) →
-    (∀ v, ‖c v‖ ≤ 1) → (∀ v, ‖c' v‖ ≤ 1) → PowerSeries.constantCoeff μ = 0 →
-    (PowerSeries.subst μ (lamF p ϖ) : PowerSeries K) = PowerSeries.X → Integral U →
-    ∃ V : MvPowerSeries (Σ v, ZV (ν v) r0 r1) K, Integral V ∧
-      MvPowerSeries.subst
-          (fun x : Σ v, Bool × EV (ν v) r0 r1 =>
-            atPlace (ι := fun v => ZV (ν v) r0 r1) x.1
-              (MvPowerSeries.C ϖ * sSub (om x.1) (oms x.1) μ x.2))
-          ((∏ v, atPlace (ι := fun v => Bool × EV (ν v) r0 r1) v
-            (mvExp (-(Gtot (E := EV (ν v) r0 r1) p (c v) (c' v) 1)))) * U) =
-        (∏ v, atPlace (ι := fun v => ZV (ν v) r0 r1) v
-          (mvExp (-(MvPowerSeries.C (ϖ ^ (p + 1) / (p : K)) * hhS p (uS (c v) (c' v)))))) * V
 
 end Formalism.InvariantFactorPaths.G7

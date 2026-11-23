@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Smooth.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Kaehler.JacobiZariski
+public import Mathlib.RingTheory.TensorProduct.Free
+
+@[expose] public section
 
 open scoped TensorProduct
 
@@ -47,7 +94,8 @@ theorem append_of_shortExact {A M₁ M₂ M₃ : Type*} [CommRing A]
     have hgx : g x ∈ Submodule.span A (Set.range fun i => g (w i)) := hws ▸ Submodule.mem_top
     obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun A).mp hgx
     have hker : g (x - ∑ i, c i • w i) = 0 := by
-      simp [map_sum, hc]
+      set_option synthInstance.maxHeartbeats 100000 in
+        simp [map_sum, hc]
     obtain ⟨y, hy⟩ := (hfg _).mp hker
     have hy' : y ∈ Submodule.span A (Set.range u) := hus ▸ Submodule.mem_top
     have hfy : f y ∈ Submodule.span A (Set.range fun i => f (u i)) := by
@@ -70,7 +118,7 @@ theorem kaehler_basis_tower : ∀ (R S T : Type) [CommRing R] [CommRing S] [Comm
     Submodule.span T (Set.range fun i => KaehlerDifferential.D R T (Fin.append (fun i => algebraMap S T (z i)) w i)) = ⊤ := by
   intro R S T _ _ _ _ _ _ _ _ e m z w hz hzs hw hws
   have hinj : Function.Injective (KaehlerDifferential.mapBaseChange R S T) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨y, rfl⟩ := (Algebra.H1Cotangent.exact_δ_mapBaseChange R S T x).mp hx
     have : Subsingleton (Algebra.H1Cotangent S T) :=

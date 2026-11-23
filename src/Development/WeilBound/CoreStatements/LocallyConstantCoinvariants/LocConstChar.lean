@@ -1,5 +1,68 @@
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteTwistedRankQuotient
-import Development.AbelianVarietyTheory.Definitions.Divisors.RankEqCardIffExistsFrameMatrixFirstColumnBlock
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FibRepApply
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RankFiltrationExists
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteTwistedRankQuotient
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.OpenMapping
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
+import Mathlib.Topology.Baire.LocallyCompactRegular
+public import Mathlib.Topology.LocallyConstant.Algebra
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsClosedEmbeddingTopEmb
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +74,7 @@ open GlobalTheory.PRep GlobalTheory.SplitWeil GlobalTheory.SmGL GlobalTheory.Ind
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
   {a : Type} [Fintype a] [DecidableEq a] {κ : ℕ}
 
-theorem common_gen (hκ : κ = Fintype.card a) (w w' : SB (RankIn k a a {κ})) :
+theorem common_gen (hκ : κ = Fintype.card a) (w w' : SB (RankIn (k := k) (a := a) (b := a) {κ})) :
     ∃ t, w ∈ Submodule.span ℂ (Set.range fun g : GL a k => rightRep (k := k) a a κ g t) ∧
       w' ∈ Submodule.span ℂ (Set.range fun g : GL a k => rightRep (k := k) a a κ g t) := by
   obtain ⟨_, _⟩ := GlobalTheory.SplitWeil.Model.secondCountable_and_t2_local_field (k := k)
@@ -26,9 +89,9 @@ theorem common_gen (hκ : κ = Fintype.card a) (w w' : SB (RankIn k a a {κ})) :
     ⟨(isTotallyDisconnected_of_image (f := fun g : GL a k => g.val) GlobalTheory.SplitFlip.isEmbedding_val_GL.continuous.continuousOn
       GlobalTheory.SplitFlip.isEmbedding_val_GL.injective (isTotallyDisconnected_of_totallyDisconnectedSpace _))⟩
   let := rMul (k := k) (a := a) (c := a) κ
-  have hsm : ∀ (g : GL a k) (x : RankIn k a a {κ}), g • x = rAct {κ} x g⁻¹ := fun _ _ => rfl
-  have : ContinuousSMul (GL a k) (RankIn k a a {κ}) := ⟨continuous_rAct_inv κ⟩
-  have : MulAction.IsPretransitive (GL a k) (RankIn k a a {κ}) := ⟨fun x y => by
+  have hsm : ∀ (g : GL a k) (x : RankIn (k := k) (a := a) (b := a) {κ}), g • x = rAct {κ} x g⁻¹ := fun _ _ => rfl
+  have : ContinuousSMul (GL a k) (RankIn (k := k) (a := a) (b := a) {κ}) := ⟨continuous_rAct_inv κ⟩
+  have : MulAction.IsPretransitive (GL a k) (RankIn (k := k) (a := a) (b := a) {κ}) := ⟨fun x y => by
     obtain ⟨g, hg⟩ := exists_gl_eq_mul_of_rank k a a x.1 y.1 (x.2.trans hκ) (y.2.trans hκ)
     refine ⟨g⁻¹, Subtype.ext ?_⟩
     rw [hsm, inv_inv, rAct_val, hg]⟩
@@ -37,10 +100,10 @@ theorem common_gen (hκ : κ = Fintype.card a) (w w' : SB (RankIn k a a {κ})) :
     ext x
     simp only [Set.mem_setOf_eq, Set.mem_singleton_iff]
     exact ⟨fun h => h.ge, fun h => le_antisymm ((Matrix.rank_le_card_height x).trans hκ.ge) h⟩
-  have : LocallyCompactSpace (RankIn k a a {κ}) := hXo.locallyCompactSpace
-  have hop : ∀ x : RankIn k a a {κ}, IsOpenMap fun g : GL a k => g • x :=
+  have : LocallyCompactSpace (RankIn (k := k) (a := a) (b := a) {κ}) := hXo.locallyCompactSpace
+  have hop : ∀ x : RankIn (k := k) (a := a) (b := a) {κ}, IsOpenMap fun g : GL a k => g • x :=
     fun x => isOpenMap_smul_of_sigmaCompact x
-  have hρ : ∀ (g : GL a k) (f : SB (RankIn k a a {κ})) (x : RankIn k a a {κ}),
+  have hρ : ∀ (g : GL a k) (f : SB (RankIn (k := k) (a := a) (b := a) {κ})) (x : RankIn (k := k) (a := a) (b := a) {κ}),
       (rightRep (k := k) a a κ g f).1 x = f.1 (g⁻¹ • x) := by
     intro g f x
     show _ = f.1 (rAct {κ} x g⁻¹⁻¹)
@@ -48,14 +111,14 @@ theorem common_gen (hκ : κ = Fintype.card a) (w w' : SB (RankIn k a a {κ})) :
     rfl
   exact exists_common_generator (rightRep (k := k) a a κ) hρ hop GlobalTheory.SplitFlip.isCompact_KO GlobalTheory.SplitFlip.isOpen_KO w w'
 
-def toRank (hκ : κ = Fintype.card a) (g : GL a k) : RankIn k a a {κ} :=
+def toRank (hκ : κ = Fintype.card a) (g : GL a k) : RankIn (k := k) (a := a) (b := a) {κ} :=
   ⟨g.val, (Matrix.rank_unit g).trans hκ.symm⟩
 
 theorem toRank_surj (hκ : κ = Fintype.card a) : Function.Surjective (toRank (k := k) hκ) := fun x => by
   obtain ⟨g, hg⟩ := exists_gl_eq_mul_of_rank k a a (1 : Matrix a a k) x.1 (by simp) (x.2.trans hκ)
   exact ⟨g, Subtype.ext (by rw [hg, Matrix.one_mul]; rfl)⟩
 
-def rankHomeo (hκ : κ = Fintype.card a) : GL a k ≃ₜ RankIn k a a {κ} :=
+def rankHomeo (hκ : κ = Fintype.card a) : GL a k ≃ₜ RankIn (k := k) (a := a) (b := a) {κ} :=
   IsEmbedding.toHomeomorphOfSurjective (f := toRank hκ)
     ((IsEmbedding.subtypeVal.of_comp_iff (f := toRank hκ)).1 (GlobalTheory.SplitFlip.isEmbedding_val_GL (k := k) (n := a))) (toRank_surj hκ)
 
@@ -69,16 +132,16 @@ theorem locConst_char {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGr
   rw [hx']
 
 theorem exists_fun (hκ : κ = Fintype.card a) {ξ : GL a k →* ℂˣ} (hξ : IsSmoothChar ξ) :
-    ∃ l : SB (RankIn k a a {κ}) →ₗ[ℂ] ℂ, Function.Surjective l ∧
+    ∃ l : SB (RankIn (k := k) (a := a) (b := a) {κ}) →ₗ[ℂ] ℂ, Function.Surjective l ∧
       (∀ (g p : GL a k) φ, l (fibBase a a κ (g, p) φ) = (ξ p : ℂ) * ((ξ g)⁻¹ : ℂˣ) * l φ) ∧
       ∀ φ, l φ = 0 → φ ∈ twRel (rightRep (k := k) a a κ) ξ⁻¹ := by
   borelize k
   let μ : Measure (GL a k) := GlobalTheory.SplitFlip.haarVol (KO k a)
   have hc := (locConst_char hξ).continuous
-  have hint : ∀ φ : SB (RankIn k a a {κ}), Integrable (fun g => φ.1 (rankHomeo hκ g) * (ξ g : ℂ)) μ := fun φ =>
+  have hint : ∀ φ : SB (RankIn (k := k) (a := a) (b := a) {κ}), Integrable (fun g => φ.1 (rankHomeo hκ g) * (ξ g : ℂ)) μ := fun φ =>
     ((φ.2.1.continuous.comp (rankHomeo hκ).continuous).mul hc).integrable_of_hasCompactSupport
       (φ.2.2.comp_homeomorph (rankHomeo hκ)).mul_right
-  let l : SB (RankIn k a a {κ}) →ₗ[ℂ] ℂ :=
+  let l : SB (RankIn (k := k) (a := a) (b := a) {κ}) →ₗ[ℂ] ℂ :=
     { toFun := fun φ => ∫ g, φ.1 (rankHomeo hκ g) * (ξ g : ℂ) ∂μ
       map_add' := fun φ ψ => by
         rw [← integral_add (hint φ) (hint ψ)]
@@ -102,7 +165,7 @@ theorem exists_fun (hκ : κ = Fintype.card a) {ξ : GL a k →* ℂˣ} (hξ : I
   let f : GL a k → ℂ := fun g => (KO k a : Set (GL a k)).indicator 1 g * ((ξ⁻¹ g : ℂˣ) : ℂ)
   have hf : f ∈ SB (GL a k) := ⟨(LocallyConstant.charFn ℂ hK).2.mul (locConst_char hξ.inv),
     HasCompactSupport.mul_right (HasCompactSupport.intro GlobalTheory.SplitFlip.isCompact_KO fun x hx => Set.indicator_of_notMem hx _)⟩
-  let φ₀ : SB (RankIn k a a {κ}) := ⟨f ∘ (rankHomeo hκ).symm, hf.1.comp_continuous (rankHomeo hκ).symm.continuous,
+  let φ₀ : SB (RankIn (k := k) (a := a) (b := a) {κ}) := ⟨f ∘ (rankHomeo hκ).symm, hf.1.comp_continuous (rankHomeo hκ).symm.continuous,
     hf.2.comp_homeomorph _⟩
   have h0 : l φ₀ ≠ 0 := by
     have e : l φ₀ = ∫ g, (KO k a : Set (GL a k)).indicator (fun _ => (1 : ℂ)) g ∂μ := by
@@ -124,7 +187,7 @@ theorem exists_fun (hκ : κ = Fintype.card a) {ξ : GL a k →* ℂˣ} (hξ : I
     | add x y _ _ hx hy =>
       obtain ⟨s, hs, e⟩ := hx
       obtain ⟨u, hu, e'⟩ := hy
-      exact ⟨s + u, by convert add_mem hs hu using 1; rw [add_smul]; abel, by rw [map_add, e, e', add_mul]⟩
+      exact ⟨s + u, by convert add_mem hs hu using 1; rw [add_smul]; abel, by rw [map_add (f := _), e, e', add_mul]⟩
     | smul c x _ hx =>
       obtain ⟨s, hs, e⟩ := hx
       exact ⟨c * s, by convert Submodule.smul_mem _ c hs using 1; rw [smul_sub, smul_smul],

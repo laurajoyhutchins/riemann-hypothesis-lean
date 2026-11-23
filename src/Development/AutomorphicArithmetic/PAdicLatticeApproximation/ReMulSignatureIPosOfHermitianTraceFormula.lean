@@ -1,4 +1,51 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.LineBasis
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.ArchFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PerCApply
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.PELU GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen
 open GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKGeo Polynomial
@@ -50,12 +97,12 @@ private lemma thR_act (L : Link D G) (th : VQ D →+ Arch G)
   induction a using TensorProduct.induction_on with
   | zero => simp
   | add a b ha hb =>
-    simp only [map_add, LinearMap.add_apply, Pi.add_apply, ha, hb, Matrix.add_mulVec]
+    simp only [map_add (f := _), LinearMap.add_apply, Pi.add_apply, ha, hb, Matrix.add_mulVec]
   | tmul r c =>
     induction x using TensorProduct.induction_on with
     | zero => simp
     | add x y hx hy =>
-      simp only [map_add, Pi.add_apply, hx, hy, Matrix.mulVec_add]
+      simp only [map_add (f := _), Pi.add_apply, hx, hy, Matrix.mulVec_add]
     | tmul s w =>
       have h : actOn L.rep ℝ (r ⊗ₜ c) (s ⊗ₜ w) = (r * s) ⊗ₜ (L.rep c w) := by
         simp [actOn, Algebra.TensorProduct.lift_tmul, Module.End.baseChangeHom, Algebra.ofId_apply,
@@ -73,13 +120,13 @@ private lemma form_ext (th : VQ D →+ Arch G) (lam : InfinitePlace G.F → ℂ)
   induction x using TensorProduct.induction_on with
   | zero => simp [hv]
   | add x x' hx hx' =>
-    simp only [map_add, LinearMap.add_apply, hx, hx', Pi.add_apply, hvAddL, mul_add, Complex.add_re,
+    simp only [map_add (f := _), LinearMap.add_apply, hx, hx', Pi.add_apply, hvAddL, mul_add, Complex.add_re,
       Finset.sum_add_distrib]
   | tmul a u =>
     induction y using TensorProduct.induction_on with
     | zero => simp [hv]
     | add y y' hy hy' =>
-      simp only [map_add, hy, hy', Pi.add_apply, hvAddR, mul_add, Complex.add_re, Finset.sum_add_distrib]
+      simp only [map_add (f := _), hy, hy', Pi.add_apply, hvAddR, mul_add, Complex.add_re, Finset.sum_add_distrib]
     | tmul b w =>
       rw [LinearMap.BilinForm.baseChange_tmul, thR_tmul, thR_tmul]
       have hterm : ∀ v, 2 * (lam v * hv (G.gram v) ((a • th u) v) ((b • th w) v)).re

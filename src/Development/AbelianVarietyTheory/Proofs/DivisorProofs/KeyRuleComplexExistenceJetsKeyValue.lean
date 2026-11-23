@@ -1,30 +1,71 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsPolAVSectionInverseImage
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToricPeriodBlockIsSymm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbsoluteSiegel
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.CmFieldHostElementAddConjEqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DimensionZeroCase
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsClassicalThetaDescriptionAbelianPartStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRealCoords
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetEqDetBlock
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValRPush
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvTEqTerm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.JetFamilyDeriv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralLabels
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLevelOfLabels
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPosDefFromBlocks
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsQuad
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableGen
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TermsumTrFacDifferentiable
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThJetOfNormalForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FullMulVec
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ToricPeriodBlockIsSymm
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.CmFieldHostElementAddConjEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DetEqDetBlock
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DifferentiableGen
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DimensionZeroCase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EvTEqTerm
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsClassicalThetaDescriptionAbelianPartStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralLabels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsKeyInNf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLevelOfLabels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPosDefFromBlocks
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsQuad
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsRealCoords
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FullMulVec
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.JetFamilyDeriv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TermsumTrFacDifferentiable
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThJetOfNormalForm
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaKeyRuleValueClassicalNormalForm
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsKeyInNf
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValRPush
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.TorusExt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
-open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.MBModel GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
+open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 open GlobalTheory.MBLow.Cl Matrix

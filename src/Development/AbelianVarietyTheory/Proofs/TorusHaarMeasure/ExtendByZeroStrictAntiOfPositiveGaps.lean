@@ -1,19 +1,63 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.CurveAsm
-import Formalism.LocalToGlobal.ProjectiveLattices.TieUpC
-import Formalism.LocalToGlobal.ProjectiveLattices.SupNDataOfNonneg
-import Formalism.LocalToGlobal.ProjectiveLattices.AxHInst
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IntAtExtExtAll
+public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.GlobalFamilyData
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.IsStrictDom
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.DimAddCardFlagVar
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.EqZeroOfHermOne
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.WeightFloorInequalities
 import Development.AbelianVarietyTheory.Definitions.UpperBounds.PhRec
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.NumericalConsequencesOfPins
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.EqZeroOfHermOne
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.WeightFloorInequalities
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.WeightAlgebra Formalism.MainNotions.Gaps.EtaleWeightGaps Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.BigRec
 
 namespace GlobalTheory.RunWts
 
-open ReciprocityTheory.ChartRestriction.G.AR.Inst in
 
+open ReciprocityTheory.ChartRestriction.G.AR.Inst in
 theorem nd_eq {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} (X : ReciprocityTheory.ChartRestriction.G.FD.Data E r)
     {f p q : ℕ} (hf : Module.finrank ℚ E = 2 * f) (hr : p + q = r) :
     nd X = f * (p * q + p * (p - 1) / 2 + q * (q - 1) / 2) := by
@@ -35,10 +79,10 @@ theorem extendByZero_strictAnti_of_positive_gaps {p : ℕ} (l : Fin p → ℕ) (
   have h1 := hg ⟨a, by omega⟩ (by show a + 1 < p; omega)
   have h2 : a + 1 < p := by omega
   unfold gapZ at h1
-  rw [dif_pos h2] at h1
+  rw [dite_eq_left h2] at h1
   have h3 : l ⟨b, hb⟩ ≤ l ⟨a + 1, h2⟩ := hl (show a + 1 ≤ b by omega)
   unfold ext0
-  rw [dif_pos hb, dif_pos (by omega : a < p)]
+  rw [dite_eq_left hb, dite_eq_left (by omega : a < p)]
   simp only at h1
   omega
 
@@ -121,8 +165,8 @@ theorem strictDom_smul_sub {E : Type} [Field E] [NumberField E] [IsCMField E] {H
     push_cast at hm' ⊢
     linarith
 
-set_option maxHeartbeats 4000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem weights_of_run : ∀ (D : D7) (T : Top D) (h : LawsP T) (j : ℕ) (hj : InR D j) (ka wL wF : WeightFamilies.Wt D j) (large₂ : SizeData₂ D) (CK C1 A1 h0 : ℝ) (Tn nP nW : ℕ), SetC large₂ (recPlus h j hj) CK C1 A1 ka wL wF Tn nP nW h0 → ∀ σ, GoodEmb T.Q.c σ → ∀ k : (T.U j σ).Comp, ReciprocityTheory.ChartRestriction.G.AR.Inst.nd ((T.U j σ).X k) = WeightFamilies.dimY D j ∧ ReciprocityTheory.ChartRestriction.G.AR.Inst.IsStrictDom ((T.U j σ).X k) (laU (T.U j σ) (wtA wL) (wL).n k) ∧ (∀ i : ℕ, 0 < i → ReciprocityTheory.ChartRestriction.G.AR.Inst.IsStrictDom ((T.U j σ).X k) ((i * g0 D) • (laU (T.U j σ) (wtA wL) (wL).n k) - (laU (T.U j σ) (wtA (etWt D j i)) ((etWt D j i)).n k))) ∧ (j = D.R.m → ((T.U j σ).X k).p0 = 0 ∨ D.R.r ≤ ((T.U j σ).X k).p0) := by
   intro D T h j hj ka wL wF large₂ CK C1 A1 h0 Tn nP nW hS σ hσ k

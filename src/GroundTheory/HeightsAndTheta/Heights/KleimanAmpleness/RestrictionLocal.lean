@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.GenericPointSectionHypotheses
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -19,8 +67,8 @@ def locAt : Set Ω :=
   {a | ∃ (f s : Poly k N) (e : ℕ), f.IsHomogeneous e ∧ s.IsHomogeneous e ∧ aeval y s ≠ 0 ∧
     a = aeval x f / aeval x s}
 
-open Classical in
 
+open Classical in
 def redAt (a : Ω) : K' :=
   if h : ∃ (p : Poly k N × Poly k N) (e : ℕ), p.1.IsHomogeneous e ∧ p.2.IsHomogeneous e ∧
       aeval y p.2 ≠ 0 ∧ a = aeval x p.1 / aeval x p.2
@@ -44,7 +92,7 @@ theorem redAt_eq {f s : Poly k N} {e : ℕ} (hf : f.IsHomogeneous e) (hs : s.IsH
   have hex : ∃ (p : Poly k N × Poly k N) (e : ℕ), p.1.IsHomogeneous e ∧ p.2.IsHomogeneous e ∧
       aeval y p.2 ≠ 0 ∧ aeval x f / aeval x s = aeval x p.1 / aeval x p.2 :=
     ⟨(f, s), e, hf, hs, h, rfl⟩
-  rw [redAt, dif_pos hex]
+  rw [redAt, dite_eq_left hex]
   obtain ⟨e', hf', hs', h', heq⟩ := hex.choose_spec
   have hx := aeval_ne_zero_of_primeOf_le hsp hs h
   have hx' := aeval_ne_zero_of_primeOf_le hsp hs' h'
@@ -85,13 +133,13 @@ theorem locAt_add {a b : Ω} (ha : a ∈ locAt k x y) (hb : b ∈ locAt k x y) :
   have hhom : (f * s' + s * f').IsHomogeneous (e + e') := (hf.mul hs').add (hs.mul hf')
   have hsum : aeval x f / aeval x s + aeval x f' / aeval x s' =
       aeval x (f * s' + s * f') / aeval x (s * s') := by
-    rw [div_add_div _ _ hsx hsx']; simp only [map_add, map_mul]
+    rw [div_add_div _ _ hsx hsx']; simp only [map_add (f := _), map_mul]
   have hss : aeval y (s * s') ≠ 0 := by rw [map_mul]; exact mul_ne_zero hsy hsy'
   rw [hsum]
   refine ⟨mem_locAt hhom (hs.mul hs') hss, ?_⟩
   rw [redAt_eq hsp hhom (hs.mul hs') hss, redAt_eq hsp hf hs hsy, redAt_eq hsp hf' hs' hsy',
     div_add_div _ _ hsy hsy']
-  simp only [map_add, map_mul]
+  simp only [map_add (f := _), map_mul]
 
 theorem locAt_mul {a b : Ω} (ha : a ∈ locAt k x y) (hb : b ∈ locAt k x y) :
     a * b ∈ locAt k x y ∧ redAt k x y (a * b) = redAt k x y a * redAt k x y b := by
@@ -152,7 +200,8 @@ theorem chartRing_sub_locAt (hxy : ∀ i, y i ≠ 0 → x i ≠ 0) (I : Chart y)
   exact ⟨mem_locAt hf hse hsy, by rw [redAt_eq hsp hf hse hsy]; exact ⟨f, s, e, hs, hf, hse, rfl⟩⟩
 
 theorem exists_redAt_eq (hxy : ∀ i, y i ≠ 0 → x i ≠ 0) (I : Chart y) {c : K'}
-    (hc : c ∈ chartRing k y I) : ∃ a ∈ chartRing k x (liftChart hxy I), redAt k x y a = c := by
+    (hc : c ∈ chartRing k y I) :
+    ∃ a ∈ chartRing k x (liftChart hxy I), redAt k x y a = c := by
   obtain ⟨f, s, e, hs, hf, hse, rfl⟩ := hc
   exact ⟨aeval x f / aeval x s, ⟨f, s, e, hs, hf, hse, rfl⟩,
     redAt_eq hsp hf hse (eval_ne_zero_of_mem_monos I hs)⟩
@@ -167,7 +216,8 @@ variable {k : Type u} [Field k] {Ω : Type w} [Field Ω] [Algebra k Ω] {K' : Ty
 theorem primeOf_le_primeOf_of_algHom {x : Fin (N + 1) → Ω} {j : Fin (N + 1)} (hj : x j ≠ 0)
     (ψ : chartRing k x (singleChart hj) →ₐ[k] K') :
     primeOf (S := k) x ≤ primeOf (S := k) (fun i => ψ (ratio hj i)) := by
-  have key : ∀ {B : Type w} [CommRing B] [Algebra k B] (φ : chartRing k x (singleChart hj) →ₐ[k] B)
+  have key : ∀ {B : Type w} [CommRing B] [Algebra k B]
+      (φ : chartRing k x (singleChart hj) →ₐ[k] B)
       (g : Poly k N), φ (aeval (ratio (S := k) hj) g) = aeval (fun i => φ (ratio hj i)) g := by
     intro B _ _ φ g
     rw [← AlgHom.comp_apply, MvPolynomial.comp_aeval]

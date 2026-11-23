@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkValEqZeroOrOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StarSubdivisionDepthHostFixingAutInvariant
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MarkValEqZeroOrOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SysExOfPol
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StarSubdivisionDepthHostFixingAutInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HomExtNormalSt
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +62,7 @@ theorem inFace_transport (β x : LinearMap.BilinForm ℤ X) :
     InFace bar ψ lab (e β) (e x) ↔ InFace bar ψ lab β x := by
   unfold InFace
   simp only [he]
-  rw [hbal, ← map_add, hψ, hψ, hψ, hlab, hlab]
+  rw [hbal, ← map_add (f := _), hψ, hψ, hψ, hlab, hlab]
   refine and_congr Iff.rfl (and_congr ?_ (and_congr ?_ Iff.rfl))
   · exact ⟨fun h y => by simpa using h (T.symm y), fun h y => h (T y)⟩
   · exact ⟨fun h y => by simpa using h (T.symm y), fun h y => h (T y)⟩
@@ -34,13 +74,13 @@ theorem isIndec_transport (β x : LinearMap.BilinForm ℤ X) :
   refine and_congr Iff.rfl (and_congr Iff.rfl ⟨fun h y z hy hz hy0 hz0 hs => ?_, fun h y z hy hz hy0 hz0 hs => ?_⟩)
   · refine h (e y) (e z) ((inFace_transport he hbal hψ hlab β y).2 hy) ((inFace_transport he hbal hψ hlab β z).2 hz)
       (e.map_ne_zero_iff.2 hy0) (e.map_ne_zero_iff.2 hz0) ?_
-    rw [← map_add, hs]
+    rw [← map_add (f := _), hs]
   · refine h (e.symm y) (e.symm z) ?_ ?_ ?_ ?_ ?_
     · rw [← inFace_transport he hbal hψ hlab, e.apply_symm_apply]; exact hy
     · rw [← inFace_transport he hbal hψ hlab, e.apply_symm_apply]; exact hz
     · exact fun h0 => hy0 (by rw [← e.apply_symm_apply y, h0, map_zero])
     · exact fun h0 => hz0 (by rw [← e.apply_symm_apply z, h0, map_zero])
-    · apply e.injective; rw [map_add, e.apply_symm_apply, e.apply_symm_apply, hs]
+    · apply e.injective; rw [map_add (f := _), e.apply_symm_apply, e.apply_symm_apply, hs]
 
 theorem isMarked_transport_of (β : LinearMap.BilinForm ℤ X) (h : IsMarked bar ψ lab i X β) :
     IsMarked bar ψ lab i X (e β) := by
@@ -51,6 +91,7 @@ theorem isMarked_transport_of (β : LinearMap.BilinForm ℤ X) (h : IsMarked bar
   · rw [Finset.mem_map_equiv, hS, ← isIndec_transport he hbal hψ hlab]
     show IsIndec bar ψ lab (e β) (e (e.symm x)) ↔ _
     rw [e.apply_symm_apply]
+
   · rw [Finset.sum_map, ← map_zsmul, hsum, map_sum]; rfl
 
 theorem isMarked_transport (β : LinearMap.BilinForm ℤ X) :
@@ -74,14 +115,16 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 def twPi (σ : 𝓞 E ≃+* 𝓞 E) (n : ℕ) : (Fin n → 𝓞 E) ≃+ (Fin n → 𝓞 E) :=
   AddEquiv.piCongrRight fun _ => σ.toAddEquiv
 
-@[simp] theorem twPi_apply (σ : 𝓞 E ≃+* 𝓞 E) (n : ℕ) (a : Fin n → 𝓞 E) : twPi σ n a = fun j => σ (a j) := rfl
-
 def twForm (σ : 𝓞 E ≃+* 𝓞 E) (n : ℕ) :
     LinearMap.BilinForm ℤ (Fin n → 𝓞 E) ≃+ LinearMap.BilinForm ℤ (Fin n → 𝓞 E) where
   toFun β := β.compl₁₂ (twPi σ n).toIntLinearEquiv.toLinearMap (twPi σ n).toIntLinearEquiv.toLinearMap
   invFun β := β.compl₁₂ (twPi σ.symm n).toIntLinearEquiv.toLinearMap (twPi σ.symm n).toIntLinearEquiv.toLinearMap
-  left_inv β := LinearMap.ext₂ fun a b => by simp
-  right_inv β := LinearMap.ext₂ fun a b => by simp
+  left_inv β := LinearMap.ext₂ fun a b => by
+    change β (fun j => σ (σ.symm (a j))) (fun j => σ (σ.symm (b j))) = β a b
+    simp only [RingEquiv.apply_symm_apply]
+  right_inv β := LinearMap.ext₂ fun a b => by
+    change β (fun j => σ.symm (σ (a j))) (fun j => σ.symm (σ (b j))) = β a b
+    simp only [RingEquiv.symm_apply_apply]
   map_add' _ _ := LinearMap.ext₂ fun a b => by simp
 
 @[simp] theorem twForm_apply (σ : 𝓞 E ≃+* 𝓞 E) (n : ℕ) (β : LinearMap.BilinForm ℤ (Fin n → 𝓞 E)) (a b : Fin n → 𝓞 E) :
@@ -126,7 +169,7 @@ theorem markVal_twist : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (
   by_cases h2 : ∃ β : LinearMap.BilinForm ℤ (Fin n → 𝓞 E), ∀ a b, B a b = β a b
   · have h1 : ∃ β : LinearMap.BilinForm ℤ (Fin n → 𝓞 E), ∀ a b, B (fun j => σ (a j)) (fun j => σ (b j)) = β a b :=
       ⟨twForm σ n h2.choose, fun a b => h2.choose_spec _ _⟩
-    rw [dif_pos h1, dif_pos h2]
+    rw [dite_eq_left h1, dite_eq_left h2]
     have e : h1.choose = twForm σ n h2.choose := LinearMap.ext₂ fun a b => by
       have := (h1.choose_spec a b).symm.trans (h2.choose_spec _ _)
       exact_mod_cast this
@@ -137,12 +180,7 @@ theorem markVal_twist : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (
       h2 ⟨twForm σ.symm n β, fun a b => by
         have := hβ (fun j => σ.symm (a j)) (fun j => σ.symm (b j))
         simpa using this⟩
-    rw [dif_neg h1, dif_neg h2]
-
-example (H : Host E) (i n : ℕ) (B : (Fin n → 𝓞 E) → (Fin n → 𝓞 E) → ℝ) :
-    markVal H.bar (zeroFun (𝓞 E)) (zeroFun (𝓞 E)) i n (fun a b => B (fun j => (RingEquiv.refl _) (a j))
-      (fun j => (RingEquiv.refl _) (b j))) = markVal H.bar (zeroFun (𝓞 E)) (zeroFun (𝓞 E)) i n B :=
-  markVal_twist E H _ _ i (fun _ _ _ _ => by simp [zeroFun]) (fun _ _ _ _ => by simp [zeroFun]) _ rfl n B
+    rw [dite_eq_right h1, dite_eq_right h2]
 
 end Main
 

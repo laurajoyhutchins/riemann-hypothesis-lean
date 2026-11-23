@@ -1,6 +1,58 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ExplicitFormula.GoodHeight
+public import Mathlib.Analysis.Analytic.Order
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+public import Mathlib.NumberTheory.LSeries.Nonvanishing
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory Filter Topology
 
 namespace GlobalTheory.GoodHeight
@@ -49,27 +101,7 @@ theorem exists_far (S : Finset ℝ) (T : ℝ) : ∃ T' : ℝ, T ≤ T' ∧ T' �
 
 theorem one_le_order {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) {w : ℂ} (h1 : w ≠ 1)
     (hw : LFunction χ w = 0) : 1 ≤ analyticOrderNatAt (LFunction χ) w := by
-  have hU : IsPreconnected ({1}ᶜ : Set ℂ) :=
-    (isConnected_compl_singleton_of_one_lt_rank (by rw [Complex.rank_real_complex]; norm_num) 1).isPreconnected
-  have han : AnalyticOnNhd ℂ (LFunction χ) ({1}ᶜ : Set ℂ) := by
-    intro z hz
-    have hd : DifferentiableOn ℂ (LFunction χ) ({1}ᶜ : Set ℂ) := fun u hu =>
-      (differentiableAt_LFunction χ u (.inl hu)).differentiableWithinAt
-    exact hd.analyticAt (isOpen_compl_singleton.mem_nhds hz)
-  have h2 : (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) := by norm_num
-  have hw1 : w ∈ ({1}ᶜ : Set ℂ) := h1
-  have hne2 : analyticOrderAt (LFunction χ) 2 ≠ ⊤ := by
-    rw [(han 2 h2).analyticOrderAt_eq_zero.mpr
-      (LFunction_ne_zero_of_one_le_re χ (.inr (by norm_num)) (by norm_num))]
-    exact ENat.zero_ne_top
-  have hnetop := han.analyticOrderAt_ne_top_of_isPreconnected hU h2 hw1 hne2
-  have hne0 : analyticOrderAt (LFunction χ) w ≠ 0 := (han w hw1).analyticOrderAt_ne_zero.mpr hw
-  unfold analyticOrderNatAt
-  obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp hnetop
-  rw [← hn] at hne0 ⊢
-  simp only [ENat.toNat_natCast]
-  have : n ≠ 0 := by rintro rfl; exact hne0 rfl
-  omega
+  apply PI.EF.one_le_mult <;> assumption
 
 theorem exists_bound_right : ∃ B : ℝ, 0 ≤ B ∧ ∀ (N : ℕ) [NeZero N] (χ : DirichletCharacter ℂ N)
     (s : ℂ), 2 ≤ s.re → ‖deriv (LFunction χ) s / LFunction χ s‖ ≤ B := by

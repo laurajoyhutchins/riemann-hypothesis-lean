@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSubquotientOfEquiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSubquotientOfEquiv
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.JacStages
 
 noncomputable section
@@ -38,7 +83,7 @@ theorem tprod_tprod_update_sigma [DecidableEq (Σ a, β a)] (x : ∀ p, M p) (a�
     intro h'
     exact h (congrArg Sigma.fst h')
 
-def curryML : MultilinearMap ℂ M (⨂[ℂ] a, ⨂[ℂ] b, M ⟨a, b⟩) where
+def curryML : (∀ p, M p) →ₘₗ[ℂ] ⨂[ℂ] a, ⨂[ℂ] b, M ⟨a, b⟩ where
   toFun x := tprod ℂ fun a => tprod ℂ fun b => x ⟨a, b⟩
   map_update_add' x p v w := by
     obtain ⟨a₀, b₀⟩ := p
@@ -46,8 +91,7 @@ def curryML : MultilinearMap ℂ M (⨂[ℂ] a, ⨂[ℂ] b, M ⟨a, b⟩) where
     rw [MultilinearMap.map_update_add, MultilinearMap.map_update_add]
   map_update_smul' x p c v := by
     obtain ⟨a₀, b₀⟩ := p
-    simp only [tprod_tprod_update_sigma]
-    rw [MultilinearMap.map_update_smul, MultilinearMap.map_update_smul]
+    simp only [tprod_tprod_update_sigma, MultilinearMap.map_update_smul, RingHom.id_apply]
 
 theorem curryML_apply (x : ∀ p, M p) : curryML M x = tprod ℂ fun a => tprod ℂ fun b => x ⟨a, b⟩ := rfl
 
@@ -122,7 +166,7 @@ theorem piTensor_flatHom_equiv : ∀ (s : ℕ) (t : Fin s → ℕ) (Γ : ∀ a, 
       rw [reindex_tprod, MonoidHom.comp_apply, piTensor_tprod]
       exact flatTensorEquiv_tprod Y fun p => ρ p.1 p.2 (g p.1 p.2) (x p)
     | add w w' hw hw' =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [hw, hw']
   refine LinearMap.ext fun v => ?_
   obtain ⟨w, rfl⟩ := (reindex ℂ (fun p : Σ a, Fin (t a) => Y p.1 p.2) finSigmaFinEquiv).surjective v

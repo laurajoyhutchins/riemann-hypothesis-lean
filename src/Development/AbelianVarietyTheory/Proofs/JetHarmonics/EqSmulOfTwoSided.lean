@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
+module
+
+public import Formalism.PeriodIntegrals.QuotInv
+public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
+public import Formalism.PeriodIntegrals.BesselPeriodGGP
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SymmetricMeasureL2NormEqResolutionL2
+import Formalism.FormalDegreeBessel.FinalG
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Jets.SumIoPr
-import Formalism.PeriodIntegrals.QuotSetU
-import Formalism.PeriodIntegrals.QuotInv
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.SymmetricMeasureL2NormEqResolutionL2
+import Formalism.HermitianCurvature.BesselNonvanishingReduction
+
+@[expose] public section
 
 open BranchingSupport Formalism.FourierDecayAlt Formalism.FourierDecayAlt.ThreeDimData Matrix MeasureTheory Finset
 open scoped InnerProductSpace ENNReal
@@ -28,7 +73,11 @@ theorem unimodular_normal : ∀ (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (�
   obtain ⟨b, -, eb⟩ := eq_smul_of_twoSided (P.B2x2.closedN k r) hN hνN
   refine ⟨fun s hs => ?_, ⟨?_⟩, fun s hs => ?_,
     fun h hh m hm => (Formalism.QuantumDeterminants.uWNormal k r z hz h hh m hm).1, fun h hh => ?_⟩
-  · rw [ea, Measure.map_smul]
+  · rw [ea, Measure.map_smul _ (by
+      apply Continuous.aemeasurable
+      refine continuous_pi fun i => continuous_pi fun j => ?_
+      simp only [PI.rmulQ, Matrix.mul_apply, Matrix.of_apply]
+      fun_prop)]
     exact congrArg (a • ·) (hνW.right s hs)
   · have hK : IsCompact (Formalism.QuantumDeterminants.UWset k r z) := P.weyl_subgroup_compact k r z hz hT
     have h1 : νW (Formalism.QuantumDeterminants.UWset k r z) < ⊤ := hνW.finite_compact _ hK
@@ -38,9 +87,17 @@ theorem unimodular_normal : ∀ (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (�
     rw [h3, add_zero] at h2
     rw [ea, Measure.smul_apply, smul_eq_mul]
     exact ENNReal.mul_lt_top a1.lt_top (h2.trans_lt h1)
-  · rw [eb, Measure.map_smul]
+  · rw [eb, Measure.map_smul _ (by
+      apply Continuous.aemeasurable
+      refine continuous_pi fun i => continuous_pi fun j => ?_
+      simp only [PI.rmulQ, Matrix.mul_apply, Matrix.of_apply]
+      fun_prop)]
     exact congrArg (b • ·) (hνN.right s hs)
-  · rw [eb, Measure.map_smul]
+  · rw [eb, Measure.map_smul _ (by
+      apply Continuous.aemeasurable
+      refine continuous_pi fun i => continuous_pi fun j => ?_
+      simp only [Matrix.mul_apply, Matrix.of_apply]
+      fun_prop)]
     exact congrArg (b • ·) (P.b2_conjInvRaw_proof k r z νN hz hT hνN h hh)
 
 end GlobalTheory.UnipotentRadicalHaar

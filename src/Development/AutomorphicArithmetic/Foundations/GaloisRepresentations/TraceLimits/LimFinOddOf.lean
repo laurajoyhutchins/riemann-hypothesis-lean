@@ -1,9 +1,61 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TraceLimits.ExistsTraceLimit
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TraceLimits.SlopeTestRemainingChoices
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LimWUOfSeeds
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AutomorphicLevelAwayNonsplit
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalOperatorsExist
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClosedAtL
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.LimWU4OfLimWU3
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAlgebraicWeightOfAutomorphicDefiniteUnitar
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLimitRep
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.KerOfLinApprox
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LinApproxOfPolyApproxTrc
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ApartOfNotMem
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AutomorphicLevelAwayNonsplit
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.BlowUpFibreSemilocal
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClosedAtL
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSatUOfUnderEq
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsUniqueSplitPlaceComponentDefiniteUnitary
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FrobOpsIdx
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LimWUOfSeeds
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalOperatorsExist
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TraceLimits.ExistsTraceLimit
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TraceLimits.SlopeTestRemainingChoices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N
 open GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.Pst GlobalTheory.LocLanglands GlobalTheory.HeckeGal GlobalTheory.LocGL GlobalTheory.GalOfCusp
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -11,8 +63,8 @@ open GlobalTheory.GalCut GlobalTheory.UnitaryBC GlobalTheory.Cong GlobalTheory.P
 
 namespace UpperTheory.Gal.Lim
 
-open GlobalTheory.Cong.OffTLimit GlobalTheory.CongL.UnitLim in
 
+open GlobalTheory.Cong.OffTLimit GlobalTheory.CongL.UnitLim in
 theorem limWU4_of : ∀ (Rk : ℕ → Prop) (Ty : UnitaryAutomorphicTypeClass) (Gen : ℕ → ℕ → Multiset ℂˣ → Prop) (Wt : SeedWtU),
     SeedWU4 Rk Ty Gen Wt → CongUW4 Rk Ty Gen Wt → LimWU4 Rk := by
   intro Rk Ty Gen Wt hSd hC E Ω _ _ _ _ _ _ l _ ι a ha hRk d hF T hT U hU w₀ v' hw₀ hsp₀ hv' hspv hvap
@@ -32,7 +84,7 @@ theorem limWU4_of : ∀ (Rk : ℕ → Prop) (Ty : UnitaryAutomorphicTypeClass) (
     intro w hs hB u hu hwu
     exact (hfin.mem_toFinset.1 hu).2 (GlobalTheory.CongL.SatConj.exists_satU_of_under_eq E a U hU.1 w u hs hwu.symm hB)
   set W0 : Set (HeightOneSpectrum (𝓞 E)) := {w | IsSplitAt w ∧ ((l : ℕ) : 𝓞 E) ∉ w.asIdeal ∧ ∃ B, SatU U w B} with hW0def
-  have hW0 : ∀ w ∈ W0, IsSplitAt w ∧ ((l : ℕ) : 𝓞 E) ∉ w.asIdeal ∧ Kw w = GlobalTheory.LFun.KGL w a := fun w hw =>
+  have hW0 : ∀ w ∈ W0, IsSplitAt w ∧ ((l : ℕ) : 𝓞 E) ∉ w.asIdeal ∧ Kw w = GlobalTheory.LFun.KGL w (n := a) := fun w hw =>
     ⟨hw.1, hw.2.1, hKGL w hw.1 (apart_of_not_mem hw₀ hw.2.1) (apart_of_not_mem hv' hw.2.1) hw.2.2⟩
   obtain ⟨J, O, x, fr, n, hx, hpl, hcov, hrat, hidx, hconv⟩ := GlobalTheory.FrobOpsIdx.frobOpsIdx hS E Ω l ι a Kw W0 hW0
   have hcomp : ∀ U' : Submodule ℂ (UA E a → ℂ), IsAutRepU U' → ∀ w, IsSplitAt w →

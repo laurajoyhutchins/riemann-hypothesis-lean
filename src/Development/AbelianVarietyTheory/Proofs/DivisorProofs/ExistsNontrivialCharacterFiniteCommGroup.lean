@@ -1,9 +1,67 @@
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCharacter
+public import Mathlib.AlgebraicGeometry.Group.Affine
+public import Mathlib.AlgebraicGeometry.Morphisms.Finite
+public import Mathlib.RingTheory.Coalgebra.GroupLike
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.MemPrimitiveTensorsIffIsPrimitiveElem
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsIdPowEqOneOfIsFiniteOfFlat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.EffectiveEpi.Comp
+import Mathlib.CategoryTheory.ExtremalEpi
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.HopfAlgebra.GroupLike
+import Mathlib.RingTheory.HopfAlgebra.TensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
 import Development.AbelianVarietyTheory.Definitions.Divisors.SameIdIff
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsCrystalPairing
-import Development.AbelianVarietyTheory.PublishedTheorems.RelativeAmpleness.RelAmpleAndKTrivIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsCharacter
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.MemPrimitiveTensorsIffIsPrimitiveElem
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsIdPowEqOneOfIsFiniteOfFlat
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+import Development.AbelianVarietyTheory.PublishedTheorems.AbelianLaws.PrincipalPolarisationOneSection
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsAdditiveOfUniversal
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.AbLaw GlobalTheory.CechPic GlobalTheory.AbDual GlobalTheory.DualCon
 open scoped CategoryTheory.Obj
@@ -14,8 +72,8 @@ set_option autoImplicit false
 
 namespace GlobalTheory.CharExists
 
-open TensorProduct WithConv in
 
+open TensorProduct WithConv in
 theorem pres (K : Type) [Field K] (N : Over (Sp K)) [GrpObj N] [IsCommMonObj N] (hf : IsFinite N.hom) :
   ∃ (B : Type) (_ : CommRing B) (_ : HopfAlgebra K B), Coalgebra.IsCocomm K B ∧ Module.Finite K B ∧
     ∃ e : (Spec (CommRingCat.of B)).asOver (Sp K) ≅ N, IsMonHom e.hom := by
@@ -72,16 +130,16 @@ theorem transfer (S : Scheme.{0}) (N N' T : Over S) [GrpObj N] [GrpObj N'] (e : 
       ext; simp [pullTop]
     rw [← this, h, map_one]
 
-open TensorProduct in
 
+open TensorProduct in
 noncomputable def secMap (K : Type) [CommRing K] (B D : Type) [CommRing B] [CommRing D] [Algebra K B] [Algebra K D] :
     B ⊗[K] D →+* Γ(((Spec (CommRingCat.of B)).asOver (Sp K) ⊗ (Spec (CommRingCat.of D)).asOver (Sp K)).left, ⊤) :=
   (pullbackSpecIso' K B D : ((Spec (CommRingCat.of B)).asOver (Sp K) ⊗
     (Spec (CommRingCat.of D)).asOver (Sp K)).left ≅ Spec (CommRingCat.of (B ⊗[K] D))).hom.appTop.hom.comp
     (Scheme.ΓSpecIso (CommRingCat.of (B ⊗[K] D))).inv.hom
 
-open TensorProduct in
 
+open TensorProduct in
 theorem secMap_injective (K : Type) [CommRing K] (B D : Type) [CommRing B] [CommRing D] [Algebra K B]
     [Algebra K D] : Function.Injective (secMap K B D) := by
   let e : ((Spec (CommRingCat.of B)).asOver (Sp K) ⊗ (Spec (CommRingCat.of D)).asOver (Sp K)).left ≅
@@ -98,8 +156,8 @@ theorem secMap_injective (K : Type) [CommRing K] (B D : Type) [CommRing B] [Comm
     (Scheme.ΓSpecIso _).hom.hom (e.inv.appTop.hom (e.hom.appTop.hom ((Scheme.ΓSpecIso _).inv.hom y))) at h2
   rwa [h1, h1, h3, h3] at h2
 
-open TensorProduct in
 
+open TensorProduct in
 theorem secMap_lift (K : Type) [CommRing K] (B D : Type) [CommRing B] [CommRing D] [Algebra K B] [Algebra K D]
     (Y : Over (Sp K)) (f : Y ⟶ (Spec (CommRingCat.of B)).asOver (Sp K))
     (h : Y ⟶ (Spec (CommRingCat.of D)).asOver (Sp K)) (b : B) (d : D) :
@@ -128,8 +186,8 @@ theorem secMap_lift (K : Type) [CommRing K] (B D : Type) [CommRing B] [CommRing 
   rw [nL, nR, ← hf, ← hh, ← hfst, ← hsnd]
   rfl
 
-open TensorProduct in
 
+open TensorProduct in
 theorem prodsec (K : Type) [CommRing K] (B D : Type) [CommRing B] [CommRing D] [Algebra K B] [Algebra K D] :
     ∃ Φ : B ⊗[K] D →+* Γ(((Spec (CommRingCat.of B)).asOver (Sp K) ⊗ (Spec (CommRingCat.of D)).asOver (Sp K)).left, ⊤),
       Function.Injective Φ ∧
@@ -140,8 +198,8 @@ theorem prodsec (K : Type) [CommRing K] (B D : Type) [CommRing B] [CommRing D] [
             h.left.appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of D)).inv.hom d) :=
   ⟨secMap K B D, secMap_injective K B D, secMap_lift K B D⟩
 
-open TensorProduct in
 
+open TensorProduct in
 theorem mulsharp (K : Type) [CommRing K] (B : Type) [CommRing B] [HopfAlgebra K B] (Y : Over (Sp K))
     (f g : Y ⟶ (Spec (CommRingCat.of B)).asOver (Sp K)) (b : B) {J : Type} (s : Finset J) (x y : J → B)
     (hb : Coalgebra.comul (R := K) b = ∑ i ∈ s, x i ⊗ₜ[K] y i) :
@@ -161,6 +219,7 @@ theorem mulsharp (K : Type) [CommRing K] (B : Type) [CommRing B] [HopfAlgebra K 
     ((Spec.map (CommRingCat.ofHom (Bialgebra.comulAlgHom K B).toRingHom)).appTop.hom _)) = _
   rw [← nC]
   change (lift f g).left.appTop.hom (secMap K B B (Bialgebra.comulAlgHom K B b)) = _
+
   rw [Bialgebra.comulAlgHom_apply, hb, map_sum, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   exact secMap_lift K B B Y f g (x i) (y i)
@@ -176,8 +235,8 @@ theorem algsharp (K : Type) [CommRing K] (A : Type) [CommRing A] [Algebra K A] (
   simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at hn
   rw [← hn]
 
-open TensorProduct in
 
+open TensorProduct in
 theorem bridge (K : Type) [Field K] (B D : Type) [CommRing B] [HopfAlgebra K B] [CommRing D] [Algebra K D]
   (u : (B ⊗[K] D)ˣ) (hu : IsGroupLikeElem D (TensorProduct.comm K B D (u : B ⊗[K] D))) (h1 : u ≠ 1) :
   ∃ χ : Γ(((Spec (CommRingCat.of B)).asOver (Sp K) ⊗ (Spec (CommRingCat.of D)).asOver (Sp K)).left, ⊤)ˣ,
@@ -212,12 +271,13 @@ theorem bridge (K : Type) [Field K] (B D : Type) [CommRing B] [HopfAlgebra K B] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul b d =>
       rw [hΦY]
       obtain ⟨S, hS⟩ := TensorProduct.exists_finset (Coalgebra.comul (R := K) b)
+
       rw [mulsharp K B Y _ _ b S (fun i => i.1) (fun i => i.2) hS, TensorProduct.comm_tmul,
-        LinearMap.lTensor_tmul, hS, TensorProduct.tmul_sum, map_sum, Finset.sum_mul]
+      LinearMap.lTensor_tmul, hS, TensorProduct.tmul_sum, map_sum, Finset.sum_mul]
       refine Finset.sum_congr rfl fun i _ => ?_
       simp only [Θ, Algebra.TensorProduct.lift_tmul]
       exact _root_.mul_comm _ _
@@ -227,7 +287,7 @@ theorem bridge (K : Type) [Field K] (B D : Type) [CommRing B] [HopfAlgebra K B] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul b d =>
       rw [hΦY, TensorProduct.comm_tmul, Algebra.TensorProduct.map_tmul]
       simp only [Θ, AlgHom.id_apply, Algebra.TensorProduct.includeLeft_apply,
@@ -239,7 +299,7 @@ theorem bridge (K : Type) [Field K] (B D : Type) [CommRing B] [HopfAlgebra K B] 
     intro x
     induction x using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
     | tmul b d =>
       conv_lhs => rw [hsnd]
       rw [hΦY, TensorProduct.comm_tmul, Algebra.TensorProduct.map_tmul]
@@ -250,8 +310,8 @@ theorem bridge (K : Type) [Field K] (B D : Type) [CommRing B] [HopfAlgebra K B] 
   ext
   simp only [pullTop, Units.coe_map, Units.val_mul]
   exact (e1 u).trans (key.trans (congrArg₂ (· * ·) (e2 u).symm (e3 u).symm))
-open TensorProduct WithConv GlobalTheory GlobalTheory.CartierDual in
 
+open TensorProduct WithConv GlobalTheory GlobalTheory.CartierDual in
 theorem exists_character_ne_one : ∀ (K : Type) [Field K] (N : Over (Sp K)) [GrpObj N] [IsCommMonObj N], IsFinite N.hom → (𝟙 N ≠ (1 : N ⟶ N)) → ∃ (T : Over (Sp K)) (χ : Γ((N ⊗ T).left, ⊤)ˣ), IsCharacter χ ∧ χ ≠ 1 := by
   intro K _ N _ _ hf hne
   obtain ⟨B, _, _, hcc, hfin, e, he⟩ := pres K N hf
@@ -278,7 +338,7 @@ theorem exists_character_ne_one : ∀ (K : Type) [Field K] (N : Over (Sp K)) [Gr
     rw [pairingMap_tmul, LinearMap.id_apply] at h2
     simp only [ofConv_toConv, AlgHom.id_apply]
     rw [← h2]
-    simp [one_apply, Algebra.algebraMap_eq_smul_one, mul_comm, AlgHom.convOne_apply]
+    simp [_root_.one_apply, Algebra.algebraMap_eq_smul_one, mul_comm, AlgHom.convOne_apply]
   have hgl := (isPerfectBicharacter_canonical K B).left
   have hu : IsUnit (canonical K B) := by
     have := hgl.isUnit

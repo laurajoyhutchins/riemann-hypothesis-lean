@@ -1,11 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsUniqueStatement
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.HeckeSectionsIsotropicCommutatorPairingPower
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.KleimanNefness.KleimanSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRedF
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.LogIntegralMultilinearStatement
+module
+
+import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.RCombine
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Birational
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.LogIntegralMultilinearStatement
+import Development.WeilBound.CoreStatements.FlagImmersions.CombLineSmoothConjInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo Filter Topology GlobalTheory.CompanionTheory.Ar.Top
 
@@ -25,40 +72,7 @@ theorem comb_a {J : Type} [Fintype J] (ℓ : J → HermLine ι) (n : J → ℤ) 
     (combLine ℓ n).a = ∑ j, n j • (ℓ j).a := rfl
 
 theorem exists_smooth (b : K → ℤ) : ∃ B : HermLine ι, IsSmoothHerm B ∧ B.a = b := by
-  classical
-  let ℓ : K → HermLine ι := fun k =>
-    { a := Pi.single k 1
-      h := fun z => Real.sqrt (∑ i, ‖z ⟨k, i⟩‖ ^ 2)
-      pos := by
-        intro z hz
-        obtain ⟨i, hi⟩ := hz k
-        apply Real.sqrt_pos.mpr
-        exact Finset.sum_pos' (fun _ _ => by positivity)
-          ⟨i, Finset.mem_univ _, pow_pos (norm_pos_iff.mpr hi) 2⟩
-      smul := by
-        intro c z hc
-        have hprod : ∏ k', ‖c k'‖ ^ ((Pi.single k (1 : ℤ) : K → ℤ) k') = ‖c k‖ := by
-          rw [Fintype.prod_eq_single k]
-          · simp
-          · intro k' hk'
-            simp [Pi.single_apply, hk']
-        rw [hprod]
-        simp only [norm_mul, mul_pow]
-        rw [← Finset.mul_sum, Real.sqrt_mul (by positivity), Real.sqrt_sq (norm_nonneg _)] }
-  refine ⟨combLine ℓ b, smooth_comb (fun k => ?_) b, ?_⟩
-  · show ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞)
-      (fun z : (k : K) × ι k → ℂ => Real.sqrt (∑ i, ‖z ⟨k, i⟩‖ ^ 2))
-      {z : (k : K) × ι k → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0}
-    apply ContDiffOn.sqrt
-    · exact (ContDiff.sum (fun i _ => (contDiff_norm_sq ℂ).comp
-        (contDiff_apply (𝕜 := ℝ) (E := ℂ) (⟨k, i⟩ : (k : K) × ι k)))).contDiffOn
-    · intro z hz
-      obtain ⟨i, hi⟩ := hz k
-      exact (Finset.sum_pos' (fun _ _ => by positivity)
-        ⟨i, Finset.mem_univ _, pow_pos (norm_pos_iff.mpr hi) 2⟩).ne'
-  · rw [comb_a]
-    funext k'
-    simp [ℓ, Finset.sum_apply, Pi.single_apply]
+  apply PositivityTheory.UnitarySelfGeneration.RC.exists_line <;> assumption
 
 theorem smooth_snoc {e : ℕ} {L : Fin e → HermLine ι} {X : HermLine ι} (hL : ∀ j, IsSmoothHerm (L j))
     (hX : IsSmoothHerm X) (j : Fin (e + 1)) :

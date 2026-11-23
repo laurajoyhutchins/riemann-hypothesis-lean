@@ -1,6 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.ExistsDenOfIsCompactAdele
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IntAdCpctOpen
+module
+
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+public import Formalism.LocalToGlobal.GlobalTheory.GL1.CompactFixesLattice.ExistsDenOfIsCompactAdele
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IntAdCpctOpen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,15 +74,15 @@ theorem adl_exists_place_ge_one (r : 𝓞 F) (hr : r ≠ 0) :
   rw [← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ w0)] at hN
   have h1 : w0 (r : F) ^ w0.mult < 1 := pow_lt_one₀ (hnn w0) (h w0) InfinitePlace.mult_pos.ne'
   have h2 : ∏ w ∈ Finset.univ.erase w0, w (r : F) ^ w.mult ≤ 1 :=
-    Finset.prod_le_one (fun w _ => pow_nonneg (hnn w) _) (fun w _ => pow_le_one₀ (hnn w) (h w).le)
+    Finset.prod_le_one₀ (fun w _ => pow_nonneg (hnn w) _) (fun w _ => pow_le_one₀ (hnn w) (h w).le)
   have h3 : 0 ≤ w0 (r : F) ^ w0.mult := pow_nonneg (hnn w0) _
   nlinarith
 
 open scoped AdeleRing
 
-variable (F) in
 
-def adlNbhd : Set (AdeleRing (𝓞 F) F) :=
+variable (F) in
+def adlNbhd (F : Type) [Field F] [NumberField F] : Set (AdeleRing (𝓞 F) F) :=
   {x | (∀ w, ‖x.1 w‖ < 1) ∧ ∀ v, x.2 v ∈ v.adicCompletionIntegers F}
 
 theorem adl_isOpen_nbhd : IsOpen (adlNbhd F) := by
@@ -68,8 +115,8 @@ theorem adl_zero_mem_nbhd : (0 : AdeleRing (𝓞 F) F) ∈ adlNbhd F := by
 
 theorem adl_norm_algebraMap (x : F) (w : InfinitePlace F) :
     ‖(algebraMap F (InfiniteAdeleRing F) x) w‖ = w x := by
-  simp [InfiniteAdeleRing.algebraMap_apply]
-  first | rfl | simp [WithAbs.equiv, WithAbs.toAbs]
+  rw [InfiniteAdeleRing.algebraMap_apply]
+  exact AbsoluteValue.Completion.norm_coe (WithAbs.toAbs w.1 x)
 
 theorem adl_eq_zero_of_mem_nbhd (a : F) (ha : algebraMap F (AdeleRing (𝓞 F) F) a ∈ adlNbhd F) : a = 0 := by
   obtain ⟨hinf, hfin⟩ := ha
@@ -95,45 +142,7 @@ theorem adl_eq_zero_of_mem_nbhd (a : F) (ha : algebraMap F (AdeleRing (𝓞 F) F
 
 theorem adl_inf_cocompact : ∃ C : Set (InfiniteAdeleRing F), IsCompact C ∧
     ∀ y, ∃ r : 𝓞 F, y - algebraMap F _ (r : F) ∈ C := by
-  classical
-  let b := mixedEmbedding.latticeBasis F
-  let R : ℝ := ∑ i, ‖b i‖
-
-  have hcoord : ∀ (x : InfiniteAdeleRing F) (w : InfinitePlace F),
-      ‖x w‖ ≤ ‖InfiniteAdeleRing.ringEquiv_mixedSpace F x‖ := by
-    intro x w
-    rw [InfiniteAdeleRing.ringEquiv_mixedSpace_apply]
-    by_cases hw : w.IsReal
-    · refine le_trans ?_ (norm_fst_le _)
-      refine le_trans ?_ (norm_le_pi_norm _ ⟨w, hw⟩)
-      exact ((InfinitePlace.Completion.isometry_extensionEmbeddingOfIsReal hw).norm_map_of_map_zero
-        (map_zero _) (x w)).ge
-    · refine le_trans ?_ (norm_snd_le _)
-      refine le_trans ?_ (norm_le_pi_norm _ ⟨w, InfinitePlace.not_isReal_iff_isComplex.mp hw⟩)
-      exact ((InfinitePlace.Completion.isometry_extensionEmbedding w).norm_map_of_map_zero
-        (map_zero _) (x w)).ge
-  have hK : ∀ w : InfinitePlace F, IsCompact {z : w.Completion | ‖z‖ ≤ R} := by
-    intro w
-    have he : {z : w.Completion | ‖z‖ ≤ R} =
-        (InfinitePlace.Completion.extensionEmbedding w) ⁻¹' Metric.closedBall 0 R := by
-      ext z
-      simp only [Set.mem_setOf_eq, Set.mem_preimage, mem_closedBall_zero_iff,
-        (InfinitePlace.Completion.isometry_extensionEmbedding w).norm_map_of_map_zero (map_zero _)]
-    rw [he]
-    exact (InfinitePlace.Completion.isometry_extensionEmbedding w).isClosedEmbedding.isCompact_preimage
-      (isCompact_closedBall 0 R)
-  refine ⟨Set.pi Set.univ fun w => {z : w.Completion | ‖z‖ ≤ R}, isCompact_univ_pi hK, ?_⟩
-  intro y
-  obtain ⟨r, hr⟩ := RingHom.mem_range.mp ((mixedEmbedding.mem_span_latticeBasis (K := F)).mp
-    (ZSpan.floor b (InfiniteAdeleRing.ringEquiv_mixedSpace F y)).2)
-  refine ⟨r, fun w _ => ?_⟩
-  show ‖(y - algebraMap F _ (r : F)) w‖ ≤ R
-  refine (hcoord _ w).trans ?_
-  rw [map_sub, ← InfiniteAdeleRing.mixedEmbedding_eq_algebraMap_comp]
-  have h2 : mixedEmbedding F (r : F) =
-      (ZSpan.floor b (InfiniteAdeleRing.ringEquiv_mixedSpace F y) : mixedEmbedding.mixedSpace F) := hr
-  rw [h2, ← ZSpan.fract_apply]
-  exact ZSpan.norm_fract_le b _
+  apply GlobalTheory.AdeleCocompact.exists_compact_infinite <;> assumption
 
 theorem adl_cocompact : ∃ K : Set (AdeleRing (𝓞 F) F), IsCompact K ∧
     ∀ x, ∃ a : F, x - algebraMap F _ a ∈ K := by
@@ -144,10 +153,10 @@ theorem adl_cocompact : ∃ K : Set (AdeleRing (𝓞 F) F), IsCompact K ∧
   obtain ⟨r, hr⟩ := hCy (x.1 - algebraMap F _ u)
   refine ⟨u + r, ?_, ?_⟩
   · show x.1 - algebraMap F (InfiniteAdeleRing F) (u + r) ∈ C
-    rw [map_add, ← sub_sub]
+    rw [map_add (f := _), ← sub_sub]
     exact hr
   · have : x.2 - algebraMap F (FiniteAdeleRing (𝓞 F) F) (u + r) =
-        (x.2 - algebraMap F _ u) - algebraMap F _ (r : F) := by rw [map_add, sub_sub]
+        (x.2 - algebraMap F _ u) - algebraMap F _ (r : F) := by rw [map_add (f := _), sub_sub]
     show ∀ v, (x.2 - algebraMap F (FiniteAdeleRing (𝓞 F) F) (u + r)) v ∈ _
     rw [this]
     exact sub_mem hu (Formalism.L2.GlobalTheoryTheory.FiltrationBoundaryCriterion.CompactFixesLatticeTheory.algebraMap_mem_intAd r)

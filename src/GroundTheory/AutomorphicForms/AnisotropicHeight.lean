@@ -1,6 +1,51 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AnisotropicOrbit
-import GroundTheory.AutomorphicForms.AdelicUnitaryGroups
+module
+
+public import GroundTheory.AutomorphicForms.ReductionHeight
+public import GroundTheory.AutomorphicForms.AdelicUnitaryGroups
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open NumberField IsDedekindDomain Topology Set Matrix Filter
@@ -51,7 +96,7 @@ theorem norm_aeval_le_sum (p : MvPolynomial (Fin N) K) (y : Fin N → F) (hy : �
   rw [norm_mul]
   refine mul_le_of_le_one_right (norm_nonneg _) ?_
   rw [norm_prod]
-  refine Finset.prod_le_one (fun i _ => norm_nonneg _) fun i _ => ?_
+  refine Finset.prod_le_one₀ (fun i _ => norm_nonneg _) fun i _ => ?_
   rw [norm_pow]
   exact pow_le_one₀ (norm_nonneg _) ((norm_le_pi_norm y i).trans hy)
 
@@ -62,7 +107,7 @@ theorem norm_aeval_le_one [IsUltrametricDist F] (p : MvPolynomial (Fin N) K)
   refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one fun s hs => ?_
   rw [norm_mul, norm_prod]
   exact mul_le_one₀ (hp s hs) (Finset.prod_nonneg fun _ _ => norm_nonneg _)
-    (Finset.prod_le_one (fun i _ => norm_nonneg _) fun i _ => by
+    (Finset.prod_le_one₀ (fun i _ => norm_nonneg _) fun i _ => by
       rw [norm_pow]; exact pow_le_one₀ (norm_nonneg _) ((norm_le_pi_norm y i).trans hy))
 
 end Local
@@ -140,13 +185,13 @@ theorem exists_adelicNorm_le_mul_pow (hd : 0 < d) (Φ : (Fin N → 𝔸[K]) → 
   have hfin_le : ∏ᶠ v, ‖Reduction.finComp v (Φ y)‖ ≤
       (∏ v ∈ S, Bf v) * (∏ᶠ v, ‖Reduction.finComp v y‖) ^ d := by
     rw [hfinΦ, hfiny, ← hST, ← Finset.prod_pow, ← Finset.prod_mul_distrib]
-    refine Finset.prod_le_prod (fun v _ => norm_nonneg _) fun v _ => ?_
+    refine Finset.prod_le_prod₀ (fun v _ => norm_nonneg _) fun v _ => ?_
     rw [hv]
     exact hloc_v v _
   have hinf_le : ∏ w, Reduction.euclidNorm (Reduction.infComp w (Φ y)) ^ w.mult ≤
       (∏ w, cw w ^ w.mult) * (∏ w, Reduction.euclidNorm (Reduction.infComp w y) ^ w.mult) ^ d := by
     rw [← Finset.prod_pow, ← Finset.prod_mul_distrib]
-    refine Finset.prod_le_prod (fun w _ => pow_nonneg (Reduction.euclidNorm_nonneg _) _)
+    refine Finset.prod_le_prod₀ (fun w _ => pow_nonneg (Reduction.euclidNorm_nonneg _) _)
       fun w _ => ?_
     rw [hw]
     calc Reduction.euclidNorm (Φw w (Reduction.infComp w y)) ^ w.mult
@@ -213,38 +258,6 @@ theorem exists_adelicNorm_aeval_le (hd : 0 < d) (P : Fin m → MvPolynomial (Fin
       (Finset.single_le_sum (f := fun k => ∑ s ∈ (P k).support,
         ‖algebraMap K w.Completion ((P k).coeff s)‖)
         (fun k _ => by positivity) (Finset.mem_univ k))
-
-theorem exists_pos_le_height_of_bound {n : ℕ} (G : Set (AdelicGLn.AdelicGL K n))
-    (Φ : (Fin n → 𝔸[K]) → Fin m → 𝔸[K]) {C : ℝ} (hC : 0 < C) (hd : 0 < d)
-    (hΦ : ∀ y, Reduction.HasFiniteContent y → Reduction.HasFiniteContent (Φ y) →
-      Reduction.adelicNorm (Φ y) ≤ C * Reduction.adelicNorm y ^ d)
-    (hG : ∀ g ∈ G, ∀ x : Fin n → K, x ≠ 0 → ∃ s : GroundTheory.Global.IdeleGroup K,
-      1 ≤ (GroundTheory.Global.IdeleGroup.ideleModule K s : ℝ) ∧ ∃ z : Fin m → K, z ≠ 0 ∧
-        Φ (Reduction.ratVec x ᵥ* (g : Matrix (Fin n) (Fin n) 𝔸[K])) =
-          (s : 𝔸[K]) • Reduction.ratVec z) :
-    ∃ ε : ℝ, 0 < ε ∧ ∀ g ∈ G, ∀ x : Fin n → K, x ≠ 0 → ε ≤ Reduction.height g x := by
-  refine ⟨min 1 C⁻¹, lt_min one_pos (inv_pos.2 hC), fun g hg x hx => ?_⟩
-  obtain ⟨s, hs, z, hz, he⟩ := hG g hg x hx
-  have hy := Reduction.hasFiniteContent_height g hx
-  have hfz : Reduction.HasFiniteContent
-      (Φ (Reduction.ratVec x ᵥ* (g : Matrix (Fin n) (Fin n) 𝔸[K]))) := by
-    rw [he]
-    exact (Reduction.hasFiniteContent_ratVec hz).smul s
-  have h1 : 1 ≤ Reduction.adelicNorm (Φ (Reduction.ratVec x ᵥ* (g : Matrix (Fin n) (Fin n) 𝔸[K]))) := by
-    rw [he, Reduction.adelicNorm_smul (Reduction.hasFiniteContent_ratVec hz)]
-    exact one_le_mul_of_one_le_of_one_le hs (Reduction.one_le_adelicNorm_ratVec hz)
-  have h2 := h1.trans (hΦ _ hy hfz)
-  have h0 : 0 ≤ Reduction.height g x := Reduction.height_nonneg g x
-  change 1 ≤ C * Reduction.height g x ^ d at h2
-  by_cases h1' : 1 ≤ Reduction.height g x
-  · exact (min_le_left _ _).trans h1'
-  · replace h1' := not_le.1 h1'
-    have hpow : Reduction.height g x ^ d ≤ Reduction.height g x := pow_le_of_le_one h0 h1'.le hd.ne'
-    have h3 : 1 ≤ C * Reduction.height g x := h2.trans (mul_le_mul_of_nonneg_left hpow hC.le)
-    refine (min_le_right _ _).trans ?_
-    calc C⁻¹ = C⁻¹ * 1 := (mul_one _).symm
-      _ ≤ C⁻¹ * (C * Reduction.height g x) := mul_le_mul_of_nonneg_left h3 (inv_nonneg.2 hC.le)
-      _ = Reduction.height g x := by rw [← mul_assoc, inv_mul_cancel₀ hC.ne', one_mul]
 
 end Anisotropic
 

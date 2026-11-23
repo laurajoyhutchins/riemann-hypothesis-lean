@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJFEHeightsilinear
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJFEBlockConv
+import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+public import GroundTheory.AutomorphicForms.GL2.GJFEBlockKernel
+public import GroundTheory.AutomorphicForms.GL2.GJFEHeightsilinear
+import GroundTheory.AutomorphicForms.GL2.GJZetaCore
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -287,7 +341,7 @@ def blockBForm (μ : Measure (GL (Fin m) F)) (σ : Representation ℂ (GL (Fin m
     W →ₗ[ℂ] smoothVectors (Representation.dual σ) →ₗ[ℂ] ℂ :=
   LinearMap.mk₂ ℂ (fun w l => blockB μ σ Ψ w (l : Module.Dual ℂ W) s)
     (fun w₁ w₂ l => by
-      simp only [blockB, map_add, mul_add]
+      simp only [blockB, map_add (f := _), mul_add]
       exact integral_add (hint _ _ l.2) (hint _ _ l.2))
     (fun c w l => by
       simp only [blockB, map_smul, smul_eq_mul]
@@ -326,11 +380,10 @@ theorem blockB_indGL_smul (μ : Measure (GL (Fin m) F)) [μ.IsHaarMeasure] {ψ :
   rw [← integral_mul_right_eq_self _ x⁻¹, ← integral_const_mul]
   congr 1
   funext h
-  simp only [LinearMap.comp_apply]
   rw [Units.val_mul, Matrix.mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one,
     Matrix.mul_one, mul_inv_rev, inv_inv, detPow_mul,
     show ((x * h⁻¹, (1 : H)) : GL (Fin m) F × H) = (x, 1) * (h⁻¹, 1) by simp, map_mul,
-    Module.End.mul_apply, detPow_inv]
+    mul_apply_eq_comp, LinearMap.comp_apply, detPow_inv]
   have h2 : detPow x (m : ℂ) * detPow x (-((m : ℂ) - s)) = detPow x s := by
     rw [detPow_mul_detPow]; congr 1; ring
   rw [← h2]

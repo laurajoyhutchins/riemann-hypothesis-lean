@@ -1,4 +1,50 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.CompactLocalGlobal
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicIndexEquality.Commensurated
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FiniteAdelicComparison.LocLift
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,13 +73,6 @@ private theorem evalV_singleV_self' {F : Type} [Field F] [NumberField F]
       (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) = c
      simp
      done)
-  | (change (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) v = c
-     simp
-     done)
-  | (change (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) v = c
-     exact RestrictedProduct.single_eq_same _ v c)
-  | (change (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) v = c
-     rfl)
 
 private theorem evalV_singleV_of_ne {F : Type} [Field F] [NumberField F]
     {v w : HeightOneSpectrum (𝓞 F)} (hw : w ≠ v) (c : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv F v) :
@@ -49,13 +88,6 @@ private theorem evalV_singleV_of_ne {F : Type} [Field F] [NumberField F]
       (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) = 0
      simp [hw]
      done)
-  | (change (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) w = 0
-     simp [hw]
-     done)
-  | (change (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) w = 0
-     exact RestrictedProduct.single_eq_of_ne _ c hw)
-  | (change (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) w = 0
-     exact Pi.single_eq_of_ne hw c)
 
 private theorem psiV_liftOne_self (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F))
     (y : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) :
@@ -66,9 +98,10 @@ private theorem psiV_liftOne_self (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F
   rw [TensorProduct.equivFinsuppOfBasisRight_symm_apply] at hy
   conv_rhs => rw [← hy]
   unfold PI.FinKW.liftOne
+
   simp only [Finsupp.sum, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
-  simp only [PI.FinKW.psiV, AlgHom.comp_apply, AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_coe, AlgEquiv.coe_algHom,
+  simp only [PI.FinKW.psiV, AlgHom.comp_apply, AlgEquiv.coe_toAlgHom, AlgHom.coe_coe, AlgEquiv.coe_algHom,
     Algebra.TensorProduct.comm_tmul, Algebra.TensorProduct.map_tmul, evalV_singleV_self', AlgHom.coe_id, id_eq,
     TensorProduct.zero_tmul]
 
@@ -77,9 +110,10 @@ private theorem psiV_liftOne_of_ne (I : AutInst) {v w : HeightOneSpectrum (𝓞 
     PI.FinKW.psiV I w (PI.FinKW.liftOne I v y) = 0 := by
   classical
   unfold PI.FinKW.liftOne
+
   simp only [Finsupp.sum, map_sum]
   refine Finset.sum_eq_zero fun j _ => ?_
-  simp only [PI.FinKW.psiV, AlgHom.comp_apply, AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_coe, AlgEquiv.coe_algHom,
+  simp only [PI.FinKW.psiV, AlgHom.comp_apply, AlgEquiv.coe_toAlgHom, AlgHom.coe_coe, AlgEquiv.coe_algHom,
     Algebra.TensorProduct.comm_tmul, Algebra.TensorProduct.map_tmul, evalV_singleV_of_ne hw, AlgHom.coe_id, id_eq,
     TensorProduct.zero_tmul]
 
@@ -89,7 +123,7 @@ theorem liftMat_map_same (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F))
   ext i j
   have h1 := fun a => psiV_liftOne_self I v a
   have h2 := psiV_liftOne_self I v 1
-  simp only [Matrix.map_apply, liftMat, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add]
+  simp only [Matrix.map_apply, liftMat, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add (f := _)]
   split_ifs with h <;> simp [h1, h2]
 
 theorem liftMat_map_ne (I : AutInst) {v w : HeightOneSpectrum (𝓞 I.F)} (hw : w ≠ v)
@@ -98,7 +132,7 @@ theorem liftMat_map_ne (I : AutInst) {v w : HeightOneSpectrum (𝓞 I.F)} (hw : 
   ext i j
   have h1 := fun a => psiV_liftOne_of_ne I hw a
   have h2 := psiV_liftOne_of_ne I hw 1
-  simp only [Matrix.map_apply, liftMat, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add]
+  simp only [Matrix.map_apply, liftMat, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_add (f := _)]
   split_ifs with h <;> simp [h1, h2, h, Matrix.one_apply]
 
 private theorem equivFinsuppOfBasisRight_psiV_eq_evalV (I : AutInst) (w : HeightOneSpectrum (𝓞 I.F))
@@ -112,15 +146,13 @@ private theorem equivFinsuppOfBasisRight_psiV_eq_evalV (I : AutInst) (w : Height
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul e a =>
-    simp only [PI.FinKW.psiV, AlgHom.comp_apply, AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_coe,
+    simp only [PI.FinKW.psiV, AlgHom.comp_apply, AlgEquiv.coe_toAlgHom, AlgHom.coe_coe,
       AlgEquiv.coe_algHom, Algebra.TensorProduct.comm_tmul, Algebra.TensorProduct.map_tmul,
       AlgHom.coe_id, id_eq, TensorProduct.equivFinsuppOfBasisRight_apply_tmul,
       TensorProduct.equivFinsuppOfBasisLeft_apply_tmul, Finsupp.mapRange_apply]
     first
     | exact (map_smul (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV I.F w) _ a).symm
-    | exact (AlgHom.map_smul_of_tower (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV I.F w) _ a).symm
-    | simp
-  | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
 
 private theorem eq_of_forall_psiV_eq (I : AutInst) {x y : I.E ⊗[I.F] Af I.F}
     (h : ∀ w, PI.FinKW.psiV I w x = PI.FinKW.psiV I w y) : x = y := by
@@ -180,7 +212,7 @@ private theorem psiV_sigR_eq_sigV_psiV (I : AutInst) (w : HeightOneSpectrum (�
   | tmul e a =>
     simp [Formalism.UG.sigR, sigV, PI.FinKW.psiV, AlgEquiv.coe_algHom, Algebra.TensorProduct.comm_tmul,
       Algebra.TensorProduct.map_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 private theorem psiV_inclE' (I : AutInst) (w : HeightOneSpectrum (𝓞 I.F)) (e : I.E) :
     PI.FinKW.psiV I w (Formalism.UG.inclE (F := I.F) (Af I.F) e) = inclV I w e := by
@@ -214,7 +246,6 @@ theorem liftMat_unitary (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F))
       rw [liftMat_map_same]
       first
       | exact hg
-      | simpa [Uv, Formalism.UG.UJ] using hg
     · rw [liftMat_map_ne I hw, Formalism.UG.cT_one, Matrix.one_mul, Matrix.mul_one]
   ext i j
   apply eq_of_forall_psiV_eq I
@@ -228,12 +259,10 @@ theorem lift_unitary' : LiftU := by
   · apply Units.ext
     first
     | exact liftMat_map_same I v g.val
-    | simpa [matV, Formalism.UG.bc, liftGL] using liftMat_map_same I v g.val
   · intro w hw
     apply Units.ext
     first
     | exact liftMat_map_ne I hw g.val
-    | simpa [matV, Formalism.UG.bc, liftGL] using liftMat_map_ne I hw g.val
 
 end PI.UnitaryGroupMassFormula.AdIndexEq
 

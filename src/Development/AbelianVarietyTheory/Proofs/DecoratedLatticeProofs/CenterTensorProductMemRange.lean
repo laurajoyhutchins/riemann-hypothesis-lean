@@ -1,6 +1,63 @@
-import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AutomorphicFormsFiniteIdeal
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.RingTheory.TensorProduct.Maps
+public import Mathlib.Algebra.Algebra.Subalgebra.Centralizer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WordDerivatives
 import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsSigmaList
+import Development.AbelianVarietyTheory.PublishedTheorems.SiegelWeil₂.AutomorphicFormsFiniteIdeal
+import Formalism.LocalRingCardinality.DataTheta
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta MeasureTheory GlobalTheory.AutFinLit GlobalTheory.Published.AutFin
 open GlobalTheory.IndefiniteRowSideFullHecke.LieAlgebraExponentialFamilies (LieAt LieInf atPlace IsExpFam IsSmoothInf wordDer)
 open scoped TensorProduct DirectSum Classical
@@ -25,10 +82,9 @@ theorem center_tensorProduct_mem_range {A B : Type} [Ring A] [Algebra ℂ A] [Ri
     have : (f : A ⊗[ℂ] (Subalgebra.center ℂ B) → A ⊗[ℂ] B) =
         LinearMap.lTensor A (Subalgebra.center ℂ B).val.toLinearMap := by
       funext x
-      induction x using TensorProduct.induction_on with
-      | zero => simp
+      induction x using TensorProduct.inductionOn with
       | tmul a b => simp [hf]
-      | add x y hx hy => simp only [map_add, hx, hy]
+      | add x y hx hy => simp only [map_add (f := _), hx, hy]
     rw [this]
     exact Module.Flat.lTensor_preserves_injective_linearMap _ Subtype.val_injective
   have hw2 : w ∈ Subalgebra.centralizer ℂ
@@ -50,10 +106,9 @@ theorem center_tensorProduct_mem_range {A B : Type} [Ring A] [Algebra ℂ A] [Ri
       (AlgHom.id ℂ (Subalgebra.center ℂ B)) u = w := hu
   rw [← hw', ← hu']
   clear hw hu hw' hu' hz
-  induction u using TensorProduct.induction_on with
-  | zero => simp
+  induction u using TensorProduct.inductionOn with
   | tmul a b => simp [hf]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem center_eq_adjoin : ∀ (A B C : Type) [Ring A] [Algebra ℂ A] [Ring B] [Algebra ℂ B] [Ring C] [Algebra ℂ C] (e : (A ⊗[ℂ] B) ≃ₐ[ℂ] C), Subalgebra.center ℂ C = Algebra.adjoin ℂ ((fun a => e (a ⊗ₜ 1)) '' (Subalgebra.center ℂ A : Set A) ∪ (fun b => e (1 ⊗ₜ b)) '' (Subalgebra.center ℂ B : Set B)) := by
   intro A B C _ _ _ _ _ _ e
@@ -70,8 +125,7 @@ theorem center_eq_adjoin : ∀ (A B C : Type) [Ring A] [Algebra ℂ A] [Ring B] 
         (Subalgebra.center ℂ B).val u) := by rw [hu, e.apply_symm_apply]
     rw [hc']
     clear hu hc'
-    induction u using TensorProduct.induction_on with
-    | zero => simp
+    induction u using TensorProduct.inductionOn with
     | tmul a b =>
       have : (Algebra.TensorProduct.map (Subalgebra.center ℂ A).val
           (Subalgebra.center ℂ B).val) (a ⊗ₜ b) = ((a : A) ⊗ₜ (1 : B)) * ((1 : A) ⊗ₜ (b : B)) := by
@@ -80,7 +134,8 @@ theorem center_eq_adjoin : ∀ (A B C : Type) [Ring A] [Algebra ℂ A] [Ring B] 
       refine Subalgebra.mul_mem _ (Algebra.subset_adjoin ?_) (Algebra.subset_adjoin ?_)
       · exact Or.inl ⟨a, a.2, rfl⟩
       · exact Or.inr ⟨b, b.2, rfl⟩
-    | add x y hx hy => rw [map_add, map_add]; exact Subalgebra.add_mem _ hx hy
+    | add x y hx hy =>
+      simpa only [map_add] using Subalgebra.add_mem _ hx hy
   · rw [Algebra.adjoin_le_iff]
     rintro _ (⟨a, ha, rfl⟩ | ⟨b, hb, rfl⟩)
     · rw [SetLike.mem_coe, Subalgebra.mem_center_iff]
@@ -88,8 +143,7 @@ theorem center_eq_adjoin : ∀ (A B C : Type) [Ring A] [Algebra ℂ A] [Ring B] 
       obtain ⟨y, rfl⟩ := e.surjective g
       rw [← map_mul, ← map_mul]
       congr 1
-      induction y using TensorProduct.induction_on with
-      | zero => simp
+      induction y using TensorProduct.inductionOn with
       | tmul x y =>
         simp [Subalgebra.mem_center_iff.1 ha x]
       | add x y hx hy => rw [mul_add, add_mul, hx, hy]
@@ -98,8 +152,7 @@ theorem center_eq_adjoin : ∀ (A B C : Type) [Ring A] [Algebra ℂ A] [Ring B] 
       obtain ⟨y, rfl⟩ := e.surjective g
       rw [← map_mul, ← map_mul]
       congr 1
-      induction y using TensorProduct.induction_on with
-      | zero => simp
+      induction y using TensorProduct.inductionOn with
       | tmul x y =>
         simp [Subalgebra.mem_center_iff.1 hb y]
       | add x y hx hy => rw [mul_add, add_mul, hx, hy]

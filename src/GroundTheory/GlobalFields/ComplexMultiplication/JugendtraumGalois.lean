@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.JugendtraumUniformization
-import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremIdeles
-import GroundTheory.GlobalFields.ComplexMultiplication.HilbertClassField
-import GroundTheory.GlobalFields.ComplexMultiplication.AutCFixed
+module
+
+public import GroundTheory.GlobalFields.ClassFieldConsequences.HilbertClassField
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticUniformization
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupActionLattice
+public import GroundTheory.GlobalFields.GlobalArtinMap.ArtinMap
+public import GroundTheory.GlobalFields.ComplexMultiplication.AutCFixed
+public import GroundTheory.GlobalFields.ComplexMultiplication.HilbertClassField
+public import GroundTheory.GlobalFields.ComplexMultiplication.JugendtraumUniformization
+public import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremIdeles
+public import GroundTheory.GlobalFields.GlobalArtinMap.Kernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupAction
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -92,10 +140,10 @@ end Artin
 section Hilbert
 
 variable {K : Type} [Field K] [NumberField K] [Algebra K ℂ] (hK : finrank ℚ K = 2)
-  [IsTotallyComplex K]
+  [_root_.NumberField.IsTotallyComplex K]
+
 
 include hK in
-
 theorem j_weierstrassCurve_idealPeriodPair_eq (𝔞 : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
     {E : WeierstrassCurve ℂ} [E.IsElliptic] {f : ℂ →+ E.toAffine.Point}
     (hf : IsAnalyticUniformization (idealLattice (algebraMap K ℂ) 𝔞) f) :
@@ -104,8 +152,8 @@ theorem j_weierstrassCurve_idealPeriodPair_eq (𝔞 : (FractionalIdeal (𝓞 K)�
   exact j_eq_of_isAnalyticUniformization hf
     (isAnalyticUniformization_toPointHom (idealPeriodPair (algebraMap K ℂ) hK 𝔞))
 
-include hK in
 
+include hK in
 theorem adjoin_j_eq_hilbertClassField_of_isAnalyticUniformization (𝔞 : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
     {E : WeierstrassCurve ℂ} [E.IsElliptic] {f : ℂ →+ E.toAffine.Point}
     (hf : IsAnalyticUniformization (idealLattice (algebraMap K ℂ) 𝔞) f) :
@@ -114,8 +162,8 @@ theorem adjoin_j_eq_hilbertClassField_of_isAnalyticUniformization (𝔞 : (Fract
   exact adjoin_j_eq_hilbertClassField hK
     (ellOf (algebraMap K ℂ) _ (latticeEnd_idealPeriodPair (algebraMap K ℂ) hK 𝔞))
 
-include hK in
 
+include hK in
 theorem mk_mem_map_standardOpenSubgroup_of_apply_j_eq (σ : ℂ ≃ₐ[K] ℂ) (s : IdeleGroup K)
     (hs : ∀ x : maximalAbelianExtension K (algebraicClosure K ℂ),
       ((artinMap K (algebraicClosure K ℂ) (IdeleClassGroup.mk K s) x : algebraicClosure K ℂ) : ℂ) =

@@ -1,12 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ZerosDisc
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ZeroFreePrincipal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LogFactorialEqSumVonMangoldtMulDiv
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DirichletLFewZerosSmallDiscStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsLargeVonMangoldtLogPowerSeriesNearZeroStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LargeMeanOfLargeDerivativeStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PrimeMeanValueCharactersTwistIntegralLeStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.ZerosDisc
+public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Aesop.Main
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DirichletLFewZerosSmallDiscStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsLargeVonMangoldtLogPowerSeriesNearZeroStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LargeMeanOfLargeDerivativeStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PrimeMeanValueCharactersTwistIntegralLeStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ZeroFreePrincipal
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LogFactorialEqSumVonMangoldtMulDiv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Complex DirichletCharacter ArithmeticFunction MeasureTheory Filter Topology GlobalTheory.Lin
 open scoped Classical
 
@@ -66,10 +118,10 @@ theorem count_le (Z : Finset ℂ) (w : ℂ → ℝ) (F : ℝ → ℝ) (U h δ M 
     simp only [setIntegral_const, smul_eq_mul]
     rw [Real.volume_real_Icc_of_le (by linarith)]
     ring
-  rw [Finset.mul_sum, ← Finset.sum_congr rfl hint, ← integral_finset_sum _ (fun ρ _ => hgi ρ),
+  rw [Finset.mul_sum, ← Finset.sum_congr rfl hint, ← integral_finsetSum _ (fun ρ _ => hgi ρ),
     ← intervalIntegral.integral_const_mul, intervalIntegral.integral_of_le hU',
     ← integral_Icc_eq_integral_Ioc]
-  refine integral_mono (integrable_finset_sum _ (fun ρ _ => hgi ρ)) ?_ fun τ => ?_
+  refine integral_mono (integrable_finsetSum _ (fun ρ _ => hgi ρ)) ?_ fun τ => ?_
   · exact ((intervalIntegrable_iff_integrableOn_Icc_of_le hU').1 hF).const_mul M
   · have he : ∑ ρ ∈ Z, g ρ τ = δ * ∑ z ∈ Z.filter (fun z => |τ - z.im| ≤ h), w z := by
       rw [Finset.mul_sum, Finset.sum_filter]
@@ -169,14 +221,14 @@ theorem mean_le : ∃ C CM : ℝ, 0 < C ∧ 0 ≤ CM ∧ ∀ (q : ℕ) [NeZero q
   have hJ : ∀ χ : DirichletCharacter ℂ q, Integrable (fun y : ℝ =>
       ∫ τ in Set.Ioc (-T) T, ‖primeSum χ N y τ‖ ^ 2 / y) (volume.restrict (Set.Ioc N M)) :=
     fun χ => (hI χ).integral_prod_right
-  rw [← integral_finset_sum _ (fun χ _ => hJ χ)]
+  rw [← integral_finsetSum _ (fun χ _ => hJ χ)]
   have hlM : 0 ≤ Real.log M := Real.log_nonneg (by linarith)
   have hc : IntegrableOn (fun y : ℝ => C * (Real.log M + CM) * y⁻¹) (Set.Ioc N M) := by
     refine (ContinuousOn.integrableOn_Icc ?_).mono_set Set.Ioc_subset_Icc_self
     exact continuousOn_const.mul (continuousOn_id.inv₀ fun y hy => by
       have := hy.1; simp only [id]; linarith)
   calc _ ≤ ∫ y in Set.Ioc N M, C * (Real.log M + CM) * y⁻¹ := by
-        refine setIntegral_mono_on (integrable_finset_sum _
+        refine setIntegral_mono_on (integrable_finsetSum _
           (fun χ _ => hJ χ)) hc measurableSet_Ioc fun y hy => ?_
         have hy1 : 1 ≤ y := by linarith [hy.1]
         simp only [integral_div]

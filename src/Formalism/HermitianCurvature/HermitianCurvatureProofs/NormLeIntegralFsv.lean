@@ -1,8 +1,55 @@
-import Formalism.HermitianCurvature.CompositeFormulaLevelZero
-import Mathlib.Analysis.Fourier.FourierTransform
-import Mathlib.Analysis.Fourier.Inversion
-import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
-import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
+module
+
+public import Formalism.HermitianCurvature.CompositeFormulaLevelZero
+public import Mathlib.Analysis.Complex.Circle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Fourier.Inversion
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Fourier.FourierTransform
+
+@[expose] public section
 
 open MeasureTheory Real
 open scoped FourierTransform RealInnerProductSpace ComplexConjugate
@@ -58,30 +105,19 @@ theorem norm_le_integral_fsv (φ : ℂ → ℂ) (hφ : Continuous φ) (hi : Meas
   have hint : Integrable (𝓕 φ) := by
     first
       | exact (integrable_comp_smul_iff volume (𝓕 φ) hc).mp hint1
-      | exact (MeasureTheory.integrable_comp_smul_iff (volume : Measure ℂ) (𝓕 φ) hc).mp hint1
-      | exact (Integrable.comp_smul_iff hc).mp hint1
   have hinv : 𝓕⁻ (𝓕 φ) t = φ t := by
     first
       | exact hi.fourier_inversion hint hφ.continuousAt
       | exact hi.fourierInv_fourier_eq hint hφ.continuousAt
-      | exact hφ.fourierInv_fourier_eq hi hint t
-      | exact Continuous.fourierInv_fourier_eq hφ hi hint t
-      | exact hi.fourierInv_fourier hint hφ.continuousAt
-      | exact hφ.fourierInv_fourier hi hint t
-      | exact MeasureTheory.Integrable.fourier_inversion hi hint hφ.continuousAt
   have hb : ‖φ t‖ ≤ ∫ w : ℂ, ‖𝓕 φ w‖ := by
     rw [← hinv]
     first
       | rw [fourierInv_eq]
-      | rw [Real.fourierInv_eq]
-      | rw [fourierInv_eq']
-      | rw [fourierInv_eq_fourier_neg, fourier_eq]
     refine (norm_integral_le_integral_norm _).trans (le_of_eq ?_)
     congr 1
     funext w
     first
       | exact Circle.norm_smul _ _
-      | simp
   have e1 := hmp.integral_comp hme (fun s : ℂ => ‖𝓕 φ ((π⁻¹ : ℝ) • s)‖)
   have e2 := Measure.integral_comp_smul (volume : Measure ℂ) (fun w : ℂ => ‖𝓕 φ w‖) (π⁻¹ : ℝ)
   try dsimp only at e1

@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MaxWeightGL1EqOne
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockParOpp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocPartMul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemInterConjIff
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BlockParOpp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocPartMul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemInterConjIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Matrix
 open scoped Classical
 
@@ -142,7 +185,7 @@ theorem ncard_fibre_eq_relIndex (T : Subgroup H) {L N : Subgroup H} (hLN : ∀ l
   rw [Subgroup.relIndex, ← hstab, MulAction.index_stabilizer]
   refine Set.ncard_congr (fun q _ => ((m * Quotient.out q : H) : H ⧸ L)) ?_ ?_ ?_
   · rintro q ⟨hq, he⟩
-    obtain ⟨t, ht, l, hl, h⟩ := (DoubleCoset.eq T L _ _).1 he.symm
+    obtain ⟨t, ht, l, hl, h⟩ := (@DoubleCoset.eq _ _ T L _ _).1 he.symm
     have hts : t ∈ S := by
       refine mem_locPart.2 ⟨ht, ?_⟩
       have : y⁻¹ * t * y = (m⁻¹ * y)⁻¹ * Quotient.out q * l⁻¹ := by
@@ -193,12 +236,12 @@ theorem dsum_eq_zero_of_fibre_sums : ∀ (H : Type) [Group H] (T P N L U : Subgr
   have hsup : L ⊔ N ≤ P := sup_le hLP hNP
   unfold dsum
   refine finsum_eq_zero_of_fibres (fun D => DoubleCoset.mk T (L ⊔ N) (Quotient.out D)) _ fun D' => ?_
-  obtain ⟨m, rfl⟩ : ∃ m, DoubleCoset.mk T (L ⊔ N) m = D' := ⟨_, DoubleCoset.out_eq' _ _ D'⟩
+  obtain ⟨m, rfl⟩ : ∃ m, DoubleCoset.mk T (L ⊔ N) m = D' := ⟨_, DoubleCoset.out_eq' D'⟩
   by_cases hm : m ∈ P
   swap
   · refine finsum_eq_zero_of_forall_eq_zero fun D => ?_
     split_ifs with h
-    · obtain ⟨t, ht, k, hk, e⟩ := (DoubleCoset.eq _ _ _ _).1 h
+    · obtain ⟨t, ht, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 h
       have : Quotient.out D ∉ P := fun hD => hm (e ▸ P.mul_mem (P.mul_mem (hTP ht) hD) (hsup hk))
       simp [wt, hP _ this]
     · rfl
@@ -210,9 +253,9 @@ theorem dsum_eq_zero_of_fibre_sums : ∀ (H : Type) [Group H] (T P N L U : Subgr
         (({q : H ⧸ (N ⊓ L) | Quotient.out q ∈ N ∧ DoubleCoset.mk T L (m * Quotient.out q) = D}.ncard : ℂ) *
           Ψ (Quotient.out D)) := by
     intro D h
-    obtain ⟨t, ht, k, hk, e⟩ := (DoubleCoset.eq _ _ _ _).1 h.symm
+    obtain ⟨t, ht, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ _ _).1 h.symm
     have hD : D = DoubleCoset.mk T L (m * k) := by
-      rw [← DoubleCoset.out_eq' T L D, eq_comm, DoubleCoset.eq]
+      rw [← DoubleCoset.out_eq' D, eq_comm, DoubleCoset.eq]
       exact ⟨t, ht, 1, L.one_mem, by rw [e]; group⟩
     have hc := ncard_fibre_eq_relIndex T hLN (m := m) (y := m * k) (by simpa using hk)
     rw [← hD] at hc
@@ -235,7 +278,7 @@ theorem dsum_eq_zero_of_fibre_sums : ∀ (H : Type) [Group H] (T P N L U : Subgr
     rw [Set.eq_empty_iff_forall_notMem]
     rintro q ⟨hq, rfl⟩
     apply h
-    obtain ⟨t, l, ht, hl', e⟩ := DoubleCoset.mk_out_eq_mul T L (m * Quotient.out q)
+    obtain ⟨t, ht, l, hl', e⟩ := DoubleCoset.mk_out_eq_mul T L (m * Quotient.out q)
     rw [e, eq_comm, DoubleCoset.eq]
     exact ⟨t, ht, Quotient.out q * l, Subgroup.mul_mem _ (Subgroup.mem_sup_right hq) (Subgroup.mem_sup_left hl'),
       by group⟩
@@ -246,7 +289,7 @@ theorem dsum_eq_zero_of_fibre_sums : ∀ (H : Type) [Group H] (T P N L U : Subgr
       · exact (hout D h) ▸ Set.finite_empty)
   have hΨ : ∀ x, Ψ (Quotient.out (DoubleCoset.mk T L x)) = Ψ x := by
     intro x
-    obtain ⟨t, l, ht, hl', e⟩ := DoubleCoset.mk_out_eq_mul T L x
+    obtain ⟨t, ht, l, hl', e⟩ := DoubleCoset.mk_out_eq_mul T L x
     rw [e, hr l hl', hl t ht]
   simp only [hΨ, Set.mem_setOf_eq] at hB
   have h0 := hsum m hm

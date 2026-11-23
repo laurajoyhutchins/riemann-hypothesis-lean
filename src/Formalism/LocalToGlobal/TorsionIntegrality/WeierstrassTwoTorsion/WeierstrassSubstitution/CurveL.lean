@@ -1,8 +1,53 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementC
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementT
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.FlowBasic
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.Laurent
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.CurveSer
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementC
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.CurveSer
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.WeierstrassSubstitution.Laurent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open PowerSeries
 
@@ -21,7 +66,7 @@ theorem DL_apply (f : LaurentSeries R) : DL W f = toL (fw W) * dL f := rfl
 theorem isDer_DL : IsDer (DL W) := by
   unfold IsDer
   refine ⟨fun a b => ?_, fun a b => ?_⟩
-  · simp only [DL, map_add, mul_add]
+  · simp only [DL, map_add (f := _), mul_add]
   · simp only [DL, dL_mul]
     ring
 
@@ -147,26 +192,5 @@ theorem invariant_flow : FlowL.{u} := by
   unfold FlowL
   intro R _ W
   exact ⟨isFlow_xL_yL W, toL_X_mul_yL W, toL_wSer_mul_yL W, toL_wSer_mul_xL W⟩
-
-theorem x_derivative_square : XLSq.{u} := by
-  unfold XLSq
-  intro R _ W
-  obtain ⟨heq, hx, hy⟩ := isFlow_xL_yL W
-  obtain ⟨c1, c2, c3, c4, c6⟩ := constCurve_DL W
-  have hD := isDer_DL W
-  rw [WeierstrassCurve.Affine.equation_iff] at heq
-  have h1 : DL W 1 = 0 := by simpa using DL_C W 1
-  have h2 : DL W 2 = 0 := by
-    rw [show (2 : LaurentSeries R) = 1 + 1 by norm_num, hD.1, h1, add_zero]
-  have hb2 : HahnSeries.C W.b₂ = (curveL W).b₂ := by simp
-  have hb4 : HahnSeries.C W.b₄ = (curveL W).b₄ := by simp
-  have hb6 : HahnSeries.C W.b₆ = (curveL W).b₆ := by simp
-  rw [hb2, hb4, hb6]
-  simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆]
-  constructor
-  · rw [hx]
-    linear_combination 4 * heq
-  · rw [hx, hD.1, hD.1, hD.2, hD.2, h2, c1, c3, hy, hx]
-    ring
 
 end Formalism.L2.Th1.A

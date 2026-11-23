@@ -1,8 +1,48 @@
-import Mathlib
-import Formalism.QuotientMetricDivisors.Statement
-import Formalism.QuotientMetricDivisors.RatHermLcvTwist
-import Formalism.QuotientMetricDivisors.ClassSumDualLe
-import Formalism.LocalRingCardinality.DataArith
+module
+
+public import Formalism.QuotientMetricDivisors.RatHermLcvTwist
+public import Formalism.QuotientMetricDivisors.ClassSumDualLe
+public import Formalism.LocalRingCardinality.DataArith
+public import Mathlib.Analysis.Matrix.Order
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder MatrixOrder
@@ -60,8 +100,8 @@ def pushFrame (φ : Matrix (Fin n) (Fin n) K) (X : InfinitePlace K → Matrix (F
     InfinitePlace K → Matrix (Fin n) (Fin n) ℂ :=
   fun v => φ.map v.embedding * X v
 
-open Classical in
 
+open Classical in
 def spliceFrame (v0 : InfinitePlace K) (Y : Matrix (Fin n) (Fin n) ℂ)
     (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ) : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ :=
   Function.update X v0 Y
@@ -86,9 +126,6 @@ def FrameOfSpec : Prop :=
   ∀ (n : ℕ) (A : Matrix (Fin n) (Fin n) ℂ), A.PosDef →
     IsUnit (frameOf A).det ∧ metOf (frameOf A) = A
 
-def FrameOfEqZeroOfNotPosDef : Prop :=
-  ∀ (n : ℕ) (A : Matrix (Fin n) (Fin n) ℂ), ¬ A.PosDef → frameOf A = 0
-
 def MetOfSpec : Prop :=
   ∀ (n : ℕ) (Y : Matrix (Fin n) (Fin n) ℂ), IsUnit Y.det →
     (metOf Y).PosDef ∧ (metOf Y)⁻¹ = Y * Yᴴ ∧ metOf (frameOf (metOf Y)) = metOf Y
@@ -102,11 +139,6 @@ def QuotEqRestrC : Prop :=
   ∀ (n d : ℕ) (A : Matrix (Fin n) (Fin n) ℂ), A.PosDef →
     ∀ (C : Matrix (Fin n) (Fin d) ℂ) (P : Matrix (Fin d) (Fin n) ℂ), P * C = 1 →
       Cᴴ * A * (1 - C * P) = 0 → quotMetC P A = restrMetC C A
-
-def StdFrameRatHerm : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (K0 : Subfield K) (n : ℕ)
-    (H : Matrix (Fin n) (Fin n) K), (∀ i j, H i j ∈ K0) →
-    (∀ v : InfinitePlace K, (H.map v.embedding).PosDef) → IsRatHerm K0 H (stdFrame H)
 
 def StdFrameHermAt : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (v0 : InfinitePlace K) (n : ℕ)
@@ -159,10 +191,6 @@ def QuotFrameHermAt : Prop :=
     ∀ (E : Matrix (Fin n) (Fin d) K) (Pr : Matrix (Fin d) (Fin n) K), IsOrthProj H E Pr →
       IsHermAt v0 (Eᴴ * H * E) (quotFrame Pr H)
 
-def RestrFormGram : Prop :=
-  ∀ (K : Type) [Field K] [StarRing K] (n d : ℕ) (H : Matrix (Fin n) (Fin n) K)
-    (E : Matrix (Fin n) (Fin d) K), Eᴴ * H * E = gramMat H (fun a i => E i a)
-
 def WeightFrameSpec : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (n : ℕ) (Ix : Type) [Fintype Ix]
     (pr : Ix → Matrix (Fin n) (Fin n) K) (t : Ix → InfinitePlace K → ℝ)
@@ -186,61 +214,9 @@ def WeightFramePart : Prop :=
       Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) (weightFrame pr t X) v x y =
         ((t p v : ℝ) : ℂ) * Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) X v x y
 
-def PushFrameSpec : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (n : ℕ) (φ : Matrix (Fin n) (Fin n) K),
-    IsUnit φ.det → ∀ X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ, (∀ v, IsUnit (X v).det) →
-    ∀ v : InfinitePlace K, IsUnit (pushFrame φ X v).det ∧
-      (∀ x y : Fin n → K,
-        Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) (pushFrame φ X) v (φ.mulVec x) (φ.mulVec y) =
-          Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) X v x y) ∧
-      detRatio X (pushFrame φ X) φ v = 1
-
 def SpliceFrameSpec : Prop :=
   ∀ (K : Type) [Field K] [NumberField K] (n : ℕ) (v0 : InfinitePlace K)
     (Y : Matrix (Fin n) (Fin n) ℂ) (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ),
     spliceFrame v0 Y X v0 = Y ∧ ∀ v, v ≠ v0 → spliceFrame v0 Y X v = X v
-
-def RowFrameSpec : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (n : ℕ) (Ix : Type) [Fintype Ix]
-    (v0 : InfinitePlace K) (Y : Matrix (Fin n) (Fin n) ℂ), IsUnit Y.det →
-    ∀ φ : Matrix (Fin n) (Fin n) K, IsUnit φ.det →
-    ∀ (pr : Ix → Matrix (Fin n) (Fin n) K) (t : Ix → InfinitePlace K → ℝ)
-    (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ), (∀ v, IsUnit (X v).det) →
-    (∀ p v, 0 < t p v) → ∑ p, pr p = 1 → (∀ p q, p ≠ q → pr p * pr q = 0) →
-    (∀ v, IsUnit (rowFrame v0 Y φ pr t X v).det) ∧ rowFrame v0 Y φ pr t X v0 = Y ∧
-    ∀ v : InfinitePlace K, v ≠ v0 →
-    (∀ p q, p ≠ q → ∀ x y : Fin n → K,
-      Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) X v ((pr p).mulVec x) ((pr q).mulVec y) = 0) →
-    ∀ (p : Ix) (x y : Fin n → K), (pr p).mulVec x = x →
-      Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) (rowFrame v0 Y φ pr t X) v (φ.mulVec x) (φ.mulVec y) =
-        ((t p v : ℝ) : ℂ) * Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin n)) X v x y
-
-def DualFrameMet : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] (n : ℕ)
-    (X : InfinitePlace K → Matrix (Fin n) (Fin n) ℂ), (∀ v, IsUnit (X v).det) →
-    ∀ v, metOf (Formalism.HN.dualFrame X v) = ((metOf (X v))⁻¹)ᵀ
-
-def FrameIndep : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (d : ℕ)
-    (X X2 : InfinitePlace K → Matrix (Fin d) (Fin d) ℂ), (∀ v, IsUnit (X v).det) →
-    (∀ v, IsUnit (X2 v).det) → (∀ v, metOf (X v) = metOf (X2 v)) →
-    (∀ v (x y : Fin d → K), Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin d)) X v x y =
-      Formalism.HermitianLatticesTheory.majAt (Pi.basisFun K (Fin d)) X2 v x y) ∧
-    ∀ L : Submodule (𝓞 K) (Fin d → K), L.FG →
-      lcv X L = lcv X2 L ∧
-      Formalism.HN.muDef (Pi.basisFun K (Fin d)) X L = Formalism.HN.muDef (Pi.basisFun K (Fin d)) X2 L ∧
-      Formalism.HN.muMaxDef (Pi.basisFun K (Fin d)) X L = Formalism.HN.muMaxDef (Pi.basisFun K (Fin d)) X2 L ∧
-      Formalism.HN.muMinDef (Pi.basisFun K (Fin d)) X L = Formalism.HN.muMinDef (Pi.basisFun K (Fin d)) X2 L
-
-def ToHLatSpec : Prop :=
-  ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (d : ℕ)
-    (X : InfinitePlace K → Matrix (Fin d) (Fin d) ℂ) (L : Submodule (𝓞 K) (Fin d → K)),
-    (toHLat X L).lcv = lcv X L ∧
-    (toHLat X L).mu = Formalism.HN.muDef (Pi.basisFun K (Fin d)) X L ∧
-    (toHLat X L).muMax = Formalism.HN.muMaxDef (Pi.basisFun K (Fin d)) X L ∧
-    (toHLat X L).muMin = Formalism.HN.muMinDef (Pi.basisFun K (Fin d)) X L ∧
-    (toHLat X L).dualL = Formalism.HN.dualLat L ∧
-    (toHLat X L).dualX = Formalism.HN.dualFrame X ∧
-    ((toHLat X L).Good ↔ (∀ v, IsUnit (X v).det) ∧ Submodule.IsLattice K L)
 
 end Formalism.L2.DIV

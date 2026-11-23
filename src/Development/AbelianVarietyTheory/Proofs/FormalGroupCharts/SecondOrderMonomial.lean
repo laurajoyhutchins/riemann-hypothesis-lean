@@ -1,8 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.WickOperatorVanishing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GEWick
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SumSplitsEvalTwoWord
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GEWick
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.DofListSum
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.EvalZeroReplicateAppend
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.SumSplitsEvalTwoWord
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CcTMulQ
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,7 +88,7 @@ theorem dpolyOf_monomial (m : ι →₀ ℕ) (a : k) (f : PS k 1 d) :
 
 theorem secondOrder_add (c : ι → ι → k) (P Q : MvPolynomial ι k) :
     secondOrder k c (P + Q) = secondOrder k c P + secondOrder k c Q := by
-  simp only [secondOrder, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [secondOrder, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem secondOrder_monomial (c : ι → ι → k) (m : ι →₀ ℕ) (a : k) :
     secondOrder k c (MvPolynomial.monomial m a) =
@@ -64,7 +108,7 @@ theorem halfSt : GE.HalfSt := by
   classical
   induction P using MvPolynomial.induction_on' with
   | add P Q hP hQ =>
-    rw [secondOrder_add, GE.dpolyOf_add_P, GE.dpolyOf_add_P, map_add, map_add, hP, hQ, mul_add]
+    rw [secondOrder_add, GE.dpolyOf_add_P, GE.dpolyOf_add_P, map_add (f := _), map_add (f := _), hP, hQ, mul_add]
   | monomial m a =>
     have h2 : algebraMap ℚ k (1 / 2) * 2 = 1 := by
       rw [show (2 : k) = algebraMap ℚ k 2 from (map_ofNat _ 2).symm, ← map_mul]
@@ -72,8 +116,9 @@ theorem halfSt : GE.HalfSt := by
     have key := G2.sum_splits_evalTwo_word c hc (Finset.univ : Finset ι).toList (Finset.nodup_toList _) m
       (fun w => constantCoeff (G2.T F u w A))
     simp only [Finset.sum_map_toList] at key
+
     rw [dpolyOf_monomial, dmonOf_eq_T_word, map_mul, constantCoeff_C,
-      G2.cc_T_mul_q c F u q hq0 hq1 hq2, secondOrder_monomial, GE.dpolyOf_sum_P, map_sum]
+    G2.cc_T_mul_q c F u q hq0 hq1 hq2, secondOrder_monomial, GE.dpolyOf_sum_P, map_sum]
     have hR : ∑ x, constantCoeff (DpolyOf F u
         (∑ y, MvPolynomial.monomial (m - Finsupp.single y 1 - Finsupp.single x 1)
           (a * (c x y * ((m y * (m - Finsupp.single y 1 : ι →₀ ℕ) x : ℕ) : k)))) A) =
@@ -82,6 +127,7 @@ theorem halfSt : GE.HalfSt := by
             (m - Finsupp.single y 1 - Finsupp.single x 1)) A) := by
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl fun x _ => ?_
+
       rw [GE.dpolyOf_sum_P, map_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl fun y _ => ?_
       rw [dpolyOf_monomial, dmonOf_eq_T_word, map_mul, constantCoeff_C, mul_assoc]

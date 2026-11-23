@@ -1,9 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.ProjectiveLattices.IntFrames
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.EigenLatticeFrames
 import Formalism.LocalToGlobal.ProjectiveLattices.GenFrPf
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.EigenLatticeFrames
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.IsTriangularReframeExistsAndUnique
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.UnivChartLoc
+import Development.AbelianVarietyTheory.Definitions.RegularCharts.Reframe
+public import Formalism.LocalToGlobal.ProjectiveLattices.GenFrPfB
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -24,37 +69,6 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : D
 section Linear
 
 variable {S : Type} [Field S] {x : Sp S ⟶ Xo.X} {m : ℕ} {u v : Fin m → (Sp (DualNumber S) ⟶ Xo.univ.t.G.left)}
-
-theorem comb_inv (hu : ∀ i, IsTanAt x (u i)) (hv : ∀ i, IsTanAt x (v i)) (M N : Matrix (Fin m) (Fin m) S)
-    (hNM : N * M = 1) (h : ∀ i, IsCombAt x v (M i) (u i)) (i : Fin m) : IsCombAt x u (N i) (v i) := by
-  have h1 := (ReframeEx.comb_iff hu (N i) _).2 rfl
-  have h2 := GlobalTheory.TangentLinear.isCombAt_mulVec E H Dw l Xo S x v hv u M.transpose (N i) _ h h1
-  have e : M.transpose.mulVec (N i) = Pi.single i 1 := by
-    funext j
-    have := congrFun (congrFun hNM i) j
-    rw [Matrix.mul_apply, Matrix.one_apply] at this
-    simp only [Matrix.mulVec, dotProduct, Matrix.transpose_apply, Pi.single_apply]
-    rw [Finset.sum_congr rfl fun k _ => _root_.mul_comm (M k j) (N i k), this]
-    simp only [eq_comm]
-  rw [e] at h2
-  rw [← ReframeEx.comb_unique hv h2 (ReframeEx.comb_single hv i)]
-  exact h1
-
-theorem tri_inv (hu : ∀ i, IsTanAt x (u i)) (hv : ∀ i, IsTanAt x (v i))
-    (h : ∀ i, ∃ cf : Fin m → S, cf i ≠ 0 ∧ (∀ j, i < j → cf j = 0) ∧ IsCombAt x v cf (u i)) :
-    ∃ N : Matrix (Fin m) (Fin m) S, IsUnit N.det ∧
-      ∀ i, N i i ≠ 0 ∧ (∀ j, i < j → N i j = 0) ∧ IsCombAt x u (N i) (v i) := by
-  choose M hd hz hc using h
-  let M' : Matrix (Fin m) (Fin m) S := Matrix.of M
-  have hdet : IsUnit M'.det := by
-    rw [Matrix.det_of_lowerTriangular M' (fun i j hij => hz i j hij), isUnit_iff_ne_zero]
-    exact Finset.prod_ne_zero_iff.2 fun i _ => hd i
-  have hNM : M'⁻¹ * M' = 1 := Matrix.nonsing_inv_mul _ hdet
-  have hz' := BorelGroupoid.lower_of_mul_eq_one M' M'⁻¹ hz hNM
-  refine ⟨M'⁻¹, Matrix.isUnit_det_of_right_inverse hNM, fun i => ⟨fun h0 => ?_, hz' i, comb_inv hu hv M' _ hNM hc i⟩⟩
-  have h2 := BorelGroupoid.lower_mul_diag M'⁻¹ M' hz' hz i
-  rw [hNM, Matrix.one_apply_eq, h0, zero_mul] at h2
-  exact one_ne_zero h2
 
 end Linear
 

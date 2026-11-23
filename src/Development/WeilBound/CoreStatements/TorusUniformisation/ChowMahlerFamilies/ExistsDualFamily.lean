@@ -1,10 +1,63 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceFamilyPairing
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceLocalizationExists
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsCmTypeEmbedding
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceDifferentialsExist
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DifferentGeneratorDualIntegral
+module
+
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.IsDerAt0
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DifferentGeneratorDualIntegral
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsDualBC
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StalkLoc
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsCmTypeEmbedding
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.ExistsFunctionAtPoint
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceDifferentialsExist
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceFamilyPairing
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.SequenceLocalizationExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -34,6 +87,7 @@ theorem exists_dual_family (A M : Type) [CommRing A] [AddCommGroup M] [Module A 
   refine ⟨n, fun i => t (Pi.single i 1), fun i => LinearMap.proj i ∘ₗ s, fun m => ?_⟩
   have h := LinearMap.congr_fun hs m
   rw [LinearMap.comp_apply, LinearMap.id_apply] at h
+
   conv_rhs => rw [← h, pi_eq_sum_univ' (s m), map_sum]
   simp only [map_smul, LinearMap.comp_apply, LinearMap.proj_apply]
 
@@ -56,7 +110,7 @@ theorem lattices_alg {O Ω C : Type} [CommRing O] [Field Ω] [Field C] [Algebra 
   classical
   have hadd : ∀ x (u u' : Fin g → RC), ev x (fun j => ((u + u') j : C)) =
       ev x (fun j => (u j : C)) + ev x fun j => (u' j : C) := fun x u u' => by
-    rw [← map_add]; rfl
+    rw [← map_add (f := _)]; rfl
   have hsm : ∀ x (s : RC) (u : Fin g → RC), ev x (fun j => ((s • u) j : C)) =
       (s : C) * ev x (fun j => (u j : C)) := fun x s u => by
     rw [← smul_eq_mul, ← map_smul]; rfl
@@ -95,6 +149,7 @@ theorem lattices_alg {O Ω C : Type} [CommRing O] [Field Ω] [Field C] [Algebra 
       obtain ⟨y, rfl⟩ := h
       refine AddSubgroup.subset_closure ⟨1, RC.one_mem, _, ⟨fun k => y.1 (b k), (hdd _).2 fun l hl => ?_, rfl⟩, ?_⟩
       · have := hW2 l hl y.1 y.2
+
         rw [map_sum] at this
         simpa only [map_smul, smul_eq_mul, dotProduct] using this
       · rw [one_smul]
@@ -111,6 +166,7 @@ theorem lattices_alg {O Ω C : Type} [CommRing O] [Field Ω] [Field C] [Algebra 
           ?_ ?_ ?_ ?_ (hall u)
         · rintro _ ⟨y, rfl⟩
           have := hR _ (hW2 a₀ ha₀ y.1 y.2)
+
           rw [map_sum, map_sum] at this
           simpa only [map_smul, smul_eq_mul, map_mul, hev] using this
         · simp only [hzero, mul_zero, Finset.sum_const_zero]; exact RC.zero_mem
@@ -134,11 +190,13 @@ theorem lattices_alg {O Ω C : Type} [CommRing O] [Field Ω] [Field C] [Algebra 
     have hid : (∑ m, (j (f m)).smulRight (toLi (e m)) : Li →ₗ[Ω] Li) = LinearMap.id :=
       hbc.algHom_ext _ _ fun v => by
         rw [LinearMap.id_apply, LinearMap.sum_apply]
+
         conv_rhs => rw [← hef v, map_sum]
         refine Finset.sum_congr rfl fun m _ => ?_
         rw [LinearMap.smulRight_apply, hj, map_smul, algebraMap_smul]
     have hk : ∀ k k', (Pi.single k 1 : Fin r → Ω) k' = ∑ m, j (f m) (b k) * co (toLi (e m)) k' := fun k k' => by
       have := congrArg co (LinearMap.congr_fun hid (b k))
+
       rw [LinearMap.id_apply, hco, LinearMap.sum_apply, map_sum] at this
       rw [← this, Finset.sum_apply]
       simp only [LinearMap.smulRight_apply, map_smul, Pi.smul_apply, smul_eq_mul]
@@ -150,6 +208,7 @@ theorem lattices_alg {O Ω C : Type} [CommRing O] [Field Ω] [Field C] [Algebra 
       rw [Finset.sum_comm]
       have : ∀ k, ∑ m, a k * algebraMap Ω C (j (f m) (b k)) * bcMap Ω C _ (co (toLi (e m))) k' =
           a k * algebraMap Ω C ((Pi.single k 1 : Fin r → Ω) k') := fun k => by
+
         rw [hk, map_sum, Finset.mul_sum]
         refine Finset.sum_congr rfl fun m _ => ?_
         rw [map_mul, _root_.mul_assoc]

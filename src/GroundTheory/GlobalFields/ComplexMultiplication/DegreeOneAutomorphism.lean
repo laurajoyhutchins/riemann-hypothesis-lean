@@ -1,10 +1,63 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.IsogenyDegreeOne
-import GroundTheory.GlobalFields.ComplexMultiplication.WeberFunctionAutomorphisms
-import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupActionIso
-import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeDescent
-import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialConstantField
-import GroundTheory.GlobalFields.ComplexMultiplication.DualDescentBase
+module
+
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.Isogeny
+public import GroundTheory.GlobalFields.ComplexMultiplication.WeberFunction
+import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsValuation
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyRamification
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeDescent
+public import GroundTheory.GlobalFields.ComplexMultiplication.DifferentialConstantField
+public import GroundTheory.GlobalFields.ComplexMultiplication.DualDescentBase
+public import GroundTheory.GlobalFields.ComplexMultiplication.IsogenyDegreeOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsOrd
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.DivisorsTranslate
+public import GroundTheory.ArithmeticGeometry.AbelianVarieties.IsogenyPoints
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -77,16 +130,16 @@ theorem exists_coeffs_of_degree_eq_one_of_isAlgClosed (ψ : Isogeny A B) (h : ψ
     C (2 * γ * ε + B.a₁ * γ * β + B.a₃ * γ - γ ^ 2 * A.a₃) with hQ
   have key : algebraMap F[X] A.toAffine.FunctionField P +
       algebraMap F[X] A.toAffine.FunctionField Q * genY A = 0 := by
-    simp only [hP, hQ, map_add, map_mul, map_pow, algebraMap_C_functionField, ← genX_eq, map_sub,
+    simp only [hP, hQ, map_add (f := _), map_mul, map_pow, algebraMap_C_functionField, ← genX_eq, map_sub,
       map_ofNat]
     linear_combination eB - ι γ ^ 2 * eA
   obtain ⟨hP0, hQ0⟩ := eq_zero_of_algebraMap_add_mul_genY A key
-  have c3 := congrArg (Polynomial.coeff · 3) hP0
-  have c2 := congrArg (Polynomial.coeff · 2) hP0
-  have c1 := congrArg (Polynomial.coeff · 1) hP0
-  have c0 := congrArg (Polynomial.coeff · 0) hP0
-  have d1 := congrArg (Polynomial.coeff · 1) hQ0
-  have d0 := congrArg (Polynomial.coeff · 0) hQ0
+  have c3 := congrArg (AddMonoidAlgebra.coeff · 3) hP0
+  have c2 := congrArg (AddMonoidAlgebra.coeff · 2) hP0
+  have c1 := congrArg (AddMonoidAlgebra.coeff · 1) hP0
+  have c0 := congrArg (AddMonoidAlgebra.coeff · 0) hP0
+  have d1 := congrArg (AddMonoidAlgebra.coeff · 1) hQ0
+  have d0 := congrArg (AddMonoidAlgebra.coeff · 0) hQ0
   simp only [hP, hQ, coeff_add, coeff_C_mul, coeff_X_pow, coeff_X, coeff_C, coeff_zero] at c3 c2 c1 c0 d1 d0
   norm_num at c3 c2 c1 c0 d1 d0
   refine ⟨α, β, γ, δ, ε, hα, hγ, hx, hy, by linear_combination c3, by linear_combination c2,

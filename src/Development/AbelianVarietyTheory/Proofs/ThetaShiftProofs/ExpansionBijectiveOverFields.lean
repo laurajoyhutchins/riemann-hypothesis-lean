@@ -1,9 +1,50 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.QkToAkU
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ProdExpPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DvrLem
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsFinsetRepresentatives
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsSecOfLocal
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DvrLem
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsFinsetRepresentatives
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsSecOfLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ProdExpPf
+
+@[expose] public section
 
 noncomputable section
 
@@ -129,8 +170,8 @@ variable {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} {D : DegData R I}
 abbrev IntSec (k : ℕ) : Type :=
   SecOver G.hom (LB.LinComb U.LG.L (K := Fin 1) (fun _ => 𝟙 G.left) (fun _ => (k : ℤ)))
 
-variable (D) in
 
+variable (D) in
 abbrev IntTerm (k : ℕ) (α : D.toPre.X) : Type :=
   SecOver D.toPre.P.A.hom (LB.LinComb D.toPre.P.L (D.toPre.famφB α) (DegPre.famε k))
 
@@ -195,13 +236,13 @@ theorem noetherianSpace_generic : NoetherianSpace (pullback G.hom (jK R) : Schem
 
 variable (F : Type) [Field F] [Algebra (FractionRing R) F]
 
-variable (G) in
 
+variable (G) in
 def groupBase : (UnifPre.GF (G := G) F).left ⟶ Spec (CommRingCat.of F) :=
   (fst (TFK (R := R) F) ((Over.pullback (jK R)).obj G)).left
 
-variable (A) in
 
+variable (A) in
 def abelianBase : (TFK (R := R) F ⊗ A.A).left ⟶ Spec (CommRingCat.of F) := (fst (TFK (R := R) F) A.A).left
 
 omit [GrpObj G] [IsCommMonObj G] in
@@ -216,8 +257,8 @@ def genericSec (k : ℕ) : IntSec U k →ₛₗ[algebraMap R (FractionRing R)] S
     (LB.LinComb U.LG.L (K := Fin 1) (fun _ => pullback.fst G.hom (jK R)) (fun _ => (k : ℤ))) :=
   pullOver U.LG.L _ (p := pullback.fst G.hom (jK R)) pullback.condition (fun _ => (Category.comp_id _).symm)
 
-variable (D) in
 
+variable (D) in
 def genericTerm (k : ℕ) (α : D.toPre.X) :
     IntTerm D k α →ₛₗ[algebraMap R (FractionRing R)] FamTerm D.toPre (FractionRing R) k α :=
   pullOver D.toPre.P.L _ (prB_hom D.toPre (FractionRing R)) (famφ_prB D.toPre (FractionRing R) α)
@@ -285,7 +326,7 @@ theorem expandsG_lin (k : ℕ) (c : F) {v v' : GroupSec U F k} {s s' : Fam D.toP
     · rw [Fin.append_right]; exact hx' i
   · rw [Fin.sum_univ_add, e₁, e₁', Finset.smul_sum]
     simp only [Fin.append_left, Fin.append_right, smul_smul]
-  · rw [Fin.sum_univ_add, map_add, map_smul, e₂, e₂', Finset.smul_sum]
+  · rw [Fin.sum_univ_add, map_add (f := _), map_smul, e₂, e₂', Finset.smul_sum]
     simp only [Fin.append_left, Fin.append_right, smul_smul]
 
 variable {k : ℕ} {w : LB.Iso (A.L.pull U.gen.hom.left) (U.LG.L.pull (pullback.fst G.hom (jK R)))}

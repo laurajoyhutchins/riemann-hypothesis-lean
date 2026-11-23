@@ -1,7 +1,52 @@
-import Formalism.GaussJetBounds.GenLogInverse
-import Formalism.GaussJetBounds.GaussJetProofs.SubstitutionWeightBound
-import Formalism.IncomingBounds.FlowDegreeBounds.ProdRangeEqFactorialMulProdIco
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormNatCastEqOneOfNotDvd
+module
+
+public import Formalism.GaussJetBounds.GenLogInverse
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormNatCastEqOneOfNotDvd
+public import Formalism.GaussJetBounds.GaussJetProofs.SubstitutionWeightBound
+public import Formalism.IncomingBounds.FlowDegreeBounds.ProdRangeEqFactorialMulProdIco
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -25,7 +70,7 @@ theorem norm_natCast_eq_pow_padicValNat {l n : ℕ} (hl : l.Prime) (hlt : ‖(l 
   rw [Nat.factorization_def n hl] at hfac hnd
   conv_lhs => rw [← hfac]
   rw [Nat.cast_mul, norm_mul, Nat.cast_pow, norm_pow, norm_natCast_eq_one_of_not_dvd hl hlt hnd,
-    mul_one]
+    mul_one, Nat.padicValNat_def]
 
 end Norms
 
@@ -83,7 +128,7 @@ theorem exponential_weight_le : ExpWtLe.{u, v} := by
 
   have hv : (padicValNat l k.factorial : ℝ) ≤ (k : ℝ) * (1 / ((l : ℝ) - 1)) := by
     rcases Nat.eq_zero_or_pos k with hk0 | hk0
-    · subst hk0; simp
+    · subst hk0; simp [_root_.Nat.padicValNat_def (n := 1)]
     · have := (Formalism.IncomingBounds.padicValFactorialBounds l hl k hk0).2
       have hl0 : (0 : ℝ) < (l : ℝ) - 1 := by linarith
       calc (padicValNat l k.factorial : ℝ) ≤ ((k : ℝ) - 1) / ((l : ℝ) - 1) := this
@@ -132,7 +177,7 @@ theorem factorial_valuation_bound : FactVal.{u, v} := by
   rw [hmf, norm_prod]
   calc ∏ i ∈ κ.support, ‖(((κ i).factorial : ℕ) : K)‖
       ≤ ∏ i ∈ κ.support, ‖(l : K)‖ ^ ((κ i : ℝ) / ((l : ℝ) - 1) - L) :=
-        Finset.prod_le_prod (fun i _ => norm_nonneg _) hcoord
+        Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) hcoord
     _ = ‖(l : K)‖ ^ (∑ i ∈ κ.support, ((κ i : ℝ) / ((l : ℝ) - 1) - L)) :=
         (Real.rpow_sum_of_pos hpi0 _ _).symm
     _ ≤ ‖(l : K)‖ ^ ((∑ i, (κ i : ℝ) / ((l : ℝ) - 1)) - (Fintype.card ι : ℝ) * L) := by

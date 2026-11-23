@@ -1,6 +1,61 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.WeierstrassPAddOfNeOfDerivNeZero
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+
+@[expose] public section
 
 open Filter PeriodPair
 open scoped Topology
@@ -87,7 +142,7 @@ private lemma exists_const_of_periodic_of_mul_tendsto_zero (L : PeriodPair) {F :
         exact sub_ne_zero.mpr hw
     refine (hK.comp hsh).congr' ?_
     filter_upwards [_root_.GlobalTheory.eventually_ne_notMem_periodLattice L l] with w hw
-    simp only [Function.comp_apply, hGdef, if_neg hw]
+    simp [hGdef, hw]
     rw [← hp (w - l) l hl, sub_add_cancel]
   have hdiff : Differentiable ℂ G := by
     intro z
@@ -155,9 +210,9 @@ private lemma half_add_half_notMem_lattice (L : PeriodPair) :
   rw [Int.cast_eq_zero] at h'
   omega
 
+
 open Filter PeriodPair in
 open scoped Topology in
-
 lemma _root_.GlobalTheory.PeriodicWeierstrass.exists_eq_of_sq_mul_tendsto (L : PeriodPair) {g : ℂ → ℂ} {a : ℂ}
     (hd : ∀ z ∉ L.lattice, DifferentiableAt ℂ g z) (hp : ∀ z, ∀ l ∈ L.lattice, g (z + l) = g z)
     (h : Tendsto (fun z ↦ z ^ 2 * g z) (𝓝[≠] 0) (𝓝 a)) :
@@ -300,9 +355,9 @@ private lemma tendsto_pow_three_mul_derivWeierstrassP (L : PeriodPair) :
   field_simp
   ring
 
+
 open Filter PeriodPair in
 open scoped Topology in
-
 lemma _root_.GlobalTheory.PeriodicWeierstrass.exists_eq_of_cube_mul_tendsto (L : PeriodPair) {g : ℂ → ℂ}
     (hd : ∀ z ∉ L.lattice, DifferentiableAt ℂ g z) (hp : ∀ z, ∀ l ∈ L.lattice, g (z + l) = g z)
     (h : Tendsto (fun z ↦ z ^ 3 * g z) (𝓝[≠] 0) (𝓝 (-2))) :
@@ -326,9 +381,9 @@ lemma _root_.GlobalTheory.PeriodicWeierstrass.exists_eq_of_cube_mul_tendsto (L :
   simp only [hf₀] at this
   linear_combination this
 
+
 open Filter PeriodPair in
 open scoped Topology in
-
 lemma _root_.GlobalTheory.PeriodicWeierstrass.tendsto_leading (W : WeierstrassCurve ℂ)
     {x y t : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
     (hE : ∀ᶠ z in 𝓝[≠] 0, W.toAffine.Equation (x z) (y z))
@@ -387,9 +442,9 @@ lemma _root_.GlobalTheory.PeriodicWeierstrass.tendsto_leading (W : WeierstrassCu
 
 end PeriodicWeierstrass
 
+
 open Filter PeriodPair in
 open scoped Topology in
-
 theorem _root_.GlobalTheory.invariants_eq_of_periodic_solution :
     ∀ (L : PeriodPair) (W : WeierstrassCurve ℂ) (x y t : ℂ → ℂ) (c : ℂ), c ≠ 0 →
   DifferentiableOn ℂ x (L.lattice : Set ℂ)ᶜ → DifferentiableOn ℂ y (L.lattice : Set ℂ)ᶜ →
@@ -471,16 +526,16 @@ theorem _root_.GlobalTheory.invariants_eq_of_periodic_solution :
   open Polynomial in
   have hcub : (C 4 * X ^ 3 - C L.g₂ * X - C L.g₃ : ℂ[X]) ≠ 0 := by
     intro h
-    have := congrArg (Polynomial.coeff · 3) h
+    have := congrArg (fun p : Polynomial ℂ => p.coeff 3) h
     norm_num [Polynomial.coeff_X, Polynomial.coeff_C] at this
   have hlin := pow_eq_zero_iff two_ne_zero |>.mp ((mul_eq_zero.mp hp).resolve_right hcub)
   have hβ₁ : 2 * b + 2 * W.a₁ * c = 0 := by
-    have := congrArg (Polynomial.coeff · 1) hlin
+    have := congrArg (fun p : Polynomial ℂ => p.coeff 1) hlin
     simp only [Polynomial.coeff_add, Polynomial.coeff_C_mul_X, Polynomial.coeff_C,
       Polynomial.coeff_zero, one_ne_zero, zero_ne_one, ↓reduceIte, add_zero, zero_add] at this
     exact this
   have hβ₀ : 2 * k' + 2 * W.a₁ * c * k + 2 * W.a₃ * c ^ 3 = 0 := by
-    have := congrArg (Polynomial.coeff · 0) hlin
+    have := congrArg (fun p : Polynomial ℂ => p.coeff 0) hlin
     simp only [Polynomial.coeff_add, Polynomial.coeff_C_mul_X, Polynomial.coeff_C,
       Polynomial.coeff_zero, one_ne_zero, zero_ne_one, ↓reduceIte, add_zero, zero_add] at this
     exact this

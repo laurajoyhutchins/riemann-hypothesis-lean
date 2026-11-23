@@ -1,8 +1,48 @@
-import Formalism.LocalToGlobal.InertKernelTheory.DefsRep
-import Formalism.LocalToGlobal.InertKernelTheory.DefsRepFrame
-import Formalism.LocalToGlobal.InertKernelTheory.FrameLatMap
-import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepTwLat
-import Formalism.LocalToGlobal.InertKernelTheory.ScalG
+module
+
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsRep
+public import Formalism.LocalToGlobal.InertKernelTheory.DefsRepFrame
+public import Formalism.LocalToGlobal.InertKernelTheory.ScalG
+public import Formalism.LocalToGlobal.InertKernelTheory.FrameInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.RepTwLat
+
+@[expose] public section
 
 noncomputable section
 
@@ -154,26 +194,6 @@ def FrameLatMapLt (ρ : ∀ v : X.Pl, D.host.E →+* X.G.P.Qq v) : Prop :=
         (∀ c, ((b i).map (ρ v)).mulVec (fun x => Gm X M φ v x c) ∈ Formalism.MainNotions.G.colSpan (X.G.P.W v) (Gp X M φ v)) ∧
         (∀ c, ((b i).map (fun y => ρ v (D.host.conj y)))ᵀ.mulVec (fun x => Gp X M φ v x c) ∈
           Formalism.MainNotions.G.colSpan (X.G.P.W v) (Gm X M φ v))
-
-def KerLatWLt (ρ : ∀ v : X.Pl, D.host.E →+* X.G.P.Qq v) : Prop :=
-  ∀ j, j < X.mm → ∀ (L0 : X.Lt j), L0 ∈ Formalism.L2.G.Pend.repOf X.Lv hfin j → ∀ La' : X.Lt (j + 1),
-    (X.Pj (j + 1)).IsLatTup La'.2 →
-    ∀ v : X.Pl,
-      locSpan D (X.G.P.W v) (ρ v) (large₂ j L0 La') =
-        (X.latAt v j L0.2).map (((M j L0 v).mulVecLin).restrictScalars (X.G.P.W v)) ∧
-      locSpan D (X.G.P.W v) (ρ v) (Lg' j L0 La') =
-        (X.latAt v (j + 1) La'.2).map (((M (j + 1) La' v).mulVecLin).restrictScalars (X.G.P.W v))
-
-def SelfDualTieLt : Prop :=
-  ∀ j, j < X.mm → ∀ (L0 : X.Lt j), L0 ∈ Formalism.L2.G.Pend.repOf X.Lv hfin j → ∀ La' : X.Lt (j + 1),
-    (X.Pj (j + 1)).IsLatTup La'.2 →
-    SelfDualP D p (large₂ j L0 La') ∧ SelfDualP D p (Lg' j L0 La')
-
-def KerLatWFLt (fd : Formalism.L2.PairingIndexBounds.F.FData X D) (ρ : ∀ v : X.Pl, D.host.E →+* X.G.P.Qq v) : Prop :=
-  KerLatWLt X fd.frM hfin D (fun j L0 _ => fd.kerN j L0) (fun j _ La' => fd.kerN (j + 1) La') ρ
-
-def SelfDualFLt (fd : Formalism.L2.PairingIndexBounds.F.FData X D) : Prop :=
-  SelfDualTieLt X hfin D (fun j L0 _ => fd.kerN j L0) (fun j _ La' => fd.kerN (j + 1) La')
 
 end Lat
 

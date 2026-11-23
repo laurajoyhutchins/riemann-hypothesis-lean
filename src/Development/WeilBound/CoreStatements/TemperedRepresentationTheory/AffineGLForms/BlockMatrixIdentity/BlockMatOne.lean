@@ -1,4 +1,48 @@
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.AffineGLForms.GenSpace
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.DifferentiableAtChart
+public import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -6,31 +50,7 @@ open NumberField GlobalTheory.CuspRep MeasureTheory
 
 namespace PositivityTheory.Affgl.CT
 
-def splitEquiv {a r : ℕ} (h : r ≤ a) : Fin r ⊕ Fin (a - r) ≃ Fin a :=
-  finSumFinEquiv.trans (finCongr (Nat.add_sub_of_le h))
-
-def blockMat {R : Type} [CommRing R] {a r : ℕ} (h : r ≤ a) (A : Matrix (Fin r) (Fin r) R)
-    (B : Matrix (Fin (a - r)) (Fin (a - r)) R) : Matrix (Fin a) (Fin a) R :=
-  Matrix.reindex (splitEquiv h) (splitEquiv h) (Matrix.fromBlocks A 0 0 B)
-
-theorem blockMat_mul {R : Type} [CommRing R] {a r : ℕ} (h : r ≤ a) (A A' : Matrix (Fin r) (Fin r) R)
-    (B B' : Matrix (Fin (a - r)) (Fin (a - r)) R) :
-    blockMat h A B * blockMat h A' B' = blockMat h (A * A') (B * B') := by
-  simp [blockMat, Matrix.fromBlocks_multiply]
-
-theorem blockMat_one {R : Type} [CommRing R] {a r : ℕ} (h : r ≤ a) :
-    blockMat h (1 : Matrix (Fin r) (Fin r) R) 1 = 1 := by
-  simp [blockMat, Matrix.fromBlocks_one]
-
-def blockGL {R : Type} [CommRing R] {a r : ℕ} (h : r ≤ a) :
-    GL (Fin r) R × GL (Fin (a - r)) R →* GL (Fin a) R where
-  toFun p := ⟨blockMat h p.1 p.2, blockMat h ↑(p.1⁻¹) ↑(p.2⁻¹),
-    by rw [blockMat_mul, Units.mul_inv, Units.mul_inv, blockMat_one],
-    by rw [blockMat_mul, Units.inv_mul, Units.inv_mul, blockMat_one]⟩
-  map_one' := Units.ext (blockMat_one h)
-  map_mul' p q := Units.ext (blockMat_mul h _ _ _ _).symm
-
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a r : ℕ}
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a r : ℕ}
 
 def ct [MeasurableSpace (BlockIx a r → Ad E)] (μ : Measure (BlockIx a r → Ad E)) (𝓕 : Set (BlockIx a r → Ad E))
     (φ : GA E a → ℂ) : GA E a → ℂ :=

@@ -1,5 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,16 +50,16 @@ open GlobalTheory.Doubling (absE)
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E} {m n : ℕ}
 
-variable (σ) in
 
+variable (σ) in
 abbrev G2 (Y : Spc F E n) : Type := UG (cA σ) (dbl (incM F Y.J))
 
 variable {Y : Spc F E n} {A : Spc F E m}
 
 def mat2 (x : G2 σ Y) : Matrix (Fin n ⊕ Fin n) (Fin n ⊕ Fin n) (AE F E) := x.1.1
 
-variable (σ Y) in
 
+variable (σ Y) in
 def rat2 : Subgroup (G2 σ Y) :=
   (Matrix.GeneralLinearGroup.map (n := Fin n ⊕ Fin n) (inclR (F := F) (E := E) (AF F))).range.subgroupOf _
 
@@ -30,8 +68,8 @@ def ht2 (x : G2 σ Y) : ℝ≥0 := heightGL F x.1
 def IsPar (p : G2 σ Y) (t : GL (Fin n) (AE F E)) : Prop :=
   mat2 p * diagCols (Fin n) = diagCols (Fin n) * (t : Matrix (Fin n) (Fin n) (AE F E))
 
-variable (σ Y) in
 
+variable (σ Y) in
 def par2 : Subgroup (G2 σ Y) := Subgroup.closure {p | ∃ t, IsPar p t}
 
 def IsEmb (h h' : UA σ Y.J) (x : G2 σ Y) : Prop := mat2 x = Matrix.fromBlocks (mat h) 0 0 (mat h')

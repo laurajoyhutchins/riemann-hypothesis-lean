@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsLineGenOn
+module
+
+import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.HodgeComponentFlagDegree
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EtaleLocalizationAtPrimeTensorOfLowHeight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.ExteriorPower.Pairing
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.InjectiveOfIsCptGen
+
+@[expose] public section
 
 noncomputable section
 
@@ -78,147 +125,15 @@ theorem wedge_of_frame {L : Lat ξ E} {r : ℕ} {e : Fin r → E} {x : Cpt ξ} (
     rw [hL]
     exact Submodule.subset_span ⟨i, rfl⟩
 
-theorem isCoeffAt_of_frame {A B : Lat ξ E} {p q : ℕ} {e : Fin p → E} {g : Fin q → E} {x : Cpt ξ}
-    (he : A.IsFrameAt e x) (hg : B.IsFrameAt g x) {s t : Ω} (hs : s ≠ 0) (ht : t ≠ 0) :
-    IsCoeffAt A B p q (s • exteriorPower.ιMulti Ω p e) (t • exteriorPower.ιMulti Ω q g) x (s / t) := by
-  refine ⟨s⁻¹, t⁻¹, inv_ne_zero hs, inv_ne_zero ht, ?_, ?_, ?_⟩
-  · rw [wedge_of_frame he, smul_smul, inv_mul_cancel₀ hs, one_smul]
-  · rw [wedge_of_frame hg, smul_smul, inv_mul_cancel₀ ht, one_smul]
-  · field_simp
-
-theorem unit_of_span_eq {F : Type} [AddCommGroup F] [Module Ω F] {x : Cpt ξ} {a : F} (ha : a ≠ 0) {α α' : Ω}
-    (h : Submodule.span (regAt ξ x) {α • a} = Submodule.span (regAt ξ x) {α' • a}) :
-    ∃ u : regAt ξ x, α = u * α' := by
-  have hmem : α • a ∈ Submodule.span (regAt ξ x) {α' • a} := by
-    rw [← h]
-    exact Submodule.mem_span_singleton_self _
-  obtain ⟨u, hu⟩ := Submodule.mem_span_singleton.1 hmem
-  refine ⟨u, ?_⟩
-  rw [Subring.smul_def, smul_smul] at hu
-  exact (smul_left_injective Ω ha hu).symm
-
-private theorem div_mem_reg_at_of_is_coeff_at {A B : Lat ξ E} {p q : ℕ} {a : ⋀[Ω]^p E} {b : ⋀[Ω]^q E} {x : Cpt ξ}
-    {f f' : Ω} (ha : a ≠ 0) (hb : b ≠ 0) (h : IsCoeffAt A B p q a b x f)
-    (h' : IsCoeffAt A B p q a b x f') : f / f' ∈ regAt ξ x := by
-  obtain ⟨α, β, hα, hβ, hA, hB, e1⟩ := h
-  obtain ⟨α', β', hα', hβ', hA', hB', e2⟩ := h'
-  obtain ⟨u', hu'⟩ := unit_of_span_eq ha (hA'.symm.trans hA)
-  obtain ⟨v, hv⟩ := unit_of_span_eq hb (hB.symm.trans hB')
-  have hf' : f' ≠ 0 := by
-    rintro rfl
-    exact hβ' (by rw [← e2, zero_mul])
-  have key : f = (v : Ω) * u' * f' := by
-    apply mul_right_cancel₀ hα
-    linear_combination e1 + hv - (v : Ω) * e2 + (v : Ω) * f' * hu'
-  rw [key, mul_div_assoc, div_self hf', mul_one]
-  exact mul_mem v.2 u'.2
-
-theorem unitAt_div {A B : Lat ξ E} {p q : ℕ} {a : ⋀[Ω]^p E} {b : ⋀[Ω]^q E} {x : Cpt ξ} {f f' : Ω}
-    (ha : a ≠ 0) (hb : b ≠ 0) (h : IsCoeffAt A B p q a b x f) (h' : IsCoeffAt A B p q a b x f') :
-    unitAt ξ x (f / f') := by
-  have hf : f ≠ 0 := by
-    obtain ⟨α, β, -, hβ, -, -, e1⟩ := h
-    rintro rfl
-    exact hβ (by rw [← e1, zero_mul])
-  have hf' : f' ≠ 0 := by
-    obtain ⟨α, β, -, hβ, -, -, e1⟩ := h'
-    rintro rfl
-    exact hβ (by rw [← e1, zero_mul])
-  refine ⟨div_ne_zero hf hf', div_mem_reg_at_of_is_coeff_at ha hb h h', ?_⟩
-  rw [inv_div]
-  exact div_mem_reg_at_of_is_coeff_at ha hb h' h
-
-theorem isCoeffAt_smul {A B : Lat ξ E} {p q : ℕ} {a : ⋀[Ω]^p E} {b : ⋀[Ω]^q E} {x : Cpt ξ} {f c d : Ω}
-    (hc : c ≠ 0) (hd : d ≠ 0) (h : IsCoeffAt A B p q a b x f) :
-    IsCoeffAt A B p q (c • a) (d • b) x (c * f / d) := by
-  obtain ⟨α, β, hα, hβ, hA, hB, e1⟩ := h
-  refine ⟨α / c, β / d, div_ne_zero hα hc, div_ne_zero hβ hd, ?_, ?_, ?_⟩
-  · rw [hA, smul_smul, div_mul_cancel₀ _ hc]
-  · rw [hB, smul_smul, div_mul_cancel₀ _ hd]
-  · rw [← e1]
-    field_simp
-
-theorem unitAt_of_isLineGenOn {A B : Lat ξ E} {p q : ℕ} {a : ⋀[Ω]^p E} {b : ⋀[Ω]^q E} {T : Set (Cpt ξ)}
-    {c : Ω} (hc : c ≠ 0) (h : IsLineGenOn A B p q a b T) (h' : IsLineGenOn A B p q (c • a) b T)
-    {x : Cpt ξ} (hx : x ∈ T) : unitAt ξ x c := by
-  have h1 : IsCoeffAt A B p q (c • a) b x c := by
-    have h2 := isCoeffAt_smul hc one_ne_zero (h.2.2 x hx)
-    rwa [one_smul, mul_one, div_one] at h2
-  have h3 := unitAt_div h'.1 h'.2.1 h1 (h'.2.2 x hx)
-  rwa [div_one] at h3
-
 theorem ιMulti_ne_zero {r : ℕ} {e : Fin r → E} (h : LinearIndependent Ω e) :
     exteriorPower.ιMulti Ω r e ≠ 0 := by
-  classical
-  obtain ⟨g, hg⟩ := LinearMap.exists_extend h.repr
-  let f : Fin r → Module.Dual Ω E := fun j => Finsupp.lapply j ∘ₗ g
-  have hfe : ∀ i j, f j (e i) = if i = j then 1 else 0 := by
-    intro i j
-    have h1 : g (e i) = Finsupp.single i 1 := by
-      have h2 := congrArg (fun φ => φ ⟨e i, Submodule.subset_span ⟨i, rfl⟩⟩) hg
-      simp only [LinearMap.comp_apply, Submodule.subtype_apply] at h2
-      rw [h2]
-      exact h.repr_eq_single i _ rfl
-    simp [f, h1, Finsupp.single_apply]
-  intro h0
-  have hd := exteriorPower.pairingDual_ιMulti_ιMulti f e
-  rw [h0, map_zero] at hd
-  have hm : (Matrix.of fun i j => f j (e i)) = 1 := by
-    ext i j
-    rw [Matrix.of_apply, hfe, Matrix.one_apply]
-  rw [hm, Matrix.det_one] at hd
-  exact zero_ne_one hd
-
-theorem ne_zero_of_frame {A B : Lat ξ E} {p q : ℕ} {a : ⋀[Ω]^p E} {b : ⋀[Ω]^q E} {x : Cpt ξ} {f : Ω}
-    {e : Fin p → E} (he : A.IsFrameAt e x) (h : IsCoeffAt A B p q a b x f) : a ≠ 0 := by
-  rintro rfl
-  obtain ⟨α, β, hα, -, hA, -, -⟩ := h
-  rw [wedge_of_frame he, smul_zero] at hA
-  have hmem : exteriorPower.ιMulti Ω p e ∈ Submodule.span (regAt ξ x) {(0 : ⋀[Ω]^p E)} := by
-    rw [← hA]
-    exact Submodule.mem_span_singleton_self _
-  rw [Submodule.span_singleton_eq_bot.2 rfl, Submodule.mem_bot] at hmem
-  exact ιMulti_ne_zero he.1 hmem
+  apply PositivityTheory.Xgn.ComponentDegreeAlt.wedge_ne_zero <;> assumption
 
 end General
 
 section Int
 
 open CptModel
-
-def line (v : Fin 2 → ℚ) : Lat (pt (algebraMap ℤ ℚ)) (Fin 2 → ℚ) :=
-  fun x => Submodule.span (regAt _ x) (Set.range ![v])
-
-theorem li {v : Fin 2 → ℚ} (hv : v ≠ 0) : LinearIndependent ℚ ![v] := by
-  exact linearIndependent_unique_iff.2 (by simpa using hv)
-
-theorem frame {v : Fin 2 → ℚ} (hv : v ≠ 0) (x) : (line v).IsFrameAt ![v] x := by
-  exact ⟨li hv, rfl⟩
-
-theorem ne₀ : (![2, 0] : Fin 2 → ℚ) ≠ 0 := by
-  intro h
-  simpa using congrFun h 0
-theorem ne₁ : (![0, 1] : Fin 2 → ℚ) ≠ 0 := by
-  intro h
-  simpa using congrFun h 1
-
-theorem gen : IsLineGenOn (line ![2, 0]) (line ![0, 1]) 1 1 (exteriorPower.ιMulti ℚ 1 ![![2, 0]])
-    (exteriorPower.ιMulti ℚ 1 ![![0, 1]]) Set.univ := by
-  refine ⟨ιMulti_ne_zero (li ne₀), ιMulti_ne_zero (li ne₁), fun x _ => ?_⟩
-  have h := isCoeffAt_of_frame (frame ne₀ x) (frame ne₁ x) (one_ne_zero) (one_ne_zero)
-  rwa [one_smul, one_smul, div_one] at h
-
-theorem coeff_half (x) : IsCoeffAt (line ![2, 0]) (line ![0, 1]) 1 1
-    ((2 : ℚ)⁻¹ • exteriorPower.ιMulti ℚ 1 ![![2, 0]]) (exteriorPower.ιMulti ℚ 1 ![![0, 1]]) x 2⁻¹ := by
-  have h := isCoeffAt_of_frame (frame ne₀ x) (frame ne₁ x) (inv_ne_zero two_ne_zero) one_ne_zero
-  rwa [one_smul, div_one] at h
-
-theorem not_gen : ¬ IsLineGenOn (line ![2, 0]) (line ![0, 1]) 1 1
-    ((2 : ℚ)⁻¹ • exteriorPower.ιMulti ℚ 1 ![![2, 0]]) (exteriorPower.ιMulti ℚ 1 ![![0, 1]]) {two} := by
-  intro h
-  have hg : IsLineGenOn (line ![2, 0]) (line ![0, 1]) 1 1 (exteriorPower.ιMulti ℚ 1 ![![2, 0]])
-      (exteriorPower.ιMulti ℚ 1 ![![0, 1]]) {two} := ⟨gen.1, gen.2.1, fun x _ => gen.2.2 x trivial⟩
-  exact half_notMem (unitAt_of_isLineGenOn (inv_ne_zero two_ne_zero) hg h (Set.mem_singleton _)).2.1
 
 end Int
 

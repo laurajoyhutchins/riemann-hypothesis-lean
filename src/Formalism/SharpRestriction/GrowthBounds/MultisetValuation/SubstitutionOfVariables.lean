@@ -1,4 +1,49 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.IntegralExpRename
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.IntegralExpRename
+public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.CyclicPowerClassOfExpEquiv
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.InParamMap
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.IntRPsubst
+import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.NatCastInvMemRp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -62,6 +107,7 @@ theorem th_inParamK_map {σ : Type} [Finite σ] (K1 K' : Type) [Field K1] [Algeb
   congr 1
   ext n
   unfold lgF
+
   rw [PowerSeries.coeff_map, PowerSeries.coeff_mk, PowerSeries.coeff_mk, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [apply_ite (algebraMap K1 K'), map_zero, map_inv₀, map_pow, map_natCast]
@@ -152,6 +198,7 @@ theorem th_inParam_sum {σ α : Type} [Finite σ] (s : Finset α) (f : α → Mv
     inParam p (∑ a ∈ s, f a) = ∑ a ∈ s, inParam p (f a) := by
   have ha := th_hasSubst_lX p (σ := σ)
   unfold inParam
+
   rw [← MvPowerSeries.coe_substAlgHom ha, map_sum]
 
 theorem th_ren_hasSubst {κ σ R : Type} [Finite κ] [CommRing R] (φ : κ → σ) :
@@ -215,6 +262,7 @@ theorem th_reduce {E τ : Type} [Fintype E] (be : MvPowerSeries (Fin 2) (K0 p))
   have hPsi0 : MvPowerSeries.constantCoeff
       (∑ e : E, sub2 p be (MvPowerSeries.X (Sum.inl e)) (MvPowerSeries.X (Sum.inr e)) :
         MvPowerSeries (E ⊕ E) (K0 p)) = 0 := by
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun e _ => by rw [substitution_of_variables]; exact th_ren_const _ hbe0
   have hPh0 : MvPowerSeries.constantCoeff Ph = 0 := by
@@ -222,6 +270,7 @@ theorem th_reduce {E τ : Type} [Fintype E] (be : MvPowerSeries (Fin 2) (K0 p))
     exact hc0
   have hGt0 : MvPowerSeries.constantCoeff (Gt p E c c') = 0 := by
     unfold Gt
+
     rw [map_sum]
     exact Finset.sum_eq_zero fun e _ => th_ren_const _ hG0
   have hδ : E0 p (inParam p Ph - Gt p E c c') := by

@@ -1,14 +1,59 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContragredientProductIrreducibleStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityOfEquiv
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductIrreducibleFiniteLength
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SegmentProductJacquetShuffleCountStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityTransitiveLeStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CanonicalShuffleCountProductStatement
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductIrreducibleAppendEquivStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.ZelevinskyCosocles.LUnlinkedComm
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CanonicalShuffleCountProductStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityOfEquiv
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.JacquetMultiplicityTransitiveLeStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductIrreducibleAppendEquivStatement
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ProductIrreducibleFiniteLength
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SegmentProductJacquetShuffleCountStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -101,7 +146,7 @@ theorem count_append {α : Type*} {p q : ℕ} (Γ' : Fin p → α) (Γ'' : Fin q
         simp only [Fin.le_def, Fin.coe_castAdd, Fin.coe_natAdd] at h0 ⊢
         omega
 
-theorem sum_get_fst (W : List (IrrGL k)) : ∑ a : Fin W.length, (W.get a).1 = (W.map Sigma.fst).sum := by
+theorem sum_get_fst (W : List (IrrGL (k := k))) : ∑ a : Fin W.length, (W.get a).1 = (W.map Sigma.fst).sum := by
   rw [← List.sum_ofFn]
   congr 1
   exact List.ext_get (by simp) (by simp)
@@ -111,7 +156,7 @@ theorem sum_decWord (Δ : Segment k) : ((decWord Δ).map Sigma.fst).sum = Δ.deg
   rw [List.map_reverse, List.sum_reverse, List.map_ofFn, List.sum_ofFn]
   exact Δ.sum_term_fst
 
-theorem sum_flat {h : ℕ} (Γ : Fin h → Segment k) (y : Fin h → IrrGL k) (hL : ∀ i, IsLSeg (Γ i) (y i).rep) :
+theorem sum_flat {h : ℕ} (Γ : Fin h → Segment k) (y : Fin h → IrrGL (k := k)) (hL : ∀ i, IsLSeg (Γ i) (y i).rep) :
     ∑ a, (((List.ofFn fun i => decWord (Γ i)).flatten).get a).1 = ∑ i, (y i).1 := by
   rw [sum_get_fst, List.map_flatten, List.sum_flatten, List.map_ofFn, List.map_ofFn, List.sum_ofFn]
   exact Finset.sum_congr rfl fun i _ => (sum_decWord (Γ i)).trans (hL i).deg_eq
@@ -124,7 +169,7 @@ theorem cusp_flat {h : ℕ} (Γ : Fin h → Segment k) : ∀ w ∈ (List.ofFn fu
   obtain ⟨a, rfl⟩ := hw
   exact (Γ i).isCusp_term a
 
-theorem jmL_congr (W : List (IrrGL k)) {N : ℕ} {V V' : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup V'] [Module ℂ V']
+theorem jmL_congr (W : List (IrrGL (k := k))) {N : ℕ} {V V' : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup V'] [Module ℂ V']
     {π : Representation ℂ (GL (Fin N) k) V} {σ : Representation ℂ (GL (Fin N) k) V'} (e : Nonempty (π.Equiv σ)) :
     jmL W π = jmL W σ := by
   unfold jmL
@@ -141,8 +186,8 @@ theorem le_one_of_mul_le {a : ℕ∞} {n : ℕ} (hn : 0 < n) (h : a * n ≤ n) :
     norm_cast at h ⊢
     exact Nat.le_of_mul_le_mul_right (by simpa using h) hn
 
-theorem ae2 {p q p' q' r t : ℕ} (y' : Fin p → IrrGL k) (y'' : Fin q → IrrGL k) (z' : Fin p' → IrrGL k)
-    (w : Fin q' → IrrGL k) (hy' : ∑ a, (y' a).1 = r) (hy'' : ∑ a, (y'' a).1 = t) (hz' : ∑ a, (z' a).1 = r)
+theorem ae2 {p q p' q' r t : ℕ} (y' : Fin p → IrrGL (k := k)) (y'' : Fin q → IrrGL (k := k)) (z' : Fin p' → IrrGL (k := k))
+    (w : Fin q' → IrrGL (k := k)) (hy' : ∑ a, (y' a).1 = r) (hy'' : ∑ a, (y'' a).1 = t) (hz' : ∑ a, (z' a).1 = r)
     (hw : ∑ a, (w a).1 = t) (e₁ : Nonempty ((prodIrr y' hy').Equiv (prodIrr z' hz')))
     (e₂ : Nonempty ((prodIrr y'' hy'').Equiv (prodIrr w hw))) :
     Nonempty ((prod₂ (prodIrr y' hy') (prodIrr y'' hy'')).Equiv (prod₂ (prodIrr z' hz') (prodIrr w hw))) := by
@@ -150,8 +195,8 @@ theorem ae2 {p q p' q' r t : ℕ} (y' : Fin p → IrrGL k) (y'' : Fin q → IrrG
   obtain ⟨ψ⟩ := e₂
   exact ⟨prod₂Equiv φ ψ⟩
 
-theorem append_equiv {p q p' q' r t : ℕ} (y' : Fin p → IrrGL k) (y'' : Fin q → IrrGL k) (z' : Fin p' → IrrGL k)
-    (w : Fin q' → IrrGL k) (hy' : ∑ a, (y' a).1 = r) (hy'' : ∑ a, (y'' a).1 = t) (hz' : ∑ a, (z' a).1 = r)
+theorem append_equiv {p q p' q' r t : ℕ} (y' : Fin p → IrrGL (k := k)) (y'' : Fin q → IrrGL (k := k)) (z' : Fin p' → IrrGL (k := k))
+    (w : Fin q' → IrrGL (k := k)) (hy' : ∑ a, (y' a).1 = r) (hy'' : ∑ a, (y'' a).1 = t) (hz' : ∑ a, (z' a).1 = r)
     (hw : ∑ a, (w a).1 = t) (e₁ : Nonempty ((prodIrr y' hy').Equiv (prodIrr z' hz')))
     (e₂ : Nonempty ((prodIrr y'' hy'').Equiv (prodIrr w hw))) (hd : ∑ a, (Fin.append y' y'' a).1 = r + t)
     (hz : ∑ a, (Fin.append z' w a).1 = r + t) :
@@ -159,12 +204,12 @@ theorem append_equiv {p q p' q' r t : ℕ} (y' : Fin p → IrrGL k) (y'' : Fin q
   ⟨(GlobalTheory.T.product_irreducible_append_equiv k p q r t y' y'' hy' hy'' hd).some.symm.trans
     ((ae2 y' y'' z' w hy' hy'' hz' hw e₁ e₂).some.trans (GlobalTheory.T.product_irreducible_append_equiv k p' q' r t z' w hz' hw hz).some)⟩
 
-def blockCl {q : ℕ} (y'' : Fin q → IrrGL k) (hirr : (prodIrr y'' rfl).IsIrreducible) : IrrGL k :=
+def blockCl {q : ℕ} (y'' : Fin q → IrrGL (k := k)) (hirr : (prodIrr y'' rfl).IsIrreducible) : IrrGL (k := k) :=
   IrrGL.of (prodIrr y'' rfl) (isSmooth_prodIrr _ _) hirr
 
-def Inv {h : ℕ} (Γ : Fin h → Segment k) (y : Fin h → IrrGL k) : Prop :=
-  ∀ (N : ℕ) (hd : ∑ a, (y a).1 = N), ∃ (g : ℕ) (z : Fin g → IrrGL k) (hz : ∑ b, (z b).1 = N),
-    Nonempty ((prodIrr y hd).Equiv (prodIrr z hz)) ∧ ∃ Wb : Fin g → List (IrrGL k),
+def Inv {h : ℕ} (Γ : Fin h → Segment k) (y : Fin h → IrrGL (k := k)) : Prop :=
+  ∀ (N : ℕ) (hd : ∑ a, (y a).1 = N), ∃ (g : ℕ) (z : Fin g → IrrGL (k := k)) (hz : ∑ b, (z b).1 = N),
+    Nonempty ((prodIrr y hd).Equiv (prodIrr z hz)) ∧ ∃ Wb : Fin g → List (IrrGL (k := k)),
       (List.ofFn Wb).flatten = (List.ofFn fun i => decWord (Γ i)).flatten ∧
       (∀ b, ∑ a, ((Wb b).get a).1 = (z b).1) ∧
       ∏ b, jmL (Wb b) (z b).rep = ((∏ i, (Finset.univ.filter fun j => j ≤ i ∧ Γ j = Γ i).card : ℕ) : ℕ∞)
@@ -174,10 +219,10 @@ theorem decWord_append {p q : ℕ} (Γ' : Fin p → Segment k) (Γ'' : Fin q →
   funext i
   refine Fin.addCases (fun i => ?_) (fun i => ?_) i <;> simp
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem inv_append (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (hU : LUnlinkedIrr k) (hJ : LSegJacquet k) {p q : ℕ}
-    (Γ' : Fin p → Segment k) (Γ'' : Fin q → Segment k) (y' : Fin p → IrrGL k) (y'' : Fin q → IrrGL k)
+    (Γ' : Fin p → Segment k) (Γ'' : Fin q → Segment k) (y' : Fin p → IrrGL (k := k)) (y'' : Fin q → IrrGL (k := k))
     (hI : Inv Γ' y') (hne : ∀ j r, Γ' j ≠ Γ'' r) (heq : ∀ r s, Γ'' r = Γ'' s) (hc : IsCanon Γ'')
     (hL : ∀ r, IsLSeg (Γ'' r) (y'' r).rep) : Inv (Fin.append Γ' Γ'') (Fin.append y' y'') := by
   intro N hd
@@ -221,7 +266,7 @@ theorem inv_append (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (hU : L
     rfl
 
 theorem inv_of_canon (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (hU : LUnlinkedIrr k) (hJ : LSegJacquet k) :
-    ∀ (h : ℕ) (Γ : Fin h → Segment k) (y : Fin h → IrrGL k), IsCanon Γ → (∀ i, IsLSeg (Γ i) (y i).rep) →
+    ∀ (h : ℕ) (Γ : Fin h → Segment k) (y : Fin h → IrrGL (k := k)), IsCanon Γ → (∀ i, IsLSeg (Γ i) (y i).rep) →
       Inv Γ y := by
   intro h
   induction h using Nat.strong_induction_on with
@@ -244,12 +289,12 @@ theorem inv_of_canon (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (hU :
       (isCanon_comp hc _ hmn) fun r => hL _
     rwa [Fin.append_castAdd_natAdd, Fin.append_castAdd_natAdd] at key
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem groupCount : ∀ {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k],
     GlobalTheory.Published.IrreducibleAdmissibleGL → LSegJacquet k → LUnlinkedIrr k → ∀ {h N : ℕ} (Γ : Fin h → Segment k)
-    (y : Fin h → IrrGL k) (hd : ∑ a, (y a).1 = N), IsCanon Γ → (∀ i, IsLSeg (Γ i) (y i).rep) →
-    ∃ (g : ℕ) (z : Fin g → IrrGL k) (hz : ∑ b, (z b).1 = N),
+    (y : Fin h → IrrGL (k := k)) (hd : ∑ a, (y a).1 = N), IsCanon Γ → (∀ i, IsLSeg (Γ i) (y i).rep) →
+    ∃ (g : ℕ) (z : Fin g → IrrGL (k := k)) (hz : ∑ b, (z b).1 = N),
       Nonempty ((prodIrr y hd).Equiv (prodIrr z hz)) ∧ jm z hz (prodIrr z hz) ≤ 1 := by
   intro k _ _ _ _ hA hJ hU h N Γ y hd hc hL
   obtain ⟨g, z, hz, e, Wb, hfl, hdeg, hpr⟩ := inv_of_canon hA hU hJ h Γ y hc hL _ hd

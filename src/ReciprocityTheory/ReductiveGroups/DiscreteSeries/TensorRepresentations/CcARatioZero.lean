@@ -1,10 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CoefEmbed
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PoleMatch
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.IsDSSigLam
+module
+
+public import Mathlib.Analysis.InnerProductSpace.Positive
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.TraceFormula
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Transported
+import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumIrr
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.IsDSSigLam
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RregRep
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.FdegTransfer
-import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CoefEmbed
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Decomp
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PoleMatch
+import Std.Tactic.BVDecide.Normalize.Bool
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,8 +69,6 @@ section SlopeTestRemainingChoices
 
 variable {ε : Fin n → Bool} {lam : Fin n → ℝ} {T : S7.KType ε (lowK ε lam)}
   {Ψ : Matrix (Fin n) (Fin n) ℂ → (T.V →L[ℂ] T.V)} {v₀ : T.V}
-
-theorem ccA_sigLam_eq : sigLam ε Ψ v₀ = closRep (rreg ε) (closGen (smE ε (rreg ε)) (datumV ε Ψ v₀)) := rfl
 
 theorem ccA_sqInt (hgap : StdGap ε lam) (hP : IsPsiFor ε lam T Ψ) (hv₀ : v₀ ≠ 0) :
     Formalism.MainNotions.S.IsSqIntOn ε (closRep (rreg ε) (closGen (smE ε (rreg ε)) (datumV ε Ψ v₀))) :=
@@ -51,11 +98,11 @@ theorem ccA_ratio_mul (dual : Bool) {ε : Fin n → Bool} {lam lam' : Fin n → 
     ratioF dual lam s * ratioF (!dual) lam' s = 1 := by
   cases dual
   · subst hlam'
-    simp only [ratioF, shiftF, Bool.not_false, cond_true, cond_false] at hgap' ⊢
+    change ratioV lam s * ratioVd (lam + Pi.single s 1) s = 1
     rw [mul_comm]
     exact ratioVd_add_single_mul s hgap.1.injective hgap'.1.injective
   · subst hlam'
-    simp only [ratioF, shiftF, Bool.not_true, cond_true, cond_false] at hgap' ⊢
+    change ratioVd lam s * ratioV (lam - Pi.single s 1) s = 1
     have h := ratioVd_add_single_mul (μ := lam - Pi.single s 1) s hgap'.1.injective
       (by rw [sub_add_cancel]; exact hgap.1.injective)
     rw [sub_add_cancel] at h
@@ -63,20 +110,22 @@ theorem ccA_ratio_mul (dual : Bool) {ε : Fin n → Bool} {lam lam' : Fin n → 
 
 theorem ccA_shift_back (dual : Bool) {lam lam' : Fin n → ℝ} (s : Fin n) (hlam' : lam' = shiftF dual lam s) :
     lam = shiftF (!dual) lam' s := by
-  cases dual <;> subst hlam' <;> simp [shiftF]
+  cases dual <;> subst hlam' <;> delta shiftF <;> simp
 
 theorem ccA_ratio_zero (dual : Bool) {ε : Fin n → Bool} {lam : Fin n → ℝ} (hgap : StdGap ε lam) (s : Fin n)
     (hsing : ¬ Function.Injective (shiftF dual lam s)) : ratioF dual lam s = 0 := by
   cases dual
   · obtain ⟨s', hs', heq⟩ := (not_injective_shift_iff hgap.1.injective s 1
-      (ν := shiftF false lam s) (by simp [shiftF])
-      (fun x hx => by simp [shiftF, Pi.single_eq_of_ne hx])).1 hsing
-    simp only [ratioF, cond_false, ratioV]
+      (ν := shiftF false lam s) (by delta shiftF; simp)
+      (fun x hx => by delta shiftF; simp [Pi.single_eq_of_ne hx])).1 hsing
+    change ratioV lam s = 0
+    delta ratioV
     exact prod_eq_zero hs' (by rw [heq, sub_self, zero_div])
   · obtain ⟨s', hs', heq⟩ := (not_injective_shift_iff hgap.1.injective s (-1)
-      (ν := shiftF true lam s) (by simp [shiftF, sub_eq_add_neg])
-      (fun x hx => by simp [shiftF, Pi.single_eq_of_ne hx])).1 hsing
-    simp only [ratioF, cond_true, ratioVd]
+      (ν := shiftF true lam s) (by delta shiftF; simp [sub_eq_add_neg])
+      (fun x hx => by delta shiftF; simp [Pi.single_eq_of_ne hx])).1 hsing
+    change ratioVd lam s = 0
+    delta ratioVd
     exact prod_eq_zero hs' (by rw [sub_eq_add_neg (lam s), heq, sub_self, zero_div])
 
 theorem cc_gk (dual : Bool) {ε : Fin n → Bool} {lam lam' : Fin n → ℝ} {T : S7.KType ε (lowK ε lam)}

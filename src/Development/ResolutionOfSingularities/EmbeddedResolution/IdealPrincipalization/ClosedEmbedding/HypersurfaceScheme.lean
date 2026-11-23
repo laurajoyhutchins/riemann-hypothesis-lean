@@ -1,21 +1,54 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupProperties
-import Development.ResolutionOfSingularities.EmbeddedResolution.IteratedBlowups.ClopenRestriction
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossingsNil
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderAtGenericPoint
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.ClosedEmbedding.MaximalContactCover
 import Development.ResolutionOfSingularities.EmbeddedResolution.AlgebraicPreliminaries.GenericPointImage
-import Development.ResolutionOfSingularities.EmbeddedResolution.MaximalContactHypersurfaces.TunedSheaf
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReductionProperties
+public import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.OrderAtGenericPoint
+import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
 import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.ClosedEmbedding.ClosedImmersionKrullDim
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.ClosedEmbedding.MaximalContactCover
 import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.ClosedEmbedding.DisjointUnionCover
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.MaxContactReduction
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.SetTheory.ZFC.PSet
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
@@ -117,12 +150,23 @@ theorem nonzeroOnComponents_of_locally_eq_coordIdeal {Y : Scheme.{u}} {k : Type 
   have hVU : V ≤ U := fun z hz => (hVsub hz).1
   have hVdisj : ∀ z : ↥Y, z ∈ V → z ∉ (⋃₀ (irreducibleComponents ↥Y \ {T})) :=
     fun z hz => (hVsub hz).2
-  have hKV : restrictIdeal K V = (ch.restrict hVU).coordIdeal S :=
-    restrictIdeal_eq_restrict_coordIdeal_of_le hVU ch K S hKU
+  let cV : EtaleChart q V m := {
+    map := Y.homOfLE hVU ≫ ch.map
+    comp_struct := by rw [Category.assoc, ch.comp_struct, ← Category.assoc, Scheme.homOfLE_ι]
+    isEtale := by
+      have := ch.isEtale
+      infer_instance }
+  have hKV : restrictIdeal K V = cV.coordIdeal S := by
+    have h' : K.comap U.ι = (coordSubspaceIdeal k m S).comap ch.map := by
+      rw [← restrictIdeal_eq_comap_ι, hKU, EtaleChart.coordIdeal_eq_comap_coordSubspaceIdeal]
+    rw [restrictIdeal_eq_comap_ι, EtaleChart.coordIdeal_eq_comap_coordSubspaceIdeal]
+    change K.comap V.ι = (coordSubspaceIdeal k m S).comap (Y.homOfLE hVU ≫ ch.map)
+    rw [Scheme.IdealSheafData.comap_comp, ← h', ← Scheme.IdealSheafData.comap_comp,
+      Scheme.homOfLE_ι]
   have : IsAffine V.toScheme := hVaff
   have haffineTop : IsAffineOpen (⊤ : V.toScheme.Opens) := isAffineOpen_top V.toScheme
-  have hEt : AlgebraicGeometry.Etale ((⊤ : V.toScheme.Opens).ι ≫ (ch.restrict hVU).map) := by
-    have : AlgebraicGeometry.Etale (ch.restrict hVU).map := (ch.restrict hVU).isEtale
+  have hEt : AlgebraicGeometry.Etale ((⊤ : V.toScheme.Opens).ι ≫ cV.map) := by
+    have : AlgebraicGeometry.Etale cV.map := cV.isEtale
     infer_instance
   have hmemV : ∀ y : ↥V.toScheme, (V.ι).base y ∈ V := by
     intro y
@@ -131,7 +175,7 @@ theorem nonzeroOnComponents_of_locally_eq_coordIdeal {Y : Scheme.{u}} {k : Type 
       exact ⟨y, rfl⟩
     exact h
   have hsupp : ∀ y : ↥V.toScheme,
-      y ∈ ((ch.restrict hVU).coordIdeal ({j} : Finset (Fin m))).support := by
+      y ∈ (cV.coordIdeal ({j} : Finset (Fin m))).support := by
     intro y
     have hyV : (V.ι).base y ∈ V := hmemV y
     have hyT : (V.ι).base y ∈ T := hOsub _ (hVdisj _ hyV)
@@ -139,16 +183,16 @@ theorem nonzeroOnComponents_of_locally_eq_coordIdeal {Y : Scheme.{u}} {k : Type 
     have h2 : y ∈ ((K.comap V.ι).support : Set ↥V.toScheme) := by
       rw [support_comap_eq V.ι K]
       exact hmem
-    have h3 : y ∈ ((ch.restrict hVU).coordIdeal S).support := by
+    have h3 : y ∈ (cV.coordIdeal S).support := by
       rw [← hKV, restrictIdeal_eq_comap_ι]
       exact h2
     rw [← one_le_orderAt_iff_mem_support] at h3 ⊢
     exact le_trans h3 (orderAt_le_of_le
-      ((ch.restrict hVU).coordIdeal_mono (Finset.singleton_subset_iff.mpr hjS)) y)
+      (cV.coordIdeal_mono (Finset.singleton_subset_iff.mpr hjS)) y)
   have y₀ : ↥V.toScheme := (⟨x, hxV⟩ : ↥V)
-  exact false_of_forall_mem_support_of_coordIdeal_singleton (V.ι ≫ q) haffineTop (chartOnOpenSubscheme (ch.restrict hVU) hEt) j
-    ((ch.restrict hVU).coordIdeal ({j} : Finset (Fin m)))
-    (restrictIdeal_top_coordIdeal (ch.restrict hVU) hEt ({j} : Finset (Fin m))) hsupp y₀
+  exact false_of_forall_mem_support_of_coordIdeal_singleton (V.ι ≫ q) haffineTop (chartOnOpenSubscheme cV hEt) j
+    (cV.coordIdeal ({j} : Finset (Fin m)))
+    (restrictIdeal_top_coordIdeal cV hEt ({j} : Finset (Fin m))) hsupp y₀
 
 namespace MaximalContactCover
 
@@ -167,23 +211,6 @@ theorem smooth_hypersurfaceStructureMap (C : MaximalContactCover p τ I c) :
   ((isSmoothDivisor_iff (C.projection ≫ p) C.toCoverData.iInfImageIdeal).mp
     C.isSmoothDivisor_iInfImageIdeal).2
 
-theorem isAffine_hypersurfaceScheme (C : MaximalContactCover p τ I c) : IsAffine C.hypersurfaceScheme := by
-  have : IsAffine C.toCoverData.disjointUnion := C.isAffine_disjointUnion
-  exact isAffine_of_isAffineHom C.toCoverData.iInfImageIdeal.subschemeι
-
-instance instIsAffineHypScheme (C : MaximalContactCover p τ I c) : IsAffine C.hypersurfaceScheme :=
-  C.isAffine_hypersurfaceScheme
-
-theorem isAffine_pullbackFiber (C : MaximalContactCover p τ I c) [IsClosedImmersion τ] :
-    IsAffine C.pullbackFiber := by
-  have : IsAffine C.toCoverData.disjointUnion := C.isAffine_disjointUnion
-  have := C.isClosedImmersion_pullbackFiberToTotal
-  exact isAffine_of_isAffineHom C.pullbackFiberToTotal
-
-instance instIsAffineStarFiber (C : MaximalContactCover p τ I c) [IsClosedImmersion τ] :
-    IsAffine C.pullbackFiber :=
-  C.isAffine_pullbackFiber
-
 theorem nonzeroOnComponents_iInfImageIdeal (C : MaximalContactCover p τ I c)
     [TopologicalSpace.NoetherianSpace ↥C.toCoverData.disjointUnion] :
     NonzeroOnComponents C.toCoverData.iInfImageIdeal := by
@@ -197,10 +224,21 @@ theorem nonzeroOnComponents_iInfImageIdeal (C : MaximalContactCover p τ I c)
       rw [MaxContactReduction.FiniteOpenCoverWithIdeals.restrictIdeal_iInfImageIdeal_summandOpen, htop]
       simp
     exact notMem_support_of_mem_opens_of_restrictIdeal_eq_top _ _ h1 y hi hy
-  · refine ⟨C.toCoverData.summandOpen i, hi, n, C.toCoverData.summandEtaleChart i ch, {j},
-      ⟨j, Finset.mem_singleton_self j⟩, ?_⟩
+  · let D := C.toCoverData
+    let c : EtaleChart (C.projection ≫ p) (D.summandOpen i) n := {
+      map := (D.summandIso i).inv ≫ ch.map
+      comp_struct := by
+        rw [Category.assoc, ch.comp_struct, ← Category.assoc,
+          ← MaxContactReduction.FiniteOpenCoverWithIdeals.summandOpen_ι_comp_disjointUnionMap,
+          Category.assoc]
+      isEtale := by
+        have := ch.isEtale
+        infer_instance }
+    refine ⟨D.summandOpen i, hi, n, c, {j}, ⟨j, Finset.mem_singleton_self j⟩, ?_⟩
     rw [MaxContactReduction.FiniteOpenCoverWithIdeals.restrictIdeal_iInfImageIdeal_summandOpen, hch,
-      MaxContactReduction.FiniteOpenCoverWithIdeals.summandEtaleChart_coordIdeal]
+      EtaleChart.coordIdeal_eq_comap_coordSubspaceIdeal, EtaleChart.coordIdeal_eq_comap_coordSubspaceIdeal]
+    change _ = (coordSubspaceIdeal k n {j}).comap ((D.summandIso i).inv ≫ ch.map)
+    rw [Scheme.IdealSheafData.comap_comp]
 
 theorem ker_pullbackFiberToHypersurface_le_idealOnHypersurface (C : MaximalContactCover p τ I c) [IsClosedImmersion τ] :
     Scheme.Hom.ker C.pullbackFiberToHypersurface ≤ C.idealOnHypersurface := by

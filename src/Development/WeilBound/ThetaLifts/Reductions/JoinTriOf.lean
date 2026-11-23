@@ -1,7 +1,54 @@
-import Development.WeilBound.ThetaLifts.CartanFactorisation.FockSecondActionMatrixUnitEq
-import Development.WeilBound.ThetaLifts.Reductions.LocalPoly
-import Development.WeilBound.ThetaLifts.Reductions.TensJoin
-import Development.WeilBound.ThetaLifts.Reductions.JoinDef
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.LocalPoly
+public import Development.WeilBound.ThetaLifts.Reductions.JoinDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLParity
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.FockSecondActionMatrixUnitEq
+import Development.WeilBound.ThetaLifts.CartanFactorisation.PolCount
+import Development.WeilBound.ThetaLifts.ConeHypotheses.PureEqPureA
+public import Development.WeilBound.ThetaLifts.Reductions.TensJoin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +77,7 @@ theorem join_pair {n d P Q R S : ℕ} {X : Spc F E n} {W : Spc F E d} {B : Base 
     have e : atL w (fockAct1 P Q R S (Z₁ + Complex.I • Z₂)) T + (c₁ w * (Z₁ + Complex.I • Z₂).trace) • T =
         (atL w (fockAct1 P Q R S Z₁) T + (c₁ w * Z₁.trace) • T) +
           Complex.I • (atL w (fockAct1 P Q R S Z₂) T + (c₁ w * Z₂.trace) • T) := by
-      simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
+      simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply, Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
       module
     rw [e]
     exact add_mem (u Z₁ a1) (Submodule.smul_mem _ _ (u Z₂ a2))
@@ -53,7 +100,7 @@ theorem join_pair {n d P Q R S : ℕ} {X : Spc F E n} {W : Spc F E d} {B : Base 
       have : _ ∈ N.comap Φ := hN.2.2.2.1 γ hγ (Φ x) hx _ (h x)
       simpa using (N.comap Φ).sub_mem this ((N.comap Φ).smul_mem (c₂ w * Z.trace) hx)
     obtain ⟨Z₁, a1, Z₂, a2, rfl, -⟩ := decomp Z
-    simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply]
+    simp only [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply]
     exact add_mem (u Z₁ a1) (Submodule.smul_mem _ _ (u Z₂ a2))
   have top : ∀ N, GlobalTheory.Published.ThetaSubInf M B.ψ B.emb om N → N.comap Φ = ⊤ → N = M.Pol B.ψ B.emb := fun N hN e =>
     le_antisymm hN.1 (by

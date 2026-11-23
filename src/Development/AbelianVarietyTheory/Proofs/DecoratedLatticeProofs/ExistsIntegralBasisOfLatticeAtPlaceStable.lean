@@ -1,9 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WittCoreEmbeddingPreservesSupportedUnitarySubgro
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsPrincipalIdealRingSemiLoc
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdelicPointComponentsAtPlacesLatticesVacua
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsPrincipalIdealRingSemiLoc
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlobApprox
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -136,6 +179,7 @@ theorem exists_basis_of_dense {A E : Type} [CommRing A] [Field E] [NumberField E
     have e : ((ε • B'.map ι) *ᵥ y) i = ε * ι ((B' *ᵥ fun k => (N : E)⁻¹ * u k) i) +
         ∑ k, (ε * ι ((B' *ᵥ (Pi.single k (m : E) : Fin n → E)) i)) * z k := by
       simp only [Matrix.mulVec_single, Matrix.mulVec, dotProduct_single]
+
       simp only [dotProduct, map_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun k _ => ?_
       rw [hyk k, Matrix.smul_apply, Matrix.map_apply, smul_eq_mul, map_mul ι (B' i k), map_mul ι (B' i k), map_natCast]
@@ -158,8 +202,8 @@ end GlobalTheory.IwaPlace.FreeAt
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.FinPl GlobalTheory.MixPer GlobalTheory.MixModel GlobalTheory.IwaPlace
 open GlobalTheory.FinPlLoc
 
-set_option synthInstance.maxHeartbeats 200000
-set_option maxHeartbeats 1000000
+
+
 
 namespace GlobalTheory.IwaPlace.FreeAt
 
@@ -169,7 +213,7 @@ theorem finPart_finIn (z : Af D.host.F ⊗[D.host.F] D.host.E) : finPart D (finI
   induction z using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul a e => rw [finIn_tmul, finPart_pair]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem idem_mul_incA (P : Pl D → Prop) (x : D.host.E) :
     idem D P * incA D x = pairA D.host.F 0 (ePl D P) ⊗ₜ[D.host.F] x := by
@@ -178,7 +222,9 @@ theorem idem_mul_incA (P : Pl D → Prop) (x : D.host.E) :
 
 noncomputable def intRing (D : D7) (P : Pl D → Prop) : NonUnitalSubring (AE D) where
   carrier := intAt D P
-  add_mem' ha hb := ⟨add_mem ha.1 hb.1, by rw [map_add]; exact add_mem ha.2 hb.2⟩
+  add_mem' ha hb := ⟨add_mem ha.1 hb.1, by
+    rw [(finPart D).map_add]
+    exact add_mem ha.2 hb.2⟩
   zero_mem' := ⟨zero_mem _, by rw [map_zero]; exact zero_mem _⟩
   mul_mem' ha hb := ⟨Ideal.mul_mem_right _ _ ha.1, by rw [map_mul]; exact FrameLat.mul_mem_intAE ha.2 hb.2⟩
   neg_mem' ha := ⟨neg_mem ha.1, by rw [map_neg]; exact neg_mem ha.2⟩
@@ -247,7 +293,7 @@ theorem intAt_dense (P : Pl D → Prop) (T : ℕ) (hT : 0 < T) (a : AE D) (ha : 
       rw [idem_mul_incA, finIn_tmul]
       unfold idem
       rw [Algebra.TensorProduct.tmul_mul_tmul, ← pairA_mul, mul_one, one_mul]
-    rw [e, map_add, map_nsmul, nsmul_eq_mul] at h2
+    rw [e, map_add (f := _), map_nsmul, nsmul_eq_mul] at h2
     rw [← h3, ← h1]
     conv_lhs => rw [h2]
     ring

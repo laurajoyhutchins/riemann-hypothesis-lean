@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousConjNilSymm
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousConjNilSymm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Matrix.Normed
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,18 +71,6 @@ theorem isClosed_nilrad (W₁ W₂ : Submodule ℂ (Fin n → ℂ)) :
   letI : NormedSpace ℂ (Matrix (Fin n) (Fin n) ℂ) := Matrix.normedSpace
   exact Submodule.closed_of_finiteDimensional (nilrad W₁ W₂)
 
-theorem locallyCompact_nilrad (W₁ W₂ : Submodule ℂ (Fin n → ℂ)) :
-    LocallyCompactSpace (nilrad W₁ W₂) := by
-  haveI : LocallyCompactSpace (Matrix (Fin n) (Fin n) ℂ) :=
-    inferInstanceAs (LocallyCompactSpace (Fin n → Fin n → ℂ))
-  exact (isClosed_nilrad W₁ W₂).isClosedEmbedding_subtypeVal.locallyCompactSpace
-
-theorem secondCountable_nilrad (W₁ W₂ : Submodule ℂ (Fin n → ℂ)) :
-    SecondCountableTopology (nilrad W₁ W₂) := by
-  haveI : SecondCountableTopology (Matrix (Fin n) (Fin n) ℂ) :=
-    inferInstanceAs (SecondCountableTopology (Fin n → Fin n → ℂ))
-  exact TopologicalSpace.Subtype.secondCountableTopology _
-
 theorem nil_mul_mem {W₁ W₂ : Submodule ℂ (Fin n → ℂ)} (hW : W₁ ≤ W₂)
     {X Y : Matrix (Fin n) (Fin n) ℂ} (hX : X ∈ nilrad W₁ W₂) (hY : Y ∈ nilrad W₁ W₂) :
     X * Y ∈ nilrad W₁ W₂ := by
@@ -51,37 +81,6 @@ theorem nil_mul_mem {W₁ W₂ : Submodule ℂ (Fin n → ℂ)} (hW : W₁ ≤ W
 
 def nmul {W₁ W₂ : Submodule ℂ (Fin n → ℂ)} (hW : W₁ ≤ W₂) (Y X : nilrad W₁ W₂) : nilrad W₁ W₂ :=
   ⟨Y.1 + X.1 + Y.1 * X.1, (nilrad W₁ W₂).add_mem ((nilrad W₁ W₂).add_mem Y.2 X.2) (nil_mul_mem hW Y.2 X.2)⟩
-
-theorem uOf_nmul {W₁ W₂ : Submodule ℂ (Fin n → ℂ)} (hW : W₁ ≤ W₂) (Y X : nilrad W₁ W₂) :
-    uOf (nmul hW Y X) = uOf Y * uOf X := by
-  apply Units.ext
-  simp only [uOf_val, Units.val_mul, nmul]
-  noncomm_ring
-
-def ninv {W₁ W₂ : Submodule ℂ (Fin n → ℂ)} (hW : W₁ ≤ W₂) (X : nilrad W₁ W₂) : nilrad W₁ W₂ :=
-  ⟨-X.1 + X.1 * X.1, (nilrad W₁ W₂).add_mem ((nilrad W₁ W₂).neg_mem X.2) (nil_mul_mem hW X.2 X.2)⟩
-
-theorem uOf_ninv {W₁ W₂ : Submodule ℂ (Fin n → ℂ)} (hW : W₁ ≤ W₂) (X : nilrad W₁ W₂) :
-    uOf (ninv hW X) = (uOf X)⁻¹ := by
-  apply Units.ext
-  rw [uOf_val, ninv]
-  change _ = 1 - X.1 + X.1 * X.1
-  noncomm_ring
-
-def nSet (W₁ W₂ : Submodule ℂ (Fin n → ℂ)) (C : Set (GL (Fin n) ℂ)) : Set (GL (Fin n) ℂ) :=
-  {g | ∃ X : nilrad W₁ W₂, ∃ c ∈ C, uOf X * c = g}
-
-theorem exists_open_cover (n : ℕ) : ∃ U : ℕ → Set (GL (Fin n) ℂ),
-    (∀ i, IsOpen (U i)) ∧ (∀ i, IsCompact (closure (U i))) ∧ ∀ g, ∃ i, g ∈ U i := by
-  haveI := locallyCompact_GL n
-  haveI := secondCountable_GL n
-  haveI : SigmaCompactSpace (GL (Fin n) ℂ) := inferInstance
-  let K := CompactExhaustion.choice (GL (Fin n) ℂ)
-  refine ⟨fun i => interior (K i), fun i => isOpen_interior, fun i => ?_, fun g => ?_⟩
-  · exact (K.isCompact i).of_isClosed_subset isClosed_closure
-      (closure_minimal interior_subset (K.isCompact i).isClosed)
-  · obtain ⟨i, hi⟩ := K.exists_mem g
-    exact ⟨i + 1, K.subset_interior_succ i hi⟩
 
 theorem isClosed_twCent (d : GL (Fin n) ℂ) :
     IsClosed (twCent (thC n) d : Set (GL (Fin n) ℂ)) := by

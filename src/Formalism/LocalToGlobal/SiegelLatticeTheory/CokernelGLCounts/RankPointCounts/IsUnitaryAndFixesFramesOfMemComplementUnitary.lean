@@ -1,5 +1,53 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.GoodFamilyMassFormula
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsTermOver
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellDef
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,33 +66,6 @@ theorem mkW_eq_iff (f : Fin (r + 1) → V) (x y : ↥(H.perp (H.X f))) :
   unfold Formalism.MainNotions.S.Loc.HermSp.mkW
   rw [Submodule.mkQ_apply, Submodule.mkQ_apply, Submodule.Quotient.eq, Submodule.mem_comap]
   rfl
-
-theorem isUnitary_and_fixes_frames_of_mem_complementUnitary {P : FPair H r} {g : V ≃ₗ[E] V} (hg : g ∈ P.UW0) :
-    IsUnitary H g ∧ ∀ b, g (P.A.f b) = P.A.f b ∧ g (P.B.f b) = P.B.f b := by
-  induction hg using Subgroup.closure_induction with
-  | mem x hx => exact hx
-  | one => exact ⟨fun x y => rfl, fun b => ⟨rfl, rfl⟩⟩
-  | mul x y _ _ hx hy =>
-    refine ⟨fun u v => ?_, fun b => ?_⟩
-    · rw [LinearEquiv.mul_apply, LinearEquiv.mul_apply, hx.1, hy.1]
-    · rw [LinearEquiv.mul_apply, LinearEquiv.mul_apply, (hy.2 b).1, (hy.2 b).2, (hx.2 b).1, (hx.2 b).2]
-      exact ⟨rfl, rfl⟩
-  | inv x _ hx =>
-    refine ⟨fun u v => ?_, fun b => ?_⟩
-    · rw [LinearEquiv.coe_inv, ← hx.1 (x.symm u) (x.symm v), LinearEquiv.apply_symm_apply,
-        LinearEquiv.apply_symm_apply]
-    · rw [LinearEquiv.coe_inv]
-      exact ⟨(LinearEquiv.symm_apply_eq x).2 (hx.2 b).1.symm, (LinearEquiv.symm_apply_eq x).2 (hx.2 b).2.symm⟩
-
-theorem fix_X (f : Fin (r + 1) → V) {g : V ≃ₗ[E] V} (hg : ∀ b, g (f b) = f b) {x : V} (hx : x ∈ H.X f) : g x = x := by
-  unfold Formalism.MainNotions.S.Loc.HermSp.X at hx
-  induction hx using Submodule.span_induction with
-  | mem y hy =>
-    obtain ⟨a, rfl⟩ := hy
-    exact hg _
-  | zero => exact map_zero g
-  | add u v _ _ hu hv => rw [map_add, hu, hv]
-  | smul c u _ hu => rw [map_smul, hu]
 
 theorem N_perp (Fr : FrameD H r) {s : V ≃ₗ[E] V} (hs : s ∈ Fr.N) {v : V} (hv : v ∈ H.perp (H.X Fr.f)) :
     s v ∈ H.perp (H.X Fr.f) ∧ s v - v ∈ H.X Fr.f := by
@@ -155,70 +176,6 @@ theorem N_perp (Fr : FrameD H r) {s : V ≃ₗ[E] V} (hs : s ∈ Fr.N) {v : V} (
   obtain ⟨_, _, _, hsP, _⟩ := hQ s hs
   exact ⟨inPerp s hsP v hv, hsP v hv⟩
 
-theorem fixX_perp (f : Fin (r + 1) → V) {g : V ≃ₗ[E] V} (hgu : IsUnitary H g) (hgX : ∀ x ∈ H.X f, g x = x)
-    {v : V} (hv : v ∈ H.perp (H.X f)) : g v ∈ H.perp (H.X f) := by
-  intro x hx
-  rw [← hgX x hx, hgu v x]
-  exact hv x hx
-
-theorem lset_move (Fr : FrameD H r) {g s : V ≃ₗ[E] V} (hgu : IsUnitary H g) (hgX : ∀ x ∈ H.X Fr.f, g x = x)
-    (hs : s ∈ Fr.N) {Λ Λ' : Submodule M.L.O V} (he : Λ' = img g (img s Λ)) (x y : ↥(H.perp (H.X Fr.f)))
-    (hxy : (y : V) = g x) :
-    H.mkW Fr.f x ∈ H.Lset Λ Fr.f ↔ H.mkW Fr.f y ∈ H.Lset Λ' Fr.f := by
-  have hsN : ∀ w, w ∈ H.Lset Λ Fr.f ↔ w ∈ H.Lset (img s Λ) Fr.f := by
-    intro w
-    constructor
-    · rintro ⟨x, hxΛ, rfl⟩
-      obtain ⟨h1, h2⟩ := N_perp Fr hs x.2
-      refine ⟨⟨s x, h1⟩, ⟨x, hxΛ, rfl⟩, ?_⟩
-      rw [mkW_eq_iff]
-      exact h2
-    · rintro ⟨y, ⟨x, hxΛ, hxy⟩, rfl⟩
-      have hsi : s⁻¹ ∈ Fr.N := Fr.N.inv_mem hs
-      obtain ⟨h1, h2⟩ := N_perp Fr hsi y.2
-      have hx : (s⁻¹ : V ≃ₗ[E] V) y = x := by
-        rw [LinearEquiv.coe_inv, ← hxy]
-        exact s.symm_apply_apply x
-      refine ⟨⟨x, hx ▸ h1⟩, hxΛ, ?_⟩
-      rw [mkW_eq_iff]
-      show x - (y : V) ∈ H.X Fr.f
-      rw [← hx]
-      exact h2
-  rw [he, hsN]
-  have hgi_u : IsUnitary H g⁻¹ := fun u v => by
-    rw [LinearEquiv.coe_inv, ← hgu (g.symm u) (g.symm v), LinearEquiv.apply_symm_apply,
-      LinearEquiv.apply_symm_apply]
-  have hgi_X : ∀ z ∈ H.X Fr.f, g⁻¹ z = z := fun z hz => by
-    rw [LinearEquiv.coe_inv, LinearEquiv.symm_apply_eq]
-    exact (hgX z hz).symm
-  constructor
-  · rintro ⟨x', hx'Θ, hx'eq⟩
-    rw [mkW_eq_iff] at hx'eq
-    refine ⟨⟨g x', fixX_perp Fr.f hgu hgX x'.2⟩, ⟨x', hx'Θ, rfl⟩, ?_⟩
-    rw [mkW_eq_iff]
-    show g x' - (y : V) ∈ H.X Fr.f
-    rw [hxy, ← map_sub, hgX _ hx'eq]
-    exact hx'eq
-  · rintro ⟨y', ⟨x'', hx''Θ, hx''y⟩, hy'eq⟩
-    rw [mkW_eq_iff] at hy'eq
-    have hgx : g x'' = y' := hx''y
-    have hx''perp : x'' ∈ H.perp (H.X Fr.f) := by
-      have h1 := fixX_perp Fr.f hgi_u hgi_X y'.2
-      have h4 : (g⁻¹ : V ≃ₗ[E] V) y' = x'' := by
-        rw [LinearEquiv.coe_inv, ← hgx]
-        exact g.symm_apply_apply x''
-      rwa [h4] at h1
-    refine ⟨⟨x'', hx''perp⟩, hx''Θ, ?_⟩
-    rw [mkW_eq_iff]
-    show x'' - (x : V) ∈ H.X Fr.f
-    have h2 : g (x'' - x) ∈ H.X Fr.f := by
-      rw [map_sub, hgx, ← hxy]
-      exact hy'eq
-    have h3 : g⁻¹ (g (x'' - x)) = x'' - x := by
-      rw [LinearEquiv.coe_inv, LinearEquiv.symm_apply_apply]
-    rw [← h3, hgi_X _ h2]
-    exact h2
-
 section Lset
 
 variable (Fr : FrameD H r)
@@ -271,7 +228,7 @@ theorem prF_mem_perp (v : V) : Fr.prF v ∈ H.perp (H.X Fr.f) := by
     obtain ⟨a, rfl⟩ := hz'
     exact (hkey v a).1
   | zero => rw [hR, hz, map_zero]
-  | add a b _ _ ha hb => rw [hR, H.h_add_left, map_add, ← hR, ← hR, ha, hb, add_zero]
+  | add a b _ _ ha hb => rw [hR, H.h_add_left, map_add (f := _), ← hR, ← hR, ha, hb, add_zero]
   | smul c a _ ha => rw [hR, H.h_smul_left, map_mul, ← hR, ha, mul_zero]
 
 theorem prF_prF' (v : V) : Fr.prF (Fr.prF v) = Fr.prF v := by
@@ -361,7 +318,7 @@ theorem lset_LamStd (L : Submodule M.L.O (H.Wb Fr.f)) (w : H.Wb Fr.f) :
       | add a b _ _ ha hb =>
         have h6 : (⟨Fr.prF (a + b), prF_mem_perp Fr _⟩ : ↥(H.perp (H.X Fr.f))) =
             ⟨Fr.prF a, prF_mem_perp Fr a⟩ + ⟨Fr.prF b, prF_mem_perp Fr b⟩ := Subtype.ext (prF_add' Fr a b)
-        rw [h6, map_add]
+        rw [h6, map_add (f := _)]
         exact add_mem ha hb
       | smul c a _ ha =>
         have h6 : (⟨Fr.prF (c • a), prF_mem_perp Fr _⟩ : ↥(H.perp (H.X Fr.f))) = (c : E) • ⟨Fr.prF a, prF_mem_perp Fr a⟩ :=
@@ -374,11 +331,6 @@ theorem lset_LamStd (L : Submodule M.L.O (H.Wb Fr.f)) (w : H.Wb Fr.f) :
       have h3 := (H.X Fr.f).neg_mem (sub_prF_mem_X Fr x.2)
       simpa using h3
     rwa [h2] at h1
-
-theorem img_one' (Λ : Submodule M.L.O V) : img (1 : V ≃ₗ[E] V) Λ = Λ := by
-  unfold img
-  have h1 : ((1 : V ≃ₗ[E] V) : V →ₗ[E] V).restrictScalars M.L.O = LinearMap.id := LinearMap.ext fun x => rfl
-  rw [h1, Submodule.map_id]
 
 theorem lset_N {n : V ≃ₗ[E] V} (hn : n ∈ Fr.N) (Λ : Submodule M.L.O V) (w : H.Wb Fr.f) :
     w ∈ H.Lset Λ Fr.f ↔ w ∈ H.Lset (img n Λ) Fr.f := by
@@ -408,38 +360,5 @@ theorem lset_term {P : FPair H r} {d : Datum P} {t : Term V M r} (ht : IsTermOve
   refine ⟨fun w => ?_, fun w => ?_⟩
   · rw [hL, lset_LamStd P.A d.L w, lset_N P.A hn]
   · rw [hL', lset_LamStd P.B d.L' w, lset_N P.B hn']
-
-def StepOrbitLat (k r : ℕ) : Prop :=
-  ∀ (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F]
-    (E : Type) [CommRing E] [Algebra F E] [TopologicalSpace E] [MeasurableSpace E]
-    (M : Model F E), M.OK →
-    ∀ (V : Type) [AddCommGroup V] [Module E V] (H : HermSp M V),
-      Module.finrank E V = k + 2 * r + 1 → 4 * r + 7 ≤ k →
-      ∀ P : FPair H r, P.RelG (theta M) → P.PrimeTo →
-        ∀ (d d' : Datum P) (t t' : Term V M r), IsTermOver P d t → IsTermOver P d' t' →
-          ∃ g ∈ P.UW0, ∃ s ∈ P.St, t'.abelian₂ = img g (img s t.abelian₂)
-
-theorem moves_of (hsp : M.split = none) {P : FPair H r} {d d' : Datum P} {t t' : Term V M r}
-    (ht : IsTermOver P d t) (ht' : IsTermOver P d' t') {g s : V ≃ₗ[E] V} (hg : g ∈ P.UW0) (hs : s ∈ P.St)
-    (he : t'.abelian₂ = img g (img s t.abelian₂)) : Datum.Moves g d d' := by
-  obtain ⟨hA, hB⟩ := lset_term ht
-  obtain ⟨hA', hB'⟩ := lset_term ht'
-  obtain ⟨hgu, hgf⟩ := isUnitary_and_fixes_frames_of_mem_complementUnitary hg
-  have hsA : s ∈ P.A.N := (Subgroup.mem_inf.1 hs).1
-  have hsB : s ∈ P.B.N := (Subgroup.mem_inf.1 hs).2
-  have hgXA : ∀ x ∈ H.X P.A.f, g x = x := fun x hx => fix_X P.A.f (fun b => (hgf b).1) hx
-  have hgXB : ∀ x ∈ H.X P.B.f, g x = x := fun x hx => fix_X P.B.f (fun b => (hgf b).2) hx
-  refine ⟨fun x y hxy => ?_, fun x y hxy => ?_, fun x' y' x y _ _ => ?_⟩
-  · rw [hA, hA']
-    exact lset_move P.A hgu hgXA hsA he x y hxy
-  · rw [hB, hB']
-    exact lset_move P.B hgu hgXB hsB he x y hxy
-  · rw [d.io_L hsp, d'.io_L hsp]
-    simp
-
-theorem stepDataOne_of (k r : ℕ) (h : StepOrbitLat k r) : StepDataOne k r := by
-  intro F _ _ _ E _ _ _ _ M hOK V _ _ H hrk hk P hR hP d d' t t' ht ht'
-  obtain ⟨g, hg, s, hs, he⟩ := h F E M hOK V H hrk hk P hR hP d d' t t' ht ht'
-  exact ⟨g, hg, moves_of hP.1 ht ht' hg hs he⟩
 
 end Formalism.L2.SG.GoodFamilyMass

@@ -1,11 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.StdCharFinitePartRationalEqExpTrace
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.SymplecticValTauCompat
-import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FactPrincipalDatum
+public import Formalism.LocalToGlobal.ProjectiveLattices.HostInt
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,7 +80,7 @@ theorem conj_int {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intAE D) :
     exact AddSubgroup.subset_closure ⟨a, ha, ⟨D.sp.cm.sig (o : D.host.E),
       (show IsIntegral ℤ (o : D.host.E) from o.2).map (D.sp.cm.sig : D.host.E →+* D.host.E).toIntAlgHom⟩, rfl⟩
   | zero => rw [RingHom.map_zero]; exact zero_mem _
-  | add x y _ _ hx hy => rw [RingHom.map_add]; exact add_mem hx hy
+  | add x y _ _ hx hy => rw [RingHom.map_add (f := _)]; exact add_mem hx hy
   | neg x _ hx => rw [RingHom.map_neg]; exact neg_mem hx
 
 theorem trace_tmul {F E R : Type} [Field F] [Field E] [Algebra F E] [FiniteDimensional F E] [CommRing R] [Algebra F R]
@@ -54,7 +94,7 @@ theorem snd_trace (z : AE D) : sndA D.host.F (Algebra.trace (AF D.host.F) (AE D)
     Algebra.trace (Af D.host.F) (Af D.host.F ⊗[D.host.F] D.host.E) (finPart D z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero]
-  | add x y hx hy => rw [RingHom.map_add, map_add, map_add, map_add, hx, hy]
+  | add x y hx hy => rw [RingHom.map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hx, hy]
   | tmul a x =>
     have e : finPart D (a ⊗ₜ[D.host.F] x) = sndA D.host.F a ⊗ₜ[D.host.F] x := rfl
     rw [e, trace_tmul, trace_tmul, map_mul, AlgHom.commutes]
@@ -74,7 +114,7 @@ theorem trace_int {z : Af D.host.F ⊗[D.host.F] D.host.E} (hz : z ∈ intAE D) 
     exact mul_mem (ha v) (coe_mem_intAf (⟨Algebra.trace D.host.F D.host.E (o : D.host.E),
       Algebra.isIntegral_trace (show IsIntegral ℤ (o : D.host.E) from o.2)⟩ : 𝓞 D.host.F) v)
   | zero => intro v; rw [map_zero, map_zero]; exact zero_mem _
-  | add x y _ _ hx hy => intro v; rw [map_add, map_add]; exact add_mem (hx v) (hy v)
+  | add x y _ _ hx hy => intro v; rw [map_add (f := _), map_add (f := _)]; exact add_mem (hx v) (hy v)
   | neg x _ hx => intro v; rw [map_neg, map_neg]; exact neg_mem (hx v)
 
 theorem char_rat {ψ : AddChar (AF D.host.F) ℂ} (hψ : IsStdChar D ψ (-1)) (z : D.host.F) :
@@ -148,7 +188,7 @@ theorem pr_cA_e : p.pr (cA D p.e) = 0 := by
 
 theorem pr_trace (x : k) :
     p.pr (algebraMap (AF D.host.F) (AE D) (Algebra.trace (AF D.host.F) (AE D) (p.sec x))) = x := by
-  rw [GlobalTheory.FockCompare.SymplVal.trace_AE, map_add, p.pr_sec, ← e_mul_sec, RingHom.map_mul, map_mul, pr_cA_e, zero_mul,
+  rw [GlobalTheory.FockCompare.SymplVal.trace_AE, map_add (f := _), p.pr_sec, ← e_mul_sec, RingHom.map_mul, map_mul, pr_cA_e, zero_mul,
     add_zero]
 
 theorem exists_idem : ∃ η : Af D.host.F, η ∈ intAf D.host.F ∧ (∀ v, ¬ v = p.v → evalV D.host.F v η = 0) ∧
@@ -211,7 +251,7 @@ theorem AA_tmul_int (hU : p.UnitAA) {η : Af D.host.F} (hη : η ∈ intAf D.hos
       change α ⊗ₜ[D.host.F] ((1 : D.host.E) * (r • (1 : D.host.E))) = _
       rw [one_mul, Algebra.smul_def, mul_one]
     | zero => rw [Pi.zero_apply, RingHom.map_zero]; exact zero_mem _
-    | add x y _ _ hx hy => rw [Pi.add_apply, RingHom.map_add]; exact add_mem hx hy
+    | add x y _ _ hx hy => rw [Pi.add_apply, RingHom.map_add (f := _)]; exact add_mem hx hy
     | neg x _ hx => rw [Pi.neg_apply, RingHom.map_neg]; exact neg_mem hx
   have h3 := h2 _ h1
   change η ⊗ₜ[D.host.F] (a * 1) ∈ intAE D at h3
@@ -222,11 +262,11 @@ theorem datum_int (hU : p.UnitAA) {z : D.host.E} (hz : z ∈
     p.pr (incA D z) ∈ 𝒪[k] := by
   obtain ⟨η, hη, h0, h⟩ := exists_idem p
   refine FractionalIdeal.mul_induction_on (C := fun z => p.pr (incA D z) ∈ 𝒪[k]) hz (fun u hu b hb => ?_)
-    (fun u w hu hw => by rw [map_add, map_add]; exact add_mem hu hw)
+    (fun u w hu hw => by rw [map_add (f := _), map_add (f := _)]; exact add_mem hu hw)
   rw [map_mul, map_mul]
   refine mul_mem ?_ ?_
   · refine FractionalIdeal.mul_induction_on (C := fun z => p.pr (incA D z) ∈ 𝒪[k]) hu (fun s hs a ha => ?_)
-      (fun u w hu hw => by rw [map_add, map_add]; exact add_mem hu hw)
+      (fun u w hu hw => by rw [map_add (f := _), map_add (f := _)]; exact add_mem hu hw)
     rw [map_mul, map_mul]
     refine mul_mem ?_ ?_
     · obtain ⟨r, rfl⟩ := (FractionalIdeal.mem_spanSingleton _).1 hs
@@ -289,7 +329,7 @@ theorem hasConductor_one : ∀ (D : D7) (k : Type) [Field k] [ValuativeRel k] [T
       simp only [map_mul, h1, one_mul] at e3
       rw [e, e3]
     have h3 := pr_trace p x
-    rw [hα, hab, pair_add, map_add, map_add, h2] at h3
+    rw [hα, hab, pair_add, map_add (f := _), map_add (f := _), h2] at h3
     rw [← h3]
     exact (Valuation.mem_integer_iff _ _).1 (add_mem ha (pr_pair_int p hβ'))
   · intro hx y hy

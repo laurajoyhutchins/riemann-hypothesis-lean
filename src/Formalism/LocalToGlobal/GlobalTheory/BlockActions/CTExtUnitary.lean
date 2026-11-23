@@ -1,8 +1,50 @@
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.TilEqLevel
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.DefNOfFact
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ExistsOnOfPosDef
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.RationalPointsLeHolds
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AfsplitB
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedSym
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ArchimedeanSignatureMatchingOfTrivialBranchingSymm
+public import Formalism.LocalToGlobal.GlobalTheory.BlockActions.ExistsOnOfPosDef
+import Formalism.LocalToGlobal.HermitianForms.TiedBrUnit
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.RationalPointsLeHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,12 +67,13 @@ theorem exists_proj {E : Type} [Field E] {N n : ℕ} (hN : n + 1 = N) (A : Matri
   refine ⟨Matrix.of fun a j => B⁻¹ (Fin.castSucc a) j, ?_, ?_⟩
   · ext a b
     have e := congrFun (congrFun h (Fin.castSucc a)) (Fin.castSucc b)
-    simp only [mul_apply, hBdef, of_apply, Fin.val_castSucc, Fin.is_lt, dif_pos, Fin.eta, one_apply,
-      Fin.castSucc_inj] at e
-    simpa [mul_apply, one_apply] using e
+    have hcol (j : Fin (n + 1)) : B j (Fin.castSucc b) = A j b := by
+      simp [hBdef]
+    simp only [Matrix.mul_apply, hcol, Matrix.one_apply, Fin.castSucc_inj] at e
+    simpa [Matrix.mul_apply, Matrix.one_apply] using e
   · funext a
     have e := congrFun (congrFun h (Fin.castSucc a)) (Fin.last n)
-    simp only [mul_apply, hBdef, of_apply, Fin.val_last, lt_irrefl, dif_neg, not_false_eq_true, one_apply] at e
+    simp only [Matrix.mul_apply, hBdef, of_apply, Fin.val_last, lt_irrefl, dif_neg, not_false_eq_true, one_apply] at e
     simpa [mulVec, dotProduct, (Fin.castSucc_lt_last a).ne] using e
 
 theorem cT_ext_unitary {A : Type} [CommRing A] (τ : A →+* A) {N n : ℕ} (I : Matrix (Fin N) (Fin n) A)
@@ -55,6 +98,7 @@ theorem latS_mulVec (R : Type) [CommRing R] [Algebra F R] (S : Subring (E ⊗[F]
     apply Submodule.subset_span
     refine ⟨M *ᵥ x0, hM x0 hx0, ?_⟩
     funext i
+
     simp only [mulVec, dotProduct, map_sum, map_mul, Matrix.map_apply]
   | zero => rw [mulVec_zero]; exact zero_mem _
   | add x y _ _ hx hy => rw [mulVec_add]; exact add_mem hx hy
@@ -117,7 +161,7 @@ theorem isExt_prV {z0 : Fin (D.R.N D.R.m) → D.host.E} (v : HeightOneSpectrum (
     simp only at this
     exact (RingHom.map_mulVec _ _ _ _).symm.trans this
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem lev_lat (Tf : FormsTiedSym D u Ch chOf)
     (k : Matrix (Fin (D.R.N D.R.m - 1)) (Fin (D.R.N D.R.m - 1)) (D.host.E ⊗[D.host.F] FiniteAdeleRing (𝓞 D.host.F) D.host.F))

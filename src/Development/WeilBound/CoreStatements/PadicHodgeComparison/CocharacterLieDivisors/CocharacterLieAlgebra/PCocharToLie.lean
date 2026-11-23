@@ -1,4 +1,60 @@
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.CocharacterLieDivisors.CocharacterLieAlgebra.StCochar
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.CocharacterLieDivisors.CocharacterLieAlgebra.StCochar
+public import Mathlib.Algebra.DualNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
+import ReciprocityTheory.NeutralLocalFields.Reciprocity
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +74,7 @@ theorem eval₂_dual {R K σ : Type} [CommRing R] [Field K] [Fintype σ] (φ : R
   next a =>
     simp [MvPolynomial.eval₂_C, MvPolynomial.pderiv_C]
   next p q hp hq =>
-    simp only [MvPolynomial.eval₂_add, hp, hq, map_add, add_mul, Finset.sum_add_distrib]
+    simp only [MvPolynomial.eval₂_add, hp, hq, map_add (f := _), add_mul, Finset.sum_add_distrib]
     ring
   next p n hp =>
     have hterm : ∀ i, MvPolynomial.eval₂ φ x (MvPolynomial.pderiv i (p * MvPolynomial.X n)) * v i =
@@ -34,7 +90,7 @@ theorem eval₂_dual {R K σ : Type} [CommRing R] [Field K] [Fintype σ] (φ : R
         try ring
     rw [MvPolynomial.eval₂_mul, hp, Finset.sum_congr rfl fun i _ => hterm i, Finset.sum_add_distrib,
       ← Finset.mul_sum, Finset.sum_ite_eq']
-    simp only [MvPolynomial.eval₂_X, MvPolynomial.eval₂_mul, Finset.mem_univ, if_true, map_add, map_mul]
+    simp only [MvPolynomial.eval₂_X, MvPolynomial.eval₂_mul, Finset.mem_univ, if_true, map_add (f := _), map_mul]
     linear_combination (algebraMap K (DualNumber K) (∑ i, MvPolynomial.eval₂ φ x (MvPolynomial.pderiv i p) * v i) *
       algebraMap K (DualNumber K) (v n)) * DualNumber.eps_mul_eps (R := K)
 
@@ -51,7 +107,7 @@ theorem epsUnit_zpow (K : Type) [Field K] (m : ℤ) :
       (1 + DualNumber.eps * algebraMap K (DualNumber K) b) =
       1 + DualNumber.eps * algebraMap K (DualNumber K) (a + b) := by
     intro a b
-    rw [map_add]
+    rw [map_add (f := _)]
     linear_combination (algebraMap K (DualNumber K) a * algebraMap K (DualNumber K) b) *
       DualNumber.eps_mul_eps (R := K)
   have hv : ((epsUnit K : (DualNumber K)ˣ) : DualNumber K) =
@@ -123,6 +179,7 @@ theorem inLie_of_cochar {K K' ι : Type} [Field K] [Field K'] [Algebra K K'] [Is
     have h2 : (⇑(LaurentPolynomial.eval₂ ψ u) ∘ ent) =
         fun p => ∑ j, ψ (P p.1 j) * ((u ^ (k j) : Sˣ) : S) * ψ (P⁻¹ j p.2) := by
       funext p
+
       simp [ent, map_sum, map_mul, LaurentPolynomial.eval₂_C, LaurentPolynomial.eval₂_T]
     rw [MvPolynomial.eval₂_comp_left, h1, h2]
   have hL0 : Lp = 0 := by
@@ -150,6 +207,7 @@ theorem inLie_of_cochar {K K' ι : Type} [Field K] [Field K'] [Algebra K K'] [Is
       rw [← Matrix.mul_apply, Matrix.mul_nonsing_inv P hP]
     simp only [epsUnit_zpow]
     rw [h1, hX, conj_apply]
+
     simp only [map_sum, map_mul, Finset.mul_sum, ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun j _ => by ring
   simp only [hent] at hd

@@ -1,5 +1,54 @@
-import Mathlib
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.WittVector.Complete
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.WeaklyAdmissibleFiltrations GlobalTheory.Per Ideal Finset
 
@@ -138,14 +187,14 @@ theorem hausdorff_pair {R : Type*} [CommRing R] [IsDomain R] (π : A →+* R) (p
     have h0 : π x = 0 := by
       refine hR _ fun n => ?_
       obtain ⟨a, b, rfl⟩ := mem_span_pair.1 (hx (n + 1))
-      simp only [map_add, map_mul, map_pow, hπp, pow_succ, mul_zero, zero_add]
+      simp only [map_add (f := _), map_mul, map_pow, hπp, pow_succ, mul_zero, zero_add]
       exact ⟨π b * π y, by ring⟩
     obtain ⟨x', hx'⟩ := mem_span_singleton'.1 (hker ▸ h0 : x ∈ span {p})
     refine ⟨x', by rw [← hx', mul_comm], fun n => ?_⟩
     obtain ⟨a, b, hab⟩ := mem_span_pair.1 (hx (n + 1))
     have h1 : π b = 0 := by
       rw [← hab] at h0
-      simp only [map_add, map_mul, map_pow, hπp, pow_succ _ n, mul_zero, zero_add] at h0
+      simp only [map_add (f := _), map_mul, map_pow, hπp, pow_succ _ n, mul_zero, zero_add] at h0
       simpa [hy] using h0
     obtain ⟨b', hb'⟩ := mem_span_singleton'.1 (hker ▸ h1 : b ∈ span {p})
     refine mem_span_pair.2 ⟨a, b' * y, ?_⟩
@@ -216,7 +265,7 @@ theorem perfection_tails {y : Perfection R p} (hy : IsNilpotent (Perfection.coef
     | succ N hN ih =>
       rw [← ih]
       simp only [S]
-      rw [sum_range_succ, map_add, map_mul, map_pow, coeff_pow_eq_zero hm n N hN, zero_mul,
+      rw [sum_range_succ, map_add (f := _), map_mul, map_pow, coeff_pow_eq_zero hm n N hN, zero_mul,
         add_zero]
   have ex : ∀ k, ∃ t : Perfection R p, ∀ n,
       Perfection.coeff R p n t = Perfection.coeff R p n (S k (p ^ n * m)) := fun k =>

@@ -1,18 +1,60 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubeTotalComplexAcyclicOfSlicesInductionOnCard
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import CompanionTheory.AutomorphicTheory.TemperedLocalSpectra.ObstructionLifting.H1StructureDimLe
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.IsScalarTowerOfAlgebraMapEq
-import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.ExistsAwayFracOfMemHomLoc
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CubeTotalComplexAcyclicOfSlicesInductionOnCard
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsLocalizedModuleResBasicOpenOfQcqs
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.IsAffineOpenBiInfOfLe
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CechLBHomologyFiniteOfAffineCover
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulHomologyEqZeroOfAcyclicFibre
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.SubsingletonOfPoints
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MumfordBundleCechFiniteVanishesOffOrigin
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MumfordBundleCechCohomologyFinrank
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsProjectiveOverRingByChartsAbelianVariety
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAmpleLBGenericOfSpecial
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.FibAc
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
+import Development.AbelianVarietyTheory.PublishedTheorems.AbelianLaws.PrincipalPolarisationOneSection
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsAdditiveOfUniversal
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.AbLaw GlobalTheory.CechPic GlobalTheory.AbDual CompanionTheory.ObstructionTrivialLocus
@@ -21,8 +63,32 @@ open GlobalTheory.CompanionTheory.PointSurjectivity
 
 namespace GlobalTheory.CompanionTheory.PointSurjectivity
 
-open GlobalTheory.Cube in
 
+open GlobalTheory.Cube in
+private noncomputable def suppHom {ν κ : Type} [LinearOrder ν] [LinearOrder κ] {R : Type} [CommRing R]
+    (A : GlobalTheory.Cube.{0} (ν ⊕ₗ κ) R) (P P' : Set (Finset (ν ⊕ₗ κ)))
+    (hP : P.OrdConnected) (hP' : P'.OrdConnected)
+    (h : ∀ ⦃s t⦄, s ⊆ t → s ∈ P → t ∈ P' → (t ∈ P ↔ s ∈ P')) :
+    supp A P hP ⟶ supp A P' hP' := by
+  classical
+  refine Cube.homMk _ _ (suppMapApp (𝟙 A) hP hP') ?_
+  intro s t hst x
+  by_cases hs : s ∈ P
+  · refine supp_ext fun ht' => ?_
+    by_cases ht : t ∈ P
+    · have hs' := (h hst hs ht').1 ht
+      rw [suppEquiv_suppMapApp (𝟙 A) ht, suppEquiv_res hst hs, suppEquiv_res hst hs',
+        suppEquiv_suppMapApp (𝟙 A) hs, app_res]
+    · have hs' := mt (h hst hs ht').2 ht
+      have := subsingleton_supp A hP ht
+      have := subsingleton_supp A hP' hs'
+      rw [Subsingleton.elim (res _ hst x) 0, Subsingleton.elim (suppMapApp (𝟙 A) hP hP' s x) 0]
+      simp only [map_zero]
+  · have := subsingleton_supp A hP hs
+    rw [Subsingleton.elim x 0]
+    simp only [map_zero]
+
+open GlobalTheory.Cube in
 theorem isZero_homology_supp_singleton {ν κ : Type} [LinearOrder ν] [LinearOrder κ] {R : Type}
     [CommRing R] (A : GlobalTheory.Cube.{0} (ν ⊕ₗ κ) R) {Q : Set (Finset ν)} (hQ : Q.OrdConnected)
     (hT₁ : Set.OrdConnected {t : Finset κ | t.card = 1}) (j : κ) (n : ℕ)
@@ -48,13 +114,13 @@ theorem isZero_homology_supp_singleton {ν κ : Type} [LinearOrder ν] [LinearOr
         (ordConnected_partsIn _ _ hQ Set.ordConnected_singleton) ⟶
       supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {t : Finset κ | t.card = 1})
         (ordConnected_partsIn _ _ hQ hT₁) :=
-    suppMap (𝟙 A) _ _ fun s t hst hs ht => iff_of_true
+    suppHom A _ _ _ _ fun s t hst hs ht => iff_of_true
       ⟨ht.1, heq (monotone_part _ hst) hs.2 ht.2⟩ (hsub s hs)
   let r : supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {t : Finset κ | t.card = 1})
         (ordConnected_partsIn _ _ hQ hT₁) ⟶
       supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {{j}})
         (ordConnected_partsIn _ _ hQ Set.ordConnected_singleton) :=
-    suppMap (𝟙 A) _ _ fun s t hst hs ht => iff_of_true (hsub t ht)
+    suppHom A _ _ _ _ fun s t hst hs ht => iff_of_true (hsub t ht)
       ⟨hs.1, heq' (monotone_part _ hst) hs.2 ht.2⟩
   have hir : i ≫ r = 𝟙 _ := by
     ext s x
@@ -73,8 +139,8 @@ theorem isZero_homology_supp_singleton {ν κ : Type} [LinearOrder ν] [LinearOr
   rw [hz, Limits.zero_comp] at hc
   exact hc.symm
 
-open GlobalTheory.Cube in
 
+open GlobalTheory.Cube in
 theorem cechComplex_sliceFst_singleton_acyclic_of_trunc₂ : ∀ {ν κ : Type} [LinearOrder ν] [LinearOrder κ] [Finite ν] [Finite κ] {R : Type} [CommRing R]
     (A : GlobalTheory.Cube.{0} (ν ⊕ₗ κ) R)
     (hA : ∀ t : Finset κ, 2 ≤ t.card → (GlobalTheory.cechComplex (GlobalTheory.Cube.sliceFst A t)).Acyclic)
@@ -91,22 +157,54 @@ theorem cechComplex_sliceFst_singleton_acyclic_of_trunc₂ : ∀ {ν κ : Type} 
     have h2 := Finset.card_le_card hc.2
     simp only [Set.mem_setOf_eq] at ha hb ⊢
     omega
-  have hS := GlobalTheory.cubeFunctor_shortExact _ (suppSequence_shortExact A
-    (ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ hT₂)
-    (ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ ordConnected_nonempty)
-    (ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ hT₁)
-    (fun u => by
-      have hc : (part (inrEmb ν κ) u).Nonempty ↔
-          2 ≤ (part (inrEmb ν κ) u).card ∨ (part (inrEmb ν κ) u).card = 1 := by
-        rw [← Finset.card_pos]
-        omega
-      simp only [mem_partsIn, Set.mem_setOf_eq]
-      tauto)
-    (fun u hu hu' => by
-      have h1 : 2 ≤ (part (inrEmb ν κ) u).card := hu.2
-      have h2 : (part (inrEmb ν κ) u).card = 1 := hu'.2
-      omega)
-    (fun _ _ hst hs ht => ⟨ht.1, hU₂ (monotone_part _ hst) hs.2⟩))
+  let P₁ := partsIn (inlEmb ν κ) (inrEmb ν κ) {s : Finset ν | s.Nonempty} {t : Finset κ | 2 ≤ t.card}
+  let P := partsIn (inlEmb ν κ) (inrEmb ν κ) {s : Finset ν | s.Nonempty} {t : Finset κ | t.Nonempty}
+  let P₂ := partsIn (inlEmb ν κ) (inrEmb ν κ) {s : Finset ν | s.Nonempty} {t : Finset κ | t.card = 1}
+  let hp₁ := ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ hT₂
+  let hp := ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ ordConnected_nonempty
+  let hp₂ := ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ hT₁
+  have h : ∀ s, s ∈ P ↔ s ∈ P₁ ∨ s ∈ P₂ := by
+    intro u
+    have hc : (part (inrEmb ν κ) u).Nonempty ↔
+        2 ≤ (part (inrEmb ν κ) u).card ∨ (part (inrEmb ν κ) u).card = 1 := by
+      rw [← Finset.card_pos]
+      omega
+    simp only [P, P₁, P₂, mem_partsIn, Set.mem_setOf_eq]
+    tauto
+  have hd : ∀ s ∈ P₁, s ∉ P₂ := by
+    intro u hu hu'
+    have h1 : 2 ≤ (part (inrEmb ν κ) u).card := hu.2
+    have h2 : (part (inrEmb ν κ) u).card = 1 := hu'.2
+    omega
+  have hu : ∀ ⦃s t⦄, s ⊆ t → s ∈ P₁ → t ∈ P → t ∈ P₁ :=
+    fun _ _ hst hs ht => ⟨ht.1, hU₂ (monotone_part _ hst) hs.2⟩
+  let f := suppHom A P₁ P hp₁ hp fun s _ hst hs ht => iff_of_true (hu hst hs ht) ((h s).2 (Or.inl hs))
+  let g := suppHom A P P₂ hp hp₂ fun s t hst hs ht => iff_of_true ((h t).2 (Or.inr ht))
+    (((h s).1 hs).resolve_left fun hs₁ => hd t (hu hst hs₁ ((h t).2 (Or.inr ht))) ht)
+  have hfg : f ≫ g = 0 := by
+    ext s x
+    by_cases hs : s ∈ P₁
+    · exact (subsingleton_supp A hp₂ (hd s hs)).elim _ _
+    · rw [(subsingleton_supp A hp₁ hs).elim x 0]
+      simp only [map_zero]
+  let S := ShortComplex.mk f g hfg
+  have hS := GlobalTheory.cubeFunctor_shortExact S (fun s => by
+    have key : Function.Exact (suppMapApp (𝟙 A) hp₁ hp s) (suppMapApp (𝟙 A) hp hp₂ s) ∧
+        Function.Injective (suppMapApp (𝟙 A) hp₁ hp s) ∧
+        Function.Surjective (suppMapApp (𝟙 A) hp hp₂ s) := by
+      by_cases hs : s ∈ P₁
+      · have := subsingleton_supp A hp₂ (hd s hs)
+        have hb : Function.Bijective (suppMapApp (𝟙 A) hp₁ hp s) :=
+          suppMapApp_bijective _ (iff_of_true hs ((h s).2 (Or.inl hs))) fun _ => Function.bijective_id
+        exact ⟨fun y => iff_of_true (Subsingleton.elim _ _) (hb.2 y), hb.1, Function.surjective_to_subsingleton _⟩
+      · have := subsingleton_supp A hp₁ hs
+        have hb : Function.Bijective (suppMapApp (𝟙 A) hp hp₂ s) :=
+          suppMapApp_bijective _ (by change s ∈ P ↔ s ∈ P₂; rw [h s]; simp only [hs, false_or]) fun _ => Function.bijective_id
+        refine ⟨fun y => ?_, Function.injective_of_subsingleton _, hb.2⟩
+        rw [map_eq_zero_iff _ hb.1]
+        exact ⟨fun hy => ⟨0, by rw [map_zero, hy]⟩, by
+          rintro ⟨x, rfl⟩; rw [Subsingleton.elim x 0, map_zero]⟩
+    exact ModuleCat.shortComplex_shortExact _ key.1 key.2.1 key.2.2)
   have h₁ : (GlobalTheory.cubeComplex (supp A _ (ordConnected_partsIn (inlEmb ν κ) (inrEmb ν κ) hQ hT₂))).Acyclic := by
     rw [supp_partsIn_comm hQ hT₂ A]
     refine GlobalTheory.cubeComplex_supp_partsIn_acyclic hcompl.symm hT₂ hQ A fun t ht => ?_
@@ -119,11 +217,32 @@ theorem cechComplex_sliceFst_singleton_acyclic_of_trunc₂ : ∀ {ν κ : Type} 
     refine isZero_homology_supp_singleton A hQ hT₁ j (n + 2) ?_
     have := GlobalTheory.isIso_homologyMap_g_of_acyclic hS h₁ (n + 2)
     exact (hT n).of_iso (@asIso _ _ _ _ _ this).symm
+  let truncIso (B : Cube ν R) (n : ℕ) :
+      (GlobalTheory.cubeComplex (trunc₁ B)).homology (n + 1) ≅
+        (GlobalTheory.cechComplex B).homology n := by
+    classical
+    let incl : supp B {s | s.Nonempty} ordConnected_nonempty ⟶ B := Cube.homMk _ _
+      (fun s => if hs : s.Nonempty then (suppEquiv B ordConnected_nonempty hs).toLinearMap else 0) (by
+        intro s t hst x
+        by_cases hs : s.Nonempty
+        · have ht : t.Nonempty := isUpperSet_nonempty hst hs
+          simp only [dif_pos hs, dif_pos ht, LinearEquiv.coe_coe]
+          exact suppEquiv_res hst hs ht x
+        · have := subsingleton_supp B ordConnected_nonempty hs
+          rw [Subsingleton.elim x 0]
+          simp only [map_zero])
+    have hi : IsIso (GlobalTheory.cechComplexMap incl) :=
+      GlobalTheory.isIso_cechComplexMap _ fun s hs => by
+        change Function.Bijective ⇑(if h : s.Nonempty then (suppEquiv B ordConnected_nonempty h).toLinearMap else 0)
+        rw [dif_pos hs]
+        exact (suppEquiv B ordConnected_nonempty hs).bijective
+    exact GlobalTheory.cubeHomologySuccIsoCech _ (subsingleton_trunc₁_empty B) n ≪≫
+      HomologicalComplex.homologyMapIso (@asIso _ _ _ _ _ hi) n
   intro n
   rw [HomologicalComplex.exactAt_iff_isZero_homology]
   refine ((hzero n).of_iso
     (GlobalTheory.suppSingletonHomologyIso hcompl hQ j A (n + 1)).symm).of_iso
     (GlobalTheory.cechHomologyMapIso (eqToIso (sliceFst_eq_slice A {j})) n ≪≫
-      (GlobalTheory.truncHomologyIso _ n).symm)
+      (truncIso _ n).symm)
 
 end GlobalTheory.CompanionTheory.PointSurjectivity

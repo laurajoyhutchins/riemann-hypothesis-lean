@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+module
+
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsIsArchimedeanAdeleChartOfRealChart
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix GlobalTheory.WeilParts
 open scoped TensorProduct Topology
@@ -86,7 +130,7 @@ theorem tensor_decomp {F A E : Type} [Field F] [CommRing A] [Algebra F A] [CommR
   | add x y hx hy =>
     obtain ⟨a, b, rfl⟩ := hx
     obtain ⟨a', b', rfl⟩ := hy
-    exact ⟨a + a', b + b', by rw [map_add, map_add]; ring⟩
+    exact ⟨a + a', b + b', by rw [map_add (f := _), map_add (f := _)]; ring⟩
 
 theorem tensor_inj {F A E : Type} [Field F] [CommRing A] [Algebra F A] [Field E] [Algebra F E] :
     Function.Injective (algebraMap A (A ⊗[F] E)) :=
@@ -100,26 +144,7 @@ theorem tensor_sq {F A E : Type} [Field F] [CommRing A] [Algebra F A] [Field E] 
 
 theorem field_decomp (D : D7) (x : D.host.E) :
     ∃ u w : D.host.F, x = u • (1 : D.host.E) + w • D.host.sqrtMinusD := by
-  have hδ : D.host.sqrtMinusD ≠ 0 := by
-    intro h
-    have := D.host.sqrtMinusD_sq
-    rw [h] at this
-    apply d_ne_zero D
-    have h2 : (D.host.d : D.host.E) = 0 := by linear_combination this
-    exact_mod_cast h2
-  have h2 : star (2 : D.host.E) = 2 := star_ofNat 2
-  obtain ⟨u, hu⟩ := (D.sp.cm.fixed ((x + star x) / 2)).1 (by
-    change star _ = _
-    rw [star_div₀, star_add, star_star, h2, add_comm])
-  obtain ⟨w, hw⟩ := (D.sp.cm.fixed ((x - star x) / (2 * D.host.sqrtMinusD))).1 (by
-    change star _ = _
-    rw [star_div₀, star_sub, star_star, star_mul', h2, star_delta]
-    field_simp
-    ring)
-  refine ⟨u, w, ?_⟩
-  rw [Algebra.smul_def, Algebra.smul_def, hu, hw]
-  field_simp
-  ring
+  apply GlobalTheory.FockCompare.RealChart.host_span <;> assumption
 
 theorem exists_half_abstract {F T T' : Type} [Field F] [NumberField F] [CommRing T] [CommRing T']
     (j : AF F →+* T) (c : T →+* T) (p : T →+* T') (δ : T) (n : ℕ) (hn0 : n ≠ 0) (hinj : Function.Injective j)
@@ -187,7 +212,7 @@ theorem exists_half_abstract {F T T' : Type} [Field F] [NumberField F] [CommRing
   · rintro e ⟨he1, he2, v, η, ⟨α, rfl, hα1, hα0⟩, he3⟩
     obtain ⟨a, b, hab⟩ := hdec e
     have hce : c e = j a - j b * δ := by
-      rw [hab, map_add, map_mul, hcj, hcj, hcδ]; ring
+      rw [hab, map_add (f := _), map_mul, hcj, hcj, hcδ]; ring
     have he4 : c e * c e = c e := by rw [← map_mul, he1]
     obtain ⟨B, hB⟩ : ∃ B : AF F, B = 2 * n * b := ⟨_, rfl⟩
     have hjB : j B = -δ * (e - c e) := by
@@ -209,7 +234,7 @@ theorem exists_half_abstract {F T T' : Type} [Field F] [NumberField F] [CommRing
     have hNI : (e + c e) * I = e + c e := by
       rw [he3, ← hI, ← map_mul, pair_mul, place_ext _ hα0 (y := 1) (by rw [hι, map_one]), mul_one]
     have hcc : c (c ε) = ε := by
-      rw [hcε, hε, ← hHH, ← hI, ← hS, ← hd, map_mul, map_add, map_mul, map_mul, hcj, hcj, hcj, hcδ, map_natCast]; ring
+      rw [hcε, hε, ← hHH, ← hI, ← hS, ← hd, map_mul, map_add (f := _), map_mul, map_mul, hcj, hcj, hcj, hcδ, map_natCast]; ring
     rcases mul_self_eq_mul_self_iff.1 (hB3.trans hs.symm) with hp | hp
     · right
       have : j B = (e + c e) * S := by

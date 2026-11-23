@@ -1,8 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.LocalAtPlace
+module
+
+public import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
 import GroundTheory.GlobalFields.Adele.Approximation
-import GroundTheory.GlobalFields.IdeleGroups.InfiniteProjInfiniteEmbeddingOfNe
-import GroundTheory.GlobalFields.IdeleGroups.Restricted
+public import GroundTheory.GlobalFields.LocalAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter
 open scoped NumberField.AdeleRing RestrictedProduct
@@ -35,9 +77,6 @@ theorem t2Space_adeleRing : T2Space 𝔸[K] :=
 instance IdeleGroup.locallyCompactSpace : LocallyCompactSpace (IdeleGroup K) :=
   inferInstance
 
-theorem IdeleGroup.t2Space : T2Space (IdeleGroup K) :=
-  inferInstance
-
 instance locallyCompactSpace_units_finiteAdeleRing :
     LocallyCompactSpace (FiniteAdeleRing (𝓞 K) K)ˣ :=
   inferInstance
@@ -45,30 +84,5 @@ instance locallyCompactSpace_units_finiteAdeleRing :
 instance locallyCompactSpace_units_infiniteAdeleRing :
     LocallyCompactSpace (InfiniteAdeleRing K)ˣ :=
   inferInstance
-
-theorem isCompact_units_adicCompletionIntegers (v : HeightOneSpectrum (𝓞 K)) :
-    IsCompact ((Submonoid.ofClass (v.adicCompletionIntegers K)).units :
-      Set (v.adicCompletion K)ˣ) := by
-  have h : IsCompact ((v.adicCompletionIntegers K : Set (v.adicCompletion K)) ×ˢ
-      (MulOpposite.unop ⁻¹' (v.adicCompletionIntegers K : Set (v.adicCompletion K)))) :=
-    (isCompact_adicCompletionIntegers v).prod
-      (MulOpposite.opHomeomorph.symm.isCompact_preimage.2 (isCompact_adicCompletionIntegers v))
-  convert Units.isClosedEmbedding_embedProduct.isCompact_preimage h using 1
-  ext u
-  simp only [SetLike.mem_coe, Submonoid.mem_units_iff, Set.mem_preimage, Set.mem_prod,
-    Units.embedProduct_apply, MulOpposite.unop_op]
-  exact Iff.rfl
-
-instance locallyCompactSpace_restrictedProduct_units :
-    LocallyCompactSpace (Πʳ v : HeightOneSpectrum (𝓞 K),
-      [(v.adicCompletion K)ˣ, (Submonoid.ofClass (v.adicCompletionIntegers K)).units]) :=
-  haveI : Fact (∀ v : HeightOneSpectrum (𝓞 K),
-      IsOpen ((Submonoid.ofClass (v.adicCompletionIntegers K)).units :
-        Set (v.adicCompletion K)ˣ)) :=
-    ⟨fun v ↦ IdeleGroup.isOpen_units_adicCompletionIntegers K v⟩
-  RestrictedProduct.locallyCompactSpace_of_group
-    (R := fun v : HeightOneSpectrum (𝓞 K) ↦ (v.adicCompletion K)ˣ)
-    (B := fun v ↦ (Submonoid.ofClass (v.adicCompletionIntegers K)).units)
-    (.of_forall fun v ↦ isCompact_units_adicCompletionIntegers K v)
 
 end GroundTheory.Global

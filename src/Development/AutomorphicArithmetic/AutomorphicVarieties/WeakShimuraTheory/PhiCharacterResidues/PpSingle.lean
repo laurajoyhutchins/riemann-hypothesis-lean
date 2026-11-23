@@ -1,8 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.PhiCharacterResidues.ContinuousResLe
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.MapApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.FlagRel
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.UniversalOrdinaryDeterminantRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.FlagRel
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.MapApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.RestrictionMemInvariantH1
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.MapRepApply
+import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RedIdeal
+import Formalism.ConjugateSelfDual.Statement
+import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.ZsmulGeneratorEqZeroOfProjection
+import ReciprocityTheory.GaloisValuations.GlobalA
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC ReciprocityTheory.Gal IsLocalRing Polynomial UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws GlobalTheory.GalOfCusp
 
@@ -19,7 +70,7 @@ private theorem pp_chi {n : ℕ} {A B G H : Type} [CommRing A] [CommRing B] [Gro
     · simp
     · induction y using MonoidAlgebra.induction_linear with
       | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
       | single g r => simp
   rw [← h, ← (UpperTheory.V.AlgebraTools.Det.mapApi (D.comap π) f).1, hD, (UpperTheory.V.AlgebraTools.Det.repApi ρ).1]
 
@@ -47,7 +98,7 @@ private theorem pp_tr {n : ℕ} {A B G H : Type} [CommRing A] [CommRing B] [Grou
     rw [if_neg (by omega)]
   rw [(map_eq_zero_iff f hf).1 h0, mul_zero]
 
-set_option maxHeartbeats 200000 in
+
 theorem UpperTheory.V.Ws.phiPair :
     ∀ {l : ℕ} [Fact l.Prime] {F : W.GFrame l} {O : Type} [CommRing O] [IsLocalRing O] [Algebra ℤ_[l] O] {n : ℕ} (r : W.Resid F O n) {B A H : Type} [CommRing B] [Algebra O B] [IsCO O B] [CommRing A] [Algebra O A] [Algebra B A] [IsScalarTower O B A] [Group H], Function.Injective (algebraMap B A) → 0 < n → ∀ (π : H →* F.G₀), Function.Surjective π → ∀ (ρ : H →* Matrix (Fin n) (Fin n) A) (D : W.GDet n B F.G₀) (ψ : ∀ v, Fin n → F.Gv v →* Bˣ), (D.comap π).map (algebraMap B A) = W.GDet.ofRep ρ → D.IsCont (maximalIdeal B) → (∀ g, (D.chi (MonoidAlgebra.single (π g) 1)).map (res O B : B →+* ResidueField O) = ∏ i, (Polynomial.X - C (r.chib i (π g) : ResidueField O))) → (∀ v i, r.IsPsi v i (ψ v i)) → (∀ g, ∃ g', π g' = (F.conj (π g))⁻¹ ∧ (((F.eps O A (π g) ^ (1 - (n : ℤ)) : Aˣ) : A) • ρ g').charpoly = (ρ g).charpoly) → (∀ v, ∃ j : F.Gv v →* H, π.comp j = F.φ v ∧ W.HasFlag (ρ.toHomUnits.comp j) fun i => W.pushCh (algebraMap B A) (ψ v i)) → (∀ u, ∀ g ∈ r.Ip u, ∃ g', π g' = g ∧ ρ g' = 1) → ∃ p : W.Pair r B, p.D = D ∧ p.ψ = ψ := by
   intro l _ F O _ _ _ n r B A H _ _ _ _ _ _ _ _ hinj hn π hπ ρ D ψ hD hcont hred hpsi hstar hflag hI

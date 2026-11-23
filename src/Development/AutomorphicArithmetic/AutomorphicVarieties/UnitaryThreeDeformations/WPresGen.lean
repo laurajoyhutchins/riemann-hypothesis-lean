@@ -1,5 +1,66 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesEvalOfPowMem
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.MvPowerSeriesEvalOfPowMem
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUniqueFixedPointOfAdicContraction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+public import Mathlib.RingTheory.AdicCompletion.Noetherian
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PowerSeries.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.AdicCompletion.Functoriality
+public import Mathlib.RingTheory.Nakayama
+public import Mathlib.RingTheory.PowerSeries.Inverse
+
+@[expose] public section
 
 noncomputable section
 
@@ -192,7 +253,7 @@ theorem surjective_of_max_le [IsAdicComplete (maximalIdeal O) O] {σ : Type} [Fi
         simpa using Ideal.sub_mem _ h2 hm
       exact (maximalIdeal.isMaximal R).ne_top ((Ideal.eq_top_iff_one _).mpr h1)
     simpa [f] using hu.map (Ideal.Quotient.mk J)
-  haveI : IsHausdorff ((maximalIdeal O).map f) (R ⧸ J) := IsHausdorff.of_le_jacobson _ _ hjac
+  haveI : IsHausdorff ((maximalIdeal O).map f) (R ⧸ J) := IsHausdorff.of_le_jacobson _ _ (by simpa only [Ideal.jacobson_bot] using hjac)
   have hle : (J ⊔ (maximalIdeal O).map (algebraMap O R)).map (Ideal.Quotient.mk J) ≤
       (maximalIdeal O).map f := by
     rw [Ideal.map_sup, Ideal.map_quotient_self, bot_sup_eq, Ideal.map_map]
@@ -246,7 +307,7 @@ private theorem eq_zero_or_exists_eq_single_of_degree_lt_two {τ : Type} (d : τ
     omega
   obtain ⟨e, rfl⟩ := exists_add_of_le hle
   have he : Finsupp.degree e = 0 := by
-    rw [map_add, Finsupp.degree_single] at h
+    rw [map_add (f := _), Finsupp.degree_single] at h
     omega
   rw [Finsupp.degree_eq_zero_iff] at he
   exact ⟨j, by simp [he]⟩
@@ -281,7 +342,8 @@ theorem max_le_erase {σ : Type} [Fintype σ] (π : MvPowerSeries σ O →ₐ[O]
       ring
     conv_lhs => rw [hf]
     rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
-    simp only [map_add, map_sum, map_mul, hCa, hs]
+
+    simp only [map_add (f := _), map_sum, map_mul, hCa, hs]
     ring
   have hsI : s ∈ Ideal.span ((fun k => π (X k)) '' {k | k ≠ i}) := by
     refine Ideal.sum_mem _ (fun k hk => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨k, ?_, rfl⟩))
@@ -332,6 +394,7 @@ theorem aeval_weight {A : Type} [CommRing A] [Algebra O A] (z : σ → A) (t : A
     rw [Finset.sum_insert ha, Finset.prod_insert ha, zpow_add, ih]
   conv_lhs => rw [p.as_sum]
   conv_rhs => rw [p.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun d hd => ?_
   have hw : Finsupp.weight w d = j := by
@@ -395,6 +458,7 @@ theorem zpow_indep {A : Type} [CommRing A] (t : (PowerSeries A)ˣ) (ht : (t : Po
       simp
     rw [e, Polynomial.coeff_coe, Polynomial.coeff_X_add_one_pow]
   have h3 := congrArg (PowerSeries.coeff (j0 + N).toNat) h2
+
   rw [map_sum, map_zero] at h3
   rw [Finset.sum_eq_single j0] at h3
   · rw [PowerSeries.coeff_mul_C, hc, Nat.choose_self, Nat.cast_one, one_mul] at h3
@@ -472,8 +536,10 @@ theorem wcomp_eq_of_nilp {A : Type} [CommRing A] [Algebra O A] (J : Ideal A) {n 
     simp only [Pk]
     rw [MvPolynomial.coeff_weightedHomogeneousComponent, if_neg hd]
   have hψG : ψ G = ∑ k ∈ K, c k := by
+
     rw [hψe G, ← hP, ← hsum, map_sum]
   have hφG : φ G = ∑ k ∈ K, ((t ^ k : (PowerSeries A)ˣ) : PowerSeries A) * PowerSeries.C (c k) := by
+
     rw [hφe G, ← hP, ← hsum, map_sum]
     exact Finset.sum_congr rfl fun k _ => hφk k
   have hz : ∑ k ∈ K, ((t ^ k : (PowerSeries A)ˣ) : PowerSeries A) *
@@ -525,7 +591,7 @@ theorem exists_wpres_of_coord {O R : Type} [CommRing O] [IsLocalRing O] [IsAdicC
       have hr : Ideal.span (Set.range x) = ⨆ s, g (some s) := Submodule.span_range_eq_iSup
       rw [hr]
       exact sup_le (sup_le le_sup_right (le_sup_left.trans le_sup_left)) (le_sup_right.trans le_sup_left)
-    obtain ⟨s0, hs0⟩ := CompleteLattice.IsCompactElement.exists_finset_of_le_iSup _ hc g hle
+    obtain ⟨s0, hs0⟩ := hc.exists_finset_of_le_iSup g hle
     refine ⟨s0.eraseNone, hs0.trans (iSup₂_le fun o ho => ?_)⟩
     cases o with
     | none => exact sup_le (le_sup_right.trans le_sup_left) le_sup_right

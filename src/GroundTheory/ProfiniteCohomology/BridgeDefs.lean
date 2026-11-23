@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.DiscreteModules.IsDiscreteRepIffForallExistsOpenNormalSubgroup
+module
+
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Continuous.TopRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -13,32 +57,11 @@ variable {k G : Type u} [CommRing k] [TopologicalSpace k] [Group G]
 abbrev underlyingRep (X : TopRep.{u} k G) : Rep.{u} k G :=
   Rep.of X.ρ.toRepresentation
 
-@[simp]
-theorem underlyingRep_ρ_apply (X : TopRep.{u} k G) (g : G) (x : X) :
-    (underlyingRep X).ρ g x = X.ρ g x :=
-  rfl
-
 section Discrete
 
 variable [DiscreteTopology k]
 
-def discreteTopRep (A : Rep.{u} k G) : TopRep.{u} k G :=
-  letI : TopologicalSpace A := ⊥
-  haveI : DiscreteTopology A := ⟨rfl⟩
-  haveI : ContinuousSMul k A := ⟨continuous_of_discreteTopology⟩
-  haveI : IsTopologicalAddGroup A := ⟨⟩
-  TopRep.of (X := A) <| ContRepresentation.ofMonoidHom
-    { toFun g := { toLinearMap := A.ρ g, cont := continuous_of_discreteTopology }
-      map_one' := by ext; simp
-      map_mul' g h := by ext; simp }
-
-instance (A : Rep.{u} k G) : DiscreteTopology (discreteTopRep A) :=
-  ⟨rfl⟩
-
 variable [TopologicalSpace G]
-
-instance (A : Rep.{u} k G) [IsDiscreteRep A] : IsDiscreteRep (underlyingRep (discreteTopRep A)) :=
-  ‹IsDiscreteRep A›
 
 end Discrete
 

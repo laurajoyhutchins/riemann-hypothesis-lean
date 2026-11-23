@@ -1,5 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Group.Subgroup.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.PullbackBijectiveDegreesOneTwo
+
+@[expose] public section
+
 open CategoryTheory GlobalTheory.CxCoh
 
 namespace GlobalTheory.TowerLift
@@ -17,9 +62,9 @@ theorem closed_lift (W A B : ℕ → Type 1) [∀ n, AddCommGroup (W n)] [∀ n,
     obtain ⟨a', w, ha', hw⟩ := hcl n _ h0
     obtain ⟨w', rfl⟩ := hr n w
     refine ⟨⟨x' + a' + c (n + 1) w', ?_⟩, ?_⟩
-    · rw [map_add, map_add, hx', ha', hdc, add_zero, add_zero]
+    · rw [map_add (f := _), map_add (f := _), hx', ha', hdc, add_zero, add_zero]
     · show s n (x' + a' + c (n + 1) w') = x.1
-      rw [map_add, map_add, hsc, add_assoc, ← hw, add_sub_cancel]
+      rw [map_add (f := _), map_add (f := _), hsc, add_assoc, ← hw, add_sub_cancel]
   choose f hf using step
   obtain ⟨a₀, ha₀⟩ := hrg 0
   let g : ∀ n, {a : A n // d n a = b n} := fun n => Nat.rec ⟨a₀, ha₀⟩ (fun n x => f n x) n
@@ -36,7 +81,7 @@ theorem closed_extend (A B : ℕ → Type 1) [∀ n, AddCommGroup (A n)] [∀ n,
     obtain ⟨a'', rfl⟩ := hs n a
     refine ⟨⟨b' + d (n + 1) a'', (Z (n + 1)).add_mem hb' (hd _ _)⟩, ?_⟩
     show t n (b' + d (n + 1) a'') = x.1
-    rw [map_add, htd, ha]
+    rw [map_add (f := _), htd, ha]
   choose f hf using step
   let g : ∀ n, Z n := fun n => Nat.rec ⟨b₀, hb₀⟩ (fun n x => f n x) n
   exact ⟨fun n => (g n).1, rfl, fun n => (g n).2, fun n => hf n (g n)⟩

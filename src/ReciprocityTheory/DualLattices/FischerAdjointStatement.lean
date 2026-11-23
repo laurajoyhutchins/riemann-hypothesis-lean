@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Matrix.MvPolynomial
+public import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,36 +87,15 @@ def rowSubst (g : Matrix (Fin ν) (Fin ν) ℂ) :
     MvPolynomial (Fin ν × ι) ℂ →ₐ[ℂ] MvPolynomial (Fin ν × ι) ℂ :=
   aeval fun p => ∑ l, C (g l p.1) * X (l, p.2)
 
-open scoped Classical in
 
-def fischer (P Q : MvPolynomial (Fin ν × ι) ℂ) : ℂ :=
-  ∑ A ∈ P.support ∪ Q.support,
-    coeff A P * starRingEnd ℂ (coeff A Q) * ((A.prod fun _ e => e.factorial : ℕ) : ℂ)
+open scoped Classical in
+def fischer (P Q : MvPolynomial (Fin ν × ι) ℂ) : ℂ := by
+  classical
+  exact ∑ A ∈ P.support ∪ Q.support,
+    AddMonoidAlgebra.coeff P A * starRingEnd ℂ (AddMonoidAlgebra.coeff Q A) * ((A.prod fun _ e => e.factorial : ℕ) : ℂ)
 
 def IsUpperUnitri (g : Matrix (Fin ν) (Fin ν) ℂ) : Prop :=
   (∀ i, g i i = 1) ∧ ∀ i j, j < i → g i j = 0
-
-def IsGLStable (N : Submodule ℂ (MvPolynomial (Fin ν × ι) ℂ)) : Prop :=
-  ∀ g : GL (Fin ν) ℂ, ∀ P ∈ N, rowSubst (g : Matrix (Fin ν) (Fin ν) ℂ) P ∈ N
-
-def unipFixed (N : Submodule ℂ (MvPolynomial (Fin ν × ι) ℂ)) : Set (MvPolynomial (Fin ν × ι) ℂ) :=
-  {F | F ∈ N ∧ ∀ g, IsUpperUnitri g → rowSubst g F = F}
-
-def FischerAdjointStatement : Prop :=
-  ∀ (ν : ℕ) (ι : Type) (g : Matrix (Fin ν) (Fin ν) ℂ) (P Q : MvPolynomial (Fin ν × ι) ℂ),
-    fischer (rowSubst g P) Q = fischer P (rowSubst gᴴ Q)
-
-def HWFixedStatement : Prop :=
-  ∀ (ν : ℕ) (ι : Type) (N : Submodule ℂ (MvPolynomial (Fin ν × ι) ℂ)),
-    FiniteDimensional ℂ N → N ≠ ⊥ → IsGLStable N → ∃ F ∈ unipFixed N, F ≠ 0
-
-def HWSpanStatement : Prop :=
-  ∀ (ν : ℕ) (ι : Type) (M : Submodule ℂ (MvPolynomial (Fin ν × ι) ℂ)),
-    FiniteDimensional ℂ M → IsGLStable M →
-    (∃ v₀ : MvPolynomial (Fin ν × ι) ℂ, v₀ ≠ 0 ∧
-      unipFixed M = ((ℂ ∙ v₀ : Submodule ℂ (MvPolynomial (Fin ν × ι) ℂ)) : Set _)) →
-    ∀ v ∈ M, v ≠ 0 →
-      Submodule.span ℂ (Set.range fun g : GL (Fin ν) ℂ => rowSubst (g : Matrix _ _ ℂ) v) = M
 
 end HW
 

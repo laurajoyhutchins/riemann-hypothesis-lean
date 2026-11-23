@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsRestTail
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsMonomialNotMem
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsRestTail
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.ExistsMonomialNotMem
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -16,8 +66,8 @@ namespace ResidueMap
 
 variable {F : Type} [Field F] {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_sub {f g : MRingOver F ι} {a : K → ℕ} (hf : IsMultiHomog f a) (hg : IsMultiHomog g a) :
     IsMultiHomog (f - g) a := by
   classical
@@ -25,8 +75,8 @@ theorem isMultiHomog_sub {f g : MRingOver F ι} {a : K → ℕ} (hf : IsMultiHom
   rcases Finset.mem_union.mp (MvPolynomial.support_sub _ f g hm) with h | h
   exacts [hf m h k, hg m h k]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_C (r : F) : IsMultiHomog (C r : MRingOver F ι) 0 := by
   classical
   intro m hm k
@@ -34,8 +84,8 @@ theorem isMultiHomog_C (r : F) : IsMultiHomog (C r : MRingOver F ι) 0 := by
   subst hm0
   simp
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_rename [DecidableEq K] (k : K) {f : MvPolynomial (ι k) F} {m : ℕ} (hf : f.IsHomogeneous m) :
     IsMultiHomog (rename (fun i : ι k => (⟨k, i⟩ : Σ k, ι k)) f) (Pi.single k m) := by
   classical
@@ -49,14 +99,14 @@ theorem isMultiHomog_rename [DecidableEq K] (k : K) {f : MvPolynomial (ι k) F} 
   by_cases hk : k' = k
   · subst hk
     rw [Pi.single_eq_same, ← hdeg]
-    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply sigma_mk_injective d i
+    exact Finset.sum_congr rfl fun i _ => Finsupp.mapDomain_apply_of_injective sigma_mk_injective d i
   · rw [Pi.single_eq_of_ne hk]
     refine Finset.sum_eq_zero fun i _ => ?_
     exact Finsupp.mapDomain_of_notMem_range _ _
       (by rintro ⟨j, hj⟩; exact hk (congrArg Sigma.fst hj).symm)
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem aeval_rename_block {A : Type} [CommRing A] [Algebra F A] (z : (Σ k, ι k) → A) (k : K)
     (p : MvPolynomial (ι k) F) :
     aeval z (rename (fun i : ι k => (⟨k, i⟩ : Σ k, ι k)) p) = aeval (IndefiniteRowSideFullHecke.Kleiman2.blockVec z k) p := by
@@ -70,6 +120,7 @@ theorem mConeMapOver_of_isMultiHomog (y : (Σ k, ι k) → Ω) {g : MRingOver F 
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hX : ∏ p : (Σ k, ι k), (MvPolynomial.X p.1 : MvPolynomial K Ω) ^ m p = ∏ k, MvPolynomial.X k ^ d k := by
@@ -114,8 +165,8 @@ theorem wd {y : (Σ k, ι k) → Ω} {y' : (Σ k, ι k) → K'} (hle : mIdealOve
   rw [map_sub, map_mul, map_mul, sub_eq_zero] at h0
   exact h0
 
-variable (F) in
 
+variable (F) in
 def fracSet (y : (Σ k, ι k) → Ω) (y' : (Σ k, ι k) → K') : Set Ω :=
   {x | ∃ (f g : MRingOver F ι) (n : K → ℕ), IsMultiHomog f n ∧ IsMultiHomog g n ∧ aeval y' g ≠ 0 ∧
     x = aeval y f / aeval y g}
@@ -133,7 +184,7 @@ def locR {y : (Σ k, ι k) → Ω} {y' : (Σ k, ι k) → K'} (hle : mIdealOver 
       rw [add_comm]; exact isMultiHomog_mul hf₂ hg
     refine ⟨f * g₂ + f₂ * g, g * g₂, n + n₂, isMultiHomog_add (isMultiHomog_mul hf hg₂) h2,
       isMultiHomog_mul hg hg₂, by rw [map_mul]; exact mul_ne_zero hg' hg₂', ?_⟩
-    rw [div_add_div _ _ (ne_zero_of hle hg hg') (ne_zero_of hle hg₂ hg₂'), map_add, map_mul, map_mul, map_mul]
+    rw [div_add_div _ _ (ne_zero_of hle hg hg') (ne_zero_of hle hg₂ hg₂'), map_add (f := _), map_mul, map_mul, map_mul]
     ring
   algebraMap_mem' r := ⟨C r, 1, 0, isMultiHomog_C r, isMultiHomog_one, by simp, by simp⟩
 
@@ -195,8 +246,8 @@ theorem frac_spec {y : (Σ k, ι k) → Ω} {y' : (Σ k, ι k) → K'} (hle : mI
 
 end ResidueMap
 
-open ResidueMap in
 
+open ResidueMap in
 theorem ResidueMap.proof : ResidueMap.Statement := by
   intro F _ K _ ι _ Ω _ _ y K' _ _ y' hle
   classical
@@ -229,7 +280,7 @@ theorem ResidueMap.proof : ResidueMap.Statement := by
       obtain ⟨h, hσ⟩ := ih
       obtain ⟨h', hσ'⟩ := ih'
       refine ⟨add_mem h h', ?_⟩
-      rw [show (⟨x + x', add_mem h h'⟩ : locR hle) = ⟨x, h⟩ + ⟨x', h'⟩ from rfl, map_add]
+      rw [show (⟨x + x', add_mem h h'⟩ : locR hle) = ⟨x, h⟩ + ⟨x', h'⟩ from rfl, map_add (f := _)]
       exact add_mem hσ hσ'
     | mul x x' _ _ ih ih' =>
       obtain ⟨h, hσ⟩ := ih

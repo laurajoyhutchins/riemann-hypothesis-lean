@@ -1,4 +1,52 @@
-import Formalism.PeriodIntegrals.TwChrOne
+module
+
+public import Formalism.PeriodIntegrals.TwChrOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -27,7 +75,7 @@ lemma reduction_spec {a : E} {r s : 𝓞 E} (hs : s ∉ P.asIdeal)
     ⟨Ideal.Quotient.mk P.asIdeal r * (Ideal.Quotient.mk P.asIdeal s)⁻¹, r, s, hs, h, by
       rw [mul_comm, mul_assoc, inv_mul_cancel₀ (mk_ne P hs), mul_one]⟩
   unfold redP
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   obtain ⟨r', s', hs', h', hc⟩ := hex.choose_spec
   have hx : s * r' = s' * r := by
     apply IsFractionRing.injective (𝓞 E) E
@@ -65,7 +113,7 @@ def intS : Subring E where
     obtain ⟨r, s, hs, h⟩ := ha
     obtain ⟨r', s', hs', h'⟩ := hb
     refine ⟨s' * r + s * r', s * s', nm_mul P hs hs', ?_⟩
-    rw [map_add, map_mul, map_mul, map_mul, ← h, ← h']
+    rw [map_add (f := _), map_mul, map_mul, map_mul, ← h, ← h']
     ring
   zero_mem' := ⟨0, 1, one_nm P, by simp⟩
   neg_mem' := by
@@ -93,9 +141,9 @@ def redH : intS P →+* 𝓞 E ⧸ P.asIdeal where
     obtain ⟨r', s', hs', h'⟩ := b.2
     show redP P (a.1 + b.1) = redP P a.1 + redP P b.1
     refine redP_eq P (r := s' * r + s * r') (s := s * s') (nm_mul P hs hs') ?_ ?_
-    · rw [map_add, map_mul, map_mul, map_mul, ← h, ← h']
+    · rw [map_add (f := _), map_mul, map_mul, map_mul, ← h, ← h']
       ring
-    · rw [map_add, map_mul, map_mul, map_mul, ← reduction_spec P hs h, ← reduction_spec P hs' h']
+    · rw [map_add (f := _), map_mul, map_mul, map_mul, ← reduction_spec P hs h, ← reduction_spec P hs' h']
       ring
 
 lemma reduction_one₂ : redP P (1 : E) = 1 := (redH P).map_one
@@ -149,6 +197,7 @@ lemma apply_eq_sum (f : Sp E n ≃ₗ[E] Sp E n) (v : Sp E n) (i : Fin n) :
     funext j
     simp [Loc.eN, Finset.sum_apply, Fin.val_inj]
   conv_lhs => rw [hv]
+
   simp [map_sum, Finset.sum_apply]
 
 variable {kj N c : ℕ}
@@ -205,7 +254,7 @@ lemma dI_inj : Function.Injective (dI kj N c) := by
 
 lemma atN_dI (v : Sp E (N + c)) (s : Fin (N - kj)) : Loc.atN v (kj + s.1) = v (dI kj N c s) := by
   unfold Loc.atN
-  rw [dif_pos (by have := s.2; omega)]
+  rw [dite_eq_left (by have := s.2; omega)]
   rfl
 
 lemma Mb_mul_of {r g h : Sp E (N + c) ≃ₗ[E] Sp E (N + c)}
@@ -282,9 +331,9 @@ lemma inX_eN {j : ℕ} (hj : j < N) : Loc.inX E N c (Loc.eN E N j) = Loc.eN E (N
   funext l
   simp only [Loc.inX, LinearMap.pi_apply]
   by_cases hl : l.1 < N
-  · rw [dif_pos hl]
+  · rw [dite_eq_left hl]
     rfl
-  · rw [dif_neg hl, LinearMap.zero_apply]
+  · rw [dite_eq_right hl, LinearMap.zero_apply]
     unfold Loc.eN
     rw [if_neg (by omega)]
 
@@ -292,10 +341,10 @@ variable {K : Type} [Field K]
 
 lemma unitV_mul (ξ : (𝓞 E ⧸ P.asIdeal)ˣ →* Kˣ) {a b d : E} (ha : IsUnit (redP P a)) (hb : IsUnit (redP P b))
     (hd : redP P d = redP P a * redP P b) :
-    LocE.unitV ξ d = LocE.unitV ξ a * LocE.unitV ξ b := by
+    LocE.unitV (P := P) ξ d = LocE.unitV (P := P) ξ a * LocE.unitV (P := P) ξ b := by
   have hd' : IsUnit (redP P d) := hd ▸ ha.mul hb
   unfold LocE.unitV
-  rw [dif_pos hd', dif_pos ha, dif_pos hb]
+  rw [dite_eq_left hd', dite_eq_left ha, dite_eq_left hb]
   have hu : hd'.unit = ha.unit * hb.unit := Units.ext (by simp [hd])
   rw [hu, map_mul, Units.val_mul]
 

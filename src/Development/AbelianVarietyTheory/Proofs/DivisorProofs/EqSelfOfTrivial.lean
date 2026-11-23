@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsHeisTrivial
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumOpTransversal
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsHeisTrivial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,27 +84,6 @@ theorem _root_.GlobalTheory.LatticeRep.transl_induction (hs : Submodule.span ℂ
   | add a b _ _ ha hb => exact add a b ha hb
   | smul c a _ ha => exact smul c a ha
 
-theorem mem_map_iff (ρ : Γ →* Module.End R X) (g : Γ) (A : Submodule R X) (x : X) :
-    x ∈ A.map (ρ g) ↔ ρ g⁻¹ x ∈ A := by
-  constructor
-  · rintro ⟨a, ha, rfl⟩
-    rw [← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one, Module.End.one_apply]; exact ha
-  · intro hx
-    exact ⟨_, hx, by rw [← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]⟩
-
-theorem IsLatSystem.selfDual_map (h : IsLatSystem σ w γ W lam A ρ) (g : Γ) : SelfDual γ (A.map (ρ g)) := by
-  obtain ⟨-, -, hA, -, hρ, -⟩ := h
-  have e : ∀ x, ρ g (ρ g⁻¹ x) = x := fun x => by
-    rw [← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one, Module.End.one_apply]
-  intro x
-  rw [mem_map_iff, hA]
-  constructor
-  · rintro hx _ ⟨a, ha, rfl⟩
-    rw [← hx a ha, ← hρ g (ρ g⁻¹ x), e]
-  · intro hx a ha
-    rw [← hρ g, e]
-    exact hx _ ⟨a, ha, rfl⟩
-
 open Classical in
 open scoped BigOperators in
 variable {R X M Γ : Type} [CommRing R] [AddCommGroup X] [Module R X] [AddCommGroup M] [Module ℂ M] [Group Γ] in
@@ -79,12 +99,12 @@ private theorem sumOp_eq_self_of_le {B : Submodule R X} (hBA : B ≤ A) {v : M}
   rw [finsum_eq_single _ 0 (fun q hq => absurd (hz q) hq)]
   exact hv _ (hBA (Quotient.out (0 : B.toAddSubgroup ⧸ A.toAddSubgroup.addSubgroupOf B.toAddSubgroup)).2)
 
+
 open Classical in
 open scoped BigOperators in
 variable {R X M Γ : Type} [CommRing R] [AddCommGroup X] [Module R X] [AddCommGroup M] [Module ℂ M] [Group Γ] in
 variable {σ : R →+* R} {w : R} {γ : X → X → ℂ} {W : X → M →ₗ[ℂ] M} {lam : ℕ →* ℂ} {A : Submodule R X}
   {ρ : Γ →* Module.End R X} {Om : Γ →* Module.End ℂ M} in
-
 theorem _root_.GlobalTheory.LatticeRep.IsLatRep.fix_of_map_le (h : _root_.GlobalTheory.LatticeRep.IsLatSystem σ w γ W lam A ρ) (hO : _root_.GlobalTheory.LatticeRep.IsLatRep W lam A ρ Om) {g : Γ}
     (hg : A.map (ρ g) ≤ A) {v : M} (hv : _root_.GlobalTheory.FinWeil.Fixes W A v) : Om g v = v := by
   rw [hO.2 g v hv]
@@ -93,14 +113,6 @@ theorem _root_.GlobalTheory.LatticeRep.IsLatRep.fix_of_map_le (h : _root_.Global
     AddSubgroup.relIndex_eq_one.mpr hg
   rw [hidx, map_one, inv_one, one_smul]
   exact sumOp_eq_self_of_le hg hv
-
-theorem IsLatRep.eq_self_of_trivial (h : IsLatSystem σ w γ W lam A ρ) (hO : IsLatRep W lam A ρ Om) {g : Γ}
-    (hg : ∀ x, ρ g x = x) (m : M) : Om g m = m := by
-  refine transl_induction h.2.2.2.1 (p := fun m => Om g m = m) (fun x v hv => ?_) (map_zero _)
-    (fun a b ha hb => by rw [map_add, ha, hb]) (fun c a ha => by rw [map_smul, ha]) m
-  rw [hO.1, hg, hO.fix_of_map_le h _ hv]
-  rintro _ ⟨a, ha, rfl⟩
-  rw [hg]; exact ha
 
 open Classical in
 open scoped BigOperators in
@@ -117,12 +129,12 @@ private theorem map_sumOp_of_commute {B : Submodule R X} (φ : M →ₗ[ℂ] M)
   rw [map_finsum φ (Set.toFinite _)]
   simp only [hφ]
 
+
 open Classical in
 open scoped BigOperators in
 variable {R X M Γ : Type} [CommRing R] [AddCommGroup X] [Module R X] [AddCommGroup M] [Module ℂ M] [Group Γ] in
 variable {σ : R →+* R} {w : R} {γ : X → X → ℂ} {W : X → M →ₗ[ℂ] M} {lam : ℕ →* ℂ} {A : Submodule R X}
   {ρ : Γ →* Module.End R X} {Om : Γ →* Module.End ℂ M} in
-
 theorem _root_.GlobalTheory.LatticeRep.IsLatRep.comm (h : _root_.GlobalTheory.LatticeRep.IsLatSystem σ w γ W lam A ρ) (hO : _root_.GlobalTheory.LatticeRep.IsLatRep W lam A ρ Om) (φ : M →ₗ[ℂ] M)
     (hφ : ∀ x m, φ (W x m) = W x (φ m)) (g : Γ) (m : M) : Om g (φ m) = φ (Om g m) := by
   refine _root_.GlobalTheory.LatticeRep.transl_induction (p := fun m => Om g (φ m) = φ (Om g m))
@@ -134,38 +146,8 @@ theorem _root_.GlobalTheory.LatticeRep.IsLatRep.comm (h : _root_.GlobalTheory.La
     unfold _root_.GlobalTheory.FinWeil.normOp
     rw [map_smul, map_sumOp_of_commute φ (h.2.2.2.2.2 g) hφ]
   · simp
-  · simp only [map_add, ha, hb]
+  · simp only [map_add (f := _), ha, hb]
   · simp only [map_smul, ha]
-
-theorem IsLatRep.exists_stab (h : IsLatSystem σ w γ W lam A ρ) (hO : IsLatRep W lam A ρ Om) (m : M) :
-    ∃ s : Set X, s.Finite ∧ ∀ g, A.map (ρ g) ≤ A → (∀ x ∈ s, ρ g x - x ∈ A ∧ γ (w • x) (ρ g x - x) = 1) → Om g m = m := by
-  refine transl_induction h.2.2.2.1 (p := fun m => ∃ s : Set X, s.Finite ∧ ∀ g, A.map (ρ g) ≤ A →
-    (∀ x ∈ s, ρ g x - x ∈ A ∧ γ (w • x) (ρ g x - x) = 1) → Om g m = m) (fun x v hv => ?_)
-    ⟨∅, Set.finite_empty, fun g _ _ => map_zero _⟩ (fun a b ha hb => ?_) (fun c a ha => ?_) m
-  · refine ⟨{x}, Set.finite_singleton x, fun g hg hx => ?_⟩
-    obtain ⟨h1, h2⟩ := hx x rfl
-    have h3 := h.1.comp x (ρ g x - x) v
-    rw [hv _ h1, h2, one_smul, add_sub_cancel] at h3
-    rw [hO.1, hO.fix_of_map_le h hg hv, h3]
-  · obtain ⟨s, hs, h1⟩ := ha
-    obtain ⟨t, ht, h2⟩ := hb
-    exact ⟨s ∪ t, hs.union ht, fun g hg hx => by
-      rw [map_add, h1 g hg fun x hx' => hx x (Or.inl hx'), h2 g hg fun x hx' => hx x (Or.inr hx')]⟩
-  · obtain ⟨s, hs, h1⟩ := ha
-    exact ⟨s, hs, fun g hg hx => by rw [map_smul, h1 g hg hx]⟩
-
-theorem exists_extend {V : Type} [AddCommGroup V] [Module ℂ V] (N : Submodule ℂ V) (O : Γ →* Module.End ℂ N) :
-    ∃ om : Γ →* Module.End ℂ V, ∀ g (m : N), om g m = O g m := by
-  obtain ⟨C, hC⟩ := N.exists_isCompl
-  let e := Submodule.prodEquivOfIsCompl N C hC
-  let P : Γ →* Module.End ℂ (N × C) :=
-    { toFun := fun g => (O g).prodMap LinearMap.id
-      map_one' := by rw [map_one]; exact LinearMap.prodMap_one
-      map_mul' := fun g k => by rw [map_mul, LinearMap.prodMap_mul]; rfl }
-  refine ⟨(e.conjRingEquiv.toMonoidHom).comp P, fun g m => ?_⟩
-  show e (P g (e.symm m)) = _
-  rw [Submodule.prodEquivOfIsCompl_symm_apply_left]
-  simp [P, e]
 
 end GlobalTheory.LatticeRep
 

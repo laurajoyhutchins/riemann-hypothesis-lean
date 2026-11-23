@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCenterMemIff
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightOrbitCenterMemIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Sub.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -10,8 +53,8 @@ namespace OrbitCenterMemIff
 
 variable {ι : Type} [DecidableEq ι] {n : ι → ℕ}
 
-open Classical in
 
+open Classical in
 theorem weightedHomogeneousComponent_X_mul (j : Coord n) (G : MvPolynomial (Coord n) ℤ)
     (e : ι → ℕ) :
     weightedHomogeneousComponent (coordDeg n) e (X j * G) =
@@ -24,29 +67,29 @@ theorem weightedHomogeneousComponent_X_mul (j : Coord n) (G : MvPolynomial (Coor
         Finsupp.weight (coordDeg n) (m - Finsupp.single j 1) + coordDeg n j := by
       conv_lhs => rw [← tsub_add_cancel_of_le (Finsupp.single_le_iff.mpr
         (Nat.one_le_iff_ne_zero.mpr (Finsupp.mem_support_iff.mp hj)))]
-      rw [map_add, Finsupp.weight_single, one_smul]
-    rw [coeff_weightedHomogeneousComponent, coeff_X_mul', if_pos hj]
+      rw [map_add (f := _), Finsupp.weight_single, one_smul]
+    rw [coeff_weightedHomogeneousComponent, coeff_X_mul', ite_eq_left hj]
     by_cases h2 : coordDeg n j ≤ e
-    · rw [if_pos h2, coeff_X_mul', if_pos hj, coeff_weightedHomogeneousComponent]
+    · rw [ite_eq_left h2, coeff_X_mul', ite_eq_left hj, coeff_weightedHomogeneousComponent]
       by_cases h1 : Finsupp.weight (coordDeg n) m = e
-      · rw [if_pos h1, if_pos (by rw [← h1, hw, add_tsub_cancel_right])]
-      · rw [if_neg h1, if_neg]
+      · rw [ite_eq_left h1, ite_eq_left (by rw [← h1, hw, add_tsub_cancel_right])]
+      · rw [ite_eq_right h1, ite_eq_right]
         intro h3
         exact h1 (by rw [hw, h3, tsub_add_cancel_of_le h2])
-    · rw [if_neg h2, coeff_zero, if_neg]
+    · rw [ite_eq_right h2, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply, ite_eq_right]
       intro h1
       apply h2
       rw [← h1, hw]
       exact le_add_self
-  · rw [coeff_weightedHomogeneousComponent, coeff_X_mul', if_neg hj, ite_self]
+  · rw [coeff_weightedHomogeneousComponent, coeff_X_mul', ite_eq_right hj, ite_self]
     by_cases h2 : coordDeg n j ≤ e
-    · rw [if_pos h2, coeff_X_mul', if_neg hj]
-    · rw [if_neg h2, coeff_zero]
+    · rw [ite_eq_left h2, coeff_X_mul', ite_eq_right hj]
+    · rw [ite_eq_right h2, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply]
 
 end OrbitCenterMemIff
 
-open OrbitCenterMemIff in
 
+open OrbitCenterMemIff in
 theorem OrbitCenterMemIff.proof : OrbitCenterMemIff.Statement := by
   classical
   intro ι _ _ n x hx v F d hF
@@ -62,12 +105,13 @@ theorem OrbitCenterMemIff.proof : OrbitCenterMemIff.Statement := by
   let P : MvPolynomial (Coord n) ℤ → Prop := fun G ↦ ∀ e : ι → ℕ,
     v (evalCone (coordVec x) (weightedHomogeneousComponent (coordDeg n) e G)) < ∏ k, M k ^ e k
   have hadd : ∀ G H, P G → P H → P (G + H) := fun G H hG hH e ↦ by
-    rw [map_add, evalCone, eval₂_add]
+    rw [map_add (f := _), evalCone, eval₂_add]
     exact (FinitePlace.add_le v _ _).trans_lt (max_lt (hG e) (hH e))
   have hC : ∀ (m : ℤ) G, P G → P (C m * G) := fun m G hG e ↦ by
     rw [weightedHomogeneousComponent_C_mul, evalCone, eval₂_mul, eval₂_C, map_mul]
     have hm : v (Int.castRingHom (coordField x) m) ≤ 1 :=
-      IsNonarchimedean.apply_intCast_le_one (FinitePlace.add_le v)
+      IsNonarchimedean.apply_intCast_le_one (map_zero_le v 1) (map_one v)
+        (map_neg_eq_map v) (FinitePlace.add_le v)
     exact (mul_le_of_le_one_left (by positivity) hm).trans_lt (hG e)
   have hX : ∀ j G, P G → P (X j * G) := fun j G hG e ↦ by
     rw [weightedHomogeneousComponent_X_mul]

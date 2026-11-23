@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.InnerProductSpace.Continuous
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,9 +88,9 @@ theorem continuous_tens [∀ v, FiniteDimensional ℂ (V v)] (hi : ∀ x y, ⟪t
       (∏ v, ⟪x v, y v⟫_ℂ) + (∏ v, ⟪x v, x v⟫_ℂ)) := by
     refine RCLike.continuous_re.comp
       (Continuous.add (Continuous.sub (Continuous.sub ?_ ?_) ?_) continuous_const)
-    · exact continuous_finset_prod _ fun v _ => (p v).inner (p v)
-    · exact continuous_finset_prod _ fun v _ => (p v).inner continuous_const
-    · exact continuous_finset_prod _ fun v _ => continuous_const.inner (p v)
+    · exact continuous_finsetProd _ fun v _ => (p v).inner (p v)
+    · exact continuous_finsetProd _ fun v _ => (p v).inner continuous_const
+    · exact continuous_finsetProd _ fun v _ => continuous_const.inner (p v)
   have h2 : Filter.Tendsto (fun y => ‖tens y - tens x‖ ^ 2) (nhds x) (nhds 0) := by
     have e : (fun y => ‖tens y - tens x‖ ^ 2) = fun y : (∀ v, V v) =>
         RCLike.re ((∏ v, ⟪y v, y v⟫_ℂ) - (∏ v, ⟪y v, x v⟫_ℂ) - (∏ v, ⟪x v, y v⟫_ℂ) +
@@ -128,7 +176,7 @@ theorem integrable_and_integral_pi_apply :
         ∑ i, ⟪stdOrthonormalBasis ℂ Vπ i, tens fun v => G v (y v)⟫_ℂ • stdOrthonormalBasis ℂ Vπ i :=
       funext fun y => ((stdOrthonormalBasis ℂ Vπ).sum_repr' _).symm
     rw [e]
-    exact integrable_finset_sum _ fun i _ => (hcoord _).smul_const _
+    exact MeasureTheory.integrable_finsetSum _ fun i _ => (hcoord _).smul_const _
   refine ⟨hFint, ?_⟩
   refine ext_inner_left ℂ fun w => ?_
   have hw : w ∈ Submodule.span ℂ (Set.range tens) := by rw [hspan]; exact Submodule.mem_top

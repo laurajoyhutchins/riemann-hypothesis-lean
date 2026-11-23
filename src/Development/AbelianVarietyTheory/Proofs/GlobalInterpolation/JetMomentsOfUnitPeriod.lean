@@ -1,10 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.LatIntZero
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormEqOfSplit
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NotDvdDifferent
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormEqOfSplit
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormSpanInvol
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AbsNormSplitPlace
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AlgebraicNumbersPadicPlacesFacts
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ContinuousToZModComp
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsPrimeUnder
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LocPAAAndPrimesNe
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemSuppBarOfNe
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MomentCompanion
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NegOneZpowRound
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NotDvdDifferent
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RatIntOfIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RelDetCompanion
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.NormPadicEmbeddingLeOneOfMemInverseHalfDifferent
 import Development.AutomorphicArithmetic.CyclotomicBounds.SmallFacts
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MemSuppBarOfNe
+import Formalism.LocalToGlobal.Columns.BaseLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -14,8 +67,8 @@ namespace GlobalTheory.MomT
 
 open Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.L2.Th1.H GlobalTheory.IndefiniteRowSideFullHecke.JetSumTable
 
-open Formalism.MainNotions.TaylorLogMetric in
 
+open Formalism.MainNotions.TaylorLogMetric in
 theorem jetMoments_of_unitPeriod
     (hM : ∀ (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) (B : Base D cc δ) (χ : IdE D → ℂ), IsCurveIdeal D cc →
       IsDiscriminantTwelfthRootOfIdealLattice D cc δ → IsChi D χ → ∀ (p : ℕ) [Fact p.Prime] (lam : TaylorLogMetric.Qbar →+* ℂ_[p]), p ≠ 2 →
@@ -117,7 +170,7 @@ theorem jetMoments_of_unitPeriod
       exact Finset.prod_ne_zero_iff.2 fun τ _ => inv_ne_zero ((map_ne_zero _).2 (div_ne_zero h0 (star_ne_zero.2 h0)))
     have hkn : ‖ι k‖ ≤ (D.Pr.T u : ℝ) ^ D.X.f := by
       rw [hk, map_prod, norm_prod]
-      refine (Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun τ _ => ?_).trans_eq
+      refine (Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun τ _ => ?_).trans_eq
         (Finset.prod_const (D.Pr.T u : ℝ))
       rw [map_inv₀]
       exact norm_ratio_le (ι.comp (D.X.emb τ)) hn

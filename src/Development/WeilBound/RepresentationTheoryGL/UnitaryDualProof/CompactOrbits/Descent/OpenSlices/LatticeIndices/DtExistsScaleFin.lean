@@ -1,5 +1,62 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.OpenSlices.LatticeIndices.ValuationPiNeZero
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DualCountBound.MatIdxB
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.OpenSlices.LatticeIndices.ValuationPiNeZero
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.CommutingInverses.InvCommOfComm
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.Descent.SliceVanishing.IsClosedGzS
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DualCountBound.MatIdxB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Valuation.Extension
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,8 +108,6 @@ instance (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) : Module.IsTorsionFree �
     · exact Or.inl (Subtype.ext h1)
     · exact Or.inr (Subtype.ext h1)
 
-example (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) : Module.Free 𝒪[k] (LatO Z) := inferInstance
-
 theorem LatO_le (Z : Subalgebra k (Matrix (Fin n) (Fin n) k)) {x : Matrix (Fin n) (Fin n) k} (hx : x ∈ LatO Z) :
     x ∈ Subalgebra.centralizer k (Z : Set (Matrix (Fin n) (Fin n) k)) :=
   (Subalgebra.mem_centralizer_iff k).2 fun a ha => hx.1 a ha
@@ -92,7 +147,7 @@ theorem det_transfer (Z : Subalgebra k (Matrix (Fin n) (Fin n) k))
       simp_rw [mul_smul]
       rw [← Finset.smul_sum]
       have : ∑ x, c x • (b x : Matrix (Fin n) (Fin n) k) = 0 := by
-        simpa [AddSubmonoidClass.coe_finset_sum, SetLike.val_smul, v] using hc'
+        simpa [AddSubmonoidClass.coe_finsetSum, SetLike.val_smul, v] using hc'
       rw [this, smul_zero]
     have := (Fintype.linearIndependent_iff.mp b.linearIndependent) d hd i
     have h2 : pi k ^ N * c i = 0 := congrArg Subtype.val this
@@ -130,7 +185,7 @@ theorem det_transfer (Z : Subalgebra k (Matrix (Fin n) (Fin n) k))
     have h2 := congrArg Subtype.val (b.sum_repr (f (b j)))
     simp only [Submodule.coe_sum, Submodule.coe_smul, dt_smul_coe_O] at h2
     rw [h1, ← h2]
-    simp only [v, LinearMap.toMatrix_apply, AddSubmonoidClass.coe_finset_sum, SetLike.val_smul]
+    simp only [v, LinearMap.toMatrix_apply, AddSubmonoidClass.coe_finsetSum, SetLike.val_smul]
     rfl
   have hM : LinearMap.toMatrix bB bB F = (LinearMap.toMatrix b b f).map (algebraMap 𝒪[k] k) := by
     ext i j

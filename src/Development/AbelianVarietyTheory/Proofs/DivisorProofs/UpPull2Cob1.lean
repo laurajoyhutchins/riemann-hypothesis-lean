@@ -1,6 +1,47 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupLawCoboundaryTwoCoboundaryOne
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -34,35 +75,11 @@ theorem map_inR (h : O →+* E) (f : MvPowerSeries (Fin d) O) : map h (inR f) = 
   funext i
   exact map_X h _
 
-theorem inL_const {f : MvPowerSeries (Fin d) O} (hf : constantCoeff f = 0) :
-    constantCoeff (inL f) = 0 :=
-  constantCoeff_subst_eq_zero hasSubst_XL (fun _ => constantCoeff_X _) hf
-
-theorem inR_const {f : MvPowerSeries (Fin d) O} (hf : constantCoeff f = 0) :
-    constantCoeff (inR f) = 0 :=
-  constantCoeff_subst_eq_zero hasSubst_XR (fun _ => constantCoeff_X _) hf
-
-theorem map_pull2 (h : O →+* E) (φ : Fin d → MvPowerSeries (Fin d) O)
-    (t : MvPowerSeries (Fin d ⊕ Fin d) O) (hφ : ∀ i, constantCoeff (φ i) = 0) :
-    pull2 (fun i => map h (φ i)) (map h t) = map h (pull2 φ t) := by
-  unfold pull2 at2
-  rw [map_subst (CobCob.elim_has (fun i => inL_const (hφ i)) (fun i => inR_const (hφ i)))]
-  congr 1
-  funext j
-  cases j with
-  | inl i => exact (map_inL h (φ i)).symm
-  | inr i => exact (map_inR h (φ i)).symm
-
 theorem map_formalGroupLawCoboundaryOne_eq (h : O →+* E) (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) O)
     (s : MvPowerSeries (Fin d) O) (hμ : ∀ i, constantCoeff (μ i) = 0) :
     cob1 (fun i => map h (μ i)) (map h s) = map h (cob1 μ s) := by
   unfold cob1
   rw [map_sub, map_sub, map_subst (hasSubst_of_constantCoeff_zero hμ), map_inL, map_inR]
-
-theorem up_pull2_cob1 : ∀ (O E : Type) [CommRing O] [CommRing E] [Algebra O E] (d : ℕ), (∀ (φ : Fin d → MvPowerSeries (Fin d) O) (t : MvPowerSeries (Fin d ⊕ Fin d) O), (∀ i, constantCoeff (φ i) = 0) → pull2 (up E φ) (map (algebraMap O E) t) = map (algebraMap O E) (pull2 φ t)) ∧ ∀ (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) O) (s : MvPowerSeries (Fin d) O), (∀ i, constantCoeff (μ i) = 0) → cob1 (up E μ) (map (algebraMap O E) s) = map (algebraMap O E) (cob1 μ s) := by
-  intro O E _ _ _ d
-  exact ⟨fun φ t hφ => map_pull2 (algebraMap O E) φ t hφ,
-    fun μ s hμ => map_formalGroupLawCoboundaryOne_eq (algebraMap O E) μ s hμ⟩
 
 end ExtCoeff
 

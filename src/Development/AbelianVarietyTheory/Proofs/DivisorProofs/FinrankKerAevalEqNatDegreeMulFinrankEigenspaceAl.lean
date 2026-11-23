@@ -1,4 +1,62 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Normal.Basic
+
+@[expose] public section
+
 open Polynomial
 namespace GlobalTheory
 
@@ -14,8 +72,8 @@ private lemma rank_submatrix_fromBlocks_one_zero_eq {F : Type} [Field F] {m : Ty
   rw [Matrix.rank_submatrix, hd, Matrix.rank_diagonal]
   simp [Fintype.card_subtype, Finset.card_filter, Fintype.sum_sum_type]
 
-open Matrix in
 
+open Matrix in
 theorem eigDim_rank_map {K L : Type} [Field K] [Field L] (φ : K →+* L) {n : Type} [Fintype n]
     [DecidableEq n] (M : Matrix n n K) : (M.map φ).rank = M.rank := by
   classical
@@ -33,7 +91,8 @@ theorem eigDim_rank_map {K L : Type} [Field K] [Field L] (φ : K →+* L) {n : T
     rw [← Matrix.map_mul, ← Matrix.map_mul, h]
     simp [← Matrix.submatrix_map, Matrix.fromBlocks_map]
   calc (M.map φ).rank = (V.map φ * M.map φ * U.map φ).rank := by
-        rw [rank_mul_eq_left_of_isUnit_det _ _ hUd, rank_mul_eq_right_of_isUnit_det _ _ hVd]
+        rw [Matrix.rank_mul_eq_left_of_isUnit_det _ _ hUd,
+          Matrix.rank_mul_eq_right_of_isUnit_det _ _ hVd]
     _ = M.rank := by rw [h']; exact rank_submatrix_fromBlocks_one_zero_eq _ _ e
 
 private lemma finrank_ker_toLin'_add_rank_eq_card {L : Type} [Field L] {n : Type} [Fintype n] [DecidableEq n]
@@ -42,7 +101,7 @@ private lemma finrank_ker_toLin'_add_rank_eq_card {L : Type} [Field L] {n : Type
   have h := LinearMap.finrank_range_add_finrank_ker (Matrix.toLin' A)
   rw [Matrix.toLin'_apply'] at h ⊢
   rw [Module.finrank_pi] at h
-  unfold Matrix.rank
+  rw [← Matrix.finrank_range_mulVecLin]
   omega
 
 theorem eigDim_ker_map {K L : Type} [Field K] [Field L] (φ : K →+* L) {n : Type} [Fintype n]

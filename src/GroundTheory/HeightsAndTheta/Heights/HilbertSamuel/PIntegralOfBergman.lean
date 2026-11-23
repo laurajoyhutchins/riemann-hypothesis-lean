@@ -1,5 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergman
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBergman
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -140,7 +194,7 @@ lemma sectionL2NormSq_pos [CompactSpace X] (W : Weight L) (dV : SmoothVolume A) 
     rw [h, Complex.mul_conj, Complex.normSq_eq_norm_sq, ← Complex.ofReal_mul, Complex.ofReal_re]
   have hpos : ptNormSq W n s x ≠ 0 := by
     rw [hval]; positivity
-  exact (continuous_ptNormSq W hs).integral_pos_of_hasCompactSupport_nonneg_nonzero
+  exact (continuous_ptNormSq W hs).integral_pos_of_hasCompactSupport_nonneg_ne_zero
     (isClosed_tsupport _).isCompact (fun y => by unfold ptNormSq; positivity) hpos
 
 variable [CompactSpace X]
@@ -158,8 +212,8 @@ def l2InnerCore (W : Weight L) (dV : SmoothVolume A) (n : ℕ) (V : Submodule �
     rw [← integral_conj]
     congr 1
     funext x
-    simp only [ptInner, map_mul, Complex.conj_conj, Complex.conj_ofReal]
-    ring
+    simp only [ptInner, map_mul, starRingEnd_self_apply, Complex.conj_ofReal]
+    ac_rfl
   re_inner_nonneg s := by
     have h : 0 ≤ ∫ x, ptNormSq W n (s : Fin A.n → X → ℂ) x ∂dV.μ :=
       integral_nonneg fun x => by unfold ptNormSq; positivity
@@ -171,8 +225,7 @@ def l2InnerCore (W : Weight L) (dV : SmoothVolume A) (n : ℕ) (V : Submodule �
       (integrable_ptInner W dV (hV t.2) (hV s'.2))]
     congr 1
     funext x
-    simp only [ptInner, Submodule.coe_add, Pi.add_apply, map_add]
-    ring
+    simp only [ptInner, Submodule.coe_add, Pi.add_apply, map_add, mul_add, add_mul]
   smul_left s t r := by
     rw [← integral_const_mul]
     congr 1
@@ -187,8 +240,8 @@ def l2InnerCore (W : Weight L) (dV : SmoothVolume A) (n : ℕ) (V : Submodule �
       simpa using hne
     exact (sectionL2NormSq_pos W dV (hV s.2) hne').ne' h
 
-omit [BorelSpace X] [CompactSpace X] in
 
+omit [BorelSpace X] [CompactSpace X] in
 lemma integral_ptInner_self (W : Weight L) (dV : SmoothVolume A) (n : ℕ) (s : Fin A.n → X → ℂ) :
     ∫ x, ptInner W n s s x ∂dV.μ = ((sectionL2NormSq W dV n s : ℝ) : ℂ) := by
   simp_rw [ptInner_self]
@@ -203,6 +256,7 @@ lemma iSup_ratio_eq {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
     intro s
     have hs : ℓ s = ∑ a, ⟪b a, s⟫_ℂ * ℓ (b a) := by
       conv_lhs => rw [← b.sum_repr' s]
+
       simp [map_sum, map_smul]
     have h1 : ‖ℓ s‖ ≤ ∑ a, ‖⟪b a, s⟫_ℂ‖ * ‖ℓ (b a)‖ := by
       rw [hs]
@@ -227,6 +281,7 @@ lemma iSup_ratio_eq {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
     simp only [hc, RCLike.norm_conj]
     exact hSdef.symm
   have hl : ℓ s0 = (S : ℂ) := by
+
     rw [hs0, map_sum, hSdef, Complex.ofReal_sum]
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [map_smul, smul_eq_mul, Complex.conj_mul', Complex.ofReal_pow]
@@ -239,8 +294,8 @@ lemma iSup_ratio_eq {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
 
 end IntegralOfBergman
 
-open IntegralOfBergman in
 
+open IntegralOfBergman in
 theorem IntegralOfBergman.proof : IntegralOfBergman.Statement := by
   intro D X _ _ _ _ _ A L W dV n V _ hV
   have := dV.isProb

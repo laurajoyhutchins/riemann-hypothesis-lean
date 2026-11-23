@@ -1,12 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianThetaSummableAndDeterminesTestFnStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianWeilActionSiegelParabolicExplicitStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LinearIndependentMul
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PosSemidefSubMulConjTranspose
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SummableEisMajorantStatement
 import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.UnitaryActHalfSpace
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianThetaSummableAndDeterminesTestFnStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.HermitianWeilActionSiegelParabolicExplicitStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionLevelSupNormUniformInLatticeStatement
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.LinearIndependentMul
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.PosSemidefSubMulConjTranspose
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SummableEisMajorantStatement
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.WeilActionLevelSupNormUniformInLatticeStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
+
+@[expose] public section
+
 open Matrix Complex NumberField GlobalTheory.SW Filter Topology
 open ReciprocityTheory.ChartRestriction.G.FD (cc herm)
 open scoped ComplexConjugate ComplexOrder Real
@@ -15,8 +71,8 @@ namespace GlobalTheory.SW.EisBdd
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {Ψ : Finset (E →+* ℂ)} {n N : ℕ}
 
-omit [IsCMField E] in
 
+omit [IsCMField E] in
 theorem approx_entry (hΨ : IsType Ψ) : ∃ K : ℝ, ∀ w : Ψ → ℂ, ∃ a : E, IsIntegral ℤ a ∧
     ∀ τ : Ψ, ‖w τ - τ.1 a‖ ≤ K := by
   classical
@@ -33,8 +89,9 @@ theorem approx_entry (hΨ : IsType Ψ) : ∃ K : ℝ, ∀ w : Ψ → ℂ, ∃ a 
     have h2 : ComplexEmbedding.conjugate (ComplexEmbedding.conjugate τ.1) = τ.1 := star_star _
     have e1 := hx τ.1
     have e2 := congrArg conj (hx (ComplexEmbedding.conjugate τ.1))
+
     simp only [x, h0, h1, h2, map_zero, add_zero, zero_add, conj_conj, map_sum, map_mul,
-      ComplexEmbedding.conjugate_coe_eq] at e1 e2
+    ComplexEmbedding.conjugate_coe_eq] at e1 e2
     have : w τ = (w τ + w τ) / 2 := by ring
     rw [this]
     nth_rewrite 1 [e1]
@@ -46,6 +103,7 @@ theorem approx_entry (hΨ : IsType Ψ) : ∃ K : ℝ, ∀ w : Ψ → ℂ, ∃ a 
   · refine IsIntegral.mul ?_ ?_
     · simpa using isIntegral_algebraMap (R := ℤ) (A := E) (x := ⌊(c i).re⌋)
     · rw [integralBasis_apply]; exact RingOfIntegers.isIntegral_coe _
+
   · rw [hre, map_sum, ← Finset.sum_sub_distrib]
     refine le_trans ((norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_))
       (Finset.single_le_sum (f := fun σ : E →+* ℂ => ∑ i, ‖σ (integralBasis E i)‖)
@@ -80,8 +138,9 @@ theorem im_nonneg {W : Matrix (Fin N) (Fin N) ℂ} (h : (imH W).PosSemidef) (v :
     0 ≤ (v ⬝ᵥ W *ᵥ star v).im := by
   have h1 := h.re_dotProduct_nonneg (star v)
   have h2 : v ⬝ᵥ Wᴴ *ᵥ star v = conj (v ⬝ᵥ W *ᵥ star v) := by
+
     simp only [dotProduct, mulVec, Finset.mul_sum, conjTranspose_apply, map_sum, map_mul,
-      Pi.star_apply, Complex.star_def, conj_conj]
+    Pi.star_apply, Complex.star_def, conj_conj]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
   rw [star_star, imH, smul_mulVec, sub_mulVec, dotProduct_smul, dotProduct_sub, h2,
@@ -115,8 +174,8 @@ omit [NumberField E] [IsCMField E] in
 theorem mem_Hn {δ : ℝ} (hδ : 0 < δ) {Z : CM Ψ N N} (hZ : Z ∈ HnGe Ψ N δ) : Z ∈ Hn Ψ N := fun τ => by
   simpa using (posDef_scalar hδ).add_posSemidef (hZ τ)
 
-open Classical in
 
+open Classical in
 theorem theta_bdd (hΨ : IsType Ψ) {R : ℕ} {δ : ℝ} (hR : 0 < R) (hδ : 0 < δ) :
     ∃ C : ℝ, ∀ φ : Matrix (Fin n) (Fin N) E → ℂ, HasLevel R φ → ∀ B : ℝ, (∀ x, ‖φ x‖ ≤ B) →
       ∀ Z ∈ HnGe Ψ N δ, ‖thH Ψ φ Z 0 0‖ ≤ C * B := by
@@ -170,8 +229,8 @@ theorem transl_mem {β : Matrix (Fin N) (Fin N) E} (h : ccT β = β) :
   rw [e, Matrix.J, fromBlocks_multiply, fromBlocks_multiply]
   simp
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 theorem botSpan_mul (γ t : M2 E N) : botSpan (γ * t) = (botSpan γ).map (vecMulLinear t) := by
   unfold botSpan
   rw [Submodule.map_span, ← Set.range_comp]
@@ -253,7 +312,7 @@ theorem eis_bdd (hΨ : IsType Ψ) (hn : Even n) (hN : 4 * N < n) {R : ℕ} {δ :
       simp only [hFac, h0, zero_dotProduct, Finset.sum_const_zero, mul_zero, Complex.exp_zero,
         mul_one, hmd]
       rw [← Finset.prod_mul_distrib, ← Finset.prod_inv_distrib, norm_prod]
-      refine Finset.prod_le_prod (fun _ _ => norm_nonneg _) fun τ _ => ?_
+      refine Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _) fun τ _ => ?_
       obtain ⟨p1, p2, p3⟩ := pair (hU (σ U)) τ
       have hb : (β.map τ.1)ᴴ = β.map τ.1 := by rw [← Base.ccT_map, hβ]
       have h3 := (hcomp _ _ (Z τ - β.map τ.1) p1 p2
@@ -280,8 +339,8 @@ theorem eis_bdd (hΨ : IsType Ψ) (hn : Even n) (hN : 4 * N < n) {R : ℕ} {δ :
 
 end GlobalTheory.SW.EisBdd
 
-open GlobalTheory.SW.EisBdd in
 
+open GlobalTheory.SW.EisBdd in
 theorem GlobalTheory.SW.theta_eis_bounded : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Ψ : Finset (E →+* ℂ)), IsType Ψ → ∀ (n N : ℕ), Even n → 4 * N < n → ∀ (R : ℕ) (δ : ℝ), 0 < R → 0 < δ → ∃ C : ℝ, ∀ φ : Matrix (Fin n) (Fin N) E → ℂ, HasLevel R φ → ∀ B : ℝ, (∀ x, ‖φ x‖ ≤ B) → ∀ Z ∈ HnGe Ψ N δ, (Summable fun U : Lag E N => ‖eisTerm Ψ U.2.choose φ Z 0 0‖) ∧ ‖thH Ψ φ Z 0 0‖ ≤ C * B ∧ ‖eis Ψ φ Z 0 0‖ ≤ C * B := by
   intro E _ _ _ Ψ hΨ n N hn hN R δ hR hδ
   obtain ⟨C₁, h₁⟩ := theta_bdd (n := n) (N := N) hΨ hR hδ

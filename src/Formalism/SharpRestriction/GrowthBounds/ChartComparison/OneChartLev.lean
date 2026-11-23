@@ -1,7 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.ChartComparison.StepIn
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ExistsPrimeToLe
-import Formalism.LocalToGlobal.HermitianForms.TiedSym
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsIdealDenominator
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedTwGen
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsIdealDenominator
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ExistsPrimeToLe
+import Formalism.LocalToGlobal.GroupLattices.PerfectRings.ExtWRec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpCMemMIff
+
+@[expose] public section
 
 noncomputable section
 
@@ -61,7 +104,7 @@ theorem locW_intAtI (V : ValTied u eV i hi K) (w : D.what₂.places.Pl) (x : ((D
     obtain ⟨P, hP, hPy⟩ := h1 B hB
     obtain ⟨Q, hQ, hQz⟩ := h2 B hB
     refine ⟨P + Q, AddSubgroup.add_mem _ hP hQ, fun t => ?_⟩
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     show (D.fm u).emb i y c t + (D.fm u).emb i z c t = _
     rw [hPy t, hQz t]
     rfl
@@ -149,74 +192,26 @@ def oneChart (K : ClsTied u i hi) (β : Unit) :
   stabI_inj := fun c => K.stabI_inj c.1
   stabI_range := fun c => K.stabI_range c.1
 
-theorem oneChart_lev (K : ClsTied u i hi) (β : Unit) : (oneChart K β).lev = K.lev := rfl
 
-set_option maxHeartbeats 2000000 in
 
 theorem valTied_toG (V : ValTied u eV i hi K) :
-    ValuationCompatibleChart (D.fm u) V.eY (fun _ => True) (chU u i) (lat := clsCrd D u i hi) (oneChart K) where
-  Fi := fun φ => by
-    rw [V.Fi φ]
-    constructor
-    · intro h β
-      exact (FiC_comp K.lev (embT D) (lamT u i) K.y (fun c : {c // chU u i c = β} => c.1)
-        (fun c => ⟨⟨c, Subsingleton.elim _ _⟩, rfl⟩) (fun c z => φ c (V.eY.symm z))).2 h
-    · intro h
-      exact (FiC_comp K.lev (embT D) (lamT u i) K.y (fun c : {c // chU u i c = ()} => c.1)
-        (fun c => ⟨⟨c, Subsingleton.elim _ _⟩, rfl⟩) (fun c z => φ c (V.eY.symm z))).1 (h ())
-  rat := fun φ => V.rat φ
-  lat := fun w _ x => locWCritI V w x
+    ValuationCompatibleChart (D.fm u) V.eY (fun _ => True) (chU u i) (lat := clsCrd D u i hi) (oneChart K) := by
+  refine ⟨?_, V.rat, fun w _ x => locWCritI V w x⟩
+  intro φ
+  rw [V.Fi φ]
+  constructor
+  · intro h β
+    exact (FiC_comp K.lev (embT D) (lamT u i) K.y (fun c : {c // chU u i c = β} => c.1)
+      (fun c => ⟨⟨c, Subsingleton.elim _ _⟩, rfl⟩) (fun c z => φ c (V.eY.symm z))).2 h
+  · intro h
+    exact (FiC_comp K.lev (embT D) (lamT u i) K.y (fun c : {c // chU u i c = ()} => c.1)
+      (fun c => ⟨⟨c, Subsingleton.elim _ _⟩, rfl⟩) (fun c z => φ c (V.eY.symm z))).1 (h ())
 
 variable {p : ℕ}
 
-set_option maxHeartbeats 2000000 in
-
-def stepInOne (V : ValTied u eV i hi K) (G : GAtP p) (dt : DetTie K.lev) (cmpt : Unit → Type) [∀ β, Fintype (cmpt β)]
-    (eC : (Σ β, cmpt β) ≃ G.comp) (loc : ∀ β, LocAt D.host.F D.host.E (D.R.N i) (gatCh G fun a : cmpt β => eC ⟨β, a⟩))
-    (pos : (Σ v : Fin G.P.nV, Fin (G.P.n' v)) ≃ D.what₂.Tau) : StepIn (D.fm u) i hi G where
-  T := (D.mem u).A.T
-  bad := badG D
-  eY := V.eY
-  okW := fun _ => True
-  Ch := Unit
-  chOf := chU u i
-  lat := clsCrd D u i hi
-  K := oneChart K
-  val := valTied_toG V
-  tw := fun _ => DetTw.ofChiD dt (cTw D i)
-  cmpt := cmpt
-  eC := eC
-  loc := loc
-  pos := pos
 
 variable {Ch : ℕ → Type} {chOf : ∀ i, (D.mem u).C.cls i → Ch i}
 
-set_option maxHeartbeats 2000000 in
-
-def stepInMid (F : FormsTiedSym D u Ch chOf) (i : ℕ) (h1 : 1 ≤ i) (h2 : i + 1 ≤ D.R.m) (G : GAtP p)
-    (dt : ∀ β, DetTie (F.ch i h1 h2 β).lev) (cmpt : Ch i → Type) [∀ β, Fintype (cmpt β)]
-    (eC : (Σ β, cmpt β) ≃ G.comp) (loc : ∀ β, LocAt D.host.F D.host.E (D.R.N i) (gatCh G fun a : cmpt β => eC ⟨β, a⟩))
-    (pos : (Σ v : Fin G.P.nV, Fin (G.P.n' v)) ≃ D.what₂.Tau) : StepIn (D.fm u) i (le_of_succ_m h2) G where
-  T := (D.mem u).A.T
-  bad := badG D
-  eY := F.eYC i h1 h2
-  okW := fun _ => True
-  Ch := Ch i
-  chOf := chOf i
-  lat := fun c => clsCrd D u i (le_of_succ_m h2) c
-  K := F.ch i h1 h2
-  val := F.valC i h1 h2
-  tw := fun β => DetTw.ofChiD (dt β) (cTw D i)
-  cmpt := cmpt
-  eC := eC
-  loc := loc
-  pos := pos
-
-def stepInTop (F : FormsTiedSym D u Ch chOf) (G : GAtP p) (dt : DetTie (F.cls D.R.m le_rfl (Or.inr rfl)).lev)
-    (cmpt : Unit → Type) [∀ β, Fintype (cmpt β)] (eC : (Σ β, cmpt β) ≃ G.comp)
-    (loc : ∀ β, LocAt D.host.F D.host.E (D.R.N D.R.m) (gatCh G fun a : cmpt β => eC ⟨β, a⟩))
-    (pos : (Σ v : Fin G.P.nV, Fin (G.P.n' v)) ≃ D.what₂.Tau) : StepIn (D.fm u) D.R.m le_rfl G :=
-  stepInOne (F.val D.R.m le_rfl (Or.inr rfl)) G dt cmpt eC loc pos
 
 end Formalism.MainNotions.G.CmpJ
 

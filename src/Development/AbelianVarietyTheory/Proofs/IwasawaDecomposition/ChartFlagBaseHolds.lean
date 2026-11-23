@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FinrankEqZeroIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FlagComponentFramedPointFrame
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChartFrameBaseHoldsStatement
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.IsChartIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FnAlgClosedOfFixedPoints
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsNatDiagIffIsDiag
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.MemMaximalIdealBall
+import Formalism.SharpRestriction.CuspSpanNormBounds.Point
+import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.AbelianAt
+public import Formalism.SharpRestriction.Divisibility.AbelianOpenPart.IsOpenPart
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FrTanAlg
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,45 +98,5 @@ theorem isCombAtG_bc {X : Scheme.{0}} (t : SAB H X) {S S' : Type} [CommRing S] [
       rfl
     rw [hl, ← comp_listProd, Over.comp_left, hw]
     rfl
-
-theorem bc_bc {Dw : Datum H} {X : Scheme.{0}} {t : SAB H X} {R S T : Type} [CommRing R] [CommRing S] [CommRing T]
-    (φ : R →+* S) (ψ : S →+* T) (u : Vecs Dw t R) : (u.bc φ).bc ψ = u.bc (ψ.comp φ) := by
-  funext τ i
-  show spMap (dualMap ψ) ≫ spMap (dualMap φ) ≫ u τ i = spMap (dualMap (ψ.comp φ)) ≫ u τ i
-  rw [← Category.assoc, ← spMap_comp]
-  congr 2
-  apply RingHom.ext
-  intro r
-  ext <;> simp [dualMap]
-
-theorem exists_spMap_fromSpec {X : Scheme.{0}} {U : X.Opens} (hU : IsAffineOpen U) {k : Type} [CommRing k]
-    (w : Sp k ⟶ X) (h : Set.range w ⊆ (U : Set X)) : ∃ φ : Γ(X, U) →+* k, spMap φ ≫ hU.fromSpec = w := by
-  have h' : Set.range w ⊆ Set.range hU.fromSpec := by rw [hU.range_fromSpec]; exact h
-  refine ⟨(Spec.preimage (IsOpenImmersion.lift hU.fromSpec w h')).hom, ?_⟩
-  rw [spMap, CommRingCat.ofHom_hom, Spec.map_preimage, IsOpenImmersion.lift_fac]
-
-theorem flagBase_of (hF : FrameBaseSt) : FlagBaseSt := by
-  intro E _ _ _ H Dw Xo p W Y i₀ Z k _ w
-  refine ⟨fun hw => ?_, fun k' _ ψ u ⟨a, φ, hφ, hfr, hs⟩ => ?_⟩
-  · have h0 : w (closedPoint k) ∈ ⋃ a, ((Z.U a).1 : Set Z.X) := Z.cover ▸ hw ⟨_, rfl⟩
-    obtain ⟨a, ha⟩ := Set.mem_iUnion.1 h0
-    obtain ⟨φ, hφ⟩ := exists_spMap_fromSpec (Z.U a).2 w (by
-      rintro _ ⟨q, rfl⟩
-      rwa [show q = closedPoint k from Subsingleton.elim (α := PrimeSpectrum k) _ _])
-    have hφ' : spMap φ ≫ Z.chart a = w := hφ
-    have hfr := hF _ _ _ _ _ _ _ _ _ _ _ φ _ (Z.frame a)
-    rw [← Category.assoc, hφ'] at hfr
-    refine ⟨(Z.fr a).bc φ, a, φ, hφ', hfr, fun τ n _ i hi => ⟨Pi.single i 1, fun j hj => ?_, ?_⟩⟩
-    · exact Pi.single_eq_of_ne (fun e => by subst e; omega) _
-    · exact isCombAtG_single _ _ (fun j => (hfr.1 τ j).1) i
-  · refine ⟨a, ψ.comp φ, by rw [spMap_comp, Category.assoc, hφ], ?_, fun τ n hn i hi => ?_⟩
-    · rw [Category.assoc, RingHom.comp_assoc]
-      exact hF _ _ _ _ _ _ _ _ _ _ _ ψ _ hfr
-    · obtain ⟨cf, h0, hc⟩ := hs τ n hn i hi
-      refine ⟨fun j => ψ (cf j), fun j hj => (congrArg ψ (h0 j hj)).trans (map_zero ψ), ?_⟩
-      rw [← bc_bc, Category.assoc]
-      exact isCombAtG_bc _ ψ hc
-
-theorem flagBase : FlagBaseSt := flagBase_of GlobalTheory.T.chart_frame_base_holds
 
 end GlobalTheory.LocM.Cht.FlagBase

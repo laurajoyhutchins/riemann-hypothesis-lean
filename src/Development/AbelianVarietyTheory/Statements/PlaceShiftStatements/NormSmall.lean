@@ -1,8 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksLemmas
-import Formalism.LocalToGlobal.UnitaryNorms.CharTied
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MemHalfCosetSelf
-import Development.AbelianVarietyTheory.Statements.CuspidalUnitaryTwists.OneSquareClosed
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksLemmas
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.MemHalfCosetSelf
+public import Development.AbelianVarietyTheory.Definitions.Foundations.TupleConstantsNeZero
+public import Formalism.PairingDivisors.StatementX
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,8 +82,8 @@ def fam (μ₀ : T) (i j : Fin D.R.m) : Option Bool → HChar D.host.E
   | none => nuH G μ₀ i j
   | some c => nuH G μ₀ i j * delOf Lc c
 
-open Classical in
 
+open Classical in
 def twPl (t : T) : Finset (HeightOneSpectrum (𝓞 D.host.E)) := (locPl G t).filter fun w => w ∉ G.pl.W0
 
 def Qn (t : T) : ℕ := ∏ w ∈ twPl G t, Ideal.absNorm w.asIdeal
@@ -114,10 +151,6 @@ def BotSmall : Prop := GBig fun {D} _ _ {sc} G μ₀ _ _ _ => GlobalTheory.NormS
 def NormBig : Prop := GBig fun {D} _ _ _ G _ _ _ _ => ∀ (δ t0 : ℂ) (i j : Fin D.R.m), ∃ A : ℂ, A ≠ 0 ∧
   ∀ t (Q : ℕ) (P P' : Pair D ⊤ δ t0 Q) (Λ : ℂ → ℂ), IsBottom G t i j (modT G t) P P' → IsHeckeL (nuH G t i j) Λ →
     (P.norm : ℂ) = A * ∏ s ∈ Icc (1 - (e0 D i j : ℤ)) (h0 D i j : ℤ), Λ s
-
-def NormSmall : Prop := GBig fun {D} _ _ _ G _ _ _ _ => ∀ (δ t0 : ℂ) (i j : Fin D.R.m), ∃ A : ℂ, A ≠ 0 ∧
-  ∀ t (Q : ℕ) (P P' : Pair D ⊤ δ t0 Q) (Λ : ℂ → ℂ), IsBottom G t i j (modT G t) P P' → IsHeckeL (nuH G t i j) Λ →
-    (P'.norm : ℂ) = A * ∏ s ∈ Icc (1 + (e0 D i j : ℤ)) (h0 D i j : ℤ), Λ s
 
 def BotNe : Prop := GBig fun {D} _ _ _ G μ₀ _ _ _ => ∀ (δ t0 : ℂ) (Q : ℕ) (P P' : Pair D ⊤ δ t0 Q) (i j : Fin D.R.m),
   IsBottom G μ₀ i j (SqNum.condE G.pl) P P' → (∃ h T, P.coord h T ≠ 0) ∧ ∃ h T, P'.coord h T ≠ 0

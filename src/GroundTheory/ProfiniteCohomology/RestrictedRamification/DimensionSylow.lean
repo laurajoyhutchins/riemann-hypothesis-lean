@@ -1,10 +1,59 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Subgroup
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.NotDvdSuperIndexBotOfIsProPGroup
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.CdpOpenSubgroupLe
-import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Closed
-import GroundTheory.ProfiniteCohomology.NotDvdSuperIndexIffMap
-import GroundTheory.ProfiniteCohomology.LocalClassFormation.FiniteVanishing.Vanishing
+module
+
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.PrimaryComponentCohomologyEqBotOfScdpLt
+public import GroundTheory.ProfiniteCohomology.CohomologyFunctoriality
+public import GroundTheory.ProfiniteCohomology.IsProPGroupSubgroupIffIsPGroupMap
+public import GroundTheory.ProfiniteCohomology.CartierDual
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.NotDvdSuperIndexBotOfIsProPGroup
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Subgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Compactness.Paracompact
+import Mathlib.Topology.Separation.Connected
+public import GroundTheory.ProfiniteCohomology.CohomologicalDimension.Closed
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -84,8 +133,7 @@ theorem cdp_le_of_forall_openSubgroup {ℓ : ℕ} (hℓ : ℓ.Prime) (A : Rep.{0
         rw [hfix]⟩
   have hcomp : ψ ≫ ψ' = 𝟙 _ := by
     ext x
-    change e.symm (e x.down) = x.down
-    exact e.symm_apply_apply x.down
+    simp [ψ, ψ', uliftIntLinearEquivAddHom_symm_apply]
   have hinj : Function.Injective (cohomologyMap ψ (n + 1)).hom := fun x y hxy => by
     have h' := congrArg (cohomologyMap ψ' (n + 1)).hom hxy
     rwa [← ModuleCat.comp_apply, ← ModuleCat.comp_apply, ← cohomologyMap_comp, hcomp,

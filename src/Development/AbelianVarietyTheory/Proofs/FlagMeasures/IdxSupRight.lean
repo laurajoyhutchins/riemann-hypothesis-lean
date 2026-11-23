@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.FlagPairDefinitePartLattice
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsLocalizedModuleSubtype
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfLatMod
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsLocalizedModuleSubtype
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeOfLatMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Formalism.HermitianLatticeCounting.S6 GlobalTheory.HermLat GlobalTheory.DegCnt
 open scoped Pointwise ENNReal Classical
@@ -126,11 +169,11 @@ theorem key (H : HermSpace K V) {M : Submodule (𝓞 K) V} {S I : Submodule K V}
   have hB : ∀ x y : C, HC.B x y = H.B x y := fun _ _ => rfl
   obtain ⟨a, b⟩ := DelScale.le_of_latMod hM.1
   have hpM : ∀ x ∈ M, p x ∈ M := fun x hx => M.sub_mem hx (a (r x).2)
-  have L := DelScale.latIn_isLattice p hCS hpC hpI hI hC hM.1
+  have L := DelScale.latIn_isFullLattice p hCS hpC hpI hI hC hM.1
   have hMd : ∀ y, y ∈ M ↔ y ∈ S ∧ ∀ x ∈ M, H.B y x ∈ (1 : Submodule (𝓞 K) K) := fun y => by
     rw [← hM.1.2, ← mem_dual_iff, hM.2]
   have hU : IsUnimod HC (GlobalTheory.Mass.latIn C M) := by
-    refine ⟨(isLatMod_top_bot_iff _).2 L, ?_⟩
+    refine ⟨(isLatMod_top_bot_iff _).2 ⟨L.toIsLattice.fg, L.span_eq_top⟩, ?_⟩
     ext y
     rw [mem_dual_iff, L.span_eq_top]
     change _ ↔ (y : V) ∈ M
@@ -172,7 +215,7 @@ theorem key (H : HermSpace K V) {M : Submodule (𝓞 K) V} {S I : Submodule K V}
     · rintro ⟨hd, hdM⟩
       refine ⟨hd, fun x hx => ?_⟩
       obtain ⟨m, hm, u, hu, rfl⟩ := Submodule.mem_sup.1 hdM
-      rw [map_add, LinearMap.add_apply, (mem_perp_iff H T u).1 hu.2 x hx.2, add_zero]
+      rw [map_add (f := _), LinearMap.add_apply, (mem_perp_iff H T u).1 hu.2 x hx.2, add_zero]
       exact ((hMd m).1 hm).2 x hx.1
   · apply le_antisymm
     · rintro s ⟨hs, hs'⟩

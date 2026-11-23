@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.CompLeft
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.CompLeft
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC CochainComplex CochainComplex.HomComplex
 open LateralTheory.E.EtaleTopologySheaves LateralTheory.E.LeafGhostCut UpperTheory.Et.Loc
 
@@ -31,7 +74,7 @@ private def asm {M : Type*} [AddCommGroup M] [Module (ULift.{1} (ZMod q)) M] {K 
     M →ₗ[ULift.{1} (ZMod q)] Cochain K I n where
   toFun x := mkC fun p => f p x
   map_add' x y := coch_ext fun p => by
-    rw [Cochain.add_v, mkC_v, mkC_v, mkC_v, map_add]
+    rw [Cochain.add_v, mkC_v, mkC_v, mkC_v, map_add (f := _)]
   map_smul' r x := coch_ext fun p => by
     rw [RingHom.id_apply, Cochain.smul_v, mkC_v, mkC_v, map_smul]
 
@@ -54,7 +97,7 @@ private def fanTP (C : B.Etale ⥤ Cx (ZMod q)) (I : Cx (ZMod q)) (n : ℤ) :
         exact preL_v (C.map a.unop) n p α }
 
 private def fanLim (C : B.Etale ⥤ Cx (ZMod q)) (I : Cx (ZMod q)) (n : ℤ) : IsLimit (fanTP C I n) :=
-  mkFanLimit _
+  Fan.IsLimit.mk _
     (fun s =>
       { app := fun U => ModuleCat.ofHom (asm (K := C.obj U.unop) (I := I) (n := n) fun p => ((s.proj p).app U).hom)
         naturality := fun U V a => by
@@ -79,11 +122,11 @@ theorem UpperTheory.totalHomPresheaf_isSheaf_injective_of_homAcyclic :
   intro q B C I hC hI n
   have hS := fun p : ℤ => hC p (I.X (p + n)) (hI _)
   let S : ℤ → SShv B q := fun p => ⟨HP (C ⋙ HomologicalComplex.eval _ _ p) (I.X (p + n)), (hS p).choose⟩
-  haveI : ∀ p, Injective (S p) := fun p => (hS p).choose_spec
+  have : ∀ p, Injective (S p) := fun p => (hS p).choose_spec
   let G := sheafToPresheaf (EtTop B) (ModuleCat.{1} (ULift.{1} (ZMod q)))
   let e : G.obj (∏ᶜ S) ≅ TP C I n :=
     PreservesProduct.iso G S ≪≫ (limit.isLimit _).conePointUniqueUpToIso (fanLim C I n)
-  have h : Presheaf.IsSheaf (EtTop B) (TP C I n) := (Presheaf.isSheaf_of_iso_iff e).1 (∏ᶜ S).cond
+  have h : Presheaf.IsSheaf (EtTop B) (TP C I n) := (Presheaf.isSheaf_of_iso_iff e).1 (∏ᶜ S).property
   refine ⟨h, ?_⟩
   exact Injective.of_iso ((fullyFaithfulSheafToPresheaf _ _).preimageIso (Y := ⟨TP C I n, h⟩) e) inferInstance
 

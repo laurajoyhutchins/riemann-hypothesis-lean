@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
-import GroundTheory.HeightsAndTheta.Theta.CMDatum
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+public import GroundTheory.HeightsAndTheta.Theta.CMDatum
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -95,8 +138,9 @@ theorem emb_sesq (τ : Ψ) (w v : Fin (j + j') → E) :
     embOf (F.σ τ) (C.h.toSesq w v) =
       star (fun i => embOf (F.σ τ) (w i)) ⬝ᵥ (C.gr τ *ᵥ fun i => embOf (F.σ τ) (v i)) := by
   rw [sesq_eq_sum C.h.toSesq (Pi.basisFun E (Fin (j + j'))) w v]
+
   simp only [map_sum, map_mul, dotProduct, mulVec, Finset.mul_sum, LatEmb.gr, Matrix.map_apply, Pi.star_apply,
-    Pi.basisFun_repr, GroundTheory.Heights₂.Theta.embedding_conj (maximalRealSubfield E) E, mul_assoc]
+  Pi.basisFun_repr, GroundTheory.Heights₂.Theta.embedding_conj (maximalRealSubfield E) E, mul_assoc]
   rfl
 
 theorem Fm_vec (x y : Λ) : C.Fm (C.vec x) (C.vec y) = F.form x y := by
@@ -160,11 +204,11 @@ def FmB : (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] (Ψ → Fin (j + j') → ℂ
 def HrB (R : RiemLat E g Λ) : (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] ℝ :=
   LinearMap.mk₂ ℝ (fun y y' => (C.perExt R y ⬝ᵥ R.Hm *ᵥ star (C.perExt R y')).im)
     (fun y z w => by
-      simp only [map_add, add_dotProduct, Complex.add_im])
+      simp only [map_add (f := _), add_dotProduct, Complex.add_im])
     (fun r y w => by
       simp only [map_smul, smul_dotProduct, Complex.smul_im])
     (fun y z w => by
-      simp only [map_add, star_add, mulVec_add, dotProduct_add, Complex.add_im])
+      simp only [map_add (f := _), star_add, mulVec_add, dotProduct_add, Complex.add_im])
     (fun r y w => by
       simp only [map_smul, star_smul, star_trivial, mulVec_smul, dotProduct_smul, Complex.smul_im])
 
@@ -194,8 +238,8 @@ theorem Fm_rot (ai : Ψ → Matrix (Fin (j + j')) (Fin (j + j')) ℂ) (h : ∀ �
   show 2 * (_ * (star (ai τ *ᵥ y' τ) ⬝ᵥ (C.gr τ *ᵥ (ai τ *ᵥ y τ)))).re = _
   rw [h1]
 
-variable (F) in
 
+variable (F) in
 def scL (c : 𝓞 E) : (Ψ → Fin (j + j') → ℂ) →ₗ[ℝ] (Ψ → Fin (j + j') → ℂ) where
   toFun y τ := F.σ τ c • y τ
   map_add' y z := by

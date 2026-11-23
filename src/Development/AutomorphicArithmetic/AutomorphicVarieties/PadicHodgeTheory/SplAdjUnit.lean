@@ -1,10 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.OrdFlag
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.CopNormLt
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MajorantSquareBound
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.NormLtOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.CopNormLt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.OrdFlag
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MajorantSquareBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.Alg UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.HV UpperTheory.V.Base IsLocalRing
 
 namespace UpperTheory.V.Loc
@@ -34,7 +83,7 @@ private theorem spl_prj (c : Fin 4 → R) (X : M4 R) (i : Fin 4) :
       Polynomial.aeval (f.mapMatrix X) (p.map f) = f.mapMatrix (Polynomial.aeval X p) := by
     intro p
     induction p using Polynomial.induction_on' with
-    | add p q hp hq => rw [Polynomial.map_add, map_add, map_add, map_add, hp, hq]
+    | add p q hp hq => rw [Polynomial.map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
     | monomial n a =>
       rw [Polynomial.map_monomial, Polynomial.aeval_monomial, Polynomial.aeval_monomial, map_mul, map_pow,
         Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one, spl_smul, map_one]
@@ -42,14 +91,14 @@ private theorem spl_prj (c : Fin 4 → R) (X : M4 R) (i : Fin 4) :
   simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C]
 
 private theorem spl_ord {I : Subgroup H} {ps : Fin 4 → H → R} {s₀ : H} {r : H →* M4 R} (h : Ord I ps s₀ r) :
-    Ord I (fun i g => f (ps i g)) s₀ (mapRep f r) where
-  charpoly := by
-    rw [spl_rep, RingHom.mapMatrix_apply, Matrix.charpoly_map, h.charpoly, Polynomial.map_prod]
+    Ord I (fun i g => f (ps i g)) s₀ (mapRep f r) := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [spl_rep, RingHom.mapMatrix_apply, Matrix.charpoly_map, h.charpoly, Polynomial.map_prod]
     simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C]
-  stable g i j hij := by
+  · intro g i j hij
     rw [spl_rep, spl_rep, spl_prj f (fun a => ps a s₀), spl_prj f (fun a => ps a s₀), ← map_mul, ← map_mul,
       h.stable g i j hij, map_zero]
-  inert s hs i := by
+  · intro s hs i
     rw [spl_rep, spl_rep, spl_prj f (fun a => ps a s₀), ← map_one f.mapMatrix, ← spl_smul, ← map_sub, ← map_mul,
       ← map_mul, h.inert s hs i, map_zero]
 
@@ -164,29 +213,6 @@ private theorem spl_int {B : Type} [CommRing B] [Algebra B K] (X : M4 B) (u : (M
 
 end Fld
 
-private theorem spl_local (R S : Type) [CommRing R] [HenselianLocalRing R] [CommRing S] [IsDomain S] [Algebra R S]
-    [Module.Finite R S] : IsLocalRing S := by
-  obtain ⟨q, hq⟩ := Ideal.exists_maximal S
-  obtain ⟨e, he, h⟩ := GlobalTheory.exists_idempotent_notMem_iff_of_henselian R q
-  refine IsLocalRing.of_unique_max_ideal ⟨q, hq, fun n hn => (h n hn).1 ?_⟩
-  rcases IsIdempotentElem.iff_eq_zero_or_one.1 he with rfl | rfl
-  · exact absurd q.zero_mem ((h q hq).2 rfl)
-  · exact (Ideal.ne_top_iff_one n).1 hn.ne_top
-
-private theorem spl_intOf {l : ℕ} [Fact l.Prime] (x : PadicAlgCl l) (h : ‖x‖ ≤ 1) : IsIntegral ℤ_[l] x := by
-  have hi : IsIntegral ℚ_[l] x := Algebra.IsIntegral.isIntegral x
-  have h0 : ‖x‖ = spectralValue (minpoly ℚ_[l] x) := rfl
-  rw [h0, spectralValue_le_one_iff (minpoly.monic hi)] at h
-  have hl' : minpoly ℚ_[l] x ∈ Polynomial.lifts (algebraMap ℤ_[l] ℚ_[l]) :=
-    (Polynomial.lifts_iff_coeff_lifts _).mpr fun n => ⟨⟨_, h n⟩, rfl⟩
-  obtain ⟨q, hq, -, hqm⟩ := Polynomial.lifts_and_degree_eq_and_monic hl' (minpoly.monic hi)
-  exact ⟨q, hqm, by rw [← Polynomial.aeval_def, ← Polynomial.aeval_map_algebraMap ℚ_[l], hq, minpoly.aeval]⟩
-
-open Polynomial in
-private theorem spl_norm_lt {l : ℕ} [Fact l.Prime] {O R : Type} [CommRing O] [Algebra ℤ_[l] O]
-    [Algebra O (PadicAlgCl l)] [IsScalarTower ℤ_[l] O (PadicAlgCl l)] [CommRing R] [IsLocalRing R] [Algebra O R]
-    (y : R →ₐ[O] PadicAlgCl l) (a : R) (ha : a ∈ maximalIdeal R) : ‖y a‖ < 1 :=
-  _root_.UpperTheory.Reformulated.B.NormLtOne.norm_lt_one y a ha
 
 private theorem spl_near {l : ℕ} [Fact l.Prime] {O B : Type} [CommRing O] [Algebra ℤ_[l] O]
     [Algebra O (PadicAlgCl l)] [IsScalarTower ℤ_[l] O (PadicAlgCl l)] [CommRing B] [IsDomain B] [HenselianLocalRing B]

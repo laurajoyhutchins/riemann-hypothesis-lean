@@ -1,4 +1,47 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.Smooth
+module
+
+public import Mathlib.MeasureTheory.Function.L2Space
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.MeasurePreservingMulRight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -150,26 +193,5 @@ theorem inner_toL2_eq_theta_pairing (ε : Fin n → Bool) {F G : Matrix (Fin n) 
   filter_upwards [hF.coeFn_toLp, hG.coeFn_toLp] with g h1 h2
   simp only [h1, h2, RCLike.inner_apply]
   exact mul_comm _ _
-
-theorem eq_on_unitary_of_toL2_eq (ε : Fin n → Bool) {F G : Matrix (Fin n) (Fin n) ℂ → ℂ}
-    (hFc : ContinuousOn F (UJset ε)) (hGc : ContinuousOn G (UJset ε))
-    (hF : MemLp (fun g : Formalism.REAL.UJ ε => F (Formalism.MainNotions.S.umat g)) 2 (Formalism.REAL.muG ε))
-    (hG : MemLp (fun g : Formalism.REAL.UJ ε => G (Formalism.MainNotions.S.umat g)) 2 (Formalism.REAL.muG ε))
-    (h : toL2 ε F = toL2 ε G) : ∀ g ∈ UJset ε, F g = G g := by
-  have h' := h
-  rw [toL2_eq_memLp_toLp ε hF, toL2_eq_memLp_toLp ε hG] at h'
-  have hae := (MemLp.toLp_eq_toLp_iff hF hG).mp h'
-  have hcF : Continuous (fun g : Formalism.REAL.UJ ε => F (Formalism.MainNotions.S.umat g)) :=
-    hFc.comp_continuous (continuous_unitary_matrix ε) (unitary_matrix_mem_set ε)
-  have hcG : Continuous (fun g : Formalism.REAL.UJ ε => G (Formalism.MainNotions.S.umat g)) :=
-    hGc.comp_continuous (continuous_unitary_matrix ε) (unitary_matrix_mem_set ε)
-  haveI : MeasureTheory.Measure.IsOpenPosMeasure (Formalism.REAL.muG ε) := by
-    first
-    | infer_instance
-    | (unfold Formalism.REAL.muG; infer_instance)
-  have heq := (Continuous.ae_eq_iff_eq (Formalism.REAL.muG ε) hcF hcG).mp hae
-  intro g hg
-  obtain ⟨y, rfl⟩ := exists_unitary_preimage ε hg
-  exact congrFun heq y
 
 end ReciprocityTheory.ChartRestriction.DS

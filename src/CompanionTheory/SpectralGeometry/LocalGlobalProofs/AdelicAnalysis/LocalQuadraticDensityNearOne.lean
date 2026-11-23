@@ -1,9 +1,66 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteFieldQuadraticFormPointCountStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.PrimitiveVectorQuadraticLevelMeasureStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DegreeOnePrimeReductionSplitPlaceDictionary
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRingStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteFieldQuadraticFormPointCountStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.PrimitiveVectorQuadraticLevelMeasureStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.StandardLocalHaarPropertiesStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRingStatement
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -44,38 +101,12 @@ theorem map_quad {R S ι : Type} [CommRing R] [CommRing S] [Fintype ι] (f : R �
 
 variable {F : Type} [Field F] [NumberField F] {v : HeightOneSpectrum (𝓞 F)}
 
-local notation "𝒪" => HeightOneSpectrum.adicCompletionIntegers F v
-local notation "𝓴" => IsLocalRing.ResidueField (HeightOneSpectrum.adicCompletionIntegers F v)
-local notation "res" => IsLocalRing.residue (HeightOneSpectrum.adicCompletionIntegers F v)
+local notation "𝒪" => v.adicCompletionIntegers F
+local notation "𝓴" => IsLocalRing.ResidueField 𝒪
+local notation "res" => IsLocalRing.residue 𝒪
 
 theorem res_eq_zero_iff (a : 𝒪) : res a = 0 ↔ Valued.v (a : Fv F v) < 1 := by
-  rw [IsLocalRing.residue_eq_zero_iff, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
-  constructor
-  · intro h
-    have h1 : Valued.v (a : Fv F v) ≤ 1 := a.2
-    refine lt_of_le_of_ne h1 fun h2 => h ?_
-    have ha0 : (a : Fv F v) ≠ 0 := by
-      intro h0
-      rw [h0, map_zero] at h2
-      exact zero_ne_one h2
-    have hinv : (a : Fv F v)⁻¹ ∈ v.adicCompletionIntegers F := by
-      show Valued.v ((a : Fv F v)⁻¹) ≤ 1
-      rw [map_inv₀, h2, inv_one]
-    refine IsUnit.of_mul_eq_one (⟨(a : Fv F v)⁻¹, hinv⟩ : v.adicCompletionIntegers F) ?_
-    apply Subtype.ext
-    show (a : Fv F v) * (a : Fv F v)⁻¹ = 1
-    exact mul_inv_cancel₀ ha0
-  · intro h hu
-    obtain ⟨b, hb⟩ := hu.exists_right_inv
-    have h3 : Valued.v ((a : Fv F v) * (b : Fv F v)) = 1 := by
-      have : (a : Fv F v) * (b : Fv F v) = 1 := congrArg Subtype.val hb
-      rw [this, map_one]
-    rw [map_mul] at h3
-    have hb1 : Valued.v (b : Fv F v) ≤ 1 := b.2
-    have h4 : Valued.v (a : Fv F v) * Valued.v (b : Fv F v) < 1 := by
-      calc _ ≤ Valued.v (a : Fv F v) * 1 := by gcongr
-        _ < 1 := by simpa using h
-    exact absurd h3 (ne_of_lt h4)
+  apply GlobalTheory.PlaceRed.mem_max_iff <;> assumption
 
 theorem res_eq_iff (a b : 𝒪) : res a = res b ↔ Valued.v ((a : Fv F v) - b) < 1 := by
   rw [← sub_eq_zero, ← map_sub, res_eq_zero_iff]

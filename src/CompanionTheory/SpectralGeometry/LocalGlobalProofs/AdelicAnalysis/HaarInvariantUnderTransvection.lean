@@ -1,6 +1,57 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.SWXSDefs
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Transvection
+public import Mathlib.MeasureTheory.Constructions.Pi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Measure.Haar.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
+
 open MeasureTheory Topology Matrix
 open scoped ENNReal NNReal
 
@@ -31,7 +82,6 @@ theorem measurePreserving_pi {K : Type} [CommRing K] [TopologicalSpace K] [IsTop
   let B : Measure ({k // p k} → K) := Measure.pi fun _ => ν
   let A : Measure ({k // ¬ p k} → K) := Measure.pi fun _ => ν
   have hmp := measurePreserving_piEquivPiSubtypeProd (fun _ : ι => ν) p
-  let e := MeasurableEquiv.piEquivPiSubtypeProd (fun _ : ι => K) p
   let g : ({k // p k} → K) → ({k // ¬ p k} → K) → ({k // ¬ p k} → K) :=
     fun b a => (fun _ => t.c * b ⟨t.j, hj⟩) + a
   have hgm : Measurable (Function.uncurry g) := by
@@ -70,9 +120,9 @@ theorem map_toMatrix_mulVec (K : Type) [CommRing K] [TopologicalSpace K] [IsTopo
   let P : Measure (ι → K) := Measure.pi fun _ : ι => ν
   haveI : P.IsAddHaarMeasure := Measure.pi.isAddHaarMeasure _
   have hμ : μ = Measure.addHaarScalarFactor μ P • P := Measure.isAddLeftInvariant_eq_smul μ P
-  have hP : P.map (fun x => t.toMatrix *ᵥ x) = P := (measurePreserving_pi ν t).map_eq
+  have hP : MeasurePreserving (fun x => t.toMatrix *ᵥ x) P P := measurePreserving_pi ν t
   generalize Measure.addHaarScalarFactor μ P = c at hμ
-  rw [hμ, Measure.map_smul, hP]
+  rw [hμ, Measure.map_smul c hP.measurable.aemeasurable, hP.map_eq]
 
 end GlobalTheory.CompanionTheory.SW.Transv
 

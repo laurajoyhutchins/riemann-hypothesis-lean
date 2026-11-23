@@ -1,7 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OntoStatementPfB
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.DivStatementPfLB
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.BasePsiLeviLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.DivStatementPfLA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OntoStatementPfB
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FourierCoefficientDomain
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.DivLC
 
@@ -57,34 +102,6 @@ theorem anal_loc {P : Frame X.Ψ r → ℂ} (hP : DifferentiableOn ℂ P X.dom) 
     (FourierCoefficientDomain.isOpen_dom X).preimage hc.continuous
   refine DivLA.analyticAt_of_diffOn hU ?_ (by simpa [cpt_zero'] using hx)
   exact hP.comp (hc.differentiable (by simp)).differentiableOn (fun z hz => hz)
-
-theorem leadM_succ {n δ : ℕ} (s : Fin n → Frame X.Ψ r → ℂ) (w0 : Frame X.Ψ r → ℂ)
-    (t : Fin δ → Frame X.Ψ r → ℂ) (T d : ℕ) (cc cc' cnew : (Fin n → ℕ) → Fin δ → ℂ)
-    (h1 : ∀ α ∈ Finset.Nat.antidiagonalTuple n d, cc' α = cnew α)
-    (h2 : ∀ α, α ∉ Finset.Nat.antidiagonalTuple n d → cc' α = cc α) (y : Frame X.Ψ r) :
-    leadM X s w0 t T (d + 1) cc' y =
-      leadM X s w0 t T d cc y + ∑ α ∈ Finset.Nat.antidiagonalTuple n d,
-        ∑ k, cnew α k * monoM X s α y * w0 y ^ (T - d) * t k y := by
-  have hU : ReciprocityTheory.ChartRestriction.G.AR.multiLt n (d + 1) =
-      ReciprocityTheory.ChartRestriction.G.AR.multiLt n d ∪ Finset.Nat.antidiagonalTuple n d := by
-    unfold ReciprocityTheory.ChartRestriction.G.AR.multiLt
-    rw [Finset.range_add_one, Finset.biUnion_insert, Finset.union_comm]
-  have hD : Disjoint (ReciprocityTheory.ChartRestriction.G.AR.multiLt n d) (Finset.Nat.antidiagonalTuple n d) := by
-    rw [Finset.disjoint_left]
-    intro α h1 h2
-    simp only [ReciprocityTheory.ChartRestriction.G.AR.multiLt, Finset.mem_biUnion, Finset.mem_range,
-      Finset.Nat.mem_antidiagonalTuple] at h1 h2
-    obtain ⟨e, he, he'⟩ := h1
-    omega
-  unfold leadM
-  rw [hU, Finset.sum_union hD]
-  congr 1
-  · apply Finset.sum_congr rfl
-    intro α hα
-    rw [h2 α (Finset.disjoint_left.mp hD hα)]
-  · apply Finset.sum_congr rfl
-    intro α hα
-    rw [h1 α hα, Finset.Nat.mem_antidiagonalTuple.mp hα]
 
 end
 

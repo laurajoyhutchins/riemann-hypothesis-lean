@@ -1,7 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.ConclOfInputs4
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NoCommonZeroSt
-import Formalism.LocalToGlobal.ProjectiveLattices.DepthTie
+module
+
+public import Development.AbelianVarietyTheory.Definitions.HeightFunctions.ConclOfInputs4
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -105,7 +140,7 @@ attribute [local irreducible]
   _root_.Submodule.Quotient.addCommGroup._aux_1 _root_.Submodule.Quotient.addCommGroup._aux_3 _root_.Quotient.map' _root_.Submodule.module'
   _root_.Subalgebra.algebra _root_.Subalgebra.instSMulSubtypeMem _root_.AddCommSemigroup.toAddCommMagma _root_.AddCommMonoid.toAddCommSemigroup
   _root_.LinearMap.comp _root_.LinearMap.restrictScalars _root_.Submodule.mkQ _root_.LinearMap.codRestrict
-  _root_.LinearMap.domRestrict _root_.Submodule.instPartialOrder _root_.Set.image _root_.Set.instUnion
+  _root_.LinearMap.domRestrict _root_.Submodule.instPartialOrder _root_.Set.image _root_.Set.instMax
   _root_.instSubNat _root_.EReal _root_.instPartialOrderEReal _root_.instZeroEReal
   _root_.instTopEReal _root_.instInfSetEReal _root_.Real.toEReal _root_.EReal.toReal
   _root_.instLENat _root_.FiniteDimensional _root_.Ideal.instHasQuotient_1 _root_.Subalgebra.toCommRing
@@ -135,28 +170,28 @@ def qT {G : GlobalFamilyData X ka wL wF} {la : HeightOneSpectrum (𝓞 B.KO)} (Q
 
 variable (G : GlobalFamilyData X ka wL wF) (S : Scal B)
 
-set_option maxHeartbeats 4000000 in
+
 theorem shareRhoR_iff (T d : ℕ) : ShareRhoR (gT n G) (sT n S) T d ↔ ShareRhoR G S T d := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem inBasis_iff (la : HeightOneSpectrum (𝓞 B.KO)) : InBasis (gT n G) la ↔ InBasis G la := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem inContainMR_iff (la : HeightOneSpectrum (𝓞 B.KO)) (CRm : ℝ) (T : ℕ) (c : ℝ) :
     InContainMR (gT n G) la (sT n S) CRm T c ↔ InContainMR G la S CRm T c := Iff.rfl
 
 variable {G}
 
-set_option maxHeartbeats 4000000 in
+
 theorem inCurve_iff {la : HeightOneSpectrum (𝓞 B.KO)} (Q : LocalPointData G la) : (qT n Q).InCurve ↔ Q.InCurve := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem inTie_iff {la : HeightOneSpectrum (𝓞 B.KO)} (Q : LocalPointData G la) : (qT n Q).InTie (sT n S) ↔ Q.InTie S := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem inLift_iff {la : HeightOneSpectrum (𝓞 B.KO)} (Q : LocalPointData G la) (T : ℕ) : (qT n Q).InLift T ↔ Q.InLift T := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem heights_iff (Qf : ∀ la, LocalPointData G la) (Gc PH Prw Pet : ℝ) :
     Heights (fun la => qT n (Qf la)) Gc PH Prw Pet ↔ Heights Qf Gc PH Prw Pet := Iff.rfl
 
@@ -164,16 +199,16 @@ end Structural
 
 variable (G : GlobalFamilyData X ka wL wF) (S : Scal B)
 
-set_option maxHeartbeats 4000000 in
+
 theorem tiedW_iff (Gc Prw : ℝ) : (gT n G).TiedW (sT n S) Gc Prw ↔ G.TiedW S Gc Prw := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem tiedTh_iff (Gc : ℝ) : (gT n G).TiedTh (sT n S) Gc ↔ G.TiedTh S Gc := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem tiedEt_iff (large₂ : SizeData₂ D) (Cf Af : ℝ) : (gT n G).TiedEt large₂ Cf Af ↔ G.TiedEt large₂ Cf Af := Iff.rfl
 
-set_option maxHeartbeats 4000000 in
+
 theorem combBound_iff (c : ℝ) (nus : HeightOneSpectrum (𝓞 B.KO) → ℝ) :
     CombBound (gT n G) (sT n S) c nus ↔ CombBound G S c nus := Iff.rfl
 
@@ -182,7 +217,7 @@ theorem inLiftC_of {la : HeightOneSpectrum (𝓞 B.KO)} (Q : LocalPointData G la
     (qT n Q).InLiftC (sT n S) Gc Prw T := fun a b c =>
   (inLift_iff n Q T).2 (h ((tiedW_iff n G S Gc Prw).1 a) ((inCurve_iff n Q).1 b) ((inTie_iff n S Q).1 c))
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem famIn_move (large₂ : SizeData₂ D) (K : KAdm) (H : KHyp) (Ch Ah Cq Aq C2 A2 CR : ℝ) (Tn : ℕ) (Gc PH Prw Pet Pd : ℝ)
     (h : FamIn large₂ K H Ch Ah Cq Aq C2 A2 CR S Tn G Gc PH Prw Pet Pd) :
@@ -192,7 +227,7 @@ theorem famIn_move (large₂ : SizeData₂ D) (K : KAdm) (H : KHyp) (Ch Ah Cq Aq
     (shareRhoR_iff n G S _ _).2 a8, a9, a10, fun la => (inBasis_iff n G la).2 (a11 la),
     fun la => (inContainMR_iff n G S la _ _ _).2 (a12 la)⟩
 
-set_option maxHeartbeats 4000000 in
+
 
 theorem ptIn_move (Tn : ℕ) (c Gc PH Prw Pet : ℝ) (nus : HeightOneSpectrum (𝓞 B.KO) → ℝ)
     (h : PtIn S Tn G c Gc PH Prw Pet nus) : PtIn (sT n S) Tn (gT n G) c Gc PH Prw Pet nus := by
@@ -201,9 +236,9 @@ theorem ptIn_move (Tn : ℕ) (c Gc PH Prw Pet : ℝ) (nus : HeightOneSpectrum (�
     fun la => (inTie_iff n S (Qf la)).2 (a3 la), fun la => inLiftC_of n S (Qf la) Gc Prw Tn (a4 la),
     (heights_iff n Qf Gc PH Prw Pet).2 a5⟩
 
-set_option maxHeartbeats 4000000 in
-set_option linter.unusedVariables false in
 
+
+set_option linter.unusedVariables false in
 theorem exists_famIn_ptIn : ∀ (D : D7) (B : WeightFamilies.Prov D) (P : ModuliIntegralCharts.Prov D) (j : ℕ) (X : PJ D B P j) (large₂ : SizeData₂ D) (K : KAdm) (H : KHyp) (Ch Ah Cq Aq C2 A2 CR CT : ℝ) (S : Scal B) (ka wL wF : WeightFamilies.Wt D j) (Tn nP nW : ℕ) (h0 : ℝ) (nus : HeightOneSpectrum (𝓞 B.KO) → ℝ) (n : SecNorm B) (G : GlobalFamilyData X ka wL wF) (Gc PH Prw Pet Pd c : ℝ), FamIn large₂ K H Ch Ah Cq Aq C2 A2 CR S Tn G Gc PH Prw Pet Pd → PtIn S Tn G c Gc PH Prw Pet nus → ∃ G' : GlobalFamilyData (PJ.tol2NormAlt n.N n.h0 n.h1 n.h2 n.h3 n.h4 X) ka wL wF, FamIn large₂ K H Ch Ah Cq Aq C2 A2 CR (scalarsWithNorm n.N n.h0 n.h1 n.h2 n.h3 n.h4 S) Tn G' Gc PH Prw Pet Pd ∧ PtIn (scalarsWithNorm n.N n.h0 n.h1 n.h2 n.h3 n.h4 S) Tn G' c Gc PH Prw Pet nus :=
   fun _ _ _ _ _ large₂ K H Ch Ah Cq Aq C2 A2 CR _ S _ _ _ Tn _ _ _ nus n G Gc PH Prw Pet Pd c hF hP =>
     ⟨gT n G, famIn_move n G S large₂ K H Ch Ah Cq Aq C2 A2 CR Tn Gc PH Prw Pet Pd hF, ptIn_move n G S Tn c Gc PH Prw Pet nus hP⟩

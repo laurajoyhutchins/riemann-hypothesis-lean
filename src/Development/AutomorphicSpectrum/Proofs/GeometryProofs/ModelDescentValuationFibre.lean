@@ -1,10 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPreFamilyOfLatticeFamilyTwo
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwinGradedFrameIff
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MemSpanOverOfMem
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocFreeMapMkQIff
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.BundleChernComparison
+public import Mathlib.RingTheory.TensorProduct.IsBaseChangeFree
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocFreeMapMkQIff
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.MemSpanOverOfMem
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Cartier
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.PTwinGradedFrameIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InstFintypeSumElim
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory NumberField MvPolynomial ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Num GlobalTheory.CompanionTheory.Ar.Top
 open GroundTheory.Heights₂.Heights.NumbersDVR (pointIdeal segreVec IsFlagFrame IsFlagPair SameGenericFibre IsModelOver divCycle)
 open GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.NumbersDVR.Bundles (mseg fnField)
@@ -114,8 +168,8 @@ variable {O Ω O' Ω' : Type} [CommRing O] [Field Ω] [Algebra O Ω] [CommRing O
   [Field Ω'] [Algebra Ω Ω'] [Algebra O' Ω'] [Algebra O Ω'] [IsScalarTower O O' Ω']
   [IsScalarTower O Ω Ω'] {K : Type} [Fintype K] {J : K → Type}
 
-variable (Ω') in
 
+variable (Ω') in
 abbrev bcPt (y : (Σ k, J k) → Ω) : (Σ k, J k) → Ω' := fun v => algebraMap Ω Ω' (y v)
 
 theorem segreVec_bcPt (y : (Σ k, J k) → Ω) (c : ∀ k, J k) :
@@ -139,7 +193,7 @@ theorem map_mem_chartRing (y : (Σ k, J k) → Ω) (c : ∀ k, J k) {a : Ω}
   | algebraMap r =>
     rw [← IsScalarTower.algebraMap_apply O Ω Ω', IsScalarTower.algebraMap_apply O O' Ω']
     exact Subalgebra.algebraMap_mem _ _
-  | add s t _ _ hs ht => rw [map_add]; exact Subalgebra.add_mem _ hs ht
+  | add s t _ _ hs ht => rw [map_add (f := _)]; exact Subalgebra.add_mem _ hs ht
   | mul s t _ _ hs ht => rw [map_mul]; exact Subalgebra.mul_mem _ hs ht
 
 variable {r : ℕ}
@@ -223,6 +277,7 @@ theorem extBasis_repr (w : Module.Basis (Fin r) Ω (Fin r → Ω)) (e : Fin r �
   classical
   have e1 : bcMap Ω Ω' (Fin r) e = ∑ i, algebraMap Ω Ω' (w.repr e i) • extBasis Ω' w i := by
     conv_lhs => rw [← w.sum_repr e]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [bcMap_smul, extBasis_apply]
@@ -242,6 +297,7 @@ theorem exists_coeff_of_mem_span {ι : Type} (x' : ι → Ω') (c : ι) (R : Sub
     obtain ⟨t, ht, _, ⟨v, hv, rfl⟩, rfl⟩ := hz
     obtain ⟨a, ha, rfl⟩ := hgen v hv
     refine ⟨fun j => t * algebraMap Ω Ω' (a j), fun j => Subalgebra.mul_mem _ ht (hR _ (ha j)), ?_⟩
+
     rw [map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [bcMap_smul, smul_smul]
@@ -312,7 +368,7 @@ theorem pointConeMap_map (y : (Σ k, J k) → Ω) (f : MRing J O) :
   | C a =>
     simp [pointConeMap, MvPolynomial.algebraMap_apply,
       ← IsScalarTower.algebraMap_apply O O' Ω', ← IsScalarTower.algebraMap_apply O Ω Ω']
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     simp only [map_mul, hp, MvPolynomial.map_X]
     simp [pointConeMap]
@@ -328,7 +384,7 @@ theorem aeval_map (y : (Σ k, J k) → Ω) (f : GroundTheory.Heights₂.Heights.
   induction f using MvPolynomial.induction_on with
   | C a =>
     simp [← IsScalarTower.algebraMap_apply O O' Ω', ← IsScalarTower.algebraMap_apply O Ω Ω']
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp => simp only [map_mul, hp, MvPolynomial.map_X, aeval_X]
 
 variable [DecidableEq K]
@@ -340,8 +396,8 @@ theorem isMultiHomog_map {f : MRing J O} {b : K → ℕ} (h : IsMultiHomog f b) 
   rw [coeff_map] at hd
   exact h fun h0 => hd (by rw [h0, map_zero])
 
-open GroundTheory.Heights₂.Heights.NumbersDVR in
 
+open GroundTheory.Heights₂.Heights.NumbersDVR in
 theorem isVerticalDivisor_ext [Fintype K] [IsDomain O] [IsDiscreteValuationRing O] [IsDomain O']
     [IsDiscreteValuationRing O'] (y : (Σ k, J k) → Ω)
     (hinj : Function.Injective (algebraMap O Ω)) {ϖ : O} {ϖ' : O'} (hϖ : Irreducible ϖ)

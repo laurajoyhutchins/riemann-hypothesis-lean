@@ -1,4 +1,45 @@
-import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.AdaptC
+module
+
+public import Development.WeilBound.ThetaLifts.LeviDeterminants.MixedModels.AdaptC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,25 +75,17 @@ theorem dec (w : Matrix (Fin n₁ ⊕ Fin 2) (Fin d) (AE F E)) : incM F (frame H
 def what₂ {R : Type} (z : Matrix (Fin n₁) (Fin d) R) (a b : Fin d → R) : Matrix (Fin n₁ ⊕ Fin 2) (Fin d) R :=
   Matrix.of fun i => Sum.elim z ![a, b] i
 
-@[simp] theorem rows_inl {R : Type} (z : Matrix (Fin n₁) (Fin d) R) (a b : Fin d → R) (i : Fin n₁) : what₂ z a b (.inl i) = z i := rfl
-
-@[simp] theorem rows_zero {R : Type} (z : Matrix (Fin n₁) (Fin d) R) (a b : Fin d → R) : what₂ z a b (.inr 0) = a := rfl
-
-@[simp] theorem rows_one {R : Type} (z : Matrix (Fin n₁) (Fin d) R) (a b : Fin d → R) : what₂ z a b (.inr 1) = b := rfl
-
-@[simp] theorem rows_sub {R : Type} (z : Matrix (Fin n₁) (Fin d) R) (a b : Fin d → R) : (what₂ z a b).submatrix .inl id = z := rfl
-
 omit [NumberField E] in
 theorem frame_alt (z : Fin d → AE F E) : incM F (frame H) * what₂ (0 : Matrix (Fin n₁) (Fin d) (AE F E)) z 0 = Matrix.vecMulVec (incV F H.x) z := by
-  rw [dec]; ext i l; simp [Matrix.vecMulVec_apply]
+  rw [dec]; ext i l; simp [what₂, Matrix.of_apply, Matrix.vecMulVec_apply, Matrix.mul_apply, Sum.elim]
 
 omit [NumberField E] in
 theorem frame_y (z : Fin d → AE F E) : incM F (frame H) * what₂ (0 : Matrix (Fin n₁) (Fin d) (AE F E)) 0 z = Matrix.vecMulVec (incV F H.y) z := by
-  rw [dec]; ext i l; simp [Matrix.vecMulVec_apply]
+  rw [dec]; ext i l; simp [what₂, Matrix.of_apply, Matrix.vecMulVec_apply, Matrix.mul_apply, Sum.elim]
 
 omit [NumberField E] in
 theorem frame_iota (z : Matrix (Fin n₁) (Fin d) (AE F E)) : incM F (frame H) * what₂ z 0 0 = incM F H.ι * z := by
-  rw [dec]; ext i l; simp [Matrix.vecMulVec_apply]
+  rw [dec]; ext i l; simp [what₂, Matrix.of_apply, Matrix.vecMulVec_apply, Matrix.mul_apply, Sum.elim]
 
 variable {A : Matrix (Fin n₁ ⊕ Fin 2) (Fin n) (AE F E)}
 

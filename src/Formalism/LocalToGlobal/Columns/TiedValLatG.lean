@@ -1,7 +1,63 @@
+module
+
+public import Formalism.LocalRingCardinality.DataForms
+public import Formalism.LocalToGlobal.Columns.CoefficientsModP.NablaIndependenceHolds
+public import Formalism.LocalToGlobal.Columns.PolyFn
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.LatticeBasisExistsHolds
+public import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairBDual
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.TauLatticeLatticeHolds
 import Formalism.LocalToGlobal.Columns.PolyFnLemmas
-import Formalism.LocalToGlobal.Columns.LocWLemmas
-import Formalism.LocalToGlobal.Columns.CoefficientsModP
-import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGen
+public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwLocGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Module Matrix
 open scoped TensorProduct
@@ -142,7 +198,7 @@ theorem vl_map_mem_intSpan (w : Pl.Pl) (lam lam' : ι → DomWeight n) (hn : ∀
       exact zero_mem _
     | add x y _ _ hx hy =>
       intro r hr
-      rw [smul_add, map_add]
+      rw [smul_add, map_add (f := _)]
       exact add_mem (hx r hr) (hy r hr)
     | smul a x _ hx =>
       intro r hr
@@ -278,7 +334,7 @@ theorem vl_coord (J : Matrix (Fin n) (Fin n) E) (lam : ι → DomWeight n) (B : 
 include hval
 
 theorem vl_mem_delAtr_iff (hpw : Function.Surjective pw) (J : Matrix (Fin n) (Fin n) E) (lam lam' : ι → DomWeight n)
-    (hn : ∀ τ, (lam τ).natW = (lam' τ).natW) (M : Submodule (𝓞 E) (Fin n → E)) (hM : Submodule.IsLattice E M) (F : VV K lam) :
+    (hn : ∀ τ, (lam τ).natW = (lam' τ).natW) (M : Submodule (𝓞 E) (Fin n → E)) (hM : Submodule.IsFullLattice E M) (F : VV K lam) :
     F ∈ delAtr emb lam M ↔ ∀ (w : Pl.Pl) (B : GL (Fin n) E), IsLocBasis (Pl.resChar w) (M : Set (Fin n → E)) B →
       ∃ P ∈ vlIntSpan s Pl w lam', evV emb J lam s F =
         fnOf _ (shiftOf lam) (atInf (embAt s emb) ((B⁻¹ : GL (Fin n) E) : Matrix (Fin n) (Fin n) E)) P := by
@@ -293,7 +349,8 @@ theorem vl_mem_delAtr_iff (hpw : Function.Surjective pw) (J : Matrix (Fin n) (Fi
   · intro h w' Bd hBd
     obtain ⟨w, rfl⟩ := hpw w'
     have : Fact (Pl.resChar w).Prime := ⟨Pl.resChar_prime w⟩
-    obtain ⟨B, hB⟩ := Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.LocB.exists_isLocBasis (Pl.resChar w) E M hM.fg hM.span_eq_top
+    letI : Submodule.IsFullLattice E M := hM
+    obtain ⟨B, hB⟩ := Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.LocB.exists_isLocBasis (Pl.resChar w) E M hM.fg Submodule.IsFullLattice.span_eq_top
     obtain ⟨P, hP, hPe⟩ := h w B hB
     obtain ⟨G, hG, rfl⟩ := vl_exists_of_mem_intSpan Pl pw hval s w lam lam' hn hP
     rw [vl_coord emb s J lam B F] at hPe

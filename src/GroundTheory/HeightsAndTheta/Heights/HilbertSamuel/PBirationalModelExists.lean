@@ -1,6 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBirationalModelExists
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogX
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBirationalModelExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsHomogeneousGrL
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.IsMultiHomogX
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ExistsPrimeFiltrationOfIsMultiHomogIdeal
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.LengthLocQuotEqZero
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -60,9 +113,12 @@ def coordClass (p : Σ k, ι k) : FractionRing (MRing ι ⧸ P) :=
 
 theorem aeval_coordClass (g : MRing ι) :
     aeval (coordClass P) g = algebraMap (MRing ι ⧸ P) (FractionRing (MRing ι ⧸ P)) (Ideal.Quotient.mk P g) := by
+  set_option synthInstance.maxHeartbeats 200000 in
   induction g using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq =>
+    rw [map_add (aeval (coordClass P)), map_add (Ideal.Quotient.mk P),
+      map_add (algebraMap _ _), hp, hq]
   | mul_X p n hp => simp only [map_mul, hp, aeval_X, coordClass]
 
 theorem aeval_coordClass_eq_zero (g : MRing ι) : aeval (coordClass P) g = 0 ↔ g ∈ P := by
@@ -79,7 +135,7 @@ def fnField : Subfield (FractionRing (MRing ι ⧸ P)) where
     refine ⟨d + d', g * h' + h * g', h * h',
       isMultiHomog_add' (isMultiHomog_mul hg hh') (isMultiHomog_mul hh hg'), isMultiHomog_mul hh hh',
       by simp [h0, h0'], ?_⟩
-    simp only [map_add, map_mul, hs, ht]
+    simp only [map_add (f := _), map_mul, hs, ht]
     ring
   mul_mem' := by
     rintro s t ⟨d, g, h, hg, hh, h0, hs⟩ ⟨d', g', h', hg', hh', h0', ht⟩
@@ -105,16 +161,13 @@ theorem coordClass_ne_zero {p : Σ k, ι k} (hp : (X p : MRing ι) ∉ P) : coor
   have h := (aeval_coordClass_eq_zero P (X p)).not.2 hp
   rwa [aeval_X] at h
 
-open Classical in
 
+open Classical in
 def birPoint (c : ∀ k, ι k) (hc : ∀ k, (X ⟨k, c k⟩ : MRing ι) ∉ P) (p : Σ k, ι k) : fnField P :=
   ⟨coordClass P p / coordClass P ⟨p.1, c p.1⟩,
     ⟨Pi.single p.1 1, X p, X ⟨p.1, c p.1⟩, isMultiHomog_X' p.1 p.2, isMultiHomog_X' p.1 (c p.1),
       by rw [aeval_X]; exact coordClass_ne_zero (hc p.1),
       by rw [aeval_X, aeval_X, div_mul_cancel₀ _ (coordClass_ne_zero (hc p.1))]⟩⟩
-
-theorem coe_birPoint (c : ∀ k, ι k) (hc : ∀ k, (X ⟨k, c k⟩ : MRing ι) ∉ P) (p : Σ k, ι k) :
-    (birPoint c hc p : FractionRing (MRing ι ⧸ P)) = coordClass P p / coordClass P ⟨p.1, c p.1⟩ := rfl
 
 theorem coe_aeval_birPoint (c : ∀ k, ι k) (hc : ∀ k, (X ⟨k, c k⟩ : MRing ι) ∉ P) {g : MRing ι} {a : K → ℕ}
     (hg : IsMultiHomog g a) :
@@ -140,7 +193,7 @@ theorem eval_mConeMap_birPoint (c : ∀ k, ι k) (hc : ∀ k, (X ⟨k, c k⟩ : 
     have e1 := map_intCast (eval₂Hom (fnField P).subtype (fun k => coordClass P ⟨k, c k⟩)) a
     simp only [coe_eval₂Hom] at e1
     simpa [mConeMap] using e1
-  | add p q hp hq => simp only [map_add, eval₂_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), eval₂_add, hp, hq]
   | mul_X p n hp =>
     have hX : mConeMap (birPoint c hc) (X n) = C (birPoint c hc n) * X n.1 := by simp [mConeMap]
     have e : (fnField P).subtype (birPoint c hc n) * coordClass P ⟨n.1, c n.1⟩ = coordClass P n :=

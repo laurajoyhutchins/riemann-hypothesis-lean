@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.HasQIff
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasQIff
+public import Mathlib.NumberTheory.ArithmeticFunction.Misc
+public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.E2.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +57,6 @@ def pv (τ : ℍ) (x : Fin 2 → ℝ) : ℂ := (x 0 : ℂ) * τ + (x 1 : ℂ)
 def eta (τ : ℍ) (x : Fin 2 → ℝ) : ℂ := EisensteinSeries.G2 τ * pv τ x - 2 * Real.pi * Complex.I * (x 0 : ℂ)
 
 def G2s (τ : ℍ) : ℂ := EisensteinSeries.G2 τ - (Real.pi : ℂ) / (τ.im : ℂ)
-
-def redR (γ : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℝ := (γ : Matrix (Fin 2) (Fin 2) ℤ).map (Int.cast : ℤ → ℝ)
 
 def redGL (N : ℕ) (γ : SL(2, ℤ)) : GL (Fin 2) (ZMod N) :=
   Matrix.SpecialLinearGroup.toGL (Matrix.SpecialLinearGroup.map (Int.castRingHom (ZMod N)) γ)
@@ -49,27 +91,27 @@ def ch (N : ℕ) (j : ZMod N) : ℂ := Complex.exp (2 * Real.pi * Complex.I * (j
 
 def ZetaAct (g : ℂ ≃+* ℂ) (N : ℕ) (a : ZMod N) : Prop := ∀ j : ZMod N, g (ch N j) = ch N (a * j)
 
-open Classical in
 
+open Classical in
 def cSum (N e : ℕ) (ε : ℂ) (x : Fin 2 → ZMod N) (k : ℕ) : ℂ :=
   ∑ m ∈ k.divisors, (m : ℂ) ^ e * ((if ((k / m : ℕ) : ZMod N) = x 0 then ch N ((m : ZMod N) * x 1) else 0) +
     ε * (if ((k / m : ℕ) : ZMod N) = -x 0 then ch N (-((m : ZMod N) * x 1)) else 0))
 
-open Classical in
 
+open Classical in
 def cB (N : ℕ) (x : Fin 2 → ZMod N) (k : ℕ) : ℂ :=
   if k = 0 then (if x 0 = 0 then ch N (x 1) / (1 - ch N (x 1)) ^ 2 else 0) else cSum N 1 1 x k
 
-open Classical in
 
+open Classical in
 def cD (N : ℕ) (x : Fin 2 → ZMod N) (k : ℕ) : ℂ :=
   if k = 0 then (if x 0 = 0 then ch N (x 1) * (1 + ch N (x 1)) / (1 - ch N (x 1)) ^ 3 else 0) else cSum N 2 (-1) x k
 
 def cG (N : ℕ) (k : ℕ) : ℂ :=
   if k = 0 then -1 / 12 else if N ∣ k then 2 * (ArithmeticFunction.sigma 1 (k / N) : ℂ) else 0
 
-open Classical in
 
+open Classical in
 def cP (N : ℕ) (x : Fin 2 → ZMod N) (k : ℕ) : ℂ := if x = 0 then 0 else cB N x k - cG N k
 
 theorem wB_eq (N : ℕ) (x : Fin 2 → ZMod N) (τ : ℍ) :

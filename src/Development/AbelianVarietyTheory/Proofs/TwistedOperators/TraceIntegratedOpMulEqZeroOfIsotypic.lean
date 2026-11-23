@@ -1,21 +1,51 @@
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.DiscreteSeriesClassificationIff
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspidalNoRadicalFixed
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ConstantTermVanishing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.InnerEqZeroOfNotUEquiv
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.HilbertSchurUnitaryIrreducibleScalar
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsCompactOperatorOfIsHilbertSchmidt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.EllipticPartTestData
 import Development.AbelianVarietyTheory.Definitions.Divisors.HasTypeVec
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.CuspDiscreteDecompositionOfTraceClass
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsClosedEmbeddingOfLocallyCompact
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsFactorisationCuspidal
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.PseudoCoefficientUpqTrivial
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.DiscreteSeriesCharacter
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.LanglandsClassification
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.LabesseWaldspurger
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.ExistsCellOfIsSubquotient
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RadfordShufflePolynomialHolds
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CuspidalNoRadicalFixed
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.ConstantTermVanishing
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.PseudoCoefficientSeparation
+import Development.AbelianVarietyTheory.Definitions.Foundations.MeasurePreservingRmulQuotMeas
+import Formalism.LocalToGlobal.IndefiniteReal.ScalarOnPartsFull
+
+@[expose] public section
+
 open MeasureTheory Set Filter NumberField IsDedekindDomain
 open GlobalTheory.AdelicU GlobalTheory.OpTrace GlobalTheory.Orb GlobalTheory.AutomorphicL2Unitary GlobalTheory.AutMult Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.IndefR.Mult
@@ -67,32 +97,32 @@ theorem isCopy_of_isIrredSubrep (hδ : IsIrrUnitary δ) (hπ : IsUnitaryRep π) 
 
 theorem exists_hilbertBasis (hδ : IsIrrUnitary δ) (hπ : IsUnitaryRep π) (hiso : IsIsotypic δ π) :
     ∃ (ι : Type) (e : ι → (X →ₗᵢ[ℂ] H)) (b : HilbertBasis (Σ _ : ι, GlobalTheory.OpTrace.stdIndex X) ℂ H),
-      (∀ i g x, e i (δ g x) = π g (e i x)) ∧ ∀ p, b p = e p.1 (GlobalTheory.OpTrace.stdBasis X p.2) := by
+      (∀ i g x, e i (δ g x) = π g (e i x)) ∧ ∀ p, b p = e p.1 (GlobalTheory.OpTrace.stdBasis (H := X) p.2) := by
   obtain ⟨ι, W, hW, hs⟩ := GlobalTheory.DiscreteSum.exists_isHilbertSum hπ fun U hU h0 => by
     obtain ⟨V, hV, hc⟩ := exists_isCopy_le hδ hπ hiso hU h0
     exact ⟨V, hV, hc.isIrredSubrep hδ.irred⟩
   choose e he hr using fun i => isCopy_iff.1 (isCopy_of_isIrredSubrep hδ hπ hiso (hW i))
   have hmem : ∀ i x, e i x ∈ W i := fun i x => hr i ▸ ⟨x, rfl⟩
-  let v : (Σ _ : ι, GlobalTheory.OpTrace.stdIndex X) → H := fun p => e p.1 (GlobalTheory.OpTrace.stdBasis X p.2)
+  let v : (Σ _ : ι, GlobalTheory.OpTrace.stdIndex X) → H := fun p => e p.1 (GlobalTheory.OpTrace.stdBasis (H := X) p.2)
   have hon : Orthonormal ℂ v := by
-    refine ⟨fun p => by simp [v, (GlobalTheory.OpTrace.stdBasis X).orthonormal.1], fun p q hpq => ?_⟩
+    refine ⟨fun p => by simp [v, (GlobalTheory.OpTrace.stdBasis (H := X)).orthonormal.1], fun p q hpq => ?_⟩
     obtain ⟨i, a⟩ := p
     obtain ⟨j, c⟩ := q
     by_cases hij : i = j
     · subst hij
       have hac : a ≠ c := fun h => hpq (by rw [h])
       simp only [v, LinearIsometry.inner_map_map]
-      exact (GlobalTheory.OpTrace.stdBasis X).orthonormal.2 hac
+      exact (GlobalTheory.OpTrace.stdBasis (H := X)).orthonormal.2 hac
     · exact hs.OrthogonalFamily hij ⟨_, hmem i _⟩ ⟨_, hmem j _⟩
   have hsp : (Submodule.span ℂ (Set.range v))ᗮ = ⊥ := by
     refine (Submodule.eq_bot_iff _).2 fun x hx => ?_
     refine GlobalTheory.DiscreteSum.eq_zero_of_isHilbertSum hs fun i y hy => ?_
     obtain ⟨z, rfl⟩ : y ∈ LinearMap.range (e i).toLinearMap := (hr i).symm ▸ hy
-    have h1 : ∀ a, ⟪GlobalTheory.OpTrace.stdBasis X a, adjoint (e i).toContinuousLinearMap x⟫_ℂ = 0 := fun a => by
+    have h1 : ∀ a, ⟪GlobalTheory.OpTrace.stdBasis (H := X) a, adjoint (e i).toContinuousLinearMap x⟫_ℂ = 0 := fun a => by
       rw [adjoint_inner_right]
       exact Submodule.inner_right_of_mem_orthogonal (Submodule.subset_span (Set.mem_range_self (f := v) ⟨i, a⟩)) hx
     have h2 : adjoint (e i).toContinuousLinearMap x = 0 := by
-      have := (GlobalTheory.OpTrace.stdBasis X).hasSum_repr (adjoint (e i).toContinuousLinearMap x)
+      have := (GlobalTheory.OpTrace.stdBasis (H := X)).hasSum_repr (adjoint (e i).toContinuousLinearMap x)
       simp only [HilbertBasis.repr_apply_apply, h1, zero_smul] at this
       exact (hasSum_zero.unique this).symm
     change ⟪(e i).toContinuousLinearMap z, x⟫_ℂ = 0
@@ -116,7 +146,7 @@ theorem hasSum_copy [MeasurableSpace G] {μ : Measure G} {f : G → ℂ} (hδ : 
     (hπ : IsUnitaryRep π) (hR : IsRepOp π μ f (repOp π μ f)) (e : X →ₗᵢ[ℂ] H)
     (he : ∀ g x, e (δ g x) = π g (e x)) (Q : H →L[ℂ] H) (hQ : ∀ g, Q * π g = π g * Q)
     (htr : trace (repOp δ μ f) = 0) (hA : IsTraceClass (repOp π μ f * Q)) :
-    HasSum (fun a => ⟪e (stdBasis X a), (repOp π μ f * Q) (e (stdBasis X a))⟫_ℂ) 0 := by
+    HasSum (fun a => ⟪e (stdBasis (H := X) a), (repOp π μ f * Q) (e (stdBasis (H := X) a))⟫_ℂ) 0 := by
   let E : X →L[ℂ] H := e.toContinuousLinearMap
   have he' : ∀ g x, E (δ g x) = π g (E x) := he
   have hEE : ∀ x, adjoint E (E x) = x := fun x => ext_inner_left ℂ fun y => by
@@ -147,10 +177,10 @@ theorem hasSum_copy [MeasurableSpace G] {μ : Measure G} {f : G → ℂ} (hδ : 
     rw [hcomm, hx, map_smul]
   have htr' : trace (adjoint E ∘L (repOp π μ f * Q) ∘L E) = 0 := by
     rw [hP, trace_smul, htr, mul_zero]
-  have h := (hA.comp_comp (adjoint E) E).hasSum_trace (stdBasis X)
+  have h := (hA.comp_comp (adjoint E) E).hasSum_trace (stdBasis (H := X))
   rw [htr'] at h
   refine h.congr_fun fun a => ?_
-  change _ = ⟪stdBasis X a, adjoint E ((repOp π μ f * Q) (E (stdBasis X a)))⟫_ℂ
+  change _ = ⟪stdBasis (H := X) a, adjoint E ((repOp π μ f * Q) (E (stdBasis (H := X) a)))⟫_ℂ
   rw [adjoint_inner_right]
   rfl
 
@@ -162,7 +192,7 @@ theorem trace_repOp_mul_eq_zero_of_isIsotypic : ∀ (G : Type) [Group G] [Topolo
   intro G _ _ _ _ _ μ f hf X _ _ _ H _ _ _ δ π hδ hπ hiso _ Q hQ htr hA
   by_cases hex : ∃ T, IsRepOp π μ f T
   swap
-  · have h0 : repOp π μ f = 0 := by rw [repOp, dif_neg hex]
+  · have h0 : repOp π μ f = 0 := by rw [repOp, dite_eq_right hex]
     rw [h0, zero_mul, trace_zero]
   have hR : IsRepOp π μ f (repOp π μ f) := by
     obtain ⟨T, hT⟩ := hex

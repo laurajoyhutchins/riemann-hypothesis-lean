@@ -1,8 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.RedDefs
-import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementK
-import Formalism.EllipticTorsion.EllipticTorsionProofs.FormalGroupPointsNoPrimeToPTorsion
-import Formalism.EllipticTorsion.EllipticTorsionProofs.TorInt
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.StatementK
+public import Formalism.EllipticTorsion.EllipticTorsionProofs.FormalGroupPointsNoPrimeToPTorsion
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.SemiChar
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical
@@ -75,15 +119,19 @@ theorem torsUnit3 (K : Type) [NormedField K] [IsUltrametricDist K] (g2 g3 : K) (
     refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> simp only [Formalism.L2.Th1.A.shortW, norm_zero, zero_le_one]
     · exact ha4.le
     · exact ha6.le
-  have hD : ‖(Formalism.L2.Th1.A.shortW g2 g3).Δ‖ = 1 := by
-    have : (Formalism.L2.Th1.A.shortW g2 g3).Δ = g2 ^ 3 - 27 * g3 ^ 2 := by
-      simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
-        WeierstrassCurve.b₈, Formalism.L2.Th1.A.shortW]
-      have h40 : (4 : K) ≠ 0 := by intro h0; rw [h0, norm_zero] at h4; exact zero_ne_one h4
-      field_simp
-      ring
-    rw [this, hΔ]
-  have hx1 := (Formalism.ELL.torsionIntegral_of Formalism.ELL.formal_group_points_no_prime_to_p_torsion K _ hW hD n hn x y h hP).1
+  have formalGroupTorsionFree : ∀ P : (Formalism.L2.Th1.A.shortW g2 g3).toAffine.Point,
+      Formalism.ELL.InFormalGroupPoints P → n • P = 0 → P = 0 := by
+    intro P hFormal hTorsion
+    by_contra hNonzero
+    obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 :=
+      Nat.exists_eq_succ_of_ne_zero (by rintro rfl; simp at hn)
+    have hz := (Formalism.ELL.FormalGroupPointsTorsion.mulz hW P hFormal hNonzero m).2
+    rw [hTorsion, Affine.Point.zero_def] at hz
+    simp only [Formalism.ELL.FormalGroupPointsTorsion.zf, zero_sub, norm_neg, norm_mul, hn, one_mul] at hz
+    exact lt_irrefl _ hz
+  have hx1 : ‖x‖ ≤ 1 := by
+    by_contra hx
+    exact Affine.Point.some_ne_zero h (formalGroupTorsionFree _ (not_le.mp hx) hP)
   by_contra hne
   have hx : ‖x‖ < 1 := lt_of_le_of_ne hx1 hne
   have heq : y ^ 2 = -g3 / 4 + (x ^ 3 + -g2 / 4 * x) := by
@@ -143,7 +191,7 @@ theorem torsUnit3 (K : Type) [NormedField K] [IsUltrametricDist K] (g2 g3 : K) (
       convert hb using 2
       ring
   have h3P : 3 • Affine.Point.some x y h = 0 := by
-    refine Formalism.ELL.formal_group_points_no_prime_to_p_torsion K _ hW hD n hn _ hE ?_
+    refine formalGroupTorsionFree _ hE ?_
     rw [smul_comm, hP, smul_zero]
   have hd1 : addOrderOf (Affine.Point.some x y h) ∣ 3 := addOrderOf_dvd_of_nsmul_eq_zero h3P
   have hd2 : addOrderOf (Affine.Point.some x y h) ∣ n := addOrderOf_dvd_of_nsmul_eq_zero hP

@@ -1,11 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovol
-import Formalism.HermitianLattices.HermitianLatticesProofs.IndexBasic
-import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
-import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
+public import Formalism.HermitianLattices.StatementMass
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusCovol
+public import Formalism.HermitianLattices.HermitianLatticesProofs.IndexBasic
+import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
 import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
@@ -57,12 +109,12 @@ end General
 variable {K V : Type} [Field K] [NumberField K] [StarRing K] [AddCommGroup V] [Module K V]
   [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V]
 
-omit [StarRing K] [FiniteDimensional K V] in
 
-theorem idxN_ne_zero {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X) (hY : Y.FG) :
+omit [StarRing K] [FiniteDimensional K V] in
+theorem idxN_ne_zero {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsFullLattice K X) (hY : Y.FG) :
     idxN Y X ≠ 0 := by
   obtain ⟨d, hd, hdY⟩ := indexBasic_denom (nonZeroDivisors (𝓞 K)) Y X hY
-    (by rw [indexBasic_locS_top (K := K) X hX.span_eq_top]; exact le_top)
+    (by rw [indexBasic_locS_top (K := K) X (Submodule.IsFullLattice.span_eq_top (A := K) (M := X))]; exact le_top)
   have hd0 : d ≠ 0 := nonZeroDivisors.ne_zero hd
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.1 (Ideal.absNorm_mem (Ideal.span {d}))
   have hn : Ideal.absNorm (Ideal.span {d}) ≠ 0 := by
@@ -83,15 +135,15 @@ theorem idxN_ne_zero {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X)
   exact Nat.card_pos.ne'
 
 omit [StarRing K] [FiniteDimensional K V] in
-theorem lattice_between {X Y Z : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X)
-    (hY : Submodule.IsLattice K Y) (h1 : X ≤ Z) (h2 : Z ≤ Y) : Submodule.IsLattice K Z :=
-  Submodule.IsLattice.of_le_of_isLattice_of_fg K h1 (hY.fg.of_le h2)
+theorem lattice_between {X Y Z : Submodule (𝓞 K) V} (hX : Submodule.IsFullLattice K X)
+    (hY : Submodule.IsFullLattice K Y) (h1 : X ≤ Z) (h2 : Z ≤ Y) : Submodule.IsFullLattice K Z :=
+  Submodule.IsFullLattice.of_le_of_fg K h1 (hY.fg.of_le h2)
 
 variable (h : V →ₗ⋆[K] V →ₗ[K] K) (hs : h.IsSymm) (hn : h.Nondegenerate)
 include hs hn
 
-theorem dual_covBy {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X)
-    (hY : Submodule.IsLattice K Y) (hc : X ⋖ Y) : dual h Y ⋖ dual h X := by
+theorem dual_covBy {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsFullLattice K X)
+    (hY : Submodule.IsFullLattice K Y) (hc : X ⋖ Y) : dual h Y ⋖ dual h X := by
   have dl := dualLattice (𝓞 K) K V h hs hn star_algebraMap_ringOfIntegers_mem_range
   have an := (dualBasic (𝓞 K) K V h hs star_algebraMap_ringOfIntegers_mem_range).1
   refine ⟨lt_of_le_of_ne (an _ _ hc.le) fun e => hc.ne ?_, fun Z h1 h2 => ?_⟩
@@ -105,8 +157,8 @@ theorem dual_covBy {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X)
     · exact h2.ne (by rw [← e, (dl Z hZ).2.1])
     · exact h1.ne (by rw [← e, (dl Z hZ).2.1])
 
-theorem idxN_dual_of_covBy {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X)
-    (hY : Submodule.IsLattice K Y) (hc : X ⋖ Y) : idxN (dual h X) (dual h Y) = idxN Y X := by
+theorem idxN_dual_of_covBy {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsFullLattice K X)
+    (hY : Submodule.IsFullLattice K Y) (hc : X ⋖ Y) : idxN (dual h X) (dual h Y) = idxN Y X := by
   obtain ⟨P, hP, hPm, hPi⟩ := exists_max_of_covBy hc
   obtain ⟨Q, hQ, hQm, hQi⟩ := exists_max_of_covBy (dual_covBy h hs hn hX hY hc)
   set σ := locBasic_sigma (genusCovol_hinj (K := K)) star_algebraMap_ringOfIntegers_mem_range with hσ
@@ -130,8 +182,8 @@ theorem idxN_dual_of_covBy {X Y : Submodule (𝓞 K) V} (hX : Submodule.IsLattic
   rw [hPi, hQi]
   exact (Nat.card_congr (Ideal.quotientEquiv P Q e hm).toEquiv).symm
 
-theorem idxN_dual {X : Submodule (𝓞 K) V} (hX : Submodule.IsLattice K X) : ∀ (n : ℕ)
-    (Y : Submodule (𝓞 K) V), Submodule.IsLattice K Y → X ≤ Y → idxN Y X = n →
+theorem idxN_dual {X : Submodule (𝓞 K) V} (hX : Submodule.IsFullLattice K X) : ∀ (n : ℕ)
+    (Y : Submodule (𝓞 K) V), Submodule.IsFullLattice K Y → X ≤ Y → idxN Y X = n →
     idxN (dual h X) (dual h Y) = n := by
   have an := (dualBasic (𝓞 K) K V h hs star_algebraMap_ringOfIntegers_mem_range).1
   intro n
@@ -184,8 +236,9 @@ theorem main : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddCommG
       change locS P.primeCompl (gmap g (loc (K := K) P A)) = _
       rw [e]
       exact genusCovol_locS_locS hle B
-    obtain ⟨a1, a2, -, -, a5⟩ := isomAct (𝓞 K) K V h g hg M
-    have b1 := (ld (gmap g M) (a5.2 hM.1).fg).1 P hP.isPrime
+    obtain ⟨a1, a2, -, -, -⟩ := isomAct (𝓞 K) K V h g hg M
+    have hgM : (gmap g M).FG := hM.1.fg.map ((g : V →ₗ[K] V).restrictScalars (𝓞 K))
+    have b1 := (ld (gmap g M) hgM).1 P hP.isPrime
     have b2 := (ld N hN.1.fg).1 P hP.isPrime
     refine ⟨_, g.injective, genusCovol_addData g _ _ (key _ _ hgL), genusCovol_addData g _ _ (key _ _ ?_)⟩
     rw [b2.1, ← b2.2, ← hgL, ← a2 P, b1.2, ← b1.1, a1, (isomAct (𝓞 K) K V h g hg (dual h M)).2.1 P]

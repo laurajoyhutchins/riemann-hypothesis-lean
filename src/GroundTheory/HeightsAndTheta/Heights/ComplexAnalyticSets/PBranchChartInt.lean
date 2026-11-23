@@ -1,9 +1,59 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StBranchChartInt
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StHolomorphicFibreSumInt
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StBranchSheetAE
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.OsgoodSeparate
-import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StBranchChartInt
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StHolomorphicFibreSumInt
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StBranchSheetAE
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.OsgoodSeparate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+public import Mathlib.Analysis.Calculus.FDeriv.Pi
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.LocDens
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -29,8 +79,8 @@ theorem differentiable_mulVec {d n : ℕ} (A : Matrix (Fin d) (Fin n) ℂ) :
     Differentiable ℂ (fun x : Fin n → ℂ => A *ᵥ x) :=
   (Matrix.mulVecLin A).toContinuousLinearMap.differentiable
 
-open Classical in
 
+open Classical in
 theorem chartDens_indicator_image {n d : ℕ} (J : Ideal (MvPolynomial (Fin n) ℂ)) (A : Matrix (Fin d) (Fin n) ℂ)
     {p : Fin n → ℂ} (γ : VarBranch J d p) (g : (Fin n → ℂ) → ℝ) (φ : Fin d → (Fin n → ℂ) → ℝ)
     (y : Fin d → ℂ) :
@@ -56,7 +106,9 @@ theorem chartDens_indicator_image {n d : ℕ} (J : Ideal (MvPolynomial (Fin n) �
       exact ⟨⟨t, ⟨ht, hx.2⟩, rfl⟩, hTx⟩
     · rintro ⟨⟨t, ⟨ht, hty⟩, rfl⟩, hTx⟩
       exact ⟨⟨γ.mapsTo ht, hty⟩, hTx⟩
-  rw [h1, h2, finsum_mem_image (γ.injOn.mono fun t ht => ht.1)]
+  have hinj : Set.InjOn γ.toFun {t | t ∈ Metric.ball (0 : Fin d → ℂ) γ.radius ∧ A *ᵥ γ.toFun t = y} :=
+    γ.injOn.mono (by intro t ht; exact ht.1)
+  rw [h1, h2, finsum_mem_image hinj]
   refine finsum_mem_congr rfl fun t ht => ?_
   have hti : γ.toFun t ∈ γ.image := ⟨t, ht.1, rfl⟩
   simp only [hT, Set.indicator_of_mem hti, ht.2]
@@ -127,8 +179,8 @@ theorem integrableOn_branch {n d : ℕ} {J : Ideal (MvPolynomial (Fin n) ℂ)} {
 
 end BranchChartInt
 
-open BranchChartInt in
 
+open BranchChartInt in
 theorem BranchChartInt.proof (hA : HolomorphicFibreSumInt.Statement) (hS : BranchSheetAE.Statement)
     (hF : ComplexSets.FibreBound.Statement) : BranchChartInt.Statement := by
   classical

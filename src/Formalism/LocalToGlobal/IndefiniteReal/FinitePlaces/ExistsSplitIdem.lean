@@ -1,5 +1,58 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.ContinuousCoB
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalEndomorphisms.HenselRoot
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Formalism.LocalRingCardinality.DataHost
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalEndomorphisms.HenselRoot
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.DataSpaces
+import Formalism.LocalRingCardinality.DataTheta
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+import Formalism.LocalToGlobal.BesselHermitianTheta.NoncompactGapAtLeastRange
+import Formalism.LocalToGlobal.IndefiniteReal.InjectiveDecompositionAction
+import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GapAtLeast
+
+@[expose] public section
 
 noncomputable section
 
@@ -115,63 +168,6 @@ section Split
 variable {D : D7} (δ : D.host.E) (hδ : D.sp.cm.sig δ = -δ) (hδ0 : δ ≠ 0) (Δ : D.host.F)
   (hΔ : algebraMap D.host.F D.host.E Δ = δ * δ)
 
-include hΔ hδ0 in
-
-theorem exists_splitIdem (v : HeightOneSpectrum (𝓞 D.host.F)) (s : v.adicCompletion D.host.F)
-    (hs : s * s = algebraMap D.host.F (v.adicCompletion D.host.F) Δ) (hcA : ∀ a b, cA D (pt δ a b) = pt δ a (-b)) :
-    ∃ e, IsSplitIdem D e := by
-  have hΔ0 : Δ ≠ 0 := by
-    intro h; rw [h, map_zero] at hΔ; exact hδ0 (mul_self_eq_zero.mp hΔ.symm)
-  have hs0 : s ≠ 0 := by
-    intro h; rw [h, mul_zero] at hs
-    exact hΔ0 ((map_eq_zero_iff _ (algebraMap D.host.F (v.adicCompletion D.host.F)).injective).mp hs.symm)
-  set a : AF D.host.F := pairA D.host.F 0 (single v (1 / 2)) with ha
-  set b : AF D.host.F := pairA D.host.F 0 (single v (1 / (2 * s))) with hb
-  have e1 : a * a + DA Δ * (b * b) = a := by
-    rw [ha, hb, DA, algebraMap_AF, pairA_mul, pairA_mul, pairA_mul, pairA_add, pairA_eq_iff]
-    refine ⟨by ring, fa_ext fun w => ?_⟩
-    simp only [fa_mul, fa_add, af_apply]
-    by_cases hw : w = v
-    · subst hw
-      have h2 : (2 : w.adicCompletion D.host.F) ≠ 0 := by
-        have := (algebraMap D.host.F (w.adicCompletion D.host.F)).injective.ne (two_ne_zero (α := D.host.F))
-        rwa [map_ofNat, map_zero] at this
-      rw [single_self, single_self, ← hs]; field_simp; ring
-    · rw [single_ne _ hw, single_ne _ hw]; ring
-  have h2 : (2 : v.adicCompletion D.host.F) ≠ 0 := by
-    have := (algebraMap D.host.F (v.adicCompletion D.host.F)).injective.ne (two_ne_zero (α := D.host.F))
-    rwa [map_ofNat, map_zero] at this
-  have e2 : a * b + b * a = b := by
-    rw [ha, hb, pairA_mul, pairA_mul, pairA_add, pairA_eq_iff]
-    refine ⟨by ring, fa_ext fun w => ?_⟩
-    simp only [fa_mul, fa_add]
-    by_cases hw : w = v
-    · subst hw; rw [single_self, single_self]; field_simp; ring
-    · rw [single_ne _ hw, single_ne _ hw]; ring
-  have e3 : a * a + DA Δ * (b * -b) = 0 := by
-    rw [ha, hb, DA, algebraMap_AF, pairA_neg, pairA_mul, pairA_mul, pairA_mul, pairA_add]
-    show pairA D.host.F _ _ = pairA D.host.F 0 0
-    rw [pairA_eq_iff]
-    refine ⟨by ring, fa_ext fun w => ?_⟩
-    simp only [fa_mul, fa_add, fa_neg, af_apply, fa_zero]
-    by_cases hw : w = v
-    · subst hw; rw [single_self, single_self, ← hs]; field_simp; ring
-    · rw [single_ne _ hw, single_ne _ hw]; ring
-  have e4 : a * -b + b * a = 0 := by ring
-  have e5 : a + a = pairA D.host.F 0 (single v 1) := by
-    rw [ha, pairA_add, pairA_eq_iff]
-    refine ⟨by ring, fa_ext fun w => ?_⟩
-    simp only [fa_add]
-    by_cases hw : w = v
-    · subst hw; rw [single_self, single_self]; field_simp; norm_num
-    · rw [single_ne _ hw, single_ne _ hw, add_zero]
-  refine ⟨pt δ a b, ?_, ?_, v, pairA D.host.F 0 (single v 1), ?_, ?_⟩
-  · rw [pt_mul δ Δ hΔ, e1, e2]
-  · rw [hcA, pt_mul δ Δ hΔ, e3, e4]; exact mkE_zero δ (AF D.host.F)
-  · refine ⟨single v 1, rfl, ?_, fun v' hv' => ?_⟩
-    · exact single_self v 1
-    · exact single_ne 1 hv'
-  · rw [hcA, pt, pt, mkE_add, add_neg_cancel, e5, algebraMap_eq_mkE]
 
 end Split
 

@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.Eval
+public import Mathlib.RingTheory.Localization.Away.Basic
+public import Mathlib.Topology.Algebra.Field
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Ideal.Quotient.Defs
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+
+@[expose] public section
 
 namespace GlobalTheory.AffinePoints
 
@@ -76,14 +131,13 @@ variable {R A B C : Type*} [CommRing R] [CommRing A] [Algebra R A] [CommRing B] 
 
 noncomputable def coords (g : MvPolynomial σ R →ₐ[R] A) (p : A →ₐ[R] C) : σ → C := fun i => p (g (X i))
 
-omit [TopologicalSpace C] in
-@[simp] theorem coords_apply (g : MvPolynomial σ R →ₐ[R] A) (p : A →ₐ[R] C) (i : σ) :
-    coords g p i = p (g (X i)) := rfl
 
 omit [TopologicalSpace C] in
 theorem aeval_coords (g : MvPolynomial σ R →ₐ[R] A) (p : A →ₐ[R] C) (q : MvPolynomial σ R) :
     aeval (coords g p) q = p (g q) := by
-  have : (aeval (coords g p) : MvPolynomial σ R →ₐ[R] C) = p.comp g := by ext i; simp
+  have : (aeval (coords g p) : MvPolynomial σ R →ₐ[R] C) = p.comp g := by
+    ext i
+    simp [coords]
   rw [this]; rfl
 
 theorem continuous_coords (g : MvPolynomial σ R →ₐ[R] A) :
@@ -94,11 +148,11 @@ theorem continuous_aeval_mvPolynomial [IsTopologicalRing C] (q : MvPolynomial σ
     Continuous fun z : σ → C => aeval z q := by
   induction q using MvPolynomial.induction_on with
   | C a => simpa using continuous_const
-  | add P Q hP hQ => simp only [map_add]; exact hP.add hQ
+  | add P Q hP hQ => simp only [map_add (f := _)]; exact hP.add hQ
   | mul_X P i hP => simp only [map_mul, aeval_X]; exact hP.mul (continuous_apply i)
 
-variable (σ R C) in
 
+variable (σ R C) in
 noncomputable def mvPolynomialHomeomorph [IsTopologicalRing C] :
     (MvPolynomial σ R →ₐ[R] C) ≃ₜ (σ → C) where
   toFun p i := p (X i)
@@ -108,8 +162,8 @@ noncomputable def mvPolynomialHomeomorph [IsTopologicalRing C] :
   continuous_toFun := continuous_pi fun _ => continuous_eval _
   continuous_invFun := continuous_iff.2 continuous_aeval_mvPolynomial
 
-omit [TopologicalSpace C] in
 
+omit [TopologicalSpace C] in
 theorem exists_comap_eq_of_surjective (φ : A →ₐ[R] B) (hφ : Function.Surjective φ)
     (p : A →ₐ[R] C) (hp : ∀ a, φ a = 0 → p a = 0) : ∃ q : B →ₐ[R] C, comap φ q = p := by
   refine ⟨(Ideal.Quotient.liftₐ (RingHom.ker φ) p hp).comp
@@ -146,19 +200,8 @@ theorem isClosedEmbedding_comap [T1Space C] (φ : A →ₐ[R] B) (hφ : Function
 theorem isClosedEmbedding_coords [T1Space C] [IsTopologicalRing C]
     (g : MvPolynomial σ R →ₐ[R] A) (hg : Function.Surjective g) :
     IsClosedEmbedding (coords g : (A →ₐ[R] C) → σ → C) :=
-  (mvPolynomialHomeomorph R C σ).isClosedEmbedding.comp (isClosedEmbedding_comap g hg)
-
-scoped instance secondCountableTopology [T1Space C] [IsTopologicalRing C]
-    [SecondCountableTopology C] [Algebra.FiniteType R A] :
-    SecondCountableTopology (A →ₐ[R] C) := by
-  obtain ⟨n, g, hg⟩ := Algebra.FiniteType.iff_quotient_mvPolynomial''.1 ‹Algebra.FiniteType R A›
-  exact (isClosedEmbedding_coords g hg).isEmbedding.secondCountableTopology
-
-scoped instance locallyCompactSpace [T1Space C] [IsTopologicalRing C]
-    [LocallyCompactSpace C] [Algebra.FiniteType R A] :
-    LocallyCompactSpace (A →ₐ[R] C) := by
-  obtain ⟨n, g, hg⟩ := Algebra.FiniteType.iff_quotient_mvPolynomial''.1 ‹Algebra.FiniteType R A›
-  exact (isClosedEmbedding_coords g hg).locallyCompactSpace
+  (mvPolynomialHomeomorph (R := R) (C := C) (σ := σ)).isClosedEmbedding.comp
+    (isClosedEmbedding_comap g hg)
 
 end Comm
 

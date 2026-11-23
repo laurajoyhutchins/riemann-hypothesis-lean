@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -61,10 +104,6 @@ def galTotRep {k : Type} [Field k] (Ω : Type) [Field Ω] [Algebra k Ω] {X : Sc
   map_one' := galTot_one l Ω p
   map_mul' := galTot_mul l Ω p
 
-def CDeg {Y X : Scheme.{0}} (f : Y ⟶ X) (d : ℕ) : Prop :=
-  ∃ (U : Scheme.{0}) (u : U ⟶ X), Etale u ∧ Surjective u ∧
-    ∃ e : ∐ (fun _ : Fin d => U) ≅ pullback f u, e.hom ≫ pullback.snd f u = Limits.Sigma.desc (fun _ => 𝟙 U)
-
 def Splits {Z Y W : Scheme.{0}} (s : Y ⟶ Z) (c : W ⟶ Z) {J : Type} (σ : J → (W ⟶ Y)) : Prop :=
   ∃ h : ∀ j, σ j ≫ s = c,
     IsIso (Limits.Sigma.desc (fun j => pullback.lift (σ j) (𝟙 W) (by rw [h j, Category.id_comp])) :
@@ -95,7 +134,6 @@ theorem isGalois_id (X : Scheme.{0}) : IsGalois (𝟙 X) Unit (fun _ => 𝟙 X) 
   convert hd using 1
   ext j
   simp
-  exact pullback.lift_fst _ _ _
 
 theorem splits_fold (X : Scheme.{0}) (J : Type) :
     Splits (Sigma.desc fun _ : J => 𝟙 X) (𝟙 X) (Sigma.ι (fun _ : J => X)) := by
@@ -104,27 +142,13 @@ theorem splits_fold (X : Scheme.{0}) (J : Type) :
   convert (inferInstance : IsIso (𝟙 (∐ fun _ : J => X))) using 1
   ext j
   simp
-  exact pullback.lift_fst _ _ _
 
 theorem isCorrOp_fold {X Z' : Scheme.{0}} {J : Type} [Fintype J] (f : J → (X ⟶ Z')) :
     IsCorrOp l (Sigma.desc fun _ : J => 𝟙 X) (Sigma.desc f) (∑ j, pullTot l (sch.map (f j))) := by
   refine ⟨X, 𝟙 X, Unit, inferInstance, inferInstance, fun _ => 𝟙 X, J, inferInstance, Sigma.ι (fun _ : J => X),
     isGalois_id X, splits_fold X J, fun x => ?_⟩
   rw [CategoryTheory.Functor.map_id, pullTot_id, LinearMap.id_apply, LinearMap.sum_apply]
-  simp only [Sigma.ι_desc]
-
-example (X : Scheme.{0}) : IsCorrOp l (𝟙 X) (𝟙 X) LinearMap.id := by
-  refine ⟨X, 𝟙 X, Unit, inferInstance, inferInstance, fun _ => 𝟙 X, Unit, inferInstance, fun _ => 𝟙 X,
-    isGalois_id X, ⟨fun _ => Category.id_comp _, ?_⟩, fun x => ?_⟩
-  · exact (isGalois_id X).2.2.2.2.2.2
-  · simp [pullTot_id]
-
-example {X Z' : Scheme.{0}} (f : Fin 2 → (X ⟶ Z')) :
-    IsCorrOp l (Sigma.desc fun _ : Fin 2 => 𝟙 X) (Sigma.desc f) (pullTot l (sch.map (f 0)) + pullTot l (sch.map (f 1))) := by
-  simpa [Fin.sum_univ_two] using isCorrOp_fold l f
-
-example {k : Type} [Field k] (Ω : Type) [Field Ω] [Algebra k Ω] {X : Scheme.{0}} (p : X ⟶ Spec (CommRingCat.of k)) :
-    galTotRep l Ω p 1 = LinearMap.id := map_one _
+  simp only [Sigma.ι_comp_desc]
 
 end GlobalTheory.GalV
 

@@ -1,13 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ThetaSetupStructureMapComp
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CongModOfSpan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassicalTraitsFourierTermsAllLevelsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsClassicalTraitSystemAtClosedPointStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PosDefMapIntOfPos
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonModule
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SqLeOfForallNonneg
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniformStrictnessAndFaceCutBounds
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ThetaSetupStructureMapComp
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.IsMaximalComapMaximalIdealOO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClassicalTraitsFourierTermsAllLevelsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CongModOfSpan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsClassicalTraitSystemAtClosedPointStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonModule
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PosDefMapIntOfPos
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SqLeOfForallNonneg
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniformStrictnessAndFaceCutBounds
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open GlobalTheory.Toroidal GlobalTheory.LocM GlobalTheory.PolFan GlobalTheory.ZM GlobalTheory.SiegelTor GlobalTheory.ZH
@@ -44,7 +84,7 @@ theorem sc_evalZ_eq_of_equiv {φ : InvFun ℤ} {X Y : Type} [AddCommGroup X] [Ad
     [Module.Finite ℤ Y] (hP : IsPolFanOn id φ X) {β : LinearMap.BilinForm ℤ X} (hs : ∀ a b, β a b = β b a)
     (hp : ∀ x, 0 ≤ β x x) {β' : LinearMap.BilinForm ℤ Y} {s s' : ℝ} (hs0 : 0 ≤ s) (hs' : 0 < s') (e : X ≃ₗ[ℤ] Y)
     (he : ∀ a b, s * β a b = s' * β' (e a) (e b)) : s * φ.evalZ β = s' * φ.evalZ β' := by
-  have hmem : toReal β ∈ psdCone (id : ℤ → ℤ) X :=
+  have hmem : toReal β ∈ psdCone (bar := (id : ℤ → ℤ)) (X := X) :=
     StrictData.toReal_mem_psdCone (mem_balForms_int.2 hs) hp
   have hform : toReal (pull e.toLinearMap β') = (s / s') • toReal β := by
     refine LinearMap.ext₂ fun a b => ?_

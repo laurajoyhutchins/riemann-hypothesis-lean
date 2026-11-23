@@ -1,9 +1,59 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.MeasuresModulus
-import GroundTheory.AutomorphicForms.MeasuresChart
-import GroundTheory.AutomorphicForms.MeasuresGL
-import GroundTheory.AutomorphicForms.MeasuresParabolic
-import GroundTheory.AutomorphicForms.Iwasawa
+module
+
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.MeasureTheory.Integral.Prod
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+public import Mathlib.NumberTheory.LocalField.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Automorphic
@@ -103,8 +153,8 @@ theorem map_mul_prod_eq_smul [TotallyDisconnectedSpace G] (P K : Subgroup G)
   have : CompactSpace K := isCompact_iff_compactSpace.1 hKc
   have : SecondCountableTopology P := IsEmbedding.subtypeVal.secondCountableTopology
   have : SecondCountableTopology K := IsEmbedding.subtypeVal.secondCountableTopology
-  have : BorelSpace P := Subtype.borelSpace (P : Set G)
-  have : BorelSpace K := Subtype.borelSpace (K : Set G)
+  have : BorelSpace P := Subtype.borelSpace (fun x => x ∈ (P : Set G))
+  have : BorelSpace K := Subtype.borelSpace (fun x => x ∈ (K : Set G))
   set m : P × K → G := fun x => (x.1 : G) * x.2 with hm_def
   have hm : Measurable m :=
     (measurable_subtype_coe.comp measurable_fst).mul
@@ -225,8 +275,8 @@ theorem lintegral_mul_prod_eq [TotallyDisconnectedSpace G] (P K : Subgroup G)
   have : CompactSpace K := isCompact_iff_compactSpace.1 hKc
   have : SecondCountableTopology P := IsEmbedding.subtypeVal.secondCountableTopology
   have : SecondCountableTopology K := IsEmbedding.subtypeVal.secondCountableTopology
-  have : BorelSpace P := Subtype.borelSpace (P : Set G)
-  have : BorelSpace K := Subtype.borelSpace (K : Set G)
+  have : BorelSpace P := Subtype.borelSpace (fun x => x ∈ (P : Set G))
+  have : BorelSpace K := Subtype.borelSpace (fun x => x ∈ (K : Set G))
   have hm : Measurable fun x : P × K => (x.1 : G) * x.2 :=
     (measurable_subtype_coe.comp measurable_fst).mul
       (measurable_subtype_coe.comp measurable_snd)
@@ -250,8 +300,8 @@ theorem integral_mul_prod_eq [TotallyDisconnectedSpace G] (P K : Subgroup G)
   have : CompactSpace K := isCompact_iff_compactSpace.1 hKc
   have : SecondCountableTopology P := IsEmbedding.subtypeVal.secondCountableTopology
   have : SecondCountableTopology K := IsEmbedding.subtypeVal.secondCountableTopology
-  have : BorelSpace P := Subtype.borelSpace (P : Set G)
-  have : BorelSpace K := Subtype.borelSpace (K : Set G)
+  have : BorelSpace P := Subtype.borelSpace (fun x => x ∈ (P : Set G))
+  have : BorelSpace K := Subtype.borelSpace (fun x => x ∈ (K : Set G))
   have hm : Measurable fun x : P × K => (x.1 : G) * x.2 :=
     (measurable_subtype_coe.comp measurable_fst).mul
       (measurable_subtype_coe.comp measurable_snd)
@@ -287,52 +337,6 @@ variable (F : Type*) [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchi
   (n : ℕ) {α : Type*} [LinearOrder α] {β : Fin n → α}
 
 variable [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)]
-
-theorem lintegral_parabolic_integralGL (hβ : Monotone β) (μG : Measure (GL (Fin n) F))
-    [μG.IsHaarMeasure] (μP : Measure (Iwasawa.blockUpper F n β)) [μP.IsHaarMeasure]
-    (μK : Measure (GLnLocal.integralGL F n)) [μK.IsHaarMeasure] {f : GL (Fin n) F → ℝ≥0∞}
-    (hf : Measurable f) :
-    μG (GLnLocal.integralGL F n) * ∫⁻ p, ∫⁻ k, f ((p : GL (Fin n) F) * k) ∂μK ∂μP =
-      μP (Subtype.val ⁻¹' (GLnLocal.integralGL F n : Set (GL (Fin n) F))) * μK univ *
-        ∫⁻ g, f g ∂μG :=
-  lintegral_mul_prod_eq _ _ (isClosed_blockUpper F n β) (GLnLocal.isOpen_integralGL F n)
-    (GLnLocal.isCompact_integralGL F n) (Iwasawa.exists_blockUpper_mul_integralGL F n hβ)
-    μG μP μK hf
-
-theorem lintegral_eq_lintegral_parabolic_integralGL (hβ : Monotone β)
-    (μG : Measure (GL (Fin n) F)) [μG.IsHaarMeasure] (μP : Measure (Iwasawa.blockUpper F n β))
-    [μP.IsHaarMeasure] (μK : Measure (GLnLocal.integralGL F n)) [μK.IsHaarMeasure]
-    (hG : μG (GLnLocal.integralGL F n) = 1)
-    (hP : μP (Subtype.val ⁻¹' (GLnLocal.integralGL F n : Set (GL (Fin n) F))) = 1)
-    (hK : μK univ = 1) {f : GL (Fin n) F → ℝ≥0∞} (hf : Measurable f) :
-    ∫⁻ g, f g ∂μG = ∫⁻ p, ∫⁻ k, f ((p : GL (Fin n) F) * k) ∂μK ∂μP := by
-  have h := lintegral_parabolic_integralGL F n hβ μG μP μK hf
-  rw [hG, hP, hK, one_mul, one_mul, one_mul] at h
-  exact h.symm
-
-theorem integral_parabolic_integralGL (hβ : Monotone β) (μG : Measure (GL (Fin n) F))
-    [μG.IsHaarMeasure] (μP : Measure (Iwasawa.blockUpper F n β)) [μP.IsHaarMeasure]
-    (μK : Measure (GLnLocal.integralGL F n)) [μK.IsHaarMeasure] {E : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] {f : GL (Fin n) F → E}
-    (hf : Integrable f μG) :
-    μG.real (GLnLocal.integralGL F n) • ∫ p, ∫ k, f ((p : GL (Fin n) F) * k) ∂μK ∂μP =
-      (μP.real (Subtype.val ⁻¹' (GLnLocal.integralGL F n : Set (GL (Fin n) F))) * μK.real univ) •
-        ∫ g, f g ∂μG :=
-  integral_mul_prod_eq _ _ (isClosed_blockUpper F n β) (GLnLocal.isOpen_integralGL F n)
-    (GLnLocal.isCompact_integralGL F n) (Iwasawa.exists_blockUpper_mul_integralGL F n hβ)
-    μG μP μK hf
-
-theorem integral_eq_integral_parabolic_integralGL (hβ : Monotone β)
-    (μG : Measure (GL (Fin n) F)) [μG.IsHaarMeasure] (μP : Measure (Iwasawa.blockUpper F n β))
-    [μP.IsHaarMeasure] (μK : Measure (GLnLocal.integralGL F n)) [μK.IsHaarMeasure]
-    (hG : μG (GLnLocal.integralGL F n) = 1)
-    (hP : μP (Subtype.val ⁻¹' (GLnLocal.integralGL F n : Set (GL (Fin n) F))) = 1)
-    (hK : μK univ = 1) {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    {f : GL (Fin n) F → E} (hf : Integrable f μG) :
-    ∫ g, f g ∂μG = ∫ p, ∫ k, f ((p : GL (Fin n) F) * k) ∂μK ∂μP := by
-  have h := integral_parabolic_integralGL F n hβ μG μP μK hf
-  simp only [Measure.real, hG, hP, hK, ENNReal.toReal_one, one_mul, one_smul] at h
-  exact h.symm
 
 end GeneralLinear
 

@@ -1,4 +1,64 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.LinearAlgebra.Trace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Artinian.Ring
+
+@[expose] public section
 
 open Module
 
@@ -38,11 +98,14 @@ private theorem exists_prod_range_iterate_eq_zero_of_commute_of_isNilpotent (n :
     (hn : ∀ a, IsNilpotent (n a)) (a : Λ) :
     ∃ m : ℕ, ((List.range m).map (fun i => n (σ^[i] a))).prod = 0 := by
   let A := Algebra.adjoin ℂ (Set.range n)
-  letI : CommRing A := Algebra.adjoinCommRingOfComm ℂ (by
-    rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩
+  letI : IsMulCommutative A := Algebra.isMulCommutative_adjoin ℂ (by
+    rintro _ ⟨x, rfl⟩ _ ⟨y, rfl⟩ _
     exact hc x y)
+  letI : CommRing A := by
+    open scoped IsMulCommutative in
+    exact inferInstance
   haveI : IsArtinianRing A := IsArtinianRing.of_finite ℂ A
-  obtain ⟨m, hm⟩ := IsArtinianRing.isNilpotent_nilradical (R := A)
+  obtain ⟨m, hm⟩ := IsArtinianRing.isNilpotent_nilradical A
   let g : ℕ → A := fun i => ⟨n (σ^[i] a), Algebra.subset_adjoin ⟨σ^[i] a, rfl⟩⟩
   have hmem : ∀ i, g i ∈ nilradical A := by
     intro i
@@ -126,6 +189,6 @@ theorem trace_Vg {u : Λ → End ℂ M} (hc : ∀ a b, Commute (u a) (u b)) (χ 
       Submodule.coe_add, Submodule.coe_smul, key, LinearMap.sub_apply,
       Module.algebraMap_end_apply]
     abel
-  rw [hsplit, map_add, map_smul, trace_nil N T σ hNc hNn hTN a, zero_add, smul_eq_mul, mul_comm]
+  rw [hsplit, map_add (f := _), map_smul, trace_nil N T σ hNc hNn hTN a, zero_add, smul_eq_mul, mul_comm]
 
 end UpperTheory.V.Z.Sym.Tf

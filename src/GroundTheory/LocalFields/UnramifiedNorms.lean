@@ -1,8 +1,56 @@
-import Mathlib
-import GroundTheory.LocalFields.UnramifiedNormSurj
-import GroundTheory.LocalFields.UnitsGalois
-import GroundTheory.LocalFields.CompleteTrivial
-import GroundTheory.LocalFields.HilbertCyclic
+module
+
+public import GroundTheory.LocalFields.UnitsGalois
+public import GroundTheory.LocalFields.CompleteTrivial
+public import GroundTheory.LocalFields.UnramifiedDefs
+public import GroundTheory.LocalFields.HilbertCyclic
+public import GroundTheory.LocalFields.UnramifiedNormSurj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +75,8 @@ theorem exists_eq_of_forall_smul_eq [IsGalois K L] {x : 𝒪[L]ˣ}
   have hfix : ((x : 𝒪[L]) : L) ∈ (⊥ : IntermediateField K L) :=
     (IsGalois.mem_bot_iff_fixed _).2 fun σ ↦ by
       have := congrArg (fun u : 𝒪[L]ˣ ↦ ((u : 𝒪[L]) : L)) (hx σ)
-      simpa using this
+      change σ ((x : 𝒪[L]) : L) = ((x : 𝒪[L]) : L) at this
+      exact this
   obtain ⟨c, hc⟩ := IntermediateField.mem_bot.1 hfix
   have hc0 : c ≠ 0 := by
     rintro rfl
@@ -51,7 +100,7 @@ theorem subsingleton_tateZero_integerUnits [IsGalois K L] [IsUnramified K L] :
     Subsingleton (TateZero (L ≃ₐ[K] L) 𝒪[L]ˣ) := by
   rw [subsingleton_tateZero_iff]
   intro x hx
-  obtain ⟨w, hw⟩ := exists_eq_of_forall_smul_eq hx
+  obtain ⟨w, hw⟩ := exists_eq_of_forall_smul_eq (K := K) (L := L) hx
   obtain ⟨v, rfl⟩ := normIntegerUnits_surjective (K := K) (L := L) w
   refine ⟨v, Units.ext (Subtype.ext ?_)⟩
   rw [coe_tateNorm_integerUnits, ← hw, ← coe_norm_integer, coe_normIntegerUnits_eq]

@@ -1,14 +1,57 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.HomExtensionByZeroOrthDecompRational
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.SplitStab
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.HalfIndexLattices.IsLatRepL
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.SiegelWeilDatumProperties
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.LiftedSchrodingerDatum
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.UnipotentNilpotentMulEqZero
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.BlockDiagonalPreservesFormIff
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.BMatK
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.EisensteinSecondTerm
+module
 
-set_option synthInstance.maxHeartbeats 200000
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.HomExtensionByZeroOrthDecompRational
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.EisensteinSecondTerm
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.BlockDiagonalPreservesFormIff
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.ThetaKernels.UnipotentNilpotentMulEqZero
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.ContinuousInFrame
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.CountableRationalPointsDoubled
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.MatrixOfUnipotentFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
+
 
 section
 set_option linter.unusedSectionVars false
@@ -107,6 +150,7 @@ theorem JW_k {R : _root_.PositivityTheory.SiegelWeilFormula.RD_k d} {J K : _root
     _ = _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.W_k R * (K.map (cA σ))ᵀ := by rw [hWW, Matrix.mul_smul, Matrix.mul_one, smul_smul, he, one_smul]
 theorem cv_vecMul_k (x : Fin d.n ⊕ Fin d.n → AE F E) (K : _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.Mt_k d) : cv σ (x ᵥ* K) = (K.map (cA σ))ᵀ *ᵥ cv σ x := by
   funext s
+
   simp [cv, Matrix.vecMul, Matrix.mulVec, dotProduct, map_sum, map_mul, mul_comm]
 def qf_k (R : _root_.PositivityTheory.SiegelWeilFormula.RD_k d) (x : Fin d.n ⊕ Fin d.n → AE F E) : AE F E := x ⬝ᵥ (_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.W_k R *ᵥ cv σ x)
 theorem qf_vecMul_k {R : _root_.PositivityTheory.SiegelWeilFormula.RD_k d} {K : _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.Mt_k d} (hKW : K * _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.W_k R * (K.map (cA σ))ᵀ = _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.W_k R) (x : Fin d.n ⊕ Fin d.n → AE F E) :
@@ -130,6 +174,7 @@ theorem D_apply_k (u : Fin L.n → AE F E) (l k : Fin d.n) :
   rw [Matrix.map_apply, Matrix.transpose_apply, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.uA_apply_k]
   by_cases hk : k = L.i₀
   · subst hk
+
     simp [_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.extendByZeroColumns, Matrix.one_apply, eq_comm, map_sum, Finset.sum_neg_distrib]
   · simp [Matrix.one_apply, hk, eq_comm]
 theorem sB_apply_k (R : _root_.PositivityTheory.SiegelWeilFormula.RD_k d) (b : Fin L.n → AE F E) (i l : Fin d.n) :
@@ -138,6 +183,7 @@ theorem sB_apply_k (R : _root_.PositivityTheory.SiegelWeilFormula.RD_k d) (b : F
   unfold _root_.PositivityTheory.SiegelWeilFormula.Act.C5.sB_k
   simp only [Matrix.sum_apply, Matrix.add_apply, Matrix.single_apply, Finset.sum_add_distrib, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.jeA_eq_k]
   rcases _root_.PositivityTheory.SiegelWeilFormula.Act.C5.idx_k L i with rfl | ⟨p, rfl⟩ <;> rcases _root_.PositivityTheory.SiegelWeilFormula.Act.C5.idx_k L l with rfl | ⟨q, rfl⟩ <;>
+
     simp [_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.extendByZeroColumns, _root_.PositivityTheory.SiegelWeilFormula.Act.ComplexParameterFamilyContinuity.em_ne_k, (_root_.PositivityTheory.SiegelWeilFormula.Act.ComplexParameterFamilyContinuity.em_ne_k L _).symm, L.inj.eq_iff, map_sum, apply_ite, eq_comm]
 theorem aB_apply_k (δ : E) (a : AF F) (i k : Fin d.n) :
     _root_.PositivityTheory.SiegelWeilFormula.Act.C5.aB_k L δ a i k = if i = L.i₀ ∧ k = L.i₀ then a • inclR (F := F) (AF F) δ else 0 := by
@@ -231,6 +277,7 @@ theorem qf_vV_k (R : _root_.PositivityTheory.SiegelWeilFormula.RD_k d) (u b : Fi
     _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.qf_k R (_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.vV_k L u b) = cA σ (_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.hh_k L u b) + ((R.ε : ℤ) : AE F E) * _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.hh_k L u b := by
   simp only [_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.qf_k, dotProduct, Fintype.sum_sum_type, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.W_mulVec_inl_k, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.W_mulVec_inr_k, cv, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.vV_k, Sum.elim_inl, Sum.elim_inr]
   rw [_root_.PositivityTheory.SiegelWeilFormula.Act.C5.sum_split_k L, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.sum_split_k L]
+
   simp only [_root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.extension_by_zero_at_base_index, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.extendZeroColumn_apply_embed, map_zero, zero_mul, mul_zero, zero_add, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.JC.hh_k, map_sum, map_mul, _root_.PositivityTheory.SiegelWeilFormula.Act.C5.cc_k d, Finset.mul_sum]
   rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
   exact Finset.sum_congr rfl fun k _ => by ring

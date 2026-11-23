@@ -1,4 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellExpansionOfSubadditive
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellExpansionOfSubadditive
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TheoremPIntegralOfPlaces
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.CutBP
 
@@ -59,8 +109,8 @@ lemma eI_inj {n : ℕ} : Function.Injective (eI (n := n)) := by
   unfold eI at this
   by_cases hI : i ∈ I <;> by_cases hJ : i ∈ J <;> simp_all
 
-open Classical in
 
+open Classical in
 def aF {n : ℕ} (S : Finset (Finset (Fin n))) (co : Finset (Fin n) → ℂ) : (Fin n → ℤ) →₀ ℂ :=
   Finsupp.mapDomain eI (Finsupp.onFinset S (fun I => if I ∈ S then co I else 0)
     (fun I hI => by by_contra h'; exact hI (if_neg h')))
@@ -344,7 +394,6 @@ theorem coefficient_growth_le_power (n r : ℕ) (b H CH C₃ : ℝ) (hb : 2 ≤ 
   have hb0 : (0 : ℝ) < b := by linarith
   have hm : ((2 * r + 2 : ℕ) : ℝ) = 2 * (r : ℝ) + 2 := by push_cast; ring
   rw [hm] at hHb ⊢
-  have hr0 : (0 : ℝ) ≤ r := Nat.cast_nonneg r
   have hn0 : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   have h32 : (n : ℝ) ^ (3 / 2 : ℝ) ≤ b ^ (3 / 2 : ℝ) := Real.rpow_le_rpow hn0 hn (by norm_num)
   have hn32 : (0 : ℝ) ≤ (n : ℝ) ^ (3 / 2 : ℝ) := Real.rpow_nonneg hn0 _
@@ -364,14 +413,6 @@ theorem coefficient_growth_le_power (n r : ℕ) (b H CH C₃ : ℝ) (hb : 2 ≤ 
   apply Real.rpow_le_rpow_of_exponent_le hb1
   push_cast
   nlinarith [mul_le_mul_of_nonneg_right hC (sq_nonneg (2 * (r : ℝ) + 2))]
-
-theorem big_cell_expansion_of_parts (p : KB.Pl P Wp Wq) (f : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) (b C₃ CH : ℝ) (a₁ : ℕ)
-    (d : PieriExpansionData P Wp Wq) (hf : f = unitF p (d.J d.lam)) (hb : 2 ≤ b) (hn : (d.n : ℝ) ≤ b) (hH : 0 ≤ d.H)
-    (hHb : d.H ≤ b ^ (CH * ((2 * P.r + 2 : ℕ) : ℝ))) (hC : CH / 2 + 5 / 8 ≤ C₃) (hc0 : P.r + 1 ≤ d.c0)
-    (hrange : (P.r + 1) * a₁ + d.c0 ≤ d.q0)
-    (hP : PieriExpansion p d) (hT : PieriCoefficientBound d) (hD : PieriDegreeConditions p d) (hM : PieriMeasurability p d) : BigCellDerivativeExpansion p f b C₃ a₁ :=
-  big_cell_expansion_of_family p f b C₃ a₁ (by linarith)
-    (family_expansion_of_parts p f b C₃ a₁ d hf hH hc0 hrange (coefficient_growth_le_power d.n P.r b d.H CH C₃ hb hn hH hHb hC) hP hT hD hM)
 
 end place
 

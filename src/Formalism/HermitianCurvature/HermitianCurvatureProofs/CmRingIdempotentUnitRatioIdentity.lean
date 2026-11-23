@@ -1,4 +1,52 @@
-import Formalism.HermitianCurvature.StatementSz
+module
+
+public import Formalism.HermitianCurvature.StatementSz
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt.Sz Finset
 
@@ -10,7 +58,7 @@ lemma prodBound {ι : Type} [Fintype ι] (F t : ι → ℝ) (K Ct : ℝ) (hK : 0
     (hF : ∀ w, 0 ≤ F w ∧ F w ≤ K * t w) (ht : ∏ w, t w ≤ Ct) :
     ∏ w, F w ≤ Ct * K ^ Fintype.card ι := by
   have h1 : ∏ w, F w ≤ ∏ w, (K * t w) :=
-    Finset.prod_le_prod (fun w _ => (hF w).1) (fun w _ => (hF w).2)
+    Finset.prod_le_prod₀ (fun w _ => (hF w).1) (fun w _ => (hF w).2)
   rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ] at h1
   have h2 : K ^ Fintype.card ι * ∏ w, t w ≤ K ^ Fintype.card ι * Ct :=
     mul_le_mul_of_nonneg_left ht (pow_nonneg hK _)
@@ -59,7 +107,6 @@ lemma sqrtTTLower (x bb cT Cb mr TT : ℝ) (hx : 1 ≤ x) (hcT : 0 < cT) (hCb : 
     (hbb : x ^ (Cb / 2) ≤ bb) (hTT : (bb ^ (cT * mr)) ^ 2 ≤ TT) :
     x * x ^ (cT * Cb - 1) ≤ Real.sqrt TT := by
   have hx0 : 0 < x := by linarith
-  have hbb0 : 0 < bb := lt_of_lt_of_le (Real.rpow_pos_of_pos hx0 _) hbb
   have e1 : x * x ^ (cT * Cb - 1) = x ^ (cT * Cb) := by
     conv_lhs => arg 1; rw [← Real.rpow_one x]
     rw [← Real.rpow_add hx0]; ring_nf
@@ -112,7 +159,6 @@ lemma quantitative_fourth_power_bound (x fr mr K P V s Del : ℝ) (hx : 1 ≤ x)
     (hf : 1 ≤ fr) (hP : 0 ≤ P) (hPK : P ≤ K) (hV : 0 < V) (hVx : 40 * V ≤ x) (hs0 : 0 ≤ s)
     (hs : s ≤ x) (hDel : x ^ 4 * fr ^ 4 * K ≤ Del) :
     P * (V * s * (10 * mr)) ≤ Del / 4 := by
-  have hx0 : 0 < x := by linarith
   have hK : 0 ≤ K := le_trans hP hPK
   have hV' : V ≤ x / 40 := by linarith
   have h1 : V * s ≤ x / 40 * x := mul_le_mul hV' hs hs0 (by linarith)
@@ -150,99 +196,9 @@ lemma quantThree (x E P M sT : ℝ) (hx : 1 ≤ x) (hPE : P ^ 2 ≤ E) (hM : 0 <
 
 end Sz8
 
-theorem dual_lattice_bound : DualLattice := by
-  intro E A _ _ ψ O La g hg
-  have key : ∀ x y : E, g ^ 2 * x * y / g = x * (g * y) := by
-    intro x y; field_simp
-  refine ⟨?_, ?_⟩
-  · ext y; simp only [Set.mem_setOf_eq, key]
-  · intro hO y hy x hx
-    have := hy (g ^ 2 * x) (hO x hx)
-    rwa [key] at this
-
-theorem g_power_bounds : GPowers := by
-  intro m i s C ka N I A TT g hm hi hs hka hg
-  obtain ⟨p, rfl⟩ : ∃ p, m = p + 1 := ⟨m - 1, by omega⟩
-  obtain ⟨q, rfl⟩ : ∃ q, i = q + 1 := ⟨i - 1, by omega⟩
-  obtain ⟨u, rfl⟩ : ∃ u, s = u + 1 := ⟨s - 1, by omega⟩
-  have e1 : 2 * (q + 1) - 2 = 2 * q := by omega
-  have e2 : 2 * (q + 1 - 1) + (u + 1) - 1 = 2 * q + u := by omega
-  have e3 : 2 * (q + 1) - 1 = 2 * q + 1 := by omega
-  have e4 : 2 * (q + 1 - 1) = 2 * q := by omega
-  simp only [xThreshold, lamThreshold, lamPrimeSq, Nat.add_sub_cancel, e1, e2, e3, e4]
-  have hg0 : g ≠ 0 := hg.ne'
-  have hka0 : ka ≠ 0 := hka.ne'
-  have e5 : 2 * q + (u + 1) - 1 = 2 * q + u := by omega
-  simp only [e5]
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-  · simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-  · simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-  · simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-
-theorem lattice_placement : Placement := by
-  intro k r m N Del hm hN hmk hk hDel
-  have hm' : (m:ℝ) = 2 * r + 2 := by rw [hm]; push_cast; ring
-  have hmk' : (m:ℝ) ≤ k := by exact_mod_cast hmk
-  have hk' : (4:ℝ) ≤ k := by exact_mod_cast hk
-  have hr0 : (0:ℝ) ≤ r := Nat.cast_nonneg r
-  have hm2 : (2:ℝ) ≤ m := by linarith
-  have hN20 : 20 ≤ N := by rw [hN]; linarith
-  have hNk : N ≤ 10 * k := by rw [hN]; linarith
-  have hN0 : 0 ≤ N := by linarith
-  have hk0 : (0:ℝ) ≤ k := by linarith
-  have hk3 : (k:ℝ) ^ 3 ≤ (k:ℝ) ^ 4 := pow_le_pow_right₀ (by linarith) (by norm_num)
-  have hN3 : N ^ 3 ≤ 1000 * (k:ℝ) ^ 3 := by
-    have := pow_le_pow_left₀ hN0 hNk 3
-    nlinarith
-  have hk4 : (256:ℝ) ≤ (k:ℝ) ^ 4 := by
-    have := pow_le_pow_left₀ (by norm_num) hk' 4; norm_num at this; linarith
-  have hN3b : (8000:ℝ) ≤ N ^ 3 := by
-    have := pow_le_pow_left₀ (by norm_num) hN20 3; norm_num at this; linarith
-  have hr1 : (r:ℝ) + 1 ≤ k / 2 := by linarith
-  have hr1' : 0 ≤ (r:ℝ) + 1 := by linarith
-  have hrr : ((r:ℝ) + 1) ^ 2 ≤ (k / 2) ^ 2 := pow_le_pow_left₀ hr1' hr1 2
-  refine ⟨by linarith, ?_, by linarith, by linarith, ?_⟩
-  · intro j hj
-    have hj0 : (0:ℝ) ≤ j := Nat.cast_nonneg j
-    have : (j:ℝ) * N ^ 2 ≤ (N - 1) * N ^ 2 := mul_le_mul_of_nonneg_right hj (sq_nonneg N)
-    nlinarith
-  · have t1 : (k:ℝ) * N * ((r:ℝ) + 1) ^ 2 ≤ (k:ℝ) * (10 * k) * (k / 2) ^ 2 := by
-      apply mul_le_mul _ hrr (sq_nonneg _) (by positivity)
-      exact mul_le_mul_of_nonneg_left hNk hk0
-    have t2 : N ^ 2 * ((r:ℝ) + 1) ^ 2 ≤ (10 * k) ^ 2 * (k / 2) ^ 2 :=
-      mul_le_mul (pow_le_pow_left₀ hN0 hNk 2) hrr (sq_nonneg _) (by positivity)
-    nlinarith
-
-theorem normalised_forms : NormalisedForms := by
-  intro m i s C ka N I A TT g hm hi hs hka hg hC hA hI hN hTT
-  obtain ⟨p, rfl⟩ : ∃ p, m = p + 1 := ⟨m - 1, by omega⟩
-  obtain ⟨q, rfl⟩ : ∃ q, i = q + 1 := ⟨i - 1, by omega⟩
-  obtain ⟨u, rfl⟩ : ∃ u, s = u + 1 := ⟨s - 1, by omega⟩
-  have e1 : 2 * (q + 1) - 2 = 2 * q := by omega
-  have e2 : 2 * (q + 1 - 1) + (u + 1) - 1 = 2 * q + u := by omega
-  have e3 : 2 * (q + 1) - 1 = 2 * q + 1 := by omega
-  have e4 : 2 * (q + 1 - 1) = 2 * q := by omega
-  simp only [xThreshold, lamThreshold, lamPrimeSq, xHat, lamHat, lamPrimeHat, Nat.add_sub_cancel, e1, e2, e3, e4]
-  have hg0 : g ≠ 0 := hg.ne'
-  have hka0 : ka ≠ 0 := hka.ne'
-  have hI0 : I ≠ 0 := hI.ne'
-  have e5 : 2 * q + (u + 1) - 1 = 2 * q + u := by omega
-  simp only [e5]
-  refine ⟨?_, ?_, ?_⟩
-  · simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-  · simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-  · have hsq : ∀ X : ℝ, g * Real.sqrt X = Real.sqrt (g ^ 2 * X) := fun X => by
-      rw [Real.sqrt_mul (sq_nonneg g), Real.sqrt_sq hg.le]
-    rw [hsq]
-    congr 1
-    simp only [div_pow, inv_pow, mul_pow, mul_inv, inv_inv, div_eq_mul_inv]; field_simp; try ring
-
 theorem threshold_products : ThresholdProducts := by
   intro ι _ t B1 B k C A0 Ct ka N I g Del TT i s hC hA0 hCt hka hkapi hN hI hg hDel hTT hCN ht htp hB1 hB hi
   have hC0 : 0 ≤ C := by linarith
-  have hg0 : 0 < g := by linarith
-  have hq0 : 0 ≤ C * Real.pi * N / I := by positivity
   have hbase0 : 0 ≤ C * ka * N / (g * I) := by positivity
   have hbase : C * ka * N / (g * I) ≤ C * Real.pi * N / I := by
     rw [div_le_div_iff₀ (by positivity) hI]
@@ -253,7 +209,6 @@ theorem threshold_products : ThresholdProducts := by
       mul_le_mul_of_nonneg_right (le_trans h1 h2) hI.le
     linarith
   have hbase1 : C * ka * N / (g * I) ≤ 1 := le_trans hbase hCN
-  have hsk : 0 ≤ Real.sqrt k := Real.sqrt_nonneg _
   have hCB : ∀ w, C * B w ≤ C * A0 * Real.sqrt k * t w := fun w => by
     have := mul_le_mul_of_nonneg_left (hB w).2 hC0
     linarith
@@ -336,14 +291,10 @@ theorem theta_lower_bound : ThetaLower := by
   intro f k C A0 Ct N I Del TT Th hf hk hC hA0 hCt hN hI hDel hTT hTh hCN h
   have hk0 : (0:ℝ) < k := by have : (1:ℝ) ≤ k := by exact_mod_cast hk
                              linarith
-  have hC0 : 0 < C := by linarith
   have hCt0 : 0 < Ct := by linarith
   have hinv : ∀ X : ℝ, 0 < X → Th⁻¹ ≤ X → X⁻¹ ≤ Th := fun X hX hX' => by
     have := inv_anti₀ (inv_pos.mpr hTh) hX'; rwa [inv_inv] at this
   have hq0 : 0 < C * Real.pi * N / I := by positivity
-  have hsk : 0 < Real.sqrt k := Real.sqrt_pos.mpr hk0
-  have hs0 : 0 < Real.sqrt (k * N ^ 3 / Del) := Real.sqrt_pos.mpr (by positivity)
-  have hsT : 0 < Real.sqrt TT := Real.sqrt_pos.mpr hTT
   have hmin1 : min (min (Real.sqrt (Del / (k * N ^ 3)) / (Ct * C * A0))
         (I / (Real.pi * Ct * C ^ 2 * A0 * Real.sqrt k * N)))
       (Real.sqrt (Real.sqrt TT / (Real.pi * Ct * C * A0 * Real.sqrt k))) ≤
@@ -391,7 +342,7 @@ theorem theta_lower_bound : ThetaLower := by
       apply mul_pos (Real.sqrt_pos.mpr hCt0) (Real.sqrt_pos.mpr (by positivity))
     exact le_trans hmin3 (by rw [e]; exact hinv _ hpos h')
 
-set_option maxHeartbeats 800000 in
+
 
 theorem theta_power_bound : ThetaPower := by
   intro C A0 Ct CDel cT Cb hC hA0 hCt hCDel hcT hCb hcb
@@ -413,7 +364,6 @@ theorem theta_power_bound : ThetaPower := by
   have m6 := le_max_right (1000 * (Ct * C * A0) ^ 2) (40 * (Real.pi * Ct * C ^ 2 * A0))
   have m7 := le_max_left ((Real.pi * Ct * C * A0) ^ 2) (40 * C * Real.pi)
   have m8 := le_max_right ((Real.pi * Ct * C * A0) ^ 2) (40 * C * Real.pi)
-  have hpi := Real.pi_pos
   have hexp := Real.exp_pos (2 / Cb)
   have hkW : 1000 * (Ct * C * A0) ^ 2 ≤ k := by linarith
   have hkV : 40 * (Real.pi * Ct * C ^ 2 * A0) ≤ k := by linarith
@@ -429,7 +379,6 @@ theorem theta_power_bound : ThetaPower := by
   have hfk' : (f:ℝ) ≤ k := by exact_mod_cast hfk
   have hf1 : (1:ℝ) ≤ f := by linarith
   have hf1N : 1 ≤ f := by omega
-  have hbbpos : 0 < bb := lt_of_lt_of_le (Real.rpow_pos_of_pos hkpos _) hbb
   have hlogk : 2 / Cb ≤ Real.log k := by
     rw [← Real.log_exp (2 / Cb)]; exact Real.log_le_log (Real.exp_pos _) hke
   have hlb : 1 ≤ Real.log bb := by
@@ -453,25 +402,18 @@ theorem theta_power_bound : ThetaPower := by
       _ = (k:ℝ) ^ 4 := by ring
   have hk256 : (256:ℝ) ≤ (k:ℝ) ^ 4 := by
     have := pow_le_pow_left₀ (by norm_num) hk4 4; norm_num at this; linarith
-  have hI4 : Del / 4 ≤ I := by rw [hI]; linarith
   have hIpos : 0 < I := by linarith
   have he2a : 2 * cExp CDel cT Cb ≤ CDel - 4 := by
     unfold cExp; have := min_le_left ((CDel - 4) / 2) ((cT * Cb - 1) / 4); linarith
   have he2b : 2 * cExp CDel cT Cb ≤ cT * Cb - 1 := by
     unfold cExp; have := min_le_right ((CDel - 4) / 2) ((cT * Cb - 1) / 4); linarith
-  have he0 : 0 ≤ cExp CDel cT Cb := by
-    unfold cExp
-    have : 0 ≤ min ((CDel - 4) / 2) ((cT * Cb - 1) / 4) := le_min (by linarith) (by linarith)
-    linarith
   have hP2 : ((k:ℝ) ^ cExp CDel cT Cb) ^ 2 = (k:ℝ) ^ (2 * cExp CDel cT Cb) := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul hkpos.le]; congr 1; push_cast; ring
   have hNk : N ≤ 10 * k := by rw [hN]; linarith
   refine ⟨?_, ?_⟩
   · rw [div_le_one hIpos]
-    have hN0 : 0 ≤ N := by rw [hN]; positivity
     have h1 : C * Real.pi * N ≤ C * Real.pi * (10 * k) := mul_le_mul_of_nonneg_left hNk (by positivity)
     have h2 : 40 * C * Real.pi * k ≤ (k:ℝ) * k := mul_le_mul_of_nonneg_right hkC hkpos.le
-    have hkk : (k:ℝ) * k = (k:ℝ) ^ 2 := by ring
     linarith
   · refine le_min (le_min ?_ ?_) ?_
     · have := Sz8.quantOne k f m ((k:ℝ) ^ (CDel - 4)) ((k:ℝ) ^ cExp CDel cT Cb) (Ct * C * A0) Del
@@ -484,7 +426,6 @@ theorem theta_power_bound : ThetaPower := by
       have := Sz8.quantitative_fourth_power_bound k f m ((k:ℝ) ^ (CDel - 4)) ((k:ℝ) ^ cExp CDel cT Cb)
         (Real.pi * Ct * C ^ 2 * A0) (Real.sqrt k) Del hk1 (by linarith) hmf' hf1 (by positivity)
         (Real.rpow_le_rpow_of_exponent_le hk1 (by linarith)) (by positivity) hkV (Real.sqrt_nonneg _) hsk hD
-      have hsk0 : 0 < Real.sqrt k := Real.sqrt_pos.mpr hkpos
       rw [le_div_iff₀ (by rw [hN]; positivity)]
       have e : (k:ℝ) ^ cExp CDel cT Cb * (Real.pi * Ct * C ^ 2 * A0 * Real.sqrt k * N) =
           (k:ℝ) ^ cExp CDel cT Cb * (Real.pi * Ct * C ^ 2 * A0 * Real.sqrt k * (10 * m)) := by rw [hN]
@@ -511,7 +452,6 @@ theorem final_smallness : FinalSmall := by
     rw [← Real.rpow_mul h2C.le, show 16 / c * (c / 16) = 1 by field_simp, Real.rpow_one] at h1
     rw [hT]; exact h1
   have hT1 : 1 ≤ T := by linarith
-  have hTpos : 0 < T := by linarith
   have hkc : (k:ℝ) ^ c = T ^ 16 := by
     rw [hT, ← Real.rpow_natCast, ← Real.rpow_mul hkpos.le]; congr 1; push_cast; field_simp
   have hThpos : 0 < Th := lt_of_lt_of_le (by rw [hkc]; positivity) hTh
@@ -524,7 +464,6 @@ theorem final_smallness : FinalSmall := by
   have huf : (C / Th) ^ f ≤ ((2 * T ^ 15)⁻¹) ^ f := pow_le_pow_left₀ hu0 hu f
   have hlogbb : Real.log bb ≤ f * Real.log T := by
     rw [hT, Real.log_rpow hkpos]
-    have hlogk0 : 0 ≤ Real.log k := Real.log_nonneg hk1
     have hlb0 : 0 ≤ Real.log bb := Real.log_nonneg hbb
     have h1 : 16 * Real.log bb ≤ c * Cf * Real.log bb := mul_le_mul_of_nonneg_right hcf hlb0
     have h2 : c * (Cf * Real.log bb) ≤ c * (f * Real.log k) := mul_le_mul_of_nonneg_left hlog hc.le
@@ -538,7 +477,6 @@ theorem final_smallness : FinalSmall := by
     exact_mod_cast this.le
   have hCT : C ≤ T := by linarith
   have hTf : T ≤ T ^ (8 * f) := le_self_pow₀ hT1 (by omega)
-  have hr0 : (0:ℝ) ≤ r := Nat.cast_nonneg r
   have hCr : C * ((r:ℝ) + 1) ≤ T ^ (8 * f) * 2 ^ f :=
     mul_le_mul (le_trans hCT hTf) hr1 (by linarith) (by positivity)
   have hbb7 : (bb ^ 7)⁻¹ ≥ ((T ^ f) ^ 7)⁻¹ :=

@@ -1,15 +1,57 @@
-import Mathlib
-import Formalism.DivisorInequality.StatementObj
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.KappaNormalise
-import Formalism.BranchSandwichDivisors.BranchIsometryProofs.TransferMean
-import Formalism.BranchSandwichDivisors.BranchIsometryProofs.StepDiii
-import Formalism.ThetaSupremumBounds.GaussianShiftBounds.Assembly
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ConjugateWeightLatticeOfGeneral
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.PlaceSumSquares
-import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.DualMu
-import Formalism.MeanHeightDescent.AverageDegreeBounds.CovolumeAssemblyHolds
-import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.LocalConditionsGlobalForm
-import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.RamBasic
+module
+
+public import Formalism.DivisorInequality.StatementObj
+public import Formalism.MirabolicMackeyTheory.StatementT
+public import Formalism.MeanHeightDescent.AverageDegreeBounds.CovolumeAssemblyHolds
+public import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.RamBasic
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ConjugateWeightLatticeOfGeneral
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.DualMu
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.PlaceSumSquares
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain Finset
 open scoped Matrix ComplexOrder
@@ -62,8 +104,7 @@ theorem slope_bounds : BoundsMu := by
     Finset.sum_congr rfl (fun j _ => hs3 j)
   rw [hF] at hch
   refine ⟨?_, fun j => ?_⟩
-  · rw [dual_lattice_measure K D hD XE hXE R hR]
-    exact hch
+  · simpa only [dual_lattice_measure K D hD XE hXE R hR] using hch
   · rw [Formalism.ExtensionFiltration.log_covolume_slope_mu K D hD (XW j) (hXW j) (M j) (hM j)]
     have : (D : ℝ) ≠ 0 := by exact_mod_cast hD.ne'
     field_simp

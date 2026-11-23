@@ -1,15 +1,63 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerSplit
-import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ExistsUnitsToIdelesEqOfIdelesSumInvEqZero
+module
+
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.IdeleLimits
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerDefs
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerLocalDefs
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.ExistsUnitsToIdelesEqOfIdelesSumInvEqZero
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.BrauerSplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.EqZeroOfBrauerLocalApplyEqZero
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IsDedekindDomain IntermediateField GroundTheory.Global DirectSum
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 theorem finite_setOf_nsmul_eq_zero_QZ {m : ℕ} (hm : m ≠ 0) : {q : QZ | m • q = 0}.Finite := by
   have hmk : ∀ (j : ℕ) (r : ℚ), j • QZ.mk r = QZ.mk (j * r) := by
@@ -65,9 +113,9 @@ theorem exists_place_above (ℓ : ℕ) (hℓ : ℓ.Prime) :
 variable (S : Set (HeightOneSpectrum (𝓞 K.1))) (ℓ : ℕ) (hℓ : ℓ.Prime)
   (hS : ∀ v : HeightOneSpectrum (𝓞 K.1), ((ℓ : ℕ) : 𝓞 K.1) ∈ v.asIdeal → v ∈ S) (ιs : LocalEmbeddings K)
 
+
 open Classical in
 include hℓ hS in
-
 theorem exists_gsLocalRes_eq_single (v : HeightOneSpectrum (𝓞 K.1)) (hv : v ∉ S)
     (t : localGaloisCohomology K 2 (.inr v)) (k : ℕ) (ht : ℓ ^ k • t = 0) :
     ∃ x : cohomology (uliftIntToIntRep (galUnits K.1 (maxUnramifiedOutside K.1 ℚ̄ S))) 2,
@@ -81,7 +129,7 @@ theorem exists_gsLocalRes_eq_single (v : HeightOneSpectrum (𝓞 K.1)) (hv : v �
       T = DirectSum.of (fun u : Place K.1 => localGaloisCohomology K 2 u) (.inr v) t +
         DirectSum.of (fun u : Place K.1 => localGaloisCohomology K 2 u) (.inr w) t').elim fun T hTdef => ?_
   have hT : sumPlaceInv K T = 0 := by
-    rw [hTdef, map_add, sumPlaceInv_of, sumPlaceInv_of, ht', add_neg_cancel]
+    rw [hTdef, map_add (f := _), sumPlaceInv_of, sumPlaceInv_of, ht', add_neg_cancel]
   refine ((sumPlaceInv_eq_zero_iff ιs T).1 hT).elim fun y hy => ?_
   have ht'k : ℓ ^ k • t' = 0 := by
     apply (placeInv_bijective_inr (K := K) w).1

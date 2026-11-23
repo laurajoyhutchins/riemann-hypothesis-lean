@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.Statement
-import Formalism.FrobeniusOrbits.DiscrMaximalRealCyclotomic
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.FrobMulInertia
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+module
+
+public import Formalism.FrobeniusOrbits.DiscrMaximalRealCyclotomic
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 
@@ -15,60 +61,12 @@ open Formalism.TwoAdicCyclotomicDecomposition
 
 namespace Misc2
 
-theorem galE_one {e q d : ℕ} (hqd : HypOdd q d) {L : Type} [Field L] [NumberField L]
-    {ζ a b : L} (h : IsLayer (e + 2) q d ζ a b) :
-    galE e ζ a b (1 : hostE ζ a b ≃ₐ[ℚ] hostE ζ a b) = 1 := by
-  obtain ⟨-, -, hmulE, -⟩ := hostGalois e q d hqd L ζ a b h
-  have := hmulE 1 1
-  rw [mul_one] at this
-  exact (mul_eq_left.mp this.symm)
-
-theorem ne_one_of_galE {e q d : ℕ} (hqd : HypOdd q d) {L : Type} [Field L] [NumberField L]
-    {ζ a b : L} (h : IsLayer (e + 2) q d ζ a b) (σ : hostE ζ a b ≃ₐ[ℚ] hostE ζ a b)
-    (hσ : galE e ζ a b σ ≠ 1) : σ ≠ 1 := by
-  rintro rfl
-  exact hσ (galE_one hqd h)
-
 theorem units_ne_one_iff (x : ℤˣ) : x ≠ 1 ↔ x = -1 := by
   rcases Int.units_eq_one_or x with rfl | rfl <;> decide
 
 end Misc2
 
 open Misc2
-
-theorem hostRamified_of (hI : HostInertia) : HostRamified := by
-  intro e q d he hH L _ _ ζ a b h p _ P _ _
-  have hqd := hH.toHypOdd
-  obtain ⟨-, -, -, hbij⟩ := hostGalois e q d hqd L ζ a b h
-  constructor
-  · rintro ⟨σ, hσ1, hσ⟩
-    by_contra hp
-    push Not at hp
-    obtain ⟨hp2, hpq, hpd⟩ := hp
-    have hF := hostFrob_of hostGalois hostGalSpec e q d hqd L ζ a b h p hp2 hpq hpd P
-    exact hσ1 ((hF.2.2 σ).mp hσ)
-  · rintro (rfl | rfl | rfl)
-    · obtain ⟨σ, hσ⟩ := hbij.2 (((1, 1), hcl e (u5 (e + 2))) : GG e)
-      refine ⟨σ, ne_one_of_galE hqd h σ ?_, ?_⟩
-      · rw [hσ]
-        intro h1
-        have h2 : hcl e (u5 (e + 2)) = 1 := congrArg Prod.snd h1
-        have h3 := (hostGroup e).2.2.2.2.2.2.2.1
-        rw [h2, orderOf_one] at h3
-        have : 2 ≤ 2 ^ e := by
-          calc 2 = 2 ^ 1 := by norm_num
-            _ ≤ 2 ^ e := Nat.pow_le_pow_right (by norm_num) he
-        omega
-      · have : P.LiesOver (span {(2 : ℤ)}) := by simpa using (inferInstance : P.LiesOver (span {((2 : ℕ) : ℤ)}))
-        exact ((hI e q d hH L ζ a b h σ).1 P).mpr (by rw [hσ]; rfl)
-    · obtain ⟨σ, hσ⟩ := hbij.2 (sg e)
-      refine ⟨σ, ne_one_of_galE hqd h σ ?_, ?_⟩
-      · rw [hσ]; simp [sg, Prod.ext_iff]
-      · exact ((hI e p d hH L ζ a b h σ).2.1 P).mpr (Or.inr hσ)
-    · obtain ⟨σ, hσ⟩ := hbij.2 (((1, -1), 1) : GG e)
-      refine ⟨σ, ne_one_of_galE hqd h σ ?_, ?_⟩
-      · rw [hσ]; simp [Prod.ext_iff]
-      · exact ((hI e q p hH L ζ a b h σ).2.2 P).mpr (Or.inr hσ)
 
 theorem hostPartner : HostPartner := by
   intro e τ hτ

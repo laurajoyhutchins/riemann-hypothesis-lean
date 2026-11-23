@@ -1,5 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.RemainderTerms.Statements
+public import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Matrix.Block
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -53,18 +106,11 @@ theorem hasDD_of_dividedDifference_eq {f N : ℕ} {H P : RootRing f N}
 
 theorem antisymmetrize_add (f N : ℕ) (H H' : RootRing f N) :
     antisymmetrize f N (H + H') = antisymmetrize f N H + antisymmetrize f N H' := by
-  simp [antisymmetrize, map_add, smul_add, Finset.sum_add_distrib]
+  simp [antisymmetrize, map_add (f := _), smul_add, Finset.sum_add_distrib]
 
 theorem antisymmetrize_smul (f N : ℕ) (b : ℚ) (H : RootRing f N) :
     antisymmetrize f N (b • H) = b • antisymmetrize f N H := by
   simp [antisymmetrize, map_smul, Finset.smul_sum, smul_comm b]
-
-theorem antisymmetrize_sum {ι : Type*} (s : Finset ι) (f N : ℕ) (H : ι → RootRing f N) :
-    antisymmetrize f N (∑ i ∈ s, H i) = ∑ i ∈ s, antisymmetrize f N (H i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [antisymmetrize]
-  | insert i s hi ih => rw [Finset.sum_insert hi, Finset.sum_insert hi, antisymmetrize_add, ih]
 
 theorem hasDD_add {f N : ℕ} {H H' P P' : RootRing f N} (h : HasDD f N H P) (h' : HasDD f N H' P') :
     HasDD f N (H + H') (P + P') := by
@@ -106,8 +152,9 @@ theorem antisymmetrize_one_eq (N : ℕ) (P : RootRing 1 N) :
 theorem antisymmetrize_prod (f N : ℕ) (P : Fin f → RootRing 1 N) :
     antisymmetrize f N (∏ σ, blockEmb f N σ (P σ)) =
       ∏ σ, blockEmb f N σ (antisymmetrize 1 N (P σ)) := by
+
   simp_rw [antisymmetrize_one_eq, map_sum, Finset.prod_univ_sum, antisymmetrize, map_prod,
-    blockPermute_blockEmb, map_smul]
+  blockPermute_blockEmb, map_smul]
   refine Finset.sum_congr (by simp) fun w _ => ?_
   simp only [blockSign, smul_eq_C_mul, Finset.prod_mul_distrib, map_prod]
 
@@ -146,12 +193,14 @@ def yEval (r a : ℕ) (c : SmallBlock) : MvPolynomial (Fin r) ℚ →ₐ[ℚ] Ro
 
 theorem blockEmb_yEval_psum (f r a : ℕ) (c : SmallBlock) (σ : Fin f) (k : ℕ) :
     blockEmb f (r + a) σ (yEval r a c (psum (Fin r) ℚ k)) = smallPowerSum f r a c k σ := by
+
   simp only [yEval, psum, map_sum, map_pow, aeval_X, smallPowerSum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [yRoot_eq_blockEmb f r a c σ i]
 
 theorem smallBlockMu_eq_sum (f r a : ℕ) (c : SmallBlock) :
     smallBlockMu f r a c = ∑ σ : Fin f, blockEmb f (r + a) σ (yEval r a c (psum (Fin r) ℚ 1)) := by
+
   simp only [yEval, psum, map_sum, pow_one, aeval_X, smallBlockMu]
   refine Finset.sum_congr rfl fun σ _ => Finset.sum_congr rfl fun i _ => ?_
   rw [yRoot_eq_blockEmb f r a c σ i]
@@ -184,6 +233,7 @@ theorem constantCoeff_completeSymmetric (σ : Type*) [Fintype σ] [DecidableEq �
   · have hpos : 0 < d.toNat := by omega
     obtain ⟨n, hn⟩ : ∃ n, d.toNat = n + 1 := ⟨d.toNat - 1, by omega⟩
     rw [hn]
+
     simp only [hsymm, map_sum]
     refine Finset.sum_eq_zero fun s _ => ?_
     rw [map_multiset_prod, Multiset.map_map]
@@ -269,6 +319,7 @@ theorem hasDD_schur_sum (r a : ℕ) (c : SmallBlock) (κ : ℚ)
     (s : Finset (Fin r → ℕ)) (hs : ∀ lam ∈ s, Antitone lam) (b : (Fin r → ℕ) → ℚ) :
     HasDD 1 (r + a) (yEval r a c (∑ lam ∈ s, C (b lam) * schur (Fin r) lam) * fib1 r a c)
       (∑ lam ∈ s, b lam • pushOut r a c κ lam) := by
+
   rw [map_sum, Finset.sum_mul]
   refine hasDD_sum s fun lam hlam => ?_
   have := hasDD_smul (b lam) (hκ lam (hs lam hlam))
@@ -290,6 +341,7 @@ theorem constantCoeff_pushOut_sum (r a : ℕ) (c : SmallBlock) (κ : ℚ) (s : F
     (hs : ∀ lam ∈ s, Antitone lam) (b : (Fin r → ℕ) → ℚ) :
     constantCoeff (∑ lam ∈ s, b lam • pushOut r a c κ lam) =
       if rectangle r a ∈ s then b (rectangle r a) * κ else 0 := by
+
   rw [map_sum]
   have : ∀ lam ∈ s, constantCoeff (b lam • pushOut r a c κ lam) =
       if lam = rectangle r a then b lam * κ else 0 := by

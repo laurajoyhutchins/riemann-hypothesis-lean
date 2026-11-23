@@ -1,5 +1,61 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdelicUnitriangularMulMemUnipotentTimesIntegral
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
+public import Mathlib.MeasureTheory.Constructions.Pi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsOpenKerFinIdele
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SatakeComb
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Formalism.UG GlobalTheory.CuspRep MeasureTheory
 open scoped ENNReal
 
@@ -179,7 +235,7 @@ variable {R : Type} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R] [Mea
   [SecondCountableTopology R] {n : ℕ} [MeasurableSpace (GL (Fin n) R)] [BorelSpace (GL (Fin n) R)]
 
 theorem measurable_rowG (x : Pos n → R) (ρ : ℕ) : Measurable (rowG x ρ) := by
-  refine measurable_pi_lambda _ fun q => ?_
+  refine Measurable.of_eval fun q => ?_
   refine Measurable.const_add (Finset.measurable_sum _ fun k _ => ?_) _
   by_cases h : q.1.1.1 < k ∧ k < q.1.1.2
   · simp only [dif_pos h]
@@ -301,8 +357,8 @@ instance (μR : Measure R) [μR.IsOpenPosMeasure] [SigmaFinite μR] :
 
 end GlobalTheory.UnipCoord
 
-open GlobalTheory.UnipCoord in
 
+open GlobalTheory.UnipCoord in
 theorem GlobalTheory.UnipCoord.map_coords_haar : ∀ (R : Type) [CommRing R] [TopologicalSpace R] [IsTopologicalRing R] [LocallyCompactSpace R]
     [SecondCountableTopology R] [T2Space R] [MeasurableSpace R] [BorelSpace R] (n : ℕ)
     [MeasurableSpace (GL (Fin n) R)] [BorelSpace (GL (Fin n) R)] (μR : Measure R) [μR.IsAddHaarMeasure]
@@ -319,6 +375,7 @@ theorem GlobalTheory.UnipCoord.map_coords_haar : ∀ (R : Type) [CommRing R] [To
     ⟨_, Measure.isMulLeftInvariant_eq_smul ν (coordMeasure μR)⟩
   refine ⟨c, ?_⟩
   change Measure.map coords ν = _
-  rw [hc, Measure.map_smul, coordMeasure, Measure.map_map measurable_coords measurable_ofCoords]
+  rw [hc, Measure.map_smul c measurable_coords.aemeasurable, coordMeasure,
+    Measure.map_map measurable_coords measurable_ofCoords]
   have : coords ∘ (ofCoords : (Pos n → R) → GlobalTheory.SmGL.unipB R (Fin n)) = id := funext coords_ofCoords
   rw [this, Measure.map_id]

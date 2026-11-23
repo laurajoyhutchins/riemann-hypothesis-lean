@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FlatMapsPreserveSchwartzBruhatAndSurjectiveStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergFrameHalfInverseStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilCharacterSplitPlaceExistsContinuousNontrivia
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousCharactersLocallyConstantNonarchLocalF
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsUnitarySupportedAtPlaceOfMulEqIdem
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
+public import Aesop.BuiltinRules
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FlatMapsPreserveSchwartzBruhatAndSurjectiveStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.HeisenbergFrameHalfInverseStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilCharacterSplitPlaceExistsContinuousNontrivia
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ContinuousCharactersLocallyConstantNonarchLocalF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR.Datum MeasureTheory Matrix ValuativeRel GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.LocMod GlobalTheory.StepData
 
 noncomputable section
@@ -94,6 +137,7 @@ theorem map_pr_mul {l m m' : Type} [Fintype m] (M : Matrix l m D.host.E) (N : Ma
 theorem pr_mulVec {l m : Type} [Fintype m] (M : Matrix l m D.host.E) (v : m → D.host.E) (r : l) :
     p.pr ((M *ᵥ v) r) = ∑ a, p.pr (M r a) * p.pr (v a) := by
   change prH p (∑ a, M r a * v a) = ∑ a, prH p (M r a) * prH p (v a)
+
   simp only [map_sum, map_mul]
 
 theorem wittDecomposition_coreProj_mul_core_eq_one {S S₀ : HSp D} {ρ : ℕ} (d : HypDec S S₀ ρ) : d.q0 * d.i₀ = 1 :=
@@ -225,12 +269,14 @@ theorem incA_mul_ι (a : D.host.E) (x : k) : (incA D a : AE D) * p.ι x = p.ι (
 theorem rat_mul_ι {l m n : ℕ} (M : Matrix (Fin l) (Fin m) D.host.E) (N : Matrix (Fin m) (Fin n) k) :
     (rat M : Mx D l m) * (N.map p.ι : Mx D m n) = (M.map p.pr * N).map p.ι := by
   ext i j
+
   simp only [Matrix.mul_apply, Matrix.map_apply, map_sum, rat]
   exact Finset.sum_congr rfl fun a _ => incA_mul_ι p _ _
 
 theorem ι_mul_rat {l m n : ℕ} (N : Matrix (Fin l) (Fin m) k) (M : Matrix (Fin m) (Fin n) D.host.E) :
     (N.map p.ι : Mx D l m) * (rat M : Mx D m n) = (N * M.map p.pr).map p.ι := by
   ext i j
+
   simp only [Matrix.mul_apply, Matrix.map_apply, map_sum, rat]
   exact Finset.sum_congr rfl fun a _ => by rw [mul_comm (N i a), mul_comm, incA_mul_ι]
 
@@ -272,8 +318,8 @@ theorem continuous_hO_up {Y Y' : Type} [Fintype Y] [DecidableEq Y] [Fintype Y'] 
     ((continuous_const.matrix_mul continuous_id).matrix_mul continuous_const).matrix_map p.cont_ι
   refine p.cont_π.comp ?_
   unfold hO
-  refine continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun b _ => continuous_finset_sum _ fun c _ =>
-    continuous_finset_sum _ fun d _ => continuous_const.mul (h.matrix_elem d a)
+  refine continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun b _ => continuous_finsetSum _ fun c _ =>
+    continuous_finsetSum _ fun d _ => continuous_const.mul (h.matrix_elem d a)
 
 variable {n n' : Type} [Fintype n] [DecidableEq n] [Fintype n'] [DecidableEq n'] {c ρ σ : ℕ}
   {J : JacLev D ρ} {B : BesLev D σ} {s hh s' : k} {G₀ : Frame k J.W₀.rank n'} {FW : Frame k J.W.rank (n' ⊕ Fin (c + 1))}
@@ -315,7 +361,7 @@ theorem factor_isModel : ∀ (D : D7), GlobalTheory.FinPl.FlatLaws D → OmLoc D
     exact hF.theta _ (hTm.theta Φ)
   · obtain ⟨Φ, h⟩ := hon Ψ
     let Φ' : SB (Matrix (n ⊕ Fin c) (n' ⊕ Fin (c + 1)) k) := ⟨fun t => Φ.1 (t + embR l x₀),
-      Φ.2.1.comp_continuous (continuous_add_right _), Φ.2.2.comp_homeomorph (Homeomorph.addRight (embR l x₀))⟩
+      Φ.2.1.comp_continuous (continuous_id.add continuous_const), Φ.2.2.comp_homeomorph (Homeomorph.addRight (embR l x₀))⟩
     have h' : Ψ'.1 = flRow ψk ν (σ + 1) Φ'.1 := funext fun x => by
       rw [hΨ', h]; exact (flRow_translate ψk ν l (σ + 1) rfl Φ.1 x₀ x).symm
     rw [← hT Φ' Ψ' h', ← hT Φ Ψ h, hTm.trans (embR l x₀) Φ Φ' fun _ => rfl, up_embR hJF hCF hBF l rfl]

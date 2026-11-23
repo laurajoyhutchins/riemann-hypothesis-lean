@@ -1,5 +1,53 @@
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AddIff
-import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.EvalExact
+module
+
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.ZeroPull
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.AddIff
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.EtaleCohomology.EvalExact
+import Mathlib.Algebra.Category.Grp.Abelian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Abelian.Exact
+import Mathlib.CategoryTheory.Abelian.FunctorCategory
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,10 +65,11 @@ private lemma sum_transport {Q : C ⥤ Type} {K : Coef C} (c : Sec Q K) {I : Typ
     (g : I → (Q ⟶ Q)) {A B : C} (φ : A ⟶ B) (w : Q.obj A) :
     (K.map φ).hom (∑ i, c.1 A ((g i).app A w)) =
       ((Finset.univ.val.map fun i => (g i).app B (Q.map φ w)).map (c.1 B)).sum := by
+
   rw [map_sum, Multiset.map_map]
   change _ = ∑ i, c.1 B ((g i).app B (Q.map φ w))
   refine Finset.sum_congr rfl fun i _ => ?_
-  rw [sec_nat c φ, FunctorToTypes.naturality]
+  rw [sec_nat c φ, ← NatTrans.naturality_apply (g i) φ]
 
 private lemma avg_indep (Pa : Parts C) {K : Coef C} (hK : Pa.Add K) {Q P : C ⥤ Type} {p : Q ⟶ P}
     {I : Type} [Fintype I] {g : I → (Q ⟶ Q)} (h : Pa.LocTrans p g) (c : Sec Q K) {A : C}
@@ -46,12 +95,13 @@ private def avg (Pa : Parts C) {K : Coef C} (hK : Pa.Add K) {Q P : C ⥤ Type} {
   ⟨fun A y => ∑ i, c.1 A ((g i).app A (lift Pa h A y)), by
     intro A B φ y
     have hw : p.app B (Q.map φ (lift Pa h A y)) = p.app B (lift Pa h B (P.map φ y)) := by
-      rw [lift_spec, FunctorToTypes.naturality, lift_spec]
+      rw [lift_spec, NatTrans.naturality_apply p φ, lift_spec]
     change (K.map φ).hom (∑ i, c.1 A ((g i).app A (lift Pa h A y))) =
       ∑ i, c.1 B ((g i).app B (lift Pa h B (P.map φ y)))
+
     rw [← avg_indep Pa hK h c hw, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [sec_nat c φ, FunctorToTypes.naturality]⟩
+    rw [sec_nat c φ, ← NatTrans.naturality_apply (g i) φ]⟩
 
 private lemma avg_apply (Pa : Parts C) {K : Coef C} (hK : Pa.Add K) {Q P : C ⥤ Type} {p : Q ⟶ P}
     {I : Type} [Fintype I] {g : I → (Q ⟶ Q)} (h : Pa.LocTrans p g) (c : Sec Q K) (A : C)
@@ -77,6 +127,7 @@ private lemma avg_map (Pa : Parts C) {K L : Coef C} (hK : Pa.Add K) (hL : Pa.Add
     (α : K ⟶ L) (c : Sec Q K) (c' : Sec Q L)
     (hc : ∀ (A : C) (q : Q.obj A), c'.1 A q = (α.app A).hom (c.1 A q)) (A : C) (y : P.obj A) :
     (avg Pa hL h c').1 A y = (α.app A).hom ((avg Pa hK h c).1 A y) := by
+
   rw [avg_apply, avg_apply, map_sum]
   exact Finset.sum_congr rfl fun i _ => hc _ _
 

@@ -1,7 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddXMulDerivativeBin
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAlgEquivXAddC
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCosetRepresentativesOfFiniteSubgroupPadicIStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddXMulDerivativeBin
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAlgEquivXAddC
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCosetRepresentativesOfFiniteSubgroupPadicIStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.FieldTheory.KummerExtension
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +154,23 @@ theorem assoc_val {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] 
 theorem assoc_l {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] (ζ : O)
     (hζ : IsPrimitiveRoot ζ l) : Associated ((ζ - 1) ^ (l - 1)) (l : O) := by
   have h := congrArg constantCoeff (lvl_eq_prod ζ hζ)
-  have h1 : constantCoeff (lvl l O 0) = (l : O) := by simp [lvl]
+  have h1 : constantCoeff (lvl l O 0) = (l : O) := by
+    have hm := mul_lvl (l := l) (O := O) 0
+    simp only [pow_zero, pow_one, zero_add, add_sub_cancel_left] at hm
+    have hc := congrArg (PowerSeries.coeff 1) hm
+    rw [mul_comm] at hc
+    have hc' : coeff (0 + 1) (lvl l O 0 * X ^ 1) = coeff 1 ((1 + X : O⟦X⟧) ^ l - 1) := by
+      simpa using hc
+    rw [coeff_mul_X_pow, coeff_zero_eq_constantCoeff_apply] at hc'
+    have hp : ((1 + X : O⟦X⟧) ^ l).coeff 1 = (l : O) := by
+      have hcoe : ((1 + X : O⟦X⟧) ^ l) =
+          Polynomial.coeToPowerSeries.ringHom ((1 + Polynomial.X : Polynomial O) ^ l) := by
+        simp [Polynomial.coeToPowerSeries.ringHom]
+      rw [hcoe, Polynomial.coeToPowerSeries.ringHom_apply, Polynomial.coeff_coe]
+      simpa [Polynomial.coeff_one_add_X_pow]
+    rw [map_sub] at hc'
+    simp only [coeff_one, one_ne_zero, if_false, sub_zero, hp] at hc'
+    exact hc'
   rw [h1, map_prod] at h
   rw [h]
   have : (ζ - 1) ^ (l - 1) = ∏ _b ∈ (Finset.univ : Finset (ZMod l)).erase 0, (ζ - 1) := by
@@ -117,10 +190,21 @@ theorem ev_act_X {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [
       ← PadicInt.ker_toZMod, RingHom.mem_ker, map_sub, map_natCast, hd, ZMod.natCast_zmod_val,
       sub_self]
   have h2 := map_dvd φ (dvd_bin_sub (O := O) 1 δ d h1)
-  have h3 : φ (1 + X) = ζ ^ b.val := by rw [map_add, map_one, hφ]; ring
-  rw [map_sub, map_pow, h3, map_one, pow_one, ← pow_mul, mul_comm, pow_mul, hζ, one_pow, sub_self,
-    zero_dvd_iff, map_sub, sub_eq_zero, bin_nat, map_pow, h3] at h2
-  rw [act_X, map_sub, map_one, h2, ZMod.val_mul, ← pow_eq_pow_mod _ hζ, pow_mul]
+  have h3 : φ (1 + X) = ζ ^ b.val := by rw [map_add (f := _), map_one, hφ]; ring
+  have hpow : (ζ ^ b.val) ^ l = 1 := by
+    rw [← pow_mul, mul_comm, pow_mul, hζ, one_pow]
+  have hzero : φ ((1 + X : O⟦X⟧) ^ l - 1) = 0 := by
+    rw [map_sub, map_pow, h3, map_one, hpow, sub_self]
+  have h2' : φ ((1 + X : O⟦X⟧) ^ l - 1) ∣
+      φ (bin (l := l) O δ) - φ (bin (l := l) O d) := by
+    simpa only [map_sub, pow_one] using h2
+  have hbin : φ (bin (l := l) O δ) = φ (bin (l := l) O d) := by
+    rw [hzero, zero_dvd_iff] at h2'
+    exact sub_eq_zero.mp h2'
+  rw [act_X, map_sub, map_one, hbin, bin_nat, map_pow, h3]
+  rw [ZMod.val_mul, ← pow_mul]
+  congr 1
+  exact pow_eq_pow_mod _ hζ
 
 theorem assoc_sub {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] [IsLocalRing O]
     (hl : ¬ IsUnit (l : O)) (ζ : O) (hm : ζ - 1 ∈ maximalIdeal O) (s : ℕ) (w : O⟦X⟧)
@@ -144,6 +228,7 @@ theorem assoc_sub {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsDomain O] 
         refine Ideal.mem_of_dvd _ (dvd_ev_sub ψ w) ?_
         rw [hψ]
         exact Ideal.mem_of_dvd _ (by simpa using sub_dvd_pow_sub_pow ζ 1 c.val) hm
+
       rw [map_mul, h1, map_pow, map_pow, map_sum]
       simp [hζ]
   obtain ⟨y, hy, hy2⟩ := key b φ hφ

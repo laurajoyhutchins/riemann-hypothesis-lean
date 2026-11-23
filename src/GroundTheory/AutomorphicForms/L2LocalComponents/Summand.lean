@@ -1,8 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.L2LocalComponents.Analytic
-import GroundTheory.AutomorphicForms.L2LocalComponents.ArchPolar
-import GroundTheory.AutomorphicForms.L2LocalComponents.CuspSmooth
-import GroundTheory.AutomorphicForms.TensorProductTheorem.CuspidalRep
+module
+
+public import GroundTheory.AutomorphicForms.L2LocalComponents.CuspSmooth
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.CuspidalRep
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.CentralCuspSplit
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SummandsAreCuspForms
+public import GroundTheory.AutomorphicForms.L2LocalComponents.Analytic
+public import GroundTheory.AutomorphicForms.L2LocalComponents.ArchPolar
+import GroundTheory.AutomorphicForms.UnitaryAdmissible.CuspFinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Filter Topology Polynomial
 open scoped InnerProductSpace
@@ -21,7 +66,7 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
-variable (μ : Measure (normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 theorem mem_of_mem_topologicalClosure {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
     {S Y : Submodule ℂ E} (hY : IsClosed (Y : Set E)) (T : E →L[ℂ] E) (hT : ∀ v ∈ S, T v ∈ Y)
@@ -29,7 +74,7 @@ theorem mem_of_mem_topologicalClosure {E : Type*} [NormedAddCommGroup E] [Normed
   have hle : S ≤ Y.comap (T : E →ₗ[ℂ] E) := fun w hw => hT w hw
   exact Submodule.topologicalClosure_minimal S hle (hY.preimage T.continuous) hv
 
-theorem exists_eq_archimedean_mul_finite (g : normOneGL K n) :
+theorem exists_eq_archimedean_mul_finite (g : normOneGL (K := K) (n := n)) :
     ∃ (a : archGroup K n) (f : AdelicGLn.FiniteAdelicGL K n),
       g = archP K n a * retractOne (finEmb K n f) := by
   refine ⟨archEquiv K n (AdelicGLn.prodEquiv K n g).1, (AdelicGLn.prodEquiv K n g).2, ?_⟩
@@ -46,7 +91,7 @@ theorem derivOp_mem {V : Submodule ℂ (CuspL2 μ)} (hVc : IsClosed (V : Set (Cu
   have ht := hasDerivAt_iff_tendsto_slope.1 hd
   refine hVc.mem_of_tendsto ht (Eventually.of_forall fun t => ?_)
   rw [slope_def_module]
-  refine V.smul_mem _ (V.sub_mem ?_ ?_)
+  refine Submodule.smul_of_tower_mem V _ (V.sub_mem ?_ ?_)
   · rw [archRepT_apply]
     exact hV _ _ hv
   · rw [archRepT_apply]
@@ -65,13 +110,13 @@ theorem aeval_uAction_cuspVecL {φ : cuspForms K n} (hφ : φ ∈ centralCuspFor
       CuspL2 μ) = cuspVecL μ (aeval (uActionCusp K n u) P φ) := by
   induction P using Polynomial.induction_on' with
   | add p q hp hq =>
-    rw [map_add, map_add, LinearMap.add_apply, LinearMap.add_apply, Submodule.coe_add, hp, hq, map_add]
+    rw [map_add (f := _), map_add (f := _), LinearMap.add_apply, LinearMap.add_apply, Submodule.coe_add, hp, hq, map_add (f := _)]
   | monomial k c =>
-    rw [aeval_monomial, aeval_monomial, Module.End.mul_apply, Module.End.mul_apply,
+    rw [aeval_monomial, aeval_monomial, mul_apply_eq_comp, mul_apply_eq_comp,
       Module.algebraMap_end_apply, Module.algebraMap_end_apply, ← map_pow, ← map_pow,
       Submodule.coe_smul, uAction_cuspToL2 μ hφ, map_smul]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem isInvariant_topologicalClosure_map {W : Submodule ℂ (cuspForms K n)}
     (hW : W ≤ centralCuspForms K n)
@@ -140,7 +185,7 @@ theorem isInvariant_topologicalClosure_map {W : Submodule ℂ (cuspForms K n)}
   rw [archRepT_apply] at this
   exact this
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem sup_orthRel_of_finite {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     (ι : cuspForms K n →ₗ[ℂ] H)
@@ -161,7 +206,8 @@ theorem sup_orthRel_of_finite {H : Type*} [NormedAddCommGroup H] [InnerProductSp
   have hΔsum : ∀ φ : cuspForms K n,
       Δ φ = ∑ i, (gkModuleCusp K n).ρ (b i) ((gkModuleCusp K n).ρ (b i) φ) := by
     intro φ
-    simp only [Δ, laplacianU, map_sum, map_mul, LinearMap.sum_apply, Module.End.mul_apply]
+
+    simp only [Δ, laplacianU, map_sum, map_mul, LinearMap.sum_apply, mul_apply_eq_comp]
     rfl
   have hΔV : ∀ φ ∈ centralCuspForms K n, Δ φ ∈ centralCuspForms K n :=
     fun φ hφ => uActionCusp_mem_centralCuspForms _ hφ
@@ -175,6 +221,7 @@ theorem sup_orthRel_of_finite {H : Type*} [NormedAddCommGroup H] [InnerProductSp
   have hT : ∀ x ∈ centralCuspForms K n, ∀ y ∈ centralCuspForms K n,
       inner ℂ (ι (Δ x)) (ι y) = inner ℂ (ι x) (ι (Δ y)) := by
     intro x hx y hy
+
     rw [hΔsum, hΔsum, map_sum, map_sum, sum_inner, inner_sum]
     exact Finset.sum_congr rfl fun i _ => hXX (b i) x hx y hy
   have hUΔ : ∀ φ ∈ U, Δ φ ∈ U := fun φ hφ => by
@@ -196,7 +243,7 @@ theorem sup_orthRel_of_finite {H : Type*} [NormedAddCommGroup H] [InnerProductSp
     { carrier := {x | x ∈ centralCuspForms K n ∧ ∀ h ∈ U₀, finRepCusp K n h x = x}
       zero_mem' := ⟨Submodule.zero_mem _, fun h _ => map_zero _⟩
       add_mem' := fun {x y} hx hy => ⟨Submodule.add_mem _ hx.1 hy.1, fun h hh => by
-        rw [map_add, hx.2 h hh, hy.2 h hh]⟩
+        rw [map_add (f := _), hx.2 h hh, hy.2 h hh]⟩
       smul_mem' := fun c x hx => ⟨Submodule.smul_mem _ c hx.1, fun h hh => by
         rw [map_smul, hx.2 h hh]⟩ }
   refine ⟨V₀, fun x hx => hx.1, ⟨hv, fun h hh => Subtype.ext (funext fun g => hU₀ g h hh)⟩,
@@ -212,7 +259,7 @@ theorem sup_orthRel_of_finite {H : Type*} [NormedAddCommGroup H] [InnerProductSp
     refine ⟨p, ?_, hHC U₀ hU₀sub _ hQm hQd _ fun φ hφ =>
       ⟨hφ.2, ρ_centralZ_eq_zero hφ.1.1, hφ.1.2⟩⟩
     show aeval Δ (p.map (algebraMap ℝ ℂ)) x = 0
-    rw [hp, mul_comm, map_mul, Module.End.mul_apply, hP, map_zero]
+    rw [hp, mul_comm, map_mul, mul_apply_eq_comp, hP, map_zero]
   · obtain ⟨e, heU, hefix, he⟩ := exists_average ι hτ U hU hUτ U₀ hU₀sub hu
     exact ⟨e, ⟨heU, hU heU, hefix⟩, fun w hw => he w hw.1 hw.2⟩
 
@@ -245,8 +292,8 @@ section Summand
 variable {V : Submodule ℂ (CuspL2 μ)} (hVc : IsClosed (V : Set (CuspL2 μ)))
   (hV : (cuspRepT μ).IsInvariant V)
 
-include hVc hV in
 
+include hVc hV in
 theorem summandCuspForms_stable_ρ :
     ∀ X, ∀ φ ∈ summandCuspForms V, (gkModuleCusp K n).ρ X φ ∈ summandCuspForms V := by
   intro X φ hφ
@@ -257,8 +304,8 @@ theorem summandCuspForms_stable_ρ :
   rw [← e]
   exact derivOp_mem μ hVc hV hφ.2 (isSmoothVector_cuspToL2 μ hφ.1) _
 
-include hV in
 
+include hV in
 theorem summandCuspForms_stable_σ :
     ∀ k, ∀ φ ∈ summandCuspForms V, (gkModuleCusp K n).σ k φ ∈ summandCuspForms V := by
   intro k φ hφ
@@ -267,8 +314,8 @@ theorem summandCuspForms_stable_σ :
   rw [cuspToL2_sigma μ k hφ.1, archRepT_apply]
   exact hV _ _ hφ.2
 
-include hV in
 
+include hV in
 theorem summandCuspForms_stable_τ :
     ∀ g, ∀ φ ∈ summandCuspForms V, finRepCusp K n g φ ∈ summandCuspForms V := by
   intro g φ hφ
@@ -281,8 +328,8 @@ theorem eq_zero_of_cuspVecL_eq_zero {φ : cuspForms K n} (hφ : φ ∈ centralCu
     (h0 : cuspVecL μ φ = 0) : φ = 0 :=
   injOn_cuspToL2 μ (hφ : _) (fun _ _ => rfl) (h0.trans (map_zero (cuspToL2 μ)).symm)
 
-include hV in
 
+include hV in
 theorem le_topologicalClosure_map [CompleteSpace V] (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible)
     {W : Submodule ℂ (cuspForms K n)} (hWU : W ≤ summandCuspForms V)
     (hWρ : ∀ X, ∀ φ ∈ W, (gkModuleCusp K n).ρ X φ ∈ W)
@@ -310,8 +357,8 @@ theorem le_topologicalClosure_map [CompleteSpace V] (hirr : ((cuspRepT μ).restr
     have : (⟨v, hv⟩ : V) ∈ Y' := h ▸ Submodule.mem_top
     exact this
 
-include hVc hV in
 
+include hVc hV in
 theorem eq_summandCuspForms [CompleteSpace V] (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible)
     {W : Submodule ℂ (cuspForms K n)} (hWU : W ≤ summandCuspForms V)
     (hWρ : ∀ X, ∀ φ ∈ W, (gkModuleCusp K n).ρ X φ ∈ W)
@@ -343,8 +390,8 @@ theorem eq_summandCuspForms [CompleteSpace V] (hirr : ((cuspRepT μ).restrict V 
     _ = W ⊔ O ⊓ summandCuspForms V := sup_inf_assoc_of_le O hWU
     _ ≤ W := by rw [hO, sup_bot_eq]
 
-include hVc hV in
 
+include hVc hV in
 theorem topologicalClosure_map_summandCuspForms [CompleteSpace V]
     (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible) (hne : summandCuspForms V ≠ ⊥) :
     ((summandCuspForms V).map (cuspVecL μ)).topologicalClosure = V := by
@@ -366,7 +413,7 @@ variable {K : Type*} [Field K] [NumberField K] {n : ℕ}
 
 namespace CuspidalAutomorphicRepresentation
 
-variable {μ : Measure (Reduction.normOneGL K n)} [μ.IsHaarMeasure]
+variable {μ : Measure (Reduction.normOneGL (K := K) (n := n))} [μ.IsHaarMeasure]
 
 def ofSummand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V] (hV : (cuspRepT μ).IsInvariant V)
     (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible) (hne : summandCuspForms V ≠ ⊥) :
@@ -378,10 +425,6 @@ def ofSummand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V] (hV : (cuspRepT 
       by_cases hW0 : W = ⊥
       · exact Or.inl hW0
       · exact Or.inr (eq_summandCuspForms hVc hV hirr hW hWρ hWσ hWτ hW0))
-
-@[simp] theorem carrier_ofSummand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V]
-    (hV : (cuspRepT μ).IsInvariant V) (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible)
-    (hne : summandCuspForms V ≠ ⊥) : (ofSummand V hV hirr hne).carrier = summandCuspForms V := rfl
 
 theorem topologicalClosure_map_ofSummand (V : Submodule ℂ (CuspL2 μ)) [CompleteSpace V]
     (hV : (cuspRepT μ).IsInvariant V) (hirr : ((cuspRepT μ).restrict V hV).IsIrreducible)

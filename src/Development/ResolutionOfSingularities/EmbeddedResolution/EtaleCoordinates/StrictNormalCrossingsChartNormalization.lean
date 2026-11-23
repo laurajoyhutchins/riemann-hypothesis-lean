@@ -1,10 +1,55 @@
-import Mathlib
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.ChartRing
+public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateDivisorSmoothness
 import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.CoordinateSubscheme
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.EtaleChartExistence
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
 import Development.ResolutionOfSingularities.Foundations.Schemes.IdealSheafData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory Opposite AlgebraicGeometry TopologicalSpace
@@ -140,9 +185,9 @@ private theorem complInv_eq_some_iff (m : ℕ) (S : Finset (Fin m)) {t : Fin m}
   constructor
   · intro h
     by_cases ht : t ∈ S
-    · rw [complInv_def, dif_pos ht] at h
+    · rw [complInv_def, dite_eq_left ht] at h
       simp at h
-    · rw [complInv_def, dif_neg ht] at h
+    · rw [complInv_def, dite_eq_right ht] at h
       have hj : Classical.choose (exists_complOrderEmb_eq m S ht) = j := Option.some.inj h
       have hspec := Classical.choose_spec (exists_complOrderEmb_eq m S ht)
       rw [hj] at hspec
@@ -151,7 +196,7 @@ private theorem complInv_eq_some_iff (m : ℕ) (S : Finset (Fin m)) {t : Fin m}
     have ht : t ∉ S := by
       rw [← h]
       exact complOrderEmb_notMem m S j
-    rw [complInv_def, dif_neg ht]
+    rw [complInv_def, dite_eq_right ht]
     have hspec := Classical.choose_spec (exists_complOrderEmb_eq m S ht)
     have heq : Classical.choose (exists_complOrderEmb_eq m S ht) = j :=
       (complOrderEmb m S).injective (by rw [hspec, h])
@@ -173,7 +218,7 @@ private theorem eq_none_of_bind_complInv_eq_none (m : ℕ) (S : Finset (Fin m)) 
   | some t =>
     exfalso
     have h' : complOrderEmbInv m S t = none := h
-    rw [complInv_def, dif_neg (hnot t rfl)] at h'
+    rw [complInv_def, dite_eq_right (hnot t rfl)] at h'
     simp at h'
 
 section

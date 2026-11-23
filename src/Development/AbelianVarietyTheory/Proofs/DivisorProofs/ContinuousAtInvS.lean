@@ -1,7 +1,49 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Divisors.OneMemH0WeightZero
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.QSA GlobalTheory.Published
 open Matrix
 open scoped Quaternion Topology TensorProduct
@@ -31,8 +73,8 @@ theorem continuous_cf (v : HeightOneSpectrum (𝓞 F)) : Continuous (cf (F := F)
 theorem ext_c {a b : AF F} (h1 : ∀ w, ci w a = ci w b) (h2 : ∀ v, cf v a = cf v b) : a = b :=
   Prod.ext (funext h1) (RestrictedProduct.ext _ _ h2)
 
-open Classical in
 
+open Classical in
 def sglI (w : InfinitePlace F) (c : w.Completion) : AF F :=
   ((Pi.single w c : InfiniteAdeleRing F), (0 : FiniteAdeleRing (𝓞 F) F))
 
@@ -97,7 +139,8 @@ variable {S₁ : Finset (InfinitePlace F)} {S₂ : Finset (HeightOneSpectrum (�
 open Classical in
 theorem ci_invS (y : AF F) (u : InfinitePlace F) :
     ci u (invS S₁ S₂ y) = if u ∈ S₁ then (ci u y)⁻¹ else 0 := by
-  rw [invS, map_add, map_sum, map_sum]
+
+  rw [invS, map_add (f := _), map_sum, map_sum]
   simp only [ci_sglF, Finset.sum_const_zero, add_zero]
   split_ifs with hu
   · rw [Finset.sum_eq_single_of_mem u hu (fun w _ hw => ci_sglI_ne (Ne.symm hw) _), ci_sglI_self]
@@ -106,7 +149,8 @@ theorem ci_invS (y : AF F) (u : InfinitePlace F) :
 open Classical in
 theorem cf_invS (y : AF F) (u : HeightOneSpectrum (𝓞 F)) :
     cf u (invS S₁ S₂ y) = if u ∈ S₂ then (cf u y)⁻¹ else 0 := by
-  rw [invS, map_add, map_sum, map_sum]
+
+  rw [invS, map_add (f := _), map_sum, map_sum]
   simp only [cf_sglI, Finset.sum_const_zero, zero_add]
   split_ifs with hu
   · rw [Finset.sum_eq_single_of_mem u hu (fun w _ hw => cf_sglF_ne (Ne.symm hw) _), cf_sglF_self]
@@ -133,9 +177,9 @@ theorem continuousAt_invS {y : AF F} (h1 : ∀ w ∈ S₁, ci w y ≠ 0) (h2 : �
     ContinuousAt (invS S₁ S₂) y := by
   unfold invS
   refine ContinuousAt.add ?_ ?_
-  · exact tendsto_finset_sum S₁ fun w hw =>
+  · exact tendsto_finsetSum S₁ fun w hw =>
       ((continuous_sglI w).continuousAt.comp ((continuousAt_inv₀ (h1 w hw)).comp (continuous_ci w).continuousAt))
-  · exact tendsto_finset_sum S₂ fun v hv =>
+  · exact tendsto_finsetSum S₂ fun v hv =>
       ((continuous_sglF v).continuousAt.comp ((continuousAt_inv₀ (h2 v hv)).comp (continuous_cf v).continuousAt))
 
 end GlobalTheory.InvIdem

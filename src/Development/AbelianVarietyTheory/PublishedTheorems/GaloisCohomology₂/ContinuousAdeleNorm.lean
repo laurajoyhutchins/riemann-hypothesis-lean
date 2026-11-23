@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.UnitaryNorms.IsUnitaryNormOf
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
-import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ContinuousInfiniteAdeleMap
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemNormGroupIffEverywhereNorm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExpoConjOfIsCsd
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ContinuousInfiniteAdeleMap
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemNormGroupIffEverywhereNorm
+public import Mathlib.Tactic.Monotonicity.Lemmas
+public import Mathlib.Topology.Sheaves.Presheaf
+public import Development.AbelianVarietyTheory.Definitions.Foundations.T2SpaceTensorProductFiniteExtension
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AlmostNormFinDiag
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Charpoly.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+
+@[expose] public section
 
 noncomputable section
 
@@ -102,8 +148,11 @@ theorem eta_neg_one (v : InfinitePlace (maximalRealSubfield E)) :
     rw [Complex.ofReal_injective h6]
     exact neg_nonpos.2 (Complex.normSq_nonneg _)
   let e := InfinitePlace.Completion.ringEquivRealOfIsReal hv
-  have he : e (algebraMap _ v.Completion δ) = InfinitePlace.embedding_of_isReal hv δ :=
-    InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hv ((WithAbs.equiv v.1).symm δ)
+  have he : e (algebraMap _ v.Completion δ) = InfinitePlace.embedding_of_isReal hv δ := by
+    simp only [e, InfinitePlace.Completion.ringEquivRealOfIsReal_apply,
+      AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply,
+      Algebra.algebraMap_self_apply, ← WithAbs.equiv_symm_apply,
+      InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe, RingEquiv.apply_symm_apply]
   have h7 := congrArg e h
   simp only [Units.val_neg, Units.val_one, map_neg, map_one, map_sub, map_mul, map_pow, he] at h7
   nlinarith [sq_nonneg (e x), mul_nonneg (neg_nonneg.2 h5) (sq_nonneg (e y))]
@@ -153,11 +202,13 @@ theorem locInf_pow {K : Type} [Field K] [NumberField K] (χ : HChar K) (k : ℕ)
 
 theorem IsConjDualBy.isPolarized {π : CuspSub E a} {χ : HChar (maximalRealSubfield E)}
     (h : IsConjDualBy π (compNorm E χ)) {m : ℕ} (hχ : ∀ v, χ.locInf v (-1) = (-1) ^ m) :
-    IsPolarized π (χ * quadChar E ^ (m + a)) where
-  sign v := by
-    rw [HChar.locInf_mul, locInf_pow, hχ, quadChar_locInf, ← pow_add, ← add_assoc, pow_add, ← two_mul, pow_mul]
+    IsPolarized π (χ * quadChar E ^ (m + a)) := by
+  constructor
+  · intro v
+    change χ.locInf v (-1) * (quadChar E ^ (m + a)).locInf v (-1) = (-1) ^ a
+    rw [locInf_pow, hχ, quadChar_locInf, ← pow_add, ← add_assoc, pow_add, ← two_mul, pow_mul]
     simp
-  dual := by rwa [map_mul, map_pow, compNorm_quadChar, one_pow, mul_one]
+  · rwa [map_mul, map_pow, compNorm_quadChar, one_pow, mul_one]
 
 theorem isPolarized_of_isCsd {π : CuspSub E a} (h : π.IsCsd) : IsPolarized π (quadChar E ^ a) := by
   simpa using IsConjDualBy.isPolarized (π := π) (χ := 1) (by rw [map_one]; exact (isConjDualBy_one π).2 h) (m := 0)

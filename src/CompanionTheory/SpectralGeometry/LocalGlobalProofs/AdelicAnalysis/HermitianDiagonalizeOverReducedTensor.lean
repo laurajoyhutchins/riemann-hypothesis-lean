@@ -1,7 +1,50 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnitaryOrbits.QuadFiniteDimensional
+module
+
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnitaryOrbits.QuadFiniteDimensional
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -106,7 +149,7 @@ variable {s}
 
 theorem bf_add_left (S : Matrix ι ι A) (x x' y : ι → A) :
     bf s S (x + x') y = bf s S x y + bf s S x' y := by
-  simp only [bf, Pi.add_apply, map_add]
+  simp only [bf, Pi.add_apply, map_add (f := _)]
   exact add_dotProduct _ _ _
 
 theorem bf_add_right (S : Matrix ι ι A) (x y y' : ι → A) :
@@ -149,6 +192,7 @@ theorem cT_apply {l m : Type} (S : Matrix l m A) (i : m) (j : l) : cT s S i j = 
 theorem bf_conj (hs : ∀ z, s (s z) = z) {S : Matrix ι ι A} (hS : cT s S = S) (x y : ι → A) :
     s (bf s S x y) = bf s S y x := by
   have hS' : ∀ i j, s (S i j) = S j i := fun i j => by rw [← cT_apply, hS]
+
   simp only [bf, dotProduct, mulVec, map_sum, map_mul, hs, hS', Finset.mul_sum]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
@@ -207,7 +251,6 @@ variable (hs : ∀ z, s (s z) = z) (hR : ∀ r, s (algebraMap R A r) = algebraMa
   {θ : A} (hθ : IsUnit θ) (hsθ : s θ = -θ) (h2 : IsUnit (2 : A))
 
 include hs ht hfix hθ hsθ h2 in
-
 theorem exists_value_notMem [Nonempty ι] {S : Matrix ι ι A} (hS : cT s S = S) (hdet : IsUnit S.det)
     (m : MaximalSpectrum R) : ∃ x, t (bf s S x x) ∉ m.asIdeal := by
   by_contra hcon
@@ -231,14 +274,13 @@ theorem exists_value_notMem [Nonempty ι] {S : Matrix ι ι A} (hS : cT s S = S)
     refine Submodule.smul_induction_on hz (fun r hr n _ => ?_) (fun a b ha hb => ?_)
     · rw [map_smul, smul_eq_mul]
       exact Ideal.mul_mem_right _ _ hr
-    · rw [map_add]
+    · rw [map_add (f := _)]
       exact Ideal.add_mem _ ha hb
   have h4 := h3 1 h1
   rw [← map_one (algebraMap R A), ht] at h4
   exact m.isMaximal.ne_top ((Ideal.eq_top_iff_one _).2 h4)
 
 include hs hR ht hfix hθ hsθ h2 in
-
 theorem exists_value_unit [Nonempty ι] [Finite (MaximalSpectrum R)] {S : Matrix ι ι A}
     (hS : cT s S = S) (hdet : IsUnit S.det) : ∃ (x : ι → A) (r : Rˣ), bf s S x x = algebraMap R A r := by
   classical
@@ -248,8 +290,10 @@ theorem exists_value_unit [Nonempty ι] [Finite (MaximalSpectrum R)] {S : Matrix
     exists_crt (B := R) fun m => if m = k then 1 else 0
   set x : ι → A := ∑ k, algebraMap R A (c k) • xm k with hx
   have hval : t (bf s S x x) = ∑ k, ∑ l, c k * c l * t (bf s S (xm k) (xm l)) := by
+
     rw [hx, bf_sum_left, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
+
     rw [bf_sum_right, map_sum]
     refine Finset.sum_congr rfl fun l _ => ?_
     rw [bf_smul_left, bf_smul_right, hR, ← mul_assoc, ← map_mul, ← Algebra.smul_def, map_smul,
@@ -262,6 +306,7 @@ theorem exists_value_unit [Nonempty ι] [Finite (MaximalSpectrum R)] {S : Matrix
     have h1 : Ideal.Quotient.mk m.asIdeal (t (bf s S x x))
         = Ideal.Quotient.mk m.asIdeal (t (bf s S (xm m) (xm m))) := by
       rw [hval]
+
       simp only [map_sum, map_mul, hπ]
       simp
     rw [Ideal.Quotient.eq_zero_iff_mem.2 hm] at h1
@@ -273,8 +318,8 @@ theorem cT_fromBlocks {l m : Type} (a : Matrix l l A) (b : Matrix l m A) (c : Ma
   rw [cT, Matrix.fromBlocks_map, Matrix.fromBlocks_transpose]
   rfl
 
-variable (s R) in
 
+variable (s R) in
 def DiagProp (A : Type) [CommRing A] [Algebra R A] (s : A →+* A) (ι : Type) [Fintype ι] [DecidableEq ι] : Prop :=
   ∀ S : Matrix ι ι A, cT s S = S → IsUnit S.det →
     ∃ (g : Matrix ι ι A) (D : ι → Rˣ), IsUnit g.det ∧
@@ -301,7 +346,6 @@ theorem DiagProp.of_equiv {κ : Type} [Fintype κ] [DecidableEq κ] (e : ι ≃ 
   simp [Matrix.diagonal_apply]
 
 include hs hR in
-
 theorem split_step (ih : DiagProp (R := R) A s ι) {S : Matrix (Unit ⊕ ι) (Unit ⊕ ι) A} (hS : cT s S = S)
     (hdet : IsUnit S.det) (r : Rˣ) (h0 : S (Sum.inl ()) (Sum.inl ()) = algebraMap R A r) :
     ∃ (g : Matrix (Unit ⊕ ι) (Unit ⊕ ι) A) (D : Unit ⊕ ι → Rˣ), IsUnit g.det ∧
@@ -380,7 +424,6 @@ theorem split_step (ih : DiagProp (R := R) A s ι) {S : Matrix (Unit ⊕ ι) (Un
     cases i <;> rfl
 
 include hs hR ht hfix hθ hsθ h2 in
-
 theorem diagProp_succ [Finite (MaximalSpectrum R)] [Finite (MaximalSpectrum A)]
     (ih : DiagProp (R := R) A s ι) : DiagProp (R := R) A s (Unit ⊕ ι) := by
   intro S hS hdet
@@ -432,7 +475,7 @@ theorem exists_diagonal_congr : ∀ (F E : Type) [Field F] [NumberField F] [Fiel
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul a b => simp [sigR, hσ]
-    | add x y hx hy => rw [map_add, map_add, hx, hy]
+    | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   have hR : ∀ r : R, sigR R σ (algebraMap R (R ⊗[F] E) r) = algebraMap R (R ⊗[F] E) r := fun r => by
     simp [sigR, Algebra.TensorProduct.algebraMap_apply]
   have hhalf : algebraMap F R (1 / 2) * 2 = 1 := by

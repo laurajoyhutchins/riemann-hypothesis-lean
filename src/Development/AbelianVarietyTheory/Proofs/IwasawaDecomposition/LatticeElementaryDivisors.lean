@@ -1,5 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsMulEqMulDiagonal
+module
+
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsMulEqMulDiagonal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Localization.Module
+
+@[expose] public section
+
 open IsDedekindDomain NumberField
 
 namespace GlobalTheory.LatticeMinuscule
@@ -7,70 +62,6 @@ namespace GlobalTheory.LatticeMinuscule
 open Matrix
 
 variable {R K : Type} [CommRing R] [Field K] [Algebra R K] {n : ℕ}
-
-theorem map_mulVec_algebraMap (M : Matrix (Fin n) (Fin n) R) (z : Fin n → R) :
-    (M.map (algebraMap R K)).mulVec (fun i => algebraMap R K (z i))
-      = fun i => algebraMap R K (M.mulVec z i) := by
-  funext i
-  rw [RingHom.map_mulVec]
-  rfl
-
-theorem exists_frame [IsDomain R] [IsPrincipalIdealRing R] [IsFractionRing R K]
-    (Λ : Submodule R (Fin n → K)) (hfg : Λ.FG)
-    (hsp : Submodule.span K (Λ : Set (Fin n → K)) = ⊤) :
-    ∃ C : Matrix (Fin n) (Fin n) K, IsUnit C.det ∧
-      ∀ y, y ∈ Λ ↔ ∃ z : Fin n → R, y = C.mulVec (fun i => algebraMap R K (z i)) := by
-  haveI : Submodule.IsLattice K Λ := ⟨hfg, hsp⟩
-  have hr : Module.finrank R Λ = n := by
-    rw [Submodule.IsLattice.finrank_of_pi K Λ, Fintype.card_fin]
-  let b : Module.Basis (Fin n) R Λ := Module.finBasisOfFinrankEq R Λ hr
-  have key : ∀ z : Fin n → R,
-      ((Pi.basisFun K (Fin n)).toMatrix (b.extendOfIsLattice K)).mulVec
-        (fun i => algebraMap R K (z i)) = ((∑ j, z j • b j : Λ) : Fin n → K) := by
-    intro z
-    funext i
-    simp [Matrix.mulVec, dotProduct, Module.Basis.toMatrix_apply, Algebra.smul_def, mul_comm]
-  refine ⟨(Pi.basisFun K (Fin n)).toMatrix (b.extendOfIsLattice K), ?_, fun y => ⟨?_, ?_⟩⟩
-  · rw [← Module.Basis.det_apply]; exact Module.Basis.isUnit_det _ _
-  · intro hy
-    refine ⟨b.repr ⟨y, hy⟩, ?_⟩
-    rw [key, b.sum_repr]
-  · rintro ⟨z, rfl⟩
-    rw [key]
-    exact Subtype.prop _
-
-theorem exists_mul_eq (Λ : Submodule R (Fin n → K)) (C : Matrix (Fin n) (Fin n) K)
-    (hC : ∀ y, y ∈ Λ ↔ ∃ z : Fin n → R, y = C.mulVec (fun i => algebraMap R K (z i)))
-    (a : Matrix (Fin n) (Fin n) K) (ha : ∀ y ∈ Λ, a.mulVec y ∈ Λ) :
-    ∃ M : Matrix (Fin n) (Fin n) R, a * C = C * M.map (algebraMap R K) := by
-  have h : ∀ j : Fin n, ∃ z : Fin n → R,
-      a.mulVec (C.mulVec (fun i => algebraMap R K ((Pi.single j 1 : Fin n → R) i)))
-        = C.mulVec (fun i => algebraMap R K (z i)) :=
-    fun j => (hC _).mp (ha _ ((hC _).mpr ⟨_, rfl⟩))
-  choose z hz using h
-  refine ⟨Matrix.of fun i j => z j i, ?_⟩
-  ext i j
-  have h1 := congrFun (hz j) i
-  have h2 : (fun i => algebraMap R K ((Pi.single j 1 : Fin n → R) i)) = Pi.single j 1 := by
-    funext k
-    by_cases hk : k = j
-    · subst hk; simp
-    · simp [hk]
-  rw [h2, Matrix.mulVec_mulVec, Matrix.mulVec_single_one] at h1
-  exact h1
-
-theorem exists_mul_unit_iff (C : Matrix (Fin n) (Fin n) K) (P : Matrix (Fin n) (Fin n) R)
-    (hP : IsUnit P.det) (y : Fin n → K) :
-    (∃ z : Fin n → R, y = C.mulVec (fun i => algebraMap R K (z i))) ↔
-      ∃ z : Fin n → R,
-        y = (C * P.map (algebraMap R K)).mulVec (fun i => algebraMap R K (z i)) := by
-  constructor
-  · rintro ⟨z, rfl⟩
-    refine ⟨P⁻¹.mulVec z, ?_⟩
-    rw [← Matrix.mulVec_mulVec, map_mulVec_algebraMap, Matrix.mulVec_mulVec,
-      Matrix.mul_nonsing_inv _ hP, Matrix.one_mulVec]
-  · rintro ⟨z, rfl⟩
-    exact ⟨P.mulVec z, by rw [← Matrix.mulVec_mulVec, map_mulVec_algebraMap]⟩
 
 open IsDedekindDomain NumberField in
 open Matrix in

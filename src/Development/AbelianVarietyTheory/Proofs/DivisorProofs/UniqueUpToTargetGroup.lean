@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTransp
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTransp
+import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.LatticeAndConstantUnique
+import Development.AbelianVarietyTheory.Counterexamples.ThetaValuation.UniformMultiplier
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ContinuousRmulPair
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.FrameBorelGroupoidProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsArchOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.NormNegCmConstantEqAtAllEmbeddings
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.Generic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -29,7 +71,7 @@ theorem herm_sub_right' (G : Matrix (Fin r) (Fin r) E) (x y z : Fin r → E) :
 
 theorem herm_add_right' (G : Matrix (Fin r) (Fin r) E) (x y z : Fin r → E) :
     herm G x (y + z) = herm G x y + herm G x z := by
-  simp only [herm, Pi.add_apply, cc, map_add, mul_add, Finset.sum_add_distrib]
+  simp only [herm, Pi.add_apply, cc, map_add (f := _), mul_add, Finset.sum_add_distrib]
 
 theorem herm_smul_left' (G : Matrix (Fin r) (Fin r) E) (c : E) (x y : Fin r → E) :
     herm G (c • x) y = c * herm G x y := by

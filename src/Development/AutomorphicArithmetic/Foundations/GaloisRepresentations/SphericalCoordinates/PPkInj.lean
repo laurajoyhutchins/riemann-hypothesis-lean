@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PFrameEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PFrameEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.SphericalCoordinates.PerCApply
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory GlobalTheory.PELU GlobalTheory.UPel.HT GlobalTheory.UPel.HT.Gen
 open GlobalTheory.LKTrip GlobalTheory.LKRes GlobalTheory.LKMid GlobalTheory.LKGeo Polynomial
@@ -41,17 +86,14 @@ private theorem intM_mul {A B : MF G} (hA : IntM A) (hB : IntM B) : IntM (fun w 
     exact int_sum _ fun l => int_mul (hA w i l) (hB w l j)
 
 private theorem intL_add {a b : Loc G} (ha : IntL a) (hb : IntL b) : IntL (a + b) := fun w i => by
-  have h := IsUltrametricDist.norm_add_le_max ((a w i : G.Fw w) : PadicAlgCl p) ((b w i : G.Fw w) : PadicAlgCl p)
-  exact h.trans (max_le (ha w i) (hb w i))
+  change ‖(a w i : PadicAlgCl p) + (b w i : PadicAlgCl p)‖ ≤ 1
+  exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (ha w i) (hb w i))
 
 private theorem intL_sub {a b : Loc G} (ha : IntL a) (hb : IntL b) : IntL (a - b) := fun w i => by
-  have e : (((a - b) w i : G.Fw w) : PadicAlgCl p) = (a w i : PadicAlgCl p) + -(b w i : PadicAlgCl p) := by
-    rw [← sub_eq_add_neg]
-    rfl
-  have h := IsUltrametricDist.norm_add_le_max ((a w i : G.Fw w) : PadicAlgCl p) (-((b w i : G.Fw w) : PadicAlgCl p))
-  rw [norm_neg] at h
-  rw [e]
-  exact h.trans (max_le (ha w i) (hb w i))
+  change ‖(a w i : PadicAlgCl p) - (b w i : PadicAlgCl p)‖ ≤ 1
+  rw [sub_eq_add_neg]
+  refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (ha w i) ?_)
+  simpa only [norm_neg] using hb w i
 
 private theorem norm_p_lt : ‖((p : ℕ) : PadicAlgCl p)‖ < 1 := by
   have h := norm_algebraMap' (PadicAlgCl p) (p : ℚ_[p])
@@ -220,10 +262,8 @@ private theorem norm_swap (g g' : Gp G) :
 
 private theorem intPt_of {g g' : Gp G} (hH : IntM (fun w => Pm g w * Gm g' w))
     (hI : IntM (fun w => Pm g' w * Gm g w)) (hs : ‖((g.1⁻¹ * g'.1 : ℚ_[p]ˣ) : ℚ_[p])‖ = 1) :
-    IntPt (g⁻¹ * g') := by
-  refine ⟨hs, fun w i j => ⟨hH w i j, ?_⟩⟩
-  rw [inv_val]
-  exact hI w i j
+    IntPt (g⁻¹ * g') :=
+  ⟨hs, fun w i j => ⟨hH w i j, by simpa only [inv_val] using hI w i j⟩⟩
 
 private theorem mono {d : ∀ w : Fin G.m, G.Fw w} (hd0 : ∀ w, d w ≠ 0)
     (hd : ∀ a : Loc G, (∀ z : Loc G, IntL z → ‖pairL a z‖ ≤ 1) ↔ IntL (fun w => d w • a w))

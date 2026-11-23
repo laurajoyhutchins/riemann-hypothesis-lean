@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.TruncLogEqOfPowEqZero
+module
+
+public import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.TruncLogEqOfPowEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.AdicCompletion.LocalRing
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.AdicCompletion.Completeness
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,9 +142,6 @@ end AcrisZero
 
 namespace Acris
 
-theorem eval_surjective (n : ℕ) : Function.Surjective (eval p R n) :=
-  AdicCompletion.surjective_evalₐ _ n
-
 theorem factorPow_eval {m n : ℕ} (hle : m ≤ n) (x : Acris p R) :
     Ideal.Quotient.factorPow _ hle (eval p R n x) = eval p R m x :=
   factorPow_evalₐ _ hle x
@@ -105,10 +150,6 @@ theorem eval_eq_zero_iff (n : ℕ) (x : Acris p R) : eval p R n x = 0 ↔ (p : A
   have := evalₐ_eq_zero_iff_dvd (p : AcrisZero p R) n x
   rw [map_natCast] at this
   exact this
-
-theorem ker_eval (n : ℕ) : RingHom.ker (eval p R n) = span {(p : Acris p R)} ^ n := by
-  ext x
-  rw [RingHom.mem_ker, eval_eq_zero_iff, Ideal.span_singleton_pow, Ideal.mem_span_singleton]
 
 theorem exists_eq_add (n : ℕ) (x : Acris p R) :
     ∃ (a : AcrisZero p R) (y : Acris p R), x = algebraMap _ _ a + (p : Acris p R) ^ n * y := by
@@ -160,7 +201,7 @@ theorem hom_ext {B : Type*} [CommRing B] [IsHausdorff (span {(p : B)}) B] {f g :
   rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow,
     Ideal.mem_span_singleton]
   refine ⟨f y - g y, ?_⟩
-  simp only [map_add, map_mul, map_pow, map_natCast, h]
+  simp only [map_add (f := _), map_mul, map_pow, map_natCast, h]
   ring
 
 theorem exists_quot (u : Ainf p R) (hu : Ainf.theta p R u = 1) (n : ℕ) :
@@ -170,10 +211,10 @@ theorem exists_quot (u : Ainf p R) (hu : Ainf.theta p R u = 1) (n : ℕ) :
     AcrisZero.gamma (k + 1) (u - 1) (by simp [hu]), ?_, ?_⟩
   · apply Subtype.ext
     have := mul_sum_descFactorial (p ^ n) (algebraMap (Ainf p R) (AinfInv p R) (u - 1))
-    rw [← map_one (algebraMap (Ainf p R) (AinfInv p R)), ← map_add, sub_add_cancel, map_one,
+    rw [← map_one (algebraMap (Ainf p R) (AinfInv p R)), ← map_add (f := _), sub_add_cancel, map_one,
       Nat.cast_pow] at this
     simp only [MulMemClass.coe_mul, SubmonoidClass.coe_pow, SubringClass.coe_natCast,
-      AddSubmonoidClass.coe_finset_sum, AcrisZero.coe_gamma, AinfInv.gamma,
+      AddSubmonoidClass.coe_finsetSum, AcrisZero.coe_gamma, AinfInv.gamma,
       AddSubgroupClass.coe_sub, OneMemClass.coe_one, Subalgebra.coe_algebraMap]
     exact this
   · rw [eval_log u hu le_rfl, Ideal.Quotient.eq, logPartial, ← Finset.sum_sub_distrib]
@@ -200,7 +241,8 @@ theorem log_mul (u v : Ainf p R) (hu : Ainf.theta p R u = 1) (hv : Ainf.theta p 
   refine ext_eval fun n => ?_
   obtain ⟨a, ha, ha'⟩ := exists_quot u hu n
   obtain ⟨b, hb, hb'⟩ := exists_quot v hv n
-  rw [map_add, ha', hb', eval_log_of_mul_eq _ huv n (a + b + p ^ n * a * b), ← map_add,
+  rw [map_add (f := eval p R n), ha', hb', eval_log_of_mul_eq _ huv n (a + b + p ^ n * a * b),
+    ← (Ideal.Quotient.mk (span {(p : AcrisZero p R)} ^ n)).map_add,
     Ideal.Quotient.eq, AcrisZero.mem_span_pow_iff]
   · exact ⟨a * b, by ring⟩
   · rw [map_mul, mul_pow, eq_add_of_sub_eq ha.symm, eq_add_of_sub_eq hb.symm]
@@ -208,16 +250,6 @@ theorem log_mul (u v : Ainf p R) (hu : Ainf.theta p R u = 1) (hv : Ainf.theta p 
 
 @[simp] theorem log_one (h : Ainf.theta p R 1 = 1) : log (1 : Ainf p R) h = 0 :=
   ext_eval fun n => by rw [eval_log_of_mul_eq _ h n 0 (by simp), map_zero, map_zero]
-
-theorem log_pow (u : Ainf p R) (hu : Ainf.theta p R u = 1) (m : ℕ)
-    (hm : Ainf.theta p R (u ^ m) = 1) : log (u ^ m) hm = m * log u hu := by
-  induction m with
-  | zero => simp only [pow_zero, Nat.cast_zero, zero_mul]; exact log_one _
-  | succ m ih =>
-    have h : Ainf.theta p R (u ^ m) = 1 := by rw [map_pow, hu, one_pow]
-    rw [log_congr hm (by rw [map_mul, h, hu, one_mul]) (pow_succ u m), log_mul _ _ h hu, ih h]
-    push_cast
-    ring
 
 theorem logTeich_mul (η η' : tateModule p R) : logTeich (η * η') = logTeich η + logTeich η' := by
   unfold logTeich
@@ -229,12 +261,6 @@ theorem logTeich_mul (η η' : tateModule p R) : logTeich (η * η') = logTeich 
 @[simp] theorem logTeich_one : logTeich (1 : tateModule p R) = 0 :=
   (log_congr _ (map_one _) (map_one _)).trans (log_one _)
 
-variable (p R) in
-
-def logTeichHom : tateModule p R →* Multiplicative (Acris p R) where
-  toFun η := Multiplicative.ofAdd (logTeich η)
-  map_one' := by simp
-  map_mul' η η' := by rw [logTeich_mul]; rfl
 
 theorem logTeich_pow (η : tateModule p R) (m : ℕ) : logTeich (η ^ m) = m * logTeich η := by
   induction m with

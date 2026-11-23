@@ -1,6 +1,51 @@
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PacketOfFrameDegree
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PTenFrames
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PacketOfFrameDegree
 import Formalism.LocalToGlobal.Columns.BrpStarLatLattice
+import Formalism.SharpRestriction.GlobalSchurBounds.TotallyPositiveTraceGeOfNormDiscr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain MvPolynomial
 open scoped Matrix
@@ -82,7 +127,13 @@ theorem q_frame_degree (D : D7) : QFrameDeg D := by
     rw [hfam p, hbK p]
   obtain ⟨-, -, hmuQ⟩ := mu_of_frames (CV.Q c τ) hQ (ownFrame (CV.Q c τ) (CV.eQ c τ) g hg hloc)
   have hML := MQ_lattice CV c τ
-  have hstdGood : (stdHL D.what₂.LL (MQ CV c τ)).Good := ⟨fun _ => by simp, hML.fg, hML.span_eq_top⟩
+  have hspan : Submodule.span D.what₂.LL (MQ CV c τ : Set (Fin (D.R.N 0) → D.what₂.LL)) = ⊤ := by
+    unfold MQ
+    rw [Submodule.map_coe, LinearMap.coe_restrictScalars]
+    rw [show ⇑(crdQ CV c τ : (CV.Q c τ).V →ₗ[D.what₂.LL] (Fin (D.R.N 0) → D.what₂.LL)) = ⇑(crdQ CV c τ) from rfl]
+    rw [← LinearEquiv.coe_coe, Submodule.span_image, hQ.2.2, Submodule.map_top]
+    exact LinearEquiv.range _
+  have hstdGood : (stdHL D.what₂.LL (MQ CV c τ)).Good := ⟨fun _ => by simp, hML.fg, hspan⟩
   let FS : FrameData (stdHL D.what₂.LL (MQ CV c τ)) (Fin (D.R.N 0)) :=
     { e := Pi.basisFun D.what₂.LL (Fin (D.R.N 0))
       Γ := g
@@ -124,12 +175,6 @@ theorem q_frame_degree (D : D7) : QFrameDeg D := by
 
 theorem class_map_archimedean (D : D7) : ClassMapT D :=
   classMapT_of (q_frame_degree D)
-
-theorem third_link_family : Link6F :=
-  Link6F_of_frameDeg q_frame_degree
-
-theorem packet_family : KudlaFamilyOfMinkowskiTransference :=
-  packet_of_third_proposition third_link_family
 
 end F
 

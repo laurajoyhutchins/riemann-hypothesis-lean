@@ -1,6 +1,47 @@
-import Formalism.LocalToGlobal.GroupLattices.CloudFilling.ExistsPowOrbRep
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.LevelGatherings
-import Formalism.LocalRingCardinality.SpanPowerMembership.GatAdd
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.CloudFilling.ExistsPowOrbRep
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.LevelGatherings
+public import Formalism.LocalRingCardinality.SpanPowerMembership.GatTies
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,8 +74,8 @@ variable (D : D7) (u : D.what₂.Word) {T : ℕ} (hg : GIdx D.host T p)
     (I : LocId L p (nOrb (zH D.R.toFrame (hP D p))) W Qq) (ψ : Formalism.L2.Herm.awayFrom₂ L p →* Oˣ)
     (y : compL L p → UPts D.sp.cm.sig D.sp.gram0 (Formalism.L2.Herm.Af D.host.F)) (e : ℕ)
 
-include hg in
 
+include hg in
 theorem gatRec_n_frob (v : Fin (gatRec D u (D.R.iota (hP D p)) hS r L I ψ y e).P.nV)
     (P : Ideal (𝓞 D.host.E)) [P.IsPrime] [P.LiesOver (Ideal.span {(p : ℤ)})] (τ : D.host.E ≃ₐ[ℚ] D.host.E)
     (hτ : IsArithFrobAt ℤ τ P) :
@@ -49,8 +90,8 @@ theorem gatRec_n_frob (v : Fin (gatRec D u (D.R.iota (hP D p)) hS r L I ψ y e).
   | simp [zPsi, Prod.orderOf]
   | simp [zPsi, Prod.orderOf_mk]
 
-include hg in
 
+include hg in
 theorem gatRec_step_frob (v : Fin (gatRec D u (D.R.iota (hP D p)) hS r L I ψ y e).P.nV)
     (s : Fin ((gatRec D u (D.R.iota (hP D p)) hS r L I ψ y e).P.n' v))
     (P : Ideal (𝓞 D.host.E)) [P.IsPrime] [P.LiesOver (Ideal.span {(p : ℤ)})] (τ : D.host.E ≃ₐ[ℚ] D.host.E)

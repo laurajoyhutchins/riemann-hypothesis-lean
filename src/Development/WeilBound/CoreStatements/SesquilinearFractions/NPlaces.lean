@@ -1,7 +1,54 @@
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LatNormGrLatNeZeroOfSpan
-import Development.WeilBound.CoreStatements.SesquilinearFractions.NIdeal
-import Development.WeilBound.CoreStatements.SesquilinearFractions.RatProductFormula
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
+
 open NumberField Matrix GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Fl
 open scoped ComplexOrder
 
@@ -12,48 +59,6 @@ namespace NP
 open IsDedekindDomain
 
 variable {k : Type} [Field k] [NumberField k]
-
-theorem norm_int_le {p : Nat.Primes} (j : k →+* ℂ_[p]) (a : 𝓞 k) : ‖j (a : k)‖ ≤ 1 :=
-  NI.norm_int_le (j.comp (algebraMap (𝓞 k) k)) a
-
-theorem norm_p_lt (p : Nat.Primes) : ‖((p : ℕ) : ℂ_[p])‖ < 1 := by
-  haveI : Fact (p : ℕ).Prime := ⟨p.2⟩
-  rw [NR.norm_padicNat, padicNorm.padicNorm_p_of_prime, Rat.cast_inv, Rat.cast_natCast]
-  exact inv_lt_one_of_one_lt₀ (by exact_mod_cast p.2.one_lt)
-
-def vj {p : Nat.Primes} (j : k →+* ℂ_[p]) : HeightOneSpectrum (𝓞 k) where
-  asIdeal :=
-    { carrier := {a | ‖(j.comp (algebraMap (𝓞 k) k)) a‖ < 1}
-      add_mem' := fun {a b} ha hb => by
-        simp only [Set.mem_setOf_eq] at *
-        rw [map_add]
-        exact (IsUltrametricDist.norm_add_le_max _ _).trans_lt (max_lt ha hb)
-      zero_mem' := by simp
-      smul_mem' := fun c {a} ha => by
-        simp only [Set.mem_setOf_eq, smul_eq_mul] at *
-        rw [map_mul, norm_mul]
-        exact (mul_le_of_le_one_left (norm_nonneg _) (norm_int_le j c)).trans_lt ha }
-  isPrime := by
-    refine ⟨fun h => ?_, fun {a b} hab => ?_⟩
-    · have := (Ideal.eq_top_iff_one _).1 h
-      simp at this
-    · simp only [Submodule.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk, Set.mem_setOf_eq] at hab ⊢
-      rw [map_mul, norm_mul] at hab
-      by_contra h
-      push_neg at h
-      have ha := le_antisymm (NI.norm_int_le (j.comp (algebraMap (𝓞 k) k)) a) h.1
-      have hb := le_antisymm (NI.norm_int_le (j.comp (algebraMap (𝓞 k) k)) b) h.2
-      rw [ha, hb, one_mul] at hab
-      exact lt_irrefl _ hab
-  ne_bot := by
-    intro h
-    have : ((p : ℕ) : 𝓞 k) ∈ (⊥ : Ideal (𝓞 k)) := by
-      rw [← h]
-      show ‖(j.comp (algebraMap (𝓞 k) k)) ((p : ℕ) : 𝓞 k)‖ < 1
-      rw [map_natCast]
-      exact norm_p_lt p
-    rw [Ideal.mem_bot] at this
-    exact p.2.ne_zero (by exact_mod_cast this)
 
 theorem exists_prime_mem (v : HeightOneSpectrum (𝓞 k)) : ∃ p : Nat.Primes, ((p : ℕ) : 𝓞 k) ∈ v.asIdeal := by
   have hP : ∀ n : ℕ, n ≠ 0 → (n : 𝓞 k) ∈ v.asIdeal → ∃ p : Nat.Primes, ((p : ℕ) : 𝓞 k) ∈ v.asIdeal := by

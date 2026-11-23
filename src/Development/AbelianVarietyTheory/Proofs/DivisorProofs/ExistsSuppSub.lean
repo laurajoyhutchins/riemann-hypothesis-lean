@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DivisorSupportCondition
-import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
@@ -33,16 +73,26 @@ theorem loc_iff {F : Shv R} {U : Scheme.{0}} (a : Sec F U) :
 def supp (F : Shv R) (U : Scheme.{0}) : Submodule (ULift.{1} R) (Sec F U) where
   carrier := {a | sv Z hZ a ∈ Scheme.etaleTopology U}
   zero_mem' := by
-    refine GrothendieckTopology.superset_covering _ (fun V g _ => Or.inr (map_zero _)) (GrothendieckTopology.top_mem _ U)
+    change sv Z hZ (0 : Sec F U) ∈ Scheme.etaleTopology U
+    refine Scheme.etaleTopology.superset_covering ?_ (Scheme.etaleTopology.top_mem U)
+    intro V g _
+    exact Or.inr (map_zero (F.obj.map g.op).hom)
   add_mem' {a b} ha hb := by
-    refine GrothendieckTopology.superset_covering _ (fun V g hg => ?_) (GrothendieckTopology.intersection_covering _ ha hb)
+    change sv Z hZ a ∈ Scheme.etaleTopology U at ha
+    change sv Z hZ b ∈ Scheme.etaleTopology U at hb
+    change sv Z hZ (a + b) ∈ Scheme.etaleTopology U
+    refine Scheme.etaleTopology.superset_covering ?_ (Scheme.etaleTopology.intersection_covering ha hb)
+    intro V g hg
     rcases hg.1 with h | h
     · exact Or.inl h
     rcases hg.2 with h' | h'
     · exact Or.inl h'
-    · right; change (F.obj.map g.op).hom (a + b) = 0; rw [map_add]; exact (congrArg₂ (· + ·) h h').trans (add_zero 0)
+    · right; change (F.obj.map g.op).hom (a + b) = 0; rw [map_add (f := _)]; exact (congrArg₂ (· + ·) h h').trans (add_zero 0)
   smul_mem' c a ha := by
-    refine GrothendieckTopology.superset_covering _ (fun V g hg => ?_) ha
+    change sv Z hZ a ∈ Scheme.etaleTopology U at ha
+    change sv Z hZ (c • a) ∈ Scheme.etaleTopology U
+    refine Scheme.etaleTopology.superset_covering ?_ ha
+    intro V g hg
     rcases hg with h | h
     · exact Or.inl h
     · right; change (F.obj.map g.op).hom (c • a) = 0; rw [map_smul]; exact (congrArg (c • ·) h).trans (smul_zero c)

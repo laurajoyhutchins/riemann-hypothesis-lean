@@ -1,5 +1,48 @@
-import Formalism.AdmissibleDesigns.YtTarget
-import Formalism.AdmissibleDesigns.TensSubsingleton
+module
+
+public import Formalism.AdmissibleDesigns.FiniteClassesContinuousLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.AdmissibleDesigns.TrCMemZ1D
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -55,8 +98,8 @@ theorem smul_OwY (heO : ∀ a : O, algebraMap Ow LL (eO a) = e (algebraMap O (Fr
 
 variable {M : Type} [AddCommGroup M] [Module O M]
 
-variable (e eO) in
 
+variable (e eO) in
 def latTY (heO : ∀ a : O, algebraMap Ow LL (eO a) = e (algebraMap O (FractionRing O) a)) :
     Submodule Ow (TrV e (MK (O := O) M)) where
   carrier := Set.range fun m : M => trY e (mkK (O := O) m)
@@ -161,8 +204,8 @@ variable {O : Type} [CommRing O] [IsDomain O] {LL : Type} [Field LL] [Topologica
   {Γ G : Type} [Group Γ] [Group G] (ι : G →* Γ)
   {N : Type} [AddCommGroup N] [Module O N]
 
-variable (e) in
 
+variable (e) in
 def eLin : TrV e (FractionRing O) →ₗ[LL] LL where
   toFun x := e (show FractionRing O from x)
   map_add' x y := map_add e _ _
@@ -170,8 +213,8 @@ def eLin : TrV e (FractionRing O) →ₗ[LL] LL where
     show e (e.symm c * (show FractionRing O from x)) = c * e (show FractionRing O from x)
     rw [map_mul, RingEquiv.apply_symm_apply]
 
-variable (e N) in
 
+variable (e N) in
 def pY : TrV e (MK (O := O) (N × O)) →ₗ[LL] LL :=
   eLin e ∘ₗ trL e (liftK (V := FractionRing O) (Algebra.linearMap O (FractionRing O) ∘ₗ LinearMap.snd O N O))
 
@@ -204,8 +247,8 @@ theorem pY_zero (m : N × O) (h : pY e N (trY e (mkK (O := O) m)) = 0) : m.2 = 0
     rwa [map_eq_zero_iff e e.injective] at h
   exact (IsFractionRing.injective O (FractionRing O)) (h1.trans (map_zero _).symm)
 
-include heO in
 
+include heO in
 theorem div_quot {V : Type} [AddCommGroup V] [Module LL V] [Module Ow V] [IsScalarTower Ow LL V]
     (T : Submodule Ow V) (a : O) (ha : a ≠ 0) (y : V ⧸ T) : ∃ q : V ⧸ T, eO a • q = y := by
   induction y using Submodule.Quotient.induction_on with
@@ -225,8 +268,8 @@ theorem nzsd_prod [NoZeroSMulDivisors O N] : NoZeroSMulDivisors O (N × O) :=
       have h2 : c * x.2 = 0 := congrArg Prod.snd h
       exact Prod.ext ((smul_eq_zero.1 h1).resolve_left hc) ((mul_eq_zero.1 h2).resolve_left hc)⟩
 
-include heO in
 
+include heO in
 theorem ext_of_baer [IsPrincipalIdealRing O] [NoZeroSMulDivisors O N] {Q : Type} [AddCommGroup Q] [Module Ow Q]
     (hdiv : ∀ a : O, a ≠ 0 → ∀ y : Q, ∃ q : Q, eO a • q = y) (g₀ : N →+ Q)
     (hg : ∀ (a : O) (n : N), g₀ (a • n) = eO a • g₀ n) :

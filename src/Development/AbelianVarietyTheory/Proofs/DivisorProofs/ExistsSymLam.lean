@@ -1,15 +1,67 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalEnd
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.MumfordConstruction
-import Development.AbelianVarietyTheory.Definitions.Degenerations.AdmissibleBaseOfCompleteDvr
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsFiniteEtaleCoverConstantTorsion
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsDescentSymmetricLinearisedBundle
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsSymmetricLinearisationSquareDiagonalBundle
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.LamIsoOfDoublingPullbackEqDiagonalSq
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.AbelianSchemeIdPowFiniteEtaleSurjective
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformizationLawsAndExpansionStatements
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRelAmpleOfIsProjBy
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceSpecOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.LamIsoOfDoublingPullbackEqDiagonalSq
+public import Mathlib.GroupTheory.Nilpotent
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRelAmpleOfIsProjBy
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.AbelianSchemeIdPowFiniteEtaleSurjective
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsHeckeQuotientTriple
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.UniformizationLawsAndExpansionStatements
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsDescentSymmetricLinearisedBundle
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsFiniteEtaleCoverConstantTorsion
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsSymmetricLinearisationSquareDiagonalBundle
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ConnectedSpaceSpecOfIsLocalRing
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IsProjectiveOverRingByChartsAbelianVariety
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.KeyFormula.GeomIntSelf
+import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,8 +75,8 @@ namespace GlobalTheory.SymBiextHalf
 
 open GlobalTheory.CechPic GlobalTheory.SymLin GlobalTheory.LamOfDouble
 
-open FreeAbelianGroup in
-set_option maxHeartbeats 1000000 in
+
+open FreeAddCommGroup in
 
 theorem exists_lin {K : Type} [Field K] [IsAlgClosed K] (hG : Out.GlobalFnsSt) {A : Over (Sp K)} [GrpObj A]
     [IsCommMonObj A] (hA : IsAbelianScheme A) {M : LB A.left} (hM : M.IsLB)
@@ -68,7 +120,7 @@ theorem exists_lin {K : Type} [Field K] [IsAlgClosed K] (hG : Out.GlobalFnsSt) {
     ⟨(map_one (uv M A.left) ▸ rep_uv 1).form (by rw [map_one, tr_one, Over.id_left]; abel),
       by simp⟩
     (fun q q' f f' hf hf' => ⟨(hf.1.mul (hf'.1.pull (tr (i q)).left)).form (by
-        simp only [map_add, map_sub, map_of_apply, Category.comp_id]
+        simp only [map_add (f := _), map_sub, map_of_apply, Category.comp_id]
         rw [← Over.comp_left, tr_tr, mul_comm q, map_mul]; abel), by
       have e : pl (GrpObj.inv : A ⟶ A).left (ρ q f') = ρ q (pl (GrpObj.inv : A ⟶ A).left f') := by
         rw [ρe, ρe, pl_pl, pl_pl, ← Over.comp_left, ← Over.comp_left, tr_inv (ii q)]
@@ -218,12 +270,12 @@ theorem exists_sym_lam : ∀ (K : Type) [Field K] [IsAlgClosed K] [CharZero K] (
   set p := cls P hP with hp
   have sy : ∀ (T : Over (Sp K)) (x y : T ⟶ A), ev p x y = ev p y x := fun T x y => by
     have e := congrArg (pull (lift y x).left) hs
-    rw [map_add, map_neg, map_zero, pull_id, ← pull_comp, ← Over.comp_left, comp_lift, lift_fst, lift_snd,
+    rw [map_add (f := _), map_neg, map_zero, pull_id, ← pull_comp, ← Over.comp_left, comp_lift, lift_fst, lift_snd,
       add_neg_eq_zero] at e
     exact e
   have b₁ : ∀ (T : Over (Sp K)) (x x' y : T ⟶ A), ev p (x * x') y = ev p x y + ev p x' y := fun T x x' y => by
     have e := congrArg (pull (lift x (lift x' y)).left) hb
-    simp only [map_add, map_neg, map_zero, ← pull_comp, ← Over.comp_left, comp_lift, MonObj.comp_mul, lift_fst,
+    simp only [map_add (f := _), map_neg, map_zero, ← pull_comp, ← Over.comp_left, comp_lift, MonObj.comp_mul, lift_fst,
       lift_snd, lift_snd_assoc] at e
     unfold ev
     rw [← sub_eq_zero, ← e]

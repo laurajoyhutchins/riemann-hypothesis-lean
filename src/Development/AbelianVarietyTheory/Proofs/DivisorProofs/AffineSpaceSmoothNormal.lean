@@ -1,20 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+module
+
+public import Mathlib.AlgebraicGeometry.Scheme
+public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsDomainAndIsIntegrallyClosedAtPrimeOfSmoothOfCo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry
 
 namespace GlobalTheory
-
-theorem smooth_affineSpace_over_of_isAffine (S : Scheme.{0}) [IsAffine S] (ι : Type) [Finite ι] :
-    Smooth (𝔸(ι; S) ↘ S) := by
-  have e : (𝔸(ι; S) ↘ S) = (AffineSpace.isoOfIsAffine ι S).hom ≫
-      Spec.map (CommRingCat.ofHom MvPolynomial.C) ≫ S.isoSpec.inv := by
-    rw [← AffineSpace.isoOfIsAffine_inv_over (n := ι) (S := S), Iso.hom_inv_id_assoc]
-  rw [e]
-  haveI : Algebra.Smooth Γ(S, ⊤) (MvPolynomial ι Γ(S, ⊤)) := ⟨inferInstance, inferInstance⟩
-  have : Smooth (Spec.map (CommRingCat.ofHom (MvPolynomial.C (R := Γ(S, ⊤)) (σ := ι)))) := by
-    rw [HasRingHomProperty.Spec_iff (P := @Smooth)]
-    exact RingHom.smooth_algebraMap.mpr inferInstance
-  infer_instance
 
 theorem isIntegrallyClosed_stalk_spec_field (K : Type) [Field K] (x : Spec (.of K)) :
     IsIntegrallyClosed ((Spec (.of K)).presheaf.stalk x) := by
@@ -25,22 +60,5 @@ theorem isIntegrallyClosed_stalk_spec_field (K : Type) [Field K] (x : Spec (.of 
     IsIntegrallyClosed.of_equiv (Scheme.ΓSpecIso (CommRingCat.of K)).symm.commRingCatIsoToRingEquiv
   exact (isDomain_and_isIntegrallyClosed_atPrime_of_isDomain (hU.primeIdealOf ⟨x, trivial⟩).asIdeal
     ((Spec (.of K)).presheaf.stalk x)).2
-
-theorem affineSpace_over_integral_affine_open_smooth_integral_normal :
-    ∀ (X : Scheme.{0}) (K : Type) [Field K] (s : X ⟶ Spec (.of K)), Smooth s →
-    ∀ (V : X.Opens), IsAffineOpen V → IsIntegral V.toScheme → ∀ (ι : Type) [Finite ι],
-    Smooth ((𝔸(ι; V.toScheme) ↘ V.toScheme) ≫ V.ι) ∧
-    LocallyOfFiniteType ((𝔸(ι; V.toScheme) ↘ V.toScheme) ≫ V.ι) ∧
-    IsIntegral 𝔸(ι; V.toScheme) ∧
-    ∀ t : 𝔸(ι; V.toScheme), IsIntegrallyClosed (𝔸(ι; V.toScheme).presheaf.stalk t) := by
-  intro X K _ s hs V hV hint ι _
-  have : IsAffine V.toScheme := hV
-  have : Smooth (𝔸(ι; V.toScheme) ↘ V.toScheme) := smooth_affineSpace_over_of_isAffine _ ι
-  have h1 : Smooth ((𝔸(ι; V.toScheme) ↘ V.toScheme) ≫ V.ι) := inferInstance
-  refine ⟨h1, inferInstance, inferInstance, fun t ↦ ?_⟩
-  have : Smooth (((𝔸(ι; V.toScheme) ↘ V.toScheme) ≫ V.ι) ≫ s) := inferInstance
-  exact (forall_isDomain_and_isIntegrallyClosed_stalk_of_smooth
-    (((𝔸(ι; V.toScheme) ↘ V.toScheme) ≫ V.ι) ≫ s)
-    (fun y ↦ ⟨inferInstance, isIntegrallyClosed_stalk_spec_field K y⟩) t).2
 
 end GlobalTheory

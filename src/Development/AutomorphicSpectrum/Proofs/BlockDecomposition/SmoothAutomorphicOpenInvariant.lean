@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.CuspRapidDecaySiegelGL
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsHeight
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.DecayUniform
+module
+
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.CuspFormsDiff
+public import GroundTheory.AutomorphicForms.CuspidalDiscreteness.ExistsNormRconvLeSiegel
 import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.GKStable
+import GroundTheory.AutomorphicForms.CuspidalDiscreteness.SiegelFinite
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
+
 open NumberField GlobalTheory.CuspRep GroundTheory.Global GroundTheory.Automorphic GroundTheory.Automorphic.Reduction
 open scoped NumberField.AdeleRing
 
@@ -68,7 +117,7 @@ theorem conj_unipGL_eq_archExp {r : ℕ} (x : AdelicGLn.AdelicGL K n) (P : UPos 
   rw [coe_expG_top, exp_eq_one_add_of_mul_self_eq_zero (conjArch_mul_conjArch x P P)]
   change archMat K n ((x⁻¹ * unipGL P * x : AdelicGLn.AdelicGL K n) :
     Matrix (Fin n) (Fin n) 𝔸[K]) = _
-  rw [coe_conj_unipGL, map_add, map_one]
+  rw [coe_conj_unipGL, map_add (f := _), map_one]
   rfl
 
 theorem norm_le_of_altSum_inf {φ : AdelicGLn.AdelicGL K n → ℂ} (hφc : Continuous φ)
@@ -139,7 +188,7 @@ theorem rho_le_of_ratio_le {ρ : Fin n → ℝ} (hρ : ∀ i, 0 < ρ i) (hprod :
   have hR0 : 0 ≤ R := by linarith
   have hprodR : ∀ f : Fin n → ℝ, (∀ j, 0 ≤ f j) → (∀ j, f j ≤ R) → ∏ j, f j ≤ R ^ n := by
     intro f hf0 hfR
-    calc ∏ j, f j ≤ ∏ _j : Fin n, R := Finset.prod_le_prod (fun j _ => hf0 j) fun j _ => hfR j
+    calc ∏ j, f j ≤ ∏ _j : Fin n, R := Finset.prod_le_prod₀ (fun j _ => hf0 j) fun j _ => hfR j
       _ = R ^ n := by rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
   constructor
   · have e1 : ρ i ^ n = ∏ j, (ρ i / ρ j) := by
@@ -280,7 +329,7 @@ theorem smooth_automorphic_open_invariant : ∀ (K : Type) [Field K] [NumberFiel
       refine h.trans ?_
       have hprodY : ∏ i, ‖Y i‖ ≤ (C₁' * gain) ^ k := by
         rw [← Fin.prod_const]
-        exact Finset.prod_le_prod (fun i _ => norm_nonneg _) fun i _ => hYn i
+        exact Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) fun i _ => hYn i
       exact mul_le_mul_of_nonneg_right
         (mul_le_mul_of_nonneg_left hprodY (pow_nonneg hd0 _)) hB₀
   refine hfinal.trans (le_of_eq ?_)

@@ -1,6 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LFixWB
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LIdemEx
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CharacterConductorCondition
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CharacterConductorCondition
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LFixWB
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.LIdemEx
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +64,9 @@ theorem trace_map {R R' : Type} [CommRing R] [Algebra F R] [CommRing R'] [Algebr
     Algebra.trace R' (R' ⊗[F] E) (Algebra.TensorProduct.map φ (AlgHom.id F E) z) =
       φ (Algebra.trace R (R ⊗[F] E) z) := by
   classical
+
   rw [Algebra.trace_eq_matrix_trace (Algebra.TensorProduct.basis R' (bE F E)),
-    Algebra.trace_eq_matrix_trace (Algebra.TensorProduct.basis R (bE F E)), Matrix.trace, Matrix.trace, map_sum]
+  Algebra.trace_eq_matrix_trace (Algebra.TensorProduct.basis R (bE F E)), Matrix.trace, Matrix.trace, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Matrix.diag_apply, Matrix.diag_apply, Algebra.leftMulMatrix_eq_repr_mul, Algebra.leftMulMatrix_eq_repr_mul,
     Algebra.TensorProduct.basis_apply, Algebra.TensorProduct.basis_apply]
@@ -62,8 +106,8 @@ theorem iV_fst (v : HeightOneSpectrum (𝓞 F)) (a : Fv F v) : (iV v a).1 = 0 :=
 
 theorem iV_snd (v : HeightOneSpectrum (𝓞 F)) (a : Fv F v) : (iV v a).2 = singleV F v a := rfl
 
-variable (E) in
 
+variable (E) in
 def plc (v : HeightOneSpectrum (𝓞 F)) : Fv F v ⊗[F] E →ₗ[F] AF F ⊗[F] E := TensorProduct.map (iV v) LinearMap.id
 
 theorem plc_tmul (v : HeightOneSpectrum (𝓞 F)) (a : Fv F v) (e : E) : plc E v (a ⊗ₜ[F] e) = iV v a ⊗ₜ[F] e := rfl
@@ -75,7 +119,7 @@ theorem evInf_apply (w : InfinitePlace F) (y : AF F) : evInf F w y = y.1 w := rf
 theorem compFin_plc_self (v : HeightOneSpectrum (𝓞 F)) (t : Fv F v ⊗[F] E) : compFin F E v (plc E v t) = t := by
   induction t using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
   | tmul a e =>
     rw [plc_tmul]
     show evFin F v (iV v a) ⊗ₜ[F] e = _
@@ -85,7 +129,7 @@ theorem compFin_plc_ne {v w : HeightOneSpectrum (𝓞 F)} (h : w ≠ v) (t : Fv 
     compFin F E w (plc E v t) = 0 := by
   induction t using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
   | tmul a e =>
     rw [plc_tmul]
     show evFin F w (iV v a) ⊗ₜ[F] e = 0
@@ -95,7 +139,7 @@ theorem compInf_plc (w : InfinitePlace F) (v : HeightOneSpectrum (𝓞 F)) (t : 
     compInf F E w (plc E v t) = 0 := by
   induction t using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => rw [map_add, map_add, hx, hy, add_zero]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, add_zero]
   | tmul a e =>
     rw [plc_tmul]
     show evInf F w (iV v a) ⊗ₜ[F] e = 0

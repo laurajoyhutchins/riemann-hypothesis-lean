@@ -1,4 +1,55 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCharacterOneOfProduct
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsHaarStabilizer
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentCoordinatesMeasurePreserving
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HermitianFormFlagVector
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MatExtMulVec
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SubMulRight
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ZhatSectionExists
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerFlagSplitting.MulVecColOfMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.StabilizerDisintegration.OD
 
@@ -69,7 +120,7 @@ theorem rhoX_spec (x : C2.Lstidx w → ℂ) :
   have e1 : rhoX S γ w x = h.choose := by
     show Formalism.FourierDecayAlt.D.rhoOfU S γ (Dx2.Rad.low w x)ᴴ = _
     unfold Formalism.FourierDecayAlt.D.rhoOfU
-    rw [dif_pos h]
+    rw [dite_eq_left h]
   rw [e1, UC.lowS_eq_low]
   exact h.choose_spec
 
@@ -145,8 +196,8 @@ theorem right_stabilizer_mem (x : C2.Lstidx w → ℂ) (u : G.UT (r + 1) → ℂ
     (Formalism.FourierDecayAlt.P.c2_tau_mem k r S.z' hz' _ (UC.upper_mem u)).2.2, Matrix.mul_assoc,
     Matrix.adjugate_mul, A.det_UT (uP_UT S hγ hd hZw hpos x u), one_smul]
 
-include hγ hd hZw hpos he in
 
+include hγ hd hZw hpos he in
 theorem Xi_eq (x : C2.Lstidx w → ℂ) (q : RR k r w) :
     Xi S w e x q = C6.actR γ (rhoX S γ w x) (Xi0 S w (Tx S γ w e x q)) := by
   have hz : C2.StdZ k r S.z := ⟨S.z_mem, S.T_pos⟩

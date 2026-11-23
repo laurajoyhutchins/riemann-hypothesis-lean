@@ -1,6 +1,44 @@
-import Formalism.LocalToGlobal.HermitianForms.TiedSym
-import Formalism.LocalToGlobal.HermitianForms.RankEqFirstLevel
-import Formalism.LocalToGlobal.HermitianColumns.SymAll
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.TiedSym
+public import Formalism.LocalToGlobal.HermitianColumns.SymAll
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +60,7 @@ theorem one_le_m (R : Ranks) : 1 ≤ R.m := by
   have h2 := R.two_le_m
   omega
 
-set_option maxHeartbeats 4000000 in
+
 
 structure ColsTiedSym (D : D7) where
   herm : Formalism.L2.Herm.ColsHermS D
@@ -83,16 +121,6 @@ structure ColsTiedSym (D : D7) where
   frame_level_zero_const : ∀ u u', (forms u).glev0.fr = (forms u').glev0.fr
   frP_const : ∀ u u', (forms u).glevP.fr = (forms u').glevP.fr
 
-set_option maxHeartbeats 4000000 in
-
-structure OneLevelSymmetricColumns (D : D7) extends ColsTiedSym D where
-  Ch_one : ∀ u i, Subsingleton (herm.base.Ch u i)
-  H_eq : ∀ u i (_ : 1 ≤ i) (_ : i + 2 ≤ D.R.m) β a v hv, (forms u).H i β a v hv = HXS D i v
-  lamC_eq : ∀ u i (_ : 1 ≤ i) (_ : i + 2 ≤ D.R.m) β a v hv (M : (forms u).H i β a v hv),
-    (((forms u).lamC i β a v hv M : ℂˣ) : ℂ) =
-      lamX ((forms u).gl.psi0 a v hv) ((forms u).gl.chiB a v hv) (D.R.N i) D.R.k (rSD D.R) D.R.t (D.R.m - 1 - i) i (k_le_N D.R i)
-        ((M : GL (Fin (D.R.N i)) (kv D.host.F v)) : Matrix (Fin (D.R.N i)) (Fin (D.R.N i)) (kv D.host.F v))
-  Yb_one : ∀ u, Subsingleton (forms u).Yb
 
 end Formalism.L2.Forms
 

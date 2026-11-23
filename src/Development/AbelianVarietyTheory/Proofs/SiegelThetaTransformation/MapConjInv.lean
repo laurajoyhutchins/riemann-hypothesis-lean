@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.UnitaryActHalfSpace
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DblZMemHn
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DblZMemHn
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.UnitaryActHalfSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical
 
@@ -401,8 +448,8 @@ theorem exp_factor {a b c d u v w : ℂ} (h : a * b = d * c) (h' : u + v = w) :
 
 end GlobalTheory.SW.DblPair
 
-open GlobalTheory.SW.DblPair in
 
+open GlobalTheory.SW.DblPair in
 theorem GlobalTheory.SW.iota_act_dbl : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : ℕ) (X : Data E r) (g : ℕ) (bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] X.Λ) (idx : Fin g ≃ X.Ψ × Fin r) (n : ℕ), IsSympl X bas → Even n → ∀ γ₁ γ₂ : GL (Fin r) E, IsUn X γ₁ → IsUn X γ₂ → iota X γ₁ γ₂ ∈ UU E r ∧ ∃ a : ℂ, a ≠ 0 ∧ ∀ x₁ ∈ X.dom, ∀ x₂ ∈ X.dom, hAct X.Ψ (iota X γ₁ γ₂) (dblZ X x₁ x₂) = dblZ X (lact γ₁ x₁) (lact γ₂ x₂) ∧ ∀ z₁ w : Fin n → Fin g → ℂ, (dblz X idx (lact γ₁ x₁) (lact γ₂ x₂) z₁ w = fun τ => Matrix.of fun k => (hDen' X.Ψ (iota X γ₁ γ₂) (dblZ X x₁ x₂) τ)⁻¹ *ᵥ dblz X idx x₁ x₂ z₁ w τ k) ∧ (dblz' X idx (lact γ₁ x₁) (lact γ₂ x₂) z₁ w = fun τ => Matrix.of fun k => dblz' X idx x₁ x₂ z₁ w τ k ᵥ* (hDen X.Ψ (iota X γ₁ γ₂) (dblZ X x₁ x₂) τ)⁻¹) ∧ kZero X idx (lact γ₁ x₁) (lact γ₂ x₂) z₁ w * hFac X.Ψ (iota X γ₁ γ₂) (dblZ X x₁ x₂) (dblz X idx x₁ x₂ z₁ w) (dblz' X idx x₁ x₂ z₁ w) = a * kZero X idx x₁ x₂ z₁ w := by
   intro E _ _ _ r X g bas idx n _ hn γ₁ γ₂ h₁ h₂
   have hι := iota_mem X h₁ h₂

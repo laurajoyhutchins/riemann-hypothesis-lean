@@ -1,9 +1,52 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalTwists.FiniteOrderCongruences.TwistIne
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.GalEmbTop
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ScNorm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IntegralityOfNormCoefficients
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.CuspidalTwists.FiniteOrderCongruences.TwistIne
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.RatTorsionFree
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsDecompositionGroupCyclotomicCharacterZpowN
 import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharInertiaSurjective
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsDecompositionGroupCyclotomicCharacterZpowN
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IntegralityOfNormCoefficients
+import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.ScNorm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.GalEmbTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 noncomputable section
 
@@ -136,8 +179,6 @@ def tau (hy : Hyp H k u g0) : Γ →* M2 R where
         Nm_conj hy hy.g0 hbg, Nm_inv, h1]
       simp only [mul_assoc, mul_one]
 
-theorem tau_apply (hy : Hyp H k u g0) (g : Γ) : tau hy g = tauF H k u g0 g := rfl
-
 theorem form_of (a b s : R) (h1 : a * a - b * b = 1) (h2 : s * s = 1) :
     (!![a, s * b; b, s * a] : M2 R)ᵀ * !![1, 0; 0, -1] * !![a, s * b; b, s * a] = !![1, 0; 0, -1] := by
   have eT : (!![a, s * b; b, s * a] : M2 R)ᵀ = !![a, b; s * b, s * a] := by
@@ -242,19 +283,19 @@ def kO (g : G ℚ Ω) : c.O :=
 theorem kO_res (x : G K' Ω) : ((kO K' κ c hc (resQ K' x) : c.O) : Qbar l) = κ x := by
   have h : ∃ y, resQ K' y = resQ K' x := ⟨x, rfl⟩
   unfold kO
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   show (κ h.choose : Qbar l) = κ x
   rw [res_inj K' h.choose_spec]
 
 theorem kO_off (g : G ℚ Ω) (hg : ¬ ∃ x, resQ K' x = g) : kO K' κ c hc g = 1 := by
   unfold kO
-  rw [dif_neg hg]
+  rw [dite_eq_right hg]
 
 def PP (e : ℤ) (A : ValuationSubring Ω) : Prop :=
   ∀ h : G K' Ω, resQ K' h ∈ Ine (F := ℚ) A → κ h = cycBar K' Ω l h ^ e
 
-open Classical in
 
+open Classical in
 def sA (m : ℕ) (A : ValuationSubring Ω) : c.O := if PP K' κ (m : ℤ) A then 1 else -1
 
 end Kap

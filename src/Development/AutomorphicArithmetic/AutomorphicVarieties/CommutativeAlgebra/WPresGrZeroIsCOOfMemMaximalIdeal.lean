@@ -1,7 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Graded
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Gordan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.Gordan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPowerSeries.Substitution
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -20,7 +68,7 @@ private theorem weight_zero_power_series_surjective (O : Type) [CommRing O] {σ 
     induction d using Finsupp.induction_linear with
     | zero => simp
     | add d d' h h' =>
-      rw [Finsupp.prod_add_index' (by simp) (fun s m n => pow_add _ _ _), h, h', map_add, monomial_mul_monomial,
+      rw [Finsupp.prod_add_index' (by simp) (fun s m n => pow_add _ _ _), h, h', map_add (f := _), monomial_mul_monomial,
         one_mul]
     | single s k =>
       rw [Finsupp.prod_single_index (by simp), Finsupp.linearCombination_single]
@@ -32,7 +80,7 @@ private theorem weight_zero_power_series_surjective (O : Type) [CommRing O] {σ 
     intro d
     induction d using Finsupp.induction_linear with
     | zero => simp
-    | add d d' h h' => rw [map_add, map_add, h, h', add_zero]
+    | add d d' h h' => rw [map_add (f := _), map_add (f := _), h, h', add_zero]
     | single s k => rw [Finsupp.linearCombination_single, map_nsmul, hgw, nsmul_zero]
   have hco : ∀ (F : MvPowerSeries τ O) n, coeff n (substAlgHom ha F) =
       ∑ᶠ d, coeff d F * (if n = Finsupp.linearCombination ℕ g d then 1 else 0) := by
@@ -84,10 +132,10 @@ theorem UpperTheory.V.Alg.wPres_gr_zero_isCO_of_mem_maximalIdeal :
           induction hz using AddSubmonoid.closure_induction with
           | mem x hx => exact (hg x hx).2
           | zero => exact map_zero _
-          | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+          | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
         obtain ⟨d, hd⟩ := ihx (hw x hx)
         obtain ⟨d', hd'⟩ := ihy (hw y hy)
-        exact ⟨d + d', by rw [map_add, hd, hd']⟩)
+        exact ⟨d + d', by rw [map_add (f := _), hd, hd']⟩)
   have hp : ∀ F, W.π (φ F) ∈ W.part 0 := fun F => ⟨φ F, hφ F, rfl⟩
   let p : MvPowerSeries g O →ₐ[O] W.gr 0 :=
     { toFun := fun F => ⟨⟨W.π (φ F), W.part_le_A (hp F)⟩, hp F⟩

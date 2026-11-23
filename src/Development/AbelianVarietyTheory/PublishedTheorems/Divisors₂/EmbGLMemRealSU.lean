@@ -1,5 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DefiniteBound
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsKMOne
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,7 +118,7 @@ theorem _root_.GlobalTheory.SUVol.isClosed_realSU (Ψ : Finset (E →+* ℂ)) (G
   unfold _root_.ReciprocityTheory.ChartRestriction.G.FD.hermC
   have hu := (hc τ).matrix_mulVec (continuous_const (y := u))
   have hw := (hc τ).matrix_mulVec (continuous_const (y := w))
-  refine continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun b _ => ?_
+  refine continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun b _ => ?_
   exact (((continuous_apply a).comp hu).mul continuous_const).mul
     (Complex.continuous_conj.comp ((continuous_apply b).comp hw))
 
@@ -94,7 +148,7 @@ def realLie (Ψ : Finset (E →+* ℂ)) (G : Matrix (Fin r) (Fin r) E) : Submodu
     have h1 := (hX τ).2 u w
     have h2 := (hY τ).2 u w
     rw [e]
-    simp only [hermC, add_mulVec, Pi.add_apply, map_add, add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
+    simp only [hermC, add_mulVec, Pi.add_apply, map_add (f := _), add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
     linear_combination h1 + h2
   smul_mem' c X hX τ := by
     have e : Matrix.of ((c • X) τ) = (c : ℂ) • Matrix.of (X τ) := rfl
@@ -140,7 +194,7 @@ def lieLat (G : Matrix (Fin r) (Fin r) E) (Λ : Submodule (𝓞 E) (Fin r → E)
     refine ⟨by rw [trace_add, hX.1, hY.1, add_zero], fun u w => ?_, fun x hx => ?_⟩
     · have h1 := hX.2.1 u w
       have h2 := hY.2.1 u w
-      simp only [herm, cc, add_mulVec, Pi.add_apply, map_add, add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
+      simp only [herm, cc, add_mulVec, Pi.add_apply, map_add (f := _), add_mul, mul_add, Finset.sum_add_distrib] at h1 h2 ⊢
       linear_combination h1 + h2
     · rw [add_mulVec]; exact Λ.add_mem (hX.2.2 x hx) (hY.2.2 x hx)
   neg_mem' {X} hX := by
@@ -202,9 +256,11 @@ private lemma hermC_map_mulVec_eq_of_preserves_form (τ : E →+* ℂ) (G M : Ma
   have hK' : ∀ a b, τ (G a b) = ∑ i, ∑ j, τ (M i a) * τ (G i j) * starRingEnd ℂ (τ (M j b)) := by
     intro a b
     rw [← hK a b]
+
     simp [map_sum, IsCMField.complexEmbedding_complexConj]
   unfold _root_.ReciprocityTheory.ChartRestriction.G.FD.hermC
   conv_rhs => rw [Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by rw [hK' a b]]
+
   simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, map_sum, map_mul, Finset.sum_mul, Finset.mul_sum]
   conv_lhs => enter [2, i, 2, j]; rw [Finset.sum_comm]
   conv_lhs => enter [2, i]; rw [Finset.sum_comm]
@@ -214,10 +270,10 @@ private lemma hermC_map_mulVec_eq_of_preserves_form (τ : E →+* ℂ) (G M : Ma
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ =>
     Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 
+
 open NumberField IsDedekindDomain Matrix MeasureTheory Filter Topology in
 open scoped ENNReal NNReal in
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ} in
-
 theorem _root_.GlobalTheory.SUVol.embGL_mem_realSU (Ψ : Finset (E →+* ℂ)) (G : Matrix (Fin r) (Fin r) E)
     (γ : GL (Fin r) E) (h1 : (γ : Matrix (Fin r) (Fin r) E).det = 1)
     (h2 : ∀ x y, _root_.ReciprocityTheory.ChartRestriction.G.FD.herm G ((γ : Matrix (Fin r) (Fin r) E) *ᵥ x) ((γ : Matrix (Fin r) (Fin r) E) *ᵥ y) =

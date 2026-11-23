@@ -1,13 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IwahoriTypeSupport.JacProd
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IwahoriTypeSupport.SuppOfTypeOf
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CyclicStrongAtCusp
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSphericalFactorOfSphericalSubquotient
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SphericalSegmentRepLengthOneUnramified
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GenericUnlinkedGL
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.LeibnizDerivatives.GenericProdIff
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.DeterminantVector
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CyclicStrongAtCusp
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GenericUnlinkedGL
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.LeibnizDerivatives.GenericProdIff
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.LanglandsMultisegments
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StandardCosocleGL
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IwahoriTypeSupport.TorusScalar
+public import GroundTheory.LocalFields.UnramifiedHensel
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsEquivProdIrrTw
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HasSupportOfIsSubquotientProdIrr
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsSphericalFactorOfSphericalSubquotient
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NontrivialTwJacquetOfSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SphericalSegmentRepLengthOneUnramified
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.SupercuspidalSupportUniqueGL
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IwahoriTypeSupport.JacProd
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IwahoriTypeSupport.SuppOfTypeOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.DeterminantVector
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,11 +60,11 @@ namespace UpperTheory.Gal.TypesAndIwahori
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem supp_unique (L : Loc) {N : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] {π : Representation ℂ (GL (Fin N) k) V}
-    {s t : Multiset (IrrGL k)} (hs : HasSupport π s) (ht : HasSupport π t) : s = t := by
+    {s t : Multiset (IrrGL (k := k))} (hs : HasSupport π s) (ht : HasSupport π t) : s = t := by
   exact SupportUnique.eq_of_hasSupport L.geo L.zel N (IrrGL.of π hs.isSmooth hs.isIrreducible) rfl s t
     (hs.of_equiv (IrrGL.equivOf _ _ _)) (ht.of_equiv (IrrGL.equivOf _ _ _))
 
-theorem ne_nu_one_of_char {x : IrrGL k} (hx : x.IsUnramChar) : x ≠ x.nu 1 := by
+theorem ne_nu_one_of_char {x : IrrGL (k := k)} (hx : x.IsUnramChar) : x ≠ x.nu 1 := by
   obtain ⟨μ, hμ, rfl⟩ := hx
   intro h
   have h' : (IrrGL.ofChar μ (isSmoothChar_of_isUnram hμ)).nu ((0:ℝ):ℂ) =
@@ -82,7 +124,7 @@ private theorem unlinked_sum_ms_of_len_one_unram_not_linked {h : ℕ} (Δ : Fin 
 theorem unlinked_of_spherical [CharZero k] (L : Loc) (hGU : GlobalTheory.Published.GenericUnlinkedGL)
     (hM : GlobalTheory.Published.LanglandsMultisegments) (hC : GlobalTheory.Published.StandardCosocleGL)
     {N : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] {π : Representation ℂ (GL (Fin N) k) V}
-    (hs : IsSmooth π) (hi : π.IsIrreducible) (hg : IsGeneric π) (hsp : IsSpherical π) {s : Multiset (IrrGL k)}
+    (hs : IsSmooth π) (hi : π.IsIrreducible) (hg : IsGeneric π) (hsp : IsSpherical π) {s : Multiset (IrrGL (k := k))}
     (hS : HasSupport π s) : GlobalTheory.RoadU.Unlinked s := by
   obtain ⟨h, Δ, x, hd, hlink, hL, ⟨e⟩⟩ := hGU k N V π hs hi hg
   have hsq : IsSubquotient π (prodIrr x hd) :=
@@ -100,7 +142,7 @@ theorem unlinked_of_spherical [CharZero k] (L : Loc) (hGU : GlobalTheory.Publish
 theorem unlinked_of_detVec [CharZero k] (L : Loc) (hGU : GlobalTheory.Published.GenericUnlinkedGL)
     (hM : GlobalTheory.Published.LanglandsMultisegments) (hC : GlobalTheory.Published.StandardCosocleGL)
     {N : ℕ} {V : Type} [AddCommGroup V] [Module ℂ V] {π : Representation ℂ (GL (Fin N) k) V}
-    (hg : IsGeneric π) {η : kˣ →* ℂˣ} (hη : IsSmoothChar η) (hv : UpperTheory.TNZ.HasDetVec π η) {s : Multiset (IrrGL k)}
+    (hg : IsGeneric π) {η : kˣ →* ℂˣ} (hη : IsSmoothChar η) (hv : UpperTheory.TNZ.HasDetVec π η) {s : Multiset (IrrGL (k := k))}
     (hS : HasSupport π s) : GlobalTheory.RoadU.Unlinked s := by
   have hη' : IsSmoothChar η⁻¹ := hη.inv
   have hsph := (UpperTheory.TNZ.step_detVec k N V π η).2 hv
@@ -115,13 +157,13 @@ theorem unlinked_of_tameSphProd [CharZero k] (L : Loc) (hGU : GlobalTheory.Publi
     (hM : GlobalTheory.Published.LanglandsMultisegments) (hC : GlobalTheory.Published.StandardCosocleGL) (hP : GlobalTheory.BZMir.Leib.GenericProdIff k)
     {N c : ℕ} {d : Fin c → ℕ} {hd : ∑ a, d a = N} {V : Type} [AddCommGroup V] [Module ℂ V]
     {π : Representation ℂ (GL (Fin N) k) V} (hg : IsGeneric π) {θ : Fin c → 𝓀[k]ˣ →* ℂˣ} (hθ : Function.Injective θ)
-    (h : IsTameSphProd π d hd θ) {s : Multiset (IrrGL k)} (hS : HasSupport π s) : GlobalTheory.RoadU.Unlinked s := by
+    (h : IsTameSphProd π d hd θ) {s : Multiset (IrrGL (k := k))} (hS : HasSupport π s) : GlobalTheory.RoadU.Unlinked s := by
   obtain ⟨η, hη, X, _, _, σ, hsm, hirr, hdv, ⟨e⟩⟩ := h
   have hgM : IsGeneric (multiProd (stdBlocks d hd) σ) := (isGeneric_congr e).1 hg
   have hgσ := (hP c N d hd X σ hsm).1 hgM
   have hcs := fun a => UpperTheory.TNZ.stepL_cuspSupp L k (d a) (X a) (σ a) (hsm a) (hirr a) (η a) (hη a).1 (hdv a)
   choose μ hμ hcsp using hcs
-  let t : Fin c → Multiset (IrrGL k) := fun a =>
+  let t : Fin c → Multiset (IrrGL (k := k)) := fun a =>
     Multiset.map (fun j => IrrGL.ofChar (μ a j) (hμ a j).1) Finset.univ.val
   have ht : ∀ a, HasSupport (σ a) (t a) := fun a => hasSupport_of_isCuspSupport (hcsp a)
   have hSM : HasSupport (multiProd (stdBlocks d hd) σ) s := hS.of_equiv e

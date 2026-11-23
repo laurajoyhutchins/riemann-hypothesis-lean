@@ -1,8 +1,55 @@
-import Development.WeilBound.ThetaLifts.Reductions.SiegelCore
-import Development.WeilBound.ThetaLifts.Reductions.SiegelAbs
-import Development.WeilBound.ThetaLifts.Reductions.SiegelMod
-import Development.WeilBound.ThetaLifts.FrameEstimates.LeHeightOfIsTorusElt
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddHaarLeftRightMulAdelicMatricesModule
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.SiegelCore
+public import Development.WeilBound.ThetaLifts.Reductions.SiegelMod
+public import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
+import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUniqueIsProdMeasureFinAway
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddHaarLeftRightMulAdelicMatricesModule
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+public import Development.WeilBound.ThetaLifts.FrameEstimates.LeHeightOfIsTorusElt
+public import Development.WeilBound.ThetaLifts.Reductions.SiegelAbs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -60,7 +107,7 @@ theorem sigR_sigR (hσ : ∀ x, σ (σ x) = x) (x : AF F ⊗[F] E) : sigR (AF F)
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp [sigR, hσ]
-  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy]
 
 theorem continuous_sigR : Continuous (sigR (AF F) σ) := by
   have : Module.Finite F E := Module.Finite.of_restrictScalars_finite ℚ F E
@@ -209,9 +256,9 @@ theorem minPar_of_eich {k : ℕ} (hk : k ≤ r) {R : Type} [CommRing R] (A : Mat
     ext i m
     simp only [Matrix.mul_apply, Matrix.of_apply, colK, Matrix.submatrix_apply, id]
     rw [sum_castLE hk (fun l => A i l * if hl : l.val < k then C ⟨l.val, hl⟩ m else 0) fun l hl => by
-      rw [dif_neg (by omega), mul_zero]]
+      rw [dite_eq_right (by omega), mul_zero]]
     refine Finset.sum_congr rfl fun l _ => ?_
-    rw [dif_pos (by simp)]
+    rw [dite_eq_left (by simp)]
     rfl
 
 theorem nMat_minPar (h : IsCMExt F E σ) (hJ : IsHermND σ J) (hW : IsWittFrame σ J X Y) {k : ℕ} (hk : k ≤ r)
@@ -424,10 +471,11 @@ theorem char_torus (h : IsCMExt F E σ) (hJ : IsHermND σ J) (hW : IsWittFrame �
   have hs : ∀ (i : Fin r) (c : ℝ), f (Pi.single i c) = g (Pi.single i c) := fun i c => by
     have e1 := congrArg f (ek_succ i c)
     have e2 := congrArg g (ek_succ i c)
-    rw [map_add] at e1 e2
+    rw [map_add (f := _)] at e1 e2
     rw [hk _ (by omega) c, hk _ (by omega) c] at e1
     linarith
   have hfg : f s = g s := by
+
     rw [← Finset.univ_sum_single s, map_sum, map_sum]
     exact Finset.sum_congr rfl fun i _ => hs i (s i)
   have e : Real.log (mulEquivHaarChar (conjC (⟨a s, haH s⟩ : H))) = 2 * Module.finrank ℚ F * rho2 n s := hfg

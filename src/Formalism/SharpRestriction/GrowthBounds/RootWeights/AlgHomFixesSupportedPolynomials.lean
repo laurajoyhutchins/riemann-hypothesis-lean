@@ -1,4 +1,52 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.EBeta
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.EBeta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Basic.PEquiv
+public import Mathlib.Data.Matrix.PEquiv
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,12 +76,8 @@ theorem divisor_supported_of_supported {R σ : Type*} [CommRing R] [IsDomain R] 
     rw [degreeOf_eq_sup]
     refine Nat.le_zero.mp (Finset.sup_le fun m hm => ?_)
     by_contra hmv
-    exact hvs (hs ((mem_vars v).mpr ⟨m, hm, Finsupp.mem_support_iff.mpr (by omega)⟩))
-  have h3 : degreeOf v q ≠ 0 := by
-    obtain ⟨m, hm, hvm⟩ := (mem_vars v).mp hv
-    have := monomial_le_degreeOf v hm
-    have := Finsupp.mem_support_iff.mp hvm
-    omega
+    exact hvs (hs ((mem_vars_iff_mem_support v).mpr ⟨m, hm, Finsupp.mem_support_iff.mpr (by omega)⟩))
+  have h3 : degreeOf v q ≠ 0 := mem_vars_iff_degreeOf_ne_zero.mp hv
   omega
 
 theorem algHom_fixes_supported_polynomials {R σ : Type*} [CommRing R] {s : Set σ} (φ : MvPolynomial σ R →ₐ[R] MvPolynomial σ R)
@@ -88,8 +132,8 @@ theorem cofactor_last_row_supported (R : Type) [CommRing R] {ι : Type} {r : ℕ
   · rw [supported_eq_adjoin_X]
     exact Algebra.subset_adjoin ⟨_, ⟨⟨i, h1, rfl⟩, h3⟩, rfl⟩
 
-open Classical in
 
+open Classical in
 theorem adjugate_last_row_ne_zero (R : Type) [CommRing R] [Nontrivial R] {ι : Type} {r : ℕ} [NeZero r] (A : Fin r → ι)
     (hA : Function.Injective A) (a : Fin r) : (matA R A).adjugate a (lastIdx r) ≠ 0 := by
   rw [adjugate_last_row_eq_cofactor_det, cofactor_det_eq_cleared_det]
@@ -124,8 +168,8 @@ theorem adjugate_last_row_ne_zero (R : Type) [CommRing R] [Nontrivial R] {ι : T
   rw [RingHom.map_det, hmap, Matrix.det_permutation, map_zero] at hdet
   rcases Int.units_eq_one_or (Equiv.Perm.sign σ) with hs | hs <;> simp [hs] at hdet
 
-open Classical in
 
+open Classical in
 def lastRowSubstitution (R : Type) [CommRing R] {ι : Type} {r : ℕ} [NeZero r] (A : Fin r → ι) (a : Fin r) :
     MvPolynomial (ι × Fin r) R →ₐ[R] MvPolynomial (ι × Fin r) R :=
   aeval fun v => if v.1 = A (lastIdx r) then (if v.2 = a then 1 else 0) else X v

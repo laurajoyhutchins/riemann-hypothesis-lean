@@ -1,5 +1,71 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.JordanBasisNilpotent
+module
+
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.JordanBasisNilpotent
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.BaseChange
+public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+public import Mathlib.LinearAlgebra.Eigenspace.Zero
+public import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+
+@[expose] public section
+
 open NumberField
 
 namespace PositivityTheory.Xgn.KernelRankAlgebraic
@@ -357,8 +423,8 @@ theorem arith_pi {E : Type} [Field E] [NumberField E] (p : ℕ) [hp : Fact p.Pri
     rw [h, Ideal.span_singleton_zero] at hI
     exact mul_ne_zero hw0 hI0 hI.symm
   · rw [← Ideal.absNorm_span_singleton, hI, map_mul, Ideal.absNorm_apply w,
-      Submodule.cardQuot_apply, hf, padicValNat.mul (pow_ne_zero _ hp.out.ne_zero) hN0,
-      padicValNat.prime_pow, padicValNat.eq_zero_of_not_dvd hnd, add_zero]
+      Submodule.cardQuot_apply, hf, (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (pow_ne_zero _ hp.out.ne_zero) hN0,
+      (show padicValNat p (p ^ f) = f from by simpa only [← Nat.padicValNat_def] using Nat.multiplicity_prime_pow f), (show padicValNat p (Ideal.absNorm I) = 0 from by simpa only [← Nat.padicValNat_def] using multiplicity_eq_zero_of_not_dvd hnd), add_zero]
 
 theorem arith_theta {E : Type} [Field E] [NumberField E] (p : ℕ) [hp : Fact p.Prime]
     (w : Ideal (𝓞 E)) [hw : w.IsMaximal] (hw0 : w ≠ ⊥) :
@@ -501,6 +567,7 @@ theorem PositivityTheory.Xgn.kernel_rank_algebraic_bound : ∀ (E : Type) [Field
       ρ (RingOfIntegers.basis E q.2) (x q.1)) with hS
     have hR : ∀ (a : 𝓞 E) (i : Fin r), ρ a (x i) ∈ S := by
       intro a i
+
       rw [← (RingOfIntegers.basis E).sum_repr a, map_sum, LinearMap.sum_apply]
       refine S.sum_mem fun q _ => ?_
       rw [map_zsmul, LinearMap.smul_apply]

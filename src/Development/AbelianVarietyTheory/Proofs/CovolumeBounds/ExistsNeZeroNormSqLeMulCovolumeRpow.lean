@@ -1,7 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsLinearIndependentSqrtEqSuccMinQuad
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.LinearIndependentRealOfIntOfDiscrete
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DiscreteTopologySpanOfLinearIndependent
+module
+
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DiscreteTopologySpanOfLinearIndependent
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsLinearIndependentNormLeSuccMin
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsLinearIndependentSqrtEqSuccMinQuad
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Group.GeometryOfNumbers
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -102,8 +150,8 @@ variable [MeasurableSpace E] [BorelSpace E]
 theorem volume_real_unitBall_pos : 0 < volume.real (Metric.ball (0 : E) 1) :=
   ENNReal.toReal_pos (Metric.measure_ball_pos _ _ one_pos).ne' measure_ball_lt_top.ne
 
-variable (E) in
 
+variable (E) in
 theorem two_div_sqrt_pow_le_volume_unitBall :
     (2 / √(finrank ℝ E : ℝ)) ^ finrank ℝ E ≤ volume.real (Metric.ball (0 : E) 1) := by
   let o := stdOrthonormalBasis ℝ E
@@ -130,8 +178,8 @@ theorem two_div_sqrt_pow_le_volume_unitBall :
     ENNReal.ofReal_le_iff_le_toReal measure_ball_lt_top.ne] at h
   rwa [div_eq_mul_inv]
 
-variable (E) in
 
+variable (E) in
 theorem two_pow_div_volume_unitBall_le :
     2 ^ finrank ℝ E / volume.real (Metric.ball (0 : E) 1) ≤
       (finrank ℝ E : ℝ) ^ ((finrank ℝ E : ℝ) / 2) := by
@@ -184,7 +232,7 @@ theorem succMin_mul_minNorm_pow_le {k : ℕ} (h1 : 1 ≤ k) (hk : k ≤ finrank 
   rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ j), show (j : ℕ) + 1 = k by simp [j]; omega]
   refine mul_le_mul_of_nonneg_left ?_ (succMin_nonneg L k)
   calc minNorm L ^ (finrank ℝ E - 1) = ∏ _i ∈ Finset.univ.erase j, minNorm L := by simp
-    _ ≤ _ := Finset.prod_le_prod (fun _ _ ↦ succMin_nonneg L 1) fun i _ ↦
+    _ ≤ _ := Finset.prod_le_prod₀ (fun _ _ ↦ succMin_nonneg L 1) fun i _ ↦
         succMin_mono_of_isZLattice (by omega) i.2
 
 end Euclidean

@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.TwoChartSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.TwoChartSt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.CalcExp
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -166,11 +204,11 @@ theorem core (hN : NabTransSt) {O : Type} [CommRing O] [StarRing O] {B B' : FB k
   · have g := gp_addOf _ B'.G.const _ _ (hp (n := 3) 0) (hp 1)
     have := r.ph1
     rw [E g (hp 2), E (hp 0) (hp 2), E (hp 1) (hp 2), ← gt_expS_add _ _ (Z (hp 0) (hp 2)) (Z (hp 1) (hp 2))] at this
-    exact solve_exp (by rw [map_add, Z (hp 0) (hp 2), Z (hp 1) (hp 2), add_zero]) (Z g (hp 2)) this
+    exact solve_exp (by rw [map_add (f := _), Z (hp 0) (hp 2), Z (hp 1) (hp 2), add_zero]) (Z g (hp 2)) this
   · have g := gp_addOf _ B'.G.const _ _ (hp (n := 3) 1) (hp 2)
     have := r.ph2
     rw [E (hp 0) g, E (hp 0) (hp 1), E (hp 0) (hp 2), ← gt_expS_add _ _ (Z (hp 0) (hp 1)) (Z (hp 0) (hp 2))] at this
-    exact solve_exp (by rw [map_add, Z (hp 0) (hp 1), Z (hp 0) (hp 2), add_zero]) (Z (hp 0) g) this
+    exact solve_exp (by rw [map_add (f := _), Z (hp 0) (hp 1), Z (hp 0) (hp 2), add_zero]) (Z (hp 0) g) this
   · have := r.sy
     rw [E (hp 1) (hp 0)] at this
     exact solve_exp (Z (hp 1) (hp 0)) hl this

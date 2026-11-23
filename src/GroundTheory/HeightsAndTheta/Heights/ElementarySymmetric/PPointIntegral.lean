@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StatementsCurrent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -35,8 +81,8 @@ theorem isFiniteProjection (p : Fin n → ℂ) (A : Matrix (Fin 0) (Fin n) ℂ) 
     simp
   refine ⟨?_, ?_⟩
   · intro P Q hPQ
-    obtain ⟨a, rfl⟩ : ∃ a, P = C a := ⟨coeff 0 P, (eq_C_of_isEmpty P)⟩
-    obtain ⟨b, rfl⟩ : ∃ b, Q = C b := ⟨coeff 0 Q, (eq_C_of_isEmpty Q)⟩
+    obtain ⟨a, rfl⟩ : ∃ a, P = C a := ⟨AddMonoidAlgebra.coeff P 0, (eq_C_of_isEmpty P)⟩
+    obtain ⟨b, rfl⟩ : ∃ b, Q = C b := ⟨AddMonoidAlgebra.coeff Q 0, (eq_C_of_isEmpty Q)⟩
     simp only [projHom, pullback, AlgHom.comp_apply, aeval_C, Ideal.Quotient.mkₐ_eq_mk] at hPQ
     rw [Ideal.Quotient.eq, RingHom.mem_ker] at hPQ
     simp [sub_eq_zero] at hPQ
@@ -49,7 +95,7 @@ theorem proof : PointIntegral.Statement := by
   have hZ : zeroSet J = {p} := zeroSet_ker_eval p
   have hex : ∃ A : Matrix (Fin 0) (Fin n) ℂ, IsFiniteProjection J A :=
     ⟨0, isFiniteProjection p 0⟩
-  rw [varInt, dif_pos hex]
+  rw [varInt, dite_eq_left hex]
   set A := hex.choose
   have hsheet : IsSheetAt J A p (fun _ => p) := by
     refine ⟨Set.univ, isOpen_univ, trivial, differentiableOn_const _, rfl, ?_, Set.univ,
@@ -68,7 +114,7 @@ theorem proof : PointIntegral.Statement := by
     intro y
     rw [chartDens, sheetSum, hfib y, finsum_mem_singleton]
     have hs : ∃ s, IsSheetAt J A p s := ⟨_, hsheet⟩
-    rw [dif_pos hs]
+    rw [dite_eq_left hs]
     simp [ReciprocityTheory.AnForm.maDens, ReciprocityTheory.AnForm.mdisc_zero]
   rw [chartInt]
   simp_rw [hdens]

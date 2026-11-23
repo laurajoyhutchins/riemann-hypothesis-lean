@@ -1,5 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.CuspSemisimpleReal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.IsCondAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.DualIsConjByOne
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MkMemAdmissibleAtIffCocycle
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.StrongMultiplicityOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.AutomorphicForms.Newform
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,39 +65,5 @@ def DescUse : Prop :=
         ∀ᶠ w : HeightOneSpectrum (𝓞 E) in Filter.cofinite, IsSplitAt w →
           ∃ (τ : SmIrr (GL (Fin n) (w.adicCompletion E))) (B : Multiset ℂˣ),
             IsCompAlong σ (locU n w) ((cLoc w).comp (locU n w).subtype) τ.ρ ∧ GlobalTheory.LFun.HasSatGL w τ.ρ B ∧ (CG.mk π).HasSat w B
-
-structure EigVec {F : Type} [Field F] [NumberField F] [IsTotallyReal F] {l : ℕ} [Fact l.Prime] (ι : Qbar l ≃+* ℂ)
-    (c : HeightOneSpectrum (𝓞 F) → ℕ) (ω : (Af F)ˣ →* ℂˣ) (m : HeightOneSpectrum (𝓞 F) → Fin 2 → ℤ)
-    (mu : HeightOneSpectrum (𝓞 F) → ℂ) (π : TR.CuspSub F 2) (x : π.V) : Prop where
-  ne : x ≠ 0
-  eig : ∀ w, x ∈ Hi.fixd (π.locRep w) (K1 w (c w)) ∧ Uop w (π.locRep w) (c w) x = mu w • x
-  cen : ∀ z, π.finPart (Matrix.GeneralLinearGroup.scalar (Fin 2) z) x = (ω z : ℂ) • x
-  inf : ∀ w, ((l : ℕ) : 𝓞 F) ∈ w.asIdeal → ∀ τ : F →+* Qbar l, EmbAt w τ →
-    π.HasInfChar (InfinitePlace.mk (ι.toRingHom.comp τ)) (infOf (m w))
-
-def WcUse : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F] [IsTotallyReal F] (l : ℕ) [Fact l.Prime], l ≠ 2 → Module.finrank ℚ F = 2 →
-    (∀ w : HeightOneSpectrum (𝓞 F), ((l : ℕ) : 𝓞 F) ∈ w.asIdeal → Ideal.absNorm w.asIdeal = l ∧ ((l : ℕ) : 𝓞 F) ∉ w.asIdeal ^ 2) →
-    ∀ (ι : Qbar l ≃+* ℂ) (s : ℤ) (c : HeightOneSpectrum (𝓞 F) → ℕ), {w | c w ≠ 0}.Finite → (∃ u, c u ≠ 0 ∧ normV u = 2) →
-    ∀ (ω : (Af F)ˣ →* ℂˣ) (m m' : HeightOneSpectrum (𝓞 F) → Fin 2 → ℤ) (mu : HeightOneSpectrum (𝓞 F) → ℂ) (π : TR.CuspSub F 2) (x : π.V),
-    EigVec ι c ω m mu π x →
-    (∀ w, c w ≠ 0 → ((l : ℕ) : 𝓞 F) ∉ w.asIdeal → ‖ι.symm (mu w)‖ = 1) →
-    (∀ w : HeightOneSpectrum (𝓞 F), ((l : ℕ) : 𝓞 F) ∈ w.asIdeal → c w = 1 ∧ m w 1 + 2 ≤ m w 0 ∧ m w 0 + m w 1 = s ∧
-      ‖ι.symm (mu w) * (normV w : Qbar l) ^ m w 0‖ = 1 ∧
-      m' w 1 + 2 ≤ m' w 0 ∧ m' w 0 + m' w 1 = s ∧ ((l : ℤ) - 1) ∣ m' w 0 - m w 0) →
-    ∃ (mu' : HeightOneSpectrum (𝓞 F) → ℂ) (π' : TR.CuspSub F 2) (y : π'.V), EigVec ι c ω m' mu' π' y ∧
-      (∀ w : HeightOneSpectrum (𝓞 F), ((l : ℕ) : 𝓞 F) ∉ w.asIdeal → ‖ι.symm (mu' w) - ι.symm (mu w)‖ < 1) ∧
-      ∀ w : HeightOneSpectrum (𝓞 F), ((l : ℕ) : 𝓞 F) ∈ w.asIdeal →
-        ‖ι.symm (mu' w) * (normV w : Qbar l) ^ m' w 0 - ι.symm (mu w) * (normV w : Qbar l) ^ m w 0‖ < 1
-
-def WcGal : Prop :=
-  ∀ (F Ω : Type) [Field F] [NumberField F] [IsTotallyReal F] [Field Ω] [Algebra F Ω] [IsAlgClosure F Ω] (l : ℕ) [Fact l.Prime], l ≠ 2 →
-    Module.finrank ℚ F = 2 →
-    (∀ w : HeightOneSpectrum (𝓞 F), ((l : ℕ) : 𝓞 F) ∈ w.asIdeal → Ideal.absNorm w.asIdeal = l ∧ ((l : ℕ) : 𝓞 F) ∉ w.asIdeal ^ 2) →
-    ∀ (ι : Qbar l ≃+* ℂ) (ξ : G F Ω →* (Qbar l)ˣ) s c m a π r, OrdForm ι ξ s c m a π r →
-    (∃ u, c u ≠ 0 ∧ normV u = 2) → ∀ m' : HeightOneSpectrum (𝓞 F) → Fin 2 → ℤ,
-    (∀ w : HeightOneSpectrum (𝓞 F), ((l : ℕ) : 𝓞 F) ∈ w.asIdeal → m' w 1 + 2 ≤ m' w 0 ∧ m' w 0 + m' w 1 = s ∧ ((l : ℤ) - 1) ∣ m' w 0 - m w 0) →
-    ∃ π' r', OrdForm ι ξ s c m' a π' r' ∧ ∀ g i, ‖(r' g : Matrix (Fin 2) (Fin 2) (Qbar l)).charpoly.coeff i -
-      (r g : Matrix (Fin 2) (Fin 2) (Qbar l)).charpoly.coeff i‖ < 1
 
 end UpperTheory.V.Z.Desc

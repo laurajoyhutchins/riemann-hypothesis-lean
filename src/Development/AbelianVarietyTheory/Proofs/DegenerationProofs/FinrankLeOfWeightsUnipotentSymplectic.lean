@@ -1,9 +1,71 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
+module
+
+public import Mathlib.Analysis.Complex.Norm
+public import Mathlib.LinearAlgebra.BilinearForm.Properties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
-import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.SemistableFin
+public import Mathlib.Analysis.Normed.Field.Basic
+import Mathlib.CategoryTheory.Monoidal.Cartesian.Basic
+import Mathlib.CategoryTheory.Monoidal.Category
+import Mathlib.CategoryTheory.Monoidal.Mon
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -33,8 +95,9 @@ theorem aeval_intertwine (f g L : Module.End 𝕜 V) (K : Submodule 𝕜 V)
       intro x hx
       rw [pow_succ, pow_succ, Module.End.mul_apply, Module.End.mul_apply, hL x hx, ih _ (hK x hx)]
   intro x hx
+
   simp only [aeval_eq_sum_range, LinearMap.sum_apply, LinearMap.smul_apply, map_sum,
-    LinearMap.map_smul_of_tower, hp _ x hx]
+  LinearMap.map_smul_of_tower, hp _ x hx]
 
 theorem aeval_adjoint (B : LinearMap.BilinForm 𝕜 V) (f g : Module.End 𝕜 V)
     (h : ∀ x y, B (f x) y = B x (g y)) (p : ℚ[X]) (x y : V) :
@@ -46,8 +109,9 @@ theorem aeval_adjoint (B : LinearMap.BilinForm 𝕜 V) (f g : Module.End 𝕜 V)
     | succ n ih =>
       intro x y
       rw [pow_succ', pow_succ, Module.End.mul_apply, Module.End.mul_apply, h, ih]
+
   simp only [aeval_eq_sum_range, LinearMap.sum_apply, LinearMap.smul_apply, map_sum,
-    LinearMap.map_smul_of_tower, hp]
+  LinearMap.map_smul_of_tower, hp]
 
 end
 
@@ -59,6 +123,7 @@ theorem aeval_rev {A : Type} [Ring A] [Algebra ℚ A] (u v : A) (h : u * v = 1) 
     induction i with
     | zero => simp
     | succ i ih => rw [pow_succ, pow_succ', _root_.mul_assoc, ← _root_.mul_assoc u, h, _root_.one_mul, ih]
+
   rw [aeval_eq_sum_range v, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i hi => ?_
   have hi' : i ≤ R.natDegree := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
@@ -79,6 +144,7 @@ theorem exists_rev {A : Type} [Ring A] [Algebra ℚ A] (u v : A) (h : u * v = 1)
   by_cases hb : β = 0
   · exfalso
     subst hb
+
     rw [map_sum, Finset.sum_eq_single R.natDegree] at hβ
     · simp [hR0] at hβ
     · intro i hi hne
@@ -102,7 +168,7 @@ theorem exists_binom (q : ℕ) : ∃ v : ℚ[X], (X + 1) ^ q = 1 + X * (C (q : �
     obtain ⟨v, hv⟩ := ih
     refine ⟨C (q : ℚ) + v + X * v, ?_⟩
     rw [pow_succ, hv]
-    simp only [Nat.cast_add, Nat.cast_one, map_add, map_one]
+    simp only [Nat.cast_add, Nat.cast_one, map_add (f := _), map_one]
     ring
 
 section
@@ -117,7 +183,7 @@ theorem graded_comm (T Φ : Module.End 𝕜 V) (q : ℕ) (hq : q ≠ 0) (hT : Is
   set u : ℚ[X] := C (q : ℚ) + X * v with hu
   have h1 : Φ * T = aeval T (X * u) * Φ := by
     have h2 := congrArg (aeval T) hv
-    rw [map_pow, map_add, map_add, map_one, aeval_X] at h2
+    rw [map_pow, map_add (f := _), map_add (f := _), map_one, aeval_X] at h2
     rw [h2, mul_add, add_mul, _root_.mul_one, _root_.one_mul, add_comm Φ] at h
     exact add_right_cancel h
   have h2 : ∀ k : ℕ, Φ * T ^ k = aeval T ((X * u) ^ k) * Φ := by
@@ -148,7 +214,7 @@ theorem graded_comm (T Φ : Module.End 𝕜 V) (q : ℕ) (hq : q ≠ 0) (hT : Is
     rw [mul_pow, map_pow]
     linear_combination X ^ i * hw
   have := congrArg (fun f : Module.End 𝕜 V => f x) (h2 i)
-  simp only [Module.End.mul_apply, h4, map_add, map_mul, map_pow (aeval T) X, aeval_X, aeval_C,
+  simp only [Module.End.mul_apply, h4, map_add (f := _), map_mul, map_pow (aeval T) X, aeval_X, aeval_C,
     LinearMap.add_apply, h3, map_zero, add_zero] at this
   rw [this, LinearMap.smul_apply, LinearMap.map_smul_of_tower, Algebra.algebraMap_eq_smul_one]
   simp
@@ -191,7 +257,7 @@ theorem finrank_le_of_injective [FiniteDimensional 𝕜 V] (T f : Module.End �
       rintro ⟨_, x, rfl⟩
       exact h1 x)
   have hL : Function.Injective L := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨_, x, rfl⟩ hx
     exact Subtype.ext (h2 x (congrArg Subtype.val hx))
   have h5 := LinearMap.finrank_le_finrank_of_injective hL

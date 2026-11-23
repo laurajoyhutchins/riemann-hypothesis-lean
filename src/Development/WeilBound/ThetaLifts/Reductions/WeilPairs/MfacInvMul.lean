@@ -1,12 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ReindexDblIncM
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LagrInt
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.Mfac
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.DCdE
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.DiagonalLagrangianIntegralSiegelParabolicTransfoAlt
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.UnitCoef
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.IntegralMul
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.PrSingle
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.DCdE
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.DiagonalLagrangianIntegralSiegelParabolicTransfoAlt
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.PrSingle
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.UnitCoef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes MeasureTheory
 open GlobalTheory.WeilM GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels
@@ -31,12 +67,6 @@ theorem nrm_zero (σ : E →ₐ[F] E) {nS nT : ℕ} (JS : Matrix (Fin nS) (Fin n
     nrm σ JS JT ξ₀ ψ ν 𝓕 f 0 = ((‖GlobalTheory.LagrTheta.lagrInt ν 𝓕 (dC (AF F ⊗[F] E) nT) f‖ ^ 2 : ℝ) : ℂ) := by
   unfold nrm
   rw [Matrix.mul_zero, heisOF_zero, Complex.mul_conj, Complex.normSq_eq_norm_sq]
-
-theorem mfac_inv_mul {nT : ℕ} (nS : ℕ) (t : GL (Fin nT) (AF F ⊗[F] E)) :
-    mfac F E nS t⁻¹ * mfac F E nS t = 1 := by
-  unfold mfac
-  rw [← Real.mul_rpow (NNReal.coe_nonneg _) (NNReal.coe_nonneg _), ← NNReal.coe_mul, ← map_mul, ← map_mul, ← map_mul,
-    inv_mul_cancel, map_one, map_one, map_one, NNReal.coe_one, Real.one_rpow]
 
 theorem mfac_pos' {nT : ℕ} (nS : ℕ) (t : GL (Fin nT) (AF F ⊗[F] E)) : 0 < mfac F E nS t := by
   unfold mfac

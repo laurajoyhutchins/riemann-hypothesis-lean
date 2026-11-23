@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CechDoubleSt
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCechDSq
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCechDoubleStair
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CechDoubleSt
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCechDoubleStair
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PCechDSq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -18,8 +62,8 @@ section General
 
 variable {S : Type u} [CommRing S] {E : Type v} [AddCommGroup E] [Module S E] {m : ℕ} {U : Finset (Fin m)}
 
-variable (S E U) in
 
+variable (S E U) in
 abbrev dE (p : ℕ) : Cochain (fun _ : Cell U => E) p →ₗ[S] Cochain (fun _ : Cell U => E) (p + 1) :=
   Cech.d (fun _ : Cell U => E) (Cech.idRes S E U) p
 
@@ -95,17 +139,17 @@ section Double
 variable {S : Type u} [CommRing S] {E : Type v} [AddCommGroup E] [Module S E] {Ω : Type w} [Field Ω] {N r : ℕ}
   {x : Fin (N + 1) → Ω} {y : Fin (r + 1) → Ω}
 
-variable (E x y) in
 
+variable (E x y) in
 abbrev W (p q : ℕ) : Type v := Cochain (fun _ : Chart x => Cochain (fun _ : Chart y => E) q) p
 
-variable (S E x y) in
 
+variable (S E x y) in
 def vW (p q : ℕ) : W E x y p q →ₗ[S] W E x y (p + 1) q :=
   Cech.d (fun _ : Chart x => Cochain (fun _ : Chart y => E) q) (Cech.idRes S _ (support x)) p
 
-variable (S E x y) in
 
+variable (S E x y) in
 def hW (p q : ℕ) : W E x y p q →ₗ[S] W E x y p (q + 1) :=
   Cech.mapC (fun _ : Chart x => dE S E (support y) q) p
 
@@ -175,15 +219,24 @@ def dbl (hM₁ : ∀ (I I' : Chart x) (J : Chart y), I.1 ⊆ I'.1 → M I J ≤ 
 theorem dbl_good (hM₁ : ∀ (I I' : Chart x) (J : Chart y), I.1 ⊆ I'.1 → M I J ≤ M I' J)
     (hM₂ : ∀ (I : Chart x) (J J' : Chart y), J.1 ⊆ J'.1 → M I J ≤ M I J')
     (hA : ∀ I, Cech.AugExact S (M I) (Ax I)) (hB : ∀ J, Cech.AugExact S (fun I => M I J) (Bx J)) :
-    (dbl Ax Bx hM₁ hM₂ hA hB).Good where
-  ha p := LinearMap.ext fun s => Subtype.ext (funext fun I' => funext fun J => by
+    (dbl Ax Bx hM₁ hM₂ hA hB).Good := by
+  refine { ha := ?ha, hc := ?hc, ka := ?ka, ra := ?ra, rh := ?rh, kc := ?kc, rc := ?rc, rv := ?rv }
+  case ha =>
+    intro p
+    refine LinearMap.ext fun s => Subtype.ext (funext fun I' => funext fun J => ?_)
     change dE S E (support x) p s.1 I' = vW S E x y p 0 (fun I _ => s.1 I) I' J
-    rw [vW_apply])
-  hc _ := LinearMap.ext fun _ => rfl
-  ka p := LinearMap.ker_eq_bot'.mpr fun s hs => Subtype.ext (funext fun I =>
-    (hA I.1).2.1 _ (s.2 I (Set.mem_univ _)) fun J => congrFun (congrFun (congrArg Subtype.val hs) I) J)
-  ra p := by
-    ext f
+    rw [vW_apply]
+  case hc =>
+    intro q
+    exact LinearMap.ext fun _ => rfl
+  case ka =>
+    intro p
+    exact LinearMap.ker_eq_bot'.mpr fun s hs => Subtype.ext (funext fun I =>
+      (hA I.1).2.1 _ (s.2 I (Set.mem_univ _)) fun J => congrFun (congrFun (congrArg Subtype.val hs) I) J)
+  case ra =>
+    intro p
+    apply Submodule.ext
+    intro f
     rw [LinearMap.mem_ker, LinearMap.mem_range]
     constructor
     · intro hf
@@ -193,8 +246,10 @@ theorem dbl_good (hM₁ : ∀ (I I' : Chart x) (J : Chart y), I.1 ⊆ I'.1 → M
       exact ⟨⟨b, fun I _ => hb I⟩, Subtype.ext (funext fun I => funext fun J => (hbf I J).symm)⟩
     · rintro ⟨s, rfl⟩
       exact Subtype.ext (funext fun I => dE_const (s.1 I))
-  rh p q := by
-    ext f
+  case rh =>
+    intro p q
+    apply Submodule.ext
+    intro f
     rw [LinearMap.mem_ker, LinearMap.mem_range]
     constructor
     · intro hf
@@ -205,10 +260,14 @@ theorem dbl_good (hM₁ : ∀ (I I' : Chart x) (J : Chart y), I.1 ⊆ I'.1 → M
       exact ⟨⟨t, (mem_Dsub M).2 fun I J => ht I J (Set.mem_univ _)⟩, Subtype.ext (funext htf)⟩
     · rintro ⟨s, rfl⟩
       exact Subtype.ext (funext fun I => dE_dE q (s.1 I))
-  kc q := LinearMap.ker_eq_bot'.mpr fun t ht => Subtype.ext (funext fun J =>
-    (hB J.1).2.1 _ (t.2 J (Set.mem_univ _)) fun I => congrFun (congrFun (congrArg Subtype.val ht) I) J)
-  rc q := by
-    ext f
+  case kc =>
+    intro q
+    exact LinearMap.ker_eq_bot'.mpr fun t ht => Subtype.ext (funext fun J =>
+      (hB J.1).2.1 _ (t.2 J (Set.mem_univ _)) fun I => congrFun (congrFun (congrArg Subtype.val ht) I) J)
+  case rc =>
+    intro q
+    apply Submodule.ext
+    intro f
     rw [LinearMap.mem_ker, LinearMap.mem_range]
     constructor
     · intro hf
@@ -223,8 +282,10 @@ theorem dbl_good (hM₁ : ∀ (I I' : Chart x) (J : Chart y), I.1 ⊆ I'.1 → M
       change vW S E x y 0 q _ I' J = 0
       rw [vW_apply]
       exact congrFun (dE_const (t.1 J)) I'
-  rv p q := by
-    ext f
+  case rv =>
+    intro p q
+    apply Submodule.ext
+    intro f
     rw [LinearMap.mem_ker, LinearMap.mem_range]
     constructor
     · intro hf

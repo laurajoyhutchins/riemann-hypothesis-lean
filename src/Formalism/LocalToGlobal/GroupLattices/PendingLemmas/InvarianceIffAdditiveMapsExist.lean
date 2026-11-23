@@ -1,10 +1,50 @@
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SysC
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WittFractionToCoefficients
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ExistsCoprimePowEqOne
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.OrbitSumStabilizer
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesTrivial
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.CardFilterValLt
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SuccMulSuccSubOneDivSucc
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.InvarianceRepresentativesTrivial
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SuccMulSuccSubOneDivSucc
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.CoeffOneLNe
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.ConditionIffAdditiveMaps
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.CardFilterValLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,22 +92,6 @@ variable (X : Sys p) [IsFractionRing X.G.O X.G.Kf] (E : CEmbC X.G)
     (F : ∀ j, X.Lt j → X.Lt (j + 1) → MvPowerSeries (T × Fin ((X.Pj (j + 1)).m + 1) × Fin ((X.Pj j).m + 1)) ℂ_[p])
 
 abbrev pendT : Pend X := pendR X E.toCEmb hfin hst (beLT hLT) (thFOf X pos F)
-
-theorem adm6_pendT (D : Formalism.BasicNotions.D7) : Formalism.MainNotions.FormalGroupSystem.adm6 D X (pendT X E hfin hst hLT pos F) := up_down_adjoint D X _
-
-theorem invariance_of_stable_geometry (D : Formalism.BasicNotions.D7) :
-    letI := wittFractionAlgebraCp p
-    letI := algKfC E.toCEmb
-    StabGeo X ℂ_[p] hfin (thFOf X pos F) → KapStab X ℂ_[p] → Formalism.MainNotions.FormalGroupSystem.MinkowskiCounting D X (pendT X E hfin hst hLT pos F) := by
-  let _ := wittFractionAlgebraCp p
-  let _ := algKfC E.toCEmb
-  exact invariance_representatives X E.toCEmb hfin hst (beLT hLT) D (thFOf X pos F) (delEquivOn_GdC X ℂ_[p]) (vtIn_GdC X ℂ_[p])
-
-theorem invariance_of_trivial_stabilisers (D : Formalism.BasicNotions.D7) (hT : ∀ j c, (X.Lv.lev j c).TrivStab) :
-    Formalism.MainNotions.FormalGroupSystem.MinkowskiCounting D X (pendT X E hfin hst hLT pos F) := by
-  let _ := wittFractionAlgebraCp p
-  let _ := algKfC E.toCEmb
-  exact invariance_representatives_trivial X E.toCEmb hfin hst (beLT hLT) D (thFOf X pos F) hT (delEquivOn_GdC X ℂ_[p]) (vtIn_GdC X ℂ_[p])
 
 theorem invariance_iff_additive_maps_exist (D : Formalism.BasicNotions.D7) :
     Formalism.MainNotions.FormalGroupSystem.adm5 D X (pendT X E hfin hst hLT pos F) ↔

@@ -1,7 +1,51 @@
-import Formalism.LatticeSlopes.Statement
-import Formalism.LatticeSlopes.CovolAntiSameRank
-import Formalism.LatticeSlopes.LatticeSlopesProofs.DiscreteTopologyOfLe
-import Formalism.LatticeSlopes.LatticeSlopesProofs.CovolEqGram
+module
+
+public import Formalism.LatticeSlopes.CovolAntiSameRank
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module Submodule
 
@@ -93,6 +137,7 @@ theorem slopesBdd_of (hG : GramDetLe.{u, 0, 0}) : SlopesBdd.{u} := by
       ‖∑ j, c j • w j‖ ≤ (K : ℝ) * ‖∑ j, c j • (f j : E)‖ := by
     intro c
     have h1 : S (∑ j, c j • w j) = ∑ j, c j • (f j : E) := by
+
       simp only [map_sum, map_smul, hSw]
     rw [← h1]
     simpa [dist_eq_norm] using hK.le_mul_dist (∑ j, c j • w j) 0
@@ -105,6 +150,7 @@ theorem slopesBdd_of (hG : GramDetLe.{u, 0, 0}) : SlopesBdd.{u} := by
     intro c hc
     have h2 : ∑ j, c j • (f j : E) = 0 := by
       rw [← map_zero S, ← hc]
+
       simp only [map_sum, map_smul, hSw]
     exact Fintype.linearIndependent_iff.mp (linearIndependent_coe_basis' N f) c h2
   have hwpos : 0 < (Matrix.gram ℝ w).det := (Matrix.posDef_gram_of_linearIndependent hwli).det_pos
@@ -130,7 +176,7 @@ theorem slopesBdd_of (hG : GramDetLe.{u, 0, 0}) : SlopesBdd.{u} := by
     rw [Real.log_one, Real.log_mul (by positivity) hgpos.ne', Real.log_pow] at h1
     push_cast at h1
     linarith
-  have hcov : covol N = Real.sqrt g := by rw [covol, dif_pos hN]
+  have hcov : covol N = Real.sqrt g := by rw [covol, dite_eq_left hN]
   show -Real.log (covol N) / (Module.finrank ℤ N : ℝ) ≤ Real.log K
   rw [hcov, Real.log_sqrt hgpos.le, div_le_iff₀ hk]
   nlinarith

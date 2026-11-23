@@ -1,6 +1,49 @@
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GramFormPhiStatement
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PhiCMinima
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.ReducedBasis
+module
+
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GramFormPhiStatement
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PhiCMinima
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.ReducedBasis
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -39,7 +82,7 @@ def gramCore {ι : Type} [Fintype ι] (G : Matrix ι ι ℝ) (hG : G.PosDef) : I
     · have h := hG.dotProduct_mulVec_pos hx
       rw [star_trivial] at h
       exact h.le
-  add_left x y z := by simp only [map_add, add_dotProduct]
+  add_left x y z := by simp only [map_add (f := _), add_dotProduct]
   smul_left x y r := by simp only [map_smul, smul_dotProduct, conj_trivial, smul_eq_mul]
   definite x h := by
     by_contra hx
@@ -144,8 +187,9 @@ theorem gram_form_phi_holds : GramFormPhiStatement := by
         intro k
         have h1 := congrFun hc (e k)
         simp only [Mz, mulVec, dotProduct, Matrix.of_apply, Equiv.symm_apply_apply, Pi.zero_apply] at h1
+
         simp only [map_sum, map_zsmul, Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.smul_apply,
-          smul_eq_mul, map_zero, Finsupp.coe_zero, Pi.zero_apply]
+        smul_eq_mul, map_zero, Finsupp.coe_zero, Pi.zero_apply]
         rw [← h1]
         exact Finset.sum_congr rfl fun i _ => mul_comm _ _
       funext i
@@ -160,8 +204,9 @@ theorem gram_form_phi_holds : GramFormPhiStatement := by
         exact hi (congrFun h i)
       · funext a
         have h1 := congrArg (fun x => ((toG ι).symm x) (e.symm a)) hg
+
         simp only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, hψ_apply, map_zero,
-          Pi.zero_apply, ψ0, LinearMap.coe_mk, AddHom.coe_mk] at h1
+        Pi.zero_apply, ψ0, LinearMap.coe_mk, AddHom.coe_mk] at h1
         simp only [mulVec, dotProduct, RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.of_apply, Mz,
           eq_intCast, Pi.zero_apply]
         rw [← h1]

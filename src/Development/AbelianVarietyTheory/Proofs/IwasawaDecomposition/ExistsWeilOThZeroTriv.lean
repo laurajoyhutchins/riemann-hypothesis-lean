@@ -1,9 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.KernelLattices.LateralTheory
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodLatticeSesquilinearFormIsHerm
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardPairLatticeLocallyOrthonormalBasis
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsWeilOfVacuum
+module
+
+public import Formalism.LocalToGlobal.KernelLattices.LateralTheory
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardPairLatticeLocallyOrthonormalBasis
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodLatticeSesquilinearFormIsHerm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.HasSumLocallyUniformlyWeierstrassZetaExcept
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +68,9 @@ theorem kappa_ne_zero {γ₀ : IsoK D} (k : KapChoice γ₀) : k.kappa ≠ 0 := 
     have h2 := k.pi_gen p p.2.1 p.2.2
     rw [h, Ideal.span_singleton_zero] at h2
     exact pow_ne_zero _ (k.pp p).ne_bot h2
-  have hE : (((k.pi p : 𝓞 D.host.K) : D.host.K) : D.host.E) ≠ 0 := by simpa using hpi
+  have hE : (((k.pi p : 𝓞 D.host.K) : D.host.K) : D.host.E) ≠ 0 := by
+    set_option synthInstance.maxHeartbeats 200000 in
+      simpa using hpi
   rw [h0, zero_pow (mul_ne_zero two_ne_zero (classNumber_ne_zero _))] at h1
   exact div_ne_zero ((map_ne_zero _).2 hE) ((map_ne_zero _).2 ((map_ne_zero _).2 hE)) h1.symm
 
@@ -34,12 +78,6 @@ theorem thMM_spec (B : Base D cc δ) (h : B.StdOK) : B.IsThMM B.thMM ∧ B.thMM 
   obtain ⟨e, u⟩ := ThetaVec.thetaVector _ _ _ _ _ _ _ _ h _ (kappa_ne_zero B.kc)
   have h1 : B.IsThMM B.thMM := Classical.epsilon_spec (p := IsThM B.L B.ω₀ B.cq B.lamM B.gC B.kappa) e
   exact ⟨h1, (u _ h1.1 h1.2).1⟩
-
-theorem thZero_ne_zero (B : Base D cc δ) (h : B.StdOK) (N N' : ℕ) : B.thZero N N' ≠ 0 := by
-  obtain ⟨a, ha⟩ := Function.ne_iff.1 (thMM_spec B h).2
-  refine Function.ne_iff.2 ⟨fun τ _ _ => a τ, ?_⟩
-  show ∏ _i : Fin N', ∏ _j : Fin N, B.thMM a ≠ 0
-  exact Finset.prod_ne_zero_iff.2 fun _ _ => Finset.prod_ne_zero_iff.2 fun _ _ => ha
 
 theorem areaOK (B : Base D cc δ) : B.AreaOK := by
   rw [Base.AreaOK, ThetaVec.area_eq]
@@ -101,16 +139,6 @@ theorem thZero_mem (B : Base D cc δ) (h : B.StdOK) (N N' : ℕ) :
     simp only [Base.thZero, tensPow, Finset.mul_sum, Finset.sum_div, ← Finset.sum_sub_distrib, Complex.exp_sum,
       ← Finset.prod_mul_distrib]
     exact Finset.prod_congr rfl fun i _ => Finset.prod_congr rfl fun j _ => hθ.2 _ (hx' i j) fun τ => z τ i j
-
-def trivChar (D : D7) {N : ℕ} (hN : Even N) : HeckeU D N where
-  f := 1
-  n := fun _ => 0
-  unitary := fun _ => by simp
-  cont := ⟨1, one_pos, fun _ _ _ => rfl⟩
-  aut := fun _ => by simp
-  norm := fun _ => rfl
-  par := fun _ => by simpa using hN
-  unr := fun _ _ _ => rfl
 
 end WeilVac
 

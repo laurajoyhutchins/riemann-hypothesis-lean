@@ -1,13 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormLeIncInf
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalCompactOneParameterLinesOfLieLines
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ProductFormulaHaar.TrSumOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LinHasTemperateGrowth
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdaptedPlaneModelRestrictionCompatible
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanAdeleCMPrescribedEmbeddingValue
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalCompactOneParameterLinesOfLieLines
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OneVectorCcOfSiegelWeil
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ProductFormulaHaar.TrSumOf
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NormLeIncInf
+
+@[expose] public section
+
 open scoped TensorProduct Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 open GlobalTheory.WeilM GlobalTheory.AdelicU GlobalTheory.LFun GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels GlobalTheory.ThK
@@ -19,15 +58,6 @@ noncomputable section
 namespace GlobalTheory.ThK.EvAt0.PlaneQ
 
 section Complex
-
-def qLoc {n : ℕ} (k : ℝ) (J θ : Matrix (Fin n) (Fin n) ℂ) : LinearMap.BilinForm ℝ (Fin n → ℂ) :=
-  LinearMap.mk₂ ℝ (fun s t => 2 * k * (s ⬝ᵥ J *ᵥ star (θ *ᵥ t)).re)
-    (fun s s' t => by rw [add_dotProduct, Complex.add_re]; ring)
-    (fun c s t => by rw [smul_dotProduct, Complex.smul_re, smul_eq_mul, smul_eq_mul]; ring)
-    (fun s t t' => by rw [Matrix.mulVec_add, star_add, Matrix.mulVec_add, dotProduct_add, Complex.add_re]; ring)
-    (fun c s t => by
-      rw [Matrix.mulVec_smul, star_smul, Matrix.mulVec_smul, dotProduct_smul, Complex.smul_re, smul_eq_mul, smul_eq_mul,
-        star_trivial]; ring)
 
 end Complex
 
@@ -72,20 +102,9 @@ theorem rho_trace [IsTotallyReal F] {σ : E →ₐ[F] E} (hCM : IsCMExt F E σ) 
   have h1 : z + cA σ z = algebraMap (AF F) (AE F E) (Algebra.trace (AF F) (AE F E) z) :=
     GlobalTheory.GaussMean.OneVec.add_sigR (AF F) hCM z
   have h2 := congrArg (fun y => (piInf τ y).re) h1
-  simp only [map_add, piInf_cA hCM, piInf_algebraMap, Complex.ofReal_re, Complex.add_re] at h2
+  simp only [map_add (f := _), piInf_cA hCM, piInf_algebraMap, Complex.ofReal_re, Complex.add_re] at h2
   rw [← h2]
   simp [two_mul]
-
-def phi [IsTotallyReal F] (h2 : Module.finrank F E = 2) {n : ℕ} {w : InfinitePlace F} (τ : EmbOver E w) :
-    (Fin n × Fin 2 → mixedEmbedding.mixedSpace F) →ₗ[ℝ] (Fin n → ℂ) where
-  toFun t i := ∑ r, ((rho w (t (i, r)) : ℝ) : ℂ) * piInf τ (tb F E h2 r)
-  map_add' t t' := by
-    funext i
-    simp only [Pi.add_apply, map_add, Complex.ofReal_add, add_mul, Finset.sum_add_distrib]
-  map_smul' c t := by
-    funext i
-    simp only [Pi.smul_apply, map_smul, smul_eq_mul, Complex.ofReal_mul, RingHom.id_apply, Complex.real_smul,
-      Finset.mul_sum, mul_assoc]
 
 end Adelic
 

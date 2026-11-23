@@ -1,8 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.Multiplier
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsHomogeneousCompIdeal
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.Reframe
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsLocalRingTrivSqZeroExt
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.EvaluationLawsGenericFramesAtlasHold
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.GenFrExAndGenFromTest
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+public import Development.AbelianVarietyTheory.Definitions.RegularCharts.ModelAt
+import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.IndefiniteTreeX
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -15,6 +57,8 @@ open scoped ENNReal
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E} {Dw : Datum H}
   {l : Level H} {Xo : Moduli Dw l} {c : Coeff l}
 
+attribute [local instance 1100] Subalgebra.algebra in
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem fChart_exists_val {h : GenFrEx Xo c} (C : Reg.FChart h) {e : Formalism.L2.Pj.Ix Dw → ℤ} {f : Rul Xo c}
     (hf : f ∈ secZ Xo c e) : ∃ b : C.R, (b : Om C.Z) = ((∏ i, C.t i ^ e i : (Om C.Z)ˣ) : Om C.Z) * genVal C.Z f ∧
       ∀ (S : Type) [CommRing S] [Algebra c.F S] (ψ : C.R →ₐ[c.F] S) (z : FrPt Xo c S), FrMap ψ C.y z →
@@ -32,6 +76,8 @@ theorem genVal_idem_self (Z : Comp Xo c) : genVal Z (idem Z) = 1 := by
   rw [genVal_apply h, evC]
   exact evR_idem (liesOn_genFr h Z) (fromTest_of_isLocalRing _)
 
+attribute [local instance 1100] Subalgebra.algebra in
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem fChart_evR_idem {h : GenFrEx Xo c} (C : Reg.FChart h) {S : Type} [CommRing S] [Algebra c.F S]
     {ψ : C.R →ₐ[c.F] S} {z : FrPt Xo c S} (hz : FrMap ψ C.y z) : evR Xo c (idem C.Z) z = 1 := by
   obtain ⟨b, hb, hb'⟩ := fChart_exists_val C (idem_mem_secZ C.Z)
@@ -45,6 +91,7 @@ theorem exists_fChart (h : GenFrEx Xo c) (Z : Comp Xo c) : ∃ C : Reg.FChart h,
   rw [evR_frBor (idem_mem_secZ C.Z) hb, fChart_evR_idem C hz] at h1
   simp at h1
 
+attribute [local instance 100] IntermediateField.instAlgebraSubtypeMem in
 theorem exists_chart_read_at_frames : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) (r : ℕ) (σ : c.F →+* ℂ) (U : Unf Xo c σ r), IsUnf U → ∀ Z : Comp Xo c, ∃ (R : Subalgebra c.F (Om Z)) (_ : Algebra.FiniteType c.F R) (t : Formalism.L2.Pj.Ix Dw → (Om Z)ˣ), (∀ (e : Formalism.L2.Pj.Ix Dw → ℤ), ∀ f ∈ secZ Xo c e, ((∏ i, t i ^ e i : (Om Z)ˣ) : Om Z) * genVal Z f ∈ R) ∧ ∀ φ : R →+* ℂ, φ.comp (algebraMap c.F R) = σ → ∃ z ∈ framesOn U Z, ∃ s : Formalism.L2.Pj.Ix Dw → ℂˣ, ∀ (e : Formalism.L2.Pj.Ix Dw → ℤ), ∀ f ∈ secZ Xo c e, ∀ b : R, (b : Om Z) = ((∏ i, t i ^ e i : (Om Z)ˣ) : Om Z) * genVal Z f → φ b = ((∏ i, s i ^ e i : ℂˣ) : ℂ) * rdU U f z.1 z.2 := by
   intro E _ _ _ H Dw l Xo c r σ U hU Z
   have h : GenFrEx Xo c := (Reg.genFrEx_and_genFromTest E H Dw l Xo c).1

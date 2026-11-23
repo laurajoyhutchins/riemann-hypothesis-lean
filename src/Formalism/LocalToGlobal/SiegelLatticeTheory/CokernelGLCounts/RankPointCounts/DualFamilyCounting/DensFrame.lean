@@ -1,9 +1,62 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.LocGlobInt
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SecondFlagXsLeBigBlock
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocFacts
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.CntNotInt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PairCorankPositivity.EqZeroOfMulVec
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SecondFlagXsLeBigBlock
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NotIntDensOfSteps
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocFacts
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.PerpendicularDefinitionHolds
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.DApprox
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.LGSmall
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.NGCong
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.NGDiff
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.RingInverseAlgebraMap
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.T2SpaceOfNonarchimedeanLocalField
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.TrDual
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PairCorankPositivity.EqZeroOfMulVec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountNonIntegrality.FrIntGOfDelta
+
+@[expose] public section
 
 open NumberField Module Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.CntLocal
 open Classical ValuativeRel
@@ -40,7 +93,7 @@ theorem localLattice_span₂ (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF
     · rw [map_zero]
       exact zero_mem _
     · intro y z _ _ hy hz
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hy hz
     · intro o y _ hy
       rw [bc_smulO]
@@ -53,7 +106,7 @@ theorem localLattice_sup (L : LocSp D M) (p : PlF D) (A B : Submodule (𝓞 D.ho
   · rw [lattice₂, Submodule.span_le]
     rintro _ ⟨x, hx, rfl⟩
     obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hx
-    rw [map_add]
+    rw [map_add (f := _)]
     exact add_mem (Submodule.mem_sup_left (Submodule.subset_span ⟨a, ha, rfl⟩))
       (Submodule.mem_sup_right (Submodule.subset_span ⟨b, hb, rfl⟩))
   · exact sup_le (Submodule.span_mono (Set.image_mono (SetLike.coe_subset_coe.2 (le_sup_left : A ≤ A ⊔ B))))
@@ -275,20 +328,16 @@ end Scal
 
 section Span
 
-theorem smul_mem_O {p : PlF D} {V : Type} [AddCommGroup V] [Module (D.s.atP p).Ep V]
-    {S : Submodule (M p).L.O V} {c : (D.s.atP p).Ep} (hc : c ∈ (M p).L.O) {v : V} (hv : v ∈ S) : c • v ∈ S := by
-  exact S.smul_mem ⟨c, hc⟩ hv
-
 theorem frame_g_zero_inl (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (a : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (a : Fin (D.R.rS + 1)) :
     g0 L δ p F0 F' (Sum.inl a) = frFac δ p a • L.bc p (F0.fvec a) := rfl
 
 theorem frame_g_zero_inr (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (a : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (a : Fin (D.R.rS + 1)) :
     g0 L δ p F0 F' (Sum.inr a) = frFac δ p a • L.bc p (F'.fl.fvec a) := rfl
 
 theorem locFam_none (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (hs : (M p).split = none) : locFam L δ p F0 F' = g0 L δ p F0 F' := by
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (hs : (M p).split = none) : locFam L δ p F0 F' = g0 L δ p F0 F' := by
   simp only [locFam, hs]
 
 theorem amat_inl (p : PlF D) (g : Loc.SplitG (M p).L) {V : Type} [AddCommGroup V] [Module (D.s.atP p).Ep V]
@@ -325,13 +374,13 @@ theorem amat_inr (p : PlF D) (g : Loc.SplitG (M p).L) {V : Type} [AddCommGroup V
   abel
 
 theorem locFam_some_inl (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) (a : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) (a : Fin (D.R.rS + 1)) :
     locFam L δ p F0 F' (Sum.inl a) = g0 L δ p F0 F' (Sum.inl a) := by
   simp only [locFam, hs]
   exact amat_inl p g _ a
 
 theorem locFam_some_inr (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) (a : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) (a : Fin (D.R.rS + 1)) :
     locFam L δ p F0 F' (Sum.inr a) = algebraMap (D.s.atP p).Fp (D.s.atP p).Ep ((g.q : (D.s.atP p).Fp)⁻¹) •
       (g0 L δ p F0 F' (Sum.inr a) - g0 L δ p F0 F' (Sum.inl a)) := by
   simp only [locFam, hs]
@@ -344,7 +393,7 @@ section SpanMain
 theorem fvec_cast {T : D.host.E} (F : FlagG (VS D) D.R.rS T) (a : Fin D.R.rS) : F.fvec a.castSucc = F.e a := by
   simp [FlagG.fvec]
 
-def NG (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+def NG (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     Submodule (M p).L.O (L.V p) :=
   Submodule.span (M p).L.O (L.bc p '' (Set.range F0.fvec ∪
     Set.range fun b => (((Lat.gS D : ℕ) : D.host.E))⁻¹ • (F'.fl.fvec b - F0.fvec b)))
@@ -353,9 +402,9 @@ def NX (δ : ∀ p : PlF D, (D.s.atP p).Fp) (L : LocSp D M) (p : PlF D) {T : D.h
     Submodule (M p).L.O (L.V p) :=
   Submodule.span (M p).L.O (Set.range fun a : Fin D.R.rS => frFac δ p a.castSucc • L.bc p (F.e a))
 
-set_option maxHeartbeats 1000000 in
+
 theorem latP_MMof (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     lattice₂ L p (MMof D F0 F') = NG L p F0 F' ⊔ NX δ L p F0 ⊔ NX δ L p F'.fl := by
   have e1 : lattice₂ L p (MMg D F0 F') = NG L p F0 F' := by
     unfold MMg NG; exact localLattice_span₂ hA L p _
@@ -365,13 +414,13 @@ theorem latP_MMof (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' :
   exact congrArg₂ (· ⊔ ·) (congrArg₂ (· ⊔ ·) e1 e2) e3
 
 theorem hf'_eq (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (b : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (b : Fin (D.R.rS + 1)) :
     L.bc p (F'.fl.fvec b) - L.bc p (F0.fvec b) = (D.s.atP p).ιE ((Lat.gS D : ℕ) : D.host.E) •
       L.bc p ((((Lat.gS D : ℕ) : D.host.E))⁻¹ • (F'.fl.fvec b - F0.fvec b)) := by
   rw [L.bc_smul, smul_smul, ← map_mul, mul_inv_cancel₀ gS_ne, map_one, one_smul, map_sub]
 
 theorem hd_eq (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (b : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (b : Fin (D.R.rS + 1)) :
     L.bc p ((((Lat.gS D : ℕ) : D.host.E))⁻¹ • (F'.fl.fvec b - F0.fvec b)) =
       (D.s.atP p).ιE (((Lat.gS D : ℕ) : D.host.E))⁻¹ • (L.bc p (F'.fl.fvec b) - L.bc p (F0.fvec b)) := by
   rw [L.bc_smul, map_sub]
@@ -381,14 +430,14 @@ theorem gS_mem_O (p : PlF D) : (D.s.atP p).ιE ((Lat.gS D : ℕ) : D.host.E) ∈
   exact natCast_mem _ _
 
 theorem mem_NG_f (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (a : Fin (D.R.rS + 1)) : L.bc p (F0.fvec a) ∈ NG L p F0 F' := Submodule.subset_span ⟨F0.fvec a, Or.inl ⟨a, rfl⟩, rfl⟩
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (a : Fin (D.R.rS + 1)) : L.bc p (F0.fvec a) ∈ NG L p F0 F' := Submodule.subset_span ⟨F0.fvec a, Or.inl ⟨a, rfl⟩, rfl⟩
 
 theorem mem_NG_d (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (b : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (b : Fin (D.R.rS + 1)) :
     L.bc p ((((Lat.gS D : ℕ) : D.host.E))⁻¹ • (F'.fl.fvec b - F0.fvec b)) ∈ NG L p F0 F' := Submodule.subset_span ⟨_, Or.inr ⟨b, rfl⟩, rfl⟩
 
 theorem mem_NG_f' (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (b : Fin (D.R.rS + 1)) : L.bc p (F'.fl.fvec b) ∈ NG L p F0 F' := by
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (b : Fin (D.R.rS + 1)) : L.bc p (F'.fl.fvec b) ∈ NG L p F0 F' := by
   have h := hf'_eq L p F0 F' b
   have e : L.bc p (F'.fl.fvec b) = L.bc p (F0.fvec b) + (D.s.atP p).ιE ((Lat.gS D : ℕ) : D.host.E) •
       L.bc p ((((Lat.gS D : ℕ) : D.host.E))⁻¹ • (F'.fl.fvec b - F0.fvec b)) := by
@@ -401,7 +450,7 @@ theorem mem_NX (L : LocSp D M) (p : PlF D) {T : D.host.E} (F : FlagG (VS D) D.R.
     frFac δ p a.castSucc • L.bc p (F.e a) ∈ NX δ L p F := Submodule.subset_span ⟨a, rfl⟩
 
 theorem locFam_inl (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T)
-    (F' : LFlag (VS D) D.R.rS T') (a : Fin (D.R.rS + 1)) :
+    (F' : LFlag (D.sp.Y 0) D.R.rS T') (a : Fin (D.R.rS + 1)) :
     locFam L δ p F0 F' (Sum.inl a) = frFac δ p a • L.bc p (F0.fvec a) := by
   rcases h : (M p).split with _ | g
   · rw [locFam_none L p F0 F' h]
@@ -410,15 +459,15 @@ theorem locFam_inl (L : LocSp D M) (p : PlF D) {T T' : D.host.E} (F0 : FlagG (VS
     exact frame_g_zero_inl L p F0 F' a
 
 theorem bc_f_eq (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') (a : Fin (D.R.rS + 1)) :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') (a : Fin (D.R.rS + 1)) :
     ∃ w ∈ (M p).L.O, L.bc p (F0.fvec a) = w • locFam L δ p F0 F' (Sum.inl a) := by
   obtain ⟨w, hw, hw1⟩ := phi_inv_mem hA p a
   exact ⟨w, hw, by rw [locFam_inl, smul_smul, hw1, one_smul]⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem span_le_none (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') (hs : (M p).split = none) :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') (hs : (M p).split = none) :
     Submodule.span (M p).L.O (Set.range (locFam L δ p F0 F')) ≤ NG L p F0 F' ⊔ NX δ L p F0 ⊔ NX δ L p F'.fl := by
   have hlast : frFac δ p (Fin.last D.R.rS) = 1 := by simp [frFac]
   rw [Submodule.span_le]
@@ -442,10 +491,10 @@ theorem span_le_none (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T
       rw [fvec_cast]
       exact Submodule.mem_sup_right (mem_NX L p F'.fl b)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem le_span_none (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') (hs : (M p).split = none) :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') (hs : (M p).split = none) :
     NG L p F0 F' ⊔ NX δ L p F0 ⊔ NX δ L p F'.fl ≤ Submodule.span (M p).L.O (Set.range (locFam L δ p F0 F')) := by
   have hF0 : ∀ b, L.bc p (F0.fvec b) ∈ Submodule.span (M p).L.O (Set.range (locFam L δ p F0 F')) := by
     intro b
@@ -486,10 +535,10 @@ end SpanMain
 
 section SpanG
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem span_le_some (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) :
     Submodule.span (M p).L.O (Set.range (locFam L δ p F0 F')) ≤ NG L p F0 F' ⊔ NX δ L p F0 ⊔ NX δ L p F'.fl := by
   have hlast : frFac δ p (Fin.last D.R.rS) = 1 := by simp [frFac]
   rw [Submodule.span_le]
@@ -510,10 +559,10 @@ theorem span_le_some (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T
     exact Submodule.mem_sup_left (Submodule.mem_sup_left
       (Submodule.smul_mem _ (⟨_, hc⟩ : (M p).L.O) (mem_NG_d L p F0 F' a)))
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem le_span_some (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') {g : Loc.SplitG (M p).L} (hs : (M p).split = some g) :
     NG L p F0 F' ⊔ NX δ L p F0 ⊔ NX δ L p F'.fl ≤ Submodule.span (M p).L.O (Set.range (locFam L δ p F0 F')) := by
   have hq0 : (g.q : (D.s.atP p).Fp) ≠ 0 := by
     intro h
@@ -566,7 +615,7 @@ theorem le_span_some (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T
       (Submodule.subset_span ⟨_, rfl⟩)
 
 theorem span_locFam (hA : ∀ p, Agree δ M p) (L : LocSp D M) (p : PlF D) {T T' : D.host.E}
-    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T') :
+    (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T') :
     Submodule.span (M p).L.O (Set.range (locFam L δ p F0 F')) = lattice₂ L p (MMof D F0 F') := by
   rw [latP_MMof hA]
   rcases h : (M p).split with _ | g
@@ -673,7 +722,7 @@ end Indep
 
 section Final
 
-theorem ga_det_ne {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS D) D.R.rS T')
+theorem ga_det_ne {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (D.sp.Y 0) D.R.rS T')
     (hG : Gflag F0 F'.fl ≠ 0) (hC : IsCompl (UPair D F0 F') (orthK (VS D).hT (UPair D F0 F'))) :
     (Ga T T' (ZhatL (lf D F0) F')).det ≠ 0 := by
   intro h0
@@ -688,6 +737,7 @@ theorem ga_det_ne {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS
   have hperp : ∀ a, (VS D).hT (vfam F0 F' a) w = 0 := fun a => by
     have := congrFun hc a
     simp only [Matrix.mulVec, dotProduct, Matrix.of_apply, Pi.zero_apply, brS] at this
+
     rw [hw, map_sum]
     simp only [map_smul, smul_eq_mul]
     rw [← this]; exact Finset.sum_congr rfl fun b _ => mul_comm _ _
@@ -700,7 +750,7 @@ theorem ga_det_ne {T T' : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (F' : LFlag (VS
       · exact hperp (Sum.inl a)
       · exact hperp (Sum.inr a)
     | zero => simp
-    | add y z _ _ hy hz => rw [map_add, LinearMap.add_apply, hy, hz, add_zero]
+    | add y z _ _ hy hz => rw [map_add (f := _), LinearMap.add_apply, hy, hz, add_zero]
     | smul s y _ hy => rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hy, smul_zero]
   have hw0 : w = 0 := by
     have := hC.disjoint

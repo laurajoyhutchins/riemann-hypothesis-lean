@@ -1,5 +1,54 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.PolarizationBihomogeneous
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaMain
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaRight
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.KappaMain
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PolynomialDifferentialWords.PolarizationBihomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial Finsupp
 
@@ -47,7 +96,7 @@ theorem bihom_zero_const (g : Pol K k) (hg : g ∈ Bihom K k 0) : ∃ r : K, g =
   have hg' : g ∈ weightedHomogeneousSubmodule K (wx k) 0 ⊓ weightedHomogeneousSubmodule K (wxi k) 0 := hg
   obtain ⟨h1, h2⟩ := Submodule.mem_inf.1 hg'
   rw [mem_weightedHomogeneousSubmodule] at h1 h2
-  refine ⟨coeff 0 g, ?_⟩
+  refine ⟨AddMonoidAlgebra.coeff g 0, ?_⟩
   ext m
   rw [coeff_C]
   split_ifs with hm
@@ -65,9 +114,11 @@ theorem bihom_zero_const (g : Pol K k) (hg : g ∈ Bihom K k 0) : ∃ r : K, g =
     · have h3 := (Finset.sum_eq_zero_iff.1 e2) i (Finset.mem_univ i)
       simp [h3]
 
-theorem bihom_le_Sc : ∀ c, c ≤ d → Bihom K k c ≤ Sc K k d c
-  | 0, _ => by
-    intro g hg
+theorem bihom_le_Sc : ∀ c, c ≤ d → Bihom K k c ≤ Sc K k d c := by
+  intro c
+  induction c with
+  | zero =>
+    intro _ g hg
     obtain ⟨r, rfl⟩ := bihom_zero_const K k g hg
     rw [mem_Sc]
     refine ⟨(r * (d.factorial : K)) • 1, Submodule.smul_mem _ _
@@ -75,8 +126,9 @@ theorem bihom_le_Sc : ∀ c, c ≤ d → Bihom K k c ≤ Sc K k d c
     rw [map_smul, symbolMapOne, smul_smul, mul_assoc,
       mul_inv_cancel₀ (Nat.cast_ne_zero.2 (Nat.factorial_ne_zero d)), mul_one, Nat.sub_zero,
       smul_eq_C_mul, mul_comm]
-  | c + 1, hc => by
-    have IH := bihom_le_Sc c (by omega)
+  | succ c ih =>
+    intro hc
+    have IH := ih (by omega)
     obtain ⟨n, hn⟩ : ∃ n, d - c = n + 1 := ⟨d - c - 1, by omega⟩
     have hn2 : d - (c + 1) = n := by omega
     intro g hg
@@ -86,10 +138,10 @@ theorem bihom_le_Sc : ∀ c, c ≤ d → Bihom K k c ≤ Sc K k d c
     rw [as_sum g]
     apply Submodule.sum_mem
     intro m hmS
-    have hne : coeff m g ≠ 0 := MvPolynomial.mem_support_iff.1 hmS
+    have hne : AddMonoidAlgebra.coeff g m ≠ 0 := MvPolynomial.mem_support_iff.1 hmS
     have hw1 := hg'.1 hne
     have hw2 := hg'.2 hne
-    rw [show monomial m (coeff m g) = coeff m g • monomial m (1 : K) by rw [smul_monomial, smul_eq_mul, mul_one]]
+    rw [show monomial m (AddMonoidAlgebra.coeff g m) = AddMonoidAlgebra.coeff g m • monomial m (1 : K) by rw [smul_monomial, smul_eq_mul, mul_one]]
     apply Submodule.smul_mem
 
     rw [wtXSum] at hw1
@@ -118,14 +170,14 @@ theorem bihom_le_Sc : ∀ c, c ≤ d → Bihom K k c ≤ Sc K k d c
       abel
     have hw1' : weight (wx k) m' = c := by
       have := hw1
-      rw [← wtXSum, map_add, map_add, weight_single, weight_single] at this
+      rw [← wtXSum, map_add (f := _), map_add (f := _), weight_single, weight_single] at this
       have e1 : wx k (Sum.inl a) = 1 := rfl
       have e2 : wx k (Sum.inr b) = 0 := rfl
       rw [e1, e2, smul_eq_mul, smul_eq_mul] at this
       omega
     have hw2' : weight (wxi k) m' = c := by
       have := hw2
-      rw [← wtXiSum, map_add, map_add, weight_single, weight_single] at this
+      rw [← wtXiSum, map_add (f := _), map_add (f := _), weight_single, weight_single] at this
       have e1 : wxi k (Sum.inl a) = 0 := rfl
       have e2 : wxi k (Sum.inr b) = 1 := rfl
       rw [e1, e2, smul_eq_mul, smul_eq_mul] at this

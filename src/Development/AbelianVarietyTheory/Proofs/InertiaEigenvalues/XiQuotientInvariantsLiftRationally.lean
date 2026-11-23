@@ -1,13 +1,62 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalSituation
-import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamFilQuotientXiPowerAinf
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodData
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankCyclotomicExtAndCyclotomicCharSurjective
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
-import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+module
+
+import Formalism.SharpRestriction.LevelLetterCocycles.LocalTheoremOfUnramifiedLifting
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExpStar
+public import Mathlib.Algebra.Lie.OfAssociative
+public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicCharacterPadicBasicProperties
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DeRhamFilQuotientXiPowerAinf
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FinrankCyclotomicExtAndCyclotomicCharSurjective
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodData
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +82,7 @@ theorem sum_co (x : T ⊗[R] M) : ∑ k, b k ⊗ₜ[R] co b k x = x := by
   | tmul t m =>
     simp only [co_tmul, ← smul_tmul]
     rw [← sum_tmul, b.sum_repr]
-  | add x y hx hy => simp only [map_add, tmul_add, Finset.sum_add_distrib, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), tmul_add, Finset.sum_add_distrib, hx, hy]
 
 theorem mem_range_iff (S : Submodule R M) (x : T ⊗[R] M) :
     x ∈ LinearMap.range (LinearMap.lTensor T S.subtype) ↔ ∀ k, co b k x ∈ S := by
@@ -44,12 +93,13 @@ theorem mem_range_iff (S : Submodule R M) (x : T ⊗[R] M) :
     | tmul t m =>
       rw [LinearMap.lTensor_tmul, co_tmul]
       exact S.smul_mem _ m.2
-    | add x y hx hy => rw [map_add, map_add]; exact S.add_mem hx hy
+    | add x y hx hy => simpa only [map_add] using S.add_mem hx hy
   · intro h
     rw [← sum_co b x]
     exact Submodule.sum_mem _ fun k _ => ⟨b k ⊗ₜ[R] ⟨_, h k⟩, rfl⟩
 
 theorem co_sum [DecidableEq ι] (m : ι → M) (k : ι) : co b k (∑ j, b j ⊗ₜ[R] m j) = m k := by
+
   simp [map_sum, co_tmul, Finsupp.single_apply]
 
 end Coord
@@ -63,7 +113,7 @@ def Phi (i : T →+ V) (hi : ∀ (c : R) t, i (c • t) = algebraMap R F c • i
     (hβ : ∀ (c : R) m, β (c • m) = algebraMap R F c • β m) : T ⊗[R] M →+ V ⊗[F] B :=
   TensorProduct.liftAddHom
     (AddMonoidHom.mk' (fun t => AddMonoidHom.mk' (fun m => i t ⊗ₜ[F] β m)
-      (fun m m' => by rw [map_add, tmul_add]))
+      (fun m m' => by rw [map_add (f := _), tmul_add]))
       (fun t t' => by ext m; simp [add_tmul]))
     (fun c t m => by simp [hi, hβ, smul_tmul])
 
@@ -78,6 +128,7 @@ theorem co_Phi {ι : Type} [Fintype ι] (bT : Basis ι R T) (bV : Basis ι F V)
     (x : T ⊗[R] M) (k : ι) : co bV k (Phi i hi β hβ x) = β (co bT k x) := by
   classical
   conv_lhs => rw [← sum_co bT x]
+
   rw [map_sum]
   simp only [Phi_tmul, hb]
   exact co_sum bV _ k
@@ -115,13 +166,13 @@ theorem core {ι : Type} [Fintype ι] (bT : Basis ι R T) (bV : Basis ι F V)
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul t m => simp only [hΦ, map_tmul, Phi_tmul, hiρ, hβρ]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   have hsm : ∀ (c : R) x, Φ (c • x) = algebraMap R F c • Φ x := by
     intro c x
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul t m => rw [smul_tmul', hΦ, Phi_tmul, Phi_tmul, hi, smul_tmul']
-    | add x y hx hy => simp only [smul_add, map_add, hx, hy]
+    | add x y hx hy => simp only [smul_add, map_add (f := _), hx, hy]
   have hq : ∀ (N : Submodule R M) (q : G → (M ⧸ N) →ₗ[R] (M ⧸ N)),
       (∀ g m, q g (Submodule.Quotient.mk m) = Submodule.Quotient.mk (ρM g m)) → ∀ g x,
       TensorProduct.map (ρT g) (q g) (LinearMap.lTensor T N.mkQ x) =
@@ -130,7 +181,7 @@ theorem core {ι : Type} [Fintype ι] (bT : Basis ι R T) (bV : Basis ι F V)
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul t m => simp [h]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    | add x y hx hy => simp only [map_add (f := _), hx, hy]
   obtain ⟨z', rfl⟩ := LinearMap.lTensor_surjective T Ne.mkQ_surjective z
   obtain ⟨w, hwG, hwa, hwe⟩ := ht (Φ z') (by
       rw [mem_range_iff bV]; intro k; rw [hco]; exact ha _) (by
@@ -157,7 +208,7 @@ theorem core {ι : Type} [Fintype ι] (bT : Basis ι R T) (bV : Basis ι F V)
       induction u using TensorProduct.induction_on with
       | zero => simp
       | tmul t m => exact ⟨ρV g t ⊗ₜ[F] ⟨_, hSb g _ m.2⟩, rfl⟩
-      | add x y hx hy => rw [map_add, map_add]; exact Submodule.add_mem _ hx hy
+      | add x y hx hy => simpa only [map_add] using Submodule.add_mem _ hx hy
     rw [map_sub, map_smul, hwG] at h1
     have := Submodule.sub_mem _ hx h1
     convert this using 1
@@ -321,8 +372,8 @@ theorem zpow_mul_mem (J : ThetaL P AI) (w : P.R.BdR) (hw : w ∈ (P.PD (botExt l
     rw [zpow_sub_one, Units.val_mul, mul_assoc, show c + (-(k : ℤ) - 1) = c - 1 + -k by ring,
       ih (c - 1), ← H (c - 1), ← mul_assoc, Units.mul_inv, one_mul, sub_add_cancel]
 
-omit hu in
 
+omit hu in
 theorem exists_beta (LT : LocTied l P AI) (J : ThetaL P AI) (K : FinExt l) (a : ℤ) :
     ∃ β : ↥(Mxi (AinfSub l) (xiU AI) a) →+ P.R.BdR,
       (∀ (c : ℤ_[l]) m, β (c • m) = algebraMap ℤ_[l] ℚ_[l] c • β m) ∧
@@ -402,6 +453,7 @@ theorem exists_bases {R F T V : Type} [CommRing R] [IsDomain R] [IsPrincipalIdea
     rw [← hsp, Submodule.span_le]
     rintro _ ⟨t, rfl⟩
     change j t ∈ _
+
     rw [← bT.sum_repr t, map_sum]
     refine Submodule.sum_mem _ fun k _ => ?_
     rw [map_smul]
@@ -519,22 +571,7 @@ theorem goodO : GoodO (Qp := ℚ_[l]) ℚ_[l] ℤ_[l] := by
   exact PadicInt.isOpenEmbedding_coe.isOpen_range
 
 theorem finKs (K : FinExt l) (s : ℕ) : FiniteDimensional ℚ_[l] ↥(Ks K s) := by
-  classical
-  haveI := K.2
-  haveI : FiniteDimensional ℚ_[l] ↥(K0 K) := FiniteDimensional.of_injective
-    (IntermediateField.inclusion (inf_le_left : K0 K ≤ K.1)).toLinearMap
-    (IntermediateField.inclusion_injective (inf_le_left : K0 K ≤ K.1))
-  have hpos : 0 < l ^ s := pow_pos (Fact.out : l.Prime).pos s
-  haveI : Finite {x : Om l | x ^ (l ^ s) = 1} := by
-    refine Set.Finite.to_subtype (Set.Finite.subset
-      (Polynomial.nthRoots (l ^ s) (1 : Om l)).toFinset.finite_toSet ?_)
-    intro x hx
-    simpa [Polynomial.mem_nthRoots hpos] using hx
-  haveI : FiniteDimensional ℚ_[l]
-      ↥(IntermediateField.adjoin ℚ_[l] {x : Om l | x ^ (l ^ s) = 1}) :=
-    IntermediateField.finiteDimensional_adjoin fun x _ =>
-      (Algebra.IsAlgebraic.isAlgebraic x).isIntegral
-  exact IntermediateField.finiteDimensional_sup _ _
+  apply Formalism.MainNotions.WachCoordinates.Br.fd_Ks <;> assumption
 
 def lev (K : FinExt l) (j : ℕ) : FinExt l := ⟨Ks K j, finKs K j⟩
 
@@ -739,8 +776,8 @@ theorem lift_lev {l : ℕ} [Fact l.Prime] {P : LocPrime l} (AI : LocAinf l P) (L
     h5 hdR a e b hae heb p hp ((actTZ LL T).comp (Subgroup.inclusion hle'))
     (fun _ _ => rfl)
 
-open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc in
 
+open Formalism.WeaklyAdmissibleFiltrations Formalism.BasicNotions Formalism.BasicNotions.Loc Formalism.MainNotions.N Formalism.MainNotions.LocalSituation GlobalTheory.Cyc in
 theorem invariants_lift : ∀ (D : Formalism.BasicNotions.D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW), adm5 D → adm7 D → ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (s : ℕ) (LL : FinExt l) (h : Good K s LL), let S := sit D.loc HW l (D.locA l) K s LL h; let E : S.Comparison₂ := ((F l).E K s LL h).tie; ∀ (T : LocLat S.G S.Qp S.LL S.O) (a e b : ℤ) (j : ℕ) (hle : Gj K j ≤ GK K), s ≤ j → a ≤ e → e ≤ b → IsCrysOn S S.W.GKs T → ∀ p : Qab (AinfSub l) (xiU (D.locA l)) a b →ₗ[ℤ_[l]] Qab (AinfSub l) (xiU (D.locA l)) a e, (∀ x, p (Submodule.Quotient.mk x) = Submodule.Quotient.mk x) → letI := zlMod LL T; ∀ z : (TensorProduct ℤ_[l] ↥T.L.T (Qab (AinfSub l) (xiU (D.locA l)) a e)), (∀ g, (repQ (D.locA l) (Gj K j) ((actTZ LL T).comp (Subgroup.inclusion hle)) a e) g z = z) → ∃ (k : ℕ) (x : (TensorProduct ℤ_[l] ↥T.L.T (Qab (AinfSub l) (xiU (D.locA l)) a b))), (∀ g, (repQ (D.locA l) (Gj K j) ((actTZ LL T).comp (Subgroup.inclusion hle)) a b) g x = x) ∧ LinearMap.lTensor ↥T.L.T p x = (l : ℤ_[l]) ^ k • z :=
   fun D HW _ h5 h7 l _ K s LL h T a e b j hle hsj hae heb hcr p hp =>
     lift_lev (D.locA l) (D.locT l) (GlobalTheory.ThetaTie.nonempty_thetaL D l) (HW l) K s LL h T a e b j hle hsj hae heb

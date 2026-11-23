@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.RingHom.Flat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 
 open TensorProduct
@@ -66,7 +114,7 @@ theorem mul_tensor_injective : ∀ (P R₂ B B₂ : Type) [CommRing P] [CommRing
 
   let ψ0 : K₁ →+ B →+ J₂ ⊗[R₂] B₂ :=
     AddMonoidHom.mk' (fun k => AddMonoidHom.mk' (fun b => ej k ⊗ₜ[R₂] c₂ b)
-      (fun b b' => by rw [map_add, tmul_add]))
+      (fun b b' => by rw [map_add (f := _), tmul_add]))
       (fun k k' => by
         ext b
         have : ej (k + k') = ej k + ej k' := Subtype.ext (by simp [ej])
@@ -79,11 +127,11 @@ theorem mul_tensor_injective : ∀ (P R₂ B B₂ : Type) [CommRing P] [CommRing
 
   let χ0 : J₂ →+ B₂ →+ K₁ ⊗[P] B :=
     AddMonoidHom.mk' (fun j => AddMonoidHom.mk' (fun β => einv j ⊗ₜ[P] s β)
-      (fun β β' => by rw [← tmul_add]; exact L1 _ _ _ (by rw [map_add, hs, hs, hs])))
+      (fun β β' => by rw [← tmul_add]; exact L1 _ _ _ (by rw [map_add (f := _), hs, hs, hs])))
       (fun j j' => by
         ext β
         have : einv (j + j') = einv j + einv j' :=
-          hE _ _ (by rw [Submodule.coe_add, map_add, hE', hE', Submodule.coe_add])
+          hE _ _ (by rw [Submodule.coe_add, map_add (f := _), hE', hE', Submodule.coe_add])
         simp only [AddMonoidHom.mk'_apply, AddMonoidHom.add_apply, this, add_tmul])
   let χ : J₂ ⊗[R₂] B₂ →+ K₁ ⊗[P] B := liftAddHom χ0 (by
     intro r j β
@@ -96,8 +144,7 @@ theorem mul_tensor_injective : ∀ (P R₂ B B₂ : Type) [CommRing P] [CommRing
   have hχψ : ∀ t, χ (ψ t) = t := by
     intro t
     induction t with
-    | zero => simp
-    | add u v hu hv => rw [map_add, map_add, hu, hv]
+    | add u v hu hv => rw [map_add (f := _), map_add (f := _), hu, hv]
     | tmul k b =>
       simp only [ψ, χ, liftAddHom_tmul, ψ0, χ0, AddMonoidHom.mk'_apply]
       rw [hE k (ej k) rfl]
@@ -112,8 +159,7 @@ theorem mul_tensor_injective : ∀ (P R₂ B B₂ : Type) [CommRing P] [CommRing
   have key : ∀ t, ν (ψ t) = c₂ (μ t) := by
     intro t
     induction t with
-    | zero => simp
-    | add u v hu hv => rw [map_add, map_add, hu, hv, map_add, map_add]
+    | add u v hu hv => rw [map_add (f := _), map_add (f := _), hu, hv, map_add (f := _), map_add (f := _)]
     | tmul k b =>
       simp only [ψ, liftAddHom_tmul, ψ0, AddMonoidHom.mk'_apply, ν, LinearMap.coe_comp,
         Function.comp_apply, LinearMap.rTensor_tmul, Submodule.subtype_apply, LinearEquiv.coe_coe,

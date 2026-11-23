@@ -1,5 +1,49 @@
-import Mathlib
-import Formalism.AlgebraicWeights.IsAlgWeight
+module
+
+public import Formalism.AlgebraicWeights.IsAlgWeight
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -127,9 +171,6 @@ def psiStd {K : Type} [Field K] (θ : ∀ x, Multiplicative (ZMod (p x)) →* K�
 def IsStdGeneric {K : Type} [Field K] {S : Subgroup (GProd p r)} (ψ : S →* Kˣ) : Prop :=
   ∃ θ : ∀ x, Multiplicative (ZMod (p x)) →* Kˣ, (2 ≤ r → ∀ x, θ x ≠ 1) ∧ ∀ u : S, ψ u = stdVal p r θ u
 
-theorem psiStd_isStdGeneric {K : Type} [Field K] (θ : ∀ x, Multiplicative (ZMod (p x)) →* Kˣ) (hθ : ∀ x, θ x ≠ 1) :
-    IsStdGeneric p r (psiStd p r θ) := ⟨θ, fun _ => hθ, fun _ => rfl⟩
-
 theorem char_one_ne {K : Type} [Field K] {q : ℕ} [NeZero q] (θ : Multiplicative (ZMod q) →* Kˣ) (hθ : θ ≠ 1) :
     θ (Multiplicative.ofAdd 1) ≠ 1 := by
   intro h
@@ -138,15 +179,6 @@ theorem char_one_ne {K : Type} [Field K] {q : ℕ} [NeZero q] (θ : Multiplicati
   have key : x = Multiplicative.ofAdd (1 : ZMod q) ^ (Multiplicative.toAdd x).val := by
     rw [← ofAdd_nsmul, nsmul_one, ZMod.natCast_zmod_val, ofAdd_toAdd]
   rw [MonoidHom.one_apply, key, map_pow, h, one_pow]
-
-theorem char_one_prim {K : Type} [Field K] {q : ℕ} (hq : q.Prime) (θ : Multiplicative (ZMod q) →* Kˣ) (hθ : θ ≠ 1) :
-    IsPrimitiveRoot (((θ (Multiplicative.ofAdd 1) : Kˣ)) : K) q := by
-  haveI := Fact.mk hq
-  haveI : NeZero q := ⟨hq.ne_zero⟩
-  have h1 : θ (Multiplicative.ofAdd 1) ^ q = 1 := by
-    rw [← map_pow, ← ofAdd_nsmul, nsmul_one, ZMod.natCast_self, ofAdd_zero, map_one]
-  rw [IsPrimitiveRoot.coe_units_iff, IsPrimitiveRoot.iff_orderOf]
-  exact orderOf_eq_prime h1 (char_one_ne θ hθ)
 
 end Unip
 
@@ -231,29 +263,6 @@ theorem stdVal_tvAt [DecidableEq ι] {K : Type} [Field K] (θ : ∀ x, Multiplic
   · intro h
     exact absurd (Finset.mem_univ x) h
 
-def charOf {K : Type} [Field K] {q : ℕ} (ζ : Kˣ) (hζ : ζ ^ q = 1) : Multiplicative (ZMod q) →* Kˣ :=
-  AddMonoidHom.toMultiplicativeLeft (ZMod.lift q ⟨MonoidHom.toAdditiveRight (zpowersHom Kˣ ζ), by
-    change Additive.ofMul (ζ ^ ((q : ℕ) : ℤ)) = 0
-    rw [zpow_natCast, hζ]; rfl⟩)
-
-theorem charOf_one {K : Type} [Field K] {q : ℕ} (ζ : Kˣ) (hζ : ζ ^ q = 1) :
-    charOf ζ hζ (Multiplicative.ofAdd 1) = ζ := by
-  have h1 : (1 : ZMod q) = ((1 : ℤ) : ZMod q) := Int.cast_one.symm
-  simp only [charOf, AddMonoidHom.toMultiplicativeLeft_apply_apply, toAdd_ofAdd]
-  rw [h1, ZMod.lift_coe]
-  simp
-
-theorem exists_isStdGeneric {K : Type} [Field K] (hp : ∀ x, (p x).Prime)
-    (hζ : ∀ x, ∃ ζ : K, IsPrimitiveRoot ζ (p x)) : ∃ ψ : Uup p r →* Kˣ, IsStdGeneric p r ψ := by
-  choose ζ hζ using hζ
-  have hne : ∀ x, ζ x ≠ 0 := fun x => (hζ x).ne_zero (hp x).ne_zero
-  let u : ∀ x, Kˣ := fun x => Units.mk0 (ζ x) (hne x)
-  have hu : ∀ x, u x ^ (p x) = 1 := fun x => Units.ext (by simp [u, (hζ x).pow_eq_one])
-  refine ⟨psiStd p r (fun x => charOf (u x) (hu x)), fun x => charOf (u x) (hu x), fun _ x h1 => ?_, fun _ => rfl⟩
-  have h2 := congrArg (fun f => f (Multiplicative.ofAdd (1 : ZMod (p x)))) h1
-  simp only [charOf_one, MonoidHom.one_apply] at h2
-  exact (hζ x).ne_one (hp x).one_lt (by simpa [u] using congrArg Units.val h2)
-
 end Test
 
 section Forms
@@ -262,7 +271,7 @@ open NumberField IsDedekindDomain ReciprocityTheory.Aut Formalism.AUTREP
 
 variable (L : Type) [Field L] [NumberField L] [IsCMField L] (n : ℕ)
 
-local notation3 "L⁺" => NumberField.maximalRealSubfield L
+local notation3 "L⁺" => maximalRealSubfield L
 
 def TypeSpF (K : Type) [Field K] {W : Type} [AddCommGroup W] [Module K W] (ρ : Representation K (GQ L n) W)
     (J : Subgroup (GAf L n)) (χ : J →* Kˣ) : Submodule K (GAf L n → W) where
@@ -280,7 +289,7 @@ variable {L n}
 
 def HypOutsideF {K : Type} [Field K] (J : Subgroup (GAf L n)) (χ : J →* Kˣ) (B : Set (HeightOneSpectrum (𝓞 L⁺))) :
     Prop :=
-  ∀ κ : GAf L n, TrivOutside Bᶜ κ → (κ ∈ J ↔ κ ∈ Umax L n) ∧ ∀ h : κ ∈ J, χ ⟨κ, h⟩ = 1
+  ∀ κ : GAf L n, TrivOutside (L := L) Bᶜ κ → (κ ∈ J ↔ κ ∈ Umax L n) ∧ ∀ h : κ ∈ J, χ ⟨κ, h⟩ = 1
 
 end Forms
 
@@ -290,7 +299,7 @@ open NumberField IsDedekindDomain ReciprocityTheory.Aut Formalism.AUTREP
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L] {n : ℕ}
 
-local notation3 "L⁺" => NumberField.maximalRealSubfield L
+local notation3 "L⁺" => maximalRealSubfield L
 
 def InParah (v : HeightOneSpectrum (𝓞 L⁺)) (r : ℕ) (x : Matrix (Fin n) (Fin n) (v.adicCompletion L⁺)) : Prop :=
   (∀ a b, x a b ∈ v.adicCompletionIntegers L⁺) ∧ ∀ a b : Fin n, r ≤ (a : ℕ) → (b : ℕ) < r → Valued.v (x a b) < 1
@@ -323,8 +332,9 @@ def detT (r : ℕ) {R : Type} [CommRing R] (x : Matrix (Fin n) (Fin n) R) : R :=
 def topR {r : ℕ} (h : r ≤ n) {R : Type} (x : Matrix (Fin n) (Fin n) R) : Matrix (Fin r) (Fin r) R :=
   x.submatrix (Fin.castLE h) (Fin.castLE h)
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def intLift (v : HeightOneSpectrum (𝓞 L⁺)) (y : v.adicCompletion L⁺) : v.adicCompletionIntegers L⁺ :=
   if h : y ∈ v.adicCompletionIntegers L⁺ then ⟨y, h⟩ else 0
 
@@ -332,19 +342,20 @@ def redMat (v : HeightOneSpectrum (𝓞 L⁺)) {ι R : Type} [CommRing R] (red :
     (x : Matrix ι ι (v.adicCompletion L⁺)) : Matrix ι ι R :=
   fun a b => red (intLift v (x a b))
 
-open Classical in
 
+open scoped Classical in
+open Classical in
 def glOf {ι R : Type} [Fintype ι] [DecidableEq ι] [CommRing R] (M : Matrix ι ι R) : GL ι R :=
   if h : IsUnit M.det then M.nonsingInvUnit h else 1
 
 theorem glOf_val {ι R : Type} [Fintype ι] [DecidableEq ι] [CommRing R] (M : Matrix ι ι R) (h : IsUnit M.det) :
     ((glOf M : GL ι R) : Matrix ι ι R) = M := by
   unfold glOf
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
-variable (L n) in
 
+variable (L n) in
 def IsAlgWeightF (K : Type) [Field K] {W : Type} [AddCommGroup W] [Module K W] (ρ : Representation K (GQ L n) W) : Prop :=
   FiniteDimensional K W ∧
   ∃ (ι : Type) (_ : Fintype ι) (_ : DecidableEq ι) (b : Module.Basis ι K W) (κ : Type) (_ : Fintype κ)

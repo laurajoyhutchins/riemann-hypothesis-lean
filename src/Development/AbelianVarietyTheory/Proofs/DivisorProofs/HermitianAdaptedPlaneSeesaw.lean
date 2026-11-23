@@ -1,10 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.SiegelWeilAnisotropicHermitian
-import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CTSmallCone
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicStoneVonNeumannLagrangianUniquenessStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenIntertwinerGoodModelsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenIntertwinerTransitive
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeilRepresentationPreservesSchwartz
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenIntertwinerGoodModelsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EigenIntertwinerTransitive
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicStoneVonNeumannLagrangianUniquenessStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 open scoped TensorProduct NNReal Matrix
 open NumberField IsDedekindDomain MeasureTheory Filter Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
@@ -110,7 +149,7 @@ theorem exists_ratCoord {n d : ℕ} {X : Spc F E n} {W : Spc F E d} (M : Model �
   let f : Matrix (Fin n) (Fin d) E →ₗ[F] (Fin n × Fin d → F) × (Fin n × Fin d → F) :=
     { toFun := fun x => (y x, z x)
       map_add' := fun a b => emb_inj (by
-        rw [← h, incM_add, map_add, h, h]
+        rw [← h, incM_add, map_add (f := _), h, h]
         exact Prod.ext (funext fun i => (map_add _ _ _).symm) (funext fun i => (map_add _ _ _).symm))
       map_smul' := fun a b => emb_inj (by
         rw [← h, incM_smul, map_smul, h]
@@ -193,7 +232,7 @@ theorem iso_lagr (B : Base F E) (M : Model σ X W) (M₁ : Model σ X₁ W) (H :
   have h3 := (M.co.form _ _).symm.trans (sp_ix (W := W) (fun u => (hH.orth u).1) m' z)
   have h4 := (M.co.form _ _).symm.trans ((sp_ii (W := W) hH.gram m m').trans (M₁.co.form m m'))
   rw [hm, hm', zero_dotProduct, zero_dotProduct, sub_self] at h4
-  simp only [map_add, Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
+  simp only [map_add (f := _), Prod.fst_add, Prod.snd_add, add_dotProduct, dotProduct_add]
   linear_combination h1 + h2 - h3 + h4
 
 theorem direct (B : Base F E) (M : Model σ X W) (M₁ : Model σ X₁ W) (H : Plane E n n₁) {j₀ j₁ : ℕ}
@@ -240,13 +279,13 @@ theorem exists_lagr (B : Base F E) (hB : B.IsGood σ) (M : Model σ X W) (M₁ :
     { toFun := fun p => Matrix.vecMulVec H.x p.1 + H.ι * φ₁.symm (0, p.2)
       map_add' := fun p q => by
         have : ((0 : Fin n₁ × Fin d → F), (p + q).2) = (0, p.2) + (0, q.2) := by simp
-        rw [this, map_add, Matrix.mul_add, Prod.fst_add, Matrix.vecMulVec_add]
+        rw [this, map_add (f := _), Matrix.mul_add, Prod.fst_add, Matrix.vecMulVec_add]
         abel
       map_smul' := fun a p => by
         have : ((0 : Fin n₁ × Fin d → F), (a • p).2) = a • (0, p.2) := by simp
         rw [this, map_smul, Matrix.mul_smul, Prod.smul_fst, Matrix.vecMulVec_smul, RingHom.id_apply, smul_add] }
   have hg : Function.Injective g := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro p hp
     obtain ⟨h1, h3⟩ := direct B M M₁ H hH p.1 _ hp
     exact Prod.ext h1 (Prod.ext_iff.1 (φ₁.symm.map_eq_zero_iff.1 h3)).2
@@ -272,7 +311,7 @@ theorem exists_lagr (B : Base F E) (hB : B.IsGood σ) (M : Model σ X W) (M₁ :
   · rintro t _ ⟨p, rfl⟩
     refine ⟨t • incV F p.1, t • incM F (φ₁.symm (0, p.2)), by rw [map_smul, Prod.smul_fst, hfst, smul_zero], fun ψ => ?_⟩
     simp only [LinearMap.comp_apply, LinearEquiv.coe_coe, hemb]
-    rw [← map_smul, smul_add, ← Matrix.vecMulVec_smul, ← Matrix.mul_smul, map_add]
+    rw [← map_smul, smul_add, ← Matrix.vecMulVec_smul, ← Matrix.mul_smul, map_add (f := _)]
     refine schr_add _ _ _ ?_ _
     have h := (M.co.form _ _).symm.trans (sp_ix (W := W) (fun u => (hH.orth u).1) (t • incM F (φ₁.symm (0, p.2)))
       (t • incV F p.1))

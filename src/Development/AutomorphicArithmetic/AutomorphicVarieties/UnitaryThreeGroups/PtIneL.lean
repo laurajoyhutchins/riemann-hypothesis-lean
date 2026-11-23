@@ -1,7 +1,50 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.KatoUse
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.DatLoc
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CommutingUpperTriangularDistinct
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.KatoUse
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.RhoKApply
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.CommutingUpperTriangularDistinct
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.DatLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.MainNotions.N Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.GalOfCusp Matrix IsLocalRing
 open UpperTheory.V UpperTheory.V.Base UpperTheory.V.HV UpperTheory.V.Alg UpperTheory.V.U3
@@ -57,10 +100,10 @@ private theorem sgn_up {R : Type} [Field R] (s : ℤˣ) (u : GL (Fin 3) R)
       rw [w, _root_.zpow_neg] at e
       exact Units.mul_inv_eq_one.1 e
 
-private theorem move {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R) (h : GL (Fin 3) R) (g : G) :
+private theorem move {G R : Type} [Group G] [CommRing R] (r : G →* GG (m := 3) (R := R)) (h : GL (Fin 3) R) (g : G) :
     ∃ M : GL (Fin 3) R, ∀ s, (r (g⁻¹ * s * g)).right = 1 →
       (conjBy M r s).left = sgnAct 3 R (r g).right (conjBy h r (g⁻¹ * s * g)).left := by
-  let w : GG 3 R := SemidirectProduct.inr (r g).right
+  let w : GG (m := 3) (R := R) := SemidirectProduct.inr (r g).right
   have hM : GG.ofGL (w * GG.ofGL h * (r g)⁻¹).left = w * GG.ofGL h * (r g)⁻¹ :=
     SemidirectProduct.ext rfl (by simp [w])
   refine ⟨(w * GG.ofGL h * (r g)⁻¹).left, fun s hs => ?_⟩
@@ -71,7 +114,7 @@ private theorem move {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R) (h 
   rw [e]
   simp [w]
 
-private theorem charpoly_conj {G R : Type} [Group G] [CommRing R] (r : G →* GG 3 R) (M : GL (Fin 3) R) (s : G)
+private theorem charpoly_conj {G R : Type} [Group G] [CommRing R] (r : G →* GG (m := 3) (R := R)) (M : GL (Fin 3) R) (s : G)
     (hs : (r s).right = 1) : (conjBy M r s).mat.charpoly = (r s).mat.charpoly := by
   have : (conjBy M r s).left = M * (r s).left * M⁻¹ := by simp [conjBy, hs]
   simp only [GG.mat, this, Units.val_mul]
@@ -79,7 +122,7 @@ private theorem charpoly_conj {G R : Type} [Group G] [CommRing R] (r : G →* GG
 
 theorem UpperTheory.V.U3.pt_inertia_above :
     CohInp → ∀ {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] {K : Type} [Field K] [NumberField K] [Algebra K Ω]
-      {l : ℕ} [Fact l.Prime] {c : Coef l} {N : ℕ} [NeZero N] {e : ℕ} {ψ : DirichletCharacter c.O N} (D : Dat Ω K c e ψ) {U : D.ULoc} {g₁ : G ℚ Ω}, D.Marked g₁ → ∀ {r : G ℚ Ω →* GG 3 (PadicAlgCl l)} (h : D.IsPt U g₁ r),
+      {l : ℕ} [Fact l.Prime] {c : Coef l} {N : ℕ} [NeZero N] {e : ℕ} {ψ : DirichletCharacter c.O N} (D : Dat Ω K c e ψ) {U : (_root_.UpperTheory.V.U3.Univ (_root_.UpperTheory.V.U3.GCond.noCondition _ (D.η.comp D.ι) (D.Ψ.comp D.ι)))} {g₁ : G ℚ Ω}, D.Marked g₁ → ∀ {r : G ℚ Ω →* GG (m := 3) (R := PadicAlgCl l)} (h : D.IsPt U g₁ r),
       ∀ A : ValuationSubring Ω, A.valuation (l : Ω) < 1 →
         (∀ g ∈ Ine (F := ℚ) A, (r g).mat.charpoly = (r0 D.η D.ΨQ g).mat.charpoly) ∧
         ∃ M : GL (Fin 3) (PadicAlgCl l), (∀ g ∈ Dec (F := ℚ) A, D.η g = 1 → ∀ a b, wt a b < 0 → (conjBy M r g).mat a b = 0) ∧

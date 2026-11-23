@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Data.Fintype.Basic
+public import Mathlib.Data.Nat.Factorial.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.LogVandermondeBounds.flipTwoThree
 
@@ -11,54 +57,8 @@ def B0 {n : ℕ} (lam : Fin (n + 1) → ℤ) (nu : Fin n → ℤ) : ℤ := ∑ i
 
 def len {n : ℕ} (lam : Fin (n + 1) → ℤ) (i : Fin n) : ℤ := lam i.castSucc - lam i.succ
 
-noncomputable def Iset {n : ℕ} (lam : Fin (n + 1) → ℤ) (b : ℤ) (i : Fin n) : Finset ℤ :=
-  Icc (lam i.succ) (lam i.succ + min (len lam i) b)
-
-def ev {n : ℕ} (nu' : Fin n → ℤ) (x : ℤ) : ℤ := ∏ j, (nu' j - (j : ℤ) - x)
-
-noncomputable def sep {n : ℕ} (lam : Fin (n + 1) → ℤ) (nu nu' : Fin n → ℤ) : ℤ :=
-  ∏ i, ∏ y ∈ (Iset lam (B0 lam nu) i).erase (nu i), ev nu' (y - (i : ℤ))
-
-def InterlacingSeparation : Prop :=
-  ∀ (n : ℕ) (lam : Fin (n + 1) → ℤ) (nu : Fin n → ℤ), Interlace lam nu →
-    (∀ nu' : Fin n → ℤ, Interlace lam nu' → B0 lam nu' = B0 lam nu →
-      ∀ i, nu' i ∈ Iset lam (B0 lam nu) i) ∧
-    (∀ i j : Fin n, i ≠ j → Disjoint ((Iset lam (B0 lam nu) i).image (fun y => y - (i : ℤ)))
-      ((Iset lam (B0 lam nu) j).image (fun y => y - (j : ℤ)))) ∧
-    sep lam nu nu ≠ 0 ∧
-    |sep lam nu nu| ≤ (lam 0 - lam (Fin.last n) + n + 1) ^
-      (n * ∑ i, (min (len lam i) (B0 lam nu)).toNat) ∧
-    (∀ nu' : Fin n → ℤ, Interlace lam nu' → B0 lam nu' = B0 lam nu → nu' ≠ nu → sep lam nu nu' = 0)
-
-def MinRatioPowerExponentialBound : Prop :=
-  ∀ (n g : ℕ), 1 ≤ g →
-    let e : ℝ := if n = 0 then 1 else min 1 ((g : ℝ) / n)
-    (e ^ g)⁻¹ * (1 + e) ^ (n + g) ≤ (2 * Real.exp 1 * max 1 ((n : ℝ) / g)) ^ g
-
-def GammaIntegralBound : Prop :=
-  ∀ (v : ℝ) (g : ℕ), 0 ≤ v →
-    MeasureTheory.IntegrableOn
-        (fun u : ℝ => Real.pi * Real.exp (-Real.pi * u) * (1 + 4 * u * v) ^ g) (Set.Ioi 0) ∧
-    ∫ u in Set.Ioi (0 : ℝ), Real.pi * Real.exp (-Real.pi * u) * (1 + 4 * u * v) ^ g ≤
-      (1 + 4 * g * v / Real.pi) ^ g
-
-def AmgmSumLowerBoundOfProd : Prop :=
-  ∀ (f : ℕ) (v : ℝ) (x : Fin f → ℝ), 1 ≤ f → 0 < v → (∀ i, 0 < x i) →
-    ((2 * v) ^ f)⁻¹ ≤ ∏ i, x i → (f : ℝ) / v ≤ 2 * ∑ i, x i
-
 noncomputable def hookF {N : ℕ} (nu : Fin N → ℕ) : ℝ :=
   (∏ i : Fin N, ((nu i + N - 1 - i : ℕ).factorial : ℝ)) /
     ∏ i : Fin N, ∏ j ∈ univ.filter (fun j => i < j), (((nu i : ℤ) - nu j + j - i : ℤ) : ℝ)
-
-def HookProductBounds : Prop :=
-  ∀ (N : ℕ) (nu : Fin (N + 1) → ℕ), Antitone nu →
-    hookF nu ≤ ∏ i : Fin (N + 1), ((nu i + N - i : ℕ).factorial : ℝ) ∧
-    ∑ i : Fin (N + 1), Real.log ((nu i + N - i : ℕ).factorial : ℝ)
-        - ((N : ℝ) + 1) ^ 2 * Real.log ((nu 0 : ℝ) + N + 1) ≤ Real.log (hookF nu) ∧
-    hookF nu / ∏ i : Fin (N + 1), ((nu i).factorial : ℝ) ≤ ((nu 0 : ℝ) + N + 1) ^ ((N + 1) ^ 2)
-
-def MultinomialPowerBound : Prop :=
-  ∀ (k : ℕ) (α : Fin k → ℕ),
-    ((∑ i, α i).factorial : ℝ) / ∏ i, ((α i).factorial : ℝ) ≤ (k : ℝ) ^ (∑ i, α i)
 
 end Formalism.LogVandermondeBounds.flipTwoThree

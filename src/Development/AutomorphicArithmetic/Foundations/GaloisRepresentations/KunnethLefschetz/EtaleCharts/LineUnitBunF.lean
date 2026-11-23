@@ -1,5 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtaleCharts.PBData
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CompOfCechPt
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.EtaleCharts.PBData
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -176,6 +219,7 @@ private theorem gl_map_mulVec_comp_eq_comp_mulVec {n : ℕ} {A B : Type} [CommRi
     (↑(Matrix.GeneralLinearGroup.map φ M) : Matrix (Fin n) (Fin n) B).mulVec (φ ∘ x) =
       φ ∘ (↑M : Matrix (Fin n) (Fin n) A).mulVec x := by
   funext i
+
   simp [Matrix.mulVec, dotProduct, map_sum]
 
 theorem w_nat {V' V : Scheme.{0}} (s : V' ⟶ V) (a b : V ⟶ P.T') (h : a ≫ P.e = b ≫ P.e)
@@ -339,7 +383,7 @@ def sv {n : ℕ} {U : Scheme.{0}} (z : Sx P.S n U) (i : Fin (n + 1)) : P.PA.obj 
 theorem S_comm {n : ℕ} {U : Scheme.{0}} (z : Sx P.S n U) :
     Sx.map P.bunV (Sx.map (pullback.fst P.bunV (PGL.pr d)) z) =
       Sx.map (PGL.pr d) (Sx.map (pullback.snd P.bunV (PGL.pr d)) z) := by
-  exact congrArg (fun φ : P.S ⟶ ofCat (glCat d) => Sx.map φ z) pullback.condition
+  exact congrArg (fun φ : P.S ⟶ ofCat (glCat d) => Sx.map φ z) (pullback.condition (f := P.bunV) (g := PGL.pr d))
 
 theorem sv_rel_le {n : ℕ} {U : Scheme.{0}} (z : Sx P.S n U) {i j : Fin (n + 1)} (hij : i ≤ j) :
     P.rel U (P.sv z i) (P.sv z j) := by
@@ -388,9 +432,11 @@ def pS : P.S ⟶ disc.obj P.Q where
     ext U z
     refine Eq.trans (congrArg (Quotient.mk (P.relS U.unop)) (P.sv_along _ θ.unop 0)) (Quotient.sound (s := P.relS U.unop) (P.sv_rel _ _ _))
 
-theorem bunF_fst : P.bunF ≫ pullback.fst P.bunV (PGL.pr d) = P.ρmap := pullback.lift_fst _ _ _
+theorem bunF_fst : P.bunF ≫ pullback.fst P.bunV (PGL.pr d) = P.ρmap := by
+  exact pullback.lift_fst (f := P.bunV) (g := PGL.pr d) _ _ _
 
-theorem bunF_snd : P.bunF ≫ pullback.snd P.bunV (PGL.pr d) = P.bunP := pullback.lift_snd _ _ _
+theorem bunF_snd : P.bunF ≫ pullback.snd P.bunV (PGL.pr d) = P.bunP := by
+  exact pullback.lift_snd (f := P.bunV) (g := PGL.pr d) _ _ _
 
 theorem ρmap_aug : P.ρmap ≫ cechAug P.c = cechAug P.e ≫ sch.map r := by
   ext n : 1

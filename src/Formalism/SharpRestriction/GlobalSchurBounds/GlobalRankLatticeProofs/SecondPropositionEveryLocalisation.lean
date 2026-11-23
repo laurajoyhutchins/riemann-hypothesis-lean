@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.CMFieldLemmas
-import Formalism.FrobeniusOrbits.HostCorollaries
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.CMFieldLemmas
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.CoprimeTwoPow
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameFacts
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,10 +68,6 @@ theorem iotaH_add (e : ℕ) (i j : ZMod (2 ^ e)) : iotaH e (i + j) = iotaH e i *
   rw [ZMod.val_add, ← pow_add]
   exact h
 
-theorem iotaH_zero (e : ℕ) : iotaH e 0 = 1 := by
-  unfold iotaH
-  rw [ZMod.val_zero, pow_zero]
-
 theorem iotaH_injective (e : ℕ) : Function.Injective (iotaH e) := by
   intro i j hij
   unfold iotaH at hij
@@ -44,13 +83,6 @@ theorem iotaH_bijective (e : ℕ) : Function.Bijective (iotaH e) := by
 theorem iotaH_iotaHInv (e : ℕ) (x : HGrp e) : iotaH e (iotaHInv e x) = x :=
   Function.rightInverse_invFun (iotaH_bijective e).2 x
 
-theorem iotaH_nsmul (e : ℕ) (k : ℕ) (i : ZMod (2 ^ e)) : iotaH e (k • i) = iotaH e i ^ k := by
-  induction k with
-  | zero => rw [zero_smul, iotaH_zero, pow_zero]
-  | succ k ih =>
-    rw [succ_nsmul, iotaH_add, ih]
-    exact (pow_succ _ _).symm
-
 def iotaHom (e : ℕ) : Multiplicative (ZMod (2 ^ e)) →* HGrp e :=
   MonoidHom.mk' (fun x => iotaH e (Multiplicative.toAdd x)) (fun _ _ => iotaH_add e _ _)
 
@@ -58,9 +90,6 @@ theorem orderOf_iotaH (e : ℕ) (i : ZMod (2 ^ e)) : orderOf (iotaH e i) = addOr
   have h := orderOf_injective (iotaHom e) (iotaH_injective e) (Multiplicative.ofAdd i)
   rw [orderOf_ofAdd_eq_addOrderOf] at h
   exact h
-
-theorem ordH_eq (e : ℕ) (x : HGrp e) : ordH (iotaHInv e x) = orderOf x := by
-  rw [ordH, ← orderOf_iotaH, iotaH_iotaHInv]
 
 theorem cc_mul_cc (φ : Formalism.HC.Frame) : φ.cc * φ.cc = 1 := φ.cc_mul_cc
 

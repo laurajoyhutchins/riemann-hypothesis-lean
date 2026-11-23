@@ -1,4 +1,61 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Valuation.RamificationGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.Invariant.Profinite
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+public import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Galois.Infinite
+public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
+public import Mathlib.RingTheory.Invariant.Defs
+
+@[expose] public section
 
 open NumberField IsDedekindDomain IntermediateField
 open scoped Pointwise
@@ -45,8 +102,8 @@ instance cen_prime (A : ValuationSubring Ω) : (cen A).IsPrime where
 theorem val_eq_one {A : ValuationSubring Ω} {s : 𝓞 Ω} (h : s ∉ cen A) : A.valuation (s : Ω) = 1 :=
   le_antisymm (int_le A s) (not_lt.1 h)
 
-variable (E) in
 
+variable (E) in
 theorem frac [Algebra.IsAlgebraic E Ω] (A : ValuationSubring Ω) {x : Ω} (hx : x ∈ A) :
     ∃ b s : 𝓞 Ω, s ∉ cen A ∧ x * s = b := by
   obtain ⟨F, hF, y, rfl⟩ : ∃ F : IntermediateField E Ω, FiniteDimensional E F ∧ ∃ y : F, algebraMap F Ω y = x :=
@@ -75,7 +132,7 @@ theorem coe_smul (g : Ω ≃ₐ[E] Ω) (b : 𝓞 Ω) : ((g • b : 𝓞 Ω) : Ω
 
 theorem map_mem [Algebra.IsAlgebraic E Ω] (A : ValuationSubring Ω) (g : Ω ≃ₐ[E] Ω)
     (hg : ∀ b : 𝓞 Ω, g • b ∈ cen A → b ∈ cen A) {x : Ω} (hx : x ∈ A) : g x ∈ A := by
-  obtain ⟨b, s, hs, e⟩ := frac E A hx
+  obtain ⟨b, s, hs, e⟩ := frac (E := E) A hx
   have h1 := val_eq_one fun h => hs (hg s h)
   have h2 := int_le A (g • b)
   rw [coe_smul, ← e, map_mul, map_mul, ← coe_smul g s, h1, mul_one] at h2
@@ -94,7 +151,7 @@ theorem of_cong [Algebra.IsAlgebraic E Ω] (A : ValuationSubring Ω) (g : Ω ≃
     refine ⟨fun h => ?_, fun h => map_mem A g⁻¹ (fun b hb => ?_) h⟩
     · simpa using map_mem A g (fun b => (hiff b).1) h
     · simpa using (hiff _).2 hb
-  · obtain ⟨b, s, hs, e⟩ := frac E A hx
+  · obtain ⟨b, s, hs, e⟩ := frac (E := E) A hx
     have h1 := val_eq_one fun h => hs ((hiff s).1 h)
     have h2 := val_eq_one hs
     have key : (g x - x ^ q) * (((g • s : 𝓞 Ω) : Ω) * (s : Ω) ^ q) =
@@ -173,7 +230,9 @@ theorem lift [IsGalois E Ω] (L : IntermediateField E Ω) [FiniteDimensional E L
         show θ (u (Ideal.Quotient.mk Q (algebraMap (𝓞 L) (𝓞 Ω) (τ • y)))) =
           Ideal.Quotient.mk Q (algebraMap (𝓞 L) (𝓞 Ω) (τ • y))
         rw [hu, hg'L, hτ] }
-  have hmax : (Q.under (𝓞 L)).IsMaximal := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal Q
+  have hmax : (Q.under (𝓞 L)).IsMaximal :=
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap (𝓞 L) (𝓞 Ω))
+      (algebraMap_isIntegral_iff.mpr this) Q
   let _ : Field (𝓞 L ⧸ Q.under (𝓞 L)) := Ideal.Quotient.field _
   have hbij : Function.Bijective ψ := Algebra.IsAlgebraic.algHom_bijective ψ
   obtain ⟨k, hk⟩ := Ideal.Quotient.stabilizerHom_surjective_of_profinite (G := G) (Q.under (𝓞 L)) Q

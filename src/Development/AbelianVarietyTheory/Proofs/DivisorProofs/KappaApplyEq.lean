@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfSecAlgTop
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdealSheafEqOfKerTensorToSubschemeSections
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EqOfSecAlgTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Opposite
@@ -12,25 +57,10 @@ theorem theta_comm {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A)) (U : T.O
     ((pullback.fst (str A B) g).appLE ⊤ ((pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp)).hom
       ((Scheme.ΓSpecIso (CommRingCat.of B)).inv.hom (algebraMap A B a)) =
     ((pullback.snd (str A B) g).app U).hom (secAlg A g U a) := by
-  have h1 := Scheme.ΓSpecIso_inv_naturality (CommRingCat.ofHom (algebraMap A B))
-  have h2 : (Scheme.ΓSpecIso (CommRingCat.of B)).inv.hom (algebraMap A B a) =
-      (str A B).appTop.hom ((Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom a) :=
-    congrArg (fun f => f.hom a) h1
-  have key : (str A B).appTop ≫ (pullback.fst (str A B) g).appLE ⊤
-      ((pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp) =
-      g.appLE ⊤ U (by simp) ≫ (pullback.snd (str A B) g).app U := by
-    calc _ = (pullback.fst (str A B) g ≫ str A B).appLE ⊤
-          ((pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp) :=
-          (Scheme.Hom.comp_appLE _ _ _ _ _).symm
-      _ = (pullback.snd (str A B) g ≫ g).appLE ⊤
-          ((pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp) :=
-          appLE_eq_of_eq (by simp [pullback.condition]) _ _ _ _
-      _ = _ := by
-          rw [Scheme.Hom.app_eq_appLE]; exact (Scheme.Hom.appLE_comp_appLE _ _ _ _ _ _ _).symm
-  rw [h2, secAlg, RingHom.comp_apply, ← CommRingCat.comp_apply, key, CommRingCat.comp_apply]
+  apply GlobalTheory.HilbAff.IdealDet.comm_fst <;> assumption
 
 def theta {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A)) (U : T.Opens) :
-    letI := (secAlg A g U).toAlgebra
+    letI := (secAlg A g U).toAlgebra;
     Γ(T, U) ⊗[A] B →+* Γ(pullback (str A B) g, (pullback.snd (str A B) g) ⁻¹ᵁ U) :=
   letI := (secAlg A g U).toAlgebra
   letI : Algebra A Γ(pullback (str A B) g, (pullback.snd (str A B) g) ⁻¹ᵁ U) :=
@@ -44,7 +74,7 @@ def theta {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A)) (U : T.Opens) :
 
 theorem theta_tmul {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A)) (U : T.Opens)
     (c : Γ(T, U)) (b : B) :
-    letI := (secAlg A g U).toAlgebra
+    letI := (secAlg A g U).toAlgebra;
     theta A B g U (c ⊗ₜ[A] b) = ((pullback.snd (str A B) g).app U).hom c *
       ((pullback.fst (str A B) g).appLE ⊤ ((pullback.snd (str A B) g) ⁻¹ᵁ U)
         (by simp)).hom ((Scheme.ΓSpecIso (CommRingCat.of B)).inv.hom b) := by
@@ -58,10 +88,17 @@ theorem kappa_apply_eq {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A))
     kappa A B g I U x =
       (I.subschemeι.app ((pullback.snd (str A B) g) ⁻¹ᵁ U)).hom (theta A B g U x) := by
   letI := (secAlg A g U).toAlgebra
-  induction x using TensorProduct.induction_on with
-  | zero => simp only [map_zero]; rfl
+  induction x using TensorProduct.inductionOn with
   | tmul c b =>
-    rw [kappa_tmul, theta_tmul, map_mul]
+    have hk : kappa A B g I U (c ⊗ₜ[A] b) =
+        ((I.subschemeι ≫ pullback.snd (str A B) g).app U).hom c *
+          ((I.subschemeι ≫ pullback.fst (str A B) g).appLE ⊤
+            ((I.subschemeι ≫ pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp)).hom
+            ((Scheme.ΓSpecIso (CommRingCat.of B)).inv.hom b) := by
+      letI : Algebra A Γ(I.subscheme, (I.subschemeι ≫ pullback.snd (str A B) g) ⁻¹ᵁ U) :=
+        (((I.subschemeι ≫ pullback.snd (str A B) g).app U).hom.comp (secAlg A g U)).toAlgebra
+      exact Algebra.TensorProduct.lift_tmul _ _ _ _ _
+    rw [hk, theta_tmul, map_mul]
     congr 1
     have e : (pullback.fst (str A B) g).appLE ⊤ ((pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp) ≫
         I.subschemeι.app ((pullback.snd (str A B) g) ⁻¹ᵁ U) =
@@ -69,7 +106,7 @@ theorem kappa_apply_eq {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A))
           ((I.subschemeι ≫ pullback.snd (str A B) g) ⁻¹ᵁ U) (by simp) := by
       rw [Scheme.Hom.app_eq_appLE]; exact Scheme.Hom.appLE_comp_appLE _ _ _ _ _ _ _
     rw [← e]; rfl
-  | add x y hx hy => simp only [map_add, hx, hy]; rfl
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]; rfl
 
 theorem ker_kappa_eq {T : Scheme.{0}} (g : T ⟶ Spec (CommRingCat.of A))
     (I : (pullback (str A B) g).IdealSheafData) (U : T.Opens) :

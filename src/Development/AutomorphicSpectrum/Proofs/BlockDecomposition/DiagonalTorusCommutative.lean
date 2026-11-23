@@ -1,5 +1,55 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.ElementaryCosets.JPred
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonomialOfConjTorus
+public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.ElementaryCosets.CosetMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,24 +71,7 @@ theorem stdBlocks_ones_eq (N : ℕ) (a : Fin N) (i : Fin (ones N a)) :
 
 theorem offDiag_of_mem {N : ℕ} {x : GL (Fin N) k} (hx : x ∈ Tor k N) {i j : Fin N} (hij : i ≠ j) :
     (x : Matrix (Fin N) (Fin N) k) i j = 0 := by
-  rw [Tor, MonoidHom.mem_range] at hx
-  obtain ⟨s, rfl⟩ := hx
-  obtain ⟨⟨a, p⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective i
-  obtain ⟨⟨b, q⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective j
-  have hab : a ≠ b := by
-    rintro rfl
-    apply hij
-    have hp : (p : ℕ) = 0 := by
-      have := p.isLt
-      simp only [ones] at this
-      omega
-    have hq : (q : ℕ) = 0 := by
-      have := q.isLt
-      simp only [ones] at this
-      omega
-    have hpq : p = q := Fin.ext (hp.trans hq.symm)
-    rw [hpq]
-  exact leviEmb_apply_ne k _ s hab p q
+  apply GlobalTheory.CompanionTheory.LbElem.ConjMonomial.tor_offDiag <;> assumption
 
 theorem diag_ne_zero {N : ℕ} (x : GL (Fin N) k)
     (h : ∀ i j : Fin N, i ≠ j → (x : Matrix (Fin N) (Fin N) k) i j = 0) (i : Fin N) :
@@ -57,27 +90,7 @@ theorem diag_ne_zero {N : ℕ} (x : GL (Fin N) k)
 
 theorem mem_of_offDiag {N : ℕ} (x : GL (Fin N) k)
     (h : ∀ i j : Fin N, i ≠ j → (x : Matrix (Fin N) (Fin N) k) i j = 0) : x ∈ Tor k N := by
-  rw [Tor, MonoidHom.mem_range]
-  refine ⟨(fun a => Matrix.GeneralLinearGroup.scalar _
-    (Units.mk0 ((x : Matrix (Fin N) (Fin N) k) a a) (diag_ne_zero x h a)) : Levi k (Bl (ones N))), ?_⟩
-  apply Units.ext
-  ext i j
-  obtain ⟨⟨a, p⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective i
-  obtain ⟨⟨b, q⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective j
-  by_cases hab : a = b
-  · subst hab
-    have hpq : p = q := by
-      apply Fin.ext
-      have hp := p.isLt
-      have hq := q.isLt
-      simp only [ones] at hp hq
-      omega
-    subst hpq
-    refine (leviEmb_apply_same (m := fun c => Fin (ones N c)) k _ _ a p p).trans ?_
-    rw [stdBlocks_ones_eq N a p]
-    simp [Matrix.GeneralLinearGroup.scalar]
-  · rw [h _ _ (fun heq => hab (congrArg Sigma.fst ((stdBlocks (ones N) (sum_ones N)).injective heq)))]
-    exact leviEmb_apply_ne (m := fun c => Fin (ones N c)) k _ _ hab p q
+  apply GlobalTheory.CompanionTheory.LbElem.ConjMonomial.mem_tor_of_offDiag <;> assumption
 
 theorem eq_diagonal {N : ℕ} (M : Matrix (Fin N) (Fin N) k)
     (h : ∀ i j : Fin N, i ≠ j → M i j = 0) : M = Matrix.diagonal fun i => M i i := by

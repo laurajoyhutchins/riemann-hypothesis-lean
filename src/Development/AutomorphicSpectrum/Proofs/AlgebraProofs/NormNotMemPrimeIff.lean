@@ -1,7 +1,59 @@
-import Mathlib
-import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.RegularHypothesesAndConclusion
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HasAffineChartId
+module
+
+public import Mathlib.RingTheory.Norm.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Charpoly.BaseChange
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FiniteFreeHom
+import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.RegularHypothesesAndConclusion
+public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory AlgebraicGeometry Opposite
 open scoped CategoryTheory.MonObj
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -9,8 +61,8 @@ open GlobalTheory.CompanionTheory.FreeQuotProof GlobalTheory.CompanionTheory.Hyp
 
 namespace GlobalTheory.CompanionTheory.NormPrime
 
-open TensorProduct in
 
+open TensorProduct in
 theorem norm_one_tmul {A B K : Type} [CommRing A] [CommRing B] [Algebra A B] [Module.Free A B]
     [Module.Finite A B] [Field K] [Algebra A K] (e : B) :
     Algebra.norm K ((1 : K) ⊗ₜ[A] e : K ⊗[A] B) = algebraMap A K (Algebra.norm A e) := by
@@ -20,7 +72,7 @@ theorem norm_one_tmul {A B K : Type} [CommRing A] [CommRing B] [Algebra A B] [Mo
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul x y => simp [LinearMap.baseChange_tmul]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem norm_mem_comap {A B : Type} [CommRing A] [CommRing B] [Algebra A B] [Module.Free A B]
     [Module.Finite A B] (e : B) (q : Ideal B) (he : e ∈ q) :
@@ -31,7 +83,7 @@ theorem norm_mem_comap {A B : Type} [CommRing A] [CommRing B] [Algebra A B] [Mod
     rw [map_zero, ← Polynomial.aeval_algHom_apply]
     exact LinearMap.aeval_self_charpoly _
   have h3 := congrArg (Polynomial.aeval e) (Polynomial.divX_mul_X_add χ)
-  rw [h2, map_add, map_mul, Polynomial.aeval_X, Polynomial.aeval_C] at h3
+  rw [h2, map_add (f := _), map_mul, Polynomial.aeval_X, Polynomial.aeval_C] at h3
   have h4 : algebraMap A B (χ.coeff 0) ∈ q := by
     have h5 : algebraMap A B (χ.coeff 0) = -(Polynomial.aeval e χ.divX * e) :=
       eq_neg_of_add_eq_zero_right h3
@@ -40,8 +92,8 @@ theorem norm_mem_comap {A B : Type} [CommRing A] [CommRing B] [Algebra A B] [Mod
   rw [Algebra.norm_apply, LinearMap.det_eq_sign_charpoly_coeff]
   exact Ideal.mul_mem_left _ _ (Ideal.mem_comap.2 h4)
 
-open TensorProduct in
 
+open TensorProduct in
 theorem norm_notMem_iff {A B : Type} [CommRing A] [CommRing B] [Algebra A B] [Module.Free A B]
     [Module.Finite A B] (e : B) (p : Ideal A) (hp : p.IsPrime) :
     Algebra.norm A e ∉ p ↔ ∀ q : Ideal B, q.IsPrime → q.comap (algebraMap A B) = p → e ∉ q := by

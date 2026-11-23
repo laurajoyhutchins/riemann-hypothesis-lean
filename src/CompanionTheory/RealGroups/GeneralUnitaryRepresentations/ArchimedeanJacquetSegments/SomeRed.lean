@@ -1,13 +1,60 @@
-import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CentralExponentBoundOver
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
+module
+
+public import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Complementary
 import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.NotInSupportOfSubsingleton
-import Mathlib
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.DualClassInvolutiveImports
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.GlobalTheory.BernsteinZelevinskyFiniteness
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothIterPhi
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CentralExponentBoundOver
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantModulus
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.IsComplementaryProductOfIsCuspidal
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsSmoothIterPhi
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -109,7 +156,7 @@ theorem norm_chi (d : ℕ) (s : ℝ) (g : Levi k fun _ : Fin 2 => Fin d) :
     Complex.norm_cpow_eq_rpow_re_of_pos (nabs_pos' k _)]
   simp
 
-set_option maxHeartbeats 2000000 in
+
 theorem someRed_of (h1 : Complementary) (h2 : Compact k) (h3 : Bound k) (h4 : Herm k) (h5 : ProdModel k) :
     SomeRed k := by
   intro x hx hu
@@ -117,7 +164,7 @@ theorem someRed_of (h1 : Complementary) (h2 : Compact k) (h3 : Bound k) (h4 : He
   push_neg at hcon
   set d := x.1 with hdd
   have hd2 : ∀ s : ℝ, ∑ a, (![x.nu (-(s : ℂ)), x.nu (s : ℂ)] a).1 = x.1 + x.1 := fun s => by
-    simp [Fin.sum_univ_two, IrrGL.nu]
+    simp [Fin.sum_univ_two, IrrGL.nu, IrrGL.tw]
   have hirr : ∀ s : ℝ, 0 ≤ s → (prodIrr ![x.nu (-(s : ℂ)), x.nu (s : ℂ)] (hd2 s)).IsIrreducible := by
     intro s hs
     obtain ⟨N, hd, hi⟩ := hcon s hs
@@ -173,7 +220,8 @@ theorem someRed_of (h1 : Complementary) (h2 : Compact k) (h3 : Bound k) (h4 : He
           exact hω t (f 0)
         · simp [g]
       rw [map_smul, piTensor_tprod, hfun, MultilinearMap.map_update_smul, Function.update_eq_self, smul_comm]
-    | add a b ha hb => rw [map_add, ha, hb, smul_add]
+      rfl
+    | add a b ha hb => rw [map_add (f := _), ha, hb, smul_add]
   have hc : ∀ w, twist τ (chi k d s) g w = c • w := fun w => by
     show (chi k d s g : ℂ) • τ g w = c • w
     rw [hτ, smul_smul]

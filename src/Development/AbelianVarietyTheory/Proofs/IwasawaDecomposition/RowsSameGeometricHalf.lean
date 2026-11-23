@@ -1,15 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ChoiceSide
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CongrFunHeq
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ClassSumEq
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ClassSumEq
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RealIoX
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ExistsIsScalar
+public import Formalism.LocalToGlobal.IndefiniteReal.PrincipalLevelFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ConcreteLevelAdelicSubset
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotBaseCondFalse
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.SetUnipotentTranslate
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.YsOfFi
+import Development.AutomorphicArithmetic.PrimeDiscriminants.Scales
+import Formalism.SharpRestriction.InertJacobiLevels.ExtraGat
+
+@[expose] public section
 
 noncomputable section
 section
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.L2 Formalism.L2.Host Formalism.L2.DIV Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.NX GlobalTheory.HeightCounting GlobalTheory.SeriesTie GlobalTheory.ExportSeries NumberField IsDedekindDomain
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.Mem GlobalTheory.Mem.R3.Tr GlobalTheory.HeightCounting.SerCopy
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 4000000
+
+
 
 namespace GlobalTheory.LayerMove.SerUp
 
@@ -29,7 +76,6 @@ set_option hygiene false in
 local notation "bb" => Oth.L (o2 o V' S')
 
 variable (YS) in
-
 def ys : @NExpRealS (Late.D bb) G _ _ Pl0 I0 T (famInThreeCoefficientChange bb A3) Ks _ _ (alg bb iK) (real3 bb R) ((cG)) ((S)) :=
   @NExpRealS.mk (Late.D bb) G _ _ Pl0 I0 T (famInThreeCoefficientChange bb A3) Ks _ _ (alg bb iK) (real3 bb R) ((by with_unfolding_all exact (cG :))) ((by with_unfolding_all exact (S :)))
     (fi := (by with_unfolding_all exact (YS.fi :))) (geq := (by with_unfolding_all exact (YS.geq :))) (rho := (by with_unfolding_all exact (YS.rho :))) (chi := (by with_unfolding_all exact (YS.chi :))) (eF := (by with_unfolding_all exact (YS.eF :))) (bsup := (by with_unfolding_all exact (YS.bsup :)))
@@ -50,13 +96,27 @@ variable (R v₀) in
 theorem norm_iff (ρ : Setup o.L.D.ntw) (i : o.L.D.ntw.Tw) (j : Fin o.L.D.R.m) (b : Bool) (ν : ℂ) :
     @IsNorm (Late.D bb) G _ _ Pl0 I0 T (famInThreeCoefficientChange bb A3) Ks _ _ (alg bb iK) (real3 bb R) ((v₀)) ((j))
       ((rho V' S' ρ).B ((i)) ((j)) b) ν ↔ IsNorm R v₀ (ρ.B i j b) ν := by
-  constructor
-  · rintro ⟨h0, c, ⟨g, c0R, c0L, hF, u, hu, hh⟩, hn⟩
-    exact ⟨h0, c, ⟨(by with_unfolding_all exact (g :)), (by with_unfolding_all exact (c0R :)), (by with_unfolding_all exact (c0L :)),
-      kc% (famTie_imp (a := bb) o.L _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hF), (by with_unfolding_all exact (u :)), (by with_unfolding_all exact (hu :)), (by with_unfolding_all exact (hh :))⟩, (by with_unfolding_all exact (hn :))⟩
-  · rintro ⟨h0, c, ⟨g, c0R, c0L, hF, u, hu, hh⟩, hn⟩
-    exact ⟨h0, c, ⟨(by with_unfolding_all exact (g :)), (by with_unfolding_all exact (c0R :)), (by with_unfolding_all exact (c0L :)),
-      kc% (famTie_imp (a := o.L) bb _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hF), (by with_unfolding_all exact (u :)), (by with_unfolding_all exact (hu :)), (by with_unfolding_all exact (hh :))⟩, (by with_unfolding_all exact (hn :))⟩
+  constructor <;> rintro ⟨h0, c, ⟨g, c0R, c0L, hF, u, hu, hh⟩, hn⟩ <;>
+    refine ⟨h0, c, ⟨(by with_unfolding_all exact g), (by with_unfolding_all exact c0R),
+      (by with_unfolding_all exact c0L), ?_, (by with_unfolding_all exact u),
+      (by with_unfolding_all exact hu), (by with_unfolding_all exact hh)⟩,
+      (by with_unfolding_all exact hn)⟩
+  have hTie := famTie_imp (a := bb) o.L G _ _ Pl0 T _ _ _ _ _ _ _ _ _ _ _ _ _ g c0R c0L hF
+  on_goal 2 =>
+    have hTie := famTie_imp (a := o.L) bb G _ _ Pl0 T _ _ _ _ _ _ _ _ _ _ _ _ _ g c0R c0L hF
+  -- Both proof terms are fully elaborated. The kernel compares the dependent
+  -- level data directly, avoiding the elaborator's repeated unfolding.
+  all_goals
+    run_tac
+      Lean.Elab.Tactic.closeMainGoalUsing `norm_iff fun target _ => do
+        let proof ← Lean.Meta.getLocalDeclFromUserName `hTie
+        let actual ← Lean.instantiateMVars proof.type
+        let target ← Lean.instantiateMVars target
+        let context ← Lean.instantiateLCtxMVars (← Lean.getLCtx)
+        match Lean.Kernel.isDefEq (← Lean.getEnv) context actual target with
+        | .ok true => pure proof.toExpr
+        | .ok false => throwError "famTie_imp has type{actual}\nbut the goal is{target}"
+        | .error error => throwError (error.toMessageData (← Lean.getOptions))
 
 variable (YS v₀) in
 theorem rat_iff {ρ : Setup o.L.D.ntw} (hρ : ρ.Good) (i : o.L.D.ntw.Tw) (j : Fin o.L.D.R.m) (b : Bool) (ν : ℂ) :
@@ -97,51 +157,3 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.HeightCounting.Up GlobalTheory.Mem.SRe GlobalTheory.Mem.R3.Rw
 open GlobalTheory.HeightCounting GlobalTheory.Mem.R3.Tr
 open GlobalTheory.LayerMove
-set_option maxHeartbeats 1000000
-theorem _root_.GlobalTheory.T.rows_same_geometric_half : ∀ (K : Ctx) (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T) (Z : w.Lt) (Wt : Set B.places.Pl) (S' : SStage B w.C Z.W) (N : ∀ u, Submodule (𝓞 B.LL) (Z.V.div.Nu u).V) (h : B.Word → ℝ) (nch : NChoice (w.D Z)) (p0 : BaseLevelRowSide (w.D Z)) (t : RowsT K w Z Wt p0) (p0' : BaseLevelRowSide (w.D (upL Z S' N h))) (t' : RowsT K w (upL Z S' N h) Wt p0'), RowsSame t t' → HEq t'.r.z.geo (R3.Tr.geoHalf (a := ⟨Z.W, Z.V, Z.S, Z.N, Z.G⟩) (upL Z S' N h) (iK := t.r.z.alg) t.r.z.geo) → ∀ (kKs : ↥t.r.z.core.Q.c.F →+* ↥(w.st Z).toD7.LL0) (hk : ∀ x, ((kKs x : ↥(w.st Z).toD7.LL0) : (w.st Z).toD7.what₂.LL) = algebraMap _ (w.st Z).toD7.what₂.LL x) (YS : Formalism.IndefR.NX.NExpRealS t.r.z.R t.r.z.cG (Formalism.IndefR.NX.ratDatR t.r.z.R t.r.z.cG kKs hk)) (kKs' : ↥t'.r.z.core.Q.c.F →+* ↥(w.st (upL Z S' N h)).toD7.LL0) (hk' : ∀ x, ((kKs' x : ↥(w.st (upL Z S' N h)).toD7.LL0) : (w.st (upL Z S' N h)).toD7.what₂.LL) = algebraMap _ (w.st (upL Z S' N h)).toD7.what₂.LL x) (YS' : Formalism.IndefR.NX.NExpRealS t'.r.z.R t'.r.z.cG (Formalism.IndefR.NX.ratDatR t'.r.z.R t'.r.z.cG kKs' hk')), HEq kKs' kKs → HEq YS'.fi YS.fi → HEq YS'.eF YS.eF → ∀ (a : NAllC (w.D Z) nch) (X' : Formalism.L2.NExpTied (w.st (upL Z S' N h)).toD7), HEq X' ((mvOf w Z S' N h).all a).exp → ∀ (PV : ∀ i : Fin (w.st Z).toD7.R.m, Formalism.IndefR.principalLevelFrame.RowPsi (Formalism.IndefR.Links.Vc (w.st Z).toD7 i) (w.st Z).toD7.R.nV) (PV' : ∀ i : Fin (w.st (upL Z S' N h)).toD7.R.m, Formalism.IndefR.principalLevelFrame.RowPsi (Formalism.IndefR.Links.Vc (w.st (upL Z S' N h)).toD7 i) (w.st (upL Z S' N h)).toD7.R.nV), HEq (fun i => (PV' i).ψ) (fun i => (PV i).ψ) → ∀ Pq Pq', HEq Pq' Pq → SerAt (D := (w.st Z).toD7) YS t.r.z.geo.v₀ a.exp PV (TC.cf w.I w.l Z) Pq → Nonempty (SerAt (D := (w.st (upL Z S' N h)).toD7) YS' t'.r.z.geo.v₀ X' PV' (TC.cf w.I w.l (upL Z S' N h)) Pq') := by
-  intro K B f T w Z Wt S' N h nch p0 t p0' t' hs hg
-  cases t' with | mk hX' r' exAt' inGeo' grpAt' grp' mu' exact' untw' emt0' emt' etaF' rowInt' idx' => ?_
-  cases r' with | mk z' holds' Y' ZZ' tupix' => ?_
-  cases z' with | mk Xg' tr' core' alg_eq' R' cG' geo' pins' lev' idG' good' muz' le' ks' => ?_
-  rename_i alg'
-  have e1 : Xg' = t.r.z.Xg := hs.Xg
-  have e2 : tr' = t.r.z.tr := hs.tr
-  subst e1 e2
-  have e3 : core' = R3.Tr.coreJ (a := ⟨Z.W, Z.V, Z.S, Z.N, Z.G⟩) (upL Z S' N h) t.r.z.core := eq_of_heq hs.core
-  subst e3
-  have e4 : alg' = t.r.z.alg := by
-    apply Algebra.algebra_ext
-    intro y
-    apply (w.D Z).what₂.embLL.injective
-    exact (alg_eq' y).trans (t.r.z.alg_eq y).symm
-  subst e4
-  have e5 : R' = R3.Tr.real3 (a := ⟨Z.W, Z.V, Z.S, Z.N, Z.G⟩) (upL Z S' N h) (iK := t.r.z.alg) t.r.z.R := eq_of_heq hs.R
-  subst e5
-  have e6 : cG' = t.r.z.cG := eq_of_heq hs.cG
-  subst e6
-  have e7 : geo' = (by with_unfolding_all exact ((R3.Tr.geoHalf (a := ⟨Z.W, Z.V, Z.S, Z.N, Z.G⟩) (upL Z S' N h) (iK := t.r.z.alg) t.r.z.geo) :)) := eq_of_heq ((by with_unfolding_all exact (hg :)))
-  subst e7
-  intro kKs hk YS kKs' hk' YS' hkk hfi heF a X' hX PV PV' hPV Pq Pq' hPq s
-  have e8 : kKs' = (by with_unfolding_all exact (kKs :)) := eq_of_heq ((by with_unfolding_all exact (hkk :)))
-  subst e8
-  obtain ⟨fi', geq', rho', chi', eF', bsup', act'⟩ := YS'
-  have e9 : fi' = (by with_unfolding_all exact (YS.fi :)) := eq_of_heq ((by with_unfolding_all exact (hfi :)))
-  have e10 : eF' = (by with_unfolding_all exact (YS.eF :)) := eq_of_heq ((by with_unfolding_all exact (heF :)))
-  subst e9 e10
-  have e11 : X' = (by with_unfolding_all exact (((mvOf w Z S' N h).all a).exp :)) := eq_of_heq ((by with_unfolding_all exact (hX :)))
-  have e12 : Pq' = (by with_unfolding_all exact (Pq :)) := eq_of_heq ((by with_unfolding_all exact (hPq :)))
-  subst e11 e12
-  have e13 : (fun i => (PV' i).ψ) = (by with_unfolding_all exact ((fun i => (PV i).ψ) :)) := eq_of_heq ((by with_unfolding_all exact (hPV :)))
-  have e14 : PV' = fun j => @Formalism.IndefR.principalLevelFrame.RowPsi.mk _ _ _ ((by with_unfolding_all exact ((PV ((j))).ψ : _))) ((by with_unfolding_all exact ((PV ((j))).inj : _))) ((by with_unfolding_all exact ((PV ((j))).into : _)))
-      ((by with_unfolding_all exact ((PV ((j))).onto : _))) := funext fun j => SerUp.rowPsi_ext ((by with_unfolding_all exact ((congrFun e13 j) :)))
-  subst e14
-  exact ⟨@SerAt.mk (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_) (_)
-    (ex := (by with_unfolding_all exact ((@SerUp.ex B w.C Z.W ⟨Z.V, Z.S, Z.N, Z.G⟩ (upL Z S' N h).V S' _ _ _ _ _ _ _ _ _ _ t.r.z.alg t.r.z.R t.r.z.cG _ YS
-      t.r.z.geo.v₀ s.ex) :)))
-    (bad := (by with_unfolding_all exact (s.bad :))) (ch := (by with_unfolding_all exact (s.ch :))) (join := (by with_unfolding_all exact (s.join :))) (sup := (by with_unfolding_all exact (s.sup :))) (off := (by with_unfolding_all exact (s.off :)))
-    (lam := (by with_unfolding_all exact (((mvOf w Z S' N h).lam s.lam) :)))
-    (lam_ok := (by with_unfolding_all exact (((mvOf w Z S' N h).lam_ok s.lam_ok) :)))
-    (lam_teich := (by with_unfolding_all exact (((mvOf w Z S' N h).lam_teich s.lam_teich) :)))
-    (lam_C := (by with_unfolding_all exact ((congrArg (mvOf w Z S' N h).cf s.lam_C) :)))
-    (lam_q := (by with_unfolding_all exact (s.lam_q :)))
-    (lam_tie := (by with_unfolding_all exact (((mvOf w Z S' N h).lam_tie s.lam_tie) :)))⟩

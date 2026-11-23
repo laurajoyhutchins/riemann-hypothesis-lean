@@ -1,6 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.CommOfIntegral
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.IsFirstOrderDeformationOfRZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.CommOfIntegral
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
+import GroundTheory.LocalFields.Examples
+import GroundTheory.LocalFields.PadicLogSeries
+import Mathlib.Algebra.Module.StablyFree.Basic
+public import Mathlib.Algebra.Module.Submodule.Union
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.Dynamics.Newton
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.IsDiag
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Nilpotent.Exp
+public import Mathlib.RingTheory.Noetherian.Nilpotent
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open Formalism.ConjugateSelfDual ReciprocityTheory.Gal Module UpperTheory.V.Loc UpperTheory.V.Alg UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.HV UpperTheory.V.Base IsLocalRing
 
 namespace UpperTheory.V.Loc.RankFourLocalLifting
@@ -82,7 +139,7 @@ private theorem liftChar [Group H] {m : Ideal B} {n : ℕ} (hm : m ^ n = ⊥) {m
     fun g => ?_, h0⟩
   · show exp (s (y (a * b))) = exp (s (y a)) * exp (s (y b))
     rw [exp_inj (n1 (a * b)) ((Commute.all _ _).isNilpotent_add (n1 a) (n1 b))
-      (by rw [exp_add_of_commute (Commute.all _ _) (n1 a) (n1 b), h2, h2, h2, map_mul]), map_add,
+      (by rw [exp_add_of_commute (Commute.all _ _) (n1 a) (n1 b), h2, h2, h2, map_mul]), map_add (f := _),
       exp_add_of_commute (Commute.all _ _) (n2 a) (n2 b)]
   · show p (exp (s (y g))) = u g
     rw [map_exp (n2 g), hps, h2]
@@ -213,7 +270,7 @@ private theorem diagAll [Infinite E] {H : Type} [Group H] (χ : Fin 4 → H →*
       induction x using Finsupp.induction_linear with
       | zero => simp
       | add a b ha hb =>
-        simp only [map_add, ← Matrix.diagonal_add, Matrix.add_apply, Matrix.map_apply] at ha hb ⊢
+        simp only [map_add (f := _), ← Matrix.diagonal_add, Matrix.add_apply, Matrix.map_apply] at ha hb ⊢
         rw [ha, hb]
       | single g a =>
         have := congrFun (congrFun (hr g) i) j
@@ -225,7 +282,7 @@ private theorem diagAll [Infinite E] {H : Type} [Group H] (χ : Fin 4 → H →*
       Finsupp.linearCombination E (fun g => r g) y * r g := fun y g => by
     induction y using Finsupp.induction_linear with
     | zero => simp
-    | add a b ha hb => rw [map_add, mul_add, add_mul, ha, hb]
+    | add a b ha hb => rw [map_add (f := _), mul_add, add_mul, ha, hb]
     | single g a => simp [hc]
   obtain ⟨U, rfl⟩ : IsUnit u := unit_mat π hπ (by rw [hu]; simp)
   have hd : ∀ g, ∃ d, r g * (U : M4 R) = (U : M4 R) * Matrix.diagonal d := fun g => by
@@ -299,7 +356,7 @@ private theorem liftSp [CharZero E] [Algebra E R'] (π' : R' →ₐ[E] E) (hπ' 
     (h1 : u'.map (π' : R' →+* E) = 1) (h2 : IsGSp 1 u') : ∃ u : M4 R, u.map (p : R →+* R') = u' ∧ IsGSp 1 u := by
   have h2' : adj u' * u' = 1 := by simpa [IsGSp] using h2
   have hm : (u' + 1).map (π' : R' →+* E) = (2 : E) • (1 : M4 E) := by
-    rw [← RingHom.mapMatrix_apply, map_add, map_one, RingHom.mapMatrix_apply, h1, two_smul]
+    rw [← RingHom.mapMatrix_apply, map_add (f := _), map_one, RingHom.mapMatrix_apply, h1, two_smul]
   obtain ⟨W, hW⟩ := (unit_mat π' hπ' (M := u' + 1) (by rw [hm]; simp)).exists_left_inv
   have hW' : (u' + 1) * W = 1 := mul_eq_one_comm.1 hW
   have hY : adj ((u' - 1) * W) = -((u' - 1) * W) := by
@@ -334,7 +391,7 @@ private theorem liftSp [CharZero E] [Algebra E R'] (π' : R' →ₐ[E] E) (hπ' 
   refine ⟨(1 + Y) * Z, ?_, ?_⟩
   · have e := congrArg (p : R →+* R').mapMatrix hZ
     rw [map_mul, map_sub, map_one, RingHom.mapMatrix_apply, hY4] at e
-    rw [← RingHom.mapMatrix_apply, map_mul, map_add, map_one, RingHom.mapMatrix_apply _ Y, hY4, hY2, mul_assoc, e, mul_one]
+    rw [← RingHom.mapMatrix_apply, map_mul, map_add (f := _), map_one, RingHom.mapMatrix_apply _ Y, hY4, hY2, mul_assoc, e, mul_one]
   · show _ = _
     have e : (1 + -Y) * (1 + Y) = (1 + Y) * (1 - Y) := by noncomm_ring
     have e2 : adj Z * (1 + Y) = 1 := by

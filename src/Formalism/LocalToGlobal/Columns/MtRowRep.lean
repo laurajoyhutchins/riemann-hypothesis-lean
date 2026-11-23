@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.GaloisLevelStructure.DefsFinTyp
-import Formalism.LocalToGlobal.GaloisLevelStructure.Checks
+module
+
+public import Formalism.LocalToGlobal.GaloisLevelStructure.DefsFinTyp
+public import Formalism.LocalToGlobal.GaloisLevelStructure.Checks
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,48 +68,6 @@ theorem finTypRep_inj {Occ : Set (NG.FinTyp L n)} {c c' : FinTypCls Occ}
 theorem finTypRep_mk_iso {Occ : Set (NG.FinTyp L n)} (π : Occ) :
     (finTypRep Occ (Quotient.mk (finTypSetoid Occ) π)).Iso π.1 :=
   Quotient.mk_out (s := finTypSetoid Occ) π
-
-def constSp (L : Type) [Field L] [NumberField L] [IsCMField L] (n : ℕ) : Submodule ℂ (GAf L n → ℂ) :=
-  Submodule.span ℂ {fun _ => (1 : ℂ)}
-
-theorem mem_constSp {f : GAf L n → ℂ} : f ∈ constSp L n ↔ ∃ a : ℂ, f = fun _ => a := by
-  rw [constSp, Submodule.mem_span_singleton]
-  constructor
-  · rintro ⟨a, rfl⟩
-    exact ⟨a, by funext x; simp⟩
-  · rintro ⟨a, rfl⟩
-    exact ⟨a, by funext x; simp⟩
-
-def finTypConst (L : Type) [Field L] [NumberField L] [IsCMField L] (n : ℕ) : NG.FinTyp L n where
-  S := constSp L n
-  stable h f hf := by
-    obtain ⟨a, rfl⟩ := mem_constSp.mp hf
-    exact mem_constSp.mpr ⟨a, rfl⟩
-  smooth f hf := by
-    obtain ⟨a, rfl⟩ := mem_constSp.mp hf
-    exact ⟨1, one_pos, fun _ _ => rfl⟩
-  ne := by
-    intro h
-    have h1 : (fun _ => (1 : ℂ)) ∈ constSp L n := Submodule.subset_span rfl
-    rw [h, Submodule.mem_bot] at h1
-    have := congrFun h1 1
-    simp at this
-  irr S' hle _ := by
-    by_cases hb : S' = ⊥
-    · exact Or.inl hb
-    · right
-      obtain ⟨f, hf, hf0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hb
-      obtain ⟨a, rfl⟩ := mem_constSp.mp (hle hf)
-      have ha : a ≠ 0 := by
-        rintro rfl
-        exact hf0 rfl
-      refine le_antisymm hle ?_
-      rw [constSp, Submodule.span_le, Set.singleton_subset_iff]
-      have e : (fun _ => (1 : ℂ)) = a⁻¹ • (fun _ : GAf L n => a) := by
-        funext x
-        simp [ha]
-      rw [SetLike.mem_coe, e]
-      exact S'.smul_mem _ hf
 
 end Gen
 

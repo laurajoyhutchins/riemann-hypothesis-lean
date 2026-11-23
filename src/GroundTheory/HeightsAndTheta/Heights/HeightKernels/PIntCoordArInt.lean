@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsIntCoordArInt
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopBasisChange
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterSt
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsIntCoordArInt
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopBasisChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -173,19 +218,19 @@ theorem ptsIntegralAt_eq (hSheet : SheetIndepStatement) (hAB : A * B = 1) (hBA :
   by_cases h₂ : ∃ γ₂, IsSheet (Q.comap (intCoordSubst A)) Ψ₂ y w₂ γ₂
   · have h : ∃ γ, IsSheet Q (Ψ₂ ∘ₗ segreMap A) y (segreMap B w₂) γ :=
       ⟨_, isSheet_pt hAB hBA h₂.choose_spec⟩
-    rw [dif_pos h₂, dif_pos h]
+    rw [dite_eq_left h₂, dite_eq_left h]
     have key := hy _ _ _ (isSheet_pt hAB hBA h₂.choose_spec) h.choose_spec
     simp only [pot] at key
     simp only [logNorm_pt hBA]
     exact key
   · have h : ¬ ∃ γ, IsSheet Q (Ψ₂ ∘ₗ segreMap A) y (segreMap B w₂) γ :=
       fun ⟨γ, hγ⟩ => h₂ ⟨_, isSheet_pt' hAB hBA hγ⟩
-    rw [dif_neg h₂, dif_neg h]
+    rw [dite_eq_right h₂, dite_eq_right h]
 
 end IntegralCoordArithIntersection
 
-open IntegralCoordArithIntersection in
 
+open IntegralCoordArithIntersection in
 theorem IntCoordArInt.proof (hInd : PtsIndepStatement) (hSheet : SheetIndepStatement) :
     IntCoordArInt.Statement := by
   intro T T₂ _ _ _ _ A B hAB hBA Q e L Ab s hQ hL hAb hs
@@ -194,12 +239,12 @@ theorem IntCoordArInt.proof (hInd : PtsIndepStatement) (hSheet : SheetIndepState
       IsGoodProj (Q.comap (intCoordSubst A)) Ψ₂
   · have h : ∃ Ψ : (((k : Unit) → dualBlocks T k) → ℂ) →ₗ[ℂ] (Fin (e + 1) → ℂ), IsGoodProj Q Ψ :=
       ⟨_, isGoodProj_comp hAB hBA h₂.choose_spec⟩
-    rw [dif_pos h₂, dif_pos h, ptsIntegralAt_eq hSheet hAB hBA Q L Ab s hQ hL hAb hs _ h₂.choose_spec]
+    rw [dite_eq_left h₂, dite_eq_left h, ptsIntegralAt_eq hSheet hAB hBA Q L Ab s hQ hL hAb hs _ h₂.choose_spec]
     exact hInd Unit (dualBlocks T) Q e _ _ L Ab s hQ (isGoodProj_comp hAB hBA h₂.choose_spec) h.choose_spec
       hL hAb hs
   · have h : ¬ ∃ Ψ : (((k : Unit) → dualBlocks T k) → ℂ) →ₗ[ℂ] (Fin (e + 1) → ℂ), IsGoodProj Q Ψ :=
       fun ⟨Ψ, hΨ⟩ => h₂ ⟨_, isGoodProj_comp' hAB hBA hΨ⟩
-    rw [dif_neg h₂, dif_neg h]
+    rw [dite_eq_right h₂, dite_eq_right h]
 
 end
 

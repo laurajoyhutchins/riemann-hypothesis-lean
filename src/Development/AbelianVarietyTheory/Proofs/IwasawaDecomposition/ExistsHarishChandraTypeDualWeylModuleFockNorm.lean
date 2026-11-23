@@ -1,9 +1,53 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Formalism.LocalRingCardinality.DataCoeff
-import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUnitaryMulTriangular
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIrreducibleSmallRepUnitary
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasModelOfAntitone
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsUnitaryMulTriangular
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HasModelOfAntitone
+import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ExistsGoodFamily
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsIrreducibleSmallRepUnitary
+import Formalism.GradedWeylDivisibility.FinalC
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDlatLemmas
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDrowLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Formalism.BasicNotions Formalism.MainNotions.S GlobalTheory.DualWeyl GlobalTheory.CompactDS
 open Formalism.GradedWeylDivisibility (rowAct rowDeg)
@@ -71,7 +115,7 @@ theorem cdom_of_partial_sums (μ ν : Fin n → ℕ)
     · simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 theorem cdom_of_coeff_ne_zero {la : Fin n → ℕ} {f : Pol n ℂ} (hf : f ∈ nabla la ℂ) (m : Fin n × Fin n →₀ ℕ)
-    (hm : coeff m f ≠ 0) : CDom (allPos n) (fun a => (rowDeg m a : ℝ)) (fun a => (la a : ℝ)) := by
+    (hm : AddMonoidAlgebra.coeff f m ≠ 0) : CDom (allPos n) (fun a => (rowDeg m a : ℝ)) (fun a => (la a : ℝ)) := by
   unfold nabla at hf
   rw [Formalism.GradedWeylDivisibility.standardMonomialSpanDomain ℂ n n la] at hf
   by_contra hc
@@ -84,8 +128,8 @@ theorem cdom_of_coeff_ne_zero {la : Fin n → ℕ} {f : Pol n ℂ} (hf : f ∈ n
     obtain ⟨h1, h2⟩ := Formalism.GradedWeylDivisibility.bidetDominance ℂ n n K sz hsz I m (mem_support_iff.2 h0)
     exact hc (cdom_of_partial_sums _ _ h1 h2)
   | zero => simp
-  | add x y _ _ hx hy => rw [coeff_add, hx, hy, add_zero]
-  | smul c x _ hx => rw [coeff_smul, hx, smul_zero]
+  | add x y _ _ hx hy => rw [MvPolynomial.coeff_add, hx, hy, add_zero]
+  | smul c x _ hx => rw [MvPolynomial.coeff_smul, hx, smul_zero]
 
 def act (lam : DomWeight n) (g : Matrix (Fin n) (Fin n) ℂ) : Space lam.natW →L[ℂ] Space lam.natW :=
   LinearMap.toContinuousLinearMap
@@ -129,9 +173,9 @@ theorem isURepOn_act (lam : DomWeight n) : IsURepOn (UJset (allPos n)) (act lam)
     exact h1.smul (continuous_rhoSpace v)
 
 theorem coeff_torus (lam : DomWeight n) (θ : Fin n → ℝ) (x : Space lam.natW) (m : Fin n × Fin n →₀ ℕ) :
-    coeff m (incl lam (act lam (torus θ) x)) =
-      chr (fun a => (rowDeg m a : ℝ) + lam.detShift) θ * coeff m (incl lam x) := by
-  rw [incl_act, torus, Matrix.diagonal_transpose, coeff_smul, Formalism.GradedWeylDivisibility.ldrow_coeff_rowAct_diag, Matrix.det_diagonal,
+    AddMonoidAlgebra.coeff (incl lam (act lam (torus θ) x)) m =
+      chr (fun a => (rowDeg m a : ℝ) + lam.detShift) θ * AddMonoidAlgebra.coeff (incl lam x) m := by
+  rw [incl_act, torus, Matrix.diagonal_transpose, MvPolynomial.coeff_smul, Formalism.GradedWeylDivisibility.ldrow_coeff_rowAct_diag, Matrix.det_diagonal,
     smul_eq_mul, mul_left_comm, mul_comm]
   congr 1
   simp only [← Complex.exp_nat_mul]
@@ -170,8 +214,8 @@ theorem isKTypeOf_act (lam : DomWeight n) : IsKTypeOf (allPos n) (act lam) (fun 
       ext m
       have h1 := coeff_torus lam θ (toSpace _ ⟨_, extremal_mem ha⟩) m
       refine h1.trans ?_
-      rw [map_smul, coeff_smul, smul_eq_mul]
-      by_cases hm : coeff m (incl lam (toSpace _ ⟨_, extremal_mem ha⟩)) = 0
+      rw [map_smul, MvPolynomial.coeff_smul, smul_eq_mul]
+      by_cases hm : AddMonoidAlgebra.coeff (incl lam (toSpace _ ⟨_, extremal_mem ha⟩)) m = 0
       · rw [hm, mul_zero, mul_zero]
       have h2 := Formalism.GradedWeylDivisibility.hwRowWeight ℂ n n le_rfl lam.natW ha hm
       have h3 : (fun a => (rowDeg m a : ℝ) + lam.detShift) = fun a => (lam.w a : ℝ) := by
@@ -186,7 +230,7 @@ theorem isKTypeOf_act (lam : DomWeight n) : IsKTypeOf (allPos n) (act lam) (fun 
       refine chr_inj fun θ => ?_
       have h2 := coeff_torus lam θ v m
       have h3 : act lam (torus θ) v = chr μ θ • v := hw θ (by rw [kset_eq]; exact torus_mem θ)
-      rw [h3, map_smul, coeff_smul, smul_eq_mul] at h2
+      rw [h3, map_smul, MvPolynomial.coeff_smul, smul_eq_mul] at h2
       exact mul_right_cancel₀ hm h2
     have h4 := cdom_add (cdom_of_coeff_ne_zero (incl_mem lam v) m hm)
       (cdom_refl (allPos n) fun _ => (lam.detShift : ℝ))

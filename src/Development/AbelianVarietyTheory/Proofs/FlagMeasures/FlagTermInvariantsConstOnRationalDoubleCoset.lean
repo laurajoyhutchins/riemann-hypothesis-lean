@@ -1,15 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.VolPin
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.Vanish
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PlacesOf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SymmMemOfMem
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.SpanFrameLtSucc
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.LeadMinorEMulUpper
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SameRowSameCosetScalarCorankOneStatement
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PairValPf
 import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.SatGram
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PairValPf
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SameRowSameCosetScalarCorankOneStatement
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SymmMemOfMem
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.LeadMinorEMulUpper
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermAttractorConstant.SpanFrameLtSucc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
+
+@[expose] public section
 
 open MeasureTheory NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.HidaSetting Formalism.L2.SG.TermOp
   Formalism.L2.SG.Full Formalism.L2.SG.RowsConc Formalism.L2.SG.NGData Formalism.L2.SG.TermLoc GlobalTheory.HL GlobalTheory.LocOver
@@ -29,18 +68,18 @@ theorem mem_orth_iff' {U : Submodule E S.V} {v : S.V} : v ∈ orth S U ↔ ∀ x
 
 theorem frame_mapLF {T : E} {γ : S.V ≃ₗ[E] S.V} (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom S.hT) (F : LFlag S r T)
     (a : Fin (r + 1)) : frame (mapLF γ F) a = γ (frame F a) := by
-  unfold mapLF; rw [dif_pos hγ]
+  unfold mapLF; rw [dite_eq_left hγ]
   induction a using Fin.lastCases with
   | last => simp [frame, FlagG.fvec, mapFlag]
   | cast i => simp [frame, FlagG.fvec, mapFlag]
 
 theorem zt_mapLF {T : E} {γ : S.V ≃ₗ[E] S.V} (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom S.hT) (F : LFlag S r T) :
     (mapLF γ F).zt = γ F.zt := by
-  unfold mapLF; rw [dif_pos hγ]
+  unfold mapLF; rw [dite_eq_left hγ]
 
 theorem Xflag_mapLF {T : E} {γ : S.V ≃ₗ[E] S.V} (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom S.hT) (F : LFlag S r T) (j : ℕ) :
     Xflag (mapLF γ F) j = (Xflag F j).map (γ : S.V →ₗ[E] S.V) := by
-  unfold mapLF; rw [dif_pos hγ]
+  unfold mapLF; rw [dite_eq_left hγ]
   show Submodule.span E ((fun a => γ (F.fl.e a)) '' {i | i.1 < j}) =
     (Submodule.span E (F.fl.e '' {i | i.1 < j})).map (γ : S.V →ₗ[E] S.V)
   rw [Submodule.map_span, Set.image_image]
@@ -48,7 +87,7 @@ theorem Xflag_mapLF {T : E} {γ : S.V ≃ₗ[E] S.V} (hγ : γ ∈ Formalism.Her
 
 theorem Xsp_mapLF {T : E} {γ : S.V ≃ₗ[E] S.V} (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom S.hT) (F : LFlag S r T) :
     Xsp (mapLF γ F) = (Xsp F).map (γ : S.V →ₗ[E] S.V) := by
-  unfold mapLF; rw [dif_pos hγ]
+  unfold mapLF; rw [dite_eq_left hγ]
   show Submodule.span E (Set.range fun a => γ (F.fl.e a)) =
     (Submodule.span E (Set.range F.fl.e)).map (γ : S.V →ₗ[E] S.V)
   rw [Submodule.map_span, ← Set.range_comp]
@@ -66,11 +105,11 @@ section D
 
 variable {D : D7}
 
-theorem nlam_top_of_nrat {T : D.host.E} {F : LFlag (VS D) D.R.rS T} {n : (VS D).V ≃ₗ[D.host.E] (VS D).V}
+theorem nlam_top_of_nrat {T : D.host.E} {F : LFlag (D.sp.Y 0) D.R.rS T} {n : (VS D).V ≃ₗ[D.host.E] (VS D).V}
     (hn : n ∈ NRat F) : n ∈ NLam (⊤ : Submodule (𝓞 D.host.E) (VS D).V) F :=
   ⟨⟨hn.1, gmap_top n⟩, hn.2.1, hn.2.2⟩
 
-theorem conj_nlam_top {T : D.host.E} {G : LFlag (VS D) D.R.rS T} {γ m : (VS D).V ≃ₗ[D.host.E] (VS D).V}
+theorem conj_nlam_top {T : D.host.E} {G : LFlag (D.sp.Y 0) D.R.rS T} {γ m : (VS D).V ≃ₗ[D.host.E] (VS D).V}
     (hγ : γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT) (hm : m ∈ NRat G) :
     γ * m * γ⁻¹ ∈ NLam (⊤ : Submodule (𝓞 D.host.E) (VS D).V) (mapLF γ G) := by
   obtain ⟨hi, hf, hp⟩ := hm
@@ -202,7 +241,7 @@ theorem pt_eq (t₀ t : TauC Y u u') (hrl : t.relevant ↔ t₀.relevant) (hat :
       rintro ⟨w, hw, hr⟩
       exact hx ⟨w, (hat w).1 hw, hrl.1 hr⟩
     unfold Formalism.L2.SG.PairVal.ptOf
-    rw [dif_neg hx, dif_neg hx']
+    rw [dite_eq_right hx, dite_eq_right hx']
 
 end GlobalTheory.HL.CosetConst
 

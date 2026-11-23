@@ -1,7 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.WittOnFalse
-import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymmCocycleApplyFinsetSumStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FormalCoboundarySmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymmCocycleApplyFinsetSumStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -42,12 +84,6 @@ theorem subst_powerSeriesEvalTwoGroups {τ τ' : Type} [Finite τ] {u v : Fin d 
   congr 1
   funext s
   cases s <;> rfl
-
-theorem powerSeriesEvalTwoGroups_X {τ : Type} {u v : Fin d → MvPowerSeries τ R} (hu : ∀ i, constantCoeff (u i) = 0)
-    (hv : ∀ i, constantCoeff (v i) = 0) (s : Fin d ⊕ Fin d) :
-    at2 (X s) u v = Sum.elim u v s := by
-  unfold at2
-  rw [subst_X (hs2 hu hv)]
 
 theorem op_addLaw {τ : Type} {u v : Fin d → MvPowerSeries τ R} (hu : ∀ i, constantCoeff (u i) = 0)
     (hv : ∀ i, constantCoeff (v i) = 0) : op (addLaw R d) u v = u + v := by
@@ -103,8 +139,8 @@ namespace GlobalTheory.SymCocAdd
 
 variable {R : Type} [CommRing R] {d : ℕ}
 
-variable (R d) in
 
+variable (R d) in
 def PtGrp (τ : Type) : AddSubgroup (Fin d → MvPowerSeries τ R) where
   carrier := {u | ∀ i, constantCoeff (u i) = 0}
   zero_mem' := fun i => by simp
@@ -151,8 +187,8 @@ theorem subst_single {τ : Type} {a : Fin d → MvPowerSeries τ R} (ha : ∀ t,
   · subst h; exact subst_X hS i
   · rw [← coe_substAlgHom hS, map_zero]
 
-variable (R) in
 
+variable (R) in
 def corr (c : MvPowerSeries (Fin d ⊕ Fin d) R) : MvPowerSeries (Fin d) R :=
   ∑ m : Fin d, at2 c (∑ j ∈ Finset.univ.filter (· < m), Pi.single j (X j))
     (Pi.single m (X m) : Fin d → MvPowerSeries (Fin d) R)
@@ -164,6 +200,7 @@ theorem subst_corr {τ : Type} {a : Fin d → MvPowerSeries τ R} (ha : ∀ t, c
   classical
   have hS : HasSubst a := hasSubst_of_constantCoeff_zero ha
   unfold corr
+
   rw [← coe_substAlgHom hS, map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [coe_substAlgHom hS, subst_powerSeriesEvalTwoGroups (cc_sum_single _ _ (fun j => by simp))
@@ -173,8 +210,8 @@ end GlobalTheory.SymCocAdd
 
 namespace GlobalTheory
 
-open GlobalTheory.SymCocAdd in
 
+open GlobalTheory.SymCocAdd in
 theorem symmetricCocycle_additive_eq_coboundary_add_alt (R : Type) [CommRing R] (d : ℕ) (c : MvPowerSeries (Fin d ⊕ Fin d) R)
     (hc : IsCoc (addLaw R d) c) (h0 : constantCoeff c = 0) :
     ∃ b : MvPowerSeries (Fin d) R, c = cob1 (addLaw R d) b +

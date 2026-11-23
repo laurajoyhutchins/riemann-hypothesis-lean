@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.L2UnitaryRepresentationData
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsFundamentalDomainOfHaar
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasSignatureFromBlocks
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FrameExistsSignCompat
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.L2UnitaryRepresentationData
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FrameExistsSignCompat
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasSignatureFromBlocks
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Upqcpt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.S Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Datum
 open Formalism.IndefR.Mult (DSModel dualPar parA parB)
@@ -55,8 +99,9 @@ theorem hasSignature_of_signCompat {n p q : ℕ} {ε : Fin n → Bool} {P : Matr
 private theorem hT_eq_sum_frame_repr {D : D7} (T : HSp D) (x y : T.V) :
     T.hT x y = ∑ j, ∑ j', star (T.frame.repr x j) * T.gram j j' * T.frame.repr y j' := by
   conv_lhs => rw [← T.frame.sum_repr x, ← T.frame.sum_repr y]
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul,
-    Finset.mul_sum]
+  Finset.mul_sum]
   conv_lhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun j' _ => ?_
   simp only [Formalism.BasicNotions.HSpace.gram, starRingEnd_apply, RingHom.id_apply]
@@ -68,8 +113,9 @@ private theorem gram_tauE_frame_repr_eq_hT {D : D7} (T : HSp D) (τ : D.what₂.
       Matrix.of fun k l => tauE D τ (T.hT (w k) (w' l)) := by
   ext k l
   rw [Matrix.of_apply, hT_eq_sum_frame_repr]
+
   simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, Matrix.of_apply, map_sum, map_mul,
-    GlobalTheory.FockCompare.tauE_star, Finset.sum_mul]
+  GlobalTheory.FockCompare.tauE_star, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun j' _ => ?_
   simp [gramAt, Matrix.map_apply]

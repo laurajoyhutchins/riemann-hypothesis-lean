@@ -1,7 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColDerApply
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDensityOfImmersion
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralDetCharacterFockColumnSubstitutionEqZero
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ColDerApply
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDensityOfImmersion
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralDetCharacterFockColumnSubstitutionEqZero
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,36 +62,38 @@ open GlobalTheory.MinorFrame
 
 variable {ι : Type} [Fintype ι] [DecidableEq ι]
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem totalDegree_colSub_le {d a : ℕ} (g : ι → Matrix (Fin a) (Fin a) ℂ) (P : Pol ι d a) :
     (colSub g P).totalDegree ≤ P.totalDegree := by
   have hX : ∀ y : Var ι d a, (colSub g (X y : Pol ι d a)).totalDegree ≤ 1 := by
     intro y
     rw [colSub, aeval_X]
-    refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun j _ => ?_)
+    refine (totalDegree_finsetSum _ _).trans (Finset.sup_le fun j _ => ?_)
     refine (totalDegree_mul _ _).trans ?_
     rw [totalDegree_C, totalDegree_X]
   conv_lhs => rw [as_sum P]
+
   rw [map_sum]
-  refine (totalDegree_finset_sum _ _).trans (Finset.sup_le fun m hm => ?_)
+  refine (totalDegree_finsetSum _ _).trans (Finset.sup_le fun m hm => ?_)
   refine le_trans ?_ (le_totalDegree hm)
   rw [monomial_eq, map_mul, algHom_C, algebraMap_eq, Finsupp.prod, map_prod]
   refine (totalDegree_mul _ _).trans ?_
   rw [totalDegree_C, zero_add]
-  refine (totalDegree_finset_prod _ _).trans (Finset.sum_le_sum fun y _ => ?_)
+  refine (totalDegree_finsetProd _ _).trans (Finset.sum_le_sum fun y _ => ?_)
   rw [map_pow]
   refine (totalDegree_pow _ _).trans ?_
   simpa using Nat.mul_le_mul_left (m y) (hX y)
 
 theorem hasDerivAt_dual_of_coeff {σ : Type} [Finite σ] (l : MvPolynomial σ ℂ →ₗ[ℂ] ℂ) (N : ℕ)
     (u : ℝ → MvPolynomial σ ℂ) (u' : MvPolynomial σ ℂ) (t : ℝ) (hu : ∀ s, (u s).totalDegree ≤ N)
-    (hd : ∀ m, HasDerivAt (fun s => coeff m (u s)) (coeff m u') t) : HasDerivAt (fun s => l (u s)) (l u') t := by
+    (hd : ∀ m, HasDerivAt (fun s => AddMonoidAlgebra.coeff (u s) m) (AddMonoidAlgebra.coeff u' m) t) : HasDerivAt (fun s => l (u s)) (l u') t := by
   classical
   let A : Finset (σ →₀ ℕ) := (Finsupp.finite_of_degree_le (σ := σ) N).toFinset ∪ u'.support
-  have key : ∀ P : MvPolynomial σ ℂ, P.support ⊆ A → l P = ∑ m ∈ A, coeff m P * l (monomial m 1) := by
+  have key : ∀ P : MvPolynomial σ ℂ, P.support ⊆ A → l P = ∑ m ∈ A, AddMonoidAlgebra.coeff P m * l (monomial m 1) := by
     intro P hP
     conv_lhs => rw [as_sum P]
+
     rw [map_sum]
     refine Finset.sum_subset_zero_on_sdiff hP (fun m hm => ?_) (fun m _ => ?_)
     · rw [notMem_support_iff.1 (Finset.mem_sdiff.1 hm).2, zero_mul]
@@ -81,8 +132,8 @@ theorem colSub_atPl_one {d a : ℕ} (τ : ι) (P : Pol ι d a) : colSub (atPl τ
 theorem colSub_exp_of_colDer : ∀ {ι : Type} [Fintype ι] [DecidableEq ι] (d a : ℕ) (τ : ι) (c : ℕ) (Q : Type) [AddCommGroup Q] [Module ℂ Q]
     (q : GlobalTheory.MinorFrame.Pol ι d a →ₗ[ℂ] Q),
     (∀ (S : Matrix (Fin a) (Fin a) ℂ) (R : GlobalTheory.MinorFrame.Pol ι d a) (m : GlobalTheory.MinorFrame.Var ι d a →₀ ℕ),
-      HasDerivAt (fun h : ℝ => MvPolynomial.coeff m (GlobalTheory.MinorFrame.colSub (GlobalTheory.ColLie.atPl τ (NormedSpace.exp ((h : ℂ) • S))) R))
-        (MvPolynomial.coeff m (GlobalTheory.ColLie.colDer τ S R)) 0) →
+      HasDerivAt (fun h : ℝ => AddMonoidAlgebra.coeff (GlobalTheory.MinorFrame.colSub (GlobalTheory.ColLie.atPl τ (NormedSpace.exp ((h : ℂ) • S))) R) m)
+        (AddMonoidAlgebra.coeff (GlobalTheory.ColLie.colDer τ S R) m) 0) →
     (∀ S : Matrix (Fin a) (Fin a) ℂ, S.conjTranspose = -S → ∀ P, q (GlobalTheory.ColLie.colDer τ S P) = ((c : ℂ) * S.trace) • q P) →
     ∀ S : Matrix (Fin a) (Fin a) ℂ, S.conjTranspose = -S → ∀ P,
       q (GlobalTheory.MinorFrame.colSub (GlobalTheory.ColLie.atPl τ (NormedSpace.exp S)) P) = ((NormedSpace.exp S).det ^ c) • q P := by

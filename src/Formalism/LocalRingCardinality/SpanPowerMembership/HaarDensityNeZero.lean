@@ -1,6 +1,54 @@
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsDensity
-import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsOmegaLeb
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.NormLeSum
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsDensity
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExistsOmegaLeb
+public import Mathlib.Analysis.Matrix.Normed
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Upqcpt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,36 +61,12 @@ variable (P Q : ℕ)
 
 local notation "J" => Formalism.UG.Jpq P Q
 
-instance : CompleteSpace (MM P Q) := FiniteDimensional.complete ℝ _
-
 def matHom : UpqT P Q →* MM P Q where
   toFun := UpqT.mat
   map_one' := rfl
   map_mul' _ _ := rfl
 
 theorem mat_mem (g : UpqT P Q) : (UpqT.mat g)ᴴ * J * UpqT.mat g = J := g.2
-
-theorem mat_left_inv (g : UpqT P Q) : (J * (UpqT.mat g)ᴴ * J) * UpqT.mat g = 1 := by
-  have h := mat_mem P Q g
-  calc J * (UpqT.mat g)ᴴ * J * UpqT.mat g = J * ((UpqT.mat g)ᴴ * J * UpqT.mat g) := by
-        simp only [Matrix.mul_assoc]
-    _ = 1 := by rw [h, J_sq]
-
-theorem mat_inv_eq (g : Formalism.UG.Upq P Q) :
-    (((g : GL (Fin P ⊕ Fin Q) ℂ)⁻¹ : GL (Fin P ⊕ Fin Q) ℂ) : MM P Q) =
-      J * (UpqT.mat (P := P) (Q := Q) g)ᴴ * J := by
-  have h1 := mat_left_inv P Q g
-  have h2 : UpqT.mat (P := P) (Q := Q) g *
-      (((g : GL (Fin P ⊕ Fin Q) ℂ)⁻¹ : GL (Fin P ⊕ Fin Q) ℂ) : MM P Q) = 1 :=
-    Units.mul_inv (g : GL (Fin P ⊕ Fin Q) ℂ)
-  calc (((g : GL (Fin P ⊕ Fin Q) ℂ)⁻¹ : GL (Fin P ⊕ Fin Q) ℂ) : MM P Q)
-      = (J * (UpqT.mat (P := P) (Q := Q) g)ᴴ * J * UpqT.mat (P := P) (Q := Q) g) *
-          (((g : GL (Fin P ⊕ Fin Q) ℂ)⁻¹ : GL (Fin P ⊕ Fin Q) ℂ) : MM P Q) := by
-        rw [h1, Matrix.one_mul]
-    _ = J * (UpqT.mat (P := P) (Q := Q) g)ᴴ * J := by
-        rw [Matrix.mul_assoc (J * (UpqT.mat (P := P) (Q := Q) g)ᴴ * J), h2, Matrix.mul_one]
-
-theorem mat_cont : Continuous (UpqT.mat : UpqT P Q → MM P Q) := Units.continuous_val.comp continuous_subtype_val
 
 theorem mat_inducing : IsInducing (UpqT.mat : UpqT P Q → MM P Q) := by
   exact Units.isOpenEmbedding_val.toIsEmbedding.toIsInducing.comp Topology.IsInducing.subtypeVal
@@ -84,11 +108,6 @@ instance (N : ℕ) : CompactSpace (UpqT N 0) :=
 theorem exp_neg_mul' (X : MM P Q) : exp (-X) * exp X = 1 := by
   have h := NormedSpace.exp_add_of_commute (Commute.neg_left (Commute.refl X))
   rw [neg_add_cancel, NormedSpace.exp_zero] at h
-  exact h.symm
-
-theorem exp_mul_neg' (X : MM P Q) : exp X * exp (-X) = 1 := by
-  have h := NormedSpace.exp_add_of_commute (Commute.neg_right (Commute.refl X))
-  rw [add_neg_cancel, NormedSpace.exp_zero] at h
   exact h.symm
 
 theorem exp_conjJ (A : MM P Q) : exp (J * A * J) = J * exp A * J := by
@@ -136,8 +155,8 @@ def chart : Chart (lieU P Q) (UpqT P Q) where
       rw [show UpqT.mat g = exp Z from hg] at this
       exact this
     rw [mem_lieU_iff]
-    calc J * (-Zᴴ) * J = logA (MM P Q) (exp (J * (-Zᴴ) * J)) := h2.symm
-      _ = logA (MM P Q) (exp Z) := congrArg (logA (MM P Q)) (exp_theta P Q Z hm)
+    calc J * (-Zᴴ) * J = logA (𝔸 := MM P Q) (exp (J * (-Zᴴ) * J)) := h2.symm
+      _ = logA (𝔸 := MM P Q) (exp Z) := congrArg (logA (𝔸 := MM P Q)) (exp_theta P Q Z hm)
       _ = Z := h1
 
 theorem norm_le_sum (X : MM P Q) : ‖X‖ ≤ ∑ i, ∑ j, ‖X i j‖ := by
@@ -220,7 +239,5 @@ def cdHaar : CDHaar where
       have h := omegaDensity_smul (P + Q) 0 (haar_density_spec (P + Q) 0) _ (scale_ne_top (P + Q) 0)
       rw [scale_mul (P + Q) 0] at h
       exact h⟩
-
-theorem cdHaar_nonempty : Nonempty CDHaar := ⟨cdHaar⟩
 
 end Formalism.BasicNotions.Examples₂.CD

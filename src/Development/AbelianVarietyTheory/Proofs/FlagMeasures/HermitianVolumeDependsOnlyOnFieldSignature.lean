@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.SameKindIsometric
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFrameOfHasSignature
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianSpacesSameSignatureIsometricStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFiniteAdelicPointLatticeEqSelfDualStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaugeVolumeEqOfSemilinearIsometryGenusStatement
+module
+
+public import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.SameKindIsometric
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFiniteAdelicPointLatticeEqSelfDualStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsFrameOfHasSignature
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GaugeVolumeEqOfSemilinearIsometryGenusStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianSpacesSameSignatureIsometricStatement
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SignatureConjugationInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField Matrix Finset Formalism.MainNotions.S GlobalTheory.Count GlobalTheory.FlagMeas
 
@@ -37,11 +82,11 @@ theorem eq_or_conj {E : Type} [Field E] [CharZero E] [StarRing E] (φ ψ : E →
   rcases sq_eq_sq_iff_eq_or_eq_neg.1 hsq with h1 | h1
   · left; ext a
     obtain ⟨u, w, hu, hw, rfl⟩ := dec a
-    simp only [map_add, map_mul, h u hu, h w hw, h1]
+    simp only [map_add (f := _), map_mul, h u hu, h w hw, h1]
   · right; ext a
     obtain ⟨u, w, hu, hw, rfl⟩ := dec a
     rw [RingHom.comp_apply, ← hψ, star_add, star_mul', hu, hw, hs]
-    simp only [map_add, map_mul, map_neg, h u hu, h w hw, h1]
+    simp only [map_add (f := _), map_mul, map_neg, h u hu, h w hw, h1]
 
 theorem hasSignature_all (I : AutInst) {p q : ℕ} (h : HasSig I p q) (φ : I.E →+* ℂ) :
     Formalism.UG.HasSignature (I.J.map φ) p q := by
@@ -124,10 +169,7 @@ theorem exists_image (e : E' ≃+* E) (he : ∀ y, e (star y) = star (e y)) (J :
       exact ⟨σ c, rfl⟩
   have hmem : ∀ y, y ∈ L ↔ f y ∈ L.map f := fun y =>
     ⟨fun h => ⟨y, h, rfl⟩, fun ⟨z, hz, h⟩ => hinj h ▸ hz⟩
-  refine ⟨L.map f, ⟨hL.fg.map f, ?_⟩, ?_, hmem⟩
-  · have : ((L.map f : Submodule (𝓞 E) (Fin n → E)) : Set (Fin n → E)) = g '' (L : Set (Fin n → E')) := rfl
-    rw [this, ← Submodule.map_span, hL.span_eq_top, Submodule.map_top, LinearMap.range_eq_top]
-    exact hsurj
+  refine ⟨L.map f, Submodule.IsLattice.of_fg E (hL.fg.map f), ?_, hmem⟩
   · intro x
     obtain ⟨x, rfl⟩ := hsurj x
     rw [← hmem, hd]
@@ -176,8 +218,8 @@ theorem volumeInvariant : VolumeInvariant := by
   rintro I I' p q ⟨e, he⟩ h h' c μf _ _ c' μf' _ _ hc hc'
   have hn : I'.n = I.n := (rank_eq I' h').trans (rank_eq I h).symm
   obtain ⟨A, Λ, hA, hΛ, hd, hmem⟩ := exists_isometry I.cm.cmUnram e he hn I.J I'.J I.J_herm I'.J_herm
-    I.J_det I'.J_det I.L ⟨I.L_fg, I.L_span⟩ (by simpa only [hform_eq] using I.L_dual)
-    I'.L ⟨I'.L_fg, I'.L_span⟩ (by simpa only [hform_eq] using I'.L_dual)
+    I.J_det I'.J_det I.L (Submodule.IsLattice.of_fg I.E I.L_fg) (by simpa only [hform_eq] using I.L_dual)
+    I'.L (Submodule.IsLattice.of_fg I'.E I'.L_fg) (by simpa only [hform_eq] using I'.L_dual)
     (hasSignature_all I h) (hasSignature_all I' h')
   obtain ⟨xf, hx⟩ := GlobalTheory.T.exists_finiteAdelicPoint_lattice_eq_selfDual I Λ hΛ (by simpa only [hform_eq] using hd)
   exact GlobalTheory.T.gaugeVolume_eq_of_semilinear_isometry_genus I I' e A xf he hn hA (hx ▸ hmem) c μf c' μf' hc hc'

@@ -1,15 +1,48 @@
-import Formalism.LocalToGlobal.Divisibility.JetBounds.PlaceInputAllEntries
-import Formalism.LocalToGlobal.Divisibility.JetBounds.JetCounting.RelShape
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.FinalFree
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.HasSubstBlock
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.GramFrameCompositionMvExpFact
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.IntOpTwoFreeOf
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.Inertia
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.AgreeOnAdjoin
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.EigenCompatOf
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.EigenFrameEOf
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.Tensor
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussianEigenFrames.GramFrameComposition.EigenFinal
+module
+
+public import Formalism.LocalToGlobal.Divisibility.JetBounds.MinorProductsLattice
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TwoPlaces
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.UniformGaussModelCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped BigOperators
 
@@ -73,29 +106,6 @@ inductive IsHostA (l : ℕ) [Fact l.Prime] (Q : OrbSys ℂ_[l] → ℝ → Prop)
       IsHostA l Q σ be0 N0 N1 (ι₁ ⊕ ι₂) (P₁ ⊕ P₂)
         (fun y => Sum.elim (fun i => Sum.inl (e₁ (y.1, i, y.2.2))) (fun i => Sum.inr (e₂ (y.1, i, y.2.2))) y.2.1)
         (S₁.mul S₂)
-        (Sum.elim (fun q => serAlong Sum.inl (x₁ q)) (fun q => serAlong Sum.inr (x₂ q)))
-        (serAlong Sum.inl Ψ₁ + serAlong Sum.inr Ψ₂) (β₁ + β₂)
-
-inductive IsHostB (l : ℕ) [Fact l.Prime] (σ : MaximalUnramifiedExtension l →+* MaximalUnramifiedExtension l) (be0 : MvPowerSeries (Fin 2) (MaximalUnramifiedExtension l)) (ph : PowerSeries (MaximalUnramifiedExtension l))
-    (N0 N1 : ℕ) :
-    (P : Type) → (S : OrbSys ℂ_[l]) → (P → MvPowerSeries S.ι ℂ_[l]) → MvPowerSeries P ℂ_[l] → ℝ → Prop
-  | orbit (Cn : ℕ) (ζ : MaximalUnramifiedExtension l) (hζ : IsPrimitiveRoot ζ (l ^ 2 - 1))
-      (g : Fin N0 × Fin N1 → MvPowerSeries (Fin N0 × Fin N1) ℂ_[l])
-      (hg0 : ∀ y, MvPowerSeries.constantCoeff (g y) = 0)
-      (hg : ∀ y, MvPowerSeries.subst g (oneLog (K := ℂ_[l]) l y) = MvPowerSeries.X y)
-      (p : Fin Cn → ℕ) (hp : ∀ c, p c ≤ N0) (I : ∀ c, Fin (p c) → Fin N1)
-      (δ : MvPolynomial (Fin N0 × Fin N0) ℂ_[l] →ₗ[ℂ_[l]] ℂ_[l])
-      (hδ : ∀ R ∈ minorProductsLattice (k := ℂ_[l]) p hp, ‖δ R‖ ≤ 1) :
-      IsHostB l σ be0 ph N0 N1 (Fin N0 × Fin N1)
-        ((sysB l N0 N1 Cn (MvPowerSeries.map (MaximalUnramifiedExtension l).subtype
-          (beMean (d := 2) l σ be0 (fun _ : Unit => (1 : MaximalUnramifiedExtension l)) (fun _ => 1) ζ)) 1 g (-1) p hp I).ap δ)
-        (fun y => at1 y (expF ℂ_[l] l)) (∑ y, at1 y (PowerSeries.map (MaximalUnramifiedExtension l).subtype ph))
-        (expB l N0 N1 Cn p)
-  | mul {P₁ P₂ : Type} {S₁ S₂ : OrbSys ℂ_[l]}
-      {x₁ : P₁ → MvPowerSeries S₁.ι ℂ_[l]} {x₂ : P₂ → MvPowerSeries S₂.ι ℂ_[l]}
-      {Ψ₁ : MvPowerSeries P₁ ℂ_[l]} {Ψ₂ : MvPowerSeries P₂ ℂ_[l]} {β₁ β₂ : ℝ}
-      (h₁ : IsHostB l σ be0 ph N0 N1 P₁ S₁ x₁ Ψ₁ β₁) (h₂ : IsHostB l σ be0 ph N0 N1 P₂ S₂ x₂ Ψ₂ β₂) :
-      IsHostB l σ be0 ph N0 N1 (P₁ ⊕ P₂) (S₁.mul S₂)
         (Sum.elim (fun q => serAlong Sum.inl (x₁ q)) (fun q => serAlong Sum.inr (x₂ q)))
         (serAlong Sum.inl Ψ₁ + serAlong Sum.inr Ψ₂) (β₁ + β₂)
 

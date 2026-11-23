@@ -1,5 +1,54 @@
-import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.ShortIsot
+module
+
+public import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.FundamentalDomainCusps.ShortIsot
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Topology Filter
 open scoped ComplexOrder
@@ -89,7 +138,7 @@ theorem exists_isPr (W : Submodule ℂ (Fin n → ℂ)) : ∃ p, IsPr W p := by
     conv_rhs => rw [← Matrix.toEuclideanLin.apply_symm_apply P]
     rfl
   refine ⟨Matrix.toEuclideanLin.symm P, ?_, fun z => ?_, fun w hw => ?_⟩
-  · refine Matrix.isHermitian_iff_isSymmetric.2 ?_
+  · refine Matrix.isSymmetric_toEuclideanLin_iff.mp ?_
     rw [LinearEquiv.apply_symm_apply]
     exact K.starProjection_isSymmetric
   · rw [hP]; exact K.starProjection_apply_mem _
@@ -117,7 +166,7 @@ theorem IsPr.entry {p : Matrix (Fin n) (Fin n) ℂ} (hp : IsPr W p) (i j : Fin n
     conv_rhs => rw [← hp.sq, ← hp.1]
     rw [hp.1]
     conv_rhs => rw [show p * p = pᴴ * p by rw [hp.1]]
-    simp only [mul_apply, conjTranspose_apply, Complex.ofReal_sum, Complex.ofReal_pow, Complex.star_def,
+    simp only [Matrix.mul_apply, conjTranspose_apply, Complex.ofReal_sum, Complex.ofReal_pow, Complex.star_def,
       Complex.conj_mul']
   have h1 : ∀ k, ‖p k j‖ ^ 2 ≤ ‖p j j‖ := fun k => by
     rw [← h j, Complex.norm_real, Real.norm_of_nonneg (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
@@ -206,7 +255,6 @@ end Am
 
 theorem norm_mulVec_le (M : Matrix (Fin n) (Fin n) ℂ) (v : Fin n → ℂ) :
     ‖M *ᵥ v‖ ≤ (1 + ∑ i, ∑ j, ‖M i j‖) * ‖v‖ := by
-  have h0 : 0 ≤ ∑ i, ∑ j, ‖M i j‖ := Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
   refine (pi_norm_le_iff_of_nonneg (by positivity)).2 fun i => ?_
   calc ‖(M *ᵥ v) i‖ ≤ ∑ j, ‖M i j‖ * ‖v‖ :=
         (norm_sum_le Finset.univ fun j => M i j * v j).trans (Finset.sum_le_sum fun j _ => by

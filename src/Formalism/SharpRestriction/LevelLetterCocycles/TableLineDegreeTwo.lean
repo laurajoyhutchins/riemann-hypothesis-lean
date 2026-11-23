@@ -1,14 +1,49 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.GammaSemisimpleLocalOfConsequences
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
-import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
-import Formalism.WeaklyAdmissibleFiltrations.Statement
-import Formalism.WeaklyAdmissibleFiltrations.StatementTor
-import Formalism.FrobeniusContraction.HighestWeightResidueAvoids
-import Formalism.FrobeniusContraction.StatementTop
-import Formalism.GaloisCohomology.LocalTateDualityK
-import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.GammaSemisimpleLocalOfConsequences
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+public import Formalism.FrobeniusContraction.HighestWeightResidueAvoids
+public import Formalism.FrobeniusContraction.StatementTop
+public import Formalism.GaloisCohomology.LocalTateDualityK
+public import Mathlib.LinearAlgebra.Charpoly.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -332,16 +367,6 @@ def HerrLat (W : LocWach PD LL O v n) : Prop :=
   ∀ T : LocLat G Qp LL O, ∃ ψ : W.DD T →ₗ[O] W.DD T, (∀ x, ψ (W.φD T x) = x) ∧
     (∀ (a : W.EE) x, ψ (W.φE a • x) = a • ψ x) ∧ ∀ g x, ψ (W.γD T g x) = W.γD T g (ψ x)
 
-theorem prop_two_a_of_herr_lattice (W : LocWach PD LL O v n) (h : HerrLat W)
-    (T : LocLat G Qp LL O) : Formalism.MainNotions.DeltaInvariantLattices.p2aK W T := by
-  intro _ _
-  obtain ⟨hs, hk⟩ := h.1 T
-  refine ⟨hs, fun w => (hk w).trans ⟨?_, ?_⟩⟩
-  · rintro ⟨m, hm, e⟩
-    exact ⟨m, hm, e⟩
-  · rintro ⟨m, hm, e⟩
-    exact ⟨m, hm, e⟩
-
 def HerrSub (W : LocWach PD LL O v n) : Prop :=
   ∀ (T : LocLat G Qp LL O) (D' : Submodule W.EE (W.DD T)),
     (∃ a : ℕ, ∀ x : W.DD T, ((PD.p : ℕ) : W.EE) ^ a • x ∈ D') →
@@ -440,16 +465,6 @@ def adm17 (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) : Prop :=
     HerrSub ((HW l).W K 1 LL hA.2.2) ∧
       HerrExt ((HW l).W K 1 LL hA.2.2) ((F l).E K 1 LL hA.2.2).tie
 
-theorem gamK_eq_gam (D : D7) (HW : HWOf D.loc) (l : ℕ) [Fact l.Prime] (K LL : FinExt l) (hA : CaseA K LL) :
-    ((HW l).W K 1 LL hA.2.2).gamK = ((HW l).W K 1 LL hA.2.2).gam :=
-  ((HW l).W K 1 LL hA.2.2).gamK_eq_one ((HW l).W_s K 1 LL hA.2.2)
-    (by rw [(D.loc l).PD_p]; exact hA.2.1)
-
-theorem prop_two_a_of_herr_hypothesis (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (h : adm16 D HW F) (l : ℕ) [Fact l.Prime] (K LL : FinExt l)
-    (hA : CaseA K LL) (T : LocLat ↥(GK K) ℚ_[l] ↥LL.1 ↥(OL LL)) :
-    Formalism.MainNotions.DeltaInvariantLattices.p2aK ((HW l).W K 1 LL hA.2.2) T :=
-  prop_two_a_of_herr_lattice _ (h l K LL hA) T
-
 def adm18 (_D : D7) : Prop := Formalism.GaloisCohomology.LocalTateDualityK ∧ Formalism.GaloisCohomology.LocalEulerCharK
 
 def adm19 (D : D7) : Prop :=
@@ -478,27 +493,6 @@ def admitted (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf 
     adm20 D HW F ∧ adm21 D HW F ∧ adm22 D ∧ adm23 D HW F ∧ FrobeniusExpansionCongruence D HW F
 
 def Stmt (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) : Prop := admitted D HW F Cm → aux₃ D HW F
-
-theorem hypotheses_of_theorem_top (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (Cm : CmpOf D.loc D.locA HW F) (h : Formalism.MainNotions.DeltaInvariantLattices.aux₃ D HW F Cm) :
-    adm1 D HW F ∧ adm2 D HW F ∧ adm3 D HW F Cm ∧ ArchimedeanSignatureMatching D HW F Cm ∧ adm5 D HW F ∧ adm6 D HW F ∧ adm7 D HW F ∧ adm8 D HW F ∧ adm9 D HW F ∧ adm10 D HW F ∧
-      adm11 D HW F ∧ adm12 D HW F ∧ adm13 D HW F ∧ adm14 D HW F ∧ adm15 D HW F := by
-  obtain ⟨h1, hc, h2, _⟩ := h
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> intro l _ K s LL hg
-  · exact (h1 l K s LL hg).1.1
-  · exact (h1 l K s LL hg).2.1
-  · exact (h1 l K s LL hg).2.2.1
-  · exact (h1 l K s LL hg).2.2.2.1
-  · exact (h1 l K s LL hg).2.2.2.2.1
-  · exact (h1 l K s LL hg).2.2.2.2.2.1
-  · exact (h1 l K s LL hg).2.2.2.2.2.2.1
-  · exact (h1 l K s LL hg).2.2.2.2.2.2.2.1
-  · exact (h1 l K s LL hg).2.2.2.2.2.2.2.2.1
-  · exact (h1 l K s LL hg).2.2.2.2.2.2.2.2.2.1
-  · exact Formalism.MainNotions.DeltaInvariantLattices.gamma_semisimple_of_consequences _ _ (hc l K s LL hg)
-  · exact (h2 l K s LL hg).1
-  · exact (h2 l K s LL hg).2.1
-  · exact (h2 l K s LL hg).2.2.1
-  · exact (h2 l K s LL hg).2.2.2
 
 theorem ainf_clauses_of_theorem (D : D7) (HW : HWOf D.loc) (F : FonOf D.loc D.locA HW) (h : Formalism.MainNotions.DeltaInvariantLattices.ConclusionE D HW F) : adm23 D HW F ∧ FrobeniusExpansionCongruence D HW F := ⟨h.1, h.2⟩
 

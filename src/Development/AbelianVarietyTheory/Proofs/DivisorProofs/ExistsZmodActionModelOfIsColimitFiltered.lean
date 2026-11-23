@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsZModTorsorIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsColimitPushoutUnder
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsZModTorsorIff
+public import Mathlib.Algebra.Category.Ring.Basic
+public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Defs
+public import Mathlib.RingTheory.EssentialFiniteness
+public import Mathlib.RingTheory.FinitePresentation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsColimitPushoutUnder
+public import Mathlib.Algebra.Category.Ring.FinitePresentation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.RingHom.FinitePresentation
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Category.Ring.Constructions
+
+@[expose] public section
+
 open CategoryTheory Limits TensorProduct
 
 namespace GlobalTheory.TorsorColim
@@ -140,12 +191,12 @@ theorem exists_action_model_of_isColimit : ∀ (J : Type) [SmallCategory J] [IsF
     IsColimit c → ∀ (q : ℕ), 0 < q → ∀ (j : J) (A : Type) [CommRing A] [Algebra (F.obj j) A]
     [Algebra.FinitePresentation (F.obj j) A] (D : Type) [CommRing D] [Algebra c.pt D]
     (act : Multiplicative (ZMod q) →* (D ≃ₐ[c.pt] D)),
-    letI : Algebra (F.obj j) c.pt := (c.ι.app j).hom.toAlgebra;
+    letI : Algebra (F.obj j) c.pt := (c.ι.app j).hom.toAlgebra
     Nonempty (c.pt ⊗[F.obj j] A ≃ₐ[c.pt] D) →
     ∃ (k : J) (B : Type) (_ : CommRing B) (_ : Algebra (F.obj k) B)
       (_ : Algebra.FinitePresentation (F.obj k) B)
       (actB : Multiplicative (ZMod q) →* (B ≃ₐ[F.obj k] B)),
-      letI : Algebra (F.obj k) c.pt := (c.ι.app k).hom.toAlgebra;
+      letI : Algebra (F.obj k) c.pt := (c.ι.app k).hom.toAlgebra
       ∃ e : c.pt ⊗[F.obj k] B ≃ₐ[c.pt] D, ∀ (g : Multiplicative (ZMod q)) (x : c.pt ⊗[F.obj k] B),
         e (GlobalTheory.TorsorColim.bcAct c.pt actB g x) = act g (e x) := by
   intro J _ _ F c hc q hq j A _ _ _ D _ _ act
@@ -211,7 +262,7 @@ theorem exists_action_model_of_isColimit : ∀ (J : Type) [SmallCategory J] [IsF
     (AlgEquiv.algHomUnitsEquiv _ _).toMonoidHom.comp σ'.toHomUnits, e, fun g x => ?_⟩
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul s b =>
     rw [bcAct_tmul, he, he, map_mul, AlgEquiv.commutes]
     congr 1

@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsReducedTensorIntNumberField
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGDatumOneOneOne
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsReducedTensorIntNumberField
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleModule.WedderburnArtin
+public import Mathlib.RingTheory.SimpleRing.Congr
+import Mathlib.RingTheory.SimpleRing.Matrix
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 namespace GlobalTheory.UPel.HT.Gen
@@ -41,7 +94,7 @@ theorem GDatum.exists_smul_eq_tmul (G : GDatum) (z : ℚ ⊗[ℤ] G.O) :
 theorem GDatum.algebraMap_injective (G : GDatum) : Function.Injective (algebraMap (𝓞 G.F) G.O) := by
   haveI := G.freeO
   haveI := GDatum.O_nontrivial G
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro c hc
   by_contra h0
   have hI : (RingHom.ker (algebraMap (𝓞 G.F) G.O)).comap (algebraMap ℤ (𝓞 G.F)) ≠ ⊥ :=
@@ -171,7 +224,7 @@ theorem GDatum.isSemisimpleRing (G : GDatum) : IsSemisimpleRing (ℚ ⊗[ℤ] G.
         induction w using TensorProduct.induction_on with
         | zero => simp
         | tmul a b => rfl
-        | add a b ha hb => simp only [map_add, Function.comp_apply] at ha hb ⊢; rw [ha, hb]
+        | add a b ha hb => simp only [map_add (f := _), Function.comp_apply] at ha hb ⊢; rw [ha, hb]
       rw [this]; exact h2.comp h1
     have hf : Function.Injective f := fun a b hab => hmap ((Algebra.TensorProduct.comm ℤ G.F ℚ_[q]).injective hab)
     haveI := GlobalTheory.isReduced_tensor_int_numberField G.F ℚ_[q]
@@ -187,7 +240,7 @@ theorem GDatum.isSemisimpleRing (G : GDatum) : IsSemisimpleRing (ℚ ⊗[ℤ] G.
       refine ⟨k, ?_⟩
       rw [hy, ← map_mul, ← map_pow, Algebra.TensorProduct.tmul_mul_tmul, mul_one,
         Algebra.TensorProduct.tmul_pow, hox, TensorProduct.zero_tmul, map_zero]
-    | add a b ha hb => rw [map_add, add_mul, Matrix.trace_add, ha, hb, add_zero]
+    | add a b ha hb => rw [map_add (f := _), add_mul, Matrix.trace_add, ha, hb, add_zero]
   have hy0 : y = 0 := by
     ext i j
     have := htr (Φ.symm (Matrix.single j i 1))

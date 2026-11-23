@@ -1,4 +1,53 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.UnitaryThreeGroups.BaseRepGL3NormalisedOfPsiEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Ideal.BigOperators
+
+@[expose] public section
 
 open Matrix UpperTheory.V.U3
 
@@ -54,11 +103,12 @@ private theorem act_onePlus (s : ℤˣ) (X : Matrix (Fin m) (Fin m) C) (h : X * 
 end SlopeTestRemainingChoices
 
 theorem UpperTheory.V.U3.exists_isDeform :
-    ∀ {G C : Type} [Group G] [CommRing C] {m : ℕ} (I : Ideal C) (r : G →* GG m C) (γ : G → Matrix (Fin m) (Fin m) C), I * I = ⊥ →
-      (∀ g, EntIn I (γ g)) → IsCoc r γ → ∃ r' : G →* GG m C, IsDeform r γ r' := by
+    ∀ {G C : Type} [Group G] [CommRing C] {m : ℕ} (I : Ideal C)
+      (r : G →* GG (m := m) (R := C)) (γ : G → Matrix (Fin m) (Fin m) C), I * I = ⊥ →
+      (∀ g, EntIn I (γ g)) → IsCoc r γ → ∃ r' : G →* GG (m := m) (R := C), IsDeform r γ r' := by
   intro G C _ _ m I r γ hI hγ hc
   have hsq : ∀ g, γ g * γ g = 0 := fun g => entIn_mul_zero hI (hγ g) (hγ g)
-  let P : G → GG m C := fun g => SemidirectProduct.inl (onePlus (γ g) (hsq g)) * r g
+  let P : G → GG (m := m) (R := C) := fun g => SemidirectProduct.inl (onePlus (γ g) (hsq g)) * r g
   have hPr : ∀ g, (P g).right = (r g).right := fun g => by simp [P]
   have hPlG : ∀ g, (P g).left = onePlus (γ g) (hsq g) * (r g).left := fun g => by
     simp [P, SemidirectProduct.mul_left]

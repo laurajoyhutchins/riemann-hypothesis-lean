@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Complex.Exponential
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Normed.Ring.InfiniteSum
+
+@[expose] public section
 
 private lemma gen {ι : Type*} (R : Set ι) (f : ι → ℝ) (hf : ∀ x, 0 ≤ f x) (τ : ι → ℤ × ℤ)
     (hinj : Set.InjOn τ R) (w : ℤ × ℤ → ℝ) (hw : Summable w) (hw0 : ∀ x, 0 ≤ w x)
@@ -50,8 +102,6 @@ private lemma nu_lower (κ Bu α T d ν a b : ℝ) (hd : 1 ≤ d) (hκ : 0 < κ)
     (κ / (Bu * d)) * (κ / (T * d)) * ((1 + d * a) * (1 + d * b)) ≤ (1 + κ * ν) ^ 2 := by
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
-  have hd0 : 0 < d := by linarith
   have hδ : κ / (Bu * d) ≤ 1 := by
     rw [div_le_one (by positivity)]
     nlinarith
@@ -83,7 +133,6 @@ private lemma lower_bound_first_case (d Bu T α a b : ℝ) (hd : 1 ≤ d) (hBu :
     (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 1 ≤ d * a) : 1 / (d * Bu * T) ≤ a * α + b / α := by
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
   have hd0 : 0 < d := by linarith
   have h1 : d⁻¹ ≤ a := by
     rw [inv_le_iff_one_le_mul₀ hd0]; linarith
@@ -102,7 +151,6 @@ private lemma lower_bound_second_case (d Bu T α a b : ℝ) (hd : 1 ≤ d) (hBu 
     (hT : 1 ≤ T) (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 1 ≤ d * b) : 1 / (d * Bu * T) ≤ a * α + b / α := by
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
   have hd0 : 0 < d := by linarith
   have h1 : d⁻¹ ≤ b := by
     rw [inv_le_iff_one_le_mul₀ hd0]; linarith
@@ -128,7 +176,6 @@ private lemma term_bd (n : ℕ) (κ Bu α T d ν a b t L M : ℝ) (hd : 1 ≤ d)
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
   have hT0 : 0 < T := by linarith
-  have hd0 : 0 < d := by linarith
   have hν0 : 0 ≤ ν := by rw [hν]; positivity
   have hE1 : 1 ≤ Real.exp t := Real.one_le_exp ht
   set E := Real.exp t with hE
@@ -137,7 +184,6 @@ private lemma term_bd (n : ℕ) (κ Bu α T d ν a b t L M : ℝ) (hd : 1 ≤ d)
   set X := 1 + κ * E * ν with hX
   have hX1 : κ * E * (1 / (d * Bu * T)) ≤ X := by
     have : κ * E * (1 / (d * Bu * T)) ≤ κ * E * ν := by gcongr
-    have h0 : 0 ≤ κ * E * ν := by positivity
     linarith
   have hX2 : 1 + κ * ν ≤ X := by
     have : κ * ν ≤ κ * E * ν := by
@@ -149,12 +195,9 @@ private lemma term_bd (n : ℕ) (κ Bu α T d ν a b t L M : ℝ) (hd : 1 ≤ d)
     nlinarith
   set c1 := κ / (Bu * d) with hc1
   set c2 := κ / (T * d) with hc2
-  have hc10 : 0 < c1 := by positivity
-  have hc20 : 0 < c2 := by positivity
   have hY : (c1 * c2 / 4) * ((1 + L) * (1 + M)) ≤ (1 + κ * ν) ^ 2 := by
     have h1 : c1 * c2 * ((1 + L) * (1 + M)) ≤ c1 * c2 * (4 * ((1 + d * a) * (1 + d * b))) := by gcongr
     nlinarith
-  have hY0 : 0 < (c1 * c2 / 4) * ((1 + L) * (1 + M)) := by positivity
   have hX4 : ((c1 * c2 / 4) * ((1 + L) * (1 + M))) ^ 2 ≤ X ^ 4 := by
     calc ((c1 * c2 / 4) * ((1 + L) * (1 + M))) ^ 2 ≤ ((1 + κ * ν) ^ 2) ^ 2 := by gcongr
       _ = (1 + κ * ν) ^ 4 := by ring
@@ -211,7 +254,6 @@ theorem UpperTheory.summable_tsum_inv_one_add_height_pow_le :
   refine ⟨C * ∑' p, w p, mul_nonneg hC0 (tsum_nonneg hw0), ?_⟩
   intro R β α T t ht hα hαT hT h1 h2 h3
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
   set τ : {r : Fin 2 → ℚ // r ≠ 0} → ℤ × ℤ := fun ξ =>
     (round ((d : ℝ) * ((ξ.1 0 : ℚ) : ℝ)),
       round ((d : ℝ) * (((ξ.1 0 : ℚ) : ℝ) * β + ((ξ.1 1 : ℚ) : ℝ)))) with hτ

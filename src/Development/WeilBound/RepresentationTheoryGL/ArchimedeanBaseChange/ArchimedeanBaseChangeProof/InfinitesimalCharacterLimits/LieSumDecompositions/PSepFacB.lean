@@ -1,4 +1,57 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.PSepFac
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.InfinitesimalCharacterLimits.LieSumDecompositions.PSepFac
+public import Mathlib.FieldTheory.Separable
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,8 +86,8 @@ theorem factor_roots (e : B) (P : B[X]) (J : Finset ℂ) (h : ∀ α ∈ J, e * 
     conv_lhs => rw [← (mul_divByMonic_eq_iff_isRoot).2 h0]
     ring
 
-omit [Algebra ℂ B] in
 
+omit [Algebra ℂ B] in
 theorem factor_deg {e : B} {P Pi Rm : B[X]} (hP : P.Monic) (hPi : Pi.Monic) (h : C e * P = Pi * Rm) :
     (Pi.natDegree ≤ P.natDegree ∨ e = 0) ∧ (Pi.natDegree = P.natDegree → ∀ k, e * P.coeff k = Pi.coeff k * e) := by
   by_cases hR : Rm = 0
@@ -157,12 +210,13 @@ theorem eq_zero_of_eval_algebraMap (D : B[X]) (h : ∀ u : ℂ, D.eval (algebraM
   have hq : q = 0 := by
     refine Polynomial.funext fun u => ?_
     have h1 : φ (D.eval (algebraMap ℂ B u)) = 0 := by rw [h u, map_zero]
+
     rw [eval_eq_sum_range, map_sum] at h1
     rw [eval_zero, ← h1, eval_finsetSum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [eval_monomial, ← map_pow, ← Algebra.commutes, ← Algebra.smul_def, map_smul, smul_eq_mul, mul_comm]
   have hc : q.coeff k = φ (D.coeff k) := by
-    simp only [q, finsetSum_coeff, coeff_monomial]
+    simp only [q, finsetSum_coeff, coeff_monomial_apply]
     by_cases hk : k ∈ Finset.range (D.natDegree + 1)
     · rw [Finset.sum_ite_eq']
       simp [hk]
@@ -194,8 +248,8 @@ theorem IsSS.adjoin {s : Set A} (hs : ∀ x ∈ s, IsSS x) (hc : ∀ x ∈ s, �
   | add x y hx hy ihx ihy => exact ihx.add ihy (hcomm x hx y hy)
   | mul x y hx hy ihx ihy => exact ihx.mul ihy (hcomm x hx y hy)
 
-set_option linter.deprecated false in
 
+set_option linter.deprecated false in
 theorem isSS_coeff_fun (m : Multiset ℂ) (hm : m.Nodup) (r s : ℕ) (_hrs : Multiset.card m = r + s) (c₁ c₂ : ℂ)
     (a b : ℕ → A) (ha : a r = 1) (hb : b s = 1)
     (hcomm : ∀ i j, Commute (a i) (a j) ∧ Commute (a i) (b j) ∧ Commute (b i) (b j))
@@ -210,7 +264,9 @@ theorem isSS_coeff_fun (m : Multiset ℂ) (hm : m.Nodup) (r s : ℕ) (_hrs : Mul
     · exact (hcomm i j).2.1.eq
     · exact ((hcomm j i).2.1.eq).symm
     · exact (hcomm i j).2.2.eq
-  letI : CommRing (Algebra.adjoin ℂ S) := Algebra.adjoinCommRingOfComm ℂ hS
+  letI : IsMulCommutative (Algebra.adjoin ℂ S) :=
+    Algebra.isMulCommutative_adjoin ℂ fun x hx y hy _ => hS x hx y hy
+  letI : CommRing (Algebra.adjoin ℂ S) := open scoped IsMulCommutative in inferInstance
   let a' : ℕ → Algebra.adjoin ℂ S := fun i => ⟨a i, Algebra.subset_adjoin (Or.inl ⟨i, rfl⟩)⟩
   let b' : ℕ → Algebra.adjoin ℂ S := fun i => ⟨b i, Algebra.subset_adjoin (Or.inr ⟨i, rfl⟩)⟩
 
@@ -252,9 +308,9 @@ theorem isSS_coeff_fun (m : Multiset ℂ) (hm : m.Nodup) (r s : ℕ) (_hrs : Mul
   have hrelP : P.comp (X + C (algebraMap ℂ _ c₁)) * Q.comp (X + C (algebraMap ℂ _ c₂)) =
       p.map (algebraMap ℂ (Algebra.adjoin ℂ S)) := by
     rw [← sub_eq_zero]
-    refine eq_zero_of_eval_algebraMap _ fun u => ?_
+    refine eq_zero_of_eval_algebraMap (B := Algebra.adjoin ℂ S) _ fun u => ?_
     rw [eval_sub, eval_mul, eval_comp, eval_comp, eval_map, eval₂_at_apply, hval]
-    simp only [eval_add, eval_X, eval_C, ← map_add]
+    simp only [eval_add, eval_X, eval_C, ← map_add (f := _)]
     rw [hPe, hQe, sub_eq_zero]
     apply Subtype.ext
     have hv : ∀ x y : Algebra.adjoin ℂ S, ((x * y : Algebra.adjoin ℂ S) : A) = (x : A) * y := fun x y => rfl
@@ -278,8 +334,8 @@ theorem isSS_coeff_fun (m : Multiset ℂ) (hm : m.Nodup) (r s : ℕ) (_hrs : Mul
   let Q₁ := Q.comp (X + C (algebraMap ℂ (Algebra.adjoin ℂ S) c₂))
   have hP₁ : P₁.Monic := hPm.comp_X_add_C _
   have hQ₁ : Q₁.Monic := hQm.comp_X_add_C _
-  have hss₁ : ∀ j, IsSS (P₁.coeff j) := isSS_coeff p hps P₁ Q₁ hP₁ hQ₁ hrelP
-  have hss₂ : ∀ j, IsSS (Q₁.coeff j) := isSS_coeff p hps Q₁ P₁ hQ₁ hP₁ (by rw [mul_comm]; exact hrelP)
+  have hss₁ : ∀ j, IsSS (P₁.coeff j) := isSS_coeff (B := Algebra.adjoin ℂ S) p hps P₁ Q₁ hP₁ hQ₁ hrelP
+  have hss₂ : ∀ j, IsSS (Q₁.coeff j) := isSS_coeff (B := Algebra.adjoin ℂ S) p hps Q₁ P₁ hQ₁ hP₁ (by rw [mul_comm]; exact hrelP)
 
   have unshift : ∀ (P₁ : (Algebra.adjoin ℂ S)[X]) (c : ℂ), (∀ j, IsSS (P₁.coeff j)) →
       ∀ k, IsSS ((P₁.comp (X - C (algebraMap ℂ _ c))).coeff k) := by

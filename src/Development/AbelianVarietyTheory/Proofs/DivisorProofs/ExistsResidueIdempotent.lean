@@ -1,6 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AzumayaBaseChange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOneTmulEq
+module
+
+public import Mathlib.Algebra.Azumaya.Defs
+public import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AzumayaBaseChange
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOneTmulEq
+import Mathlib.Algebra.Azumaya.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.LittleWedderburn
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleModule.WedderburnArtin
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Central.Defs
+public import Mathlib.LinearAlgebra.Dual.Lemmas
+public import Mathlib.LinearAlgebra.TensorProduct.Quotient
+public import Mathlib.RingTheory.Artinian.Defs
+public import Mathlib.RingTheory.Artinian.Module
+
+@[expose] public section
+
 open IsLocalRing
 open scoped TensorProduct
 
@@ -35,7 +99,7 @@ theorem isSimpleRing_of_isAzumaya (k B : Type) [Field k] [Ring B] [Algebra k B]
       rw [AlgHom.mulLeftRight_apply]
       exact I.mul_mem_right _ _ (I.mul_mem_left _ _ hzI)
     | add x y hx hy =>
-      rw [map_add, LinearMap.add_apply]
+      rw [map_add (f := _), LinearMap.add_apply]
       exact I.add_mem hx hy
   rw [← TwoSidedIdeal.one_mem_iff, ← hf, ← ht]
   exact key t
@@ -80,6 +144,7 @@ theorem exists_rankOne_idempotent (k B : Type) [Field k] [Finite k] [Ring B] [Al
     simp only [E, Matrix.single_mul_mul_single, one_mul, mul_one, Matrix.smul_single, ← hc]
     rw [Algebra.algebraMap_eq_smul_one]
   · apply e.injective
+
     simp [E, map_sum, Matrix.single_mul_single_same, Matrix.sum_single_one]
 
 end GlobalTheory.AzumayaResidue
@@ -130,6 +195,7 @@ theorem exists_residue_idempotent : ∀ (A : Type) [CommRing A] [IsLocalRing A] 
     refine ⟨c, hker _ ?_⟩
     rw [map_sub, map_mul, map_mul, hc, map_smul, ← ResidueField.algebraMap_eq,
       algebraMap_smul, sub_self]
+
   · simp only [map_sub, map_sum, map_mul, map_one, ha, hb, hsum, sub_self]
 
 end GlobalTheory.AzumayaResidue

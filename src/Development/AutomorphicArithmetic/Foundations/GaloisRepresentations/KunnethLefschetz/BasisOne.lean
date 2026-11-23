@@ -1,4 +1,48 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.OneMul
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.KunnethLefschetz.OneMul
+public import Mathlib.Order.CompletePartialOrder
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry GlobalTheory.EtC LateralTheory.EtaleTrace
@@ -9,8 +53,8 @@ namespace UpperTheory.Gal.KunnethLefschetz
 section Defs
 variable {k : Type} [Field k]
 
-variable (k) in
 
+variable (k) in
 structure GysT where
   g : ∀ (q : ℕ) {d e : ℕ} {Z X : Scheme.{0}} {p : X ⟶ S k} {ι : Z ⟶ X}, IsPair d e p ι → ∀ {n m i j : ℤ}, n + 2 * d = m → i + d = j →
     Ht q (sch.obj Z) n i →+ Ht q (sch.obj X) m j
@@ -38,8 +82,8 @@ abbrev slice {X : Scheme.{0}} {p : X ⟶ S k} (y : Pt p) : X ⟶ pullback p p :=
 def OffPts {X : Scheme.{0}} {p : X ⟶ S k} (s : Finset (Pt p)) (U : X.Opens) : Prop :=
   (U : Set X) = (⋃ y ∈ s, Set.range y.1)ᶜ
 
-variable (k) in
 
+variable (k) in
 def LowT (q : ℕ) : Prop :=
   ((∀ z : Ht q (sch.obj (S k)) 0 0, ∃ a : ℕ, z = a • one q (sch.obj (S k))) ∧ ∀ a : ℕ, a • one q (sch.obj (S k)) = 0 → q ∣ a) ∧
   ∀ {X : Scheme.{0}} (p : X ⟶ S k), IsProper p → ∀ z : Ht q (sch.obj X) 0 0,

@@ -1,5 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLengthCutGlobal
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StLengthCutGlobal
+public import Mathlib.RingTheory.QuotSMulTop
+public import Mathlib.Algebra.Module.LocalizedModule.Exact
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.CharP.Defs
+public import Mathlib.Algebra.Module.Torsion.Basic
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -32,8 +84,8 @@ theorem length_localized_add {N M Q : Type*} [AddCommGroup N] [Module C N] [AddC
     (IsLocalizedModule.map_surjective P.primeCompl fM fQ g hg)
     (IsLocalizedModule.map_exact P.primeCompl fN fM fQ f g H)
 
-omit [P.IsPrime] in
 
+omit [P.IsPrime] in
 theorem length_quotSMulTop_add (y : C) {N M Q : Type*} [AddCommGroup N] [Module C N]
     [AddCommGroup M] [Module C M] [AddCommGroup Q] [Module C Q] (f : N →ₗ[C] M) (g : M →ₗ[C] Q)
     (hf : Function.Injective f) (hg : Function.Surjective g) (H : Function.Exact f g)
@@ -66,8 +118,8 @@ theorem smul_injective_pi {y : C} (hy : y ∉ P) (n : ℕ) (v : Fin n → C ⧸ 
   rw [Pi.smul_apply, Algebra.smul_def, Ideal.Quotient.algebraMap_eq, Pi.zero_apply] at hi
   exact (mul_eq_zero.1 hi).resolve_left (fun h => hy (Ideal.Quotient.eq_zero_iff_mem.1 h))
 
-omit [P.IsPrime] in
 
+omit [P.IsPrime] in
 theorem length_quotSMulTop_quot {y : C} (hmax : (P ⊔ Ideal.span {y}).IsMaximal) :
     Module.length C (QuotSMulTop y (C ⧸ P)) = 1 := by
   let g : C →ₗ[C] QuotSMulTop y (C ⧸ P) :=
@@ -91,7 +143,7 @@ theorem length_quotSMulTop_quot {y : C} (hmax : (P ⊔ Ideal.span {y}).IsMaximal
       obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hx
       obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.1 hb
       refine ⟨Ideal.Quotient.mk P c, ?_⟩
-      rw [Algebra.smul_def, Ideal.Quotient.algebraMap_eq, map_add,
+      rw [Algebra.smul_def, Ideal.Quotient.algebraMap_eq, map_add (f := _),
         Ideal.Quotient.eq_zero_iff_mem.2 ha, zero_add, map_mul, mul_comm]
   rw [← (g.quotKerEquivOfSurjective hg).length_eq, hker]
   exact Module.length_eq_one_iff.2 (isSimpleModule_iff_isCoatom.mpr (Ideal.isMaximal_def.1 hmax))

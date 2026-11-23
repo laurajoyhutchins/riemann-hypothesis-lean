@@ -1,6 +1,50 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.FibFour
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensGen
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.FibGlue
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.FibFour
+public import Mathlib.MeasureTheory.Integral.RieszMarkovKakutani.Real
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +57,8 @@ section Ext
 
 variable {V : Type} [TopologicalSpace V] [T2Space V]
 
-open Classical in
 
+open Classical in
 def extZ (U : Set V) (φ : U → ℝ) : V → ℝ := fun v => if h : v ∈ U then φ ⟨v, h⟩ else 0
 
 theorem extZ_val (U : Set V) (φ : U → ℝ) (u : U) : extZ U φ u = φ u := by simp [extZ]
@@ -67,8 +111,8 @@ section Dens
 variable {V X Y : Type} [TopologicalSpace V] [MeasurableSpace V] [TopologicalSpace X]
   [MeasurableSpace X] {μ : Measure V} {ν : Measure X} {f : V → Y} {ι : X → Y} {U : Set V}
 
-open Classical in
 
+open Classical in
 def G (hD : DensAll μ f ι ν U) (φ : V → ℝ) : X → ℝ :=
   if h : IsCcOn U φ then Classical.choose (hD φ h.1 h.2.1 h.2.2) else 0
 
@@ -93,21 +137,7 @@ theorem dens_unique {g1 g2 : X → ℝ} (h1 : Continuous g1) (h2 : Continuous g2
 
 theorem dens_nonneg {g : X → ℝ} (hg : Continuous g)
     (h : ∀ S, IsCompact S → 0 ≤ ∫ b in S, g b ∂ν) (b0 : X) : 0 ≤ g b0 := by
-  by_contra hneg
-  have hneg' : 0 < -g b0 := by linarith
-  have hev : ∀ᶠ b in 𝓝 b0, -g b0 / 2 < -g b :=
-    (hg.neg.continuousAt (x := b0)).eventually (lt_mem_nhds (by simp only [Pi.neg_apply]; linarith))
-  obtain ⟨S, hSn, hSsub, hSc⟩ := local_compact_nhds hev
-  have hSm : MeasurableSet S := hSc.isClosed.measurableSet
-  have hlt : ν S ≠ ⊤ := hSc.measure_lt_top.ne
-  have hpos' : 0 < ν.real S := by
-    rw [measureReal_def]
-    exact ENNReal.toReal_pos (ν.measure_pos_of_mem_nhds hSn).ne' hlt
-  have hge := setIntegral_ge_of_const_le_real (c := -g b0 / 2) hSm hlt
-    (fun b hb => (hSsub hb).le) (hg.neg.continuousOn.integrableOn_compact hSc)
-  simp only [Pi.neg_apply, integral_neg] at hge
-  have := h S hSc
-  nlinarith
+  apply (config := { allowSynthFailures := true }) PI.VolStabSW.Glue.dens_nonneg <;> assumption
 
 variable [IsFiniteMeasureOnCompacts μ] [OpensMeasurableSpace V]
 

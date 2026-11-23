@@ -1,18 +1,79 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.BasicLiftAll
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QuantumMinorSumPolynomialOperator
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RootVectorActionCutoff
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellMulVecBasis
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGHeadV
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.BaseIndexConstantInjective
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableCsmul
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RdVOfEq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHLFrozen
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.QxChain
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.BasicLiftAll
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RootVectorActionCutoff
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBGHeadV
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BaseIndexConstantInjective
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QuantumMinorSumPolynomialOperator
+import Formalism.FormalDegreeBessel.FinalG
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BigCellZetaMinors
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainX1
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutHLFrozen
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FiniteSumLocalExpansion
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.HomogeneityNaturalDegree
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegrableCsmul
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.JacquetRaisingOperator
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LiftClosedUnderOperations
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorPreservesFusionForms
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralIdentities
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.QxChain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RdVOfEq
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RightDerivativeRulePsi
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SandwichRhoAction
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SecondExpansionIdentity
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.WeylCellMulVecBasis
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.XiYZhatIdentity
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix MeasureTheory Filter Topology
 open scoped ContDiff
@@ -177,18 +238,22 @@ theorem gauge_bar (n : Fin r → ℕ) (H : (Fin r → ℂ) → E) (c : Fin r →
 
 theorem wCell_vec (c : Fin r → ℂ) : ∀ n : ℕ, ∀ i : Fin (r + 1), i.val = n →
     (∀ a : Fin r, i.val ≤ a.val → wCell k r i c *ᵥ bvec (eI k r a) = bvec (eI k r a)) ∧
-    (∀ a : Fin r, a.val < i.val → wCell k r i c *ᵥ bvec (esI k r a) = (star (c a))⁻¹ • bvec (eI k r a))
-  | 0, i, hi => by
+    (∀ a : Fin r, a.val < i.val → wCell k r i c *ᵥ bvec (esI k r a) = (star (c a))⁻¹ • bvec (eI k r a)) := by
+  intro n
+  induction n with
+  | zero =>
+    intro i hi
     have : i = 0 := Fin.ext (by simp [hi])
     subst this
     rw [Formalism.FourierDecayAlt.P.Qx6.wCell_zero]
     exact ⟨fun a _ => by simp, fun a ha => absurd ha (by simp)⟩
-  | n + 1, i, hi => by
+  | succ n ih =>
+    intro i hi
     have hl : n < r := by have := i.isLt; omega
     set l : Fin r := ⟨n, hl⟩ with hldef
     have hil : i = l.succ := Fin.ext (by simp [l, hi])
     subst hil
-    obtain ⟨ih1, ih2⟩ := wCell_vec c n l.castSucc (by simp [l])
+    obtain ⟨ih1, ih2⟩ := ih l.castSucc (by simp [l])
     rw [Formalism.FourierDecayAlt.P.Qx6.wCell_succ]
     refine ⟨fun a ha => ?_, fun a ha => ?_⟩
     · rw [← Matrix.mulVec_mulVec, weyl_cell_mulVec_basis]
@@ -693,8 +758,8 @@ section main
 
 open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.R Formalism.FourierDecayAlt.Wd Formalism.FourierDecayAlt.Fr Formalism.REAL Formalism.QuantumDeterminants MeasureTheory GlobalTheory.HatNF
 
-open scoped Classical in
 
+open scoped Classical in
 def coefV (k r : ℕ) (Bi : Fin r → Fin (2 * r + k + 1)) (g : B.Mat k r) : ℂ :=
   if StrictMono (fun l => C3.keyS k r (Bi l)) then
     (Matrix.of fun a l : Fin r => ((Hpk k r * gᴴ * Hpk k r) *ᵥ bvec (eI k r (Fin.castLE le_rfl a))) (Bi l)).det

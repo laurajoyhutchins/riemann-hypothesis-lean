@@ -1,5 +1,58 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.OneFormMapEqKaehlerDifferentialMap
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.CommAlgFunctorCoboundaryZeroMemCocyclesOne
 import Development.AbelianVarietyTheory.Definitions.Divisors.DivPowerCompatTwoFormDerivativeCompOneForm
+import Development.AbelianVarietyTheory.Definitions.Divisors.Pullback1MemHodgeFiltration
+import Development.AbelianVarietyTheory.Definitions.Divisors.PullbackBijectiveDegreesOneTwo
+import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
+import Mathlib.RingTheory.DividedPowers.Basic
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry KaehlerDifferential DividedPowers ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi GlobalTheory.CatCoh GlobalTheory.Cris GlobalTheory.CechDR GlobalTheory.CxCoh GlobalTheory.PDA GlobalTheory.PDForm GlobalTheory.SmoothLift
 
 set_option autoImplicit false
@@ -103,8 +156,8 @@ theorem SemiHom.mem_of_mDR_eq_zero (hq : Function.Surjective q) (K : Ideal (DR R
   let δ : Derivation R G (DR R B ⧸ K) := Derivation.mk'
     { toFun g := π (ι1 (D R B (s g)))
       map_add' a b := by
-        rw [← map_add, ← map_add, ← map_add]
-        exact k1 _ _ (by rw [map_add, hs, hs, hs])
+        rw [← map_add (f := _), ← map_add (f := _), ← map_add (f := _)]
+        exact k1 _ _ (by rw [map_add (f := _), hs, hs, hs])
       map_smul' r g := by
         rw [RingHom.id_apply, ← hπr, ← LinearMap.map_smul_of_tower, ← Derivation.map_smul]
         exact k1 _ _ (by rw [hs, h r (s g), hs]; rfl) }
@@ -112,7 +165,7 @@ theorem SemiHom.mem_of_mDR_eq_zero (hq : Function.Surjective q) (K : Ideal (DR R
       change π (ι1 (D R B (s (a * b)))) = a • π (ι1 (D R B (s b))) + b • π (ι1 (D R B (s a)))
       have e : π (ι1 (D R B (s a * s b))) = π (algebraMap B _ (s a)) * π (ι1 (D R B (s b))) +
           π (algebraMap B _ (s b)) * π (ι1 (D R B (s a))) := by
-        rw [Derivation.leibniz, map_add, map_smul, map_smul, Algebra.smul_def, Algebra.smul_def,
+        rw [Derivation.leibniz, map_add (f := _), map_smul, map_smul, Algebra.smul_def, Algebra.smul_def,
           map_add, map_mul, map_mul]
       rw [← hφ, ← hφ, hs, hs] at e
       rw [hsm, hsm, ← e]
@@ -127,7 +180,7 @@ theorem SemiHom.mem_of_mDR_eq_zero (hq : Function.Surjective q) (K : Ideal (DR R
       congr 1
       exact k1 _ _ (hs _)
     | h0 => simp
-    | ha x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add]
+    | ha x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _), map_add (f := _)]
   have hsq : ∀ ω, f ω * f ω = 0 := by
     intro ω
     obtain ⟨ω', rfl⟩ := h.oneFormMap_surjective_of_surjective hq ω
@@ -141,7 +194,7 @@ theorem SemiHom.mem_of_mDR_eq_zero (hq : Function.Surjective q) (K : Ideal (DR R
       rw [h.mDR_ι, ExteriorAlgebra.lift_ι_apply]
       exact hf _
     | hm x y hx hy => rw [map_mul, map_mul, hx, hy, map_mul]
-    | ha x y hx hy => rw [map_add, map_add, hx, hy, map_add]
+    | ha x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)]
   have := key x
   rw [hx, map_zero] at this
   exact (Ideal.Quotient.eq_zero_iff_mem).1 this.symm

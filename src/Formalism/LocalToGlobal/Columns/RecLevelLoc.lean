@@ -1,5 +1,52 @@
-import Formalism.LocalToGlobal.Columns.RecLevel
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+module
+
+public import Formalism.LocalToGlobal.Columns.RecLevel
+public import Formalism.LocalToGlobal.Columns.AdelicLemmas
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.LevelSubgroupFiniteAdelicStandard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix
 open scoped TensorProduct
@@ -84,7 +131,7 @@ end Int
 section Loc
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG E n SG))
+variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG (E := E) (n := n) (SG := SG)))
 
 theorem levLoc_le (v : HeightOneSpectrum (𝓞 F)) :
     levLoc hc n ST SG H v ≤ UPts hc.sig (1 : Matrix (Fin n) (Fin n) E) (v.adicCompletion F) := by
@@ -215,8 +262,41 @@ variable (n : ℕ) [NeZero n] (ST : Finset (Pl E))
 theorem rll_mem_baseLb (x : Fin n → E) :
     x ∈ baseLb E n ST ↔ ∃ r : Fin n → 𝓞 E, (∀ i, algebraMap (𝓞 E) E (r i) = x i) ∧
       ∀ P ∈ ST, r (lastIdx n) ∈ P.asIdeal := by
+  classical
   unfold baseLb
-  rw [(Deco.base_ok (E := E) (n := n) (ST := ST) (SG := ∅)).mem_L]
+  have hmem : ∀ x : Fin n → E, x ∈ (Deco.base E n ST (∅ : Finset (Pl E))).L ↔
+      x ∈ stdLat E n ∧ ∀ P : ST, (Deco.base E n ST (∅ : Finset (Pl E))).f P x = 0 := by
+    intro x
+    constructor
+    · intro hx
+      induction hx using Submodule.span_induction with
+      | mem y hy => exact hy
+      | zero =>
+        refine ⟨zero_mem _, fun P => ?_⟩
+        simp only [Deco.base, if_pos (le_locP _ _ (zero_mem (stdLat E n))), Pi.zero_apply]
+        simpa using (reduction_coe P.1 (0 : 𝓞 E))
+      | add y z _ _ hy hz =>
+        refine ⟨add_mem hy.1 hz.1, fun P => ?_⟩
+        have hxy := le_locP P.1 _ (add_mem hy.1 hz.1)
+        have hy' := le_locP P.1 _ hy.1
+        have hz' := le_locP P.1 _ hz.1
+        have hy0 := hy.2 P
+        have hz0 := hz.2 P
+        simp only [Deco.base, if_pos hy'] at hy0
+        simp only [Deco.base, if_pos hz'] at hz0
+        simp only [Deco.base, if_pos hxy, Pi.add_apply]
+        rw [reduction_add ((mem_localization_standardLattice _ _).1 hy' _) ((mem_localization_standardLattice _ _).1 hz' _), hy0, hz0, add_zero]
+      | smul a y _ hy =>
+        refine ⟨Submodule.smul_mem _ _ hy.1, fun P => ?_⟩
+        have hay := le_locP P.1 _ (Submodule.smul_mem (stdLat E n) a hy.1)
+        have hy' := le_locP P.1 _ hy.1
+        have hy0 := hy.2 P
+        simp only [Deco.base, if_pos hy'] at hy0
+        simp only [Deco.base, if_pos hay, Pi.smul_apply]
+        rw [redP_osmul a ((mem_localization_standardLattice _ _).1 hy' _), hy0, mul_zero]
+    · intro hx
+      exact Submodule.subset_span hx
+  rw [hmem]
   constructor
   · rintro ⟨hN, hf⟩
     have hN' : x ∈ stdLat E n := hN
@@ -292,7 +372,7 @@ theorem rll_mem_hat_base (z : Fin n → E ⊗[F] Formalism.L2.Herm.Af F) :
       obtain ⟨y', hy', hyP'⟩ := hb
       refine ⟨y + y', fun i => ?_, fun P hP => ?_⟩
       · rw [Pi.add_apply, Pi.add_apply, ← hy, ← hy']; rfl
-      · rw [Pi.add_apply, map_add, hyP P hP, hyP' P hP, add_zero]
+      · rw [Pi.add_apply, map_add (f := _), hyP P hP, hyP' P hP, add_zero]
     | smul s a _ ha =>
       obtain ⟨y, hy, hyP⟩ := ha
       refine ⟨fun i => s * y i, fun i => ?_, fun P hP => ?_⟩
@@ -350,7 +430,7 @@ end Hat
 section Stab
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG E n SG))
+variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG (E := E) (n := n) (SG := SG)))
 
 theorem rll_stab_of_maps {A R : Type} [CommRing A] [CommRing R] [Algebra R A] {m : Type} [Fintype m] [DecidableEq m]
     (Λ : Submodule R (m → A)) (g : GL m A) (h1 : ∀ x ∈ Λ, (g : Matrix m m A) *ᵥ x ∈ Λ)
@@ -371,6 +451,7 @@ theorem mirabolicLevel_maps_baseLattice {k : GL (Fin n) (E ⊗[F] Formalism.L2.H
     rw [AddSubmonoidClass.coe_finsetSum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← hu j]; rfl
+
   · rw [map_sum, Finset.sum_eq_single (lastIdx n)]
     · rw [map_mul, huP P hP, mul_zero]
     · intro j _ hj
@@ -392,7 +473,7 @@ end Stab
 section Put
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [StarRing E] [Algebra F E]
-variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG E n SG))
+variable (hc : Formalism.BasicNotions.CMData F E) (n : ℕ) [NeZero n] (ST SG : Finset (Pl E)) (H : Subgroup (GLG (E := E) (n := n) (SG := SG)))
 
 theorem rll_locL_std (v : HeightOneSpectrum (𝓞 F)) :
     Formalism.L2.Herm.locL v (stdLat E n) =

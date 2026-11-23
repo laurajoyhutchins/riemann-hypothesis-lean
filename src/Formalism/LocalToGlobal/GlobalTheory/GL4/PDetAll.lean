@@ -1,5 +1,60 @@
-import Mathlib
-import Formalism.LocalToGlobal.Columns.BrpAevalScaleMonomial
+module
+
+public import Formalism.LocalToGlobal.Columns.BrpAevalScaleMonomial
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Formalism.GradedWeylDivisibility.FinalD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
 
 open MvPolynomial
 open scoped Matrix
@@ -54,7 +109,7 @@ theorem glChar_single_eq (a b : Fin n) (t : Kˣ) :
     rw [brp_perm_diag]
     congr 2
     funext x
-    simp only [Function.comp_apply, Pi.mulSingle_apply]
+    simp only [Function.comp_apply]
     by_cases hx : x = b
     · subst hx; simp
     · by_cases hxa : x = a
@@ -143,7 +198,7 @@ theorem rowAct_one_tr (F : MvPolynomial (Fin n × Fin n) K) :
   have h := rowAct_scalar (n := n) K 1
   rw [one_smul] at h
   rw [h]
-  simp
+  simp [MvPolynomial.aeval_X_left_apply]
 
 theorem trAct_single_scalar (lam : ι → DomWeight n) (τ : ι) (t : Kˣ) (F : Pol K ι n) (hF : F ∈ VV K lam) :
     trAct (Pi.mulSingle τ (brpSc K t)) F = (t : K) ^ (∑ i, (lam τ).natW i) • F := by
@@ -166,7 +221,7 @@ theorem trAct_single_scalar (lam : ι → DomWeight n) (τ : ι) (t : Kˣ) (F : 
       · rw [if_neg hs, Pi.mulSingle_eq_of_ne hs, Units.val_one, rowAct_one_tr, one_smul]
     rw [Finset.prod_congr rfl fun s _ => hfac s, Finset.prod_smul, Finset.prod_ite_eq' Finset.univ τ, if_pos (Finset.mem_univ τ)]
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add, hx, hy, smul_add]
+  | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, smul_add]
   | smul a x _ hx => rw [map_smul, hx, smul_comm]
 
 theorem detTwK_single_scalar (lam : ι → DomWeight n) (τ : ι) (t : Kˣ) :

@@ -1,10 +1,57 @@
-import Mathlib
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
+public import Development.AbelianVarietyTheory.Definitions.QuasicoherentCohomology.BijectiveSmulChartSec
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqOfLbIso
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ExistsSmulEqMapOfIsCompactOfIsQuasiSeparated
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsBasisOnAny
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.QuasiAffine
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Development.AbelianVarietyTheory.Definitions.AbelianSchemeLaws.FirstCohomologyVanishesSpecOfIsLocalRing
 import Development.AbelianVarietyTheory.Definitions.KeyFormula.GeomIntSelf
-import Development.AbelianVarietyTheory.Statements.FundamentalDomains.AtOfNumberField
-import Development.AbelianVarietyTheory.Statements.ThetaLevelCharacters.MemThetaLevelCharDimZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsBasisOnAny
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaEmbeddingSectionsBaseChangeAffine
+import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
+import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.GoodClass
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -26,14 +73,29 @@ variable {X : Scheme.{0}} {L : LB X}
 theorem exists_global [CompactSpace X] [QuasiSeparatedSpace X] (hL : L.IsLB) (a : Γ(X, ⊤)) {V : X.Opens}
     (hV : X.basicOpen a ≤ V) {θ : ∀ i, Γ(X, V ⊓ L.U i)} (hθ : θ ∈ secOn L V) {g : X} (hg : g ∈ X.basicOpen a)
     {i : L.ι} (hi : g ∈ X.basicOpen (θ i)) : ∃ u : L.Sec, g ∈ Out.nonzeroLocus u := by
-  obtain ⟨n, t, ht⟩ := AbLaw.SecOn.exists_pow_smul_eq_restrict hL (V := ⊤) isCompact_univ
-    isQuasiSeparated_univ a le_top rfl
-    (AbLaw.SecOn.restrict L hV ((AbLaw.SecOn.equivFamilies _ _).symm ⟨θ, hθ⟩))
+  have mem_nonzeroLocus (s : L.Sec) (x : X) :
+      x ∈ Out.nonzeroLocus s ↔ ∃ k, x ∈ L.U k ∧ IsUnit (ReciprocityTheory.ChartRestriction.G.Geo.Tor.gs (𝟙 X) x _ (s.f k)) := by
+    refine Opens.mem_iSup.trans (exists_congr fun k => ⟨fun h => ?_, fun ⟨h, hu⟩ => ?_⟩)
+    · have hk : x ∈ L.U k := X.basicOpen_le _ h
+      refine ⟨hk, ?_⟩
+      rw [gs_eq (𝟙 X) x _ hk]
+      exact (X.mem_basicOpen _ _ hk).1 h
+    · rw [gs_eq (𝟙 X) x _ h] at hu
+      exact (X.mem_basicOpen _ _ h).2 hu
+  let topSec (s : Γ(GlobalTheory.LB.toMod L, ⊤)) : L.Sec :=
+    ⟨fun i => resG X (le_inf le_top le_rfl) (GlobalTheory.LB.coord s i),
+      fun i j => by
+        change resG X _ (resG X _ _) = _ * resG X _ (resG X _ _)
+        rw [GlobalTheory.LB.resG_resG, GlobalTheory.LB.resG_resG, GlobalTheory.LB.coord_rel s i j _ _ le_rfl, GlobalTheory.LB.resG_self]⟩
+  haveI := GlobalTheory.LB.isQuasicoherent_toMod hL
+  obtain ⟨n, t, ht⟩ := QCoh.Qcqs.exists_pow_smul_eq_res_of_qcqs (GlobalTheory.LB.toMod L)
+    isCompact_univ isQuasiSeparated_univ a le_top rfl
+    (((GlobalTheory.LB.toMod L).presheaf.map (homOfLE hV).op ((GlobalTheory.LB.secOnEquiv _ _).symm ⟨θ, hθ⟩)))
   have hi' : g ∈ V ⊓ L.U i := X.basicOpen_le _ hi
   have hm : (𝟙 X : X ⟶ X) g ∈ X.basicOpen a ⊓ L.U i := ⟨hg, hi'.2⟩
-  refine ⟨AbLaw.SecOn.topEquiv _ t, (mem_nonzeroLocus _ _).2 ⟨i, hi'.2, ?_⟩⟩
+  refine ⟨topSec t, (mem_nonzeroLocus _ _).2 ⟨i, hi'.2, ?_⟩⟩
   have q := congrArg (fun s => gs (𝟙 X) g _ (GlobalTheory.LB.coord s i)) ht
-  have e : gs (𝟙 X) g (L.U i) ((AbLaw.SecOn.topEquiv _ t).f i) =
+  have e : gs (𝟙 X) g (L.U i) ((topSec t).f i) =
       gs (𝟙 X) g ⊤ a ^ n * gs (𝟙 X) g (V ⊓ L.U i) (θ i) := by
     refine (gs_res (𝟙 X) g _ hi'.2 _).trans ((gs_res (𝟙 X) g _ hm _).symm.trans (q.symm.trans
       ((gs_mul (𝟙 X) g _ hm _ _).trans (congrArg₂ (· * ·) ?_ (gs_res (𝟙 X) g _ hm _)))))
@@ -44,7 +106,7 @@ theorem exists_global [CompactSpace X] [QuasiSeparatedSpace X] (hL : L.IsLB) (a 
     ((LBGerm.isUnit_gs_iff (𝟙 X) g _ hi' _).2 hi)
 
 def add (s t : L.Sec) : L.Sec :=
-  ⟨fun i => s.f i + t.f i, fun i j => by rw [map_add, map_add, s.compat i j, t.compat i j, mul_add]⟩
+  ⟨fun i => s.f i + t.f i, fun i j => by rw [map_add (f := _), map_add (f := _), s.compat i j, t.compat i j, mul_add]⟩
 
 theorem add_comm' (s t : L.Sec) : add s t = add t s := by
   unfold add
@@ -52,6 +114,15 @@ theorem add_comm' (s t : L.Sec) : add s t = add t s := by
 
 theorem mem_nonzeroLocus_add {s t : L.Sec} {y : X} (hs : y ∈ Out.nonzeroLocus s) (ht : y ∉ Out.nonzeroLocus t) :
     y ∈ Out.nonzeroLocus (add s t) := by
+  have mem_nonzeroLocus (s : L.Sec) (x : X) :
+      x ∈ Out.nonzeroLocus s ↔ ∃ k, x ∈ L.U k ∧ IsUnit (ReciprocityTheory.ChartRestriction.G.Geo.Tor.gs (𝟙 X) x _ (s.f k)) := by
+    refine Opens.mem_iSup.trans (exists_congr fun k => ⟨fun h => ?_, fun ⟨h, hu⟩ => ?_⟩)
+    · have hk : x ∈ L.U k := X.basicOpen_le _ h
+      refine ⟨hk, ?_⟩
+      rw [gs_eq (𝟙 X) x _ hk]
+      exact (X.mem_basicOpen _ _ hk).1 h
+    · rw [gs_eq (𝟙 X) x _ h] at hu
+      exact (X.mem_basicOpen _ _ h).2 hu
   obtain ⟨k, hk, u⟩ := (mem_nonzeroLocus _ _).1 hs
   refine (mem_nonzeroLocus _ _).2 ⟨k, hk, ?_⟩
   have hn : ¬ IsUnit (gs (𝟙 X) y (L.U k) (t.f k)) := fun h => ht ((mem_nonzeroLocus _ _).2 ⟨k, hk, h⟩)

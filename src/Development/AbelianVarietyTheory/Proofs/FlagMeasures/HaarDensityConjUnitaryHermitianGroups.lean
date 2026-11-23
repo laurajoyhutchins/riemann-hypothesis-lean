@@ -1,10 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Formalism.PeriodIntegrals.QuotInv
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.LocalRingCardinality.DataCD
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ClosedMatrixSubgroupTheoremStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RiemannianHaarIndependentOfOrthonormalFrame
+public import Formalism.PeriodIntegrals.QuotInv
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ClosedMatrixSubgroupTheoremStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,38 +70,7 @@ theorem volume_image_eq {V W : Type} [NormedAddCommGroup V] [InnerProductSpace �
     [MeasurableSpace V] [BorelSpace V] [MeasurableSpace W] [BorelSpace W]
     (L : V ≃ₗ[ℝ] W) (σ : V →ₗ[ℝ] V) (τ : W →ₗ[ℝ] W) (hσ : ∀ x, σ (σ x) = x) (hτ : ∀ x, τ (τ x) = x)
     (h : ∀ x y, ⟪τ (L x), L y⟫_ℝ = ⟪σ x, y⟫_ℝ) (s : Set V) : volume (L '' s) = volume s := by
-  classical
-  have hfin : Module.finrank ℝ V = Module.finrank ℝ W := L.finrank_eq
-  let e : V ≃ₗᵢ[ℝ] W := (stdOrthonormalBasis ℝ V).equiv (stdOrthonormalBasis ℝ W) (finCongr hfin)
-  let M : V →ₗ[ℝ] V := e.symm.toLinearEquiv.toLinearMap ∘ₗ L.toLinearMap
-  let T : V →ₗ[ℝ] V := e.symm.toLinearEquiv.toLinearMap ∘ₗ τ ∘ₗ e.toLinearEquiv.toLinearMap
-  have hM : ∀ x, e (M x) = L x := fun x => by simp [M]
-  have hT : ∀ x, e (T x) = τ (e x) := fun x => by simp [T]
-
-  have key : LinearMap.adjoint M ∘ₗ T ∘ₗ M = σ := by
-    refine LinearMap.ext fun x => ext_inner_right ℝ fun y => ?_
-    rw [LinearMap.comp_apply, LinearMap.adjoint_inner_left, LinearMap.comp_apply,
-      ← LinearIsometryEquiv.inner_map_map e, hT, hM, hM, h]
-  have hsq : ∀ f : V →ₗ[ℝ] V, (∀ x, f (f x) = x) → LinearMap.det f ^ 2 = 1 := by
-    intro f hf
-    have : f ∘ₗ f = LinearMap.id := LinearMap.ext hf
-    rw [sq, ← LinearMap.det_comp, this, LinearMap.det_id]
-  have hT2 : ∀ x, T (T x) = x := fun x => e.injective (by rw [hT, hT, hτ])
-  have hdet : |LinearMap.det M| = 1 := by
-    have h1 := congrArg LinearMap.det key
-    rw [LinearMap.det_comp, LinearMap.det_comp, det_adjoint'] at h1
-    have h4 : |LinearMap.det M| ^ 4 = 1 := by
-      have hs := hsq σ hσ
-      have ht := hsq T hT2
-      rw [← h1] at hs
-      rw [pow_abs, abs_eq_self.mpr (by positivity)]
-      nlinarith [hs, ht]
-    exact (pow_eq_one_iff_of_nonneg (abs_nonneg _) (by norm_num)).mp h4
-  have himg : L '' s = e '' (M '' s) := by
-    rw [Set.image_image]; exact Set.image_congr fun x _ => (hM x).symm
-  rw [himg, LinearIsometryEquiv.image_eq_preimage_symm,
-    e.symm.measurePreserving.measure_preimage_emb e.symm.toHomeomorph.measurableEmbedding,
-    MeasureTheory.Measure.addHaar_image_linearMap, hdet, ENNReal.ofReal_one, one_mul]
+  apply GlobalTheory.FrameIndep.volume_image_of_form <;> assumption
 
 abbrev EE (m : ℕ) := EuclideanSpace ℝ (Fin m × Fin m × Bool)
 
@@ -83,7 +97,7 @@ theorem inner_rl {m : ℕ} (X Y : Matrix (Fin m) (Fin m) ℂ) : ⟪rl m X, rl m 
 
 def cj {m : ℕ} (A B : Matrix (Fin m) (Fin m) ℂ) : EE m →ₗ[ℝ] EE m where
   toFun x := rl m (A * unrealify x * B)
-  map_add' x y := by rw [← rl_symm, ← rl_symm, ← rl_symm, map_add, Matrix.mul_add, Matrix.add_mul, map_add]
+  map_add' x y := by rw [← rl_symm, ← rl_symm, ← rl_symm, map_add (f := _), Matrix.mul_add, Matrix.add_mul, map_add (f := _)]
   map_smul' t x := by
     rw [← rl_symm, ← rl_symm, map_smul, Matrix.mul_smul, Matrix.smul_mul, map_smul]; rfl
 

@@ -1,6 +1,52 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.InjectiveDecompositionAction
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SgMulSelf
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.RealLeviDescent.InjectiveDecompositionAction
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PairStructureOnLine
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SgMulSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset
 
@@ -23,13 +69,6 @@ def ttL (i j k : Lt n) : ℂ :=
 
 def IsClosedL (S : Lt n → Prop) : Prop :=
   ∀ l m k : Lt n, S l → S m → l.2.1.2 = m.2.1.1 → k.1 = xor l.1 m.1 → k.2.1 = (l.2.1.1, m.2.1.2) → S k
-
-theorem isClosedL_univ : IsClosedL (fun _ : Lt n => True) := fun _ _ _ _ _ _ _ _ => trivial
-
-theorem isClosedL_isK : IsClosedL (isK (n := n)) := by
-  intro l m k hl hm _ hk _
-  simp only [isK] at hl hm ⊢
-  simp [hk, hl, hm]
 
 theorem cstL_eq (i j k : Lt n) : cstL i j k = ttL i j k - ttL j i k := by
   have e : ∀ p q : Lt n, (p.2.1.2 = q.2.1.1 ∧ k.1 = xor p.1 q.1 ∧ k.2.1.1 = p.2.1.1 ∧ k.2.1.2 = q.2.1.2) ↔
@@ -73,8 +112,8 @@ theorem cstL_supp {S : Lt n → Prop} (hS : IsClosedL S) {i j k : Lt n} (hi : S 
     hk (hS j i k hj hi h.1 (hw.trans (Bool.xor_comm _ _)) h.2)
   simp [cp, a1, a2]
 
-open Classical in
 
+open Classical in
 theorem sum_sub (S : Lt n → Prop) {M : Type*} [AddCommMonoid M] (f : Lt n → M) :
     ∑ k : {l // S l}, f k.1 = ∑ k, if S k then f k else 0 := by
   rw [← Finset.sum_filter]
@@ -96,19 +135,19 @@ section Ring
 
 variable {R : Type} [Ring R] [Algebra ℂ R]
 
-open Classical in
 
+open Classical in
 def partA (S : Lt n → Prop) (X an : Lt n → R) : R := ∑ l, if S l then X l * an l else 0
 
-open Classical in
 
+open Classical in
 def partB (S : Lt n → Prop) (an cr : Lt n → R) : R :=
   ∑ l : Lt n, ∑ m : Lt n, ∑ k : Lt n,
     if S l ∧ S m ∧ l.2.1.2 = m.2.1.1 ∧ k.1 = xor l.1 m.1 ∧ k.2.1.1 = l.2.1.1 ∧ k.2.1.2 = m.2.1.2 then
       cr k * an m * an l else 0
 
-open Classical in
 
+open Classical in
 theorem partB_eq {S : Lt n → Prop} (hS : IsClosedL S) (an cr : Lt n → R) (haa : ∀ i j, an i * an j + an j * an i = 0) :
     (1 / 2 : ℂ) • ∑ i : {l // S l}, ∑ j : {l // S l}, ∑ k : {l // S l},
       cstL i.1 j.1 k.1 • (cr k.1 * an j.1 * an i.1) = partB S an cr := by
@@ -151,8 +190,8 @@ theorem partB_eq {S : Lt n → Prop} (hS : IsClosedL S) (an cr : Lt n → R) (ha
     refine Finset.sum_eq_zero fun k _ => ?_
     rw [if_neg fun h => hij ⟨h.1, h.2.1⟩]
 
-open Classical in
 
+open Classical in
 theorem part_sq {S : Lt n → Prop} (hS : IsClosedL S) (X an cr : Lt n → R)
     (hX : ∀ i j, S i → S j → X i * X j - X j * X i = ∑ k, cstL i j k • X k)
     (h1 : ∀ i j, Commute (X i) (an j)) (h2 : ∀ i j, Commute (X i) (cr j))

@@ -1,4 +1,50 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.CentralizerRepresentatives.IsChain
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.CentralizerRepresentatives.IsChain
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,23 +73,23 @@ theorem chain_repr_N {N : W →ₗ[E] W} {ι : Type} {l : ι → ℕ} {B : Modul
     rintro ⟨b, j⟩
     rw [LinearMap.comp_apply, hB]
     by_cases hi : 0 < (i : ℕ)
-    · rw [dif_pos hi]
+    · rw [dite_eq_left hi]
       by_cases hj : (j : ℕ) + 1 < l b
-      · rw [dif_pos hj, Module.Basis.coord_apply, Module.Basis.coord_apply, Module.Basis.repr_self_apply,
+      · rw [dite_eq_left hj, Module.Basis.coord_apply, Module.Basis.coord_apply, Module.Basis.repr_self_apply,
           Module.Basis.repr_self_apply]
         have hiff : ((⟨b, ⟨j + 1, hj⟩⟩ : Σ a, Fin (l a)) = ⟨a, i⟩) ↔
             ((⟨b, j⟩ : Σ a, Fin (l a)) = ⟨a, ⟨i - 1, by omega⟩⟩) := by
           rw [sigma_fin_eq_iff, sigma_fin_eq_iff]
           constructor <;> rintro ⟨h1, h2⟩ <;> exact ⟨h1, by simp only at h2 ⊢; omega⟩
         exact if_congr hiff rfl rfl
-      · rw [dif_neg hj, map_zero, Module.Basis.coord_apply, Module.Basis.repr_self_apply, if_neg]
+      · rw [dite_eq_right hj, map_zero, Module.Basis.coord_apply, Module.Basis.repr_self_apply, if_neg]
         intro h
         rw [sigma_fin_eq_iff] at h
         obtain ⟨rfl, h2⟩ := h
         simp only at h2
         have := i.2
         omega
-    · rw [dif_neg hi]
+    · rw [dite_eq_right hi]
       split_ifs with hj
       · rw [Module.Basis.coord_apply, Module.Basis.repr_self_apply, if_neg, LinearMap.zero_apply]
         intro h
@@ -65,11 +111,11 @@ theorem chain_repr_Npow {N : W →ₗ[E] W} {ι : Type} {l : ι → ℕ} {B : Mo
   | succ m ih =>
     rw [pow_succ, Module.End.mul_apply, ih]
     by_cases h1 : m + 1 ≤ (i : ℕ)
-    · rw [dif_pos (by omega), dif_pos h1, chain_repr_N hB, dif_pos (by simp; omega)]
+    · rw [dite_eq_left (by omega), dite_eq_left h1, chain_repr_N hB, dite_eq_left (by simp; omega)]
       congr 2
-    · rw [dif_neg h1]
+    · rw [dite_eq_right h1]
       split_ifs with h2
-      · rw [chain_repr_N hB, dif_neg]
+      · rw [chain_repr_N hB, dite_eq_right]
         simp
         omega
       · rfl
@@ -78,7 +124,7 @@ theorem chain_repr_of_ker {N : W →ₗ[E] W} {ι : Type} {l : ι → ℕ} {B : 
     (hB : IsChain N l B) (m : ℕ) (z : W) (hz : (N ^ m) z = 0) (a : ι) (i : Fin (l a))
     (hi : (i : ℕ) + m < l a) : B.repr z ⟨a, i⟩ = 0 := by
   have h := chain_repr_Npow hB m z a ⟨i + m, hi⟩
-  rw [hz, map_zero, dif_pos (by simp)] at h
+  rw [hz, map_zero, dite_eq_left (by simp)] at h
   rw [Finsupp.zero_apply] at h
   rw [h]
   congr 2
@@ -93,8 +139,8 @@ theorem chain_Npow_zero {N : W →ₗ[E] W} {ι : Type} {l : ι → ℕ} {B : Mo
   | succ j ih =>
     rw [pow_succ', Module.End.mul_apply, ih]
     by_cases hj : j < l b
-    · rw [dif_pos hj, hB]
-    · rw [dif_neg hj, map_zero, dif_neg (by omega)]
+    · rw [dite_eq_left hj, hB]
+    · rw [dite_eq_right hj, map_zero, dite_eq_right (by omega)]
 
 theorem repr_centralizer_eq_zero (N : W →ₗ[E] W) {ι : Type} [Fintype ι] (l : ι → ℕ)
     (B : Module.Basis (Σ a, Fin (l a)) E W) (hB : IsChain N l B) (s : ι → ℕ) (_hs : ∀ a, s a ≤ l a)
@@ -102,24 +148,25 @@ theorem repr_centralizer_eq_zero (N : W →ₗ[E] W) {ι : Type} [Fintype ι] (l
     (A : W →ₗ[E] W) (hA : A ∘ₗ N = N ∘ₗ A) (a : ι) (i : Fin (l a)) (hi : (i : ℕ) < s a) :
     B.repr (A v) ⟨a, i⟩ = 0 := by
   have hc : Commute A N := hA
+
   rw [hv, map_sum, map_sum, Finsupp.finsetSum_apply]
   apply Finset.sum_eq_zero
   intro b _
   by_cases hb : s b < l b
-  · rw [dif_pos hb]
+  · rw [dite_eq_left hb]
     have hlb : 0 < l b := by omega
     have h1 : B ⟨b, ⟨s b, hb⟩⟩ = (N ^ s b) (B ⟨b, ⟨0, hlb⟩⟩) := by
-      rw [chain_Npow_zero hB b hlb, dif_pos hb]
+      rw [chain_Npow_zero hB b hlb, dite_eq_left hb]
     have hcomm : ∀ m : ℕ, ∀ x, A ((N ^ m) x) = (N ^ m) (A x) := fun m x =>
       LinearMap.congr_fun (hc.pow_right m).eq x
     rw [h1, hcomm, chain_repr_Npow hB]
     split_ifs with h2
     · refine chain_repr_of_ker hB (l b) _ ?_ a _ ?_
-      · rw [← hcomm, chain_Npow_zero hB b hlb, dif_neg (lt_irrefl _), map_zero]
+      · rw [← hcomm, chain_Npow_zero hB b hlb, dite_eq_right (lt_irrefl _), map_zero]
       · have := hC a b
         show (i : ℕ) - s b + l b < l a
         omega
     · rfl
-  · rw [dif_neg hb, map_zero, map_zero, Finsupp.zero_apply]
+  · rw [dite_eq_right hb, map_zero, map_zero, Finsupp.zero_apply]
 
 end PositivityTheory.RgUd.T.Nil.Orb.BReps

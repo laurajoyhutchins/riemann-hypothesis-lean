@@ -1,5 +1,45 @@
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.BlkFockLe
-import Formalism.LocalToGlobal.GlobalTheory.BlockActions.NfAllSmulReB
+module
+
+public import Formalism.LocalToGlobal.HermitianForms.FormsTied
+public import Formalism.LocalToGlobal.HermitianForms.TiedBrRep
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,10 +64,11 @@ theorem map_rowSubK {R S : Type} [CommRing R] [CommRing S] (j : R →+* S) (o : 
     map j (rowSubK o P) = rowSubK (fun τ => (o τ).map j) (map j P) := by
   induction P using MvPolynomial.induction_on with
   | C a => simp [rowSubK, MvPolynomial.algebraMap_eq]
-  | add p q hp hq => rw [map_add, map_add, hp, hq, map_add, map_add]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq, map_add (f := _), map_add (f := _)]
   | mul_X p v hp =>
     simp only [map_mul, hp]
     congr 1
+
     simp [rowSubK, map_sum, Matrix.map_apply]
 
 theorem blkRow_comp (K L : ι → Matrix (Fin n) (Fin n) ℂ) (P : MvPolynomial (ι × Fin n × Fin n) ℂ) :
@@ -36,8 +77,9 @@ theorem blkRow_comp (K L : ι → Matrix (Fin n) (Fin n) ℂ) (P : MvPolynomial 
     apply MvPolynomial.algHom_ext
     intro v
     rw [AlgHom.comp_apply]
+
     simp only [blkRow, aeval_X, map_sum, map_mul, aeval_C, Matrix.mul_apply, Finset.mul_sum, Finset.sum_mul, ← mul_assoc,
-      MvPolynomial.algebraMap_eq]
+    MvPolynomial.algebraMap_eq]
     rw [Finset.sum_comm]
   rw [← e, AlgHom.comp_apply]
 

@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsUniqueCmHermitianLatticeForm
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsUniqueCmHermitianLatticeForm
 import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IntegersOfCmFieldConjStructure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
@@ -56,8 +96,8 @@ theorem IsSumOfNorms.sum {κ : Type} (s : Finset κ) {B : κ → M → M → R} 
 
 variable (g : M → M →ₗ[R] R) (herm : ∀ x y, g x y = br (g y x))
 
-include herm in
 
+include herm in
 theorem exists_step (e : M) (q : ℕ) (hq : g e e = q) :
     ∃ Z : M →ₗ[R] M, Z e = 0 ∧
       ∀ x y, g (Z y) (Z x) = (q : R) ^ 2 * g y x - q * (g e x * br (g e y)) := by
@@ -101,14 +141,15 @@ theorem exists_kill {κ : Type} (v : κ → M) (s : Finset κ) :
         push_cast
         ring
 
-include herm pos in
 
+include herm pos in
 theorem exists_split {n : ℕ} (u w : Fin n → M) (fr : ∀ a, a = ∑ i, g (w i) a • u i) :
     ∃ (N m : ℕ) (l : M →ₗ[R] (Fin m → R)) (r : (Fin m → R) →ₗ[R] M), 1 ≤ N ∧ r ∘ₗ l = LinearMap.id ∧
       ∀ x y, (N : R) * g y x = ∑ k, l x k * br (l y k) := by
   classical
   obtain ⟨N, Z, hN, hZ, hB⟩ := exists_kill g herm pos u Finset.univ
   have hZ0 : ∀ a, Z a = 0 := fun a => by
+
     rw [fr a, map_sum]
     exact Finset.sum_eq_zero fun i hi => by rw [map_smul, hZ i hi, smul_zero]
   have hB' : IsSumOfNorms br (fun x y => (N : R) * g y x) := hB.congr fun x y => by simp [hZ0]
@@ -154,7 +195,7 @@ theorem kForm_sum_sq : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H
   obtain rfl := huniq h hh
   let g : D.La → D.La →ₗ[OK H] OK H := fun y =>
     { toFun := fun x => h₀ x y
-      map_add' := fun a b => by rw [map_add]; rfl
+      map_add' := fun a b => by rw [map_add (f := _)]; rfl
       map_smul' := fun c a => by rw [map_smul]; rfl }
   obtain ⟨N, m, l, r, hN, hr, hl⟩ := exists_split (br := br.toRingHom) g
     (fun x y => Subtype.ext ((hherm x y).trans (hbr _).symm))
@@ -166,6 +207,7 @@ theorem kForm_sum_sq : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H
       rw [Int.cast_natCast, SubringClass.coe_natCast]) u w fr
   refine ⟨N, m, l, r, hN, hr, fun x y => ?_⟩
   have := congrArg (OK H).val (hl x y)
+
   simp only [map_mul, map_sum, map_natCast, Subalgebra.coe_val] at this
   simp only [← hbr]
   exact this

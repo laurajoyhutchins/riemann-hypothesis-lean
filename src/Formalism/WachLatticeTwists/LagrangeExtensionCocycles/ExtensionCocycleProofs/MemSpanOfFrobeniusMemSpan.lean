@@ -1,6 +1,52 @@
-import Formalism.WachLatticeTwists.LagrangeExtensionCocycles.Statement
-import Formalism.LagrangeIdealLifts.LiftLagrangeIdealInt
-import Formalism.WindowSums.PowerSeriesRelationList
+module
+
+public import Formalism.WachLatticeTwists.LagrangeExtensionCocycles.Statement
+public import Formalism.LagrangeIdealLifts.LiftLagrangeIdealInt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -87,7 +133,7 @@ theorem lagrange_annihilation : StatLagrange := by
   choose w hw using hw
   obtain ⟨q, hq⟩ : ∃ q : O[X], ∀ a ∈ S₁, q.eval (c a) = w a * ∏ b ∈ S₁.erase a, (c a - c b) := by
     refine ⟨∑ a' ∈ S₁, C (w a') * ∏ b ∈ S₁.erase a', (X - C (c b)), fun a ha => ?_⟩
-    rw [eval_finset_sum, Finset.sum_eq_single a]
+    rw [eval_finsetSum, Finset.sum_eq_single a]
     · simp [eval_prod]
     · intro a' _ hne
       rw [eval_mul, eval_prod, Finset.prod_eq_zero (Finset.mem_erase.2 ⟨hne.symm, ha⟩) (by simp),
@@ -106,7 +152,7 @@ theorem lagrange_resolvent_kills_class : StatLagrangeKill := by
   intro ℓ _ O _ _ S₁ S₂ c sg P _ _ g hdisj hassoc h1 h2 x
   obtain ⟨p₁, p₂, hp⟩ := Ideal.mem_span_pair.1 (lagrange_annihilation ℓ O S₁ S₂ c sg hdisj hassoc)
   have h3 : aeval g (C ((ℓ : O) ^ lagE ℓ sg S₁ S₂)) = 0 := by
-    rw [← hp, map_add, map_mul, map_mul, h1, h2, mul_zero, mul_zero, add_zero]
+    rw [← hp, map_add (f := _), map_mul, map_mul, h1, h2, mul_zero, mul_zero, add_zero]
   rw [aeval_C, Algebra.algebraMap_eq_smul_one] at h3
   have h4 : (((ℓ : O) ^ lagE ℓ sg S₁ S₂) • (1 : Module.End O P)) x = (0 : Module.End O P) x := by
     rw [h3]

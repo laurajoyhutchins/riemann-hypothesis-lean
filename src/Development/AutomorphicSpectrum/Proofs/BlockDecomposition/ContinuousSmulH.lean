@@ -1,6 +1,51 @@
-import Mathlib
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianMeasureConjugation
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharLeftRightMatrixMulAdeleTensor
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AddEquivAddHaarCharProdCongrStatement
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsRestrictScalarsMatrixLeftRightMulAdeleTens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.WhitKA
 import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.EmDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.HermitianMeasureConjugation
+import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.SingularNullSets.WeakApproximationFinitePlace
+
+@[expose] public section
+
 noncomputable section
 open scoped Matrix NNReal ENNReal ComplexConjugate TensorProduct
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta Formalism.L2.Pj Formalism.IndefR.Datum MeasureTheory
@@ -26,9 +71,9 @@ def imKer [IsTopologicalAddGroup M] (S : AddSubgroup M) (P : M →+ M) (hPc : Co
     have h2 : P p.2.1 = 0 := p.2.2
     refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
     · change P (p.1.1 + p.2.1) = p.1.1
-      rw [map_add, hPs _ p.1.2, h2, add_zero]
+      rw [map_add (f := _), hPs _ p.1.2, h2, add_zero]
     · change (p.1.1 + p.2.1) - P (p.1.1 + p.2.1) = p.2.1
-      rw [map_add, hPs _ p.1.2, h2, add_zero, add_sub_cancel_left]
+      rw [map_add (f := _), hPs _ p.1.2, h2, add_zero, add_sub_cancel_left]
   right_inv x := by
     change P x + (x - P x) = x
     abel
@@ -63,7 +108,7 @@ theorem char_restr [IsTopologicalAddGroup M] [LocallyCompactSpace M] [SecondCoun
     have hl : Ψ.symm (Ψ p) = p := Ψ.left_inv p
     rw [hl]
     change U p.1.1 + p.2.1 = U (p.1.1 + p.2.1)
-    rw [map_add, hfix _ p.2.2]
+    rw [map_add (f := _), hfix _ p.2.2]
   rw [← e, GlobalTheory.ModuLR.addEquivAddHaarChar_transport Ψ, GlobalTheory.T.addEquivAddHaarChar_prodCongr, addEquivAddHaarChar_refl, mul_one]
 
 end Abstract
@@ -74,8 +119,8 @@ open GlobalTheory.CompanionTheory.IwaAd GlobalTheory.CompanionTheory.HermVol Glo
 
 variable {D : D7} {n : ℕ}
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1000000 in
+
+
 
 theorem char_herm [BorelSpace (Mx D n n)] [LocallyCompactSpace (hermA D n)] (a : GL (Fin n) (AE D)) :
     addEquivAddHaarChar (restr (hermA D n) (GlobalTheory.ModuLR.lrCE a (ad a)⁻¹) (lr_herm a) (lr_herm_symm a)) =
@@ -110,7 +155,7 @@ def smulH (e : AE D) (hc : cA D e = e) : hermA D n →+ hermA D n where
   map_zero' := Subtype.ext (smul_zero e)
   map_add' x y := Subtype.ext (smul_add e x.1 y.1)
 
-set_option synthInstance.maxHeartbeats 400000 in
+
 theorem continuous_smulH (e : AE D) (hc : cA D e = e) : Continuous (smulH (n := n) e hc) :=
   ((continuous_const_smul e).comp continuous_subtype_val).subtype_mk _
 

@@ -1,12 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsRegularOfMulEqSmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmulMemRange
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupOmegaFiniteFreeAndPSqMemDlogSpan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HodgeTateSandwichStarRep
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPowEqOfIntegers
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FontaineAinfLocalDomainXiAdicOrder
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PDivGroupOmegaFiniteFreeAndPSqMemDlogSpan
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvEqOneOfForallPairing
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPowEqOfIntegers
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FontaineAinfLocalDomainXiAdicOrder
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HodgeTateSandwichStarRep
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsRegularOfMulEqSmul
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SmulMemRange
+import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.Kernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+public import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open CategoryTheory Opposite Matrix GlobalTheory GlobalTheory.PDivGroup GlobalTheory.Sandwich GlobalTheory.IndefiniteRowSideFullHecke.EpsilonPairingZeta GlobalTheory.PDivLat
 
@@ -21,14 +66,13 @@ def dotL {O : Type} [CommRing O] {h : ℕ} (u : Fin h → O) : (Fin h → O) →
   map_add' a b := dotProduct_add u a b
   map_smul' c m := by simp
 
-theorem dotL_apply {O : Type} [CommRing O] {h : ℕ} (u m : Fin h → O) : dotL u m = u ⬝ᵥ m := rfl
-
 theorem dot_single {O : Type} [CommRing O] {h : ℕ} (g : (Fin h → O) →ₗ[O] O) (x : Fin h → O) :
     (fun i => g (Pi.single i 1)) ⬝ᵥ x = g x := by
   have hx : x = ∑ i, x i • Pi.single i (1 : O) := by
     ext j
     simp [Finset.sum_apply, Pi.single_apply]
   conv_rhs => rw [hx]
+
   simp [map_sum, dotProduct, mul_comm]
 
 theorem toLin'_transpose_dot {A O : Type} [CommRing A] [CommRing O] (θ : A →+* O) {h : ℕ}
@@ -82,6 +126,7 @@ theorem hasDatum_dual : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlg
   have hexp : ∀ t, t = ∑ i, e t i • E i := by
     intro t
     apply e.injective
+
     rw [map_sum]
     ext j
     simp [E, Finset.sum_apply, Pi.single_apply]
@@ -94,6 +139,7 @@ theorem hasDatum_dual : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlg
     · refine (injective_iff_map_eq_zero L).2 fun χ hχ => hflip.1 ?_
       rw [map_zero]
       refine LinearMap.ext fun t => ?_
+
       rw [LinearMap.flip_apply, LinearMap.zero_apply, hexp t, map_sum, LinearMap.sum_apply]
       refine Finset.sum_eq_zero fun i _ => ?_
       rw [map_smul, LinearMap.smul_apply, ← epsPairing_smul hε, ← hL, hχ]
@@ -118,6 +164,7 @@ theorem hasDatum_dual : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlg
       fun _ => rfl
     rw [hs]
     conv_lhs => rw [hexp t]
+
     rw [map_sum, map_sum]
     simp only [map_smul, ← hs, hj, Pi.single_apply, smul_eq_mul, mul_ite, mul_one, mul_zero,
       Finset.sum_ite_eq', Finset.sum_ite_eq, Finset.mem_univ, if_true]

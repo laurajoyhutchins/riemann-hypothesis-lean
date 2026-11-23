@@ -1,6 +1,52 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.ThmISt
-import GroundTheory.HeightsAndTheta.Heights.Intersections.UniquenessDegreeFormOfIntersectionForm
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.ThmISt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -11,20 +57,19 @@ open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-open Classical in
 
+open Classical in
 def killBlocks (S : Set K) : MRing ι →ₐ[ℤ] MRing ι :=
   aeval fun p => if p.1 ∈ S then 0 else X p
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
-open Classical in
 
+open Classical in
 theorem killBlocks_X (S : Set K) (p : Σ k, ι k) :
     killBlocks S (X p : MRing ι) = if p.1 ∈ S then 0 else X p := by
   rw [killBlocks, aeval_X]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem killBlocks_monomial_of_forall (S : Set K) (m : (Σ k, ι k) →₀ ℕ) (c : ℤ)
     (h : ∀ p ∈ m.support, p.1 ∉ S) : killBlocks S (monomial m c : MRing ι) = monomial m c := by
   rw [killBlocks, aeval_monomial, monomial_eq, algebraMap_eq]
@@ -32,8 +77,8 @@ theorem killBlocks_monomial_of_forall (S : Set K) (m : (Σ k, ι k) →₀ ℕ) 
   refine Finsupp.prod_congr fun p hp => ?_
   rw [if_neg (h p hp)]
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem killBlocks_monomial_of_mem (S : Set K) (m : (Σ k, ι k) →₀ ℕ) (c : ℤ) (p : Σ k, ι k)
     (hp : p ∈ m.support) (hS : p.1 ∈ S) : killBlocks S (monomial m c : MRing ι) = 0 := by
   rw [killBlocks, aeval_monomial, Finsupp.prod]
@@ -44,6 +89,7 @@ theorem killBlocks_of_isMultiHomog (S : Set K) {f : MRing ι} {a : K → ℕ} (h
     killBlocks S f = f ∨ killBlocks S f = 0 := by
   by_cases ha : ∀ k ∈ S, a k = 0
   · left
+
     rw [f.as_sum, map_sum]
     refine Finset.sum_congr rfl fun m hm => killBlocks_monomial_of_forall S m _ ?_
     rintro ⟨k, i⟩ hp hkS
@@ -55,6 +101,7 @@ theorem killBlocks_of_isMultiHomog (S : Set K) {f : MRing ι} {a : K → ℕ} (h
   · right
     push Not at ha
     obtain ⟨k, hkS, hak⟩ := ha
+
     rw [f.as_sum, map_sum]
     refine Finset.sum_eq_zero fun m hm => ?_
     have h1 := hf m hm k
@@ -75,15 +122,15 @@ theorem le_comap_killBlocks {P : Ideal (MRing ι)} (hP : IsMultiHomogIdeal P) (S
   · exact Ideal.subset_span hf
   · exact Ideal.zero_mem _
 
-omit [Fintype K] [∀ k, Fintype (ι k)] in
 
+omit [Fintype K] [∀ k, Fintype (ι k)] in
 theorem killBlocks_comp {S S' : Set K} (h : S ⊆ S') :
     (killBlocks S').comp (killBlocks S) = (killBlocks S' : MRing ι →ₐ[ℤ] MRing ι) := by
   refine MvPolynomial.algHom_ext fun p => ?_
-  rw [AlgHom.comp_apply, killBlocks_X, killBlocks_X]
+  simp only [AlgHom.comp_apply, killBlocks, aeval_X]
   by_cases hp : p.1 ∈ S
-  · rw [if_pos hp, map_zero, if_pos (h hp)]
-  · rw [if_neg hp, killBlocks_X]
+  · simp [hp, h hp]
+  · simp [hp, killBlocks, aeval_X]
 
 theorem comap_killBlocks_mono {P : Ideal (MRing ι)} (hP : IsMultiHomogIdeal P) {S S' : Set K}
     (h : S ⊆ S') : P.comap (killBlocks S) ≤ P.comap (killBlocks S') := by

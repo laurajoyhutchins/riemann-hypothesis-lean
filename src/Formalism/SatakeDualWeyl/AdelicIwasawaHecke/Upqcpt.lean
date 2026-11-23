@@ -1,4 +1,54 @@
-import Formalism.SatakeDualWeyl.Statement
+module
+
+public import Formalism.SatakeDualWeyl.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -104,59 +154,5 @@ theorem Jpq_mul_self (p q : ℕ) : Formalism.UG.Jpq p q * Formalism.UG.Jpq p q =
   congr 1
   ext i
   rcases i with i | i <;> simp
-
-def JpqUnit (p q : ℕ) : GL (Fin p ⊕ Fin q) ℂ :=
-  ⟨Formalism.UG.Jpq p q, Formalism.UG.Jpq p q, Jpq_mul_self p q, Jpq_mul_self p q⟩
-
-theorem mem_blockDiag_iff (p q : ℕ) (g : GL (Fin p ⊕ Fin q) ℂ) :
-    g ∈ Formalism.UG.blockDiag p q ↔
-      Formalism.UG.Jpq p q * (g : Matrix _ _ ℂ) = (g : Matrix _ _ ℂ) * Formalism.UG.Jpq p q := by
-  simp only [Formalism.UG.blockDiag, Set.mem_setOf_eq]
-  rw [Jpq_eq_diagonal]
-  constructor
-  · intro h
-    ext a b
-    rw [Matrix.diagonal_mul, Matrix.mul_diagonal]
-    rcases a with i | i <;> rcases b with j | j
-    · simp
-    · simp [(h i j).1]
-    · simp [(h j i).2]
-    · simp
-  · intro h i j
-    have h1 := congrFun (congrFun h (Sum.inl i)) (Sum.inr j)
-    have h2 := congrFun (congrFun h (Sum.inr j)) (Sum.inl i)
-    rw [Matrix.diagonal_mul, Matrix.mul_diagonal] at h1 h2
-    simp only [Sum.elim_inl, Sum.elim_inr, one_mul, mul_one, mul_neg, neg_mul] at h1 h2
-    constructor
-    · first | exact h1 | linear_combination h1 / 2 | linear_combination -h1 / 2
-    · first | exact h2 | linear_combination h2 / 2 | linear_combination -h2 / 2
-
-theorem maximal_compact_subgroup_compact : Formalism.UG.KpqSubgroupCompact := by
-  intro p q
-  have hJ : ((JpqUnit p q : GL (Fin p ⊕ Fin q) ℂ) : Matrix _ _ ℂ) = Formalism.UG.Jpq p q := rfl
-  have hset : ((Formalism.UG.Upq p q ⊓ Subgroup.centralizer {JpqUnit p q} : Subgroup _) :
-      Set (GL (Fin p ⊕ Fin q) ℂ)) = ↑(Formalism.UG.Upq p q) ∩ Formalism.UG.blockDiag p q := by
-    ext g
-    simp only [Subgroup.coe_inf, Set.mem_inter_iff, SetLike.mem_coe, Subgroup.mem_centralizer_iff,
-      Set.mem_singleton_iff, forall_eq, mem_blockDiag_iff]
-    rw [Units.ext_iff, Units.val_mul, Units.val_mul, hJ]
-  refine ⟨_, hset, ?_⟩
-  rw [hset]
-  have hT : IsClosed {M : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ |
-      star M * Formalism.UG.Jpq p q * M = Formalism.UG.Jpq p q ∧ Formalism.UG.Jpq p q * M = M * Formalism.UG.Jpq p q} := by
-    apply IsClosed.inter
-    · exact isClosed_eq ((continuous_star.mul continuous_const).mul continuous_id) continuous_const
-    · exact isClosed_eq (continuous_const.mul continuous_id) (continuous_id.mul continuous_const)
-  have hU : ∀ M ∈ {M : Matrix (Fin p ⊕ Fin q) (Fin p ⊕ Fin q) ℂ |
-      star M * Formalism.UG.Jpq p q * M = Formalism.UG.Jpq p q ∧ Formalism.UG.Jpq p q * M = M * Formalism.UG.Jpq p q},
-      star M * M = 1 := by
-    rintro M ⟨h1, h2⟩
-    have hJJ := Jpq_mul_self p q
-    calc star M * M = star M * M * (Formalism.UG.Jpq p q * Formalism.UG.Jpq p q) := by rw [hJJ, mul_one]
-      _ = star M * (Formalism.UG.Jpq p q * M) * Formalism.UG.Jpq p q := by rw [h2]; simp only [mul_assoc]
-      _ = 1 := by rw [← mul_assoc, h1, hJJ]
-  convert isCompact_units_of_unitary hT hU using 1
-  ext g
-  simp only [Set.mem_inter_iff, SetLike.mem_coe, mem_Upq_iff, mem_blockDiag_iff, Set.mem_setOf_eq]
 
 end Formalism.UG.P

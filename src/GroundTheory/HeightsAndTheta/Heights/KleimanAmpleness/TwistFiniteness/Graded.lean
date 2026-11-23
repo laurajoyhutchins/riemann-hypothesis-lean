@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistFiniteness.PsiOfIsHomogeneous
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.TwistFiniteness.PsiOfIsHomogeneous
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -66,11 +112,13 @@ theorem projT_mem_TMod {m : Amb x η} (hm : m ∈ TMod x η S n0 d0 g0) (c : ℤ
     · exact Submodule.subset_span ⟨j, rfl⟩
     · rw [map_zero]; exact zero_mem _
   | zero => rw [map_zero, map_zero, map_zero]; exact zero_mem _
-  | add a b _ _ ha hb => rw [map_add, map_add, map_add]; exact add_mem (ha c) (hb c)
+  | add a b _ _ ha hb => rw [map_add (f := _), map_add (f := _), map_add (f := _)]; exact add_mem (ha c) (hb c)
   | smul p m _ hm =>
     have hsum : toA x η (p • m) = ∑ d ∈ Finset.range (p.totalDegree + 1),
         phi x η S (homogeneousComponent d p) * toA x η m := by
+
       rw [toA_smulP, ← Finset.sum_mul, ← map_sum, sum_homogeneousComponent]
+
     rw [hsum, map_sum, map_sum]
     refine Submodule.sum_mem _ fun d _ => ?_
     rw [projT_mul_of_mem (phi_mem_tgr x η S (homogeneousComponent_isHomogeneous d p))]
@@ -83,7 +131,8 @@ def pieceM (c : ℤ) : Submodule (Sy S r) (TMod x η S n0 d0 g0) where
   carrier := {m | toA x η (m : Amb x η) ∈ tgr c}
   add_mem' {a b} ha hb := by
     change toA x η ((a : Amb x η) + b) ∈ tgr c
-    rw [map_add]; exact add_mem ha hb
+    rw [map_add (toA x η)]
+    exact add_mem ha hb
   zero_mem' := by
     change toA x η ((0 : TMod x η S n0 d0 g0) : Amb x η) ∈ tgr c
     rw [Submodule.coe_zero, map_zero]; exact zero_mem _
@@ -113,7 +162,7 @@ theorem isInternal_pieceM : DirectSum.IsInternal (pieceM x η S n0 d0 g0) := by
         DFinsupp.mapRange_single (hf := fun c => map_zero (pc c))
       rw [this, DirectSum.coeAddMonoidHom_of]
       rfl
-    | add a b ha hb => simp only [map_add, ha, hb, Submodule.coe_add]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb, Submodule.coe_add]
   constructor
   · intro v w hvw
     have h1 : Φ v = Φ w := (gradeBy.isInternal (R := Ω) (AddMonoidHom.fst ℤ ℤ)).1 (by
@@ -135,7 +184,9 @@ theorem isInternal_pieceM : DirectSum.IsInternal (pieceM x η S n0 d0 g0) := by
         rw [AddEquiv.apply_symm_apply]; exact projT_mem c _⟩, ?_⟩
     apply Subtype.ext
     apply (toA x η).injective
+
     rw [map_sum]
+
     simp only [DirectSum.coeAddMonoidHom_of, Submodule.coe_sum, map_sum, AddEquiv.apply_symm_apply]
     exact hF
 

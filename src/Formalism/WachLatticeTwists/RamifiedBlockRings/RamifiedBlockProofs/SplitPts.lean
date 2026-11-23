@@ -1,5 +1,51 @@
-import Formalism.WachLatticeTwists.RamifiedBlockRings.RightIdealImageOfSurjective
-import Formalism.CharacterColumnKernels.IdempotentNormalForms.SplitFibre
+module
+
+public import Formalism.WachLatticeTwists.RamifiedBlockRings.RightIdealImageOfSurjective
+public import Formalism.CharacterColumnKernels.IdempotentNormalForms.SplitFibre
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Finset Classical
 
@@ -9,7 +55,7 @@ namespace Formalism.RepresentationBoundsCohomology.ringDataObjects
 
 open Formalism.NG Formalism.TruncatedSeriesCounting.TruncatedSeriesCountingIdentities
 
-set_option maxHeartbeats 1000000 in
+
 theorem splitPts : StatSplitPts := by
   intro O _ _ Xs T t P hPc hPr
   rcases isEmpty_or_nonempty Xs with hX | hX
@@ -22,11 +68,11 @@ theorem splitPts : StatSplitPts := by
     rw [h]; exact Polynomial.monic_prod_of_monic _ _ fun i _ => Polynomial.monic_X_sub_C _
   have hdegP : ∀ x, (P x).natDegree = t := fun x => by
     obtain ⟨α, -, h⟩ := hPr x
-    rw [h, Polynomial.natDegree_finset_prod_X_sub_C_eq_card]; simp
+    rw [h, Polynomial.natDegree_finsetProd_X_sub_C_eq_card]; simp
   let PT : Polynomial T := ∑ k ∈ range (t + 1), Polynomial.monomial k ⟨fun x => (P x).coeff k, hPc k⟩
   have hcoef : ∀ k, PT.coeff k = if k ≤ t then ⟨fun x => (P x).coeff k, hPc k⟩ else 0 := by
     intro k
-    simp only [PT, Polynomial.finset_sum_coeff, Polynomial.coeff_monomial, Finset.sum_ite_eq',
+    simp only [PT, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial_apply, Finset.sum_ite_eq',
       Finset.mem_range, Nat.lt_succ_iff]
   have hmap : ∀ x, PT.map (evT x) = P x := by
     intro x
@@ -99,6 +145,7 @@ theorem splitPts : StatSplitPts := by
     obtain ⟨z, rfl⟩ := hrange f' hf'
     refine ⟨fun k => (bas.repr z k).1, fun k => (bas.repr z k).2, ?_⟩
     conv_lhs => rw [← bas.sum_repr z]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Algebra.smul_def, map_mul, hΨa]
@@ -148,6 +195,7 @@ theorem splitPts : StatSplitPts := by
           rw [hψ2, hσ])
         exact fun z => DFunLike.congr_fun h12 z
       have h4 := congrArg ι (ha y rfl)
+
       rw [map_sum, map_zero] at h4
       rw [← h4]
       refine Finset.sum_congr rfl fun k _ => ?_

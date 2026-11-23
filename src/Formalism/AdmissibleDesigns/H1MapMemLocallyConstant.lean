@@ -1,4 +1,50 @@
-import Formalism.AdmissibleDesigns.BlockTwistedCyclotomic
+module
+
+public import Formalism.AdmissibleDesigns.BlockTwistedCyclotomic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 variable [hT2Core : Fact ReciprocityTheory.ChartRestriction.T2.Core]
 
@@ -20,7 +66,7 @@ variable {R S G M M' : Type} [CommRing R] [CommRing S] [Algebra S R] [Group G]
 def cocycleMap : coZ1s ρ →ₗ[S] coZ1s ρ' where
   toFun c := ⟨fun g => φ ((c : G → M) g), fun g h => by
     show φ ((c : G → M) (g * h)) = φ ((c : G → M) g) + ρ' g (φ ((c : G → M) h))
-    rw [c.2 g h, map_add, hφ]⟩
+    rw [c.2 g h, map_add (f := _), hφ]⟩
   map_add' a b := Subtype.ext <| funext fun g => map_add φ ((a : G → M) g) ((b : G → M) g)
   map_smul' r a := Subtype.ext <| funext fun g => map_smul φ r ((a : G → M) g)
 
@@ -226,7 +272,7 @@ variable {ι : Type} [Fintype ι] (b : Module.Basis ι ℤ_[l] O)
 
 def psiQ (j : ι) : ℚ_[l] →ₗ[ℤ_[l]] KO O where
   toFun x := Submodule.Quotient.mk (iotaK l O x * algebraMap O (FractionRing O) (b j))
-  map_add' x y := by rw [map_add, add_mul, Submodule.Quotient.mk_add]
+  map_add' x y := by rw [map_add (f := _), add_mul, Submodule.Quotient.mk_add]
   map_smul' a x := by
     rw [RingHom.id_apply, ← Submodule.Quotient.mk_smul, smulK, Algebra.smul_def a x, map_mul, iotaK_alg,
       mul_assoc]
@@ -256,6 +302,7 @@ theorem Psi_inj : Function.Injective (Psi l O b) := by
   have hs' : ∀ j, ∃ cj : ℤ_[l], algebraMap ℤ_[l] ℚ_[l] cj = (s : ℤ_[l]) • x j := fun j => hs j
   choose c hc using hs'
   have h1 : (∑ j, iotaK l O (x j) * algebraMap O (FractionRing O) (b j)) ∈ (1 : Submodule O (FractionRing O)) := by
+
     rw [← Submodule.Quotient.mk_eq_zero, ← Submodule.mkQ_apply, map_sum, ← hv, Psi_apply]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← hx j]
@@ -263,6 +310,7 @@ theorem Psi_inj : Function.Injective (Psi l O b) := by
   obtain ⟨o, ho⟩ := Submodule.mem_one.mp h1
   have h2 : algebraMap O (FractionRing O) ((s : ℤ_[l]) • o) =
       algebraMap O (FractionRing O) (∑ j, c j • b j) := by
+
     rw [Algebra.smul_def, map_mul, ho, Finset.mul_sum, map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Algebra.smul_def, map_mul, ← mul_assoc]
@@ -292,6 +340,7 @@ theorem Psi_surj [IsLocalHom (algebraMap ℤ_[l] O)] : Function.Surjective (Psi 
   refine ⟨fun j => QZ.mk l (algebraMap ℤ_[l] ℚ_[l] (b.equivFun (a * w) j) / ((l : ℕ) : ℚ_[l]) ^ m), ?_⟩
   rw [Psi_apply]
   simp only [PsiJ_mk, ← Submodule.mkQ_apply]
+
   rw [← map_sum]
   congr 1
   have hl0 : ((l : ℕ) : O) ≠ 0 := by
@@ -308,6 +357,7 @@ theorem Psi_surj [IsLocalHom (algebraMap ℤ_[l] O)] : Function.Surjective (Psi 
     rw [← map_mul, ← hw, map_pow, map_natCast]
   have hsum : ∑ j, algebraMap O (FractionRing O) (algebraMap ℤ_[l] O (b.equivFun (a * w) j)) *
       algebraMap O (FractionRing O) (b j) = algebraMap O (FractionRing O) (a * w) := by
+
     conv_rhs => rw [← b.sum_equivFun (a * w), map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [Algebra.smul_def, map_mul (algebraMap O (FractionRing O))]

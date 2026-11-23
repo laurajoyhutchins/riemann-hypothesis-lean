@@ -1,5 +1,45 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.ContinuousThetaInf
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.ConstCut
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.EqOneOfToHAFin
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.StdConjExOfWitt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,36 +62,12 @@ theorem betaV_add {D : D7} (X : HidaSetting D) (v : InfinitePlace X.B.I.F) (Y Z 
   funext j
   exact map_add _ _ _
 
-theorem betaV_act {D : D7} (X : HidaSetting D) (hb : AdBridgeIso X.B.I) (s : X.B.I.Ginf) (v : InfinitePlace X.B.I.F)
-    (Y : TupI X) : betaV X v (X.toInf hb s • Y) = uMat (s v) * betaV X v Y := by
-  haveI : FiniteDimensional X.B.I.F X.B.I.E := fd_of X
-  have hPu : IsUnit (X.B.I.P v).det := (Matrix.isUnit_iff_isUnit_det _).1 (X.B.I.P_unit v)
-  set Mm : Matrix (Fin X.B.I.n) (Fin X.B.I.n) (Ainf X.B.I.F ⊗[X.B.I.F] X.B.I.E) :=
-    ((HA.mat (Ainf X.B.I.F) X.B.I.cm.sig X.B.I.J (X.toInf hb s) : GL (Fin X.B.I.n) (Ainf X.B.I.F ⊗[X.B.I.F] X.B.I.E)) :
-      Matrix (Fin X.B.I.n) (Fin X.B.I.n) (Ainf X.B.I.F ⊗[X.B.I.F] X.B.I.E)) with hMm
-  have hmap : Mm.map (PI.AprimeInfU.thetaInf X v) = X.B.I.P v * uMat (s v) * (X.B.I.P v)⁻¹ := by
-    rw [uMat_toInf X hb s v, ← hMm]
-    simp only [← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hPu, Matrix.one_mul]
-    rw [Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hPu, Matrix.mul_one]
-  have hcol : ∀ b, (fun j => PI.AprimeInfU.thetaInf X v ((X.toInf hb s • Y) b j)) =
-      (X.B.I.P v * uMat (s v) * (X.B.I.P v)⁻¹) *ᵥ fun j => PI.AprimeInfU.thetaInf X v (Y b j) := by
-    intro b
-    rw [← hmap]
-    funext i
-    show PI.AprimeInfU.thetaInf X v ((Mm *ᵥ Y b) i) = _
-    simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, Matrix.map_apply]
-  ext i b
-  simp only [betaV, Matrix.of_apply, Matrix.mul_apply]
-  rw [hcol b]
-  rw [Matrix.mulVec_mulVec, ← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.nonsing_inv_mul _ hPu, Matrix.one_mul,
-    ← Matrix.mulVec_mulVec]
-  simp only [Matrix.mulVec, dotProduct]
-
 theorem betaV_rmul {D : D7} (X : HidaSetting D) (v : InfinitePlace X.B.I.F) (a : MfI X) (Y : TupI X) :
     betaV X v (rmulT X a Y) = betaV X v Y * a.map (PI.AprimeInfU.thetaInf X v) := by
   ext i b
+
   simp only [betaV, Matrix.of_apply, Matrix.mul_apply, Matrix.map_apply, rmulT, Matrix.mulVec, dotProduct,
-    map_sum, map_mul, Finset.mul_sum, Finset.sum_mul]
+  map_sum, map_mul, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun j _ => ?_
   ring

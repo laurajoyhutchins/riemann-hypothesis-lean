@@ -1,9 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTuplesOfLaws
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsModelsExt
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTuplesOfLaws
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsModelsExt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsMeasY
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
-import Formalism.LocalToGlobal.IndefiniteReal.LinksW
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftsAtAndSeedFacts
+import Formalism.LocalToGlobal.IndefiniteReal.LinksExist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.Datum Formalism.IndefR.FWT Formalism.L2.Pj
 open scoped TensorProduct InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -26,31 +64,31 @@ theorem extL_is (hL : R.toLevCh.Is A.μ0) (hV : ∀ n, TwLev R (V.xiH n) (V.xi n
     (hQ : ∀ p ∈ ({D.host.pde, D.host.pde'} : Set ℕ), ∃ 𝔭 : HeightOneSpectrum (𝓞 D.host.K),
       (∀ t, ∀ PP ∈ R.Q t, ((p : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal → PP.under (𝓞 D.host.K) = 𝔭) ∧
         ∀ n, ∀ PP ∈ V.Q n, ((p : ℕ) : 𝓞 D.host.E) ∈ PP.asIdeal → PP.under (𝓞 D.host.K) = 𝔭) :
-    (extL R.toLevCh V).Is (.inl A.μ0) where
-  mu0 := hL.mu0
-  eta := hL.eta
-  xi := Sum.rec hL.xi fun n => (hV n).xi
-  xi_inj := by
-    rintro (t | n) (t' | n') h
-    · exact congrArg _ (hL.xi_inj h)
-    · exact absurd h.symm (hn n' t)
-    · exact absurd h (hn n t')
-    · exact congrArg _ (hi h)
-  xi_base := hL.xi_base
-  xi_fin := Sum.rec hL.xi_fin fun n => (hV n).xi_fin
-  xi_triv := Sum.rec hL.xi_triv fun n => (hV n).xi_triv
-  xi_tame := Sum.rec hL.xi_tame fun n => (hV n).xi_tame
-  Pg := hL.Pg
-  Q_pl := Sum.rec hL.Q_pl fun n => (hV n).Q_pl
-  Q_off := Sum.rec hL.Q_off fun n => (hV n).Q_off
-  Q_de p hp := (hQ p hp).imp fun _ h => Sum.rec h.1 h.2
-  Q_ram := Sum.rec hL.Q_ram fun n => (hV n).Q_ram
-  chi := hL.chi
-  xiR := Sum.rec hL.xiR fun n => (hV n).xiR
-  βY := hL.βY
-  βX := hL.βX
-  βV := hL.βV
-  βW := hL.βW
+    (extL R.toLevCh V).Is (.inl A.μ0) :=
+  { mu0 := hL.mu0
+    eta := hL.eta
+    xi := Sum.rec hL.xi fun n => (hV n).xi
+    xi_inj := by
+      rintro (t | n) (t' | n') h
+      · exact congrArg _ (hL.xi_inj h)
+      · exact absurd h.symm (hn n' t)
+      · exact absurd h (hn n t')
+      · exact congrArg _ (hi h)
+    xi_base := hL.xi_base
+    xi_fin := Sum.rec hL.xi_fin fun n => (hV n).xi_fin
+    xi_triv := Sum.rec hL.xi_triv fun n => (hV n).xi_triv
+    xi_tame := Sum.rec hL.xi_tame fun n => (hV n).xi_tame
+    Pg := hL.Pg
+    Q_pl := Sum.rec hL.Q_pl fun n => (hV n).Q_pl
+    Q_off := Sum.rec hL.Q_off fun n => (hV n).Q_off
+    Q_de p hp := (hQ p hp).imp fun _ h => Sum.rec h.1 h.2
+    Q_ram := Sum.rec hL.Q_ram fun n => (hV n).Q_ram
+    chi := hL.chi
+    xiR := Sum.rec hL.xiR fun n => (hV n).xiR
+    βY := hL.βY
+    βX := hL.βX
+    βV := hL.βV
+    βW := hL.βW }
 
 theorem Q_base (hL : R.toLevCh.Is A.μ0) : R.Q A.μ0 = ∅ :=
   Finset.eq_empty_of_forall_notMem fun PP hP => (hL.Q_ram A.μ0 PP).2 (Or.inl hP) (by
@@ -58,8 +96,8 @@ theorem Q_base (hL : R.toLevCh.Is A.μ0) : R.Q A.μ0 = ∅ :=
     rw [hL.xi_base]
     exact fun _ _ => rfl)
 
-open Formalism.L2.Host Formalism.L2.Col GlobalTheory.RationalValues in
 
+open Formalism.L2.Host Formalism.L2.Col GlobalTheory.RationalValues in
 theorem xiR_mem (hL : R.toLevCh.Is A.μ0) (hF : R.IsFam) {χ xi Q xiR} (h : TwLev R χ xi Q xiR) :
     ∀ PP ∈ Q, ∀ x, ((xiR PP x : ℂˣ) : ℂ) ∈ D.what₂.embLL.fieldRange := by
   classical
@@ -108,8 +146,8 @@ theorem xiR_mem (hL : R.toLevCh.Is A.μ0) (hF : R.IsFam) {χ xi Q xiR} (h : TwLe
   rw [h.xiR PP hPP a k x hk hx]
   exact hm
 
-variable (R V) in
 
+variable (R V) in
 def okOf (n : N) : Set Pl0 := {P | Bridge.SplitOff (R.pl P) ((R.Sb : Set (Pl D.host.E)) ∪ (V.Q n : Set (Pl D.host.E)))}
 
 theorem okOf_subset (hL : R.toLevCh.Is A.μ0) (hF : R.IsFam) (n : N) : okOf R V n ⊆ A.ok A.μ0 := by
@@ -125,7 +163,7 @@ theorem sep_new (hL' : (extL R.toLevCh V).Is (.inl A.μ0)) (n : N) : ∀ PP ∈ 
     GlobalTheory.HeckeCharacterRestriction.not_isConjPl_union hL' (.inr n) (Or.inl h) (Or.inr h'),
     GlobalTheory.HeckeCharacterRestriction.not_isConjPl_union hL' (.inr n) (Or.inr h') (Or.inl h)⟩
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem exists_sideX (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R F) (hL' : (extL R.toLevCh V).Is (.inl A.μ0)) (n : N)
     (hV : TwLev R (V.xiH n) (V.xi n) (V.Q n) (V.xiR n)) :
@@ -139,7 +177,7 @@ theorem exists_sideX (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R
       ∀ P, op (P, 0) = 1 ∧ ∀ k, D.sp.X'.rank < k → op (P, k) = 0 := by
   have hχ := GlobalTheory.RationalValues.chiVal_of_chiW R hC.grp.chiW
   have hξ := xiR_mem hC.lev hC.fam hV
-  obt ⟨g, c, c', ht⟩ := hC.fam.tie
+  obtain ⟨g, c, c', ht⟩ := hC.fam.tie
   have key := hS D G D.sp.X' R.βX R.ΛX hC.lev.βX (R.datXt A.μ0) (V.Q n) ((extL R.toLevCh V).datXt (.inr n)).xq Pl0 R.pl (A.ok A.μ0)
     (okOf R V n) ((R.Sb : Set (Pl D.host.E)) ∪ (V.Q n : Set (Pl D.host.E)))
     (by show R.Q A.μ0 ⊆ _; rw [Q_base hC.lev]; exact Finset.empty_subset _) (okOf_subset hC.lev hC.fam n) (sep_new hL' n)
@@ -150,12 +188,12 @@ theorem exists_sideX (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R
       rw [e, Units.val_inv_eq_inv_val]
       exact Subfield.inv_mem _ (hξ PP hP x))
     R.cX.coef _ _ _ (R.B.R A.μ0) ⟨_, c, _, _, _, _, ht.mapR, ht.coefR A.μ0⟩
-  obt ⟨S, act, op, B, h1, h2, h3⟩ := key
+  obtain ⟨S, act, op, B, h1, h2, h3⟩ := key
   refine ⟨S, act, op, B, fun q => ?_, h2, h3⟩
-  obt ⟨hq, e⟩ := h1 q
+  obtain ⟨hq, e⟩ := h1 q
   exact (congrArg R.eG e).trans (hC.grp.red_R A.μ0 ⟨q, hq⟩)
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem exists_sideV (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R F) (hL' : (extL R.toLevCh V).Is (.inl A.μ0)) (i : Fin D.R.m)
     (n : N) (hV : TwLev R (V.xiH n) (V.xi n) (V.Q n) (V.xiR n)) :
@@ -170,7 +208,7 @@ theorem exists_sideV (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R
       ∀ P, op (P, 0) = 1 ∧ ∀ k, (Vc D i).rank < k → op (P, k) = 0 := by
   have hχ := GlobalTheory.RationalValues.chiVal_of_chiW R hC.grp.chiW
   have hξ := xiR_mem hC.lev hC.fam hV
-  obt ⟨g, c, c', ht⟩ := hC.fam.tie
+  obtain ⟨g, c, c', ht⟩ := hC.fam.tie
   have key := hS D G (Vc D i) (R.βV i) (R.ΛV i) (hC.lev.βV i) (R.datVt i A.μ0) (V.Q n) ((extL R.toLevCh V).datVt i (.inr n)).xq Pl0 R.pl
     (A.ok A.μ0) (okOf R V n) ((R.Sb : Set (Pl D.host.E)) ∪ (V.Q n : Set (Pl D.host.E)))
     (by show R.Q A.μ0 ⊆ _; rw [Q_base hC.lev]; exact Finset.empty_subset _) (okOf_subset hC.lev hC.fam n) (sep_new hL' n)
@@ -181,12 +219,12 @@ theorem exists_sideV (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R
       exact Subfield.inv_mem _ (hχ i PP hP x))
     (fun PP hP x => hξ PP hP x)
     (R.cV i).coef _ _ _ (R.B.L i A.μ0) ⟨_, c' i, _, _, _, _, ht.mapL i, ht.coefL i A.μ0⟩
-  obt ⟨S, act, op, B, h1, h2, h3⟩ := key
+  obtain ⟨S, act, op, B, h1, h2, h3⟩ := key
   refine ⟨S, act, op, B, fun q => ?_, h2, h3⟩
-  obt ⟨hq, e⟩ := h1 q
+  obtain ⟨hq, e⟩ := h1 q
   exact (congrArg R.eG e).trans (hC.grp.red_L i A.μ0 ⟨q, hq⟩)
 
-set_option maxHeartbeats 2000000 in
+
 
 def newRealOfSideData {X : NewFam A N}
     (BR : ∀ n, Bridge.SideReal D D.sp.X'
@@ -219,7 +257,7 @@ def newRealOfSideData {X : NewFam A N}
   thF _ _ := 0
   thG _ _ := 0
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem fam_stage (hS : SideLev) {F : Face D A} (hC : GlobalTheory.Hk3.Core R F) (hL' : (extL R.toLevCh V).Is (.inl A.μ0))
     (hV : ∀ n, TwLev R (V.xiH n) (V.xi n) (V.Q n) (V.xiR n)) : ∃ (X : NewFam A N) (Y : NewReal R V X), FamC Y := by

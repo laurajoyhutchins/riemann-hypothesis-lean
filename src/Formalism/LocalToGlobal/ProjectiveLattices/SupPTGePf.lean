@@ -1,5 +1,44 @@
-import Formalism.LocalToGlobal.ProjectiveLattices.AxHLAM
-import Formalism.LocalToGlobal.ProjectiveLattices.SupNDataOfNonneg
+module
+
+public import Formalism.LocalToGlobal.ProjectiveLattices.SupNDataOfNonneg
+public import Formalism.LocalToGlobal.ProjectiveLattices.XcLat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.ExistsPowSmulMemBall
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,16 +52,6 @@ variable {D : D7} {Tc : Core D} (hL : LawsCore Tc) (j : ℕ)
 def SupPtAt (σ : Tc.Q.c.F →+* ℂ) : Type :=
   Σ k : (Tc.U j σ).Comp, {x : ReciprocityTheory.ChartRestriction.G.FD.Frame ((Tc.U j σ).X k).Ψ D.R.r // x ∈ ((Tc.U j σ).X k).dom}
 
-variable {j} in
-
-def NrmTieK (h : GenFrEx (Tc.Q.Xo j) Tc.Q.c)
-    (fn : ∀ σ : Tc.Q.c.F →+* ℂ, FrPt (Tc.Q.Xo j) Tc.Q.c (CAt σ) → Ix (Tc.Q.Dw j) → ℝ)
-    (yP : ∀ Z : Comp (Tc.Q.Xo j) Tc.Q.c, ∀ P : Om Z →+* ℂ, FrPt (Tc.Q.Xo j) Tc.Q.c (CAt (sgOf P)))
-    (ka : WeightFamilies.Wt D j)
-    (pt : ∀ (Z : Comp (Tc.Q.Xo j) Tc.Q.c) (P : Om Z →+* ℂ), SupPtAt j (goodOf Tc.Q.c (sgOf P))) : Prop :=
-  ∀ (Z : Comp (Tc.Q.Xo j) Tc.Q.c) (P : Om Z →+* ℂ) (F : Tc.R j),
-    nrmC fn (yP Z) (wtZ (wtA ka) ka.n) (valC h (wtA ka) ka.n F Z) P =
-      recNrm (Tc.U j (goodOf Tc.Q.c (sgOf P))) (xiR D) (wtA ka) ka.n F (pt Z P).1 (pt Z P).2.1
 
 def DensK (h : GenFrEx (Tc.Q.Xo j) Tc.Q.c) (ka : WeightFamilies.Wt D j)
     (pt : ∀ (Z : Comp (Tc.Q.Xo j) Tc.Q.c) (P : Om Z →+* ℂ), SupPtAt j (goodOf Tc.Q.c (sgOf P))) : Prop :=
@@ -32,17 +61,5 @@ def DensK (h : GenFrEx (Tc.Q.Xo j) Tc.Q.c) (ka : WeightFamilies.Wt D j)
       (recB hL).supN j ka sg F' ≤
         ⨆ P : PT (Ω := Om Z) sg, recNrm (Tc.U j (goodOf Tc.Q.c (sgOf (P : Om Z →+* ℂ)))) (xiR D) (wtA ka) ka.n
           (F : Tc.R j) (pt Z P).1 (pt Z P).2.1
-
-theorem supPTGe_of (h : GenFrEx (Tc.Q.Xo j) Tc.Q.c)
-    (fn : ∀ σ : Tc.Q.c.F →+* ℂ, FrPt (Tc.Q.Xo j) Tc.Q.c (CAt σ) → Ix (Tc.Q.Dw j) → ℝ)
-    (yP : ∀ Z : Comp (Tc.Q.Xo j) Tc.Q.c, ∀ P : Om Z →+* ℂ, FrPt (Tc.Q.Xo j) Tc.Q.c (CAt (sgOf P)))
-    (ka : WeightFamilies.Wt D j)
-    (pt : ∀ (Z : Comp (Tc.Q.Xo j) Tc.Q.c) (P : Om Z →+* ℂ), SupPtAt j (goodOf Tc.Q.c (sgOf P)))
-    (htie : NrmTieK h fn yP ka pt) (hden : DensK hL j h ka pt) :
-    SupPTGe hL j h fn yP ka := by
-  intro Z F hF hev
-  obtain ⟨F', hF', hne, hsup⟩ := hden Z F hF hev
-  refine ⟨F', hF', hne, fun sg => (hsup sg).trans (le_of_eq ?_)⟩
-  exact iSup_congr fun P => (htie Z P (F : Tc.R j)).symm
 
 end Formalism.L2.Pj

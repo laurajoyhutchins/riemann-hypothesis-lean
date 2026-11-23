@@ -1,6 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.BigOperators.Finprod
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.GroupTheory.GroupAction.Defs
+public import Mathlib.SetTheory.Cardinal.Finite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.IndefiniteReal.Bridge
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+
+@[expose] public section
+
 open Formalism.IndefR.Bridge Formalism.L2.DIV Formalism.DivisionValues Formalism.L2.Col NumberField MeasureTheory Polynomial
 
 namespace GlobalTheory
@@ -94,8 +148,8 @@ def swapEquiv {Γ X Y Z : Type} [Group Γ] [MulAction Γ X] [MulAction Γ Y] [Mu
 
 end OrbitDoubleCount
 
-open OrbitDoubleCount in
 
+open OrbitDoubleCount in
 theorem weighted_fibre_sums_eq : ∀ {Γ X Y Z I I' : Type} [Group Γ] [MulAction Γ X] [MulAction Γ Y] [MulAction Γ Z] [Fintype I] [Fintype I'] (p : Z → X) (q : Z → Y) (x : I → X) (y : I' → Y) (φ : Z → ℂ), (∀ (γ : Γ) z, p (γ • z) = γ • p z) → (∀ (γ : Γ) z, q (γ • z) = γ • q z) → (∀ u : X, ∃! i, u ∈ MulAction.orbit Γ (x i)) → (∀ u : Y, ∃! i, u ∈ MulAction.orbit Γ (y i)) → (∀ i, Finite (MulAction.stabilizer Γ (x i))) → (∀ i, Finite (MulAction.stabilizer Γ (y i))) → (∀ i, {z | p z = x i}.Finite) → (∀ i, {z | q z = y i}.Finite) → (∀ (γ : Γ) z, φ (γ • z) = φ z) → ∑ i, ((Nat.card (MulAction.stabilizer Γ (x i)) : ℂ))⁻¹ * ∑ᶠ z ∈ {z | p z = x i}, φ z = ∑ i, ((Nat.card (MulAction.stabilizer Γ (y i)) : ℂ))⁻¹ * ∑ᶠ z ∈ {z | q z = y i}, φ z := by
   intro Γ X Y Z I I' _ _ _ _ _ _ p q x y φ hp hq hx hy fx fy gx gy hφ
   have h1 := fun i => fibre_sum p q (x i) y φ hy fy (gx i)

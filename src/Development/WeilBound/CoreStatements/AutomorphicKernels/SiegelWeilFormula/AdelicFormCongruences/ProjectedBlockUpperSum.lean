@@ -1,8 +1,60 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LowerRankDatum
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.FourierCompactness.SigmaSigmaOfGood
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.CayleyTransform.RDIota
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DenseRationalsPlusSinglePlaceAdelesStatement
-import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.UnipotentLeDiagonalStabiliser
+module
+
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.LowerRankDatum
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.FourierCompactness.DoubledGroupTopologicalProperties
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.MeanSquareAddFundamentalDomainOfCocompact
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DenseRationalsPlusSinglePlaceAdelesStatement
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.BlockTriangularFrames.SiegelParabolicEqStabiliserCols
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.G2HaarMeasure.CountableRationalPointsDoubled
+import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.UnitsBorelSpace.BorelSpaceDoubledGroup
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.CayleyTransform.CompFinFinOne
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.CayleyTransform.RDIota
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.FourierCompactness.SigmaSigmaOfGood
+import Development.WeilBound.ThetaLifts.LatticeBasics.IsCompactOfUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.CayleyTransform.DZTranspose
+
+@[expose] public section
 
 set_option linter.unusedSectionVars false
 
@@ -70,7 +122,7 @@ def Qa (ε : ℤˣ) : Matrix (Fin d.n ⊕ Fin d.n) (Fin d.n ⊕ Fin d.n) (AE F E
 
 theorem uZ_unitary (ε : ℤˣ) (u : Fin L.n → AE F E) : (uZ L u)ᵀ * Qa (d := d) ε * (uZ L u).map (cA σ) = Qa ε := by
   have hσ := kfour.sigma_sigma_of_good d.ok.good
-  have hcc := GlobalTheory.EisBL.DoubledUnipotentRadical.cA_cA σ hσ
+  have hcc := kfour.cA_cA' σ hσ
   have hD : (uD (σ := σ) L u).map (cA σ) = 1 - (uN L u)ᵀ := by
     ext i j
     simp only [uD, Matrix.map_apply, Matrix.sub_apply, Matrix.transpose_apply, map_sub, hcc, Matrix.one_apply]
@@ -187,7 +239,7 @@ theorem projected_block_upper_sum {ε : ℤˣ} (A D : Matrix (Fin d.n) (Fin d.n)
 theorem uM_eq {uM : (Fin L.n → AE F E) → d.G} {ν 𝓤} (h : L.UData uM ν 𝓤) : uM = unipotentPoint L := by
   obtain ⟨ε, hε⟩ := d.ok.frame.1
   have hσ := kfour.sigma_sigma_of_good d.ok.good
-  have hcc := GlobalTheory.EisBL.DoubledUnipotentRadical.cA_cA σ hσ
+  have hcc := kfour.cA_cA' σ hσ
   funext u
   obtain ⟨a', ha'⟩ := h.1 u
   refine kfour.inFrame_injective d.b ?_
@@ -222,7 +274,7 @@ theorem mem_ratV (v : Fin L.n → AE F E) : v ∈ L.ratV ↔ ∃ e, GlobalTheory
     | add x y _ _ hx hy =>
       obtain ⟨X, rfl⟩ := hx
       obtain ⟨Z, rfl⟩ := hy
-      exact ⟨X + Z, funext fun i => by simp [incV_apply, map_add]⟩
+      exact ⟨X + Z, funext fun i => by simp [incV_apply, map_add (f := _)]⟩
     | neg x _ hx =>
       obtain ⟨X, rfl⟩ := hx
       exact ⟨-X, funext fun i => by simp [incV_apply, map_neg]⟩
@@ -278,7 +330,8 @@ theorem finOne_mul {a : AF F} (ha : a.2 = 0) : finOne F * a = 0 :=
 theorem sum_mem_Sw (w : InfinitePlace F) (s : Fin (Module.finrank F E) → AF F) (hs : ∀ k, (s k).2 = 0 ∧ ∀ w', w' ≠ w → (s k).1 w' = 0) :
     ∑ k, s k • kfour.bsA F E k ∈ Sw d w := by
   refine ⟨fun w' hw' => ?_, ?_⟩
-  · rw [map_sum]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      rw [map_sum]
     refine Finset.sum_eq_zero fun k _ => ?_
     rw [St.piInf_smul, (hs k).2 w' hw', map_zero, zero_mul]
   · rw [Finset.smul_sum]
@@ -299,6 +352,7 @@ theorem dense_Sw (w : InfinitePlace F) : Dense {z : AE F E | ∃ e : E, ∃ s �
   choose q hq using hx
   refine ⟨∑ k, q k • kfour.bsE F E k, ∑ k, s k • kfour.bsA F E k, sum_mem_Sw d w s hs, ?_⟩
   have h1 : inclR (F := F) (AF F) (∑ k, q k • kfour.bsE F E k) = ∑ k, algebraMap F (AF F) (q k) • kfour.bsA F E k := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [Algebra.TensorProduct.basis_apply, algebraMap_smul, kfour.inclR_eq, TensorProduct.tmul_smul]
@@ -322,6 +376,7 @@ variable {d : SD σ} (L : LD d)
 theorem cw_uN (w' : InfinitePlace F) (u : Fin L.n → AE F E) :
     d.cw w' (uN L u) = ∑ j, Matrix.single L.i₀ (L.em j) (piInf (d.B.emb w') (u j)) := by
   ext a b
+
   simp only [SD.cw, uN, Matrix.map_apply, Matrix.sum_apply, map_sum, Matrix.single_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
   split_ifs <;> simp

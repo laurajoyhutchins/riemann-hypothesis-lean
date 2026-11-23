@@ -1,9 +1,49 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.OrthSubrepresentation
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CyclicStrongAtCusp
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.InertiaQuadraticRamification.NumberField
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IwahoriTypeSupport.HasTypeVecIff
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.RegularSemisimpleFibres.PowerMatchingTraces.MatchCut
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.OrthSubrepresentation
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CyclicStrongAtCusp
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.InertiaQuadraticRamification.NumberField
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.EmbedsLevelZeroDepthZero
+public import Development.AutomorphicArithmetic.Foundations.Convolution.GeneralizedMeasures.LocHeckeInert
+public import GroundTheory.LocalFields.UnramifiedHensel
+public import PositivityTheory.AutomorphicForms.PublishedInputs.CyclicBaseChange.IsGalAd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.GelfandKazhdanReal
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,8 +83,6 @@ structure Lbl where
   D : List (ℕ × ℕ)
   L : List (ℕ × ℕ)
 
-instance : Inhabited Lbl := ⟨⟨2, [], []⟩⟩
-
 namespace Lbl
 
 def rk (a : Lbl) : ℕ := deg a.D + deg a.L
@@ -77,7 +115,7 @@ variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
 def HasLbl (θ : AlgebraicClosure 𝓀[k] →* ℂ) (π : Representation ℂ (GL (Fin n) k) V) (a : Lbl) : Prop :=
   a.Ok ∧ a.q = Nat.card 𝓀[k] ∧ n = a.rk ∧ Meets (levelZero π) (JD θ a.D a.L n)
 
-def Mixed (x : IrrGL k) : Prop :=
+def Mixed (x : IrrGL (k := k)) : Prop :=
   UpperTheory.Zero.LLC.DZ x ∧ ∃ s, HasSupport x.rep s ∧ GlobalTheory.RoadU.Unlinked s ∧
     (s.filter fun y => 2 ≤ y.1).Pairwise fun y z => ¬ y.Inert z
 
@@ -99,7 +137,7 @@ structure Pt (E Ω : Type) [Field E] [Field Ω] [Algebra E Ω] (n : ℕ) : Type 
   K : Type
   [field : Field K]
   [numberField : NumberField K]
-  [cx : IsTotallyComplex K]
+  [cx : _root_.NumberField.IsTotallyComplex K]
   [algE : Algebra E K]
   [algΩ : Algebra K Ω]
   [tower : IsScalarTower E K Ω]
@@ -112,7 +150,7 @@ section Tower
 
 variable {E Ω : Type} [Field E] [Field Ω] [Algebra E Ω] {n : ℕ}
 
-def Pt.base [NumberField E] [IsTotallyComplex E] (Ω : Type) [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (π : CuspSub E n) : Pt E Ω n :=
+def Pt.base [NumberField E] [_root_.NumberField.IsTotallyComplex E] (Ω : Type) [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (π : CuspSub E n) : Pt E Ω n :=
   { K := E, π := π }
 
 def Step (X Y : Pt E Ω n) : Prop :=
@@ -124,8 +162,8 @@ def Lifts (X Y : Pt E Ω n) : Prop := Relation.ReflTransGen Step X Y
 end Tower
 
 def FinTrace : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsGalois F E] [IsTotallyComplex F]
-    [IsTotallyComplex E], (Module.finrank F E).Prime → ∀ n : ℕ, 0 < n →
+  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] [IsGalois F E] [_root_.NumberField.IsTotallyComplex F]
+    [_root_.NumberField.IsTotallyComplex E], (Module.finrank F E).Prime → ∀ n : ℕ, 0 < n →
     ∀ (π : CuspSub F n) (P : CuspSub E n), (∀ g : E ≃ₐ[F] E, (Cusp.cx P).ConjIso g.toRingEquiv) →
       WeakBC (Cusp.cx π).sat (Cusp.cx P).sat → ∀ (v : HeightOneSpectrum (𝓞 F)) (w : PlacesOver E v),
       ¬ UpperTheory.ConvolutionTheory.GM.Split E v → UpperTheory.ConvolutionTheory.GM.Unr E v →
@@ -157,14 +195,14 @@ def LblBC : Prop :=
 def ToralOver {E M Ω : Type} [Field E] [NumberField E] [Field M] [NumberField M] [Field Ω] [Algebra E M] [Algebra E Ω] [Algebra M Ω]
     [IsScalarTower E M Ω] [IsAlgClosure E Ω] [IsAlgClosure M Ω] {A : ValuationSubring Ω} {v : HeightOneSpectrum (𝓞 E)}
     {w : HeightOneSpectrum (𝓞 M)} (h : IsPlaceOver A v) (h' : IsPlaceOver A w) {n : ℕ}
-    (x : IrrGL (v.adicCompletion E)) (τ' : SmIrr (GL (Fin n) (w.adicCompletion M)))
+    (x : IrrGL (k := v.adicCompletion E)) (τ' : SmIrr (GL (Fin n) (w.adicCompletion M)))
     (ξ : Fin n → ((w.adicCompletion M)ˣ →* ℂˣ)) (hξ : ∀ j, IsSmoothChar (ξ j)) : Prop :=
   (∀ j, UpperTheory.Zero.LLC.TameChar (ξ j)) ∧ HasSupport τ'.ρ (GlobalTheory.RoadU.chars ξ hξ) ∧
     ∀ rc, UpperTheory.Zero.LLC.IsRecT h rc → ∀ a', IsLocalArtin h' a' → ∀ t : Ine (F := M) A,
       (rc x).inePol (AlgEquiv.restrictScalars E (t : G M Ω)) = ∏ j, (X - C ((ξ j (a' (ineIncl h' t)) : ℂˣ) : ℂ))
 
 def SuppBC : Prop :=
-  ∀ (E Ω : Type) [Field E] [NumberField E] [IsTotallyComplex E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (n : ℕ), 0 < n →
+  ∀ (E Ω : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (n : ℕ), 0 < n →
     ∀ (π : CuspSub E n) (Y : Pt E Ω n), Lifts (Pt.base Ω π) Y →
     ∀ (A : ValuationSubring Ω) (v : HeightOneSpectrum (𝓞 E)) (w : HeightOneSpectrum (𝓞 Y.K)) (h : IsPlaceOver A v)
       (h' : IsPlaceOver A w) (g : ℕ) [Fact g.Prime] (i : ℚ_[g] ≃+* v.adicCompletion E), Continuous i →

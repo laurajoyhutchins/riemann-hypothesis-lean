@@ -1,10 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ToOneSucc
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralMulOfSupport
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatSelfAverageHeisenbergStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiTargetBilinearFormIntegralStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsBilinearPositionMiddleVertexStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ToOneSucc
+public import Mathlib.CategoryTheory.Category.Basic
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsBilinearPositionMiddleVertexStatement
 import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsLinearIsQuotIntTIntStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FourierJacobiTargetBilinearFormIntegralStatement
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatSelfAverageHeisenbergStatement
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegrableOfMemSB
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntegralMulOfSupport
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.OrbitLocallyConstant
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.QuotientIntegralParabolicUnfolding
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RootExchangeSupportAndFourierRelation
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SchwartzFourierTransformPiSurjectiveSchwartzBruhStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.FramePositiveSum
+
+@[expose] public section
+
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.StepData GlobalTheory.PosOne
 open GlobalTheory.IndefiniteRowSideFullHecke.FourierJacobiAverage (app HasTensorVal fl opEFJ IsQuotIntFJ IsFJ Represents)
 open GlobalTheory.IndefiniteRowSideFullHecke.FramePositiveSum (IsCO rescale)
@@ -69,7 +123,7 @@ theorem exists_fj_of_exUp {ρ : ℕ} (h1 : 1 ≤ ρ) (h2 : ρ < c) {ψ : AddChar
     ∫ β, Φ₀.1 β * B φ (σ (colE c (ρ + 1) β) v) ∂(Measure.pi fun _ => ν)
   have fadd1 : ∀ φ φ' v Φ₀, f (φ + φ') v Φ₀ = f φ v Φ₀ + f φ' v Φ₀ := by
     intro φ φ' v Φ₀
-    simp only [f, map_add, LinearMap.add_apply, mul_add]
+    simp only [f, map_add (f := _), LinearMap.add_apply, mul_add]
     exact integral_add (hI φ v Φ₀) (hI φ' v Φ₀)
   have fsmul1 : ∀ (z : ℂ) φ v Φ₀, f (z • φ) v Φ₀ = z • f φ v Φ₀ := by
     intro z φ v Φ₀
@@ -77,7 +131,7 @@ theorem exists_fj_of_exUp {ρ : ℕ} (h1 : 1 ≤ ρ) (h2 : ρ < c) {ψ : AddChar
     rw [← integral_const_mul]; congr 1; funext β; ring
   have fadd2 : ∀ φ v v' Φ₀, f φ (v + v') Φ₀ = f φ v Φ₀ + f φ v' Φ₀ := by
     intro φ v v' Φ₀
-    simp only [f, map_add, mul_add]
+    simp only [f, map_add (f := _), mul_add]
     exact integral_add (hI φ v Φ₀) (hI φ v' Φ₀)
   have fsmul2 : ∀ (z : ℂ) φ v Φ₀, f φ (z • v) Φ₀ = z • f φ v Φ₀ := by
     intro z φ v Φ₀

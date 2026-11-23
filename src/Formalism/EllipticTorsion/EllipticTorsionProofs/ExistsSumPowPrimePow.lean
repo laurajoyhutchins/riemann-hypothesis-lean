@@ -1,5 +1,50 @@
-import Mathlib
-import Formalism.EllipticTorsion.EllipticTorsionWeights
+module
+
+public import Formalism.EllipticTorsion.EllipticTorsionWeights
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 universe u
 
@@ -42,12 +87,13 @@ theorem frobenius_expansion : FrobExpand := by
         - ∑ e, C (b e) * X e ^ (p ^ j)
       = ∑ e, C (a e ^ (p ^ j) - b e) * X e ^ (p ^ j)
         + C (p : K) * map R.subtype r := by
-    rw [hmap, ← map_pow, hr, map_add, map_sum, map_mul, map_natCast]
+
+    rw [hmap, ← map_pow, hr, map_add (f := _), map_sum, map_mul, map_natCast]
     simp only [map_pow, map_mul, map_C, map_X, mul_pow, map_sub, sub_mul,
       Finset.sum_sub_distrib, map_natCast]
     simp [a']
     ring
-  rw [key, coeff_add, coeff_sum, coeff_C_mul, coeff_map]
+  rw [key, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, coeff_sum, coeff_C_mul, coeff_map]
   refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
   · refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (norm_nonneg _) fun e _ => ?_
     rw [coeff_C_mul, coeff_X_pow, norm_mul]
@@ -55,8 +101,8 @@ theorem frobenius_expansion : FrobExpand := by
     · simpa using hab e
     · simp
   · rw [norm_mul]
-    have h1 : ‖((coeff α r : R) : K)‖ ≤ 1 := (coeff α r).2
-    calc ‖(p : K)‖ * ‖((coeff α r : R) : K)‖ ≤ ‖(p : K)‖ * 1 :=
+    have h1 : ‖(r.coeff α : K)‖ ≤ 1 := (r.coeff α).2
+    calc ‖(p : K)‖ * ‖(r.coeff α : K)‖ ≤ ‖(p : K)‖ * 1 :=
           mul_le_mul_of_nonneg_left h1 (norm_nonneg _)
       _ = ‖(p : K)‖ := mul_one _
 

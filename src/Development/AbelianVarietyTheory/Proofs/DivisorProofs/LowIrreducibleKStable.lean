@@ -1,6 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EabIsKCInr
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockOperatorsLieRepresentationCommute
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LowestDegreeComponentInvariant
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TprodMemTensSpan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockFirstActionMatrixUnitEq
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockOperatorsLieRepresentationCommute
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Formalism.BasicNotions.TH
 
@@ -8,28 +52,7 @@ namespace GlobalTheory.LowStable
 
 theorem X_mul_pderiv_totalDegree_le {σ : Type} (u v : σ) (g : MvPolynomial σ ℂ) :
     (X u * pderiv v g).totalDegree ≤ g.totalDegree := by
-  classical
-  have key : ∀ m ∈ (pderiv v g).support, (m.sum fun _ e => e) + 1 ≤ g.totalDegree := by
-    intro m hm
-    have hc : coeff (m + Finsupp.single v 1) g ≠ 0 := by
-      rw [mem_support_iff, coeff_pderiv] at hm
-      intro h
-      rw [h, zero_mul] at hm
-      exact hm rfl
-    have h1 := le_totalDegree (mem_support_iff.2 hc)
-    have h2 : ((m + Finsupp.single v 1).sum fun _ e => e) = (m.sum fun _ e => e) + 1 := by
-      rw [Finsupp.sum_add_index' (fun _ => rfl) (fun _ _ _ => rfl), Finsupp.sum_single_index rfl]
-    rw [h2] at h1
-    exact h1
-  by_cases h0 : pderiv v g = 0
-  · rw [h0, mul_zero, totalDegree_zero]; exact Nat.zero_le _
-  · obtain ⟨m, hm⟩ := (support_nonempty).2 h0
-    have hm1 := key m hm
-    have hle : (pderiv v g).totalDegree ≤ g.totalDegree - 1 :=
-      Finset.sup_le fun m' hm' => by have := key m' hm'; show (m'.sum fun _ e => e) ≤ _; omega
-    refine (totalDegree_mul _ _).trans ?_
-    rw [totalDegree_X]
-    omega
+  apply GlobalTheory.KFixIrr.LowStable.deg_X_pderiv <;> assumption
 
 theorem omE_mem_restrictTotalDegree {P Q R S : ℕ} (D : ℕ) (u v : Ln P Q R S) (h : linePos u = linePos v)
     (g : Pol P Q R S) (hg : g ∈ restrictTotalDegree (Ln P Q R S) ℂ D) :
@@ -46,6 +69,7 @@ theorem omE_mem_restrictTotalDegree {P Q R S : ℕ} (D : ℕ) (u v : Ln P Q R S)
 theorem fockAct2_apply_eq {P Q R S : ℕ} (Z : Mat R S) (g : Pol P Q R S) :
     fockAct2 P Q R S Z g = ∑ c, ∑ d, Z c d • ∑ a, omE (a, c) (a, d) g := by
   conv_lhs => rw [Matrix.matrix_eq_sum_single Z]
+
   simp only [map_sum, LinearMap.sum_apply]
   refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun d _ => ?_
   have : Matrix.single c d (Z c d) = Z c d • (Eab c d : Mat R S) := by

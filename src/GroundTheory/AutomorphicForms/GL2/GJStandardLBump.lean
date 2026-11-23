@@ -1,5 +1,64 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJStandardLDefs
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLDefs
+import Aesop.Main
+import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+import GroundTheory.AutomorphicForms.MeasuresGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Presheaf
+import Mathlib.Topology.UniformSpace.Uniformizable
+public import Mathlib.Analysis.Calculus.BumpFunction.Basic
+
+@[expose] public section
 
 open MeasureTheory Filter Set Topology Metric IsDedekindDomain NumberField NumberField.mixedEmbedding
 open scoped NumberField.AdeleRing SchwartzMap Classical ENNReal
@@ -120,8 +179,8 @@ theorem ringInverse_eq_infInv {x : InfiniteAdeleRing K} (hx : IsUnit x) : Ring.i
   have h2 := congrFun h1 w
   exact eq_inv_of_mul_eq_one_left h2
 
-variable (K n) in
 
+variable (K n) in
 theorem isOpenEmbedding_val_infiniteAdelicGL :
     IsOpenEmbedding (Units.val : AdelicGLn.InfiniteAdelicGL K n → Matrix (Fin n) (Fin n) (InfiniteAdeleRing K)) := by
   have hdet : Continuous fun A : Matrix (Fin n) (Fin n) (InfiniteAdeleRing K) ↦ A.det :=
@@ -154,8 +213,8 @@ theorem isOpenEmbedding_val_infiniteAdelicGL :
     exact isOpen_iInter_of_finite fun w ↦
       isOpen_compl_singleton.preimage ((continuous_apply w).comp hdet)
 
-variable (K n) in
 
+variable (K n) in
 def archEntries : Matrix (Fin n) (Fin n) (InfiniteAdeleRing K) ≃ₜ (Fin n × Fin n → mixedSpace K) where
   toFun x ij := GroundTheory.Global.homeomorphMixedSpace K (x ij.1 ij.2)
   invFun y := Matrix.of fun i j ↦ (GroundTheory.Global.homeomorphMixedSpace K).symm (y (i, j))
@@ -208,6 +267,7 @@ theorem exists_archBump (μ : Measure (AdelicGLn.InfiniteAdelicGL K n)) [μ.IsHa
     fun x ↦ archEntries K n (x : Matrix (Fin n) (Fin n) (InfiniteAdeleRing K)) with hJdef
   have hJ : IsOpenEmbedding J :=
     (archEntries K n).isOpenEmbedding.comp (isOpenEmbedding_val_infiniteAdelicGL K n)
+  letI : R1Space (AdelicGLn.InfiniteAdelicGL K n) := hJ.isEmbedding.isInducing.r1Space
   set c₀ : ℂ := f x₀ with hc₀
   set W : Set (AdelicGLn.InfiniteAdelicGL K n) := {x | 0 < (starRingEnd ℂ c₀ * f x).re} with hWdef
   have hWo : IsOpen W := isOpen_lt continuous_const (Complex.continuous_re.comp (continuous_const.mul hf))

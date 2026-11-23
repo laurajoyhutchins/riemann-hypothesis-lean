@@ -1,18 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnivChar
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameEquivApply
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdmissibleTwistOfTwistingCharacter
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousCoeffBlockAct
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.ExistsNatSmulSingle
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffPolynomialEqZeroOfVanishingOnGLFamily
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisConjDefiniteFormsSemilinearEquiv
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FockHarmonicValueSpaceMapEqDualWeylModuleFunctioStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameKeepsMatricesMatchesRationalPointsStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarmonicPolynomialEqZeroOfFunctionStatement
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.Columns.CoefModAt
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsGlob
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NStageTrivialCharacterCoeffEqAlt
 import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NoFormsOff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SubsetTwistExceptionalPlaces
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameEquivApply
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsUniqueHcharOfFiniteOrder
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdmissibleTwistOfTwistingCharacter
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousCoeffBlockAct
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TensorMapDescent
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsGaloisConjDefiniteFormsSemilinearEquiv
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.HarmonicPolynomialEqZeroOfFunctionStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FockHarmonicValueSpaceMapEqDualWeylModuleFunctioStatement
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffPolynomialEqZeroOfVanishingOnGLFamily
-import Formalism.LocalToGlobal.Columns.CoefModAt
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameKeepsMatricesMatchesRationalPointsStatement
+import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.GoodPartLeTypeSubspace
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.N Formalism.MainNotions.StandardLattice Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.L2 Formalism.L2.Host Formalism.L2.DIV Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.NX GlobalTheory.HeightCounting GlobalTheory.TwInputs GlobalTheory.SeriesTie GlobalTheory.ExportSeries NumberField IsDedekindDomain
 open Formalism.MainNotions.IntegralHeckeForms (TwOK)
 open Formalism.AUTREP (GAf)
@@ -20,8 +59,8 @@ open GlobalTheory.FormInner (frameEquiv)
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.MtRead
-set_option synthInstance.maxHeartbeats 400000
-set_option maxHeartbeats 800000
+
+
 noncomputable section
 
 namespace GlobalTheory.MtRead.WtEmb
@@ -48,7 +87,7 @@ def cfn {n : ℕ} (lam : D.what₂.Tau → DomWeight n) : VV ℂ lam →ₗ[ℂ]
   toFun F := coefFn (RingHom.id ℂ) lam (F : Pol ℂ D.what₂.Tau n)
   map_add' F G := by
     funext x
-    simp only [coefFn, Submodule.coe_add, map_add, Pi.add_apply, mul_add]
+    simp only [coefFn, Submodule.coe_add, map_add (f := _), Pi.add_apply, mul_add]
   map_smul' c F := by
     funext x
     simp only [coefFn, Submodule.coe_smul, MvPolynomial.smul_eq_C_mul, map_mul, MvPolynomial.eval₂Hom_C, RingHom.id_apply,
@@ -128,6 +167,7 @@ theorem linInd_mapVV {ι' : Type} [Fintype ι'] {n : ℕ} {K : Type} [Field K] (
   · rw [← GlobalTheory.CoefModel.span_mapVV φ lam, Submodule.span_le]
     rintro _ ⟨i, rfl⟩
     dsimp only
+
     rw [← c.sum_repr (bVV K lam i), map_sum]
     refine Submodule.sum_mem _ fun x _ => ?_
     rw [LinearMap.map_smulₛₗ]
@@ -147,6 +187,29 @@ theorem mem_coefLat_iff {D : D7} {S T : HSp D} (B : Base S T) {K : Type} [Field 
     (emb : D.what₂.Tau → (D.host.E →+* K)) (O : Subring ℂ) (h : Bridge.Gf S) (P : PolF D T.rank S.rank) :
     P ∈ B.coefLat σ emb O h ↔
       P ∈ harm T.rank B.w B.F.BS ∧ harmFn T.rank B.w B.F.BS P ∈ coefLatFn σ emb O B.w.lam (B.latAt h) := Iff.rfl
+
+private theorem span_dualFr_eq_top {K : Type} [Field K] [NumberField K] {n : ℕ}
+    (M : Submodule (𝓞 K) (Fin n → K)) (hM : M.FG) :
+    Submodule.span K (dualFr M : Set (Fin n → K)) = ⊤ := by
+  rw [eq_top_iff]
+  intro x _
+  obtain ⟨s, hs⟩ := hM
+  obtain ⟨d, hdmem⟩ := IsLocalization.exist_integer_multiples
+    (nonZeroDivisors (𝓞 K)) s (fun y => x ⬝ᵥ y)
+  have hdx : (d : 𝓞 K) • x ∈ dualFr M := by
+    intro y hy
+    rw [← hs] at hy
+    induction hy using Submodule.span_induction with
+    | mem y hy =>
+      rw [smul_dotProduct]
+      exact Submodule.mem_one.2 (hdmem y hy)
+    | zero => simp
+    | add y z _ _ hy hz => rw [dotProduct_add]; exact add_mem hy hz
+    | smul a y _ hy => rw [dotProduct_smul]; exact Submodule.smul_mem _ _ hy
+  have hd0 := (IsFractionRing.injective (𝓞 K) K).ne (nonZeroDivisors.ne_zero d.2)
+  have hx := (Submodule.span K (dualFr M : Set (Fin n → K))).smul_mem
+    (algebraMap (𝓞 K) K d)⁻¹ (Submodule.subset_span hdx)
+  rwa [← algebraMap_smul K (d : 𝓞 K) x, smul_smul, inv_mul_cancel₀ hd0, one_smul] at hx
 
 theorem exists_wtMap : ∀ (D : D7) (S T : HSp D) (B : GlobalTheory.ExportSeries.Base S T), B.Good → ∀ (n : ℕ) (hF : D.host.F = maximalRealSubfield D.host.E) (P : principalLevelFrame.RowPsi S n), IdFrame hF P → ∀ (hn : S.rank = n) (K₀ : Type) [Field K₀] (R : Type) [CommRing R] [IsDomain R] (e : FractionRing R →+* ℂ) (f : K₀ →+* FractionRing R) (s : ↥D.LL0 →+* K₀), (∀ x, e (f (s x)) = embLL0 D x) → IsCoefRing (embLL0 D) (labLL0 D) (e.comp (algebraMap R (FractionRing R))).range → ∀ (W₀ : Type) [AddCommGroup W₀] [Module K₀ W₀] (ρ₀ : Representation K₀ (ReciprocityTheory.Aut.GQ D.host.E n) W₀) (lam : D.what₂.Tau → DomWeight n), (∀ τ a, (lam τ).w (Fin.cast hn a) = (B.w.lam τ).w a) → ∀ T₀ : W₀ ≃ₗ[K₀] VV K₀ lam, (∀ (γ : ReciprocityTheory.Aut.GQ D.host.E n) (γ₀ : GL (Fin n) D.host.E), (((γ : GAf D.host.E n) : GL (Fin n) (ReciprocityTheory.Aut.AL D.host.E)) : Matrix (Fin n) (Fin n) (ReciprocityTheory.Aut.AL D.host.E)) = (γ₀ : Matrix (Fin n) (Fin n) D.host.E).map Algebra.TensorProduct.includeLeftRingHom → ∀ x, T₀ (ρ₀ γ x) = rhoVr (fun τ => s.comp (labLL0 D τ)) lam γ₀ (T₀ x)) → ∀ (W : Type) [AddCommGroup W] [Module (FractionRing R) W] (ρ : Representation (FractionRing R) (ReciprocityTheory.Aut.GQ D.host.E n) W), (∃ (ι : Type) (_ : Fintype ι) (_ : DecidableEq ι) (b₀ : Module.Basis ι K₀ W₀) (b₁ : Module.Basis ι (FractionRing R) W), ∀ γ : ReciprocityTheory.Aut.GQ D.host.E n, LinearMap.toMatrix b₁ b₁ (ρ γ) = (LinearMap.toMatrix b₀ b₀ (ρ₀ γ)).map f) → ∃ ω : W →ₛₗ[e] PolF D T.rank S.rank, WtMap B (frameEquiv P) R e ρ ω := by
   intro D S T B hB n hF P hP hn K₀ _ R _ _ e f s hs hc W₀ _ _ ρ₀ lam hlam T₀ hT₀ W _ _ ρ hW
@@ -170,6 +233,7 @@ theorem exists_wtMap : ∀ (D : D7) (S T : HSp D) (B : GlobalTheory.ExportSeries
     intro w y h
     rw [show Ω w = sumMap e b₁ v w from rfl, sumMap_apply]
     conv_rhs => rw [← c₀.sum_repr y]
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [LinearMap.map_smulₛₗ, h x]
@@ -234,7 +298,7 @@ theorem exists_wtMap : ∀ (D : D7) (S T : HSp D) (B : GlobalTheory.ExportSeries
     | add φ₁ φ₂ _ _ h₁ h₂ =>
       obtain ⟨w₁, rfl⟩ := h₁
       obtain ⟨w₂, rfl⟩ := h₂
-      exact ⟨w₁ + w₂, by rw [map_add, map_add]⟩
+      exact ⟨w₁ + w₂, by rw [map_add (f := _), map_add (f := _)]⟩
     | smul o φ _ h₁ =>
       obtain ⟨w₁, rfl⟩ := h₁
       obtain ⟨_, r, rfl⟩ := o
@@ -243,8 +307,9 @@ theorem exists_wtMap : ∀ (D : D7) (S T : HSp D) (B : GlobalTheory.ExportSeries
       rfl
   ·
     intro h w
-    have hL : Submodule.IsLattice D.host.E (B.latAt h) :=
-      Formalism.UG.P.csGlob_lattice _ (Module.Finite.iff_fg.2 hB.frame.sdS.1.fg) hB.frame.sdS.1.span_eq_top _
+    have hS := Formalism.IndefR.Fin.PDA.selfDual_isFullLattice S B.F.ΛS hB.frame.sdS
+    have hL : Submodule.IsFullLattice D.host.E (B.latAt h) :=
+      Formalism.UG.P.csGlob_lattice _ (Module.Finite.iff_fg.2 hS.fg) hS.span_eq_top _
     let Lat : Submodule O (VV ℂ B.w.lam) :=
       (coefLatFn (embLL0 D) (labLL0 D) O B.w.lam (B.latAt h)).comap ((cfn B.w.lam).restrictScalars O)
     have hsmul : ∀ (c : R) {G : VV ℂ B.w.lam}, G ∈ Lat → e (algebraMap R (FractionRing R) c) • G ∈ Lat :=
@@ -256,7 +321,7 @@ theorem exists_wtMap : ∀ (D : D7) (S T : HSp D) (B : GlobalTheory.ExportSeries
       obtain ⟨c₁, hc₁, h₁⟩ := h₁ r
       obtain ⟨c₂, hc₂, h₂⟩ := h₂ r
       refine ⟨c₂ * c₁, mul_ne_zero hc₂ hc₁, ?_⟩
-      rw [map_add, smul_add, map_mul (algebraMap R (FractionRing R)) c₂ c₁, mul_assoc, map_mul e, ← smul_smul]
+      rw [map_add (f := _), smul_add, map_mul (algebraMap R (FractionRing R)) c₂ c₁, mul_assoc, map_mul e, ← smul_smul]
       refine add_mem (hsmul c₂ h₁) ?_
       rw [← map_mul e, ← mul_assoc, ← map_mul (algebraMap R (FractionRing R)), mul_comm c₂ c₁,
         map_mul (algebraMap R (FractionRing R)), mul_assoc, map_mul e, ← smul_smul]
@@ -280,14 +345,16 @@ theorem exists_wtMap : ∀ (D : D7) (S T : HSp D) (B : GlobalTheory.ExportSeries
       induction hG using Submodule.span_induction with
       | mem F hF => exact hQbase F hF
       | zero => rw [map_zero]; exact hQ0
-      | add _ _ _ _ h₁ h₂ => rw [map_add]; exact hQadd _ _ h₁ h₂
+      | add _ _ _ _ h₁ h₂ => rw [map_add (f := _)]; exact hQadd _ _ h₁ h₂
       | smul k _ _ h₁ => rw [LinearMap.map_smulₛₗ]; exact hQsmul _ _ h₁
-    have hlat := Formalism.L2.DIV.nabAtr_isLattice (labLL0 D) B.w.lam (B.latAt h) hL
+    have hlat : Submodule.IsFullLattice (↥D.LL0) (nabAtr (labLL0 D) B.w.lam (B.latAt h)) := by
+      exact Formalism.L2.DIV.nabAtr_isLattice (labLL0 D) B.w.lam (B.latAt h) hL
     have hg : ∀ i, Q (mapK s B.w.lam (bVV (↥D.LL0) B.w.lam i)) := fun i =>
       hspanLL _ (by rw [hlat.span_eq_top]; trivial)
     have hgind : LinearIndependent K₀ fun i => mapK s B.w.lam (bVV (↥D.LL0) B.w.lam i) := by
       refine Fintype.linearIndependent_iff.2 fun k hk i => ?_
       have h1 := congrArg (GlobalTheory.CoefModel.mapVV (e.comp f) B.w.lam) hk
+
       rw [map_sum, map_zero] at h1
       simp only [LinearMap.map_smulₛₗ, mapVV_mapK] at h1
       rw [hsO] at h1

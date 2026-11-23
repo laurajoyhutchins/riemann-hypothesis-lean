@@ -1,9 +1,61 @@
-import Mathlib
-import GroundTheory.FunctionField.PlaceDefs
-import GroundTheory.FunctionField.PlaceBasic
-import GroundTheory.FunctionField.Divisor
-import GroundTheory.FunctionField.DivisorDegree
-import GroundTheory.FunctionField.Repartition
+module
+
+public import GroundTheory.FunctionField.Repartition
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Order.Int.ConditionallyCompleteOrder
+public import GroundTheory.FunctionField.DivisorDegree
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.FunctionField
@@ -84,7 +136,7 @@ theorem exists_bound_deg_sub_finrank_L :
   have hl : (l : ℤ) = deg A₁ := Int.toNat_of_nonneg (deg_nonneg hA₁)
   set El : Divisor k K := l • B + C with hEl
   have hdegEl : deg El = l * n + deg C := by
-    rw [hEl, map_add, map_nsmul, hdegB, nsmul_eq_mul]
+    rw [hEl, map_add (f := _), map_nsmul, hdegB, nsmul_eq_mul]
   have hkey := key l
   have hle : El - A₁ ≤ El := sub_le_self _ hA₁
   have h2 := finrank_L_le_of_le hle
@@ -104,7 +156,7 @@ theorem exists_bound_deg_sub_finrank_L :
     rw [this]
     exact hzL
   have hlD₁ : finrank k (L D₁) = finrank k (L A₁) := finrank_L_add_divisor A₁ (inv_ne_zero hz0)
-  have hdegD₁ : deg D₁ = deg A₁ := by rw [hD₁, map_add, deg_divisor, add_zero]
+  have hdegD₁ : deg D₁ = deg A₁ := by rw [hD₁, map_add (f := _), deg_divisor, add_zero]
   have h3 := deg_sub_finrank_L_mono hD₁El
   rw [hlD₁, hdegD₁] at h3
   linarith
@@ -122,8 +174,8 @@ theorem bddAbove_range_deg_add_one_sub :
   simp only
   linarith
 
-variable (k K) in
 
+variable (k K) in
 noncomputable def genusInt : ℤ :=
   sSup (Set.range fun D : Divisor k K => deg D + 1 - (finrank k (L D) : ℤ))
 
@@ -148,8 +200,8 @@ theorem genusInt_nonneg (hk : algebraicClosure k K = ⊥) : 0 ≤ genusInt k K :
   rw [finrank_L_zero_eq_one hk, map_zero] at h
   simpa using h
 
-variable (k K) in
 
+variable (k K) in
 noncomputable def genus : ℕ := (genusInt k K).toNat
 
 theorem genus_eq_genusInt (hk : algebraicClosure k K = ⊥) : (genus k K : ℤ) = genusInt k K :=

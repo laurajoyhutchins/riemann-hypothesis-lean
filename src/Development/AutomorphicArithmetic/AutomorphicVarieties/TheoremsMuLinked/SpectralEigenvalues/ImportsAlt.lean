@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.RingTheory.Ideal.Maps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open IsLocalRing Polynomial
 
@@ -18,7 +62,7 @@ theorem UpperTheory.V.Th.Sp.der :
     · intro σ hσ n _
       rw [hlam, (RingHom.mem_ker).1 hσ, zero_mul]
     · intro y z hy hz
-      rw [map_add, hy, hz, add_zero]
+      rw [map_add (f := _), hy, hz, add_zero]
   have hΦK : ∀ a, x a = 0 → ∀ m ∈ (RingHom.ker th • ⊤ : Submodule S M), Φ ((t * a) • m) = 0 := by
     intro a ha m hm
     refine Submodule.smul_induction_on (p := fun m => Φ ((t * a) • m) = 0) hm ?_ ?_
@@ -26,7 +70,7 @@ theorem UpperTheory.V.Th.Sp.der :
       rw [← smul_comm σ (t * a) n, hΦ, (RingHom.mem_ker).1 hσ, zero_smul, zero_add,
         hlamK _ (hker a ha n), zero_smul]
     · intro y z hy hz
-      rw [smul_add, map_add, hy, hz, add_zero]
+      rw [smul_add, map_add (f := _), hy, hz, add_zero]
   have hx0 : ∀ a, x (a - algebraMap O T (x a)) = 0 := by
     intro a
     rw [map_sub, AlgHom.commutes, Algebra.algebraMap_self_apply, sub_self]
@@ -51,7 +95,7 @@ theorem UpperTheory.V.Th.Sp.der :
         show (a - algebraMap O T (x a)) * (b - algebraMap O T (x b)) * (t * t) = (t * (a - algebraMap O T (x a))) * (t * (b - algebraMap O T (x b))) by ring,
         mul_smul]
       exact hΦK _ (hx0 a) _ (hker _ (hx0 b) v)
-    rw [h, add_smul, add_smul, map_add, map_add, hz, zero_add, mul_smul (algebraMap O T (x a)), mul_smul (algebraMap O T (x b)), ← hO, ← hO, hΦO, hΦO]
+    rw [h, add_smul, add_smul, map_add (f := _), map_add (f := _), hz, zero_add, mul_smul (algebraMap O T (x a)), mul_smul (algebraMap O T (x b)), ← hO, ← hO, hΦO, hΦO]
   · intro τ σ hτσ hxτ
     show Φ ((τ - algebraMap O T (x τ)) • m0) = lam m0 • ell σ
     rw [sub_smul, hτσ, hxτ, ← hO, ← sub_smul, hΦ, map_sub th, AlgHom.commutes, Algebra.algebraMap_self_apply, sub_self,

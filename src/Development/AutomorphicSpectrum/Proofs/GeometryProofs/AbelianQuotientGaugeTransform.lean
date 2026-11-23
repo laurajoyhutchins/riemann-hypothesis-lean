@@ -1,9 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SqMap
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeneratorRatioUnitExistsStatement
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FrRatio
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermBPrim
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdSy
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SqMap
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeneratorRatioUnitExistsStatement
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdJet
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FBIdSy
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.FrRatio
+public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermBPrim
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDJet
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermFunPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+
+@[expose] public section
 
 noncomputable section
 
@@ -66,7 +115,8 @@ theorem bind_fst (P : MvPolynomial (Fin 1 × Fin d) R) :
     obtain rfl : a = 0 := Subsingleton.elim _ _
     rfl
   rw [this]
-  simp
+  change MvPolynomial.aeval (MvPolynomial.X : Fin 1 × Fin d → MvPolynomial (Fin 1 × Fin d) R) P = P
+  rw [MvPolynomial.aeval_X_left_apply]
 
 theorem bind_zero {σ τ : Type} (P : MvPolynomial σ R) (h : MvPolynomial.constantCoeff P = 0) :
     (MvPolynomial.bind₁ fun _ : σ => (0 : MvPolynomial τ R)) P = 0 := by
@@ -100,7 +150,10 @@ theorem double_substitution_first_axis (Qs : Fin d' → PS R 1 d) (hQ : ∀ i, M
   rw [cc_psIn, hQ, map_zero, sub_zero, psIn, MvPolynomial.aeval_rename]
   fin_cases l
   · simp [Function.comp_def]
-    exact bind_zero _ (by rw [cc_psTrunc, hQ])
+    have h0 : MvPolynomial.constantCoeff (psTrunc m (Qs j)) = 0 := by rw [cc_psTrunc, hQ]
+    first
+      | exact bind_zero _ h0
+      | simp [cc_psTrunc, hQ]
   · simp [Function.comp_def, cc_psTrunc, hQ]
     exact bind_fst _
 
@@ -115,7 +168,10 @@ theorem double_substitution_second_axis (Qs : Fin d' → PS R 1 d) (hQ : ∀ i, 
   · simp [Function.comp_def, cc_psTrunc, hQ]
     exact bind_fst _
   · simp [Function.comp_def]
-    exact bind_zero _ (by rw [cc_psTrunc, hQ])
+    have h0 : MvPolynomial.constantCoeff (psTrunc m (Qs j)) = 0 := by rw [cc_psTrunc, hQ]
+    first
+      | exact bind_zero _ h0
+      | simp [cc_psTrunc, hQ]
 
 theorem first_axis_comp_jet_inclusion (m : ℕ) :
     (jAx0 R d m).comp (jetCopy d m (0 : Fin 2)) = (Algebra.ofId R _).comp (jetAug : Jet R (Fin 1 × Fin d) m →ₐ[R] R) := by
@@ -418,8 +474,8 @@ theorem psJet_one' {R : Type} [CommRing R] {κ : Type} [Fintype κ] [DecidableEq
     psJet m (1 : MvPowerSeries κ R) = 1 := by
   rw [psJet, ← MvPolynomial.coe_one, Formalism.MainNotions.ModuliIntegralCharts.H1.FBIdJet.psTrunc_eq, Formalism.MainNotions.ModuliIntegralCharts.H1.FBIdJet.mk_trunc_coe, map_one]
 
-open Formalism.MainNotions.ModuliIntegralCharts.H1.GermD Formalism.MainNotions.ModuliIntegralCharts.H1.GermFun in
 
+open Formalism.MainNotions.ModuliIntegralCharts.H1.GermD Formalism.MainNotions.ModuliIntegralCharts.H1.GermFun in
 theorem exists_lam : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) [StarRing (𝓞 E)], (∀ a : 𝓞 E, star a = H.bar a) → ∀ (X : Scheme.{0}) (t : SAB H X) (k : Type) [Field k] [IsAlgClosed k] (p : ℕ) [Fact p.Prime] [CharP k p] (x : Sp k ⟶ X) (Q : AbQuot t x) (d d' : ℕ) (g : GermAt t x d) (gB : GermAt Q.tB (𝟙 (Sp k)) d'), ∀ (w : LB.Iso (t.PP.L.pull (pullback.fst t.G.hom x)) (Q.tB.PP.L.pull Q.q.left)), w.IsGen → ∀ Qs : Fin d' → PS k 1 d, (∀ i, MvPowerSeries.constantCoeff (Qs i) = 0) → (∀ m, fibPt t x (g.x m) ≫ Q.q = homAt (𝟙 (Sp k)) (sub1 Qs m) ≫ gB.x m) → ∃ lam : PS k 2 d, AxOne lam ∧ ∀ m, ∃ U : (Jet k (Fin 2 × Fin d) m)ˣ, (U : Jet k (Fin 2 × Fin d) m) = psJet m lam ∧ Tr w (cubeF t x ![jptG t x d g.x m (0 : Fin 2), jptG t x d g.x m (1 : Fin 2)]) (cφG t ![jptG t x d g.x m (0 : Fin 2), jptG t x d g.x m (1 : Fin 2)]) (fun I => (homAt (𝟙 (Sp k)) (sub2 Qs m)).left ≫ cφG Q.tB ![jptG Q.tB (𝟙 (Sp k)) d' gB.x m (0 : Fin 2), jptG Q.tB (𝟙 (Sp k)) d' gB.x m (1 : Fin 2)] I) (cε 2) (g.e m) (LB.pullGen Q.tB.PP.L (cφG Q.tB ![jptG Q.tB (𝟙 (Sp k)) d' gB.x m (0 : Fin 2), jptG Q.tB (𝟙 (Sp k)) d' gB.x m (1 : Fin 2)]) (cε 2) (gB.e m) (homAt (𝟙 (Sp k)) (sub2 Qs m)).left) (unitΓ U⁻¹) := by
   intro E _ _ _ H _ _ X t k _ _ p _ _ x Q d d' g gB w hw Qs hQ hq
   choose U hU using fun m => exists_U (g := g) (gB := gB) (Qs := Qs) w hw hq m

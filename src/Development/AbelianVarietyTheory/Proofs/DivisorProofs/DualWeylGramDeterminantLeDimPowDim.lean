@@ -1,7 +1,45 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdelicOne
-import Formalism.LocalToGlobal.CMDeterminantIdeals.StatementG
-import Formalism.PolynomialDimension.WeylDim
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryMinorLeOneAndHadamardColumnsStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsAdelicOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryMinorLeOneAndHadamardColumnsStatement
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LDlatLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.L2.Pj GlobalTheory.DualWeyl GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.DefPt MvPolynomial
 open scoped Matrix
 
@@ -14,7 +52,7 @@ theorem norm_evalAt_intVec_le {n : ℕ} (la : Fin n → ℕ) (j : Idx la) (g : U
   rw [hv, Formalism.GradedWeylDivisibility.ldlat_map_bidet]
   unfold Formalism.GradedWeylDivisibility.bideterminant
   rw [map_prod, norm_prod]
-  refine Finset.prod_le_one (fun _ _ => norm_nonneg _) fun k _ => ?_
+  refine Finset.prod_le_one₀ (fun _ _ => norm_nonneg _) fun k _ => ?_
   unfold Formalism.GradedWeylDivisibility.initMinor
   rw [Formalism.GradedWeylDivisibility.algHom_det_of]
   have h : (Matrix.of fun p q : Fin (sz k) => evalAt g.1 (X (I k p, Fin.castLE (hsz k) q) : Pol n ℂ)) =
@@ -52,7 +90,7 @@ theorem norm_det_onMat_sq_le : ∀ (n : ℕ) (la : Fin n → ℕ), Antitone la �
   refine ⟨det_onMat_ne_zero la, ?_⟩
   refine (GlobalTheory.T.unitary_minor_le_one_and_hadamard_columns.2 (Idx la) (onMat la)).trans ?_
   calc ∏ j, ∑ i, ‖onMat la i j‖ ^ 2 ≤ ∏ _j : Idx la, (dim la : ℝ) :=
-        Finset.prod_le_prod (fun j _ => Finset.sum_nonneg fun _ _ => by positivity)
+        Finset.prod_le_prod₀ (fun j _ => Finset.sum_nonneg fun _ _ => by positivity)
           fun j _ => (sum_norm_sq_onMat la j).trans_le (normSq_basis_le la j)
     _ = (dim la : ℝ) ^ dim la := by rw [Finset.prod_const, Finset.card_univ, ← dim_eq_card]
 

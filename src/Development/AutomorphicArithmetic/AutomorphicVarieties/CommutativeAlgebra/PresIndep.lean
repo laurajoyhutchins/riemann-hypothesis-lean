@@ -1,8 +1,56 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.ResMapBijective
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.MapPart
 import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.PartClosed
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.MapPart
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PiSpanVariable
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DensePiDecomposition
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DensePiDecomposition
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.PiSpanVariable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open IsLocalRing MvPowerSeries UpperTheory.V.Alg
 
@@ -22,7 +70,7 @@ private theorem pi_wcomp_mul {O σ X : Type} [CommRing O] [AddCommGroup X] (wt :
     intro p hp
     by_cases h2 : Finsupp.weight wt p.2 = c
     · have hn : Finsupp.weight wt n = Finsupp.weight wt p.1 + c := by
-        rw [← Finset.HasAntidiagonal.mem_antidiagonal.1 hp, map_add, h2]
+        rw [← Finset.HasAntidiagonal.mem_antidiagonal.1 hp, map_add (f := _), h2]
       rw [coeff_wcomp, hn]
       by_cases h1 : Finsupp.weight wt p.1 = j - c
       · rw [if_pos h1, if_pos (by rw [h1]; abel)]
@@ -97,7 +145,7 @@ private theorem pi_homog (hz : ∀ s, W.z s ∈ maximalIdeal R) (N : ℕ) (f : M
       obtain ⟨g, rfl, hg⟩ := hy
       obtain ⟨g', rfl, hg'⟩ := hz
       refine ⟨g + g', map_add _ _ _, fun a j => ?_⟩
-      rw [mul_add, map_add, map_add]
+      rw [mul_add, map_add (f := _), map_add (f := _)]
       exact add_mem (hg a j) (hg' a j)
     | smul r y _ hy =>
       obtain ⟨g, rfl, hg⟩ := hy
@@ -151,8 +199,8 @@ theorem UpperTheory.V.Alg.pres_indep :
         exact zero_mem _
     · exact ⟨0, map_zero _, by simp⟩
     · rintro a b ⟨f, hf, hf'⟩ ⟨g, hg, hg'⟩
-      refine ⟨f + g, by rw [map_add, hf, hg], ?_⟩
-      rw [map_add, map_add]
+      refine ⟨f + g, by rw [map_add (f := _), hf, hg], ?_⟩
+      rw [map_add (f := _), map_add (f := _)]
       exact add_mem hf' hg'
   obtain ⟨f, hf, hf'⟩ := key
   obtain ⟨g, hg, hgx⟩ := hx

@@ -1,5 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RbUVal
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PublishedTheorems.FerreroWashington
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.RbUVal
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.QuadraticExtensions.ModulusAdjoinISqrtNegPrimes
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC ReciprocityTheory.Gal IsLocalRing UpperTheory.V.Base UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws UpperTheory.V.Two
 open scoped Classical
@@ -59,7 +103,8 @@ theorem UpperTheory.V.Ws.card_cocycles_vanishing_on_inertia_le_pow :
       exact Equiv.sum_comp (MulAction.toPerm h) (fun q : G F Ω ⧸ K => w q.out)
     have hexp : ∑ q : G F Ω ⧸ K, w (h * q.out) =
         Fintype.card (G F Ω ⧸ K) • w h + ρ h (∑ q : G F Ω ⧸ K, w q.out) := by
-      simp only [hw, Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, map_sum]
+      set_option synthInstance.maxHeartbeats 100000 in
+        simp only [hw, Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, map_sum]
     rw [hsum, hS, map_zero, add_zero] at hexp
     exact eq_zero_of_nsmul_eq_zero_of_coprime_torsion l M htor _ hn (w h) hexp.symm
   obtain ⟨hXfin, hXcard⟩ := hX
@@ -82,7 +127,7 @@ theorem UpperTheory.V.Ws.card_cocycles_vanishing_on_inertia_le_pow :
       refine ⟨?_, ?_, ?_, ?_⟩
       · exact (hlc.comp_continuous continuous_subtype_val).comp (fun m => c i m)
       · intro a e
-        rw [Subgroup.coe_mul, hcoc, hK a a.2, map_add]
+        rw [Subgroup.coe_mul, hcoc, hK a a.2, map_add (f := _)]
       · intro A u hu
         have hin : (u : G F Ω) ∈ ineOff F Ω 1 := by
           show ∃ A, _

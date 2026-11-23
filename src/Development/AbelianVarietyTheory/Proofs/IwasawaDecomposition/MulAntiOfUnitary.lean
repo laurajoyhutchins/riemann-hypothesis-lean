@@ -1,19 +1,65 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Formalism.LocalToGlobal.IndefiniteReal.DatumVec
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsSigmaList
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AdelicDataRowMeasureScaleTrivialTuple
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsSigmaList
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedDef
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.ConjAtFixedIff
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.RightDerivativeAlongLieSmoothAndLinear
 import Development.AbelianVarietyTheory.Proofs.HeightProofs.UnitaryLieGeneratorsRep
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalEigenspaceSumSqInvariantFieldsAStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalKerAevalOfEigenspacesStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothOfFiniteDimensionalTranslationStableStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.QuadraticGelfandInvariantEqNegSumSqDefiniteStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteHermitianEqPmGramUnitaryCompactStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntertwineAeval
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteHermitianEqPmGramUnitaryCompactStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalEigenspaceSumSqInvariantFieldsAStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteDimensionalKerAevalOfEigenspacesStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IntertwineAeval
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.QuadraticGelfandInvariantEqNegSumSqDefiniteStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SmoothOfFiniteDimensionalTranslationStableStatement
+public import Formalism.LocalToGlobal.GlobalTheory.GL5.FamilyMassVolumeIdentityOfClassDecomp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -69,13 +115,13 @@ def uGrp (H : IsLieData σ j s) : Subgroup 𝔸ˣ where
     rw [h]
     exact unitary_anti H hu
 
-open Classical in
 
+open Classical in
 def toU (H : IsLieData σ j s) (a : 𝔸) : uGrp H :=
   if h : σ a * a = 1 then ⟨⟨a, σ a, mul_anti_of_unitary h, h⟩, h⟩ else 1
 
 theorem toU_val (H : IsLieData σ j s) {a : 𝔸} (h : σ a * a = 1) : ((toU H a).1 : 𝔸) = a := by
-  rw [toU, dif_pos h]
+  rw [toU, dite_eq_left h]
 
 theorem toU_coe (H : IsLieData σ j s) (k : uGrp H) : toU H (k.1 : 𝔸) = k :=
   Subtype.ext (Units.ext (toU_val H k.2))
@@ -187,6 +233,7 @@ theorem finite_translates (H : IsLieData σ j s) (hl : HasLog σ j) (hc : IsComp
     have := map_aeval (res H x ∘ₗ W.subtype) (T := T)
       (T' := ∑ i, derOp (isLieData_toU H) hl (X i) * derOp (isLieData_toU H) hl (X i)) (fun v => by
         change res H x ((∑ i, derOp H hl (X i) * derOp H hl (X i)) v.1) = _
+
         simp only [LinearMap.sum_apply, map_sum, Module.End.mul_apply, res_derOp]
         rfl) T.charpoly ⟨φ, hφ⟩
     rw [LinearMap.aeval_self_charpoly, LinearMap.zero_apply, map_zero] at this

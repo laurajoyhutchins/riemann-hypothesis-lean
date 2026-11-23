@@ -1,10 +1,56 @@
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutDef
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.ContinuousTheta
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StdCharHalfSymplecticFormRealCoordinatesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHomActionRealCoordinatesEqStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HalvedSymplecticFormFiniteRealOrthogonalStatement
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepC
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAddCharIsStandardCharOfAdmissibleCM
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutDef
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.GoodLat
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicHomActionRealCoordinatesEqStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HalvedSymplecticFormFiniteRealOrthogonalStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAddCharIsStandardCharOfAdmissibleCM
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StdCharHalfSymplecticFormRealCoordinatesStatement
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.ContinuousTheta
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.LatRepC
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +68,7 @@ variable {σ : E →ₐ[F] E} {B : Base F E} {nS nT : ℕ} {JS : Matrix (Fin nS)
 theorem fin_smul_eq (z : AEF F E) :
     (pairA F 0 1 : AF F) • z = (TensorProduct.map (LinearMap.inr F (Ainf F) (Af F)) LinearMap.id (finPartF F E z) : AEF F E) := by
   induction z using TensorProduct.induction_on with
-  | zero => rw [smul_zero, map_zero, map_zero]; rfl
+  | zero => rw [smul_zero, map_zero, map_zero]
   | tmul a e =>
     rw [TensorProduct.smul_tmul']
     show _ = TensorProduct.map (LinearMap.inr F (Ainf F) (Af F)) LinearMap.id
@@ -35,7 +81,7 @@ theorem fin_smul_eq (z : AEF F E) :
 theorem inf_smul_eq (z : AEF F E) :
     (pairA F 1 0 : AF F) • z = (TensorProduct.map (LinearMap.inl F (Ainf F) (Af F)) LinearMap.id (infPartF F E z) : AEF F E) := by
   induction z using TensorProduct.induction_on with
-  | zero => rw [smul_zero, map_zero, map_zero]; rfl
+  | zero => rw [smul_zero, map_zero, map_zero]
   | tmul a e =>
     rw [TensorProduct.smul_tmul']
     show _ = TensorProduct.map (LinearMap.inl F (Ainf F) (Af F)) LinearMap.id
@@ -54,7 +100,7 @@ theorem finIdem_mul_of_fin {z : AEF F E} (hz : infPartF F E z = 0) : finIdem F E
     _ = z := by rw [← add_smul, h1, one_smul]
 
 theorem finIdem_mul_of_real {z : AEF F E} (hz : finPartF F E z = 0) : finIdem F E * z = 0 := by
-  rw [finIdem, ← Algebra.smul_def, fin_smul_eq, hz, map_zero]; rfl
+  rw [finIdem, ← Algebra.smul_def, fin_smul_eq, hz, map_zero]
 
 theorem finPartF_finIdem : finPartF F E (finIdem F E) = 1 := by
   show Algebra.TensorProduct.map (sndA F) (AlgHom.id F E) (pairA F 0 1 ⊗ₜ 1) = 1
@@ -85,9 +131,9 @@ theorem finIdem_add_iota (hι : IsChartF θ ι) (x : WOF F E nS nT) : x = finIde
   funext i j
   show x i j = finIdem F E * x i j + ι (fun w => θ w (infPartF F E (x i j)))
   refine (sub_eq_zero.1 (hι.ext _ ?_ ?_)).symm.symm
-  · simp only [map_sub, map_add, map_mul, finPartF_finIdem, one_mul, hι.fin, add_zero, sub_self]
+  · simp only [map_sub, map_add (f := _), map_mul, finPartF_finIdem, one_mul, hι.fin, add_zero, sub_self]
   · intro w
-    simp only [map_sub, map_add, map_mul, infPartF_finIdem, zero_mul, zero_add, hι.comp, sub_self]
+    simp only [map_sub, map_add (f := _), map_mul, infPartF_finIdem, zero_mul, zero_add, hι.comp, sub_self]
 
 theorem continuous_piWF (C : Ctx σ B JS JT ξ₀ θ ι) : Continuous (piWF (nS := nS) (nT := nT) θ) :=
   continuous_pi fun p => (PositivityTheory.ThKW.RealC.continuous_theta (C.inf p.2)).comp
@@ -140,7 +186,8 @@ theorem piWF_actOF (C : Ctx σ B JS JT ξ₀ θ ι) (g : GAF σ JS) (h : GAF σ 
 
 theorem hOF_rat (x y : Matrix (Fin nT) (Fin nS) E) :
     hOF σ JS JT (ratWF (F := F) x) (ratWF (F := F) y) = incAF F E (hRatF σ JS JT x y) := by
-  simp only [hOF, hRatF, ratWF, Matrix.map_apply, cAF_inc, map_sum, map_mul]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [hOF, hRatF, ratWF, Matrix.map_apply, cAF_inc, map_sum, map_mul]
 
 theorem trace_inc (e : E) :
     Algebra.trace (AF F) (AEF F E) (incAF F E e) = algebraMap F (AF F) (Algebra.trace F E e) := by
@@ -227,7 +274,7 @@ theorem symplOF_actOF (C : Ctx σ B JS JT ξ₀ θ ι) (g : GAF σ JS) (h : GAF 
 
 theorem symplOF_eq_add (x y : WOF F E nS nT) :
     symplOF σ JS JT ξ₀ x y = symplOHF σ JS JT ξ₀ x y + symplOHF σ JS JT ξ₀ x y := by
-  rw [symplOHF, ← add_mul, ← map_add]
+  rw [symplOHF, ← add_mul, ← map_add (f := _)]
   norm_num
 
 theorem gamQF_eq_one_iff (C : Ctx σ B JS JT ξ₀ θ ι) (x y : Matrix (Fin nT) (Fin nS) E) :
@@ -408,7 +455,7 @@ theorem cw_cw (B : Base F E) (w : InfinitePlace F) (z : ℂ) : cw B w (cw B w z)
 theorem wE_comap (B : Base F E) (w : InfinitePlace F) : (wE B w).comap (algebraMap F E) = w := by
   rw [wE, InfinitePlace.comap_mk, (B.emb w).2, InfinitePlace.mk_embedding]
 
-def Lm (B : Base F E) [IsTotallyComplex E] : mixedEmbedding.mixedSpace E →ₗ[ℝ] (InfinitePlace F → ℂ) :=
+def Lm (B : Base F E) [_root_.NumberField.IsTotallyComplex E] : mixedEmbedding.mixedSpace E →ₗ[ℝ] (InfinitePlace F → ℂ) :=
   LinearMap.pi fun w => (cw B w).comp ((LinearMap.proj (R := ℝ) (φ := fun _ : {W : InfinitePlace E // W.IsComplex} => ℂ)
     ⟨wE B w, IsTotallyComplex.isComplex _⟩).comp (LinearMap.snd ℝ _ _))
 

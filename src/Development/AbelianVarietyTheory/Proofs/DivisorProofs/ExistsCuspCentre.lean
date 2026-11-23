@@ -1,18 +1,95 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.UpperBounds.FreeBallIffOfDimXEqZero
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.SumRangeBlocks
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ContDiffAtLogMinorProd
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBlockDetGe
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsPhlaBound
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsMixedProj
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.OneAddLeLminorSq
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.FirstMinimumInvariantContinuousPosOnFrames
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.DivisionWithBasisOfDivision
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.CuspStatementPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.PointwiseNormInvarianceHolds
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPf
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KronHolPsiStatementHolds
+module
+
+public import Development.AbelianVarietyTheory.Definitions.UpperBounds.FreeBallIffOfDimXEqZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.PnormInvStatement
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfH
+public import ReciprocityTheory.SemistableReduction.ShareSt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsBlockDetGe
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ContinuousOnOfCharts
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.DivisionWithBasisOfDivision
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsLeNormDev
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsMixedProj
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsPhlaBound
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.FirstMinimumInvariantContinuousPosOnFrames
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.IsUpqSubmatrix
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.KaFrameOfDelta
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MajLactRmul
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MuFSublevelLtTop
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.OneAddLeLminorSq
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.OneLeMinorOfIsOrth
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.SumRangeBlocks
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Unbundled.RingSeminorm
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.AbsoluteValue
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.L2DbarEstimates.LeviForms.EventuallyDifferentiableAtOfContDiffAt
+import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.DerivDerivNonposOfIsLocalMax
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.ArakelovInstances.PointwiseNormInvarianceHolds
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.CuspStatementPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfD
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfE
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.FundSetPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfC
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfE
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.KronHolPsiStatementHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.LUStatementPfB
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.MeasInvStatementPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OntoStatementPfB
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OntoStatementPfE
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.OrthoStatementPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.PoinStatementPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.RhGradFPf
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.SiegelSpaceAlgebraHolds
+public import ReciprocityTheory.SemistableReduction.SemiAll
+import ReciprocityTheory.SemistableReduction.ShareBallA
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField ReciprocityTheory.ChartRestriction.G.FD ReciprocityTheory.ChartRestriction.G.AR ReciprocityTheory.ChartRestriction.G.AR.Inst ReciprocityTheory.ChartRestriction.G.AR.Up ReciprocityTheory.L2DbarEstimates MeasureTheory Topology
 open scoped ContDiff ENNReal Matrix
@@ -44,7 +121,7 @@ theorem poleSolve' (hI : MeasInvStatement (E := E)) (r : ℕ) (X : Data E r) (G 
   set S : Set (V (nd X)) := rhF X x0 ⁻¹' Set.Icc (ε / 2) ε with hS
   have hSm : MeasurableSet S := measurable_rhF X x0 measurableSet_Icc
   have hfin : muF X x0 S < ⊤ :=
-    (measure_mono fun z hz => hz.2).trans_lt (SublevelFin.muF_sublevel_lt_top hI r X x0 h0 ε)
+    (measure_mono fun z (hz : z ∈ S) => hz.2).trans_lt (SublevelFin.muF_sublevel_lt_top hI r X x0 h0 ε)
   refine ⟨χ, ENNReal.ofReal (K * Real.exp (A + C + bb * ε)) * muF X x0 S, hχ.continuous, h1, h2, h3,
     ENNReal.mul_lt_top ENNReal.ofReal_lt_top hfin, fun δ ψ hψ => ?_⟩
   obtain ⟨hψs, hψl⟩ := hψ.2.2.1 x0 h0
@@ -100,8 +177,9 @@ theorem poleSolve' (hI : MeasInvStatement (E := E)) (r : ℕ) (X : Data E r) (G 
           deriv χ (rhF X x0 z) ^ 2 * Complex.normSq
             (∑ j, wd (nd X) j (fun w => ((rhF X x0 w : ℝ) : ℂ)) z * ξ j) := by
         simp only [wdb_ofReal_comp hcd hrd, wdb_ofReal hrd, mul_assoc, ← map_mul]
+
         rw [← Finset.mul_sum, ← map_sum, norm_mul, Complex.norm_conj, mul_pow,
-          Complex.normSq_eq_norm_sq, Complex.norm_real, Real.norm_eq_abs, sq_abs]
+        Complex.normSq_eq_norm_sq, Complex.norm_real, Real.norm_eq_abs, sq_abs]
       rw [e]
       by_cases hzS : z ∈ S
       · rw [Set.indicator_of_mem hzS, ← ENNReal.ofReal_mul hK0]
@@ -399,8 +477,8 @@ theorem orbitInterp' (r : ℕ) (X : Data E r) (G : Subgroup (GL (Fin r) E)) (x0 
   rw [e', FundSetPf.lact_mul, hu'.1.1.2.2 _ (X.Γ.inv_mem hs) _
     (MajInv.lact_mem_dom X (hG.isUStab h1) hx0), h3, mul_zero]
 
-open GlobalTheory.Up.BallExPf in
 
+open GlobalTheory.Up.BallExPf in
 theorem frame_bound3 {r : ℕ} (X : Data E r) {x0 x1 : Frame X.Ψ r} (h0 : IsOrth X x0)
     (h1 : IsOrth X x1) (hρ : rhX X x0 x1 ≤ 1 / 4) (τ : X.Ψ) (u : Fin r → ℂ) :
     ReciprocityTheory.MultiplicativeHeights.normSq (((mat x0 τ)⁻¹ * mat x1 τ)⁻¹ *ᵥ u) ≤ 3 * ReciprocityTheory.MultiplicativeHeights.normSq u ∧
@@ -530,9 +608,9 @@ theorem normSq_sub_le {r : ℕ} (v w : Fin r → ℂ) :
   have h : ‖(v - w) k‖ ≤ ‖v k‖ + ‖w k‖ := norm_sub_le _ _
   nlinarith [norm_nonneg ((v - w) k), norm_nonneg (v k), norm_nonneg (w k), sq_nonneg (‖v k‖ - 3 * ‖w k‖)]
 
+
 open ReciprocityTheory.MultiplicativeHeights in
 open scoped ComplexOrder in
-
 theorem eq_one_of_cong {K : Type} [Field K] [NumberField K] {r M : ℕ} (hM : 5 ≤ M)
     (H : (K →+* ℂ) → Matrix (Fin r) (Fin r) ℂ) (hH : ∀ σ, (H σ).PosDef)
     (L : Submodule (𝓞 K) (Fin r → K)) (γ : Matrix (Fin r) (Fin r) K) (hNC : NoContraction H L)
@@ -573,8 +651,8 @@ theorem eq_one_of_cong {K : Type} [Field K] [NumberField K] {r M : ℕ} (hM : 5 
       nlinarith
   exact sub_eq_zero.1 ((smul_eq_zero.1 hN).resolve_left (inv_ne_zero hM0))
 
-open GlobalTheory.Up.BallExPf in
 
+open GlobalTheory.Up.BallExPf in
 theorem exists_freeBall {r : ℕ} (X : DataX E r) {N : ℕ} (hN : 5 ≤ N)
     (hL : ∀ γ ∈ X.Γ, ∀ x ∈ X.L', ∃ y ∈ X.L', (γ : Matrix (Fin r) (Fin r) E) *ᵥ x - x = (N : E) • y) :
     ∃ x0, IsOrth X.toData x0 ∧ FreeBall X.toData X.Γ x0 (1 / 4) := by

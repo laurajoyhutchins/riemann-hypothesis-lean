@@ -1,17 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.ClassSK
-import Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces
-import Formalism.LocalToGlobal.IndefiniteReal.PrimitivePackageFullHecke
-import Formalism.LocalToGlobal.IndefiniteReal.LinksLemmas
-import Formalism.LocalToGlobal.IndefiniteReal.SpOfRwRange
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SignsG
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.STiesR
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.FramesOK
-import Formalism.LocalToGlobal.IndefiniteReal.FrameExistence.NormalFrameClauses
-import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.RatDatOfReal
-import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SEEPinC
-import Formalism.LocalToGlobal.IndefiniteReal.RationalEmbedding
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.UnipotentInLevelSubgroup
+module
+
+public import Formalism.LocalToGlobal.HilbertRowConditions.ColumnsFunctionAtSubspaces
+public import Formalism.LocalToGlobal.IndefiniteReal.SpOfRwRange
+public import Formalism.LocalToGlobal.IndefiniteReal.RealSeparation.SignsG
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.STiesR
+public import Formalism.LocalToGlobal.IndefiniteReal.FrameExistence.NormalFrameClauses
+public import Formalism.LocalToGlobal.IndefiniteReal.DoubleCosetOperators.RatDatOfReal
+public import Formalism.LocalToGlobal.IndefiniteReal.EvalTieTOne
+public import Formalism.LocalToGlobal.IndefiniteReal.RationalEmbedding
+public import Formalism.LocalToGlobal.Divisibility.InertPartitionLePartF
+public import Formalism.LocalToGlobal.IndefiniteReal.BaseLiftsPackageOfPrimitiveLinks
+public import Formalism.LocalToGlobal.IndefiniteReal.PackageFromPrimitiveStatements
+public import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.UnipotentInLevelSubgroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,8 +74,8 @@ def TrISepWith {G Pl0 I0 T : Type} [Group G] [Fintype G] (A3 : FamIn3 D.what₂.
     (∃ k : A3.okI A3.A.μ0 × List ℕ, p.2 (k.1.1, k.2) ≠ p'.2 (k.1.1, k.2)) →
       ∃ k : A3.okI A3.A.μ0 × List ℕ, tr j p.2 (k.1.1, k.2) ≠ tr j p'.2 (k.1.1, k.2)
 
-open Classical in
 
+open Classical in
 def hkCan {G Pl0 I0 T : Type} [Group G] [Fintype G] (A3 : FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T D.R.m) : HkDat3 A3 where
   Hk := A3.fam3.base3.Ix
   ev p q := if p = q then 1 else 0
@@ -71,9 +108,9 @@ def seeKS (X : Formalism.L2.SG.HidaSetting.HidaSetting D) : Set X.B.I.GA := {x |
 
 def seeChiS (X : Formalism.L2.SG.HidaSetting.HidaSetting D) : X.B.I.GA → ℂ := fun x => star (X.chi2 x.2)
 
+
 set_option genInjectivity false in
 set_option genSizeOfSpec false in
-
 structure RealT (Rc : Formalism.L2.RecT ex) (P : RowSideFamily ex) (Dcf : ∀ Zs : DefSub P.A3.fam3.amb3, DefCols (P.A3.side3 P.Ps P.ψs Zs))
     (Spf : ∀ Zs : DefSub P.A3.fam3.amb3, SPer (Dcf Zs)) (Zscf : DefSub P.A3.fam3.amb3 → IndefScale P.A3.fam3.base3)
     (S : Formalism.L2.SG.SpectralTiesReal.STiesR Rc) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] : Type 1 where
@@ -185,8 +222,6 @@ variable {Rc : Formalism.L2.RecT ex} {P : RowSideFamily ex} {Dcf : ∀ Zs : DefS
   (R : RealT Rc P Dcf Spf Zscf S Ks)
 
 abbrev F (_R : RealT Rc P Dcf Spf Zscf S Ks) : Face3 D P.A3 := faceT P Dcf Spf Zscf
-
-def FramesEx : Prop := Formalism.IndefR.Seed.Frm.FramesExistDiagonal D R.Rl.Pg
 
 end RealT
 

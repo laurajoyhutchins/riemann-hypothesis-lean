@@ -1,6 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+module
+
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsTopologicalRingAE
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Matrix GlobalTheory.FockCompare GlobalTheory.IndefiniteRowSideFullHecke.FockOrthogonalDecomposition
 open scoped TensorProduct ContDiff ComplexOrder
@@ -39,7 +82,7 @@ theorem tensor_prod_ext {F E R A B : Type} [Field F] [Field E] [Algebra F E] [Co
     | zero => simp
     | tmul m x => simp [← TensorProduct.add_tmul, h]
     | add a b ha hb =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       rw [add_add_add_comm, ← ha, ← hb]
   rw [key a, h1, h2]; simp
 
@@ -145,8 +188,8 @@ theorem exists_chart : ∀ (D : D7) (θ : InfFam D), IsInfFam θ → ∀ ρ : (D
     have c2 : Continuous (imaginary D.what₂.Tau (Real.sqrt D.host.d)) :=
       continuous_pi fun τ => (Complex.continuous_im.comp (continuous_apply τ)).div_const _
     exact ((continuous_emb _).comp (hρ.comp c1)).add ((continuous_emb _).comp (hρ.comp c2))
-  · rw [hσ, RingHom.map_add, finPart_emb, finPart_emb, add_zero]
-  · rw [hσ, RingHom.map_add, infPart_emb, infPart_emb, RingHom.map_add, comp_tmul hθ τ _ D.host.sqrtMinusD, h1, h1,
+  · rw [hσ, RingHom.map_add (f := _), finPart_emb, finPart_emb, add_zero]
+  · rw [hσ, RingHom.map_add (f := _), infPart_emb, infPart_emb, RingHom.map_add (f := _), comp_tmul hθ τ _ D.host.sqrtMinusD, h1, h1,
       tauE_sqrtMinusD]
     show ((z τ).re : ℂ) + (((z τ).im / Real.sqrt D.host.d : ℝ) : ℂ) * _ = _
     have h2 : ((Real.sqrt D.host.d : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hd.ne'
@@ -155,7 +198,7 @@ theorem exists_chart : ∀ (D : D7) (θ : InfFam D), IsInfFam θ → ∀ ρ : (D
     have key : ∀ τ, θ τ (b₀ ⊗ₜ[D.host.F] (1 : D.host.E)) = 0 ∧ θ τ (b₁ ⊗ₜ[D.host.F] (1 : D.host.E)) = 0 := by
       intro τ
       have e := hi τ
-      rw [hb, RingHom.map_add, comp_tmul hθ τ _ D.host.sqrtMinusD, tauE_sqrtMinusD] at e
+      rw [hb, RingHom.map_add (f := _), comp_tmul hθ τ _ D.host.sqrtMinusD, tauE_sqrtMinusD] at e
       have r0 := Complex.conj_eq_iff_im.1 (conj_tmul_one hθ τ b₀)
       have r1 := Complex.conj_eq_iff_im.1 (conj_tmul_one hθ τ b₁)
       generalize θ τ (b₀ ⊗ₜ[D.host.F] (1 : D.host.E)) = p at *

@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingMulRight
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingMulRight
+public import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.FiniteIntertwining
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelPlusSubgroup
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqBotOrTopOfTensor
-import Development.AbelianVarietyTheory.PublishedTheorems.PublishedFoundations.FiniteIntertwining
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LevelPlusSubgroup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousCoeffBlockAct
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeadingMinorsWeightVectorEqTensorExtremalVectors
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChiGridHighestWeightEqCompactChainParameter
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ChiGridHighestWeightEqCompactChainParameter
+import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RealLineOfPeriodsOnLine
+
+@[expose] public section
 
 noncomputable section
 
@@ -71,9 +116,10 @@ private theorem map_conj_blockAct {ι : Type} [Fintype ι] {n : ℕ} (U : ι →
   next a =>
     simp [Formalism.GradedWeylDivisibility.blockAct, MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq]
   next p q hp hq =>
-    simp only [map_add, hp, hq]
+    simp only [map_add (f := _), hp, hq]
   next p v hp =>
-    simp only [map_mul, hp, map_X, Formalism.L2.DIV.blockAct_X, map_sum, map_C, Matrix.map_apply]
+    set_option synthInstance.maxHeartbeats 100000 in
+      simp only [map_mul, hp, map_X, Formalism.L2.DIV.blockAct_X, map_sum, map_C, Matrix.map_apply]
 
 theorem fockS_conj_trAct (n : ℕ) (g : ι → GL (Fin n) ℂ) (F F' : Formalism.L2.DIV.Pol ℂ ι n) :
     fockS (map (starRingEnd ℂ) (Formalism.L2.DIV.trAct g F)) (Formalism.L2.DIV.trAct (invTrK g) F') =
@@ -117,7 +163,7 @@ theorem eq_zero_of_fockS_self {σ : Type} (F : MvPolynomial σ ℂ) (h : fockS F
   have hall := (Finset.sum_eq_zero_iff_of_nonneg
     (fun m _ => mul_nonneg (Complex.normSq_nonneg _) (Nat.cast_nonneg _))).1 hsum
   ext m
-  rw [coeff_zero]
+  change F.coeff m = 0
   by_contra hne
   have hm : m ∈ F.support := mem_support_iff.mpr hne
   have hfac : (mfact m : ℝ) ≠ 0 := by
@@ -173,7 +219,7 @@ theorem weylSub_eq (n : ℕ) (lam : ι → ℕ → ℤ) (lam' : ι → DomWeight
         simp [GlobalTheory.Branching.unitaryIncl_coe]
       · simp
       · intro x y _ _ hx hy
-        rw [map_add]
+        rw [map_add (f := _)]
         exact S.add_mem hx hy
       · intro c x _ hx
         rw [map_smul]
@@ -213,12 +259,12 @@ variable {ι : Type} [Fintype ι] [DecidableEq ι]
 
 def bilF (n : ℕ) : Formalism.L2.DIV.Pol ℂ ι n →ₗ[ℂ] Formalism.L2.DIV.Pol ℂ ι n →ₗ[ℂ] ℂ :=
   LinearMap.mk₂ ℂ (fun F F' => fockS (map (starRingEnd ℂ) F) F')
-    (fun F₁ F₂ F' => by simp only [map_add, ← fockL_apply, LinearMap.add_apply])
+    (fun F₁ F₂ F' => by simp only [map_add (f := _), ← fockL_apply, LinearMap.add_apply])
     (fun c F F' => by
       simp only [← fockL_apply, smul_eq_C_mul, map_mul, map_C, RingHom.coe_comp, Function.comp_apply]
       rw [← smul_eq_C_mul, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul]
       simp)
-    (fun F F₁ F₂ => by simp only [← fockL_apply, map_add])
+    (fun F F₁ F₂ => by simp only [← fockL_apply, map_add (f := _)])
     (fun c F F' => by simp only [← fockL_apply, map_smul, smul_eq_mul])
 
 theorem bilF_apply (n : ℕ) (F F' : Formalism.L2.DIV.Pol ℂ ι n) : bilF n F F' = fockS (map (starRingEnd ℂ) F) F' := rfl
@@ -391,8 +437,8 @@ theorem rowComp_zero (g : Gc D.what₂.Tau (rowSizes D)) :
   simp [rowComp, Fin.snoc, (rowSizes D).m_pos]
   rfl
 
-set_option maxHeartbeats 1000000 in
 
+set_option maxHeartbeats 1000000 in
 theorem coefPsi (W : G.Weil) (h0 : PosOnb W (.top 0)) :
     ∃ A : weylSub ((rowSizes D).nR (0 : Fin ((rowSizes D).m + 1))) (psiWt (rowEntries D sc.cGap)) ≃ₗ[ℂ]
         Module.Dual ℂ (GlobalTheory.IndefiniteRowSideFullHecke.LevelPlusSubgroup.coefPlus G W.θ).W,

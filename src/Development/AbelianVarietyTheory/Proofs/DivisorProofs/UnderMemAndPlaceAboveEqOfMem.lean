@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,8 +136,8 @@ theorem gdet_mem_unitCong {c : kˣ} {g : GL a k} (h : g ∈ glLatCong c (SplitFl
   congr 1
   exact ((algebraMap 𝒪[k] k).map_det u.val).symm
 
-omit [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] in
 
+omit [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] in
 theorem isNatDatum_cosets {ι : Type*} {p : ι → Prop} {f : ι → Matrix a b k} (hf : ∀ y, IntM (f y)) {ϖ : kˣ}
     (hϖ : IsUnif ϖ) {e' e : ℕ} (he : e' ≤ e) :
     IsNatDatum ϖ e (Set.indicator {x | ∃ y, p y ∧ x - f y ∈ matLat a (ϖ ^ e' • SplitFlip.stdLat k b)} 1) := by
@@ -131,8 +175,8 @@ theorem indicator_cosets_mul {ι : Type*} {p : ι → Prop} {f : ι → Matrix a
   rwa [Matrix.mul_assoc, Matrix.mul_assoc, Matrix.mul_assoc, Units.mul_inv, Matrix.mul_one, ← Matrix.mul_assoc,
     Units.inv_mul, Matrix.one_mul] at this
 
-omit [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] in
 
+omit [Fintype a] [DecidableEq a] [Fintype b] [DecidableEq b] in
 theorem isNatDatum_of_periodic {Φ : Matrix a b k → ℂ} (hs : ∀ x, Φ x ≠ 0 → IntM x)
     (hp : ∀ x y, MaxM y → Φ (x + y) = Φ x) {ϖ : kˣ} (hϖ : IsUnif ϖ) {e : ℕ} (he : 1 ≤ e) : IsNatDatum ϖ e Φ := by
   refine ⟨fun X hX => by_contra fun h => hX (mem_matLat_stdLat.2 (hs X h)), fun X Z hZ => hp X Z fun i j => ?_⟩
@@ -166,9 +210,9 @@ theorem hasTypes_vacuum : HasTypes 1 (TypeDatum.full k a).toLevel (TypeDatum.ful
     fun h => (key (one_mem _) h.2).trans (by
       rw [show (TypeDatum.full k b).lam h = 1 from rfl, inv_one, Units.val_one, one_smul])⟩
 
+
 omit [Fintype b] [DecidableEq b] in
 open Classical in
-
 theorem parPhi_periodic {b' : Type*} {δ : kˣ →* ℂˣ} (hδ : IsTame δ) :
     (∀ x : Matrix (a ⊕ b) (a ⊕ b') k, parPhi δ x ≠ 0 → IntM x) ∧
       ∀ x y : Matrix (a ⊕ b) (a ⊕ b') k, MaxM y → parPhi δ (x + y) = parPhi δ x := by
@@ -342,8 +386,8 @@ theorem chi_condLE (hw : w ∈ locPl G t) {i : ℕ} (h1 : 1 ≤ i) (h2 : i ≤ D
     unfold Places.W0
     convert Finset.mem_image_of_mem _ h'
 
-variable (L t) in
 
+variable (L t) in
 theorem stepFn_periodic (hL : L.Is μ₀) (w : Pl D.host.E) (j : ℕ) :
     (∀ x, stepFn L t w j x ≠ 0 → IntM x) ∧ ∀ x y, MaxM y → stepFn L t w j (x + y) = stepFn L t w j x := by
   unfold stepFn
@@ -436,7 +480,7 @@ theorem isNatDatum_givenDatum (hL : L.Is μ₀) {b : Edge} (hb : b ∈ givenPath
     refine isNatDatum_of_periodic (fun x hx a b => ?_) (fun x y hy => h2 _ (yᵀ.submatrix _ _) fun _ _ => hy _ _)
       (isUnif_unifAt w) (le_max_right _ _)
     simpa using h1 _ hx ((ixFin G t w (j + 1)).symm b) ((ixFin G t w j).symm a)
-  · rw [givenDatum, dif_pos hi]
+  · rw [givenDatum, dite_eq_left hi]
     exact isNatDatum_cosets (intM_coord B hL hi) (isUnif_unifAt w) (le_max_left _ _)
 
 theorem givenLevel_succ {j : ℕ} {P : TypeDatum (Kw w) (Ix (Fin D.R.r) (Fin D.R.t) (j + 1))}
@@ -474,7 +518,7 @@ theorem row_law (hL : L.Is μ₀) (hw : w ∈ locPl G t) (g : (locGrid G t w).Ve
   have hc : ∀ l, (locGrid G t w).blockChar (.ex i 0) (gdet (g (l, 0))) = 1 := fun l =>
     chi_condLE hw (by change 1 ≤ D.R.m - i; omega) (Nat.sub_le _ _) _ (gdet_mem_unitCong (h0 l))
   rw [edgeFactor_eq fun Y => (givenLevel_open hL hw Y).2 (hg Y), hc, hc, inv_one, Units.val_one, one_mul, one_mul,
-    givenDatum, dif_pos hi]
+    givenDatum, dite_eq_left hi]
   exact indicator_cosets_mul (intM_coord B hL hi) (inv_mem (invT_mem_glLatCong (h0 _))) (invT_mem_glLatCong (h0 _)) _
 
 theorem column_law (hL : L.Is μ₀) (hw : w ∈ locPl G t) (g : (locGrid G t w).VertexGroup)

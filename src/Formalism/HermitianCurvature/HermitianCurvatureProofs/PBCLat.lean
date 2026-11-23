@@ -1,10 +1,62 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCStmt
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.MajorantIntegrals
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LatticeSummability
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSizesJointMean
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PeriodLatticeFactsSplitOfGeneral
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LocalConditionsAndQuotientSplitting
-import Lemmata.GeneralBFactRightSide.Imports
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PBCStmt
+import Aesop.Main
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LatticeSummability
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSizesJointMean
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MajorantIntegrals
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PeriodLatticeFactsSplitOfGeneral
+public import Lemmata.GeneralBFactRightSide.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P.PBC
 
@@ -38,14 +90,15 @@ theorem sizesSup : PBC.SizesSup := by
   have hgR : (0 : ℝ) < S.g := by linarith
   have hrd1 := rd_ge_one E
   have hrd : 0 < S6.rd E := by linarith
-  obtain ⟨-, -, -, -, -, -, hN, -⟩ := Formalism.FourierDecayAlt.P.block_lattices Formalism.FourierDecayAlt.P.lattice_facts_general
-    Formalism.FourierDecayAlt.P.dualIdealEqLiftIdeal Formalism.FourierDecayAlt.P.scaledIdealNorm E hU S.g S.G.r b n hgN
+  have hN' := Formalism.FourierDecayAlt.P.Jx2.sqrt_idl
+    Formalism.FourierDecayAlt.P.scaledIdealNorm E S.g (S6.nuBlock S.G.r b n + 1) hgN
+  have hN : √(FractionalIdeal.absNorm (S6.dualIdl E S.g (S6.nuBlock S.G.r b n)) : ℝ) =
+      (((S.g : ℝ) * S6.rd E ^ (S6.nuBlock S.G.r b n + 1)) ^ S6.deg E)⁻¹ := by
+    simpa only [S6.dualIdl] using hN'
   set ν : ℤ := S6.nuBlock S.G.r b n with hν
   set x : ℝ := S6.rd E ^ ν with hx
   have hxpos : 0 < x := zpow_pos hrd _
-  have hexp : ((2 * S.G.r + 4 : ℤ) - 2 * b - n) = ν + 1 := by
-    simp only [hν, S6.nuBlock]; ring
-  rw [hexp, zpow_add₀ hrd.ne', zpow_one] at hN
+  rw [zpow_add₀ hrd.ne', zpow_one] at hN
   set m : ℝ := Finset.univ.inf' Finset.univ_nonempty (thr S b n) with hm
   have hmpos : 0 < m := by
     rw [hm, Finset.lt_inf'_iff]; exact fun v _ => hthr v
@@ -105,7 +158,7 @@ theorem sizesSup : PBC.SizesSup := by
         simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
         rw [pow_mul]
     _ ≤ ∏ v, Cs * (thr S b n v ^ 2 * ((S.g : ℝ) * (x * S6.rd E)) ^ 2) :=
-        Finset.prod_le_prod (fun v _ => by have := hthr v; positivity) (fun v _ => key v)
+        Finset.prod_le_prod₀ (fun v _ => by have := hthr v; positivity) (fun v _ => key v)
     _ = Cs ^ S.f * ((∏ v, thr S b n v) ^ 2 * ((S.g : ℝ) * (x * S6.rd E)) ^ (2 * S.f)) := by
         rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin,
           Finset.prod_mul_distrib, Finset.prod_pow, Finset.prod_const, Finset.card_univ, Fintype.card_fin,
@@ -116,7 +169,7 @@ theorem psi_add {f : ℕ} (a b : crystallineComparison.V f) : crystallineCompari
   rw [← Complex.exp_add, ← mul_add, ← Finset.sum_add_distrib]
   congr 2
   refine Finset.sum_congr rfl (fun v _ => ?_)
-  simp only [Pi.add_apply, map_add]
+  simp only [Pi.add_apply, map_add (f := _)]
   ring
 
 theorem psi_zero {f : ℕ} : crystallineComparison.psi (0 : crystallineComparison.V f) = 1 := by simp [crystallineComparison.psi]
@@ -320,7 +373,6 @@ theorem dual_sep (f : ℕ) (R : ℝ) (hR : 0 < R) (σ σ' : crystallineCompariso
     by_contra h; push Not at h; exact hne (funext h)
   obtain ⟨a, b, hab⟩ := (mem_dual_iff f R hR σ).1 hσ v
   obtain ⟨a', b', hab'⟩ := (mem_dual_iff f R hR σ').1 hσ' v
-  have hR' : (2 * (R : ℂ)) ≠ 0 := by simp [hR.ne']
   have hd : σ v - σ' v = (((a - a' : ℤ) : ℂ) + ((b - b' : ℤ) : ℂ) * Complex.I) / (2 * (R : ℂ)) := by
     rw [hab, hab']; push_cast; field_simp; ring
   have hnz : (((a - a' : ℤ) : ℂ) + ((b - b' : ℤ) : ℂ) * Complex.I) ≠ 0 := by
@@ -354,15 +406,13 @@ theorem lstdSum : PBC.LstdSum := by
   have hint := hmaj.1
   have hnn : ∀ y : crystallineComparison.V f, 0 ≤ crystallineComparison.mL K L' y := fun y =>
     Finset.prod_nonneg (fun v _ => Formalism.FourierDecayAlt.P.LatticeSummability.mfac_nonneg K (hL'pos v).le _ (norm_nonneg _))
-  have hnn0 : ∀ y : crystallineComparison.V f, 0 ≤ crystallineComparison.mL K large₂ y := fun y =>
-    Finset.prod_nonneg (fun v _ => Formalism.FourierDecayAlt.P.LatticeSummability.mfac_nonneg K (hLg0 v) _ (norm_nonneg _))
   set vb := (volume : Measure (crystallineComparison.V f)).real (Metric.ball 0 δ) with hvb
   have hvb0 : 0 < vb := by rw [hvb, vol_ball_V f δ hδ]; positivity
   have hvbσ : ∀ σ : crystallineComparison.V f, (volume : Measure (crystallineComparison.V f)).real (Metric.ball σ δ) = vb := by
     intro σ; rw [hvb, Measure.real, Measure.real, Measure.addHaar_ball_center]
   have hpt : ∀ σ : crystallineComparison.V f, ∀ y ∈ Metric.ball σ δ, crystallineComparison.mL K large₂ σ ≤ crystallineComparison.mL K L' y := by
     intro σ y hy
-    apply Finset.prod_le_prod (fun v _ => Formalism.FourierDecayAlt.P.LatticeSummability.mfac_nonneg K (hLg0 v) _ (norm_nonneg _))
+    apply Finset.prod_le_prod₀ (fun v _ => Formalism.FourierDecayAlt.P.LatticeSummability.mfac_nonneg K (hLg0 v) _ (norm_nonneg _))
     intro v _
     have hyv : ‖y v‖ ≤ ‖σ v‖ + δ := by
       have h1 : ‖y v - σ v‖ ≤ ‖y - σ‖ := norm_le_pi_norm (y - σ) v
@@ -406,7 +456,7 @@ theorem lstdSum : PBC.LstdSum := by
 
   rw [hmaj.2, hvb, vol_ball_V f δ hδ, show (Real.pi * δ ^ 2) ^ f = ∏ _v : Fin f, (Real.pi * δ ^ 2) by simp]
   rw [← Finset.prod_div_distrib]
-  apply Finset.prod_le_prod
+  apply Finset.prod_le_prod₀
   · intro v _
     have hK2 : (0 : ℝ) < (K : ℝ) - 2 := by simp [hKdef, C.Kst]; norm_num
     have := hL'pos v
@@ -420,7 +470,6 @@ theorem lstdSum : PBC.LstdSum := by
     show L v / g + δ = _
     rw [hxdef, hδdef]; field_simp
   rw [hx]
-  have ht : 0 < Real.pi * δ ^ 2 := by positivity
   have e : Real.pi * (4 * δ * x + δ) ^ 2 * 5 / (5 - 2) / (Real.pi * δ ^ 2) = (4 * x + 1) ^ 2 * 5 / 3 := by
     field_simp; ring
   rw [e]

@@ -1,13 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.CMLattices.IntegralOf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IntegralOf
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsFieldsSeparately
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ChartCoverFOfSecBaseChange
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.DetDvdEquivariantFramePolynomial
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsFramedPointBaseChangeAlgebraMap
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsUniqueFrameChangeByMatrices
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeByMatricesReflAndComp
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameChangeCommBaseChange
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FramedPointBaseChangeUniqueReflIff
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LowerTriIsUnitDet
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.DetDvdEquivariantFramePolynomial
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ChartCoverFOfSecBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsDedekindDomain MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.LamCM Formalism.L2.Pj
@@ -268,8 +314,8 @@ theorem exists_isFrPoly_field : ∀ (E : Type) [Field E] [NumberField E] [IsCMFi
   exact hu.mul_left_cancel h1
 
 theorem coeff_aeval_scale {K σ : Type} [CommRing K] (t : K) (G : MvPolynomial σ K) (m : σ →₀ ℕ) :
-    MvPolynomial.coeff m (MvPolynomial.aeval (fun v => MvPolynomial.C t * MvPolynomial.X v : σ → MvPolynomial σ K) G) =
-      t ^ m.degree * MvPolynomial.coeff m G := by
+    AddMonoidAlgebra.coeff (MvPolynomial.aeval (fun v => MvPolynomial.C t * MvPolynomial.X v : σ → MvPolynomial σ K) G) m =
+      t ^ m.degree * AddMonoidAlgebra.coeff G m := by
   classical
   induction G using MvPolynomial.induction_on' with
   | monomial u r =>
@@ -283,7 +329,7 @@ theorem coeff_aeval_scale {K σ : Type} [CommRing K] (t : K) (G : MvPolynomial �
     split_ifs with hu
     · rw [hu]
     · simp
-  | add p q hp hq => simp only [map_add, MvPolynomial.coeff_add, hp, hq, mul_add]
+  | add p q hp hq => simp only [map_add (f := _), MvPolynomial.coeff_add, hp, hq, mul_add]
 
 theorem isHomogeneous_of_scaling {K σ : Type} [Field K] [CharZero K] (G D : MvPolynomial σ K) (hD : D ≠ 0) (d : ℕ)
     (h : ∀ x : σ → K, MvPolynomial.eval x D ≠ 0 →
@@ -300,13 +346,13 @@ theorem isHomogeneous_of_scaling {K σ : Type} [Field K] [CharZero K] (G D : MvP
         clear h
         induction G using MvPolynomial.induction_on with
         | C r => simp
-        | add p q hp hq => simp only [map_add, hp, hq]
+        | add p q hp hq => simp only [map_add (f := _), hp, hq]
         | mul_X p v hp => simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.eval_C, MvPolynomial.eval_X]
       rw [map_mul, map_sub, e, h x hx]
       simp
   have h2 := sub_eq_zero.1 ((mul_eq_zero.1 h1).resolve_left hD)
   intro m hm
-  have h3 := congrArg (MvPolynomial.coeff m) h2
+  have h3 := congrArg (AddMonoidAlgebra.coeff · m) h2
   rw [coeff_aeval_scale, MvPolynomial.coeff_C_mul] at h3
   have h4 : (2 : K) ^ m.degree = 2 ^ d := mul_right_cancel₀ hm h3
   have h5 : (2 : ℕ) ^ m.degree = 2 ^ d := by exact_mod_cast h4
@@ -358,8 +404,7 @@ theorem exists_isFrPoly_isHomogeneous : ∀ (E : Type) [Field E] [NumberField E]
       unfold evalFr
       congr 2
       funext v
-      simp only [T, Matrix.mul_diagonal, X, Matrix.of_apply]
-      exact mul_comm _ _
+      simp [X, T, Matrix.mul_diagonal, mul_comm]
     rw [← p₂, ← e₂, e₃, p₁, e₁]
     rfl
 

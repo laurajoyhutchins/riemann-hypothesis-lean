@@ -1,5 +1,51 @@
-import Mathlib
-import Development.DiscreteGroups.GlobalIrreducibility.ExistsOfMemKOne
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+public import Development.DiscreteGroups.GlobalIrreducibility.ExistsOfMemKOne
+import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,30 +91,5 @@ theorem ker_redO : RingHom.ker (redO i hi) = IsLocalRing.maximalIdeal 𝒪[w.adi
   show PadicInt.toZMod (toInt i hi y) = 0 ↔ _
   rw [← RingHom.mem_ker, PadicInt.ker_toZMod, IsLocalRing.mem_maximalIdeal, PadicInt.mem_nonunits, PadicInt.norm_def,
     coe_toInt, ← valuation_lt_iff i hi, RingEquiv.apply_symm_apply]
-
-theorem resCard_eq : resCard (w.adicCompletion E) = g := by
-  have e : (𝒪[w.adicCompletion E] ⧸ IsLocalRing.maximalIdeal 𝒪[w.adicCompletion E]) ≃+* ZMod g :=
-    (Ideal.quotEquivOfEq (ker_redO i hi).symm).trans (RingHom.quotientKerEquivOfSurjective (redO_surjective i hi))
-  show Nat.card (𝒪[w.adicCompletion E] ⧸ IsLocalRing.maximalIdeal 𝒪[w.adicCompletion E]) = g
-  rw [Nat.card_congr e.toEquiv, Nat.card_zmod]
-
-theorem valuation_i_eq_uniformizer : valuation (w.adicCompletion E) (i (g : ℚ_[g])) = uniformizer (w.adicCompletion E) := by
-  apply le_antisymm
-  · rw [le_uniformizer_iff]
-    exact (valuation_lt_iff i hi _).2 Padic.norm_p_lt_one
-  · obtain ⟨y, hy⟩ := valuation_surjective (K := w.adicCompletion E) (uniformizer (w.adicCompletion E))
-    have hx : ‖i.symm y‖ < 1 :=
-      (valuation_lt_iff i hi _).1 (by rw [RingEquiv.apply_symm_apply, hy]; exact uniformizer_lt_one)
-    obtain ⟨x', hx'⟩ : ∃ x' : ℤ_[g], (x' : ℚ_[g]) = i.symm y := ⟨⟨i.symm y, hx.le⟩, rfl⟩
-    obtain ⟨c, hc⟩ := (PadicInt.norm_lt_one_iff_dvd x').1 (by rw [PadicInt.norm_def, hx']; exact hx)
-    have e := congrArg (fun z : ℤ_[g] => (z : ℚ_[g])) hc
-    simp only [PadicInt.coe_mul, PadicInt.coe_natCast, hx'] at e
-    have e2 : y = i (g : ℚ_[g]) * i (c : ℚ_[g]) := by
-      rw [← map_mul, ← e, RingEquiv.apply_symm_apply]
-    rw [← hy, e2, map_mul]
-    exact mul_le_of_le_one_right' ((valuation_le_iff i hi _).2 c.2)
-
-theorem valuation_natCast_eq_uniformizer : valuation (w.adicCompletion E) (g : w.adicCompletion E) = uniformizer (w.adicCompletion E) := by
-  rw [← map_natCast i g, valuation_i_eq_uniformizer i hi]
 
 end DiscreteGroups.sglob.DzIso

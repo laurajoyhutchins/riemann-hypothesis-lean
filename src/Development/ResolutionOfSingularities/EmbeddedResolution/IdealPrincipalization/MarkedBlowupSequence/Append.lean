@@ -1,13 +1,53 @@
-import Mathlib
-import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
-import Development.ResolutionOfSingularities.Foundations.Blowup.StrictTransform
-import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.StrictNormalCrossings
-import Development.ResolutionOfSingularities.EmbeddedResolution.DerivativeIdeal.IdealSheafOrder
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.IdealBlowupSequence
-import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.MarkedSequenceOfBlowups
-import Development.ResolutionOfSingularities.Foundations.BlowupUniversalProperty
-import Development.ResolutionOfSingularities.EmbeddedResolution.ResolutionOfSingularities
+module
+
+public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.MarkedBlowupSequence.BlowupSequenceData
+public import Mathlib.Tactic.Bound
+public import Mathlib.Tactic.Monotonicity.Lemmas
+public import Development.ResolutionOfSingularities.Foundations.Blowup.BlowupExistence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 universe u
 
 open CategoryTheory AlgebraicGeometry
@@ -549,7 +589,7 @@ theorem center_support_subset_orderAtLeastLocus_appendIdeal (hinv : ComapIsoInva
       (t.ideal (i - s.toBlowupSequenceData.length))
       (t.center_order (i - s.toBlowupSequenceData.length) hsub)
 
-private theorem smooth_center_comp_appendProjectionToBase (hinv : ComapIsoInvariance.{u}) (i : ℕ)
+theorem smooth_center_comp_appendProjectionToBase (hinv : ComapIsoInvariance.{u}) (i : ℕ)
     (hi : i < (s.appendToBlowupSequenceData t).length) :
     AlgebraicGeometry.Smooth
       (((s.appendToBlowupSequenceData t).center i).subschemeι ≫ s.appendProjectionToBase t i ≫ p) := by
@@ -610,7 +650,7 @@ private theorem hasStrictNormalCrossingsWith_comap_iso_inv {K : Type u} [Field K
   rw [Iso.symm_hom, Iso.inv_hom_id_assoc, map_comap_hom_map_comap_inv e F] at h2
   exact h2
 
-private theorem hasStrictNormalCrossingsWith_appendBoundary (hinv : ComapIsoInvariance.{u}) (i : ℕ)
+theorem hasStrictNormalCrossingsWith_appendBoundary (hinv : ComapIsoInvariance.{u}) (i : ℕ)
     (hi : i < (s.appendToBlowupSequenceData t).length) :
     HasStrictNormalCrossingsWith (s.appendProjectionToBase t i ≫ p) ((s.appendToBlowupSequenceData t).center i)
       (s.appendBoundary t i) := by
@@ -747,7 +787,7 @@ private theorem map_strictTransform_comp_iso_hom (hinv : ComapIsoInvariance.{u})
       AlgebraicGeometry.Scheme.IdealSheafData.comap_comp, hZ]
   rw [hL1, List.map_map, hfun, hexc]
 
-private theorem appendBoundary_succ (hinv : ComapIsoInvariance.{u}) (i : ℕ)
+theorem appendBoundary_succ (hinv : ComapIsoInvariance.{u}) (i : ℕ)
     (hi : i < (s.appendToBlowupSequenceData t).length) :
     s.appendBoundary t (i + 1) =
       (s.appendBoundary t i).map
@@ -823,11 +863,6 @@ theorem append_toBlowupSequenceData (hinv : ComapIsoInvariance.{u}) :
 @[simp]
 theorem append_length (hinv : ComapIsoInvariance.{u}) :
     (s.append t hinv).toBlowupSequenceData.length =
-      s.toBlowupSequenceData.length + t.toBlowupSequenceData.length := rfl
-
-@[simp]
-theorem append_toMarkedSequence_length (hinv : ComapIsoInvariance.{u}) :
-    (s.append t hinv).toMarkedSequenceOfBlowups.toSequenceOfBlowups.length =
       s.toBlowupSequenceData.length + t.toBlowupSequenceData.length := rfl
 
 theorem append_projectionToBase (hinv : ComapIsoInvariance.{u}) (i : ℕ) :

@@ -1,7 +1,52 @@
-import Formalism.LocalToGlobal.GlobalTheory.ColValOfTiedSOfRest
-import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.RankConditionsOfLayerTwo
-import Formalism.LocalToGlobal.Columns.TiedValRat
-import Formalism.LocalToGlobal.GlobalTheory.GL4.PColStd
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.LocalToGlobal.GroupLattices.DownNaturalLevelZero
+public import Formalism.SharpRestriction.GlobalSchurBounds.FlipTwoThree
+public import Formalism.LocalToGlobal.Columns.PolyFnLemmas
+public import Formalism.LocalToGlobal.Columns.TiedValRat
+public import Formalism.LocalToGlobal.GlobalTheory.GL4.PColStd
+public import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.UnitTraceSumBounds.RankConditionsOfLayerTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalToGlobal.Columns.PolyFn
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +66,7 @@ def rd (F : Pol0 D) (z : (D.mem u).C.Y 0) : ℂ :=
   fnOf _ (shiftOf (lamT u 0)) 1 (MvPolynomial.map D.what₂.embLL F) (T.val0.eY z)
 
 theorem rd_add (F F' : Pol0 D) (z : (D.mem u).C.Y 0) : rd T (F + F') z = rd T F z + rd T F' z := by
-  simp only [rd, map_add, Pi.add_apply]
+  simp only [rd, map_add (f := _), Pi.add_apply]
 
 theorem map_smul_LL (a : D.what₂.LL) (F : Pol0 D) :
     MvPolynomial.map D.what₂.embLL (a • F) = D.what₂.embLL a • MvPolynomial.map D.what₂.embLL F := by
@@ -55,7 +100,7 @@ theorem pol_spec (x : ((D.fm u).lat 0).V) (c : (D.mem u).C.cls 0) (z : (D.mem u)
 def co0 : ((D.fm u).lat 0).V →ₗ[D.what₂.LL] ((D.mem u).C.cls 0 → Pol0 D) where
   toFun x c := pol T x c
   map_add' x y := funext fun c => rd_unique T fun z => by
-    rw [Pi.add_apply, rd_add, ← pol_spec, ← pol_spec, ← pol_spec, map_add]
+    rw [Pi.add_apply, rd_add, ← pol_spec, ← pol_spec, ← pol_spec, map_add (f := _)]
     rfl
   map_smul' a x := funext fun c => rd_unique T fun z => by
     simp only [Pi.smul_apply, RingHom.id_apply]

@@ -1,7 +1,68 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionRelation
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.HomotheticLatticeIntegralS2
-import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveJetsUnitBall
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinRecursion
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.HomotheticLatticeIntegralS2
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinS2LimitFormula
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveEndoAll
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinRecursion
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.HasCMByStable
+public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.IsogenyFormulaInstance
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionHypothesesOfLevelOne
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.BiextensionRelation
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.LubinTateLogIsArtinHasse
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SubstFirstCoboundaryThree
+import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.TransportFirstLevel
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.CurveSecondLogDerivative
+public import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.FirstLevelFromUniversalLaw
+import Formalism.LocalToGlobal.TorsionIntegrality.SecondCoefficientNorms.PhNormFromDatum
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.TwoTorsionU
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -20,8 +81,8 @@ section Alg
 variable {K K' : Type} [Field K] [Field K'] (φ : K →+* K')
 
 theorem map_derivative (f : PowerSeries K) :
-    PowerSeries.map φ (PowerSeries.derivative K f) =
-      PowerSeries.derivative K' (PowerSeries.map φ f) := by
+    PowerSeries.map φ (PowerSeries.derivative (R := K) f) =
+      PowerSeries.derivative (R := K') (PowerSeries.map φ f) := by
   ext n
   simp [PowerSeries.coeff_derivative]
 
@@ -104,7 +165,8 @@ theorem endoCurve_of_endoZ [CharZero K] [CharZero K'] (W : WeierstrassCurve K) {
     apply mul_left_cancel₀ h2'
     linear_combination h4
   apply PowerSeries.map_injective φ φ.injective
-  rw [map_mul, PowerSeries.map_C, map_pow, map_rescale, h3, map_add, map_sum]
+
+  rw [map_mul, PowerSeries.map_C, map_pow, map_rescale, h3, map_add (f := _), map_sum]
   simp only [map_sub, PowerSeries.map_C, Finset.sum_sub_distrib]
   rw [hsum]
 
@@ -384,7 +446,7 @@ theorem NRDense_of (hSq : SqrtKur) : NRDense := by
   have hNK : α * σ α = (Fintype.card S : MaximalUnramifiedExtension l) + 1 := by
     apply Subtype.ext
     have h := congrArg ι hprod
-    simp only [map_mul, map_add, map_sub, map_intCast, map_natCast, map_one] at h
+    simp only [map_mul, map_add (f := _), map_sub, map_intCast, map_natCast, map_one] at h
     rw [hσα, hαw, Fintype.card_coe]
     push_cast
     rw [hwc]
@@ -400,7 +462,8 @@ theorem NRDense_of (hSq : SqrtKur) : NRDense := by
   have hs : α * (α - σ α) * s2 = ∑ P, xP P := by
     apply Subtype.ext
     have h := congrArg ι hs2C
-    simp only [map_mul, map_add, map_sub, map_intCast, map_one, map_sum] at h
+
+    simp only [map_mul, map_add (f := _), map_sub, map_intCast, map_one, map_sum] at h
     rw [hσα, hαw]
     push_cast
     rw [hwc, hs2, h]

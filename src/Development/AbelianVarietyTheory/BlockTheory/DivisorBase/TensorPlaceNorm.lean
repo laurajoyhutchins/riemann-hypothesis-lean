@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.CoefMod
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -11,28 +52,6 @@ namespace GlobalTheory.IndefiniteRowSideFullHecke.TensorPlaceNorm
 open Formalism.BasicNotions Formalism.L2.DIV
 
 variable {ι : Type} [Fintype ι] {n n' : ℕ}
-
-def placeNorm (lam : DomWeight n) (f : nablaSq ℂ n lam) : ℝ :=
-  Real.sqrt (normFock lam f.1 f.1).re
-
-def coefNorm (lam : ι → DomWeight n) (F : VV ℂ lam) : ℝ :=
-  Real.sqrt (pairK lam (fun _ => (1 : Matrix (Fin n) (Fin n) ℂ)) F F).re
-
-def pureTen (lam : ι → DomWeight n) (f : ∀ τ, nablaSq ℂ n (lam τ)) : VV ℂ lam :=
-  ⟨ten fun τ => (f τ).1, Submodule.subset_span ⟨fun τ => (f τ).1, fun τ => (f τ).2, rfl⟩⟩
-
-def IsTensorMap (lam : ι → DomWeight n) (lam' : ι → DomWeight n')
-    (A : ∀ τ, nablaSq ℂ n (lam τ) →ₗ[ℂ] nablaSq ℂ n' (lam' τ)) (T : VV ℂ lam →ₗ[ℂ] VV ℂ lam') : Prop :=
-  ∀ f : ∀ τ, nablaSq ℂ n (lam τ), T (pureTen lam f) = pureTen lam' fun τ => A τ (f τ)
-
-def TensorNormBound : Prop :=
-  ∀ (ι : Type) [Fintype ι] (n n' : ℕ) (lam : ι → DomWeight n) (lam' : ι → DomWeight n')
-    (A : ∀ τ, nablaSq ℂ n (lam τ) →ₗ[ℂ] nablaSq ℂ n' (lam' τ)) (c : ι → ℝ),
-    (∀ τ, 0 ≤ c τ) →
-    (∀ τ (f : nablaSq ℂ n (lam τ)), placeNorm (lam' τ) (A τ f) ≤ c τ * placeNorm (lam τ) f) →
-    (∃! T : VV ℂ lam →ₗ[ℂ] VV ℂ lam', IsTensorMap lam lam' A T) ∧
-      ∀ T : VV ℂ lam →ₗ[ℂ] VV ℂ lam', IsTensorMap lam lam' A T →
-        ∀ F : VV ℂ lam, coefNorm lam' (T F) ≤ (∏ τ, c τ) * coefNorm lam F
 
 theorem fockF_eq_fockS {σ : Type} (f : MvPolynomial σ ℂ) : Formalism.REAL.fockF f f = fockS f f := by
   unfold Formalism.REAL.fockF fockS mfact

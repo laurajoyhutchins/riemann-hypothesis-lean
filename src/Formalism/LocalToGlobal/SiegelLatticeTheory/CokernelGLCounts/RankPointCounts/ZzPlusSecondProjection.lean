@@ -1,5 +1,54 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCountP
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PcIntGen
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PartnerCountP
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.PairValPf
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedVolumeStatements.GenericRatioOfBoundHolds
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocModel
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PcIntGen
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -133,7 +182,7 @@ theorem clsOf_mul_sgn (p : PlF D) (Y : MatP D p) :
     congr 1
   · have hc' : ¬ ((∀ a b, (Y * S) a b ∈ (M p).R) ∧ IsUnit (Y * S).det) := by
       rintro ⟨h1', h2'⟩; exact hc ⟨hint.1 h1', hdet.1 h2'⟩
-    rw [dif_neg hc, dif_neg hc']
+    rw [dite_eq_right hc, dite_eq_right hc']
 
 theorem clsSgn_holds (Zd : LocDat D) : ClsSgn Zd := by
   intro p Y s
@@ -265,6 +314,7 @@ theorem zhat_vc (Zd : LocDat D) (p : PlF D) (γ : TermDef.Term D u u' F0 what₂
   ext a b
   rw [Matrix.mul_apply]
   simp only [tLoc]
+
   rw [zhat_loc, Matrix.mul_apply, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [zhat_locF', vc, Matrix.of_apply, map_mul (D.s.atP p).ιE]
@@ -379,8 +429,8 @@ def XiTyped : Prop :=
       (∃ x ∈ 𝒪[(D.s.atP p).Fp], p2 g.e ((D.s.atP p).ιE ((((admXi D γ.lam (lf D F0) (repF γ))⁻¹).map
           (algebraMap (𝓞 D.host.E) D.host.E)) k b)) = (g.q : (D.s.atP p).Fp) * x)
 
-variable (D) in
 
+variable (D) in
 def UInt : Prop := ∀ p : PlF D, (D.s.atP p).ιF ((uP p : ℚ) : D.host.F) ∈ 𝒪[(D.s.atP p).Fp]
 
 variable {Zd u u' F0 what₂}

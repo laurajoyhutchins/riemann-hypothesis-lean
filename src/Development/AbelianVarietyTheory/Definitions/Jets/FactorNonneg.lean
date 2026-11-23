@@ -1,5 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Jets.Imports
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Jets.Imports
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
+
+@[expose] public section
 
 open Finset
 
@@ -48,70 +92,5 @@ theorem placeWeight_nonneg {n : ℕ} {L : Fin (n + 1) → ℤ} {M : Fin n → �
   rw [prod_erase_eq, ← Finset.prod_div_distrib]
   refine Finset.prod_nonneg fun j _ => ?_
   simpa using factor_nonneg h l j 1 zero_le_one le_rfl
-
-theorem wM_nonneg {n : ℕ} {L : Fin (n + 1) → ℤ} {M : Fin n → ℤ} (h : Box L M)
-    (l : Fin (n + 1)) : 0 ≤ wM L M l := by
-  unfold GlobalTheory.WigSh.wM
-  rw [prod_erase_eq, ← Finset.prod_div_distrib]
-  refine Finset.prod_nonneg fun j _ => ?_
-  simpa using factor_nonneg h l j 0 le_rfl zero_le_one
-
-theorem denom_ne_zero {n : ℕ} {L : Fin (n + 1) → ℤ} {M : Fin n → ℤ} (h : Box L M)
-    (l : Fin (n + 1)) : ∏ j ∈ univ.erase l, ((L j : ℝ) - (L l : ℝ)) ≠ 0 := by
-  rw [prod_erase_eq]
-  refine Finset.prod_ne_zero_iff.mpr fun j _ => sub_ne_zero.mpr ?_
-  exact_mod_cast h.strictAnti.injective.ne (Fin.succAbove_ne l j)
-
-theorem weight_eq_abs_prod_div_prod {n : ℕ} {L : Fin (n + 1) → ℤ} {M : Fin n → ℤ} (h : Box L M) (β : ℝ)
-    (u : Fin (n + 1) → ℝ) (ρ : Fin n → ℝ)
-    (hu : ∀ j, (L j : ℝ) = u j - (n : ℝ) / 2 - β)
-    (hρ : ∀ j, (M j : ℝ) = ρ j - ((n : ℝ) - 1) / 2 - β) (l : Fin (n + 1)) :
-    wP L M l = (∏ i, |u l + 1 / 2 - ρ i|) / ∏ i ∈ univ.erase l, |u l - u i| := by
-  rw [← abs_of_nonneg (placeWeight_nonneg h l)]
-  unfold GlobalTheory.WigSh.wP
-  rw [abs_div, Finset.abs_prod, Finset.abs_prod]
-  congr 1 <;> refine Finset.prod_congr rfl fun i _ => ?_
-  · rw [hρ, hu, ← abs_neg]
-    congr 1
-    ring
-  · rw [hu i, hu l, ← abs_neg]
-    congr 1
-    ring
-
-theorem wM_eq_abs {n : ℕ} {L : Fin (n + 1) → ℤ} {M : Fin n → ℤ} (h : Box L M) (β : ℝ)
-    (u : Fin (n + 1) → ℝ) (ρ : Fin n → ℝ)
-    (hu : ∀ j, (L j : ℝ) = u j - (n : ℝ) / 2 - β)
-    (hρ : ∀ j, (M j : ℝ) = ρ j - ((n : ℝ) - 1) / 2 - β) (l : Fin (n + 1)) :
-    wM L M l = (∏ i, |u l - 1 / 2 - ρ i|) / ∏ i ∈ univ.erase l, |u l - u i| := by
-  rw [← abs_of_nonneg (wM_nonneg h l)]
-  unfold GlobalTheory.WigSh.wM
-  rw [abs_div, Finset.abs_prod, Finset.abs_prod]
-  congr 1 <;> refine Finset.prod_congr rfl fun i _ => ?_
-  · rw [hρ, hu, ← abs_neg]
-    congr 1
-    ring
-  · rw [hu i, hu l, ← abs_neg]
-    congr 1
-    ring
-
-theorem example_wP : Box ![3, -1] ![1] ∧ wP ![3, -1] ![1] 0 = 3 / 4 ∧ wP ![3, -1] ![1] 1 = 1 / 4 := by
-  refine ⟨?_, ?_, ?_⟩
-  · intro j
-    fin_cases j
-    decide
-  · simp [GlobalTheory.WigSh.wP, prod_erase_eq]
-    norm_num
-  · simp [GlobalTheory.WigSh.wP, prod_erase_eq, Fin.succAbove]
-    norm_num
-
-theorem example_wM : wM ![3, -1] ![1] 0 = 1 / 2 ∧ wM ![3, -1] ![1] 1 = 1 / 2 := by
-  refine ⟨?_, ?_⟩
-  · simp [GlobalTheory.WigSh.wM, prod_erase_eq]
-    norm_num
-  · simp [GlobalTheory.WigSh.wM, prod_erase_eq, Fin.succAbove]
-    norm_num
-
-theorem rank_one (L : Fin 1 → ℤ) (M : Fin 0 → ℤ) : wP L M 0 = 1 ∧ wM L M 0 = 1 := by
-  constructor <;> simp [GlobalTheory.WigSh.wP, GlobalTheory.WigSh.wM]
 
 end GlobalTheory.WigSh.Model

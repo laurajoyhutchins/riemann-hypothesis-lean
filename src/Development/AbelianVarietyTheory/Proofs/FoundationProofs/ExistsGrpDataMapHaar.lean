@@ -1,8 +1,54 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.AllTied
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.NotTrivialAndTwist
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.BlockOrderedSquareIntegrable
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.HaarUpqEqOfOmegaDensity
+module
+
+public import Formalism.LocalRingCardinality.DataTheta
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.BlockOrderedSquareIntegrable
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.FiniteDimKStableSubspaceKFiniteLie
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.HaarUpqEqOfOmegaDensity
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.HaarUpqIsMulRightInvariant
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.NotTrivialAndTwist
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Compactness.CompactlyGeneratedSpace
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.L2.Theta MeasureTheory Matrix
 open scoped NNReal
@@ -105,13 +151,13 @@ instance measurable_cover : MeasurableSpace (cover p q) := borel _
 
 instance borel_cover : BorelSpace (cover p q) := ⟨rfl⟩
 
-open Classical in
 
+open Classical in
 def expLift (X : Mat p q) : cover p q :=
   if h : X ∈ upq p q then ⟨(expGL X, expHalf X), expGL_mem h, expHalf_sq X⟩ else 1
 
 theorem expLift_val {X : Mat p q} (h : X ∈ upq p q) : (expLift X).1 = (expGL X, expHalf X) := by
-  rw [expLift, dif_pos h]
+  rw [expLift, dite_eq_left h]
 
 def grpOf (p q : ℕ) (ν : Measure (cover p q)) [ν.IsHaarMeasure] : GrpData p q where
   G := cover p q
@@ -195,7 +241,8 @@ theorem exists_grpData_map_haar : ∀ (p q : ℕ) (μ : Measure (UpqT p q)), μ.
   haveI : (t • (Measure.haar : Measure (cover p q))).IsHaarMeasure := Measure.IsHaarMeasure.nnreal_smul _ h0
   refine ⟨grpOf p q (t • Measure.haar), ?_⟩
   rw [ht]
-  exact Measure.map_smul _ _ _
+  haveI : BorelSpace (UpqT p q) := ⟨rfl⟩
+  exact Measure.map_smul _ (continuous_covU _).aemeasurable
 
 end GlobalTheory.DetSqrtCover
 

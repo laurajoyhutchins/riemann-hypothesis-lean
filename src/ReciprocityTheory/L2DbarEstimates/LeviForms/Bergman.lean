@@ -1,5 +1,54 @@
-import ReciprocityTheory.L2DbarEstimates.LeviForms.HoloClosedNeed
-import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+module
+
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.HoloClosedNeed
+public import ReciprocityTheory.L2DbarEstimates.LeviForms.BergmanExistsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.L2DbarEstimates.ChartDerivatives.ChartSymmEventuallyEq
+
+@[expose] public section
 
 universe u
 
@@ -32,21 +81,20 @@ theorem bg_wint_eq_lintegral (n : ℕ) (z : M → V n) (ps : M → ℝ) (hps : M
   rfl
 
 theorem bg_eLpNorm_two_eq (n : ℕ) (z : M → V n) (ps : M → ℝ) (hps : Measurable ps) (f : M → ℂ) :
-    eLpNorm f 2 (bgMeas n z ps) = wint n z f ps ^ (1/(2:ℝ)) := by
-  rw [eLpNorm_eq_lintegral_rpow_enorm (by norm_num) (by norm_num), bg_wint_eq_lintegral n z ps hps f,
-    ENNReal.toReal_ofNat]
+    eLpNorm' f 2 (bgMeas n z ps) = wint n z f ps ^ (1/(2:ℝ)) := by
+  rw [eLpNorm'_eq_lintegral_eNorm, bg_wint_eq_lintegral n z ps hps f]
 
 theorem bg_memLp_of_wint (n : ℕ) (z : M → V n) (ps : M → ℝ) (hps : Measurable ps) (f : M → ℂ)
     (hf : AEStronglyMeasurable f (bgMeas n z ps)) (h : wint n z f ps < ⊤) :
     MemLp f 2 (bgMeas n z ps) := by
-  refine ⟨hf, ?_⟩
-  rw [bg_eLpNorm_two_eq n z ps hps f]
+  change eLpNorm f 2 (bgMeas n z ps) < ⊤
+  rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) hf, ENNReal.toReal_ofNat, bg_eLpNorm_two_eq n z ps hps f]
   exact ENNReal.rpow_lt_top_of_nonneg (by norm_num) h.ne
 
 theorem bg_wint_lt_top_of_memLp (n : ℕ) (z : M → V n) (ps : M → ℝ) (hps : Measurable ps) (f : M → ℂ)
     (hf : MemLp f 2 (bgMeas n z ps)) : wint n z f ps < ⊤ := by
-  have h := hf.2
-  rw [bg_eLpNorm_two_eq n z ps hps f] at h
+  have h : eLpNorm f 2 (bgMeas n z ps) < ⊤ := hf
+  rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num) hf.aestronglyMeasurable, ENNReal.toReal_ofNat, bg_eLpNorm_two_eq n z ps hps f] at h
   exact (ENNReal.rpow_lt_top_iff_of_pos (by norm_num)).1 h
 
 end
@@ -82,12 +130,13 @@ theorem bgHoloSub_closed (n : ℕ) (X : EtaleStein n M) (ps : M → ℝ) (hps : 
       (eLpNorm (⇑(F k) - ⇑f) 2 (bgMeas n X.z ps)) ^ (2 : ℝ) := by
     intro k
     have h1 := bg_eLpNorm_two_eq n X.z ps hpsm (fun x => G k x - hfa.mk (f : M → ℂ) x)
-    have h2 : eLpNorm (fun x => G k x - hfa.mk (f : M → ℂ) x) 2 (bgMeas n X.z ps) =
-        eLpNorm (⇑(F k) - ⇑f) 2 (bgMeas n X.z ps) := by
-      apply eLpNorm_congr_ae
+    have h2 : eLpNorm' (fun x => G k x - hfa.mk (f : M → ℂ) x) 2 (bgMeas n X.z ps) =
+        eLpNorm' (⇑(F k) - ⇑f) 2 (bgMeas n X.z ps) := by
+      apply eLpNorm'_congr_ae
       filter_upwards [hGe k, hf0] with x h3 h4
       rw [Pi.sub_apply, h3, h4]
-    rw [← h2, h1, ← ENNReal.rpow_mul]
+    rw [eLpNorm_eq_eLpNorm' (by norm_num) (by norm_num)
+      ((Lp.aestronglyMeasurable (F k)).sub (Lp.aestronglyMeasurable f)), ENNReal.toReal_ofNat, ← h2, h1, ← ENNReal.rpow_mul]
     norm_num
   have ht := (Lp.tendsto_Lp_iff_tendsto_eLpNorm' F f).1 hF
   have hw0 : Tendsto (fun k => wint n X.z (fun x => G k x - hfa.mk (f : M → ℂ) x) ps) atTop (𝓝 0) := by

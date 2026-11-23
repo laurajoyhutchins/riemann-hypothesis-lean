@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.BaseCoefCrys
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CoefficientBaseChange.InvBaseChange
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.JointConditionsZpowers.BaseCoefCrys
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CoefficientBaseChange.InvBaseChange
+public import Mathlib.LinearAlgebra.TensorProduct.Pi
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open TensorProduct
 
@@ -50,6 +98,7 @@ theorem coefEquiv_tmul (c : LL') (v : Fin k → LL) (b : BB) :
 theorem mulVec_map_smul (A : Matrix (Fin k) (Fin k) LL) (v : Fin k → LL) (c : LL') :
     (A.map (algebraMap LL LL')).mulVec (fun i => v i • c) = fun i => (A.mulVec v) i • c := by
   funext i
+
   simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Algebra.smul_def, map_sum, map_mul, Finset.sum_mul]
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -63,11 +112,11 @@ theorem coefEquiv_comm (A : Matrix (Fin k) (Fin k) LL) (β : BB →ₗ[Qp] BB)
     coefEquiv ((actT A β).baseChange LL' x) = actT (A.map (algebraMap LL LL')) β (coefEquiv x) := by
   induction x using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
   | tmul c y =>
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add y z hy hz => simp only [tmul_add, map_add, hy, hz]
+    | add y z hy hz => simp only [tmul_add, map_add (f := _), hy, hz]
     | tmul v b =>
       rw [LinearMap.baseChange_tmul]
       simp only [actT, AlgebraTensorModule.map_tmul, coefEquiv_tmul, Matrix.toLin'_apply]

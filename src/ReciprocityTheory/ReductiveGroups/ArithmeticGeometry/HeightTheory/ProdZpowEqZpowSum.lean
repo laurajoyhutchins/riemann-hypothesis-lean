@@ -1,6 +1,58 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.BlockDegOfScale
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.GoodPrimesProperties
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.KTFiniteDimensional
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.BlockDegOfScale
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HeightIntegralEstimates
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.GoodPrimesProperties
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.KTFiniteDimensional
+
+@[expose] public section
 
 theorem ReciprocityTheory.ChartRestriction.G.T0.prod_zpow_eq_zpow_sum_height {M : Type*} [CommGroupWithZero M] {α : Type*}
     (s : Finset α) (f : α → ℤ) (a : M) (ha : a ≠ 0) :
@@ -33,14 +85,6 @@ private theorem tauFG_sH_X (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) (v : TVar d.D 
     rfl
   have hTC : ∀ a : Ω c, tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (C a) = C a :=
     fun a => (tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u).commutes a
-  have hconst : ∀ r : K, tauFG (Ω := Ω c) (D := d.D) (N := d.N) b u
-      (algebraMap K (OmS (Ω c) d.D d.N) r) = algebraMap K (OmS (Ω c) d.D d.N) r := by
-    intro r
-    rw [hKC]
-    unfold tauFG
-    rw [IsFractionRing.ringEquivOfRingEquiv_algebraMap]
-    congr 1
-    exact hTC _
   have hTin : ∀ w : SVar d.D d.N, IsBaseBlockVar b w →
       tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (X w) = C (algebraMap K (Ω c) u) * X w := by
     intro w hw
@@ -79,8 +123,9 @@ private theorem tauFG_sH_X (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) (v : TVar d.D 
             from fun A F => Fin.insertNth_apply_same _ _ _]
         split_ifs with hi0
         · exact hTin _ (hib.symm.trans hi0)
+
         · simp only [map_neg, map_sum, map_mul, hTC, fun k => hTin (Sum.inr (i, k)) hib, mul_neg,
-            Finset.mul_sum, mul_assoc]
+          Finset.mul_sum, mul_assoc]
       · rw [show ∀ (A : MvPolynomial (SVar d.D d.N) (Ω c)) (F : Fin d.N → MvPolynomial (SVar d.D d.N) (Ω c)),
             Fin.succAboveCases (α := fun _ => MvPolynomial (SVar d.D d.N) (Ω c)) (d.jc c) A F
               ((d.jc c).succAbove k) = F k
@@ -102,6 +147,7 @@ private theorem tauFG_sH_X (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) (v : TVar d.D 
             from fun A F => Fin.insertNth_apply_same _ _ _]
         split_ifs with hi0
         · exact hTout _ (fun hb0 => hib (hi0.trans hb0.symm))
+
         · simp only [map_neg, map_sum, map_mul, hTC, fun k => hTout (Sum.inr (i, k)) hib]
       · rw [show ∀ (A : MvPolynomial (SVar d.D d.N) (Ω c)) (F : Fin d.N → MvPolynomial (SVar d.D d.N) (Ω c)),
             Fin.succAboveCases (α := fun _ => MvPolynomial (SVar d.D d.N) (Ω c)) (d.jc c) A F
@@ -131,24 +177,6 @@ theorem tauFG_KTtoS (h : d.S1) (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) (z : KTf K
     rw [IsFractionRing.ringEquivOfRingEquiv_algebraMap]
     congr 1
     exact hTC _
-  have hTin : ∀ w : SVar d.D d.N, IsBaseBlockVar b w →
-      tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (X w) = C (algebraMap K (Ω c) u) * X w := by
-    intro w hw
-    show (aeval (R := Ω c) (S₁ := MvPolynomial (SVar d.D d.N) (Ω c)) _) (X w) = _
-    rw [aeval_X]
-    try dsimp only
-    rw [if_pos hw]
-    rfl
-  have hTout : ∀ w : SVar d.D d.N, ¬ IsBaseBlockVar b w →
-      tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (X w) = X w := by
-    intro w hw
-    show (aeval (R := Ω c) (S₁ := MvPolynomial (SVar d.D d.N) (Ω c)) _) (X w) = _
-    rw [aeval_X]
-    try dsimp only
-    rw [if_neg hw]
-  have hsX : ∀ w : TVar d.D d.N, d.sH c (X w) = sImg (d.jc c) (d.x c) w := fun w => by
-    show aeval (sImg (d.jc c) (d.x c)) (X w) = _
-    exact aeval_X _ _
   have hsC : d.sH c (C (u : K)) = algebraMap K _ (u : K) := (d.sH c).commutes _
   have hX : ∀ v : TVar d.D d.N, tauFG (Ω := Ω c) b u (d.sH c (X v)) = d.sH c (sigP b u (X v)) :=
     fun v => tauFG_sH_X d c b u v
@@ -216,6 +244,7 @@ theorem tauFG_w0rat (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) :
     exact (tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u).commutes a
   have hsC : d.sH c (C (u : K)) = algebraMap K _ (u : K) := (d.sH c).commutes _
   unfold rationalBaseRow
+
   rw [map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, tauFG_sH_X d c b u (0, j), hΩ]
@@ -372,13 +401,14 @@ theorem F_degrees (hd : d.AxH 𝒜) (h : d.S1) (c : ι) (F : KTp K d.D d.N)
     (∀ s ∈ F.support, ∑ j, s (0, j) = d.delc c) ∧
       ∀ b : Fin (d.D + 1), b ≠ 0 → ∀ s ∈ F.support, ∑ j, s (b, j) = (d.aMM h c).toNat := by
   have hco : ∀ (b : Fin (d.D + 1)) (u : Kˣ) (s : TVar d.D d.N →₀ ℕ),
-      coeff s F * (u : K) ^ (∑ j, s (b, j)) =
-        (u : K) ^ (if b = 0 then (d.delc c : ℤ) else d.aMM h c) * coeff s F := by
+      AddMonoidAlgebra.coeff F s * (u : K) ^ (∑ j, s (b, j)) =
+        (u : K) ^ (if b = 0 then (d.delc c : ℤ) else d.aMM h c) * AddMonoidAlgebra.coeff F s := by
     intro b u s
-    have e := congrArg (coeff s) (sigP_F d hd h c F hF b u)
+    have e := congrArg (AddMonoidAlgebra.coeff · s) (sigP_F d hd h c F hF b u)
     rw [coeff_C_mul] at e
     rw [← e]
     conv_rhs => rw [F.as_sum]
+
     rw [map_sum, coeff_sum]
     simp only [sigP_monomial, coeff_monomial]
     rw [Finset.sum_ite_eq']

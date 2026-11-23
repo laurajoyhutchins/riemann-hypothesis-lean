@@ -1,7 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SortSign
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CechModulesFunctorShortExactOfAcyclic
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.HigherDirectImagesVanishOfIsAffineHom
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.SortSign
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.CechModulesFunctorShortExactOfAcyclic
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.HigherDirectImagesVanishOfIsAffineHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CoeEqAlgebraMapZeroEquiv
+
+@[expose] public section
 
 open CategoryTheory
 
@@ -152,6 +198,7 @@ theorem totalD_total (X : ∀ s, A.obj s) (t : Finset κ) :
     Cube.totalD B (P.total X) t = P.total (Cube.totalD A X) t := by
   rw [Cube.totalD_apply]
   by_cases ht : Set.InjOn τ (t : Set κ)
+
   · rw [total_of_inj _ _ ht, Cube.totalD_apply, Finset.sum_image ht, map_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl fun i hi => ?_
     have hs : Set.InjOn τ (t.erase i : Finset κ) := ht.mono (by simp [Finset.erase_subset])
@@ -192,7 +239,7 @@ theorem totalD_total (X : ∀ s, A.obj s) (t : Finset κ) :
 
 def term (p : ℕ) : Cube.Term A p →ₛₗ[σ] Cube.Term B p where
   toFun x t := P.total (Cube.extend A p x) t.1
-  map_add' x y := funext fun t => by rw [map_add, map_add]; rfl
+  map_add' x y := funext fun t => by rw [map_add (f := _), map_add (f := _)]; rfl
   map_smul' r x := funext fun t => by rw [map_smul, map_smulₛₗ]; rfl
 
 theorem term_of_card {p : ℕ} (x : Cube.Term A p) (t : {s : Finset κ // s.card = p})
@@ -307,13 +354,6 @@ def altAb (f : T' ⟶ T) {F : AbSheaf T} {G : AbSheaf T'} (φ : F ⟶ (push f).o
     refine (congrArg (G.obj.map _) (ConcreteCategory.congr_hom (φ.hom.naturality _) x)).trans ?_
     exact (map_map_thin _ _ _ (homOfLE ((cechOpen_anti W U' h).trans (hτ s))).op _).trans
       (map_map_thin _ _ _ _ _).symm
-
-theorem altAb_app (f : T' ⟶ T) {F : AbSheaf T} {G : AbSheaf T'} (φ : F ⟶ (push f).obj G)
-    {V : Opens T} {W : Opens T'} {U : ι → Opens T} {U' : κ → Opens T'} (τ : κ → ι)
-    (hτ : ∀ t : Finset κ, cechOpen W U' t ≤ (Opens.map f).obj (cechOpen V U (t.image τ)))
-    (t : Finset κ) (x : F.obj.obj (op (cechOpen V U (t.image τ)))) :
-    (altAb f φ τ hτ).app t x =
-      G.obj.map (homOfLE (hτ t)).op (φ.hom.app (op (cechOpen V U (t.image τ))) x) := rfl
 
 theorem altAb_comm (f : T' ⟶ T) {A B : AbSheaf T} {A' B' : AbSheaf T'} (a : A ⟶ B) (b : A' ⟶ B')
     (φ₁ : A ⟶ (push f).obj A') (φ₂ : B ⟶ (push f).obj B') (h : a ≫ φ₂ = φ₁ ≫ (push f).map b)

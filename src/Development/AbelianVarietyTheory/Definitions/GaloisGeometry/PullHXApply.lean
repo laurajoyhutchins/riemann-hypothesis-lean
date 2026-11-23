@@ -1,8 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsContinuousForgetForget
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.PullPreservesFiniteLimits
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsContinuousForgetForget
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite
@@ -13,20 +51,20 @@ open GlobalTheory.EtC.Rel
 section Sites
 variable {Z Y U Z' Y' U' : Scheme.{0}}
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 def bcSq {a : Z ⟶ Z'} {i' : Z' ⟶ Y'} {i : Z ⟶ Y} {b : Y ⟶ Y'} (h : a ≫ i' = i ≫ b) :
     bc i' ⋙ bc a ≅ bc b ⋙ bc i :=
   (MorphismProperty.Over.pullbackComp a i').symm ≪≫ MorphismProperty.Over.pullbackCongr h ≪≫
     MorphismProperty.Over.pullbackComp i b
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 def bcComp {f : U ⟶ Z} {g : Z ⟶ Y} {k : U ⟶ Y} (h : f ≫ g = k) : bc g ⋙ bc f ≅ bc k :=
   (MorphismProperty.Over.pullbackComp f g).symm ≪≫ MorphismProperty.Over.pullbackCongr h
 
-set_option backward.isDefEq.respectTransparency.types false in
 
+set_option backward.isDefEq.respectTransparency.types false in
 def bcFst (f : U ⟶ Y) : bc f ⋙ (Scheme.Etale.forget U ⋙ Over.forget U) ⟶ Scheme.Etale.forget Y ⋙ Over.forget Y where
   app V := pullback.fst V.hom f
   naturality V W g := pullback.lift_fst _ _ _
@@ -91,55 +129,16 @@ variable (R : Type) [CommRing R]
 section Flat
 variable {Z Y U Z' Y' U' : Scheme.{0}}
 
-def transFlat {a : Z ⟶ Z'} {i' : Z' ⟶ Y'} {j' : U' ⟶ Y'} {i : Z ⟶ Y} {j : U ⟶ Y} {b : Y ⟶ Y'} {c : U ⟶ U'}
-    (α : bc i' ⋙ bc a ⟶ bc b ⋙ bc i) (hc : c ≫ j' = j ≫ b) :
-    nb R i' j' ⋙ Rel.pull R a ⟶ nb R i j :=
-  Functor.whiskerRight (trans R α hc) (Rel.pull R a) ≫ Functor.whiskerLeft (nb R i j) (adj (R := R) a).counit
-
 def nbC (i : Z ⟶ Y) (j : U ⟶ Y) (F : Shv R) : CochainComplex (ShvS R Z) ℤ :=
   ((nb R i j).mapHomologicalComplex _).obj (GlobalTheory.EtC.res R F)
 
 def nbCMap (i : Z ⟶ Y) (j : U ⟶ Y) {F G : Shv R} (φ : F ⟶ G) : nbC R i j F ⟶ nbC R i j G :=
   ((nb R i j).mapHomologicalComplex _).map (resMap R φ)
 
-def transC {a : Z ⟶ Z'} {i' : Z' ⟶ Y'} {j' : U' ⟶ Y'} {i : Z ⟶ Y} {j : U ⟶ Y} {b : Y ⟶ Y'} {c : U ⟶ U'}
-    (α : bc i' ⋙ bc a ⟶ bc b ⋙ bc i) (hc : c ≫ j' = j ≫ b) (F : Shv R) :
-    (pullC R a).obj (nbC R i' j' F) ⟶ nbC R i j F :=
-  (NatTrans.mapHomologicalComplex (transFlat R α hc) _).app (GlobalTheory.EtC.res R F)
-
 end Flat
 
 section HX
 variable {Z Z' : Scheme.{0}}
-
-instance (a : Z ⟶ Z') : PreservesFiniteLimits (Rel.pull R a) := pull_preservesFiniteLimits R a
-
-instance (a : Z ⟶ Z') : PreservesFiniteColimits (Rel.pull R a) := by
-  have : PreservesColimitsOfSize.{0, 0} (Rel.pull R a) := (adj (R := R) a).leftAdjoint_preservesColimits
-  exact PreservesColimitsOfSize.preservesFiniteColimits _
-
-def cmpCst (a : Z ⟶ Z') : (Rel.pull R a).obj (Rel.cst R Z') ⟶ Rel.cst R Z :=
-  ((adj (R := R) a).homEquiv _ _).symm ((resUnit R a).app (coef R))
-
-def cmpCstInv (a : Z ⟶ Z') : Rel.cst R Z ⟶ (Rel.pull R a).obj (Rel.cst R Z') := by
-  classical
-  exact if h : IsIso (cmpCst R a) then inv (cmpCst R a) else 0
-
-def pullHX (a : Z ⟶ Z') (L : DerivedCategory (ShvS R Z')) (n : ℤ) :
-    HX R Z' L n →+ HX R Z ((Rel.pull R a).mapDerivedCategory.obj L) n :=
-  (Preadditive.leftComp _ ((DerivedCategory.singleFunctor (ShvS R Z) 0).map (cmpCstInv R a) ≫
-      ((Rel.pull R a).mapDerivedCategorySingleFunctor 0).inv.app (Rel.cst R Z'))).comp
-    ((Preadditive.rightComp _ (((Rel.pull R a).mapDerivedCategory.commShiftIso n).hom.app L)).comp
-      (Rel.pull R a).mapDerivedCategory.mapAddHom)
-
-def postHX {L L' : DerivedCategory (ShvS R Z)} (φ : L ⟶ L') (n : ℤ) : HX R Z L n →+ HX R Z L' n where
-  toFun x := x ≫ φ⟦n⟧'
-  map_zero' := zero_comp
-  map_add' x y := Preadditive.add_comp _ _ _ _ _ _
-
-def pullHXC (a : Z ⟶ Z') (K : CochainComplex (ShvS R Z') ℤ) (n : ℤ) :
-    HXC R Z' K n →+ HXC R Z ((pullC R a).obj K) n :=
-  (postHX R (((Rel.pull R a).mapDerivedCategoryFactors).hom.app K) n).comp (pullHX R a _ n)
 
 end HX
 

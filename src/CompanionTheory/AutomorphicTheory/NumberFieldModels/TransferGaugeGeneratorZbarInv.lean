@@ -1,7 +1,53 @@
-import CompanionTheory.AutomorphicTheory.NumberFieldModels.NFTieProv
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGVsTr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGTrChain
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SquareIntegrableGammaZetabarInv
+public import CompanionTheory.AutomorphicTheory.NumberFieldModels.NFTieProv
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeVLem
+public import Formalism.HermitianCurvature.StatementTop
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGTrChain
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeGVTr
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NFRadRedA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt Formalism.FourierDecayAlt.P.CutMP.Gauge Formalism.FourierDecayAlt.P.CutMP.Gauge.VLem
 
@@ -69,22 +115,6 @@ include hpl hk he
 theorem tr_add (Φ Ψ : Q.RadSp P.k P.r Bs.z Bs.z' Bs.π Bs.π') : tr P Bs e (Φ + Ψ) = tr P Bs e Φ + tr P Bs e Ψ :=
   trR_add _ _ _ _ (fun ρ => smR hpl hk he (famR_rad hpl Φ) ρ) (fun ρ => smR hpl hk he (famR_rad hpl Ψ) ρ)
 
-def tiedAlg : Subalgebra ℂ (Q.Pr (Q.RadSp P.k P.r Bs.z Bs.z' Bs.π Bs.π') × MA.A P (MA.DQ P)) where
-  carrier := {x | Tied P Bs e x.1 x.2}
-  mul_mem' := by
-    intro x y hx hy Φ
-    show tr P Bs e (x.1.1 (y.1.1 Φ)) = MA.actA P (x.2 * y.2) _
-    rw [actA_mul, hx, hy]
-  add_mem' := by
-    intro x y hx hy Φ
-    show tr P Bs e (x.1.1 Φ + y.1.1 Φ) = MA.actA P (x.2 + y.2) _
-    rw [actA_add, tr_add hpl hk he, hx, hy]
-  algebraMap_mem' := by
-    intro z Φ
-    show tr P Bs e (z • Φ) = MA.actA P (algebraMap ℂ _ z) _
-    rw [actA_algebraMap]
-    exact trR_smul _ _ z _
-
 theorem tr_mul (T : Module.End ℂ (Q.RadSp P.k P.r Bs.z Bs.z' Bs.π Bs.π')) (f : (Fin P.r → ℂ) × Q.Mx P.k P.r → ℂ)
     (hT : ∀ Φ : Q.RadSp P.k P.r Bs.z Bs.z' Bs.π Bs.π', ∀ x ∈ Q.DomR P.k P.r Bs.z Bs.z',
       (T Φ : Q.Fn P.k P.r (Wq →L[ℂ] Wp)) x.1 x.2 = f x • (Φ : Q.Fn P.k P.r (Wq →L[ℂ] Wp)) x.1 x.2)
@@ -125,23 +155,7 @@ theorem gg_apply (q : MA.Qp r TT) :
 
 theorem inv_apply (φ : MA.SmQ r TT) (hφ : ∀ q, (φ : MA.Qp r TT → ℂ) q ≠ 0) (q : MA.Qp r TT) :
     ((Ring.inverse φ : MA.SmQ r TT) : MA.Qp r TT → ℂ) q = ((φ : MA.Qp r TT → ℂ) q)⁻¹ := by
-  have hsm : (fun q : MA.Qp r TT => ((φ : MA.Qp r TT → ℂ) q)⁻¹) ∈ MA.smSub r TT := by
-    show ContDiffOn ℝ MA.sm (MA.ext fun q : MA.Qp r TT => ((φ : MA.Qp r TT → ℂ) q)⁻¹) (MA.Qset r TT)
-    have h0 : ContDiffOn ℝ MA.sm (MA.ext (φ : MA.Qp r TT → ℂ)) (MA.Qset r TT) := φ.2
-    refine (h0.inv fun x hx => ?_).congr fun x hx => ?_
-    · simp only [MA.ext, hx, dif_pos]; exact hφ _
-    · simp [MA.ext, hx]
-  let w : MA.SmQ r TT := ⟨_, hsm⟩
-  have h1 : φ * w = 1 := by
-    apply Subtype.ext; funext q
-    exact mul_inv_cancel₀ (hφ q)
-  have h2 : w * φ = 1 := by
-    apply Subtype.ext; funext q
-    exact inv_mul_cancel₀ (hφ q)
-  let u : (MA.SmQ r TT)ˣ := ⟨φ, w, h1, h2⟩
-  have hu : (u : MA.SmQ r TT) = φ := rfl
-  rw [← hu, Ring.inverse_unit]
-  rfl
+  apply Formalism.FourierDecayAlt.P.MAx2.Adj.inv_val <;> assumption
 
 end coords
 

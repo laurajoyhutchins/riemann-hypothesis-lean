@@ -1,7 +1,55 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MonomialMemReesAlgIff
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.MonomialMemReesAlgIff
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,11 +67,11 @@ variable (M : ℕ → Submodule K A) [SetLike.GradedMonoid M]
 
 def mono (e : ℕ) : M e →ₗ[K] polyAlg M where
   toFun a := ⟨monomial e (a : A), fun n => by
-    rw [coeff_monomial]
+    rw [coeff_monomial_apply]
     split_ifs with h
     · exact h ▸ a.2
     · exact (M n).zero_mem⟩
-  map_add' a b := Subtype.ext (by simp)
+  map_add' a b := Subtype.ext ((monomial e).map_add (a : A) (b : A))
   map_smul' c a := Subtype.ext (smul_monomial c e (a : A)).symm
 
 theorem mono_val (e : ℕ) (a : M e) : (mono M e a : A[X]) = monomial e (a : A) := rfl
@@ -52,12 +100,12 @@ theorem coeff_coe (x : DirectSum ℕ fun e => piece M e) (n : ℕ) :
       rw [DirectSum.of_eq_same]
     · rw [DirectSum.of_eq_of_ne _ _ _ (Ne.symm h)]
       obtain ⟨_, a, rfl⟩ := y
-      simp [mono_val, coeff_monomial, h]
+      simp [mono_val, h]
   | add x y hx hy => simp [hx, hy]
 
 theorem isInternal : DirectSum.IsInternal (piece M) := by
   constructor
-  · rw [injective_iff_map_eq_zero]
+  · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     ext1 n
     have h := coeff_coe M x n
@@ -71,9 +119,10 @@ theorem isInternal : DirectSum.IsInternal (piece M) := by
   · intro r
     refine ⟨∑ n ∈ (r : A[X]).support,
       DirectSum.of (fun e => piece M e) n ⟨mono M n ⟨_, r.2 n⟩, _, rfl⟩, ?_⟩
+
     rw [map_sum]
     apply Subtype.ext
-    simp only [DirectSum.coeAddMonoidHom_of, AddSubmonoidClass.coe_finset_sum, mono_val]
+    simp only [DirectSum.coeAddMonoidHom_of, AddSubmonoidClass.coe_finsetSum, mono_val]
     exact (as_sum_support _).symm
 
 def grading : GradedAlgebra (piece M) where
@@ -83,7 +132,7 @@ def grading : GradedAlgebra (piece M) where
 theorem isDomain {B : Type} [CommRing B] [IsDomain B] (π : A →+* B)
     (hπ : ∀ n, ∀ a ∈ M n, π a = 0 → a = 0) : IsDomain (polyAlg M) := by
   refine Function.Injective.isDomain ((mapRingHom π).comp (polyAlg M).val.toRingHom) ?_
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro r hr
   apply Subtype.ext
   ext n
@@ -103,8 +152,6 @@ variable {K : Type} [Field K] {X : Scheme.{0}} (p : X ⟶ Sp K) (L : LB X)
 
 def constHom (U : X.Opens) : K →+* Γ(X, U) :=
   (p.appLE ⊤ U (fun _ _ => trivial)).hom.comp (Scheme.ΓSpecIso (CommRingCat.of K)).inv.hom
-
-theorem constHom_apply (U : X.Opens) (a : K) : constHom p U a = constFn p U a := rfl
 
 theorem res_constHom {U V : X.Opens} (h : V ≤ U) (a : K) :
     (X.presheaf.map (homOfLE h).op).hom (constHom p U a) = constHom p V a :=
@@ -153,7 +200,7 @@ def secs (e : ℕ) : Submodule K (Fam p L) where
         (X.presheaf.map (homOfLE (inf_le_right : chart L i ⊓ chart L j ≤ chart L j)).op).hom
           (evalFam p L j f)}
   add_mem' := fun {a b} ha hb i j => by
-    simp only [map_add, ha i j, hb i j, _root_.mul_add]
+    simp only [map_add (f := _), ha i j, hb i j, _root_.mul_add]
   zero_mem' := fun i j => by simp only [map_zero, MulZeroClass.mul_zero]
   smul_mem' := fun c a ha i j => by
     have h : ∀ k, evalFam p L k (c • a) = constHom p _ c * evalFam p L k a := fun k => rfl

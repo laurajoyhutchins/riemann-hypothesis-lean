@@ -1,7 +1,43 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftsInvOne
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevQOfCongE
-import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.RedPEqZeroOfDiv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftsInvOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevQOfCongE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC GlobalTheory.Mem.Col2.AdT Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
@@ -10,7 +46,7 @@ noncomputable section
 
 namespace GlobalTheory.Mem.Col2.AdT
 
-set_option maxHeartbeats 1600000 in
+
 private theorem mem_GLint_and_exists_liftsInv_of_congE : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → ∀ (u : B.Word) (a : I.ι) (i : ℕ) (hi : i < B.R.m)
     (b : (I.stp u a i).β) (P : SBof I a) (g : Sp B.fields.E (B.R.N i) ≃ₗ[B.fields.E] Sp B.fields.E (B.R.N i)) (z : B.fields.K),
     MidAt I hi b P g z → g ∈ Formalism.L2.Col.GLint B.fields.E (B.R.N i) P.1 ∧
@@ -35,20 +71,20 @@ private theorem mem_GLint_and_exists_liftsInv_of_congE : ∀ {B : Base} {X : Pre
     intro w _
     simp only [levGAt, hb, Option.elim]
     by_cases hw : w.1 = P.1
-    · rw [dif_pos hw]
+    · rw [dite_eq_left hw]
       apply inv_mem
       rw [hO.grpG]
       obtain ⟨w, hwG⟩ := w
       simp only at hw
       subst hw
       exact ⟨g, hpr, fun x hx => GlobalTheory.TopStep.redV_redGL ⟨g, hgi⟩ hx⟩
-    · rw [dif_neg hw]
+    · rw [dite_eq_right hw]
       exact one_mem _
   · rw [LevQFam.grp, Subgroup.mem_pi]
     intro w _
     simp only [levQAt, hb, Option.elim]
     by_cases hw : w.1 = P.1
-    · rw [dif_pos hw]
+    · rw [dite_eq_left hw]
       apply inv_mem
       obtain ⟨w, hwQ⟩ := w
       simp only at hw
@@ -72,13 +108,13 @@ private theorem mem_GLint_and_exists_liftsInv_of_congE : ∀ {B : Base} {X : Pre
         rw [hk, mul_inv_cancel_left]
       rw [e2]
       exact mul_mem hgQ hd
-    · rw [dif_neg hw]
+    · rw [dite_eq_right hw]
       exact one_mem _
   · exact map_one (ufGL B.fields.E (B.R.N i))
   · refine ⟨hg', ?_, ?_⟩
     · intro h x hx
       dsimp only
-      rw [dif_pos rfl, inv_inv, ← GlobalTheory.TopStep.redV_redGL ⟨g, hgi⟩ hx]
+      rw [dite_eq_left rfl, inv_inv, ← GlobalTheory.TopStep.redV_redGL ⟨g, hgi⟩ hx]
       have hD : (I.cst a).D P = 1 := hO.depthG P h
       have hq := hc x hx
       rw [hD, pow_one] at hq
@@ -91,21 +127,21 @@ private theorem mem_GLint_and_exists_liftsInv_of_congE : ∀ {B : Base} {X : Pre
       exact h0.symm
     · intro h
       dsimp only
-      rw [dif_pos rfl, inv_inv]
+      rw [dite_eq_left rfl, inv_inv]
   · intro P' hP'
     have hne : P'.1 ≠ P.1 := fun e => hP' (Subtype.ext e)
     refine ⟨one_mem _, ?_, ?_⟩
     · intro h x hx
       dsimp only
-      rw [dif_neg hne, inv_one]
+      rw [dite_eq_right hne, inv_one]
       simp
     · intro h
       dsimp only
-      rw [dif_neg hne, inv_one]
+      rw [dite_eq_right hne, inv_one]
       all_goals rfl
 
-open Classical in
 
+open Classical in
 theorem midAt_lifts : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok → ∀ (u : B.Word) (a : I.ι) (i : ℕ) (hi : i < B.R.m)
     (b : (I.stp u a i).β) (P : SBof I a) (g : Sp B.fields.E (B.R.N i) ≃ₗ[B.fields.E] Sp B.fields.E (B.R.N i)) (z : B.fields.K),
     MidAt I hi b P g z → g ∈ Formalism.L2.Col.GLint B.fields.E (B.R.N i) P.1 ∧

@@ -1,6 +1,64 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.FiniteBruhat
-import GroundTheory.AutomorphicForms.InductionParabolicGroups
+module
+
+public import GroundTheory.AutomorphicForms.FiniteBruhat
+public import GroundTheory.AutomorphicForms.Iwasawa
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+public import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -19,7 +77,7 @@ theorem exists_mul_mul_eq_one_of_rank (A : Matrix m l K) :
     ∃ (L : Matrix (Fin A.rank) m K) (R : Matrix l (Fin A.rank) K), L * A * R = 1 := by
   classical
   set f := A.mulVecLin with hf
-  have hr : Module.finrank K (LinearMap.range f) = A.rank := rfl
+  have hr : Module.finrank K (LinearMap.range f) = A.rank := Matrix.finrank_range_mulVecLin A
   let b : Module.Basis (Fin A.rank) K (LinearMap.range f) := Module.finBasisOfFinrankEq K _ hr
   have hx : ∀ i, ∃ x, f x = (b i : m → K) := fun i => LinearMap.mem_range.1 (b i).2
   choose x hx using hx
@@ -32,6 +90,7 @@ theorem exists_mul_mul_eq_one_of_rank (A : Matrix m l K) :
     intro c
     rw [← Matrix.mulVec_mulVec, hRc]
     have : A *ᵥ (∑ i, c i • x i) = f (∑ i, c i • x i) := rfl
+
     rw [this, map_sum]
     simp only [map_smul, hx]
   have hli : LinearIndependent K (fun i => (b i : m → K)) :=
@@ -95,7 +154,7 @@ theorem submatrix_mul_of_mem_blockUpper {p : GL (Fin n) F} (hp : p ∈ blockUppe
           (fun i : {i : Fin n // a ≤ β i} => (i : Fin n)) *
         M.submatrix (fun i : {i : Fin n // a ≤ β i} => (i : Fin n)) c := by
   ext i j
-  simp only [submatrix_apply, mul_apply]
+  simp only [submatrix_apply, Matrix.mul_apply]
   rw [← Fintype.sum_subtype_add_sum_subtype (fun k => a ≤ β k)]
   have h0 : ∑ k : {k : Fin n // ¬ a ≤ β k}, (p : Matrix (Fin n) (Fin n) F) i k * M k (c j) = 0 :=
     Finset.sum_eq_zero fun k _ => by
@@ -110,7 +169,7 @@ theorem mul_submatrix_of_mem_blockUpper {q : GL (Fin n) F} (hq : q ∈ blockUppe
         (q : Matrix (Fin n) (Fin n) F).submatrix (fun j : {j : Fin n // γ j ≤ b} => (j : Fin n))
           (fun j : {j : Fin n // γ j ≤ b} => (j : Fin n)) := by
   ext i j
-  simp only [submatrix_apply, mul_apply]
+  simp only [submatrix_apply, Matrix.mul_apply]
   rw [← Fintype.sum_subtype_add_sum_subtype (fun k => γ k ≤ b)]
   have h0 : ∑ k : {k : Fin n // ¬ γ k ≤ b}, M (r i) k * (q : Matrix (Fin n) (Fin n) F) k j = 0 :=
     Finset.sum_eq_zero fun k _ => by
@@ -167,7 +226,7 @@ theorem cellRank_permGL (w : Equiv.Perm (Fin n)) (a b : ℕ) :
   set X := ((permGL F w : GL (Fin n) F) : Matrix (Fin n) (Fin n) F).submatrix
     (fun i : {i : Fin n // a ≤ β i} => (i : Fin n)) (fun j : {j : Fin n // γ j ≤ b} => (j : Fin n))
     with hX
-  rw [Matrix.rank_eq_finrank_span_cols]
+  rw [← Matrix.finrank_span_range_col]
   let v : {j : Fin n // γ j ≤ b ∧ a ≤ β (w j)} → ({i : Fin n // a ≤ β i} → F) :=
     fun t => Pi.single ⟨w t, t.2.2⟩ 1
   have hv : LinearIndependent F v := by
@@ -440,8 +499,8 @@ theorem closure_doubleCoset_subset (g : GL (Fin n) F) :
   · exact Or.inl (mem_doubleCoset_of_cellRank_eq
       (cellRank_eq_of_le_of_cellHeight_le hxZ (not_lt.1 hlt)))
 
-omit [TopologicalSpace F] [IsTopologicalRing F] [T1Space F] in
 
+omit [TopologicalSpace F] [IsTopologicalRing F] [T1Space F] in
 theorem cellHeight_of_mem_doubleCoset {g x : GL (Fin n) F}
     (hx : x ∈ doubleCoset g (blockUpper F n β : Set (GL (Fin n) F)) (blockUpper F n γ)) :
     cellHeight β γ x = cellHeight β γ g := by

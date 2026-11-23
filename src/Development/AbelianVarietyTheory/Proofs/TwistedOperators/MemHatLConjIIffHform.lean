@@ -1,12 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RedMFrMapAdjZero
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CompletedTensorLatticeStrongApproxOpenCompact
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CompletedTensorLatticeLatticeVacuumTransport
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HformZeroRight
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelCharacterEmbeddingCompat
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
-import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemLatOIffExistsActO
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.FirstCoordinateAdmissible
+public import Formalism.LocalToGlobal.HermitianForms.PrkSmul
+public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HformZeroRight
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UnitaryCompletionMapsDualLattices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.Fischer
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+import Development.AbelianVarietyTheory.Definitions.ThetaValues.PolyDerivSmulLetter
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RevPosRevPos
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThPDatumEq
+import Formalism.LocalToGlobal.IndefiniteReal.ExistsChosenExtremalVector
+import Formalism.LocalToGlobal.IndefiniteReal.SelfDualFullLattice
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.IndefR.Mult Formalism.IndefR.FWT Formalism.L2.Pj
 open MeasureTheory IsDedekindDomain NumberField Matrix Complex
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory GlobalTheory.ThFr GlobalTheory.Ker GlobalTheory.AdSpan
@@ -150,7 +200,7 @@ theorem sigR_invol (x : Lev.EAf D) :
       AlgHom.id_apply]
     congr 1
     exact star_star a
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 def cO (D : D7) : 𝓞 D.host.E →+* 𝓞 D.host.E :=
   NumberField.RingOfIntegers.mapRingHom (D.sp.cm.sig : D.host.E →+* D.host.E)
@@ -251,11 +301,16 @@ theorem frameGram_det (T : HSp D) (β : GL (Fin T.rank) (Lev.EAf D)) : IsUnit (f
     rw [RingHom.map_det] at h3
     exact h3
 
+private theorem selfDual_isFullLattice {D : D7} : ∀ (V : HSp D) (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)),
+    IsSelfDualC V Λ → Submodule.IsFullLattice D.host.E Λ := by
+  intro V Λ hΛ
+  exact Formalism.IndefR.Datum.IsSelfDualC.isFullLattice V Λ hΛ
+
 theorem frameGram_inv_int {T : HSp D} {Λ : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)} (hsd : IsSelfDualC T Λ)
     {β : GL (Fin T.rank) (Lev.EAf D)} (hfr : Formalism.L2.DIV.IsFrame β Λ) (i j : Fin T.rank) :
     (frameGram T β)⁻¹ i j ∈ Formalism.L2.Herm.intAf D.host.F D.host.E :=
   GlobalTheory.GramFrame.inv_int D.sp.cm.sig (fun _ hs => GlobalTheory.LevSplit.sigR_int hs) T.gram (GlobalTheory.LatVac.gram_det_isUnit T)
-    β Λ hsd.1 hfr (selfDual_dualL_le hsd) _ (Matrix.mul_nonsing_inv _ (frameGram_det T β)) i j
+    β Λ (selfDual_isFullLattice T Λ hsd) hfr (selfDual_dualL_le hsd) _ (Matrix.mul_nonsing_inv _ (frameGram_det T β)) i j
 
 theorem hform_col (T : HSp D) (β : GL (Fin T.rank) (Lev.EAf D)) (v : Fin T.rank → Lev.EAf D) (j : Fin T.rank) :
     Formalism.UG.hform σA (T.gram.map ιA) v (fun c => β.1 c j) =

@@ -1,4 +1,49 @@
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.TotallyRealRoots.GalDefs
+module
+
+public import Mathlib.NumberTheory.Padics.Complex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.TotallyRealRoots.LeNuIffPowMemPrinc
+
+@[expose] public section
 
 open KStar.TotallyRealRoots
 
@@ -6,33 +51,13 @@ namespace KStar.IdealValuations
 
 variable (l : ℕ) [Fact l.Prime]
 
-def locInertia : Subgroup Gal(PadicAlgCl l/ℚ_[l]) where
-  carrier := {g | ∀ (m : ℕ) (ζ : PadicAlgCl l), ¬ l ∣ m → ζ ^ m = 1 → g ζ = ζ}
-  one_mem' := fun _ _ _ _ => rfl
-  mul_mem' := fun {g h} hg hh m ζ h1 h2 => by
-    rw [AlgEquiv.mul_apply, hh m ζ h1 h2, hg m ζ h1 h2]
-  inv_mem' := fun {g} hg m ζ h1 h2 => by
-    conv_lhs => rw [← hg m ζ h1 h2]
-    exact g.symm_apply_apply ζ
-
 def IsResTrivial (g : Gal(PadicAlgCl l/ℚ_[l])) : Prop :=
   ∀ x : PadicAlgCl l, ‖x‖ ≤ 1 → ‖g x - x‖ < 1
 
-def IsLocFrob (σ : Gal(PadicAlgCl l/ℚ_[l])) : Prop :=
-  ∀ (m : ℕ) (ζ : PadicAlgCl l), ¬ l ∣ m → ζ ^ m = 1 → σ ζ = ζ ^ l
-
-noncomputable def unramField (k : ℕ) : IntermediateField ℚ_[l] (PadicAlgCl l) :=
-  adjoinRoots ℚ_[l] (l ^ k - 1)
-
-noncomputable def towerField (k s : ℕ) : IntermediateField ℚ_[l] (PadicAlgCl l) :=
-  unramField l k ⊔ adjoinRoots ℚ_[l] (l ^ s)
 
 variable {l} in
-
 noncomputable def complField {E : Type*} [Field E] (j : E →+* PadicAlgCl l) :
     IntermediateField ℚ_[l] (PadicAlgCl l) :=
   IntermediateField.adjoin ℚ_[l] (Set.range j)
-
-example : IsResTrivial l 1 := fun x _ => by simp
 
 end KStar.IdealValuations

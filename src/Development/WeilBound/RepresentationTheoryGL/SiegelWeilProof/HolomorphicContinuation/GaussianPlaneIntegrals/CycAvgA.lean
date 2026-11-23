@@ -1,5 +1,62 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.GaussianPlaneIntegrals.AssemblyAlt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.NullSec
+public import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Integral.Pi
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Norm.Transitivity
+
+@[expose] public section
 
 noncomputable section
 
@@ -43,7 +100,7 @@ theorem evX_subR (u : Matrix (Fin m) (Fin m) ℂ) (P : PX m n) (x : Fin m → Fi
     evX (subR u P) x = evX P (act u x) := by
   induction P using MvPolynomial.induction_on
   next c => simp [evX_eq]
-  next p q hp hq => simp only [evX_eq, map_add] at *; rw [hp, hq]
+  next p q hp hq => simp only [evX_eq, map_add (f := _)] at *; rw [hp, hq]
   next p k hp =>
     simp only [evX_eq, map_mul] at *
     rw [hp, eval_pt_var, eval_X]
@@ -51,10 +108,14 @@ theorem evX_subR (u : Matrix (Fin m) (Fin m) ℂ) (P : PX m n) (x : Fin m → Fi
 theorem subR_comp (v w : Matrix (Fin m) (Fin m) ℂ) : (subR (n := n) v).comp (subR w) = subR (w * v) := by
   apply MvPolynomial.algHom_ext
   rintro ⟨a, i, _ | _⟩
-  · simp only [AlgHom.comp_apply, subR_X_false, map_sum, map_mul, subR_C]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [AlgHom.comp_apply, subR_X_false, map_sum, map_mul, subR_C]
+
     simp only [Finset.mul_sum, Matrix.mul_apply, map_sum, Finset.sum_mul, ← mul_assoc, ← C_mul]
     exact Finset.sum_comm
-  · simp only [AlgHom.comp_apply, subR_X_true, map_sum, map_mul, subR_C]
+  · set_option synthInstance.maxHeartbeats 100000 in
+      simp only [AlgHom.comp_apply, subR_X_true, map_sum, map_mul, subR_C]
+
     simp only [Finset.mul_sum, Matrix.mul_apply, star_sum, star_mul', map_sum, Finset.sum_mul, ← mul_assoc, ← C_mul]
     exact Finset.sum_comm
 

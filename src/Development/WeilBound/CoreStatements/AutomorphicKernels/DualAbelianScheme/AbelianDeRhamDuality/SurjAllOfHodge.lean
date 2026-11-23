@@ -1,8 +1,49 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.PoincareDeRhamDuality.DeRhamPerfectPairing.PoincareDeRhamDualityOfCube
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecPullA
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.BijectiveCechDeRhamComparisonDegreeOne
+public import Development.WeilBound.CoreStatements.PublishedTheorems.PoincareDeRhamDuality.DeRhamPerfectPairing.H1OnPointsEqZeroOfIsIso
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StructureSheafComparisonInjective
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CechDeRhamComparisonBijectiveCupSmooth
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbelianHodgeDeRham
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -40,8 +81,8 @@ theorem pt_comp {s : X ⟶ Sp R} {T T' : TT s} (a : T ⟶ T') :
 def ofPC (s : X ⟶ Sp R) : CoefMap (RingHom.id R) (FP s) ((IsTriv s).ι ⋙ O (dp0 R) s) where
   G := { obj := ptOf
          map := fun a ↦ ⟨a.hom.φ, pt_comp a⟩
-         map_id := fun _ ↦ hom_ext fun _ ↦ rfl
-         map_comp := fun _ _ ↦ hom_ext fun _ ↦ rfl }
+         map_id := fun _ ↦ CrystallinePoints.Pd.hom_ext' fun _ ↦ rfl
+         map_comp := fun _ _ ↦ CrystallinePoints.Pd.hom_ext' fun _ ↦ rfl }
   α T := RingHom.id T.obj.B
   naturality _ _ := rfl
   smul _ _ _ := rfl
@@ -69,7 +110,7 @@ theorem toPO_ofPC (s : X ⟶ Sp R) (c : H1OnPoints s) : (toPO s).pull1 ((ofPC s)
   rw [← CoefMap.pullCohomologyOne_comp]
   let θ : ((ofPC s).comp (toPO s)).G ⟶ (CoefMap.id (FP s)).G :=
     { app := fun P => ⟨AlgHom.id R P.B, spMap_id_comp_spMap_symm_comp _ (fun _ => rfl) P.x⟩
-      naturality := fun _ _ _ => CrystallinePoints.Pd.hom_ext fun _ => rfl }
+      naturality := fun _ _ _ => CrystallinePoints.Pd.hom_ext' fun _ => rfl }
   exact (CoefMap.pullCohomologyOne_eq_of_natTrans _ (CoefMap.id (FP s)) θ (fun _ _ => rfl) c).trans (CoefMap.pullCohomologyOne_id c)
 
 private theorem cmpO_toH1O_eq_toHO1_cmp1 (s : X ⟶ Sp R) (c : FirstDeRham s) :

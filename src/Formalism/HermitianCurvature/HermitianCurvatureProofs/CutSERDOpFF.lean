@@ -1,9 +1,51 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialIdentityOfQuadratic
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStable
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStableAsm
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OrbitalIntegralIdentities
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RadialIdentityOfQuadratic
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStableAdjComm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStableEquivOps
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStableGerm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJAFFStableLoc
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelFormSesquilinearFiniteClass
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.RegularisedPairingViaPhase
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -39,8 +81,8 @@ theorem radial_operator_function_field : RDOpFF := by
       B.SuppIn (B.GPos D) f' := by
     intro f' hs x hx
     have hxG : x ∈ B.GV k r :=
-      (Formalism.FourierDecayAlt.P.B5.GV_closed (k := k) (r := r)).closure_subset_iff.2 (fun y hy => hy.1) hx
-    have hxT : x ∈ tsupport f' := closure_mono (fun y hy => hy.2) hx
+      (Formalism.FourierDecayAlt.P.B5.GV_closed (k := k) (r := r)).closure_subset_iff.2 (by exact fun y hy => hy.1) hx
+    have hxT : x ∈ tsupport f' := closure_mono (by exact fun y hy => hy.2) hx
     exact hPos x (hs hxT) hxG
   constructor
   · refine equivariant_operators_holds extension_locality_holds _ _ _ _ D (Q.OmPlus k r D.z D.z') (B.opApply Θ) hDom

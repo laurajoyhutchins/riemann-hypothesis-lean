@@ -1,7 +1,56 @@
+module
+
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMemWpNormSubLtOne
+public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
-import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.TranslateProduct
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.StatementC
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.StatementK
+
+@[expose] public section
+
 open PowerSeries GlobalTheory.Honda Formalism.L2.Th1.CM
 
 noncomputable section
@@ -9,9 +58,6 @@ noncomputable section
 namespace GlobalTheory.ResidueUnr
 
 open Polynomial
-
-local notation "PX" => (Polynomial.X)
-local notation "PC" => (Polynomial.C)
 
 variable {l : ℕ} [Fact l.Prime]
 
@@ -28,16 +74,16 @@ theorem norm_aeval_le (x : PadicAlgCl l) (hx : ‖x‖ ≤ 1) (g : ℤ_[l][X]) :
 
 theorem norm_aeval_lt (x : PadicAlgCl l) (hx : ‖x‖ ≤ 1) (g : ℤ_[l][X])
     (hg : g.map (PadicInt.toZMod (p := l)) = 0) : ‖aeval x g‖ < 1 := by
-  have hd : ∀ n, (PC (l : ℤ_[l])) ∣ PC (g.coeff n) := by
+  have hd : ∀ n, (Polynomial.C (l : ℤ_[l])) ∣ Polynomial.C (g.coeff n) := by
     intro n
     have h0 : PadicInt.toZMod (g.coeff n) = 0 := by
-      have := congrArg (fun f => Polynomial.coeff f n) hg
+      have := congrArg (fun f => _root_.AddMonoidAlgebra.coeff (M := ℕ) f n) hg
       simpa [Polynomial.coeff_map] using this
     have hm : g.coeff n ∈ IsLocalRing.maximalIdeal ℤ_[l] := by
       rw [← PadicInt.ker_toZMod]; exact h0
     rw [PadicInt.maximalIdeal_eq_span_p, Ideal.mem_span_singleton] at hm
-    exact map_dvd PC hm
-  obtain ⟨h, rfl⟩ : (PC (l : ℤ_[l])) ∣ g := (Polynomial.C_dvd_iff_dvd_coeff _ _).2
+    exact map_dvd Polynomial.C hm
+  obtain ⟨h, rfl⟩ : (Polynomial.C (l : ℤ_[l])) ∣ g := (Polynomial.C_dvd_iff_dvd_coeff _ _).2
     (fun n => by simpa using (Polynomial.C_dvd_iff_dvd_coeff _ _).1 (hd n) 0)
   rw [map_mul, aeval_C, norm_mul]
   have hl : ‖algebraMap ℤ_[l] (PadicAlgCl l) (l : ℤ_[l])‖ < 1 := by
@@ -59,43 +105,11 @@ theorem exists_monic (x : PadicAlgCl l) (hx : ‖x‖ ≤ 1) : ∃ q : ℤ_[l][X
 
 theorem exists_pow_near_one (x : PadicAlgCl l) (hx : ‖x‖ = 1) :
     ∃ m : ℕ, 0 < m ∧ ‖x ^ m - 1‖ < 1 := by
-  obtain ⟨q, hqm, hq⟩ := exists_monic x hx.le
-  have hq1 : q ≠ 1 := by rintro rfl; simp at hq
-  set d := q.natDegree
-  let r : ℕ → ℤ_[l][X] := fun k => (PX ^ k) %ₘ q
-  have hr : ∀ k, aeval x (r k) = x ^ k := by
-    intro k
-    have h := congrArg (aeval x) (modByMonic_add_div (PX ^ k : ℤ_[l][X]) q)
-    simpa [hq] using h
-  have hdeg : ∀ k, (r k).natDegree < d := fun k => natDegree_modByMonic_lt _ hqm hq1
-  let F : ℕ → (Fin d → ZMod l) := fun k i => PadicInt.toZMod ((r k).coeff i)
-  obtain ⟨i, j, hij, hF⟩ := Finite.exists_ne_map_eq_of_infinite F
-  have key : ∀ a b : ℕ, F a = F b → a < b → ∃ m : ℕ, 0 < m ∧ ‖x ^ m - 1‖ < 1 := by
-    intro a b hab hlt
-    have hsm : ‖x ^ b - x ^ a‖ < 1 := by
-      rw [← hr b, ← hr a, ← map_sub]
-      apply norm_aeval_lt x hx.le
-      ext n
-      rw [Polynomial.coeff_map, Polynomial.coeff_sub, map_sub, Polynomial.coeff_zero]
-      by_cases hn : n < d
-      · have := congrFun hab ⟨n, hn⟩
-        rw [sub_eq_zero]
-        exact this.symm
-      · rw [coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (hdeg b) (not_lt.1 hn)),
-          coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (hdeg a) (not_lt.1 hn))]
-        simp
-    refine ⟨b - a, Nat.sub_pos_of_lt hlt, ?_⟩
-    have e : x ^ b - x ^ a = x ^ a * (x ^ (b - a) - 1) := by
-      rw [mul_sub, ← pow_add, Nat.add_sub_cancel' hlt.le, mul_one]
-    rw [e, norm_mul, norm_pow, hx, one_pow, one_mul] at hsm
-    exact hsm
-  rcases lt_or_gt_of_ne hij with h | h
-  · exact key i j hF h
-  · exact key j i hF.symm h
+  apply GlobalTheory.ResidueRoot.exists_pow_alg <;> assumption
 
 theorem frob_inj (z : PadicAlgCl l) (hz : ‖z‖ ≤ 1) (h : ‖z ^ l - 1‖ < 1) : ‖z - 1‖ < 1 := by
   have hp := (Fact.out : l.Prime)
-  have hpoly : (((PX - 1) ^ l - (PX ^ l - 1) : ℤ_[l][X])).map (PadicInt.toZMod (p := l)) = 0 := by
+  have hpoly : (((Polynomial.X - 1) ^ l - (Polynomial.X ^ l - 1) : ℤ_[l][X])).map (PadicInt.toZMod (p := l)) = 0 := by
     rw [Polynomial.map_sub, Polynomial.map_pow, Polynomial.map_sub, Polynomial.map_sub,
       Polynomial.map_pow, Polynomial.map_X, Polynomial.map_one, sub_pow_char, one_pow, sub_self]
   have h1 := norm_aeval_lt z hz _ hpoly
@@ -128,30 +142,7 @@ theorem one_le_norm_prod (s : Multiset ℂ_[l]) (h : ∀ a ∈ s, 1 ≤ ‖a‖)
 
 theorem exists_root_near (x : ℂ_[l]) (m : ℕ) (hm : 0 < m) (h : ‖x ^ m - 1‖ < 1) :
     ∃ ζ : ℂ_[l], ζ ^ m = 1 ∧ ‖x - ζ‖ < 1 := by
-  set P : ℂ_[l][X] := PX ^ m - PC 1
-  have hPm : P.Monic := monic_X_pow_sub_C 1 hm.ne'
-  have hcard : Multiset.card P.roots = P.natDegree := IsAlgClosed.card_roots_eq_natDegree
-  have hprod := prod_multiset_X_sub_C_of_monic_of_roots_card_eq hPm hcard
-  have hev := congrArg (eval x) hprod
-  rw [eval_multiset_prod, Multiset.map_map] at hev
-  by_contra hne
-  push_neg at hne
-  have hall : ∀ a ∈ P.roots, 1 ≤ ‖x - a‖ := by
-    intro a ha
-    apply hne a _
-    have := (mem_roots hPm.ne_zero).1 ha
-    simpa [P, sub_eq_zero] using this
-  have := one_le_norm_prod (P.roots.map fun a => x - a) (by
-    intro b hb
-    obtain ⟨a, ha, rfl⟩ := Multiset.mem_map.1 hb
-    exact hall a ha)
-  have e : (Multiset.map (eval x ∘ fun a => PX - PC a) P.roots).prod = (P.roots.map fun a => x - a).prod := by
-    congr 1
-    exact Multiset.map_congr rfl (fun a _ => by simp)
-  rw [e] at hev
-  rw [hev] at this
-  simp [P] at this
-  linarith
+  apply GlobalTheory.ResidueRoot.exists_root <;> assumption
 
 theorem exists_near_kur : ∀ (l : ℕ) [Fact l.Prime] (x : ℂ_[l]), ‖x‖ ≤ 1 →
     ∃ y ∈ MaximalUnramifiedExtension l, ‖y‖ ≤ 1 ∧ ‖x - y‖ < 1 := by

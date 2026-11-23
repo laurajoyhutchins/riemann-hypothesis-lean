@@ -1,11 +1,58 @@
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.ThetaCoefficientMapEq
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LocFactor
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MSpBasis
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpRoots
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchingBaseChange.SpFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpecializationMapCompUniversalSection
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.MSpBasis
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LocFactor
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoEvLow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoQuot
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebra.CoMvps
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.PatchingBaseChange.SpFin
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.AnnihilatorBaseChange.SpRoots
+
+@[expose] public section
 
 open IsLocalRing Matrix Filter UpperTheory.V.Alg UpperTheory.V.W UpperTheory.V.AlgebraTools UpperTheory.V.Pa UpperTheory.V.Pa.Core
 open scoped TensorProduct
@@ -28,7 +75,7 @@ private theorem spCo_desc {R L : Type} [CommRing R] [CommRing L] [Algebra R L] {
     rw [SetLike.mem_coe, RingHom.mem_ker]
     have h1 : ∀ i, F (MvPowerSeries.C (ut j i) + MvPowerSeries.X (j, i)) = a j i := by
       intro i
-      rw [map_add, hC, hX]
+      rw [map_add (f := _), hC, hX]
       exact add_sub_cancel _ _
     have h2 : (F : MvPowerSeries (Fin q × Fin n) R →+* L).comp MvPowerSeries.C = algebraMap R L :=
       RingHom.ext hC
@@ -81,13 +128,13 @@ private theorem splitting_algebra_nontrivial_free_generated (R : Type) [CommRing
     obtain ⟨y, rfl⟩ := hBs x
     obtain ⟨r, hr⟩ := residue_surjective (χ y)
     refine ⟨r, ?_⟩
-    rw [IsScalarTower.algebraMap_apply R (MSplitAlg P n) (Localization.AtPrime n0), ← map_sub]
+    rw [IsScalarTower.algebraMap_apply R (MSplitAlg P n) (Localization.AtPrime n0), ← (algebraMap (MSplitAlg P n) (Localization.AtPrime n0)).map_sub y (algebraMap R (MSplitAlg P n) r)]
     apply hinB
     rw [hmem0, map_sub, hχalg, hr, sub_self])
   have hmemB : ∀ p : Fin q × Fin n, algebraMap (MSplitAlg P n) (Localization.AtPrime n0) (MSplitAlg.root P n p.1 p.2) -
       algebraMap R (Localization.AtPrime n0) (ut p.1 p.2) ∈ maximalIdeal (Localization.AtPrime n0) := by
     intro p
-    rw [IsScalarTower.algebraMap_apply R (MSplitAlg P n) (Localization.AtPrime n0), ← map_sub]
+    rw [IsScalarTower.algebraMap_apply R (MSplitAlg P n) (Localization.AtPrime n0), ← (algebraMap (MSplitAlg P n) (Localization.AtPrime n0)).map_sub (MSplitAlg.root P n p.1 p.2) (algebraMap R (MSplitAlg P n) (ut p.1 p.2))]
     exact hinB _ (hroot p.1 p.2)
   obtain ⟨F, ⟨hFC, hFX⟩, -⟩ := co_ev R R (Localization.AtPrime n0) (Fin q × Fin n) (Algebra.ofId R (Localization.AtPrime n0))
     (fun p => algebraMap (MSplitAlg P n) (Localization.AtPrime n0) (MSplitAlg.root P n p.1 p.2) - algebraMap R (Localization.AtPrime n0) (ut p.1 p.2)) hmemB
@@ -139,7 +186,7 @@ private theorem splitting_algebra_nontrivial_free_generated (R : Type) [CommRing
     intro j i
     rw [AlgHom.comp_apply, hΨ, hχr]
     show χ' (Sp.mk P ut _) = _
-    rw [hχ', map_add, hF0C, hF0X, add_zero]
+    rw [hχ', map_add (f := _), hF0C, hF0X, add_zero]
   have hcomap : Ideal.comap Ψ.toRingHom (maximalIdeal (Sp P ut)) = n0 := by
     refine Ideal.ext fun y => ?_
     rw [Ideal.mem_comap, ← hkerχ', hmem0, RingHom.mem_ker]
@@ -155,7 +202,7 @@ private theorem splitting_algebra_nontrivial_free_generated (R : Type) [CommRing
   have hΦu : ∀ j i, Φ (Sp.u P ut j i) = algebraMap (MSplitAlg P n) (Localization.AtPrime n0) (MSplitAlg.root P n j i) := by
     intro j i
     show Φ (Sp.mk P ut _) = _
-    rw [hΦ, map_add, hFC', hFX']
+    rw [hΦ, map_add (f := _), hFC', hFX']
     exact add_sub_cancel _ _
   have hΦg : Φ.comp g = AlgHom.id R (Localization.AtPrime n0) := by
     have h1 : (Φ.comp g).comp (IsScalarTower.toAlgHom R (MSplitAlg P n) (Localization.AtPrime n0)) = IsScalarTower.toAlgHom R (MSplitAlg P n) (Localization.AtPrime n0) := by
@@ -204,7 +251,7 @@ private theorem splitting_algebra_nontrivial_free_generated (R : Type) [CommRing
     rw [Ψ.commutes]
     exact Subalgebra.algebraMap_mem _ r
   | add p1 p2 h1 h2 =>
-    rw [map_add, map_add]
+    rw [map_add (f := _), map_add (f := _)]
     exact add_mem h1 h2
   | mul_X p s hp =>
     rw [map_mul, map_mul]

@@ -1,6 +1,54 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.BcTensMapInclR
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TopoAF
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.MassDataInst
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.BcTensMapInclR
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.UnfAbs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.EqZeroOfMemNbhdA
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.LocallyCompactAdelicUnitary
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TopoAF
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.InclusionInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +108,6 @@ private theorem actTup_bc (R : Type) [CommRing R] [Algebra F R] (u : GL (Fin n) 
   funext b i
   first
   | simp [actTup, ratTup, Formalism.UG.bc, Matrix.mulVec, dotProduct, map_sum]
-  | simp [actTup, ratTup, Formalism.UG.bc, Matrix.mulVec, Matrix.dotProduct, map_sum]
 
 theorem prjF_map_ratOf :
     (ratOf (K := Hsub (AF F) σ J P)).map (prjF σ J P) =
@@ -96,7 +143,6 @@ theorem prjF_map_ratOf :
       have := congrFun (congrFun hst b) i
       first
       | exact inclR_injective (E := E) (Af F) (inj_Af F) this
-      | exact inclR_injective (E := E) (Af F) (inj_Af F) (by simpa [ratTup] using this)
     have hg : g ∈ Hsub (AF F) σ J P := by
       show actTup (AF F) (Formalism.UG.bc (inclR (F := F) (E := E) (AF F)) u)
         (ratTup (F := F) (AF F) (tupH P)) = ratTup (F := F) (AF F) (tupH P)
@@ -142,8 +188,6 @@ theorem continuous_prjF : Continuous (prjF σ J P) := by
   have hs : Continuous (sndA F) := by
     first
     | exact continuous_snd
-    | (simp only [sndA]; exact continuous_snd)
-    | fun_prop
   have hm := continuous_haMap (σ := σ) (J := J) (sndA F) hs
   exact continuous_induced_rng.2 (hm.comp continuous_subtype_val)
 
@@ -151,18 +195,13 @@ theorem continuous_splitA_u : Continuous (splitA σ J) := by
   have hs : Continuous (sndA F) := by
     first
     | exact continuous_snd
-    | (simp only [sndA]; exact continuous_snd)
-    | fun_prop
   have hf : Continuous (fstA F) := by
     first
     | exact continuous_fst
-    | (simp only [fstA]; exact continuous_fst)
-    | fun_prop
   have h1 := continuous_haMap (σ := σ) (J := J) (fstA F) hf
   have h2 := continuous_haMap (σ := σ) (J := J) (sndA F) hs
   first
   | exact h1.prodMk h2
-  | exact h1.prod_mk h2
 
 theorem isClosed_stabT' (R : Type) [CommRing R] [Algebra F R] [TopologicalSpace R] [IsTopologicalRing R]
     [LocallyCompactSpace R] [T2Space R] {a : ℕ} (X0 : Fin a → Fin n → E) :
@@ -175,8 +214,7 @@ theorem isClosed_stabT' (R : Type) [CommRing R] [Algebra F R] [TopologicalSpace 
     refine continuous_pi fun i => ?_
     first
     | simp only [Matrix.mulVec, dotProduct]
-    | simp only [Matrix.mulVec, Matrix.dotProduct]
-    refine continuous_finset_sum _ fun j _ => ?_
+    refine continuous_finsetSum _ fun j _ => ?_
     exact ((continuous_apply j).comp ((continuous_apply i).comp hmat)).mul continuous_const
   have hset : ((stabT R σ J X0 : Subgroup (HA R σ J)) : Set (HA R σ J)) =
       {g | actTup R (HA.mat R σ J g) (ratTup (F := F) R X0) = ratTup (F := F) R X0} := by

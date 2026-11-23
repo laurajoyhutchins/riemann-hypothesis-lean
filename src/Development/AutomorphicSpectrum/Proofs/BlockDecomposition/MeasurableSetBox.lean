@@ -1,10 +1,49 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.EmDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SigmaFiniteParameterProductMeasure
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitIdelesOpen
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdelesCompactOfLocalBounds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AddHaarCharLeftRightMatrixMulAdeleTensor
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.TensorIdeleAbsDetUnitaryAdelicEqOne
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.RegularisedSiegelWeil.HermitianCellMeasures.EmDefs
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdelesCompactOfLocalBounds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitIdelesOpen
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SigmaFiniteParameterProductMeasure
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsCompactIsOpenUnitsAt
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +87,7 @@ theorem abs_map (f : M → X) (hf : Measurable f) {B : Set M} (hB : MeasurableSe
     have e2 := Measure.restrict_map (μ := P) hT hB
     rw [hBT, hP] at e2
     rw [← e2, Measure.restrict_smul]
-  rw [h1, Measure.map_smul]
+  rw [h1, Measure.map_smul k hf.aemeasurable]
 
 open Pointwise in
 theorem abs_finite [AddCommGroup M] [TopologicalSpace M] [ContinuousAdd M] [TopologicalSpace X] [T2Space X]
@@ -85,7 +124,7 @@ theorem topRing (D : D7) : IsTopologicalRing (AE D) :=
 
 def offS (S : Finset (Pl D)) : AddSubgroup (AE D) where
   carrier := {z | ∀ v ∉ S, cv D v z ∈ intLoc D.host.F D.host.E v}
-  add_mem' := fun hx hy v hv => by rw [RingHom.map_add]; exact add_mem (hx v hv) (hy v hv)
+  add_mem' := fun hx hy v hv => by rw [RingHom.map_add (f := _)]; exact add_mem (hx v hv) (hy v hv)
   zero_mem' := fun v _ => by rw [RingHom.map_zero]; exact zero_mem _
   neg_mem' := fun hx v hv => by rw [RingHom.map_neg]; exact neg_mem (hx v hv)
 
@@ -115,8 +154,8 @@ theorem measurableSet_box (S : Finset (Pl D)) :
   have o : OpensMeasurableSpace (Mx D a r × Mx D a t) := g1.opensMeasurable
   exact (((isOpen_intOff S).preimage continuous_fst).inter ((isOpen_intOff S).preimage continuous_snd)).measurableSet
 
-open Classical in
 
+open Classical in
 theorem exists_box (S : Finset (Pl D)) {e : AE D} (hS : IsIdem S e) (a b : ℕ) :
     ∃ T : Set (Mx D a b), IsCompact T ∧ ∀ x, IntOff S x → (1 - e) • x ∈ T := by
   have hL : ∀ v : Pl D, IsCompact (if v ∈ S then ({0} : Set (Fv D.host.F v ⊗[D.host.F] D.host.E))

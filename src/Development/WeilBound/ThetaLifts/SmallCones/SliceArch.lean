@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.Complex.RealDeriv
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
+public import Mathlib
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,8 +67,8 @@ variable {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
 def Bd (m : ℕ) (f : V → ℂ) (C : ℝ) : Prop := ∀ j ≤ m, ∀ x, (1 + ‖x‖) ^ m * ‖iteratedFDeriv ℝ j f x‖ ≤ C
 
-variable (V) in
 
+variable (V) in
 def P (m : ℕ) : Seminorm ℂ (SchwartzMap V ℂ) := (Finset.Iic (m, m)).sup (schwartzSeminormFamily ℂ V ℂ)
 
 theorem P_cont (m : ℕ) : Continuous (P V m) :=
@@ -32,9 +88,6 @@ theorem bd_P (m : ℕ) (f : SchwartzMap V ℂ) : Bd m f (2 ^ m * P V m f) := fun
 
 theorem Bd.nonneg {m : ℕ} {f : V → ℂ} {C : ℝ} (h : Bd m f C) : 0 ≤ C :=
   le_trans (by positivity) (h 0 (Nat.zero_le _) 0)
-
-theorem Bd.mono {m : ℕ} {f : V → ℂ} {C C' : ℝ} (h : Bd m f C) (hC : C ≤ C') : Bd m f C' :=
-  fun j hj x => (h j hj x).trans hC
 
 theorem Bd.succ {m : ℕ} {f : V → ℂ} {C : ℝ} (h : Bd (m + 1) f C) : Bd m f C := fun j hj x =>
   le_trans (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ (by linarith [norm_nonneg x]) (Nat.le_succ m)) (norm_nonneg _))
@@ -229,7 +282,7 @@ theorem S_add (w h : V × (V →L[ℝ] ℝ)) (f : SchwartzMap V ℂ) :
   rw [SchwartzMap.smul_apply, S_apply, S_apply, S_apply, ph, ph, ph, smul_eq_mul, ← mul_assoc, ← mul_assoc, ← Complex.exp_add,
     ← Complex.exp_add, Prod.fst_add, add_assoc x]
   congr 2
-  simp only [Prod.snd_add, ContinuousLinearMap.add_apply, map_add]
+  simp only [Prod.snd_add, ContinuousLinearMap.add_apply, map_add (f := _)]
   push_cast
   ring
 

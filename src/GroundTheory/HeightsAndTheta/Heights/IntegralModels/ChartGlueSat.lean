@@ -1,5 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.Bundle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Module.BigOperators
+public import Mathlib.RingTheory.Ideal.Basic
+public import Mathlib.RingTheory.Ideal.BigOperators
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Model
@@ -10,36 +59,6 @@ section Sat
 
 variable {Ω : Type*} [Field Ω] {E : Type*} [AddCommGroup E] [Module Ω E]
 variable {S : Type*} [SetLike S Ω] [SubringClass S Ω]
-
-theorem inv_pow_smul_mem (Y : AddSubgroup E) {u : Ω} (hYu : ∀ e ∈ Y, u⁻¹ • e ∈ Y) (k : ℕ) :
-    ∀ e ∈ Y, (u⁻¹) ^ k • e ∈ Y := by
-  induction k with
-  | zero => intro e he; simpa using he
-  | succ k ih => intro e he; rw [pow_succ, mul_smul]; exact ih _ (hYu e he)
-
-theorem exists_pow_smul_mem_iff_of_loc (A : S) (X Y : AddSubgroup E) {u f : Ω} (j : ℕ)
-    (hu0 : u ≠ 0) (huA : u ∈ A) (hg : u ^ j * f ∈ A) (hXA : ∀ a ∈ A, ∀ e ∈ X, a • e ∈ X)
-    (hXY : X ≤ Y) (hYu : ∀ e ∈ Y, u⁻¹ • e ∈ Y) (hYX : ∀ e ∈ Y, ∃ k : ℕ, u ^ k • e ∈ X) (e : E) :
-    (∃ n : ℕ, (u ^ (j + 1) * f) ^ n • e ∈ X) ↔ ∃ n : ℕ, f ^ n • e ∈ Y := by
-  constructor
-  · rintro ⟨n, hn⟩
-    refine ⟨n, ?_⟩
-    have h1 : f ^ n • e = ((u⁻¹) ^ ((j + 1) * n)) • ((u ^ (j + 1) * f) ^ n • e) := by
-      rw [smul_smul]
-      congr 1
-      rw [mul_pow, ← pow_mul, ← mul_assoc, ← mul_pow, inv_mul_cancel₀ hu0, one_pow, one_mul]
-    rw [h1]
-    exact inv_pow_smul_mem Y hYu _ _ (hXY hn)
-  · rintro ⟨n, hn⟩
-    obtain ⟨k, hk⟩ := hYX _ hn
-    refine ⟨n + k, ?_⟩
-    have h1 : (u ^ (j + 1) * f) ^ (n + k) • e =
-        ((u ^ j * f) ^ k * u ^ ((j + 1) * n)) • (u ^ k • f ^ n • e) := by
-      rw [smul_smul, smul_smul]
-      congr 1
-      ring
-    rw [h1]
-    exact hXA _ (mul_mem (pow_mem hg _) (pow_mem huA _)) _ hk
 
 theorem exists_sum_mul_pow_eq_one (A : S) {k : ℕ} (f c : Fin k → Ω) (hf : ∀ l, f l ∈ A)
     (hc : ∀ l, c l ∈ A) (h1 : ∑ l, c l * f l = 1) (N : ℕ) :
@@ -58,22 +77,6 @@ theorem exists_sum_mul_pow_eq_one (A : S) {k : ℕ} (f c : Fin k → Ω) (hf : �
   refine ⟨fun l => d l, fun l => (d l).2, ?_⟩
   have := congrArg Subtype.val hd
   simpa [f'] using this
-
-theorem exists_uniform_mul (T : Submonoid ℤ) (A : S) (L : AddSubgroup E)
-    (hLA : ∀ a ∈ A, ∀ e ∈ L, a • e ∈ L) {ζ : Ω} (hζ : ζ ∈ A) {ι : Type*} [Fintype ι] (w : ι → E)
-    (h : ∀ l, ∃ t ∈ T, ∃ n : ℕ, ((t : Ω) * ζ ^ n) • w l ∈ L) :
-    ∃ t ∈ T, ∃ n : ℕ, ∀ l, ∀ n' ≥ n, ((t : Ω) * ζ ^ n') • w l ∈ L := by
-  classical
-  choose t ht n hn using h
-  refine ⟨∏ l, t l, prod_mem fun l _ => ht l, Finset.univ.sup n, fun l n' hn' => ?_⟩
-  have hle : n l ≤ n' := le_trans (Finset.le_sup (Finset.mem_univ l)) hn'
-  have : (((∏ l, t l : ℤ) : Ω) * ζ ^ n') =
-      (((∏ l' ∈ Finset.univ.erase l, t l' : ℤ) : Ω) * ζ ^ (n' - n l)) * ((t l : Ω) * ζ ^ n l) := by
-    rw [← Finset.mul_prod_erase Finset.univ t (Finset.mem_univ l), Int.cast_mul,
-      ← pow_sub_mul_pow ζ hle]
-    ring
-  rw [this, mul_smul]
-  exact hLA _ (mul_mem (intCast_mem A _) (pow_mem hζ _)) _ (hn l)
 
 end Sat
 

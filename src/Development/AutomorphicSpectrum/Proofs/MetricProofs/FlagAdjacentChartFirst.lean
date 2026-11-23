@@ -1,5 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsBaseChart
+module
+
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagAnalyticDenseGoodPoints
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsBaseChart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped ComplexOrder Classical
 open GlobalTheory.CompanionTheory.Ar.PB.WSq GlobalTheory.CompanionTheory.Ar.PB.WMan
@@ -15,29 +58,7 @@ variable {e N : ℕ} {s : Set (Fin e → ℂ)}
 theorem analytic_minorIJ (g : (Fin e → ℂ) → Matrix (Fin N) (Fin N) ℂ)
     (hg : ∀ a b, AnalyticOnNhd ℂ (fun w => g w a b) s) (I J : Finset (Fin N)) :
     AnalyticOnNhd ℂ (fun w => minorIJ (g w) I J) s := by
-  by_cases e' : I.card = J.card
-  · have hfun : (fun w => minorIJ (g w) I J) = fun w => ∑ σ : Equiv.Perm (Fin J.card),
-        ((Equiv.Perm.sign σ : ℤ) : ℂ) * ∏ i, g w (I.orderEmbOfFin e' (σ i)) (J.orderEmbOfFin rfl i) := by
-      funext w
-      rw [minorIJ, dif_pos e', Matrix.det_apply']
-      rfl
-    rw [hfun]
-    have H := Finset.analyticOnNhd_sum (𝕜 := ℂ) (s := s) (Finset.univ : Finset (Equiv.Perm (Fin J.card)))
-      (f := fun σ w => ((Equiv.Perm.sign σ : ℤ) : ℂ) * ∏ i, g w (I.orderEmbOfFin e' (σ i)) (J.orderEmbOfFin rfl i))
-      (fun σ _ => analyticOnNhd_const.mul (by
-        have P := Finset.analyticOnNhd_prod (𝕜 := ℂ) (s := s) (Finset.univ : Finset (Fin J.card))
-          (f := fun i w => g w (I.orderEmbOfFin e' (σ i)) (J.orderEmbOfFin rfl i)) (fun i _ => hg _ _)
-        convert P using 1
-        funext w
-        rw [Finset.prod_apply]))
-    convert H using 1
-    funext w
-    rw [Finset.sum_apply]
-  · have hfun : (fun w => minorIJ (g w) I J) = fun _ => 0 := by
-      funext w
-      rw [minorIJ, dif_neg e']
-    rw [hfun]
-    exact analyticOnNhd_const
+  apply GlobalTheory.CompanionTheory.Ar.PB.WSq.FC.DensR.analytic_minorIJ <;> assumption
 
 theorem analytic_mul_entry (g g' : (Fin e → ℂ) → Matrix (Fin N) (Fin N) ℂ)
     (hg : ∀ a b, AnalyticOnNhd ℂ (fun w => g w a b) s)
@@ -66,14 +87,14 @@ theorem analytic_lowMat (s : Set (Fin e → ℂ)) (ε : Fin n ⊕ LowIdx Ψ N j 
   · have hfun : (fun w => lowMat (wL ε w) τ' a b) = fun w => w (ε (Sum.inr (Sum.inl ⟨(τ', a, b), hc⟩))) := by
       funext w
       simp only [lowMat]
-      rw [dif_pos hc]
+      rw [dite_eq_left hc]
       rfl
     rw [hfun]
     exact analytic_coord _
   · have hfun : (fun w => lowMat (wL ε w) τ' a b) = fun _ => if a = b then (1 : ℂ) else 0 := by
       funext w
       simp only [lowMat]
-      rw [dif_neg hc]
+      rw [dite_eq_right hc]
     rw [hfun]
     exact analyticOnNhd_const
 
@@ -115,7 +136,7 @@ theorem analytic_flagZ (M : FlagModel y Ψ N j) (F : FrameData ι Ψ N M.Ω M.bl
         ∑ I, valAt M.x (F.u q I) (zb w) * minorIJ (H w e'.choose.1) I (stepCols N j e'.choose.2) := by
       funext w
       simp only [flagZ]
-      rw [dif_pos e']
+      rw [dite_eq_left e']
     rw [hfun]
     have S := Finset.analyticOnNhd_sum (𝕜 := ℂ) (s := s) Finset.univ
       (f := fun I w => valAt M.x (F.u q I) (zb w) * minorIJ (H w e'.choose.1) I (stepCols N j e'.choose.2))
@@ -126,7 +147,7 @@ theorem analytic_flagZ (M : FlagModel y Ψ N j) (F : FrameData ι Ψ N M.Ω M.bl
   · have hfun : (fun w => flagZ M F (zb w) (H w) q) = fun w => zb w ⟨⟨q.1, fun p hp => e' ⟨p, hp⟩⟩, q.2⟩ := by
       funext w
       simp only [flagZ]
-      rw [dif_neg e']
+      rw [dite_eq_right e']
     rw [hfun]
     exact hzb _
 

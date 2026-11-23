@@ -1,8 +1,54 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CubeTrivialisationOnUniformisingSpace
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.CubeTrivialisationOnUniformisingSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj Complex Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -85,7 +131,7 @@ theorem form_eq_zero_of_unit {g : ℕ} (Λ : Submodule ℤ (Fin g → ℂ)) [Dis
     (hper : ∀ z (l : Λ), ψ (z + l) = ρ l * cexp (π * D z l + π / 2 * D l l) * ψ z) :
     (∀ z w, D z w = 0) ∧ ∀ l, ρ l = 1 := by
   have hadd2 : ∀ z w w', D z (w + w') = D z w + D z w' := fun z w w' => by
-    rw [hst, hadd, map_add, ← hst, ← hst]
+    rw [hst, hadd, map_add (f := _), ← hst, ← hst]
   have hsm2 : ∀ (t : ℂ) z w, D z (t • w) = starRingEnd ℂ t * D z w := fun t z w => by
     rw [hst, hsm, map_mul, ← hst]
   have hdiag_im : ∀ z, (D z z).im = 0 := fun z => by
@@ -396,7 +442,7 @@ theorem exists_unit_of_iso (hv : ValueRules) {A : Over (Sp ℂ)} [GrpObj A] [IsC
       refine Finset.prod_congr rfl fun I _ => ?_
       rw [← mul_zpow, ha _ (hSl I) (p.1 I) _ ((hMc z p.1).1 hp'.1 I)]
       rw [show ∑ k ∈ I.down, Y k (z + l) = ∑ k ∈ I.down, Y k z + ∑ k ∈ I.down, Y k l by
-        simp only [map_add, Finset.sum_add_distrib]]
+        simp only [map_add (f := _), Finset.sum_add_distrib]]
     have n0 := hFc_ne z p.1 hp'.1
     have n1 : Fc p.1 (z + l) ≠ 0 := hFc_ne (z + l) p.1 (by rw [hex z l hl]; exact hp'.1)
     have n2 : (∏ I : ULift.{0} (Finset (Fin n)), a (∑ k ∈ I.down, Y k l)
@@ -494,11 +540,11 @@ theorem appellHumbert_data_of_iso_cube :
     exact ((herm_continuous Hm continuous_id hFc).add (herm_continuous Hm hFc continuous_id)).sub
       (herm_continuous Hm continuous_id continuous_id)
   have hadd : ∀ z z' w, D (z + z') w = D z w + D z' w := fun z z' w => by
-    simp only [hD, herm_add_left, map_add]; ring
+    simp only [hD, herm_add_left, map_add (f := _)]; ring
   have hsm : ∀ (t : ℂ) z w, D (t • z) w = t * D z w := fun t z w => by
     simp only [hD, herm_smul_left, map_smul]; ring
   have hst : ∀ z w, D w z = starRingEnd ℂ (D z w) := fun z w => by
-    simp only [hD, map_sub, map_add, ← herm_conj Hm hH]; ring
+    simp only [hD, map_sub, map_add (f := _), ← herm_conj Hm hH]; ring
   have hρ : ∀ l, ‖ρ l‖ = 1 := fun l => by
     simp [hρdef, hχ]
   have hper : ∀ z (l : u.Λ), ψ (z + l) = ρ l * cexp (π * D z l + π / 2 * D l l) * ψ z := by

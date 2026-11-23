@@ -1,6 +1,63 @@
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.KernelIndexForm
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.XiConn
-import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.DvdOfNormIntCastLt
+module
+
+public import Formalism.LocalToGlobal.AlgebraicTheory.DefsKer
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.DvdOfNormIntCastLt
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.LinearSubstitutionDiagonal
+import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.ScalarConst
+import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensZEt
+import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.TensorFourthPowerScaling
+public import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.XiConn
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.AlternatingFormStandardHermitian
+public import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.ThDistC
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.LogarithmEquivalence
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -16,11 +73,11 @@ namespace KerA
 
 private theorem skew_form_add_left {V : Type*} [AddCommGroup V] [Module ℂ V] (H : Sesq V) (x y z : V) :
     altE H (x + y) z = altE H x z + altE H y z := by
-  simp only [altE, map_add, LinearMap.add_apply, Complex.add_im]
+  simp only [altE, map_add (f := _), LinearMap.add_apply, Complex.add_im]
 
 private theorem skew_form_add_right {V : Type*} [AddCommGroup V] [Module ℂ V] (H : Sesq V) (x y z : V) :
     altE H x (y + z) = altE H x y + altE H x z := by
-  simp only [altE, map_add, Complex.add_im]
+  simp only [altE, map_add (f := _), Complex.add_im]
 
 private theorem exp_two_pi_I_int_eq_one (t : ℝ) (h : ∃ m : ℤ, t = m) :
     Complex.exp (2 * Real.pi * Complex.I * (t : ℂ)) = 1 := by
@@ -253,7 +310,7 @@ theorem HV_flat (sc : ℝ) (z w : DVar T a b → ℂ) :
 theorem opU_flat (sc : ℝ) (u : VCx T a b) (F : VCx T a b → ℂ) (w : DVar T a b → ℂ) :
     opU (HV sc) u F (flat T a b w) = opU (matH (hSc T a b sc)) ((flat T a b).symm u) (fun v => F (flat T a b v)) w := by
   simp only [opU]
-  rw [← HV_flat, ← HV_flat, map_add, LinearEquiv.apply_symm_apply]
+  rw [← HV_flat, ← HV_flat, map_add (f := _), LinearEquiv.apply_symm_apply]
 
 theorem alV_flat (d : ℕ) (sc : ℝ) (z : DVar T a b → ℂ) :
     alV d sc (flat T a b z) = alphaQ (Real.sqrt d / 2) (matH (hSc T a b sc)) z := by
@@ -261,6 +318,7 @@ theorem alV_flat (d : ℕ) (sc : ℝ) (z : DVar T a b → ℂ) :
 
 theorem herm_hSc (sc : ℝ) : IsHerm (matH (hSc T a b sc)) := by
   intro x y
+
   rw [matH_hSc, matH_hSc, map_mul, map_sum, Complex.conj_ofReal]
   congr 1
   refine Finset.sum_congr rfl fun i _ => ?_

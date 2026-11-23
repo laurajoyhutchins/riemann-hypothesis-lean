@@ -1,7 +1,47 @@
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SubstZOfXCoordZA
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.DetYtMatNeZero
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.DetOfColSpanEq
-import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WeightUpdateAtPlace
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SubstZOfXCoordZA
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.DetYtMatNeZero
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.DetOfColSpanEq
+public import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.WeightUpdateAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,12 +73,6 @@ def cA (j : ℕ) (B : ∀ v : X.Pl, GL (Fin ((X.Pj j).m + 1)) (X.G.P.Qq v)) : Kc
 
 def GoodG (j : ℕ) (G : (X.Pj j).Xsp) : Prop := denD X Kc j ∣ subD X Kc j G * numD X Kc j
 
-def DelEquiv : Prop :=
-  ∀ (j : ℕ) (A : ∀ v : Fin (X.Pj j).nV, GL (Fin ((X.Pj j).m + 1)) ((X.Pj j).Qq v)) (G : (X.Pj j).Xsp)
-    (f : MvPowerSeries (X.ZA j) Kc), GoodG X Kc j G →
-    GoodG X Kc j ((X.Pj j).natAct A G) ∧
-    delF X Kc j ((X.Pj j).natAct A G) (SA X Kc j (glAt X j A) f) = cA X Kc j (glAt X j A) • delF X Kc j G f
-
 def gamAt (j : ℕ) (c : X.Lv.comp j) (γ : (X.Lv.lev j c).Γ) : ∀ v : X.Pl, GL (Fin ((X.Pj j).m + 1)) (X.G.P.Qq v) :=
   glAt X j fun v => (X.Lv.lev j c).act v γ
 
@@ -56,13 +90,5 @@ def chiN (j : ℕ) (La : X.Lt j) : Kc := (kapG X Kc j La.1 (delt X hfin j La.1 L
 def thFN (Th0 : ∀ j, X.Lt j → X.Lt (j + 1) → MvPowerSeries (X.ZA j) Kc) (j : ℕ) (La : X.Lt j) (La' : X.Lt (j + 1)) :
     MvPowerSeries (X.ZA j) Kc :=
   MvPowerSeries.C (chiN X Kc hfin j La) * Th0 j La La'
-
-def GeoLaw (Th0 : ∀ j, X.Lt j → X.Lt (j + 1) → MvPowerSeries (X.ZA j) Kc) : Prop :=
-  ∀ j (c : X.Lv.comp j) (L : (X.Pj j).Tup) (La' : X.Lt (j + 1)) (γ : (X.Lv.lev j c).Γ), (X.Pj j).IsLatTup L →
-    Th0 j (c, (X.Lv.lev j c).smul γ L) La' = SA X Kc j (gamAt X j c γ) (Th0 j (c, L) La')
-
-def KapStab : Prop :=
-  ∀ j (c : X.Lv.comp j) (L : (X.Pj j).Tup) (γ : (X.Lv.lev j c).Γ), (X.Pj j).IsLatTup L →
-    (X.Lv.lev j c).smul γ L = L → kapG X Kc j c γ = 1
 
 end Formalism.L2.G.Pend

@@ -1,26 +1,54 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.FractionFieldToGenericStalkAlgebraMapEq
-import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.GFrames
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OrthonormalBasisAndOneOrbit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEquivOfRetractions
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FramesCommonStabiliserEqPairingMatrixStabiliser
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.SelfDualLatticeUnipotentTranslateStandard
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianDoubleCosetTermBasicFacts
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HmUnit
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FramesCommonStabiliserEqPairingMatrixStabiliser
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianFramesStabilizerActsOnTerms
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralOfMulVec
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemPerpSpan
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TermInvariantsIndependentOfWitnesses
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianFramesStabilizerActsOnTerms
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianFramesComplementUnitaryActsOnTerms
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TermExponentsNonnegAndDefectGroupBound
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsGluingHomomorphismDefectGroup
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitEntries
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IntegralOfMulVec
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HmUnit
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.RationalExtend
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsIntegralOfQuad
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Formalism.MainNotions.S.Loc GlobalTheory.HL GlobalTheory.HL.StdPlace NumberField IsDedekindDomain
 open scoped Pointwise ENNReal Classical
 
@@ -106,7 +134,7 @@ theorem stab_coordLat : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSp
         · simp only [th1, inv_one, map_one, one_smul, map_sub]
           exact (coordLat S).sub_mem (gf' g h2 b) (gf g h1 b)
       | zero => simp
-      | add x y _ _ hx hy => rw [map_add]; exact (coordLat S).add_mem hx hy
+      | add x y _ _ hx hy => rw [map_add (f := _)]; exact (coordLat S).add_mem hx hy
       | smul c x _ hx =>
         have e : g (c • x) = c • g x := by
           first
@@ -125,7 +153,7 @@ theorem stab_coordLat : ∀ {F : Type} [Field F] [ValuativeRel F] [TopologicalSp
       have h1 := hM 1 (one_smul _ _) (one_smul _ _) m hmM
       have : w = (m + w) - m := by abel
       rw [this]; exact (coordLat S).sub_mem hx h1
-    rw [map_add, (GlobalTheory.HL.FrameStab.stab_eq L r k S).1 g hgSt w hw]
+    rw [map_add (f := _), (GlobalTheory.HL.FrameStab.stab_eq L r k S).1 g hgSt w hw]
     exact (coordLat S).add_mem (hM g hgf hgf' m hmM) hw'
   ext h
   simp only [Subgroup.mem_inf, MulAction.mem_stabilizer_iff, Frames.K0]

@@ -1,17 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.IntAdCpctOpen
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicClassFiniteness.DictRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Metric
 
 namespace Formalism.L2.SG.Pf.RescaleCore.NCov
-
-def AdCocpt : Prop :=
-  ∀ (F : Type) [Field F] [NumberField F],
-    ∃ C : Set (AF F), IsCompact C ∧ ∀ a : AF F, ∃ x : F, a - algebraMap F (AF F) x ∈ C
 
 namespace AdCocptW
 
@@ -41,36 +79,31 @@ theorem NCovAd_inf_approx : ∃ R : ℝ, ∀ x : Ainf F, ∃ β : 𝓞 F,
   have hB : ∃ R : ℝ, ∀ y ∈ ZSpan.fundamentalDomain b, ‖y‖ ≤ R := by
     first
     | exact (ZSpan.fundamentalDomain_isBounded b).exists_norm_le
-    | exact isBounded_iff_forall_norm_le.mp (ZSpan.fundamentalDomain_isBounded b)
   obtain ⟨R, hR⟩ := hB
   refine ⟨R, fun x => ?_⟩
   obtain ⟨⟨w, hw⟩, hwD, -⟩ := ZSpan.exist_unique_vadd_mem_fundamentalDomain b (NumberField.InfiniteAdeleRing.ringEquiv_mixedSpace F x)
   have hc' : ∃ c : Module.Free.ChooseBasisIndex ℤ (𝓞 F) → ℤ, ∑ i, c i • b i = w := by
     first
     | exact (Submodule.mem_span_range_iff_exists_fun ℤ).mp hw
-    | exact Submodule.mem_span_range_iff_exists_fun.mp hw
   obtain ⟨c, hc⟩ := hc'
   let γ : 𝓞 F := ∑ i, c i • NumberField.RingOfIntegers.basis F i
   have hγ : NumberField.mixedEmbedding F (algebraMap (𝓞 F) F γ) = w := by
     rw [← hc]
+
     simp only [γ, map_sum, map_zsmul, hb, NumberField.mixedEmbedding.latticeBasis_apply,
-      NumberField.integralBasis_apply]
+    NumberField.integralBasis_apply]
   refine ⟨-γ, fun v => ?_⟩
   have hneg : ((-γ : 𝓞 F) : F) = -(algebraMap (𝓞 F) F γ) := by
     first
     | rfl
-    | simp
-    | (push_cast; rfl)
   set z := x - algebraMap F (Ainf F) ((-γ : 𝓞 F) : F) with hzdef
   have hz : NumberField.InfiniteAdeleRing.ringEquiv_mixedSpace F z ∈ ZSpan.fundamentalDomain b := by
     have e : NumberField.InfiniteAdeleRing.ringEquiv_mixedSpace F z = w + NumberField.InfiniteAdeleRing.ringEquiv_mixedSpace F x := by
-      rw [hzdef, hneg, map_neg, sub_neg_eq_add, map_add, ← hγ,
+      rw [hzdef, hneg, map_neg, sub_neg_eq_add, map_add (f := _), ← hγ,
         NumberField.InfiniteAdeleRing.mixedEmbedding_eq_algebraMap_comp, add_comm]
     rw [e]
     first
     | exact hwD
-    | (rw [Submodule.vadd_def, vadd_eq_add] at hwD; exact hwD)
-    | (simpa [Submodule.vadd_def] using hwD)
   have hn := hR _ hz
   by_cases hv : v.IsReal
   · calc ‖z v‖ = ‖(NumberField.InfiniteAdeleRing.ringEquiv_mixedSpace F z).1 ⟨v, hv⟩‖ := by
@@ -95,13 +128,6 @@ theorem NCovAd_int_mem (β : 𝓞 F) : algebraMap F (Af F) (β : F) ∈ Formalis
   intro v
   first
   | exact v.coe_mem_adicCompletionIntegers β
-  | exact (v.mem_adicCompletionIntegers F).mpr (by
-      rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation']
-      simpa using v.valuation_le_one β)
-  | exact (v.mem_adicCompletionIntegers F).mpr (by
-      show Valued.v ((β : F) : v.adicCompletion F) ≤ 1
-      rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation']
-      simpa using v.valuation_le_one β)
 
 theorem NCovAd_fin_approx (a : Af F) : ∃ x : F, a - algebraMap F (Af F) x ∈ Formalism.UG.intAd F := by
   obtain ⟨m, hm, hma⟩ := PIW.AdelClassFin.DictRing.af_denom a

@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.NVolAllOf
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.EqOneOfToHAFin
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.NVolAllOf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,19 +56,11 @@ namespace MassDataMassesW
 theorem prod_rect_of_ne_zero {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] (μ : Measure α)
     (ν : Measure β) (h0 : μ.prod ν ≠ 0) {s : Set α} {t : Set β} (hs : MeasurableSet s)
     (ht : MeasurableSet t) : μ.prod ν (s ×ˢ t) = μ s * ν t := by
-  have hf : AEMeasurable (fun x : α => Measure.map (Prod.mk x) ν) μ := by
-    by_contra hf
-    apply h0
-    rw [Measure.prod, Measure.bind, Measure.map_of_not_aemeasurable hf, Measure.join_zero]
-  rw [Measure.prod, Measure.bind_apply (hs.prod ht) hf]
-  have key : ∀ x, Measure.map (Prod.mk x) ν (s ×ˢ t) = s.indicator (fun _ => ν t) x := by
-    intro x
-    rw [Measure.map_apply measurable_prodMk_left (hs.prod ht)]
-    by_cases hx : x ∈ s
-    · simp [hx, Set.mk_preimage_prod_right hx]
-    · simp [hx, Set.mk_preimage_prod_right_eq_empty hx]
-  simp_rw [key]
-  rw [lintegral_indicator_const hs, mul_comm]
+  have hν : SFinite ν := by
+    by_contra hν
+    exact h0 (Measure.prod_eq_zero_of_not_sfinite hν)
+  letI : SFinite ν := hν
+  exact Measure.prod_prod s t
 
 theorem tauF_eq_comm {D : D7} (X : HidaSetting D) (y : AF X.B.I.F ⊗[X.B.I.F] X.B.I.E) :
     tauF X.B.I y = Algebra.TensorProduct.comm X.B.I.F (Af X.B.I.F) X.B.I.E
@@ -35,24 +70,11 @@ theorem tauF_eq_comm {D : D7} (X : HidaSetting D) (y : AF X.B.I.F ⊗[X.B.I.F] X
   | tmul a x =>
     rw [tauF_tmul]
     rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem toHA_fin_one {D : D7} (X : HidaSetting D) (hb : AdBridgeIso X.B.I) (s : X.B.I.Ginf) :
     (splitA X.B.I.cm.sig X.B.I.J (toHA X.B.I hb (s, 1))).2 = 1 := by
-  have hbr := ((toHA_isBridge X.B.I hb) (s, 1)).2
-  apply Subtype.ext
-  apply Units.ext
-  ext i j
-  have e := congrFun (congrFun hbr i) j
-  simp only [ofHAFin, Matrix.map_apply] at e
-  rw [tauF_eq_comm] at e
-  have e2 := congrArg (Algebra.TensorProduct.comm X.B.I.F (Af X.B.I.F) X.B.I.E).symm e
-  rw [AlgEquiv.symm_apply_apply] at e2
-  show tensMap (E := X.B.I.E) (sndA X.B.I.F) _ = _
-  rw [← e2]
-  show _ = (1 : Matrix (Fin X.B.I.n) (Fin X.B.I.n) (Af X.B.I.F ⊗[X.B.I.F] X.B.I.E)) i j
-  simp only [Formalism.MainNotions.S.AutInst.fmat, OneMemClass.coe_one, Units.val_one, Matrix.one_apply]
-  split_ifs <;> simp
+  apply PI.AprimeInfU.toHA_fin_one <;> assumption
 
 section Split
 
@@ -60,23 +82,7 @@ variable {D : D7} (X : HidaSetting D) (hb : AdBridgeIso X.B.I)
 
 theorem eq_one_of_toHA_fin {D : D7} (X : HidaSetting D) (hb : AdBridgeIso X.B.I) (p : X.B.I.GA)
     (h : (splitA X.B.I.cm.sig X.B.I.J (toHA X.B.I hb p)).2 = 1) : p.2 = 1 := by
-  have hbr := ((toHA_isBridge X.B.I hb) p).2
-  apply Subtype.ext
-  apply Units.ext
-  ext i j
-  have e := congrFun (congrFun hbr i) j
-  simp only [ofHAFin, Matrix.map_apply] at e
-  rw [tauF_eq_comm] at e
-  have h2 : tensMap (E := X.B.I.E) (sndA X.B.I.F) (hmat X.B.I (toHA X.B.I hb p) i j) =
-      (1 : Matrix (Fin X.B.I.n) (Fin X.B.I.n) (Af X.B.I.F ⊗[X.B.I.F] X.B.I.E)) i j := by
-    have := congrArg (fun g : HA (Af X.B.I.F) X.B.I.cm.sig X.B.I.J =>
-      (HA.mat (Af X.B.I.F) X.B.I.cm.sig X.B.I.J g).val i j) h
-    exact this
-  rw [h2] at e
-  rw [Formalism.MainNotions.S.AutInst.fmat] at e
-  show _ = (1 : Matrix (Fin X.B.I.n) (Fin X.B.I.n) (X.B.I.E ⊗[X.B.I.F] Af X.B.I.F)) i j
-  rw [e, Matrix.one_apply, Matrix.one_apply]
-  split_ifs <;> simp
+  apply PI.AprimeInfU.eq_one_of_toHA_fin <;> assumption
 
 theorem split_unitary_infinite_one (s : X.B.I.Ginf) :
     splitA X.B.I.cm.sig X.B.I.J (toHA X.B.I hb (s, 1)) = (X.toInf hb s, 1) :=

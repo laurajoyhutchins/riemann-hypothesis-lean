@@ -1,6 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.ConeBall
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.Characterised
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.ConeBall
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -70,46 +120,6 @@ theorem measurableSet_coneBall (h : HermNorm n) (W : Ideal (MvPolynomial (Fin n)
   convert this using 1
   ext y
   simp [coneBall, Metric.mem_ball]
-
-theorem ConeLogBound.proof (hMass : ConeIntegralMass.Statement) (hFin : ConeBallFinite.Statement)
-    (hInt : ConeFsLogIntegrable.Statement) (hNull : ConeHyperplaneNull.Statement) :
-    ConeLogBound.Statement := by
-  intro n e δ h W f u hW hf hδ hu
-  set μ := Measure.hausdorffMeasure ((2 * (e + 1) : ℕ) : ℝ) (X := EuclideanSpace ℂ (Fin n))
-  set c := (μ {y : EuclideanSpace ℂ (Fin n) | ‖y‖ < 1 ∧ ∀ j : Fin n, e + 1 ≤ (j : ℕ) → y j = 0}).toReal
-  have hmass := hMass n e δ h W f hW hf hδ
-  have hfin := hFin n e h W f hW hf
-  have hS := measurableSet_coneBall h W
-  have hconst : IntegrableOn (fun _ : EuclideanSpace ℂ (Fin n) => Real.log (h.norm u)) (coneBall h W) μ :=
-    integrableOn_const hfin.ne
-  have hae : (fun y => fsLog h u (h.pointOf y)) ≤ᵐ[μ.restrict (coneBall h W)]
-      fun _ => Real.log (h.norm u) := by
-    rw [Filter.EventuallyLE, ae_restrict_iff' hS]
-    have hnull := hNull n e h W f u hW hf hu
-    refine measure_mono_null (fun y hy => ?_) hnull
-    have hy' : ¬(y ∈ coneBall h W → fsLog h u (h.pointOf y) ≤ Real.log (h.norm u)) := hy
-    refine ⟨?_, ?_⟩
-    · by_contra hc
-      exact hy' fun h' => absurd h' hc
-    · show ∑ j, u j * h.pointOf y j = 0
-      by_contra hne
-      exact hy' fun _ => fsLog_le h hne
-  have hle := setIntegral_mono_ae_restrict (hInt n e h W f u hW hf hu) hconst hae
-  rw [setIntegral_const, smul_eq_mul] at hle
-  unfold coneIntegral at hmass ⊢
-  change (∫ y in coneBall h W, fsLog h u (h.pointOf y) ∂μ) / c ≤ δ * Real.log (h.norm u)
-  change (∫ y in coneBall h W, (1 : ℝ) ∂μ) / c = δ at hmass
-  rw [setIntegral_const, smul_eq_mul, mul_one] at hmass
-  rcases (le_or_gt c 0) with hc | hc
-  · have hc0 : c = 0 := le_antisymm hc ENNReal.toReal_nonneg
-    rw [hc0, div_zero] at hmass ⊢
-    rw [← hmass]
-    simp
-  · rw [div_le_iff₀ hc]
-    calc _ ≤ μ.real (coneBall h W) * Real.log (h.norm u) := hle
-      _ = δ * Real.log (h.norm u) * c := by
-        rw [← hmass]
-        field_simp
 
 end
 

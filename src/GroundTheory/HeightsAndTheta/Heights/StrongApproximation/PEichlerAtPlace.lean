@@ -1,5 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.StrongApproximation.Statements
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.StrongApproximation.Statements
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -26,8 +69,9 @@ theorem hf_single_incl (c : E ≃ₐ[F] E) (v : HeightOneSpectrum (𝓞 F))
     {N : ℕ} (J : Matrix (Fin N) (Fin N) E) (u : Fin N → Kv E v) (y : Fin N → E) :
     hf (sigA c) (J.map (inclA F E)) (singleV E v ∘ u) (inclA F E ∘ y) =
       singleV E v (hf (sigV c v).toRingHom (J.map (inclV E v)) u (inclV E v ∘ y)) := by
+
   simp only [hf, map_sum, Matrix.map_apply, Function.comp_apply, AlgHom.toRingHom_eq_coe,
-    RingHom.coe_coe]
+  RingHom.coe_coe]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [sigA_inclA, sigV_inclV, mul_assoc, ← map_mul (inclA F E), mul_assoc, ← map_mul (inclV E v), hsi]
 
@@ -38,8 +82,9 @@ theorem hf_single_single (c : E ≃ₐ[F] E) (v : HeightOneSpectrum (𝓞 F))
     {N : ℕ} (J : Matrix (Fin N) (Fin N) E) (u w : Fin N → Kv E v) :
     hf (sigA c) (J.map (inclA F E)) (singleV E v ∘ u) (singleV E v ∘ w) =
       singleV E v (hf (sigV c v).toRingHom (J.map (inclV E v)) u w) := by
+
   simp only [hf, map_sum, Matrix.map_apply, Function.comp_apply, AlgHom.toRingHom_eq_coe,
-    RingHom.coe_coe]
+  RingHom.coe_coe]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [hsig, hmul, hsi]
 
@@ -52,18 +97,21 @@ theorem embed_eich (c : E ≃ₐ[F] E) (v : HeightOneSpectrum (𝓞 F))
   have hw : ∀ j, ((J.map (inclV E v)) *ᵥ ((sigV c v).toRingHom ∘ (inclV E v ∘ e))) j =
       inclV E v ((J *ᵥ (c ∘ e)) j) := by
     intro j
+
     simp only [mulVec, dotProduct, map_sum, Matrix.map_apply, Function.comp_apply,
-      AlgHom.toRingHom_eq_coe, RingHom.coe_coe, sigV_inclV, map_mul]
+    AlgHom.toRingHom_eq_coe, RingHom.coe_coe, sigV_inclV, map_mul]
   have hwA : ∀ j, ((J.map (inclA F E)) *ᵥ (sigA c ∘ (inclA F E ∘ e))) j =
       inclA F E ((J *ᵥ (c ∘ e)) j) := by
     intro j
+
     simp only [mulVec, dotProduct, map_sum, Matrix.map_apply, Function.comp_apply, sigA_inclA,
-      map_mul]
+    map_mul]
   have hz : ∀ j, ((J.map (inclA F E)) *ᵥ (sigA c ∘ (singleV E v ∘ u))) j =
       singleV E v (((J.map (inclV E v)) *ᵥ ((sigV c v).toRingHom ∘ u)) j) := by
     intro j
+
     simp only [mulVec, dotProduct, map_sum, Matrix.map_apply, Function.comp_apply,
-      AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
+    AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [hsig, mul_comm (inclV E v (J j k)), hsi, mul_comm]
   ext i j
@@ -85,7 +133,7 @@ theorem proof (hPM : PlaceMaps.Statement) : EichlerAtPlace.Statement := by
     refine ⟨singleV E v ∘ u, singleV E v c', ?_, ?_, ?_, key a u c'⟩
     · rw [hf_single_incl c v hsi J, hua, map_zero]
     · rw [hf_single_incl c v hsi J, hub, map_zero]
-    · rw [hf_single_single c v hsi hmul hsig J, hsig, ← map_add, ← map_add]
+    · rw [hf_single_single c v hsi hmul hsig J, hsig, ← map_add (f := _), ← map_add (f := _)]
       exact (congrArg (singleV E v) hc').trans (map_zero _)
   rcases hg with hg | hg
   · exact Or.inl (along e f hg)

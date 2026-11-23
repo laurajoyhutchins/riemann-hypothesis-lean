@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.ComplexUniformizationSigOne
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasDivPlace
+public import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsSumBaseChangeOfCommuteBaseChange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDimEqOne
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsHolPeriods
+import Development.AbelianVarietyTheory.Definitions.Divisors.PointsNonemptyUnitaryRankOne
 import Development.AutomorphicArithmetic.RealSpanData.RealData
-import Development.AutomorphicArithmetic.RealSpanData.JSpan
-import Development.AutomorphicArithmetic.CommutativeAlgebra.ExistsSumBaseChangeOfCommuteBaseChange
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -42,7 +82,7 @@ private theorem actOn_inj {C V R : Type} [Ring C] [Algebra ℚ C] [AddCommGroup 
       induction w using TensorProduct.induction_on with
       | zero => simp
       | tmul r c => simp [Φ, Ψ, actOn_tmul]
-      | add a b ha hb => simp only [map_add, LinearMap.add_apply, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), LinearMap.add_apply, ha, hb]
     have hΨ : ∀ f, Ψ f z = 0 := by
       intro f
       apply hrep
@@ -55,7 +95,7 @@ private theorem actOn_inj {C V R : Type} [Ring C] [Algebra ℚ C] [AddCommGroup 
       induction w using TensorProduct.induction_on with
       | zero => simp
       | tmul r c => simp [Ψ, Module.Basis.tensorProduct_repr_tmul_apply, mul_comm]
-      | add a b ha hb => simp only [map_add, Finsupp.add_apply, ha, hb]
+      | add a b ha hb => simp only [map_add (f := _), Finsupp.add_apply, ha, hb]
     apply (bR.tensorProduct bC).repr.injective
     ext ⟨i, j⟩
     rw [hrepr, hΨ]
@@ -74,6 +114,7 @@ theorem UpperTheory.commutant_eq_range_actOn_and_injective :
   have hx : ∀ l, ∃ x, L.rep x = h l := fun l => (L.rep_range (h l)).2 (fun b => hh l b)
   choose x hx using hx
   refine ⟨∑ l, r l ⊗ₜ[ℚ] x l, ?_⟩
+
   rw [hA', map_sum]
   refine Finset.sum_congr rfl fun l _ => ?_
   refine TensorProduct.AlgebraTensorModule.curry_injective (LinearMap.ext_ring (LinearMap.ext fun v => ?_))

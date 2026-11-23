@@ -1,8 +1,53 @@
-import Development.WeilBound.CoreStatements.PlurisubharmonicCones.ExistsSmulMemOfEig
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValuesOfFrame
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AbelianPartIntegralPointAltBis
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianHomLieExtends
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsUniqueLeftBasisCoordsAdicCompletion
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptAwayFromPrimesStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianHomLieExtends
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ValuesOfFrame
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField Matrix Filter Topology
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.Semi
@@ -25,7 +70,11 @@ theorem finrank_eig' (h : 𝔐.IsLinPtOf z P MV A) (s : CMType H ⊕ CMType H) :
   have h1 := hb _ trivial hU
   have h2 : (𝔐.dR s).IsFrameAt b ⟨centre (spMap (algebraMap (𝓞 L) L) ≫ z), 𝔐.all _⟩ :=
     ⟨h1.1, (Lat.patch_of_not _ _ _ fun p hp => PtHt.FrameVal.not_inFibre _ _ p (𝔐.S_prime p hp)).symm.trans h1.2⟩
-  obtain ⟨sL, -, hi, hs⟩ := GlobalTheory.T.abelian_part_integral_point_alt E H D l Xo c Y S Ω K J y 𝔐 L z P V MV A s _ b h h2
+  have hlat := (GlobalTheory.T.hodge_cpt_away_from_primes E H D l Xo c (𝓞 c.F) (algebraMap _ _) Y S Ω K J y 𝔐
+    (FaithfulSMul.algebraMap_injective _ _) ⟨centre (spMap (algebraMap (𝓞 L) L) ≫ z), 𝔐.all _⟩
+    (fun p hp => PtHt.FrameVal.not_inFibre _ _ p hp)).2.2
+  obtain ⟨sL, -, hi, hs⟩ :=
+    PtHt.FrameVal.values_core 𝔐 _ P.tK P.m MV A.ρ A.σ A.σ_bij.1 h.1 h.2.1 hlat s b h2
   rw [← hs, finrank_span_eq_card hi, Fintype.card_fin]
 
 omit [∀ k, Fintype (J k)] in
@@ -39,8 +88,14 @@ theorem exists_action (h : 𝔐.IsLinPtOf z P MV A) :
     t'.act.mul t'.act.add
   refine ⟨t', m', MB, ρM, hfib, hρ, fun a x => ?_⟩
   have := t'.semi.separated
+  have hinj : Function.Injective (GlobalTheory.CompanionTheory.Ar.dualMap (algebraMap (𝓞 L) L)) := by
+    intro u v huv
+    have hL := IsFractionRing.injective (𝓞 L) L
+    refine TrivSqZeroExt.ext (hL ?_) (hL ?_)
+    · simpa [GlobalTheory.CompanionTheory.Ar.dualMap] using congrArg TrivSqZeroExt.fst huv
+    · simpa [GlobalTheory.CompanionTheory.Ar.dualMap] using congrArg TrivSqZeroExt.snd huv
   refine MB.inj (Over.OverMorphism.ext (LieHomOk.ext_of_spMap_injective (dualMap (algebraMap (𝓞 L) L))
-    (LieTangent.dualMap_injective (IsFractionRing.injective _ _)) t'.G.hom _ _
+    hinj t'.G.hom _ _
     ((Over.w (MB.pt _)).trans (Over.w (MB.pt _)).symm) ?_))
   have h1 : (MV.pt (A.ρ a x) ≫ P.τ.q ≫ P.e.hom).left ≫ m'.φ = _ := hl ⟨A.ρ a x, A.stable a x x.2⟩
   have h2 : (MV.pt x ≫ P.τ.q ≫ P.e.hom).left ≫ m'.φ = _ := hl x

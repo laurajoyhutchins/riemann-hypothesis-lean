@@ -1,8 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SchurCoreA
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SmatUnitary
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ClmEqZeroOfSpan
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SchurCoreA
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.SmatUnitary
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ClmEqZeroOfSpan
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,8 +62,6 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 section Lin
 
 variable {n k : ℕ} (ε : Fin n → Bool)
-
-theorem hJ_eq (x y : Fin n → ℂ) : hJ ε x y = star x ⬝ᵥ (Formalism.REAL.Jm ε *ᵥ y) := rfl
 
 theorem hJ_symm (x y : Fin n → ℂ) : hJ ε x y = star (hJ ε y x) := by
   simp only [hJ, dotProduct, Formalism.REAL.Jm, mulVec_diagonal, Pi.star_apply, star_sum, star_mul', star_star]
@@ -88,7 +129,7 @@ abbrev rvc (v : InfinitePlace X.B.I.F) (p : (VS D).V) : Fin X.B.I.n → ℂ := r
 
 theorem crd_add (p p' : (VS D).V) : X.crd (p + p') = X.crd p + X.crd p' := by
   funext i
-  simp only [Formalism.L2.SG.HidaSetting.HidaSetting.crd, Formalism.L2.SG.HidaSetting.crdOf, map_add, Finsupp.add_apply, Pi.add_apply]
+  simp only [Formalism.L2.SG.HidaSetting.HidaSetting.crd, Formalism.L2.SG.HidaSetting.crdOf, map_add (f := _), Finsupp.add_apply, Pi.add_apply]
 
 theorem crd_smul (c : D.host.E) (p : (VS D).V) : X.crd (c • p) = X.ιE.symm c • X.crd p := by
   funext i
@@ -100,7 +141,7 @@ theorem rvc_add (v : InfinitePlace X.B.I.F) (p p' : (VS D).V) : rvc X v (p + p')
   rw [← mulVec_add]
   congr 1
   funext i
-  simp only [Pi.add_apply, map_add]
+  simp
 
 theorem rvc_smul (v : InfinitePlace X.B.I.F) (c : D.host.E) (p : (VS D).V) :
     rvc X v (c • p) = X.B.I.φ v (X.ιE.symm c) • rvc X v p := by
@@ -108,7 +149,7 @@ theorem rvc_smul (v : InfinitePlace X.B.I.F) (c : D.host.E) (p : (VS D).V) :
   rw [← mulVec_smul]
   congr 1
   funext i
-  simp only [Pi.smul_apply, smul_eq_mul, map_mul]
+  simp
 
 theorem rvc_zero (v : InfinitePlace X.B.I.F) : rvc X v 0 = 0 := by
   simpa using rvc_smul X v (0 : D.host.E) 0
@@ -183,10 +224,6 @@ def sUg {n k : ℕ} (ε : Fin n → Bool) (wf : Fin k → Fin n → ℂ)
     smat_inv _ _ (Formalism.REAL.Jm_mul_self _) (Formalism.REAL.Jm_conjTranspose _) G hG hon⟩,
     smat_unitary _ _ hon (Formalism.REAL.Jm_conjTranspose _) G hG⟩
 
-theorem uMat_sUg {n k : ℕ} (ε : Fin n → Bool) (wf : Fin k → Fin n → ℂ)
-    (hon : ∀ a b, hJ ε (wf a) (wf b) = if a = b then 1 else 0) (G : Matrix (Fin k) (Fin k) ℂ) (hG : Gᴴ * G = 1) :
-    uMat (sUg ε wf hon G hG) = smat (Formalism.REAL.Jm ε) wf G := rfl
-
 theorem uMat_mul' {n : ℕ} {ε : Fin n → Bool} (a b : Formalism.REAL.UJ ε) : uMat (a * b) = uMat a * uMat b := by
   rfl
 
@@ -224,8 +261,7 @@ theorem geomB_of (hL : LeviTens) (hW : WfrSpan) (hN : CplxNF) : GeomB := by
   have hiso := q.2.2.1
   have hfrq : (frq X q).fl = mapFlag q.1.2 hiso (lf D (X.Fu u')).fl := by
     unfold frq mapLF
-    rw [dif_pos hiso]
-    rfl
+    rw [dite_eq_left hiso]
   have he' : ∀ a, q.1.2 (X.eX a) ∈ (frq X q).fl.X := by
     intro a
     rw [hfrq]

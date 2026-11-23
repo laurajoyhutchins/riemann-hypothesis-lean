@@ -1,4 +1,51 @@
-import Development.EtaleCohomology.EtaleSheaves.LeafVanBStalkPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafVanBStalkPf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Etale.StandardEtale
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC
@@ -38,7 +85,7 @@ theorem isLocalRing_of_cof {J : Type} [SmallCategory J] [IsFiltered J] (D : J �
   have : Nontrivial c.pt := ω.domain_nontrivial
   refine IsLocalRing.of_nonunits_add (fun a b ha hb hab => ?_)
   have := hab.map ω
-  rw [map_add, key a ha, key b hb, add_zero] at this
+  rw [map_add (f := _), key a ha, key b hb, add_zero] at this
   exact not_isUnit_zero this
 
 open Polynomial in
@@ -50,7 +97,7 @@ theorem poly_rep {J : Type} [SmallCategory J] [IsFiltered J] (D : J ⥤ CommRing
     obtain ⟨j2, P2, rfl⟩ := hq
     refine ⟨IsFiltered.max j1 j2, P1.map (D.map (IsFiltered.leftToMax j1 j2)).hom +
       P2.map (D.map (IsFiltered.rightToMax j1 j2)).hom, ?_⟩
-    rw [Polynomial.map_add, Polynomial.map_map, Polynomial.map_map, ← CommRingCat.hom_comp,
+    rw [Polynomial.map_add (f := _), Polynomial.map_map, Polynomial.map_map, ← CommRingCat.hom_comp,
       ← CommRingCat.hom_comp, c.w, c.w]
   | monomial n a =>
     obtain ⟨j, f, rfl⟩ := Limits.Concrete.isColimit_exists_rep D hc a
@@ -65,8 +112,8 @@ theorem monic_rep {J : Type} [SmallCategory J] [IsFiltered J] (D : J ⥤ CommRin
   obtain ⟨Q, hQ, -, hm⟩ := lifts_and_degree_eq_and_monic (f := (c.ι.app j).hom) ⟨P, hP⟩ hp
   exact ⟨j, Q, hQ, hm⟩
 
-open Polynomial in
 
+open Polynomial in
 theorem root_of_cof {J : Type} [SmallCategory J] [IsFiltered J] (D : J ⥤ CommRingCat.{0}) (c : Cocone D)
     {Ω : Type} [Field Ω] (ω : c.pt →+* Ω)
     (H : ∀ (j : J) (E : Type) (_ : CommRing E) (_ : Algebra (D.obj j) E) (_ : Algebra.Etale (D.obj j) E) (ψ : E →+* Ω),

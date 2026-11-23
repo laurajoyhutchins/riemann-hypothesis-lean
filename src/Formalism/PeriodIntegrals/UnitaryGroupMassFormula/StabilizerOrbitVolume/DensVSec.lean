@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensVSecSt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.TensTop
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.DensVSecSt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.LevelIntersectParabolic
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +64,7 @@ theorem exists_leftInv_of_linIndep {K : Type} [CommRing K] [IsSemisimpleRing K] 
     intro c
     simp [f, LinearMap.sum_apply]
   have hf : Function.Injective f := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro c hc
     rw [hf_apply] at hc
     funext i
@@ -39,6 +85,7 @@ theorem exists_leftInv_of_linIndep {K : Type} [CommRing K] [IsSemisimpleRing K] 
       simp
     rw [hZf, ← LinearMap.comp_apply, hg, LinearMap.id_apply]
   have h2 := congrFun key i'
+
   rw [hZi, map_sum] at h2
   simpa [Finset.sum_apply, map_smul] using h2
 
@@ -50,7 +97,7 @@ theorem secGram_holds : SecGram := by
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul r e => simp [sigR, hσ]
-    | add z w hz hw => rw [map_add, map_add, hz, hw]
+    | add z w hz hw => rw [map_add (f := _), map_add (f := _), hz, hw]
   have hsF : ∀ c : F, sigR R σ (algebraMap F (R ⊗[F] E) c) = algebraMap F (R ⊗[F] E) c := by
     intro c
     simp [sigR]
@@ -80,6 +127,7 @@ theorem secGram_holds : SecGram := by
     have hx0 : ∑ i, s (c i) • x i = 0 := by
       funext k
       have h4 := congrArg s (congrFun hv0 k)
+
       simp only [hv, map_sum, map_mul, hs2, map_zero, Pi.zero_apply] at h4
       simpa [Finset.sum_apply, smul_eq_mul] using h4
     have h5 := Fintype.linearIndependent_iff.1 hx _ hx0 i
@@ -108,12 +156,13 @@ theorem secGram_holds : SecGram := by
     simp [hq]
   have h2 : ∀ i j, hR R σ J (Y i) (x j) = s (hR R σ J (x j) (Y i)) := by
     intro i j
+
     simp only [hR, Formalism.UG.hform, ← hs, map_sum, map_mul, hs2, hJR]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => by ring
   have hsc : s c = c := hsF _
   have hcc : c + c = 1 := by
-    rw [hc, ← map_add, show (1 / 2 : F) + 1 / 2 = 1 by norm_num, map_one]
+    rw [hc, ← map_add (f := _), show (1 / 2 : F) + 1 / 2 = 1 by norm_num, map_one]
   unfold gramB
   funext i j
   show hR R σ J (x i) (Y j) + hR R σ J (Y i) (x j) = S i j

@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.DeRhamMap
-import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.ExistsFactorialMulEqPow
+module
+
+public import Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.TruncLogEqOfPowEqZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +103,7 @@ theorem truncLog_add {n : ℕ} {x y : B} (hx : x ^ n = 0) (hy : y ^ n = 0)
       ← mul_assoc, d2]
     simp
     ring
-  haveI : IsAddTorsionFree B := IsAddTorsionFree.of_module_rat B
+  haveI : HasUniqueDiv B := HasUniqueDiv.of_module_rat B
   have hC := eq_C_of_derivative_eq_zero hD
   have e1 := congrArg (evalRingHom 1) hC
   have e0 := congrArg (evalRingHom 0) hC
@@ -85,25 +134,16 @@ theorem log_mul (u v : BdRPlus p R) (hu : theta p R u = 1) (hv : theta p R v = 1
   refine ext_eval fun n => ?_
   have e : eval p R n (u * v - 1) =
       eval p R n (u - 1) + eval p R n (v - 1) + eval p R n (u - 1) * eval p R n (v - 1) := by
-    rw [← map_mul, ← map_add, ← map_add]; congr 1; ring
-  rw [map_add, eval_log, eval_log, eval_log, e]
+    rw [← map_mul, ← map_add (f := _), ← map_add (f := _)]; congr 1; ring
+  rw [map_add (f := _), eval_log, eval_log, eval_log, e]
   refine truncLog_add (eval_pow_eq_zero (by simp [hu]) n) (eval_pow_eq_zero (by simp [hv]) n) ?_
   rw [← e]
   exact eval_pow_eq_zero (by simp [hu, hv]) n
-
-theorem log_one : log (1 : BdRPlus p R) (map_one _) = 0 :=
-  ext_eval fun n => by rw [eval_log, sub_self, map_zero, truncLog_zero]
 
 theorem eval_two_log (u : BdRPlus p R) (hu : theta p R u = 1) :
     eval p R 2 (log u hu) = eval p R 2 (u - 1) := by
   rw [eval_log, truncLog, Finset.sum_range_succ, Finset.sum_range_one,
     eval_pow_eq_zero (x := u - 1) (by simp [hu]) 2]
-  simp
-
-theorem theta_log (u : BdRPlus p R) (hu : theta p R u = 1) : theta p R (log u hu) = 0 := by
-  rw [theta_eq_of_eval_one (a := 0), map_zero]
-  rw [eval_log, truncLog, Finset.sum_range_one, zero_add,
-    eval_pow_eq_zero (x := u - 1) (by simp [hu]) 1]
   simp
 
 def logTeich (η : tateModule p R) : BdRPlus p R :=
@@ -129,16 +169,6 @@ theorem logFlat_twist (η : tateModule p R) (ϖ : PFlat p R) :
     logFlat (ϖ.twist η) = logTeich η + logFlat ϖ := by
   rw [logFlat, logFlat, logTeich, ← log_mul]
   exact log_congr (by simp [teichDivP, PFlat.twist, mul_assoc]) _ _
-
-theorem map_logTeich (f : R →+* S) (η : tateModule p R) :
-    map p f (logTeich η) = logTeich (tateModule.map p f η) := by
-  rw [logTeich, map_log]
-  exact log_congr (by simp) _ _
-
-theorem map_logFlat (f : R →+* S) (ϖ : PFlat p R) :
-    map p f (logFlat ϖ) = logFlat (PFlat.map p f ϖ) := by
-  rw [logFlat, map_log]
-  exact log_congr (by simp [teichDivP]) _ _
 
 end BdRPlus
 

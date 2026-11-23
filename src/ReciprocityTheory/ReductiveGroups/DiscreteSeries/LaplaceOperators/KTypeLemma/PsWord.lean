@@ -1,5 +1,60 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.TransferStatement
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiP
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.TransferStatement
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ContinuousOnFderivPhiP
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
+
+@[expose] public section
 
 noncomputable section
 
@@ -18,7 +73,7 @@ variable {n : ℕ}
 
 local notation "𝕄" => Fin n → Fin n → ℂ
 local notation "MM" => Matrix (Fin n) (Fin n) ℂ
-local notation "WW" => ((Fin n → Fin n → ℂ) × (Fin n → Fin n → ℂ)) × (Fin n → Fin n → ℂ)
+local notation "WW" => (𝕄 × 𝕄) × 𝕄
 
 def mmul (A B : 𝕄) : 𝕄 := Matrix.of A * Matrix.of B
 
@@ -33,7 +88,7 @@ lemma continuous_mmul {X : Type*} [TopologicalSpace X] {f g : X → 𝕄} (hf : 
     (hg : Continuous g) : Continuous fun x => mmul (f x) (g x) := by
   refine continuous_pi fun a => continuous_pi fun b => ?_
   simp only [mmul, Matrix.mul_apply, Matrix.of_apply]
-  exact continuous_finset_sum _ fun c _ =>
+  exact continuous_finsetSum _ fun c _ =>
     ((continuous_apply c).comp ((continuous_apply a).comp hf)).mul
       ((continuous_apply b).comp ((continuous_apply c).comp hg))
 
@@ -41,14 +96,6 @@ lemma diffAt {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] [NormedAdd
     [NormedSpace ℂ F] {f : E → F} {s : Set E} {x : E} (h : ContDiffOn ℂ ω f s) (hs : IsOpen s)
     (hx : x ∈ s) : DifferentiableAt ℂ f x := by
   exact (h.contDiffAt (hs.mem_nhds hx)).differentiableAt (by simp)
-
-lemma contDiffAt_zpow {X : Type*} [NormedAddCommGroup X] [NormedSpace ℂ X] {f : X → ℂ} {x : X}
-    (hf : ContDiffAt ℂ ω f x) (hx : f x ≠ 0) (m : ℤ) : ContDiffAt ℂ ω (fun y => f y ^ m) x := by
-  rcases Int.eq_nat_or_neg m with ⟨k, rfl | rfl⟩
-  · simp only [zpow_natCast]
-    exact hf.pow k
-  · simp only [_root_.zpow_neg, zpow_natCast]
-    exact (hf.pow k).inv (pow_ne_zero _ hx)
 
 private theorem contDiff_det_k_type {m : ℕ} {k : WithTop ℕ∞} :
     ContDiff ℂ k (fun z : Fin m → Fin m → ℂ => Matrix.det z) := by
@@ -110,7 +157,6 @@ lemma hasFDerivAt_slice {f : WW → ℂ} {q : WW} (hf : DifferentiableAt ℂ f q
       ((fderiv ℂ f q).comp (ContinuousLinearMap.inr ℂ (𝕄 × 𝕄) 𝕄)) q.2 := by
   first
   | exact hf.hasFDerivAt.comp q.2 (hasFDerivAt_prodMk_right q.1 q.2)
-  | exact hf.hasFDerivAt.comp q.2 (hasFDerivAt_prod_mk_right q.1 q.2)
 
 lemma contDiffOn_Fw (μ : Fin n → ℤ) : ∀ D : List MM, ContDiffOn ℂ ω (Fw μ D) Om
   | [] => (contDiffOn_phiQ μ).comp contDiff_snd.contDiffOn fun _ hq => hq
@@ -136,22 +182,16 @@ lemma hasFDerivAt_psi (k : KG ε) (z : 𝕄) : HasFDerivAt (psi k) (dpsi k) z :=
   first
   | exact (hasFDerivAt_const (toMK k⁻¹, toMK k) z).prodMk
       (Ps1.conjCLM (toMK k⁻¹) (toMK k)).hasFDerivAt
-  | exact (hasFDerivAt_const (toMK k⁻¹, toMK k) z).prod
-      (Ps1.conjCLM (toMK k⁻¹) (toMK k)).hasFDerivAt
 
 lemma continuous_psi : Continuous fun p : 𝕄 × KG ε => psi p.2 p.1 := by
   have h1 : Continuous fun k : KG ε => toMK k := by
     first
     | fun_prop
-    | (unfold toMK; fun_prop)
-    | continuity
-    | (unfold toMK; continuity)
   have h2 : Continuous fun k : KG ε => toMK k⁻¹ := h1.comp continuous_inv
   have hm : Continuous fun p : 𝕄 × KG ε => mmul (mmul (toMK p.2⁻¹) p.1) (toMK p.2) :=
     continuous_mmul (continuous_mmul (h2.comp continuous_snd) continuous_fst) (h1.comp continuous_snd)
   first
   | exact ((h2.comp continuous_snd).prodMk (h1.comp continuous_snd)).prodMk hm
-  | exact ((h2.comp continuous_snd).prod_mk (h1.comp continuous_snd)).prod_mk hm
 
 def cc (T : KType ε Λ) : ℂ := (Module.finrank ℂ T.V : ℂ) / ((muK ε Set.univ).toReal : ℂ)
 
@@ -167,22 +207,11 @@ lemma hasFDerivAt_G (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) (k : KG
   exact ((diffAt (contDiffOn_Fw μ D) isOpen_Om hx).hasFDerivAt.comp x
     (hasFDerivAt_psi k x)).smul_const _
 
-lemma continuousOn_G (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) :
-    ContinuousOn (fun p : 𝕄 × KG ε => G T μ D p.1 p.2) (Ps1.Uset ε ×ˢ Set.univ) := by
-  have hop : Continuous fun k : KG ε => T.op k := continuous_subtype_val.comp T.cont
-  have hC : Continuous fun k : KG ε => T.op k * projW T * T.op k⁻¹ :=
-    (hop.mul continuous_const).mul (hop.comp continuous_inv)
-  exact ((contDiffOn_Fw μ D).continuousOn.comp continuous_psi.continuousOn
-    (fun ⦃p⦄ hp => hp.1 p.2)).smul (hC.comp continuous_snd).continuousOn
-
 lemma continuousOn_G' (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) :
     ContinuousOn (fun p : 𝕄 × KG ε => G' T μ D p.1 p.2) (Ps1.Uset ε ×ˢ Set.univ) := by
   have h1 : Continuous fun k : KG ε => toMK k := by
     first
     | fun_prop
-    | (unfold toMK; fun_prop)
-    | continuity
-    | (unfold toMK; continuity)
   have h2 : Continuous fun k : KG ε => toMK k⁻¹ := h1.comp continuous_inv
   have hop : Continuous fun k : KG ε => T.op k := continuous_subtype_val.comp T.cont
   have hC : Continuous fun k : KG ε => T.op k * projW T * T.op k⁻¹ :=
@@ -196,8 +225,6 @@ lemma continuousOn_G' (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) :
     first
     | exact continuous_const.prodMk
         (continuous_mmul (continuous_mmul (h2.comp continuous_snd) continuous_const) (h1.comp continuous_snd))
-    | exact continuous_const.prod_mk
-        (continuous_mmul (continuous_mmul (h2.comp continuous_snd) continuous_const) (h1.comp continuous_snd))
   exact (hFd.clm_apply hdy.continuousOn).smul (hC.comp continuous_snd).continuousOn
 
 lemma continuous_Fwk (μ : Fin n → ℤ) (D : List MM) {z : 𝕄} (hz : z ∈ Ps1.Uset ε) :
@@ -205,7 +232,6 @@ lemma continuous_Fwk (μ : Fin n → ℤ) (D : List MM) {z : 𝕄} (hz : z ∈ P
   have hc : Continuous fun k : KG ε => psi k z := by
     first
     | exact continuous_psi.comp (Continuous.prodMk continuous_const continuous_id)
-    | exact continuous_psi.comp (Continuous.prod_mk continuous_const continuous_id)
   exact (contDiffOn_Fw μ D).continuousOn.comp_continuous hc (fun k => hz k)
 
 lemma continuous_Gk (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : 𝕄} (hz : z ∈ Ps1.Uset ε) :
@@ -220,9 +246,6 @@ lemma continuous_G'k (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : �
   have h1 : Continuous fun k : KG ε => toMK k := by
     first
     | fun_prop
-    | (unfold toMK; fun_prop)
-    | continuity
-    | (unfold toMK; continuity)
   have h2 : Continuous fun k : KG ε => toMK k⁻¹ := h1.comp continuous_inv
   have hop : Continuous fun k : KG ε => T.op k := continuous_subtype_val.comp T.cont
   have hC : Continuous fun k : KG ε => T.op k * projW T * T.op k⁻¹ :=
@@ -230,7 +253,6 @@ lemma continuous_G'k (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : �
   have hps : Continuous fun k : KG ε => psi k z := by
     first
     | exact continuous_psi.comp (Continuous.prodMk continuous_const continuous_id)
-    | exact continuous_psi.comp (Continuous.prod_mk continuous_const continuous_id)
   have hFd : Continuous fun k : KG ε => fderiv ℂ (Fw μ D) (psi k z) :=
     ((contDiffOn_Fw μ D).continuousOn_fderiv_of_isOpen isOpen_Om le_top).comp_continuous hps
       (fun k => hz k)
@@ -238,20 +260,17 @@ lemma continuous_G'k (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : �
   have hdy : Continuous fun k : KG ε => dpsi k y := by
     first
     | exact continuous_const.prodMk (continuous_mmul (continuous_mmul h2 continuous_const) h1)
-    | exact continuous_const.prod_mk (continuous_mmul (continuous_mmul h2 continuous_const) h1)
   exact (hFd.clm_apply hdy).smul hC
 
 lemma integrable_G [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : 𝕄}
     (hz : z ∈ Ps1.Uset ε) : Integrable (G T μ D z) (muK ε) := by
   first
   | exact (continuous_Gk T μ D hz).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-  | exact integrableOn_univ.1 ((continuous_Gk T μ D hz).continuousOn.integrableOn_compact isCompact_univ)
 
 lemma integrable_G' [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : 𝕄}
     (hz : z ∈ Ps1.Uset ε) : Integrable (G' T μ D z) (muK ε) := by
   first
   | exact (continuous_G'k T μ D hz).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-  | exact integrableOn_univ.1 ((continuous_G'k T μ D hz).continuousOn.integrableOn_compact isCompact_univ)
 
 lemma hasFDerivAt_intG [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM)
     {z : 𝕄} (hz : z ∈ Ps1.Uset ε) :
@@ -275,8 +294,6 @@ lemma toMK_mul_inv (k : KG ε) : toMK k * toMK k⁻¹ = 1 := by
   | (simp only [toMK]; rw [← map_mul, mul_inv_cancel, map_one])
   | (unfold toMK; rw [← map_mul, mul_inv_cancel, map_one])
   | simp [toMK, toM]
-  | (unfold toMK toM; simp)
-  | (simp only [toMK, toM]; simp [Matrix.mul_eq_one_comm])
 
 lemma G'_apply (T : KType ε Λ) (μ : Fin n → ℤ) (D : List MM) {z : MM} (hz : z ∈ Ps1.Uset ε)
     (k : KG ε) (Z : MM) : G' T μ D z k (Z * z) = G T μ (Z :: D) z k := by

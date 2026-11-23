@@ -1,8 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsMatrixForm
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsStrictlySemistableAlt
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.YonedaAddNaturalityLeft
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsGrothendieckAbelianPresheaf
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.YonedaAddNaturalityLeft
+public import Mathlib.Algebra.Category.ModuleCat.Monoidal.Closed
+public import Mathlib.Algebra.Homology.DerivedCategory.Ext.Map
+public import Mathlib.CategoryTheory.Abelian.GrothendieckCategory.HasExt
+public import Mathlib.CategoryTheory.Monoidal.Braided.Reflection
+public import Mathlib.CategoryTheory.Sites.Monoidal
+public import Mathlib.RingTheory.PiTensorProduct
+public import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Flat.CategoryTheory
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite MonoidalCategory Enriched.FunctorCategory
@@ -98,8 +147,7 @@ theorem tensorLeft_sheaf_additive (F : Sheaf J (ModuleCat.{1} S)) : (tensorLeft 
   exact Functor.additive_of_iso e.symm
 
 theorem tensorLeft_sheaf_linear (F : Sheaf J (ModuleCat.{1} S)) :
-    letI := tensorLeft_sheaf_additive J S F
-    (tensorLeft F).Linear S := by
+    (letI := tensorLeft_sheaf_additive J S F; (tensorLeft F).Linear S) := by
   letI := tensorLeft_sheaf_additive J S F
   have e : tensorLeft F ≅ sheafToPresheaf J _ ⋙ tensorLeft F.obj ⋙ presheafToSheaf J _ :=
     (tensoringLeft _).mapIso (asIso ((sheafificationAdjunction J _).counit.app F)).symm ≪≫
@@ -132,8 +180,6 @@ instance (F : Shv R) : PreservesFiniteColimits (tensorRight F) :=
 abbrev freePre (X : Scheme.{0}) : Scheme.{0}ᵒᵖ ⥤ ModuleCat.{1} (ULift.{1} R) :=
   uliftYoneda.{1}.obj X ⋙ ModuleCat.free (ULift.{1} R)
 
-example (X : Scheme.{0}) : (freeOn R).obj X = (presheafToSheaf _ _).obj (freePre R X) := rfl
-
 instance (X : Scheme.{0}) : PreservesFiniteLimits (tensorLeft ((freeOn R).obj X)) :=
   preservesFiniteLimits_tensorLeft_sheafify _ _ (freePre R X) (fun U =>
     inferInstanceAs (Module.Flat (ULift.{1} R) (ULift.{1} (U.unop ⟶ X) →₀ ULift.{1} R)))
@@ -143,36 +189,13 @@ class FlatCoef : Prop where
 
 attribute [instance] FlatCoef.preservesFiniteLimits_tensorRight
 
-theorem FlatCoef.of_flat (h : ∀ U : Scheme.{0}, Module.Flat R C(U, R)) : FlatCoef R := by
-  have : PreservesFiniteLimits (tensorLeft (coef R)) :=
-    preservesFiniteLimits_tensorLeft_sheafify _ _ (coefPre R) (fun U => by
-      have := h U.unop
-      change Module.Flat (ULift.{1} R) (ULift.{1} C(U.unop, R))
-      rw [Module.Flat.ulift_left_iff]
-      infer_instance)
-  exact ⟨preservesFiniteLimits_of_natIso (BraidedCategory.tensorLeftIsoTensorRight (coef R))⟩
-
-instance [IsDomain R] [IsBezout R] : FlatCoef R := by
-  refine FlatCoef.of_flat R fun U => ?_
-  rw [Module.Flat.flat_iff_torsion_eq_bot_of_isBezout, eq_bot_iff]
-  intro f hf
-  obtain ⟨a, ha⟩ := (Submodule.mem_torsion_iff f).1 hf
-  ext u
-  have hu := congrArg (fun g : C(U, R) => g u) ha
-  simp only [Submonoid.smul_def, ContinuousMap.smul_apply, smul_eq_mul, ContinuousMap.zero_apply] at hu
-  exact (mul_eq_zero.1 hu).resolve_left (nonZeroDivisors.ne_zero a.2)
-
-example : FlatCoef ℚ := inferInstance
-example (p : ℕ) [Fact p.Prime] : FlatCoef ℤ_[p] := inferInstance
-example (p : ℕ) [Fact p.Prime] : FlatCoef ℚ_[p] := inferInstance
-
 def coefMulPre : coefPre R ⊗ coefPre R ⟶ coefPre R where
   app U := ModuleCat.ofHom (TensorProduct.lift (LinearMap.mk₂ (ULift.{1} R)
     (fun f g : ULift.{1} C(U.unop, R) => (⟨f.down * g.down⟩ : ULift.{1} C(U.unop, R)))
-    (fun _ _ _ => ULift.ext _ _ (add_mul _ _ _))
-    (fun c _ _ => ULift.ext _ _ (smul_mul_assoc c.down _ _))
-    (fun _ _ _ => ULift.ext _ _ (mul_add _ _ _))
-    (fun c _ _ => ULift.ext _ _ (mul_smul_comm c.down _ _))))
+    (fun _ _ _ => ULift.ext (add_mul _ _ _))
+    (fun c _ _ => ULift.ext (smul_mul_assoc c.down _ _))
+    (fun _ _ _ => ULift.ext (mul_add _ _ _))
+    (fun c _ _ => ULift.ext (mul_smul_comm c.down _ _))))
   naturality U V f := by
     apply ModuleCat.MonoidalCategory.tensor_ext
     intro x y
@@ -182,7 +205,7 @@ def coefOnePre : 𝟙_ (Scheme.{0}ᵒᵖ ⥤ ModuleCat.{1} (ULift.{1} R)) ⟶ co
   app U := ModuleCat.ofHom (LinearMap.toSpanSingleton (ULift.{1} R) _ (⟨1⟩ : ULift.{1} C(U.unop, R)))
   naturality U V f := by
     ext c
-    exact ULift.ext _ _ (ContinuousMap.ext fun x => rfl)
+    exact ULift.ext (ContinuousMap.ext fun x => rfl)
 
 def freeDiagPre (X : Scheme.{0}) : freePre R X ⟶ freePre R X ⊗ freePre R X where
   app U := ModuleCat.ofHom (Finsupp.linearCombination (ULift.{1} R)
@@ -231,21 +254,52 @@ def cupExt (X : Scheme.{0}) {i j n : ℕ} (h : i + j = n) (a : HS R (coef R) i X
     ((a.mapExactFunctor (tensorRight (coef R))).comp (Abelian.Ext.mk₀ (coefMul R)) (add_zero i))
     (show j + i = n by omega)) (zero_add n)
 
+private theorem extComp_isLinear {S D : Type*} [CommRing S] [Category* D] [Abelian D]
+    [HasExt.{1} D] [Linear S D] {A B C M N : D} {i j n : ℕ} (h : j + i = n)
+    (f : Abelian.Ext A B i →ₗ[S] Abelian.Ext M N i)
+    (g : Abelian.Ext A B j →ₗ[S] Abelian.Ext C M j)
+    (d : Abelian.Ext A C 0) (m : Abelian.Ext N B 0)
+    (product : Abelian.Ext A B i → Abelian.Ext A B j → Abelian.Ext A B n)
+    (hprod : product = fun a b => d.comp ((g b).comp ((f a).comp m (add_zero i)) h) (zero_add n)) :
+    (∀ b, IsLinearMap S (fun a => product a b)) ∧
+      (∀ a, IsLinearMap S (product a)) := by
+  subst product
+  let precomp := d.precompOfLinear S B (zero_add n)
+  constructor
+  · intro b
+    exact (precomp.comp (((g b).precompOfLinear S B h).comp
+      ((m.postcompOfLinear S M (add_zero i)).comp f))).isLinear
+  · intro a
+    exact (precomp.comp ((((f a).comp m (add_zero i)).postcompOfLinear S C h).comp g)).isLinear
+
+private theorem cupExt_isLinear (X : Scheme.{0}) {i j n : ℕ} (h : i + j = n) :
+    (∀ b : HS R (coef R) j X,
+      IsLinearMap (ULift.{1} R) (fun a : HS R (coef R) i X => cupExt R X h a b)) ∧
+    (∀ a : HS R (coef R) i X,
+      IsLinearMap (ULift.{1} R) (fun b : HS R (coef R) j X => cupExt R X h a b)) := by
+  let A := (freeOn R).obj X
+  let B := coef R
+  exact extComp_isLinear ((Nat.add_comm j i).trans h)
+    ((tensorRight B).mapExtLinearMap (ULift.{1} R) A B i)
+    ((tensorLeft A).mapExtLinearMap (ULift.{1} R) A B j)
+    (Abelian.Ext.mk₀ (freeDiag R X)) (Abelian.Ext.mk₀ (coefMul R))
+    (cupExt R X h) rfl
+
 theorem cupExt_add_left (X : Scheme.{0}) {i j n : ℕ} (h : i + j = n) (a a' : HS R (coef R) i X)
     (b : HS R (coef R) j X) : cupExt R X h (a + a') b = cupExt R X h a b + cupExt R X h a' b := by
-  simp only [cupExt, Abelian.Ext.mapExactFunctor_add, Abelian.Ext.add_comp, Abelian.Ext.comp_add]
+  exact ((cupExt_isLinear R X h).1 b).map_add a a'
 
 theorem cupExt_add_right (X : Scheme.{0}) {i j n : ℕ} (h : i + j = n) (a : HS R (coef R) i X)
     (b b' : HS R (coef R) j X) : cupExt R X h a (b + b') = cupExt R X h a b + cupExt R X h a b' := by
-  simp only [cupExt, Abelian.Ext.mapExactFunctor_add, Abelian.Ext.add_comp, Abelian.Ext.comp_add]
+  exact ((cupExt_isLinear R X h).2 a).map_add b b'
 
 theorem cupExt_smul_left (X : Scheme.{0}) {i j n : ℕ} (h : i + j = n) (r : ULift.{1} R) (a : HS R (coef R) i X)
     (b : HS R (coef R) j X) : cupExt R X h (r • a) b = r • cupExt R X h a b := by
-  simp only [cupExt, Functor.mapExactFunctor_smul, Abelian.Ext.smul_comp, Abelian.Ext.comp_smul]
+  exact ((cupExt_isLinear R X h).1 b).map_smul r a
 
 theorem cupExt_smul_right (X : Scheme.{0}) {i j n : ℕ} (h : i + j = n) (r : ULift.{1} R) (a : HS R (coef R) i X)
     (b : HS R (coef R) j X) : cupExt R X h a (r • b) = r • cupExt R X h a b := by
-  simp only [cupExt, Functor.mapExactFunctor_smul, Abelian.Ext.smul_comp, Abelian.Ext.comp_smul]
+  exact ((cupExt_isLinear R X h).2 a).map_smul r b
 
 def cupN (X : Scheme.{0}) (i j n : ℕ) (h : i + j = n) : H R i X →ₗ[R] H R j X →ₗ[R] H R n X :=
   LinearMap.mk₂ R (fun a b => cupExt R X h a b)
@@ -256,67 +310,11 @@ def cupN (X : Scheme.{0}) (i j n : ℕ) (h : i + j = n) : H R i X →ₗ[R] H R 
 
 def cup (X : Scheme.{0}) (i j : ℕ) : H R i X →ₗ[R] H R j X →ₗ[R] H R (i + j) X := cupN R X i j (i + j) rfl
 
-theorem cupN_apply (X : Scheme.{0}) (i j n : ℕ) (h : i + j = n) (a : H R i X) (b : H R j X) :
-    cupN R X i j n h a b = cupExt R X h a b := rfl
-
-theorem cup_eq_cupN (X : Scheme.{0}) (i j : ℕ) : cup R X i j = cupN R X i j (i + j) rfl := rfl
-
 end Cup
 
 section Natural
 
 variable [FlatCoef R]
-
-theorem freeDiagPre_naturality {X Y : Scheme.{0}} (f : X ⟶ Y) :
-    ((Functor.whiskeringRight _ _ _).obj (ModuleCat.free (ULift.{1} R))).map (uliftYoneda.{1}.map f) ≫ freeDiagPre R Y =
-      freeDiagPre R X ≫ (((Functor.whiskeringRight _ _ _).obj (ModuleCat.free (ULift.{1} R))).map (uliftYoneda.{1}.map f) ⊗ₘ
-        ((Functor.whiskeringRight _ _ _).obj (ModuleCat.free (ULift.{1} R))).map (uliftYoneda.{1}.map f)) := by
-  ext U : 2
-  apply ModuleCat.hom_ext
-  refine Finsupp.lhom_ext (fun g c => ?_)
-  change Finsupp.linearCombination _ _ (Finsupp.mapDomain _ (Finsupp.single g c)) =
-    ((Functor.whiskerRight (uliftYoneda.{1}.map f) (ModuleCat.free (ULift.{1} R)) ⊗ₘ
-        Functor.whiskerRight (uliftYoneda.{1}.map f) (ModuleCat.free (ULift.{1} R))).app U).hom
-      (Finsupp.linearCombination _ _ (Finsupp.single g c))
-  rw [Finsupp.mapDomain_single]
-  erw [Finsupp.linearCombination_single, Finsupp.linearCombination_single, map_smul]
-  congr 1
-  exact (congrArg₂ (fun (a b : (freePre R Y).obj U) => a ⊗ₜ[ULift.{1} R] b) Finsupp.mapDomain_single
-    Finsupp.mapDomain_single).symm
-
-theorem freeDiag_naturality {X Y : Scheme.{0}} (f : X ⟶ Y) :
-    (freeOn R).map f ≫ freeDiag R Y = freeDiag R X ≫ ((freeOn R).map f ⊗ₘ (freeOn R).map f) := by
-  change (presheafToSheaf _ _).map _ ≫ (presheafToSheaf _ _).map (freeDiagPre R Y) ≫ _ =
-    ((presheafToSheaf _ _).map (freeDiagPre R X) ≫ _) ≫ ((presheafToSheaf _ _).map _ ⊗ₘ (presheafToSheaf _ _).map _)
-  rw [Category.assoc, Functor.OplaxMonoidal.δ_natural, ← Functor.map_comp_assoc, freeDiagPre_naturality,
-    Functor.map_comp_assoc]
-
-theorem mk₀_comp_cupExt {X Y : Scheme.{0}} (f : X ⟶ Y) {i j n : ℕ} (h : i + j = n) (a : HS R (coef R) i Y)
-    (b : HS R (coef R) j Y) :
-    (Abelian.Ext.mk₀ ((freeOn R).map f)).comp (cupExt R Y h a b) (zero_add n) =
-      cupExt R X h ((Abelian.Ext.mk₀ ((freeOn R).map f)).comp a (zero_add i))
-        ((Abelian.Ext.mk₀ ((freeOn R).map f)).comp b (zero_add j)) := by
-  simp only [cupExt]
-  rw [Abelian.Ext.mapExactFunctor_comp, Abelian.Ext.mapExactFunctor_comp, Abelian.Ext.mapExactFunctor_mk₀,
-    Abelian.Ext.mapExactFunctor_mk₀, Abelian.Ext.mk₀_comp_mk₀_assoc, freeDiag_naturality,
-    ← Abelian.Ext.mk₀_comp_mk₀_assoc]
-  congr 1
-  rw [Abelian.Ext.comp_assoc _ _ _ (zero_add j) (show j + i = n by omega) (by omega),
-    Abelian.Ext.comp_assoc_of_third_deg_zero, ← Abelian.Ext.comp_assoc_of_second_deg_zero]
-  have hτ := GlobalTheory.ChangeRing.mapExactFunctor_natTrans.{1, 1} (tensorLeft ((freeOn R).obj X))
-    (tensorLeft ((freeOn R).obj Y)) ((tensoringLeft (Shv R)).map ((freeOn R).map f)) j b
-  erw [hτ]
-  rw [Abelian.Ext.comp_assoc _ _ _ (zero_add j) (show j + i = n by omega) (by omega), Abelian.Ext.mk₀_comp_mk₀_assoc]
-  congr 2
-  exact MonoidalCategory.tensorHom_def' (C := Shv R) ((freeOn R).map f) ((freeOn R).map f)
-
-theorem pull_cupN {X Y : Scheme.{0}} (f : X ⟶ Y) (i j n : ℕ) (h : i + j = n) (a : H R i Y) (b : H R j Y) :
-    pull R n f (cupN R Y i j n h a b) = cupN R X i j n h (pull R i f a) (pull R j f b) :=
-  mk₀_comp_cupExt R f h a b
-
-theorem pull_cup {X Y : Scheme.{0}} (f : X ⟶ Y) (i j : ℕ) (a : H R i Y) (b : H R j Y) :
-    pull R (i + j) f (cup R Y i j a b) = cup R X i j (pull R i f a) (pull R j f b) :=
-  pull_cupN R f i j (i + j) rfl a b
 
 end Natural
 
@@ -326,13 +324,22 @@ variable [FlatCoef R]
 
 def ofPre {X : Scheme.{0}} (γ : freePre R X ⟶ coefPre R) : H R 0 X := Abelian.Ext.mk₀ ((presheafToSheaf _ _).map γ)
 
+private theorem ext_tensor_mk₀ {D : Type*} [Category* D] [Abelian D] [HasExt.{1} D]
+    [MonoidalCategory D] {A B : D} [(tensorLeft A).Additive] [(tensorRight B).Additive]
+    [PreservesFiniteLimits (tensorLeft A)] [PreservesFiniteLimits (tensorRight B)]
+    [PreservesFiniteColimits (tensorLeft A)] [PreservesFiniteColimits (tensorRight B)]
+    (d : A ⟶ A ⊗ A) (g g' : A ⟶ B) (m : B ⊗ B ⟶ B) :
+    (Abelian.Ext.mk₀ d).comp (((Abelian.Ext.mk₀ g').mapExactFunctor (tensorLeft A)).comp
+      (((Abelian.Ext.mk₀ g).mapExactFunctor (tensorRight B)).comp (Abelian.Ext.mk₀ m) (add_zero 0))
+      (zero_add 0)) (zero_add 0) = Abelian.Ext.mk₀ (d ≫ (g ⊗ₘ g') ≫ m) := by
+  simp only [Abelian.Ext.mapExactFunctor_mk₀, Abelian.Ext.mk₀_comp_mk₀]
+  exact congrArg (fun f => Abelian.Ext.mk₀ (d ≫ f))
+    (MonoidalCategory.tensorHom_def'_assoc g g' m).symm
+
 theorem cupExt_mk₀ (X : Scheme.{0}) (g g' : (freeOn R).obj X ⟶ coef R) :
     cupExt R X (rfl : 0 + 0 = 0) (Abelian.Ext.mk₀ g) (Abelian.Ext.mk₀ g') =
       Abelian.Ext.mk₀ (freeDiag R X ≫ (g ⊗ₘ g') ≫ coefMul R) := by
-  simp only [cupExt, Abelian.Ext.mapExactFunctor_mk₀, Abelian.Ext.mk₀_comp_mk₀]
-  congr 1
-  rw [MonoidalCategory.tensorHom_def' (C := Shv R) g g', Category.assoc]
-  rfl
+  exact ext_tensor_mk₀ (freeDiag R X) g g' (coefMul R)
 
 theorem cupN_ofPre (X : Scheme.{0}) (γ γ' : freePre R X ⟶ coefPre R) :
     cupN R X 0 0 0 rfl (ofPre R γ) (ofPre R γ') = ofPre R (freeDiagPre R X ≫ (γ ⊗ₘ γ') ≫ coefMulPre R) := by
@@ -366,15 +373,10 @@ theorem homEquiv_map_ofPre {X : Scheme.{0}} (γ : freePre R X ⟶ coefPre R) :
   exact ((sheafificationAdjunction _ _).unit.naturality γ).symm
 
 theorem exists_ofPre {X : Scheme.{0}} (x : H R 0 X) : ∃ γ : freePre R X ⟶ coefPre R, ofPre R γ = x := by
-  obtain ⟨g, rfl⟩ := (Abelian.Ext.mk₀_bijective ((freeOn R).obj X) (coef R)).surjective x
-  let adj := sheafificationAdjunction Scheme.proetaleTopology.{0} (ModuleCat.{1} (ULift.{1} R))
-  refine ⟨adj.homEquiv _ _ g ≫ (isoSheafify _ (H0.sh R)).inv, ?_⟩
-  refine congrArg Abelian.Ext.mk₀ ((adj.homEquiv _ _).injective ?_)
-  erw [homEquiv_map_ofPre]
-  have hi : (isoSheafify _ (H0.sh R)).inv ≫ toSheafify Scheme.proetaleTopology.{0} (coefPre R) = 𝟙 _ := by
-    rw [← isoSheafify_hom _ (H0.sh R)]
-    exact Iso.inv_hom_id _
-  exact (Category.assoc _ _ _).trans ((congrArg (adj.homEquiv _ _ g ≫ ·) hi).trans (Category.comp_id _))
+  let e := H0.yonedaAdd R X (coefPre R)
+  let v : (coefPre R).obj (op X) := ULift.up (H0.e R X x)
+  refine ⟨e.symm v, (H0.e R X).injective ?_⟩
+  exact (e_ofPre R X (e.symm v)).trans (congrArg ULift.down (e.apply_symm_apply v))
 
 theorem e_cupN (X : Scheme.{0}) (x y : H R 0 X) :
     H0.e R X (cupN R X 0 0 0 rfl x y) = H0.e R X x * H0.e R X y := by
@@ -410,30 +412,11 @@ theorem e_one (X : Scheme.{0}) : H0.e R X (one R X) = 1 := by
   change ((((1 : ULift.{1} R) • (1 : ULift.{1} R)) • (⟨1⟩ : ULift.{1} C(X, R))).down) x = (1 : C(X, R)) x
   simp
 
-theorem gal_cup {k : Type} [Field k] (Ω : Type) [Field Ω] [Algebra k Ω] {X : Scheme.{0}}
-    (p : X ⟶ Spec (CommRingCat.of k)) (i j : ℕ) (σ : Ω ≃ₐ[k] Ω) (a : H R i (geom Ω p)) (b : H R j (geom Ω p)) :
-    gal R Ω p (i + j) σ (cup R (geom Ω p) i j a b) = cup R (geom Ω p) i j (gal R Ω p i σ a) (gal R Ω p j σ b) :=
-  pull_cup R _ i j a b
-
 end One
 
 section Examples
 
 variable (X : Scheme.{0})
-
-example (p : ℕ) [Fact p.Prime] : cup ℚ_[p] X 0 0 (one ℚ_[p] X) (one ℚ_[p] X) = (H0.e ℚ_[p] X).symm 1 := by
-  apply (H0.e ℚ_[p] X).injective
-  rw [e_cup, e_one, LinearEquiv.apply_symm_apply, one_mul]
-
-example (p : ℕ) [Fact p.Prime] [Nonempty X] : one ℤ_[p] X ≠ 0 := by
-  intro h
-  have h1 := e_one ℤ_[p] X
-  rw [h, map_zero] at h1
-  exact zero_ne_one (DFunLike.congr_fun h1 (Classical.arbitrary X))
-
-example (p : ℕ) [Fact p.Prime] (f g : C(X, ℤ_[p])) :
-    H0.e ℤ_[p] X (cup ℤ_[p] X 0 0 ((H0.e ℤ_[p] X).symm f) ((H0.e ℤ_[p] X).symm g)) = f * g := by
-  rw [e_cup, LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
 
 end Examples
 

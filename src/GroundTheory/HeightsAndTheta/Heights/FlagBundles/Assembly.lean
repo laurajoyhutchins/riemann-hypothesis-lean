@@ -1,72 +1,65 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PUnipotentLeadingMinor
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PUnipotentCoordinates
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PPluckerFrameChange
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PGramSumOfMinors
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.POmitStepPolynomial
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PLineQuotientDeterminant
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PSectionLocalEquation
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PDiagonalQuotient
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PDiagonalLocalDVR
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PBlochOverlap
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PSectionNormLog
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PGKernelIdentity
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PMixedCoefficient
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PSphereHeightUniform
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PSphereMoment
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PFibrePushforward
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalKernel
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PSphereLongitudeCoordinates
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalHeightReduction
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalKernelPairing
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalBilinearFormula
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PGHatIdentity
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PFibreConstantClosedForm
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PFibreIntegralInvariant
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PCompactPairCurveForm
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PBarCurveForm
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PTorusInvariantDiagonal
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PTopPowerDiagonal
-import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PPolarisationDegreeD
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.StatementsSphereLongitude
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.StatementsZonalPairing
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.StatementsZonalReduction
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PFibreConstantClosedForm
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PFibreIntegralInvariant
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PGHatIdentity
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PGKernelIdentity
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PSphereLongitudeCoordinates
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalBilinearFormula
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalHeightReduction
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalKernel
+public import GroundTheory.HeightsAndTheta.Heights.FlagBundles.PZonalKernelPairing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.FlagBundles
 
-theorem UnipotentLeadingMinor.full : UnipotentLeadingMinor.Statement :=
-  UnipotentLeadingMinor.proof
-
-theorem PluckerFrameChange.full : PluckerFrameChange.Statement :=
-  PluckerFrameChange.proof
-
-theorem GramSumOfMinors.full : GramSumOfMinors.Statement :=
-  GramSumOfMinors.proof PluckerFrameChange.full
-
-theorem OmitStepPolynomial.full : OmitStepPolynomial.Statement :=
-  OmitStepPolynomial.proof
-
-theorem LineQuotientDeterminant.full : LineQuotientDeterminant.Statement :=
-  LineQuotientDeterminant.proof
-
-theorem SectionLocalEquation.full : SectionLocalEquation.Statement :=
-  SectionLocalEquation.proof
-
-theorem DiagonalQuotient.full : DiagonalQuotient.Statement :=
-  DiagonalQuotient.proof
-
-theorem DiagonalLocalDVR.full : DiagonalLocalDVR.Statement :=
-  DiagonalLocalDVR.proof DiagonalQuotient.full
-
-theorem BlochOverlap.full : BlochOverlap.Statement :=
-  BlochOverlap.proof
-
-theorem SectionNormLog.full : SectionNormLog.Statement :=
-  SectionNormLog.proof BlochOverlap.full
-
 theorem GKernelIdentity.full : GKernelIdentity.Statement :=
   GKernelIdentity.proof
-
-theorem MixedCoefficient.full : MixedCoefficient.Statement :=
-  MixedCoefficient.proof
 
 theorem ZonalKernel.full : ZonalKernel.Statement :=
   ZonalKernel.proof
@@ -95,20 +88,5 @@ theorem fibreConstant_eq (k : ℕ) :
 
 theorem FibreIntegralInvariant.full : FibreIntegralInvariant.Statement :=
   FibreIntegralInvariant.proof FibreConstantClosedForm.full
-
-theorem CompactPairCurveForm.full : CompactPairCurveForm.Statement :=
-  CompactPairCurveForm.proof
-
-theorem BarCurveForm.full : BarCurveForm.Statement :=
-  BarCurveForm.proof
-
-theorem TorusInvariantDiagonal.full : TorusInvariantDiagonal.Statement :=
-  TorusInvariantDiagonal.proof
-
-theorem TopPowerDiagonal.full : TopPowerDiagonal.Statement :=
-  TopPowerDiagonal.proof
-
-theorem PolarisationDegreeD.full : PolarisationDegreeD.Statement :=
-  PolarisationDegreeD.proof
 
 end GroundTheory.Heights₂.Heights.FlagBundles

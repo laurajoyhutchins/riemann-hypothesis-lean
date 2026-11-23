@@ -1,5 +1,44 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix Finset
 
@@ -26,10 +65,6 @@ def InNil (s : A →+* A) (J : Matrix (Fin n) (Fin n) A) (W : Submodule A (Fin n
 def InCen (s : A →+* A) (J : Matrix (Fin n) (Fin n) A) (W : Submodule A (Fin n → A))
     (Y : Matrix (Fin n) (Fin n) A) : Prop :=
   InNil s J W Y ∧ ∀ u ∈ perpSet s J W, Y *ᵥ u = 0
-
-theorem inCen_zero (s : A →+* A) (J : Matrix (Fin n) (Fin n) A) (W : Submodule A (Fin n → A)) :
-    InCen s J W 0 := by
-  refine ⟨⟨?_, ?_, ?_, ?_⟩, ?_⟩ <;> simp [IsSkew, perpSet, Formalism.UG.hform]
 
 end Lie
 
@@ -58,22 +93,7 @@ def diagEmb (Y : Matrix (Fin I.n) (Fin I.n) I.E) : InfinitePlace I.F → Matrix 
 def normAt (x : I.GA) (Y : InfinitePlace I.F → Matrix (Fin I.n) (Fin I.n) ℂ) : ℝ :=
   Real.sqrt (∑ v, Formalism.REAL.hs (uMat (x.1 v)⁻¹ * (I.P v)⁻¹ * Y v * I.P v * uMat (x.1 v)))
 
-theorem normAt_zero (x : I.GA) : normAt I x 0 = 0 := by
-  simp [normAt, Formalism.REAL.hs]
-
 def nextSize {a : ℕ} (τ : Fin a → ℝ) (i : Fin a) : ℝ :=
   if h : (i : ℕ) + 1 < a then τ ⟨(i : ℕ) + 1, h⟩ else 1 / 2
-
-example : nextSize ![(1 : ℝ) / 8, 1 / 4] 0 = 1 / 4 ∧ nextSize ![(1 : ℝ) / 8, 1 / 4] 1 = 1 / 2 := by
-  constructor <;> simp [nextSize]
-
-def CoveringRadii : Prop :=
-  ∀ (I : AutInst) (x : I.GA) (a : ℕ) (S : Fin (a + 1) → Submodule (𝓞 I.E) (Fin I.n → I.E)) (τ : Fin a → ℝ),
-    HasFlag I x S τ → ∀ (i : Fin a) (ρ : ℝ), 0 < ρ → τ i ≤ ρ * nextSize τ i → τ i ^ 2 ≤ ρ / 4 →
-      (∀ Y ∈ nilReal I (S i.succ), ∃ Y₀ ∈ nilInt I x (S i.succ), ∃ Z ∈ cenReal I (S i.succ),
-        normAt I x (Y - diagEmb I Y₀ - Z) ≤
-          ((I.n : ℝ) ^ 2 * I.f) / 8 * I.rd * ρ / Real.sqrt (2 * I.f)) ∧
-      (∀ Z ∈ cenReal I (S i.succ), ∃ Z₀ ∈ cenInt I x (S i.succ),
-        normAt I x (Z - diagEmb I Z₀) ≤ ((I.n : ℝ) ^ 2 * I.f) * I.rd * ρ / (16 * Real.sqrt I.f))
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CenteredPerpendicularSets

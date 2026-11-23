@@ -1,50 +1,100 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.Imports
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.RestAssembly
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.AssemblyAnalytic
-import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Assembly
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSmooth
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineLevi
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSemipositive
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PNefOfNonneg
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsConjInvariant
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassLeRoot
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootDivSuppEmpty
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootAnchorNonzero
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootPointConj
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootPointsFinite
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootLogNormBound
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPtsIntegralZeroLowerNE
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PMultiHomogMemCoord
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootHeightNE
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootDense
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassHeightBound
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLatticeBasisExists
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualEmbBijective
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineSemipositive
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineConj
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPointDegCPos
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualCurvePoint
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPointArInt
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPointVertR
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineIndex
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPointLineDegree
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PTelescope
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopSubLattice
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualGeomDegStandard
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopMetricChange
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopLatticeChange
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopStandard
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopBound
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPtsOnPlane
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPtsOfPlane
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStdMassAt
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualGeomDegPos
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLineOfLargeDegreeDual
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.DualProjApply
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualEnergy
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualGeomDegCharts
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStackedDegree
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualStdBaseChange
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopBasisChange
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualTopStacked
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassGeomDegChart
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsGrassLinesProj
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsPointVertRSteps
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.AssemblyAnalytic
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualCurvePoint
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualEmbBijective
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualGeomDegPos
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualGeomDegStandard
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLatticeBasisExists
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineConj
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineIndex
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualLineSemipositive
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPointLineDegree
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPtsOfPlane
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualPtsOnPlane
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualStdMassAt
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopBound
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopLatticeChange
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopMetricChange
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopStandard
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PDualTopSubLattice
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsConjInvariant
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineLevi
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSemipositive
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PFsLineSmooth
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassHeightBound
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PGrassLeRoot
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLineOfLargeDegreeDual
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PMultiHomogMemCoord
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PNefOfNonneg
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPointArInt
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPointDegCPos
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPointVertR
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PPtsIntegralZeroLowerNE
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootAnchorNonzero
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootArithVar
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootDense
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootDivSuppEmpty
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootHeightNE
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootLogNormBound
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootPointConj
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PRootPointsFinite
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PTelescope
+public import GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.Assembly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -120,23 +170,5 @@ theorem LineOfLargeDegreeFromZ.ofOpen (hVI : VertRIndex.Statement) (hSN : Sectio
     (DualPointLineDegree.ofOpen hVI hSN)
     (DualTopBound.ofOpen hEnergy hBasis hStacked hSDeg hBC hGL hCharts hGChart hMass)
     (DualGeomDegPos.ofOpen hDeg hInd)
-
-theorem KernelsCut.ofOpen (hZ1 : SuccessiveMinimaLowerBound) (hZ2 : SuccessiveMinimaUpperBound)
-    (hI : ReciprocityTheory.ChartRestriction.G.AI.I2.ExistsStatement)
-    (hVI : VertRIndex.Statement) (hSN : SectionIndexNorm.Statement)
-    (hEnergy : DualMetricEnergy.Statement)
-    (hBasis : DualTopBasisChange.Statement) (hStacked : DualTopStacked.Statement)
-    (hSDeg : DualStackedDegree.Statement) (hBC : DualStdBaseChange.Statement)
-    (hGL : GrassLinesProj.Statement) (hCharts : DualGeomDegCharts.Statement)
-    (hGChart : GrassGeomDegChart.Statement) (hMass : ChartMassInvariant.Statement)
-    (hDeg : DegreeStatement) (hInd : PtsIndepStatement)
-    (h₁ : RestTerms.CoinvariantTopDegree.Statement)
-    (h₂ : RestTerms.FlagIntegralKillsPowerSums.Statement)
-    (h₃ : RestTerms.RestTermWellDefined.Statement) (h₄ : RestTerms.SameFactorBound.Statement)
-    (h₅ : RestTerms.RestBound.Statement) : KernelsCut.Statement :=
-  KernelsCut.proof
-    (LineOfLargeDegreeFromZ.ofOpen hVI hSN hEnergy hBasis hStacked hSDeg hBC hGL hCharts hGChart
-      hMass hDeg hInd hZ1 hZ2 hI)
-    (RestTermSharp.ofRestTerms h₁ h₂ h₃ h₄ h₅)
 
 end GroundTheory.Heights₂.Heights

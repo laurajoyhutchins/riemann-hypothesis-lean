@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.LocalFields.UnitsBasic
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsRootOfAdicComplete
+module
+
+public import GroundTheory.LocalFields.UnitsBasic
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsRootOfAdicComplete
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Finite.Basic
+
+@[expose] public section
 
 namespace GroundTheory.LocalField
 
@@ -39,6 +90,7 @@ theorem eq_one_of_pow_eq_one {m : ℕ} (hm : (m : 𝓀[K]) ≠ 0) {u : 𝒪[K]ˣ
   rw [← Units.val_pow_eq_pow_val, h, Units.val_one, sub_self] at hgeom
   have hS : IsUnit (∑ i ∈ Finset.range m, (u : 𝒪[K]) ^ i) := by
     rw [← residue_ne_zero_iff_isUnit]
+
     simpa [map_sum, hres] using hm
   have := (hS.mul_right_eq_zero).mp hgeom
   ext
@@ -125,30 +177,6 @@ theorem unitsMulInvTeichmuller_mem (u : 𝒪[K]ˣ) :
 
 variable (K)
 
-noncomputable def unitsEquivResidueProd : 𝒪[K]ˣ ≃* 𝓀[K]ˣ × unitFiltration K 1 where
-  toFun u := (unitsToResidue K u, ⟨_, unitsMulInvTeichmuller_mem u⟩)
-  invFun p := teichmuller K p.1 * p.2
-  left_inv u := by simp
-  right_inv p := by
-    obtain ⟨ζ, v, hv⟩ := p
-    have hv' : unitsToResidue K v = 1 := by rwa [← MonoidHom.mem_ker, ker_unitsToResidue]
-    ext
-    · simp [hv']
-    · simp [hv']
-  map_mul' u w := by
-    ext
-    · simp
-    · simp only [map_mul, mul_inv_rev, Prod.snd_mul, Subgroup.coe_mul]
-      simp only [mul_comm, mul_left_comm, mul_assoc]
-
-@[simp]
-theorem unitsEquivResidueProd_fst (u : 𝒪[K]ˣ) :
-    (unitsEquivResidueProd K u).1 = unitsToResidue K u := rfl
-
-@[simp]
-theorem unitsEquivResidueProd_symm_apply (ζ : 𝓀[K]ˣ) (v : unitFiltration K 1) :
-    (unitsEquivResidueProd K).symm (ζ, v) = teichmuller K ζ * v := rfl
-
 end Teichmuller
 
 section Powers
@@ -179,17 +207,6 @@ theorem exists_unitFiltration_le_range_pow {m : ℕ} (hm : (m : K) ≠ 0) :
   obtain ⟨k, ε, hk⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hm' hϖ
   refine ⟨2 * k + 1, fun w hw ↦ ?_⟩
   obtain ⟨x, hx⟩ := exists_pow_eq_of_mem hϖ hm0 (ε := ε) (by rw [hk, mul_comm]) hw
-  exact ⟨x, hx⟩
-
-theorem unitFiltration_one_le_range_pow {m : ℕ} (hm : (m : 𝓀[K]) ≠ 0) :
-    unitFiltration K 1 ≤ (powMonoidHom m : 𝒪[K]ˣ →* 𝒪[K]ˣ).range := by
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible 𝒪[K]
-  have hu : IsUnit (m : 𝒪[K]) := by
-    rw [← residue_ne_zero_iff_isUnit, map_natCast]; exact hm
-  have hm0 : m ≠ 0 := by rintro rfl; simp at hm
-  intro w hw
-  obtain ⟨x, hx⟩ := exists_pow_eq_of_mem hϖ hm0 (k := 0) (ε := hu.unit) (by simp)
-    (by simpa using hw)
   exact ⟨x, hx⟩
 
 theorem finite_quotient_range_pow {m : ℕ} (hm : (m : K) ≠ 0) :

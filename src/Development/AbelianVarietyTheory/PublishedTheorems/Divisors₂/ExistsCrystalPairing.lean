@@ -1,14 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.CrystallinePull2SumCup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AbelianSchemeGerms
 import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsUniqueIsConnOfLift
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GrothendieckDeformation
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.FormalAlgebraisation
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.TateUnramifiedOfTorsionUnramified
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalGroupAlgebraisation
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsSmoothOfRelativeDimensionSpreadFromGeneric
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GrpHomAlgebraisationOfReductions
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.HomExtensionSemiAbelianDiscreteValuationRing
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.IsAbelianSchemeAndExtendOfGenericHoms
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -44,12 +76,6 @@ section Neron
 
 variable {V K : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRing V] [Field K] [Algebra V K]
   [IsFractionRing V K] {A B : Over (Sp V)} [GrpObj A] [GrpObj B]
-
-theorem hom_extends (hA : IsAbelianScheme A) (hB : IsAbelianScheme B)
-    (f : (Over.pullback (spMap (algebraMap V K))).obj A ⟶ (Over.pullback (spMap (algebraMap V K))).obj B)
-    [hf : IsMonHom f] : ∃! F : A ⟶ B, IsMonHom F ∧ (Over.pullback (spMap (algebraMap V K))).map F = f := by
-  exact homExtension_semiAbelian_dvr V K A B (isSemiAbelian_of_isAbelianScheme A hA)
-    (isSemiAbelian_of_isAbelianScheme B hB) f hf
 
 end Neron
 
@@ -103,29 +129,6 @@ theorem exists_crystal_pairing (κ : DividedPowers I) (h : IsGrpPullback A₀ A 
   refine ⟨φ', h₁, fun x y => h₂ _ _ _ _ (fun c => ?_) (fun c => ?_)⟩
   · exact (crysToDR_apply κ h x c).symm
   · exact (crysToDR_apply κ k y c).symm
-
-theorem polForm_unique {S : Scheme.{0}} {t : S ⟶ Sp R} {G : Over S} [GrpObj G] (C : CupSquare κ t G)
-    {L : LB G.left} (hL : L.IsLB) {ψ ψ' : LinearMap.BilinForm R (Crys κ t G)} (h : IsPolForm κ t G L ψ)
-    (h' : IsPolForm κ t G L ψ') : ψ = ψ' := by
-  obtain ⟨n, a, b, ha, rfl⟩ := h
-  obtain ⟨n', a', b', ha', rfl⟩ := h'
-  have hz := ((GlobalTheory.Cris.isChern_existsUnique_and_iso R I κ G.left (G.hom ≫ t)).1 L hL).unique ha ha'
-  refine LinearMap.ext fun x => LinearMap.ext fun y => ?_
-  set E := AllPrim.dualEquiv κ t C.allPrim
-  have hx : ∀ c : prim κ t G, x c = E.symm x c.1 := fun c => by
-    conv_lhs => rw [← E.apply_symm_apply x]
-    rfl
-  have hy : ∀ c : prim κ t G, y c = E.symm y c.1 := fun c => by
-    conv_lhs => rw [← E.apply_symm_apply y]
-    rfl
-  obtain ⟨Λ, hΛ⟩ := C.wedge (E.symm x) (E.symm y)
-  have key : ∀ {m : ℕ} (a b : Fin m → prim κ t G),
-      wedgeForm κ t G a b x y = Λ (∑ k, cup _ (a k).1 (b k).1) := by
-    intro m a b
-    rw [wedgeForm_apply, map_sum]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [hΛ, hx (a k), hx (b k), hy (a k), hy (b k)]
-  rw [key, key, hz]
 
 variable {M : Type} [AddCommGroup M] [Module R M] [Module Rᵐᵒᵖ M] [IsCentralScalar R M]
   {T : Type} [CommRing T] [Algebra T R] [Module T M] [IsScalarTower T R M]

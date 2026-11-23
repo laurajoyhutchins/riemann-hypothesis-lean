@@ -1,4 +1,54 @@
-import Formalism.WachLatticeTwists.Statement
+module
+
+public import Formalism.WachLatticeTwists.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.LinearAlgebra.FreeModule.PID
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,6 +76,7 @@ theorem length_le_of_killed {O : Type*} [CommRing O] (b : O) {X : Type*} [AddCom
     simp only [h, LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.proj_apply,
       Submodule.liftQ_apply, gi, LinearMap.toSpanSingleton_apply]
     conv_rhs => rw [pi_eq_sum_univ v]
+
     rw [map_sum]
     simp only [map_smul]
   calc Module.length O X ≤ Module.length O (ι → O ⧸ Ideal.span {b}) :=
@@ -107,6 +158,7 @@ theorem Formalism.RepresentationBoundsCohomology.rowColength : Formalism.Represe
     obtain ⟨x, rfl⟩ := I.mkQ_surjective z
     refine ⟨fun i => bQ.repr (T.mkQ x) i, ?_⟩
     have h1 : T.mkQ (G0 (fun i => bQ.repr (T.mkQ x) i)) = T.mkQ x := by
+
       rw [hG0, map_sum]
       simp only [map_smul, hm]
       exact bQ.sum_repr (T.mkQ x)

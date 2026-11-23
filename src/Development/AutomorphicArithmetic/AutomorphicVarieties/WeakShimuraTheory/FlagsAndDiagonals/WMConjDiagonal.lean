@@ -1,6 +1,48 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.NearSplit
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.NearSplit
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.SgnMulSelf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,14 +89,6 @@ theorem gsp_map (f : R →+* R') {ν : R} {g : M4 R} (h : IsGSp ν g) : IsGSp (f
   rw [IsGSp, adj_map, ← Matrix.map_mul, h]
   ext i j
   by_cases e : i = j <;> simp [e, Matrix.one_apply]
-
-def conjSp {Γ : Type} [Group Γ] {m : M4 R} (hm : IsGSp 1 m) (r : Γ →* M4 R) : Γ →* M4 R where
-  toFun g := adj m * r g * m
-  map_one' := by rw [map_one, mul_one, sp_adj_mul hm]
-  map_mul' g h := by
-    rw [map_mul]
-    calc adj m * (r g * r h) * m = adj m * r g * (m * adj m) * r h * m := by rw [sp_mul_adj hm]; simp only [mul_assoc, mul_one]
-      _ = _ := by simp only [mul_assoc]
 
 theorem wM_sp (pr : Bool) : IsGSp 1 (wM R pr) := by
   cases pr
@@ -106,12 +140,6 @@ theorem Par.adj {X : M4 R} (hX : Par X) : Par (adj X) := by
 variable {I : Ideal R}
 
 theorem Cg.refl (X : M4 R) : Cg I X X := fun i j => by simp
-
-theorem Cg.symm {X Y : M4 R} (h : Cg I X Y) : Cg I Y X := fun i j => by
-  simpa using neg_mem (h i j)
-
-theorem Cg.trans {X Y Z : M4 R} (h : Cg I X Y) (h' : Cg I Y Z) : Cg I X Z := fun i j => by
-  simpa using add_mem (h i j) (h' i j)
 
 theorem Cg.mul {X Y X' Y' : M4 R} (h : Cg I X Y) (h' : Cg I X' Y') : Cg I (X * X') (Y * Y') := by
   intro i j

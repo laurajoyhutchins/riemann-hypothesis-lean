@@ -1,7 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
-import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.PredMulSumPadicValNatFactorialAddCardLe
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.FormalGroupCoeffSecondLinear
+module
+
+public import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ConnectionKillsSeries
+public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.PredMulSumPadicValNatFactorialAddCardLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.FormalGroupCoeffSecondLinear
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -30,7 +73,7 @@ theorem exists_decomp [Fintype σ] (g : MvPowerSeries σ V) :
   exact ⟨k, by rw [← hk]; ring⟩
 
 theorem coeff_single_eq (q : τ) (f : MvPowerSeries τ V) :
-    coeff (Finsupp.single q 1) f = constantCoeff (pderiv V q f) := by
+    coeff (Finsupp.single q 1) f = constantCoeff (pderiv (R := V) q f) := by
   rw [← coeff_zero_eq_constantCoeff_apply, coeff_pderiv]
   simp
 
@@ -67,11 +110,13 @@ theorem coeff_hom [Fintype σ] (ψ : MvPowerSeries σ V →ₐ[V] MvPowerSeries 
   have h1 : ∀ j, coeff (Finsupp.single j 1) f = constantCoeff (k j) := by
     intro j
     conv_lhs => rw [hk]
-    rw [map_add, coeff_single_C, zero_add, map_sum]
+
+    rw [map_add (f := _), coeff_single_C, zero_add, map_sum]
     rw [Finset.sum_congr rfl fun i _ => coeff_single_mul j (X i) (k i) (by simp)]
     simp [coeff_single_X]
   conv_lhs => rw [hk]
-  rw [map_add, hC, map_add, coeff_single_C, zero_add, map_sum, map_sum]
+
+  rw [map_add (f := _), hC, map_add (f := _), coeff_single_C, zero_add, map_sum, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, coeff_single_mul _ _ _ (h j), const_hom ψ h, h1, _root_.mul_comm]
 
@@ -80,7 +125,7 @@ theorem evC_hom [Fintype σ] (a : σ → MvPowerSeries τ V) (ha : ∀ j, consta
   have hs : HasSubst a := hasSubst_of_constantCoeff_zero ha
   have h : ∃ ψ : MvPowerSeries σ V →ₐ[V] MvPowerSeries τ V, ∀ j, ψ (MvPowerSeries.X j) = a j :=
     ⟨substAlgHom hs, fun j => substAlgHom_X hs j⟩
-  exact ⟨h.choose, h.choose_spec, fun f => by unfold evC; rw [dif_pos h]⟩
+  exact ⟨h.choose, h.choose_spec, fun f => by unfold evC; rw [dite_eq_left h]⟩
 
 theorem const_evC [Fintype σ] (a : σ → MvPowerSeries τ V) (ha : ∀ j, constantCoeff (a j) = 0)
     (f : MvPowerSeries σ V) : constantCoeff (evC a f) = constantCoeff f := by

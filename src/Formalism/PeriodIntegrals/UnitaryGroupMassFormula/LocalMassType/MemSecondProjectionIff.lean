@@ -1,5 +1,47 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.WProof
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.LatBasis
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.WProof
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.LatBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -67,8 +109,9 @@ theorem sigR_inclR (a : E) : sigR (Fv F v) σ (inclR (F := F) (Fv F v) a) = incl
 
 theorem hermitian_snd_projection (J : Matrix (Fin n) (Fin n) E) (x y : Fin n → Fv F v ⊗[F] E) :
     D.π₂ (hR (Fv F v) σ J x y) = c1 D x ⬝ᵥ (Mj D J *ᵥ c2 D y) := by
+
   simp only [hR, Formalism.UG.hform, map_sum, map_mul, D.hσ2, JR, Matrix.map_apply, dotProduct,
-    Matrix.mulVec, c1, c2, Mj, Matrix.of_apply, Finset.mul_sum]
+  Matrix.mulVec, c1, c2, Mj, Matrix.of_apply, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
 
@@ -79,8 +122,9 @@ theorem hermitian_fst_projection {J : Matrix (Fin n) (Fin n) E} (hJ : ∀ i j, �
     intro i j
     rw [← hJ i j, ← sigR_inclR, D.hσ1]
     rfl
+
   simp only [hR, Formalism.UG.hform, map_sum, map_mul, D.hσ1, JR, Matrix.map_apply, key, dotProduct,
-    Matrix.mulVec, c1, c2, Finset.mul_sum]
+  Matrix.mulVec, c1, c2, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
@@ -99,7 +143,7 @@ theorem snd_integer_smul (c : v.adicCompletionIntegers F) (x : Fv F v ⊗[F] E) 
 
 def pr1 : (Fin n → Fv F v ⊗[F] E) →ₗ[v.adicCompletionIntegers F] (Fin n → Fv F v) where
   toFun := c1 D
-  map_add' x y := by funext i; simp [c1, map_add]
+  map_add' x y := by funext i; simp [c1, map_add (f := _)]
   map_smul' c x := by
     funext i
     simp only [c1, Pi.smul_apply, RingHom.id_apply]
@@ -107,7 +151,7 @@ def pr1 : (Fin n → Fv F v ⊗[F] E) →ₗ[v.adicCompletionIntegers F] (Fin n 
 
 def pr2 : (Fin n → Fv F v ⊗[F] E) →ₗ[v.adicCompletionIntegers F] (Fin n → Fv F v) where
   toFun := c2 D
-  map_add' x y := by funext i; simp [c2, map_add]
+  map_add' x y := by funext i; simp [c2, map_add (f := _)]
   map_smul' c x := by
     funext i
     simp only [c2, Pi.smul_apply, RingHom.id_apply]
@@ -116,11 +160,11 @@ def pr2 : (Fin n → Fv F v ⊗[F] E) →ₗ[v.adicCompletionIntegers F] (Fin n 
 theorem mkV_split (y z : Fin n → Fv F v ⊗[F] E) :
     mkV D (c1 D y) (c2 D z) = D.e • y + (1 - D.e) • z := by
   refine D.extV (fun i => ?_) (fun i => ?_)
-  · simp only [mkV, c1, c2, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add, map_mul, map_sub,
+  · simp only [mkV, c1, c2, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add (f := _), map_mul, map_sub,
       map_one, D.he1]
     rw [fst_proj_split_element D.he1 D.hsc]
     ring
-  · simp only [mkV, c1, c2, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add, map_mul, map_sub,
+  · simp only [mkV, c1, c2, Pi.add_apply, Pi.smul_apply, smul_eq_mul, map_add (f := _), map_mul, map_sub,
       map_one, D.he2]
     rw [snd_proj_split_element D.he2 D.hsc]
     ring
@@ -174,7 +218,7 @@ theorem span_first_projection {Λ : Set (Fin n → E)}
       add_mem' := fun {x y} hx hy => by
         have h1 : c1 D (x + y) = c1 D x + c1 D y := by
           funext i
-          simp [c1, map_add]
+          simp [c1, map_add (f := _)]
         show c1 D (x + y) ∈ T
         rw [h1]
         exact add_mem hx hy
@@ -226,8 +270,8 @@ theorem dot_int_iff (w : Fin n → Fv F v) :
     simp only [dotProduct]
     exact sum_mem fun i _ => mul_mem (hc i) (h i)
 
-include D in
 
+include D in
 theorem latStd_SD {J : Matrix (Fin n) (Fin n) E} {Λ : Set (Fin n → E)} (hJ : IsHermND σ J)
     (hSD : IsSDLoc σ J v Λ) (hLat : LocMassOrdW.IsLatLoc v Λ) :
     ∃ Q : GL (Fin n) (Fv F v ⊗[F] E),

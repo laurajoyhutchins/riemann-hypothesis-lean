@@ -1,16 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToRepFam
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGaloisCoverQuotientFreeFiniteAction
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsQProjOverTargetGaloisCoverNoetherian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsQProjOverOfRelAmpleOverQprojNoetherian
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AbelianSchemeDescendsGaloisCoverNoetherianBase
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PullClsDiag
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSquareBundleDescentGaloisCover
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.GaloisCoverDescentAndCartesianSquares
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSquareBundleDescentGaloisCover
+public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ExistsTorusAndQuotientHom
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsGenOfRigidifiedFaithfullyFlatDescent
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ClsLinCombSingle
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RigidLineBundleIsoDescentAlongGaloisCover
-import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.PolBaseChangeOfRelAmpleLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.AmplePt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBPull
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+import Development.AbelianVarietyTheory.Definitions.Divisors.NotCompactOfMEqOne
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.UPel.HT
 
@@ -77,15 +120,30 @@ theorem exists_gen_of_side {π : X ⟶ Y} {Ga : Type} [Group Ga] {ρ : Ga → (X
   have := hG.fin
   have := hG.etale
   have := hG.onto
-  have hN := pull_isLB hP₀ k₀
+  have hN := LB.isLB_pull hP₀ k₀
   refine GlobalTheory.exists_gen_of_rigidified_of_flat_baseChange GlobalTheory.SemiRigid.globalFns Y X π A₀ _ hA₀ hN
-    inferInstance inferInstance inferInstance ((cls_eq_zero_iff (pull_isLB hN _)).1 ?_)
-    ((cls_eq_zero_iff (pull_isLB hN _)).1 ?_)
-  · rw [cls_pull hN, cls_pull hP₀ k₀ hN, ← pull_comp, he, ← cls_pull hP₀ _ (pull_isLB hP₀ _)]
-    exact (cls_eq_zero_iff _).2 h0
-  · rw [cls_pull hN, cls_pull hP₀ k₀ hN, ← pull_comp, ← gp.1.isoPullback_inv_fst, Category.assoc, ← hk,
-      pull_comp, pull_comp, ← cls_pull hP₀ φ₂ (pull_isLB hP₀ φ₂), ← (cls_eq_iff hP (pull_isLB hP₀ φ₂)).2 i,
-      ← cls_pull hP k (pull_isLB hP k), (cls_eq_zero_iff _).2 hgen, map_zero]
+    inferInstance inferInstance inferInstance ?_ ?_
+  · obtain ⟨t, ht⟩ := h0
+    exact gen_chartPull (chartPullOut P₀ (fun _ : PUnit => k₀) (fun _ => 1) (eSec A₀)
+      (fun _ => eSec (A₀ ⊗ A₀)) (fun _ => he.symm)) t ht
+  · have hiso : LBIso (P.pull k) ((P₀.pull φ₂).pull k) :=
+      i.chartPull (chartPullPull P k) (chartPullPull (P₀.pull φ₂) k)
+    have htrans : ∀ {U : Scheme.{0}} {L M : LB U}, L.IsLB → M.IsLB → LBIso L M →
+        (∃ t : L.Gen, t.IsGen) → ∃ t : M.Gen, t.IsGen := by
+      intro U L M hL hM h H
+      obtain ⟨w, hw⟩ := h.chartPull (chartPullId L) (chartPullPull M (𝟙 U))
+      obtain ⟨t, ht⟩ := H
+      obtain ⟨a, ha⟩ := gen_chartPull (chartPullPull L (𝟙 U)) t ht
+      obtain ⟨c, hc, -⟩ := exists_up ((isGen_iff w).1 hw) hM hL a ha
+      exact gen_chartPull (chartPullUnpull M _ (Category.id_comp _)) c hc
+    obtain ⟨t, ht⟩ := htrans (LB.isLB_pull hP k) (LB.isLB_pull (LB.isLB_pull hP₀ φ₂) k) hiso hgen
+    obtain ⟨u, hu⟩ := gen_chartPull (chartPullIn P₀ (fun _ : PUnit => φ₂) (fun _ => 1) k) t ht
+    have hc : pullback.fst A₀.hom π ≫ k₀ = (gp.1.isoPullback.inv ≫ k) ≫ φ₂ := by
+      rw [Category.assoc, hk, ← Category.assoc, gp.1.isoPullback_inv_fst]
+    apply gen_chartPull (chartPullOut P₀ (fun _ : PUnit => k₀) (fun _ => 1) (pullback.fst A₀.hom π)
+      (fun _ => gp.1.isoPullback.inv ≫ (k ≫ φ₂)) (fun _ => by rw [← Category.assoc, ← hc]))
+      (LB.pullGen P₀ (fun _ : PUnit => k ≫ φ₂) (fun _ => 1) u gp.1.isoPullback.inv)
+    exact DVR.pullGen_isGen _ _ _ u hu _
 
 end GlobalTheory.DescGalRig
 

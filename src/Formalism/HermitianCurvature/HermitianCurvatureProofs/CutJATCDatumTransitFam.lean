@@ -1,4 +1,51 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJATCDatumTransitCut
+module
+
+public import Formalism.FormalDegreeBessel.StatementG
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.StatementI
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt NumberField
 open scoped ComplexConjugate Matrix
@@ -49,12 +96,12 @@ theorem herm_w_bvec {i : Fin (2 * r + k + 1)} (hi : i.val < r ∨ r + k < i.val)
 theorem fam_in {e : Fin (k + 1) → Fin (2 * r + k + 1) → ℂ} {i : Fin (2 * r + k + 1)} (h : r ≤ i.val ∧ i.val ≤ r + k) :
     fam k r e i = e ⟨i.val - r, by omega⟩ := by
   simp only [fam]
-  rw [dif_pos h]
+  rw [dite_eq_left h]
 
 theorem fam_out {e : Fin (k + 1) → Fin (2 * r + k + 1) → ℂ} {i : Fin (2 * r + k + 1)} (h : i.val < r ∨ r + k < i.val) :
     fam k r e i = bvec i := by
   simp only [fam]
-  rw [dif_neg]
+  rw [dite_eq_right]
   omega
 
 theorem famGram {e : Fin (k + 1) → Fin (2 * r + k + 1) → ℂ} (he : ONb k r e) (i j : Fin (2 * r + k + 1)) :
@@ -68,28 +115,6 @@ theorem famGram {e : Fin (k + 1) → Fin (2 * r + k + 1) → ℂ} (he : ONb k r 
   · rw [fam_out (i := i) (by omega), fam_in hj, herm_bvec_w (i := i) (by omega) (he.1 _),
       (hpk_out_in (i := i) (j := j) (by omega) hj).2]
   · rw [fam_out (i := i) (by omega), fam_out (i := j) (by omega), herm_bvec_bvec]
-
-theorem out_cases {i : Fin (2 * r + k + 1)} (hi : i.val < r ∨ r + k < i.val) :
-    (∃ a : Fin r, i = eI k r a) ∨ (∃ a : Fin r, i = esI k r a) := by
-  have := i.isLt
-  rcases hi with hi | hi
-  · left
-    exact ⟨⟨i.val, hi⟩, Fin.ext rfl⟩
-  · right
-    refine ⟨⟨2 * r + k - i.val, by omega⟩, Fin.ext ?_⟩
-    show i.val = 2 * r + k - (2 * r + k - i.val)
-    omega
-
-theorem glev_fix {g : Q.Mx k r} (hg : g ∈ Q.Glev k r (Fin.last r)) {i : Fin (2 * r + k + 1)}
-    (hi : i.val < r ∨ r + k < i.val) : g *ᵥ bvec i = bvec i := by
-  obtain ⟨_, h2⟩ := hg
-  rcases out_cases hi with ⟨a, rfl⟩ | ⟨a, rfl⟩
-  · exact (h2 a (by rw [Fin.val_last]; exact a.isLt)).1
-  · exact (h2 a (by rw [Fin.val_last]; exact a.isLt)).2
-
-theorem uw_glev {z : Fin (2 * r + k + 1) → ℂ} {g : Q.Mx k r} (hg : g ∈ UWset k r z) : g ∈ Q.Glev k r (Fin.last r) := by
-  obtain ⟨h1, h2, -⟩ := hg
-  exact ⟨h1, fun a _ => h2 a⟩
 
 end
 

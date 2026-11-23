@@ -1,41 +1,68 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CInfGood
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.BcMapBcVec
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.FlatChernWeightEqOfIndependence
-import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.OnbMat
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.RegularFormsIsBundleProjectiveCover
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.TwistedDualRegularFormsFiniteCover
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CuspOnto
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.AdelicGLLastRowAndDetModuleUnderLeftMultiplicati
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.LamLevel
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.ThmFlatA
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.FlatDegree
-import Development.AutomorphicSpectrum.Statements.MetricStatements.SmallOnTower
-import Development.AutomorphicSpectrum.Statements.MetricStatements.RankBound
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.HSClaim
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.ShareLow
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LogMeanShares.LogMeanStatements.LineDegreeClosedFormula
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEmptyZeroPieces
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.CcPreserving
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfO
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.UnitHmE
-import Development.AutomorphicSpectrum.ParallelStatements.ParallelGeometry.LowerWeightVolume
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCellMongeAmpereDensityConstant
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereSingularTotalMassDegree
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereIntegralParametrizedCover
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagPotentialLeviFormCell
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.MongeAmpereDensityDiagonalLevi
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SepCountEqFactorialDegree
-import ReciprocityTheory.AnalyticForms.PotentialTheory.Degree
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptInteriorFlag
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeInnerProductMapIff
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjEmbRtOfNe
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RiemannFormFramePeriodsEqMajorant
+public import Development.AbelianVarietyTheory.Definitions.CMLattices.IntegralOf
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NonemptyUnitAt
+public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.LawsFieldsSeparately
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MetricChangeOfFrame
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.RigidifiedSectionCorrespondenceExistsUniqueNonva
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.UnifMetricScalar
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.UniversalTripleFibreKeyDataNonemptyField
+public import Development.AbelianVarietyTheory.Proofs.GenericRegularity.TriangularFrameChangeOfTriangularPeriod
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsValLineLogNormAtIffEmbedding
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.CmTypeLetterFrameColumnDictionary
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FibreSectionNowhereZeroOfGenerates
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsCombAtIffIsDerivAt0
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TriangularFrameMovesPeriodBlockTriangular
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCptInteriorFlag
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeHermitianFormExists
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjEmbRtOfNe
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.UnifMetricScalar
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.MetricChangeOfFrame
-import Development.AbelianVarietyTheory.Proofs.GenericRegularity.TriangularFrameChangeOfTriangularPeriod
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RiemannFormFramePeriodsEqMajorant
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeInnerProductMapIff
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieLatticeEvalAtLocalRingStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthogonalFrameDomain
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthonormalFlagTranslateHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ProdCastLESucc
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupAtUnit
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.UnitHmA
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD Formalism.L2.Pj
@@ -111,10 +138,10 @@ theorem letters (hσ : GoodEmb c σ) (hU : IsUnf U) (k : U.Comp) :
   rcases h with ⟨a, rfl, rfl⟩ | ⟨a, rfl, rfl, d⟩
   · rw [if_neg (by simp)]
     unfold perFr
-    rw [dif_pos a, dif_pos hn]
+    rw [dite_eq_left a, dite_eq_left hn]
   · rw [if_pos (by dsimp only; omega)]
     unfold perFr
-    rw [dif_neg a, dif_pos (show conjEmb (relab c σ s.1) ∈ (U.X k).Ψ from hτ), dif_pos hn]
+    rw [dite_eq_right a, dite_eq_left (show conjEmb (relab c σ s.1) ∈ (U.X k).Ψ from hτ), dite_eq_left hn]
     rfl
 
 theorem hm_diag (hσ : GoodEmb c σ) (hU : IsUnf U) {k : U.Comp} {x : (U.X k).dom} (W : PullbackSections.UnfAt U k x)
@@ -208,7 +235,7 @@ theorem move (hσ : GoodEmb c σ) (hU : IsUnf U) {k : U.Comp} (x : (U.X k).dom) 
 theorem leadMinor_smul_one {n : ℕ} (κ : ℝ) (m : ℕ) (hm : m ≤ n) :
     GlobalTheory.CompanionTheory.Ar.leadMinor ((κ : ℂ) • (1 : Matrix (Fin n) (Fin n) ℂ)) m = κ ^ m := by
   unfold GlobalTheory.CompanionTheory.Ar.leadMinor
-  rw [dif_pos hm, Matrix.submatrix_smul, Pi.smul_apply, Pi.smul_apply,
+  rw [dite_eq_left hm, Matrix.submatrix_smul, Pi.smul_apply, Pi.smul_apply,
     Matrix.submatrix_one _ (Fin.castLE_injective hm), Matrix.det_smul, Matrix.det_one, Fintype.card_fin, _root_.mul_one,
     ← Complex.ofReal_pow, Complex.ofReal_re]
 

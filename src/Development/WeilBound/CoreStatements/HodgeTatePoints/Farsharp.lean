@@ -1,7 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Statements.GeometryStatements.HodgeTateCokerSharp
-import Development.WeilBound.CoreStatements.HodgeTatePoints.FarsharpA
-import Development.WeilBound.CoreStatements.HodgeTatePoints.FarsharpB
+module
+
+public import Development.AutomorphicSpectrum.Statements.GeometryStatements.HodgeTateCokerSharp
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConvEqOneOfForallPairing
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.FarsharpA
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.FarsharpB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,11 +57,11 @@ variable (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero
   (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C] (hv : v.Integers O)
   (hp : v (p : C) < 1)
 
-include hv hp in
 
+include hv hp in
 theorem smul_dUnit_mem (A : Type) [CommRing A] [Bialgebra O A] [IsCocomm O A] [Module.Finite O A]
     [Module.Projective O A] (hfin : {u : A | IsGroupLikeElem O u}.Finite) (q : O) (hq : q ≠ 0)
-    (M : Submodule O (Cot O A)) (hM : ∀ u, IsGroupLikeElem O u → dUnit O u ∈ M)
+    (M : Submodule O (Cot O A)) (hM : ∀ u, IsGroupLikeElem O u → dUnit (R := O) u ∈ M)
     (hqM : ∀ y, q • y ∈ M) (κ : O) (hκ : v (algebraMap O C κ) ^ (p - 1) ≤ v (p : C))
     (y : Cot O A) : κ • y ∈ M := by
   have : IsDomain O := hv.hom_inj.isDomain (algebraMap O C)
@@ -40,12 +84,14 @@ theorem smul_dUnit_mem (A : Type) [CommRing A] [Bialgebra O A] [IsCocomm O A] [M
     refine sup_le (Submodule.span_le.2 hM) (sup_le ?_ ?_)
     · rintro _ ⟨t, rfl⟩
       induction t with
-      | zero => simp
       | tmul a b =>
         have h0 : ∀ a, ε (π a) = 0 := fun a => by rw [hπ]; simp
         rw [Submodule.mem_comap, hμ, AugCot.d_mul, h0, h0, zero_smul, zero_smul, add_zero]
         exact zero_mem _
-      | add x y hx hy => rw [map_add]; exact add_mem hx hy
+      | add x y hx hy =>
+        change AugCot.d ε (μ (x + y)) ∈ M
+        rw [map_add, map_add]
+        exact add_mem hx hy
     · rintro _ ⟨a, rfl⟩
       rw [Submodule.mem_comap, LinearMap.smul_apply, map_smul]
       exact hqM _
@@ -63,11 +109,11 @@ theorem smul_dUnit_mem (A : Type) [CommRing A] [Bialgebra O A] [IsCocomm O A] [M
     rw [hμ, hπ, hπ]
     simp only [Algebra.smul_def, map_mul]
     ring
-  rw [h3, map_add, map_sub, map_sub, map_smul, map_smul, map_smul] at h1
+  rw [h3, map_add (f := _), map_sub, map_sub, map_smul, map_smul, map_smul] at h1
   exact (dvd_add_left h2).1 h1
 
-include hv hp in
 
+include hv hp in
 theorem smul_mem_range_dlogLinear [Algebra ℤ_[p] O] [IsAdicComplete (Ideal.span {(p : O)}) O]
     (G : PDivGroup p O) (κ : O) (hκ : v (algebraMap O C κ) ^ (p - 1) ≤ v (p : C)) (w : G.omega) :
     κ • w ∈ LinearMap.range (dlogLinear G) := by
@@ -106,10 +152,12 @@ theorem hodgeTateCokerSharp : GlobalTheory.CompanionTheory.Ar.HT.HodgeTateCokerS
   rw [← hz]
   clear hz
   induction z with
-  | zero => simp
   | tmul c χ =>
     obtain ⟨t, rfl⟩ := (tateCongr O G.bidual).surjective χ
     exact ⟨c ⊗ₜ t, rfl⟩
-  | add x y hx hy => rw [map_add]; exact add_mem hx hy
+  | add x y hx hy =>
+    obtain ⟨a, ha⟩ := hx
+    obtain ⟨b, hb⟩ := hy
+    exact ⟨a + b, by rw [map_add, map_add, ha, hb]⟩
 
 end PositivityTheory.HtPt.Farsharp

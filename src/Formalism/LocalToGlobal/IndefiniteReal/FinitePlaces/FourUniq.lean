@@ -1,4 +1,60 @@
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.SmulFinsum
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.FourModel
+public import Mathlib.Algebra.Module.Pi
+public import Mathlib.GroupTheory.QuotientGroup.Defs
+public import Mathlib.LinearAlgebra.Span.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.BigOperators.GroupWithZero.Action
+public import Mathlib.Algebra.Module.Submodule.Basic
+
+@[expose] public section
 
 set_option linter.style.haveILetI false
 
@@ -68,8 +124,8 @@ def Gk (L Y : AddSubgroup W) (k : ℕ) : AddSubgroup (QY L Y) :=
 def Pk (ρ : W → Module.End ℂ V) (L Y : AddSubgroup W) (f₀ : V) (k : ℕ) : V :=
   (Nat.card (Gk L Y k) : ℂ)⁻¹ • ∑ᶠ g : Gk L Y k, ρ ((g : QY L Y).out) f₀
 
-open Classical in
 
+open Classical in
 def indk (L X : AddSubgroup W) (k : ℕ) (t : W) : ℂ := if t ∈ smulSub k (L ⊓ X) then 1 else 0
 
 theorem Gk_out {k : ℕ} (g : Gk L Y k) : (g : QY L Y).out ∈ Y ∧ k • (g : QY L Y).out ∈ L := by
@@ -255,6 +311,7 @@ theorem T_indk (T : (W → ℂ) →ₗ[ℂ] V)
     rw [Finset.sum_apply]
     simp only [Pi.smul_apply, smul_eq_mul]
     rw [indk_eq hχl hχr hχ0 hLL hdX hdivX hdivY hfinY htf hk t, finsum_eq_sum_of_fintype, Finset.mul_sum]
+
   rw [hfun, map_sum]
   simp only [map_smul]
   unfold Pk
@@ -268,6 +325,8 @@ end Uniq2
 
 section Uniq3
 
+open Classical
+
 variable {ρ : W → Module.End ℂ V} {χ : W → W → ℂ} {L X Y : AddSubgroup W} {f₀ : V}
   (hχl : ∀ t t' y, χ (t + t') y = χ t y * χ t' y)
   (hχr : ∀ t y y', χ t (y + y') = χ t y * χ t y') (hχ0 : ∀ t y, χ t y ≠ 0)
@@ -278,9 +337,10 @@ variable {ρ : W → Module.End ℂ V} {χ : W → W → ℂ} {L X Y : AddSubgro
   (hfinX : ∀ k, 0 < k → Finite (Qt k (L ⊓ X))) (hfinY : ∀ k, 0 < k → Finite (Qt k (L ⊓ Y)))
   (htf : ∀ k : ℕ, 0 < k → ∀ t : W, k • t = 0 → t = 0)
 
+include hχl hχr hχ0 hLL hdX hdivX hdivY hfinX hfinY htf
+
 include hχl hχr hχ0 hLL hdX hdivX hdivY hfinX hfinY htf in
 open Classical in
-
 theorem T_formula (T : (W → ℂ) →ₗ[ℂ] V)
     (htr : ∀ Φ, IsSB L X Φ → ∀ x ∈ X, T (fun t => Φ (t + x)) = ρ x (T Φ))
     (hmo : ∀ Φ, IsSB L X Φ → ∀ y ∈ Y, T (fun t => χ t y * Φ t) = ρ y (T Φ))
@@ -345,14 +405,15 @@ theorem T_formula (T : (W → ℂ) →ₗ[ℂ] V)
     simp only [h0, zero_smul]
   rw [finsum_eq_sum_of_support_subset _ hsub]
   conv_lhs => rw [hdec]
+
   rw [map_sum]
   refine Finset.sum_congr rfl (fun q hq => ?_)
   rw [map_smul, htr _ (isSB_indk hk) _ (hX q hq),
     T_indk hχl hχr hχ0 hLL hdX hdivX hdivY hfinY htf T hmo hva hk]
 
+
 include hχl hχr hχ0 hLL hdX hdivX hdivY hfinX hfinY htf in
 open Classical in
-
 theorem model_unique (T T' : (W → ℂ) →ₗ[ℂ] V)
     (htr : ∀ Φ, IsSB L X Φ → ∀ x ∈ X, T (fun t => Φ (t + x)) = ρ x (T Φ))
     (hmo : ∀ Φ, IsSB L X Φ → ∀ y ∈ Y, T (fun t => χ t y * Φ t) = ρ y (T Φ))
@@ -365,9 +426,9 @@ theorem model_unique (T T' : (W → ℂ) →ₗ[ℂ] V)
   rw [T_formula hχl hχr hχ0 hLL hdX hdivX hdivY hfinX hfinY htf T' htr' hmo' hva' hk hs hi hl,
     T_formula hχl hχr hχ0 hLL hdX hdivX hdivY hfinX hfinY htf T htr hmo hva hk hs hi hl]
 
+
 include hχl hχr hχ0 hLL hdX hdivX hdivY hfinX hfinY htf in
 open Classical in
-
 theorem model_mem_span (T : (W → ℂ) →ₗ[ℂ] V)
     (htr : ∀ Φ, IsSB L X Φ → ∀ x ∈ X, T (fun t => Φ (t + x)) = ρ x (T Φ))
     (hmo : ∀ Φ, IsSB L X Φ → ∀ y ∈ Y, T (fun t => χ t y * Φ t) = ρ y (T Φ))
@@ -386,6 +447,7 @@ theorem model_mem_span (T : (W → ℂ) →ₗ[ℂ] V)
     exact Submodule.zero_mem _
   · apply Submodule.smul_mem
     unfold Pk
+
     rw [map_smul, finsum_eq_sum_of_fintype, map_sum]
     apply Submodule.smul_mem
     apply Submodule.sum_mem

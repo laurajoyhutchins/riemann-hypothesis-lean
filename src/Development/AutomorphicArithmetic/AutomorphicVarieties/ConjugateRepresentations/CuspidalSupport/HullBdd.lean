@@ -1,5 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsAutomorphicFormOfBddSubmodule
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ConjugateRepresentations.CuspidalSupport.HeckeLocalBlock
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsAutomorphicFormOfBddSubmodule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Matrix GlobalTheory.CuspRep GlobalTheory.LFun Formalism.UG Formalism.UG.P Formalism.L2.Host UpperTheory.V.Cj.S
 open GroundTheory.Automorphic.AutomorphicForm (UPos unipGL constantTerm archCompact infEmb isExpLieAlgebra)
@@ -7,18 +47,18 @@ open UpperTheory.V.Af.Fin (emb e1 e2 blk Bdd)
 open GlobalTheory.PRep (fixed)
 open scoped TensorProduct
 
-private theorem hull_le {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+private theorem hull_le {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
     {S U : Submodule ℂ (Sm E a)} (h : ∀ T ∈ Comm E a, ∀ φ ∈ S, T φ ∈ U) : hull S ≤ U := by
   refine Submodule.span_le.2 ?_
   rintro _ ⟨T, hT, φ, hφ, rfl⟩
   exact h T hT φ hφ
 
-private theorem smEq_aeval {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+private theorem smEq_aeval {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
     (z : GroundTheory.Automorphic.AutomorphicForm.UEnv E a) (p : Polynomial ℂ) (φ : Sm E a) :
     Polynomial.aeval (GroundTheory.Automorphic.AutomorphicForm.uAction z) p (UpperTheory.V.Cm.smEq E a φ) =
       UpperTheory.V.Cm.smEq E a (Polynomial.aeval (UpperTheory.V.Cm.uTC E a z) p φ) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => simp only [map_add, LinearMap.add_apply, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), LinearMap.add_apply, hp, hq]
   | monomial n c =>
     simp only [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply, map_smul]
     congr 1
@@ -29,7 +69,7 @@ private theorem smEq_aeval {E : Type} [Field E] [NumberField E] [IsTotallyComple
 private theorem commute_aeval {A : Type} [Ring A] [Algebra ℂ A] {T z : A} (h : Commute T z) (p : Polynomial ℂ) :
     Commute T (Polynomial.aeval z p) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add]; exact hp.add_right hq
+  | add p q hp hq => rw [map_add (f := _)]; exact hp.add_right hq
   | monomial n c =>
     rw [Polynomial.aeval_monomial]
     exact (Algebra.commute_algebraMap_right c T).mul_right (h.pow_right n)
@@ -65,7 +105,9 @@ theorem UpperTheory.V.Cj.S.hullBdd :
     have h0 : φ ∈ LinearMap.ker (Polynomial.aeval (Cm.uTC E a z) p) := by
       refine hull_le (fun T hT ψ hψ => ?_) hφ.1
       have h1 := hm _ ⟨ψ, hψ, rfl⟩
-      rw [Submodule.mem_bot, LinearEquiv.coe_coe, smEq_aeval, LinearEquiv.map_eq_zero_iff] at h1
+      rw [Submodule.mem_bot, LinearEquiv.coe_coe, smEq_aeval] at h1
+      have h1 : Polynomial.aeval (Cm.uTC E a z) p ψ = 0 :=
+        (Cm.smEq E a).injective (h1.trans (Cm.smEq E a).map_zero.symm)
       rw [LinearMap.mem_ker, ← Module.End.mul_apply, ← (commute_aeval (hT.2.1 z hz) p).eq, Module.End.mul_apply, h1,
         map_zero]
-    rw [Submodule.mem_bot, LinearEquiv.coe_coe, smEq_aeval, LinearMap.mem_ker.1 h0, map_zero]
+    rw [Submodule.mem_bot, LinearEquiv.coe_coe, smEq_aeval, LinearMap.mem_ker.1 h0, (Cm.smEq E a).map_zero]

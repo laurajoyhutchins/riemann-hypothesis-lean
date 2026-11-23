@@ -1,5 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.IsInfUnitary
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.IsInfUnitary
+public import Mathlib.GroupTheory.Perm.Sign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -94,12 +137,6 @@ end Bessel
 def CapelliCentralStatement : Prop :=
   ∀ (𝒰 : Type u) [Ring 𝒰] [Algebra ℂ 𝒰] (n : ℕ) (E : Fin n → Fin n → 𝒰) (x : ℂ),
     GlRelR E → ∀ a b, Commute (E a b) (capelliC E x)
-
-def CapelliHWStatement : Prop :=
-  ∀ (M : Type u) [AddCommGroup M] [Module ℂ M] (n : ℕ) (E : Fin n → Fin n → Module.End ℂ M)
-    (μ : Fin n → ℝ) (v : M) (x : ℂ), IsGlRep E → IsHWVec E μ v →
-    ∀ y ∈ genSub E (Submodule.span ℂ {v}),
-      capelliC E x y = (∏ a : Fin n, (x + (μ a : ℂ) - ((a : ℕ) : ℂ))) • y
 
 def CapelliExpandStatement : Prop :=
   ∀ (𝒰 : Type u) [Ring 𝒰] [Algebra ℂ 𝒰] (m : ℕ) (E : Fin (m + 1) → Fin (m + 1) → 𝒰) (om : ℂ),

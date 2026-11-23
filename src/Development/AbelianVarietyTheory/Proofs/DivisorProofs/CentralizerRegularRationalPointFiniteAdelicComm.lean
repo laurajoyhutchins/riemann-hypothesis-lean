@@ -1,7 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnifAt
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeftMulMatrixTransfer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalComponentDefiniteUnitaryFinitePartEqLocalPo
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeftMulMatrixTransfer
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalComponentDefiniteUnitaryFinitePartEqLocalPo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Matrix Polynomial Filter GlobalTheory.CuspRep GlobalTheory.PRep Formalism.UG Formalism.BasicNotions GlobalTheory.UnitaryBC Formalism.L2.Host GlobalTheory.BCT
 open scoped Classical TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
@@ -13,7 +54,7 @@ namespace GlobalTheory.BCT.FinCentComm
 theorem commute_aeval {R : Type} [CommRing R] {r : ℕ} {m A : Matrix (Fin r) (Fin r) R}
     (h : Commute m A) (p : R[X]) : Commute m (aeval A p) := by
   induction p using Polynomial.induction_on' with
-  | add p q hp hq => rw [map_add]; exact hp.add_right hq
+  | add p q hp hq => rw [map_add (f := _)]; exact hp.add_right hq
   | monomial k a =>
     rw [aeval_monomial, Algebra.algebraMap_eq_smul_one, smul_mul_assoc, one_mul]
     exact (h.pow_right k).smul_right a
@@ -22,9 +63,10 @@ theorem aeval_mulVec_krylov {R : Type} [CommRing R] {r : ℕ} (A : Matrix (Fin r
     (v c : Fin r → R) :
     aeval A (∑ j : Fin r, monomial (j : ℕ) (c j)) *ᵥ v = GlobalTheory.ClassParam.krylov A v *ᵥ c := by
   ext i
+
   simp [GlobalTheory.ClassParam.krylov, map_sum, aeval_monomial, Matrix.sum_mulVec,
-    Algebra.algebraMap_eq_smul_one, Matrix.smul_mulVec, Matrix.mulVec, dotProduct, Matrix.sum_apply,
-    Finset.mul_sum, Finset.sum_mul]
+  Algebra.algebraMap_eq_smul_one, Matrix.smul_mulVec, Matrix.mulVec, dotProduct, Matrix.sum_apply,
+  Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
@@ -67,7 +109,7 @@ namespace GlobalTheory.BCT.FinCentComm
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
-theorem map_fst_eq_one (a : finU E n) : ((a : UA E n) : GA E n).val.map (FinPtLoc.fstA E) = 1 := by
+theorem map_fst_eq_one (a : finU (E := E) (n := n)) : ((a : UA E n) : GA E n).val.map (FinPtLoc.fstA E) = 1 := by
   have ha : cInf (a : UA E n) = 1 := a.2
   ext i j
   have h := congrArg (fun g : GL (Fin n) (Cinf E) => g.val i j) ha
@@ -78,7 +120,7 @@ theorem map_fst_eq_one (a : finU E n) : ((a : UA E n) : GA E n).val.map (FinPtLo
   by_cases hij : i = j <;> simp [Matrix.one_apply, hij]
 
 theorem map_snd_finPt (γ : UE E n) :
-    (((finPt γ : finU E n) : UA E n) : GA E n).val.map (pFin E) = γ.1.val.map (algebraMap E (Af E)) := by
+    (((finPt γ : finU (E := E) (n := n)) : UA E n) : GA E n).val.map (pFin E) = γ.1.val.map (algebraMap E (Af E)) := by
   rw [FinPtLoc.finPt_eq]
   ext i j
   rw [Matrix.map_apply, FinPtLoc.snd_entry]
@@ -86,18 +128,18 @@ theorem map_snd_finPt (γ : UE E n) :
 
 end GlobalTheory.BCT.FinCentComm
 
-open GlobalTheory.BCT.FinCentComm in
 
+open GlobalTheory.BCT.FinCentComm in
 theorem GlobalTheory.BCT.finCent_comm : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (γ : UE E n),
-    γ.1.val.charpoly.Separable → ∀ a ∈ twCent (MonoidHom.id (finU E n)) (finPt γ),
-      ∀ b ∈ twCent (MonoidHom.id (finU E n)) (finPt γ), a * b = b * a := by
+    γ.1.val.charpoly.Separable → ∀ a ∈ twCent (MonoidHom.id (finU (E := E) (n := n))) (finPt γ),
+      ∀ b ∈ twCent (MonoidHom.id (finU (E := E) (n := n))) (finPt γ), a * b = b * a := by
   intro E _ _ _ n γ hγ a ha b hb
-  have key : ∀ c ∈ twCent (MonoidHom.id (finU E n)) (finPt γ),
+  have key : ∀ c ∈ twCent (MonoidHom.id (finU (E := E) (n := n))) (finPt γ),
       (((c : UA E n) : GA E n).val.map (pFin E)) * γ.1.val.map (algebraMap E (Af E)) =
         γ.1.val.map (algebraMap E (Af E)) * ((c : UA E n) : GA E n).val.map (pFin E) := by
     intro c hc
     have h : c * finPt γ = finPt γ * c := hc
-    have h' := congrArg (fun z : finU E n => ((z : UA E n) : GA E n).val.map (pFin E)) h
+    have h' := congrArg (fun z : finU (E := E) (n := n) => ((z : UA E n) : GA E n).val.map (pFin E)) h
     simp only [Subgroup.coe_mul, Units.val_mul, Matrix.map_mul] at h'
     rwa [map_snd_finPt] at h'
   apply Subtype.ext; apply Subtype.ext; apply Units.ext

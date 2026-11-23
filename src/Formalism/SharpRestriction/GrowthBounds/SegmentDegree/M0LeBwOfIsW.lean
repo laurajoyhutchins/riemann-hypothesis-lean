@@ -1,4 +1,55 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscPowerMonomialDegreeAtW
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscPowerMonomialDegreeAtW
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.CardFinRange
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscPowerMonomialMemSupported
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscriminantNonzeroModUniformiser
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DminusLeBeS
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DplusLeBeS
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.FourHundredSixteenLeA
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.PsiCutSupported
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.ReflectionMemGlevCastSucc
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.SegmentProductDegreeDetermined
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.SumSingleApplyZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,7 +125,8 @@ theorem restMemC_of (D : Formalism.BasicNotions.D7) (hAdm : AdmB D) : RestMemC 1
   have hr : 0 < r := NeZero.pos r
   have hA3 : Formalism.MainNotions.CovariantDegrees.DefiniteRankOne D := hAdm.2.2.2.2.2.2.2.2.1
   obtain ⟨dd, b', b'', P, P1, P2, hPμ, h1, h2, hsum, hC, hPATH, hGood, hSt, hu, hd⟩ := exists_path_decomposition D hAdm hX j b q
-  have H := plHyp_of X p K hX j _ _ dd hPATH
+  have H : PlHyp (segN X.F j - r) (X.beS p K j (X.restr j b) : ℤ) (plPart q.1.1) :=
+    plHyp_of X p K hX j _ _ dd hPATH
   have hI' : IsSt P1.mu (Ican P1.mu) := by rw [h1]; exact mem_isSt_Ican H
   have hI'' : IsSt P2.mu q.1.2.1 := by rw [h2]; exact hSt
   have u1 := (standard_polynomial_mem_bounds (segLL X.F j) b' (fun th M => (hA3 p O S _ r (segLL X.F j) b' th M).1) P1 _ hI').1
@@ -165,7 +217,8 @@ theorem restMemD_of (D : Formalism.BasicNotions.D7) (hAdm : AdmB D) (C₀ : ℝ)
   have hr : 0 < r := NeZero.pos r
   have hA3 : Formalism.MainNotions.CovariantDegrees.DefiniteRankOne D := hAdm.2.2.2.2.2.2.2.2.1
   obtain ⟨dd, b', b'', P, P1, P2, hPμ, h1, h2, hsum, hC, hPATH, hGood, hSt, hu, hd⟩ := exists_path_decomposition D hAdm hX j b q
-  have H := plHyp_of X p K hX j _ _ dd hPATH
+  have H : PlHyp (segN X.F j - r) (X.beS p K j (X.restr j b) : ℤ) (plPart q.1.1) :=
+    plHyp_of X p K hX j _ _ dd hPATH
   have hI' : IsSt P1.mu (Ican P1.mu) := by rw [h1]; exact mem_isSt_Ican H
   have hI'' : IsSt P2.mu q.1.2.1 := by rw [h2]; exact hSt
   have u1 := (standard_polynomial_mem_bounds (segLL X.F j) b' (fun th M => (hA3 p O S _ r (segLL X.F j) b' th M).1) P1 _ hI').1
@@ -193,8 +246,8 @@ theorem restMemD_of (D : Formalism.BasicNotions.D7) (hAdm : AdmB D) (C₀ : ℝ)
     ring
   rw [hfac, MvPolynomial.mem_restrictSupport_iff]
   intro mm hmm i hi c
-  have hmm' : coeff mm (monomial (X.monTau K j q.1.2.2) (1 : O) *
-      (plEmb O r K (X.discPowerTimesMonomial p K O j b * X.memPl K O j q.1.1) * nmEmb O r K (X.memG K O j q.1))) ≠ 0 := by
+  have hmm' : AddMonoidAlgebra.coeff (monomial (X.monTau K j q.1.2.2) (1 : O) *
+      (plEmb O r K (X.discPowerTimesMonomial p K O j b * X.memPl K O j q.1.1) * nmEmb O r K (X.memG K O j q.1))) mm ≠ 0 := by
     rw [← MvPolynomial.mem_support_iff]; exact_mod_cast hmm
   rw [MvPolynomial.coeff_monomial_mul'] at hmm'
   split_ifs at hmm' with hle

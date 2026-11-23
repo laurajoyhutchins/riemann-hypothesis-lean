@@ -1,6 +1,55 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FlatTensorVacuum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OrdL
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInverseUnipotentVolumeConjDiagonalEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PairPtsClasses
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ValuationGdetKapAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInverseUnipotentVolumeConjDiagonalEq
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField MeasureTheory Matrix ValuativeRel GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.ExpansionInvariance GlobalTheory.SplitFlip GlobalTheory.SplitWeil GlobalTheory.RootEx
 attribute [local instance] Formalism.BasicNotions.Host.cmStar GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField borelKw borelSpaceKw
@@ -56,7 +105,7 @@ theorem stepPt_rr_lt (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (l : Fin 
   have h1 : ¬ (Free (c / 2 + 1) ((Sum.inr l : n ⊕ Fin c), (Sum.inr i : n' ⊕ Fin (c + 1))) ∨
       Kept ((Sum.inr l : n ⊕ Fin c), (Sum.inr i : n' ⊕ Fin (c + 1)))) := by
     simp only [Free, Kept, or_false]; omega
-  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dif_neg h1, add_zero, basePt, fromBlocks_apply₂₂,
+  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dite_eq_right h1, add_zero, basePt, fromBlocks_apply₂₂,
     Matrix.of_apply, if_neg (by omega)]
 
 theorem stepPt_rr_eq (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (l : Fin c) (i : Fin (c + 1))
@@ -64,7 +113,7 @@ theorem stepPt_rr_eq (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (l : Fin 
   have h1 : ¬ (Free (c / 2 + 1) ((Sum.inr l : n ⊕ Fin c), (Sum.inr i : n' ⊕ Fin (c + 1))) ∨
       Kept ((Sum.inr l : n ⊕ Fin c), (Sum.inr i : n' ⊕ Fin (c + 1)))) := by
     simp only [Free, Kept, or_false]; omega
-  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dif_neg h1, add_zero, basePt, fromBlocks_apply₂₂,
+  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dite_eq_right h1, add_zero, basePt, fromBlocks_apply₂₂,
     Matrix.of_apply, if_pos h]
 
 theorem stepPt_lr_zero (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (r : n) (i : Fin (c + 1))
@@ -72,7 +121,7 @@ theorem stepPt_lr_zero (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (r : n)
   have h1 : ¬ (Free (c / 2 + 1) ((Sum.inl r : n ⊕ Fin c), (Sum.inr i : n' ⊕ Fin (c + 1))) ∨
       Kept ((Sum.inl r : n ⊕ Fin c), (Sum.inr i : n' ⊕ Fin (c + 1)))) := by
     simp only [Free, Kept, Nat.even_iff]; omega
-  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dif_neg h1, add_zero, basePt, fromBlocks_apply₁₂,
+  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dite_eq_right h1, add_zero, basePt, fromBlocks_apply₁₂,
     Matrix.zero_apply]
 
 theorem stepPt_rl_zero (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (l : Fin c) (s : n')
@@ -80,7 +129,7 @@ theorem stepPt_rl_zero (x₀ : Matrix n n' k) (e : StepVar n c n' → k) (l : Fi
   have h1 : ¬ (Free (c / 2 + 1) ((Sum.inr l : n ⊕ Fin c), (Sum.inl s : n' ⊕ Fin (c + 1))) ∨
       Kept ((Sum.inr l : n ⊕ Fin c), (Sum.inl s : n' ⊕ Fin (c + 1)))) := by
     simp only [Free, Kept, Nat.odd_iff]; omega
-  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dif_neg h1, add_zero, basePt, fromBlocks_apply₂₁,
+  rw [stepPt, Matrix.add_apply, Matrix.of_apply, dite_eq_right h1, add_zero, basePt, fromBlocks_apply₂₁,
     Matrix.zero_apply]
 
 end Step

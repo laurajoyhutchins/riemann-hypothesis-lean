@@ -1,10 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfFrobeniusLevels
-import Formalism.SharpRestriction.LevelLetterCocycles.LevelSeriesFirstFactorOrderOne
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.JumpsLetExists
-import Formalism.SharpRestriction.LevelLetterCocycles.GammaSemisimpleLocalOfConsequences
-import Formalism.SharpRestriction.LevelLetterCocycles.IsFracOL
-import Formalism.SharpRestriction.LevelLetterCocycles.LocalizationQuotientSeparatedDvd
-import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.WachFrobeniusLatticeUnramifiedFunctor
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsGenerators
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.MemCrit
+public import Formalism.SharpRestriction.LevelLetterCocycles.ArcCoordinatesOfFrobeniusLevels
+public import Formalism.SharpRestriction.LevelLetterCocycles.IsFracOL
+public import Formalism.SharpRestriction.LevelLetterCocycles.LevelSeriesFirstFactorOrderOne
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.ConstantCoeffQZeroEqP
+public import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.JumpsLetExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,30 +69,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
 theorem memCrit_of_free [NeZero n] (hA : Formalism.MainNotions.LiftingTheory.CaseA W) (hFr : IsFractionRing O LL)
     (h1 : Formalism.MainNotions.DeltaInvariantLattices.WachLatticeFree W) (h3 : Formalism.MainNotions.DeltaInvariantLattices.P3W W) (h4 : Formalism.MainNotions.WachCoordinates.LevelMapHodgeFiltration W)
     (h5 : Formalism.MainNotions.DeltaInvariantLattices.P5W W) (hD : Formalism.MainNotions.RamifiedCoefficientChains.DdREqDcris PD LL) : MemCrit W := by
-  intro T hT c x k hk hxc hexp
-  have hs : W.s = 1 := hA.2.1
-  have hp : (PD.p : LL) ≠ 0 := by
-    intro h0
-    have := W.v_l
-    rw [h0, AddValuation.map_zero] at this
-    exact WithTop.top_ne_coe this
-  obtain ⟨M, h, hJ⟩ := jumpsLet_exists W hA hD T hT
-  have h5T := (h5 T M h hT hJ).2.2 x ⟨k, hk⟩
-  refine h5T.2 fun i ζ hQ k' hk' => ?_
-  by_cases hic : i = c
-  · subst hic
-    have hζ := qroot_prim W hs hp hQ
-    have := fd_ιDi W hA hD T hT i
-    exact mem_vanI_at W hFr T i ζ ((h1 T hT).2 i) (h3 T hT)
-      (h4 T hT i 0 ζ (by rwa [zero_add, pow_one])) (W.Q ^ k' • x) hk'
-      (by rw [smul_comm, hxc]) k' (shift_exp W hs hp T i hζ x k hk (hexp ζ hζ) k' hk')
-  · have hl : (letE c : LetA O n) ∈ Formalism.MainNotions.DeltaInvariantLattices.vanI W i ζ k' := by
-      show W.lev i ζ (letE c) ∈ Ideal.span {(PowerSeries.X : PowerSeries LL) ^ k'}
-      rw [W.lev_letter i ζ _ (by simp [letE, Pi.single_eq_of_ne hic])]
-      exact Ideal.zero_mem _
-    have e1 : W.Q ^ k' • x = (letE c : LetA O n) • (W.Q ^ k' • x) := by rw [smul_comm, hxc]
-    rw [e1]
-    exact Submodule.smul_mem_smul hl hk'
+  apply Formalism.MainNotions.N.Pv.LocalLengthBound.memCrit_of <;> assumption
 
 end Pf
 

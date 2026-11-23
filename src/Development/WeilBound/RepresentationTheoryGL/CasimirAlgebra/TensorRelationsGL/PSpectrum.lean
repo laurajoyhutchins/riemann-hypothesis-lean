@@ -1,4 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.LiftCommEAt
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.CasimirAlgebra.TensorRelationsGL.QdetFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -114,21 +164,26 @@ theorem Kl_sum {V : Type} [AddCommGroup V] [Module ℂ V] (A B : Module.End ℂ 
     · exact hAB.eq
     · exact hAB.eq.symm
     · rfl
-  letI : CommRing (Algebra.adjoin ℂ ({A, B} : Set (Module.End ℂ V))) := Algebra.adjoinCommRingOfComm ℂ hc
+  open scoped IsMulCommutative in
+  letI : IsMulCommutative (Algebra.adjoin ℂ ({A, B} : Set (Module.End ℂ V))) :=
+    Algebra.isMulCommutative_adjoin ℂ (fun a ha b hb _ => hc a ha b hb)
   let a' : Algebra.adjoin ℂ ({A, B} : Set (Module.End ℂ V)) := ⟨A, Algebra.subset_adjoin (by simp)⟩
   let b' : Algebra.adjoin ℂ ({A, B} : Set (Module.End ℂ V)) := ⟨B, Algebra.subset_adjoin (by simp)⟩
   have hinj : Function.Injective (Algebra.adjoin ℂ ({A, B} : Set (Module.End ℂ V))).val := Subtype.val_injective
   have hA' : (La.map fun a : ℕ => a' - algebraMap ℂ _ (α + a)).prod = 0 := by
     apply hinj
     rw [map_list_prod, map_zero, List.map_map]
-    simpa [Function.comp_def, a'] using hLa
+    set_option synthInstance.maxHeartbeats 200000 in
+      simpa [Function.comp_def, a'] using hLa
   have hB' : (Lb.map fun b : ℕ => b' - algebraMap ℂ _ (β + b)).prod = 0 := by
     apply hinj
     rw [map_list_prod, map_zero, List.map_map]
-    simpa [Function.comp_def, b'] using hLb
+    set_option synthInstance.maxHeartbeats 200000 in
+      simpa [Function.comp_def, b'] using hLb
   have hs := congrArg (Algebra.adjoin ℂ ({A, B} : Set (Module.End ℂ V))).val (sum_comm a' b' α β La Lb hA' hB')
   rw [map_list_prod, map_zero, List.map_map] at hs
-  simpa [Function.comp_def, a', b'] using hs
+  set_option synthInstance.maxHeartbeats 200000 in
+    simpa [Function.comp_def, a', b'] using hs
 
 theorem xJ_apply {m : ℕ} {M : Type} [AddCommGroup M] [Module ℂ M] (E : Fin n → Fin n → Module.End ℂ M) (j : Fin m)
     (f : TV n M (Fin m)) (I : Fin m → Fin n) :
@@ -148,7 +203,8 @@ theorem xJ_nat {m : ℕ} {M₁ M₂ : Type} [AddCommGroup M₁] [Module ℂ M₁
     LinearMap.compLeft φ (Fin m → Fin n) ∘ₗ xJ E₁ j = xJ E₂ j ∘ₗ LinearMap.compLeft φ (Fin m → Fin n) := by
   have h' : ∀ a b v, φ (E₁ a b v) = E₂ a b (φ v) := fun a b v => LinearMap.congr_fun (h a b) v
   refine LinearMap.ext fun f => funext fun I => ?_
-  simp [xJ_apply, map_add, map_sum, h', LinearMap.compLeft_apply]
+
+  simp [xJ_apply, map_add (f := _), map_sum, h', LinearMap.compLeft_apply]
 
 theorem glrel_inj {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
     (G : Fin n → Fin n → Module.End ℂ V) (H : Fin n → Fin n → Module.End ℂ W) (φ : V →ₗ[ℂ] W)

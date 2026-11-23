@@ -1,5 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.HarishChandraDescent.Descent
-import Mathlib.Analysis.InnerProductSpace.JointEigenspace
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.HarishChandraDescent.Descent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.InnerProductSpace.JointEigenspace
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -25,8 +74,9 @@ def Qop (ε : Fin n → Bool) (E : Fin n → Fin n → Module.End ℂ M) (μ : F
 
 theorem qf_eq (E : Fin n → Fin n → Module.End ℂ M) (μ : Fin n → ℝ) (x : M) :
     qf E μ x = RCLike.re (Bq E μ x x) := by
+
   simp only [qf, Bq, Lop, map_sum, LinearMap.sub_apply, LinearMap.smul_apply, Module.End.one_apply,
-    inner_self_eq_norm_sq]
+  inner_self_eq_norm_sq]
 
 theorem Bq_eq (ε : Fin n → Bool) {E : Fin n → Fin n → Module.End ℂ M} (hU : IsInfUnitary ε E) (μ : Fin n → ℝ) (y z : M) :
     Bq E μ y z = ⟪y, Qop ε E μ z⟫_ℂ := by
@@ -241,11 +291,13 @@ theorem comp_proof : SqId → Comp := by
   have hdiagsum : ∀ P : Module.End ℂ M, (∀ o, Commute (Aop ε E o) P) →
       ⟪x, P x⟫_ℂ = ∑ χ ∈ s, ⟪c χ, P (c χ)⟫_ℂ := by
     intro P hP
+
     rw [hxs, map_sum, sum_inner]
     refine Finset.sum_congr rfl fun χ hχ => ?_
     rw [inner_sum]
     exact Finset.sum_eq_single χ (fun ψ _ hψ => hoff χ ψ (Ne.symm hψ) P hP) (fun h => absurd hχ h)
   have hqf : qf E μ x = ∑ χ ∈ s, qf E μ (c χ) := by
+
     rw [qf_eq, Bq_eq ε hU, hdiagsum _ hQ, map_sum]
     refine Finset.sum_congr rfl fun χ _ => ?_
     rw [qf_eq, Bq_eq ε hU]
@@ -253,6 +305,7 @@ theorem comp_proof : SqId → Comp := by
     have h := hdiagsum 1 (fun o => Commute.one_right _)
     simp only [Module.End.one_apply] at h
     have h2 := congrArg RCLike.re h
+
     rw [map_sum] at h2
     simp only [inner_self_eq_norm_sq] at h2
     exact h2

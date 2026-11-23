@@ -1,10 +1,64 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TorusProjPeriodZeroEqReal
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.HasSumLocallyUniformlyOnTerm
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FormalThetaSumShiftPeriodDiv
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SmulPeriodMapMkZeroFstEqNegForm
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsEqMulCanonicalThetaOfSignMultiplier
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TwoDvdMultiplierOfThetaZActEqUnitMul
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.TorusProjPeriodZeroEqReal
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.HasSumLocallyUniformlyOnTerm
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.FormalThetaSumShiftPeriodDiv
+public import ReciprocityTheory.ThetaQuasiPeriods.PeriodLattice
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ExistsEqMulCanonicalThetaOfSignMultiplier
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SmulPeriodMapMkZeroFstEqNegForm
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.TwoDvdMultiplierOfThetaZActEqUnitMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Star.Real
+import ReciprocityTheory.ThetaQuasiPeriods.Transl
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HasSumPolyDerivMulProdAddMatrix
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,9 +107,10 @@ theorem im_posDef_of_hermForm {M τ : Matrix (Fin g) (Fin g) ℂ} (hM : M.IsHerm
       refine (hpos _ h0).trans_eq ?_
       simp [hermForm, dotProduct, mulVec, Complex.re_sum, Complex.im_sum, h1']
   have hY : (τ.map Complex.im)ᵀ * M.map Complex.re = 1 := by
-    ext j k
-    rw [one_apply, ← h2 j k]
-    simp [hermForm, hs, dotProduct, mul_apply, Complex.im_sum, h1']
+    apply Matrix.ext
+    intro j k
+    rw [Matrix.one_apply, ← h2 j k]
+    simp [hermForm, hs, dotProduct, Matrix.mul_apply, Complex.im_sum, h1']
   have := hG.inv.transpose
   rwa [inv_eq_left_inv hY, transpose_transpose] at this
 
@@ -168,8 +223,9 @@ theorem IsConvLine.BwMat_posDef {T₀ : ℝ} (hT : A.IsConvLine T₀) {w : ℂ} 
       hx (funext (Fintype.linearIndependent_iff.1 b.linearIndependent x h))
     have := A.be_pos _ h0
     convert this using 1
+
     simp only [M, dotProduct, mulVec, map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul,
-      Finset.mul_sum, Matrix.of_apply]
+    Finset.mul_sum, Matrix.of_apply]
     rw [Finset.sum_comm]
     exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
   have hC : (A.BwMat (T₀ * Complex.I)).PosSemidef := by
@@ -182,8 +238,9 @@ theorem IsConvLine.BwMat_posDef {T₀ : ℝ} (hT : A.IsConvLine T₀) {w : ℂ} 
         simp only [Complex.mul_im, Complex.ofReal_re, Complex.I_im, Complex.ofReal_im, Complex.I_re]
         linarith
       refine h1.trans_eq ?_
+
       simp only [dotProduct, mulVec, map_sum, map_zsmul, AddMonoidHom.finsetSum_apply, AddMonoidHom.smul_apply,
-        zsmul_eq_mul, Finset.mul_sum, BwMat_apply, b]
+      zsmul_eq_mul, Finset.mul_sum, BwMat_apply, b]
       rw [Finset.sum_comm]
       exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
   have := (hM.smul (sub_pos.2 hw)).add_posSemidef hC
@@ -201,7 +258,8 @@ theorem coord_Pw_of_basis (Φ : A.V →ₗ[ℂ] (Fin g → ℂ)) {w : ℂ} {τ :
       Φ (A.Pw w (bas (Pi.single (.inr k) 1))) = τ *ᵥ Pi.single k 1) (u : Fin g ⊕ Fin g → ℤ) :
     Φ (A.Pw w (bas u)) = τ *ᵥ ofIntVec (fun k => u (.inr k)) + ofIntVec (fun k => u (.inl k)) := by
   conv_lhs => rw [pi_eq_sum_univ' u]
-  simp only [Fintype.sum_sum_type, map_add, map_sum, map_zsmul, fun k => (hP k).1, fun k => (hP k).2]
+
+  simp only [Fintype.sum_sum_type, map_add (f := _), map_sum, map_zsmul, fun k => (hP k).1, fun k => (hP k).2]
   funext i
   simp [ofIntVec, mulVec, dotProduct, Pi.single_apply, mul_comm, add_comm]
 
@@ -319,7 +377,9 @@ theorem exists_classical_law (hEF : ∀ u v, A.EF (bas u) (bas v) = -omegaStd u 
   · have : (Sum.elim 0 0 : Fin g ⊕ Fin g → ℤ) = 0 := by funext s; cases s <;> rfl
     simp [this, logConst, ofIntVec_zero]
   · have : (Sum.elim (-m) (-n) : Fin g ⊕ Fin g → ℤ) = -Sum.elim m n := by funext s; cases s <;> rfl
-    simp [this, logConst, ofIntVec_neg, A.chi_neg, A.psi_neg, H_neg_left, H_neg_right, mulVec_neg]
+    have hy (v : A.La) : (-v).y = -v.y := rfl
+    have hl (v : A.La) : (-v).l = -v.l := rfl
+    simp [this, logConst, ofIntVec_neg, A.chi_neg, A.psi_neg, H_neg_left, H_neg_right, mulVec_neg, map_neg, hy, hl]
   · obtain ⟨hy, hl⟩ := (A.orth_ker_iff (bas (Sum.elim (Pi.single k 1) 0))).1 fun v' hv' => by
       obtain ⟨u, rfl⟩ := bas.surjective v'
       simp [hEF, omegaStd, Pi.single_apply, (hS u).1 hv' k hk]
@@ -331,7 +391,7 @@ theorem exists_classical_law (hEF : ∀ u v, A.EF (bas u) (bas v) = -omegaStd u 
   · set u : Fin g ⊕ Fin g → ℤ := Sum.elim m n with hu
     have hN : ∀ v, B v (A.N (bas u)) = 0 := fun v => h0 v _
     have hPw : ∀ v, B v (A.Pw w (bas u)) = B v (A.P0 (bas u)) := fun v => by
-      rw [Pw_apply, map_add, map_smul, hN, smul_zero, add_zero]
+      rw [Pw_apply, map_add (f := _), map_smul, hN, smul_zero, add_zero]
     have hPP : B (A.Pw w (bas u)) (A.Pw w (bas u)) = B (A.P0 (bas u)) (A.P0 (bas u)) := by
       rw [hPw, hs, hPw]
     have hq : ofIntVec n ⬝ᵥ Φ (A.N (bas u)) = 2 * A.q (bas u).y := by
@@ -343,7 +403,7 @@ theorem exists_classical_law (hEF : ∀ u v, A.EF (bas u) (bas v) = -omegaStd u 
       have h1 : Φ (A.Pw w (bas u)) = τ w *ᵥ ofIntVec n + ofIntVec m := hΦ w u
       have h2 : Φ (A.Pw 0 (bas u)) = τ 0 *ᵥ ofIntVec n + ofIntVec m := hΦ 0 u
       rw [Pw_zero] at h2
-      rw [Pw_apply, map_add, map_smul, h2] at h1
+      rw [Pw_apply, map_add (f := _), map_smul, h2] at h1
       have h3 := congrArg (ofIntVec n ⬝ᵥ ·) h1
       simp only [dotProduct_add, dotProduct_smul, hq, smul_eq_mul] at h3
       linear_combination -h3
@@ -352,7 +412,7 @@ theorem exists_classical_law (hEF : ∀ u v, A.EF (bas u) (bas v) = -omegaStd u 
     rw [perFactor_eq_exp, L_apply, eC, hk, hτ]
     simp only [← Complex.exp_add]
     congr 1
-    simp only [map_add, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hPP, hs (A.Pw w (bas u)) v, logConst]
+    simp only [map_add (f := _), LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hPP, hs (A.Pw w (bas u)) v, logConst]
     push_cast
     ring
 
@@ -379,7 +439,7 @@ theorem eq_mul_thetaCharOff (hEF : ∀ u v, A.EF (bas u) (bas v) = -omegaStd u v
       · simp [ha k hk]
       · simp [coord_torus_eq_zero hEF hS hΦ l hk]
     rw [show p n.1 = μ from n.2] at h2
-    rw [map_add, CanTh.thTerm_add_var, add_dotProduct, h3, add_zero, ← h2, e_def]
+    rw [map_add (f := _), CanTh.thTerm_add_var, add_dotProduct, h3, add_zero, ← h2, e_def]
     change _ = c * (Complex.exp (_ * (ofIntVec n.1 ⬝ᵥ _)) * _)
     ring
   have hF : ∀ (l : A.X →+ ℂ) μ, A.term 1 0 th μ (v + (l, 0)) * eTwoPi (w * A.exponent 1 0 μ) =
@@ -454,7 +514,7 @@ theorem theta_comparison (A : AnArc O) {T₀ : ℝ} (hT : A.IsConvLine T₀) {g 
     intro w n m z
     obtain ⟨v, rfl⟩ := Φ.surjective z
     have e : Φ v + τ w *ᵥ ofIntVec n + ofIntVec m = Φ (v + A.Pw w (bas (Sum.elim m n))) := by
-      rw [map_add, hΦ, add_assoc]; rfl
+      rw [map_add (f := _), hΦ, add_assoc]; rfl
     simp only [e, F, LinearEquiv.symm_apply_apply]
     rw [A.Sum_add_period hth, pow_one, ← mul_assoc, law, mul_assoc]
   have hw₀ : T₀ < (((T₀ + 1 : ℝ) : ℂ) * Complex.I).im := by simp
@@ -482,7 +542,7 @@ theorem theta_comparison (A : AnArc O) {T₀ : ℝ} (hT : A.IsConvLine T₀) {g 
     rw [thetaCharOff_congr (fun k hk => by simp [haS k hk]) (fun k hk i => tau_col_eq hS hΦ w' w hk i)]
     refine eq_mul_thetaCharOff hEF hS hΦ (summable_term hT one_ne_zero hth hw v) (hτ w hw) haS fun l => ?_
     rw [hc w hw]
-    simp only [map_add, LinearMap.add_apply, hB0, hs (l, 0) v, add_zero]
+    simp only [map_add (f := _), LinearMap.add_apply, hB0, hs (l, 0) v, add_zero]
   obtain ⟨z₀, hz₀⟩ := Function.ne_iff.1 hne
   have hcc : ∀ w hw, c w hw = c _ hw₀ := fun w hw => by
     have h1 := hoff w hw 0 (0, z₀)
@@ -508,34 +568,6 @@ theorem theta_comparison (A : AnArc O) {T₀ : ℝ} (hT : A.IsConvLine T₀) {g 
   rw [mul_assoc, ← h3, Complex.exp_neg]
   have := Complex.exp_ne_zero (B v v)
   field_simp
-
-example (τ₀ : ℂ) : ∃ (h₀ : (tate τ₀).V ≃ₗ[ℂ] (Fin 1 → ℂ)) (bas : (Fin 1 ⊕ Fin 1 → ℤ) ≃ₗ[ℤ] (tate τ₀).La),
-    (∀ u v, (tate τ₀).EF (bas u) (bas v) = -omegaStd u v) ∧
-    (∀ u, (bas u).y = 0 ↔ ∀ k ∈ (Finset.univ : Finset (Fin 1)), u (.inr k) = 0) ∧
-    ∀ w k, (1 : Matrix (Fin 1) (Fin 1) ℂ) *ᵥ h₀ ((tate τ₀).Pw w (bas (Pi.single (.inl k) 1))) = Pi.single k 1 ∧
-      (1 : Matrix (Fin 1) (Fin 1) ℂ) *ᵥ h₀ ((tate τ₀).Pw w (bas (Pi.single (.inr k) 1))) =
-        !![τ₀ + 2 * w] *ᵥ Pi.single k 1 := by
-  let h₀ : ((ℤ →+ ℂ) × (Fin 0 → ℂ)) ≃ₗ[ℂ] (Fin 1 → ℂ) :=
-    { toFun := fun v _ => v.1 1
-      map_add' := fun _ _ => rfl
-      map_smul' := fun _ _ => rfl
-      invFun := fun z => (zmultiplesHom ℂ (z 0), 0)
-      left_inv := fun v => Prod.ext (AddMonoidHom.ext_int (by simp)) (Subsingleton.elim _ _)
-      right_inv := fun z => funext fun i => by simp [Subsingleton.elim i 0] }
-  let bas : (Fin 1 ⊕ Fin 1 → ℤ) ≃+ (ℤ × (ℤ →+ ℤ) × (⊥ : Submodule ℤ (Fin 0 → ℂ))) :=
-    { toFun := fun u => (u (.inr 0), zmultiplesHom ℤ (u (.inl 0)), 0)
-      map_add' := fun u u' => Prod.ext rfl (Prod.ext (AddMonoidHom.ext_int (by simp)) (Subsingleton.elim _ _))
-      invFun := fun p => Sum.elim (fun _ => p.2.1 1) fun _ => p.1
-      left_inv := fun u => funext fun s => by rcases s with i | i <;> simp [Subsingleton.elim i 0]
-      right_inv := fun p => Prod.ext rfl (Prod.ext (AddMonoidHom.ext_int (by simp)) (Subsingleton.elim _ _)) }
-  refine ⟨h₀, AddEquiv.toIntLinearEquiv (M₂ := (tate τ₀).La) bas, fun u v => ?_, fun u => ?_, fun w k => ?_⟩
-  · change zmultiplesHom ℤ (v (.inl 0)) (u (.inr 0)) - zmultiplesHom ℤ (u (.inl 0)) (v (.inr 0)) + 0 = _
-    simp [omegaStd, mul_comm]
-  · change u (.inr 0) = 0 ↔ _
-    simp
-  · rw [one_mulVec, one_mulVec, Subsingleton.elim k 0]
-    refine ⟨funext fun i => (tate_Pw τ₀ w _ _).trans ?_, funext fun i => (tate_Pw τ₀ w _ _).trans ?_⟩ <;>
-      simp [Subsingleton.elim i 0]
 
 end AnArc
 

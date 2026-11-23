@@ -1,10 +1,56 @@
-import Mathlib
-import Formalism.PeriodIntegrals.DSInfCharCap
-import Formalism.PeriodIntegrals.IsLowUnitH
-import Formalism.RealPlaceAnalysis.StatementU
-import Formalism.RealPlaceAnalysis.QuotientSettingHolds
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.QdetTopThreeOrders
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirAlgebra.RhoEqRhoCAddRhoN
+module
+
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CasimirScalarOfCapelliDeterminantEigenvalue
+public import Formalism.RealPlaceAnalysis.StatementA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+
+@[expose] public section
+
 open Finset
 
 namespace GlobalTheory.CompanionTheory.Inh.CapelliCasimir
@@ -47,61 +93,7 @@ theorem scalar_core (n : ℕ) (hn : 2 ≤ n) (ρ μ a : Fin n → ℂ) (b : Fin 
     ((∑ l, ρ l) ^ 2 - ∑ l, ρ l ^ 2) * e + 2 * ∑ i, (∑ l ∈ univ.erase i, ρ l) * a i
       + 2 * ∑ i, ∑ j ∈ univ.filter (fun j => i < j), b i j
       = ((∑ l, μ l) ^ 2 - ∑ l, μ l ^ 2) * e := by
-  have key : C e * rev univ ρ + X * ∑ i, C (a i) * rev (univ.erase i) ρ
-      + X ^ 2 * ∑ i, ∑ j ∈ univ.filter (fun j => i < j), C (b i j) * rev ((univ.erase i).erase j) ρ
-      + X ^ 3 * ∑ d ∈ range (n - 2), C (r d) * X ^ (n - 3 - d) * (1 + C c * X) ^ d
-      = C e * rev univ μ := by
-    apply Polynomial.eq_of_infinite_eval_eq
-    refine Set.Infinite.mono (s := {0}ᶜ) ?_ (Set.finite_singleton (0:ℂ)).infinite_compl
-    intro t ht
-    have ht : t ≠ 0 := ht
-    simp only [Set.mem_setOf_eq, eval_add, eval_mul, eval_C, eval_X, eval_pow, eval_finset_sum,
-      eval_one, rev_eval _ _ _ ht, card_univ, Fintype.card_fin]
-    have := congrArg (fun z => t ^ n * z) (h t⁻¹)
-    simp only [mul_add, mul_sum] at this ⊢
-    refine Eq.trans ?_ (this.trans (by ring))
-    congr 1
-    · congr 1
-      · congr 1
-        · ring
-        · refine sum_congr rfl fun i _ => ?_
-          rw [card_erase_of_mem (mem_univ _), card_univ, Fintype.card_fin]
-          obtain ⟨m, hm⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
-          have : t ^ n = t * t ^ (n - 1) := by
-            rw [← pow_succ']; congr 1; omega
-          rw [this]; ring
-      · refine sum_congr rfl fun i _ => sum_congr rfl fun j hj => ?_
-        have hij : j ≠ i := (mem_filter.1 hj).2.ne'
-        rw [card_erase_of_mem (mem_erase.2 ⟨hij, mem_univ _⟩), card_erase_of_mem (mem_univ _),
-          card_univ, Fintype.card_fin]
-        have : t ^ n = t ^ 2 * t ^ (n - 1 - 1) := by
-          rw [← pow_add]; congr 1; omega
-        rw [this]; ring
-    · refine sum_congr rfl fun d hd => ?_
-      have hd := mem_range.1 hd
-      have h1 : t ^ n = t ^ 3 * t ^ (n - 3 - d) * t ^ d := by
-        rw [← pow_add, ← pow_add]; congr 1; omega
-      have h2 : (1 + c * t) = t * (t⁻¹ + c) := by field_simp
-      rw [h1, h2, mul_pow]; ring
-  have k1 := congrArg (fun p => p.coeff 1) key
-  have k2 := congrArg (fun p => p.coeff 2) key
-  simp only [coeff_add, coeff_C_mul, coeff_X_pow_mul'] at k1 k2
-  have c1 : ∀ p : ℂ[X], (X * p).coeff 1 = p.coeff 0 := fun p => coeff_X_mul p 0
-  have c2 : ∀ p : ℂ[X], (X * p).coeff 2 = p.coeff 1 := fun p => coeff_X_mul p 1
-  rw [c1] at k1
-  rw [c2] at k2
-  simp only [finset_sum_coeff, coeff_C_mul, (rev_coeff _ _).1, (rev_coeff _ _).2.1, le_refl, if_true,
-    Nat.sub_self, mul_one] at k1 k2
-  norm_num at k1 k2
-  constructor
-  · linear_combination k1
-  · have p1 := (rev_coeff univ ρ).2.2
-    have p2 := (rev_coeff univ μ).2.2
-    have : ∑ i, (∑ l ∈ univ.erase i, ρ l) * a i = ∑ i, a i * (∑ l, ρ l - ρ i) := by
-      refine sum_congr rfl fun i _ => ?_
-      rw [sum_erase_eq_sub (mem_univ _), mul_comm]
-    rw [this]
-    linear_combination 2 * k2 - e * p1 + e * p2
+  apply GlobalTheory.CapelliCasimir.scalar_core <;> assumption
 
 theorem sum_sq_split {A : Type} [AddCommGroup A] {n : ℕ} (F : Fin n → Fin n → A) :
     ∑ i, ∑ j, F i j = ∑ i, F i i + ∑ i, ∑ j ∈ univ.filter (fun j => i < j), (F i j + F j i) := by
@@ -149,75 +141,5 @@ theorem sq_sub_cas {A : Type} [Ring A] [Algebra ℂ A] {n : ℕ} (E : Fin n → 
   rw [two_smul, ← h1, ← sub_eq_zero.1 h2]
   abel
 
-theorem cvalR_eq {n : ℕ} (ε : Fin n → Bool) (lam : Fin n → ℝ) :
-    ((Formalism.REAL.cvalR ε lam : ℝ) : ℂ)
-      = ∑ l, (lam l : ℂ) ^ 2 - ∑ l : Fin n, (((n : ℂ) - 1) / 2 - ((l : ℕ) : ℂ)) ^ 2 := by
-  have h : Formalism.REAL.rhoC ε + Formalism.REAL.rhoN ε = ReciprocityTheory.ChartRestriction.DS.rho n :=
-    (ReciprocityTheory.ChartRestriction.DS.rho_eq_rhoC_add_rhoN ε).symm
-  rw [Formalism.REAL.cvalR, h]
-  simp only [Formalism.REAL.nsq, Formalism.REAL.dot, ReciprocityTheory.ChartRestriction.DS.rho]
-  push_cast
-  congr 1 <;> refine sum_congr rfl fun l _ => ?_ <;> ring
-
-open Formalism.REAL in
-
-theorem cas_of_capelli_vec : ∀ (n : ℕ) (ε : Fin n → Bool) (V : Type) [AddCommGroup V] [Module ℂ V] (E : Fin n → Fin n → Module.End ℂ V) (lam : Fin n → ℝ) (v : V), GlRel E → (∀ Y : ℂ, qdet E (Y + ((n : ℂ) - 1) / 2) v = Formalism.QuantumDeterminants.capP (fun s => (lam s : ℂ)) Y • v) → Cas E v = ((cvalR ε lam : ℝ) : ℂ) • v := by
-  intro n ε M _ _ E mu v hE h
-  rw [cvalR_eq]
-  obtain ⟨Rm, hR⟩ := _root_.GlobalTheory.qdet_top_three_orders (Module.End ℂ M) n E
-  by_cases hn : 2 ≤ n
-  swap
-  · have hn' : n = 0 ∨ n = 1 := by omega
-    rcases hn' with rfl | rfl
-    · simp [Cas]
-    · have h0 := h 0
-      rw [hR] at h0
-      have h1 : E 0 0 v = (mu 0 : ℂ) • v := by
-        simpa [Formalism.QuantumDeterminants.capP, Finset.filter_singleton] using h0
-      simp [Cas, h1, sq, mul_smul]
-  set ρ : Fin n → ℂ := fun l => ((n : ℂ) - 1) / 2 - ((l : ℕ) : ℂ) with hρ
-  have hρ0 : ∑ l, ρ l = 0 := by
-    have h1 : ∑ l, ρ l = ∑ l, ρ (Fin.rev l) := (Equiv.sum_comp Fin.revPerm ρ).symm
-    have h2 : ∑ l, ρ (Fin.rev l) = - ∑ l, ρ l := by
-      rw [← sum_neg_distrib]
-      refine sum_congr rfl fun l _ => ?_
-      have := l.2
-      simp only [hρ, Fin.val_rev]
-      rw [Nat.cast_sub (by omega)]; push_cast; ring
-    linear_combination (h1.trans h2) / 2
-  have core := fun φ : Module.Dual ℂ M =>
-    scalar_core n hn ρ (fun s => (mu s : ℂ)) (fun i => φ (E i i v))
-      (fun i j => φ ((E i i * E j j - E j i * E i j) v)) (fun d => φ (Rm d v)) (φ v)
-      (((n : ℂ) - 1) / 2)
-      (fun Y => by
-        have h1 := h Y
-        rw [hR] at h1
-        have h2 := congrArg φ h1
-        simp only [LinearMap.add_apply, LinearMap.sum_apply, LinearMap.smul_apply,
-          Module.End.one_apply, map_add, map_sum, map_smul, smul_eq_mul, add_sub_assoc,
-          Formalism.QuantumDeterminants.capP] at h2
-        exact h2)
-  have e1 : (∑ i, E i i) v = (∑ l, (mu l : ℂ)) • v := by
-    rw [← sub_eq_zero, ← Module.forall_dual_apply_eq_zero_iff ℂ]
-    intro φ
-    have := (core φ).1
-    rw [hρ0] at this
-    simp only [LinearMap.sum_apply, map_sub, map_sum, map_smul, smul_eq_mul]
-    linear_combination this
-  rw [← sub_eq_zero, ← Module.forall_dual_apply_eq_zero_iff ℂ]
-  intro φ
-  have h2 := (core φ).2
-  have h3 := congrArg (fun T : Module.End ℂ M => φ (T v)) (sq_sub_cas E hE)
-  rw [LinearMap.sub_apply, Module.End.mul_apply, e1, map_smul, e1, LinearMap.sub_apply] at h3
-  simp only [sum_erase_eq_sub (mem_univ _), hρ0] at h2
-  simp only [LinearMap.sum_apply, LinearMap.smul_apply, map_sub φ, map_sum, map_smul,
-    smul_eq_mul] at h3 h2 ⊢
-  have h5 : ∑ i : Fin n, ((n : ℂ) - 1 - 2 * (i : ℕ)) * φ (E i i v)
-      = - (2 * ∑ i, (0 - ρ i) * φ (E i i v)) := by
-    rw [mul_sum, ← sum_neg_distrib]
-    refine sum_congr rfl fun i _ => ?_
-    simp only [hρ]; ring
-  rw [h5] at h3
-  linear_combination -h3 - h2
 
 end GlobalTheory.CompanionTheory.Inh.CapelliCasimir

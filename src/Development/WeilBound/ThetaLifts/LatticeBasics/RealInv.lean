@@ -1,9 +1,56 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LatticeBasics.HodgeTateFromSandwich
-import Development.WeilBound.ThetaLifts.LatticeBasics.RealInvL
-import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.SchwartzLogDerivLinearGaussian
-import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfForallNhds
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.HodgeTateFromSandwich
+public import Development.WeilBound.ThetaLifts.LatticeBasics.RealInvL
+public import Development.WeilBound.ThetaLifts.CartanFactorisation.CartanConj
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.EqZeroOfForallNhds
+public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.SchwartzLogDerivLinearGaussian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +76,7 @@ theorem exists_fixed {S H P : Type} [AddCommGroup S] [Module ℂ S] [NormedAddCo
     exact hz.2
   · have hm : ι (g - (f - z)) ∈ Z := ⟨_, ⟨sub_mem hg (sub_mem hf hz.1), by simp [h1]⟩, rfl⟩
     have := norm_add_sq_eq_norm_sq_add_norm_sq_of_inner_eq_zero _ _ (hy _ hm)
-    rw [← e', ← map_add, sub_add_cancel, h2, right_eq_add, mul_self_eq_zero, norm_eq_zero] at this
+    rw [← e', ← map_add (f := _), sub_add_cancel, h2, right_eq_add, mul_self_eq_zero, norm_eq_zero] at this
     exact sub_eq_zero.1 (hι (this.trans (map_zero ι).symm))
 
 def dopL {V : Type} [NormedAddCommGroup V] [NormedSpace ℝ V] (a : V) (L : V →L[ℝ] ℝ) : 𝓢(V, ℂ) →ₗ[ℂ] 𝓢(V, ℂ) where
@@ -72,7 +119,7 @@ def vacSp (M : Model σ X W) (τ : ∀ w : InfinitePlace F, EmbOver E w) (ε : I
     (∀ w, u'.map (piInf (τ w)) = (((ε w : ℤ) : ℂ) * Complex.I) • (X.θ w * u.map (piInf (τ w)) * (W.θ w)ᵀ)) →
     dopL (aOf M u') (lOf M u') f = Complex.I • dopL (aOf M u) (lOf M u) f}
   zero_mem' _ _ _ _ _ := by simp
-  add_mem' hf hg u u' h1 h2 h3 := by rw [map_add, map_add, hf u u' h1 h2 h3, hg u u' h1 h2 h3, smul_add]
+  add_mem' hf hg u u' h1 h2 h3 := by rw [map_add (f := _), map_add (f := _), hf u u' h1 h2 h3, hg u u' h1 h2 h3, smul_add]
   smul_mem' c f hf u u' h1 h2 h3 := by rw [map_smul, map_smul, hf u u' h1 h2 h3, smul_comm]
 
 theorem vacSp_fin (h : IsCMExt F E σ) (M : Model σ X W) (τ : ∀ w : InfinitePlace F, EmbOver E w) (ε : InfinitePlace F → ℤˣ) :
@@ -91,7 +138,7 @@ theorem vacSp_fin (h : IsCMExt F E σ) (M : Model σ X W) (τ : ∀ w : Infinite
   obtain ⟨S, J, sAt, sev, sJ⟩ := exists_real_structure σ h τ M.co.e C
   let T : (Fin n × Fin d → mixedEmbedding.mixedSpace F) →ₗ[ℝ] (Fin n × Fin d → mixedEmbedding.mixedSpace F) →ₗ[ℝ] ℝ :=
     LinearMap.mk₂ ℝ (fun y b => linForm b y) (fun y y' b => map_add _ y y') (fun t y b => map_smul _ t y)
-      (fun y b b' => by simp only [linForm_apply, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add])
+      (fun y b b' => by simp only [linForm_apply, Pi.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)])
       (fun t y b => by simp only [linForm_apply, Pi.smul_apply, mul_smul_comm, ← Finset.smul_sum, map_smul])
   obtain ⟨m, hm⟩ := GlobalTheory.CompanionTheory.Twist.FockLogDeriv.main T (fun b hb => funext fun i => trace_mul_eq_zero _ fun y => by
       have : linForm b (Pi.single i y) = 0 := hb _
@@ -145,7 +192,7 @@ theorem pol_finite (h : IsCMExt F E σ) (hψ : IsStd ψ) (hs : IsSplitting (adel
         rintro f g ⟨N, _, h1, h2⟩ ⟨N', _, h1', h2'⟩
         refine ⟨N ⊔ N', inferInstance, Submodule.add_mem_sup h1 h1', fun k hk A hA g hg => ?_⟩
         obtain ⟨x, hx, y, hy, rfl⟩ := Submodule.mem_sup.1 hg
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Submodule.add_mem_sup (h2 k hk A hA x hx) (h2' k hk A hA y hy)
       smul_mem' := fun c f ⟨N, h0, h1, h2⟩ => ⟨N, h0, N.smul_mem c h1, h2⟩ }
   refine (sInf_le (a := S) ⟨fun f₀ ⟨ε, hε⟩ => ?_, fun u hu g ⟨N, h0, h1, h2⟩ g₁ hg => ?_⟩ : M.Pol ψ τ ≤ S) hf
@@ -185,7 +232,8 @@ theorem realInv_of (hA : PositivityTheory.ThKF.ArchOp) : RealInv := by
   have hn := Dense.lintegral_eq (S := om (k, 1)) (fun μ hμ => hs.unit μ hμ (k, 1)) (hT.1 f₀)
   have := hfix (T f₀) ⟨h2 k hk T hT.1 _ hf₀.1, hP' _ hf₀.2⟩ (hq.cpt k hk f₀ hf₀.2 _ (hT.2 f₀)) (by
     change ‖(T f₀).toLp 2 _‖ = ‖f₀.toLp 2 _‖
-    simp only [SchwartzMap.norm_toLp, eLpNorm_eq_lintegral_rpow_enorm_toReal two_ne_zero ENNReal.ofNat_ne_top,
+    simp only [SchwartzMap.norm_toLp, eLpNorm_eq_lintegral_rpow_eNorm_toReal two_ne_zero ENNReal.ofNat_ne_top (T f₀).continuous.aestronglyMeasurable,
+      eLpNorm_eq_lintegral_rpow_eNorm_toReal two_ne_zero ENNReal.ofNat_ne_top f₀.continuous.aestronglyMeasurable,
       ENNReal.toReal_ofNat, ENNReal.rpow_two, hn])
   simpa only [this] using hT.2 f₀
 

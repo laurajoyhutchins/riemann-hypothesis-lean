@@ -1,10 +1,64 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertIndexSteps
-import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveClosedPointChart
-import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsUnitOfNumMem
-import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
-import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveDivVertical
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveVertIndexSteps
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.StatementsCurveClosedPointChart
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveDivVertical
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals.MemMCoordIdealOfAevalEqZero
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.AvoidRing
+public import GroundTheory.HeightsAndTheta.Heights.Intersections.NotIsUnitOfNumMem
+public import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveCountObjects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.LittleWedderburn
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDivSupp
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterPCProof
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Targets
@@ -17,8 +71,8 @@ namespace CurveVerticalPointResidue
 
 variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_sub' {f g : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f a) (hg : IsMultiHomog g a) :
     IsMultiHomog (f - g) a := by
   classical
@@ -27,8 +81,8 @@ theorem isMultiHomog_sub' {f g : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f 
   · exact hf m h k
   · exact hg m h k
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_add' {f g : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f a) (hg : IsMultiHomog g a) :
     IsMultiHomog (f + g) a := by
   classical
@@ -37,8 +91,8 @@ theorem isMultiHomog_add' {f g : MRing ι} {a : K → ℕ} (hf : IsMultiHomog f 
   · exact hf m h k
   · exact hg m h k
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem isMultiHomog_C' (a : ℤ) : IsMultiHomog (C a : MRing ι) 0 := by
   classical
   intro m hm k
@@ -63,7 +117,7 @@ theorem exists_homog {S : Type*} [CommRing S] (χ : MRing ι →+* S) (c : ∀ k
       isMultiHomog_add' (isMultiHomog_mul h₁ (isMultiHomog_coordProd c n₂)) ?_, ?_⟩
     · rw [add_comm n₁]
       exact isMultiHomog_mul h₂ (isMultiHomog_coordProd c n₁)
-    · rw [map_add, map_mul, map_mul, hχp, hχp, mul_one, mul_one, e₁, e₂, map_add]
+    · rw [map_add (f := _), map_mul, map_mul, hχp, hχp, mul_one, mul_one, e₁, e₂, map_add (f := _)]
   | mul_X p i hp =>
     obtain ⟨n, G, h, e⟩ := hp
     exact ⟨n + Pi.single i.1 1, G * X i, isMultiHomog_mul h (isMultiHomog_X i.1 i.2), by
@@ -90,7 +144,7 @@ theorem exists_homog_mem {S : Type*} [CommRing S] (χ : MRing ι →+* S) (c : �
       isMultiHomog_add' (isMultiHomog_mul h₁ (isMultiHomog_coordProd c n₂)) ?_, ?_⟩
     · rw [add_comm n₁]
       exact isMultiHomog_mul h₂ (isMultiHomog_coordProd c n₁)
-    · rw [map_add, map_mul, map_mul, hχp, hχp, mul_one, mul_one, e₁, e₂, map_add]
+    · rw [map_add (f := _), map_mul, map_mul, hχp, hχp, mul_one, mul_one, e₁, e₂, map_add (f := _)]
   | smul a x _ hx =>
     obtain ⟨n, G, hG, h, e⟩ := hx
     obtain ⟨m, A, hA, eA⟩ := exists_homog χ c hχ a
@@ -119,8 +173,8 @@ theorem aeval_div {Ω : Type} [Field Ω] (y : (Σ k, ι k) → Ω) (c : ∀ k, �
 
 end CurveVerticalPointResidue
 
-open CurveVerticalPointResidue in
 
+open CurveVerticalPointResidue in
 theorem CurveVertPointResidue.proof (hC : CurveClosedPointChart.Statement) :
     CurveVertPointResidue.Statement := by
   intro K _ ι _ Ω _ y s d hP hs hsP W hW
@@ -155,7 +209,7 @@ theorem CurveVertPointResidue.proof (hC : CurveClosedPointChart.Statement) :
   set J := W ⊔ I0 with hJ
   have hgeo : ∀ b, geoNum 0 W b = ((Module.length ℤ (MRing ι ⧸ J)).toNat : ℤ) := by
     intro b
-    rw [geoNum, dif_pos hWrel]
+    rw [geoNum, dite_eq_left hWrel]
   obtain ⟨hF, hFin, hcard⟩ := Inter.regularityLocalResidue_holds.chart_field_card hWmh hcW hdim (charOf W) hp
   letI : Field (MRing ι ⧸ J) := hF.toField
   have hyc : ∀ k, y ⟨k, c k⟩ ≠ 0 := fun k => ne_zero_of_X_notMem fun h => hcW k (hPW h)
@@ -264,7 +318,7 @@ theorem CurveVertPointResidue.proof (hC : CurveClosedPointChart.Statement) :
         eq_intCast ((Ideal.Quotient.mk J).comp C) a]
       exact intCast_mem _ a
     | add p q hp hq =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem hp hq
     | mul_X p i hp =>
       rw [map_mul]
@@ -279,7 +333,7 @@ theorem CurveVertPointResidue.proof (hC : CurveClosedPointChart.Statement) :
       obtain ⟨w, hw, z, hz, rfl⟩ := Submodule.mem_sup.mp hb
       obtain ⟨n, G, hGW, hG, hφG⟩ := exists_homog_mem φ c hφc hWmh hw
       have h1 : (b : Ω) = aeval y G * (∏ k, y ⟨k, c k⟩ ^ n k)⁻¹ := by
-        rw [← hφform G n hG, hφG, ← hf, map_add, hspan hz, add_zero]
+        rw [← hφform G n hG, hφG, ← hf, map_add (f := _), hspan hz, add_zero]
       refine Ideal.subset_span ⟨n, G, ∏ k, (X ⟨k, c k⟩ : MRing ι) ^ n k, hG, isMultiHomog_coordProd c n, hGW,
         coordProd_not_mem hWp c hcW n, ?_⟩
       rw [h1, haevalD, mul_assoc, inv_mul_cancel₀ (hD n), mul_one]
@@ -299,7 +353,7 @@ theorem CurveVertPointResidue.proof (hC : CurveClosedPointChart.Statement) :
         intro hJh
         obtain ⟨w, hw, z, hz, hwz⟩ := Submodule.mem_sup.mp hJh
         obtain ⟨n', G, hGW, hG, hφG⟩ := exists_homog_mem φ c hφc hWmh hw
-        have e1 : φ G = φ h := by rw [hφG, ← hwz, map_add, hspan hz, add_zero]
+        have e1 : φ G = φ h := by rw [hφG, ← hwz, map_add (f := _), hspan hz, add_zero]
         have hmem : G * ∏ k, (X ⟨k, c k⟩ : MRing ι) ^ n k - h * ∏ k, (X ⟨k, c k⟩ : MRing ι) ^ n' k ∈
             mCoordIdeal y := by
           refine LowerBoundFree.mem_mCoordIdeal_of_aeval_eq_zero y (d := n' + n)

@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.TateCohomology.AugmentationSES
-import GroundTheory.TateCohomology.CohTrivialBasic
+module
+
+public import GroundTheory.TateCohomology.AugmentationSES
+public import GroundTheory.TateCohomology.CohTrivialBasic
+import GroundTheory.TateCohomology.InducedNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open CategoryTheory groupCohomology Rep
@@ -16,19 +65,12 @@ noncomputable def augHom : Rep.leftRegular k G ⟶ Rep.trivial k G k :=
     change augmentation k G ((Rep.leftRegular k G).ρ g x) = augmentation k G x
     exact augmentation_ρ g x⟩
 
-@[simp] theorem augHom_apply (x : Rep.leftRegular k G) :
-    (augHom k G).hom x = augmentation k G x := rfl
-
 theorem augIdealι_augHom : augIdealι k G ≫ augHom k G = 0 := by
   ext x
   exact LinearMap.mem_ker.1 x.2
 
 noncomputable def augTrivSES : ShortComplex (Rep.{u} k G) :=
   ShortComplex.mk (augIdealι k G) (augHom k G) (augIdealι_augHom k G)
-
-@[simp] theorem augTrivSES_X₁ : (augTrivSES k G).X₁ = augIdeal k G := rfl
-@[simp] theorem augTrivSES_X₂ : (augTrivSES k G).X₂ = Rep.leftRegular k G := rfl
-@[simp] theorem augTrivSES_X₃ : (augTrivSES k G).X₃ = Rep.trivial k G k := rfl
 
 theorem augTrivSES_shortExact : (augTrivSES k G).ShortExact := by
   refine shortExact_of_linear (fun a b h => Subtype.ext h)
@@ -40,7 +82,7 @@ theorem cohTrivial_leftRegular [Fintype G] : CohTrivial (Rep.leftRegular k G) :=
   refine cohTrivial_of_sum_eq _ coeffOneProj fun m => ?_
   induction m using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add x y hx hy => simp only [map_add, Finset.sum_add_distrib, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Finset.sum_add_distrib, hx, hy]
   | single h c =>
     rw [Fintype.sum_eq_single h]
     · simp [coeffOneProj_apply]
@@ -74,7 +116,7 @@ theorem cocycleLinear_ρ (f : cocycles₁ A) (s : G) (x : MonoidAlgebra k G) :
       A.ρ s (cocycleLinear f x) + augmentation k G x • f s := by
   induction x using MonoidAlgebra.induction_linear with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy, add_smul]; abel
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, add_smul]; abel
   | single g r =>
     have hf : f (s * g) = A.ρ s (f g) + f s := (mem_cocycles₁_iff _).1 f.2 s g
     rw [Representation.ofMulAction_single, smul_eq_mul, cocycleLinear_single, cocycleLinear_single,
@@ -110,8 +152,6 @@ noncomputable def augCocycle : cocycles₁ (Rep.res φ (augIdeal k G)) :=
     rw [map_sub, Representation.ofMulAction_single, Representation.ofMulAction_single, smul_eq_mul,
       smul_eq_mul, mul_one, map_mul]
     abel⟩
-
-@[simp] theorem augCocycle_apply (h : H) : augCocycle k φ h = augIdealSubOne (φ h) := rfl
 
 theorem augTrivSES_res_shortExact : ((augTrivSES k G).map (resFunctor φ)).ShortExact :=
   (shortExact_res φ).2 (augTrivSES_shortExact k G)

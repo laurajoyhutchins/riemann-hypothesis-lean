@@ -1,5 +1,50 @@
-import Mathlib
-import GroundTheory.GlobalFields.ClassFieldConsequences.CongruenceSubgroupLeStandardOpenSubgroup
+module
+
+public import GroundTheory.GlobalFields.ClassFieldConsequences.CongruenceSubgroupLeStandardOpenSubgroup
+public import GroundTheory.GlobalFields.TateThesis.HeckeCharRayClass
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.Convex
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Topology Filter NumberField IsDedekindDomain Function
 open scoped NumberField.AdeleRing
@@ -71,8 +116,9 @@ theorem Modulus.exists_congruenceSubgroup_le (H : Subgroup (IdeleGroup K))
       by_contra h
       exact hv (hn0 v h)
   let 𝔪 : Modulus K := ⟨∏ᶠ v, v.asIdeal ^ n v, finprod_asIdeal_pow_ne_bot n, Set.univ⟩
-  have hle : ∀ v, n v ≤ 𝔪.exponent v :=
-    (finprod_asIdeal_pow_dvd_iff hsupp (finprod_asIdeal_pow_ne_bot n)).1 dvd_rfl
+  have hle (v : HeightOneSpectrum (𝓞 K)) : n v ≤ 𝔪.exponent v := by
+    rw [exponent, ite_eq_left (FiniteMultiplicity.of_prime_left v.prime 𝔪.ideal_ne_bot)]
+    exact (finprod_asIdeal_pow_dvd_iff hsupp (finprod_asIdeal_pow_ne_bot n)).mp dvd_rfl v
   refine ⟨𝔪, rfl, fun x hx ↦ ?_⟩
   obtain ⟨hf, hi⟩ := 𝔪.mem_congruenceSubgroup.1 hx
   rw [← ofFinite_mul_ofInfinite x]
@@ -93,12 +139,6 @@ theorem IdeleClassGroup.exists_map_congruenceSubgroup_le (H : Subgroup (IdeleCla
   obtain ⟨𝔪, h𝔪, hle⟩ := Modulus.exists_congruenceSubgroup_le (H.comap (IdeleClassGroup.mk K))
     (hH.preimage (IdeleClassGroup.continuous_mk K))
   exact ⟨𝔪, h𝔪, Subgroup.map_le_iff_le_comap.2 hle⟩
-
-theorem IdeleClassGroup.exists_map_congruenceSubgroup_le_of_finiteIndex
-    (H : Subgroup (IdeleClassGroup K)) (hH : IsOpen (H : Set (IdeleClassGroup K)))
-    (_ : H.FiniteIndex) :
-    ∃ 𝔪 : Modulus K, 𝔪.congruenceSubgroup.map (IdeleClassGroup.mk K) ≤ H :=
-  (IdeleClassGroup.exists_map_congruenceSubgroup_le H hH).imp fun _ h ↦ h.2
 
 theorem Modulus.isOpen_map_congruenceSubgroup (𝔪 : Modulus K) :
     IsOpen (𝔪.congruenceSubgroup.map (IdeleClassGroup.mk K) : Set (IdeleClassGroup K)) := by

@@ -1,7 +1,51 @@
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutLat
-import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.HermitianFormRealCoordinateMatrixHermitianDetNeZ
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussianPoincareSeriesThetaVacuum
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAddCharIsStandardCharOfAdmissibleCM
+module
+
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutDef
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.GoodLat
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussianPoincareSeriesThetaVacuum
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergCMRealLineAddNoPhase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StandardTraceAddCharIsStandardCharOfAdmissibleCM
+public import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.AutLat
+import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.ContinuousTheta
+import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.FinIdemSmulOfReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -53,7 +97,7 @@ theorem quad (hσ : ∀ x, σ (σ x) = x) (hS : IsHermND σ JS) (hT : IsHermND �
         (symplOHF σ JS JT ξ₀ y u + symplOHF σ JS JT ξ₀ (intAF F w • (y + u)) (y + u)) =
       symplOHF σ JS JT ξ₀ (intAF F w • y) y + symplOF σ JS JT ξ₀ (intAF F w • y) u := by
   have h1 : intAF F w • y + cAF σ (intAF F w) • y = y := by
-    rw [← add_smul, cAF_intAF, ← map_add, hw, map_one, one_smul]
+    rw [← add_smul, cAF_intAF, ← map_add (f := _), hw, map_one, one_smul]
   have h2 := congrArg (fun z => symplOHF σ JS JT ξ₀ z u) h1
   simp only [GlobalTheory.HeisLineF.symplOHF_add_left] at h2
   have h3 := symplOHF_smul σ JS JT hσ ξ₀ (intAF F w) u y
@@ -100,8 +144,15 @@ theorem main (C : Ctx σ B JS JT ξ₀ θ ι) (hG : GoodLat Λ) (hR : RatSD σ J
   have hψ : IsCharAF F B.ψ := (GlobalTheory.StdCharWeilDatum.isStdCharF_of_isGood F E σ B C.good).1
   have hA := hO.sd
   have hw := hO.hw
-  obtain ⟨-, hJ, hsym, hpos⟩ := omV_laws
-    (PositivityTheory.ThKW.hermitian_majorant_selfAdjoint_posDef F E σ B C.good nS nT JS JT C.hS C.hT ξ₀ C.h0 C.hξ).1 hs.sq hs.pos
+  have hH : (HMF JS JT ξ₀ (tauB B))ᴴ = HMF JS JT ξ₀ (tauB B) := by
+    have hτ := C.good.cm.2.2.2
+    unfold HMF
+    rw [GlobalTheory.RealWeil.blk_conjTranspose]
+    congr 1 <;> funext v
+    · rw [conjTranspose_smul, RealC.herm_map (hτ _) C.hT]
+      simp
+    · rw [conjTranspose_nonsing_inv, RealC.herm_map (hτ _) C.hS]
+  obtain ⟨-, hJ, hsym, hpos⟩ := omV_laws hH hs.sq hs.pos
   have hl : ∀ x y z : WOF F E nS nT, B.ψ (symplOHF σ JS JT ξ₀ (x + y) z) =
       B.ψ (symplOHF σ JS JT ξ₀ x z) * B.ψ (symplOHF σ JS JT ξ₀ y z) :=
     fun x y z => by rw [GlobalTheory.HeisLineF.symplOHF_add_left, AddChar.map_add_eq_mul]

@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsAlgHomValuationSubring
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsLieCoordinates
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
+module
+
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniqueSecOfCompatible
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsLieCoordinates
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsToJetEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry IsLocalRing
@@ -50,8 +90,8 @@ theorem existsUnique_jet [IsLocalRing V] {x : Fam G (Fin d)} (hx : IsUnivChart G
 
 variable {O : Type} [CommRing O] [Algebra V O]
 
-variable (V O d) in
 
+variable (V O d) in
 def jetIn (m : ℕ) : JetR V (Fin d) m →ₐ[V] JetR O (Fin 1 × Fin d) m :=
   jetLift V (RingHom.ker (jetAug O _ m)) (ker_jetAug_pow _ m) (fun j => zR m (0, j)) (fun _ => zR_mem_ker m _)
 
@@ -245,29 +285,10 @@ theorem HasVal.mul (hx : IsUnivChart G d x) {L : Fin d → PS V 2 d} (hL : IsLaw
 theorem exists_lim {R : Type} [CommRing R] (I : Ideal R) [IsPrecomplete I R] (x : ∀ e : ℕ, R ⧸ I ^ (e + 1))
     (hx : ∀ e, Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.le_succ (e + 1))) (x (e + 1)) = x e) :
     ∃ y : R, ∀ e, Ideal.Quotient.mk (I ^ (e + 1)) y = x e := by
-  choose a ha using fun e => Ideal.Quotient.mk_surjective (x e)
-  have step : ∀ e, a e - a (e + 1) ∈ I ^ (e + 1) := fun e => by
-    refine Ideal.Quotient.eq.1 ?_
-    rw [ha, ← hx e, ← ha (e + 1), Ideal.Quotient.factor_mk]
-  have cau : ∀ m n, m ≤ n → a m - a n ∈ I ^ (m + 1) := fun m n hmn => by
-    induction n, hmn using Nat.le_induction with
-    | base => rw [sub_self]; exact zero_mem _
-    | succ n hmn ih =>
-      have := add_mem ih (Ideal.pow_le_pow_right (Nat.succ_le_succ hmn) (step n))
-      rwa [sub_add_sub_cancel] at this
-  obtain ⟨L, hL⟩ := IsPrecomplete.prec' (I := I) a (fun {m n} hmn => by
-    rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top]
-    exact Ideal.pow_le_pow_right (Nat.le_succ m) (cau m n hmn))
-  refine ⟨L, fun e => ?_⟩
-  have := hL (e + 1)
-  rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top] at this
-  have h₂ := add_mem (step e) this
-  rw [sub_add_sub_cancel] at h₂
-  rw [← ha e]
-  exact (Ideal.Quotient.eq.2 h₂).symm
+  apply GlobalTheory.SectionLimit.exists_lim <;> assumption
+
 
 variable (V) in
-
 def res {B : Type} [CommRing B] [Algebra O B] (θ : A →ₐ[O] B) :
     specV (algebraMap V O) B ⟶ specV (algebraMap V O) A :=
   Over.homMk (Spec.map (CommRingCat.ofHom θ.toRingHom)) (by

@@ -1,7 +1,45 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RankPosOfLeaves
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDimensionalProdSpan
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LimitBlockTypes
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RankPosOfLeaves
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FiniteDimensionalProdSpan
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LimitBlockTypes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,7 +55,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {a b : ℕ}
 theorem sl₂_eq {F : H E a b → ℂ} {m : GA E a} {φ : Sm E b} (h : φ.1 = fun x => F (m, x)) : sl₂ F m = φ := by
   have hx : ∃ φ : Sm E b, φ.1 = fun x => F (m, x) := ⟨φ, h⟩
   unfold sl₂
-  rw [dif_pos hx]
+  rw [dite_eq_left hx]
   exact Subtype.ext (hx.choose_spec.trans h.symm)
 
 variable {U₁ : Submodule ℂ (Sm E a)} {U₂ : Submodule ℂ (Sm E b)} {F G : H E a b → ℂ}
@@ -36,7 +74,7 @@ theorem ap₂_add (hS : PairSlices) (T : Sm E b →ₗ[ℂ] Sm E b) (hF : F ∈ 
     funext y
     exact congrArg₂ (· + ·) (sl₂_val hS hF x.1 y) (sl₂_val hS hG x.1 y))
   change (T (sl₂ (F + G) x.1)).1 x.2 = _
-  rw [e, map_add]
+  rw [e, map_add (f := _)]
   rfl
 
 theorem ap₂_smul (hS : PairSlices) (T : Sm E b →ₗ[ℂ] Sm E b) (c : ℂ) (hF : F ∈ pairSpace U₁ U₂) :
@@ -77,7 +115,7 @@ theorem ap₂_rt (hS : PairSlices) (T : Sm E b →ₗ[ℂ] Sm E b)
   rw [e, hT _ _ (sl₂_mem hS hF _)]
   rfl
 
-theorem rt_mem (hU : IsStable U₂) (hF : F ∈ pairSpace U₁ U₂) (g : Hf E a b) :
+theorem rt_mem (hU : _root_.GlobalTheory.CuspRep.IsStable U₂) (hF : F ∈ pairSpace U₁ U₂) (g : Hf E a b) :
     (fun y => F (y * finH g)) ∈ pairSpace (⊤ : Submodule ℂ (Sm E a)) U₂ := by
   induction hF using Submodule.span_induction with
   | mem F h =>
@@ -140,7 +178,7 @@ theorem ap₂_type (hS : PairSlices) {K₁ : Subgroup (GL (Fin a) (Af E))} {K₂
     rw [e]
     rfl
 
-theorem ap₂_hecke (hS : PairSlices) {ι : Type} [Fintype ι] (hU : IsStable U₂) (T : Sm E b →ₗ[ℂ] Sm E b)
+theorem ap₂_hecke (hS : PairSlices) {ι : Type} [Fintype ι] (hU : _root_.GlobalTheory.CuspRep.IsStable U₂) (T : Sm E b →ₗ[ℂ] Sm E b)
     (hT : ∀ o, ∀ ψ ∈ U₂, T (act o ψ) = act o (T ψ)) {f : ι → H E a b → ℂ}
     (hf : ∀ i, f i ∈ pairSpace U₁ U₂) (h : HeckeM E a b ι) (c : ℂ) (hh : heckeAct h f = c • f) :
     heckeAct h (fun i => ap₂ T (f i)) = c • fun i => ap₂ T (f i) := by

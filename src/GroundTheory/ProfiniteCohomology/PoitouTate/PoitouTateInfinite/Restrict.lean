@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.LocalMaps
-import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
+module
+
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.IsUnramifiedOutsideIffLeMaxUnramifiedOutside
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -64,35 +108,6 @@ theorem gsRes_restrictNormalHom (h : T ⊆ S) (σ : Gal(Ω/K)) :
   apply Subtype.val_injective
   rw [gsRes_apply, AlgEquiv.restrictNormalHom_apply, AlgEquiv.restrictNormalHom_apply]
 
-theorem gsRes_surjective (h : T ⊆ S) : Function.Surjective (gsRes (Ω := Ω) h) := fun τ =>
-  ⟨AlgEquiv.restrictNormalHom (maxUnramifiedOutside K Ω S) (gsAutExtend T τ), by
-    rw [gsRes_restrictNormalHom]
-    exact (AlgEquiv.restrictNormalHom_surjective (K₁ := maxUnramifiedOutside K Ω T) Ω τ).choose_spec⟩
-
-theorem gsRes_gsRes (hTS : T ⊆ S) (hUT : U ⊆ T) (σ : galUnramifiedOutside K Ω S) :
-    gsRes hUT (gsRes hTS σ) = gsRes (hUT.trans hTS) σ := by
-  apply AlgEquiv.ext
-  intro x
-  apply Subtype.val_injective
-  rw [gsRes_apply hUT, gsRes_apply hTS, gsRes_apply]
-
-theorem mem_ker_gsRes (h : T ⊆ S) (σ : galUnramifiedOutside K Ω S) :
-    σ ∈ (gsRes (Ω := Ω) h).ker ↔
-      ∀ x : maxUnramifiedOutside K Ω T, σ ⟨x, maxUnramifiedOutside_mono h x.2⟩ =
-        ⟨x, maxUnramifiedOutside_mono h x.2⟩ := by
-  rw [MonoidHom.mem_ker]
-  constructor
-  · intro hσ x
-    apply Subtype.val_injective
-    have := gsRes_apply h σ x
-    rw [hσ] at this
-    exact this.symm
-  · intro hσ
-    apply AlgEquiv.ext
-    intro x
-    apply Subtype.val_injective
-    rw [gsRes_apply, hσ x, AlgEquiv.one_apply]
-
 theorem continuous_gsRes (h : T ⊆ S) : Continuous (gsRes (Ω := Ω) h) := by
   have hq : Topology.IsQuotientMap
       (AlgEquiv.restrictNormalHom (F := K) (K₁ := Ω) (maxUnramifiedOutside K Ω S)) :=
@@ -107,10 +122,6 @@ theorem continuous_gsRes (h : T ⊆ S) : Continuous (gsRes (Ω := Ω) h) := by
 
 def gsResCont (h : T ⊆ S) : galUnramifiedOutside K Ω S →ₜ* galUnramifiedOutside K Ω T :=
   ⟨gsRes h, continuous_gsRes h⟩
-
-@[simp]
-theorem gsResCont_apply (h : T ⊆ S) (σ : galUnramifiedOutside K Ω S) : gsResCont h σ = gsRes h σ :=
-  rfl
 
 section Local
 

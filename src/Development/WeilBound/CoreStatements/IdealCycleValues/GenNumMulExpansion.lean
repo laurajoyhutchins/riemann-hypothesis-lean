@@ -1,8 +1,51 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.BundleChernComparison
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
-import Development.WeilBound.CoreStatements.IdealCycleValues.ProdMapToMultiset
-import Development.WeilBound.CoreStatements.IdealCycleValues.IntersectionNumbersPermInvariant
+module
+
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.BundleChernComparison
+public import Development.WeilBound.CoreStatements.IdealCycleValues.IntersectionNumbersPermInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial GroundTheory.Heights₂.Heights.NumbersDVR GlobalTheory.CompanionTheory.Ar.Num
 
@@ -10,9 +53,9 @@ theorem BaseChangeColon.genNum_mul_expansion : ∀ (F : Type) [Field F] (K : Typ
   intro F _ K _ _ ι _ σ V cls H G Q
   classical
   have key : ∀ (P : MvPolynomial σ ℝ) (L : List (K → ℤ)) (s : Finset (σ →₀ ℕ)), P.support ⊆ s →
-      genNum F V cls P L = ∑ κ ∈ s, MvPolynomial.coeff κ P * (intNumL F V (classList cls κ ++ L) : ℝ) := by
+      genNum F V cls P L = ∑ κ ∈ s, AddMonoidAlgebra.coeff P κ * (intNumL F V (classList cls κ ++ L) : ℝ) := by
     intro P L s hs
-    show ∑ κ ∈ P.support, MvPolynomial.coeff κ P * (intNumL F V (classList cls κ ++ L) : ℝ) = _
+    show ∑ κ ∈ P.support, AddMonoidAlgebra.coeff P κ * (intNumL F V (classList cls κ ++ L) : ℝ) = _
     refine Finset.sum_subset hs (fun κ _ hκ => ?_)
     rw [MvPolynomial.notMem_support_iff.mp hκ, zero_mul]
   have hadd : ∀ P P' : MvPolynomial σ ℝ, genNum F V cls (P + P') Q = genNum F V cls P Q + genNum F V cls P' Q := by
@@ -39,7 +82,7 @@ theorem BaseChangeColon.genNum_mul_expansion : ∀ (F : Type) [Field F] (K : Typ
     intro ν μ
     have hp : (classList cls (ν + μ)).Perm (classList cls ν ++ classList cls μ) := by
       rw [← Multiset.coe_eq_coe, ← Multiset.coe_add]
-      simp only [classList, Multiset.coe_toList, Finsupp.toMultiset_add, Multiset.map_add]
+      simp only [classList, Multiset.coe_toList, Finsupp.toMultiset_add, Multiset.map_add (f := _)]
     rw [← List.append_assoc]
     exact BaseChangeColon.intersection_numbers_perm_invariant.1 F K ι V _ _ (hp.append_right Q)
   conv_lhs => rw [H.as_sum, G.as_sum, Finset.sum_mul_sum]

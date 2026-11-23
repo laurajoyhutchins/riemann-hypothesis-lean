@@ -1,6 +1,47 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutMP2
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelSystemAdmissibleSize
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutRegFF
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutMP2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt
 
@@ -30,14 +71,14 @@ theorem isBuiltPlace_mono {Cc₁ Cc₂ : ℝ} (h : Cc₁ ≤ Cc₂) {S : C.HidaS
 theorem toSm_smul (P : M.Par) (c : ℂ) (u : MA.Qp P.r P.TT → ℂ) : MA.toSm P (c • u) = c • MA.toSm P u := by
   unfold Formalism.FourierDecayAlt.MA.toSm
   by_cases hu : u ∈ MA.smSub P.r P.TT
-  · rw [dif_pos hu, dif_pos (Subalgebra.smul_mem _ hu c)]
+  · rw [dite_eq_left hu, dite_eq_left (Subalgebra.smul_mem _ hu c)]
     rfl
-  · rw [dif_neg hu, smul_zero]
+  · rw [dite_eq_right hu, smul_zero]
     by_cases hc : c = 0
     · subst hc
-      rw [dif_pos (by rw [zero_smul]; exact Subalgebra.zero_mem _)]
+      rw [dite_eq_left (by rw [zero_smul]; exact Subalgebra.zero_mem _)]
       exact Subtype.ext (by simp)
-    · rw [dif_neg]
+    · rw [dite_eq_right]
       intro h
       apply hu
       have h2 := Subalgebra.smul_mem _ h c⁻¹
@@ -104,6 +145,7 @@ theorem actA_mul (P : M.Par) (a b : MA.A P (MA.DQ P)) (x : M.Ty P → MA.SmQ P.r
       | (simp; rfl)
   rw [Finset.sum_congr rfl fun π' _ => e π', Finset.sum_comm]
   refine Finset.sum_congr rfl fun σ _ => ?_
+
   rw [map_sum]
 
 theorem actA_smul (P : M.Par) (c : ℂ) (a : MA.A P (MA.DQ P)) (x : M.Ty P → MA.SmQ P.r P.TT) :

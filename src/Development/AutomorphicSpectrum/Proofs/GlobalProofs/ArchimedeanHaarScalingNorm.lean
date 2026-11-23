@@ -1,20 +1,76 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CoefS
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IntegralIndicatorCharOfTrivial
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CharEqOneOfNear
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.SelfDualMap
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicCharacterTrivialAlmostEverywhereStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LocalAnnihilatorSelfDualVolumeStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicAnnihilatorBoxProductStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.MemAnnihilatorSmallBallEventuallyStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FiniteAdeleBoxMeasureProductStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanFourierApproximateIdentityStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.NormalisedFourierBumpLimitStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicIntegrableProductIndicatorStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsRealApproximateIdentityStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.NumberFieldApproximateIdentityStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GaloisUnramifiedOutsideDescendsFiniteStatement
+module
+
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IntegralIndicatorCharOfTrivial
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IsCovolOne
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRing
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.ExistsUnipotentInvariantCompactlySupportedWeight
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteAdelesLocalRingTotallyReal
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.SelfDualMap
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicAnnihilatorBoxProductStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicCharacterTrivialAlmostEverywhereStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicIntegrableProductIndicatorStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanFourierApproximateIdentityStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ExistsRealApproximateIdentityStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FiniteAdeleBoxMeasureProductStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.GaloisUnramifiedOutsideDescendsFiniteStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LocalAnnihilatorSelfDualVolumeStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.MemAnnihilatorSmallBallEventuallyStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.NormalisedFourierBumpLimitStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.NumberFieldApproximateIdentityStatement
+import GroundTheory.GlobalFields.LocalFieldAtPlace
+import GroundTheory.LocalFields.LocalFourierHaar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.IsSchwartzBruhatOfProd
+
+@[expose] public section
 
 noncomputable section
 

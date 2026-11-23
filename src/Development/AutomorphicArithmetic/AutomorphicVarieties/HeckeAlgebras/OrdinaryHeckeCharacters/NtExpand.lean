@@ -1,13 +1,62 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.LocCFTAll
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PatchingModules.Classical
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.GlBridge
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ValuationDetOfMemKO
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.GlBridge
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.CharZeroAdicCompletion
+import Formalism.SharpRestriction.GrowthBounds.MonomialOrderSegments.BrData
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Dvd
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.PID
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Polynomial ValuativeRel IsLocalRing GlobalTheory.CuspRep GlobalTheory.WeilDeligne GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.UnitaryBC UpperTheory.V UpperTheory.V.Hi UpperTheory.V.Hi.CaseU
 open UpperTheory.V.W (Plc Lp HidaSetting Vl Resid LamObj UniversalOrdinaryDeterminantRing Pair)
 open UpperTheory.V.HV (Coef)
 open scoped TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option synthInstance.maxHeartbeats 200000
+
 
 private lemma nt_expand {R : Type*} [Ring R] (y : R) (m : ℕ) :
     ∃ w : R, (1 + y) ^ m = 1 + m • y + (m.choose 2) • (y * y) + y * y * y * w := by
@@ -246,6 +295,7 @@ private theorem nt_int (T : Plc (Lp L) → Plc L) (hT : ∀ v, (T v).under (𝓞
       have e := HeightOneSpectrum.valuation_liesOver L v (T v) y'
       have h0 : v.asIdeal.ramificationIdx' (T v).asIdeal ≠ 0 :=
         Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver _ v.ne_bot
+      rw [← Ideal.ramificationIdx'_eq_ramificationIdx v.asIdeal (T v).asIdeal v.ne_bot] at e
       exact (pow_le_one_iff h0).1 (e ▸ hv v)
     have : y = algebraMap (Lp L) L (algebraMap _ (Lp L) z) := by rw [hz]; rfl
     rw [this]
@@ -371,33 +421,36 @@ omit [Fact l.Prime] in
 private theorem nt_cmp (w : Plc L) (h : ((l : ℕ) : 𝓞 L) ∉ w.asIdeal) (x : UA L n) :
     cmp n w ((away l L n).rangeRestrict x) = cLoc w x := by
   unfold CaseU.cmp
-  rw [dif_pos h]
+  rw [dite_eq_left h]
   rfl
 
 variable {V : s.Lev} (Q : QData V) {c : Coef l} {m : ℕ} (τ₀ : KT n (wt s) →* GL (Fin m) c.O) (K : (hset Q τ₀).Lev)
 
 private theorem nt_out (w : Plc L) (hw : w.under (𝓞 (Lp L)) ∉ V.S') :
     (hset Q τ₀).lev K ≤ (KO (w.adicCompletion L) (Fin n)).comap ((cmp n w).comp (Ub n s).subtype) := by
-  refine sup_le (inf_le_left.trans ((iInf_le _ w).trans (iInf_le _ hw))) (iSup_le fun q => ?_)
-  rintro _ ⟨g, -, rfl⟩
-  have hne : w.under (𝓞 (Lp L)) ≠ (Q.wq q).under (𝓞 (Lp L)) := fun e => hw (by
-    rw [Q.range, e]; exact Or.inr ⟨q, rfl⟩)
-  have := Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (nt_sec (s := s) (Q.wq q) g).1 w) hne
-  exact Subgroup.mem_comap.2 ((MonoidHom.mem_ker.1 this).symm ▸ one_mem _)
+  apply sup_le
+  · exact inf_le_left.trans ((iInf_le _ w).trans (iInf_le _ hw))
+  · refine iSup_le fun q => ?_
+    rintro _ ⟨g, -, rfl⟩
+    have hne : w.under (𝓞 (Lp L)) ≠ (Q.wq q).under (𝓞 (Lp L)) := fun e => hw (by
+      rw [Q.range, e]; exact Or.inr ⟨q, rfl⟩)
+    have := Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (nt_sec (s := s) (Q.wq q) g).1 w) hne
+    exact Subgroup.mem_comap.2 ((MonoidHom.mem_ker.1 this).symm ▸ one_mem _)
 
 private theorem nt_Q (q : Q.Q) :
     (hset Q τ₀).lev K ≤ (K.1 q).comap ((cmp n (Q.wq q)).comp (Ub n s).subtype) := by
-  refine sup_le (inf_le_right.trans ((iInf_le _ q).trans fun x hx => ?_)) (iSup_le fun q' => ?_)
-  · exact Subgroup.mem_comap.2 ((MonoidHom.mem_ker.1 hx).symm ▸ one_mem _)
-  rintro _ ⟨g, hg, rfl⟩
-  by_cases e : q = q'
-  · subst e
-    rcases (nt_sec (s := s) (Q.wq q) g).2 with h | h
-    · exact Subgroup.mem_comap.2 ((congrArg (· ∈ K.1 q) h).mpr hg)
-    · exact Subgroup.mem_comap.2 ((congrArg (· ∈ K.1 q) h).mpr (one_mem _))
-  · have := Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (nt_sec (s := s) (Q.wq q') g).1 (Q.wq q)) fun h => e (Q.inj h)
-    exact Subgroup.mem_comap.2 ((MonoidHom.mem_ker.1 this).symm ▸ one_mem _)
-
+  apply sup_le
+  · refine inf_le_right.trans ((iInf_le _ q).trans fun x hx => ?_)
+    exact Subgroup.mem_comap.2 ((MonoidHom.mem_ker.1 hx).symm ▸ one_mem _)
+  · refine iSup_le fun q' => ?_
+    rintro _ ⟨g, hg, rfl⟩
+    by_cases e : q = q'
+    · subst e
+      rcases (nt_sec (s := s) (Q.wq q) g).2 with h | h
+      · exact Subgroup.mem_comap.2 ((congrArg (· ∈ K.1 q) h).mpr hg)
+      · exact Subgroup.mem_comap.2 ((congrArg (· ∈ K.1 q) h).mpr (one_mem _))
+    · have := Subgroup.mem_iInf.1 (Subgroup.mem_iInf.1 (nt_sec (s := s) (Q.wq q') g).1 (Q.wq q)) fun h => e (Q.inj h)
+      exact Subgroup.mem_comap.2 ((MonoidHom.mem_ker.1 this).symm ▸ one_mem _)
 end Lev
 
 private theorem nt_Iw {L : Type} [Field L] [NumberField L] {n : ℕ} {V : Type} [Fintype V] (S : V → Plc L) :

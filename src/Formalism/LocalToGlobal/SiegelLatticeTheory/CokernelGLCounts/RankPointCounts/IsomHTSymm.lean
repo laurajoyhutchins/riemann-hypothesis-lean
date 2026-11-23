@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.YvMemUUE
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermOp
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.PairingOmegaPrimeZ
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.GflagSwap
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.YvMemUUE
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,6 +84,7 @@ private theorem yv_mapFlag {T0 T1 : E} {γ : S.V ≃ₗ[E] S.V} (h : γ ∈ Form
     (F : FlagG S r T0) (F' : FlagG S r T1) :
     yv (mapFlag γ h F) (mapFlag γ h F') = γ (yv F F') := by
   simp only [yv, omp, Dl, Zhat_mapFlag', mapFlag_fvec']
+
   simp [map_sum, map_smul, mapFlag]
 
 private theorem mapFlag_X' {T0 : E} {γ : S.V ≃ₗ[E] S.V} (h : γ ∈ Formalism.HermitianLatticesTheory.isom S.hT)
@@ -50,16 +94,16 @@ private theorem mapFlag_X' {T0 : E} {γ : S.V ≃ₗ[E] S.V} (h : γ ∈ Formali
   rfl
 
 private theorem mem_Hp_iff_orthogonal {T0 T1 : E} (Λ : Submodule (NumberField.RingOfIntegers E) S.V)
-    (hΛ : Submodule.IsLattice E Λ) (F : LFlag S r T0) (F' : LFlag S r T1)
+    (hΛ : Submodule.IsFullLattice E Λ) (F : LFlag S r T0) (F' : LFlag S r T1)
     (hF : IsLift Λ F) (hF' : IsLift Λ F') (h : S.V) :
     h ∈ Hp Λ F F' ↔ ((∀ x ∈ F.fl.X, S.hT x h = 0) ∧ S.hT F.fl.z h = 0 ∧
       (∀ x ∈ F'.fl.X, S.hT x h = 0) ∧ S.hT F'.fl.z h = 0) := by
   constructor
   · intro hh
     exact ⟨fun x hx => hT_UUE_Hp Λ F F' hh (X_le_UUE Λ hΛ F F' hF hF' hx),
-      hT_UUE_Hp Λ F F' hh (z_mem_UUE Λ hΛ F F' hF hF'),
+      hT_UUE_Hp Λ F F' hh (z_mem_UUE Λ hΛ.toIsLattice F F' hF hF'),
       fun x hx => hT_UUE_Hp Λ F F' hh (X'_le_UUE Λ hΛ F F' hF hF' hx),
-      hT_UUE_Hp Λ F F' hh (z'_mem_UUE Λ hΛ F F' hF hF')⟩
+      hT_UUE_Hp Λ F F' hh (z'_mem_UUE Λ hΛ.toIsLattice F F' hF hF')⟩
   · rintro ⟨h1, h2, h3, h4⟩
     have hU : UU Λ F F' ≤ (LinearMap.ker (S.hT.flip h)).restrictScalars
         (NumberField.RingOfIntegers E) := by
@@ -83,11 +127,11 @@ private theorem mem_Hp_iff_orthogonal {T0 T1 : E} (Λ : Submodule (NumberField.R
     simpa using key hu
 
 private theorem isLattice_sup_span_singleton (Λ : Submodule (NumberField.RingOfIntegers E) S.V)
-    (hΛ : Submodule.IsLattice E Λ) (v : S.V) :
-    Submodule.IsLattice E (Λ ⊔ Submodule.span (NumberField.RingOfIntegers E) {v}) := by
-  refine ⟨hΛ.fg.sup (Submodule.fg_span_singleton v), ?_⟩
-  rw [eq_top_iff, ← hΛ.span_eq_top]
-  exact Submodule.span_mono (SetLike.coe_subset_coe.2 le_sup_left)
+    (hΛ : Submodule.IsFullLattice E Λ) (v : S.V) :
+    Submodule.IsFullLattice E (Λ ⊔ Submodule.span (NumberField.RingOfIntegers E) {v}) := by
+  let : Submodule.IsFullLattice E Λ := hΛ
+  exact Submodule.IsFullLattice.of_le_of_fg E le_sup_left
+    (hΛ.fg.sup (Submodule.fg_span_singleton v))
 
 private theorem flagG_ext_of_e_eq_of_z_eq {T0 : E} (F G : FlagG S r T0) (he : F.e = G.e) (hz : F.z = G.z) :
     F = G := by
@@ -99,7 +143,7 @@ private theorem flagG_ext_of_e_eq_of_z_eq {T0 : E} (F G : FlagG S r T0) (he : F.
   rfl
 
 theorem line_pair' (k : ℕ) (hdim : finrank E S.V = k + 2 * r + 1) (Λ : Submodule (NumberField.RingOfIntegers E) S.V)
-    (hΛ : Submodule.IsLattice E Λ) (Fl : LFlag S r T) (L0 : LFlag S r T') (γ1 γ2 : S.V ≃ₗ[E] S.V)
+    (hΛ : Submodule.IsFullLattice E Λ) (Fl : LFlag S r T) (L0 : LFlag S r T') (γ1 γ2 : S.V ≃ₗ[E] S.V)
     (hγ1 : γ1 ∈ Formalism.HermitianLatticesTheory.isom S.hT) (hγ2 : γ2 ∈ Formalism.HermitianLatticesTheory.isom S.hT)
     (hL : IsLift Λ Fl) (hL1 : IsLift Λ (mapLF γ1 L0)) (hL2 : IsLift Λ (mapLF γ2 L0))
     (hG1 : Gval Fl (mapLF γ1 L0) ≠ 0) (hG12 : Gval Fl (mapLF γ2 L0) = Gval Fl (mapLF γ1 L0))
@@ -116,7 +160,7 @@ theorem line_pair' (k : ℕ) (hdim : finrank E S.V = k + 2 * r + 1) (Λ : Submod
   have hδ : γ1 * γ2⁻¹ ∈ Formalism.HermitianLatticesTheory.isom S.hT := mul_mem hγ1 (inv_mem hγ2)
   set δ := γ1 * γ2⁻¹ with hδd
   set Λ' := Λ ⊔ Submodule.span (NumberField.RingOfIntegers E) {δ Fl.fl.z} with hΛ'd
-  have hΛ' : Submodule.IsLattice E Λ' := isLattice_sup_span_singleton Λ hΛ _
+  have hΛ' : Submodule.IsFullLattice E Λ' := isLattice_sup_span_singleton Λ hΛ _
   have hle : Λ ≤ Λ' := le_sup_left
   have hL1' : IsLift Λ' (mapLF γ1 L0) := ⟨hle hL1.1, hL1.2⟩
   have hL' : IsLift Λ' Fl := ⟨hle hL.1, hL.2⟩

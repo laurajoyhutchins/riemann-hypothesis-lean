@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.OfNatTrans
+module
+
+public import Mathlib.Algebra.Group.Int.Defs
+public import Mathlib.CategoryTheory.Functor.Basic
+public import Mathlib.Data.Fin.SuccPred
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Category.ModuleCat.Basic
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -22,43 +67,5 @@ theorem sign_swap {q : ℕ} (i : Fin (q + 2)) (k : Fin (q + 1)) :
   rcases h with h | h
   · rw [← h, pow_succ]; ring
   · rw [h, pow_succ]; ring
-
-noncomputable def term {n : ℕ} (s : ComposableArrows C (n + 2)) (f : Cn F n) (g : Fin (n + 1) → Fin (n + 3))
-    (hg : Monotone g) : F.obj (s.obj (Fin.last (n + 2))) :=
-  (F.map (s.map (homOfLE (Fin.le_last (g (Fin.last n)))))).hom (f (hg.functor ⋙ s))
-
-theorem term_congr {n : ℕ} (s : ComposableArrows C (n + 2)) (f : Cn F n) {g g' : Fin (n + 1) → Fin (n + 3)}
-    (hg : Monotone g) (hg' : Monotone g') (h : g = g') : term F s f g hg = term F s f g' hg' := by
-  subst h; rfl
-
-theorem face_face_apply {n : ℕ} (s : ComposableArrows C (n + 2)) (f : Cn F n) (j : Fin (n + 3)) (i : Fin (n + 2)) :
-    (F.map (toLast j s)).hom ((F.map (toLast i (face j s))).hom (f (face i (face j s)))) =
-      term F s f (j.succAbove ∘ i.succAbove)
-        ((Fin.strictMono_succAbove j).monotone.comp (Fin.strictMono_succAbove i).monotone) := by
-  have e : toLast i (face j s) ≫ toLast j s =
-      s.map (homOfLE (Fin.le_last (j.succAbove (i.succAbove (Fin.last n))))) := by
-    change s.map _ ≫ s.map _ = _
-    rw [← s.map_comp]; rfl
-  rw [← ModuleCat.comp_apply, ← F.map_comp, e]
-  rfl
-
-theorem d_d {n : ℕ} (f : Cn F n) : d F (n + 1) (d F n f) = 0 := by
-  funext s
-  change ∑ j : Fin (n + 3), (-1 : ℤ) ^ (j : ℕ) • (F.map (toLast j s)).hom
-      (∑ i : Fin (n + 2), (-1 : ℤ) ^ (i : ℕ) • (F.map (toLast i (face j s))).hom (f (face i (face j s)))) = 0
-  simp only [map_sum, map_zsmul, Finset.smul_sum, smul_smul, face_face_apply]
-  rw [← Fintype.sum_prod_type']
-  refine Finset.sum_involution (fun p _ => (p.1.succAbove p.2, p.2.predAbove p.1)) ?_ ?_ ?_ ?_
-  · rintro ⟨j, i⟩ _
-    dsimp only
-    have e : ((j.succAbove i).succAbove ∘ (i.predAbove j).succAbove) = j.succAbove ∘ i.succAbove :=
-      funext fun t => Fin.succAbove_succAbove_succAbove_predAbove j i t
-    rw [term_congr F s f _ ((Fin.strictMono_succAbove j).monotone.comp (Fin.strictMono_succAbove i).monotone) e,
-      sign_swap, neg_smul, add_neg_cancel]
-  · rintro ⟨j, i⟩ _ _ h
-    exact Fin.succAbove_ne j i (congrArg Prod.fst h)
-  · intro _ _; exact Finset.mem_univ _
-  · rintro ⟨j, i⟩ _
-    simp only [Fin.succAbove_succAbove_predAbove, Fin.predAbove_predAbove_succAbove]
 
 end GlobalTheory.CatH.DSq

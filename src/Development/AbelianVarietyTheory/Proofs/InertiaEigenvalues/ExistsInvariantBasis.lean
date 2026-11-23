@@ -1,8 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLaws
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPowSubOneOfNotDvd
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAddValuationFinExt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLaws
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsAddValuationFinExt
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPowSubOneOfNotDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +68,8 @@ theorem coeff_mul_apply (hγ : constantCoeff (γ X) = 0) (g c : K⟦X⟧) (n : �
   have hc : c = X ^ (n + 1) * (PowerSeries.mk fun i ↦ coeff (i + (n + 1)) c) +
       ∑ d ∈ Finset.range (n + 1), coeff d c • X ^ d := by
     ext m
-    rw [map_add, coeff_X_pow_mul', map_sum]
+
+    rw [map_add (f := _), coeff_X_pow_mul', map_sum]
     simp only [coeff_smul, coeff_X_pow, smul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq,
       Finset.mem_range, coeff_mk]
     split_ifs with h1 h2 h2
@@ -30,7 +78,8 @@ theorem coeff_mul_apply (hγ : constantCoeff (γ X) = 0) (g c : K⟦X⟧) (n : �
     · rw [zero_add]
     · omega
   conv_lhs => rw [hc]
-  rw [map_add, mul_add, map_add, map_mul γ, map_pow γ, map_sum γ, Finset.mul_sum, map_sum]
+
+  rw [map_add (f := _), mul_add, map_add (f := _), map_mul γ, map_pow γ, map_sum γ, Finset.mul_sum, map_sum]
   have h0 : ∀ b : K⟦X⟧, coeff n (g * (γ X ^ (n + 1) * b)) = 0 := fun b => by
     rw [ha, mul_pow, show g * (X ^ (n + 1) * a ^ (n + 1) * b) = X ^ (n + 1) * (g * a ^ (n + 1) * b) by ring,
       coeff_X_pow_mul', if_neg (by omega)]
@@ -48,8 +97,9 @@ theorem coeff_mul_pow_self (hγ : constantCoeff (γ X) = 0) (g : K⟦X⟧) (n : 
 theorem coeff_op (hγ : constantCoeff (γ X) = 0) (hG : G.map constantCoeff = 1) (c : ι → K⟦X⟧) (i : ι)
     (n : ℕ) : coeff n (G.mulVec (fun j => γ (c j)) i) = coeff 1 (γ X) ^ n * coeff n (c i) +
       ∑ j, ∑ d ∈ Finset.range n, coeff n (G i j * γ X ^ d) * coeff d (c j) := by
+
   simp only [Matrix.mulVec, dotProduct, map_sum, coeff_mul_apply γ hγ, Finset.sum_range_succ,
-    Finset.sum_add_distrib, coeff_mul_pow_self γ hγ]
+  Finset.sum_add_distrib, coeff_mul_pow_self γ hγ]
   rw [add_comm]
   congr 1
   have : ∀ j, constantCoeff (G i j) = (1 : Matrix ι ι K) i j := fun j => by rw [← hG]; rfl
@@ -97,8 +147,8 @@ theorem sol_eq_zero (hγ : constantCoeff (γ X) = 0) (hG : G.map constantCoeff =
   ext i n
   simp [this]
 
-omit [DecidableEq ι] in
 
+omit [DecidableEq ι] in
 theorem apply_C (x : K) : γ (C x) = C x := γ.commutes x
 
 end Formal
@@ -185,6 +235,7 @@ theorem exists_basis {K O : Type} [NormedField K] [IsUltrametricDist K] [CommRin
     have hγv : (fun j => γ (U.mulVec (fun i => C (constantCoeff (b i))) j)) =
         (U.map γ).mulVec fun i => C (constantCoeff (b i)) := by
       funext j
+
       simp only [Matrix.mulVec, dotProduct, map_sum, map_mul, apply_C, Matrix.map_apply]
     refine sol_eq_zero γ _ hγ (hmap G hG) hu _ (fun i => ?_) ?_
     · have : ∀ j, constantCoeff (U i j) = (1 : Matrix ι ι K) i j := fun j => by rw [← hU0]; rfl
@@ -217,9 +268,10 @@ theorem bound_le (l : ℕ) [hl : Fact l.Prime] (s n : ℕ) :
   have h0 : (n.factorial : ℚ_[l]) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   have hn : ‖(n.factorial : ℤ_[l])‖ = (l : ℝ) ^ (-(padicValNat l n.factorial : ℤ)) := by
     rw [PadicInt.norm_def, PadicInt.coe_natCast, Padic.norm_eq_zpow_neg_valuation h0,
-      Padic.valuation_natCast]
+      Padic.valuation_natCast, Nat.padicValNat_def]
   have hv : ((l : ℝ) - 1) * (padicValNat l n.factorial : ℝ) ≤ n := by
-    have h := sub_one_mul_padicValNat_factorial (p := l) n
+    have h := Nat.Prime.sub_one_mul_multiplicity_factorial (n := n) hl.out
+    rw [← Nat.padicValNat_def] at h
     have h' : (l - 1) * padicValNat l n.factorial ≤ n := h ▸ Nat.sub_le _ _
     have h'' : (((l - 1) * padicValNat l n.factorial : ℕ) : ℝ) ≤ n := by exact_mod_cast h'
     rwa [Nat.cast_mul, Nat.cast_sub hl.out.one_lt.le, Nat.cast_one] at h''

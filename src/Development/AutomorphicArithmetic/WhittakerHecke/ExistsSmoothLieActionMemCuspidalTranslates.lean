@@ -1,11 +1,55 @@
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.ConjInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicArithmetic.Foundations.Convolution.RealGroupAnalysis.GaussianProducts.ExistsRowSec
 import Development.AutomorphicArithmetic.Foundations.Convolution.SplitEigenfunctions.CharacterNorms.ThInf
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Matrix Topology Filter
 open Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep GlobalTheory.GalOfCusp UpperTheory.V UpperTheory.V.Af UpperTheory.V.Published GroundTheory.Global GroundTheory.Automorphic.GJMatrix
 open UpperTheory.ConvolutionTheory.R2 UpperTheory.ConvolutionTheory.RankTwoDescent UpperTheory.ConvolutionTheory.RankTwoDescent.TA
 open UpperTheory.ConvolutionTheory.R2.G (FS2 nE)
 open scoped Classical
 
-private theorem rt_infGL_lie {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+private theorem rt_infGL_lie {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
     (y : GL (Fin a) (Cinf E)) (X : Matrix (Fin a) (Fin a) (Cinf E)) :
     rt E a (infGL E a y) * lie E a (toL X) =
       lie E a (toL (y.val * X * (y⁻¹).val)) * rt E a (infGL E a y) := by
@@ -22,7 +66,7 @@ private theorem rt_infGL_lie {E : Type} [Field E] [NumberField E] [IsTotallyComp
   exact congrArg (fun Z => fderiv ℝ (chart φ.1 g) (toL y.val) (toL Z))
     (Units.inv_mul_cancel_right (y.val * X) y).symm
 
-private theorem lie_rt_eq {E : Type} [Field E] [NumberField E] [IsTotallyComplex E] {a : ℕ}
+private theorem lie_rt_eq {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] {a : ℕ}
     (X : Matrix (Fin a) (Fin a) (Cinf E)) (h : GL (Fin a) (A E)) :
     ∃ Y : Lie E a, lie E a (toL X) * rt E a h = rt E a h * lie E a Y := by
   set y := Matrix.GeneralLinearGroup.map (pInf E) h with hy
@@ -37,7 +81,7 @@ private theorem lie_rt_eq {E : Type} [Field E] [NumberField E] [IsTotallyComplex
   rw [← map_mul, ← hh]
 
 theorem UpperTheory.exists_smooth_lie_action_mem_cuspidal_translates :
-    ∀ (E : Type) [Field E] [NumberField E] [IsTotallyComplex E] (P : CuspSub E 2) (X : Lie E 2) (φ : GL (Fin 2) (A E) → ℂ), φ ∈ Tr P → ∃ f : Sm E 2, f.1 = φ ∧ (lie E 2 X f).1 ∈ Tr P := by
+    ∀ (E : Type) [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E] (P : CuspSub E 2) (X : Lie E 2) (φ : GL (Fin 2) (A E) → ℂ), φ ∈ Tr P → ∃ f : Sm E 2, f.1 = φ ∧ (lie E 2 X f).1 ∈ Tr P := by
   intro E _ _ _ P X φ hφ
   induction hφ using Submodule.span_induction with
   | mem φ hφ =>
@@ -54,7 +98,7 @@ theorem UpperTheory.exists_smooth_lie_action_mem_cuspidal_translates :
     obtain ⟨fa, rfl, ha⟩ := ha
     obtain ⟨fb, rfl, hb⟩ := hb
     refine ⟨fa + fb, rfl, ?_⟩
-    rw [map_add]
+    rw [map_add (f := _)]
     exact (Tr P).add_mem ha hb
   | smul c a _ ha =>
     obtain ⟨fa, rfl, ha⟩ := ha

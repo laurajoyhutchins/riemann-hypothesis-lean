@@ -1,6 +1,46 @@
-import Development.AutomorphicArithmetic.PrimitiveCosets.CoreGm
-import Development.AutomorphicArithmetic.PrimitiveCosets.Imports
-import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin
+module
+
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.TopWin
+public import Development.AutomorphicArithmetic.PrimitiveCosets.CoreAtH
+public import Development.AutomorphicArithmetic.PrimitiveCosets.CoreGm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -23,13 +63,6 @@ theorem windowInequality_of_artinInputs
   have b := le_of_max_le_right hx
   obtain ⟨i, hi⟩ := h Fm _ _ _ _ _ _ _ (hT x (le_of_max_le_left b) hw)
   exact hx1 x (le_of_max_le_left hx) _ ((core Fm).D x i).host.toHostAx _ (hE x (le_of_max_le_right b) i) hi
-
-theorem zeroFreeOn_of_core {Q : PChar → Prop}
-    (h : ∀ {eps : ℝ} (Fm : Fam eps) (eD eL K cHH eK CL x : ℝ), Tied Fm eD eL K cHH eK CL x → FamCoreConstantBounds (core Fm) eD eL K cHH eK x)
-    (hW : ∀ ψ, Q ψ → ∃ (Λ : Level) (la : ℝ), ψ ∈ Λ.KEPT ∧ 1 < la ∧ ChebyshevInequalityAtWindowScale @core @Tied la Λ) : ZeroFreeOn Q :=
-  zeroFreeOn_of_tiedWin fun ψ hψ => by
-    obtain ⟨Λ, la, a, b, c⟩ := hW ψ hψ
-    exact ⟨Λ, la, a, b, windowInequality_of_artinInputs h Λ, formB Λ, c⟩
 
 end UpperTheory.Comparison₂
 

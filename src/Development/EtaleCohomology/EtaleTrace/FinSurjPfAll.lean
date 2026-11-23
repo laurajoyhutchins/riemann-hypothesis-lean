@@ -1,4 +1,53 @@
-import Development.EtaleCohomology.EtaleTrace.FinSurjPfDense
+module
+
+import Development.EtaleCohomology.EtaleTrace.GenOnAgreePf
+public import Development.EtaleCohomology.EtaleTrace.FinSurjPf
+public import Development.EtaleCohomology.EtaleTrace.FinSurjPfDense
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry MvPolynomial
@@ -36,25 +85,9 @@ theorem linForm {k : Type} [Field k] {K : Type} [Field K] (f : k →+* K) {N : �
   refine ⟨∑ j, C (c j) * X j, ?_, by simp [eval₂_sum]⟩
   exact IsHomogeneous.sum _ _ _ fun j _ => isHomogeneous_C_mul_X _ _
 
-theorem PN_cover (k : Type) [Field k] (d : ℕ) (y : PN k d) :
+theorem PN_cover (k : Type) [Field k] (d : ℕ) (y : PN (k := k) d) :
     ∃ i : Fin (d + 1), y ∈ Proj.basicOpen (homogeneousSubmodule (Fin (d + 1)) k) (X i) := by
-  have htop := Proj.iSup_basicOpen_eq_top (homogeneousSubmodule (Fin (d + 1)) k)
-    (fun i : Fin (d + 1) => (X i : MvPolynomial (Fin (d + 1)) k)) ?_
-  · have : y ∈ (⊤ : (PN k d).Opens) := trivial
-    rw [← htop] at this
-    exact TopologicalSpace.Opens.mem_iSup.mp this
-  intro q hq
-  rw [← Set.image_univ, MvPolynomial.mem_ideal_span_X_image]
-  intro m hm
-  by_contra! hne
-  have hm0 : m = 0 := Finsupp.ext fun i => hne i (Set.mem_univ i)
-  subst hm0
-  have h0 : GradedRing.proj (homogeneousSubmodule (Fin (d + 1)) k) 0 q = 0 := hq
-  rw [GradedRing.proj_apply] at h0
-  change ((MvPolynomial.decomposition.decompose' q 0 : homogeneousSubmodule (Fin (d + 1)) k 0) :
-    MvPolynomial (Fin (d + 1)) k) = 0 at h0
-  rw [MvPolynomial.decomposition.decompose'_apply, homogeneousComponent_zero, C_eq_zero] at h0
-  exact (mem_support_iff.mp hm) h0
+  apply LateralTheory.EtaleTrace.Cov.pn_cover <;> assumption
 
 theorem FSAffine_pf : FSAffine := by
   intro k _ X _ p N d ι π v w hι cv cw hlin hx

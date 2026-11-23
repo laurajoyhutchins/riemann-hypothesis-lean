@@ -1,11 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.HasBasisOfBasis
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsUnitCharts
+public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsBasisB
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.HasBasisOfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.DimSplitPf
-import Development.AbelianVarietyTheory.Definitions.Degenerations.BaseFacts
-import Development.AbelianVarietyTheory.Definitions.Degenerations.IsAffineSplitTorusLeft
-import Development.AbelianVarietyTheory.Definitions.Degenerations.CompanionTheory
-import Development.AbelianVarietyTheory.Statements.SemistableTorsion.UTorsSt
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -50,24 +91,51 @@ theorem exists_monomial (L : LB X) (φ : Y ⟶ X) (N d : ℕ) {J : Type} [Fintyp
     (σ : J → (LB.LinComb L (K := Fin 1) (fun _ => 𝟙 X) (fun _ => (N : ℤ))).Sec) (α : J → ℕ) (hα : ∑ i, α i = d) :
     ∃ s : (LB.LinComb L (K := Fin 1) (fun _ => φ) (fun _ => ((N * d : ℕ) : ℤ))).Sec,
       ∀ j, s.f j = ∏ i, (φ.appLE _ _ (wchart_le L φ j)).hom ((σ i).f j) ^ α i := by
-  refine ⟨⟨fun j => ∏ i, (φ.appLE _ _ (wchart_le L φ j)).hom ((σ i).f j) ^ α i, fun j j' => fn_ext fun y hy => ?_⟩,
-    fun _ => rfl⟩
-  have v : ∀ j : Fin 1 → L.ι, y ∈ LB.wchart L (fun _ : Fin 1 => φ) j →
-      gs (𝟙 Y) y _ (∏ i, (φ.appLE _ _ (wchart_le L φ j)).hom ((σ i).f j) ^ α i) =
-        ∏ i, gs (𝟙 Y ≫ φ) y (LB.wchart L (fun _ : Fin 1 => 𝟙 X) j) ((σ i).f j) ^ α i := fun j hj => by
-    rw [gs_eq (𝟙 Y) y _ hj, map_prod, map_prod]
-    refine Finset.prod_congr rfl fun i _ => ?_
-    rw [map_pow, map_pow, ← gs_eq (𝟙 Y) y _ hj]
-    exact congrArg (· ^ α i) ((gs_res (𝟙 Y) y (wchart_le L φ j) hj _).trans
-      (gs_pull (𝟙 Y) φ y _ (wchart_le L φ j hj) _))
-  refine ((gs_res (𝟙 Y) y _ hy _).trans (v j hy.1)).trans (Eq.trans ?_ ((gs_mul (𝟙 Y) y _ hy _ _).trans
-    (congrArg₂ (· * ·) ((gs_unit (𝟙 Y) y _ hy _).trans
-      (congrArg Units.val (gm_linComb L _ _ (𝟙 Y) y j j' hy.1 hy.2))) ((gs_res (𝟙 Y) y _ hy _).trans (v j' hy.2)))).symm)
-  simp only [fun i => sec_trans (σ i) (𝟙 Y ≫ φ) y (wchart_le L φ j hy.1) (wchart_le L φ j' hy.2), mul_pow]
-  rw [Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, hα]
-  simp only [trF]
-  rw [Fin.prod_univ_one, Fin.prod_univ_one, Category.comp_id, zpow_natCast, zpow_natCast, pow_mul]
-  simp only [Units.val_pow_eq_pow_val]
+  have pull_restrict {U U' : X.Opens} {V V' : Y.Opens} (hu : U' ≤ U) (hv : V' ≤ V)
+      (h : V ≤ φ ⁻¹ᵁ U) (h' : V' ≤ φ ⁻¹ᵁ U') (a : Γ(X, U)) :
+      (Y.presheaf.map (homOfLE hv).op).hom ((φ.appLE U V h).hom a) =
+        (φ.appLE U' V' h').hom ((X.presheaf.map (homOfLE hu).op).hom a) := by
+    rw [← CommRingCat.comp_apply, ← CommRingCat.comp_apply,
+      Scheme.Hom.appLE_map, Scheme.Hom.map_appLE]
+  have transition {Z : Scheme.{0}} (f : Z ⟶ X) (j j' : Fin 1 → L.ι) (n : ℕ) :
+      ((L.LinComb (fun _ : Fin 1 => f) (fun _ => (n : ℤ))).g j j').val =
+        ((f.appLE _ _ (le_inf
+          (inf_le_left.trans (LB.wchart_le L (fun _ : Fin 1 => f) j 0))
+          (inf_le_right.trans (LB.wchart_le L (fun _ : Fin 1 => f) j' 0)))).hom
+          (L.g (j 0) (j' 0)).val) ^ n := by
+    simp only [LB.LinComb, Fin.prod_univ_one, zpow_natCast, Units.val_pow_eq_pow_val]
+    rfl
+  let A (j : Fin 1 → L.ι) := L.wchart (fun _ : Fin 1 => 𝟙 X) j
+  let B (j : Fin 1 → L.ι) := L.wchart (fun _ : Fin 1 => φ) j
+  let s (i : J) (j : Fin 1 → L.ι) : Γ(X, A j) := (σ i).f j
+  let m (j : Fin 1 → L.ι) : Γ(Y, B j) := ∏ i, (φ.appLE (A j) (B j) (wchart_le L φ j)).hom (s i j) ^ α i
+  refine ⟨⟨m, ?_⟩, fun _ => rfl⟩
+  rintro (j : Fin 1 → L.ι) (j' : Fin 1 → L.ι)
+  let U := A j ⊓ A j'
+  let V := B j ⊓ B j'
+  have h : V ≤ φ ⁻¹ᵁ U := fun _ hy => ⟨wchart_le L φ j hy.1, wchart_le L φ j' hy.2⟩
+  let p := (φ.appLE U V h).hom
+  let gX : Γ(X, U) := ((L.LinComb (fun _ : Fin 1 => 𝟙 X) (fun _ => (N : ℤ))).g j j').val
+  let gY : Γ(Y, V) := ((L.LinComb (fun _ : Fin 1 => φ) (fun _ => ((N * d : ℕ) : ℤ))).g j j').val
+  have hg : p gX ^ d = gY := by
+    dsimp only [p, gX, gY]
+    rw [transition (𝟙 X) j j' N, transition φ j j' (N * d), map_pow, ← pow_mul,
+      ← CommRingCat.comp_apply]
+    erw [Scheme.Hom.appLE_comp_appLE φ (𝟙 X)]
+    rfl
+  let leftX := (X.presheaf.map (homOfLE (inf_le_left : U ≤ A j)).op).hom
+  let rightX := (X.presheaf.map (homOfLE (inf_le_right : U ≤ A j')).op).hom
+  have hc (i : J) : p (leftX (s i j)) = p gX * p (rightX (s i j')) := by
+    rw [← map_mul]
+    exact congrArg p ((σ i).compat j j')
+  change (Y.presheaf.map (homOfLE (inf_le_left : V ≤ B j)).op).hom (m j) =
+    gY * (Y.presheaf.map (homOfLE (inf_le_right : V ≤ B j')).op).hom (m j')
+  simp only [m, map_prod, map_pow,
+    pull_restrict (inf_le_left : U ≤ A j) (inf_le_left : V ≤ B j) (wchart_le L φ j) h,
+    pull_restrict (inf_le_right : U ≤ A j') (inf_le_right : V ≤ B j') (wchart_le L φ j') h]
+  change (∏ i, p (leftX (s i j)) ^ α i) = gY * ∏ i, p (rightX (s i j')) ^ α i
+  simp only [hc, mul_pow]
+  rw [Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, hα, hg]
 
 end Values
 
@@ -77,6 +145,7 @@ theorem hilb_le {k J : Type} [Field k] [Fintype J] (C : Set (J → k)) (d m : �
   have le : (MvPolynomial.homogeneousSubmodule J k d).map
       (LinearMap.pi fun v : C => (MvPolynomial.aeval (R := k) v.1).toLinearMap) ≤ Submodule.span k (Set.range β) := by
     rintro _ ⟨P, hP, rfl⟩
+
     rw [P.as_sum, map_sum]
     refine Submodule.sum_mem _ fun α hα => ?_
     have hd : ∑ i, α i = d := by

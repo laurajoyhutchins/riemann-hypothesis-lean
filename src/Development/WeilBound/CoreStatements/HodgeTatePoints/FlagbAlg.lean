@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GrIsGenAt
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GrIsGenAt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Mathlib.LinearAlgebra.Dual.Basis
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,8 +86,8 @@ theorem exists_basis (hinj : Function.Injective (algebraMap A Ω)) (N : Submodul
       { carrier := {s | ∃ n ∈ N, (∀ j < i, φ j n = 0) ∧ φ i n = algebraMap A Ω s * t i}
         add_mem' := by
           rintro a b ⟨n, hn, h0, h⟩ ⟨n', hn', h0', h'⟩
-          refine ⟨n + n', N.add_mem hn hn', fun j hj => by rw [map_add, h0 j hj, h0' j hj, add_zero], ?_⟩
-          rw [map_add, map_add, h, h', add_mul]
+          refine ⟨n + n', N.add_mem hn hn', fun j hj => by rw [map_add (f := _), h0 j hj, h0' j hj, add_zero], ?_⟩
+          rw [map_add (f := _), map_add (f := _), h, h', add_mul]
         zero_mem' := ⟨0, N.zero_mem, fun j _ => map_zero _, by simp⟩
         smul_mem' := by
           rintro c a ⟨n, hn, h0, h⟩
@@ -52,7 +104,7 @@ theorem exists_basis (hinj : Function.Injective (algebraMap A Ω)) (N : Submodul
       { carrier := {s | ∃ a : A, algebraMap A Ω s * φ i n = algebraMap A Ω a * t i}
         add_mem' := by
           rintro a b ⟨x, h⟩ ⟨y, h'⟩
-          exact ⟨x + y, by rw [map_add, map_add, add_mul, add_mul, h, h']⟩
+          exact ⟨x + y, by rw [map_add (f := _), map_add (f := _), add_mul, add_mul, h, h']⟩
         zero_mem' := ⟨0, by simp⟩
         smul_mem' := by
           rintro c a ⟨x, h⟩
@@ -71,6 +123,7 @@ theorem exists_basis (hinj : Function.Injective (algebraMap A Ω)) (N : Submodul
     induction i using WellFoundedLT.induction with
     | _ i ih =>
       have := congrArg (φ i) hg'
+
       rw [map_sum, map_zero, Finset.sum_eq_single i] at this
       · rw [map_smul_alg, hnt] at this
         exact hinj (by rw [map_zero]; exact (mul_eq_zero.1 this).resolve_right (ht i))
@@ -286,9 +339,11 @@ theorem shape_alt {r : ℕ} (b₀ : Fin r → L) (e : Fin r → Ω) (he : ∀ a,
     · simp
   · have hz : (z : Module.Dual Ω L) = ∑ i, n.repr z i • (n i).1 := by
       have := congrArg N.subtype (n.sum_repr z)
+
       rw [map_sum] at this
       exact this.symm
     rw [Module.Basis.dualBasis_apply, hz]
+
     simp only [map_sum, Finset.mul_sum]
     simp only [fun a' i => map_smul_alg (Module.Dual.eval Ω L (e a' • b₀ a')) (n.repr z i) (n i).1]
     rw [Finset.sum_comm]

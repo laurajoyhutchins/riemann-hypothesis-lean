@@ -1,7 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsTildeVanish
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PTildeVanishLoc
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.Statements
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsTildeVanish
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PTildeVanishLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman
@@ -56,7 +101,7 @@ theorem liftCochain_mem {i : ℕ} (t : Cech.Cochain (fun I : Chart x => ↥((M.t
   · rw [liftCochain_of M c t J hJ]
     exact liftTilde_mem M c _ hJ _
   · change (if hJ : J.1.1 ⊆ support x then _ else 0) ∈ _
-    rw [dif_neg hJ]
+    rw [dite_eq_right hJ]
     exact zero_mem _
 
 theorem locConeE_d {i : ℕ} (z : Cech.Cochain (locSys S N M.coneSubE) i)
@@ -64,6 +109,7 @@ theorem locConeE_d {i : ℕ} (z : Cech.Cochain (locSys S N M.coneSubE) i)
     locConeE M K.1.1 hK (Cech.d (locSys S N M.coneSubE) locResS i z K) =
       ∑ j : K.1.1, Cech.sgn K.1.1 j • locConeE M (Cech.face K j).1.1
         ((Cech.face_subset K j).trans hK) (z (Cech.face K j)) := by
+
   rw [Cech.d_apply, map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_zsmul]
@@ -90,6 +136,7 @@ theorem d_liftCochain {i : ℕ} (t : Cech.Cochain (fun I : Chart x => ↥((M.til
           exact locConeE_liftTilde M c _ _ _
       _ = singleE S x E c (∑ j : K.1.1, Cech.sgn K.1.1 j •
             (t (Cech.face (⟨⟨K.1.1, K.1.2.1, hK⟩, K.2⟩ : Cech.Idx (support x) (i + 1 + 1)) j) : E)) := by
+
           rw [map_sum]
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [map_zsmul]
@@ -105,7 +152,8 @@ theorem tildeSys_H_subsingleton (k : ℕ) (h : Subsingleton (cohom M.coneGradedE
   unfold cohom Cech.Hdeg at h
   rw [Submodule.Quotient.subsingleton_iff, Submodule.eq_top_iff'] at h
   unfold SubSystem.H Cech.H
-  refine Submodule.Quotient.subsingleton_iff.mpr (Submodule.eq_top_iff'.mpr ?_)
+  set_option synthInstance.maxHeartbeats 200000 in
+    refine Submodule.Quotient.subsingleton_iff.mpr (Submodule.eq_top_iff'.mpr ?_)
   rintro ⟨t, ht⟩
   rw [Submodule.mem_comap]
   change t ∈ LinearMap.range (Cech.d _ (M.tildeSys c).res k)
@@ -133,7 +181,8 @@ theorem tildeSys_H_subsingleton (k : ℕ) (h : Subsingleton (cohom M.coneGradedE
   rw [← coeffE_singleE_same (S := S) (x := x) c (t J : E), ← e1, ← e2]
   refine Eq.trans ?_ (congrArg (coeffE S x E c)
     (locConeE_d M y ⟨⟨J.1.1, J.1.2.1, Finset.subset_univ _⟩, J.2⟩ J.1.2.2)).symm
-  rw [map_sum]
+  set_option synthInstance.maxHeartbeats 100000 in
+    rw [map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_zsmul]
   rfl

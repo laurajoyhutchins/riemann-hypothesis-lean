@@ -1,6 +1,61 @@
-import Mathlib
-import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.CentralIdemCoeff
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.GaloisValuations.ContinuousConstSMulQuotient
+import Std.Tactic.BVDecide.Normalize.Prop
+import Formalism.ConjugateSelfDual.Statement
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,6 +84,7 @@ theorem cob_of_vanish {G : Type} [Group G] (H : Subgroup G) [H.FiniteIndex] {L M
     congr 2
     conv_lhs => rw [← QuotientGroup.out_eq' q]
     rfl
+
   simp only [h2, Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, ← map_sum] at h1
   rw [← hS, ← Nat.cast_smul_eq_nsmul L] at h1
   have h3 : c g = ((Fintype.card (G ⧸ H) : ℕ) : L)⁻¹ • (S - a g S) := by
@@ -94,21 +150,21 @@ theorem tB_act (ρ : Representation LL G V) (ρ' : Representation LL G V') (u : 
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [actVB_tmul, hu]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem fst_inl (z : V ⊗[Qp] B) :
     tB B (LinearMap.fst LL V LL) (tB B (LinearMap.inl LL V LL) z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem snd_inl (z : V ⊗[Qp] B) :
     tB B (LinearMap.snd LL V LL) (tB B (LinearMap.inl LL V LL) z) = 0 := by
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp
-  | add x y hx hy => simp only [map_add, hx, hy, add_zero]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, add_zero]
 
 theorem decomp (z : (V × LL) ⊗[Qp] B) :
     tB B (LinearMap.inl LL V LL) (tB B (LinearMap.fst LL V LL) z) +
@@ -116,7 +172,7 @@ theorem decomp (z : (V × LL) ⊗[Qp] B) :
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul v b => simp [← add_tmul]
-  | add x y hx hy => simp only [map_add]; rw [add_add_add_comm, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _)]; rw [add_add_add_comm, hx, hy]
 
 theorem split_of_crys [FiniteDimensional LL V] (ρ : Representation LL G V) (f : G → V)
     (hf : ∀ g h, f (g * h) = f g + ρ g (f h)) (h0 : IsCrys PD ρ) (h1 : IsCrys PD (extRep ρ f hf))
@@ -154,7 +210,7 @@ theorem split_of_crys [FiniteDimensional LL V] (ρ : Representation LL G V) (f :
       exact h4
   have hpb : Function.Bijective p := by
     constructor
-    · rw [injective_iff_map_eq_zero]
+    · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
       intro z h
       have hz : tB B (LinearMap.snd LL V LL) z.1.1 = 0 := congrArg Subtype.val z.2
       have hz' : tB B (LinearMap.fst LL V LL) z.1.1 = 0 := congrArg Subtype.val h
@@ -182,9 +238,9 @@ theorem split_of_crys [FiniteDimensional LL V] (ρ : Representation LL G V) (f :
   rw [hz1] at hd
   refine ⟨-tB B (LinearMap.fst LL V LL) z.1, fun g => ?_⟩
   have h3 := (mem_Dcris PD _ _).1 z.2 g
-  rw [← hd, map_add, ← tB_act PD _ _ _ ei] at h3
+  rw [← hd, map_add (f := _), ← tB_act PD _ _ _ ei] at h3
   have h4 := congrArg (tB B (LinearMap.fst LL V LL)) h3
-  rw [map_add, map_add, fst_inl, fst_inl] at h4
+  rw [map_add (f := _), map_add (f := _), fst_inl, fst_inl] at h4
   have h5 : tB B (LinearMap.fst LL V LL) (actVB PD (extRep ρ f hf) g
       (tB B (LinearMap.inr LL V LL) ((1 : LL) ⊗ₜ[Qp] (1 : B)))) = f g ⊗ₜ[Qp] (1 : B) := by
     simp [actVB_tmul, extRep_apply]
@@ -209,8 +265,8 @@ def extG (W : GRep G Qp LL O) (f : G → W.V) (hf : ∀ g h, f (g * h) = f g + W
     simp only [extRep_apply]
     exact ((W.cont z.1).add (hc.const_smul z.2)).prodMk continuous_const
 
-variable (G Qp LL O) in
 
+variable (G Qp LL O) in
 def trivG : GRep G Qp LL O where
   V := LL
   ρ := Representation.trivial LL G LL
@@ -257,7 +313,7 @@ theorem cocycle_of_inj (A W : GRep G Qp LL O) (j : W.V →ₗ[LL] A.V) (hj : Fun
     rw [this]
     haveI : ContinuousSMul LL W.V := IsModuleTopology.toContinuousSMul LL _
     exact (IsModuleTopology.continuous_of_linearMap r).comp ((A.cont x).add continuous_const)
-  · rw [map_add, he, hf, hf, hf, map_mul, map_sub, Module.End.mul_apply]
+  · rw [map_add (f := _), he, hf, hf, hf, map_mul, map_sub, Module.End.mul_apply]
     abel
 
 theorem split_of_closure
@@ -281,7 +337,7 @@ theorem split_of_closure
     simp [u, extRep_apply, he, hf, smul_sub]
     abel
   have hui : Function.Injective u := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     rintro ⟨w, c⟩ h
     have h' : j w + c • x = 0 := by simpa [u] using h
     have hc0 : c = 0 := by
@@ -319,10 +375,10 @@ theorem actVB_congr {G' : Type} [Group G'] {K₀' K' : Type} [Field K₀'] [Fiel
   induction z using TensorProduct.induction_on with
   | zero => rw [map_zero, map_zero]
   | tmul v b => rw [actVB_tmul, actVB_tmul, h1, h2]
-  | add a b ha hb => rw [map_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), map_add (f := _), ha, hb]
+
 
 omit [TopologicalSpace G] [TopologicalSpace LL] [IsTopologicalRing LL] in
-
 theorem descend [CharZero LL] (H : Subgroup G) [H.FiniteIndex]
     {V : Type} [AddCommGroup V] [Module LL V] [Module Qp V] [IsScalarTower Qp LL V]
     (ρ : Representation LL G V) (f : G → V) (hf : ∀ g h, f (g * h) = f g + ρ g (f h)) (y : V ⊗[Qp] B)
@@ -335,7 +391,7 @@ theorem descend [CharZero LL] (H : Subgroup G) [H.FiniteIndex]
       abel)
     (fun g hg => sub_eq_zero.2 (hy g hg))
   refine ⟨w + y, fun g => ?_⟩
-  rw [map_add, sub_eq_iff_eq_add.1 (hw g)]
+  rw [map_add (f := _), sub_eq_iff_eq_add.1 (hw g)]
   abel
 
 end Closure

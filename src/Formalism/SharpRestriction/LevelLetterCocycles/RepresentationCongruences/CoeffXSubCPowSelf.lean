@@ -1,4 +1,59 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.RepVVSmulA
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcGamLiftCore
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ExistsPhiBridge
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.AcoordSumVecMul
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.FilVSep
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LemGBInImgIff
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.LiftsAtThinLetterType
+import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.RepVVSmulA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,10 +102,11 @@ theorem cst_C' (x : O) : Br.cst (C x) = algebraMap O (LetA O n) x := by
   simp [PhiBridge.cst, h]
 
 theorem EL_add (F G : PowerSeries O) : EL Br a (F + G) = EL Br a F + EL Br a G := by
-  simp only [EL, cst_add' Br, mul_add, map_add]
+  simp only [EL, cst_add' Br, mul_add, map_add (f := _)]
 
 theorem EL_sum {I : Type} (s : Finset I) (F : I → PowerSeries O) :
     EL Br a (∑ i ∈ s, F i) = ∑ i ∈ s, EL Br a (F i) := by
+
   simp only [EL, cst_sum' Br, Finset.mul_sum, map_sum]
 
 theorem EL_zero : EL Br a 0 = 0 := by
@@ -97,10 +153,10 @@ theorem EL_of_mem {u : LetA O n} (hu : u ∈ W.AΔ) :
   simp only [EL]
   congr 1
   funext i
-  simp only [Pi.mul_apply, PhiBridge.cst]
+  simp only [Pi.mul_apply]
   by_cases hi : i = a
   · subst hi
-    rw [hF]
+    simp only [hF, PhiBridge.cst]
   · unfold letE
     rw [Pi.single_eq_of_ne hi, zero_mul, zero_mul]
 
@@ -136,12 +192,14 @@ theorem crisMap_coords (W : LocWach PD LL O v n) {T₁ T₂ : LocLat G Qp LL O} 
       ∑ k, algebraMap O LL (μ m k) • ((φVB PD (LL := LL) (V := T₂.V)) ^ e) (cmpD W T₂ (bb k)) := by
     intro m
     have hm := hμ m
+
     simp only [dvO, dv, map_sum, map_smul] at hm
     simpa [Pi.single_apply] using hm
+
   simp only [dvO, dv, map_sum, map_smul, hX, Finset.smul_sum, smul_smul, map_mul, Finset.sum_smul]
   exact Finset.sum_comm
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem lift2a [NeZero n] [Fintype (K →ₐ[Qp] LL)] [IsDomain O] [IsDiscreteValuationRing O]
     [IsAdicComplete (IsLocalRing.maximalIdeal O) O] (W : LocWach PD LL O v n)
@@ -296,6 +354,7 @@ theorem lift2a [NeZero n] [Fintype (K →ₐ[Qp] LL)] [IsDomain O] [IsDiscreteVa
   set zb : W.DD T₁ := ∑ δ ∈ W.DelF, W.γD T₁ δ ((letE a : LetA O n) • z₀) with hzb
   obtain ⟨hzbΔ, hzblet⟩ := avg_props W a hzN hzlet
   have hmapzb : W.map F zb = (W.DelF.card : ℕ) • (W.π₀ ^ AA • y) := by
+
     rw [hzb, map_sum]
     have : ∀ δ ∈ W.DelF, W.map F (W.γD T₁ δ ((letE a : LetA O n) • z₀)) = W.π₀ ^ AA • y := by
       intro δ hδ
@@ -425,6 +484,7 @@ theorem lift2a [NeZero n] [Fintype (K →ₐ[Qp] LL)] [IsDomain O] [IsDiscreteVa
   have hlC : ∀ m, ((PD.p : ℕ) : O) ^ κ * Cc m = ∑ i, coef i * c₀ i m := by
     intro m
     have := congrArg (PowerSeries.coeff J) (hstar m)
+
     rw [PowerSeries.coeff_C_mul, map_sum] at this
     show _ * PowerSeries.coeff J (Φ m) = _
     rw [this]
@@ -523,6 +583,7 @@ theorem lift2a [NeZero n] [Fintype (K →ₐ[Qp] LL)] [IsDomain O] [IsDiscreteVa
         rw [e, hUu, ← mul_assoc, ← map_mul, EL_mulA Br a _ _ _ hc2, mul_assoc]
       exact hL.symm.trans (h1.trans hR)
     have hco := congrArg (PowerSeries.coeff J) hser
+
     rw [PowerSeries.coeff_C_mul, map_sub, map_sum, PowerSeries.coeff_X_pow_mul', if_neg (by omega)] at hco
     have hδc : PowerSeries.coeff J δk = if k = k₀ then ((W.DelF.card : ℕ) : O) * ((PD.p : ℕ) : O) ^ (2 * σ) else 0 := by
       by_cases hk : k = k₀

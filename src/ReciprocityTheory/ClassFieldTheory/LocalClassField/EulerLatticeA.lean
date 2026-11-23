@@ -1,4 +1,49 @@
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.EulerDefs
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.ValUnitsD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.LocalFieldAutomorphisms.Inertia
+import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.LocalFieldAutomorphisms.ModelF
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.Euler
 
@@ -10,44 +55,17 @@ section aux
 
 variable (p : ℕ) [Fact p.Prime] (K : IntermediateField ℚ_[p] (PadicAlgCl p))
 
-def OLaddEquiv : OLadd p K ≃+ OK p K where
-  toFun x := ⟨⟨x.1, x.2.1⟩, (mem_OK_iff p K _).2 x.2.2⟩
-  invFun y := ⟨y.1.1, y.1.2, (mem_OK_iff p K _).1 y.2⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-  map_add' _ _ := rfl
-
-theorem map_range_OLaddEquiv (z : ℤ) :
-    (zmultiplesHom (OLadd p K →+ OLadd p K) (AddMonoidHom.id _) z).range.map (OLaddEquiv p K : OLadd p K →+ OK p K) =
-      (Ideal.span {(z : OK p K)}).toAddSubgroup := by
-  ext y
-  rw [AddSubgroup.mem_map, Submodule.mem_toAddSubgroup, Ideal.mem_span_singleton']
-  constructor
-  · rintro ⟨_, ⟨x, rfl⟩, rfl⟩
-    refine ⟨OLaddEquiv p K x, ?_⟩
-    have : (zmultiplesHom (OLadd p K →+ OLadd p K) (AddMonoidHom.id _) z) x = z • x := rfl
-    rw [this]
-    show _ = OLaddEquiv p K (z • x)
-    rw [map_zsmul, zsmul_eq_mul, mul_comm]
-  · rintro ⟨a, rfl⟩
-    refine ⟨_, ⟨(OLaddEquiv p K).symm a, rfl⟩, ?_⟩
-    have : (zmultiplesHom (OLadd p K →+ OLadd p K) (AddMonoidHom.id _) z) ((OLaddEquiv p K).symm a) =
-      z • (OLaddEquiv p K).symm a := rfl
-    rw [this]
-    show OLaddEquiv p K (z • (OLaddEquiv p K).symm a) = _
-    rw [map_zsmul, zsmul_eq_mul, mul_comm, AddEquiv.apply_symm_apply]
-
-def quotOLaddEquiv (z : ℤ) :
-    (OLadd p K ⧸ (zmultiplesHom (OLadd p K →+ OLadd p K) (AddMonoidHom.id _) z).range) ≃
-      (OK p K ⧸ Ideal.span {(z : OK p K)}) :=
-  (QuotientAddGroup.congr _ _ (OLaddEquiv p K) (map_range_OLaddEquiv p K z)).toEquiv
-
 attribute [local instance] zpAlgOK
 
 theorem card_OK_quot_natCast (hK : FiniteDimensional ℚ_[p] K) {n : ℕ} (hn : n ≠ 0) :
     Nat.card (OK p K ⧸ Ideal.span {(n : OK p K)}) = (p ^ padicValNat p n) ^ Module.finrank ℚ_[p] K := by
   have := isScalarTower_zp_OK p K
-  have := isIntegralClosure_OK p K
+  have : IsIntegralClosure (OK p K) ℤ_[p] K := by
+    refine ⟨Subtype.val_injective, ?_⟩
+    intro x
+    rw [isIntegral_zp_K_iff, ← _root_.ReciprocityTheory.Neutral.Cmp.norm_le_one_iff_isIntegral,
+      ← mem_OK_iff]
+    exact ⟨fun h => ⟨⟨x, h⟩, rfl⟩, by rintro ⟨y, rfl⟩; exact y.2⟩
   have := isTorsionFree_zp_K p K
   have : Module.Free ℤ_[p] (OK p K) := IsIntegralClosure.module_free ℤ_[p] ℚ_[p] K _
   have : Module.Finite ℤ_[p] (OK p K) := IsIntegralClosure.finite ℤ_[p] ℚ_[p] K _

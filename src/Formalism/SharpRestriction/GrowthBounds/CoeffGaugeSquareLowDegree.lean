@@ -1,4 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.CoeffIdentitySelfConjOfTwo
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.PowerSeriesFrobeniusCongruence
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePHStab
+public import Formalism.SharpRestriction.GrowthBounds.AlongCvSmul
+import Formalism.SharpRestriction.GrowthBounds.CoeffIdentityPlainChartOfThree
+public import Formalism.SharpRestriction.GrowthBounds.PsOfIntS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -187,7 +237,8 @@ theorem coeff_gaugeSquare_low_degree (X : RawChart C d I κ)
     (hax : ∀ e : Fin 2 × κ →₀ ℕ, (∀ s ∈ e.support, s.1 ≠ 1) → coeff e X.h = 0) (e : Fin 2 × κ →₀ ℕ)
     (he : zdeg e < 2) : coeff e (h2 X) = 0 := by
   unfold h2
-  rw [map_add, map_sum]
+
+  rw [map_add (f := _), map_sum]
   by_cases h0 : ∀ i, e (1, i) = 0
   · rw [Finset.sum_eq_zero fun i _ => coeff_X_mul_rho i _ e (h0 i), add_zero]
     apply hax
@@ -266,6 +317,7 @@ theorem r1sHLin_holds : GaugeLeadingTermLinear := by
       unfold h2
       rw [subst_add hS]
       congr 1
+
       rw [← substAlgHom_apply hS, map_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [substAlgHom_apply hS, subst_mul hS, subst_X hS]
@@ -284,11 +336,13 @@ theorem r1sHLin_holds : GaugeLeadingTermLinear := by
   have hK2 : Kd (m * 2) (subst a (h2 X)) := Kd_subst ha0 haK (coeff_gaugeSquare_low_degree X hax)
   constructor
   · intro n j hj
+
     rw [hdec, map_sub, hK2 n j (by omega), map_sum, zero_sub, neg_eq_zero]
     apply Finset.sum_eq_zero
     intro i _
     rw [coeff_inV_mul, hc i j hj, zero_mul]
   · intro n
+
     rw [hdec, map_sub, hK2 n m (by omega), map_sum, zero_sub]
     congr 1
     simp only [coeff_inV_mul]
@@ -297,6 +351,7 @@ theorem r1sHLin_holds : GaugeLeadingTermLinear := by
       funext k
       rw [Finset.sum_eq_single k (fun q _ hq => by rw [Pi.single_eq_of_ne (Ne.symm hq), mul_zero])
         (fun h => absurd (Finset.mem_univ k) h), Pi.single_eq_same, mul_one]
+
     rw [hv, sg_lin, alongCv_lin hx, map_sum]
     simp only [PowerSeries.coeff_smul, smul_eq_mul]
 

@@ -1,15 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.LeISupInfPreimage
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ConstThickeningFieldStructure
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueInvariantVectorFieldOfTangent
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PreimageTranslate
-import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIsLieBasisBaseChange
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.UnifUniqSt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsInvDer
+public import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ConstThickeningFieldStructure
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsUniqueInvariantVectorFieldOfTangent
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PreimageTranslate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -243,7 +282,8 @@ private theorem rsT_comp_app_eq_pbT_app {Z Y X : Scheme.{0}} (y : Z ⟶ Y) (m : 
 
 private theorem rsT_sum_mul_fintype {Y : Scheme.{0}} {O₀ O : Y.Opens} {J : Type} [Fintype J] (s t : J → Γ(Y, O₀))
     (h : O ≤ O₀) : rsT (∑ a, s a * t a) O = ∑ a, rsT (s a) O * rsT (t a) O := by
-  simp only [rsT_eq_resG_of_le' _ h, map_sum, map_mul]
+  set_option synthInstance.maxHeartbeats 100000 in
+    simp only [rsT_eq_resG_of_le' _ h, map_sum, map_mul]
 
 private theorem sheaf_map_eq_rsT {Y : Scheme.{0}} {O₀ O : Y.Opens} (e : O ⟶ O₀) (s : Γ(Y, O₀)) :
     ConcreteCategory.hom (Y.sheaf.obj.map e.op) s = rsT s O := by
@@ -271,9 +311,9 @@ theorem existsUnique_coeff : ∀ (K : Type) [Field K] (A₀ : Over (Sp K)) [GrpO
     intro W V hW hW₀ hV hVW
     refine existsUnique_coeff_affine (G := A₀) hv hd x₀ p m H y hW hV hVW (fun f => rsT (d W f) V) ?_ ?_ ?_
     · intro f f'
-      simp only [hD.add W hW₀, rsT_eq_resG_of_le' (O₀ := (y ≫ m) ⁻¹ᵁ W) _ hVW, map_add]
+      simp only [hD.add W hW₀, rsT_eq_resG_of_le' (O₀ := (y ≫ m) ⁻¹ᵁ W) _ hVW, map_add (f := _)]
     · intro f f'
-      simp only [hD.mul W hW₀, rsT_eq_resG_of_le' (O₀ := (y ≫ m) ⁻¹ᵁ W) _ hVW, map_add, map_mul]
+      simp only [hD.mul W hW₀, rsT_eq_resG_of_le' (O₀ := (y ≫ m) ⁻¹ᵁ W) _ hVW, map_add (f := _), map_mul]
       simp only [← rsT_eq_resG_of_le' (O₀ := (y ≫ m) ⁻¹ᵁ W) _ hVW, rsT_comp_app_eq_pbT_app y m hVW]
     · intro r
       simp only [hD.base W hW₀, GlobalTheory.KS.InvField.constFn_zero, rsT_eq_resG_of_le' (O₀ := (y ≫ m) ⁻¹ᵁ W) _ hVW,

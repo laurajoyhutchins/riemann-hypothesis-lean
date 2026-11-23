@@ -1,5 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsRead
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IsRead
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ContrFactor
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MeasureTheory ValuativeRel Matrix GlobalTheory.SplitWeil GlobalTheory.RootEx GlobalTheory.StepData
 
 namespace GlobalTheory.FlatRed
@@ -38,7 +84,7 @@ theorem fill_eq (ρ : ℕ) (h : ρ < c + 1) (t : Matrix (n ⊕ Fin c) (n' ⊕ Fi
   ext r q
   simp only [fill, affPt, Matrix.of_apply, Matrix.add_apply]
   by_cases hF : Free (ρ + 1) (r, q)
-  · rw [dif_pos ((mem_itFree ρ _).2 hF), dif_pos hF]
+  · rw [dite_eq_left ((mem_itFree ρ _).2 hF), dite_eq_left hF]
     rcases r with r | l <;> rcases q with s | i
     · exact hF.elim
     · have h1 : ρ + 1 < i.val + 1 := hF
@@ -48,7 +94,7 @@ theorem fill_eq (ρ : ℕ) (h : ρ < c + 1) (t : Matrix (n ⊕ Fin c) (n' ⊕ Fi
     · have h1 : l.val < i.val := hF
       have h2 : l.val ≠ i.val := by omega
       simp [basePt, colAt, h2]
-  · rw [dif_neg (fun hh => hF ((mem_itFree ρ _).1 hh)), dif_neg hF]
+  · rw [dite_eq_right (fun hh => hF ((mem_itFree ρ _).1 hh)), dite_eq_right hF]
     by_cases hR : IsRead n n' c ρ (r, q)
     · rw [if_neg (fun hh => ((mem_evAll ρ _).1 hh).2 hR)]
       rcases r with r | l <;> rcases q with s | i

@@ -1,15 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsEmbeddingOfRingTie
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLocIdOfCompletions
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AddCharIsIntegral
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CharZeroOfSetting
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.AmbientBaseHeq
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.CompanionOfBaseTied
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.RecursiveTieLevelZeroEq
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TieTrF
-import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.GTiedFOfIsRecCEv
-import Formalism.LocalToGlobal.HermitianColumns.FullSym
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LocalIdentificationPlaceEqInducedRealPlaceStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AddCharIsIntegral
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.CompanionOfBaseTied
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.FullTiedCBase
+public import Formalism.LocalToGlobal.HermitianColumns.FullSym
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FrobOrderSpec
+public import Formalism.LocalToGlobal.GroupLattices.TiedFamilies.TieStd
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TieEmbeddingCastLevelTie
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CharZeroOfSetting
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLocIdOfCompletions
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -64,11 +100,10 @@ def gatOf (I : ∀ u (w : D.what₂.places.Pl), GIdx D.host (D.mem u).A.T (D.wha
     GAtP (D.what₂.places.resChar w) :=
   (packC D (fun u => L0 u) I ψ u w h).gat (rSc sc D.R.k (D.what₂.places.resChar w)) (epSc D.R sc 1 (D.what₂.places.resChar w))
 
-set_option maxHeartbeats 4000000 in
+
 theorem gatOf_d (T : ∀ u : D.what₂.Word, Forms0 D u) (hJ : ∀ u, Joint0 L0 u (T u)) (I) (ψ) (sc : Scale) (u : D.what₂.Word)
     (w : D.what₂.places.Pl) (h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) :
-    (gatOf D L0 I ψ sc u w h).d = Module.finrank ℂ (D.mem u).A.Mu0 :=
-by
+    (gatOf D L0 I ψ sc u w h).d = Module.finrank ℂ (D.mem u).A.Mu0 := by
   have e := GlobalTheory.ClassRank.pack_d_eq D L0 T hJ u w h (I u w h) (ψ u w h) (rSc sc D.R.k (D.what₂.places.resChar w))
     (epSc D.R sc 1 (D.what₂.places.resChar w))
   rw [pack_eq] at e
@@ -78,7 +113,7 @@ section Main
 
 variable {D L0}
 
-set_option maxHeartbeats 4000000 in
+
 theorem posOK_placeId (hS : Formalism.L2.Herm.StdTied D) (hC : Companion D L0)
     (ψ : ∀ u (w : D.what₂.places.Pl), GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w) →
       Formalism.L2.Herm.awayFrom₂ (L0 u) (D.what₂.places.resChar w) →* (ORec D w (nFr D (D.what₂.places.resChar w)))ˣ)

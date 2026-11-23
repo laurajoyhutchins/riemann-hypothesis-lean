@@ -1,4 +1,50 @@
-import ReciprocityTheory.AnalyticForms.MaIntEmpty
+module
+
+public import ReciprocityTheory.AnalyticForms.MaIntEmpty
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.M
 
@@ -122,10 +168,10 @@ def integralWith (A : FinHolAtlas e X) (P : ChartPartition A) (Φ : Fin e → Lo
   ∑ j, ∫ y in (A.chart j).target,
     P.χ j ((A.chart j).symm y) * g ((A.chart j).symm y) * locDens A Φ j y
 
-open scoped Classical in
 
+open scoped Classical in
 def mInt (A : FinHolAtlas e X) (Φ : Fin e → LocPot X) (g : X → ℝ) : ℝ :=
-  if h : Nonempty (ChartPartition A) then integralWith A h.some Φ g else 0
+  by classical exact if h : Nonempty (ChartPartition A) then integralWith A h.some Φ g else 0
 
 def MIntegrable (A : FinHolAtlas e X) (Φ : Fin e → LocPot X) (g : X → ℝ) : Prop :=
   ∀ j, ∀ K ⊆ (A.chart j).target, IsCompact K →
@@ -167,10 +213,10 @@ def pushDens (A : FinHolAtlas e X) (Φ : Fin e → LocPot X) (q : X → Fin e �
     ‖LinearMap.det (fderiv ℂ (q ∘ (A.chart (chartIdx A x)).symm) (A.chart (chartIdx A x) x) :
       (Fin e → ℂ) →ₗ[ℂ] (Fin e → ℂ))‖ ^ 2
 
-open scoped Classical in
 
+open scoped Classical in
 def maMeasure [MeasurableSpace X] (A : FinHolAtlas e X) (Φ : Fin e → LocPot X) : Measure X :=
-  if h : Nonempty (ChartPartition A) then
+  by classical exact if h : Nonempty (ChartPartition A) then
     ∑ j, ((volume.restrict (A.chart j).target).withDensity fun y =>
       ENNReal.ofReal (h.some.χ j ((A.chart j).symm y) * locDens A Φ j y)).map (A.chart j).symm
   else 0

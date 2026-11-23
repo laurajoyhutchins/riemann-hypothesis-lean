@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
+public import Mathlib.Analysis.Complex.Circle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,12 +76,10 @@ def mtF (σ : E →ₐ[F] E) {n : ℕ} (J : Matrix (Fin n) (Fin n) E) (g : GAF �
   (matHomF σ J g).1
 
 variable (F E) in
-
 def infPartF : AEF F E →+* Ainf F ⊗[F] E :=
   (Algebra.TensorProduct.map (fstA F) (AlgHom.id F E)).toRingHom
 
 variable (F E) in
-
 def finPartF : AEF F E →+* Af F ⊗[F] E :=
   (Algebra.TensorProduct.map (sndA F) (AlgHom.id F E)).toRingHom
 
@@ -56,14 +98,12 @@ def IsStdCharF {Tau : Type} [Fintype Tau] (tauE : Tau → (E →+* ℂ)) (ψ : A
     ∀ x : Ainf F, psiInf F ψ x = Complex.exp (2 * Real.pi * Complex.I * s * ∑ ρ, θ ρ (x ⊗ₜ[F] (1 : E)))
 
 variable (F E) in
-
 def idFF : (AF F)ˣ →* (AEF F E)ˣ := Units.map (algebraMap (AF F) (AEF F E)).toMonoidHom
 
 def IsHeckeCharF (χ : (AEF F E)ˣ →* Circle) : Prop :=
   Continuous χ ∧ ∀ x : Eˣ, χ (Units.map (incAF F E).toMonoidHom x) = 1
 
 variable (E) in
-
 def IsEtaF (η : (AF F)ˣ →* Circle) : Prop :=
   Continuous η ∧ (∀ a : Fˣ, η (Units.map (algebraMap F (AF F)).toMonoidHom a) = 1) ∧
     (∀ x : (AEF F E)ˣ, η (Units.map (Algebra.norm (AF F) : AEF F E →* AF F) x) = 1) ∧ η ≠ 1
@@ -72,7 +112,6 @@ def ResEtaF (χ : (AEF F E)ˣ →* Circle) (n : ℕ) : Prop :=
   AllSome (IsEtaF E) fun η => ∀ a, χ (idFF F E a) = η a ^ n
 
 variable (F) in
-
 def IsPlaceIdemF (v : HeightOneSpectrum (𝓞 F)) (ε : AF F) : Prop :=
   ∃ α : Af F, ε = pairA F 0 α ∧ evalV F v α = 1 ∧ ∀ v', v' ≠ v → evalV F v' α = 0
 
@@ -100,7 +139,6 @@ scoped instance measWOF (nS nT : ℕ) : MeasurableSpace (WOF F E nS nT) := borel
 def ratWF (γ : Matrix (Fin nT) (Fin nS) E) : WOF F E nS nT := γ.map (incAF F E)
 
 variable (F E nS nT) in
-
 def ratLF : AddSubgroup (WOF F E nS nT) :=
   ((incAF F E).toAddMonoidHom.mapMatrix (m := Fin nT) (n := Fin nS)).range
 
@@ -153,10 +191,6 @@ structure IsWeilDatumOF {Tau : Type} [Fintype Tau] (tauE : Tau → (E →+* ℂ)
       ∀ f, IsThetaFunOF σ JS JT xi0 ψ f → ℓ (om (g, h) f) = (r : ℂ) * (splitFacOF χS χT x y : ℂ) * ℓ f
 
 variable {σ JS JT}
-
-def thetaKOF (om : GAF σ JS × GAF σ JT →* Module.End ℂ (WOF F E nS nT → ℂ)) (g : GAF σ JS) (h : GAF σ JT)
-    (f : WOF F E nS nT → ℂ) : ℂ :=
-  om (g, h) f 0
 
 end Orient
 

@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NuInRange
-import Formalism.LocalRingCardinality.DataExtra
-import Formalism.LocalRingCardinality.DataTies
-import Formalism.LocalRingCardinality.Lemmas
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RhoDetPrimeEqMuTildeMulChiPow
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions NumberField IsDedekindDomain GlobalTheory.Mem
 
@@ -29,6 +66,7 @@ theorem exists_complex_extension [Fintype ι] (e : V →ₛₗ[σ] M) (b : Modul
     exact h1
   refine ⟨G, fun x => ?_⟩
   rw [← b.sum_repr x]
+
   simp only [map_sum, LinearMap.map_smulₛₗ, hb, RingHom.id_apply]
 
 theorem mem_span_of_kernel [Fintype ι] {J : Type} [Fintype J] (e : V →ₛₗ[σ] M)
@@ -56,8 +94,9 @@ theorem mem_span_of_kernel [Fintype ι] {J : Type} [Fintype J] (e : V →ₛₗ[
     intro x
     have h1 : g x = ∑ j, Pi.single j (f j x) := (Finset.univ_sum_single (g x)).symm
     rw [h1]
+
     simp only [P, LinearMap.sub_apply, LinearMap.id_apply, LinearMap.sum_apply,
-      LinearMap.comp_apply, map_sub, map_sum, ← hf, hH, LinearMap.coe_single]
+    LinearMap.comp_apply, map_sub, map_sum, ← hf, hH, LinearMap.coe_single]
   have hPm : P m = m := by
     simp [P, LinearMap.sum_apply, h0]
   rw [← hPm]
@@ -109,6 +148,7 @@ theorem span_ramSub {R : Ranks} {LL : Type} [Field LL] [NumberField LL] [StarRin
       exact ⟨∑ a, y a, by simp only [map_sum, hy, ColumnsAtT.Nm, LinearMap.sum_apply]⟩
     have hall : ∀ x, M.emb 0 x ∈ A.Mu0 := by
       intro x
+
       rw [← hsp, ← (M.lat 0).b.sum_repr x, map_sum]
       refine Submodule.sum_mem _ fun i _ => ?_
       rw [LinearMap.map_smulₛₗ]

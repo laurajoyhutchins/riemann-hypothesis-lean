@@ -1,14 +1,62 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingUnitsDefs
+module
+
+public import GroundTheory.ProfiniteCohomology.RealPlaces.VanishingUnitsDefs
+public import GroundTheory.ProfiniteCohomology.GlobalClassFormation.HighUnits
+public import GroundTheory.ProfiniteCohomology.RealPlaces.GSDefs
+public import GroundTheory.ProfiniteCohomology.RealPlaces.LocalCohomologyIsoHomologyMapNormCochains
+import GroundTheory.ProfiniteCohomology.ClassFormations.HighFormations
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.HighUnitsLocal
+import GroundTheory.ProfiniteCohomology.GlobalClassFormation.LocalResConj
+public import GroundTheory.ProfiniteCohomology.RestrictedRamification.EqZeroOfPowNsmulCohomologySUnitsOfOdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
 
 open CategoryTheory NumberField IsDedekindDomain GroundTheory.Global
 
-local notation "ℚ̄" => AlgebraicClosure ℚ
-
 noncomputable section
+
+local notation "ℚ̄" => AlgebraicClosure ℚ
 
 variable {K : FiniteSubfield} (S : Set (HeightOneSpectrum (𝓞 K.1)))
   (ιr : ∀ v : {v : InfinitePlace K.1 // v.IsReal}, ℚ̄ →ₐ[K.1] AlgebraicClosure v.1.Completion)
@@ -65,7 +113,7 @@ theorem subsingleton_realLocal_of_odd (w : {v : InfinitePlace K.1 // v.IsReal}) 
   have := subsingleton_localGaloisCohomology_of_isReal_of_odd w.1 w.2 hn
   exact (realLocalEquiv w n).injective.subsingleton
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem two_nsmul_realLocal (w : {v : InfinitePlace K.1 // v.IsReal}) {n : ℕ} (hn : 1 ≤ n)
     (t : cohomology (galUnits.{0} w.1.Completion (AlgebraicClosure w.1.Completion)) n) : 2 • t = 0 := by
@@ -107,9 +155,9 @@ theorem realLocalEquiv_realUnitsRes (ι : LocalEmbeddings K) {r : ℕ} (hr : 1 �
   exact (unitsLocalRes_sUnitsInfl S (ιr w) r y).trans
     (congrArg (realLocalEquiv w r) (congrArg (fun f => f.hom y) (realUnitsRes_eq S ιr r w).symm))
 
-set_option maxHeartbeats 1000000 in
-include h2S in
 
+
+include h2S in
 theorem eq_zero_of_realUnitsRes_eq_zero {r : ℕ} (hr : 4 ≤ r) (y : cohomology (galSUnitsMax K.1 ℚ̄ S) r)
     {k : ℕ} (hk : 2 ^ k • y = 0) (h : ∀ w, (realUnitsRes S ιr r w).hom y = 0) : y = 0 := by
   have hinj := (sUnitsRealPrimaryEquiv K S (nonempty_localEmbeddings K).some h2S hr).injective
@@ -121,9 +169,9 @@ theorem eq_zero_of_realUnitsRes_eq_zero {r : ℕ} (hr : 4 ≤ r) (y : cohomology
     rfl
   exact congrArg Subtype.val h0
 
-set_option maxHeartbeats 1000000 in
-include h2S in
 
+
+include h2S in
 theorem exists_realUnitsRes_eq {r : ℕ} (hr : 4 ≤ r)
     (t : ∀ w : {v : InfinitePlace K.1 // v.IsReal},
       cohomology (galUnits.{0} w.1.Completion (AlgebraicClosure w.1.Completion)) r) :
@@ -135,7 +183,7 @@ theorem exists_realUnitsRes_eq {r : ℕ} (hr : 4 ≤ r)
   rw [sUnitsRealPrimaryEquiv_apply] at hy
   exact congrFun hy w
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem realUnitsRes_tateToGlobal (n : ℕ) (x : unitsTateCohomology S ιr ιs (n + 1))
     (w : {v : InfinitePlace K.1 // v.IsReal}) :
@@ -146,9 +194,9 @@ theorem realUnitsRes_tateToGlobal (n : ℕ) (x : unitsTateCohomology S ιr ιs (
     (gsFinFamily S ιs) (gsRealFamily S ιr) (galSUnitsMax K.1 ℚ̄ S) (finUnits S) (finUnitsMor S ιs) realUnits
     (realUnitsMor S ιr) n) x)) w
 
-set_option maxHeartbeats 1000000 in
-include h2S in
 
+
+include h2S in
 theorem exists_realUnitsRes_eq_of_three_le {m : ℕ} (hm : 3 ≤ m + 1)
     (t : ∀ w : {v : InfinitePlace K.1 // v.IsReal}, cohomology (realUnits w) (m + 1)) :
     ∃ y : cohomology (galSUnitsMax K.1 ℚ̄ S) (m + 1), ∀ w, (realUnitsRes S ιr (m + 1) w).hom y = t w := by
@@ -156,7 +204,7 @@ theorem exists_realUnitsRes_eq_of_three_le {m : ℕ} (hm : 3 ≤ m + 1)
   · exact exists_realUnitsRes_eq S ιr h2S (r := m + 1) (by obtain ⟨j, hj⟩ := he; omega) t
   · exact ⟨0, fun w => @Subsingleton.elim _ (subsingleton_realLocal_of_odd w ho) _ _⟩
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem tateGlobalToLocal_units_eq {m : ℕ} (hm : 3 ≤ m + 1)
     (t : (∀ v : S, cohomology (finUnits S v) (m + 1)) ×
@@ -168,8 +216,8 @@ theorem tateGlobalToLocal_units_eq {m : ℕ} (hm : 3 ≤ m + 1)
       (m + 1)).hom y = t.1 := funext fun v => @Subsingleton.elim _ (subsingleton_finLocal S v hm) _ _
   exact Prod.ext h1 (funext hy)
 
-include h2S in
 
+include h2S in
 theorem exists_tateGlobalToLocal_eq {m : ℕ} (hm : 3 ≤ m + 1)
     (t : (∀ v : S, cohomology (finUnits S v) (m + 1)) ×
       (∀ w : {v : InfinitePlace K.1 // v.IsReal}, cohomology (realUnits w) (m + 1))) :
@@ -179,9 +227,9 @@ theorem exists_tateGlobalToLocal_eq {m : ℕ} (hm : 3 ≤ m + 1)
   (exists_realUnitsRes_eq_of_three_le S ιr h2S hm t.2).imp fun y hy =>
     tateGlobalToLocal_units_eq S ιr ιs hm t y hy
 
-set_option maxHeartbeats 1000000 in
-include h2S in
 
+
+include h2S in
 theorem tateToGlobal_units_eq_zero {n : ℕ} (hn : 3 ≤ n) (x : unitsTateCohomology S ιr ιs (n + 1))
     {k : ℕ} (hk : 2 ^ k • x = 0) :
     (tateToGlobal (gsFinFamily S ιs) (gsRealFamily S ιr) (galSUnitsMax K.1 ℚ̄ S) (finUnits S)
@@ -190,9 +238,9 @@ theorem tateToGlobal_units_eq_zero {n : ℕ} (hn : 3 ≤ n) (x : unitsTateCohomo
   · rw [← map_nsmul, hk, map_zero]
   · exact realUnitsRes_tateToGlobal S ιr ιs n x w
 
-set_option maxHeartbeats 1000000 in
-include h2S in
 
+
+include h2S in
 theorem eq_zero_of_tateToGlobal_units_eq_zero {m : ℕ} (hm : 3 ≤ m + 1)
     (x : unitsTateCohomology S ιr ιs (m + 1 + 1))
     (hx : (tateToGlobal (gsFinFamily S ιs) (gsRealFamily S ιr) (galSUnitsMax K.1 ℚ̄ S) (finUnits S)
@@ -206,8 +254,8 @@ theorem eq_zero_of_tateToGlobal_units_eq_zero {m : ℕ} (hm : 3 ≤ m + 1)
     (gsRealFamily S ιr) (galSUnitsMax K.1 ℚ̄ S) (finUnits S) (finUnitsMor S ιs) realUnits
     (realUnitsMor S ιr) m) g
 
-include h2S in
 
+include h2S in
 theorem eq_zero_unitsTateCohomology_of_two_pow_nsmul {r : ℕ} (hr : 4 ≤ r) (x : unitsTateCohomology S ιr ιs r)
     {k : ℕ} (hk : 2 ^ k • x = 0) : x = 0 := by
   obtain ⟨m, rfl⟩ : ∃ m, r = m + 1 + 1 := ⟨r - 2, by omega⟩

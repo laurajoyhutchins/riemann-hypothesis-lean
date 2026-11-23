@@ -1,9 +1,48 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.IsNsmul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.MapsAtLeA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubicalPullBaseChangeSt
-import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.RigidPullbackIdentification
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegExp
+public import Development.AbelianVarietyTheory.BlockTheory.UniformisationCharts.RigidPullbackIdentification
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -114,8 +153,8 @@ def GenericInPsiLocus (φ : R →+* R') (D : DegPre R) : Prop :=
 
 end Pull
 
-open scoped CategoryTheory.Obj in
 
+open scoped CategoryTheory.Obj in
 def UnifBaseChange : Prop :=
   ∀ (R R' : Type) [CommRing R] [IsDomain R] [CommRing R'] [IsDomain R']
     (I : Ideal R) (I' : Ideal R') (_ : AdmBase R I) (_ : AdmBase R' I')
@@ -136,29 +175,6 @@ def UnifBaseChange : Prop :=
 section Basic₂
 
 variable {R R' : Type} [CommRing R] [IsDomain R] [CommRing R'] [IsDomain R']
-
-example (G : Over (Spec (CommRingCat.of R))) [GrpObj G] : Nonempty (GrpPull (RingHom.id R) G G) := by
-  have h : specOf (RingHom.id R) = 𝟙 _ := by simp [specOf]
-  refine ⟨⟨𝟙 _, ?_, ?_, ?_⟩⟩
-  · rw [h]; exact IsPullback.of_horiz_isIso ⟨by simp⟩
-  · rw [h]; exact (Category.comp_id _).trans (Category.id_comp _).symm
-  · have : ∀ a b, pullback.map G.hom G.hom G.hom G.hom (𝟙 _) (𝟙 _) (specOf (RingHom.id R)) a b =
-        𝟙 _ := by
-      intro a b
-      apply pullback.hom_ext <;> simp
-    rw [this]
-    exact (Category.comp_id _).trans (Category.id_comp _).symm
-
-example {φ : R →+* R'} {I : Ideal R} {I' : Ideal R'} {G : Over (Spec (CommRingCat.of R))} [GrpObj G]
-    {G' : Over (Spec (CommRingCat.of R'))} [GrpObj G'] (pG : GrpPull φ G G')
-    (hI : I ≤ I'.comap φ) (e : ℕ) :
-    pG.thickF hI e ≫ (fstG I e G).left = (fstG I' e G').left ≫ pG.F :=
-  pullback.lift_fst _ _ _
-
-example (φ : R →+* R') (D : DegPre R) (D' : DegPre R') (h : PullIdent φ D D') :
-    GenericInPsiLocus φ D := by
-  obtain ⟨W, ψW, g, hg, -⟩ := h.w_psi
-  exact ⟨W, ψW, g, hg⟩
 
 end Basic₂
 

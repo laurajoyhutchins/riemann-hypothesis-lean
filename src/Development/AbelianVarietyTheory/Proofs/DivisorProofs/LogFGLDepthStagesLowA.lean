@@ -1,14 +1,60 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.PeriodValuationTheory
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.WtSubOneLe
-import Development.AbelianVarietyTheory.Definitions.Foundations.IsSatFrame
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogFGLDepthStagesLowAImports
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TypicalCurvesTangentAndBasesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RootExtractionLemmaSheafStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GluedBlocksMulInvIntegralUnitDetStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RootTrickFinsetCurvesBlockInverseStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RebasedTypicalCurvesIsBasisStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanTangentOfTypeStatement
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.WeightedSumBounds.RootStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogFGLDepthStagesLowAImports
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GluedBlocksMulInvIntegralUnitDetStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RebasedTypicalCurvesIsBasisStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RootExtractionLemmaSheafStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RootTrickFinsetCurvesBlockInverseStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpanTangentOfTypeStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TypicalCurvesTangentAndBasesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Data.Int.Interval
+
+@[expose] public section
 
 open MvPowerSeries ReciprocityTheory.PGsh ReciprocityTheory.ChartRestriction.G.Sh
 
@@ -39,7 +85,7 @@ theorem finrank_mod_le {M : Type} [AddCommGroup M] [Module C M] (W : Submodule C
     rintro _ ⟨w, hw, rfl⟩
     obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.1 (hA w hw)
     have hy0 : W.mkQ y = 0 := (Submodule.Quotient.mk_eq_zero W).2 hy
-    rw [map_add, hy0, zero_add, Finset.coe_image, Submodule.span_image]
+    rw [map_add (f := _), hy0, zero_add, Finset.coe_image, Submodule.span_image]
     exact Submodule.mem_map_of_mem hz
   have : Module.Finite C (Submodule.span C ((t.image W.mkQ : Finset _) : Set (M ⧸ W))) :=
     Module.Finite.span_of_finite C (Finset.finite_toSet _)

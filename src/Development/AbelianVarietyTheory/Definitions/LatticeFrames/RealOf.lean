@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevChiEqOne
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.NotBadPrimeBase
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.NotBadPrimeBase
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.OnFramesRdApply
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.SplitPart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevChiEqOne
+
+@[expose] public section
 
 set_option genSizeOfSpec false
 set_option genInjectivity false
@@ -52,19 +92,5 @@ def JOf (j : SmT R.MX →ₗ[ℂ] (FrP (I.rec7 l Z) → ℂ))
 
 variable (P : LevelP R.Pg (I.rec7 l Z).R.r ℂ) {t : T} (r : RowCh R P u g t) {a : I.ι} (k : ColCh (D := I.rec7 l Z) u ((I.rec7 l Z).chTw u a))
   (tl : ColT I l u a B.R.m → CXP R P t → ℂ)
-
-@[reducible] def clsKOf (s : ℕ → ℂ)
-    (J : SmT R.MX → GA (I.rec7 l Z) (I.rec7 l Z).sp.X' → FrN (I.rec7 l Z) (B.R.N B.R.m - 1) → ℂ) (A : TwDat I l Z u a k.Ch) :
-    ClsK (realOf u R g s J) (tupOf R P u g t r k tl) where
-  cl := fun j β => {c // A.chOf j c = β}
-  fin := fun j _ => letI := (I.chain l u a).clsFin j; Subtype.fintype _
-  U := A.U
-  chi := A.chi
-  h := A.h
-  val := fun _ _ ψ c z => ψ c.1 ⟨z.1, z.2⟩
-  abelian₂ := fun j _ _ c c' => A.abelian₂ j c.1 c'.1
-
-def PinCh (c₀ : ℕ → ℂ) (A : TwDat I l Z u a k.Ch) (w : ∀ j, k.Ch j → k.Ch (j + 1) → ℂ) : Prop :=
-  PinColT A R.ψ R.θ g.x g.vac c₀ k.kom k.dd w k.Ram k.rd k.cK
 
 end GlobalTheory.AdForm

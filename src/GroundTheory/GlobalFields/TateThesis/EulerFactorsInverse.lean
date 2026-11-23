@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.GlobalFields.TateThesis.EulerFactorsArch
-import GroundTheory.GlobalFields.TateThesis.EulerFactorsFinite
+module
+
+public import GroundTheory.GlobalFields.TateThesis.EulerFactorsArch
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField InfinitePlace InfinitePlace.Completion Complex
 open scoped Real
@@ -34,8 +82,8 @@ theorem eq_of_forall_exp_mul_I {a b : ℝ}
   have h5 : (1 : ℤ) = 2 * n := by exact_mod_cast h4
   omega
 
-omit [NumberField K] in
 
+omit [NumberField K] in
 theorem exists_extensionEmbedding_eq_ofReal (w : InfinitePlace K) (r : ℝ) :
     ∃ a : w.Completion, extensionEmbedding w a = r := by
   by_cases hw : w.IsReal
@@ -150,8 +198,8 @@ theorem conductor_inv : χ⁻¹.conductor = χ.conductor := by
     exact (χ⁻¹).map_idealLevel_conductor_le_ker
   exact le_antisymm (Ideal.le_of_dvd h2) (Ideal.le_of_dvd h1)
 
-open Classical in
 
+open Classical in
 theorem infiniteParams_inv (w : InfinitePlace K) :
     (χ⁻¹).infiniteParams w =
       (if w.IsReal then χ.infiniteWeight w else -χ.infiniteWeight w, -χ.infiniteTau w) := by

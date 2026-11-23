@@ -1,7 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.ExhaustFStatementPfE
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.InterpStatementPfE
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.AR.Up.IW
 
@@ -52,16 +99,6 @@ theorem log_densF_eq (x0 : Frame X.Ψ r) {z : V (nd X)} (hz : z ∈ OmF X x0) :
   simp only [Lm]
   push_cast
   try ring
-
-private theorem sum_range_two_mul_sub_mul_sub_eq (L : ℕ → ℝ) (c : ℝ) (r : ℕ) :
-    ∑ i ∈ Finset.range r, ((2 * i : ℝ) - c) * (L (i + 1) - L i) =
-      2 * r * L r - 2 * ∑ i ∈ Finset.range r, L (i + 1) - c * L r + c * L 0 := by
-  induction r with
-  | zero => simp only [Finset.sum_range_zero, Nat.cast_zero]; ring
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ih, Finset.sum_range_succ]
-    push_cast
-    ring
 
 theorem sbp (L : ℕ → ℝ) : ∀ r : ℕ, ∑ i ∈ Finset.range r, ((2 * i : ℝ) - ((r : ℝ) - 1)) * (L (i + 1) - L i) =
     ((r : ℝ) - 1) * L r - 2 * ∑ i ∈ Finset.range r, L i + ((r : ℝ) + 1) * L 0
@@ -172,7 +209,6 @@ theorem gram_cpt_cd (x0 : Frame X.Ψ r) (τ : X.Ψ) (a b : Fin r) :
     intro a b
     first
     | exact Complex.conjCLE.contDiff.comp (hc a b)
-    | simpa [Function.comp_def] using Complex.conjCLE.contDiff.comp (hc a b)
   simp only [gram, hermC, col, Matrix.of_apply, mat]
   refine ContDiff.sum (fun k _ => ContDiff.sum (fun l _ => ?_))
   exact ((hc k a).mul contDiff_const).mul (hcj l b)
@@ -256,7 +292,6 @@ theorem nmat_zero (τ : X.Ψ) : mat (nmat X (0 : V (nd X))) τ = 1 := by
   · simp [mat, nmat, Matrix.one_apply, h, h.ne']
     first
     | exact V_zero_app _
-    | rfl
   · simp [mat, nmat, Matrix.one_apply, h]
 
 theorem cpt_zero (x0 : Frame X.Ψ r) : cpt X x0 0 = x0 := by
@@ -320,15 +355,10 @@ private theorem leviV_sub_sub_const_mul_of_eventuallyEq {n : ℕ} (f f1 f2 f3 : 
   have hle1 : (1 : WithTop ℕ∞) ≤ ∞ := by
     first
     | exact mod_cast le_top
-    | simp
   have hle2 : (1 : WithTop ℕ∞) + 1 ≤ ∞ := by
     rw [one_add_one_eq_two]
     first
     | exact WithTop.coe_le_coe.mpr le_top
-    | exact (WithTop.coe_le_coe.mpr (le_top : ((2 : ℕ) : ℕ∞) ≤ ⊤))
-    | exact mod_cast le_top
-    | simp
-    | decide
   have hn0 : (∞ : WithTop ℕ∞) ≠ 0 := (lt_of_lt_of_le zero_lt_one hle1).ne'
   have hD : ∀ᶠ w in 𝓝 z, fderiv ℝ f w = fderiv ℝ f1 w - fderiv ℝ f2 w - c • fderiv ℝ f3 w := by
     filter_upwards [hev.eventuallyEq_nhds, h1, h2, h3] with w hw hw1 hw2 hw3
@@ -387,7 +417,6 @@ theorem leviM_comb (x0 : Frame X.Ψ r) (ho : IsOrth X x0) {z : V (nd X)} (hz : z
   · first
     | (simp only [Complex.sub_re, Complex.mul_re, Complex.natCast_re, Complex.natCast_im, zero_mul,
         sub_zero]; done)
-    | simp
   · filter_upwards [hev] with w hw
     have hw' : cpt X x0 w ∈ X.dom := hw
     try dsimp only

@@ -1,5 +1,49 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
+module
+
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLines
+public import Development.WeilBound.ThetaLifts.FrameEstimates.SquareIntegrableWeilRange
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Connected.Separation
+import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.MatchingOfParts
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,8 +57,8 @@ namespace LatticeQuotientMeasure
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] {σ : E →ₐ[F] E}
 
-variable (F) in
 
+variable (F) in
 def e0 : AF F := ((0 : Ainf F), (1 : Af F))
 
 theorem at_iff {M : Type} [AddCommGroup M] [Module (AF F) M] (z : M) : At (evI F) z ↔ e0 F • z = 0 := by
@@ -57,28 +101,7 @@ theorem ring_AE : IsTopologicalRing (AE F E) := by
 
 omit [NumberField E] in
 theorem continuous_piInf {w : InfinitePlace F} (τ : EmbOver E w) : Continuous (piInf τ) := by
-  let φ : AF F →+* ℂ := (NumberField.InfinitePlace.Completion.extensionEmbedding w).comp
-    (GlobalTheory.AdelicU.evInf F w).toRingHom
-  have hφ : Continuous φ :=
-    (NumberField.InfinitePlace.Completion.isometry_extensionEmbedding w).continuous.comp
-      ((continuous_apply w).comp continuous_fst)
-  letI : Module (AF F) ℂ := Module.compHom ℂ φ
-  haveI : ContinuousSMul (AF F) ℂ := ⟨(hφ.comp continuous_fst).mul continuous_snd⟩
-  have hpt : ∀ (b : AF F) (e : E), piInf τ (b ⊗ₜ[F] e) = φ b * (τ.1 e) := fun b e => rfl
-  let Lm : AE F E →ₗ[AF F] ℂ :=
-    { toFun := piInf τ
-      map_add' := map_add _
-      map_smul' := by
-        intro a x
-        induction x using TensorProduct.induction_on with
-        | zero => simp
-        | tmul b e =>
-          rw [TensorProduct.smul_tmul', hpt, hpt, smul_eq_mul, map_mul]
-          show φ a * φ b * τ.1 e = φ a * (φ b * τ.1 e)
-          ring
-        | add x y hx hy =>
-          rw [smul_add, map_add, hx, hy, map_add, smul_add] }
-  exact IsModuleTopology.continuous_of_linearMap Lm
+  apply PositivityTheory.RL.continuous_piInf <;> assumption
 
 variable {n d : ℕ}
 
@@ -115,8 +138,8 @@ theorem continuous_mat_inv {J : Matrix (Fin n) (Fin n) E} : Continuous fun g : U
 
 end LatticeQuotientMeasure
 
-open LatticeQuotientMeasure in
 
+open LatticeQuotientMeasure in
 theorem latMeas : LatMeas := by
   intro F E _ _ _ _ _ σ _ τ n d J J' _ _ C N S hC h
   haveI := ring_AE F E
@@ -125,11 +148,8 @@ theorem latMeas : LatMeas := by
   haveI : Countable (Matrix (Fin n) (Fin d) E) := show Countable (Fin n → Fin d → E) from inferInstance
   haveI : BorelSpace (GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.UA σ J) := ⟨rfl⟩
   delta latSum
-  refine Measurable.ennreal_tsum fun x => ENNReal.measurable_ofReal.comp ?_
+  refine Measurable.tsum fun x => ENNReal.measurable_ofReal.comp ?_
   exact measurable_maj τ hC N ((continuous_mat_inv.matrix_mul continuous_const).matrix_mul continuous_const)
-
-theorem latMeas_of : GrpTop → LatMeas := by
-  exact fun _ => latMeas
 
 end PositivityTheory.ThKEst
 

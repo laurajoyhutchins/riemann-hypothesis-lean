@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
-import Formalism.LocalRingCardinality.ConjSqrtMinusD
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedWeil
+public import Formalism.LocalRingCardinality.ConjSqrtMinusD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -134,16 +174,7 @@ def period (P : PosDatum A B ι) (ψ : AddChar (AF D.host.F) ℂ) (μ : Measure 
     (ν : Measure P.bes.N) (𝓝 : Set P.bes.N) (s : GA D A → GA D B) (φ : GA D A → ℂ) (F : GA D B → ℂ) : ℂ :=
   P.move (P.bes.period ψ μ 𝓕 ν 𝓝 s φ) F
 
-theorem period_sym (d : BesselDatum A B ι) (ψ μ 𝓕 ν 𝓝 s φ F) :
-    (sym d).period ψ μ 𝓕 ν 𝓝 s φ F = d.period ψ μ 𝓕 ν 𝓝 s φ F := rfl
-
 end PosDatum
-
-theorem toPos_sym {A B : HSp D} {ι : A.V →ₗ[D.host.E] B.V} (d : BesselDatum A B ι) (ε m b) :
-    d.toPos ε m (d.ρ + 1) b = b := by
-  unfold BesselDatum.toPos
-  rw [List.filter_eq_nil_iff.2 (fun i _ => by have := i.2; simp; omega)]
-  rfl
 
 theorem embedding_xi_zero_ne_zero (D : D7) : D.host.xi0 ≠ 0 := by
   have h1 : (Ideal.absNorm D.host.ccK : D.host.E) ≠ 0 := by
@@ -239,21 +270,6 @@ structure BesselTied (D : D7) (X : ThetaX D) (T : ThetaTied D X) (Wl : WeilTied 
   pos_split_places : ∀ u ε, IsSplitIdem D ε →
     ((∃ a, (dat _ _ _ (memberDatum D u).isom (odd_codim (memberDatum D u)) (X.pos1 u)).ε a = ε) ↔
       (PlaceDivides D ε (piT u) ∨ ∃ i, PlaceDivides D ε (piGbar i)))
-
-def NSetIsGroup (D : D7) : Prop :=
-  ∀ (A B : HSp D) (ι : A.V →ₗ[D.host.E] B.V) (d : BesselDatum A B ι),
-    (d.N : Set (GA D B)) = d.NSet ∧ ∀ ε i, IsSplitIdem D ε → (d.Ex ε i : Set (GA D B)) = d.ExSet ε i
-
-def PsiNIsChar (D : D7) : Prop :=
-  ∀ (A B : HSp D) (ι : A.V →ₗ[D.host.E] B.V) (d : BesselDatum A B ι) (ψ : AddChar (AF D.host.F) ℂ),
-    IsCharAF D.host.F ψ →
-    (∀ n ∈ d.N, ∀ n' ∈ d.N, d.psiN ψ (n * n') = d.psiN ψ n * d.psiN ψ n') ∧
-    (∀ n ∈ d.N, n ∈ GQ B → d.psiN ψ n = 1) ∧
-    ∀ g h, EmbRel B A ι g h → ∀ n ∈ d.N, g * n * g⁻¹ ∈ d.N ∧ d.psiN ψ (g * n * g⁻¹) = d.psiN ψ n
-
-def FramesExist (D : D7) : Prop :=
-  ∀ (A B : HSp D) (ι : A.V →ₗ[D.host.E] B.V) (d : BesselDatum A B ι),
-    (∃ ν 𝓝, d.IsUnitPair ν 𝓝) ∧ ∀ h, ∃! g, EmbRel B A ι g h
 
 def ConvergesDef (D : D7) : Prop :=
   ∀ (A B : HSp D) (ι : A.V →ₗ[D.host.E] B.V) (d : BesselDatum A B ι) (ψ : AddChar (AF D.host.F) ℂ),

@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterIdempotentOfFixed
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantLetterIdempotentOfFixed
+import Formalism.SharpRestriction.LevelLetterCocycles.QuotientImageDivisibility.Pi0PowSmulInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -92,18 +134,20 @@ theorem sum_clK_eq_pow_smul_clK_of_level_decomposition [NeZero n] (M s σ : ℕ)
       simp only [Submodule.coe_add, Submodule.coe_smul, Prod.snd_add, Prod.smul_snd, cb]
       rw [← hγ]
       have hw : InPN W T M (W.γ T (∑ c ∈ ev, Y c) - ∑ c ∈ ev, Y c) := by
+
         rw [map_sum, ← Finset.sum_sub_distrib]
         exact Finset.sum_induction _ _ (fun a b ha hb => Formalism.MainNotions.RamifiedCoefficientChains.S9.inPN_add W T ha hb)
           (uniformizerLattice_zero W T M) (fun c hc => hYg c hc)
       refine (hF2 _ hw).unique ⟨?_, ?_⟩ ⟨hY2, ?_⟩
       · exact Finset.sum_induction _ _ (fun a b ha hb => Formalism.MainNotions.RamifiedCoefficientChains.S9.inPN_add W T ha hb)
           (uniformizerLattice_zero W T M) (fun c hc => (hZ c hc).1)
-      · rw [map_sum, ← Finset.sum_sub_distrib, map_sum, ← Finset.sum_sub_distrib]
+      · set_option synthInstance.maxHeartbeats 100000 in
+          rw [map_sum, ← Finset.sum_sub_distrib, map_sum, ← Finset.sum_sub_distrib]
         exact Finset.sum_congr rfl fun c hc => (hZ c hc).2
       · rw [← hY1]
         have hyz' : W.γ T (yz : W.DD T × W.DD T).1 - (yz : W.DD T × W.DD T).1 =
             W.φD T (yz : W.DD T × W.DD T).2 - (yz : W.DD T × W.DD T).2 := by rw [hγ]; exact hyz
-        simp only [map_add, map_sub, map_smul, gamma_frobenius_comm]
+        simp only [map_add (f := _), map_sub, map_smul, gamma_frobenius_comm]
         have e : ((PD.p : ℕ) : O) ^ s • W.γ T (yz : W.DD T × W.DD T).1 =
             ((PD.p : ℕ) : O) ^ s • (yz : W.DD T × W.DD T).1 +
               ((PD.p : ℕ) : O) ^ s • (W.φD T (yz : W.DD T × W.DD T).2 - (yz : W.DD T × W.DD T).2) := by

@@ -1,7 +1,55 @@
-import Mathlib
-import GroundTheory.TateCohomology.InducedNorm
-import GroundTheory.TateCohomology.TateAddEquivAbelianizationTateClass
-import GroundTheory.TateCohomology.PGroupFixed
+module
+
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import Mathlib.GroupTheory.PGroup
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RepresentationTheory.Homological.GroupHomology.LowDegree
+public import GroundTheory.TateCohomology.PGroupFixed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.GroupCoh
@@ -19,7 +67,7 @@ theorem d₁₀_mapRange (y : G →₀ A) :
     d₁₀ B (Finsupp.mapRange.linearMap f.hom.toLinearMap y) = f.hom (d₁₀ A y) := by
   induction y using Finsupp.induction_linear with
   | zero => simp
-  | add y₁ y₂ h₁ h₂ => simp only [map_add, h₁, h₂]
+  | add y₁ y₂ h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
   | single g a =>
     rw [Finsupp.mapRange.linearMap_apply, Finsupp.mapRange_single, d₁₀_single, d₁₀_single,
       map_sub, Rep.hom_comm_apply]
@@ -30,7 +78,7 @@ theorem d₂₁_mapRange (c : G × G →₀ A) :
       Finsupp.mapRange.linearMap f.hom.toLinearMap (d₂₁ A c) := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add c₁ c₂ h₁ h₂ => simp only [map_add, h₁, h₂]
+  | add c₁ c₂ h₁ h₂ => simp only [map_add (f := _), h₁, h₂]
   | single g a =>
     rw [Finsupp.mapRange.linearMap_apply, Finsupp.mapRange_single, d₂₁_single, d₂₁_single,
       map_add, map_sub, Finsupp.mapRange.linearMap_apply, Finsupp.mapRange.linearMap_apply,
@@ -160,13 +208,13 @@ theorem exists_iso_free_of_isZero_groupHomology_one (hG : IsPGroup p G) (M : Rep
     induction y using Finsupp.induction_linear with
     | zero => simp
     | add y₁ y₂ h₁ h₂ =>
-      rw [map_add, map_add, map_add, add_sub_add_comm]
+      rw [map_add (f := _), map_add (f := _), map_add (f := _), add_sub_add_comm]
       exact add_mem h₁ h₂
     | single i a =>
       induction a using MonoidAlgebra.induction_linear with
       | zero => simp
       | add a₁ a₂ h₁ h₂ =>
-        rw [Finsupp.single_add, map_add, map_add, map_add, add_sub_add_comm]
+        rw [Finsupp.single_add, map_add (f := _), map_add (f := _), map_add (f := _), add_sub_add_comm]
         exact add_mem h₁ h₂
       | single g r =>
         refine Coinvariants.mem_ker_of_eq g (single i (MonoidAlgebra.single 1 r)) _ ?_

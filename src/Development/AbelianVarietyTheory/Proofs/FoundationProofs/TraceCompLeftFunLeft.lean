@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.StandardFiveNontrivial
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Trace
+public import Mathlib.RepresentationTheory.Coinduced
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Foundations.SamePartIffOfNeZero
+
+@[expose] public section
+
 open Polynomial Classical GlobalTheory.BadShare
 
 noncomputable section
@@ -13,6 +62,7 @@ theorem trace_compLeft_funLeft {G W : Type} [Fintype G] [AddCommGroup W] [Module
       ∑ x, LinearMap.single ℂ (fun _ : G => W) x ∘ₗ (A ∘ₗ LinearMap.proj (f x)) := by
     refine LinearMap.ext fun φ => funext fun y => ?_
     simp [LinearMap.sum_apply, Finset.sum_apply, Pi.single_apply, LinearMap.funLeft_apply]
+
   rw [h, map_sum]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [LinearMap.trace_comp_comm']
@@ -33,8 +83,9 @@ def coindSum : (G → W) →ₗ[ℂ] Representation.coindV r σ :=
   LinearMap.codRestrict _
     (∑ γ : Γ, (σ γ⁻¹ : W →ₗ[ℂ] W).compLeft G ∘ₗ LinearMap.funLeft ℂ W fun x => r γ * x) (by
       intro φ δ x
+
       simp only [LinearMap.sum_apply, Finset.sum_apply, LinearMap.comp_apply, LinearMap.compLeft_apply,
-        Function.comp_apply, LinearMap.funLeft_apply, map_sum]
+      Function.comp_apply, LinearMap.funLeft_apply, map_sum]
       refine Fintype.sum_equiv (Equiv.mulRight δ) _ _ fun γ => ?_
       simp only [Equiv.coe_mulRight, map_mul r, mul_assoc, mul_inv_rev]
       rw [← Module.End.mul_apply, ← map_mul σ, mul_inv_cancel_left])
@@ -66,6 +117,7 @@ theorem trace_coind_mul_card (g : G) :
     change (coindSum r σ φ).1 (x * g) = _
     rw [coindSum_apply]
     simp [LinearMap.sum_apply, Finset.sum_apply, LinearMap.funLeft_apply]
+
   rw [mul_comm, ← smul_eq_mul, ← map_smul, h1, LinearMap.trace_comp_comm', h2, map_sum]
   exact Finset.sum_congr rfl fun γ _ => trace_compLeft_funLeft _ _
 

@@ -1,5 +1,47 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CasimirVolumeRatios.DensDefs
-import Formalism.SatakeDualWeyl.KpqSubgroupCompact
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobAut
+public import Formalism.SharpRestriction.CuspSpanNormBounds.UnimodularSchurMeasures.RrgCountableField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -7,7 +49,7 @@ namespace Formalism.L2.S.S7.DensRat
 
 open NumberField
 open scoped Matrix
-open Formalism.MainNotions.S Formalism.L2.S.S7.DensDefs
+open Formalism.MainNotions.S
 
 def ratReal (I : AutInst) (γ : GL (Fin I.n) I.E) (hγ : γ ∈ Formalism.UG.UJ (starRingEnd I.E) I.J)
     (v : InfinitePlace I.F) : Formalism.REAL.UJ (I.ε v) :=
@@ -63,14 +105,6 @@ def ratReal (I : AutInst) (γ : GL (Fin I.n) I.E) (hγ : γ ∈ Formalism.UG.UJ 
     congr 1
     simp only [← Matrix.mul_assoc]
     rw [hu]⟩
-
-theorem ratPoint_holds (I : AutInst) : RatPoint I := by
-  intro g hg
-  have hf : Formalism.UG.bc (Formalism.UG.inclE (F := I.F) (Af I.F)) g ∈ Formalism.UG.UPts I.cm.sig I.J (Af I.F) :=
-    Formalism.UG.Final.RatPtsLe I.F I.E (Fin I.n) I.cm.sig I.J (Af I.F) (Subgroup.mem_map_of_mem _ hg)
-  let x : I.GA := (fun v => ratReal I g hg v, ⟨_, hf⟩)
-  have hx : x ∈ I.GFset := ⟨g, hg, fun v => rfl, rfl⟩
-  exact ⟨x, hx, ratM_eq I hx g rfl⟩
 
 end Formalism.L2.S.S7.DensRat
 

@@ -1,18 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.LogChain
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CoeffEqZeroOfMemSpanPow
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsPowSpanXLeSpanFormalModuleMatrixStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpecStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsFiniteBasisPowerSeriesSubstFiniteColengthStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.InvariantsAndTraceFiniteFreeDomainEndomorphismsStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalSeriesDescendsOfSplitKernelInvariantStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.DetJacobianFormalModuleMatrixEqConstMulUnitStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalMatrixKernelFiniteNcardEqRankStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.NatCastMulCoeffOfPderivEq
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantDvdTraceOfJacobianFiniteColengthStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.DetJacobianFormalModuleMatrixEqConstMulUnitStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsFiniteBasisPowerSeriesSubstFiniteColengthStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExistsPowSpanXLeSpanFormalModuleMatrixStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalGroupTranslateAutomorphismAndMatrixKernelStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalMatrixKernelFiniteNcardEqRankStatement
 import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalModuleMatrixApplyPointsActionLawsStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalGroupTranslateAutomorphismAndMatrixKernelStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ConstantDvdTraceOfJacobianFiniteColengthStatement
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ImportsTer
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.FormalSeriesDescendsOfSplitKernelInvariantStatement
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ImportsTer
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.InvariantsAndTraceFiniteFreeDomainEndomorphismsStatement
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpecStatement
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.CoeffEqZeroOfMemSpanPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -92,7 +133,7 @@ theorem coeff_one_subst {k σ τ : Type} [CommRing k] [Fintype σ] {a : σ → M
     (ha : ∀ s, MvPowerSeries.constantCoeff (a s) = 0) (f : MvPowerSeries σ k) (t : τ) :
     MvPowerSeries.coeff (Finsupp.single t 1) (MvPowerSeries.subst a f) =
       ∑ s, MvPowerSeries.coeff (Finsupp.single s 1) f * MvPowerSeries.coeff (Finsupp.single t 1) (a s) := by
-  have h0 : ∀ {ρ : Type} (u : ρ) (g : MvPowerSeries ρ k), MvPowerSeries.constantCoeff (MvPowerSeries.pderiv k u g) =
+  have h0 : ∀ {ρ : Type} (u : ρ) (g : MvPowerSeries ρ k), MvPowerSeries.constantCoeff (MvPowerSeries.pderiv (R := k) u g) =
       MvPowerSeries.coeff (Finsupp.single u 1) g := by
     intro ρ u g
     rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, MvPowerSeries.coeff_pderiv]
@@ -107,7 +148,8 @@ theorem coeff_one_subst {k σ τ : Type} [CommRing k] [Fintype σ] {a : σ → M
       obtain ⟨s, hs⟩ := Finsupp.support_nonempty_iff.2 he
       rw [Finsupp.prod, map_prod, Finset.prod_eq_zero hs, smul_zero]
       rw [map_pow, ha, zero_pow (Finsupp.mem_support_iff.1 hs)]
-  rw [← h0, ReciprocityTheory.ChartRestriction.G.TB.LogPf.pderiv_subst ha, map_sum]
+
+  rw [← h0, GlobalTheory.FormalCalc.pderiv_subst (MvPowerSeries.hasSubst_of_constantCoeff_zero ha), map_sum]
   simp only [map_mul, h1, h0]
 
 theorem map_subst_eq_zero {k σ τ Ω : Type} [CommRing k] [CommRing Ω] [Algebra k Ω] [Fintype σ]

@@ -1,5 +1,59 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
-import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UJClassFin
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.HodgeTateFromSandwich
+public import Formalism.PeriodIntegrals.UJClassFin
+public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.UJClassFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +113,9 @@ private def rho : Lsq R (algebraMap F R Δ) →+* R ⊗[F] Lsq F Δ where
 private def psi : R ⊗[F] Lsq F Δ →+* Lsq R (algebraMap F R Δ) :=
   (Algebra.TensorProduct.lift (IsScalarTower.toAlgHom F R (Lsq R (algebraMap F R Δ)))
     { qm (algebraMap F R) rfl with
-      commutes' := fun r => by ext <;> simp [qm, QuadraticAlgebra.algebraMap_eq, IsScalarTower.algebraMap_apply F R (Lsq R (algebraMap F R Δ))] }
+      commutes' := fun r => by
+        refine QuadraticAlgebra.ext rfl ?_
+        exact map_zero (algebraMap F R) }
     fun _ _ => Commute.all _ _).toRingHom
 
 private theorem psi_tmul (a : R) (x : Lsq F Δ) : psi Δ R (a ⊗ₜ x) = a • qm (algebraMap F R) rfl x := by
@@ -67,11 +123,12 @@ private theorem psi_tmul (a : R) (x : Lsq F Δ) : psi Δ R (a ⊗ₜ x) = a • 
 
 private theorem psi_rho (x : Lsq R (algebraMap F R Δ)) : psi Δ R (rho Δ R x) = x := by
   change psi Δ R (_ + _) = _
-  rw [map_add, psi_tmul, psi_tmul]
+  rw [map_add (f := _), psi_tmul, psi_tmul]
   ext <;> simp [qm, QuadraticAlgebra.re_one, QuadraticAlgebra.im_one]
 
 private def sg : Lsq F Δ →ₐ[F] Lsq F Δ :=
-  { starRingEnd (Lsq F Δ) with commutes' := fun r => by ext <;> simp [QuadraticAlgebra.algebraMap_eq, starRingEnd_apply] }
+  { starRingEnd (Lsq F Δ) with commutes' := fun r =>
+      (QuadraticAlgebra.starAlgEquiv (R := F) (a := Δ) (b := 0)).commutes r }
 
 private theorem rho_star (x : Lsq R (algebraMap F R Δ)) :
     rho Δ R (star x) = Algebra.TensorProduct.map (AlgHom.id F R) (sg Δ) (rho Δ R x) := by
@@ -90,15 +147,15 @@ private theorem int_star {O K : Type} [CommRing O] [Field K] [Algebra O K] {Δ :
 private theorem int_coord {O K : Type} [CommRing O] [Field K] [Algebra O K] {Δ : K} (hΔ : IsIntegral O Δ) {x : Lsq K Δ}
     (h : IsIntegral O x) : IsIntegral O (2 * x.re) ∧ IsIntegral O (2 * Δ * x.im) := by
   have hi : Function.Injective (IsScalarTower.toAlgHom O K (Lsq K Δ)) := fun a b e => by
-    simpa [QuadraticAlgebra.algebraMap_eq] using congrArg QuadraticAlgebra.re e
+    exact congrArg QuadraticAlgebra.re e
   have h1 : ∀ y : Lsq K Δ, IsIntegral O y → IsIntegral O (2 * y.re) := fun y hy => by
     rw [← isIntegral_algHom_iff _ hi]
     convert hy.add (int_star hy) using 1
-    ext <;> simp [QuadraticAlgebra.algebraMap_eq, two_mul]
+    ext <;> simp [two_mul]
   have hω : IsIntegral O (QuadraticAlgebra.omega : Lsq K Δ) := by
     refine IsIntegral.of_pow two_pos ?_
     convert hΔ.map (IsScalarTower.toAlgHom O K (Lsq K Δ)) using 1
-    ext <;> simp [QuadraticAlgebra.algebraMap_eq, pow_two]
+    ext <;> simp [pow_two]
   refine ⟨h1 x h, ?_⟩
   convert h1 _ (hω.mul h) using 1
   simp [mul_assoc]
@@ -130,7 +187,7 @@ private theorem ev_eq (v : Pl F) (z : AF F ⊗[F] Lsq F Δ) :
   induction z using TensorProduct.induction_on with
   | zero => simp
   | tmul a x => rw [ev_tmul, Algebra.TensorProduct.map_tmul, evf_tmul]; rfl
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 private theorem ae_int (x : F) : ∀ᶠ v : Pl F in Filter.cofinite, cv v x ∈ v.adicCompletionIntegers F :=
   (algebraMap F (Af F) x).2
@@ -248,7 +305,7 @@ private theorem int_of_stab (k : HH Δ)
       rw [evf_tmul]
       exact this.smul (⟨_, ha v⟩ : Ov v)
     | zero => simpa using isIntegral_zero
-    | add x y _ _ hx hy => rw [Pi.add_apply, map_add]; exact hx.add hy
+    | add x y _ _ hx hy => rw [Pi.add_apply, map_add (f := _)]; exact hx.add hy
     | neg x _ hx => rw [Pi.neg_apply, map_neg]; exact hx.neg
   have h2 : (Pi.single j 1 : Fin 3 → Af F ⊗[F] Lsq F Δ) ∈ latHat F (Lsq F Δ) {x : Fin 3 → Lsq F Δ | ∀ i, IsIntegral ℤ (x i)} := by
     refine AddSubgroup.subset_closure ⟨1, fun w => ?_, Pi.single j 1, fun i => ?_, funext fun i => ?_⟩
@@ -269,7 +326,7 @@ private theorem emb_star [IsTotallyReal F] (hneg : ∀ σ : F →+* ℝ, σ Δ <
   have h1 : τ QuadraticAlgebra.omega * τ QuadraticAlgebra.omega = f Δ := by
     rw [← map_mul, ← h0]
     congr 1
-    ext <;> simp [QuadraticAlgebra.algebraMap_eq]
+    ext <;> simp
   have h2 : (τ QuadraticAlgebra.omega).re = 0 := by
     have hre := congrArg Complex.re h1
     have him := congrArg Complex.im h1
@@ -281,12 +338,12 @@ private theorem emb_star [IsTotallyReal F] (hneg : ∀ σ : F →+* ℝ, σ Δ <
       exact (mul_eq_zero.1 this).resolve_left hne
     nlinarith [mul_self_nonneg (τ QuadraticAlgebra.omega).re]
   have e1 : a = algebraMap F _ a.re + algebraMap F _ a.im * QuadraticAlgebra.omega := by
-    ext <;> simp [QuadraticAlgebra.algebraMap_eq]
+    ext <;> simp
   have e2 : star a = algebraMap F _ a.re - algebraMap F _ a.im * QuadraticAlgebra.omega := by
-    ext <;> simp [QuadraticAlgebra.algebraMap_eq]
+    ext <;> simp
   rw [e2]
   conv_rhs => rw [e1]
-  simp only [map_add, map_sub, map_mul, h0, Complex.conj_ofReal]
+  simp only [map_add (f := _), map_sub, map_mul, h0, Complex.conj_ofReal]
   apply Complex.ext <;> simp [h2]
 
 end Main

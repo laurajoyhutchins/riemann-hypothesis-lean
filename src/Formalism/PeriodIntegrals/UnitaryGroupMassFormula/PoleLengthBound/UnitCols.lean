@@ -1,5 +1,45 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PoleLengthBound.AssembleAlt
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BaseLengthBound.TaylorSpanGeneratorsAlt
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PoleLengthBound.AssembleAlt
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BaseLengthBound.TaylorSpanGeneratorsAlt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,17 +60,18 @@ theorem uSpec_wfr (G : GlobalFamilyData X ka wL wF) (la : HeightOneSpectrum (�
 
 theorem sum_T_wfr (G : GlobalFamilyData X ka wL wF) (la : HeightOneSpectrum (𝓞 B.KO)) :
     ∑ col, algebraMap (Kp X la G.N) ↥(Frac0 X la G.w)
-      (algebraMap (Op X la G.N) (Kp X la G.N) (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col))) *
+      (@algebraMap (Op X la G.N) (Kp X la G.N) _ _ _ (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col))) *
         PoleLengthBounds.wfr G la col = 1 := by
   apply Subtype.ext
   have h : ∀ col, ((algebraMap (Kp X la G.N) ↥(Frac0 X la G.w)
-      (algebraMap (Op X la G.N) (Kp X la G.N) (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col))) *
+      (@algebraMap (Op X la G.N) (Kp X la G.N) _ _ _ (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col))) *
         PoleLengthBounds.wfr G la col : ↥(Frac0 X la G.w)) : Lw X la G.w) =
-      frac X la G.w 1 ((algebraMap (Op X la G.N) (Kp X la G.N) (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col))) •
+      frac X la G.w 1 ((@algebraMap (Op X la G.N) (Kp X la G.N) _ _ _ (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col))) •
         emb X la G.N (X.inc wL (G.w col))) := by
     intro col
     rw [LinearMap.map_smul, Algebra.smul_def]
     rfl
+
   rw [AddSubmonoidClass.coe_finsetSum, Finset.sum_congr rfl fun col _ => h col, ← map_sum]
   show frac X la G.w 1 (sec X la G.w 0) = _
   rw [frac_apply, pow_one, section_mul_inverse_eq_one]
@@ -40,6 +81,7 @@ theorem sum_T_u (G : GlobalFamilyData X ka wL wF) (la : HeightOneSpectrum (𝓞 
     ∑ col, algebraMap (Op X la G.N) (OsK X la G.w) (Tv X la G.N ((0 : Fin (WeightFamilies.dimY D j + 1)), col)) *
       toOsK X la G.w (PoleLengthBounds.wfr G la col) = 1 := by
   have := congrArg (toOsK X la G.w) (sum_T_wfr G la)
+
   rw [map_one, map_sum] at this
   rw [← this]
   refine Finset.sum_congr rfl fun col _ => ?_

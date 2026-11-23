@@ -1,6 +1,62 @@
-import Mathlib
-import Formalism.DropLevelBounds.Statement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LeWeightOfCoeffPow
+module
+
+public import Formalism.DropLevelBounds.Statement
+public import Mathlib.CategoryTheory.Category.Basic
+public import Mathlib.RingTheory.MvPolynomial.WeightedHomogeneous
+public import Mathlib.RingTheory.MvPowerSeries.Rename
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LeWeightOfCoeffPow
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.LinearAlgebra.Matrix.Block
+
+@[expose] public section
+
 open Formalism.UnitaryBoundIntegral Formalism.IncomingBounds
 open scoped BigOperators
 
@@ -66,15 +122,15 @@ lemma kill_monomial (S : σ → Prop) [DecidablePred S] (m : σ →₀ ℕ) (c :
 
 open Classical in
 lemma coeff_kill (S : σ → Prop) [DecidablePred S] (P : MvPolynomial σ R) (e : σ →₀ ℕ) :
-    MvPolynomial.coeff e (kill S P) =
-      if ∀ x, S x → e x = 0 then MvPolynomial.coeff e P else 0 := by
+    AddMonoidAlgebra.coeff (kill S P) e =
+      if ∀ x, S x → e x = 0 then AddMonoidAlgebra.coeff P e else 0 := by
   refine MvPolynomial.induction_on' P (fun m c => ?_) (fun p q hp hq => ?_)
   · rw [kill_monomial]
     by_cases hme : m = e
     · subst hme
       split_ifs <;> simp
     · split_ifs <;> simp [MvPolynomial.coeff_monomial, hme]
-  · rw [map_add, MvPolynomial.coeff_add, hp, hq, MvPolynomial.coeff_add]
+  · rw [map_add (f := _), MvPolynomial.coeff_add, hp, hq, MvPolynomial.coeff_add]
     split_ifs <;> simp
 
 end Kill
@@ -229,7 +285,7 @@ lemma det_homog {C : Type} [Field C] {σ : Type} {n : ℕ} (w : σ → ℕ) (f :
   rwa [Equiv.sum_comp τ r] at hprod
 
 lemma rowDeg_of_mem {C : Type} [Field C] {n : ℕ} (a b : ℕ) (m : PVar n →₀ ℕ)
-    (hm : MvPolynomial.coeff m (detL C n ^ a * detR C n ^ b) ≠ 0) (ρ : Fin n) :
+    (hm : AddMonoidAlgebra.coeff (detL C n ^ a * detR C n ^ b) m ≠ 0) (ρ : Fin n) :
     rowDegZ m ρ = a ∧ rowDegZ' m ρ = b := by
   classical
   let wL : PVar n → ℕ := Sum.elim (fun p => if p.1 = ρ then 1 else 0) (fun _ => 0)
@@ -388,7 +444,7 @@ private lemma filter_nondiag_eq_diagMon_of_coeff_ne_zero {C : Type} [Field C] {n
     (hHd : ∀ m : PVar n →₀ ℕ, (∀ x ∈ m.support, n0 ≤ (rowOf x).val) →
       (∀ ρ : Fin n, n0 ≤ ρ.val → rowDegZ m ρ ≤ L * y ∧ rowDegZ' m ρ ≤ y) →
       MvPowerSeries.coeff m H = if m = diagMon n0 n L y then 1 else 0)
-    (m : PVar n →₀ ℕ) (hm : MvPolynomial.coeff m (detL C n ^ (L * y) * detR C n ^ y) ≠ 0)
+    (m : PVar n →₀ ℕ) (hm : AddMonoidAlgebra.coeff (detL C n ^ (L * y) * detR C n ^ y) m ≠ 0)
     (hmG : MvPowerSeries.coeff m (G1 * H) ≠ 0) :
     m.filter (fun x => ¬ (rowOf x).val < n0) = diagMon n0 n L y := by
   classical
@@ -421,7 +477,7 @@ theorem blockJet : BlockJet := by
   have hkill := kill_detL_pow_mul_detR_pow (C := C) hn L y
     (fun x : PVar n => n0 ≤ (rowOf x).val ∧ Sum.elim Prod.snd Prod.snd x ≠ rowOf x)
     (fun ρ c => Iff.rfl) (fun ρ c => Iff.rfl)
-  have havoid : ∀ m : PVar n →₀ ℕ, MvPolynomial.coeff m (detL C n ^ (L * y) * detR C n ^ y) ≠ 0 →
+  have havoid : ∀ m : PVar n →₀ ℕ, AddMonoidAlgebra.coeff (detL C n ^ (L * y) * detR C n ^ y) m ≠ 0 →
       MvPowerSeries.coeff m (G1 * H) ≠ 0 →
       ∀ x, (n0 ≤ (rowOf x).val ∧ Sum.elim Prod.snd Prod.snd x ≠ rowOf x) → m x = 0 := by
     intro m hm hmG x hx
@@ -448,7 +504,7 @@ theorem blockJet : BlockJet := by
       · rfl
       · by_cases h0 : MvPowerSeries.coeff m (G1 * H) = 0
         · simp [h0]
-        · by_cases h1 : MvPolynomial.coeff m (detL C n ^ (L * y) * detR C n ^ y) = 0
+        · by_cases h1 : AddMonoidAlgebra.coeff (detL C n ^ (L * y) * detR C n ^ y) m = 0
           · simp [h1]
           · exact absurd (havoid m h1 h0) h
     · intro m hm

@@ -1,7 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SumFinsuppAntidiagProdPowDivMultiFactorial
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsMinorProdEqSmulColActBasePoly
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SumFinsuppAntidiagProdPowDivMultiFactorial
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsWeightedHomogeneousOfMemOrbitSpan
+public import Mathlib.Analysis.Complex.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MvPolynomial Matrix Topology Filter
 open GlobalTheory.MvPoly
@@ -32,11 +87,11 @@ theorem pderiv_algHom_of_linear {R : Type*} [CommRing R]
     rw [map_mul, Derivation.leibniz, hP, h1, smul_eq_mul, smul_eq_mul, ← h2, Finset.mul_sum,
       ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun j _ => ?_
-    rw [Derivation.leibniz, map_add, smul_add, smul_eq_mul, smul_eq_mul, map_mul G (X k),
+    rw [Derivation.leibniz, map_add (f := _), smul_add, smul_eq_mul, smul_eq_mul, map_mul G (X k),
       mul_smul_comm]
 
-omit [Fintype τ] in
 
+omit [Fintype τ] in
 theorem constantCoeff_algHom_of_linear {R : Type*} [CommRing R]
     (G : MvPolynomial τ R →ₐ[R] MvPolynomial σ R) (M : σ → τ → R)
     (hG : ∀ j, G (X j) = ∑ i, M i j • X i) (Q : MvPolynomial τ R) :
@@ -57,11 +112,12 @@ theorem fockInner_algHom_of_linear (F : MvPolynomial σ ℂ →ₐ[ℂ] MvPolyno
     rw [algHom_C, algebraMap_eq, C_apply, C_apply, fockInner_monomial_left,
       fockInner_monomial_left, this]
     simp [constantCoeff_eq]
-  | add P P' hP hP' => rw [map_add, fockInner_add_left, fockInner_add_left, hP, hP']
+  | add P P' hP hP' => rw [map_add (f := _), fockInner_add_left, fockInner_add_left, hP, hP']
   | mul_X P k hP =>
+
     rw [mul_comm P, fockInner_X_mul_left, pderiv_algHom_of_linear G _ hG, map_mul, hF,
-      Finset.sum_mul, ← fockInnerₛₗ_apply, ← fockInnerₛₗ_apply, map_sum, map_sum,
-      LinearMap.sum_apply]
+    Finset.sum_mul, ← fockInnerₛₗ_apply, ← fockInnerₛₗ_apply, map_sum, map_sum,
+    LinearMap.sum_apply]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [fockInnerₛₗ_apply, fockInnerₛₗ_apply, smul_mul_assoc, fockInner_smul_left,
       fockInner_smul_right, fockInner_X_mul_left, hP]
@@ -99,14 +155,16 @@ theorem exists_fockInner_sub_eq_zero {σ : Type*} (W : Submodule ℂ (MvPolynomi
     LinearMap.pi fun i => (fockInnerₛₗ σ ℂ).flip (b i)
   have hL (P) (h : L P = 0) (w) (hw : w ∈ W) : fockInner P w = 0 := by
     have := congrArg W.subtype (b.sum_repr ⟨w, hw⟩)
+
     rw [map_sum, Submodule.subtype_apply] at this
     change _ = w at this
+
     rw [← this, ← fockInnerₛₗ_apply, map_sum]
     refine Finset.sum_eq_zero fun i _ => ?_
     rw [map_smul, fockInnerₛₗ_apply, fockInner_smul_right]
     exact mul_eq_zero_of_right _ (congrFun h i)
   have hinj : Function.Injective (L ∘ₗ W.subtype) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     have := hL x hx x x.2
     rw [fockInner_self] at this

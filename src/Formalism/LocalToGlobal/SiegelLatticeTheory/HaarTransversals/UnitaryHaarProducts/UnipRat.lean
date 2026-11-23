@@ -1,5 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.UnipReal
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.UnipBasis
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.SiegelMassRatios.ColsDim
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.UnipReal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,10 +82,6 @@ theorem intDiv_neg {c : ℕ} {M : Matrix α β E} (hM : IntDiv c M) : IntDiv c (
   rw [Matrix.neg_apply]
   exact (hA i j).neg
 
-theorem intDiv_sub {c : ℕ} {M N : Matrix α β E} (hM : IntDiv c M) (hN : IntDiv c N) : IntDiv c (M - N) := by
-  rw [sub_eq_add_neg]
-  exact intDiv_add hM (intDiv_neg hN)
-
 theorem intDiv_mul {c d : ℕ} {M : Matrix α β E} {N : Matrix β γ E} (hM : IntDiv c M) (hN : IntDiv d N) :
     IntDiv (c * d) (M * N) := by
   obtain ⟨A, hA, rfl⟩ := hM
@@ -59,24 +98,12 @@ theorem intDiv_dvd {c d : ℕ} {M : Matrix α β E} (hM : IntDiv (c * d) M) : In
   rw [Matrix.smul_apply, smul_eq_mul]
   exact (isInt_natCast d).mul (hA i j)
 
-theorem intDiv_smul_nat {c : ℕ} (d : ℕ) {M : Matrix α β E} (hM : IntDiv c M) : IntDiv (d * c) ((d : E) • M) := by
-  obtain ⟨A, hA, rfl⟩ := hM
-  exact ⟨A, hA, by rw [smul_smul, Nat.cast_mul]⟩
-
 theorem intDiv_one_one [DecidableEq α] [Fintype α] : IntDiv 1 (1 : Matrix α α E) := by
   refine ⟨1, fun i j => ?_, by simp⟩
   rw [Matrix.one_apply]
   split_ifs
   · exact isIntegral_one
   · exact isIntegral_zero
-
-theorem intDiv_conjTranspose (hst : ∀ a : E, IsIntegral ℤ a → IsIntegral ℤ (star a)) {c : ℕ} {M : Matrix α β E}
-    (hM : IntDiv c M) : IntDiv c Mᴴ := by
-  obtain ⟨A, hA, rfl⟩ := hM
-  refine ⟨Aᴴ, fun i j => ?_, ?_⟩
-  · rw [Matrix.conjTranspose_apply]
-    exact hst _ (hA j i)
-  · rw [Matrix.conjTranspose_smul, star_natCast]
 
 theorem intDiv_pow [DecidableEq α] [Fintype α] {c : ℕ} {M : Matrix α α E} (hM : IntDiv c M) (j : ℕ) :
     IntDiv (c ^ j) (M ^ j) := by

@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.OneMemH0WeightZero
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
-import GroundTheory.GlobalFields.IdeleGroups.IdeleNorms
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosureNormOneProductsSubgroupPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtInvS
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousLocAdele
+module
+
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StrongApproximationSL2Adeles
+public import Development.AbelianVarietyTheory.Definitions.Divisors.OneMemH0WeightZero
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosureNormOneProductsSubgroupPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousAtInvS
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousLocAdele
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.QSA GlobalTheory.Published
 open Matrix
 open scoped Quaternion Topology TensorProduct
@@ -84,21 +130,7 @@ variable {F : Type} [Field F] [NumberField F]
 
 theorem isPlacesIdem_mul_self {S₁ : Finset (InfinitePlace F)} {S₂ : Finset (HeightOneSpectrum (𝓞 F))} {η : AF F}
     (hη : IsPlacesIdem S₁ S₂ η) : η * η = η := by
-  have h1 : fstA F (η * η) = fstA F η := by
-    rw [map_mul]
-    funext w
-    change fstA F η w * fstA F η w = fstA F η w
-    by_cases hw : w ∈ S₁
-    · rw [hη.1 w hw, one_mul]
-    · rw [hη.2.1 w hw, zero_mul]
-  have h2 : sndA F (η * η) = sndA F η := by
-    refine RestrictedProduct.ext _ _ fun u => ?_
-    change evalV F u (sndA F (η * η)) = evalV F u (sndA F η)
-    rw [map_mul, map_mul]
-    by_cases hu : u ∈ S₂
-    · rw [hη.2.2.1 u hu, one_mul]
-    · rw [hη.2.2.2 u hu, zero_mul]
-  exact Prod.ext h1 h2
+  apply GlobalTheory.StrongApproximationSL2.idem_of_isPlacesIdem <;> assumption
 
 theorem rat_mul {a b : F} (x y : ℍ[F, a, b]) : rat (x * y) = rat x * rat y := by
   ext <;> simp [rat] <;> ring

@@ -1,8 +1,57 @@
-import Mathlib
-import Formalism.DistinguishedUnitIdeals.BridgeLevelOf
-import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.Graded
-import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.Partners
-import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.UnivPart
+module
+
+public import Formalism.DistinguishedUnitIdeals.BridgeLevelOf
+public import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.Graded
+public import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.Partners
+public import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.UnivPart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -130,7 +179,7 @@ lemma cf_Fy_neg (x : Fin r → PowerSeries Ks) {i : ℤ} (hi : i < 0) : cf (Fy L
 lemma Fy_add (x x' : Fin r → PowerSeries Ks) : Fy LL lam (x + x') = Fy LL lam x + Fy LL lam x' := by
   unfold Fy
   rw [← Finset.sum_add_distrib]
-  exact Finset.sum_congr rfl fun k _ => by rw [Pi.add_apply, map_add, add_smul]
+  exact Finset.sum_congr rfl fun k _ => by rw [Pi.add_apply, map_add (f := _), add_smul]
 
 lemma Fy_smul (a : PowerSeries Ks) (x : Fin r → PowerSeries Ks) :
     Fy LL lam (a • x) = HahnSeries.ofPowerSeries ℤ Ks a • Fy LL lam x := by
@@ -235,7 +284,7 @@ lemma ex_split (π : (Fin r → O) →ₗ[O] (Fin r → O)) (z : Fin r → Power
       z k * PowerSeries.C (((LinearMap.id : (Fin r → O) →ₗ[O] (Fin r → O)) - π) (sv O k) l) =
         z k * PowerSeries.C (sv O k l) := by
     intro k
-    rw [← mul_add, ← map_add, LinearMap.sub_apply, LinearMap.id_apply, Pi.sub_apply,
+    rw [← mul_add, ← map_add (f := _), LinearMap.sub_apply, LinearMap.id_apply, Pi.sub_apply,
       add_sub_cancel]
   simp only [this, sv]
   simp
@@ -289,6 +338,7 @@ lemma exists_theta (hϖ : Irreducible ϖ) (lam : Fin r → D) (hI : LinearIndepe
     rw [hU, ← ho]
     exact W.smul_mem _ hw
   have h2 : f (algebraMap O LL (ϖ ^ N) • w) = algebraMap O LL (g o l) := by
+
     rw [ho, map_sum, LinearMap.pi_apply_eq_sum_univ g o, Finset.sum_apply, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_smul, hf, smul_eq_mul, Pi.smul_apply, smul_eq_mul, map_mul]
@@ -324,7 +374,7 @@ lemma FA_add (y y' : Fin r → PowerSeries O) : FA LL lam ρ (y + y') = FA LL la
   rw [← Fy_add]
   congr 1
   funext k
-  simp
+  simp only [Pi.add_apply, map_add]
 
 omit [IsDomain O] [IsDiscreteValuationRing O] in
 lemma FA_smul (a : PowerSeries O) (y : Fin r → PowerSeries O) :
@@ -333,7 +383,7 @@ lemma FA_smul (a : PowerSeries O) (y : Fin r → PowerSeries O) :
   rw [← Fy_smul]
   congr 1
   funext k
-  simp
+  simp only [Pi.smul_apply, smul_eq_mul, map_mul]
 
 omit [IsDomain O] [IsDiscreteValuationRing O] [IsFractionRing O LL] in
 lemma FA_cst (hρ : ∀ a : O, ρ (PowerSeries.C a) =
@@ -398,8 +448,10 @@ theorem core_mp (hϖ : Irreducible ϖ) (hI : LinearIndependent LL lam)
         exact Submodule.zero_mem _
       · exact h5
     have h5 := ev_kill f W hf2 h4
+
     rw [FA, cf_Fy_nat, map_sum] at h5
     simp only [ev_smul_tmul, hf1] at h5
+
     rw [ex_apply, map_sum, map_sum]
     simp only [map_mul, hρ, PowerSeries.coeff_mul_C]
     exact h5
@@ -480,8 +532,8 @@ variable {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] {ϖ : 
   [AddCommGroup D] [Module LL D] {R : LevelModel S LL Ks Δ D} {η : ℕ} {kind : ℕ → Kind}
   {b : ℕ → ℕ} {lam : Fin r → D} {U : ℕ → Submodule O (Fin r → O)}
 
-omit [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [IsDomain O] [IsDiscreteValuationRing O] in
 lemma nb_iff (h : BridgeItems R ϖ η kind b lam U) {s : ℕ} (hs : s < ell)
     (y : Fin r → PowerSeries O) (m m' : ℕ)
     (hX : ∀ i : ℤ, 0 ≤ i → NbK (kind s) (b s) (UOf (kind s) (b s) η (R.Fil s)) (i - H s) =
@@ -542,8 +594,8 @@ theorem level_iff (hϖ : Irreducible ϖ) (h : BridgeItems R ϖ η kind b lam U) 
       split_ifs <;> first | rfl | omega), core _ _ (Nat.le_add_right _ _)]
     rfl
 
-omit [IsDomain O] [IsDiscreteValuationRing O] in
 
+omit [IsDomain O] [IsDiscreteValuationRing O] in
 lemma pr_key (h : BridgeItems R ϖ η kind b lam U) {s : ℕ} (hs : s < ell)
     (y : Fin r → PowerSeries O) (N : ℕ) (o : Fin r → O) (d : D) (e : S.Lv)
     (hd : algebraMap O LL (ϖ ^ N) • d = ∑ k, algebraMap O LL (o k) • lam k)

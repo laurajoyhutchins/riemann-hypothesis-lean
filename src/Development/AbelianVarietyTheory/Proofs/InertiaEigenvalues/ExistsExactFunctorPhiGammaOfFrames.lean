@@ -1,5 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardLeOfSpan
+module
+
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CardLeOfSpan
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,7 +67,7 @@ theorem frame_transport {ε ε' : Rk} {m m' : ℕ} {β : Vc k m →+ Rk ⊗[k] (
     ∃ u : Vc k m →+ Vc k m', (∀ x, β' (u x) = T (β x)) ∧ ∀ c x, u (c • x) = s c • u x := by
   choose u hu using hst
   refine ⟨AddMonoidHom.mk' u fun x y => h'.1 ?_, hu, fun c x => h'.1 ?_⟩
-  · rw [map_add, hu, hu, hu, map_add, map_add]
+  · rw [map_add (f := _), hu, hu, hu, map_add (f := _), map_add (f := _)]
   · change β' (u _) = β' (s c • u x)
     rw [h'.2.1, hu, hu, h.2.1, hT]
 
@@ -42,6 +87,7 @@ theorem frame_span_top {ε : Rk} (hε : IsIdempotentElem ε) (h0 : ε ≠ 0) {m 
   let b := Module.finBasis k⸨X⸩ W
   have key : ∀ x : W, β x ∈ Submodule.span Rk (Set.range fun j => β (b j)) := by
     intro x
+
     rw [← b.sum_repr x, Submodule.coe_sum, map_sum]
     refine Submodule.sum_mem _ fun j _ => ?_
     rw [Submodule.coe_smul, h.2.1]
@@ -64,7 +110,7 @@ theorem frame_map_span {m m' : ℕ} (β : Vc k m →+ Rk ⊗[k] (Fin m → k))
   induction hy using Submodule.span_induction with
   | mem y hy => obtain ⟨x, rfl⟩ := hy; exact Submodule.subset_span ⟨u x, ⟨x, rfl⟩, hu x⟩
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact Submodule.add_mem _ hy hz
+  | add y z _ _ hy hz => rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
   | smul w y _ hy => rw [hT]; exact Submodule.smul_mem _ _ hy
 
 end
@@ -208,8 +254,8 @@ theorem exists_dfun_of_frames {k G : Type} [Field k] [Group G] {Rk : Type} [Comm
     rw [hM A C _ i hA hC hgf, LinearMap.comp_apply, hM B C g i hB hC hg, hM A B f i hA hB hf,
       LinearMap.baseChange_comp]; rfl
   · have hfg : IsHom A B (f + g) := fun s y => by
-      rw [LinearMap.add_apply, LinearMap.add_apply, hf, hg, map_add]
-    rw [hM A B _ i hA hB hfg, map_add, hM A B f i hA hB hf, hM A B g i hA hB hg, LinearMap.baseChange_add]; rfl
+      rw [LinearMap.add_apply, LinearMap.add_apply, hf, hg, map_add (f := _)]
+    rw [hM A B _ i hA hB hfg, map_add (f := _), hM A B f i hA hB hf, hM A B g i hA hB hg, LinearMap.baseChange_add]; rfl
   · have hcf : IsHom A B (c • f) := fun s y => by
       rw [LinearMap.smul_apply, LinearMap.smul_apply, hf, map_smul]
     rw [hM A B _ i hA hB hcf, vc_const_smul c (M A B f i x), (H.frame B hB i).2.1, H.κ_k,
@@ -232,9 +278,11 @@ theorem exists_dfun_of_frames {k G : Type} [Field k] [Group G] {Rk : Type} [Comm
         rw [← (H.frame A hA j).2.2.1, smul_smul, H.ε_orth i j hj.symm, zero_smul]
       · intro h; exact (h (Finset.mem_univ _)).elim
     obtain ⟨t, ht, hfix⟩ := H.fix A hA (∑ j, β A j (x j)) (by
+
         rw [map_sum, ← Equiv.sum_comp (Equiv.subRight (1 : ZMod n))]
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [Equiv.subRight_apply, ← (hD A hA).1, hφ]) (by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [← (hD A hA).2, hγ]) (fun i => ⟨x i, he i⟩)

@@ -1,4 +1,54 @@
-import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+module
+
+public import Formalism.PadicSubsetSums.CentralIdempotents.EigenbasisOfDistinctRoots
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.Multiplicity
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace Formalism.IrreducibleCountingLemmas.GaloisIrreducibility
 
@@ -66,9 +116,10 @@ private theorem lte_val (g δ l : ℕ) (hg : 2 ≤ g) (h4 : 4 ∣ g - 1) (hδ : 
       simp at this; omega
     rw [← padicValNat_eq_emultiplicity n1, ← padicValNat_eq_emultiplicity (by omega : g - 1 ≠ 0),
       ← padicValNat_eq_emultiplicity (by omega : δ ≠ 0)] at key
+    simp only [Nat.padicValNat_def]
     exact_mod_cast key
   · have := padicValNat.pow_sub_pow (p := l) hodd (x := g) (y := 1) (by omega) hd hlg (n := δ) (by omega)
-    simpa using this
+    simpa [Nat.padicValNat_def] using this
 
 theorem prime_power_order_count : PrimePowerOrderCount := by
   classical
@@ -88,7 +139,7 @@ theorem prime_power_order_count : PrimePowerOrderCount := by
       intro l hl
       rw [Finset.mem_filter] at hl
       have hp := Nat.prime_of_mem_primeFactors hl.1
-      rw [lte_val g δ l hg h4 hδ hp hl.2, Nat.factorization_mul (by omega) hA0,
+      rw [lte_val g δ l hg h4 hδ hp hl.2, Nat.padicValNat_def, Nat.padicValNat_def, Nat.factorization_mul (by omega) hA0,
         Finsupp.add_apply, Nat.factorization_def _ hp, Nat.factorization_def _ hp, add_comm]
     rw [Finset.sum_congr rfl e]
     refine le_trans (sum_le_prod_of_two_le _ _ ?_).1 (prod_pow_factorization_le _ _
@@ -108,7 +159,7 @@ theorem prime_power_order_count : PrimePowerOrderCount := by
       intro l hl
       rw [Finset.mem_filter] at hl
       have hp := Nat.prime_of_mem_primeFactors hl.1
-      rw [← Nat.factorization_def _ hp, hB, Nat.factorization_mul hA0 hB0]
+      rw [Nat.padicValNat_def, ← Nat.factorization_def _ hp, hB, Nat.factorization_mul hA0 hB0]
       have : A.factorization l = 0 := Nat.factorization_eq_zero_of_not_dvd hl.2
       simp [this]
     rw [Finset.sum_congr rfl e]

@@ -1,5 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsGraphGenTwistBundleZero
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.IsGraphGenTwistBundleZero
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -19,14 +69,15 @@ theorem sum_block_eq_blockWeight (e : (Σ k, ι k) →₀ ℕ) (k : K) :
   rw [Finsupp.weight_apply, Finsupp.sum_fintype _ _ (by simp), Finset.sum_apply, Fintype.sum_sigma]
   simp [NumbersDVR.blockWeight, Pi.single_apply]
 
-omit [DecidableEq K] in
 
+omit [DecidableEq K] in
 theorem mConeMapOver_eq_of_block (y : (Σ k, ι k) → Ω) {f : MvPolynomial (Σ k, ι k) S} {d : K → ℕ}
     (hf : ∀ e ∈ f.support, ∀ k, ∑ i, e ⟨k, i⟩ = d k) :
     mConeMapOver S y f = MvPolynomial.C (aeval y f) * ∏ k, MvPolynomial.X k ^ d k := by
   classical
   conv_lhs => rw [f.as_sum]
   conv_rhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun e he => ?_
   have hX : ∏ p : (Σ k, ι k), (MvPolynomial.X p.1 : MvPolynomial K Ω) ^ e p =
@@ -42,7 +93,7 @@ theorem mConeMapOver_eq_of_block (y : (Σ k, ι k) → Ω) {f : MvPolynomial (Σ
   ring
 
 theorem coeff_mConeMapOver (y : (Σ k, ι k) → Ω) (b : K → ℕ) (f : MvPolynomial (Σ k, ι k) S) :
-    coeff (Finsupp.equivFunOnFinite.symm b) (mConeMapOver S y f) =
+    AddMonoidAlgebra.coeff (mConeMapOver S y f) (Finsupp.equivFunOnFinite.symm b) =
       aeval y (weightedHomogeneousComponent (NumbersDVR.blockWeight ι) b f) := by
   classical
   induction f using MvPolynomial.induction_on' with
@@ -62,9 +113,9 @@ theorem coeff_mConeMapOver (y : (Σ k, ι k) → Ω) (b : K → ℕ) (f : MvPoly
     rw [hX, coeff_C_mul, coeff_monomial]
     by_cases h : b = Finsupp.weight (NumbersDVR.blockWeight ι) e
     · subst h; simp
-    · rw [if_neg h, if_neg (fun h' => h (Finsupp.equivFunOnFinite.symm.injective h').symm)]
+    · rw [ite_eq_right h, ite_eq_right (fun h' => h (Finsupp.equivFunOnFinite.symm.injective h').symm)]
       simp
-  | add p q hp hq => rw [map_add, coeff_add, hp, hq, map_add, map_add]
+  | add p q hp hq => simp only [map_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hp, hq]
 
 theorem isMultiHomogIdeal_mIdealOver (y : (Σ k, ι k) → Ω) :
     NumbersDVR.IsMultiHomogIdeal (R := S) (mIdealOver S y) := by
@@ -76,18 +127,18 @@ theorem isMultiHomogIdeal_mIdealOver (y : (Σ k, ι k) → Ω) :
     intro e' he' k
     rw [sum_block_eq_blockWeight,
       weightedHomogeneousComponent_isWeightedHomogeneous b f (mem_support_iff.mp he')]
-  rw [mConeMapOver_eq_of_block y hb, ← coeff_mConeMapOver, hf', coeff_zero, map_zero, zero_mul]
+  rw [mConeMapOver_eq_of_block y hb, ← coeff_mConeMapOver, hf']
+  simp
 
 theorem isMultiProjPrime_mIdealOver (y : (Σ k, ι k) → Ω) (hy : ∀ k, ∃ i, y ⟨k, i⟩ ≠ 0) :
-    NumbersDVR.IsMultiProjPrime (R := S) (mIdealOver S y) where
-  isPrime := RingHom.ker_isPrime _
-  multiHomog := isMultiHomogIdeal_mIdealOver y
-  relevant k := by
-    obtain ⟨i, hi⟩ := hy k
-    refine ⟨i, fun h => ?_⟩
-    have h' : mConeMapOver S y (X ⟨k, i⟩) = 0 := RingHom.mem_ker.mp h
-    simp only [mConeMapOver, aeval_X] at h'
-    exact mul_ne_zero (by rwa [Ne, MvPolynomial.C_eq_zero]) (X_ne_zero _) h'
+    NumbersDVR.IsMultiProjPrime (R := S) (mIdealOver S y) := by
+  refine ⟨RingHom.ker_isPrime (mConeMapOver S y), isMultiHomogIdeal_mIdealOver y, ?_⟩
+  intro k
+  obtain ⟨i, hi⟩ := hy k
+  refine ⟨i, fun h => ?_⟩
+  have h' : mConeMapOver S y (X ⟨k, i⟩) = 0 := RingHom.mem_ker.mp h
+  simp only [mConeMapOver, aeval_X] at h'
+  exact mul_ne_zero (by rwa [Ne, MvPolynomial.C_eq_zero]) (X_ne_zero _) h'
 
 end Homog
 
@@ -103,6 +154,7 @@ theorem mConeMapOver_graph_comp_base (x : Fin (N + 1) → Ω) (s : Fin m → Ω)
   apply MvPolynomial.algHom_ext
   intro a
   simp [mConeMapOver, Kleiman.cone, ReciprocityTheory.ChartRestriction.G.Geo.coneMap]
+  rfl
 
 theorem cone_eq_graph_comp (x : Fin (N + 1) → Ω) (s : Fin m → Ω) :
     Kleiman.cone (S := S) x =
@@ -112,6 +164,7 @@ theorem cone_eq_graph_comp (x : Fin (N + 1) → Ω) (s : Fin m → Ω) :
   apply MvPolynomial.algHom_ext
   intro a
   simp [mConeMapOver, Kleiman.cone, ReciprocityTheory.ChartRestriction.G.Geo.coneMap]
+  rfl
 
 theorem comap_mIdealOver_graph (x : Fin (N + 1) → Ω) (s : Fin m → Ω) :
     (mIdealOver S (graphVec x s)).comap

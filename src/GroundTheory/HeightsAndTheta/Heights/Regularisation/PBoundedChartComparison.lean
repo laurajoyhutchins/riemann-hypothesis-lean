@@ -1,9 +1,57 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.BoundedStatements
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.IsCompactImageClosureMid
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.GlueCharts
-import GroundTheory.HeightsAndTheta.Heights.Regularisation.PChartComparison
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.BoundedStatements
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.GlueCharts
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.IsCompactImageClosureMid
+public import GroundTheory.HeightsAndTheta.Heights.Regularisation.PChartComparison
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.PshMoll
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Regular
@@ -140,7 +188,6 @@ theorem BoundedChartComparison.proof (h0 : MollifiedLowerBound.Statement)
   simp only [lt_min_iff] at ht₀
   obtain ⟨htδ₁, htδ, hte⟩ := ht₀
   have hCt : t * (C₁ + 2) < δ := (lt_div_iff₀ hC₁2).1 htδ
-  have hCt' : t * (C₁ + 2) = C₁ * t + 2 * t := by ring
   have hC₁t : C₁ * t ≤ δ := by linarith
   have hC₁tlt : C₁ * t < δ := by linarith
   have htLt : t ≤ L * t := le_mul_of_one_le_left ht.le hL
@@ -184,7 +231,6 @@ theorem BoundedChartComparison.proof (h0 : MollifiedLowerBound.Statement)
         polyMax (B.u k) (B.chart k x) s ≤ polyMax (B.u k) (B.chart k x) s' :=
       fun s s' hs hss' hs' => polyMax_mono' hpk.1 hs hss' (hball k x hx.2 _ hs')
     have e1 := mono (L * t) (C₁ * t) (by linarith) hLt hC₁t
-    have h4C : 0 < 4 * C₁ := by linarith
     have hq : t / (4 * C₁) ≤ t / 4 := div_le_div_of_nonneg_left ht.le (by norm_num) (by linarith)
     have e2 := mono (t / (4 * C₁)) (t / 4) (by positivity) hq (by linarith)
     have e3 := mono (t / 4) (2 * t) (by positivity) (by linarith) (by linarith)
@@ -222,14 +268,6 @@ theorem BoundedChartComparison.proof (h0 : MollifiedLowerBound.Statement)
           polyMax (B.u k) (B.chart k x) (t / (4 * C₁))) ≤ E / Real.log t⁻¹ := by
       rw [hE, mul_div_assoc]
       exact mul_le_mul_of_nonneg_left hO (by linarith)
-    have hsum : polyMax (B.u k) (B.chart k x) (L * t) - polyMax (B.u k) (B.chart k x) (2 * t) +
-          c₀ * (polyMax (B.u k) (B.chart k x) (2 * t) - polyMax (B.u k) (B.chart k x) (t / 4)) ≤
-        (1 + c₀) * (polyMax (B.u k) (B.chart k x) (C₁ * t) -
-          polyMax (B.u k) (B.chart k x) (t / (4 * C₁))) := by
-      have h' : polyMax (B.u k) (B.chart k x) (L * t) - polyMax (B.u k) (B.chart k x) (2 * t) ≤
-          polyMax (B.u k) (B.chart k x) (C₁ * t) - polyMax (B.u k) (B.chart k x) (t / (4 * C₁)) := by
-        linarith
-      linarith
     simp only [BoundedPshData.phReg, BoundedPshData.smoothed]
     linarith
   intro j k x hx

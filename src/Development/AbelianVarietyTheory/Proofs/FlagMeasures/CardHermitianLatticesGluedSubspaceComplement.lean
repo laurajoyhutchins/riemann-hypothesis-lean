@@ -1,10 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitian
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
+public import Formalism.HermitianLattices.StatementMass
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianLatticeDiscriminantOrderNeZeroUnimodula
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeQuotientGensAndIntermediateCount
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.WittExtensionTotallyDefiniteHermitian
+import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
@@ -14,24 +59,6 @@ namespace GlobalTheory.Mass.Glue
 section
 
 variable {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module K V]
-
-theorem mem_perp (h : V →ₗ⋆[K] V →ₗ[K] K) (U : Submodule K V) (v : V) :
-    v ∈ perp h U ↔ ∀ x ∈ U, h x v = 0 := by
-  simp [perp, Submodule.mem_iInf]
-
-theorem nondeg_of_pd [NumberField K] (h : V →ₗ⋆[K] V →ₗ[K] K) (hp : PD h) : h.Nondegenerate := by
-  obtain ⟨τ⟩ : Nonempty (K →+* ℂ) := inferInstance
-  constructor
-  · intro x hx
-    by_contra h0
-    have := hp τ x h0
-    rw [hx x] at this
-    simp at this
-  · intro x hx
-    by_contra h0
-    have := hp τ x h0
-    rw [hx x] at this
-    simp at this
 
 end
 
@@ -193,13 +220,13 @@ private lemma le_sup_map_dual_latIn_perp {h : V →ₗ⋆[K] V →ₗ[K] K} (hs 
   · rw [_root_.Formalism.HermitianLatticesTheory.dualBasic_mem_dual]
     intro y hy
     have hyL := hL _ (mem_latIn_iff.1 hy) _ hx
-    rw [map_add, (_root_.GlobalTheory.Mass.Witt.mem_perp h W w).1 hw _ y.2, add_zero] at hyL
+    rw [map_add (f := _), (_root_.GlobalTheory.Mass.Witt.mem_perp h W w).1 hw _ y.2, add_zero] at hyL
     rw [hRes_apply]
     exact hyL
   · rw [_root_.Formalism.HermitianLatticesTheory.dualBasic_mem_dual]
     intro y hy
     have hyL := hL _ (mem_latIn_iff.1 hy) _ hx
-    rw [map_add, apply_eq_zero_of_mem_perp hs hu y.2, zero_add] at hyL
+    rw [map_add (f := _), apply_eq_zero_of_mem_perp hs hu y.2, zero_add] at hyL
     rw [hRes_apply]
     exact hyL
 

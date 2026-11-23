@@ -1,9 +1,63 @@
-import Development.AutomorphicArithmetic.CyclotomicBounds.ClassNumberBounds.IdealValuations.LocRootsY
-import GroundTheory.LocalFields.KroneckerWeber
-import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
-import GroundTheory.LocalFields.LocalArtinCompletion
-import GroundTheory.LocalFields.PrincipalUnitsRank
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixingSubgroupEquivBicontinuous
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.FiniteCohomology
+public import Mathlib.Topology.Algebra.Group.TopologicalAbelianization
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FixingSubgroupEquivBicontinuous
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.OpenField
+import GroundTheory.LocalFields.Examples
+public import GroundTheory.LocalFields.FiniteExtension
+public import GroundTheory.LocalFields.LocalArtinCompletion
+import GroundTheory.LocalFields.PadicLogSeries
+import GroundTheory.LocalFields.UnitsPowers
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.ClopenNhdofOne
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Algebra.ProperAction.Basic
+import Mathlib.Topology.Compactness.Paracompact
+public import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeAndRangePowLe
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.Loc UpperTheory.V.Loc Topology
 
@@ -13,7 +67,7 @@ private theorem mn_sep {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalG
   obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective h
   have hg : g ∉ (commutator G).topologicalClosure := fun hm => hh ((QuotientGroup.eq_one_iff g).2 hm)
   have hS : IsOpen {x : G | x * g ∉ ((commutator G).topologicalClosure : Set G)} :=
-    (Subgroup.isClosed_topologicalClosure _).isOpen_compl.preimage (continuous_mul_right g)
+    (Subgroup.isClosed_topologicalClosure _).isOpen_compl.preimage (continuous_mul_const g)
   have h1 : (1 : G) ∈ {x : G | x * g ∉ ((commutator G).topologicalClosure : Set G)} := by
     show 1 * g ∉ ((commutator G).topologicalClosure : Set G)
     rw [one_mul]
@@ -121,7 +175,7 @@ private theorem mn_cyc {l : ℕ} [Fact l.Prime] (σ : GQ l) {ζ : Om l} (h1 : ζ
   have hk' : PadicInt.toZModPow 1 x = 1 := by
     rw [← ZMod.natCast_zmod_val (PadicInt.toZModPow 1 x), hk, Nat.cast_one]
   have hmem : x - 1 ∈ RingHom.ker (PadicInt.toZModPow (p := l) 1) := by
-    rw [RingHom.mem_ker, map_sub, hk', map_one, sub_self]
+    rw [RingHom.mem_ker, RingHom.map_sub, hk', map_one, sub_self]
   rw [PadicInt.ker_toZModPow, pow_one, ← PadicInt.maximalIdeal_eq_span_p, ← PadicInt.ker_toZMod,
     RingHom.mem_ker, map_sub, map_one, sub_eq_zero] at hmem
   exact hmem

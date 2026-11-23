@@ -1,16 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Formalism.PeriodIntegrals.QuotInv
-import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
-import Formalism.LocalRingCardinality.DataCD
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
+module
+
+public import Formalism.PeriodIntegrals.QuotInv
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DensityInChartStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUniqueHaarDensityAtIdentityStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HaarUpqHasOmegaDensity
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OmegaDensityUpqUniqueAndSmul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsOmegaLebesgueMeasure
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousGrpHom
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousMatExp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsOmegaLebesgueMeasure
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HaarUpqHasOmegaDensity
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OmegaDensityUpqUniqueAndSmul
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.UpqLocallyCompactGroup
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousGrpHom
+import Mathlib.Algebra.Order.Archimedean.Real.Hom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MeasureTheory Matrix Filter Topology Formalism.QuantumDeterminants Formalism.MainNotions.S GlobalTheory.SgInf GlobalTheory.Amp
 open scoped InnerProductSpace ENNReal
@@ -126,7 +172,6 @@ theorem measurePreserving_unrealify {ι : Type} [Fintype ι] {n : ℕ} (e : ι �
   have hσ1 : ∀ p : ι × ι, σ (Sum.inl p) = (e p.1, e p.2, false) := fun p => rfl
   have hσ2 : ∀ p : ι × ι, σ (Sum.inr p) = (e p.1, e p.2, true) := fun p => rfl
   convert total using 1
-  case e'_7 => exact volume_pi
   clear h1 h2 h3 h4 h5 total
   clear_value σ
   funext x p
@@ -255,8 +300,8 @@ def cplxIsom (e : Fin P ⊕ Fin Q ≃ Fin n) :
     WithLp 2 (lieE (UH (form e)) × lieE (UH (form e))) →ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n × Fin n × Bool) where
   toFun p := coord e (((lieCoord e).symm p.fst).1 + Complex.I • ((lieCoord e).symm p.snd).1)
   map_add' p q := by
-    rw [← map_add]; congr 1
-    simp only [WithLp.add_fst, WithLp.add_snd, map_add, Submodule.coe_add, smul_add]
+    rw [← map_add (f := _)]; congr 1
+    simp only [WithLp.add_fst, WithLp.add_snd, map_add (f := _), Submodule.coe_add, smul_add]
     abel
   map_smul' c p := by
     rw [RingHom.id_apply, ← map_smul]; congr 1
@@ -332,7 +377,6 @@ theorem isOmegaLeb_frobenius (e : Fin P ⊕ Fin Q ≃ Fin n) :
     simp
   rw [Measure.map_prod_map _ _ hLs hLs, Measure.map_map hG (hLs.prodMap hLs)]
   convert hT.map_eq using 2
-  case e'_6 => rfl
   funext ab
   funext p
   show ((lieCoord e).symm ab.1 : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ) p.1 p.2 +

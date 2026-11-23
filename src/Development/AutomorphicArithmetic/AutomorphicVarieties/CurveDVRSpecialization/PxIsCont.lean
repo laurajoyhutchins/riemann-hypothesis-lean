@@ -1,14 +1,60 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.SecondThirdPrimeConditionTransferAlt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Integral
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.SelfTwistEigenvalues.UnipTorsion
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.CoB
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.DetMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.TraceMem
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.MemPowSmulLe
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.CharpolyFlag
-import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.Imports
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGmap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.ExistsAdjoinCoeffCharacterSubMemMaximalIdealPow
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.SecondThirdPrimeConditionTransferAlt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGmap
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.ExistsAdjoinCoeffCharacterSubMemMaximalIdealPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.SelfTwistEigenvalues.UnipTorsion
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.DetMem
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.FrobeniusSmoothVectors.TraceMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.overlappingInstances false
 
@@ -27,7 +73,7 @@ private theorem px_chi (ρ : G →* Matrix (Fin n) (Fin n) A) (y : MonoidAlgebra
       (Polynomial.C : A →+* Polynomial A).mapMatrix (MonoidAlgebra.lift A _ G ρ y) := by
     induction y using MonoidAlgebra.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | single g r => ext i j : 2; simp [W.GDet.repAlg]
   rw [map_sub, h]
   ext i j : 2
@@ -50,7 +96,7 @@ private theorem px_isCont [TopologicalSpace G] (I : Ideal A) (ρ : G →* Matrix
   have h2 := h1.comp fun M : Matrix (Fin n) (Fin n) (A ⧸ I ^ N) => (-1) ^ i * M.charpoly.coeff (n - i)
   convert h2 using 1
   funext g
-  simp only [W.GDet.lam, px_chi, Matrix.charpoly_map, Function.comp_apply, MonoidAlgebra.lift_single, one_smul,
+  simp only [Function.comp_apply, W.GDet.lam, px_chi, MonoidAlgebra.lift_single, one_smul, Matrix.charpoly_map,
     Polynomial.coeff_map, map_mul, map_pow, map_neg, map_one]
 
 private theorem px_prod {M : Type} [Ring M] [Algebra A M] : ∀ {m : ℕ} (c : Fin m → A) (a : Fin m → M),
@@ -85,8 +131,9 @@ private theorem px_mul {Γ : Type} [TopologicalSpace Γ] {I : Ideal A} {a b : Γ
 
 private theorem px_coef {O : Type} [CommRing O] [Algebra O A] (B : Subalgebra O A) (M : Matrix (Fin n) (Fin n) A)
     (c : A) (hc : c ∈ B)
-    (h : ∀ α, MvPolynomial.coeff α (∑ a : Fin 2, (MvPolynomial.X a : MvPolynomial (Fin 2) A) •
-      (![1, M] a).map (MvPolynomial.C : A →+* MvPolynomial (Fin 2) A)).det ∈ B) (i : ℕ) : (c • M).charpoly.coeff i ∈ B := by
+    (h : ∀ α, AddMonoidAlgebra.coeff (∑ a : Fin 2, (MvPolynomial.X a : MvPolynomial (Fin 2) A) •
+      (![1, M] a).map (MvPolynomial.C : A →+* MvPolynomial (Fin 2) A)).det α ∈ B)
+    (i : ℕ) : (c • M).charpoly.coeff i ∈ B := by
   let φ : MvPolynomial (Fin 2) A →ₐ[A] Polynomial A := MvPolynomial.aeval ![Polynomial.X, -Polynomial.C c]
   have h1 : φ (∑ a : Fin 2, (MvPolynomial.X a : MvPolynomial (Fin 2) A) • (![1, M] a).map (MvPolynomial.C : A →+* MvPolynomial (Fin 2) A)).det =
       (c • M).charpoly := by
@@ -97,6 +144,7 @@ private theorem px_coef {O : Type} [CommRing O] [Algebra O A] (B : Subalgebra O 
     by_cases h : i = j <;> simp [φ, Fin.sum_univ_two, Matrix.charmatrix_apply, h, Matrix.one_apply, sub_eq_add_neg]
   generalize (∑ a : Fin 2, (MvPolynomial.X a : MvPolynomial (Fin 2) A) • (![1, M] a).map (MvPolynomial.C : A →+* MvPolynomial (Fin 2) A)).det = P at h h1
   have h2 : φ P ∈ Polynomial.liftsRing (B.val : B →+* A) := by
+
     rw [P.as_sum, map_sum]
     refine sum_mem fun α _ => ?_
     rw [MvPolynomial.aeval_monomial]
@@ -145,8 +193,10 @@ private theorem px_ord (ρ : NRep F n A) (v : G.Vl) (g : Fin n → G.Gv v) :
   rw [W.GFrame.oEl, map_list_prod, List.map_ofFn, ← h1]
   congr 2
   funext i
-  simp only [Function.comp_apply, map_sub, MonoidAlgebra.lift_single, one_smul, map_one, smul_sub, smul_smul, K.lam_loc]
-  rw [mul_comm]
+  simp only [Function.comp_apply, map_sub, MonoidAlgebra.lift_single, one_smul, map_one, smul_sub, smul_smul,
+    K.lam_loc]
+  change _ - ((ρ.ψ (K.e v) i (K.lam v (g i)) : A) * (K.κA A (G.φ v (g i)) : A)) • _ = _
+  rw [mul_comm (ρ.ψ (K.e v) i (K.lam v (g i)) : A)]
   rfl
 
 variable [IsCO O A]

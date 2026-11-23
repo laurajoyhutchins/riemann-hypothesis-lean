@@ -1,6 +1,67 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.FiniteAlgebraLocalCompletion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.DimensionQuotientBound
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.PrimeAvoidanceFibre
+module
+
+public import Mathlib.RingTheory.DiscreteValuationRing.Basic
+public import Mathlib.RingTheory.Flat.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+public import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.DimensionQuotientBound
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.PrimeAvoidanceFibre
+public import Mathlib.FieldTheory.Separable
+public import Mathlib.RingTheory.DedekindDomain.Basic
+public import Mathlib.RingTheory.DedekindDomain.Dvr
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+public import Mathlib.RingTheory.Flat.TorsionFree
+public import Mathlib.RingTheory.Localization.Finiteness
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0.DiscreteValuationPoint
 
@@ -123,7 +184,7 @@ private theorem exists_dvr_embedding_of_dedekind {O C : Type} [CommRing O] [IsDo
   haveI := hNmax
   have hϖN : algebraMap O C ϖ ∈ N := by
     have hc : (N.comap (algebraMap O C)).IsMaximal := by
-      exact Ideal.isMaximal_comap_of_isIntegral_of_isMaximal N
+      exact Ideal.isMaximal_under_of_isIntegral_of_isMaximal N
     rw [← Ideal.mem_comap, IsLocalRing.eq_maximalIdeal hc]
     exact hϖm
   have hch : ∀ P : Ideal C, P.IsPrime → ⊥ ≤ P → P ≤ N → algebraMap O C ϖ ∈ P → P = N := by
@@ -153,7 +214,7 @@ private theorem exists_dvr_embedding_of_dedekind {O C : Type} [CommRing O] [IsDo
         rw [Ideal.mem_comap] at h
         exact hP.ne_top (Ideal.eq_top_of_isUnit_mem _ h (IsLocalization.Away.algebraMap_isUnit s))
     rw [← hQ]
-    rw [IsLocalization.map_comap (Submonoid.powers s)]
+    rw [IsLocalization.map_under (Submonoid.powers s)]
   have hdisj : Disjoint (Submonoid.powers s : Set C) (N : Set C) := by
     rw [Set.disjoint_left]
     rintro x ⟨n, rfl⟩ hx
@@ -247,7 +308,7 @@ private theorem exists_finite_domain_quotient_ne_zero {O B : Type} [CommRing O] 
         rw [Ideal.mem_comap, Ideal.mem_comap] at h
         exact hP.ne_top (Ideal.eq_top_of_isUnit_mem _ h (IsLocalization.Away.algebraMap_isUnit _))
     rw [← hQ, Ideal.map_comap_of_surjective _ Ideal.Quotient.mk_surjective]
-    rw [IsLocalization.map_comap (Submonoid.powers (Ideal.Quotient.mk q s))]
+    rw [IsLocalization.map_under (Submonoid.powers (Ideal.Quotient.mk q s))]
   have hdisj : Disjoint (Submonoid.powers (Ideal.Quotient.mk q s) : Set (B ⧸ q))
       (Ideal.map (Ideal.Quotient.mk q) M : Set (B ⧸ q)) := by
     rw [Set.disjoint_left]

@@ -1,7 +1,67 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJParabolicFubini
-import GroundTheory.AutomorphicForms.GL2.GJLeviZeta
-import GroundTheory.AutomorphicForms.HaarCosets
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJParabolicFubini
+public import GroundTheory.AutomorphicForms.GL2.GJLeviZeta
+public import GroundTheory.AutomorphicForms.InductionParabolic
+import GroundTheory.AutomorphicForms.AdmissibleInduction
+public import GroundTheory.AutomorphicForms.HaarCosets
+public import GroundTheory.AutomorphicForms.Measures
+import GroundTheory.LocalFields.ExistsUnitFiltrationUnitsLeRangeNormUnits
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
+import Mathlib.Topology.Separation.CompletelyRegular
+import Mathlib.Topology.Separation.Connected
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -97,8 +157,8 @@ theorem IsSchwartzBruhat.comp_mulRight {Φ : Matrix (Fin n) (Fin n) F → ℂ}
       continuous_invFun := Continuous.matrix_mul continuous_id continuous_const }
   exact ⟨hΦ.1.comp_continuous T.continuous, hΦ.2.comp_homeomorph T⟩
 
-omit [Field F] [ValuativeRel F] [IsNonarchimedeanLocalField F] in
 
+omit [Field F] [ValuativeRel F] [IsNonarchimedeanLocalField F] in
 theorem IsSchwartzBruhat.norm {Φ : Matrix (Fin n) (Fin n) F → ℂ} (hΦ : IsSchwartzBruhat Φ) :
     IsSchwartzBruhat fun X => ((‖Φ X‖ : ℝ) : ℂ) :=
   ⟨hΦ.1.comp fun z => ((‖z‖ : ℝ) : ℂ),
@@ -228,8 +288,8 @@ theorem continuous_monoidHom_of_eq_one {G : Type*} [Group G] [TopologicalSpace G
   simp only [Set.mem_preimage, smul_eq_mul, map_mul, hV v hv, mul_one]
   exact hg
 
-variable (β) in
 
+variable (β) in
 def leviSqrtModular : levi F n β →* ℝ≥0 where
   toFun m := NNReal.sqrt (Measure.modularCharacter (leviIncl m))
   map_one' := by simp
@@ -345,8 +405,8 @@ theorem integral_inducedIntegrand_mul (μ𝔪 : Measure (LeviIndex n β → F))
     coe_leviSqrtModular]
   ring
 
-omit [MeasurableSpace F] [BorelSpace F] in
 
+omit [MeasurableSpace F] [BorelSpace F] in
 theorem lintegral_eq_sum_parabolic [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)]
     (μG : Measure (GL (Fin n) F)) [μG.IsHaarMeasure]
     (μP : Measure (blockUpper F n β)) [μP.IsHaarMeasure]
@@ -382,8 +442,8 @@ theorem lintegral_eq_sum_parabolic [MeasurableSpace (GL (Fin n) F)] [BorelSpace 
   rw [lintegral_const_mul _ (Finset.measurable_sum _ fun q _ => hmeas q),
     lintegral_finsetSum _ fun q _ => hmeas q]
 
-omit [MeasurableSpace F] [BorelSpace F] in
 
+omit [MeasurableSpace F] [BorelSpace F] in
 theorem integral_eq_sum_parabolic [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)]
     (μG : Measure (GL (Fin n) F)) [μG.IsHaarMeasure]
     (μP : Measure (blockUpper F n β)) [μP.IsHaarMeasure]

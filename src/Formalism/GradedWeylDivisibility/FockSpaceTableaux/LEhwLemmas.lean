@@ -1,7 +1,54 @@
-import Formalism.GradedWeylDivisibility.StatementE
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LHwlineLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LHwrowLemmas
-import Formalism.GradedWeylDivisibility.FockSpaceTableaux.DualWeylDominanceOf
+module
+
+public import Formalism.GradedWeylDivisibility.StatementA
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FinalC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -15,17 +62,18 @@ theorem lehw_dom {r n : ℕ} (ν : Fin n → ℕ) (hnr : n ≤ r) (hν : Antiton
       (∑ a : Fin r with a.val < k, rowDeg m a) ≤ ∑ a : Fin r with a.val < k, rowNu (r := r) ν a := by
   classical
   intro m hm k
-  let N : ℕ := ∏ d ∈ f.support, (coeff d f).den
+  let N : ℕ := ∏ d ∈ f.support, (AddMonoidAlgebra.coeff f d).den
   let u : MvPolynomial (Fin r × Fin n) ℤ := ∑ d ∈ f.support,
-    monomial d ((∏ d' ∈ f.support.erase d, ((coeff d' f).den : ℤ)) * (coeff d f).num)
+    monomial d ((∏ d' ∈ f.support.erase d, ((AddMonoidAlgebra.coeff f d').den : ℤ)) * (AddMonoidAlgebra.coeff f d).num)
   have hu : map (Int.castRingHom ℚ) u = (N : ℚ) • f := by
     conv_rhs => rw [f.as_sum]
     rw [Finset.smul_sum]
+
     simp only [u, map_sum, map_monomial, smul_monomial]
     refine Finset.sum_congr rfl fun d hd => ?_
     congr 1
     push_cast
-    have hN : (N : ℚ) = (∏ d' ∈ f.support.erase d, ((coeff d' f).den : ℚ)) * (coeff d f).den := by
+    have hN : (N : ℚ) = (∏ d' ∈ f.support.erase d, ((AddMonoidAlgebra.coeff f d').den : ℚ)) * (AddMonoidAlgebra.coeff f d).den := by
       simp only [N]
       push_cast
       rw [Finset.prod_erase_mul _ _ hd]
@@ -34,14 +82,14 @@ theorem lehw_dom {r n : ℕ} (ν : Fin n → ℕ) (hnr : n ≤ r) (hν : Antiton
   have hN0 : (N : ℚ) ≠ 0 := by
     simp only [N]
     push_cast
-    exact Finset.prod_ne_zero_iff.mpr fun d _ => Nat.cast_ne_zero.mpr (coeff d f).den_nz
+    exact Finset.prod_ne_zero_iff.mpr fun d _ => Nat.cast_ne_zero.mpr (AddMonoidAlgebra.coeff f d).den_nz
   have huD : u ∈ dualWeyl ℤ r n ν :=
     (dualWeylIntRat r n ν u).mpr (by rw [hu]; exact (dualWeyl ℚ r n ν).smul_mem _ hf)
   have hmu : m ∈ u.support := by
     rw [mem_support_iff]
     intro h0
-    have e := congrArg (coeff m) hu
-    rw [coeff_map, h0, map_zero, coeff_smul, smul_eq_mul] at e
+    have e := congrArg (AddMonoidAlgebra.coeff · m) hu
+    rw [coeff_map, h0, map_zero, MvPolynomial.coeff_smul, smul_eq_mul] at e
     exact (mem_support_iff.mp hm) ((mul_eq_zero.mp e.symm).resolve_left hN0)
   exact (dualWeylDominanceZ r n ν hnr hν u huD m hmu).1 k
 
@@ -77,7 +125,7 @@ theorem lehwShift_one {R : Type*} [CommRing R] {r n : ℕ} (w : Fin r × Fin n �
     · exact (hd rfl).elim
   · rw [Polynomial.coeff_one, if_neg (by omega)]
     intro d hd
-    exact (hd (MvPolynomial.coeff_zero d)).elim
+    exact (hd (by simp)).elim
 
 theorem lehwShift_pow {R : Type*} [CommRing R] {r n : ℕ} {w : Fin r × Fin n → ℤ}
     {P : Polynomial (MvPolynomial (Fin r × Fin n) R)} {μ δ : ℤ}
@@ -136,13 +184,13 @@ theorem lehwShift_gen {R : Type*} [CommRing R] {r n : ℕ} (w : Fin r × Fin n �
         simp [Polynomial.coeff_C]
       rw [e]
       intro d hd
-      exact (hd (MvPolynomial.coeff_zero d)).elim
+      exact (hd (by simp)).elim
   · rw [if_neg (show ¬ (c, s).1 = b from hc), add_zero, Polynomial.coeff_C]
     split_ifs with hk
     · subst hk
       simpa using isWeightedHomogeneous_X R w (c, s)
     · intro d hd
-      exact (hd (MvPolynomial.coeff_zero d)).elim
+      exact (hd (by simp)).elim
 
 theorem lehwShift_rowGen_monomial (R : Type*) [CommRing R] {r n : ℕ} (w : Fin r × Fin n → ℤ) (δ : ℤ)
     (a b : Fin r) (hstep : ∀ s : Fin n, w (a, s) = w (b, s) + δ) (d : Fin r × Fin n →₀ ℕ) (c : R) :
@@ -159,10 +207,11 @@ theorem lehw_rowDiv_shift (R : Type*) [CommRing R] {r n : ℕ} (w : Fin r × Fin
     (f : MvPolynomial (Fin r × Fin n) R) (hf : IsWeightedHomogeneous w f H) :
     IsWeightedHomogeneous w (rowDiv R a b k f) (H + k * δ) := by
   unfold rowDiv
-  rw [f.as_sum, map_sum, Polynomial.finset_sum_coeff]
+
+  rw [f.as_sum, map_sum, Polynomial.finsetSum_coeff]
   refine (mem_weightedHomogeneousSubmodule _ _ _ _).mp (Submodule.sum_mem _ fun d hd => ?_)
   refine (mem_weightedHomogeneousSubmodule _ _ _ _).mpr ?_
-  have h := lehwShift_rowGen_monomial R w δ a b hstep d (coeff d f) k
+  have h := lehwShift_rowGen_monomial R w δ a b hstep d (AddMonoidAlgebra.coeff f d) k
   rw [hf (mem_support_iff.mp hd)] at h
   exact h
 

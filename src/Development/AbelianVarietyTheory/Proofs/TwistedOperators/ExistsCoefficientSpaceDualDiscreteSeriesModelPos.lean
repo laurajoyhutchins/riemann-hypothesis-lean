@@ -1,10 +1,57 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ColLieApply
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompactAdele
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteSmoothIrreducible
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TensorProductDefiniteUnitaryLocalModelsIrreducib
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FactTypePrime
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteSmoothIrreducible
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TensorProductDefiniteUnitaryLocalModelsIrreducib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOnAtTau
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryActionAtRealPlace
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsCompactAdele
+
+@[expose] public section
 
 noncomputable section
 
@@ -57,6 +104,7 @@ theorem exists_contragredient {G X κ : Type} [Group G] [TopologicalSpace G] [Ad
     simp_rw [h2]
     have h3 : ∑ q, B.repr (T g (B p)) q * B.repr (T g⁻¹ (B q)) r =
         B.repr (T g⁻¹ (∑ q, B.repr (T g (B p)) q • B q)) r := by
+
       rw [map_sum, map_sum, Finsupp.coe_finsetSum, Finset.sum_apply]
       refine Finset.sum_congr rfl fun q _ => ?_
       rw [map_smul, map_smul, Finsupp.smul_apply, smul_eq_mul]
@@ -69,6 +117,7 @@ theorem exists_contragredient {G X κ : Type} [Group G] [TopologicalSpace G] [Ad
           starRingEnd ℂ (∑ p, x p * starRingEnd ℂ (B.repr (T g (B p)) q))
         = ∑ p, ∑ r, starRingEnd ℂ (x p) * y r *
             ∑ q, B.repr (T g (B p)) q * starRingEnd ℂ (B.repr (T g (B r)) q) := by
+
           simp only [map_sum, map_mul, Complex.conj_conj, Finset.sum_mul, Finset.mul_sum]
           rw [Finset.sum_comm]
           refine Finset.sum_congr rfl fun r _ => ?_
@@ -175,7 +224,7 @@ theorem nontrivial_dual_tensor {ι : Type} [Fintype ι] {H : ι → Type} [∀ i
     simp only [not_exists, not_not] at h
     exact hv i ((Module.forall_dual_apply_eq_zero_iff ℂ (v i)).mp h)
   choose f hf using hf
-  let m : MultilinearMap ℂ H ℂ := (MultilinearMap.mkPiAlgebra ℂ ι ℂ).compLinearMap f
+  let m : (∀ i, H i) →ₘₗ[ℂ] ℂ := (MultilinearMap.mkPiAlgebra ℂ ι ℂ).compLinearMap f
   let φ : Module.Dual ℂ (⨂[ℂ] i, H i) := PiTensorProduct.lift m
   refine ⟨⟨φ, 0, fun h => ?_⟩⟩
   have hz := LinearMap.congr_fun h (PiTensorProduct.tprod ℂ v)

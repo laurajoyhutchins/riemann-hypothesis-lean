@@ -1,7 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.CovolumeGram
-import GroundTheory.HeightsAndTheta.Heights.HermitianEuclidean
-import GroundTheory.HeightsAndTheta.Heights.ArithDegreeExact
+module
+
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Mathlib.NumberTheory.NumberField.EquivReindex
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.Slopes
+import GroundTheory.HeightsAndTheta.Heights.HermitianLattice
+
+@[expose] public section
 
 namespace GroundTheory.Heights₂.Heights
 
@@ -20,25 +64,14 @@ variable {E : Type*} [AddCommGroup E] [Module (𝓞 K) E] [Module.Finite (𝓞 K
 
 namespace RealSpace
 
-instance instMeasurableSpace : MeasurableSpace (RealSpace h) := borel _
-
-instance instBorelSpace : BorelSpace (RealSpace h) := ⟨rfl⟩
-
 end RealSpace
-
-def arithEuler : ℝ := -Real.log (ZLattice.covolume (RealSpace.lattice h))
 
 end Real
 
+open scoped Classical in
 open Classical in
-
 theorem det_basisMatrix_sq : (basisMatrix K).det ^ 2 = ((discr K : ℤ) : ℂ) := by
-  rw [basisMatrix_eq_embeddingsMatrixReindex,
-    ← Algebra.discr_eq_det_embeddingsMatrixReindex_pow_two ℚ ℂ
-      (integralBasis K ∘ (equivReindex K)) (RingHom.equivRatAlgHom K ℂ),
-    ← (equivReindex K).symm_symm, Algebra.discr_reindex ℚ (integralBasis K) (equivReindex K).symm,
-    ← coe_discr]
-  simp
+  exact (discr_eq_basisMatrix_det_sq K).symm
 
 theorem basisMatrix_apply' (τ σ : K →+* ℂ) :
     basisMatrix K τ σ = σ ((RingOfIntegers.basis K (equivReindex K τ) : 𝓞 K) : K) := by
@@ -50,9 +83,6 @@ section Gram
 variable {E : Type*} [AddCommGroup E] [Module (𝓞 K) E] [Module.Finite (𝓞 K) E]
   [Module.Projective (𝓞 K) E] (h : HermitianMetric K E) {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-def towerVec (s : ι → E) (p : ι × (K →+* ℂ)) : RealSpace h :=
-  RealSpace.ofModule h (RingOfIntegers.basis K (equivReindex K p.2) • s p.1)
-
 end Gram
 
 section RiemannRoch
@@ -61,40 +91,9 @@ variable {E : Type*} [AddCommGroup E] [Module (𝓞 K) E] [Module.Finite (𝓞 K
   [Module.Projective (𝓞 K) E] (h : HermitianMetric K E) {ι : Type*} [Fintype ι] [DecidableEq ι]
   {s : ι → E}
 
-def towerBasis (hs : LinearIndependent (𝓞 K) s) :
-    Basis (ι × (K →+* ℂ)) ℤ (Submodule.span (𝓞 K) (Set.range s)) :=
-  ((RingOfIntegers.basis K).smulTower' (Basis.span hs)).reindex
-    (Equiv.prodCongr (Equiv.refl ι) (equivReindex K).symm)
 
-def spanToReal (s : ι → E) : Submodule.span (𝓞 K) (Set.range s) →ₗ[ℤ] RealSpace h :=
-  (RealSpace.ofModule h).toIntLinearMap ∘ₗ
-    ((Submodule.span (𝓞 K) (Set.range s)).subtype.restrictScalars ℤ)
-
-omit [Fintype ι] [DecidableEq ι] in
-theorem spanToReal_injective (s : ι → E) : Function.Injective (spanToReal h s) :=
-  (RealSpace.ofModule_injective h).comp Subtype.val_injective
-
-def spanLattice (s : ι → E) : Submodule ℤ (RealSpace h) := LinearMap.range (spanToReal h s)
-
-omit [Fintype ι] [DecidableEq ι] in
-theorem spanLattice_le (s : ι → E) : spanLattice h s ≤ RealSpace.lattice h := by
-  rintro _ ⟨x, rfl⟩
-  exact ⟨x, rfl⟩
-
-instance (s : ι → E) : DiscreteTopology (spanLattice h s) := by
-  have : DiscreteTopology (RealSpace.lattice h : Set (RealSpace h)) :=
-    (inferInstance : DiscreteTopology (RealSpace.lattice h))
-  exact DiscreteTopology.of_subset this (spanLattice_le h s)
-
-def spanLatticeBasis (hs : LinearIndependent (𝓞 K) s) :
-    Basis (ι × (K →+* ℂ)) ℤ (spanLattice h s) :=
-  (towerBasis hs).map (AddEquiv.ofBijective (spanToReal h s).rangeRestrict.toAddMonoidHom
-    ⟨fun _ _ hxy ↦ spanToReal_injective h s (congrArg Subtype.val hxy),
-      LinearMap.surjective_rangeRestrict _⟩).toIntLinearEquiv
 
 end RiemannRoch
-
-def HermitianBundle.arithEuler (A : HermitianBundle K) : ℝ := Heights.arithEuler A.metric
 
 namespace HermitianExtension
 

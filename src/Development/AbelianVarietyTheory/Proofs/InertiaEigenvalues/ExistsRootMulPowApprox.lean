@@ -1,4 +1,56 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.FieldTheory.Finite.Basic
+import Mathlib.RingTheory.PowerSeries.Basic
+
+@[expose] public section
+
 open PowerSeries
 
 namespace GlobalTheory.PadicUnitGen
@@ -41,7 +93,7 @@ theorem exists_pow_approx {l : ℕ} [hl : Fact l.Prime] (u : ℤ_[l]) (h2 : l �
     have hd : (l : ℤ_[l]) ∣ c - u ^ m * (j * (w + l * y)
         + (l : ℤ_[l]) ^ k * l * (w + l * y) ^ 2 * z) := by
       rw [dvd_iff_toZMod]
-      simp only [map_sub, map_mul, map_add, map_pow, hl0, hu1, map_natCast, hj,
+      simp only [map_sub, map_mul, map_add (f := _), map_pow, hl0, hu1, map_natCast, hj,
         ZMod.natCast_zmod_val, ZMod.natCast_self]
       field_simp
       ring
@@ -68,12 +120,14 @@ theorem exists_lift {l : ℕ} [hl : Fact l.Prime] (Δ : Subgroup ℤ_[l]ˣ) [Fin
     rcases mul_eq_zero.1 h3 with h | h
     · exfalso
       have := congrArg (PadicInt.toZMod (p := l)) h
+
       simp only [map_sum, map_pow, h1, one_pow, Finset.sum_const, Finset.card_range,
-        nsmul_eq_mul, mul_one, map_zero] at this
+      nsmul_eq_mul, mul_one, map_zero] at this
       rw [Nat.cast_pred hl.out.pos] at this
       simp at this
-    · ext
-      simpa using sub_eq_zero.1 h
+    · apply Subtype.ext
+      apply Units.ext
+      exact sub_eq_zero.1 h
   have hbij : Function.Bijective f := by
     refine hinj.bijective_of_nat_card_le ?_
     rw [hΔ, Nat.card_eq_fintype_card, ZMod.card_units]

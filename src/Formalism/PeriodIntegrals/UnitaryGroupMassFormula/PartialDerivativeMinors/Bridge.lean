@@ -1,5 +1,51 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PartialDerivativeMinors.PMinorAff
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.PartialDerivativeMinors.PMinorAff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,8 +68,8 @@ abbrev up (κ : ZV H N0 N1 →₀ ℕ) (t : H) (a : Fin N0) (b : Fin N1) : ZV H 
   κ + Finsupp.single (zF t a b) 1 + Finsupp.single (zT t a b) 1
 
 private theorem coeff_pd_eq_coeff_add_single_mul (i : XZ (Bool × H) N0 N1) (Q : PolyXZ H N0 N1) (ν : XZ (Bool × H) N0 N1 →₀ ℕ) :
-    MvPolynomial.coeff ν (pd i Q) = MvPolynomial.coeff (ν + Finsupp.single i 1) Q * ((ν i : ℤ) + 1) := by
-  show MvPolynomial.coeff ν (MvPolynomial.pderiv i Q) = _
+    AddMonoidAlgebra.coeff (pd i Q) ν = AddMonoidAlgebra.coeff Q (ν + Finsupp.single i 1) * ((ν i : ℤ) + 1) := by
+  show AddMonoidAlgebra.coeff (MvPolynomial.pderiv i Q) ν = _
   refine MvPolynomial.induction_on' Q (fun s c => ?_) (fun p q hp hq => ?_)
   · rw [MvPolynomial.pderiv_monomial, MvPolynomial.coeff_monomial, MvPolynomial.coeff_monomial]
     by_cases h : s = ν + Finsupp.single i 1
@@ -44,12 +90,12 @@ private theorem coeff_pd_eq_coeff_add_single_mul (i : XZ (Bool × H) N0 N1) (Q :
           · omega
         simp [hsi]
       · rw [if_neg h2]
-  · simp only [map_add, MvPolynomial.coeff_add, hp, hq, add_mul]
+  · simp only [map_add (f := _), MvPolynomial.coeff_add, hp, hq, add_mul]
 
 theorem coeff_lapT (t : H) (Q : PolyXZ H N0 N1) (ν : XZ (Bool × H) N0 N1 →₀ ℕ) :
-    MvPolynomial.coeff ν (lapT N0 N1 t Q) =
+    AddMonoidAlgebra.coeff (lapT N0 N1 t Q) ν =
       ∑ a : Fin N0, ∑ b : Fin N1,
-        MvPolynomial.coeff (ν + Finsupp.single (Sum.inr (zF t a b)) 1 + Finsupp.single (Sum.inr (zT t a b)) 1) Q *
+        AddMonoidAlgebra.coeff Q (ν + Finsupp.single (Sum.inr (zF t a b)) 1 + Finsupp.single (Sum.inr (zT t a b)) 1) *
           (((ν (Sum.inr (zT t a b)) : ℤ) + 1) * ((ν (Sum.inr (zF t a b)) : ℤ) + 1)) := by
   unfold lapT
   simp only [LinearMap.sum_apply, MvPolynomial.coeff_sum, (show ∀ (f g : Module.End ℤ (PolyXZ H N0 N1)) (x : PolyXZ H N0 N1), (f * g) x = f (g x) from fun _ _ _ => rfl), coeff_pd_eq_coeff_add_single_mul]
@@ -81,7 +127,7 @@ def wt (μ : XZ (Bool × H) N0 N1 →₀ ℕ) (m : XV H N0 →₀ ℕ) (κ : ZV 
   if xpart μ = m ∧ κ ≤ zpart μ ∧ Bal N0 N1 n (zpart μ - κ) then (wv (zpart μ) κ : ℤ) else 0
 
 theorem acon_eq (P : PolyXZ H N0 N1) (m : XV H N0 →₀ ℕ) (κ : ZV H N0 N1 →₀ ℕ) (n : H → ℕ) :
-    Acon P m κ n = ∑ μ ∈ P.support, MvPolynomial.coeff μ P * wt μ m κ n := by
+    Acon P m κ n = ∑ μ ∈ P.support, AddMonoidAlgebra.coeff P μ * wt μ m κ n := by
   unfold Acon wt wv
   refine Finset.sum_congr rfl fun μ _ => ?_
   split_ifs <;> (try push_cast) <;> ring
@@ -290,14 +336,14 @@ theorem acon_step (P : PolyXZ H N0 N1) (m : XV H N0 →₀ ℕ) (κ : ZV H N0 N1
         ((κ (zT t a b) : ℤ) + 1) * ((κ (zF t a b) : ℤ) + 1) * Acon P m (up κ t a b) n' := by
   simp only [acon_eq, Finset.mul_sum]
   have hb : ∀ μ ∈ P.support,
-      ((n' t : ℤ) + 1) * (MvPolynomial.coeff μ P * wt μ m κ n) =
+      ((n' t : ℤ) + 1) * (AddMonoidAlgebra.coeff P μ * wt μ m κ n) =
         ∑ a : Fin N0, ∑ b : Fin N1, ((κ (zT t a b) : ℤ) + 1) * ((κ (zF t a b) : ℤ) + 1) *
-          (MvPolynomial.coeff μ P * wt μ m (up κ t a b) n') := by
+          (AddMonoidAlgebra.coeff P μ * wt μ m (up κ t a b) n') := by
     intro μ _
     have := mono_step μ m κ n n' t hn
-    calc ((n' t : ℤ) + 1) * (MvPolynomial.coeff μ P * wt μ m κ n)
-        = MvPolynomial.coeff μ P * (((n' t : ℤ) + 1) * wt μ m κ n) := by ring
-      _ = MvPolynomial.coeff μ P * ∑ a : Fin N0, ∑ b : Fin N1,
+    calc ((n' t : ℤ) + 1) * (AddMonoidAlgebra.coeff P μ * wt μ m κ n)
+        = AddMonoidAlgebra.coeff P μ * (((n' t : ℤ) + 1) * wt μ m κ n) := by ring
+      _ = AddMonoidAlgebra.coeff P μ * ∑ a : Fin N0, ∑ b : Fin N1,
           ((κ (zT t a b) : ℤ) + 1) * ((κ (zF t a b) : ℤ) + 1) * wt μ m (up κ t a b) n' := by rw [this]
       _ = _ := by
         simp only [Finset.mul_sum]
@@ -342,7 +388,7 @@ private theorem bal_zero_iff (k : ZV H N0 N1 →₀ ℕ) : Bal N0 N1 (fun _ => 0
 
 theorem bridge_list (L : List H) (P : PolyXZ H N0 N1) (m : XV H N0 →₀ ℕ) (κ : ZV H N0 N1 →₀ ℕ) :
     (∏ t : H, ((L.count t).factorial : ℤ)) * Acon P m κ (fun t => L.count t) =
-      MvPolynomial.coeff (Finsupp.sumFinsuppEquivProdFinsupp.symm (m, κ)) ((L.map (lapT N0 N1)).prod P) := by
+      AddMonoidAlgebra.coeff ((L.map (lapT N0 N1)).prod P) (Finsupp.sumFinsuppEquivProdFinsupp.symm (m, κ)) := by
   induction L generalizing κ with
   | nil =>
     simp only [List.count_nil, Nat.factorial_zero, Nat.cast_one, Finset.prod_const_one, one_mul,
@@ -367,7 +413,7 @@ theorem bridge_list (L : List H) (P : PolyXZ H N0 N1) (m : XV H N0 →₀ ℕ) (
       rw [if_neg (fun h => hne ((key μ).1 h))]
     · intro hν
       rw [if_pos ((key _).2 rfl)]
-      have h0 : MvPolynomial.coeff (Finsupp.sumFinsuppEquivProdFinsupp.symm (m, κ)) P = 0 := by
+      have h0 : AddMonoidAlgebra.coeff P (Finsupp.sumFinsuppEquivProdFinsupp.symm (m, κ)) = 0 := by
         by_contra h
         exact hν (MvPolynomial.mem_support_iff.2 h)
       rw [h0, zero_mul, zero_mul]

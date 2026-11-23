@@ -1,5 +1,43 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.LinksDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,12 +151,6 @@ structure Carries (V V' : HSp D) (h : V.rank = V'.rank)
     Hecke₂ V (levS V β L) (levChi V β L) S P d (inA V R) ↔
       Hecke₂ V' (levS V' β' (castDat h L)) (levChi V' β' (castDat h L)) S P d (imA φ R)
 
-def LocalIsometry (D : D7) : Prop :=
-  ∀ (V V' : HSp D), V.rank = V'.rank →
-    ∀ (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)) (Λ' : Submodule (𝓞 D.host.E) (Fin V'.rank → D.host.E)),
-      Formalism.IndefR.Datum.IsSelfDualC V Λ → Formalism.IndefR.Datum.IsSelfDualC V' Λ' →
-      ∀ v : HeightOneSpectrum (𝓞 D.host.F), ∃ j, IsLocLatIsom V V' Λ Λ' v j
-
 def GlobalIsometry (D : D7) : Prop :=
   ∀ (V V' : HSp D), V.rank = V'.rank →
     ∀ (Λ : Submodule (𝓞 D.host.E) (Fin V.rank → D.host.E)) (Λ' : Submodule (𝓞 D.host.E) (Fin V'.rank → D.host.E))
@@ -135,9 +167,6 @@ def InducedIso (D : D7) : Prop :=
     ∀ (T : Set (Formalism.L2.DIV.Pl D.host.E)) (j : Matrix (Fin V'.rank) (Fin V.rank) (EAf D)),
       IsLatIsom V V' Λ Λ' j → MatchesAt V V' β β' T j →
       ∃ φ : GfC V ≃ₜ* GfC V', IsConjBy V V' j φ ∧ Carries V V' h Λ Λ' β β' (N * N') T φ
-
-def FiniteAdelicIdentification (D : D7) : Prop :=
-  LocalIsometry D ∧ GlobalIsometry D ∧ InducedIso D
 
 end GlobalTheory.IndefiniteRowSideFullHecke.IsometryCarriesCharacter
 

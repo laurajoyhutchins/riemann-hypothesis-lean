@@ -1,8 +1,57 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ThetaQuasiPeriods.Transl
+import Std.Tactic.BVDecide.Normalize.Prop
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.LinCombTrivG
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+
+@[expose] public section
 
 noncomputable section
 
@@ -115,7 +164,7 @@ open Out Out.Inh
 
 theorem valAt'_id (f : Γ(Sp ℂ, ⊤)) :
     valAt' (𝟙 (Sp ℂ)) ⊤ f = (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom.hom f := by
-  rw [valAt', dif_pos (show (⊤ : (Sp ℂ).Opens) ≤ 𝟙 (Sp ℂ) ⁻¹ᵁ ⊤ from le_rfl), valAt]
+  rw [valAt', dite_eq_left (show (⊤ : (Sp ℂ).Opens) ≤ 𝟙 (Sp ℂ) ⁻¹ᵁ ⊤ from le_rfl), valAt]
   congr 1
 
 theorem valAt'_id_bijective (U : (Sp ℂ).Opens) (hU : U = ⊤) :
@@ -124,54 +173,6 @@ theorem valAt'_id_bijective (U : (Sp ℂ).Opens) (hU : U = ⊤) :
   refine ⟨?_, by rw [valAt'_id, map_one]⟩
   rw [show valAt' (𝟙 (Sp ℂ)) ⊤ = _ from funext valAt'_id]
   exact ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (CommRingCat.of ℂ)).hom
-
-theorem unit_hom_left {X : Over (Sp ℂ)} (v : X ⟶ 𝟙_ (Over (Sp ℂ))) : v.left = X.hom :=
-  (Category.comp_id v.left).symm.trans (Over.w v)
-
-def zeroUnif : HolUnif (zeroPolAV (Sp ℂ)).A (zeroPolAV (Sp ℂ)).L 0 where
-  ex _ := 1
-  ex_add _ _ := (_root_.mul_one _).symm
-  ex_onto x := ⟨0, toUnit_unique _ _⟩
-  Λ := ⊤
-  ker _ := by simp
-  discrete := inferInstance
-  full := by simp
-  hol U f := ⟨isOpen_discrete _, differentiableOn_const _⟩
-  fr _ _ := 1
-  fr_hol _ := differentiableOn_const _
-  fr_ne _ _ _ := one_ne_zero
-  fr_compat i j z _ := by
-    rw [_root_.mul_one]
-    exact (valAt'_id_bijective _ (inf_idem _)).2.symm
-
-theorem isTangent_zero (v : epsR ℂ ⟶ (zeroPolAV (Sp ℂ)).A) : IsTangent v := by
-  have h1 : v.left = (epsR ℂ).hom := unit_hom_left v
-  have h2 : η[(zeroPolAV (Sp ℂ)).A].left = 𝟙 (Sp ℂ) := unit_hom_left (X := 𝟙_ _) _
-  rw [IsTangent, h1, h2]
-  change spMap _ ≫ spMap _ = _
-  rw [← Spec.map_comp]
-  refine Eq.trans ?_ (Spec.map_id (CommRingCat.of ℂ))
-  congr 1
-
-theorem snd_pull_eq_zero (φ : Sp (DualNumber ℂ) ⟶ Sp ℂ) (hφ : φ = spMap (algebraMap ℂ (DualNumber ℂ)))
-    (U : (Sp ℂ).Opens) (h : ⊤ ≤ φ ⁻¹ᵁ U) (f : Γ(Sp ℂ, U)) :
-    TrivSqZeroExt.snd (show DualNumber ℂ from
-      (Scheme.ΓSpecIso (CommRingCat.of (DualNumber ℂ))).hom.hom ((φ.appLE U ⊤ h).hom f)) = 0 := by
-  have hU : U = ⊤ := top_unique fun x _ => by
-    obtain ⟨y⟩ : Nonempty (Sp (DualNumber ℂ)) := inferInstanceAs (Nonempty (PrimeSpectrum (DualNumber ℂ)))
-    have hy : φ y ∈ U := h (show y ∈ (⊤ : (Sp (DualNumber ℂ)).Opens) from trivial)
-    rwa [show x = φ y from Subsingleton.elim (α := PrimeSpectrum ℂ) _ _]
-  subst hU hφ
-  have e : (spMap (algebraMap ℂ (DualNumber ℂ))).appLE ⊤ ⊤ h = (spMap (algebraMap ℂ (DualNumber ℂ))).appTop :=
-    Scheme.Hom.appLE_eq_app _
-  have n := congrArg (fun k => k.hom f) (Scheme.ΓSpecIso_naturality (CommRingCat.ofHom (algebraMap ℂ (DualNumber ℂ))))
-  rw [e]
-  exact (congrArg (TrivSqZeroExt.snd (R := ℂ) (M := ℂ)) n).trans rfl
-
-theorem isDiff_zero (w : Fin 0 → ℂ) (v : epsR ℂ ⟶ (zeroPolAV (Sp ℂ)).A) : zeroUnif.IsDiff w v := by
-  intro U h f
-  rw [Subsingleton.elim w 0, map_zero]
-  exact snd_pull_eq_zero v.left (unit_hom_left v) U h f
 
 end DimZero
 

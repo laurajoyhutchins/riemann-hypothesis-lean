@@ -1,5 +1,49 @@
-import Development.WeilBound.CoreStatements.BranchingTraces.ContinuousEmb
-import Formalism.SharpRestriction.CuspSpanNormBounds.LowestKTypeMultiplicity
+module
+
+public import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.SmoothCyclicVectors.SmoothVec
+public import Development.WeilBound.CoreStatements.BranchingTraces.HeBranching
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ModularCharacterEqOneOnExpHermitian
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,11 +70,13 @@ theorem u_adj (hU : IsURepOn (UJset ε) π) (g : UJ ε) (x y : H) : ⟪π (um g)
   conv_lhs => rw [hy]
   exact (LinearIsometry.mk (π (um g) : H →ₗ[ℂ] H) (hU.2.1 _ (umat_mem g))).inner_map_map x _
 
-theorem repOn (hU : IsURepOn (UJset ε) π) : RepOn (PI.PhMeasCore.UH (Jm ε)) π where
-  one_mem := (1 : UJ ε).2
-  mul_mem a ha b hb := (indefiniteUnitaryMk ε a ha * indefiniteUnitaryMk ε b hb).2
-  map_one := hU.1.1
-  map_mul a ha b hb := hU.1.2 a ha b hb
+theorem repOn (hU : IsURepOn (UJset ε) π) : RepOn (PI.PhMeasCore.UH (Jm ε)) π := by
+  exact {
+    one_mem := (1 : UJ ε).2
+    mul_mem := fun a ha b hb => (indefiniteUnitaryMk ε a ha * indefiniteUnitaryMk ε b hb).2
+    map_one := hU.1.1
+    map_mul := hU.1.2
+  }
 
 theorem smT_act (hU : IsURepOn (UJset ε) π) (g : UJ ε) {x : Fin m → H} (hx : x ∈ SmT ε π) : actT π (um g) x ∈ SmT ε π := by
   intro c

@@ -1,4 +1,66 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Field.ZMod
+public import Mathlib.RingTheory.FiniteType
+public import Mathlib.RingTheory.IntegralClosure.Algebra.Basic
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.RingTheory.MvPolynomial.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.FieldTheory.PurelyInseparable.Exponent
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Algebra.ZMod
+public import Mathlib.Algebra.CharP.Algebra
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
+public import Mathlib.FieldTheory.PurelyInseparable.Basic
+public import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 open scoped nonZeroDivisors
@@ -10,45 +72,14 @@ theorem module_finite_of_semilinear {B R M N : Type*} [CommRing B] [CommRing R] 
     [Module B N] [Module R N] [IsScalarTower R B N] [Module.Finite B N]
     (σ : B →+* R) (hσ : Function.Surjective σ) (φ : M →+ N) (hφ : Function.Injective φ)
     (hφσ : ∀ (b : B) (m : M), φ (b • m) = σ b • φ m) : Module.Finite B M := by
+  letI : RingHomSurjective σ := ⟨hσ⟩
   have : Module.Finite R N := Module.Finite.trans B N
   have : IsNoetherian R N := isNoetherian_of_isNoetherianRing_of_finite R N
-  let P : Submodule R N :=
-    { carrier := Set.range φ
-      add_mem' := by
-        rintro _ _ ⟨x, rfl⟩ ⟨y, rfl⟩
-        exact ⟨x + y, map_add φ x y⟩
-      zero_mem' := ⟨0, map_zero φ⟩
-      smul_mem' := by
-        rintro r _ ⟨x, rfl⟩
-        obtain ⟨b, rfl⟩ := hσ r
-        exact ⟨b • x, hφσ b x⟩ }
-  obtain ⟨s, hs⟩ := (IsNoetherian.noetherian P : P.FG)
-  have hsP : ∀ n ∈ s, ∃ m, φ m = n := fun n hn => by
-    have : n ∈ P := hs ▸ Submodule.subset_span hn
-    exact this
-  choose! g hg using hsP
-  classical
-  refine ⟨⟨s.image g, ?_⟩⟩
-  rw [eq_top_iff]
-  rintro m -
-  let Q : Submodule B M := Submodule.span B (s.image g : Set M)
-  let Q' : Submodule R N :=
-    { carrier := φ '' Q
-      add_mem' := by
-        rintro _ _ ⟨x, hx, rfl⟩ ⟨y, hy, rfl⟩
-        exact ⟨x + y, Q.add_mem hx hy, map_add φ x y⟩
-      zero_mem' := ⟨0, Q.zero_mem, map_zero φ⟩
-      smul_mem' := by
-        rintro r _ ⟨x, hx, rfl⟩
-        obtain ⟨b, rfl⟩ := hσ r
-        exact ⟨b • x, Q.smul_mem b hx, hφσ b x⟩ }
-  have hsQ' : (s : Set N) ⊆ Q' := by
-    intro n hn
-    refine ⟨g n, Submodule.subset_span ?_, hg n hn⟩
-    exact Finset.mem_coe.mpr (Finset.mem_image_of_mem g hn)
-  have hPQ : P ≤ Q' := hs ▸ Submodule.span_le.mpr hsQ'
-  obtain ⟨m', hm', he⟩ := hPQ (⟨m, rfl⟩ : φ m ∈ P)
-  exact hφ he ▸ hm'
+  let f : M →ₛₗ[σ] N :=
+    { toFun := φ
+      map_add' := φ.map_add
+      map_smul' := hφσ }
+  exact ⟨Submodule.fg_of_fg_map_injective f hφ (IsNoetherian.noetherian _)⟩
 
 theorem mvPolynomial_finite_frobenius_range (p : ℕ) [Fact p.Prime] (s e : ℕ) :
     Module.Finite (iterateFrobenius (MvPolynomial (Fin s) (ZMod p)) p e).range

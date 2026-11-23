@@ -1,6 +1,45 @@
-import Mathlib
-import Formalism.LocalToGlobal.Divisibility.ZscOfNum
-import Formalism.LocalToGlobal.Divisibility.HeckeRI
+module
+
+public import Formalism.LocalToGlobal.Divisibility.ZscOfNum
+public import Formalism.LocalToGlobal.Divisibility.HeckeRI
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 
@@ -30,15 +69,6 @@ def ZscOfNum3 (A3 : FamIn3 K G Pl0 I0 Ty T m) (P0 : Subgroup G) (ψ0 : P0 →* K
 
 variable (A3 : FamIn3 K G Pl0 I0 Ty T m) (P0 : Subgroup G) (ψ0 : P0 →* Kˣ) (Nd : NumDatum)
   (eJ : A3.fam3.base3.J ≃ Fin Nd.R.m) (Nc : ℝ)
-
-theorem ZscOfNum3_units (Zs : DefSub A3.fam3.amb3) :
-    (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).E1u = Nd.unitE Nc ∧
-      (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).l3u = Nd.B0 * Real.log (Real.log Nd.sc.x) ∧
-      (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).l6u = (Nd.R.f : ℝ) * (Nd.R.nV : ℝ) ^ 2 * Nd.Lp ∧
-      (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).x = Nd.sc.x ∧ (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).b = Nd.sc.b ∧
-      (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).la = Real.log (Fintype.card G) ∧
-      (ZscOfNum3 A3 P0 ψ0 Nd eJ Nc Zs).de = 8 * (Nd.R.f : ℝ) * (Nd.R.r : ℝ) / ((min (Nd.g 0) (Nd.g 1) : ℕ) : ℝ) :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 end Scale3
 

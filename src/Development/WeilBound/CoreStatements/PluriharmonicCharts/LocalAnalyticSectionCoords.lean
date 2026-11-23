@@ -1,11 +1,65 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogPeriodStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticFifth
+module
+
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ExistsBlkCover
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsImg
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PullbackPullback
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticFifth
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticFirst
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticThirdStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverBasePointInPointsStatement
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverFramesAtPointStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticEighthStatement
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticSecondStatement
-import Development.WeilBound.CoreStatements.PluriharmonicCharts.PullDegSome
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPoints
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPointsStatement
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogPeriodStatement
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.SameOrbitRefl
+public import Development.WeilBound.CoreStatements.PluriharmonicCharts.PullDegSome
+import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PCoordConeArithVar
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.GenericComplexPoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterBridgeB
+
+@[expose] public section
+
 open MvPolynomial MeasureTheory Filter Topology Matrix ReciprocityTheory.AnForm ReciprocityTheory.AnForm.M ReciprocityTheory.AnForm.P ReciprocityTheory.ChartRestriction.G.Geo ReciprocityTheory.ChartRestriction.G.AI.I1 ReciprocityTheory.ChartRestriction.G.AI.I2 ReciprocityTheory.ChartRestriction.G.AI.I4 GlobalTheory.CompanionTheory.Ar.PB GroundTheory.Heights₂.Heights GroundTheory.Heights₂.Heights.LowerBoundFree
 open scoped ComplexOrder Classical
 open GlobalTheory.CompanionTheory.Ar.PB.WSq GlobalTheory.CompanionTheory.Ar.PB.CovMap PositivityTheory.Xgp.c_algsq
@@ -20,8 +74,6 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 def joinPt {R : Type} (k₀ : K) (z₀ z₁ : (Σ k, ι k) → R) : (Σ o : Option K, ι (o.getD k₀)) → R
   | ⟨some k, m⟩ => z₀ ⟨k, m⟩
   | ⟨none, m⟩ => z₁ ⟨k₀, m⟩
-
-theorem join_v₀ {R : Type} (k₀ : K) (z₀ z₁ : (Σ k, ι k) → R) : joinPt k₀ z₀ z₁ ∘ v₀ k₀ = z₀ := rfl
 
 theorem join_v₁ {R : Type} {k₀ : K} {z₀ z₁ : (Σ k, ι k) → R} (h : ∀ k, k ≠ k₀ → ∀ m, z₀ ⟨k, m⟩ = z₁ ⟨k, m⟩) :
     joinPt k₀ z₀ z₁ ∘ v₁ k₀ = z₁ := by
@@ -174,8 +226,8 @@ section Cov
 
 variable {M : FlagModel y Ψ N j} {M' : FlagModel y' Ψ N j}
 
-open FibreCount in
 
+open FibreCount in
 theorem img_blk (Cv : FlagCover M' M) {d : ℕ}
     (hy : IsArithVar (mCoordIdeal y) (d + 2)) (hy' : IsArithVar (mCoordIdeal y') (d + 2))
     {w₁ w₂ : (Σ k, ι k) → ℂ} (hw : w₁ ∈ mcPts (mCoordIdeal y)) {z₁ z₂ : (Σ k, ι' k) → ℂ}

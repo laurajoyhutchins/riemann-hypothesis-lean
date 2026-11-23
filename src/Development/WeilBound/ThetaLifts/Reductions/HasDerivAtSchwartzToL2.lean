@@ -1,4 +1,54 @@
-import Development.WeilBound.ThetaLifts.Reductions.MetaDef
+module
+
+import CompanionTheory.ThickeningEstimates.LieGroupReduction.HasDerivAtSchwartzToL2
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IteratedLineDerivMemWeylAlg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Monotonicity.Lemmas
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Development.WeilBound.ThetaLifts.CartanFactorisation.EqOfInner
+
+@[expose] public section
 
 noncomputable section
 
@@ -22,50 +72,7 @@ theorem csmul (r : ℝ) (x : L2 l) : (r : ℂ) • x = r • x := by
 theorem hasDerivAt_schwartz_to_L2 {F : ℝ → Sch l} {G : Sch l} {t₀ : ℝ} (hp : ∀ x, HasDerivAt (fun t => F t x) (G x) t₀) {C : ℝ}
     (hb : ∀ᶠ t in 𝓝 t₀, ∀ x, (1 + ‖x‖) ^ (Module.finrank ℝ (EuclideanSpace ℝ l) + 1) * ‖F t x - F t₀ x‖ ≤ C * |t - t₀|) :
     HasDerivAt (fun t => schwartzToL2 l (F t)) (schwartzToL2 l G) t₀ := by
-  set N := Module.finrank ℝ (EuclideanSpace ℝ l) + 1 with hN
-  obtain ⟨C', hC', hG⟩ := exists_decay G N
-  let u : ℝ → Sch l := fun t => (((t - t₀)⁻¹ : ℝ) : ℂ) • (F t - F t₀) - G
-  have hu : ∀ t x, u t x = (t - t₀)⁻¹ • (F t x - F t₀ x) - G x := fun t x => by
-    simp [u]
-  have h1 : Tendsto (fun t => ∫ x, ‖u t x‖ ^ (2 : ℝ)) (𝓝[≠] t₀) (𝓝 (∫ _x : EuclideanSpace ℝ l, (0 : ℝ))) := by
-    have hi := (integrable_one_add_norm (E := EuclideanSpace ℝ l) (μ := volume) (r := N)
-      (by rw [hN]; push_cast; linarith)).const_mul ((C + C') ^ 2)
-    refine tendsto_integral_filter_of_dominated_convergence _
-      (.of_forall fun t => ((u t).continuous.norm.rpow_const fun _ => Or.inr (by norm_num)).aestronglyMeasurable) ?_ hi
-      (.of_forall fun x => ?_)
-    · filter_upwards [nhdsWithin_le_nhds hb, self_mem_nhdsWithin] with t ht ht0
-      refine .of_forall fun x => ?_
-      have ht1 : 0 < |t - t₀| := abs_pos.2 (sub_ne_zero.2 ht0)
-      have hw : 1 ≤ (1 + ‖x‖) ^ N := one_le_pow₀ (by simp)
-      have h2 : (1 + ‖x‖) ^ N * ‖u t x‖ ≤ C + C' := by
-        rw [hu]
-        refine (mul_le_mul_of_nonneg_left (norm_sub_le _ _) (by positivity)).trans ?_
-        rw [mul_add, norm_smul, norm_inv, Real.norm_eq_abs]
-        refine add_le_add ?_ (hG x)
-        rw [mul_left_comm, inv_mul_le_iff₀ ht1, mul_comm |t - t₀|]
-        exact ht x
-      rw [Real.rpow_neg (by positivity), Real.rpow_natCast, Real.rpow_two, Real.norm_of_nonneg (by positivity),
-        ← div_eq_mul_inv, le_div_iff₀ (by positivity)]
-      have h3 : ((1 + ‖x‖) ^ N * ‖u t x‖) ^ 2 ≤ (C + C') ^ 2 := pow_le_pow_left₀ (by positivity) h2 2
-      refine le_trans ?_ h3
-      rw [mul_pow, mul_comm]
-      gcongr
-      nlinarith
-    · have h2 := (hasDerivAt_iff_tendsto_slope.1 (hp x))
-      have h3 := tendsto_iff_norm_sub_tendsto_zero.1 h2
-      have h4 := h3.rpow_const (p := 2) (Or.inr (by norm_num))
-      simpa [hu, slope_def_module] using h4
-  rw [integral_zero] at h1
-  have h2 := h1.rpow_const (p := 2⁻¹) (Or.inr (by norm_num))
-  rw [Real.zero_rpow (by norm_num)] at h2
-  rw [hasDerivAt_iff_tendsto_slope, tendsto_iff_norm_sub_tendsto_zero]
-  refine h2.congr fun t => ?_
-  have : slope (fun t => schwartzToL2 l (F t)) t₀ t - schwartzToL2 l G = (u t).toLp 2 volume := by
-    rw [← schwartzToL2_apply, slope_def_module]
-    simp only [u, map_sub, map_smul]
-    simp only [csmul]
-  rw [this, norm_toLp' (by simp) (by simp)]
-  simp
+  apply CompanionTheory.ThKR.LL.hasDerivAt_schwartz_to_L2 <;> assumption
 
 def LD (U : ℝ → Sch l →L[ℂ] Sch l) (Q : Sch l → Sch l) (t₀ : ℝ) : Prop :=
   ∀ f, HasDerivAt (fun t => schwartzToL2 l (U t f)) (schwartzToL2 l (Q f)) t₀
@@ -91,7 +98,7 @@ theorem LD.mul {U W : ℝ → Sch l →L[ℂ] Sch l} {P Q : Sch l → Sch l} {t�
   have h2 : HasDerivAt (fun t : ℝ => (t - t₀) • schwartzToL2 l (U t (Q f))) (schwartzToL2 l (U t₀ (Q f))) t₀ := by
     simpa using ((hasDerivAt_id t₀).sub_const t₀).fun_smul (hU (Q f))
   have h3 := (h1.fun_add h2).fun_add (hU (W t₀ f))
-  rw [zero_add, ← map_add, add_comm (U t₀ (Q f))] at h3
+  rw [zero_add, ← map_add (f := _), add_comm (U t₀ (Q f))] at h3
   refine h3.congr_of_eventuallyEq (.of_forall fun t => ?_)
   simp only [ContinuousLinearMap.mul_apply, map_sub, map_smul]
   simp only [csmul]
@@ -103,6 +110,7 @@ theorem weyl_step {V : Sch l →L[ℂ] Sch l} {w v : l ⊕ l → ℝ} (h : ∀ f
     (A : Sch l →L[ℂ] Sch l) (f : Sch l) :
     schwartzToL2 l ((A * dRho w) (V f)) = ∑ a, v a • schwartzToL2 l (A (V (dRho (Pi.single a 1) f))) := by
   rw [ContinuousLinearMap.mul_apply, h, dRho_eq_sum v]
+
   simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, map_sum, map_smul]
   simp only [csmul]
 
@@ -119,7 +127,7 @@ theorem LD.differentiableAt {V : ℝ → Sch l →L[ℂ] Sch l} {Q : Sch l → S
       filter_upwards [h] with t ht
       exact weyl_step (ht w) A f
     · intro A B hA hB f
-      simp only [ContinuousLinearMap.add_apply, map_add]
+      simp only [ContinuousLinearMap.add_apply, map_add (f := _)]
       exact (hA f).add (hB f)
     · intro c A hA f
       simp only [ContinuousLinearMap.smul_apply, map_smul]
@@ -142,14 +150,15 @@ theorem LD.hasDerivAt {V : ℝ → Sch l →L[ℂ] Sch l} {Q : Sch l →L[ℂ] S
       · have e : dRho w * Q = Q * dRho w - dRho (v' w) := by rw [← hQ, sub_sub_cancel]
         rw [ContinuousLinearMap.mul_apply, ← ContinuousLinearMap.mul_apply (dRho w), e, dRho_eq_sum w,
           dRho_eq_sum (v' w)]
+
         simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, map_sum, map_smul, hv0, h0,
-          ContinuousLinearMap.sub_apply, ContinuousLinearMap.mul_apply, map_sub, neg_smul, ← sub_eq_add_neg,
-          Finset.sum_sub_distrib]
+        ContinuousLinearMap.sub_apply, ContinuousLinearMap.mul_apply, map_sub, neg_smul, ← sub_eq_add_neg,
+        Finset.sum_sub_distrib]
         simp only [csmul]
       · filter_upwards [h] with t ht
         exact weyl_step (ht w) A f
     · intro A B hA hB f
-      simp only [ContinuousLinearMap.add_apply, map_add]
+      simp only [ContinuousLinearMap.add_apply, map_add (f := _)]
       exact (hA f).add (hB f)
     · intro c A hA f
       simp only [ContinuousLinearMap.smul_apply, map_smul]

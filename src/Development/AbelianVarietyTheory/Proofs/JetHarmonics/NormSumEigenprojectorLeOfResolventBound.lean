@@ -1,4 +1,60 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.FDeriv.Add
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+public import Mathlib.Analysis.Complex.CauchyIntegral
+
+@[expose] public section
+
 open Finset
 open scoped InnerProductSpace
 
@@ -18,13 +74,13 @@ private lemma circleIntegral_finset_sum_of_continuousOn {E ι : Type*} [NormedAd
     have hs : ∀ i ∈ s, ContinuousOn (f i) (Metric.sphere c R) :=
       fun i hi => hf i (Finset.mem_insert_of_mem hi)
     have hsum : ContinuousOn (fun z => ∑ i ∈ s, f i z) (Metric.sphere c R) :=
-      continuousOn_finset_sum s hs
+      continuousOn_finsetSum s hs
     simp only [Finset.sum_insert ha]
     rw [circleIntegral.integral_add (ha'.circleIntegrable hR) (hsum.circleIntegrable hR), ih hs]
 
+
 open Finset Complex in
 open scoped InnerProductSpace in
-
 theorem _root_.GlobalTheory.norm_sum_eigenprojector_le_of_resolvent_bound :
     ∀ (H κ : Type) [NormedAddCommGroup H] [NormedSpace ℂ H] [Fintype κ] [DecidableEq κ]
     (VV : Submodule ℂ H) (T : H →ₗ[ℂ] H) (p : κ → H →ₗ[ℂ] H) (lam : κ → ℂ) (In : Finset κ)
@@ -54,6 +110,7 @@ theorem _root_.GlobalTheory.norm_sum_eigenprojector_le_of_resolvent_bound :
     have hcoe : ((F ζ : VV) : H) = ∑ i, (ζ - lam i)⁻¹ • p i x := by
       simp [F, v]
     have key : ζ • ((F ζ : VV) : H) - T ((F ζ : VV) : H) = x := by
+
       rw [hcoe, map_sum, Finset.smul_sum, ← Finset.sum_sub_distrib]
       conv_rhs => rw [← hsum x hx]
       refine Finset.sum_congr rfl fun i _ => ?_

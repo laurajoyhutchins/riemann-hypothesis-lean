@@ -1,6 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.MassDataInst
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalVolumeIndices.LocLocGLInvVal
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalVolumeIndices.LocLocGLInvVal
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,8 +88,8 @@ theorem LocB_eOf_mem (a : Af I.F) (ha : a ∈ Formalism.UG.intAd I.F) : eOf I a 
   show eOf I a ∈ Formalism.UG.tensInt (F := I.F) (Af I.F) (Formalism.UG.intOE I.E) (Formalism.UG.intAd I.F)
   exact Subring.subset_closure (Or.inr ⟨⟨a, ha⟩, rfl⟩)
 
-open scoped Classical in
 
+open scoped Classical in
 def locG (a : Af I.F) (x : I.Gf) : I.Gf :=
   if h : a * a = a then
     ⟨locGL (eOf I a) (LocB_eOf_idem I a h) (x : GL (Fin I.n) (I.E ⊗[I.F] Af I.F)), by
@@ -59,7 +99,7 @@ def locG (a : Af I.F) (x : I.Gf) : I.Gf :=
 
 theorem LocB_fmat (a : Af I.F) (ha : a * a = a) (x : I.Gf) :
     I.fmat (locG I a x) = locM (eOf I a) (I.fmat x) := by
-  rw [locG, dif_pos ha]
+  rw [locG, dite_eq_left ha]
   exact Loc_locGL_val _ _ _
 
 theorem LocB_ext (x y : I.Gf) (h : I.fmat x = I.fmat y) : x = y := Subtype.ext (Units.ext h)

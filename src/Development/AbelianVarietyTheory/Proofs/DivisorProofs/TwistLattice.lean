@@ -1,10 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.MemPass
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsTrSelf
-import Development.AbelianVarietyTheory.Definitions.Divisors.ZetaActRefl
-import Development.AbelianVarietyTheory.Definitions.Divisors.TorsTransport
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeDecompositionOfIdeleApprox
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.IsTrSelf
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ZetaActRefl
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.LatticeNormTransport
+public import Development.AbelianVarietyTheory.Definitions.Divisors.HasLevelStd
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLatticeDecompositionOfIdeleApprox
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteAdeleStrongApproximationModNat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.CMVal GlobalTheory.HilbFam GlobalTheory.WpFam GlobalTheory.QFam ReciprocityTheory.ChartRestriction.L1
 open scoped UpperHalfPlane nonZeroDivisors Matrix
 
@@ -72,7 +118,7 @@ theorem IsW.row (hO : ∀ z : K, algebraMap K (Af K) z ∈ intA K ↔ ∃ a b : 
   have hDK : (D : K) ≠ 0 := Nat.cast_ne_zero.2 hD
   set z : K := ((p * W 0 0 + q * W 1 0 - r : ℤ) * θ + (p * W 0 1 + q * W 1 1 - s : ℤ)) with hz
   have h1 : algebraMap K (Af K) z = D * (w - p * w₁ - q * w₂) := by
-    simp only [hz, map_add, map_mul, map_intCast] at e e₁ e₂ ⊢
+    simp only [hz, map_add (f := _), map_mul, map_intCast] at e e₁ e₂ ⊢
     push_cast
     linear_combination e - p * e₁ - q * e₂
   have h2 : algebraMap K (Af K) (z / D) = w - p * w₁ - q * w₂ := by
@@ -134,13 +180,13 @@ variable {F : Type} [Field F] [NumberField F]
 
 def vm (x : Fin 2 → F) (P : Matrix (Fin 2) (Fin 2) ℤ) : Fin 2 → F := x ᵥ* P.map (Int.cast : ℤ → F)
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 theorem vm_apply (x : Fin 2 → F) (P : Matrix (Fin 2) (Fin 2) ℤ) (j : Fin 2) : vm x P j = x 0 * P 0 j + x 1 * P 1 j := by
   simp [vm, Matrix.vecMul, dotProduct, Fin.sum_univ_two]
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 theorem vm_vm (x : Fin 2 → F) {P Q Z : Matrix (Fin 2) (Fin 2) ℤ} {D : ℕ} (h : P * Q = 1 + (D : ℤ) • Z) :
     vm (vm x P) Q = x + (D : 𝓞 F) • vm x Z := by
   have h' : ∀ i j, ((P i 0 * Q 0 j + P i 1 * Q 1 j : ℤ) : F) = (((1 : Matrix (Fin 2) (Fin 2) ℤ) i j + D * Z i j : ℤ) : F) :=
@@ -176,8 +222,8 @@ theorem mem_twist (N : ℕ) (L : Lat F) (α : Matrix (Fin 2) (Fin 2) (ZMod N)) (
   · rintro ⟨l, hl, z, hz, rfl⟩
     exact ⟨_, ⟨l, hl, rfl⟩, _, ⟨z, hz, rfl⟩, by rw [← e]; rfl⟩
 
-omit [NumberField F] in
 
+omit [NumberField F] in
 theorem vm_add_smul (x z : Fin 2 → F) (a : 𝓞 F) (P : Matrix (Fin 2) (Fin 2) ℤ) :
     vm (x + a • z) P = vm x P + a • vm z P := by
   funext j
@@ -261,7 +307,7 @@ theorem twist_lattice : ∀ (K : Type) [Field K] [NumberField K] (ι : K →+* �
       rw [← SetLike.mem_coe (p := Λ₁.lattice), h1, ι.injective.mem_set_image]; rfl
     rw [mem_intA, ← h𝔞 z, e2, hτ₁.2]
     refine exists₂_congr fun a b => ?_
-    rw [← ι.injective.eq_iff, map_add, map_mul, map_mul, hκ₁, hκ₂, map_intCast, map_intCast]
+    rw [← ι.injective.eq_iff, map_add (f := _), map_mul, map_mul, hκ₁, hκ₂, map_intCast, map_intCast]
     constructor <;> intro h <;> linear_combination h
   have hI : ∀ a b : ℤ, (a : K) * θ₀ + b = 0 → a = 0 ∧ b = 0 := fun a b h => by
     have h' := congrArg (fun z => (ι z).im) h
@@ -282,9 +328,9 @@ theorem twist_lattice : ∀ (K : Type) [Field K] [NumberField K] (ι : K →+* �
     obtain ⟨k, k', hk, hk', hT⟩ := htor v
     have hNC : (N : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hN
     have ek : (((v 0).val : ℤ) : K) * θ₀ + (((v 1).val : ℤ) : K) = N * k := ι.injective (by
-      simp only [map_add, map_mul, map_intCast, map_natCast, hk, hθ, tors, Int.cast_natCast]; field_simp)
+      simp only [map_add (f := _), map_mul, map_intCast, map_natCast, hk, hθ, tors, Int.cast_natCast]; field_simp)
     have ek' : (((vmul v A 0).val : ℤ) : K) * κ₁ + (((vmul v A 1).val : ℤ) : K) * κ₂ = N * k' := ι.injective (by
-      simp only [map_add, map_mul, map_intCast, map_natCast, hk', hκ₁, hκ₂, tors, Int.cast_natCast]; field_simp)
+      simp only [map_add (f := _), map_mul, map_intCast, map_natCast, hk', hκ₁, hκ₂, tors, Int.cast_natCast]; field_simp)
     obtain ⟨r0, r1⟩ := (hW.of_dvd (D' := N) ⟨_, rfl⟩).row hO hI hN (mem_intA.2 hT)
       (p := (vmul v A 0).val) (q := (vmul v A 1).val) (r := (v 0).val) (s := (v 1).val) (by
         rw [ek, ek', map_mul, map_mul, map_natCast]; ring)
@@ -302,7 +348,7 @@ theorem twist_lattice : ∀ (K : Type) [Field K] [NumberField K] (ι : K →+* �
   obtain ⟨⟨w₁, hw₁, e₁⟩, ⟨w₂, hw₂, e₂⟩⟩ := hW
   have f₁ := congrArg (GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.finiteAdeleMap K E) e₁
   have f₂ := congrArg (GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.finiteAdeleMap K E) e₂
-  simp only [map_add, map_mul, GlobalTheory.LatDecomp.finiteAdeleMap_algebraMap, map_intCast, map_natCast] at f₁ f₂
+  simp only [map_add (f := _), map_mul, GlobalTheory.LatDecomp.finiteAdeleMap_algebraMap, map_intCast, map_natCast] at f₁ f₂
   have hx : ∀ i, (d : Af E) * algebraMap E (Af E) ((x i : maximalRealSubfield E) : E) ∈ intA E := fun i => by
     obtain ⟨r, hr⟩ := Submodule.mem_one.1 (hd i trivial)
     have hr' : (d : E) * ((x i : maximalRealSubfield E) : E) = ((algebraMap (OF E) (𝓞 E) r : 𝓞 E) : E) := by
@@ -317,7 +363,7 @@ theorem twist_lattice : ∀ (K : Type) [Field K] [NumberField K] (ι : K →+* �
   rw [← add_mem_cancel_right (H := hatO c) hz, mul_inv_rev, inv_inv, Units.val_mul]
   have hT : (GlobalTheory.IndefiniteRowSideFullHecke.LatticeNormTransport.upIdele K E t : Af E) = GlobalTheory.IndefiniteRowSideFullHecke.UnitaryHeckeCharacterIdele.finiteAdeleMap K E (t : Af K) := rfl
   refine iff_of_eq (congrArg (· ∈ hatO c) ?_)
-  simp only [hT, vm_apply, Subfield.coe_add, Subfield.coe_mul, SubringClass.coe_intCast, map_add, map_mul, map_intCast,
+  simp only [hT, vm_apply, Subfield.coe_add, Subfield.coe_mul, SubringClass.coe_intCast, map_add (f := _), map_mul, map_intCast,
     map_natCast]
   push_cast at f₁ f₂
   linear_combination (-(algebraMap E (Af E) (n : E)⁻¹ * ((y⁻¹ : (Af E)ˣ) : Af E))) *

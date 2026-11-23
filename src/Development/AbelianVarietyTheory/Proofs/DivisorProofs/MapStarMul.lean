@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.Topology.Instances.Matrix
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.Normed
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -10,9 +63,9 @@ section Exp
 
 variable {m n : Type} [Fintype m] [DecidableEq m] [Fintype n] [DecidableEq n]
 
+
 open scoped Matrix in
 variable {m n : Type} [Fintype m] [DecidableEq m] [Fintype n] [DecidableEq n] in
-
 theorem _root_.GlobalTheory.IndLine.Iwasawa.exp_mul_eq {A : Matrix m m ℂ} {D : Matrix n n ℂ}
     {B : Matrix m n ℂ} (h : A * B = B * D) :
     NormedSpace.exp A * B = B * NormedSpace.exp D := by
@@ -65,10 +118,6 @@ structure Grading (p r q θ : R) : Prop where
   sum : r = 1 - p - q
   θθ : θ * θ = 1
   θp : θ * p = q * θ
-
-example : Grading (R := Matrix (Fin 3) (Fin 3) ℤ) !![1, 0, 0; 0, 0, 0; 0, 0, 0] !![0, 0, 0; 0, 1, 0; 0, 0, 0]
-    !![0, 0, 0; 0, 0, 0; 0, 0, 1] !![0, 0, 1; 0, 1, 0; 1, 0, 0] := by
-  constructor <;> decide
 
 namespace Grading
 
@@ -214,9 +263,6 @@ structure Hyp (c : A →+* A) (J : Matrix m m A) (x y : m → A) (ι : Matrix m 
   right : ι * ι' = 1 - prX c J x y - prY c J x y
 
 variable {c : A →+* A} {c' : A' →+* A'} {J : Matrix m m A} {x y : m → A} {ι : Matrix m n A} {ι' : Matrix n m A}
-
-example : Hyp (RingHom.id ℤ) !![0, 1; -1, 0] ![1, 0] ![0, 1] (0 : Matrix (Fin 2) (Fin 0) ℤ) 0 := by
-  constructor <;> first | decide | (intro a; rfl)
 
 theorem map_mulVec' (f : A →+* A') (hf : ∀ a, f (c a) = c' (f a)) (J : Matrix m m A) (x : m → A) :
     f ∘ (J *ᵥ (c ∘ x)) = J.map f *ᵥ (c' ∘ (f ∘ x)) := by

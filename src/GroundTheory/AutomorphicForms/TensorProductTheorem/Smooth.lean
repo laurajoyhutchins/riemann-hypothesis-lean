@@ -1,7 +1,53 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.SmoothRep
-import GroundTheory.AutomorphicForms.TensorProductTheorem.Restricted
-import GroundTheory.AutomorphicForms.TensorProductTheorem.TotallyDisconnectedSpaceRestrictedProduct
+module
+
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.Restricted
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.TotallyDisconnectedSpaceRestrictedProduct
+import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,12 +67,12 @@ variable {ι : Type*} {G : ι → Type*} [∀ v, Group (G v)] [∀ v, Topologica
   {V : ι → Type*} [∀ v, AddCommGroup (V v)] [∀ v, Module ℂ (V v)]
   {π : ∀ v, Representation ℂ (G v) (V v)} {ξ : ∀ v, V v}
 
+
 omit [∀ v, TopologicalSpace (G v)] [∀ v, IsTopologicalGroup (G v)]
   [∀ v, LocallyCompactSpace (G v)] [∀ v, T2Space (G v)] [∀ v, TotallyDisconnectedSpace (G v)]
   hKo hKc in
-
 theorem tensorRep_mulSingle_tprod [DecidableEq ι] (a : ι) (k : G a) (x : ∀ v, V v) :
-    tensorRep K π (RestrictedProduct.mulSingle K a k) (tprod ℂ x) =
+    tensorRep (K := K) π (RestrictedProduct.mulSingle K a k) (tprod ℂ x) =
       tprod ℂ (Function.update x a (π a k (x a))) := by
   rw [tensorRep_tprod]
   congr 1
@@ -56,7 +102,7 @@ theorem exists_boxSubgroup_fixing (hπ : ∀ v, IsSmooth (π v))
     (ht : t ∈ restrictedTensor ξ) :
     ∃ K' : ∀ v, Subgroup (G v), (∀ v, IsCompact (K' v : Set (G v))) ∧
       (∀ v, IsOpen (K' v : Set (G v))) ∧ (∀ v, K' v ≤ K v) ∧ (∀ᶠ v in cofinite, K' v = K v) ∧
-        ∀ g ∈ boxSubgroup K K', tensorRep K π g t = t := by
+        ∀ g ∈ boxSubgroup K K', tensorRep (K := K) π g t = t := by
   classical
   have hKcs : ∀ v, IsCompact (K v : Set (G v)) := fun v => isCompact_iff_compactSpace.2 (hKc v)
   induction ht using Submodule.span_induction with
@@ -99,7 +145,7 @@ theorem exists_boxSubgroup_fixing (hπ : ∀ v, IsSmooth (π v))
       fun g hg => ?_⟩
     · filter_upwards [hAe, hBe] with v h1 h2
       rw [h1, h2, inf_idem]
-    · rw [map_add, hAfix g fun v => (hg v).1, hBfix g fun v => (hg v).2]
+    · rw [map_add (f := _), hAfix g fun v => (hg v).1, hBfix g fun v => (hg v).2]
   | smul c a _ ha =>
     obtain ⟨A, hAc, hAo, hAK, hAe, hAfix⟩ := ha
     exact ⟨A, hAc, hAo, hAK, hAe, fun g hg => by rw [map_smul, hAfix g hg]⟩
@@ -125,8 +171,8 @@ theorem isCompact_boxSubgroup_of_eq :
     IsCompact (boxSubgroup K K' : Set (Πʳ v, [G v, K v])) :=
   isCompact_boxSubgroup hK'c (hK'e.mono fun v h => h.le)
 
-include hπ hξ hK'c hK'o hK'e in
 
+include hπ hξ hK'c hK'o hK'e in
 theorem coe_fixedProj_tprod {x : ∀ v, V v} (hx : IsRestricted ξ x) :
     ((fixedProj (restrictedTensorRep π ξ hξ) (isSmooth_restrictedTensorRep hπ hξ)
       (isCompact_boxSubgroup_of_eq hK'c hK'e) (isOpen_boxSubgroup hK'o hK'e)
@@ -144,7 +190,7 @@ theorem coe_fixedProj_tprod {x : ∀ v, V v} (hx : IsRestricted ξ x) :
       fixedVectors ρW H := by
     intro g hg
     refine Subtype.ext ?_
-    show tensorRep K π g (tprod ℂ y) = tprod ℂ y
+    show tensorRep (K := K) π g (tprod ℂ y) = tprod ℂ y
     rw [tensorRep_tprod]
     congr 1
     funext v
@@ -232,9 +278,9 @@ variable (hπ : ∀ v, IsAdmissible (π v)) (hξ : ∀ᶠ v in cofinite, ξ v �
   {K' : ∀ v, Subgroup (G v)} (hK'c : ∀ v, IsCompact (K' v : Set (G v)))
   (hK'o : ∀ v, IsOpen (K' v : Set (G v)))
 
+
 omit [∀ v, IsTopologicalGroup (G v)] [∀ v, LocallyCompactSpace (G v)] [∀ v, T2Space (G v)]
   [∀ v, TotallyDisconnectedSpace (G v)] hKo hKc in
-
 def windowEmbed [DecidableEq ι] (ξ : ∀ v, V v) (S : Finset ι) :
     (⨂[ℂ] v : S, fixedVectors (π v) (K' v)) →ₗ[ℂ] ⨂[ℂ] v, V v :=
   finiteEmbed ξ S ∘ₗ PiTensorProduct.map fun v => (fixedVectors (π v) (K' v)).subtype
@@ -247,17 +293,9 @@ theorem windowEmbed_tprod [DecidableEq ι] (S : Finset ι)
   rw [windowEmbed, LinearMap.comp_apply, PiTensorProduct.map_tprod, finiteEmbed_tprod]
   rfl
 
-include hπ hK'c hK'o in
-omit [∀ v, IsTopologicalGroup (G v)] [∀ v, LocallyCompactSpace (G v)] [∀ v, T2Space (G v)]
-  [∀ v, TotallyDisconnectedSpace (G v)] hKo hKc in
-theorem finiteDimensional_range_windowEmbed [DecidableEq ι] (S : Finset ι) :
-    FiniteDimensional ℂ (LinearMap.range (windowEmbed (π := π) (K' := K') ξ S)) := by
-  have : ∀ v : S, FiniteDimensional ℂ (fixedVectors (π v) (K' v)) :=
-    fun v => (hπ v).2 _ (hK'c v) (hK'o v)
-  exact LinearMap.finiteDimensional_range _
+
 
 include hπ hK'c hK'o in
-
 theorem le_range_windowEmbed [DecidableEq ι] (hK'e : ∀ᶠ v in cofinite, K' v = K v)
     (S : Finset ι) (hSK : ∀ v ∉ S, K' v = K v)
     (hSgel : ∀ v ∉ S, ∀ u ∈ fixedVectors (π v) (K v), ∃ c : ℂ, u = c • ξ v)
@@ -326,32 +364,6 @@ theorem le_range_windowEmbed [DecidableEq ι] (hK'e : ∀ᶠ v in cofinite, K' v
     exact Submodule.smul_mem _ _ ha
 
 end Admissible
-
-theorem isAdmissible_restrictedTensorRep (hπ : ∀ v, IsAdmissible (π v))
-    (hξ : ∀ᶠ v in cofinite, ξ v ∈ fixedVectors (π v) (K v))
-    (hgel : ∀ᶠ v in cofinite, ∀ u ∈ fixedVectors (π v) (K v), ∃ c : ℂ, u = c • ξ v) :
-    IsAdmissible (restrictedTensorRep π ξ hξ) := by
-  classical
-  have hπs : ∀ v, IsSmooth (π v) := fun v => (hπ v).1
-  refine ⟨isSmooth_restrictedTensorRep hπs hξ, fun H hHc hHo => ?_⟩
-  obtain ⟨K', hK'c, hK'o, -, hK'e, hsub⟩ := exists_boxSubgroup_subset
-    (fun v => isCompact_iff_compactSpace.2 (hKc v)) (hHo.mem_nhds H.one_mem)
-  set S : Finset ι := ((Filter.eventually_cofinite.1 ((hK'e.and hgel).and hξ))).toFinset
-  have hS : ∀ v ∉ S, K' v = K v ∧ (∀ u ∈ fixedVectors (π v) (K v), ∃ c : ℂ, u = c • ξ v) ∧
-      ξ v ∈ fixedVectors (π v) (K v) := fun v hv => by simpa [S] using hv
-  have hle := le_range_windowEmbed hπ hξ hK'c hK'o hK'e S (fun v hv => (hS v hv).1)
-    (fun v hv => (hS v hv).2.1) (fun v hv => (hS v hv).2.2)
-  have hfin := finiteDimensional_range_windowEmbed hπ hK'c hK'o (ξ := ξ) S
-  have hbox : FiniteDimensional ℂ (fixedVectors (restrictedTensorRep π ξ hξ) (boxSubgroup K K')) := by
-    let f := ((restrictedTensor ξ).subtype ∘ₗ
-      (fixedVectors (restrictedTensorRep π ξ hξ) (boxSubgroup K K')).subtype)
-    have hf : ∀ a b, f a = f b → a = b := fun a b h => Subtype.ext (Subtype.ext h)
-    let f' := LinearMap.codRestrict (LinearMap.range (windowEmbed (π := π) (K' := K') ξ S)) f
-      (fun t => hle ⟨t, t.2, rfl⟩)
-    exact Module.Finite.of_injective f' (fun a b h => hf a b (by
-      have := congrArg Subtype.val h
-      simpa [f'] using this))
-  exact Submodule.finiteDimensional_of_le (fixedVectors_antitone _ hsub)
 
 end RestrictedTensor
 

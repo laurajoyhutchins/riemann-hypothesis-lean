@@ -1,5 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.CdScaleTieIff
+module
+
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselGapDimensionFormula
+public import Development.AbelianVarietyTheory.Definitions.Foundations.CdScaleTieIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField Matrix GlobalTheory.Mem.Vol
 open scoped TensorProduct
@@ -16,7 +57,7 @@ theorem lamS_succ_lt (R : Ranks) (P : HCParam R) (i j : Fin R.r) (hij : j.val = 
   unfold Formalism.MainNotions.S.lamS
   by_cases hj : j.val < R.k - 1
   · have hi : i.val < R.k - 1 := by omega
-    rw [dif_pos hj, dif_pos hi]
+    rw [dite_eq_left hj, dite_eq_left hi]
     have key : P.v ⟨j.val, hj⟩ < P.v ⟨i.val, hi⟩ :=
       calc P.v ⟨j.val, hj⟩ < P.u ⟨j.val, by omega⟩ := P.u_gt_v ⟨j.val, hj⟩
         _ = P.u ⟨i.val + 1, by omega⟩ := hu _ _ (by simp [hij])
@@ -24,7 +65,7 @@ theorem lamS_succ_lt (R : Ranks) (P : HCParam R) (i j : Fin R.r) (hij : j.val = 
     exact_mod_cast key
   · by_cases hi : i.val < R.k - 1
     · have hj0 : j.val - (R.k - 1) < R.m := by omega
-      rw [dif_neg hj, dif_pos hj0, dif_pos hi]
+      rw [dite_eq_right hj, dite_eq_left hj0, dite_eq_left hi]
       have key : -P.b ⟨j.val - (R.k - 1), hj0⟩ < P.v ⟨i.val, hi⟩ :=
         calc -P.b ⟨j.val - (R.k - 1), hj0⟩ = -P.b ⟨0, by omega⟩ :=
             congrArg (fun x => -x) (hb _ _ (show j.val - (R.k - 1) = 0 by omega))
@@ -37,7 +78,7 @@ theorem lamS_succ_lt (R : Ranks) (P : HCParam R) (i j : Fin R.r) (hij : j.val = 
     · have hj0 : j.val - (R.k - 1) < R.m := by omega
       have hi0 : i.val - (R.k - 1) < R.m := by omega
       have hi1 : i.val - (R.k - 1) + 1 < R.m := by omega
-      rw [dif_neg hj, dif_pos hj0, dif_neg hi, dif_pos hi0]
+      rw [dite_eq_right hj, dite_eq_left hj0, dite_eq_right hi, dite_eq_left hi0]
       have h1 := P.gap_be ⟨i.val - (R.k - 1), hi0⟩
       have h2 := P.gap_eb ⟨i.val - (R.k - 1), hi0⟩ hi1
       have h3 : P.b ⟨i.val - (R.k - 1) + 1, hi1⟩ = P.b ⟨j.val - (R.k - 1), hj0⟩ := hb _ _ (by simp; omega)
@@ -75,22 +116,7 @@ theorem lamSH_isHCParam (R : Ranks) (P : HCParam R) : Formalism.QuantumDetermina
 
 theorem fdegHC_pos_of_injective {n : ℕ} (lam : Fin n → ℝ) (hlam : Function.Injective lam) :
     0 < Formalism.QuantumDeterminants.fdegHC lam := by
-  unfold Formalism.QuantumDeterminants.fdegHC
-  apply div_pos
-  · apply Finset.prod_pos
-    intro a _
-    apply Finset.prod_pos
-    intro b hb
-    rw [Finset.mem_filter] at hb
-    exact abs_pos.mpr (sub_ne_zero.mpr fun h => hb.2.ne (hlam h))
-  · apply Finset.prod_pos
-    intro a _
-    apply Finset.prod_pos
-    intro b hb
-    rw [Finset.mem_filter] at hb
-    have h1 : (a : ℕ) < b := hb.2
-    have h2 : ((a : ℕ) : ℝ) < ((b : ℕ) : ℝ) := by exact_mod_cast h1
-    linarith
+  apply GlobalTheory.BesselNorm.fdegHC_pos <;> assumption
 
 theorem lamSH_isHCParam_and_trueDsig_pos :
     ∀ (R : Ranks) (P : HCParam R), Formalism.QuantumDeterminants.IsHCParam (lamSH R P) ∧ 0 < trueDsig R P := by

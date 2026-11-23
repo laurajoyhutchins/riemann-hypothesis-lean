@@ -1,9 +1,47 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelDiagonalIntegrableHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvTop
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiVecExHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiClosT
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.LogAbsEqLogIdeleNorm
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiClosT
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelDiagonalIntegrableHolds
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi DiscreteGroups.T1.G
 
@@ -21,8 +59,17 @@ section Meas
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
-private theorem continuous_ac' : Continuous (ac E n) :=
-  (GlobalTheory.OneRep.SplitTwist.continuous_splitCentre.comp (continuous_id.div_const _)).prodMk continuous_const
+private theorem continuous_ac' : Continuous (ac E n) := by
+  have hc : Continuous (splitCentre E n) := by
+    have e : splitCentre E n = fun t : ℝ =>
+        GeneralLinearGroup.scalar (Fin n) (infId E (expU fun _ : InfinitePlace E => (t : ℂ))) :=
+      funext GlobalTheory.CuspRep.CuspidalL2GL.splitCentre_eq_scalar
+    rw [e]
+    refine Continuous.units_map _ ?_ |>.comp ((continuous_infId E).comp
+      (continuous_expU.comp (continuous_pi fun _ => Complex.continuous_ofReal)))
+    change Continuous fun x : Ad E => Matrix.diagonal fun _ : Fin n => x
+    exact (continuous_pi fun _ => continuous_id).matrix_diagonal
+  exact (hc.comp (continuous_id.div_const _)).prodMk continuous_const
 
 private theorem measurable_reduced_size : Measurable (r0 : H E n 0 → ℝ) := by
   have hc : Continuous fun x : H E n 0 => (ac E n (-ldet x) * x).1 :=
@@ -36,11 +83,12 @@ private theorem measurable_cnt {Ω : Set (H E n 0)} (hΩ : IsCompact Ω) :
     Measurable (cnt (ratH E n 0) Ω) := by
   haveI := borelSpace_H (E := E) (n := n)
   haveI : Countable (ratH E n 0) := DiscreteGroups.T1.G.Dcy.countable_ratH'
-  have hm : MeasurableSet Ω := hΩ.measurableSet
-  refine Measurable.ennreal_tsum fun γ => ?_
-  have hc : Continuous fun x : H E n 0 => x⁻¹ * (γ : H E n 0) * x :=
-    (continuous_inv.mul continuous_const).mul continuous_id
-  exact (measurable_one.indicator hm).comp hc.measurable
+  set_option synthInstance.maxHeartbeats 200000 in
+    have hm : MeasurableSet Ω := hΩ.measurableSet
+    refine Measurable.tsum fun γ => ?_
+    have hc : Continuous fun x : H E n 0 => x⁻¹ * (γ : H E n 0) * x :=
+      (continuous_inv.mul continuous_const).mul continuous_id
+    exact (measurable_one.indicator hm).comp hc.measurable
 
 end Meas
 
@@ -115,7 +163,7 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.tailInt_of_bounds :
   calc ∫⁻ x, A.indicator (fun x => ‖m.G x x‖ₑ) x ∂s.D.ν
       ≤ ∫⁻ x, ∑ b, ENNReal.ofReal (Cb b * ‖m.U‖) * f b x ∂s.D.ν := lintegral_mono hpt
     _ = ∑ b, ENNReal.ofReal (Cb b * ‖m.U‖) * ∫⁻ x, f b x ∂s.D.ν := by
-        rw [lintegral_finset_sum _ fun b _ => (hfm b).const_mul _]
+        rw [lintegral_finsetSum _ fun b _ => (hfm b).const_mul _]
         exact Finset.sum_congr rfl fun b _ => lintegral_const_mul _ (hfm b)
     _ ≤ ∑ b, ENNReal.ofReal (Cb b * Db b * ‖m.U‖ * (1 + R) ^ (Finset.univ.sup Nb) * Real.exp (-(L * ρ))) :=
         Finset.sum_le_sum fun b _ => hT b

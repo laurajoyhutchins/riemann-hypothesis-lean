@@ -1,6 +1,55 @@
-import Formalism.HermitianCurvature.StatementQr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorRepresentations
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusInvariance.TransferInvarianceRestriction
+public import Formalism.HermitianCurvature.StatementQr
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorRepresentations
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Finset
 open scoped ContDiff
@@ -109,22 +158,7 @@ theorem mul_inv_uh {g : Mx k r} (hg : g ∈ UH (Hpk k r)) : g * g⁻¹ = 1 := by
 theorem inv_mul_uh {g : Mx k r} (hg : g ∈ UH (Hpk k r)) : g⁻¹ * g = 1 := Matrix.nonsing_inv_mul g (Matrix.isUnit_det_of_right_inverse (mul_inv_uh hg))
 
 theorem glev_inv {i : Fin (r + 1)} {g : Mx k r} (hg : g ∈ Glev k r i) : g⁻¹ ∈ Glev k r i := by
-  simp only [Glev, Set.mem_setOf_eq] at hg ⊢
-  obtain ⟨hU, hfix⟩ := hg
-  have h1 := mul_inv_uh hU
-  have h2 := inv_mul_uh hU
-  refine ⟨?_, fun a ha => ?_⟩
-  · have hU' : gᴴ * Hpk k r * g = Hpk k r := hU
-    show (g⁻¹)ᴴ * Hpk k r * g⁻¹ = Hpk k r
-    calc (g⁻¹)ᴴ * Hpk k r * g⁻¹ = (g⁻¹)ᴴ * (gᴴ * Hpk k r * g) * g⁻¹ := by rw [hU']
-      _ = (g * g⁻¹)ᴴ * Hpk k r * (g * g⁻¹) := by rw [conjTranspose_mul]; simp only [Matrix.mul_assoc]
-      _ = Hpk k r := by rw [h1, conjTranspose_one, Matrix.one_mul, Matrix.mul_one]
-  · obtain ⟨e1, e2⟩ := hfix a ha
-    constructor
-    · conv_lhs => rw [← e1]
-      rw [mulVec_mulVec, h2, one_mulVec]
-    · conv_lhs => rw [← e2]
-      rw [mulVec_mulVec, h2, one_mulVec]
+  apply Formalism.FourierDecayAlt.Q.TInvW.glev_inv <;> assumption
 
 theorem herm_inv {g : Mx k r} (hg : g ∈ UH (Hpk k r)) (x y : Fin (2 * r + k + 1) → ℂ) :
     herm (Hpk k r) (g *ᵥ x) y = herm (Hpk k r) x (g⁻¹ *ᵥ y) := by
@@ -283,64 +317,8 @@ section Reg
 
 variable {k r : ℕ}
 
-def entL (k r : ℕ) (p q : Fin (2 * r + k + 1)) : Mx k r →L[ℝ] ℂ :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun M => M p q
-      map_add' := fun _ _ => rfl
-      map_smul' := fun _ _ => rfl }
-
-theorem poly_contDiff
-    (p : MvPolynomial ((Fin (2 * r + k + 1) × Fin (2 * r + k + 1)) ⊕ (Fin (2 * r + k + 1) × Fin (2 * r + k + 1))) ℂ) :
-    ContDiff ℝ ∞ fun g : Mx k r => MvPolynomial.eval
-      (Sum.elim (fun x => g x.1 x.2) (fun x => (Hpk k r * gᴴ * Hpk k r) x.1 x.2)) p := by
-  induction p using MvPolynomial.induction_on with
-  | C a =>
-    simpa using (contDiff_const : ContDiff ℝ ∞ fun _ : Mx k r => a)
-  | add p q hp hq =>
-    simpa only [map_add] using hp.add hq
-  | mul_X p n hp =>
-    simp only [map_mul, MvPolynomial.eval_X]
-    refine hp.mul ?_
-    cases n with
-    | inl x =>
-      simp only [Sum.elim_inl]
-      exact (entL k r x.1 x.2).contDiff
-    | inr x =>
-      simp only [Sum.elim_inr, Matrix.mul_apply, Matrix.conjTranspose_apply]
-      refine ContDiff.sum fun c _ => ContDiff.mul ?_ contDiff_const
-      refine ContDiff.sum fun d _ => ContDiff.mul contDiff_const ?_
-      exact Complex.conjCLE.contDiff.comp (entL k r c d).contDiff
-
-theorem regular_smooth {f : Mx k r → ℂ} (hf : IsRegular k r f) (i : Fin (r + 1)) (D : Set (Mx k r)) :
-    SmoothLev k r i D f := by
-  obtain ⟨p, hp⟩ := hf
-  intro g₀ _
-  refine ⟨Set.univ, _, isOpen_univ, Set.mem_univ _, (poly_contDiff p).contDiffOn, fun g _ hg => ?_⟩
-  have hU : gᴴ * Hpk k r * g = Hpk k r := by
-    simp only [Glev, UH, Set.mem_setOf_eq] at hg
-    exact hg.1
-  have hl : (Hpk k r * gᴴ * Hpk k r) * g = 1 := by
-    calc (Hpk k r * gᴴ * Hpk k r) * g = Hpk k r * (gᴴ * Hpk k r * g) := by simp only [Matrix.mul_assoc]
-      _ = 1 := by rw [hU, Hpk_mul_self_eq_one]
-  rw [hp g]
-  simp only [Matrix.inv_eq_left_inv hl]
-
 end Reg
 
 end FrameEntries
-
-theorem qr_detHatRegular_of (h : Formalism.FourierDecayAlt.Q.DetHat) : Formalism.FourierDecayAlt.Q.DetHatRegular := by
-  intro k r z z' f hz hz' hT hT' hf
-  exact h ℂ k r z z' Set.univ f hz hz' hT hT' isOpen_univ (FrameEntries.regular_smooth hf (Fin.last r) Set.univ)
-
-theorem qr_detGeneric_of (h : Formalism.FourierDecayAlt.Q.DetHatRegular) : Formalism.FourierDecayAlt.Q.DetGeneric := by
-  intro k r z z' f u u' hz hz' hT hT' hf _ Bs Bs' hB hB' hE g hg Y
-  rw [h k r z z' f hz hz' hT hT' hf Bs Bs' hB hB' g ⟨hg, Set.mem_univ _⟩ Y,
-    Qx8.loc_capLft isOpen_univ Bs hB.1 _ _ _ (fun x hx => (hE x hx.1 Y).2) g ⟨hg, Set.mem_univ _⟩,
-    FrameEntries.capLft_smul]
-  beta_reduce
-  rw [(hE g hg Y).1, Finset.prod_mul_distrib]
-  simp only [smul_eq_mul]
-  ring
 
 end Formalism.FourierDecayAlt.P

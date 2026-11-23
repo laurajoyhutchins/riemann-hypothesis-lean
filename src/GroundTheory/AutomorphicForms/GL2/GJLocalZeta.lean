@@ -1,6 +1,64 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJLaurentIdeal
-import GroundTheory.AutomorphicForms.GL2.GJZetaCore
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJLaurentIdeal
+public import GroundTheory.AutomorphicForms.GL2.GJZetaDefs
+public import GroundTheory.AutomorphicForms.SupercuspidalCoefficients
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import GroundTheory.AutomorphicForms.GL2.ExistsEqPowMulOfValuationLe
+public import GroundTheory.AutomorphicForms.GL2.GJZetaCore
+import GroundTheory.AutomorphicForms.MeasuresGL
+import GroundTheory.AutomorphicForms.SmoothRepContragredient
+import GroundTheory.AutomorphicForms.SmoothRepSchur
+import GroundTheory.LocalFields.SeparableClosureValuation
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -143,16 +201,6 @@ theorem exists_integrable_zetaIntegral [π.IsIrreducible] (hπ : IsAdmissible π
   obtain ⟨s₀, _, _, _, h⟩ := exists_zeta_rat hπ μ
   exact ⟨s₀, fun Φ hΦ v ℓ hℓ => (h Φ hΦ v ℓ hℓ).1⟩
 
-theorem exists_ratFunc_zetaIntegral [π.IsIrreducible] (hπ : IsAdmissible π)
-    (μ : Measure (GL (Fin n) F)) [μ.IsHaarMeasure] :
-    ∃ s₀ : ℝ, ∀ Φ : Matrix (Fin n) (Fin n) F → ℂ, IsSchwartzBruhat Φ → ∀ (v : V) (ℓ : Module.Dual ℂ V),
-      ℓ ∈ smoothVectors (Representation.dual π) → ∃ R : RatFunc ℂ, ∀ s : ℂ, s₀ < s.re →
-        zetaIntegral μ Φ (matrixCoeff π v ℓ) s = R.eval (RingHom.id ℂ) (qs F s) := by
-  obtain ⟨s₀, _, _, _, h⟩ := exists_zeta_rat hπ μ
-  refine ⟨s₀, fun Φ hΦ v ℓ hℓ => ?_⟩
-  obtain ⟨-, N, P, hP⟩ := h Φ hΦ v ℓ hℓ
-  exact ⟨_, hP⟩
-
 theorem zetaIntegral_translate (μ : Measure (GL (Fin n) F)) [μ.IsHaarMeasure] (a : GL (Fin n) F)
     (Φ : Matrix (Fin n) (Fin n) F → ℂ) (v : V) (ℓ : Module.Dual ℂ V) (s : ℂ) :
     zetaIntegral μ (fun Y => Φ (((a⁻¹ : GL (Fin n) F) : Matrix (Fin n) (Fin n) F) * Y))
@@ -178,8 +226,8 @@ theorem mem_zetaSet_of_translate (μ : Measure (GL (Fin n) F)) [μ.IsHaarMeasure
   rw [zetaIntegral_translate, hZ s ((le_max_left _ _).trans_lt hs),
     hs₁ s ((le_max_right _ _).trans_lt hs)]
 
-omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 
+omit [MeasurableSpace (GL (Fin n) F)] [BorelSpace (GL (Fin n) F)] in
 theorem ordDet_diagPow_single [NeZero n] :
     ordDet (Cartan.diagPow F n (Pi.single 0 1)) = 1 := by
   rw [ordDet, Cartan.coe_diagPow, det_diagonal, Finset.prod_eq_single (0 : Fin n)]
@@ -418,16 +466,16 @@ theorem zetaIdeal_eq_of_isHaarMeasure (μ ν : Measure (GL (Fin n) F)) [μ.IsHaa
     exact zetaIdeal_le_smul μ (Measure.haarScalarFactor_pos_of_isHaarMeasure ν μ).ne'
   exact le_antisymm (key μ ν) (key ν μ)
 
-variable (π) in
 
+variable (π) in
 def LPolynomial : ℂ[X] := by
   classical
   exact if h : ∃ P : ℂ[X], P.eval 0 = 1 ∧ ∀ R : RatFunc ℂ,
       R ∈ zetaIdeal π (Measure.haar : Measure (GL (Fin n) F)) ↔
         ∃ L ∈ laurentSubalgebra, R = L / algebraMap ℂ[X] (RatFunc ℂ) P then h.choose else 1
 
-variable (π) in
 
+variable (π) in
 def LFunction (s : ℂ) : ℂ :=
   ((LPolynomial π).eval (qs F s))⁻¹
 
@@ -437,7 +485,7 @@ theorem LPolynomial_spec [NeZero n] [π.IsIrreducible] (hπ : IsAdmissible π)
       ∃ L ∈ laurentSubalgebra, R = L / algebraMap ℂ[X] (RatFunc ℂ) (LPolynomial π) := by
   classical
   have h := (existsUnique_zetaIdeal_eq hπ (Measure.haar : Measure (GL (Fin n) F))).exists
-  rw [LPolynomial, dif_pos h]
+  rw [LPolynomial, dite_eq_left h]
   obtain ⟨h0, hiff⟩ := h.choose_spec
   refine ⟨h0, fun R => ?_⟩
   rw [zetaIdeal_eq_of_isHaarMeasure μ Measure.haar]

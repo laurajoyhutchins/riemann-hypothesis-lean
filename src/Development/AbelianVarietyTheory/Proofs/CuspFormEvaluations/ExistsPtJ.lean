@@ -1,8 +1,55 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.GeneratorPowers.IntChartCut
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasisBaseChange
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.ExistsIsUnivChartOfIsLieBasis
-import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalEvSecondPointOfXZero
+module
+
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ChartSer
+public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalEvSecondPointOfXZero
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.DualLiftInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.Ideal
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasisBaseChange
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,11 +64,11 @@ section Points
 
 variable {k : Type} [CommRing k] {d : ℕ}
 
-variable (k d) in
 
+variable (k d) in
 def Q (n : ℕ) : AddSubgroup (Pt k n d) where
   carrier := {p | ∀ i, constantCoeff (p i) = 0}
-  add_mem' := fun ha hb i => by rw [Pi.add_apply, map_add, ha i, hb i, add_zero]
+  add_mem' := fun ha hb i => by rw [Pi.add_apply, map_add (f := _), ha i, hb i, add_zero]
   zero_mem' := fun _ => map_zero _
   neg_mem' := fun ha i => by rw [Pi.neg_apply, map_neg, ha i, neg_zero]
 
@@ -29,7 +76,9 @@ variable {n l : ℕ}
 
 def gen (j : Fin n) : Q k d n := ⟨pt k d j, cc_pt j⟩
 
-theorem czQ (b : Fin n → Q k d l) : CZ (fun j => (b j).1) := fun j i => (b j).2 i
+theorem czQ (b : Fin n → Q k d l) : CZ (fun j => (b j).1) := by
+  change ∀ j i, constantCoeff ((b j).1 i) = 0
+  exact fun j i => (b j).2 i
 
 def sb (b : Fin n → Q k d l) : PS k n d →+* PS k l d := evHom (czQ b)
 
@@ -136,7 +185,8 @@ theorem exists_pj (z : ∀ m, JetR R σ m) (hz : ∀ m, jetTruncR R σ m (z (m +
   exact (coeff_add_degree_eq_coeff_degree_of_stable q hc e j).symm
 
 def jS {κ : Type} (m : ℕ) (a : κ → MvPowerSeries τ R) (ha : ∀ s, constantCoeff (a s) = 0) : JetR R κ m →ₐ[R] JetR R τ m :=
-  jetLift R (RingHom.ker (jetAug R τ m)) (ker_jetAug_pow τ m) (fun s => pj m (a s)) fun s => (aug_pj m _).trans (ha s)
+  jetLift (R := R) (RingHom.ker (jetAug R τ m)) (ker_jetAug_pow (R := R) τ m)
+    (fun s => pj m (a s)) fun s => (aug_pj m _).trans (ha s)
 
 theorem jS_zR {κ : Type} (m : ℕ) (a : κ → MvPowerSeries τ R) (ha) (s : κ) : jS m a ha (zR m s) = pj m (a s) := by
   show (MvPolynomial.aeval fun s => pj m (a s)) (MvPolynomial.X s) = pj m (a s)
@@ -144,7 +194,7 @@ theorem jS_zR {κ : Type} (m : ℕ) (a : κ → MvPowerSeries τ R) (ha) (s : κ
 
 private theorem pj_add {κ : Type} [Finite κ] (m : ℕ) (g h : MvPowerSeries κ R) :
     pj m (g + h) = pj m g + pj m h := by
-  simp only [pj, map_add]
+  simp only [pj, map_add (f := _)]
 
 private theorem pj_mul' {κ : Type} [Finite κ] (m : ℕ) (g h : MvPowerSeries κ R) :
     pj m (g * h) = pj m g * pj m h := by
@@ -167,7 +217,7 @@ private theorem pj_aeval (m : ℕ) (a : σ → MvPowerSeries τ R) (q : MvPolyno
     · subst h
       simp
     · rw [if_neg h, if_neg (Ne.symm h)]
-  | add p q hp hq => rw [map_add, map_add, pj_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), pj_add, hp, hq]
   | mul_X p s hp => rw [map_mul, map_mul, pj_mul', hp, MvPolynomial.aeval_X, MvPolynomial.aeval_X]
 
 theorem jS_pj (m : ℕ) (a : σ → MvPowerSeries τ R) (ha) (f : MvPowerSeries σ R) : jS m a ha (pj m f) = pj m (subst a f) := by
@@ -175,9 +225,16 @@ theorem jS_pj (m : ℕ) (a : σ → MvPowerSeries τ R) (ha) (f : MvPowerSeries 
   have h1 : pj m (subst a f) = pj m (subst a (truncTotal (m + 1) f : MvPowerSeries σ R)) := by
     show Ideal.Quotient.mk _ (truncTotal (m + 1) (subst a f)) =
       Ideal.Quotient.mk _ (truncTotal (m + 1) (subst a (truncTotal (m + 1) f : MvPowerSeries σ R)))
-    rw [MvPowerSeries.truncTotal_subst_eq_truncTotal_subst_sum ha' ha, ← MvPowerSeries.truncTotal_eq_sum]
+    rw [MvPowerSeries.truncTotal_subst_eq_truncTotal_subst_sum ha' ha,
+      ← MvPowerSeries.truncTotal_eq_sum]
   rw [h1, MvPowerSeries.subst_coe, pj_aeval]
-  rfl
+  have h : (jS m a ha).comp (Ideal.Quotient.mkₐ R _) =
+      MvPolynomial.aeval (fun s => pj m (a s)) := by
+    apply MvPolynomial.algHom_ext
+    intro s
+    change jS m a ha (zR m s) = _
+    rw [jS_zR, MvPolynomial.aeval_X]
+  exact AlgHom.congr_fun h _
 
 variable {G : Over (Spec (CommRingCat.of R))} [GrpObj G] {d : ℕ} (x : ∀ m : ℕ, sp (R₀ := R) (JetR R (Fin d) m) ⟶ G) {n l : ℕ}
 
@@ -411,30 +468,6 @@ private theorem prod_ofFn_eq_apply_of_forall_ne_eq_one {M : Type*} [Monoid M] (n
 
 theorem comb_single {v : Fin d → (Geo.Tor.epsR R ⟶ G)} (hv : ∀ j, v j = spMap (dualLift (Pi.single j 1)) ≫ x 1) (i : Fin d) :
     Geo.Tor.IsLieComb (Pi.single i 1) v (v i) := by
-  have h1 : Geo.Tor.epsScaleR (1 : R) = RingHom.id (DualNumber R) :=
-    RingHom.ext fun z => TrivSqZeroExt.ext (by simp [Geo.Tor.epsScaleR]) (by simp [Geo.Tor.epsScaleR])
-  have h0 : Geo.Tor.epsScaleR (0 : R) =
-      (algebraMap R (DualNumber R)).comp (TrivSqZeroExt.fstHom R R R).toRingHom :=
-    RingHom.ext fun z => TrivSqZeroExt.ext (by simp [Geo.Tor.epsScaleR, TrivSqZeroExt.algebraMap_eq_inl])
-      (by simp [Geo.Tor.epsScaleR, TrivSqZeroExt.algebraMap_eq_inl])
-  refine ⟨fun j => if j = i then v j else 1, fun j => ?_, ?_⟩
-  · by_cases hj : j = i
-    · subst hj
-      simp only [if_true, Pi.single_eq_same, h1]
-      show _ = Spec.map (CommRingCat.ofHom (RingHom.id _)) ≫ _
-      rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
-    · show (if j = i then v j else 1).left = _
-      have ht0 : Geo.Tor.IsTangent (v j) := by
-        rw [hv j]
-        exact (basis_of_chart hx).1 j
-      have ht : Spec.map (CommRingCat.ofHom (TrivSqZeroExt.fstHom R R R).toRingHom) ≫ (v j).left = η[G].left := ht0
-      rw [if_neg hj, Pi.single_eq_of_ne hj, h0]
-      show _ = Spec.map (CommRingCat.ofHom ((algebraMap R (DualNumber R)).comp
-        (TrivSqZeroExt.fstHom R R R).toRingHom)) ≫ (v j).left
-      rw [CommRingCat.ofHom_comp, Spec.map_comp, Category.assoc, ht]
-      rfl
-  · rw [prod_ofFn_eq_apply_of_forall_ne_eq_one hx d _ i fun j hj => if_neg hj]
-    show v i = if i = i then v i else 1
-    rw [if_pos rfl]
+  apply ReciprocityTheory.ChartRestriction.G.Chart.comb_single <;> assumption
 
 end GlobalTheory.ChartJet

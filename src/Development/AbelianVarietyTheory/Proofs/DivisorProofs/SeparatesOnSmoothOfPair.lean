@@ -1,21 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsLogCanonicalMultipleCanonical
-import Development.AbelianVarietyTheory.Definitions.Divisors.CuspIso
-import Development.AbelianVarietyTheory.Definitions.Divisors.WellChosen
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeSmoothProjectiveVarietyProperties
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AmpleModuloEffectiveAwayFromPointPullAffine
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNefLineBundleBaseChangeFieldExtension
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsBigLineBundleOfSmulClassEqAmpleAtAddNef
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneLeIntersectionNumberSubvarietyThroughPositive
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNefBigOfClassEqSmulAddSmul
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowMulIntersectionLeOfNefClassOnClosed
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NadelVanishingCanonicalAddBoundary
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeSectionsFiniteSpan
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionOverFieldEqOfClosedPointImageEq
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsClosedImageSectionProjectiveOverField
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleValueAtPointNeZeroIffMemNonzeroLocus
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEmbeddingsAgreeOnSubfieldNe
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAffineOpenPreimageOfIsPullback
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsLogCanonicalMultipleCanonical
+public import Development.AbelianVarietyTheory.Definitions.Divisors.CuspIso
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.ExistsAlgClosedBaseChange
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IsProjOverIffIsProperAndExistsIsAmpleLB
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AmpleModuloEffectiveAwayFromPointPullAffine
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeSectionsFiniteSpan
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BaseChangeSmoothProjectiveVarietyProperties
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsEmbeddingsAgreeOnSubfieldNe
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNefBigOfClassEqSmulAddSmul
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteFinrankLineBundleSectionsFiniteEtale
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsBigLineBundleOfSmulClassEqAmpleAtAddNef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsClosedImageSectionProjectiveOverField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNefLineBundleBaseChangeFieldExtension
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleValueAtPointNeZeroIffMemNonzeroLocus
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NadelVanishingCanonicalAddBoundary
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OneLeIntersectionNumberSubvarietyThroughPositive
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowMulIntersectionLeOfNefClassOnClosed
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionOverFieldEqOfClosedPointImageEq
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GeometricallyIntegralIffGeometricallyConnectedOf
+public import Mathlib.Algebra.MvPolynomial.Cardinal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+public import Mathlib.FieldTheory.IsAlgClosed.Classification
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.Algebraic.Cardinality
+public import Mathlib.RingTheory.Localization.Cardinality
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -35,7 +82,7 @@ theorem nef_pull (hN : GlobalTheory.Published.NefNumerics) {F E : Type} [Field F
   letI := algebraΓOfHom pY
   obtain ⟨hpp, A, hA⟩ := (isProjOver_iff_isProper_and_exists_isAmpleLB pX).1 hX
   obtain ⟨B, hB⟩ := exists_isAmpleLB_of_isProjOver hY
-  have : IsProper (strHom F X) := by rw [strHom_eq (f := pX) fun _ => rfl]; exact hpp
+  have : IsProper (strHom F (X := X)) := by rw [strHom_eq (f := pX) fun _ => rfl]; exact hpp
   exact NefFieldExt.isNef_pull hN hL hA hB g
 
 section Descent
@@ -79,6 +126,7 @@ theorem sum_val_pull_eq_zero {F : Type} [Field F] [Algebra F ℂ] {Y : Scheme.{0
       (Scheme.Hom.appLE_comp_appLE (x j) π (T.U (k j)) _ ⊤ ((chartPullPull T π).le (pIdx T π (k j))) (hk' j))
   have hs : ∀ j, val (x j) (pIdx T π (k j)) le_top (hk' j) (ofSec q ⊤ t) =
       ∑ i, u i * val (x j ≫ π) (k j) le_top (hk j) (ofSec p ⊤ (b i)) := fun j => by
+
     rw [ht, map_sum, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [ofSec_smul]
@@ -194,13 +242,13 @@ theorem separate_two (hS : SeparatesOnSmooth) (hNN : GlobalTheory.Published.NefN
   have hNnC : IsNef ℂ (N.pull π) := nef_pull hNN p q π hp hq N hNn
   have hN₂C : IsNef ℂ (N₂.pull π) := nef_pull hNN p q π hp hq N₂ hN₂n
   have hcl : a • cls (N.pull π) hNC = cls (N₁.pull π) (LB.isLB_pull h₁ π) + cls (N₂.pull π) (LB.isLB_pull h₂ π) := by
-    rw [cls_pull hN, cls_pull h₁, cls_pull h₂, ← map_nsmul, hdec, map_add]
+    rw [cls_pull hN, cls_pull h₁, cls_pull h₂, ← map_nsmul, hdec, map_add (f := _)]
   have hbig : IsBig ℂ (N.pull π) :=
     isBig_of_smul_cls_eq_add_ampleAt hNN ℂ _ q hq _ _ _ hNC _ _ a (zC 0 s₀) hNnC ha hcl (hA 0) hN₂C
   have hpos := fun j => GlobalTheory.PosThrough.one_le_interNumRed hNN ℂ _ q hq _ _ _ hNC _ _ a (zC j s₀) hNnC ha hcl (hA j) hN₂C
   have hcB : cls (B.pull π) (LB.isLB_pull hB π) =
       m • cls (N.pull π) hNC + cls (N'.pull π) (LB.isLB_pull hN' π) := by
-    rw [cls_pull hB, cls_pull hN, cls_pull hN', hBc, map_add, map_nsmul]
+    rw [cls_pull hB, cls_pull hN, cls_pull hN', hBc, map_add (f := _), map_nsmul]
   have hpt : ∀ (W : Scheme.{0}) (y : Sp ℂ ⟶ W) (O : W.Opens), y s₀ ∈ O → ⊤ ≤ y ⁻¹ᵁ O := by
     intro W y O hs t _
     rw [Subsingleton.elim t s₀]
@@ -240,8 +288,8 @@ theorem separate_two (hS : SeparatesOnSmooth) (hNN : GlobalTheory.Published.NefN
       erw [e, mul_zero, zero_add] at this
       exact this)
 
-open Cardinal in
 
+open Cardinal in
 theorem nonempty_ringHom_complex (K : Type) [Field K] [CharZero K] [Countable K] : Nonempty (K →+* ℂ) := by
   let F := FractionRing (MvPolynomial ℝ K)
   let L := AlgebraicClosure F
@@ -307,8 +355,8 @@ theorem sum_rpow_le (D : ℕ) :
     push_cast at this ih ⊢
     linarith
 
-open GlobalTheory.Discrepancy GlobalTheory.TopForm GlobalTheory.QCoh in
 
+open GlobalTheory.Discrepancy GlobalTheory.TopForm GlobalTheory.QCoh in
 theorem separatesOnSmooth_of_pair (h : ∀ (X : Scheme.{0}) [IsIntegral X] [IsLocallyNoetherian X] [GlobalTheory.IsNormalScheme X]
     (p : X ⟶ Sp ℂ) (n : ℕ), IsProjOver p → topologicalKrullDim X = n →
     letI := algebraΓOfHom p

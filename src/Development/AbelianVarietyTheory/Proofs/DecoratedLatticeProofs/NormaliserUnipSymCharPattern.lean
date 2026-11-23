@@ -1,5 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSingle
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSingle
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -58,7 +109,7 @@ theorem step_up (hYX : Y * X = 1)
   by_contra hc
   push_neg at hc
   have h0 : (Y * X) q q = 0 := by
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     refine Finset.sum_eq_zero fun j _ => ?_
     by_cases hj : Prec ρ κ i j
     · rw [hc j hj, mul_zero]
@@ -72,7 +123,7 @@ theorem step_down (hXY : X * Y = 1)
   by_contra hc
   push_neg at hc
   have h0 : (X * Y) c c = 0 := by
-    rw [mul_apply]
+    rw [Matrix.mul_apply]
     refine Finset.sum_eq_zero fun j _ => ?_
     by_cases hj : Prec ρ κ j a
     · rw [hc j hj, zero_mul]
@@ -283,7 +334,7 @@ theorem normaliser_unipSym_char : ∀ (k : Type) [Field k] (n ρ κ : ℕ), n = 
   have diag : ∀ b : Fin n, X b b * Y b b = 1 := by
     intro b
     have h := congrFun (congrFun hXY b) b
-    rw [mul_apply, Finset.sum_eq_single b, one_apply_eq] at h
+    rw [Matrix.mul_apply, Finset.sum_eq_single b, one_apply_eq] at h
     · exact h
     · intro j _ hj
       rcases eq_or_ne (X b j) 0 with h1 | h1
@@ -329,7 +380,7 @@ theorem normaliser_unipSym_char : ∀ (k : Type) [Field k] (n ρ κ : ℕ), n = 
     · exact (mul_eq_zero.1 h).resolve_left (hX0 rmF)
   have S3 : Y tF tmF = 0 := by
     have h := congrFun (congrFun hYX tF) tmF
-    rw [mul_apply, Finset.sum_eq_single tmF, one_apply_ne (fun e => by rw [e] at htF; omega)] at h
+    rw [Matrix.mul_apply, Finset.sum_eq_single tmF, one_apply_ne (fun e => by rw [e] at htF; omega)] at h
     · exact (mul_eq_zero.1 h).resolve_right (hX0 tmF)
     · intro j _ hj
       rcases eq_or_ne (Y tF j) 0 with h1 | h1
@@ -347,7 +398,7 @@ theorem normaliser_unipSym_char : ∀ (k : Type) [Field k] (n ρ κ : ℕ), n = 
     · intro h; exact absurd (Finset.mem_univ _) h
   have S4 : X rF tF = 0 := by
     have h := congrFun (congrFun hXY rF) tF
-    rw [mul_apply, Finset.sum_eq_single tF, one_apply_ne (fun e => by rw [e] at hrF; omega)] at h
+    rw [Matrix.mul_apply, Finset.sum_eq_single tF, one_apply_ne (fun e => by rw [e] at hrF; omega)] at h
     · exact (mul_eq_zero.1 h).resolve_right (hY0 tF)
     · intro j _ hj
       rcases eq_or_ne (X rF j) 0 with h1 | h1

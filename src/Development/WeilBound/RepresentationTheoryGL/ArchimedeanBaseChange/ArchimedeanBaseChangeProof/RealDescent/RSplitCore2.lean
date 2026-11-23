@@ -1,6 +1,47 @@
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.PowerBoundFastDecay
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.RealDescent.DescentOfLocalGlobalInputs
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.CuspidalMultiplicityOne
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.SatakeExponents.FibreFactorHolds
+import Development.WeilBound.RepresentationTheoryGL.JacquetShalikaBounds.AbsoluteRigidity.NewtonLow
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,39 +54,8 @@ attribute [local instance] borelH
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {n : ℕ}
 
-def prg (D : Dom E n 0) (ψ : Sm E n) (u : ℝ → ℂ) (φ : Sm E n) : ℂ :=
-  ∫ x, starRingEnd ℂ (ψ.1 x.1 * u (ldet x)) * φ.1 x.1 ∂D.ν
-
-def Orth (D : Dom E n 0) (π : CuspSub E n) (φ : Sm E n) : Prop :=
-  ∀ ψ ∈ π.V, ∀ u : ℝ → ℂ, ContDiff ℝ (⊤ : ℕ∞) u → HasCompactSupport u → prg D ψ u φ = 0
-
-def OrthCount : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (D : Dom E n 0) (π : CuspSub E n),
-  ThetaFix π → ∃ (ψ : ℕ → Sm E n) (u : ℕ → ℝ → ℂ), (∀ j, ψ j ∈ π.V ∧ Continuous (u j) ∧ HasCompactSupport (u j)) ∧
-    ∀ φ : Sm E n, IsAutForm φ → (∀ j, prg D (ψ j) (u j) φ = 0) → Orth D π φ
-
-def OrthAct : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (D : Dom E n 0) (π : CuspSub E n),
-  ThetaFix π → ∀ φ : Sm E n, IsAutForm φ → Orth D π φ → ∀ o, Orth D π (act o φ)
-
-def NoPi : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (D : Dom E n 0) (π : CuspSub E n),
-  ThetaFix π → ∀ U : Submodule ℂ (Sm E n), IsStable U → (∀ φ ∈ U, IsAutForm φ ∧ Orth D π φ) →
-    ∀ (z : ℂ), ∀ T : Sm E n →ₗ[ℂ] Sm E n, (∀ o, ∀ φ ∈ U, T (act o φ) = act o (T φ)) →
-      (∀ φ ∈ U, ∃ ψ ∈ π.V, ∀ g, (T φ).1 g = ψ.1 g * Complex.exp (z * logAbs g.val.det)) → ∀ φ ∈ U, T φ = 0
-
-def RNoPi : Prop := GlobalTheory.Published.JacquetShalikaRigidity → GlobalTheory.Published.CuspidalMultiplicityOne → NoPi
-
-def TwTrEx : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ), 1 ≤ n → ∀ (D : Dom E n 0) (π : CuspSub E n),
-  ThetaFix π → ∀ φ : H E n 0 → ℂ, IsTestH φ → FinOn D.μ π φ → ∃! t, IsTwTr D.μ π φ t
-
-def AbsSplit : Prop := ForSys fun {W} q X _ A => ∀ (I : Set W), (Summable fun w : I => (q w : ℝ)⁻¹) → ∀ x₀ : X,
-  (∀ w ∈ I, ∀ a, ‖A x₀ w a‖ ≤ 1) → ∀ (ι : Type) [Fintype ι] (y : ι → X),
-    (∀ w, w ∉ I → ∀ k : ℕ, ∑ a, A x₀ w a ^ (k + 1) = ∑ j, ∑ b, A (y j) w b ^ (k + 1)) → ∃ j, y j = x₀
-
-def RAbsSplit : Prop := EulerLog → Conv1 → Unb → AbsSplit
-
 def InertThin : Prop := ∀ (E : Type) [Field E] [NumberField E] [IsCMField E],
   Summable fun w : {w : HeightOneSpectrum (𝓞 E) // ¬ IsSplitAt w} => (Ideal.absNorm w.1.asIdeal : ℝ)⁻¹
-
-def RSplitCore2 : Prop := AbsSplit → InertThin → DetOne → PrimeOff → RSplitCore
 
 end PositivityTheory.Rg.BcB.Desc
 

@@ -1,8 +1,56 @@
-import Formalism.HermitianCurvature.StatementC
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroEstimateProduct
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.PeriodLatticeFactsSplitOfGeneral
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LocalisationScaledIdealMemIff
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwistedIsRealOrderLattice
+module
+
+public import Formalism.HermitianCurvature.StatementC
+public import Mathlib.Topology.Separation.CompletelyRegular
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.JointInstanceTheoremA
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LevelZeroEstimateProduct
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LocalisationScaledIdealMemIff
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.PeriodLatticeFactsSplitOfGeneral
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TwistedIsRealOrderLattice
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace Formalism.FourierDecayAlt.P
 
@@ -26,25 +74,7 @@ theorem idl_ne_zero (g : ℕ) (hg : 0 < g) (k ν : ℤ) : S6.idl E g k ν ≠ 0 
     exact zpow_ne_zero _ (Nat.cast_ne_zero.mpr hg.ne')
 
 theorem idl_two_le_one (g : ℕ) (ν : ℤ) : S6.idl E g 2 ν ≤ S6.idl E g 1 ν := by
-  unfold S6.idl
-  have hg1 : FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 E)) (g : E) ≤ 1 := by
-    rw [FractionalIdeal.spanSingleton_le_iff_mem, FractionalIdeal.mem_one_iff]
-    exact ⟨(g : 𝓞 E), by simp⟩
-  have h2 : ((g : E) ^ (2 : ℤ)) = (g : E) * (g : E) ^ (1 : ℤ) := by
-    rw [zpow_one, zpow_two]
-  have key : FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 E)) ((g : E) ^ (2 : ℤ)) ≤
-      FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 E)) ((g : E) ^ (1 : ℤ)) := by
-    rw [h2, ← FractionalIdeal.spanSingleton_mul_spanSingleton]
-    calc _ ≤ 1 * FractionalIdeal.spanSingleton (nonZeroDivisors (𝓞 E)) ((g : E) ^ (1 : ℤ)) := by
-          first
-            | exact FractionalIdeal.mul_right_mono _ hg1
-            | exact FractionalIdeal.mul_le_mul_right hg1 _
-            | gcongr
-      _ = _ := one_mul _
-  first
-    | exact FractionalIdeal.mul_left_mono _ key
-    | exact FractionalIdeal.mul_le_mul_left key _
-    | gcongr
+  apply Formalism.FourierDecayAlt.P.S6x2.idl_le <;> assumption
 
 theorem frame_facts (g : ℕ) (hg : 0 < g) (ν : ℤ) :
     DiscreteTopology (S6.frameLat E (S6.perLat E g ν 1) 1) ∧
@@ -108,12 +138,8 @@ theorem σ_or (S : HidaSetting E Wp Wq) (v : Fin S.f) :
   · exact Or.inl h.symm
   · exact Or.inr h.symm
 
-theorem norm_σ (S : HidaSetting E Wp Wq) (v : Fin S.f) (t : E) : ‖S.σ v t‖ = S.pl v t := by
-  rw [← S.hemb v]
-  exact (NumberField.InfinitePlace.apply (S.emb v) t).symm
 
 open Classical in
-
 def cj (S : HidaSetting E Wp Wq) : J.CV E ≃ₗᵢ[ℝ] J.CV E :=
   LinearIsometryEquiv.piLpCongrRight 2 fun w =>
     if S.σ (S.pl.symm w) = w.embedding then LinearIsometryEquiv.refl ℝ ℂ else Complex.conjLIE
@@ -153,38 +179,6 @@ theorem re_cj (S : HidaSetting E Wp Wq) (c : J.CV E) (l : E) (v : Fin S.f) :
       ring
 
 theorem cj_mp (S : HidaSetting E Wp Wq) : MeasurePreserving (cj S) := (cj S).measurePreserving
-
-theorem mem_comap_cj (S : HidaSetting E Wp Wq) (L : Submodule ℤ E) (x : J.CV E) :
-    x ∈ ZLattice.comap ℝ (J.eLat E L 1) (cj S).toLinearEquiv.toLinearMap ↔
-      ∃ t ∈ L, ∀ v, x (S.pl v) = S.σ v t := by
-  have hinv : ∀ c : J.CV E, cj S (cj S c) = c := by
-    intro c
-    ext w
-    obtain ⟨v, rfl⟩ := S.pl.surjective w
-    by_cases h : S.σ v = (S.pl v).embedding
-    · rw [(cj_apply S _ v).1 h, (cj_apply S _ v).1 h]
-    · rw [(cj_apply S _ v).2 h, (cj_apply S _ v).2 h, Complex.conj_conj]
-  have hs : ∀ t : E, (J.semb E 1).toIntLinearMap t = J.cemb E t := fun t => by
-    simp [J.semb]
-  change cj S x ∈ J.eLat E L 1 ↔ _
-  simp only [J.eLat, Submodule.mem_map, hs]
-  constructor
-  · rintro ⟨t, ht, he⟩
-    refine ⟨t, ht, fun v => ?_⟩
-    rw [← hinv x, ← he, cj_cemb]
-  · rintro ⟨t, ht, he⟩
-    refine ⟨t, ht, ?_⟩
-    rw [← hinv (J.cemb E t)]
-    congr 1
-    ext w
-    obtain ⟨v, rfl⟩ := S.pl.surjective w
-    rw [cj_cemb, he]
-
-theorem covolume_comap_cj (S : HidaSetting E Wp Wq) (L : Submodule ℤ E) [DiscreteTopology (J.eLat E L 1)]
-    [IsZLattice ℝ (J.eLat E L 1)] :
-    ZLattice.covolume (ZLattice.comap ℝ (J.eLat E L 1) (cj S).toLinearEquiv.toLinearMap) =
-      ZLattice.covolume (J.eLat E L 1) :=
-  ZLattice.covolume_comap (J.eLat E L 1) volume volume (e := (cj S).toContinuousLinearEquiv) (cj_mp S)
 
 theorem first_norm_real_nonneg (S : HidaSetting E Wp Wq) (hP : ThmPPos S) (ε : ℝ) (hε : 0 < ε) (i : ℕ)
     (hi : i ≤ S.G.r + 1) (w : S.W) (Y : Finset (TB.Pt E)) (κ : TB.Pt E → TB.Pt E → ℂ)

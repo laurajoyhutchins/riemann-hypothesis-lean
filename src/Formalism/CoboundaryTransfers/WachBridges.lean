@@ -1,24 +1,54 @@
-import Formalism.CoboundaryTransfers.GammaStableTransfers.MemCoboundariesOfIsOneCoboundary
-import Formalism.CoboundaryTransfers.GammaStableTransfers.GammaStableOfGammaQUnitHolds
-import Formalism.CoboundaryTransfers.GammaStableTransfers.DiffOneSmulOfTower
-import Formalism.CoboundaryTransfers.GammaStableTransfers.TorsionKilledCriterionHolds
-import Formalism.CoboundaryTransfers.GammaStableTransfers.BridgeCL
-import Formalism.CoboundaryTransfers.GammaStableTransfers.BridgeLIFT
-import Formalism.CoboundaryTransfers.GammaStableTransfers.DepthPageFirstZetaFactorEqPrimePower
-import Formalism.CoboundaryTransfers.GammaStableTransfers.Transfer
-import Formalism.CoboundaryTransfers.GammaStableTransfers.WachLatticeNonemptyGamma
-import Formalism.CoboundaryTransfers.GammaStableTransfers.IntegralWachDefinitions
+module
+
+public import Formalism.CoboundaryTransfers.Statement
+public import Mathlib.Algebra.Polynomial.AlgebraMap
+public import Formalism.CoboundaryTransfers.GammaStableTransfers.DiffOneSmulOfTower
+public import Formalism.CoboundaryTransfers.GammaStableTransfers.TorsionKilledCriterionHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 namespace Formalism.CoboundaryTransfers
-
-theorem wach_api : Complex ∧ Submods ∧ CocZf ∧ HomMaps ∧ GammaQNOf ∧ DiagramChase₂ ∧ CoboundaryTransfer ∧
-    GradedStep ∧ GammaOnto ∧ ColBound ∧ LiftHf ∧ Mono ∧ IntDefs ∧ NonemptyQ ∧ NonemptyU ∧
-    NonemptyG :=
-  ⟨differentialsComplex_holds, cochainsSubmodules_holds, cocyclesFinite_holds, homPreservesCochains_holds, gammaStableOfGammaQUnit_holds, cocycleLiftOfExact_holds,
-    torsionKilledCriterion_holds, gammaGradedStep_holds, gammaImageProduct_holds, cokernelLengthBound_holds, finiteClassesLift_holds, liftsAt_mono,
-    integral_wach_definitions, wach_lattice_nonempty_Q, wach_lattice_nonempty_unramified, wach_lattice_nonempty_gamma⟩
 
 theorem lift_wach (O A : Type) [CommRing O] [CommRing A] [Algebra O A] (B : Base O A) (M : ℕ)
     (D₀ D₁ D₂ : Type)

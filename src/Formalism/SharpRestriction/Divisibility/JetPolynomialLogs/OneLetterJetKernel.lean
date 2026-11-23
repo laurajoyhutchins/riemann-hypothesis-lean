@@ -1,8 +1,58 @@
-import Formalism.SharpRestriction.Divisibility.JetPolynomialLogs.DworkPowerSeriesWeights
-import Formalism.GaussJetBounds.GaussJetProofs.LogarithmWeightComparison
-import Formalism.GaussJetBounds.GaussJetProofs.OrbMul
-import Formalism.GaussJetBounds.GaussJetProofs.OneGauss
+module
+
+public import Formalism.SharpRestriction.Divisibility.JetPolynomialLogs.DworkPowerSeriesWeights
+public import Mathlib.RingTheory.MvPowerSeries.Rename
 import Formalism.GaussJetBounds.GaussJetProofs.ConstantCoeffAevalLinP
+import Formalism.GaussJetBounds.GaussJetProofs.FJEval
+import Formalism.GaussJetBounds.GaussJetProofs.LogarithmWeightComparison
+import Formalism.GaussJetBounds.GaussJetProofs.OneGauss
+public import Formalism.GaussJetBounds.GaussJetProofs.OrbMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.GroupTheory.Nilpotent
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option linter.unusedVariables false
 
@@ -301,7 +351,7 @@ theorem psi_monomial (μ : product_zeroth_first_parts.XZ Lt N0 N1 →₀ ℕ) (c
 theorem applyAt0_eq_sum (Th : MvPowerSeries (Lt × Fin N0 × Fin N1) ℂ_[l])
     (P : MvPolynomial (product_zeroth_first_parts.XZ Lt N0 N1) ℤ) (S : Finset (product_zeroth_first_parts.XZ Lt N0 N1 →₀ ℕ)) (hS : P.support ⊆ S) :
     product_zeroth_first_parts.applyAt0 N0 N1 l Th P = ∑ μ ∈ S, MvPolynomial.monomial (Finsupp.sumFinsuppEquivProdFinsupp μ).1
-      (((MvPolynomial.coeff μ P : ℤ) : ℂ_[l]) *
+      (((AddMonoidAlgebra.coeff P μ : ℤ) : ℂ_[l]) *
         ((Finsupp.sumFinsuppEquivProdFinsupp μ).2.prod fun _ n => (n.factorial : ℂ_[l])) *
         MvPowerSeries.coeff (Finsupp.sumFinsuppEquivProdFinsupp μ).2 Th) := by
   unfold product_zeroth_first_parts.applyAt0
@@ -320,13 +370,13 @@ theorem applyAt0_eq_jet (Th : MvPowerSeries (Lt × Fin N0 × Fin N1) ℂ_[l])
     congr 1
     rw [DworkPowerSeriesWeights.mfact, Nat.cast_finsuppProd]
     ring
-  · rw [map_add, OrbMul.jetPairPoly_add_left, ← hp, ← hq,
+  · rw [map_add (f := _), OrbMul.jetPairPoly_add_left, ← hp, ← hq,
       applyAt0_eq_sum N0 N1 l Th (p + q) (p.support ∪ q.support) MvPolynomial.support_add,
       applyAt0_eq_sum N0 N1 l Th p (p.support ∪ q.support) Finset.subset_union_left,
       applyAt0_eq_sum N0 N1 l Th q (p.support ∪ q.support) Finset.subset_union_right,
       ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun μ _ => ?_
-    rw [MvPolynomial.coeff_add, Int.cast_add, add_mul, add_mul, map_add]
+    rw [MvPolynomial.coeff_add, Int.cast_add, add_mul, add_mul, map_add (f := _)]
 
 end Apply
 
@@ -336,6 +386,7 @@ theorem jetPairPoly_map_rename {K : Type} [Field K] {σ τ ι : Type} (ρ : σ �
       MvPolynomial.rename ρ (jetPairPoly P Th) := by
   rw [OrbMul.jetPairPoly_eq_sum _ Th P.support (MvPolynomial.support_map_subset _ _)]
   unfold jetPairPoly
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun κ _ => ?_
   rw [MvPolynomial.coeff_map, map_mul (MvPolynomial.rename ρ), MvPolynomial.rename_C]
@@ -413,6 +464,7 @@ theorem psi_Gxz (l : ℕ) [Fact l.Prime] (d N0 N1 : ℕ) [NeZero d] (nu : ZMod d
   rw [RingHom.map_det]
   congr 1
   ext r r'
+
   simp [psi, frIdx, map_sum, map_mul, MvPolynomial.map_C, MvPolynomial.rename_X]
 
 theorem tieFrame : TieFrame := by
@@ -426,7 +478,7 @@ theorem tieFrame : TieFrame := by
   have hhom : Pop.IsHomogeneous (∑ s : ZMod d, ∑ c : Fin ((nu s).rowLen 0), (nu s).colLen c) :=
     MvPolynomial.IsHomogeneous.prod _ _ _ fun s _ => minorProd_hom _ (fun i b =>
       MvPolynomial.IsHomogeneous.sum _ _ _ fun a _ => MvPolynomial.isHomogeneous_C_mul_X _ _) _ _ _
-  have hbound : ∀ n, ‖MvPolynomial.coeff n (jetPairPoly Pop Th)‖ ≤ (l : ℝ) ^ (-B) := by
+  have hbound : ∀ n, ‖AddMonoidAlgebra.coeff (jetPairPoly Pop Th) n‖ ≤ (l : ℝ) ^ (-B) := by
     intro n
     have h := hyp (fun s c => ⇑(I s c)) n
     unfold frameJet at h
@@ -494,13 +546,13 @@ theorem apply_at_zero_eq_jet_pair (Th : MvPowerSeries (ZMod 1 × Fin N0 × Fin N
     congr 1
     rw [DworkPowerSeriesWeights.mfact, Finsupp.prod_embDomain, Nat.cast_finsuppProd]
     ring
-  · rw [map_add, OrbMul.jetPairPoly_add_left, ← hp, ← hq,
+  · rw [map_add (f := _), OrbMul.jetPairPoly_add_left, ← hp, ← hq,
       applyAt0_eq_sum N0 N1 l Th (p + q) (p.support ∪ q.support) MvPolynomial.support_add,
       applyAt0_eq_sum N0 N1 l Th p (p.support ∪ q.support) Finset.subset_union_left,
       applyAt0_eq_sum N0 N1 l Th q (p.support ∪ q.support) Finset.subset_union_right,
       ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun μ _ => ?_
-    rw [MvPolynomial.coeff_add, Int.cast_add, add_mul, add_mul, map_add]
+    rw [MvPolynomial.coeff_add, Int.cast_add, add_mul, add_mul, map_add (f := _)]
 
 def frIdx1 : Fin N0 × Fin N0 → ZMod 1 × ℕ × Fin N0 := fun v => (default, (v.1 : ℕ), v.2)
 
@@ -526,6 +578,7 @@ theorem jet_map_minor_product (nu : YoungDiagram) (hp : ∀ c : Fin (nu.rowLen 0
   rw [RingHom.map_det]
   congr 1
   ext r r'
+
   simp [psi1, frIdx1, map_sum, map_mul, MvPolynomial.map_C, MvPolynomial.rename_X]
   all_goals rfl
 
@@ -552,7 +605,7 @@ theorem tieFrameOne : TieFrameOne := by
     congr 1
     funext v
     rw [MvPowerSeries.subst_X (hasSubst_CX ep0)]
-  have hbound : ∀ n, ‖MvPolynomial.coeff n (jetPairPoly Pop ThF)‖ ≤ (l : ℝ) ^ (-B) := by
+  have hbound : ∀ n, ‖AddMonoidAlgebra.coeff (jetPairPoly Pop ThF) n‖ ≤ (l : ℝ) ^ (-B) := by
     intro n
     have h := hyp (fun c => ⇑(I default c)) n
     unfold frameJetOne at h

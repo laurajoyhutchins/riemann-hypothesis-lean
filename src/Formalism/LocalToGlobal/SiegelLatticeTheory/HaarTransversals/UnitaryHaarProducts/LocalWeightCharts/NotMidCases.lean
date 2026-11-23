@@ -1,4 +1,51 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.InstLocallyCompactSpace
+module
+
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OppositeWeylSubgroupClosed
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.InstLocallyCompactSpace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,7 +121,7 @@ lemma wI_inj {a b : Fin (k + 1)} (h : wI k r a = wI k r b) : a = b := by
 lemma emb_out_col (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * r + k + 1)) (hj : ¬ mid k r j) :
     embWb k r μ q j = if q = j then 1 else 0 := by
   unfold embWb
-  rw [dif_neg (fun h => hj h.2)]
+  rw [dite_eq_right (fun h => hj h.2)]
   by_cases h : q = j
   · subst h; rw [if_pos ⟨rfl, hj⟩, if_pos rfl]
   · rw [if_neg (fun h' => h h'.1), if_neg h]
@@ -82,7 +129,7 @@ lemma emb_out_col (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * 
 lemma emb_out_row (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * r + k + 1)) (hq : ¬ mid k r q) :
     embWb k r μ q j = if q = j then 1 else 0 := by
   unfold embWb
-  rw [dif_neg (fun h => hq h.1)]
+  rw [dite_eq_right (fun h => hq h.1)]
   by_cases h : q = j
   · rw [if_pos ⟨h, hq⟩, if_pos h]
   · rw [if_neg (fun h' => h h'.1), if_neg h]
@@ -90,7 +137,7 @@ lemma emb_out_row (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * 
 lemma emb_mid (μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ) (q j : Fin (2 * r + k + 1)) (hq : mid k r q) (hj : mid k r j) :
     embWb k r μ q j = μ (midx hq) (midx hj) := by
   unfold embWb
-  rw [dif_pos ⟨hq, hj⟩]
+  rw [dite_eq_left ⟨hq, hj⟩]
   rfl
 
 def Em (k r : ℕ) : Matrix (Fin (2 * r + k + 1)) (Fin (k + 1)) ℂ := fun i m => if i = wI k r m then 1 else 0
@@ -398,54 +445,7 @@ lemma real_bound (u z : Fin (k + 1) → ℂ) (τ : ℝ)
     (h2 : ‖(∑ i : Fin k, star (z i.castSucc) * u i.castSucc) - star (z (Fin.last k)) * u (Fin.last k)‖ ≤ τ)
     (hT : (∑ i : Fin k, ‖z i.castSucc‖ ^ 2) < ‖z (Fin.last k)‖ ^ 2) (i : Fin (k + 1)) :
     ‖u i‖ ≤ 1 + (τ + √(∑ i : Fin k, ‖z i.castSucc‖ ^ 2)) / (‖z (Fin.last k)‖ - √(∑ i : Fin k, ‖z i.castSucc‖ ^ 2)) := by
-  set X := ∑ i : Fin k, ‖u i.castSucc‖ ^ 2 with hX
-  set Y := ∑ i : Fin k, ‖z i.castSucc‖ ^ 2 with hY
-  set A := ‖u (Fin.last k)‖ with hA
-  set B := ‖z (Fin.last k)‖ with hB
-  have hA0 : 0 ≤ A := norm_nonneg _
-  have hB0 : 0 ≤ B := norm_nonneg _
-  have hY0 : 0 ≤ Y := Finset.sum_nonneg fun i _ => by positivity
-  have hX0 : 0 ≤ X := Finset.sum_nonneg fun i _ => by positivity
-  have hBpos : 0 < B := by
-    rcases hB0.lt_or_eq with h | h
-    · exact h
-    · rw [← h] at hT; norm_num at hT; linarith
-  have hy : √Y < B := (Real.sqrt_lt' hBpos).mpr hT
-  have hy0 : 0 ≤ √Y := Real.sqrt_nonneg _
-  have hx : √X ≤ 1 + A := by
-    rw [Real.sqrt_le_iff]
-    constructor
-    · linarith
-    · nlinarith
-  have hS : ‖∑ i : Fin k, star (z i.castSucc) * u i.castSucc‖ ≤ √Y * √X := by
-    calc ‖∑ i : Fin k, star (z i.castSucc) * u i.castSucc‖ ≤ ∑ i : Fin k, ‖star (z i.castSucc) * u i.castSucc‖ :=
-          norm_sum_le _ _
-      _ = ∑ i : Fin k, ‖z i.castSucc‖ * ‖u i.castSucc‖ := by
-          refine Finset.sum_congr rfl fun i _ => ?_
-          rw [norm_mul, norm_star]
-      _ ≤ √Y * √X := Real.sum_mul_le_sqrt_mul_sqrt _ _ _
-  have hBA : B * A ≤ τ + √Y * √X := by
-    have e : B * A = ‖star (z (Fin.last k)) * u (Fin.last k)‖ := by rw [norm_mul, norm_star]
-    rw [e]
-    calc ‖star (z (Fin.last k)) * u (Fin.last k)‖
-        = ‖(∑ i : Fin k, star (z i.castSucc) * u i.castSucc) -
-            ((∑ i : Fin k, star (z i.castSucc) * u i.castSucc) - star (z (Fin.last k)) * u (Fin.last k))‖ := by
-          congr 1; ring
-      _ ≤ ‖∑ i : Fin k, star (z i.castSucc) * u i.castSucc‖ +
-            ‖(∑ i : Fin k, star (z i.castSucc) * u i.castSucc) - star (z (Fin.last k)) * u (Fin.last k)‖ :=
-          norm_sub_le _ _
-      _ ≤ τ + √Y * √X := by linarith
-  have hd : 0 < B - √Y := by linarith
-  have hAle : A ≤ (τ + √Y) / (B - √Y) := by
-    rw [le_div_iff₀ hd]
-    have : √Y * √X ≤ √Y * (1 + A) := mul_le_mul_of_nonneg_left hx hy0
-    nlinarith
-  refine Fin.lastCases ?_ (fun j => ?_) i
-  · linarith
-  · have hj : ‖u j.castSucc‖ ^ 2 ≤ X :=
-      Finset.single_le_sum (f := fun i : Fin k => ‖u i.castSucc‖ ^ 2) (fun i _ => by positivity) (Finset.mem_univ j)
-    have : ‖u j.castSucc‖ ≤ √X := Real.le_sqrt_of_sq_le hj
-    linarith
+  apply Formalism.FourierDecayAlt.P.B2x3.real_bound <;> assumption
 
 lemma normsq_eq (x : ℂ) : star x * x = ((‖x‖ ^ 2 : ℝ) : ℂ) := by
   rw [Complex.star_def, ← Complex.normSq_eq_conj_mul_self, Complex.normSq_eq_norm_sq]
@@ -458,40 +458,7 @@ lemma hb_self_re (v : Fin (k + 1) → ℂ) :
 
 lemma col_bound (z : Fin (k + 1) → ℂ) (hT : (star z ⬝ᵥ (Hb k *ᵥ z)).re < 0) :
     ∃ R : ℝ, ∀ μ : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ, μᴴ * Hb k * μ = Hb k → μ *ᵥ z = z → ∀ i j, ‖μ i j‖ ≤ R := by
-  rw [hb_self_re] at hT
-  refine ⟨1 + ((∑ j, ‖z j‖) + √(∑ i : Fin k, ‖z i.castSucc‖ ^ 2)) /
-    (‖z (Fin.last k)‖ - √(∑ i : Fin k, ‖z i.castSucc‖ ^ 2)), fun μ hμ hz i j => ?_⟩
-  have hu : ∀ l, (μ *ᵥ Pi.single j 1) l = μ l j := fun l => by
-    simp [Matrix.mulVec, dotProduct, Pi.single_apply]
-  have hHb : ∀ l, (Hb k *ᵥ Pi.single j 1) l = Hb k l j := fun l => by
-    simp [Matrix.mulVec, dotProduct, Pi.single_apply]
-  have key : ∀ w : Fin (k + 1) → ℂ, star (μ *ᵥ w) ⬝ᵥ (Hb k *ᵥ (μ *ᵥ Pi.single j 1)) = star w ⬝ᵥ (Hb k *ᵥ Pi.single j 1) := by
-    intro w
-    rw [Matrix.star_mulVec, ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, hμ]
-  have hHbn : ∀ l, ‖Hb k l j‖ ≤ 1 := by
-    intro l
-    unfold Hb
-    rw [Matrix.diagonal_apply]
-    split_ifs <;> simp
-  have a1 := key (Pi.single j 1)
-  have a2 := key z
-  rw [hz] at a2
-  have b1 : (star (μ *ᵥ Pi.single j 1) ⬝ᵥ (Hb k *ᵥ (μ *ᵥ Pi.single j 1))).re ≤ 1 := by
-    rw [a1]
-    have : star (Pi.single j 1 : Fin (k + 1) → ℂ) ⬝ᵥ (Hb k *ᵥ Pi.single j 1) = Hb k j j := by
-      rw [← hHb j]
-      simp [dotProduct, Pi.single_apply]
-    rw [this]
-    exact (Complex.re_le_norm _).trans (hHbn j)
-  rw [hb_self_re] at b1
-  have b2 : ‖star z ⬝ᵥ (Hb k *ᵥ (μ *ᵥ Pi.single j 1))‖ ≤ ∑ j, ‖z j‖ := by
-    rw [a2, dotProduct]
-    refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun l _ => ?_)
-    rw [hHb, norm_mul, Pi.star_apply, norm_star]
-    exact mul_le_of_le_one_right (norm_nonneg _) (hHbn l)
-  rw [hb_form] at b2
-  have := real_bound (μ *ᵥ Pi.single j 1) z _ b1 b2 (by linarith) i
-  rwa [hu] at this
+  apply Formalism.FourierDecayAlt.P.B2x3.col_bound <;> assumption
 
 lemma EmT_mulVec (z : Fin (2 * r + k + 1) → ℂ) (m : Fin (k + 1)) : ((Em k r)ᵀ *ᵥ z) m = z (wI k r m) := by
   rw [Matrix.mulVec, dotProduct, Finset.sum_eq_single (wI k r m)]

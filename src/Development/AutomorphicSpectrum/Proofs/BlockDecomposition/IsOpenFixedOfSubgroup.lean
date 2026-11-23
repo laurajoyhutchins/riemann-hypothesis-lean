@@ -1,9 +1,64 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.TwistedKernels.ExPhiPlusOnto
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousMirProj
+module
+
+public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.ColMatMulGlEmbMat
+public import Mathlib.Topology.Instances.Matrix
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
-import GroundTheory.AutomorphicForms.LocallyProfinite
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AbelianVarietyTheory.Definitions.Foundations.SecondCountableAndT2LocalField
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousMirProj
+public import GroundTheory.AutomorphicForms.LocallyProfinite
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.GroupTheory.DoubleCoset
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Algebra.Group.Units
+import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.TwistedKernels.ExPhiPlusOnto
+
+@[expose] public section
 
 open GlobalTheory.PRep GlobalTheory.BZMir GlobalTheory.BZMir.Fun Matrix Topology
 
@@ -36,12 +91,14 @@ theorem exists_fixed_lift {L W W' : Type} [Group L] [AddCommGroup W] [Module ℂ
   have hc : ((Fintype.card (L ⧸ S) : ℕ) : ℂ) ≠ 0 := by
     exact_mod_cast Fintype.card_ne_zero
   refine ⟨((Fintype.card (L ⧸ S) : ℕ) : ℂ)⁻¹ • ∑ x, φ x, ?_, fun l => ?_⟩
+
   · rw [map_smul, map_sum]
     have : ∀ x, f (φ x) = f w := fun x => by
       show f (ρ x.out w) = f w
       rw [hf, hw]
     simp only [this, Finset.sum_const, Finset.card_univ]
     rw [← Nat.cast_smul_eq_nsmul ℂ, smul_smul, inv_mul_cancel₀ hc, one_smul]
+
   · rw [map_smul, map_sum]
     simp only [key]
     congr 1
@@ -202,8 +259,8 @@ theorem cInd_lift (H : Subgroup G) (hH : IsClosed (H : Set G))
     apply hB0
     rintro ⟨a, x, hx, e⟩
     apply hne
-    rw [← DoubleCoset.out_eq' H K d]
-    exact ((DoubleCoset.eq H K _ _).2 ⟨a, a.2, x, hx, e⟩).symm
+    rw [← DoubleCoset.out_eq' d]
+    exact ((@DoubleCoset.eq _ _ H K _ _).2 ⟨a, a.2, x, hx, e⟩).symm
   refine ⟨∑ d ∈ T, B (Quotient.out d), fun g => ?_⟩
   let ev : cIndSpace H ρ →ₗ[ℂ] W :=
     (LinearMap.proj g) ∘ₗ (indSpace H ρ).subtype ∘ₗ (smoothPart (ind H ρ)).subtype ∘ₗ (cIndSpace H ρ).subtype
@@ -212,7 +269,7 @@ theorem cInd_lift (H : Subgroup G) (hH : IsClosed (H : Set G))
   rw [hsum]
   by_cases hg : DoubleCoset.mk H K g ∈ T
   · rw [Finset.sum_eq_single_of_mem _ hg (fun d _ hd => hoff d g (Ne.symm hd))]
-    obtain ⟨a, ha, x, hx, e⟩ := (DoubleCoset.eq H K _ _).1 (DoubleCoset.out_eq' H K (DoubleCoset.mk H K g))
+    obtain ⟨a, ha, x, hx, e⟩ := (@DoubleCoset.eq _ _ H K _ _).1 (DoubleCoset.out_eq' (DoubleCoset.mk H K g))
     have e' : g = ((⟨a, ha⟩ : H) : G) * Quotient.out (DoubleCoset.mk H K g) * x := e
     generalize Quotient.out (DoubleCoset.mk H K g) = c at e'
     rw [e', hB1 _ _ _ hx, hf, hw1, hKinv _ _ hx, hFeq]
@@ -223,7 +280,7 @@ theorem cInd_lift (H : Subgroup G) (hH : IsClosed (H : Set G))
     obtain ⟨x, hx, rfl⟩ := hcc
     apply hg
     have : DoubleCoset.mk H K c = DoubleCoset.mk H K g :=
-      (DoubleCoset.eq H K _ _).2 ⟨a, ha, x, hx, by rw [e]; group⟩
+      (@DoubleCoset.eq _ _ H K _ _).2 ⟨a, ha, x, hx, by rw [e]; group⟩
     rw [← this]
     exact Finset.mem_image_of_mem _ hc
 

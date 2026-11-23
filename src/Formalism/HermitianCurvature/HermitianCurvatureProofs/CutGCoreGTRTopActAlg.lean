@@ -1,7 +1,56 @@
-import Formalism.RealPlaceAnalysis.StatementE
-import Mathlib.Algebra.Polynomial.Eval.Defs
-import Mathlib.Algebra.Polynomial.Degree.Defs
-import Mathlib.GroupTheory.Perm.Support
+module
+
+public import Formalism.RealPlaceAnalysis.StatementE
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Polynomial Finset
 
@@ -55,10 +104,13 @@ theorem eval_prodP {m : ℕ} (lin : Fin m → Prop) [DecidablePred lin] (B : Fin
 
 theorem coeff_all : ∀ {m : ℕ} (B : Fin m → A),
     (List.ofFn fun l => (X + C (B l) : A[X])).prod.coeff m = 1 ∧
-      (1 ≤ m → (List.ofFn fun l => (X + C (B l) : A[X])).prod.coeff (m - 1) = ∑ l, B l)
-  | 0, B => by simp
-  | m + 1, B => by
-    have ih := coeff_all (fun l : Fin m => B l.succ)
+      (1 ≤ m → (List.ofFn fun l => (X + C (B l) : A[X])).prod.coeff (m - 1) = ∑ l, B l) := by
+  intro m
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    intro B
+    specialize ih (fun l => B l.succ)
     have hdeg : (List.ofFn fun l : Fin m => (X + C (B l.succ) : A[X])).prod.natDegree ≤ m := by
       have := natDegree_prodP (fun _ : Fin m => True) (fun l => B l.succ)
       simp only [if_true, Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul, mul_one] at this
@@ -97,14 +149,11 @@ theorem quadratic_top_algebra_holds : QTopAlg := by
       intro σ
       have e1 : (List.ofFn fun k : Fin n => Tm E (Y + h - (k : ℂ)) (id (σ k)) (id k)) =
           List.ofFn fun l => (if lin σ l then algebraMap ℂ A Y else 0) + B σ l := by
-        congr 1
-        funext l
-        simp only [Tm, id, lin, B]
-        split_ifs with hl
-        · have : Y + h - ((l : ℕ) : ℂ) = Y + (h - ((l : ℕ) : ℂ)) := by ring
-          rw [this, map_add]
-          abel
-        · simp
+        refine congrArg List.ofFn (funext fun l => ?_)
+        simp only [Tm, id_eq, lin, B]
+        split_ifs
+        · rw [add_sub_assoc, map_add, add_assoc]
+        · simp only [zero_add]
       rw [e1, ← eval_prodP]
       have hdeg : (Pσ σ).natDegree < n + 1 := by
         have := natDegree_prodP (lin σ) (B σ)
@@ -135,6 +184,7 @@ theorem quadratic_top_algebra_holds : QTopAlg := by
         rw [if_pos (show lin 1 l from rfl)]
       rw [e1, (coeff_all (B 1)).2 hn]
       simp only [B, Equiv.Perm.one_apply, if_true]
+
       rw [Finset.sum_add_distrib, add_comm, ← map_sum]
       congr 1
       congr 1

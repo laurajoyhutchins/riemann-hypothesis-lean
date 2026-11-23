@@ -1,22 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StChartFH
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.LengthDegreeAbelianVariety
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.Clauses
-import ReciprocityTheory.DualLattices.SubMemOfCompat
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.Biextensions.GenericFiberCubeInclusion
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsSeparatedOfIsQProjOver
-import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.IsEigBasisIff
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EigenspaceDimAddSplitExactTransposeStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EmbeddingsLiftIntegersIdempotentsConjugationStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EigenbasisRestrictionSurjectiveEquivariantStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TateModuleEigenspaceDimEqLieAlgebraSumStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.PadicPlaceBasisOfIdempotentStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsFreeGeneratorsStatement
-import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.PadicIntAlgebraOfIsAdicCompleteMatrixUniqueStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.IsEigBasisIff
+public import ReciprocityTheory.DualLattices.CokernelLengthComparisonStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EigenbasisRestrictionSurjectiveEquivariantStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EigenspaceDimAddSplitExactTransposeStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.EmbeddingsLiftIntegersIdempotentsConjugationStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsFreeGeneratorsStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.PadicIntAlgebraOfIsAdicCompleteMatrixUniqueStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.PadicPlaceBasisOfIdempotentStatement
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.TateModuleEigenspaceDimEqLieAlgebraSumStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry TensorProduct Matrix
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ ReciprocityTheory.ChartRestriction.G.Pdiv.ChartF ReciprocityTheory.ChartRestriction.G.Pdiv.AvDefs
 open ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.Be2 GlobalTheory.ChF
@@ -121,6 +157,7 @@ private theorem wfd (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C
 private theorem mulVec_comb {O I J K : Type} [CommRing O] [Fintype I] [Fintype J] (M : Matrix K J O)
     (c : I → O) (u : I → J → O) : M *ᵥ (∑ i, c i • u i) = ∑ i, c i • (M *ᵥ u i) := by
   show Matrix.mulVecLin M _ = _
+
   rw [map_sum]
   exact Finset.sum_congr rfl fun i _ => map_smul _ _ _
 
@@ -219,7 +256,7 @@ theorem exists_generators : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [I
     induction x using TensorProduct.induction_on with
     | zero => simp
     | tmul c a => rw [extM_tmul, hLt, Matrix.mul_smul, Matrix.smul_mul, hL.eqB]
-    | add x x' h h' => rw [map_add, map_add, Matrix.mul_add, Matrix.add_mul, h, h']
+    | add x x' h h' => rw [map_add (f := _), map_add (f := _), Matrix.mul_add, Matrix.add_mul, h, h']
   have hA : ∀ x, Aᵀ * (extM p ρG x)ᵀ = (extM p (trR NZ) x).map (algebraMap ℤ_[p] O) * Aᵀ := by
     intro x
     induction x using TensorProduct.induction_on with
@@ -232,7 +269,7 @@ theorem exists_generators : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [I
         ← Matrix.transpose_mul, ← Matrix.transpose_mul, hL.eqA]
       rfl
     | add x x' h h' =>
-      rw [map_add, map_add, Matrix.transpose_add, Matrix.mul_add, h, h', Matrix.map_add _ (map_add _),
+      rw [map_add (f := _), map_add (f := _), Matrix.transpose_add, Matrix.mul_add, h, h', Matrix.map_add _ (map_add _),
         Matrix.add_mul]
   let ρ' : (ℤ_[p] ⊗[ℤ] OE) →ₐ[ℤ_[p]] Matrix (Ix g) (Ix g) ℤ_[p] := H.ρ.comp (sigE p OE).toAlgHom
   have hρ' : ∀ x, ρ' x = H.ρ (sigE p OE x) := fun x => rfl
@@ -247,7 +284,7 @@ theorem exists_generators : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [I
     | tmul c a =>
       rw [extM_tmul, Matrix.transpose_smul, Matrix.smul_mulVec, map_smul, res_eig _ _ _ (hW j), smul_smul]
       congr 1
-    | add x x' h h' => rw [map_add, map_add, Matrix.transpose_add, Matrix.add_mulVec, map_add, h, h', add_smul]
+    | add x x' h h' => rw [map_add (f := _), map_add (f := _), Matrix.transpose_add, Matrix.add_mulVec, map_add (f := _), h, h', add_smul]
   obtain ⟨h₁, y, hy, hyd⟩ := wfd p C v O hv OE w b (Ix g) ρ'
   obtain ⟨h₂, z, hz, hzd⟩ := wfd p C v O hv OE w b (Fin r) (extM p (trR NZ))
   choose kB hkB using hL.fromB
@@ -306,9 +343,11 @@ theorem exists_generators : ∀ (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [I
     omega
   · intro l j
     refine Fin.addCases (fun l => ?_) (fun l => ?_) l
+
     · rw [Fin.append_left, hχ, map_sum]
       exact Submodule.sum_mem _ fun i _ => by
         rw [map_smul]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨_, rfl⟩)
+
     · rw [Fin.append_right, map_sum]
       exact Submodule.sum_mem _ fun i _ => by
         rw [map_smul]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨_, rfl⟩)

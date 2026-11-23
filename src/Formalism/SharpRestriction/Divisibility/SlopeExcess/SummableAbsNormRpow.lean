@@ -1,5 +1,61 @@
-import Mathlib
-import Formalism.SharpRestriction.Divisibility.FunctionModelRallisFromInputs
+module
+
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ZetaEulerProducts.SummablePrimesRpow
+public import Mathlib.NumberTheory.LSeries.Basic
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Formalism.LocalRingCardinality.DataHost
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+public import Mathlib.NumberTheory.LSeries.SumCoeff
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Ideal.Asymptotics
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Formalism.SharpRestriction.Divisibility.SchurIrreducible
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain Filter Topology Asymptotics
@@ -76,43 +132,7 @@ lemma lseries_summable {σ : ℝ} (hσ : 1 < σ) :
 
 theorem summable_absNorm_rpow {σ : ℝ} (hσ : 1 < σ) :
     Summable (fun w : HeightOneSpectrum (𝓞 K) => ((Ideal.absNorm w.asIdeal : ℕ) : ℝ) ^ (-σ)) := by
-  classical
-  set c : ℕ → ℝ := fun n => (Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) with hc
-  have hL := lseries_summable K hσ
-  set a : ℕ → ℝ := fun k => ‖LSeries.term (fun n => ((c n : ℝ) : ℂ)) (σ : ℂ) k‖ with ha_def
-  have ha : Summable a := hL.norm
-  have ha_eq : ∀ k, k ≠ 0 → a k = c k * (k : ℝ) ^ (-σ) := by
-    intro k hk
-    simp only [ha_def, LSeries.term, hk, if_false]
-    rw [norm_div, Complex.norm_natCast_cpow_of_pos (Nat.pos_of_ne_zero hk)]
-    rw [Complex.norm_real, Real.norm_of_nonneg (by positivity), Real.rpow_neg (by positivity)]
-    simp [div_eq_mul_inv]
-  refine summable_of_sum_le (fun w => by positivity) (c := ∑' k, a k) ?_
-  intro u
-  let N' : HeightOneSpectrum (𝓞 K) → ℕ := fun w => Ideal.absNorm w.asIdeal
-  rw [← Finset.sum_fiberwise_of_maps_to (g := N') (t := u.image N')
-    (fun w hw => Finset.mem_image_of_mem _ hw)]
-  calc _ ≤ ∑ k ∈ u.image N', a k := by
-        apply Finset.sum_le_sum
-        intro k hk
-        obtain ⟨w0, -, rfl⟩ := Finset.mem_image.1 hk
-        have hk0 : N' w0 ≠ 0 := by
-          simp only [N']; rw [Ne, Ideal.absNorm_eq_zero_iff]; exact w0.ne_bot
-        rw [ha_eq _ hk0]
-        rw [Finset.sum_congr rfl (g := fun _ => ((N' w0 : ℕ) : ℝ) ^ (-σ))
-          (fun w hw => by show ((N' w : ℕ) : ℝ) ^ (-σ) = _; rw [(Finset.mem_filter.1 hw).2])]
-        rw [Finset.sum_const, nsmul_eq_mul]
-        apply mul_le_mul_of_nonneg_right _ (by positivity)
-        simp only [hc]
-        rw [card_fib]
-        exact_mod_cast Finset.card_le_card_of_injOn (fun w : HeightOneSpectrum (𝓞 K) => w.asIdeal)
-          (fun w hw => by
-            have hw' : w ∈ u.filter (fun i => N' i = N' w0) := hw
-            have hmem : w.asIdeal ∈ (Ideal.finite_setOfPred_absNorm_eq (S := 𝓞 K) (N' w0)).toFinset := by
-              rw [Set.Finite.mem_toFinset]; exact (Finset.mem_filter.1 hw').2
-            exact hmem)
-          (fun w1 _ w2 _ h => HeightOneSpectrum.ext h)
-    _ ≤ ∑' k, a k := ha.sum_le_tsum _ (fun k _ => norm_nonneg _)
+  apply PositivityTheory.Lord.summable_primes_rpow <;> assumption
 
 end Sum
 
@@ -121,10 +141,6 @@ end Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
 namespace Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
 section Euler
 variable {ι : Type} (q : ι → ℕ) (ε : ι → ℕ → ℂ) (n : ℕ)
-
-def at' (i : ι) (j : ℕ) (s : ℂ) : ℂ := ε i j * ((q i : ℕ) : ℂ) ^ (-(2 * s + (j : ℂ)))
-
-def ell (i : ι) (s : ℂ) : ℂ := ∑ j ∈ Finset.Icc 1 n, -Complex.log (1 - at' q ε i j s)
 
 variable {q ε}
 
@@ -135,35 +151,12 @@ end Euler
 end Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
 
 namespace Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
-open Formalism.MainNotions.SchurIrreducible Formalism.MainNotions.PDVS MeasureTheory
+open Formalism.MainNotions.SchurIrreducible MeasureTheory
 
 section Tail
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-def qS (S : Finset (Pl F)) : {w : HeightOneSpectrum (𝓞 F) // Sum.inr w ∉ S} → ℕ := fun w => qNorm w.1
 
-variable (E) in
-
-def εS (n M : ℕ) (S : Finset (Pl F)) : {w : HeightOneSpectrum (𝓞 F) // Sum.inr w ∉ S} → ℕ → ℂ :=
-  fun w j => etaV (E := E) w.1 ^ (M + n - j)
-
-variable (E) in
-
-def LL (n M : ℕ) (S : Finset (Pl F)) (s : ℂ) : ℂ := ∑' w, ell (qS S) (εS E n M S) n w s
-
-lemma εS_le (n M : ℕ) (S : Finset (Pl F)) : ∀ w j, ‖εS E n M S w j‖ ≤ 1 := by
-  intro w j
-  simp only [εS, norm_pow]
-  unfold etaV
-  split_ifs <;> simp
-
-def eqv (S : Finset (Pl F)) (hinf : ∀ v : NumberField.InfinitePlace F, Sum.inl v ∈ S) :
-    {w : HeightOneSpectrum (𝓞 F) // Sum.inr w ∉ S} ≃ {v : Pl F // v ∉ S} :=
-  Equiv.ofBijective (fun w => ⟨Sum.inr w.1, w.2⟩)
-    ⟨fun a b h => Subtype.ext (Sum.inr_injective (congrArg Subtype.val h)), fun ⟨v, hv⟩ => by
-      cases v with
-      | inl x => exact absurd (hinf x) hv
-      | inr w => exact ⟨⟨w, hv⟩, rfl⟩⟩
 
 end Tail
 
@@ -175,7 +168,7 @@ end Main
 end Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
 
 namespace Formalism.MainNotions.DIV.Proofs
-open Formalism.BasicNotions Formalism.MainNotions.PDVS Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
+open Formalism.BasicNotions Formalism.MainNotions.DIV.Proofs.QuadraticNormBounds
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
 end Formalism.MainNotions.DIV.Proofs

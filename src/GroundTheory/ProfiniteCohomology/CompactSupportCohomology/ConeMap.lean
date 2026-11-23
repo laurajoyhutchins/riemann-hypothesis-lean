@@ -1,5 +1,49 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.ShiftNegOneHomologyIsoSymmHom
+module
+
+public import GroundTheory.ProfiniteCohomology.CompactSupportCohomology.ShiftNegOneHomologyIsoSymmHom
+import Mathlib.Algebra.Homology.HomologicalComplexAbelian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -39,17 +83,9 @@ noncomputable def shiftNegOneMap (β : L ⟶ L') : shiftNegOne L ⟶ shiftNegOne
       (shiftNegOneMapF_comm β n)).trans
       (congrArg (· ≫ shiftNegOneMapF β (n + 1)) (shiftNegOne_d L n)).symm
 
-@[reassoc]
 theorem shiftNegOneSuccHom_shiftNegOneMap_f (β : L ⟶ L') (n : ℕ) :
     shiftNegOneSuccHom L n ≫ (shiftNegOneMap β).f (n + 1) = β.f n ≫ shiftNegOneSuccHom L' n :=
   ModuleCat.hom_ext (LinearMap.ext fun _ => rfl)
-
-@[simp]
-theorem shiftNegOneMap_id : shiftNegOneMap (𝟙 L) = 𝟙 (shiftNegOne L) := by
-  ext n : 1
-  cases n with
-  | zero => exact ModuleCat.hom_ext (LinearMap.ext fun _ => rfl)
-  | succ n => rfl
 
 @[reassoc]
 theorem shiftNegOneHomologyHom_naturality (β : L ⟶ L') (n : ℕ) :
@@ -90,19 +126,11 @@ theorem mapF_comm (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') (n 
         (shiftNegOneD L' n).hom ((shiftNegOneMapF β n).hom p.2) =
       (shiftNegOneMapF β (n + 1)).hom (shiftNegOneSucc L n ((f.f n).hom p.1) +
         (shiftNegOneD L n).hom p.2)
-    rw [map_add, shiftNegOneMapF_succ_apply, hβ, hom_apply_hom_apply_eq_of_comp_eq wn p.1]
+    rw [map_add (f := _), shiftNegOneMapF_succ_apply, hβ, hom_apply_hom_apply_eq_of_comp_eq wn p.1]
 
 noncomputable def map (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') :
     mappingCoconeNat f ⟶ mappingCoconeNat f' :=
   CochainComplex.ofHom (mapF α β) (mapF_comm α β w)
-
-@[simp]
-theorem map_id : map (𝟙 K) (𝟙 L) (by simp) = 𝟙 (mappingCoconeNat f) := by
-  ext n : 1
-  refine ModuleCat.hom_ext (LinearMap.ext fun (p : K.X n × shiftNegOneX L n) => Prod.ext rfl ?_)
-  cases n with
-  | zero => rfl
-  | succ n => rfl
 
 theorem map_comp (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') (α' : K' ⟶ K'')
     (β' : L' ⟶ L'') (w' : f' ≫ β' = α' ≫ f'') :
@@ -114,19 +142,12 @@ theorem map_comp (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') (α'
   | zero => rfl
   | succ n => rfl
 
-@[reassoc (attr := simp)]
-theorem map_fst (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') :
-    map α β w ≫ fst f' = fst f ≫ α :=
-  HomologicalComplex.hom_ext _ _ fun _ => ModuleCat.hom_ext (LinearMap.ext fun _ => rfl)
-
-@[reassoc (attr := simp)]
 theorem inr_map (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') :
     inr f ≫ map α β w = shiftNegOneMap β ≫ inr f' := by
   ext n : 1
   refine ModuleCat.hom_ext (LinearMap.ext fun y => Prod.ext ?_ rfl)
   exact (α.f n).hom.map_zero
 
-@[reassoc]
 theorem homologyδ_naturality (α : K ⟶ K') (β : L ⟶ L') (w : f ≫ β = α ≫ f') (n : ℕ) :
     homologyδ f n ≫ HomologicalComplex.homologyMap (map α β w) (n + 1) =
       HomologicalComplex.homologyMap β n ≫ homologyδ f' n := by

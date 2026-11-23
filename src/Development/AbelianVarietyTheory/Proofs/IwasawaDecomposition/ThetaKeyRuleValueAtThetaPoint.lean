@@ -1,10 +1,51 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KchMul
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.UnifMetricScalar
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.TangentVectorExistsUniqueUniformisingVector
-import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaKeyRulePowComplex
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.KchMul
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.NormConst
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRootOfKeyFormula
+public import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsUniformisationOfComplexConjugateKeyDatum
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.TangentVectorExistsUniqueUniformisingVector
+public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.UnifMetricScalar
 import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.NormalFormOfParts
+public import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.ThetaKeyRulePowComplex
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TopLePreimageOfValAtNeZero
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExponentialDerivativeAtZeroIsTangent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -42,7 +83,7 @@ theorem exists_unif_of_frame {σ : KA l →+* ℂ} {g : ℕ} {ty : Fin g → (E 
   obtain ⟨w, ⟨hw, hrig⟩, hth⟩ := val_tie Φ.m ht
   obtain ⟨w', hw', hinv⟩ := ConjUnif.exists_inv w hw
   have hL := Φ.T.t.PP.isLB
-  have hM := pull_isLB Xo.univ.t.PP.isLB Φ.m.φ
+  have hM := LB.isLB_pull Xo.univ.t.PP.isLB Φ.m.φ
   have hol := isHolTo_exp F i hP
   let u₁ := fibreUnif Φ.m.cart (F.ex i P) P.range fr (F.ex_add i P hP) (F.ex_onto i P hP) (F.ex_ker i P hP)
     hP.2.2.1 hP.2.2.2.1 hol c₁ c₂ c₃
@@ -97,8 +138,9 @@ theorem mulVec_period {g : ℕ} {La : Type} [AddCommGroup La] (P : La →+ (Fin 
     ext k; simp [Finset.sum_apply, Pi.single_apply]
   rw [h1 (fun i => a (Sum.inl i)), h1 (fun i => a (Sum.inr i))]
   conv_lhs => rw [h2]
-  simp only [map_sum, map_zsmul, Fintype.sum_sum_type, map_add, Matrix.mulVec_add, Matrix.mulVec_sum,
-    Matrix.mulVec_smul, (hn _).1, (hn _).2]
+
+  simp only [map_sum, map_zsmul, Fintype.sum_sum_type, map_add (f := _), Matrix.mulVec_add, Matrix.mulVec_sum,
+  Matrix.mulVec_smul, (hn _).1, (hn _).2]
 
 theorem normalAt_of_coord (x : KeyIn ℂ) (u : HolUnif x.P.A x.P.L x.P.g) {La : Type} [AddCommGroup La]
     (P : La →+ (Fin x.P.g → ℂ)) (bas : (Fin x.P.g ⊕ Fin x.P.g → ℤ) ≃ₗ[ℤ] La)

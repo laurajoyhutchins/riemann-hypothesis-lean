@@ -1,8 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsPullQk
+module
+
+public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsPullQk
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.AdicCompletion.Completeness
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PowerSeries.Ideal
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RigIsoCongr
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.HasArcDataIff
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.CubePullbacks.CubePull
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,7 +100,7 @@ section Witness
 
 variable {R : Type} [CommRing R] [IsDomain R] {I : Ideal R} {g : O'' →+* R} {f₀ : O' →+* R} {u : R} {χ : Sp R ⟶ Y.X}
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_witness (h : IsBC f a a' hD) (hf₀ : f₀ = g.comp f) (W : ArcWit Y a I f₀ u χ) :
     ∃ W' : ArcWit Y a' I g u χ, W'.t = W.t ∧ HEq W'.m W.m ∧ HEq W'.P W.P ∧ HEq (W'.φ ≫ proj hD) W.φ ∧
@@ -160,35 +206,6 @@ theorem admissibleBase_powerSeries_span_X (A : Type) [CommRing A] [IsDomain A] [
     AdmBase (PowerSeries A) (Ideal.span {PowerSeries.X}) :=
   ⟨inferInstance, inferInstance, inferInstance, inferInstance⟩
 
-def IsArc (Y : Model Xo c β) {A : Type} [CommRing A] [IsDomain A] {b : O →+* A} (a : ArcIn D l β A b) (ϖ : A)
-    (χ : Sp (PowerSeries A) ⟶ Y.X) : Prop :=
-  χ ≫ Y.s = spMap (PowerSeries.C (R := A)) ≫ spMap b ∧
-  (∀ x : Sp (PowerSeries A), χ x ∈ abLocus Y.t.G ↔ PowerSeries.X ∉ x.asIdeal) ∧
-  (∀ x : Sp (PowerSeries A), PowerSeries.C ϖ * PowerSeries.X ∉ x.asIdeal → χ x ∈ Set.range Y.j) ∧
-  Y.HasArcData a (Ideal.span {PowerSeries.X}) (PowerSeries.C (R := A)) PowerSeries.X χ
-
-def IsArcBase (A : Type) [CommRing A] [IsDomain A] (ϖ : A) : Prop :=
-  (IsField A ∧ ϖ = 1) ∨ (IsDiscreteValuationRing A ∧ Irreducible ϖ ∧ IsAdicComplete (Ideal.span {ϖ}) A)
-
-theorem IsArcBase.isPrincipalIdealRing {A : Type} [CommRing A] [IsDomain A] {ϖ : A} (h : IsArcBase A ϖ) :
-    IsPrincipalIdealRing A := by
-  rcases h with ⟨h, -⟩ | ⟨h, -⟩
-  · letI := h.toField
-    infer_instance
-  · infer_instance
-
-theorem IsArcBase.ne_zero {A : Type} [CommRing A] [IsDomain A] {ϖ : A} (h : IsArcBase A ϖ) : ϖ ≠ 0 := by
-  rcases h with ⟨-, rfl⟩ | ⟨-, h, -⟩
-  exacts [one_ne_zero, h.ne_zero]
-
-theorem IsArcBase.dvd_pow {A : Type} [CommRing A] [IsDomain A] {ϖ : A} (h : IsArcBase A ϖ) {x : A} (hx : x ≠ 0) :
-    ∃ n : ℕ, x ∣ ϖ ^ n := by
-  rcases h with ⟨h, rfl⟩ | ⟨_, h, -⟩
-  · obtain ⟨y, hy⟩ := h.mul_inv_cancel hx
-    exact ⟨0, y, by rw [pow_zero, hy]⟩
-  · obtain ⟨n, hn⟩ := IsDiscreteValuationRing.associated_pow_irreducible hx h
-    exact ⟨n, hn.dvd⟩
-
 section PowerSeries
 
 theorem map_comp_C' (f : O' →+* O'') :
@@ -217,30 +234,6 @@ theorem exists_witness_powerSeries (hG : GlobalFnsSt) (hP : PolBaseChangeSt) (hU
   exists_witness_baseChange hG hP hU h5 h (admissibleBase_powerSeries_span_X O') (admissibleBase_powerSeries_span_X O'')
     (PowerSeries.map_injective f h.injective)
     (by rw [Ideal.map_span, Set.image_singleton, PowerSeries.map_X]) (map_comp_C' f) (PowerSeries.map_X f) W
-
-theorem IsArc.baseChange (hG : GlobalFnsSt) (hP : PolBaseChangeSt) (hU : UnifBaseChangeSt) (h5 : Laws5)
-    (h : IsBC f a a' hD) {ϖ : O'} {ϖ' : O''} (hϖ : IsArcBase O' ϖ) (hϖ' : IsArcBase O'' ϖ')
-    {χ : Sp (PowerSeries O') ⟶ Y.X} (hχ : IsArc Y a ϖ χ) : IsArc Y a' ϖ' (spMap (PowerSeries.map f) ≫ χ) := by
-  have := hϖ.isPrincipalIdealRing
-  have := hϖ'.isPrincipalIdealRing
-  obtain ⟨h₁, h₂, h₃, h₄⟩ := hχ
-  have mem : ∀ (x : Sp (PowerSeries O'')) (s : PowerSeries O'),
-      s ∈ (spMap (PowerSeries.map f) x).asIdeal ↔ PowerSeries.map f s ∈ x.asIdeal := fun _ _ => Iff.rfl
-  refine ⟨?_, fun x => ?_, fun x hx => ?_, ?_⟩
-  · rw [Category.assoc, h₁, ← Category.assoc, ← spMap_comp, map_comp_C', spMap_comp, spMap_comp, Category.assoc]
-  · refine (h₂ (spMap (PowerSeries.map f) x)).trans ?_
-    rw [mem, PowerSeries.map_X]
-  · refine h₃ (spMap (PowerSeries.map f) x) fun hm => hx ?_
-    rw [mem, map_mul, PowerSeries.map_X, PowerSeries.map_C] at hm
-    rcases x.isPrime.mem_or_mem hm with hm | hm
-    · obtain ⟨n, y, hy⟩ := hϖ'.dvd_pow ((map_ne_zero_iff f h.injective).2 hϖ.ne_zero)
-      refine Ideal.mul_mem_right _ _ (x.isPrime.mem_of_pow_mem n ?_)
-      rw [← map_pow, hy, map_mul]
-      exact Ideal.mul_mem_right _ _ hm
-    · exact Ideal.mul_mem_left _ _ hm
-  · obtain ⟨W⟩ := (Y.hasArcData_iff _ _ _ _ _).1 h₄
-    obtain ⟨W', -⟩ := exists_witness_powerSeries hG hP hU h5 h W
-    exact (Y.hasArcData_iff _ _ _ _ _).2 ⟨W'⟩
 
 end PowerSeries
 

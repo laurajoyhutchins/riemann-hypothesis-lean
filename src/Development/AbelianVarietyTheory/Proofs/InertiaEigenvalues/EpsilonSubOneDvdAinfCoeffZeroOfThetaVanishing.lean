@@ -1,10 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NormLeOneOfMemOL
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsTeichmullerTiltMinusOnePowDivEnvelope
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FontaineThetaEqZeroIffFontaineXiElementDvd
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusIntegralityWittTiltAinf
+module
+
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPotential
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusIntegralityWittTiltAinf
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FontaineThetaEqZeroIffFontaineXiElementDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
+
 open Formalism Formalism.BasicNotions Formalism.BasicNotions.Loc GlobalTheory.BKGal
 open scoped Formalism.Per
 
@@ -39,6 +82,7 @@ def xin (ε : OCb l) (n : ℕ) : Ainf l :=
 theorem frob_iter_xin (ε : OCb l) (n k : ℕ) :
     (⇑(WittVector.frobenius : Ainf l →+* Ainf l))^[n + k] (xin ε n) =
       ∑ i ∈ Finset.range l, (WittVector.teichmuller l (rt ε 1 ^ (l ^ k))) ^ i := by
+
   rw [xin, ← RingHom.coe_pow, map_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [map_pow, RingHom.coe_pow, frob_iter_teich, pow_add, pow_mul, add_comm n 1, rt_pow]
@@ -58,6 +102,7 @@ theorem natCast_ne_zero : ((l : ℕ) : Per.OC l) ≠ 0 := by
 
 theorem theta_frob_xin (ε : OCb l) (hε : ε.untilt = 1) (n j : ℕ) :
     Per.θ l ((⇑(WittVector.frobenius : Ainf l →+* Ainf l))^[n + (j + 1)] (xin ε n)) = l := by
+
   rw [frob_iter_xin, map_sum]
   have h1 : (rt ε 1 ^ (l ^ (j + 1))).untilt = 1 := by
     rw [pow_succ', pow_mul]
@@ -79,6 +124,7 @@ theorem xin_dvd (ε : OCb l) (hε : GlobalTheory.MemLoc.IsEps ε) (n : ℕ) (b :
 
 theorem coeff_xin (ε : OCb l) (n : ℕ) :
     (xin ε n).coeff 0 * (rt ε (n + 1) - 1) = rt ε n - 1 := by
+
   rw [← WittVector.constantCoeff_apply, xin, map_sum]
   simp only [map_pow, WittVector.constantCoeff_apply, WittVector.teichmuller_coeff_zero]
   rw [geom_sum_mul]
@@ -192,8 +238,8 @@ end GlobalTheory.EpsCoeff
 
 namespace GlobalTheory
 
-open GlobalTheory.EpsCoeff in
 
+open GlobalTheory.EpsCoeff in
 theorem eps_sub_one_dvd_coeff_zero : ∀ (l : ℕ) [Fact l.Prime] (ε : OCb l), IsEps ε → ∀ a : Ainf l,
     (∀ n : ℕ, Per.θ l (WittVector.frobenius^[n] a) = 0) → (ε - 1) ∣ a.coeff 0 := by
   intro l _ ε hε a ha

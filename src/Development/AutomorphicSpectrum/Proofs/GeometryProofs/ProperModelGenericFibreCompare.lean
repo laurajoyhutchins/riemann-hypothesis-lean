@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenPtSpecializesOfSpecializes
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueSection
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GermStalkClosedPointToBaseChange
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LineLatticeGenericSectionsStatement
-import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.AlgClosedTensorIsDomainStatement
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FlatBCSec
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LevelSectionsExactKernelLocusOpen
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.FlatBCSec
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.AlgClosedTensorIsDomainStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsUniqueSection
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenPtSpecializesOfSpecializes
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GermStalkClosedPointToBaseChange
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsVBOneOfChartGenerators
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LineLatticeGenericSectionsStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Flat TensorProduct
 
@@ -152,7 +203,7 @@ theorem descent_core {K Ω C : Type} [Field K] [Field Ω] [Algebra K Ω] [Field 
       exact mul_mem ha (hK p _)
     | zero => simp [zero_mem]
     | add u v _ _ hu hv =>
-      rw [map_add, Finsupp.add_apply]
+      rw [map_add (f := _), Finsupp.add_apply]
       exact add_mem hu hv
   have hτ0 : τ ≠ 0 := fun h => one_ne_zero (by rw [← hτυ, h, zero_mul] : (1 : Ω ⊗[K] C) = 0)
   have hυ0 : υ ≠ 0 := fun h => one_ne_zero (by rw [← hτυ, h, mul_zero] : (1 : Ω ⊗[K] C) = 0)
@@ -240,7 +291,7 @@ theorem tensor_inj {O K Ω C B : Type} [CommRing O] [IsDomain O] [Field K] [Alge
     induction z using TensorProduct.induction_on with
     | zero => simp
     | tmul b c => rw [hι]; rfl
-    | add u v hu hv => rw [map_add, map_add, hu, hv, map_add]
+    | add u v hu hv => rw [map_add (f := _), map_add (f := _), hu, hv, map_add (f := _)]
   intro a b hab
   have h := congrArg e hab
   rw [hE, hE] at h
@@ -380,7 +431,7 @@ theorem chart (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Spec (CommRingCat.of
       rw [hι, hφ, show E (b ⊗ₜ[O] c) = _ from eTens_tmul s s' f hpb W hW b c, map_mul,
         val_pull hdom W W' inf_le_left hne hne', val_algX h2]
       rfl
-    | add u v hu hv => simp only [map_add, hu, hv]
+    | add u v hu hv => simp only [map_add (f := _), hu, hv]
   have hφs : ∀ (a : Ω) (z : Ω ⊗[K] C), φ (a • z) = i a * φ z := by
     intro a z
     rw [Algebra.smul_def, map_mul, Algebra.TensorProduct.algebraMap_apply, hφ]
@@ -412,8 +463,8 @@ theorem chart (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Spec (CommRingCat.of
           intro b z
           rw [map_mul, hι, Algebra.smul_def, Algebra.TensorProduct.algebraMap_apply]
           rfl
-        rw [map_add, hb, hb, e₁, e₂, map_mul, smul_add, smul_smul, smul_smul, mul_comm (val ξ W hne b₁)]
-    rw [injective_iff_map_eq_zero]
+        rw [map_add (f := _), hb, hb, e₁, e₂, map_mul, smul_add, smul_smul, smul_smul, mul_comm (val ξ W hne b₁)]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro x hx
     obtain ⟨b, hb, z, hz⟩ := key x
     have h0 : val ξ' W' hne' (E z) = val ξ' W' hne' 0 := by
@@ -586,8 +637,8 @@ theorem finiteRing_sq_sub_mul_sq_eq_of_card (X : Scheme.{0}) (Ω : Type) [Field 
 
 end GlobalTheory.CompanionTheory.Ar.Flat.Descend
 
-open GlobalTheory.CompanionTheory.Ar.Flat.Descend in
 
+open GlobalTheory.CompanionTheory.Ar.Flat.Descend in
 theorem GlobalTheory.CompanionTheory.Ar.Flat.exists_gen_of_extension : ∀ (X : Scheme.{0}) (Ω : Type) [Field Ω] (ξ : Spec (CommRingCat.of Ω) ⟶ X) [CharZero Ω] (O : Type) [CommRing O] [IsDomain O] [Algebra O Ω] (s : X ⟶ Spec (CommRingCat.of O)) [IsNoetherianRing O] [IsProper s] (X' : Scheme.{0}) (Ω' : Type) [Field Ω'] (ξ' : Spec (CommRingCat.of Ω') ⟶ X') (f : X' ⟶ X) (i : Ω →+* Ω') (C : Type) [Field C] [Algebra O C] [Algebra C Ω'] (s' : X' ⟶ Spec (CommRingCat.of C)), ξ ≫ s = Spec.map (CommRingCat.ofHom (algebraMap O Ω)) → Function.Injective (algebraMap O Ω) → Function.Injective (algebraMap O C) → IsPullback f s' s (Spec.map (CommRingCat.ofHom (algebraMap O C))) → ξ' ≫ s' = Spec.map (CommRingCat.ofHom (algebraMap C Ω')) → Dominates ξ' ξ f i → IsCptGen ξ → IsCptGen ξ' → ConstClosed O Ω → ∀ (L : Lat ξ Ω) (t' : Ω'), L.IsVBOn (genFibre O ξ) 1 ⊤ → (∀ p' : Cpt ξ', (L.pull ξ' f i.toAddMonoidHom).IsGenAt p' t') → ∃ (t : Ω) (c : C), (∀ p ∈ genFibre O ξ, L.IsGenAt p t) ∧ t' = algebraMap C Ω' c * i t := by
   intro X Ω _ ξ _ O _ _ _ s _ _ X' Ω' _ ξ' f i C _ _ _ s' h1 hO hOC hpb h2 hdom hg hg' hcc L t' hVB hgen
   haveI : FaithfulSMul O Ω := (faithfulSMul_iff_algebraMap_injective O Ω).2 hO

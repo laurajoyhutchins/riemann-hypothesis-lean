@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIwVecTrivial
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.DepthZeroJacquetInjective
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HasFiniteLengthOfIsIrreducible
-import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCuspidalIffCompositions
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyInv
+module
+
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIwVecTrivial
+public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsCuspidalIffCompositions
+public import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.EventuallyInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Fin.Tuple.Sort
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.ExistsReadingLaws
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,8 +84,23 @@ theorem val_det_of_mem_KO {m : Type} [Fintype m] [DecidableEq m] {g : GL m k} (h
 theorem emb₂_one_apply {r t : ℕ} (m : GL (Fin r) k) (x y : Fin r ⊕ Fin t) :
     ((emb₂ k (stdSum (rfl : r + t = r + t)) (m, 1) : GL (Fin (r + t)) k) : Matrix (Fin (r + t)) (Fin (r + t)) k)
       (stdSum rfl x) (stdSum rfl y) = fromBlocks (m : Matrix (Fin r) (Fin r) k) 0 0 1 x y := by
-  rw [val_emb₂]
-  simp
+  have same : ∀ (a : Bool) (i j : Two (Fin r) (Fin t) a),
+      ((leviEmb k (two (stdSum (rfl : r + t = r + t))) (leviTwo k (Fin r) (Fin t) (m, 1)) : GL _ k) : Matrix _ _ k)
+        (two (stdSum rfl) ⟨a, i⟩) (two (stdSum rfl) ⟨a, j⟩) =
+        ((leviTwo k (Fin r) (Fin t) (m, 1) a : GL _ k) : Matrix _ _ k) i j := by
+    intro a i j
+    simp [leviEmb, blockDiagonal'_apply_eq]
+  have ne : ∀ (a b : Bool), a ≠ b → ∀ (i : Two (Fin r) (Fin t) a) (j : Two (Fin r) (Fin t) b),
+      ((leviEmb k (two (stdSum (rfl : r + t = r + t))) (leviTwo k (Fin r) (Fin t) (m, 1)) : GL _ k) : Matrix _ _ k)
+        (two (stdSum rfl) ⟨a, i⟩) (two (stdSum rfl) ⟨b, j⟩) = 0 := by
+    intro a b h i j
+    simp [leviEmb, blockDiagonal'_apply, h]
+  change ((leviEmb k (two (stdSum rfl)) (leviTwo k (Fin r) (Fin t) (m, 1)) : GL (Fin (r + t)) k) : Matrix (Fin (r + t)) (Fin (r + t)) k) _ _ = _
+  rcases x with x | x <;> rcases y with y | y
+  · exact same false x y
+  · exact ne false true (by decide) x y
+  · exact ne true false (by decide) x y
+  · exact same true x y
 
 theorem emb₂_one_mem_KO {r t : ℕ} {m : GL (Fin r) k} (hm : m ∈ KO k (Fin r)) :
     emb₂ k (stdSum (rfl : r + t = r + t)) (m, 1) ∈ KO k (Fin (r + t)) := by
@@ -56,7 +116,7 @@ theorem emb₂_one_mem_KO {r t : ℕ} {m : GL (Fin r) k} (hm : m ∈ KO k (Fin r
     · exact hg1 a b
     · simp
     · simp
-    · rw [fromBlocks_apply₂₂, one_apply]
+    · rw [fromBlocks_apply₂₂, Matrix.one_apply]
       split_ifs <;> simp
   refine mem_KO_of_val_le (key m hm) ?_
   have : (emb₂ k (stdSum (rfl : r + t = r + t)) (m, 1))⁻¹ = emb₂ k (stdSum (rfl : r + t = r + t)) (m⁻¹, 1) := by
@@ -201,7 +261,8 @@ theorem exists_isIwVec_fst : ∀ (k : Type) [Field k] [ValuativeRel k] [Topologi
             (w.symm.injective h))))
       · simp
       · simp
-      · rw [fromBlocks_apply₂₂, one_apply]
+      · rw [fromBlocks_apply₂₂]
+        change (if a = b then (1 : k) else 0) = _
         by_cases hab : a = b
         · subst hab; simp
         · rw [if_neg hab, if_neg]

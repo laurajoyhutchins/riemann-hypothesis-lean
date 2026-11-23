@@ -1,33 +1,65 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Forms
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CoefAEqOfHeq
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.GreenCuspidalIff
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsIsBIffCoreB
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Formalism.LocalToGlobal.IndefiniteReal.LinksStage
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CrdOver
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqCjOneSmul
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LinksAnalyticHypothesesOfWeilRepHarishChandraStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntertwinersAndLiftsExistAtChoices
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsBaseEnlargementFixedCoefFieldOfCoeffEnlargemen
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
+public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.DsExistsOfDiscreteSeriesExists
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CrdOver
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RealDatumPrerequisitesUpdateModels
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EventuallyDefiniteSpacesStandardAndLarge
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCopiesReferenceObjectsOverEnlargedBase
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteGroupCharacterEqProductResidualCharactersEStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FormGroupsModelsActionsMeasuresBasesCharacterise
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GoodIdempotentCoefficientsAgreeEnlargedBaseStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftCharactersAgreeOverEnlargedBaseStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LinksAnalyticHypothesesOfWeilRepHarishChandraStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RationalDefiniteFormsLargerFieldCombinationSmall
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleHilbertModelDefiniteFormsEnlarged
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleRationalFormLiftsAlgebraicEnlarged
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleWeilDatumVectorPolynomialMapEnlarg
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardLatticesDiagonal
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EventuallyDefiniteSpacesStandardAndLarge
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LiftCharactersAgreeOverEnlargedBaseStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GoodIdempotentCoefficientsAgreeEnlargedBaseStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FormGroupsModelsActionsMeasuresBasesCharacterise
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleWeilDatumVectorPolynomialMapEnlarg
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleHilbertModelDefiniteFormsEnlarged
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ThetaLiftAtReferenceTupleOverEnlargedBaseStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FiniteGroupCharacterEqProductResidualCharactersEStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RationalDefiniteFormsLargerFieldCombinationSmall
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ReferenceTupleRationalFormLiftsAlgebraicEnlarged
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCopiesReferenceObjectsOverEnlargedBase
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ThetaLiftAtReferenceTupleOverEnlargedBaseStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IntertwinersAndLiftsExistAtChoices
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqCjOneSmul
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.MainNotions.S MeasureTheory IsDedekindDomain NumberField
 open Formalism.L2.Theta Formalism.L2.DIV Formalism.L2.Indef Formalism.L2.Rows Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.Lev Formalism.IndefR.Cx Formalism.IndefR.RecTie
 open scoped TensorProduct InnerProductSpace ComplexOrder
@@ -59,6 +91,23 @@ theorem trans_eq_of_heq (X : Stages) {px : PreX X.B.toPre} {Pg Pg' : Finset (Pl 
   obtain rfl := eq_of_heq hc
   rfl
 
+private theorem updM_preserves_invariants {D : D7} {G : Type} [Group G] [Fintype G]
+    {Pl0 I0 T0 : Type} {A3 : FamIn3 D.what₂.LL G Pl0 I0 (List ℕ) T0 D.R.m}
+    {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL]
+    (R : RealDat3 D A3 Ks) {F : Face D A3.A} {cG : G0 R.Pg D.R.r ≃* G0g D.nd}
+    (hPre : R.toRealDat.Pre0 F) (hIn : R.IsInert) (hTup : R.IsTup)
+    (hKeep : Keep (A3 := A3) R.toRealDat F cG)
+    (HX HV HE gE jX jV νY fdY ν0 fd0 νX fdX νV fdV ωP vP thF thG) :
+    let R' : RealDat3 D A3 Ks :=
+      ⟨updM R.toRealDat HX HV HE gE jX jV νY fdY ν0 fd0 νX fdX νV fdV ωP vP thF thG,
+        R.plI, R.SF, R.phs, R.lam3⟩
+    R'.toRealDat.Pre0 F ∧ R'.IsInert ∧ R'.IsTup ∧ Keep (A3 := A3) R'.toRealDat F cG := by
+  exact ⟨realDatum_prerequisites_update_models hPre HX HV HE gE jX jV νY fdY ν0 fd0 νX fdX νV fdV ωP vP thF thG,
+    ⟨hIn.tie, hIn.onto, hIn.hR, hIn.hL, hIn.SF⟩,
+    ⟨hTup.mu_off, hTup.mu_used, hTup.mu_ne, hTup.mu_conj, hTup.mu_on⟩,
+    ⟨hKeep.std, hKeep.signs, hKeep.frames, hKeep.beta, hKeep.prX, hKeep.grp, hKeep.psi, hKeep.guard,
+      hKeep.valKs, hKeep.frameKs, hKeep.levKs⟩⟩
+
 section
 
 variable {B B' : Base} {f : Fr B.toPre} {f' : Fr B'.toPre} {T : TwDat B} {T' : TwDat B'} {w : ColW B f T} {w' : ColW B' f' T'}
@@ -69,7 +118,7 @@ variable {B B' : Base} {f : Fr B.toPre} {f' : Fr B'.toPre} {T : TwDat B} {T' : T
 theorem m_eq (hE : Enl0 B B') : (w'.st Z').toD7.R.m = (w.st Z).toD7.R.m :=
   show B'.toPre.R.m = B.toPre.R.m from congrArg (fun P => P.R.m) hE.1
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem exists_rSide (z : Dat (w.st Z) w.I hX T Wt) (Wt' : Set B'.places.Pl)
     (R₀ : RealDat3 (w'.st Z').toD7 (famR (w'.st Z') w'.I hX' (usedOf w'.I T' Wt') Xg tr) Ks) (hE : Enl0 B B') (h : RSideW z Wt' R₀) :
@@ -79,7 +128,8 @@ theorem exists_rSide (z : Dat (w.st Z) w.I hX T Wt) (Wt' : Set B'.places.Pl)
   have key := fun i' : Fin (w'.st Z').toD7.R.m => GlobalTheory.T.exists_copies_reference_objects_over_enlarged_base z Wt' R₀ hE h (Fin.cast (m_eq hE) i') i' rfl
   choose ω v H th g ν fd k using key
   refine ⟨fun i _ => H i, fun i _ => ν i, fun i _ => fd i, fun i _ => ω i, fun i _ => v i, fun i _ => th i, fun i _ => g i, ?_, ?_⟩
-  · exact (by with_unfolding_all exact (h :))
+  · delta RSideW at h ⊢
+    with_unfolding_all exact (h :)
   · intro i i' e
     have e' : i = Fin.cast (m_eq hE) i' := Fin.ext e
     subst e'
@@ -87,7 +137,7 @@ theorem exists_rSide (z : Dat (w.st Z) w.I hX T Wt) (Wt' : Set B'.places.Pl)
 
 end
 
-set_option maxHeartbeats 8000000 in
+
 
 theorem exists_pins_rSide : GlobalTheory.Published.DiscreteSeriesCover → GlobalTheory.Published.HarishChandraModules → GlobalTheory.Published.CuspRapidDecay → GlobalTheory.Published.CasselmanWallach → GlobalTheory.Published.WeilRepresentationUnitaryPair → GlobalTheory.Published.DiscreteSeriesExists → GlobalTheory.Published.HarishChandraFinite → (StepW Pinned fun K B' f' T' w' => ∀ (B : Base) (f : Fr B.toPre) (T : TwDat B) (w : ColW B f T), Enl0 B B' →
   HEq f' f → Pinned K B f T w → HEq w'.px w.px → ∀ (Z : w.Lt) (hX : B.fields.Ok) (Wt : Set B.places.Pl)
@@ -126,7 +176,7 @@ theorem exists_pins_rSide : GlobalTheory.Published.DiscreteSeriesCover → Globa
   generalize {v | B'.places.resChar v ∈ T'.pl} = Wt' at *
   have hHH := (H (w'.st Z') rfl).1
   have hn := (H (w.st Z) hE.1.symm).2
-  obt ⟨HV, νV, fdV, ωP, vP, thF, thG, hS⟩ := exists_rSide z Wt' R₀ hE hSide
+  obtain ⟨HV, νV, fdV, ωP, vP, thF, thG, hS⟩ := exists_rSide z Wt' R₀ hE hSide
   generalize hR₁ : (⟨updM R₀.toRealDat R₀.HX HV R₀.HE R₀.gE R₀.jX (fun _ _ => 0) R₀.νY R₀.fdY R₀.ν0 R₀.fd0
       R₀.νX R₀.fdX νV fdV ωP vP thF thG, R₀.plI, R₀.SF, R₀.phs, R₀.lam3⟩ :
       RealDat3 (w'.st Z').toD7 (famR (w'.st Z') w'.I hX' (usedOf w'.I T' Wt') Xg tr₀) core'.Q.c.F) = R₁ at hS
@@ -137,34 +187,57 @@ theorem exists_pins_rSide : GlobalTheory.Published.DiscreteSeriesCover → Globa
       Keep R₁.toRealDat (face0 (w'.st Z') w'.I hX' (usedOf w'.I T' Wt') Xg tr₀).lv2 cG₁ ∧
       BrgStd (w'.st Z') w'.I hX' (usedOf w'.I T' Wt') Xg tr₀ R₁.toRealDat := by
     subst hR₁
-    exact ⟨cG, hLev, hId, hGood, hMu, realDatum_prerequisites_update_models hPre _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _,
-      ⟨hIn.tie, hIn.onto, hIn.hR, hIn.hL, hIn.SF⟩, ⟨hTup.mu_off, hTup.mu_used, hTup.mu_ne, hTup.mu_conj, hTup.mu_on⟩, hAll,
-      ⟨hKeep.std, hKeep.signs, hKeep.frames, hKeep.beta, hKeep.prX, hKeep.grp, hKeep.psi, hKeep.guard, hKeep.valKs, hKeep.frameKs,
-        hKeep.levKs⟩, hBrg⟩
+    have hUpd := updM_preserves_invariants R₀ hPre hIn hTup hKeep R₀.HX HV R₀.HE R₀.gE
+      R₀.jX (fun _ _ => 0) R₀.νY R₀.fdY R₀.ν0 R₀.fd0 R₀.νX R₀.fdX νV fdV ωP vP thF thG
+    refine ⟨cG, ?_, ?_, ?_, ?_, hUpd.1, hUpd.2.1, hUpd.2.2.1, ?_, hUpd.2.2.2, ?_⟩
+    · exact hLev
+    · exact hId
+    · exact hGood
+    · exact hMu
+    · exact hAll
+    · delta BrgStd at hBrg ⊢
+      exact hBrg
   clear hR₁ hLev hId hGood hMu hPre hIn hTup hAll hKeep hBrg hSide
   obtain ⟨cG₁, hLev, hId, hGood, hMu, hPre, hIn, hTup, hAll, hKeep, hBrg⟩ := move
+  have hSide₁ := hS.1
   have hL := GlobalTheory.T.liftCharacters_agree_over_enlarged_base z Wt' R₁ hE hf hpx hLev
-  have hI := GlobalTheory.T.goodIdempotent_coefficients_agree_enlarged_base z Wt' R₁ hE hf hpx hG hG' hS.1 cG₁ hKeep
+  have hI := GlobalTheory.T.goodIdempotent_coefficients_agree_enlarged_base z Wt' R₁ hE hf hpx hG hG' hSide₁ cG₁ hKeep
   have hz := ratAt_of_geo z.R z.F z.pins.char hFine.1 hn z.geo hFine.2.1 hHolds.unif
-  obt ⟨tr, R, cG', hPins, hEx, hLevEq, hEG, hCG, hmu, htw, hBrg', hS', hSame⟩ :=
+  obtain ⟨tr, R, cG', hPins, hEx, hLevEq, hEG, hCG, hmu, htw, hBrg', hS', hSame⟩ :=
     charW_keep (w'.st Z') w'.px w'.I hX' (usedOf w'.I T' Wt') Xg tr₀ core'.Q.c.F R₁ cG₁ (GlobalTheory.T.linksAnalyticHypotheses_of_weilRep_harishChandra h5 h6 h7 h3 _) hIdem
       (fun R hP hc ht => GlobalTheory.ExAtAssembly.exAt_holds h1 h2 h3 h4 _ _ _ _ _ _ R hP.1.lev hP.1.fam hP.2 hP.1.record hHH hc ht)
       (fun R => RSideW z Wt' (⟨R, R₁.plI, R₁.SF, R₁.phs, R₁.lam3⟩ :
         RealDat3 (w'.st Z').toD7 (famR (w'.st Z') w'.I hX' (usedOf w'.I T' Wt') Xg tr₀) core'.Q.c.F))
-      (fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ s => (by with_unfolding_all exact (s :))) (fun _ _ _ _ _ _ _ _ _ _ _ _ s => (by with_unfolding_all exact (s :)))
-      (fun _ _ _ s => (by with_unfolding_all exact (s :))) ((by with_unfolding_all exact (hS.1 :))) hPre hIn hTup hAll hKeep hBrg
-      (GlobalTheory.T.finiteGroupCharacter_eq_product_residualCharacters_enlarged z Wt' R₁ hE hpx hS.1 hL) (GlobalTheory.T.modW_of_rSideW z Wt' R₁ hE hpx hS.1) (GlobalTheory.T.referenceTuple_weilDatum_vector_polynomialMap_enlarged z Wt' R₁ hE hFine.1 hS hL)
+      (fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ s => by
+        delta RSideW at s ⊢
+        with_unfolding_all exact (s :))
+      (fun _ _ _ _ _ _ _ _ _ _ _ _ s => by
+        delta RSideW at s ⊢
+        with_unfolding_all exact (s :))
+      (fun _ _ _ s => by
+        delta RSideW at s ⊢
+        with_unfolding_all exact (s :))
+      (by with_unfolding_all exact (hSide₁ :)) hPre hIn hTup hAll hKeep hBrg
+      (GlobalTheory.T.finiteGroupCharacter_eq_product_residualCharacters_enlarged z Wt' R₁ hE hpx hSide₁ hL) (GlobalTheory.T.modW_of_rSideW z Wt' R₁ hE hpx hSide₁) (GlobalTheory.T.referenceTuple_weilDatum_vector_polynomialMap_enlarged z Wt' R₁ hE hFine.1 hS hL)
       (GlobalTheory.T.referenceTuple_hilbertModel_definiteForms_enlarged z Wt' R₁ hE hPre hS hL) (GlobalTheory.T.thetaLift_at_reference_tuple_over_enlarged_base z Wt' R₁ hE hpx hFine.1 hS hI)
-      (GlobalTheory.T.referenceTuple_rationalForm_lifts_algebraic_enlarged z Wt' R₁ hE hS (GlobalTheory.T.rationalDefiniteForms_largerField_combination_smallerField z Wt' R₁ hE hf hpx hS.1) hz)
+      (GlobalTheory.T.referenceTuple_rationalForm_lifts_algebraic_enlarged z Wt' R₁ hE hS (GlobalTheory.T.rationalDefiniteForms_largerField_combination_smallerField z Wt' R₁ hE hf hpx hSide₁) hz)
   have hPg : R.Pg = R₁.Pg := congrArg LevCh.Pg hLevEq
   refine ⟨tr, R, cG', hPins, hLevEq ▸ hLev, isIdG_of_heq _ R.eG R₁.eG hPg hEG hId, ?_, ?_, hBrg', hEx, ?_, fun i i' e => ?_⟩
   · rw [trans_eq_of_heq _ R.eG R₁.eG cG' cG₁ hPg hEG hCG]; exact hGood
   · rw [hmu, htw]; exact hMu
-  · exact (by with_unfolding_all exact (hS' :))
-  · obt ⟨a1, a2, a3, a4, a5, a6, a7⟩ := hS.2 i i' e
-    obt ⟨b1, b2, b3, b4, b5, b6, b7⟩ := hSame i'
-    exact ⟨(heq_of_eq b1).trans a1, (heq_of_eq b2).trans a2, b3.trans a3, b4.trans a4, b5.trans a5, (heq_of_eq b6).trans a6,
-      (heq_of_eq b7).trans a7⟩
+  · delta RSideW at hS' ⊢
+    with_unfolding_all exact (hS' :)
+  · -- Project the conjuncts directly to avoid large eliminators in this dependent goal.
+    have hRef := hS.2 i i' e
+    have hSameAt := hSame i'
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · exact (heq_of_eq hSameAt.1).trans hRef.1
+    · exact (heq_of_eq hSameAt.2.1).trans hRef.2.1
+    · exact hSameAt.2.2.1.trans hRef.2.2.1
+    · exact hSameAt.2.2.2.1.trans hRef.2.2.2.1
+    · exact hSameAt.2.2.2.2.1.trans hRef.2.2.2.2.1
+    · exact (heq_of_eq hSameAt.2.2.2.2.2.1).trans hRef.2.2.2.2.2.1
+    · exact (heq_of_eq hSameAt.2.2.2.2.2.2).trans hRef.2.2.2.2.2.2
 
 end GlobalTheory.Mem.R3.Rw.WeilExt
 

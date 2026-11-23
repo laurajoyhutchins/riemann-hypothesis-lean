@@ -1,7 +1,48 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecondVeroneseParts
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CSandwichStA
-import ReciprocityTheory.GeometryOfNumbers.SphericalMonomials.MonoNormSq
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsSecondVeroneseParts
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.CSandwichStA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -31,19 +72,6 @@ theorem adtEnum_zero_eq (D : ℕ) (l : Fin (Finset.Nat.antidiagonalTuple (D + 1)
     (((Finset.Nat.antidiagonalTuple (D + 1) 0).equivFin.symm l).2)
   funext i
   exact (Finset.sum_eq_zero_iff.mp h) i (Finset.mem_univ i)
-
-example (D : ℕ) : ∀ k, aeval (Veronese.x D) ((fun _ : Fin 1 => (1 : MvPolynomial (Ix (Idx D)) ℚ)) k) =
-    ∑ l : Fin (Finset.Nat.antidiagonalTuple (D + 1) (2 * 0)).card,
-      (((fun _ _ => 1 : Matrix (Fin 1) (Fin (Finset.Nat.antidiagonalTuple (D + 1) (2 * 0)).card) ℤ) k l : ℤ) :
-        Veronese.Fld D) * ∏ i, Veronese.t D i ^ adtEnum D (2 * 0) l i := by
-  intro k
-  have hc : (Finset.Nat.antidiagonalTuple (D + 1) (2 * 0)).card = 1 := by
-    rw [Nat.mul_zero, Finset.Nat.antidiagonalTuple_zero_right, Finset.card_singleton]
-  rw [map_one]
-  have : ∀ l : Fin (Finset.Nat.antidiagonalTuple (D + 1) (2 * 0)).card,
-      (((1 : ℤ) : Veronese.Fld D) * ∏ i, Veronese.t D i ^ adtEnum D (2 * 0) l i) = 1 := fun l => by
-    simp [adtEnum_zero_eq D l]
-  simp only [this, Finset.sum_const, Finset.card_univ, Fintype.card_fin, hc, one_smul]
 
 end
 

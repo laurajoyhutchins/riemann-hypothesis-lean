@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.PartnerCountOfCentral
+module
+
+import Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.MeanNum
+public import Formalism.SharpRestriction.GrowthBounds.LogarithmicSums.PartnerCountOfCentral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -151,63 +195,10 @@ theorem xpow_le_exp (x N y : ℝ) (hx : 0 < x) (h : N * Real.log x ≤ y) : x ^ 
 
 theorem second_level_lt_good_of_log {D : D7} (L : SizeData₂ D) (hS : Formalism.MainNotions.SizesAt L) (hx : Real.exp 1 ≤ L.sc.x)
     (h : 514 * Real.log L.sc.x ≤ L.sc.x ^ (L.sc.eps / 8)) : L2 D L.sc < goodU L.sc.delta1 := by
-  have hx0 : 0 < L.sc.x := lt_trans zero_lt_one L.sc.one_lt_alt
-  have hL : 1 ≤ Real.log L.sc.x := by
-    rw [← Real.log_exp 1]
-    exact Real.log_le_log (Real.exp_pos 1) hx
-  have hk1 := one_le_k D
-  have hk6 := k_le_x_pow_six L hS
-  have hlogk : Real.log (D.R.k : ℝ) ≤ 6 * Real.log L.sc.x := by
-    calc Real.log (D.R.k : ℝ) ≤ Real.log (L.sc.x ^ (6 : ℝ)) := Real.log_le_log (by linarith) hk6
-      _ = 6 * Real.log L.sc.x := by rw [Real.log_rpow hx0]
-  have hlog2 := Real.log_two_gt_d9
-  have hL1 : ∀ p : ℕ, p.Prime → L1 D L.sc p ≤ ⌈186 * Real.log L.sc.x⌉₊ := by
-    intro p hp
-    unfold L1
-    apply Nat.ceil_mono
-    have hp2 : (2 : ℝ) ≤ p := by exact_mod_cast hp.two_le
-    have hlp : Real.log 2 ≤ Real.log p := Real.log_le_log (by norm_num) hp2
-    have hlp0 : 0 < Real.log p := by linarith
-    have hk0 : (D.R.k : ℝ) ≠ 0 := ne_of_gt (by linarith)
-    have hxA : L.sc.x ^ Scale.A ≠ 0 := (Real.rpow_pos_of_pos hx0 _).ne'
-    have hy : Real.log (((D.R.k : ℝ) * L.sc.x ^ Scale.A) ^ 4) =
-        4 * (Real.log D.R.k + Scale.A * Real.log L.sc.x) := by
-      rw [Real.log_pow, Real.log_mul hk0 hxA, Real.log_rpow hx0]
-      push_cast
-      ring
-    have hy0 : 0 ≤ Real.log (D.R.k : ℝ) := Real.log_nonneg hk1
-    have hA : Scale.A = 26 := rfl
-    unfold Real.logb
-    rw [hy, div_le_iff₀ hlp0, hA]
-    have hLn : (0 : ℝ) ≤ 186 * Real.log L.sc.x := by linarith
-    nlinarith [mul_le_mul_of_nonneg_left hlp hLn, mul_le_mul_of_nonneg_left hlog2.le hLn]
-  have hSup : sSup {l | ∃ p : ℕ, p.Prime ∧ D.host.cls p = PrimeClass.inertClass ∧ l = L1 D L.sc p} ≤
-      ⌈186 * Real.log L.sc.x⌉₊ := by
-    apply csSup_le'
-    rintro l ⟨p, hp, -, rfl⟩
-    exact hL1 p hp
-  have hL2 : L2 D L.sc ≤ 2 * ⌈186 * Real.log L.sc.x⌉₊ := by
-    unfold L2
-    exact Nat.mul_le_mul_left 2 hSup
-  have hL2r : (L2 D L.sc : ℝ) ≤ 2 * (⌈186 * Real.log L.sc.x⌉₊ : ℝ) := by exact_mod_cast hL2
-  have hceil := Nat.ceil_lt_add_one (by linarith : (0 : ℝ) ≤ 186 * Real.log L.sc.x)
-  have hU : L.sc.x ^ (L.sc.eps / 8) ≤ (goodU L.sc.delta1 : ℝ) := by
-    unfold goodU
-    rw [inv_delta1]
-    exact Nat.le_ceil _
-  have hlt : (L2 D L.sc : ℝ) < goodU L.sc.delta1 := by linarith
-  exact_mod_cast hlt
+  apply Formalism.MainNotions.AuxBlock8.Pf.second_level_lt_good_of_log <;> assumption
 
 def CStar (eps : ℝ) (K : Consts) (C31 : ℝ) : ℝ :=
   3 + K.tII * (rE eps : ℝ) + (2 * (3 : ℝ) + 4 * K.tII + 160 * C31 + 7) + K.Pr1 * C31 + K.kappaThresholdOne * |cNE eps|
-
-theorem CStar_nonneg (eps : ℝ) (K : Consts) (hK : K.Nonneg) (C31 : ℝ) (hC31 : 0 < C31) : 0 ≤ CStar eps K C31 := by
-  obtain ⟨-, -, -, htII, -, -, -, -, htI1, -, -, -, -, hPr1, -⟩ := hK
-  unfold CStar
-  have a := mul_nonneg htII (Nat.cast_nonneg (α := ℝ) (rE eps))
-  have b := mul_nonneg hPr1 hC31.le
-  have c := mul_nonneg htI1 (abs_nonneg (cNE eps))
-  linarith
 
 def SmallB (D : D7) (L : SizeData₂ D) (K : Consts) (C31 bo : ℝ) : Prop :=
   (∀ p : ℕ, p.Prime → (p : ℝ) < L.sc.p0 D.R.k → (D.R.k : ℝ) * Qp L.sc p ≤ L.sc.b') ∧

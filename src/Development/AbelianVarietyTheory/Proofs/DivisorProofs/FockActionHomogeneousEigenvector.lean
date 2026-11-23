@@ -1,9 +1,53 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataTheta
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AbsSubOfDisjoint
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineMatrixKroneckerLeftFactorEqZeroOfIsPC
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockActDualPairCommutingLieActions
-import Development.AbelianVarietyTheory.Definitions.Foundations.HarmonicAllOfCompact
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineKroneckerRightMatrixConjTranspose
+public import Development.AbelianVarietyTheory.Definitions.Foundations.HarmonicAllOfCompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockActDualPairCommutingLieActions
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.AbsSubOfDisjoint
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LineMatrixKroneckerLeftFactorEqZeroOfIsPC
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -15,12 +59,12 @@ theorem injective_of_isFockIP {σ : Type} [DecidableEq σ] {H : Type} [NormedAdd
     [InnerProductSpace ℂ H] {ι : MvPolynomial σ ℂ →ₗ[ℂ] H} (hι : IsFockIP ι) :
     Function.Injective ι := by
   have key : ∀ (α : σ →₀ ℕ) (P : MvPolynomial σ ℂ), inner ℂ (ι (monomial α 1)) (ι P) =
-      coeff α P * α.prod (fun _ k => (k.factorial : ℂ)) := by
+      AddMonoidAlgebra.coeff P α * α.prod (fun _ k => (k.factorial : ℂ)) := by
     intro α P
     induction P using MvPolynomial.induction_on' with
-    | add P P' h h' => simp only [map_add, inner_add_right, h, h', coeff_add, add_mul]
+    | add P P' h h' => simp only [map_add (f := _), inner_add_right, h, h', MvPolynomial.coeff_add, add_mul]
     | monomial β c =>
-      rw [monomial_eq_smul β c, map_smul, inner_smul_right, hι, coeff_smul, coeff_monomial]
+      rw [monomial_eq_smul β c, map_smul, inner_smul_right, hι, MvPolynomial.coeff_smul, coeff_monomial]
       by_cases e : α = β
       · subst e; simp
       · simp [e, Ne.symm e]
@@ -35,7 +79,7 @@ variable {p q r s : ℕ}
 
 def charSub (p q r s : ℕ) (x : ℚ) : Submodule ℂ (Pol p q r s) where
   carrier := {f | ∀ Y : Mat p q, IsKC Y → fockAct1 p q r s Y f = ((x : ℂ) * Y.trace) • f}
-  add_mem' := fun ha hb Y hY => by rw [map_add, ha Y hY, hb Y hY, smul_add]
+  add_mem' := fun ha hb Y hY => by rw [map_add (f := _), ha Y hY, hb Y hY, smul_add]
   zero_mem' := fun Y _ => by simp
   smul_mem' := fun c _ ha Y hY => by rw [map_smul, ha Y hY, smul_comm]
 

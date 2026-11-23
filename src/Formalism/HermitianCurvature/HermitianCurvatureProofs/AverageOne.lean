@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.HermitianCurvature.LatticeHerglotzBound
+module
+
+public import Formalism.HermitianCurvature.LatticeHerglotzBound
+public import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology Finset
 
@@ -75,7 +125,6 @@ lemma avg_smul (e : ι → Λ) (c : ℕ → Λ) (a : ℂ) (g : Λ → ℂ) :
 lemma avg_one (e : ι → Λ) (c : ℕ → Λ) (n : ℕ) : avg e c (fun _ => 1) n = 1 := by
   unfold avg
   rw [Finset.sum_const, card_box, nsmul_eq_mul, mul_one]
-  have hpos : (0 : ℝ) < (n + 1 : ℝ) ^ Fintype.card ι := by positivity
   push_cast
   field_simp
 
@@ -212,7 +261,6 @@ lemma avg_shift_small (e : ι → Λ) (c : ℕ → Λ) (g : Λ → ℂ) (B : ℝ
     refine Finset.sum_congr rfl (fun m _ => ?_); rw [bpt_add_single]
   rw [hs]
   have h := shift_sum_bound (n + 1) j (fun m => g (bpt e (c n) m)) B (fun m => hB _)
-  have hpos : (0 : ℝ) < (n + 1 : ℝ) := by positivity
   have hpow : ((n + 1 : ℕ) : ℝ) ^ Fintype.card ι = (n + 1 : ℝ) * (n + 1 : ℝ) ^ (Fintype.card ι - 1) := by
     push_cast
     rw [← pow_succ']; congr 1; omega
@@ -330,7 +378,6 @@ lemma exists_far {f : ℕ} (La : Submodule ℤ (V f)) [DiscreteTopology La] [IsZ
   let b := Module.Free.chooseBasis ℤ La
   let bR := b.ofZLatticeBasis ℝ La
   set γ : ℝ := ∑ i, ‖bR i‖ with hγ
-  have hγ0 : 0 ≤ γ := Finset.sum_nonneg (fun i _ => norm_nonneg _)
   let w : V f := fun _ => ((|T| + γ : ℝ) : ℂ)
   refine ⟨(ZSpan.floor bR w : V f), ?_, ?_⟩
   · have h := (ZSpan.floor bR w).2
@@ -374,7 +421,6 @@ theorem meanExists : MeanExists := by
   let Λ := La.toAddSubgroup
   let e : Module.Free.ChooseBasisIndex ℤ La → Λ := fun i => ⟨(b i : V f), (b i).2⟩
   set β : ℝ := ∑ i, ‖(b i : V f)‖ with hβ
-  have hβ0 : 0 ≤ β := Finset.sum_nonneg (fun i _ => norm_nonneg _)
   have hfar := fun n : ℕ => exists_far La ((n : ℝ) + (n + 1) * β)
   choose y hyLa hy using hfar
   let c : ℕ → Λ := fun n => ⟨y n, hyLa n⟩
@@ -394,13 +440,9 @@ theorem meanExists : MeanExists := by
     | add z1 z2 _ _ h1 h2 =>
       have := (AddSubgroup.closure (Set.range e)).add_mem h1 h2
       convert this using 1
-      apply Subtype.ext
-      simp
     | smul a z _ h =>
       have := (AddSubgroup.closure (Set.range e)).zsmul_mem h a
       convert this using 1
-      apply Subtype.ext
-      simp
   obtain ⟨hmean, hvan⟩ := exists_mean e he c
   refine ⟨LIMf e c, hmean, ?_⟩
   intro g hg htend

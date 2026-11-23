@@ -1,4 +1,54 @@
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.HerbrandA
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.HerbrandA
+public import Mathlib.GroupTheory.Index
+public import Mathlib.RepresentationTheory.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RepresentationTheory.Invariants
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.ZMod.QuotientGroup
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField.Herbrand
 
@@ -17,17 +67,11 @@ def cokerMap (f : A →+ B) (fD : ∀ a, f (DA a) = DB (f a)) : B ⧸ f.range �
 theorem ses_coker (hf : Injective f)
     (fD : ∀ a, f (DA a) = DB (f a)) (fN : ∀ a, f (NA a) = NB (f a))
     (DN : ∀ b, DB (NB b) = 0) (ND : ∀ b, NB (DB b) = 0) :
-    SES DA NA DB NB (cokerMap f fD) (cokerMap f fN) f (QuotientAddGroup.mk' f.range) where
-  inj := hf
-  exact := fun b => by
-    rw [QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff]; rfl
-  surj := QuotientAddGroup.mk'_surjective _
-  fD := fD
-  fN := fN
-  gD := fun _ => rfl
-  gN := fun _ => rfl
-  DN := DN
-  ND := ND
+    SES DA NA DB NB (cokerMap f fD) (cokerMap f fN) f (QuotientAddGroup.mk' f.range) := by
+  refine ⟨hf, ?_, QuotientAddGroup.mk'_surjective _, fD, fN, fun _ => rfl, fun _ => rfl, DN, ND⟩
+  intro b
+  rw [QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff]
+  rfl
 
 theorem isFin_iff_of_finiteIndex (hf : Injective f) (hfi : f.range.FiniteIndex)
     (fD : ∀ a, f (DA a) = DB (f a)) (fN : ∀ a, f (NA a) = NB (f a))
@@ -92,6 +136,7 @@ theorem map_dHom (ρA : Representation k G A) (ρB : Representation k G B) (g : 
 
 theorem map_nHom (ρA : Representation k G A) (ρB : Representation k G B) (i : A →+ B)
     (hiG : ∀ c a, i (ρA c a) = ρB c (i a)) (a : A) : i (nHom ρA a) = nHom ρB (i a) := by
+
   rw [nHom_apply, nHom_apply, map_sum]
   exact Finset.sum_congr rfl fun c _ => hiG c a
 

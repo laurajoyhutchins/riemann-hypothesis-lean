@@ -1,10 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsRatConstMul
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsInertTop
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LowestWeightVectorsAtRows
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExtLinearIndependent
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsHomogeneousOfRowDeg
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.TwistSeries
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoefMapNormEquivariantBasis
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OscillatorModelExtensionFirst
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PureTensorOInjective
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PureTensorOMulSource
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RationalPointsGenerate
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.AdelicUnitaryRealPointsStructureRealPlaces
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ComplexCoefficientMapCoreFieldPropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LowestWeightVectorsAtRows
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsHarmonicCoefficientMapAtWeights
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PureTensorOSmul
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.WeightExponentsEmbeddingsDegree
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.FFVMap
+import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.DatEqZero
+import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.RationalRayLevels
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -13,7 +65,7 @@ namespace GlobalTheory.SerLetters
 
 theorem coord_mem_fieldRange {ι K J : Type} [Field K] [Fintype J] (σ : K →+* ℂ) (e : J → MvPolynomial ι K)
     (hli : LinearIndependent ℂ fun j => MvPolynomial.map σ (e j)) (a : J → ℂ)
-    (hx : ∀ m, MvPolynomial.coeff m (∑ j, a j • MvPolynomial.map σ (e j)) ∈ σ.fieldRange) (j : J) :
+    (hx : ∀ m, AddMonoidAlgebra.coeff (∑ j, a j • MvPolynomial.map σ (e j)) m ∈ σ.fieldRange) (j : J) :
     a j ∈ σ.fieldRange := by
   classical
   by_contra hj
@@ -30,15 +82,18 @@ theorem coord_mem_fieldRange {ι K J : Type} [Field K] [Fintype J] (σ : K →+*
   have hsum : ∑ k, π (a k) • e k = 0 := by
     ext m
     have h1 := hπ0 _ (hp _ (hx m))
+
     simp only [MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, MvPolynomial.coeff_map, smul_eq_mul, map_sum] at h1
     simp only [MvPolynomial.coeff_sum, MvPolynomial.coeff_smul, smul_eq_mul, MvPolynomial.coeff_zero]
+    change (∑ x, π (a x) * (e x).coeff m) = 0
     rw [← h1]
     refine Finset.sum_congr rfl fun k _ => ?_
-    have e1 : a k * σ (MvPolynomial.coeff m (e k)) = MvPolynomial.coeff m (e k) • a k := by
+    have e1 : a k * σ (AddMonoidAlgebra.coeff (e k) m) = AddMonoidAlgebra.coeff (e k) m • a k := by
       rw [Algebra.smul_def]; exact mul_comm _ _
     rw [e1, map_smul, smul_eq_mul, mul_comm]
   have h2 : ∑ k, σ (π (a k)) • MvPolynomial.map σ (e k) = 0 := by
     have := congrArg (MvPolynomial.map σ) hsum
+
     simpa [map_sum, MvPolynomial.smul_eq_C_mul, MvPolynomial.map_C] using this
   have h3 := Fintype.linearIndependent_iff.1 hli _ h2 j
   exact hπ ((map_eq_zero σ).1 h3)
@@ -57,8 +112,8 @@ attribute [local instance] Formalism.BasicNotions.Host.cmStar
 namespace GlobalTheory.SerLetters
 open GlobalTheory.AdTh.PhaseMap GlobalTheory.AdTh.PhaseMapFree
 
-set_option maxHeartbeats 1600000 in
 
+set_option maxHeartbeats 1600000 in
 theorem io_eq_phase_smul_letters : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m) (T : CoreJ D) [Algebra T.Q.c.F D.what₂.LL] (R : RealDat D A T.Q.c.F) (κ : ∀ i : Fin D.R.m, WeightFamilies.Wt D ((i : ℕ) + 1)) (v₀ : ∀ (i : Fin D.R.m) (σ : D.what₂.LL →+* ℂ), (R.MW i σ).Vec), R.toLevCh.Is A.μ0 → R.IsFam → R.IsModels → R.IsThP → TieIn T R κ v₀ → ∀ i : Fin D.R.m, VStd D i → ∀ u : (∀ ρ, lowT (R.MW i (sg0 D A)) ρ), (∀ ρ, (u ρ : (R.MW i (sg0 D A)).sm ρ) = v₀ i (sg0 D A) ρ) → ∀ c0 : VsV D i ℂ →ₗ[ℂ] (R.cV i).W, GlobalTheory.IndefiniteRowSideFullHecke.TwistSeries.IsCoefMap R i c0 → ∀ lt : LtN (T.Q.Dw ((i : ℕ) + 1)) (Vc D i).rank → FVar D (Wc D i).rank (Vc D i).rank, GlobalTheory.AdTh.PhaseMap.IsLt lt → ∃ ka : ℂ, ‖ka‖ = 1 ∧ ∃ io : VsV D i T.Q.c.F →ₗ[T.Q.c.F] MvPolynomial (LtN (T.Q.Dw ((i : ℕ) + 1)) (Vc D i).rank) T.Q.c.F, (∀ v, io v ∈ Submodule.span T.Q.c.F (HHa (T.Q.Dw ((i : ℕ) + 1)).mult (Vc D i).rank T.Q.c.F ComplexEmbedding.conjugate (InPsi T.Q.H) (fun τ j => wtA (κ i) (τ, j)))) ∧ ∀ f, IsThetaFunO R.ψ (Vc D i) (Wc D i) f → ∀ v : VsV D i T.Q.c.F, pureTensorO R.ψ R.θ (Vc D i) (Wc D i) (fun _ => 1) (cart (R.MW i (sg0 D A))) (R.BV i) (onb (R.MW i (sg0 D A))) f (R.ioP i (PiTensorProduct.tprod ℂ u) (c0 (GlobalTheory.AdTh.CoefExt.up (inC T.Q.c) (lamV D i) v))) = ka • pureTensorO R.ψ R.θ (Vc D i) (Wc D i) (fun _ => 1) (cart (R.MW i (sg0 D A))) (fun _ => 1) (onb (R.MW i (sg0 D A))) f (GlobalTheory.AdTh.PhaseMap.toF T.Q.c lt (io v)) := by
   intro D G _ _ Pl0 T0 A T _ R κ v₀ hL hFam hM hP hT i hstd u hu c0 hc lt hl
   have hθ : IsInfFam R.θ := hM.inf
@@ -128,7 +183,7 @@ theorem io_eq_phase_smul_letters : ∀ (D : D7) (G : Type) [Group G] [Fintype G]
   let c0' : VsV D i T.Q.c.F →ₛₗ[inC T.Q.c] (R.cV i).W :=
     { toFun := fun v => c0 (GlobalTheory.AdTh.CoefExt.up (inC T.Q.c) (lamV D i) v)
       map_add' := fun v w => by
-        rw [← map_add]
+        rw [← map_add (f := _)]
         congr 1
         exact Subtype.ext (map_add (MvPolynomial.map (inC T.Q.c)) _ _)
       map_smul' := fun a v => by
@@ -144,9 +199,10 @@ theorem io_eq_phase_smul_letters : ∀ (D : D7) (G : Type) [Group G] [Fintype G]
   have n3' : Submodule.span ℂ (Set.range c0') = ⊤ := n3
   have hsm : ∀ (a : T.Q.c.F) P, toF T.Q.c lt (a • P) = (a : ℂ) • toF T.Q.c lt P := fun a P => by
     rw [MvPolynomial.smul_eq_C_mul, map_mul, toF_C, MvPolynomial.smul_eq_C_mul]
+  set_option synthInstance.maxHeartbeats 200000 in
   obtain ⟨B₀, hB₀⟩ := exists_ext c0' n4
     { toFun := fun v => toF T.Q.c lt (io v)
-      map_add' := fun v w => by rw [map_add, map_add]
+      map_add' := fun v w => by rw [map_add (f := _), map_add (f := _)]
       map_smul' := fun a v => by rw [map_smul, hsm]; rfl }
   replace hB₀ : ∀ v, B₀ (c0' v) = toF T.Q.c lt (io v) := hB₀
   have hpG : toF T.Q.c lt (io hw) = RealDat.Delta i := by

@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
-import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSplitIdempotentsOfRelTraceOneModTwo
+module
+
+public import Formalism.LocalToGlobal.HeckeThetaElements.IsHeckeElt
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSplitIdempotentsOfRelTraceOneModTwo
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.Theta
 open scoped TensorProduct Matrix
@@ -50,7 +89,7 @@ theorem exists_trace {z : Formalism.L2.Theta.AE D} (hz : z ∈ intL D) :
     obtain ⟨t, ht⟩ := exists_of_star_eq D (x := (o : D.host.E) + star (o : D.host.E))
       (by rw [star_add, star_star, add_comm])
     have hti : IsIntegral ℤ t := by
-      rw [← isIntegral_algebraMap_iff (algebraMap D.host.F D.host.E).injective, ht]
+      rw [← isIntegral_algebraMap_iff (B := D.host.E), ht]
       exact o.2.add (isIntegral_star o.2)
     refine ⟨algebraMap D.host.F (Af D.host.F) t * α, fun v => ?_, ?_⟩
     · rw [map_mul]; exact mul_mem (evalV_algebraMap_mem v t hti) (hα v)
@@ -62,7 +101,7 @@ theorem exists_trace {z : Formalism.L2.Theta.AE D} (hz : z ∈ intL D) :
     obtain ⟨a, ha, h1⟩ := hx
     obtain ⟨b, hb, h2⟩ := hy
     exact ⟨a + b, fun v => by rw [map_add]; exact add_mem (ha v) (hb v), by
-      rw [RingHom.map_add, map_add (fj D), ← h1, ← h2, add_add_add_comm]⟩
+      rw [RingHom.map_add (f := _), map_add (fj D), ← h1, ← h2, add_add_add_comm]⟩
   | neg x _ hx =>
     obtain ⟨a, ha, h1⟩ := hx
     exact ⟨-a, fun v => by rw [map_neg]; exact neg_mem (ha v), by
@@ -110,7 +149,7 @@ theorem exists_hom {v} {e : Formalism.L2.Theta.AE D} (he : SplitAt D v e) :
   · refine scalar_eq he ?_
     rw [← hf, map_zero, mul_zero, ← sub_self (0 : Fv D.host.F v), singleV_sub, sub_self, map_zero, zero_mul]
   · refine scalar_eq he ?_
-    rw [← hf, map_add, singleV_add, map_add, mul_add, add_mul, hf, hf]
+    rw [← hf, map_add (f := _), singleV_add, map_add (f := _), mul_add, add_mul, hf, hf]
 
 theorem hom_algebraMap {v} {e : Formalism.L2.Theta.AE D} (he : SplitAt D v e) {φ : D.host.E →+* Fv D.host.F v}
     (hφ : ∀ x, e * incA D x = fj D (singleV D.host.F v (φ x)) * e) (t : D.host.F) :
@@ -136,7 +175,7 @@ theorem exists_isIdemAt : ∀ (D : D7) (v : HeightOneSpectrum (𝓞 D.host.F)) (
     { carrier := {x | Valued.v (φ x) < 1}
       add_mem' := fun {a b} ha hb => by
         show Valued.v (φ ((a : D.host.E) + b)) < 1
-        rw [map_add]
+        rw [map_add (f := _)]
         exact Valuation.map_add_lt _ ha hb
       zero_mem' := by
         show Valued.v (φ 0) < 1

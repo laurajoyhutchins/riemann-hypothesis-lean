@@ -1,4 +1,54 @@
-import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialPullbackStatement
+module
+
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.IsPotentialPullbackStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Comp
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.FDeriv.Mul
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.M
 
@@ -6,10 +56,6 @@ open MeasureTheory FinHolAtlas Filter Topology
 open scoped ContDiff
 
 noncomputable section
-
-def HoloSmoothStatement : Prop :=
-  ∀ {e e' : ℕ} (F : (Fin e → ℂ) → (Fin e' → ℂ)) (U : Set (Fin e → ℂ)), IsOpen U →
-    AnalyticOnNhd ℂ F U → ContDiffOn ℝ ∞ F U
 
 def SmoothOnAlgStatement : Prop :=
   ∀ {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X) (U V : Set X) (f g : X → ℝ)
@@ -19,7 +65,7 @@ def SmoothOnAlgStatement : Prop :=
 theorem smoothOnAlg : SmoothOnAlgStatement := by
   intro e X _ A U V f g c hf hg hVU
   refine ⟨fun j => ?_, fun j => ?_⟩
-  · exact ((hf j).mono fun y hy => ⟨hy.1, hVU hy.2⟩).add (hg j)
+  · exact ((hf j).mono (by exact fun y hy => ⟨hy.1, hVU hy.2⟩)).add (hg j)
   · exact contDiffOn_const.mul (hf j)
 
 section SlopeTestRemainingChoices
@@ -62,7 +108,7 @@ theorem isPotentialAdd : IsPotentialAddStatement := by
   intro e X _ A P Q hP hQ
   refine ⟨fun x => ?_, fun x x' y hy => ?_⟩
   · rw [add_U, add_φ]
-    exact fun j => ((hP.1 x j).mono fun y hy => ⟨hy.1, hy.2.1⟩).add
+    exact fun j => ((hP.1 x j).mono (by exact fun y hy => ⟨hy.1, hy.2.1⟩)).add
       ((hQ.1 x j).mono fun y hy => ⟨hy.1, hy.2.2⟩)
   · rw [add_U, add_U] at hy
     obtain ⟨⟨hPx, hQx⟩, hPx', hQx'⟩ := hy

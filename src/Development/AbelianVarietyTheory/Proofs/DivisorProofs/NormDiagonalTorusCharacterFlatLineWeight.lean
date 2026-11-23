@@ -1,9 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrameCoord
-import Development.AbelianVarietyTheory.Definitions.Divisors.VolMeasureOfAdd
-import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ImDiagEqTrace
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.NonemptyUnitAt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.SupAtUnit
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.VolMeasureOfAdd
+public import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsFlatSecRankZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.AevalEqZeroOfMemConeIdeal
+import Development.AbelianVarietyTheory.Definitions.Divisors.HtValOnSubset
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory ReciprocityTheory.ChartRestriction.G.Semi NumberField IsDedekindDomain Module Formalism.BasicNotions Formalism.L2.Pj ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.FlatLine GlobalTheory.CompHt GlobalTheory.FlatCore
 
 set_option autoImplicit false
@@ -24,7 +61,7 @@ theorem norm_diagChar_flatWt : ∀ (E : Type) [Field E] [NumberField E] [IsCMFie
     simp only [he_def, exOf, exZ, wtOf, flatWt, parWt, Datum.mult] at hi ⊢
     by_cases h : ρ (H.rt : E) = H.rt0
     · rw [if_pos h] at hi
-      rw [dif_pos h, dif_pos hi]
+      rw [dite_eq_left h, dite_eq_left hi]
       have h2 : ρ ≠ conjEmb τ.1 := fun e => conj_not_mem τ (e ▸ h)
       by_cases h1 : ρ = τ.1
       · subst h1
@@ -32,10 +69,10 @@ theorem norm_diagChar_flatWt : ∀ (E : Type) [Field E] [NumberField E] [IsCMFie
       · have h3 : (⟨ρ, h⟩ : Psi H) ≠ τ := fun e => h1 (congrArg Subtype.val e)
         simp [h1, h2, h3]
     · rw [if_neg h] at hi
-      rw [dif_neg h]
+      rw [dite_eq_right h]
       have h1 : ρ ≠ τ.1 := fun e => h (e ▸ τ.2)
       by_cases h' : conjEmb ρ (H.rt : E) = H.rt0
-      · rw [dif_pos h', dif_pos hi]
+      · rw [dite_eq_left h', dite_eq_left hi]
         by_cases h2 : ρ = conjEmb τ.1
         · have h3 : (⟨conjEmb ρ, h'⟩ : Psi H) = τ := Subtype.ext (show conjEmb ρ = τ.1 by rw [h2, conjEmb_conjEmb])
           rw [if_pos h3, if_neg h1, if_pos h2]
@@ -44,7 +81,7 @@ theorem norm_diagChar_flatWt : ∀ (E : Type) [Field E] [NumberField E] [IsCMFie
             rw [← congrArg Subtype.val e, conjEmb_conjEmb])
           rw [if_neg h3, if_neg h1, if_neg h2]
           norm_num
-      · rw [dif_neg h']
+      · rw [dite_eq_right h']
         have h2 : ρ ≠ conjEmb τ.1 := fun e => h' (by rw [e, conjEmb_conjEmb]; exact τ.2)
         simp [h1, h2]
   have e0 : e none = 0 := by simp [he_def, exOf, exZ, wtOf_snd]

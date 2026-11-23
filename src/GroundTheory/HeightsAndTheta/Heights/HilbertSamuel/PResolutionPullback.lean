@@ -1,7 +1,58 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionPullback
-import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ADensStC
+module
+
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PResolutionMetricPair
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionPullback
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Analysis.Analytic.Polynomial
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.AnalyticForms.PotentialTheory.PshShiftA
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovGeometry.ADensStC
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -47,32 +98,7 @@ theorem lintegral_chart [MeasurableSpace X] [BorelSpace X] (c : OpenPartialHomeo
       μ S = ∫⁻ y in c.target ∩ c.symm ⁻¹' S, ENNReal.ofReal (ν y))
     {W : Set X} (hW : IsOpen W) (g : X → ℝ≥0∞) (hg : Measurable g) :
     ∫⁻ x in c.source ∩ W, g x ∂μ = ∫⁻ y in c.target ∩ c.symm ⁻¹' W, g (c.symm y) * ENNReal.ofReal (ν y) := by
-  set T := c.target ∩ c.symm ⁻¹' W with hT
-  have hTm : MeasurableSet T := (c.isOpen_inter_preimage_symm hW).measurableSet
-  have hsymm : AEMeasurable c.symm (volume.restrict T) :=
-    (c.continuousOn_symm.mono inter_subset_left).aemeasurable hTm
-  have hdens : AEMeasurable (fun y => ENNReal.ofReal (ν y)) (volume.restrict T) :=
-    ENNReal.measurable_ofReal.comp_aemeasurable ((hνc.mono inter_subset_left).aemeasurable hTm)
-  have hsymm' : AEMeasurable c.symm ((volume.restrict T).withDensity fun y => ENNReal.ofReal (ν y)) :=
-    hsymm.mono_ac (withDensity_absolutelyContinuous _ _)
-  have hmeas : μ.restrict (c.source ∩ W) =
-      ((volume.restrict T).withDensity fun y => ENNReal.ofReal (ν y)).map c.symm := by
-    ext S hS
-    rw [Measure.restrict_apply hS, Measure.map_apply_of_aemeasurable hsymm' hS, withDensity_apply',
-      Measure.restrict_restrict' hTm,
-      hν _ (hS.inter (c.open_source.inter hW).measurableSet) (inter_subset_right.trans inter_subset_left)]
-    have hset : c.target ∩ c.symm ⁻¹' (S ∩ (c.source ∩ W)) = c.symm ⁻¹' S ∩ T := by
-      ext y
-      constructor
-      · rintro ⟨hyt, hyS, -, hyW⟩
-        exact ⟨hyS, hyt, hyW⟩
-      · rintro ⟨hyS, hyt, hyW⟩
-        exact ⟨hyt, hyS, c.map_target hyt, hyW⟩
-    rw [hset]
-  rw [hmeas, lintegral_map' hg.aemeasurable hsymm',
-    lintegral_withDensity_eq_lintegral_mul₀ (g := fun a => g (c.symm a)) hdens (hg.comp_aemeasurable hsymm)]
-  refine lintegral_congr fun y => ?_
-  simp [mul_comm]
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.ResolutionMetricPair.lintegral_chart <;> assumption
 
 end Refine
 
@@ -107,8 +133,8 @@ theorem normRatio_torus {f : MRing ι} {k₀ : K} {n : ℕ} (hf : IsMultiHomog f
   have : ‖c k₀‖ ^ n ≠ 0 := pow_ne_zero _ (norm_ne_zero_iff.2 (hc k₀))
   rw [mul_div_mul_left _ _ this]
 
-omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 
+omit [DecidableEq K] [∀ k, Fintype (ι k)] in
 theorem isOpen_blockNonzero : IsOpen {z : (Σ k, ι k) → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0} := by
   simp only [Set.ofPred_forall, Set.ofPred_exists]
   exact isOpen_iInter_of_finite fun k => isOpen_iUnion fun i =>
@@ -119,7 +145,7 @@ def blockRatio (k₀ : K) (z z' : (Σ k, ι k) → ℂ) : ℂ :=
 
 theorem blockRatio_eq {k₀ : K} {z' : (Σ k, ι k) → ℂ} (c : K → ℂ) (h : ∃ i : ι k₀, z' ⟨k₀, i⟩ ≠ 0) :
     blockRatio k₀ (fun p => c p.1 * z' p) z' = c k₀ := by
-  rw [blockRatio, dif_pos h]
+  rw [blockRatio, dite_eq_left h]
   exact mul_div_cancel_right₀ _ h.choose_spec
 
 theorem blockRatio_eq_div {k₀ : K} {z z' : (Σ k, ι k) → ℂ} (hzz : SameOrbit z z') {i : ι k₀}

@@ -1,4 +1,48 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,31 +56,34 @@ abbrev Ideles : Type := (AdeleRing (𝓞 L) L)ˣ
 
 def diagUnits : Lˣ →* Ideles L := Units.map (algebraMap L (AdeleRing (𝓞 L) L)).toMonoidHom
 
-open Classical in
 
-def finSingle (v : HeightOneSpectrum (𝓞 L)) : v.adicCompletion L →* FiniteAdeleRing (𝓞 L) L where
-  toFun x := ⟨Pi.mulSingle v x, by
-    refine Filter.eventually_cofinite.mpr ((Set.finite_singleton v).subset ?_)
-    intro w hw
-    by_contra h
-    apply hw
-    have h' : w ≠ v := h
-    rw [Pi.mulSingle_eq_of_ne h']
-    exact one_mem _⟩
-  map_one' := by
-    apply Subtype.ext
-    exact Pi.mulSingle_one v
-  map_mul' x y := by
-    apply Subtype.ext
-    exact Pi.mulSingle_mul v x y
+open Classical in
+def finSingle (v : HeightOneSpectrum (𝓞 L)) : v.adicCompletion L →* FiniteAdeleRing (𝓞 L) L := by
+  classical
+  exact {
+    toFun x := ⟨Pi.mulSingle v x, by
+      refine Filter.eventually_cofinite.mpr ((Set.finite_singleton v).subset ?_)
+      intro w hw
+      by_contra h
+      apply hw
+      have h' : w ≠ v := h
+      rw [Pi.mulSingle_eq_of_ne h']
+      exact one_mem _⟩
+    map_one' := by
+      apply Subtype.ext
+      exact Pi.mulSingle_one v
+    map_mul' x y := by
+      apply Subtype.ext
+      exact Pi.mulSingle_mul v x y }
 
 def localIdele (v : HeightOneSpectrum (𝓞 L)) : (v.adicCompletion L)ˣ →* Ideles L :=
   Units.map ((MonoidHom.inr (InfiniteAdeleRing L) (FiniteAdeleRing (𝓞 L) L)).comp (finSingle L v))
 
-open Classical in
 
-def infIdele (w : InfinitePlace L) : (w.Completion)ˣ →* Ideles L :=
-  Units.map ((MonoidHom.inl (InfiniteAdeleRing L) (FiniteAdeleRing (𝓞 L) L)).comp
+open Classical in
+def infIdele (w : InfinitePlace L) : (w.Completion)ˣ →* Ideles L := by
+  classical
+  exact Units.map ((MonoidHom.inl (InfiniteAdeleRing L) (FiniteAdeleRing (𝓞 L) L)).comp
     (MonoidHom.mulSingle (fun w : InfinitePlace L => w.Completion) w))
 
 theorem valued_algebraMap_eq_one (v : HeightOneSpectrum (𝓞 L)) (x : 𝓞 L) (hx : x ∉ v.asIdeal) :

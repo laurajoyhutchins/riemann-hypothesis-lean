@@ -1,6 +1,54 @@
-import Mathlib
-import GroundTheory.PAdicHodge.BCrisNewtonNorm
-import GroundTheory.PAdicHodge.ACrisBdRInj
+module
+
+public import GroundTheory.PAdicHodge.BCrisNewtonNorm
+public import GroundTheory.PAdicHodge.ACrisBdR
+public import GroundTheory.PAdicHodge.ACrisBdRInj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -15,9 +63,8 @@ variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
 variable {p : ℕ} [hp : Fact p.Prime] [IsPerfectoidField K p] [CharZero K]
 
 local notation "𝒪" => normInteger K
-local notation "𝒪♭" => PreTilt (normInteger K) p
 local notation "𝔸" => Localization.Away (p : AInf K p)
-local notation "θ" => fontaineTheta (normInteger K) p
+local notation "θ" => fontaineTheta 𝒪 p
 
 theorem exists_approx (a : ACris K p) (N : ℕ) :
     ∃ c : ACrisZero K p, a - algebraMap _ (ACris K p) c ∈ Ideal.span {(p : ACris K p) ^ N} := by
@@ -27,7 +74,7 @@ theorem exists_approx (a : ACris K p) (N : ℕ) :
   have h : a - _root_.AdicCompletion.of _ _ c ∈
       (Ideal.span {(p : ACrisZero K p)} ^ N).map (algebraMap (ACrisZero K p) (ACris K p)) := by
     rw [← ker_adicCompletion_evalₐ (Submodule.fg_span_singleton _), RingHom.mem_ker]
-    simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, map_sub]
+    simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, RingHom.map_sub]
     rw [← hc]
     exact sub_eq_zero.2 (_root_.AdicCompletion.evalₐ_of _ N c).symm
   rwa [span_p_pow_map, Ideal.span_singleton_pow] at h
@@ -36,7 +83,7 @@ theorem exists_eq_pow_mul_of_mem {c₁ c₂ : ACrisZero K p} {N : ℕ}
     (h : algebraMap _ (ACris K p) c₁ - algebraMap _ (ACris K p) c₂ ∈
       Ideal.span {(p : ACris K p) ^ N}) :
     ∃ z : ACrisZero K p, c₁ - c₂ = (p : ACrisZero K p) ^ N * z := by
-  rw [← Ideal.span_singleton_pow, ← span_p_pow_map, ← map_sub,
+  rw [← Ideal.span_singleton_pow, ← span_p_pow_map, ← RingHom.map_sub (algebraMap (ACrisZero K p) (ACris K p)),
     ← ker_adicCompletion_evalₐ (Submodule.fg_span_singleton _), RingHom.mem_ker] at h
   have h2 : Ideal.Quotient.mk (Ideal.span {(p : ACrisZero K p)} ^ N) (c₁ - c₂) = 0 := by
     rw [← _root_.AdicCompletion.evalₐ_of]
@@ -120,7 +167,7 @@ theorem exists_iotaQ_ne_zero {a : ACris K p} (ha : a ≠ 0) : ∃ m, iotaQ K p (
   · rw [← iotaQ_compat (Nat.zero_le 1), RingHom.comp_apply, h 0, map_zero]
   · exact h m
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_lower_bound {a : ACris K p} (ha : a ≠ 0) :
     ∃ (B : ℝ) (N₀ : ℕ), 0 < B ∧ ∀ N ≥ N₀, ∀ c : ACrisZero K p,
@@ -170,7 +217,7 @@ theorem exists_lower_bound {a : ACris K p} (ha : a ≠ 0) :
         (p : Q) ^ M * ((p : Q) ^ (k₀ + v) * Ideal.Quotient.mk (kerAway K p ^ (m + 1)) (algebraMap _ 𝔸 w)) := by
       have := congrArg (Ideal.Quotient.mk (kerAway K p ^ (m + 1))) hc'
       rw [map_mul, map_pow, map_natCast] at this
-      rw [this, hwz, map_add, map_add, hz0, add_zero]
+      rw [this, hwz, map_add (f := _), map_add (f := _), hz0, add_zero]
       simp only [map_mul, map_pow, map_natCast]
       ring
     rw [mul_comm] at e1
@@ -179,7 +226,7 @@ theorem exists_lower_bound {a : ACris K p} (ha : a ≠ 0) :
   have hiota : iotaQ K p (m + 1) a = Ideal.Quotient.mk (kerAway K p ^ (m + 1)) (c : 𝔸) +
       (p : Q) ^ N * iotaQ K p (m + 1) α := by
     have := congrArg (iotaQ K p (m + 1)) hα
-    rw [map_mul, map_pow, map_natCast, map_sub,
+    rw [map_mul, map_pow, map_natCast, RingHom.map_sub (iotaQ K p (m + 1)),
       show algebraMap (ACrisZero K p) (ACris K p) c = _root_.AdicCompletion.of _ _ c from rfl,
       iotaQ_of] at this
     linear_combination -this
@@ -199,7 +246,7 @@ theorem exists_lower_bound {a : ACris K p} (ha : a ≠ 0) :
   rw [hiota, hmk, hpN]
   ring
 
-set_option maxHeartbeats 1600000 in
+
 
 theorem exists_stable {a : ACris K p} (ha : a ≠ 0) :
     ∃ (ρ₂ : ℝ) (N₀ : ℕ) (c₀ : ACrisZero K p), ‖(p : K)‖ < ρ₂ ∧ ρ₂ < 1 ∧

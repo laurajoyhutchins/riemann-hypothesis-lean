@@ -1,10 +1,57 @@
-import Mathlib
-import Formalism.HermitianLattices.GenusCovolBound
-import Formalism.HermitianLattices.HermitianLatticesProofs.GenusScale
-import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
-import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+module
+
+public import Formalism.HermitianLattices.GenusCovolBound
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
+public import Formalism.FockGram.FockGramProofs.CovolGram
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusBasic
+public import Formalism.HermitianLattices.HermitianLatticesProofs.GenusScale
 import Formalism.HermitianLattices.HermitianLatticesProofs.IsomAct
-import Formalism.FockGram.FockGramProofs.CovolGram
+public import Formalism.HermitianLattices.HermitianLatticesProofs.LocDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField
 
@@ -70,6 +117,7 @@ theorem genusCovolBound_covol_le (h : V →ₗ⋆[K] V →ₗ[K] K) (N : ℕ)
   let y : n → V := fun j => ∑ k, ((Hq k j : ℚ) : K) • x k
   have hy : ∀ j, ι (y j) = w j := by
     intro j
+
     simp only [y, w, map_sum]
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_ratCast_smul ι K ℝ, hxb]
@@ -223,6 +271,7 @@ theorem genusCovolBound_discr (a : K)
         ∑ j, (NumberField.integralBasis K).repr a j *
           Algebra.trace ℚ K (NumberField.integralBasis K i * NumberField.integralBasis K j) := by
       conv_lhs => rw [← (NumberField.integralBasis K).sum_repr a]
+
       rw [Finset.sum_mul, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [smul_mul_assoc, LinearMap.map_smul, smul_eq_mul,
@@ -254,6 +303,7 @@ theorem genusCovolBound_discr (a : K)
     rfl
   rw [Submodule.mem_one]
   refine ⟨∑ i, Matrix.mulVec (Matrix.of T).adjugate m i • RingOfIntegers.basis K i, ?_⟩
+
   rw [map_sum]
   conv_rhs => rw [← (NumberField.integralBasis K).sum_repr a, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -273,7 +323,12 @@ theorem genusCovolBound_trace_int (r : 𝓞 K) :
 end PartB
 
 theorem genusCovolBound : GenusCovolBound := by
-  intro K V _ _ _ _ _ _ _ _ h hs hpos N ι hι L hL
+  intro K V _ _ _ _ _ _ _ _ h hs hpos N ι hι L _
+  classical
+  by_cases hgenus : (genus h L).Nonempty
+  swap
+  · exact ⟨0, fun M hM => (hgenus ⟨M, hM⟩).elim⟩
+  obtain ⟨L₀, hL₀⟩ := hgenus
   have hnd : h.Nondegenerate := by
     refine ⟨fun x hx => ?_, fun y hy => ?_⟩
     · by_contra hne
@@ -290,8 +345,9 @@ theorem genusCovolBound : GenusCovolBound := by
       have := (RingOfIntegers.isIntegral_coe r).map ((starRingEnd K).toIntAlgHom)
       rwa [RingHom.toIntAlgHom_apply, starRingEnd_apply] at this
     exact (IsIntegralClosure.isIntegral_iff (A := 𝓞 K)).mp hi
-  have hdL := dualLattice (𝓞 K) K V h hs hnd hstar L hL
-  obtain ⟨d, hd0, hd⟩ := genusScale K V h hs (dual h L) hdL.1
+  have hdL₀ := dualLattice (𝓞 K) K V h hs hnd hstar L₀ hL₀.1
+  obtain ⟨d, hd0, hd⟩ := genusScale K V h hs (dual h L₀) hdL₀.1.toIsLattice
+  have hgenusEquiv := (genusBasic (𝓞 K) K V h hs hstar).1
   set δ : ℤ := NumberField.discr K with hδ
   have hδ0 : δ ≠ 0 := NumberField.discr_ne_zero K
   refine ⟨Real.sqrt (((d * δ.natAbs ^ 2 : ℕ) : ℝ) ^ N), fun M hM _ _ => ?_⟩
@@ -313,7 +369,9 @@ theorem genusCovolBound : GenusCovolBound := by
     rw [← hz, ← algebraMap_smul K s x, LinearMap.map_smulₛₗ, LinearMap.smul_apply, hs',
       starRingEnd_apply, star_star, smul_eq_mul, mul_comm]
   intro y y' hy hy'
-  have hmem := genusCovolBound_dual_genus h hs hnd hstar L hL M hM
+  have hML₀ : M ∈ genus h L₀ :=
+    ⟨hM.1, hgenusEquiv.trans (hgenusEquiv.symm hL₀.2) hM.2⟩
+  have hmem := genusCovolBound_dual_genus h hs hnd hstar L₀ hL₀.1.toIsLattice M hML₀
   have h1 := hd (dual h M) hmem _ (key y hy) _ (key y' hy')
   obtain ⟨w, hw⟩ := Submodule.mem_one.mp h1
   obtain ⟨z, hz⟩ := genusCovolBound_trace_int w

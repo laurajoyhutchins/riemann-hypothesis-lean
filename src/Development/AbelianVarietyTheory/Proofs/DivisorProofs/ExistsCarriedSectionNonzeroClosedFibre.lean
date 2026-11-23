@@ -1,16 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecCarried
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AppEqZeroOfSval
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionNonzeroOfExpansionModMaximalIdeal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsExpandsAtOfAdmissibleBase
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteExtensionUniformisationOfTraitUnif
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GmMulEqOfResMulEq
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpandsGTransport
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IntegralSectionsCorrespond
-import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.NotIsThetaOfNonunit
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecCarried
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaArc
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsToricRankOne
+public import Development.AbelianVarietyTheory.Definitions.Divisors.QuasiCompact
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsOpenFarSet
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFamFieldPull
+public import Development.AbelianVarietyTheory.Counterexamples.JetSurvey.NotIsThetaOfNonunit
 import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ThetaArc
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AppEqZeroOfSval
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsExpandsAtOfAdmissibleBase
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteExtensionUniformisationOfTraitUnif
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SectionNonzeroOfExpansionModMaximalIdeal
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsDivOfExpandsAt
+import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.ExpansionOfIntegralSectionIsIntegral
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsFamOfIsPullDeg
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsUniqueSecPull
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpandsAtTransport
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExpandsGTransport
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GmMulEqOfResMulEq
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.IntegralSectionsCorrespond
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsoUniqueOfRig
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -231,9 +278,9 @@ theorem secCarried_of_isSecPull {X : Scheme.{0}} {L : LB X} {f : X ⟶ X} {w : L
   have h₂ := gs_res (𝟙 X) z (DVR.chart_le_weighted_chart_single k) hk (σ.f fun _ => k)
   exact (gs_eq _ _ _ hj _).symm.trans (h₁.trans (h.trans (congrArg (_ * ·) (h₂.symm.trans (gs_eq _ _ _ hk _)))))
 
-set_option maxHeartbeats 1000000 in
-set_option linter.unusedVariables false in
 
+
+set_option linter.unusedVariables false in
 theorem exists_carried_nonzero : ∀ (R : Type) [CommRing R] [IsDomain R] [IsLocalRing R] (hB : Base R) (R' : Type) [CommRing R'] [IsDomain R'] [IsLocalRing R'] (ρ : R →+* R') (hF : FinExt ρ) (hG : IsGal ρ) (D : DegData R (maximalIdeal R)) (D' : DegData R' (maximalIdeal R')) (hD : IsPullDeg ρ D.toPre D'.toPre) (A' : PolAV (Sp (FractionRing R'))) (G' : Over (Sp R')) [GrpObj G'] [IsCommMonObj G'] (hS' : IsSemiAbelian G') (U' : Unif (maximalIdeal R') D' A' G') (a : GalAct ρ hD U') (G : Over (Sp R)) [GrpObj G] [IsCommMonObj G] (β : G'.left ⟶ G.left) (hS : IsSemiAbelian G) (hβ : IsGrpPullback G' G (spMap ρ) β) (hact : ∀ σ, a.act σ ≫ β = β), ∃ θ : U'.LG.L.Sec, (∀ (σ : Gal ρ) (h : IsPullDeg (Gal.hom σ) D'.toPre D'.toPre) (bc : G' ≅ (Over.pullback (specOf (Gal.hom σ))).obj G'), bc.hom.left ≫ pullback.fst G'.hom (specOf (Gal.hom σ)) = a.act σ → ∀ hP : IsPullUnif (Gal.hom σ) h bc U' U', PullOver hD h → SecCarried U'.LG.L θ _ (Classical.choose hP.lg)) ∧ ∃ g' : G'.left, G'.hom g' = closedPoint R' ∧ g' ∈ secNz θ := by
   intro R _ _ _ hB R' _ _ _ ρ hF hG D D' hD A' G' _ _ hS' U' a G _ _ β hS hβ hact
   have : IsNoetherianRing R := hB.1.1

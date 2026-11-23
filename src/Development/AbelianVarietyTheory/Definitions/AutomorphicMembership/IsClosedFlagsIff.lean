@@ -1,5 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.ExistsIsAdaptedOfIsLocalRing
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.ExistsIsAdaptedOfIsLocalRing
+public import Mathlib.Topology.KrullDimension
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -19,7 +66,7 @@ def regFns : Subalgebra k (Frames k V → k) :=
 
 instance instTopFrames : TopologicalSpace (Frames k V) := .generateFrom {s | ∃ f ∈ regFns k V, s = {b | f b ≠ 0}}
 
-def Flags : Type := ∀ i, FullFlag k (V i) (finrank k (V i))
+def Flags : Type := ∀ i, FullFlag (R := k) (M := V i) (finrank k (V i))
 
 variable {k V}
 
@@ -66,11 +113,6 @@ theorem finrank_step (F : Flags k V) (i : ι) (n : ℕ) : finrank k (F.step i n)
   simp only [Set.mem_setOf_eq, Fin.lt_def, Fin.val_castSucc, Fin.card_filter_val_lt]
   omega
 
-theorem Flags.ext {F F' : Flags k V} (h : ∀ i n, F.step i n = F'.step i n) : F = F' :=
-  funext fun i => FullFlag.ext (funext fun n => by
-    have := h i n
-    simpa only [Flags.step, min_eq_left (Nat.lt_succ_iff.1 n.2)] using this)
-
 def between (n : ℕ) (A B : ∀ i, Submodule k (V i)) : Closeds (Flags k V) where
   carrier := {F | ∀ i, A i ≤ F.step i n ∧ F.step i n ≤ B i}
   isClosed' := by
@@ -88,16 +130,5 @@ def between (n : ℕ) (A B : ∀ i, Submodule k (V i)) : Closeds (Flags k V) whe
         isClosed_zero (Algebra.subset_adjoin (.inl ⟨i, φ, a, rfl⟩))
 
 def dim (s : Closeds (Flags k V)) : ℕ := ((topologicalKrullDim (s : Set (Flags k V))).unbotD 0).toNat
-
-theorem dim_eq {s : Closeds (Flags k V)} {n : ℕ} (h : topologicalKrullDim (s : Set (Flags k V)) = n) : dim s = n := by
-  rw [dim, h]
-  rfl
-
-example (n : ℕ) : between (k := k) (V := V) n ⊥ ⊤ = ⊤ := Closeds.ext (Set.eq_univ_of_forall fun _ _ => ⟨bot_le, le_top⟩)
-
-example (n : ℕ) (i : ι) (h : n < finrank k (V i)) (F : Flags k V) : F ∉ between n ⊤ ⊤ := fun hF => by
-  have := finrank_step F i n
-  rw [top_le_iff.1 (hF i).1, finrank_top] at this
-  omega
 
 end GlobalTheory.FlagPts

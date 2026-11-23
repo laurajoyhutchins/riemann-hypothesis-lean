@@ -1,5 +1,58 @@
-import Formalism.RealPlaceAnalysis.StatementU
-import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
+module
+
+public import Formalism.RealPlaceAnalysis.StatementU
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CasComm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Finiteness.Lattice
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open scoped InnerProductSpace
 open Finset
@@ -313,8 +366,6 @@ variable {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V] {n : ℕ}
 private theorem arr_ext {j : ℕ} {F G : Arr V n j} (h : ∀ α, F α = G α) : F = G := by
   first
   | exact PiLp.ext h
-  | exact (WithLp.linearEquiv 2 ℂ ((Fin j → Fin n × Fin n) → V)).injective (funext h)
-  | exact funext h
 
 private theorem arr_sub_apply {j : ℕ} (F G : Arr V n j) (α : Fin j → Fin n × Fin n) :
     (F - G) α = F α - G α := rfl
@@ -537,8 +588,10 @@ theorem symmetrization_equivariant (E : Fin n → Fin n → Module.End ℂ V) (h
       intro α; rw [factorAction_apply']; split_ifs <;> simp
     simp only [e1, Finset.sum_sub_distrib]
     rw [sum_update_first_index_swap i c d (fun α β => u1W E α (F β)), sum_update_second_index_swap i c d (fun α β => u1W E α (F β))]
+
   rw [theta_map_apply, theta_map_apply, map_sum]
-  simp only [arr_operator_apply, map_add, map_sum, hder, Finset.sum_add_distrib]
+
+  simp only [arr_operator_apply, map_add (f := _), map_sum, hder, Finset.sum_add_distrib]
   rw [hkey]
   exact add_comm _ _
 
@@ -604,8 +657,6 @@ theorem pfil_succ_le_theta_image_sup (j : ℕ) : pfil ε E u (j + 1) ≤
       have hm : α0 i ∈ w.reverse := by
         first
         | exact List.get_mem _ _
-        | exact List.get_mem _ _ _
-        | simp [α0, List.getElem_mem]
       exact hnc (α0 i) (List.mem_reverse.mp hm)
     let F : Arr V n (j + 1) :=
       (WithLp.linearEquiv 2 ℂ ((Fin (j + 1) → Fin n × Fin n) → V)).symm
@@ -651,13 +702,10 @@ theorem permuted_words_diff_mem_pfil (hE : GlRel E) (y : V) (hy : y ∈ kSpan ε
       have e1 : l₁ = [] := by
         first
         | exact List.eq_nil_of_length_eq_zero (by omega)
-        | exact List.length_eq_zero_iff.mp (by omega)
-        | exact List.length_eq_zero.mp (by omega)
       subst e1
       have e2 : l₂ = [] := by
         first
         | exact h.symm.eq_nil
-        | exact h.nil_eq.symm
       subst e2
       rw [sub_self, map_zero]
       exact Submodule.zero_mem _
@@ -711,7 +759,6 @@ theorem symmetrization_perm_sub_mem (hE : GlRel E) (j : ℕ) (F : Arr V n (j + 1
       have h0 : (List.ofFn (β ∘ σ.symm)).Perm (List.ofFn β) := by
         first
         | exact Equiv.Perm.ofFn_comp_perm σ.symm β
-        | exact List.ofFn_comp_perm σ.symm β
       exact (List.reverse_perm _).trans (h0.trans (List.reverse_perm _).symm)
     exact permuted_words_diff_mem_pfil ε E u hE (F β) hβ _ _ hperm
       (reverse_of_fn_noncompact ε (β ∘ σ.symm) (fun i => h (σ.symm i))) j (by simp)

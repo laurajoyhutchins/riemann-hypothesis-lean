@@ -1,8 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LocWSOf
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
-import Formalism.SharpRestriction.CuspSpanNormBounds.FlagEEqHyperbolic
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LocWSOf
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HermitianETransportInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,8 +51,6 @@ open Matrix MeasureTheory NumberField Formalism.BasicNotions Formalism.MainNotio
 namespace Formalism.L2.SG.Pf.LTL
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
-
-def pt0 (D : D7) : Point ℂ (D.R.rS + 1) := ⟨[(1, D.R.rS + 1)], by simp, by simp⟩
 
 section Lemmas
 
@@ -104,14 +141,14 @@ theorem Q_fvec (u : D.what₂.Word) (τ : D.what₂.Tau) (a : Fin (D.R.rS + 1)) 
       simp only [Formalism.MainNotions.S.FlagG.fvec, Fin.snoc_castSucc]
       exact congrFun (X.Fu_e u) _
     rw [← ha] at h2
-    rw [h2, ← frS_pow D a h, Formalism.QuantumDeterminants.fvec, dif_pos h, Formalism.QuantumDeterminants.bvec, h1]
+    rw [h2, ← frS_pow D a h, Formalism.QuantumDeterminants.fvec, dite_eq_left h, Formalism.QuantumDeterminants.bvec, h1]
     rfl
   · have ha : a = Fin.last D.R.rS := Fin.ext (by have := a.isLt; simp; omega)
     subst ha
     have h3 : (X.Fu u).fvec (Fin.last D.R.rS) = X.zu u := by
       simp only [Formalism.MainNotions.S.FlagG.fvec, Fin.snoc_last]
       exact X.flagZVector u
-    rw [h3, rhoF_last, Formalism.QuantumDeterminants.fvec, dif_neg h]
+    rw [h3, rhoF_last, Formalism.QuantumDeterminants.fvec, dite_eq_right h]
     simp only [zB, Complex.ofReal_one, one_smul]
     rw [Matrix.mulVec_mulVec, hQQi, Matrix.one_mulVec]
     rfl

@@ -1,12 +1,56 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.JTranslate
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.Imports
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.BlockIndexOfWeylShuffle
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.Bridge
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellBlockShapes.OpenJ
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellBlockShapes.ValuationOneApplyLe
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.MemUnipUTwo
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellBlockShapes.ValuationOneApplyLe
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellBlockShapes.OpenJ
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.Imports
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.JTranslate
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.MemUnipUTwo
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.OpenCellDecomposition.OpenCellUnipotents.Translate
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,7 +77,7 @@ theorem scalar_id (t : ℝ) (ht : 0 < t) (i m r : ℕ) :
 
 variable {r m : ℕ} {W : Type} [AddCommGroup W] [Module ℂ W]
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem openCellPar (ψ : AddChar k Circle) (hψ : Continuous ψ)
     (ρ : Representation ℂ (Levi k fun a => Fin (dd r m a)) W) (hρ : IsSmooth ρ) (ω : kˣ →* ℂˣ)
@@ -46,10 +90,10 @@ theorem openCellPar (ψ : AddChar k Circle) (hψ : Continuous ψ)
           twKer (parInd (stdBlocks (dd r m) (hdd r m)) ρ) (unipB k (Fin (r + m))) (whitChar ψ (r + m)) := by
   obtain ⟨v, hv⟩ := hv
   have hv0 : v ≠ 0 := fun h => hv (h ▸ Submodule.zero_mem _)
-  obtain ⟨J, vol, _, hJker, hJU, _, hJvol⟩ :=
-    CellB.openJ k ψ hψ 2 (r + m) (dd r m) (hdd r m) ρ hρ
-  obtain ⟨n, _, hwhit, hcpt, hopen, f, hf, hfv, hf0⟩ :=
-    exists_bump k ψ hψ 2 (r + m) (dd r m) (hdd r m) ρ hρ v
+  have hJ := CellB.openJ k ψ hψ 2 (r + m) (dd r m) (hdd r m) ρ hρ
+  rcases hJ with ⟨J, vol, -, hJker, hJU, -, hJvol⟩
+  have hbump := exists_bump k ψ hψ 2 (r + m) (dd r m) (hdd r m) ρ hρ v
+  rcases hbump with ⟨n, -, hwhit, hcpt, hopen, f, hf, hfv, hf0⟩
   have hle : CellB.congrL k r m n ≤ unipU k (dd r m) (hdd r m) := inf_le_left
   have hwL : ∀ (u : GL (Fin (r + m)) k) (hb : u ∈ unipB k (Fin (r + m))),
       u ∈ CellB.congrL k r m n → whitChar ψ (r + m) ⟨u, hb⟩ = 1 :=

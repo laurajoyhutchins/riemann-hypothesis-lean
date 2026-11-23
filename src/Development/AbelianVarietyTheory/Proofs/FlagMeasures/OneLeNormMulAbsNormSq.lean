@@ -1,7 +1,58 @@
-import Mathlib
-import Formalism.LocalRingCardinality.DataSpaces
-import Formalism.FlagUnipotentLattices.CardSubmodulesAndLinearEquivBounds
-import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+module
+
+public import Mathlib.Analysis.Complex.Norm
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Formalism.FlagUnipotentLattices.CardSubgroupsOfIndexLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
+
 open NumberField Module Matrix Formalism.BasicNotions
 open scoped ENNReal
 
@@ -55,7 +106,7 @@ theorem exists_diag {K V : Type} [Field K] [StarRing K] [AddCommGroup V] [Module
     generalize P x = y at *
     generalize g x = c at *
     rw [hx']
-    simp only [map_add, LinearMap.add_apply, map_smul, LinearMap.map_smulₛₗ, LinearMap.smul_apply,
+    simp only [map_add (f := _), LinearMap.add_apply, map_smul, LinearMap.map_smulₛₗ, LinearMap.smul_apply,
       smul_eq_mul, hk, hk', starRingEnd_apply]
     ring
 
@@ -132,7 +183,7 @@ theorem one_le_norm_mul_absNorm_sq {K : Type} [Field K] [NumberField K] [StarRin
     · rintro x y ⟨o, ho⟩ ⟨o', ho'⟩
       refine ⟨o + o', ?_⟩
       change algebraMap _ K (o + o') = c * algebraMap _ K (x + y)
-      rw [map_add, map_add, mul_add]
+      rw [map_add (f := _), map_add (f := _), mul_add]
       exact congrArg₂ (· + ·) ho ho')
   rw [map_mul, hN] at this
   push_cast at this
@@ -165,6 +216,7 @@ theorem dualPack : ∀ (K V : Type) [Field K] [NumberField K] [StarRing K] [AddC
       map_add' := by intro x y; ext v i; simp [add_mul] }
   have hΦ : ∀ x ∈ S, ∀ v, ‖Φ x v‖ ^ 2 = (τ v (h x x)).re := by
     intro x hx v
+
     rw [EuclideanSpace.norm_sq_eq, hf x (Submodule.subset_span hx), map_sum, Complex.re_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     change ‖τ v (f i x) * (Real.sqrt (τ v (h (e i) (e i))).re : ℂ)‖ ^ 2 = _

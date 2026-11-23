@@ -1,4 +1,48 @@
-import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.ValuationBoundAdd
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.DescentCore
+public import Formalism.SharpRestriction.GrowthBounds.MultisetValuation.ValuationBoundAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.DiscreteValuationRing
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,7 +64,7 @@ theorem inLatC_smulC {j : ℕ} {g : ℝ} {L : (X.Pj j).Tup} (b : Y.Kc) (k : ℤ)
     (hb : b * (p : Y.Kc) ^ k ∈ Y.Oc) {y : XspC (X.Pj j) Y.Kc} (h : Y.inLatC j g L y) :
     Y.inLatC j (g - k) L (b • y) := by
   unfold Formalism.MainNotions.FormalGroupSystem.Pend.inLatC at h ⊢
-  have hm := AddSubgroup.mem_map_of_mem (DistribMulAction.toAddMonoidHom (XspC (X.Pj j) Y.Kc) b) h
+  have hm := AddSubgroup.mem_map_of_mem (DistribSMul.toAddMonoidHom (XspC (X.Pj j) Y.Kc) b) h
   rw [AddMonoidHom.map_closure] at hm
   refine AddSubgroup.closure_mono ?_ hm
   rintro _ ⟨_, ⟨a, ha, z, hz, rfl⟩, rfl⟩
@@ -111,8 +155,8 @@ theorem wt_inv (N d : ℕ) (hpos : 0 < N) (hle : padicValNat p N ≤ d) :
     exact hm (dvd_zero p)
   have he : e ≤ d := by
     have hv : padicValNat p (p ^ e * m) = e := by
-      rw [padicValNat.mul (pow_ne_zero _ hpp.ne_zero) hm0, padicValNat.prime_pow,
-        padicValNat.eq_zero_of_not_dvd hm, add_zero]
+      rw [Nat.padicValNat_def, Nat.multiplicity_mul (pow_ne_zero _ hpp.ne_zero) hm0,
+        Nat.multiplicity_prime_pow, multiplicity_eq_zero_of_not_dvd hm, add_zero]
     omega
   have hp := pKc_ne (Y := Y)
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le he
@@ -121,10 +165,5 @@ theorem wt_inv (N d : ℕ) (hpos : 0 < N) (hle : padicValNat p N ≤ d) :
       mul_assoc, inv_mul_cancel_left₀ (pow_ne_zero _ hp)]
   rw [key]
   exact Y.Oc.mul_mem (natInv_mem Y m hm) (Y.Oc.pow_mem (natCast_mem Y.Oc p) _)
-
-theorem stab_inv (j : ℕ) (hj : j ≤ X.mm) (La : X.Lt j) (hLa : (X.Pj j).IsLatTup La.2) :
-    algebraMap X.G.Kf Y.Kc (((X.stab j La : X.G.Kf))⁻¹) * (p : Y.Kc) ^ ((X.dG j : ℕ) : ℤ) ∈ Y.Oc := by
-  rw [map_inv₀, map_natCast]
-  exact wt_inv Y _ _ (Y.stab_fin j hj La hLa) (X.dG_spec j hj La.1 La.2 hLa)
 
 end Formalism.MainNotions.FormalGroupSystem.Pf

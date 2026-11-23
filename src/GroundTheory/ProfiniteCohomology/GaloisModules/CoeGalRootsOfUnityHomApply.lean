@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.FieldTheory.Galois.Notation
+public import Mathlib.RepresentationTheory.Coinduced
+public import Mathlib.RingTheory.RootsOfUnity.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.ProfCoh
 
@@ -23,31 +69,14 @@ def intRep {V : Type u} [AddCommGroup V] (φ : G →* AddMonoid.End V) :
     ext x
     simp
 
-@[simp]
-theorem intRep_apply {V : Type u} [AddCommGroup V] (φ : G →* AddMonoid.End V) (g : G) (x : V) :
-    intRep.{w} φ g x = φ g x :=
-  rfl
-
 def intRepOfMonoidEnd {M : Type u} [CommGroup M] (φ : G →* Monoid.End M) :
     Representation (ULift.{w} ℤ) G (Additive M) :=
   intRep.{w} ((monoidEndToAdditive M : Monoid.End M →* AddMonoid.End (Additive M)).comp φ)
-
-@[simp]
-theorem intRepOfMonoidEnd_apply {M : Type u} [CommGroup M] (φ : G →* Monoid.End M) (g : G)
-    (x : Additive M) :
-    intRepOfMonoidEnd.{w} φ g x = Additive.ofMul (φ g x.toMul) :=
-  rfl
 
 def zRepOfMonoidEnd {M : Type u} [CommGroup M] (φ : G →* Monoid.End M) :
     Representation ℤ G (Additive M) :=
   (addMonoidEndRingEquivInt (Additive M) : AddMonoid.End (Additive M) →* _).comp
     ((monoidEndToAdditive M : Monoid.End M →* AddMonoid.End (Additive M)).comp φ)
-
-@[simp]
-theorem zRepOfMonoidEnd_apply {M : Type u} [CommGroup M] (φ : G →* Monoid.End M) (g : G)
-    (x : Additive M) :
-    zRepOfMonoidEnd φ g x = Additive.ofMul (φ g x.toMul) :=
-  rfl
 
 end IntRep
 
@@ -94,26 +123,9 @@ abbrev galUnits : Rep.{u} (ULift.{w} ℤ) Gal(L/K) :=
 abbrev galRootsOfUnity (n : ℕ) : Rep.{u} (ULift.{w} ℤ) Gal(L/K) :=
   Rep.of (intRepOfMonoidEnd.{w} (galRootsOfUnityHom K L n))
 
-abbrev galAddZ : Rep.{u} ℤ Gal(L/K) := Rep.ofDistribMulAction ℤ Gal(L/K) L
-
 abbrev galUnitsZ : Rep.{u} ℤ Gal(L/K) := Rep.of (zRepOfMonoidEnd (galUnitsHom K L))
 
-abbrev galRootsOfUnityZ (n : ℕ) : Rep.{u} ℤ Gal(L/K) :=
-  Rep.of (zRepOfMonoidEnd (galRootsOfUnityHom K L n))
-
 variable {K L}
-
-@[simp]
-theorem galAdd_ρ_apply (σ : Gal(L/K)) (x : L) : (galAdd K L).ρ σ x = σ x :=
-  rfl
-
-@[simp]
-theorem galAddInt_ρ_apply (σ : Gal(L/K)) (x : L) : (galAddInt.{w} K L).ρ σ x = σ x :=
-  rfl
-
-@[simp]
-theorem galAddZ_ρ_apply (σ : Gal(L/K)) (x : L) : (galAddZ K L).ρ σ x = σ x :=
-  rfl
 
 @[simp]
 theorem galUnits_ρ_apply (σ : Gal(L/K)) (x : Additive Lˣ) :
@@ -128,11 +140,6 @@ theorem galUnitsZ_ρ_apply (σ : Gal(L/K)) (x : Additive Lˣ) :
 @[simp]
 theorem galRootsOfUnity_ρ_apply (n : ℕ) (σ : Gal(L/K)) (x : Additive (rootsOfUnity n L)) :
     (galRootsOfUnity.{w} K L n).ρ σ x = Additive.ofMul (galRootsOfUnityHom K L n σ x.toMul) :=
-  rfl
-
-@[simp]
-theorem galRootsOfUnityZ_ρ_apply (n : ℕ) (σ : Gal(L/K)) (x : Additive (rootsOfUnity n L)) :
-    (galRootsOfUnityZ K L n).ρ σ x = Additive.ofMul (galRootsOfUnityHom K L n σ x.toMul) :=
   rfl
 
 end Galois

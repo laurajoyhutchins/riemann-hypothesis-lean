@@ -1,6 +1,56 @@
-import Mathlib
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.GalOfKer
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntIntCast
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.FiniteEtaleModels.GalOfKer
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.IntegralStructures.GeometricFlagBases.FinModel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DualLatticeDegreeNeg
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDivisorMulIntegralUnitFiniteAdelesAwayPStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FlatHermUnitConstant
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorActionFormEqSimilitudeMulStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralAdeleUnitCongruenceSequence
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIntIntCast
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeCompletionEqLatticeVectorAddNsmul
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeEndomorphismIntegralApproximation
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeVectorBundlePullback
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ValuedIntCastLeIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -61,7 +111,7 @@ private theorem mult_form (D : Datum p) (g : ℤ) (hg : ∀ x y, g ∣ D.EF x y)
     | zero =>
       simpa using Mult.zero (p := p) g
     | add z z' _ _ h1 h2 =>
-      rw [map_add, LinearMap.add_apply]
+      rw [map_add (f := _), LinearMap.add_apply]
       exact Mult.add h1 h2
     | neg z _ h =>
       rw [map_neg, LinearMap.neg_apply]
@@ -74,7 +124,7 @@ private theorem mult_form (D : Datum p) (g : ℤ) (hg : ∀ x y, g ∣ D.EF x y)
   | zero =>
     simpa using Mult.zero (p := p) g
   | add z z' _ _ h1 h2 =>
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Mult.add h1 h2
   | neg z _ h =>
     rw [map_neg]
@@ -178,7 +228,7 @@ theorem UpperTheory.Gal.FiniteEtaleModels.dictP_holds :
       (isInt_mul (isInt_natCast c') ht) hprod
   have hcc : κ ^ 2 = c * c' := by
     refine hMU2 (κ ^ 2) (c * c') (ε * t) (ε' * t') (Nat.Coprime.pow_left 2 hκp)
-      (Nat.Coprime.mul hcp hc') (isInt_mul hε ht) (isInt_mul hε' ht') ?_ ?_
+      (Nat.Coprime.mul_left hcp hc') (isInt_mul hε ht) (isInt_mul hε' ht') ?_ ?_
     · calc ε * t * (ε' * t') = (ε * ε') * (t * t') := by ring
         _ = 1 := by rw [hεε, htt, _root_.mul_one]
     · rw [← hprod, hmuc]
@@ -196,7 +246,7 @@ theorem UpperTheory.Gal.FiniteEtaleModels.dictP_holds :
       rw [inAf_sub, ← actAf_inAf, smul_sub]
       have e3 : inAf D ((f n) (a • x)) = actAf D a (h₀ (inAf D x)) - n • w1 := by
         rw [← hcomm, actAf_inAf, he1, add_sub_cancel_right]
-      rw [e3, he2, map_add, map_nsmul]
+      rw [e3, he2, map_add (f := _), map_nsmul]
       abel
     have hmem : actAf D a w2 - w1 ∈ LaHat D := (LaHat D).sub_mem (actAf_mem_laHat D a hw2) hw1
     obtain ⟨z, hz⟩ := LatDiv.eq_nsmul_of_inAf_eq_nsmul p D _ n hn hnp _ hmem key
@@ -247,7 +297,7 @@ theorem UpperTheory.Gal.FiniteEtaleModels.dictP_holds :
     have hh : h₀ (L.actG h (inAf D x)) = κ • inAf D x := by
       simp only [h₀, LinearMap.smul_apply]
       rw [hinv]
-    rw [hyw, map_add, map_nsmul, he'] at hh
+    rw [hyw, map_add (f := _), map_nsmul, he'] at hh
     have key : inAf D ((f n) y - κ • x) = n • (-(w' + h₀ w)) := by
       rw [inAf_sub, inAf_nsmul, ← hh, smul_neg, smul_add]
       abel

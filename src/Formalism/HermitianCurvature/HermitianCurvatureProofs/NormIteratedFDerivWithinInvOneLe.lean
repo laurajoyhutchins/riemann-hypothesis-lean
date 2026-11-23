@@ -1,7 +1,16 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.IntegralIteratedFDerivEqZero
-import Mathlib.Analysis.Calculus.Deriv.ZPow
-import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-import Mathlib.Analysis.InnerProductSpace.Calculus
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.FTaylorSeries
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Bounds
+public import Mathlib.Analysis.Calculus.Deriv.ZPow
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+public import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.MeasureTheory.Covering.Besicovitch
+import Mathlib.Tactic.TypeStar
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+
+@[expose] public section
 
 open MeasureTheory Module Set
 open scoped Nat
@@ -43,7 +52,6 @@ theorem norm_iteratedFDeriv_inner_self_le (n : ℕ) (x : V) :
           refine Finset.sum_le_sum fun i _ => ?_
           have h1 := norm_iteratedFDeriv_id_le i x
           have h2 := norm_iteratedFDeriv_id_le (n - i) x
-          have hc : (0 : ℝ) ≤ (n.choose i : ℝ) := Nat.cast_nonneg _
           gcongr
       _ = 2 ^ n * (1 + ‖x‖) ^ 2 := by
           rw [← Finset.sum_mul, ← Finset.sum_mul]

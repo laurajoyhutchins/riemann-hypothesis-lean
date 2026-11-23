@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.PAdicHodge.ACrisLog
+module
+
+public import GroundTheory.PAdicHodge.ACrisLog
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.PAdicHodge
@@ -66,10 +113,10 @@ variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
 variable {p : ℕ} [hp : Fact p.Prime] [IsPerfectoidField K p]
 
 local notation "𝒪♭" => PreTilt (normInteger K) p
-local notation "θ" => fontaineTheta (normInteger K) p
 local notation "𝔸" => Localization.Away (p : AInf K p)
-local notation "φ" => WittVector.frobeniusEquiv p (PreTilt (normInteger K) p)
+local notation "θ" => fontaineTheta (normInteger K) p
 local notation "𝔭" => Ideal.span {(p : ACris K p)}
+local notation "φ" => WittVector.frobeniusEquiv p 𝒪♭
 
 theorem dpow_p_pow_succ (x : AInf K p) (j : ℕ) :
     dpow p x ^ (j + 1) =
@@ -152,8 +199,8 @@ theorem mem_jacobson_of_pow_mem {x : ACris K p} {m : ℕ} (h : x ^ m ∈ 𝔭) :
     x ∈ (⊥ : Ideal (ACris K p)).jacobson :=
   Ideal.isRadical_jacobson ⊥ ⟨m, IsAdicComplete.le_jacobson_bot _ h⟩
 
-set_option maxHeartbeats 1600000 in
 
+set_option maxHeartbeats 1600000 in
 theorem exists_periodT_eq_mu_mul_unit {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1)
     (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) :
     ∃ u : ACris K p, IsUnit u ∧
@@ -245,7 +292,8 @@ theorem exists_periodT_eq_mu_mul_unit {ε : 𝒪♭} (hε : PreTilt.untilt ε = 
     simp [U, V, h0]
   have hUJ : ∀ n : ℕ, 1 ≤ n → algebraMap (ACrisZero K p) (ACris K p) (U n) ∈ J := by
     intro n hn
-    simp only [U, V, map_mul, map_pow, map_neg, map_one]
+    set_option synthInstance.maxHeartbeats 200000 in
+      simp only [U, V, map_mul, map_pow, map_neg, map_one]
     rcases Nat.eq_zero_or_pos (n % (p - 1)) with hr | hr
     · have hq : 0 < n / (p - 1) := by
         have := Nat.mod_add_div n (p - 1)
@@ -276,13 +324,6 @@ theorem mu_mem_span_periodT {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1)
   obtain ⟨u, hu, ht⟩ := exists_periodT_eq_mu_mul_unit hε hζ
   rw [Ideal.mem_span_singleton']
   exact ⟨↑hu.unit⁻¹, by rw [ht, mul_comm, mul_assoc, IsUnit.mul_val_inv, mul_one]⟩
-
-theorem span_periodT_eq_span_mu {ε : 𝒪♭} (hε : PreTilt.untilt ε = 1)
-    (hζ : PreTilt.untilt ((_root_.frobeniusEquiv 𝒪♭ p).symm ε) ≠ 1) :
-    Ideal.span {periodT (K := K) hε} =
-      Ideal.span {algebraMap (AInf K p) (ACris K p) (AInf.mu ε)} := by
-  obtain ⟨u, hu, ht⟩ := exists_periodT_eq_mu_mul_unit hε hζ
-  rw [ht, Ideal.span_singleton_mul_right_unit hu]
 
 end ACris
 

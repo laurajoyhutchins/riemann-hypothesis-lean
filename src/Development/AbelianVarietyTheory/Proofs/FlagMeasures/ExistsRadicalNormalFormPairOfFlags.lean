@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
-import Formalism.SharpRestriction.CuspSpanNormBounds.NormalizedLocalScale
-import Formalism.SharpRestriction.CuspSpanNormBounds.RootMeasBig
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.BlockAnti
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RootMeasBig
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,10 +90,15 @@ theorem entry_cases (t : ℂ) (s : ℕ) (bs : List (ℂ × ℕ)) (i j : ℕ) (h 
     · rw [if_neg h2] at h; exact absurd rfl h
 
 theorem entry_same : ∀ (bs : List (ℂ × ℕ)) (i j i' j' : ℕ), ptEntry bs i j ≠ 0 → ptEntry bs i' j' ≠ 0 →
-    blockIdx bs i = blockIdx bs i' → ptEntry bs i j = ptEntry bs i' j' ∧ i + j = i' + j'
-  | [], _, _, _, _, h, _, _ => absurd rfl h
-  | (t, s) :: bs, i, j, i', j', h, h', hb => by
-    have ih := entry_same bs (i - s) (j - s) (i' - s) (j' - s)
+    blockIdx bs i = blockIdx bs i' → ptEntry bs i j = ptEntry bs i' j' ∧ i + j = i' + j' := by
+  intro bs
+  induction bs with
+  | nil =>
+    intro i j i' j' h h' hb
+    exact absurd rfl h
+  | cons b bs ih =>
+    rcases b with ⟨t, s⟩
+    intro i j i' j' h h' hb
     simp only [blockIdx] at hb
     rcases entry_cases t s bs i j h with ⟨a1, a2, a3⟩ | ⟨a1, a2, a3⟩ <;>
       rcases entry_cases t s bs i' j' h' with ⟨b1, b2, b3⟩ | ⟨b1, b2, b3⟩
@@ -57,20 +106,27 @@ theorem entry_same : ∀ (bs : List (ℂ × ℕ)) (i j i' j' : ℕ), ptEntry bs 
     · rw [if_pos a1, if_neg (by omega)] at hb; omega
     · rw [if_pos b1, if_neg (by omega)] at hb; omega
     · rw [if_neg (by omega), if_neg (by omega)] at hb
-      obtain ⟨e1, e2⟩ := ih (a3 ▸ h) (b3 ▸ h') (by omega)
+      obtain ⟨e1, e2⟩ := ih (i - s) (j - s) (i' - s) (j' - s)
+        (a3 ▸ h) (b3 ▸ h') (by omega)
       exact ⟨by rw [a3, b3, e1], by omega⟩
 
 theorem entry_exists : ∀ (bs : List (ℂ × ℕ)), (∀ b ∈ bs, b.1 ≠ 0 ∧ 1 ≤ b.2) → ∀ j, j < (bs.map Prod.snd).sum →
-    ∃ i, i < (bs.map Prod.snd).sum ∧ ptEntry bs i j ≠ 0
-  | [], _, j, h => by simp at h
-  | (t, s) :: bs, hb, j, h => by
+    ∃ i, i < (bs.map Prod.snd).sum ∧ ptEntry bs i j ≠ 0 := by
+  intro bs
+  induction bs with
+  | nil =>
+    intro hb j h
+    simp at h
+  | cons b bs ih =>
+    rcases b with ⟨t, s⟩
+    intro hb j h
     simp only [List.map_cons, List.sum_cons] at h ⊢
     by_cases h1 : j < s
     · refine ⟨s - 1 - j, by omega, ?_⟩
       simp only [ptEntry]
       rw [if_pos (by omega), if_pos (by omega)]
       exact (hb (t, s) (by simp)).1
-    · obtain ⟨i, hi, he⟩ := entry_exists bs (fun b hb' => hb b (by simp [hb'])) (j - s) (by omega)
+    · obtain ⟨i, hi, he⟩ := ih (fun b hb' => hb b (by simp [hb'])) (j - s) (by omega)
       refine ⟨s + i, by omega, ?_⟩
       simp only [ptEntry]
       rw [if_neg (by omega), if_pos (by omega)]

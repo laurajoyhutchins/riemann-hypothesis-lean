@@ -1,9 +1,56 @@
-import Formalism.HermitianCurvature.StatementQr
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainRecursionFromSingleDescent
+module
+
+public import Formalism.HermitianCurvature.StatementQr
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainRecursionFromSingleDescent
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.QuantumDetHighestWeightHolds
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.ShiftedGeneratorEqIteSmulAdd
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.GeneratorCommutatorQuantumDet
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Finset Polynomial
 
@@ -58,15 +105,14 @@ theorem map_qminor {B : Type} [Ring B] [Algebra ℂ B] (f : B →+* A)
     (hf : ∀ v, f (algebraMap ℂ B v) = algebraMap ℂ A v) (E' : Fin n → Fin n → B) (hE' : ∀ a b, f (E' a b) = E a b)
     {t : ℕ} (a b : Fin t → Fin n) (u : ℂ) : f (qminor E' a b u) = qminor E a b u := by
   unfold qminor
+
   rw [map_sum]
   refine Finset.sum_congr rfl fun σ _ => ?_
   rw [map_mul, map_intCast, map_list_prod, List.map_ofFn]
   congr 3
   funext k
-  simp only [Function.comp, Tm, map_add, hE']
-  split_ifs
-  · rw [hf]
-  · rw [map_zero]
+  simp only [Function.comp_apply, Tm, map_add, hE']
+  split_ifs <;> simp [hf]
 
 def EX (a b : Fin n) : A[X] := C (E a b) + if a = b then X else 0
 
@@ -98,7 +144,7 @@ theorem Tm_EX (v : ℂ) (c p : Fin n) : Tm (EX E) v c p = C (Tm E v c p) + if c 
 theorem cancel (Z : Fin n → A[X]) (v : ℂ) (h : ∀ c, ∑ p, Z p * Tm (EX E) v c p = 0) : ∀ p, Z p = 0 := by
   have step : ∀ k, (∀ p, (Z p).coeff (k + 1) = 0) → ∀ p, (Z p).coeff k = 0 := by
     intro k hk c
-    have h1 := congrArg (fun f => coeff f (k + 1)) (h c)
+    have h1 := congrArg (fun f : A[X] => f.coeff (k + 1)) (h c)
     simp only [Tm_EX, mul_add, Finset.sum_add_distrib, coeff_add, finsetSum_coeff, coeff_mul_C, hk, zero_mul,
       Finset.sum_const_zero, zero_add, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, coeff_mul_X,
       coeff_zero] at h1

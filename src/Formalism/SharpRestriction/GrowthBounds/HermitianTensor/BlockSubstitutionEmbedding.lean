@@ -1,4 +1,45 @@
-import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.SubYGenCoefHom
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.CoeffSumMonomialLinear
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.ColSums
+public import Formalism.SharpRestriction.GrowthBounds.HermitianTensor.SubYGenCoefHom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -31,7 +72,7 @@ theorem th_X_none (K : Type) [Field K] (r : ℕ) (b : Bool) (a t : Fin (r + 1 + 
 
 theorem th_coeff (K : Type) [Field K] (r : ℕ) (b : Bool) (v : MvPolynomial (Fin (r + 1 + 1) × Fin (r + 1 + 1)) K)
     (u : Fin (r + 1 + 1) × Fin (r + 1 + 1) →₀ ℕ) :
-    coeff u (th K r b v) = blockEmb K b (coeff u (subY K r v)) := by
+    AddMonoidAlgebra.coeff (th K r b v) u = blockEmb K b (AddMonoidAlgebra.coeff (subY K r v) u) := by
   rw [th, AlgHom.comp_apply, mAH_coeff]
 
 theorem block_substitution_embedding (K : Type) [Field K] (r : ℕ) (b : Bool) (v : MvPolynomial (Fin (r + 1 + 1) × Fin (r + 1 + 1)) K) :
@@ -81,7 +122,7 @@ theorem psiB_map (ψ : MvPolynomial σ K →ₐ[K] MvPolynomial σ K) (G : MvPol
 theorem lcoef_C_mul_map (L : B →ₗ[K] K) (b : B) (G : MvPolynomial σ K) :
     lcoef L (C b * map (algebraMap K B) G) = L b • G := by
   ext u
-  rw [coeff_lcoef, coeff_C_mul, coeff_map, coeff_smul, smul_eq_mul, mul_comm b, ← Algebra.smul_def, map_smul,
+  rw [coeff_lcoef, coeff_C_mul, coeff_map, MvPolynomial.coeff_smul, smul_eq_mul, mul_comm b, ← Algebra.smul_def, map_smul,
     smul_eq_mul, mul_comm]
 
 theorem lcoef_comm (ψ : MvPolynomial σ K →ₐ[K] MvPolynomial σ K) (L : B →ₗ[K] K) (h : MvPolynomial σ B) :
@@ -91,7 +132,7 @@ theorem lcoef_comm (ψ : MvPolynomial σ K →ₐ[K] MvPolynomial σ K) (L : B �
     have e : (monomial u b : MvPolynomial σ B) = C b * map (algebraMap K B) (monomial u 1) := by
       rw [map_monomial, map_one, C_mul_monomial, mul_one]
     rw [e, lcoef_C_mul_map, map_mul, psiB_map, psiB_C, lcoef_C_mul_map, map_smul]
-  | add p q hp hq => rw [map_add, map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
 
 theorem hom_eq_on {S : Type} [CommRing S] (f g : MvPolynomial σ K →+* S) (hC : ∀ a, f (C a) = g (C a))
     (hX : ∀ w, f (X w) = g (X w)) (v : MvPolynomial σ K) : f v = g v := by
@@ -126,7 +167,7 @@ theorem sc_monomial {σ : Type} (d : σ → K) (u : σ →₀ ℕ) (a : K) :
   ring
 
 theorem sc_coeff {σ : Type} (d : σ → K) (f : MvPolynomial σ K) (m : σ →₀ ℕ) :
-    coeff m (aeval (fun w => C (d w) * X w) f) = coeff m f * m.prod fun w e => d w ^ e := by
+    AddMonoidAlgebra.coeff (aeval (fun w => C (d w) * X w) f) m = AddMonoidAlgebra.coeff f m * m.prod fun w e => d w ^ e := by
   classical
   induction f using MvPolynomial.induction_on' with
   | monomial u a =>
@@ -134,7 +175,7 @@ theorem sc_coeff {σ : Type} (d : σ → K) (f : MvPolynomial σ K) (m : σ →�
     split_ifs with h
     · rw [h]
     · rw [zero_mul]
-  | add p q hp hq => rw [map_add, coeff_add, coeff_add, hp, hq, add_mul]
+  | add p q hp hq => rw [map_add (f := _), MvPolynomial.coeff_add, MvPolynomial.coeff_add, hp, hq, add_mul]
 
 def scCol (K : Type) [Field K] (k : ℕ) (t0 : Fin k) (c : K) :
     MvPolynomial (Fin k × Fin k) K →ₐ[K] MvPolynomial (Fin k × Fin k) K :=
@@ -158,32 +199,33 @@ theorem sc_prod {k : ℕ} (t0 : Fin k) (c : K) (m : Fin k × Fin k →₀ ℕ) :
     exact absurd (Finset.mem_univ _) h
 
 theorem scCol_coeff {k : ℕ} (t0 : Fin k) (c : K) (f : MvPolynomial (Fin k × Fin k) K) (m : Fin k × Fin k →₀ ℕ) :
-    coeff m (scCol K k t0 c f) = coeff m f * c ^ (Finsupp.weight (colW k k) m t0) := by
+    AddMonoidAlgebra.coeff (scCol K k t0 c f) m = AddMonoidAlgebra.coeff f m * c ^ (Finsupp.weight (colW k k) m t0) := by
   unfold scCol
   rw [sc_coeff, sc_prod]
 
 theorem scCol_of_hom {k : ℕ} (t0 : Fin k) (c : K) (f : MvPolynomial (Fin k × Fin k) K) (ν : Fin k → ℕ)
     (hf : IsWeightedHomogeneous (colW k k) f ν) : scCol K k t0 c f = c ^ ν t0 • f := by
   ext m
-  rw [scCol_coeff, coeff_smul, smul_eq_mul, mul_comm]
-  by_cases h : coeff m f = 0
+  rw [scCol_coeff, MvPolynomial.coeff_smul, smul_eq_mul, mul_comm]
+  by_cases h : AddMonoidAlgebra.coeff f m = 0
   · rw [h, mul_zero, mul_zero]
   · rw [hf h]
 
 theorem wt_of_scale [Infinite K] {k : ℕ} (t0 : Fin k) (n : ℕ) (f : MvPolynomial (Fin k × Fin k) K)
-    (h : ∀ c : K, c ≠ 0 → scCol K k t0 c f = c ^ n • f) (m : Fin k × Fin k →₀ ℕ) (hm : coeff m f ≠ 0) :
+    (h : ∀ c : K, c ≠ 0 → scCol K k t0 c f = c ^ n • f) (m : Fin k × Fin k →₀ ℕ) (hm : AddMonoidAlgebra.coeff f m ≠ 0) :
     Finsupp.weight (colW k k) m t0 = n := by
   apply pow_exp_inj (K := K)
   intro c hc
-  have := congrArg (coeff m) (h c hc)
-  rw [scCol_coeff, coeff_smul, smul_eq_mul, mul_comm] at this
+  have := congrArg (AddMonoidAlgebra.coeff · m) (h c hc)
+  rw [scCol_coeff, MvPolynomial.coeff_smul, smul_eq_mul, mul_comm] at this
   exact mul_right_cancel₀ hm this
 
 theorem colAdd_trivial {k : ℕ} (l j : Fin k) (c : K) (f : MvPolynomial (Fin k × Fin k) K)
-    (hf : ∀ m, coeff m f ≠ 0 → Finsupp.weight (colW k k) m j = 0) : colAdd K l j c f = f := by
+    (hf : ∀ m, AddMonoidAlgebra.coeff f m ≠ 0 → Finsupp.weight (colW k k) m j = 0) : colAdd K l j c f = f := by
   classical
-  have e : colAdd K l j c f = ∑ m ∈ f.support, colAdd K l j c (monomial m (coeff m f)) := by
+  have e : colAdd K l j c f = ∑ m ∈ f.support, colAdd K l j c (monomial m (AddMonoidAlgebra.coeff f m)) := by
     conv_lhs => rw [f.as_sum]
+
     rw [map_sum]
   rw [e]
   conv_rhs => rw [f.as_sum]

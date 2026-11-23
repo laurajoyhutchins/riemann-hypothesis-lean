@@ -1,34 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.NormSmall
-import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFinPt
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.IntegralFundamentalDomainEqSumDoubleCoset
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DefiniteBottomTowerConstantsDifferByFactor
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.CompAtMtOfMemGfC
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaIntegrandIntegrable
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsCompactParahoricLevelAndContainsLifts
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.MeasureToRealEqMass
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ClassSumIntegral
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicFormsFiniteStabilisers
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MeasurePreservingMulRightOfMem
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.GenusMassSignature
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AdelicUnitaryTopology
-import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.LevelADef
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryDoubleCosetClassesFiniteCardLe
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilLatticeVacuumEqProdSplitPlaceFactors
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionSchrodingerModelFiniteIdempotent
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHomLatticeIffFrameStabilizerActMem
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstStandardPairMemberHasThetaFunction
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdemAtUniqueOrth
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ConjPlEqCP
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitSumStabLattice
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelCharacterUnramifiedMu
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LatNotSelfDual
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.InfPartOfSplitIdem
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitCharTriangle
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DetIdlVal
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitSumStabLattice
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LatNotSelfDual
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ConjPlEqCP
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.IdemAtUniqueOrth
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilDataLines
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelCharacterUnramifiedMu
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RamificationIdxEqOneOfIsSquare
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.WeilDataLines
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.InfPartOfSplitIdem
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IdempotentMulEqZeroOfOrthogonal
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelHyperspecialTrivialCharacterSplitsOffPlaces
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FirstStandardPairMemberHasThetaFunction
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemHomLatticeIffFrameStabilizerActMem
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilActionSchrodingerModelFiniteIdempotent
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.WeilLatticeVacuumEqProdSplitPlaceFactors
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.FinitePrimesUnder
+import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsMatchOver
+import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LeafBounds.IntegralLeaf.LeafINTFree
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.Theta IsDedekindDomain NumberField Finset MeasureTheory
 open Formalism.MainNotions.TaylorLogMetric Formalism.MainNotions.StandardLatticesGL3 Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open Formalism.DivisionValues (vw)
@@ -38,8 +73,8 @@ open GlobalTheory.NormSum (Pair Tup)
 open Classical
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option synthInstance.maxHeartbeats 200000
-set_option maxHeartbeats 800000
+
+
 
 noncomputable section
 
@@ -91,9 +126,9 @@ theorem unitChar_mul (ν : (Formalism.L2.Theta.AE D)ˣ →* Circle) {e : Formali
   unfold unitChar
   by_cases h : ∃ y, IsUnitDet e N y
   · have h' : ∃ y, IsUnitDet e (K * N) y := ⟨_, isUnitDet_mul he hx h.choose_spec⟩
-    rw [dif_pos h, dif_pos h', isUnitDet_unique h'.choose_spec (isUnitDet_mul he hx h.choose_spec), map_mul, mul_inv,
+    rw [dite_eq_left h, dite_eq_left h', isUnitDet_unique h'.choose_spec (isUnitDet_mul he hx h.choose_spec), map_mul, mul_inv,
       Circle.coe_mul]
-  · rw [dif_neg h, dif_neg, mul_zero]
+  · rw [dite_eq_right h, dite_eq_right, mul_zero]
     rintro ⟨y, hy⟩
     have := isUnitDet_mul he hx' hy
     rw [← Matrix.mul_assoc, hK, Matrix.one_mul] at this
@@ -115,7 +150,7 @@ theorem inId_mul {I : Ideal (𝓞 D.host.E)} {k d : ℕ} {K : Matrix (Fin k) (Fi
     exact Subring.sum_mem _ fun l _ => Subring.mul_mem _ (hK i l) (h1 l)
   refine ⟨hm, ?_⟩
   have e : (⟨(HMul.hMul K Y) i j, hm⟩ : OO) = ∑ l, (⟨K i l, hK i l⟩ : OO) * ⟨Y l j, h1 l⟩ := Subtype.ext (by
-    rw [AddSubmonoidClass.coe_finset_sum]
+    rw [AddSubmonoidClass.coe_finsetSum]
     exact Matrix.mul_apply)
   rw [e]
   exact Ideal.sum_mem _ fun l _ => Ideal.mul_mem_left _ _ (h2 l)
@@ -165,9 +200,9 @@ theorem isUnitDet_frG {e : Formalism.L2.Theta.AE D} {P : Finset (Pl D.host.E)} (
     linear_combination e * h1 + ((Formalism.L2.Theta.mt S g).det * (Formalism.L2.Theta.mt S g⁻¹).det - (Formalism.L2.Theta.mt S g).det -
       (Formalism.L2.Theta.mt S g⁻¹).det + 1) * hee
   refine ⟨?_, ?_, ?_⟩
-  · rw [detIdl_val hee, RingHom.map_add, RingHom.map_mul, RingHom.map_sub, hinf, RingHom.map_one, zero_mul, zero_add, sub_zero]
-  · rw [detIdl_val hee, RingHom.map_add, RingHom.map_mul, RingHom.map_sub, RingHom.map_one, det_frG, add_comm]
-  · rw [hinv, detIdl_val hee, RingHom.map_add, RingHom.map_mul, RingHom.map_sub, RingHom.map_one, ← det_frG S β]
+  · rw [detIdl_val hee, RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, hinf, RingHom.map_one, zero_mul, zero_add, sub_zero]
+  · rw [detIdl_val hee, RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, RingHom.map_one, det_frG, add_comm]
+  · rw [hinv, detIdl_val hee, RingHom.map_add (f := _), RingHom.map_mul, RingHom.map_sub, RingHom.map_one, ← det_frG S β]
     exact add_mem (mul_mem hE (det_mem (isIntM_frG (by rw [map_inv]; exact inv_mem hg)))) (sub_mem (one_mem _) hE)
 
 theorem stdSnd_actO (ν : (Formalism.L2.Theta.AE D)ˣ →* Circle) {e : Formalism.L2.Theta.AE D} {P : Finset (Pl D.host.E)} (he : IsIdemSum e P)
@@ -200,6 +235,7 @@ theorem keeps_latHat {S : HSp D} {Λ : Submodule (𝓞 D.host.E) (Fin S.rank →
       ((Formalism.L2.Theta.mt S g).map (finPart D)).mulVec y ∈ latHat D.host.F D.host.E (Λ : Set (Fin S.rank → D.host.E)) := by
   rw [GlobalTheory.LevSplit.latHat_iff, GlobalTheory.LevSplit.latHat_iff, GlobalTheory.IndefiniteRowSideFullHecke.SplitSumStabLattice.mulVec_mem_hatL_iff hβ hg]
   refine iff_of_eq (congrArg (· ∈ Formalism.L2.Herm.hatL (F := D.host.F) Λ) (funext fun i => ?_))
+
   simp only [Matrix.mulVec, dotProduct, map_sum, map_mul]
   rfl
 
@@ -219,7 +255,7 @@ theorem detIdl_one (e : Formalism.L2.Theta.AE D) (S : HSp D) : detIdl e S 1 = 1 
   · refine Units.ext ?_
     rw [detIdl_val hee, Formalism.IndefR.Fin.LevelGroupLemmas.Lat.mt_one, Matrix.det_one, Units.val_one]
     ring
-  · rw [detIdl, dif_neg hee]
+  · rw [detIdl, dite_eq_right hee]
 
 theorem fix_of_unram {T : Type} {A A' WW : HSp D} {X : Tri T A A' WW} {ψ : AddChar (AF D.host.F) ℂ} {θ : InfFam D}
     {α β : T → ((Formalism.L2.Theta.AE D)ˣ →* Circle)} {νH : T → Formalism.L2.Host.HChar D.host.E} {S : T → Finset (Pl D.host.E)}
@@ -298,14 +334,5 @@ theorem unram_off {T : Type} {L : LevCh D T} {sc : GlobalTheory.ChiGrid.Consts} 
   exact ⟨GlobalTheory.SeeSaw.WeilLines.charUnram_mul hμ (charUnram_pow hη n), GlobalTheory.SeeSaw.WeilLines.charUnram_mul hχ (charUnram_pow hη n)⟩
 
 end GlobalTheory.BotFinLevel
-
-theorem GlobalTheory.BotFinLevel.finLevel_fix : GlobalTheory.FunPr.Hypotheses₂ → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.ThetaIntegralsAgree → GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.LocalMatching →
-    (∀ D, GlobalTheory.NormSum.Inp D) → GlobalTheory.SqTop.BotSmall →
-    GlobalTheory.SqTop.GBig fun {D} T _ _ G _ _ _ _ => ∀ (W : G.Weil), IsStdChar D W.ψ (-1) → ∀ (i j : Fin D.R.m) (A A' WW : HSp D)
-      (X : Tri T A A' WW), IsBottomTri W i j X → ∀ (s : T), ∀ k ∈ Lev.levA A' (Formalism.L2.DIV.St X.rA'.β), X.ω' s (k, 1) (X.f' s) = X.f' s := by
-  intro _ _ _ _ _
-  refine ⟨0, fun _ _ _ => ⟨0, 0, fun _ _ D large₂ _ _ _ T Lc μ₀ hμ G => ?_⟩⟩
-  intro W _ i j A A' WW X hX s k hk
-  exact GlobalTheory.BotFinLevel.fix_of_unram hX.is s (fun v hv => GlobalTheory.BotFinLevel.unram_off G hμ s i j _ hv) hk
 
 end

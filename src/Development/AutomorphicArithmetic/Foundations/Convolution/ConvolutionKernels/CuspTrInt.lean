@@ -1,14 +1,60 @@
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.HsOfKer
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.TraceKer
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.RopAdj
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.RopPc
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.RopAe
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KvCont
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.TwAdj
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.QhtBasic
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.NormLeOfSq
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.QmapPres
-import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.GalTwistEx
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.HsOfKer
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.KvCont
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.NormLeOfSq
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.QmapPres
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.RopAdj
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.RopAe
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.RopPc
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.TraceKer
+public import Development.AutomorphicArithmetic.Foundations.Convolution.ConvolutionKernels.TwAdj
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Measure.SeparableMeasure
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory NumberField GroundTheory.Automorphic GroundTheory.Automorphic.CuspidalSpectrum GroundTheory.Automorphic.RightCosetSpace
 open GroundTheory.Automorphic.CuspidalProjection PositivityTheory.Rg.Tf.Core UpperTheory.ConvolutionTheory.K
@@ -23,6 +69,10 @@ theorem UpperTheory.ConvolutionTheory.K.cuspTrInt :
         ⟪Pc μ (kv μ a (Quotient.out y)), M (Pc μ (kv μ (ccStar g) (θ.e (Quotient.out y))))⟫_ℂ ∂quotientMeasure (Gam K n) μ := by
   intro K _ _ n μ _ θ f a g M ha hg hM hf
   haveI := Reduction.isFiniteMeasure_quotientMeasure (K := K) (n := n) μ
+  haveI : SigmaFinite (quotientMeasure (Gam K n) μ) := IsFiniteMeasure.toSigmaFinite _
+  haveI : SFinite (quotientMeasure (Gam K n) μ) := by
+    set_option synthInstance.maxHeartbeats 400000 in
+      exact inferInstance
   haveI : Fact ((2 : ENNReal) ≠ ⊤) := ⟨by simp⟩
   haveI : SecondCountableTopology (RightCosetSpace (Gam K n)) :=
     (isOpenQuotientMap_mk (Gam K n)).isQuotientMap.secondCountableTopology (isOpenQuotientMap_mk (Gam K n)).isOpenMap
@@ -78,7 +128,7 @@ theorem UpperTheory.ConvolutionTheory.K.cuspTrInt :
     rwa [ContinuousLinearMap.adjoint_adjoint] at this
   refine ⟨?_, ?_⟩
   · have m3 := M.comp_memLp' m2
-    refine (m1.norm.integrable_mul m3.norm).mono' (m1.1.inner m3.1) (Filter.Eventually.of_forall fun y => ?_)
+    refine (m1.norm.integrable_mul m3.norm).mono' (m1.aestronglyMeasurable.inner m3.aestronglyMeasurable) (Filter.Eventually.of_forall fun y => ?_)
     exact norm_inner_le_norm _ _
   · rw [← traceKer _ _ M _ _ _ m1 m2 sA sB (hker a) hBk, cuspTr]
     congr 1

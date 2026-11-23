@@ -1,23 +1,62 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPeriodAtRestrict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EmbedsGeneric
-import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.PotentialsBoundedRegSettingEqReference
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GlobalSncChartSystemStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsTorusStableSncChartsStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BoundaryPointsClosedStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairLatticeSumComapStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairLatticeDegreeBoundStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataIntersectionSumStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsPositiveHermitianLineStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ConstantsInCoordRatioFieldStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SmoothGenericFibreOfSncStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BirationalOfTranscendenceDegreeStatement
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsPeriodAtRestrict
+public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.GoodOrigin
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IntegralClosureHeightEqOneOfLiesOver
+public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.CmHostRankBoundsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BirationalOfTranscendenceDegreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BoundaryPointsClosedStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComplexPointsIffCentresStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsChartBundleStatement
-import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.CmHostRankBoundsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentDataIntersectionSumStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ConstantsInCoordRatioFieldStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsChartBundleStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsPositiveHermitianLineStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsTorusStableSncChartsStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GlobalSncChartSystemStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairLatticeDegreeBoundStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PairLatticeSumComapStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SmoothGenericFibreOfSncStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,9 +79,10 @@ theorem exists_componentData_origin : Top.Given → Out.WeilSt → ∀ (E : Type
         Or.inl ⟨rfl, rfl, rfl⟩, fun _ => by simp, fun _ => rfl, by omega, hp, by omega⟩
     · refine ⟨Sum.inr, Sum.inl, D.q, D.p, by simp, by simp, Or.inl rfl, fun _ => rfl,
         Or.inr ⟨rfl, rfl, rfl⟩, fun _ => by simp, fun _ => rfl, by omega, hq, by omega⟩
+  have hchart := GlobalTheory.T.global_snc_chart_system hG hW E H D Xo l c Y hgl hp hq Ω₀ ξ₀ hξ S₀ S₁ sm (D.p + D.q - j) hsmc hr hS₀ hS₁ hd hdisc
   obtain ⟨K, _, J, _, Ω, _, _, y, 𝔐, deg, bd, vdeg, vnum, vden, s, aMu, e₀, hK, hgen, hcov, hom, hfree,
     htr, hsnc, hbd, hR, htors, hvb, hvert, hvert2, hli, hspan, hdeg⟩ :=
-    GlobalTheory.T.global_snc_chart_system hG hW E H D Xo l c Y hgl hp hq Ω₀ ξ₀ hξ S₀ S₁ sm (D.p + D.q - j) hsmc hr hS₀ hS₁ hd hdisc
+    hchart
   have hn : D.dim = Fintype.card (CMType H) * j * (D.p + D.q - j) := by
     have h2 := (GlobalTheory.T.cm_host_rank_bounds E H).2.2
     have hmul : j * (D.p + D.q - j) = D.p * D.q := by

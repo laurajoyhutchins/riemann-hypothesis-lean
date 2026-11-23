@@ -1,5 +1,58 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CoordsAt
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CoordsAt
+public import Mathlib.AlgebraicGeometry.Morphisms.Proper
+public import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,7 +104,7 @@ variable {o x}
 lemma coe_eq_monomial {n : ℕ} {f : rees o x} (hf : f ∈ grading o x n) :
     (f : (Polynomial Ω)) = Polynomial.monomial n ((f : (Polynomial Ω)).coeff n) := by
   ext i
-  rw [Polynomial.coeff_monomial]
+  rw [Polynomial.coeff_monomial_apply]
   split_ifs with h
   · rw [h]
   · exact hf i (Ne.symm h)
@@ -59,14 +112,14 @@ lemma coe_eq_monomial {n : ℕ} {f : rees o x} (hf : f ∈ grading o x n) :
 def comp (i : ℕ) (f : rees o x) : grading o x i :=
   ⟨⟨Polynomial.monomial i ((f : (Polynomial Ω)).coeff i), by
       intro k
-      rw [Polynomial.coeff_monomial]
+      rw [Polynomial.coeff_monomial_apply]
       split_ifs with h
       · rw [← h]
         exact f.2 _
       · exact Submodule.zero_mem _⟩, by
     intro k hk
     change (Polynomial.monomial i ((f : (Polynomial Ω)).coeff i)).coeff k = 0
-    rw [Polynomial.coeff_monomial, if_neg (Ne.symm hk)]⟩
+    exact Polynomial.coeff_monomial_of_ne _ hk⟩
 
 lemma coeff_coeAddMonoidHom (y : DirectSum ℕ fun i => grading o x i) (n : ℕ) :
     ((DirectSum.coeAddMonoidHom (grading o x) y : rees o x) : (Polynomial Ω)).coeff n =
@@ -82,14 +135,14 @@ lemma coeff_coeAddMonoidHom (y : DirectSum ℕ fun i => grading o x i) (n : ℕ)
     · rw [DirectSum.of_eq_of_ne _ _ _ (Ne.symm h), a.2 n (Ne.symm h)]
       simp
   | add a b ha hb =>
-    rw [map_add, DirectSum.add_apply]
+    rw [map_add (f := _), DirectSum.add_apply]
     simp only [AddMemClass.coe_add, Subalgebra.coe_add, Polynomial.coeff_add, ha, hb]
 
 lemma bijective_coeAddMonoidHom :
     Function.Bijective (DirectSum.coeAddMonoidHom (grading o x)) := by
   classical
   constructor
-  · rw [injective_iff_map_eq_zero]
+  · set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro y hy
     refine DFinsupp.ext fun n => ?_
     refine Subtype.ext (Subtype.ext ?_)
@@ -99,10 +152,11 @@ lemma bijective_coeAddMonoidHom :
     simp
   · intro f
     refine ⟨∑ i ∈ (f : (Polynomial Ω)).support, DirectSum.of (fun i => grading o x i) i (comp i f), ?_⟩
+
     rw [map_sum]
     refine Subtype.ext ?_
     simp only [DirectSum.coeAddMonoidHom_of]
-    rw [AddSubmonoidClass.coe_finset_sum]
+    rw [AddSubmonoidClass.coe_finsetSum]
     exact (Polynomial.as_sum_support (f : (Polynomial Ω))).symm
 
 instance gradedRing : GradedRing (grading o x) where
@@ -113,8 +167,8 @@ instance gradedRing : GradedRing (grading o x) where
   mul_mem := by
     intro i j a b ha hb k hk
     change ((a : (Polynomial Ω)) * (b : (Polynomial Ω))).coeff k = 0
-    rw [coe_eq_monomial ha, coe_eq_monomial hb, Polynomial.monomial_mul_monomial,
-      Polynomial.coeff_monomial, if_neg (Ne.symm hk)]
+    rw [coe_eq_monomial ha, coe_eq_monomial hb, Polynomial.monomial_mul_monomial]
+    exact Polynomial.coeff_monomial_of_ne _ hk
   decompose' := (Equiv.ofBijective _ bijective_coeAddMonoidHom).symm
   left_inv := (Equiv.ofBijective _ bijective_coeAddMonoidHom).apply_symm_apply
   right_inv := (Equiv.ofBijective _ bijective_coeAddMonoidHom).symm_apply_apply
@@ -137,7 +191,7 @@ lemma ev_apply (f : rees o x) : ev f = (f : Polynomial Ω).eval 1 := rfl
 lemma ev_of_mem {n : ℕ} {f : rees o x} (hf : f ∈ grading o x n) :
     ev f = (f : Polynomial Ω).coeff n := by
   rw [ev_apply, coe_eq_monomial hf, Polynomial.eval_monomial, one_pow, mul_one,
-    Polynomial.coeff_monomial, if_pos rfl]
+    Polynomial.coeff_monomial_same]
 
 lemma eq_zero_of_ev {n : ℕ} {f : rees o x} (hf : f ∈ grading o x n) (h : ev f = 0) : f = 0 := by
   rw [ev_of_mem hf] at h
@@ -148,7 +202,7 @@ lemma eq_zero_of_ev {n : ℕ} {f : rees o x} (hf : f ∈ grading o x n) (h : ev 
 def coord (c : κ) : rees o x :=
   ⟨Polynomial.monomial 1 (x c), by
     intro k
-    rw [Polynomial.coeff_monomial]
+    rw [Polynomial.coeff_monomial_apply]
     split_ifs with h
     · subst h
       rw [pow_one]
@@ -158,7 +212,7 @@ def coord (c : κ) : rees o x :=
 lemma coord_mem (c : κ) : coord (o := o) (x := x) c ∈ grading o x 1 := by
   intro i hi
   change (Polynomial.monomial 1 (x c)).coeff i = 0
-  rw [Polynomial.coeff_monomial, if_neg (Ne.symm hi)]
+  exact Polynomial.coeff_monomial_of_ne _ hi
 
 lemma ev_coord (c : κ) : ev (coord (o := o) (x := x) c) = x c := by
   rw [ev_apply]
@@ -188,7 +242,7 @@ lemma chartVal_mk {g : rees o x} (hu : IsUnit (ev g)) {d : ℕ} (hg : g ∈ grad
 
 lemma chartVal_injective {g : rees o x} (hu : IsUnit (ev g)) {d : ℕ} (hg : g ∈ grading o x d) :
     Function.Injective (chartVal g hu) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro z hz
   obtain ⟨n, a, ha, rfl⟩ := Away.mk_surjective (grading o x) hg z
   have h1 := chartVal_mk hu hg n a ha
@@ -326,7 +380,7 @@ lemma adjoin_coord_eq_top :
       exact hS' (coord j) (Algebra.subset_adjoin ⟨j, rfl⟩)
     | zero => simpa using zero_mem S'
     | add a b _ _ ha hb =>
-      rw [map_add]
+      rw [map_add (f := _)]
       exact add_mem ha hb
     | smul r a _ ha =>
       have : Polynomial.monomial 1 (r • a) =
@@ -353,7 +407,7 @@ lemma adjoin_coord_eq_top :
         rw [this]
         exact mul_mem (ih a ha) (hV b hb)
       | add a _ b _ ha hb =>
-        rw [map_add]
+        rw [map_add (f := _)]
         exact add_mem ha hb
   rw [eq_top_iff]
   intro f _
@@ -518,7 +572,7 @@ theorem tie_of_charts (o : Type) [CommRing o] [Algebra o Ω] {κ : Type} (x : κ
     rintro ⟨q, hq⟩
     obtain ⟨c, p, rfl⟩ := hcover q
     obtain ⟨φ, h1, h2, h3⟩ := chart_stalk (θ c) (j c) ξ (hξ c) p hq
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro t ht
     obtain ⟨u, s, hs, hts⟩ := h3 t
     have h4 := congrArg (genMap ξ ⟨j c p, hq⟩) hts
@@ -603,7 +657,7 @@ theorem tie_of_charts (o : Type) [CommRing o] [Algebra o Ω] {κ : Type} (x : κ
         { carrier := {b | θ ⟨c, hc⟩ b * a ∈ (θ ⟨c, hc⟩).range}
           add_mem' := by
             intro b b' hb hb'
-            rw [Set.mem_setOf_eq, map_add, add_mul]
+            rw [Set.mem_setOf_eq, map_add (f := _), add_mul]
             exact add_mem hb hb'
           zero_mem' := by
             rw [Set.mem_setOf_eq, map_zero, zero_mul]

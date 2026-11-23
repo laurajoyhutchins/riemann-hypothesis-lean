@@ -1,15 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UOver
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThetaSysUOver
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitIntCastStalkIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineChartRatLift
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonBaseChangeOfUOver
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticLevelExtendsNoetherianNormalDomain
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UOver
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.AbelianSchemeLawsUnconditional
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsSymplecticLevelBaseChangePolarisedAbelian
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsAffineChartRatLift
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonBaseChangeOfUOver
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsThetaSysUOver
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsUnitIntCastStalkIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleSymmetryHypothesisExtendsNormalAffineC
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolAVDimEqOfGrpPullbackField
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolarizedAbelianVarietyPullbackAffineOpen
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingOnAffineOpenFinitelyGenerated
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolAVDimEqOfGrpPullbackField
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LineBundleSymmetryHypothesisExtendsNormalAffineC
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolarizedAbelianVarietyPullbackAffineOpen
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SemiAbelianHomExtensionHolds
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymplecticLevelExtendsNoetherianNormalDomain
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.GenericExistsUniqueOActOfIsGrpPullback
+import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.IsSchemeTheoreticallyDominantSpecOfInjective
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsMonHomLift
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.PUnit
+import Mathlib.Algebra.Ring.BooleanRing
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj IsLocalRing NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open GlobalTheory.ZH GlobalTheory.UPoinc GlobalTheory.UCovSep
@@ -108,9 +155,42 @@ theorem exists_uAct {R R' Ω : Type} [CommRing R] [IsDomain R] [IsNoetherianRing
   have e' : spMap τ ≫ spMap σ = spMap (algebraMap R Ω) := by rw [← Spec.map_comp, ← e]; rfl
   have hG := isGrpPullback_pullback G (spMap τ)
   have hGP := (hG.comp hα).congr e' rfl
-  have hs := GlobalTheory.isSemiAbelian_of_isAbelianScheme _ P.isAb
+  have hs : IsSemiAbelian P.A := by
+    have := P.isAb.proper
+    refine ⟨P.isAb.comm, P.isAb.smooth, inferInstance, inferInstance, P.isAb.geomConnected, ?_⟩
+    intro K _ _ p
+    have hab : IsAbelianScheme ((Over.pullback p).obj P.A) := by
+      have := P.isAb.comm
+      have := P.isAb.smooth
+      have := P.isAb.proper
+      have := P.isAb.geomConnected
+      refine ⟨inferInstance, ?_, ?_, ?_⟩
+      · change Smooth (pullback.snd P.A.hom p); infer_instance
+      · change IsProper (pullback.snd P.A.hom p); infer_instance
+      · change GeometricallyConnected (pullback.snd P.A.hom p); infer_instance
+    refine ⟨{ X := PUnit
+              B := _
+              isAbelian := hab
+              q := 𝟙 _
+              q_hom := inferInstance
+              q_flat := ?_
+              q_surjective := ?_
+              q_quasiCompact := ?_
+              i := toUnit _ ≫ η
+              i_hom := ?_
+              isKernel := ?_ }⟩
+    · rw [Over.id_left]; infer_instance
+    · rw [Over.id_left]; infer_instance
+    · rw [Over.id_left]; infer_instance
+    · have := hab.comm; infer_instance
+    · have : IsIso (toUnit (splitTorus (Sp K) PUnit)) := by
+        have h : 𝟙 (splitTorus (Sp K) PUnit) = 1 := by
+          rw [← Diag.diagMap_id, ← Diag.diagMap_zero]
+          congr 1
+        exact ⟨η, h.symm, toUnit_unique _ _⟩
+      exact IsPullback.of_vert_isIso ⟨Category.comp_id _⟩
   haveI := P.isAb.proper
-  haveI := (PolPull.isAbelianScheme_of_isGrpPullback P.isAb hα).smooth
+  haveI : Smooth G.hom := MorphismProperty.of_isPullback (P := @Smooth) hα.1 P.isAb.smooth
   haveI : IsSchemeTheoreticallyDominant (spMap τ) := ExtUnique.isSchemeTheoreticallyDominant_spec_of_injective _ hτ
   haveI : IsSchemeTheoreticallyDominant (pullback.fst G.hom (spMap τ)) := .of_isPullback hG.1.flip
   have key : ∀ a : 𝓞 E, ∃ F : P.A ⟶ P.A, IsMonHom F ∧ ∃ f : G ⟶ G, f.left ≫ α = α ≫ F.left ∧

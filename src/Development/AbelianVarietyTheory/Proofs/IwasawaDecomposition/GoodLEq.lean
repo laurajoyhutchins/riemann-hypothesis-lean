@@ -1,10 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CenUsedOfCenReal
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.SettingsFormsExistList
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PlaceModelImp
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DofOTw
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SideTw
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AutomorphicSideTransfer
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RingSpecNormalisedCharacterEq
+public import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.EtaJUntw
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NotBaseCondFalse
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.PositionOfIntro
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.RowsRestWordColumnUnitBaseTupleAlt
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StableIffCarrierEq
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.FunKilled
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.N Formalism.L2 Formalism.L2.Host Formalism.L2.NT Formalism.IndefR.NX NumberField IsDedekindDomain GlobalTheory.Mem GlobalTheory.Mem.Col2 GlobalTheory.Mem.Top GlobalTheory.Mem.Top.GroupRetwisting GlobalTheory.Mem.Top.Bl GlobalTheory.Mem.R3 GlobalTheory.Mem.R3.Rw GlobalTheory.HeightCounting GlobalTheory.HeightCounting.Up
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
@@ -16,40 +56,6 @@ namespace GlobalTheory.HeightCounting.Up.LiTw
 section Gen
 
 variable {D : D7} (N : TwNew D)
-
-def sideA {cf : CharFrame D} {jE : D.host.E →+* Qb} (A : SideA D cf jE) : SideA N.toD7 (N.cf cf) jE :=
-  { bare := A.bare
-    wdT := A.wdT
-    lab := A.lab
-    chr := { A.chr with }
-    row := N.row A.row
-    pl := { A.pl with }
-    iota := A.iota
-    wd := { A.wd with }
-    grp := { A.grp with }
-    par := { A.par with }
-    au := { A.au with }
-    chiT := A.chiT }
-
-def stA {hL : GlobalTheory.Published.LocalLanglandsGL} {cf : CharFrame D} {rep : D.what₂.FT → NG.FinTyp D.host.E D.R.r} (a : StA hL D cf rep)
-    (rep' : N.toD7.what₂.FT → NG.FinTyp N.toD7.host.E N.toD7.R.r) (e : HEq rep' rep) :
-    StA hL N.toD7 (N.cf cf) rep' where
-  host := ⟨a.host.fr, a.host.jLL, a.host.embLL⟩
-  jE := a.jE
-  frame := a.frame
-  A := sideA N a.A
-  cg := { a.cg with }
-  au := a.au
-  row := by obtain rfl : rep' = rep := eq_of_heq e; exact a.row
-  fr := ⟨a.fr.jE, a.fr.eOm, a.fr.comm⟩
-  fr_jE := a.fr_jE
-  pht := { a.pht with }
-  depth := by obtain rfl : rep' = rep := eq_of_heq e; exact a.depth
-  elem := { a.elem with }
-  val := { a.val with }
-  labc := a.labc
-  zeta := a.zeta
-  omax := a.omax
 
 theorem goodL_eq (S : RatDat D.ntw) (θ : ∀ kk : Fin 2, Multiplicative (ZMod (D.host.g kk)) →* (↥D.LL0)ˣ) (j : ℕ) :
     goodL N.toD7 (N.rat S) θ j = goodL D S θ j := by

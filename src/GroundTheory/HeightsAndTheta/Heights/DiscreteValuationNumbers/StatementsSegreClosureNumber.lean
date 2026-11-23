@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreClosureModel
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsSegreClosureModel
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.StatementsFlagIndependence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.IsSemipositiveOn
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -45,42 +91,13 @@ def SegreClosureNumber.Statement : Prop :=
 
 section Examples
 
-def pointOne : (Σ k, PointIdx k) → LineFieldDyadic := fun _ => 1
-
-instance pointPairIdx_unique : ∀ o, Unique (bundleIdx (bundleIdx PointIdx 1) 1 o)
-  | none => inferInstanceAs (Unique (Fin 1))
-  | some none => inferInstanceAs (Unique (Fin 1))
-  | some (some _) => inferInstanceAs (Unique (Fin 1))
-
-abbrev pointBundle {s : LineFieldDyadic} (hs : s ≠ 0) :
-    ChartBundle ℤ_[2] (segreVec pointOne) 1 (Fin 1 → LineFieldDyadic) :=
-  scaledTrivBundle ℤ_[2] (segreVec pointOne) 1 hs
-
-def pointPhi : Fin 1 → Module.Dual LineFieldDyadic (Fin 1 → LineFieldDyadic) :=
-  fun l => LinearMap.proj l
-
-def pointPhi' : Fin 1 → Module.Dual LineFieldDyadic (Fin 1 → LineFieldDyadic) :=
-  fun l => (algebraMap ℤ_[2] LineFieldDyadic ((2 : ℕ) : ℤ_[2]))⁻¹ • LinearMap.proj l
-
-def pointPairCoord : (Σ o, bundleIdx (bundleIdx PointIdx 1) 1 o) → GenericCoordField 1 :=
-  pairProjCoord pointOne (scaledBasis 1 (one_ne_zero (α := LineFieldDyadic))) pointPhi pointPhi'
-    (genericCoords 1)
-
-def dualGeneratorForm : MRing (bundleIdx (bundleIdx PointIdx 1) 1) ℤ_[2] := X ⟨some none, (0 : Fin 1)⟩
-
-def scaledDualGeneratorForm : MRing (bundleIdx (bundleIdx PointIdx 1) 1) ℤ_[2] :=
-  C ((2 : ℕ) : ℤ_[2]) * X ⟨none, (0 : Fin 1)⟩
-
 theorem mem_of_divCycle_ne_zero {K : Type*} {ι : K → Type*} {R : Type*} [CommRing R]
     {P : Ideal (MRing ι R)} {f : MRing ι R} {W : Ideal (MRing ι R)} (h : divCycle P f W ≠ 0) :
     f ∈ W ∧ W.IsPrime ∧ IsRelevant W := by
   unfold divCycle at h
-  split_ifs at h with hW
+  by_cases hW : W ∈ (P ⊔ Ideal.span {f}).minimalPrimes ∧ IsRelevant W
   · exact ⟨hW.1.1.2 (Ideal.mem_sup_right (Ideal.subset_span rfl)), hW.1.1.1, hW.2⟩
-  · exact absurd rfl h
-
-def pointExpansion : Fin (1 + 1) → MvPolynomial (Fin (1 + 1) ⊕ Fin (1 + 1)) ℤ :=
-  fun i => if (i : ℕ) < 1 then 1 else 0
+  · exact False.elim (h (dif_neg hW))
 
 end Examples
 

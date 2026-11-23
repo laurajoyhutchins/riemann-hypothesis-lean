@@ -1,6 +1,52 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ContinuousMapPFin
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Divisors.HasBlockOfOccurs
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSystemOf
+import Formalism.PieriBlockIdeals.BlockIdealBound5Derived
+
+@[expose] public section
+
 open NumberField IsDedekindDomain GlobalTheory.CuspRep GlobalTheory.UnitaryBC GlobalTheory.DefU Formalism.BasicNotions Formalism.CohomologicalDescent.DepthNonnegative GlobalTheory.ExpFrame GlobalTheory.FrameAut
 open scoped Topology
 
@@ -18,7 +64,7 @@ def coefL (R : UA E n →* Module.End ℂ X) (F : UA E n → X) : Module.Dual �
 
 theorem isAutFormU_coef : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) (X : Type) [AddCommGroup X]
     [Module ℂ X] [FiniteDimensional ℂ X] (R : UA E n →* Module.End ℂ X) (F : UA E n → X),
-    (∀ k ∈ finU E n, R k = 1) → (∀ (u : X) (ℓ : Module.Dual ℂ X), Continuous fun g => ℓ (R g u)) →
+    (∀ k ∈ finU (E := E) (n := n), R k = 1) → (∀ (u : X) (ℓ : Module.Dual ℂ X), Continuous fun g => ℓ (R g u)) →
     (∀ y ∈ infU E n, ∀ g, F (g * y) = F g) → (∀ γ ∈ ratU E n, ∀ g, F (γ * g) = R γ (F g)) →
     (∀ᶠ y in 𝓝 (1 : UA E n), ∀ g, F (g * y) = F g) →
     ∀ ℓ : Module.Dual ℂ X, IsAutFormU fun g => ℓ (R g⁻¹ (F g)) := by
@@ -40,7 +86,7 @@ theorem isAutFormU_coef : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
     rw [hrat γ hγ g, _root_.mul_inv_rev, map_mul, Module.End.mul_apply, ← Module.End.mul_apply (R γ⁻¹), ← map_mul,
       inv_mul_cancel, map_one, Module.End.one_apply]
   · let φ : UA E n → ℂ := fun g => ℓ (R g⁻¹ (F g))
-    let H : Subgroup (finU E n) :=
+    let H : Subgroup (finU (E := E) (n := n)) :=
       { carrier := {k | RU E n (k : UA E n) φ = φ}
         mul_mem' := fun {a b} ha hb => by
           change RU E n ((a : UA E n) * b) _ = _
@@ -53,13 +99,13 @@ theorem isAutFormU_coef : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E]
           conv_lhs => rw [← ha]
           change RU E n ((a : UA E n)⁻¹) (RU E n (a : UA E n) _) = _
           rw [GlobalTheory.DefU.RU_RU, inv_mul_cancel, map_one]; rfl }
-    have hnb : {k : finU E n | ∀ g, F (g * (k : UA E n)) = F g} ∈ 𝓝 (1 : finU E n) :=
-      (continuous_subtype_val.tendsto (1 : finU E n)).eventually hsm
+    have hnb : {k : finU (E := E) (n := n) | ∀ g, F (g * (k : UA E n)) = F g} ∈ 𝓝 (1 : finU (E := E) (n := n)) :=
+      (continuous_subtype_val.tendsto (1 : finU (E := E) (n := n))).eventually hsm
     refine H.isOpen_of_mem_nhds (g := 1) (Filter.mem_of_superset hnb fun k hk => ?_)
     change RU E n (k : UA E n) φ = φ
     funext g
     change ℓ (R (g * (k : UA E n))⁻¹ (F (g * k))) = ℓ (R g⁻¹ (F g))
-    rw [hk g, _root_.mul_inv_rev, map_mul, hfin _ ((finU E n).inv_mem k.2), one_mul]
+    rw [hk g, _root_.mul_inv_rev, map_mul, hfin _ ((finU (E := E) (n := n)).inv_mem k.2), one_mul]
   · refine Submodule.finiteDimensional_of_le (S₂ := LinearMap.range (coefL R F)) (Submodule.span_le.2 ?_)
     rintro _ ⟨k, rfl⟩
     refine ⟨ℓ ∘ₗ R (k : UA E n)⁻¹, ?_⟩

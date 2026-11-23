@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCptGen
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCptGen
+public import Mathlib.Data.Nat.Prime.Int
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,25 +83,9 @@ theorem unitAt_iff (ξ : Spec (CommRingCat.of Ω) ⟶ X) (p : Cpt ξ) (a : Ω) :
     refine ⟨(u.isUnit.map (genMap ξ p)).ne_zero, ⟨_, rfl⟩, ⟨(u⁻¹ : _ˣ), ?_⟩⟩
     exact (map_units_inv (genMap ξ p) u)
 
-theorem isDomain_stalk {ξ : Spec (CommRingCat.of Ω) ⟶ X} (h : IsCptGen ξ) (p : Cpt ξ) :
-    IsDomain (X.presheaf.stalk p.1) :=
-  Function.Injective.isDomain (genMap ξ p) (h.inj p)
-
 theorem regAt_self {ξ : Spec (CommRingCat.of Ω) ⟶ X} (h : IsCptGen ξ) : regAt ξ (self ξ) = ⊤ := by
   rw [regAt, RingHom.range_eq_top, genMap_self]
   exact h.bij.2
-
-theorem eq_of_specializes {ξ : Spec (CommRingCat.of Ω) ⟶ X} (h : IsCptGen ξ) {y : X}
-    (hy : y ⤳ genPt ξ) : y = genPt ξ := by
-  have hF : IsField (X.presheaf.stalk (genPt ξ)) :=
-    MulEquiv.isField (Field.toIsField Ω) (RingEquiv.ofBijective _ h.bij).toMulEquiv
-  have hr : y ∈ Set.range (X.fromSpecStalk (genPt ξ)) := by
-    rw [Scheme.range_fromSpecStalk]; exact hy
-  obtain ⟨z, rfl⟩ := hr
-  let _ := hF.toField
-  have : z = IsLocalRing.closedPoint (X.presheaf.stalk (genPt ξ)) :=
-    Subsingleton.elim (α := PrimeSpectrum (X.presheaf.stalk (genPt ξ))) _ _
-  rw [this, Scheme.fromSpecStalk_closedPoint]
 
 end General
 
@@ -123,7 +156,7 @@ theorem genPt_asIdeal (φ : R →+* K) : (genPt (pt φ)).asIdeal = RingHom.ker �
 
 theorem genMap_injective (φ : R →+* K) (hφ : Function.Injective φ) (p : Cpt (pt φ)) :
     Function.Injective (genMap (pt φ) p) := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro x hx
   obtain ⟨a, s, hs, h⟩ := exists_frac φ p x
   have h1 := (map_mul (genMap (pt φ) p) _ _).symm.trans (congrArg (genMap (pt φ) p) h)
@@ -144,14 +177,6 @@ theorem isCptGen_fractionRing [IsDomain R] [Algebra R K] [IsFractionRing R K] :
   change s ∉ (genPt (pt (algebraMap R K))).asIdeal
   rw [genPt_asIdeal]
   exact h0
-
-theorem injective_of_isCptGen [IsDomain R] (φ : R →+* K) (h : IsCptGen (pt φ)) :
-    Function.Injective φ := by
-  have hb : (⊥ : PrimeSpectrum R) ⤳ (genPt (pt φ) : PrimeSpectrum R) :=
-    (PrimeSpectrum.le_iff_specializes _ _).1 bot_le
-  have e := eq_of_specializes h hb
-  rw [RingHom.injective_iff_ker_eq_bot, ← genPt_asIdeal, ← e]
-  rfl
 
 end Affine
 
@@ -184,16 +209,6 @@ theorem unitAt_three : unitAt _ two (3 : ℚ) := by
     hn (Ideal.mem_span_singleton.1 hm)
   refine ⟨by norm_num, (mem_regAt_iff _ _ _).2 ⟨3, 1, h 1 (by decide), by simp, by simp⟩,
     (mem_regAt_iff _ _ _).2 ⟨1, 3, h 3 (by decide), by simp, by simp⟩⟩
-
-theorem not_isCptGen_closed : ¬ IsCptGen (pt (Int.castRingHom (ZMod 2))) := fun h => by
-  have := injective_of_isCptGen _ h (a₁ := 2) (a₂ := 0) (by decide)
-  exact absurd this (by decide)
-
-theorem not_isCptGen_real : ¬ IsCptGen (pt (algebraMap ℤ ℝ)) := fun h => by
-  have h1 : Real.sqrt 2 ∈ regAt _ (self (pt (algebraMap ℤ ℝ))) := by rw [regAt_self h]; trivial
-  obtain ⟨a, s, -, h0, e⟩ := (mem_regAt_iff _ _ _).1 h1
-  simp only [algebraMap_int_eq, eq_intCast] at h0 e
-  exact irrational_sqrt_two ⟨(a : ℚ) / s, by push_cast; rw [← e, mul_div_cancel_right₀ _ h0]⟩
 
 end Int
 

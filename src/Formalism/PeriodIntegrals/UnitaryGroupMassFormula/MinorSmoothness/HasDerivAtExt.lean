@@ -1,7 +1,61 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+module
 
-import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DerivativePreservation.HasDerivAtExt
+public import Formalism.HermitianCurvature.StatementQ
+public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CartanInvolutionConjTransposeMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Filter Topology
 open scoped ContDiff
@@ -56,44 +110,7 @@ lemma exp_mem_UH (Y : Mx k r) (hY : Yᴴ = -(Hpk k r * Y * Hpk k r)) :
 
 lemma exp_fix (Y : Mx k r) (c : Fin (2 * r + k + 1)) (hY : ∀ x, Y x c = 0) :
     NormedSpace.exp Y *ᵥ bvec c = bvec c := by
-  set P : Mx k r := Matrix.single c c 1 with hPdef
-  have hYP : Y * P = 0 := by
-    ext x y
-    simp only [hPdef, Matrix.mul_apply, Matrix.single_apply, Matrix.zero_apply]
-    refine Finset.sum_eq_zero (fun j _ => ?_)
-    split_ifs with h
-    · rw [← h.1, hY, mul_one]
-    · exact mul_zero _
-  have hne : NormedSpace.exp Y ≠ 0 := by
-    intro h0
-    have hc : NormedSpace.exp (-Y) * NormedSpace.exp Y = 1 := by
-      rw [← Matrix.exp_add_of_commute _ _ (Commute.neg_left (Commute.refl Y)), neg_add_cancel,
-        NormedSpace.exp_zero]
-    rw [h0, Matrix.mul_zero] at hc
-    have := congrFun (congrFun hc ⟨0, by omega⟩) ⟨0, by omega⟩
-    simp at this
-  have hsum : Summable (fun n : ℕ => ((n.factorial : ℂ)⁻¹) • Y ^ n) := by
-    by_contra hns
-    apply hne
-    rw [congrFun (NormedSpace.exp_eq_tsum ℂ) Y]
-    exact tsum_eq_zero_of_not_summable hns
-  have hhas : HasSum (fun n : ℕ => ((n.factorial : ℂ)⁻¹) • Y ^ n) (NormedSpace.exp Y) := by
-    have := hsum.hasSum
-    rwa [← congrFun (NormedSpace.exp_eq_tsum ℂ) Y] at this
-  have h1 := hhas.mul_right P
-  have h2 : HasSum (fun n : ℕ => ((n.factorial : ℂ)⁻¹) • Y ^ n * P) P := by
-    have := hasSum_single (f := fun n : ℕ => ((n.factorial : ℂ)⁻¹) • Y ^ n * P) 0 (by
-      intro m hm
-      obtain ⟨m', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm
-      rw [Matrix.smul_mul, pow_succ, Matrix.mul_assoc, hYP, Matrix.mul_zero, smul_zero])
-    simpa using this
-  have hEP : NormedSpace.exp Y * P = P := h1.unique h2
-  have hPv : P *ᵥ bvec c = bvec c := by
-    ext x
-    by_cases h : x = c
-    · subst h; simp [hPdef, bvec, Matrix.mulVec, dotProduct, Matrix.single_apply, Pi.single_apply]
-    · simp [hPdef, bvec, Matrix.mulVec, dotProduct, Pi.single_apply, h, Ne.symm h]
-  rw [← hPv, Matrix.mulVec_mulVec, hEP]
+  apply Formalism.FourierDecayAlt.Q.EabLie.exp_fix <;> assumption
 
 lemma glev_mul {i : Fin (r + 1)} {g h : Mx k r} (hg : g ∈ Glev k r i) (hh : h ∈ Glev k r i) :
     g * h ∈ Glev k r i := by
@@ -156,25 +173,7 @@ lemma hpart_cols (i : Fin (r + 1)) (p q : Fin (mdim k r i)) :
     (∀ a : Fin r, a.val < i.val → ∀ x,
       hpart2 (Hpk k r) (Matrix.single (posL k r i p) (posL k r i q) 1) x (eI k r a) = 0 ∧
       hpart2 (Hpk k r) (Matrix.single (posL k r i p) (posL k r i q) 1) x (esI k r a) = 0) := by
-  have key : ∀ a : Fin r, a.val < i.val → ∀ x c, (c = eI k r a ∨ c = esI k r a) →
-      (Matrix.single (posL k r i p) (posL k r i q) (1 : ℂ)) x c = 0 ∧
-      (Hpk k r * (Matrix.single (posL k r i p) (posL k r i q) (1 : ℂ))ᴴ * Hpk k r) x c = 0 := by
-    intro a ha x c hc
-    obtain ⟨n1, n2⟩ := posL_ne i q a ha
-    obtain ⟨z1, z2⟩ := hpk_zero i p a ha
-    rcases hc with rfl | rfl
-    · exact unit_col i p q _ n1 z1 x
-    · exact unit_col i p q _ n2 z2 x
-  refine ⟨fun a ha x => ?_, fun a ha x => ?_⟩ <;>
-  · obtain ⟨e1, e2⟩ := key a ha x _ (Or.inl rfl)
-    obtain ⟨e3, e4⟩ := key a ha x _ (Or.inr rfl)
-    simp only [hpart1, hpart2]
-    rw [hpk_inv]
-    refine ⟨?_, ?_⟩ <;>
-    · first
-      | rw [Matrix.smul_apply, Matrix.sub_apply]
-      | rw [Matrix.smul_apply, Matrix.add_apply]
-      simp only [e1, e2, e3, e4, sub_zero, add_zero, smul_zero]
+  apply Formalism.FourierDecayAlt.Q.EabLie.hpart_cols <;> assumption
 
 theorem exp_hpart1_mem (i : Fin (r + 1)) (p q : Fin (mdim k r i)) (t : ℝ) :
     NormedSpace.exp ((t : ℂ) • hpart1 (Hpk k r) (Matrix.single (posL k r i p) (posL k r i q) 1))
@@ -190,21 +189,7 @@ theorem hasDerivAt_ext {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
     (hgG : g ∈ Glev k r i) (hF : ContDiffOn ℝ ∞ F U)
     (hfF : ∀ x ∈ U, x ∈ Glev k r i → f x = F x) :
     HasDerivAt (fun t : ℝ => f (g * NormedSpace.exp ((t : ℂ) • X))) (fderiv ℝ F g (g * X)) 0 := by
-  have hγ := hasDerivAt_mul_exp_smul_zero g X
-  have hγ0 : g * NormedSpace.exp (((0 : ℝ) : ℂ) • X) = g := by
-    simp [NormedSpace.exp_zero]
-  have hFd : DifferentiableAt ℝ F g :=
-    (hF.differentiableOn (by simp)).differentiableAt (hU.mem_nhds hg)
-  have hcomp : HasDerivAt (fun t : ℝ => F (g * NormedSpace.exp ((t : ℂ) • X)))
-      (fderiv ℝ F g (g * X)) 0 :=
-    hFd.hasFDerivAt.comp_hasDerivAt_of_eq (0 : ℝ) hγ hγ0.symm
-  have hev : (fun t : ℝ => f (g * NormedSpace.exp ((t : ℂ) • X))) =ᶠ[𝓝 0]
-      (fun t : ℝ => F (g * NormedSpace.exp ((t : ℂ) • X))) := by
-    have hmem : ∀ᶠ t : ℝ in 𝓝 0, g * NormedSpace.exp ((t : ℂ) • X) ∈ U :=
-      hγ.continuousAt.preimage_mem_nhds (by rw [hγ0]; exact hU.mem_nhds hg)
-    filter_upwards [hmem] with t ht
-    exact hfF _ ht (glev_mul hgG (hX t))
-  exact hcomp.congr_of_eventuallyEq hev
+  apply Formalism.FourierDecayAlt.Q.EabLie.hasDerivAt_ext <;> assumption
 
 theorem rdV_ext {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
     (i : Fin (r + 1)) (X : Mx k r) (hX : ∀ t : ℝ, NormedSpace.exp ((t : ℂ) • X) ∈ Glev k r i)

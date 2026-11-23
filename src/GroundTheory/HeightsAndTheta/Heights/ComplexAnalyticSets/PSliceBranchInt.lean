@@ -1,9 +1,53 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceBranchInt
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StParamChartInt
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StBranchProperAtPoint
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StSliceBranchInt
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StParamChartInt
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StBranchProperAtPoint
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLinearNoetherNormalization
 import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PSliceImmersiveGeneral
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PLinearNoetherNormalization
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -41,8 +85,8 @@ theorem hypIncl_tail {d : ℕ} (t : Fin (d + 1) → ℂ) (ht : t 0 = 0) :
 
 end SliceBranchInt
 
-open ReciprocityTheory.AnForm.A (hypIncl densHyp) in
 
+open ReciprocityTheory.AnForm.A (hypIncl densHyp) in
 theorem SliceBranchInt.proof (hBP : IndefiniteRowSideFullHecke.ComplexSets.BranchProperAtPoint.Statement)
     (hPCI : ParamChartInt.Statement) : SliceBranchInt.Statement := by
   classical
@@ -87,7 +131,7 @@ theorem SliceBranchInt.proof (hBP : IndefiniteRowSideFullHecke.ComplexSets.Branc
       obtain ⟨U, hU, hS, hc⟩ := hφ i
       exact ⟨U, hU, (show zeroSet W ⊆ zeroSet J from fun x hx p hp => hx p (hJW hp)).trans hS, hc⟩)
   · unfold varInt
-    rw [dif_pos hex, hA]
+    rw [dite_eq_left hex, hA]
     rfl
   · have h2 := hprop b (hypIncl w) (hball w hw) (Set.mem_iInter.1 hN.2 b)
     rwa [Metric.mem_closedBall, dist_zero_right, SliceBranchInt.norm_hypIncl] at h2

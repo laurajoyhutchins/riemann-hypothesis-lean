@@ -1,11 +1,79 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.KeyPBIff
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.AbsoluteSiegel
+module
+
+public import Mathlib.Analysis.Analytic.OfScalars
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.RingTheory.PowerSeries.Basic
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsForallNeZeroOfCountableAnalytic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Encodable
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.Degenerations.SepticCharacterInjective
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsPolAVSectionInverseImage
+import Development.AbelianVarietyTheory.Definitions.Divisors.TorusExt
+import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRootOfKeyFormula
+import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsRegularFnIffOfIsAffineOpen
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CoeffTopMonEqZero
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsForallNeZeroOfCountableAnalytic
+import Development.AbelianVarietyTheory.Proofs.ToricGeometry.MemSpanOfCardLe
+public import Mathlib.Analysis.Analytic.Linear
+public import Mathlib.RingTheory.MvPolynomial.Basic
+import Mathlib.Topology.Sheaves.Presheaf
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.EllipsoidStA
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.CanonGenIsGen
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.StTransl
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField MeasureTheory
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.GeometryOfNumbersTheory
-open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.MBModel GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
+open GlobalTheory GlobalTheory.LieHt GlobalTheory.Cartier GlobalTheory.ThetaOnto GlobalTheory.KeyCl GlobalTheory.Ex GlobalTheory.MBLow GlobalTheory.SecJet
 open scoped CategoryTheory.Obj
 attribute [local instance] Over.cartesianMonoidalCategory
 
@@ -20,7 +88,7 @@ noncomputable def absConv (u : ℂ) : Subring (PowerSeries ℂ) where
   add_mem' := by
     intro f g hf hg
     refine (Summable.add hf hg).of_nonneg_of_le (fun _ => norm_nonneg _) fun n => ?_
-    rw [map_add, add_mul]
+    rw [map_add (f := _), add_mul]
     exact norm_add_le _ _
   neg_mem' := by
     intro f hf
@@ -48,7 +116,7 @@ noncomputable def evalAt (u : ℂ) : absConv u →+* ℂ where
     intro f g
     have hf : Summable fun n => ‖PowerSeries.coeff n (f : PowerSeries ℂ) * u ^ n‖ := f.2
     have hg : Summable fun n => ‖PowerSeries.coeff n (g : PowerSeries ℂ) * u ^ n‖ := g.2
-    simp only [Subring.coe_add, map_add, add_mul]
+    simp only [Subring.coe_add, map_add (f := _), add_mul]
     exact hf.of_norm.tsum_add hg.of_norm
   map_mul' := by
     intro f g
@@ -64,8 +132,8 @@ noncomputable def evalAt (u : ℂ) : absConv u →+* ℂ where
 
 theorem countable_closure {A : Type} [CommRing A] (S : Set A) (hS : S.Countable) :
     Countable (Subring.closure S) := by
-  haveI : Countable S := hS.to_subtype
-  haveI : Countable (MvPolynomial S ℤ) :=
+  have : Countable S := hS.to_subtype
+  have : Countable (MvPolynomial S ℤ) :=
     (MvPolynomial.basisMonomials S ℤ).repr.injective.countable
   let φ : MvPolynomial S ℤ →+* A := MvPolynomial.eval₂Hom (Int.castRingHom A) Subtype.val
   have hle : Subring.closure S ≤ φ.range := Subring.closure_le.2 fun s hs =>
@@ -91,11 +159,11 @@ theorem radius_ge (ε : ℝ) (Φ : PowerSeries ℂ)
 
 end GlobalTheory.PowEval
 
-open GlobalTheory.PowEval in
 
+open GlobalTheory.PowEval in
 theorem GlobalTheory.exists_injective_evalAt_closure : ∀ (ε : ℝ) (S : Set (PowerSeries ℂ)), 0 < ε → S.Countable → (∀ Φ ∈ S, ∀ u : ℂ, u ≠ 0 → ‖u‖ < ε → Summable fun n => ‖PowerSeries.coeff n Φ * u ^ n‖) → ∃ (u : ℂ) (i : Subring.closure S →+* ℂ), u ≠ 0 ∧ ‖u‖ < ε ∧ Function.Injective i ∧ ∀ Φ : Subring.closure S, i Φ = ∑' n, PowerSeries.coeff n (Φ : PowerSeries ℂ) * u ^ n := by
   intro ε S hε hS h
-  haveI : Countable (Subring.closure S) := countable_closure S hS
+  have : Countable (Subring.closure S) := countable_closure S hS
   let p : PowerSeries ℂ → FormalMultilinearSeries ℂ ℂ ℂ := fun Φ =>
     FormalMultilinearSeries.ofScalars ℂ fun n => PowerSeries.coeff n Φ
   have hsum : ∀ (Φ : PowerSeries ℂ) (u : ℂ), (p Φ).sum u = ∑' n, PowerSeries.coeff n Φ * u ^ n := by
@@ -112,10 +180,10 @@ theorem GlobalTheory.exists_injective_evalAt_closure : ∀ (ε : ℝ) (S : Set (
     radius_ge ε Φ (hcl Φ hΦ)
   have hpos : ∀ Φ ∈ Subring.closure S, 0 < (p Φ).radius := fun Φ hΦ =>
     lt_of_lt_of_le (ENNReal.ofReal_pos.2 hε) (hrad Φ hΦ)
-  have hball : ∀ Φ ∈ Subring.closure S, Metric.ball (0 : ℂ) ε ⊆ EMetric.ball 0 (p Φ).radius := by
+  have hball : ∀ Φ ∈ Subring.closure S, Metric.ball (0 : ℂ) ε ⊆ Metric.eball 0 (p Φ).radius := by
     intro Φ hΦ
-    rw [← Metric.emetric_ball]
-    exact EMetric.ball_subset_ball (hrad Φ hΦ)
+    rw [← Metric.eball_ofReal]
+    exact Metric.eball_subset_eball (hrad Φ hΦ)
   let J := Option {Φ : Subring.closure S // Φ ≠ 0}
   let f : J → ℂ → ℂ := fun i => match i with
     | none => id
@@ -137,7 +205,7 @@ theorem GlobalTheory.exists_injective_evalAt_closure : ∀ (ε : ℝ) (S : Set (
         exact_mod_cast (by linarith : ε / 2 ≠ 0)
     | some Φ =>
       by_contra hcon
-      push_neg at hcon
+      push Not at hcon
       have hev : (p (Φ.1 : PowerSeries ℂ)).sum =ᶠ[nhds 0] 0 := by
         filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hε] with y hy
         exact hcon y hy

@@ -1,4 +1,46 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.CommutingEndomorphismPreservesInvariants
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.BlochKatoPhases
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +61,7 @@ private theorem exists_ne_zero_addVal_algebraMap_eq_mul (hinj : Function.Injecti
   have hnu : ¬ IsUnit (algebraMap R R' ϖ) := by
     intro hu
     have hmax := Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (R := R)
-      (IsLocalRing.maximalIdeal R')
+      (algebraMap _ _) (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr inferInstance)) (IsLocalRing.maximalIdeal R')
     have heq := IsLocalRing.eq_maximalIdeal hmax
     have hmem : ϖ ∈ (IsLocalRing.maximalIdeal R').comap (algebraMap R R') := by
       rw [heq]; exact (IsLocalRing.mem_maximalIdeal ϖ).mpr hϖ.not_isUnit
@@ -38,7 +80,7 @@ private theorem exists_ne_zero_addVal_algebraMap_eq_mul (hinj : Function.Injecti
     have hy' : algebraMap R R' y =
         ↑(Units.map (algebraMap R R' : R →* R') u * w ^ n) * ϖ' ^ (e * n) := by
       rw [hu, map_mul, map_pow, hw]
-      simp only [Units.val_mul, Units.val_pow_eq_pow_val, Units.coe_map, MonoidHom.coe_coe]
+      simp only [Units.val_mul, Units.val_pow_eq_pow_val, Units.coe_map, MonoidHom.coe_ofClass]
       ring
     rw [IsDiscreteValuationRing.addVal_def _ _ hϖ' _ hy']
     push_cast
@@ -49,68 +91,8 @@ theorem nval_map (hinj : Function.Injective (algebraMap R R')) [Module.Finite R 
   obtain ⟨e, he, hE⟩ := exists_ne_zero_addVal_algebraMap_eq_mul hinj
   simp only [nval]
   rw [hE x, ← map_natCast (algebraMap R R') l, hE]
-  simp only [ENat.toNat_mul, ENat.toNat_coe, Nat.cast_mul]
+  simp only [ENat.toNat_mul, ENat.toNat_natCast, Nat.cast_mul]
   exact mul_div_mul_left _ _ (by exact_mod_cast he)
-
-private theorem nval_mul_eq_add_of_ne_zero (l : ℕ) {a b : R} (ha : a ≠ 0) (hb : b ≠ 0) :
-    nval R l (a * b) = nval R l a + nval R l b := by
-  simp only [nval]
-  rw [(IsDiscreteValuationRing.addVal R).map_mul, ENat.toNat_add, Nat.cast_add, add_div]
-  · exact fun h => ha (IsDiscreteValuationRing.addVal_eq_top_iff.mp h)
-  · exact fun h => hb (IsDiscreteValuationRing.addVal_eq_top_iff.mp h)
-
-theorem vK_eq_of_frac (l : ℕ) {x : FractionRing R} (hx : x ≠ 0) {a b : R} (hb : b ≠ 0)
-    (h : x * algebraMap R (FractionRing R) b = algebraMap R (FractionRing R) a) :
-    vK R l x = nval R l a - nval R l b := by
-  have key : vK R l x = nval R l (IsLocalization.surj (nonZeroDivisors R) x).choose.1 -
-      nval R l ((IsLocalization.surj (nonZeroDivisors R) x).choose.2 : R) := rfl
-  have hspec := (IsLocalization.surj (nonZeroDivisors R) x).choose_spec
-  rw [key]
-  generalize (IsLocalization.surj (nonZeroDivisors R) x).choose = q at hspec ⊢
-  rcases q with ⟨c, d, hd⟩
-  dsimp only at hspec ⊢
-  have hd0 : d ≠ 0 := nonZeroDivisors.ne_zero hd
-  have hinjK := IsFractionRing.injective R (FractionRing R)
-  have hb' : algebraMap R (FractionRing R) b ≠ 0 := fun h0 => hb (hinjK (by rw [h0, map_zero]))
-  have hd' : algebraMap R (FractionRing R) d ≠ 0 := fun h0 => hd0 (hinjK (by rw [h0, map_zero]))
-  have ha : a ≠ 0 := by
-    rintro rfl
-    rw [map_zero] at h
-    exact mul_ne_zero hx hb' h
-  have hc : c ≠ 0 := by
-    rintro rfl
-    rw [map_zero] at hspec
-    exact mul_ne_zero hx hd' hspec
-  have hcross : a * d = c * b := by
-    apply hinjK
-    rw [map_mul, map_mul, ← h, ← hspec]
-    ring
-  have e1 := nval_mul_eq_add_of_ne_zero (R := R) l ha hd0
-  have e2 := nval_mul_eq_add_of_ne_zero (R := R) l hc hb
-  rw [hcross] at e1
-  linarith
-
-abbrev fracMap (hinj : Function.Injective (algebraMap R R')) : FractionRing R →+* FractionRing R' :=
-  IsFractionRing.map (j := algebraMap R R') hinj
-
-theorem vK_map (hinj : Function.Injective (algebraMap R R')) [Module.Finite R R'] (l : ℕ) {x : FractionRing R}
-    (hx : x ≠ 0) : vK R' l (fracMap hinj x) = vK R l x := by
-  have key : vK R l x = nval R l (IsLocalization.surj (nonZeroDivisors R) x).choose.1 -
-      nval R l ((IsLocalization.surj (nonZeroDivisors R) x).choose.2 : R) := rfl
-  have hspec := (IsLocalization.surj (nonZeroDivisors R) x).choose_spec
-  rw [key]
-  generalize (IsLocalization.surj (nonZeroDivisors R) x).choose = q at hspec ⊢
-  rcases q with ⟨c, d, hd⟩
-  dsimp only at hspec ⊢
-  have hd0 : d ≠ 0 := nonZeroDivisors.ne_zero hd
-  have hfx : fracMap hinj x ≠ 0 := fun h0 => hx ((fracMap hinj).injective (by rw [h0, map_zero]))
-  have hd' : algebraMap R R' d ≠ 0 := fun h0 => hd0 (hinj (by rw [h0, map_zero]))
-  have hcomm : ∀ r : R, fracMap hinj (algebraMap R (FractionRing R) r) =
-      algebraMap R' (FractionRing R') (algebraMap R R' r) := fun r => IsLocalization.map_eq _ _
-  have hmap : fracMap hinj x * algebraMap R' (FractionRing R') (algebraMap R R' d) =
-      algebraMap R' (FractionRing R') (algebraMap R R' c) := by
-    rw [← hcomm, ← hcomm, ← map_mul, hspec]
-  rw [vK_eq_of_frac l hfx hd' hmap, nval_map hinj l c, nval_map hinj l d]
 
 end Formalism.MainNotions.TwOe
 

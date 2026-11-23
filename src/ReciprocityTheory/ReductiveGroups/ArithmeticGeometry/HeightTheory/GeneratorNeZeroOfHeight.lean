@@ -1,5 +1,59 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.UniformizerOfResidueIndep
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.NormByPlaces
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HeightIntegralEstimates
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HtDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.NormByPlaces
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.UniformizerOfResidueIndep
+
+@[expose] public section
 
 namespace ReciprocityTheory.ChartRestriction.G.T0
 
@@ -9,7 +63,7 @@ theorem ratio_eq_of_eq_smul {Ω V : Type*} [Field Ω] [AddCommGroup V] [Module �
     (hg : g ≠ 0) (h : f = a • g) : ratio f g = a := by
   unfold ratio
   have hex : ∃ a' : Ω, f = a' • g := ⟨a, h⟩
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   have hs : a • g = hex.choose • g := by
     rw [← h]
     exact hex.choose_spec
@@ -73,14 +127,15 @@ theorem lineRatio_ne_zero (hd : d.AxH 𝒜) (c : ι) : d.rationalBaseRow c ≠ 0
         MvPolynomial.C (ratio (Ω := Ω c) (d.w ((d.jc c).succAbove k) c) (d.w (d.jc c) c))) := by
     unfold rationalBaseRow sH sHom
     rw [Fin.sum_univ_succAbove _ (d.jc c)]
+
     simp only [MvPolynomial.aeval_X, sImg, Fin.succAbove_cases_eq_insertNth, Fin.insertNth_apply_same,
-      Fin.insertNth_apply_succAbove, if_true, hr1, map_one, mul_one, map_add, map_sum, map_mul]
+    Fin.insertNth_apply_succAbove, if_true, hr1, map_one, mul_one, map_add, map_sum, map_mul]
     congr 1
   rw [e]
   intro h0
   have hinj := IsFractionRing.injective (MvPolynomial (SVar d.D d.N) (Ω c)) (OmS (Ω c) d.D d.N)
   rw [← map_zero (algebraMap (MvPolynomial (SVar d.D d.N) (Ω c)) (OmS (Ω c) d.D d.N))] at h0
-  have h1 := congrArg (MvPolynomial.coeff (Finsupp.single (Sum.inl ()) 1)) (hinj h0)
+  have h1 := congrArg (AddMonoidAlgebra.coeff · (Finsupp.single (Sum.inl ()) 1)) (hinj h0)
   simp [MvPolynomial.coeff_X', MvPolynomial.coeff_sum, MvPolynomial.coeff_X_mul', Finsupp.single_eq_single_iff] at h1
 
 end Data

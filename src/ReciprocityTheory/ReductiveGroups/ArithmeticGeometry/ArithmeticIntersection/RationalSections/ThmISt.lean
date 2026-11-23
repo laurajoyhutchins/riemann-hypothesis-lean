@@ -1,6 +1,48 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.IsRatSectionOn
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.IsFieldIntersection
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.IndexSt
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.IsRatSectionOn
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.MultihomogeneousIdeals.IsFieldIntersection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -39,9 +81,6 @@ def MultilinStatement : Prop :=
       I P n (Function.update L j (A.tensor B)) =
         I P n (Function.update L j A) + I P n (Function.update L j B)
 
-def TheoremIStatement : Prop :=
-  ExistsStatement ∧ UniqueStatement ∧ SymmStatement ∧ MultilinStatement
-
 def AvoidStatement : Prop :=
   ∀ (R : Type) [CommRing R] (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)]
     (Ws : Finset (Ideal (MRingOver R ι))), (∀ W ∈ Ws, IsMultiProjPrime W) →
@@ -62,9 +101,6 @@ def DimensionOneRationalSectionIndependence : Prop :=
     (A : HermLine ι) (s t : MRing ι),
     IsArithVar P 1 → IsSectionOn P A s → IsSectionOn P A t →
     recR I P (Fin.elim0 : Fin 0 → HermLine ι) A s = recR I P (Fin.elim0 : Fin 0 → HermLine ι) A t
-
-def DimensionOneRationalSectionsFromIndex : Prop :=
-  IndexStatement → DimensionOneRationalSectionIndependence
 
 end TheoremI
 
@@ -137,25 +173,6 @@ def FibreCompStatement : Prop :=
 end Consequences
 
 section Inhabit
-
-def DimensionOneRationalSectionExample : Prop :=
-  IsArithVar (⊥ : Ideal (MRing (PBlk 1))) 1 ∧
-    ∀ I : Ideal (MRing (PBlk 1)) → (n : ℕ) → (Fin n → HermLine (PBlk 1)) → ℝ,
-      IsIntersectionFamily I → ∀ A : HermLine (PBlk 1), IsSmoothHerm A →
-        I ⊥ 1 ![A] = Real.log (A.h 1)
-
-def ProjectiveLineRationalSectionExample : Prop :=
-  ∀ I : Ideal (MRing (PBlk 2)) → (n : ℕ) → (Fin n → HermLine (PBlk 2)) → ℝ,
-    IsIntersectionFamily I → I ⊥ 2 ![fsLine 2, fsLine 2] = 1 / 2
-
-def InhabitVertStatement : Prop :=
-  ∀ p : ℕ, p.Prime →
-    IsRatSectionOn (⊥ : Ideal (MRing (PBlk 2))) (constLine (-Real.log p)) (C (p : ℤ)) 1 ∧
-    (∀ W ∈ divSupp (⊥ : Ideal (MRing (PBlk 2))) (C (p : ℤ)), ¬ IsHorizontal W) ∧
-    (∀ z ∈ mcPts (⊥ : Ideal (MRing (PBlk 2))),
-      ‖eval z (map (Int.castRingHom ℂ) (C (p : ℤ)))‖ =
-        ‖eval z (map (Int.castRingHom ℂ) (1 : MRing (PBlk 2)))‖ *
-          (constLine (-Real.log p) : HermLine (PBlk 2)).h z)
 
 end Inhabit
 

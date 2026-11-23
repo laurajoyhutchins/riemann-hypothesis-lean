@@ -1,6 +1,51 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocFramePrimJoint
+module
+
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.GlobalConditionOfProductFormula
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
+public import Formalism.PeriodIntegrals.LocFramePrim
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.LocFramePrimJoint
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -50,7 +95,7 @@ theorem corr_mul {A B A' B'} (h : CorrFI ι A B) (h' : CorrFI ι A' B') : CorrFI
       exact FractionalIdeal.mul_mem_mul ((h a).1 ha) ((h' a').1 ha')
     · intro x x' hx hx'
       show ι (x + x') ∈ B * B'
-      rw [map_add]
+      rw [map_add (f := _)]
       exact FractionalIdeal.mem_coe.1 (add_mem (FractionalIdeal.mem_coe.2 hx) (FractionalIdeal.mem_coe.2 hx'))
   · intro hy
     have key : ι.symm (ι y) ∈ A * A' := by
@@ -61,7 +106,7 @@ theorem corr_mul {A B A' B'} (h : CorrFI ι A B) (h' : CorrFI ι A' B') : CorrFI
         exact FractionalIdeal.mul_mem_mul ((corr_symm ι h b).2 hb) ((corr_symm ι h' b').2 hb')
       · intro x x' hx hx'
         show ι.symm (x + x') ∈ A * A'
-        rw [map_add]
+        rw [map_add (f := _)]
         exact FractionalIdeal.mem_coe.1 (add_mem (FractionalIdeal.mem_coe.2 hx) (FractionalIdeal.mem_coe.2 hx'))
     rwa [RingEquiv.symm_apply_apply] at key
 
@@ -89,22 +134,7 @@ theorem corr_zpow_neg {A B} (h : CorrFI ι A B) (hA : A ≠ 0) (hB : B ≠ 0) (k
 theorem mem_dual_one_iff (t : K) :
     t ∈ FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 K)⁰ K) ↔
       ∀ s : 𝓞 K, ∃ z : ℤ, Algebra.trace ℚ K (t * (s : K)) = z := by
-  rw [FractionalIdeal.mem_dual (one_ne_zero : (1 : FractionalIdeal (𝓞 K)⁰ K) ≠ 0)]
-  constructor
-  · intro H s
-    obtain ⟨z, hz⟩ := H (s : K) (by rw [FractionalIdeal.mem_one_iff]; exact ⟨s, rfl⟩)
-    refine ⟨z, ?_⟩
-    rw [Algebra.traceForm_apply] at hz
-    rw [← hz]
-    simp
-  · intro H a ha
-    rw [FractionalIdeal.mem_one_iff] at ha
-    obtain ⟨s, rfl⟩ := ha
-    obtain ⟨z, hz⟩ := H s
-    rw [RingHom.mem_range]
-    refine ⟨z, ?_⟩
-    rw [Algebra.traceForm_apply]
-    simpa using hz.symm
+  apply Formalism.MainNotions.BridgeLemma.mem_dual_iff <;> assumption
 
 theorem mem_diff_iff (x : 𝓞 K) : x ∈ differentIdeal ℤ (𝓞 K) ↔
     ∀ b : K, (∀ s : 𝓞 K, ∃ z : ℤ, Algebra.trace ℚ K (b * (s : K)) = z) →
@@ -266,12 +296,11 @@ theorem cinv_crd (y : (VS D).V) : cinv X (crd X y) = y := by
 
 theorem crd_cinv (x : Fin X.B.I.n → X.B.I.E) : crd X (cinv X x) = x := by
   funext i
-  simp only [crd, crdOf, cinv, map_sum, map_smul, Module.Basis.repr_self, Finsupp.coe_finset_sum,
-    Finset.sum_apply, Finsupp.smul_apply, Finsupp.single_apply, smul_eq_mul, mul_ite, mul_one, mul_zero,
-    Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true, RingEquiv.symm_apply_apply]
+
+  simp [crd, crdOf, cinv, Finsupp.single_apply]
 
 theorem cinv_add (x y : Fin X.B.I.n → X.B.I.E) : cinv X (x + y) = cinv X x + cinv X y := by
-  simp only [cinv, Pi.add_apply, map_add, add_smul, Finset.sum_add_distrib]
+  simp only [cinv, Pi.add_apply, map_add (f := _), add_smul, Finset.sum_add_distrib]
 
 theorem cinv_zero : cinv X 0 = 0 := by
   simp [cinv]
@@ -290,7 +319,7 @@ theorem cinv_osmul (o : 𝓞 X.B.I.E) (x : Fin X.B.I.n → X.B.I.E) :
 
 theorem crd_add (x y : (VS D).V) : crd X (x + y) = crd X x + crd X y := by
   funext i
-  simp [crdOf, map_add]
+  simp [crdOf, map_add (f := _)]
 
 theorem crd_zero : crd X 0 = 0 := by
   funext i
@@ -400,6 +429,7 @@ variable {D : D7} (X : HidaSetting D)
 
 theorem cinv_sum {ι : Type} (s : Finset ι) (x : ι → Fin X.B.I.n → X.B.I.E) :
     cinv X (∑ j ∈ s, x j) = ∑ j ∈ s, cinv X (x j) := by
+
   simp only [cinv, Finset.sum_apply, map_sum, Finset.sum_smul]
   exact Finset.sum_comm
 

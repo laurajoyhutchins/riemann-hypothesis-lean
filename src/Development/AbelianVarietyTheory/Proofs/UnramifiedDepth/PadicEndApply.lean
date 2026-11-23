@@ -1,8 +1,56 @@
-import Mathlib
-import ReciprocityTheory.DualLattices.TowerZeroSurjective
-import ReciprocityTheory.DualLattices.LinPairStatement
-import ReciprocityTheory.DualLattices.SubMemOfCompat
+module
+
+public import ReciprocityTheory.DualLattices.LinPairStatement
+public import ReciprocityTheory.DualLattices.FormalChartAtZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.Sheaves.Presheaf
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.LePreimageOfNil
+
+@[expose] public section
+
 open TensorProduct IsLocalRing Matrix CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj ReciprocityTheory.PGsh ReciprocityTheory.PGsh.Up ReciprocityTheory.PGsh.L2 ReciprocityTheory.PGsh.Be2 ReciprocityTheory.ChartRestriction.G.Chart
 open scoped CategoryTheory.Obj CategoryTheory.MonObj
 attribute [local instance] Over.cartesianMonoidalCategory
@@ -29,10 +77,7 @@ def padicEnd (p : ℕ) [Fact p.Prime] (M : Type) [AddCommGroup M] (hM : ∀ x : 
   map_add' a b := by
     ext x
     change (PadicInt.toZMod (a + b)).val • x = (PadicInt.toZMod a).val • x + (PadicInt.toZMod b).val • x
-    rw [map_add, ZMod.val_add, ← nsmul_eq_mod_nsmul _ (hM x), add_nsmul]
-
-lemma padicEnd_apply (p : ℕ) [Fact p.Prime] (M : Type) [AddCommGroup M] (hM : ∀ x : M, p • x = 0)
-    (c : ℤ_[p]) (x : M) : padicEnd p M hM c x = (PadicInt.toZMod c).val • x := rfl
+    rw [map_add (f := _), ZMod.val_add, ← nsmul_eq_mod_nsmul _ (hM x), add_nsmul]
 
 def liftInt {A B C : Type} [CommRing A] [CommRing B] [Ring C] (φ : A →+* C) (ψ : B →+* C)
     (h : ∀ a b, φ a * ψ b = ψ b * φ a) : A ⊗[ℤ] B →+* C :=
@@ -51,9 +96,6 @@ def resEnd {B : BX R₀} {O : LAlg R₀} (e : OEnd B O) (p : ℕ) {S : LAlg R₀
     AddMonoid.End (torP B p S) :=
   ((e.f s).comp (torP B p S).subtype).codRestrict (torP B p S) fun x => by
     rw [mem_torP, ← map_nsmul, pTorsion_nsmul_eq_zero, map_zero]
-
-lemma resEnd_apply {B : BX R₀} {O : LAlg R₀} (e : OEnd B O) (p : ℕ) {S : LAlg R₀} (s : LHom O S)
-    (x : torP B p S) : (resEnd e p s x : B.G S) = e.f s x := rfl
 
 def ordEnd {B : BX R₀} {O : LAlg R₀} {O₀ : Type} [CommRing O₀] (f : O₀ → OEnd B O) (p : ℕ)
     {S : LAlg R₀} (s : LHom O S)
@@ -106,7 +148,7 @@ lemma padic_mul_eq {p : ℕ} [Fact p.Prime] {R : Type} [CommRing R] (t : ℤ_[p]
   have hc : c = d * p + ((PadicInt.toZMod c).val : ℤ_[p]) := by rw [hd]; ring
   rw [nsmul_eq_mul] at hi ⊢
   conv_lhs => rw [hc]
-  rw [map_add, map_mul, map_natCast, map_natCast, add_mul, _root_.mul_assoc, hi, mul_zero, zero_add]
+  rw [map_add (f := _), map_mul, map_natCast, map_natCast, add_mul, _root_.mul_assoc, hi, mul_zero, zero_add]
 
 theorem main :
   (∀ {R₀ : Type} [CommRing R₀] {g : ℕ} (B : BX R₀) (O : LAlg R₀) (gb : Module.Basis (Fin g) R₀ B.gg) (O₀ : Type) [CommRing O₀] (f : O₀ → OEnd B O) (p : ℕ) [Fact p.Prime] [Algebra ℤ_[p] (O : Type)] (dL : O₀ →+* Matrix (Fin g) (Fin g) (O : Type)),
@@ -159,7 +201,7 @@ theorem main :
           kerMul π (s.1 (complMat p dL a k l)) i + kerMul π (s.1 (complMat p dL b k l)) i :=
         fun k => Subtype.ext (by simp [kerMul, add_mul])
       simp only [this, TensorProduct.tmul_add, Finset.sum_add_distrib]
-      rw [map_add (B.tg π hπ), ← ha, ← hb, map_add]
+      rw [map_add (B.tg π hπ), ← ha, ← hb, map_add (f := _)]
       rfl
   have key2 : ∀ a {R S : LAlg R₀} (s : LHom O R) (π : LHom R S) (hπ : π.SqZero) (l : Fin g)
       (i : π.ker) (hi : p • i = 0),
@@ -177,7 +219,7 @@ theorem main :
   refine ⟨{ act := fun a S s => complEnd f p s (hf s) a
             act_one := fun S s x => by rw [map_one]; rfl
             act_mul := fun a b S s x => by rw [map_mul]; rfl
-            act_add := fun a b S s x => by rw [map_add]; rfl
+            act_add := fun a b S s x => by rw [map_add (f := _)]; rfl
             act_nat := ?_
             actL := L
             act_tg := ?_ }, complMat p dL, complMat_tmul p dL, ?_,
@@ -190,25 +232,28 @@ theorem main :
     | zero => simp
     | tmul c a => rw [complEnd_tmul, complEnd_tmul, map_nsmul, (f a).nat]
     | add a b ha hb =>
-      rw [map_add, map_add]
+      rw [map_add (f := _), map_add (f := _)]
       change B.map φ ((complEnd f p s (hf s) a x : B.G S) + (complEnd f p s (hf s) b x : B.G S)) = _
-      rw [map_add, ha, hb]
+      rw [map_add (f := _), ha, hb]
       rfl
   · intro a R S s π hπ w i hi
     have hr : ∀ l, p • (gb.repr w l • i) = 0 := fun l => by rw [smul_comm, hi, smul_zero]
     have h1 : (⟨B.tg π hπ (w ⊗ₜ i), tg_torP B p π hπ w i hi⟩ : torP B p R) =
         ∑ l, ⟨B.tg π hπ (gb l ⊗ₜ (gb.repr w l • i)), tg_torP B p π hπ _ _ (hr l)⟩ := by
       apply Subtype.ext
-      rw [AddSubmonoidClass.coe_finset_sum]
+      rw [AddSubmonoidClass.coe_finsetSum]
       change B.tg π hπ (w ⊗ₜ i) = ∑ l, B.tg π hπ (gb l ⊗ₜ (gb.repr w l • i))
+
       rw [← map_sum]
       congr 1
       conv_lhs => rw [← gb.sum_repr w, TensorProduct.sum_tmul]
       exact Finset.sum_congr rfl fun l _ => TensorProduct.smul_tmul _ _ _
     change (complEnd f p s (hf s) a ⟨B.tg π hπ (w ⊗ₜ i), tg_torP B p π hπ w i hi⟩ : B.G R) = _
-    rw [h1, map_sum, AddSubmonoidClass.coe_finset_sum,
-      Finset.sum_congr rfl fun l _ => key2 a s π hπ l _ (hr l), ← map_sum]
+
+    rw [h1, map_sum, AddSubmonoidClass.coe_finsetSum,
+    Finset.sum_congr rfl fun l _ => key2 a s π hπ l _ (hr l), ← map_sum]
     congr 1
+
     conv_rhs => rw [← gb.sum_repr w, map_sum, TensorProduct.sum_tmul]
     exact Finset.sum_congr rfl fun l _ => by rw [map_smul, TensorProduct.smul_tmul]
   · intro a k l

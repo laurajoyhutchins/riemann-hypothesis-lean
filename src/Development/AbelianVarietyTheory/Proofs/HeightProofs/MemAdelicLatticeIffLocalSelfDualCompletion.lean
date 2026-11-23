@@ -1,6 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ImportsBis
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.AdelicUnitaryGroups
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLattice
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ImportsBis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.BasicNotions
 open scoped TensorProduct
 
@@ -8,19 +49,19 @@ namespace GlobalTheory.LatticeLocalGlobal
 
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
-omit [NumberField F] [NumberField E] in
 
+omit [NumberField F] [NumberField E] in
 theorem repr_map {R R' ι : Type} [CommRing R] [Algebra F R] [CommRing R'] [Algebra F R']
     (φ : R →ₐ[F] R') (b : Module.Basis ι F E) (z : R ⊗[F] E) (k : ι) :
     (Algebra.TensorProduct.basis R' b).repr (Algebra.TensorProduct.map φ (AlgHom.id F E) z) k =
       φ ((Algebra.TensorProduct.basis R b).repr z k) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
   | tmul a e => simp [Algebra.TensorProduct.basis_repr_tmul]
 
-omit [NumberField E] in
 
+omit [NumberField E] in
 theorem ext_components (z z' : Af F ⊗[F] E)
     (h : ∀ v : HeightOneSpectrum (𝓞 F),
       Algebra.TensorProduct.map (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV F v) (AlgHom.id F E) z =
@@ -83,7 +124,7 @@ theorem mem_latHat_iff :
       simp only [Pi.zero_apply, map_zero]
       exact zero_mem _
     | add y z _ _ hy hz =>
-      simp only [Pi.add_apply, map_add]
+      simp only [Pi.add_apply, map_add (f := _)]
       exact add_mem hy hz
     | neg y _ hy =>
       simp only [Pi.neg_apply, map_neg]
@@ -98,6 +139,7 @@ theorem mem_latHat_iff :
       funext i
       apply ext_components
       intro v
+
       rw [ea v i, Finset.sum_apply, map_sum]
       refine Finset.sum_congr rfl fun j _ => ?_
       rw [Algebra.TensorProduct.map_tmul, hA]

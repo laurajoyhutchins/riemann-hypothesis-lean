@@ -1,10 +1,69 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ThetaValues.FlatMemLatIffStdLat
-import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.NsmulApplyMemOfMemTensorLat
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemOfMemSpanFraction
-import ReciprocityTheory.SemistableReduction.ExistsIntSmulMemSpan
-import ReciprocityTheory.SemistableReduction.SemiDegCE
-import ReciprocityTheory.DualLattices.WedgeNeZeroOfLinearIndependent
+module
+
+public import ReciprocityTheory.SemistableReduction.SemiDegCA
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsSmulMemOfMemSpanFraction
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.DualLattices.SmallLevelClassSet
+public import ReciprocityTheory.SemistableReduction.SemiDegCC
+public import ReciprocityTheory.SemistableReduction.SemiDegCD
+public import ReciprocityTheory.SemistableReduction.SemiDegCE
+public import Mathlib.NumberTheory.NumberField.CMField
+import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.ConjSymm
+public import ReciprocityTheory.GeometryOfNumbers.LatticeCovolumes.InhabSt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.PerpSurj
+
+@[expose] public section
 
 namespace GlobalTheory.TensorLat
 
@@ -117,7 +176,8 @@ theorem exists_coe_eq_span_det_of_intVec_le (X : Submodule (𝓞 K) (Fin n → K
     ∃ J : FractionalIdeal (𝓞 K)⁰ K, (J : Submodule (𝓞 K) K) = Submodule.span (𝓞 K)
         {d | ∃ v : Fin n → Fin n → K, (∀ i, v i ∈ X) ∧ d = (Matrix.of v).det} ∧
       FractionalIdeal.absNorm J * ((intVec K n).toAddSubgroup.relIndex X.toAddSubgroup : ℚ) = 1 := by
-  obtain ⟨C, z, hfgC, h1, htri, hdiag, hin, hdec, hidx⟩ := lattice_split K n X hfg hstd
+  obtain ⟨C, z, hfgC, h1, htri, hdiag, hin, hdec, hidx⟩ :=
+    ReciprocityTheory.MultiplicativeHeights.SemiDegIdx.lattice_split K n X hfg hstd
   let CF : Fin n → FractionalIdeal (𝓞 K)⁰ K := fun i =>
     ⟨C i, FractionalIdeal.isFractional_of_fg (hfgC i)⟩
   refine ⟨∏ i, CF i, ?_, ?_⟩
@@ -220,42 +280,6 @@ theorem exists_coe_eq_span_det {Λ Λ' : Submodule (𝓞 K) (Fin n → K)} (hle 
   · rw [← htower, hidx, Nat.cast_mul, ← hN] at hN'
     refine mul_right_cancel₀ (right_ne_zero_of_mul (hN ▸ hn0)) ?_
     linear_combination -hN'
-
-theorem smul_coe_fractionalIdeal (𝔫 : Ideal (𝓞 K)) (J : FractionalIdeal (𝓞 K)⁰ K) :
-    𝔫 • (J : Submodule (𝓞 K) K) =
-      (((𝔫 : FractionalIdeal (𝓞 K)⁰ K) * J : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K) := by
-  rw [FractionalIdeal.coe_mul]
-  refine le_antisymm (Submodule.smul_le.2 fun a ha x hx => ?_)
-    (Submodule.mul_le.2 fun a ha x hx => ?_)
-  · rw [Algebra.smul_def]
-    exact Submodule.mul_mem_mul (FractionalIdeal.mem_coeIdeal_of_mem _ ha) hx
-  · obtain ⟨b, hb, rfl⟩ := (FractionalIdeal.mem_coeIdeal _).1 ha
-    rw [← Algebra.smul_def]
-    exact Submodule.smul_mem_smul hb hx
-
-theorem exists_indexIdeal_span_det {Λ Λ' : Submodule (𝓞 K) (Fin n → K)} (hle : Λ ≤ Λ')
-    (hfg : Λ'.FG) (hsp : Submodule.span K (Λ : Set (Fin n → K)) = ⊤) :
-    ∃ 𝔫 : Ideal (𝓞 K), 𝔫 ≠ ⊥ ∧ Ideal.absNorm 𝔫 = Λ.toAddSubgroup.relIndex Λ'.toAddSubgroup ∧
-      ∀ 𝔪 : Ideal (𝓞 K), Submodule.span (𝓞 K)
-          {d | ∃ v : Fin n → Fin n → K, (∀ i, v i ∈ Λ) ∧ d = (Matrix.of v).det} =
-        𝔪 • Submodule.span (𝓞 K)
-          {d | ∃ v : Fin n → Fin n → K, (∀ i, v i ∈ Λ') ∧ d = (Matrix.of v).det} ↔ 𝔪 = 𝔫 := by
-  obtain ⟨J, J', h0, h0', hJ, hJ', hN⟩ := exists_coe_eq_span_det hle hfg hsp
-  have hJJ : J ≤ J' := by
-    rw [← FractionalIdeal.coe_le_coe, hJ, hJ']
-    exact Submodule.span_mono fun _ ⟨v, hv, h⟩ => ⟨v, fun i => hle (hv i), h⟩
-  have h1 : J * J'⁻¹ ≤ 1 := by
-    rw [← mul_inv_cancel₀ h0']
-    gcongr
-  obtain ⟨𝔫, h𝔫⟩ := FractionalIdeal.le_one_iff_exists_coeIdeal.1 h1
-  have h2 : J = 𝔫 * J' := by rw [h𝔫, inv_mul_cancel_right₀ h0']
-  refine ⟨𝔫, ?_, ?_, fun 𝔪 => ?_⟩
-  · rintro rfl
-    simp [h0] at h2
-  · rw [h2, map_mul, FractionalIdeal.coeIdeal_absNorm] at hN
-    exact_mod_cast mul_right_cancel₀ (FractionalIdeal.absNorm_eq_zero_iff.not.2 h0') hN
-  · rw [← hJ, ← hJ', smul_coe_fractionalIdeal, FractionalIdeal.coeToSubmodule_inj, h2,
-      mul_left_inj' h0', FractionalIdeal.coeIdeal_inj, eq_comm]
 
 attribute [local instance] extModR
 

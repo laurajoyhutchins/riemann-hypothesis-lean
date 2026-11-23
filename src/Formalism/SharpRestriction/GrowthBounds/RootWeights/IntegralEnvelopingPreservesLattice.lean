@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.RootWeights.EnvelopingMonoidPreservesStable
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.IsotypicProjectorFixedMem
+public import Formalism.SharpRestriction.GrowthBounds.RootWeights.EnvelopingMonoidPreservesStable
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,7 +156,7 @@ theorem generated_subrep_stable (E : GLOps n K V) (h : V) (a b : Fin n) (z : V) 
     obtain ⟨u, hu, rfl⟩ := hx
     exact Submodule.subset_span ⟨E a b * u, Submonoid.mul_mem _ (Submonoid.subset_closure ⟨(a, b), rfl⟩) hu, rfl⟩
   | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact Submodule.add_mem _ hx hy
+  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Submodule.add_mem _ hx hy
   | smul c x _ hx => rw [map_smul]; exact Submodule.smul_mem _ _ hx
 
 theorem mem_generated_subrep_self (E : GLOps n K V) (h : V) : h ∈ generatedSubrep E h :=
@@ -208,7 +251,7 @@ theorem generated_lattice_corollary_of_thm (D : Formalism.BasicNotions.D7) (h12 
       iSup₂_le fun mu hmu z hz => LinearMap.mem_ker.2 (hπ.2 mu hmu z hz.1)
     have hπr : π r = 0 := LinearMap.mem_ker.1 (hker hr)
     have hπh : π h = h := hπ.1 h ((mem_highestWeight_iff E lam h).1 hhHW).1
-    have hπu : π (u' y) = a • h := by rw [← hsum, map_add, map_smul, hπh, hπr, add_zero]
+    have hπu : π (u' y) = a • h := by rw [← hsum, map_add (f := _), map_smul, hπh, hπr, add_zero]
     have hr' : r = u' y - ((p : KK O) ^ c * algebraMap O (KK O) o) • h := by
       rw [← ho, hπu, ← hsum]; abel
     have hle : (⨆ mu ∈ {mu : Fin n → ℤ | mu ≠ lam}, (weightSp E mu ⊓ generatedSubrep E h)) ≤

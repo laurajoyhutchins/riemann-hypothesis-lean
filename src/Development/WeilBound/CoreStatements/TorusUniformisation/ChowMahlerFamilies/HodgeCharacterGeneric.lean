@@ -1,7 +1,54 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsFlatAnIffIsConstMul
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GermSys
+public import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.TotallySplit
+import Mathlib.Algebra.AffineMonoid.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicSpectrum.Definitions.AdelicLattices.FactPrimes
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj GlobalTheory.CompanionTheory.Ar.Flat GlobalTheory.CompanionTheory.Ar.Fl
@@ -30,6 +77,7 @@ theorem sum_emb [Fintype (E →+* K)] (h : Nat.card (E →+* K) = Module.finrank
     rw [AlgHom.card, ← h, Nat.card_eq_fintype_card]
   have hb : Function.Bijective f := (Fintype.bijective_iff_injective_and_card f).mpr ⟨hf, hcard⟩
   apply (algebraMap K (AlgebraicClosure K)).injective
+
   rw [map_sum]
   calc ∑ s : E →+* K, algebraMap K (AlgebraicClosure K) (s x) = ∑ s, f s x := rfl
     _ = ∑ σ : E →ₐ[ℚ] AlgebraicClosure K, σ x := hb.sum_comp (fun σ => σ x)
@@ -45,9 +93,11 @@ theorem sum_eigProj [Fintype (E →+* K)] (h : Nat.card (E →+* K) = Module.fin
   set b := RingOfIntegers.basis E with hb
   have h1 : (1 : E) = ∑ j, ((b.repr 1 j : ℤ) : E) * integralBasis E j := by
     have := congrArg (algebraMap (𝓞 E) E) (b.sum_repr 1)
+
     simpa [integralBasis_apply, map_sum, zsmul_eq_mul] using this.symm
   have hrep : ∀ k, Algebra.trace ℚ E (dualInt E k) = ((b.repr 1 k : ℤ) : ℚ) := by
     intro k
+
     conv_lhs => rw [← mul_one (dualInt E k), h1, Finset.mul_sum, map_sum]
     simp_rw [mul_left_comm (dualInt E _), ← zsmul_eq_mul, map_zsmul, trace_dualInt]
     simp
@@ -55,6 +105,7 @@ theorem sum_eigProj [Fintype (E →+* K)] (h : Nat.card (E →+* K) = Module.fin
   rw [Finset.sum_comm]
   simp_rw [← Finset.sum_smul, sum_emb h, hrep]
   calc ∑ k, algebraMap ℚ K ((b.repr 1 k : ℤ) : ℚ) • ρ (b k) = ρ (∑ k, b.repr 1 k • b k) := by
+
         rw [map_sum]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [map_zsmul, map_intCast, Int.cast_smul_eq_zsmul]

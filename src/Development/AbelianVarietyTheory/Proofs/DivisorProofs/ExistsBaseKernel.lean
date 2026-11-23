@@ -1,19 +1,60 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.KerDatTuple
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.Definitions.Divisors.IsDeltaDelAtOwnAt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GramMapMulInv
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilDatumTwistHeckeCharacters
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilRepresentationVacuumCosetVectorsGrid
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstRelIffTwistFactorAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+public import Development.AbelianVarietyTheory.Definitions.Divisors.RealisedChainTorusEq
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.KernelSpanOverClasses
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.NotIsConjPlOfIdemSum
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstRelIffTwistFactorAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilDatumTwistHeckeCharacters
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsWeilRepresentationVacuumCosetVectorsGrid
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsFundamentalDomainOfHaar
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EasyInputs
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCmAdeleUnitCharacterReadingHeckeChar
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIsResOfTameAt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EasyInputs
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.NotIsConjPlOfIdemSum
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsFundamentalDomainOfHaar
-import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSumOfNoConj
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GramMapMulInv
+public import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemSumOfNoConj
 import Formalism.LocalToGlobal.UnitaryNorms.CharUniq
 import Formalism.MirabolicMackeyTheory.MirabolicMackeyProofs.RamBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Definitions.Divisors.KerDatTuple
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -26,8 +67,8 @@ open GlobalTheory.OnCmp GlobalTheory.BigOn GlobalTheory.RealIndexBound
 
 namespace GlobalTheory.OnCmp
 
-open Classical in
 
+open Classical in
 theorem exists_baseKernel : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m) (Ks : Type) [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A), GlobalTheory.Hk3.Core R F → ∀ (i : Fin D.R.m), ∀ (v : HeightOneSpectrum (𝓞 D.what₂.LL)), v ∈ R.twPl → R.tup_mu_on → ∃ ω φ, IsBaseKernel R i v (ownAt D v) ω φ := by
   intro D G _ _ Pl0 T0 A Ks _ _ _ R F hC i v hv hmu
   obtain ⟨ψw, Qw, hψ, hxi⟩ := hmu v hv
@@ -37,7 +78,11 @@ theorem exists_baseKernel : ∀ (D : D7) (G : Type) [Group G] [Fintype G] (Pl0 T
     intro P
     unfold Formalism.L2.Host.HChar.TameAt Formalism.L2.Host.HChar.LevelLe
     intro x hx hle
-    rw [hδ, Formalism.L2.Host.HChar.loc_mul, Formalism.L2.Host.HChar.loc_inv, hL.xi_tame (R.mu v) P x hx hle, hψ.tame P x hx hle,
+    have loc_mul (a b : Formalism.L2.Host.HChar D.host.E) :
+        (a * b).loc P x = a.loc P x * b.loc P x := rfl
+    have loc_inv (a : Formalism.L2.Host.HChar D.host.E) :
+        (a⁻¹).loc P x = (a.loc P x)⁻¹ := rfl
+    rw [hδ, loc_mul, loc_inv, hL.xi_tame (R.mu v) P x hx hle, hψ.tame P x hx hle,
       inv_one, mul_one]
   have htriv : (R.C.delAt (Formalism.EigenvalueLevelCeiling.plc v)).TrivOn D.host.F := by
     rw [hδ]; exact (hL.xi_triv (R.mu v)).mul hψ.triv.inv

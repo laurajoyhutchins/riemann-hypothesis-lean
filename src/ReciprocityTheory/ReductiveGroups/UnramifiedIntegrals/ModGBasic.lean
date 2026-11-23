@@ -1,5 +1,53 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.Valuation.LocalSubring
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
+import ReciprocityTheory.NeutralLocalFields.HilbertClassField
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical UpperHalfPlane
@@ -41,40 +89,6 @@ theorem mem_nonunits_Aio {d l : ℕ} [Fact l.Prime] (ι : ℂ ≃+* ℂ_[l]) (x 
     have hn : ‖ι (x : ℂ)‖ * ‖ι ((((u⁻¹ : (Aio d l ι)ˣ) : Aio d l ι) : Om d) : ℂ)‖ = 1 := by
       simpa using congrArg (fun t => ‖ι t‖) hmul
     nlinarith [norm_nonneg (ι (x : ℂ)), mul_le_mul_of_nonneg_left hy (norm_nonneg (ι (x : ℂ)))]
-
-theorem inertiaEl_iff {E Ω : Type*} [Field E] [Field Ω] [Algebra E Ω] (A : ValuationSubring Ω) (g : Ω ≃ₐ[E] Ω) :
-    InertiaEl A g ↔ g ∈ (A.inertiaSubgroup E).map (A.decompositionSubgroup E).subtype := by
-  constructor
-  · rintro ⟨hd, hx⟩
-    refine Subgroup.mem_map.2 ⟨⟨g, hd⟩, ?_, rfl⟩
-    rw [ValuationSubring.inertiaSubgroup, MonoidHom.mem_ker]
-    refine RingEquiv.ext fun y => ?_
-    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective y
-    change Ideal.Quotient.mk (IsLocalRing.maximalIdeal A) ((⟨g, hd⟩ : A.decompositionSubgroup E) • a) =
-      Ideal.Quotient.mk (IsLocalRing.maximalIdeal A) a
-    rw [Ideal.Quotient.eq]
-    obtain ⟨h1, h2⟩ := (ValuationSubring.mem_nonunits_iff_exists_mem_maximalIdeal (A := A)).1 (hx a a.2)
-    exact h2
-  · intro hg
-    obtain ⟨g', hg', rfl⟩ := Subgroup.mem_map.1 hg
-    refine ⟨g'.2, fun x hx => ?_⟩
-    have key : (g' • (⟨x, hx⟩ : A)) - ⟨x, hx⟩ ∈ IsLocalRing.maximalIdeal A := by
-      rw [ValuationSubring.inertiaSubgroup, MonoidHom.mem_ker] at hg'
-      have h3 := congrArg (fun f : RingAut (IsLocalRing.ResidueField A) =>
-        f (Ideal.Quotient.mk (IsLocalRing.maximalIdeal A) ⟨x, hx⟩)) hg'
-      change Ideal.Quotient.mk (IsLocalRing.maximalIdeal A) (g' • (⟨x, hx⟩ : A)) =
-        Ideal.Quotient.mk (IsLocalRing.maximalIdeal A) ⟨x, hx⟩ at h3
-      exact Ideal.Quotient.eq.1 h3
-    have e : ((A.decompositionSubgroup E).subtype g') x - x =
-        ((g' • (⟨x, hx⟩ : A) - (⟨x, hx⟩ : A) : A) : Ω) := rfl
-    rw [e, ValuationSubring.mem_nonunits_iff_exists_mem_maximalIdeal (A := A)]
-    exact ⟨(g' • (⟨x, hx⟩ : A) - (⟨x, hx⟩ : A)).2, key⟩
-
-theorem inertiaEl_mem_hilbert {E Ω : Type*} [Field E] [Field Ω] [Algebra E Ω] {A : ValuationSubring Ω}
-    {g : Ω ≃ₐ[E] Ω} (h : InertiaEl A g) : g ∈ hilbertSubgroup E Ω := by
-  unfold hilbertSubgroup
-  exact Subgroup.le_topologicalClosure _
-    (Subgroup.subset_closure (Or.inl (Or.inr ⟨A, (inertiaEl_iff A g).1 h⟩)))
 
 theorem mem_of_isIntegral {Ω : Type*} [Field Ω] (A : ValuationSubring Ω) {x : Ω} (hx : IsIntegral ℤ x) : x ∈ A := by
   have h2 : IsIntegral A x := hx.tower_top

@@ -1,5 +1,53 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.ExistsGlOfEquiv
+import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+
+@[expose] public section
+
 open GlobalTheory.FinPl GlobalTheory.LatPair GlobalTheory.SplitWeil ValuativeRel IsLocalRing Matrix
 open scoped Pointwise
 
@@ -44,9 +92,12 @@ theorem det_mem_of_mem_latStab_std {g : GL n k} (hg : g ∈ latStab (stdLat k n)
   rw [← hA, ← RingHom.map_det]
   exact (A.det).2
 
-theorem exists_smul_stdLat_eq (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] : ∃ h : GL n k, h • stdLat k n = L := by
+theorem exists_smul_stdLat_eq (L : Submodule 𝒪[k] (n → k)) [L.IsFullLattice k] : ∃ h : GL n k, h • stdLat k n = L := by
+  classical
+  letI : Module.Free 𝒪[k] L := Submodule.IsLattice.free k L
+  letI : Module.Finite 𝒪[k] L := Submodule.IsLattice.finite k L
   let b := Module.Free.chooseBasis 𝒪[k] L
-  let B := b.extendOfIsLattice k
+  let B := b.extendOfIsFullLattice k
   have hc : Fintype.card (Module.Free.ChooseBasisIndex 𝒪[k] L) = Fintype.card n := by
     have := Module.finrank_eq_card_basis B
     simpa using this.symm
@@ -88,7 +139,7 @@ theorem exists_smul_stdLat_eq (L : Submodule 𝒪[k] (n → k)) [L.IsLattice k] 
     refine Finset.sum_congr rfl fun i _ => ?_
     exact algebraMap_smul k (c i) _
 
-theorem det_mem_of_mem_latStab {L : Submodule 𝒪[k] (n → k)} [L.IsLattice k] {g : GL n k} (hg : g ∈ latStab L) :
+theorem det_mem_of_mem_latStab {L : Submodule 𝒪[k] (n → k)} [L.IsFullLattice k] {g : GL n k} (hg : g ∈ latStab L) :
     ((Matrix.GeneralLinearGroup.det g : kˣ) : k) ∈ 𝒪[k] := by
   obtain ⟨h, rfl⟩ := exists_smul_stdLat_eq L
   have hs : h⁻¹ * g * h ∈ latStab (stdLat k n) := by
@@ -100,7 +151,7 @@ theorem det_mem_of_mem_latStab {L : Submodule 𝒪[k] (n → k)} [L.IsLattice k]
     rw [map_mul, map_mul, map_inv, mul_comm, ← mul_assoc, mul_inv_cancel, one_mul]
   rwa [hdet] at h1
 
-theorem valuation_det_of_mem_latStab {L : Submodule 𝒪[k] (n → k)} [L.IsLattice k] {g : GL n k} (hg : g ∈ latStab L) :
+theorem valuation_det_of_mem_latStab {L : Submodule 𝒪[k] (n → k)} [L.IsFullLattice k] {g : GL n k} (hg : g ∈ latStab L) :
     valuation k ((Matrix.GeneralLinearGroup.det g : kˣ) : k) = 1 := by
   have h1 := det_mem_of_mem_latStab hg
   have h2 := det_mem_of_mem_latStab (inv_mem hg)
@@ -113,7 +164,7 @@ theorem valuation_det_of_mem_latStab {L : Submodule 𝒪[k] (n → k)} [L.IsLatt
 
 end
 
-theorem isUnram_det_latStab : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (n : Type) [Fintype n] [DecidableEq n] (L : Submodule 𝒪[k] (n → k)), L.IsLattice k → ∀ g ∈ latStab L, ∀ μ : kˣ →* ℂˣ, IsUnram μ → μ (Matrix.GeneralLinearGroup.det g) = 1 := by
+theorem isUnram_det_latStab : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (n : Type) [Fintype n] [DecidableEq n] (L : Submodule 𝒪[k] (n → k)), L.IsFullLattice k → ∀ g ∈ latStab L, ∀ μ : kˣ →* ℂˣ, IsUnram μ → μ (Matrix.GeneralLinearGroup.det g) = 1 := by
   intro k _ _ _ _ n _ _ L hL g hg μ hμ
   exact hμ _ (valuation_det_of_mem_latStab hg)
 

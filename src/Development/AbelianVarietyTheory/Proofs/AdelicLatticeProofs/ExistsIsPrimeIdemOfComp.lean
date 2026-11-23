@@ -1,7 +1,53 @@
-import Mathlib
-import Formalism.UnipotentAdelicQuotients.ThmBInHecke
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+module
+
+public import Formalism.UnipotentAdelicQuotients.ThmBInHecke
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteAdeleBaseChangeEquiv
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsAdeleRingTensorEquivInfiniteProdFinite
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,13 +82,13 @@ theorem exists_of_conj_eq {σ : E →ₐ[F] E} (h : IsCMExt F E σ) {x : E} (hx 
     rw [hy'] at this
     exact this.symm
 
-variable (F E) in
 
+variable (F E) in
 def infPart : AE F E →+* Ainf F ⊗[F] E :=
   (Algebra.TensorProduct.map (AlgHom.fst F (Ainf F) (Af F) : AF F →ₐ[F] Ainf F) (AlgHom.id F E)).toRingHom
 
-variable (F E) in
 
+variable (F E) in
 def swapAf : Af F ⊗[F] E →+* E ⊗[F] Af F := (Algebra.TensorProduct.comm F (Af F) E).toRingEquiv.toRingHom
 
 def Comp (Φ : AE F E →+* FiniteAdeleRing (𝓞 E) E) : Prop :=
@@ -66,6 +112,7 @@ theorem mem_intAE_iff (z : Af F ⊗[F] E) :
     obtain ⟨r, hr, e⟩ := Formalism.UG.P.levelaf_decomp g hg hz
     have : z = ∑ j, r j ⊗ₜ[F] (g j : E) := by
       apply (Algebra.TensorProduct.comm F (Af F) E).injective
+
       rw [map_sum]
       exact e
     rw [this]
@@ -131,7 +178,7 @@ theorem cA_cA (h : IsCMExt F E σ) (z : AE F E) : cA σ (cA σ z) = z := by
   | tmul a x =>
     change a ⊗ₜ[F] σ (σ x) = _
     rw [conj_conj h]
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
 
 theorem parts_cA (z : AE F E) :
     infPart F E (cA σ z) = sigR (Ainf F) σ (infPart F E z) ∧
@@ -139,7 +186,7 @@ theorem parts_cA (z : AE F E) :
   induction z using TensorProduct.induction_on with
   | zero => simp only [map_zero, and_self]
   | tmul a x => exact ⟨rfl, rfl⟩
-  | add a b ha hb => simp only [map_add, ha.1, ha.2, hb.1, hb.2, and_self]
+  | add a b ha hb => simp only [map_add (f := _), ha.1, ha.2, hb.1, hb.2, and_self]
 
 theorem finPart_cA_mem {z : AE F E} (hz : finPart F E z ∈ intAE F E) :
     finPart F E (cA σ z) ∈ intAE F E := by
@@ -217,7 +264,7 @@ theorem ev_mul (a b : AE F E) (Q : HeightOneSpectrum (𝓞 E)) : Φ (a * b) Q = 
   rw [map_mul]; rfl
 
 theorem ev_add (a b : AE F E) (Q : HeightOneSpectrum (𝓞 E)) : Φ (a + b) Q = Φ a Q + Φ b Q := by
-  rw [map_add]; rfl
+  rw [map_add (f := _)]; rfl
 
 theorem ev_zero (Q : HeightOneSpectrum (𝓞 E)) : Φ 0 Q = 0 := by rw [map_zero]; rfl
 
@@ -315,7 +362,7 @@ theorem exists_isPrimeIdem_of_comp (hσ : IsCMExt F E σ) (P : HeightOneSpectrum
       · subst hQ
         rw [he'.2.2 Q (Ne.symm hc), mul_zero]
       · rw [he.2.2 Q hQ, zero_mul]
-    · refine hΦ.ext' (by rw [RingHom.map_add, he.1, he'.1, add_zero, h0]) fun Q => ?_
+    · refine hΦ.ext' (by rw [RingHom.map_add (f := _), he.1, he'.1, add_zero, h0]) fun Q => ?_
       rw [ev_add]
       by_cases hQ : Q = P
       · subst hQ
@@ -347,12 +394,5 @@ theorem exists_isUnifIdele (hσ : IsCMExt F E σ) (P : HeightOneSpectrum (𝓞 E
     generalize incA F E (ϖ : E)⁻¹ = b at hm ⊢
     linear_combination e * e * hm + (2 - a - b) * he
   exact ⟨Units.mkOfMulEqOne _ _ hu, e, f, ϖ, h, h1, h2, rfl⟩
-
-theorem chiAt_one : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ P : HeightOneSpectrum (𝓞 E), chiAt σ (1 : (AE F E)ˣ →* Circle) P = 1 := by
-  intro F E _ _ _ _ _ σ hσ P
-  obtain ⟨e, f, -, h⟩ := exists_isPrimeIdem hσ P
-  unfold chiAt
-  rw [dif_pos ⟨⟨e, f, h, fun _ _ _ _ => rfl⟩, exists_isUnifIdele hσ P⟩]
-  rfl
 
 end GlobalTheory.CMPrimeIdele

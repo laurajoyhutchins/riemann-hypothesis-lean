@@ -1,9 +1,56 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageArith
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsAnResNullForm
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageInverse
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageMetrics
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageChi
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageArith
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsAnResNullForm
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageInverse
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageMetrics
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsBlockImageChi
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.ArithModel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -30,7 +77,7 @@ theorem eval_blockSubst {J : Type} (k₀ : K) (M : Matrix J (ι k₀) ℤ) (f : 
       eval (blockMapC k₀ M z) (map (Int.castRingHom ℂ) f) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [blockSubst]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p j hp =>
     simp only [map_mul, hp]
     congr 1
@@ -43,7 +90,7 @@ theorem mConeMap_blockSubst (hB : IsBlockImage y k₀ M N x) (f : MvPolynomial (
     mConeMap y (blockSubst k₀ M f) = Polynomial.aeval (X k₀ : MvPolynomial K Ω) (coneMap ℤ x f) := by
   induction f using MvPolynomial.induction_on with
   | C a => simp [blockSubst, coneMap, mConeMap]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p j hp =>
     simp only [map_mul, hp]
     congr 1
@@ -137,8 +184,8 @@ theorem N_injective (hB : IsBlockImage y k₀ M N x) (hx : LinearIndependent ℤ
         exact Finset.sum_comm
     _ = 0 := by simp [h1]
 
-omit [DecidableEq K] [CharZero Ω] in
 
+omit [DecidableEq K] [CharZero Ω] in
 theorem exists_blockBasis [CharZero Ω] (y : (Σ k, ι k) → Ω) (k₀ : K) :
     ∃ (r : ℕ) (M : Matrix (Ix (Fin r)) (ι k₀) ℤ) (N : Matrix (ι k₀) (Ix (Fin r)) ℤ) (x : Ix (Fin r) → Ω),
       IsBlockImage y k₀ M N x ∧ LinearIndependent ℤ x := by
@@ -230,10 +277,11 @@ theorem BlockImageDatum.proof (hA : BlockImageArith.Statement) (hI : BlockImageI
         obtain ⟨p, hp⟩ := Function.ne_iff.mp hz
         exact ⟨p.2, by cases k; exact hp⟩
       conjInv := fun u => by
-        change (fsMetric (ι d.k₀)).ρ _ = (fsMetric (ι d.k₀)).ρ _
+        change (fsMetric (ι := ι d.k₀)).ρ _ = (fsMetric (ι := ι d.k₀)).ρ _
         rw [← ProjLine.isConjInvariant_fs (fun i => ∑ j, (N i j : ℂ) * u j)]
         congr 1
         funext i
+
         simp [map_sum]
       normalForm_baseLattice_le_dualSpan_sup_line := bot_le
       semipos := hMet.1 (ι d.k₀) (Fin r) N hN _
@@ -241,7 +289,7 @@ theorem BlockImageDatum.proof (hA : BlockImageArith.Statement) (hI : BlockImageI
   let d₀ : HSMBlockDatum D K ι Ω :=
     { y := d.y
       k₀ := d.k₀
-      A := HermLine.ofMetrics (fun k => fsMetric (ι k)) (unitDeg d.k₀)
+      A := HermLine.ofMetrics (fun k => fsMetric (ι := ι k)) (unitDeg d.k₀)
       P0 := ⊥
       J := d.J
       R := d.R
@@ -260,8 +308,8 @@ theorem BlockImageDatum.proof (hA : BlockImageArith.Statement) (hI : BlockImageI
       vol := d.vol }
   have hh : ∀ z ∈ mcPts (mCoordIdeal d.y), d₀.A.h z = d'.m.ρ (blockMapC d.k₀ M z) := by
     intro z hz
-    change ∏ k, (fsMetric (ι k)).ρ (fun i => z ⟨k, i⟩) ^ (unitDeg d.k₀ k) =
-      (fsMetric (ι d.k₀)).ρ (fun i => ∑ j, (N i j : ℂ) * blockMapC d.k₀ M z j)
+    change ∏ k, (fsMetric (ι := ι k)).ρ (fun i => z ⟨k, i⟩) ^ (unitDeg d.k₀ k) =
+      (fsMetric (ι := ι d.k₀)).ρ (fun i => ∑ j, (N i j : ℂ) * blockMapC d.k₀ M z j)
     rw [Finset.prod_eq_single d.k₀ (fun k _ hk => by simp [unitDeg, hk]) (by simp)]
     simp only [unitDeg, if_true, zpow_one]
     congr 1

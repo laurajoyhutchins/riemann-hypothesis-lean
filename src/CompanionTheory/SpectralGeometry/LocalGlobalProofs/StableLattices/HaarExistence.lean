@@ -1,7 +1,56 @@
-import Mathlib
-import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.HilbertSchmidtDecay.HaarExists
+module
+
+public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.MatrixCoefficientDecay.KeepsMul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Matrix
+
+namespace CompanionTheory.RgExh.Dec.L
+
+def HaarExists : Prop :=
+  ∀ (n : ℕ) (ε : Fin n → Bool) (A : Matrix (Fin n) (Fin n) ℂ),
+    IsGrad ε A → ∃ ν : Measure (PSub ε A), ν.IsHaarMeasure
+
+end CompanionTheory.RgExh.Dec.L
 
 namespace GlobalTheory.CompanionTheory.ParabolicHaar
 
@@ -44,7 +93,7 @@ theorem isClosed_keeps (ε : Fin n → Bool) (S : Submodule ℂ (Fin n → ℂ))
   refine isClosed_biInter fun v _ => ?_
   have hS : IsClosed (S : Set (Fin n → ℂ)) := S.closed_of_finiteDimensional
   have hc : Continuous fun g : S7.UJ ε => S7.toM g *ᵥ v :=
-    Continuous.matrix_mulVec (Units.continuous_val.comp continuous_subtype_val) continuous_const
+    (S7.continuous_toM ε).matrix_mulVec continuous_const
   exact IsClosed.preimage hc hS
 
 theorem isClosed_pSub (ε : Fin n → Bool) (A : Matrix (Fin n) (Fin n) ℂ) :
@@ -58,8 +107,11 @@ theorem haar_pSub_isHaar (ε : Fin n → Bool) (A : Matrix (Fin n) (Fin n) ℂ) 
     (Measure.haar : Measure (PSub ε A)).IsHaarMeasure := by
   infer_instance
 
-theorem haarExists : CompanionTheory.RgExh.Dec.L.HaarExists := by
-  intro n ε A _
+theorem haarExists (n : ℕ) (ε : Fin n → Bool) (A : Matrix (Fin n) (Fin n) ℂ)
+    (_ : IsGrad ε A) : ∃ ν : Measure (PSub ε A), ν.IsHaarMeasure := by
   exact ⟨Measure.haar, haar_pSub_isHaar ε A⟩
 
 end GlobalTheory.CompanionTheory.ParabolicHaar
+
+theorem GlobalTheory.T.HaarExistence : CompanionTheory.RgExh.Dec.L.HaarExists :=
+  GlobalTheory.CompanionTheory.ParabolicHaar.haarExists

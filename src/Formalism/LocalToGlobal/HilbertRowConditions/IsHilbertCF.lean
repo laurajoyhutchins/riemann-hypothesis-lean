@@ -1,8 +1,46 @@
-import Mathlib
-import Formalism.LocalToGlobal.UnitaryNorms.MemFIffReal
-import Formalism.LocalToGlobal.UnitaryNorms.CharTied
-import Formalism.LocalToGlobal.Divisibility.LiftLat
-import Formalism.LocalToGlobal.Divisibility.GoodPartHermitianSpec
+module
+
+public import Formalism.LocalToGlobal.UnitaryNorms.MemFIffReal
+public import Formalism.LocalToGlobal.UnitaryNorms.CharTied
+public import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -83,9 +121,6 @@ structure KsPieces (D : D7) (T : HostTied D) where
 
   E_le_KPs : T.fr.j.fieldRange ≤ KPs
 
-theorem KsPieces.K_le_M {D : D7} {T : HostTied D} (P : KsPieces D T) : Formalism.L2.Host.KQ D.host.d ≤ P.M :=
-  le_trans (P.HK_hilb.1.1) P.HK_le_M
-
 def rootOrders (D : D7) : List ℕ :=
   [Nat.card (G0g D.nd), D.host.g 0 * (D.host.g 0 - 1), D.host.g 1 * (D.host.g 1 - 1), 3 ^ 4, 5 ^ 4]
 
@@ -93,19 +128,5 @@ def KsQ (D : D7) (T : HostTied D) (C : CharFrame D) (P : KsPieces D T) : Fld :=
   T.fr.j.fieldRange ⊔ (⨆ n ∈ rootOrders D, muFld n) ⊔ valsFld D T C ⊔ P.rcf ⊔ P.M ⊔ P.MDel ⊔ P.KPs
 
 def OsQ (K : Fld) : Set Qb := {x | x ∈ K ∧ IsIntegral ℤ x}
-
-def getQ {n : ℕ} (f : Fin n → ℚ) (i : ℕ) : ℚ := if h : i < n then f ⟨i, h⟩ else 0
-
-def vPar (D : D7) (τ : D.what₂.Tau) (i : ℕ) : ℚ :=
-  if i < D.R.k - 1 then getQ (D.hc τ).v i else -getQ (D.hc τ).b (i - (D.R.k - 1))
-
-def aPlus (D : D7) (j : ℕ) (τ : D.what₂.Tau) (i : ℕ) : ℚ :=
-  vPar D τ i + getQ (D.hc τ).e (j - 1) - ((D.R.nV : ℚ) + 1 - 2 * ((i : ℚ) + 1)) / 2 -
-    (((D.R.sigW j).1 : ℚ) - (D.R.sigW j).2) / 2
-
-def aMinusAt (D : D7) (j : ℕ) (τ : D.what₂.Tau) (c₀ : ℕ) : ℚ :=
-  (getQ (D.hc τ).b (j + c₀) - getQ (D.hc τ).e (j - 1)) - ((D.R.t : ℚ) - 1 + 2 * ((c₀ : ℚ) + 1)) / 2
-
-def kaSmallOf (D : D7) (j : ℕ) (τ : D.what₂.Tau) (c₀ : ℕ) : ℚ := -aMinusAt D j τ c₀
 
 end Formalism.L2.Rows

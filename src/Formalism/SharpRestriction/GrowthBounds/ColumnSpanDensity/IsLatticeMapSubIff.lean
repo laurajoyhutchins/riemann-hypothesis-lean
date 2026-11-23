@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RingIndep
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MemColSpanIff
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.UnramifiedQuadraticSetting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,12 +96,6 @@ theorem map_smul' {σ : Type*} (c : A) (f : MvPolynomial σ A) : map φ (c • f
   rw [smul_eq_C_mul, smul_eq_C_mul, map_mul, map_C]
 
 end Poly
-
-theorem map_symm_map {A B σ : Type*} [CommRing A] [CommRing B] (φ : A ≃+* B) (f : MvPolynomial σ A) :
-    map (φ.symm : B →+* A) (map (φ : A →+* B) f) = f := by
-  rw [map_map]
-  have : (φ.symm : B →+* A).comp (φ : A →+* B) = RingHom.id A := by ext; simp
-  rw [this, map_id]
 
 structure Iso2 (R₁ F₁ R₂ F₂ : Type) [CommRing R₁] [Field F₁] [Algebra R₁ F₁] [CommRing R₂] [Field F₂]
     [Algebra R₂ F₂] where
@@ -118,9 +157,6 @@ theorem mapSub_symm' (L : Submodule R₂ (Fin k → F₂)) : mapSub J (mapSub J.
 
 theorem mapSub_mono {L L' : Submodule R₁ (Fin k → F₁)} (h : L ≤ L') : mapSub J L ≤ mapSub J L' :=
   fun _ hy => h hy
-
-theorem mapSub_inj {L L' : Submodule R₁ (Fin k → F₁)} (h : mapSub J L = mapSub J L') : L = L' := by
-  rw [← mapSub_symm J L, h, mapSub_symm]
 
 theorem mapSub_span (S : Set (Fin k → F₁)) :
     mapSub J (Submodule.span R₁ S) = Submodule.span R₂ ((fun x i => J.φF (x i)) '' S) := by

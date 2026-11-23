@@ -1,5 +1,53 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePKeyDef
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePGmExLem
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePKeyDef
+public import Formalism.LocalToGlobal.CharacterGerms.CoeffSubstEqSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.NumberTheory.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.CharacterGerms.RowTiePProjFB
+
+@[expose] public section
 
 noncomputable section
 
@@ -52,11 +100,6 @@ theorem MT.pow (h : MT V A B) (m : ℕ) : MT V (fun k => A k ^ m) (B ^ m) := by
 
 theorem MT.unique (h : MT V A B) (h' : MT V A B') : B = B' :=
   Matrix.ext fun i j => (h i j).unique (h' i j)
-
-theorem MT.shift (h : MT V A B) : MT V (fun k => A (k + 1)) B := by
-  intro i j w
-  obtain ⟨n0, hn0⟩ := h i j w
-  exact ⟨n0, fun m hm => hn0 (m + 1) (by omega)⟩
 
 theorem IntM.of_MT (h : MT V A B) (hA : ∀ k, IntM V (A k)) : IntM V B :=
   fun i j => (h i j).ge0 (fun k => hA k i j)
@@ -160,18 +203,12 @@ theorem add_mem {B B' : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) (hB' : B' �
   obtain ⟨s, hs⟩ := hB
   obtain ⟨s', hs'⟩ := hB'
   refine ⟨fun k => s k + s' k, ?_⟩
-  simpa only [map_add, Matrix.mul_add] using hs.add hs'
+  simpa only [map_add (f := _), Matrix.mul_add] using hs.add hs'
 
 theorem neg_mem {B : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) : -B ∈ Acl K := by
   obtain ⟨s, hs⟩ := hB
   refine ⟨fun k => -s k, ?_⟩
   simpa only [map_neg, Matrix.mul_neg, zero_sub] using (MT.const (V := V) (0 : Matrix (Fin n) (Fin n) C)).sub hs
-
-theorem sub_mem {B B' : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) (hB' : B' ∈ Acl K) : B - B' ∈ Acl K := by
-  obtain ⟨s, hs⟩ := hB
-  obtain ⟨s', hs'⟩ := hB'
-  refine ⟨fun k => s k - s' k, ?_⟩
-  simpa only [map_sub, Matrix.mul_sub] using hs.sub hs'
 
 theorem mul_mem {B B' : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) (hB' : B' ∈ Acl K) : B * B' ∈ Acl K := by
   obtain ⟨s, hs⟩ := hB
@@ -182,13 +219,6 @@ theorem mul_mem {B B' : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) (hB' : B' �
 theorem P_mem : K.P ∈ Acl K := by
   refine ⟨fun _ => 1, ?_⟩
   simpa only [map_one, Matrix.mul_one] using MT.const (V := V) K.P
-
-theorem pow_mem {B : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) (m : ℕ) : B ^ (m + 1) ∈ Acl K := by
-  induction m with
-  | zero => simpa using hB
-  | succ m ih =>
-    rw [pow_succ]
-    exact mul_mem K ih hB
 
 theorem comm_mem {B B' : Matrix (Fin n) (Fin n) C} (hB : B ∈ Acl K) (hB' : B' ∈ Acl K) : B * B' = B' * B := by
   obtain ⟨s, hs⟩ := hB

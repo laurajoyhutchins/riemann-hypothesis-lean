@@ -1,5 +1,59 @@
-import Mathlib
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocDistC
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocDistC
+import Development.WeilBound.ThetaLifts.LatticeBasics.LocDistA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Swap
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Filter Topology GlobalTheory.WeilM Matrix
 
@@ -37,13 +91,13 @@ theorem step_chart (hc : ∀ a ≠ 0, c a ≠ 0) (h0 : ϖ ≠ 0) (h1 : ϖ ≠ 1)
     fun z h => hz _ (by simpa [chR] using h)
   let T : ∀ ψ : Matrix (Fin n) (Fin d) k → ℂ, ((Fin (n + 1) → k) × (Fin d → k) → ℂ) →ₗ[ℂ] ℂ := fun ψ =>
     { toFun := fun F => L fun z => F z.1 * ψ z.2
-      map_add' := fun F F' => by rw [← map_add]; congr 1; ext z; simp [add_mul]
+      map_add' := fun F F' => by rw [← map_add (f := _)]; congr 1; ext z; simp [add_mul]
       map_smul' := fun a F => by rw [← map_smul]; congr 1; ext z; simp [mul_assoc] }
   refine kill_tens {x : Fin (n + 1) → k | x 0 ≠ 0} (T ψ) (fun f hf hf0 => ?_) hF fun z h => hF0 z h
   replace hf0 : ∀ x, x 0 = 0 → f x = 0 := fun x hx => hf0 x (not_not.2 hx)
   let m : ∀ ψ : Matrix (Fin n) (Fin d) k → ℂ, ((Fin d → k) → ℂ) →ₗ[ℂ] ℂ := fun ψ =>
     { toFun := fun g => T ψ fun z => f z.1 * g z.2
-      map_add' := fun F F' => by rw [← map_add]; congr 1; ext z; simp [mul_add]
+      map_add' := fun F F' => by rw [← map_add (f := _)]; congr 1; ext z; simp [mul_add]
       map_smul' := fun a F => by rw [← map_smul]; congr 1; ext z; simp [mul_left_comm] }
   have hm : ∀ ψ g, m ψ g = l fun X => f (chE X).1.1 * g (chE X).1.2 * ψ (chE X).2 := fun _ _ => rfl
   have sb : ∀ ψ ∈ SB _, ∀ g ∈ SB (Fin d → k), (fun X => f (chE X).1.1 * g (chE X).1.2 * ψ (chE X).2) ∈ SB _ := fun ψ hψ g hg =>
@@ -59,7 +113,7 @@ theorem step_chart (hc : ∀ a ≠ 0, c a ≠ 0) (h0 : ϖ ≠ 0) (h1 : ϖ ≠ 1)
   refine (hs _ (inv ψ hψ)).2 ?_
   let l₁ : (Matrix (Fin n) (Fin d) k → ℂ) →ₗ[ℂ] ℂ :=
     { toFun := fun ψ => l fun X => f (chE X).1.1 * g₀ (chE X).1.2 * ψ (chE X).2
-      map_add' := fun F F' => by rw [← map_add]; congr 1; ext z; simp [mul_add]
+      map_add' := fun F F' => by rw [← map_add (f := _)]; congr 1; ext z; simp [mul_add]
       map_smul' := fun a F => by rw [← map_smul]; congr 1; ext z; simp [mul_left_comm] }
   refine ih l₁ (fun h hh => ?_) (fun ψ hψ hψ0 => hd _ (sb ψ hψ _ hg₀.1) fun X hX => ?_) ψ hψ
   · have hg₁ : Bump fun u => g₀ (u ᵥ* h) :=
@@ -108,7 +162,7 @@ theorem step_closed {n d : ℕ} (ih : Claim c n d) {l : (Matrix (Fin (n + 1)) (F
     sb_comp (fun X => (X 0, tl X)) (fun z => cn z.1 z.2) (by fun_prop) ccn hcn (sb_tens hg₀.1 hψ)
   let l₂ : (Matrix (Fin n) (Fin d) k → ℂ) →ₗ[ℂ] ℂ :=
     { toFun := fun ψ => l fun X => g₀ (X 0) * ψ (tl X)
-      map_add' := fun F F' => by rw [← map_add]; congr 1; ext z; simp [mul_add]
+      map_add' := fun F F' => by rw [← map_add (f := _)]; congr 1; ext z; simp [mul_add]
       map_smul' := fun a F => by rw [← map_smul]; congr 1; ext z; simp [mul_left_comm] }
   have eq : ∀ φ ∈ SB _, ∀ φ' ∈ SB _, (∀ X, X 0 = 0 → φ X = φ' X) → l φ = l φ' := fun φ hφ φ' hφ' h => by
     rw [← sub_eq_zero, ← map_sub]
@@ -123,7 +177,7 @@ theorem step_closed {n d : ℕ} (ih : Claim c n d) {l : (Matrix (Fin (n + 1)) (F
     rw [this, hX, hg₀.2.2, one_mul]
   · obtain ⟨t, pt, ht⟩ := hl h hh
     refine ⟨t, pt, fun ψ hψ => (eq _ (sb _ (sb_right hψ hh)) _ (sb_right (sb ψ hψ) hh) fun X hX => ?_).trans (ht _ (sb ψ hψ))⟩
-    have : (X * h) 0 = 0 := by ext j; simp [mul_apply, hX]
+    have : (X * h) 0 = 0 := by ext j; simp [Matrix.mul_apply, hX]
     rw [hX, this]; rfl
   · obtain ⟨v, hv, h⟩ := hX
     rw [hψ0 (tl X) ⟨v, hv, funext fun i => congrFun h i.succ⟩, mul_zero]

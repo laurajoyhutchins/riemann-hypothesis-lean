@@ -1,13 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HeisenbergCocycleFormIntegralSelfDual
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeylHeisenbergOperatorCalculusRational
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MonomialEqSumJet
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdmissibleLatticeBasisExistsStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AlgebraicNumbersPadicPlacesFactsStatement
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsLocallyConstantToZModPow
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RatIntOfIsIntegral
-import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FieldIsoLatticesFormTaylorCorrespondStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TranslateMomentsAll
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.InducedTypeThetaGenusOnePermutes
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdmissibleLatticeBasisExistsStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AlgebraicNumbersPadicPlacesFactsStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FieldIsoLatticesFormTaylorCorrespondStatement
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.HeisenbergCocycleFormIntegralSelfDual
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsLocallyConstantToZModPow
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.MonomialEqSumJet
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.RatIntOfIsIntegral
+public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.WeylHeisenbergOperatorCalculusRational
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.Valuation.Integral
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.HermitianLatticesTheory Formalism.MainNotions Formalism.L2.DIV Formalism.L2.Col Formalism.L2.Ker Formalism.L2.Th1.H GlobalTheory.IndefiniteRowSideFullHecke.JetSumTable GlobalTheory.MomT
 
 noncomputable section
@@ -198,6 +247,7 @@ theorem pu_iT (z : VCx X.Tau a b) : (fun τ => pu s z (s.iT τ)) = z := by funex
 
 theorem mat_sum {r : ℕ} (c : Fin r → ℕ) (β : Fin r → HomE X.E a b) :
     mat s (∑ i, (c i : X.E) • β i) = ∑ i, (c i : D.host.E) • mat s (β i) := by
+
   simp only [map_sum, Nat.cast_smul_eq_nsmul, map_nsmul]
 
 variable {s} (hs : s.Ok)
@@ -286,18 +336,20 @@ theorem pairN_nat {D : D7} {N N' r : ℕ} (Ω : ℂ_[p]) (b : Fin r → Matrix (
     TaylorLogMetric.pairN D lam Ω b y (fun i => (c i : ℤ_[p])) =
       Ω⁻¹ * TaylorLogMetric.lamC lam (D.host.φ₀ ((TaylorLogMetric.hYY D y (∑ i, (c i : D.host.E) • b i) : D.host.K) : D.host.E)) := by
   let f : Matrix (Fin N') (Fin N) D.host.E →+ D.host.K := AddMonoidHom.mk' (TaylorLogMetric.hYY D y) fun u v => by
-    simp only [TaylorLogMetric.hYY, Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add]
+    simp only [TaylorLogMetric.hYY, Matrix.add_apply, mul_add, Finset.sum_add_distrib, map_add (f := _)]
   have h : TaylorLogMetric.hYY D y (∑ i, (c i : D.host.E) • b i) = ∑ i, (c i : D.host.K) * TaylorLogMetric.hYY D y (b i) := by
     change f _ = ∑ i, (c i : D.host.K) * f (b i)
+
     simp only [map_sum, Nat.cast_smul_eq_nsmul, map_nsmul, nsmul_eq_mul]
   rw [TaylorLogMetric.pairN, h]
   simp only [lamHom_apply, zc_nat]
   push_cast
+
   simp only [map_sum, map_mul, map_natCast]
 
 theorem continuous_pairN {D : D7} {N N' r : ℕ} (Ω : ℂ_[p]) (b : Fin r → Matrix (Fin N') (Fin N) D.host.E)
     (y : Matrix (Fin N') (Fin N) D.host.E) : Continuous (TaylorLogMetric.pairN D lam Ω b y) :=
-  continuous_const.mul (continuous_finset_sum _ fun i _ => (continuous_zc.comp (continuous_apply i)).mul continuous_const)
+  continuous_const.mul (continuous_finsetSum _ fun i _ => (continuous_zc.comp (continuous_apply i)).mul continuous_const)
 
 theorem lamC_prod {κ : Type} (m : κ →₀ ℕ) (f : κ → ℂ) (hf : ∀ k, f k ∈ TaylorLogMetric.Qbar) :
     (m.prod fun k n => f k ^ n) ∈ TaylorLogMetric.Qbar ∧
@@ -416,7 +468,7 @@ theorem ptMom : ∀ (D : D7) (X : Fields) (s : Seam D X) (cc : Ideal (𝓞 D.hos
             rw [Nat.cast_smul_eq_nsmul]; exact nsmul_mem (hβ i) _
     obtain ⟨l, γ, yy, hγ1, hγ2⟩ := GlobalTheory.MonoJet.monomial_eq_sum_jet D p a b lam (m.mapDomain fun v => (s.iT v.1, v.2))
     let G : Fin l → C(Fin r → ℤ_[p], ℂ_[p]) := fun i =>
-      g₀ * ⟨fun c => ∏ j, TaylorLogMetric.pairN D lam Ω bb (yy i j) c, continuous_finset_prod _ fun j _ => continuous_pairN lam Ω bb _⟩
+      g₀ * ⟨fun c => ∏ j, TaylorLogMetric.pairN D lam Ω bb (yy i j) c, continuous_finsetProd _ fun j _ => continuous_pairN lam Ω bb _⟩
     have hG := fun i => hJ _ (yy i) (G i) fun c => by
       change g₀ _ * _ = _
       rw [hg₀]
@@ -428,6 +480,7 @@ theorem ptMom : ∀ (D : D7) (X : Fields) (s : Seam D X) (cc : Ideal (𝓞 D.hos
     · rw [hjet]; exact mul_mem hα (mul_mem c1 (mul_mem f1 (hC _)))
     · rw [hjet, lamC_mul lam hα (mul_mem c1 (mul_mem f1 (hC _))), lamC_mul lam c1 (mul_mem f1 (hC _)), lamC_mul lam f1 (hC _),
         c2, f2]
+
       simp only [map_smul, map_sum, smul_eq_mul, ← hG, ← hγ1, Finsupp.prod_mapDomain_index_inj ren_inj]
       rfl
     · rw [ptTab_eq lam hs hι, hγ2, mat_sum]

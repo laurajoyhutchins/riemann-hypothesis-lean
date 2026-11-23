@@ -1,5 +1,56 @@
-import Formalism.LocalToGlobal.Columns.TwQBridge
-import Formalism.LocalToGlobal.Columns.TwQLev
+module
+
+public import Formalism.LocalToGlobal.Columns.TwQBridge
+public import Formalism.LocalToGlobal.Columns.TwQLev
+import Formalism.LocalToGlobal.Columns.TiedGlLoc
+import Formalism.LocalToGlobal.Columns.TwQSplit
+import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LevGapLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open scoped TensorProduct
@@ -14,7 +65,7 @@ section Div
 
 variable {F : Type} [Field F] [NumberField F] {v : HeightOneSpectrum (𝓞 F)} {n : ℕ}
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem qbK_of_div {c : v.adicCompletion F} (hc : c ∈ v.adicCompletionIntegers F) (hc1 : Valued.v c < 1)
     {k : GL (Fin n) (v.adicCompletion F)} (hk : qbDiv c ((k : Matrix (Fin n) (Fin n) (v.adicCompletion F)) - 1)) : k ∈ qbK c := by
@@ -101,7 +152,7 @@ variable {F E K : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Sta
   (hc : Formalism.BasicNotions.CMData F E) {n : ℕ} [NeZero n] {Q : Finset (Pl E)} (Θ : LevQFam E K n Q)
   (hQ : ∀ P : Q, conjPrime₂ P.1 ≠ P.1) (hΘ : ThetaOpen Θ)
 
-set_option maxHeartbeats 2000000 in
+
 
 theorem qbDF_spec (P : Q) : ∃ D : 𝓞 F, D ≠ 0 ∧ D ∈ (underPl F P.1).asIdeal ∧ ∃ w ∈ ((qv F P.1).adicCompletionIntegers F),
     algebraMap (𝓞 F) ((qv F P.1).adicCompletion F) D = qbF hc hQ P (qbD hc Θ hQ hΘ P) * w := by
@@ -144,10 +195,11 @@ theorem qbDF_prop (P : Q) : qbDF hc Θ hQ hΘ P ≠ 0 ∧ qbDF hc Θ hQ hΘ P �
       algebraMap (𝓞 F) ((qv F P.1).adicCompletion F) (qbDF hc Θ hQ hΘ P) = qbF hc hQ P (qbD hc Θ hQ hΘ P) * w :=
   Classical.choose_spec (qbDF_spec hc Θ hQ hΘ P)
 
-set_option maxHeartbeats 4000000 in
 
-theorem qbOpen : QOpen (qbLoc hc Θ hQ hΘ) where
-  princ P := by
+
+theorem qbOpen : QOpen (qbLoc hc Θ hQ hΘ) := by
+  refine { princ := ?_, glob := ?_ }
+  · intro P
     classical
     obtain ⟨hD0, -, w, hw, hDw⟩ := qbDF_prop hc Θ hQ hΘ P
     refine ⟨Ideal.absNorm (Ideal.span {qbDF hc Θ hQ hΘ P}), Nat.pos_of_ne_zero fun h => hD0 ?_, fun x _ hy => ?_⟩
@@ -174,8 +226,7 @@ theorem qbOpen : QOpen (qbLoc hc Θ hQ hΘ) where
     show f ((x : Matrix (Fin n) (Fin n) _) i j) - (1 : Matrix (Fin n) (Fin n) _) i j = _
     rw [← e4, e2, e3]
     ring
-  glob := by
-    classical
+  · classical
     refine ⟨∏ P ∈ Q.attach, algebraMap (𝓞 F) (𝓞 E) (qbDF hc Θ hQ hΘ P), ?_, fun u _ sa hu P => ?_⟩
     · refine Finset.prod_ne_zero_iff.2 fun P _ h => (qbDF_prop hc Θ hQ hΘ P).1 ?_
       have hinj : Function.Injective (algebraMap (𝓞 F) E) := by
@@ -203,7 +254,7 @@ theorem qbOpen : QOpen (qbLoc hc Θ hQ hΘ) where
       Subring.mul_mem _ (Subring.mul_mem _ hw (Subring.prod_mem _ fun P' _ => glo_algMap_int _ _))
         ((((qbLoc hc Θ hQ hΘ).sp_int P _).1 (afsplit_prV_int (qv F P.1) _ (sa i j).2)).1), ?_⟩
     show f (prV (E := E) (qv F P.1) ((u : Matrix (Fin n) (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) i j)) - (1 : Matrix (Fin n) (Fin n) _) i j = _
-    rw [hu i j, map_add, map_add, map_mul, map_mul]
+    rw [hu i j, map_add (f := _), map_add (f := _), map_mul, map_mul]
     have e4 : f (prV (E := E) (qv F P.1) ((1 : Matrix (Fin n) (Fin n) (E ⊗[F] Formalism.L2.Herm.Af F)) i j)) = (1 : Matrix (Fin n) (Fin n) _) i j := by
       rw [Matrix.one_apply, Matrix.one_apply]; split_ifs <;> simp
     rw [e4, add_sub_cancel_left]

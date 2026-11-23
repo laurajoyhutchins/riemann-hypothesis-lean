@@ -1,5 +1,53 @@
-import Mathlib
-import GroundTheory.ProfiniteCohomology.FilteredHomology
+module
+
+public import Mathlib.Algebra.Category.ModuleCat.Abelian
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+public import Mathlib.Combinatorics.Quiver.ReflQuiver
+public import GroundTheory.ProfiniteCohomology.FilteredHomology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RepresentationTheory.Rep.Basic
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -62,40 +110,6 @@ section GroupCohomology
 
 variable {k G : Type u} [CommRing k] [Group G] {ι : Type*} {P : Rep.{u} k G}
   {A : ι → Rep.{u} k G}
-
-theorem cochainsMap_pi_bijective (p : ∀ i, P ⟶ A i)
-    (hp : Function.Bijective fun (x : P) (i : ι) => (p i).hom x) (m : ℕ) :
-    Function.Bijective fun (f : (groupCohomology.inhomogeneousCochains P).X m) (i : ι) =>
-      ((groupCohomology.cochainsMap (MonoidHom.id G) (p i)).f m).hom f := by
-  constructor
-  · intro f f' h
-    funext g
-    apply hp.1
-    funext i
-    exact congrFun (congrFun h i) g
-  · intro F
-    refine ⟨fun g => Function.surjInv hp.2 (fun i => F i g), funext fun i => funext fun g => ?_⟩
-    exact congrFun (Function.surjInv_eq hp.2 (fun i => F i g)) i
-
-theorem groupCohomology_pi_bijective (p : ∀ i, P ⟶ A i)
-    (hp : Function.Bijective fun (x : P) (i : ι) => (p i).hom x) (n : ℕ) :
-    Function.Bijective fun (x : groupCohomology P n) (i : ι) =>
-      (groupCohomology.map (MonoidHom.id G) (p i) n).hom x :=
-  homologyMap_pi_bijective (fun i => groupCohomology.cochainsMap (MonoidHom.id G) (p i))
-    (cochainsMap_pi_bijective p hp) n
-
-noncomputable def groupCohomologyPiEquiv (p : ∀ i, P ⟶ A i)
-    (hp : Function.Bijective fun (x : P) (i : ι) => (p i).hom x) (n : ℕ) :
-    groupCohomology P n ≃ₗ[k] ∀ i, groupCohomology (A i) n :=
-  LinearEquiv.ofBijective (LinearMap.pi fun i => (groupCohomology.map (MonoidHom.id G) (p i) n).hom)
-    (groupCohomology_pi_bijective p hp n)
-
-@[simp]
-theorem groupCohomologyPiEquiv_apply (p : ∀ i, P ⟶ A i)
-    (hp : Function.Bijective fun (x : P) (i : ι) => (p i).hom x) (n : ℕ)
-    (x : groupCohomology P n) (i : ι) :
-    groupCohomologyPiEquiv p hp n x i = (groupCohomology.map (MonoidHom.id G) (p i) n).hom x :=
-  rfl
 
 end GroupCohomology
 

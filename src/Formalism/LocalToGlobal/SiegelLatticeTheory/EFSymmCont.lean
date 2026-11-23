@@ -1,9 +1,48 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtB
-import Formalism.SharpRestriction.CuspSpanNormBounds.FlagEEqHyperbolic
-import Formalism.LocalToGlobal.SiegelLatticeTheory.PtEquivApply
-import Formalism.LocalRingCardinality.DataLevelD
+module
+
+public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
+public import Formalism.LocalRingCardinality.SpanPowerMembership.LocAtB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -44,38 +83,6 @@ theorem conjF_invol (D : D7) (x : D.host.E) : D.conjF (D.conjF x) = x := by
 
 def locC (D : D7) (p : HeightOneSpectrum (𝓞 D.host.F)) : Formalism.MainNotions.S.Loc.LocAt D.host.F D.host.E D.conjF p :=
   Examples₂.locAtC D.conjF (conjF_invol D) (Examples₂.finrank_FE D.host) p
-
-@[simp] theorem locC_Fp (D : D7) (p : HeightOneSpectrum (𝓞 D.host.F)) : (locC D p).Fp = p.adicCompletion D.host.F := rfl
-
-structure SiegelLatticeAgreement (D : D7) : Prop where
-
-  loc : ∀ p, Nonempty (LocIso (D.s.atP p) (locC D p))
-
-  term : Nonempty (Formalism.MainNotions.S.TermTie D)
-
-theorem letter_eq (D : D7) (w : D.what₂.Word) (τ : D.what₂.Tau) (l : Fin (D.R.k - 2)) :
-    D.s.letter w l = letterOf (D.hcW w τ) l := by
-  have hu := D.s.u_letter w τ l.1 l.2
-  have hD := D.s.Del_pos
-  unfold letterOf
-  rw [hu]
-  cases hb : D.s.letter w l
-  · simp [hb]
-  · simp [hb, hD.ne']
-
-theorem del_eq (D : D7) (hk : 3 ≤ D.R.k) (w : D.what₂.Word) (τ : D.what₂.Tau) :
-    (D.s.Del : ℚ) = delOf (D.hcW w τ) hk := by
-  have h : (D.hcW w τ).v ⟨0, by omega⟩ - (D.hcW w τ).v ⟨1, by omega⟩ = 4 * D.s.Del :=
-    D.s.cloud_gap w τ 0 (by omega)
-  unfold delOf
-  linarith
-
-theorem letterOf_inj (D : D7) (τ : D.what₂.Tau) : Function.Injective fun w => letterOf (D.hcW w τ) := by
-  have e : (fun w => letterOf (D.hcW w τ)) = D.s.letter := by
-    funext w l
-    exact (letter_eq D w τ l).symm
-  rw [e]
-  exact D.s.letter_inj
 
 def LocIso.refl {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
     {sig : E →ₐ[F] E} {p : HeightOneSpectrum (𝓞 F)} (A : Formalism.MainNotions.S.Loc.LocAt F E sig p) : LocIso A A where
@@ -120,13 +127,5 @@ theorem loc_of_adj (D : D7)
   obtain ⟨s, hs⟩ := h p
   rw [hs]
   exact ⟨LocIso.setSplit (locC D p) s⟩
-
-def SplitAgree (D : D7) (L : LevelData D) : Prop :=
-  letI := D.host.cmStar
-  ∀ (p : HeightOneSpectrum (𝓞 D.host.F)) S, (D.s.atP p).split = some S →
-    ∀ (u : D.what₂.Word) (i : Fin 2) (h : ((D.host.g i : ℕ) : 𝓞 D.host.F) ∈ p.asIdeal) (x y : D.host.E),
-      ((S.e ((D.s.atP p).ιE x)).1 ≤ᵥ (S.e ((D.s.atP p).ιE y)).1 ↔
-        Valued.v (((L u).splitG i p h (x ⊗ₜ[D.host.F] (1 : p.adicCompletion D.host.F))).1) ≤
-          Valued.v (((L u).splitG i p h (y ⊗ₜ[D.host.F] (1 : p.adicCompletion D.host.F))).1))
 
 end Formalism.L2.S

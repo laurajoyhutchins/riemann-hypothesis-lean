@@ -1,66 +1,101 @@
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.NzOfSteps
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.NeedCProps
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.GMain
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.GEmb
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TypeExNZ
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeLAdicCharacterAndPrincipalIdealSt
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ArtinTransferDecompositionHolds
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.LocalArtinBlockProduct
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TranslationCoordinates
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TwistedSphericalEquivalence
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.DistinctCharacterUnits
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SmoothStabiliserSubgroup
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PArtinIne
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CharacterConductorBound
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CuspidalSupport2
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.DeterminantVector
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PDMul
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PDUnit
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PIndDetK
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PIndExt
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Isotypic₂
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacquetFiniteLength2
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacquetImage
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.P_Jmul
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PJone
-import Mathlib.RepresentationTheory.Maschke
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.MaschkeCompactGroup
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SubrepresentationTransport
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SchurKernelSubmodule
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.InPowAlgebraMap
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PKill
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamBasic
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamLevi
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamUnip
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ParabolicMaximalCompact
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.InPowMono
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ProductIrreducible2
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PProdRc
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ScalarInertia
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SphericalOfUnramified
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SphericalUnramified
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Subquotient2
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PSumList
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.NeedCProps
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ArtinTransferDecompositionHolds
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CharacterConductor
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CharacterConductorBound
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CuspidalSupport2
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.DeterminantVector
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.DistinctCharacterUnits
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.GEmb
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.GMain
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.InPowAlgebraMap
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.InPowMono
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.IsClosedUnipRad
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Isotypic₂
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Iwahori₂
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacquetFiniteLength2
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacquetImage
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacquetKernel
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.LeviEigenvectorMembership
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.LocalArtinBlockProduct
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.MaschkeCompactGroup
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.MemKCOfRedEq
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.NzOfSteps
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PArtinIne
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PDMul
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PDUnit
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PExGrp
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PIndDetK
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PIndExt
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PJinv
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PJone
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PKill
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamBasic
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamLevi
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamMul
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamUnip
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PNonint
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PProdRc
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PSumList
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PTpow
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PTwistRc
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PTzInj
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PUntwistRc
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.P_Jmul
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ParabolicMaximalCompact
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ProductIrreducible2
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.ScalarInertia
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SchurKernelSubmodule
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SmoothStabiliserSubgroup
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SphericalOfUnramified
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SphericalUnramified
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.StepV0Stable
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Subquotient2
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SubrepresentationTransport
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SupportProduct
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Tensor2
 import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TensorVector
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PTwistRc
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Uniformizer₂
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.UnramifiedTwist
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PUntwistRc
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.MemKCOfRedEq
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.StepV0Stable
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.CharacterConductor
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PTpow
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Iwahori₂
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PLamMul
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Tensor2
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PExGrp
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.LeviEigenvectorMembership
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PJinv
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PNonint
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.IsClosedUnipRad
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.JacquetKernel
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.PTzInj
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.SupportProduct
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TranslationCoordinates
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TwistedSphericalEquivalence
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.TypeExNZ
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.Uniformizer₂
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.UnramifiedTwist
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Polynomial ValuativeRel UpperTheory.TNZ
 
@@ -89,7 +124,7 @@ open UpperTheory.V.W (Plc Lp HidaSetting Vl Resid LamObj UniversalOrdinaryDeterm
 open UpperTheory.V.HV (Coef)
 open scoped TensorProduct
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
-set_option synthInstance.maxHeartbeats 200000
+
 
 theorem UpperTheory.NonzeroTypeTheory.exists_type_for_residual_rep :
     GlobalTheory.Mem.LiteralAutomorphy.LitN → ∀ (l : ℕ) [Fact l.Prime] (L Ω : Type) [Field L] [NumberField L] [IsCMField L] [Field Ω] [Algebra L Ω] [IsAlgClosure L Ω] (s : HidaSetting l L Ω) (n : ℕ), 1 ≤ n → ∀ (V : s.Lev) (Q : QData V) (c : Coef l), ∀ (r : Resid V.frame c.O n) (ι : Qbar l ≃+* ℂ), ∃ (m : ℕ) (τ₀ : KT n (wt s) →* GL (Fin m) c.O), TypeFor r ι τ₀ :=

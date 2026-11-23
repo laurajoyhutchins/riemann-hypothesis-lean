@@ -1,4 +1,55 @@
-import Formalism.PolynomialDimension.StatementHar
+module
+
+public import Formalism.PolynomialDimension.StatementHar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -138,18 +189,18 @@ theorem diagMul_pow_apply (i : Fin k) (n : ℕ) (f : PolXY K k) :
   rw [this, h3e, LinearMap.pow_mulLeft, LinearMap.mulLeft_apply]
 
 theorem coeff_diagMul_pow (i : Fin k) (n : ℕ) (f : PolXY K k) (m : XY k →₀ ℕ) :
-    coeff m ((h3e K i ^ n) f) = if h3s i n ≤ m then coeff (m - h3s i n) f else 0 := by
+    AddMonoidAlgebra.coeff ((h3e K i ^ n) f) m = if h3s i n ≤ m then AddMonoidAlgebra.coeff f (m - h3s i n) else 0 := by
   rw [diagMul_pow_apply, coeff_monomial_mul', one_mul]
 
 theorem coeff_diagLaplacian_pow (i : Fin k) (n : ℕ) : ∀ (f : PolXY K k) (m : XY k →₀ ℕ),
-    coeff m ((h3d K i ^ n) f) = coeff (m + h3s i n) f *
+    AddMonoidAlgebra.coeff ((h3d K i ^ n) f) m = AddMonoidAlgebra.coeff f (m + h3s i n) *
       (((m (Sum.inl i) + n).descFactorial n : ℕ) * ((m (Sum.inr i) + n).descFactorial n : ℕ)) := by
   induction n with
   | zero => intro f m; simp [h3s]
   | succ n ih =>
     intro f m
     rw [pow_succ, Module.End.mul_apply, ih]
-    have h1 : coeff (m + h3s i n) (h3d K i f) = coeff (m + h3s i (n + 1)) f *
+    have h1 : AddMonoidAlgebra.coeff (h3d K i f) (m + h3s i n) = AddMonoidAlgebra.coeff f (m + h3s i (n + 1)) *
         (((m (Sum.inl i) + n + 1 : ℕ) : K) * ((m (Sum.inr i) + n + 1 : ℕ) : K)) := by
       simp only [diagLaplacian_apply, coeff_pderiv]
       have e : m + h3s i n + Finsupp.single (Sum.inl i) 1 + Finsupp.single (Sum.inr i) 1 = m + h3s i (n + 1) := by
@@ -205,25 +256,25 @@ theorem zero_mem_fockLattice (R : Subring K) : (0 : PolXY K k) ∈ FockLat R := 
 theorem add_mem_fockLattice (R : Subring K) (f g : PolXY K k) (hf : f ∈ FockLat R) (hg : g ∈ FockLat R) :
     f + g ∈ FockLat R := by
   intro m
-  rw [coeff_add, mul_add]
+  rw [MvPolynomial.coeff_add, mul_add]
   exact R.add_mem (hf m) (hg m)
 
 theorem smul_mem_fockLattice (R : Subring K) (r : K) (hr : r ∈ R) (f : PolXY K k) (hf : f ∈ FockLat R) :
     r • f ∈ FockLat R := by
   intro m
-  rw [coeff_smul, smul_eq_mul, mul_left_comm]
+  rw [MvPolynomial.coeff_smul, smul_eq_mul, mul_left_comm]
   exact R.mul_mem hr (hf m)
 
 theorem diagMul_divPow_mem_fockLattice (R : Subring K) (i : Fin k) (n : ℕ) (f : PolXY K k) (hf : f ∈ FockLat R) :
     (((n.factorial : K)⁻¹) • h3e K i ^ n) f ∈ FockLat R := by
   intro m
-  rw [LinearMap.smul_apply, coeff_smul, smul_eq_mul, coeff_diagMul_pow]
+  rw [LinearMap.smul_apply, MvPolynomial.coeff_smul, smul_eq_mul, coeff_diagMul_pow]
   split_ifs with h
   · obtain ⟨m', rfl⟩ : ∃ m', m = m' + h3s i n := ⟨m - h3s i n, (tsub_add_cancel_of_le h).symm⟩
     rw [add_tsub_cancel_right, xFactorial_add_diagExponent]
     have hn : (n.factorial : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
-    have : (((m' (Sum.inl i) + n).descFactorial n * xFact m' : ℕ) : K) * ((n.factorial : K)⁻¹ * coeff m' f) =
-        (((m' (Sum.inl i) + n).choose n : ℕ) : K) * ((xFact m' : K) * coeff m' f) := by
+    have : (((m' (Sum.inl i) + n).descFactorial n * xFact m' : ℕ) : K) * ((n.factorial : K)⁻¹ * AddMonoidAlgebra.coeff f m') =
+        (((m' (Sum.inl i) + n).choose n : ℕ) : K) * ((xFact m' : K) * AddMonoidAlgebra.coeff f m') := by
       rw [Nat.cast_mul, descFactorial_cast_eq]
       field_simp
     rw [this]
@@ -233,14 +284,14 @@ theorem diagMul_divPow_mem_fockLattice (R : Subring K) (i : Fin k) (n : ℕ) (f 
 theorem diagLaplacian_divPow_mem_fockLattice (R : Subring K) (i : Fin k) (n : ℕ) (f : PolXY K k) (hf : f ∈ FockLat R) :
     (((n.factorial : K)⁻¹) • h3d K i ^ n) f ∈ FockLat R := by
   intro m
-  rw [LinearMap.smul_apply, coeff_smul, smul_eq_mul, coeff_diagLaplacian_pow]
+  rw [LinearMap.smul_apply, MvPolynomial.coeff_smul, smul_eq_mul, coeff_diagLaplacian_pow]
   have hn : (n.factorial : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
   have h1 := hf (m + h3s i n)
   rw [xFactorial_add_diagExponent] at h1
-  have : (xFact m : K) * ((n.factorial : K)⁻¹ * (coeff (m + h3s i n) f *
+  have : (xFact m : K) * ((n.factorial : K)⁻¹ * (AddMonoidAlgebra.coeff f (m + h3s i n) *
         ((((m (Sum.inl i) + n).descFactorial n : ℕ) : K) * (((m (Sum.inr i) + n).descFactorial n : ℕ) : K)))) =
       (((m (Sum.inr i) + n).choose n : ℕ) : K) *
-        ((((m (Sum.inl i) + n).descFactorial n * xFact m : ℕ) : K) * coeff (m + h3s i n) f) := by
+        ((((m (Sum.inl i) + n).descFactorial n * xFact m : ℕ) : K) * AddMonoidAlgebra.coeff f (m + h3s i n)) := by
     rw [Nat.cast_mul, descFactorial_cast_eq (m (Sum.inr i))]
     field_simp
   rw [this]
@@ -267,6 +318,7 @@ variable {K : Type} [Field K] [CharZero K] {k : ℕ}
 theorem linearSubst_pairing (g : GL (Fin k) K) : glAct g (hXY K k) = hXY K k := by
   have hg : ((g⁻¹ : GL (Fin k) K) : Matrix (Fin k) (Fin k) K) * (g : Matrix (Fin k) (Fin k) K) = 1 := by
     rw [← Matrix.GeneralLinearGroup.coe_mul]; simp
+
   simp only [glAct, hXY, map_sum, map_mul, aeval_X, Sum.elim_inl, Sum.elim_inr]
   simp only [Finset.sum_mul_sum]
   rw [Finset.sum_comm]
@@ -276,6 +328,7 @@ theorem linearSubst_pairing (g : GL (Fin k) K) : glAct g (hXY K k) = hXY K k := 
       (C (((g⁻¹ : GL (Fin k) K) : Matrix (Fin k) (Fin k) K) l i) * X (Sum.inr l)) =
       C ((1 : Matrix (Fin k) (Fin k) K) l j) * ((X (Sum.inl j) : PolXY K k) * X (Sum.inr l)) := by
     intro l
+
     rw [← hg, Matrix.mul_apply, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [C_mul]; ring
@@ -287,9 +340,9 @@ theorem pderiv_aeval_eq_sum_chain_rule {σ : Type} [Fintype σ] (u : σ → MvPo
   classical
   induction f using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp only [map_add, hp, hq, add_mul, Finset.sum_add_distrib]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq, add_mul, Finset.sum_add_distrib]
   | mul_X p n hp =>
-    simp only [map_mul, aeval_X, Derivation.leibniz, smul_eq_mul, hp, map_add, pderiv_X, add_mul,
+    simp only [map_mul, aeval_X, Derivation.leibniz, smul_eq_mul, hp, map_add (f := _), pderiv_X, add_mul,
       Finset.sum_add_distrib]
     have h1 : ∑ w : σ, aeval u p * aeval u ((Pi.single w 1 : σ → MvPolynomial σ K) n) * pderiv v (u w) =
         aeval u p * pderiv v (u n) := by
@@ -309,6 +362,7 @@ theorem pderiv_inl_linearSubst (g : GL (Fin k) K) (j : Fin k) (f : PolXY K k) :
   classical
   unfold glAct
   rw [pderiv_aeval_eq_sum_chain_rule, Fintype.sum_sum_type]
+
   simp only [Sum.elim_inl, Sum.elim_inr, map_sum, pderiv_C_mul, pderiv_X, Pi.single_apply]
   simp [mul_comm]
 
@@ -318,6 +372,7 @@ theorem pderiv_inr_linearSubst (g : GL (Fin k) K) (j : Fin k) (f : PolXY K k) :
   classical
   unfold glAct
   rw [pderiv_aeval_eq_sum_chain_rule, Fintype.sum_sum_type]
+
   simp only [Sum.elim_inl, Sum.elim_inr, map_sum, pderiv_C_mul, pderiv_X, Pi.single_apply]
   simp [mul_comm]
 
@@ -328,7 +383,9 @@ theorem laplacian_apply' (f : PolXY K k) :
 theorem laplacian_linearSubst (g : GL (Fin k) K) (f : PolXY K k) : ctrF K k (glAct g f) = glAct g (ctrF K k f) := by
   have hg : (g : Matrix (Fin k) (Fin k) K) * ((g⁻¹ : GL (Fin k) K) : Matrix (Fin k) (Fin k) K) = 1 := by
     rw [← Matrix.GeneralLinearGroup.coe_mul]; simp
+
   rw [laplacian_apply', laplacian_apply', map_sum]
+
   simp only [pderiv_inr_linearSubst, map_sum, pderiv_C_mul, pderiv_inl_linearSubst, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -337,6 +394,7 @@ theorem laplacian_linearSubst (g : GL (Fin k) K) (f : PolXY K k) : ctrF K k (glA
         (C ((g : Matrix (Fin k) (Fin k) K) l j) * glAct g (pderiv (Sum.inl l) (pderiv (Sum.inr i) f))) =
       C ((1 : Matrix (Fin k) (Fin k) K) l i) * glAct g (pderiv (Sum.inl l) (pderiv (Sum.inr i) f)) := by
     intro l
+
     rw [← hg, Matrix.mul_apply, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [C_mul]; ring

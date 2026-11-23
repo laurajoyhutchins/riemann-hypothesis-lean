@@ -1,9 +1,51 @@
-import Mathlib
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsConjLinearIsometryCompactUnitaryTypeWeylMoStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormalizedFockFormPureTensorPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsConjLinearOfGramEqStatement
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsConjLinearIsometryCompactUnitaryTypeWeylMoStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsConjLinearOfGramEqStatement
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormalizedFockFormPureTensorPropertiesStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.MainNotions.S Formalism.L2.Forms Formalism.UG Matrix NumberField IsDedekindDomain
 open scoped InnerProductSpace TensorProduct
@@ -35,7 +77,7 @@ theorem nfAll_add_left {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeigh
     (p p' q : MvPolynomial (ι × Fin n × Fin n) ℂ) :
     nfAll lam (p + p') q = nfAll lam p q + nfAll lam p' q := by
   unfold nfAll
-  rw [fockF_eq_fockL (p + p') q, map_add, ← fockF_eq_fockL p q, ← fockF_eq_fockL p' q, add_div]
+  rw [fockF_eq_fockL (p + p') q, map_add (f := _), ← fockF_eq_fockL p q, ← fockF_eq_fockL p' q, add_div]
 
 theorem nfAll_smul_left {ι : Type} [Fintype ι] {n : ℕ} (lam : ι → DomWeight n)
     (c : ℂ) (p q : MvPolynomial (ι × Fin n × Fin n) ℂ) :
@@ -55,7 +97,7 @@ theorem eval_rowAct {n : ℕ} (g x : Matrix (Fin n) (Fin n) ℂ) (p : MvPolynomi
       MvPolynomial.eval (fun v : Fin n × Fin n => (g * x) v.1 v.2) p := by
   induction p using MvPolynomial.induction_on with
   | C a => simp [Formalism.GradedWeylDivisibility.rowAct]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p v hp =>
     have hX : MvPolynomial.eval (fun w : Fin n × Fin n => x w.1 w.2)
         (Formalism.GradedWeylDivisibility.rowAct ℂ g (MvPolynomial.X v)) = (g * x) v.1 v.2 := by
@@ -136,7 +178,7 @@ theorem tensor_dict : ∀ (ι : Type) [Fintype ι] (k n : ℕ) (h : k = n) (lam 
       rw [hjeq τ (m τ) (hm τ) (x τ)]
       exact factor_eq (m τ) (o τ) (y.1 τ) (y'.1 τ) (hm τ) (ho τ) (shiftOf lam τ) (j τ (x τ)) (hy τ)
     | zero => simp
-    | add z w _ _ hz hw => simp only [map_add, Pi.add_apply, hz, hw]
+    | add z w _ _ hz hw => simp only [map_add (f := _), Pi.add_apply, hz, hw]
     | smul c z _ hz => simp only [map_smul, map_smulₛₗ, Pi.smul_apply, smul_eq_mul, hz]
 
 end GlobalTheory.TenTypes

@@ -1,4 +1,46 @@
-import Formalism.LocalToGlobal.Columns.CardFilterNeighboursEqPaths
+module
+
+public import Formalism.LocalToGlobal.Columns.CardFilterNeighboursEqPaths
+public import Formalism.LocalToGlobal.Columns.HeckeSpCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -46,10 +88,20 @@ section Lat
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ}
 
 theorem conjPrime_ne_conjPrime {P Q : HeightOneSpectrum (𝓞 E)} (h : Q ≠ P) : conjPrime₂ Q ≠ conjPrime₂ P := fun e =>
-  h (by rw [← conjugatePrime_conjugatePrime Q, e, conjugatePrime_conjugatePrime])
+  h (by
+    have hinv (R : HeightOneSpectrum (𝓞 E)) : conjPrime₂ (conjPrime₂ R) = R := by
+      apply HeightOneSpectrum.ext
+      ext r
+      rw [mem_conjP, mem_conjP, cO_cO]
+    exact (hinv Q).symm.trans ((congrArg conjPrime₂ e).trans (hinv P)))
 
 theorem ne_conjPrime_symm {P Q : HeightOneSpectrum (𝓞 E)} (h : Q ≠ conjPrime₂ P) : P ≠ conjPrime₂ Q := fun e =>
-  h (by rw [e, conjugatePrime_conjugatePrime])
+  h (by
+    have hinv : conjPrime₂ (conjPrime₂ Q) = Q := by
+      apply HeightOneSpectrum.ext
+      ext r
+      rw [mem_conjP, mem_conjP, cO_cO]
+    exact hinv.symm.trans (congrArg conjPrime₂ e.symm))
 
 theorem neighbour_inf_eq_sup {P Q : HeightOneSpectrum (𝓞 E)} (hQP' : Q ≠ conjPrime₂ P) (hQbP : conjPrime₂ Q ≠ conjPrime₂ P) {i j : ℕ}
     {N e M : Submodule (𝓞 E) (Sp E n)} (h1 : IsHeckeNbr P.asIdeal i N e) (h2 : IsHeckeNbr Q.asIdeal j e M) :
@@ -198,12 +250,12 @@ section Deco
 
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {n : ℕ} {ST SG : Finset (HeightOneSpectrum (𝓞 E))}
 
-theorem mem_heckeNeighbour_iff {P : HeightOneSpectrum (𝓞 E)} {i : ℕ} {d e : DecoSet E n ST SG} :
+theorem mem_heckeNeighbour_iff {P : HeightOneSpectrum (𝓞 E)} {i : ℕ} {d e : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)} :
     e ∈ d.heckeNb P.asIdeal i ↔ IsHeckeNbr P.asIdeal i d.1.N e.1.N ∧ e.1.f = d.1.f ∧ e.1.be = d.1.be :=
   DecoSet.mem_heckeNb P.ne_bot (conjIdeal_ne_bot P.ne_bot) i d e
 
 theorem pathCount_le_one {P Q : HeightOneSpectrum (𝓞 E)} (hne : conjPrime₂ P ≠ P) (hQP' : Q ≠ conjPrime₂ P)
-    (hQbP : conjPrime₂ Q ≠ conjPrime₂ P) (i j : ℕ) (d f : DecoSet E n ST SG) : decorationPathCount P.asIdeal Q.asIdeal i j d f ≤ 1 := by
+    (hQbP : conjPrime₂ Q ≠ conjPrime₂ P) (i j : ℕ) (d f : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) : decorationPathCount P.asIdeal Q.asIdeal i j d f ≤ 1 := by
   classical
   unfold decorationPathCount
   rw [Finset.card_le_one]
@@ -219,7 +271,7 @@ theorem pathCount_le_one {P Q : HeightOneSpectrum (𝓞 E)} (hne : conjPrime₂ 
 
 theorem pathCount_pos_symm {P Q : HeightOneSpectrum (𝓞 E)} (hneQ : conjPrime₂ Q ≠ Q) (hQP : Q ≠ P) (hQP' : Q ≠ conjPrime₂ P)
     (hSTQ : ∀ R : ST, R.1 ≠ Q ∧ R.1 ≠ conjPrime₂ Q) (hSGQ : ∀ w : SG, w.1 ≠ Q ∧ w.1 ≠ conjPrime₂ Q) (i j : ℕ)
-    (d f : DecoSet E n ST SG) (h : 0 < decorationPathCount P.asIdeal Q.asIdeal i j d f) :
+    (d f : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) (h : 0 < decorationPathCount P.asIdeal Q.asIdeal i j d f) :
     0 < decorationPathCount Q.asIdeal P.asIdeal j i d f := by
   classical
   unfold decorationPathCount at h ⊢
@@ -227,7 +279,7 @@ theorem pathCount_pos_symm {P Q : HeightOneSpectrum (𝓞 E)} (hneQ : conjPrime�
   rw [Finset.mem_filter, mem_heckeNeighbour_iff, mem_heckeNeighbour_iff] at he
   obtain ⟨⟨a1, b1, c1⟩, a2, b2, c2⟩ := he
   obtain ⟨N', hl, hu, hnb, hsame, hnb2⟩ := neighbour_path_transfer hneQ hQP hQP' d.2.lat d.2.uni f.2.uni a1 a2
-  let e' : DecoSet E n ST SG := ⟨{ N := N', f := d.1.f, be := d.1.be },
+  let e' : DecoSet (E := E) (n := n) (ST := ST) (SG := SG) := ⟨{ N := N', f := d.1.f, be := d.1.be },
     d.2.replN hl hu (fun R => hsame R.1 (hSTQ R).1 (hSTQ R).2) (fun w => hsame w.1 (hSGQ w).1 (hSGQ w).2)⟩
   refine Finset.card_pos.2 ⟨e', ?_⟩
   rw [Finset.mem_filter, mem_heckeNeighbour_iff, mem_heckeNeighbour_iff]
@@ -236,7 +288,7 @@ theorem pathCount_pos_symm {P Q : HeightOneSpectrum (𝓞 E)} (hneQ : conjPrime�
 theorem pathCount_symm_distinct (P Q : HeightOneSpectrum (𝓞 E)) (hne : conjPrime₂ P ≠ P) (hneQ : conjPrime₂ Q ≠ Q) (hQP : Q ≠ P)
     (hQP' : Q ≠ conjPrime₂ P) (hST : ∀ R : ST, R.1 ≠ P ∧ R.1 ≠ conjPrime₂ P) (hSG : ∀ w : SG, w.1 ≠ P ∧ w.1 ≠ conjPrime₂ P)
     (hSTQ : ∀ R : ST, R.1 ≠ Q ∧ R.1 ≠ conjPrime₂ Q) (hSGQ : ∀ w : SG, w.1 ≠ Q ∧ w.1 ≠ conjPrime₂ Q) (i j : ℕ)
-    (d f : DecoSet E n ST SG) : decorationPathCount P.asIdeal Q.asIdeal i j d f = decorationPathCount Q.asIdeal P.asIdeal j i d f := by
+    (d f : DecoSet (E := E) (n := n) (ST := ST) (SG := SG)) : decorationPathCount P.asIdeal Q.asIdeal i j d f = decorationPathCount Q.asIdeal P.asIdeal j i d f := by
   have hPQ : P ≠ Q := Ne.symm hQP
   have hPQ' : P ≠ conjPrime₂ Q := ne_conjPrime_symm hQP'
   have h1 := pathCount_le_one hne hQP' (conjPrime_ne_conjPrime hQP) i j d f

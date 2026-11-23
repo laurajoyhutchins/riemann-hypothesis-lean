@@ -1,7 +1,61 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJStandardL
-import GroundTheory.AutomorphicForms.TensorProductTheorem.CuspidalRepBasic
-import GroundTheory.AutomorphicForms.GL2Classical.HeckeSatakeRep
+module
+
+public import GroundTheory.AutomorphicForms.HeckeAlgebraLevel
+public import GroundTheory.AutomorphicForms.StrongApproximationSLDense
+public import GroundTheory.AutomorphicForms.GL2.GJGlobalDefs
+public import GroundTheory.AutomorphicForms.GL2.GJStandardLDefs
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.CuspidalRep
+import GroundTheory.AutomorphicForms.GL2.GJFEInducedLevi
+public import GroundTheory.AutomorphicForms.TensorProductTheorem.CuspidalRepBasic
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open MeasureTheory Set Filter NumberField IsDedekindDomain
 open GroundTheory.Automorphic GroundTheory.Automorphic.HeckeAlgebra
@@ -10,7 +64,7 @@ namespace GroundTheory.Automorphic.GJStandardLCuspidal
 
 noncomputable section
 
-set_option maxHeartbeats 1000000
+
 set_option linter.unusedSectionVars false
 
 section Abstract
@@ -50,8 +104,8 @@ theorem abstract_form {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ 
     change N⁻¹ * L u * N = _
     rw [hLa, mul_comm N⁻¹, mul_assoc, inv_mul_cancel₀ hN0, mul_one]
 
-include μ hKc hKo in
 
+include μ hKc hKo in
 theorem schur_form {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] (B : V →ₗ[ℂ] H)
     (hB : ∀ u, B u = 0 → u = 0)
     (hinv : ∀ x u w, inner ℂ (B (ρ x u)) (B (ρ x w)) = inner ℂ (B u) (B w))
@@ -101,7 +155,7 @@ theorem schur_form {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] 
     { toSubmodule :=
         { carrier := {u | ∀ x, ∀ w ∈ F, inner ℂ (B w) (R (B (ρ x u))) = c * inner ℂ (B w) (B (ρ x u))}
           add_mem' := fun {a b} ha hb x w hw => by
-            simp only [map_add, inner_add_right]
+            simp only [map_add (f := _), inner_add_right]
             rw [ha x w hw, hb x w hw]; ring
           zero_mem' := fun x w hw => by simp
           smul_mem' := fun c' a ha x w hw => by
@@ -148,7 +202,7 @@ variable {K : Type} [Field K] [NumberField K] {n : ℕ}
 
 theorem toOne_mul (g h : AdelicGLn.AdelicGL K n) : toOne (g * h) = toOne g * toOne h := by
   apply Subtype.ext
-  show ((toOne (g * h) : Reduction.normOneGL K n) : AdelicGLn.AdelicGL K n) =
+  show ((toOne (g * h) : Reduction.normOneGL (K := K) (n := n)) : AdelicGLn.AdelicGL K n) =
     (toOne g : AdelicGLn.AdelicGL K n) * (toOne h : AdelicGLn.AdelicGL K n)
   rw [coe_toOne, coe_toOne, coe_toOne, map_mul, map_mul, mul_inv_rev]
   have hc : ∀ (s : {r : ℝ // 0 < r}) (x : AdelicGLn.AdelicGL K n),
@@ -165,7 +219,7 @@ theorem toOne_mul (g h : AdelicGLn.AdelicGL K n) : toOne (g * h) = toOne g * toO
 theorem toOne_one : toOne (1 : AdelicGLn.AdelicGL K n) = 1 :=
   Subtype.ext (by rw [coe_toOne, map_one, map_one, inv_one, mul_one]; rfl)
 
-variable (μ : Measure (Reduction.normOneGL K n)) [μ.IsHaarMeasure]
+variable (μ : Measure (Reduction.normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 theorem T_mul (a b : AdelicGLn.AdelicGL K n) (v : cuspidalL2 μ) :
     cuspRep μ (toOne (a * b)) v = cuspRep μ (toOne a) (cuspRep μ (toOne b) v) :=
@@ -185,10 +239,10 @@ theorem matrixCoeff_eq_inner {φ : cuspForms K n} (hφ : φ ∈ centralCuspForms
     (g : AdelicGLn.AdelicGL K n) :
     GJGlobal.matrixCoeff μ (φ : AdelicGLn.AdelicGL K n → ℂ) φ g =
       inner ℂ (cuspToL2 μ φ) (cuspRep μ (toOne g) (cuspToL2 μ φ)) := by
-  have hmp := measurePreserving_rightMul (Γ := Reduction.rationalGLOne K n) μ (toOne g)
+  have hmp := measurePreserving_rightMul (Γ := Reduction.rationalGLOne (K := K) (n := n)) μ (toOne g)
   have hq : ((cuspRep μ (toOne g) (cuspToL2 μ φ) : cuspidalL2 μ) :
-        Lp ℂ 2 (quotientMeasure (Reduction.rationalGLOne K n) μ)) =ᵐ[quotientMeasure (Reduction.rationalGLOne K n) μ]
-      fun q => cuspQuot φ.2.1.isLeftInvariant (rightMul (Reduction.rationalGLOne K n) (toOne g) q) := by
+        Lp ℂ 2 (quotientMeasure (Reduction.rationalGLOne (K := K) (n := n)) μ)) =ᵐ[quotientMeasure (Reduction.rationalGLOne (K := K) (n := n)) μ]
+      fun q => cuspQuot φ.2.1.isLeftInvariant (rightMul (Reduction.rationalGLOne (K := K) (n := n)) (toOne g) q) := by
     rw [coe_cuspRep_apply]
     exact (coeFn_rightTranslate _ _ _ _).trans
       (hmp.quasiMeasurePreserving.ae_eq (coeFn_cuspToL2 μ φ))
@@ -196,7 +250,7 @@ theorem matrixCoeff_eq_inner {φ : cuspForms K n} (hφ : φ ∈ centralCuspForms
   refine Eq.trans ?_ (inner_ae _ _ _ _ (coeFn_cuspToL2 μ φ) hq).symm
   have hc : Continuous (cuspQuot φ.2.1.isLeftInvariant) := continuous_cuspQuot _ φ.2.1.continuous
   have h1 : AEStronglyMeasurable (cuspQuot φ.2.1.isLeftInvariant)
-      (quotientMeasure (Reduction.rationalGLOne K n) μ) := hc.aestronglyMeasurable
+      (quotientMeasure (Reduction.rationalGLOne (K := K) (n := n)) μ) := hc.aestronglyMeasurable
   rw [quotientMeasure, integral_map (measurable_mk _).aemeasurable]
   · unfold GJGlobal.matrixCoeff
     refine integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
@@ -420,7 +474,7 @@ theorem hR_gen {A H : Type*} [Group A] [NormedAddCommGroup H] [InnerProductSpace
 variable {K : Type} [Field K] [NumberField K] {n : ℕ}
   (P : CuspidalAutomorphicRepresentation K n) (D : AdelicDecomposition P.toModule)
   (a : D.toDecomposition.W₁) (x : ∀ v, D.finite.W v) (hx : IsRestricted D.finite.ξ x)
-  (μ : Measure (Reduction.normOneGL K n)) [μ.IsHaarMeasure]
+  (μ : Measure (Reduction.normOneGL (K := K) (n := n))) [μ.IsHaarMeasure]
 
 def Phi0 : cuspForms K n := ((phi D a x hx : P.carrier) : cuspForms K n)
 
@@ -591,52 +645,6 @@ section Conclusion
 open GodementJacquet GLnLocal GJStandardL NumberField.mixedEmbedding
 open scoped SchwartzMap Classical
 
-def PartialLFunctionalEquation {K : Type} [Field K] [NumberField K] {n : ℕ} (S : Finset (HeightOneSpectrum (𝓞 K)))
-    {V : HeightOneSpectrum (𝓞 K) → Type} [∀ v, AddCommGroup (V v)] [∀ v, Module ℂ (V v)]
-    (π : ∀ v, Representation ℂ (GL (Fin n) (v.adicCompletion K)) (V v)) (ξ : ∀ v, V v)
-    (ℓ : ∀ v, Module.Dual ℂ (V v)) (fi : AdelicGLn.InfiniteAdelicGL K n → ℂ) : Prop :=
-    ∃ σ : ℝ, ∃ Λ : ℂ → ℂ, Differentiable ℂ Λ ∧
-      ∃ (φ φ' : 𝓢(Fin n × Fin n → mixedSpace K, ℂ))
-        (Φ Φ' : ∀ v : HeightOneSpectrum (𝓞 K), Matrix (Fin n) (Fin n) (v.adicCompletion K) → ℂ) (c c' : ℂ),
-        c ≠ 0 ∧ c' ≠ 0 ∧ φ' = archMatrixFourier φ ∧
-        (∃ C : ℂ, C ≠ 0 ∧
-          (∀ (φ₀ : 𝓢(Fin n × Fin n → mixedSpace K, ℂ)) (S₀ : Finset (HeightOneSpectrum (𝓞 K)))
-            (Φ₀ : ∀ v : HeightOneSpectrum (𝓞 K), Matrix (Fin n) (Fin n) (v.adicCompletion K) → ℂ),
-            (∀ v ∈ S₀, IsSchwartzBruhat (Φ₀ v)) →
-            (∀ v ∉ S₀, Φ₀ v = integralIndicator (v.adicCompletion K) n) →
-            GJMatrix.adelicMatrixFourier K (GJStandardL.matrixTensor φ₀ Φ₀) = C • GJStandardL.matrixTensor (archMatrixFourier φ₀)
-              (fun v ↦ GJMatrix.localMatrixFourier (GroundTheory.Global.localAdelicChar K v) (Φ₀ v))) ∧
-          c = C ^ 3 * c') ∧
-        (∀ v ∈ S, IsSchwartzBruhat (Φ v) ∧
-          Φ' v = GJMatrix.localMatrixFourier (GroundTheory.Global.localAdelicChar K v) (Φ v)) ∧
-        (∀ v ∉ S, Φ v = integralIndicator (v.adicCompletion K) n ∧
-          Φ' v = integralIndicator (v.adicCompletion K) n) ∧
-        (∀ v ∈ S, RatFE (v.adicCompletion K)
-          (gammaFactor (v.adicCompletion K) (π v) (GroundTheory.Global.localAdelicChar K v))
-          (zetaIntegral (localHaar n v) (Φ v) (Parabolic.matrixCoeff (F := v.adicCompletion K) (π v) (ξ v) (ℓ v)))
-          (fun s ↦ zetaIntegral (localHaar n v) (Φ' v)
-            (fun g ↦ Parabolic.matrixCoeff (F := v.adicCompletion K) (π v) (ξ v) (ℓ v) g⁻¹) (1 - s))) ∧
-        Differentiable ℂ (archZeta Measure.haar φ' (fun x ↦ fi x⁻¹)) ∧
-        (∃ s, archZeta Measure.haar φ' (fun x ↦ fi x⁻¹) s ≠ 0) ∧
-        (∀ v ∈ S, ∃ a : ℂ, a ≠ 0 ∧ ∃ g₀ : GL (Fin n) (v.adicCompletion K), ∀ s : ℂ,
-          zetaIntegral (localHaar n v) (Φ' v)
-            (fun g ↦ Parabolic.matrixCoeff (F := v.adicCompletion K) (π v) (ξ v) (ℓ v) g⁻¹) s =
-            a * detPow g₀ (s + ((n : ℂ) - 1) / 2)) ∧
-        ∀ s : ℂ, σ < s.re →
-          HasProd (fun v : {v : HeightOneSpectrum (𝓞 K) // v ∉ S} ↦
-            LFunction (F := (v : HeightOneSpectrum (𝓞 K)).adicCompletion K) (π v) s) (partialL S π s) ∧
-          HasProd (fun v : {v : HeightOneSpectrum (𝓞 K) // v ∉ S} ↦
-            LFunction (F := (v : HeightOneSpectrum (𝓞 K)).adicCompletion K) (contragredient (π v)) s)
-            (dualPartialL S π s) ∧
-          partialL S π s ≠ 0 ∧ dualPartialL S π s ≠ 0 ∧
-          Λ s = c * archZeta Measure.haar φ fi s *
-            (∏ v ∈ S, zetaIntegral (localHaar n v) (Φ v)
-              (Parabolic.matrixCoeff (F := v.adicCompletion K) (π v) (ξ v) (ℓ v)) s) * partialL S π s ∧
-          Λ (1 - s) = c' * archZeta Measure.haar φ' (fun x ↦ fi x⁻¹) s *
-            (∏ v ∈ S, zetaIntegral (localHaar n v) (Φ' v)
-              (fun g ↦ Parabolic.matrixCoeff (F := v.adicCompletion K) (π v) (ξ v) (ℓ v) g⁻¹) s) *
-            dualPartialL S π s
-
 end Conclusion
 
 section Final
@@ -715,7 +723,7 @@ theorem exists_pureTensor_spherical (P : CuspidalAutomorphicRepresentation K n) 
     · exact hwf v hv
 
 theorem matrixCoeff_factorization_of_pureTensor (P : CuspidalAutomorphicRepresentation K n) (D : AdelicDecomposition P.toModule)
-    (μ : Measure (Reduction.normOneGL K n)) [μ.IsHaarMeasure] (a : D.toDecomposition.W₁)
+    (μ : Measure (Reduction.normOneGL (K := K) (n := n))) [μ.IsHaarMeasure] (a : D.toDecomposition.W₁)
     (x : ∀ v, D.finite.W v) (hx : IsRestricted D.finite.ξ x) (ha : a ≠ 0) (hx0 : ∀ v, x v ≠ 0) :
     ∃ (ℓ : ∀ v, Module.Dual ℂ (D.finite.W v)) (fi : InfiniteAdelicGL K n → ℂ),
       (∀ v, ℓ v ∈ smoothVectors (Representation.dual (D.finite.π v))) ∧ (∀ v, ℓ v (x v) = 1) ∧
@@ -763,33 +771,6 @@ theorem matrixCoeff_factorization_of_pureTensor (P : CuspidalAutomorphicRepresen
     rw [hk, hℓ1 v]
 
 end Sph
-
-theorem matrixCoeff_factorization_cuspidal (P : CuspidalAutomorphicRepresentation K n)
-    (D : AdelicDecomposition P.toModule) (μ : Measure (Reduction.normOneGL K n)) [μ.IsHaarMeasure] :
-    ∃ (φ : cuspForms K n) (ξ : ∀ v, D.finite.W v) (ℓ : ∀ v, Module.Dual ℂ (D.finite.W v))
-      (fi : InfiniteAdelicGL K n → ℂ) (S₀ : Finset (HeightOneSpectrum (𝓞 K))),
-      φ ∈ P.carrier ∧ φ ≠ 0 ∧ (∀ v, ξ v ∈ smoothVectors (D.finite.π v)) ∧
-      (∀ v, ℓ v ∈ smoothVectors (Representation.dual (D.finite.π v))) ∧
-      (∀ v ∉ S₀, ξ v ∈ fixedVectors (D.finite.π v) (integralGL (v.adicCompletion K) n) ∧ ℓ v (ξ v) = 1) ∧
-      (∀ v ∉ S₀, ℓ v ∈ fixedVectors (Representation.dual (D.finite.π v)) (integralGL (v.adicCompletion K) n)) ∧
-      (∀ g, GJGlobal.matrixCoeff μ (φ : AdelicGL K n → ℂ) φ g = fi (GJStandardL.archComp K n g) *
-        ∏ᶠ v : HeightOneSpectrum (𝓞 K), Parabolic.matrixCoeff (F := v.adicCompletion K) (D.finite.π v) (ξ v) (ℓ v)
-          (GJStandardL.localComp n v g)) ∧
-      ∃ g, GJGlobal.matrixCoeff μ (φ : AdelicGL K n → ℂ) φ g ≠ 0 := by
-  obtain ⟨a, x, hx, ha, hx0⟩ := exists_pureTensor P D
-  obtain ⟨ℓ, fi, hℓs, hℓ1, hℓK, hf, hF1⟩ := matrixCoeff_factorization_of_pureTensor P D μ a x hx ha hx0
-  have hS : ∀ᶠ v in cofinite, x v ∈ fixedVectors (D.finite.π v) (integralGL (v.adicCompletion K) n) := by
-    filter_upwards [hx, D.finite.mem_fixedVectors] with v h1 h2
-    rw [h1]
-    exact h2
-  have hfin := Filter.eventually_cofinite.1 hS
-  have hnot : ∀ v ∉ hfin.toFinset, x v ∈ fixedVectors (D.finite.π v) (integralGL (v.adicCompletion K) n) := by
-    intro v hv
-    by_contra h
-    exact hv (hfin.mem_toFinset.2 h)
-  exact ⟨Phi0 P D a x hx, x, ℓ, fi, hfin.toFinset, (phi D a x hx).2,
-    fun h => phi_ne D a x hx ha hx0 (Subtype.ext h), fun v => (D.finite.isAdmissible v).1 (x v), hℓs,
-    fun v hv => ⟨hnot v hv, hℓ1 v⟩, fun v hv => hℓK v (hnot v hv), hf, ⟨1, hF1⟩⟩
 
 end Final
 

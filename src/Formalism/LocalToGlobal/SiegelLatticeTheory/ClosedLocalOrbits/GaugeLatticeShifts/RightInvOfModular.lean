@@ -1,7 +1,48 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.EqOneOfZpowMem
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.HermitianZZEqNeg
-import Formalism.RealPlaceAnalysis.FinalF
+module
+
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.IsClosedSLoc
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacobianCoordinates
+public import Formalism.RealPlaceAnalysis.FinalF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,21 +57,7 @@ variable {n r : ℕ} (ε : Fin n → Bool) (e : Fin r → Fin n → ℂ) (z : Fi
 
 theorem inS_pres {g : Matrix (Fin n) (Fin n) ℂ} (hg : InS e z g) (a : ℕ) :
     ∀ y ∈ spanLt e a, g *ᵥ y ∈ spanLt e a := by
-  intro y hy
-  have hle : spanLt e a ≤ (spanLt e a).comap (Matrix.mulVecLin g) := by
-    unfold spanLt
-    rw [Submodule.span_le]
-    rintro _ ⟨b, hb, rfl⟩
-    have hb' : (b : ℕ) < a := hb
-    simp only [SetLike.mem_coe, Submodule.mem_comap, Matrix.mulVecLin_apply]
-    have e1 : g *ᵥ e b = e b + (g - 1) *ᵥ e b := by
-      rw [Matrix.sub_mulVec, Matrix.one_mulVec]; abel
-    rw [e1]
-    refine Submodule.add_mem _ (Submodule.subset_span ⟨b, hb', rfl⟩) ?_
-    refine Submodule.span_mono ?_ (hg.1 b)
-    rintro _ ⟨c, hc, rfl⟩
-    exact ⟨c, lt_trans hc hb', rfl⟩
-  exact hle hy
+  apply Formalism.L2.SG.RealObj.InfCut.JacobianCoordinates.JL.HC.spanLt_pres <;> assumption
 
 theorem inS_mul {g h : Matrix (Fin n) (Fin n) ℂ} (hg : InS e z g) (hh : InS e z h) : InS e z (g * h) := by
   have key : ∀ v : Fin n → ℂ, (g * h - 1) *ᵥ v = g *ᵥ ((h - 1) *ᵥ v) + (g - 1) *ᵥ v := fun v => by
@@ -74,61 +101,6 @@ theorem SG_closed : IsClosed (SG ε e z : Set (Formalism.REAL.UJ ε)) := by
 section Sub
 
 variable {ε e z}
-
-local notation "SS" => (SG ε e z)
-
-instance instLCSG : LocallyCompactSpace SS := (SG_closed ε e z).isClosedEmbedding_subtypeVal.locallyCompactSpace
-
-instance instSCSG : SecondCountableTopology SS := Topology.IsEmbedding.subtypeVal.secondCountableTopology
-
-theorem rightInv_of_modular (hΔ : ∀ s : SS, Measure.modularCharacterFun s = 1)
-    (μ : Measure (Formalism.REAL.UJ ε)) (hμ : IsHaarS (SLoc ε e z) μ) :
-    ∀ s ∈ SLoc ε e z, μ.map (· * s) = μ := by
-  intro s hs
-  obtain ⟨⟨hσ, hne, hcompl, hinv⟩, hfin⟩ := hμ
-  have hSm : MeasurableSet (SG ε e z : Set (Formalism.REAL.UJ ε)) := (SG_closed ε e z).measurableSet
-  have memb : MeasurableEmbedding (Subtype.val : SS → Formalism.REAL.UJ ε) := MeasurableEmbedding.subtype_coe hSm
-  set ν : Measure SS := μ.comap Subtype.val with hν
-  have hrestr : μ.restrict (SG ε e z : Set (Formalism.REAL.UJ ε)) = μ := by
-    apply Measure.restrict_eq_self_of_ae_mem
-    rw [ae_iff]
-    exact hcompl
-  have hmapν : ν.map Subtype.val = μ := by
-    rw [hν, memb.map_comap, Subtype.range_coe, hrestr]
-  have himg : ∀ (t : SS) (A : Set SS), Subtype.val '' ((fun x => t * x) ⁻¹' A) =
-      (fun x => (t : Formalism.REAL.UJ ε) * x) ⁻¹' (Subtype.val '' A) := by
-    intro t A
-    ext x
-    constructor
-    · rintro ⟨y, hy, rfl⟩
-      exact ⟨t * y, hy, rfl⟩
-    · rintro ⟨a, ha, hax⟩
-      have hxS : x ∈ SS := by
-        have : x = ((t⁻¹ * a : SS) : Formalism.REAL.UJ ε) := by
-          simp only [Subgroup.coe_mul, Subgroup.coe_inv, hax]; group
-        rw [this]; exact (t⁻¹ * a).2
-      refine ⟨⟨x, hxS⟩, ?_, rfl⟩
-      show t * ⟨x, hxS⟩ ∈ A
-      have : t * ⟨x, hxS⟩ = a := Subtype.ext (by simpa using hax.symm)
-      rw [this]; exact ha
-  have hνinv : ν.IsMulLeftInvariant := by
-    refine ⟨fun t => ?_⟩
-    ext A hA
-    rw [Measure.map_apply (measurable_const_mul t) hA, hν, memb.comap_apply, memb.comap_apply, himg,
-      ← Measure.map_apply (measurable_const_mul _) (memb.measurableSet_image.2 hA), hinv _ t.2]
-  have hνfin : IsFiniteMeasureOnCompacts ν := by
-    refine ⟨fun K hK => ?_⟩
-    rw [hν, memb.comap_apply]
-    exact (hK.image continuous_subtype_val).measure_lt_top
-  have hνeq : ν = ν.haarScalarFactor Measure.haar • Measure.haar := Measure.isMulLeftInvariant_eq_smul ν Measure.haar
-  have hνright : ν.map (· * ⟨s, hs⟩) = ν := by
-    rw [hνeq, Measure.map_smul, Formalism.L2.SG.RealObj.InfCut.UnitaryIsometries.Modular.map_right, hΔ, one_smul]
-  calc μ.map (· * s) = (ν.map Subtype.val).map (· * s) := by rw [hmapν]
-    _ = (ν.map (· * ⟨s, hs⟩)).map Subtype.val := by
-        rw [Measure.map_map (measurable_mul_const s) measurable_subtype_coe,
-          Measure.map_map measurable_subtype_coe (measurable_mul_const _)]
-        rfl
-    _ = μ := by rw [hνright, hmapν]
 
 end Sub
 

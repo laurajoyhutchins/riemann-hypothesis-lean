@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.MvPolynomial.PDeriv
+public import Mathlib.RingTheory.AlgebraicIndependent.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.MvPolynomial.IrreducibleQuadratic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -12,11 +67,11 @@ theorem derivation_aeval_eq {K R ι : Type*} [CommRing K] [CommRing R] [Algebra 
   classical
   induction P using MvPolynomial.induction_on with
   | C a => simp
-  | add p q hp hq => simp [map_add, hp, hq, add_mul, Finset.sum_add_distrib]
+  | add p q hp hq => simp [map_add (f := _), hp, hq, add_mul, Finset.sum_add_distrib]
   | mul_X p j hp =>
     simp only [map_mul, aeval_X, Derivation.leibniz, hp, smul_eq_mul, pderiv_X, Pi.single_apply,
       add_mul, Finset.sum_add_distrib, Finset.mul_sum]
-    simp only [map_add, map_mul, aeval_X, apply_ite (aeval z), map_zero, map_one, add_mul, mul_ite,
+    simp only [map_add (f := _), map_mul, aeval_X, apply_ite (aeval z), map_zero, map_one, add_mul, mul_ite,
       mul_one, mul_zero, ite_mul, zero_mul, Finset.sum_add_distrib, Finset.sum_ite_eq,
       Finset.mem_univ, if_true]
     ring
@@ -24,11 +79,12 @@ theorem derivation_aeval_eq {K R ι : Type*} [CommRing K] [CommRing R] [Algebra 
 theorem totalDegree_pderiv_lt {K ι : Type*} [CommRing K] (P : MvPolynomial ι K) (i : ι)
     (hP : 0 < P.totalDegree) : (pderiv i P).totalDegree < P.totalDegree := by
   classical
-  have hsum : pderiv i P = ∑ m ∈ P.support, pderiv i (monomial m (coeff m P)) := by
+  have hsum : pderiv i P = ∑ m ∈ P.support, pderiv i (monomial m (AddMonoidAlgebra.coeff P m)) := by
     conv_lhs => rw [P.as_sum]
+
     rw [map_sum]
   rw [hsum]
-  refine lt_of_le_of_lt (totalDegree_finset_sum _ _) ?_
+  refine lt_of_le_of_lt (MvPolynomial.totalDegree_finsetSum _ _) ?_
   rw [Finset.sup_lt_iff hP]
   intro m hm
   rw [pderiv_monomial]
@@ -62,8 +118,8 @@ theorem eq_C_of_pderiv_eq_zero {K ι : Type*} [Field K] [CharZero K] (P : MvPoly
     by_contra hc
     push_neg at hc
     exact hm0 (Finsupp.ext hc)
-  have hc := congrArg (coeff (m - Finsupp.single i 1)) (h i)
-  rw [coeff_pderiv, coeff_zero] at hc
+  have hc := congrArg (AddMonoidAlgebra.coeff · (m - Finsupp.single i 1)) (h i)
+  rw [coeff_pderiv, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] at hc
   have hm' : m - Finsupp.single i 1 + Finsupp.single i 1 = m := by
     ext k
     by_cases hk : k = i
@@ -98,7 +154,7 @@ theorem algebraicIndependent_of_derivations {K R ι J : Type*} [Field K] [CharZe
   have h0 := eq_C_of_pderiv_eq_zero P hd
   rw [totalDegree_eq_zero_iff_eq_C] at h0
   rw [h0, aeval_C] at hP
-  have hc : coeff 0 P = 0 := (algebraMap K R).injective (hP.trans (map_zero _).symm)
+  have hc : AddMonoidAlgebra.coeff P 0 = 0 := (algebraMap K R).injective (hP.trans (map_zero _).symm)
   rw [h0, hc, map_zero]
 
 end DerivationAlgebraicIndependence

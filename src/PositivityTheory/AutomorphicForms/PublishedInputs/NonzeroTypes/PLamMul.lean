@@ -1,5 +1,40 @@
-import Mathlib
-import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.NonzeroLeviEigenvectorExists
+module
+
+public import PositivityTheory.AutomorphicForms.PublishedInputs.NonzeroTypes.NonzeroLeviEigenvectorExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,7 +54,7 @@ theorem chk_mul (ψ : kˣ →* ℂˣ) {x y : k} (hx : x ≠ 0) (hy : y ≠ 0) :
     chk ψ (x * y) = chk ψ x * chk ψ y := by
   have hxy : x * y ≠ 0 := mul_ne_zero hx hy
   unfold chk
-  rw [dif_neg hxy, dif_neg hx, dif_neg hy]
+  rw [dite_eq_right hxy, dite_eq_right hx, dite_eq_right hy]
   have e : Units.mk0 (x * y) hxy = Units.mk0 x hx * Units.mk0 y hy := Units.ext rfl
   rw [e, map_mul, Units.val_mul]
 
@@ -29,7 +64,7 @@ theorem algebraMap_unit_ne_zero (u : 𝒪[k]ˣ) : algebraMap 𝒪[k] k (u : 𝒪
 theorem chk_unit (ψ : kˣ →* ℂˣ) (u : 𝒪[k]ˣ) :
     chk ψ (algebraMap 𝒪[k] k (u : 𝒪[k])) = ((res ψ u : ℂˣ) : ℂ) := by
   unfold chk
-  rw [dif_neg (algebraMap_unit_ne_zero u)]
+  rw [dite_eq_right (algebraMap_unit_ne_zero u)]
   have e : Units.mk0 (algebraMap 𝒪[k] k (u : 𝒪[k])) (algebraMap_unit_ne_zero u) = unitIncl k u :=
     Units.ext rfl
   rw [e]
@@ -61,7 +96,7 @@ theorem factor_mul (hC : CompactConductorBasicProp (k := k)) (hU : ModulusOnUnit
   have hhz := Δ_ne_zero G hU hB hh a
   by_cases ha : (a : ℕ) + 1 < G.s
   · obtain ⟨u, hu1, hu⟩ := hM hC hB g hg h hh a ha
-    have hn : G.μnext a = G.μ ⟨a + 1, ha⟩ := by unfold μnext; rw [dif_pos ha]
+    have hn : G.μnext a = G.μ ⟨a + 1, ha⟩ := by unfold μnext; rw [dite_eq_left ha]
     have hres : ((res (G.μ a / G.μnext a) u : ℂˣ) : ℂ) = 1 := by
       rw [hn, hB.2.2.2 a ⟨a + 1, ha⟩ u hu1, Units.val_one]
     rw [hu, chk_mul _ (mul_ne_zero hgz hhz) (algebraMap_unit_ne_zero u), chk_unit, hres, mul_one,

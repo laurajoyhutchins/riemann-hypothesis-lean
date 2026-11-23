@@ -1,5 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.FtFockZeroLeft
-import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.OtherStart
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.CoarseMultiplicity.FTDefs
+public import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.OtherStart
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.ContravariantIsotypicOrthogonal
+
+@[expose] public section
 
 noncomputable section
 
@@ -37,7 +82,7 @@ theorem supp_of_supported {A : Set σ} {F : MvPolynomial σ K} (hF : F ∈ suppo
     (ha : a ∈ F.support) : (a.support : Set σ) ⊆ A := by
   intro x hx
   rw [mem_supported] at hF
-  exact hF ((mem_vars x).mpr ⟨a, ha, hx⟩)
+  exact hF ((mem_vars_iff_mem_support x).mpr ⟨a, ha, hx⟩)
 
 theorem add_eq_add_disj {A B : Set σ} (hAB : Disjoint A B) {a a' b b' : σ →₀ ℕ} (ha : (a.support : Set σ) ⊆ A)
     (ha' : (a'.support : Set σ) ⊆ A) (hb : (b.support : Set σ) ⊆ B) (hb' : (b'.support : Set σ) ⊆ B) :

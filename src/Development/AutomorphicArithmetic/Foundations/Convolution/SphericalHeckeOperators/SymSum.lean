@@ -1,7 +1,49 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.MacdonaldFormula
-import GroundTheory.AutomorphicForms.SatakeNormalized
-import GroundTheory.AutomorphicForms.IwahoriFactorization
+module
+
+public import GroundTheory.AutomorphicForms.SatakeNormalized
+public import GroundTheory.AutomorphicForms.AffineBruhat
+public import GroundTheory.AutomorphicForms.MacdonaldAlternant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,12 +55,12 @@ section Laurent
 
 variable {n : ℕ}
 
-variable (n) in
 
+variable (n) in
 def pairs : Finset (Fin n × Fin n) := Finset.univ.filter fun p => p.1 < p.2
 
-variable (n) in
 
+variable (n) in
 def dPol (t : ℂ) : LaurentRing n := ∏ p ∈ pairs n, (varL p.1 - t • varL p.2)
 
 def symSum (y : LaurentRing n) : LaurentRing n := ∑ σ : Equiv.Perm (Fin n), permAct σ y
@@ -38,8 +80,6 @@ def eR (S : Finset (Fin n × Fin n)) : Fin n → ℤ := ∑ p ∈ pairs n \ S, P
 
 def sgS (S : Finset (Fin n × Fin n)) : ℂ := (-1) ^ (pairs n \ S).card
 
-example : Dom (0 : LaurentRing n) := fun _ h => by simp at h
-
 end Laurent
 
 variable (F : Type) [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F] {n : ℕ}
@@ -49,8 +89,8 @@ def dco (a : Fin n → ℤ) : Set (GL (Fin n) F) :=
 
 def uFn (a : Fin n → ℤ) : GL (Fin n) F → ℂ := (dco F a).indicator 1
 
-variable (n) in
 
+variable (n) in
 def oneK : GL (Fin n) F → ℂ := (integralGL F n : Set (GL (Fin n) F)).indicator 1
 
 def BiI (φ : GL (Fin n) F → ℂ) : Prop := ∀ g, ∀ y ∈ iwahori F n, φ (y * g) = φ g ∧ φ (g * y) = φ g

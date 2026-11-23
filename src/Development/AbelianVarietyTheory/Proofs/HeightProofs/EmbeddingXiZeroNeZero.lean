@@ -1,9 +1,50 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
-import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
-import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WeilIdempotents
-import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+module
+
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueInfEmb
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.WeilIdempotents
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+public import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -29,7 +70,7 @@ theorem gen_coord (R : Type) [CommRing R] [Algebra F R] (α β : E →ₗ[F] F) 
     simp only [r, LinearMap.comp_apply, LinearMap.baseChange_tmul, LinearEquiv.coe_coe,
       TensorProduct.AlgebraTensorModule.rid_tmul, TensorProduct.smul_tmul, ← TensorProduct.tmul_add, ← h]
   | add x y hx hy =>
-    simp only [map_add, TensorProduct.add_tmul]
+    simp only [map_add (f := _), TensorProduct.add_tmul]
     conv_lhs => rw [hx, hy]
     abel
 
@@ -44,7 +85,7 @@ theorem gen_parts (R S : Type) [CommRing R] [Algebra F R] [CommRing S] [Algebra 
     | zero => simp
     | tmul a e => simp [← TensorProduct.add_tmul]
     | add x y hx hy =>
-      simp only [map_add]
+      simp only [map_add (f := _)]
       conv_lhs => rw [hx, hy]
       abel
   rw [this z, h1, h2, map_zero, map_zero, add_zero]
@@ -115,7 +156,7 @@ theorem realAd_add (D : D7) (s t : InfinitePlace D.host.F → ℝ) :
   refine Prod.ext ?_ (add_zero _).symm
   change _ = _ + _
   simp only [pairA]
-  rw [← map_add, Prod.mk_add_mk, add_zero]
+  rw [← map_add (f := _), Prod.mk_add_mk, add_zero]
   rfl
 
 theorem continuous_realAd (D : D7) : Continuous (GlobalTheory.IndefiniteRowSideFullHecke.HeisenbergWeilMatrices.realAd D) := by
@@ -147,7 +188,7 @@ theorem continuous_realPt (D : D7) : Continuous (GlobalTheory.IndefiniteRowSideF
 theorem finPart_realPt (D : D7) (p) : finPart D (GlobalTheory.IndefiniteRowSideFullHecke.HeisenbergWeilMatrices.realPt D p) = 0 := by
   have : ∀ s e, finPart D (GlobalTheory.IndefiniteRowSideFullHecke.HeisenbergWeilMatrices.realAd D s ⊗ₜ[D.host.F] e) = 0 := fun s e =>
     TensorProduct.zero_tmul _ e
-  rw [GlobalTheory.IndefiniteRowSideFullHecke.HeisenbergWeilMatrices.realPt, RingHom.map_add, this, this, add_zero]
+  rw [GlobalTheory.IndefiniteRowSideFullHecke.HeisenbergWeilMatrices.realPt, RingHom.map_add (f := _), this, this, add_zero]
 
 theorem parts_zero (D : D7) (z : AE D) (h1 : infPart D z = 0) (h2 : finPart D z = 0) : z = 0 :=
   gen_parts (Ainf D.host.F) (Af D.host.F) z h1 h2
@@ -167,7 +208,7 @@ theorem exists_co (D : D7) : ∃ co : AE D →+ (InfinitePlace D.host.F → ℝ)
       rfl
     rw [RingHom.map_sub, e, sub_eq_zero]
     conv_lhs => rw [h z]
-    rw [RingHom.map_add, RingHom.map_add]
+    rw [RingHom.map_add (f := _), RingHom.map_add (f := _)]
     rfl
   refine ⟨co, (hr.comp hα).prodMk (hr.comp hβ), k, fun z hz => ?_⟩
   exact (sub_eq_zero.1 (parts_zero D _ (k z) (by rw [RingHom.map_sub, hz, finPart_realPt, sub_zero]))).symm
@@ -192,7 +233,7 @@ theorem plF_bijective (D : D7) : Function.Bijective (plF D) := by
     have h3 : tauE D ρ = tauE D ρ' := by
       refine RingHom.ext fun e => ?_
       rw [hc e, Algebra.smul_def, Algebra.smul_def]
-      simp only [map_add, map_mul, map_one, h2]
+      simp only [map_add (f := _), map_mul, map_one, h2]
       rw [show tauE D ρ (algebraMap _ _ (α e)) = tauE D ρ' (algebraMap _ _ (α e)) from DFunLike.congr_fun h1 _,
         show tauE D ρ (algebraMap _ _ (β e)) = tauE D ρ' (algebraMap _ _ (β e)) from DFunLike.congr_fun h1 _]
     exact D.eTau.injective (Subtype.ext ((factEmb D.R D.host).1.1 h3))
@@ -243,24 +284,7 @@ theorem gen_inf_val (τ : E →+* ℂ) (w : InfinitePlace F) (hw : w.embedding =
 
 theorem gen_inf_exists (τ : E →+* ℂ) (w : InfinitePlace F) (hw : w.embedding = τ.comp (algebraMap F E)) :
     ∃ θ : Ainf F ⊗[F] E →+* ℂ, IsInfEmb τ θ := by
-  let _ : Algebra F ℂ := (τ.comp (algebraMap F E)).toAlgebra
-  let f : Ainf F →ₐ[F] ℂ :=
-    { toRingHom := (InfinitePlace.Completion.extensionEmbedding w).comp (Pi.evalRingHom _ w)
-      commutes' := fun x =>
-        (InfinitePlace.Completion.extensionEmbedding_coe w _).trans (DFunLike.congr_fun hw x) }
-  let g : E →ₐ[F] ℂ := { toRingHom := τ, commutes' := fun _ => rfl }
-  refine ⟨(Algebra.TensorProduct.lift f g (fun _ _ => Commute.all _ _)).toRingHom, fun x => ?_, ?_⟩
-  · show f 1 * g x = τ x
-    rw [map_one, one_mul]
-    rfl
-  · have : (fun a : Ainf F => (Algebra.TensorProduct.lift f g (fun _ _ => Commute.all _ _)).toRingHom
-        (a ⊗ₜ[F] (1 : E))) = fun a => InfinitePlace.Completion.extensionEmbedding w (a w) := by
-      funext a
-      show f a * g 1 = _
-      rw [map_one, mul_one]
-      rfl
-    rw [this]
-    exact (InfinitePlace.Completion.isometry_extensionEmbedding w).continuous.comp (continuous_apply w)
+  apply GlobalTheory.Mem.VolEmb.infEmb_exists <;> assumption
 
 end Gen
 

@@ -1,16 +1,55 @@
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.RecTTransport
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.Multi
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LanglandsExtensionUniqueOnCuspidal
-import Development.DiscreteGroups.GlobalIrreducibility.DzLCusp
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ArtEx
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.CuspEx
+module
+
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.IsRecTOfIsRec
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LanglandsExtensionUniqueOnCuspidal
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ArtEx
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.CuspEx
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtDepth
 import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtDim
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.RcTwOfSegments
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtDual
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtInj
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtDepth
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.TypeIff
-import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ClBasic
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtDual
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.ExtInj
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.RcTwOfSegments
+public import Development.AutomorphicArithmetic.Foundations.LocalLanglands.LocalCentralUnits.TypeIff
+import Development.AutomorphicArithmetic.Foundations.LocalLanglands.Multi
+public import Development.DiscreteGroups.GlobalIrreducibility.DzLCusp
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain ValuativeRel Matrix Polynomial Formalism.ConjugateSelfDual ReciprocityTheory.Gal GlobalTheory.WeilDeligne GlobalTheory.LocGL GlobalTheory.LocLanglands GlobalTheory.GLq
 open GlobalTheory.PRep GlobalTheory.SmGL GlobalTheory.SplitWeil
@@ -24,7 +63,7 @@ theorem UpperTheory.Zero.LLC.recTExists :
   obtain ⟨r, hr⟩ := UpperTheory.Zero.LLC.cuspEx E Ω A w h a ha
   obtain ⟨⟨rc, hrc⟩, hcu⟩ :=
     GlobalTheory.LocLanglands.exists_isLExt UpperTheory.Zero.LLC.Pr.exh UpperTheory.Zero.LLC.Pr.multi E Ω A w h r
-  have hcusp : ∀ x : IrrGL (HeightOneSpectrum.adicCompletion E w), x.IsCusp → rc x = r x :=
+  have hcusp : ∀ x : IrrGL (k := HeightOneSpectrum.adicCompletion E w), x.IsCusp → rc x = r x :=
     hcu rc hrc
   have hD := UpperTheory.Zero.LLC.extDim E Ω A w h a ha r rc hr hrc
   have hT := UpperTheory.Zero.LLC.extTw E Ω A w h a ha r rc hr hrc

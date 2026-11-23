@@ -1,4 +1,51 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.TripleSumIndependence.RowSwApply
+module
+
+public import Formalism.LocalToGlobal.GlobalTheory.GL3.PIopIso
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.IntegralSquareRoots.MulIntegerMemBaseLattice
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.RightMoveTrianglesOfUnit
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.TripleSumIndependence.TripleSumIndep
+import Formalism.LocalToGlobal.GlobalTheory.GL3.PThIndep
+import Formalism.LocalToGlobal.KernelLattices.KernelLocalFactors.IsAdmissibleFlagPairOfUnitriangularLeftAutomorph
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.IntegralSquareRoots.SecondConstantHolds
+import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.NormOneUnitIdealAlt
+public import Formalism.LocalToGlobal.PairingIndexBounds.SplitPairEquations.TripleSumIndependence.RowSwApply
+import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators ComplexConjugate
@@ -58,8 +105,18 @@ theorem muOneL_of (hcc : TaylorLogMetric.IsCurveIdeal D cc) (hδ : TaylorLogMetr
     (hS : B.StdOK) : MuOneL B := by
   intro N N' L L₁ hN hN' hL hL₁
   have hLat := B.latAll hcc hδ h0
-  have hT := tripleData_of hLat (admissible_of_integral_conj_le hN hN' (sd0 N) (sd0 N')) (admissible_of_integral_conj_le hN hN' hL (sd0 N'))
-    (admissible_of_integral_conj_le hN hN' hL₁ (sd0 N'))
+  have a1 := admissible_of_integral_conj_le (D := D) hN hN' (sd0 N) (sd0 N')
+  have a2 := admissible_of_integral_conj_le (D := D) hN hN' hL (sd0 N')
+  have a3 := admissible_of_integral_conj_le (D := D) hN hN' hL₁ (sd0 N')
+  have hT : TripleData (Ker.formV (TaylorLogMetric.area (TaylorLogMetric.lamOf D cc δ)) D.what₂.Tau N N') (TaylorLogMetric.al D B.tor)
+      (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N'))
+      (TaylorLogMetric.La D B.tor L (StandardLatticesGL3.stdL D N')) (TaylorLogMetric.La D B.tor L₁ (StandardLatticesGL3.stdL D N')) := by
+    exact ⟨formV_herm' _ _ _ _, (hLat.1 N N' _ _ a1).1, (hLat.1 N N' _ _ a2).1,
+      (hLat.1 N N' _ _ a3).1, (hLat.1 N N' _ _ a1).2, (hLat.1 N N' _ _ a2).2,
+      (hLat.1 N N' _ _ a3).2, (hLat.2 N N' _ _ _ _ a1 a2).1,
+      (hLat.2 N N' _ _ _ _ a1 a2).2, (hLat.2 N N' _ _ _ _ a1 a3).1,
+      (hLat.2 N N' _ _ _ _ a1 a3).2, (hLat.2 N N' _ _ _ _ a2 a3).1,
+      (hLat.2 N N' _ _ _ _ a2 a3).2⟩
   obtain ⟨S₂, hS₂⟩ := (repsExist _ _ _ hT.i₁₂).1
   obtain ⟨S₃, hS₃⟩ := (repsExist _ _ _ hT.i₂₃).1
   refine ⟨S₂, S₃, hS₂, hS₃, ?_⟩
@@ -88,8 +145,18 @@ theorem muOneR_of (hcc : TaylorLogMetric.IsCurveIdeal D cc) (hδ : TaylorLogMetr
     (hS : B.StdOK) : MuOneR B := by
   intro N N' L' L'' hN hN' hL' hL''
   have hLat := B.latAll hcc hδ h0
-  have hT := tripleData_of hLat (admissible_of_integral_conj_le hN hN' (sd0 N) (sd0 N')) (admissible_of_integral_conj_le hN hN' (sd0 N) hL')
-    (admissible_of_integral_conj_le hN hN' (sd0 N) hL'')
+  have a1 := admissible_of_integral_conj_le (D := D) hN hN' (sd0 N) (sd0 N')
+  have a2 := admissible_of_integral_conj_le (D := D) hN hN' (sd0 N) hL'
+  have a3 := admissible_of_integral_conj_le (D := D) hN hN' (sd0 N) hL''
+  have hT : TripleData (Ker.formV (TaylorLogMetric.area (TaylorLogMetric.lamOf D cc δ)) D.what₂.Tau N N') (TaylorLogMetric.al D B.tor)
+      (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N'))
+      (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) L') (TaylorLogMetric.La D B.tor (StandardLatticesGL3.stdL D N) L'') := by
+    exact ⟨formV_herm' _ _ _ _, (hLat.1 N N' _ _ a1).1, (hLat.1 N N' _ _ a2).1,
+      (hLat.1 N N' _ _ a3).1, (hLat.1 N N' _ _ a1).2, (hLat.1 N N' _ _ a2).2,
+      (hLat.1 N N' _ _ a3).2, (hLat.2 N N' _ _ _ _ a1 a2).1,
+      (hLat.2 N N' _ _ _ _ a1 a2).2, (hLat.2 N N' _ _ _ _ a1 a3).1,
+      (hLat.2 N N' _ _ _ _ a1 a3).2, (hLat.2 N N' _ _ _ _ a2 a3).1,
+      (hLat.2 N N' _ _ _ _ a2 a3).2⟩
   obtain ⟨S₂, hS₂⟩ := (repsExist _ _ _ hT.i₁₂).1
   obtain ⟨S₃, hS₃⟩ := (repsExist _ _ _ hT.i₂₃).1
   refine ⟨S₂, S₃, hS₂, hS₃, ?_⟩

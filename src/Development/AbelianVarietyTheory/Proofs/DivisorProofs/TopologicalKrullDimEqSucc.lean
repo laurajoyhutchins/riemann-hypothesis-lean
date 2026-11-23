@@ -1,10 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsFlagModelHermSum
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.EqOfIsometricTrivShift
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GenericallySmoothModel
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TopologicalKrullDimEqSucc
-import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SmoothGenericFibreOfAffineOpens
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RingKrullDimQuotientAddOneOfMemMinimalPrimesSup
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsClosedImmersionGenericPoint
+public import Development.AbelianVarietyTheory.Definitions.ShimuraVarieties.FlatImageOfOverFractionFieldOfValuationRing
+import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.RingKrullDimQuotientEqOfMemMinimalPrimes
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsSmoothOfRelativeDimensionSpreadFromGeneric
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNormalProjectiveModel
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RingKrullDimQuotientAddOneOfMemMinimalPrimesSup
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SpanFinrankMaximalIdealLeNcardOfLeSupSq
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.GenericallySmoothModel
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.TopologicalKrullDimEqSucc
+public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SmoothGenericFibreOfAffineOpens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.WeaklyEtale
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.KrullDimension.Field
+import Mathlib.RingTheory.KrullDimension.PID
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Definitions.Divisors.IsFrameOfForallExists
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -19,7 +68,7 @@ theorem injective_of_charZero {k A : Type} [CommRing k] [IsDomain k] [Module.Fin
     [CommRing A] [CharZero A] (f : k →+* A) : Function.Injective f := by
   rw [RingHom.injective_iff_ker_eq_bot]
   refine Ideal.eq_bot_of_comap_eq_bot (R := ℤ) ?_
-  rw [RingHom.comap_ker, ← RingHom.injective_iff_ker_eq_bot]
+  rw [Ideal.under_def, RingHom.comap_ker, ← RingHom.injective_iff_ker_eq_bot]
   exact RingHom.injective_int _
 
 theorem smooth_of_regular (K : Type) [Field K] [PerfectField K] (B : Type) [CommRing B]
@@ -132,8 +181,8 @@ theorem topologicalKrullDim_eq_succ (h : IsArithVar p D) {K : Type} [Field K] [A
     refine Order.le_krullDim_iff.2 ⟨(l.map _ hm).cons x hlt, ?_⟩
     simp [hl]
 
-attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra in
 theorem ringKrullDim_chart (h : IsArithVar p D) {K : Type} [Field K] [Algebra k K]
     [IsFractionRing k K] {Y : Scheme.{0}} {j : Y ⟶ X} {q : Y ⟶ Sp K}
     (H : IsPullback j q p (spMap (algebraMap k K))) {A : Type} [CommRing A] [Algebra k A]
@@ -245,11 +294,5 @@ theorem genSmooth (h : IsArithVar p D) (hr : ∀ x, IsRegularLocalRing (X.preshe
   obtain ⟨U, x, hU, hz, hx⟩ := ModelCharts.exists_etale_coords_of_opens p D W (mem_ptsIn.1 hW)
   obtain ⟨c, hc, -⟩ := AlgChart.exists_of_etale hU x hx (mem_ptsIn.2 hz)
   exact ⟨c, hc⟩
-
-theorem genSmooth_of_isRegSurf : ∀ (k : Type) [CommRing k] (X : Scheme.{0}) (p : X ⟶ Sp k),
-    IsRegSurf p → GenSmooth p 1 ∧ ∀ (σ : k →+* ℂ) (y : CxPts p σ),
-      ∃ U : X.Opens, y ∈ ptsIn p σ U ∧ SmoothOfRelativeDimension 1 (U.ι ≫ p) :=
-  fun _ _ _ _ h => ⟨genSmooth h.toIsArithVar h.regular,
-    exists_opens_smooth h.toIsArithVar h.regular⟩
 
 end GlobalTheory.RegGenSmooth

@@ -1,8 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArith
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsArithKleiman
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsCurvePointsFinite
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDerived
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.IsRatSectionOn
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterDerived
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.HilbertSamuel
@@ -144,62 +188,6 @@ theorem G5.top_tensor_constLine (I : Ideal (MRing ι) → (n : ℕ) → (Fin n �
   have := step (D + 1) le_rfl
   rw [hall] at this
   rw [this]
-
-theorem G5.proof (hK : ArithKleiman.Statement) (hF : CurvePointsFinite.Statement)
-    (hPts : GroundTheory.Heights₂.Heights.PtsIntegralPoints.Statement) : G5.Statement := by
-  intro K _ ι _ P P0 D A e II hII hP hP0 hsemi hnef hconj hW
-  set A' := A.tensor (constLine (ι := ι) e) with hA'def
-  have hA : IsSmoothHerm A := hsemi.1
-  have hA' : IsSmoothHerm A' := hA.mul (G5.isSmoothHerm_constLine e)
-  have hU : IsOpen {z : (Σ k, ι k) → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0} := by
-    simp only [Set.ofPred_forall, Set.ofPred_exists]
-    exact isOpen_iInter_of_finite fun k => isOpen_iUnion fun i =>
-      isOpen_ne_fun (continuous_apply _) continuous_const
-  have hsemi' : IsSemipositiveRel P0 P A' := by
-    refine ⟨hA', fun z hz w hw => ?_⟩
-    have hev : ∀ᶠ z' in 𝓝 z, Real.log (A'.h z') = Real.log (A.h z') + -e :=
-      (show ∀ᶠ z' in 𝓝 z, ∀ k, ∃ i, z' ⟨k, i⟩ ≠ 0 from hU.mem_nhds hz.1).mono fun z' hz' => G5.log_tensor_constLine A e z' hz'
-    have : leviForm (fun z => Real.log (A'.h z)) z w = leviForm (fun z => Real.log (A.h z)) z w := by
-      unfold leviForm
-      rw [G5.fderiv_fderiv_eq_of_add_const (-e) hev]
-    rw [this]
-    exact hsemi.2 z hz w hw
-  have ha : A'.a = A.a := by
-    show A.a + 0 = A.a
-    rw [add_zero]
-  have hnef' : NefOnFibres P A'.a := ha ▸ hnef
-  have hconj' : IsConjInvariantH A' := fun z => by
-    show A.h _ * Real.exp (-e) = A.h z * Real.exp (-e)
-    rw [hconj z]
-  have hW' : ∀ W, IsArithVar W 1 → P ≤ W → 0 ≤ II K ι W 1 ![A'] := by
-    intro W hW1 hPW
-    have hsn : ∀ B : ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι, (Fin.snoc (![] : Fin 0 → ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι) B : Fin 1 → ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι) = ![B] := by
-      intro B
-      funext j
-      fin_cases j
-      rfl
-    have hmc := metricChange K ι (II K ι) (hII K ι) W 0 ![] A (fun _ => e) (fun _ _ _ => rfl) hW1
-      (fun j => j.elim0) hA contDiffOn_const
-    rw [hsn, hsn] at hmc
-    have : Nonempty K := hW1.1
-    have : Finite (GroundTheory.Heights₂.Heights.projPts W) := hF K ι W hW1
-    have hpot : pot (![] : Fin 0 → ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι) = Fin.elim0 := Subsingleton.elim _ _
-    have hpts := hPts K ι W (fun _ => e) inferInstance (fun _ _ _ _ => rfl)
-    have hcount : ptsIntegral W (pot (![] : Fin 0 → ReciprocityTheory.ChartRestriction.G.Geo.HermLine ι)) (fun _ => e) = e * degC W := by
-      rw [hpot, hpts]
-      letI := Fintype.ofFinite (GroundTheory.Heights₂.Heights.projPts W)
-      rw [finsum_eq_sum_of_fintype, Finset.sum_const, Finset.card_univ, nsmul_eq_mul,
-        GroundTheory.Heights₂.Heights.degC_eq_card_projPts, Nat.card_eq_fintype_card]
-      ring
-    have hA'W : II K ι W 1 ![A'] = II K ι W 1 ![A] - e * degC W := by
-      rw [← hcount]
-      exact hmc
-    rw [hA'W]
-    linarith [hW W hW1 hPW]
-  have hkl := hK K ι P P0 D A' II hII hP hP0 hsemi' hnef' hconj' hW'
-  have htop := G5.top_tensor_constLine (II K ι) (hII K ι) P D A e hP hA
-  rw [← hA'def] at htop
-  linarith
 
 end
 

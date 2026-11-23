@@ -1,8 +1,52 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.FormalDegreeG2.FdDefs
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.ProdSubLtEqFactorial
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.FormalDegreeG2.FdDefs
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.Residue
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,12 +76,6 @@ theorem ph_lamT (lam : Fin n → ℝ) (t : ℕ) (X : Matrix (Fin n) (Fin n) ℂ)
   rw [sCoef_lamT lam t hi', sCoef_zero_of i hi']
   ring
 
-theorem dvec_antitone : Antitone (Dvec n) := by
-  intro a b hab
-  simp only [Dvec]
-  have : ((a : ℕ) : ℝ) ≤ ((b : ℕ) : ℝ) := by exact_mod_cast hab
-  linarith
-
 theorem lamT_apply (lam : Fin n → ℝ) (t : ℕ) (a : Fin n) :
     lamT lam t a = lam a + (t : ℝ) * ((n : ℝ) - 1 - ((a : ℕ) : ℝ)) := by
   simp [lamT, Dvec]
@@ -55,36 +93,11 @@ theorem strictAnti_lamT {lam : Fin n → ℝ} (hlam : StrictAnti lam) (t : ℕ) 
   nlinarith
 
 theorem isHCParam_lamT {lam : Fin n → ℝ} (hlam : IsHCParam lam) (t : ℕ) : IsHCParam (lamT lam t) := by
-  refine ⟨strictAnti_lamT hlam.1 t, fun a => ?_⟩
-  obtain ⟨m, hm⟩ := hlam.2 a
-  have ha : (a : ℕ) + 1 ≤ n := a.2
-  refine ⟨m + (t : ℤ) * ((n : ℤ) - 1 - (a : ℤ)), ?_⟩
-  rw [lamT_apply]
-  push_cast
-  linarith
+  apply ReciprocityTheory.ChartRestriction.DS.isHCParam_lamT <;> assumption
 
 theorem gap_lamT {ε : Fin n → Bool} {lam : Fin n → ℝ} {h : ℝ} (hlam : StrictAnti lam)
     (hgap : GapAtLeast ε lam h) (t : ℕ) : GapAtLeast ε (lamT lam t) (h + t) := by
-  intro a b hab
-  have hg := hgap a b hab
-  have hne : a ≠ b := fun e => hab (by rw [e])
-  have h3 : (0 : ℝ) ≤ t := Nat.cast_nonneg t
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · have h1 := hlam hlt
-    have h2 : ((a : ℕ) : ℝ) + 1 ≤ ((b : ℕ) : ℝ) := by exact_mod_cast hlt
-    rw [abs_of_pos (sub_pos.2 h1)] at hg
-    rw [lamT_sub, abs_of_pos (by nlinarith)]
-    nlinarith
-  · have h1 := hlam hlt
-    have h2 : ((b : ℕ) : ℝ) + 1 ≤ ((a : ℕ) : ℝ) := by exact_mod_cast hlt
-    rw [abs_of_neg (sub_neg.2 h1)] at hg
-    rw [lamT_sub, abs_of_neg (by nlinarith)]
-    nlinarith
-
-theorem lowK_lamT (ε : Fin n → Bool) (lam : Fin n → ℝ) (t : ℕ) :
-    lowK ε (lamT lam t) = lowK ε lam + (t : ℝ) • Dvec n := by
-  simp only [lowK, lamT]
-  abel
+  apply ReciprocityTheory.ChartRestriction.DS.gap_lamT <;> assumption
 
 theorem vand_pos {lam : Fin n → ℝ} (hlam : StrictAnti lam) : 0 < Vand lam := by
   unfold Vand
@@ -94,73 +107,11 @@ theorem vand_pos {lam : Fin n → ℝ} (hlam : StrictAnti lam) : 0 < Vand lam :=
 
 theorem ratioV_eq_vand {μ : Fin n → ℝ} (hμ : StrictAnti μ) (s : Fin n) :
     ratioV μ s = Vand (μ + Pi.single s 1) / Vand μ := by
-  set ν : Fin n → ℝ := μ + Pi.single s 1 with hν
-  set r : Fin n → Fin n → ℝ := fun a b => (ν a - ν b) / (μ a - μ b) with hr
-  have hsplit : Vand ν / Vand μ = ∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b), r a b := by
-    simp only [Vand, hr, Finset.prod_div_distrib]
-  have hr1 : ∀ a b : Fin n, a ≠ s → b ≠ s → a < b → r a b = 1 := by
-    intro a b ha hb hab
-    have : μ a - μ b ≠ 0 := (sub_pos.2 (hμ hab)).ne'
-    simp only [hr, hν, Pi.add_apply, Pi.single_apply, if_neg ha, if_neg hb, add_zero]
-    exact div_self this
-  have hin : ∀ a : Fin n, a ≠ s →
-      ∏ b ∈ univ.filter (fun b : Fin n => a < b), r a b = if a < s then r a s else 1 := by
-    intro a ha
-    split_ifs with has
-    · rw [Finset.prod_eq_single_of_mem s (by simp [has])]
-      intro b hb hbs
-      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hb
-      exact hr1 a b ha hbs hb
-    · refine Finset.prod_eq_one fun b hb => ?_
-      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hb
-      have hbs : b ≠ s := fun e => has (e ▸ hb)
-      exact hr1 a b ha hbs hb
-  rw [hsplit, ← Finset.mul_prod_erase univ _ (mem_univ s)]
-  rw [Finset.prod_congr rfl (fun a ha => hin a (Finset.ne_of_mem_erase ha))]
-  rw [Finset.prod_ite, Finset.prod_const_one, mul_one]
-  have hfac : ∀ s' ∈ univ.erase s, (μ s + 1 - μ s') / (μ s - μ s') =
-      if s < s' then r s s' else r s' s := by
-    intro s' hs'
-    have hne : s' ≠ s := Finset.ne_of_mem_erase hs'
-    have hne' : μ s - μ s' ≠ 0 := sub_ne_zero.2 (hμ.injective.ne hne.symm)
-    have hne'' : μ s' - μ s ≠ 0 := sub_ne_zero.2 (hμ.injective.ne hne)
-    split_ifs with h
-    · simp only [hr, hν, Pi.add_apply, Pi.single_apply, if_neg hne, ↓reduceIte]
-      ring_nf
-    · simp only [hr, hν, Pi.add_apply, Pi.single_apply, if_neg hne, ↓reduceIte, add_zero]
-      rw [div_eq_div_iff hne' hne'']
-      ring
-  unfold ratioV
-  rw [Finset.prod_congr rfl hfac, Finset.prod_ite]
-  have e1 : (univ.erase s).filter (fun s' => s < s') = univ.filter (fun b : Fin n => s < b) := by
-    ext x; simp only [Finset.mem_filter, Finset.mem_erase, Finset.mem_univ, and_true, true_and]
-    constructor
-    · exact fun h => h.2
-    · exact fun h => ⟨ne_of_gt h, h⟩
-  have e2 : (univ.erase s).filter (fun s' => ¬ s < s') = (univ.erase s).filter (fun a : Fin n => a < s) := by
-    ext x; simp only [Finset.mem_filter, Finset.mem_erase, Finset.mem_univ, and_true]
-    constructor
-    · rintro ⟨h1, h2⟩; exact ⟨h1, lt_of_le_of_ne (not_lt.1 h2) h1⟩
-    · rintro ⟨h1, h2⟩; exact ⟨h1, not_lt.2 h2.le⟩
-  rw [e1, e2]
+  apply ReciprocityTheory.ChartRestriction.DS.ratioV_eq_vand <;> assumption
 
 theorem prod_sub_lt_eq_factorial (b : Fin n) :
     ∏ a ∈ univ.filter (fun a : Fin n => a < b), (((b : ℕ) : ℝ) - ((a : ℕ) : ℝ)) = ((b : ℕ).factorial : ℝ) := by
-  rw [Finset.prod_filter]
-  simp_rw [Fin.lt_def]
-  rw [Fin.prod_univ_eq_prod_range (fun i => if i < (b : ℕ) then (((b : ℕ) : ℝ) - (i : ℝ)) else 1) n]
-  rw [← Finset.prod_filter]
-  have hb : (b : ℕ) < n := b.2
-  have e : (range n).filter (fun i => i < (b : ℕ)) = range (b : ℕ) := by
-    ext i; simp only [Finset.mem_filter, Finset.mem_range]; omega
-  rw [e, ← Finset.prod_range_reflect]
-  have : ∀ j ∈ range (b : ℕ), (((b : ℕ) : ℝ) - (((b : ℕ) - 1 - j : ℕ) : ℝ)) = ((j + 1 : ℕ) : ℝ) := by
-    intro j hj
-    simp only [Finset.mem_range] at hj
-    have h1 : (b : ℕ) - 1 - j + (j + 1) = (b : ℕ) := by omega
-    have h2 : ((((b : ℕ) - 1 - j : ℕ) : ℝ)) + ((j + 1 : ℕ) : ℝ) = ((b : ℕ) : ℝ) := by exact_mod_cast h1
-    linarith
-  rw [Finset.prod_congr rfl this, ← Nat.cast_prod, Finset.prod_range_add_one_eq_factorial]
+  apply ReciprocityTheory.ChartRestriction.DS.prod_sub_lt_eq_factorial <;> assumption
 
 theorem prod_pairs_eq_factorial (n : ℕ) :
     ∏ a : Fin n, ∏ b ∈ univ.filter (fun b : Fin n => a < b), (((b : ℕ) : ℝ) - ((a : ℕ) : ℝ)) =

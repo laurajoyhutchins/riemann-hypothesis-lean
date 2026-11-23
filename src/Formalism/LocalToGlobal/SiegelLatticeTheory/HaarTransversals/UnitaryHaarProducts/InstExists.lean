@@ -1,9 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
-import Formalism.LocalToGlobal.UnitaryNorms.RealPl
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.UnitaryPointsRankZeroSubsingleton
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.TermTiesEmptyOfLargeIndex
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.NumericSettingWithGapSatisfiable
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
+public import Formalism.LocalToGlobal.UnitaryNorms.RealPl
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.UnitaryPointsRankZeroSubsingleton
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.TermTiesEmptyOfLargeIndex
+public import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
+public import Formalism.HermitianLattices.HermitianLatticesProofs.DualLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.BitVec
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
 
 noncomputable section
 
@@ -32,8 +78,9 @@ theorem hform_eq (x y : Fin (VS D).rank → D.host.E) :
     Formalism.UG.hform (starRingEnd D.host.E) (Jv D) x y =
       (VS D).hT (∑ i, x i • (VS D).frame i) (∑ j, y j • (VS D).frame j) := by
   unfold Formalism.UG.hform Jv
+
   simp only [map_sum, map_smulₛₗ, LinearMap.sum_apply, LinearMap.smul_apply, map_smul, smul_eq_mul,
-    Finset.mul_sum, RingHom.id_apply]
+  Finset.mul_sum, RingHom.id_apply]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [show (VS D).gram i j = (VS D).hT ((VS D).frame i) ((VS D).frame j) from rfl]
@@ -80,8 +127,10 @@ theorem L_fg : (Lv D).FG := by
   exact Submodule.FG.map _ (VS D).standardTuple_isLattice.fg
 
 theorem L_span : Submodule.span D.host.E ((Lv D : Set (Fin (VS D).rank → D.host.E))) = ⊤ := by
+  have hspan : Submodule.span D.host.E ((VS D).L0 : Set (VS D).V) = ⊤ :=
+    Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top (VS D).baseLattice_isUnimodular (VS D).herm (VS D).standardTuple_isLattice.fg
   rw [Lv_eq_map, Submodule.map_coe, LinearMap.coe_restrictScalars, Submodule.span_image,
-    (VS D).standardTuple_isLattice.span_eq_top, Submodule.map_top, LinearEquiv.range]
+    hspan, Submodule.map_top, LinearEquiv.range]
 
 theorem L_dual (x : Fin (VS D).rank → D.host.E) : x ∈ Lv D ↔
     ∀ y ∈ Lv D, Formalism.UG.hform (starRingEnd D.host.E) (Jv D) y x ∈ (algebraMap (𝓞 D.host.E) D.host.E).range := by
@@ -256,7 +305,5 @@ def instanceOfRecord : UnitaryGroupInstance D where
   φ_eq := fun _ _ => rfl
   n_eq := rank_eq D
   eps_eq := fun _ _ => rfl
-
-theorem instExists : InstExists D := ⟨instanceOfRecord D⟩
 
 end Formalism.L2.SG.InstExistsPf

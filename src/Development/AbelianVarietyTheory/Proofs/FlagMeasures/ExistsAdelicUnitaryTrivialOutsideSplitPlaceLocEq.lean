@@ -1,5 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemMaxCompactOfTrivOutsideLocalIntegral
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemMaxCompactOfTrivOutsideLocalIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open NumberField ReciprocityTheory.Aut IsDedekindDomain TensorProduct
 
 noncomputable section
@@ -9,7 +58,7 @@ open GlobalTheory.InertUmax
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => maximalRealSubfield L
+local notation3 "L⁺" => NumberField.maximalRealSubfield L
 
 theorem sgl_mul (v : HeightOneSpectrum (𝓞 L⁺)) (a b : v.adicCompletion L⁺) :
     sgl L v a * sgl L v b = sgl L v (a * b) := by
@@ -87,7 +136,7 @@ open GlobalTheory.InertUmax
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => maximalRealSubfield L
+local notation3 "L⁺" => NumberField.maximalRealSubfield L
 
 def Ep (s : SplitPlace L) (δ : L) : AL L := ιs s (1 / 2) + tt δ * ιs s (1 / (2 * s.i δ))
 
@@ -148,7 +197,7 @@ theorem Em_mul_P (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraM
 
 theorem proj_Ep (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraMap L⁺ L d) (hr : s.i δ ≠ 0) : s.proj (Ep s δ) = 1 := by
   have h2 := two_ne s
-  rw [Ep, map_add, map_mul, proj_ιs, proj_ιs, proj_tt]
+  rw [Ep, map_add (f := _), map_mul, proj_ιs, proj_ιs, proj_tt]
   field_simp
   ring
 
@@ -162,7 +211,7 @@ end Idem
 
 theorem conj_Ep (s : SplitPlace L) (δ : L) (hδ : IsCMField.complexConj L δ = -δ) :
     conjAL L (Ep s δ) = Em s δ := by
-  rw [Ep, Em, map_add, map_mul, conj_ιs, conj_ιs, conj_tt δ hδ]; ring
+  rw [Ep, Em, map_add (f := _), map_mul, conj_ιs, conj_ιs, conj_tt δ hδ]; ring
 
 theorem conj_Em (s : SplitPlace L) (δ : L) (hδ : IsCMField.complexConj L δ = -δ) :
     conjAL L (Em s δ) = Ep s δ := by
@@ -170,7 +219,7 @@ theorem conj_Em (s : SplitPlace L) (δ : L) (hδ : IsCMField.complexConj L δ = 
 
 theorem compAt_Ep (s : SplitPlace L) (δ : L) {w : HeightOneSpectrum (𝓞 L⁺)} (hw : w ≠ s.v) :
     compAt L w (Ep s δ) = 0 := by
-  rw [Ep, map_add, map_mul, compAt_ιs s _ hw, compAt_ιs s _ hw]; ring
+  rw [Ep, map_add (f := _), map_mul, compAt_ιs s _ hw, compAt_ιs s _ hw]; ring
 
 theorem compAt_Em (s : SplitPlace L) (δ : L) {w : HeightOneSpectrum (𝓞 L⁺)} (hw : w ≠ s.v) :
     compAt L w (Em s δ) = 0 := by
@@ -183,7 +232,7 @@ open GlobalTheory.InertUmax
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => maximalRealSubfield L
+local notation3 "L⁺" => NumberField.maximalRealSubfield L
 
 def θ (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraMap L⁺ L d) (hr : s.i δ ≠ 0) :
     s.v.adicCompletion L⁺ × s.v.adicCompletion L⁺ × AL L →+* AL L where
@@ -211,7 +260,7 @@ open GlobalTheory.InertUmax
 
 variable {L : Type} [Field L] [NumberField L] [IsCMField L]
 
-local notation3 "L⁺" => maximalRealSubfield L
+local notation3 "L⁺" => NumberField.maximalRealSubfield L
 
 theorem θ_apply (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraMap L⁺ L d) (hr : s.i δ ≠ 0)
     (q : s.v.adicCompletion L⁺ × s.v.adicCompletion L⁺ × AL L) :
@@ -219,14 +268,14 @@ theorem θ_apply (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraM
 
 theorem proj_θ (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraMap L⁺ L d) (hr : s.i δ ≠ 0)
     (q : s.v.adicCompletion L⁺ × s.v.adicCompletion L⁺ × AL L) : s.proj (θ s δ d hd hr q) = q.1 := by
-  rw [θ_apply, map_add, map_add, map_mul, map_mul, map_mul, map_sub, map_one, proj_Ep s δ d hd hr,
+  rw [θ_apply, map_add (f := _), map_add (f := _), map_mul, map_mul, map_mul, map_sub, map_one, proj_Ep s δ d hd hr,
     proj_Em s δ d hd hr, proj_ιs, proj_ιs, proj_ιs]
   ring
 
 theorem compAt_θ (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraMap L⁺ L d) (hr : s.i δ ≠ 0)
     (q : s.v.adicCompletion L⁺ × s.v.adicCompletion L⁺ × AL L) {w : HeightOneSpectrum (𝓞 L⁺)}
     (hw : w ≠ s.v) : compAt L w (θ s δ d hd hr q) = compAt L w q.2.2 := by
-  rw [θ_apply, map_add, map_add, map_mul, map_mul, map_mul, map_sub, map_one, compAt_Ep s δ hw,
+  rw [θ_apply, map_add (f := _), map_add (f := _), map_mul, map_mul, map_mul, map_sub, map_one, compAt_Ep s δ hw,
     compAt_Em s δ hw]
   simp only [compAt_ιs s _ hw]
   ring
@@ -235,7 +284,7 @@ theorem conj_θ (s : SplitPlace L) (δ : L) (d : L⁺) (hd : δ * δ = algebraMa
     (hδ : IsCMField.complexConj L δ = -δ)
     (q : s.v.adicCompletion L⁺ × s.v.adicCompletion L⁺ × AL L) :
     conjAL L (θ s δ d hd hr q) = θ s δ d hd hr (q.2.1, q.1, conjAL L q.2.2) := by
-  rw [θ_apply, θ_apply, map_add, map_add, map_mul, map_mul, map_mul, map_sub, map_one,
+  rw [θ_apply, θ_apply, map_add (f := _), map_add (f := _), map_mul, map_mul, map_mul, map_sub, map_one,
     conj_Ep s δ hδ, conj_Em s δ hδ, conj_ιs, conj_ιs, conj_ιs]
   ring
 

@@ -1,7 +1,52 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsEqnIffGeneratesAtInv
+public import Development.AbelianVarietyTheory.Definitions.Divisors.LineBundleGlobalSectionsDimCongrPicardClass
+public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.MemNonzeroLocusIffPowFn
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyExistsLiftSectionOfAmplePowFromClosedStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.CentreAtOfIsAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsIsLogMult
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EventuallyExistsLiftSectionOfAmplePowFromClosedStatement
+import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IsLogCanonicalMultipleCanonical
+
+@[expose] public section
+
 open CategoryTheory AlgebraicGeometry TopologicalSpace Filter
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.AnForm.R
 open ReciprocityTheory.ChartRestriction.G.Out (nonzeroLocus)
@@ -21,7 +66,7 @@ theorem presents_lbPow_toLB {X : Scheme.{0}} [IsIntegral X] (A : CartierDiv X) (
 theorem secPull_add' {X Y : Scheme.{0}} {L : LB X} (s t : L.Sec) (f : Y ⟶ X) :
     GlobalTheory.secPull (s + t) f = GlobalTheory.secPull s f + GlobalTheory.secPull t f :=
   LB.f_injective (funext fun i => by
-    simp only [GlobalTheory.secPull, GlobalTheory.chartSec_f, LB.add_f, map_add])
+    simp only [GlobalTheory.secPull, GlobalTheory.chartSec_f, LB.add_f, map_add (f := _)])
 
 theorem secPull_smul' {X Y : Scheme.{0}} {L : LB X} (c : Γ(X, ⊤)) (s : L.Sec) (f : Y ⟶ X) :
     GlobalTheory.secPull (c • s) f = f.appTop c • GlobalTheory.secPull s f :=
@@ -88,6 +133,7 @@ theorem exists_sections_restrict_basis :
   choose s hs using fun i => hl₁ l hl (v i)
   refine ⟨_, fun i => hP.rat (s i), fun i => hP.rat_mem _, hr, fun a ha => ?_⟩
   have e₁ : ∑ i, Cartier.constFn p (a i) * hP.rat (s i) = hP.rat (∑ i, algX p ⊤ (a i) • s i) := by
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [LinearMap.map_smul, Algebra.smul_def, CartierDiv.algebraMap_top]
@@ -100,6 +146,7 @@ theorem exists_sections_restrict_basis :
           rwa [zero_smul, map_zero, zero_smul] at this
         map_add' := fun t t' => secPull_add' t t' _ }
     change F _ = _
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     change GlobalTheory.secPull _ _ = _

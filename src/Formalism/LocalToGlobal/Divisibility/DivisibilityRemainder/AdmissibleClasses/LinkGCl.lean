@@ -1,4 +1,43 @@
-import Formalism.LocalToGlobal.ClassOfRecordOfChoice
+module
+
+public import Formalism.LocalToGlobal.ClassOfRecordOfChoice
+public import Formalism.SharpRestriction.SmoothDesignExistence.AdmissibleTopsMertens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -8,28 +47,8 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Pk Forma
 
 variable {eps : ℝ}
 
-theorem gTiedF_of_sel (Fm : FamP eps) (s : Formalism.L2.TSelF Fm) : Formalism.L2.G.GroupCompatibilityFamily Fm :=
-  Formalism.L2.gTiedF_of_C2S Fm (tied_families_of_choice s)
-
 theorem admissible_tops_of_class {𝒜 : FamClass} {C0 : ℝ} (Fm : FamP eps) (hc : D3 C0 𝒜 Fm) : Formalism.MainNotions.G.Adm2F Fm :=
   admissible_tops_mertens Fm (topsF_of_chosenE Fm hc.2.1.choose_spec)
-
-theorem linkG_closed (𝒜 : FamClass) (sel : Formalism.L2.TSel 𝒜) : Closed (D3 3 𝒜) fun Fm _ => LinkG Fm :=
-  Formalism.L2.G.linkG_concrete5 (D3 3 𝒜)
-    (Closed.of_class fun Fm _ hc => gTiedF_of_sel Fm (sel Fm (d3_a hc)))
-    (Closed.of_class fun Fm _ hc => admissible_tops_of_class Fm hc)
-
-theorem linkG_frame (𝒜 : FamClass) (sel : Formalism.L2.TSel 𝒜) :
-    Closed (D3 3 𝒜) fun Fm _ => ∀ _ : D3 3 𝒜 Fm, Formalism.MainNotions.TuSize Fm → Formalism.MainNotions.DGamSize Fm → LinkG Fm := by
-  obtain ⟨ε1, hε, H⟩ := linkG_closed 𝒜 sel
-  refine ⟨ε1, hε, fun eps he hle => ?_⟩
-  obtain ⟨K, hK⟩ := H eps he hle
-  refine ⟨K, fun Fm CH hc => ?_⟩
-  have h1 := hK Fm CH hc
-  intro hl
-  beta_reduce
-  intro _ _ _
-  exact h1 hl
 
 end Formalism.L2.DIV.LinkGCl
 

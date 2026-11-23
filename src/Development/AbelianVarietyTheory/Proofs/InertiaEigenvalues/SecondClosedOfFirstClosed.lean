@@ -1,9 +1,48 @@
-import Mathlib
-import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Formalism.SharpRestriction.ParamsHeightRankConstant
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockHodgeTateJumps
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockJumpCount
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockHodgeTateJumps
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockJumpCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,9 +87,10 @@ theorem continuous_of_comb (had : IsAdic (IsLocalRing.maximalIdeal O)) {ι : Typ
   have : (fun x => (d : O) * f x) = fun x => ∑ j, a j * h j x := by
     funext x
     apply IsFractionRing.injective O (FractionRing O)
+
     simp only [map_mul, map_sum, hf, ha, Finset.mul_sum, Algebra.smul_def, mul_assoc]
   rw [this]
-  exact continuous_finset_sum _ fun j _ => continuous_const.mul (hh j)
+  exact continuous_finsetSum _ fun j _ => continuous_const.mul (hh j)
 
 theorem continuous_of_splitsAs (had : IsAdic (IsLocalRing.maximalIdeal O)) {Γ : Type} [Group Γ]
     [TopologicalSpace Γ] {n r t : ℕ} {M : Γ →* Matrix (Fin n) (Fin n) O}
@@ -68,6 +108,7 @@ theorem continuous_of_splitsAs (had : IsAdic (IsLocalRing.maximalIdeal O)) {Γ :
   have h2 : ∀ v : Fin n → FractionRing O, (e v).1 a = ∑ j, (e (Pi.single j 1)).1 a * v j := by
     intro v
     conv_lhs => rw [pi_eq_sum_univ' v]
+
     simp [map_sum, Prod.fst_sum, Finset.sum_apply, mul_comm]
   rw [h2] at h1
   simp only [hu, LinearEquiv.apply_symm_apply, Matrix.mulVec_single_one] at h1
@@ -97,21 +138,7 @@ theorem continuous_rho (π : N.X i) (hr : IsHeckeGalois N i π (r π))
   continuous_of_splitsAs (M := rO N i r π) (P := rhoO N i ρ π) (N.O_adic i)
     ((blockSum_iff N i r ρ π).1 hs) hr.1
 
-def HasGalois : Prop := ∃ r₀ : N.X i → (GE N →* GL (Fin R.nV) (N.O i)), GoodR N i r₀
-
 end Glob
-
-def FirstAt (D : D7) (i : D.nd.Loc) : Prop :=
-  ∀ (r : D.nd.X i → (GE D.nd →* GL (Fin D.R.nV) (D.nd.O i)))
-    (ρ : D.nd.X i → (GE D.nd →* GL (Fin D.R.r) (D.nd.O i))) (π : D.nd.X i),
-    π ∈ D.nd.Z i → IsHeckeGalois D.nd i π (r π) → GlobalTheory.IndefiniteRowSideFullHecke.BlockJumpCount.IsBlockSum D.nd i r ρ π →
-    ∀ (w : HeightOneSpectrum (𝓞 D.host.E)) (hw : w ∈ placesOver D.host.E (D.nd.l i))
-      (τ : Br.Kw D.nbr i w hw →ₐ[ℚ_[D.nd.l i]] Br.LL D.nbr i w hw),
-      ∃ J : Multiset ℤ,
-        GlobalTheory.IndefiniteRowSideFullHecke.BlockJumpCount.IsJumpMultiset (Br.PD D.loc D.nbr i w hw)
-          (matRep (Br.loc D.nbr i w hw (WpO D.nd i ρ π))) τ J ∧
-        GlobalTheory.IndefiniteRowSideFullHecke.BlockJumpCount.IsJumpMultiset (Br.PD D.loc D.nbr i w hw)
-          (matRep (Br.loc D.nbr i w hw (rTwO D.nd i r π))) τ (J + GlobalTheory.IndefiniteRowSideFullHecke.BlockJumpCount.blockJumps D.R.t)
 
 end GlobalTheory.BlockJumpsCompare
 

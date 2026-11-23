@@ -1,8 +1,52 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.NGData
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.TermLoc
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LinearFormsBoundedRepresentatives
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsNeZeroSmulMem
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LocClosed
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsNeZeroSmulMem
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LinearFormsBoundedRepresentatives
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
+
+@[expose] public section
+
 open scoped Classical ENNReal
 open NumberField Formalism.BasicNotions Formalism.MainNotions.S Formalism.MainNotions.S.Lat Formalism.MainNotions.S.LocalSplitGroups Formalism.L2.SG.HidaSetting Formalism.L2.SG.TermOp Formalism.L2.SG.Full Formalism.L2.SG.RowsConc Formalism.L2.SG.NGData Formalism.L2.SG.TermLoc GlobalTheory.Unfold
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -46,7 +90,7 @@ theorem X_le_orth (F : LFlag S r T) : Xsp F ≤ orth S (Xsp F) := fun y hy =>
 theorem half_not_int : ¬ ∃ o : 𝓞 E, (o : E) = algebraMap ℚ E (1 / 2) := by
   rintro ⟨o, ho⟩
   have h1 : IsIntegral ℤ (algebraMap ℚ E (1 / 2)) := by rw [← ho]; exact o.2
-  rw [isIntegral_algebraMap_iff (algebraMap ℚ E).injective] at h1
+  rw [isIntegral_algebraMap_iff ] at h1
   obtain ⟨n, hn⟩ := IsIntegrallyClosed.isIntegral_iff.mp h1
   have h2 : ((2 * n : ℤ) : ℚ) = 1 := by push_cast; rw [show (algebraMap ℤ ℚ n) = (n : ℚ) from rfl] at hn; rw [hn]; norm_num
   have h3 : 2 * n = 1 := by exact_mod_cast h2
@@ -62,15 +106,18 @@ section Gen
 
 variable {E : Type} [Field E] [NumberField E] [StarRing E] {S : HSpace E} {r : ℕ} {T : E}
 
-theorem exists_smul_mem_lat (L : Submodule (𝓞 E) S.V) (hL : Submodule.IsLattice E L) (x : S.V) :
+theorem span_eq_top_of_unimodular (L : Submodule (𝓞 E) S.V)
+    (hL : Submodule.IsLattice E L)
+    (hU : Formalism.HermitianLatticesTheory.IsUnimodular S.hT L) :
+    Submodule.span E (L : Set S.V) = ⊤ := by
+  exact Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top hU S.herm hL.fg
+
+theorem exists_smul_mem_lat (L : Submodule (𝓞 E) S.V) (hL : Submodule.IsLattice E L)
+    (hU : Formalism.HermitianLatticesTheory.IsUnimodular S.hT L) (x : S.V) :
     ∃ r : 𝓞 E, r ≠ 0 ∧ r • x ∈ L := by
-  first
-  | exact @_root_.GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem
-  | exact _root_.GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem
-  | (apply _root_.GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem <;> assumption)
-  | (intros; apply _root_.GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem ..)
+  have hfull : Submodule.IsFullLattice E L :=
+    { toIsLattice := hL, span_eq_top := span_eq_top_of_unimodular L hL hU }
+  exact GlobalTheory.NonzeroIntegerSmulMem.exists_ne_zero_smul_mem L hfull x
 
 theorem z_not_mem_X (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T)
     (hprim : ∀ c : E, c • F.fl.z ∈ Lsub Λ F → ∃ o : 𝓞 E, (o : E) = c) : F.fl.z ∉ Xsp F := by
@@ -95,7 +142,7 @@ theorem exists_partner_rep (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T)
     refine ⟨inf_le_left, le_antisymm (le_inf inf_le_left fun x hx => Submodule.subset_span hx) ?_⟩
     refine inf_le_inf_left _ ?_
     intro x hx
-    exact (Submodule.span_le (p := U)).2 (fun y hy => hy.2) hx
+    exact (Submodule.span_le (p := U)).2 (fun y (hy : y ∈ M0) => hy.2) hx
   have hint : ∀ x : M0, ∃ o : 𝓞 E, (o : E) = φ x := by
     rintro ⟨x, hxΛ, hxU⟩
     obtain ⟨y, hy, w, hw, rfl⟩ := Submodule.mem_sup.1 (show x ∈ U from hxU)
@@ -107,7 +154,7 @@ theorem exists_partner_rep (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T)
         have := Submodule.add_mem_sup h1 h2
         simpa using this, (orth S (Xsp F)).smul_mem a (z_mem_orth F)⟩
     refine ⟨o, ?_⟩
-    simp [map_add, hφ0 y hy, hφz, ho]
+    simp [map_add (f := _), hφ0 y hy, hφz, ho]
   choose ψ hψ using hint
   let ψ' : M0 →ₗ[𝓞 E] 𝓞 E :=
     { toFun := ψ
@@ -119,7 +166,9 @@ theorem exists_partner_rep (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T)
         simp only [hψ, RingHom.id_apply, smul_eq_mul, map_mul, Submodule.coe_smul]
         rw [← algebraMap_smul E c (x : S.V), map_smul]
         simp [hψ] }
-  obtain ⟨w, hw⟩ := GlobalTheory.LoopC.FunIdx.exists_dual_vec S M0 Λ hlat hprimM ψ'
+  have hfull : Submodule.IsFullLattice E Λ :=
+    { toIsLattice := hlat, span_eq_top := span_eq_top_of_unimodular Λ hlat hU }
+  obtain ⟨w, hw⟩ := GlobalTheory.LoopC.FunIdx.exists_dual_vec S M0 Λ hfull hprimM ψ'
   have hwM : ∀ x (hx : x ∈ M0), S.hT w x = φ x := fun x hx => by
     rw [← hw ⟨x, hx⟩]; exact hψ ⟨x, hx⟩
   have hwΛ : (w : S.V) ∈ Λ := by
@@ -129,7 +178,7 @@ theorem exists_partner_rep (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T)
   · show (w : S.V) ∈ orth S (Xsp F)
     rw [mem_orth_iff]
     intro x hx
-    obtain ⟨c, hc0, hcx⟩ := exists_smul_mem_lat Λ hlat x
+    obtain ⟨c, hc0, hcx⟩ := exists_smul_mem_lat Λ hlat hU x
     have hcX : c • x ∈ Xsp F := by
       rw [← algebraMap_smul E c x]; exact (Xsp F).smul_mem _ hx
     have hm : c • x ∈ M0 := ⟨hcx, Submodule.mem_sup_left hcX⟩

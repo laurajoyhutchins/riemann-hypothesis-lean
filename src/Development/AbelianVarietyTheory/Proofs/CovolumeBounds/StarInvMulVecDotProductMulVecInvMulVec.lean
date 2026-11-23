@@ -1,5 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.OneLeDetOneAdd
+module
+
+public import Mathlib.Analysis.Matrix.Order
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.OneLeDetOneAdd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+
+@[expose] public section
 
 open Matrix
 open scoped ComplexOrder MatrixOrder
@@ -141,32 +189,6 @@ theorem le_re_trace_smul_one_of_posSemidef {A : Matrix n n 𝕜} (hA : A.PosSemi
   rw [← smul_eq_re_smul_of_nonneg hA.trace_nonneg]
   exact le_trace_smul_one_of_posSemidef hA
 
-theorem le_re_trace_mul_smul_inv {l b : Matrix n n 𝕜} (hl : l.PosDef) (hb : b.PosSemidef) :
-    b ≤ RCLike.re (l * b).trace • l⁻¹ := by
-  obtain ⟨C, hC, rfl⟩ := CStarAlgebra.isStrictlyPositive_iff_eq_star_mul_self.mp
-    hl.isStrictlyPositive
-  let _ := hC.invertible
-  have h1 := le_re_trace_smul_one_of_posSemidef (hb.mul_mul_conjTranspose_same C)
-  have h2 := conjTranspose_mul_mul_le_of_le h1 C⁻¹ᴴ
-  have e1 : Cᴴ * C⁻¹ᴴ = 1 := by
-    rw [← conjTranspose_mul, inv_mul_of_invertible, conjTranspose_one]
-  rw [conjTranspose_conjTranspose, ← Matrix.mul_assoc, ← Matrix.mul_assoc, inv_mul_of_invertible,
-    Matrix.one_mul, Matrix.mul_assoc, e1, Matrix.mul_one, Matrix.mul_smul, Matrix.smul_mul,
-    Matrix.mul_one, trace_mul_cycle] at h2
-  rwa [star_eq_conjTranspose, Matrix.mul_inv_rev, ← conjTranspose_nonsing_inv]
-
-omit [Fintype n] [DecidableEq n] in
-
-theorem norm_sq_apply_le_of_posSemidef {A : Matrix n n 𝕜} (hA : A.PosSemidef) (i j : n) :
-    ‖A i j‖ ^ 2 ≤ RCLike.re (A i i) * RCLike.re (A j j) := by
-  have h := (hA.submatrix ![i, j]).det_nonneg
-  rw [det_fin_two] at h
-  simp only [submatrix_apply, cons_val_zero, cons_val_one, sub_nonneg] at h
-  have h2 := (RCLike.le_iff_re_im.mp h).1
-  have hi := (RCLike.nonneg_iff.mp (hA.diag_nonneg (i := i))).2
-  rw [← hA.1.apply j i, RCLike.star_def, RCLike.mul_conj, RCLike.mul_re (A i i), hi] at h2
-  norm_cast at h2
-  simpa using h2
 
 section Gram
 

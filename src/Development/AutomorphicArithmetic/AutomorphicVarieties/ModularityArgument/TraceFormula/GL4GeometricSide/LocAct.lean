@@ -1,10 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.HasDerivAtOfDual
-import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.ActEig
-import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.KerReg
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.HasInfCharGLIff
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActLoc
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMulRightInvariantOfCenter
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.InnerEq
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GL4GeometricSide.HasDerivAtOfDual
+public import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.ActEig
+import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.HderEntry
+public import Development.AutomorphicArithmetic.Foundations.BaseChangeIdentities.RealTraceClifford.KerReg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMulRightInvariantOfCenter
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.HasInfCharGLIff
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.InfinitesimalCharacterGL.PChart
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PActLoc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.CStarAlgebra.ContinuousLinearMap
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open UpperTheory.V.Z.GSp4Splitting PositivityTheory.RgBcC PositivityTheory.RgBcC.RealD PositivityTheory.Rg.BcB.Desc
 
@@ -52,7 +97,7 @@ private theorem sec_eq (hc : ∀ j, Continuous (c j))
     rw [hF y hy κ, Finset.sum_smul]
     exact Finset.sum_congr rfl fun j _ => by rw [smul_smul, mul_comm]
   simp only [h1]
-  rw [integral_finset_sum (f := fun j κ => F j y • (c j κ • M.ρ κ)) _ fun j _ => (integrable_c ν M hc j).smul (F j y)]
+  rw [integral_finsetSum (f := fun j κ => F j y • (c j κ • M.ρ κ)) _ fun j _ => (integrable_c ν M hc j).smul (F j y)]
   simp only [integral_smul]
 
 private theorem sec_equiv (hc : ∀ j, Continuous (c j))
@@ -67,7 +112,7 @@ private theorem sec_equiv (hc : ∀ j, Continuous (c j))
       rw [hF y hy κ, Finset.sum_smul]
       exact Finset.sum_congr rfl fun j _ => by rw [smul_smul, mul_comm]
     rw [h1]
-    exact integrable_finset_sum _ fun j _ => (integrable_c ν M hc j).smul (F j y)
+    exact integrable_finsetSum _ fun j _ => (integrable_c ν M hc j).smul (F j y)
   have h2 := (ContinuousLinearMap.mul ℂ (M.V →L[ℂ] M.V) (M.ρ a⁻¹)).integral_comp_comm hint
   simp only [ContinuousLinearMap.mul_apply'] at h2
   rw [← h2, ← integral_mul_left_eq_self (fun κ : Un n => M.ρ a⁻¹ * (F0 (y * κ.1) • M.ρ κ)) a]
@@ -107,12 +152,12 @@ private theorem ker_avg (hν : ν Set.univ = 1) (hk : IsMult μ M k val T') (hc 
     have h4 := fun j => ((ContinuousLinearMap.mul ℂ (M.V →L[ℂ] M.V)).flip (c j κ • M.ρ κ)).integral_comp_comm
       (integrable_k M μ hk (hs j))
     simp only [ContinuousLinearMap.flip_apply, ContinuousLinearMap.mul_apply'] at h4
-    rw [integral_finset_sum _ fun j _ => (integrable_k M μ hk (hs j)).mul_const _]
+    rw [integral_finsetSum _ fun j _ => (integrable_k M μ hk (hs j)).mul_const _]
     exact Finset.sum_congr rfl fun j _ => h4 j
   have h5 : ∫ y : G n, F0 y.val • k y.val ∂μ = ∫ _κ : Un n, (∫ y : G n, F0 y.val • k y.val ∂μ) ∂ν := by
     simp [Measure.real, hν]
   rw [h5, integral_congr_ae (Filter.Eventually.of_forall h1),
-    integral_finset_sum _ fun j _ => (integrable_c ν M hc j).const_mul _]
+    integral_finsetSum _ fun j _ => (integrable_c ν M hc j).const_mul _]
   refine Finset.sum_congr rfl fun j _ => ?_
   have h6 := (ContinuousLinearMap.mul ℂ (M.V →L[ℂ] M.V) (∫ y : G n, F j y.val • k y.val ∂μ)).integral_comp_comm
     (integrable_c ν M hc j)
@@ -129,14 +174,15 @@ private theorem ker_val (hk : IsMult μ M k val T') (hc : ∀ j, Continuous (c j
   have hCE : (fun x => ∑ j, F j x • B j e) ∈ CE M := by
     refine ⟨ContDiffOn.sum fun j _ => (hs j).smul contDiffOn_const, fun y hy a => ?_⟩
     have h := congrArg (fun X : M.V →L[ℂ] M.V => X e) (sec_equiv ν M hc hF hy a)
-    simpa only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, ContinuousLinearMap.mul_apply] using h
+    simpa only [sum_apply, smul_apply, mul_apply_eq_comp] using h
   have h := UpperTheory.RealTr.actEig n μ M k val T' hk χ _ hCE
     (PositivityTheory.Rg.BcB.CG.isEig_sum χ F (fun j => B j e) hs he) 1 (val_mem 1)
   have hI := fun j => integrable_k M μ hk (hs j).continuousOn
-  simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, ContinuousLinearMap.mul_apply]
+  simp only [sum_apply, smul_apply, mul_apply_eq_comp]
   rw [← h]
+
   simp only [act, one_mul, map_sum, map_smul]
-  rw [integral_finset_sum (f := fun j (y : PositivityTheory.RgTw.G n) => F j y.val • k y.val (B j e)) _
+  rw [integral_finsetSum (f := fun j (y : PositivityTheory.RgTw.G n) => F j y.val • k y.val (B j e)) _
     fun j _ => (hI j).apply_continuousLinearMap (B j e)]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [ContinuousLinearMap.integral_apply (hI j)]
@@ -156,6 +202,7 @@ private theorem abs_act (hν : ν Set.univ = 1) (hk : IsMult μ M k val T') (T :
     rw [map_smul, smul_eq_mul, mul_comm]
     rfl
   simp only [h2]
+
   rw [h1, map_smul, map_sum, smul_eq_mul]
   congr 1
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -201,6 +248,7 @@ theorem UpperTheory.V.Z.GSp4Splitting.locAct :
   have hev : ∀ x ∈ S, (D.i x).1.1 = ∑ j, ⟪((b j : S) : D.U), x⟫_ℂ • (D.i (b j : S)).1.1 := by
     intro x hx
     conv_lhs => rw [hexp x hx]
+
     simp only [map_sum, map_smul, Submodule.coe_sum, Submodule.coe_smul]
   have heig := (bridge E n π.V w (infOf lam)).2 hch
   have h := abs_act ν M μC (c := fun j κ => ⟪((b j : S) : D.U), D.σ w κ u⟫_ℂ)

@@ -1,5 +1,53 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
+module
+
+public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
+public import GroundTheory.AutomorphicForms.MacdonaldHecke
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option maxSynthPendingDepth 1
 
@@ -73,27 +121,16 @@ theorem finsum_cosets {W : Type} [AddCommGroup W] [Module ℂ W] (Φ : GL (Fin n
 
 theorem unipC_mem_integralGL (S : Finset (Fin n)) (c : Pairs S → 𝓀[F]) :
     unipC S c ∈ integralGL F n := by
-  apply GroundTheory.Automorphic.Spherical.mem_integralGL_of_forall_mem
-  · intro i j
-    rw [GroundTheory.Automorphic.Spherical.coe_unipC, Matrix.add_apply]
-    refine add_mem ?_ (GroundTheory.Automorphic.Spherical.cMat_mem c i j)
-    by_cases h : i = j
-    · subst h; rw [Matrix.one_apply_eq]; exact one_mem _
-    · rw [Matrix.one_apply_ne h]; exact zero_mem _
-  · have hdet : (↑(unipC (F := F) S c) : Matrix (Fin n) (Fin n) F).det = 1 := by
-      rw [GroundTheory.Automorphic.Spherical.coe_unipC, Matrix.det_of_upperTriangular]
-      · apply Finset.prod_eq_one
-        intro i _
-        rw [Matrix.add_apply, Matrix.one_apply_eq,
-          GroundTheory.Automorphic.Spherical.cMat_apply_of_not c (by simp), add_zero]
-      · intro i j hij
-        have hij' : j < i := hij
-        have hne : i ≠ j := fun h => by subst h; exact lt_irrefl _ hij'
-        show (1 : Matrix (Fin n) (Fin n) F) i j + cMat S c i j = 0
-        rw [Matrix.one_apply_ne hne,
-          GroundTheory.Automorphic.Spherical.cMat_apply_of_not (i := i) (j := j) c (by
-            rintro ⟨-, -, h⟩; exact absurd h (not_lt.mpr hij'.le)), add_zero]
-    rw [hdet, map_one]
+  refine ((mem_unipotent_inf_integralGL_iff F n).2 ⟨unipC_mem_unipotent S c, ?_⟩).2
+  intro i j
+  rw [coe_unipC, Matrix.add_apply]
+  refine add_mem ?_ (cMat_mem c i j)
+  by_cases h : i = j
+  · subst h
+    rw [Matrix.one_apply_eq]
+    exact one_mem _
+  · rw [Matrix.one_apply_ne h]
+    exact zero_mem _
 
 def revCompl (S : Finset (Fin n)) : Finset (Fin n) :=
   Finset.univ.filter fun i => Fin.rev i ∉ S
@@ -260,10 +297,12 @@ theorem sum_kappa {z : Fin n → ℂˣ} (hU : Unit' ρ B) (hH : Heig ρ v z) {r 
         (kappa F S : ℂ) * B v (ρ (torusPow F n (lamS S)) v) =
       sqrtQ F ^ (r * (n - r)) * evalAt z (esymmL n r) * B v v := by
   have h := congrArg (B v) (sum_eig hH hr)
+
   rw [map_sum, map_smul, smul_eq_mul] at h
   rw [← h]
   apply Finset.sum_congr rfl
   intro S _
+
   rw [map_sum]
   simp only [coeff_gMat hU hH.1]
   rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
@@ -279,8 +318,8 @@ theorem conj_sqrtQ_pow (k : ℕ) : starRingEnd ℂ (sqrtQ F ^ k) = sqrtQ F ^ k :
 
 end GlobalTheory.CompanionTheory.SatakeStable
 
-open GlobalTheory.CompanionTheory.SatakeStable in
 
+open GlobalTheory.CompanionTheory.SatakeStable in
 theorem GlobalTheory.CompanionTheory.SatakeStable.l11 : liftZP_unit := by
   unfold liftZP_unit
   intro F _ _ _ _ n V _ _ ρ B hU v z hv0 hH r hr
@@ -307,6 +346,7 @@ theorem GlobalTheory.CompanionTheory.SatakeStable.l11 : liftZP_unit := by
       (kappa F S : ℂ) * (evalAt z (esymmL n n) * starRingEnd ℂ (B v (ρ (torusPow F n (lamS S)) v))) =
       evalAt z (esymmL n n) * starRingEnd ℂ (∑ S ∈ (Finset.univ : Finset (Fin n)).powersetCard r,
         (kappa F S : ℂ) * B v (ρ (torusPow F n (lamS S)) v)) := by
+
     rw [map_sum, Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro S _

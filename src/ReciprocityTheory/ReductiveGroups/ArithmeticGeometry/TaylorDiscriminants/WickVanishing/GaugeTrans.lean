@@ -1,4 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.ChartChg
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Data.Nat.Choose.Cast
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -17,7 +66,6 @@ theorem gt_coeff_X_pow (i : Fin 2) (n : ℕ) (e : Fin 2 →₀ ℕ) :
   first
     | exact MvPowerSeries.coeff_X_pow e i n
     | (classical exact MvPowerSeries.coeff_X_pow e i n)
-    | simp [MvPowerSeries.coeff_X_pow]
 
 theorem gt_coeff_expX (i : Fin 2) (e : Fin 2 →₀ ℕ) :
     coeff e (PowerSeries.subst (X i : MvPowerSeries (Fin 2) A) (PowerSeries.exp A)) =
@@ -48,6 +96,7 @@ theorem gt_coeff_sum_pow (n : ℕ) (e : Fin 2 →₀ ℕ) :
       MvPowerSeries.X_pow_eq, MvPowerSeries.X_pow_eq, MvPowerSeries.monomial_mul_monomial,
       MvPowerSeries.coeff_monomial]
     split_ifs <;> simp
+
   rw [add_pow, map_sum]
   simp_rw [hterm]
   rw [Finset.sum_eq_single (e 0)]
@@ -146,19 +195,16 @@ theorem gt_ev_add {m n : ℕ} (a : Fin m → Pt k n d) (ha : ∀ j, GP (a j)) (f
     ev a (f + g) = ev a f + ev a g := by
   first
     | exact MvPowerSeries.subst_add (gt_hasSubst a ha) f g
-    | exact map_add (MvPowerSeries.substAlgHom (gt_hasSubst a ha)) f g
 
 theorem gt_ev_sub {m n : ℕ} (a : Fin m → Pt k n d) (ha : ∀ j, GP (a j)) (f g : PS k m d) :
     ev a (f - g) = ev a f - ev a g := by
   first
     | exact MvPowerSeries.subst_sub (gt_hasSubst a ha) f g
-    | rw [eq_sub_iff_add_eq, ← gt_ev_add a ha, sub_add_cancel]
 
 theorem gt_ev_mul {m n : ℕ} (a : Fin m → Pt k n d) (ha : ∀ j, GP (a j)) (f g : PS k m d) :
     ev a (f * g) = ev a f * ev a g := by
   first
     | exact MvPowerSeries.subst_mul (gt_hasSubst a ha) f g
-    | exact map_mul (MvPowerSeries.substAlgHom (gt_hasSubst a ha)) f g
 
 theorem gt_ev_zero {m n : ℕ} (a : Fin m → Pt k n d) (ha : ∀ j, GP (a j)) :
     ev a (0 : PS k m d) = 0 := by
@@ -166,20 +212,17 @@ theorem gt_ev_zero {m n : ℕ} (a : Fin m → Pt k n d) (ha : ∀ j, GP (a j)) :
   rw [add_zero] at h
   first
     | linear_combination -h
-    | simpa using h
 
 theorem gt_ev_X {m n : ℕ} (a : Fin m → Pt k n d) (ha : ∀ j, GP (a j)) (j : Fin m) (i : Fin d) :
     ev a (X (j, i) : PS k m d) = a j i := by
   first
     | exact MvPowerSeries.subst_X (gt_hasSubst a ha) (j, i)
-    | simp [ev, MvPowerSeries.subst_X (gt_hasSubst a ha)]
 
 theorem gt_ev_ev {l m n : ℕ} (a : Fin m → Pt k n d) (b : Fin l → Pt k m d) (ha : ∀ j, GP (a j))
     (hb : ∀ j, GP (b j)) (f : PS k l d) :
     ev a (ev b f) = ev (fun j i => ev a (b j i)) f := by
   first
     | exact MvPowerSeries.subst_comp_subst_apply (gt_hasSubst b hb) (gt_hasSubst a ha) f
-    | exact MvPowerSeries.subst_comp_subst_apply (gt_hasSubst a ha) (gt_hasSubst b hb) f
 
 private theorem gt_cc_lemma {σ τ : Type} [Finite σ] (a : σ → MvPowerSeries τ k)
     (ha : ∀ s, constantCoeff (a s) = 0) (f : MvPowerSeries σ k) :
@@ -334,7 +377,6 @@ theorem gt_const_ev_eq {m n : ℕ} (V : Fin m → Pt k n d) (hV : ∀ j, GP (V j
 theorem gt_map_id {σ : Type} (f : MvPowerSeries σ k) : MvPowerSeries.map (algebraMap k k) f = f := by
   first
     | (ext e; simp)
-    | simp
 
 end Calc
 
@@ -363,7 +405,6 @@ private theorem gt_evz_lemma {m n : ℕ} (f : PS k m d) (hf : constantCoeff f = 
   simp only [h2, gt_ev_zero _ he] at h1
   first
     | exact h1.symm
-    | exact h1
 
 theorem gt_comp1_zero {n : ℕ} (φ : Pt k 1 d) (hφ : GP φ) : comp1 φ (0 : Pt k n d) = 0 := by
   funext i
@@ -389,8 +430,6 @@ theorem gt_ev_pt_self (f : PS k 1 d) : ev ![pt k (n := 1) d 0] f = f := by
   show MvPowerSeries.subst _ f = f
   first
     | (rw [h, MvPowerSeries.subst_self]; rfl)
-    | rw [h, MvPowerSeries.subst_self]
-    | simp [h, MvPowerSeries.subst_self]
 
 theorem gt_comp1_pt_right (φ : Pt k 1 d) : comp1 φ (pt k (n := 1) d 0) = φ := by
   funext i
@@ -411,7 +450,7 @@ private theorem gt_ev2_lemma {k : Type} [CommRing k] {d m n : ℕ} (V : Fin m �
 private theorem gt_cc3_lemma {k : Type} [CommRing k] {d n : ℕ} (f : PS k 2 d) (hf : constantCoeff f = 0)
     (V1 V2 V3 : Fin 2 → Pt k n d) (h1 : ∀ j, GP (V1 j)) (h2 : ∀ j, GP (V2 j)) (h3 : ∀ j, GP (V3 j)) :
     constantCoeff (ev V1 f + ev V2 f - ev V3 f) = 0 := by
-  rw [map_sub, map_add, gt_const_ev V1 h1 f hf, gt_const_ev V2 h2 f hf, gt_const_ev V3 h3 f hf]
+  rw [map_sub, map_add (f := _), gt_const_ev V1 h1 f hf, gt_const_ev V2 h2 f hf, gt_const_ev V3 h3 f hf]
   all_goals simp
 
 private theorem gt_cc2_lemma {k : Type} [CommRing k] {d n : ℕ} (f : PS k 2 d) (hf : constantCoeff f = 0)

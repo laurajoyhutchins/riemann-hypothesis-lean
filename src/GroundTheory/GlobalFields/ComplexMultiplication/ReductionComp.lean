@@ -1,5 +1,51 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.ReductionIsogeny
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionLift
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionRespectsAdd
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionIsogeny
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace GroundTheory.Global
 
@@ -15,8 +61,8 @@ section Generic
 
 variable [W.IsElliptic]
 
-omit [W.IsElliptic] in
 
+omit [W.IsElliptic] in
 theorem reduceFF_some (V : WeierstrassCurve 𝒪) [V.IsElliptic] {x y : gaussRing W}
     (h : ((V.baseChange K).baseChange (W.baseChange K).toAffine.FunctionField).toAffine.Nonsingular
       (algebraMap (gaussRing W) _ x) (algebraMap (gaussRing W) _ y)) :
@@ -29,8 +75,9 @@ theorem reduceFF_some (V : WeierstrassCurve 𝒪) [V.IsElliptic] {x y : gaussRin
     rw [gaussCurve_map_functionField]; exact h
   have e₁ : pointCongr (gaussCurve_map_functionField K W V).symm (Point.some _ _ h) =
       Point.some _ _ h₁ := pointCongr_some _ h
-  have n₁ := nonsingular_residue_of_isElliptic (W.baseChange K).toAffine.FunctionField
-    (gaussCurve W V) h₁.1
+  have n₁ := WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+    (equation_residue (gaussCurve W V)
+      (equation_of_map (W.baseChange K).toAffine.FunctionField (gaussCurve W V) h₁.1))
   obtain ⟨h₂, e₂⟩ := pointMapRing_some (gaussResidue W) ((gaussCurve W V).map (residue _)) n₁
   refine ⟨by rw [← gaussCurve_map_residue W V]; exact h₂, ?_⟩
   simp only [reduceFF, AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom, reductionHom_apply]
@@ -51,8 +98,9 @@ theorem reduceFF_genericPoint :
         (GroundTheory.Arith.Abelian.genericPoint (W.baseChange K)) = Point.some _ _ h₁ := by
     rw [GroundTheory.Arith.Abelian.genericPoint, pointCongr_some]
     exact exists_some_eq _ hx.symm hy.symm
-  have n₁ := nonsingular_residue_of_isElliptic (W.baseChange K).toAffine.FunctionField
-    (gaussCurve W W) h₁.1
+  have n₁ := WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+    (equation_residue (gaussCurve W W)
+      (equation_of_map (W.baseChange K).toAffine.FunctionField (gaussCurve W W) h₁.1))
   obtain ⟨h₂, e₂⟩ := pointMapRing_some (gaussResidue W) ((gaussCurve W W).map (residue _)) n₁
   simp only [reduceFF, AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom, reductionHom_apply]
   rw [e₁, reducePoint_some_integral _ _ h₁ n₁]
@@ -120,12 +168,6 @@ end Coordinates
 
 section Composition
 
-theorem pointCongr₃_eq {F : Type*} [Field F] [DecidableEq F]
-    {V₁ V₂ V₃ V₄ : WeierstrassCurve F} (h₁ : V₁ = V₂) (h₂ : V₂ = V₃) (h₃ : V₃ = V₄)
-    (h₄ : V₁ = V₄) (P : V₁.toAffine.Point) :
-    pointCongr h₃ (pointCongr h₂ (pointCongr h₁ P)) = pointCongr h₄ P := by
-  subst h₁; subst h₂; subst h₃; rfl
-
 omit [IsFractionRing 𝒪 K] in
 theorem fieldEvalRed_congr {Λ : Type*} [CommRing Λ] [IsDomain Λ] [IsDiscreteValuationRing Λ]
     (j : 𝒪 →+* Λ) [IsLocalHom j] {x₁ y₁ x₂ y₂ : Λ} (hxy₁ : (W.map j).toAffine.Equation x₁ y₁)
@@ -149,7 +191,7 @@ theorem gaussResidue_comp_residueField_map :
 
 variable (W' W'' : WeierstrassCurve 𝒪) [W'.IsElliptic] [W''.IsElliptic]
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem reduceFF_map_genEval
     {R : ((W'.baseChange K).baseChange (W.baseChange K).toAffine.FunctionField).toAffine.Point}
@@ -187,7 +229,7 @@ theorem reduceFF_map_genEval
     exact (WeierstrassCurve.Affine.map_equation (W'.map j).toAffine
       (IsFractionRing.injective _ (W.baseChange K).toAffine.FunctionField) x y).mp h₁
   have hx : Function.Injective (eval₂RingHom (ResidueField.map j) (residue _ x)) := by
-    rw [injective_iff_map_eq_zero]
+    set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
     intro p hp
     by_contra hp0
     have hT : Transcendental (ResidueField 𝒪) (gaussResidue W (residue _ x)) := hR''

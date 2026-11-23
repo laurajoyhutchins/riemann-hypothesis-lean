@@ -1,6 +1,50 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
-import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.IsMultiHomogChartMonomial
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.IsVerticalCartier
+public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.IsMultiHomogChartMonomial
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Topology.Algebra.MvPolynomial
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -149,49 +193,6 @@ theorem valM_eq (hz : z ∈ mcPts (mCoordIdeal y)) {S : Matrix (Fin N) (Fin N) �
     valM y S z = Sz := by
   ext p q
   exact IndefiniteRowSideFullHecke.LowerBoundFree.valAt_eq hz (hS p q)
-
-theorem regularAt_smul {a : Ω} (s : K → ℂ) (hs : ∀ k, s k ≠ 0)
-    (ha : IndefiniteRowSideFullHecke.LowerBoundFree.RegularAt y a z) :
-    IndefiniteRowSideFullHecke.LowerBoundFree.RegularAt y a (fun p => s p.1 * z p) :=
-  ⟨_, ha.choose_spec.smul s hs⟩
-
-theorem regularAt_conj {a : Ω} (ha : IndefiniteRowSideFullHecke.LowerBoundFree.RegularAt y a z) :
-    IndefiniteRowSideFullHecke.LowerBoundFree.RegularAt y a (fun p => starRingEnd ℂ (z p)) :=
-  ⟨_, ha.choose_spec.conj⟩
-
-theorem isLocSection_smul {W : ChartBundle ℤ (segreCoord y) N E} {e : E} (s : K → ℂ)
-    (hs : ∀ k, s k ≠ 0) {z' : (Σ k, ι k) → ℂ} (hz' : z' = fun p => s p.1 * z p)
-    (he : IndefiniteRowSideFullHecke.LowerBoundFree.IsLocSection y W z e) : IndefiniteRowSideFullHecke.LowerBoundFree.IsLocSection y W z' e := by
-  subst hz'
-  obtain ⟨c, hc, m, a, t, ht, ha, rfl⟩ := he
-  exact ⟨c, fun k => mul_ne_zero (hs k) (hc k), m, a, t, ht, fun l => regularAt_smul s hs (ha l), rfl⟩
-
-theorem isLocSection_conj {W : ChartBundle ℤ (segreCoord y) N E} {e : E}
-    (he : IndefiniteRowSideFullHecke.LowerBoundFree.IsLocSection y W z e) :
-    IndefiniteRowSideFullHecke.LowerBoundFree.IsLocSection y W (fun p => starRingEnd ℂ (z p)) e := by
-  obtain ⟨c, hc, m, a, t, ht, ha, rfl⟩ := he
-  exact ⟨c, fun k => (map_ne_zero _).2 (hc k), m, a, t, ht, fun l => regularAt_conj (ha l), rfl⟩
-
-theorem isFrameAt_smul {W : ChartBundle ℤ (segreCoord y) N E} {b : Fin N → E} (s : K → ℂ)
-    (hs : ∀ k, s k ≠ 0) (hb : IndefiniteRowSideFullHecke.LowerBoundFree.IsFrameAt y W z b) :
-    IndefiniteRowSideFullHecke.LowerBoundFree.IsFrameAt y W (fun p => s p.1 * z p) b := by
-  refine ⟨fun q => isLocSection_smul s hs rfl (hb.1 q), fun e he => ?_⟩
-  have he' : IndefiniteRowSideFullHecke.LowerBoundFree.IsLocSection y W z e :=
-    isLocSection_smul (fun k => (s k)⁻¹) (fun k => inv_ne_zero (hs k))
-      (funext fun p => (inv_mul_cancel_left₀ (hs p.1) (z p)).symm) he
-  obtain ⟨a, ha, hae⟩ := hb.2 e he'
-  exact ⟨a, fun q => regularAt_smul s hs (ha q), hae⟩
-
-theorem isFrameAt_conj {W : ChartBundle ℤ (segreCoord y) N E} {b : Fin N → E}
-    (hb : IndefiniteRowSideFullHecke.LowerBoundFree.IsFrameAt y W z b) :
-    IndefiniteRowSideFullHecke.LowerBoundFree.IsFrameAt y W (fun p => starRingEnd ℂ (z p)) b := by
-  refine ⟨fun q => isLocSection_conj (hb.1 q), fun e he => ?_⟩
-  have he' : IndefiniteRowSideFullHecke.LowerBoundFree.IsLocSection y W z e := by
-    have h := isLocSection_conj he
-    simp only [RCLike.conj_conj] at h
-    exact h
-  obtain ⟨a, ha, hae⟩ := hb.2 e he'
-  exact ⟨a, fun q => regularAt_conj (ha q), hae⟩
 
 theorem inFrameDomain_smul {c : (k : K) → ι k} {f : Ω} (s : K → ℂ) (hs : ∀ k, s k ≠ 0)
     (hd : InFrameDomain y c f z) : InFrameDomain y c f (fun p => s p.1 * z p) := by

@@ -1,4 +1,56 @@
-import CompanionTheory.AutomorphicTheory.SchurLimitBounds.SchurOrthogonality.URepSchur
+module
+
+public import CompanionTheory.AutomorphicTheory.SchurLimitBounds.SchurOrthogonality.URepBasic
+public import Mathlib.MeasureTheory.Group.ModularCharacter
+public import CompanionTheory.AutomorphicTheory.SchurLimitBounds.SchurOrthogonality.URepSchur
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -65,10 +117,6 @@ def SqInt (μ : Measure G) (π : UnitaryRep G H) : Prop := ∀ v w : H, MemLp (f
 def pairing (μ : Measure G) (π : UnitaryRep G H) (σ : UnitaryRep G K) (v w : H) (v' w' : K) : ℂ :=
   ∫ g, ⟪w, π g v⟫_ℂ * star ⟪w', σ g v'⟫_ℂ ∂μ
 
-theorem integrable_pairing {π : UnitaryRep G H} {σ : UnitaryRep G K} (hπ : SqInt μ π) (hσ : SqInt μ σ)
-    (v w : H) (v' w' : K) : Integrable (fun g => ⟪w, π g v⟫_ℂ * star ⟪w', σ g v'⟫_ℂ) μ :=
-  (hπ v w).integrable_mul (hσ v' w').star
-
 theorem integral_mul_right (f : G → ℂ) (h : G) :
     ∫ g, f (g * h) ∂μ = (Measure.modularCharacterFun h : ℝ) * ∫ g, f g ∂μ := by
   have e : Measure.map (· * h) μ = Measure.modularCharacterFun h • μ := by
@@ -123,8 +171,8 @@ theorem exists_op_left {π : UnitaryRep G H} {σ : UnitaryRep G K} (hπ : SqInt 
     rw [← inner_conj_symm, ← hA, ← integral_conj]
     unfold pairing
     congr 1
-    funext g
-    simp
+    funext x
+    simp [inner_conj_symm]
   refine ⟨A, fun h w => ?_, key⟩
   refine ext_inner_right ℂ fun w' => ?_
   rw [UnitaryRep.inner_map_left, ← key, ← key, ← pairing_left π σ v w v' _ h]
@@ -211,7 +259,8 @@ theorem schur_orthogonality {π : UnitaryRep G H} (hirr : π.IsIrreducible) (hπ
   ring
 
 theorem pairing_eq_zero {π : UnitaryRep G H} {σ : UnitaryRep G K} (hπi : π.IsIrreducible)
-    (hσi : σ.IsIrreducible) (hπ : SqInt μ π) (hσ : SqInt μ σ) (hne : ¬ π.IsEquivalent σ)
+    (hσi : σ.IsIrreducible) (hπ : SqInt μ π) (hσ : SqInt μ σ)
+    (hne : ¬ Nonempty (π.Equiv σ))
     (v w : H) (v' w' : K) : pairing μ π σ v w v' w' = 0 := by
   obtain ⟨A, hA, h⟩ := exists_op_left hπ hσ v v'
   rw [h, hπi.eq_zero_of_not_isEquivalent hσi hne hA]

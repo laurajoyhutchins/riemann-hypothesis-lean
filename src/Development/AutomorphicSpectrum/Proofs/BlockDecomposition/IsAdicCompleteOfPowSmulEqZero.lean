@@ -1,4 +1,59 @@
-import Mathlib
+module
+
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TensorQuotientTorsionFreeComplete
+public import Mathlib.Algebra.DirectSum.Basic
+public import Mathlib.Data.Nat.Prime.Defs
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.LocalRing.Defs
+public import Mathlib.Algebra.Module.PID
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.FreeProduct.Basic
+public import Mathlib.LinearAlgebra.TensorProduct.Prod
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open TensorProduct
 
@@ -21,33 +76,7 @@ theorem isAdicComplete_span_iff {M : Type} [AddCommGroup M] [Module A M] :
       (∀ x : M, (∀ n : ℕ, ∃ z : M, π ^ n • z = x) → x = 0) ∧
       ∀ u : ℕ → M, (∀ n : ℕ, ∃ z : M, π ^ n • z = u n - u (n + 1)) →
         ∃ L : M, ∀ n : ℕ, ∃ z : M, π ^ n • z = u n - L := by
-  constructor
-  · intro h
-    refine ⟨fun x hx => ?_, fun u hu => ?_⟩
-    · refine h.toIsHausdorff.haus x fun n => ?_
-      rw [smodEq_span_iff, sub_zero]
-      exact hx n
-    · have hc : ∀ {m n : ℕ}, m ≤ n →
-          u m ≡ u n [SMOD (Ideal.span {π} ^ m • ⊤ : Submodule A M)] := by
-        intro m n hmn
-        rw [smodEq_span_iff]
-        induction n, hmn using Nat.le_induction with
-        | base => exact ⟨0, by simp⟩
-        | succ k hk ih =>
-          obtain ⟨z, hz⟩ := ih
-          obtain ⟨w, hw⟩ := hu k
-          refine ⟨z + π ^ (k - m) • w, ?_⟩
-          rw [smul_add, smul_smul, ← pow_add, Nat.add_sub_cancel' hk, hz, hw]
-          abel
-      obtain ⟨L, hL⟩ := h.toIsPrecomplete.prec hc
-      exact ⟨L, fun n => (smodEq_span_iff π n _ _).1 (hL n)⟩
-  · rintro ⟨h1, h2⟩
-    haveI : IsHausdorff (Ideal.span {π}) M := ⟨fun x hx => h1 x fun n => by
-      simpa using (smodEq_span_iff π n _ _).1 (hx n)⟩
-    haveI : IsPrecomplete (Ideal.span {π}) M := ⟨fun u hu => by
-      obtain ⟨L, hL⟩ := h2 u fun n => (smodEq_span_iff π n _ _).1 (hu (Nat.le_succ n))
-      exact ⟨L, fun n => (smodEq_span_iff π n _ _).2 (hL n)⟩⟩
-    exact ⟨⟩
+  apply GlobalTheory.XiQuotient.isAdicComplete_iff <;> assumption
 
 variable {π}
 

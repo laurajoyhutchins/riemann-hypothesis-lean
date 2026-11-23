@@ -1,7 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
-import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+module
+
+public import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.GaugeTrans
+public import Development.AbelianVarietyTheory.Proofs.RingsOfIntegers.MvPowerSeriesSubstConstTermsLocalAlgHomSpec
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option autoImplicit false
 noncomputable section
@@ -43,7 +83,7 @@ def intLog (hi : Function.Injective (algebraMap V K)) (n d : ℕ) : AddSubgroup 
   zero_mem' := ⟨map_zero _, 1, by rw [expS_zero']; exact map_one _⟩
   add_mem' := by
     rintro f g ⟨hf, u, hu⟩ ⟨hg, v, hv⟩
-    refine ⟨by rw [map_add, hf, hg, add_zero], u * v, ?_⟩
+    refine ⟨by rw [map_add (f := _), hf, hg, add_zero], u * v, ?_⟩
     rw [gt_expS_add f g hf hg, ← hu, ← hv]
     exact map_mul _ _ _
   neg_mem' := by
@@ -151,12 +191,12 @@ theorem hq_add_left (hh : B.IsCanonGauge K h) {n : ℕ} {x y z : Pt V n d} (hx :
   have pa := gp_addOf _ (GP_FK B K) _ _ p0 p1
   have hA : ∀ j, GP ((fun j => mp K (![x, y, z] j)) j) := fun j => constantCoeff_baseChange_eq_zero K (triple_points_zero_constant hx hy hz j)
   have m := ev_mem K hi ![x, y, z] (triple_points_zero_constant hx hy hz) _ (by
-    rw [map_sub, map_add, gt_const_ev _ (pair_points_zero_constant p0 p2) _ h0, gt_const_ev _ (pair_points_zero_constant p1 p2) _ h0,
+    rw [map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant p0 p2) _ h0, gt_const_ev _ (pair_points_zero_constant p1 p2) _ h0,
       gt_const_ev _ (pair_points_zero_constant pa p2) _ h0]; simp) _ hh.ph1
   rw [gt_ev_sub _ hA, gt_ev_add _ hA, germEv_germEv_two_points K _ hA p0 p2, germEv_germEv_two_points K _ hA p1 p2, germEv_germEv_two_points K _ hA pa p2,
     evP_addOf _ hA _ _ _ p0 p1, evP_pt _ hA, evP_pt _ hA, evP_pt _ hA] at m
   unfold hq
-  rw [← map_add, mp_addOf K _ hx hy, eq_comm, ← sub_eq_zero, ← map_sub, QuotientAddGroup.mk'_apply,
+  rw [← map_add (f := _), mp_addOf K _ hx hy, eq_comm, ← sub_eq_zero, ← map_sub, QuotientAddGroup.mk'_apply,
     QuotientAddGroup.eq_zero_iff]
   exact m
 
@@ -169,12 +209,12 @@ theorem hq_add_right (hh : B.IsCanonGauge K h) {n : ℕ} {x y z : Pt V n d} (hx 
   have pa := gp_addOf _ (GP_FK B K) _ _ p1 p2
   have hA : ∀ j, GP ((fun j => mp K (![x, y, z] j)) j) := fun j => constantCoeff_baseChange_eq_zero K (triple_points_zero_constant hx hy hz j)
   have m := ev_mem K hi ![x, y, z] (triple_points_zero_constant hx hy hz) _ (by
-    rw [map_sub, map_add, gt_const_ev _ (pair_points_zero_constant p0 p1) _ h0, gt_const_ev _ (pair_points_zero_constant p0 p2) _ h0,
+    rw [map_sub, map_add (f := _), gt_const_ev _ (pair_points_zero_constant p0 p1) _ h0, gt_const_ev _ (pair_points_zero_constant p0 p2) _ h0,
       gt_const_ev _ (pair_points_zero_constant p0 pa) _ h0]; simp) _ hh.ph2
   rw [gt_ev_sub _ hA, gt_ev_add _ hA, germEv_germEv_two_points K _ hA p0 p1, germEv_germEv_two_points K _ hA p0 p2, germEv_germEv_two_points K _ hA p0 pa,
     evP_addOf _ hA _ _ _ p1 p2, evP_pt _ hA, evP_pt _ hA, evP_pt _ hA] at m
   unfold hq
-  rw [← map_add, mp_addOf K _ hy hz, eq_comm, ← sub_eq_zero, ← map_sub, QuotientAddGroup.mk'_apply,
+  rw [← map_add (f := _), mp_addOf K _ hy hz, eq_comm, ← sub_eq_zero, ← map_sub, QuotientAddGroup.mk'_apply,
     QuotientAddGroup.eq_zero_iff]
   exact m
 
@@ -284,6 +324,7 @@ theorem hq_sum (hh : B.IsCanonGauge K h) (w0 : O) {n m : ℕ} (mu : Matrix (Fin 
   rw [Finset.sum_comm]
   have e2 : ∀ k, ∑ i, φ j k (star (mu i j) * mu i k * w0) = if j = k then N • φ j k w0 else 0 := by
     intro k
+
     rw [← map_sum, ← Finset.sum_mul, hmu j k]
     split_ifs
     · rw [← nsmul_eq_mul, map_nsmul]
@@ -339,8 +380,9 @@ theorem GlobalTheory.PlaceInt.exists_isKappa : ∀ (V : Type) [CommRing V] [IsDo
   have key := hq_sum hi hh w0 mu N hmu (fun j => pt V (n := n) d j) hx
   have hmem : (∑ b : Fin n, ev (n := n) ![fun i => FB.toK K (matV B mu (fun j => pt V (n := n) d j) b i)] (B.hL K h w0)
       - (N : K) • ∑ b : Fin n, ev (n := n) ![pt K d b] (B.hL K h w0)) ∈ intLog K hi n d := by
+
     rw [← QuotientAddGroup.eq_zero_iff, ← QuotientAddGroup.mk'_apply, map_sub, sub_eq_zero, Nat.cast_smul_eq_nsmul,
-      map_nsmul, map_sum, map_sum]
+    map_nsmul, map_sum, map_sum]
     convert key using 2 with b _
     · rw [matV_eq_sumP B mu _ hx b, hq,
         ← ev_hL w0 (constantCoeff_sumP_eq_zero B fun j => gp_comp1 _ _ (constantCoeff_act_eq_zero B _) (hx j))]

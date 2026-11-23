@@ -1,4 +1,50 @@
-import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
+import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -78,8 +124,8 @@ theorem mul_mem_coeffIdeal' {B Q : Type} [CommRing B] [CommRing Q] [Algebra B Q]
 
 end GlobalTheory.DevStep
 
-open GlobalTheory.DevStep in
 
+open GlobalTheory.DevStep in
 theorem GlobalTheory.step_independent : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Type) [CommRing B] [CommRing Q] [CommRing O] [Algebra B Q] (θ : B →+* O), IsFrame p Q θ → ∀ (d : ℕ) (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) B), IsLift θ μ → ∀ (C : Type) [CommRing C] [Algebra O C], IsFrame p C (RingHom.id O) → ∀ Θ : Q →+* C, (∀ b, Θ (algebraMap B Q b) = algebraMap O C (θ b)) → ∀ (ι : Type) [Fintype ι] (e : ι → MvPowerSeries (Fin d) Q), (∀ i, QL μ ⊤ (e i)) → IsBasis (fun i => map θ (μ i)) (fun i => map Θ (e i)) → ∀ N' N : Ideal B, IsStep p θ N' N → ∀ (b : ι → B) (s : MvPowerSeries (Fin d) Q), (∀ i, b i ∈ N) → In N s → QL μ N' (comb b e - s) → (∀ i, b i ∈ N') ∧ In N' s := by
   intro p _ B O Q _ _ _ _ θ hF d μ hμ C _ _ hC Θ hΘ ι _ e he hB N' N hstep b s hb hs hQL
   obtain ⟨n, a, ⟨c, hc⟩, hN, hn⟩ := hstep
@@ -119,8 +165,8 @@ theorem GlobalTheory.step_independent : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Ty
     intro α; rw [hE, map_sub, hcomb, cS₁]
   have hkey : comb b e - s = (comb n' e - S') + algebraMap B Q n • E := by
     ext α
-    rw [map_sub, map_add, map_sub, coeff_smul, cE, hcomb, hcomb, hts, cS']
-    simp only [hβ, map_add, map_mul, add_mul, Finset.sum_add_distrib, mul_sub, Finset.mul_sum]
+    rw [map_sub, map_add (f := _), map_sub, coeff_smul, cE, hcomb, hcomb, hts, cS']
+    simp only [hβ, map_add (f := _), map_mul, add_mul, Finset.sum_add_distrib, mul_sub, Finset.mul_sum]
     ring_nf
 
   let L : MvPowerSeries (Fin d) Q →ₗ[Q] MvPowerSeries (Fin d ⊕ Fin d) Q :=
@@ -150,7 +196,7 @@ theorem GlobalTheory.step_independent : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Ty
       exact Submodule.sub_mem _ (Submodule.sum_mem _ fun j _ => mul_mem_coeffIdeal' _ (hej j))
         (mem_coeffIdeal.2 ⟨_, trivial, rfl⟩)
     · have h1 := congrArg (coeff (Finsupp.single i 1)) hkey
-      rw [map_add, coeff_smul] at h1
+      rw [map_add (f := _), coeff_smul] at h1
       have h2 : algebraMap B Q n * coeff (Finsupp.single i 1) E =
           lin (comb b e - s) i - coeff (Finsupp.single i 1) (comb n' e - S') := by
         rw [hl, h1]; ring
@@ -171,10 +217,10 @@ theorem GlobalTheory.step_independent : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Ty
       exact mem_coeffIdeal.2 ⟨y, hy, h⟩
     · have h1 : cob1 (up Q μ) (comb b e - s) =
           cob1 (up Q μ) (comb n' e - S') + algebraMap B Q n • cob1 (up Q μ) E := by
-        rw [← hL, hkey, map_add, map_smul]; rfl
+        rw [← hL, hkey, map_add (f := _), map_smul]; rfl
       have h2 : algebraMap B Q n * coeff α (cob1 (up Q μ) E) =
           coeff α (cob1 (up Q μ) (comb b e - s)) - coeff α (cob1 (up Q μ) (comb n' e - S')) := by
-        rw [h1, map_add, coeff_smul]; ring
+        rw [h1, map_add (f := _), coeff_smul]; ring
       rw [h2]
       refine Submodule.sub_mem _ ?_ ?_
       · obtain ⟨y, hy, h⟩ := hQL.2.2 α; exact mem_coeffIdeal.2 ⟨y, hy, h⟩
@@ -223,6 +269,7 @@ theorem GlobalTheory.step_independent : ∀ (p : ℕ) [Fact p.Prime] (B O Q : Ty
   have hc1 : ∀ α, coeff α (map Θ E - comb (fun i => θ (β i)) (fun i => map Θ (e i))) =
       -algebraMap O C (θ (t α)) := by
     intro α
+
     rw [map_sub, coeff_map, cE, hcΘ, map_sub, map_sum]
     simp only [map_mul, hΘ]; ring
   have h2 : map Θ E - comb (fun i => a * γ i) (fun i => map Θ (e i)) =

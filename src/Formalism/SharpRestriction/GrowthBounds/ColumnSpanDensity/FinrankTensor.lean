@@ -1,7 +1,54 @@
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.MeanDefs
-import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundOfEdgeCount
-import Formalism.PolynomialDimension.MultinomialDepth.WeylDimPosOfAntitone
-import Formalism.GradedWeylDivisibility.FinalD
+module
+
+import Formalism.SharpRestriction.GrowthBounds.BinomialRatio.FinrankTensor
+public import Formalism.PolynomialDimension.DigitClassSize
+public import Formalism.PolynomialDimension.WeylDim
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundLargeConductor
+public import Formalism.GradedWeylDivisibility.FinalD
+public import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.RhoLowerBoundOfEdgeCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -148,29 +195,7 @@ theorem finrank_tensor (Kf : Type) [Field Kf] (S : Type) [Fintype S] [DecidableE
     (ν : S → Fin n → ℕ) :
     Module.finrank Kf (Formalism.GradedWeylDivisibility.tensorLat Kf Kf fun s => Formalism.GradedWeylDivisibility.dualWeyl Kf k n (ν s)) =
       ∏ s, Module.finrank Kf (Formalism.GradedWeylDivisibility.dualWeyl Kf k n (ν s)) := by
-  classical
-  haveI : IsFractionRing Kf Kf := by
-    first
-    | infer_instance
-    | exact IsLocalization.atUnits Kf (nonZeroDivisors Kf)
-        (fun x hx => (IsUnit.mem_submonoid_iff _).mpr (Ne.isUnit (nonZeroDivisors.ne_zero hx)))
-  let M : S → Submodule Kf (MvPolynomial (Fin k × Fin n) Kf) := fun s => Formalism.GradedWeylDivisibility.dualWeyl Kf k n (ν s)
-  let B : ∀ s, Module.Basis (Module.Basis.ofVectorSpaceIndex Kf (M s)) Kf (M s) :=
-    fun s => Module.Basis.ofVectorSpace Kf (M s)
-  let b : ∀ s, Module.Basis.ofVectorSpaceIndex Kf (M s) → MvPolynomial (Fin k × Fin n) Kf :=
-    fun s i => ((B s i : M s) : MvPolynomial (Fin k × Fin n) Kf)
-  have hli : ∀ s, LinearIndependent Kf (b s) := fun s =>
-    (B s).linearIndependent.map' (M s).subtype (Submodule.ker_subtype _)
-  have hsp : ∀ s, Submodule.span Kf (Set.range (b s)) = M s := by
-    intro s
-    have h1 : Set.range (b s) = (M s).subtype '' Set.range (B s) := by
-      rw [← Set.range_comp]
-      rfl
-    rw [h1, Submodule.span_image, (B s).span_eq, Submodule.map_subtype_top]
-  obtain ⟨hT, hTs⟩ := Formalism.GradedWeylDivisibility.tensorBasis Kf Kf S k n (fun s => Module.Basis.ofVectorSpaceIndex Kf (M s)) M b hli hsp
-  show Module.finrank Kf (Formalism.GradedWeylDivisibility.tensorLat Kf Kf M) = _
-  rw [← hTs, Module.finrank_eq_nat_card_basis (Module.Basis.span hT), Nat.card_pi]
-  exact Finset.prod_congr rfl fun s _ => (Module.finrank_eq_nat_card_basis (B s)).symm
+  apply Formalism.MainNotions.ColumnSystems.Pf.finrank_tensor <;> assumption
 
 theorem RS.charZeroO {p n' : ℕ} (R : RS p n') : CharZero R.O := by
   obtain ⟨c, hc⟩ := CharP.exists R.O

@@ -1,6 +1,57 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HalfSymplZeroRight
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ThetaFunctionZeroOfInvariantFunctionals
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HalfSymplZeroRight
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSplitIdempotentsOfRelTraceOneModTwo
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.T2SpaceHalfAdelicMatrixAddSubgroup
+public import Development.AbelianVarietyTheory.Counterexamples.HeightSurvey.StarPurelyImaginaryEqNeg
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FinTensMemLatO
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SplitPlaceAnnihilatorRelativelyCompact
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardAdelicCharacterLocalComponentNeOne
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ThetaFunctionZeroOfInvariantFunctionals
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Algebra.Group.OpenMapping
+public import Mathlib.Topology.Baire.LocallyCompactRegular
+
+@[expose] public section
 
 noncomputable section
 
@@ -14,6 +65,7 @@ open GlobalTheory.IdemModTwo
 theorem sum_incA_inv_mul {D : D7} (W : HSp D) (p i : Fin W.rank) :
     ∑ k, incA D (W.gram⁻¹ p k) * incA D (W.gram k i) = if p = i then 1 else 0 := by
   have h1 : (∑ k, incA D (W.gram⁻¹ p k) * incA D (W.gram k i)) = incA D ((W.gram⁻¹ * W.gram) p i) := by
+
     rw [Matrix.mul_apply, map_sum (incA D)]
     exact Finset.sum_congr rfl fun k _ => ((incA D).map_mul _ _).symm
   rw [h1, Matrix.nonsing_inv_mul _ (GlobalTheory.LatVac.gram_det_isUnit W), Matrix.one_apply]
@@ -21,7 +73,7 @@ theorem sum_incA_inv_mul {D : D7} (W : HSp D) (p i : Fin W.rank) :
   · exact map_one _
   · exact map_zero _
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_pair_entry {D : D7} {v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers D.host.F)}
     {e : AE D} (he : SplitAt D v e) (W : HSp D) {r : ℕ} (p : Fin W.rank) (q : Fin r) (c : Fv D.host.F v) :
@@ -60,7 +112,7 @@ namespace GlobalTheory.HalfSeparate
 
 open GlobalTheory.IdemModTwo
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_open_separated : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), IsStdChar D ψ (-1) → ∀ (W : HSp D) (r : ℕ) (e : AE D), IsSplitIdem D e → ∀ U : AddSubgroup (halfMx (cA D e) W.rank r), IsOpen (U : Set (halfMx (cA D e) W.rank r)) → ∃ L : AddSubgroup (halfMx (cA D e) W.rank r), IsOpen (L : Set (halfMx (cA D e) W.rank r)) ∧ L ≤ U ∧ ∀ x, x ∉ L → ∃ a : halfMx e W.rank r, (∀ l ∈ L, ψ (halfSympl W (a : Mx D W.rank r) (l : Mx D W.rank r)) = 1) ∧ ψ (halfSympl W (a : Mx D W.rank r) (x : Mx D W.rank r)) ≠ 1 := by
   intro D ψ hψ W r e hε U hU
@@ -71,7 +123,7 @@ theorem exists_open_separated : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), I
   have : ProperSpace (Fv D.host.F v) := GlobalTheory.AdelicUnitaryTop.properSpace_adicCompletion D.host.F v
   let sg : Fv D.host.F v →+ Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Af D.host.F := AddMonoidHom.ofMapSub (singleV D.host.F v) (singleV_sub D v)
   let ι : Fv D.host.F v →+ AF D.host.F := AddMonoidHom.mk' (fun y => pairA D.host.F 0 (sg y)) fun a b => by
-    rw [map_add]; exact Prod.ext (add_zero _).symm rfl
+    rw [map_add (f := _)]; exact Prod.ext (add_zero _).symm rfl
   have hι : Continuous ι := Continuous.prodMk continuous_const (GlobalTheory.SplitAnnihilator.continuous_singleV D.host.F v)
   have hψc : Continuous fun x => ψ (ι x) := hψ.1.1.comp hι
 
@@ -87,7 +139,7 @@ theorem exists_open_separated : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), I
   let J : G →+ Mx D W.rank r := AddMonoidHom.mk' (fun y => Matrix.of fun i k => fj D (sg (y (i, k))) * cA D e)
     fun a b => by
       ext i k
-      simp only [G, Matrix.of_apply, Matrix.add_apply, Pi.add_apply, map_add, add_mul]
+      simp only [G, Matrix.of_apply, Matrix.add_apply, Pi.add_apply, map_add (f := _), add_mul]
   have hJ : Continuous J := continuous_matrix fun i k =>
     ((IsModuleTopology.continuous_of_linearMap (Algebra.linearMap (AF D.host.F) (AE D))).comp
       (hι.comp (continuous_apply (i, k)))).mul continuous_const
@@ -112,11 +164,11 @@ theorem exists_open_separated : ∀ (D : D7) (ψ : AddChar (AF D.host.F) ℂ), I
   let LG : AddSubgroup G :=
     { carrier := {y | ∀ p, ∀ c : Fv D.host.F v, ‖c‖ ≤ ‖y1‖ / ρ → ψ (ι (c * y p)) = 1}
       add_mem' := fun {a b} ha hb p c hc => by
-        rw [Pi.add_apply, mul_add, map_add, AddChar.map_add_eq_mul, ha p c hc, hb p c hc, one_mul]
+        rw [Pi.add_apply, mul_add, map_add (f := _), AddChar.map_add_eq_mul, ha p c hc, hb p c hc, one_mul]
       zero_mem' := fun p c _ => by rw [Pi.zero_apply, mul_zero, map_zero, AddChar.map_zero_eq_one]
       neg_mem' := fun {a} ha p c hc => by
         have h := ψ.map_add_eq_mul (ι (c * (-a) p)) (ι (c * a p))
-        rw [← map_add, Pi.neg_apply, mul_neg, neg_add_cancel, map_zero, AddChar.map_zero_eq_one, ha p c hc,
+        rw [← map_add (f := _), Pi.neg_apply, mul_neg, neg_add_cancel, map_zero, AddChar.map_zero_eq_one, ha p c hc,
           mul_one] at h
         rw [Pi.neg_apply, mul_neg]
         exact h.symm }

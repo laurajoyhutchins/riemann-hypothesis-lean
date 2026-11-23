@@ -1,17 +1,73 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
-import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsHeatZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthonormalFlagTranslateHolds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralTransportHermitianFrameChartMeasure
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsSystem
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralTransportHermitianFrameChartMeasure
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+public import Mathlib.RingTheory.Complex
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FlowMatMulVec
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.OrthonormalFlagTranslateHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ProdCastLESucc
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Complex NumberField MeasureTheory GlobalTheory GlobalTheory.SW GlobalTheory.ThFr ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD
 open scoped ComplexConjugate ComplexOrder Real Classical
 
 namespace GlobalTheory.SW.Slab
 
+
 open Matrix Complex NumberField MeasureTheory in
 open scoped ComplexConjugate ComplexOrder Real Classical in
-
 theorem _root_.GlobalTheory.SW.Slab.exists_lminor_near {r : ℕ} (S : Matrix (Fin r) (Fin r) ℂ) :
     ∃ δ : ℝ, 0 < δ ∧ δ ≤ 1 ∧ ∀ G : Matrix (Fin r) (Fin r) ℂ, (∀ a b, ‖G a b - S a b‖ < δ) →
       ∀ i, ‖_root_.ReciprocityTheory.ChartRestriction.G.FD.lminor G i - _root_.ReciprocityTheory.ChartRestriction.G.FD.lminor S i‖ < 1 / 2 := by
@@ -31,9 +87,9 @@ theorem _root_.GlobalTheory.SW.Slab.exists_lminor_near {r : ℕ} (S : Matrix (Fi
   rw [dist_eq_norm] at h2
   exact h2
 
+
 open Matrix Complex NumberField MeasureTheory in
 open scoped ComplexConjugate ComplexOrder Real Classical in
-
 theorem _root_.GlobalTheory.SW.Slab.exists_bound_upper {r : ℕ} (d : Fin r → ℂ) (hd : ∀ a, ‖d a‖ = 1) (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ b : Matrix (Fin r) (Fin r) ℂ, b.BlockTriangular id → (∀ a, b a a ≠ 0) →
       (∀ a, ‖(b a a)⁻¹‖ ≤ 2) →
@@ -274,9 +330,9 @@ private theorem norm_sgnM_le_one (a b : Fin r) :
   · rw [Matrix.diagonal_apply_ne _ h]
     simp
 
+
 open Matrix Complex NumberField MeasureTheory in
 open scoped ComplexConjugate ComplexOrder Real Classical in
-
 theorem _root_.GlobalTheory.SW.thin_slab : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r : ℕ) (X : _root_.ReciprocityTheory.ChartRestriction.G.FD.Data E r), ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ ≤ δ₀ → IsOpen (_root_.GlobalTheory.SW.slab X δ) ∧ _root_.GlobalTheory.SW.slab X δ ⊆ X.dom ∧ (∀ x : _root_.ReciprocityTheory.ChartRestriction.G.FD.Frame X.Ψ r, (∀ τ : X.Ψ, _root_.ReciprocityTheory.ChartRestriction.G.FD.gram τ.1 X.Gm (_root_.ReciprocityTheory.ChartRestriction.G.FD.mat x τ) = _root_.GlobalTheory.SW.sgnM X) → x ∈ _root_.GlobalTheory.SW.slab X δ) ∧ (∃ x : _root_.ReciprocityTheory.ChartRestriction.G.FD.Frame X.Ψ r, (∀ τ : X.Ψ, _root_.ReciprocityTheory.ChartRestriction.G.FD.gram τ.1 X.Gm (_root_.ReciprocityTheory.ChartRestriction.G.FD.mat x τ) = _root_.GlobalTheory.SW.sgnM X)) ∧ (∀ u : X.Ψ → Matrix (Fin r) (Fin r) ℂ, (∀ (τ : X.Ψ) v w, _root_.ReciprocityTheory.ChartRestriction.G.FD.hermC τ.1 X.Gm (u τ *ᵥ v) (u τ *ᵥ w) = _root_.ReciprocityTheory.ChartRestriction.G.FD.hermC τ.1 X.Gm v w) → MeasurePreserving (X.lmulC u) volume volume ∧ (∀ x, X.lmulC u x ∈ _root_.GlobalTheory.SW.slab X δ ↔ x ∈ _root_.GlobalTheory.SW.slab X δ) ∧ ∀ x, X.lmulC u x ∈ X.dom ↔ x ∈ X.dom) ∧ (∃ C : ℝ, ∀ x ∈ _root_.GlobalTheory.SW.slab X δ, ∃ x' : _root_.ReciprocityTheory.ChartRestriction.G.FD.Frame X.Ψ r, (∀ τ : X.Ψ, _root_.ReciprocityTheory.ChartRestriction.G.FD.gram τ.1 X.Gm (_root_.ReciprocityTheory.ChartRestriction.G.FD.mat x' τ) = _root_.GlobalTheory.SW.sgnM X) ∧ ∃ b ∈ _root_.ReciprocityTheory.ChartRestriction.G.FD.Bor X.Ψ r, x = _root_.ReciprocityTheory.ChartRestriction.G.FD.rmul x' b ∧ ∀ τ i j, ‖b τ i j‖ ≤ C ∧ ‖(b τ i i)⁻¹‖ ≤ C) ∧ ∀ x ∈ X.dom, ∃ x' : _root_.ReciprocityTheory.ChartRestriction.G.FD.Frame X.Ψ r, (∀ τ : X.Ψ, _root_.ReciprocityTheory.ChartRestriction.G.FD.gram τ.1 X.Gm (_root_.ReciprocityTheory.ChartRestriction.G.FD.mat x' τ) = _root_.GlobalTheory.SW.sgnM X) ∧ ∃ b ∈ _root_.ReciprocityTheory.ChartRestriction.G.FD.Bor X.Ψ r, x = _root_.ReciprocityTheory.ChartRestriction.G.FD.rmul x' b := by
   intro E _ _ _ r X
   obtain ⟨δ₀, hδ₀, hδ₀1, hnear⟩ := _root_.GlobalTheory.SW.Slab.exists_lminor_near (_root_.GlobalTheory.SW.sgnM X)

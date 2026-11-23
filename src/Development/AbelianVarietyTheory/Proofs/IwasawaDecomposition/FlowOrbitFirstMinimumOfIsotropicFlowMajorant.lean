@@ -1,12 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrbitThickSt
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajorantConjugateTransfer
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.QuadraticCoefficientForms
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.OrbitThickSt
+public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.EventuallyComparable
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsIntMulIntegral
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FlowMatMulVec
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.HermitianTraceFormVanishing
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IntegerApproximationCountHolds
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.EventuallyComparable
-import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsIntMulIntegral
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IntegerApproximationCountHolds
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajPos
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.MajorantConjugateTransfer
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.QuadraticCoefficientForms
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open NumberField Complex ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.CuspFrom
 open scoped ComplexConjugate
@@ -21,7 +62,7 @@ theorem min_le_sum {ι : Type} [Fintype ι] [Nonempty ι] (a : ι → ℝ) (ha :
   · exact (min_le_left _ _).trans h1
   refine (min_le_right _ _).trans (h.trans ?_)
   have h0 : 0 ≤ ∑ i, a i := Finset.sum_nonneg fun i _ => ha i
-  calc ∏ i, a i ≤ ∏ _i : ι, ∑ j, a j := Finset.prod_le_prod (fun i _ => ha i) fun i _ =>
+  calc ∏ i, a i ≤ ∏ _i : ι, ∑ j, a j := Finset.prod_le_prod₀ (fun i _ => ha i) fun i _ =>
         Finset.single_le_sum (fun j _ => ha j) (Finset.mem_univ i)
     _ = (∑ j, a j) ^ Fintype.card ι := by simp
     _ ≤ ∑ j, a j := pow_le_of_le_one h0 h1 Fintype.card_ne_zero
@@ -112,7 +153,7 @@ theorem prod_lower_of_ne {y : Frame X.Ψ r}
   have h2 : 0 ≤ ∏ τ, X.c τ ^ 2 := Finset.prod_nonneg fun τ _ => sq_nonneg _
   refine (le_mul_of_one_le_right h2 h1).trans ?_
   rw [← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib]
-  refine Finset.prod_le_prod (fun τ _ => by positivity) fun τ _ => ?_
+  refine Finset.prod_le_prod₀ (fun τ _ => by positivity) fun τ _ => ?_
   rw [map_mul, norm_mul, mul_pow, emb_herm]
   have := mul_le_mul_of_nonneg_left (hcs τ (Data.emb τ.1 v) (Data.emb τ.1 ξ))
     (show 0 ≤ X.c τ ^ 2 * ‖τ.1 (X.den : E)‖ ^ 2 by positivity)

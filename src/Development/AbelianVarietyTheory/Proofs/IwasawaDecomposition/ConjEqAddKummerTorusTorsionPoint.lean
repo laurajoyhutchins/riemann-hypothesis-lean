@@ -1,11 +1,56 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.NonemptyTorusExtensionOfIsAlgClosed
-import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.AllTorsMap
-import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
-import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
-import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.GeneratorValues
-import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PsiUnitOnOfFixedOverUnramifiedExtension
-import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GtOntoDivisibleKernel
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Uniformization.TXFrame
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.GeneratorValues
+public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.BiextensionSecondLawCommutativityValue
+public import Mathlib.RingTheory.Henselian
+public import Mathlib.RingTheory.RegularLocalRing.Defs
+public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.PsiUnitOnOfFixedOverUnramifiedExtension
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.GtOntoDivisibleKernel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+
+@[expose] public section
+
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField IsLocalRing
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Out ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open scoped CategoryTheory.Obj
@@ -106,7 +151,8 @@ theorem conj_eq_add_tor : ∀ (R : Type) [CommRing R] [IsDomain R] (D : DegPre R
       rw [ofMul_pow, map_nsmul, ← hτ, hkd, ofMul_one, map_zero]
     exact Additive.ofMul.injective (torusPt_injective e)
   let q : QkPt D F k := qkMk hB 0 d (by rw [hkd, map_zero])
-  refine ⟨τ, q, hτk, rfl, (GlobalTheory.UT.isTor_iff _ _).2 ((isTorusPtF_iff_eq d τ).2 hτ), ?_, fun χ x hx => ?_⟩
+  refine ⟨τ, q, hτk, rfl, (GlobalTheory.UT.isTor_iff _ _).2 (by
+    simpa only [q, qkMk_g] using (isTorusPtF_iff_eq d τ).2 hτ), ?_, fun χ x hx => ?_⟩
   · refine (qkAdd_iff hB _ _ _).2 ?_
     have e : qkAdd hB p q = qkExt hB σ.toRingHom hσ' p := qk_ext (add_zero _) hgd.symm
     rw [e]
@@ -134,7 +180,14 @@ theorem conj_eq_add_tor : ∀ (R : Type) [CommRing R] [IsDomain R] (D : DegPre R
   obtain ⟨b, hb'⟩ := exists_extend O φ ρ rfl p.g.b
   have e₁ := w_nsmul ρ hJ' w hint p.g b hb' χ k
   rw [qk_nsmul hB, iota_val hB _ _ hJ'] at e₁
-  have C : IsCub (th D (T := TF (R := R) F) z J) := isCub_cubV D.cub hJ'
+  have face3 (x x' : TF (R := R) F ⟶ D.P.A) : cubV D.cub z J x x' 1 = 1 := by
+    have hm : lift x (lift x' 1) = lift x x' ≫ faceMap (G := D.P.A) 2 := by
+      simp [faceMap, x2, pzero, Hom.one_def]
+    refine Eq.trans ?_ ((val_corr (hJ := hJ') (D.cub.face 2) (lift x x').left).trans (val_one _))
+    refine Eq.trans ?_ (val_pull (hJ := hJ') ..).symm
+    show val D.cub.t (lift x (lift x' 1)).left z J = _
+    rw [hm, Over.comp_left]
+    all_goals rfl
   refine ⟨(sig F (charVal p.g χ z J) : F), Units.ne_zero _, ?_, ?_⟩
   · have e₂ := congrArg Units.val e₁
     rw [Units.val_pow_eq_pow_val, hw, hw] at e₂
@@ -184,7 +237,9 @@ theorem conj_eq_add_tor : ∀ (R : Type) [CommRing R] [IsDomain R] (D : DegPre R
         ((Scheme.ΓSpecIso (CommRingCat.of F)).inv.hom (τ (Multiplicative.ofAdd χ) : F))) = _
       rw [← CommRingCat.comp_apply, germ_stalkClosedPointIso_hom, Iso.inv_hom_id_apply]
     have e := add_val p.g d χ hJ'
-    rw [hdb, C.face₃, _root_.mul_one] at e
+    rw [hdb] at e
+    change charVal (p.g + d) χ z J * cubV D.cub z J (cP D _ χ) p.g.b 1 = _ at e
+    rw [face3, _root_.mul_one] at e
     rw [key, hgd, e, map_mul, Units.val_mul, hs, mul_comm]
 
 end GlobalTheory.KummerConj

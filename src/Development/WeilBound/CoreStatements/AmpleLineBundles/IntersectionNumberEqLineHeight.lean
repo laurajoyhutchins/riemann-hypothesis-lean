@@ -1,7 +1,66 @@
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HeightLowerBoundChartNorm
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsVerticalBound
-import Development.WeilBound.CoreStatements.AmpleLineBundles.PtsIntegralMap
+module
+
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
+public import Development.WeilBound.CoreStatements.AmpleLineBundles.PtsIntegralMap
+public import GroundTheory.HeightsAndTheta.Heights.HeightComparison.HeightObjects
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HeightLowerBoundChartNorm
+public import Development.WeilBound.CoreStatements.AmpleLineBundles.HeightRecRFull
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitArchSum
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartDehom
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitChartQuot
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitDegree
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.POrbitDivVertical
+import GroundTheory.HeightsAndTheta.Heights.HeightComparison.PSubringPrimeMaximal
+public import GroundTheory.HeightsAndTheta.Heights.HeightsOfSets.PCurveIsOrbit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open MvPolynomial ReciprocityTheory.ChartRestriction.G.Geo NumberField GlobalTheory.CompanionTheory.Ar GlobalTheory.CompanionTheory.Ar.Top GlobalTheory.CompanionTheory.Ar.Small GlobalTheory.CompanionTheory.Ar.Cmp GlobalTheory.CompanionTheory.Ar.Ht
 
@@ -30,7 +89,7 @@ def stdLine (m : K → ℕ) : HermLine ι where
 theorem stdLine_smooth (m : K → ℕ) : IsSmoothHerm (stdLine (ι := ι) m) := by
   refine ContDiff.contDiffOn ?_
   refine contDiff_prod fun k _ => ContDiff.pow (ContDiff.sum fun i _ => ?_) _
-  exact (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ ℂ (⟨k, i⟩ : Σ k, ι k))
+  exact (contDiff_norm_sq ℝ).comp (contDiff_apply ℝ (fun _ => ℂ) (⟨k, i⟩ : Σ k, ι k))
 
 theorem tensor_smooth {A B : HermLine ι} (hA : IsSmoothHerm A) (hB : IsSmoothHerm B) :
     IsSmoothHerm (A.tensor B) := ContDiffOn.mul hA hB
@@ -199,10 +258,42 @@ theorem CoverDenseAlt.intersection_number_eq_line_height : ∀ (K : Type) [Finty
       exact GroundTheory.Heights₂.Heights.OrbitDivVertical.proof K n (toNum e A hA) x _ hx hsec V hV
     have h4 : ∀ V ∈ divSupp (Ideal.map (ren e) W) (ren e s), ∀ (c1 c2 : (k : K) → blockIdx n k),
         (∀ k, X ⟨k, c1 k⟩ ∉ V) → (∀ k, X ⟨k, c2 k⟩ ∉ V) →
-        Nonempty (MRing (blockIdx n) ⧸ chartId V c1 ≃+* MRing (blockIdx n) ⧸ chartId V c2) := by
+        Nonempty (MRing (blockIdx n) ⧸ chartId V c1 ≃+* MRing (blockIdx n) ⧸ chartId V c2) :=
+      open GroundTheory.Heights₂.Heights in by
       intro V hV c1 c2 hc1 hc2
+      have hvertical := h3 V hV
       rw [hs, hWx] at hV
-      exact (CoverDenseAlt.chartDehom_full K n (toNum e A hA) x _ hx hsec V hV c1 c2 hc1 hc2).2
+      have hVprime : V.IsPrime := hV.1.1.1
+      have hWV : orbitIdeal x ≤ V := le_sup_left.trans hV.1.1.2
+      have hVh : ∀ f ∈ V, ∀ b, weightedHomogeneousComponent (coordDeg n) b f ∈ V :=
+        fun _ hf b => weightedHomogeneousComponent_mem_of_mem_divSupp x
+          ((geoMultiHomog_iff _ a0).mp hhom') hV hf b
+      have hfield (d : (k : K) → blockIdx n k) (hd : ∀ k, X ⟨k, d k⟩ ∉ V) :
+          IsField (dehomFrac V d).range := by
+        have hxd : ∀ k, x k (d k) ≠ 0 := by
+          intro k hxk
+          apply hd k (hWV ?_)
+          rw [orbitIdeal, mCoordIdeal, RingHom.mem_ker, mConeMap, aeval_X]
+          simp [flatCone, hxk]
+        obtain ⟨eQ⟩ := OrbitChartQuot.proof K n x d hxd V hWV
+        let eRange := eQ.trans (quotEquivRange hVh hd)
+        have hprime : (chartPoint x d V).IsPrime :=
+          (Ideal.Quotient.isDomain_iff_prime _).mp (Function.Injective.isDomain eRange eRange.injective)
+        have hne : chartPoint x d V ≠ ⊥ := by
+          intro hbot
+          apply hvertical
+          refine le_antisymm (fun m hm => Ideal.mem_bot.mpr ?_) bot_le
+          have hmem : chartEval x d (C m) ∈ chartPoint x d V := Ideal.mem_map_of_mem _ hm
+          rw [hbot, Ideal.mem_bot] at hmem
+          simpa using hmem
+        have hmax := SubringPrimeMaximal.proof (ratioField x) _ _ hprime hne
+        exact MulEquiv.isField ((Ideal.Quotient.maximal_ideal_iff_isField_quotient _).mp hmax)
+          eRange.symm.toMulEquiv
+      have hr : (dehomFrac V c1).range = (dehomFrac V c2).range :=
+        le_antisymm (range_dehomFrac_le hc2 hc1 (hfield c2 hc2))
+          (range_dehomFrac_le hc1 hc2 (hfield c1 hc1))
+      exact ⟨(quotEquivRange hVh hc1).trans
+        ((Subalgebra.equivOfEq _ _ hr).toRingEquiv.trans (quotEquivRange hVh hc2).symm)⟩
     rw [h0, ← recR_map e (II K ι) (II K (blockIdx n)) W hhomW hfin A (toNum e A hA).toGeo s h1 h2 h3 h4,
       hs, hWx, CoverDenseAlt.heightRecR_full K n (II K (blockIdx n)) (toNum e A hA) x _ hx hsec,
       height_toNum e A hA x, hdeg]

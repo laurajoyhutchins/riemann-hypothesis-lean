@@ -1,5 +1,47 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.DiscreteSeries.DiscreteSeriesCovers.EquivariantSections.EquivSection
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.DiscreteSeries.DiscreteSeriesCovers.EquivariantSections.EquivSection
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RightDerivativeToL2
+
+@[expose] public section
 
 noncomputable section
 
@@ -27,7 +69,7 @@ theorem cD_cons (hP : IsPsiFor ε lam T Ψ) (p : Fin n × Fin n) (w : List (Fin 
 theorem cD_add (hP : IsPsiFor ε lam T Ψ) (u v : T.V) :
     ∀ w : List (Fin n × Fin n), cD hP w (u + v) = cD hP w u + cD hP w v
   | [] => Subtype.ext (datumEmbedding_add hP T.w u v)
-  | p :: w => by rw [cD_cons, cD_cons, cD_cons, cD_add hP u v w, map_add]
+  | p :: w => by rw [cD_cons, cD_cons, cD_cons, cD_add hP u v w, map_add (f := _)]
 
 theorem cD_smul (hP : IsPsiFor ε lam T Ψ) (c : ℂ) (v : T.V) :
     ∀ w : List (Fin n × Fin n), cD hP w (c • v) = c • cD hP w v
@@ -58,8 +100,8 @@ theorem ofW_inj {m : ℕ} {x y : Wd n m} (h : ofW x = ofW y) : x = y := by
   subst this
   rfl
 
-open Classical in
 
+open Classical in
 def sgl (m : ℕ) (w : List (Fin n × Fin n)) (v : T.V) : AS T m := fun y => if ofW y = w then v else 0
 
 theorem actL_sgl (hP : IsPsiFor ε lam T Ψ) {m : ℕ} {w : List (Fin n × Fin n)} (h : w.length ≤ m) (v : T.V) :
@@ -86,6 +128,7 @@ theorem actLin_apply (hP : IsPsiFor ε lam T Ψ) {m : ℕ} (a : AS T m) : actLin
 theorem pad (hP : IsPsiFor ε lam T Ψ) {m m' : ℕ} (h : m ≤ m') (a : AS T m) :
     ∃ a' : AS T m', actL T Ψ a' = actL T Ψ a := by
   refine ⟨∑ x : Wd n m, sgl m' (ofW x) (a x), ?_⟩
+
   rw [← actLin_apply hP, map_sum, actL_eq hP a]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [actLin_apply, actL_sgl hP]
@@ -124,6 +167,7 @@ theorem genSub_le_exS (hP : IsPsiFor ε lam T Ψ) :
     rw [this]
     exact cD_mem_exS hP [] v
   · obtain ⟨m, f, hf⟩ := hx
+
     rw [eq_sum hP hf, map_sum]
     refine Submodule.sum_mem _ fun y _ => ?_
     have := cD_cons hP (a, b) (ofW y) (f y)

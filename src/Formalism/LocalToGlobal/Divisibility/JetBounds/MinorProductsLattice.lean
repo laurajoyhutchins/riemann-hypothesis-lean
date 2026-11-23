@@ -1,4 +1,47 @@
-import Formalism.LocalToGlobal.Divisibility.JetBounds.IsExpansion
+module
+
+public import Formalism.LocalToGlobal.Divisibility.JetBounds.IsExpansion
+public import Formalism.GaussJetBounds.StatementS
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open scoped BigOperators
 
@@ -18,7 +61,7 @@ def OrbSys.ap {k : Type} [NormedField k] (S : OrbSys k) (δ : MvPolynomial S.σ 
   σ := Empty
   g := S.g
   E := S.E
-  P := ∑ κ ∈ S.P.support, MvPolynomial.monomial κ (MvPolynomial.C (δ (MvPolynomial.coeff κ S.P)))
+  P := ∑ κ ∈ S.P.support, MvPolynomial.monomial κ (MvPolynomial.C (δ (AddMonoidAlgebra.coeff S.P κ)))
 
 def sysF (l : ℕ) [Fact l.Prime] (d N0 N1 : ℕ) [NeZero d]
     (g : ZV d N0 N1 → MvPowerSeries (ZV d N0 N1) ℂ_[l]) (E : MvPowerSeries (ZV d N0 N1) ℂ_[l]) (colN : ZMod d → ℕ)
@@ -71,26 +114,5 @@ inductive IsSysW (l : ℕ) [Fact l.Prime] (Q : OrbSys ℂ_[l] → ℝ → Prop) 
       IsSysW l Q (S.ap δ) β
   | mul {S₁ S₂ : OrbSys ℂ_[l]} {β₁ β₂ : ℝ} (h₁ : IsSysW l Q S₁ β₁) (h₂ : IsSysW l Q S₂ β₂) :
       IsSysW l Q (S₁.mul S₂) (β₁ + β₂)
-
-def ApJet : Prop :=
-  ∀ (k : Type) [NormedField k] (S : OrbSys k) (δ : MvPolynomial S.σ k →ₗ[k] k) (Th : MvPowerSeries S.ι k),
-    jetPairPoly (S.ap δ).P Th = MvPolynomial.C (δ (jetPairPoly S.P Th))
-
-def OneWeyl : Prop :=
-  ∀ (k : Type) [NormedField k] [IsUltrametricDist k] (N0 N1 C : ℕ) (p : Fin C → ℕ) (hp : ∀ c, p c ≤ N0)
-    (I : ∀ c, Fin (p c) → Fin N1) (Th : MvPowerSeries (Fin N0 × Fin N1) k)
-    (δ : MvPolynomial (Fin N0 × Fin N0) k →ₗ[k] k), (∀ Q ∈ minorProductsLattice (k := k) p hp, ‖δ Q‖ ≤ 1) →
-    ∀ B : ℝ, (∀ n, ‖MvPolynomial.coeff n (frameJetOne p hp I Th)‖ ≤ B) → ‖δ (frameJetOne p hp I Th)‖ ≤ B
-
-def AWeyl : Prop :=
-  ∀ (k : Type) [NormedField k] [IsUltrametricDist k] (d N0 N1 : ℕ) [NeZero d] (colN : ZMod d → ℕ)
-    (p : ∀ s, Fin (colN s) → ℕ) (hp : ∀ s c, p s c ≤ N0) (I : ∀ s c, Fin (p s c) → Fin N1)
-    (Th : MvPowerSeries (ZV d N0 N1) k) (δ : MvPolynomial (ZMod d × Fin N0 × Fin N0) k →ₗ[k] k),
-    (∀ Q ∈ nablaO (K := k) colN p hp, ‖δ Q‖ ≤ 1) →
-    ∀ B : ℝ, (∀ n, ‖MvPolynomial.coeff n (frameJet colN p hp I Th)‖ ≤ B) → ‖δ (frameJet colN p hp I Th)‖ ≤ B
-
-def SysWBound : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (Q : OrbSys ℂ_[l] → ℝ → Prop), KnownOk l Q → ∀ (S : OrbSys ℂ_[l]) (β : ℝ), IsSysW l Q S β →
-    HasJetBound S.g S.E S.P (‖(l : ℂ_[l])‖ ^ β)
 
 end Formalism.L2.DIV

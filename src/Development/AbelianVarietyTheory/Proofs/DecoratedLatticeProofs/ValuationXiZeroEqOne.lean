@@ -1,21 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LineLatAt
+module
+
+public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.IsSumFrame
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.PeriodIdealZpowCompletionAdeleConjIff
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceHermitianFramePropertiesStatement
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemSmulOfMemFlagSubOne
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
 import Development.AbelianVarietyTheory.Definitions.LatticeFrames.NotLineLatAtZero
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.LevAtZ
-import Development.AbelianVarietyTheory.Definitions.LatticeFrames.ExistsSumFrame
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.AdmissibleDiscreteSeriesOfHasParam
-import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.HarishChandraModulesOn
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.WeilRepresentationUnitaryPair
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.FractionalIdealCompletionPropertiesAtPlace
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LineLatticeSelfDual
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CoprimeScalingIdealValuationLe
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SplitPlaceHermitianFramePropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsSplitPointFrameCharacter
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SelfDualSplitComponentIsLatticeStabilizerEq
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MemSmulOfMemFlagSubOne
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.EmbeddingXiZeroNeZero
+
+@[expose] public section
 
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum MeasureTheory IsDedekindDomain NumberField Matrix
 open GlobalTheory.MixModel GlobalTheory.MixPer GlobalTheory.Unf GlobalTheory.SplitWeil GlobalTheory.LatPair GlobalTheory.SeeSaw GlobalTheory.FinPl ValuativeRel
@@ -76,19 +110,7 @@ theorem exists_orthSum {S A B : HSp D} (o : OrthDec S A B) {LA : Lat A} {LB : La
   refine ⟨LA.map fA ⊔ LB.map fB, ⟨⟨(hA.1.fg.map _).sup (hB.1.fg.map _), ?_⟩, fun y => ⟨fun hy x hx => ?_, fun h => ?_⟩⟩,
     fun v y => ⟨fun hy => ⟨rat_mulVec_mem _ (fun x hx => ((hmem x).1 hx).1) hy,
       rat_mulVec_mem _ (fun x hx => ((hmem x).1 hx).2) hy⟩, fun h => ?_⟩⟩
-  · rw [eq_top_iff]
-    intro y _
-    have key : ∀ {C : HSp D} (m : Matrix (Fin S.rank) (Fin C.rank) D.host.E) (LC : Lat C), IsSelfDualC C LC →
-        (∀ x ∈ LC, m *ᵥ x ∈ LA.map fA ⊔ LB.map fB) → ∀ z, m *ᵥ z ∈ Submodule.span D.host.E
-          ((LA.map fA ⊔ LB.map fB : Lat S) : Set (Fin S.rank → D.host.E)) := by
-      intro C m LC hC hm z
-      have hz : z ∈ Submodule.span D.host.E (LC : Set (Fin C.rank → D.host.E)) := by rw [hC.1.span_eq_top]; trivial
-      have : Submodule.span D.host.E (LC : Set (Fin C.rank → D.host.E)) ≤ Submodule.comap (mulVecLin m)
-          (Submodule.span D.host.E ((LA.map fA ⊔ LB.map fB : Lat S) : Set (Fin S.rank → D.host.E))) :=
-        Submodule.span_le.2 fun x hx => Submodule.subset_span (hm x hx)
-      exact this hz
-    rw [hsum y]
-    exact add_mem (key _ LA hA hiA _) (key _ LB hB hiB _)
+  · exact (Submodule.IsLattice.of_fg D.host.E ((hA.1.fg.map fA).sup (hB.1.fg.map fB))).linearIndepOn
   · obtain ⟨_, ⟨a, ha, rfl⟩, _, ⟨b, hb, rfl⟩, rfl⟩ := Submodule.mem_sup.1 hx
     obtain ⟨c, hc⟩ := (hA.2 _).1 ((hmem y).1 hy).1 a ha
     obtain ⟨d, hd⟩ := (hB.2 _).1 ((hmem y).1 hy).2 b hb
@@ -104,8 +126,11 @@ theorem exists_orthSum {S A B : HSp D} (o : OrthDec S A B) {LA : Lat A} {LB : La
     · have := h _ (hiB b hb)
       have e2 : star (o.iB *ᵥ b) ⬝ᵥ S.gram *ᵥ y = star b ⬝ᵥ B.gram *ᵥ (o.qB *ᵥ y) := pair_iA o.symm b y
       rwa [dsum_eq, e2, ← dsum_eq] at this
-  · have e : y = o.jA *ᵥ (o.pA *ᵥ y) + o.jB *ᵥ (o.pB *ᵥ y) := by
-      rw [mulVec_mulVec, mulVec_mulVec, ← add_mulVec, o.sum_eq_one, one_mulVec]
+  · have hs : o.jA * o.pA + o.jB * o.pB = 1 := by
+      simp only [OrthDec.jA, OrthDec.jB, OrthDec.pA, OrthDec.pB, rat, ← Matrix.map_mul,
+        ← Matrix.map_add _ (map_add (incA D)), o.iA_qA_add, Matrix.map_one _ (map_zero _) (map_one _)]
+    have e : y = o.jA *ᵥ (o.pA *ᵥ y) + o.jB *ᵥ (o.pB *ᵥ y) := by
+      rw [mulVec_mulVec, mulVec_mulVec, ← add_mulVec, hs, one_mulVec]
     rw [e]
     exact add_mem (rat_mulVec_mem _ hiA h.1) (rat_mulVec_mem _ hiB h.2)
 
@@ -142,14 +167,14 @@ theorem latV_eq_at {S : HSp D} {L M : Lat S} {P : Pl D → Prop} (h : latV S M P
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem exists_modify {ι : Type} {p : ι → SplitPt D k} (hp : Function.Injective fun i => (p i).v) {S : HSp D} {n : Type}
-    [Fintype n] [DecidableEq n] (β : ∀ i, Frame (p i) S n) (Λ : ι → Submodule 𝒪[k] (n → k)) (hΛ : ∀ i, (Λ i).IsLattice k)
+    [Fintype n] [DecidableEq n] (β : ∀ i, Frame (p i) S n) (Λ : ι → Submodule 𝒪[k] (n → k)) (hΛ : ∀ i, (Λ i).IsFullLattice k)
     {L : Lat S} (hL : IsSelfDualC S L) (l : List ι) : ∃ M : Lat S, IsSelfDualC S M ∧ (∀ i ∈ l, (β i).IsLat M (Λ i)) ∧
       ∀ v, (∀ i, v ≠ (p i).v) → latV S M (· = v) = latV S L (· = v) := by
   induction l with
   | nil => exact ⟨L, hL, by simp, fun _ _ => rfl⟩
   | cons i l ih =>
     obtain ⟨M, hM, h1, h2⟩ := ih
-    obtain ⟨M', hM', h3, h4⟩ := (GlobalTheory.T.splitPlaceHermitianFrame_properties D k (p i) S n (β i)).2.2.2.2.1 M (Λ i) hM (hΛ i)
+    obtain ⟨M', hM', h3, h4⟩ := (GlobalTheory.T.splitPlaceHermitianFrame_properties D k (p i) S n (β i)).2.2.2.2.1 M (Λ i) hM (by first | exact hΛ i | exact (hΛ i).toIsLattice)
     refine ⟨M', hM', fun i' hi' => ?_, fun v hv => (latV_eq_at h4 (hv i)).trans (h2 v hv)⟩
     by_cases e : i' = i
     · subst e; exact h3
@@ -168,21 +193,8 @@ theorem eq_sec_add (p : SplitPt D k) {a : AE D} (ha : a ∈ idAt D (· = p.v)) :
 theorem mem_intAt_iff (p : SplitPt D k) {a : AE D} (ha : a ∈ idAt D (· = p.v)) :
     a ∈ intAt D (· = p.v) ↔ p.pr a ∈ 𝒪[k] ∧ p.pr (cA D a) ∈ 𝒪[k] := by
   refine ⟨fun h => ⟨pr_mem_of_intAt p h.2, pr_mem_of_intAt p ((cA_int_iff a).2 h.2)⟩, fun h => ⟨ha, ?_⟩⟩
-  rw [eq_sec_add p ha, RingHom.map_add]
+  rw [eq_sec_add p ha, RingHom.map_add (f := _)]
   exact add_mem ((p.int_iff _).1 h.1) ((cA_int_iff _).2 ((p.int_iff _).1 h.2))
-
-theorem valuation_xi_zero_eq_one (p : SplitPt D k) (hp : p.UnitAA) : valuation k (p.pr (incA D D.host.xi0)) = 1 := by
-  obtain ⟨h1, h2⟩ := hp.1 _ (e_mem_intAt p)
-  have he : p.pr p.e = 1 := by rw [← sec_one, p.pr_sec]
-  have h3 := pr_mem_of_intAt p h1.2
-  have h4 := pr_mem_of_intAt p h2.2
-  rw [RingHom.map_mul, he, mul_one, Valuation.mem_integer_iff] at h3 h4
-  have h5 : valuation k (p.pr (incA D D.host.xi0)) * valuation k (p.pr (incA D D.host.xi0⁻¹)) = 1 := by
-    rw [← map_mul, ← RingHom.map_mul, ← RingHom.map_mul, mul_inv_cancel₀ (GlobalTheory.DualPairCompare.embedding_xi_zero_ne_zero D), RingHom.map_one,
-      RingHom.map_one, map_one]
-  refine le_antisymm h3 ?_
-  rw [← h5]
-  exact mul_le_of_le_one_right' h4
 
 theorem single_mem_glued_iff {n : Type} [DecidableEq n] (q : Unif k) (P : Pair k n) (t : k) :
     (Pi.single (Sum.inr 0) t : n ⊕ Fin 1 → k) ∈ gluedS q 1 P.ker P.vec ↔ t ∈ 𝒪[k] := by
@@ -219,6 +231,7 @@ theorem pair_sumFrame {p : SplitPt D k} {S A L : HSp D} (o : OrthDec S A L) (ζ 
     rw [mul_comm, ← conjTranspose_apply, gram_conjTranspose]
   have h1 : ∑ i, ∑ j, (β₀.b *ᵥ x) i * p.pr (cA D (incA D (S.gram i j))) * (t * p.pr (incA D (star (vecB o ζ j)))) =
       t * ((f ∘ r) ⬝ᵥ β₀.b *ᵥ x) := by
+
     simp only [dotProduct, Function.comp_apply, hr, map_sum, map_mul, Finset.mul_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     change _ * f (star (S.gram i j)) * (t * f (star (vecB o ζ j))) = _

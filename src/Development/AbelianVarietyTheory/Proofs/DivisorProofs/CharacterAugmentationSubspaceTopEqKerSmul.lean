@@ -1,47 +1,93 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QActMSubAlgebraMap
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QActMSubAlgebraMap
+public import Mathlib.RingTheory.Ideal.Maps
+public import Mathlib.RingTheory.TensorProduct.Maps
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open scoped TensorProduct
 universe u
 
 namespace GlobalTheory.HTRho
 
-theorem mSub_top_eq_ker_smul : ∀ (k : Type) [Field k] (C : Type) [CommRing C] (H : Type u) [AddCommGroup H]
-    [Module k H] (σ : C →+* Module.End k H) (χ : C →+* k),
-    letI : Module (k ⊗[ℤ] C) H := Module.compHom H (Algebra.TensorProduct.lift (Algebra.ofId k (Module.End k H))
-      σ.toIntAlgHom (fun _ _ => Algebra.commutes _ _)).toRingHom;
-    ∀ x : H, x ∈ GlobalTheory.HTRho.mSub σ χ ⊤ ↔ x ∈ (RingHom.ker (Algebra.TensorProduct.lift (Algebra.ofId k k)
-      χ.toIntAlgHom (fun _ _ => Commute.all _ _) : k ⊗[ℤ] C →ₐ[k] k) • ⊤ : Submodule (k ⊗[ℤ] C) H) := by
+theorem mSub_top_eq_ker_smul :
+    ∀ (k : Type) [Field k] (C : Type) [CommRing C] (H : Type u) [AddCommGroup H]
+      [Module k H] (σ : C →+* Module.End k H) (χ : C →+* k),
+      letI : Module (k ⊗[ℤ] C) H := Module.compHom H
+        (Algebra.TensorProduct.lift (Algebra.ofId k (Module.End k H)) σ.toIntAlgHom
+          (fun _ _ => Algebra.commutes _ _)).toRingHom
+      ∀ x : H, x ∈ GlobalTheory.HTRho.mSub σ χ ⊤ ↔
+        x ∈ (RingHom.ker (Algebra.TensorProduct.lift (Algebra.ofId k k) χ.toIntAlgHom
+          (fun _ _ => Commute.all _ _) : k ⊗[ℤ] C →ₐ[k] k) • ⊤ : Submodule (k ⊗[ℤ] C) H) := by
   intro k _ C _ H _ _ σ χ x
-  letI : Module (k ⊗[ℤ] C) H := Module.compHom H (Algebra.TensorProduct.lift (Algebra.ofId k (Module.End k H))
+  let : Module (k ⊗[ℤ] C) H := Module.compHom H (Algebra.TensorProduct.lift (Algebra.ofId k (Module.End k H))
       σ.toIntAlgHom (fun _ _ => Algebra.commutes _ _)).toRingHom
-  set L := Algebra.TensorProduct.lift (Algebra.ofId k (Module.End k H)) σ.toIntAlgHom
-    (fun _ _ => Algebra.commutes _ _) with hLdef
+  let L := Algebra.TensorProduct.lift (Algebra.ofId k (Module.End k H)) σ.toIntAlgHom
+    (fun _ _ => Algebra.commutes _ _)
   set φ : k ⊗[ℤ] C →ₐ[k] k := Algebra.TensorProduct.lift (Algebra.ofId k k) χ.toIntAlgHom
     (fun _ _ => Commute.all _ _) with hφdef
   have hsmul : ∀ (a : k ⊗[ℤ] C) (y : H), a • y = L a y := fun _ _ => rfl
   have hLt : ∀ (l : k) (c : C) (y : H), L (l ⊗ₜ c) y = l • σ c y := by
     intro l c y
-    have h1 := LinearMap.congr_fun (Algebra.TensorProduct.lift_tmul (Algebra.ofId k (Module.End k H))
-      σ.toIntAlgHom (fun _ _ => Algebra.commutes _ _) l c) y
-    rw [hLdef]
-    refine h1.trans ?_
-    rw [Module.End.mul_apply, Algebra.ofId_apply, Module.algebraMap_end_apply]
-    rfl
+    exact congrArg (fun f : Module.End k H => f y)
+      (Algebra.TensorProduct.lift_tmul (Algebra.ofId k (Module.End k H))
+        σ.toIntAlgHom (fun _ _ => Algebra.commutes _ _) l c)
   have hφt : ∀ (l : k) (c : C), φ (l ⊗ₜ c) = l * χ c := by
     intro l c
     simp [hφdef, Algebra.TensorProduct.lift_tmul]
   have key : ∀ (a : k ⊗[ℤ] C) (y : H), L a y - φ a • y ∈ mSub σ χ ⊤ := by
     intro a y
-    induction a using TensorProduct.induction_on with
-    | zero => simp
+    induction a using TensorProduct.inductionOn with
     | tmul l c =>
       rw [hLt, hφt, mul_smul, ← smul_sub]
       refine Submodule.smul_mem _ l (Submodule.subset_span ⟨c, y, trivial, ?_⟩)
       simp
     | add a b ha hb =>
-      convert add_mem ha hb using 1
-      rw [map_add, map_add, LinearMap.add_apply, add_smul]
-      abel
+      rw [map_add L, map_add φ, LinearMap.add_apply, add_smul, add_sub_add_comm]
+      exact add_mem ha hb
   constructor
   · intro hx
     induction hx using Submodule.span_induction with

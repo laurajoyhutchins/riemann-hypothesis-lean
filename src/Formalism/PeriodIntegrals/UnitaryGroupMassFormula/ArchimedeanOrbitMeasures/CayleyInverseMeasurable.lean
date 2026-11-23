@@ -1,5 +1,54 @@
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExCayK
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExCayK
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExOm
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.CayDensExTop
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,7 +109,7 @@ theorem cayCand_mem (g : UpqT P Q) : cayCand P Q g ∈ lieU P Q := by
 
 theorem cayInv_eq (g : UpqT P Q) : cayInv P Q g = ⟨cayCand P Q g, cayCand_mem P Q g⟩ := by
   unfold cayInv
-  rw [dif_pos (cayCand_mem P Q g)]
+  rw [dite_eq_left (cayCand_mem P Q g)]
 
 end Chart
 
@@ -131,34 +180,5 @@ theorem cayley_inverse_measurable : CayInvMeas := by
   rw [← hpw]
   classical
   exact hcont.measurable_piecewise continuousOn_const hO.measurableSet
-
-theorem cayley_set_measurable : CaySUnivMeas := by
-  intro P Q
-  have hmat : Continuous (UpqT.mat (P := P) (Q := Q)) := (isInducing_mat P Q).continuous
-  set C : Set (UpqT P Q × lieU P Q) := {p | UpqT.mat p.1 *
-    ((1 + 1) - ((p.2 : lieU P Q) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)) =
-      (1 + 1) + ((p.2 : lieU P Q) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)}
-  have hC : IsClosed C := by
-    have hv : Continuous fun p : UpqT P Q × lieU P Q =>
-        ((p.2 : lieU P Q) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ) :=
-      continuous_subtype_val.comp continuous_snd
-    exact isClosed_eq ((hmat.comp continuous_fst).matrix_mul (continuous_const.sub hv))
-      (continuous_const.add hv)
-  have e : cayS (Set.univ : Set (lieU P Q)) = (fun g => (g, cayInv P Q g)) ⁻¹' C := by
-    ext g
-    constructor
-    · rintro ⟨X, -, h⟩
-      show UpqT.mat g * ((1 + 1) - ((cayInv P Q g : lieU P Q) :
-          Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)) =
-        (1 + 1) + ((cayInv P Q g : lieU P Q) : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ)
-      rw [cayley_inverse_iff P Q g X h]
-      exact h
-    · intro h
-      exact ⟨cayInv P Q g, Set.mem_univ _, h⟩
-  rw [e]
-  exact (measurable_id.prodMk (cayley_inverse_measurable P Q)) hC.measurableSet
-
-theorem cayleyLoc_of_dens (h : CayleyDens) : CayleyLoc :=
-  cayleyLoc_of cayley_inverse_measurable cayley_inverse_iff cayley_set_measurable h
 
 end HcInf

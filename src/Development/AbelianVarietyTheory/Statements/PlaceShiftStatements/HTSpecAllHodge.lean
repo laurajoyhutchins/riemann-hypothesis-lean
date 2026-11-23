@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CoeEqAlgebraMapZeroEquiv
-import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
-import Formalism.LocalToGlobal.CyclotomicLocalNorms.NormSubToZModPowVal
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.HarishChandraFormulaStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.CoeEqAlgebraMapZeroEquiv
+public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
+public import Formalism.LocalToGlobal.CyclotomicLocalNorms.NormSubToZModPowVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -65,8 +104,6 @@ def IsHT (F : Frame q n) (Φ : Matrix (Fin F.d) F.Col ℂ_[l]) : Prop :=
 
 end Frame
 
-def SmProj {X : Scheme.{0}} (q : X ⟶ Sp ↥K.1) : Prop := Smooth q ∧ IsProjOver q
-
 universe u
 
 structure HodgeFam (K : FinExt l) : Type (max 1 (u + 1)) where
@@ -81,54 +118,6 @@ structure HodgeFam (K : FinExt l) : Type (max 1 (u + 1)) where
     ∀ (n : ℕ) (a : Fin (n + 1)), H q n a →ₗ[↥K.1] H q' n a
 
 attribute [instance] HodgeFam.add HodgeFam.mod
-
-def hodgeFam (K : FinExt l) : HodgeFam.{0} K where
-  H q n a := HodgeV q n a
-  pull hf n a := GlobalTheory.HodgeCoh.hodgePull hf a (n - a)
-
-abbrev Pairing (D : HodgeFam.{u} K) {X : Scheme.{0}} (q : X ⟶ Sp ↥K.1) (n : ℕ) : Type (max 1 u) :=
-  ∀ a : Fin (n + 1), EtV q n →ₗ[ℚ_[l]] Module.Dual ↥K.1 (D.H q n a) →ₗ[↥K.1] ℂ_[l]
-
-structure IsHTPair {D : HodgeFam.{u} K} {X : Scheme.{0}} {q : X ⟶ Sp ↥K.1} {n : ℕ} (h : Pairing D q n) : Prop where
-
-  finEt : FiniteDimensional ℚ_[l] (EtV q n)
-
-  finH : ∀ a, FiniteDimensional ↥K.1 (D.H q n a)
-
-  equi : ∀ (σ : ↥(GK K)) (a : Fin (n + 1)) (v : EtV q n) (φ : Module.Dual ↥K.1 (D.H q n a)),
-    chiPow (σ : GQ l) ((a : ℕ) : ℤ) * h a (etAct q n σ v) φ = Formalism.Per.σC (σ : GQ l) (h a v φ)
-
-  inj : ∀ (m : ℕ) (v : Fin m → EtV q n) (c : Fin m → ℂ_[l]), LinearIndependent ℚ_[l] v →
-    (∀ (a : Fin (n + 1)) (φ : Module.Dual ↥K.1 (D.H q n a)), ∑ i, c i * h a (v i) φ = 0) → c = 0
-
-  onto : ∑ a, Module.finrank ↥K.1 (D.H q n a) = Module.finrank ℚ_[l] (EtV q n)
-
-def IsNat {D : HodgeFam.{u} K} {X X' : Scheme.{0}} {q : X ⟶ Sp ↥K.1} {q' : X' ⟶ Sp ↥K.1} {f : X' ⟶ X} (hf : f ≫ q = q')
-    {n : ℕ} (h : Pairing D q n) (h' : Pairing D q' n) : Prop :=
-  ∀ (a : Fin (n + 1)) (v : EtV q n) (φ' : Module.Dual ↥K.1 (D.H q' n a)),
-    h' a (etPull hf n v) φ' = h a v (φ' ∘ₗ D.pull hf n a)
-
-def HTOn (K : FinExt l) (P : CrystallineSemistableComparison.Model l K.1 → Prop) (D : HodgeFam.{u} K) (n : ℕ) : Prop :=
-  ∃ h : ∀ M : CrystallineSemistableComparison.Model l K.1, P M → Pairing D M.q n,
-    (∀ (M : CrystallineSemistableComparison.Model l K.1) (hM : P M), IsHTPair (h M hM)) ∧
-    ∀ (M N : CrystallineSemistableComparison.Model l K.1) (hM : P M) (hN : P N) (g : M.X ⟶ N.X) (hg : g ≫ N.p = M.p),
-      IsNat (CrystallineSemistableComparison.Model.genMap_q g hg) (h N hN) (h M hM)
-
-def SmProjModel (M : CrystallineSemistableComparison.Model l K.1) : Prop := Smooth M.p ∧ IsProjOver M.p
-
-def HTSpec (D : ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l), HodgeFam.{u} K) : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (n : ℕ), HTOn K SmProjModel (D l K) n
-
-def HTSpecHodge : Prop := HTSpec fun _ _ K => hodgeFam K
-
-def HTSpecAll (D : ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l), HodgeFam.{u} K) : Prop :=
-  ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (n : ℕ),
-    ∃ h : ∀ (X : Scheme.{0}) (q : X ⟶ Sp ↥K.1), SmProj q → Pairing (D l K) q n,
-      (∀ (X : Scheme.{0}) (q : X ⟶ Sp ↥K.1) (hq : SmProj q), IsHTPair (h X q hq)) ∧
-      ∀ (X X' : Scheme.{0}) (q : X ⟶ Sp ↥K.1) (q' : X' ⟶ Sp ↥K.1) (hq : SmProj q) (hq' : SmProj q')
-        (f : X' ⟶ X) (hf : f ≫ q = q'), IsNat hf (h X q hq) (h X' q' hq')
-
-def HTSpecAllHodge : Prop := HTSpecAll fun _ _ K => hodgeFam K
 
 end GlobalTheory.HTLink
 

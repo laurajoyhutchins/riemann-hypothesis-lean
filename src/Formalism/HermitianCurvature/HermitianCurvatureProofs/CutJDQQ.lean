@@ -1,6 +1,54 @@
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDRed
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHat
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDJDJComm
+module
+
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHat
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BoundedOperatorsSquareIntegrable
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutAsm
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDAsm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDCCLower
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatBdd
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDJDJComm
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.TransferSquareIntegrableHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.REAL Formalism.QuantumDeterminants Formalism.FourierDecayAlt
 
@@ -32,11 +80,6 @@ def JDHatOpQQ : Prop :=
           ∀ J ∈ Q.FFl S.G.k S.G.r (T v).base.z (T v).base.z' (T v).base.π (T v).base.π' 0 (OmP S T v),
             MA.actA (D.parOf S v) X (trJ S T v e J) =
               (ts.map fun t => MA.actA (D.parOf S v) t.1 (trJ S T v e (B.opApply t.2 J))).sum
-
-theorem jDHatOpQQ_of (h : JDHatOp) : JDHatOpQQ := by
-  obtain ⟨Cc, hCc, H⟩ := h
-  exact ⟨Cc, hCc, fun E _ _ _ Wp Wq _ _ _ _ _ _ S T f χ ν' m₀ top A₀ hB v e L hFr hGa _ hL =>
-    H E Wp Wq S T f χ ν' m₀ top A₀ hB v e L hFr hGa hL⟩
 
 def JDecayTrQQd : Prop :=
   ∃ Cc : ℝ, ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (Wp Wq : InfinitePlace E → Type)
@@ -142,8 +185,6 @@ theorem jDecayTrQQd_of_leaves (h1 : JDHatBdd) (h2 : JDHatOpQQ) (h3 : JDJComm) (h
 
 theorem jDecayTrQQd_of_open (h2 : JDHatOpQQ) : JDecayTrQQd :=
   jDecayTrQQd_of_leaves hat_bounded_decay_holds h2 transfer_commutation_holds class_lower_decay_holds transfer_square_integrable_holds bounded_operators_square_integrable
-
-theorem jDecayTr_of_hatOp (h2 : JDHatOp) : JDecayTr := jDecayTr_of_open h2 transfer_commutation_holds
 
 end
 

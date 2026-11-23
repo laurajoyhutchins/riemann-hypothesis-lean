@@ -1,8 +1,60 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.AutomorphicKernels.UnitarySchrodingerModel.LocalDefs
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FixedNondeg
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedQuotientCardStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ResAlgSplitTwo
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FixedNondeg
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.UnramifiedQuotientCardStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
+
+@[expose] public section
+
 open PositivityTheory.PfSWUS.Loc GlobalTheory.CompanionTheory.UnrDens GlobalTheory.CompanionTheory.SiegLoc Filter Topology
 
 noncomputable section
@@ -56,7 +108,7 @@ def traceChar (σ : R →+* R) (ϖ : R) (hfix : σ ϖ = ϖ) (ψ : ∀ k, AddChar
     AddChar (R ⧸ lev ϖ 1) ℂ :=
   (ψ 1).compAddMonoidHom (AddMonoidHom.mk'
     (fun t => Ideal.Quotient.mk (lev ϖ 1) c * t + barσ σ ϖ hfix 1 (Ideal.Quotient.mk (lev ϖ 1) c * t))
-    (by intro x y; simp only [mul_add, map_add]; abel))
+    (by intro x y; simp only [mul_add, map_add (f := _)]; abel))
 
 theorem traceChar_mk (σ : R →+* R) (ϖ : R) (hfix : σ ϖ = ϖ) (ψ : ∀ k, AddChar (R ⧸ lev ϖ k) ℂ)
     (c y : R) :
@@ -64,7 +116,7 @@ theorem traceChar_mk (σ : R →+* R) (ϖ : R) (hfix : σ ϖ = ϖ) (ψ : ∀ k, 
       = ψ 1 (Ideal.Quotient.mk _ (c * y + σ (c * y))) := by
   show ψ 1 (Ideal.Quotient.mk (lev ϖ 1) c * Ideal.Quotient.mk _ y
     + barσ σ ϖ hfix 1 (Ideal.Quotient.mk (lev ϖ 1) c * Ideal.Quotient.mk _ y)) = _
-  rw [← map_mul, barσ_mk, ← map_add]
+  rw [← map_mul, barσ_mk, ← map_add (f := _)]
 
 theorem sum_traceChar {σ : R →+* R} {ϖ : R} {q : ℕ} {ε : ℤ} (hR : IsUnrQuad R σ ϖ q ε)
     [Fintype (R ⧸ lev ϖ 1)] {ψ : ∀ k, AddChar (R ⧸ lev ϖ k) ℂ} (hψ : IsLevelChars σ ϖ ψ) (c : R)
@@ -78,7 +130,7 @@ theorem sum_traceChar {σ : R →+* R} {ϖ : R} {q : ℕ} {ε : ℤ} (hR : IsUnr
       rw [traceChar_mk]
       have : Ideal.Quotient.mk (lev ϖ 1) (c * y + σ (c * y)) = 0 := by
         have h0 : Ideal.Quotient.mk (lev ϖ 1) c = 0 := Ideal.Quotient.eq_zero_iff_mem.2 hc
-        rw [map_add, ← barσ_mk σ ϖ hR.fix_ϖ, map_mul, h0]
+        rw [map_add (f := _), ← barσ_mk σ ϖ hR.fix_ϖ, map_mul, h0]
         simp
       rw [this, AddChar.map_zero_eq_one]
     simp [h1]
@@ -100,12 +152,12 @@ theorem gaussTerm_shift {σ : R →+* R} {ϖ : R} (hinv : ∀ a, σ (σ a) = a) 
         * traceChar σ ϖ hfix ψ (a * σ x) (Ideal.Quotient.mk _ y) := by
   have hp := psi_pow hψ 1 (j + 1) (a * σ x * y + σ (a * σ x * y))
   rw [show 1 + (j + 1) = j + 2 by omega] at hp
-  rw [← map_add, gaussTerm_mk, gaussTerm_mk, traceChar_mk, ← hp, ← AddChar.map_add_eq_mul,
+  rw [← map_add (f := _), gaussTerm_mk, gaussTerm_mk, traceChar_mk, ← hp, ← AddChar.map_add_eq_mul,
     ← map_add]
   congr 1
   rw [Ideal.Quotient.eq]
   refine mem_lev_iff.2 ⟨ϖ ^ j * (a * σ y * y), ?_⟩
-  simp only [map_mul, map_add, map_pow, hfix, ha, hinv]
+  simp only [map_mul, map_add (f := _), map_pow, hfix, ha, hinv]
   ring
 
 theorem mem_lev_one_iff {σ : R →+* R} {ϖ : R} {q : ℕ} {ε : ℤ} (hR : IsUnrQuad R σ ϖ q ε) {a : R}

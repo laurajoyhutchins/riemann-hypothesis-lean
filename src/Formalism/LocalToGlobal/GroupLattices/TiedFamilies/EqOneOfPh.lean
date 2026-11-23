@@ -1,8 +1,50 @@
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.NatActRVtupR
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.FramesTr
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CastGLSymmApply
-import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.JPMemAwayP
+module
+
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.FramesTr
+public import Formalism.LocalToGlobal.GroupLattices.LevelGatherings.JPMemAwayP
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.ValUniqOf
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CastGLSymmApply
 import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Afsplit
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -51,8 +93,8 @@ theorem sec_off (X : ∀ v : Fin G.P.nV, GL (Fin n) ((A.pl v).1.adicCompletion F
     bc (prV (E := E) w) (H.sec X : GL (Fin n) (E ⊗[F] FiniteAdeleRing (𝓞 F) F)) = 1 :=
   bc_secAll_off F E σ J (fun v => (A.pl v).1) (pl_inj A) w (fun v h => hw (h ▸ (A.pl v).2)) _
 
-include H in
 
+include H in
 theorem eq_one_of_ph (v : Fin G.P.nV) (x : GL (Fin n) (E ⊗[F] (A.pl v).1.adicCompletion F))
     (hx : x ∈ UPts σ J ((A.pl v).1.adicCompletion F)) (h1 : bc (A.ph v) x = 1) : x = 1 := by
   have h2 : H.uGL v ⟨x, hx⟩ = 1 := by rw [H.uGL_apply]; exact h1
@@ -123,7 +165,7 @@ theorem ptEx_of (H : LocGood σ J A) (S : StepLevel F E σ J T f bad) (yc : cls 
   set x : UPts σ J (FiniteAdeleRing (𝓞 F) F) := ⟨A.yG i, H.yG_mem i⟩ * H.sec (fun v => bc (A.phE v) A.B *
       bc ((A.eQ v : G.P.Qq v →+* (A.pl v).1.adicCompletion F)) (castGL A.rk (G.P.Qq v) (g v)) * (bc (A.phE v) A.B)⁻¹) with hx
   obtain ⟨c, hc⟩ := hs (Quotient.mk'' x)
-  obtain ⟨h, hh, k, hk, e⟩ := (DoubleCoset.eq _ _ (yc c) x).1 hc
+  obtain ⟨h, hh, k, hk, e⟩ := (@DoubleCoset.eq _ _ _ _ (yc c) x).1 hc
   obtain ⟨γ, hγ, eγ⟩ := Subgroup.mem_map.1 (Subgroup.mem_subgroupOf.1 hh)
   refine ⟨c, γ, ⟨k.1, Subgroup.mem_subgroupOf.1 hk⟩, hγ, ?_⟩
   have e2 : bc (inclE (F := F) (FiniteAdeleRing (𝓞 F) F)) γ * (yc c).1 * k.1 = x.1 := by

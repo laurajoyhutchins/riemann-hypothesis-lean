@@ -1,4 +1,49 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.PartialSumRootEq
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.PartialSumRootEq
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.VermaCone
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.VermaProductIdentity
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -97,7 +142,7 @@ theorem lowestKType_tensor_lift (ε : Fin n → Bool) (lam : Fin n → ℝ) (s :
         convert h2 using 1
         abel
       | zero => simp
-      | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+      | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
       | smul a x _ hx => rw [map_smul, hx, smul_zero]
     have hT0 := hTR _ (wordSpan_isKStable hA (hKq μ u hu)) hθW _
       (kirrWord_mem (A := A) (ε := ε) (l := []) _ (by simp [KirrLow]))
@@ -117,8 +162,8 @@ theorem lowestKType_tensor_lift (ε : Fin n → Bool) (lam : Fin n → ℝ) (s :
     refine ⟨c₁, c₂, hne, ?_⟩
     have hu : IsKHWVec ε A Λ' (c₁ • u₁ + c₂ • u₂) := by
       refine ⟨fun a => ?_, fun a b hab he => ?_⟩
-      · rw [map_add, map_smul, map_smul, hu₁.1 a, hu₂.1 a, smul_add, smul_comm c₁, smul_comm c₂]
-      · rw [map_add, map_smul, map_smul, hu₁.2 a b hab he, hu₂.2 a b hab he, smul_zero, smul_zero, add_zero]
+      · rw [map_add (f := _), map_smul, map_smul, hu₁.1 a, hu₂.1 a, smul_add, smul_comm c₁, smul_comm c₂]
+      · rw [map_add (f := _), map_smul, map_smul, hu₁.2 a b hab he, hu₂.2 a b hab he, smul_zero, smul_zero, add_zero]
     have hθW : ∀ x ∈ kirrSpan ε A (aeval ES q (c₁ • u₁ + c₂ • u₂)), θ x = 0 := by
       intro x hx
       induction hx using Submodule.span_induction with
@@ -126,7 +171,7 @@ theorem lowestKType_tensor_lift (ε : Fin n → Bool) (lam : Fin n → ℝ) (s :
         obtain ⟨l, hl, rfl⟩ := hy
         rcases l with _ | ⟨p, l'⟩
         · simp only [kirrWord] at hsum ⊢
-          rw [map_add, map_smul, map_smul, map_add, map_smul, map_smul, hsum]
+          rw [map_add (f := _), map_smul, map_smul, map_add (f := _), map_smul, map_smul, hsum]
         · obtain ⟨hmem, hw⟩ := hkey Λ' _ hu (p :: l') hl
           by_contra hne0
           have h1 := hVC.1.1 _ _ hmem hne0 hw
@@ -136,17 +181,17 @@ theorem lowestKType_tensor_lift (ε : Fin n → Bool) (lam : Fin n → ℝ) (s :
           rw [e] at h1
           exact not_rootCone_of_ne Λ' (p :: l') hl (List.cons_ne_nil _ _) h1
       | zero => simp
-      | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
+      | add x y _ _ hx hy => rw [map_add (f := _), hx, hy, add_zero]
       | smul a x _ hx => rw [map_smul, hx, smul_zero]
     have hT0 := hTR _ (wordSpan_isKStable hA (hKq Λ' _ hu)) hθW _
       (kirrWord_mem (A := A) (ε := ε) (l := []) _ (by simp [KirrLow]))
     simp only [kirrWord] at hT0
     have heig : eeV E (T (c₁ • u₁ + c₂ • u₂)) = ((thV lam s : ℝ) : ℂ) • T (c₁ • u₁ + c₂ • u₂) := by
-      rw [map_add, map_smul, map_smul, map_add, map_smul, map_smul, (mem_eigenTensorSpace_iff.1 hf₁).2,
+      rw [map_add (f := _), map_smul, map_smul, map_add (f := _), map_smul, map_smul, (mem_eigenTensorSpace_iff.1 hf₁).2,
         (mem_eigenTensorSpace_iff.1 hf₂).2, smul_add, smul_comm c₁, smul_comm c₂]
     rw [hTq _ heig] at hT0
     have := (smul_eq_zero.1 hT0).resolve_left hc
-    rw [map_add, map_smul, map_smul] at this
+    rw [map_add (f := _), map_smul, map_smul] at this
     exact this
 
 end Core

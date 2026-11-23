@@ -1,7 +1,56 @@
-import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.FixedBaseSurjectivity.GaloisPeriodCyclotomic
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.InvRestrictScalarsMem
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.FrobAinfMapFrobenius
-import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.ThetaAlgebraMap.ThAlgebraMap
+module
+
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.ExistsMapEqOfPowMul
+public import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.PeriodRingUnits.DieudonneManinBasisModification
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.InvRestrictScalarsMem
+public import Development.WeilBound.CoreStatements.CrystallinePeriodRings.PhiGalCris
+public import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.FixedBaseSurjectivity.GaloisPeriodCyclotomic
+public import Development.WeilBound.RepresentationTheoryGL.PeriodRingBases.ThetaAlgebraMap.ThAlgebraMap
+import GroundTheory.PAdicHodge.ACrisFrobFixed
+import GroundTheory.PAdicHodge.BCrisPlusInvariants
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -10,7 +59,7 @@ noncomputable section
 namespace period_ring_base
 
 open Formalism.Per6 hiding σB aB
-open GroundTheory.PAdicHodge DeRhamPotentiallySemistable.DRPst PfDRPst Matrix
+open GroundTheory.PAdicHodge DeRhamPotentiallySemistable.DRPst Matrix
 
 namespace BaseA
 
@@ -66,7 +115,7 @@ theorem uB_mem (c : ↥(Formalism.BasicNotions.Loc.MaximalUnramifiedExtension l)
     | add x y hx hy ihx ihy =>
       intro h
       have : (⟨x + y, h⟩ : ↥(Formalism.BasicNotions.Loc.MaximalUnramifiedExtension l)) = ⟨x, adj x hx⟩ + ⟨y, adj y hy⟩ := rfl
-      rw [this, map_add]
+      rw [this, map_add (f := _)]
       exact Subring.add_mem _ (ihx (adj x hx)) (ihy (adj y hy))
     | mul x y hx hy ihx ihy =>
       intro h
@@ -107,6 +156,7 @@ theorem base_fixed' (l : ℕ) [Fact l.Prime] : ∀ L : Fld l, FiniteDimensional 
       refine hsum.trans ?_
       simp only [IntermediateField.coe_sum, Algebra.smul_def, IntermediateField.coe_mul, c]
       rfl
+
     rw [hk', map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, PositivityTheory.LocInh.uB_algebraMap, qB_eq]

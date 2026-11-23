@@ -1,18 +1,58 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+module
+
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDefs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.IsIntegralOfRoot
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModBasic
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModEisInt
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModDeltaInt
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.CoeffRescaleExpandOfNotDvd
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModEvalSer
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModEvalMF
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModQExpEq
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModQPrin
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModEvalSer
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModFacSer
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModFrobSer
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGmForm
 import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModGmQ
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.IsIntegralOfRoot
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModFrobSer
-import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModKronSer
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModKronSer
+public import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModQExpEq
+import ReciprocityTheory.ReductiveGroups.UnramifiedIntegrals.ModQPrin
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators Classical UpperHalfPlane MatrixGroups CongruenceSubgroup Manifold
@@ -71,7 +111,7 @@ theorem kronFun_div {p : ℕ} (hp : p.Prime) :
       prodSer p + xp p ((aC * dC ^ p - aC ^ p * dC) ^ 2) := by
     rw [← gmQ_xp hp0]
     ext m
-    simp only [xp, PowerSeries.coeff_mk, map_add]
+    simp only [xp, PowerSeries.coeff_mk, map_add (f := _)]
     split_ifs <;> simp
   rw [← key, hsum, hk]
   rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, PowerSeries.coeff_mk]

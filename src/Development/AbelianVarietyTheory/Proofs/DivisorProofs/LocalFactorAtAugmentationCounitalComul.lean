@@ -1,4 +1,63 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.DFinsupp
+public import Mathlib.RingTheory.Finiteness.Defs
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
+public import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+public import Mathlib.RingTheory.Ideal.IdempotentFG
+public import Mathlib.RingTheory.Noetherian.Nilpotent
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.Artinian.Defs
+public import Mathlib.RingTheory.Artinian.Module
+public import Mathlib.RingTheory.TensorProduct.Maps
+
+@[expose] public section
+
 open scoped TensorProduct
 
 namespace GlobalTheory
@@ -43,7 +102,7 @@ theorem localFactor_counital_descends :
     induction t using TensorProduct.induction_on with
     | zero => simp
     | tmul x y => simp [φ, hε', mul_comm]
-    | add s t hs ht => simp only [map_add, hs, ht]
+    | add s t hs ht => simp only [map_add (f := _), hs, ht]
   have hφΔ : ∀ a, φ (Δ'' a) = ε a := by
     intro a
     show φ (Algebra.TensorProduct.map mk mk (Δ a)) = ε a
@@ -70,9 +129,9 @@ theorem localFactor_counital_descends :
         have h1 : x ⊗ₜ[k] y = iL x * iR y := by
           simp [iL, iR, Algebra.TensorProduct.tmul_mul_tmul]
         have h2 : iL x = iL u + algebraMap k _ (ε' x) := by
-          rw [← AlgHom.commutes iL, ← map_add]; simp [u]
+          rw [← AlgHom.commutes iL, ← map_add (f := _)]; simp [u]
         have h3 : iR y = iR v + algebraMap k _ (ε' y) := by
-          rw [← AlgHom.commutes iR, ← map_add]; simp [v]
+          rw [← AlgHom.commutes iR, ← map_add (f := _)]; simp [v]
         have h4 : φ (x ⊗ₜ[k] y) = ε' x * ε' y := by simp [φ]
         rw [h4, map_mul, h1, h2, h3]; ring
       rw [heq]
@@ -80,7 +139,7 @@ theorem localFactor_counital_descends :
     | add s t hs ht =>
       have := add_mem hs ht
       convert this using 1
-      simp only [map_add]; abel
+      simp only [map_add (f := _)]; abel
   have hkill : ∀ a ∈ J, Δ'' a = 0 := by
     have h0 : Δ'' e' = 0 := by
       apply (he'.map Δ'').eq_zero_of_isNilpotent
@@ -101,7 +160,7 @@ theorem localFactor_counital_descends :
       induction t using TensorProduct.induction_on with
       | zero => simp
       | tmul x y => simp [hε']
-      | add s t hs ht => simp only [map_add, hs, ht]
+      | add s t hs ht => simp only [map_add (f := _), hs, ht]
     rw [← hmk, hΔ', gen, hL]
   · intro a'
     obtain ⟨a, rfl⟩ := Ideal.Quotient.mkₐ_surjective k J a'
@@ -111,7 +170,7 @@ theorem localFactor_counital_descends :
       induction t using TensorProduct.induction_on with
       | zero => simp
       | tmul x y => simp [hε']
-      | add s t hs ht => simp only [map_add, hs, ht]
+      | add s t hs ht => simp only [map_add (f := _), hs, ht]
     rw [← hmk, hΔ', gen, hR]
   · rw [Ideal.FG.isNilpotent_iff_le_nilradical (IsNoetherian.noetherian _)]
     intro y hy

@@ -1,8 +1,63 @@
-import Mathlib
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OneEqSpTranslZero
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
-import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+module
+
+public import Mathlib.Analysis.Calculus.FDeriv.Defs
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.InversionStatement
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EntireApplyEqOfPeriodicOfSpanReal
+public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.EqZeroOfSemicharacterMultiplier
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Convex.Contractible
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.OfRealVecHalfVec
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.SubConjTransposeOfSymm
+import ReciprocityTheory.ThetaQuasiPeriods.Change
+import ReciprocityTheory.ThetaQuasiPeriods.Transl
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SymplecticGenerators.SymplecticCharacters.Blocks
+
+@[expose] public section
 
 open Complex Matrix NumberField
 open ReciprocityTheory.PTheta ReciprocityTheory.ChartRestriction.G.Key ReciprocityTheory.ChartRestriction.G.Key.Chi ReciprocityTheory.ChartRestriction.G.Geo.Tor
@@ -11,8 +66,8 @@ noncomputable section
 
 namespace GlobalTheory
 
-open Complex Matrix NumberField Filter Topology in
 
+open Complex Matrix NumberField Filter Topology in
 theorem _root_.GlobalTheory.entire_eq_zero_of_mul_continuous_eq_zero {E : Type*} [NormedAddCommGroup E]
     [NormedSpace ℂ E] {f t : E → ℂ} (hf : Differentiable ℂ f) (ht : Continuous t) (ht0 : t ≠ 0)
     (h : ∀ z, f z * t z = 0) (z : E) : f z = 0 := by
@@ -70,8 +125,8 @@ private theorem span_real_period_lattice_full {g : ℕ} {τ : Matrix (Fin g) (Fi
   · exact Submodule.subset_span ⟨(Pi.single j 1, 0), rfl⟩
   · exact Submodule.subset_span ⟨(0, Pi.single j 1), rfl⟩
 
-open Complex Matrix NumberField Filter Topology in
 
+open Complex Matrix NumberField Filter Topology in
 theorem _root_.GlobalTheory.two_dvd_of_entire_sign_periodic {g : ℕ} {τ : Matrix (Fin g) (Fin g) ℂ}
     (hτ : τ ∈ _root_.ReciprocityTheory.PTheta.SiegelH (Fin g)) {σ : (Fin g → ℂ) → ℂ} (hσ : Differentiable ℂ σ) (h0 : σ 0 ≠ 0)
     {N : (Fin g → ℤ) → (Fin g → ℤ) → ℤ}
@@ -160,8 +215,8 @@ private theorem quadratic_lattice_translate_eq {g : ℕ} (C τ τ' M : Matrix (F
     dotProduct_comm z u, dotProduct_comm (M⁻¹ᵀ *ᵥ z) q, dotProduct_comm (τ' *ᵥ q) q, dotProduct_comm q' q]
   ring
 
-open Complex Matrix NumberField Filter Topology in
 
+open Complex Matrix NumberField Filter Topology in
 theorem _root_.GlobalTheory.halfChar_fixed_of_theta_transform_unit :
     ∀ (g : ℕ) (γ : Matrix (Fin g ⊕ Fin g) (Fin g ⊕ Fin g) ℤ), γ ∈ Matrix.symplecticGroup (Fin g) ℤ → (∀ i j, (8 : ℤ) ∣ γ (Sum.inl i) (Sum.inr j) ∧ (8 : ℤ) ∣ γ (Sum.inr i) (Sum.inl j)) → ∀ (c : ℂ) (n n' : Fin g → ℤ), c ≠ 0 → (∀ τ ∈ _root_.ReciprocityTheory.PTheta.SiegelH (Fin g), ∀ z : Fin g → ℂ, _root_.ReciprocityTheory.PTheta.theta (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec 0) (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec 0) (_root_.ReciprocityTheory.ChartRestriction.G.Key.Chi.zAct γ τ z) (_root_.ReciprocityTheory.ChartRestriction.G.Key.Chi.spAct γ τ) ^ 2 = c * (_root_.ReciprocityTheory.ChartRestriction.G.Key.Chi.jAut γ τ).det * _root_.ReciprocityTheory.PTheta.eC (_root_.ReciprocityTheory.ChartRestriction.G.Key.Chi.expArg γ τ z) * _root_.ReciprocityTheory.PTheta.theta (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec 0) (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec 0) z τ ^ 2) → ∀ τ ∈ _root_.ReciprocityTheory.PTheta.SiegelH (Fin g), ∀ ρ : (Fin g → ℂ) → ℂ, Differentiable ℂ ρ → (∀ z, ρ z ≠ 0) → (∀ z, _root_.ReciprocityTheory.PTheta.theta (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec n) (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec n') (_root_.ReciprocityTheory.ChartRestriction.G.Key.Chi.zAct γ τ z) (_root_.ReciprocityTheory.ChartRestriction.G.Key.Chi.spAct γ τ) = ρ z * _root_.ReciprocityTheory.PTheta.theta (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec n) (_root_.ReciprocityTheory.ChartRestriction.G.Key.halfVec n') z τ) → (∀ i, (2 : ℤ) ∣ (γ.toBlocks₁₁ᵀ *ᵥ n) i - n i) ∧ (∀ i, (2 : ℤ) ∣ (γ.toBlocks₂₂ᵀ *ᵥ n') i - n' i) := by
 

@@ -1,4 +1,57 @@
-import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreLie
+module
+
+public import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.CoreDefs
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.MemLeftHighestWeightOfIsMinimalJointVector
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockJointMultiplicity.LoweringPartRightActionInlInr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Bool
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -12,7 +65,7 @@ section Gen
 variable {σ κ : Type} [Fintype κ]
 
 private theorem coeff_pderiv_real_seminorm_filtration (l : σ) (P : MvPolynomial σ ℂ) (γ : σ →₀ ℕ) :
-    coeff γ (pderiv l P) = coeff (γ + Finsupp.single l 1) P * ((γ l : ℂ) + 1) := by
+    AddMonoidAlgebra.coeff (pderiv l P) γ = AddMonoidAlgebra.coeff P (γ + Finsupp.single l 1) * ((γ l : ℂ) + 1) := by
   classical
   refine MvPolynomial.induction_on' P (fun s a => ?_) (fun p q hp hq => ?_)
   · rw [pderiv_monomial, coeff_monomial, coeff_monomial]
@@ -30,7 +83,7 @@ private theorem coeff_pderiv_real_seminorm_filtration (l : σ) (P : MvPolynomial
   · simp [hp, hq, add_mul]
 
 theorem supp_wt_term (w : σ → ℕ) (l l' : σ) (P : MvPolynomial σ ℂ) (γ : σ →₀ ℕ)
-    (h : coeff γ (X l * pderiv l' P) ≠ 0) :
+    (h : AddMonoidAlgebra.coeff (X l * pderiv l' P) γ ≠ 0) :
     ∃ β ∈ P.support, Finsupp.weight w β + w l = Finsupp.weight w γ + w l' := by
   classical
   rw [coeff_X_mul'] at h
@@ -48,8 +101,8 @@ theorem supp_wt_term (w : σ → ℕ) (l l' : σ) (P : MvPolynomial σ ℂ) (γ 
         intro y
         simp [Finsupp.weight_apply]
       have key := congrArg (Finsupp.weight w) (tsub_add_cancel_of_le hle)
-      rw [map_add, hsw] at key
-      rw [map_add, hsw]
+      rw [map_add (f := _), hsw] at key
+      rw [map_add (f := _), hsw]
       omega
   · exact absurd rfl h
 
@@ -59,7 +112,7 @@ private theorem weight_le_of_mem_support_mul_of_right (w : σ → ℕ) (k : ℕ)
   classical
   intro γ hγ
   obtain ⟨a, _, b, hb, rfl⟩ := Finset.mem_add.mp (support_mul F G hγ)
-  rw [map_add]
+  rw [map_add (f := _)]
   exact le_add_left (hG b hb)
 
 private theorem weight_le_of_mem_support_sum {ι : Type} (w : σ → ℕ) (k : ℕ) (s : Finset ι)
@@ -77,20 +130,20 @@ private theorem exists_mem_support_mul_weight_eq_of_weight_zero (w : σ → ℕ)
     ∃ γ ∈ (D * g).support, Finsupp.weight w γ = b := by
   classical
   let g0 : MvPolynomial σ ℂ :=
-    ∑ x ∈ g.support.filter (fun x => Finsupp.weight w x = b), monomial x (coeff x g)
-  have hc0 : ∀ γ, coeff γ g0 = if Finsupp.weight w γ = b then coeff γ g else 0 := by
+    ∑ x ∈ g.support.filter (fun x => Finsupp.weight w x = b), monomial x (AddMonoidAlgebra.coeff g x)
+  have hc0 : ∀ γ, AddMonoidAlgebra.coeff g0 γ = if Finsupp.weight w γ = b then AddMonoidAlgebra.coeff g γ else 0 := by
     intro γ
-    by_cases hγ : coeff γ g = 0 <;>
+    by_cases hγ : AddMonoidAlgebra.coeff g γ = 0 <;>
       simp [g0, coeff_sum, coeff_monomial, Finset.mem_filter, mem_support_iff, hγ]
   have hg0 : g0 ≠ 0 := by
     intro h
     have h1 := hc0 γ0
-    rw [h, if_pos hb, coeff_zero] at h1
+    simp [h, hb] at h1
     exact (mem_support_iff.mp hγ0) h1.symm
   obtain ⟨γ, hγ⟩ := PI.FJMP.exists_mem_support (mul_ne_zero hD0 hg0)
   have hwγ : Finsupp.weight w γ = b := by
     obtain ⟨x, hx, y, hy, hxy⟩ := Finset.mem_add.mp (support_mul D g0 hγ)
-    rw [← hxy, map_add, hD x hx, zero_add]
+    rw [← hxy, map_add (f := _), hD x hx, zero_add]
     have h2 := mem_support_iff.mp hy
     rw [hc0] at h2
     by_contra hne
@@ -100,15 +153,18 @@ private theorem exists_mem_support_mul_weight_eq_of_weight_zero (w : σ → ℕ)
   have hrest : ∀ δ ∈ (D * (g - g0)).support, b + 1 ≤ Finsupp.weight w δ := by
     apply weight_le_of_mem_support_mul_of_right
     intro δ hδ
-    rw [mem_support_iff, coeff_sub, hc0] at hδ
+    have hsub : AddMonoidAlgebra.coeff (g - g0) δ =
+        AddMonoidAlgebra.coeff g δ - AddMonoidAlgebra.coeff g0 δ := by
+      first | rw [eq_sub_iff_add_eq, ← MvPolynomial.coeff_add, sub_add_cancel] | simp
+    rw [mem_support_iff, hsub, hc0] at hδ
     by_cases hδb : Finsupp.weight w δ = b
     · rw [if_pos hδb, sub_self] at hδ
       exact absurd rfl hδ
     · rw [if_neg hδb, sub_zero] at hδ
       have h3 := hg δ (mem_support_iff.mpr hδ)
       omega
-  rw [mem_support_iff, hsplit, coeff_add]
-  have h4 : coeff γ (D * (g - g0)) = 0 := by
+  rw [mem_support_iff, hsplit, MvPolynomial.coeff_add]
+  have h4 : AddMonoidAlgebra.coeff (D * (g - g0)) γ = 0 := by
     by_contra hne
     have h5 := hrest γ (mem_support_iff.mpr hne)
     omega
@@ -220,7 +276,7 @@ theorem supp_gen_pos {N : ℕ} (pos : κ → Bool) (ρ : Fin N → κ) (hρ : �
   have hg : ∀ γ ∈ (g i0).support, Finsupp.weight w e0 ≤ Finsupp.weight w γ := by
     intro γ hγ
     have h1 := mem_support_iff.mp hγ
-    change coeff γ (pderiv (v (ρ i0)) P) ≠ 0 at h1
+    change AddMonoidAlgebra.coeff (pderiv (v (ρ i0)) P) γ ≠ 0 at h1
     rw [coeff_pderiv_real_seminorm_filtration] at h1
     have hmem : γ + Finsupp.single (v (ρ i0)) 1 ∈ P.support := by
       rw [mem_support_iff]
@@ -228,7 +284,7 @@ theorem supp_gen_pos {N : ℕ} (pos : κ → Bool) (ρ : Fin N → κ) (hρ : �
       apply h1
       rw [h0, zero_mul]
     have h2 := hmin _ hmem
-    rw [map_add, hsw, hwpos _ hpos0] at h2
+    rw [map_add (f := _), hsw, hwpos _ hpos0] at h2
     omega
   have hle : Finsupp.single (v (ρ i0)) 1 ≤ e0 := by
     rw [Finsupp.single_le_iff, hi0]
@@ -237,12 +293,12 @@ theorem supp_gen_pos {N : ℕ} (pos : κ → Bool) (ρ : Fin N → κ) (hρ : �
     tsub_add_cancel_of_le hle
   have hγ0 : e0 - Finsupp.single (v (ρ i0)) 1 ∈ (g i0).support := by
     rw [mem_support_iff]
-    change coeff _ (pderiv (v (ρ i0)) P) ≠ 0
+    change AddMonoidAlgebra.coeff (pderiv (v (ρ i0)) P) _ ≠ 0
     rw [coeff_pderiv_real_seminorm_filtration, hadd]
     exact mul_ne_zero (mem_support_iff.mp he0) (Nat.cast_add_one_ne_zero _)
   have hwγ0 : Finsupp.weight w (e0 - Finsupp.single (v (ρ i0)) 1) = Finsupp.weight w e0 := by
     have h1 := congrArg (Finsupp.weight w) hadd
-    rw [map_add, hsw, hwpos _ hpos0, add_zero] at h1
+    rw [map_add (f := _), hsw, hwpos _ hpos0, add_zero] at h1
     exact h1
   obtain ⟨γ, hγ, hγw⟩ := exists_mem_support_mul_weight_eq_of_weight_zero w _ M.det (g i0) hD0 hD hg _ hγ0 hwγ0
   rw [hdet] at hγ

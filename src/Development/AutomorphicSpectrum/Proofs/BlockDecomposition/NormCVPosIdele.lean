@@ -1,5 +1,50 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.ThetaBasic
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.ThetaBasic
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.LogAbsoluteWedges.LogAbsBasic
+public import GroundTheory.AutomorphicForms.ReductionSplitting
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelL2RowsColumns
+
+@[expose] public section
 
 noncomputable section
 
@@ -9,7 +54,7 @@ open GroundTheory.Automorphic.Reduction
 
 namespace GlobalTheory.CompanionTheory.TorNorm
 
-variable {E : Type} [Field E] [NumberField E] [IsTotallyComplex E]
+variable {E : Type} [Field E] [NumberField E] [_root_.NumberField.IsTotallyComplex E]
 
 theorem norm_cV (v : InfinitePlace E) (u : Ad E) : ‖cV v u‖ = ‖u.1 v‖ :=
   (InfinitePlace.Completion.isometryEquivComplexOfIsComplex (IsTotallyComplex.isComplex v)).isometry.norm_map_of_map_zero (map_zero (InfinitePlace.Completion.ringEquivComplexOfIsComplex (IsTotallyComplex.isComplex v))) _
@@ -37,9 +82,12 @@ theorem logAbs_of (u : Ad E) (t : ℝ) (h1 : ∀ v, ‖cV v u‖ = Real.exp t) (
 theorem tor_neg {n : ℕ} (x : Fin n → ℝ) : (An.tor E x : GA E n)⁻¹ = An.tor E (-x) := by
   refine (eq_inv_of_mul_eq_one_left ?_).symm
   have : ∀ i, posIdele (K := E) (Real.exp ((-x) i)) (Real.exp_pos _) * posIdele (K := E) (Real.exp (x i)) (Real.exp_pos _) = 1 := fun i => by
-    rw [← posIdeleHom_apply ⟨Real.exp ((-x) i), Real.exp_pos _⟩, ← posIdeleHom_apply ⟨Real.exp (x i), Real.exp_pos _⟩, ← map_mul]
-    convert map_one (posIdeleHom E)
-    exact Subtype.ext (by simp [← Real.exp_add])
+    have h : (⟨Real.exp ((-x) i), Real.exp_pos _⟩ : {r : ℝ // 0 < r}) *
+        ⟨Real.exp (x i), Real.exp_pos _⟩ = 1 := by
+      apply Subtype.ext
+      simp [← Real.exp_add]
+    have := congrArg (posIdeleHom E) h
+    simpa only [map_mul, map_one, posIdeleHom_apply] using this
   change diagUnits n _ * diagUnits n _ = 1
   rw [← map_mul]
   convert map_one (diagUnits n (R := Ad E))
@@ -63,7 +111,7 @@ theorem logSizeM_tor {n : ℕ} (x : Fin n → ℝ) :
         exact Real.exp_le_exp.2 (by push_cast; linarith)
       · simp [(Real.exp_pos _).le]
     calc _ ≤ Real.posLog (Real.exp (2 * ‖x‖)) :=
-          Real.posLog_le_posLog (Real.iSup_nonneg fun _ => by positivity) hle
+          Real.posLog_le_posLog (le_trans (by norm_num) (Real.iSup_nonneg fun _ => by positivity)) hle
       _ = 2 * ‖x‖ := by
           rw [Real.posLog, Real.log_exp]
           exact max_eq_right (by positivity)

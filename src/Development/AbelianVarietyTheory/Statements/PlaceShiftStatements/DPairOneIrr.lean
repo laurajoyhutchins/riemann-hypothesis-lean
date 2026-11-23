@@ -1,5 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiagHermitianTrivialOfSumFourSquares
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.DiagHermitianTrivialOfSumFourSquares
+public import Development.AbelianVarietyTheory.Definitions.Divisors.MarkedSumIrr
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,38 +57,6 @@ def MoveDefInv : Prop :=
 namespace MoveEx
 
 open GlobalTheory.LKTrip.Example GlobalTheory.LKMid.Example
-
-theorem sig_one (v : InfinitePlace (ex 1 one_ne_zero).F) : sigPosH ((ex 1 one_ne_zero).gram_herm v) = 1 :=
-  (sigPos_Hc 1 v.embedding).trans (by simp)
-
-theorem form_one (v : InfinitePlace (ex 1 one_ne_zero).F) (x : Fin 1 → ℂ) :
-    (star x ⬝ᵥ ((ex 1 one_ne_zero).gram v *ᵥ x)).re = ‖x 0‖ ^ 2 := by
-  suffices h : ∀ τ : QI →+* ℂ, (star x ⬝ᵥ (gramAt (Hc 1) τ *ᵥ x)).re = ‖x 0‖ ^ 2 from h v.embedding
-  intro τ
-  have h1 : τ 1 = 1 := map_one _
-  simp only [gramAt, Hc, dotProduct, Matrix.mulVec, Fin.sum_univ_one, Matrix.transpose_apply, Matrix.map_apply,
-    Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_fin_one, Rat.cast_one, Pi.star_apply]
-  rw [h1, one_mul, Complex.star_def, Complex.conj_mul']
-  norm_cast
-
-def dPairOne : DPair (ex 1 one_ne_zero) where
-  β := exPair.β
-  γ := exPair.γ
-  c := exPair.c
-  sym := exPair.sym
-  sim := exPair.sim
-  reg := exPair.reg
-  trivAf := exPair.trivAf
-  posR := fun v x hx => by
-    refine ⟨fun _ => ?_, fun h => absurd (sig_one v) h⟩
-    have e : exPair.β = 1 := rfl
-    rw [e, inv_one, Units.val_one, map_one, Matrix.mul_one]
-    have := form_one v x
-    refine lt_of_lt_of_eq ?_ this.symm
-    have h0 : x (0 : Fin 1) ≠ 0 := fun h => hx (funext fun i => by
-      have hi : i = (0 : Fin 1) := Subsingleton.elim (α := Fin 1) _ _
-      rw [hi]; exact h)
-    positivity
 
 end MoveEx
 

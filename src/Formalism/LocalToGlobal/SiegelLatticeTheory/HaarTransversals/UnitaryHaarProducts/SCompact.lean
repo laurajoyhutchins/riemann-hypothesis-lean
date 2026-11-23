@@ -1,10 +1,64 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.IUnfold
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HaarOn
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.IUnfold
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.ConcreteLevelAdelicSubset
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.HaarOn
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeCountingBound.ArchPlace
+public import Formalism.RealPlaceAnalysis.FinalF
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IndefiniteUnitaryPreservesForm
-import Formalism.RealPlaceAnalysis.FinalF
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHAlg
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.AutomorphicFormsDecompositionHolds
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.MarkSpec
+
+@[expose] public section
 
 noncomputable section
 
@@ -26,7 +80,7 @@ theorem Ksub_coe : ((Ksub I : Subgroup I.Gf) : Set I.Gf) = I.Kset := rfl
 
 theorem hs_continuous {n : ℕ} : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => Formalism.REAL.hs M) := by
   unfold Formalism.REAL.hs
-  refine continuous_finset_sum _ (fun i _ => continuous_finset_sum _ (fun j _ => ?_))
+  refine continuous_finsetSum _ (fun i _ => continuous_finsetSum _ (fun j _ => ?_))
   exact ((continuous_id.matrix_elem i j).norm).pow 2
 
 theorem omCover_holds : OmCover I := by
@@ -95,18 +149,11 @@ theorem hJ_sum_right' {ι : Type*} (s : Finset ι) (x : Fin n → ℂ) (c : ι �
   unfold hJ
   simp [Matrix.mulVec_sum, Matrix.mulVec_smul, dotProduct_sum, dotProduct_smul]
 
-theorem hJ_sub_right' (x y y' : Fin n → ℂ) : hJ ε x (y - y') = hJ ε x y - hJ ε x y' := by
-  unfold hJ
-  simp [Matrix.mulVec_sub]
-
-theorem hJ_zero_right' (x : Fin n → ℂ) : hJ ε x 0 = 0 := by
-  unfold hJ
-  simp
-
 theorem hJ_conj' (x y : Fin n → ℂ) : hJ ε x y = starRingEnd ℂ (hJ ε y x) := by
   unfold hJ Formalism.REAL.Jm
+
   simp only [Matrix.mulVec_diagonal, dotProduct, map_sum, map_mul, Pi.star_apply, RCLike.star_def,
-    Complex.conj_conj]
+  Complex.conj_conj]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   split_ifs <;> simp <;> ring
 
@@ -302,8 +349,9 @@ theorem hJ_rv_sc (I : AutInst) (v : InfinitePlace I.F) (x y : Fin I.n → I.E) :
   unfold hJ
   rw [key, dotProduct_mulVec, hx]
   unfold Formalism.UG.hform
+
   simp only [map_sum, map_mul, dotProduct, Matrix.mulVec, Pi.star_apply, Matrix.map_apply,
-    starRingEnd_apply, PI.UnitaryGroupMassFormula.LCG.ap_star, Finset.mul_sum]
+  starRingEnd_apply, PI.UnitaryGroupMassFormula.LCG.ap_star, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
 
@@ -444,9 +492,5 @@ theorem colBound_of (hK : X.LevelSubgroupCharacter) (hCF : Cut.ClassFin X u hK) 
     (fun _ _ => norm_nonneg _) (Finset.mem_univ c)
 
 end Col
-
-def SCompactC : Prop := ∀ (D : D7) (X : HidaSetting D) (u : D.what₂.Word), SCompact X u
-
-def SinfSectionC : Prop := ∀ (D : D7) (X : HidaSetting D) (u : D.what₂.Word), SinfSection X u
 
 end Formalism.L2.SG.Pf

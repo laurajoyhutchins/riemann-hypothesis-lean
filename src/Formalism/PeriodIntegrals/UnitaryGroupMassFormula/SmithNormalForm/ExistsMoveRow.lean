@@ -1,6 +1,59 @@
-import Mathlib
-import Formalism.PeriodIntegrals.SmithMat
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SmithNormalForm.IsUnitOneAddVecMulVec
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SmithNormalForm.IsUnitOneAddVecMulVec
+public import Mathlib.RingTheory.Ideal.Span
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.Matrix.Permutation
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Basic.PEquiv
+public import Mathlib.Data.Matrix.PEquiv
+
+@[expose] public section
 
 namespace PI.SmithWork
 
@@ -101,7 +154,7 @@ theorem exists_blk {n : ℕ} (A : Matrix (Fin (n + 1)) (Fin (n + 1)) R) :
     have h0 : blk (0 : R) (0 : Matrix (Fin n) (Fin n) R) = A := by
       rw [hA]
       ext a c
-      refine Fin.cases ?_ (fun i => ?_) a <;> refine Fin.cases ?_ (fun k => ?_) c <;> simp
+      refine Fin.cases ?_ (fun i => ?_) a <;> refine Fin.cases ?_ (fun k => ?_) c <;> simp [blk]
     rw [h0]
     exact Eqv.refl A
   let S : Set R := {r | r ≠ 0 ∧ ∃ B, Eqv A B ∧ B 0 0 = r}
@@ -212,12 +265,12 @@ theorem smith (n : ℕ) : ∀ A : Matrix (Fin n) (Fin n) R,
       cases a using Fin.cases with
       | zero =>
         cases c using Fin.cases with
-        | zero => simp
-        | succ k => simp [Matrix.diagonal_apply, (Fin.succ_ne_zero k).symm]
+        | zero => simp [blk]
+        | succ k => simp [blk, Matrix.diagonal_apply, (Fin.succ_ne_zero k).symm]
       | succ i =>
         cases c using Fin.cases with
-        | zero => simp [Matrix.diagonal_apply, Fin.succ_ne_zero]
-        | succ k => simp [Matrix.diagonal_apply, Fin.succ_inj]
+        | zero => simp [blk, Matrix.diagonal_apply, Fin.succ_ne_zero]
+        | succ k => simp [blk, Matrix.diagonal_apply, Fin.succ_inj]
     refine ⟨Fin.cons b d, ?_, ?_⟩
     · rw [← eb]
       exact hAD.trans (Eqv.blk ⟨U, V, hU, hV, hUV⟩ b)

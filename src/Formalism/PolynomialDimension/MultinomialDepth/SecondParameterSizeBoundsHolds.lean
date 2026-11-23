@@ -1,4 +1,49 @@
-import Formalism.PolynomialDimension.StatementNum
+module
+
+public import Formalism.PolynomialDimension.StatementNum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -232,14 +277,6 @@ lemma pII0_floor (L Y k Q a B : ℝ) (hQ0 : 0 < Q) (ha : 0 ≤ a) (hYk100 : 100 
       gcongr
     exact le_trans (Int.floor_le _) h3
 
-lemma sizeBound_one_le_product (k r N Q c' Y : ℝ) (hk : 1 ≤ k) (hr : 1 ≤ r) (hN : 1 ≤ N) (hQ : 1 ≤ Q)
-    (hc : 1 ≤ c') (hY : 1 ≤ Y) : 1 ≤ k ^ 3 * r ^ 2 * N * Q ^ 5 * c' * Y := by
-  have h1 : 1 ≤ k ^ 3 := one_le_pow₀ hk
-  have h2 : 1 ≤ r ^ 2 := one_le_pow₀ hr
-  have h3 : 1 ≤ Q ^ 5 := one_le_pow₀ hQ
-  exact pII0_one_le_mul (pII0_one_le_mul (pII0_one_le_mul (pII0_one_le_mul
-    (pII0_one_le_mul h1 h2) hN) h3) hc) hY
-
 lemma pII0_om (r N n' c₀ c'' : ℕ) (hr : 1 ≤ r) (hN : 1 ≤ N) : (c₀ : ℝ) ≤ omII r N n' c₀ c'' := by
   unfold omII
   have hr' : (1 : ℝ) ≤ r := by exact_mod_cast hr
@@ -249,7 +286,7 @@ lemma pII0_om (r N n' c₀ c'' : ℕ) (hr : 1 ≤ r) (hN : 1 ≤ N) : (c₀ : �
   have h2 : (0 : ℝ) ≤ 2 * r * n' * c'' := by positivity
   nlinarith
 
-set_option maxHeartbeats 1000000 in
+
 theorem secondParameterSizeBounds_holds : ParamsII0 := by
   intro CE C₂ hCE hC₂
   refine ⟨64 * CE + 400 + C₂, by linarith, ?_⟩

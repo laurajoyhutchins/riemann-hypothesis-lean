@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Basic.Complex.Basic
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.Block
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,7 +98,7 @@ theorem IsUB.inv {blk : Fin m → ℕ} {C : Matrix (Fin m) (Fin m) ℂ} (h : IsU
   refine ⟨fun i => ?_, fun i j hij => ⟨?_, ?_⟩⟩
   · have h1 : (C * C⁻¹) i i = 1 := by
       rw [Matrix.mul_nonsing_inv _ hdet, one_apply_eq]
-    rw [mul_apply, Finset.sum_eq_single i] at h1
+    rw [Matrix.mul_apply, Finset.sum_eq_single i] at h1
     · rwa [h.1, one_mul] at h1
     · intro k _ hk
       rcases lt_or_gt_of_ne hk with hlt | hlt
@@ -74,9 +124,9 @@ theorem Z_ne' (i : Fin m) : Z i (π i) ≠ 0 := (hZ i (π i)).mpr (hπ i).symm
 def Zi : Matrix (Fin m) (Fin m) ℂ := Matrix.of fun b c => if b = π c then (Z c b)⁻¹ else 0
 
 theorem Z_mul_Zi : Z * Zi π Z = 1 := by
-  ext i k
-  simp only [mul_apply, Zi, of_apply, mul_ite, mul_zero, Finset.sum_ite_eq',
-    Finset.mem_univ, if_true, one_apply]
+  refine Matrix.ext fun i k => ?_
+  rw [Matrix.mul_apply, Matrix.one_apply]
+  simp only [Zi, of_apply, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
   by_cases hik : i = k
   · subst hik
     rw [if_pos rfl]
@@ -96,7 +146,7 @@ theorem isUnit_Z : IsUnit Z.det := Matrix.isUnit_det_of_right_inverse (Z_mul_Zi 
 theorem conj_apply (X : Matrix (Fin m) (Fin m) ℂ) (j i : Fin m) :
     (Z * X * Z⁻¹) j i = Z j (π j) * X (π j) (π i) * (Z i (π i))⁻¹ := by
   rw [Z_inv_eq π hπ Z hZ]
-  simp only [mul_apply, Zi, of_apply, mul_ite, mul_zero, Finset.sum_ite_eq',
+  simp only [Matrix.mul_apply, Zi, of_apply, mul_ite, mul_zero, Finset.sum_ite_eq',
     Finset.mem_univ, if_true]
   congr 1
   rw [Finset.sum_eq_single (π j)]
@@ -163,7 +213,7 @@ theorem gram_last {blk : Fin (m + 1) → ℕ} {A : Matrix (Fin (m + 1)) (Fin (m 
     · rw [if_neg hj]
       exact hA.zero_of_lt (lt_of_le_of_ne (Fin.le_last j) hj)
   ext i j
-  simp only [mul_apply, conjTranspose_apply]
+  simp only [Matrix.mul_apply, conjTranspose_apply]
   rw [Finset.sum_eq_single (Fin.last m)]
   · rw [Finset.sum_eq_single (Fin.last m)]
     · rw [hrow i, hrow j]

@@ -1,5 +1,48 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.NEqRZeroMulXPow
-import Development.AutomorphicArithmetic.CyclotomicBounds.SmallSum
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.NEqRZeroMulXPow
+public import Formalism.SharpRestriction.LevelLetterCocycles.StatementFamilies.ExportFamilies
+public import Development.AutomorphicArithmetic.CyclotomicBounds.SmallSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -344,7 +387,7 @@ theorem lA_lt_lStar : lA L < lStar L := by
       mul_le_mul_of_nonneg_right h1C hU18.le, mul_le_mul_of_nonneg_right hm2 hb0]
   exact lt_of_le_of_lt hA hlow
 
-set_option maxHeartbeats 1000000 in
+
 theorem exc_pt {l : ℕ} (hl : lStar L < l) :
     bbB L C + lenB L C l ≤ 1000 * (C + 1) ^ 2 * Ub L C ^ 9 := by
   have hls := seven_lt_lStar L P
@@ -498,46 +541,7 @@ section Sums
 variable {C : ℝ} (hC : 0 < C) (P : ParameterChoice' D L) (hPar : ParametersPolynomiallyBounded L C P) (hL : Large L.sc.x L.sc.eps C)
 include hC P hPar hL
 
-theorem big_le_b : 4 * 10 ^ 6 * (C + 1) ^ 2 * Ub L C ^ 18 ≤ L.sc.b := by
-  have hx1 : (1:ℝ) ≤ L.sc.x := le_trans (by norm_num) hL.x100
-  have hx0 : (0:ℝ) < L.sc.x := by linarith
-  have hA : (C + 1) ^ 2 ≤ (C + 1) ^ 3 := by nlinarith [mul_nonneg (sq_nonneg (C + 1)) hC.le]
-  have hx2 : 4 * 10 ^ 6 * (C + 1) ^ 2 ≤ L.sc.x ^ 2 := by
-    nlinarith [mul_le_mul_of_nonneg_left hL.x100 hx0.le, hL.xK, hA, sq_nonneg (C + 1)]
-  have hxp : L.sc.x ^ 2 ≤ L.sc.x ^ (2 * C + 4) := by
-    rw [← Real.rpow_two L.sc.x]
-    exact Real.rpow_le_rpow_of_exponent_le hx1 (by linarith)
-  have hUb : Ub L C ^ 18 = L.sc.x ^ ((C + 2) * 18) * Real.exp (18 * L.sc.x ^ (L.sc.eps / 4)) := by
-    unfold Ub
-    rw [mul_pow, ← Real.rpow_mul_natCast hx0.le, ← Real.exp_nat_mul]
-    norm_num
-  have hkey := hL.ex
-  have hsplit1 : L.sc.x ^ (20 * C + 40) = L.sc.x ^ ((C + 2) * 18) * L.sc.x ^ (2 * C + 4) := by
-    rw [← Real.rpow_add hx0]; congr 1; ring
-  have hsplit2 : Real.exp (20 * L.sc.x ^ (L.sc.eps / 4)) =
-      Real.exp (18 * L.sc.x ^ (L.sc.eps / 4)) * Real.exp (2 * L.sc.x ^ (L.sc.eps / 4)) := by
-    rw [← Real.exp_add]; congr 1; ring
-  rw [hsplit1, hsplit2] at hkey
-  have h1 : (1:ℝ) ≤ L.sc.x ^ (C + 2) := Real.one_le_rpow hx1 (by linarith)
-  have hE2 : (1:ℝ) ≤ Real.exp (2 * L.sc.x ^ (L.sc.eps / 4)) :=
-    Real.one_le_exp (mul_nonneg (by norm_num) (Real.rpow_nonneg hx0.le _))
-  have hP : 0 ≤ L.sc.x ^ ((C + 2) * 18) := Real.rpow_nonneg hx0.le _
-  have hQ : 0 ≤ Real.exp (18 * L.sc.x ^ (L.sc.eps / 4)) := (Real.exp_pos _).le
-  have hR : 4 * 10 ^ 6 * (C + 1) ^ 2 ≤ L.sc.x ^ (2 * C + 4) := le_trans hx2 hxp
-  have hX0 : 0 ≤ Real.exp (L.sc.x ^ (L.sc.eps / 3)) := (Real.exp_pos _).le
-  show 4 * 10 ^ 6 * (C + 1) ^ 2 * Ub L C ^ 18 ≤ Real.exp (L.sc.x ^ L.sc.eps)
-  rw [hUb]
-  calc 4 * 10 ^ 6 * (C + 1) ^ 2 * (L.sc.x ^ ((C + 2) * 18) * Real.exp (18 * L.sc.x ^ (L.sc.eps / 4)))
-      ≤ L.sc.x ^ (2 * C + 4) * (L.sc.x ^ ((C + 2) * 18) * Real.exp (18 * L.sc.x ^ (L.sc.eps / 4))) :=
-        mul_le_mul_of_nonneg_right hR (mul_nonneg hP hQ)
-    _ ≤ L.sc.x ^ (2 * C + 4) * (L.sc.x ^ ((C + 2) * 18) * Real.exp (18 * L.sc.x ^ (L.sc.eps / 4))) *
-          Real.exp (2 * L.sc.x ^ (L.sc.eps / 4)) :=
-        le_mul_of_one_le_right (mul_nonneg (Real.rpow_nonneg hx0.le _) (mul_nonneg hP hQ)) hE2
-    _ = L.sc.x ^ ((C + 2) * 18) * L.sc.x ^ (2 * C + 4) *
-          (Real.exp (18 * L.sc.x ^ (L.sc.eps / 4)) * Real.exp (2 * L.sc.x ^ (L.sc.eps / 4))) := by ring
-    _ ≤ Real.exp (L.sc.x ^ (L.sc.eps / 3)) := hkey
-    _ ≤ L.sc.x ^ (C + 2) * Real.exp (L.sc.x ^ (L.sc.eps / 3)) := le_mul_of_one_le_left hX0 h1
-    _ ≤ Real.exp (L.sc.x ^ L.sc.eps) := hL.Xb
+theorem big_le_b : 4 * 10 ^ 6 * (C + 1) ^ 2 * Ub L C ^ 18 ≤ L.sc.b := sc_b_ge_const_mul_Ub_pow_eighteen L hC P hPar hL
 
 end Sums
 
@@ -888,7 +892,7 @@ section Point
 variable {C : ℝ} (hC : 0 < C) (P : ParameterChoice' D L) (hPar : ParametersPolynomiallyBounded L C P) (hL : Large L.sc.x L.sc.eps C)
 include hC P hPar hL
 
-set_option maxHeartbeats 1000000 in
+
 open Classical in
 theorem point_bound (tb : Tab L) (hA : AdmT L tb C P) (S : Finset ℕ) (hS : ∀ l ∈ S, l.Prime) :
     6 + UpperTheory.KStar.nuBudget D + Real.log (Formalism.MainNotions.N.hE D.host : ℝ) + Real.log (D.what₂.restRowsFiniteGroupCard : ℝ) +

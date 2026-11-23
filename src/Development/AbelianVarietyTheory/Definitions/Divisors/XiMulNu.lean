@@ -1,4 +1,51 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Eigenspace.Basic
+public import Mathlib.RingTheory.Perfectoid.FontaineTheta
+public import Mathlib.RingTheory.WittVector.Compare
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -81,20 +128,6 @@ def etale (ε : PreTilt O p) (h : ℕ) : Datum ε h ℤ_[p] where
   Ψ_mul := by simp
   F_act := by intro a; simp [Algebra.ofId_apply]
 
-def mult (ε : PreTilt O p) : Datum ε 1 ℤ_[p] where
-  F := Matrix.of fun _ _ => mu ε
-  G := 1
-  Ψ := Matrix.of fun _ _ => xi ε
-  Ψ' := 1
-  ρT := Algebra.ofId _ _
-  ρM := (RingHom.mapMatrix (ofPadic p O)).comp (algebraMap _ _)
-  G_mul_F := by ext1 i j; simp [Subsingleton.elim i j]
-  F_eq := by ext1 i j; simp [Matrix.mul_apply, phiInv_mu, xi_mul_nu]
-  Ψ_mul := by ext1 i j; simp [Subsingleton.elim i j]
-  F_act := by
-    intro a; ext1 i j
-    simp [Matrix.mul_apply, Algebra.ofId_apply, mul_comm, Subsingleton.elim i 0, Subsingleton.elim j 0]
-
 namespace Datum
 
 variable {ε : PreTilt O p} {h : ℕ} {Λ : Type} [CommRing Λ] [Algebra ℤ_[p] Λ] (D : Datum ε h Λ)
@@ -114,18 +147,6 @@ def Hsub (τ : Λ →+* O) : Submodule O (Fin h → O) :=
   ⨅ a : Λ, Module.End.eigenspace (Matrix.toLin' ((D.ρM a).map (fontaineTheta O p))) (τ a)
 
 def W (τ : Λ →+* O) : Submodule O (Fin h → O) := D.Tsub τ ⊓ LinearMap.ker D.al
-
-def lieRank (τ : Λ →+* O) : ℕ := Module.finrank O ↥(D.Lie ⊓ D.Tsub τ)
-
-def filRank (τ : Λ →+* O) : ℕ := Module.finrank O ↥(D.Fil ⊓ D.Hsub τ)
-
-abbrev QOne (τ : Λ →+* O) : Type := D.W τ ⧸ (D.Lie ⊓ D.Tsub τ).comap (D.W τ).subtype
-
-abbrev QTwo (τ : Λ →+* O) : Type :=
-  ↥(D.Fil ⊓ D.Hsub τ) ⧸ ((D.Tsub τ).map D.al).comap (D.Fil ⊓ D.Hsub τ).subtype
-
-abbrev QDel (τ : Λ →+* O) : Type :=
-  ↥(D.Lie ⊓ D.Tsub τ) ⧸ ((D.Hsub τ).map D.bb).comap (D.Lie ⊓ D.Tsub τ).subtype
 
 end Datum
 

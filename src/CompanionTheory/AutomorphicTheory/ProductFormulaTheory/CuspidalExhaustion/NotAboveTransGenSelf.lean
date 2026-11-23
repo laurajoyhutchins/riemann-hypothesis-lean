@@ -1,6 +1,47 @@
-import CompanionTheory.AutomorphicTheory.ProductFormulaTheory.CuspidalExhaustion.CuspEmbP
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsListPairwiseNotRel
+module
+
+public import CompanionTheory.AutomorphicTheory.ProductFormulaTheory.CuspidalExhaustion.CuspEmbP
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsListPairwiseNotRel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -34,9 +75,9 @@ theorem linkP : LinkP k := by
     rw [hF, hL, hfirst, IrrGL.nu_nu, ht, show (c' : ℂ) + ((d' - c' + 1 : ℤ) : ℂ) = ((c' + (d' - c' + 1) : ℤ) : ℂ) by push_cast; ring]
     exact hinj _ _ (by omega)
 
-private def Above (a b : IrrGL k) : Prop := 0 < a.1 ∧ ∃ j : ℕ, 0 < j ∧ a = b.nu (j : ℕ)
+private def Above (a b : IrrGL (k := k)) : Prop := 0 < a.1 ∧ ∃ j : ℕ, 0 < j ∧ a = b.nu (j : ℕ)
 
-private theorem above_transGen {a b : IrrGL k} (H : Relation.TransGen Above a b) :
+private theorem above_transGen {a b : IrrGL (k := k)} (H : Relation.TransGen Above a b) :
     0 < a.1 ∧ ∃ j : ℕ, 0 < j ∧ a = b.nu (j : ℕ) := by
   induction H with
   | single H => exact H
@@ -45,14 +86,14 @@ private theorem above_transGen {a b : IrrGL k} (H : Relation.TransGen Above a b)
     obtain ⟨-, j, hj, e'⟩ := H
     exact ⟨ha, i + j, by omega, by rw [e, e', IrrGL.nu_nu, Nat.cast_add, add_comm]⟩
 
-private theorem not_above_transGen_self (a : IrrGL k) : ¬ Relation.TransGen Above a a := fun H => by
+private theorem not_above_transGen_self (a : IrrGL (k := k)) : ¬ Relation.TransGen Above a a := fun H => by
   obtain ⟨ha, j, hj, e⟩ := above_transGen H
   have : a.nu ((0 : ℕ) : ℂ) = a.nu ((j : ℕ) : ℂ) := by simpa using e
   exact hj.ne ((IrrGL.nu_natCast_inj ha).1 this)
 
 theorem minP : MinP k := by
   intro l hl hc
-  obtain ⟨l', hl', hp⟩ := exists_list_pairwise_not_rel (not_above_transGen_self (k := k)) (l : Multiset (IrrGL k))
+  obtain ⟨l', hl', hp⟩ := exists_list_pairwise_not_rel (not_above_transGen_self (k := k)) (l : Multiset (IrrGL (k := k)))
   have hmem : ∀ x, x ∈ l' ↔ x ∈ l := fun x => by
     rw [← Multiset.mem_coe, hl', Multiset.mem_coe]
   cases l' with

@@ -1,8 +1,48 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Formalism.PairingDivisors.StatementH
-import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntegralFiniteAdeleCompleteSeparated
+module
+
+public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IntegralFiniteAdeleCompleteSeparated
+public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain
 open scoped TensorProduct
@@ -16,7 +56,7 @@ open Formalism.UG Formalism.UG.P
 variable {E : Type} [Field E] [NumberField E]
 
 local notation "𝔸" => FiniteAdeleRing (𝓞 ℚ) ℚ
-local notation "𝒮" => tensInt (F := ℚ) (FiniteAdeleRing (𝓞 ℚ) ℚ) (intOE E) (intAd ℚ)
+local notation "𝒮" => tensInt (F := ℚ) 𝔸 (intOE E) (intAd ℚ)
 
 def ratBasis (E : Type) [Field E] [NumberField E] :
     Module.Basis (Fin (Module.finrank ℤ (𝓞 E))) ℚ E :=
@@ -37,12 +77,13 @@ def comb : (Fin (Module.finrank ℤ (𝓞 E)) → 𝔸) →+ E ⊗[ℚ] 𝔸 whe
 theorem coord_comb (r : Fin (Module.finrank ℤ (𝓞 E)) → 𝔸) (i : Fin (Module.finrank ℤ (𝓞 E))) :
     coord i (comb r) = r i := by
   change coord i (∑ j, algebraMap (𝓞 E) E (Module.finBasis ℤ (𝓞 E) j) ⊗ₜ[ℚ] r j) = r i
+
   rw [map_sum, Finset.sum_eq_single i]
   · rw [← ratBasis_apply]
     simp [coord]
   · intro j _ hj
     rw [← ratBasis_apply]
-    simp [coord, Finsupp.single_apply, hj]
+    simp [coord, hj]
   · simp
 
 theorem comb_mem (r : Fin (Module.finrank ℤ (𝓞 E)) → 𝔸) (hr : ∀ j, r j ∈ intAd ℚ) :
@@ -91,7 +132,7 @@ theorem tensInt_separated_complete (E : Type) [Field E] [NumberField E] :
       intro i
       refine hcpl (fun N => coord i (x N)) (fun N => coord_mem (hx N) i) fun N k hN hk => ?_
       obtain ⟨w, hw, h⟩ := hxx N k hN hk
-      exact ⟨_, coord_mem hw i, by rw [h, map_add, map_nsmul]⟩
+      exact ⟨_, coord_mem hw i, by rw [h, map_add (f := _), map_nsmul]⟩
     choose y hy using key
     have main : ∀ N : ℕ, 0 < N → ∃ w ∈ tensInt (F := ℚ) 𝔸 (intOE E) (intAd ℚ),
         comb y = x N + N • w := by
@@ -99,14 +140,14 @@ theorem tensInt_separated_complete (E : Type) [Field E] [NumberField E] :
       choose a ha hya using fun i => hy i N hN
       refine ⟨comb a, comb_mem a ha, ?_⟩
       have : y = (fun i => coord i (x N)) + N • a := funext hya
-      rw [this, map_add, map_nsmul, comb_coord (hx N)]
+      rw [this, map_add (f := _), map_nsmul, comb_coord (hx N)]
     refine ⟨comb y, ?_, main⟩
     obtain ⟨w, hw, h⟩ := main 1 one_pos
     rw [h]
     exact add_mem (hx 1) (nsmul_mem hw 1)
 
-open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.StandardLatticesGL3 in
 
+open Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.StandardLatticesGL3 in
 theorem integral_separated_complete : ∀ (D : D7), (∀ y : AE D, (∀ N : ℕ, 0 < N → ∃ w ∈ OhE D, y = (N : AE D) * w) → y = 0) ∧ ∀ x : ℕ → AE D, (∀ N, x N ∈ OhE D) → (∀ N m : ℕ, 0 < N → 0 < m → ∃ w ∈ OhE D, x (N * m) = x N + (N : AE D) * w) → ∃ y ∈ OhE D, ∀ N : ℕ, 0 < N → ∃ w ∈ OhE D, y = x N + (N : AE D) * w :=
   fun D => tensInt_separated_complete D.host.E
 

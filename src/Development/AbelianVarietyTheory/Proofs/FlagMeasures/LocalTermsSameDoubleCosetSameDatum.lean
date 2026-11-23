@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsDatumOfTwoCongruentFrames
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsDatumOfTwoCongruentFramesStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FrameDualUnipotentGroupActsUnitriangularOnto
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsDatumOfTwoCongruentFrames
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsDatumOfTwoCongruentFramesStatement
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianDatumOfTermReadOnLattice
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermitianDatumOfTermReadOnLattice
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open ValuativeRel Formalism.MainNotions.S Formalism.MainNotions.S.Loc Formalism.MainNotions.S.LocNG GlobalTheory.LocOver
 open scoped Classical
 
@@ -169,10 +214,10 @@ lemma cong_img {r : ℕ} {f₁ f₁' f₂ f₂' : Fin (r + 1) → V} (k : V ≃�
       rw [LinearEquiv.coe_coe] at hyk
       rwa [← k.injective hyk]
     · apply k.injective
-      rw [he, map_add, map_add]
+      rw [he, map_add (f := _), map_add (f := _)]
   · rintro ⟨a, ha, b, hb, c, hc, hbX, hcX, rfl⟩
     refine ⟨k a, (TermOver.mem_img k _ _).2 ⟨a, ha, rfl⟩, k b, (TermOver.mem_img k _ _).2 ⟨b, hb, rfl⟩,
-      k c, (TermOver.mem_img k _ _).2 ⟨c, hc, rfl⟩, ?_, ?_, by rw [map_add, map_add]⟩
+      k c, (TermOver.mem_img k _ _).2 ⟨c, hc, rfl⟩, ?_, ?_, by rw [map_add (f := _), map_add (f := _)]⟩
     · rw [hX]; exact Submodule.mem_map_of_mem hbX
     · rw [hX']; exact Submodule.mem_map_of_mem hcX
 
@@ -205,6 +250,7 @@ lemma tri_map (k : V ≃ₗ[E] V) {n : ℕ} {f g : Fin n → V} (h : Tri E f g) 
   obtain ⟨A, hA, hC⟩ := h
   exact ⟨A, hA, fun b => by
     show k (g b) = ∑ a, A a b • k (f a)
+
     rw [hC b, map_sum]; simp only [map_smul]⟩
 
 lemma tri_trans {n : ℕ} {f g h : Fin n → V} (h1 : Tri E f g) (h2 : Tri E g h) : Tri E f h := by

@@ -1,12 +1,48 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.CompatFub
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.PSplit
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.HeckeFubiniCompatibility.MultHasCompactSupport
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SizeBasicOfConjPlaces
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SizeFinitePlaces
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConjugatePlacesFacts
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.RedSizeRatGLMul
-import GroundTheory.AutomorphicForms.CuspidalDiscreteness.Counting
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.IsotropicMahlerBounds.VeryCuspZero
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConjugatePlacesFacts
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SizeBasicOfConjPlaces
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SizeFinitePlaces
+public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.EigenvalueSeparation.LeftInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open NumberField IsDedekindDomain Matrix MeasureTheory Filter Topology
@@ -25,22 +61,6 @@ theorem size_facts (E : Type) [Field E] [NumberField E] [IsCMField E] (n : ℕ) 
     GlobalTheory.CompanionTheory.ConjAtPlaces.conjPlaces E n
   exact ⟨h1, h2, max c 0, le_max_right _ _, fun g h =>
     (hc g h).trans (add_le_add le_rfl (le_max_left _ _))⟩
-
-def ratP (E : Type) [Field E] [NumberField E] [IsCMField E] (a b : ℕ) :
-    GL (Fin a) E × GL (Fin b) E →* ratH E a b := ((ratGL E a).prodMap (ratGL E b)).rangeRestrict
-
-theorem toRationalSubgroup_surjective : Function.Surjective (ratP E a b) := MonoidHom.rangeRestrict_surjective _
-
-instance countable_ratH : Countable (ratH E a b) := by
-  have : Countable E := by
-    exact (Algebra.IsAlgebraic.cardinalMk_le_max ℚ E |>.trans (by simp)) |> Cardinal.mk_le_aleph0_iff.1
-  have h : Countable (GL (Fin a) E × GL (Fin b) E) := by
-    have hh : ∀ n : ℕ, Countable (GL (Fin n) E) := fun n =>
-      haveI : Countable (Matrix (Fin n) (Fin n) E) := inferInstanceAs (Countable (Fin n → Fin n → E))
-      Function.Injective.countable (f := fun g : GL (Fin n) E => (g.val : Matrix (Fin n) (Fin n) E))
-        Units.val_injective
-    exact @instCountableProd _ _ (hh a) (hh b)
-  exact (toRationalSubgroup_surjective (E := E) (a := a) (b := b)).countable
 
 end GlobalTheory.CompanionTheory.Growth
 end

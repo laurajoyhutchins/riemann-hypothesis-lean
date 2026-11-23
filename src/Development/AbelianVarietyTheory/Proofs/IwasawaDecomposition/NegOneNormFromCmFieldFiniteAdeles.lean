@@ -1,8 +1,52 @@
-import Mathlib
+module
+
+public import Formalism.LocalRingCardinality.DataSpaces
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsRootQuadratic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.RootOfUnityEightQMemCoeffGaloisSubfield
-import Formalism.LocalRingCardinality.SpanPowerMembership.Spaces
-import Formalism.SharpRestriction.InertJacobiLevels.HostFam
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsRootQuadratic
+
+@[expose] public section
 
 open Formalism.BasicNotions NumberField IsDedekindDomain GlobalTheory.Mem
 open scoped TensorProduct
@@ -94,14 +138,14 @@ theorem cm_local_neg_one (cm : CMData F E) (θ : 𝓞 E) (t n : 𝓞 F)
       rw [hpq, star_add, star_mul, hs, hs, mul_comm]
     have e1 : (t' : F) = 2 * p + q * t := by
       apply (algebraMap F E).injective
-      simp only [map_add, map_mul, map_ofNat]
+      simp only [map_add (f := _), map_mul, map_ofNat]
       rw [← ht', ← ht, hst, hpq]; ring
     have e2 : (n' : F) = p ^ 2 + p * q * t + q ^ 2 * n := by
       apply (algebraMap F E).injective
-      simp only [map_add, map_mul, map_pow]
+      simp only [map_add (f := _), map_mul, map_pow]
       rw [← hn', ← ht, ← hn, hst, hpq]; ring
     rw [e1, e2] at h
-    simp only [map_add, map_mul, map_pow, map_ofNat] at h
+    simp only [map_add (f := _), map_mul, map_pow, map_ofNat] at h
     refine ⟨a + b * algebraMap F _ p, b * algebraMap F _ q, ?_, fun h => (h hd).elim⟩
     linear_combination h
   · obtain ⟨a, b, t', n', ht', hn', h⟩ := GlobalTheory.LocalNormNegOne.main F E cm v θ ⟨t, n, ht, hn, hd⟩
@@ -154,8 +198,8 @@ theorem neg_one_norm_finiteAdele : ∀ (F E : Type) [Field F] [NumberField F] [F
   have h1 := congrArg L ht
   have h2 := congrArg L hn
   have h3 := congrArg Rr hab
-  simp only [map_add, map_mul, map_pow, map_neg, map_one, AlgHom.commutes] at h1 h2 h3
-  rw [map_add, map_mul, hL, hR, hR]
+  simp only [map_add (f := _), map_mul, map_pow, map_neg, map_one, AlgHom.commutes] at h1 h2 h3
+  rw [map_add (f := _), map_mul, hL, hR, hR]
   rw [← h1, ← h2] at h3
   linear_combination h3
 

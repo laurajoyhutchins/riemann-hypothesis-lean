@@ -1,8 +1,59 @@
-import Mathlib
-import ReciprocityTheory.NeutralLocalFields.Duality
-import ReciprocityTheory.GroupCohomology.ImportsAlt
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.QZDefs
-import ReciprocityTheory.ClassFieldTheory.LocalClassField.MemZmultiplesOfAddOrderOf
+module
+
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.QZDefs
+public import ReciprocityTheory.GroupCohomology.CardLenStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ClassFieldTheory.LocalClassField.MemZmultiplesOfAddOrderOf
+public import ReciprocityTheory.GroupCohomology.ConnNatHolds
+public import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
+public import ReciprocityTheory.GroupCohomology.FiniteLevel
+public import ReciprocityTheory.GroupCohomology.LengthKerEqCoker
+import ReciprocityTheory.GroupCohomology.LowHolds
+import ReciprocityTheory.GroupCohomology.PairHomFCoeOfId
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace ReciprocityTheory.DiscreteGroups.LocalClassField
 
@@ -52,19 +103,16 @@ theorem h_rat_subsingleton [CompactSpace G] [T2Space G] [TotallyDisconnectedSpac
   · simpa [nsmul_eq_mul, hk'] using h
   · simp only [nsmul_eq_mul]; field_simp
 
-theorem admissible_int_rat_sequence : admitted (trivMap G (Int.castAddHom ℚ)) (trivMap G (QuotientAddGroup.mk' (Int.castAddHom ℚ).range)) where
-  i_id := rfl
-  p_id := rfl
-  emb := by
-    have hi : Injective (trivMap G (Int.castAddHom ℚ)).u := Int.cast_injective (α := ℚ)
+theorem admissible_int_rat_sequence : admitted (trivMap G (Int.castAddHom ℚ)) (trivMap G (QuotientAddGroup.mk' (Int.castAddHom ℚ).range)) := by
+  refine ⟨rfl, rfl, ?_, ?_, ?_⟩
+  · have hi : Injective (trivMap G (Int.castAddHom ℚ)).u := Int.cast_injective (α := ℚ)
     exact (Topology.IsOpenEmbedding.of_continuous_injective_isOpenMap continuous_of_discreteTopology hi
       fun _ _ => isOpen_discrete _).isEmbedding
-  exact := by
-    intro (y : ℚ)
+  · intro (y : ℚ)
     show (QuotientAddGroup.mk y : QZ) = 0 ↔ y ∈ Set.range (Int.castAddHom ℚ)
     rw [QuotientAddGroup.eq_zero_iff]; rfl
-  sec := ⟨Function.surjInv (QuotientAddGroup.mk'_surjective (Int.castAddHom ℚ).range),
-    continuous_of_discreteTopology, Function.surjInv_eq _⟩
+  · exact ⟨Function.surjInv (QuotientAddGroup.mk'_surjective (Int.castAddHom ℚ).range),
+      continuous_of_discreteTopology, Function.surjInv_eq _⟩
 
 theorem conn_int_rat_bijective [CompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
     (δ : ∀ n, (trivRep G QZ).H n →ₗ[ℤ] (trivRep G ℤ).H (n + 1))

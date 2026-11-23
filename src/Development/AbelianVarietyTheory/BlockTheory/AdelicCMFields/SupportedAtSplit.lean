@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.Hat1
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -20,67 +62,19 @@ def evalAt (v : HeightOneSpectrum (𝓞 F)) : FiniteAdeleRing (𝓞 F) F →ₐ[
   map_add' _ _ := rfl
   commutes' _ := rfl
 
-variable (E) in
 
+variable (E) in
 def loc (v : HeightOneSpectrum (𝓞 F)) : RA F E →ₐ[F] v.adicCompletion F ⊗[F] E :=
   Algebra.TensorProduct.map (evalAt v) (AlgHom.id F E)
 
-variable (F) in
 
-def ratM {n : ℕ} (γ : Matrix (Fin n) (Fin n) E) : Matrix (Fin n) (Fin n) (RA F E) :=
-  γ.map fun e => (1 : FiniteAdeleRing (𝓞 F) F) ⊗ₜ e
-
-def IsUnitaryA (c : E ≃ₐ[F] E) {n : ℕ} (G : Matrix (Fin n) (Fin n) E)
-    (g : Matrix (Fin n) (Fin n) (RA F E)) : Prop :=
-  ∀ x y : Fin n → RA F E, hermA c G (g.mulVec x) (g.mulVec y) = hermA c G x y
 
 variable (E) in
-
 def IsSplitPlace (v : HeightOneSpectrum (𝓞 F)) : Prop :=
   ∃ w w' : Ideal (𝓞 E), w ≠ w' ∧ w.IsPrime ∧ w'.IsPrime ∧
     w.comap (algebraMap (𝓞 F) (𝓞 E)) = v.asIdeal ∧ w'.comap (algebraMap (𝓞 F) (𝓞 E)) = v.asIdeal
 
-def SupportedAtSplit (N : ℕ) {n : ℕ} (h : Matrix (Fin n) (Fin n) (RA F E)) : Prop :=
-  ∃ T : Finset (HeightOneSpectrum (𝓞 F)),
-    (∀ v ∈ T, IsSplitPlace E v ∧ (N : 𝓞 F) ∉ v.asIdeal) ∧ ∀ v ∉ T, h.map (loc E v) = 1
-
-def Stabilises {n : ℕ} (L : Set (Fin n → E)) (k : Matrix (Fin n) (Fin n) (RA F E)) : Prop :=
-  k.mulVec '' (hat F L : Set (Fin n → RA F E)) = hat F L
-
-def CongOneAt (N D : ℕ) {n : ℕ} (L : Set (Fin n → E)) (k : Matrix (Fin n) (Fin n) (RA F E)) : Prop :=
-  ∀ v : HeightOneSpectrum (𝓞 F), (N : 𝓞 F) ∈ v.asIdeal →
-    ∀ x ∈ hat F L, ∃ y ∈ hat F L, ∀ i, loc E v (k.mulVec x i - x i) = loc E v ((D • y) i)
-
-def InLevel (c : E ≃ₐ[F] E) {n : ℕ} (G : Matrix (Fin n) (Fin n) E) (L : Set (Fin n → E)) (N D : ℕ)
-    (k : Matrix (Fin n) (Fin n) (RA F E)) : Prop :=
-  IsUnitaryA c G k ∧ Stabilises L k ∧ CongOneAt N D L k
-
-def HasSplitRepresentatives (c : E ≃ₐ[F] E) {n : ℕ} (G : Matrix (Fin n) (Fin n) E)
-    (L : Set (Fin n → E)) (N D : ℕ) : Prop :=
-  ∀ g : Matrix (Fin n) (Fin n) (RA F E), IsUnitaryA c G g →
-    ∃ (γ : Matrix (Fin n) (Fin n) E) (h k : Matrix (Fin n) (Fin n) (RA F E)),
-      IsUnitaryA c G (ratM F γ) ∧ (IsUnitaryA c G h ∧ SupportedAtSplit N h) ∧ InLevel c G L N D k ∧
-        g = ratM F γ * h * k
-
 end Notions
-
-def SplitRepresentatives : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    (c : E ≃ₐ[F] E), Module.finrank F E = 2 → c ≠ 1 →
-    ∀ (n : ℕ), 2 ≤ n → ∀ G : Matrix (Fin n) (Fin n) E, (∀ a b, G b a = c (G a b)) → G.det ≠ 0 →
-    ∀ L : Submodule (𝓞 E) (Fin n → E), L.FG → Submodule.span E (L : Set (Fin n → E)) = ⊤ →
-    ∀ N D : ℕ, N ≠ 0 → D ≠ 0 → HasSplitRepresentatives c G (L : Set (Fin n → E)) N D
-
-def SplitRepresentativesCM : Prop :=
-  ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
-    [IsTotallyReal F] [IsTotallyComplex E]
-    (c : E ≃ₐ[F] E), Module.finrank F E = 2 → c ≠ 1 →
-    ∀ (n : ℕ), 2 ≤ n → ∀ G : Matrix (Fin n) (Fin n) E, (∀ a b, G b a = c (G a b)) → G.det ≠ 0 →
-    ∀ L : Submodule (𝓞 E) (Fin n → E), L.FG → Submodule.span E (L : Set (Fin n → E)) = ⊤ →
-    ∀ N D : ℕ, N ≠ 0 → D ≠ 0 → HasSplitRepresentatives c G (L : Set (Fin n → E)) N D
-
-theorem SplitRepresentatives.cm (H : SplitRepresentatives) : SplitRepresentativesCM :=
-  fun F E _ _ _ _ _ _ _ => H F E
 
 section Basic₂
 

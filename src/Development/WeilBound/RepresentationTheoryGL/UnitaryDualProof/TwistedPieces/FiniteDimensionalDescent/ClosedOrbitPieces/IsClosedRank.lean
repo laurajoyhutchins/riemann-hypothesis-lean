@@ -1,4 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.ClosedOrbitPieces.PieceTop
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.ClosedOrbitPieces.PieceTop
+import GroundTheory.AutomorphicForms.GLnLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Topology.Algebra.Polynomial
+
+@[expose] public section
 
 noncomputable section
 
@@ -36,7 +86,7 @@ theorem isClosed_rank {X : Type} [TopologicalSpace X] {F : Set X} (hF : IsClosed
     IsClosed {x | x ∈ F ∧ (f x).rank = r} := by
   apply isClosed_of_closure_subset
   intro x hx
-  have hxF : x ∈ F := hF.closure_subset (closure_mono (fun y hy => hy.1) hx)
+  have hxF : x ∈ F := hF.closure_subset (closure_mono (by exact fun y hy => hy.1) hx)
   obtain ⟨U, hU, hUe⟩ := rank_eq_near (hi x hxF)
   obtain ⟨y, hyU, hyF, hyr⟩ := mem_closure_iff_nhds.1 hx _ (hf.continuousAt.preimage_mem_nhds hU)
   exact ⟨hxF, (hUe _ hyU (hi y hyF)).symm.trans hyr⟩
@@ -65,7 +115,7 @@ theorem pe_conj {Z : Subalgebra k (Matrix (Fin N) (Fin N) k)} {d : ℕ} (c : Fin
 theorem aeval_conj (g : GL (Fin N) k) (x : Matrix (Fin N) (Fin N) k) (χ : k[X]) :
     aeval (g.val * x * g⁻¹.val) χ = g.val * aeval x χ * g⁻¹.val := by
   induction χ using Polynomial.induction_on' with
-  | add p r hp hr => simp only [map_add, hp, hr, mul_add, add_mul]
+  | add p r hp hr => simp only [map_add (f := _), hp, hr, mul_add, add_mul]
   | monomial n a =>
     simp only [aeval_monomial, Units.conj_pow, ← Algebra.smul_def, mul_smul_comm, smul_mul_assoc]
 
@@ -80,7 +130,7 @@ theorem pieceTop : PieceTop k := by
     (isClosed_Bz Z).inter (isClosed_eq (Polynomial.continuous_aeval χ) continuous_const)
   have hft : ∀ t : Fin D.m, Continuous fun x : Matrix (Fin N) (Fin N) k =>
       ∑ j : Fin D.r, D.κ t j • pe (D.a j) x :=
-    fun t => continuous_finset_sum _
+    fun t => continuous_finsetSum _
       (fun j _ => (continuous_const_smul (D.κ t j)).comp (continuous_pe (D.a j)))
   have hidem : ∀ t : Fin D.m, ∀ x ∈ {x : Matrix (Fin N) (Fin N) k | x ∈ Bz Z ∧ aeval x χ = 0},
       IsIdempotentElem (∑ j : Fin D.r, D.κ t j • pe (D.a j) x) :=

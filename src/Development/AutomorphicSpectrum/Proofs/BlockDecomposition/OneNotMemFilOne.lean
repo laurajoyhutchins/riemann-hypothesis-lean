@@ -1,9 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.HeckeLAdicCharacterDeRham
-import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.DeRhamJacobian.IsdRJ
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.EventuallyClosedOfDictClosed
-import Development.WeilBound.CoreStatements.CrystallinePeriodRings.LocTied6
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitDetEmbMat
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsUnitDetEmbMat
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,7 +85,7 @@ theorem ev_actVdR (hact : ∀ g x, PD.actdR g (algebraMap Om BdR x) = algebraMap
     ev σ (actVdR PD ρ g z) = algebraMap Om BdR (σ (χ g : LL)) * PD.actdR g (ev (tw act g σ) z) := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy, mul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, mul_add]
   | tmul v b =>
     have h1 : actVdR PD ρ g (v ⊗ₜ[Qp] b) = (ρ g v) ⊗ₜ[Qp] (PD.actdR g b) := rfl
     rw [h1, ev_tmul, ev_tmul, hρ, map_mul, hact]
@@ -52,7 +96,7 @@ theorem ev_mulVdR (c : K) (σ : LL →ₐ[Qp] Om)
     ev σ (mulVdR (K := K) (BdR := BdR) (V := Fin 1 → LL) (LL := LL) c z) = algebraMap K BdR c * ev σ z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add x y hx hy => simp only [map_add, hx, hy, mul_add]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy, mul_add]
   | tmul v b =>
     have h1 : mulVdR (K := K) (BdR := BdR) (V := Fin 1 → LL) (LL := LL) c (v ⊗ₜ[Qp] b) =
       v ⊗ₜ[Qp] (algebraMap K BdR c * b) := rfl
@@ -85,7 +129,8 @@ theorem mem_filV_coord (hOm : ∀ x : Om, algebraMap Om BdR x ∈ PD.Fil 0) (a :
   · rintro ⟨y, rfl⟩ σ
     induction y using TensorProduct.induction_on with
     | zero => simp
-    | add x y hx hy => rw [map_add, map_add]; exact Submodule.add_mem _ hx hy
+    | add x y hx hy =>
+      simpa only [map_add] using Submodule.add_mem (PD.Fil a) hx hy
     | tmul v c =>
       have h1 : AlgebraTensorModule.map (LinearMap.id : (Fin 1 → LL) →ₗ[LL] _)
         ((PD.Fil a).restrictScalars Qp).subtype (v ⊗ₜ[Qp] c) = v ⊗ₜ[Qp] (c : BdR) := rfl

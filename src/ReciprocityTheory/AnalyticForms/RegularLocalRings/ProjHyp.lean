@@ -1,10 +1,62 @@
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjDehom
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.LogResStC
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinTypeQE
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypA
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypStalk
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypB
-import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypC
+module
+
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjDehom
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.FinTypeQE
+public import Mathlib.AlgebraicGeometry.Noetherian
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypA
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypB
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypC
+public import ReciprocityTheory.AnalyticForms.RegularLocalRings.ProjHypStalk
+
+@[expose] public section
 
 namespace ReciprocityTheory.AnForm.R
 
@@ -83,10 +135,11 @@ theorem mem_projB_iff {P D : Ideal (MvPolynomial (Σ k, ι k) ℂ)} (hP : IsMult
       rw [hsec, away_eq_mk_of_val hP p _ hhom _ (val_polyToAway_mul_pow hP p ha)]
       exact (evaluation_awayToSection_eq_zero_iff _ _ x hx _).mpr (hx' ⟨_, hrn, rfl⟩)
     | zero => simp
-    | add f g _ _ h1 h2 => simp only [map_add, h1, h2, add_zero]
+    | add f g _ _ h1 h2 => simp only [map_add (f := _), h1, h2, add_zero]
     | smul a f _ h1 => simp only [smul_eq_mul, map_mul, h1, mul_zero]
   · intro h g hg
     obtain ⟨g, hg, rfl⟩ := hg
+
     rw [← sum_homogeneousComponent g, map_sum]
     show _ ∈ (ProjectiveSpectrum.asHomogeneousIdeal (𝒜 := segreGrading P) x).toIdeal
     refine Ideal.sum_mem _ fun d _ => ?_

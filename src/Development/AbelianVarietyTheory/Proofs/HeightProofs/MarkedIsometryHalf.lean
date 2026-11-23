@@ -1,18 +1,68 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.HeightFunctions.XiValIffXiAt
-import Formalism.LocalToGlobal.ProjectiveLattices.PerFrLact
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevelActionShortThetaSeriesRootOfUnityMul
+module
+
+public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.CoeSelfDualLatticeInFrameCoordinatesEq
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FormPlus
+public import Formalism.LocalToGlobal.ProjectiveLattices.HalfOneAddSqrtNegIsIntegral
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThClassPins
+public import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsAdelicElementOfMarkedComponentLattice
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FrameFreeFiniteOrderRuleConstPeriodSpace
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevelActionShortThetaSeriesRootOfUnityMul
 import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MarkedLatticeIsometryDoubleCosetMove
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsAdelicElementOfMarkedComponentLattice
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FrameFreeFiniteOrderRuleConstPeriodSpace
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.WeightZeroSectionValueConjPoint
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameMulTriangularOrthonormal
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnitFrameEqOrthonormalMulTriangular
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplit
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PointEqIffIsometryClosed
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ComponentEqOfMatchedLatticesMarkings
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.AllUniformizationLawsHold
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ThetaUniformisationComplexAbelianVariety
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplit
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryLatticeRationalTranslateInvarianceStatement
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ArchimedeanMatrixUnitaryContinuousMultiplicativeStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsComplexFrobeniusPoints
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameMulTriangularOrthonormal
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FrameUniformEmbeddingSecond
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsPeriodCompIsometry
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LevelAutomorphismPeriodFamily
 import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RealAdelesCmFieldEquivComplexCmType
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ArchimedeanMatrixUnitaryContinuousMultiplicativeStatement
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryLatticeRationalTranslateInvarianceStatement
-import Development.AbelianVarietyTheory.Counterexamples.LevelGroupExamples.OrthonormalBaseFrameNeg
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RelabelEmbeddingsGoodBijectiveConjCompat
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnitFrameEqOrthonormalMulTriangular
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.WeightZeroSectionValueConjPoint
+public import Formalism.LocalToGlobal.ProjectiveLattices.PerFrLact
+public import Formalism.LocalToGlobal.ProjectiveLattices.UnifDom
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,6 +80,7 @@ theorem perFr_of_unitary {E : Type} [Field E] [NumberField E] [IsCMField E] {r :
     perFr X' x' (γ.1 *ᵥ v) τ i = perFr X x v τ i := by
   have hemb : ∀ τ' : E →+* ℂ, Data.emb τ' (γ.1 *ᵥ v) = (γ.1.map τ') *ᵥ Data.emb τ' v := fun τ' => by
     funext a
+
     simp [Data.emb, Matrix.mulVec, dotProduct, map_sum]
   have hdetγ : ∀ τ' : E →+* ℂ, IsUnit ((γ.1.map τ').det) := fun τ' => by
     have hd : (γ.1.map τ').det = τ' γ.1.det := (RingHom.map_det τ' _).symm
@@ -38,14 +89,14 @@ theorem perFr_of_unitary {E : Type} [Field E] [NumberField E] [IsCMField E] {r :
   unfold perFr
   rw [hp, hG]
   by_cases h1 : τ ∈ X.Ψ
-  · rw [dif_pos h1, dif_pos ((hΨ τ).2 h1)]
+  · rw [dite_eq_left h1, dite_eq_left ((hΨ τ).2 h1)]
     split_ifs with h2
     · rw [hm τ h1, hemb, Matrix.mul_inv_rev, ← Matrix.mulVec_mulVec,
         Matrix.mulVec_mulVec (Data.emb τ v) (γ.1.map τ)⁻¹, Matrix.nonsing_inv_mul _ (hdetγ τ), Matrix.one_mulVec]
     · rfl
-  rw [dif_neg h1, dif_neg (mt (hΨ τ).1 h1)]
+  rw [dite_eq_right h1, dite_eq_right (mt (hΨ τ).1 h1)]
   by_cases h3 : conjEmb τ ∈ X.Ψ
-  · rw [dif_pos h3, dif_pos ((hΨ _).2 h3)]
+  · rw [dite_eq_left h3, dite_eq_left ((hΨ _).2 h3)]
     split_ifs with h4
     · have hu : (γ.1.map (conjEmb τ))ᵀ * X.Gm.map (conjEmb τ) *
           (γ.1.map (conjEmb τ)).map (starRingEnd ℂ) = X.Gm.map (conjEmb τ) := by
@@ -65,7 +116,7 @@ theorem perFr_of_unitary {E : Type} [Field E] [NumberField E] [IsCMField E] {r :
         fun A c Y => by rw [Matrix.dotProduct_mulVec c Aᵀ Y, Matrix.vecMul_transpose]
       rw [hm _ h3, hcol, hemb, hermC_eq, hermC_eq, star_mulVec', e1, Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, hu]
     · rfl
-  rw [dif_neg h3, dif_neg (mt (hΨ _).1 h3)]
+  rw [dite_eq_right h3, dite_eq_right (mt (hΨ _).1 h3)]
 
 theorem point_eq_of_isometry {E : Type} [Field E] [NumberField E] [IsCMField E] {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E}
     {Dw : Datum H} {l : Geo.Tor.Level H} {Xo : Moduli Dw l} {σ' : KA l →+* ℂ} {g : ℕ}
@@ -87,7 +138,7 @@ theorem point_eq_of_isometry {E : Type} [Field E] [NumberField E] [IsCMField E] 
     ⟨gam, LinearEquiv.refl ℂ _, hEF, hM,
       fun a => ⟨gam (F.t _ a) - F.t _ a, by rw [hA, one_smul, add_sub_cancel]⟩, h⟩
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem marked_isometry_half {D : D7} (V : HSp D) {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host D.host.E} {Dw : Datum H}
     (l : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Level H) (io : Dw.La →ₗ[𝓞 D.host.E] (Fin V.rank → D.host.E))
@@ -150,7 +201,7 @@ theorem marked_isometry_half {D : D7} (V : HSp D) {H : ReciprocityTheory.ChartRe
         funext i
         exact TensorProduct.tmul_sub _ _ _)
     refine ⟨φ'.symm ⟨w, (hmem' w).2 (hw ▸ hz)⟩, φ'.injective (Subtype.ext ?_)⟩
-    rw [hgam, sub_eq_iff_eq_add'.1 e', map_add, map_nsmul, LinearEquiv.apply_symm_apply]
+    rw [hgam, sub_eq_iff_eq_add'.1 e', map_add (f := _), map_nsmul, LinearEquiv.apply_symm_apply]
     rfl
 
 section Dict
@@ -164,7 +215,7 @@ variable {D : D7} (V : HSp D) {H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.
   (th : ∀ k, (U.X k).Ψ → (Ainf D.host.F ⊗[D.host.F] D.host.E →+* ℂ))
   (x₀ : (D.host.E →+* ℂ) → Matrix (Fin V.rank) (Fin V.rank) ℂ)
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem exists_dict_over (hσ : GoodEmb c σ) (hA : l.A = 1) (hpq : 1 ≤ Dw.p + Dw.q)
     (hU : IsUnf U) (hW : ∀ k, ModelW V rfl (U.X k)) (hD : DictLat U V rfl dict io e F ik φ th x₀)
@@ -227,7 +278,7 @@ theorem exists_dict_over (hσ : GoodEmb c σ) (hA : l.A = 1) (hpq : 1 ≤ Dw.p +
     (hAr τ).2.2.1 f hf, hδa τ _ (hθ τ), hau τ ((hmem k τ).1 h), (hu τ h).2, Matrix.mul_one, ← Matrix.mul_assoc]
   rfl
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem value_ratio (hσ : σ = c.F.val.toRingHom) (hA : l.A = 1) (hpq : 1 ≤ Dw.p + Dw.q)
     (hU : IsUnf U) (hW : ∀ k, ModelW V rfl (U.X k)) (hD : DictLat U V rfl dict io e F ik φ th x₀)

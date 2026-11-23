@@ -1,7 +1,58 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.IrreducibleParity.MemCOfInt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.WCard
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.QuadraticTorusFixedVerticesFinite
-import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsLatticeIffFixedPointQuadraticTorus
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.IrreducibleParity.MemCOfInt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.IsLatticeIffFixedPointQuadraticTorus
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.BuildingsResidueChars.QuadraticTorusFixedVerticesFinite
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.LocalHermitianForms.LocalOrbitCounts.WCard
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -88,7 +139,7 @@ theorem unit_of_sq (L : IsLoc O Δ) {s : Kˣ} {ε : Oˣ} (h : 1 = algebraMap O K
   exact ⟨Units.mkOfMulEqOne _ _ h2, hr⟩
 
 theorem cls_key (L : IsLoc O Δ) {t t' : Kˣ} {S S' : Set (Etau K τ)} (h : S ∈ Gs O τ t 1) (h' : S' ∈ Gs O τ t' 1)
-    (e : cls τ S = cls τ S') : ∃ (s : Kˣ) (ε : Oˣ), S = ml (sc τ s) S' ∧ (t' : K) = algebraMap O K ε * (s : K) ^ 2 * t := by
+    (e : cls τ S = cls τ S') : ∃ (s : Kˣ) (ε : Oˣ), S = ml (sc (τ := τ) s) S' ∧ (t' : K) = algebraMap O K ε * (s : K) ^ 2 * t := by
   obtain ⟨s, hs⟩ := cls_eq e
   obtain ⟨h, c, -, hg⟩ := h
   have h1 : IsFixP O τ (t' / (s : K) ^ 2) S := by
@@ -120,7 +171,7 @@ theorem fv_card (L : IsLoc O Δ) (hτ : τ ^ 2 - 4 ≠ 0) (t p : Kˣ) (hp : ¬ E
   have aux : ∀ (t : Kˣ) (t' : K) (S : Set (Etau K τ)), IsFixP O τ t' S → (∃ c ∈ Cint O τ, Gen O τ S c) →
       EvenVal O (t' / t) → cls τ S ∈ cls τ '' Gs O τ t 1 := by
     rintro t t' S h ⟨c, hc, hg⟩ ⟨ε, s, hs, e⟩
-    refine ⟨ml (sc τ (Units.mk0 s hs)) S, ⟨fix_ml _ ?_, _, mul_mem (sc_mem _) hc, by rw [one_mul]; exact gen_ml hg _⟩,
+    refine ⟨ml (sc (τ := τ) (Units.mk0 s hs)) S, ⟨fix_ml _ ?_, _, mul_mem (sc_mem _) hc, by rw [one_mul]; exact gen_ml hg _⟩,
       cls_sc _ _⟩
     convert fix_unit ε⁻¹ h using 1
     rw [div_eq_iff t.ne_zero] at e
@@ -160,7 +211,7 @@ theorem vcount_eq (L : IsLoc O Δ) (hτ : τ ^ 2 - 4 ≠ 0) : vcount O τ ω = (
     refine ⟨z, ?_, rfl⟩
     rw [hs] at e
     obtain ⟨s, e⟩ := cls_eq e
-    have h1 := gen_ml hg' (sc τ s)
+    have h1 := gen_ml hg' (sc (τ := τ) s)
     rw [← e] at h1
     have := mul_mem (mul_mem (mul_mem (sc_mem s) hc') (gen_uniq h1 (gen_ml hg z))) (inv_mem hc)
     rwa [mul_inv_cancel_left, mul_inv_cancel_right] at this
@@ -180,7 +231,7 @@ theorem pcount_eq (L : IsLoc O Δ) (hτ : τ ^ 2 - 4 ≠ 0) (t : Kˣ) (a b : (Et
     rw [hs, mul_left_comm]; exact gen_ml hg _
   have hE : ∀ a c z S, c ∈ Cint O τ → IsFixP O τ t S → Gen O τ S (a * c * z ^ 2) → z⁻¹ • S ∈ Gs O τ t a := by
     intro a c z S hc h hg
-    refine ⟨hf _ S h, c * sc τ (nU z), mul_mem hc (sc_mem _), ?_⟩
+    refine ⟨hf _ S h, c * sc (τ := τ) (nU z), mul_mem hc (sc_mem _), ?_⟩
     rw [hs]
     convert gen_ml hg (qU z⁻¹) using 1
     rw [qU, inv_inv]

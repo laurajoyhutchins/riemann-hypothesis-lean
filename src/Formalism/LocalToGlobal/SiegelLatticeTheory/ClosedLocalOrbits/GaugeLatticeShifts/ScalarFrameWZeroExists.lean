@@ -1,6 +1,55 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ProductExactness
-import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.UnitaryIsometries
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.UnitaryIsometries
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.ProductExactness
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.InHHDef
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -45,6 +94,7 @@ theorem dual_exists {m : ℕ} (V : Fin m → Fin n → ℂ) (hV : LinearIndepend
     simp only [LinearMap.comp_apply, Submodule.subtype_apply, Finsupp.lapply_apply] at h1
     rw [hV.repr_eq_single i _ rfl, Finsupp.single_apply] at h1
     rw [← h1]
+
     conv_rhs => rw [pi_eq_sum_univ (V i), map_sum]
     simp only [map_smul, smul_eq_mul]
   choose w hw using key
@@ -52,6 +102,7 @@ theorem dual_exists {m : ℕ} (V : Fin m → Fin n → ℂ) (hV : LinearIndepend
   rw [hJ_eq_dot, Matrix.mulVec_mulVec, Jm_mul_self, Matrix.one_mulVec]
   have h := hw j i
   calc star (V i) ⬝ᵥ star (w j) = conj (∑ k, V i k * w j k) := by
+
         simp only [dotProduct, Pi.star_apply, map_sum, map_mul]
         rfl
     _ = _ := by rw [h]; split_ifs <;> simp
@@ -88,7 +139,7 @@ theorem partner_exists (e : Fin r → Fin n → ℂ) (z : Fin n → ℂ) (he : L
   classical
   have hz : z ∉ Submodule.span ℂ (Set.range e) := not_mem_span_of_orth ε e z hez hzz
   have hV : LinearIndependent ℂ (Fin.snoc e z : Fin (r + 1) → Fin n → ℂ) :=
-    linearIndependent_fin_snoc.2 ⟨he, hz⟩
+    linearIndependent_finSnoc.2 ⟨he, hz⟩
   obtain ⟨q, hq⟩ := dual_exists ε (Fin.snoc e z : Fin (r + 1) → Fin n → ℂ) hV
   have hEq : ∀ a b, hJ ε (e a) (q (Fin.castSucc b)) = if a = b then 1 else 0 := by
     intro a b

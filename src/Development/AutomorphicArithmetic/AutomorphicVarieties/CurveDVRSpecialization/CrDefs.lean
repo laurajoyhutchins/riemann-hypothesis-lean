@@ -1,5 +1,41 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.Inertia
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CurveDVRSpecialization.EveryPointSatisfiesFrameCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -24,12 +60,10 @@ structure Ad (k : GalLink η Ψ σ g₁ B M L Φ) (s : W.HidaSetting l L Ω) whe
   v0Ψ : ∀ g ∈ Dec (F := L) (s.A s.v0), Φ.Ψ (k.p0 g) = 1
   v0ω : ∃ g ∈ Dec (F := L) (s.A s.v0), PadicInt.toZMod ((cycZ L Ω l g : ℤ_[l]ˣ) : ℤ_[l]) ≠ 1
 
-variable (Ω L) in
 
+variable (Ω L) in
 def toUpl : G (W.Lp L) Ω →* upl Ω L :=
   (galEmb ℚ (W.Lp L) Ω).codRestrict _ fun g x hx => g.commutes ⟨x, hx⟩
-
-theorem toUpl_coe (g : G (W.Lp L) Ω) : (toUpl Ω L g).1 = galEmb ℚ (W.Lp L) Ω g := rfl
 
 theorem toUpl_surj : Function.Surjective (toUpl Ω L) := by
   rintro ⟨s, hs⟩
@@ -100,7 +134,7 @@ theorem natCast_place {A : ValuationSubring Ω} {v : W.Plc E} (h : IsPlaceOver A
     A.valuation (m : Ω) < 1 ↔ ((m : ℕ) : 𝓞 E) ∈ v.asIdeal := by
   unfold IsPlaceOver at h
   rw [← h (m : 𝓞 E)]
-  simp
+  simp only [map_natCast]
 
 end
 
@@ -175,10 +209,6 @@ def CrResid : Prop :=
     (∀ g, κ g * κ (G.conj g) = G.eps O O g ^ (1 - (n : ℤ))) →
     ∃ r : W.Resid G O n, (∀ i g, r.chib i g = F.Ψ (π g) ^ Fr.w n i * W.pushCh (residue O) κ g) ∧
       ∀ v i g, r.psib v i g = r.chib i (G.φ v g)
-
-def CrOk : Prop :=
-  ∀ {l : ℕ} [Fact l.Prime] {O : Type} [CommRing O] [IsLocalRing O] [Algebra ℤ_[l] O] [CharP (ResidueField O) l]
-    {G : W.GFrame l} {n : ℕ} (r : W.Resid G O n), (∀ v i g, r.psib v i g = r.chib i (G.φ v g)) → r.Ok
 
 end UpperTheory.V.Pr
 

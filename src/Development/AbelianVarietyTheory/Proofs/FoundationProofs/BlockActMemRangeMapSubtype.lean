@@ -1,13 +1,53 @@
-import Mathlib
-import Formalism.PairingDivisors.PairingDivisorProofs.ValAdd
+module
+
+public import Formalism.LocalToGlobal.Divisibility.CoefMod
+public import Formalism.QuotientMetricDivisors.Statement
+public import Formalism.LocalToGlobal.Divisibility.CoefModLemmas
+public import Formalism.PairingDivisors.PairingDivisorProofs.ValAdd
+public import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ValBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.IsSelfDualE
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.PairingNondegenerateHolds
-import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
-import Formalism.GradedWeylDivisibility.StatementE
-import Formalism.HarderNarasimhan.ShiftInvariance
-import Formalism.QuotientMetricDivisors.ReductionLemmaZero
-import Formalism.QuotientMetricDivisors.ProdFormula
 import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.RealCubicMeans.LeafBounds.MeanMaxLeaf.LeafMMFree
+import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MvPolynomial Formalism.BasicNotions Formalism.L2.DIV Formalism.DivisionValues GlobalTheory.TestLat Formalism.L2.Indef.Tree.ArchimedeanLeafBounds.Cuts
 open scoped Matrix ComplexOrder
 
@@ -58,11 +98,11 @@ section
 variable {K : Type} [Field K] (R : Subring K)
 
 theorem mem_range_map_subtype_iff {σ : Type} (P : MvPolynomial σ K) :
-    P ∈ (MvPolynomial.map (σ := σ) R.subtype).range ↔ ∀ m, coeff m P ∈ R := by
+    P ∈ (MvPolynomial.map (σ := σ) R.subtype).range ↔ ∀ m, AddMonoidAlgebra.coeff P m ∈ R := by
   constructor
   · rintro ⟨Q, rfl⟩ m
     rw [coeff_map]
-    exact (coeff m Q).2
+    exact (AddMonoidAlgebra.coeff Q m).2
   · intro h
     rw [P.as_sum]
     exact sum_mem fun m _ => ⟨monomial m ⟨_, h m⟩, by rw [map_monomial]; rfl⟩
@@ -84,7 +124,7 @@ theorem blockAct_mem_range_map_subtype {ι : Type} [Fintype ι] {n : ℕ}
     rw [map_C, algHom_C]
     exact hC a.2
   | add p q hp hq =>
-    rw [map_add (MvPolynomial.map R.subtype), map_add]
+    rw [map_add (MvPolynomial.map R.subtype), map_add (f := _)]
     exact add_mem hp hq
   | mul_X p v hp =>
     rw [map_mul (MvPolynomial.map R.subtype), map_X, map_mul, blockAct_X]
@@ -92,7 +132,7 @@ theorem blockAct_mem_range_map_subtype {ι : Type} [Fintype ι] {n : ℕ}
 
 end
 
-theorem vw_fockS_blockAct_nonneg : ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (ι : Type) [Fintype ι] (n : ℕ) (w : HeightOneSpectrum (𝓞 K)) (F F' : Pol K ι n) (U : ι → Matrix (Fin n) (Fin n) K), (∀ mo, 0 ≤ vw (conjPl w) (coeff mo F)) → (∀ mo, 0 ≤ vw w (coeff mo F')) → (∀ τ a b, 0 ≤ vw w (U τ a b)) → 0 ≤ vw w (fockS F (Formalism.GradedWeylDivisibility.blockAct K U F')) := by
+theorem vw_fockS_blockAct_nonneg : ∀ (K : Type) [Field K] [NumberField K] [StarRing K] (ι : Type) [Fintype ι] (n : ℕ) (w : HeightOneSpectrum (𝓞 K)) (F F' : Pol K ι n) (U : ι → Matrix (Fin n) (Fin n) K), (∀ mo, 0 ≤ vw (conjPl w) (AddMonoidAlgebra.coeff F mo)) → (∀ mo, 0 ≤ vw w (AddMonoidAlgebra.coeff F' mo)) → (∀ τ a b, 0 ≤ vw w (U τ a b)) → 0 ≤ vw w (fockS F (Formalism.GradedWeylDivisibility.blockAct K U F')) := by
   intro K _ _ _ ι _ n w F F' U hF hF' hU
   have h := (mem_range_map_subtype_iff (nonnegRing_vw w) _).1
     (blockAct_mem_range_map_subtype (nonnegRing_vw w) U hU
@@ -100,7 +140,7 @@ theorem vw_fockS_blockAct_nonneg : ∀ (K : Type) [Field K] [NumberField K] [Sta
   change fockS F (Formalism.GradedWeylDivisibility.blockAct K U F') ∈ nonnegRing_vw w
   unfold fockS
   refine sum_mem fun m _ => mul_mem (mul_mem ?_ (h m)) (natCast_mem _ _)
-  change 0 ≤ vw w (star (coeff m F))
+  change 0 ≤ vw w (star (AddMonoidAlgebra.coeff F m))
   rw [ValuationRepresentative.vw_star]
   exact hF m
 

@@ -1,5 +1,47 @@
-import Formalism.LocalRingCardinality.SpanPowerMembership.GatAdd
-import Formalism.SharpRestriction.InertJacobiLevels.ExtraGat
+module
+
+public import Formalism.LocalRingCardinality.SpanPowerMembership.GatTies
+public import Formalism.SharpRestriction.InertJacobiLevels.ExtraGat
+public import Formalism.LocalRingCardinality.DataGatTies
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Formalism.SharpRestriction.GrowthBounds.IsResidueClassZero
+
+@[expose] public section
 
 noncomputable section
 
@@ -60,68 +102,10 @@ def gatTiesC : GatTies (withGatC D h0 rOf eOf bs) where
     @position_succ_eq_mul_frobenius _ D.host _ (served_of h) (bs u (D.what₂.places.resChar w)) _ D.eTau v s P hP hL σ hσ
   gat_lam := fun _ _ _ _ _ _ => rfl
 
-theorem withGatC_M (u w h) : ((withGatC D h0 rOf eOf bs).gat u w h).M = ⊥ := gatOfC_M _ _ _ _ _ _
-
-theorem withGatC_e (u w h) : ((withGatC D h0 rOf eOf bs).gat u w h).e = eOf (D.what₂.places.resChar w) := rfl
-
-theorem withGatC_trans (u w h) (c : ((withGatC D h0 rOf eOf bs).gat u w h).comp)
-    (L L' : ((withGatC D h0 rOf eOf bs).gat u w h).P.Tup) (hL : ((withGatC D h0 rOf eOf bs).gat u w h).P.IsLatTup L)
-    (hL' : ((withGatC D h0 rOf eOf bs).gat u w h).P.IsLatTup L') :
-    ∃ γ : (((withGatC D h0 rOf eOf bs).gat u w h).lev c).Γ, L' = (((withGatC D h0 rOf eOf bs).gat u w h).lev c).smul γ L :=
-  levAll_trans _ L L' hL hL'
-
-def withGatC_comp (u w h) : ((withGatC D h0 rOf eOf bs).gat u w h).comp ≃ ((withGatC D h0 rOf eOf bs).mem u).C.cls 0 :=
-  Equiv.refl _
-
-theorem gatTiesC_pos_base (u) (w : D.what₂.places.Pl)
-    (h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w))
-    (hT : Set.InjOn (fun x => (QuotientGroup.mk x : Quo (gPsi (H := D.host) (served_of h))))
-      (bs u (D.what₂.places.resChar w)))
-    {x : ↥(D.R.Psi)} (hx : x ∈ bs u (D.what₂.places.resChar w))
-    (s : Fin (orderOf (gPsi (H := D.host) (served_of h)))) :
-    D.eTau ((gatTiesC D h0 rOf eOf bs).gat_pos u w h ⟨orbIdx (gPsi (served_of h)) x, s⟩) =
-      x * gPsi (served_of h) ^ (s : ℕ) :=
-  (D.eTau.apply_symm_apply _).trans (orbEquiv_idx _ _ hT hx s)
-
 variable (B : D.what₂.Word → ℕ → Set (HH D))
-
-def withGatCB : D7 := withGatC D h0 rOf eOf (fun u p => tau1P D.R.toFrame '' B u p)
-
-def gatTiesCB : GatTies (withGatCB D h0 rOf eOf B) := gatTiesC D h0 rOf eOf (fun u p => tau1P D.R.toFrame '' B u p)
-
-def vOfCB (u : D.what₂.Word) (w : D.what₂.places.Pl)
-    (h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w)) (t0 : HH D) :
-    Fin ((withGatCB D h0 rOf eOf B).gat u w h).P.nV :=
-  orbIdx (gPsi (H := D.host) (served_of h)) (tau1P D.R.toFrame t0)
 
 variable (u : D.what₂.Word) (w : D.what₂.places.Pl)
   (h : GIdx D.host (D.mem u).A.T (D.what₂.places.resChar w))
-
-theorem vOfCB_injOn
-    (hB : ∀ t ∈ B u (D.what₂.places.resChar w), ∀ t' ∈ B u (D.what₂.places.resChar w), ∀ i : ℕ,
-      t' = t + i • hP D (D.what₂.places.resChar w) → t' = t) :
-    Set.InjOn (vOfCB D h0 rOf eOf B u w h) (B u (D.what₂.places.resChar w)) := fun t ht t' ht' e =>
-  tau1P_injective _ (orbIdx_injOn _ _ (injOn_tau1P D (served_of h) _ hB) ⟨t, ht, rfl⟩ ⟨t', ht', rfl⟩ e)
-
-theorem withGatCB_n' (v) :
-    ((withGatCB D h0 rOf eOf B).gat u w h).P.n' v = addOrderOf (hP D (D.what₂.places.resChar w)) :=
-  order_gPsi D (served_of h)
-
-theorem withGatCB_r : ((withGatCB D h0 rOf eOf B).gat u w h).P.r = rOf u (D.what₂.places.resChar w) := rfl
-
-theorem gatTiesCB_pos
-    (hB : ∀ t ∈ B u (D.what₂.places.resChar w), ∀ t' ∈ B u (D.what₂.places.resChar w), ∀ i : ℕ,
-      t' = t + i • hP D (D.what₂.places.resChar w) → t' = t)
-    {t0 : HH D} (ht0 : t0 ∈ B u (D.what₂.places.resChar w))
-    (s : Fin (((withGatCB D h0 rOf eOf B).gat u w h).P.n' (vOfCB D h0 rOf eOf B u w h t0))) :
-    ((D.eTau ((gatTiesCB D h0 rOf eOf B).gat_pos u w h ⟨vOfCB D h0 rOf eOf B u w h t0, s⟩) : D.R.Psi) :
-      D.R.GG) = D.R.tau1 (t0 + s.val • hP D (D.what₂.places.resChar w)) := by
-  have h1 := gatTiesC_pos_base D h0 rOf eOf (fun u p => tau1P D.R.toFrame '' B u p) u w h
-    (injOn_tau1P D (served_of h) _ hB) ⟨t0, ht0, rfl⟩ s
-  exact congrArg (fun x : ↥(D.R.Psi) => (x : D.R.GG))
-    (h1.trans (tau1P_mul_gPsi_pow D (served_of h) t0 s.val))
-
-theorem hP_withGatCB (p : ℕ) : hP (withGatCB D h0 rOf eOf B) p = hP D p := rfl
 
 end Formalism.MainNotions.Inhab
 

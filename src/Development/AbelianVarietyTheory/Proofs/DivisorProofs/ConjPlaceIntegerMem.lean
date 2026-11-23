@@ -1,8 +1,45 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.InvVolConjLevelOne
-import Development.AbelianVarietyTheory.Definitions.Divisors.BplusOfEquivariant
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemGLintOfEntries
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsCompactParahoricLevelAndContainsLifts
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.LatSelfDualOfUnimod
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsGivenStageEqOne
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.CsDual
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ConjugatePlaceIntegrality
 section
@@ -27,7 +64,7 @@ theorem cpt_sg_mem_integers : ∀ {D : D7} (Q : Pl D.host.E) (z : Lev.EAf D),
     cpt Q z ∈ Q.adicCompletionIntegers D.host.E →
       cpt (GlobalTheory.IdemSupport.cP Q) (sg D z) ∈ (GlobalTheory.IdemSupport.cP Q).adicCompletionIntegers D.host.E := by
   intro D Q z hz
-  obtain ⟨e, -, -, h1, h0⟩ := exists_idem (D := D) ({Q} : Set (Pl D.host.E))
+  obtain ⟨e, -, -, h1, h0⟩ := GlobalTheory.StdFrames.exists_idem (D := D) ({Q} : Set (Pl D.host.E))
   have he1 : cpt Q e = 1 := h1 Q rfl
   have hez : e * z ∈ OA D := (mem_OA_iff _).2 fun P => by
     by_cases hP : P = Q
@@ -60,9 +97,6 @@ open scoped TensorProduct nonZeroDivisors ComplexOrder
 open GlobalTheory.FunObj GlobalTheory.ChiGrid GlobalTheory.SplitFlip GlobalTheory.SplitWeil GlobalTheory.StepData GlobalTheory.StdFrames Formalism.L2.Host Formalism.L2.DIV ValuativeRel
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField GlobalTheory.FunObj.borelKw GlobalTheory.FunObj.borelSpaceKw
-
-theorem _root_.GlobalTheory.Adopt.conj_place_integer_mem : ∀ {D : D7} (Q : Pl D.host.E) (z : Lev.EAf D), cpt Q z ∈ Q.adicCompletionIntegers D.host.E → cpt (GlobalTheory.IdemSupport.cP Q) (sg D z) ∈ (GlobalTheory.IdemSupport.cP Q).adicCompletionIntegers D.host.E := by
-  first | exact @ConjugatePlaceIntegrality.GlobalTheory.CompanionTheory.ConjPlaceInt.cpt_sg_mem_integers | exact ConjugatePlaceIntegrality.GlobalTheory.CompanionTheory.ConjPlaceInt.cpt_sg_mem_integers | (intros; apply ConjugatePlaceIntegrality.GlobalTheory.CompanionTheory.ConjPlaceInt.cpt_sg_mem_integers <;> assumption)
 
 end
 end

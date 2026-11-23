@@ -1,6 +1,57 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Uniform
-import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
+module
+
+public import GroundTheory.GlobalFields.TateThesis.AdeleMeasure
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.HasModerateGrowthZero
+public import GroundTheory.AutomorphicForms.AutomorphicFormSpaces.Uniform
+import GroundTheory.AutomorphicForms.ReductionMeasure
+import GroundTheory.GlobalFields.Adele.Topology
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Dynamics.Ergodic.Action.Regular
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Topology Filter Set MeasureTheory
 open scoped NumberField.AdeleRing
@@ -154,8 +205,8 @@ theorem exists_isCompact_superset_unipFundamentalDomain :
   intro X hX p _
   exact ⟨subset_closure (hX p (mem_univ p)).1, (hX p (mem_univ p)).2⟩
 
-variable (r) in
 
+variable (r) in
 def constantTerm (φ : AdelicGLn.AdelicGL K n → ℂ) (g : AdelicGLn.AdelicGL K n) : ℂ :=
   ∫ X in unipFundamentalDomain K n r, φ (unipGL X * g) ∂unipMeasure K n r
 
@@ -201,8 +252,8 @@ theorem constantTerm_rightTranslate (φ : AdelicGLn.AdelicGL K n → ℂ) (h g :
 def IsCuspidal (φ : AdelicGLn.AdelicGL K n → ℂ) : Prop :=
   ∀ r : ℕ, 0 < r → r < n → ∀ g, constantTerm r φ g = 0
 
-variable (K n) in
 
+variable (K n) in
 def cuspForms : Submodule ℂ (AdelicGLn.AdelicGL K n → ℂ) where
   carrier := {φ | IsAutomorphicForm φ ∧ IsCuspidal φ}
   zero_mem' := ⟨isAutomorphicForm_zero, fun r _ _ g => constantTerm_zero g⟩

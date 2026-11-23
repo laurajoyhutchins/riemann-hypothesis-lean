@@ -1,7 +1,55 @@
-import Mathlib
+module
+
+public import Mathlib.Algebra.Module.Lattice.Full
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CycOfPrime
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
-import Development.AbelianVarietyTheory.PublishedTheorems.DiscreteSeriesUnitary₂.MaxMass
-import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.CycOfPrime
+
+@[expose] public section
 
 open NumberField Matrix GlobalTheory.Mass Formalism.HermitianLatticesTheory
 open scoped ENNReal Classical
@@ -65,10 +113,10 @@ theorem encard_mul (I J : Ideal O) (h : IsCoprime I J) :
       obtain ⟨v, rfl⟩ := hg y
       refine ⟨b • u + a • v, Prod.ext ?_ ?_⟩
       · change f (b • u + a • v) = f u
-        rw [map_add, map_smul, map_smul, smul_quot ha, ← smul_quot ha (f u), ← add_smul,
+        rw [map_add (f := _), map_smul, map_smul, smul_quot ha, ← smul_quot ha (f u), ← add_smul,
           add_comm, hab, one_smul]
       · change g (b • u + a • v) = g v
-        rw [map_add, map_smul, map_smul, smul_quot hb, ← smul_quot hb (g v), ← add_smul,
+        rw [map_add (f := _), map_smul, map_smul, smul_quot hb, ← smul_quot hb (g v), ← add_smul,
           add_comm, hab, one_smul]
     · rw [LinearEquiv.ker_comp, LinearMap.ker_prod]
   · rintro ⟨L₁, L₂⟩ ⟨h1, h2⟩ ⟨L₁', L₂'⟩ ⟨h1', h2'⟩ he
@@ -135,14 +183,15 @@ end Abstract
 
 theorem finrank_lattice {K V : Type} [Field K] [NumberField K] [AddCommGroup V] [Module K V]
     [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] (M : Submodule (𝓞 K) V)
-    (hM : Submodule.IsLattice K M) : Module.finrank (𝓞 K) M = Module.finrank K V := by
+    (hM : Submodule.IsFullLattice K M) : Module.finrank (𝓞 K) M = Module.finrank K V := by
+  letI := hM
   have hr : Module.rank (𝓞 K) V = Module.rank K V :=
     (IsLocalization.rank_eq K (nonZeroDivisors (𝓞 K)) le_rfl).symm
   have : Module.rank (𝓞 K) M = Module.rank K V := by
     apply le_antisymm
     · rw [← hr]; exact Submodule.rank_le M
     · obtain ⟨s, hsM, hspan, hli⟩ := exists_linearIndependent K (M : Set V)
-      rw [hM.span_eq_top] at hspan
+      rw [Submodule.IsFullLattice.span_eq_top (A := K) (M := M)] at hspan
       have h1 : Module.rank K V = Cardinal.mk s := by
         rw [← rank_top, ← hspan, rank_span_set hli]
       have h2 : LinearIndependent (𝓞 K) (fun x : s => (⟨x.1, hsM x.2⟩ : M)) := by
@@ -152,8 +201,10 @@ theorem finrank_lattice {K V : Type} [Field K] [NumberField K] [AddCommGroup V] 
       exact h2.cardinal_le_rank
   simp only [Module.finrank, this]
 
-theorem main : ∀ (K V : Type) [Field K] [NumberField K] [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] (M : Submodule (𝓞 K) V), Submodule.IsLattice K M → ∀ (T : ℕ) (s : Finset (Ideal (𝓞 K))), T.Prime → (∀ P ∈ s, P.IsMaximal ∧ Ideal.absNorm P = T) → {L : Submodule (𝓞 K) V | L ≤ M ∧ Nonempty ((↥M ⧸ L.comap M.subtype) ≃ₗ[𝓞 K] (𝓞 K ⧸ ∏ P ∈ s, P))}.encard = (((∑ i ∈ Finset.range (Module.finrank K V), T ^ i) ^ s.card : ℕ) : ℕ∞) := by
+theorem main : ∀ (K V : Type) [Field K] [NumberField K] [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Module (𝓞 K) V] [IsScalarTower (𝓞 K) K V] (M : Submodule (𝓞 K) V), Submodule.IsFullLattice K M → ∀ (T : ℕ) (s : Finset (Ideal (𝓞 K))), T.Prime → (∀ P ∈ s, P.IsMaximal ∧ Ideal.absNorm P = T) → {L : Submodule (𝓞 K) V | L ≤ M ∧ Nonempty ((↥M ⧸ L.comap M.subtype) ≃ₗ[𝓞 K] (𝓞 K ⧸ ∏ P ∈ s, P))}.encard = (((∑ i ∈ Finset.range (Module.finrank K V), T ^ i) ^ s.card : ℕ) : ℕ∞) := by
   intro K V _ _ _ _ _ _ _ M hM T s hT hs
+  letI := hM
+  letI : Module.Finite (𝓞 K) M := Submodule.IsLattice.finite K M
   have : Module.IsTorsionFree (𝓞 K) V := Module.IsTorsionFree.trans_faithfulSMul (𝓞 K) K V
   have : Module.FinitePresentation (𝓞 K) M := Module.finitePresentation_of_finite _ _
   have : Module.Projective (𝓞 K) M := Module.Flat.projective_of_finitePresentation

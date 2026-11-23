@@ -1,4 +1,50 @@
-import Mathlib
+module
+
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.RingTheory.AdicCompletion.Basic
+public import Mathlib.RingTheory.LocalRing.ResidueField.Defs
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Topology.Defs.Basic
+
+@[expose] public section
 
 namespace ReciprocityTheory.Def
 
@@ -15,8 +61,6 @@ class IsCNL (O : Type u) (A : Type w) [CommRing O] [IsLocalRing O] [CommRing A] 
 
 attribute [instance] IsCNL.noeth IsCNL.complete IsCNL.localHom
 
-abbrev PS (O : Type u) [CommRing O] (a : ℕ) : Type u := MvPowerSeries (Fin a) O
-
 structure Pattern (n : ℕ) where
   rel : Fin n → Fin n → Prop
   refl : ∀ i, rel i i
@@ -26,21 +70,6 @@ namespace Pattern
 
 variable {n : ℕ}
 
-def full (n : ℕ) : Pattern n := ⟨fun _ _ => True, fun _ => trivial, fun _ _ _ _ _ => trivial⟩
-
-def upper (n : ℕ) : Pattern n := ⟨fun i j => i ≤ j, fun i => le_refl i, fun _ _ _ h h' => le_trans h h'⟩
-
-def diag (n : ℕ) : Pattern n := ⟨fun i j => i = j, fun _ => rfl, fun _ _ _ h h' => h.trans h'⟩
-
-def Mem (S : Pattern n) {A : Type*} [Zero A] (X : Matrix (Fin n) (Fin n) A) : Prop :=
-  ∀ i j, ¬ S.rel i j → X i j = 0
-
-def mat (S : Pattern n) (A : Type*) [CommRing A] : Submodule A (Matrix (Fin n) (Fin n) A) where
-  carrier := {X | S.Mem X}
-  add_mem' := fun {X Y} hX hY i j h => by simp [hX i j h, hY i j h]
-  zero_mem' := fun _ _ _ => rfl
-  smul_mem' := fun c X hX i j h => by simp [hX i j h]
-
 end Pattern
 
 section Lift
@@ -48,30 +77,10 @@ section Lift
 variable (O : Type u) [CommRing O] [IsLocalRing O]
 variable {G : Type v} [Group G] [TopologicalSpace G] {n : ℕ}
 
-structure IsResidual (S : Pattern n) (rbar : G →* GL (Fin n) (ResidueField O)) : Prop where
-  cont : IsOpen {g : G | rbar g = 1}
-  mem : ∀ g, S.Mem (rbar g).val
-
-structure IsLift (S : Pattern n) (rbar : G →* GL (Fin n) (ResidueField O))
-    {A : Type w} [CommRing A] [IsLocalRing A] [Algebra O A] [IsLocalHom (algebraMap O A)]
-    (ρ : G →* GL (Fin n) A) : Prop where
-  cont : ∀ N : ℕ, IsOpen {g : G | ∀ i j, (ρ g).val i j - (1 : Matrix (Fin n) (Fin n) A) i j ∈ maximalIdeal A ^ N}
-  red : ∀ g, (ρ g).val.map (residue A) = (rbar g).val.map (ResidueField.map (algebraMap O A))
-  mem : ∀ g, S.Mem (ρ g).val
-
 def push {A : Type w} {B : Type w'} [CommRing A] [CommRing B] [Algebra O A] [Algebra O B] (f : A →ₐ[O] B)
     (ρ : G →* GL (Fin n) A) : G →* GL (Fin n) B :=
   (Matrix.GeneralLinearGroup.map f.toRingHom).comp ρ
 
-structure IsUniversal (S : Pattern n) (rbar : G →* GL (Fin n) (ResidueField O))
-    (R : Type u) [CommRing R] [IsLocalRing R] [Algebra O R] [IsCNL O R] (ρu : G →* GL (Fin n) R) : Prop where
-  isLift : IsLift O S rbar ρu
-  existsUnique : ∀ (A : Type u) [CommRing A] [IsLocalRing A] [Algebra O A] [IsCNL O A]
-    (ρ : G →* GL (Fin n) A), IsLift O S rbar ρ → ∃! f : R →ₐ[O] A, push O f ρu = ρ
-
 end Lift
-
-def MazurFin (p : ℕ) (G : Type v) [Group G] [TopologicalSpace G] : Prop :=
-  ∀ H : OpenSubgroup G, Finite (ContinuousMonoidHom H (Multiplicative (ZMod p)))
 
 end ReciprocityTheory.Def

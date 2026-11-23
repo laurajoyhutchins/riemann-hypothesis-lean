@@ -1,8 +1,49 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WtChar
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GalLab
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapInverseNatCast
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaSetupDividingLabelPersistsDeeperLevelStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WtChar
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GalLab
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MapInverseNatCast
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCommonFibre
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisAutomorphismActsOnDeeperLevelLabels
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ThetaSetupDividingLabelPersistsDeeperLevelStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedThetaValueEqRootMulThetaOperatorValueStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -77,8 +118,8 @@ theorem exists_conj_over (hx : IsGenLab ρ ρ' lab φ P₀ a a' x) (σ : Ω' →
       exact ((Category.assoc _ _ _).symm.trans (congrArg (· ≫ _) hs)).symm
     · rw [Category.assoc, Category.assoc, ht₂, reassoc_of% e₀, e₀, Category.comp_id]
 
-open Classical in
 
+open Classical in
 theorem exists_root_conj [ArithBase o Ω] [ArithBase o' Ω'] (hx : IsGenLab ρ ρ' lab φ P₀ a a' x)
     (hadd : ∀ b b', x (b + b') = x b * x b') {m : ℕ} (hm : S'.N = m ^ 2) (H : AddSubgroup S'.Gam) (x₀ : S.Gam)
     (h₀ : S.th x₀ ≠ 0) (h₀' : S'.th (lab x₀) ≠ 0) {κ : S.Gam} {h : S'.Gam} (hh : h ∈ H) (e : m • h = lab κ) :
@@ -127,9 +168,10 @@ theorem exists_root_conj [ArithBase o Ω] [ArithBase o' Ω'] (hx : IsGenLab ρ �
   have hσV : ∀ t : S'.perp H, σ (V t) = V (e' t) := fun t =>
     ((hV₁ t).conj σ s hs g.toAddMonoidHom hg).unique ρ'
       (hV (g h) ((hH h).2 hh) (by rw [← map_nsmul, e, hl]) (e' t))
+
   rw [hf, hf, map_div₀, map_mul, map_inverse_natCast, map_sum,
-    show σ (φ (S.th x₀)) = φ (S.th x₀) from RingHom.congr_fun hφ _,
-    ← Equiv.sum_comp e' fun t => algebraMap o' Ω' (S'.ζN ^ (-(wtChar S' _ (g b) t)).val) * V t]
+  show σ (φ (S.th x₀)) = φ (S.th x₀) from RingHom.congr_fun hφ _,
+  ← Equiv.sum_comp e' fun t => algebraMap o' Ω' (S'.ζN ^ (-(wtChar S' _ (g b) t)).val) * V t]
   simp only [map_mul, hζ, hσV]
 
 end General
@@ -140,14 +182,14 @@ theorem exists_root_galois : ∀ (g n : ℕ) (F : SFam g n (zetaAway n)) (W : Ma
   obtain ⟨x, hx, hadd⟩ := exists_isGenLab_of h₁ h₂ l₁ l₂ hpt
   have hb : GSum.base X₁ z₁ ∈ X₁.S.supI X₁.M z₁ := by
     have hne : (X₁.S.supI X₁.M z₁).Nonempty := X₁.div z₁
-    rw [GSum.base, dif_pos hne]
+    rw [GSum.base, dite_eq_left hne]
     exact hne.some_mem
   have hb' := GlobalTheory.T.thetaSetup_dividingLabel_persists_deeperLevel g n F W Z i X₁ hg hn hodd hi hE hT hP ε₁ hε₁ D z₁ _ hb z₂ hq
   have hl : ∀ κ : X₁.S.Gam, GSum.lift D z₂ κ ∈ D.X.S.HH D.X.M z₂ ∧ ∃ κ', D.m • GSum.lift D z₂ κ = D.lab κ' := fun κ => by
     by_cases h : ∃ h' ∈ D.X.S.HH D.X.M z₂, D.m • h' = D.lab κ
-    · rw [GSum.lift, dif_pos h]
+    · rw [GSum.lift, dite_eq_left h]
       exact ⟨h.choose_spec.1, κ, h.choose_spec.2⟩
-    · rw [GSum.lift, dif_neg h]
+    · rw [GSum.lift, dite_eq_right h]
       exact ⟨zero_mem _, 0, by rw [smul_zero, map_zero]⟩
   choose U hU hσU using fun κ : X₁.S.HH X₁.M z₁ =>
     exists_root_conj hx hadd D.sq (D.X.S.HH D.X.M z₂) _ hb.1 hb'.1 (hl κ).1 (hl κ).2.choose_spec

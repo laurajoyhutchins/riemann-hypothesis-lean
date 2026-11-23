@@ -1,6 +1,47 @@
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.StringRepresentations.AdmissibleTemperedUnramified
-import Formalism.SharpRestriction.LevelLetterCocycles.QuotientHomNonvanishingBound
-import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.Transported
+module
+
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.StringRepresentations.AdmissibleTemperedUnramified
+public import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.TypeConditions.Transported
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -96,9 +137,6 @@ theorem RelW.refl {w : PlE H} (x : A.LP w) : RelW N A x x := ⟨rfl, fun _ => rf
 
 theorem RelW.of_eq {w : PlE H} {x y : A.LP w} (e : x = y) : RelW N A x y := e ▸ RelW.refl x
 
-theorem RelW.ofN {w : PlE H} {x y : A.LP w} (h : UpperTheory.GalN.RelW N A x y) : RelW N A x y :=
-  ⟨h.dim, h.eq_of_unr, fun _ => h.ine, fun k => h.mono k.2.1⟩
-
 theorem RelW.unr {w : PlE H} {x y : A.LP w} (h : RelW N A x y) (u : A.unr y) : A.unr x := (h.eq_of_unr u) ▸ u
 
 theorem RelW.sum (hLP : TieLP N A) {w : PlE H} {x y x' y' : A.LP w} (h : RelW N A x y) (h' : RelW N A x' y') :
@@ -109,11 +147,6 @@ theorem RelW.sum (hLP : TieLP N A) {w : PlE H} {x y x' y' : A.LP w} (h : RelW N 
   all_goals obtain ⟨t1, t2⟩ := nc_sum hLP _ _ T
   · rw [A.inePol_sum, A.inePol_sum, h.ine t1 σ hσ, h'.ine t2 σ hσ]
   · exact (A.monomial_sum_iff _ _).2 ⟨h.mono t1, h'.mono t2⟩
-
-theorem RelW.tw {w : PlE H} {x y : A.LP w} (h : RelW N A x y) (s : ℝ) : RelW N A (A.lpTw x s) (A.lpTw y s) :=
-  ⟨by rw [A.lpDim_tw, A.lpDim_tw, h.dim], fun k => by rw [h.eq_of_unr ((A.unr_tw _ _).1 k)],
-    fun T σ hσ => by rw [A.inePol_tw _ _ σ hσ, A.inePol_tw _ _ σ hσ, h.ine ((nc_tw _ _).1 T) σ hσ],
-    fun T => (A.monomial_twist_iff _ _).2 (h.mono ((nc_tw _ _).1 T))⟩
 
 theorem unr_of_char (hLP : TieLP N A) {w : PlE H} {y k : A.LP w} (hk : A.lpDim k = 1) (hu : A.unr k)
     (h : A.unr (A.lpChar y k)) : A.unr y := by
@@ -155,16 +188,7 @@ def NcPt (i : N.Loc) (x : N.X i) (w : PlE H) : Prop :=
 
 variable {N A}
 
-theorem weakA (h : exists_galois_rep_local_global_compatible N A) : AutomorphicGaloisAdmissible N A := fun i =>
-  ⟨fun a ha π hc hr => by
-    obtain ⟨ρ, c, s, o, u⟩ := (h i).1 a ha π hc hr
-    refine ⟨ρ, c, s, fun w hw => RelW.of_eq (o w hw).1,
-      fun w hw _ => ⟨(u w hw).1, (u w hw).2.1, CuspA.of_eq (u w hw).2.2⟩, fun _ w => ?_⟩
-    by_cases hw : w ∈ placesOver H.E (N.l i)
-    · exact (u w hw).2.2
-    · exact (o w hw).1, (h i).2⟩
 theorem weakA' (h : AutomorphicGaloisAdmissible N A) : AutomorphicGaloisAdmissible N A := h
-theorem weak {D : D7} (h : adm2 D) : AutomorphicGaloisAdmissible D.nd D.naut := weakA h
 theorem weak' {D : D7} (h : AutomorphicGaloisAdmissible D.nd D.naut) : AutomorphicGaloisAdmissible D.nd D.naut := h
 
 end UpperTheory.GalS

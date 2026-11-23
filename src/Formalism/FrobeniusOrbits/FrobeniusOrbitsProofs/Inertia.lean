@@ -1,8 +1,59 @@
-import Mathlib
-import Formalism.FrobeniusOrbits.Statement
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
-import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.FrobMulInertia
-import Formalism.TameInertiaTowers.TowerFieldFoundations
+module
+
+public import Formalism.FrobeniusOrbits.Statement
+public import Mathlib.RingTheory.SimpleRing.Principal
+public import Formalism.FrobeniusOrbits.FrobeniusOrbitsProofs.Galois
+public import Formalism.TameInertiaTowers.TowerFieldFoundations
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField IntermediateField Ideal
 
@@ -59,7 +110,7 @@ theorem sqrt_fixed {F : Type} [Field F] [NumberField F] {r p : ℕ} (hr : r.Prim
   have hmem := hall ω
   have hval : algebraMap (𝓞 F) F (σ • ω - ω) = -X := by
     show σ ((1 + X) / 2) - (1 + X) / 2 = -X
-    rw [map_div₀, map_add, map_one, hσX, map_ofNat]
+    rw [map_div₀, map_add (f := _), map_one, hσX, map_ofNat]
     ring
   have hy2 : (σ • ω - ω) * (σ • ω - ω) = -((r : ℤ) : 𝓞 F) := by
     apply FaithfulSMul.algebraMap_injective (𝓞 F) F
@@ -155,7 +206,7 @@ theorem hcl_eq_one (h : IsLayer (e + 2) q d ζ a b) (p : ℕ) (hp : p.Prime) (hp
     apply FaithfulSMul.algebraMap_injective (𝓞 L) L
     have e1 : algebraMap (𝓞 L) L (τ • Θ) = τ ζ + τ ζ⁻¹ := by
       show τ (Θ : L) = _
-      rw [hΘ, map_add]
+      rw [hΘ, map_add (f := _)]
     have e2 : algebraMap (𝓞 L) L Θ = ζ + ζ⁻¹ := hΘ
     simp only [map_sub, map_mul, map_pow, map_one, e1, e2, eZ, eZi, hτζ, hτζi, inv_pow]
     field_simp
@@ -221,7 +272,7 @@ theorem sub_h (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b) (p : ℕ) (hp 
     apply Subtype.ext
     exact h1
   obtain ⟨Q, -, hQp, hQc⟩ := Ideal.exists_ideal_over_prime_of_isIntegral P (⊥ : Ideal (𝓞 L))
-    (by rw [Ideal.comap_bot_of_injective _ hinj]; exact bot_le)
+    (by rw [(show Ideal.under _ ⊥ = ⊥ from Ideal.comap_bot_of_injective _ hinj)]; exact bot_le)
   haveI := hQp
   haveI : Q.LiesOver P := ⟨hQc.symm⟩
   haveI : Q.LiesOver (span {(p : ℤ)}) := Ideal.LiesOver.trans Q P _
@@ -270,7 +321,7 @@ theorem sup (hqd : HypOdd q d) (h : IsLayer (e + 2) q d ζ a b) (p : ℕ)
     apply Subtype.ext
     exact h1
   obtain ⟨Q, -, hQp, hQc⟩ := Ideal.exists_ideal_over_prime_of_isIntegral P (⊥ : Ideal (𝓞 L))
-    (by rw [Ideal.comap_bot_of_injective _ hinj]; exact bot_le)
+    (by rw [(show Ideal.under _ ⊥ = ⊥ from Ideal.comap_bot_of_injective _ hinj)]; exact bot_le)
   haveI := hQp
   haveI : Q.LiesOver P := ⟨hQc.symm⟩
   haveI : Q.LiesOver (span {(p : ℤ)}) := Ideal.LiesOver.trans Q P _

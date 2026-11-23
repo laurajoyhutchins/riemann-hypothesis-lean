@@ -1,5 +1,53 @@
-import Formalism.HermitianCurvature.StatementQ
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MinorSmoothness.ExpSecondHermitianMemLevel
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MinorSmoothness.ExpSecondHermitianMemLevel
+import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open Matrix Filter Topology
 open scoped ContDiff
@@ -15,7 +63,7 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 variable {k r : ℕ} {i : Fin (r + 1)} {D : Set (Mx k r)}
 
 lemma entry_cd (a b : Fin (2 * r + k + 1)) : ContDiff ℝ ∞ (fun g : Mx k r => g a b) := by
-  exact (contDiff_apply ℝ ℂ b).comp (contDiff_apply ℝ (Fin (2 * r + k + 1) → ℂ) a)
+  exact (contDiff_apply ℝ (fun _ => ℂ) b).comp (contDiff_apply ℝ (fun _ => (Fin (2 * r + k + 1) → ℂ)) a)
 
 lemma inv_glev {g : Mx k r} (hg : g ∈ Glev k r i) : g⁻¹ = Hpk k r * gᴴ * Hpk k r := by
   simp only [Glev, UH, Set.mem_setOf_eq] at hg
@@ -75,6 +123,7 @@ lemma chatL_local (hD : IsOpen D) (u : ℂ) (a β : Mx k r → Fin (mdim k r i) 
 lemma chatL_clm (hD : IsOpen D) (u : ℂ) (a β : Mx k r → Fin (mdim k r i) → ℂ)
     (L : E →L[ℂ] E') (f : Mx k r → E) (hf : SmoothLev k r i D f) (g : Mx k r) (hg : g ∈ Glev k r i ∩ D) :
     chatL (EH k r) (posL k r i) u a β (fun y => L (f y)) g = L (chatL (EH k r) (posL k r i) u a β f g) := by
+
   simp only [chatL, map_sum, map_smul]
   refine Finset.sum_congr rfl fun i0 _ => Finset.sum_congr rfl fun j0 _ => ?_
   congr 1
@@ -115,6 +164,7 @@ lemma second_capelli_minor_continuousLinear (hD : IsOpen D) (u : ℂ) (a a' β �
     (L : E →L[ℂ] E') (f : Mx k r → E) (hf : SmoothLev k r i D f) (g : Mx k r) (hg : g ∈ Glev k r i ∩ D) :
     chat2L (EH k r) (posL k r i) u a a' β β' (fun y => L (f y)) g =
       L (chat2L (EH k r) (posL k r i) u a a' β β' f g) := by
+
   simp only [chat2L, map_sum]
   refine Finset.sum_congr rfl fun i0 _ => Finset.sum_congr rfl fun i1 _ =>
     Finset.sum_congr rfl fun j0 _ => Finset.sum_congr rfl fun j1 _ => ?_
@@ -210,8 +260,5 @@ theorem qnTPres_of (hT : TInvariant) : TPreservesFF := by
       rw [hLx]
       exact hW x hx h hh h' hh'
     rw [← e, tl_local hD z z' Y p q _ _ hloc g hg, tl_clm hD z z' Y p q L J hs g hg, hLx]
-
-theorem qnTPres_of' (hT : TInvariant) (_ : EabPres) : TPreservesFF := by
-  exact qnTPres_of hT
 
 end Formalism.FourierDecayAlt.Q.TPresMain

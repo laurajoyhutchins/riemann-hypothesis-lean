@@ -1,18 +1,56 @@
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.HilbertSamuelGrowthOffHypersurfacePolynomial
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.NumbersDVRC3ResidualContractionComponent
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.FieldNumbersLocalIntegralClosureFinite
-import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.HilbertSamuelIrreducibleBasicOpenConnected
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PStokesOnChart
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocLocalize
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocResidue
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreNonempty
-import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalResidueLength
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
-import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PIrreducibleConnected
-import GroundTheory.HeightsAndTheta.Heights.IntegralModels.Assembly
-import GroundTheory.HeightsAndTheta.Heights.IntegralModels.PDescendHom
-import GroundTheory.HeightsAndTheta.Heights.IntegralModels.PFreeSheafBasis
-import GroundTheory.HeightsAndTheta.Heights.IntegralModels.PSpreadBundleNbhd
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StStokesOnChart
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsFibreNonempty
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.StatementsSemilocalResidueLength
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PStokesOnChart
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocLocalize
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PDegZeroLocResidue
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PFibreNonempty
+public import GroundTheory.HeightsAndTheta.Heights.FieldsOfNumbers.PSemilocalResidueLength
+public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.AssemblyBase
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.FieldNumbersLocalIntegralClosureFinite
+public import GroundTheory.HeightsAndTheta.Heights.LocalFiniteness.HilbertSamuelIrreducibleBasicOpenConnected
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 theorem GroundTheory.Heights₂.Heights.AutoClose.FieldNumbers_FibreNonempty.{u} : GroundTheory.Heights₂.Heights.FieldNumbers.FibreNonempty.Statement.{u} :=
@@ -20,18 +58,6 @@ theorem GroundTheory.Heights₂.Heights.AutoClose.FieldNumbers_FibreNonempty.{u}
 
 theorem GroundTheory.Heights₂.Heights.AutoClose.FieldNumbers_SemilocalResidueLength.{u} : GroundTheory.Heights₂.Heights.FieldNumbers.SemilocalResidueLength.Statement.{u} :=
   @GroundTheory.Heights₂.Heights.FieldNumbers.SemilocalResidueLength.proof.{u} GroundTheory.Heights₂.Heights.FieldNumbers.DegZeroLocResidue.proof GroundTheory.Heights₂.Heights.AutoClose.FieldNumbers_SemilocalFiniteRank GroundTheory.Heights₂.Heights.FieldNumbers.DegZeroLocLocalize.proof
-
-theorem GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadBundle : GroundTheory.Heights₂.Heights.Model.SpreadBundle.Statement :=
-  @GroundTheory.Heights₂.Heights.Model.SpreadBundle.of_open GroundTheory.Heights₂.Heights.Model.FreeSheafBasis.proof GroundTheory.Heights₂.Heights.AutoClose.Model_BasisIsoFree GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadStep
-
-theorem GroundTheory.Heights₂.Heights.AutoClose.Model_GlueBundles : GroundTheory.Heights₂.Heights.Model.GlueBundles.Statement :=
-  @GroundTheory.Heights₂.Heights.Model.GlueBundles.of_open GroundTheory.Heights₂.Heights.Model.FreeSheafBasis.proof GroundTheory.Heights₂.Heights.AutoClose.Model_BasisIsoFree GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadStep GroundTheory.Heights₂.Heights.Model.DescendHom.proof GroundTheory.Heights₂.Heights.AutoClose.Model_GenericPullInj GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadHomSections
-
-theorem GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadBundleNbhd : GroundTheory.Heights₂.Heights.Model.SpreadBundleNbhd.Statement :=
-  @GroundTheory.Heights₂.Heights.Model.SpreadBundleNbhd.proof GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadLocal GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadStep
-
-theorem GroundTheory.Heights₂.Heights.AutoClose.spread_vector_bundle_holds : GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.Model.SpreadBundle.Statement :=
-  @GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.Model.SpreadBundle.of_open GroundTheory.Heights₂.Heights.Model.FreeSheafBasis.proof GroundTheory.Heights₂.Heights.AutoClose.Model_BasisIsoFree GroundTheory.Heights₂.Heights.AutoClose.Model_SpreadStep
 
 theorem GroundTheory.Heights₂.Heights.AutoClose.StokesOnChart : GroundTheory.Heights₂.Heights.StokesOnChart.Statement :=
   @GroundTheory.Heights₂.Heights.StokesOnChart.proof GroundTheory.Heights₂.Heights.HilbertSamuel.Closed.ComplexSets.DiscriminantCover GroundTheory.Heights₂.Heights.AutoClose.CutOffLimit

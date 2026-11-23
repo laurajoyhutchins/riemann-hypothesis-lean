@@ -1,9 +1,61 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSFinVolSk
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSAdTup
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSOmDecomp
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.LatHat
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.LatHat
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.PosNear
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSAdTup
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NcSOmDecomp
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.T2SpaceTensorProductFiniteExtension
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MassComputations.ProdFirstProjectionSmul
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DetAdmA
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.RPGlue
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.RestrProdG
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TensTop
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.TopoAF
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,7 +63,6 @@ namespace Formalism.L2.SG.Pf.NcS.KfOrbPf
 
 open Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.L2.SG.Sub Formalism.L2.SG.Measures Formalism.L2.SG.LocVol NumberField IsDedekindDomain
   MeasureTheory Topology Filter
-open Formalism.L2.SG.Pf.NcS.FinVolSk
 open scoped TensorProduct
 
 section SlopeTestRemainingChoices
@@ -33,10 +84,11 @@ theorem int_smul_mem {n : ℕ} (v : HeightOneSpectrum (𝓞 F)) (M : ℤ) (hM : 
   rw [e]
   exact S.smul_mem _ hy
 
-theorem ev_latLoc_std {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsLattice E L) :
+theorem ev_latLoc_std {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E)) (hL : Submodule.IsFullLattice E L) :
     ∀ᶠ v : HeightOneSpectrum (𝓞 F) in cofinite, latLoc (E := E) v (L : Set (Fin n → E)) =
       latLoc (E := E) v ((MassDataMassesW.KCptW.stdSub : Submodule (𝓞 E) (Fin n → E)) : Set (Fin n → E)) := by
-  obtain ⟨N, hN0, hN⟩ := MassDataMassesW.KCptW.std_mult L hL.span_eq_top
+  let : Submodule.IsFullLattice E L := hL
+  obtain ⟨N, hN0, hN⟩ := MassDataMassesW.KCptW.std_mult L Submodule.IsFullLattice.span_eq_top
   obtain ⟨N', hN'0, hN'⟩ := MassDataMassesW.KCptW.lat_mult L hL.fg
   filter_upwards [ev_int ((N : F)⁻¹), ev_int ((N' : F)⁻¹)] with v hv hv'
   apply le_antisymm
@@ -99,9 +151,11 @@ theorem ev_crd_oev {d : ℕ} (b : Module.Basis (Fin d) F E) :
     rw [hcrd]
     have ho : (o : E) = ∑ t, (B.repr o t) • ((B t : 𝓞 E) : E) := by
       have := congrArg (algebraMap (𝓞 E) E) (B.sum_repr o)
+
       rw [map_sum] at this
       simpa [map_zsmul] using this.symm
-    rw [ho, map_sum, Finsupp.finset_sum_apply, map_sum]
+
+    rw [ho, map_sum, Finsupp.finsetSum_apply, map_sum]
     refine Subring.sum_mem _ fun t _ => ?_
     rw [map_zsmul, Finsupp.smul_apply, map_zsmul]
     exact Subring.zsmul_mem _ (hv t l) _
@@ -114,7 +168,7 @@ theorem ev_crd_oev {d : ℕ} (b : Module.Basis (Fin d) F E) :
     exact hgen o l
   | zero => simp [PI.VolStabS.PositiveNearLattice.crd]
   | add a c _ _ ha hc =>
-    simp only [PI.VolStabS.PositiveNearLattice.crd, map_add, Finsupp.add_apply] at *
+    simp only [PI.VolStabS.PositiveNearLattice.crd, map_add (f := _), Finsupp.add_apply] at *
     exact Subring.add_mem _ ha hc
   | smul c a _ ha =>
     have e : PI.VolStabS.PositiveNearLattice.crd b (Fv F v) (c • a) l =
@@ -130,14 +184,24 @@ theorem projV_eq_map (v : HeightOneSpectrum (𝓞 F)) {n : ℕ} (X : Matrix (Fin
 
 end SlopeTestRemainingChoices
 
-theorem finite_orbit_holds : KfOrb := by
+theorem finite_orbit_holds :
+    ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
+      (σ : E →ₐ[F] E) (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (a : ℕ) (X0 : Fin a → Fin n → E)
+      (Λ : Set (Fin n → E)),
+      IsCMExt F E σ → IsHermND σ J →
+      (∃ L : Submodule (𝓞 E) (Fin n → E), Submodule.IsFullLattice E L ∧ (L : Set (Fin n → E)) = Λ) →
+      MeasurableSet {x : Fin a → Fin n → Af F ⊗[F] E | ∃ k ∈ Kf σ J Λ, x = k • ratTup (Af F) X0} ∧
+      ∀ x : Fin a → Fin n → Af F ⊗[F] E, (∃ k ∈ Kf σ J Λ, x = k • ratTup (Af F) X0) ↔
+        ∀ v : HeightOneSpectrum (𝓞 F),
+          projV v x ∈ {X | ∃ k ∈ Formalism.L2.SG.TypedSets.Kv σ J Λ v, X = k • ratTup (Fv F v) X0} := by
   intro F E _ _ _ _ _ σ n J a X0 Λ hCM hJ hLat
   classical
   have : FiniteDimensional F E := Module.Finite.of_restrictScalars_finite ℚ F E
   obtain ⟨L, hL, rfl⟩ := hLat
+  let : Submodule.IsFullLattice E L := hL
   let b := Module.finBasis F E
   set Y := ratTup (F := F) (Af F) X0 with hYdef
-  obtain ⟨hKc, -⟩ := Formalism.L2.SG.Pf.NcS.AdTupPf.kf_compact_open σ J L hL
+  obtain ⟨hKc, -⟩ := Formalism.L2.SG.Pf.NcS.AdTupPf.kf_compact_open σ J L inferInstance
   have hmat : Continuous (fun g : HA (Af F) σ J =>
       ((HA.mat (Af F) σ J g : GL (Fin n) (Af F ⊗[F] E)) : Matrix (Fin n) (Fin n) (Af F ⊗[F] E))) :=
     Units.continuous_val.comp continuous_subtype_val

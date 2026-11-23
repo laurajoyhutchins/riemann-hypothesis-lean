@@ -1,4 +1,50 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.ColOfLeftInv
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.ColOfLeftInv
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix Formalism.QuantumDeterminants
 
@@ -123,20 +169,21 @@ structure ColB (g : Mx k r) : Prop where
   ww : ∀ j c : Fin (k + 1), g (wI k r j) (wI k r c) = if j = c then 1 else 0
   sw : ∀ (a : Fin r) (j : Fin (k + 1)), g (esI k r a) (wI k r j) = 0
 
-theorem colB_of {g : Mx k r} (h : UnitaryGroupBasics.col k r g) : ColB g where
-  aa a b hab := by
+theorem colB_of {g : Mx k r} (h : UnitaryGroupBasics.col k r g) : ColB g := by
+  refine { aa := ?_, wa := ?_, sa := ?_, ww := ?_, sw := ?_ }
+  · intro a b hab
     rw [h _ _ (by simp only [eI]; omega) (Or.inl (by simp only [eI]; exact hab))]
     simp only [eI_inj]
-  wa j b := by
+  · intro j b
     rw [h _ _ (by simp only [eI]; omega) (Or.inr (by simp only [wI]; omega)),
       if_neg (eI_ne_wI b j).symm]
-  sa a b := by
+  · intro a b
     rw [h _ _ (by simp only [eI]; omega) (Or.inr (by simp only [esI]; omega)),
       if_neg (eI_ne_esI b a).symm]
-  ww j c := by
+  · intro j c
     rw [h _ _ (by simp only [wI]; omega) (Or.inr (by simp only [wI]; omega))]
     simp only [wI_inj]
-  sw a j := by
+  · intro a j
     rw [h _ _ (by simp only [wI]; omega) (Or.inr (by simp only [esI]; omega)),
       if_neg (wI_ne_esI j a).symm]
 

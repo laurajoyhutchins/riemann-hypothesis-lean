@@ -1,7 +1,52 @@
-import Mathlib
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.WaveSt
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMultOfFintype
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GelfandSeriesShiftIdentityStatement
+module
+
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsMultOfFintype
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GelfandSeriesShiftIdentityStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open MeasureTheory Matrix Finset
 open scoped ContDiff ComplexConjugate InnerProductSpace
 open PositivityTheory.RgTw (Mat G)
@@ -92,8 +137,9 @@ theorem mk_decomp (g : ℕ → ℂ) (m : ℕ) :
     PowerSeries.mk g = ∑ j ∈ range (m + 1), g j • (X : PowerSeries ℂ) ^ j
       + X ^ (m + 1) * PowerSeries.mk (fun i => g (i + (m + 1))) := by
   ext k
-  simp only [map_add, map_sum, coeff_mk, coeff_X_pow_mul', LinearMap.map_smul, coeff_X_pow,
-    smul_eq_mul, mul_ite, mul_one, mul_zero]
+
+  simp only [map_add (f := _), map_sum, coeff_mk, coeff_X_pow_mul', LinearMap.map_smul, coeff_X_pow,
+  smul_eq_mul, mul_ite, mul_one, mul_zero]
   by_cases hk : m + 1 ≤ k
   · rw [if_pos hk, Nat.sub_add_cancel hk, sum_ite_eq]
     simp [mem_range]
@@ -113,7 +159,8 @@ theorem sum_of_subst (N : ℂ) (τ g : ℕ → ℂ) {w : PowerSeries ℂ} (hw : 
   have hG : θ (PowerSeries.mk g) = ∑ j ∈ range (m + 1), g j • (-(X * w)) ^ j
       + (-(X * w)) ^ (m + 1) * θ H := by
     conv_lhs => rw [mk_decomp g m]
-    simp only [map_add, map_sum, map_smul, map_mul, map_pow, hX, hH]
+
+    simp only [map_add (f := _), map_sum, map_smul, map_mul, map_pow, hX, hH]
   rw [hθ, map_sub, map_one, map_mul, hX, hG] at h
   have hterm : ∀ j, Q * (X * w) * (g j • (-(X * w)) ^ j)
       = (g j * (-1) ^ j) • (X * bser N τ j) := by
@@ -126,8 +173,9 @@ theorem sum_of_subst (N : ℂ) (τ g : ℕ → ℂ) {w : PowerSeries ℂ} (hw : 
     rw [← h, ← sum_congr rfl fun j _ => hterm j, ← mul_sum, neg_mul_eq_mul_neg X w, mul_pow]
     ring
   have hc := congrArg (coeff (m + 1)) hfin
-  simp only [map_add, map_sum, LinearMap.map_smul, coeff_succ_X_mul, coeff_bser, coeff_X_pow_mul',
-    smul_eq_mul, hQ, map_sub, coeff_mk, coeff_one] at hc
+
+  simp only [map_add (f := _), map_sum, LinearMap.map_smul, coeff_succ_X_mul, coeff_bser, coeff_X_pow_mul',
+  smul_eq_mul, hQ, map_sub, coeff_mk, coeff_one] at hc
   simp at hc
   have e : ∑ j ∈ range (m + 1), bco N τ m j * ((-1) ^ j * g j)
       = ∑ x ∈ range (m + 1), g x * (-1) ^ x * bco N τ m x :=
@@ -146,13 +194,13 @@ theorem mul_subst_eq_one (n : ℕ) (cc : Fin n → ℂ) {w : PowerSeries ℂ}
       = w * (1 - C (cc i + ((n : ℂ) - 1) / 2 + 1) * X) := by
     intro i
     have hn : C (n : ℂ) = C (-cc i + ((n : ℂ) - 1) / 2) + C (cc i + ((n : ℂ) - 1) / 2 + 1) := by
-      rw [← map_add]; congr 1; ring
+      rw [← map_add (f := _)]; congr 1; ring
     linear_combination (-1 : PowerSeries ℂ) * hw - X * w * hn
   have e2 : ∀ i, 1 - C (-cc i + ((n : ℂ) - 1) / 2 + 1) * -(X * w)
       = w * (1 - C (cc i + ((n : ℂ) - 1) / 2) * X) := by
     intro i
     have hn : C (n : ℂ) = C (-cc i + ((n : ℂ) - 1) / 2 + 1) + C (cc i + ((n : ℂ) - 1) / 2) := by
-      rw [← map_add]; congr 1; ring
+      rw [← map_add (f := _)]; congr 1; ring
     linear_combination (-1 : PowerSeries ℂ) * hw - X * w * hn
   have h1 := GlobalTheory.T.gelfand_series_shift_identity n cc
   have h2 := congrArg θ (GlobalTheory.T.gelfand_series_shift_identity n (fun a => - cc a))

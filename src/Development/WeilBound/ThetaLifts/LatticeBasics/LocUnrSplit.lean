@@ -1,8 +1,59 @@
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnr
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrSplitA
-import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrSplitL
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormSatakeLeOfUnitarySphericalGL
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormUniformiserEqInvAbsNorm
+module
+
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnr
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrSplitA
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.InstBorelGL
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnramifiedCharacterAtUniformizer
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsSplitChartOne
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsSplitChartSplitChart
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NormUniformiserEqInvAbsNorm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormSatakeLeOfUnitarySphericalGL
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LocalFieldUniformizerNormProperties
+public import Development.WeilBound.CoreStatements.LocalThetaKernels.IwasMain
+import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrInertA
+public import Development.WeilBound.ThetaLifts.LatticeBasics.LocUnrSplitL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,8 +168,6 @@ open Matrix (fromBlocks fromRows GeneralLinearGroup)
 
 attribute [local instance] GlobalTheory.LocalData.complRel GlobalTheory.LocalData.isLocalField
 
-set_option hygiene false in
-local notation "𝟙" => (1 : Matrix (Fin n) (Fin n) (Fv F v))
 
 theorem locUnrSplit : LocUnrSplit := by
   rintro F E _ _ _ _ _ σ B n Y r s hB hY χ - hr K e hK he v ⟨τ⟩ hu μ hμ hμ1 z f hz hf
@@ -181,11 +230,11 @@ theorem locUnrSplit : LocUnrSplit := by
   have hφ : ∀ y : GL (Fin n) (Fv F v), ∃ t, IsGcd (v.adicCompletionIntegers F).toSubring y t ∧ f (e (Λ (b * y * b⁻¹), 1)) =
       chS χ (τ.comp σ) (z + n / 2) (GeneralLinearGroup.det y⁻¹) *
         (chS χ τ (z + n / 2) * chS χ (τ.comp σ) (z + n / 2)) (GeneralLinearGroup.det t) := fun y => by
-    obtain ⟨t, κ, k1, k2, ht, hκ⟩ := exists_frame (lf v) y
+    obtain ⟨t, κ, k1, k2, ht, hκ⟩ := GlobalTheory.ThK.Dbl.Split.exists_frame (lf v) y
     refine ⟨t, ht, ?_⟩
     let p := bd b b * (bd y 1 * κ⁻¹) * (bd b b)⁻¹
-    have hp : p.1 * fromRows 𝟙 𝟙 = fromRows 𝟙 𝟙 * (b * t * b⁻¹).1 := by
-      have : ((bd b b)⁻¹).1 * fromRows 𝟙 𝟙 = fromRows 𝟙 𝟙 * (b⁻¹).1 := by
+    have hp : p.1 * (fromRows (1 : Matrix (Fin n) (Fin n) (Fv F v)) 1 : Matrix (Fin n ⊕ Fin n) (Fin n) (Fv F v)) = (fromRows (1 : Matrix (Fin n) (Fin n) (Fv F v)) 1 : Matrix (Fin n ⊕ Fin n) (Fin n) (Fv F v)) * (b * t * b⁻¹).1 := by
+      have : ((bd b b)⁻¹).1 * (fromRows (1 : Matrix (Fin n) (Fin n) (Fv F v)) 1 : Matrix (Fin n ⊕ Fin n) (Fin n) (Fv F v)) = (fromRows (1 : Matrix (Fin n) (Fin n) (Fv F v)) 1 : Matrix (Fin n ⊕ Fin n) (Fin n) (Fv F v)) * (b⁻¹).1 := by
         simp only [bd_inv, Matrix.fromBlocks_mul_fromRows, Matrix.fromRows_mul, Matrix.mul_one, Matrix.one_mul, Matrix.zero_mul,
           add_zero, zero_add]
       simp only [p, Units.val_mul, Matrix.mul_assoc, this]
@@ -266,7 +315,7 @@ theorem locUnrSplit : LocUnrSplit := by
     rw [show b * (b⁻¹ * dn g * b) * b⁻¹ = dn g by group, inv_one, Units.val_one, Matrix.one_mul, Matrix.mul_one] at this
     rw [Inert.stab_latW hat, stab_iff hσ τ hb hb', show (mat g).map (piW (τ.comp σ)) = _ from snd_eq τ h1 g]
     exact and_congr Iff.rfl ((Iff.of_eq (congrArg (fun M : Matrix _ _ _ => ∀ i j, M i j ∈ v.adicCompletionIntegers F) this)).trans
-      forall_swap)
+      ⟨fun h i j => h j i, fun h i j => h j i⟩)
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have bb : ∀ t : E →ₐ[F] Fv F v, UnrAt χ (splitPrime t) → ∀ i < n,
       ‖chS χ t (z + n / 2) (unifAt v)‖ * (Ideal.absNorm v.asIdeal : ℝ) ^ i < 1 := fun t ht i hi => by

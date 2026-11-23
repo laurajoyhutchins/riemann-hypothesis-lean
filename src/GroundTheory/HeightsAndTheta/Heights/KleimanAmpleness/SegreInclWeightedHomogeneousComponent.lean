@@ -1,5 +1,54 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideLast
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.ImportsSideLast
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.LocalProperties.Reduced
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization
@@ -13,8 +62,8 @@ section
 
 variable {K : Type} [Fintype K] [DecidableEq K] {ι : K → Type} {F : Type} [Field F]
 
-omit [Fintype K] in
 
+omit [Fintype K] in
 theorem segre_weight_mapDomain (e : (Σ k, ι k) →₀ ℕ) :
     Finsupp.weight (NumbersDVR.blockWeight (segreIdx ι))
         (Finsupp.mapDomain (fun v : Σ k, ι k => (⟨Sum.inr v.1, v.2⟩ : Σ c, segreIdx ι c)) e) =
@@ -78,7 +127,7 @@ theorem segreLiftMap_monomial (W : Ideal (MRing ι F)) (s : (Σ c, segreIdx ι c
     have hm : (monomial (Finsupp.single v n + s) r : MRing (segreIdx ι) F) =
         X v ^ n * monomial s r := by
       rw [X_pow_eq_monomial, monomial_mul, one_mul]
-    rw [hm, map_mul, map_pow, ha, segreLiftMap, aeval_X, hβ, map_add, Pi.add_apply,
+    rw [hm, map_mul, map_pow, ha, segreLiftMap, aeval_X, hβ, map_add (f := _), Pi.add_apply,
       Finsupp.weight_single, Pi.smul_apply, smul_eq_mul, map_mul, map_pow]
     ring
 
@@ -86,9 +135,10 @@ theorem segreLiftMap_of_isWeightedHomogeneous (W : Ideal (MRing ι F)) {f : MRin
     {e : Unit ⊕ K → ℕ} (hf : IsWeightedHomogeneous (NumbersDVR.blockWeight (segreIdx ι)) f e) :
     ∃ a, segreLiftMap ι F W f = Polynomial.X ^ e (Sum.inl ()) * Polynomial.C a := by
   classical
-  choose a ha using fun s => segreLiftMap_monomial W s (coeff s f)
+  choose a ha using fun s => segreLiftMap_monomial W s (AddMonoidAlgebra.coeff f s)
   refine ⟨∑ s ∈ f.support, a s, ?_⟩
   conv_lhs => rw [f.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun s hs => ?_
   rw [ha s, hf (mem_support_iff.mp hs)]
@@ -170,8 +220,9 @@ theorem SegreLiftComap.proof : SegreLiftComap.Statement := by
   rw [segreLift, RingHom.mem_ker]
   constructor
   · intro hf
+
     rw [← sum_weightedHomogeneousComponent (NumbersDVR.blockWeight (segreIdx ι)) f,
-      finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
+    finsum_eq_sum _ (weightedHomogeneousComponent_finsupp f), map_sum]
     refine Finset.sum_eq_zero fun e _ => ?_
     obtain ⟨a, ha⟩ := segreLiftMap_of_isWeightedHomogeneous W
       (weightedHomogeneousComponent_isWeightedHomogeneous

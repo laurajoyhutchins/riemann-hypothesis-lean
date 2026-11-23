@@ -1,16 +1,77 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.HeckeThetaIntegrals.HkSupSizedOfHkSup
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HeckePrimeDetection
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SqrtDivMulEqSqrtMul
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeThetaValueIdentityUnitFramesStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeKernelComplexPointMatchesCosetsStatement
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsDerivAt0CompLinearIff
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HermFormEqOfImSpan
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PsiRealPtEqExpIm
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MapIncAMulRealPt
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeLiftReps
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.SplitLinearModelNorm
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnramifiedCharacter
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.HeckePrimeDetection
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.SqrtDivMulEqSqrtMul
+public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.KerScheme
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsCan
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaAtEqProdAhG
+public import Formalism.LocalToGlobal.IndefiniteReal.FWExist
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsPlaceModelPlaceMap
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.RealIdemMulOfReal
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SelfDualLatticePairingDual
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.SmulEqZeroOfInf
+public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OmRatInvApply
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsInvariantForm
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HeckeLiftReps
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HermFormEqOfImSpan
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsDerivAt0CompLinearIff
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsSelfDualCoordLatticeOfSelfDualFrame
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.MapIncAMulRealPt
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.PsiRealPtEqExpIm
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ThetaFunctionOrientedModelEqOfRealAdelicPointsStatement
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ThetaPointsChangeLevelIsometryLinearMap
+import Formalism.LocalToGlobal.IndefiniteReal.LevelTypeEquivalence.IsThetaFunOPull
+import Formalism.LocalToGlobal.ProjectiveLattices.FreeBridge
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.PPSemichar
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Formalism.L2.Theta Formalism.L2.DIV Formalism.IndefR Formalism.IndefR.Links Formalism.IndefR.FWT Formalism.L2.Pj Formalism.IndefR.Datum ReciprocityTheory.ChartRestriction.G.PullbackSections ReciprocityTheory.ChartRestriction.G.Geo.Tor
 open Formalism.L2.NTheta (IsIdemAt)
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -186,7 +247,7 @@ theorem gform {g n : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH : Hm.IsHermitian
   field_simp
   linear_combination (-(θ (z + lam m) * fr (z + lam m))) * e2
 
-set_option maxHeartbeats 1000000 in
+
 
 theorem geo_sum (hσ : GoodEmb c σ) (hU : IsUnf U) {P : Ideal (𝓞 E)} {p i : ℕ} {k k' : U.Comp} (x : (U.X k).dom)
     (x' : (U.X k').dom) (hu : ∀ τ' i', ‖dmin (U.X k).Gm x.1 τ' i'‖ = 1) (hu' : ∀ τ' i', ‖dmin (U.X k').Gm x'.1 τ' i'‖ = 1)
@@ -313,8 +374,8 @@ theorem colB_mul (M : Matrix (Fin (Wc D i).rank) (Fin (Wc D i).rank) D.host.E)
 
 end Columns
 
-set_option maxHeartbeats 2000000 in
-set_option synthInstance.maxHeartbeats 400000 in
+
+
 
 theorem theta_prod_eq_phased_sum : ∀ (D : D7), GlobalTheory.IndefiniteRowSideFullHecke.HeckePrimeDetection.HeckePointLaws → GlobalTheory.IndefiniteRowSideFullHecke.SplitLinearModelNorm.SplitLinearModel D → GlobalTheory.IndefiniteRowSideFullHecke.UnramifiedCharacter.VacFixed D →
     ∀ (G : Type) [Group G] [Fintype G] (Pl0 T0 : Type) (A : FamIn D.what₂.LL G Pl0 T0 D.R.m)

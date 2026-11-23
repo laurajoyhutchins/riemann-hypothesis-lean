@@ -1,7 +1,56 @@
-import Mathlib
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerUnitClassModPrimePowProperties
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Definitions.Foundations.ExistsRootOfIsAlgClosed
-import Development.AbelianVarietyTheory.Definitions.Foundations.EeProd
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.TowerUnitClassModPrimePowProperties
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,6 +96,7 @@ theorem hilbert_ninety : ∀ (Ω K Γ : Type) [Field Ω] [Field K] [Algebra Ω K
     rw [QuotientGroup.eq] at h
     have e : g' = g * (g⁻¹ * g') := by group
     rw [e, cm, c1 _ h, map_one, one_mul, map_mul, AlgEquiv.mul_apply, h _ x.2]
+
   rw [map_sum, Finset.mul_sum]
   refine Fintype.sum_equiv (MulAction.toPerm γ) _ _ fun q => ?_
   rw [MulAction.toPerm_apply, F (γ * q.out) (γ • q).out
@@ -256,6 +306,7 @@ theorem cls_eq_of_mem_Gam : ∀ (Ω : Type) [Field Ω] [Algebra ℚ Ω] (ε : Ω
     | mem b hb =>
       refine ⟨hb.2 γ hγ, ?_⟩
       obtain ⟨c, -, hc⟩ := hb.1
+
       rw [hc, hc, map_sum, map_sum, Finset.smul_sum]
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [map_smul, map_smul, smul_smul]
@@ -267,7 +318,7 @@ theorem cls_eq_of_mem_Gam : ∀ (Ω : Type) [Field Ω] [Algebra ℚ Ω] (ε : Ω
         rw [this]
       · rw [zero_pow h.ne', mul_zero, mul_zero]
     | zero => simp
-    | add x y _ _ hx hy => exact ⟨by rw [map_add, hx.1, hy.1], by simp only [Pi.add_apply, map_add, hx.2, hy.2, smul_add]⟩
+    | add x y _ _ hx hy => exact ⟨by rw [map_add (f := _), hx.1, hy.1], by simp only [Pi.add_apply, map_add (f := _), hx.2, hy.2, smul_add]⟩
     | smul a x _ hx => exact ⟨by rw [map_smul, hx.1], by simp only [Pi.smul_apply, map_smul, hx.2, smul_comm a]⟩
   have e1 : X.kmap l (X.sl (ofSL γ)).toRingEquiv (b u) = b ![1, 0] := by
     have := congrFun key.1 ![1, 0]

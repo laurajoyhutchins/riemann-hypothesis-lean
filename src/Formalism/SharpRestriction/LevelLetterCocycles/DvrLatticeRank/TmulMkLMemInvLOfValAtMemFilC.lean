@@ -1,6 +1,56 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ExpansionLowCoeffsIntegral
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.PiNSOfPi
-import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ModelFPfB
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ExpansionLowCoeffsIntegral
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.PiNSOfPi
+public import Formalism.SharpRestriction.LevelLetterCocycles.SplitROfSteps
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.DescentValuation
+public import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ModelFPfB
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.U3upPfFilCAnti
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.UnivLinkPfA
+import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.Interval.Finset.Box
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +80,7 @@ theorem ser_van {LL : Type} [Field LL] (e e₁ P G A : PowerSeries LL) (u x₀ :
     · subst hk; simp
     · simp
   have hresc : rescale u A = C x₀ * rescale u (e ^ h) + X ^ N * (C (u ^ N) * rescale u D₁) := by
-    rw [hA', map_add, map_mul, map_mul, hRC, map_pow (rescale u) X N, rescale_X, mul_pow]
+    rw [hA', map_add (f := _), map_mul, map_mul, hRC, map_pow (rescale u) X N, rescale_X, mul_pow]
     simp only [map_pow]; ring
   have key : X ^ h * (C (u ^ h) * (rescale u e₁) ^ h * P * G) =
       X ^ h * (X ^ N * (e₁ ^ h * C (u ^ N) * rescale u D₁ - C (u ^ h) * (rescale u e₁) ^ h * D₁)) := by
@@ -201,8 +251,8 @@ variable (hfr : IsFrame W Pt π' Eπ h' M σ c α β) (hc1 : IsCrys PD T₁.ρ) 
     (hj2 : ∀ τ, JumpsInV PD T₂.ρ τ (Set.Icc (-(h' : ℤ)) h'))
     (hMF1 : ModelF W T₁ Pt π' Eπ h' M c α β) (hMF2 : ModelF W T₂ Pt π' Eπ h' M c α β) (hM : 1 ≤ M)
 
-include hfr hc1 hc2 hj1 hj2 hMF1 hMF2 hM in
 
+include hfr hc1 hc2 hj1 hj2 hMF1 hMF2 hM in
 theorem core (f : W.EE) (x : W.DD T₂) (hx : x ∈ NcS W T₂ (c - 1)) (x₁ : W.DD T₁)
     (hx₁ : x₁ ∈ NcS W T₁ (c - 1)) (ρ : ℕ)
     (hdiff : W.map F x₁ - ((PD.p : ℕ) : O) ^ ρ • x ∈ PiNS W T₂ π' 1)
@@ -234,8 +284,8 @@ theorem core (f : W.EE) (x : W.DD T₂) (hx : x ∈ NcS W T₂ (c - 1)) (x₁ : 
   refine ⟨hyI, w₁, hw₁I, ?_⟩
   simpa using hP
 
-include hMF2 hM in
 
+include hMF2 hM in
 theorem combine (ρ y : ℕ) (o : O) (X XK XN : ↥(LamLA W T₂ π' Eπ h' c ⊤))
     (hX : ((PD.p : ℕ) : O) ^ y • X = o • XK + XN)
     (hK : ∀ z hz, α T₂ XK = mkP W T₂ π' Eπ h' M c z hz → LiftsBy W F π' Eπ h' ρ c z)
@@ -247,7 +297,7 @@ theorem combine (ρ y : ℕ) (o : O) (X XK XN : ↥(LamLA W T₂ π' Eπ h' c �
   obtain ⟨-, wK, hwK, hK'⟩ := hK zK zK.2 hzK.symm
   obtain ⟨-, wN, hwN, hN'⟩ := hN zN zN.2 hzN.symm
   have h1 := congrArg (α T₂) hX
-  rw [map_smul, map_add, map_smul, hα, ← hzK, ← hzN] at h1
+  rw [map_smul, map_add (f := _), map_smul, hα, ← hzK, ← hzN] at h1
   have hJ : Submodule.Quotient.mk (((PD.p : ℕ) : O) ^ y • (⟨z, hz⟩ : ↥(LamPS W T₂ Eπ h' c)) -
       (o • zK + zN)) = (0 : QLamP W T₂ π' Eπ h' M c) := by
     rw [Submodule.Quotient.mk_sub, Submodule.Quotient.mk_smul, Submodule.Quotient.mk_add,
@@ -259,7 +309,7 @@ theorem combine (ρ y : ℕ) (o : O) (X XK XN : ↥(LamLA W T₂ π' Eπ h' c �
   have h2 := Submodule.add_mem _ (Submodule.add_mem _
     (Submodule.smul_mem _ (((PD.p : ℕ) : O) ^ ρ) hP) (Submodule.smul_mem _ o hK')) hN'
   convert h2 using 1
-  rw [map_add, LinearMap.map_smul_of_tower, pow_add]
+  rw [map_add (f := _), LinearMap.map_smul_of_tower, pow_add]
   module
 
 theorem NL_rep (T : LocLat G Qp LL O) {x : LA W T π' c} (hx : x ∈ NL W T Pt π' Eπ h' c) :
@@ -275,7 +325,7 @@ theorem NL_rep (T : LocLat G Qp LL O) {x : LA W T π' c} (hx : x ∈ NL W T Pt �
     let U : Fin (m + m') → ↥(NcS W T (c - 1)) :=
       Fin.append (fun j => ⟨u j, hu j⟩) (fun j => ⟨u' j, hu' j⟩)
     refine ⟨m + m', Fin.append a a', fun j => U j, ⟨fun j => (U j).2, ?_⟩, fun τ ζ hpt i => ?_⟩
-    · rw [map_add, hx1, hy1, Fin.sum_univ_add]
+    · rw [map_add (f := _), hx1, hy1, Fin.sum_univ_add]
       simp only [U, Fin.append_left, Fin.append_right]
     · have := Submodule.add_mem _ (hx2 τ ζ hpt i) (hy2 τ ζ hpt i)
       unfold expS at this ⊢
@@ -297,8 +347,8 @@ theorem NL_rep (T : LocLat G Qp LL O) {x : LA W T π' c} (hx : x ∈ NL W T Pt �
         rw [Subalgebra.coe_smul, lev_smul, smul_smul]
       · rw [smul_zero]
 
-include hfr hc1 hc2 hj1 hj2 hMF1 hMF2 in
 
+include hfr hc1 hc2 hj1 hj2 hMF1 hMF2 in
 theorem compare {ρ : ℕ} (hW : WKill W F ρ) (hNL : NinLam W T₁ Eπ h') (V₂ : ValH W T₂ Pt π' c)
     (hEu : IsUnit (algebraMap (LetA O n) W.EE Eπ)) (hh : 1 ≤ h')
     (hE : ∀ τ ζ, Pt c ζ τ → ∃ e₁ : PowerSeries LL, W.lev c ζ Eπ = X * e₁ ∧ constantCoeff e₁ ≠ 0)
@@ -323,6 +373,7 @@ theorem compare {ρ : ℕ} (hW : WKill W F ρ) (hNL : NinLam W T₁ Eπ h') (V�
       smulLA W T π' c (Eπ ^ h') (∑ j, e j ⊗ₜ z j) =
         ∑ j, algebraMap (LetA O n) W.EE ((letE c : LetA O n) * a j) ⊗ₜ z j := by
     intro T z
+
     rw [map_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [ModelFPf.smulLA_tmul, he, ← mul_assoc, hΛu.mul_val_inv, one_mul]
@@ -335,7 +386,7 @@ theorem compare {ρ : ℕ} (hW : WKill W F ρ) (hNL : NinLam W T₁ Eπ h') (V�
       | tmul u w =>
         rw [ModelFPf.smulLA_tmul, TensorProduct.map_tmul, LinearMap.mulLeft_apply, LinearMap.id_apply,
           ← mul_assoc, hΛu.val_inv_mul, one_mul]
-      | add u w hu hw => simp only [map_add, hu, hw]
+      | add u w hu hw => simp only [map_add (f := _), hu, hw]
     exact Function.LeftInverse.injective hl
   have hν1 : ν = ∑ j, e j ⊗ₜ mkL W T₁ π' c (y j) (hy j) := hinjΛ (by rw [hrep, hΛe])
   have hν₂ : ∑ j, e j ⊗ₜ mkL W T₂ π' c (W.map F (y j)) (hy2 j) ∈ LamLA W T₂ π' Eπ h' c ⊤ := by

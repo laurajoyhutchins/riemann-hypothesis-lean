@@ -1,6 +1,62 @@
-import Mathlib
-import GroundTheory.AutomorphicForms.GL2.GJZetaDefs
-import GroundTheory.AutomorphicForms.Measures
+module
+
+public import GroundTheory.AutomorphicForms.GL2.GJZetaDefs
+public import GroundTheory.AutomorphicForms.InductionParabolicGroups
+public import GroundTheory.AutomorphicForms.MeasuresParabolic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import GroundTheory.AutomorphicForms.AdmissibleInduction
+import GroundTheory.AutomorphicForms.CuspidalAdmissible
+import GroundTheory.AutomorphicForms.MeasuresGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Countable
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 noncomputable section
@@ -17,12 +73,12 @@ set_option linter.unusedSectionVars false
 variable {F : Type*} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchimedeanLocalField F]
   {n : ℕ} {α : Type*} [LinearOrder α]
 
-variable (n) in
 
+variable (n) in
 abbrev LeviIndex (β : Fin n → α) : Type := {ij : Fin n × Fin n // β ij.1 = β ij.2}
 
-variable (F) in
 
+variable (F) in
 def unipMatrix {β : Fin n → α} (u : UnipotentIndex n β → F) : Matrix (Fin n) (Fin n) F :=
   fun i j => if h : β i < β j then u ⟨(i, j), h⟩ else 0
 
@@ -44,13 +100,9 @@ def lieLevi : Submodule F (Matrix (Fin n) (Fin n) F) where
   zero_mem' i j _ := rfl
   smul_mem' c A hA i j h := by simp [hA i j h]
 
-variable {F n β} in
-theorem mem_lieLevi {A : Matrix (Fin n) (Fin n) F} :
-    A ∈ lieLevi F n β ↔ ∀ i j, β i ≠ β j → A i j = 0 :=
-  Iff.rfl
+
 
 variable {F n β} in
-
 theorem mul_mem_lieLevi {A B : Matrix (Fin n) (Fin n) F} (hA : A ∈ lieLevi F n β)
     (hB : B ∈ lieLevi F n β) : A * B ∈ lieLevi F n β := by
   intro i j h
@@ -74,10 +126,6 @@ def leviCoord : lieLevi F n β ≃ₗ[F] (LeviIndex n β → F) where
   right_inv x := by
     funext s
     simp [s.2]
-
-@[simp] theorem leviCoord_apply (A : lieLevi F n β) (s : LeviIndex n β) :
-    leviCoord F n β A s = (A : Matrix (Fin n) (Fin n) F) s.1.1 s.1.2 :=
-  rfl
 
 def leviCoordHomeomorph : lieLevi F n β ≃ₜ (LeviIndex n β → F) where
   toEquiv := (leviCoord F n β).toEquiv
@@ -187,8 +235,8 @@ theorem isUnit_add_unipMatrix (m : levi F n β) (u : UnipotentIndex n β → F) 
   rw [Matrix.isUnit_iff_isUnit_det, det_add_unipMatrix, ← Matrix.isUnit_iff_isUnit_det]
   exact (m : GL (Fin n) F).isUnit
 
-variable (β) in
 
+variable (β) in
 def parabolicMk (m : levi F n β) (u : UnipotentIndex n β → F) : blockUpper F n β :=
   ⟨(isUnit_add_unipMatrix m u).unit, by
     rw [mem_blockUpper, IsUnit.unit_spec]
@@ -326,13 +374,13 @@ theorem parabolicChart_parabolicMk (m : levi F n β) (u : UnipotentIndex n β �
   funext s
   rw [parabolicChart_apply, coe_parabolicMk, Matrix.add_apply, coordAddEquiv_apply]
   by_cases h : β s.1.1 = β s.1.2
-  · rw [dif_pos h, unipMatrix_apply_of_not_lt u (by rw [h]; exact lt_irrefl _), add_zero]
+  · rw [dite_eq_left h, unipMatrix_apply_of_not_lt u (by rw [h]; exact lt_irrefl _), add_zero]
     rfl
   · have hlt := lt_of_le_of_ne (not_lt.1 s.2) h
-    rw [dif_neg h, mem_levi.1 m.2 _ _ h, unipMatrix_apply_of_lt u hlt, zero_add]
+    rw [dite_eq_right h, mem_levi.1 m.2 _ _ h, unipMatrix_apply_of_lt u hlt, zero_add]
+
 
 variable (β) in
-
 def parabolicMkHomeomorph : (levi F n β × (UnipotentIndex n β → F)) ≃ₜ blockUpper F n β where
   toFun x := parabolicMk β x.1 x.2
   invFun p := (leviProj F n β p, unipCoord p)
@@ -383,8 +431,8 @@ variable [MeasurableSpace F] [BorelSpace F] [MeasurableSpace (GL (Fin n) F)]
 
 variable {β : Fin n → α}
 
-variable (β) in
 
+variable (β) in
 def haarLevi (μ𝔪 : Measure (LeviIndex n β → F)) : Measure (levi F n β) :=
   (leviChart β).haar μ𝔪
 
@@ -392,8 +440,8 @@ instance isHaarMeasure_haarLevi (μ𝔪 : Measure (LeviIndex n β → F)) [μ�
     (haarLevi β μ𝔪).IsHaarMeasure :=
   LinearChart.isHaarMeasure_haar _ μ𝔪
 
-variable (β) in
 
+variable (β) in
 def parabolicMeasure (μ𝔪 : Measure (LeviIndex n β → F)) (μ𝔫 : Measure (UnipotentIndex n β → F)) :
     Measure (ParabolicIndex n β → F) :=
   map (coordEquiv β) (μ𝔪.prod μ𝔫)

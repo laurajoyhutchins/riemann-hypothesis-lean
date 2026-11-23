@@ -1,5 +1,51 @@
-import Formalism.LagrangeIdealLifts.Statement
-import Formalism.WindowSums.AnnihilatorPolynomials.ZpowVal
+module
+
+public import Formalism.LagrangeIdealLifts.Statement
+public import Formalism.WindowSums.AnnihilatorPolynomials.ZpowVal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.Algebra.Polynomial.Div
+
+@[expose] public section
 
 noncomputable section
 
@@ -13,7 +59,7 @@ theorem aeval_pres {R E : Type} [CommRing R] [AddCommGroup E] [Module R E] (f : 
   intro y hy
   induction p using Polynomial.induction_on' with
   | add p q hp hq =>
-    rw [map_add, LinearMap.add_apply]
+    rw [map_add (f := _), LinearMap.add_apply]
     exact S.add_mem hp hq
   | monomial n a =>
     rw [Polynomial.aeval_monomial, Module.End.mul_apply, Module.algebraMap_end_apply]
@@ -152,7 +198,7 @@ theorem main (P : Polynomial ℤ_[ℓ]) (cG : ℤ_[ℓ]) (hcG : cG ≠ 0)
     have e1 : cG • W.φ (B.X • n) = W.φ (cG • (B.X • n)) := (map_smul _ _ _).symm
     have e2 : cG • W.γ y = W.γ (cG • y) := (map_smul _ _ _).symm
     rw [smul_sub, smul_sub, smul_sub, e1, e2, hxe]
-    simp only [map_sub, map_add, W.comm]
+    simp only [map_sub, map_add (f := _), W.comm]
     abel
   have hω' : ω ∈ CS W := hω
   set p := Polynomial.aeval W.γ P with hp
@@ -186,7 +232,7 @@ theorem main (P : Polynomial ℤ_[ℓ]) (cG : ℤ_[ℓ]) (hcG : cG ≠ 0)
       (N_le_QS W (W.N.smul_mem _ hx₀)),
       ⟨B.X ^ M • z₀, W.N.smul_mem _ hz₀, by rw [pow_succ', mul_smul]⟩⟩, ?_⟩
   rw [mul_comm, mul_smul, eS, hy₀e, smul_sub, e0, e1, WD.d1]
-  simp only [map_add, map_neg, map_smul, smul_sub, smul_neg]
+  simp only [map_add (f := _), map_neg, map_smul, smul_sub, smul_neg]
   abel
 
 end CocyclePolynomialSubmodules

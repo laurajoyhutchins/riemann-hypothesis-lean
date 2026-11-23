@@ -1,5 +1,57 @@
-import Formalism.SatakeDualWeyl.StatementW
-import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+module
+
+public import Formalism.SatakeDualWeyl.StatementW
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -31,8 +83,9 @@ lemma wlocal_rowAct_mul {r n : ℕ} (A B : Matrix (Fin r) (Fin r) R) :
     rowAct R (n := n) (A * B) = (rowAct R B).comp (rowAct R A) := by
   apply MvPolynomial.algHom_ext
   intro v
+
   simp only [rowAct, AlgHom.comp_apply, aeval_X, map_sum, map_mul, aeval_C, MvPolynomial.algebraMap_eq,
-    Matrix.mul_apply, Finset.mul_sum, Finset.sum_mul]
+  Matrix.mul_apply, Finset.mul_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun c _ => ?_
   ring
@@ -60,7 +113,7 @@ lemma wlocal_eval_rowGen {r n : ℕ} (a b : Fin r) (c : R) (f : MvPolynomial (Fi
   · intro x
     simp [rowGen, rowAct, Polynomial.algebraMap_apply, MvPolynomial.algebraMap_eq]
   · intro p q hp hq
-    rw [map_add, map_add, Polynomial.eval_add, hp, hq]
+    rw [map_add (f := _), map_add (f := _), Polynomial.eval_add, hp, hq]
   · intro p v hp
     rw [map_mul, map_mul, Polynomial.eval_mul, hp]
     congr 1
@@ -97,7 +150,7 @@ private lemma coeff_rowGen_mem_weyl {r n : ℕ} (hn : n ≤ r) (ν : Fin n → �
     exact Submodule.subset_span ⟨(a, b, k) :: w, rfl⟩
   · simp
   · intro x y _ _ hx hy
-    rw [map_add, Polynomial.coeff_add]
+    rw [map_add (f := _), Polynomial.coeff_add]
     exact Submodule.add_mem _ hx hy
   · intro m x _ hx
     rw [map_smul, Polynomial.coeff_smul]
@@ -438,7 +491,7 @@ lemma wlocal_map_weyl (φ : R →+* S) {r n : ℕ} (hn : n ≤ r) (ν : Fin n �
   · rw [map_zero]
     exact Submodule.zero_mem _
   · intro x y _ _ hx hy
-    rw [map_add]
+    rw [map_add (f := _)]
     exact Submodule.add_mem _ hx hy
   · intro m x _ hx
     rw [wlocal_map_smul]
@@ -469,13 +522,14 @@ lemma wlocal_kill (P : Ideal R) [P.IsPrime] {σ : Type} (w : MvPolynomial σ R)
   have hc : ∀ m, ∃ t : P.primeCompl, (t : R) * w.coeff m = 0 := by
     intro m
     have h1 : algebraMap R (Localization.AtPrime P) (w.coeff m) = 0 := by
-      have := congrArg (coeff m) hw
-      rwa [coeff_map, coeff_zero] at this
+      have := congrArg (AddMonoidAlgebra.coeff · m) hw
+      simpa only [coeff_map, AddMonoidAlgebra.coeff_zero, Finsupp.zero_apply] using this
     exact (IsLocalization.map_eq_zero_iff P.primeCompl (Localization.AtPrime P) _).mp h1
   choose t ht using hc
   refine ⟨∏ m ∈ w.support, (t m : R), Submonoid.prod_mem _ (fun m _ => (t m).2), ?_⟩
   ext m
-  rw [coeff_C_mul, coeff_zero]
+  rw [coeff_C_mul, AddMonoidAlgebra.coeff_zero]
+  change (∏ m ∈ w.support, (t m : R)) * w.coeff m = 0
   by_cases hm : m ∈ w.support
   · rw [← Finset.mul_prod_erase _ _ hm, mul_comm ((t m : P.primeCompl) : R), mul_assoc, ht m, mul_zero]
   · have h0 : w.coeff m = 0 := by
@@ -507,7 +561,7 @@ lemma wlocal_loc (P : Ideal R) [P.IsPrime] {r n : ℕ} (hn : n ≤ r) (ν : Fin 
       obtain ⟨s2, hs2, z2, hz2, e2⟩ := h2
       refine ⟨s1 * s2, P.primeCompl.mul_mem hs1 hs2, s2 • z1 + s1 • z2,
         Submodule.add_mem _ (Submodule.smul_mem _ _ hz1) (Submodule.smul_mem _ _ hz2), ?_⟩
-      rw [map_add, wlocal_map_smul, wlocal_map_smul, ← e1, ← e2]
+      rw [map_add (f := _), wlocal_map_smul, wlocal_map_smul, ← e1, ← e2]
       simp only [MvPolynomial.smul_eq_C_mul, map_mul]
       ring
     · intro a y' _ h

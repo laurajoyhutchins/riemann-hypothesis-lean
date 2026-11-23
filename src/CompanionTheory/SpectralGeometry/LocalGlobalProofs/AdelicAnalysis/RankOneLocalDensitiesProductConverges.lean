@@ -1,10 +1,64 @@
-import Mathlib
-import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteProductMultipliable
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianOneByOneIsScalarStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LocalRankOneDensityUniformizerPowerStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.RankOneLocalDensityAlmostAllStatement
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.LocalMassSeries.HermitianRankOneLocalVolumeStatement
+module
+
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicBoxesCompactExhaust
+public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianOneByOneIsScalarStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteProductMultipliable
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.LocalRankOneDensityUniformizerPowerStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.RankOneLocalDensityAlmostAllStatement
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.LocalMassSeries.HermitianRankOneLocalVolumeStatement
+public import Mathlib.Algebra.FiniteSupport.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Presheaf
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -43,28 +97,7 @@ theorem two_le_norm (v : HeightOneSpectrum (𝓞 F)) : 2 ≤ Ideal.absNorm v.asI
 
 theorem exists_nat_mul_mem (v : HeightOneSpectrum (𝓞 F)) (x : Fv F v) :
     ∃ n : ℕ, 0 < n ∧ (n : Fv F v) * x ∈ v.adicCompletionIntegers F := by
-  set q : 𝓞 F := ((Ideal.absNorm v.asIdeal : ℕ) : 𝓞 F) with hq
-  have hqm : q ∈ v.asIdeal := Ideal.absNorm_mem v.asIdeal
-  have hlt := val_lt_one_of_mem v hqm
-  have hcast : (algebraMap F (Fv F v)) (algebraMap (𝓞 F) F q) = ((Ideal.absNorm v.asIdeal : ℕ) : Fv F v) := by
-    simp [hq]
-  rw [hcast] at hlt
-  set y : Fv F v := ((Ideal.absNorm v.asIdeal : ℕ) : Fv F v) with hy
-  have hy0 : y ≠ 0 := by
-    have hq0 : q ≠ 0 := by
-      rw [hq]; exact_mod_cast (by have := two_le_norm v; omega : Ideal.absNorm v.asIdeal ≠ 0)
-    rw [← hcast]
-    exact (map_ne_zero _).2 ((map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 F) F)).2 hq0)
-  have hv0 : Valued.v y ≠ 0 := (Valuation.ne_zero_iff _).2 hy0
-  have hgt : 1 < (Valued.v y)⁻¹ := by
-    exact (one_lt_inv₀ (zero_lt_iff.2 hv0)).2 hlt
-  obtain ⟨j, hj⟩ := MulArchimedean.arch (Valued.v x) hgt
-  refine ⟨Ideal.absNorm v.asIdeal ^ j, pow_pos (by have := two_le_norm v; omega) j, ?_⟩
-  rw [HeightOneSpectrum.mem_adicCompletionIntegers]
-  push_cast
-  rw [map_mul, map_pow, ← hy]
-  calc Valued.v y ^ j * Valued.v x ≤ Valued.v y ^ j * (Valued.v y)⁻¹ ^ j := by gcongr
-    _ = 1 := by rw [← mul_pow, mul_inv_cancel₀ hv0, one_pow]
+  apply GlobalTheory.CompanionTheory.SW.BoxF.exists_nat_v <;> assumption
 
 theorem exists_exponents (a : ℕ) (ha : 0 < a) :
     ∃ e : HeightOneSpectrum (𝓞 F) → ℕ,
@@ -376,7 +409,7 @@ theorem growth_main (hσ : IsCMExt F E σ) (hJ : IsHermND σ J) (hM : 3 ≤ M) (
     rw [e2]
     refine mul_le_mul_of_nonneg_right ?_ hC.le
     calc (1 / 2 : ℝ) ^ P.card = ∏ _v ∈ P, (1 / 2 : ℝ) := by simp
-      _ ≤ _ := Finset.prod_le_prod (fun _ _ => by norm_num) fun v hv =>
+      _ ≤ _ := Finset.prod_le_prod₀ (fun _ _ => by norm_num) fun v hv =>
         hhalf a ha hDa v fun hvB => hpB v hvB ((hPmem v).1 hv)
   rw [mul_comm]
   exact mul_le_mul_of_nonneg_left hlow (by positivity)

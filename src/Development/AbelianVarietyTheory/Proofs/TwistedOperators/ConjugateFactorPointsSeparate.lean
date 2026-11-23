@@ -1,6 +1,53 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.CentralizerTensorForms
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NotCompactOfIdempotent
+module
+
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NotCompactOfIdempotent
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,7 +68,6 @@ theorem exists_eq_tmul_add_tmul {F E P : Type} [Field F] [CommRing E] [Algebra F
     [Algebra F P] (b : Module.Basis (Fin 2) F E) (x : P ⊗[F] (E ⊗[F] F)) :
     ∃ p q : P, x = p ⊗ₜ (b 0 ⊗ₜ (1 : F)) + q ⊗ₜ (b 1 ⊗ₜ (1 : F)) := by
   induction x with
-  | zero => exact ⟨0, 0, by simp⟩
   | tmul p y =>
     obtain ⟨e, rfl⟩ := (TensorProduct.rid F E).symm.surjective y
     refine ⟨b.repr e 0 • p, b.repr e 1 • p, ?_⟩
@@ -59,7 +105,7 @@ theorem separatingPoints : SeparatingPoints := by
     have key : ∀ i, e p i = 0 ∧ e q i = 0 := fun i => by
       obtain ⟨h1, h2⟩ := hx i
       have hm : (e q i ⊗ₜ[F] b 1 : K i ⊗[F] E) = (e q i ⊗ₜ[F] 1) * (1 ⊗ₜ[F] b 1) := by simp
-      simp only [AlgHom.comp_apply, map_add, hc, hπ, hb0, hb1, map_one, TensorProduct.tmul_neg,
+      simp only [AlgHom.comp_apply, map_add (f := _), hc, hπ, hb0, hb1, map_one, TensorProduct.tmul_neg,
         map_neg] at h1 h2
       rw [hm, map_mul] at h1 h2
       have hδ : χ i (1 ⊗ₜ[F] b 1) ≠ 0 := fun h0 => by
@@ -83,7 +129,7 @@ theorem separatingPoints : SeparatingPoints := by
       exact zero_ne_one this
     have h1 : π i (tConj3 P σ F x) = tConj (K i) σ (π i x) := by
       obtain ⟨p, q, rfl⟩ := exists_eq_tmul_add_tmul b x
-      simp only [map_add, hc, hπ, tConj, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+      simp only [map_add (f := _), hc, hπ, tConj, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
     rw [AlgHom.comp_apply, h1, h0, map_zero, map_zero]
 
 end GlobalTheory.RegSS

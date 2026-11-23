@@ -1,5 +1,51 @@
-import Formalism.LocalToGlobal.CharacterGerms.ConstantCoeffPderivUncurry
-import Formalism.LocalToGlobal.CharacterGerms.CoeffSingleSubstOfLowDegree
+module
+
+public import Formalism.LocalToGlobal.CharacterGerms.RowTieFB
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.CharacterGerms.SubstSubst
+import Formalism.LocalToGlobal.ProjectiveLattices.SubConstMemOrig
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.PushInvertible
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -23,51 +69,8 @@ theorem integralSeries_uncurry_one {χ : PS C 1 dd} (h : IntS V χ) : IntS V (un
   intro μ
   exact h _
 
-def lin {Y : FBChart C V O dd} (p : PairData Y d I) (g : Fin 2) (i : Fin dd) : MvPowerSeries (I g) C :=
-  ∑ c', p.u g c' i • (MvPowerSeries.X c' : MvPowerSeries (I g) C)
-
-theorem cc_lin {Y : FBChart C V O dd} (p : PairData Y d I) (g : Fin 2) (i : Fin dd) :
-    MvPowerSeries.constantCoeff (lin p g i) = 0 := by
-  unfold lin
-  simp
-
-theorem subst_lin_linF {Y : FBChart C V O dd} (p : PairData Y d I) (g : Fin 2) (χ : PS C 1 dd) :
-    MvPowerSeries.subst (lin p g) (linF (dlogC χ)) =
-      ∑ x : I g, p.yOf g χ x • (MvPowerSeries.X x : MvPowerSeries (I g) C) := by
-  unfold linF
-  rw [subst_sum (cc_lin p g)]
-  have h1 : ∀ i : Fin dd, MvPowerSeries.subst (lin p g) (dlogC χ i • (MvPowerSeries.X i : MvPowerSeries (Fin dd) C)) =
-      ∑ x : I g, (dlogC χ i * p.u g x i) • (MvPowerSeries.X x : MvPowerSeries (I g) C) := by
-    intro i
-    rw [subst_smul (cc_lin p g), subst_X (cc_lin p g)]
-    unfold lin
-    rw [Finset.smul_sum]
-    exact Finset.sum_congr rfl fun x _ => by rw [smul_smul]
-  rw [Finset.sum_congr rfl fun i _ => h1 i, Finset.sum_comm]
-  refine Finset.sum_congr rfl fun x _ => ?_
-  unfold PairData.yOf
-  rw [Finset.sum_smul]
-
 end ChG
 
-open ChG VP in
-theorem charGerm_holds : CharGermSt := by
-  intro C _ _ V O _ _ dd Y d _ I _ p Hc χ hχ g S t ht
-  obtain ⟨P, hP0, hPI, -, hPt⟩ := FormalGermZero.sys_P Y p (Hc g) (S g)
-  have ht0 : ∀ g c, MvPowerSeries.constantCoeff (t g c) = 0 := fun g c => (ht g).1 c
-  have hI : IntS V (MvPowerSeries.subst P (un1 χ)) := IntS.subst hP0 hPI (integralSeries_uncurry_one hχ.1)
-  have key : MvPowerSeries.subst (t g) (MvPowerSeries.subst P (un1 χ)) =
-      mvExp (∑ x : I g, p.yOf g χ x • (MvPowerSeries.X x : MvPowerSeries (I g) C)) := by
-    rw [subst_subst hP0 (ht0 g)]
-    have h1 : (fun j => MvPowerSeries.subst (t g) (P j)) = fun j => MvPowerSeries.subst (lin p g) (e Y j) := by
-      funext j
-      exact hPt (t g) (ht g) j
-    rw [h1, ← subst_subst (cc_e Y) (cc_lin p g)]
-    show MvPowerSeries.subst (lin p g) (Psi Y χ) = _
-    rw [chi_exp Y hχ, subst_exp (cc_lin p g) (constantCoeff_linF _), subst_lin_linF]
-  refine ⟨upG g (MvPowerSeries.subst P (un1 χ)), ?_, ?_⟩
-  · exact IntS.subst (fun _ => cc_X _) (fun _ => IntS_X _) hI
-  · rw [AbstractGermZero.upG_subst t ht0 g, key]
 
 section Chart
 
@@ -75,9 +78,6 @@ open Formalism.L2.Pj NumberField ReciprocityTheory.ChartRestriction.G Reciprocit
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 variable (Xo : Moduli Dw l) (c : Coeff l) [StarRing (𝓞 E)]
-
-theorem chart_hypothesis_of_characters (h : CharacterHypothesisCharts Xo c) : CharacterHypothesisAllCharts Xo c :=
-  chart_hypothesis_of_character Xo c charGerm_holds h
 
 end Chart
 

@@ -1,11 +1,61 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualLatticeIndex
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesIsLattice
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesGenIndexTrans
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesLatticeBasis
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesGenIndexDet
-import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesIdealLatticeFG
-import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.BoxBounds
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.StatementsDualLatticeIndex
+public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.BoxBounds
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesGenIndexDet
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesGenIndexTrans
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesIdealLatticeFG
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesIsLattice
+public import GroundTheory.HeightsAndTheta.Heights.HeightKernels.PLinesLatticeBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -221,6 +271,7 @@ theorem dual_box {c : K} (hc : c ≠ 0) : dual (box (i := i) c) = box c⁻¹ := 
     choose a ha using h
     choose b hb using hx
     refine ⟨∑ j, a j * b j, ?_⟩
+
     rw [map_sum, dotProduct]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← ha j, ← hb j, Algebra.smul_def, Algebra.smul_def, map_mul]
@@ -267,7 +318,7 @@ theorem box_relIndex_ne_zero {c : K} (hc : c ≠ 0) :
   have hid : ∀ c : K, box (i := i) c =
       idealLattice (fun _ : Fin i => FractionalIdeal.spanSingleton (𝓞 K)⁰ c) := fun c => by
     simp only [box, idealLattice, FractionalIdeal.coe_spanSingleton]
-  have lat : ∀ c : K, c ≠ 0 → Submodule.IsLattice ℚ ((box (i := i) c).restrictScalars ℤ) := by
+  have lat : ∀ c : K, c ≠ 0 → Submodule.IsFullLattice ℚ ((box (i := i) c).restrictScalars ℤ) := by
     intro c hc
     obtain ⟨hfg, hspan⟩ := LinesIdealLatticeFG.proof K i (fun _ => FractionalIdeal.spanSingleton (𝓞 K)⁰ c)
       (fun _ => by rw [Ne, FractionalIdeal.spanSingleton_eq_zero_iff]; exact hc)
@@ -297,8 +348,8 @@ theorem eq_of_le_of_prod {a₁ a₂ a₃ b₁ b₂ b₃ : ℕ} (h₁ : a₁ ≤ 
 
 end DualLatticeIndexAlt
 
-open DualLatticeIndexAlt in
 
+open DualLatticeIndexAlt in
 theorem DualLatticeIndex.proof : DualLatticeIndex.Statement := by
   intro K _ _ i F F' hle
   obtain ⟨e₁, he₁, hlo⟩ := exists_box_le F'.lattice F'.span_eq
@@ -348,12 +399,6 @@ theorem DualLatticeIndex.proof : DualLatticeIndex.Statement := by
     ring
   rw [← dual_toAddSubgroup, ← dual_toAddSubgroup]
   exact eq_of_le_of_prod a₁ a₂ a₃ hprod hb0
-
-example : (dualLattice (HermLattice.standard ℚ 1)).toAddSubgroup.relIndex
-      (dualLattice HermLattice.twiceStandardExample).toAddSubgroup =
-    HermLattice.twiceStandardExample.lattice.toAddSubgroup.relIndex
-      (HermLattice.standard ℚ 1).lattice.toAddSubgroup :=
-  DualLatticeIndex.proof ℚ 1 _ _ twiceStandardExample_le
 
 end
 

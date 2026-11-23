@@ -1,7 +1,59 @@
-import Mathlib
-import Formalism.GradedWeylDivisibility.FinalD
-import Formalism.LocalRingCardinality.DataCoeff
-import Formalism.HermitianLattices.StatementLat
+module
+
+public import Formalism.LocalRingCardinality.DataCoeff
+public import Formalism.HermitianLattices.StatementLat
+public import Formalism.GradedWeylDivisibility.StatementD
+public import Formalism.SatakeDualWeyl.Statement
+public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
+public import Formalism.GradedWeylDivisibility.FinalD
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalRingCardinality.Params
+
+@[expose] public section
 
 open MvPolynomial NumberField IsDedekindDomain
 open scoped Matrix
@@ -37,18 +89,18 @@ def fockL : MvPolynomial σ K →ₗ⋆[K] MvPolynomial σ K →ₗ[K] K :=
         fockS_eq_sum f g (f.support ∪ f'.support) Finset.subset_union_left,
         fockS_eq_sum f' g (f.support ∪ f'.support) Finset.subset_union_right, ← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun m _ => ?_
-      rw [coeff_add, star_add]; ring)
+      rw [MvPolynomial.coeff_add, star_add]; ring)
     (by
       intro c f g
       rw [fockS_eq_sum (c • f) g f.support (support_smul), fockS, smul_eq_mul, Finset.mul_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
-      rw [coeff_smul, smul_eq_mul, star_mul', starRingEnd_apply]; ring)
+      rw [MvPolynomial.coeff_smul, smul_eq_mul, star_mul', starRingEnd_apply]; ring)
     (by
       intro f g g'
-      simp only [fockS, coeff_add, mul_add, add_mul, Finset.sum_add_distrib])
+      simp only [fockS, MvPolynomial.coeff_add, mul_add, add_mul, Finset.sum_add_distrib])
     (by
       intro c f g
-      simp only [fockS, coeff_smul, smul_eq_mul, RingHom.id_apply, Finset.mul_sum]
+      simp only [fockS, MvPolynomial.coeff_smul, smul_eq_mul, RingHom.id_apply, Finset.mul_sum]
       refine Finset.sum_congr rfl fun m _ => ?_
       ring)
 
@@ -79,6 +131,7 @@ theorem blockAct_comp (g h : ι → Matrix (Fin n) (Fin n) K) :
     (Formalism.GradedWeylDivisibility.blockAct K (n := n) g).comp (Formalism.GradedWeylDivisibility.blockAct K h) = Formalism.GradedWeylDivisibility.blockAct K fun τ => h τ * g τ := by
   apply MvPolynomial.algHom_ext
   intro v
+
   simp only [AlgHom.comp_apply, Formalism.GradedWeylDivisibility.blockAct, aeval_X, map_sum, map_mul, algHom_C, Matrix.mul_apply]
   simp only [algebraMap_eq, Finset.mul_sum, Finset.sum_mul, ← C_mul]
   rw [Finset.sum_comm]

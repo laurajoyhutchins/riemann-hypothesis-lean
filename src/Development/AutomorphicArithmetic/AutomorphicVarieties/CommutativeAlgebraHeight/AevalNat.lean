@@ -1,5 +1,55 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.FinDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DPoly
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.RepAlg
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DPoly
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.IsLocalHom
+
+@[expose] public section
 
 open TensorProduct IsLocalRing Polynomial UpperTheory.V.W UpperTheory.V.Alg UpperTheory.V.CA
 
@@ -15,6 +65,7 @@ private theorem pol_homog (D : GDet n A G) (s : Finset G) : (pol D s).IsHomogene
   have h2 : D.toDet.poly (fun a : s => (MonoidAlgebra.single (a : G) 1 : MonoidAlgebra A G)) = pol D s := by
     change D.D _ (ofT A G _ _) = D.D _ _
     congr 1
+
     simp [Det.gen, map_sum, ofT_tmul]
   rwa [h2] at h
 
@@ -29,6 +80,7 @@ private theorem pol_map (D : GDet n A G) {A' : Type} [CommRing A'] (f : A →+* 
     pol (D.map f) s = MvPolynomial.map f (pol D s) := by
   rw [pol, pol, ← nat' D f (MvPolynomial.map f) (by simp)]
   congr 1
+
   simp [map_sum]
 
 private theorem sum_single {S : Type} [CommRing S] (s : Finset G) (y : MonoidAlgebra S G)
@@ -36,7 +88,7 @@ private theorem sum_single {S : Type} [CommRing S] (s : Finset G) (y : MonoidAlg
   classical
   rw [Finset.sum_coe_sort s (fun a => MonoidAlgebra.single a (y.coeff a))]
   ext g
-  simp only [MonoidAlgebra.coeff_sum, MonoidAlgebra.coeff_single, Finsupp.finset_sum_apply, Finsupp.single_apply, Finset.sum_ite_eq']
+  simp only [MonoidAlgebra.coeff_sum, MonoidAlgebra.coeff_single, Finsupp.finsetSum_apply, Finsupp.single_apply, Finset.sum_ite_eq']
   split_ifs with h
   · rfl
   · exact (Finsupp.notMem_support_iff.1 fun h' => h (hy h')).symm
@@ -47,6 +99,7 @@ private theorem pol_eval (D : GDet n A G) (s : Finset G) {S : Type} [CommRing S]
   rw [pol, ← D.nat]
   congr 1
   conv_lhs => rw [← sum_single s y hy]
+
   simp [map_sum]
 
 private theorem aeval_nat {σ A' : Type} [CommRing A'] (f : A →+* A') {S S' : Type} [CommRing S]
@@ -55,7 +108,7 @@ private theorem aeval_nat {σ A' : Type} [CommRing A'] (f : A →+* A') {S S' : 
     φ (MvPolynomial.aeval c p) = MvPolynomial.aeval (fun a => φ (c a)) (MvPolynomial.map f p) := by
   induction p using MvPolynomial.induction_on with
   | C a => simp [h]
-  | add p q hp hq => simp only [map_add, hp, hq]
+  | add p q hp hq => simp only [map_add (f := _), hp, hq]
   | mul_X p i hp => simp only [map_mul, hp, MvPolynomial.aeval_X, MvPolynomial.map_X]
 
 private theorem supp_map {S S' : Type} [CommRing S] [CommRing S'] (φ : S →+* S') (y : MonoidAlgebra S G) :
@@ -71,7 +124,7 @@ private theorem sep (I : Ideal A) [IsAdicComplete I A] {σ : Type} {p q : MvPoly
     p = q := by
   ext m
   refine sub_eq_zero.1 (IsHausdorff.haus (I := I) inferInstance _ fun N => ?_)
-  have := congrArg (MvPolynomial.coeff m) (h N)
+  have := congrArg (AddMonoidAlgebra.coeff · m) (h N)
   rw [MvPolynomial.coeff_map, MvPolynomial.coeff_map, Ideal.Quotient.eq] at this
   rw [SModEq.zero, smul_eq_mul, Ideal.mul_top]
   exact this
@@ -114,11 +167,12 @@ private theorem lift_ex {S : Type} [CommRing S] [Algebra A S] (y : MonoidAlgebra
     by_contra h
     rw [Finsupp.mem_support_iff] at hg
     apply hg
-    simp only [MonoidAlgebra.coeff_sum, MonoidAlgebra.coeff_single, Finsupp.finset_sum_apply]
+    simp only [MonoidAlgebra.coeff_sum, MonoidAlgebra.coeff_single, Finsupp.finsetSum_apply]
     refine Finset.sum_eq_zero fun a _ => Finsupp.single_eq_of_ne ?_
     rintro rfl
     exact h a.2
   · conv_rhs => rw [← sum_single _ y le_rfl]
+
     simp [map_sum]
 
 end

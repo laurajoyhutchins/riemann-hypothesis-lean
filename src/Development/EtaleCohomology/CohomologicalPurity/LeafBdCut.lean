@@ -1,4 +1,48 @@
-import Development.EtaleCohomology.CohomologicalPurity.LeafIndExc
+module
+
+public import Development.EtaleCohomology.CohomologicalPurity.LeafIndExc
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.CategoryTheory.Limits.Types.Pushouts
+import Mathlib.CategoryTheory.Presentable.Type
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite GlobalTheory.EtC CochainComplex.HomComplex
@@ -85,7 +129,7 @@ def LeafImgHom : Prop := ∀ (S R : Type) [CommRing S] [CommRing R] (I : Cx S) (
 def LeafImg : Prop := ∀ (S R : Type) [CommRing S] [CommRing R] (I : Cx S) (J : Cx R) (ρ : SemiMap I J),
   ∃ T : ∀ (E : Spc) (n : ℤ), Cochain ((chains S).obj E) I n →+ Cochain ((chains R).obj E) J n,
     (∀ (E : Spc) (n : ℤ) (α : Cochain ((chains S).obj E) I n) (p : ℕ) (s : ℤ) (h : -(p : ℤ) + n = s) (U : Scheme.{0})
-      (x : Sx E p U), ev (T E n α) p s h U x = ρ.app U s (ev α p s h U x)) ∧
+      (x : Sx E p U), ev (R := R) (T E n α) p s h U x = ρ.app U s (ev (R := S) α p s h U x)) ∧
     (∀ (E : Spc) (n m : ℤ) (α : Cochain ((chains S).obj E) I n), T E m (δ n m α) = δ n m (T E n α)) ∧
     ∀ (E E' : Spc) (f : E ⟶ E') (n : ℤ) (α : Cochain ((chains S).obj E') I n),
       T E n (pb ((chains S).map f) α) = pb ((chains R).map f) (T E' n α)
@@ -96,7 +140,7 @@ theorem good (h1 : LeafMono) (h2 : LeafPush) (h3 : LeafGood) (R : Type) [CommRin
     unfold res; infer_instance
 
 theorem inl_map {P' P : Arrow Spc} (φ : P' ⟶ P) : dbl.inl P' ≫ dbl.map φ = φ.right ≫ dbl.inl P :=
-  pushout.inl_desc _ _ _
+  pushout.inl_desc (f := P'.hom) (g := P'.hom) _ _ _
 
 theorem goal_of (h1 : LeafMono) (h2 : LeafPush) (h3 : LeafGood) (h4 : LeafDelta) (h5 : LeafExact) (h6 : LeafImg) :
     LeafBd := by

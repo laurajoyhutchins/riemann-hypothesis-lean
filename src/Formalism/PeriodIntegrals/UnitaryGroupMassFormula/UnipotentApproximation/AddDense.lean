@@ -1,5 +1,55 @@
-import Mathlib
-import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentApproximation.MemZeroLocusGLIff
+module
+
+public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnipotentApproximation.MemZeroLocusGLIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.RingTheory.DedekindDomain.Factorization
+
+@[expose] public section
 
 noncomputable section
 
@@ -16,26 +66,18 @@ private theorem val_K_lemma (v : HeightOneSpectrum R) (k : K) :
     Valued.v (algebraMap K (v.adicCompletion K) k) = v.valuation K k := by
   first
   | exact valuedAdicCompletion_eq_valuation' v k
-  | exact valuedAdicCompletion_eq_valuation' k
-  | exact valuedAdicCompletion_eq_valuation v k
-  | exact valuedAdicCompletion_eq_valuation k
-  | rfl
 
 theorem int_R (v : HeightOneSpectrum R) (r : R) :
     algebraMap K (v.adicCompletion K) (algebraMap R K r) ∈ v.adicCompletionIntegers K := by
   rw [mem_adicCompletionIntegers, val_K_lemma, valuation_of_algebraMap]
   first
   | exact v.intValuation_le_one r
-  | exact intValuation_le_one v r
-  | exact intValuation_le_one r
 
 theorem val_R (v : HeightOneSpectrum R) (r : R) :
     Valued.v (algebraMap K (v.adicCompletion K) (algebraMap R K r)) = v.intValuation r := by
   rw [val_K_lemma]
   first
   | exact valuation_of_algebraMap v r
-  | exact v.valuation_of_algebraMap r
-  | simp [valuation_of_algebraMap]
 
 theorem exists_near (v : HeightOneSpectrum R) (y : v.adicCompletion K) :
     ∃ k : K, y - algebraMap K (v.adicCompletion K) k ∈ v.adicCompletionIntegers K := by
@@ -65,7 +107,6 @@ theorem exists_den (b : FiniteAdeleRing R K) :
   have hfin : {v : HeightOneSpectrum R | b v ∉ v.adicCompletionIntegers K}.Finite := by
     first
     | exact Filter.eventually_cofinite.mp b.2
-    | exact Filter.eventually_cofinite.mp b.prop
   choose s hs0 hs using fun v => exists_den_local (R := R) (K := K) v (b v)
   refine ⟨∏ v ∈ hfin.toFinset, s v, Finset.prod_ne_zero_iff.mpr fun v _ => hs0 v, ?_⟩
   intro w
@@ -74,7 +115,6 @@ theorem exists_den (b : FiniteAdeleRing R K) :
     first
     | rfl
     | (rw [← IsScalarTower.algebraMap_apply]; rfl)
-    | simp [IsScalarTower.algebraMap_apply R K (w.adicCompletion K)]
   rw [hc]
   by_cases hw : w ∈ hfin.toFinset
   · rw [← Finset.mul_prod_erase _ _ hw, map_mul, map_mul, mul_assoc, mul_left_comm]
@@ -149,21 +189,17 @@ theorem exists_approx_adele (b : FiniteAdeleRing R K) :
   have hinj : Function.Injective (algebraMap R K) := by
     first
     | exact IsFractionRing.injective R K
-    | exact IsFractionRing.injective
-    | exact NoZeroSMulDivisors.algebraMap_injective R K
   have hrK : algebraMap R K r ≠ 0 := fun h => hr (hinj (by rw [h, map_zero]))
   have hx : algebraMap K (v.adicCompletion K) (algebraMap R K r) ≠ 0 := (map_ne_zero _).mpr hrK
   have e1 : (b - algebraMap K (FiniteAdeleRing R K) (algebraMap R K a / algebraMap R K r)) v
       = b v - algebraMap K (v.adicCompletion K) (algebraMap R K a / algebraMap R K r) := by
     first
     | rfl
-    | simp
   have e2 : (algebraMap R (FiniteAdeleRing R K) r * b) v
       = algebraMap K (v.adicCompletion K) (algebraMap R K r) * b v := by
     first
     | rfl
     | (rw [← IsScalarTower.algebraMap_apply]; rfl)
-    | simp [IsScalarTower.algebraMap_apply R K (v.adicCompletion K)]
   have h1 := ha v
   rw [e2] at h1
   have e3 : b v - algebraMap K (v.adicCompletion K) (algebraMap R K a / algebraMap R K r)
@@ -211,8 +247,6 @@ theorem exists_small_finset (s : Finset (HeightOneSpectrum R)) (U : ∀ v : Heig
   intro w _
   first
   | exact v.intValuation_le_one (r w)
-  | exact intValuation_le_one v (r w)
-  | exact intValuation_le_one (r w)
 
 theorem denseRange : DenseRange (algebraMap K (FiniteAdeleRing R K)) := by
   classical
@@ -253,7 +287,7 @@ theorem denseRange : DenseRange (algebraMap K (FiniteAdeleRing R K)) := by
     intro v
     show algebraMap K (v.adicCompletion K) (u0 + algebraMap R K a) - x v =
       -((x v - algebraMap K (v.adicCompletion K) u0) - algebraMap K (v.adicCompletion K) (algebraMap R K a))
-    rw [map_add]; ring
+    rw [map_add (f := _)]; ring
   have hval : ∀ v : HeightOneSpectrum R,
       Valued.v ((algebraMap K (FiniteAdeleRing R K) (u0 + algebraMap R K a) - x) v) ≤ v.intValuation r := by
     intro v

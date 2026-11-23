@@ -1,11 +1,47 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsobaricDiscreteSelfDualStrongMultiplicityOne
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NotIsobaricRigid
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.DepthZeroLabelsOfLabelLaws
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsTameGenAt
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsTeichmullerMaps
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsobaricDiscreteSelfDualStrongMultiplicityOne
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.RankOneUnitary
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.TeichmullerInertiaLabelCondition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -19,14 +55,6 @@ section WDLaws
 variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω]
 variable {B : ValuationSubring Ω} {w : HeightOneSpectrum (𝓞 E)} {h : IsPlaceOver B w}
 variable {g : ℕ} [Fact g.Prime]
-
-theorem lab_lpTw (τ : Fbar g →* ℂ) (γ : G E Ω) (a : WD h) (s : ℝ) :
-    WD.lab τ γ (a.lpTw s) = WD.lab τ γ a :=
-  WD.lab_lpTw τ γ a s
-
-theorem natDegree_lab_le (τ : Fbar g →* ℂ) (γ : G E Ω) (a : WD h) :
-    (WD.lab τ γ a).natDegree ≤ a.lpDim :=
-  WD.natDegree_lab_le τ γ a
 
 end WDLaws
 
@@ -49,14 +77,6 @@ theorem tieLab_of_labTie {T : GlobalTheory.RowTie.WDTie N A} {τ : ∀ k, Fb (H.
   · haveI : Fact (H.g k).Prime := ⟨H.g_prime k⟩
     rw [(hT k v).2.2, ← T.dim]
     exact WD.natDegree_lab_le _ _ _
-
-theorem labTame_of_labTie {T : GlobalTheory.RowTie.WDTie N A} {τ : ∀ k, Fb (H.g k) (H.g_prime k) →* ℂ}
-    {γ : Fin 2 → PlE H → G H.E N.Om} (hT : LabTie T τ γ) : GlobalTheory.RowTie.LabTame N A := by
-  intro k v a ha σ hσ hw
-  haveI : Fact (H.g k).Prime := ⟨H.g_prime k⟩
-  rw [(hT k v).2.2, ← T.dim] at ha
-  rw [T.inePol _ a σ hσ, ← T.dim]
-  exact WD.inePol_wild_of_natDegree_lab ha hw
 
 end Comparison₂
 

@@ -1,4 +1,51 @@
-import Formalism.FormalDegreeBessel.StatementG
+module
+
+public import Formalism.FormalDegreeBessel.StatementG
+public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Matrix MeasureTheory TensorProduct
 
@@ -20,14 +67,6 @@ def IsBesselFunctional {Vs Wp : Type*} [AddCommGroup Vs] [Module ℂ Vs] [AddCom
     (ℓ : Vs ⊗[ℂ] Module.Dual ℂ Wp →ₗ[ℂ] ℂ) : Prop :=
   ∀ h ∈ UWset k r z, ∀ n ∈ Nset k r, ∀ (v : Vs) (w : Module.Dual ℂ Wp),
     ℓ (σ (h * n) v ⊗ₜ dualAct π h w) = psi k r z c n * ℓ (v ⊗ₜ w)
-
-def IsBesselMap {Vs Wp : Type*} [AddCommGroup Vs] [Module ℂ Vs] [AddCommGroup Wp] [Module ℂ Wp]
-    (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (c : ℂ)
-    (σ : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → Module.End ℂ Vs)
-    (π : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → Module.End ℂ Wp)
-    (L : Vs →ₗ[ℂ] Wp) : Prop :=
-  ∀ h ∈ UWset k r z, ∀ n ∈ Nset k r, ∀ v : Vs,
-    L (σ (h * n) v) = psi k r z c n • π h (L v)
 
 def pairing {Vs Wp : Type*} [AddCommGroup Vs] [Module ℂ Vs] [AddCommGroup Wp] [Module ℂ Wp]
     (L : Vs →ₗ[ℂ] Wp) : Vs ⊗[ℂ] Module.Dual ℂ Wp →ₗ[ℂ] ℂ :=
@@ -71,25 +110,6 @@ def bigCell (k r : ℕ) (c : Fin r → ℂ) (μ : Matrix (Fin (k + 1)) (Fin (k +
     (if hi : r ≤ i.val ∧ i.val ≤ r + k then μ ⟨i.val - r, by omega⟩ ⟨j.val - r, by omega⟩ else 0)
   else
     (if i.val = 2 * r + k - j.val then (star (c ⟨2 * r + k - j.val, by omega⟩))⁻¹ else 0)
-
-def BesselSub : Prop :=
-  ∀ (Vs Wp : Type) [AddCommGroup Vs] [Module ℂ Vs] [AddCommGroup Wp] [Module ℂ Wp]
-    (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (c : ℂ)
-    (σ : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → Module.End ℂ Vs)
-    (π : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → Module.End ℂ Wp),
-    IsBesselFunctional k r z c σ π 0 ∧
-    (∀ ℓ₁ ℓ₂, IsBesselFunctional k r z c σ π ℓ₁ → IsBesselFunctional k r z c σ π ℓ₂ →
-      IsBesselFunctional k r z c σ π (ℓ₁ + ℓ₂)) ∧
-    (∀ (a : ℂ) ℓ, IsBesselFunctional k r z c σ π ℓ → IsBesselFunctional k r z c σ π (a • ℓ))
-
-def BesselMapEquiv : Prop :=
-  ∀ (Vs Wp : Type) [AddCommGroup Vs] [Module ℂ Vs] [AddCommGroup Wp] [Module ℂ Wp]
-    (k r : ℕ) (z : Fin (2 * r + k + 1) → ℂ) (c : ℂ)
-    (σ : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → Module.End ℂ Vs)
-    (π : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ → Module.End ℂ Wp),
-    inWb k r z → IsRepOn (UWset k r z) π →
-    (∀ L : Vs →ₗ[ℂ] Wp, IsBesselMap k r z c σ π L ↔ IsBesselFunctional k r z c σ π (pairing L)) ∧
-    (FiniteDimensional ℂ Wp → Function.Bijective (pairing (Vs := Vs) (Wp := Wp)))
 
 def BesselNEquiv : Prop :=
   ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [NormedSpace ℂ Wp] [CompleteSpace Wp]

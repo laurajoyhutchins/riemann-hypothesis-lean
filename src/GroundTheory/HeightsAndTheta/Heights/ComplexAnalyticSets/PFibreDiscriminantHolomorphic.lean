@@ -1,6 +1,55 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StFibreDiscriminantHolomorphic
-import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PRiemannExtensionAnalytic
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.StFibreDiscriminantHolomorphic
+public import GroundTheory.HeightsAndTheta.Heights.ComplexAnalyticSets.PRiemannExtensionAnalytic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.IndefiniteRowSideFullHecke.ComplexSets
@@ -16,8 +65,8 @@ variable {σ : Type} [Fintype σ]
 def pairProd {N : ℕ} (l : (σ → ℂ) →L[ℂ] ℂ) (z : Fin N → σ → ℂ) : ℂ :=
   ∏ q ∈ (Finset.univ : Finset (Fin N)).offDiag, (l (z q.1) - l (z q.2))
 
-omit [Fintype σ] in
 
+omit [Fintype σ] in
 theorem continuous_pairProd {N : ℕ} (l : (σ → ℂ) →L[ℂ] ℂ) : Continuous (pairProd (N := N) l) := by
   unfold pairProd
   exact continuous_finsetProd _ fun q _ =>
@@ -56,7 +105,7 @@ theorem fibreDiscr_eq_pairProd {Y : Set (σ → ℂ)} {d : ℕ} {A : (σ → ℂ
     (Set.finite_range p).eq_of_subset_of_encard_le hsub (by rw [hr]; exact hle)
   have hN : {x | x ∈ Y ∧ A x = y}.encard = N := heq ▸ hr
   unfold fibreDiscr
-  rw [dif_pos hN]
+  rw [dite_eq_left hN]
   unfold pairProd
   symm
   refine Finset.prod_bij (fun q _ => (p q.1, p q.2)) ?_ ?_ ?_ ?_
@@ -82,12 +131,12 @@ theorem fibreDiscr_eq_pairProd {Y : Set (σ → ℂ)} {d : ℕ} {A : (σ → ℂ
 theorem norm_prod_le_pow {ι : Type*} (s : Finset ι) (F : ι → ℂ) {C : ℝ} (hC : 1 ≤ C) {n : ℕ}
     (hs : s.card ≤ n) (hF : ∀ i ∈ s, ‖F i‖ ≤ C) : ‖∏ i ∈ s, F i‖ ≤ C ^ n := by
   rw [norm_prod]
-  calc ∏ i ∈ s, ‖F i‖ ≤ ∏ _i ∈ s, C := Finset.prod_le_prod (fun i _ => norm_nonneg _) hF
+  calc ∏ i ∈ s, ‖F i‖ ≤ ∏ _i ∈ s, C := Finset.prod_le_prod₀ (fun i _ => norm_nonneg _) hF
     _ = C ^ s.card := Finset.prod_const C
     _ ≤ C ^ n := pow_le_pow_right₀ hC hs
 
-omit [Fintype σ] in
 
+omit [Fintype σ] in
 theorem exists_bound_pairs {Y : Set (σ → ℂ)} {d : ℕ} {A : (σ → ℂ) →L[ℂ] (Fin d → ℂ)}
     {K : Set (Fin d → ℂ)} (l : (σ → ℂ) →L[ℂ] ℂ) (hK : IsCompact {x | x ∈ Y ∧ A x ∈ K}) :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ a ∈ {x | x ∈ Y ∧ A x ∈ K}, ∀ b ∈ {x | x ∈ Y ∧ A x ∈ K}, ‖l a - l b‖ ≤ C := by
@@ -160,7 +209,7 @@ theorem continuousAt_of_count_ne {Y : Set (σ → ℂ)} {d : ℕ} {A : (σ → �
     (hN : {x | x ∈ Y ∧ A x = y₀}.encard ≠ N) : ContinuousAt (fibreDiscr Y A l N) y₀ := by
   have hf0 : fibreDiscr Y A l N y₀ = 0 := by
     unfold fibreDiscr
-    rw [dif_neg hN]
+    rw [dite_eq_right hN]
   obtain ⟨ρ, hρ, hρD⟩ := Metric.isOpen_iff.1 hD y₀ hy₀
   have hKD : closedBall y₀ (ρ / 2) ⊆ D := (closedBall_subset_ball (by linarith)).trans hρD
   have hYK := hproper _ hKD (isCompact_closedBall y₀ (ρ / 2))
@@ -200,10 +249,10 @@ theorem continuousAt_of_count_ne {Y : Set (σ → ℂ)} {d : ℕ} {A : (σ → �
   by_cases hNy : {x | x ∈ Y ∧ A x = y}.encard = N
   swap
   · unfold fibreDiscr
-    rw [dif_neg hNy, norm_zero]
+    rw [dite_eq_right hNy, norm_zero]
     exact hε
   unfold fibreDiscr
-  rw [dif_pos hNy]
+  rw [dite_eq_left hNy]
   have hTcard : (Set.finite_of_encard_eq_coe hNy).toFinset.card = N := by
     have := (Set.finite_of_encard_eq_coe hNy).encard_eq_coe_toFinset_card
     rw [hNy] at this

@@ -1,6 +1,54 @@
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.DiffAtOddSt
-import Lemmata.MiscLemmasK.Imports
-import Lemmata.FirstBlockLemmaL.Imports
+module
+
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.DiffAtOddSt
+public import Mathlib.Algebra.AffineMonoid.Basic
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+public import Mathlib.NumberTheory.NumberField.Discriminant.Different
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.NumberTheory.Padics.PadicVal.Basic
+
+@[expose] public section
 
 noncomputable section
 
@@ -86,12 +134,12 @@ variable {E : Type} [Field E] [NumberField E]
 theorem padicValNat_multiset_prod (ℓ : ℕ) [Fact ℓ.Prime] (s : Multiset ℕ) (h : ∀ x ∈ s, x ≠ 0) :
     padicValNat ℓ s.prod = (s.map (padicValNat ℓ)).sum := by
   induction s using Multiset.induction_on with
-  | empty => simp
+  | empty => simp [Nat.padicValNat_def]
   | cons b s ih =>
     have hb : b ≠ 0 := h b (Multiset.mem_cons_self b s)
     have hs : ∀ x ∈ s, x ≠ 0 := fun x hx => h x (Multiset.mem_cons_of_mem hx)
     have hp : s.prod ≠ 0 := Multiset.prod_ne_zero (fun h0 => hs 0 h0 rfl)
-    rw [Multiset.prod_cons, padicValNat.mul hb hp, Multiset.map_cons, Multiset.sum_cons, ih hs]
+    rw [Multiset.prod_cons, (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) hb hp, Multiset.map_cons, Multiset.sum_cons, ih hs]
 
 theorem natCast_ne_zero_oe (ℓ : ℕ) [hℓ : Fact ℓ.Prime] : (ℓ : 𝓞 E) ≠ 0 := by
   intro h
@@ -123,7 +171,8 @@ theorem padicValNat_absNorm_eq_sum (ℓ : ℕ) [Fact ℓ.Prime] {X : Ideal (𝓞
   have hv : ∀ Q : Ideal (𝓞 E), Q.IsPrime → Q ≠ ⊥ → (ℓ : 𝓞 E) ∉ Q →
       padicValNat ℓ (Ideal.absNorm Q) = 0 := by
     intro Q hQp hQ0 hlQ
-    apply padicValNat.eq_zero_of_not_dvd
+    rw [Nat.padicValNat_def]
+    apply multiplicity_eq_zero_of_not_dvd
     intro hdvd
     haveI : Q.IsMaximal := hQp.isMaximal hQ0
     letI : Field (𝓞 E ⧸ Q) := Ideal.Quotient.field Q
@@ -159,10 +208,6 @@ theorem padicValNat_absNorm_eq_sum (ℓ : ℕ) [Fact ℓ.Prime] {X : Ideal (𝓞
       = ∑ Q ∈ A ∪ B, (normalizedFactors X).count Q * padicValNat ℓ (Ideal.absNorm Q) := by
         apply Finset.sum_subset Finset.subset_union_left
         intro Q hQ hQA
-        have hQB : Q ∈ B := by
-          rcases Finset.mem_union.mp hQ with h | h
-          · exact absurd h hQA
-          · exact h
         have hc : (normalizedFactors X).count Q = 0 :=
           Multiset.count_eq_zero.mpr (fun h => hQA (Multiset.mem_toFinset.mpr h))
         rw [hc, zero_mul]
@@ -217,11 +262,19 @@ theorem diffExp : DiffExpSt := by
   have hm0 : m ≠ 0 := by
     rintro rfl
     exact hm (dvd_zero ℓ)
+  have hpow : padicValNat ℓ (ℓ ^ a) = a := by
+    rw [Nat.padicValNat_def]
+    exact multiplicity_base_pow hℓ.one_lt a
+  have hmval : padicValNat ℓ m = 0 := by
+    rw [Nat.padicValNat_def]
+    exact multiplicity_eq_zero_of_not_dvd hm
   have hA : padicValNat ℓ (Ideal.absNorm (differentIdeal ℤ (𝓞 E))) = a := by
-    rw [hnorm, hd, padicValNat.mul (pow_ne_zero _ hℓ.ne_zero) hm0, padicValNat.prime_pow,
-      padicValNat.eq_zero_of_not_dvd hm, add_zero]
+    rw [hnorm, hd,
+      (show ∀ {p a b : ℕ} [_root_.Fact (_root_.Nat.Prime p)], a ≠ 0 → b ≠ 0 → _root_.padicValNat p (a * b) = _root_.padicValNat p a + _root_.padicValNat p b from by simpa only [← _root_.Nat.padicValNat_def] using @_root_.Nat.multiplicity_mul) (pow_ne_zero _ hℓ.ne_zero) hm0,
+      hpow, hmval, add_zero]
   have hn : padicValNat ℓ (Ideal.absNorm (Ideal.span {(ℓ : 𝓞 E)})) = Module.finrank ℚ E := by
-    rw [absNorm_span_nat, padicValNat.prime_pow]
+    rw [absNorm_span_nat, Nat.padicValNat_def]
+    exact multiplicity_base_pow hℓ.one_lt (Module.finrank ℚ E)
   have htrans : ∀ Q ∈ (normalizedFactors (Ideal.span {(ℓ : 𝓞 E)})).toFinset,
       ∃ σ : E ≃ₐ[ℚ] E, σ • P = Q := by
     intro Q hQ

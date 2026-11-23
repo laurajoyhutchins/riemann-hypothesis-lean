@@ -1,9 +1,54 @@
-import Mathlib
-import GroundTheory.TateCohomology.InfRes
+module
+
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.Brauer
+public import GroundTheory.ProfiniteCohomology.GaloisCohomology.BrauerInflationDefs
 import GroundTheory.ProfiniteCohomology.Colimit
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.Brauer
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.IsZeroGroupCohomologyQuotientToInvariantsGalAdd
-import GroundTheory.ProfiniteCohomology.GaloisCohomology.BrauerInflationDefs
+public import GroundTheory.TateCohomology.InfRes
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.ProfCoh
@@ -78,11 +123,6 @@ noncomputable def galTowerKerEquiv :
           have h1 : σ.1.restrictNormal E = 1 := MonoidHom.mem_ker.1 σ.2
           rw [h1] at hx
           exact hx.symm, Subtype.ext (AlgEquiv.ext fun _ => rfl)⟩⟩
-
-@[simp]
-theorem coe_galTowerKerEquiv_apply (τ : Gal(F/E)) (x : F) :
-    ((galTowerKerEquiv K E F τ : Gal(F/K)) : F → F) x = τ x :=
-  rfl
 
 theorem isZero_groupCohomology_one_ker_galUnits [FiniteDimensional K F] :
     IsZero (groupCohomology (Rep.res (AlgEquiv.restrictNormalHom (F := K) (K₁ := F) E).ker.subtype
@@ -165,8 +205,8 @@ section Profinite
 
 variable {K L : Type u} [Field K] [Field L] [Algebra K L] [IsGalois K L]
 
-omit [IsGalois K L] in
 
+omit [IsGalois K L] in
 theorem fixedField_le_of_le {U V : OpenNormalSubgroup Gal(L/K)} (h : V ≤ U) :
     fixedField (U : Subgroup Gal(L/K)) ≤ fixedField (V : Subgroup Gal(L/K)) :=
   fun _ hx => (mem_fixedField_iff _ _).2 fun σ hσ => (mem_fixedField_iff _ _).1 hx σ (h hσ)
@@ -196,7 +236,7 @@ theorem transition_comp_groupCohomologyQuotientGalUnitsIso {U V : OpenNormalSubg
 
 theorem unitsInflation_fixedField_two_injective (U : OpenNormalSubgroup Gal(L/K)) :
     Function.Injective (unitsInflation (fixedField (U : Subgroup Gal(L/K))) 2).hom := by
-  rw [injective_iff_map_eq_zero]
+  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
   intro y hy
   obtain ⟨y₀, rfl⟩ : ∃ y₀, (groupCohomologyQuotientGalUnitsIso U 2).hom.hom y₀ = y :=
     ⟨(groupCohomologyQuotientGalUnitsIso U 2).inv.hom y, by

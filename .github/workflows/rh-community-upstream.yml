@@ -11,6 +11,9 @@ on:
       - 'tools/rh_ci_identity.py'
       - 'lake-manifest.json'
       - 'lean-toolchain'
+      - 'comparator.json'
+      - 'export-targets.txt'
+      - 'tools/rh_pr221_verify_inputs.py'
   workflow_dispatch:
 
 permissions:
@@ -32,14 +35,22 @@ jobs:
           sparse-checkout: |
             .gitmodules
             lake-manifest.json
+            lakefile.toml
             lean-toolchain
+            comparator.json
+            export-targets.txt
+            src/Main.lean
+            src/Statements.lean
+            src/Challenge.lean
+            scripts/rh-buildq/fragment.py
+            scripts/rh-buildq/README.md
             tools
           sparse-checkout-cone-mode: false
           persist-credentials: false
           submodules: false
       - name: Verify pinned Git submodule object
         env:
-          COMMUNITY_SHA: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          COMMUNITY_SHA: 603ea75621e6ff907690902e2a35e7a974183ba3
         run: |
           set -euo pipefail
           gitlink="$(git ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')"
@@ -50,21 +61,32 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: leanprover-community/riemann-hypothesis
-          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          ref: 603ea75621e6ff907690902e2a35e7a974183ba3
           path: community-harness
           sparse-checkout: |
             scripts
             lake-manifest.json
             lean-toolchain
-          sparse-checkout-cone-mode: true
+            comparator.json
+            export-targets.txt
+          sparse-checkout-cone-mode: false
           persist-credentials: false
           submodules: false
       - name: Verify toolchain and dependency manifest remain identical
         run: |
           set -euo pipefail
-          test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          test "$(git -C community-harness rev-parse HEAD)" = '603ea75621e6ff907690902e2a35e7a974183ba3'
           cmp lean-toolchain community-harness/lean-toolchain
           cmp lake-manifest.json community-harness/lake-manifest.json
+          cmp comparator.json community-harness/comparator.json
+          cmp export-targets.txt community-harness/export-targets.txt
+          cmp scripts/rh-buildq/fragment.py community-harness/scripts/rh-buildq/fragment.py
+          cmp scripts/rh-buildq/README.md community-harness/scripts/rh-buildq/README.md
+      - name: Check exact five-root comparator inputs and upstream source tree
+        run: |
+          set -euo pipefail
+          python3 tools/rh_pr221_verify_inputs.py --test
+          python3 tools/rh_pr221_verify_inputs.py .
       - name: Validate the fork-only identity adapter
         run: python3 -m unittest discover -s tools -p 'test_rh_ci_identity.py' -v
       - name: Run community's own CI preparation and publication-trust tests
@@ -91,7 +113,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: leanprover-community/riemann-hypothesis
-          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          ref: 603ea75621e6ff907690902e2a35e7a974183ba3
           path: community-harness
           sparse-checkout: |
             scripts
@@ -105,8 +127,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
-          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          test "$(git -C community-harness rev-parse HEAD)" = '603ea75621e6ff907690902e2a35e7a974183ba3'
+          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '603ea75621e6ff907690902e2a35e7a974183ba3'
           cmp candidate/lake-manifest.json community-harness/lake-manifest.json
           cmp candidate/lean-toolchain community-harness/lean-toolchain
           command -v bwrap

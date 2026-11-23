@@ -1,15 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.FixedVectorEqOfStandardData
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsTwIffCanonEq
-import Formalism.LocalToGlobal.KernelLattices.TopPin
-import Formalism.LocalToGlobal.KernelLattices.InterlaceAll
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.JetsInIffStepField
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HermitianChartComplexRationalIntegralFormsStatement
-import Formalism.LocalToGlobal.KernelLattices.ColumnData.DiagramFitsSourceRank
-import Formalism.UnipotentAdelicQuotients.WeylLatDual
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolFunApply
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EvalTwSubK
-import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.TiedRec
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EvalTwSubK
+public import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.TiedRec
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StdLvPr
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.KerEntHyp
+public import Formalism.LocalToGlobal.KernelLattices.ColumnData.DiagramFitsSourceRank
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Col Formalism.L2.DIV Formalism.L2.Ker Formalism.UG Formalism.L2.Forms GlobalTheory.Mem GlobalTheory.Mem.Chr GlobalTheory.Mem.Col2 GlobalTheory.Mem.Col2.TC Matrix
 attribute [local instance] GlobalTheory.Mem.Col2.starE Formalism.BasicNotions.Host.cmStar
 open GlobalTheory.IntegralityCompare
@@ -26,7 +61,7 @@ theorem map_twSubK_field {E K K' ι : Type} [Field E] [Field K] [Field K'] [Fint
   induction P using MvPolynomial.induction_on with
   | C a => simp
   | add p q hp hq => simp [hp, hq]
-  | mul_X p k hp => simp [hp]
+  | mul_X p k hp => simp [hp, MvPolynomial.bind₁_X_right]
 
 theorem eq_of_eval_invertible {LL ι : Type} [Field LL] [Fintype ι] {n : ℕ} (e : LL →+* ℂ)
     {A B : MvPolynomial (ι × Fin n × Fin n) LL}
@@ -133,7 +168,7 @@ theorem srcFun_secC_read : ∀ {B : Base} {X : PreX B.toPre} (I : TC B X), I.Ok 
     have he := Formalism.L2.G.Cmp.tEL_emb (I.rec7 l Z) τ x
     rw [RingHom.comp_apply, Pl.iL_lam' w _ hx]
     unfold TaylorLogMetric.tauEmb TaylorLogMetric.lamC
-    rw [dif_pos (he ▸ hx)]
+    rw [dite_eq_left (he ▸ hx)]
     exact congrArg (Pl.lam w) (Subtype.ext he)
   have hA : ∀ τ, (Bm : Matrix (Fin ((I.rec7 l Z).R.N i)) (Fin ((I.rec7 l Z).R.N i)) (I.rec7 l Z).host.E).map
       (TaylorLogMetric.tauEmb (I.rec7 l Z) (Pl.lam w) τ) =

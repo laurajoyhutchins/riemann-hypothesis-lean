@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.ThmISt
+module
+
+import GroundTheory.HeightsAndTheta.Heights.OrbitLimits.CurveVerticalPointChart
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsPowSubMemSpanOfIsUnitModOfIsAlgClosed
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.RationalSections.IsRatSectionOn
+
+@[expose] public section
 
 noncomputable section
 
@@ -117,6 +166,7 @@ theorem mConeMap_homog (y : (Σ k, ι k) → Ω) {h : MRing ι} {d : K → ℕ} 
   classical
   conv_lhs => rw [h.as_sum]
   conv_rhs => rw [h.as_sum]
+
   rw [map_sum, map_sum, map_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl fun m hm => ?_
   rw [mConeMap, aeval_monomial, aeval_monomial, map_mul, mul_assoc]
@@ -128,7 +178,7 @@ theorem aeval_scaled (y : (Σ k, ι k) → Ω) (τ : K → Ω) (h : MRing ι) :
     aeval (fun p : Σ k, ι k => y p * τ p.1) h = aeval τ (mConeMap y h) := by
   induction h using MvPolynomial.induction_on with
   | C a => simp [mConeMap]
-  | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
+  | add p q hp hq => rw [map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
   | mul_X p i hp =>
     rw [map_mul, map_mul, map_mul, hp]
     simp [mConeMap]
@@ -151,31 +201,7 @@ theorem aeval_ne_zero {y : (Σ k, ι k) → Ω} {h : MRing ι} {d : K → ℕ} (
 theorem chart_form {y : (Σ k, ι k) → Ω} {c : ∀ k, ι k} (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) {r : Ω}
     (hr : r ∈ chartRingZ y c) :
     ∃ (m : K → ℕ) (G : MRing ι), IsMultiHomog G m ∧ r * ∏ k, y ⟨k, c k⟩ ^ m k = aeval y G := by
-  classical
-  induction hr using Algebra.adjoin_induction with
-  | mem x hx =>
-    obtain ⟨p, rfl⟩ := hx
-    refine ⟨Pi.single p.1 1, X p, homog_X p, ?_⟩
-    rw [aeval_X, Finset.prod_eq_single p.1 (fun k _ hk => by rw [Pi.single_eq_of_ne hk, pow_zero])
-      (by simp), Pi.single_eq_same, pow_one, div_mul_cancel₀ _ (hc p.1)]
-  | algebraMap z =>
-    exact ⟨0, C z, homog_C z, by simp⟩
-  | add x1 x2 _ _ ih1 ih2 =>
-    obtain ⟨m1, G1, hG1, e1⟩ := ih1
-    obtain ⟨m2, G2, hG2, e2⟩ := ih2
-    refine ⟨m1 + m2, G1 * cMon c m2 + G2 * cMon c m1,
-      homog_add (homog_mul hG1 (homog_cMon c m2))
-        (by rw [add_comm m1 m2]; exact homog_mul hG2 (homog_cMon c m1)), ?_⟩
-    rw [map_add, map_mul, map_mul, aeval_cMon, aeval_cMon, ← e1, ← e2]
-    simp only [Pi.add_apply, pow_add, Finset.prod_mul_distrib]
-    ring
-  | mul x1 x2 _ _ ih1 ih2 =>
-    obtain ⟨m1, G1, hG1, e1⟩ := ih1
-    obtain ⟨m2, G2, hG2, e2⟩ := ih2
-    refine ⟨m1 + m2, G1 * G2, homog_mul hG1 hG2, ?_⟩
-    rw [map_mul, ← e1, ← e2]
-    simp only [Pi.add_apply, pow_add, Finset.prod_mul_distrib]
-    ring
+  apply GroundTheory.Heights₂.Heights.Targets.CurveVerticalPointChart.exists_rep <;> assumption
 
 theorem mem_of_local (R : Subalgebra ℤ Ω) (w : Ω)
     (h : ∀ q : Ideal R, q.IsPrime → ∃ a : R, a ∉ q ∧ (a : Ω) * w ∈ R) : w ∈ R := by
@@ -220,8 +246,8 @@ theorem zpow_factor_inv {a b : K → ℕ} (Y : K → Ω) (hY : ∀ k, Y k ≠ 0)
 
 end UnitChart
 
-open UnitChart in
 
+open UnitChart in
 theorem isUnitSec_iff_chart (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (Ω : Type) [Field Ω]
     (y : (Σ k, ι k) → Ω) (f g : MRing ι) (df dg : K → ℕ) (_hy : ∀ k, ∃ i, y ⟨k, i⟩ ≠ 0)
     (hf : IsMultiHomog f df) (hg : IsMultiHomog g dg) (hfn : f ∉ mCoordIdeal y) (hgn : g ∉ mCoordIdeal y) :

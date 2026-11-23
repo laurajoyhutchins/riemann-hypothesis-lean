@@ -1,8 +1,54 @@
-import ReciprocityTheory.GroupCohomology.CupConnRightStatement
-import ReciprocityTheory.GroupCohomology.HomogExistsStatement
-import ReciprocityTheory.GroupCohomology.DEqZeroOfMemB
-import ReciprocityTheory.GroupCohomology.HomogIso
-import ReciprocityTheory.GroupCohomology.PrismOpZeroEval
+module
+
+public import ReciprocityTheory.GroupCohomology.CupConnRightStatement
+public import ReciprocityTheory.GroupCohomology.HomogExistsStatement
+public import Mathlib.Topology.ContinuousMap.Algebra
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.GroupCohomology.HomogIso
+public import ReciprocityTheory.GroupCohomology.PrismOpZeroEval
+
+@[expose] public section
 
 namespace ReciprocityTheory.Coh
 
@@ -92,6 +138,7 @@ theorem shpPush_hd (n : ℕ) (F : hcoch C G n) (F' : hcoch C G (n + 1)) (h : F'.
     (shpPush ev hφ (n + 1) F').1 = hd n (shpPush ev hφ n F).1 := by
   funext x
   rw [shpPush_apply, h]
+
   simp only [hd, map_sum, map_zsmul, shpPush_apply]
 
 variable (j : C.V → C(G, M.V)) (hj : Topology.IsEmbedding j) (hjc : ∀ c g, j c g = ev.u (C.rho g c))
@@ -235,13 +282,13 @@ def coindTr (g : G) : coindSub U M →ₗ[R] coindSub U M where
   map_add' f f' := rfl
   map_smul' c f := rfl
 
-@[simp] theorem coindTr_apply (g : G) (f : coindSub U M) (h : G) : (coindTr g f).1 h = f.1 (h * g) := rfl
-
 variable (U M)
 
 def coindRho : Representation R G (coindSub U M) where
   toFun := coindTr
-  map_one' := LinearMap.ext fun f => Subtype.ext (ContinuousMap.ext fun h => by simp)
+  map_one' := LinearMap.ext fun f => Subtype.ext (ContinuousMap.ext fun h => by
+    change f.1 (h * 1) = f.1 h
+    rw [mul_one])
   map_mul' g g' := LinearMap.ext fun f => Subtype.ext (ContinuousMap.ext fun h => by
     show f.1 (h * (g * g')) = f.1 (h * g * g')
     rw [mul_assoc])
@@ -285,10 +332,6 @@ theorem coindEv_isCoind : IsCoind U M (coindRep U M) (coindEv U M) := by
   rw [one_mul]
 
 end Coind
-
-theorem coind_holds : CoindStatement.{u} := by
-  intro R _ G _ _ _ _ U M
-  exact ⟨coindRep U M, coindEv U M, coindEv_isCoind U M⟩
 
 end
 

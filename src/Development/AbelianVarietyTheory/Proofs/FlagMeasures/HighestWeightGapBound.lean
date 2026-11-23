@@ -1,11 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ActSingleNeZero
-import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.EigenfunctionFiniteCoefficients
+module
+
+public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ActSingleNeZero
+public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactCasimirHighestWeight
+public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivedModuleCoefficientsAndStableFlows
+public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.JetUniquenessAlgebraicStatement
+import Formalism.RealPlaceAnalysis.FinalF
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.FirstSlotSliceSlotMixedCasimirZero
 import Formalism.RealPlaceAnalysis.RealPlaceTaylor.IsCompactInvariantOrthogonalInf
-import Formalism.RealPlaceAnalysis.FinalF
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DerivedModuleCoefficientsAndStableFlows
-import Development.AbelianVarietyTheory.Proofs.FlagMeasures.JetUniquenessAlgebraicStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+public import Mathlib.Analysis.Normed.Module.HahnBanach
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Mathlib.Topology.UniformSpace.Matrix
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LayerProd
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PosPartUnitaryMul
+import Development.AbelianVarietyTheory.Statements.CuspFrameWeights.EigenfunctionFiniteCoefficients
+
+@[expose] public section
 
 open MeasureTheory Matrix Finset Formalism.MainNotions.S Formalism.REAL Formalism.QuantumDeterminants GlobalTheory.Count GlobalTheory.Dec GlobalTheory.DSId GlobalTheory.Jet
 open scoped InnerProductSpace ComplexOrder
@@ -32,18 +83,6 @@ theorem smooth_comb {f g : Matrix (Fin n) (Fin n) ℂ → ℂ} (c : ℂ)
 
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace in
 theorem smooth_zero : SmoothOnG ε (fun _ : Matrix (Fin n) (Fin n) ℂ => 0) := fun _ _ => ⟨Set.univ, fun _ => 0, isOpen_univ, Set.mem_univ _, contDiffOn_const, fun _ _ _ => rfl⟩
-
-def smSub (ε : Fin n → Bool) : Submodule ℂ (Matrix (Fin n) (Fin n) ℂ → ℂ) where
-  carrier := {f | SmoothOnG ε f}
-  add_mem' := fun {f g} hf hg => by
-    have := smooth_comb 1 hf hg
-    simp only [one_mul] at this
-    exact this
-  zero_mem' := smooth_zero
-  smul_mem' := fun c f hf => by
-    have := smooth_comb c smooth_zero hf
-    simp only [zero_add] at this
-    exact this
 
 theorem eab_smooth {f : Matrix (Fin n) (Fin n) ℂ → ℂ} (hf : SmoothOnG ε f) (a b : Fin n) :
     SmoothOnG ε (Eab ε a b f) := by
@@ -126,17 +165,6 @@ theorem eword_zero (w : List (Fin n × Fin n)) :
     show Eab ε p.1 p.2 (Eword ε w fun _ => 0) g = 0
     rw [ih]
     simp [Eab, Ec, Rd]
-
-def dw (ε : Fin n → Bool) (w : List (Fin n × Fin n)) : smSub ε →ₗ[ℂ] ℂ where
-  toFun f := Eword ε w f.1 1
-  map_add' f f' := by
-    have := eword_comb f.2 f'.2 1 w 1 inUJ_one
-    simp only [one_mul] at this
-    exact this
-  map_smul' c f := by
-    have := eword_comb smooth_zero f.2 c w 1 inUJ_one
-    simp only [zero_add, eword_zero] at this
-    exact this
 
 theorem eword_append (w w' : List (Fin n × Fin n)) (f : Matrix (Fin n) (Fin n) ℂ → ℂ) :
     Eword ε (w ++ w') f = Eword ε w (Eword ε w' f) := by

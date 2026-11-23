@@ -1,6 +1,47 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.FunctionalLowerBoundOfConditionsNumeric
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FpTiedIffExistsLeafFP
+module
+
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.FunctionalLowerBoundOfConditionsNumeric
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix nonZeroDivisors
@@ -12,11 +53,6 @@ namespace GlobalTheory.FinitePlacesProbe
 open Formalism.DivisionValues Formalism.L2.Indef Formalism.L2.Indef.Tree
 
 variable {K : Type} [Field K] [NumberField K] [StarRing K] {Bs : DefBase K} {Df : DefSide Bs}
-
-def LocalAt (O : FunData K Df) (t : Bs.Tup) (w : HeightOneSpectrum (𝓞 K)) (δ : ℤ) : Prop :=
-  Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (matLat (O.vmu t) (Df.Mt t)) ≤
-    Formalism.HermitianLatticesTheory.localization₂ w.asIdeal (Formalism.HermitianLatticesTheory.idealSmul
-      (((w.asIdeal : FractionalIdeal (𝓞 K)⁰ K) ^ (-δ) : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K) O.M)
 
 theorem logArg_nonneg (O : FunData K Df) {b : ℝ} (hb : 1 ≤ b) :
     0 ≤ Real.log (b * O.nr * O.g1 * O.g2 * O.pd * O.pd' * |(O.dE : ℝ)|) := by
@@ -39,14 +75,5 @@ theorem sigma_mono_in_constant (O : FunData K Df) {C C' b : ℝ} (h : C ≤ C') 
       gcongr
     · exact le_rfl
   exact_mod_cast this
-
-theorem monotonicity₂ (O : FunData K Df) {C C' b : ℝ} (h0 : 0 ≤ C) (h : C ≤ C') (hb : 1 ≤ b) : O.bFP C b ≤ O.bFP C' b := by
-  have h1 := sigma_mono_in_constant O h hb
-  have h2 := Sig0_nonneg O C b
-  have h3 := Real.log_nonneg hb
-  have h4 : 0 ≤ C' := h0.trans h
-  have h5 : 0 ≤ b := by linarith
-  unfold FunData.bFP
-  gcongr
 
 end GlobalTheory.FinitePlacesProbe

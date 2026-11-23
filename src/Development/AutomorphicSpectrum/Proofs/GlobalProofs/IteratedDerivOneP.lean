@@ -1,13 +1,64 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IoInjective
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SkewOfCommute
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DerivativeSkewAdjointCuspFormsStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LieAlgebraSpannedByCompactAndFrameStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FiniteCoefficientSpaceAnnihilatingPolynomialStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SkewOperatorBoundedByPolynomialRootsStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CuspTranslateBoundedByDerivativeStatement
-import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanNeighbourhoodExpSurjectiveStatement
-import GroundTheory.GlobalFields.IdeleGroups.GaloisOnAdeles.Action
+module
+
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.IoInjective
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DifferentiableOneP
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HarishChandraFinite
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsMulRightInvariantHaarAdelicUnitaryGroupHermiti
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousOneP
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.AdelicOpenNeighbourhoodProduct
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.ArchimedeanNeighbourhoodExpSurjectiveStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.CuspTranslateBoundedByDerivativeStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.DerivativeSkewAdjointCuspFormsStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FiniteCoefficientSpaceAnnihilatingPolynomialStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.FiniteDimensionalOfEmbedding
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.LieAlgebraSpannedByCompactAndFrameStatement
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SkewOfCommute
+public import Development.AutomorphicSpectrum.Proofs.GlobalProofs.SkewOperatorBoundedByPolynomialRootsStatement
+public import Development.WeilBound.CoreStatements.MeasureExistence.ExistsMeas
+import Formalism.LocalToGlobal.IndefiniteReal.FinitePlaces.IdemElt
+import Formalism.RealPlaceAnalysis.RealPlaceTaylor.KoszulLowersPower
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.MatrixExponential
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasDRepIffHasDerivAt
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta MeasureTheory Matrix
 open scoped TensorProduct Topology InnerProductSpace
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -44,7 +95,7 @@ theorem Bd.add {S T : Module.End ℂ (Mc θ V)} (hS : Bd μ hθ E S) (hT : Bd μ
   obtain ⟨a, ha, h⟩ := hS
   obtain ⟨b, hb, k⟩ := hT
   refine ⟨a + b, add_nonneg ha hb, fun φ hφ => ?_⟩
-  rw [LinearMap.add_apply, map_add, add_mul]
+  rw [LinearMap.add_apply, map_add (io μ hθ), add_mul]
   exact (norm_add_le _ _).trans (add_le_add (h φ hφ) (k φ hφ))
 
 theorem Bd.smul {T : Module.End ℂ (Mc θ V)} (c : ℂ) (hT : Bd μ hθ E T) : Bd μ hθ E (c • T) := by
@@ -85,8 +136,9 @@ theorem bd_of_casimir (μ : Measure (GA D V)) [μ.IsHaarMeasure] (hθ : IsInfFam
   have hB0 : 0 ≤ B := add_nonneg (norm_nonneg _) (Finset.sum_nonneg fun b _ => sq_nonneg _)
   refine ⟨Real.sqrt B, Real.sqrt_nonneg _, fun φ hφ => ?_⟩
   have h2 := congrArg (fun w => ⟪io μ hθ φ, io μ hθ w⟫_ℂ) (hE φ hφ)
+
   simp only [map_smul, map_sub, map_sum, inner_smul_right, inner_sub_right, inner_sum, inner_der_der,
-    inner_self_eq_norm_sq_to_K] at h2
+  inner_self_eq_norm_sq_to_K] at h2
   have e : ((‖io μ hθ φ‖ : ℂ) ^ 2) = ((‖io μ hθ φ‖ ^ 2 : ℝ) : ℂ) := by push_cast; rfl
   rw [show ((RCLike.ofReal ‖io μ hθ φ‖ : ℂ) ^ 2) = ((‖io μ hθ φ‖ ^ 2 : ℝ) : ℂ) from e] at h2
   have h3 := congrArg Complex.re h2
@@ -264,6 +316,7 @@ theorem bd_inf (μ : Measure (GA D V)) [μ.IsHaarMeasure] (hθ : IsInfFam θ) (E
     conv_lhs => rw [← b.sum_repr X]
     rw [derInf_sum]
     rfl
+
   rw [e, LinearMap.sum_apply, map_sum, Finset.sum_mul, Finset.sum_mul]
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
   rw [LinearMap.smul_apply, map_smul, norm_smul, Complex.norm_real]
@@ -379,7 +432,7 @@ theorem cuspFinite : ∀ (D : D7) (θ : D.what₂.Tau → (Ainf D.host.F ⊗[D.h
       rw [hg φ.1 (smooth_of_mem φ)] at h1
       refine Subtype.ext ?_
       rw [Submodule.coe_smul, ← h1]
-      simp [Submodule.coe_sum]) bK
+      simp [Submodule.coe_sum, der]) bK
     obtain ⟨_, b'⟩ := bd_span μ hθ (E : Set (Mc θ V))
       (Set.range X ∪ Set.range fun b => (fr τ)⁻¹ * y b * fr τ) (by
         rintro _ (⟨a, rfl⟩ | ⟨b, rfl⟩)

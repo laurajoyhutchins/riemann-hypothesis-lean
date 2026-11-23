@@ -1,11 +1,64 @@
-import Mathlib
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.Cut_BPEq
-import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimENF
-import Formalism.HermitianCurvature.HerGenC
+module
+
+public import Formalism.HermitianCurvature.HerGenC
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutDec
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimET
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OnePointBasisFundamentalDomainVolume
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LevelFormCutoffTendstoBelow
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LiftBoundOfCompactPositivity
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LimPosOfLimEvTOfCompactPositivity
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PictureMemStableBounded
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PlaneWaveBoundOfCompactPositivity
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PosAtOfCptCoefOfThmPActualCpt
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RadialBetaPosOfXiExists
+public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.WaveIsometryOfRadial
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLemB
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutLimTop
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsAuxiliaryXi
-import Development.AbelianVarietyTheory.PublishedTheorems.BesselIntegrals.BesselXiIntegrable
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.LimPosOfLimEvTOfCompactPositivity
-import Development.AbelianVarietyTheory.Proofs.JetHarmonics.WaveIsometryOfRadial
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.HeadContinuityAtZeroOfStandard
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.MinLeTruncatedExponential
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.TriangleInequalityAtPlace
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.Cut_BPEq
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.NormSqLeShifted
+
+@[expose] public section
 
 open Formalism.FourierDecayAlt Formalism.FourierDecayAlt.P Formalism.FourierDecayAlt.P.CutBP Formalism.FourierDecayAlt.P.CutBP2 Formalism.FourierDecayAlt.P.CutBPEq Formalism.QuantumDeterminants
 open Filter Topology
@@ -58,8 +111,8 @@ theorem top_threshold_le (r k N : ℕ) :
         mul_le_mul_of_nonneg_left (h4.trans h7) (by positivity)
     _ = _ := by ring
 
-open GlobalTheory.PointwiseBound in
 
+open GlobalTheory.PointwiseBound in
 theorem ptBound_of_xiExists (hXi : B.XiExists) (hA : P5.ThmPActualCpt) : ∃ C₂ : ℝ, 0 < C₂ ∧ ∀ (Wp Wq : Type) [NormedAddCommGroup Wp] [InnerProductSpace ℂ Wp] [NormedAddCommGroup Wq] [InnerProductSpace ℂ Wq] [FiniteDimensional ℂ Wp] [FiniteDimensional ℂ Wq] (P : M.Par) (p : KB.Pl P Wp Wq) (F : B.Mat P.k P.r → (Wq →L[ℂ] Wp)) (Λ κ₀ : ℝ) (χ nn : ℝ → ℝ) (Y : Finset ℝ) (K N : ℕ) (Cb : ℝ), 1 ≤ Λ → 0 < κ₀ → 3 ≤ K → (P.r + 1) * K ≤ N → C6.IsCut0 χ → (∀ y, 0 < nn y) → KB.InDDplus2 P p.l0 p.T.base Cb p.Θ → B.CkOn ⊤ (B.GV P.k P.r) F → TBBx5.WaveGrid p nn Y Λ K N → TBBx5.LiftGrid p nn Y Λ K N → (∀ ε : ℝ, 0 < ε → ∀ n : ℕ, TBB.BlockGrowthBound p nn (apx (D.cutF p.T.base χ F ε) n) Y K N) → (∀ ε : ℝ, 0 < ε → LimTopN p nn (D.cutF p.T.base χ F ε)) → (∀ ε : ℝ, 0 < ε → LimZeroN p nn (D.cutF p.T.base χ F ε) Y N) → LimE p nn χ F Y N → LemB p F κ₀ → TBB.PtBound p F (κ₀ * (C₂ * Λ ^ 2) ^ (P.r + 1)) := by
   have hRad := GlobalTheory.WeightedFormPos.radialModuleForm_of_xiExists hXi
   have hSS := GlobalTheory.ListDuality.listDuality_cpt hRad

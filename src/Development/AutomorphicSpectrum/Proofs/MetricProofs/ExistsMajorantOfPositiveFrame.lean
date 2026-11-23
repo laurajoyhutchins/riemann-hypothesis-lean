@@ -1,9 +1,48 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSheetCover
-import GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsProved
-import GroundTheory.HeightsAndTheta.Heights.CountingLowerBound.Assembly
-import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+module
+
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.ArchimedeanUnitarySurjective
+public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IntEmbInjective
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 
@@ -82,35 +121,7 @@ theorem embOf_injective : Function.Injective (embOf : (𝓞 E →+* ℂ) → (E 
   simpa [embOf_coe] using this
 
 theorem plc_bijective (F : UnivFam E Ψ j j' n g Λ) : Function.Bijective (plc F) := by
-  have hcm := F.cm
-  constructor
-  · intro τ τ' h
-    rcases InfinitePlace.mk_eq_iff.1 h with h | h
-    · exact hcm.1 (embOf_injective h)
-    · exfalso
-      have hs : F.σ τ' = (starRingEnd ℂ).comp (F.σ τ) := by
-        ext a
-        have := congrArg (fun φ : E →+* ℂ => φ (a : E)) h
-        simpa [embOf_coe, ComplexEmbedding.conjugate_coe_eq] using this.symm
-      exact ((hcm.2 (F.σ τ)).1 ⟨τ, rfl⟩) ⟨τ', hs⟩
-  · intro w
-    set s : 𝓞 E →+* ℂ := w.embedding.comp (algebraMap (𝓞 E) E) with hs
-    by_cases h : ∃ τ, F.σ τ = s
-    · obtain ⟨τ, hτ⟩ := h
-      refine ⟨τ, ?_⟩
-      rw [plc, hτ, hs, embOf_comp, InfinitePlace.mk_embedding]
-    · have h2 : ∃ τ, F.σ τ = (starRingEnd ℂ).comp s := by
-        by_contra h3
-        exact h ((hcm.2 s).2 h3)
-      obtain ⟨τ, hτ⟩ := h2
-      refine ⟨τ, ?_⟩
-      have he : embOf (F.σ τ) = ComplexEmbedding.conjugate w.embedding := by
-        rw [hτ]
-        have : (starRingEnd ℂ).comp s =
-            (ComplexEmbedding.conjugate w.embedding).comp (algebraMap (𝓞 E) E) := by
-          ext a; simp [hs, ComplexEmbedding.conjugate_coe_eq]
-        rw [this, embOf_comp]
-      rw [plc, he, InfinitePlace.mk_conjugate_eq, InfinitePlace.mk_embedding]
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.Dict.plc_bijective <;> assumption
 
 theorem emb_ne (F : UnivFam E Ψ j j' n g Λ) (τ : Ψ) (h : (plc F τ).embedding ≠ embOf (F.σ τ)) :
     (plc F τ).embedding = ComplexEmbedding.conjugate (embOf (F.σ τ)) :=

@@ -1,11 +1,50 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.FramedDConst
-import Development.AbelianVarietyTheory.Definitions.Divisors.ActAtApply
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolEval
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchActionReadingsCompatible
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOneParameterSubgroupUnitaryOfRealPlaceLieAStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIndefiniteUnitaryLieAlgAddISmulEqStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FramedDConst
+public import Development.AbelianVarietyTheory.Definitions.Divisors.ActAtApply
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.HoweDualityReal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ArchActionReadingsCompatible
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIndefiniteUnitaryLieAlgAddISmulEqStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsOneParameterSubgroupUnitaryOfRealPlaceLieAStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -28,6 +67,7 @@ theorem sumPl_single_add_smul {ι : Type} [Fintype ι] [DecidableEq ι] {V : ι 
     simp only [PiTensorProduct.mapMultilinear_apply, Function.update_eq_self, PiTensorProduct.map_id] at e e2
     simp only [atPl]
     rw [Module.End.one_eq_id, Module.End.one_eq_id, e, e2]
+    rfl
   have h0 : ∀ v, v ≠ w → atPl v (L v) = (0 : Module.End ℂ (⨂[ℂ] i, V i)) := by
     intro v hv
     rw [hL v hv]
@@ -59,7 +99,7 @@ theorem stab_comap_of_thetaSubInf : ∀ (F E : Type) [Field F] [NumberField F] [
     exact (N.add_mem_iff_left (N.smul_mem _ hy)).1 hmem
   intro Z y hy
   obtain ⟨A, hA, B, hB, rfl⟩ := GlobalTheory.T.exists_indefiniteUnitaryLieAlg_add_I_smul_eq _ _ Z
-  rw [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply]
+  rw [map_add (f := _), map_smul, LinearMap.add_apply, LinearMap.smul_apply]
   exact add_mem (key A hA y hy) (Submodule.smul_mem _ _ (key B hB y hy))
 
 end GlobalTheory.HoweD

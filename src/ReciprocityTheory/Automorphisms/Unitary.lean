@@ -1,4 +1,52 @@
-import Mathlib
+module
+
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.RingTheory.DedekindDomain.FiniteAdeleRing
+public import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.Aut
 
@@ -63,7 +111,7 @@ theorem conjAL_conjAL (x : AL L) : conjAL L (conjAL L x) = x := by
   induction x using TensorProduct.induction_on with
   | zero => simp
   | tmul a b => simp [conjAL, hc]
-  | add x y hx hy => simp only [map_add, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), hx, hy]
 
 theorem complexConj_invol (x : L) :
     (IsCMField.complexConj L : L →+* L) ((IsCMField.complexConj L : L →+* L) x) = x := by
@@ -85,8 +133,8 @@ noncomputable def evalAt (v : HeightOneSpectrum (𝓞 L⁺)) : AFplus L →ₐ[L
 noncomputable def compAt (v : HeightOneSpectrum (𝓞 L⁺)) : AL L →+* L ⊗[L⁺] v.adicCompletion L⁺ :=
   (Algebra.TensorProduct.map (AlgHom.id L⁺ L) (evalAt L v)).toRingHom
 
-variable {L} in
 
+variable {L} in
 noncomputable def SplitPlace.proj (s : SplitPlace L) : AL L →+* s.v.adicCompletion L⁺ :=
   (Algebra.TensorProduct.lift s.i (evalAt L s.v) (fun _ _ => Commute.all _ _)).toRingHom
 
@@ -136,24 +184,21 @@ noncomputable def Umax (n : ℕ) : Subgroup (GA L n) where
     simp only [InvMemClass.coe_inv, h1, conjT, Matrix.transpose_apply, Matrix.map_apply]
     exact conjAL_mem_ALint L (ha j i)
 
-variable {L} in
 
+variable {L} in
 noncomputable def SplitPlace.loc (s : SplitPlace L) (n : ℕ) :
     GA L n →* GL (Fin n) (s.v.adicCompletion L⁺) :=
   (Matrix.GeneralLinearGroup.map s.proj).comp (GA L n).subtype
 
-variable {L} in
 
+variable {L} in
 def TrivOutside {n : ℕ} (T : Set (HeightOneSpectrum (𝓞 L⁺))) (x : GA L n) : Prop :=
   ∀ v, v ∉ T → (x.1 : Matrix (Fin n) (Fin n) (AL L)).map (compAt L v) = 1
 
-variable {L} in
 
+variable {L} in
 noncomputable def Level {n : ℕ} {ι : Type*} (s : ι → SplitPlace L)
     (H : ∀ a, Subgroup (GL (Fin n) ((s a).v.adicCompletion L⁺))) : Subgroup (GA L n) :=
-  Umax L n ⊓ ⨅ a, (H a).comap ((s a).loc n)
-
-def IsNeat {n : ℕ} (U : Subgroup (GA L n)) : Prop :=
-  ∀ g : GA L n, ∀ γ ∈ GQ L n, g⁻¹ * γ * g ∈ U → γ = 1
+  Umax L n ⊓ ⨅ a, (H a).comap (SplitPlace.loc (s a) n)
 
 end ReciprocityTheory.Aut

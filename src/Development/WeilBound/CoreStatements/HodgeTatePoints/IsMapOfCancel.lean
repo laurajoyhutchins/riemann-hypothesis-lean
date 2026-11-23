@@ -1,14 +1,63 @@
-import Development.WeilBound.CoreStatements.HodgeTatePoints.LbIsoPullPull
+module
+
+public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.GermComp1ZeroPointLeft
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LocalComponentsSurjective
+public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ToFirst
+import Development.WeilBound.CoreStatements.HodgeTatePoints.ActGeneratorZero
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.CcInjAlg
 import Development.WeilBound.CoreStatements.HodgeTatePoints.CdLocal
 import Development.WeilBound.CoreStatements.HodgeTatePoints.CdUniv
-import Development.WeilBound.CoreStatements.HodgeTatePoints.ActGeneratorZero
-import Development.WeilBound.CoreStatements.HodgeTatePoints.CcInjAlg
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeometricToTangentPowerFreeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermBaseChangeStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermDimensionUniqueStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermsIsomorphicStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TangentPowerFreeConjInjectiveStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsFormalGermOpenAffineStatement
+public import Development.WeilBound.CoreStatements.HodgeTatePoints.LbIsoPullPull
+import Mathlib.Algebra.CharP.Subring
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsFormalGermOpenAffineStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermBaseChangeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermDimensionUniqueStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FormalGermsIsomorphicStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GeometricToTangentPowerFreeStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TangentPowerFreeConjInjectiveStatement
+
+@[expose] public section
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
 open ReciprocityTheory.ChartRestriction.G ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj Formalism.MainNotions.ModuliIntegralCharts.H1 GlobalTheory.CompanionTheory.Ar.Crv GlobalTheory.CompanionTheory.Ar.Conj
@@ -29,13 +78,14 @@ theorem fib_inj_of (htan : type_of% @GlobalTheory.T.geometric_to_tangent_power_f
 
 theorem isMapOf_cancel {R R₂ R₃ O : Type} [CommRing R] [CommRing R₂] [CommRing R₃] [CommRing O] [StarRing O] {d : ℕ}
     {f : R →+* R₂} {g : R₂ →+* R₃} {B : Germ.FB R d O} {B₂ : Germ.FB R₂ d O} {B₃ : Germ.FB R₃ d O}
-    (h : IsMapOf f B B₂) (h' : IsMapOf (g.comp f) B B₃) : IsMapOf g B₂ B₃ where
-  F := fun i => by rw [h'.F, h.F, MvPowerSeries.map_comp]; rfl
-  act := fun a i => by rw [h'.act, h.act, MvPowerSeries.map_comp]; rfl
-  ph1 := by rw [h'.ph1, h.ph1, MvPowerSeries.map_comp]; rfl
-  ph2 := by rw [h'.ph2, h.ph2, MvPowerSeries.map_comp]; rfl
-  sy := by rw [h'.sy, h.sy, MvPowerSeries.map_comp]; rfl
-  ad := fun a => by rw [h'.ad, h.ad, MvPowerSeries.map_comp]; rfl
+    (h : IsMapOf f B B₂) (h' : IsMapOf (g.comp f) B B₃) : IsMapOf g B₂ B₃ := by
+  exact
+    { F := fun i => by simp only [h'.F i, h.F i, MvPowerSeries.map_comp, RingHom.comp_apply]
+      act := fun a i => by simp only [h'.act a i, h.act a i, MvPowerSeries.map_comp, RingHom.comp_apply]
+      ph1 := by simp only [h'.ph1, h.ph1, MvPowerSeries.map_comp, RingHom.comp_apply]
+      ph2 := by simp only [h'.ph2, h.ph2, MvPowerSeries.map_comp, RingHom.comp_apply]
+      sy := by simp only [h'.sy, h.sy, MvPowerSeries.map_comp, RingHom.comp_apply]
+      ad := fun a => by simp only [h'.ad a, h.ad a, MvPowerSeries.map_comp, RingHom.comp_apply] }
 
 theorem spMap_comp' {R R₂ R₃ : Type} [CommRing R] [CommRing R₂] [CommRing R₃] (f : R →+* R₂) (g : R₂ →+* R₃) :
     spMap g ≫ spMap f = spMap (g.comp f) := (Spec.map_comp _ _).symm

@@ -1,8 +1,52 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EigLat
-import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsCocharLie
-import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
-import Development.WeilBound.CoreStatements.AmpleLineBundles.SquareZeroDeformationAdditivity
+module
+
+public import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.LieModel
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.CubicalStructures.CubeSymmetricSwapFirst
+
+@[expose] public section
+
 open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj AlgebraicGeometry NumberField
 open scoped CategoryTheory.Obj
 open ReciprocityTheory.ChartRestriction.G.Semi ReciprocityTheory.ChartRestriction.G.Geo.Tor GlobalTheory.CompanionTheory.Ar
@@ -132,7 +176,7 @@ private theorem isHecke_div_and_resEtaPow_div {P G1 : Scheme.{0}} (π1 π2 : P �
         linear_combination z11 - z22 - z33 -
           (z11 - z12 - z13 - z21 + z22 + z23 - z31 + z32 + z33)
       map_zero' := by simp only [map_zero]; ring
-      map_add' := by intro v w; simp only [map_add]; ring }
+      map_add' := by intro v w; simp only [map_add (f := _)]; ring }
   have hc : ∀ (Wi : G1.Opens) (πi : P ⟶ G1) (hi : Z ≤ πi ⁻¹ᵁ Wi)
       (u u' : Spec (CommRingCat.of C) ⟶ P) (hu : ⊤ ≤ u ⁻¹ᵁ Z) (hu' : ⊤ ≤ u' ⁻¹ᵁ Z),
       u ≫ πi = u' ≫ πi → ∀ r,
@@ -191,7 +235,7 @@ private theorem isHecke_div_and_resEtaPow_div {P G1 : Scheme.{0}} (π1 π2 : P �
     rw [hs', ← RingHom.comp_apply, ← CommRingCat.hom_comp, Scheme.Hom.map_appLE]
   rw [hres u1 o1 z1, hres u2 o2 z2, hres u3 o3 z3, hres u4 o4 z4]
   apply (Scheme.ΓSpecIso (CommRingCat.of C)).commRingCatIsoToRingEquiv.injective
-  simp only [map_add]
+  simp only [map_add (f := _)]
   have hiso : ∀ (u : Spec (CommRingCat.of C) ⟶ P) (hz : ⊤ ≤ u ⁻¹ᵁ Z),
       (Scheme.ΓSpecIso (CommRingCat.of C)).commRingCatIsoToRingEquiv ((u.appLE Z ⊤ hz).hom s') =
         (u.appLE Z ⊤ hz ≫ (Scheme.ΓSpecIso (CommRingCat.of C)).hom).hom s' := fun _ _ => rfl
@@ -217,7 +261,7 @@ private theorem isPair_and_isPair_of_isTriple {P G1 : Scheme.{0}} (π1 π2 : P �
   apply (Scheme.ΓSpecIso (CommRingCat.of A)).commRingCatIsoToRingEquiv.injective
   have hiso : ∀ x, (Scheme.ΓSpecIso (CommRingCat.of A)).commRingCatIsoToRingEquiv x =
       (Scheme.ΓSpecIso (CommRingCat.of A)).hom.hom x := fun _ => rfl
-  simp only [map_add, hiso]
+  simp only [map_add (f := _), hiso]
   rw [← sub_eq_zero]
   apply eq_zero_of_localization
   intro m hm
@@ -267,9 +311,9 @@ private theorem isPair_and_isPair_of_isTriple {P G1 : Scheme.{0}} (π1 π2 : P �
     (he u1 e1) (he u2 e2) (he u3 e3) O
     (fun _ _ => o1 trivial) (fun _ _ => o2 trivial) (fun _ _ => o3 trivial) (fun _ _ => o4 trivial) s
   have h := congrArg (Scheme.ΓSpecIso (CommRingCat.of (Localization.AtPrime m))).hom.hom hloc
-  simp only [map_add] at h
+  simp only [map_add (f := _)] at h
   rw [natE u1 o1, natE u2 o2, natE u3 o3, natE u4 o4] at h
-  rw [map_sub, map_add, map_add]
+  rw [map_sub, map_add (f := _), map_add (f := _)]
   linear_combination h
 
 theorem sqzero_add : ∀ (S : Scheme.{0}) (G : Over S) [GrpObj G] (B : Type) [CommRing B] [IsLocalRing B] (b : Sp B ⟶ S) (A : Type) [CommRing A] (g : B →+* A) (J : Ideal A), J ^ 2 = ⊥ → ∀ x y : Over.mk (spMap g ≫ b) ⟶ G, spMap (Ideal.Quotient.mk J) ≫ x.left = spMap (Ideal.Quotient.mk J) ≫ (1 : Over.mk (spMap g ≫ b) ⟶ G).left → spMap (Ideal.Quotient.mk J) ≫ y.left = spMap (Ideal.Quotient.mk J) ≫ (1 : Over.mk (spMap g ≫ b) ⟶ G).left → ∀ (V : G.left.Opens) (hx : ⊤ ≤ x.left ⁻¹ᵁ V) (hy : ⊤ ≤ y.left ⁻¹ᵁ V) (hxy : ⊤ ≤ (x * y).left ⁻¹ᵁ V) (h1 : ⊤ ≤ (1 : Over.mk (spMap g ≫ b) ⟶ G).left ⁻¹ᵁ V) (f : Γ(G.left, V)), ((x * y).left.appLE V ⊤ hxy).hom f + ((1 : Over.mk (spMap g ≫ b) ⟶ G).left.appLE V ⊤ h1).hom f = (x.left.appLE V ⊤ hx).hom f + (y.left.appLE V ⊤ hy).hom f := by

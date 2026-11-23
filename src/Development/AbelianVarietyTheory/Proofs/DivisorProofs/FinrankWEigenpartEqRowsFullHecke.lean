@@ -1,20 +1,63 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
-import Development.AbelianVarietyTheory.PublishedTheorems.GaloisGeometry₂.HoweUnram
-import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.IsStepWeil
-import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ExistsNormLeHeightPow
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.Divisibility.ProjLemmas
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SignAtBasePlaceEqEmbedding
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjMapMemMult
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodPartFullEqKilled
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsometryMatchingLatticesMatchesSphericalOpsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLabelThetaLiftSpaceIffDualStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftLevelsGoodPrimesPropertiesStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelOperatorsAtPrimeOffLevelDatumStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSphericalOperatorsRowsNormalEigenspacesStatement
-import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalOperatorsFormsOnRankSpaceNormalStatement
+module
+
+public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.NormalFam
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinRepApply
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjMapMemMult
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFiniteAdelicIsometryMatchingFramesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FinrankKilledEqOfEqualMultiplicitiesStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GoodPartFullEqKilled
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdemOfCoeffRealStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IrreducibleAdmissibleDecomposableCompEquivStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLabelThetaLiftSpaceIffDualStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsometryMatchesParahoricLevelsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsometryMatchingLatticesMatchesSphericalOpsStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LevelTypeHeckeKilledCorrespondMatchingIsoStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SignAtBasePlaceEqEmbedding
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TypePlacesNotPairwiseConjugateStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSphericalOperatorsRowsNormalEigenspacesStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.LevelOperatorsAtPrimeOffLevelDatumStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SphericalOperatorsFormsOnRankSpaceNormalStatement
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ThetaLiftLevelsGoodPrimesPropertiesStatement
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteGroupLiftsToParahoricLevelStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -162,6 +205,7 @@ theorem alg_comp (ρ : Representation ℂ H' X) (Φ : H ≃* H') (B : Finset H) 
     Representation.asAlgebraHom (ρ.comp Φ.toMonoidHom : Representation ℂ H X)
         (∑ γ ∈ B, MonoidAlgebra.single γ 1 - MonoidAlgebra.single 1 z) v =
       ρ.asAlgebraHom (∑ γ ∈ B.map Φ.toEquiv.toEmbedding, MonoidAlgebra.single γ 1 - MonoidAlgebra.single 1 z) v := by
+
   simp [map_sub, map_sum, Representation.asAlgebraHom_single, Finset.sum_map, LinearMap.sum_apply]
 
 end Alg
@@ -325,14 +369,15 @@ theorem finrank_rel {s : ℕ} (hs : A.fam.Ok s) (hC : Core R F) (hX : GoodStable
     partFull R.θ (R.MW i (sg0 D A)) (levS _ (R.βW i) (R.datWp i R.triv)) (levChi _ (R.βW i) (R.datWp i R.triv)) SF c)
     (inf_le_left.trans (hW.trans inf_le_left)))
   rw [fW.1, fE.1]
-  have f1 := Module.rank_lt_aleph0_iff.1 (lt_of_eq_of_lt hr'.symm (Module.rank_lt_aleph0_iff.2 fE.2))
+  set_option synthInstance.maxHeartbeats 200000 in
+    have f1 := Module.rank_lt_aleph0_iff.1 (lt_of_eq_of_lt hr'.symm (Module.rank_lt_aleph0_iff.2 fE.2))
   rw [← count hC hD hM i M₀ _ hSF c f1 fW.2]
   exact congrArg Cardinal.toNat hr'.symm
 
 end GlobalTheory.DimFull
 
-open GlobalTheory.DimFull in
 
+open GlobalTheory.DimFull in
 theorem GlobalTheory.DimFull.dim_parts_full : ∀ {D : D7} {G : Type} [Group G] [Fintype G] {Pl0 T : Type} {A : FamIn D.what₂.LL G Pl0 T D.R.m} {Ks : Type} [Field Ks] [NumberField Ks] [Algebra Ks D.what₂.LL] (R : RealDat D A Ks) (F : Face D A) {s : ℕ}, A.fam.Ok s → Core R F → SchurAll R → GoodStable A.X → GlobalTheory.CuspMult.CuspDecomp D → GlobalTheory.CuspMult.MultEq R → ∀ SF, IsSF R SF → ∀ (P : Subgroup G) (ψ : P →* D.what₂.LLˣ) i c, Module.finrank ℂ (Wcc R SF i c ⊓ (R.Wat i (sg0 D A) (levPOf R.eG (sg0 D A) P ψ⁻¹)).comap (R.HW i _).e : Submodule ℂ _) = Module.finrank ℂ (EEc R SF c ⊓ (R.EEat (levPOf R.eG D.what₂.embLL P ψ)).comap R.HE.e : Submodule ℂ _) := by
   intro D G _ _ Pl0 T A Ks _ _ _ R F s hs hC hS hX hD hM SF hSF P ψ i c
   by_cases hrel : ∀ Q, Good R A.μ0 Q → ∀ d, IsLab (Yc D 0) Q d → star (c Q (dualLab d)) = c Q d

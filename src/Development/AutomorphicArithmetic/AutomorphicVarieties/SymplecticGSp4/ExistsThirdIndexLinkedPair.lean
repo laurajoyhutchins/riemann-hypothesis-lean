@@ -1,12 +1,63 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LocDefs
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.GeAlgTop
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EptInt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtInSmul
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.XvanExt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LocVanP
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.PadicHodgeTheory.LocalPublishedTheorems
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.DecompSigmaOrd
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.LocalRingsCompletion.dvrFinite
+import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.DvrFacts
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.NormO
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.EptInt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.GeAlgTop
 import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LMemMax
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.OrdFlag
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaloisLibrary.SelmerTransport.NormO
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.LocVanP
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.OrdFlag
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.PtInSmul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.XvanExt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal IsLocalRing UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement
 
 private theorem mem_max_iff {l : ℕ} [Fact l.Prime] (c : Coef l) (b : c.O) :
@@ -91,6 +142,7 @@ private theorem lattice {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuatio
     have e5 : residue O (r h s s) = residue O (r h s s) - residue O 0 := by simp
     rw [← e4, e5, ← e3]
     conv_rhs => rw [← e2]
+
     simp only [map_sum, map_mul, hm, ← Finset.sum_sub_distrib, Finset.mul_sum]
     refine Finset.sum_congr rfl fun g _ => ?_
     ring
@@ -251,7 +303,7 @@ private theorem core {Ω : Type} [Field Ω] [CharZero Ω] [IsAlgClosure ℚ Ω] 
       rw [← hcK, hmul, hR, hR, hcK g, hcK h]
       ring
     simp only [z]
-    rw [hγ, e, map_add, map_mul, map_mul, hdiag, hdiag, map_mul, Units.val_mul, map_mul]
+    rw [hγ, e, map_add (f := _), map_mul, map_mul, hdiag, hdiag, map_mul, Units.val_mul, map_mul]
     have := hU g
     have := hU h
     field_simp

@@ -1,8 +1,56 @@
-import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.GoodModelAll
-import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SecondLogDerivativeUnique
-import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.AnalyticTransOfAdd
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalA
-import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalD
+module
+
+public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.GoodModelAll
+public import Formalism.LocalToGlobal.TorsionIntegrality.GaussSumParity.KummerThetaLogarithms.SecondLogDerivativeUnique
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalA
+public import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.FinalD
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.AnalyticTransOfAdd
+public import Formalism.LocalToGlobal.TorsionIntegrality.TorsionTranslationPowers.NonsingularJetNorms.CmIntegralityOfTorsionPoints
+import Formalism.LocalToGlobal.TorsionIntegrality.WeierstrassTwoTorsion.CubeThreeR
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 open scoped BigOperators
@@ -81,7 +129,7 @@ variable {p : ℕ} [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p])
 theorem sum_bar (dK : ℕ) (m : ℤ) :
     ι ((m : ℂ) + ((1 : ℤ) : ℂ) * omegaK dK) + ι ((m : ℂ) + ((1 : ℤ) : ℂ) * (1 - omegaK dK)) =
       ((2 * m + 1 : ℤ) : ℂ_[p]) := by
-  rw [← map_add]
+  rw [← map_add (f := _)]
   have e : ((m : ℂ) + ((1 : ℤ) : ℂ) * omegaK dK) + ((m : ℂ) + ((1 : ℤ) : ℂ) * (1 - omegaK dK)) =
       ((2 * m + 1 : ℤ) : ℂ) := by
     push_cast
@@ -157,6 +205,7 @@ theorem CMDatum_proof : CMDatum := by
     rwa [Formalism.L2.Th1.E.ScaledModelNorms.py_ptOf p L ι hΔ _ (hker P).2] at h
   · rw [← map_mul, hprod, Fintype.card_coe]
     simp
+
   · rw [← map_sub, ← map_mul, ← map_mul, hs2C, map_sum, hb2]
     simp
 

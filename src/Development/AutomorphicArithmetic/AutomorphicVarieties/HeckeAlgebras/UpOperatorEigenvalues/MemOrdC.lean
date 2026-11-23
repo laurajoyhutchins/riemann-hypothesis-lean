@@ -1,6 +1,51 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.CoefficientRepTrivialOnUnramified
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpNat
-import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpMul
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.CoefficientRepTrivialOnUnramified
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpMul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpNat
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.OrdinaryHeckeCharacters.UOpSum
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open GlobalTheory.CuspRep UpperTheory.V.Hi
 
 namespace UpperTheory.V.Hi.Up
@@ -37,7 +82,7 @@ private theorem step (Z W : Submodule ℂ M) (hZ : ∀ g, ∀ z ∈ Z, ρ g z �
     refine (((isIrreducible_iff σ.ρ).1 σ.irred).2 _ fun g v hv => ?_).resolve_left fun hb => ?_
     · rw [Submodule.mem_comap] at hv ⊢
       obtain ⟨a, ha, b, hb, e⟩ := Submodule.mem_sup.1 hv
-      rw [hf, ← e, map_add]
+      rw [hf, ← e, map_add (f := _)]
       exact Submodule.add_mem_sup (hZ g a ha) (hW g b hb)
     · have : u ∈ (Z ⊔ W).comap f := Submodule.mem_sup.2 ⟨_, hz, -w, neg_mem hw, by simp⟩
       rw [hb] at this
@@ -53,7 +98,7 @@ private theorem step (Z W : Submodule ℂ M) (hZ : ∀ g, ∀ z ∈ Z, ρ g z �
   refine ⟨{ toFun := p
             map_add' := fun a b => uniq _ (hp1 _) _ (add_mem (hp1 a) (hp1 b)) _ (hp2 _) (by
               have := add_mem (hp2 a) (hp2 b)
-              rw [map_add]; convert this using 1; abel)
+              rw [map_add (f := _)]; convert this using 1; abel)
             map_smul' := fun c a => uniq _ (hp1 _) _ (Z.smul_mem c (hp1 a)) _ (hp2 _) (by
               have := W.smul_mem c (hp2 a)
               rw [map_smul]; rwa [smul_sub] at this) }, fun g v => ?_, ?_, fun h0 => hz0 ?_⟩
@@ -79,7 +124,7 @@ theorem isoSub (h : IsoSum ρ Y σ) (Z : Submodule ℂ M) (hZY : Z ≤ Y) (hne :
       rw [Finset.iSup_insert]
       refine ⟨fun g z hz => ?_, fun hn => ?_⟩
       · obtain ⟨_, ⟨u, rfl⟩, w, hw, rfl⟩ := Submodule.mem_sup.1 hz
-        rw [map_add, ← f.2.1]
+        rw [map_add (f := _), ← f.2.1]
         exact Submodule.add_mem_sup ⟨_, rfl⟩ (ih.1 g w hw)
       · by_cases hd : Z ⊓ (⨆ f ∈ S, LinearMap.range f.1) = ⊥
         · exact step Z _ hZ ih.1 hd f.1 f.2.1 hn
@@ -232,8 +277,10 @@ theorem exInv (ω : Fin n → kˣ →* ℂˣ) : ∃ φ : (glIwa k n).T →* ℂ�
     exact (MulEquiv.symm_apply_eq _).2 rfl
   change χ ((MonoidHom.ofInjective hinj).symm (Subgroup.inclusion (glIwa k n).T_le (eT k n i y))) = _
   rw [h1]
-  simp only [χ, MonoidHom.finset_prod_apply, MonoidHom.comp_apply, Pi.evalMonoidHom_apply, MonoidHom.inv_apply]
-  rw [Finset.prod_eq_single i (fun j _ hj => by simp [hj]) (by simp), Pi.mulSingle_eq_same]
+  simp only [χ, MonoidHom.finsetProd_apply]
+  rw [Finset.prod_eq_single i (fun j _ hj => by
+    simp [MonoidHom.comp_apply, Pi.mulSingle_apply, hj]) (by simp)]
+  simp [MonoidHom.comp_apply]
 
 theorem Uc_le (c : ℕ) : Uc k c ≤ Uo k := by
   rintro _ ⟨u, -, rfl⟩

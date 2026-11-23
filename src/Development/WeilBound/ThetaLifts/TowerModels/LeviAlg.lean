@@ -1,4 +1,54 @@
-import Mathlib
+module
+
+public import Mathlib.Data.Matrix.ColumnRowPartitioned
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+
+@[expose] public section
 
 namespace PositivityTheory.ThKG.Tow.Levi
 
@@ -60,9 +110,9 @@ theorem cols_of_mul {m : Matrix d d R} {g : Matrix e e R} {b : Matrix e (Fin 2) 
   rw [fr, mul_fromCols, fromCols_mul_fromBlocks, fromCols_ext_iff] at h
   refine ⟨h.1, funext fun i => ?_, funext fun i => ?_⟩
   · have := congrFun (congrFun h.2 i) 0
-    simpa [mul_apply, mulVec, dotProduct, add_assoc, mul_comm] using this
+    simpa [Matrix.mul_apply, mulVec, dotProduct, add_assoc, mul_comm] using this
   · have := congrFun (congrFun h.2 i) 1
-    simpa [mul_apply, mulVec, dotProduct, add_assoc, mul_comm] using this
+    simpa [Matrix.mul_apply, mulVec, dotProduct, add_assoc, mul_comm] using this
 
 theorem IsFr.levi (h : IsFr c J J₁ ι x y) (hcc : ∀ a, c (c a) = a) {t t' : R} (ht : t * t' = 1) {g g' : Matrix e e R}
     (hg' : g * g' = 1) (hg : gᵀ * J₁ * g.map c = J₁) :
@@ -87,7 +137,7 @@ theorem IsFr.levi (h : IsFr c J J₁ ι x y) (hcc : ∀ a, c (c a) = a) {t t' : 
     · simp
     · simp
     · ext i j
-      fin_cases i <;> fin_cases j <;> simp [mul_apply, ht, hct, hcc]
+      fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, ht, hct, hcc]
   have e1 : A.map c * A'.map c = 1 := by
     rw [← Matrix.map_mul, h1, Matrix.map_one _ (map_zero _) (map_one _)]
   have e2 : A * D * A' * A = A * D := by rw [Matrix.mul_assoc, h2, Matrix.mul_one]
@@ -126,17 +176,17 @@ theorem IsFr.stab (h : IsFr c J J₁ ι x y) {t t' : R} (ht : t * t' = 1) {p : M
   have hct : c t * c t' = 1 := by rw [← map_mul, ht, map_one]
   have e4 : ∀ j, P (Sum.inr 1) (Sum.inl j) = 0 := fun j => by
     have := congrFun (congrFun hP (Sum.inl j)) (Sum.inr 0)
-    simp [mul_apply, e3, gr, one_apply, Fintype.sum_sum_type, apply_ite c] at this
+    simp [Matrix.mul_apply, e3, gr, one_apply, Fintype.sum_sum_type, apply_ite c] at this
     calc _ = P (Sum.inr 1) (Sum.inl j) * c t * c t' := by rw [mul_assoc, hct, mul_one]
       _ = 0 := by rw [this, zero_mul]
   rw [← fromBlocks_toBlocks P] at e2
   refine ⟨P.toBlocks₁₁, fun j => P (Sum.inr 0) (Sum.inl j), ?_, fun z => ?_⟩
   · ext i j
     have := congrFun (congrFun hP (Sum.inl i)) (Sum.inl j)
-    simpa [mul_apply, e4, gr, Fintype.sum_sum_type, toBlocks₁₁] using this
+    simpa [Matrix.mul_apply, e4, gr, Fintype.sum_sum_type, toBlocks₁₁] using this
   · rw [mulVec_mulVec, (cols_of_mul e2).1, add_mulVec, mulVec_mulVec]
     congr 1
     ext i
-    simp [mulVec, dotProduct, mul_apply, toBlocks₂₁, e4, Finset.sum_mul, Finset.mul_sum, mul_comm, mul_left_comm]
+    simp [mulVec, dotProduct, Matrix.mul_apply, toBlocks₂₁, e4, Finset.sum_mul, Finset.mul_sum, mul_comm, mul_left_comm]
 
 end PositivityTheory.ThKG.Tow.Levi

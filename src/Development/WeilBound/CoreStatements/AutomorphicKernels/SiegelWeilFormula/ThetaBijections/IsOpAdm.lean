@@ -1,4 +1,48 @@
-import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.ThetaBijections.AlgInjective
+module
+
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ActFromBlocks
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasCompactSupportFinprodSchwartzBruhatFiniteAdel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantFinprodSchwartzBruhatFiniteAdel
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SchwartzBruhatFiniteAdelesMemSpanRestrictedProdu
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,24 +55,24 @@ variable {F : Type} [Field F] [NumberField F]
 
 theorem isOp_adm {κ : Type} [Fintype κ] {ψ : AddChar (AF F) ℂ} {a : Matrix (κ ⊕ κ) (κ ⊕ κ) F}
     {e : ((κ → AF F) → ℂ) →ₗ[ℂ] (κ → AF F) → ℂ} {c : ℂ} {ei : SInf F κ →L[ℂ] SInf F κ}
-    {ev : ∀ v : Pl F, ((κ → Fv F v) → ℂ) →ₗ[ℂ] (κ → Fv F v) → ℂ} (h : IsOp ψ a e c ei ev)
+    {ev : ∀ v : Pl (F := F), ((κ → Fv F v) → ℂ) →ₗ[ℂ] (κ → Fv F v) → ℂ} (h : IsOp ψ a e c ei ev)
     (l : ((κ → AF F) → ℂ) →ₗ[ℂ] ℂ) (hl : l ∈ (adeleClass F).adm κ) : l ∘ₗ e ∈ (adeleClass F).adm κ := by
-  have hfamOf : ∀ φ : (v : Pl F) → (κ → Fv F v) → ℂ, (∀ v, φ v ∈ SB (κ → Fv F v)) →
+  have hfamOf : ∀ φ : (v : Pl (F := F)) → (κ → Fv F v) → ℂ, (∀ v, φ v ∈ SB (κ → Fv F v)) →
       (∀ᶠ v in Filter.cofinite, φ v = {x : κ → Fv F v | ∀ i, x i ∈
         IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers F v}.indicator 1) → IsFam φ :=
     fun φ h1 h2 => ⟨h1, h2⟩
-  have hSB : ∀ φ : (v : Pl F) → (κ → Fv F v) → ℂ, IsFam φ →
+  have hSB : ∀ φ : (v : Pl (F := F)) → (κ → Fv F v) → ℂ, IsFam φ →
       (fun y : κ → Af F => ∏ᶠ v, φ v fun i => evalV F v (y i)) ∈ SB (κ → Af F) := by
     intro φ hφ
     exact ⟨isLocallyConstant_finprod_evalV φ hφ.1 hφ.2,
       GlobalTheory.AdelicCoordSupport.hasCompactSupport_finprod φ hφ.1 hφ.2⟩
-  have hpure : ∀ (f : SInf F κ) (φ : (v : Pl F) → (κ → Fv F v) → ℂ),
+  have hpure : ∀ (f : SInf F κ) (φ : (v : Pl (F := F)) → (κ → Fv F v) → ℂ),
       pureA F f (fun y : κ → Af F => ∏ᶠ v, φ v fun i => evalV F v (y i)) =
         GlobalTheory.IndefiniteRowSideFullHecke.WeilTensorModels.pure f φ := by
     intro f φ
     rfl
   intro g hg
-  have key : ∀ p ∈ Submodule.span ℂ {p : (κ → Af F) → ℂ | ∃ φ : (v : Pl F) → (κ → Fv F v) → ℂ,
+  have key : ∀ p ∈ Submodule.span ℂ {p : (κ → Af F) → ℂ | ∃ φ : (v : Pl (F := F)) → (κ → Fv F v) → ℂ,
         (∀ v : IsDedekindDomain.HeightOneSpectrum (𝓞 F), φ v ∈ SB (κ → Fv F v)) ∧
         (∀ᶠ v in Filter.cofinite, φ v = {x : κ → Fv F v | ∀ i, x i ∈
           IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers F v}.indicator 1) ∧
@@ -58,7 +102,7 @@ theorem isOp_adm {κ : Type} [Fintype κ] {ψ : AddChar (AF F) ℂ} {a : Matrix 
       have : pureA F f (p + q) = pureA F f p + pureA F f q := by
         funext x
         simp [pureA, mul_add]
-      rw [this, map_add, h1, h2]
+      rw [this, map_add (f := _), h1, h2]
       rfl
     | smul a p _ hp =>
       obtain ⟨T1, h1⟩ := hp

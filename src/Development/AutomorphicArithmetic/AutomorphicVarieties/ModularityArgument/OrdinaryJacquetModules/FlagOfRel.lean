@@ -1,13 +1,70 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.OrdinaryJacquetModules.FlagJ
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.EigenbasisLifts.RelKill
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.EigenbasisLifts.Factor
-import Development.AutomorphicArithmetic.AutomorphicVarieties.TheoremsMuLinked.NormsAndPolarizations.RegArith
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LemmaL
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.MapApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.IrrIffSpan
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGmap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
+module
+
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.CoiConjSingle
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LagNeZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.LagTriangular
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.OrdExt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGext
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.EigenbasisLifts.TrPlus
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.ExistsNotCongPow
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.BaseChangeDefiniteUnitary
+import Development.AbelianVarietyTheory.PublishedTheorems.GaloisCohomology₂.TrivialOnInertiaOfUnr
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.EqLagIff
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.ContinuousTorusCharacter
+import Development.AutomorphicArithmetic.AutomorphicVarieties.HeckeAlgebras.IsTheta
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.OrdinaryJacquetModules.CoreOrdAlt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.EigenbasisLifts.IsTanZero
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeilGroupCharacters.ContinuousResP
+import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.BasicNotions Formalism.MainNotions.N Polynomial ValuativeRel IsLocalRing GlobalTheory.CuspRep GlobalTheory.WeilDeligne
 open GlobalTheory.LocLanglands GlobalTheory.LocGL GlobalTheory.GalOfCusp GlobalTheory.SmGL GlobalTheory.SplitWeil GlobalTheory.UnitaryBC GlobalTheory.PRep UpperTheory.V UpperTheory.V.Hi UpperTheory.V.Hi.CaseU
@@ -80,6 +137,51 @@ private theorem descend {n : ℕ} {A G H : Type} [CommRing A] [Group G] [Group H
     (hφ : Function.Surjective φ) (ρ : H →* GL (Fin n) A) (hn : 1 ≤ n) (hF : Ws.Eb.Full ρ)
     (hD : D.comap φ = W.GDet.ofRep (W.mat ρ)) :
     ∃ ρ₀ : G →* GL (Fin n) A, ρ₀.comp φ = ρ ∧ Ws.Eb.Full ρ₀ ∧ D = W.GDet.ofRep (W.mat ρ₀) := by
+  have rep_single {T : Type} [Group T] (R : T →* Matrix (Fin n) (Fin n) A) (B : Type) [CommRing B] [Algebra A B] (g : T) (r : B) :
+      W.GDet.repAlg (R) B (MonoidAlgebra.single g r) = r • (R g).map (algebraMap A B) := by
+    unfold W.GDet.repAlg
+    rw [MonoidAlgebra.lift_single]
+    rfl
+  have rep_map {T : Type} [Group T] (R : T →* Matrix (Fin n) (Fin n) A) (y : MonoidAlgebra A T) :
+      W.GDet.repAlg (R) A[X] (MonoidAlgebra.mapRingHom T (algebraMap A A[X]) y) =
+        (W.GDet.repAlg (R) A y).map (algebraMap A A[X]) := by
+    induction y using MonoidAlgebra.induction_on with
+    | of g => simp [MonoidAlgebra.of_apply, rep_single R]
+    | add x y hx hy =>
+      rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _)]
+      ext i j
+      simp
+    | smul r x hx =>
+      have hr : r • x = MonoidAlgebra.single 1 r * x := by
+        rw [Algebra.smul_def]
+        rfl
+      have hm : MonoidAlgebra.mapRingHom T (algebraMap A A[X]) (MonoidAlgebra.single 1 r)
+          = MonoidAlgebra.single 1 (algebraMap A A[X] r) := by
+        ext g
+        simp [MonoidAlgebra.coeff_single, Finsupp.single_apply]
+      rw [hr, map_mul, map_mul, map_mul, hx, Matrix.map_mul, hm, rep_single R, rep_single R, map_one]
+      congr 1
+      ext i j
+      by_cases h : i = j <;> simp [Matrix.one_apply, h]
+  have rep_chi {T : Type} [Group T] (R : T →* Matrix (Fin n) (Fin n) A) (y : MonoidAlgebra A T) :
+      (W.GDet.ofRep (R)).chi y = (W.GDet.repAlg (R) A y).charpoly := by
+    unfold W.GDet.chi
+    change (W.GDet.repAlg (R) A[X] _).det = _
+    rw [← Polynomial.algebraMap_eq, map_sub, rep_single R, rep_map R, map_one]
+    rw [Matrix.charpoly]
+    congr 1
+    ext i j
+    by_cases h : i = j <;> simp [Matrix.charmatrix_apply, Matrix.one_apply, h]
+  have rep_trace {T : Type} [Group T] (R : T →* Matrix (Fin n) (Fin n) A) (y : MonoidAlgebra A T) :
+      (W.GDet.ofRep (R)).tr y = (W.GDet.repAlg (R) A y).trace := by
+    haveI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+    unfold W.GDet.tr W.GDet.lam
+    rw [rep_chi R, Matrix.trace_eq_neg_charpoly_coeff, Fintype.card_fin]
+    ring
+  have rep_chi_single {T : Type} [Group T] (R : T →* Matrix (Fin n) (Fin n) A) (g : T) :
+      (W.GDet.ofRep (R)).chi (MonoidAlgebra.single g 1) = (R g).charpoly := by
+    rw [rep_chi R, rep_single R]
+    simp
   have hchi : ∀ h, D.chi (MonoidAlgebra.single (φ h) 1) = (W.GDet.ofRep (W.mat ρ)).chi (MonoidAlgebra.single h 1) :=
     fun h => by rw [← hD, chi_single]
   have hker : φ.ker ≤ ρ.ker := fun g hg => by
@@ -88,8 +190,8 @@ private theorem descend {n : ℕ} {A G H : Type} [CommRing A] [Group G] [Group H
           (W.GDet.ofRep (W.mat ρ)).tr (MonoidAlgebra.single h 1) := by
         unfold W.GDet.tr W.GDet.lam
         rw [← hchi, ← hchi, map_mul, MonoidHom.mem_ker.1 hg, mul_one]
-      rw [(AlgebraTools.Det.repApi (W.mat ρ)).2.2.1 hn, (AlgebraTools.Det.repApi (W.mat ρ)).2.2.1 hn] at e
-      rw [(AlgebraTools.Det.repApi (W.mat ρ)).2.2.1 hn, mul_sub, map_sub, Matrix.trace_sub,
+      rw [rep_trace (W.mat ρ), rep_trace (W.mat ρ)] at e
+      rw [rep_trace (W.mat ρ), mul_sub, map_sub, Matrix.trace_sub,
         MonoidAlgebra.single_mul_single, MonoidAlgebra.single_mul_single, mul_one, mul_one, e, sub_self]
     rw [map_sub, sub_eq_zero] at h0
     refine Units.ext ?_
@@ -103,37 +205,4 @@ private theorem descend {n : ℕ} {A G H : Type} [CommRing A] [Group G] [Group H
     exact ⟨φ h, hm h⟩
   · obtain ⟨h, rfl⟩ := hφ g
     unfold W.GDet.lam
-    rw [hchi, (AlgebraTools.Det.repApi _).2.1, (AlgebraTools.Det.repApi _).2.1, hm]
-
-theorem UpperTheory.V.Z.Ord.flagJ :
-    GlobalTheory.Mem.LiteralAutomorphy.LitN → FlagJ := by
-  intro H l _ L Ω _ _ _ _ _ _ s n V c r B Λ J hJ x h ρ hJx hA hx hirr v
-  have hn : 1 ≤ n := by
-    rcases Nat.eq_zero_or_pos n with rfl | h0
-    · exact absurd (Subsingleton.elim _ _) hirr.1
-    · exact h0
-  have hs : Function.Surjective V.pr := fun g => by
-    obtain ⟨τ, hτ⟩ : ∃ τ, toGS Ω V.S' τ = g.1 := QuotientGroup.mk_surjective g.1
-    obtain ⟨σ, rfl⟩ := (V.hη τ).1 (by rw [hτ]; exact g.2)
-    exact ⟨σ, Subtype.ext hτ⟩
-  have hF : Ws.Eb.Full ρ := (AlgebraTools.Det.irrIffSpan (W.mat ρ)).1 fun N hN => by
-    rcases hirr.2.2 N le_top fun g v hv => hN g v hv with h1 | h1
-    · exact Or.inl h1
-    · exact Or.inr h1
-  obtain ⟨ρ₀, rfl, hfull, hD⟩ := descend x.D V.pr hs ρ hn hF hx
-  obtain ⟨hO, -⟩ := Ws.Eb.relKill B x ρ₀ hfull hD
-  obtain ⟨g₀, hg₀⟩ := Th.Nm.regArith H s h v (x.psi v) hA.1 (hA.2 v)
-  refine flag_of_rel _ (x.psi v) (hO v) (fun t => ?_) g₀ hg₀
-  let xb : B.B ⧸ J →+* Qbar l := Ideal.Quotient.lift J (x : B.B →+* Qbar l) fun a ha => hJx ha
-  have e0 : xb.comp (Ideal.Quotient.mk J) = (x : B.B →+* Qbar l) := RingHom.ext fun a => rfl
-  have e1 : (B.DD J).map xb = W.GDet.ofRep (W.mat ρ₀) := by
-    have h1 : (B.DD J).map xb = B.u.D.map (xb.comp (Ideal.Quotient.mk J)) := (CA.d_gmap B.u.D).2.1 _ _
-    rw [h1, e0]
-    exact hD
-  have e2 := (AlgebraTools.Det.mapApi (B.DD J) xb).1 (MonoidAlgebra.single (V.frame.φ v t) 1)
-  rw [MonoidAlgebra.mapRingHom_single, map_one, e1, (AlgebraTools.Det.repApi _).2.1] at e2
-  refine e2.trans ((congrArg (Polynomial.map xb) (hJ.O1 v t)).trans ?_)
-  rw [Polynomial.map_prod]
-  refine Finset.prod_congr rfl fun i _ => ?_
-  simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C]
-  rfl
+    rw [hchi, rep_chi_single (W.mat ρ), rep_chi_single (W.mat ρ₀), hm]

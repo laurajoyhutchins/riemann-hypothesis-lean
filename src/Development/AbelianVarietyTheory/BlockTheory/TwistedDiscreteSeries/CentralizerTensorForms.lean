@@ -1,6 +1,52 @@
-import Mathlib
-import Formalism.SatakeDualWeyl.Statement
-import Formalism.LocalRingCardinality.DataLevel
+module
+
+public import Formalism.LocalRingCardinality.DataLevel
+public import Mathlib.NumberTheory.NumberField.AdeleRing
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -54,10 +100,10 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.CentralizerTensorForms.hf
   unfold _root_.Formalism.UG.hform
   simp [dotProduct, mulVec, Finset.mul_sum, mul_assoc]
 
+
 open Matrix NumberField in
 open scoped TensorProduct in
 variable {A : Type} [CommRing A] {n : Type} [Fintype n] [DecidableEq n] in
-
 theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.CentralizerTensorForms.form_adj (σ : A →+* A) {J : Matrix n n A} (hJ : IsUnit J.det)
     (l : Matrix n n A) (y y' : n → A) :
     _root_.GlobalTheory.IndefiniteRowSideFullHecke.CentralizerTensorForms.form σ J y (l *ᵥ y') =
@@ -70,6 +116,7 @@ theorem _root_.GlobalTheory.IndefiniteRowSideFullHecke.CentralizerTensorForms.fo
   congr 1
   funext i
   unfold _root_.Formalism.UG.cT
+
   simp [vecMul, mulVec, dotProduct, map_sum, mul_comm]
 
 end Ring
@@ -248,72 +295,5 @@ def RegularAdelic : Prop :=
           (AdelicCompact σ J γ ↔ ∀ i, IsField (K i ⊗[F] E))
 
 def RegularSemisimple : Prop := RegularStructure ∧ RegularAdelic
-
-theorem isQuadInvol_complex : IsQuadInvol ℝ ℂ (Complex.conjAe : ℂ →ₐ[ℝ] ℂ) where
-  etale := ⟨Algebra.FormallyEtale.of_isSeparable ℝ ℂ,
-    Algebra.FinitePresentation.of_finiteType.1 inferInstance⟩
-  finrank_eq := Complex.finrank_real_complex
-  invol := by intro e; simp
-  ne_id := ⟨Complex.I, by simp [Complex.ext_iff]; norm_num⟩
-
-def exElt : GL (Fin 2) ℂ where
-  val := !![2, 0; 0, 1 / 2]
-  inv := !![1 / 2, 0; 0, 2]
-  val_inv := by ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
-  inv_val := by ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
-
-theorem isRegular_exElt :
-    IsRegular (Complex.conjAe : ℂ →ₐ[ℝ] ℂ) (!![0, 1; 1, 0] : Matrix (Fin 2) (Fin 2) ℂ) exElt where
-  quad := isQuadInvol_complex
-  herm := by ext i j; fin_cases i <;> fin_cases j <;> simp [cT]
-  nondeg := by simp [Matrix.det_fin_two]
-  mem := by
-    show cT _ _ * _ * _ = _
-    have h2 : (starRingEnd ℂ) 2 = 2 := map_ofNat _ 2
-    ext i j; fin_cases i <;> fin_cases j <;>
-      simp [cT, exElt, Matrix.mul_apply, Fin.sum_univ_two, h2]
-  sep := by
-    have h : (exElt : Matrix (Fin 2) (Fin 2) ℂ) = Matrix.diagonal ![2, 1 / 2] := by
-      ext i j; fin_cases i <;> fin_cases j <;> simp [exElt]
-    rw [h, Matrix.charpoly_diagonal]
-    refine Polynomial.separable_prod_X_sub_C_iff.2 ?_
-    intro i j hij
-    fin_cases i <;> fin_cases j <;> simp at hij ⊢ <;> norm_num at hij
-
-def exDiag (R : Type) [CommRing R] [Algebra ℝ R] :
-    (Fin 1 → Rˣ) →* Matrix (Fin 2) (Fin 2) (ℂ ⊗[ℝ] R) where
-  toFun t := Matrix.diagonal ![1 ⊗ₜ (t 0 : R), 1 ⊗ₜ (((t 0)⁻¹ : Rˣ) : R)]
-  map_one' := by
-    ext i j; fin_cases i <;> fin_cases j <;> simp [Algebra.TensorProduct.one_def]
-  map_mul' a b := by
-    rw [Matrix.diagonal_mul_diagonal]
-    congr 1; funext i; fin_cases i <;> simp [mul_comm]
-
-def exSplit : SplitSubtorus (Complex.conjAe : ℂ →ₐ[ℝ] ℂ)
-    (!![0, 1; 1, 0] : Matrix (Fin 2) (Fin 2) ℂ) exElt 1 where
-  hom R _ _ := (exDiag R).toHomUnits
-  mem R _ _ t := by
-    refine ⟨?_, ?_⟩
-    · show cT _ (exDiag R t) * _ * exDiag R t = _
-      ext i j; fin_cases i <;> fin_cases j <;>
-        simp [cT, exDiag, sigR, Matrix.mul_apply, Fin.sum_univ_two, Algebra.TensorProduct.one_def]
-    · refine Subgroup.mem_centralizer_singleton_iff.2 (Units.ext ?_)
-      show exDiag R t * (exElt : Matrix (Fin 2) (Fin 2) ℂ).map _ =
-        (exElt : Matrix (Fin 2) (Fin 2) ℂ).map _ * exDiag R t
-      ext i j; fin_cases i <;> fin_cases j <;>
-        simp [exDiag, exElt, Matrix.mul_apply, Fin.sum_univ_two, mul_comm]
-  inj R _ _ a b h := by
-    have h1 : exDiag R a 0 0 = exDiag R b 0 0 := by
-      have := congrArg Units.val h
-      exact congrFun (congrFun this 0) 0
-    have h2 : (Algebra.TensorProduct.includeRight : R →ₐ[ℝ] ℂ ⊗[ℝ] R) (a 0) =
-        (Algebra.TensorProduct.includeRight : R →ₐ[ℝ] ℂ ⊗[ℝ] R) (b 0) := by
-      simpa [exDiag] using h1
-    have h3 := Algebra.TensorProduct.includeRight_injective (algebraMap ℝ ℂ).injective h2
-    funext i; fin_cases i; exact Units.ext h3
-  natural R S _ _ _ _ f t := by
-    refine Units.ext ?_
-    show exDiag S _ = (exDiag R t).map _
-    ext i j; fin_cases i <;> fin_cases j <;> simp [exDiag]
 
 end GlobalTheory.IndefiniteRowSideFullHecke.CentralizerTensorForms

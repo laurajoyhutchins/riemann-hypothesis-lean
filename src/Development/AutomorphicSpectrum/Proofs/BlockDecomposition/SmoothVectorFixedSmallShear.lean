@@ -1,5 +1,57 @@
-import Mathlib
-import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ShearGL
+module
+
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ShearOrbitFinite
+public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ShearGL
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivOfRangeEq
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.SegmentCuspLines.ProdIrrFiniteLength
+import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.LSegJacquet
+
+@[expose] public section
 
 noncomputable section
 
@@ -11,17 +63,7 @@ namespace GlobalTheory.CompanionTheory.MirPair
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem continuous_leviMir (m : ℕ) : Continuous (levi k m) := by
-  have hmat : Continuous (GlobalTheory.BZMir.glEmbHom k m) := by
-    apply continuous_matrix
-    intro i j
-    induction i using Fin.lastCases <;> induction j using Fin.lastCases <;>
-      simp [GlobalTheory.BZMir.glEmbHom, GlobalTheory.BZMir.glEmbMat] <;>
-      first
-        | exact continuous_const
-        | exact continuous_id.matrix_elem _ _
-        | fun_prop
-  have hGL : Continuous (GlobalTheory.BZMir.glEmb k m) := Continuous.units_map _ hmat
-  exact continuous_induced_rng.2 hGL
+  apply _root_.GlobalTheory.CompanionTheory.MirPair.ShearOrbit.continuous_levi <;> assumption
 
 theorem tendsto_shearGL_zero (n : ℕ) :
     Filter.Tendsto (shearGL (k := k) n) (𝓝 0) (𝓝 1) := by
@@ -50,7 +92,7 @@ theorem tendsto_shearGL_zero (n : ℕ) :
       ⟨⟨_, _, hmul, mul_eq_one_comm.mp hmul⟩, rfl⟩
     have hcoe : ((GlobalTheory.CompanionTheory.MirPair.shearGL n b : GL (Fin (n + 1)) k) : Matrix (Fin (n + 1)) (Fin (n + 1)) k) =
         1 + vecMulVec (GlobalTheory.BZMir.eLast k n) b := by
-      rw [GlobalTheory.CompanionTheory.MirPair.shearGL, dif_pos hu]
+      rw [GlobalTheory.CompanionTheory.MirPair.shearGL, dite_eq_left hu]
       exact hu.unit_spec
     refine ⟨hcoe, Units.inv_eq_of_mul_eq_one_right ?_⟩
     rw [hcoe]

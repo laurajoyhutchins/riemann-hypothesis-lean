@@ -1,4 +1,52 @@
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FlatNullA
+module
+
+public import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FlatNullA
+public import ReciprocityTheory.L2DbarEstimates.JacobianInterpolationStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.L2DbarEstimates.Y
 
@@ -33,7 +81,7 @@ theorem fn_mu_compl (hN : EXTNullStatement n) (hD : A.D0 L w w0 s) (hF : A.Flat 
     (A.chart (A.pick x)).continuousOn.isOpen_inter_preimage (A.chart (A.pick x)).open_source hB2
   have hne : ∃ y ∈ Metric.ball ((A.chart (A.pick x)) x) r, fnG A w0 s De (A.pick x) y ≠ 0 := by
     obtain ⟨y, ⟨hys, hyB⟩, hyM⟩ := (fn_dense A hD hF).inter_open_nonempty _ hO1
-      ⟨x, hxs, Metric.mem_ball_self hr⟩
+      ⟨x, hxs, Set.mem_preimage.mpr (Metric.mem_ball_self hr)⟩
     refine ⟨(A.chart (A.pick x)) y, hyB, ?_⟩
     rw [fn_G_ne_iff A hD ((A.chart (A.pick x)).map_source hys), (A.chart (A.pick x)).left_inv hys]
     exact hyM
@@ -57,7 +105,7 @@ theorem fn_mu_compl (hN : EXTNullStatement n) (hD : A.D0 L w w0 s) (hF : A.Flat 
       | simp [Measure.restrict_eq_zero.2 hvol]
   refine ⟨(A.Mset w0 s De)ᶜ ∩ ((A.chart (A.pick x)).source ∩
       (A.chart (A.pick x)) ⁻¹' Metric.ball ((A.chart (A.pick x)) x) r),
-    inter_mem_nhdsWithin _ (hO1.mem_nhds ⟨hxs, Metric.mem_ball_self hr⟩), ?_⟩
+    inter_mem_nhdsWithin _ (hO1.mem_nhds ⟨hxs, Set.mem_preimage.mpr (Metric.mem_ball_self hr)⟩), ?_⟩
   refine measure_mono_null ?_ hTnull
   rintro y ⟨hyM, hys, hyB⟩
   refine ⟨⟨hys, hyB⟩, ?_⟩
@@ -169,7 +217,7 @@ theorem fn_loc (hD : A.D0 L w w0 s) {la : La} {F : ι → Y → ℂ}
     rw [(A.chart i).left_inv hy.1] at h2
     exact ⟨h.2, h2⟩
   have hFW : ContinuousOn (F i) W := by
-    refine (hFS.comp ((A.chart i).continuousOn.mono (fun y hy => hy.1)) (fun y hy => hy.2)).congr ?_
+    refine (hFS.comp ((A.chart i).continuousOn.mono (by exact fun y hy => hy.1)) (by exact fun y hy => hy.2)).congr ?_
     intro y hy
     simp [Function.comp, (A.chart i).left_inv hy.1]
   have hphW : ContinuousOn (A.ph la i) W := (fn_contOn_ph A la i).mono fun y hy => hy.1
@@ -293,8 +341,8 @@ theorem fn_ext (hE : EXTStatement n) (hD : A.D0 L w w0 s) (hF : A.Flat w0 s De)
       have hOt : Metric.ball u (r u) ∩ Metric.ball u₀ (r u₀) ⊆ (A.chart i).target :=
         fun x hx => hball u hu hx.1
       have hcl := fn_sub_closure A hD hF i hO hOt
-      refine Set.EqOn.of_subset_closure ?_ ((hU1 u hu).continuousOn.mono fun x hx => hx.1)
-        ((hU1 u₀ hu₀).continuousOn.mono fun x hx => hx.2) Set.inter_subset_left hcl hw
+      refine Set.EqOn.of_subset_closure ?_ ((hU1 u hu).continuousOn.mono (by exact fun x hx => hx.1))
+        ((hU1 u₀ hu₀).continuousOn.mono (by exact fun x hx => hx.2)) Set.inter_subset_left hcl hw
       intro x hx
       rw [hU2 u hu ⟨hx.1.1, hx.2⟩, hU2 u₀ hu₀ ⟨hx.1.2, hx.2⟩]
     refine ⟨fun u => U u u, ?_, ?_⟩

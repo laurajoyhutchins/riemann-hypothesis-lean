@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
-import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.AmpTensorDSdNonemptyOfSubsingleton
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.LocWSOf
+public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SettingConstruction
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.Choice
+import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.QuotSetU
+import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeCSB
+import Formalism.SharpRestriction.CuspSpanNormBounds.BridgeLemma3
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.AmpTensorDSdNonemptyOfSubsingleton
+import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.TopsChoicePartA
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -145,7 +195,7 @@ private theorem conj_mem_lemma (C : Choice X θ) (τ : D.what₂.Tau) (γ : Form
 theorem wT_off (C : Choice X θ) (u : D.what₂.Word) (τ : D.what₂.Tau) (m : Formalism.FourierDecayAlt.B.Mat D.R.k D.R.rS)
     (hm : m ∉ Formalism.QuantumDeterminants.UH (Formalism.QuantumDeterminants.Hpk D.R.k D.R.rS)) : wT C u τ m = 0 := by
   unfold wT
-  rw [dif_neg]
+  rw [dite_eq_right]
   rintro ⟨γ, hγ⟩
   apply hm
   obtain ⟨h1, h2, -, -⟩ := C.isT τ
@@ -166,7 +216,7 @@ theorem wT_at (C : Choice X θ) (u : D.what₂.Word) (τ : D.what₂.Tau) (γ : 
   have hex : ∃ γ' : Formalism.REAL.UJ (X.B.I.ε (vOf X τ)), uMat γ' = C.Q τ * (C.Qi τ * uMat γ * C.Q τ) * C.Qi τ :=
     ⟨γ, by simp only [Matrix.mul_assoc, h2, Matrix.mul_one, hB]⟩
   unfold wT
-  rw [dif_pos hex]
+  rw [dite_eq_left hex]
   have heq : uMat hex.choose = uMat γ := by
     rw [hex.choose_spec]
     simp only [Matrix.mul_assoc, h2, Matrix.mul_one, hB]

@@ -1,6 +1,55 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.LettersFreeOfRank
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.LettersFreeOfRank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.WachLettersFree
+
+@[expose] public section
 
 noncomputable section
 
@@ -48,20 +97,8 @@ theorem φD_smulA (a : LetA O n) (x : W.DD T) : W.φD T (a • x) = W.φA a • 
   rw [algebraMap_smul, W.φE_ext, algebraMap_smul] at this
   exact this
 
-theorem γD_smulA (g : W.Gam) (a : LetA O n) (x : W.DD T) :
-    W.γD T g (a • x) = W.γA g a • W.γD T g x := by
-  have := W.γD_smul T g (algebraMap (LetA O n) W.EE a) x
-  rw [algebraMap_smul, W.γE_ext, algebraMap_smul] at this
-  exact this
-
-theorem γA_letE (g : W.Gam) (i : ZMod n) : W.γA g (letE i) = letE i := by
-  funext j
-  by_cases h : j = i
-  · subst h; simp [LocWach.γA, letγ, letE]
-  · simp [LocWach.γA, letγ, letE, h]
 
 include W in
-
 theorem neZero_letters : NeZero n := by
   have := PD.finK₀
   exact ⟨by rw [W.n_eq]; exact Module.finrank_pos.ne'⟩
@@ -81,7 +118,7 @@ theorem isUnit_Q : IsUnit (algebraMap (LetA O n) W.EE W.Q) := by
     have h2 := (Ideal.mem_jacobson_bot.1 hj) (x * r * (↑u⁻¹ : W.EE))
     have h3 : x * algebraMap (LetA O n) W.EE W.q =
         (((PD.p : ℕ) : W.EE) * (x * r * (↑u⁻¹ : W.EE)) + 1) * u := by
-      rw [hx, ← map_mul, h1, map_sub, map_pow, map_add, map_one, ← hx, hr, ← hu]
+      rw [hx, ← map_mul, h1, map_sub, map_pow, map_add (f := _), map_one, ← hx, hr, ← hu]
       have := u.inv_mul
       linear_combination (-((PD.p : ℕ) : W.EE) * x * r) * this
     exact isUnit_of_mul_isUnit_right (h3 ▸ h2.mul u.isUnit)
@@ -100,21 +137,6 @@ theorem Q_pow_smul_cancel (m : ℕ) {x y : W.DD T} (h : W.Q ^ m • x = W.Q ^ m 
   exact ((isUnit_Q W).pow m).smul_left_cancel.1 h
 
 variable {W T}
-
-theorem φD_fixed (i : ZMod n) {x : W.DD T} (hx : x ∈ W.Nl T (i - 1)) :
-    (letE i : LetA O n) • W.φD T x = W.φD T x := by
-  rw [← phi_letE W i, ← φD_smulA, ((mem_Nl_iff W T _ x).1 hx).2]
-
-theorem letE_smul_φpull (i : ZMod n) {y : W.DD T} (hy : y ∈ W.φpull T) :
-    (letE i : LetA O n) • y ∈ phiPullLetter W T i := by
-  induction hy using Submodule.span_induction with
-  | mem x hx =>
-    obtain ⟨z, hz, rfl⟩ := hx
-    rw [← phi_letE W i, ← φD_smulA]
-    exact Submodule.subset_span ⟨_, letE_smul_mem W T _ hz, rfl⟩
-  | zero => simp
-  | add x y _ _ hx hy => rw [smul_add]; exact Submodule.add_mem _ hx hy
-  | smul a x _ hx => rw [smul_comm]; exact Submodule.smul_mem _ a hx
 
 variable (W T)
 

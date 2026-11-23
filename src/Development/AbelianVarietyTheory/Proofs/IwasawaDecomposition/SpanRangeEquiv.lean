@@ -1,28 +1,70 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.CenUsedOfCenReal
-import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdmissibleTwistOfTwistingCharacter
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SideIn
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SwapCastEqSwapAE
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExtLvlFormMemCutSp
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeOperatorKeepsRationalIntegralLevelFormsStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StdFrameLevelSubgroupBoundedOpenHyperspecialStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RamifiedLevelEqParahoricWithTupleCharacterStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsProdLevelStdFrameTwoBlockUnipotentLevelStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemRationalGLOfUnitaryGroupGramUnitGram
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteLevelFormsIffStdGroupTypeSpaceStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PlacesUnder
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelUnipotentGenericCharTypePlaceStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoefficientSpaceDefiniteFormIrreducibleAlgebraicStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InfOfLamLdefEqParamV
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitFrame
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIntOfFinite
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqPlMapOfConj
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLevOfAll
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteGroupGoodSetLevelsCharactersStatement
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLiftFormsAdelicDecoratedLatticesStatement
+module
+
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SideIn
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SwapCastEqSwapAE
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.StrictHenselianAcyclic
+public import Formalism.LocalToGlobal.IndefiniteReal.FrameExistence.FramesExistOfDiagonalTypePlaces
+public import Formalism.SharpRestriction.CuspSpanNormBounds.BesselShellMomentBounds
+public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsWtOfParUnique
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrameEquivApply
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.CoefficientSpaceDefiniteFormIrreducibleAlgebraicStatement
 import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousCoeffBlockAct
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardLatticesDiagonal
-import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsWtOfParUnique
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DefiniteLevelFormsIffStdGroupTypeSpaceStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqPlMapOfConj
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsFiniteGroupGoodSetLevelsCharactersStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsIntOfFinite
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLevOfAll
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsLiftFormsAdelicDecoratedLatticesStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUnitFrame
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExtLvlFormMemCutSp
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HeckeOperatorKeepsRationalIntegralLevelFormsStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InfOfLamLdefEqParamV
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsProdLevelStdFrameTwoBlockUnipotentLevelStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LevelUnipotentGenericCharTypePlaceStatement
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.MemRationalGLOfUnitaryGroupGramUnitGram
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PlacesUnder
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.RamifiedLevelEqParahoricWithTupleCharacterStatement
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StandardLatticesDiagonal
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.StdFrameLevelSubgroupBoundedOpenHyperspecialStatement
+import Formalism.LocalRingCardinality.RankBoundMonotoneInDimension
+import Formalism.LocalToGlobal.Columns.RowFormsSel
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -30,7 +72,7 @@ open Formalism.BasicNotions Formalism.MainNotions Formalism.BasicNotions.TH Form
 open scoped TensorProduct
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 
-set_option maxHeartbeats 1000000
+
 
 namespace GlobalTheory.MtId
 
@@ -60,6 +102,7 @@ theorem constr_semi {K M N : Type} [Field K] [AddCommGroup M] [Module ℂ M] [Ad
   have hx : x = ∑ a, x a • (Pi.single a 1 : Fin d → K) := by
     funext i; simp [Finset.sum_apply, Pi.single_apply]
   rw [hx]
+
   simp only [map_sum, map_smulₛₗ, hb, RingHom.id_apply]
 
 theorem side_read {V : HSp D} {n : ℕ} (hn : V.rank = n) {β : GL (Fin V.rank) (EAf D)} (hβ : β = 1) {c : CoefA V} {j : ℕ}
@@ -453,7 +496,7 @@ theorem real_state (pin : ColPin w) {Fm : ∀ i, principalLevelFrame.RowPsi (Vc 
         (tAll w.I μ) := by
       refine (P.q.mL μ _).trans ?_
       unfold mLU
-      rw [dif_pos ⟨by omega, i.2⟩]
+      rw [dite_eq_left ⟨by omega, i.2⟩]
       rfl
     obtain ⟨e, li, span, lat⟩ := tie_cast hm (P.q.p.tL μ ((i : ℕ) + 1))
     obtain ⟨m, h1⟩ := all_read (w.st x.o.Z) w.I P.hX w.ok ⟨pin.vals, pin.roots⟩ x.fits.grpAt hL P.z.Xg P.z.tr μ μ i (hF i) e li span lat
@@ -471,12 +514,11 @@ theorem inMt_state (pin : ColPin w) :
   rw [hm]
   exact idFrame_castFr _ _ (hF i)
 
-theorem inMt_idFrame : PrN → AllSt fun _ _ _ _ w P x =>
-    ∃ m : InMt x.r.Y (cfOf x) w.I.xi (QOf P), ∀ i, GlobalTheory.MtRead.IdFrame x.r.Y.hF (m.ad.PV i) :=
-  fun _ => StepW.of_all fun _ _ _ _ _ _ _ hs _ x => hs.1.elim fun pin => inMt_state x pin
-
-theorem sMt : SMt :=
-  StepW.of_all fun _ _ _ _ _ _ _ hs _ x => hs.1.elim fun pin => (inMt_state x pin).elim fun m _ => ⟨m⟩
+theorem sMt : SMt := by
+  unfold SMt
+  apply StepW.of_all
+  intro K B f T w hK hF hs P x
+  exact hs.1.elim fun pin => (inMt_state x pin).elim fun m _ => ⟨m⟩
 
 end State
 

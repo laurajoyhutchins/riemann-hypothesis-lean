@@ -1,8 +1,54 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.OfDetToDet
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.BcChiTmul
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DComm
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.HomTwo
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
 import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.IsLocalHom
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DComm
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.HomTwo
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.BcChiTmul
+
+@[expose] public section
 
 open TensorProduct IsLocalRing Polynomial UpperTheory.V.W UpperTheory.V.Alg UpperTheory.V.CA
 
@@ -34,7 +80,7 @@ private theorem dker_unit (T : Type) [CommRing T] [Algebra A T] (t : T) (ht : Is
 private theorem dker_cancel (S : Type) [CommRing S] [Algebra A S] (w : S ⊗[A] E) :
     Det.cancel A E S S[X] (1 + X ⊗ₜ w) = 1 + ((X : S[X]) ⊗ₜ[A] (1 : E)) *
       Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) w := by
-  rw [map_add, map_one]
+  rw [map_add (f := _), map_one]
   congr 1
 
 private theorem dker_top (S : Type) [CommRing S] [Algebra A S] (w : S ⊗[A] E) :
@@ -42,7 +88,7 @@ private theorem dker_top (S : Type) [CommRing S] [Algebra A S] (w : S ⊗[A] E) 
       Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) w)).coeff n = D.D S w := by
   obtain ⟨h1, h2, -⟩ := d_bc D S
   obtain ⟨-, -, h3, h4, -⟩ := d_chi (D.baseChange S) w
-  rw [← dker_cancel, ← h1, h3, ← h2, ← h4, finset_sum_coeff]
+  rw [← dker_cancel, ← h1, h3, ← h2, ← h4, finsetSum_coeff]
   simp only [coeff_C_mul_X_pow]
   simp
 
@@ -50,10 +96,10 @@ private theorem dker_of_kills {x : E} (hx : D.Kills x) : x ∈ D.ker := by
   rw [Det.mem_ker]
   intro S _ _ y u v
   rw [← dker_top, ← dker_top D S y]
-  congr 1
+  apply congrArg (fun p : S[X] => p.coeff n)
   apply dker_poly_eq
   intro T _ _ f hf
-  simp only [map_add, map_mul, map_one, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+  simp only [map_add (f := _), map_mul, map_one, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
   generalize Algebra.TensorProduct.map f (AlgHom.id A E) (Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) y) = y'
   generalize Algebra.TensorProduct.map f (AlgHom.id A E) (Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) u) = u'
   generalize Algebra.TensorProduct.map f (AlgHom.id A E) (Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) v) = v'
@@ -73,7 +119,7 @@ private theorem dker_kills_of {x : E}
       D.D S[X] 1 := by
     apply dker_poly_eq
     intro T _ _ f hf
-    simp only [map_add, map_mul, map_one, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+    simp only [map_add (f := _), map_mul, map_one, Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
     generalize Algebra.TensorProduct.map f (AlgHom.id A E) (Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) h) = h'
     obtain ⟨c, hc⟩ := dker_unit T (f X) hf h'
     have e : 1 + (c : T ⊗[A] E) * (1 ⊗ₜ x) = (c : T ⊗[A] E) * ((↑c⁻¹ : T ⊗[A] E) + 1 ⊗ₜ x) := by
@@ -84,13 +130,12 @@ private theorem dker_kills_of {x : E}
       (Algebra.TensorProduct.map (IsScalarTower.toAlgHom A S S[X]) (AlgHom.id A E) h) = h := by
     clear key
     induction h with
-    | zero => simp
     | tmul b z => simp [ev]
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
   have hX : ev X = 1 := by simp [ev]
   have k2 := congrArg ev key
   rw [← D.nat, map_one, map_one] at k2
-  simp only [map_add, map_mul, map_one, Algebra.TensorProduct.map_tmul, AlgHom.id_apply, hev, hX] at k2
+  simp only [map_add (f := _), map_mul, map_one, Algebra.TensorProduct.map_tmul, AlgHom.id_apply, hev, hX] at k2
   rw [← Algebra.TensorProduct.one_def, one_mul, add_mul, one_mul, add_comm (_ ⊗ₜ x), ← add_assoc, hx] at k2
   exact k2
 
@@ -107,5 +152,5 @@ theorem UpperTheory.V.CA.d_ker :
     have h4 : D.D A[X] (1 + X ⊗ₜ (h * x)) = 1 := by
       simpa using D.mem_ker.1 hx A[X] 1 (X ⊗ₜ h) 1
     have h5 := congrArg (fun p => p.coeff i) (h3.symm.trans h4)
-    simp only [finset_sum_coeff, coeff_C_mul_X_pow, coeff_one] at h5
+    simp only [finsetSum_coeff, coeff_C_mul_X_pow, coeff_one] at h5
     simpa [Nat.lt_succ_of_le hi, show i ≠ 0 by omega] using h5

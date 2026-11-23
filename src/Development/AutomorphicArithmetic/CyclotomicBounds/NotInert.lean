@@ -1,36 +1,54 @@
-import Formalism.LocalRingCardinality.HostCls
+module
+
+public import Formalism.LocalRingCardinality.DataHost
+public import Formalism.LocalRingCardinality.HostCls
+public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.HostFacts
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.HC
 
 namespace Formalism.BasicNotions.Host
 
 variable {R : Ranks} (H : Host R) {p : ℕ}
-
-theorem cls_ne_signal_of_jacobi (h : jacobiSym (-(H.d : ℤ)) p = 1) : H.cls p ≠ .signal := fun e =>
-  ((primeClass_eq_signal_iff H.toHostRaw).1 e).2.2.2.1 h
-
-theorem primeClass_ne_of_jacobi_one (h : jacobiSym (-(H.d : ℤ)) p = 1) : H.cls p ≠ .inertClass := fun e =>
-  ((primeClass_eq_inert_iff H.toHostRaw).1 e).2.2.2.1 h
-
-theorem not_inert_of_le_splitBound (hp : p.Prime) (h : p ≤ H.splitBound) :
-    ¬ (H.cls p = .signal ∨ H.cls p = .inertClass) := by
-  by_cases h2 : p = 2
-  · subst h2
-    have e : H.cls 2 = .ram2 := primeClass_two H.toHostRaw
-    rw [e]
-    simp
-  · have hj := H.split_small p hp h2 h
-    rintro (e | e)
-    · exact H.cls_ne_signal_of_jacobi hj e
-    · exact H.primeClass_ne_of_jacobi_one hj e
-
-theorem splitBound_lt_of_inert (hp : p.Prime) (h : H.cls p = .signal ∨ H.cls p = .inertClass) : H.splitBound < p :=
-  lt_of_not_ge fun hle => H.not_inert_of_le_splitBound hp hle h
-
-theorem five_le_of_inert (hp : p.Prime) (h3 : 3 ≤ H.splitBound) (h : H.cls p = .signal ∨ H.cls p = .inertClass) : 5 ≤ p := by
-  have h1 := H.splitBound_lt_of_inert hp h
-  have h4 : p ≠ 4 := by rintro rfl; exact absurd hp (by norm_num)
-  omega
 
 theorem cls_splitK_or_small (hp : p.Prime) (h : p ≤ H.splitBound) (hq : p ≠ H.q) (hd : p ≠ H.d) :
     H.cls p = .splitK ∨ p ∈ H.small := by

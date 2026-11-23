@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.WeilJacquetShalikaLaw
+import Aesop.Frontend.Tactic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -17,10 +60,6 @@ theorem vAdd_one (D : D7) (w : D.what₂.places.Pl) : vAdd (D.plEq w) (1 : D.wha
   first
   | rfl
   | (simp [vAdd]; done)
-  | (norm_num [vAdd]; done)
-  | (simp; done)
-  | (unfold vAdd; simp; done)
-  | aesop
 
 theorem div_mem_intW (D : D7) (w : D.what₂.places.Pl) {a b : D.what₂.LL} (ha : a ≠ 0) (hb : b ≠ 0)
     (h : vAdd (D.plEq w) a ≤ vAdd (D.plEq w) b) : b / a ∈ intW D.what₂.places w := by
@@ -43,9 +82,6 @@ theorem VGe_of_mem {z : V} (hz : z ∈ locW D.what₂.places w Λ) : VGe D w Λ 
   rw [vAdd_one]
   first
   | (simp [ur]; done)
-  | (norm_num [ur]; done)
-  | (unfold ur; simp; done)
-  | (simp; done)
 
 theorem valuation_ge_add_of_le {a1 a2 : D.what₂.LL} {z1 z2 : V} {s : ℝ} (h1 : a1 ≠ 0) (h2 : a2 ≠ 0)
     (hz1 : z1 ∈ locW D.what₂.places w Λ) (hz2 : z2 ∈ locW D.what₂.places w Λ)
@@ -121,7 +157,7 @@ theorem step_loc (i : ℕ) (s : ℝ)
     obtain ⟨yb, hyb, hvb⟩ := hb
     refine ⟨ya + yb, ?_, VGe_add hva hvb⟩
     show M.emb (i + 1) (ya + yb) = C.Klin i (M.emb i (a + b))
-    rw [map_add, map_add, map_add, hya, hyb]
+    rw [map_add (f := _), map_add (f := _), map_add (f := _), hya, hyb]
     rfl
   | smul r a _ ha =>
     obtain ⟨ya, hya, hva⟩ := ha
@@ -173,10 +209,6 @@ theorem card_lifts (D : D7) : ((SizeData₂.lifts D).card : ℝ) = (D.R.m : ℝ)
   first
   | rfl
   | (simp [SizeData₂.lifts]; done)
-  | (norm_num [SizeData₂.lifts]; done)
-  | (simp; done)
-  | (unfold SizeData₂.lifts; simp; done)
-  | aesop
 
 theorem base_map_mem_local_lattice {D : D7} (T : TwForms D) (u : D.what₂.Word) (μ : D.what₂.Tup) (w : D.what₂.places.Pl)
     (x : ((D.fm u).lat 0).V) (hx : x ∈ locW D.what₂.places w ((D.fm u).lat 0).L) :
@@ -185,7 +217,7 @@ theorem base_map_mem_local_lattice {D : D7} (T : TwForms D) (u : D.what₂.Word)
   induction hx using Submodule.span_induction with
   | mem x hx => exact Submodule.subset_span ((T.twist_preserves_base_lattice u μ x).1 hx)
   | zero => rw [map_zero]; exact Submodule.zero_mem _
-  | add a b _ _ ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+  | add a b _ _ ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
   | smul r a _ ha =>
     rw [Subring.smul_def, map_smul, ← Subring.smul_def]
     exact Submodule.smul_mem _ r ha

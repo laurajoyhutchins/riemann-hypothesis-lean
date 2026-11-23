@@ -1,6 +1,46 @@
-import Mathlib
-import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.LocalDualIndex
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueIsStdChar
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.LocalDualIndex
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsCharOfTrace
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsUniqueIsStdChar
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -33,10 +73,10 @@ theorem sum_mult_re_eq_trace (x : F) :
 theorem traceInf_add (x y : Ainf F) : traceInf F (x + y) = traceInf F x + traceInf F y := by
   rw [traceInf, traceInf, traceInf, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun w _ => ?_
-  rw [show (x + y) w = x w + y w from rfl, map_add, Complex.add_re, mul_add]
+  rw [show (x + y) w = x w + y w from rfl, map_add (f := _), Complex.add_re, mul_add]
 
 theorem continuous_traceInf : Continuous (traceInf F) := by
-  refine continuous_finset_sum _ fun w _ => continuous_const.mul (Complex.continuous_re.comp ?_)
+  refine continuous_finsetSum _ fun w _ => continuous_const.mul (Complex.continuous_re.comp ?_)
   exact (InfinitePlace.Completion.isometry_extensionEmbedding w).continuous.comp (continuous_apply w)
 
 theorem traceInf_algebraMap (x : F) :
@@ -44,7 +84,8 @@ theorem traceInf_algebraMap (x : F) :
   rw [← sum_mult_re_eq_trace, traceInf]
   refine Finset.sum_congr rfl fun w _ => ?_
   congr 2
-  exact InfinitePlace.Completion.extensionEmbedding_coe w _
+  rw [InfiniteAdeleRing.algebraMap_apply, InfinitePlace.Completion.extensionEmbedding_coe]
+  simp
 
 theorem existsUnique_isStdChar : ∃! ψ₀ : AddChar (AF F) ℂ, IsStdChar F ψ₀ := by
   let L : Ainf F →+ ℂ := AddMonoidHom.mk' (fun x => (traceInf F x : ℂ)) fun a b => by

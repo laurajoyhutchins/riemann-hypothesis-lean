@@ -1,6 +1,55 @@
-import Formalism.GradedWeylDivisibility.StatementD
-import Mathlib.LinearAlgebra.PiTensorProduct.Basis
-import Mathlib.RingTheory.Localization.Module
+module
+
+public import Formalism.GradedWeylDivisibility.StatementD
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+public import Mathlib.LinearAlgebra.PiTensorProduct.Basis
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.RingTheory.Localization.Module
+
+@[expose] public section
 
 open MvPolynomial PiTensorProduct
 open scoped Pointwise
@@ -39,7 +88,7 @@ theorem ldtensor_span_prod (R K : Type*) [CommRing R] [CommRing K] [Algebra R K]
   rw [Submodule.prod_span] at h2
   refine Submodule.span_mono ?_ h2
   intro y hy
-  rw [Set.mem_finset_prod] at hy
+  rw [Set.mem_finsetProd] at hy
   obtain ⟨g, hg, rfl⟩ := hy
   choose i hi using fun s => hg (Finset.mem_univ s)
   exact ⟨i, Finset.prod_congr rfl fun s _ => hi s⟩
@@ -50,8 +99,8 @@ variable (K : Type*) [Field K] {S : Type*} [Fintype S] [DecidableEq S] {k n : �
 
 theorem ldtensor_glue_apply (α : S → (Fin k × Fin n →₀ ℕ)) (s : S) (v : Fin k × Fin n) :
     (∑ t, (α t).mapDomain (Prod.mk t)) (s, v) = α s v := by
-  rw [Finsupp.finset_sum_apply, Finset.sum_eq_single s]
-  · exact Finsupp.mapDomain_apply (fun x y h => by simpa using h) _ v
+  rw [Finsupp.finsetSum_apply, Finset.sum_eq_single s]
+  · exact Finsupp.mapDomain_apply_of_injective (fun x y h => by simpa using h) _ v
   · intro t _ hts
     apply Finsupp.mapDomain_notin_range
     rintro ⟨w, hw⟩

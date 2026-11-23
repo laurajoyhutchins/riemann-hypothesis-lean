@@ -1,5 +1,54 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.DerKer
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.NormalizedAbsCharacterization
+module
+
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.TransversalSums.ContinuousBlkAtApply
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.DerKer
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -38,7 +87,7 @@ theorem blkAt_val_left {n N : ℕ} (h : n ≤ N) (g : GL (Fin n) k) (i j : Fin N
       one_apply_ne (fun e => by rw [e] at hi; omega)]
     rfl
   · rw [cast_eq_natAdd h j (by omega), finSumFinEquiv_symm_apply_natAdd, fromBlocks_apply₂₂]
-    simp only [one_apply, Fin.ext_iff]
+    simp only [Matrix.one_apply, Fin.ext_iff]
     congr 1
     apply propext; omega
 
@@ -73,7 +122,7 @@ theorem colEl_val {m N : ℕ} (h : m + 2 ≤ N) (x : Fin (m + 1) → k) (i j : F
   · by_cases hj : (j : ℕ) < m + 2
     · rw [blkAt_val_lt h _ i j hi hj, unip_val]
       congr 1
-      · simp [one_apply, Fin.ext_iff]
+      · simp [Matrix.one_apply, Fin.ext_iff]
       · by_cases c : (j : ℕ) = m + 1 ∧ (i : ℕ) ≤ m
         · rw [dif_pos ⟨c.1, by simp only [Fin.val_mk]; omega⟩, dif_pos c]
         · rw [dif_neg (by simp only [Fin.val_mk]; omega), dif_neg c]
@@ -118,7 +167,7 @@ theorem mem_colFix_iff {N n : ℕ} (g : GL (Fin N) k) :
       fun r => (g : Matrix (Fin N) (Fin N) k) r i := by
     intro i; funext r; simp [mulVec, dotProduct, Pi.single_apply]
   have e1 : ∀ i : Fin N, (Pi.single i (1 : k) : Fin N → k) = fun r => (1 : Matrix (Fin N) (Fin N) k) r i := by
-    intro i; funext r; simp [Pi.single_apply, one_apply]
+    intro i; funext r; simp [Pi.single_apply, Matrix.one_apply]
   constructor
   · intro hg r i hi
     have hg' : ∀ i : Fin N, (i : ℕ) < n →
@@ -252,16 +301,16 @@ theorem B_scalAt {m N : ℕ} (h : m + 2 ≤ N) {V : Type} [AddCommGroup V] [Modu
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem row_one_mul {N : ℕ} (A M : Matrix (Fin N) (Fin N) k) (i j : Fin N)
     (hA : ∀ l, A i l = (1 : Matrix (Fin N) (Fin N) k) i l) : (A * M) i j = M i j := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   simp_rw [hA]
-  rw [← mul_apply, Matrix.one_mul]
+  rw [← Matrix.mul_apply, Matrix.one_mul]
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem col_mul_one {N : ℕ} (A M : Matrix (Fin N) (Fin N) k) (i j : Fin N)
     (hA : ∀ l, A l j = (1 : Matrix (Fin N) (Fin N) k) l j) : (M * A) i j = M i j := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   simp_rw [hA]
-  rw [← mul_apply, Matrix.mul_one]
+  rw [← Matrix.mul_apply, Matrix.mul_one]
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem colFix_mulVec {N n : ℕ} {g : GL (Fin N) k} (hg : g ∈ colFix k N n) (y : Fin N → k)
@@ -283,9 +332,9 @@ theorem mulVec_single_apply {N : ℕ} (M : Matrix (Fin N) (Fin N) k) (i r : Fin 
 theorem colEl_mul_apply {m N : ℕ} (h : m + 2 ≤ N) (x : Fin (m + 1) → k) (M : Matrix (Fin N) (Fin N) k) (i j : Fin N) :
     ((colEl k m N h x : Matrix (Fin N) (Fin N) k) * M) i j =
       M i j + if hi : (i : ℕ) ≤ m then x ⟨i, by omega⟩ * M ⟨m + 1, by omega⟩ j else 0 := by
-  rw [mul_apply]
+  rw [Matrix.mul_apply]
   simp_rw [colEl_val, add_mul, Finset.sum_add_distrib]
-  have e1 : ∑ l, (1 : Matrix (Fin N) (Fin N) k) i l * M l j = M i j := by rw [← mul_apply, Matrix.one_mul]
+  have e1 : ∑ l, (1 : Matrix (Fin N) (Fin N) k) i l * M l j = M i j := by rw [← Matrix.mul_apply, Matrix.one_mul]
   rw [e1]
   congr 1
   by_cases hi : (i : ℕ) ≤ m
@@ -301,36 +350,7 @@ theorem colEl_mul_apply {m N : ℕ} (h : m + 2 ≤ N) (x : Fin (m + 1) → k) (M
 theorem conj_colEl (ψ : AddChar k Circle) {m N : ℕ} (h : m + 2 ≤ N) (x : Fin (m + 1) → k) (u : derUnip k N (m + 2)) :
     ∃ hu : colEl k m N h x * (u : GL (Fin N) k) * (colEl k m N h x)⁻¹ ∈ derUnip k N (m + 2),
       lvlChar k ψ N (m + 2) ⟨_, hu⟩ = lvlChar k ψ N (m + 2) u := by
-  obtain ⟨hu1, hu2⟩ := Subgroup.mem_inf.1 u.2
-  have hrow : ∀ M : Matrix (Fin N) (Fin N) k, ∀ i j : Fin N, m + 1 ≤ (i : ℕ) →
-      ((colEl k m N h x : Matrix (Fin N) (Fin N) k) * M) i j = M i j := by
-    intro M i j hi
-    exact row_one_mul _ _ _ _ fun l => by rw [colEl_val, dif_neg (by omega), add_zero]
-  have hcol : ∀ M : Matrix (Fin N) (Fin N) k, ∀ i j : Fin N, m + 2 ≤ (j : ℕ) →
-      (M * (((colEl k m N h x)⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k)) i j = M i j := by
-    intro M i j hj
-    exact col_mul_one _ _ _ _ fun l => by rw [colEl_inv, colEl_val, dif_neg (by omega), add_zero]
-  have hmem : colEl k m N h x * (u : GL (Fin N) k) * (colEl k m N h x)⁻¹ ∈ derUnip k N (m + 2) := by
-    refine Subgroup.mem_inf.2 ⟨Subgroup.mul_mem _ (Subgroup.mul_mem _ (colEl_mem_unipB h x) hu1)
-      (Subgroup.inv_mem _ (colEl_mem_unipB h x)), ?_⟩
-    show ∀ i : Fin N, (i : ℕ) < m + 2 → _
-    intro i hi
-    have hy : ∀ r : Fin N, m + 2 ≤ (r : ℕ) →
-        (((colEl k m N h x)⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k).mulVec (Pi.single i 1) r = 0 := by
-      intro r hr
-      rw [mulVec_single_apply, colEl_inv, colEl_val, one_apply_ne (fun e => by rw [e] at hr; omega),
-        dif_neg (by omega), add_zero]
-    rw [Units.val_mul, Units.val_mul, ← mulVec_mulVec, ← mulVec_mulVec, colFix_mulVec hu2 _ hy, mulVec_mulVec,
-      ← Units.val_mul, mul_inv_cancel, Units.val_one, one_mulVec]
-  refine ⟨hmem, ?_⟩
-  show Circle.toUnits (ψ (∑ p : Fin N × Fin N with (p.2 : ℕ) = p.1 + 1 ∧ m + 2 - 1 ≤ (p.1 : ℕ),
-      (colEl k m N h x * (u : GL (Fin N) k) * (colEl k m N h x)⁻¹ : GL (Fin N) k).val p.1 p.2)) =
-    Circle.toUnits (ψ (∑ p : Fin N × Fin N with (p.2 : ℕ) = p.1 + 1 ∧ m + 2 - 1 ≤ (p.1 : ℕ),
-      (u : GL (Fin N) k).val p.1 p.2))
-  congr 2
-  refine Finset.sum_congr rfl fun p hp => ?_
-  obtain ⟨h1, h2⟩ := (Finset.mem_filter.1 hp).2
-  rw [Units.val_mul, Units.val_mul, hcol _ _ _ (by omega), hrow _ _ _ (by omega)]
+  apply PositivityTheory.RgUd.Form.ColumnElementGluing.Glue.colEl_conj_derUnip' <;> assumption
 
 theorem colEl_twKer (ψ : AddChar k Circle) {m N : ℕ} (h : m + 2 ≤ N) {V : Type} [AddCommGroup V] [Module ℂ V]
     (π : Representation ℂ (GL (Fin N) k) V) (x : Fin (m + 1) → k) {v : V}

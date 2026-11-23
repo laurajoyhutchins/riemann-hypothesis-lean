@@ -1,8 +1,57 @@
-import Mathlib
-import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremLattice
-import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremFrobenius
-import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremIdeles
-import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticUniformizationClassification
+module
+
+public import GroundTheory.GlobalFields.ComplexMultiplication.AlgebraicityHom
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticUniformization
+public import GroundTheory.GlobalFields.ComplexMultiplication.BaseChangeField
+public import GroundTheory.GlobalFields.ComplexMultiplication.ClassGroupActionLattice
+public import GroundTheory.GlobalFields.ComplexMultiplication.IdeleActionQuotient
+public import GroundTheory.GlobalFields.ComplexMultiplication.ReductionRespectsAdd
+public import GroundTheory.GlobalFields.ComplexMultiplication.AnalyticUniformizationClassification
+public import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremIdeles
+public import GroundTheory.GlobalFields.ComplexMultiplication.MainTheoremLattice
+import GroundTheory.GlobalFields.ComplexMultiplication.ReductionEval
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Global
@@ -58,8 +107,8 @@ theorem exists_constMap_eq (A : WeierstrassCurve L) (P : (A.baseChange ℂ).toAf
       (A.toAffine.baseChange_nonsingular (f := Algebra.ofId L ℂ) (algebraMap L ℂ).injective a b).1 h
     exact ⟨.some a b h', rfl⟩
 
-omit [DecidableEq L] in
 
+omit [DecidableEq L] in
 theorem baseChange_map_eq (A : WeierstrassCurve L) (τ : L →+* L) (σ : ℂ →+* ℂ)
     (hτσ : ∀ a : L, σ (algebraMap L ℂ a) = algebraMap L ℂ (τ a)) :
     (A.baseChange ℂ).map σ = (A.map τ).baseChange ℂ := by
@@ -69,8 +118,8 @@ theorem baseChange_map_eq (A : WeierstrassCurve L) (τ : L →+* L) (σ : ℂ �
   ext a
   exact hτσ a
 
-omit [Algebra L ℂ] in
 
+omit [Algebra L ℂ] in
 theorem constMap_eq_pointMapRing {M : Type} [Field M] [Algebra L M] [DecidableEq M]
     (A : WeierstrassCurve L) (t : A.toAffine.Point) :
     constMap A M t = pointMapRing (algebraMap L M) A t := by
@@ -130,10 +179,10 @@ end Ideals
 section Level
 
 variable {K : Type} [Field K] [NumberField K] [Algebra K ℂ] (hK : finrank ℚ K = 2)
-  [IsTotallyComplex K]
+  [_root_.NumberField.IsTotallyComplex K]
+
 
 include hK in
-
 theorem exists_uniformization_of_data (σ : ℂ ≃ₐ[K] ℂ) (s : IdeleGroup K)
     (𝔞 : (FractionalIdeal (𝓞 K)⁰ K)ˣ) {E : WeierstrassCurve ℂ} [E.IsElliptic]
     {f : ℂ →+ E.toAffine.Point} (hf : IsAnalyticUniformization (idealLattice (algebraMap K ℂ) 𝔞) f)
@@ -220,7 +269,7 @@ theorem exists_uniformization_of_data (σ : ℂ ≃ₐ[K] ℂ) (s : IdeleGroup K
     refine map_mem_idealLattice _ ?_
     rw [← neg_sub]
     exact Submodule.neg_mem _ h1
-  rw [← sub_add_cancel (algebraMap K ℂ y) (algebraMap K ℂ ((x⁻¹ : K) * t)), map_add,
+  rw [← sub_add_cancel (algebraMap K ℂ y) (algebraMap K ℂ ((x⁻¹ : K) * t)), map_add (f := _),
     (hf'.map_eq_zero_iff _).2 hdiff, zero_add]
 
   set z := algebraMap K ℂ t with hz

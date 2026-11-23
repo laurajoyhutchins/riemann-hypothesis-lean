@@ -1,7 +1,45 @@
-import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.Statement
-import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.StatClause5Row
-import Formalism.WachLatticeTwists.CupProductVanishing.StatVhEInChi
-import Formalism.WachLatticeTwists.CupProductVanishing.H2MapInjective
+module
+
+public import Formalism.WachLatticeTwists.ShapeRowIsomorphisms.StatClause5Row
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Formalism.NG Formalism.RepresentationBoundsCohomology.BR Formalism.RepresentationBoundsCohomology.JT Formalism.RepresentationBoundsCohomology.LocallyConstantCohomology
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual ReciprocityTheory.Gal Formalism.RepresentationBoundsCohomology.LOC
@@ -57,17 +95,6 @@ section Defs2
 variable {O : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
   {A T' G : Type} [Ring A] [Algebra O A] [CommRing T'] [Algebra T' A] [Group G]
 
-def RowTB (ℓ : ℕ) [Fact ℓ.Prime] (M : Type) [AddCommGroup M] [Module A M] [Module O M]
-    [SMulCommClass A O M] (r : G →* A) (χ : G →* T'ˣ) (E : A) (Dw : Subgroup G)
-    (F : Submodule O (H1z (resRep (uRep O (M := M) r χ) Dw)))
-    (u w : ℤ_[ℓ]ˣ) (s m e d : ℕ) (U : Finset ℤ) : Prop :=
-  ∀ ψ : Ymod r χ E →ₗ[O] M, (∀ g ∈ Dw, ∀ y, ψ (uElt r χ g • y) = uElt r χ g • ψ y) →
-    ∀ z : coZ1s (resRep (uRep O (M := M) r χ) Dw),
-      (∀ g : Dw, (z : Dw → M) g = ψ (yY r χ E (g : G))) →
-      ∃ B : TBBridge ℓ F.toAddSubgroup
-          (Submodule.mkQ _ z : H1z (resRep (uRep O (M := M) r χ) Dw)),
-        TBFullIn B.D u w s m e d U
-
 end Defs2
 
 def StatRowRhoReal : Prop :=
@@ -111,27 +138,5 @@ def StatRowRhoReal : Prop :=
         (((HfV.restrictScalars O).map D.q).map (kRow D _ u hu)) Fs ∧
       InRowRhoNoBK M r χ E (Aw.decompositionSubgroup Ek) ε ρ₁ inc π γ
         (LinearMap.range (kRow D _ u hu)) (clsRow D v) pr Fs Im
-
-def StatRowChiReal : Prop :=
-  ∀ (p : ℕ) [Fact p.Prime] (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-    [Algebra ℤ_[p] O] [Module.Finite ℤ_[p] O], Function.Injective (algebraMap ℤ_[p] O) →
-    ∀ (Ek Ω : Type) [Field Ek] [NumberField Ek] [Field Ω] [Algebra Ek Ω] [IsAlgClosure Ek Ω]
-    (Aw : ValuationSubring Ω), Aw.valuation (p : Ω) < 1 →
-    ∀ pl : HeightOneSpectrum (𝓞 Ek), IsPlaceOver Aw pl →
-    ∀ (A T' : Type) [Ring A] [Algebra O A] [CommRing T'] [Algebra T' A]
-    (M : Type) [AddCommGroup M] [Module A M] [Module O M] [SMulCommClass A O M]
-    (r : (Ω ≃ₐ[Ek] Ω) →* A) (χ : (Ω ≃ₐ[Ek] Ω) →* T'ˣ) (E : A) (ε : (Ω ≃ₐ[Ek] Ω) →* Oˣ) (e : ℕ),
-    IsCycOn p (Aw.decompositionSubgroup Ek) (ε.comp (Aw.decompositionSubgroup Ek).subtype) →
-    Nonempty (M ≃ₗ[O] KO O) →
-    (∀ g ∈ Aw.decompositionSubgroup Ek, ∀ m : M, uElt r χ g • m = ((((ε g) ^ e)⁻¹ : Oˣ) : O) • m) →
-    ∀ F : Submodule O (H1z (resRep (uRep O (M := M) r χ) (Aw.decompositionSubgroup Ek))),
-    (0 < e → F = ⊥) →
-    (e = 0 → F = lcH1 (resRep (uRep O (M := M) r χ) (Aw.decompositionSubgroup Ek)) ⊓
-      unrH1 (resRep (uRep O (M := M) r χ) (Aw.decompositionSubgroup Ek))
-        ((Ine (F := Ek) Aw).subgroupOf (Aw.decompositionSubgroup Ek))) →
-    ∀ (uu ww : ℤ_[p]ˣ) (s m d : ℕ) (U : Finset ℤ),
-    RowTB p M r χ E (Aw.decompositionSubgroup Ek) F uu ww s m e d U →
-    RowIn p M r χ E (Aw.decompositionSubgroup Ek)
-      (lcH1 (resRep (uRep O (M := M) r χ) (Aw.decompositionSubgroup Ek))) F uu ww s m e d U (locDeg pl)
 
 end Formalism.RepresentationBoundsCohomology.FIN

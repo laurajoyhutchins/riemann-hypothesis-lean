@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDerivationSplitKaehlerDSmoothStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BertiniGeneralMembersNoDerivativeRelationStatement
+module
+
+public import Mathlib.RingTheory.Localization.AtPrime.Basic
+public import Mathlib.RingTheory.Smooth.Basic
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BertiniGeneralMembersNoDerivativeRelationStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsDerivationSplitKaehlerDSmoothStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 namespace GlobalTheory
 
@@ -14,7 +67,7 @@ theorem derivation_mem_of_mem_sq {k A : Type} [CommRing k] [CommRing A] [Algebra
     rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul]
     exact q.add_mem (q.mul_mem_right _ hm) (q.mul_mem_right _ hn)
   · intro x y hx hy
-    rw [map_add]; exact q.add_mem hx hy
+    rw [map_add (f := _)]; exact q.add_mem hx hy
 
 theorem residue_algebraMap_eq_zero_iff_mem {A R : Type} [CommRing A] [CommRing R] [IsLocalRing R]
     [Algebra A R] (q : Ideal A) [q.IsPrime] [IsLocalization.AtPrime R q] (x : A) :
@@ -47,6 +100,7 @@ theorem cotangent_relation_derivation {k A R : Type} [CommRing k] [CommRing A] [
 
   have hT : (maximalIdeal R).toCotangent
       (∑ j ∈ J, algebraMap A R (a j) • (⟨_, hg j⟩ : maximalIdeal R)) = 0 := by
+
     rw [map_sum]
     have : ∀ j ∈ J, (maximalIdeal R).toCotangent (algebraMap A R (a j) • (⟨_, hg j⟩ : maximalIdeal R))
         = ψ b • (c j • (maximalIdeal R).toCotangent ⟨_, hg j⟩) := by
@@ -57,6 +111,7 @@ theorem cotangent_relation_derivation {k A R : Type} [CommRing k] [CommRing A] [
   rw [Ideal.toCotangent_eq_zero] at hT
   have hcoe : ((∑ j ∈ J, algebraMap A R (a j) • (⟨_, hg j⟩ : maximalIdeal R) : maximalIdeal R) : R)
       = algebraMap A R y := by
+
     simp [hy, Submodule.coe_sum, map_sum, map_mul, Algebra.smul_def]
   rw [hcoe, ← IsLocalization.AtPrime.map_eq_maximalIdeal q R, ← Ideal.map_pow,
     IsLocalization.mem_map_algebraMap_iff q.primeCompl R] at hT
@@ -69,11 +124,12 @@ theorem cotangent_relation_derivation {k A R : Type} [CommRing k] [CommRing A] [
   have ht0 : ψ t ≠ 0 := fun h => t.2 ((hψ _).1 h)
   have hy0 : ψ y = 0 := (hψ _).2 hyq
   have hδy : ψ (δ y) = 0 := by
-    simp only [Derivation.leibniz, smul_eq_mul, map_add, map_mul, hy0] at hδz
+    simp only [Derivation.leibniz, smul_eq_mul, map_add (f := _), map_mul, hy0] at hδz
     simpa [hs0, ht0] using hδz
   have hg0 : ∀ j, ψ (g j) = 0 := fun j => (hψ _).2 (hgq j)
+
   rw [hy, map_sum, map_sum] at hδy
-  simp only [Derivation.leibniz, smul_eq_mul, map_add, map_mul, hg0, zero_mul, add_zero] at hδy
+  simp only [Derivation.leibniz, smul_eq_mul, map_add (f := _), map_mul, hg0, zero_mul, add_zero] at hδy
   rw [Finset.sum_congr rfl (fun j hj => by rw [hψa j hj, mul_assoc]), ← Finset.mul_sum] at hδy
   exact (mul_eq_zero.1 hδy).resolve_left hb0
 

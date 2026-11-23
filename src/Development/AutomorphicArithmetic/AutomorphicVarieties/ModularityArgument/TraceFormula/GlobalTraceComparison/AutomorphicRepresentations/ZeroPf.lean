@@ -1,8 +1,49 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
-import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ThetaCellCovers.KernelDiagonalIntegrableHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiInvTop
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiVecExHolds
-import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.PiSeenA
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.TraceFormula.GlobalTraceComparison.AutomorphicRepresentations.EvalBasis
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.T2SpaceAdelicGeneralLinearGroupNumberField
+public import Development.DiscreteGroups.PiInvariants.CompactSupportTwists.LogAbsEqLogIdeleNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi DiscreteGroups.T1.G
 open MeasureTheory Filter GlobalTheory.CuspRep GlobalTheory.UnitaryBC PositivityTheory.Rg.BcB PositivityTheory.Rg.BcB.E PositivityTheory.Rg.BcB.Desc
@@ -13,9 +54,13 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.zero_pf :
     AeEq → Zero := by
   intro hAe E _ _ _ n D f I hf hinv hI h
   classical
-  haveI : T2Space (H E n 0) := (PositivityTheory.Rg.BcB.E1.ctx PositivityTheory.Rg.BcB.E1.ratProper_holds D).t2
-  haveI : LocallyCompactSpace (H E n 0) := (PositivityTheory.Rg.BcB.E1.ctx PositivityTheory.Rg.BcB.E1.ratProper_holds D).lc
-  haveI : SecondCountableTopology (H E n 0) := (PositivityTheory.Rg.BcB.E1.ctx PositivityTheory.Rg.BcB.E1.ratProper_holds D).sc
+  haveI := CuspidalL2GL.t2Space_GA E n
+  haveI := CuspidalL2GL.t2Space_GA E 0
+  haveI := CuspidalL2GL.locallyCompactSpace_GA E n
+  haveI := CuspidalL2GL.locallyCompactSpace_GA E 0
+  haveI := CuspidalL2GL.secondCountableTopology_GA E n
+  haveI := CuspidalL2GL.secondCountableTopology_GA E 0
+  haveI : SigmaCompactSpace (H E n 0) := sigmaCompactSpace_of_locallyCompact_secondCountable
   haveI : BorelSpace (H E n 0) := ⟨rfl⟩
   haveI : IsLocallyFiniteMeasure D.μ := D.haar.2.2.2
   have key : ∀ K : Set (H E n 0), IsCompact K → ∀ᵐ x ∂D.ν, x ∈ K → ldet x ∈ I → f x = 0 := by
@@ -29,7 +74,7 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.zero_pf :
         (hK.measure_lt_top_of_nhdsWithin fun x _ => D.μ.finiteAt_nhdsWithin x K)
     set w : H E n 0 → ℂ := S.indicator fun x => starRingEnd ℂ (f x) with hwdef
     have hw : MemLp w 2 D.ν := by
-      rw [hwdef, memLp_indicator_iff_restrict hSm]
+      rw [hwdef, memLp_indicator_iff_restrict hSm.nullMeasurableSet]
       haveI : IsFiniteMeasure (D.ν.restrict S) := isFiniteMeasure_restrict.2 hνS.ne
       refine MemLp.of_bound (Complex.continuous_conj.comp hf).aestronglyMeasurable B
         ((ae_restrict_iff' hSm).2 (Eventually.of_forall fun x hx => ?_))
@@ -37,7 +82,7 @@ theorem UpperTheory.V.Z.Tf.GlobalTraceComparison.Pi.zero_pf :
     have hv : (hw.toLp w : H E n 0 → ℂ) =ᵐ[D.ν] w := hw.coeFn_toLp
     have h0 := h (hw.toLp w) (hv.mono fun y hy hl => by
       rw [hy]
-      exact Set.indicator_of_notMem (fun hs => hl hs.2) _)
+      exact Set.indicator_of_notMem (by exact fun hs => hl hs.2) _)
     have hpt : ∀ y, w y * f y = ((‖w y‖ ^ 2 : ℝ) : ℂ) := by
       intro y
       by_cases hy : y ∈ S

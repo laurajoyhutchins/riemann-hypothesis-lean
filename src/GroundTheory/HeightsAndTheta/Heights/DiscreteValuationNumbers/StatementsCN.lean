@@ -1,5 +1,52 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.Objects
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights.NumbersDVR
@@ -21,8 +68,8 @@ def shiftFn (s : K → ℤ) (f : (K → ℤ) → ℤ) : (K → ℤ) → ℤ := f
 
 variable {ι : K → Type*}
 
+open scoped Classical in
 open Classical in
-
 def idealCycle {R : Type*} [CommRing R] (J W : Ideal (MRing ι R)) : ℤ :=
   if h : W ∈ J.minimalPrimes ∧ IsRelevant W then
     haveI : W.IsPrime := h.1.1.1
@@ -92,8 +139,8 @@ def GradedPieceQuot.Statement : Prop :=
       Module.finrank F (weightedHomogeneousSubmodule F (blockWeight ι) m) -
         Module.finrank F ↥(weightedHomogeneousSubmodule F (blockWeight ι) m ⊓ I.restrictScalars F)
 
-open Classical in
 
+open Classical in
 def CutPieces.Statement : Prop :=
   ∀ (F : Type u) [Field F] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type)
     [∀ k, Fintype (ι k)] (I : Ideal (MRing ι F)) (x : MRing ι F) (e m : K → ℕ),
@@ -154,8 +201,8 @@ def PrimeFiltration.Statement : Prop :=
       (∀ m : K → ℤ, hilbFn J m = (l.map fun p => hilbFn p.1 (m - fun k => (p.2 k : ℤ))).sum) ∧
       (∀ (W : Ideal (MRing ι F)) [W.IsPrime], multAt J W = (l.map fun p => multAt p.1 W).sum)
 
-open Classical in
 
+open Classical in
 def MultAtPrimeAtMinimal.Statement : Prop :=
   ∀ (R : Type u) [CommRing R] (K : Type) (ι : K → Type) (J Q W : Ideal (MRing ι R)) [Q.IsPrime]
     [W.IsPrime], J ≤ Q → W ∈ J.minimalPrimes → multAt Q W = if Q = W then 1 else 0

@@ -1,4 +1,57 @@
-import Mathlib
+module
+
+public import Mathlib.Data.Nat.Totient
+public import Mathlib.Data.ZMod.Units
+public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Algebra.BigOperators.Field
+
+@[expose] public section
 
 open ArithmeticFunction Finset
 
@@ -18,8 +71,6 @@ theorem sum_totient_pow {l : ℕ} (hl : l.Prime) (s : ℕ) : ∑ k ∈ range (s 
 private theorem totient_ne_zero_of_ne_zero {n : ℕ} (hn : n ≠ 0) : n.totient ≠ 0 := by
   first
   | exact (Nat.totient_pos.mpr (Nat.pos_of_ne_zero hn)).ne'
-  | exact (Nat.totient_pos (Nat.pos_of_ne_zero hn)).ne'
-  | simpa using hn
 
 private theorem isPrimePow_of_dvd_isPrimePow_of_ne_one {n k : ℕ} (hn : IsPrimePow n) (hk : k ∣ n) (hk1 : k ≠ 1) :
     IsPrimePow k := by
@@ -38,7 +89,6 @@ private theorem exists_eq_prime_pow_mul_not_dvd {n p : ℕ} (hn : n ≠ 0) (hp :
 private theorem prime_pow_dvd_prime_pow_iff_le {p a b : ℕ} (hp : p.Prime) : p ^ a ∣ p ^ b ↔ a ≤ b := by
   first
   | exact Nat.pow_dvd_pow_iff_le_right hp.one_lt
-  | exact pow_dvd_pow_iff_le hp.ne_zero hp.not_isUnit
   | exact ⟨fun h => (Nat.pow_le_pow_iff_right hp.one_lt).mp (Nat.le_of_dvd (pow_pos hp.pos _) h),
       fun h => pow_dvd_pow p h⟩
 
@@ -128,15 +178,12 @@ theorem weight_sum {N m : ℕ} (hN : N ≠ 0) (hm : m ∣ N) (hm1 : m ≠ 1) :
 
 variable {N : ℕ} [NeZero N]
 
-private theorem natCast_val_zmod_eq_self (x : ZMod N) : ((x.val : ℕ) : ZMod N) = x := by
-  first
-  | exact ZMod.natCast_zmod_val x
-  | simp
+private theorem natCast_val_zmod_eq_self (x : ZMod N) : ((x.val : ℕ) : ZMod N) = x :=
+  ZMod.natCast_zmod_val x
 
 private theorem intCast_zmod_eq_zero_iff_dvd' (a : ℤ) : ((a : ZMod N) = 0) ↔ (N : ℤ) ∣ a := by
   first
   | exact CharP.intCast_eq_zero_iff (ZMod N) N a
-  | exact ZMod.intCast_zmod_eq_zero_iff_dvd a N
 
 theorem order_dvd_iff {m : ℕ} (hm : m ∣ N) (u : ZMod N) : addOrderOf (u - 1) ∣ m ↔ u.val ≡ 1 [MOD N / m] := by
   obtain ⟨d, hd⟩ := hm
@@ -157,8 +204,6 @@ private theorem coe_unitsMap_eq_natCast_val_of_dvd {d : ℕ} (hd : d ∣ N) (u :
   rw [← ZMod.cast_eq_val]
   first
   | rfl
-  | exact ZMod.unitsMap_val hd u
-  | simp [ZMod.unitsMap_def]
 
 theorem mem_ker_iff {f : ℕ} (hf : f ∣ N) (u : (ZMod N)ˣ) :
     u ∈ (ZMod.unitsMap hf).ker ↔ (u : ZMod N).val ≡ 1 [MOD f] := by
@@ -187,14 +232,14 @@ theorem card_KK {f : ℕ} (hf : f ∣ N) : (KK N f).card * f.totient = N.totient
   have h2 : (ZMod.unitsMap hf).ker.index = Nat.card (ZMod f)ˣ := by
     first
     | exact Nat.card_congr (QuotientGroup.quotientKerEquivOfSurjective _ (ZMod.unitsMap_surjective hf)).toEquiv
-    | rw [Subgroup.index_ker, Set.range_eq_univ.mpr (ZMod.unitsMap_surjective hf), Nat.card_univ]
   rw [h1, ← ZMod.card_units_eq_totient f, ← Nat.card_eq_fintype_card, ← h2, Subgroup.card_mul_index,
     Nat.card_eq_fintype_card, ZMod.card_units_eq_totient]
 
-open Classical in
 
-def rho (U : Subgroup (ZMod N)ˣ) (f : ℕ) : ℝ :=
-  (((KK N f).filter fun u => u ∉ U).card : ℝ) * f.totient / N.totient
+open Classical in
+def rho (U : Subgroup (ZMod N)ˣ) (f : ℕ) : ℝ := by
+  classical
+  exact (((KK N f).filter fun u => u ∉ U).card : ℝ) * f.totient / N.totient
 
 open Classical in
 theorem abel (U : Subgroup (ZMod N)ˣ) :
@@ -242,7 +287,9 @@ private theorem card_KK_ne_zero_of_dvd {f : ℕ} (hf : f ∣ N) : (KK N f).card 
 
 theorem rho_nonneg (U : Subgroup (ZMod N)ˣ) (f : ℕ) : 0 ≤ rho U f := by
   unfold rho
-  positivity
+  apply div_nonneg
+  · positivity
+  · exact le_of_lt (by exact_mod_cast (Nat.totient_pos).2 (Nat.pos_of_ne_zero (NeZero.ne N)))
 
 open Classical in
 theorem rho_eq (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N) :
@@ -262,8 +309,11 @@ theorem rho_eq (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N) :
       exact_mod_cast card_KK hf
     have ht : (f.totient : ℝ) ≠ 0 := by
       exact_mod_cast totient_ne_zero_of_ne_zero (ne_zero_of_dvd_of_neZero hf)
+    have hK : ((KK N f).card : ℝ) ≠ 0 := by
+      exact_mod_cast card_KK_ne_zero_of_dvd hf
     unfold rho
-    rw [← hc, mul_div_mul_right _ _ ht]
+    rw [← hc]
+    field_simp [ht, hK]
   have hc : ((KK N f).card : ℝ) * f.totient = N.totient := by
     exact_mod_cast card_KK hf
   have ht : (f.totient : ℝ) ≠ 0 := by
@@ -317,8 +367,11 @@ theorem half_le_rho (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N) (h : ∃ 
       exact_mod_cast card_KK hf
     have ht : (f.totient : ℝ) ≠ 0 := by
       exact_mod_cast totient_ne_zero_of_ne_zero (ne_zero_of_dvd_of_neZero hf)
+    have hK : ((KK N f).card : ℝ) ≠ 0 := by
+      exact_mod_cast card_KK_ne_zero_of_dvd hf
     unfold rho
-    rw [← hc, mul_div_mul_right _ _ ht]
+    rw [← hc]
+    field_simp [ht, hK]
   open Classical in
   have card_inside_le_outside_lemma_15 {N : ℕ} [NeZero N] (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N) {u0 : (ZMod N)ˣ}
       (hu0 : u0 ∈ KK N f) (hu0' : u0 ∉ U) :
@@ -341,7 +394,6 @@ theorem half_le_rho (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N) (h : ∃ 
   rw [kernelOutsideFraction_eq_div_lemma_13 U hf]
   first
   | exact (le_div_iff₀ hK).mpr (by linarith)
-  | exact (le_div_iff hK).mpr (by linarith)
 
 theorem rho_le_half (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N)
     (h : ∀ u ∈ KK N f, ∀ v ∈ KK N f, u ∉ U → v ∉ U → u * v ∈ U) : rho U f ≤ 1 / 2 := by
@@ -362,8 +414,11 @@ theorem rho_le_half (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N)
       exact_mod_cast card_KK hf
     have ht : (f.totient : ℝ) ≠ 0 := by
       exact_mod_cast totient_ne_zero_of_ne_zero (ne_zero_of_dvd_of_neZero hf)
+    have hK : ((KK N f).card : ℝ) ≠ 0 := by
+      exact_mod_cast card_KK_ne_zero_of_dvd hf
     unfold rho
-    rw [← hc, mul_div_mul_right _ _ ht]
+    rw [← hc]
+    field_simp [ht, hK]
   open Classical in
   have card_outside_le_inside_lemma_16 {N : ℕ} [NeZero N] (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N)
       (h : ∀ u ∈ KK N f, ∀ v ∈ KK N f, u ∉ U → v ∉ U → u * v ∈ U) :
@@ -387,7 +442,6 @@ theorem rho_le_half (U : Subgroup (ZMod N)ˣ) {f : ℕ} (hf : f ∣ N)
   rw [kernelOutsideFraction_eq_div_lemma_13 U hf]
   first
   | exact (div_le_iff₀ hK).mpr (by linarith)
-  | exact (div_le_iff hK).mpr (by linarith)
 
 theorem KK_gcd (U : Subgroup (ZMod N)ˣ) {a b : ℕ} (ha : a ∣ N) (hb : b ∣ N) (h1 : ∀ u ∈ KK N a, u ∈ U)
     (h2 : ∀ u ∈ KK N b, u ∈ U) : ∀ u ∈ KK N (Nat.gcd a b), u ∈ U := by

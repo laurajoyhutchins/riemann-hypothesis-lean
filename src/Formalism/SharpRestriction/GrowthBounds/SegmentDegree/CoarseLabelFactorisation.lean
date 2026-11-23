@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.TopDegreeComparison
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.DiscriminantNeZeroOfResidueNeZero
+public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.StrictMonoIntExists
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 noncomputable section
 
@@ -74,8 +120,8 @@ section Lab
 
 variable {n' r : ℕ} [NeZero n'] [NeZero r] (X : Dat n' r) (p K : ℕ)
 
-open Classical in
 
+open Classical in
 def ellExp (l : Fin n' × Fin (r + K) →₀ ℕ) (j : ℤ) : ℤ × Fin (r + K) →₀ ℕ :=
   Finsupp.onFinset (X.toLate j ×ˢ (Finset.univ : Finset (Fin (r + K))))
     (fun v => if v.1 ∈ X.toLate j then l (posOf n' v.1, v.2) / p ^ X.F.dist j v.1 else 0)
@@ -138,24 +184,12 @@ private theorem eq_of_posOf_eq_of_dist_lt {n' : ℕ} [NeZero n'] {x y : ℤ} (hx
     linarith
   · nlinarith
 
-private theorem fr_first_le_fr_of_valid {n' r : ℕ} [NeZero n'] {F : Frames n' r} {L₁ N₁ : ℕ}
-    (hV : F.Valid L₁ N₁) (j : ℤ) : ∀ k, k < r → F.fr j 0 ≤ F.fr j k := by
-  intro k
-  induction k with
-  | zero => intro _; exact le_rfl
-  | succ k ih =>
-    intro hk
-    exact le_trans (ih (by omega)) (le_of_lt (hV.2.2.1 j k hk))
-
 private theorem eq_of_posOf_eq_of_mem_letters_not_isW {n' r : ℕ} [NeZero n'] [NeZero r] {F : Frames n' r} {L₁ N₁ : ℕ}
     (hV : F.Valid L₁ N₁) {j1 j2 : ℕ} (hj1 : j1 < F.J) (hj2 : j2 < F.J) {x1 x2 : ℤ}
     (h1 : x1 ∈ F.letters (j1 : ℤ)) (h1' : ¬ F.IsW (j1 : ℤ) x1)
     (h2 : x2 ∈ F.letters (j2 : ℤ)) (h2' : ¬ F.IsW (j2 : ℤ) x2)
     (hp : posOf n' x1 = posOf n' x2) : j1 = j2 ∧ x1 = x2 := by
-  have hr : 0 < r := Nat.pos_of_ne_zero (NeZero.ne r)
-  have step : ∀ i : ℤ, F.fr i (r - 1) < F.fr (i + 1) (r - 1) := fun i =>
-    lt_of_lt_of_le (hV.2.2.2.1 i) (fr_first_le_fr_of_valid hV (i + 1) (r - 1) (by omega))
-  have hmono : StrictMono (fun i : ℤ => F.fr i (r - 1)) := strictMono_int_of_lt_succ step
+  have hmono := eFr_strictMono hV
   have hper : F.fr ((F.J : ℤ) - 1) (r - 1) = F.fr (-1) (r - 1) + n' := by
     have h := fr_period hV (-1) (r - 1) 1
     rw [show (-1 : ℤ) + 1 * F.J = F.J - 1 by ring, one_mul] at h
@@ -194,7 +228,7 @@ theorem coarse_label_factorisation : CoarseLabelFactorisation := by
   have hSval : ∀ t c, S (t, c) = ∑ j ∈ Finset.range D.F.J, ∑ x ∈ D.toLate (j : ℤ),
       if posOf n' x = t then p ^ D.F.dist (j : ℤ) x * (l (t, c) / p ^ D.F.dist (j : ℤ) x) else 0 := by
     intro t c
-    rw [hS, Finsupp.finset_sum_apply]
+    rw [hS, Finsupp.finsetSum_apply]
     exact Finset.sum_congr rfl (fun j _ => img_ellExp D p K l j t c)
   have hS1 : ∀ t c (j0 : ℕ) (x0 : ℤ), j0 < D.F.J → x0 ∈ D.toLate (j0 : ℤ) → posOf n' x0 = t →
       S (t, c) = p ^ D.F.dist (j0 : ℤ) x0 * (l (t, c) / p ^ D.F.dist (j0 : ℤ) x0) := by

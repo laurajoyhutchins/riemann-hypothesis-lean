@@ -1,17 +1,54 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Definitions.Divisors.BudgetAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.ToKnownTheoremsOf
-import Development.AbelianVarietyTheory.Definitions.Divisors.EightDvdNCol
-import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumLogDivPredLeReal
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightDivisionL1Bound
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PosDividedSlopeWeightsBaseHeight
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpreadLeAt
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumPadicValNatMulLogLeLog
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogDivPredMemOfPrime
-import Development.AutomorphicArithmetic.PrimeDiscriminants.BadCount
+module
 
-set_option synthInstance.maxHeartbeats 400000
+public import Development.AbelianVarietyTheory.Definitions.Divisors.BudgetAt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.QuoIff
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LogDivPredMemOfPrime
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PosDividedSlopeWeightsBaseHeight
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SpreadLeAt
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumLogDivPredLeReal
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SumPadicValNatMulLogLeLog
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightDivisionL1Bound
+public import Development.AutomorphicArithmetic.PrimeDiscriminants.BadCount
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+
+@[expose] public section
+
+
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.MainNotions Formalism.L2.Pj Formalism.BasicNotions.TH Formalism.L2.Theta ReciprocityTheory.ChartRestriction.G.Geo.Tor ReciprocityTheory.ChartRestriction.G.FD GlobalTheory.AllWt GlobalTheory.CompHt GlobalTheory.CovTop GlobalTheory.BigTop GlobalTheory.CovHt
 
@@ -146,7 +183,7 @@ theorem pp_bounds {PP A : ℝ} (h : HostNum D L PP A 1) : (D.R.f : ℝ) ^ 2 * (D
   refine le_trans ?_ (le_mul_of_one_le_right (by positivity) (one_le_pow₀ hL))
   gcongr <;> first | assumption | norm_num
 
-set_option maxHeartbeats 800000 in
+
 
 theorem sizes {PP A : ℝ} (h : HostNum D L PP A 1) (hw : WtNum p i PP) (h0 : ℤ) (S eta : ℝ) (hS : 0 ≤ S) (he : 0 ≤ eta)
     (hP : PP * (S + eta) ≤ 100 * L.sc.w'' D.R.n)
@@ -313,11 +350,5 @@ theorem budgetAt {PP A : ℝ} (h : HostNum D L PP A 1) (hw : WtNum p i PP) (hi :
     exact main _ (by linarith)
 
 end Point
-
-theorem budget : (∀ M, HostN M) → WtN → Size → Budget := fun hH hW _ =>
-  Closed.imp (Closed.and (hH 1) hW) fun _ _ _ ⟨⟨_, _, h1⟩, ⟨_, _, h2⟩⟩ => by
-    obtain ⟨x0, h⟩ := h1.and h2
-    exact ⟨83400, by norm_num, x0, fun x hx hle ι p hp i hi Y hY u1 hq =>
-      budgetAt p i ((h x hx hle ι p hp).1 i) ((h x hx hle ι p hp).2 i) hi Y hY u1 hq⟩
 
 end GlobalTheory.CovHt.BudgetPf

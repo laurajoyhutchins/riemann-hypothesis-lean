@@ -1,16 +1,51 @@
-import Mathlib
-import Formalism.GaussValuationBounds.Statement
+module
+
+public import Formalism.GaussValuationBounds.Statement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
 namespace Formalism.NOK
-
-def WPrimeCut : Prop :=
-  ∀ (n : ℕ) [NeZero n] (ℓ c G Hm : ℝ) (s H : ZMod n → ℝ) (i : ZMod n) (j : ℕ),
-    3 ≤ ℓ → 0 ≤ c → 0 ≤ G → (∀ k, H k ≤ Hm) →
-    (∀ k : ℕ, 1 ≤ k → k ≤ j → H (i + k) ≤ 2 * G) →
-    (∀ k, s (k - 1) ≤ H k + c + 3 + s k / (ℓ - 1)) →
-    s i ≤ (2 * G + c + 3) * (ℓ - 1) / (ℓ - 2) + (Hm + c + 3) * (ℓ - 1) / ((ℓ - 2) * (ℓ - 1) ^ j)
 
 def Trunc : Prop :=
   ∀ (A : Type) [CommRing A] (ℓ : ℕ) [Fact ℓ.Prime], 3 ≤ ℓ →
@@ -20,14 +55,5 @@ def Trunc : Prop :=
         (ℓ : A) ^ sigNOK ℓ y M j * (u * X * ∏ s ∈ Finset.range j, p s ^ (ℓ - 1)) ^ r ∈
           Ideal.span {(ℓ : A) ^ ⌈(r : ℝ) * ℓ / ((ℓ : ℝ) - 1)⌉₊,
             X ^ M * ∏ s ∈ Finset.range j, p s ^ y}
-
-def KapBound3 : Prop :=
-  ∀ (ℓ : ℕ) [Fact ℓ.Prime], ℓ ≠ 2 → ∀ (χ : ℤ_[ℓ]ˣ), PadicInt.valuation ((χ : ℤ_[ℓ]) - 1) = 1 →
-    ∀ (ell g h : ℕ) (a : Fin 3 → ℤ) (JJ : Finset ℤ),
-      JJ ⊆ Finset.univ.biUnion (fun t => Finset.Ico (a t) (a t + 3 * (g : ℤ))) →
-      (∀ i ∈ JJ, |i| ≤ 2 * (h : ℤ)) →
-      (Formalism.WindowSums.PP ℓ χ ell JJ).eval 1 ≠ 0 ∧
-      (PadicInt.valuation ((Formalism.WindowSums.PP ℓ χ ell JJ).eval 1) : ℝ) ≤
-        ell + 9 * g * (1 + ell) + 3 * (3 * g / ((ℓ : ℝ) - 1) + Real.logb ℓ (2 * h))
 
 end Formalism.NOK

@@ -1,12 +1,42 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.SingleIndexPlacesAreTwisted
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RunsHoldOfTies
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeavesSupSpanData
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasIndexBoundOfRuns
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NumOfFjEqOfRecord
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LeafDepthAllRecord
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SecondLinkOfWeightRowsStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RunNumericalConditionsHoldAlongFamilyStatement
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.SingleIndexPlacesAreTwisted
+public import Formalism.LocalToGlobal.IndefiniteForms.IndefiniteTree.DepthCond
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NumOfFjEqOfRecord
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -32,32 +62,5 @@ theorem indefinitePoint_splitPartContent_eq_forcedContent (p : PtAt ex Csz) (C C
   rfl
 
 end Comparison₂
-
-theorem geoSt_of_pageSt : PageSt → GeoSt := by
-  intro hP
-  obtain ⟨CK, xa, HR⟩ := runsHold_of_ties
-  obtain ⟨xb, HL⟩ := leaves_sup_span_data CK
-  obtain ⟨Cd, HD⟩ := leafDepth_all_record
-  refine ((hP.and (GlobalTheory.T.runNumericalConditions_hold_along_family xa)).and (GlobalTheory.T.runNumericalConditions_hold_along_family xb)).imp fun Fm CH _ H => ?_
-  obtain ⟨⟨⟨c0, hc0⟩, ⟨ya, hya⟩⟩, ⟨yb, hyb⟩⟩ := H
-  refine ⟨max c0 Cd, fun c hc hbad => ?_⟩
-  obtain ⟨x0, hx0⟩ := hc0 c ((le_max_left _ _).trans hc) hbad
-  refine ⟨max x0 (max ya yb), fun x hx hle i p hrows hmore r O hrec => ?_⟩
-  have h0 : x0 ≤ x := (le_max_left _ _).trans hle
-  have ha : ya ≤ x := ((le_max_left _ _).trans (le_max_right _ _)).trans hle
-  have hb : yb ≤ x := ((le_max_right _ _).trans (le_max_right _ _)).trans hle
-  obtain ⟨hPg, hSz, -, -, -, -, hOb, -, -⟩ := hx0 x hx h0 i p hrows hmore r O hrec
-  obtain ⟨pna, hx3, hkb, hxe, -⟩ := hya x hx ha i
-  obtain ⟨pnb, -, -, -, -⟩ := hyb x hx hb i
-  have hcore := hmore.2.1
-  have hown := hrec.2
-  have hch := (GlobalTheory.T.second_link_of_weight_rows _ _ _ _ _ _ _ _ _ _ p hrows hmore.1).1
-  have hRH := HR _ _ _ _ _ _ _ (F2 p) _ _ _ _ _ _ (Fm.ex x hx i).kap_def _ _ hcore hrec.1.ok hown pna
-  obtain ⟨hSup, hSpan, hS, hData⟩ := HL _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ O hrec.1 hcore hown pnb hRH hch.grp
-    hch.tup.mu_conj hch.tup.mu_off hch.tup.mu_ne
-  refine ⟨hSup, hSpan, hS, hData, hasIndexBound_of_runs CK _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ O hrec.1 hcore hown hRH hSup hSpan
-    hOb, fun C CH' => ?_⟩
-  exact HD _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ O hrec.1 _ hPg hSz hx3 hkb (indefinitePoint_splitPartContent_eq_forcedContent p C CH')
-    ((le_max_right _ _).trans hc) (le_of_eq pna.2.1.symm) hxe
 
 end GlobalTheory.BigOn

@@ -1,4 +1,45 @@
-import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.SzTLe
+module
+
+public import Formalism.LocalToGlobal.PairingIndexBounds.RowActionCoefficients.SzTLe
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GroupLattices.FockModels.TransposeWords.FockR
+
+@[expose] public section
 
 open MvPolynomial
 
@@ -85,7 +126,7 @@ def XB : Prop :=
     (La : X.Lt j) (La' : X.Lt (j + 1)) (φ : Frm X j La La') (P : DA X Kc j) (f : MvPowerSeries (X.ZA j) Kc)
     (l : XspC (X.Pj (j + 1)) Kc →ₗ[Kc] Kc) (R : MvPolynomial (X.ZA j) Kc),
     (∀ d0 : X.ZA j → Kc, eval d0 R = l (evD X Kc j (fun y => ∑ z, bc Kc φ z y * d0 z) P)) →
-      l (pairD X Kc j P (linSub (bc Kc φ) f)) = ∑ n ∈ R.support, derAt X Kc j n f * coeff n R
+      l (pairD X Kc j P (linSub (bc Kc φ) f)) = ∑ n ∈ R.support, derAt X Kc j n f * AddMonoidAlgebra.coeff R n
 
 def TransposedFrameImageBlockwise : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (X : Sys p) (Kc : Type) [Field Kc] [Algebra (K0 p) Kc] [Algebra X.G.Kf Kc] (j : ℕ)
@@ -102,7 +143,7 @@ def XG : Prop :=
   ∀ (p : ℕ) [Fact p.Prime] (X : Sys p) (Kc : Type) [Field Kc] [Algebra X.G.Kf Kc] (j : ℕ) (I : X.ColCh j) (i0 : X.Pl → ℕ)
     (f : MvPowerSeries (X.ZA j) Kc) (x : X.FrI j → Kc),
     ∑ n ∈ (map (eval₂Hom (Int.castRingHom Kc) x) (X.PI j I i0)).support,
-        derAt X Kc j n f * coeff n (map (eval₂Hom (Int.castRingHom Kc) x) (X.PI j I i0)) =
+        derAt X Kc j n f * AddMonoidAlgebra.coeff (map (eval₂Hom (Int.castRingHom Kc) x) (X.PI j I i0)) n =
       eval x (applyD (X.PI j I i0) f)
 
 end Formalism.L2.PairingIndexBounds.Ent

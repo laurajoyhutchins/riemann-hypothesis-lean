@@ -1,6 +1,59 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteNotIsUnitOneAddSmul
-import Development.AbelianVarietyTheory.Definitions.PlaceAdaptation.AdaptStd
+module
+
+public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.AdmissibleHarmonicLattice
+public import Formalism.LocalToGlobal.ProjectiveLattices.ThShort
+public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
+public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FiniteNotIsUnitOneAddSmul
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.FiniteResidueFieldAdicCompletionIntegers
+
+@[expose] public section
 
 set_option autoImplicit false
 
@@ -36,8 +89,8 @@ theorem exists_coprime_nsmul_mem (m : ℕ) (L : Submodule (𝓞 E) (Fin n → E)
   · rw [← natCast_zsmul, hg']
     exact Int.dvd_natAbs.2 dvd_rfl
 
-omit [NumberField E] [IsCMField E] in
 
+omit [NumberField E] [IsCMField E] in
 theorem exists_coprime_uniform (m : ℕ) {L₁ L₂ : Submodule (𝓞 E) (Fin n → E)} (hL : L₁.FG)
     (h : ∀ x ∈ L₁, ∃ k : ℕ, k.Coprime m ∧ k • x ∈ L₂) : ∃ k : ℕ, k.Coprime m ∧ ∀ x ∈ L₁, k • x ∈ L₂ := by
   obtain ⟨s, rfl⟩ := hL
@@ -70,7 +123,7 @@ theorem exists_unitary_of_selfDual [Algebra.Unramified (𝓞 (maximalRealSubfiel
   have hinv : ∀ v, ((h v)⁻¹).1 = ((h v).1.map (locConj v))ᵀ := fun v =>
     Units.inv_eq_of_mul_eq_one_left (hh' v)
   obtain ⟨γ, hγ, hγ'⟩ := exists_unitary_near hm (fun v => (h v).1) hh'
-  have hmap : ∀ v (M : Matrix (Fin n) (Fin n) E) (x : Fin n → E),
+  have hmap : ∀ (v : HeightOneSpectrum (𝓞 (maximalRealSubfield E))) (M : Matrix (Fin n) (Fin n) E) (x : Fin n → E),
       (fun i => locEmb v ((M *ᵥ x) i)) = M.map (locEmb v) *ᵥ fun i => locEmb v (x i) :=
     fun v M x => funext fun i => RingHom.map_mulVec (locEmb v) M x i
   refine ⟨γ, hγ, fun x hx => exists_coprime_nsmul_mem m _ _ fun v hv => ?_,
@@ -78,8 +131,9 @@ theorem exists_unitary_of_selfDual [Algebra.Unramified (𝓞 (maximalRealSubfiel
   · have h1 := (hhL v _).1 (Submodule.subset_span ⟨x, hx, rfl⟩)
     have h2 : ∀ i j, (((γ.map cc)ᵀ).map (locEmb v) * (h v).1) i j ∈ locOrder v := fun i j => by
       convert locConj_mem v (hγ' v hv j i) using 1
+
       simp only [Matrix.mul_apply, Matrix.transpose_apply, Matrix.map_apply, map_sum, map_mul, locConj_locConj,
-        locConj_locEmb, mul_comm]
+      locConj_locEmb, mul_comm]
     have h3 := mulVec_mem_locOrder v h2 h1
     rw [Matrix.mulVec_mulVec, Matrix.mul_assoc, Units.mul_inv, Matrix.mul_one, ← hmap] at h3
     exact exists_smul_mem_stdMod v h3
@@ -90,8 +144,8 @@ theorem exists_unitary_of_selfDual [Algebra.Unramified (𝓞 (maximalRealSubfiel
     obtain ⟨a, ha⟩ := mem_stdMod.1 hy i
     exact ha ▸ locEmb_mem_locOrder v a
 
-open Formalism.L2.Pj in
 
+open Formalism.L2.Pj in
 theorem exists_lat (Λ : GenLat E n) {N : ℕ} (hU : Λ.Unimod) (hN : 0 < N)
     (hle : Ideal.span {(N : 𝓞 E)} • stdLat E n ≤ Λ.La) : ∃ Λ' : Lat E n, Λ'.L = Λ.La ∧ Λ'.SelfDual := by
   classical
@@ -129,8 +183,8 @@ theorem exists_lat (Λ : GenLat E n) {N : ℕ} (hU : Λ.Unimod) (hN : 0 < N)
 
 end Genus
 
-open ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj in
 
+open ReciprocityTheory.ChartRestriction.G.Geo.Tor Formalism.L2.Pj in
 theorem exists_unitary_adapted : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (n : ℕ)
     (Λ : GenLat E n) (N : ℕ), Λ.Unimod → 0 < N → Ideal.span {(N : 𝓞 E)} • stdLat E n ≤ Λ.La → ∀ m : ℕ, 0 < m →
     ∃ (k : ℕ) (ga : Matrix (Fin n) (Fin n) E), Nat.Coprime k m ∧

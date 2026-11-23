@@ -1,8 +1,57 @@
-import Mathlib
+module
+
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdicCompactDensity.ExistsNatLocal
+public import Formalism.UnipotentAdelicQuotients.SWXSDefs
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
+public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
+public import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
 import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.TensorLocallyCompactRing
-import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelesLocallyCompactSecondCountable
-import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsCompactAdeleRingModNumberField
+
+@[expose] public section
+
 open HeckeCharacterZeroLocus.SiegelWeilU GlobalTheory.CompanionTheory.SW NumberField IsDedekindDomain MeasureTheory Topology
 open scoped TensorProduct ENNReal NNReal Matrix
 
@@ -66,23 +115,7 @@ theorem latN_mono {N N' : ℕ} (h : N ∣ N') : latN F N ⊆ latN F N' := by
 
 theorem exists_nat_mul_mem (v : HeightOneSpectrum (𝓞 F)) (x : v.adicCompletion F) :
     ∃ N : ℕ, 0 < N ∧ (N : v.adicCompletion F) * x ∈ v.adicCompletionIntegers F := by
-  obtain ⟨b, hb, hbx⟩ := HeightOneSpectrum.adicCompletion.mul_nonZeroDivisor_mem_adicCompletionIntegers v x
-  have hb0 : b ≠ 0 := nonZeroDivisors.ne_zero hb
-  have hN : Ideal.absNorm (Ideal.span {b}) ≠ 0 := by
-    rw [Ne, Ideal.absNorm_eq_zero_iff]
-    simpa using hb0
-  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp (Ideal.absNorm_mem (Ideal.span {b}))
-  refine ⟨_, Nat.pos_of_ne_zero hN, ?_⟩
-  have hcast : ((Ideal.absNorm (Ideal.span {b}) : ℕ) : v.adicCompletion F) =
-      algebraMap (𝓞 F) (v.adicCompletion F) c * algebraMap (𝓞 F) (v.adicCompletion F) b := by
-    rw [← map_mul, hc, map_natCast]
-  rw [hcast]
-  have hcm : algebraMap (𝓞 F) (v.adicCompletion F) c ∈ v.adicCompletionIntegers F :=
-    HeightOneSpectrum.coe_mem_adicCompletionIntegers v c
-  have hm : algebraMap (𝓞 F) (v.adicCompletion F) c *
-      (x * algebraMap (𝓞 F) (v.adicCompletion F) b) ∈ v.adicCompletionIntegers F := mul_mem hcm hbx
-  convert hm using 1
-  ring
+  apply PI.AdCpctDenWork.exists_nat_local <;> assumption
 
 theorem exists_mem_latN (y : Af F) : ∃ N : ℕ, 0 < N ∧ y ∈ latN F N := by
   classical
@@ -122,8 +155,7 @@ theorem repr_map {d : ℕ} (b : Module.Basis (Fin d) F E) {R R' : Type} [CommRin
     (Algebra.TensorProduct.basis R' b).repr (Algebra.TensorProduct.map f (AlgHom.id F E) y) k =
       f ((Algebra.TensorProduct.basis R b).repr y k) := by
   induction y with
-  | zero => simp
-  | add x y hx hy => simp only [map_add, Finsupp.add_apply, hx, hy]
+  | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
   | tmul r e =>
     simp [Algebra.TensorProduct.basis_repr_tmul, Finsupp.mapRange_apply]
 
@@ -185,8 +217,8 @@ theorem continuous_coord {d n M : ℕ} (a : Fin n) (i : Fin M) (k : Fin d) :
 theorem continuous_sizeA {d n M : ℕ} :
     Continuous (sizeA : (Fin n → Fin M → Fin d → AF F) → ℝ) := by
   unfold sizeA
-  refine continuous_finset_sum _ fun a _ => continuous_finset_sum _ fun i _ =>
-    continuous_finset_sum _ fun k _ => continuous_finset_sum _ fun v _ => ?_
+  refine continuous_finsetSum _ fun a _ => continuous_finsetSum _ fun i _ =>
+    continuous_finsetSum _ fun k _ => continuous_finsetSum _ fun v _ => ?_
   exact (((continuous_apply v).comp (continuous_fstA.comp
     (continuous_coord a i k)))).norm
 
@@ -210,8 +242,8 @@ theorem norm_le_sizeA {d n M : ℕ} (Z : Fin n → Fin M → Fin d → AF F) (a 
         Finset.sum_nonneg fun _ _ => norm_nonneg _) (Finset.mem_univ a)
   exact h1.trans (h2.trans (h3.trans h4))
 
-variable (F) in
 
+variable (F) in
 def boxT (d n M N : ℕ) (r : ℝ) : Set (Fin n → Fin M → Fin d → AF F) :=
   {Z | (∀ a i k, sndA F (Z a i k) ∈ latN F N) ∧ sizeA Z ≤ r}
 

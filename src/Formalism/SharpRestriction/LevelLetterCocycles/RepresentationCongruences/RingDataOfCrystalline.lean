@@ -1,7 +1,53 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcGamLiftCoreT
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.SaturationFractionModule
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
-import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.CmpDSmulLetter
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.ArcGamLiftCoreT
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.GammaPi0EqPi0MulUnit
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.CmpDSmulLetter
+public import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.SaturationFractionModule
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -113,6 +159,7 @@ theorem delta_lift (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : 
   have havgN : avg ∈ W.N T₁ := Submodule.sum_mem _ fun δ _ => W.N_Γ T₁ δ x hxN
   have havgΔ : ∀ δ ∈ W.DelF, W.γD T₁ δ avg = avg := by
     intro δ hδ
+
     rw [havg, map_sum]
     refine Finset.sum_nbij' (δ * ·) (δ⁻¹ * ·) (fun g hg => delF_mul W hδ hg)
       (fun g hg => delF_mul W (delF_inv W hδ) hg) (fun g _ => by simp) (fun g _ => by simp)
@@ -123,6 +170,7 @@ theorem delta_lift (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : 
     refine Finset.sum_congr rfl fun δ _ => ?_
     rw [← γA_letE W δ c, ← γD_smulA, hxc]
   have hFavg : W.map F avg = ((PD.p - 1 : ℕ) : O) • (Formalism.MainNotions.LiftingTheory.lp W rr • y) := by
+
     rw [havg, map_sum]
     have : ∀ δ ∈ W.DelF, W.map F (W.γD T₁ δ x) = Formalism.MainNotions.LiftingTheory.lp W rr • y := by
       intro δ hδ
@@ -172,8 +220,8 @@ theorem RepVV_lp {T : LocLat G Qp LL O} {c' : ZMod n} {e M : ℕ} {Λ : LetA O n
     rw [heq]
     exact InFP_lp W r h3
 
-include W in
 
+include W in
 theorem isUnit_prime_sub_one (hl : 5 ≤ PD.p) (hOv : ∀ x : LL, 0 ≤ v x → ∃ y : O, algebraMap O LL y = x)
     (hinj : Function.Injective (algebraMap O LL)) : IsUnit (((PD.p - 1 : ℕ) : O)) := by
   have hv1 : v ((PD.p : ℕ) : LL) = 1 := W.v_l
@@ -297,7 +345,7 @@ theorem ps_eq (hR : GS.RD W) {s k : ℕ} (hk : k < s) : ∃ h ∈ W.AΔ, ps W s 
   refine ⟨h, hh, ?_⟩
   have e : ps W s = (W.φA ^ s) W.π₀ + lA W := by
     unfold ps qA
-    rw [map_add]
+    rw [map_add (f := _)]
     congr 1
     unfold lA
     exact map_natCast _ _

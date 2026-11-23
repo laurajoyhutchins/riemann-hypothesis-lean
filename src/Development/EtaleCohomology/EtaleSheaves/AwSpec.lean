@@ -1,58 +1,88 @@
-import Development.EtaleCohomology.EtaleSheaves.TwPairExists
-import Development.EtaleCohomology.EtaleSheaves.EtaleFirstChernClassRepresentedByChernCocycle
-import Development.EtaleCohomology.EtaleSheaves.GoalOf
-import Development.EtaleCohomology.EtaleSheaves.LeafSupport
-import Development.EtaleCohomology.EtaleSheaves.LeafActSheafPf
+module
+
+public import Development.EtaleCohomology.EtaleSheaves.LeafSupport
+public import Development.EtaleCohomology.EtaleSheaves.HalfDegreeVanishing.SecondBlockUnimodularLocusInclusionMono
+public import Development.EtaleCohomology.EtaleSheaves.LeafOneLocPf
+public import Development.EtaleCohomology.EtaleSheaves.LeafTensQIsoPf
+public import Development.EtaleCohomology.EtaleSheaves.LeafTw0GenFreeOf
+public import Development.EtaleCohomology.EtaleSheaves.TwistTensorRestriction
+public import Development.EtaleCohomology.EtaleSheaves.LeafUnitActPf
+public import Development.EtaleCohomology.EtaleSheaves.UnitExistence
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTateTwistResolutionTensorFlat
+import Development.EtaleCohomology.EtaleSheaves.BaerFlatZModCriterion
+import Development.EtaleCohomology.EtaleSheaves.EtaleEvenCohomologyGradedCommRingOfCupRingAxioms
+public import Development.EtaleCohomology.EtaleSheaves.EtaleFirstChernClassRepresentedByChernCocycle
+public import Development.EtaleCohomology.EtaleSheaves.GoalOf
+public import Development.EtaleCohomology.EtaleSheaves.LeafActSheafPf
 import Development.EtaleCohomology.EtaleSheaves.LeafChernPf
 import Development.EtaleCohomology.EtaleSheaves.LeafCochainVanishPf
 import Development.EtaleCohomology.EtaleSheaves.LeafCover2Of
-import Development.EtaleCohomology.EtaleSheaves.LeafExtTensPf
-import Development.EtaleCohomology.EtaleSheaves.LeafGeomPfLoc
-import Development.EtaleCohomology.EtaleSheaves.WeightBoundsExistence
-import Development.EtaleCohomology.EtaleSheaves.UnimodularBlockEqToHomValEqOne
-import Development.EtaleCohomology.EtaleSheaves.HalfDegreeVanishing.SecondBlockUnimodularLocusInclusionMono
-import Development.EtaleCohomology.EtaleSheaves.BaerFlatZModCriterion
+public import Development.EtaleCohomology.EtaleSheaves.LeafGeomPfLoc
 import Development.EtaleCohomology.EtaleSheaves.LeafInjSecInjOf
 import Development.EtaleCohomology.EtaleSheaves.LeafLinePf
 import Development.EtaleCohomology.EtaleSheaves.LeafMapWPf
 import Development.EtaleCohomology.EtaleSheaves.LeafNatPf
 import Development.EtaleCohomology.EtaleSheaves.LeafNewtonPf
-import Development.EtaleCohomology.EtaleSheaves.UnitExistence.CocycleOfSec
-import Development.EtaleCohomology.EtaleSheaves.LeafOneLocPf
-import Development.EtaleCohomology.EtaleSheaves.LeafOneSpecPf
-import Development.EtaleCohomology.EtaleSheaves.LeafPairExtPf
-import Development.EtaleCohomology.EtaleSheaves.PairExtensionOfTensorUniversal
 import Development.EtaleCohomology.EtaleSheaves.LeafPreTensLocInjPf
 import Development.EtaleCohomology.EtaleSheaves.LeafPrimCoverPf
-import Development.EtaleCohomology.EtaleSheaves.PrimitiveRootLocalization
 import Development.EtaleCohomology.EtaleSheaves.LeafRepVanishPf
-import Development.EtaleCohomology.EtaleSheaves.RingCommutativity
-import Development.EtaleCohomology.EtaleSheaves.LeafRingUnitPf
-import Development.EtaleCohomology.EtaleSheaves.EtaleEvenCohomologyGradedCommRingOfCupRingAxioms
-import Development.EtaleCohomology.EtaleSheaves.LeafSecInjPf
+public import Development.EtaleCohomology.EtaleSheaves.LeafSecInjPf
 import Development.EtaleCohomology.EtaleSheaves.LeafTensFactorPf
-import Development.EtaleCohomology.EtaleSheaves.LeafTensMonoPf
 import Development.EtaleCohomology.EtaleSheaves.LeafTensQIsoGenPf
-import Development.EtaleCohomology.EtaleSheaves.LeafTensQIsoPf
 import Development.EtaleCohomology.EtaleSheaves.LeafTensUPPf
 import Development.EtaleCohomology.EtaleSheaves.LeafTw0LocGenOf
-import Development.EtaleCohomology.EtaleSheaves.LeafTw0LocSplitOf
-import Development.EtaleCohomology.EtaleSheaves.LeafTw0GenFreeOf
 import Development.EtaleCohomology.EtaleSheaves.LeafTw0TwFreeOf
-import Development.EtaleCohomology.EtaleSheaves.LeafTwPairHtpyPf
-import Development.EtaleCohomology.EtaleSheaves.LeafTwPairUniquePf
 import Development.EtaleCohomology.EtaleSheaves.LeafTwResHtpyPf
 import Development.EtaleCohomology.EtaleSheaves.LeafTwTensExistsPf
-import Development.EtaleCohomology.EtaleSheaves.TwistTensorRestriction
 import Development.EtaleCohomology.EtaleSheaves.LeafUnitAWPf
-import Development.EtaleCohomology.EtaleSheaves.LeafUnitActPf
-import Development.EtaleCohomology.EtaleSheaves.LeafUnitPairGPf
-import Development.EtaleCohomology.EtaleSheaves.LeafUnitPairPf
-import Development.EtaleCohomology.EtaleSheaves.UnitSections
 import Development.EtaleCohomology.EtaleSheaves.LeafWhitneyPf
 import Development.EtaleCohomology.EtaleSheaves.LeafZModInjFlatPf
-import Development.EtaleCohomology.EtaleSheaves.InstCommRingR
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsTateTwistResolutionTensorFlat
+import Development.EtaleCohomology.EtaleSheaves.PrimitiveRootLocalization
+import Development.EtaleCohomology.EtaleSheaves.RingCommutativity
+import Development.EtaleCohomology.EtaleSheaves.TwPairExists
+import Development.EtaleCohomology.EtaleSheaves.UnimodularBlockEqToHomValEqOne
+import Development.EtaleCohomology.EtaleSheaves.UnitExistence.CocycleOfSec
+import Development.EtaleCohomology.EtaleSheaves.UnitSections
+public import Development.EtaleCohomology.EtaleSheaves.WeightBoundsExistence
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+
+@[expose] public section
 
 noncomputable section
 open CategoryTheory Limits AlgebraicGeometry Opposite CochainComplex CochainComplex.HomComplex GlobalTheory.EtC
@@ -123,7 +153,5 @@ theorem s54 : LateralTheory.E.D2.LeafWhitney := @_root_.LateralTheory.E.D2.LeafW
 theorem s55 : LateralTheory.E.D2.LeafLine := @_root_.LateralTheory.E.D2.LeafLine_of s0
 theorem s56 : LateralTheory.E.D2.LeafNewton := @_root_.LateralTheory.E.LeafNewtonPf.LeafNewton_of
 theorem s57 : LateralTheory.E.EtaleChapterDTwo := @_root_.LateralTheory.E.D2.goal_of s42 s43 s44 s54 s55 s56
-
-theorem intersectionNumber_baseChange : LateralTheory.E.EtaleChapterDTwo := s57
 
 end LateralTheory.Fix.EtaleChapterDTwo

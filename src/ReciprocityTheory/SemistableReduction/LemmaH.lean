@@ -1,4 +1,57 @@
-import ReciprocityTheory.SemistableReduction.TorsionNonvanishStatement
+module
+
+public import ReciprocityTheory.SemistableReduction.TorsionNonvanishStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Coalgebra.IsFrobenius
+import Mathlib.RingTheory.HopfAlgebra.Basic
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.InnerProductSpace.GramSchmidtOrtho
+
+@[expose] public section
 
 namespace ReciprocityTheory.MultiplicativeHeights
 
@@ -77,19 +130,16 @@ theorem lemmaH_holds : LemmaHStatement := by
     simp [← hkb t]
   have hmain := P_ite_mul_eq_prod_triChar_mul p a P hP k b hkdet hbdet hbt Finset.univ
   rw [← hxk] at hmain
-  have hC0 : 0 ≤ C := by
-    have h1 := hC (fun s => 1) (fun s => one_mem _)
-    exact (norm_nonneg _).trans h1
   have hbR : ∀ s i, ‖b s i i‖ ≤ R := by
     intro s i
     have h1 := (hdiag s i).trans (hcol s i)
     nlinarith [norm_nonneg (b s i i)]
   have hprod : ‖∏ s, triChar (a s) (b s)‖ ≤ R ^ (∑ s, ∑ i, a s i) := by
     rw [norm_prod, ← Finset.prod_pow_eq_pow_sum]
-    apply Finset.prod_le_prod (fun _ _ => norm_nonneg _)
+    apply Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _)
     intro s _
     rw [triChar, norm_prod, ← Finset.prod_pow_eq_pow_sum]
-    apply Finset.prod_le_prod (fun _ _ => norm_nonneg _)
+    apply Finset.prod_le_prod₀ (fun _ _ => norm_nonneg _)
     intro i _
     rw [norm_pow]
     exact pow_le_pow_left₀ (norm_nonneg _) (hbR s i) _

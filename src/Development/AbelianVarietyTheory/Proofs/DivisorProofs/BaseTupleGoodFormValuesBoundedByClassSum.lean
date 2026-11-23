@@ -1,21 +1,72 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
-import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.DictAt
-import Development.AbelianVarietyTheory.Definitions.Divisors.DiscreteSeriesHermitianUnique
-import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
-import Development.AbelianVarietyTheory.Definitions.Divisors.FrameSignSimple
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteInfinitePsiBounds
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoefAtOfPosDef
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AuxiliaryVectorDecompositionEqZero
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RationalFormCoordinatesCoeffMemCoefficientField
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BranchingPairingMemCoefficientField
-import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteGroupActsUnitarily
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EqBotOrTopOfTensor
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HcParameterEAddHalfShiftLeBSucc
-import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardWeylLatticesFockDual
-import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsIsConjAtOfEmbedding
+module
+
+public import Development.AbelianVarietyTheory.Statements.PlaceShiftStatements.InfClassAt
+public import Development.AbelianVarietyTheory.Definitions.Divisors.FrameSignSimple
+public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.ExistsIsConjAtOfEmbedding
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AuxiliaryVectorDecompositionEqZero
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoefAtOfPosDef
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FiniteInfinitePsiBounds
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IntValuationEqOfMem
+public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.StandardWeylLatticesFockDual
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HcParameterEAddHalfShiftLeBSucc
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CoefActionReprMemSubfield
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.HasRatBasisOfAct
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.MemCmComplexOfPow
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ReprMemOfBasisRational
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.BranchingPairingMemCoefficientField
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.FiniteGroupActsUnitarily
+public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RationalFormCoordinatesCoeffMemCoefficientField
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LClosedeqLemmas
+public import Formalism.LocalRingCardinality.SpanPowerMembership.NZTypeE
+import Formalism.LocalToGlobal.Columns.CoefColLemmas
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkMapInitMinor
+import Formalism.LocalToGlobal.Columns.CoefficientsModP.FkPderivBlockEmbNe
 import Formalism.LocalToGlobal.Divisibility.ProjLemmas
-import Formalism.LocalRingCardinality.SpanPowerMembership.NZTypeE
+import Formalism.SharpRestriction.Divisibility.LiftErrorLocal
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.UnitaryAtAllRows
+public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ClassPresBasic
+
+@[expose] public section
+
 open Formalism.BasicNotions Formalism.BasicNotions.TH Formalism.MainNotions Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes Formalism.MainNotions.StandardLattice Formalism.L2.Theta Formalism.IndefR Formalism.IndefR.Datum Formalism.IndefR.Links Formalism.L2.DIV
 open IsDedekindDomain NumberField Matrix GlobalTheory.ChiGrid GlobalTheory.FunObj GlobalTheory.RowTest GlobalTheory.RowClaim GlobalTheory.TestLat GlobalTheory.SumSize
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
@@ -35,8 +86,9 @@ private theorem schur_form {H Γ : Type} [NormedAddCommGroup H] [InnerProductSpa
   have hT : ∀ x y, inner ℂ x (T y) = B x y := by
     intro x y
     conv_rhs => rw [← b.sum_repr' x]
+
     simp only [T, LinearMap.sum_apply, LinearMap.smulRight_apply, inner_sum, inner_smul_right, map_sum, LinearMap.map_smulₛₗ,
-      LinearMap.smul_apply, smul_eq_mul, inner_conj_symm]
+    LinearMap.smul_apply, smul_eq_mul, inner_conj_symm]
     exact Finset.sum_congr rfl fun i _ => mul_comm _ _
   have hs : ∀ g, Function.Surjective (ρ g) := fun g => by
     refine LinearMap.injective_iff_surjective.1 ((injective_iff_map_eq_zero _).2 fun x hx => ?_)
@@ -222,16 +274,18 @@ variable {K : Type} [Field K] [NumberField K] [StarRing K] (S : CSD K) (σ : K �
 private theorem pairAt_sesq {W : Type} [AddCommGroup W] [Module ℂ W] (j : S.V →ₛₗ[σ] W) (B : W →ₗ⋆[ℂ] W →ₗ[ℂ] ℂ)
     (h : ∀ i k, B (j (S.bV i)) (j (S.bV k)) = σ (S.pair (S.bV i) (S.bV k))) (x y : S.V) : pairAt S σ x y = B (j x) (j y) := by
   conv_rhs => rw [← S.bV.sum_repr x, ← S.bV.sum_repr y]
+
   simp only [pairAt, map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, h,
-    CSD.gramV, Matrix.of_apply, RingHom.id_apply, Finset.mul_sum]
+  CSD.gramV, Matrix.of_apply, RingHom.id_apply, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
 
 private theorem csumAt_sum {I : Type} [Fintype I] (a : I → K) (f : I → S.Cl → S.V) :
     csumAt S σ (∑ i, a i • f i) (∑ i, a i • f i) = ∑ i, ∑ k, starRingEnd ℂ (σ (a i)) * csumAt S σ (f i) (f k) * σ (a k) := by
+
   simp only [csumAt, pairAt, Finset.sum_apply, Pi.smul_apply, map_sum, map_smul, Finsupp.coe_finsetSum, Finsupp.coe_smul, smul_eq_mul,
-    map_mul, Finset.mul_sum, Finset.sum_mul]
+  map_mul, Finset.mul_sum, Finset.sum_mul]
   conv_rhs =>
     rw [Finset.sum_comm]
     enter [2, k]
@@ -314,6 +368,7 @@ private theorem pairK_mapVV_rat {K : Type} [Field K] [StarRing K] (σ : K →+* 
     obtain ⟨P, hP⟩ := bVVfun_int K lam j
     exact pairK_mapVV_int σ lam G _ y P ((bVV_coe _ lam j).trans hP)
   rw [← (bVV K lam).sum_repr x]
+
   simp only [map_sum, LinearMap.sum_apply, LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, hb, map_mul]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [starRingEnd_apply (R := K), hx j σ]
@@ -478,7 +533,7 @@ private theorem idemOf_mem (h : R.grp_record) (g : Γ) : (idemOf A.X).coeff g �
     simp only [MonoidAlgebra.coeff_mul_single_apply, MonoidAlgebra.coeff_single_mul_apply, inv_inv, mul_one, one_mul] at this
     rw [he, he, map_mul eR, map_mul eR, this]
 
-set_option maxHeartbeats 1600000 in
+
 private theorem herm_eq (F : Face D A) (hc : GlobalTheory.Hk3.Core R F) (t : T) (σ : D.what₂.LL →+* ℂ)
     (x : Fin ((A.fam.R t).nV (A.fam.lvl F.P0 F.ψ0)) → D.what₂.LL) :
     (Nat.card (A.fam.lvl F.P0 F.ψ0).P : ℝ) *
@@ -504,7 +559,7 @@ private theorem herm_eq (F : Face D A) (hc : GlobalTheory.Hk3.Core R F) (t : T) 
   have hN : (Nat.card (A.fam.lvl F.P0 F.ψ0).P : ℂ) ≠ 0 := Nat.cast_ne_zero.2 Nat.card_pos.ne'
   rw [h3, ← Complex.re_ofReal_mul, Complex.ofReal_natCast, mul_inv_cancel_left₀ hN]
 
-set_option maxHeartbeats 1600000 in
+
 private theorem value_nonneg_and_norm_bound (ch : Choice R) (large₂ : SizeData₂ D) (F : Face D A) (hS : HidaSetting large₂ R F) (t : T) (σ : D.what₂.LL →+* ℂ)
     (f : (A.MtildeCSD t).Forms) :
     0 ≤ (csumAt (A.MtildeCSD t) σ f.1 f.1).re ∧ ∀ y, NrmLe _ σ (rowVal ch.S.toGridChoice (ch.S.formC t (R.jX t f) y))
@@ -557,7 +612,7 @@ end Main
 
 end GlobalTheory.FormNorm
 
-set_option maxHeartbeats 1600000 in
+
 open GlobalTheory.FormNorm in
 theorem _root_.GlobalTheory.T.baseTupleGoodForm_values_bounded_by_classSum : BigC fun {D} {_} _ _ {_} {_} {A} {_} _ _ _ {R} F ch _ _ => ∀ (σ : D.what₂.LL →+* ℂ) (x : Fin ((A.fam.R A.μ0).nV (A.fam.lvl F.P0 F.ψ0)) → D.what₂.LL),
   0 ≤ (star (fun i => σ (x i)) ⬝ᵥ (((A.fam.R A.μ0).HV (A.fam.lvl F.P0 F.ψ0)).map σ).mulVec fun i => σ (x i)).re ∧ ∀ y,

@@ -1,4 +1,47 @@
-import ReciprocityTheory.GroupCohomology.TransgressionStatement
+module
+
+public import ReciprocityTheory.GroupCohomology.ContinuousContractNth
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 namespace ReciprocityTheory.Coh
 
@@ -7,23 +50,6 @@ open ReciprocityTheory.Gal Cx Function
 noncomputable section
 
 universe u
-
-def PiRepStatement : Prop := ∀ (R : Type u) [CommRing R] (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (κ : Type u) (A : κ → TRep R G) (L : TRep R G) (π : ∀ a, Pair L (A a)),
-  (∀ a, (π a).φ = MonoidHom.id G) → IsHomeomorph (fun (x : L.V) a => (π a).u x) →
-  ∀ n, Bijective (LinearMap.pi fun a => ((π a).hom.f n)) ∧ Bijective (LinearMap.pi fun a => (π a).hom.H n)
-
-def CentralStatement : Prop := ∀ (R : Type u) [CommRing R] (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (M : TRep R G) (s : G) (c : R), s ∈ Subgroup.center G →
-  (∀ m, M.rho s m = c • m) → ∀ n (x : M.H n), (c - 1) • x = 0
-
-def QuadStatement : Prop := ∀ (R : Type u) [CommRing R] (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (M M' : TRep R G) (U : Subgroup G), IsOpen (U : Set G) → U.index = 2 →
-  IsUnit (2 : R) → ∀ P : Pair M' (M.resSub U), P.φ = U.subtype → IsHomeomorph P.u →
-  (∀ g ∉ U, ∀ m, P.u (M'.rho g m) = -M.rho g (P.u m)) → ∀ n,
-  Bijective (((Pair.res M U.subtype continuous_subtype_val).hom.H n).coprod (P.hom.H n))
-
-def InfIsoStatement : Prop := ∀ (R : Type u) [CommRing R] (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] [T2Space G] [TotallyDisconnectedSpace G]
-  (M : TRep R G) [DiscreteTopology M.V] (N : Subgroup G) [N.Normal], IsClosed (N : Set G) →
-  (∀ W : Subgroup N, IsOpen (W : Set N) → IsUnit (W.index : R)) →
-  ∀ (Q : TRep R (G ⧸ N)) (P : Pair Q M), IsInvRep M N Q P → P.hom.QuasiIso
 
 def IsZHat (G : Type u) [Group G] [TopologicalSpace G] (s : G) : Prop :=
   Dense (Subgroup.zpowers s : Set G) ∧ ∀ k : ℕ, 0 < k → ∃ W : Subgroup G, IsOpen (W : Set G) ∧ W.index = k
@@ -38,22 +64,6 @@ def ShiftStatement : Prop := ∀ (R : Type u) [CommRing R] (G : Type u) [Group G
   (∀ (M : TRep R G) [DiscreteTopology M.V], (∀ m : M.V, ∃ k : ℕ, 0 < k ∧ k • m = 0) → Subsingleton (M.H N)) →
   ∀ (M : TRep R G) [DiscreteTopology M.V], (∀ m : M.V, ∃ k : ℕ, 0 < k ∧ k • m = 0) →
     ∀ n, N ≤ n → Subsingleton (M.H n)
-
-def KilledStatement : Prop := ∀ (R : Type u) [CommRing R] (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (M M' : TRep R G) [DiscreteTopology M.V] [DiscreteTopology M'.V]
-  (P : Pair M M') (c : R), P.φ = MonoidHom.id G → (∀ m, P.u m = 0 → c • m = 0) →
-  (∀ m' : M'.V, c • m' ∈ LinearMap.range P.u) → ∀ n,
-  (∀ x, P.hom.H n x = 0 → c ^ 2 • x = 0) ∧ ∀ y : M'.H n, c ^ 2 • y ∈ LinearMap.range (P.hom.H n)
-
-def CofinStatement : Prop := ∀ (R : Type u) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R] (G : Type u)
-  [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] (t : R), Irreducible t →
-  ∀ (K D : TRep R G) [DiscreteTopology K.V] [DiscreteTopology D.V] (i : Pair K D), i.φ = MonoidHom.id G →
-  Injective i.u → (∀ x, x ∈ LinearMap.range i.u ↔ t • x = 0) → (∀ x : D.V, ∃ y, x = t • y) →
-  (∀ x : D.V, ∃ m : ℕ, t ^ m • x = 0) → ∀ n, (∀ x : D.H n, ∃ m : ℕ, t ^ m • x = 0) ∧
-    (IsFiniteLength R (K.H n) → IsArtinian R (D.H n))
-
-def CardLenStatement : Prop := ∀ (R : Type u) [CommRing R] [IsLocalRing R] [Finite (IsLocalRing.ResidueField R)]
-  (H : Type u) [AddCommGroup H] [Module R H], (IsFiniteLength R H ↔ Finite H) ∧
-  (Finite H → Nat.card H = Nat.card (IsLocalRing.ResidueField R) ^ (Module.length R H).toNat)
 
 end
 

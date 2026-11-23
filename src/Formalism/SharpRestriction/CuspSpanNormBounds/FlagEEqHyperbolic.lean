@@ -1,7 +1,46 @@
-import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
-import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
-import Formalism.SharpRestriction.CuspSpanNormBounds.StandingNumericalData
-import Formalism.SharpRestriction.CuspSpanNormBounds.NormalizedLocalScale
+module
+
+public import Formalism.SharpRestriction.CuspSpanNormBounds.IsPrimitiveSub
+public import Formalism.SharpRestriction.CuspSpanNormBounds.NormalizedLocalScale
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -84,7 +123,7 @@ open MeasureTheory
 
 variable (D : D7)
 
-abbrev lf {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) : LFlag (VS D) D.R.rS T := ⟨F0, F0.z⟩
+abbrev lf {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) : LFlag (D.sp.Y 0) D.R.rS T := ⟨F0, F0.z⟩
 
 def stabF {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) : Set ((VS D).V ≃ₗ[D.host.E] (VS D).V) :=
   {γ | γ ∈ Formalism.HermitianLatticesTheory.isom (VS D).hT ∧ (∀ j, (F0.Xa j).map (γ : (VS D).V →ₗ[D.host.E] (VS D).V) = F0.Xa j) ∧
@@ -116,14 +155,14 @@ def autLz {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (Λ : Submodule (𝓞 D.ho
 def wRow {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (Λ : Submodule (𝓞 D.host.E) (VS D).V) : ℝ :=
   ((Nat.card (autLz D F0 Λ) : ℝ))⁻¹
 
-def FrameOK {T' : D.host.E} (Λ : Submodule (𝓞 D.host.E) (VS D).V) (F' : LFlag (VS D) D.R.rS T') : Prop :=
+def FrameOK {T' : D.host.E} (Λ : Submodule (𝓞 D.host.E) (VS D).V) (F' : LFlag (D.sp.Y 0) D.R.rS T') : Prop :=
   IsFixedConv Λ (gS D) F' ∧ XLam Λ F' = XS D F'.fl
 
-def FrameEqv {T' : D.host.E} (n : (VS D).V ≃ₗ[D.host.E] (VS D).V) (F' F'₂ : LFlag (VS D) D.R.rS T') : Prop :=
+def FrameEqv {T' : D.host.E} (n : (VS D).V ≃ₗ[D.host.E] (VS D).V) (F' F'₂ : LFlag (D.sp.Y 0) D.R.rS T') : Prop :=
   ∃ ξ : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) (𝓞 D.host.E),
     (∀ a b, b < a → ξ a b = 0) ∧ (∀ a, ξ a a = 1) ∧ frame F'₂ = frameAct (fun a => n (frame F' a)) ξ
 
-def cntSW {T : D.host.E} (T' : D.host.E) (F : LFlag (VS D) D.R.rS T) (Λ : Submodule (𝓞 D.host.E) (VS D).V)
+def cntSW {T : D.host.E} (T' : D.host.E) (F : LFlag (D.sp.Y 0) D.R.rS T) (Λ : Submodule (𝓞 D.host.E) (VS D).V)
     (Z : Matrix (Fin (D.R.rS + 1)) (Fin (D.R.rS + 1)) D.host.E) : ℕ∞ :=
   let X : Set (LFlag (VS D) D.R.rS T') :=
     {F' | IsTerm Λ (gS D) F F' ∧ FrameOK D Λ F' ∧ IsGeneric Λ (gS D) F F' ∧ ZEquiv (ZhatL F F') Z}

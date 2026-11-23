@@ -1,9 +1,54 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.EvenPos
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.QuadraticGaussSumPowEightEqCardMulRadicalPowFour
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.EvenPosGramFormIntegralLatticeProperties
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.DualLatticeIndexEqDiscrPowMulDetPow
-import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.ExistsFiniteRepsScaledLatticeCardNorm
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.EvenPos
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.DualLatticeIndexEqDiscrPowMulDetPow
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.EvenPosGramFormIntegralLatticeProperties
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.GaussSumFiltrations.ExistsFiniteRepsScaledLatticeCardNorm
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Algebra.Order.Star.Rat
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+public import Mathlib.NumberTheory.SumFourSquares
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep UpperTheory.V UpperTheory.V.Af UpperTheory.V.Sd GlobalTheory.HilbertThetaSeries
 open scoped Matrix
@@ -342,8 +387,8 @@ end GlobalTheory.HilbertThetaSeries.GaussPow
 
 namespace GlobalTheory.HilbertThetaSeries
 
-open GaussPow in
 
+open GaussPow in
 theorem gaussSum_pow_eight : ∀ (F : Type) [Field F] [NumberField F] (κ : Type) [Fintype κ] [DecidableEq κ] (G : Matrix κ κ ℤ), EvenPos G → ∀ t : ℕ, G.det = (t : ℤ) ^ 2 → ∀ k : ℕ, Fintype.card κ = 2 * k → ∀ (N : ℕ) (a b c d : F) (T : Finset (κ → F)), 0 < N → (∀ y ∈ dualL F G, (N : F) • y ∈ LL F κ ∧ IsIntegral ℤ ((N : F) * QF G y)) → IsIntegral ℤ a → IsIntegral ℤ b → IsIntegral ℤ (c / N) → IsIntegral ℤ d → a * d - b * c = 1 → c ≠ 0 → IsReps (aL κ c) (aL κ (1 : F)) T → (wC k t c c * ∑ x ∈ T, et (a / c * QF G x)) ^ 8 = 1 := by
   intro F _ _ κ _ _ G hG t ht k hk N a b c d T hN hdual ha hb hcN hd hadbc hc0 hT
   classical
@@ -377,10 +422,10 @@ theorem gaussSum_pow_eight : ∀ (F : Type) [Field F] [NumberField F] (κ : Type
   let f : (κ → F) → ℂ := fun x => et (a / c * QF G x)
   let g : (κ → F) → (κ → F) → ℂ := fun x y => et (a / c * BF G x y)
   let C : AddSubgroup (κ → F) := aL κ (1 : F) ⊓
-    (dualL F G).comap (DistribMulAction.toAddMonoidHom (κ → F) (a / c))
+    (dualL F G).comap (DistribSMul.toAddMonoidHom (κ → F) (a / c))
   have hCmem : ∀ u, u ∈ C ↔ u ∈ LL F κ ∧ (a / c) • u ∈ dualL F G := by
     intro u
-    simp only [C, AddSubgroup.mem_inf, AddSubgroup.mem_comap, DistribMulAction.toAddMonoidHom_apply, hB]
+    simp only [C, AddSubgroup.mem_inf, AddSubgroup.mem_comap, DistribSMul.toAddMonoidHom_apply, hB]
   have h2 : ∀ x y, f (x + y) = f x * f y * g x y := by
     intro x y
     show et (a / c * QF G (x + y)) = et (a / c * QF G x) * et (a / c * QF G y) * et (a / c * BF G x y)
@@ -480,11 +525,11 @@ theorem gaussSum_pow_eight : ∀ (F : Type) [Field F] [NumberField F] (κ : Type
     push_cast
     exact e1.symm
   have hmain := GaussPow.gauss_reps hT hAC hCB f g (T.card ^ 2) (by positivity) h1 h2 h3 h4 h5 h6 h7
-  let φc : (κ → F) →+ (κ → F) := DistribMulAction.toAddMonoidHom (κ → F) c⁻¹
+  let φc : (κ → F) →+ (κ → F) := DistribSMul.toAddMonoidHom (κ → F) c⁻¹
   have hAeq : aL κ c = (LL F κ).comap φc := by
     ext x
     rw [haL, AddSubgroup.mem_comap]
-    simp only [φc, DistribMulAction.toAddMonoidHom_apply]
+    simp only [φc, DistribSMul.toAddMonoidHom_apply]
     constructor
     · rintro ⟨l, hl, rfl⟩
       rwa [smul_smul, inv_mul_cancel₀ hc0, one_smul]
@@ -493,7 +538,7 @@ theorem gaussSum_pow_eight : ∀ (F : Type) [Field F] [NumberField F] (κ : Type
   have hdeq : C.map φc = dualL F G := by
     ext y
     rw [AddSubgroup.mem_map]
-    simp only [φc, DistribMulAction.toAddMonoidHom_apply]
+    simp only [φc, DistribSMul.toAddMonoidHom_apply]
     constructor
     · rintro ⟨u, hu, rfl⟩
       obtain ⟨huL, hud⟩ := (hCmem u).mp hu
@@ -559,6 +604,6 @@ end GlobalTheory.HilbertThetaSeries
 
 open NumberField IsDedekindDomain Neutral.B1 Formalism.L2.Host Formalism.ConjugateSelfDual GlobalTheory.CuspRep UpperTheory.V UpperTheory.V.Af UpperTheory.V.Sd GlobalTheory.HilbertThetaSeries
 open scoped Matrix
-set_option maxHeartbeats 1000000 in
+
 theorem _root_.GlobalTheory.T.lattice_normalized_gaussSum_eighth_root : ∀ (F : Type) [Field F] [NumberField F] (κ : Type) [Fintype κ] [DecidableEq κ] (G : Matrix κ κ ℤ), EvenPos G → ∀ t : ℕ, G.det = (t : ℤ) ^ 2 → ∀ k : ℕ, Fintype.card κ = 2 * k → ∀ (N : ℕ) (a b c d : F) (T : Finset (κ → F)), 0 < N → (∀ y ∈ dualL F G, (N : F) • y ∈ LL F κ ∧ IsIntegral ℤ ((N : F) * QF G y)) → IsIntegral ℤ a → IsIntegral ℤ b → IsIntegral ℤ (c / N) → IsIntegral ℤ d → a * d - b * c = 1 → c ≠ 0 → IsReps (aL κ c) (aL κ (1 : F)) T → (wC k t c c * ∑ x ∈ T, et (a / c * QF G x)) ^ 8 = 1 := by
   first | exact @GlobalTheory.HilbertThetaSeries.gaussSum_pow_eight | exact GlobalTheory.HilbertThetaSeries.gaussSum_pow_eight | (intros; apply GlobalTheory.HilbertThetaSeries.gaussSum_pow_eight <;> assumption)

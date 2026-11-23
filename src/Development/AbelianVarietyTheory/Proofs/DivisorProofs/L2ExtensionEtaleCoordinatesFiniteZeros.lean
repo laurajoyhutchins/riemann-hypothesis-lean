@@ -1,15 +1,62 @@
-import Mathlib
-import ReciprocityTheory.L2DbarEstimates.Imports
-import ReciprocityTheory.L2DbarEstimates.PlurisubharmonicCharts.FourSignHolds
-import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.L2ExtensionLogCanonical
-import Development.AbelianVarietyTheory.Definitions.Divisors.EtaleEmpty
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalHolomorphicExtensionNearZerosStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmoothCutoffSlopeThreeQuartersStatement
+module
+
+public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.L2ExtensionLogCanonical
+public import Development.AbelianVarietyTheory.Definitions.Divisors.EtaleEmpty
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalHolomorphicExtensionNearZerosStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSmoothCutoffSlopeThreeQuartersStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExtensionAcrossHypersurfaceValuesAtZerosStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralSublevelTailLeOfFiniteStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeasurableNsqExtendAndPsiStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedEstimateEtalePartManifoldStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExtensionAcrossHypersurfaceValuesAtZerosStatement
-import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralSublevelTailLeOfFiniteStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MeasureComplNonvanishingSetEqZeroOfDenseStatement
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TwistedEstimateEtalePartManifoldStatement
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Algebra.Ring.IsFormallyReal
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 open MeasureTheory Filter Topology Metric ReciprocityTheory.L2DbarEstimates ReciprocityTheory.L2DbarEstimates.Y GlobalTheory.OTY GlobalTheory.Published.L2Extension
 open scoped ENNReal ContDiff
 
@@ -18,8 +65,6 @@ namespace GlobalTheory
 theorem norm_sub_sq_le_of_split (u v : ℂ) : ‖u - v‖ ^ 2 ≤ 32 / 31 * ‖v‖ ^ 2 + 32 * ‖u‖ ^ 2 := by
   have h1 : ‖u - v‖ ≤ ‖u‖ + ‖v‖ := norm_sub_le u v
   have h0 : 0 ≤ ‖u - v‖ := norm_nonneg _
-  have hu := norm_nonneg u
-  have hv := norm_nonneg v
   nlinarith [sq_nonneg (‖v‖ - 31 * ‖u‖)]
 
 theorem weight_ge_of_nonpos (δ t : ℝ) (hδ : 0 < δ) (ht : t ≤ 0) :
@@ -44,13 +89,11 @@ theorem final_pointwise_le (n : ℕ) (x T tv ep e : ℝ) (Fp hp : ℂ) (hep : 0 
   have hu : ‖(tv : ℂ) * hp‖ ^ 2 = tv ^ 2 * ‖hp‖ ^ 2 := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, mul_pow, sq_abs]
   rw [hu] at hnorm
-  have hγ0 : 0 ≤ 1 / (1 + x ^ 2) := by positivity
   have hmin : 0 < 1 + min (x ^ 2) ((T + 1) ^ 2) :=
     lt_of_lt_of_le one_pos (le_add_of_nonneg_right (le_min (sq_nonneg _) (sq_nonneg _)))
   have hγw : 1 / (1 + x ^ 2) ≤ wT T x := by
     unfold wT
     exact one_div_le_one_div_of_le hmin (by linarith [min_le_left (x ^ 2) ((T + 1) ^ 2)])
-  have hv0 : 0 ≤ ‖(tv : ℂ) * hp - Fp‖ ^ 2 := sq_nonneg _
   apply mul_le_mul_of_nonneg_left _ (pow_nonneg (by norm_num : (0:ℝ) ≤ 2) n)
   have h1 : 1 / (1 + x ^ 2) * (‖Fp‖ ^ 2 * ep) * e ≤
       1 / (1 + x ^ 2) * e * ep * (32 / 31 * ‖(tv : ℂ) * hp - Fp‖ ^ 2 + 32 * (tv ^ 2 * ‖hp‖ ^ 2)) := by
@@ -102,7 +145,6 @@ theorem l2_extension_of_etale_coordinates : ∀ (n : ℕ) (Y : Type) [Topologica
     have hψle : ∀ y, psi A L s y ≤ 0 := fun y => by
       unfold psi
       exact mul_nonpos_of_nonneg_of_nonpos hn0.le (Real.log_nonpos (hsqn_nn y) (hsq y))
-    have hc0 : 0 < min 1 (1 / (2 * δ ^ 2)) := lt_min one_pos (by positivity)
     have hL2 : ∫⁻ y, ENNReal.ofReal (A.nsq (A.kap + E) h y) ∂A.mu < ⊤ := by
       have hle : ∀ y, ENNReal.ofReal (A.nsq (A.kap + E) h y) ≤
           ENNReal.ofReal (1 / min 1 (1 / (2 * δ ^ 2))) * ENNReal.ofReal (1 / (1 + (δ * psi A L s y) ^ 2) *
@@ -128,10 +170,6 @@ theorem l2_extension_of_etale_coordinates : ∀ (n : ℕ) (Y : Type) [Topologica
         _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hfin
     set K : ℝ := Real.pi ^ n / ((n - 1).factorial : ℝ) / δ *
         ∑ P ∈ hS.toFinset, resSq A E L s P (f P) with hK
-    have hKpos : 0 < K := by
-      have := Real.pi_pos
-      have : (0:ℝ) < ((n - 1).factorial : ℝ) := by positivity
-      exact mul_pos (by positivity) hSpos
     have hggm : Measurable (fun y => ENNReal.ofReal (1 / (1 + (δ * psi A L s y) ^ 2) *
         A.nsq (A.kap + E) h y * Real.exp (-psi A L s y))) := by
       refine Measurable.ennreal_ofReal ?_

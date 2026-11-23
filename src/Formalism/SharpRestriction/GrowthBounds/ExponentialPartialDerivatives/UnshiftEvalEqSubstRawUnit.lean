@@ -1,6 +1,56 @@
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEq2
-import Formalism.LocalToGlobal.CharacterGerms.RowTiePAddCvSelf
-import Formalism.SharpRestriction.GrowthBounds.ExponentialPartialDerivatives.SumAtOf
+module
+
+public import Formalism.SharpRestriction.GrowthBounds.ExponentialPartialDerivatives.SumAtOf
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqDer
+import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
+import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartAdd
+import Formalism.LocalToGlobal.CharacterGerms.RowTieCartFB
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePAddCvSelf
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqEx
+public import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqM2
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 noncomputable section
 
@@ -41,13 +91,13 @@ theorem unshift_eval_eq_subst_rawUnit (f : PS C 1 dd) :
 
 theorem pderiv_expG_U (hE : ExDerSt Y) (g : Fin 2) (k : I g)
     (j : Fin dd) :
-    MvPowerSeries.pderiv C k ((rawU Y d u).expG g j) =
+    MvPowerSeries.pderiv (R := C) k ((rawU Y d u).expG g j) =
       MvPowerSeries.subst ((rawU Y d u).expG g) (un1 (Y.dF ((rawU Y d u).u g k) j)) := by
   have hlin0 := lin_const (rawU Y d u) g
   have hL := MvPowerSeries.hasSubst_of_constantCoeff_zero hlin0
   have hx0 : ∀ i, MvPowerSeries.constantCoeff ((rawU Y d u).ex i) = 0 := constantCoeff_rawUnit_exp Y d u
   have e1 : MvPowerSeries.subst (rawU Y d u).ex (un1 (Y.dF ((rawU Y d u).u g k) j)) =
-      ∑ i, MvPowerSeries.C ((rawU Y d u).u g k i) * MvPowerSeries.pderiv C i ((rawU Y d u).ex j) := by
+      ∑ i, MvPowerSeries.C ((rawU Y d u).u g k i) * MvPowerSeries.pderiv (R := C) i ((rawU Y d u).ex j) := by
     rw [← unshift_eval_eq_subst_rawUnit Y d u, ← hE, uncurry_linear_combination]
     simp only [← pderiv_uncurry]
     rfl
@@ -55,6 +105,7 @@ theorem pderiv_expG_U (hE : ExDerSt Y) (g : Fin 2) (k : I g)
   rw [Formalism.G.LogCR.pderiv_subst hlin0,
     ← MvPowerSeries.subst_comp_subst_apply (MvPowerSeries.hasSubst_of_constantCoeff_zero hx0) hL]
   simp only [pderiv_lin]
+
   rw [e1, ← MvPowerSeries.coe_substAlgHom hL, map_sum, MvPowerSeries.coe_substAlgHom]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [MvPowerSeries.subst_mul hL, MvPowerSeries.subst_C, mul_comm]
@@ -66,7 +117,7 @@ theorem derAt_rawU (hu : ∀ g c i, V.Ge 0 (u g c i)) : DerAt V (rawU Y d u) := 
     rw [expPt_eq]
     exact upG_const _ (constantCoeff_subst_zero (lin_const (rawU Y d u) q.1) (constantCoeff_rawUnit_exp Y d u q.2))
   have hES := MvPowerSeries.hasSubst_of_constantCoeff_zero hE0
-  have hd : ∀ (g' : Fin 2) (j : Fin dd), MvPowerSeries.pderiv C (⟨1 - g, k⟩ : WV I) ((rawU Y d u).expPt g' j) =
+  have hd : ∀ (g' : Fin 2) (j : Fin dd), MvPowerSeries.pderiv (R := C) (⟨1 - g, k⟩ : WV I) ((rawU Y d u).expPt g' j) =
       if g' = 1 - g then MvPowerSeries.subst ((rawU Y d u).expPt (1 - g)) (un1 (Y.dF ((rawU Y d u).u (1 - g) k) j))
       else 0 := by
     intro g' j
@@ -78,10 +129,10 @@ theorem derAt_rawU (hu : ∀ g c i, V.Ge 0 (u g c i)) : DerAt V (rawU Y d u) := 
       funext i
       exact (expPt_eq _ _ _).symm
     · rw [expPt_eq, pderiv_upG_ne (1 - g) g' hg k]
-  have hch : MvPowerSeries.pderiv C (⟨1 - g, k⟩ : WV I)
+  have hch : MvPowerSeries.pderiv (R := C) (⟨1 - g, k⟩ : WV I)
       (MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (rawU Y d u).expPt q.1 q.2) Y.h) =
       ∑ j, MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (rawU Y d u).expPt q.1 q.2)
-          (MvPowerSeries.pderiv C ((1 - g : Fin 2), j) Y.h) *
+          (MvPowerSeries.pderiv (R := C) ((1 - g : Fin 2), j) Y.h) *
         MvPowerSeries.subst ((rawU Y d u).expPt (1 - g)) (un1 (Y.dF ((rawU Y d u).u (1 - g) k) j)) := by
     rw [Formalism.G.LogCR.pderiv_subst hE0, Fintype.sum_prod_type, Finset.sum_eq_single (1 - g)]
     · simp only [hd, if_true]
@@ -90,14 +141,15 @@ theorem derAt_rawU (hu : ∀ g c i, V.Ge 0 (u g c i)) : DerAt V (rawU Y d u) := 
     · intro h
       exact absurd (Finset.mem_univ _) h
   set J : PS C 2 dd := (∑ j, ev (n := 2) ![pt C dd (1 - g)] (Y.dF ((rawU Y d u).u (1 - g) k) j) *
-      MvPowerSeries.pderiv C ((1 - g : Fin 2), j) Y.h) + ev (n := 2) ![pt C dd g] (Y.sgP ((rawU Y d u).u (1 - g) k))
+      MvPowerSeries.pderiv (R := C) ((1 - g : Fin 2), j) Y.h) + ev (n := 2) ![pt C dd g] (Y.sgP ((rawU Y d u).u (1 - g) k))
     with hJd
   have hsubD : MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (rawU Y d u).expPt q.1 q.2)
       (∑ j, ev (n := 2) ![pt C dd (1 - g)] (Y.dF ((rawU Y d u).u (1 - g) k) j) *
-        MvPowerSeries.pderiv C ((1 - g : Fin 2), j) Y.h) =
+        MvPowerSeries.pderiv (R := C) ((1 - g : Fin 2), j) Y.h) =
       ∑ j, MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (rawU Y d u).expPt q.1 q.2)
-          (MvPowerSeries.pderiv C ((1 - g : Fin 2), j) Y.h) *
+          (MvPowerSeries.pderiv (R := C) ((1 - g : Fin 2), j) Y.h) *
         MvPowerSeries.subst ((rawU Y d u).expPt (1 - g)) (un1 (Y.dF ((rawU Y d u).u (1 - g) k) j)) := by
+
     rw [← MvPowerSeries.coe_substAlgHom hES, map_sum, MvPowerSeries.coe_substAlgHom]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [MvPowerSeries.subst_mul hES, subst_exp_eval_two _ hE0, mul_comm]
@@ -116,7 +168,7 @@ theorem derAt_rawU (hu : ∀ g c i, V.Ge 0 (u g c i)) : DerAt V (rawU Y d u) := 
       rfl
   refine ⟨J, hJ, ?_⟩
   rw [dVar_eq]
-  show MvPowerSeries.pderiv C _ (((Y.k : ℕ) : C) •
+  show MvPowerSeries.pderiv (R := C) _ (((Y.k : ℕ) : C) •
     MvPowerSeries.subst (fun q : Fin 2 × Fin dd => (rawU Y d u).expPt q.1 q.2) Y.h) = _
   rw [Derivation.map_smul, hch, ← hsubD, hJd, MvPowerSeries.subst_add hES, subst_exp_eval_two _ hE0, rawU_sg Y d u,
     add_sub_cancel_right]
@@ -165,7 +217,7 @@ theorem addM_rawU : AddM V (rawU Y d u) := by
   refine ⟨γ'', fun j => ⟨hγ''0 j, IntS.subst hρ0 hρI (Y.intF j)⟩, ?_, ?_⟩
   · intro i
     have h := congrArg (MvPowerSeries.subst ρ) (Y.lg_add i)
-    rw [← MvPowerSeries.coe_substAlgHom hρS, map_add, MvPowerSeries.coe_substAlgHom hρS, hev _ hca, hev _ hc0,
+    rw [← MvPowerSeries.coe_substAlgHom hρS, map_add (f := _), MvPowerSeries.coe_substAlgHom hρS, hev _ hca, hev _ hc0,
       hev _ hc1, hpa, hp0, hp1] at h
     exact h
   · intro v hv

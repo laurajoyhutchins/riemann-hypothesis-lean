@@ -1,6 +1,56 @@
-import Mathlib
-import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
-import Formalism.LocalToGlobal.IndefiniteReal.CxLemmas
+module
+
+public import Formalism.LocalToGlobal.IndefiniteReal.CutTuples2
+public import Formalism.LocalToGlobal.Divisibility.FramesLemmas
+public import Formalism.LocalToGlobal.IndefiniteReal.CxLemmas
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Etale.Weakly
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField IsDedekindDomain
 open scoped Matrix ComplexOrder InnerProductSpace
@@ -30,6 +80,7 @@ def uQ (t : Bs.Tup) : Fin ((lv (fc X.zs) b).dQ t) → X.FC t :=
 
 theorem iC_eq_comp (t : Bs.Tup) (c : Fin ((lv (fc X.zs) b).dQ t) → ℂ) :
     X.iC cr b t c = X.Θ t (lin (X.uQ cr b t) c) := by
+
   simp only [iC, uQ, lin_apply, map_sum, map_smul]
 
 theorem lin_uQ_cpt (t : Bs.Tup) (x : Fin ((lv (fc X.zs) b).dQ t) → K) :
@@ -38,6 +89,7 @@ theorem lin_uQ_cpt (t : Bs.Tup) (x : Fin ((lv (fc X.zs) b).dQ t) → K) :
     funext i
     simp [Finset.sum_apply, Pi.single_apply]
   conv_rhs => rw [hx]
+
   simp only [map_sum, map_smul, LinearMap.map_smulₛₗ, lin_apply, uQ, cpt]
 
 theorem gram_uQ (hIso : X.IsoR cr b) (t : Bs.Tup) :
@@ -58,8 +110,8 @@ theorem lin_uQ_injective (hW : (lv (fc X.zs) b).WF) (hn : 0 < X.nP b) (hIso : X.
 
 end CxData
 
-open CxData in
 
+open CxData in
 theorem cutRows {Bs : DefBase K} {A : DefAmb Bs} {X : CxData A} {fc : DefSub A → DefFace Bs} (cr : Crd A fc)
     (cv : CrdV A) (b : Bool) : X.CutRows cr cv b := by
   intro hW hpos hIso hZ hV0' hRat hDn hUp hB hParts

@@ -1,10 +1,66 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.PhiFacts
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DerivG
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ByParts
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DTauFacts
+module
+
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.LinearAlgebra.Matrix.FiniteDimensional
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Lemma
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ByParts
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DTauFacts
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DerivG
 import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.DerivGA
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFacts
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.KFactsA
+public import Mathlib.Analysis.Calculus.ContDiff.Basic
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.MeasureTheory.Function.LocallyIntegrable
+
+@[expose] public section
 
 noncomputable section
 
@@ -55,7 +111,6 @@ lemma contDiffAt_phiM (μ : Fin n → ℤ) {z : Matrix (Fin n) (Fin n) ℂ} (hz 
   show ContDiffAt ℂ 1 (fun z => ∏ i : Fin n, lead ((i : ℕ) + 1) z ^ (-(μ i - muNext μ i))) z
   first
   | exact contDiffAt_prod fun i _ => InfKA.contDiffAt_zpow (contDiff_lead _).contDiffAt (hz i) _
-  | exact contDiffAt_finset_prod fun i _ => InfKA.contDiffAt_zpow (contDiff_lead _).contDiffAt (hz i) _
 
 lemma isOpen_omega' : IsOpen (OmegaSet n) := by
   have e : OmegaSet n = ⋂ i : Fin n, {z | lead ((i : ℕ) + 1) z ≠ 0} := by
@@ -64,7 +119,6 @@ lemma isOpen_omega' : IsOpen (OmegaSet n) := by
   rw [e]
   first
   | exact isOpen_iInter_of_finite fun i => isOpen_ne_fun (contDiff_lead _).continuous continuous_const
-  | exact isOpen_iInter fun i => isOpen_ne_fun (contDiff_lead _).continuous continuous_const
 
 lemma continuousOn_fderiv_phiM (μ : Fin n → ℤ) : ContinuousOn (fderiv ℂ (PhiM μ)) (OmegaSet n) := by
   exact ContDiffOn.continuousOn_fderiv_of_isOpen
@@ -76,9 +130,6 @@ lemma continuousOn_phiM (μ : Fin n → ℤ) : ContinuousOn (PhiM μ) (OmegaSet 
 lemma continuous_toMK' : Continuous fun k : KG ε => toMK k := by
   first
     | fun_prop
-    | exact continuous_subtype_val.comp continuous_subtype_val
-    | exact Units.continuous_val.comp (continuous_subtype_val.comp continuous_subtype_val)
-    | exact (continuous_subtype_val.comp continuous_subtype_val).comp continuous_subtype_val
     | continuity
 
 lemma continuous_toMK_inv : Continuous fun k : KG ε => toMK k⁻¹ := by
@@ -93,8 +144,6 @@ private lemma toMK_conjTranspose_mul_self (k : KG ε) : (toMK k)ᴴ * toMK k = 1
   obtain ⟨hU, -⟩ := h
   first
   | exact Unitary.star_mul_self_of_mem hU
-  | exact (Matrix.mem_unitaryGroup_iff').1 hU
-  | exact hU.1
 
 lemma toMK_inv_eq (k : KG ε) : toMK k⁻¹ = (toMK k)ᴴ := by
   have hu : star (toMK k) * toMK k = 1 := toMK_conjTranspose_mul_self k
@@ -121,8 +170,6 @@ lemma conj_mem_omega {x : Matrix (Fin n) (Fin n) ℂ} (hx : x.PosDef) (k : KG ε
   rw [dif_pos (show (i : ℕ) + 1 ≤ n from i.isLt)]
   first
   | exact (hP.submatrix (Fin.castLE_injective _)).det_pos.ne'
-  | exact (hP.submatrix (Fin.castLEEmb (show (i : ℕ) + 1 ≤ n from i.isLt))).det_pos.ne'
-  | exact (hP.submatrix _ (Fin.castLE_injective _)).det_pos.ne'
 
 def entryCLM (a b : Fin n) : Matrix (Fin n) (Fin n) ℂ →L[ℂ] ℂ :=
   LinearMap.toContinuousLinearMap
@@ -130,15 +177,13 @@ def entryCLM (a b : Fin n) : Matrix (Fin n) (Fin n) ℂ →L[ℂ] ℂ :=
       map_add' := fun _ _ => rfl
       map_smul' := fun _ _ => rfl }
 
-@[simp] lemma entryCLM_apply (a b : Fin n) (M : Matrix (Fin n) (Fin n) ℂ) : entryCLM a b M = M a b := rfl
-
 def DkL (T : KType ε Λ) (μ : Fin n → ℤ) (x : Matrix (Fin n) (Fin n) ℂ) (k : KG ε) :
     Matrix (Fin n) (Fin n) ℂ →ₗ[ℂ] (T.V →L[ℂ] T.V) where
   toFun Y := fderiv ℂ (PhiM μ) (toMK k⁻¹ * x * toMK k)
         (toMK k⁻¹ * x * toMK k * Y - Y * (toMK k⁻¹ * x * toMK k)) • (T.op k * projW T * T.op k⁻¹) +
       PhiM μ (toMK k⁻¹ * x * toMK k) • (T.op k * (T.dτ Y * projW T - projW T * T.dτ Y) * T.op k⁻¹)
   map_add' Y Y' := by
-    simp only [Matrix.mul_add, Matrix.add_mul, map_add, map_sub, add_mul, mul_add, sub_mul, mul_sub,
+    simp only [Matrix.mul_add, Matrix.add_mul, map_add (f := _), map_sub, add_mul, mul_add, sub_mul, mul_sub,
       add_smul, sub_smul, smul_add, smul_sub]
     abel
   map_smul' c Y := by
@@ -161,7 +206,6 @@ def Ek (T : KType ε Λ) (μ : Fin n → ℤ) (x : Matrix (Fin n) (Fin n) ℂ)
 lemma continuous_B (A : Matrix (Fin n) (Fin n) ℂ) : Continuous fun k : KG ε => toMK k⁻¹ * A * toMK k := by
   first
     | exact (continuous_toMK_inv.matrix_mul continuous_const).matrix_mul continuous_toMK'
-    | exact ((continuous_toMK_inv (ε := ε)).mul continuous_const).mul continuous_toMK'
 
 lemma continuous_Gint (T : KType ε Λ) (μ : Fin n → ℤ) {x : Matrix (Fin n) (Fin n) ℂ}
     (hx : x.PosDef) : Continuous (Gint T μ x) := by
@@ -200,7 +244,6 @@ lemma integrable_of_cont [CompactSpace (KG ε)] {E : Type*} [NormedAddCommGroup 
     | exact hf.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace f)
     | (unfold muK; exact integrableOn_univ.1 (hf.continuousOn.integrableOn_compact isCompact_univ))
     | (unfold muK; exact hf.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace f))
-    | exact integrableOn_univ.1 (hf.continuousOn.integrableOn_compact isCompact_univ)
 
 lemma integral_Ek_inK [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n → ℤ) {x : Matrix (Fin n) (Fin n) ℂ}
     (hx : x.PosDef) (φ : Matrix (Fin n) (Fin n) ℂ →L[ℂ] ℂ) (A : Matrix (Fin n) (Fin n) ℂ)
@@ -223,7 +266,7 @@ lemma integral_Ek_inK [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n → �
       (φ (Bk * Z - Z * Bk)) 0 :=
     (φ.restrictScalars ℝ).hasFDerivAt.comp_hasDerivAt (0 : ℝ) (dga_path Z Bk)
   have h := hφ.smul (hasDerivAt_Gint T μ hx k hZ γ hγ)
-  convert h using 1
+  convert (preTransparency := .reducible) h using 1
   · funext t
     congr 2
     rw [_root_.mul_inv_rev, hmk, hmk, hinv_t, hγ, hBk]
@@ -239,7 +282,7 @@ lemma Ek_decomp (T : KType ε Λ) (μ : Fin n → ℤ) (x : Matrix (Fin n) (Fin 
         Complex.I • (toMK k⁻¹ * A * toMK k * Q - Q * (toMK k⁻¹ * A * toMK k)) := by
     simp only [Matrix.mul_add, Matrix.add_mul, Matrix.mul_smul, Matrix.smul_mul, smul_sub]
     abel
-  simp only [Ek, h1, map_add, map_smul, smul_eq_mul]
+  simp only [Ek, h1, map_add (f := _), map_smul, smul_eq_mul]
   first
   | module
   | (simp only [smul_add, add_smul, smul_smul, mul_comm]; abel)
@@ -268,23 +311,17 @@ lemma integral_Ek_block [CompactSpace (KG ε)] (T : KType ε Λ) (μ : Fin n →
     · intro a b h
       first
       | simp only [Matrix.smul_apply, Matrix.sub_apply, hM a b h, hMh a b h, sub_zero, smul_zero]
-      | simp [hM a b h, hMh a b h]
     · ext a b
       first
       | (simp [Matrix.conjTranspose_apply]; ring)
       | (simp [Matrix.conjTranspose_apply, Complex.star_def]; ring)
-      | simp [Matrix.conjTranspose_apply]
-      | simp [Matrix.conjTranspose_apply, Complex.star_def]
     · intro a b h
       first
       | simp only [Matrix.smul_apply, Matrix.add_apply, hM a b h, hMh a b h, add_zero, smul_zero]
-      | simp [hM a b h, hMh a b h]
     · ext a b
       first
       | (simp [Matrix.conjTranspose_apply, Complex.star_def]; ring)
       | (simp [Matrix.conjTranspose_apply]; ring)
-      | simp [Matrix.conjTranspose_apply, Complex.star_def]
-      | simp [Matrix.conjTranspose_apply]
     · ext a b
       simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.sub_apply, smul_eq_mul]
       linear_combination (M a b + Mᴴ a b) / 2 * Complex.I_sq

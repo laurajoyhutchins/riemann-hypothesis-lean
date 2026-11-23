@@ -1,5 +1,49 @@
-import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.PieceGood
-import Development.WeilBound.CoreStatements.AutomorphicKernels.BernsteinUnitaryProducts.BernsteinTheoremA.FrobeniusReciprocity.SupportedInIffOfFrob
+module
+
+public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.TwistedPieces.FiniteDimensionalDescent.PieceGood
+public import Development.WeilBound.CoreStatements.AutomorphicKernels.BernsteinUnitaryProducts.BernsteinTheoremA.FrobeniusReciprocity.SupportedInIffOfFrob
+public import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -21,8 +65,8 @@ def re {d r : ℕ} (γ : Fin d → Fin r → k) (s : Fin r → Matrix (Fin N) (F
     Matrix (Fin N) (Fin N) k :=
   ∑ l, ∑ j, γ l j • (s j * ε ^ (l : ℕ))
 
-open Classical in
 
+open Classical in
 structure SData (Z : Subalgebra k (Matrix (Fin N) (Fin N) k)) (χ : k[X]) (q : ℕ) where
   r : ℕ
   d : ℕ
@@ -81,10 +125,6 @@ def PieceTop : Prop :=
 def Dich : Prop :=
   ∀ (N q : ℕ) (Z : Subalgebra k (Matrix (Fin N) (Fin N) k)), CR Z → ∀ (χ : k[X]) (D : SData Z χ q) τ,
     ∀ x₀ ∈ piece D τ, mu (Sx D x₀) < mu Z ∨ ∃ c ∈ Z, IsNilpotent (x₀ - c)
-
-def MuConst : Prop :=
-  ∀ (N q : ℕ) (Z : Subalgebra k (Matrix (Fin N) (Fin N) k)), CR Z → ∀ (χ : k[X]) (D : SData Z χ q) τ,
-    ∀ x ∈ piece D τ, ∀ x' ∈ piece D τ, mu (Sx D x) = mu (Sx D x')
 
 def Transfer : Prop :=
   PositivityTheory.PfBern.Frob.FrobeniusReciprocity → ∀ (p : ℕ) [Fact p.Prime] [CharP k p], PositivityTheory.RgUd.T.Desc.SLF.Unimod (k := k) →

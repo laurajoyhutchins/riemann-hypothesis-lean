@@ -1,10 +1,53 @@
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccATensWordMem
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccBLowKShiftF
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceEstimates.ImageLeClosGen
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.AnyDec
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.DataGenSubIrred
-import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.HasGelfandCharSigLam
+module
+
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.ProjectionCommutesDerivedAction
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccATensWordMem
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.BochnerInequality.LayerBasic
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.RregRep
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.ExistenceG2.SigLamKTypeBounds
+public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceEstimates.ImageLeClosGen
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.RigidityTheorems.IsInLieAlgebraISmulAddConjTranspose
+
+@[expose] public section
 
 noncomputable section
 
@@ -49,53 +92,16 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] {ε : Fin 
 theorem layer_k_stable (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {V : Submodule ℂ D}
     (hVs : IsKStableSub ε E V) (hVK : ∀ k ∈ Kset ε, ∀ v ∈ V, ∃ w ∈ V, (w : H) = σ k v) :
     ∀ j, ∀ k ∈ Kset ε, ∀ x ∈ layer ε E V j, ∃ y ∈ layer ε E V j, (y : H) = σ k x := by
-  intro j
-  induction j with
-  | zero => exact hVK
-  | succ j ih =>
-    intro k hk
-    let Tk : Submodule ℂ D :=
-      { carrier := {x | ∃ y ∈ layer ε E V (j + 1), (y : H) = σ k x}
-        add_mem' := by
-          rintro x x' ⟨y, hy, e⟩ ⟨y', hy', e'⟩
-          exact ⟨y + y', Submodule.add_mem _ hy hy', by simp [e, e']⟩
-        zero_mem' := ⟨0, Submodule.zero_mem _, by simp⟩
-        smul_mem' := by
-          rintro c x ⟨y, hy, e⟩
-          exact ⟨c • y, Submodule.smul_mem _ c hy, by simp [e]⟩ }
-    suffices hle : layer ε E V (j + 1) ≤ Tk from fun x hx => hle hx
-    show layer ε E V j ⊔ _ ≤ Tk
-    refine sup_le (fun x hx => ?_) (iSup_le fun a => iSup_le fun b => iSup_le fun _ => ?_)
-    · obtain ⟨y, hy, e⟩ := ih k hk x hx
-      exact ⟨y, layer_le_succ j hy, e⟩
-    · rw [Submodule.map_le_iff_le_comap]
-      intro x hx
-      obtain ⟨y, hy, e⟩ := ih k hk x hx
-      have h := derived_adK hσ hD hk (Matrix.single a b (1 : ℂ)) x
-      rw [tset_actM_single] at h
-      have hyx : (⟨σ k (x : H), hD.kStable k hk x x.2⟩ : D) = y := Subtype.ext e.symm
-      rw [hyx] at h
-      refine ⟨(actM E (k * Matrix.single a b 1 * kᴴ)) y, ?_, h.symm⟩
-      simp only [actM, LinearMap.sum_apply, LinearMap.smul_apply]
-      exact Submodule.sum_mem _ fun a' _ => Submodule.sum_mem _ fun b' _ =>
-        Submodule.smul_mem _ _ (apply_mem_layer_succ hD.glRep hVs a' b' hy)
+  apply ReciprocityTheory.ChartRestriction.DS.layer_k_stable <;> assumption
 
 theorem tensor_generated_mem_layer (hE : IsGlRep E) {V : Submodule ℂ D} (hVs : IsKStableSub ε E V)
     {f : Fin n → D} (hf : f ∈ tensSub (genSub E V)) : ∃ j, ∀ c, f c ∈ layer ε E V j := by
-  rw [tset_mem] at hf
-  have hdir : Directed (· ≤ ·) (fun k => layer ε E V k) :=
-    fun i j => ⟨max i j, layer_mono (le_max_left i j), layer_mono (le_max_right i j)⟩
-  have hc : ∀ c, ∃ j, f c ∈ layer ε E V j := fun c => by
-    have := hf c
-    rw [genSub_eq_iSup_layer hE hVs] at this
-    exact (Submodule.mem_iSup_of_directed _ hdir).mp this
-  choose j hj using hc
-  exact ⟨Finset.univ.sup j, fun c => layer_mono (Finset.le_sup (Finset.mem_univ c)) (hj c)⟩
+  apply ReciprocityTheory.ChartRestriction.DS.tensor_generated_mem_layer <;> assumption
 
 theorem occurrence_coef_add (dual : Bool) (η f f' : Fin n → H) :
     occCoef dual σ η (f + f') = occCoef dual σ η f + occCoef dual σ η f' := by
   funext g
-  simp only [occCoef, tensGrp, Pi.add_apply, map_add, smul_add, Finset.sum_add_distrib, inner_add_right]
+  simp only [occCoef, tensGrp, Pi.add_apply, map_add (f := _), smul_add, Finset.sum_add_distrib, inner_add_right]
 
 theorem occurrence_coef_smul (dual : Bool) (η f : Fin n → H) (c : ℂ) :
     occCoef dual σ η (c • f) = c • occCoef dual σ η f := by

@@ -1,4 +1,47 @@
-import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusMemPullbackOfInvariant
+module
+
+public import Formalism.SharpRestriction.LevelLetterCocycles.BaseChangePreservesUnitaryOf
+public import Formalism.SharpRestriction.LevelLetterCocycles.CrystallineLiftingInputs
+public import Formalism.SharpRestriction.LevelLetterCocycles.ElementDenominator
+public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusMemPullbackOfInvariant
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -174,13 +217,13 @@ theorem extDataOne_exists [NeZero n] (W : LocWach PD LL O v n)
     have htΔ : ∀ δ ∈ W.DelF, W.γD T δ t = t := fun δ hδ => hinj (by rw [W.map_γ, ht, hw.2 δ hδ])
     refine ⟨t, htN, htΔ, hinj ?_⟩
     rw [pow_one, liftb_map_smul W ι W.π₀ t, ht, ← hwe]
-    simp only [natCast_pow_smul_eq_algebra W T N, map_add, map_sub, liftb_map_smul, hγdef, W.map_γ, hz', hμ i,
+    simp only [natCast_pow_smul_eq_algebra W T N, map_add (f := _), map_sub, liftb_map_smul, hγdef, W.map_γ, hz', hμ i,
       gammaD_semilinear, gammaA_natCast_pow, gammaA_letter_idempotent, smul_sub]
     abel
 
   have hw4 : W.map ι (((PD.p : ℕ) : O) ^ N • ((letE i : LetA O n) • y) + W.φD T (μ (i - 1)) - μ i) =
       W.φD Y (ε (i - 1)) - ε i := by
-    simp only [natCast_pow_smul_eq_algebra W T N, map_add, map_sub, liftb_map_smul, W.map_φ, hy, hμ, liftb_φ_smul,
+    simp only [natCast_pow_smul_eq_algebra W T N, map_add (f := _), map_sub, liftb_map_smul, W.map_φ, hy, hμ, liftb_φ_smul,
       frobeniusA_natCast_pow, wmap_φA_letE, smul_sub]
     abel
   have h4 : qp W ^ Mi i • (((PD.p : ℕ) : O) ^ N • ((letE i : LetA O n) • y) + W.φD T (μ (i - 1)) - μ i) ∈
@@ -201,7 +244,7 @@ theorem extDataOne_exists [NeZero n] (W : LocWach PD LL O v n)
     have hβz : β • W.φD Y (ε (i - 1)) = 0 := by
       have hπ0 : W.map π (((PD.p : ℕ) : LetA O n) ^ N • (qp W ^ hi i • (W.φD Y (ε (i - 1)) - ε i))) = 0 := by
         rw [← hw4, ← liftb_map_smul, ← liftb_map_smul, hπι]
-      rw [hβe, map_add, hπι, zero_add, liftb_map_smul, W.map_φ, hεπ'' (i - 1), liftb_φ_smul,
+      rw [hβe, map_add (f := _), hπι, zero_add, liftb_map_smul, W.map_φ, hεπ'' (i - 1), liftb_φ_smul,
         frobeniusA_natCast_pow, frobenius_idempotent_shift, hφe', smul_smul, smul_smul] at hπ0
       by_cases he'0 : e' = 0
       · rw [hβ0 he'0, zero_smul]

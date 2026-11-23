@@ -1,6 +1,64 @@
-import Mathlib
-import Formalism.MeanHeightDescent.MuMaxMinkowski
-import Formalism.HarderNarasimhan.ShiftInvariance
+module
+
+public import Formalism.MeanHeightDescent.MuMaxMinkowski
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DiscreteSpanOfLinIndep
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.HtImage
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.MuChar
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SatBasic
+public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.SizeMu
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Real
+import Mathlib.Analysis.CStarAlgebra.Module.Constructions
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Matrix.Hermitian
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open Module NumberField
 
@@ -17,10 +75,11 @@ variable {K : Type} [Field K] [NumberField K] [StarRing K]
 
 theorem norm_herm_idem_le (R : Matrix ι ι ℂ) (h1 : R.IsHermitian) (h2 : R * R = R)
     (z : EuclideanSpace ℂ ι) : ‖Matrix.toEuclideanLin R z‖ ≤ ‖z‖ := by
-  have hs : (Matrix.toEuclideanLin R).IsSymmetric := (Matrix.isHermitian_iff_isSymmetric).1 h1
+  have hs : (Matrix.toEuclideanLin R).IsSymmetric := Matrix.isSymmetric_toEuclideanLin_iff.mpr h1
   have hTT : ∀ w, Matrix.toEuclideanLin R (Matrix.toEuclideanLin R w) = Matrix.toEuclideanLin R w := by
     intro w
-    rw [Matrix.toEuclideanLin_eq_toLin, ← LinearMap.comp_apply, ← Matrix.toLin_mul, h2]
+    change Matrix.toLpLin 2 2 R (Matrix.toLpLin 2 2 R w) = Matrix.toLpLin 2 2 R w
+    rw [← LinearMap.comp_apply, ← Matrix.toLpLin_mul_same, h2]
   set y := Matrix.toEuclideanLin R z with hy
   have h3 : @inner ℂ _ _ y y = @inner ℂ _ _ z y := by
     have h4 := hs z y
@@ -361,7 +420,7 @@ theorem log_htQ (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ) (h
   simp only [logDisc]
   ring
 
-theorem rk_mul_mu [IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
+theorem rk_mul_mu [_root_.NumberField.IsTotallyComplex K] (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
     (hX : ∀ v, IsUnit (X v).det) (L : Submodule (𝓞 K) V) (hL : L.FG) :
     (rkK L : ℝ) * muDef b X L = -Real.log (ht b X L) / (nPl K : ℝ) := by
   by_cases h0 : L = ⊥
@@ -416,7 +475,7 @@ theorem good_bad_split : GoodBadCut := by
       Finset.prod_nonneg fun v _ => pow_nonneg (norm_nonneg _) _
     have hP : ∏ v, opNormAt b X b X v φ ^ (2 * rkK I) ≤ (g : ℝ) ^ (nPl K * (2 * rkK I)) := by
       calc ∏ v, opNormAt b X b X v φ ^ (2 * rkK I) ≤ ∏ _v : InfinitePlace K, (g : ℝ) ^ (2 * rkK I) :=
-            Finset.prod_le_prod (fun v _ => pow_nonneg (norm_nonneg _) _) fun v _ =>
+            Finset.prod_le_prod₀ (fun v _ => pow_nonneg (norm_nonneg _) _) fun v _ =>
               pow_le_pow_left₀ (norm_nonneg _) (opNormAt_le b X hX e g v hee (hsa v)) _
         _ = (g : ℝ) ^ (nPl K * (2 * rkK I)) := by
             rw [Finset.prod_const, ← pow_mul, nPl, Finset.card_univ, mul_comm]

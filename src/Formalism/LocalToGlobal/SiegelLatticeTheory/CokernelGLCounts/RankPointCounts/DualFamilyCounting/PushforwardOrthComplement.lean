@@ -1,8 +1,59 @@
-import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SameGenusFixPushIff
-import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LamGEqOneOfOrtho
+module
+
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.ExtensionIdentityOfMemCompl
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.NondegenerateOnOrthCompl
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
+public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsIntegralLatOfForall
 import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsUnimodularAtIffVd
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LamGEqOneOfOrtho
 import Formalism.HermitianLattices.HermitianLatticesProofs.AutFinite
 import Formalism.HermitianLattices.HermitianLatticesProofs.MassBasic
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.DualEquivSymmApply
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.LinearIndependentOrth
+public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.DualFamilyCounting.SameGenusFixPushIff
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 open NumberField Module
 
@@ -32,7 +83,7 @@ theorem isTotPosDef_formOn (hpos : PosDefOn h (orthK h U)) :
 
 theorem jordan_data (h1 : JordanExists) (h5 : AlphaDisc) (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F)
     (hs : h.IsSymm) (hnd : Nondeg h) (hc : IsCompl U (orthK h U)) (hpos : PosDefOn h (orthK h U))
-    (T : Submodule (𝓞 K) ↥(orthK h U)) (hT : Submodule.IsLattice K T)
+    (T : Submodule (𝓞 K) ↥(orthK h U)) (hT : Submodule.IsFullLattice K T)
     (hTi : Formalism.HermitianLatticesTheory.IsIntegralLat (formOn h (orthK h U)) T) (𝔭 : Ideal (𝓞 F)) (h𝔭 : 𝔭.IsMaximal) :
     vJ h (orthK h U) (push _ T) 𝔭 = vd (formOn h (orthK h U)) T 𝔭 ∧
     alphaL (formOn h (orthK h U)) T 𝔭 = (discAut h (orthK h U) (push _ T) 𝔭 : ℝ) *
@@ -46,8 +97,8 @@ theorem jordan_data (h1 : JordanExists) (h5 : AlphaDisc) (hK : Formalism.Hermiti
         alphaStd K 𝔭 (finrank K ↥(orthK h U) - cJof 𝔭 a) := by
     intro b a hb
     have hb' := isJordanIn_top h𝔭.isPrime hb
-    have e1 := (h1 K F ↥(orthK h U) hK hF (formOn h (orthK h U)) hWs).2 T hT 𝔭 h𝔭 _ _ hb'
-    have e2 := h5 K F ↥(orthK h U) hK hF (formOn h (orthK h U)) hWs hWd T hT hTi 𝔭 h𝔭 _ _ hb'
+    have e1 := (h1 K F ↥(orthK h U) hK hF (formOn h (orthK h U)) hWs).2 T hT.toIsLattice 𝔭 h𝔭 _ _ hb'
+    have e2 := h5 K F ↥(orthK h U) hK hF (formOn h (orthK h U)) hWs hWd T hT.toIsLattice hTi 𝔭 h𝔭 _ _ hb'
     rw [vJof_cast] at e1
     rw [cJof_cast, ← discAut_push h𝔭.isPrime] at e2
     exact ⟨e1.symm, e2⟩
@@ -75,14 +126,42 @@ theorem jordan_data (h1 : JordanExists) (h5 : AlphaDisc) (hK : Formalism.Hermiti
 theorem mem_of_isLatIn {X : Submodule K V} {T : Submodule (𝓞 K) V} (hT : IsLatIn X T) :
     ∀ v ∈ T, v ∈ X := fun _ hv => hT.2 ▸ Submodule.subset_span hv
 
+theorem full_of_sameGenusFix {A B : Submodule (𝓞 K) ↥(orthK h U)}
+    (hA : Submodule.IsFullLattice K A) (hB : Submodule.IsLattice K B)
+    (hg : SameGenusFix (F := F) h U (push _ A) (push _ B))
+    (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F)
+    (hs : h.IsSymm) (hc : IsCompl U (orthK h U)) : Submodule.IsFullLattice K B := by
+  obtain ⟨𝔭, h𝔭⟩ := Ideal.exists_maximal (α := 𝓞 F)
+  have hg' := (sameGenusFix_push_iff hK hF hs hc A B).1 hg
+  rw [GoodGenusOrbits.sameGenus_iff (F := F) hK hF A B] at hg'
+  obtain ⟨g, hg, he⟩ := hg' ⟨𝔭, h𝔭⟩
+  have hspan : ∀ x ∈ A, g x ∈ Submodule.span K (B : Set ↥(orthK h U)) := by
+    intro x hx
+    apply Formalism.L2.SG.Pf.GluingBases.locF_subset_span h𝔭.isPrime B
+    rw [← he]
+    exact ⟨x, LocF.le_locF 𝔭 A hx, rfl⟩
+  refine { toIsLattice := hB, span_eq_top := ?_ }
+  apply top_unique
+  intro x _
+  have hx : g.symm x ∈ Submodule.span K (A : Set ↥(orthK h U)) := by rw [hA.span_eq_top]; trivial
+  have hk : ∀ y ∈ Submodule.span K (A : Set ↥(orthK h U)), g y ∈ Submodule.span K (B : Set ↥(orthK h U)) := by
+    intro y hy
+    induction hy using Submodule.span_induction with
+    | mem y hy => exact hspan y hy
+    | zero => simp
+    | add y z hy hz ihy ihz => simpa using (Submodule.add_mem _ ihy ihz)
+    | smul a y hy ih => simpa using (Submodule.smul_mem _ a ih)
+  simpa using hk (g.symm x) hx
+
 theorem genusMassW_of (h1 : JordanExists) (h5 : AlphaDisc) : GenusMassW := by
   intro K F V _ _ _ _ _ _ _ _ _ _ _ hK hF h hs hnd U hc hpos T₀ hT₀ hT₀i c hmc
   obtain ⟨T', rfl⟩ : ∃ T', push (orthK h U) T' = T₀ := ⟨_, push_pull (mem_of_isLatIn hT₀)⟩
-  have hT' : Submodule.IsLattice K T' := (isLatIn_push_iff_isLattice T').1 hT₀
+  have hT' : Submodule.IsFullLattice K T' := (isLatIn_push_iff_isLattice T').1 hT₀
   have hT'i := (isIntegralLat_push T').1 hT₀i
   have hWs := formOn_isSymm hs (orthK h U)
   have hWd := isTotPosDef_formOn hpos
-  have hMB := Formalism.HermitianLatticesTheory.massBasic K ↥(orthK h U) (formOn h (orthK h U)) hWs (StabilizerLattices.trace_pos hWd) T' hT'
+  have hMB := Formalism.HermitianLatticesTheory.massBasic K ↥(orthK h U) (formOn h (orthK h U)) hWs
+    (StabilizerLattices.trace_pos hWd) T' hT'
   obtain ⟨s', hs'⟩ := hMB.1
   have hmass := hMB.2.1 s' hs'
   have hMpos := hMB.2.2
@@ -119,6 +198,8 @@ theorem genusMassW_of (h1 : JordanExists) (h5 : AlphaDisc) : GenusMassW := by
         vd (formOn h (orthK h U)) T' 𝔭.1 = 0 := fun 𝔭 h𝔭 => by
       rw [hZdef, Set.Finite.mem_toFinset] at h𝔭
       exact not_not.mp h𝔭
+    have hlam₀ : ∀ 𝔭 ∉ Z, lamP (formOn h (orthK h U)) T' 𝔭.1 = 1 :=
+      fun 𝔭 h𝔭 => localMassFactor_of_valuation_eq_zero hK hF hWs hWd hT' hT'i 𝔭.2 (hout 𝔭 h𝔭)
     have hjd := fun 𝔭 : {𝔭 : Ideal (𝓞 F) // 𝔭.IsMaximal} =>
       jordan_data h1 h5 hK hF hs hnd hc hpos T' hT' hT'i 𝔭.1 𝔭.2
     have hlam : ∀ 𝔭 : {𝔭 : Ideal (𝓞 F) // 𝔭.IsMaximal},
@@ -133,7 +214,7 @@ theorem genusMassW_of (h1 : JordanExists) (h5 : AlphaDisc) : GenusMassW := by
     have hD1 : ∀ 𝔭 ∉ Z, discAut h (orthK h U) (push _ T') 𝔭.1 = 1 := by
       intro 𝔭 h𝔭
       have hv := hout 𝔭 h𝔭
-      have hl := localMassFactor_of_valuation_eq_zero hK hF hWs hWd hT' hT'i 𝔭.2 hv
+      have hl := hlam₀ 𝔭 h𝔭
       rw [hlam 𝔭, hv, (hjd 𝔭).2.2 hv, Nat.sub_zero, mul_zero, pow_zero, mul_one] at hl
       have hA := (alphaStd_pos hK hF 𝔭.2 (finrank K ↥(orthK h U))).ne'
       have hDA : (discAut h (orthK h U) (push _ T') 𝔭.1 : ℝ) *
@@ -148,7 +229,7 @@ theorem genusMassW_of (h1 : JordanExists) (h5 : AlphaDisc) : GenusMassW := by
         ∏ 𝔭 ∈ Z, discAut h (orthK h U) (push _ T') 𝔭.1 := tprod_eq_prod hD1
     have e2 : lamG F (formOn h (orthK h U)) T' = ∏ 𝔭 ∈ Z, lamP (formOn h (orthK h U)) T' 𝔭.1 := by
       unfold lamG
-      exact tprod_eq_prod fun 𝔭 h𝔭 => localMassFactor_of_valuation_eq_zero hK hF hWs hWd hT' hT'i 𝔭.2 (hout 𝔭 h𝔭)
+      exact tprod_eq_prod hlam₀
     have e3 : nM F h (orthK h U) (push _ T') =
         ∏ 𝔭 ∈ Z, (Ideal.absNorm 𝔭.1 : ℝ) ^ vd (formOn h (orthK h U)) T' 𝔭.1 := by
       unfold nM

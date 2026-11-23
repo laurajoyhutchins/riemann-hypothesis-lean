@@ -1,8 +1,49 @@
-import Mathlib
-import Formalism.LocalToGlobal.BesselHermitianTheta.TiedKfin
-import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasWeil
-import Formalism.LocalToGlobal.BesselHermitianTheta.LemmasSign
-import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.FockOrthogonalDecomposition
+module
+
+public import Formalism.LocalToGlobal.BesselHermitianTheta.TiedKfin
+public import Development.AbelianVarietyTheory.BlockTheory.HeightDefect.FockOrthogonalDecomposition
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.PicardGroup
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -47,7 +88,7 @@ def piW (θ : InfFam D) (V W : HSp D) : WA V W →+ RW V W where
   map_add' x y := by
     funext τ i j
     show θ τ (infPart D (x i j + y i j)) = θ τ (infPart D (x i j)) + θ τ (infPart D (y i j))
-    rw [RingHom.map_add, RingHom.map_add]
+    rw [RingHom.map_add (f := _), RingHom.map_add (f := _)]
 
 def iotaW (σ : (D.what₂.Tau → ℂ) →+ AE D) (V W : HSp D) : RW V W →+ WA V W where
   toFun z := Matrix.of fun i j => σ fun τ => z τ i j
@@ -64,7 +105,7 @@ theorem symplC_add_left (V W : HSp D) (τ : D.what₂.Tau) (x x' y : WC V W) :
 theorem symplC_add_right (V W : HSp D) (τ : D.what₂.Tau) (x y y' : WC V W) :
     symplC V W τ x (y + y') = symplC V W τ x y + symplC V W τ x y' := by
   unfold symplC hC
-  split_ifs <;> simp only [Matrix.add_apply, mul_add, add_mul, map_add, Finset.sum_add_distrib, Complex.add_re]
+  split_ifs <;> simp only [Matrix.add_apply, mul_add, add_mul, map_add (f := _), Finset.sum_add_distrib, Complex.add_re]
 
 theorem hC_smul_right (V W : HSp D) (τ : D.what₂.Tau) (c : ℂ) (x y : WC V W) :
     hC V W τ x (c • y) = c * hC V W τ x y := by
@@ -155,6 +196,7 @@ theorem continuous_comp (hθ : IsInfFam θ) (τ : D.what₂.Tau) : Continuous fu
       θ τ (fstA D.host.F (B.coord i z) ⊗ₜ[D.host.F] (1 : D.host.E)) * tauE D τ (b i) := by
     funext z
     conv_lhs => rw [← B.sum_repr z]
+
     rw [show ∀ y, θ τ (infPart D y) = ((θ τ).comp (infPart D)).toAddMonoidHom y from fun _ => rfl, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     show θ τ (infPart D _) = _
@@ -162,7 +204,7 @@ theorem continuous_comp (hθ : IsInfFam θ) (τ : D.what₂.Tau) : Continuous fu
       Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
     rfl
   rw [he]
-  refine continuous_finset_sum _ fun i _ => Continuous.mul ?_ continuous_const
+  refine continuous_finsetSum _ fun i _ => Continuous.mul ?_ continuous_const
   have h1 : Continuous (B.coord i) := IsModuleTopology.continuous_of_linearMap _
   have h2 : Continuous (fstA D.host.F) := continuous_fst
   exact (hθ τ).2.comp (h2.comp h1)
@@ -194,7 +236,7 @@ theorem comp_cA (hθ : IsInfFam θ) (τ : D.what₂.Tau) (z : AE D) :
     θ τ (infPart D (cA D z)) = starRingEnd ℂ (θ τ (infPart D z)) := by
   induction z using TensorProduct.induction_on with
   | zero => simp only [RingHom.map_zero]
-  | add a b ha hb => simp only [RingHom.map_add, ha, hb]
+  | add a b ha hb => simp only [RingHom.map_add (f := _), ha, hb]
   | tmul a x =>
     have e : ∀ y : D.host.E, fstA D.host.F a ⊗ₜ[D.host.F] y =
         (fstA D.host.F a ⊗ₜ[D.host.F] (1 : D.host.E)) * ((1 : Ainf D.host.F) ⊗ₜ[D.host.F] y) := by
@@ -210,9 +252,6 @@ def Rel (V : HSp D) (τ : D.what₂.Tau) (A : Matrix (Fin (V.sig (tauE D τ)).1 
     (s : Module.End D.host.E V.V) : Prop :=
   Aᴴ * Formalism.UG.Jpq (V.sig (tauE D τ)).1 (V.sig (tauE D τ)).2 * A = gramAt D V τ ∧
     Formalism.UG.Jpq (V.sig (tauE D τ)).1 (V.sig (tauE D τ)).2 * A = A * thAt V τ s
-
-def Adapted (V : HSp D) (b : Module.Basis (Fin V.rank) D.host.E V.V) (s : InvFam V) : Prop :=
-  (∀ i j, i ≠ j → V.hT (b i) (b j) = 0) ∧ ∀ τ i, s τ (b i) = b i ∨ s τ (b i) = -b i
 
 end GlobalTheory.FockCompare
 

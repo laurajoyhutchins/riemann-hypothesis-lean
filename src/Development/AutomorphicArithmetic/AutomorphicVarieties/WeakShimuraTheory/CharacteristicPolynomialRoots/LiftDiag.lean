@@ -1,7 +1,45 @@
-import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.CharacteristicPolynomialRoots.LeKerPt
-import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
-import Development.AutomorphicArithmetic.AutomorphicVarieties.CommutativeAlgebraHeight.DGmap
-import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.CopNormLt
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.WeakShimuraTheory.CharacteristicPolynomialRoots.LeKerPt
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.AlgebraTools.DeterminantRepresentations.RepApi
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.SymplecticGSp4.CopNormLt
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+
+@[expose] public section
 
 open NumberField IsDedekindDomain Formalism.ConjugateSelfDual Formalism.HC Formalism.MainNotions.N ReciprocityTheory.Gal IsLocalRing Polynomial UpperTheory.V UpperTheory.V.Base UpperTheory.V.Alg UpperTheory.V.HV UpperTheory.V.GradeZeroInterpolatingElement UpperTheory.V.Ws GlobalTheory.GalOfCusp
 
@@ -17,11 +55,16 @@ private theorem chi_map_eq_map_chi_mapRingHom {n : ℕ} {B K Γ : Type} [CommRin
       MonoidAlgebra.single 1 X - MonoidAlgebra.mapRingHom Γ C (MonoidAlgebra.mapRingHom Γ f z) := by
     rw [map_sub, MonoidAlgebra.mapRingHom_single]
     congr 1
-    · simp [φ]
+    · congr 1
+      change Polynomial.map f X = X
+      simp only [Polynomial.map_X]
     · induction z using MonoidAlgebra.induction_linear with
       | zero => simp
-      | add a b ha hb => simp only [map_add, ha, hb]
-      | single g b => simp [φ, MonoidAlgebra.mapRingHom_single]
+      | add a b ha hb => simp only [map_add (f := _), ha, hb]
+      | single g b =>
+        simp only [MonoidAlgebra.mapRingHom_single]
+        change MonoidAlgebra.single g ((C b).map f) = MonoidAlgebra.single g (C (f b))
+        rw [Polynomial.map_C]
   have h := D.nat B[X] K[X] φ (MonoidAlgebra.single 1 X - MonoidAlgebra.mapRingHom Γ C z)
   rw [e] at h
   exact h.symm
@@ -33,7 +76,7 @@ private theorem chi_ofRep_eq_charpoly_lift {n : ℕ} {K Γ : Type} [CommRing K] 
       (C : K →+* K[X]).mapMatrix (MonoidAlgebra.lift K (Matrix (Fin n) (Fin n) K) Γ σ w) := by
     induction w using MonoidAlgebra.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | single g b =>
       simp only [W.GDet.repAlg, MonoidAlgebra.mapRingHom_single, MonoidAlgebra.lift_single]
       ext i j
@@ -56,7 +99,7 @@ private theorem chi_map {n : ℕ} {O B K Γ : Type} [CommRing O] [CommRing B] [C
       MonoidAlgebra.mapRingHom Γ (algebraMap O K) y := by
     induction y using MonoidAlgebra.induction_linear with
     | zero => simp
-    | add a b ha hb => simp only [map_add, ha, hb]
+    | add a b ha hb => simp only [map_add (f := _), ha, hb]
     | single g b => simp [MonoidAlgebra.mapRingHom_single]
   rw [e, MonoidAlgebra.lift_mapRingHom_algebraMap]
 
@@ -67,10 +110,10 @@ private theorem lift_diag {n : ℕ} {O K Γ : Type} [CommRing O] [CommRing K] [A
   induction y using MonoidAlgebra.induction_linear with
   | zero => simp
   | add a b ha hb =>
-    rw [map_add, ha, hb, Matrix.diagonal_add]
+    rw [map_add (f := _), ha, hb, Matrix.diagonal_add]
     congr 1
     funext i
-    rw [map_add]
+    rw [map_add (f := _)]
   | single g b =>
     ext i j
     simp [W.diagRep, MonoidAlgebra.lift_single, Matrix.diagonal_apply]
@@ -134,7 +177,7 @@ private theorem near {n : ℕ} {B K : Type} [CommRing B] [NormedField K] [IsUltr
   have : (1 : ℝ) ≤ ‖∏ i, (z - x (a i))‖ := by
     rw [norm_prod]
     calc (1 : ℝ) = ∏ _i : Fin n, (1 : ℝ) := by simp
-      _ ≤ ∏ i, ‖z - x (a i)‖ := Finset.prod_le_prod (fun _ _ => zero_le_one) (fun i _ => hne i)
+      _ ≤ ∏ i, ‖z - x (a i)‖ := Finset.prod_le_prod₀ (fun _ _ => zero_le_one) (fun i _ => hne i)
   linarith
 
 theorem UpperTheory.V.Ws.Pu.ptRed :

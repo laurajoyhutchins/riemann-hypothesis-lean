@@ -1,7 +1,62 @@
-import Mathlib
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousDistribHaarCharUnits
-import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HaarModulusTensorEqModulusNorm
+module
+
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.DisjointSpanPerpLat
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.T2SpaceNumberFieldInfiniteAdeles
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ContinuousDistribHaarCharUnits
+public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.HaarModulusTensorEqModulusNorm
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.LcscAdelicUnitaryGroup
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.SimpleRing.Principal
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.HaveILetI
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
+
 open NumberField IsDedekindDomain MeasureTheory Topology Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes GlobalTheory.GaugeEx
 open scoped TensorProduct NNReal ENNReal
 
@@ -27,6 +82,7 @@ theorem Scales.comp {μ : Measure X} {f g : X → X} {m n : ℝ≥0} (hf : Scale
   have e : μ.map (Φ.trans Ψ) = (μ.map Φ).map Ψ :=
     (Measure.map_map Ψ.continuous.measurable Φ.continuous.measurable).symm
   rw [e, mul_comm, mul_smul, ← Measure.map_smul, ← h1, ← h2]
+  exact Ψ.continuous.measurable.aemeasurable
 
 theorem Scales.prod [SecondCountableTopology X] [SecondCountableTopology Y]
     {μ : Measure X} {ν : Measure Y} [SFinite μ] [SFinite ν] {f : X → X} {g : Y → Y} {m n : ℝ≥0}
@@ -90,56 +146,28 @@ theorem conj_conj (h : IsCMExt F E σ) (e : E) : σ (σ e) = e := by
 
 theorem exists_of_conj_eq (h : IsCMExt F E σ) (e : E) (he : σ e = e) :
     ∃ f, algebraMap F E f = e := by
-  haveI := Subalgebra.isSimpleOrder_of_finrank h.2.2.1
-  rcases eq_bot_or_eq_top (AlgHom.equalizer σ (AlgHom.id F E)) with h0 | h0
-  · have : e ∈ AlgHom.equalizer σ (AlgHom.id F E) := he
-    rw [h0, Algebra.mem_bot] at this
-    exact this
-  · exfalso
-    obtain ⟨τ⟩ : Nonempty (E →+* ℂ) := inferInstance
-    haveI := h.2.1
-    refine IsTotallyComplex.complexEmbedding_not_isReal τ ?_
-    rw [ComplexEmbedding.isReal_iff]
-    ext x
-    have hx : x ∈ AlgHom.equalizer σ (AlgHom.id F E) := h0 ▸ Algebra.mem_top
-    have hx' : σ x = x := hx
-    have := h.2.2.2 τ x
-    rw [hx'] at this
-    exact this.symm
+  apply GlobalTheory.SelfDualLatticeCompare.exists_of_conj_eq <;> assumption
 
 theorem trace_field (h : IsCMExt F E σ) (e : E) :
     algebraMap F E (Algebra.trace F E e) = e + σ e := by
   have hσ := conj_conj h
-  obtain ⟨a, ha⟩ := exists_of_conj_eq h (e + σ e) (by rw [map_add, hσ, add_comm])
+  obtain ⟨a, ha⟩ := exists_of_conj_eq h (e + σ e) (by rw [map_add (f := _), hσ, add_comm])
   have h1 : Algebra.trace F E (σ e) = Algebra.trace F E e :=
     Algebra.trace_eq_of_algEquiv (AlgEquiv.ofAlgHom σ σ (AlgHom.ext hσ) (AlgHom.ext hσ)) e
   have h3 := congrArg (Algebra.trace F E) ha
-  rw [Algebra.trace_algebraMap, h.2.2.1, map_add, h1, two_smul, ← two_mul, ← two_mul] at h3
+  rw [Algebra.trace_algebraMap, h.2.2.1, map_add (f := _), h1, two_smul, ← two_mul, ← two_mul] at h3
   rw [← ha, mul_left_cancel₀ two_ne_zero h3]
 
 variable (R : Type) [CommRing R] [Algebra F R]
 
 theorem trace_tensor (h : IsCMExt F E σ) (z : R ⊗[F] E) :
     algebraMap R (R ⊗[F] E) (Algebra.trace R (R ⊗[F] E) z) = z + sigR R σ z := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]; ring
-  | tmul a e =>
-    have h1 : a ⊗ₜ[F] e = a • ((1 : R) ⊗ₜ[F] e) := by
-      rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
-    have h3 : Algebra.trace R (R ⊗[F] E) (a ⊗ₜ[F] e) =
-        a * algebraMap F R (Algebra.trace F E e) := by
-      rw [h1, map_smul, Algebra.trace_apply, Algebra.trace_apply, ← Algebra.baseChange_lmul,
-        LinearMap.trace_baseChange, smul_eq_mul]
-    have h4 : sigR R σ (a ⊗ₜ[F] e) = a ⊗ₜ[F] σ e := rfl
-    rw [h3, h4, ← TensorProduct.tmul_add, ← trace_field h, Algebra.TensorProduct.algebraMap_apply,
-      Algebra.algebraMap_self, RingHom.id_apply, mul_comm, ← Algebra.smul_def,
-      TensorProduct.smul_tmul, Algebra.algebraMap_eq_smul_one]
+  apply GlobalTheory.SelfDualLatticeCompare.trace_tensor <;> assumption
 
 theorem sigR_sigR (h : IsCMExt F E σ) (z : R ⊗[F] E) : sigR R σ (sigR R σ z) = z := by
   induction z using TensorProduct.induction_on with
   | zero => simp
-  | add a b ha hb => simp only [map_add, ha, hb]
+  | add a b ha hb => simp only [map_add (f := _), ha, hb]
   | tmul a e =>
     show a ⊗ₜ[F] σ (σ e) = _
     rw [conj_conj h]
@@ -161,6 +189,7 @@ theorem hR_symm (h : IsCMExt F E σ) {M : ℕ} {J : Matrix (Fin M) (Fin M) E} (h
     intro i j
     show (1 : R) ⊗ₜ[F] σ (J j i) = (1 : R) ⊗ₜ[F] J i j
     rw [hJ.1]
+
   simp only [hR, Formalism.UG.hform, map_sum, map_mul, sigR_sigR R h]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_

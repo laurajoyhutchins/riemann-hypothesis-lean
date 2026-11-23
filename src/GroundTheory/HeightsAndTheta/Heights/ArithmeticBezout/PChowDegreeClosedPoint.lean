@@ -1,9 +1,63 @@
-import Mathlib
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsClosedPointChartField
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsClosedPointConeCoord
-import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PIntChowFormExists
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowFormHomog
-import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormIrreducible
+module
+
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsClosedPointChartField
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsClosedPointConeCoord
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsChowDegreeClosedPoint
+public import GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.PIntChowFormExists
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PChowFormHomog
+public import GroundTheory.HeightsAndTheta.Heights.VerticalDivisors.PNormFormIrreducible
+import Mathlib.Algebra.AffineMonoid.UniqueSums
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.RegularLocalRing.Defs
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Polynomial.Basic
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Tactic.TypeStar
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
+
 set_option maxSynthPendingDepth 1
 
 namespace GroundTheory.Heights₂.Heights
@@ -18,6 +72,7 @@ theorem aeval_smul_of_isHomogeneous {F K : Type*} [Field F] [Field K] [Algebra F
   classical
   conv_lhs => rw [g.as_sum]
   conv_rhs => rw [g.as_sum]
+
   rw [map_sum, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun m hm => ?_
   have hdeg : ∑ j ∈ m.support, m j = d := by
@@ -45,7 +100,7 @@ theorem ChowDegreeClosedPoint.proof (hField : ClosedPointChartField.Statement)
     intro g
     induction g using MvPolynomial.induction_on with
     | C a => simp; rfl
-    | add p q hp hq => rw [map_add, map_add, hp, hq]
+    | add p q hp hq => rw [map_add (f := _), map_add (f := _), hp, hq]
     | mul_X p j hp => rw [map_mul, map_mul, hp, aeval_X]
   have hξi : ξ i = 1 := by
     have : X i - 1 ∈ J := Ideal.mem_sup_right (Ideal.mem_span_singleton_self _)
@@ -89,7 +144,8 @@ theorem ChowDegreeClosedPoint.proof (hField : ClosedPointChartField.Statement)
     let ys : Fin n → K := fun j => (y i)⁻¹ * y j
     have hker : J ≤ RingHom.ker (aeval (R := F) ys).toRingHom := by
       refine sup_le (fun g hg => ?_) ((Ideal.span_le).mpr ?_)
-      · rw [RingHom.mem_ker, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom,
+      · set_option synthInstance.maxHeartbeats 100000 in
+        rw [RingHom.mem_ker, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom,
           ← sum_homogeneousComponent g, map_sum]
         refine Finset.sum_eq_zero fun d _ => ?_
         rw [aeval_smul_of_isHomogeneous (homogeneousComponent_isHomogeneous d g),

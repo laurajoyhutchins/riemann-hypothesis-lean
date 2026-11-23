@@ -1,5 +1,47 @@
-import Mathlib
-import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+module
+
+public import Development.AutomorphicArithmetic.AutomorphicVarieties.IdeleGenerators.ConstSmall
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Measure
+public import Mathlib.NumberTheory.Modular
+public import Mathlib.NumberTheory.ModularForms.Petersson
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -40,11 +82,6 @@ def TT (L : ℕ) [NeZero L] (G : (Fin 2 → ZMod L) → ℍ → ℂ) (s : ℝ) :
 
 def IsCls {L : ℕ} (ψ : DirichletCharacter ℂ L) (F : ℍ → ℂ) (G : (Fin 2 → ZMod L) → ℍ → ℂ) : Prop :=
   ∀ (n : ℕ) (γ : SL(2, ℤ)) (z : ℍ), G (cls L ((n : ℤ) • row γ)) z = ψ (n : ZMod L) * F (γ • z)
-
-example : IsCls (1 : DirichletCharacter ℂ 1) 1 1 := fun _ _ _ => by
-  rw [MulChar.one_apply (isUnit_of_subsingleton _)]; simp
-
-example : Nice 0 := ⟨continuous_const, 0, fun _ _ _ => by simp⟩
 
 def gam (t : ℝ) : ℝ := Real.Gamma t / (4 * Real.pi) ^ t
 

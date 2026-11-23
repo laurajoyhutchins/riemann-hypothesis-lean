@@ -1,5 +1,55 @@
-import Mathlib
-import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalisationLadders.CriterionTruncation
+module
+
+public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalisationLadders.TruncationHomExt
+public import Mathlib.Algebra.Exact.Basic
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.Finsupp.Pointwise
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.PiTensorProduct
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.RingTheory.WittVector.IsPoly
+import Mathlib.Tactic.Basify
+import Mathlib.Tactic.ENatToNat
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.ReduceModChar
+import Mathlib.Topology.Sheaves.Init
+import Std.Tactic.BVDecide.Normalize.Prop
+
+@[expose] public section
 
 set_option backward.isDefEq.respectTransparency false
 set_option autoImplicit false
@@ -26,7 +76,7 @@ theorem ev_single (Q : Poly Φ) (T : C) (k : ℕ) (y : Φ.A.obj T) :
 theorem ev_smul (Q : Poly Φ) (T : C) (s : R) (c : ℕ →₀ Φ.A.obj T) : ev Q T (s • c) = s • ev Q T c := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => rw [smul_add, map_add, map_add, hf, hg, smul_add]
+  | add f g hf hg => rw [smul_add, map_add (f := _), map_add (f := _), hf, hg, smul_add]
   | single k y => rw [Finsupp.smul_single, ev_single, ev_single, map_smul, smul_mul_assoc]
 
 def sh {M : Type} [AddCommMonoid M] : (ℕ →₀ M) →+ (ℕ →₀ M) where
@@ -61,13 +111,14 @@ theorem sh_tr {T T' : C} (φ : T ⟶ T') (t : Φ.A.obj T') (c : ℕ →₀ Φ.A.
     sh (tr φ t c) = tr φ t (sh c) := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => simp only [map_add, hf, hg]
+  | add f g hf hg => simp only [map_add (f := _), hf, hg]
   | single n y =>
     cases n with
     | zero =>
       rw [sh_single_zero, tr_single, map_zero, Finset.Nat.antidiagonal_zero, Finset.sum_singleton]
       exact sh_single_zero _
     | succ n =>
+
       rw [sh_single_succ, tr_single, tr_single, map_sum, Finset.Nat.sum_antidiagonal_succ, sh_single_zero, zero_add]
       exact Finset.sum_congr rfl fun p _ => sh_single_succ _ _
 
@@ -77,13 +128,14 @@ theorem ev_tr (Q : Poly Φ) {T T' : C} (φ : T ⟶ T') (ψ : Q.P T ⟶ Q.P T') (
     (Φ.A.map ψ).hom (ev Q T c) = ev Q T' (tr φ t c) := by
   induction c using Finsupp.induction_linear with
   | zero => simp
-  | add f g hf hg => simp only [map_add, hf, hg]
+  | add f g hf hg => simp only [map_add (f := _), hf, hg]
   | single n y =>
     have hy : (Φ.A.map ψ).hom ((Φ.A.map (Q.j T)).hom y) = (Φ.A.map (Q.j T')).hom ((Φ.A.map φ).hom y) := by
       rw [← Cut.mapA_comp, ← Cut.mapA_comp, hj]
     have hjt : (Φ.A.map (Q.j T')).hom t ∈ Φ.J.S (Q.P T') := Φ.J.map_mem _ ht
+
     rw [ev_single, map_mul, hy, Φ.dp_map ψ n (Q.X_mem T), hX, Φ.dp_add n (Q.X_mem T') hjt, tr_single, map_sum,
-      Finset.mul_sum]
+    Finset.mul_sum]
     refine Finset.sum_congr rfl fun p _ => ?_
     rw [ev_single, map_mul, Φ.dp_map (Q.j T') p.2 ht]
     ring
@@ -137,10 +189,10 @@ def dX (h₁ : Q.Crit a r) (h₂ : Q.Crit a (r - 1)) (h₃ : Q.Crit b r) (h₄ :
   map_add' x y := Subtype.ext (by
     have e : Ideal.Quotient.mk ((b r).S (Q.P T)) (ev Q T (rep Q _ _ (x + y))) =
         Ideal.Quotient.mk _ (ev Q T (rep Q _ _ x + rep Q _ _ y)) := by
-      rw [← rep_eq, map_add, map_add, ← rep_eq, ← rep_eq]
+      rw [← rep_eq, map_add (f := _), map_add (f := _), ← rep_eq, ← rep_eq]
       rfl
     have := wd Q h₃ h₄ e
-    rw [map_add, map_add, map_add] at this
+    rw [map_add (f := _), map_add (f := _), map_add (f := _)] at this
     exact this)
   map_smul' s x := Subtype.ext (by
     have e : Ideal.Quotient.mk ((b r).S (Q.P T)) (ev Q T (rep Q _ _ (s • x))) =
@@ -185,7 +237,7 @@ theorem dX_surj (h₁ : Q.Crit a r) (h₂ : Q.Crit a (r - 1)) (h₃ : Q.Crit b r
   let c : ℕ →₀ Φ.A.obj T := Finsupp.mapDomain (· + 1) c'
   have hs : sh c = c' := by
     ext k
-    exact Finsupp.mapDomain_apply inj c' k
+    exact Finsupp.mapDomain_apply_of_injective inj c' k
   have hc : ev Q T c ∈ (a r).S (Q.P T) := by
     refine (h₁ T c).2 fun k => ?_
     cases k with
@@ -196,7 +248,7 @@ theorem dX_surj (h₁ : Q.Crit a r) (h₂ : Q.Crit a (r - 1)) (h₃ : Q.Crit b r
     | succ k =>
       have e : r - ((k + 1 : ℕ) : ℤ) = r - 1 - (k : ℤ) := by push_cast; ring
       rw [e]
-      have : c (k + 1) = c' k := Finsupp.mapDomain_apply inj c' k
+      have : c (k + 1) = c' k := Finsupp.mapDomain_apply_of_injective inj c' k
       rw [this]
       exact (h₂ T c').1 hm k
   exact ⟨⟨_, Ideal.mem_map_of_mem _ hc⟩, dX_eq Q h₁ h₂ h₃ h₄ _ z c rfl (by rw [hs, hz])⟩

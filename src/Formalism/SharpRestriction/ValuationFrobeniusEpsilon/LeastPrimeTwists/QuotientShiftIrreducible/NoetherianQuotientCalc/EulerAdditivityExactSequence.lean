@@ -1,4 +1,50 @@
-import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+module
+
+public import Formalism.SharpRestriction.ValuationFrobeniusEpsilon.LeastPrimeTwists.QuotientShiftIrreducible.NoetherianQuotientCalc.EulerVanishingBelowDimension
+public import Mathlib.Algebra.Module.SnakeLemma
+import Mathlib.Algebra.Order.Floor.Extended
+import Mathlib.Algebra.Order.Floor.Semifield
+import Mathlib.Algebra.Order.Interval.Basic
+import Mathlib.Algebra.Order.Star.Int
+import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+import Mathlib.Analysis.Normed.Algebra.GelfandRadius
+import Mathlib.Analysis.SpecialFunctions.Bernstein
+import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+import Mathlib.Combinatorics.Enumerative.DyckWord
+import Mathlib.Combinatorics.SimpleGraph.Triangle.Removal
+import Mathlib.Data.NNRat.Floor
+import Mathlib.Data.Nat.Choose.Multinomial
+import Mathlib.Geometry.Euclidean.Volume.Basic
+import Mathlib.NumberTheory.Chebyshev
+import Mathlib.NumberTheory.Height.NumberField
+import Mathlib.NumberTheory.Height.Projectivization
+import Mathlib.NumberTheory.LucasLehmer
+import Mathlib.NumberTheory.SelbergSieve
+import Mathlib.RingTheory.Radical.NatInt
+import Mathlib.Tactic.Echelon.Zsqrtd
+import Mathlib.Tactic.Inclusion.Extension.Core.Core
+import Mathlib.Tactic.Inclusion.Extension.Interval.BinarySplit
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Exp
+import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Basic
+import Mathlib.Tactic.Inclusion.Extension.IntervalInt.Hypotheses
+import Mathlib.Tactic.Linter.Style
+import Mathlib.Tactic.NormNum.Irrational
+import Mathlib.Tactic.NormNum.IsCoprime
+import Mathlib.Tactic.NormNum.IsSquare
+import Mathlib.Tactic.NormNum.LegendreSymbol
+import Mathlib.Tactic.NormNum.ModEq
+import Mathlib.Tactic.NormNum.NatFib
+import Mathlib.Tactic.NormNum.NatLog
+import Mathlib.Tactic.NormNum.NatSqrt
+import Mathlib.Tactic.NormNum.Ordinal
+import Mathlib.Tactic.NormNum.Parity
+import Mathlib.Tactic.NormNum.Prime
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Topology.Sheaves.Init
+
+@[expose] public section
 
 noncomputable section
 
@@ -59,7 +105,7 @@ theorem hom_cmp {G H : GMod B R k} (hG : DirectSum.IsInternal G.gr)
     · subst hn
       rw [cmp_of_mem _ _ y.2, cmp_of_mem _ _ (hφ _ _ y.2)]
     · rw [cmp_of_mem_ne _ _ y.2 hn, cmp_of_mem_ne _ _ (hφ _ _ y.2) hn, map_zero]
-  | add a b ha hb => rw [map_add, cmp_add, cmp_add, map_add, ha, hb]
+  | add a b ha hb => rw [map_add (f := _), cmp_add, cmp_add, map_add (f := _), ha, hb]
 
 theorem isHomSub_of_cmp (F : GMod B R k) (h : DirectSum.IsInternal F.gr) (N : Submodule R F.M)
     (hN : ∀ x ∈ N, ∀ m, cmp F h x m ∈ N) : F.IsHomSub N := by
@@ -334,8 +380,8 @@ theorem adm_of_section_mem [IsLocalRing B] (𝒜 : Deg k → Submodule B R) {ts 
     exact Ideal.mem_sup_left hs
   · exact Ideal.mem_sup_right (Ideal.subset_span ⟨d', h1⟩)
 
-include S in
 
+include S in
 theorem length_add (m : Deg k) :
     Module.length B (F.gr m) = Module.length B (F'.gr m) + Module.length B (F''.gr m) := by
   refine Module.length_eq_add_of_exact
@@ -381,8 +427,8 @@ theorem add_of_hom {k : ℕ} (X : HidaSetting k) (hGr : RuleGr) (ts : List (Deg 
 
 end E1
 
-open E1 in
 
+open E1 in
 theorem euler_additivity_of_rules : RuleGr → RuleFin → RuleIso → EulerAdditivityExactSequence := by
   intro hGr hFin hIso k X ts
   induction ts with
